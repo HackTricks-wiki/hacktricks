@@ -37,6 +37,6 @@ mkdir rootfs
 runc run demo
 ```
 > [!CAUTION]
-> Cela ne fonctionnera pas toujours car l'opération par défaut de runc est de s'exécuter en tant que root, donc l'exécuter en tant qu'utilisateur non privilégié ne peut tout simplement pas fonctionner (à moins que vous n'ayez une configuration sans root). Faire d'une configuration sans root la valeur par défaut n'est généralement pas une bonne idée car il y a pas mal de restrictions à l'intérieur des conteneurs sans root qui ne s'appliquent pas en dehors des conteneurs sans root.
+> Cela ne fonctionnera pas toujours car l'opération par défaut de runc est de s'exécuter en tant que root, donc l'exécuter en tant qu'utilisateur non privilégié ne peut tout simplement pas fonctionner (à moins que vous n'ayez une configuration sans root). Faire de la configuration sans root la valeur par défaut n'est généralement pas une bonne idée car il y a pas mal de restrictions à l'intérieur des conteneurs sans root qui ne s'appliquent pas en dehors des conteneurs sans root.
 
 {{#include ../../banners/hacktricks-training.md}}

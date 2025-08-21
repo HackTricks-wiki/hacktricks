@@ -92,7 +92,7 @@ Vous devriez commencer par lire ce post pour quelques concepts de base que vous 
 ## 7.1. Fine-Tuning for Classification
 
 > [!TIP]
-> L'objectif de cette section est de montrer comment affiner un modèle déjà pré-entraîné afin qu'au lieu de générer un nouveau texte, le LLM donnera les **probabilités que le texte donné soit catégorisé dans chacune des catégories données** (comme si un texte est du spam ou non).
+> L'objectif de cette section est de montrer comment affiner un modèle déjà pré-entraîné afin qu'au lieu de générer un nouveau texte, le LLM donnera les **probabilités que le texte donné soit catégorisé dans chacune des catégories données** (comme si un texte est un spam ou non).
 
 
 {{#ref}}
@@ -102,7 +102,7 @@ Vous devriez commencer par lire ce post pour quelques concepts de base que vous 
 ## 7.2. Fine-Tuning to follow instructions
 
 > [!TIP]
-> L'objectif de cette section est de montrer comment **affiner un modèle déjà pré-entraîné pour suivre des instructions** plutôt que de simplement générer du texte, par exemple, répondre à des tâches comme un chatbot.
+> L'objectif de cette section est de montrer comment **affiner un modèle déjà pré-entraîné pour suivre des instructions** plutôt que de simplement générer du texte, par exemple, répondre à des tâches en tant que chatbot.
 
 
 {{#ref}}

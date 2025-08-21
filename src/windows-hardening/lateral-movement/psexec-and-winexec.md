@@ -83,7 +83,7 @@ Artifacts
 
 ### Impacket smbexec.py (SMBExec)
 
-- Crée un service temporaire qui lance cmd.exe et utilise un pipe nommé pour l'entrée/sortie. Évite généralement de déposer un payload EXE complet ; l'exécution de commandes est semi-interactive.
+- Crée un service temporaire qui lance cmd.exe et utilise un pipe nommé pour l'entrée/sortie. Évite généralement de déposer un payload EXE complet ; l'exécution des commandes est semi-interactive.
 ```bash
 smbexec.py DOMAIN/user:Password@HOST
 smbexec.py -hashes LMHASH:NTHASH DOMAIN/user@HOST
@@ -126,7 +126,7 @@ Idées de chasse
 
 ## Notes de durcissement
 - Windows 11 24H2 et Windows Server 2025 nécessitent la signature SMB par défaut pour les connexions sortantes (et Windows 11 entrantes). Cela ne casse pas l'utilisation légitime de PsExec avec des identifiants valides mais empêche l'abus de relais SMB non signé et peut impacter les appareils qui ne supportent pas la signature.
-- Le nouveau blocage NTLM du client SMB (Windows 11 24H2/Server 2025) peut empêcher le retour à NTLM lors de la connexion par IP ou à des serveurs non-Kerberos. Dans des environnements durcis, cela cassera PsExec/SMBExec basé sur NTLM ; utilisez Kerberos (nom d'hôte/FQDN) ou configurez des exceptions si nécessaire légitimement.
+- Le nouveau blocage NTLM du client SMB (Windows 11 24H2/Server 2025) peut empêcher le retour à NTLM lors de la connexion par IP ou à des serveurs non-Kerberos. Dans des environnements durcis, cela cassera PsExec/SMBExec basé sur NTLM ; utiliser Kerberos (nom d'hôte/FQDN) ou configurer des exceptions si nécessaire légitimement.
 - Principe du moindre privilège : minimiser l'appartenance à l'administrateur local, préférer Just-in-Time/Just-Enough Admin, appliquer LAPS, et surveiller/alerter sur les installations de service 7045.
 
 ## Voir aussi

@@ -4,7 +4,7 @@
 
 ## Informations de base
 
-Le Sandbox macOS (appelé initialement Seatbelt) **limite les applications** s'exécutant à l'intérieur du sandbox aux **actions autorisées spécifiées dans le profil Sandbox** avec lequel l'application s'exécute. Cela aide à garantir que **l'application n'accédera qu'aux ressources attendues**.
+Le macOS Sandbox (appelé initialement Seatbelt) **limite les applications** s'exécutant à l'intérieur du sandbox aux **actions autorisées spécifiées dans le profil Sandbox** avec lequel l'application s'exécute. Cela aide à garantir que **l'application n'accédera qu'aux ressources attendues**.
 
 Toute application avec l'**entitlement** **`com.apple.security.app-sandbox`** sera exécutée à l'intérieur du sandbox. Les **binaires Apple** sont généralement exécutés à l'intérieur d'un Sandbox, et toutes les applications de l'**App Store ont cet entitlement**. Ainsi, plusieurs applications seront exécutées à l'intérieur du sandbox.
 
@@ -135,7 +135,7 @@ Ici, vous pouvez trouver un exemple :
 >
 > Notez que dans la version compilée d'un profil, le nom des opérations est remplacé par leurs entrées dans un tableau connu par le dylib et le kext, rendant la version compilée plus courte et plus difficile à lire.
 
-Les **services système** importants s'exécutent également dans leur propre **sandbox** personnalisée, comme le service `mdnsresponder`. Vous pouvez consulter ces **profils de sandbox** personnalisés dans :
+Des **services système** importants s'exécutent également dans leur propre **sandbox** personnalisée, comme le service `mdnsresponder`. Vous pouvez consulter ces **profils de sandbox** personnalisés dans :
 
 - **`/usr/share/sandbox`**
 - **`/System/Library/Sandbox/Profiles`**
@@ -222,12 +222,12 @@ sandbox-exec -f /tmp/trace.sb /bin/ls
 ```
 Dans `/tmp/trace.out`, vous pourrez voir chaque vérification de sandbox effectuée chaque fois qu'elle a été appelée (donc, beaucoup de doublons).
 
-Il est également possible de tracer le sandbox en utilisant le paramètre **`-t`** : `sandbox-exec -t /path/trace.out -p "(version 1)" /bin/ls`
+Il est également possible de tracer le sandbox en utilisant le **`-t`** paramètre : `sandbox-exec -t /path/trace.out -p "(version 1)" /bin/ls`
 
 #### Via API
 
 La fonction `sandbox_set_trace_path` exportée par `libsystem_sandbox.dylib` permet de spécifier un nom de fichier de trace où les vérifications de sandbox seront écrites.\
-Il est également possible de faire quelque chose de similaire en appelant `sandbox_vtrace_enable()` et en obtenant ensuite les erreurs de journal à partir du tampon en appelant `sandbox_vtrace_report()`.
+Il est également possible de faire quelque chose de similaire en appelant `sandbox_vtrace_enable()` et en obtenant ensuite les erreurs de logs du tampon en appelant `sandbox_vtrace_report()`.
 
 ### Inspection du Sandbox
 
@@ -275,7 +275,7 @@ macos-sandbox-debug-and-bypass/
 
 ## **Extensions Sandbox**
 
-Les extensions permettent de donner des privilèges supplémentaires à un objet et sont accordées en appelant l'une des fonctions :
+Les extensions permettent de donner des privilèges supplémentaires à un objet et sont appelées en utilisant l'une des fonctions :
 
 - `sandbox_issue_extension`
 - `sandbox_extension_issue_file[_with_new_type]`
@@ -287,8 +287,8 @@ Les extensions permettent de donner des privilèges supplémentaires à un objet
 
 Les extensions sont stockées dans le deuxième emplacement d'étiquette MACF accessible depuis les informations d'identification du processus. Le **`sbtool`** suivant peut accéder à ces informations.
 
-Notez que les extensions sont généralement accordées par des processus autorisés, par exemple, `tccd` accordera le jeton d'extension de `com.apple.tcc.kTCCServicePhotos` lorsqu'un processus essaie d'accéder aux photos et a été autorisé dans un message XPC. Ensuite, le processus devra consommer le jeton d'extension pour qu'il soit ajouté à celui-ci.\
-Notez que les jetons d'extension sont de longs hexadécimaux qui codent les autorisations accordées. Cependant, ils n'ont pas le PID autorisé codé en dur, ce qui signifie que tout processus ayant accès au jeton pourrait être **consommé par plusieurs processus**.
+Notez que les extensions sont généralement accordées par des processus autorisés, par exemple, `tccd` accordera le jeton d'extension de `com.apple.tcc.kTCCServicePhotos` lorsqu'un processus essaie d'accéder aux photos et a été autorisé dans un message XPC. Ensuite, le processus devra consommer le jeton d'extension pour qu'il soit ajouté.\
+Notez que les jetons d'extension sont de longs hexadécimaux qui codent les permissions accordées. Cependant, ils n'ont pas le PID autorisé codé en dur, ce qui signifie que tout processus ayant accès au jeton pourrait être **consommé par plusieurs processus**.
 
 Notez que les extensions sont également très liées aux attributions, donc avoir certaines attributions pourrait automatiquement accorder certaines extensions.
 
@@ -354,7 +354,7 @@ Notez qu'en iOS, l'extension du noyau contient **tous les profils codés en dur*
 
 - **`hook_policy_init`** : Elle accroche `mpo_policy_init` et est appelée après `mac_policy_register`. Elle effectue la plupart des initialisations du Sandbox. Elle initialise également SIP.
 - **`hook_policy_initbsd`** : Elle configure l'interface sysctl en enregistrant `security.mac.sandbox.sentinel`, `security.mac.sandbox.audio_active` et `security.mac.sandbox.debug_mode` (si démarré avec `PE_i_can_has_debugger`).
-- **`hook_policy_syscall`** : Elle est appelée par `mac_syscall` avec "Sandbox" comme premier argument et un code indiquant l'opération dans le deuxième. Un switch est utilisé pour trouver le code à exécuter selon le code demandé.
+- **`hook_policy_syscall`** : Elle est appelée par `mac_syscall` avec "Sandbox" comme premier argument et un code indiquant l'opération dans le deuxième. Un switch est utilisé pour trouver le code à exécuter en fonction du code demandé.
 
 ### MACF Hooks
 
@@ -364,15 +364,15 @@ Un bon exemple de cela est la fonction **`_mpo_file_check_mmap`** qui accroche *
 
 De plus, parmi les centaines de hooks utilisés par Sandbox, il y en a 3 en particulier qui sont très intéressants :
 
-- `mpo_proc_check_for` : Elle applique le profil si nécessaire et s'il n'a pas été appliqué précédemment.
+- `mpo_proc_check_for` : Elle applique le profil si nécessaire et si elle n'a pas été appliquée précédemment.
 - `mpo_vnode_check_exec` : Appelée lorsqu'un processus charge le binaire associé, puis une vérification de profil est effectuée ainsi qu'une vérification interdisant les exécutions SUID/SGID.
-- `mpo_cred_label_update_execve` : Cela est appelé lorsque l'étiquette est assignée. C'est le plus long car il est appelé lorsque le binaire est entièrement chargé mais qu'il n'a pas encore été exécuté. Il effectuera des actions telles que la création de l'objet sandbox, l'attachement de la structure sandbox aux identifiants kauth, la suppression de l'accès aux ports mach...
+- `mpo_cred_label_update_execve` : Cela est appelé lorsque l'étiquette est assignée. C'est le plus long car il est appelé lorsque le binaire est entièrement chargé mais n'a pas encore été exécuté. Il effectuera des actions telles que la création de l'objet sandbox, l'attachement de la structure sandbox aux identifiants kauth, la suppression de l'accès aux ports mach...
 
 Notez que **`_cred_sb_evalutate`** est un wrapper autour de **`sb_evaluate_internal`** et cette fonction obtient les identifiants passés et effectue ensuite l'évaluation en utilisant la fonction **`eval`** qui évalue généralement le **profil de plateforme** qui est par défaut appliqué à tous les processus et ensuite le **profil de processus spécifique**. Notez que le profil de plateforme est l'un des principaux composants de **SIP** dans macOS.
 
 ## Sandboxd
 
-Sandbox dispose également d'un démon utilisateur en cours d'exécution exposant le service Mach XPC `com.apple.sandboxd` et liant le port spécial 14 (`HOST_SEATBELT_PORT`) que l'extension du noyau utilise pour communiquer avec lui. Il expose certaines fonctions en utilisant MIG.
+Sandbox dispose également d'un démon utilisateur en cours d'exécution exposant le service XPC Mach `com.apple.sandboxd` et liant le port spécial 14 (`HOST_SEATBELT_PORT`) que l'extension du noyau utilise pour communiquer avec lui. Il expose certaines fonctions en utilisant MIG.
 
 ## References
 

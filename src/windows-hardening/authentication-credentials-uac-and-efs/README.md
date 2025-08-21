@@ -4,7 +4,7 @@
 
 ## Politique AppLocker
 
-Une liste blanche d'applications est une liste de logiciels ou d'exécutables approuvés qui sont autorisés à être présents et à s'exécuter sur un système. L'objectif est de protéger l'environnement contre les logiciels malveillants nuisibles et les logiciels non approuvés qui ne correspondent pas aux besoins spécifiques d'une organisation.
+Une liste blanche d'applications est une liste d'applications logicielles ou d'exécutables approuvés qui sont autorisés à être présents et à s'exécuter sur un système. L'objectif est de protéger l'environnement contre les logiciels malveillants nuisibles et les logiciels non approuvés qui ne correspondent pas aux besoins spécifiques d'une organisation.
 
 [AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) est la **solution de liste blanche d'applications** de Microsoft et donne aux administrateurs système le contrôle sur **quelles applications et fichiers les utilisateurs peuvent exécuter**. Elle fournit un **contrôle granulaire** sur les exécutables, les scripts, les fichiers d'installation Windows, les DLL, les applications empaquetées et les installateurs d'applications empaquetées.\
 Il est courant que les organisations **bloquent cmd.exe et PowerShell.exe** et l'accès en écriture à certains répertoires, **mais tout cela peut être contourné**.
@@ -24,9 +24,9 @@ Ce chemin de registre contient les configurations et politiques appliquées par 
 
 - `HKLM\Software\Policies\Microsoft\Windows\SrpV2`
 
-### Bypass
+### Contournement
 
-- Dossiers **écrits** utiles pour contourner la politique AppLocker : Si AppLocker permet d'exécuter quoi que ce soit à l'intérieur de `C:\Windows\System32` ou `C:\Windows`, il y a des **dossiers écrits** que vous pouvez utiliser pour **contourner cela**.
+- Dossiers **écrits** utiles pour contourner la politique AppLocker : Si AppLocker permet d'exécuter quoi que ce soit à l'intérieur de `C:\Windows\System32` ou `C:\Windows`, il existe des **dossiers écrits** que vous pouvez utiliser pour **contourner cela**.
 ```
 C:\Windows\System32\Microsoft\Crypto\RSA\MachineKeys
 C:\Windows\System32\spool\drivers\color
@@ -48,18 +48,18 @@ Les identifiants locaux sont présents dans ce fichier, les mots de passe sont h
 
 ### Autorité de sécurité locale (LSA) - LSASS
 
-Les **identifiants** (hachés) sont **enregistrés** dans la **mémoire** de ce sous-système pour des raisons de Single Sign-On.\
-**LSA** administre la **politique de sécurité** locale (politique de mot de passe, permissions des utilisateurs...), **authentification**, **jetons d'accès**...\
+Les **identifiants** (hachés) sont **enregistrés** dans la **mémoire** de ce sous-système pour des raisons de connexion unique.\
+**LSA** administre la **politique de sécurité** locale (politique de mot de passe, permissions des utilisateurs...), **l'authentification**, **les jetons d'accès**...\
 LSA sera celui qui **vérifiera** les identifiants fournis dans le fichier **SAM** (pour une connexion locale) et **communiquera** avec le **contrôleur de domaine** pour authentifier un utilisateur de domaine.
 
-Les **identifiants** sont **enregistrés** à l'intérieur du **processus LSASS** : tickets Kerberos, hachages NT et LM, mots de passe facilement déchiffrés.
+Les **identifiants** sont **enregistrés** dans le **processus LSASS** : tickets Kerberos, hachages NT et LM, mots de passe facilement déchiffrables.
 
 ### Secrets LSA
 
 LSA pourrait enregistrer sur disque certains identifiants :
 
 - Mot de passe du compte ordinateur de l'Active Directory (contrôleur de domaine inaccessible).
-- Mots de passe des comptes de services Windows
+- Mots de passe des comptes des services Windows
 - Mots de passe pour les tâches planifiées
 - Plus (mot de passe des applications IIS...)
 
@@ -130,7 +130,7 @@ Vous pouvez également utiliser `cipher /e` et `cipher /d` dans un dossier pour 
 
 #### Être l'autorité système
 
-Cette méthode nécessite que l'**utilisateur victime** exécute un **processus** à l'intérieur de l'hôte. Si c'est le cas, en utilisant une session `meterpreter`, vous pouvez usurper le jeton du processus de l'utilisateur (`impersonate_token` de `incognito`). Ou vous pourriez simplement `migrate` vers le processus de l'utilisateur.
+Cette méthode nécessite que l'**utilisateur victime** soit **en train d'exécuter** un **processus** à l'intérieur de l'hôte. Si c'est le cas, en utilisant une session `meterpreter`, vous pouvez usurper le jeton du processus de l'utilisateur (`impersonate_token` de `incognito`). Ou vous pourriez simplement `migrer` vers le processus de l'utilisateur.
 
 #### Connaître le mot de passe de l'utilisateur
 
@@ -143,10 +143,10 @@ https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files
 Microsoft a développé les **Comptes de service gérés par groupe (gMSA)** pour simplifier la gestion des comptes de service dans les infrastructures informatiques. Contrairement aux comptes de service traditionnels qui ont souvent le paramètre "**Le mot de passe n'expire jamais**" activé, les gMSA offrent une solution plus sécurisée et gérable :
 
 - **Gestion automatique des mots de passe** : les gMSA utilisent un mot de passe complexe de 240 caractères qui change automatiquement selon la politique de domaine ou d'ordinateur. Ce processus est géré par le Service de distribution de clés (KDC) de Microsoft, éliminant le besoin de mises à jour manuelles des mots de passe.
-- **Sécurité renforcée** : ces comptes sont immunisés contre les verrouillages et ne peuvent pas être utilisés pour des connexions interactives, renforçant leur sécurité.
+- **Sécurité renforcée** : ces comptes sont immunisés contre les verrouillages et ne peuvent pas être utilisés pour des connexions interactives, renforçant ainsi leur sécurité.
 - **Support multi-hôte** : les gMSA peuvent être partagés entre plusieurs hôtes, ce qui les rend idéaux pour les services fonctionnant sur plusieurs serveurs.
 - **Capacité de tâche planifiée** : contrairement aux comptes de service gérés, les gMSA prennent en charge l'exécution de tâches planifiées.
-- **Gestion simplifiée des SPN** : le système met automatiquement à jour le nom principal de service (SPN) lorsqu'il y a des changements dans les détails du sAMaccount de l'ordinateur ou le nom DNS, simplifiant la gestion des SPN.
+- **Gestion simplifiée des SPN** : le système met automatiquement à jour le nom principal de service (SPN) lorsqu'il y a des changements dans les détails du sAMaccount de l'ordinateur ou le nom DNS, simplifiant ainsi la gestion des SPN.
 
 Les mots de passe pour les gMSA sont stockés dans la propriété LDAP _**msDS-ManagedPassword**_ et sont automatiquement réinitialisés tous les 30 jours par les contrôleurs de domaine (DC). Ce mot de passe, un blob de données chiffrées connu sous le nom de [MSDS-MANAGEDPASSWORD_BLOB](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e), ne peut être récupéré que par des administrateurs autorisés et les serveurs sur lesquels les gMSA sont installés, garantissant un environnement sécurisé. Pour accéder à ces informations, une connexion sécurisée telle que LDAPS est requise, ou la connexion doit être authentifiée avec 'Sealing & Secure'.
 
@@ -219,11 +219,11 @@ $command = "Write-Host 'My voice is my passport, verify me.'" $bytes = [System.T
 ```
 More can be found [here](https://blog.netspi.com/15-ways-to-bypass-the-powershell-execution-policy/)
 
-## Interface de support de sécurité (SSPI)
+## Interface de fournisseur de support de sécurité (SSPI)
 
 Est l'API qui peut être utilisée pour authentifier les utilisateurs.
 
-Le SSPI sera chargé de trouver le protocole adéquat pour deux machines qui souhaitent communiquer. La méthode préférée pour cela est Kerberos. Ensuite, le SSPI négociera quel protocole d'authentification sera utilisé, ces protocoles d'authentification sont appelés Security Support Provider (SSP), se trouvent à l'intérieur de chaque machine Windows sous la forme d'un DLL et les deux machines doivent prendre en charge le même pour pouvoir communiquer.
+Le SSPI sera chargé de trouver le protocole adéquat pour deux machines qui souhaitent communiquer. La méthode préférée pour cela est Kerberos. Ensuite, le SSPI négociera quel protocole d'authentification sera utilisé, ces protocoles d'authentification sont appelés Fournisseur de support de sécurité (SSP), sont situés à l'intérieur de chaque machine Windows sous la forme d'un DLL et les deux machines doivent prendre en charge le même pour pouvoir communiquer.
 
 ### Principaux SSP
 
@@ -240,9 +240,9 @@ Le SSPI sera chargé de trouver le protocole adéquat pour deux machines qui sou
 
 #### La négociation pourrait offrir plusieurs méthodes ou seulement une.
 
-## UAC - Contrôle de compte utilisateur
+## UAC - Contrôle de compte d'utilisateur
 
-[User Account Control (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) est une fonctionnalité qui permet un **message de consentement pour des activités élevées**.
+[Contrôle de compte d'utilisateur (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) est une fonctionnalité qui permet un **message de consentement pour des activités élevées**.
 
 
 {{#ref}}

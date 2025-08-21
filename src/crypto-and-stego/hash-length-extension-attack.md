@@ -1,4 +1,4 @@
-# Hash Length Extension Attack
+# Attaque par extension de longueur de hachage
 
 {{#include ../banners/hacktricks-training.md}}
 
@@ -35,6 +35,6 @@ https://github.com/iagox86/hash_extender
 
 ### Références
 
-Vous pouvez trouver cette attaque bien expliquée dans [https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks](https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks)
+Vous pouvez trouver cette attaque bien expliquée sur [https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks](https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks)
 
 {{#include ../banners/hacktricks-training.md}}

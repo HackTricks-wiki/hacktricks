@@ -36,7 +36,7 @@ Plus d'infos : [https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/](https:
 
 ### **Forcer l'authentification**
 
-Si un attaquant est capable de **compromettre un ordinateur autorisé pour "Délégation non contrainte"**, il pourrait **tromper** un **serveur d'impression** pour **se connecter automatiquement** contre lui **en sauvegardant un TGT** dans la mémoire du serveur.\
+Si un attaquant est capable de **compromettre un ordinateur autorisé pour la "Délégation non contrainte"**, il pourrait **tromper** un **serveur d'impression** pour **se connecter automatiquement** contre lui **en sauvegardant un TGT** dans la mémoire du serveur.\
 Ensuite, l'attaquant pourrait effectuer une **attaque Pass the Ticket pour usurper** le compte d'ordinateur du serveur d'impression.
 
 Pour faire en sorte qu'un serveur d'impression se connecte à n'importe quelle machine, vous pouvez utiliser [**SpoolSample**](https://github.com/leechristensen/SpoolSample) :

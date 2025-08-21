@@ -14,7 +14,7 @@ access-tokens.md
 
 ### SeImpersonatePrivilege
 
-C'est un privilège détenu par tout processus qui permet l'imitation (mais pas la création) de tout token, à condition qu'un handle puisse être obtenu. Un token privilégié peut être acquis à partir d'un service Windows (DCOM) en l'incitant à effectuer une authentification NTLM contre un exploit, permettant ensuite l'exécution d'un processus avec des privilèges SYSTEM. Cette vulnérabilité peut être exploitée à l'aide de divers outils, tels que [juicy-potato](https://github.com/ohpe/juicy-potato), [RogueWinRM](https://github.com/antonioCoco/RogueWinRM) (qui nécessite que winrm soit désactivé), [SweetPotato](https://github.com/CCob/SweetPotato) et [PrintSpoofer](https://github.com/itm4n/PrintSpoofer).
+C'est un privilège détenu par tout processus qui permet l'imitation (mais pas la création) de tout token, à condition qu'un handle puisse être obtenu. Un token privilégié peut être acquis à partir d'un service Windows (DCOM) en l'incitant à effectuer une authentification NTLM contre un exploit, permettant ensuite l'exécution d'un processus avec des privilèges SYSTEM. Cette vulnérabilité peut être exploitée à l'aide de divers outils, tels que [juicy-potato](https://github.com/ohpe/juicy-potato), [RogueWinRM](https://github.com/antonioCoco/RogueWinRM) (qui nécessite que winrm soit désactivé), [SweetPotato](https://github.com/CCob/SweetPotato), et [PrintSpoofer](https://github.com/itm4n/PrintSpoofer).
 
 {{#ref}}
 roguepotato-and-printspoofer.md
@@ -36,7 +36,7 @@ Si vous avez activé ce token, vous pouvez utiliser **KERB_S4U_LOGON** pour obte
 
 ### SeBackupPrivilege
 
-Le système est amené à **accorder tous les accès en lecture** à tout fichier (limité aux opérations de lecture) par ce privilège. Il est utilisé pour **lire les hachages de mot de passe des comptes Administrateur locaux** à partir du registre, après quoi des outils comme "**psexec**" ou "**wmiexec**" peuvent être utilisés avec le hachage (technique Pass-the-Hash). Cependant, cette technique échoue sous deux conditions : lorsque le compte Administrateur local est désactivé, ou lorsqu'une politique est en place qui retire les droits administratifs des Administrateurs locaux se connectant à distance.\
+Le système est amené à **accorder tous les accès en lecture** à tout fichier (limité aux opérations de lecture) par ce privilège. Il est utilisé pour **lire les hachages de mot de passe des comptes Administrateur locaux** à partir du registre, après quoi, des outils comme "**psexec**" ou "**wmiexec**" peuvent être utilisés avec le hachage (technique Pass-the-Hash). Cependant, cette technique échoue dans deux conditions : lorsque le compte Administrateur local est désactivé, ou lorsqu'une politique est en place qui retire les droits administratifs des Administrateurs locaux se connectant à distance.\
 Vous pouvez **abuser de ce privilège** avec :
 
 - [https://github.com/Hackplayers/PsCabesha-tools/blob/master/Privesc/Acl-FullControl.ps1](https://github.com/Hackplayers/PsCabesha-tools/blob/master/Privesc/Acl-FullControl.ps1)
@@ -50,15 +50,15 @@ Vous pouvez **abuser de ce privilège** avec :
 
 ### SeRestorePrivilege
 
-Ce privilège permet un **accès en écriture** à tout fichier système, indépendamment de la liste de contrôle d'accès (ACL) du fichier. Il ouvre de nombreuses possibilités d'escalade, y compris la capacité de **modifier des services**, effectuer du DLL Hijacking, et définir des **débogueurs** via les options d'exécution de fichiers d'image parmi diverses autres techniques.
+La permission pour **l'accès en écriture** à tout fichier système, indépendamment de la liste de contrôle d'accès (ACL) du fichier, est fournie par ce privilège. Cela ouvre de nombreuses possibilités d'escalade, y compris la capacité de **modifier des services**, effectuer du DLL Hijacking, et définir des **débogueurs** via les options d'exécution de fichiers d'image parmi diverses autres techniques.
 
 ### SeCreateTokenPrivilege
 
-SeCreateTokenPrivilege est un puissant privilège, particulièrement utile lorsqu'un utilisateur possède la capacité d'imiter des tokens, mais aussi en l'absence de SeImpersonatePrivilege. Cette capacité repose sur la possibilité d'imiter un token qui représente le même utilisateur et dont le niveau d'intégrité ne dépasse pas celui du processus actuel.
+SeCreateTokenPrivilege est une permission puissante, particulièrement utile lorsqu'un utilisateur possède la capacité d'imiter des tokens, mais aussi en l'absence de SeImpersonatePrivilege. Cette capacité repose sur la possibilité d'imiter un token qui représente le même utilisateur et dont le niveau d'intégrité ne dépasse pas celui du processus actuel.
 
 **Points Clés :**
 
-- **Imitation sans SeImpersonatePrivilege :** Il est possible de tirer parti de SeCreateTokenPrivilege pour l'EoP en imitant des tokens dans des conditions spécifiques.
+- **Imitation sans SeImpersonatePrivilege :** Il est possible de tirer parti de SeCreateTokenPrivilege pour EoP en imitant des tokens dans des conditions spécifiques.
 - **Conditions pour l'imitation de token :** Une imitation réussie nécessite que le token cible appartienne au même utilisateur et ait un niveau d'intégrité inférieur ou égal à celui du processus tentant l'imitation.
 - **Création et modification de tokens d'imitation :** Les utilisateurs peuvent créer un token d'imitation et l'améliorer en ajoutant un SID (Identifiant de Sécurité) d'un groupe privilégié.
 
@@ -114,7 +114,7 @@ Ce privilège permet de **déboguer d'autres processus**, y compris de lire et d
 
 #### Dump mémoire
 
-Vous pourriez utiliser [ProcDump](https://docs.microsoft.com/en-us/sysinternals/downloads/procdump) de la [SysInternals Suite](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite) pour **capturer la mémoire d'un processus**. Plus précisément, cela peut s'appliquer au processus **Local Security Authority Subsystem Service (**[**LSASS**](https://en.wikipedia.org/wiki/Local_Security_Authority_Subsystem_Service)**)**, qui est responsable du stockage des informations d'identification des utilisateurs une fois qu'un utilisateur s'est connecté avec succès à un système.
+Vous pouvez utiliser [ProcDump](https://docs.microsoft.com/en-us/sysinternals/downloads/procdump) de la [SysInternals Suite](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite) pour **capturer la mémoire d'un processus**. Plus précisément, cela peut s'appliquer au processus **Local Security Authority Subsystem Service (**[**LSASS**](https://en.wikipedia.org/wiki/Local_Security_Authority_Subsystem_Service)**)**, qui est responsable du stockage des informations d'identification des utilisateurs une fois qu'un utilisateur s'est connecté avec succès à un système.
 
 Vous pouvez ensuite charger ce dump dans mimikatz pour obtenir des mots de passe :
 ```

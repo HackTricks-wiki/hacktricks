@@ -1,4 +1,4 @@
-# AD CS Vol de Certificat
+# AD CS Certificate Theft
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -6,7 +6,7 @@
 
 ## Que puis-je faire avec un certificat
 
-Avant de vérifier comment voler les certificats, voici quelques informations sur la façon de trouver à quoi le certificat peut servir :
+Avant de vérifier comment voler les certificats, voici quelques informations sur la façon de trouver à quoi sert le certificat :
 ```bash
 # Powershell
 $CertPath = "C:\path\to\cert.pfx"
@@ -26,7 +26,7 @@ Pour une **approche programmatique**, des outils tels que le cmdlet PowerShell `
 
 Cependant, si une clé privée est définie comme non-exportable, CAPI et CNG bloqueront normalement l'extraction de tels certificats. Pour contourner cette restriction, des outils comme **Mimikatz** peuvent être employés. Mimikatz offre des commandes `crypto::capi` et `crypto::cng` pour patcher les API respectives, permettant l'exportation des clés privées. Plus précisément, `crypto::capi` patch le CAPI dans le processus actuel, tandis que `crypto::cng` cible la mémoire de **lsass.exe** pour le patching.
 
-## Vol de certificat utilisateur via DPAPI – THEFT2
+## Vol de certificats utilisateur via DPAPI – THEFT2
 
 Plus d'infos sur DPAPI dans :
 
@@ -36,7 +36,7 @@ Plus d'infos sur DPAPI dans :
 
 Dans Windows, **les clés privées des certificats sont protégées par DPAPI**. Il est crucial de reconnaître que les **emplacements de stockage pour les clés privées utilisateur et machine** sont distincts, et les structures de fichiers varient en fonction de l'API cryptographique utilisée par le système d'exploitation. **SharpDPAPI** est un outil qui peut naviguer automatiquement dans ces différences lors du décryptage des blobs DPAPI.
 
-Les **certificats utilisateur** sont principalement logés dans le registre sous `HKEY_CURRENT_USER\SOFTWARE\Microsoft\SystemCertificates`, mais certains peuvent également être trouvés dans le répertoire `%APPDATA%\Microsoft\SystemCertificates\My\Certificates`. Les **clés privées** correspondantes pour ces certificats sont généralement stockées dans `%APPDATA%\Microsoft\Crypto\RSA\User SID\` pour les clés **CAPI** et `%APPDATA%\Microsoft\Crypto\Keys\` pour les clés **CNG**.
+**Les certificats utilisateur** sont principalement logés dans le registre sous `HKEY_CURRENT_USER\SOFTWARE\Microsoft\SystemCertificates`, mais certains peuvent également être trouvés dans le répertoire `%APPDATA%\Microsoft\SystemCertificates\My\Certificates`. Les **clés privées** correspondantes pour ces certificats sont généralement stockées dans `%APPDATA%\Microsoft\Crypto\RSA\User SID\` pour les clés **CAPI** et `%APPDATA%\Microsoft\Crypto\Keys\` pour les clés **CNG**.
 
 Pour **extraire un certificat et sa clé privée associée**, le processus implique :
 
@@ -52,7 +52,7 @@ dpapi::masterkey /in:"C:\PATH\TO\KEY" /rpc
 # With mimikatz, if the user's password is known
 dpapi::masterkey /in:"C:\PATH\TO\KEY" /sid:accountSid /password:PASS
 ```
-Pour rationaliser le déchiffrement des fichiers masterkey et des fichiers de clé privée, la commande `certificates` de [**SharpDPAPI**](https://github.com/GhostPack/SharpDPAPI) s'avère utile. Elle accepte `/pvk`, `/mkfile`, `/password` ou `{GUID}:KEY` comme arguments pour déchiffrer les clés privées et les certificats associés, générant ensuite un fichier `.pem`.
+Pour rationaliser le déchiffrement des fichiers masterkey et des fichiers de clé privée, la commande `certificates` de [**SharpDPAPI**](https://github.com/GhostPack/SharpDPAPI) s'avère bénéfique. Elle accepte `/pvk`, `/mkfile`, `/password` ou `{GUID}:KEY` comme arguments pour déchiffrer les clés privées et les certificats associés, générant ensuite un fichier `.pem`.
 ```bash
 # Decrypting using SharpDPAPI
 SharpDPAPI.exe certificates /mkfile:C:\temp\mkeys.txt
@@ -66,7 +66,7 @@ Les certificats de machine stockés par Windows dans le registre à `HKEY_LOCAL_
 
 Le déchiffrement manuel peut être réalisé en exécutant la commande `lsadump::secrets` dans **Mimikatz** pour extraire le secret LSA DPAPI_SYSTEM, puis en utilisant cette clé pour déchiffrer les clés maîtresses de la machine. Alternativement, la commande `crypto::certificates /export /systemstore:LOCAL_MACHINE` de Mimikatz peut être utilisée après avoir patché CAPI/CNG comme décrit précédemment.
 
-**SharpDPAPI** offre une approche plus automatisée avec sa commande de certificats. Lorsque le drapeau `/machine` est utilisé avec des permissions élevées, il s'élève à SYSTEM, extrait le secret LSA DPAPI_SYSTEM, l'utilise pour déchiffrer les clés maîtresses DPAPI de la machine, puis emploie ces clés en texte clair comme table de recherche pour déchiffrer toutes les clés privées de certificats de machine.
+**SharpDPAPI** offre une approche plus automatisée avec sa commande de certificats. Lorsque le drapeau `/machine` est utilisé avec des permissions élevées, il s'élève à SYSTEM, extrait le secret LSA DPAPI_SYSTEM, l'utilise pour déchiffrer les clés maîtresses DPAPI de la machine, puis utilise ces clés en texte clair comme table de recherche pour déchiffrer toutes les clés privées de certificats de machine.
 
 ## Recherche de fichiers de certificats – THEFT4
 
@@ -102,7 +102,7 @@ tgt::pac /caname:generic-DC-CA /subject:genericUser /castore:current_user /domai
 ```
 **`Rubeus`** peut également obtenir ces informations avec l'option **`asktgt [...] /getcredentials`**.
 
-De plus, il est noté que Kekeo peut traiter des certificats protégés par carte intelligente, à condition que le code PIN puisse être récupéré, avec référence à [https://github.com/CCob/PinSwipe](https://github.com/CCob/PinSwipe). La même capacité est indiquée comme étant prise en charge par **Rubeus**, disponible à [https://github.com/GhostPack/Rubeus](https://github.com/GhostPack/Rubeus).
+De plus, il est noté que Kekeo peut traiter des certificats protégés par carte à puce, à condition que le code PIN puisse être récupéré, avec référence à [https://github.com/CCob/PinSwipe](https://github.com/CCob/PinSwipe). La même capacité est indiquée comme étant prise en charge par **Rubeus**, disponible à [https://github.com/GhostPack/Rubeus](https://github.com/GhostPack/Rubeus).
 
 Cette explication résume le processus et les outils impliqués dans le vol de crédentiels NTLM via PKINIT, en se concentrant sur la récupération des hachages NTLM à travers le TGT obtenu en utilisant PKINIT, et les utilitaires qui facilitent ce processus.
 

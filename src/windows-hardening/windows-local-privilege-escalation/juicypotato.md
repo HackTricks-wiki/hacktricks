@@ -18,11 +18,11 @@ _Une version sucrée de_ [_RottenPotatoNG_](https://github.com/breenmachine/Rott
 
 [**Depuis le Readme de juicy-potato**](https://github.com/ohpe/juicy-potato/blob/master/README.md)**:**
 
-[RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG) et ses [variantes](https://github.com/decoder-it/lonelypotato) exploitent la chaîne d'escalade de privilèges basée sur [`BITS`](<https://msdn.microsoft.com/en-us/library/windows/desktop/bb968799(v=vs.85).aspx>) [service](https://github.com/breenmachine/RottenPotatoNG/blob/4eefb0dd89decb9763f2bf52c7a067440a9ec1f0/RottenPotatoEXE/MSFRottenPotato/MSFRottenPotato.cpp#L126) ayant l'écouteur MiTM sur `127.0.0.1:6666` et lorsque vous avez les privilèges `SeImpersonate` ou `SeAssignPrimaryToken`. Lors d'un examen de build Windows, nous avons trouvé une configuration où `BITS` était intentionnellement désactivé et le port `6666` était occupé.
+[RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG) et ses [variantes](https://github.com/decoder-it/lonelypotato) exploitent la chaîne d'escalade de privilèges basée sur [`BITS`](<https://msdn.microsoft.com/en-us/library/windows/desktop/bb968799(v=vs.85).aspx>) [service](https://github.com/breenmachine/RottenPotatoNG/blob/4eefb0dd89decb9763f2bf52c7a067440a9ec1f0/RottenPotatoEXE/MSFRottenPotato/MSFRottenPotato.cpp#L126) ayant l'écouteur MiTM sur `127.0.0.1:6666` et lorsque vous avez les privilèges `SeImpersonate` ou `SeAssignPrimaryToken`. Lors d'un examen de build Windows, nous avons trouvé une configuration où `BITS` était intentionnellement désactivé et le port `6666` était pris.
 
 Nous avons décidé d'armement [RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG) : **Dites bonjour à Juicy Potato**.
 
-> Pour la théorie, voir [Rotten Potato - Escalade de privilèges des comptes de service à SYSTEM](https://foxglovesecurity.com/2016/09/26/rotten-potato-privilege-escalation-from-service-accounts-to-system/) et suivez la chaîne de liens et références.
+> Pour la théorie, voir [Rotten Potato - Escalade de privilèges des comptes de service à SYSTEM](https://foxglovesecurity.com/2016/09/26/rotten-potato-privilege-escalation-from-service-accounts-to-system/) et suivez la chaîne de liens et de références.
 
 Nous avons découvert qu'en plus de `BITS`, il existe plusieurs serveurs COM que nous pouvons exploiter. Ils doivent simplement :
 
@@ -45,8 +45,8 @@ JuicyPotato vous permet de :
 - `les deux`
 - **Processus à lancer** _lancez un exécutable ou un script si l'exploitation réussit_
 - **Argument de processus** _personnalisez les arguments du processus lancé_
-- **Adresse du serveur RPC** _pour une approche furtive, vous pouvez vous authentifier à un serveur RPC externe_
-- **Port du serveur RPC** _utile si vous souhaitez vous authentifier à un serveur externe et que le pare-feu bloque le port `135`…_
+- **Adresse du serveur RPC** _pour une approche furtive, vous pouvez vous authentifier auprès d'un serveur RPC externe_
+- **Port du serveur RPC** _utile si vous souhaitez vous authentifier auprès d'un serveur externe et que le pare-feu bloque le port `135`…_
 - **MODE TEST** _principalement à des fins de test, c'est-à-dire tester les CLSID. Il crée le DCOM et imprime l'utilisateur du jeton. Voir_ [_ici pour les tests_](http://ohpe.it/juicy-potato/Test/)
 
 ### Utilisation <a href="#usage" id="usage"></a>
@@ -72,7 +72,7 @@ Optional args:
 
 Si l'utilisateur a les privilèges `SeImpersonate` ou `SeAssignPrimaryToken`, alors vous êtes **SYSTEM**.
 
-Il est presque impossible d'empêcher l'abus de tous ces serveurs COM. Vous pourriez penser à modifier les permissions de ces objets via `DCOMCNFG`, mais bonne chance, cela va être difficile.
+Il est presque impossible d'empêcher l'abus de tous ces serveurs COM. Vous pourriez penser à modifier les permissions de ces objets via `DCOMCNFG`, mais bonne chance, cela va être un défi.
 
 La véritable solution est de protéger les comptes et applications sensibles qui fonctionnent sous les comptes `* SERVICE`. Arrêter `DCOM` inhiberait certainement cette exploitation, mais pourrait avoir un impact sérieux sur le système d'exploitation sous-jacent.
 

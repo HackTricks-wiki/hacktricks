@@ -66,8 +66,8 @@ Ou [**binvis.io**](https://binvis.io/#/) ([code](https://code.google.com/archive
 
 ### Récupération du Système de Fichiers
 
-Avec les outils précédemment commentés comme `binwalk -ev <bin>`, vous devriez avoir pu **extraire le système de fichiers**.\
-Binwalk extrait généralement cela dans un **dossier nommé selon le type de système de fichiers**, qui est généralement l'un des suivants : squashfs, ubifs, romfs, rootfs, jffs2, yaffs2, cramfs, initramfs.
+Avec les outils commentés précédemment comme `binwalk -ev <bin>`, vous devriez avoir pu **extraire le système de fichiers**.\
+Binwalk l'extrait généralement dans un **dossier nommé selon le type de système de fichiers**, qui est généralement l'un des suivants : squashfs, ubifs, romfs, rootfs, jffs2, yaffs2, cramfs, initramfs.
 
 #### Extraction Manuelle du Système de Fichiers
 
@@ -154,7 +154,7 @@ Une fois le système de fichiers extrait, la recherche de failles de sécurité 
 
 - **etc/shadow** et **etc/passwd** pour les identifiants utilisateurs
 - Certificats SSL et clés dans **etc/ssl**
-- Fichiers de configuration et scripts pour d'éventuelles vulnérabilités
+- Fichiers de configuration et scripts pour des vulnérabilités potentielles
 - Binaires intégrés pour une analyse plus approfondie
 - Serveurs web et binaires courants des dispositifs IoT
 
@@ -170,7 +170,7 @@ Le code source et les binaires compilés trouvés dans le système de fichiers d
 
 ## Émulation de Firmware pour Analyse Dynamique
 
-Le processus d'émulation de firmware permet une **analyse dynamique** soit du fonctionnement d'un appareil, soit d'un programme individuel. Cette approche peut rencontrer des défis liés aux dépendances matérielles ou d'architecture, mais le transfert du système de fichiers racine ou de binaires spécifiques vers un appareil avec une architecture et un ordre des octets correspondants, comme un Raspberry Pi, ou vers une machine virtuelle préconstruite, peut faciliter des tests supplémentaires.
+Le processus d'émulation de firmware permet une **analyse dynamique** soit du fonctionnement d'un dispositif, soit d'un programme individuel. Cette approche peut rencontrer des défis liés aux dépendances matérielles ou d'architecture, mais le transfert du système de fichiers racine ou de binaires spécifiques vers un dispositif avec une architecture et un ordre des octets correspondants, comme un Raspberry Pi, ou vers une machine virtuelle préconstruite, peut faciliter des tests supplémentaires.
 
 ### Émulation de Binaires Individuels
 
@@ -212,7 +212,7 @@ Développer un PoC pour les vulnérabilités identifiées nécessite une compré
 
 Des systèmes d'exploitation comme [AttifyOS](https://github.com/adi0x90/attifyos) et [EmbedOS](https://github.com/scriptingxss/EmbedOS) fournissent des environnements préconfigurés pour les tests de sécurité des firmwares, équipés des outils nécessaires.
 
-## OS préparés pour analyser le firmware
+## Systèmes d'exploitation préparés pour analyser le firmware
 
 - [**AttifyOS**](https://github.com/adi0x90/attifyos) : AttifyOS est une distribution destinée à vous aider à effectuer des évaluations de sécurité et des tests de pénétration des dispositifs Internet des objets (IoT). Elle vous fait gagner beaucoup de temps en fournissant un environnement préconfiguré avec tous les outils nécessaires chargés.
 - [**EmbedOS**](https://github.com/scriptingxss/EmbedOS) : Système d'exploitation de test de sécurité embarqué basé sur Ubuntu 18.04 préchargé avec des outils de test de sécurité des firmwares.
@@ -244,7 +244,7 @@ Dans le firmware vulnérable (rétrogradé), le paramètre `md5` est concaténé
 
 ### Extraction de Firmware à partir d'Applications Mobiles
 
-De nombreux fournisseurs regroupent des images de firmware complètes à l'intérieur de leurs applications mobiles compagnon afin que l'application puisse mettre à jour l'appareil via Bluetooth/Wi-Fi. Ces paquets sont généralement stockés non chiffrés dans l'APK/APEX sous des chemins comme `assets/fw/` ou `res/raw/`. Des outils tels que `apktool`, `ghidra`, ou même un simple `unzip` vous permettent d'extraire des images signées sans toucher au matériel physique.
+De nombreux fournisseurs regroupent des images de firmware complètes dans leurs applications mobiles compagnon afin que l'application puisse mettre à jour l'appareil via Bluetooth/Wi-Fi. Ces paquets sont généralement stockés non chiffrés dans l'APK/APEX sous des chemins comme `assets/fw/` ou `res/raw/`. Des outils tels que `apktool`, `ghidra`, ou même un simple `unzip` vous permettent d'extraire des images signées sans toucher au matériel physique.
 ```
 $ apktool d vendor-app.apk -o vendor-app
 $ ls vendor-app/assets/firmware

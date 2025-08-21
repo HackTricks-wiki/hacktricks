@@ -17,14 +17,14 @@ Enfin, le sandbox sera activé par un appel à **`__sandbox_ms`** qui appellera 
 
 ### Contournement de l'attribut de quarantaine
 
-**Les fichiers créés par des processus sandboxés** se voient ajouter l'**attribut de quarantaine** pour empêcher les échappées du sandbox. Cependant, si vous parvenez à **créer un dossier `.app` sans l'attribut de quarantaine** au sein d'une application sandboxée, vous pourriez faire pointer le binaire du bundle de l'application vers **`/bin/bash`** et ajouter certaines variables d'environnement dans le **plist** pour abuser de **`open`** afin de **lancer la nouvelle application sans sandbox**.
+**Les fichiers créés par des processus sandboxés** se voient ajouter l'**attribut de quarantaine** pour empêcher les échappements du sandbox. Cependant, si vous parvenez à **créer un dossier `.app` sans l'attribut de quarantaine** au sein d'une application sandboxée, vous pourriez faire pointer le binaire du bundle de l'application vers **`/bin/bash`** et ajouter certaines variables d'environnement dans le **plist** pour abuser de **`open`** afin de **lancer la nouvelle application sans sandbox**.
 
 C'est ce qui a été fait dans [**CVE-2023-32364**](https://gergelykalman.com/CVE-2023-32364-a-macOS-sandbox-escape-by-mounting.html)**.**
 
 > [!CAUTION]
-> Par conséquent, pour le moment, si vous êtes simplement capable de créer un dossier avec un nom se terminant par **`.app`** sans un attribut de quarantaine, vous pouvez échapper au sandbox car macOS ne **vérifie** que l'**attribut de quarantaine** dans le **dossier `.app`** et dans le **binaire principal** (et nous allons faire pointer le binaire principal vers **`/bin/bash`**).
+> Par conséquent, pour le moment, si vous êtes simplement capable de créer un dossier avec un nom se terminant par **`.app`** sans un attribut de quarantaine, vous pouvez échapper au sandbox car macOS ne **vérifie** que l'**attribut de quarantaine** dans le **dossier `.app`** et dans le **binaire principal** (et nous ferons pointer le binaire principal vers **`/bin/bash`**).
 >
-> Notez que si un bundle .app a déjà été autorisé à s'exécuter (il a un attribut de quarantaine avec le drapeau autorisé à s'exécuter), vous pourriez également en abuser... sauf que maintenant vous ne pouvez pas écrire à l'intérieur des bundles **`.app`** à moins d'avoir certains privilèges TCC (ce que vous n'aurez pas à l'intérieur d'un sandbox élevé).
+> Notez que si un bundle .app a déjà été autorisé à s'exécuter (il a un attribut de quarantaine avec le drapeau autorisé à s'exécuter), vous pourriez également en abuser... sauf que maintenant vous ne pouvez pas écrire à l'intérieur des bundles **`.app`** à moins d'avoir certains privilèges TCC (que vous n'aurez pas à l'intérieur d'un sandbox élevé).
 
 ### Abus de la fonctionnalité Open
 
@@ -249,9 +249,9 @@ Notez que même si certaines **actions** peuvent être **autorisées par le sand
 (global-name "com.apple.cfnetwork.cfnetworkagent")
 [...]
 ```
-### Interposition Bypass
+### Interposting Bypass
 
-Pour plus d'informations sur **Interposition**, consultez :
+Pour plus d'informations sur **Interposting**, consultez :
 
 
 {{#ref}}

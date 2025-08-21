@@ -112,10 +112,10 @@ suricata -r packets.pcap -c /etc/suricata/suricata.yaml -k none -v -l log
 [**YaraPCAP**](https://github.com/kevthehermit/YaraPcap) est un outil qui
 
 - Lit un fichier PCAP et extrait les flux Http.
-- gzip décompresse tous les flux compressés
-- Scanne chaque fichier avec yara
-- Écrit un rapport.txt
-- Enregistre éventuellement les fichiers correspondants dans un répertoire
+- Décompresse les flux compressés avec gzip.
+- Scanne chaque fichier avec yara.
+- Écrit un rapport.txt.
+- Enregistre éventuellement les fichiers correspondants dans un répertoire.
 
 ### Analyse de Malware
 

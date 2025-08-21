@@ -2,9 +2,9 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-> L'injection d'**argument** par **wildcard** (aussi appelée *glob*) se produit lorsqu'un script privilégié exécute un binaire Unix tel que `tar`, `chown`, `rsync`, `zip`, `7z`, … avec un wildcard non cité comme `*`. 
-> Étant donné que le shell développe le wildcard **avant** d'exécuter le binaire, un attaquant capable de créer des fichiers dans le répertoire de travail peut concevoir des noms de fichiers qui commencent par `-` afin qu'ils soient interprétés comme des **options au lieu de données**, permettant ainsi de faire passer des drapeaux arbitraires ou même des commandes.
-> Cette page regroupe les primitives les plus utiles, les recherches récentes et les détections modernes pour 2023-2025.
+> L'injection d'**argument de wildcard** (aussi appelée *glob*) se produit lorsqu'un script privilégié exécute un binaire Unix tel que `tar`, `chown`, `rsync`, `zip`, `7z`, … avec un wildcard non cité comme `*`. 
+> Étant donné que le shell développe le wildcard **avant** d'exécuter le binaire, un attaquant qui peut créer des fichiers dans le répertoire de travail peut concevoir des noms de fichiers qui commencent par `-` afin qu'ils soient interprétés comme **options au lieu de données**, permettant ainsi de faire passer des drapeaux arbitraires ou même des commandes.
+> Cette page recueille les primitives les plus utiles, les recherches récentes et les détections modernes pour 2023-2025.
 
 ## chown / chmod
 
@@ -20,7 +20,7 @@ chmod -R 644 *.php
 ```
 `--reference=/root/secret``file` est injecté, ce qui fait que *tous* les fichiers correspondants héritent de la propriété/des permissions de `/root/secret``file`.
 
-*PoC & outil* : [`wildpwn`](https://github.com/localh0t/wildpwn) (attaque combinée).
+*PoC & outil* : [`wildpwn`](https://github.com/localh0t/wildpwn) (attaque combinée).  
 Voir aussi le document classique de DefenseCode pour plus de détails.
 
 ---
@@ -41,7 +41,7 @@ Une fois que root exécute par exemple `tar -czf /root/backup.tgz *`, `shell.sh`
 
 ### bsdtar / macOS 14+
 
-Le `tar` par défaut sur les versions récentes de macOS (basé sur `libarchive`) ne met *pas* en œuvre `--checkpoint`, mais vous pouvez toujours obtenir une exécution de code avec le drapeau **--use-compress-program** qui vous permet de spécifier un compresseur externe.
+Le `tar` par défaut sur les versions récentes de macOS (basé sur `libarchive`) *n'implémente pas* `--checkpoint`, mais vous pouvez toujours obtenir une exécution de code avec le drapeau **--use-compress-program** qui vous permet de spécifier un compresseur externe.
 ```bash
 # macOS example
 touch "--use-compress-program=/bin/sh"
@@ -57,7 +57,7 @@ Lorsque un script privilégié exécute `tar -cf backup.tar *`, `/bin/sh` sera l
 # attacker-controlled directory
 touch "-e sh shell.sh"        # -e <cmd> => use <cmd> instead of ssh
 ```
-Si root archive plus tard le répertoire avec `rsync -az * backup:/srv/`, le drapeau injecté lance votre shell du côté distant.
+Si root archive ensuite le répertoire avec `rsync -az * backup:/srv/`, le drapeau injecté lance votre shell du côté distant.
 
 *PoC*: [`wildpwn`](https://github.com/localh0t/wildpwn) (`rsync` mode).
 
@@ -65,7 +65,7 @@ Si root archive plus tard le répertoire avec `rsync -az * backup:/srv/`, le dra
 
 ## 7-Zip / 7z / 7za
 
-Même lorsque le script privilégié *défensivement* préfixe le caractère générique avec `--` (pour arrêter l'analyse des options), le format 7-Zip prend en charge **les fichiers de liste de fichiers** en préfixant le nom de fichier avec `@`. Combiner cela avec un lien symbolique vous permet d'*exfiltrer des fichiers arbitraires*:
+Même lorsque le script privilégié *défensivement* préfixe le caractère générique avec `--` (pour arrêter l'analyse des options), le format 7-Zip prend en charge **les fichiers de liste de fichiers** en préfixant le nom de fichier avec `@`. Combiner cela avec un lien symbolique vous permet d'*exfiltrer des fichiers arbitraires* :
 ```bash
 # directory writable by low-priv user
 cd /path/controlled
@@ -107,7 +107,7 @@ Ces primitives sont moins courantes que les classiques *tar/rsync/zip* mais vale
 
 ## Hooks de rotation tcpdump (-G/-W/-z) : RCE via injection argv dans les wrappers
 
-Lorsqu'un shell restreint ou un wrapper de fournisseur construit une ligne de commande `tcpdump` en concaténant des champs contrôlés par l'utilisateur (par exemple, un paramètre "nom de fichier") sans citation/validation stricte, vous pouvez introduire des drapeaux supplémentaires `tcpdump`. La combinaison de `-G` (rotation basée sur le temps), `-W` (limiter le nombre de fichiers) et `-z <cmd>` (commande post-rotation) permet l'exécution de commandes arbitraires en tant qu'utilisateur exécutant tcpdump (souvent root sur les appareils).
+Lorsqu'un shell restreint ou un wrapper de fournisseur construit une ligne de commande `tcpdump` en concaténant des champs contrôlés par l'utilisateur (par exemple, un paramètre "nom de fichier") sans citation/validation stricte, vous pouvez introduire des drapeaux `tcpdump` supplémentaires. La combinaison de `-G` (rotation basée sur le temps), `-W` (limiter le nombre de fichiers) et `-z <cmd>` (commande post-rotation) permet l'exécution de commandes arbitraires en tant qu'utilisateur exécutant tcpdump (souvent root sur les appareils).
 
 Conditions préalables :
 
@@ -139,7 +139,7 @@ Détails :
 
 Variantes sans média amovible :
 
-- Si vous avez un autre moyen d'écrire des fichiers (par exemple, un wrapper de commande séparé qui permet la redirection de sortie), déposez votre script dans un chemin connu et déclenchez `-z /bin/sh /path/script.sh` ou `-z /path/script.sh` selon la sémantique de la plateforme.
+- Si vous avez un autre moyen d'écrire des fichiers (par exemple, un wrapper de commande séparé qui permet la redirection de sortie), placez votre script dans un chemin connu et déclenchez `-z /bin/sh /path/script.sh` ou `-z /path/script.sh` selon la sémantique de la plateforme.
 - Certains wrappers de fournisseurs tournent vers des emplacements contrôlables par l'attaquant. Si vous pouvez influencer le chemin tourné (symlink/traversée de répertoire), vous pouvez orienter `-z` pour exécuter du contenu que vous contrôlez entièrement sans média externe.
 
 Conseils de durcissement pour les fournisseurs :
@@ -152,7 +152,7 @@ Conseils de durcissement pour les fournisseurs :
 
 1. **Désactivez le globbing de shell** dans les scripts critiques : `set -f` (`set -o noglob`) empêche l'expansion des jokers.
 2. **Citez ou échappez** les arguments : `tar -czf "$dst" -- *` n'est *pas* sûr — préférez `find . -type f -print0 | xargs -0 tar -czf "$dst"`.
-3. **Chemins explicites** : Utilisez `/var/www/html/*.log` au lieu de `*` afin que les attaquants ne puissent pas créer de fichiers frères qui commencent par `-`.
+3. **Chemins explicites** : Utilisez `/var/www/html/*.log` au lieu de `*` afin que les attaquants ne puissent pas créer de fichiers frères commençant par `-`.
 4. **Moins de privilèges** : Exécutez des tâches de sauvegarde/maintenance en tant que compte de service non privilégié au lieu de root chaque fois que possible.
 5. **Surveillance** : La règle préconstruite d'Elastic *Potential Shell via Wildcard Injection* recherche `tar --checkpoint=*`, `rsync -e*`, ou `zip --unzip-command` immédiatement suivi d'un processus enfant shell. La requête EQL peut être adaptée pour d'autres EDR.
 
@@ -160,7 +160,7 @@ Conseils de durcissement pour les fournisseurs :
 
 ## Références
 
-* Elastic Security – Règle détectée *Potential Shell via Wildcard Injection* (dernière mise à jour en 2025)
+* Elastic Security – Règle détectée *Potential Shell via Wildcard Injection* (dernière mise à jour 2025)
 * Rutger Flohil – “macOS — Tar wildcard injection” (18 déc. 2024)
 * GTFOBins – [tcpdump](https://gtfobins.github.io/gtfobins/tcpdump/)
 * FiberGateway GR241AG – [Full Exploit Chain](https://r0ny.net/FiberGateway-GR241AG-Full-Exploit-Chain/)

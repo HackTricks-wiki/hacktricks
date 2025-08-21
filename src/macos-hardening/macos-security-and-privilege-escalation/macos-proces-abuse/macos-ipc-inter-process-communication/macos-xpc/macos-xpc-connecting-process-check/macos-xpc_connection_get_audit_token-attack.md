@@ -41,7 +41,7 @@ Deux méthodes différentes par lesquelles cela pourrait être exploitable :
 1. Variante 1 :
 - **L'exploit** **se connecte** au service **A** et au service **B**
 - Le service **B** peut appeler une **fonctionnalité privilégiée** dans le service A que l'utilisateur ne peut pas
-- Le service **A** appelle **`xpc_connection_get_audit_token`** tout en _**ne**_ étant pas à l'intérieur du **gestionnaire d'événements** pour une connexion dans un **`dispatch_async`**.
+- Le service **A** appelle **`xpc_connection_get_audit_token`** tout en _**n'étant pas**_ à l'intérieur du **gestionnaire d'événements** pour une connexion dans un **`dispatch_async`**.
 - Ainsi, un **message différent** pourrait **écraser le jeton d'audit** car il est dispatché de manière asynchrone en dehors du gestionnaire d'événements.
 - L'exploit passe au **service B le droit d'ENVOYER au service A**.
 - Ainsi, le svc **B** sera en fait **en train d'envoyer** les **messages** au service **A**.
@@ -50,7 +50,7 @@ Deux méthodes différentes par lesquelles cela pourrait être exploitable :
 - Le service **B** peut appeler une **fonctionnalité privilégiée** dans le service A que l'utilisateur ne peut pas
 - L'exploit se connecte avec le **service A** qui **envoie** à l'exploit un **message s'attendant à une réponse** dans un **port de réponse** spécifique.
 - L'exploit envoie au **service** B un message passant **ce port de réponse**.
-- Lorsque le service **B répond**, il **envoie le message au service A**, **tandis que** l'**exploit** envoie un **message différent au service A** essayant d'**atteindre une fonctionnalité privilégiée** et s'attendant à ce que la réponse du service B écrase le jeton d'audit au bon moment (Condition de course).
+- Lorsque le service **B répond**, il **envoie le message au service A**, **tandis que** l'**exploit** envoie un **message différent au service A** essayant d'**atteindre une fonctionnalité privilégiée** et s'attendant à ce que la réponse du service B écrase le jeton d'audit au bon moment (Race Condition).
 
 ## Variante 1 : appel de xpc_connection_get_audit_token en dehors d'un gestionnaire d'événements <a href="#variant-1-calling-xpc_connection_get_audit_token-outside-of-an-event-handler" id="variant-1-calling-xpc_connection_get_audit_token-outside-of-an-event-handler"></a>
 
@@ -62,7 +62,7 @@ Scénario :
 - Pour ce contrôle d'autorisation, **`A`** obtient le jeton d'audit de manière asynchrone, par exemple en appelant `xpc_connection_get_audit_token` depuis **`dispatch_async`**.
 
 > [!CAUTION]
-> Dans ce cas, un attaquant pourrait déclencher une **Condition de course** en réalisant un **exploit** qui **demande à A d'effectuer une action** plusieurs fois tout en faisant **B envoyer des messages à `A`**. Lorsque la RC est **réussie**, le **jeton d'audit** de **B** sera copié en mémoire **tandis que** la demande de notre **exploit** est en cours de **traitement** par A, lui donnant **accès à l'action privilégiée que seul B pouvait demander**.
+> Dans ce cas, un attaquant pourrait déclencher une **Race Condition** en réalisant un **exploit** qui **demande à A d'effectuer une action** plusieurs fois tout en faisant **B envoyer des messages à `A`**. Lorsque le RC est **réussi**, le **jeton d'audit** de **B** sera copié en mémoire **tandis que** la demande de notre **exploit** est en cours de **traitement** par A, lui donnant **accès à l'action privilégiée que seul B pouvait demander**.
 
 Cela s'est produit avec **`A`** en tant que `smd` et **`B`** en tant que `diagnosticd`. La fonction [`SMJobBless`](https://developer.apple.com/documentation/servicemanagement/1431078-smjobbless?language=objc) de smb peut être utilisée pour installer un nouvel outil d'assistance privilégié (en tant que **root**). Si un **processus s'exécutant en tant que root contacte** **smd**, aucun autre contrôle ne sera effectué.
 
@@ -81,7 +81,7 @@ Pour effectuer l'attaque :
 
 ## Variante 2 : transfert de réponse
 
-Dans un environnement XPC (Communication inter-processus), bien que les gestionnaires d'événements ne s'exécutent pas de manière concurrente, le traitement des messages de réponse a un comportement unique. Plus précisément, deux méthodes distinctes existent pour envoyer des messages qui s'attendent à une réponse :
+Dans un environnement XPC (Communication Inter-Processus), bien que les gestionnaires d'événements ne s'exécutent pas de manière concurrente, le traitement des messages de réponse a un comportement unique. Plus précisément, deux méthodes distinctes existent pour envoyer des messages qui s'attendent à une réponse :
 
 1. **`xpc_connection_send_message_with_reply`** : Ici, le message XPC est reçu et traité sur une file d'attente désignée.
 2. **`xpc_connection_send_message_with_reply_sync`** : À l'inverse, dans cette méthode, le message XPC est reçu et traité sur la file d'attente de dispatch actuelle.
@@ -109,9 +109,9 @@ Voici une représentation visuelle du scénario d'attaque décrit :
 
 ## Problèmes de découverte
 
-- **Difficultés à localiser des instances** : La recherche d'instances d'utilisation de `xpc_connection_get_audit_token` a été difficile, tant statiquement que dynamiquement.
+- **Difficultés à localiser des instances** : La recherche d'instances d'utilisation de `xpc_connection_get_audit_token` était difficile, tant statiquement que dynamiquement.
 - **Méthodologie** : Frida a été utilisée pour accrocher la fonction `xpc_connection_get_audit_token`, filtrant les appels ne provenant pas des gestionnaires d'événements. Cependant, cette méthode était limitée au processus accroché et nécessitait une utilisation active.
-- **Outils d'analyse** : Des outils comme IDA/Ghidra ont été utilisés pour examiner les services mach accessibles, mais le processus était long, compliqué par les appels impliquant le cache partagé dyld.
+- **Outils d'analyse** : Des outils comme IDA/Ghidra ont été utilisés pour examiner les services mach accessibles, mais le processus était long, compliqué par des appels impliquant le cache partagé dyld.
 - **Limitations de script** : Les tentatives de script de l'analyse pour les appels à `xpc_connection_get_audit_token` à partir de blocs `dispatch_async` ont été entravées par des complexités dans l'analyse des blocs et les interactions avec le cache partagé dyld.
 
 ## La solution <a href="#the-fix" id="the-fix"></a>

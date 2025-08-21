@@ -46,7 +46,7 @@ Il en va de même pour cette carte HID où seulement 2 des 3 octets peuvent êtr
 
 ### Emulate/Write
 
-Après avoir **copié** une carte ou **entré** l'ID **manuellement**, il est possible de **l'émuler** avec Flipper Zero ou de **l'écrire** sur une carte réelle.
+Après avoir **copié** une carte ou **saisi** l'ID **manuellement**, il est possible de **l'émuler** avec Flipper Zero ou de **l'écrire** sur une carte réelle.
 
 ## References
 

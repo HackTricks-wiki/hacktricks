@@ -63,7 +63,7 @@ Tout d'abord, changer les **attributs d'assemblage** liés au **débogage** :
 ```aspnet
 [assembly: Debuggable(DebuggableAttribute.DebuggingModes.IgnoreSymbolStoreSequencePoints)]
 ```
-Je suis désolé, mais il semble que vous n'ayez pas fourni de contenu à traduire. Veuillez fournir le texte que vous souhaitez que je traduise en français.
+Je suis désolé, mais il semble que vous n'ayez pas fourni de contenu à traduire. Veuillez fournir le texte que vous souhaitez que je traduise.
 ```
 [assembly: Debuggable(DebuggableAttribute.DebuggingModes.Default |
 DebuggableAttribute.DebuggingModes.DisableOptimizations |
@@ -150,7 +150,7 @@ Ensuite, en regardant cela, vous pouvez voir quand l'exécution a été arrêté
 cheat-engine.md
 {{#endref}}
 
-[**PiNCE**](https://github.com/korcankaraokcu/PINCE) est un outil de front-end/reverse engineering pour le débogueur du projet GNU (GDB), axé sur les jeux. Cependant, il peut être utilisé pour toute tâche liée à l'ingénierie inverse.
+[**PiNCE**](https://github.com/korcankaraokcu/PINCE) est un outil de front-end/rétro-ingénierie pour le débogueur du projet GNU (GDB), axé sur les jeux. Cependant, il peut être utilisé pour toute tâche liée à la rétro-ingénierie.
 
 [**Decompiler Explorer**](https://dogbolt.org/) est un front-end web pour un certain nombre de décompilateurs. Ce service web vous permet de comparer la sortie de différents décompilateurs sur de petits exécutables.
 
@@ -176,7 +176,7 @@ blobrunner.md
 
 ### Débogage d'un shellcode avec jmp2it
 
-[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4) est très similaire à blobrunner. Il va **allouer** le **shellcode** dans un espace de mémoire et démarrer une **boucle éternelle**. Vous devez ensuite **attacher le débogueur** au processus, **jouer, attendre 2-5 secondes et appuyer sur arrêter** et vous vous retrouverez dans la **boucle éternelle**. Sautez à l'instruction suivante de la boucle éternelle car ce sera un appel au shellcode, et enfin, vous vous retrouverez à exécuter le shellcode.
+[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4) est très similaire à blobrunner. Il va **allouer** le **shellcode** dans un espace de mémoire et démarrer une **boucle éternelle**. Vous devez ensuite **attacher le débogueur** au processus, **jouer démarrer attendre 2-5 secondes et appuyer sur arrêter** et vous vous retrouverez dans la **boucle éternelle**. Sautez à l'instruction suivante de la boucle éternelle car ce sera un appel au shellcode, et enfin vous vous retrouverez à exécuter le shellcode.
 
 ![](<../../images/image (509).png>)
 
@@ -184,19 +184,19 @@ Vous pouvez télécharger une version compilée de [jmp2it sur la page des versi
 
 ### Débogage de shellcode avec Cutter
 
-[**Cutter**](https://github.com/rizinorg/cutter/releases/tag/v1.12.0) est l'interface graphique de radare. Avec Cutter, vous pouvez émuler le shellcode et l'inspecter dynamiquement.
+[**Cutter**](https://github.com/rizinorg/cutter/releases/tag/v1.12.0) est l'interface graphique de radare. En utilisant Cutter, vous pouvez émuler le shellcode et l'inspecter dynamiquement.
 
-Notez que Cutter vous permet d'"Ouvrir un fichier" et "Ouvrir un shellcode". Dans mon cas, lorsque j'ai ouvert le shellcode en tant que fichier, il l'a décompilé correctement, mais quand je l'ai ouvert en tant que shellcode, cela n'a pas fonctionné :
+Notez que Cutter vous permet de "Ouvrir un fichier" et "Ouvrir un shellcode". Dans mon cas, lorsque j'ai ouvert le shellcode en tant que fichier, il l'a décompilé correctement, mais quand je l'ai ouvert en tant que shellcode, cela n'a pas fonctionné :
 
 ![](<../../images/image (562).png>)
 
-Pour commencer l'émulation à l'endroit souhaité, définissez un point d'arrêt là et apparemment Cutter commencera automatiquement l'émulation à partir de là :
+Pour commencer l'émulation à l'endroit que vous souhaitez, définissez un point d'arrêt là et apparemment Cutter commencera automatiquement l'émulation à partir de là :
 
 ![](<../../images/image (589).png>)
 
 ![](<../../images/image (387).png>)
 
-Vous pouvez voir la pile, par exemple, dans un dump hexadécimal :
+Vous pouvez voir la pile par exemple à l'intérieur d'un dump hexadécimal :
 
 ![](<../../images/image (186).png>)
 
@@ -288,7 +288,7 @@ Dans [**no$gba**](https://problemkaputt.de/gba.htm), dans _**Options --> Configu
 
 ![](<../../images/image (581).png>)
 
-Lorsqu'ils sont pressés, chaque **touche a une valeur** pour l'identifier :
+Lorsqu'il est pressé, chaque **touche a une valeur** pour l'identifier :
 ```
 A = 1
 B = 2
@@ -372,7 +372,7 @@ Dans le code précédent, vous pouvez voir que nous comparons **uVar1** (l'endro
 
 - D'abord, il est comparé avec la **valeur 4** (bouton **SELECT**) : Dans le défi, ce bouton efface l'écran.
 - Ensuite, il est comparé avec la **valeur 8** (bouton **START**) : Dans le défi, cela vérifie si le code est valide pour obtenir le drapeau.
-- Dans ce cas, la var **`DAT_030000d8`** est comparée à 0xf3 et si la valeur est la même, un certain code est exécuté.
+- Dans ce cas, la var **`DAT_030000d8`** est comparée avec 0xf3 et si la valeur est la même, un certain code est exécuté.
 - Dans tous les autres cas, un cont (`DAT_030000d4`) est vérifié. C'est un cont car il ajoute 1 juste après être entré dans le code.\
 **Si** moins de 8, quelque chose qui implique **d'ajouter** des valeurs à **`DAT_030000d8`** est fait (en gros, il ajoute les valeurs des touches pressées dans cette variable tant que le cont est inférieur à 8).
 

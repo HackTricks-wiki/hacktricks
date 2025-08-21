@@ -6,7 +6,6 @@
 
 Allez au lien suivant pour apprendre **ce qu'est containerd** et `ctr` :
 
-
 {{#ref}}
 ../../network-services-pentesting/2375-pentesting-docker.md
 {{#endref}}

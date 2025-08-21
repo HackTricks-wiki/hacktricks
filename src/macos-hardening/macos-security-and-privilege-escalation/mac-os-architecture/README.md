@@ -33,7 +33,7 @@ De plus, **Mach et BSD maintiennent chacun des modèles de sécurité différent
 
 ### I/O Kit - Drivers
 
-L'I/O Kit est un framework **de pilote de périphérique** open-source et orienté objet dans le noyau XNU, gérant **les pilotes de périphérique chargés dynamiquement**. Il permet d'ajouter du code modulaire au noyau à la volée, prenant en charge un matériel divers.
+L'I/O Kit est un framework de **pilotes de périphériques** orienté objet open-source dans le noyau XNU, gérant des **pilotes de périphériques chargés dynamiquement**. Il permet d'ajouter du code modulaire au noyau à la volée, prenant en charge un matériel diversifié.
 
 {{#ref}}
 macos-iokit.md
@@ -47,7 +47,7 @@ macos-iokit.md
 
 ## macOS Kernel Extensions
 
-macOS est **très restrictif pour charger les extensions de noyau** (.kext) en raison des privilèges élevés avec lesquels le code s'exécutera. En fait, par défaut, il est pratiquement impossible (à moins qu'un contournement ne soit trouvé).
+macOS est **très restrictif pour charger des extensions de noyau** (.kext) en raison des privilèges élevés avec lesquels le code s'exécutera. En fait, par défaut, il est pratiquement impossible (à moins qu'un contournement ne soit trouvé).
 
 Sur la page suivante, vous pouvez également voir comment récupérer le `.kext` que macOS charge dans son **kernelcache** :
 

@@ -39,23 +39,23 @@ Il est également connu sous le nom d'encodage Manchester. La valeur logique est
 **4. Combinaison des précédents et autres exotiques**
 
 > [!TIP]
-> Il existe des protocoles IR qui **essaient de devenir universels** pour plusieurs types d'appareils. Les plus connus sont RC5 et NEC. Malheureusement, le plus célèbre **ne signifie pas le plus courant**. Dans mon environnement, j'ai rencontré seulement deux télécommandes NEC et aucune RC5.
+> Il existe des protocoles IR qui **essaient de devenir universels** pour plusieurs types d'appareils. Les plus connus sont RC5 et NEC. Malheureusement, le plus connu **ne signifie pas le plus courant**. Dans mon environnement, j'ai rencontré seulement deux télécommandes NEC et aucune RC5.
 >
 > Les fabricants aiment utiliser leurs propres protocoles IR uniques, même au sein de la même gamme d'appareils (par exemple, les décodeurs TV). Par conséquent, les télécommandes de différentes entreprises et parfois de différents modèles de la même entreprise, ne peuvent pas fonctionner avec d'autres appareils du même type.
 
 ### Exploration d'un signal IR
 
-Le moyen le plus fiable de voir à quoi ressemble le signal IR de la télécommande est d'utiliser un oscilloscope. Il ne démodule pas ou n'inverse pas le signal reçu, il est simplement affiché "tel quel". Cela est utile pour les tests et le débogage. Je vais montrer le signal attendu à l'exemple du protocole IR NEC.
+Le moyen le plus fiable de voir à quoi ressemble le signal IR de la télécommande est d'utiliser un oscilloscope. Il ne démodule ni n'inverse le signal reçu, il est simplement affiché "tel quel". Cela est utile pour les tests et le débogage. Je vais montrer le signal attendu à l'exemple du protocole IR NEC.
 
 <figure><img src="../../images/image (235).png" alt=""><figcaption></figcaption></figure>
 
-En général, il y a un préambule au début d'un paquet encodé. Cela permet au récepteur de déterminer le niveau de gain et le bruit de fond. Il existe également des protocoles sans préambule, par exemple, Sharp.
+En général, il y a un préambule au début d'un paquet encodé. Cela permet au récepteur de déterminer le niveau de gain et de fond. Il existe également des protocoles sans préambule, par exemple, Sharp.
 
 Ensuite, les données sont transmises. La structure, le préambule et la méthode d'encodage des bits sont déterminés par le protocole spécifique.
 
 Le **protocole IR NEC** contient une courte commande et un code de répétition, qui est envoyé pendant que le bouton est enfoncé. La commande et le code de répétition ont tous deux le même préambule au début.
 
-La **commande NEC**, en plus du préambule, se compose d'un octet d'adresse et d'un octet de numéro de commande, par lequel l'appareil comprend ce qui doit être effectué. Les octets d'adresse et de numéro de commande sont dupliqués avec des valeurs inverses, pour vérifier l'intégrité de la transmission. Il y a un bit d'arrêt supplémentaire à la fin de la commande.
+La **commande NEC**, en plus du préambule, se compose d'un octet d'adresse et d'un octet de numéro de commande, par lesquels l'appareil comprend ce qui doit être effectué. Les octets d'adresse et de numéro de commande sont dupliqués avec des valeurs inverses, pour vérifier l'intégrité de la transmission. Il y a un bit d'arrêt supplémentaire à la fin de la commande.
 
 Le **code de répétition** a un "1" après le préambule, qui est un bit d'arrêt.
 
@@ -82,17 +82,17 @@ Des travaux académiques récents (EvilScreen, 2022) ont démontré que **les t�
 
 ### Exfiltration de données air-gapped via des LED IR (famille aIR-Jumper)
 
-Les caméras de sécurité, les routeurs ou même les clés USB malveillantes incluent souvent des **LED IR de vision nocturne**. Des recherches montrent que des logiciels malveillants peuvent moduler ces LED (<10–20 kbit/s avec OOK simple) pour **exfiltrer des secrets à travers les murs et les fenêtres** vers une caméra externe placée à des dizaines de mètres. Comme la lumière est en dehors du spectre visible, les opérateurs ne remarquent que rarement. Contre-mesures :
+Les caméras de sécurité, les routeurs ou même les clés USB malveillantes incluent souvent des **LED IR de vision nocturne**. Des recherches montrent que des logiciels malveillants peuvent moduler ces LED (<10–20 kbit/s avec OOK simple) pour **exfiltrer des secrets à travers les murs et les fenêtres** vers une caméra externe placée à des dizaines de mètres. Comme la lumière est en dehors du spectre visible, les opérateurs remarquent rarement. Contre-mesures :
 
 * Protéger physiquement ou retirer les LED IR dans les zones sensibles
 * Surveiller le cycle de service des LED de la caméra et l'intégrité du firmware
 * Déployer des filtres IR-cut sur les fenêtres et les caméras de surveillance
 
-Un attaquant peut également utiliser de puissants projecteurs IR pour **infiltrer** des commandes dans le réseau en renvoyant des données vers des caméras non sécurisées.
+Un attaquant peut également utiliser de puissants projecteurs IR pour **infiltrer** des commandes dans le réseau en flashant des données vers des caméras non sécurisées.
 
 ### Brute-Force à Longue Portée & Protocoles Étendus avec Flipper Zero 1.0
 
-Le firmware 1.0 (septembre 2024) a ajouté **des dizaines de protocoles IR supplémentaires et des modules amplificateurs externes optionnels**. Combiné avec le mode brute-force de télécommande universelle, un Flipper peut désactiver ou reconfigurer la plupart des téléviseurs/AC publics jusqu'à 30 m en utilisant une diode haute puissance.
+Le firmware 1.0 (septembre 2024) a ajouté **des dizaines de protocoles IR supplémentaires et des modules amplificateurs externes optionnels**. Combiné avec le mode brute-force de télécommande universelle, un Flipper peut désactiver ou reconfigurer la plupart des téléviseurs/climatiseurs publics jusqu'à 30 m en utilisant une diode haute puissance.
 
 ---
 

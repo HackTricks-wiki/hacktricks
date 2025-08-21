@@ -38,7 +38,7 @@ macos-sandbox/
 macos-tcc/
 {{#endref}}
 
-### Launch/Environment Constraints & Trust Cache
+### Contraintes de lancement/environnement et cache de confiance
 
 Les contraintes de lancement dans macOS sont une fonctionnalité de sécurité pour **réguler l'initiation des processus** en définissant **qui peut lancer** un processus, **comment** et **d'où**. Introduites dans macOS Ventura, elles classifient les binaires système en catégories de contraintes au sein d'un **cache de confiance**. Chaque binaire exécutable a des **règles** définies pour son **lancement**, y compris des contraintes **auto**, **parent** et **responsable**. Étendues aux applications tierces en tant que **Contraintes d'Environnement** dans macOS Sonoma, ces fonctionnalités aident à atténuer les potentielles exploitations du système en régissant les conditions de lancement des processus.
 
@@ -50,7 +50,7 @@ macos-launch-environment-constraints.md
 
 L'Outil de suppression de logiciels malveillants (MRT) est une autre partie de l'infrastructure de sécurité de macOS. Comme son nom l'indique, la fonction principale de MRT est de **supprimer les logiciels malveillants connus des systèmes infectés**.
 
-Une fois qu'un logiciel malveillant est détecté sur un Mac (soit par XProtect, soit par d'autres moyens), MRT peut être utilisé pour **supprimer automatiquement le logiciel malveillant**. MRT fonctionne silencieusement en arrière-plan et s'exécute généralement chaque fois que le système est mis à jour ou lorsqu'une nouvelle définition de logiciel malveillant est téléchargée (il semble que les règles que MRT doit suivre pour détecter les logiciels malveillants se trouvent à l'intérieur du binaire).
+Une fois qu'un logiciel malveillant est détecté sur un Mac (soit par XProtect, soit par d'autres moyens), MRT peut être utilisé pour **supprimer automatiquement le logiciel malveillant**. MRT fonctionne silencieusement en arrière-plan et s'exécute généralement chaque fois que le système est mis à jour ou lorsqu'une nouvelle définition de logiciel malveillant est téléchargée (il semble que les règles que MRT doit suivre pour détecter les logiciels malveillants se trouvent dans le binaire).
 
 Bien que XProtect et MRT fassent tous deux partie des mesures de sécurité de macOS, ils remplissent des fonctions différentes :
 
@@ -101,9 +101,9 @@ xattr -rc dumpBTM # Remove quarantine attr
 ```
 Ces informations sont stockées dans **`/private/var/db/com.apple.backgroundtaskmanagement/BackgroundItems-v4.btm`** et le Terminal nécessite FDA.
 
-### Manipulation avec BTM
+### Manipulation de BTM
 
-Lorsqu'une nouvelle persistance est trouvée, un événement de type **`ES_EVENT_TYPE_NOTIFY_BTM_LAUNCH_ITEM_ADD`** est généré. Donc, toute méthode pour **prévenir** cet **événement** d'être envoyé ou pour empêcher **l'agent d'alerter** l'utilisateur aidera un attaquant à _**contourner**_ BTM.
+Lorsqu'une nouvelle persistance est trouvée, un événement de type **`ES_EVENT_TYPE_NOTIFY_BTM_LAUNCH_ITEM_ADD`** est généré. Ainsi, toute méthode pour **prévenir** cet **événement** d'être envoyé ou pour empêcher **l'agent d'alerter** l'utilisateur aidera un attaquant à _**contourner**_ BTM.
 
 - **Réinitialisation de la base de données** : Exécuter la commande suivante réinitialisera la base de données (devrait la reconstruire depuis le début), cependant, pour une raison quelconque, après avoir exécuté cela, **aucune nouvelle persistance ne sera alertée jusqu'à ce que le système soit redémarré**.
 - **root** est requis.

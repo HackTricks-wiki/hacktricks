@@ -83,8 +83,8 @@ open "http://attacker%2Ecom%2F./"   # should be blocked by Screen Time
 # if the patch is missing Safari will happily load the page
 ```
 ### Bug d'ordre des règles du filtre de paquets (PF) dans les premières versions de macOS 14 “Sonoma”
-Lors du cycle bêta de macOS 14, Apple a introduit une régression dans l'enveloppe utilisateur autour de **`pfctl`**.  
-Les règles ajoutées avec le mot-clé `quick` (utilisé par de nombreux kill-switches VPN) ont été silencieusement ignorées, provoquant des fuites de trafic même lorsqu'une interface graphique VPN/firewall signalait *bloqué*. Le bug a été confirmé par plusieurs fournisseurs de VPN et corrigé dans RC 2 (build 23A344).
+Pendant le cycle bêta de macOS 14, Apple a introduit une régression dans l'enveloppe utilisateur autour de **`pfctl`**.  
+Les règles ajoutées avec le mot-clé `quick` (utilisé par de nombreux kill-switches VPN) étaient silencieusement ignorées, provoquant des fuites de trafic même lorsqu'une interface graphique VPN/firewall rapportait *bloqué*. Le bug a été confirmé par plusieurs fournisseurs de VPN et corrigé dans RC 2 (build 23A344).
 
 Vérification rapide des fuites :
 ```bash

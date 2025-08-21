@@ -24,7 +24,7 @@ Les fichiers téléchargés peuvent contenir l'**ADS Zone.Identifier** indiquant
 
 ### Corbeille
 
-Dans Vista/Win7/Win8/Win10, la **Corbeille** se trouve dans le dossier **`$Recycle.bin`** à la racine du disque (`C:\$Recycle.bin`).\
+Dans Vista/Win7/Win8/Win10, la **Corbeille** se trouve dans le dossier **`$Recycle.bin`** à la racine du lecteur (`C:\$Recycle.bin`).\
 Lorsqu'un fichier est supprimé dans ce dossier, 2 fichiers spécifiques sont créés :
 
 - `$I{id}` : Informations sur le fichier (date de sa suppression)
@@ -40,7 +40,7 @@ Avec ces fichiers, vous pouvez utiliser l'outil [**Rifiuti**](https://github.com
 
 ### Copies de Volume Shadow
 
-La copie Shadow est une technologie incluse dans Microsoft Windows qui peut créer des **copies de sauvegarde** ou des instantanés de fichiers ou de volumes informatiques, même lorsqu'ils sont en cours d'utilisation.
+La copie Shadow est une technologie incluse dans Microsoft Windows qui peut créer des **copies de sauvegarde** ou des instantanés de fichiers ou de volumes informatiques, même lorsqu'ils sont utilisés.
 
 Ces sauvegardes se trouvent généralement dans le `\System Volume Information` à la racine du système de fichiers et le nom est composé de **UIDs** montrés dans l'image suivante :
 
@@ -122,8 +122,8 @@ Vous pouvez inspecter les jumplists en utilisant [**JumplistExplorer**](https://
 
 Il est possible d'identifier qu'un appareil USB a été utilisé grâce à la création de :
 
-- Dossier Récents Windows
-- Dossier Récents Microsoft Office
+- Dossier Récents de Windows
+- Dossier Récents de Microsoft Office
 - Jumplists
 
 Notez que certains fichiers LNK au lieu de pointer vers le chemin d'origine, pointent vers le dossier WPDNSE :
@@ -140,7 +140,7 @@ Les fichiers dans le dossier WPDNSE sont une copie des originaux, donc ne surviv
 
 Vérifiez le fichier `C:\Windows\inf\setupapi.dev.log` pour obtenir les horodatages concernant le moment où la connexion USB a été produite (recherchez `Section start`).
 
-![](<../../../images/image (477) (2) (2) (2) (2) (2) (2) (2) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (14) (2).png>)
+![](<../../../images/image (477) (2) (2) (2) (2) (2) (2) (2) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (14) (2).png>)
 
 ### USB Detective
 
@@ -158,7 +158,7 @@ Une capture d'écran montrant le contenu de la tâche est fournie : ![](https://
 
 **Composants clés et paramètres de la tâche :**
 
-- **pnpclean.dll** : Ce DLL est responsable du processus de nettoyage réel.
+- **pnpclean.dll** : Cette DLL est responsable du processus de nettoyage réel.
 - **UseUnifiedSchedulingEngine** : Défini sur `TRUE`, indiquant l'utilisation du moteur de planification de tâches générique.
 - **MaintenanceSettings** :
 - **Period ('P1M')** : Indique au Planificateur de tâches de lancer la tâche de nettoyage mensuellement lors de la maintenance automatique régulière.
@@ -179,9 +179,9 @@ De plus, à l'intérieur des en-têtes `References` et `In-Reply-To`, vous pouve
 
 ![](<../../../images/image (593).png>)
 
-### Application Mail Windows
+### Application Mail de Windows
 
-Cette application enregistre les emails en HTML ou texte. Vous pouvez trouver les emails dans des sous-dossiers à l'intérieur de `\Users\<username>\AppData\Local\Comms\Unistore\data\3\`. Les emails sont enregistrés avec l'extension `.dat`.
+Cette application enregistre les emails en HTML ou en texte. Vous pouvez trouver les emails dans des sous-dossiers à l'intérieur de `\Users\<username>\AppData\Local\Comms\Unistore\data\3\`. Les emails sont enregistrés avec l'extension `.dat`.
 
 Les **métadonnées** des emails et les **contacts** peuvent être trouvés à l'intérieur de la **base de données EDB** : `\Users\<username>\AppData\Local\Comms\UnistoreDB\store.vol`
 
@@ -242,7 +242,7 @@ Le Registre Windows, stockant d'importantes données sur le système et l'activi
 Certains outils sont utiles pour analyser les fichiers de registre :
 
 - **Éditeur de Registre** : Il est installé dans Windows. C'est une interface graphique pour naviguer à travers le registre Windows de la session actuelle.
-- [**Registry Explorer**](https://ericzimmerman.github.io/#!index.md) : Il vous permet de charger le fichier de registre et de naviguer à travers eux avec une interface graphique. Il contient également des signets mettant en évidence des clés avec des informations intéressantes.
+- [**Registry Explorer**](https://ericzimmerman.github.io/#!index.md) : Il vous permet de charger le fichier de registre et de naviguer à travers eux avec une interface graphique. Il contient également des signets mettant en évidence les clés avec des informations intéressantes.
 - [**RegRipper**](https://github.com/keydet89/RegRipper3.0) : Encore une fois, il a une interface graphique qui permet de naviguer à travers le registre chargé et contient également des plugins qui mettent en évidence des informations intéressantes à l'intérieur du registre chargé.
 - [**Windows Registry Recovery**](https://www.mitec.cz/wrr.html) : Une autre application GUI capable d'extraire les informations importantes du registre chargé.
 
@@ -273,11 +273,11 @@ interesting-windows-registry-keys.md
 
 Dans [ce post](https://jonahacks.medium.com/investigating-common-windows-processes-18dee5f97c1d), vous pouvez apprendre sur les processus Windows communs pour détecter des comportements suspects.
 
-### Applications Récentes Windows
+### Applications Récentes de Windows
 
 À l'intérieur du registre `NTUSER.DAT` dans le chemin `Software\Microsoft\Current Version\Search\RecentApps`, vous pouvez trouver des sous-clés avec des informations sur l'**application exécutée**, **la dernière fois** qu'elle a été exécutée, et **le nombre de fois** qu'elle a été lancée.
 
-### BAM (Modérateur d'Activité en Arrière-plan)
+### BAM (Modérateur d'Activité en Arrière-Plan)
 
 Vous pouvez ouvrir le fichier `SYSTEM` avec un éditeur de registre et à l'intérieur du chemin `SYSTEM\CurrentControlSet\Services\bam\UserSettings\{SID}`, vous pouvez trouver des informations sur les **applications exécutées par chaque utilisateur** (notez le `{SID}` dans le chemin) et à **quelle heure** elles ont été exécutées (l'heure est à l'intérieur de la valeur de données du registre).
 
@@ -299,7 +299,7 @@ Pour inspecter ces fichiers, vous pouvez utiliser l'outil [**PEcmd.exe**](https:
 
 ### Superprefetch
 
-**Superprefetch** a le même objectif que prefetch, **charger les programmes plus rapidement** en prédisant ce qui va être chargé ensuite. Cependant, il ne remplace pas le service de prefetch.\
+**Superprefetch** a le même objectif que le prefetch, **charger les programmes plus rapidement** en prédisant ce qui va être chargé ensuite. Cependant, il ne remplace pas le service de prefetch.\
 Ce service générera des fichiers de base de données dans `C:\Windows\Prefetch\Ag*.db`.
 
 Dans ces bases de données, vous pouvez trouver le **nom** du **programme**, le **nombre** d'**exécutions**, les **fichiers** **ouverts**, le **volume** **accédé**, le **chemin** **complet**, les **plages horaires** et les **horodatages**.
@@ -367,7 +367,7 @@ Vous pouvez utiliser l'outil [**RecentFileCacheParse**](https://github.com/EricZ
 
 ### Tâches planifiées
 
-Vous pouvez les extraire de `C:\Windows\Tasks` ou `C:\Windows\System32\Tasks` et les lire au format XML.
+Vous pouvez les extraire de `C:\Windows\Tasks` ou `C:\Windows\System32\Tasks` et les lire en tant que XML.
 
 ### Services
 
@@ -378,9 +378,9 @@ Vous pouvez les trouver dans le registre sous `SYSTEM\ControlSet001\Services`. V
 Les applications installées peuvent être trouvées dans `\ProgramData\Microsoft\Windows\AppRepository\`\
 Ce dépôt a un **journal** avec **chaque application installée** dans le système à l'intérieur de la base de données **`StateRepository-Machine.srd`**.
 
-À l'intérieur de la table Application de cette base de données, il est possible de trouver les colonnes : "Application ID", "PackageNumber" et "Display Name". Ces colonnes contiennent des informations sur les applications préinstallées et installées et il est possible de vérifier si certaines applications ont été désinstallées car les ID des applications installées devraient être séquentiels.
+À l'intérieur de la table Application de cette base de données, il est possible de trouver les colonnes : "Application ID", "PackageNumber" et "Display Name". Ces colonnes contiennent des informations sur les applications préinstallées et installées et il peut être vérifié si certaines applications ont été désinstallées car les ID des applications installées devraient être séquentiels.
 
-Il est également possible de **trouver des applications installées** dans le chemin du registre : `Software\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore\Applications\`\
+Il est également possible de **trouver des applications installées** à l'intérieur du chemin du registre : `Software\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore\Applications\`\
 Et **des applications désinstallées** dans : `Software\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore\Deleted\`
 
 ## Événements Windows
@@ -412,18 +412,18 @@ Les événements d'accès sont enregistrés dans le fichier de configuration de 
 
 #### Sous-types dans EventID 4634/4647 :
 
-- **Interactive (2)** : Connexion directe de l'utilisateur.
-- **Network (3)** : Accès aux dossiers partagés.
+- **Interactif (2)** : Connexion directe de l'utilisateur.
+- **Réseau (3)** : Accès aux dossiers partagés.
 - **Batch (4)** : Exécution de processus par lots.
 - **Service (5)** : Lancements de services.
 - **Proxy (6)** : Authentification par proxy.
-- **Unlock (7)** : Écran déverrouillé avec un mot de passe.
-- **Network Cleartext (8)** : Transmission de mot de passe en texte clair, souvent depuis IIS.
-- **New Credentials (9)** : Utilisation de différentes informations d'identification pour l'accès.
-- **Remote Interactive (10)** : Connexion à distance ou services de terminal.
-- **Cache Interactive (11)** : Connexion avec des informations d'identification mises en cache sans contact avec le contrôleur de domaine.
-- **Cache Remote Interactive (12)** : Connexion à distance avec des informations d'identification mises en cache.
-- **Cached Unlock (13)** : Déverrouillage avec des informations d'identification mises en cache.
+- **Déverrouillage (7)** : Écran déverrouillé avec un mot de passe.
+- **Réseau Cleartext (8)** : Transmission de mot de passe en texte clair, souvent depuis IIS.
+- **Nouveaux identifiants (9)** : Utilisation de différents identifiants pour l'accès.
+- **Interactif à distance (10)** : Connexion à distance ou services de terminal.
+- **Cache interactif (11)** : Connexion avec des identifiants mis en cache sans contact avec le contrôleur de domaine.
+- **Cache à distance interactif (12)** : Connexion à distance avec des identifiants mis en cache.
+- **Déverrouillage mis en cache (13)** : Déverrouillage avec des identifiants mis en cache.
 
 #### Codes d'état et sous-codes pour EventID 4625 :
 
@@ -435,8 +435,8 @@ Les événements d'accès sont enregistrés dans le fichier de configuration de 
 - **0xC0000070** : Violation des restrictions de station de travail - Pourrait être une tentative de connexion depuis un emplacement non autorisé.
 - **0xC0000193** : Expiration du compte - Tentatives d'accès avec des comptes utilisateurs expirés.
 - **0xC0000071** : Mot de passe expiré - Tentatives de connexion avec des mots de passe obsolètes.
-- **0xC0000133** : Problèmes de synchronisation horaire - De grandes différences de temps entre le client et le serveur peuvent indiquer des attaques plus sophistiquées comme le pass-the-ticket.
-- **0xC0000224** : Changement de mot de passe obligatoire requis - Des changements obligatoires fréquents pourraient suggérer une tentative de déstabiliser la sécurité du compte.
+- **0xC0000133** : Problèmes de synchronisation horaire - Grandes divergences de temps entre le client et le serveur peuvent indiquer des attaques plus sophistiquées comme le pass-the-ticket.
+- **0xC0000224** : Changement de mot de passe obligatoire requis - Changements obligatoires fréquents pourraient suggérer une tentative de déstabiliser la sécurité du compte.
 - **0xC0000225** : Indique un bug système plutôt qu'un problème de sécurité.
 - **0xC000015b** : Type de connexion refusé - Tentative d'accès avec un type de connexion non autorisé, comme un utilisateur essayant d'exécuter une connexion de service.
 
@@ -458,7 +458,7 @@ Les événements d'accès sont enregistrés dans le fichier de configuration de 
 - **10100** : Mise à jour du pilote USB.
 - **EventID 112** : Heure de l'insertion de l'appareil USB.
 
-Pour des exemples pratiques sur la simulation de ces types de connexion et d'opportunités de dumping d'informations d'identification, consultez [le guide détaillé d'Altered Security](https://www.alteredsecurity.com/post/fantastic-windows-logon-types-and-where-to-find-credentials-in-them).
+Pour des exemples pratiques sur la simulation de ces types de connexion et d'opportunités de dumping d'identifiants, consultez [le guide détaillé d'Altered Security](https://www.alteredsecurity.com/post/fantastic-windows-logon-types-and-where-to-find-credentials-in-them).
 
 Les détails des événements, y compris les codes d'état et de sous-état, fournissent des informations supplémentaires sur les causes des événements, particulièrement notables dans l'Event ID 4625.
 
@@ -480,9 +480,9 @@ Enregistré par l'EventID 4616, les changements d'heure système peuvent compliq
 
 #### Suivi des appareils USB
 
-Les identifiants d'événements système utiles pour le suivi des appareils USB incluent 20001/20003/10000 pour l'utilisation initiale, 10100 pour les mises à jour de pilotes, et l'EventID 112 de DeviceSetupManager pour les horodatages d'insertion.
+Les EventIDs système utiles pour le suivi des appareils USB incluent 20001/20003/10000 pour l'utilisation initiale, 10100 pour les mises à jour de pilotes, et l'EventID 112 de DeviceSetupManager pour les horodatages d'insertion.
 
-#### Événements d'alimentation système
+#### Événements d'alimentation du système
 
 L'EventID 6005 indique le démarrage du système, tandis que l'EventID 6006 marque l'arrêt.
 

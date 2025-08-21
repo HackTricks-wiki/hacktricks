@@ -6,13 +6,13 @@
 
 ## Silver ticket
 
-L'attaque **Silver Ticket** implique l'exploitation des tickets de service dans les environnements Active Directory (AD). Cette méthode repose sur **l'acquisition du hachage NTLM d'un compte de service**, tel qu'un compte d'ordinateur, pour forger un ticket de service de ticket granting (TGS). Avec ce ticket forgé, un attaquant peut accéder à des services spécifiques sur le réseau, **impostant n'importe quel utilisateur**, visant généralement des privilèges administratifs. Il est souligné que l'utilisation de clés AES pour forger des tickets est plus sécurisée et moins détectable.
+L'attaque **Silver Ticket** implique l'exploitation des tickets de service dans les environnements Active Directory (AD). Cette méthode repose sur **l'acquisition du hash NTLM d'un compte de service**, tel qu'un compte d'ordinateur, pour forger un ticket de service de ticket granting (TGS). Avec ce ticket forgé, un attaquant peut accéder à des services spécifiques sur le réseau, **impostant n'importe quel utilisateur**, visant généralement des privilèges administratifs. Il est souligné que l'utilisation de clés AES pour forger des tickets est plus sécurisée et moins détectable.
 
 > [!WARNING]
-> Les Silver Tickets sont moins détectables que les Golden Tickets car ils ne nécessitent que le **hachage du compte de service**, et non le compte krbtgt. Cependant, ils sont limités au service spécifique qu'ils ciblent. De plus, il suffit de voler le mot de passe d'un utilisateur.
+> Les Silver Tickets sont moins détectables que les Golden Tickets car ils ne nécessitent que le **hash du compte de service**, et non le compte krbtgt. Cependant, ils sont limités au service spécifique qu'ils ciblent. De plus, il suffit de voler le mot de passe d'un utilisateur.
 De plus, si vous compromettez le **mot de passe d'un compte avec un SPN**, vous pouvez utiliser ce mot de passe pour créer un Silver Ticket en impersonnant n'importe quel utilisateur pour ce service.
 
-Pour le crafting de tickets, différents outils sont utilisés en fonction du système d'exploitation :
+Pour la création de tickets, différents outils sont utilisés en fonction du système d'exploitation :
 
 ### On Linux
 ```bash
@@ -50,7 +50,7 @@ Le service CIFS est mis en avant comme une cible courante pour accéder au syst�
 | Partage de Fichiers Windows, aussi psexec | CIFS                                                                       |
 | Opérations LDAP, y compris DCSync        | LDAP                                                                       |
 | Outils d'Administration de Serveur à Distance Windows | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                         |
-| Golden Tickets                             | krbtgt                                                                     |
+| Tickets en Or                              | krbtgt                                                                     |
 
 En utilisant **Rubeus**, vous pouvez **demander tous** ces tickets en utilisant le paramètre :
 

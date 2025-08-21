@@ -18,7 +18,7 @@ Lorsqu'une connexion est établie à un service XPC, le serveur vérifiera si la
 1. Si cela **n'est pas vérifié**, le client pourrait être **vulnérable à l'injection de code**.
 6. Vérifiez si le processus de connexion a un **droit** qui lui permet de se connecter au service. Cela s'applique aux binaires Apple.
 7. La **vérification** doit être **basée** sur le **jeton d'audit du client de connexion** **au lieu** de son ID de processus (**PID**) puisque le premier empêche les **attaques de réutilisation de PID**.
-- Les développeurs **utilisent rarement l'appel d'API de jeton d'audit** car il est **privé**, donc Apple pourrait **changer** cela à tout moment. De plus, l'utilisation d'API privées n'est pas autorisée dans les applications du Mac App Store.
+- Les développeurs **utilisent rarement l'API de jeton d'audit** car elle est **privée**, donc Apple pourrait **changer** cela à tout moment. De plus, l'utilisation d'API privées n'est pas autorisée dans les applications du Mac App Store.
 - Si la méthode **`processIdentifier`** est utilisée, elle pourrait être vulnérable.
 - **`xpc_dictionary_get_audit_token`** devrait être utilisé à la place de **`xpc_connection_get_audit_token`**, car ce dernier pourrait également être [vulnérable dans certaines situations](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/).
 

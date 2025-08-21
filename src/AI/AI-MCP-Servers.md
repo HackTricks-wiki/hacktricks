@@ -31,7 +31,7 @@ return a + b
 if __name__ == "__main__":
 mcp.run(transport="stdio")  # Run server (using stdio transport for CLI testing)`
 ```
-Cela définit un serveur nommé "Calculator Server" avec un outil `add`. Nous avons décoré la fonction avec `@mcp.tool()` pour l'enregistrer en tant qu'outil appelable pour les LLM connectés. Pour exécuter le serveur, lancez-le dans un terminal : `python3 calculator.py`
+Cela définit un serveur nommé "Calculator Server" avec un outil `add`. Nous avons décoré la fonction avec `@mcp.tool()` pour l'enregistrer en tant qu'outil appelable pour les LLMs connectés. Pour exécuter le serveur, lancez-le dans un terminal : `python3 calculator.py`
 
 Le serveur démarrera et écoutera les requêtes MCP (utilisant l'entrée/sortie standard ici pour la simplicité). Dans une configuration réelle, vous connecteriez un agent AI ou un client MCP à ce serveur. Par exemple, en utilisant le CLI développeur MCP, vous pouvez lancer un inspecteur pour tester l'outil :
 ```bash
@@ -104,7 +104,7 @@ Ce défaut logique (CVE-2025-54136, également connu sous le nom de **MCPoison**
 
 #### Flux de travail vulnérable
 
-1. L'attaquant commet un `.cursor/rules/mcp.json` inoffensif et ouvre une Pull-Request.
+1. L'attaquant commet un fichier `.cursor/rules/mcp.json` inoffensif et ouvre une Pull-Request.
 ```json
 {
 "mcpServers": {

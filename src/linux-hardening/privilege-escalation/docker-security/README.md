@@ -22,7 +22,7 @@ Cependant, exposer le démon Docker via HTTP n'est pas recommandé en raison de 
 1. Le client vérifie l'identité du serveur.
 2. Le client et le serveur s'authentifient mutuellement l'identité de chacun.
 
-Des certificats sont utilisés pour confirmer l'identité d'un serveur. Pour des exemples détaillés des deux méthodes, référez-vous à [**ce guide**](https://sreeninet.wordpress.com/2016/03/06/docker-security-part-3engine-access/).
+Des certificats sont utilisés pour confirmer l'identité d'un serveur. Pour des exemples détaillés des deux méthodes, consultez [**ce guide**](https://sreeninet.wordpress.com/2016/03/06/docker-security-part-3engine-access/).
 
 ### Sécurité des images de conteneurs
 
@@ -34,7 +34,7 @@ Les images de conteneurs peuvent être stockées dans des dépôts privés ou pu
 
 ### Analyse d'images
 
-Les conteneurs peuvent avoir des **vulnérabilités de sécurité** soit à cause de l'image de base, soit à cause du logiciel installé sur l'image de base. Docker travaille sur un projet appelé **Nautilus** qui effectue une analyse de sécurité des conteneurs et répertorie les vulnérabilités. Nautilus fonctionne en comparant chaque couche d'image de conteneur avec un référentiel de vulnérabilités pour identifier les failles de sécurité.
+Les conteneurs peuvent avoir des **vulnérabilités de sécurité** soit à cause de l'image de base, soit à cause des logiciels installés sur l'image de base. Docker travaille sur un projet appelé **Nautilus** qui effectue une analyse de sécurité des conteneurs et répertorie les vulnérabilités. Nautilus fonctionne en comparant chaque couche d'image de conteneur avec un référentiel de vulnérabilités pour identifier les failles de sécurité.
 
 Pour plus [**d'informations, lisez ceci**](https://docs.docker.com/engine/scan/).
 
@@ -74,9 +74,9 @@ La signature d'image Docker garantit la sécurité et l'intégrité des images u
 
 - **Docker Content Trust** utilise le projet Notary, basé sur The Update Framework (TUF), pour gérer la signature des images. Pour plus d'infos, voir [Notary](https://github.com/docker/notary) et [TUF](https://theupdateframework.github.io).
 - Pour activer la confiance dans le contenu Docker, définissez `export DOCKER_CONTENT_TRUST=1`. Cette fonctionnalité est désactivée par défaut dans Docker version 1.10 et ultérieure.
-- Avec cette fonctionnalité activée, seules les images signées peuvent être téléchargées. Le premier envoi d'image nécessite de définir des phrases de passe pour les clés racine et de balisage, Docker prenant également en charge Yubikey pour une sécurité renforcée. Plus de détails peuvent être trouvés [ici](https://blog.docker.com/2015/11/docker-content-trust-yubikey/).
+- Avec cette fonctionnalité activée, seules les images signées peuvent être téléchargées. La première poussée d'image nécessite de définir des phrases de passe pour les clés racine et de balisage, Docker prenant également en charge Yubikey pour une sécurité renforcée. Plus de détails peuvent être trouvés [ici](https://blog.docker.com/2015/11/docker-content-trust-yubikey/).
 - Tenter de tirer une image non signée avec la confiance dans le contenu activée entraîne une erreur "No trust data for latest".
-- Pour les envois d'images après le premier, Docker demande la phrase de passe de la clé du dépôt pour signer l'image.
+- Pour les poussées d'image après la première, Docker demande la phrase de passe de la clé du dépôt pour signer l'image.
 
 Pour sauvegarder vos clés privées, utilisez la commande :
 ```bash
@@ -148,7 +148,7 @@ namespaces/
 ### cgroups
 
 La fonctionnalité du noyau Linux **cgroups** fournit la capacité de **restreindre les ressources comme le cpu, la mémoire, l'io, la bande passante réseau parmi** un ensemble de processus. Docker permet de créer des conteneurs en utilisant la fonctionnalité cgroup qui permet le contrôle des ressources pour le conteneur spécifique.\
-Voici un conteneur créé avec une mémoire d'espace utilisateur limitée à 500m, une mémoire noyau limitée à 50m, une part de cpu à 512, un blkioweight à 400. La part de CPU est un ratio qui contrôle l'utilisation du CPU par le conteneur. Elle a une valeur par défaut de 1024 et une plage entre 0 et 1024. Si trois conteneurs ont la même part de CPU de 1024, chaque conteneur peut prendre jusqu'à 33 % du CPU en cas de contention des ressources CPU. Le blkio-weight est un ratio qui contrôle l'IO du conteneur. Il a une valeur par défaut de 500 et une plage entre 10 et 1000.
+Voici un conteneur créé avec une mémoire d'espace utilisateur limitée à 500m, une mémoire noyau limitée à 50m, une part de cpu à 512, un blkioweight à 400. La part de CPU est un ratio qui contrôle l'utilisation du CPU par le conteneur. Il a une valeur par défaut de 1024 et une plage entre 0 et 1024. Si trois conteneurs ont la même part de CPU de 1024, chaque conteneur peut prendre jusqu'à 33 % du CPU en cas de contention des ressources CPU. Le blkio-weight est un ratio qui contrôle l'IO du conteneur. Il a une valeur par défaut de 500 et une plage entre 10 et 1000.
 ```
 docker run -it -m 500M --kernel-memory 50M --cpu-shares 512 --blkio-weight 400 --name ubuntu1 ubuntu bash
 ```
@@ -198,7 +198,7 @@ apparmor.md
 - **Labeling des Fichiers dans les Conteneurs** : Les fichiers à l'intérieur du conteneur sont généralement étiquetés comme `container_file_t`.
 - **Règles de Politique** : La politique SELinux garantit principalement que les processus avec le label `container_t` ne peuvent interagir (lire, écrire, exécuter) qu'avec des fichiers étiquetés comme `container_file_t`.
 
-Ce mécanisme garantit que même si un processus à l'intérieur d'un conteneur est compromis, il est confiné à interagir uniquement avec des objets ayant les labels correspondants, limitant considérablement les dommages potentiels provenant de tels compromis.
+Ce mécanisme garantit que même si un processus à l'intérieur d'un conteneur est compromis, il est confiné à interagir uniquement avec des objets ayant les labels correspondants, limitant considérablement les dommages potentiels résultant de tels compromis.
 
 {{#ref}}
 ../selinux.md
@@ -276,9 +276,9 @@ Pour plus d'options **`--security-opt`**, consultez : [https://docs.docker.com/e
 
 Il est crucial d'éviter d'incorporer des secrets directement dans les images Docker ou d'utiliser des variables d'environnement, car ces méthodes exposent vos informations sensibles à quiconque ayant accès au conteneur via des commandes comme `docker inspect` ou `exec`.
 
-**Les volumes Docker** sont une alternative plus sûre, recommandée pour accéder à des informations sensibles. Ils peuvent être utilisés comme un système de fichiers temporaire en mémoire, atténuant les risques associés à `docker inspect` et à la journalisation. Cependant, les utilisateurs root et ceux ayant accès à `exec` dans le conteneur pourraient toujours accéder aux secrets.
+Les **volumes Docker** sont une alternative plus sûre, recommandée pour accéder à des informations sensibles. Ils peuvent être utilisés comme un système de fichiers temporaire en mémoire, atténuant les risques associés à `docker inspect` et à la journalisation. Cependant, les utilisateurs root et ceux ayant accès à `exec` dans le conteneur pourraient toujours accéder aux secrets.
 
-**Les secrets Docker** offrent une méthode encore plus sécurisée pour gérer des informations sensibles. Pour les instances nécessitant des secrets pendant la phase de construction de l'image, **BuildKit** présente une solution efficace avec le support des secrets au moment de la construction, améliorant la vitesse de construction et fournissant des fonctionnalités supplémentaires.
+Les **secrets Docker** offrent une méthode encore plus sécurisée pour gérer des informations sensibles. Pour les instances nécessitant des secrets pendant la phase de construction de l'image, **BuildKit** présente une solution efficace avec prise en charge des secrets au moment de la construction, améliorant la vitesse de construction et fournissant des fonctionnalités supplémentaires.
 
 Pour tirer parti de BuildKit, il peut être activé de trois manières :
 
@@ -305,7 +305,7 @@ file: ./my_secret_file.txt
 ```
 Cette configuration permet l'utilisation de secrets lors du démarrage de services avec Docker Compose.
 
-Dans les environnements Kubernetes, les secrets sont pris en charge nativement et peuvent être gérés davantage avec des outils comme [Helm-Secrets](https://github.com/futuresimple/helm-secrets). Les contrôles d'accès basés sur les rôles (RBAC) de Kubernetes renforcent la sécurité de la gestion des secrets, similaire à Docker Enterprise.
+Dans les environnements Kubernetes, les secrets sont pris en charge nativement et peuvent être gérés davantage avec des outils comme [Helm-Secrets](https://github.com/futuresimple/helm-secrets). Les contrôles d'accès basés sur les rôles (RBAC) de Kubernetes améliorent la sécurité de la gestion des secrets, similaire à Docker Enterprise.
 
 ### gVisor
 
@@ -317,7 +317,7 @@ https://github.com/google/gvisor
 
 ### Kata Containers
 
-**Kata Containers** est une communauté open source travaillant à construire un runtime de conteneur sécurisé avec des machines virtuelles légères qui se comportent et fonctionnent comme des conteneurs, mais fournissent une **isolation de charge de travail plus forte utilisant la technologie de virtualisation matérielle** comme deuxième couche de défense.
+**Kata Containers** est une communauté open source travaillant à construire un runtime de conteneur sécurisé avec des machines virtuelles légères qui se comportent et fonctionnent comme des conteneurs, mais fournissent une **isolation de charge de travail plus forte en utilisant la technologie de virtualisation matérielle** comme deuxième couche de défense.
 
 {{#ref}}
 https://katacontainers.io/
@@ -326,16 +326,16 @@ https://katacontainers.io/
 ### Résumé des conseils
 
 - **N'utilisez pas le drapeau `--privileged` ou ne montez pas un** [**socket Docker à l'intérieur du conteneur**](https://raesene.github.io/blog/2016/03/06/The-Dangers-Of-Docker.sock/)**.** Le socket Docker permet de créer des conteneurs, ce qui est un moyen facile de prendre le contrôle total de l'hôte, par exemple, en exécutant un autre conteneur avec le drapeau `--privileged`.
-- Ne **tournez pas en tant que root à l'intérieur du conteneur. Utilisez un** [**utilisateur différent**](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#user) **et** [**des espaces de noms utilisateur**](https://docs.docker.com/engine/security/userns-remap/)**.** Le root dans le conteneur est le même que sur l'hôte, sauf s'il est remappé avec des espaces de noms utilisateur. Il est seulement légèrement restreint par, principalement, les espaces de noms Linux, les capacités et les cgroups.
+- Ne **travaillez pas en tant que root à l'intérieur du conteneur. Utilisez un** [**utilisateur différent**](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#user) **et** [**des espaces de noms utilisateur**](https://docs.docker.com/engine/security/userns-remap/)**.** Le root dans le conteneur est le même que sur l'hôte, sauf s'il est remappé avec des espaces de noms utilisateur. Il est seulement légèrement restreint par, principalement, les espaces de noms Linux, les capacités et les cgroups.
 - [**Supprimez toutes les capacités**](https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities) **(`--cap-drop=all`) et activez uniquement celles qui sont nécessaires** (`--cap-add=...`). Beaucoup de charges de travail n'ont pas besoin de capacités et les ajouter augmente le champ d'une attaque potentielle.
 - [**Utilisez l'option de sécurité “no-new-privileges”**](https://raesene.github.io/blog/2019/06/01/docker-capabilities-and-no-new-privs/) pour empêcher les processus d'acquérir plus de privilèges, par exemple via des binaires suid.
 - [**Limitez les ressources disponibles pour le conteneur**](https://docs.docker.com/engine/reference/run/#runtime-constraints-on-resources)**.** Les limites de ressources peuvent protéger la machine contre les attaques par déni de service.
-- **Ajustez** [**seccomp**](https://docs.docker.com/engine/security/seccomp/)**,** [**AppArmor**](https://docs.docker.com/engine/security/apparmor/) **(ou SELinux)** profils pour restreindre les actions et les appels système disponibles pour le conteneur au minimum requis.
-- **Utilisez** [**des images Docker officielles**](https://docs.docker.com/docker-hub/official_images/) **et exigez des signatures** ou construisez les vôtres sur cette base. N'héritez pas ou n'utilisez pas d'images [backdoorées](https://arstechnica.com/information-technology/2018/06/backdoored-images-downloaded-5-million-times-finally-removed-from-docker-hub/). Conservez également les clés root et les phrases de passe dans un endroit sûr. Docker prévoit de gérer les clés avec UCP.
+- **Ajustez** [**seccomp**](https://docs.docker.com/engine/security/seccomp/)**,** [**AppArmor**](https://docs.docker.com/engine/security/apparmor/) **(ou SELinux)** les profils pour restreindre les actions et les syscalls disponibles pour le conteneur au minimum requis.
+- **Utilisez** [**des images Docker officielles**](https://docs.docker.com/docker-hub/official_images/) **et exigez des signatures** ou construisez les vôtres à partir de celles-ci. N'héritez pas ou n'utilisez pas d'images [backdoorées](https://arstechnica.com/information-technology/2018/06/backdoored-images-downloaded-5-million-times-finally-removed-from-docker-hub/). Conservez également les clés root et les phrases de passe dans un endroit sûr. Docker prévoit de gérer les clés avec UCP.
 - **Reconstruisez régulièrement** vos images pour **appliquer des correctifs de sécurité à l'hôte et aux images.**
 - Gérez vos **secrets avec sagesse** afin qu'il soit difficile pour l'attaquant d'y accéder.
 - Si vous **exposez le démon Docker, utilisez HTTPS** avec authentification client et serveur.
-- Dans votre Dockerfile, **privilégiez COPY au lieu de ADD**. ADD extrait automatiquement les fichiers compressés et peut copier des fichiers à partir d'URLs. COPY n'a pas ces capacités. Évitez d'utiliser ADD autant que possible pour ne pas être vulnérable aux attaques via des URLs distantes et des fichiers Zip.
+- Dans votre Dockerfile, **privilégiez COPY au lieu de ADD**. ADD extrait automatiquement les fichiers compressés et peut copier des fichiers à partir d'URL. COPY n'a pas ces capacités. Évitez d'utiliser ADD autant que possible pour ne pas être vulnérable aux attaques via des URL distantes et des fichiers Zip.
 - Ayez **des conteneurs séparés pour chaque micro-s**ervice.
 - **Ne mettez pas ssh** à l'intérieur du conteneur, “docker exec” peut être utilisé pour ssh au conteneur.
 - Ayez des **images de conteneur plus petites**.
@@ -358,7 +358,7 @@ authz-and-authn-docker-access-authorization-plugin.md
 
 ## Renforcement de Docker
 
-- L'outil [**docker-bench-security**](https://github.com/docker/docker-bench-security) est un script qui vérifie des dizaines de meilleures pratiques courantes concernant le déploiement de conteneurs Docker en production. Les tests sont tous automatisés et basés sur le [CIS Docker Benchmark v1.3.1](https://www.cisecurity.org/benchmark/docker/).\
+- L'outil [**docker-bench-security**](https://github.com/docker/docker-bench-security) est un script qui vérifie des dizaines de meilleures pratiques courantes concernant le déploiement de conteneurs Docker en production. Les tests sont tous automatisés et sont basés sur le [CIS Docker Benchmark v1.3.1](https://www.cisecurity.org/benchmark/docker/).\
 Vous devez exécuter l'outil depuis l'hôte exécutant Docker ou depuis un conteneur avec suffisamment de privilèges. Découvrez **comment l'exécuter dans le README :** [**https://github.com/docker/docker-bench-security**](https://github.com/docker/docker-bench-security).
 
 ## Références

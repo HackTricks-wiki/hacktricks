@@ -48,9 +48,9 @@ Le démon Docker peut également [écouter sur un port (par défaut 2375, 2376)]
 > - rktlet : `unix:///var/run/rktlet.sock`
 > - ...
 
-## Abus de capacités
+## Abus de capacités pour évasion
 
-Vous devez vérifier les capacités du conteneur, s'il en a certaines des suivantes, vous pourriez être en mesure d'en sortir : **`CAP_SYS_ADMIN`**_,_ **`CAP_SYS_PTRACE`**, **`CAP_SYS_MODULE`**, **`DAC_READ_SEARCH`**, **`DAC_OVERRIDE, CAP_SYS_RAWIO`, `CAP_SYSLOG`, `CAP_NET_RAW`, `CAP_NET_ADMIN`**
+Vous devez vérifier les capacités du conteneur, s'il en a certaines des suivantes, vous pourriez être en mesure de vous échapper : **`CAP_SYS_ADMIN`**_,_ **`CAP_SYS_PTRACE`**, **`CAP_SYS_MODULE`**, **`DAC_READ_SEARCH`**, **`DAC_OVERRIDE, CAP_SYS_RAWIO`, `CAP_SYSLOG`, `CAP_NET_RAW`, `CAP_NET_ADMIN`**
 
 Vous pouvez vérifier les capacités actuelles du conteneur en utilisant **les outils automatiques mentionnés précédemment** ou :
 ```bash
@@ -76,7 +76,7 @@ Un conteneur privilégié peut être créé avec le drapeau `--privileged` ou en
 - `--cgroupns=host`
 - `Mount /dev`
 
-Le drapeau `--privileged` réduit considérablement la sécurité du conteneur, offrant **un accès aux périphériques sans restriction** et contournant **plusieurs protections**. Pour une analyse détaillée, consultez la documentation sur les impacts complets de `--privileged`.
+Le drapeau `--privileged` réduit considérablement la sécurité du conteneur, offrant **un accès illimité aux périphériques** et contournant **plusieurs protections**. Pour une analyse détaillée, consultez la documentation sur les impacts complets de `--privileged`.
 
 {{#ref}}
 ../docker-privileged.md
@@ -92,7 +92,7 @@ docker run --rm -it --pid=host --privileged ubuntu bash
 ```
 ### Privilégié
 
-Avec le drapeau privilégié, vous pouvez essayer d'**accéder au disque de l'hôte** ou essayer de **vous échapper en abusant de release_agent ou d'autres échappements**.
+Juste avec le drapeau privilégié, vous pouvez essayer d'**accéder au disque de l'hôte** ou essayer d'**échapper en abusant de release_agent ou d'autres échappements**.
 
 Testez les contournements suivants dans un conteneur en exécutant :
 ```bash
@@ -134,7 +134,7 @@ mount: /mnt: permission denied. ---> Failed! but if not, you may have access to 
 ### debugfs (Interactive File System Debugger)
 debugfs /dev/sda1
 ```
-#### Évasion de privilèges en abusant de release_agent existant ([cve-2022-0492](https://unit42.paloaltonetworks.com/cve-2022-0492-cgroups/)) - PoC1
+#### Évasion de privilèges Abus de release_agent existant ([cve-2022-0492](https://unit42.paloaltonetworks.com/cve-2022-0492-cgroups/)) - PoC1
 ```bash:Initial PoC
 # spawn a new container to exploit via:
 # docker run --rm -it --privileged ubuntu bash
@@ -329,7 +329,7 @@ sensitive-mounts.md
 
 ### Montages arbitraires
 
-À plusieurs occasions, vous constaterez que le **conteneur a un volume monté depuis l'hôte**. Si ce volume n'est pas correctement configuré, vous pourriez être en mesure de **accéder/modifier des données sensibles** : Lire des secrets, changer ssh authorized_keys…
+À plusieurs occasions, vous constaterez que le **conteneur a un volume monté depuis l'hôte**. Si ce volume n'est pas correctement configuré, vous pourriez être en mesure d'**accéder/modifier des données sensibles** : Lire des secrets, changer ssh authorized_keys…
 ```bash
 docker run --rm -it -v /:/host ubuntu bash
 ```
@@ -348,12 +348,12 @@ bash -p #From non priv inside mounted folder
 ```
 ### Escalade de privilèges avec 2 shells
 
-Si vous avez accès en tant que **root à l'intérieur d'un conteneur** et que vous avez **échappé en tant qu'utilisateur non privilégié vers l'hôte**, vous pouvez abuser des deux shells pour **privesc à l'intérieur de l'hôte** si vous avez la capacité MKNOD à l'intérieur du conteneur (c'est par défaut) comme [**expliqué dans cet article**](https://labs.withsecure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/).\
+Si vous avez accès en tant que **root à l'intérieur d'un conteneur** et que vous avez **échappé en tant qu'utilisateur non privilégié vers l'hôte**, vous pouvez abuser des deux shells pour **privesc à l'intérieur de l'hôte** si vous avez la capacité MKNOD à l'intérieur du conteneur (c'est par défaut) comme [**expliqué dans ce post**](https://labs.withsecure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/).\
 Avec une telle capacité, l'utilisateur root à l'intérieur du conteneur est autorisé à **créer des fichiers de périphériques de bloc**. Les fichiers de périphériques sont des fichiers spéciaux utilisés pour **accéder au matériel sous-jacent et aux modules du noyau**. Par exemple, le fichier de périphérique de bloc /dev/sda donne accès à **lire les données brutes sur le disque du système**.
 
 Docker protège contre l'utilisation abusive des périphériques de bloc à l'intérieur des conteneurs en appliquant une politique de cgroup qui **bloque les opérations de lecture/écriture sur les périphériques de bloc**. Néanmoins, si un périphérique de bloc est **créé à l'intérieur du conteneur**, il devient accessible de l'extérieur du conteneur via le **répertoire /proc/PID/root/**. Cet accès nécessite que **le propriétaire du processus soit le même** à l'intérieur et à l'extérieur du conteneur.
 
-**Exploitation** exemple de cette [**écriture**](https://radboudinstituteof.pwning.nl/posts/htbunictfquals2021/goodgames/):
+**Exploitation** exemple de ce [**writeup**](https://radboudinstituteof.pwning.nl/posts/htbunictfquals2021/goodgames/):
 ```bash
 # On the container as root
 cd /
@@ -440,7 +440,7 @@ Vous pourrez également accéder aux **services réseau liés à localhost** à 
 ```bash
 docker run --rm -it --ipc=host ubuntu bash
 ```
-Avec `hostIPC=true`, vous accédez aux ressources de communication inter-processus (IPC) de l'hôte, telles que **la mémoire partagée** dans `/dev/shm`. Cela permet de lire/écrire là où les mêmes ressources IPC sont utilisées par d'autres processus de l'hôte ou du pod. Utilisez `ipcs` pour inspecter ces mécanismes IPC plus en détail.
+Avec `hostIPC=true`, vous accédez aux ressources de communication inter-processus (IPC) de l'hôte, telles que **la mémoire partagée** dans `/dev/shm`. Cela permet de lire/écrire là où les mêmes ressources IPC sont utilisées par d'autres processus de l'hôte ou du pod. Utilisez `ipcs` pour examiner plus en détail ces mécanismes IPC.
 
 - **Inspecter /dev/shm** - Recherchez des fichiers dans cet emplacement de mémoire partagée : `ls -la /dev/shm`
 - **Inspecter les installations IPC existantes** – Vous pouvez vérifier si des installations IPC sont utilisées avec `/usr/bin/ipcs`. Vérifiez-le avec : `ipcs -a`
@@ -464,7 +464,7 @@ La deuxième technique expliquée dans le post [https://labs.withsecure.com/blog
 Dans le cas où vous pouvez exécuter `docker exec` en tant que root (probablement avec sudo), vous essayez d'escalader les privilèges en échappant d'un conteneur en abusant de CVE-2019-5736 (exploit [ici](https://github.com/Frichetten/CVE-2019-5736-PoC/blob/master/main.go)). Cette technique va essentiellement **écraser** le binaire _**/bin/sh**_ de l'**hôte** **depuis un conteneur**, donc quiconque exécutant docker exec peut déclencher le payload.
 
 Modifiez le payload en conséquence et construisez le main.go avec `go build main.go`. Le binaire résultant doit être placé dans le conteneur docker pour exécution.\
-Lors de l'exécution, dès qu'il affiche `[+] /bin/sh écrasé avec succès`, vous devez exécuter ce qui suit depuis la machine hôte :
+Lors de l'exécution, dès qu'il affiche `[+] /bin/sh écrasé avec succès` vous devez exécuter ce qui suit depuis la machine hôte :
 
 `docker exec -it <container-name> /bin/sh`
 

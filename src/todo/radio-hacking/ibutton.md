@@ -4,7 +4,7 @@
 
 ## Intro
 
-iButton est un nom générique pour une clé d'identification électronique emballée dans un **conteneur en métal en forme de pièce**. Elle est également appelée **Dallas Touch** Memory ou mémoire de contact. Bien qu'elle soit souvent à tort qualifiée de clé « magnétique », il n'y a **rien de magnétique** à l'intérieur. En fait, un **microchip** complet fonctionnant sur un protocole numérique est caché à l'intérieur.
+iButton est un nom générique pour une clé d'identification électronique emballée dans un **conteneur métallique en forme de pièce**. Elle est également appelée **Dallas Touch** Memory ou mémoire de contact. Bien qu'elle soit souvent à tort qualifiée de clé « magnétique », il n'y a **rien de magnétique** à l'intérieur. En fait, un **microchip** complet fonctionnant sur un protocole numérique est caché à l'intérieur.
 
 <figure><img src="../../images/image (915).png" alt=""><figcaption></figcaption></figure>
 
@@ -14,7 +14,7 @@ En général, l'iButton implique la forme physique de la clé et du lecteur - un
 
 <figure><img src="../../images/image (1078).png" alt=""><figcaption></figcaption></figure>
 
-Lorsque la clé atteint le lecteur, les **contacts se touchent** et la clé est alimentée pour **transmettre** son ID. Parfois, la clé n'est **pas lue** immédiatement car le **PSD de contact d'un interphone est plus grand** qu'il ne devrait l'être. Ainsi, les contours extérieurs de la clé et du lecteur ne pouvaient pas se toucher. Si c'est le cas, vous devrez appuyer la clé contre l'un des murs du lecteur.
+Lorsque la clé atteint le lecteur, les **contacts se touchent** et la clé est alimentée pour **transmettre** son ID. Parfois, la clé n'est **pas lue** immédiatement car le **PSD de contact d'un interphone est plus grand** qu'il ne devrait l'être. Ainsi, les contours extérieurs de la clé et du lecteur ne peuvent pas se toucher. Si c'est le cas, vous devrez appuyer la clé contre l'un des murs du lecteur.
 
 <figure><img src="../../images/image (290).png" alt=""><figcaption></figcaption></figure>
 

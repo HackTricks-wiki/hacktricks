@@ -60,7 +60,7 @@ macos-installers-abuse.md
 - **`.dylib`** : Bibliothèques dynamiques (comme les fichiers DLL de Windows)
 - **`.pkg`** : Sont les mêmes que xar (format d'archive extensible). La commande d'installateur peut être utilisée pour installer le contenu de ces fichiers.
 - **`.DS_Store`** : Ce fichier est présent dans chaque répertoire, il sauvegarde les attributs et personnalisations du répertoire.
-- **`.Spotlight-V100`** : Ce dossier apparaît dans le répertoire racine de chaque volume sur le système.
+- **`.Spotlight-V100`** : Ce dossier apparaît dans le répertoire racine de chaque volume du système.
 - **`.metadata_never_index`** : Si ce fichier est à la racine d'un volume, Spotlight n'indexera pas ce volume.
 - **`.noindex`** : Les fichiers et dossiers avec cette extension ne seront pas indexés par Spotlight.
 - **`.sdef`** : Fichiers à l'intérieur des bundles spécifiant comment il est possible d'interagir avec l'application depuis un AppleScript.
@@ -75,7 +75,7 @@ macos-bundles.md
 
 ## Cache de bibliothèque partagée Dyld (SLC)
 
-Sur macOS (et iOS), toutes les bibliothèques partagées système, comme les frameworks et les dylibs, sont **combinées en un seul fichier**, appelé le **cache partagé dyld**. Cela améliore les performances, car le code peut être chargé plus rapidement.
+Sur macOS (et iOS), toutes les bibliothèques partagées système, comme les frameworks et dylibs, sont **combinées en un seul fichier**, appelé le **cache partagé dyld**. Cela améliore les performances, car le code peut être chargé plus rapidement.
 
 Cela se trouve sur macOS dans `/System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/` et dans les versions plus anciennes, vous pourriez trouver le **cache partagé** dans **`/System/Library/dyld/`**.\
 Sur iOS, vous pouvez les trouver dans **`/System/Library/Caches/com.apple.dyld/`**.
@@ -93,7 +93,7 @@ dyldex_all [dyld_shared_cache_path] # Extract all
 # More options inside the readme
 ```
 > [!TIP]
-> Notez que même si l'outil `dyld_shared_cache_util` ne fonctionne pas, vous pouvez passer le **binaire dyld partagé à Hopper** et Hopper sera capable d'identifier toutes les bibliothèques et vous laissera **sélectionner celle que** vous souhaitez enquêter :
+> Notez que même si l'outil `dyld_shared_cache_util` ne fonctionne pas, vous pouvez passer le **binaire dyld partagé à Hopper** et Hopper sera capable d'identifier toutes les bibliothèques et vous permettra de **sélectionner celle que** vous souhaitez enquêter :
 
 <figure><img src="../../../images/image (1152).png" alt="" width="563"><figcaption></figcaption></figure>
 
@@ -130,7 +130,7 @@ Il existe certains drapeaux qui peuvent être définis dans les fichiers qui fer
 - **`uchg`** : Connu sous le nom de drapeau **uchange**, il **empêchera toute action** de modification ou de suppression du **fichier**. Pour le définir, faites : `chflags uchg file.txt`
 - L'utilisateur root pourrait **supprimer le drapeau** et modifier le fichier.
 - **`restricted`** : Ce drapeau rend le fichier **protégé par SIP** (vous ne pouvez pas ajouter ce drapeau à un fichier).
-- **`Sticky bit`** : Si un répertoire a le bit collant, **seul** le **propriétaire du répertoire ou root peut renommer ou supprimer** des fichiers. Typiquement, cela est défini sur le répertoire /tmp pour empêcher les utilisateurs ordinaires de supprimer ou de déplacer les fichiers d'autres utilisateurs.
+- **`Sticky bit`** : Si un répertoire a un bit collant, **seul** le **propriétaire du répertoire ou root peut renommer ou supprimer** des fichiers. Typiquement, cela est défini sur le répertoire /tmp pour empêcher les utilisateurs ordinaires de supprimer ou de déplacer les fichiers d'autres utilisateurs.
 
 Tous les drapeaux peuvent être trouvés dans le fichier `sys/stat.h` (trouvez-le en utilisant `mdfind stat.h | grep stat.h`) et sont :
 
@@ -215,7 +215,7 @@ find / -type f -exec ls -ld {} \; 2>/dev/null | grep -E "[x\-]@ " | awk '{printf
 
 L'attribut étendu `com.apple.decmpfs` indique que le fichier est stocké de manière chiffrée, `ls -l` rapportera une **taille de 0** et les données compressées se trouvent à l'intérieur de cet attribut. Chaque fois que le fichier est accédé, il sera déchiffré en mémoire.
 
-Cet attr peut être vu avec `ls -lO` indiqué comme compressé car les fichiers compressés sont également étiquetés avec le drapeau `UF_COMPRESSED`. Si un fichier compressé est supprimé avec ce drapeau via `chflags nocompressed </path/to/file>`, le système ne saura pas que le fichier était compressé et ne pourra donc pas décompresser et accéder aux données (il pensera qu'il est en fait vide).
+Cet attribut peut être vu avec `ls -lO` indiqué comme compressé car les fichiers compressés sont également étiquetés avec le drapeau `UF_COMPRESSED`. Si un fichier compressé est supprimé avec ce drapeau via `chflags nocompressed </path/to/file>`, le système ne saura pas que le fichier était compressé et ne pourra donc pas décompresser et accéder aux données (il pensera qu'il est en fait vide).
 
 L'outil afscexpand peut être utilisé pour forcer la décompression d'un fichier.
 

@@ -23,7 +23,7 @@ Dyld sera chargé par **`dyldboostrap::start`**, qui chargera également des él
 ./
 {{#endref}}
 
-Ensuite, il mappe le cache partagé dyld qui prélie tous les bibliothèques système importantes, puis il mappe les bibliothèques dont dépend le binaire et continue récursivement jusqu'à ce que toutes les bibliothèques nécessaires soient chargées. Par conséquent :
+Ensuite, il mappe le cache partagé dyld qui prélie tous les systèmes de bibliothèques importants, puis il mappe les bibliothèques dont dépend le binaire et continue récursivement jusqu'à ce que toutes les bibliothèques nécessaires soient chargées. Par conséquent :
 
 1. il commence à charger les bibliothèques insérées avec `DYLD_INSERT_LIBRARIES` (si autorisé)
 2. Ensuite, celles mises en cache partagées
@@ -42,8 +42,8 @@ Quelques sections de stub dans le binaire :
 
 - **`__TEXT.__[auth_]stubs`** : Pointeurs des sections `__DATA`
 - **`__TEXT.__stub_helper`** : Petit code invoquant le lien dynamique avec des informations sur la fonction à appeler
-- **`__DATA.__[auth_]got`** : Table des décalages globaux (adresses des fonctions importées, lorsqu'elles sont résolues, (liées pendant le temps de chargement car elles sont marquées avec le drapeau `S_NON_LAZY_SYMBOL_POINTERS`)
-- **`__DATA.__nl_symbol_ptr`** : Pointeurs de symboles non paresseux (liés pendant le temps de chargement car ils sont marqués avec le drapeau `S_NON_LAZY_SYMBOL_POINTERS`)
+- **`__DATA.__[auth_]got`** : Table des décalages globaux (adresses des fonctions importées, lorsqu'elles sont résolues, (liées pendant le temps de chargement car marquées avec le drapeau `S_NON_LAZY_SYMBOL_POINTERS`)
+- **`__DATA.__nl_symbol_ptr`** : Pointeurs de symboles non paresseux (liés pendant le temps de chargement car marqués avec le drapeau `S_NON_LAZY_SYMBOL_POINTERS`)
 - **`__DATA.__la_symbol_ptr`** : Pointeurs de symboles paresseux (liés lors du premier accès)
 
 > [!WARNING]
@@ -103,7 +103,7 @@ Cette dernière fonction, après avoir trouvé l'adresse de la fonction recherch
 > [!TIP]
 > Cependant, notez que les versions actuelles de dyld chargent tout de manière non paresseuse.
 
-#### Opcodes de Dyld
+#### Opérations opcodes de Dyld
 
 Enfin, **`dyld_stub_binder`** doit trouver la fonction indiquée et l'écrire à la bonne adresse pour ne pas la rechercher à nouveau. Pour ce faire, il utilise des opcodes (une machine à états finis) au sein de dyld.
 
@@ -264,7 +264,7 @@ dyld[21623]: running initializer 0x18e59e5c0 in /usr/lib/libSystem.B.dylib
 - `DYLD_PRINT_BINDINGS`: Imprimer les symboles lors de la liaison
 - `DYLD_WEAK_BINDINGS`: Imprimer uniquement les symboles faibles lors de la liaison
 - `DYLD_PRINT_CODE_SIGNATURES`: Imprimer les opérations d'enregistrement de signature de code
-- `DYLD_PRINT_DOFS`: Imprimer les sections de format d'objet D-Trace lors du chargement
+- `DYLD_PRINT_DOFS`: Imprimer les sections de format d'objet D-Trace telles que chargées
 - `DYLD_PRINT_ENV`: Imprimer l'environnement vu par dyld
 - `DYLD_PRINT_INTERPOSTING`: Imprimer les opérations d'interposition
 - `DYLD_PRINT_LIBRARIES`: Imprimer les bibliothèques chargées

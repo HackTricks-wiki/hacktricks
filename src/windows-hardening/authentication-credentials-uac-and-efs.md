@@ -9,7 +9,7 @@ Une liste blanche d'applications est une liste de logiciels ou d'exécutables ap
 [AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) est la **solution de liste blanche d'applications** de Microsoft et donne aux administrateurs système le contrôle sur **quelles applications et fichiers les utilisateurs peuvent exécuter**. Elle fournit un **contrôle granulaire** sur les exécutables, les scripts, les fichiers d'installation Windows, les DLL, les applications empaquetées et les installateurs d'applications empaquetées.\
 Il est courant que les organisations **bloquent cmd.exe et PowerShell.exe** et l'accès en écriture à certains répertoires, **mais tout cela peut être contourné**.
 
-### Vérification
+### Vérifier
 
 Vérifiez quels fichiers/extensions sont sur liste noire/liste blanche :
 ```bash
@@ -36,7 +36,7 @@ C:\windows\tracing
 - Les binaires **"LOLBAS"** [**de confiance**](https://lolbas-project.github.io/) peuvent également être utiles pour contourner AppLocker.
 - **Des règles mal écrites peuvent également être contournées**
 - Par exemple, **`<FilePathCondition Path="%OSDRIVE%*\allowed*"/>`**, vous pouvez créer un **dossier appelé `allowed`** n'importe où et il sera autorisé.
-- Les organisations se concentrent souvent sur le **blocage de l'exécutable `%System32%\WindowsPowerShell\v1.0\powershell.exe`**, mais oublient les **autres** [**emplacements d'exécutables PowerShell**](https://www.powershelladmin.com/wiki/PowerShell_Executables_File_System_Locations) tels que `%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe` ou `PowerShell_ISE.exe`.
+- Les organisations se concentrent souvent sur **le blocage de l'exécutable `%System32%\WindowsPowerShell\v1.0\powershell.exe`**, mais oublient les **autres** [**emplacements d'exécutables PowerShell**](https://www.powershelladmin.com/wiki/PowerShell_Executables_File_System_Locations) tels que `%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe` ou `PowerShell_ISE.exe`.
 - **L'application des DLL est très rarement activée** en raison de la charge supplémentaire qu'elle peut imposer à un système, et de la quantité de tests nécessaires pour s'assurer que rien ne se casse. Donc, utiliser **des DLL comme portes dérobées aidera à contourner AppLocker**.
 - Vous pouvez utiliser [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) ou [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) pour **exécuter du code Powershell** dans n'importe quel processus et contourner AppLocker. Pour plus d'infos, consultez : [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode).
 
@@ -52,7 +52,7 @@ Les **identifiants** (hachés) sont **enregistrés** dans la **mémoire** de ce 
 **LSA** administre la **politique de sécurité** locale (politique de mot de passe, permissions des utilisateurs...), **authentification**, **jetons d'accès**...\
 LSA sera celui qui **vérifiera** les identifiants fournis dans le fichier **SAM** (pour une connexion locale) et **communiquera** avec le **contrôleur de domaine** pour authentifier un utilisateur de domaine.
 
-Les **identifiants** sont **enregistrés** à l'intérieur du **processus LSASS** : tickets Kerberos, hachages NT et LM, mots de passe facilement déchiffrés.
+Les **identifiants** sont **enregistrés** dans le **processus LSASS** : tickets Kerberos, hachages NT et LM, mots de passe facilement déchiffrés.
 
 ### Secrets LSA
 
@@ -116,7 +116,7 @@ Cette méthode de chiffrement permet un **accès transparent** aux fichiers chif
 
 - EFS utilise un FEK symétrique, chiffré avec la clé publique de l'utilisateur.
 - Le déchiffrement utilise la clé privée de l'utilisateur pour accéder au FEK.
-- Le déchiffrement automatique se produit dans des conditions spécifiques, comme le copier vers FAT32 ou la transmission sur le réseau.
+- Le déchiffrement automatique se produit dans des conditions spécifiques, comme la copie vers FAT32 ou la transmission sur le réseau.
 - Les fichiers chiffrés sont accessibles au propriétaire sans étapes supplémentaires.
 
 ### Vérifier les informations EFS
@@ -162,17 +162,17 @@ Aussi, consultez cette [page web](https://cube0x0.github.io/Relaying-for-gMSA/) 
 
 ## LAPS
 
-La **Solution de Mot de Passe d'Administrateur Local (LAPS)**, disponible en téléchargement sur [Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899), permet la gestion des mots de passe d'administrateur local. Ces mots de passe, qui sont **randomisés**, uniques, et **changement régulier**, sont stockés de manière centralisée dans Active Directory. L'accès à ces mots de passe est restreint par des ACL aux utilisateurs autorisés. Avec des permissions suffisantes accordées, la capacité de lire les mots de passe d'administrateur local est fournie.
+La **Local Administrator Password Solution (LAPS)**, disponible en téléchargement sur [Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899), permet la gestion des mots de passe des administrateurs locaux. Ces mots de passe, qui sont **randomisés**, uniques et **régulièrement changés**, sont stockés de manière centralisée dans Active Directory. L'accès à ces mots de passe est restreint par des ACL aux utilisateurs autorisés. Avec des permissions suffisantes accordées, la capacité de lire les mots de passe des administrateurs locaux est fournie.
 
 {{#ref}}
 active-directory-methodology/laps.md
 {{#endref}}
 
-## Mode de Langage Contraint PS
+## PS Constrained Language Mode
 
-PowerShell [**Mode de Langage Contraint**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/) **verrouille de nombreuses fonctionnalités** nécessaires pour utiliser PowerShell efficacement, comme le blocage des objets COM, n'autorisant que les types .NET approuvés, les workflows basés sur XAML, les classes PowerShell, et plus encore.
+PowerShell [**Constrained Language Mode**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/) **verrouille de nombreuses fonctionnalités** nécessaires pour utiliser PowerShell efficacement, telles que le blocage des objets COM, n'autorisant que les types .NET approuvés, les workflows basés sur XAML, les classes PowerShell, et plus encore.
 
-### **Vérifiez**
+### **Vérifier**
 ```bash
 $ExecutionContext.SessionState.LanguageMode
 #Values could be: FullLanguage or ConstrainedLanguage
@@ -219,11 +219,11 @@ $command = "Write-Host 'My voice is my passport, verify me.'" $bytes = [System.T
 ```
 More can be found [here](https://blog.netspi.com/15-ways-to-bypass-the-powershell-execution-policy/)
 
-## Interface de support de sécurité (SSPI)
+## Interface de fournisseur de support de sécurité (SSPI)
 
 Est l'API qui peut être utilisée pour authentifier les utilisateurs.
 
-Le SSPI sera chargé de trouver le protocole adéquat pour deux machines qui souhaitent communiquer. La méthode préférée pour cela est Kerberos. Ensuite, le SSPI négociera quel protocole d'authentification sera utilisé, ces protocoles d'authentification sont appelés Security Support Provider (SSP), se trouvent à l'intérieur de chaque machine Windows sous la forme d'un DLL et les deux machines doivent prendre en charge le même pour pouvoir communiquer.
+Le SSPI sera chargé de trouver le protocole adéquat pour deux machines qui souhaitent communiquer. La méthode préférée pour cela est Kerberos. Ensuite, le SSPI négociera quel protocole d'authentification sera utilisé, ces protocoles d'authentification sont appelés Fournisseur de support de sécurité (SSP), se trouvent à l'intérieur de chaque machine Windows sous la forme d'un DLL et les deux machines doivent prendre en charge le même pour pouvoir communiquer.
 
 ### Principaux SSP
 
@@ -242,7 +242,7 @@ Le SSPI sera chargé de trouver le protocole adéquat pour deux machines qui sou
 
 ## UAC - Contrôle de compte d'utilisateur
 
-[User Account Control (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) est une fonctionnalité qui permet un **message de consentement pour des activités élevées**.
+[Contrôle de compte d'utilisateur (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) est une fonctionnalité qui permet un **message de consentement pour des activités élevées**.
 
 
 {{#ref}}

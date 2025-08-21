@@ -2,12 +2,11 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-
 {{#ref}}
 adws-enumeration.md
 {{#endref}}
 
-> REMARQUE : Cette page regroupe certaines des utilitaires les plus utiles pour **énumérer** et **visualiser** les relations Active Directory. Pour la collecte via le canal furtif **Active Directory Web Services (ADWS)**, consultez la référence ci-dessus.
+> REMARQUE : Cette page regroupe certaines des utilitaires les plus utiles pour **énumérer** et **visualiser** les relations Active Directory. Pour la collecte via le canal **Active Directory Web Services (ADWS)** furtif, consultez la référence ci-dessus.
 
 ---
 
@@ -29,7 +28,7 @@ adws-enumeration.md
 
 ## ADRecon
 
-[ADRecon](https://github.com/adrecon/ADRecon) extrait un large ensemble d'artefacts d'un domaine (ACL, GPO, relations de confiance, modèles CA…) et produit un **rapport Excel**.
+[ADRecon](https://github.com/adrecon/ADRecon) extrait un grand ensemble d'artefacts d'un domaine (ACL, GPO, trusts, modèles CA…) et produit un **rapport Excel**.
 ```powershell
 # On a Windows host in the domain
 PS C:\> .\ADRecon.ps1 -OutputDir C:\Temp\ADRecon
@@ -57,7 +56,7 @@ SharpHound.exe --CollectionMethods All           # Full sweep (noisy)
 SharpHound.exe --CollectionMethods Group,LocalAdmin,Session,Trusts,ACL
 SharpHound.exe --Stealth --LDAP                      # Low noise LDAP only
 ```
-Les collecteurs génèrent du JSON qui est ingéré via l'interface graphique de BloodHound.
+Les collecteurs génèrent du JSON qui est ingéré via l'interface BloodHound.
 
 ---
 

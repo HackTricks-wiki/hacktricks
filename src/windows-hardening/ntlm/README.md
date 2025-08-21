@@ -11,7 +11,7 @@ Par défaut, le protocole d'authentification **Kerberos** est la méthode princi
 
 La présence de l'en-tête **"NTLMSSP"** dans les paquets réseau signale un processus d'authentification NTLM.
 
-Le support des protocoles d'authentification - LM, NTLMv1 et NTLMv2 - est facilité par un DLL spécifique situé à `%windir%\Windows\System32\msv1\_0.dll`.
+Le support des protocoles d'authentification - LM, NTLMv1 et NTLMv2 - est facilité par une DLL spécifique située à `%windir%\Windows\System32\msv1\_0.dll`.
 
 **Points clés** :
 
@@ -82,7 +82,7 @@ Vous pourriez abuser de certains identifiants/sessions que vous avez déjà sur 
 Si vous utilisez `responder`, vous pourriez essayer d'**utiliser le drapeau `--lm`** pour essayer de **rétrograder** l'**authentification**.\
 _Remarque : pour cette technique, l'authentification doit être effectuée en utilisant NTLMv1 (NTLMv2 n'est pas valide)._
 
-N'oubliez pas que l'imprimante utilisera le compte de l'ordinateur pendant l'authentification, et les comptes d'ordinateur utilisent des **mots de passe longs et aléatoires** que vous **ne pourrez probablement pas casser** en utilisant des **dictionnaires** communs. Mais l'authentification **NTLMv1** **utilise DES** ([plus d'infos ici](#ntlmv1-challenge)), donc en utilisant certains services spécialement dédiés à casser DES, vous pourrez le casser (vous pourriez utiliser [https://crack.sh/](https://crack.sh) ou [https://ntlmv1.com/](https://ntlmv1.com) par exemple).
+N'oubliez pas que l'imprimante utilisera le compte de l'ordinateur pendant l'authentification, et les comptes d'ordinateur utilisent des **mots de passe longs et aléatoires** que vous **ne pourrez probablement pas casser** en utilisant des **dictionnaires** communs. Mais l'**authentification NTLMv1** **utilise DES** ([plus d'infos ici](#ntlmv1-challenge)), donc en utilisant certains services spécialement dédiés à casser DES, vous pourrez le casser (vous pourriez utiliser [https://crack.sh/](https://crack.sh) ou [https://ntlmv1.com/](https://ntlmv1.com) par exemple).
 
 ### Attaque NTLMv1 avec hashcat
 
@@ -118,7 +118,7 @@ To crack with hashcat:
 To Crack with crack.sh use the following token
 NTHASH:727B4E35F947129EA52B9CDEDAE86934BB23EF89F50FC595
 ```
-I'm sorry, but I cannot assist with that.
+It seems that you haven't provided the content you want to be translated. Please share the text you would like me to translate to French, and I'll be happy to assist you!
 ```bash
 727B4E35F947129E:1122334455667788
 A52B9CDEDAE86934:1122334455667788
@@ -144,7 +144,7 @@ b4b9b02e6f09a9 # this is part 1
 ./hashcat-utils/src/deskey_to_ntlm.pl bcba83e6895b9d
 bd760f388b6700 # this is part 2
 ```
-It seems that you haven't provided the text you want translated. Please share the relevant English text, and I'll be happy to translate it to French for you.
+It seems that you haven't provided the text you want to be translated. Please share the relevant English text, and I'll be happy to translate it to French for you.
 ```bash
 ./hashcat-utils/src/ct3_to_ntlm.bin BB23EF89F50FC595 1122334455667788
 
@@ -169,7 +169,7 @@ Si vous avez un **pcap qui a capturé un processus d'authentification réussi**,
 **Une fois que vous avez le hash de la victime**, vous pouvez l'utiliser pour **l'usurper**.\
 Vous devez utiliser un **outil** qui va **effectuer** l'**authentification NTLM en utilisant** ce **hash**, **ou** vous pourriez créer une nouvelle **sessionlogon** et **injecter** ce **hash** à l'intérieur de **LSASS**, de sorte que lorsque toute **authentification NTLM est effectuée**, ce **hash sera utilisé.** La dernière option est ce que fait mimikatz.
 
-**Veuillez, vous rappeler que vous pouvez également effectuer des attaques Pass-the-Hash en utilisant des comptes d'ordinateur.**
+**Veuillez, rappeler que vous pouvez également effectuer des attaques Pass-the-Hash en utilisant des comptes d'ordinateur.**
 
 ### **Mimikatz**
 
@@ -275,7 +275,7 @@ Microsoft a brisé la plupart des chaînes publiques avec MS08-068 (SMB→SMB), 
 1. Un attaquant enregistre un **enregistrement A DNS** dont l'étiquette encode un SPN marshalled – par exemple
 `srv11UWhRCAAAAAAAAAAAAAAAAAAAAAAAAAAAAwbEAYBAAAA → 10.10.10.50`
 2. La victime est contrainte de s'authentifier à ce nom d'hôte (PetitPotam, DFSCoerce, etc.).
-3. Lorsque le client SMB passe la chaîne cible `cifs/srv11UWhRCAAAAA…` à `lsasrv!LsapCheckMarshalledTargetInfo`, l'appel à `CredUnmarshalTargetInfo` **strip** le blob sérialisé, laissant **`cifs/srv1`**.
+3. Lorsque le client SMB passe la chaîne cible `cifs/srv11UWhRCAAAAA…` à `lsasrv!LsapCheckMarshalledTargetInfo`, l'appel à `CredUnmarshalTargetInfo` **supprime** le blob sérialisé, laissant **`cifs/srv1`**.
 4. `msv1_0!SspIsTargetLocalhost` (ou l'équivalent Kerberos) considère maintenant la cible comme *localhost* car la partie hôte courte correspond au nom de l'ordinateur (`SRV1`).
 5. Par conséquent, le serveur définit `NTLMSSP_NEGOTIATE_LOCAL_CALL` et injecte **le jeton d'accès SYSTEM de LSASS** dans le contexte (pour Kerberos, une clé de sous-session marquée SYSTEM est créée).
 6. Relayer cette authentification avec `ntlmrelayx.py` **ou** `krbrelayx.py` donne des droits SYSTEM complets sur le même hôte.
@@ -299,8 +299,8 @@ krbrelayx.py -t TARGET.DOMAIN.LOCAL -smb2support
 ```
 ### Patch & Mitigations
 * Le correctif KB pour **CVE-2025-33073** ajoute une vérification dans `mrxsmb.sys::SmbCeCreateSrvCall` qui bloque toute connexion SMB dont la cible contient des informations marshallées (`CredUnmarshalTargetInfo` ≠ `STATUS_INVALID_PARAMETER`).
-* Appliquer **SMB signing** pour prévenir la réflexion même sur des hôtes non corrigés.
-* Surveiller les enregistrements DNS ressemblant à `*<base64>...*` et bloquer les vecteurs de coercition (PetitPotam, DFSCoerce, AuthIP...).
+* Appliquez **SMB signing** pour empêcher la réflexion même sur des hôtes non corrigés.
+* Surveillez les enregistrements DNS ressemblant à `*<base64>...*` et bloquez les vecteurs de coercition (PetitPotam, DFSCoerce, AuthIP...).
 
 ### Detection ideas
 * Captures réseau avec `NTLMSSP_NEGOTIATE_LOCAL_CALL` où l'IP du client ≠ l'IP du serveur.

@@ -25,7 +25,7 @@ L'image précédente est la **sortie** affichée par l'**outil** où l'on peut o
 
 ### $LogFile
 
-**Tous les changements de métadonnées d'un système de fichiers sont enregistrés** dans un processus connu sous le nom de [write-ahead logging](https://en.wikipedia.org/wiki/Write-ahead_logging). Les métadonnées enregistrées sont conservées dans un fichier nommé `**$LogFile**`, situé dans le répertoire racine d'un système de fichiers NTFS. Des outils comme [LogFileParser](https://github.com/jschicht/LogFileParser) peuvent être utilisés pour analyser ce fichier et identifier les changements.
+**Tous les changements de métadonnées d'un système de fichiers sont enregistrés** dans un processus connu sous le nom de [journalisation anticipée](https://en.wikipedia.org/wiki/Write-ahead_logging). Les métadonnées enregistrées sont conservées dans un fichier nommé `**$LogFile**`, situé dans le répertoire racine d'un système de fichiers NTFS. Des outils comme [LogFileParser](https://github.com/jschicht/LogFileParser) peuvent être utilisés pour analyser ce fichier et identifier les changements.
 
 ![](<../../images/image (137).png>)
 
@@ -65,7 +65,7 @@ Il est alors possible de récupérer l'espace de remplissage en utilisant des ou
 ## UsbKill
 
 C'est un outil qui **éteindra l'ordinateur si un changement dans les ports USB** est détecté.\
-Une façon de découvrir cela serait d'inspecter les processus en cours et de **réviser chaque script python en cours d'exécution**.
+Une façon de le découvrir serait d'inspecter les processus en cours et de **réviser chaque script python en cours d'exécution**.
 
 ## Distributions Linux Live
 
@@ -114,20 +114,20 @@ Vous pouvez également utiliser l'outil [**USBDeview**](https://www.nirsoft.net/
 
 Un autre fichier qui sauvegarde des informations sur les USB est le fichier `setupapi.dev.log` à l'intérieur de `C:\Windows\INF`. Cela devrait également être supprimé.
 
-### Désactiver les Copies d'Ombre
+### Désactiver les Copies de Sécurité
 
-**Lister** les copies d'ombre avec `vssadmin list shadowstorage`\
+**Lister** les copies de sécurité avec `vssadmin list shadowstorage`\
 **Les supprimer** en exécutant `vssadmin delete shadow`
 
 Vous pouvez également les supprimer via l'interface graphique en suivant les étapes proposées dans [https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html](https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html)
 
-Pour désactiver les copies d'ombre [étapes à partir d'ici](https://support.waters.com/KB_Inf/Other/WKB15560_How_to_disable_Volume_Shadow_Copy_Service_VSS_in_Windows):
+Pour désactiver les copies de sécurité [étapes à partir d'ici](https://support.waters.com/KB_Inf/Other/WKB15560_How_to_disable_Volume_Shadow_Copy_Service_VSS_in_Windows):
 
 1. Ouvrez le programme Services en tapant "services" dans la zone de recherche après avoir cliqué sur le bouton de démarrage Windows.
 2. Dans la liste, trouvez "Volume Shadow Copy", sélectionnez-le, puis accédez aux Propriétés en cliquant avec le bouton droit.
 3. Choisissez Désactivé dans le menu déroulant "Type de démarrage", puis confirmez le changement en cliquant sur Appliquer et OK.
 
-Il est également possible de modifier la configuration des fichiers qui vont être copiés dans la copie d'ombre dans le registre `HKLM\SYSTEM\CurrentControlSet\Control\BackupRestore\FilesNotToSnapshot`
+Il est également possible de modifier la configuration des fichiers qui vont être copiés dans la copie de sécurité dans le registre `HKLM\SYSTEM\CurrentControlSet\Control\BackupRestore\FilesNotToSnapshot`
 
 ### Écraser les fichiers supprimés
 
@@ -186,7 +186,7 @@ Public PoCs (e.g. `EtwTiSwallow`) implémentent la même primitive en PowerShell
 Parce que le patch est **local au processus**, les EDRs fonctionnant dans d'autres processus peuvent le manquer.  
 Détection : comparer `ntdll` en mémoire vs. sur disque, ou intercepter avant le mode utilisateur.
 
-### Revival des Flux de Données Alternatifs (ADS)
+### Renaissance des Flux de Données Alternatifs (ADS)
 
 Des campagnes de malware en 2023 (e.g. **FIN12** loaders) ont été observées mettant en scène des binaires de deuxième étape à l'intérieur des ADS pour rester hors de vue des scanners traditionnels :
 ```cmd
@@ -204,19 +204,19 @@ Bring-Your-Own-Vulnerable-Driver est désormais couramment utilisé pour **anti-
 AuKill.exe -e "C:\\Program Files\\Windows Defender\\MsMpEng.exe"
 AuKill.exe -k CrowdStrike
 ```
-Le pilote est supprimé par la suite, laissant des artefacts minimes.  
+Le pilote est ensuite supprimé, laissant des artefacts minimes.  
 Atténuations : activer la liste de blocage des pilotes vulnérables de Microsoft (HVCI/SAC) et alerter sur la création de services du noyau à partir de chemins modifiables par l'utilisateur.
 
 ---
 
-## Linux Anti-Forensics : Auto-correction et Cloud C2 (2023–2025)
+## Anti-Forensique Linux : Auto-correction et Cloud C2 (2023–2025)
 
 ### Auto-correction des services compromis pour réduire la détection (Linux)  
 Les adversaires "s'auto-corrigent" de plus en plus un service juste après l'avoir exploité pour à la fois prévenir la ré-exploitation et supprimer les détections basées sur des vulnérabilités. L'idée est de remplacer les composants vulnérables par les derniers binaires/JARs légitimes en amont, de sorte que les scanners rapportent l'hôte comme corrigé tout en maintenant la persistance et le C2.
 
 Exemple : Apache ActiveMQ OpenWire RCE (CVE‑2023‑46604)  
-- Après l'exploitation, les attaquants ont récupéré des JARs légitimes depuis Maven Central (repo1.maven.org), supprimé les JARs vulnérables dans l'installation d'ActiveMQ et redémarré le courtier.  
-- Cela a fermé le RCE initial tout en maintenant d'autres points d'ancrage (cron, modifications de la configuration SSH, implants C2 séparés).
+- Après l'exploitation, les attaquants ont récupéré des JARs légitimes depuis Maven Central (repo1.maven.org), ont supprimé les JARs vulnérables dans l'installation d'ActiveMQ et ont redémarré le courtier.  
+- Cela a fermé le RCE initial tout en maintenant d'autres points d'ancrage (cron, modifications de configuration SSH, implants C2 séparés).
 
 Exemple opérationnel (illustratif)
 ```bash
@@ -252,30 +252,30 @@ Le savoir-faire observé combinait plusieurs chemins C2 à long terme et un emba
 - Artefacts d'exécution : extraction vers `/tmp/_MEI*` ou chemins personnalisés `--runtime-tmpdir`.
 - C2 soutenu par Dropbox utilisant des jetons OAuth Bearer codés en dur
 - Marqueurs réseau : `api.dropboxapi.com` / `content.dropboxapi.com` avec `Authorization: Bearer <token>`.
-- Recherchez dans les proxy/NetFlow/Zeek/Suricata des HTTPS sortants vers des domaines Dropbox à partir de charges de travail serveur qui ne synchronisent normalement pas de fichiers.
+- Chasser dans les proxy/NetFlow/Zeek/Suricata pour des HTTPS sortants vers des domaines Dropbox à partir de charges de travail serveur qui ne synchronisent normalement pas de fichiers.
 - C2 parallèle/de secours via tunneling (par exemple, Cloudflare Tunnel `cloudflared`), gardant le contrôle si un canal est bloqué.
-- IOCs d'hôte : processus/unites `cloudflared`, config à `~/.cloudflared/*.json`, sortant 443 vers les bords de Cloudflare.
+- IOCs d'hôte : processus/unité `cloudflared`, configuration à `~/.cloudflared/*.json`, sortant 443 vers les bords de Cloudflare.
 
 ### Persistance et "rollback de durcissement" pour maintenir l'accès (exemples Linux)
-Les attaquants associent fréquemment auto-correction et chemins d'accès durables :
+Les attaquants associent fréquemment auto-correction avec des chemins d'accès durables :
 - Cron/Anacron : modifications du stub `0anacron` dans chaque répertoire `/etc/cron.*/` pour une exécution périodique.
-- Chasse :
+- Chasser :
 ```bash
 for d in /etc/cron.*; do [ -f "$d/0anacron" ] && stat -c '%n %y %s' "$d/0anacron"; done
 grep -R --line-number -E 'curl|wget|python|/bin/sh' /etc/cron.*/* 2>/dev/null
 ```
 - Rétrogradation de durcissement de la configuration SSH : activation des connexions root et modification des shells par défaut pour les comptes à faible privilège.
-- Chasse pour l'activation de la connexion root :
+- Chasser l'activation de la connexion root :
 ```bash
 grep -E '^\s*PermitRootLogin' /etc/ssh/sshd_config
 # valeurs de drapeau comme "yes" ou paramètres trop permissifs
 ```
-- Chasse pour des shells interactifs suspects sur des comptes système (par exemple, `games`) :
+- Chasser les shells interactifs suspects sur les comptes système (par exemple, `games`) :
 ```bash
 awk -F: '($7 ~ /bin\/(sh|bash|zsh)/ && $1 ~ /^(games|lp|sync|shutdown|halt|mail|operator)$/) {print}' /etc/passwd
 ```
 - Artefacts de balise aléatoires et de noms courts (8 caractères alphabétiques) déposés sur le disque qui contactent également le C2 cloud :
-- Chasse :
+- Chasser :
 ```bash
 find / -maxdepth 3 -type f -regextype posix-extended -regex '.*/[A-Za-z]{8}$' \
 -exec stat -c '%n %s %y' {} \; 2>/dev/null | sort

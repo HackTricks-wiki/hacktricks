@@ -4,7 +4,7 @@
 
 Cette page regroupe des **extraits de code C petits et autonomes** qui sont utiles lors de l'escalade de privilèges locaux sur Windows ou après une exploitation. Chaque payload est conçu pour être **facile à copier-coller**, nécessite uniquement l'API Windows / le runtime C, et peut être compilé avec `i686-w64-mingw32-gcc` (x86) ou `x86_64-w64-mingw32-gcc` (x64).
 
-> ⚠️  Ces payloads supposent que le processus dispose déjà des privilèges minimaux nécessaires pour effectuer l'action (par exemple, `SeDebugPrivilege`, `SeImpersonatePrivilege`, ou un contexte d'intégrité moyen pour un contournement UAC). Ils sont destinés à des **environnements de red-team ou CTF** où l'exploitation d'une vulnérabilité a permis l'exécution de code natif arbitraire.
+> ⚠️  Ces payloads supposent que le processus dispose déjà des privilèges minimaux nécessaires pour effectuer l'action (par exemple, `SeDebugPrivilege`, `SeImpersonatePrivilege`, ou un contexte d'intégrité moyenne pour un contournement UAC). Ils sont destinés à des **environnements de red-team ou CTF** où l'exploitation d'une vulnérabilité a permis l'exécution de code natif arbitraire.
 
 ---
 
@@ -20,8 +20,8 @@ return 0;
 ```
 ---
 
-## Contournement UAC – Détournement de registre `fodhelper.exe` (Intégrité Moyenne → Élevée)
-Lorsque le binaire de confiance **`fodhelper.exe`** est exécuté, il interroge le chemin de registre ci-dessous **sans filtrer le verbe `DelegateExecute`**. En plaçant notre commande sous cette clé, un attaquant peut contourner UAC *sans* déposer de fichier sur le disque.
+## Contournement de l'UAC – Détournement de registre `fodhelper.exe` (Intégrité Moyenne → Élevée)
+Lorsque le binaire de confiance **`fodhelper.exe`** est exécuté, il interroge le chemin de registre ci-dessous **sans filtrer le verbe `DelegateExecute`**. En plaçant notre commande sous cette clé, un attaquant peut contourner l'UAC *sans* déposer de fichier sur le disque.
 
 *Chemin de registre interrogé par `fodhelper.exe`*
 ```
@@ -123,7 +123,7 @@ sedebug-+-seimpersonate-copy-token.md
 ---
 
 ## Patch AMSI & ETW en mémoire (Évasion de défense)
-La plupart des moteurs AV/EDR modernes s'appuient sur **AMSI** et **ETW** pour inspecter les comportements malveillants. Patchant les deux interfaces tôt dans le processus actuel, cela empêche les charges utiles basées sur des scripts (par exemple, PowerShell, JScript) d'être analysées.
+La plupart des moteurs AV/EDR modernes s'appuient sur **AMSI** et **ETW** pour inspecter les comportements malveillants. Patchant les deux interfaces tôt dans le processus actuel, cela empêche les charges utiles basées sur des scripts (par exemple, PowerShell, JScript) d'être scannées.
 ```c
 // gcc -o patch_amsi.exe patch_amsi.c -lntdll
 #define _CRT_SECURE_NO_WARNINGS

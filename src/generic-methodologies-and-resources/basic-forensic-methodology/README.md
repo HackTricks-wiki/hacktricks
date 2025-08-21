@@ -11,7 +11,7 @@
 
 ## Analyse de Malware
 
-Ce **n'est pas nécessairement la première étape à réaliser une fois que vous avez l'image**. Mais vous pouvez utiliser ces techniques d'analyse de malware de manière indépendante si vous avez un fichier, une image de système de fichiers, une image mémoire, pcap... donc il est bon de **garder ces actions à l'esprit** :
+Ce **n'est pas nécessairement la première étape à réaliser une fois que vous avez l'image**. Mais vous pouvez utiliser ces techniques d'analyse de malware indépendamment si vous avez un fichier, une image de système de fichiers, une image mémoire, pcap... donc il est bon de **garder ces actions à l'esprit** :
 
 
 {{#ref}}
@@ -20,14 +20,14 @@ malware-analysis.md
 
 ## Inspection d'une Image
 
-Si vous recevez une **image forensique** d'un appareil, vous pouvez commencer **à analyser les partitions, le système de fichiers** utilisé et **récupérer** potentiellement des **fichiers intéressants** (même ceux supprimés). Apprenez comment dans :
+Si vous recevez une **image forensique** d'un appareil, vous pouvez commencer **à analyser les partitions, le système de fichiers** utilisé et **à récupérer** potentiellement des **fichiers intéressants** (même ceux supprimés). Apprenez comment dans :
 
 
 {{#ref}}
 partitions-file-systems-carving/
 {{#endref}}
 
-Selon les systèmes d'exploitation utilisés et même la plateforme, différents artefacts intéressants devraient être recherchés :
+Selon les OS utilisés et même la plateforme, différents artefacts intéressants devraient être recherchés :
 
 
 {{#ref}}
@@ -44,7 +44,7 @@ linux-forensics.md
 docker-forensics.md
 {{#endref}}
 
-## Inspection Approfondie de Types de Fichiers et de Logiciels Spécifiques
+## Inspection approfondie de types de fichiers spécifiques et de logiciels
 
 Si vous avez un **fichier** très **suspect**, alors **selon le type de fichier et le logiciel** qui l'a créé, plusieurs **astuces** peuvent être utiles.\
 Lisez la page suivante pour apprendre quelques astuces intéressantes :

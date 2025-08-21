@@ -10,7 +10,7 @@ Permissions dans un **répertoire** :
 - **écriture** - vous pouvez **supprimer/écrire** des **fichiers** dans le répertoire et vous pouvez **supprimer des dossiers vides**.
 - Mais vous **ne pouvez pas supprimer/modifier des dossiers non vides** à moins d'avoir des permissions d'écriture dessus.
 - Vous **ne pouvez pas modifier le nom d'un dossier** à moins de le posséder.
-- **exécution** - vous êtes **autorisé à traverser** le répertoire - si vous n'avez pas ce droit, vous ne pouvez pas accéder à des fichiers à l'intérieur, ni dans des sous-répertoires.
+- **exécution** - vous êtes **autorisé à traverser** le répertoire - si vous n'avez pas ce droit, vous ne pouvez accéder à aucun fichier à l'intérieur, ni dans aucun sous-répertoire.
 
 ### Combinaisons dangereuses
 
@@ -18,7 +18,7 @@ Permissions dans un **répertoire** :
 
 - Un parent **propriétaire de répertoire** dans le chemin est l'utilisateur
 - Un parent **propriétaire de répertoire** dans le chemin est un **groupe d'utilisateurs** avec **accès en écriture**
-- Un **groupe** d'utilisateurs a un accès **en écriture** au **fichier**
+- Un **groupe d'utilisateurs** a un accès **en écriture** au **fichier**
 
 Avec l'une des combinaisons précédentes, un attaquant pourrait **injecter** un **lien sym/hard** vers le chemin attendu pour obtenir un écriture arbitraire privilégiée.
 
@@ -60,7 +60,7 @@ Exemple :
 
 ### Fuite FD (pas de `O_CLOEXEC`)
 
-Si un appel à `open` n'a pas le drapeau `O_CLOEXEC`, le descripteur de fichier sera hérité par le processus enfant. Donc, si un processus privilégié ouvre un fichier privilégié et exécute un processus contrôlé par l'attaquant, l'attaquant **héritera du FD sur le fichier privilégié**.
+Si un appel à `open` n'a pas le drapeau `O_CLOEXEC`, le descripteur de fichier sera hérité par le processus enfant. Donc, si un processus privilégié ouvre un fichier privilégié et exécute un processus contrôlé par l'attaquant, l'attaquant **héritera le FD sur le fichier privilégié**.
 
 Si vous pouvez faire en sorte qu'un **processus ouvre un fichier ou un dossier avec des privilèges élevés**, vous pouvez abuser de **`crontab`** pour ouvrir un fichier dans `/etc/sudoers.d` avec **`EDITOR=exploit.py`**, de sorte que `exploit.py` obtiendra le FD vers le fichier à l'intérieur de `/etc/sudoers` et l'abusera.
 
@@ -148,14 +148,13 @@ ls -le test
 
 Pas vraiment nécessaire mais je le laisse là juste au cas où :
 
-
 {{#ref}}
 macos-xattr-acls-extra-stuff.md
 {{#endref}}
 
 ## Contourner les vérifications de signature
 
-### Contourner les vérifications des binaires de la plateforme
+### Contourner les vérifications des binaires de plateforme
 
 Certaines vérifications de sécurité vérifient si le binaire est un **binaire de plateforme**, par exemple pour permettre de se connecter à un service XPC. Cependant, comme exposé dans un contournement sur https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/, il est possible de contourner cette vérification en obtenant un binaire de plateforme (comme /bin/ls) et d'injecter l'exploit via dyld en utilisant une variable d'environnement `DYLD_INSERT_LIBRARIES`.
 
@@ -327,7 +326,7 @@ echo $FILENAME
 ```
 ## Mémoire Partagée POSIX
 
-**La mémoire partagée POSIX** permet aux processus dans des systèmes d'exploitation conformes à POSIX d'accéder à une zone de mémoire commune, facilitant une communication plus rapide par rapport à d'autres méthodes de communication inter-processus. Cela implique de créer ou d'ouvrir un objet de mémoire partagée avec `shm_open()`, de définir sa taille avec `ftruncate()`, et de le mapper dans l'espace d'adressage du processus en utilisant `mmap()`. Les processus peuvent ensuite lire et écrire directement dans cette zone de mémoire. Pour gérer l'accès concurrent et prévenir la corruption des données, des mécanismes de synchronisation tels que des mutex ou des sémaphores sont souvent utilisés. Enfin, les processus désassocient et ferment la mémoire partagée avec `munmap()` et `close()`, et éventuellement suppriment l'objet de mémoire avec `shm_unlink()`. Ce système est particulièrement efficace pour un IPC rapide et efficace dans des environnements où plusieurs processus doivent accéder rapidement à des données partagées.
+**La mémoire partagée POSIX** permet aux processus dans des systèmes d'exploitation conformes à POSIX d'accéder à une zone de mémoire commune, facilitant une communication plus rapide par rapport à d'autres méthodes de communication inter-processus. Cela implique de créer ou d'ouvrir un objet de mémoire partagée avec `shm_open()`, de définir sa taille avec `ftruncate()`, et de le mapper dans l'espace d'adresses du processus en utilisant `mmap()`. Les processus peuvent ensuite lire et écrire directement dans cette zone de mémoire. Pour gérer l'accès concurrent et prévenir la corruption des données, des mécanismes de synchronisation tels que des mutex ou des sémaphores sont souvent utilisés. Enfin, les processus désassocient et ferment la mémoire partagée avec `munmap()` et `close()`, et éventuellement suppriment l'objet de mémoire avec `shm_unlink()`. Ce système est particulièrement efficace pour un IPC rapide et efficace dans des environnements où plusieurs processus doivent accéder rapidement à des données partagées.
 
 <details>
 
@@ -429,7 +428,7 @@ Cette fonctionnalité est particulièrement utile pour prévenir certaines class
 
 - `guarded_open_np`: Ouvre un FD avec une garde
 - `guarded_close_np`: Ferme-le
-- `change_fdguard_np`: Change les drapeaux de garde sur un descripteur (même en supprimant la protection de garde)
+- `change_fdguard_np`: Change les drapeaux de garde sur un descripteur (y compris la suppression de la protection de garde)
 
 ## Références
 

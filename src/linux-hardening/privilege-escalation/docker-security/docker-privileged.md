@@ -11,7 +11,7 @@ Lorsque vous exécutez un conteneur en mode privilégié, voici les protections 
 Dans un conteneur privilégié, tous les **périphériques peuvent être accessibles dans `/dev/`**. Par conséquent, vous pouvez **échapper** en **montant** le disque de l'hôte.
 
 {{#tabs}}
-{{#tab name="À l'intérieur du conteneur par défaut"}}
+{{#tab name="Inside default container"}}
 ```bash
 # docker run --rm -it alpine sh
 ls /dev
@@ -85,7 +85,6 @@ mount  | grep /proc.*tmpfs
 ### Capacités Linux
 
 Les moteurs de conteneurs lancent les conteneurs avec un **nombre limité de capacités** pour contrôler ce qui se passe à l'intérieur du conteneur par défaut. Les conteneurs **privilégiés** ont **toutes** les **capacités** accessibles. Pour en savoir plus sur les capacités, lisez :
-
 
 {{#ref}}
 ../linux-capabilities.md
@@ -163,7 +162,8 @@ apparmor.md
 ```
 ### SELinux
 
-Exécuter un conteneur avec le `--privileged` désactive les **étiquettes SELinux**, ce qui lui fait hériter de l'étiquette du moteur de conteneur, généralement `unconfined`, accordant un accès complet similaire à celui du moteur de conteneur. En mode sans privilèges, il utilise `container_runtime_t`, tandis qu'en mode root, `spc_t` est appliqué.
+Exécuter un conteneur avec le drapeau `--privileged` désactive les **étiquettes SELinux**, ce qui lui fait hériter de l'étiquette du moteur de conteneur, généralement `unconfined`, accordant un accès complet similaire à celui du moteur de conteneur. En mode sans privilèges, il utilise `container_runtime_t`, tandis qu'en mode root, `spc_t` est appliqué.
+
 
 {{#ref}}
 ../selinux.md
@@ -189,7 +189,7 @@ PID   USER     TIME  COMMAND
 ```
 {{#endtab}}
 
-{{#tab name="Inside --pid=host Container"}}
+{{#tab name="À l'intérieur du conteneur --pid=host"}}
 ```bash
 # docker run --rm --privileged --pid=host -it alpine sh
 ps -ef

@@ -59,7 +59,7 @@ L'appel **mshta** lance un script PowerShell caché qui récupère `PartyContinu
 
 ## Détection & Chasse
 
-Les équipes bleues peuvent combiner la télémétrie du presse-papiers, de la création de processus et du registre pour identifier les abus de pastejacking :
+Les équipes de sécurité peuvent combiner la télémétrie du presse-papiers, de la création de processus et du registre pour identifier les abus de pastejacking :
 
 * Registre Windows : `HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\RunMRU` conserve un historique des commandes **Win + R** – recherchez des entrées Base64 / obfusquées inhabituelles.
 * ID d'événement de sécurité **4688** (Création de processus) où `ParentImage` == `explorer.exe` et `NewProcessName` dans { `powershell.exe`, `wscript.exe`, `mshta.exe`, `curl.exe`, `cmd.exe` }.
@@ -68,14 +68,14 @@ Les équipes bleues peuvent combiner la télémétrie du presse-papiers, de la c
 
 ## Atténuations
 
-1. Renforcement du navigateur – désactiver l'accès en écriture au presse-papiers (`dom.events.asyncClipboard.clipboardItem` etc.) ou exiger un geste de l'utilisateur.
-2. Sensibilisation à la sécurité – apprendre aux utilisateurs à *taper* des commandes sensibles ou à les coller d'abord dans un éditeur de texte.
-3. Mode de langue contraint PowerShell / Politique d'exécution + Contrôle des applications pour bloquer les one-liners arbitraires.
-4. Contrôles réseau – bloquer les requêtes sortantes vers des domaines C2 de pastejacking et de malware connus.
+1. Renforcement du navigateur – désactivez l'accès en écriture au presse-papiers (`dom.events.asyncClipboard.clipboardItem` etc.) ou exigez un geste de l'utilisateur.
+2. Sensibilisation à la sécurité – apprenez aux utilisateurs à *taper* des commandes sensibles ou à les coller d'abord dans un éditeur de texte.
+3. Mode de langue contraint PowerShell / Politique d'exécution + Contrôle des applications pour bloquer les lignes de commande arbitraires.
+4. Contrôles réseau – bloquez les requêtes sortantes vers des domaines C2 de pastejacking et de malware connus.
 
-## Astuces Connexes
+## Astuces connexes
 
-* Le **Détournement d'Invitation Discord** abuse souvent de la même approche ClickFix après avoir attiré les utilisateurs dans un serveur malveillant :
+* Le **Détournement d'invitation Discord** abuse souvent de la même approche ClickFix après avoir attiré les utilisateurs dans un serveur malveillant :
 
 {{#ref}}
 discord-invite-hijacking.md

@@ -17,7 +17,7 @@ En général, cela signifie que pour s'échapper, vous devez être root à l'int
 ### Root + CWD
 
 > [!WARNING]
-> Si vous êtes **root** à l'intérieur d'un chroot, vous **pouvez vous échapper** en créant **un autre chroot**. Cela parce que 2 chroots ne peuvent pas coexister (dans Linux), donc si vous créez un dossier et ensuite **créez un nouveau chroot** dans ce nouveau dossier en étant **vous à l'extérieur**, vous serez maintenant **à l'extérieur du nouveau chroot** et donc vous serez dans le FS.
+> Si vous êtes **root** à l'intérieur d'un chroot, vous **pouvez vous échapper** en créant **un autre chroot**. Cela parce que 2 chroots ne peuvent pas coexister (dans Linux), donc si vous créez un dossier et ensuite **créez un nouveau chroot** dans ce nouveau dossier en étant **vous à l'extérieur de celui-ci**, vous serez maintenant **à l'extérieur du nouveau chroot** et donc vous serez dans le FS.
 >
 > Cela se produit parce que généralement chroot NE déplace PAS votre répertoire de travail vers celui indiqué, donc vous pouvez créer un chroot mais être à l'extérieur de celui-ci.
 

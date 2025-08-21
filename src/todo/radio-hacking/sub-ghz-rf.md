@@ -27,7 +27,7 @@ De plus, en utilisant la séquence de De Bruijn (une méthode pour réduire le n
 
 Un exemple de cette attaque a été implémenté dans [https://github.com/samyk/opensesame](https://github.com/samyk/opensesame)
 
-Exiger **un préambule évitera l'optimisation de la séquence de De Bruijn** et **les codes roulants empêcheront cette attaque** (supposant que le code est suffisamment long pour ne pas être brute-forcé).
+Exiger **un préambule évitera l'optimisation de la séquence de De Bruijn** et **les codes roulants empêcheront cette attaque** (en supposant que le code soit suffisamment long pour ne pas être brute-forcé).
 
 ## Attaque Sub-GHz
 
@@ -41,7 +41,7 @@ flipper-zero/fz-sub-ghz.md
 
 Les ouvre-portes de garage automatiques utilisent généralement une télécommande sans fil pour ouvrir et fermer la porte du garage. La télécommande **envoie un signal de fréquence radio (RF)** à l'ouvre-porte de garage, qui active le moteur pour ouvrir ou fermer la porte.
 
-Il est possible que quelqu'un utilise un appareil connu sous le nom de code grabber pour intercepter le signal RF et l'enregistrer pour une utilisation ultérieure. Cela est connu sous le nom d'**attaque par répétition**. Pour prévenir ce type d'attaque, de nombreux ouvre-portes de garage modernes utilisent une méthode de cryptage plus sécurisée connue sous le nom de système de **code roulant**.
+Il est possible que quelqu'un utilise un appareil connu sous le nom de code grabber pour intercepter le signal RF et l'enregistrer pour une utilisation ultérieure. Cela s'appelle une **attaque par répétition**. Pour prévenir ce type d'attaque, de nombreux ouvre-portes de garage modernes utilisent une méthode de cryptage plus sécurisée connue sous le nom de système de **code roulant**.
 
 Le **signal RF est généralement transmis en utilisant un code roulant**, ce qui signifie que le code change à chaque utilisation. Cela rend **difficile** pour quelqu'un d'**intercepter** le signal et de **l'utiliser** pour obtenir un accès **non autorisé** au garage.
 
@@ -53,7 +53,7 @@ En gros, vous écoutez le bouton et **capturez le signal pendant que la téléco
 
 ### Attaque de brouillage de lien complet
 
-Un attaquant pourrait **brouiller le signal près du véhicule ou du récepteur** afin que le **récepteur ne puisse pas réellement ‘entendre’ le code**, et une fois cela fait, vous pouvez simplement **capturer et rejouer** le code lorsque vous avez arrêté le brouillage.
+Un attaquant pourrait **brouiller le signal près du véhicule ou du récepteur** afin que le **récepteur ne puisse pas réellement ‘entendre’ le code**, et une fois que cela se produit, vous pouvez simplement **capturer et rejouer** le code lorsque vous avez arrêté le brouillage.
 
 La victime à un moment donné utilisera les **clés pour verrouiller la voiture**, mais ensuite l'attaque aura **enregistré suffisamment de "codes de fermeture de porte"** qui, espérons-le, pourraient être renvoyés pour ouvrir la porte (un **changement de fréquence pourrait être nécessaire** car il y a des voitures qui utilisent les mêmes codes pour ouvrir et fermer mais écoutent les deux commandes à des fréquences différentes).
 
@@ -63,7 +63,7 @@ La victime à un moment donné utilisera les **clés pour verrouiller la voiture
 ### **Attaque de capture de code (alias ‘RollJam’)**
 
 C'est une technique de **brouillage furtif**. L'attaquant va brouiller le signal, donc lorsque la victime essaie de verrouiller la porte, cela ne fonctionnera pas, mais l'attaquant va **enregistrer ce code**. Ensuite, la victime va **essayer de verrouiller la voiture à nouveau** en appuyant sur le bouton et la voiture va **enregistrer ce deuxième code**.\
-Instantanément après cela, l'**attaquant peut envoyer le premier code** et la **voiture se verrouillera** (la victime pensera que la deuxième pression l'a fermée). Ensuite, l'attaquant pourra **envoyer le deuxième code volé pour ouvrir** la voiture (supposant qu'un **code "fermer la voiture" peut également être utilisé pour l'ouvrir**). Un changement de fréquence pourrait être nécessaire (car il y a des voitures qui utilisent les mêmes codes pour ouvrir et fermer mais écoutent les deux commandes à des fréquences différentes).
+Instantanément après cela, l'**attaquant peut envoyer le premier code** et la **voiture se verrouillera** (la victime pensera que la deuxième pression l'a fermée). Ensuite, l'attaquant pourra **envoyer le deuxième code volé pour ouvrir** la voiture (en supposant qu'un **code "fermer la voiture" puisse également être utilisé pour l'ouvrir**). Un changement de fréquence pourrait être nécessaire (car il y a des voitures qui utilisent les mêmes codes pour ouvrir et fermer mais écoutent les deux commandes à des fréquences différentes).
 
 L'attaquant peut **brouiller le récepteur de la voiture et non son récepteur** car si le récepteur de la voiture écoute par exemple une bande large de 1 MHz, l'attaquant ne **brouillera** pas la fréquence exacte utilisée par la télécommande mais **une proche dans ce spectre** tandis que le **récepteur de l'attaquant écoutera dans une plage plus petite** où il peut écouter le signal de la télécommande **sans le signal de brouillage**.
 
@@ -75,7 +75,7 @@ L'attaquant peut **brouiller le récepteur de la voiture et non son récepteur**
 
 ### Attaque de brouillage de son d'alarme
 
-En testant un système de code roulant après-vente installé sur une voiture, **l'envoi du même code deux fois** a immédiatement **activé l'alarme** et l'immobilisateur, offrant une opportunité unique de **déni de service**. Ironiquement, le moyen de **désactiver l'alarme** et l'immobilisateur était de **presser** la **télécommande**, offrant à un attaquant la possibilité de **réaliser continuellement une attaque DoS**. Ou de mélanger cette attaque avec la **précédente pour obtenir plus de codes** car la victime aimerait arrêter l'attaque le plus rapidement possible.
+En testant un système de code roulant après-vente installé sur une voiture, **l'envoi du même code deux fois** a immédiatement **activé l'alarme** et l'immobilisateur, offrant une opportunité unique de **déni de service**. Ironiquement, le moyen de **désactiver l'alarme** et l'immobilisateur était de **presser** la **télécommande**, offrant à un attaquant la possibilité de **réaliser continuellement une attaque DoS**. Ou de mélanger cette attaque avec la **précédente pour obtenir plus de codes** alors que la victime voudrait arrêter l'attaque le plus rapidement possible.
 
 ## Références
 

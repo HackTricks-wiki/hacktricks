@@ -176,7 +176,7 @@ Vérifiez dans la page mentionnée dans la **section suivante comment le faire m
 
 ## Liens de Confiance MSSQL
 
-Si une instance MSSQL est de confiance (lien de base de données) par une autre instance MSSQL. Si l'utilisateur a des privilèges sur la base de données de confiance, il va pouvoir **utiliser la relation de confiance pour exécuter des requêtes également dans l'autre instance**. Ces confiances peuvent être enchaînées et à un moment donné, l'utilisateur pourrait être en mesure de trouver une base de données mal configurée où il peut exécuter des commandes.
+Si une instance MSSQL est de confiance (lien de base de données) par une autre instance MSSQL. Si l'utilisateur a des privilèges sur la base de données de confiance, il pourra **utiliser la relation de confiance pour exécuter des requêtes également dans l'autre instance**. Ces confiances peuvent être enchaînées et à un moment donné, l'utilisateur pourrait être en mesure de trouver une base de données mal configurée où il peut exécuter des commandes.
 
 **Les liens entre les bases de données fonctionnent même à travers les confiances de forêt.**
 
@@ -278,14 +278,14 @@ EXECUTE('EXECUTE(''sp_addsrvrolemember ''''hacker'''' , ''''sysadmin'''' '') AT 
 
 L'**utilisateur local MSSQL** a généralement un type de privilège spécial appelé **`SeImpersonatePrivilege`**. Cela permet au compte de "se faire passer pour un client après authentification".
 
-Une stratégie que de nombreux auteurs ont développée est de forcer un service SYSTEM à s'authentifier auprès d'un service malveillant ou de type homme du milieu que l'attaquant crée. Ce service malveillant peut alors se faire passer pour le service SYSTEM pendant qu'il essaie de s'authentifier.
+Une stratégie que de nombreux auteurs ont développée consiste à forcer un service SYSTEM à s'authentifier auprès d'un service malveillant ou de type homme du milieu que l'attaquant crée. Ce service malveillant peut alors se faire passer pour le service SYSTEM pendant qu'il essaie de s'authentifier.
 
 [SweetPotato](https://github.com/CCob/SweetPotato) a une collection de ces diverses techniques qui peuvent être exécutées via la commande `execute-assembly` de Beacon.
 
 
 
 ### Relais NTLM du point de gestion SCCM (Extraction de secrets OSD)
-Voyez comment les rôles SQL par défaut des **Points de gestion SCCM** peuvent être abusés pour extraire les secrets du Compte d'accès réseau et de la séquence de tâches directement à partir de la base de données du site :
+Voyez comment les rôles SQL par défaut des **Points de gestion SCCM** peuvent être abusés pour extraire le compte d'accès réseau et les secrets de séquence de tâches directement à partir de la base de données du site :
 
 {{#ref}}
 sccm-management-point-relay-sql-policy-secrets.md

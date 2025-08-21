@@ -312,7 +312,7 @@ bypass-fs-protections-read-only-no-exec-distroless/
 
 ## Bash NOP Sled basé sur l'espace ("Bashsledding")
 
-Lorsqu'une vulnérabilité vous permet de contrôler partiellement un argument qui atteint finalement `system()` ou un autre shell, vous ne connaissez peut-être pas le décalage exact à partir duquel l'exécution commence à lire votre charge utile. Les NOP sleds traditionnels (par exemple `\x90`) ne fonctionnent **pas** dans la syntaxe shell, mais Bash ignorera sans danger les espaces vides en début de ligne avant d'exécuter une commande.
+Lorsqu'une vulnérabilité vous permet de contrôler partiellement un argument qui atteint finalement `system()` ou un autre shell, vous ne connaissez peut-être pas le décalage exact à partir duquel l'exécution commence à lire votre charge utile. Les NOP sleds traditionnels (par exemple `\x90`) ne fonctionnent **pas** dans la syntaxe shell, mais Bash ignorera sans danger les espaces vides en tête avant d'exécuter une commande.
 
 Par conséquent, vous pouvez créer un *NOP sled pour Bash* en préfixant votre vraie commande avec une longue séquence d'espaces ou de caractères de tabulation :
 ```bash
@@ -326,7 +326,7 @@ Cas d'utilisation pratiques :
 
 1. **Blobs de configuration mappés en mémoire** (par exemple, NVRAM) accessibles à travers les processus.
 2. Situations où l'attaquant ne peut pas écrire de bytes NULL pour aligner la charge utile.
-3. Dispositifs embarqués où seul `ash`/`sh` de BusyBox est disponible – ils ignorent également les espaces de début.
+3. Dispositifs embarqués où seul BusyBox `ash`/`sh` est disponible – ils ignorent également les espaces en tête.
 
 > 🛠️  Combinez cette astuce avec des gadgets ROP qui appellent `system()` pour augmenter considérablement la fiabilité de l'exploitation sur des routeurs IoT à mémoire limitée.
 

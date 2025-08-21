@@ -80,7 +80,7 @@ Pour **usurper la communication** entre un appareil et JMF, vous avez besoin de 
 - Le **UUID** de l'appareil : `ioreg -d2 -c IOPlatformExpertDevice | awk -F" '/IOPlatformUUID/{print $(NF-1)}'`
 - Le **trousseau JAMF** de : `/Library/Application\ Support/Jamf/JAMF.keychain` qui contient le certificat de l'appareil
 
-Avec ces informations, **créez une VM** avec le **UUID** matériel **volé** et avec **SIP désactivé**, déposez le **trousseau JAMF,** **interceptez** l'agent Jamf et volez ses informations.
+Avec ces informations, **créez une VM** avec le **UUID** matériel **volé** et avec **SIP désactivé**, déposez le **trousseau JAMF,** **interceptez** l'**agent** Jamf et volez ses informations.
 
 #### Vol de secrets
 
@@ -169,7 +169,7 @@ dsconfigad -show
 ```
 Plus d'infos sur [https://its-a-feature.github.io/posts/2018/01/Active-Directory-Discovery-with-a-Mac/](https://its-a-feature.github.io/posts/2018/01/Active-Directory-Discovery-with-a-Mac/)
 
-### Mot de passe de l'ordinateur$
+### Mot de passe Computer$
 
 Obtenez des mots de passe en utilisant :
 ```bash

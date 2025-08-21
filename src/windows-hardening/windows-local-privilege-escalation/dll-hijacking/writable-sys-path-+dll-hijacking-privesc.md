@@ -41,7 +41,7 @@ $newPath = "$envPath;$folderPath"
 ```
 - Lancez **`procmon`** et allez dans **`Options`** --> **`Enable boot logging`** et appuyez sur **`OK`** dans l'invite.
 - Ensuite, **redémarrez**. Lorsque l'ordinateur redémarre, **`procmon`** commencera à **enregistrer** les événements dès que possible.
-- Une fois que **Windows** est **démarré, exécutez à nouveau `procmon`**, il vous dira qu'il a été en cours d'exécution et vous **demandera si vous souhaitez stocker** les événements dans un fichier. Dites **oui** et **stockez les événements dans un fichier**.
+- Une fois que **Windows** est **démarré, exécutez `procmon`** à nouveau, il vous dira qu'il a été en cours d'exécution et vous **demandera si vous souhaitez stocker** les événements dans un fichier. Dites **oui** et **stockez les événements dans un fichier**.
 - **Après** que le **fichier** soit **généré**, **fermez** la fenêtre **`procmon`** ouverte et **ouvrez le fichier des événements**.
 - Ajoutez ces **filtres** et vous trouverez tous les Dlls que certains **processus ont essayé de charger** depuis le dossier System Path écrivable :
 
@@ -75,7 +75,7 @@ Vous pouvez [**essayer d'utiliser l'un de ces exemples**](#creating-and-compilin
 
 Au moment de la rédaction, le service **Planificateur de tâches** est exécuté avec **Nt AUTHORITY\SYSTEM**.
 
-Ayant **généré la dll malveillante** (_dans mon cas, j'ai utilisé un shell inversé x64 et j'ai obtenu un shell, mais Defender l'a tué car il provenait de msfvenom_), enregistrez-le dans le chemin système écrivable sous le nom **WptsExtensions.dll** et **redémarrez** l'ordinateur (ou redémarrez le service ou faites tout ce qu'il faut pour relancer le service/programme affecté).
+Ayant **généré la dll malveillante** (_dans mon cas, j'ai utilisé un shell inversé x64 et j'ai obtenu un shell, mais Defender l'a tué parce qu'il provenait de msfvenom_), enregistrez-le dans le chemin système écrivable sous le nom **WptsExtensions.dll** et **redémarrez** l'ordinateur (ou redémarrez le service ou faites tout ce qu'il faut pour relancer le service/programme affecté).
 
 Lorsque le service est redémarré, la **dll devrait être chargée et exécutée** (vous pouvez **réutiliser** le truc **procmon** pour vérifier si la **bibliothèque a été chargée comme prévu**).
 

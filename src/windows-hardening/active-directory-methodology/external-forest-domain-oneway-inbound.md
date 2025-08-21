@@ -56,11 +56,11 @@ IsDomain     : True
 # You may also enumerate where foreign groups and/or users have been assigned
 # local admin access via Restricted Group by enumerating the GPOs in the foreign domain.
 ```
-Dans l'énumération précédente, il a été trouvé que l'utilisateur **`crossuser`** est dans le groupe **`External Admins`** qui a un **accès Admin** à l'**AD du domaine externe**.
+Dans l'énumération précédente, il a été trouvé que l'utilisateur **`crossuser`** est dans le groupe **`External Admins`** qui a **un accès Admin** à l'**AD du domaine externe**.
 
 ## Accès Initial
 
-Si vous **ne pouviez pas** trouver d'**accès spécial** de votre utilisateur dans l'autre domaine, vous pouvez toujours revenir à la méthodologie AD et essayer de **privesc depuis un utilisateur non privilégié** (des choses comme le kerberoasting par exemple) :
+Si vous **n'avez pas pu** trouver d'accès **spécial** de votre utilisateur dans l'autre domaine, vous pouvez toujours revenir à la méthodologie AD et essayer de **privesc depuis un utilisateur non privilégié** (des choses comme le kerberoasting par exemple) :
 
 Vous pouvez utiliser les **fonctions Powerview** pour **énumérer** l'**autre domaine** en utilisant le paramètre `-Domain` comme dans :
 ```bash

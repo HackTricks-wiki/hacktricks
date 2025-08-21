@@ -2,6 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
+
 ## Linux Capabilities
 
 Les capacités Linux divisent **les privilèges root en unités plus petites et distinctes**, permettant aux processus d'avoir un sous-ensemble de privilèges. Cela minimise les risques en ne conférant pas de privilèges root complets inutilement.
@@ -10,7 +11,7 @@ Les capacités Linux divisent **les privilèges root en unités plus petites et 
 
 - Les utilisateurs normaux ont des permissions limitées, affectant des tâches comme l'ouverture d'un socket réseau qui nécessite un accès root.
 
-### Ensembles de Capacités :
+### Ensembles de Capabilités :
 
 1. **Héritées (CapInh)** :
 
@@ -38,7 +39,7 @@ Les capacités Linux divisent **les privilèges root en unités plus petites et 
 
 5. **Ambiante (CapAmb)** :
 - **But** : Permet à certaines capacités d'être maintenues lors d'un appel système `execve`, ce qui entraînerait normalement une réinitialisation complète des capacités du processus.
-- **Fonctionnalité** : Garantit que les programmes non-SUID qui n'ont pas de capacités de fichier associées peuvent conserver certains privilèges.
+- **Fonctionnalité** : Assure que les programmes non-SUID qui n'ont pas de capacités de fichier associées peuvent conserver certains privilèges.
 - **Restrictions** : Les capacités dans cet ensemble sont soumises aux contraintes des ensembles héritables et permis, garantissant qu'elles ne dépassent pas les privilèges autorisés du processus.
 ```python
 # Code to demonstrate the interaction of different capability sets might look like this:
@@ -58,8 +59,8 @@ Pour plus d'informations, consultez :
 
 ### Capacités des processus
 
-Pour voir les capacités d'un processus particulier, utilisez le fichier **status** dans le répertoire /proc. Comme il fournit plus de détails, limitons-le uniquement aux informations liées aux capacités Linux.\
-Notez que pour tous les processus en cours d'exécution, les informations sur les capacités sont maintenues par thread, pour les binaires dans le système de fichiers, elles sont stockées dans des attributs étendus.
+Pour voir les capacités d'un processus particulier, utilisez le fichier **status** dans le répertoire /proc. Comme il fournit plus de détails, limitons-nous uniquement aux informations liées aux capacités Linux.\
+Notez que pour tous les processus en cours d'exécution, les informations de capacité sont maintenues par thread, pour les binaires dans le système de fichiers, elles sont stockées dans des attributs étendus.
 
 Vous pouvez trouver les capacités définies dans /usr/include/linux/capability.h
 
@@ -122,7 +123,7 @@ CapAmb:    0000000000000000
 $ capsh --decode=0000000000003000
 0x0000000000003000=cap_net_admin,cap_net_raw
 ```
-Comme vous pouvez le voir, les capacités données correspondent aux résultats des 2 façons d'obtenir les capacités d'un binaire.\
+Comme vous pouvez le voir, les capacités données correspondent aux résultats des 2 manières d'obtenir les capacités d'un binaire.\
 L'outil _getpcaps_ utilise l'appel système **capget()** pour interroger les capacités disponibles pour un thread particulier. Cet appel système n'a besoin de fournir que le PID pour obtenir plus d'informations.
 
 ### Capacités des binaires
@@ -174,7 +175,7 @@ cap_sys_admin,22,25          jrsysadmin
 ```
 ## Capacités de l'environnement
 
-En compilant le programme suivant, il est possible de **lancer un shell bash à l'intérieur d'un environnement qui fournit des capacités**.
+En compilant le programme suivant, il est possible de **lancer un shell bash dans un environnement qui fournit des capacités**.
 ```c:ambient.c
 /*
 * Test program for the ambient capabilities
@@ -310,7 +311,7 @@ docker run --rm -it  --cap-drop=ALL --cap-add=SYS_PTRACE r.j3ss.co/amicontained 
 ```
 ## Privesc/Container Escape
 
-Les capacités sont utiles lorsque vous **voulez restreindre vos propres processus après avoir effectué des opérations privilégiées** (par exemple, après avoir configuré chroot et lié à un socket). Cependant, elles peuvent être exploitées en leur passant des commandes ou des arguments malveillants qui sont ensuite exécutés en tant que root.
+Les capacités sont utiles lorsque vous **souhaitez restreindre vos propres processus après avoir effectué des opérations privilégiées** (par exemple, après avoir configuré chroot et lié à un socket). Cependant, elles peuvent être exploitées en leur passant des commandes ou des arguments malveillants qui sont ensuite exécutés en tant que root.
 
 Vous pouvez forcer des capacités sur des programmes en utilisant `setcap`, et interroger celles-ci en utilisant `getcap`:
 ```bash
@@ -362,7 +363,7 @@ alors **ce binaire s'exécutera en tant que root**.
 getcap -r / 2>/dev/null
 /usr/bin/python2.7 = cap_sys_admin+ep
 ```
-En utilisant Python, vous pouvez monter un fichier _passwd_ modifié par-dessus le vrai fichier _passwd_:
+En utilisant Python, vous pouvez monter un fichier _passwd_ modifié par-dessus le vrai fichier _passwd_ :
 ```bash
 cp /etc/passwd ./ #Create a copy of the passwd file
 openssl passwd -1 -salt abc password #Get hash of "password"
@@ -433,7 +434,7 @@ ssh john@172.17.0.1 -p 2222
 ```
 ## CAP_SYS_PTRACE
 
-**Cela signifie que vous pouvez échapper au conteneur en injectant un shellcode à l'intérieur d'un processus s'exécutant à l'intérieur de l'hôte.** Pour accéder aux processus s'exécutant à l'intérieur de l'hôte, le conteneur doit être exécuté au moins avec **`--pid=host`**.
+**Cela signifie que vous pouvez échapper au conteneur en injectant un shellcode à l'intérieur de certains processus s'exécutant à l'intérieur de l'hôte.** Pour accéder aux processus s'exécutant à l'intérieur de l'hôte, le conteneur doit être exécuté au moins avec **`--pid=host`**.
 
 **[`CAP_SYS_PTRACE`](https://man7.org/linux/man-pages/man7/capabilities.7.html)** accorde la capacité d'utiliser les fonctionnalités de débogage et de traçage des appels système fournies par `ptrace(2)` et les appels d'attachement inter-mémoire comme `process_vm_readv(2)` et `process_vm_writev(2)`. Bien que puissant pour des fins de diagnostic et de surveillance, si `CAP_SYS_PTRACE` est activé sans mesures restrictives comme un filtre seccomp sur `ptrace(2)`, cela peut considérablement compromettre la sécurité du système. En particulier, cela peut être exploité pour contourner d'autres restrictions de sécurité, notamment celles imposées par seccomp, comme le démontrent [des preuves de concept (PoC) comme celle-ci](https://gist.github.com/thejh/8346f47e359adecd1d53).
 
@@ -611,7 +612,7 @@ uid=0(root)
 gid=0(root)
 groups=0(root
 ```
-Lister les **processus** en cours d'exécution sur l'**hôte** `ps -eaf`
+Listez les **processus** en cours d'exécution sur l'**hôte** `ps -eaf`
 
 1. Obtenez l'**architecture** `uname -m`
 2. Trouvez un **shellcode** pour l'architecture ([https://www.exploit-db.com/exploits/41128](https://www.exploit-db.com/exploits/41128))
@@ -718,7 +719,7 @@ Make[1]: *** /lib/modules/5.10.0-kali7-amd64/build: No such file or directory.  
 sudo apt update
 sudo apt full-upgrade
 ```
-Enfin, démarrez `nc` dans un shell et **chargez le module** depuis un autre et vous capturerez le shell dans le processus nc :
+Enfin, démarrez `nc` à l'intérieur d'un shell et **chargez le module** depuis un autre et vous capturerez le shell dans le processus nc :
 ```bash
 #Shell 1
 nc -lvnp 4444
@@ -737,7 +738,7 @@ Un autre exemple de cette technique peut être trouvé sur [https://www.cyberark
 
 **Exemple avec binaire**
 
-Le binaire sera capable de lire n'importe quel fichier. Donc, si un fichier comme tar a cette capacité, il pourra lire le fichier shadow :
+Le binaire pourra lire n'importe quel fichier. Donc, si un fichier comme tar a cette capacité, il pourra lire le fichier shadow :
 ```bash
 cd /etc
 tar -czf /tmp/shadow.tar.gz shadow #Compress show file in /tmp
@@ -1111,7 +1112,7 @@ close(fd1);
 return 0;
 }
 ```
-Pour échapper au conteneur docker, vous pourriez **télécharger** les fichiers `/etc/shadow` et `/etc/passwd` depuis l'hôte, **ajouter** un **nouvel utilisateur**, et utiliser **`shocker_write`** pour les écraser. Ensuite, **accéder** via **ssh**.
+Pour échapper au conteneur docker, vous pourriez **télécharger** les fichiers `/etc/shadow` et `/etc/passwd` depuis l'hôte, **ajouter** un **nouveau utilisateur**, et utiliser **`shocker_write`** pour les écraser. Ensuite, **accéder** via **ssh**.
 
 **Le code de cette technique a été copié du laboratoire "Abusing DAC_OVERRIDE Capability" de** [**https://www.pentesteracademy.com**](https://www.pentesteracademy.com)
 
@@ -1168,7 +1169,7 @@ Il existe de nombreux fichiers que vous pouvez **écraser pour élever les privi
 
 **Exemple avec un binaire**
 
-Dans ce cas, vous devriez chercher des fichiers intéressants que un groupe peut lire car vous pouvez usurper n'importe quel groupe :
+Dans ce cas, vous devriez rechercher des fichiers intéressants qu'un groupe peut lire car vous pouvez usurper n'importe quel groupe :
 ```bash
 #Find every file writable by a group
 find / -perm /g=w -exec ls -lLd {} \; 2>/dev/null
@@ -1183,11 +1184,11 @@ import os
 os.setgid(42)
 os.system("/bin/bash")
 ```
-Dans ce cas, le groupe shadow a été usurpé, vous pouvez donc lire le fichier `/etc/shadow`:
+Dans ce cas, le groupe shadow a été usurpé afin que vous puissiez lire le fichier `/etc/shadow`:
 ```bash
 cat /etc/shadow
 ```
-Si **docker** est installé, vous pourriez **imiter** le **groupe docker** et en abuser pour communiquer avec le [**socket docker** et élever les privilèges](#writable-docker-socket).
+Si **docker** est installé, vous pourriez **vous faire passer** pour le **groupe docker** et en abuser pour communiquer avec le [**socket docker** et élever les privilèges](#writable-docker-socket).
 
 ## CAP_SETFCAP
 
@@ -1253,14 +1254,14 @@ setcap cap_sys_admin,cap_sys_ptrace+eip /usr/bin/gdb
 bash: /usr/bin/gdb: Operation not permitted
 ```
 [From the docs](https://man7.org/linux/man-pages/man7/capabilities.7.html): _Permitted: Ceci est un **sous-ensemble limitant pour les capacités effectives** que le thread peut assumer. C'est aussi un sous-ensemble limitant pour les capacités qui peuvent être ajoutées à l'ensemble héritable par un thread qui **n'a pas la capacité CAP_SETPCAP** dans son ensemble effectif._\
-Il semble que les capacités Permises limitent celles qui peuvent être utilisées.\
-Cependant, Docker accorde également la **CAP_SETPCAP** par défaut, donc vous pourriez être en mesure de **définir de nouvelles capacités à l'intérieur des héritables**.\
+Il semble que les capacités Permitted limitent celles qui peuvent être utilisées.\
+Cependant, Docker accorde également le **CAP_SETPCAP** par défaut, donc vous pourriez être en mesure de **définir de nouvelles capacités à l'intérieur des héritables**.\
 Cependant, dans la documentation de cette capacité : _CAP_SETPCAP : \[…] **ajoute toute capacité de l'ensemble de bornes du thread appelant** à son ensemble héritable_.\
-Il semble que nous ne puissions ajouter à l'ensemble héritable que des capacités de l'ensemble de bornes. Ce qui signifie que **nous ne pouvons pas mettre de nouvelles capacités comme CAP_SYS_ADMIN ou CAP_SYS_PTRACE dans l'ensemble hérité pour escalader les privilèges**.
+Il semble que nous ne puissions ajouter à l'ensemble héritable que des capacités de l'ensemble de bornes. Ce qui signifie que **nous ne pouvons pas mettre de nouvelles capacités comme CAP_SYS_ADMIN ou CAP_SYS_PTRACE dans l'ensemble héritable pour escalader les privilèges**.
 
 ## CAP_SYS_RAWIO
 
-[**CAP_SYS_RAWIO**](https://man7.org/linux/man-pages/man7/capabilities.7.html) fournit un certain nombre d'opérations sensibles, y compris l'accès à `/dev/mem`, `/dev/kmem` ou `/proc/kcore`, modifier `mmap_min_addr`, accéder aux appels système `ioperm(2)` et `iopl(2)`, et diverses commandes disque. L'ioctl(2) `FIBMAP` est également activé via cette capacité, ce qui a causé des problèmes dans le [passé](http://lkml.iu.edu/hypermail/linux/kernel/9907.0/0132.html). Selon la page de manuel, cela permet également au détenteur de `réaliser une gamme d'opérations spécifiques aux dispositifs sur d'autres dispositifs`.
+[**CAP_SYS_RAWIO**](https://man7.org/linux/man-pages/man7/capabilities.7.html) fournit un certain nombre d'opérations sensibles, y compris l'accès à `/dev/mem`, `/dev/kmem` ou `/proc/kcore`, modifier `mmap_min_addr`, accéder aux appels système `ioperm(2)` et `iopl(2)`, et diverses commandes disque. Le `FIBMAP ioctl(2)` est également activé via cette capacité, ce qui a causé des problèmes dans le [passé](http://lkml.iu.edu/hypermail/linux/kernel/9907.0/0132.html). Selon la page de manuel, cela permet également au détenteur de `réaliser une gamme d'opérations spécifiques aux dispositifs sur d'autres dispositifs`.
 
 Cela peut être utile pour **l'escalade de privilèges** et **le contournement de Docker.**
 
@@ -1280,7 +1281,7 @@ os.killpg(pgid, signal.SIGKILL)
 ```
 **Privesc avec kill**
 
-Si vous avez des capacités kill et qu'il y a un **programme node s'exécutant en tant que root** (ou en tant qu'un autre utilisateur), vous pourriez probablement **lui envoyer** le **signal SIGUSR1** et le faire **ouvrir le débogueur node** pour vous y connecter.
+Si vous avez des capacités kill et qu'il y a un **programme node s'exécutant en tant que root** (ou en tant qu'un autre utilisateur), vous pourriez probablement **lui envoyer** le **signal SIGUSR1** et le faire **ouvrir le débogueur node** où vous pouvez vous connecter.
 ```bash
 kill -s SIGUSR1 <nodejs-ps>
 # After an URL to access the debugger will appear. e.g. ws://127.0.0.1:9229/45ea962a-29dd-4cdd-be08-a6827840553d
@@ -1296,7 +1297,7 @@ electron-cef-chromium-debugger-abuse.md
 
 **Exemple avec un binaire**
 
-Si **`python`** a cette capacité, il pourra écouter sur n'importe quel port et même se connecter à partir de celui-ci à n'importe quel autre port (certains services nécessitent des connexions à partir de ports privilégiés spécifiques)
+Si **`python`** a cette capacité, il pourra écouter sur n'importe quel port et même se connecter depuis celui-ci à n'importe quel autre port (certains services nécessitent des connexions depuis des ports de privilèges spécifiques)
 
 {{#tabs}}
 {{#tab name="Listen"}}
@@ -1324,11 +1325,11 @@ s.connect(('10.10.10.10',500))
 
 ## CAP_NET_RAW
 
-[**CAP_NET_RAW**](https://man7.org/linux/man-pages/man7/capabilities.7.html) la capacité permet aux processus de **créer des sockets RAW et PACKET**, leur permettant de générer et d'envoyer des paquets réseau arbitraires. Cela peut entraîner des risques de sécurité dans des environnements conteneurisés, tels que le spoofing de paquets, l'injection de trafic et le contournement des contrôles d'accès réseau. Des acteurs malveillants pourraient exploiter cela pour interférer avec le routage des conteneurs ou compromettre la sécurité du réseau hôte, surtout sans protections de pare-feu adéquates. De plus, **CAP_NET_RAW** est crucial pour les conteneurs privilégiés afin de prendre en charge des opérations comme le ping via des requêtes ICMP RAW.
+[**CAP_NET_RAW**](https://man7.org/linux/man-pages/man7/capabilities.7.html) permet aux processus de **créer des sockets RAW et PACKET**, leur permettant de générer et d'envoyer des paquets réseau arbitraires. Cela peut entraîner des risques de sécurité dans des environnements conteneurisés, tels que le spoofing de paquets, l'injection de trafic et le contournement des contrôles d'accès réseau. Des acteurs malveillants pourraient exploiter cela pour interférer avec le routage des conteneurs ou compromettre la sécurité du réseau hôte, surtout sans protections de pare-feu adéquates. De plus, **CAP_NET_RAW** est crucial pour les conteneurs privilégiés afin de prendre en charge des opérations comme le ping via des requêtes ICMP RAW.
 
 **Cela signifie qu'il est possible d'intercepter le trafic.** Vous ne pouvez pas élever les privilèges directement avec cette capacité.
 
-**Exemple avec binaire**
+**Exemple avec un binaire**
 
 Si le binaire **`tcpdump`** a cette capacité, vous pourrez l'utiliser pour capturer des informations réseau.
 ```bash
@@ -1387,7 +1388,7 @@ count=count+1
 
 [**CAP_NET_ADMIN**](https://man7.org/linux/man-pages/man7/capabilities.7.html) la capacité accorde au titulaire le pouvoir de **modifier les configurations réseau**, y compris les paramètres de pare-feu, les tables de routage, les autorisations de socket et les paramètres d'interface réseau au sein des espaces de noms réseau exposés. Elle permet également d'activer le **mode promiscuous** sur les interfaces réseau, permettant l'analyse des paquets à travers les espaces de noms.
 
-**Exemple avec binaire**
+**Exemple avec un binaire**
 
 Supposons que le **binaire python** ait ces capacités.
 ```python
@@ -1451,7 +1452,7 @@ f.write('New content for the file\n')
 
 ## CAP_SYSLOG
 
-[**CAP_SYSLOG**](https://man7.org/linux/man-pages/man7/capabilities.7.html) a été séparé de la plus large **CAP_SYS_ADMIN** dans Linux 2.6.37, accordant spécifiquement la capacité d'utiliser l'appel `syslog(2)`. Cette capacité permet de visualiser les adresses du noyau via `/proc` et des interfaces similaires lorsque le paramètre `kptr_restrict` est à 1, ce qui contrôle l'exposition des adresses du noyau. Depuis Linux 2.6.39, la valeur par défaut pour `kptr_restrict` est 0, ce qui signifie que les adresses du noyau sont exposées, bien que de nombreuses distributions définissent cela à 1 (cacher les adresses sauf pour uid 0) ou 2 (cacher toujours les adresses) pour des raisons de sécurité.
+[**CAP_SYSLOG**](https://man7.org/linux/man-pages/man7/capabilities.7.html) a été séparé de la plus large **CAP_SYS_ADMIN** dans Linux 2.6.37, accordant spécifiquement la capacité d'utiliser l'appel `syslog(2)`. Cette capacité permet de visualiser les adresses du noyau via `/proc` et des interfaces similaires lorsque le paramètre `kptr_restrict` est à 1, ce qui contrôle l'exposition des adresses du noyau. Depuis Linux 2.6.39, la valeur par défaut de `kptr_restrict` est 0, ce qui signifie que les adresses du noyau sont exposées, bien que de nombreuses distributions définissent cela à 1 (cacher les adresses sauf pour l'uid 0) ou 2 (cacher toujours les adresses) pour des raisons de sécurité.
 
 De plus, **CAP_SYSLOG** permet d'accéder à la sortie de `dmesg` lorsque `dmesg_restrict` est défini à 1. Malgré ces changements, **CAP_SYS_ADMIN** conserve la capacité d'effectuer des opérations `syslog` en raison de précédents historiques.
 
@@ -1462,11 +1463,11 @@ De plus, **CAP_SYSLOG** permet d'accéder à la sortie de `dmesg` lorsque `dmesg
 - **S_IFCHR** : Fichiers spéciaux de caractères, qui sont des dispositifs comme des terminaux.
 - **S_IFBLK** : Fichiers spéciaux de blocs, qui sont des dispositifs comme des disques.
 
-Cette capacité est essentielle pour les processus qui nécessitent la capacité de créer des fichiers de périphériques, facilitant l'interaction directe avec le matériel via des dispositifs de caractères ou de blocs.
+Cette capacité est essentielle pour les processus qui nécessitent la possibilité de créer des fichiers de périphériques, facilitant l'interaction directe avec le matériel via des dispositifs de caractères ou de blocs.
 
 C'est une capacité docker par défaut ([https://github.com/moby/moby/blob/master/oci/caps/defaults.go#L6-L19](https://github.com/moby/moby/blob/master/oci/caps/defaults.go#L6-L19)).
 
-Cette capacité permet d'effectuer des escalades de privilèges (via une lecture complète du disque) sur l'hôte, sous ces conditions :
+Cette capacité permet de réaliser des escalades de privilèges (via une lecture complète du disque) sur l'hôte, sous ces conditions :
 
 1. Avoir un accès initial à l'hôte (non privilégié).
 2. Avoir un accès initial au conteneur (privilégié (EUID 0), et `CAP_MKNOD` effectif).

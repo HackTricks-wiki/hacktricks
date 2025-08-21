@@ -4,9 +4,9 @@
 
 ## XPC Authorization
 
-Apple propose également une autre façon d'authentifier si le processus de connexion a **les permissions d'appeler une méthode XPC exposée**.
+Apple propose également une autre façon d'authentifier si le processus de connexion a **les autorisations d'appeler une méthode XPC exposée**.
 
-Lorsqu'une application a besoin d'**exécuter des actions en tant qu'utilisateur privilégié**, au lieu d'exécuter l'application en tant qu'utilisateur privilégié, elle installe généralement un HelperTool en tant que service XPC qui peut être appelé depuis l'application pour effectuer ces actions. Cependant, l'application appelant le service doit avoir suffisamment d'autorisation.
+Lorsqu'une application a besoin d'**exécuter des actions en tant qu'utilisateur privilégié**, au lieu d'exécuter l'application en tant qu'utilisateur privilégié, elle installe généralement en tant que root un HelperTool en tant que service XPC qui peut être appelé depuis l'application pour effectuer ces actions. Cependant, l'application appelant le service doit avoir suffisamment d'autorisation.
 
 ### ShouldAcceptNewConnection toujours OUI
 
@@ -94,7 +94,7 @@ assert(blockErr == errAuthorizationSuccess);
 }];
 }
 ```
-La fonction `enumerateRightsUsingBlock` est celle utilisée pour obtenir les autorisations des applications, qui sont définies dans `commandInfo`:
+La fonction `enumerateRightsUsingBlock` est celle utilisée pour obtenir les autorisations des applications, qui sont définies dans `commandInfo` :
 ```objectivec
 static NSString * kCommandKeyAuthRightName    = @"authRightName";
 static NSString * kCommandKeyAuthRightDefault = @"authRightDefault";
@@ -172,15 +172,15 @@ block(authRightName, authRightDefault, authRightDesc);
 }];
 }
 ```
-Cela signifie qu'à la fin de ce processus, les autorisations déclarées dans `commandInfo` seront stockées dans `/var/db/auth.db`. Notez comment vous pouvez trouver pour **chaque méthode** qui nécessitera une **authentification**, **le nom de la permission** et le **`kCommandKeyAuthRightDefault`**. Ce dernier **indique qui peut obtenir ce droit**.
+Cela signifie qu'à la fin de ce processus, les autorisations déclarées dans `commandInfo` seront stockées dans `/var/db/auth.db`. Notez comment vous pouvez trouver pour **chaque méthode** qui nécessitera une **authentification**, **nom de l'autorisation** et le **`kCommandKeyAuthRightDefault`**. Ce dernier **indique qui peut obtenir ce droit**.
 
 Il existe différents portées pour indiquer qui peut accéder à un droit. Certaines d'entre elles sont définies dans [AuthorizationDB.h](https://github.com/aosm/Security/blob/master/Security/libsecurity_authorization/lib/AuthorizationDB.h) (vous pouvez trouver [toutes ici](https://www.dssw.co.uk/reference/authorization-rights/)), mais en résumé :
 
 <table><thead><tr><th width="284.3333333333333">Nom</th><th width="165">Valeur</th><th>Description</th></tr></thead><tbody><tr><td>kAuthorizationRuleClassAllow</td><td>allow</td><td>Tout le monde</td></tr><tr><td>kAuthorizationRuleClassDeny</td><td>deny</td><td>Personne</td></tr><tr><td>kAuthorizationRuleIsAdmin</td><td>is-admin</td><td>L'utilisateur actuel doit être un admin (dans le groupe admin)</td></tr><tr><td>kAuthorizationRuleAuthenticateAsSessionUser</td><td>authenticate-session-owner</td><td>Demander à l'utilisateur de s'authentifier.</td></tr><tr><td>kAuthorizationRuleAuthenticateAsAdmin</td><td>authenticate-admin</td><td>Demander à l'utilisateur de s'authentifier. Il doit être un admin (dans le groupe admin)</td></tr><tr><td>kAuthorizationRightRule</td><td>rule</td><td>Spécifier des règles</td></tr><tr><td>kAuthorizationComment</td><td>comment</td><td>Spécifier quelques commentaires supplémentaires sur le droit</td></tr></tbody></table>
 
-### Vérification des droits
+### Vérification des Droits
 
-Dans `HelperTool/HelperTool.m`, la fonction **`readLicenseKeyAuthorization`** vérifie si l'appelant est autorisé à **exécuter cette méthode** en appelant la fonction **`checkAuthorization`**. Cette fonction vérifiera que **authData** envoyé par le processus appelant a un **format correct** et ensuite vérifiera **ce qui est nécessaire pour obtenir le droit** d'appeler la méthode spécifique. Si tout se passe bien, l'**erreur retournée sera `nil`** :
+Dans `HelperTool/HelperTool.m`, la fonction **`readLicenseKeyAuthorization`** vérifie si l'appelant est autorisé à **exécuter cette méthode** en appelant la fonction **`checkAuthorization`**. Cette fonction vérifiera que les **authData** envoyés par le processus appelant ont un **format correct** et ensuite vérifiera **ce qui est nécessaire pour obtenir le droit** d'appeler la méthode spécifique. Si tout se passe bien, l'**erreur retournée sera `nil`** :
 ```objectivec
 - (NSError *)checkAuthorization:(NSData *)authData command:(SEL)command
 {
@@ -285,7 +285,7 @@ Vérifiez le **`/var/db/auth.db`** pour voir s'il est possible d'obtenir des aut
 
 Ensuite, vous devez trouver le schéma de protocole afin de pouvoir établir une communication avec le service XPC.
 
-La fonction **`shouldAcceptNewConnection`** indique le protocole qui est exporté :
+La fonction **`shouldAcceptNewConnection`** indique le protocole étant exporté :
 
 <figure><img src="../../../../../images/image (44).png" alt=""><figcaption></figcaption></figure>
 
@@ -409,7 +409,7 @@ NSLog(@"Response: %@", error);
 NSLog(@"Finished!");
 }
 ```
-## Autres helpers de privilège XPC abusés
+## Autres helpers de privilèges XPC abusés
 
 - [https://blog.securelayer7.net/applied-endpointsecurity-framework-previlege-escalation/?utm_source=pocket_shared](https://blog.securelayer7.net/applied-endpointsecurity-framework-previlege-escalation/?utm_source=pocket_shared)
 

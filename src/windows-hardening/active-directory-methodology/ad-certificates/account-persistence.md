@@ -59,18 +59,18 @@ certreq -enroll -user -cert <SerialOrID> renew [reusekeys]
 ```
 > Conseil opérationnel : Suivez les durées de vie des fichiers PFX détenus par l'attaquant et renouvelez-les tôt. Le renouvellement peut également entraîner l'inclusion de l'extension de mappage SID moderne dans les certificats mis à jour, les rendant utilisables sous des règles de mappage DC plus strictes (voir la section suivante).
 
-## Plantage de mappages de certificats explicites (altSecurityIdentities) – PERSIST4
+## Plantage de Mappages de Certificats Explicites (altSecurityIdentities) – PERSIST4
 
 Si vous pouvez écrire dans l'attribut `altSecurityIdentities` d'un compte cible, vous pouvez mapper explicitement un certificat contrôlé par l'attaquant à ce compte. Cela persiste à travers les changements de mot de passe et, lorsqu'on utilise des formats de mappage forts, reste fonctionnel sous l'application moderne du DC.
 
 Flux de haut niveau :
 
 1. Obtenez ou émettez un certificat d'authentification client que vous contrôlez (par exemple, inscrivez le modèle `User` en tant que vous-même).
-2. Extrayez un identifiant fort du certificat (Issuer+Serial, SKI ou SHA1-PublicKey).
+2. Extrayez un identifiant fort du certificat (Émetteur+Numéro de série, SKI ou SHA1-Clé publique).
 3. Ajoutez un mappage explicite sur `altSecurityIdentities` du principal victime en utilisant cet identifiant.
 4. Authentifiez-vous avec votre certificat ; le DC le mappe à la victime via le mappage explicite.
 
-Exemple (PowerShell) utilisant un mappage fort Issuer+Serial :
+Exemple (PowerShell) utilisant un mappage fort Émetteur+Numéro de série :
 ```powershell
 # Example values - reverse the issuer DN and serial as required by AD mapping format
 $Issuer  = 'DC=corp,DC=local,CN=CORP-DC-CA'
@@ -85,18 +85,18 @@ Ensuite, authentifiez-vous avec votre PFX. Certipy obtiendra un TGT directement 
 certipy auth -pfx attacker_user.pfx -dc-ip 10.0.0.10
 ```
 Notes
-- Utilisez uniquement des types de mappage forts : X509IssuerSerialNumber, X509SKI ou X509SHA1PublicKey. Les formats faibles (Subject/Issuer, Subject-only, RFC822 email) sont obsolètes et peuvent être bloqués par la politique du DC.
-- La chaîne de certificats doit se construire vers une racine de confiance pour le DC. Les CAs d'entreprise dans NTAuth sont généralement de confiance ; certains environnements font également confiance aux CAs publics.
+- Utilisez uniquement des types de mappage forts : X509IssuerSerialNumber, X509SKI ou X509SHA1PublicKey. Les formats faibles (Subject/Issuer, Subject-only, email RFC822) sont obsolètes et peuvent être bloqués par la politique du DC.
+- La chaîne de certificats doit aboutir à une racine de confiance par le DC. Les CAs d'entreprise dans NTAuth sont généralement de confiance ; certains environnements font également confiance aux CAs publics.
 
-Pour plus d'informations sur les mappages explicites faibles et les chemins d'attaque, voir :
+Pour en savoir plus sur les mappages explicites faibles et les chemins d'attaque, voir :
 
 {{#ref}}
 domain-escalation.md
 {{#endref}}
 
-## Enrollment Agent as Persistence – PERSIST5
+## Agent d'inscription comme persistance – PERSIST5
 
-Si vous obtenez un certificat valide d'Agent de Demande de Certificat/Agent d'Inscription, vous pouvez créer de nouveaux certificats capables de connexion au nom des utilisateurs à volonté et garder le PFX de l'agent hors ligne comme un jeton de persistance. Workflow d'abus :
+Si vous obtenez un certificat valide d'Agent de demande de certificat/Agent d'inscription, vous pouvez créer de nouveaux certificats capables de se connecter au nom des utilisateurs à volonté et garder le PFX de l'agent hors ligne comme un jeton de persistance. Workflow d'abus :
 ```bash
 # Request an Enrollment Agent cert (requires template rights)
 Certify.exe request /ca:CA-SERVER\CA-NAME /template:"Certificate Request Agent"
@@ -111,12 +111,12 @@ certipy req -u 'john@corp.local' -p 'Passw0rd!' -ca 'CA-SERVER\CA-NAME' \
 ```
 La révocation du certificat d'agent ou des autorisations de modèle est nécessaire pour évincer cette persistance.
 
-## 2025 Application stricte du mappage de certificats : Impact sur la persistance
+## 2025 Application stricte de la cartographie des certificats : Impact sur la persistance
 
-Microsoft KB5014754 a introduit l'application stricte du mappage de certificats sur les contrôleurs de domaine. Depuis le 11 février 2025, les DC par défaut appliquent une application complète, rejetant les mappages faibles/ambiguës. Implications pratiques :
+Microsoft KB5014754 a introduit l'application stricte de la cartographie des certificats sur les contrôleurs de domaine. Depuis le 11 février 2025, les DCs passent par défaut à l'application complète, rejetant les cartographies faibles/ambiguës. Implications pratiques :
 
-- Les certificats d'avant 2022 qui manquent de l'extension de mappage SID peuvent échouer au mappage implicite lorsque les DC sont en application complète. Les attaquants peuvent maintenir l'accès en renouvelant les certificats via AD CS (pour obtenir l'extension SID) ou en plantant un mappage explicite fort dans `altSecurityIdentities` (PERSIST4).
-- Les mappages explicites utilisant des formats forts (Issuer+Serial, SKI, SHA1-PublicKey) continuent de fonctionner. Les formats faibles (Issuer/Subject, Subject-only, RFC822) peuvent être bloqués et doivent être évités pour la persistance.
+- Les certificats d'avant 2022 qui manquent de l'extension de cartographie SID peuvent échouer à la cartographie implicite lorsque les DCs sont en application complète. Les attaquants peuvent maintenir l'accès en renouvelant les certificats via AD CS (pour obtenir l'extension SID) ou en plantant une cartographie explicite forte dans `altSecurityIdentities` (PERSIST4).
+- Les cartographies explicites utilisant des formats forts (Issuer+Serial, SKI, SHA1-PublicKey) continuent de fonctionner. Les formats faibles (Issuer/Subject, Subject-only, RFC822) peuvent être bloqués et doivent être évités pour la persistance.
 
 Les administrateurs doivent surveiller et alerter sur :
 - Les changements dans `altSecurityIdentities` et l'émission/renouvellements des certificats d'agent d'inscription et d'utilisateur.
@@ -124,7 +124,7 @@ Les administrateurs doivent surveiller et alerter sur :
 
 ## Références
 
-- Microsoft. KB5014754 : Changements d'authentification basée sur les certificats sur les contrôleurs de domaine Windows (chronologie de l'application et mappages forts).
+- Microsoft. KB5014754 : Changements d'authentification basée sur les certificats sur les contrôleurs de domaine Windows (chronologie de l'application et cartographies fortes).
 https://support.microsoft.com/en-au/topic/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers-ad2c23b0-15d8-4340-a468-4d4f3b188f16
 - Certipy Wiki – Référence de commande (`req -renew`, `auth`, `shadow`).
 https://github.com/ly4k/Certipy/wiki/08-%E2%80%90-Command-Reference

@@ -6,12 +6,12 @@
 
 ### Informations de base
 
-Tout d'abord, il est recommandé d'avoir une **clé USB** avec des **binaires et bibliothèques bien connus** dessus (vous pouvez simplement obtenir ubuntu et copier les dossiers _/bin_, _/sbin_, _/lib,_ et _/lib64_), puis monter la clé USB et modifier les variables d'environnement pour utiliser ces binaires :
+Tout d'abord, il est recommandé d'avoir une **USB** avec des **binaires et bibliothèques bien connus** dessus (vous pouvez simplement obtenir ubuntu et copier les dossiers _/bin_, _/sbin_, _/lib,_ et _/lib64_), puis monter l'USB et modifier les variables d'environnement pour utiliser ces binaires :
 ```bash
 export PATH=/mnt/usb/bin:/mnt/usb/sbin
 export LD_LIBRARY_PATH=/mnt/usb/lib:/mnt/usb/lib64
 ```
-Une fois que vous avez configuré le système pour utiliser de bons binaires connus, vous pouvez commencer à **extraire des informations de base** :
+Une fois que vous avez configuré le système pour utiliser de bons binaires connus, vous pouvez commencer **à extraire des informations de base** :
 ```bash
 date #Date and time (Clock may be skewed, Might be at a different timezone)
 uname -a #OS info
@@ -35,7 +35,7 @@ Lors de l'obtention des informations de base, vous devez vérifier des choses é
 
 - **Les processus root** s'exécutent généralement avec de faibles PIDS, donc si vous trouvez un processus root avec un grand PID, vous pouvez suspecter
 - Vérifiez les **connexions enregistrées** des utilisateurs sans shell dans `/etc/passwd`
-- Vérifiez les **hashs de mots de passe** dans `/etc/shadow` pour les utilisateurs sans shell
+- Vérifiez les **hashs de mot de passe** dans `/etc/shadow` pour les utilisateurs sans shell
 
 ### Dump de mémoire
 
@@ -54,7 +54,7 @@ sudo insmod lime.ko "path=/home/sansforensics/Desktop/mem_dump.bin format=lime"
 LiME prend en charge 3 **formats** :
 
 - Brut (chaque segment concaténé ensemble)
-- Padded (identique à brut, mais avec des zéros dans les bits de droite)
+- Rembourré (identique au brut, mais avec des zéros dans les bits de droite)
 - Lime (format recommandé avec des métadonnées)
 
 LiME peut également être utilisé pour **envoyer le dump via le réseau** au lieu de le stocker sur le système en utilisant quelque chose comme : `path=tcp:4444`
@@ -64,7 +64,7 @@ LiME peut également être utilisé pour **envoyer le dump via le réseau** au l
 #### Arrêt
 
 Tout d'abord, vous devrez **éteindre le système**. Ce n'est pas toujours une option car parfois le système sera un serveur de production que l'entreprise ne peut pas se permettre d'éteindre.\
-Il existe **2 façons** d'éteindre le système, un **arrêt normal** et un **arrêt "débrancher"**. Le premier permettra aux **processus de se terminer comme d'habitude** et au **système de fichiers** d'être **synchronisé**, mais il permettra également au **malware** de **détruire des preuves**. L'approche "débrancher" peut entraîner **une certaine perte d'informations** (pas beaucoup d'infos vont être perdues car nous avons déjà pris une image de la mémoire) et le **malware n'aura aucune opportunité** d'agir. Par conséquent, si vous **soupçonnez** qu'il pourrait y avoir un **malware**, exécutez simplement la **commande** **`sync`** sur le système et débranchez.
+Il existe **2 façons** d'éteindre le système, un **arrêt normal** et un **arrêt "débrancher le câble"**. Le premier permettra aux **processus de se terminer comme d'habitude** et au **système de fichiers** d'être **synchronisé**, mais il permettra également au **malware** de **détruire des preuves**. L'approche "débrancher le câble" peut entraîner **une certaine perte d'informations** (pas beaucoup d'infos vont être perdues car nous avons déjà pris une image de la mémoire) et le **malware n'aura aucune opportunité** d'agir. Par conséquent, si vous **soupçonnez** qu'il pourrait y avoir un **malware**, exécutez simplement la **commande** **`sync`** sur le système et débranchez le câble.
 
 #### Prendre une image du disque
 
@@ -156,7 +156,7 @@ Pour rechercher efficacement des programmes installés sur les systèmes Debian 
 - Pour Debian, inspectez _**`/var/lib/dpkg/status`**_ et _**`/var/log/dpkg.log`**_ pour obtenir des détails sur les installations de paquets, en utilisant `grep` pour filtrer des informations spécifiques.
 - Les utilisateurs de RedHat peuvent interroger la base de données RPM avec `rpm -qa --root=/mntpath/var/lib/rpm` pour lister les paquets installés.
 
-Pour découvrir des logiciels installés manuellement ou en dehors de ces gestionnaires de paquets, explorez des répertoires comme _**`/usr/local`**_, _**`/opt`**_, _**`/usr/sbin`**_, _**`/usr/bin`**_, _**`/bin`**_, et _**`/sbin`**_. Combinez les listings de répertoires avec des commandes spécifiques au système pour identifier des exécutables non associés à des paquets connus, améliorant ainsi votre recherche de tous les programmes installés.
+Pour découvrir des logiciels installés manuellement ou en dehors de ces gestionnaires de paquets, explorez des répertoires comme _**`/usr/local`**_, _**`/opt`**_, _**`/usr/sbin`**_, _**`/usr/bin`**_, _**`/bin`**_, et _**`/sbin`**_. Combinez les listings de répertoires avec des commandes spécifiques au système pour identifier les exécutables non associés à des paquets connus, améliorant ainsi votre recherche de tous les programmes installés.
 ```bash
 # Debian package and log details
 cat /var/lib/dpkg/status | grep -E "Package:|Status:"
@@ -205,7 +205,7 @@ for d in /etc/cron.*; do [ -f "$d/0anacron" ] && stat -c '%n %y %s' "$d/0anacron
 # Look for obvious execution of shells or downloaders embedded in cron stubs
 grep -R --line-number -E 'curl|wget|/bin/sh|python|bash -c' /etc/cron.*/* 2>/dev/null
 ```
-#### Hunt: Rétrogradation du durcissement SSH et shells de porte dérobée
+#### Hunt: SSH hardening rollback and backdoor shells
 Les modifications apportées à sshd_config et aux shells des comptes système sont courantes après une exploitation pour préserver l'accès.
 ```bash
 # Root login enablement (flag "yes" or lax values)
@@ -233,7 +233,7 @@ Chemins où un malware pourrait être installé en tant que service :
 - **/etc/systemd/system** : Un répertoire pour les scripts du gestionnaire de système et de service.
 - **/etc/systemd/system/multi-user.target.wants/** : Contient des liens vers des services qui doivent être démarrés dans un niveau d'exécution multi-utilisateur.
 - **/usr/local/etc/rc.d/** : Pour des services personnalisés ou tiers.
-- **\~/.config/autostart/** : Pour les applications de démarrage automatique spécifiques à l'utilisateur, qui peuvent être un endroit caché pour des malwares ciblant l'utilisateur.
+- **\~/.config/autostart/** : Pour les applications de démarrage automatique spécifiques à l'utilisateur, qui peuvent être un endroit caché pour des malwares ciblant les utilisateurs.
 - **/lib/systemd/system/** : Fichiers d'unité par défaut à l'échelle du système fournis par les paquets installés.
 
 ### Kernel Modules
@@ -262,7 +262,7 @@ Les systèmes Linux suivent les activités des utilisateurs et les événements 
 - **/var/log/boot.log** : Contient des messages de démarrage du système.
 - **/var/log/maillog** ou **/var/log/mail.log** : Journalise les activités du serveur de messagerie, utile pour suivre les services liés aux e-mails.
 - **/var/log/kern.log** : Stocke les messages du noyau, y compris les erreurs et avertissements.
-- **/var/log/dmesg** : Contient des messages des pilotes de périphériques.
+- **/var/log/dmesg** : Contient des messages du pilote de périphérique.
 - **/var/log/faillog** : Enregistre les tentatives de connexion échouées, aidant dans les enquêtes sur les violations de sécurité.
 - **/var/log/cron** : Journalise les exécutions des tâches cron.
 - **/var/log/daemon.log** : Suit les activités des services en arrière-plan.
@@ -355,9 +355,9 @@ ls -laR --sort=time /bin```
 ls -lai /bin | sort -n```
 ````
 > [!TIP]
-> Notez qu'un **attaquant** peut **modifier** le **temps** pour faire **apparaître** les **fichiers** comme **légitimes**, mais il **ne peut pas** modifier l'**inode**. Si vous constatez qu'un **fichier** indique qu'il a été créé et modifié en même temps que le reste des fichiers dans le même dossier, mais que l'**inode** est **inattendu plus grand**, alors les **horodatages de ce fichier ont été modifiés**.
+> Notez qu'un **attaquant** peut **modifier** le **temps** pour faire en sorte que les **fichiers apparaissent** **légitimes**, mais il **ne peut pas** modifier l'**inode**. Si vous constatez qu'un **fichier** indique qu'il a été créé et modifié en même temps que le reste des fichiers dans le même dossier, mais que l'**inode** est **inattendu plus grand**, alors les **horodatages de ce fichier ont été modifiés**.
 
-## Comparer des fichiers de différentes versions de système de fichiers
+## Comparer les fichiers de différentes versions de système de fichiers
 
 ### Résumé de la comparaison des versions de système de fichiers
 
@@ -384,7 +384,7 @@ git diff --no-index --diff-filter=D path/to/old_version/ path/to/new_version/
 - `T`: Changements de type (par exemple, fichier vers symlink)
 - `U`: Fichiers non fusionnés
 - `X`: Fichiers inconnus
-- `B`: Fichiers corrompus
+- `B`: Fichiers cassés
 
 ## Références
 

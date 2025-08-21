@@ -10,7 +10,7 @@ L'unité **minimale** d'un disque est le **secteur** (normalement composé de 51
 ### MBR (master Boot Record)
 
 Il est alloué dans le **premier secteur du disque après les 446B du code de démarrage**. Ce secteur est essentiel pour indiquer au PC ce qui doit être monté et d'où.\
-Il permet jusqu'à **4 partitions** (au maximum **juste 1** peut être active/**bootable**). Cependant, si vous avez besoin de plus de partitions, vous pouvez utiliser des **partitions étendues**. Le **dernier octet** de ce premier secteur est la signature du boot record **0x55AA**. Une seule partition peut être marquée comme active.\
+Il permet jusqu'à **4 partitions** (au maximum **juste 1** peut être active/**démarrable**). Cependant, si vous avez besoin de plus de partitions, vous pouvez utiliser des **partitions étendues**. Le **dernier octet** de ce premier secteur est la signature du boot record **0x55AA**. Une seule partition peut être marquée comme active.\
 Le MBR permet **max 2.2TB**.
 
 ![](<../../../images/image (350).png>)
@@ -36,7 +36,7 @@ Des **octets 440 à 443** du MBR, vous pouvez trouver la **signature de disque W
 
 | Offset    | Longueur | Élément                                                  |
 | --------- | -------- | ------------------------------------------------------- |
-| 0 (0x00)  | 1 (0x01) | Drapeau actif (0x80 = bootable)                         |
+| 0 (0x00)  | 1 (0x01) | Drapeau actif (0x80 = démarrable)                       |
 | 1 (0x01)  | 1 (0x01) | Tête de départ                                          |
 | 2 (0x02)  | 1 (0x01) | Secteur de départ (bits 0-5); bits supérieurs du cylindre (6- 7) |
 | 3 (0x03)  | 1 (0x01) | Cylindre de départ 8 bits les plus bas                  |
@@ -49,7 +49,7 @@ Des **octets 440 à 443** du MBR, vous pouvez trouver la **signature de disque W
 
 Pour monter un MBR sous Linux, vous devez d'abord obtenir l'offset de départ (vous pouvez utiliser `fdisk` et la commande `p`)
 
-![](<../../../images/image (413) (3) (3) (3) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
+![](<../../../images/image (413) (3) (3) (3) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
 Et ensuite, utilisez le code suivant
 ```bash
@@ -66,13 +66,13 @@ mount -o ro,loop,offset=32256,noatime /path/to/image.dd /media/part/
 
 La Table de partition GUID, connue sous le nom de GPT, est privilégiée pour ses capacités améliorées par rapport au MBR (Master Boot Record). Distinctive pour son **identifiant unique global** pour les partitions, GPT se distingue de plusieurs manières :
 
-- **Emplacement et taille** : À la fois GPT et MBR commencent au **secteur 0**. Cependant, GPT fonctionne sur **64 bits**, contrairement aux 32 bits du MBR.
-- **Limites de partition** : GPT prend en charge jusqu'à **128 partitions** sur les systèmes Windows et peut accueillir jusqu'à **9,4 ZB** de données.
-- **Noms de partition** : Offre la possibilité de nommer les partitions avec jusqu'à 36 caractères Unicode.
+- **Emplacement et taille** : Tant GPT que MBR commencent au **secteur 0**. Cependant, GPT fonctionne sur **64 bits**, contrairement aux 32 bits de MBR.
+- **Limites de partition** : GPT prend en charge jusqu'à **128 partitions** sur les systèmes Windows et peut accueillir jusqu'à **9,4ZB** de données.
+- **Noms de partitions** : Offre la possibilité de nommer les partitions avec jusqu'à 36 caractères Unicode.
 
 **Résilience et récupération des données** :
 
-- **Redondance** : Contrairement au MBR, GPT ne confine pas les données de partition et de démarrage à un seul endroit. Il réplique ces données sur le disque, améliorant ainsi l'intégrité et la résilience des données.
+- **Redondance** : Contrairement à MBR, GPT ne confine pas les données de partition et de démarrage à un seul endroit. Il réplique ces données sur le disque, améliorant ainsi l'intégrité et la résilience des données.
 - **Contrôle de redondance cyclique (CRC)** : GPT utilise le CRC pour garantir l'intégrité des données. Il surveille activement la corruption des données, et lorsqu'elle est détectée, GPT tente de récupérer les données corrompues à partir d'un autre emplacement sur le disque.
 
 **MBR protecteur (LBA0)** :
@@ -85,9 +85,9 @@ La Table de partition GUID, connue sous le nom de GPT, est privilégiée pour se
 
 [From Wikipedia](https://en.wikipedia.org/wiki/GUID_Partition_Table)
 
-Dans les systèmes d'exploitation qui prennent en charge le **démarrage basé sur GPT via les services BIOS** plutôt que EFI, le premier secteur peut également être utilisé pour stocker la première étape du code du **bootloader**, mais **modifié** pour reconnaître les **partitions GPT**. Le bootloader dans le MBR ne doit pas supposer une taille de secteur de 512 octets.
+Dans les systèmes d'exploitation qui prennent en charge **le démarrage basé sur GPT via les services BIOS** plutôt que EFI, le premier secteur peut également être utilisé pour stocker la première étape du code du **bootloader**, mais **modifié** pour reconnaître les **partitions GPT**. Le bootloader dans le MBR ne doit pas supposer une taille de secteur de 512 octets.
 
-**En-tête de table de partition (LBA 1)**
+**En-tête de la table de partition (LBA 1)**
 
 [From Wikipedia](https://en.wikipedia.org/wiki/GUID_Partition_Table)
 
@@ -114,14 +114,14 @@ L'en-tête de la table de partition définit les blocs utilisables sur le disque
 **Entrées de partition (LBA 2–33)**
 
 | Format d'entrée de partition GUID |          |                                                                                                               |
-| ----------------------------- | -------- | ------------------------------------------------------------------------------------------------------------- |
-| Offset                      | Longueur | Contenu                                                                                                      |
-| 0 (0x00)                    | 16 octets | [Type de partition GUID](https://en.wikipedia.org/wiki/GUID_Partition_Table#Partition_type_GUIDs) (endian mixte) |
-| 16 (0x10)                   | 16 octets | GUID de partition unique (endian mixte)                                                                          |
-| 32 (0x20)                   | 8 octets  | Premier LBA ([little endian](https://en.wikipedia.org/wiki/Little_endian))                                      |
-| 40 (0x28)                   | 8 octets  | Dernier LBA (inclusif, généralement impair)                                                                             |
-| 48 (0x30)                   | 8 octets  | Drapeaux d'attributs (par exemple, le bit 60 indique en lecture seule)                                                               |
-| 56 (0x38)                   | 72 octets | Nom de la partition (36 [UTF-16](https://en.wikipedia.org/wiki/UTF-16)LE unités de code)                               |
+| --------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------- |
+| Offset                            | Longueur | Contenu                                                                                                      |
+| 0 (0x00)                          | 16 octets | [GUID de type de partition](https://en.wikipedia.org/wiki/GUID_Partition_Table#Partition_type_GUIDs) (endian mixte) |
+| 16 (0x10)                        | 16 octets | GUID de partition unique (endian mixte)                                                                          |
+| 32 (0x20)                        | 8 octets  | Premier LBA ([little endian](https://en.wikipedia.org/wiki/Little_endian))                                      |
+| 40 (0x28)                        | 8 octets  | Dernier LBA (inclusif, généralement impair)                                                                             |
+| 48 (0x30)                        | 8 octets  | Drapeaux d'attributs (par exemple, le bit 60 indique lecture seule)                                                               |
+| 56 (0x38)                        | 72 octets | Nom de la partition (36 [UTF-16](https://en.wikipedia.org/wiki/UTF-16)LE unités de code)                               |
 
 **Types de partitions**
 
@@ -149,7 +149,7 @@ S'il s'agissait d'une **table GPT au lieu d'un MBR**, la signature _EFI PART_ de
 
 ### FAT
 
-Le système de fichiers **FAT (Table d'allocation de fichiers)** est conçu autour de son composant central, la table d'allocation de fichiers, positionnée au début du volume. Ce système protège les données en maintenant **deux copies** de la table, garantissant l'intégrité des données même si l'une est corrompue. La table, ainsi que le dossier racine, doivent être dans un **emplacement fixe**, crucial pour le processus de démarrage du système.
+Le système de fichiers **FAT (Table d'allocation de fichiers)** est conçu autour de son composant central, la table d'allocation de fichiers, positionnée au début du volume. Ce système protège les données en maintenant **deux copies** de la table, garantissant l'intégrité des données même si l'une est corrompue. La table, ainsi que le dossier racine, doit être dans un **emplacement fixe**, crucial pour le processus de démarrage du système.
 
 L'unité de stockage de base du système de fichiers est un **cluster, généralement 512B**, comprenant plusieurs secteurs. FAT a évolué à travers des versions :
 
@@ -199,7 +199,7 @@ file-data-carving-recovery-tools.md
 
 ### **Carving de fichiers**
 
-Le **carving de fichiers** est une technique qui essaie de **trouver des fichiers dans la masse de données**. Il existe 3 principales manières dont des outils comme celui-ci fonctionnent : **Basé sur les en-têtes et pieds de page des types de fichiers**, basé sur les **structures** des types de fichiers et basé sur le **contenu** lui-même.
+**Le carving de fichiers** est une technique qui tente de **trouver des fichiers dans la masse de données**. Il existe 3 principales manières dont des outils comme celui-ci fonctionnent : **Basé sur les en-têtes et pieds de page des types de fichiers**, basé sur les **structures** des types de fichiers et basé sur le **contenu** lui-même.
 
 Notez que cette technique **ne fonctionne pas pour récupérer des fichiers fragmentés**. Si un fichier **n'est pas stocké dans des secteurs contigus**, alors cette technique ne pourra pas le trouver ou au moins une partie de celui-ci.
 
@@ -220,7 +220,7 @@ file-data-carving-recovery-tools.md
 
 ### Suppression sécurisée
 
-Évidemment, il existe des moyens de **"supprimer de manière sécurisée" des fichiers et une partie des journaux les concernant**. Par exemple, il est possible de **surcharger le contenu** d'un fichier avec des données inutiles plusieurs fois, puis **de supprimer** les **journaux** du **$MFT** et **$LOGFILE** concernant le fichier, et **de supprimer les copies de volume shadow**.\
+Évidemment, il existe des moyens de **"supprimer de manière sécurisée" des fichiers et une partie des journaux les concernant**. Par exemple, il est possible de **réécrire le contenu** d'un fichier avec des données inutiles plusieurs fois, puis **de supprimer** les **journaux** du **$MFT** et **$LOGFILE** concernant le fichier, et **de supprimer les copies de l'ombre du volume**.\
 Vous pouvez remarquer qu'en effectuant cette action, il peut y avoir **d'autres parties où l'existence du fichier est toujours enregistrée**, et c'est vrai, et une partie du travail des professionnels de l'analyse judiciaire est de les trouver.
 
 ## Références

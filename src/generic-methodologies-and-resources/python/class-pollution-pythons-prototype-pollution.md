@@ -65,7 +65,7 @@ print(vars(emp)) #{'name': 'Ahemd', 'age': 23, 'manager': {'name': 'Sarah'}}
 
 <details>
 
-<summary>Création de la valeur par défaut de propriété de classe pour RCE (subprocess)</summary>
+<summary>Création d'une valeur par défaut de propriété de classe pour RCE (subprocess)</summary>
 ```python
 from os import popen
 class Employee: pass # Creating an empty class

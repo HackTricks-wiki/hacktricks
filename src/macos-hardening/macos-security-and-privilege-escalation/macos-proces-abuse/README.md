@@ -11,7 +11,7 @@ Puis **`posix_spawn`** a été introduit combinant **`vfork`** et **`execve`** e
 
 - `POSIX_SPAWN_RESETIDS` : Réinitialiser les identifiants effectifs aux identifiants réels
 - `POSIX_SPAWN_SETPGROUP` : Définir l'affiliation au groupe de processus
-- `POSUX_SPAWN_SETSIGDEF` : Définir le comportement par défaut du signal
+- `POSUX_SPAWN_SETSIGDEF` : Définir le comportement par défaut des signaux
 - `POSIX_SPAWN_SETSIGMASK` : Définir le masque de signal
 - `POSIX_SPAWN_SETEXEC` : Exécuter dans le même processus (comme `execve` avec plus d'options)
 - `POSIX_SPAWN_START_SUSPENDED` : Démarrer suspendu
@@ -34,7 +34,7 @@ Les PIDs, identifiants de processus, identifient un processus unique. Dans XNU, 
 **Les processus** peuvent être insérés dans des **groupes** pour faciliter leur gestion. Par exemple, les commandes dans un script shell seront dans le même groupe de processus, il est donc possible de **les signaler ensemble** en utilisant kill par exemple.\
 Il est également possible de **grouper des processus en sessions**. Lorsqu'un processus démarre une session (`setsid(2)`), les processus enfants sont placés à l'intérieur de la session, sauf s'ils démarrent leur propre session.
 
-La coalition est une autre façon de grouper des processus dans Darwin. Un processus rejoignant une coalition lui permet d'accéder à des ressources partagées, de partager un registre ou de faire face à Jetsam. Les coalitions ont différents rôles : Leader, service XPC, Extension.
+La coalition est une autre façon de grouper des processus dans Darwin. Un processus rejoignant une coalition lui permet d'accéder à des ressources partagées, partageant un registre ou faisant face à Jetsam. Les coalitions ont différents rôles : Leader, service XPC, Extension.
 
 ### Identifiants et personas
 
@@ -77,7 +77,7 @@ Pour gérer l'accès aux ressources partagées et éviter les conditions de cour
 - **Mutex rapide (Signature : 0x4d55545A) :** Semblable à un mutex régulier mais optimisé pour des opérations plus rapides, également de 60 octets de taille.
 2. **Variables de condition :**
 - Utilisées pour attendre que certaines conditions se produisent, avec une taille de 44 octets (40 octets plus une signature de 4 octets).
-- **Attributs de variable de condition (Signature : 0x434e4441) :** Attributs de configuration pour les variables de condition, de 12 octets de taille.
+- **Attributs de variable de condition (Signature : 0x434e4441) :** Attributs de configuration pour les variables de condition, d'une taille de 12 octets.
 3. **Variable Once (Signature : 0x4f4e4345) :**
 - Assure qu'un morceau de code d'initialisation est exécuté une seule fois. Sa taille est de 12 octets.
 4. **Verrous de lecture-écriture :**
@@ -129,7 +129,7 @@ Les classes QoS sont une approche plus moderne pour gérer les priorités des th
 1. **Interactif Utilisateur :**
 - Cette classe est pour les tâches qui interagissent actuellement avec l'utilisateur ou nécessitent des résultats immédiats pour offrir une bonne expérience utilisateur. Ces tâches se voient attribuer la plus haute priorité pour maintenir l'interface réactive (par exemple, animations ou gestion d'événements).
 2. **Initié par l'Utilisateur :**
-- Tâches que l'utilisateur initie et attend des résultats immédiats, comme ouvrir un document ou cliquer sur un bouton nécessitant des calculs. Celles-ci ont une priorité élevée mais inférieure à celle des tâches interactives.
+- Tâches que l'utilisateur initie et attend des résultats immédiats, comme ouvrir un document ou cliquer sur un bouton nécessitant des calculs. Celles-ci ont une priorité élevée mais inférieure à celle des tâches interactives utilisateur.
 3. **Utilitaire :**
 - Ces tâches sont de longue durée et affichent généralement un indicateur de progression (par exemple, téléchargement de fichiers, importation de données). Elles ont une priorité inférieure à celle des tâches initiées par l'utilisateur et n'ont pas besoin de se terminer immédiatement.
 4. **Arrière-plan :**
@@ -137,7 +137,7 @@ Les classes QoS sont une approche plus moderne pour gérer les priorités des th
 
 En utilisant les classes QoS, les développeurs n'ont pas besoin de gérer les numéros de priorité exacts mais plutôt de se concentrer sur la nature de la tâche, et le système optimise les ressources CPU en conséquence.
 
-De plus, il existe différentes **politiques de planification des threads** qui spécifient un ensemble de paramètres de planification que le planificateur prendra en considération. Cela peut être fait en utilisant `thread_policy_[set/get]`. Cela pourrait être utile dans les attaques par condition de course.
+De plus, il existe différentes **politiques de planification de threads** qui spécifient un ensemble de paramètres de planification que le planificateur prendra en considération. Cela peut être fait en utilisant `thread_policy_[set/get]`. Cela pourrait être utile dans les attaques par condition de course.
 
 ## Abus de Processus MacOS
 
@@ -154,7 +154,7 @@ macos-library-injection/
 
 ### Accrochage de Fonction
 
-L'accrochage de fonction implique **d'intercepter les appels de fonction** ou les messages au sein d'un code logiciel. En accrochant des fonctions, un attaquant peut **modifier le comportement** d'un processus, observer des données sensibles, ou même prendre le contrôle du flux d'exécution.
+L'accrochage de fonction implique **d'intercepter des appels de fonction** ou des messages au sein d'un code logiciel. En accrochant des fonctions, un attaquant peut **modifier le comportement** d'un processus, observer des données sensibles, ou même prendre le contrôle du flux d'exécution.
 
 
 {{#ref}}
@@ -190,7 +190,7 @@ macos-chromium-injection.md
 
 ### NIB Sale
 
-Les fichiers NIB **définissent les éléments de l'interface utilisateur (UI)** et leurs interactions au sein d'une application. Cependant, ils peuvent **exécuter des commandes arbitraires** et **Gatekeeper ne bloque pas** une application déjà exécutée si un **fichier NIB est modifié**. Par conséquent, ils pourraient être utilisés pour faire exécuter des programmes arbitraires des commandes arbitraires :
+Les fichiers NIB **définissent des éléments d'interface utilisateur (UI)** et leurs interactions au sein d'une application. Cependant, ils peuvent **exécuter des commandes arbitraires** et **Gatekeeper ne bloque pas** une application déjà exécutée si un **fichier NIB est modifié**. Par conséquent, ils pourraient être utilisés pour faire exécuter des programmes arbitraires des commandes arbitraires :
 
 
 {{#ref}}
@@ -262,18 +262,18 @@ Notez que les exécutables compilés avec **`pyinstaller`** n'utiliseront pas ce
 
 ### Bouclier
 
-[**Bouclier**](https://theevilbit.github.io/shield/) ([**Github**](https://github.com/theevilbit/Shield)) est une application open source qui peut **détecter et bloquer les actions d'injection de processus** :
+[**Shield**](https://theevilbit.github.io/shield/) ([**Github**](https://github.com/theevilbit/Shield)) est une application open source qui peut **détecter et bloquer les actions d'injection de processus** :
 
 - En utilisant **des variables d'environnement** : Elle surveillera la présence de l'une des variables d'environnement suivantes : **`DYLD_INSERT_LIBRARIES`**, **`CFNETWORK_LIBRARY_PATH`**, **`RAWCAMERA_BUNDLE_PATH`** et **`ELECTRON_RUN_AS_NODE`**
 - En utilisant des appels **`task_for_pid`** : Pour trouver quand un processus veut obtenir le **port de tâche d'un autre** ce qui permet d'injecter du code dans le processus.
 - **Paramètres des applications Electron** : Quelqu'un peut utiliser les arguments de ligne de commande **`--inspect`**, **`--inspect-brk`** et **`--remote-debugging-port`** pour démarrer une application Electron en mode débogage, et ainsi injecter du code.
-- En utilisant **des symlinks** ou **des hardlinks** : Typiquement, l'abus le plus courant consiste à **placer un lien avec nos privilèges d'utilisateur**, et **pointer vers un emplacement de privilège supérieur**. La détection est très simple pour les hardlinks et les symlinks. Si le processus créant le lien a un **niveau de privilège différent** de celui du fichier cible, nous créons une **alerte**. Malheureusement, dans le cas des symlinks, le blocage n'est pas possible, car nous n'avons pas d'informations sur la destination du lien avant sa création. C'est une limitation du cadre EndpointSecurity d'Apple.
+- En utilisant **des liens symboliques** ou **des liens durs** : Typiquement, l'abus le plus courant consiste à **placer un lien avec nos privilèges d'utilisateur**, et **pointer vers un emplacement de privilège supérieur**. La détection est très simple pour les liens durs et symboliques. Si le processus créant le lien a un **niveau de privilège différent** de celui du fichier cible, nous créons une **alerte**. Malheureusement, dans le cas des liens symboliques, le blocage n'est pas possible, car nous n'avons pas d'informations sur la destination du lien avant sa création. C'est une limitation du cadre EndpointSecurity d'Apple.
 
 ### Appels effectués par d'autres processus
 
 Dans [**cet article de blog**](https://knight.sc/reverse%20engineering/2019/04/15/detecting-task-modifications.html), vous pouvez trouver comment il est possible d'utiliser la fonction **`task_name_for_pid`** pour obtenir des informations sur d'autres **processus injectant du code dans un processus** et ensuite obtenir des informations sur cet autre processus.
 
-Notez que pour appeler cette fonction, vous devez être **le même uid** que celui exécutant le processus ou **root** (et cela retourne des informations sur le processus, pas un moyen d'injecter du code).
+Notez que pour appeler cette fonction, vous devez avoir le **même uid** que celui exécutant le processus ou être **root** (et cela retourne des informations sur le processus, pas un moyen d'injecter du code).
 
 ## Références
 

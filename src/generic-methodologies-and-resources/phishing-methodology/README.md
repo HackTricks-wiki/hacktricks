@@ -1,44 +1,44 @@
-# Méthodologie de Phishing
+# Phishing Methodology
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Méthodologie
+## Methodology
 
 1. Reconnaître la victime
 1. Sélectionner le **domaine de la victime**.
 2. Effectuer une énumération web de base **à la recherche de portails de connexion** utilisés par la victime et **décider** lequel vous allez **imiter**.
 3. Utiliser des **OSINT** pour **trouver des emails**.
 2. Préparer l'environnement
-1. **Acheter le domaine** que vous allez utiliser pour l'évaluation de phishing.
-2. **Configurer le service email** et les enregistrements associés (SPF, DMARC, DKIM, rDNS).
-3. Configurer le VPS avec **gophish**.
+1. **Acheter le domaine** que vous allez utiliser pour l'évaluation de phishing
+2. **Configurer le service email** et les enregistrements associés (SPF, DMARC, DKIM, rDNS)
+3. Configurer le VPS avec **gophish**
 3. Préparer la campagne
-1. Préparer le **modèle d'email**.
-2. Préparer la **page web** pour voler les identifiants.
+1. Préparer le **modèle d'email**
+2. Préparer la **page web** pour voler les identifiants
 4. Lancer la campagne !
 
 ## Générer des noms de domaine similaires ou acheter un domaine de confiance
 
-### Techniques de Variation de Noms de Domaine
+### Techniques de variation de nom de domaine
 
 - **Mot-clé** : Le nom de domaine **contient** un **mot-clé** important du domaine original (par exemple, zelster.com-management.com).
 - **sous-domaine hyphéné** : Changer le **point par un tiret** d'un sous-domaine (par exemple, www-zelster.com).
-- **Nouveau TLD** : Même domaine utilisant un **nouveau TLD** (par exemple, zelster.org).
-- **Homoglyphes** : Il **remplace** une lettre dans le nom de domaine par des **lettres qui se ressemblent** (par exemple, zelfser.com).
+- **Nouveau TLD** : Même domaine utilisant un **nouveau TLD** (par exemple, zelster.org)
+- **Homoglyph** : Il **remplace** une lettre dans le nom de domaine par **des lettres qui se ressemblent** (par exemple, zelfser.com).
 
 {{#ref}}
 homograph-attacks.md
 {{#endref}}
-- **Transposition** : Il **échange deux lettres** dans le nom de domaine (par exemple, zelsetr.com).
-- **Singularisation/Pluralisation** : Ajoute ou enlève un "s" à la fin du nom de domaine (par exemple, zeltsers.com).
+- **Transposition :** Il **échange deux lettres** dans le nom de domaine (par exemple, zelsetr.com).
+- **Singularisation/Pluralisation** : Ajoute ou enlève un “s” à la fin du nom de domaine (par exemple, zeltsers.com).
 - **Omission** : Il **supprime une** des lettres du nom de domaine (par exemple, zelser.com).
-- **Répétition** : Il **répète une** des lettres dans le nom de domaine (par exemple, zeltsser.com).
-- **Remplacement** : Comme homoglyphes mais moins furtif. Il remplace une des lettres dans le nom de domaine, peut-être par une lettre proche de la lettre originale sur le clavier (par exemple, zektser.com).
+- **Répétition :** Il **répète une** des lettres dans le nom de domaine (par exemple, zeltsser.com).
+- **Remplacement** : Comme homoglyph mais moins furtif. Il remplace une des lettres dans le nom de domaine, peut-être par une lettre proche de la lettre originale sur le clavier (par exemple, zektser.com).
 - **Sous-domaine** : Introduire un **point** à l'intérieur du nom de domaine (par exemple, ze.lster.com).
 - **Insertion** : Il **insère une lettre** dans le nom de domaine (par exemple, zerltser.com).
 - **Point manquant** : Ajouter le TLD au nom de domaine. (par exemple, zelstercom.com)
 
-**Outils Automatiques**
+**Outils automatiques**
 
 - [**dnstwist**](https://github.com/elceef/dnstwist)
 - [**urlcrazy**](https://github.com/urbanadventurer/urlcrazy)
@@ -55,9 +55,9 @@ Il y a une **possibilité qu'un des bits stockés ou en communication puisse êt
 
 Lorsque ce concept est **appliqué aux requêtes DNS**, il est possible que le **domaine reçu par le serveur DNS** ne soit pas le même que le domaine initialement demandé.
 
-Par exemple, une seule modification de bit dans le domaine "windows.com" peut le changer en "windnws.com".
+Par exemple, une seule modification de bit dans le domaine "windows.com" peut le changer en "windnws.com."
 
-Les attaquants peuvent **profiter de cela en enregistrant plusieurs domaines à bit-flipping** qui sont similaires au domaine de la victime. Leur intention est de rediriger les utilisateurs légitimes vers leur propre infrastructure.
+Les attaquants peuvent **profiter de cela en enregistrant plusieurs domaines à inversion de bits** qui sont similaires au domaine de la victime. Leur intention est de rediriger les utilisateurs légitimes vers leur propre infrastructure.
 
 Pour plus d'informations, lisez [https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)
 
@@ -69,7 +69,7 @@ Pour vous assurer que le domaine expiré que vous allez acheter **a déjà un bo
 - [http://www.fortiguard.com/webfilter](http://www.fortiguard.com/webfilter)
 - [https://urlfiltering.paloaltonetworks.com/query/](https://urlfiltering.paloaltonetworks.com/query/)
 
-## Découverte d'Emails
+## Découverte d'emails
 
 - [https://github.com/laramies/theHarvester](https://github.com/laramies/theHarvester) (100% gratuit)
 - [https://phonebook.cz/](https://phonebook.cz) (100% gratuit)
@@ -78,7 +78,7 @@ Pour vous assurer que le domaine expiré que vous allez acheter **a déjà un bo
 - [https://anymailfinder.com/](https://anymailfinder.com)
 
 Pour **découvrir plus** d'adresses email valides ou **vérifier celles** que vous avez déjà découvertes, vous pouvez vérifier si vous pouvez forcer les serveurs smtp de la victime. [Apprenez à vérifier/découvrir une adresse email ici](../../network-services-pentesting/pentesting-smtp/index.html#username-bruteforce-enumeration).\
-De plus, n'oubliez pas que si les utilisateurs utilisent **un portail web pour accéder à leurs mails**, vous pouvez vérifier s'il est vulnérable à **la force brute sur les noms d'utilisateur**, et exploiter la vulnérabilité si possible.
+De plus, n'oubliez pas que si les utilisateurs utilisent **un portail web pour accéder à leurs mails**, vous pouvez vérifier s'il est vulnérable à **la force brute sur le nom d'utilisateur**, et exploiter la vulnérabilité si possible.
 
 ## Configuration de GoPhish
 
@@ -87,7 +87,7 @@ De plus, n'oubliez pas que si les utilisateurs utilisent **un portail web pour a
 Vous pouvez le télécharger depuis [https://github.com/gophish/gophish/releases/tag/v0.11.0](https://github.com/gophish/gophish/releases/tag/v0.11.0)
 
 Téléchargez-le et décompressez-le dans `/opt/gophish` et exécutez `/opt/gophish/gophish`\
-Un mot de passe pour l'utilisateur admin sur le port 3333 vous sera donné dans la sortie. Par conséquent, accédez à ce port et utilisez ces identifiants pour changer le mot de passe admin. Vous devrez peut-être faire un tunnel de ce port vers local :
+Un mot de passe pour l'utilisateur admin sera donné sur le port 3333 dans la sortie. Par conséquent, accédez à ce port et utilisez ces identifiants pour changer le mot de passe admin. Vous devrez peut-être faire un tunnel de ce port vers local :
 ```bash
 ssh -L 3333:127.0.0.1:3333 <user>@<ip>
 ```
@@ -227,7 +227,7 @@ service gophish stop
 
 ### Attendre & être légitime
 
-Plus un domaine est ancien, moins il est probable qu'il soit considéré comme du spam. Vous devriez donc attendre le plus longtemps possible (au moins 1 semaine) avant l'évaluation de phishing. De plus, si vous mettez en place une page sur un secteur réputé, la réputation obtenue sera meilleure.
+Plus un domaine est ancien, moins il est probable qu'il soit considéré comme du spam. Vous devriez donc attendre le plus longtemps possible (au moins 1 semaine) avant l'évaluation de phishing. De plus, si vous mettez en place une page sur un secteur de réputation, la réputation obtenue sera meilleure.
 
 Notez que même si vous devez attendre une semaine, vous pouvez terminer la configuration de tout maintenant.
 
@@ -348,7 +348,7 @@ Notez que **pour augmenter la crédibilité de l'email**, il est recommandé d'u
 ![](<../../images/image (80).png>)
 
 > [!TIP]
-> Le modèle d'email permet également de **joindre des fichiers à envoyer**. Si vous souhaitez également voler des défis NTLM en utilisant des fichiers/documents spécialement conçus [lisez cette page](../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md).
+> Le modèle d'email permet également de **joindre des fichiers à envoyer**. Si vous souhaitez également voler des défis NTLM en utilisant des fichiers/documents spécialement conçus, [lisez cette page](../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md).
 
 ### Page de destination
 
@@ -364,7 +364,7 @@ Notez que **pour augmenter la crédibilité de l'email**, il est recommandé d'u
 > Notez que si vous avez besoin d'**utiliser des ressources statiques** pour le HTML (peut-être des pages CSS et JS), vous pouvez les enregistrer dans _**/opt/gophish/static/endpoint**_ et ensuite y accéder depuis _**/static/\<filename>**_
 
 > [!TIP]
-> Pour la redirection, vous pourriez **rediriger les utilisateurs vers la véritable page web principale** de la victime, ou les rediriger vers _/static/migration.html_ par exemple, mettre un **roue qui tourne** (**[**https://loading.io/**](https://loading.io)**) pendant 5 secondes et ensuite indiquer que le processus a été réussi**.
+> Pour la redirection, vous pourriez **rediriger les utilisateurs vers la vraie page web principale** de la victime, ou les rediriger vers _/static/migration.html_ par exemple, mettre un **roue qui tourne** (**[**https://loading.io/**](https://loading.io)**) pendant 5 secondes et ensuite indiquer que le processus a été réussi**.
 
 ### Utilisateurs & Groupes
 
@@ -386,9 +386,9 @@ Notez que le **profil d'envoi permet d'envoyer un email test pour voir à quoi r
 
 Une fois que tout est prêt, lancez simplement la campagne !
 
-## Clonage de site Web
+## Clonage de site web
 
-Si pour une raison quelconque vous souhaitez cloner le site Web, consultez la page suivante :
+Si pour une raison quelconque vous souhaitez cloner le site web, consultez la page suivante :
 
 {{#ref}}
 clone-a-website.md
@@ -407,7 +407,7 @@ phishing-documents.md
 
 ### Via Proxy MitM
 
-L'attaque précédente est assez astucieuse car vous simulez un vrai site Web et collectez les informations fournies par l'utilisateur. Malheureusement, si l'utilisateur n'a pas saisi le bon mot de passe ou si l'application que vous avez simulée est configurée avec 2FA, **ces informations ne vous permettront pas d'usurper l'identité de l'utilisateur trompé**.
+L'attaque précédente est assez astucieuse car vous simulez un vrai site web et collectez les informations fournies par l'utilisateur. Malheureusement, si l'utilisateur n'a pas saisi le bon mot de passe ou si l'application que vous avez simulée est configurée avec 2FA, **ces informations ne vous permettront pas d'usurper l'identité de l'utilisateur trompé**.
 
 C'est là que des outils comme [**evilginx2**](https://github.com/kgretzky/evilginx2)**,** [**CredSniper**](https://github.com/ustayready/CredSniper) et [**muraena**](https://github.com/muraenateam/muraena) sont utiles. Cet outil vous permettra de générer une attaque de type MitM. En gros, l'attaque fonctionne de la manière suivante :
 
@@ -426,13 +426,13 @@ Vous pouvez faire cela avec [**EvilnVNC**](https://github.com/JoelGMSec/EvilnoVN
 Évidemment, l'un des meilleurs moyens de savoir si vous avez été démasqué est de **chercher votre domaine dans les listes noires**. S'il apparaît, d'une manière ou d'une autre, votre domaine a été détecté comme suspect.\
 Un moyen facile de vérifier si votre domaine apparaît dans une liste noire est d'utiliser [https://malwareworld.com/](https://malwareworld.com)
 
-Cependant, il existe d'autres moyens de savoir si la victime **cherche activement des activités de phishing suspectes dans la nature** comme expliqué dans :
+Cependant, il existe d'autres moyens de savoir si la victime **cherche activement des activités de phishing suspectes dans la nature**, comme expliqué dans :
 
 {{#ref}}
 detecting-phising.md
 {{#endref}}
 
-Vous pouvez **acheter un domaine avec un nom très similaire** à celui du domaine de la victime **et/ou générer un certificat** pour un **sous-domaine** d'un domaine contrôlé par vous **contenant** le **mot-clé** du domaine de la victime. Si la **victime** effectue une sorte d'**interaction DNS ou HTTP** avec eux, vous saurez qu'**il recherche activement** des domaines suspects et vous devrez être très discret.
+Vous pouvez **acheter un domaine avec un nom très similaire** à celui du domaine de la victime **et/ou générer un certificat** pour un **sous-domaine** d'un domaine contrôlé par vous **contenant** le **mot-clé** du domaine de la victime. Si la **victime** effectue une sorte d'**interaction DNS ou HTTP** avec eux, vous saurez qu'elle **cherche activement** des domaines suspects et vous devrez être très discret.
 
 ### Évaluer le phishing
 
@@ -444,14 +444,14 @@ Les ensembles d'intrusion modernes contournent de plus en plus complètement les
 
 ### Flux d'attaque
 1. Reconnaissance de la victime
-* Collectez des détails personnels et d'entreprise à partir de LinkedIn, des violations de données, de GitHub public, etc.
-* Identifiez des identités de grande valeur (dirigeants, informatique, finance) et énumérez le **processus exact du support technique** pour la réinitialisation du mot de passe / MFA.
+* Collectez des détails personnels et d'entreprise à partir de LinkedIn, de violations de données, de GitHub public, etc.
+* Identifiez des identités de grande valeur (dirigeants, informatique, finance) et énumérez le **processus exact du support technique** pour la réinitialisation de mot de passe / MFA.
 2. Ingénierie sociale en temps réel
 * Appelez, utilisez Teams ou discutez avec le support technique tout en usurpant la cible (souvent avec un **ID d'appel falsifié** ou une **voix clonée**).
 * Fournissez les PII collectées précédemment pour passer la vérification basée sur les connaissances.
 * Convainquez l'agent de **réinitialiser le secret MFA** ou d'effectuer un **échange de carte SIM** sur un numéro de mobile enregistré.
 3. Actions immédiates après accès (≤60 min dans des cas réels)
-* Établissez un point d'ancrage via n'importe quel portail SSO web.
+* Établissez une prise de contrôle via n'importe quel portail SSO web.
 * Énumérez AD / AzureAD avec des outils intégrés (aucun binaire déposé) :
 ```powershell
 # lister les groupes de répertoire & rôles privilégiés
@@ -471,14 +471,14 @@ Get-MgUserRegisteredDevice -UserId <user@corp.local>
 * Méthode MFA changée + authentification depuis un nouvel appareil / géo.
 * Élévation immédiate du même principal (utilisateur-→-admin).
 * Enregistrez les appels du support technique et imposez un **appel de retour à un numéro déjà enregistré** avant toute réinitialisation.
-* Mettez en œuvre un **Accès Juste à Temps (JIT) / Accès Privilégié** afin que les comptes nouvellement réinitialisés ne **n'héritent pas automatiquement de jetons à haut privilège**.
+* Mettez en œuvre un **Accès Juste à Temps (JIT) / Accès Privilégié** afin que les comptes nouvellement réinitialisés ne **héritent pas automatiquement de jetons à haut privilège**.
 
 ---
 
-## Tromperie à grande échelle – Empoisonnement SEO & Campagnes “ClickFix”
+## Tromperie à grande échelle – Poisonnement SEO & Campagnes “ClickFix”
 Les équipes de commodité compensent le coût des opérations à fort contact avec des attaques de masse qui transforment **les moteurs de recherche et les réseaux publicitaires en canal de livraison**.
 
-1. **L'empoisonnement SEO / malvertising** pousse un faux résultat tel que `chromium-update[.]site` en haut des annonces de recherche.
+1. **Le poisonnement SEO / malvertising** pousse un faux résultat tel que `chromium-update[.]site` en haut des annonces de recherche.
 2. La victime télécharge un petit **chargeur de première étape** (souvent JS/HTA/ISO). Exemples vus par l'Unité 42 :
 * `RedLine stealer`
 * `Lumma stealer`
@@ -503,11 +503,11 @@ and child_image: *\\*.exe
 ## Opérations de phishing améliorées par l'IA
 Les attaquants enchaînent désormais des **API LLM & de clonage vocal** pour des leurres entièrement personnalisés et une interaction en temps réel.
 
-| Couche | Utilisation exemple par l'acteur de menace |
+| Couche | Exemple d'utilisation par l'acteur de menace |
 |-------|-----------------------------|
 |Automatisation|Générer et envoyer >100 k emails / SMS avec un wording randomisé et des liens de suivi.|
 |IA générative|Produire des emails *uniques* faisant référence à des fusions et acquisitions publiques, des blagues internes des réseaux sociaux ; voix de PDG deep-fake dans une escroquerie de rappel.|
-|IA agentique|Enregistrer des domaines de manière autonome, extraire des informations open-source, rédiger des mails de prochaine étape lorsqu'une victime clique mais ne soumet pas d'identifiants.|
+|IA agentique|Enregistrer de manière autonome des domaines, extraire des informations ouvertes, rédiger des mails de prochaine étape lorsqu'une victime clique mais ne soumet pas d'identifiants.|
 
 **Défense :**
 • Ajoutez des **bannières dynamiques** mettant en évidence les messages envoyés par une automatisation non fiable (via des anomalies ARC/DKIM).
@@ -516,7 +516,7 @@ Les attaquants enchaînent désormais des **API LLM & de clonage vocal** pour de
 
 ---
 
-## Fatigue MFA / Variante de bombardement de push – Réinitialisation forcée
+## Fatigue MFA / Variante de Bombardement de Push – Réinitialisation forcée
 En plus du bombardement classique par push, les opérateurs **forcent simplement un nouvel enregistrement MFA** lors de l'appel au support technique, annulant le jeton existant de l'utilisateur. Tout prompt de connexion ultérieur apparaît légitime pour la victime.
 ```text
 [Attacker]  →  Help-Desk:  “I lost my phone while travelling, can you unenrol it so I can add a new authenticator?”
