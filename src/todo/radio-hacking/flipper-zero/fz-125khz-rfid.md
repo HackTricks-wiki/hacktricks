@@ -18,10 +18,10 @@ Für weitere Informationen über diese Arten von Tags [**lesen Sie diese Einfüh
 
 ### Lesen
 
-Versucht, die **Karteninformationen** zu **lesen**. Dann kann sie **emuliert** werden.
+Versucht, die **Karteninformationen** zu **lesen**. Dann kann es sie **emulieren**.
 
 > [!WARNING]
-> Beachten Sie, dass einige Gegensprechanlagen versuchen, sich vor Schlüsselduplikationen zu schützen, indem sie einen Schreibbefehl vor dem Lesen senden. Wenn das Schreiben erfolgreich ist, wird dieses Tag als gefälscht betrachtet. Wenn Flipper RFID emuliert, gibt es keine Möglichkeit für den Leser, es vom Original zu unterscheiden, sodass keine solchen Probleme auftreten.
+> Beachten Sie, dass einige Gegensprechanlagen versuchen, sich vor Schlüsselduplikationen zu schützen, indem sie einen Schreibbefehl vor dem Lesen senden. Wenn das Schreiben erfolgreich ist, wird dieses Tag als gefälscht betrachtet. Wenn Flipper RFID emuliert, gibt es keine Möglichkeit für den Leser, es von dem Original zu unterscheiden, sodass solche Probleme nicht auftreten.
 
 ### Manuell hinzufügen
 

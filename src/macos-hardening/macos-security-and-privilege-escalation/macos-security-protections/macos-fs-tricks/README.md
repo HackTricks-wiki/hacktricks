@@ -8,7 +8,7 @@ Berechtigungen in einem **Verzeichnis**:
 
 - **lesen** - Sie können die **Einträge** im Verzeichnis **auflisten**.
 - **schreiben** - Sie können **Dateien** im Verzeichnis **löschen/schreiben** und Sie können **leere Ordner löschen**.
-- Aber Sie **können keine nicht-leeren Ordner löschen/ändern**, es sei denn, Sie haben Schreibberechtigungen dafür.
+- Aber Sie **können nicht nicht-leere Ordner löschen/ändern**, es sei denn, Sie haben Schreibberechtigungen dafür.
 - Sie **können den Namen eines Ordners nicht ändern**, es sei denn, Sie besitzen ihn.
 - **ausführen** - Sie dürfen das Verzeichnis **durchqueren** - wenn Sie dieses Recht nicht haben, können Sie auf keine Dateien darin oder in Unterverzeichnissen zugreifen.
 
@@ -20,25 +20,25 @@ Berechtigungen in einem **Verzeichnis**:
 - Ein übergeordneter **Verzeichnisbesitzer** im Pfad ist eine **Benutzergruppe** mit **Schreibzugriff**
 - Eine Benutzer-**Gruppe** hat **Schreib**zugriff auf die **Datei**
 
-Mit einer der vorherigen Kombinationen könnte ein Angreifer einen **sym/hard link** in den erwarteten Pfad **einspeisen**, um einen privilegierten beliebigen Schreibzugriff zu erhalten.
+Mit einer der vorherigen Kombinationen könnte ein Angreifer einen **sym/hard link** in den erwarteten Pfad **einspeisen**, um einen privilegierten willkürlichen Schreibzugriff zu erhalten.
 
 ### Ordner root R+X Sonderfall
 
-Wenn es Dateien in einem **Verzeichnis** gibt, in dem **nur root R+X-Zugriff hat**, sind diese **für niemanden sonst zugänglich**. Eine Schwachstelle, die es ermöglicht, eine von einem Benutzer lesbare Datei, die aufgrund dieser **Einschränkung** nicht gelesen werden kann, aus diesem Ordner **in einen anderen** zu verschieben, könnte ausgenutzt werden, um diese Dateien zu lesen.
+Wenn es Dateien in einem **Verzeichnis** gibt, in dem **nur root R+X-Zugriff hat**, sind diese **für niemanden sonst zugänglich**. Eine Schwachstelle, die es ermöglicht, eine von einem Benutzer lesbare Datei, die aufgrund dieser **Einschränkung** nicht gelesen werden kann, von diesem Ordner **in einen anderen** zu verschieben, könnte ausgenutzt werden, um diese Dateien zu lesen.
 
-Beispiel unter: [https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions](https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions)
+Beispiel in: [https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions](https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions)
 
 ## Symbolischer Link / Harte Verknüpfung
 
 ### Erlaubte Datei/Ordner
 
-Wenn ein privilegierter Prozess Daten in eine **Datei** schreibt, die von einem **weniger privilegierten Benutzer** **kontrolliert** werden könnte oder die **zuvor** von einem weniger privilegierten Benutzer erstellt wurde. Der Benutzer könnte einfach **auf eine andere Datei** über einen symbolischen oder harten Link **verweisen**, und der privilegierte Prozess wird in dieser Datei schreiben.
+Wenn ein privilegierter Prozess Daten in eine **Datei** schreibt, die von einem **weniger privilegierten Benutzer** **kontrolliert** werden könnte oder die **zuvor von einem weniger privilegierten Benutzer erstellt** wurde. Der Benutzer könnte einfach **auf eine andere Datei** über einen symbolischen oder harten Link **verweisen**, und der privilegierte Prozess wird in dieser Datei schreiben.
 
-Überprüfen Sie in den anderen Abschnitten, wo ein Angreifer **einen beliebigen Schreibzugriff ausnutzen könnte, um Privilegien zu eskalieren**.
+Überprüfen Sie in den anderen Abschnitten, wo ein Angreifer **einen willkürlichen Schreibzugriff ausnutzen könnte, um Privilegien zu eskalieren**.
 
 ### Offen `O_NOFOLLOW`
 
-Das Flag `O_NOFOLLOW`, wenn es von der Funktion `open` verwendet wird, folgt einem Symlink im letzten Pfadkomponenten nicht, folgt aber dem Rest des Pfades. Der richtige Weg, um das Folgen von Symlinks im Pfad zu verhindern, ist die Verwendung des Flags `O_NOFOLLOW_ANY`.
+Das Flag `O_NOFOLLOW`, wenn es von der Funktion `open` verwendet wird, folgt einem Symlink im letzten Pfadkomponenten nicht, aber es folgt dem Rest des Pfades. Der richtige Weg, um das Folgen von Symlinks im Pfad zu verhindern, ist die Verwendung des Flags `O_NOFOLLOW_ANY`.
 
 ## .fileloc
 
@@ -157,7 +157,7 @@ macos-xattr-acls-extra-stuff.md
 
 ### Umgehung von Plattform-Binärprüfungen
 
-Einige Sicherheitsprüfungen überprüfen, ob die Binärdatei eine **Plattform-Binärdatei** ist, um beispielsweise die Verbindung zu einem XPC-Dienst zu ermöglichen. Wie in einer Umgehung in https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/ dargelegt, ist es möglich, diese Überprüfung zu umgehen, indem man eine Plattform-Binärdatei (wie /bin/ls) erhält und den Exploit über dyld mit einer Umgebungsvariable `DYLD_INSERT_LIBRARIES` injiziert.
+Einige Sicherheitsprüfungen überprüfen, ob die Binärdatei eine **Plattform-Binärdatei** ist, um beispielsweise die Verbindung zu einem XPC-Dienst zu ermöglichen. Wie in einem Bypass in https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/ dargelegt, ist es jedoch möglich, diese Überprüfung zu umgehen, indem man eine Plattform-Binärdatei (wie /bin/ls) erhält und den Exploit über dyld mit einer Umgebungsvariable `DYLD_INSERT_LIBRARIES` injiziert.
 
 ### Umgehung der Flags `CS_REQUIRE_LV` und `CS_FORCED_LV`
 
@@ -249,7 +249,7 @@ hdiutil detach /private/tmp/mnt 1>/dev/null
 # You can also create a dmg from an app using:
 hdiutil create -srcfolder justsome.app justsome.dmg
 ```
-Normalerweise mountet macOS Festplatten, indem es mit dem `com.apple.DiskArbitrarion.diskarbitrariond` Mach-Dienst (bereitgestellt von `/usr/libexec/diskarbitrationd`) kommuniziert. Wenn man den Parameter `-d` zur LaunchDaemons plist-Datei hinzufügt und neu startet, werden die Protokolle in `/var/log/diskarbitrationd.log` gespeichert.\
+Normalerweise mountet macOS Festplatten, indem es mit dem `com.apple.DiskArbitrarion.diskarbitrariond` Mach-Dienst (bereitgestellt von `/usr/libexec/diskarbitrationd`) kommuniziert. Wenn man den Parameter `-d` zur LaunchDaemons plist-Datei hinzufügt und neu startet, werden Protokolle in `/var/log/diskarbitrationd.log` gespeichert.\
 Es ist jedoch möglich, Tools wie `hdik` und `hdiutil` zu verwenden, um direkt mit dem `com.apple.driver.DiskImages` kext zu kommunizieren.
 
 ## Arbiträre Schreibvorgänge
@@ -258,7 +258,7 @@ Es ist jedoch möglich, Tools wie `hdik` und `hdiutil` zu verwenden, um direkt m
 
 Wenn Ihr Skript als **Shell-Skript** interpretiert werden könnte, könnten Sie das **`/etc/periodic/daily/999.local`** Shell-Skript überschreiben, das jeden Tag ausgelöst wird.
 
-Sie können eine Ausführung dieses Skripts fälschen mit: **`sudo periodic daily`**
+Sie können die Ausführung dieses Skripts mit **`sudo periodic daily`** **fälschen**.
 
 ### Daemons
 
@@ -303,17 +303,17 @@ LogFilePerm 777
 ```
 Dies wird die Datei `/etc/sudoers.d/lpe` mit den Berechtigungen 777 erstellen. Der zusätzliche Müll am Ende dient dazu, die Erstellung des Fehlerprotokolls auszulösen.
 
-Dann schreibe in `/etc/sudoers.d/lpe` die benötigte Konfiguration, um die Berechtigungen zu eskalieren, wie `%staff ALL=(ALL) NOPASSWD:ALL`.
+Dann schreibe in `/etc/sudoers.d/lpe` die benötigte Konfiguration, um Privilegien zu eskalieren, wie `%staff ALL=(ALL) NOPASSWD:ALL`.
 
 Ändere dann die Datei `/etc/cups/cups-files.conf` erneut und gebe `LogFilePerm 700` an, damit die neue sudoers-Datei gültig wird, wenn `cupsctl` aufgerufen wird.
 
 ### Sandbox Escape
 
-Es ist möglich, die macOS-Sandbox mit einem FS-arbiträren Schreibzugriff zu umgehen. Für einige Beispiele siehe die Seite [macOS Auto Start](../../../../macos-auto-start-locations.md), aber ein gängiger ist, eine Terminal-Präferenzdatei in `~/Library/Preferences/com.apple.Terminal.plist` zu schreiben, die einen Befehl beim Start ausführt, und sie mit `open` aufzurufen.
+Es ist möglich, die macOS-Sandbox mit einem FS-arbiträren Schreibzugriff zu verlassen. Für einige Beispiele siehe die Seite [macOS Auto Start](../../../../macos-auto-start-locations.md), aber ein gängiger ist, eine Terminal-Präferenzdatei in `~/Library/Preferences/com.apple.Terminal.plist` zu schreiben, die einen Befehl beim Start ausführt, und sie mit `open` aufzurufen.
 
 ## Generiere beschreibbare Dateien als andere Benutzer
 
-Dies wird eine Datei erzeugen, die root gehört und von mir beschreibbar ist ([**code from here**](https://github.com/gergelykalman/brew-lpe-via-periodic/blob/main/brew_lpe.sh)). Dies könnte auch als privesc funktionieren:
+Dies wird eine Datei erzeugen, die root gehört und von mir beschreibbar ist ([**code from here**](https://github.com/gergelykalman/brew-lpe-via-periodic/blob/main/brew_lpe.sh)). Dies könnte auch als Privilegieneskalation funktionieren:
 ```bash
 DIRNAME=/usr/local/etc/periodic/daily
 
@@ -425,7 +425,7 @@ return 0;
 
 **macOS geschützte Deskriptoren** sind eine Sicherheitsfunktion, die in macOS eingeführt wurde, um die Sicherheit und Zuverlässigkeit von **Dateideskriptoroperationen** in Benutzeranwendungen zu verbessern. Diese geschützten Deskriptoren bieten eine Möglichkeit, spezifische Einschränkungen oder "Wächter" mit Dateideskriptoren zu verknüpfen, die vom Kernel durchgesetzt werden.
 
-Diese Funktion ist besonders nützlich, um bestimmte Klassen von Sicherheitsanfälligkeiten wie **unauthorized file access** oder **race conditions** zu verhindern. Diese Anfälligkeiten treten auf, wenn beispielsweise ein Thread auf eine Dateibeschreibung zugreift und **einem anderen anfälligen Thread Zugriff darauf gewährt** oder wenn ein Dateideskriptor von einem anfälligen Kindprozess **vererbt** wird. Einige Funktionen, die mit dieser Funktionalität zusammenhängen, sind:
+Diese Funktion ist besonders nützlich, um bestimmte Klassen von Sicherheitsanfälligkeiten wie **unbefugten Dateizugriff** oder **Rennbedingungen** zu verhindern. Diese Anfälligkeiten treten auf, wenn beispielsweise ein Thread auf eine Dateibeschreibung zugreift und **einem anderen anfälligen Thread Zugriff darauf gewährt** oder wenn ein Dateideskriptor von einem anfälligen Kindprozess **vererbt** wird. Einige Funktionen, die mit dieser Funktionalität zusammenhängen, sind:
 
 - `guarded_open_np`: Öffnet einen FD mit einem Wächter
 - `guarded_close_np`: Schließt ihn

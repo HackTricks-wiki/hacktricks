@@ -81,7 +81,7 @@ Dies könnte in den folgenden Situationen auftreten:
 
 In der Lage zu sein, eine **Datei zu erstellen**, die von **root verwendet wird**, ermöglicht es einem Benutzer, **von ihrem Inhalt zu profitieren** oder sogar **Symlinks/Hardlinks** zu erstellen, um sie an einen anderen Ort zu verweisen.
 
-Für diese Art von Schwachstellen vergessen Sie nicht, **anfällige `.pkg` Installer** zu überprüfen:
+Für diese Art von Schwachstellen vergessen Sie nicht, **anfällige `.pkg` Installer zu überprüfen**:
 
 
 {{#ref}}

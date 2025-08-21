@@ -10,7 +10,7 @@
 - **/dev**: Alles wird als Datei behandelt, sodass Sie hier Hardwaregeräte sehen können.
 - **/etc**: Konfigurationsdateien
 - **/Library**: Viele Unterverzeichnisse und Dateien, die mit Einstellungen, Caches und Protokollen zu tun haben, finden sich hier. Ein Library-Ordner existiert im Root-Verzeichnis und im Verzeichnis jedes Benutzers.
-- **/private**: Nicht dokumentiert, aber viele der genannten Ordner sind symbolische Links zum privaten Verzeichnis.
+- **/private**: Undokumentiert, aber viele der genannten Ordner sind symbolische Links zum privaten Verzeichnis.
 - **/sbin**: Essentielle System-Binaries (bezogen auf die Verwaltung)
 - **/System**: Dateien, um OS X auszuführen. Hier sollten hauptsächlich nur Apple-spezifische Dateien (keine Drittanbieter) zu finden sein.
 - **/tmp**: Dateien werden nach 3 Tagen gelöscht (es ist ein symbolischer Link zu /private/tmp)
@@ -23,8 +23,8 @@
 ### Anwendungsordner
 
 - **Systemanwendungen** befinden sich unter `/System/Applications`
-- **Installierte** Anwendungen werden normalerweise in `/Applications` oder in `~/Applications` installiert.
-- **Anwendungsdaten** finden sich in `/Library/Application Support` für Anwendungen, die als Root ausgeführt werden, und in `~/Library/Application Support` für Anwendungen, die als Benutzer ausgeführt werden.
+- **Installierte** Anwendungen sind normalerweise in `/Applications` oder in `~/Applications` installiert.
+- **Anwendungsdaten** finden sich in `/Library/Application Support` für die als Root ausgeführten Anwendungen und `~/Library/Application Support` für Anwendungen, die als Benutzer ausgeführt werden.
 - Drittanbieteranwendungen **Dämonen**, die **als Root ausgeführt werden müssen**, befinden sich normalerweise in `/Library/PrivilegedHelperTools/`
 - **Sandboxed** Apps sind im Ordner `~/Library/Containers` abgebildet. Jede App hat einen Ordner, der nach der Bundle-ID der Anwendung benannt ist (`com.apple.Safari`).
 - Der **Kernel** befindet sich in `/System/Library/Kernels/kernel`
@@ -50,7 +50,7 @@ macos-installers-abuse.md
 - **`.dmg`**: Apple Disk Image-Dateien sind sehr häufig für Installer.
 - **`.kext`**: Es muss einer bestimmten Struktur folgen und ist die OS X-Version eines Treibers. (es ist ein Bundle)
 - **`.plist`**: Auch bekannt als Property List, speichert Informationen im XML- oder Binärformat.
-- Kann XML oder binär sein. Binäre können gelesen werden mit:
+- Kann XML oder binär sein. Binäre können mit folgendem gelesen werden:
 - `defaults read config.plist`
 - `/usr/libexec/PlistBuddy -c print config.plsit`
 - `plutil -p ~/Library/Preferences/com.apple.screensaver.plist`
@@ -82,7 +82,7 @@ In iOS finden Sie sie in **`/System/Library/Caches/com.apple.dyld/`**.
 
 Ähnlich wie der dyld shared cache sind der Kernel und die Kernel-Erweiterungen ebenfalls in einem Kernel-Cache kompiliert, der beim Booten geladen wird.
 
-Um die Bibliotheken aus dem einzelnen Datei-dylib-Shared-Cache zu extrahieren, war es möglich, das Binärprogramm [dyld_shared_cache_util](https://www.mbsplugins.de/files/dyld_shared_cache_util-dyld-733.8.zip) zu verwenden, das heutzutage möglicherweise nicht mehr funktioniert, aber Sie können auch [**dyldextractor**](https://github.com/arandomdev/dyldextractor) verwenden:
+Um die Bibliotheken aus dem einzelnen Datei-dylib-Shared-Cache zu extrahieren, war es möglich, das Binärprogramm [dyld_shared_cache_util](https://www.mbsplugins.de/files/dyld_shared_cache_util-dyld-733.8.zip) zu verwenden, das möglicherweise heutzutage nicht mehr funktioniert, aber Sie können auch [**dyldextractor**](https://github.com/arandomdev/dyldextractor) verwenden:
 ```bash
 # dyld_shared_cache_util
 dyld_shared_cache_util -extract ~/shared_cache/ /System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/dyld_shared_cache_arm64e
@@ -121,7 +121,7 @@ Verwendung der Umgebungsvariablen:
 
 ### Ordners Berechtigungen
 
-In einem **Ordner** ermöglicht **lesen** das **Auflisten**, **schreiben** erlaubt das **Löschen** und **schreiben** von Dateien darin, und **ausführen** erlaubt das **Durchqueren** des Verzeichnisses. Ein Benutzer mit **Lesezugriff auf eine Datei** in einem Verzeichnis, in dem er **keine Ausführungsberechtigung** hat, **wird die Datei nicht lesen können**.
+In einem **Ordner** erlaubt **lesen**, ihn **aufzulisten**, **schreiben** erlaubt das **Löschen** und **Schreiben** von Dateien darin, und **ausführen** erlaubt das **Durchqueren** des Verzeichnisses. Ein Benutzer mit **Lesezugriff auf eine Datei** in einem Verzeichnis, in dem er **keine Ausführungsberechtigung** hat, **wird die Datei nicht lesen können**.
 
 ### Flag-Modifikatoren
 
@@ -130,7 +130,7 @@ Es gibt einige Flags, die in den Dateien gesetzt werden können, die das Verhalt
 - **`uchg`**: Bekannt als **uchange**-Flag, wird **jede Aktion** zum Ändern oder Löschen der **Datei** verhindern. Um es zu setzen, tun Sie: `chflags uchg file.txt`
 - Der Root-Benutzer könnte **das Flag entfernen** und die Datei ändern.
 - **`restricted`**: Dieses Flag schützt die Datei **durch SIP** (Sie können dieses Flag nicht zu einer Datei hinzufügen).
-- **`Sticky bit`**: Wenn ein Verzeichnis mit Sticky-Bit, **kann nur** der **Verzeichnisbesitzer oder Root Dateien umbenennen oder löschen**. Typischerweise wird dies im /tmp-Verzeichnis gesetzt, um zu verhindern, dass normale Benutzer die Dateien anderer Benutzer löschen oder verschieben.
+- **`Sticky bit`**: Wenn ein Verzeichnis mit Sticky Bit, **kann nur** der **Verzeichnisbesitzer oder Root Dateien umbenennen oder löschen**. Typischerweise wird dies im /tmp-Verzeichnis gesetzt, um zu verhindern, dass normale Benutzer die Dateien anderer Benutzer löschen oder verschieben.
 
 Alle Flags finden Sie in der Datei `sys/stat.h` (finden Sie sie mit `mdfind stat.h | grep stat.h`) und sind:
 
@@ -172,7 +172,7 @@ ls -lde Movies
 drwx------+ 7 username  staff  224 15 Apr 19:42 Movies
 0: group:everyone deny delete
 ```
-Sie können **alle Dateien mit ACLs** mit (das ist sehr langsam) finden:
+Sie können **alle Dateien mit ACLs** mit (das ist sehr langsam):
 ```bash
 ls -RAle / 2>/dev/null | grep -E -B1 "\d: "
 ```
@@ -183,8 +183,8 @@ Erweiterte Attribute haben einen Namen und einen beliebigen gewünschten Wert un
 - `com.apple.resourceFork`: Kompatibilität mit Resource Fork. Auch sichtbar als `filename/..namedfork/rsrc`
 - `com.apple.quarantine`: MacOS: Gatekeeper-Quarantänemechanismus (III/6)
 - `metadata:*`: MacOS: verschiedene Metadaten, wie `_backup_excludeItem` oder `kMD*`
-- `com.apple.lastuseddate` (#PS): Datum der letzten Dateinutzung
-- `com.apple.FinderInfo`: MacOS: Finder-Informationen (z.B. Farb-Tags)
+- `com.apple.lastuseddate` (#PS): Letztes Dateinutzungsdatum
+- `com.apple.FinderInfo`: MacOS: Finder-Informationen (z. B. Farb-Tags)
 - `com.apple.TextEncoding`: Gibt die Textkodierung von ASCII-Textdateien an
 - `com.apple.logd.metadata`: Wird von logd für Dateien in `/var/db/diagnostics` verwendet
 - `com.apple.genstore.*`: Generational storage (`/.DocumentRevisions-V100` im Wurzelverzeichnis des Dateisystems)
@@ -192,7 +192,7 @@ Erweiterte Attribute haben einen Namen und einen beliebigen gewünschten Wert un
 - `com.apple.uuidb.boot-uuid`: logd-Markierungen von Boot-Epochen mit eindeutiger UUID
 - `com.apple.decmpfs`: MacOS: Transparente Dateikompression (II/7)
 - `com.apple.cprotect`: \*OS: Per-Datei-Verschlüsselungsdaten (III/11)
-- `com.apple.installd.*`: \*OS: Metadaten, die von installd verwendet werden, z.B. `installType`, `uniqueInstallID`
+- `com.apple.installd.*`: \*OS: Metadaten, die von installd verwendet werden, z. B. `installType`, `uniqueInstallID`
 
 ### Resource Forks | macOS ADS
 
@@ -237,7 +237,7 @@ macos-memory-dumping.md
 
 ## Risikokategorie Dateien Mac OS
 
-Das Verzeichnis `/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/System` ist der Ort, an dem Informationen über das **Risiko, das mit verschiedenen Dateierweiterungen verbunden ist**, gespeichert werden. Dieses Verzeichnis kategorisiert Dateien in verschiedene Risikostufen, die beeinflussen, wie Safari mit diesen Dateien beim Herunterladen umgeht. Die Kategorien sind wie folgt:
+Das Verzeichnis `/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/System` ist der Ort, an dem Informationen über das **Risiko, das mit verschiedenen Dateierweiterungen verbunden ist**, gespeichert sind. Dieses Verzeichnis kategorisiert Dateien in verschiedene Risikostufen, die beeinflussen, wie Safari mit diesen Dateien beim Herunterladen umgeht. Die Kategorien sind wie folgt:
 
 - **LSRiskCategorySafe**: Dateien in dieser Kategorie gelten als **vollständig sicher**. Safari öffnet diese Dateien automatisch, nachdem sie heruntergeladen wurden.
 - **LSRiskCategoryNeutral**: Diese Dateien kommen ohne Warnungen und werden **nicht automatisch von Safari geöffnet**.

@@ -4,9 +4,9 @@
 
 ## XNU Kernel
 
-Der **Kern von macOS ist XNU**, was für "X is Not Unix" steht. Dieser Kernel besteht grundlegend aus dem **Mach-Mikrokernel** (der später besprochen wird) und Elementen der Berkeley Software Distribution (**BSD**). XNU bietet auch eine Plattform für **Kernel-Treiber über ein System namens I/O Kit**. Der XNU-Kernel ist Teil des Darwin-Open-Source-Projekts, was bedeutet, dass **der Quellcode frei zugänglich ist**.
+Der **Kern von macOS ist XNU**, was für "X is Not Unix" steht. Dieser Kernel besteht grundlegend aus dem **Mach-Mikrokernel** (der später besprochen wird) **und** Elementen der Berkeley Software Distribution (**BSD**). XNU bietet auch eine Plattform für **Kernel-Treiber über ein System namens I/O Kit**. Der XNU-Kernel ist Teil des Darwin-Open-Source-Projekts, was bedeutet, dass **der Quellcode frei zugänglich ist**.
 
-Aus der Perspektive eines Sicherheitsforschers oder Unix-Entwicklers kann **macOS** ziemlich **ähnlich** einem **FreeBSD**-System mit einer eleganten GUI und einer Vielzahl von benutzerdefinierten Anwendungen erscheinen. Die meisten für BSD entwickelten Anwendungen werden ohne Modifikationen auf macOS kompiliert und ausgeführt, da die Befehlszeilenwerkzeuge, die Unix-Benutzern vertraut sind, alle in macOS vorhanden sind. Da der XNU-Kernel jedoch Mach integriert, gibt es einige wesentliche Unterschiede zwischen einem traditionellen Unix-ähnlichen System und macOS, und diese Unterschiede können potenzielle Probleme verursachen oder einzigartige Vorteile bieten.
+Aus der Perspektive eines Sicherheitsforschers oder Unix-Entwicklers kann **macOS** ziemlich **ähnlich** einem **FreeBSD**-System mit einer eleganten GUI und einer Vielzahl von benutzerdefinierten Anwendungen erscheinen. Die meisten für BSD entwickelten Anwendungen werden auf macOS ohne Änderungen kompiliert und ausgeführt, da die für Unix-Benutzer vertrauten Befehlszeilenwerkzeuge alle in macOS vorhanden sind. Da der XNU-Kernel jedoch Mach integriert, gibt es einige wesentliche Unterschiede zwischen einem traditionellen Unix-ähnlichen System und macOS, und diese Unterschiede können potenzielle Probleme verursachen oder einzigartige Vorteile bieten.
 
 Open-Source-Version von XNU: [https://opensource.apple.com/source/xnu/](https://opensource.apple.com/source/xnu/)
 
@@ -18,16 +18,16 @@ In XNU ist Mach **verantwortlich für viele der kritischen Low-Level-Operationen
 
 ### BSD
 
-Der XNU **Kernel** **integriert** auch eine erhebliche Menge an Code, der aus dem **FreeBSD**-Projekt stammt. Dieser Code **läuft als Teil des Kernels zusammen mit Mach** im selben Adressraum. Der FreeBSD-Code innerhalb von XNU kann jedoch erheblich vom ursprünglichen FreeBSD-Code abweichen, da Modifikationen erforderlich waren, um die Kompatibilität mit Mach sicherzustellen. FreeBSD trägt zu vielen Kernel-Operationen bei, einschließlich:
+Der XNU **Kernel** **integriert** auch eine erhebliche Menge an Code, der aus dem **FreeBSD**-Projekt stammt. Dieser Code **läuft als Teil des Kernels zusammen mit Mach** im selben Adressraum. Der FreeBSD-Code innerhalb von XNU kann jedoch erheblich vom ursprünglichen FreeBSD-Code abweichen, da Änderungen erforderlich waren, um die Kompatibilität mit Mach sicherzustellen. FreeBSD trägt zu vielen Kernel-Operationen bei, einschließlich:
 
-- Prozessmanagement
+- Prozessverwaltung
 - Signalverarbeitung
 - Grundlegende Sicherheitsmechanismen, einschließlich Benutzer- und Gruppenverwaltung
 - Systemaufruf-Infrastruktur
 - TCP/IP-Stack und Sockets
 - Firewall und Paketfilterung
 
-Das Verständnis der Interaktion zwischen BSD und Mach kann komplex sein, aufgrund ihrer unterschiedlichen konzeptionellen Rahmen. Zum Beispiel verwendet BSD Prozesse als seine grundlegende Ausführungseinheit, während Mach auf Threads basiert. Diese Diskrepanz wird in XNU dadurch ausgeglichen, dass **jeder BSD-Prozess mit einer Mach-Aufgabe** verknüpft wird, die genau einen Mach-Thread enthält. Wenn der fork()-Systemaufruf von BSD verwendet wird, nutzt der BSD-Code innerhalb des Kernels Mach-Funktionen, um eine Aufgabe und eine Thread-Struktur zu erstellen.
+Das Verständnis der Interaktion zwischen BSD und Mach kann komplex sein, aufgrund ihrer unterschiedlichen konzeptionellen Rahmen. Zum Beispiel verwendet BSD Prozesse als seine grundlegende Ausführungseinheit, während Mach auf Threads basiert. Diese Diskrepanz wird in XNU dadurch ausgeglichen, dass **jeder BSD-Prozess mit einer Mach-Aufgabe** assoziiert wird, die genau einen Mach-Thread enthält. Wenn der fork()-Systemaufruf von BSD verwendet wird, nutzt der BSD-Code innerhalb des Kernels Mach-Funktionen, um eine Aufgabe und eine Thread-Struktur zu erstellen.
 
 Darüber hinaus **pflegen Mach und BSD jeweils unterschiedliche Sicherheitsmodelle**: **Das Sicherheitsmodell von Mach** basiert auf **Port-Rechten**, während das Sicherheitsmodell von BSD auf **Prozesseigentum** basiert. Unterschiede zwischen diesen beiden Modellen haben gelegentlich zu lokalen Privilegieneskalationsanfälligkeiten geführt. Neben typischen Systemaufrufen gibt es auch **Mach-Traps, die es Benutzerspace-Programmen ermöglichen, mit dem Kernel zu interagieren**. Diese verschiedenen Elemente bilden zusammen die facettenreiche, hybride Architektur des macOS-Kernels.
 
@@ -57,7 +57,7 @@ macos-kernel-extensions.md
 
 ### macOS Systemerweiterungen
 
-Anstelle von Kernel-Erweiterungen hat macOS die Systemerweiterungen geschaffen, die auf Benutzerebene APIs bieten, um mit dem Kernel zu interagieren. Auf diese Weise können Entwickler die Verwendung von Kernel-Erweiterungen vermeiden.
+Anstelle von Kernel-Erweiterungen hat macOS die Systemerweiterungen geschaffen, die auf Benutzerebene APIs bieten, um mit dem Kernel zu interagieren. Auf diese Weise können Entwickler auf die Verwendung von Kernel-Erweiterungen verzichten.
 
 {{#ref}}
 macos-system-extensions.md

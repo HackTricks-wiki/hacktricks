@@ -66,7 +66,7 @@ proc.Create "powershell <beacon line generated>
 ```
 #### Manuell Metadaten entfernen
 
-Gehe zu **Datei > Informationen > Dokument überprüfen > Dokument überprüfen**, um den Dokumentinspektor zu öffnen. Klicke auf **Überprüfen** und dann auf **Alle entfernen** neben **Dokumenteigenschaften und persönliche Informationen**.
+Gehe zu **Datei > Informationen > Dokument überprüfen > Dokument überprüfen**, was den Dokumentinspektor öffnet. Klicke auf **Überprüfen** und dann auf **Alle entfernen** neben **Dokumenteigenschaften und persönliche Informationen**.
 
 #### Doc-Erweiterung
 

@@ -51,7 +51,7 @@ Nach der Replikation kann der Angreifer einfach **logon** als `attacker_dMSA$` o
 
 ### Automatisierung
 
-Mehrere öffentliche PoCs umhüllen den gesamten Workflow, einschließlich der Passwortabfrage und Ticketverwaltung:
+Mehrere öffentliche PoCs umfassen den gesamten Workflow, einschließlich der Passwortabfrage und Ticketverwaltung:
 
 * SharpSuccessor (C#) – [https://github.com/logangoins/SharpSuccessor](https://github.com/logangoins/SharpSuccessor)
 * BadSuccessor.ps1 (PowerShell) – [https://github.com/LuemmelSec/Pentest-Tools-Collection/blob/main/tools/ActiveDirectory/BadSuccessor.ps1](https://github.com/LuemmelSec/Pentest-Tools-Collection/blob/main/tools/ActiveDirectory/BadSuccessor.ps1)
@@ -77,7 +77,7 @@ Aktivieren Sie **Objektauditing** für OUs und überwachen Sie die folgenden Win
 * GUID `a0945b2b-57a2-43bd-b327-4d112a4e8bd1` → `msDS-ManagedAccountPrecededByLink`
 * **2946** – TGT-Ausstellung für das dMSA
 
-Die Korrelation von `4662` (Attributänderung), `4741` (Erstellung eines Computer-/Dienstkontos) und `4624` (darauffolgende Anmeldung) hebt schnell BadSuccessor-Aktivitäten hervor. XDR-Lösungen wie **XSIAM** werden mit einsatzbereiten Abfragen geliefert (siehe Referenzen).
+Die Korrelation von `4662` (Attributänderung), `4741` (Erstellung eines Computer-/Dienstkontos) und `4624` (darauffolgende Anmeldung) hebt schnell BadSuccessor-Aktivitäten hervor. XDR-Lösungen wie **XSIAM** liefern sofort einsatzbereite Abfragen (siehe Referenzen).
 
 ## Mitigation
 

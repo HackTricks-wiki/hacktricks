@@ -19,7 +19,7 @@
 
 ### **Grundlagen des DEP (Device Enrollment Program)**
 
-Das [Device Enrollment Program](https://www.apple.com/business/site/docs/DEP_Guide.pdf) (DEP), das von Apple angeboten wird, vereinfacht die Integration von Mobile Device Management (MDM), indem es eine Zero-Touch-Konfiguration für iOS-, macOS- und tvOS-Geräte ermöglicht. DEP automatisiert den Registrierungsprozess, sodass Geräte sofort einsatzbereit sind, ohne dass Benutzer oder Administratoren eingreifen müssen. Wesentliche Aspekte sind:
+Das [Device Enrollment Program](https://www.apple.com/business/site/docs/DEP_Guide.pdf) (DEP), das von Apple angeboten wird, vereinfacht die Integration von Mobile Device Management (MDM), indem es eine Zero-Touch-Konfiguration für iOS-, macOS- und tvOS-Geräte ermöglicht. DEP automatisiert den Registrierungsprozess, sodass Geräte sofort einsatzbereit sind, mit minimalem Benutzer- oder Verwaltungsaufwand. Wesentliche Aspekte sind:
 
 - Ermöglicht es Geräten, sich autonom bei einem vordefinierten MDM-Server bei der ersten Aktivierung zu registrieren.
 - Primär vorteilhaft für brandneue Geräte, aber auch anwendbar für Geräte, die neu konfiguriert werden.
@@ -49,7 +49,7 @@ Es ist wichtig zu beachten, dass die durch DEP gebotene einfache Registrierung, 
 ### MDM
 
 - Kombination aus APNs (**Apple-Server**n) + RESTful API (**MDM** **Anbieter**-Server)
-- **Kommunikation** erfolgt zwischen einem **Gerät** und einem Server, der mit einem **Geräteverwaltungs**-**produkt** verbunden ist
+- **Kommunikation** erfolgt zwischen einem **Gerät** und einem Server, der mit einem **Geräteverwaltungs**produkt verbunden ist
 - **Befehle** werden vom MDM an das Gerät in **plist-kodierten Dictionaries** übermittelt
 - Überall über **HTTPS**. MDM-Server können (und sind normalerweise) gepinnt.
 - Apple gewährt dem MDM-Anbieter ein **APNs-Zertifikat** zur Authentifizierung
@@ -97,7 +97,7 @@ Die Datei `/Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk/System/Libra
 
 ### Schritt 4: DEP-Check-in - Abrufen des Aktivierungsdatensatzes
 
-Dieser Teil des Prozesses erfolgt, wenn ein **Benutzer einen Mac zum ersten Mal bootet** (oder nach einer vollständigen Löschung)
+Dieser Teil des Prozesses tritt auf, wenn ein **Benutzer einen Mac zum ersten Mal bootet** (oder nach einer vollständigen Löschung)
 
 ![](<../../../images/image (1044).png>)
 
@@ -107,7 +107,7 @@ oder beim Ausführen von `sudo profiles show -type enrollment`
 - Aktivierungsdatensatz ist der interne Name für **DEP „Profil“**
 - Beginnt, sobald das Gerät mit dem Internet verbunden ist
 - Angetrieben von **`CPFetchActivationRecord`**
-- Implementiert durch **`cloudconfigurationd`** über XPC. Der **"Setup-Assistent"** (wenn das Gerät zum ersten Mal gebootet wird) oder der **`profiles`**-Befehl wird **dieses Daemon** kontaktieren, um den Aktivierungsdatensatz abzurufen.
+- Implementiert durch **`cloudconfigurationd`** über XPC. Der **"Setup-Assistent"** (wenn das Gerät zum ersten Mal gebootet wird) oder der **`profiles`**-Befehl wird **diesem Daemon** kontaktieren, um den Aktivierungsdatensatz abzurufen.
 - LaunchDaemon (läuft immer als root)
 
 Es folgen einige Schritte, um den Aktivierungsdatensatz durch **`MCTeslaConfigurationFetcher`** abzurufen. Dieser Prozess verwendet eine Verschlüsselung namens **Absinthe**
@@ -121,7 +121,7 @@ Es folgen einige Schritte, um den Aktivierungsdatensatz durch **`MCTeslaConfigur
 4. Sitzung einrichten (**`NACKeyEstablishment`**)
 5. Anfrage stellen
 1. POST an [https://iprofiles.apple.com/macProfile](https://iprofiles.apple.com/macProfile) mit den Daten `{ "action": "RequestProfileConfiguration", "sn": "" }`
-2. Die JSON-Payload wird mit Absinthe (**`NACSign`**) verschlüsselt
+2. Die JSON-Payload ist mit Absinthe (**`NACSign`**) verschlüsselt
 3. Alle Anfragen über HTTPs, integrierte Root-Zertifikate werden verwendet
 
 ![](<../../../images/image (566) (1).png>)
@@ -144,7 +144,7 @@ Die Antwort ist ein JSON-Dictionary mit einigen wichtigen Daten wie:
 - Signiert mit dem **Geräteidentitätszertifikat (von APNS)**
 - **Zertifikatkette** umfasst abgelaufene **Apple iPhone Device CA**
 
-![](<../../../images/image (567) (1) (2) (2) (2) (2) (2) (2) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (2) (2).png>)
+![](<../../../images/image (567) (1) (2) (2) (2) (2) (2) (2) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (2) (2).png>)
 
 ### Schritt 6: Installation des Profils
 
@@ -163,8 +163,8 @@ Die Antwort ist ein JSON-Dictionary mit einigen wichtigen Daten wie:
 Typischerweise wird das **Aktivierungsprofil**, das von einem MDM-Anbieter bereitgestellt wird, die folgenden Payloads **enthalten**:
 
 - `com.apple.mdm`: um das Gerät in MDM zu **registrieren**
-- `com.apple.security.scep`: um ein **Client-Zertifikat** sicher an das Gerät bereitzustellen.
-- `com.apple.security.pem`: um vertrauenswürdige CA-Zertifikate im System-Schlüsselbund des Geräts zu **installieren**.
+- `com.apple.security.scep`: um dem Gerät ein **Client-Zertifikat** sicher bereitzustellen.
+- `com.apple.security.pem`: um **vertrauenswürdige CA-Zertifikate** im System-Schlüsselbund des Geräts zu installieren.
 - Die Installation der MDM-Payload entspricht dem **MDM-Check-in in der Dokumentation**
 - Die Payload **enthält wichtige Eigenschaften**:
 - - MDM-Check-In-URL (**`CheckInURL`**)

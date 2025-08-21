@@ -34,7 +34,7 @@ lsof -i TCP -sTCP:ESTABLISHED
 ```
 ### Missbrauch von DNS
 
-DNS-Auflösungen erfolgen über die signierte Anwendung **`mdnsreponder`**, die wahrscheinlich berechtigt ist, DNS-Server zu kontaktieren.
+DNS-Auflösungen erfolgen über die **`mdnsreponder`** signierte Anwendung, die wahrscheinlich berechtigt ist, DNS-Server zu kontaktieren.
 
 <figure><img src="../../images/image (468).png" alt="https://www.youtube.com/watch?v=UlT5KFTMn2k"><figcaption></figcaption></figure>
 
@@ -74,8 +74,8 @@ macos-proces-abuse/
 
 ## Aktuelle macOS Firewall-Umgehungsschwachstellen (2023-2025)
 
-### Umgehung des Webinhaltsfilters (Bildschirmzeit) – **CVE-2024-44206**
-Im Juli 2024 hat Apple einen kritischen Fehler in Safari/WebKit behoben, der den systemweiten „Webinhaltsfilter“ beeinträchtigte, der von den Bildschirmzeit-Elterngesetzen verwendet wird. 
+### Umgehung des Webinhaltfilters (Bildschirmzeit) – **CVE-2024-44206**
+Im Juli 2024 hat Apple einen kritischen Fehler in Safari/WebKit behoben, der den systemweiten „Webinhaltfilter“ beeinträchtigte, der von den Bildschirmzeit-Elterngesteuerten verwendet wird. 
 Eine speziell gestaltete URI (zum Beispiel mit doppelt URL-kodiertem “://”) wird von der Bildschirmzeit-ACL nicht erkannt, aber von WebKit akzeptiert, sodass die Anfrage ungefiltert gesendet wird. Jeder Prozess, der eine URL öffnen kann (einschließlich sandboxed oder unsigniertem Code), kann daher auf Domains zugreifen, die vom Benutzer oder einem MDM-Profil ausdrücklich blockiert sind.
 
 Praktischer Test (nicht gepatchtes System):
@@ -84,7 +84,7 @@ open "http://attacker%2Ecom%2F./"   # should be blocked by Screen Time
 # if the patch is missing Safari will happily load the page
 ```
 ### Packet Filter (PF) Regelreihenfolge-Fehler in der frühen macOS 14 “Sonoma”
-Während des macOS 14 Beta-Zyklus führte Apple eine Regression im Userspace-Wraparound **`pfctl`** ein. Regeln, die mit dem `quick` Schlüsselwort hinzugefügt wurden (verwendet von vielen VPN-Kill-Switches), wurden stillschweigend ignoriert, was zu Datenlecks führte, selbst wenn eine VPN/Firewall-GUI *blockiert* meldete. Der Fehler wurde von mehreren VPN-Anbietern bestätigt und in RC 2 (Build 23A344) behoben.
+Während des macOS 14 Beta-Zyklus führte Apple eine Regression im Userspace-Wrapper um **`pfctl`** ein. Regeln, die mit dem `quick` Schlüsselwort hinzugefügt wurden (verwendet von vielen VPN-Kill-Switches), wurden stillschweigend ignoriert, was zu Datenlecks führte, selbst wenn eine VPN-/Firewall-GUI *blockiert* meldete. Der Fehler wurde von mehreren VPN-Anbietern bestätigt und in RC 2 (Build 23A344) behoben.
 
 Schneller Leak-Check:
 ```bash

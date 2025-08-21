@@ -12,7 +12,7 @@ Mehrmals vertraut das Backend dem **Host-Header**, um einige Aktionen durchzufü
 ### Sitzungs-Boolean
 
 Manchmal, wenn Sie eine Überprüfung korrekt abschließen, wird das Backend **einfach ein Boolean mit dem Wert "True" zu einem Sicherheitsattribut Ihrer Sitzung hinzufügen**. Dann wird ein anderer Endpunkt wissen, ob Sie diese Überprüfung erfolgreich bestanden haben.\
-Wenn Sie jedoch **die Überprüfung bestehen** und Ihre Sitzung diesen "True"-Wert im Sicherheitsattribut erhält, können Sie versuchen, **auf andere Ressourcen zuzugreifen**, die **von demselben Attribut abhängen**, auf die Sie **keine Berechtigung** haben sollten. [WriteUp](https://medium.com/@ozguralp/a-less-known-attack-vector-second-order-idor-attacks-14468009781a).
+Wenn Sie jedoch die **Überprüfung bestehen** und Ihre Sitzung diesen "True"-Wert im Sicherheitsattribut erhält, können Sie versuchen, **auf andere Ressourcen zuzugreifen**, die **von demselben Attribut abhängen**, auf die Sie **keine Berechtigung** haben sollten. [WriteUp](https://medium.com/@ozguralp/a-less-known-attack-vector-second-order-idor-attacks-14468009781a).
 
 ### Registrierungsfunktionalität
 
@@ -30,7 +30,7 @@ https://yourcompanyname.atlassian.net/servicedesk/customer/user/login
 
 ### TRACE-Methode
 
-Entwickler könnten vergessen, verschiedene Debugging-Optionen in der Produktionsumgebung zu deaktivieren. Zum Beispiel ist die HTTP `TRACE`-Methode für Diagnosezwecke gedacht. Wenn sie aktiviert ist, wird der Webserver auf Anfragen, die die `TRACE`-Methode verwenden, mit der genauen Anfrage antworten, die empfangen wurde. Dieses Verhalten ist oft harmlos, führt aber gelegentlich zu Informationslecks, wie z.B. den Namen interner Authentifizierungsheader, die von Reverse-Proxys an Anfragen angehängt werden können.![Image for post](https://miro.medium.com/max/60/1*wDFRADTOd9Tj63xucenvAA.png?q=20)
+Entwickler könnten vergessen, verschiedene Debugging-Optionen in der Produktionsumgebung zu deaktivieren. Zum Beispiel ist die HTTP `TRACE`-Methode für Diagnosezwecke gedacht. Wenn sie aktiviert ist, wird der Webserver auf Anfragen, die die `TRACE`-Methode verwenden, mit der genauen Anfrage antworten, die empfangen wurde. Dieses Verhalten ist oft harmlos, führt aber gelegentlich zu Informationsoffenlegung, wie z.B. den Namen interner Authentifizierungsheader, die von Reverse-Proxys an Anfragen angehängt werden können.![Image for post](https://miro.medium.com/max/60/1*wDFRADTOd9Tj63xucenvAA.png?q=20)
 
 ![Image for post](https://miro.medium.com/max/1330/1*wDFRADTOd9Tj63xucenvAA.png)
 

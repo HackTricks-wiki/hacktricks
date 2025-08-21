@@ -7,7 +7,7 @@
 Eine Anwendungs-Whitelist ist eine Liste genehmigter Softwareanwendungen oder ausführbarer Dateien, die auf einem System vorhanden sein und ausgeführt werden dürfen. Das Ziel ist es, die Umgebung vor schädlicher Malware und nicht genehmigter Software zu schützen, die nicht mit den spezifischen Geschäftsbedürfnissen einer Organisation übereinstimmt.
 
 [AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) ist Microsofts **Lösung zur Anwendungs-Whitelist** und gibt Systemadministratoren die Kontrolle darüber, **welche Anwendungen und Dateien Benutzer ausführen können**. Es bietet **feingranulare Kontrolle** über ausführbare Dateien, Skripte, Windows-Installationsdateien, DLLs, verpackte Apps und Installationsprogramme für verpackte Apps.\
-Es ist üblich, dass Organisationen **cmd.exe und PowerShell.exe** sowie Schreibzugriff auf bestimmte Verzeichnisse blockieren, **aber das kann alles umgangen werden**.
+Es ist üblich, dass Organisationen **cmd.exe und PowerShell.exe** sowie den Schreibzugriff auf bestimmte Verzeichnisse blockieren, **aber das kann alles umgangen werden**.
 
 ### Überprüfen
 
@@ -58,7 +58,7 @@ Die **Anmeldeinformationen** werden im **Prozess LSASS** gespeichert: Kerberos-T
 
 LSA könnte einige Anmeldeinformationen auf der Festplatte speichern:
 
-- Passwort des Computerkontos des Active Directory (nicht erreichbarer Domänencontroller).
+- Passwort des Computerkontos des Active Directory (unerreichbarer Domänencontroller).
 - Passwörter der Konten von Windows-Diensten
 - Passwörter für geplante Aufgaben
 - Mehr (Passwort von IIS-Anwendungen...)
@@ -103,7 +103,7 @@ sc query windefend
 ```
 ## Encrypted File System (EFS)
 
-EFS sichert Dateien durch Verschlüsselung, indem ein **symmetrischer Schlüssel** verwendet wird, der als **Dateiverschlüsselungsschlüssel (FEK)** bekannt ist. Dieser Schlüssel wird mit dem **öffentlichen Schlüssel** des Benutzers verschlüsselt und im $EFS **alternativen Datenstrom** der verschlüsselten Datei gespeichert. Wenn eine Entschlüsselung erforderlich ist, wird der entsprechende **private Schlüssel** des digitalen Zertifikats des Benutzers verwendet, um den FEK aus dem $EFS-Strom zu entschlüsseln. Weitere Details finden Sie [hier](https://en.wikipedia.org/wiki/Encrypting_File_System).
+EFS sichert Dateien durch Verschlüsselung, indem es einen **symmetrischen Schlüssel** verwendet, der als **Dateiverschlüsselungsschlüssel (FEK)** bekannt ist. Dieser Schlüssel wird mit dem **öffentlichen Schlüssel** des Benutzers verschlüsselt und im $EFS **alternativen Datenstrom** der verschlüsselten Datei gespeichert. Wenn eine Entschlüsselung erforderlich ist, wird der entsprechende **private Schlüssel** des digitalen Zertifikats des Benutzers verwendet, um den FEK aus dem $EFS-Strom zu entschlüsseln. Weitere Details finden Sie [hier](https://en.wikipedia.org/wiki/Encrypting_File_System).
 
 **Entschlüsselungsszenarien ohne Benutzerinitiierung** umfassen:
 
@@ -123,7 +123,7 @@ Diese Verschlüsselungsmethode ermöglicht **transparenten Zugriff** auf verschl
 
 Überprüfen Sie, ob ein **Benutzer** diesen **Dienst** genutzt hat, indem Sie überprüfen, ob dieser Pfad existiert: `C:\users\<username>\appdata\roaming\Microsoft\Protect`
 
-Überprüfen Sie, **wer** Zugriff auf die Datei hat, indem Sie cipher /c \<file>\
+Überprüfen Sie, **wer** Zugriff auf die Datei hat, indem Sie cipher /c \<file>\ verwenden.\
 Sie können auch `cipher /e` und `cipher /d` innerhalb eines Ordners verwenden, um alle Dateien zu **verschlüsseln** und **zu entschlüsseln**.
 
 ### Entschlüsseln von EFS-Dateien
@@ -140,7 +140,7 @@ https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files
 
 ## Group Managed Service Accounts (gMSA)
 
-Microsoft entwickelte **Group Managed Service Accounts (gMSA)**, um die Verwaltung von Dienstkonten in IT-Infrastrukturen zu vereinfachen. Im Gegensatz zu traditionellen Dienstkonten, die oft die Einstellung "**Passwort läuft niemals ab**" aktiviert haben, bieten gMSAs eine sicherere und verwaltbare Lösung:
+Microsoft entwickelte **Group Managed Service Accounts (gMSA)**, um die Verwaltung von Dienstkonten in IT-Infrastrukturen zu vereinfachen. Im Gegensatz zu traditionellen Dienstkonten, die oft die Einstellung "**Passwort läuft nie ab**" aktiviert haben, bieten gMSAs eine sicherere und verwaltbare Lösung:
 
 - **Automatische Passwortverwaltung**: gMSAs verwenden ein komplexes, 240-Zeichen-Passwort, das automatisch gemäß der Domänen- oder Computerpolitik geändert wird. Dieser Prozess wird vom Key Distribution Service (KDC) von Microsoft verwaltet, wodurch manuelle Passwortaktualisierungen entfallen.
 - **Erhöhte Sicherheit**: Diese Konten sind immun gegen Sperrungen und können nicht für interaktive Anmeldungen verwendet werden, was ihre Sicherheit erhöht.
@@ -170,7 +170,7 @@ Die **Local Administrator Password Solution (LAPS)**, die von [Microsoft](https:
 
 ## PS Constrained Language Mode
 
-PowerShell [**Constrained Language Mode**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/) **schränkt viele der Funktionen ein**, die benötigt werden, um PowerShell effektiv zu nutzen, wie das Blockieren von COM-Objekten, das Zulassen nur genehmigter .NET-Typen, XAML-basierte Workflows, PowerShell-Klassen und mehr.
+PowerShell [**Constrained Language Mode**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/) **schränkt viele der benötigten Funktionen** ein, um PowerShell effektiv zu nutzen, wie das Blockieren von COM-Objekten, das Zulassen nur genehmigter .NET-Typen, XAML-basierter Workflows, PowerShell-Klassen und mehr.
 
 ### **Überprüfen**
 ```bash
@@ -195,7 +195,7 @@ C:\Windows\Microsoft.NET\Framework64\v4.0.30319\InstallUtil.exe /logfile= /LogTo
 ```
 Sie können [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) oder [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) verwenden, um **Powershell**-Code in jedem Prozess auszuführen und den eingeschränkten Modus zu umgehen. Für weitere Informationen siehe: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode).
 
-## PS Ausführungsrichtlinie
+## PS-Ausführungsrichtlinie
 
 Standardmäßig ist sie auf **restricted** eingestellt. Hauptwege, um diese Richtlinie zu umgehen:
 ```bash
@@ -223,7 +223,7 @@ Mehr kann [hier](https://blog.netspi.com/15-ways-to-bypass-the-powershell-execut
 
 Ist die API, die zur Authentifizierung von Benutzern verwendet werden kann.
 
-Die SSPI ist dafür verantwortlich, das geeignete Protokoll für zwei Maschinen zu finden, die kommunizieren möchten. Die bevorzugte Methode dafür ist Kerberos. Dann wird die SSPI aushandeln, welches Authentifizierungsprotokoll verwendet wird, diese Authentifizierungsprotokolle werden Security Support Provider (SSP) genannt, befinden sich in jeder Windows-Maschine in Form einer DLL und beide Maschinen müssen dasselbe unterstützen, um kommunizieren zu können.
+Die SSPI ist dafür verantwortlich, das geeignete Protokoll für zwei Maschinen zu finden, die kommunizieren möchten. Die bevorzugte Methode dafür ist Kerberos. Dann wird die SSPI aushandeln, welches Authentifizierungsprotokoll verwendet wird, diese Authentifizierungsprotokolle werden als Security Support Provider (SSP) bezeichnet, befinden sich in jeder Windows-Maschine in Form einer DLL und beide Maschinen müssen dasselbe unterstützen, um kommunizieren zu können.
 
 ### Haupt-SSPs
 
@@ -238,7 +238,7 @@ Die SSPI ist dafür verantwortlich, das geeignete Protokoll für zwei Maschinen 
 - **Negotiate**: Es wird verwendet, um das zu verwendende Protokoll auszuhandeln (Kerberos oder NTLM, wobei Kerberos das Standardprotokoll ist)
 - %windir%\Windows\System32\lsasrv.dll
 
-#### Die Verhandlung könnte mehrere Methoden oder nur eine anbieten.
+#### Die Aushandlung könnte mehrere Methoden oder nur eine anbieten.
 
 ## UAC - Benutzerkontensteuerung
 

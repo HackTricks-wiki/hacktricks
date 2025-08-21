@@ -50,7 +50,7 @@ SeUndockPrivilege             Remove computer from docking station Disabled
 SeIncreaseWorkingSetPrivilege Increase a process working set       Disabled
 SeTimeZonePrivilege           Change the time zone                 Disabled
 ```
-oder mit _Process Explorer_ von Sysinternals (Prozess auswählen und den Tab "Sicherheit" aufrufen):
+oder mit _Process Explorer_ von Sysinternals (Prozess auswählen und auf den Reiter "Sicherheit" zugreifen):
 
 ![](<../../images/image (772).png>)
 
@@ -76,16 +76,16 @@ Dies ist nützlich, wenn Sie nützliche Anmeldeinformationen haben, um auf Objek
 
 Es gibt zwei Arten von Tokens:
 
-- **Primäres Token**: Es dient als Darstellung der Sicherheitsanmeldeinformationen eines Prozesses. Die Erstellung und Zuordnung von primären Tokens zu Prozessen sind Aktionen, die erhöhte Privilegien erfordern, was das Prinzip der Privilegientrennung betont. Typischerweise ist ein Authentifizierungsdienst für die Token-Erstellung verantwortlich, während ein Anmeldedienst dessen Zuordnung zur Betriebssystem-Shell des Benutzers übernimmt. Es ist erwähnenswert, dass Prozesse das primäre Token ihres übergeordneten Prozesses bei der Erstellung erben.
-- **Impersonation Token**: Ermöglicht einer Serveranwendung, vorübergehend die Identität des Clients anzunehmen, um auf sichere Objekte zuzugreifen. Dieser Mechanismus ist in vier Betriebsebenen unterteilt:
+- **Primäres Token**: Es dient als Darstellung der Sicherheitsanmeldeinformationen eines Prozesses. Die Erstellung und Zuordnung von primären Tokens zu Prozessen sind Aktionen, die erhöhte Privilegien erfordern, was das Prinzip der Privilegtrennung betont. Typischerweise ist ein Authentifizierungsdienst für die Token-Erstellung verantwortlich, während ein Anmeldedienst dessen Zuordnung zur Betriebssystem-Shell des Benutzers übernimmt. Es ist erwähnenswert, dass Prozesse das primäre Token ihres übergeordneten Prozesses bei der Erstellung erben.
+- **Impersonation Token**: Ermöglicht einer Serveranwendung, vorübergehend die Identität des Clients anzunehmen, um auf sichere Objekte zuzugreifen. Dieser Mechanismus ist in vier Betriebsstufen unterteilt:
 - **Anonym**: Gewährt dem Server Zugriff ähnlich dem eines nicht identifizierten Benutzers.
 - **Identifikation**: Ermöglicht es dem Server, die Identität des Clients zu überprüfen, ohne sie für den Objektzugriff zu nutzen.
 - **Impersonation**: Ermöglicht es dem Server, unter der Identität des Clients zu arbeiten.
-- **Delegation**: Ähnlich wie Impersonation, umfasst jedoch die Fähigkeit, diese Identitätsannahme auf entfernte Systeme auszudehnen, mit denen der Server interagiert, um die Anmeldeinformationen zu bewahren.
+- **Delegation**: Ähnlich wie Impersonation, umfasst jedoch die Fähigkeit, diese Identitätsübernahme auf entfernte Systeme auszudehnen, mit denen der Server interagiert, um die Anmeldeinformationen zu bewahren.
 
 #### Impersonate Tokens
 
-Mit dem _**incognito**_ Modul von Metasploit können Sie, wenn Sie über ausreichende Privilegien verfügen, andere **Tokens** leicht **auflisten** und **nachahmen**. Dies könnte nützlich sein, um **Aktionen auszuführen, als ob Sie der andere Benutzer wären**. Sie könnten auch mit dieser Technik **Privilegien erhöhen**.
+Mit dem _**incognito**_ Modul von Metasploit können Sie, wenn Sie über ausreichende Privilegien verfügen, andere **Tokens** leicht **auflisten** und **imitieren**. Dies könnte nützlich sein, um **Aktionen auszuführen, als ob Sie der andere Benutzer wären**. Sie könnten auch mit dieser Technik **Privilegien erhöhen**.
 
 ### Token-Privilegien
 

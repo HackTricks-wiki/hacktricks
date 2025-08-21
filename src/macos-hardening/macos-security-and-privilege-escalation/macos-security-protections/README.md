@@ -40,7 +40,7 @@ macos-tcc/
 
 ### Start-/Umgebungsbeschränkungen & Vertrauenscache
 
-Startbeschränkungen in macOS sind eine Sicherheitsfunktion, um **die Prozessinitiierung zu regulieren**, indem definiert wird, **wer einen Prozess starten kann**, **wie** und **von wo**. Eingeführt in macOS Ventura, kategorisieren sie System-Binärdateien in Beschränkungs-Kategorien innerhalb eines **Vertrauenscaches**. Jede ausführbare Binärdatei hat festgelegte **Regeln** für ihren **Start**, einschließlich **selbst**, **Eltern** und **verantwortlich**. Diese Funktionen wurden in macOS Sonoma auf Drittanbieter-Apps als **Umgebungs**-Beschränkungen ausgeweitet, um potenzielle Systemausnutzungen zu mindern, indem die Bedingungen für das Starten von Prozessen geregelt werden.
+Startbeschränkungen in macOS sind eine Sicherheitsfunktion, um **die Prozessinitiierung** zu **regulieren**, indem definiert wird, **wer einen Prozess starten kann**, **wie** und **von wo**. Eingeführt in macOS Ventura, kategorisieren sie System-Binärdateien in Beschränkungs-Kategorien innerhalb eines **Vertrauenscaches**. Jede ausführbare Binärdatei hat festgelegte **Regeln** für ihren **Start**, einschließlich **selbst**, **Eltern** und **verantwortlich**. Diese Funktionen wurden in macOS Sonoma auf Drittanbieter-Apps als **Umgebungs**-Beschränkungen ausgeweitet, um potenzielle Systemausnutzungen zu mindern, indem die Bedingungen für das Starten von Prozessen geregelt werden.
 
 {{#ref}}
 macos-launch-environment-constraints.md
@@ -61,7 +61,7 @@ Die MRT-Anwendung befindet sich in **`/Library/Apple/System/Library/CoreServices
 
 ## Verwaltung von Hintergrundaufgaben
 
-**macOS** warnt jetzt jedes Mal, wenn ein Tool eine bekannte **Technik zur Persistenz der Codeausführung** verwendet (wie Anmeldeobjekte, Daemons...), damit der Benutzer besser weiß, **welche Software persistiert**.
+**macOS** warnt jetzt jedes Mal, wenn ein Tool eine bekannte **Technik zur Persistenz der Codeausführung** verwendet (wie Login-Elemente, Daemons...), damit der Benutzer besser weiß, **welche Software persistiert**.
 
 <figure><img src="../../../images/image (1183).png" alt=""><figcaption></figcaption></figure>
 
@@ -103,7 +103,7 @@ Diese Informationen werden in **`/private/var/db/com.apple.backgroundtaskmanagem
 
 ### Manipulation mit BTM
 
-Wenn eine neue Persistenz gefunden wird, wird ein Ereignis vom Typ **`ES_EVENT_TYPE_NOTIFY_BTM_LAUNCH_ITEM_ADD`** ausgelöst. Jede Möglichkeit, dieses **Ereignis** daran zu hindern, gesendet zu werden, oder den **Agenten daran zu hindern**, den Benutzer zu benachrichtigen, wird einem Angreifer helfen, BTM _**zu umgehen**_.
+Wenn eine neue Persistenz gefunden wird, tritt ein Ereignis vom Typ **`ES_EVENT_TYPE_NOTIFY_BTM_LAUNCH_ITEM_ADD`** auf. Jede Möglichkeit, dieses **Ereignis** daran zu hindern, gesendet zu werden, oder den **Agenten daran zu hindern**, den Benutzer zu benachrichtigen, wird einem Angreifer helfen, BTM zu _**umgehen**_.
 
 - **Datenbank zurücksetzen**: Das Ausführen des folgenden Befehls setzt die Datenbank zurück (sollte sie von Grund auf neu aufbauen), jedoch wird aus irgendeinem Grund nach dem Ausführen dies **keine neue Persistenz benachrichtigt, bis das System neu gestartet wird**.
 - **root** ist erforderlich.
@@ -124,7 +124,7 @@ kill -SIGSTOP 1011
 ps -o state 1011
 T
 ```
-- **Fehler**: Wenn der **Prozess, der die Persistenz erstellt hat, direkt danach schnell existiert**, wird der Daemon versuchen, **Informationen darüber zu erhalten**, **scheitern** und **wird nicht in der Lage sein, das Ereignis zu senden**, das anzeigt, dass eine neue Sache persistiert.
+- **Fehler**: Wenn der **Prozess, der die Persistenz erstellt hat, direkt danach existiert**, wird der Daemon versuchen, **Informationen darüber zu erhalten**, **fehlschlagen** und **nicht in der Lage sein, das Ereignis zu senden**, das anzeigt, dass eine neue Sache persistiert.
 
 Referenzen und **weitere Informationen über BTM**:
 

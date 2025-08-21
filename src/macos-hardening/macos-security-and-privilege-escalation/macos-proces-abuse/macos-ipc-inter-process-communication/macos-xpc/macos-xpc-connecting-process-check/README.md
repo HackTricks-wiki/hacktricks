@@ -26,11 +26,13 @@ Wenn eine Verbindung zu einem XPC-Dienst hergestellt wird, überprüft der Serve
 
 Für weitere Informationen über den PID-Wiederverwendungsangriff siehe:
 
+
 {{#ref}}
 macos-pid-reuse.md
 {{#endref}}
 
-Für weitere Informationen über den **`xpc_connection_get_audit_token`** Angriff siehe:
+Für weitere Informationen über den Angriff auf **`xpc_connection_get_audit_token`** siehe:
+
 
 {{#ref}}
 macos-xpc_connection_get_audit_token-attack.md

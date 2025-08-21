@@ -8,7 +8,7 @@ XPC, was für XNU (den von macOS verwendeten Kernel) Inter-Process Communication
 
 XPC verwendet eine Form der Inter-Process Communication (IPC), die eine Reihe von Methoden umfasst, damit verschiedene Programme, die auf demselben System laufen, Daten hin und her senden können.
 
-Die wichtigsten Vorteile von XPC sind:
+Die Hauptvorteile von XPC sind:
 
 1. **Sicherheit**: Durch die Trennung der Arbeit in verschiedene Prozesse kann jedem Prozess nur die Berechtigung gewährt werden, die er benötigt. Das bedeutet, dass selbst wenn ein Prozess kompromittiert wird, er nur begrenzte Möglichkeiten hat, Schaden anzurichten.
 2. **Stabilität**: XPC hilft, Abstürze auf die Komponente zu isolieren, in der sie auftreten. Wenn ein Prozess abstürzt, kann er neu gestartet werden, ohne den Rest des Systems zu beeinträchtigen.
@@ -18,9 +18,9 @@ Der einzige **Nachteil** ist, dass **die Trennung einer Anwendung in mehrere Pro
 
 ## Anwendungsspezifische XPC-Dienste
 
-Die XPC-Komponenten einer Anwendung befinden sich **innerhalb der Anwendung selbst.** Zum Beispiel finden Sie sie in Safari unter **`/Applications/Safari.app/Contents/XPCServices`**. Sie haben die Erweiterung **`.xpc`** (wie **`com.apple.Safari.SandboxBroker.xpc`**) und sind **auch Bundles** mit der Haupt-Binärdatei darin: `/Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/MacOS/com.apple.Safari.SandboxBroker` und eine `Info.plist: /Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/Info.plist`
+Die XPC-Komponenten einer Anwendung befinden sich **innerhalb der Anwendung selbst.** Zum Beispiel finden Sie sie in **`/Applications/Safari.app/Contents/XPCServices`**. Sie haben die Erweiterung **`.xpc`** (wie **`com.apple.Safari.SandboxBroker.xpc`**) und sind **auch Bundles** mit der Haupt-Binärdatei darin: `/Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/MacOS/com.apple.Safari.SandboxBroker` und eine `Info.plist: /Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/Info.plist`
 
-Wie Sie vielleicht denken, wird eine **XPC-Komponente andere Berechtigungen und Privilegien** haben als die anderen XPC-Komponenten oder die Hauptanwendungs-Binärdatei. AUSGENOMMEN, wenn ein XPC-Dienst mit [**JoinExistingSession**](https://developer.apple.com/documentation/bundleresources/information_property_list/xpcservice/joinexistingsession) auf „True“ in seiner **Info.plist**-Datei konfiguriert ist. In diesem Fall wird der XPC-Dienst in der **gleichen Sicherheits-Sitzung wie die Anwendung** ausgeführt, die ihn aufgerufen hat.
+Wie Sie vielleicht denken, wird eine **XPC-Komponente andere Berechtigungen und Privilegien** haben als die anderen XPC-Komponenten oder die Haupt-App-Binärdatei. AUSGENOMMEN, wenn ein XPC-Dienst mit [**JoinExistingSession**](https://developer.apple.com/documentation/bundleresources/information_property_list/xpcservice/joinexistingsession) auf „Wahr“ in seiner **Info.plist**-Datei konfiguriert ist. In diesem Fall wird der XPC-Dienst in der **gleichen Sicherheits-Sitzung wie die Anwendung** ausgeführt, die ihn aufgerufen hat.
 
 XPC-Dienste werden von **launchd** gestartet, wenn sie benötigt werden, und **heruntergefahren**, sobald alle Aufgaben **abgeschlossen** sind, um Systemressourcen freizugeben. **Anwendungsspezifische XPC-Komponenten können nur von der Anwendung** genutzt werden, wodurch das Risiko im Zusammenhang mit potenziellen Sicherheitsanfälligkeiten verringert wird.
 
@@ -83,9 +83,9 @@ Daher ist der `xpc_<objectType>_t` eine Art Unterklasse von `xpc_object_t`, die 
 Ein **`xpc_pipe`** ist ein FIFO-Rohr, das Prozesse zur Kommunikation verwenden können (die Kommunikation erfolgt über Mach-Nachrichten).\
 Es ist möglich, einen XPC-Server zu erstellen, indem `xpc_pipe_create()` oder `xpc_pipe_create_from_port()` aufgerufen wird, um ihn mit einem bestimmten Mach-Port zu erstellen. Um Nachrichten zu empfangen, ist es möglich, `xpc_pipe_receive` und `xpc_pipe_try_receive` aufzurufen.
 
-Beachten Sie, dass das **`xpc_pipe`**-Objekt ein **`xpc_object_t`** mit Informationen in seiner Struktur über die beiden verwendeten Mach-Ports und den Namen (falls vorhanden) ist. Der Name, zum Beispiel, der Daemon `secinitd` in seiner plist `/System/Library/LaunchDaemons/com.apple.secinitd.plist`, konfiguriert das Rohr mit dem Namen `com.apple.secinitd`.
+Beachten Sie, dass das **`xpc_pipe`**-Objekt ein **`xpc_object_t`** mit Informationen in seiner Struktur über die beiden verwendeten Mach-Ports und den Namen (falls vorhanden) ist. Der Name, zum Beispiel, der Daemon `secinitd` in seiner plist `/System/Library/LaunchDaemons/com.apple.secinitd.plist` konfiguriert das Rohr mit dem Namen `com.apple.secinitd`.
 
-Ein Beispiel für ein **`xpc_pipe`** ist das von **`launchd`** erstellte **Bootstrap-Pipe**, das das Teilen von Mach-Ports ermöglicht.
+Ein Beispiel für ein **`xpc_pipe`** ist das **bootstrap pipe**, das von **`launchd`** erstellt wird und das Teilen von Mach-Ports ermöglicht.
 
 - **`NSXPC*`**
 
@@ -94,12 +94,12 @@ Darüber hinaus ist es einfacher, diese Objekte mit DTrace zu debuggen als die v
 
 - **`GCD Queues`**
 
-XPC verwendet GCD, um Nachrichten zu übermitteln, und generiert bestimmte Dispatch-Warteschlangen wie `xpc.transactionq`, `xpc.io`, `xpc-events.add-listenerq`, `xpc.service-instance`...
+XPC verwendet GCD, um Nachrichten zu übermitteln, außerdem generiert es bestimmte Dispatch-Warteschlangen wie `xpc.transactionq`, `xpc.io`, `xpc-events.add-listenerq`, `xpc.service-instance`...
 
 ## XPC-Dienste
 
 Dies sind **Bundles mit der Erweiterung `.xpc`**, die sich im **`XPCServices`**-Ordner anderer Projekte befinden und in der `Info.plist` den `CFBundlePackageType` auf **`XPC!`** gesetzt haben.\
-Diese Datei hat andere Konfigurationsschlüssel wie `ServiceType`, die Application, User, System oder `_SandboxProfile` sein können, die einen Sandbox oder `_AllowedClients` definieren können, die Berechtigungen oder IDs angeben könnten, die erforderlich sind, um den Dienst zu kontaktieren. Diese und andere Konfigurationsoptionen sind nützlich, um den Dienst beim Start zu konfigurieren.
+Diese Datei hat andere Konfigurationsschlüssel wie `ServiceType`, der Application, User, System oder `_SandboxProfile` sein kann, das einen Sandbox oder `_AllowedClients` definieren kann, was Berechtigungen oder IDs angeben könnte, die erforderlich sind, um den Dienst zu kontaktieren. Diese und andere Konfigurationsoptionen sind nützlich, um den Dienst beim Start zu konfigurieren.
 
 ### Starten eines Dienstes
 
@@ -118,7 +118,7 @@ Das Dienstprogramm `xpcproxy` verwendet das Präfix `0x22`, zum Beispiel: `0x220
 
 Anwendungen können sich **für verschiedene Ereignis-**nachrichten **anmelden**, sodass sie **auf Abruf** initiiert werden können, wenn solche Ereignisse eintreten. Die **Einrichtung** für diese Dienste erfolgt in **launchd plist-Dateien**, die sich in den **gleichen Verzeichnissen wie die vorherigen** befinden und einen zusätzlichen **`LaunchEvent`**-Schlüssel enthalten.
 
-### XPC-Verbindungsprozessprüfung
+### XPC Verbindungsprozessprüfung
 
 Wenn ein Prozess versucht, eine Methode über eine XPC-Verbindung aufzurufen, sollte der **XPC-Dienst überprüfen, ob dieser Prozess berechtigt ist, sich zu verbinden**. Hier sind die gängigen Methoden zur Überprüfung und die häufigsten Fallstricke:
 

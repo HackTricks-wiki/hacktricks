@@ -9,7 +9,7 @@
 ## Chroot-Ausbrüche
 
 Von [wikipedia](https://en.wikipedia.org/wiki/Chroot#Limitations): Der chroot-Mechanismus ist **nicht dazu gedacht**, um gegen absichtliche Manipulationen durch **privilegierte** (**root**) **Benutzer** zu verteidigen. In den meisten Systemen stapeln sich chroot-Kontexte nicht richtig und chrooted Programme **mit ausreichenden Rechten können einen zweiten chroot durchführen, um auszubrechen**.\
-Normalerweise bedeutet dies, dass du root innerhalb des chroot sein musst, um auszubrechen.
+Normalerweise bedeutet dies, dass du root innerhalb des chroot sein musst, um zu entkommen.
 
 > [!TIP]
 > Das **Tool** [**chw00t**](https://github.com/earthquake/chw00t) wurde entwickelt, um die folgenden Szenarien auszunutzen und aus `chroot` auszubrechen.
@@ -17,7 +17,7 @@ Normalerweise bedeutet dies, dass du root innerhalb des chroot sein musst, um au
 ### Root + CWD
 
 > [!WARNING]
-> Wenn du **root** innerhalb eines chroot bist, **kannst du ausbrechen**, indem du **einen weiteren chroot** erstellst. Das liegt daran, dass 2 chroots nicht koexistieren können (in Linux), also wenn du einen Ordner erstellst und dann **einen neuen chroot** in diesem neuen Ordner erstellst, während du **außerhalb davon bist**, wirst du jetzt **außerhalb des neuen chroot** sein und somit im FS.
+> Wenn du **root** innerhalb eines chroot bist, **kannst du entkommen**, indem du **einen weiteren chroot** erstellst. Das liegt daran, dass 2 chroots nicht koexistieren können (in Linux), also wenn du einen Ordner erstellst und dann **einen neuen chroot** in diesem neuen Ordner erstellst, während **du außerhalb davon bist**, wirst du jetzt **außerhalb des neuen chroot** sein und somit im FS.
 >
 > Dies geschieht, weil chroot normalerweise DEIN Arbeitsverzeichnis nicht in das angegebene verschiebt, sodass du einen chroot erstellen kannst, aber außerhalb davon bist.
 
@@ -79,7 +79,7 @@ system("/bin/bash");
 ### Root + Gespeicherter fd
 
 > [!WARNING]
-> Dies ist ähnlich wie im vorherigen Fall, aber in diesem Fall **speichert der Angreifer einen Dateideskriptor für das aktuelle Verzeichnis** und **erstellt dann das chroot in einem neuen Ordner**. Schließlich hat er **Zugriff** auf diesen **FD** **außerhalb** des chroot, er greift darauf zu und **entkommt**.
+> Dies ist ähnlich wie der vorherige Fall, aber in diesem Fall **speichert der Angreifer einen Dateideskriptor für das aktuelle Verzeichnis** und **erstellt dann das chroot in einem neuen Ordner**. Schließlich hat er **Zugriff** auf diesen **FD** **außerhalb** des chroot, er greift darauf zu und **entkommt**.
 
 <details>
 
@@ -139,7 +139,7 @@ chroot(".");
 
 > [!WARNING]
 >
-> - Erstelle einen Fork (Kindprozess) und chroote in einen anderen Ordner tiefer im FS und wechsle in ihn
+> - Erstelle einen Fork (Kindprozess) und chroote in einen anderen Ordner tiefer im FS und wechsle dorthin
 > - Bewege vom Elternprozess den Ordner, in dem sich der Kindprozess befindet, in einen Ordner vor dem chroot der Kinder
 > - Dieser Kinderprozess wird sich außerhalb des chroot finden
 
@@ -177,7 +177,7 @@ echo /home/* #List directory
 ```
 ### Erstelle Skript
 
-Überprüfe, ob du eine ausführbare Datei mit _/bin/bash_ als Inhalt erstellen kannst
+Überprüfe, ob du eine ausführbare Datei mit _/bin/bash_ als Inhalt erstellen kannst.
 ```bash
 red /bin/bash
 > w wx/path #Write /bin/bash in a writable and executable path
@@ -236,11 +236,11 @@ Einige Tricks, um **Funktionen einer Bibliothek ohne Verwendung von Punkten aufz
 print(string.char(0x41, 0x42))
 print(rawget(string, "char")(0x41, 0x42))
 ```
-Auflisten von Funktionen einer Bibliothek:
+Enumerieren Sie Funktionen einer Bibliothek:
 ```bash
 for k,v in pairs(string) do print(k,v) end
 ```
-Beachten Sie, dass sich **die Reihenfolge der Funktionen ändert**, jedes Mal, wenn Sie die vorherige Einzeiler in einer **anderen Lua-Umgebung ausführen**. Daher können Sie, wenn Sie eine bestimmte Funktion ausführen müssen, einen Brute-Force-Angriff durchführen, indem Sie verschiedene Lua-Umgebungen laden und die erste Funktion der Bibliothek aufrufen:
+Beachten Sie, dass sich bei jeder Ausführung der vorherigen Einzeiler in einer **anderen Lua-Umgebung die Reihenfolge der Funktionen ändert**. Daher können Sie, wenn Sie eine bestimmte Funktion ausführen müssen, einen Brute-Force-Angriff durchführen, indem Sie verschiedene Lua-Umgebungen laden und die erste Funktion der Bibliothek aufrufen:
 ```bash
 #In this scenario you could BF the victim that is generating a new lua environment
 #for every interaction with the following line and when you are lucky

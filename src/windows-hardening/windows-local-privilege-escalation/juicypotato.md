@@ -39,7 +39,7 @@ JuicyPotato ermöglicht Ihnen:
 
 - **Ziel-CLSID** _wählen Sie jede CLSID, die Sie möchten._ [_Hier_](http://ohpe.it/juicy-potato/CLSID/) _finden Sie die Liste, die nach OS organisiert ist._
 - **COM-Listening-Port** _definieren Sie den bevorzugten COM-Listening-Port (anstatt des fest codierten 6666)_
-- **COM-Listening-IP-Adresse** _binden Sie den Server an eine beliebige IP_
+- **COM-Listening-IP-Adresse** _binden Sie den Server an jede IP_
 - **Prozessstartmodus** _je nach Berechtigungen des impersonierten Benutzers können Sie wählen zwischen:_
 - `CreateProcessWithToken` (benötigt `SeImpersonate`)
 - `CreateProcessAsUser` (benötigt `SeAssignPrimaryToken`)
@@ -48,7 +48,7 @@ JuicyPotato ermöglicht Ihnen:
 - **Prozessargument** _passen Sie die Argumente des gestarteten Prozesses an_
 - **RPC-Serveradresse** _für einen stealthy Ansatz können Sie sich bei einem externen RPC-Server authentifizieren_
 - **RPC-Serverport** _nützlich, wenn Sie sich bei einem externen Server authentifizieren möchten und die Firewall den Port `135` blockiert…_
-- **TEST-Modus** _hauptsächlich für Testzwecke, d.h. zum Testen von CLSIDs. Es erstellt das DCOM und druckt den Benutzer des Tokens. Siehe_ [_hier zum Testen_](http://ohpe.it/juicy-potato/Test/)
+- **TEST-Modus** _hauptsächlich zu Testzwecken, d.h. zum Testen von CLSIDs. Es erstellt das DCOM und druckt den Benutzer des Tokens. Siehe_ [_hier zum Testen_](http://ohpe.it/juicy-potato/Test/)
 
 ### Verwendung <a href="#usage" id="usage"></a>
 ```
@@ -106,7 +106,7 @@ c:\Users\Public>
 
 ## CLSID-Probleme
 
-Oft funktioniert der standardmäßige CLSID, den JuicyPotato verwendet, **nicht** und der Exploit schlägt fehl. In der Regel sind mehrere Versuche erforderlich, um einen **funktionierenden CLSID** zu finden. Um eine Liste von CLSIDs für ein bestimmtes Betriebssystem zu erhalten, solltest du diese Seite besuchen:
+Oft funktioniert der Standard-CLSID, den JuicyPotato verwendet, **nicht** und der Exploit schlägt fehl. In der Regel sind mehrere Versuche erforderlich, um einen **funktionierenden CLSID** zu finden. Um eine Liste von CLSIDs für ein bestimmtes Betriebssystem zu erhalten, solltest du diese Seite besuchen:
 
 {{#ref}}
 https://ohpe.it/juicy-potato/CLSID/
@@ -116,9 +116,9 @@ https://ohpe.it/juicy-potato/CLSID/
 
 Zuerst benötigst du einige ausführbare Dateien neben juicypotato.exe.
 
-Lade [Join-Object.ps1](https://github.com/ohpe/juicy-potato/blob/master/CLSID/utils/Join-Object.ps1) herunter und lade es in deine PS-Sitzung, und lade [GetCLSID.ps1](https://github.com/ohpe/juicy-potato/blob/master/CLSID/GetCLSID.ps1) herunter und führe es aus. Dieses Skript erstellt eine Liste möglicher CLSIDs, die getestet werden können.
+Lade [Join-Object.ps1](https://github.com/ohpe/juicy-potato/blob/master/CLSID/utils/Join-Object.ps1) herunter und lade es in deine PS-Sitzung, und lade und führe [GetCLSID.ps1](https://github.com/ohpe/juicy-potato/blob/master/CLSID/GetCLSID.ps1) aus. Dieses Skript erstellt eine Liste möglicher CLSIDs, die getestet werden können.
 
-Lade dann [test_clsid.bat ](https://github.com/ohpe/juicy-potato/blob/master/Test/test_clsid.bat) herunter (ändere den Pfad zur CLSID-Liste und zur juicypotato ausführbaren Datei) und führe es aus. Es wird versuchen, jeden CLSID zu testen, und **wenn sich die Portnummer ändert, bedeutet das, dass der CLSID funktioniert hat**.
+Lade dann [test_clsid.bat ](https://github.com/ohpe/juicy-potato/blob/master/Test/test_clsid.bat) herunter (ändere den Pfad zur CLSID-Liste und zur juicypotato-executablen) und führe es aus. Es wird versuchen, jede CLSID zu testen, und **wenn sich die Portnummer ändert, bedeutet das, dass die CLSID funktioniert hat**.
 
 **Überprüfe** die funktionierenden CLSIDs **mit dem Parameter -c**
 

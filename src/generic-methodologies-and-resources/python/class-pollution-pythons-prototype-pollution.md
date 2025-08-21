@@ -4,7 +4,7 @@
 
 ## Grundlegendes Beispiel
 
-Überprüfen Sie, wie es möglich ist, Klassen von Objekten mit Strings zu verschmutzen:
+Überprüfen Sie, wie es möglich ist, Klassen von Objekten mit Zeichenfolgen zu verschmutzen:
 ```python
 class Company: pass
 class Developer(Company): pass
@@ -225,8 +225,8 @@ execute() #> Executing echo Polluted
 
 <summary>Überschreiben des Flask-Geheimnisses über Dateien hinweg</summary>
 
-Wenn Sie also eine Klassenverschmutzung über ein Objekt durchführen können, das in der Haupt-Python-Datei der Webanwendung definiert ist, aber **dessen Klasse in einer anderen Datei** als der Hauptdatei definiert ist. Denn um auf \_\_globals\_\_ in den vorherigen Payloads zuzugreifen, müssen Sie auf die Klasse des Objekts oder die Methoden der Klasse zugreifen, werden Sie in der Lage sein, **auf die Globals in dieser Datei zuzugreifen, aber nicht in der Hauptdatei**. \
-Daher **werden Sie nicht in der Lage sein, auf das globale Flask-App-Objekt** zuzugreifen, das den **Geheimschlüssel** auf der Hauptseite definiert hat:
+Wenn Sie also eine Klassenverschmutzung über ein Objekt durchführen können, das in der Haupt-Python-Datei des Webs definiert ist, aber **dessen Klasse in einer anderen Datei** als der Hauptdatei definiert ist. Denn um auf \_\_globals\_\_ in den vorherigen Payloads zuzugreifen, müssen Sie auf die Klasse des Objekts oder die Methoden der Klasse zugreifen, werden Sie in der Lage sein, **auf die Globals in dieser Datei zuzugreifen, aber nicht in der Hauptdatei**. \
+Daher **werden Sie nicht auf das globale Flask-App-Objekt zugreifen können**, das den **Geheimschlüssel** auf der Hauptseite definiert:
 ```python
 app = Flask(__name__, template_folder='templates')
 app.secret_key = '(:secret:)'
@@ -237,7 +237,7 @@ Eine Payload wie diese [aus diesem Bericht](https://ctftime.org/writeup/36082):
 ```python
 __init__.__globals__.__loader__.__init__.__globals__.sys.modules.__main__.app.secret_key
 ```
-Verwenden Sie diese Payload, um **`app.secret_key`** zu ändern (der Name in Ihrer App könnte anders sein), um neue und privilegiertere Flask-Cookies signieren zu können.
+Verwenden Sie diese Payload, um **`app.secret_key`** zu ändern (der Name in Ihrer App könnte anders sein), um neue und privilegierte Flask-Cookies signieren zu können.
 
 </details>
 

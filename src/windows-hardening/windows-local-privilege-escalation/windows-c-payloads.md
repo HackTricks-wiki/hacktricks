@@ -4,7 +4,7 @@
 
 Diese Seite sammelt **kleine, eigenständige C-Snippets**, die während der Windows Local Privilege Escalation oder Post-Exploitation nützlich sind. Jedes Payload ist so gestaltet, dass es **copy-paste-freundlich** ist, benötigt nur die Windows API / C-Laufzeit und kann mit `i686-w64-mingw32-gcc` (x86) oder `x86_64-w64-mingw32-gcc` (x64) kompiliert werden.
 
-> ⚠️  Diese Payloads setzen voraus, dass der Prozess bereits über die minimalen Berechtigungen verfügt, die erforderlich sind, um die Aktion auszuführen (z. B. `SeDebugPrivilege`, `SeImpersonatePrivilege` oder Kontext mit mittlerer Integrität für einen UAC-Bypass). Sie sind für **Red-Team- oder CTF-Einstellungen** gedacht, in denen das Ausnutzen einer Schwachstelle zur Ausführung beliebigen nativen Codes geführt hat.
+> ⚠️  Diese Payloads setzen voraus, dass der Prozess bereits über die minimalen Berechtigungen verfügt, die erforderlich sind, um die Aktion auszuführen (z. B. `SeDebugPrivilege`, `SeImpersonatePrivilege` oder Kontext mit mittlerer Integrität für einen UAC-Bypass). Sie sind für **Red-Team- oder CTF-Einstellungen** gedacht, in denen das Ausnutzen einer Schwachstelle zu beliebiger nativer Codeausführung geführt hat.
 
 ---
 
@@ -66,7 +66,7 @@ return 0;
 ---
 
 ## SYSTEM-Shell über Token-Duplikation erzeugen (`SeDebugPrivilege` + `SeImpersonatePrivilege`)
-Wenn der aktuelle Prozess **beide** Privilegien `SeDebug` und `SeImpersonate` besitzt (typisch für viele Dienstkonten), können Sie das Token von `winlogon.exe` stehlen, es duplizieren und einen erhöhten Prozess starten:
+Wenn der aktuelle Prozess **beide** Privilegien `SeDebug` und `SeImpersonate` hält (typisch für viele Dienstkonten), können Sie das Token von `winlogon.exe` stehlen, es duplizieren und einen erhöhten Prozess starten:
 ```c
 // x86_64-w64-mingw32-gcc -O2 -o system_shell.exe system_shell.c -ladvapi32 -luser32
 #include <windows.h>
@@ -123,7 +123,7 @@ sedebug-+-seimpersonate-copy-token.md
 ---
 
 ## In-Memory AMSI & ETW Patch (Abwehrumgehung)
-Die meisten modernen AV/EDR-Engines verlassen sich auf **AMSI** und **ETW**, um bösartiges Verhalten zu inspizieren. Das Patchen beider Schnittstellen früh im aktuellen Prozess verhindert, dass skriptbasierte Payloads (z. B. PowerShell, JScript) gescannt werden.
+Die meisten modernen AV/EDR-Engines verlassen sich auf **AMSI** und **ETW**, um bösartige Verhaltensweisen zu inspizieren. Das Patchen beider Schnittstellen früh im aktuellen Prozess verhindert, dass skriptbasierte Payloads (z. B. PowerShell, JScript) gescannt werden.
 ```c
 // gcc -o patch_amsi.exe patch_amsi.c -lntdll
 #define _CRT_SECURE_NO_WARNINGS
@@ -156,6 +156,6 @@ return 0;
 
 ## Referenzen
 * Ron Bowes – “Fodhelper UAC Bypass Deep Dive” (2024)
-* SplinterCode – “AMSI Bypass 2023: Der kleinste Patch reicht immer noch aus” (BlackHat Asia 2023)
+* SplinterCode – “AMSI Bypass 2023: Der kleinste Patch ist immer noch ausreichend” (BlackHat Asia 2023)
 
 {{#include ../../banners/hacktricks-training.md}}

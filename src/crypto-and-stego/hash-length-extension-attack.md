@@ -17,14 +17,14 @@ Dann ist es möglich für einen **Angreifer**, **Daten** **anzuhängen** und ein
 
 ### Wie?
 
-Grundsätzlich erzeugen die anfälligen Algorithmen die Hashes, indem sie zuerst einen **Block von Daten hashen** und dann, **aus** dem **zuvor** erstellten **Hash** (Zustand), sie **den nächsten Block von Daten hinzufügen** und **hashen**.
+Grundsätzlich generieren die anfälligen Algorithmen die Hashes, indem sie zuerst einen Block von Daten **hashen** und dann, **aus** dem **zuvor** erstellten **Hash** (Zustand), den **nächsten Block von Daten** **hinzufügen** und **hashen**.
 
 Stellen Sie sich vor, das Geheimnis ist "secret" und die Daten sind "data", der MD5 von "secretdata" ist 6036708eba0d11f6ef52ad44e8b74d5b.\
-Wenn ein Angreifer die Zeichenfolge "append" anhängen möchte, kann er:
+Wenn ein Angreifer den String "append" anhängen möchte, kann er:
 
 - Einen MD5 von 64 "A"s generieren
-- Den Zustand des zuvor initialisierten Hashs auf 6036708eba0d11f6ef52ad44e8b74d5b ändern
-- Die Zeichenfolge "append" anhängen
+- Den Zustand des zuvor initialisierten Hash auf 6036708eba0d11f6ef52ad44e8b74d5b ändern
+- Den String "append" anhängen
 - Den Hash beenden und der resultierende Hash wird ein **gültiger für "secret" + "data" + "padding" + "append"** sein
 
 ### **Tool**

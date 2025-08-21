@@ -14,9 +14,9 @@ Es werden mehrere Methoden für DLL Hijacking eingesetzt, wobei jede je nach DLL
 
 1. **DLL-Ersetzung**: Austausch einer echten DLL gegen eine bösartige, optional unter Verwendung von DLL Proxying, um die Funktionalität der ursprünglichen DLL zu erhalten.
 2. **DLL-Suchreihenfolge-Hijacking**: Platzierung der bösartigen DLL in einem Suchpfad vor der legitimen, um das Suchmuster der Anwendung auszunutzen.
-3. **Phantom-DLL-Hijacking**: Erstellen einer bösartigen DLL, die von einer Anwendung geladen wird, die denkt, es sei eine nicht vorhandene erforderliche DLL.
-4. **DLL-Umleitung**: Modifizieren von Suchparametern wie `%PATH%` oder `.exe.manifest` / `.exe.local`-Dateien, um die Anwendung auf die bösartige DLL zu lenken.
-5. **WinSxS DLL-Ersetzung**: Ersetzen der legitimen DLL durch eine bösartige im WinSxS-Verzeichnis, eine Methode, die oft mit DLL Side-Loading in Verbindung gebracht wird.
+3. **Phantom-DLL-Hijacking**: Erstellung einer bösartigen DLL, die von einer Anwendung geladen wird, die denkt, es handele sich um eine nicht vorhandene erforderliche DLL.
+4. **DLL-Umleitung**: Modifizierung von Suchparametern wie `%PATH%` oder `.exe.manifest` / `.exe.local`-Dateien, um die Anwendung auf die bösartige DLL zu lenken.
+5. **WinSxS DLL-Ersetzung**: Ersetzung der legitimen DLL durch eine bösartige im WinSxS-Verzeichnis, eine Methode, die oft mit DLL Side-Loading in Verbindung gebracht wird.
 6. **Relative Pfad DLL Hijacking**: Platzierung der bösartigen DLL in einem benutzerkontrollierten Verzeichnis mit der kopierten Anwendung, ähnlich den Techniken der Binary Proxy Execution.
 
 ## Fehlende DLLs finden
@@ -36,7 +36,7 @@ Wenn Sie nach einer **fehlenden DLL in einer bestimmten ausführbaren Datei** su
 
 ## Ausnutzen fehlender DLLs
 
-Um die Privilegien zu eskalieren, haben wir die beste Chance, wenn wir in der Lage sind, **eine DLL zu schreiben, die ein privilegierter Prozess versuchen wird zu laden** an einem **Ort, wo sie gesucht wird**. Daher werden wir in der Lage sein, **eine DLL in einem** **Ordner** zu **schreiben**, wo die **DLL zuerst gesucht wird** bevor der Ordner, wo die **ursprüngliche DLL** ist (seltsamer Fall), oder wir werden in der Lage sein, **in einen Ordner zu schreiben, wo die DLL gesucht wird** und die ursprüngliche **DLL nicht in irgendeinem Ordner existiert**.
+Um die Privilegien zu eskalieren, haben wir die beste Chance, wenn wir in der Lage sind, **eine DLL zu schreiben, die ein privilegierter Prozess versuchen wird zu laden** an einem **Ort, wo sie gesucht wird**. Daher werden wir in der Lage sein, **eine DLL in einem** **Ordner** zu **schreiben**, wo die **DLL vorher** im Ordner gesucht wird, wo die **ursprüngliche DLL** ist (seltsamer Fall), oder wir werden in der Lage sein, **in einen Ordner zu schreiben, wo die DLL gesucht wird** und die ursprüngliche **DLL nicht in einem Ordner existiert**.
 
 ### DLL-Suchreihenfolge
 
@@ -47,15 +47,15 @@ Um die Privilegien zu eskalieren, haben wir die beste Chance, wenn wir in der La
 Sie können die **DLL-Suchreihenfolge auf 32-Bit**-Systemen unten sehen:
 
 1. Das Verzeichnis, aus dem die Anwendung geladen wurde.
-2. Das Systemverzeichnis. Verwenden Sie die [**GetSystemDirectory**](https://docs.microsoft.com/en-us/windows/desktop/api/sysinfoapi/nf-sysinfoapi-getsystemdirectorya) Funktion, um den Pfad dieses Verzeichnisses zu erhalten. (_C:\Windows\System32_)
+2. Das Systemverzeichnis. Verwenden Sie die [**GetSystemDirectory**](https://docs.microsoft.com/en-us/windows/desktop/api/sysinfoapi/nf-sysinfoapi-getsystemdirectorya)-Funktion, um den Pfad dieses Verzeichnisses zu erhalten. (_C:\Windows\System32_)
 3. Das 16-Bit-Systemverzeichnis. Es gibt keine Funktion, die den Pfad dieses Verzeichnisses erhält, aber es wird durchsucht. (_C:\Windows\System_)
-4. Das Windows-Verzeichnis. Verwenden Sie die [**GetWindowsDirectory**](https://docs.microsoft.com/en-us/windows/desktop/api/sysinfoapi/nf-sysinfoapi-getwindowsdirectorya) Funktion, um den Pfad dieses Verzeichnisses zu erhalten. (_C:\Windows_)
+4. Das Windows-Verzeichnis. Verwenden Sie die [**GetWindowsDirectory**](https://docs.microsoft.com/en-us/windows/desktop/api/sysinfoapi/nf-sysinfoapi-getwindowsdirectorya)-Funktion, um den Pfad dieses Verzeichnisses zu erhalten. (_C:\Windows_)
 5. Das aktuelle Verzeichnis.
 6. Die Verzeichnisse, die in der PATH-Umgebungsvariable aufgeführt sind. Beachten Sie, dass dies nicht den pro-Anwendungspfad umfasst, der durch den **App Paths**-Registrierungsschlüssel angegeben ist. Der **App Paths**-Schlüssel wird nicht verwendet, wenn der DLL-Suchpfad berechnet wird.
 
 Das ist die **Standard**-Suchreihenfolge mit **SafeDllSearchMode** aktiviert. Wenn es deaktiviert ist, steigt das aktuelle Verzeichnis auf den zweiten Platz. Um diese Funktion zu deaktivieren, erstellen Sie den **HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager**\\**SafeDllSearchMode**-Registrierungswert und setzen Sie ihn auf 0 (Standard ist aktiviert).
 
-Wenn die [**LoadLibraryEx**](https://docs.microsoft.com/en-us/windows/desktop/api/LibLoaderAPI/nf-libloaderapi-loadlibraryexa) Funktion mit **LOAD_WITH_ALTERED_SEARCH_PATH** aufgerufen wird, beginnt die Suche im Verzeichnis des ausführbaren Moduls, das **LoadLibraryEx** lädt.
+Wenn die [**LoadLibraryEx**](https://docs.microsoft.com/en-us/windows/desktop/api/LibLoaderAPI/nf-libloaderapi-loadlibraryexa)-Funktion mit **LOAD_WITH_ALTERED_SEARCH_PATH** aufgerufen wird, beginnt die Suche im Verzeichnis des ausführbaren Moduls, das **LoadLibraryEx** lädt.
 
 Beachten Sie schließlich, dass **eine DLL geladen werden könnte, indem der absolute Pfad angegeben wird, anstatt nur den Namen**. In diesem Fall wird diese DLL **nur in diesem Pfad gesucht** (wenn die DLL Abhängigkeiten hat, werden diese wie gerade nach Namen geladen gesucht).
 
@@ -76,8 +76,8 @@ Bestimmte Ausnahmen von der standardmäßigen DLL-Suchreihenfolge sind in der Wi
 - Identifizieren Sie einen Prozess, der unter **unterschiedlichen Privilegien** (horizontale oder laterale Bewegung) arbeitet oder arbeiten wird, der **eine DLL** **fehlt**.
 - Stellen Sie sicher, dass **Schreibzugriff** für ein **Verzeichnis** verfügbar ist, in dem die **DLL** **gesucht wird**. Dieser Ort könnte das Verzeichnis der ausführbaren Datei oder ein Verzeichnis innerhalb des Systempfads sein.
 
-Ja, die Anforderungen sind kompliziert zu finden, da **es standardmäßig seltsam ist, eine privilegierte ausführbare Datei ohne eine DLL zu finden** und es ist sogar **noch seltsamer, Schreibberechtigungen in einem Systempfad-Ordner zu haben** (standardmäßig können Sie das nicht). Aber in falsch konfigurierten Umgebungen ist dies möglich.\
-Falls Sie Glück haben und die Anforderungen erfüllen, könnten Sie das [UACME](https://github.com/hfiref0x/UACME) Projekt überprüfen. Auch wenn das **Hauptziel des Projekts darin besteht, UAC zu umgehen**, finden Sie dort möglicherweise einen **PoC** für ein DLL Hijacking für die Windows-Version, die Sie verwenden können (wahrscheinlich müssen Sie nur den Pfad des Ordners ändern, in dem Sie Schreibberechtigungen haben).
+Ja, die Anforderungen sind kompliziert zu finden, da **es standardmäßig seltsam ist, eine privilegierte ausführbare Datei ohne eine DLL zu finden**, und es ist sogar **noch seltsamer, Schreibberechtigungen für einen Systempfad-Ordner zu haben** (standardmäßig können Sie das nicht). Aber in falsch konfigurierten Umgebungen ist dies möglich.\
+Falls Sie Glück haben und die Anforderungen erfüllen, könnten Sie das [UACME](https://github.com/hfiref0x/UACME)-Projekt überprüfen. Auch wenn das **Hauptziel des Projekts darin besteht, UAC zu umgehen**, finden Sie dort möglicherweise einen **PoC** für ein DLL-Hijacking für die Windows-Version, die Sie verwenden können (wahrscheinlich müssen Sie nur den Pfad des Ordners ändern, in dem Sie Schreibberechtigungen haben).
 
 Beachten Sie, dass Sie **Ihre Berechtigungen in einem Ordner überprüfen können**, indem Sie:
 ```bash
@@ -133,7 +133,7 @@ msfvenom -p windows/adduser USER=privesc PASS=Attacker@123 -f dll -o msf.dll
 ```
 ### Dein eigenes
 
-Beachte, dass in mehreren Fällen die Dll, die du kompilierst, **mehrere Funktionen exportieren muss**, die vom Opferprozess geladen werden, wenn diese Funktionen nicht existieren, **kann die Binary sie nicht laden** und der **Exploit wird fehlschlagen**.
+Beachte, dass die Dll, die du kompilierst, in mehreren Fällen **mehrere Funktionen exportieren** muss, die vom Opferprozess geladen werden, wenn diese Funktionen nicht existieren, **kann die Binary sie nicht laden** und der **Exploit wird fehlschlagen**.
 ```c
 // Tested in Win10
 // i686-w64-mingw32-g++ dll.c -lws2_32 -o srrstr.dll -shared

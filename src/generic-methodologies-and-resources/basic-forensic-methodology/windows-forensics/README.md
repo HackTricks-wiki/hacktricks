@@ -42,15 +42,15 @@ Mit diesen Dateien können Sie das Tool [**Rifiuti**](https://github.com/abelche
 
 Shadow Copy ist eine Technologie, die in Microsoft Windows enthalten ist und **Sicherungs kopien** oder Schnappschüsse von Computerdateien oder -volumes erstellen kann, selbst wenn sie verwendet werden.
 
-Diese Sicherungen befinden sich normalerweise im `\System Volume Information` im Wurzelverzeichnis des Dateisystems, und der Name besteht aus **UIDs**, die im folgenden Bild angezeigt werden:
+Diese Sicherungen befinden sich normalerweise im `\System Volume Information` im Stammverzeichnis des Dateisystems, und der Name besteht aus **UIDs**, die im folgenden Bild angezeigt werden:
 
 ![](<../../../images/image (94).png>)
 
-Durch das Einbinden des forensischen Images mit dem **ArsenalImageMounter** kann das Tool [**ShadowCopyView**](https://www.nirsoft.net/utils/shadow_copy_view.html) verwendet werden, um eine Schattenkopie zu inspizieren und sogar **die Dateien** aus den Schattenkopie-Sicherungen **extrahieren**.
+Durch das Einbinden des forensischen Images mit dem **ArsenalImageMounter** kann das Tool [**ShadowCopyView**](https://www.nirsoft.net/utils/shadow_copy_view.html) verwendet werden, um eine Schattenkopie zu inspizieren und sogar **die Dateien** aus den Schattenkopien zu extrahieren.
 
 ![](<../../../images/image (576).png>)
 
-Der Registrierungseintrag `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\BackupRestore` enthält die Dateien und Schlüssel, **die nicht gesichert** werden sollen:
+Der Registrierungseintrag `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\BackupRestore` enthält die Dateien und Schlüssel, **die nicht gesichert werden sollen**:
 
 ![](<../../../images/image (254).png>)
 
@@ -126,7 +126,7 @@ Es ist möglich zu identifizieren, dass ein USB-Gerät verwendet wurde, dank der
 - Microsoft Office Recent Folder
 - Jumplists
 
-Beachten Sie, dass einige LNK-Dateien anstelle des ursprünglichen Pfades auf den WPDNSE-Ordner verweisen:
+Beachten Sie, dass einige LNK-Dateien anstelle des ursprünglichen Pfads auf den WPDNSE-Ordner verweisen:
 
 ![](<../../../images/image (218).png>)
 
@@ -140,17 +140,17 @@ Die Dateien im WPDNSE-Ordner sind eine Kopie der ursprünglichen, überstehen al
 
 Überprüfen Sie die Datei `C:\Windows\inf\setupapi.dev.log`, um die Zeitstempel zu erhalten, wann die USB-Verbindung hergestellt wurde (suchen Sie nach `Section start`).
 
-![](<../../../images/image (477) (2) (2) (2) (2) (2) (2) (2) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (14) (2).png>)
+![](<../../../images/image (477) (2) (2) (2) (2) (2) (2) (2) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (14) (2).png>)
 
 ### USB Detective
 
-[**USBDetective**](https://usbdetective.com) kann verwendet werden, um Informationen über die USB-Geräte zu erhalten, die mit einem Bild verbunden waren.
+[**USBDetective**](https://usbdetective.com) kann verwendet werden, um Informationen über die USB-Geräte zu erhalten, die mit einem Bild verbunden wurden.
 
 ![](<../../../images/image (452).png>)
 
 ### Plug and Play Cleanup
 
-Die geplante Aufgabe, die als 'Plug and Play Cleanup' bekannt ist, dient hauptsächlich der Entfernung veralteter Treiberversionen. Entgegen ihrem angegebenen Zweck, die neueste Treiberpaketversion beizubehalten, deuten Online-Quellen darauf hin, dass sie auch Treiber anvisiert, die seit 30 Tagen inaktiv sind. Folglich können Treiber für abnehmbare Geräte, die in den letzten 30 Tagen nicht verbunden waren, gelöscht werden.
+Die geplante Aufgabe, die als 'Plug and Play Cleanup' bekannt ist, dient hauptsächlich der Entfernung veralteter Treiberversionen. Entgegen ihrem angegebenen Zweck, die neueste Treiberpaketversion beizubehalten, deuten Online-Quellen darauf hin, dass sie auch Treiber anvisiert, die in den letzten 30 Tagen inaktiv waren. Folglich können Treiber für abnehmbare Geräte, die in den letzten 30 Tagen nicht angeschlossen waren, gelöscht werden.
 
 Die Aufgabe befindet sich unter folgendem Pfad: `C:\Windows\System32\Tasks\Microsoft\Windows\Plug and Play\Plug and Play Cleanup`.
 
@@ -159,10 +159,10 @@ Ein Screenshot, der den Inhalt der Aufgabe zeigt, ist bereitgestellt: ![](https:
 **Wichtige Komponenten und Einstellungen der Aufgabe:**
 
 - **pnpclean.dll**: Diese DLL ist für den eigentlichen Bereinigungsprozess verantwortlich.
-- **UseUnifiedSchedulingEngine**: Auf `TRUE` gesetzt, was die Verwendung der generischen Aufgabenplanung anzeigt.
+- **UseUnifiedSchedulingEngine**: Auf `TRUE` gesetzt, was die Verwendung der generischen Aufgabenplanungs-Engine anzeigt.
 - **MaintenanceSettings**:
 - **Period ('P1M')**: Weist den Task Scheduler an, die Bereinigungsaufgabe monatlich während der regulären automatischen Wartung zu starten.
-- **Deadline ('P2M')**: Weist den Task Scheduler an, falls die Aufgabe zwei aufeinanderfolgende Monate fehlschlägt, die Aufgabe während der Notfallautomatik-Wartung auszuführen.
+- **Deadline ('P2M')**: Weist den Task Scheduler an, die Aufgabe während der Notfallautomatik-Wartung auszuführen, wenn die Aufgabe zwei Monate hintereinander fehlschlägt.
 
 Diese Konfiguration stellt regelmäßige Wartung und Bereinigung der Treiber sicher, mit Bestimmungen für einen erneuten Versuch der Aufgabe im Falle aufeinanderfolgender Fehler.
 
@@ -201,7 +201,7 @@ Im Microsoft Outlook-Client werden alle gesendeten/empfangenen Nachrichten, Kont
 - `%USERPROFILE%\Local Settings\Application Data\Microsoft\Outlook` (WinXP)
 - `%USERPROFILE%\AppData\Local\Microsoft\Outlook`
 
-Der Registrierungs-Pfad `HKEY_CURRENT_USER\Software\Microsoft\WindowsNT\CurrentVersion\Windows Messaging Subsystem\Profiles\Outlook` zeigt die verwendete Datei an.
+Der Registrierungs-Pfad `HKEY_CURRENT_USER\Software\Microsoft\WindowsNT\CurrentVersion\Windows Messaging Subsystem\Profiles\Outlook` zeigt die Datei an, die verwendet wird.
 
 Sie können die PST-Datei mit dem Tool [**Kernel PST Viewer**](https://www.nucleustechnologies.com/es/visor-de-pst.html) öffnen.
 
@@ -209,18 +209,18 @@ Sie können die PST-Datei mit dem Tool [**Kernel PST Viewer**](https://www.nucle
 
 ### Microsoft Outlook OST-Dateien
 
-Eine **OST-Datei** wird von Microsoft Outlook erstellt, wenn es mit **IMAP** oder einem **Exchange**-Server konfiguriert ist und speichert ähnliche Informationen wie eine PST-Datei. Diese Datei wird mit dem Server synchronisiert und behält Daten für **die letzten 12 Monate** bis zu einer **maximalen Größe von 50 GB** und befindet sich im selben Verzeichnis wie die PST-Datei. Um eine OST-Datei anzuzeigen, kann der [**Kernel OST Viewer**](https://www.nucleustechnologies.com/ost-viewer.html) verwendet werden.
+Eine **OST-Datei** wird von Microsoft Outlook erstellt, wenn es mit **IMAP** oder einem **Exchange**-Server konfiguriert ist und ähnliche Informationen wie eine PST-Datei speichert. Diese Datei wird mit dem Server synchronisiert und behält Daten für **die letzten 12 Monate** bis zu einer **maximalen Größe von 50 GB** und befindet sich im selben Verzeichnis wie die PST-Datei. Um eine OST-Datei anzuzeigen, kann der [**Kernel OST Viewer**](https://www.nucleustechnologies.com/ost-viewer.html) verwendet werden.
 
 ### Wiederherstellung von Anhängen
 
-Verlorene Anhänge könnten wiederhergestellt werden aus:
+Verlorene Anhänge können möglicherweise wiederhergestellt werden von:
 
 - Für **IE10**: `%APPDATA%\Local\Microsoft\Windows\Temporary Internet Files\Content.Outlook`
 - Für **IE11 und höher**: `%APPDATA%\Local\Microsoft\InetCache\Content.Outlook`
 
 ### Thunderbird MBOX-Dateien
 
-**Thunderbird** verwendet **MBOX-Dateien**, um Daten zu speichern, die sich in `\Users\%USERNAME%\AppData\Roaming\Thunderbird\Profiles` befinden.
+**Thunderbird** verwendet **MBOX-Dateien**, um Daten zu speichern, die sich unter `\Users\%USERNAME%\AppData\Roaming\Thunderbird\Profiles` befinden.
 
 ### Bildvorschauen
 
@@ -237,13 +237,13 @@ Die Windows-Registrierung, die umfangreiche System- und Benutzeraktivitätsdaten
 - Windows Vista und spätere Versionen sichern `HKEY_LOCAL_MACHINE`-Registrierungsdateien in `%Windir%\System32\Config\RegBack\`.
 - Darüber hinaus werden Informationen zur Programmausführung in `%UserProfile%\{User}\AppData\Local\Microsoft\Windows\USERCLASS.DAT` ab Windows Vista und Windows 2008 Server gespeichert.
 
-### Werkzeuge
+### Tools
 
-Einige Werkzeuge sind nützlich, um die Registrierungsdateien zu analysieren:
+Einige Tools sind nützlich, um die Registrierungsdateien zu analysieren:
 
-- **Registrierungs-Editor**: Er ist in Windows installiert. Es ist eine GUI, um durch die Windows-Registrierung der aktuellen Sitzung zu navigieren.
+- **Registrierungs-Editor**: Es ist in Windows installiert. Es ist eine GUI, um durch die Windows-Registrierung der aktuellen Sitzung zu navigieren.
 - [**Registry Explorer**](https://ericzimmerman.github.io/#!index.md): Es ermöglicht Ihnen, die Registrierungsdatei zu laden und durch sie mit einer GUI zu navigieren. Es enthält auch Lesezeichen, die Schlüssel mit interessanten Informationen hervorheben.
-- [**RegRipper**](https://github.com/keydet89/RegRipper3.0): Auch hier gibt es eine GUI, die es ermöglicht, durch die geladene Registrierung zu navigieren und Plugins enthält, die interessante Informationen innerhalb der geladenen Registrierung hervorheben.
+- [**RegRipper**](https://github.com/keydet89/RegRipper3.0): Es hat ebenfalls eine GUI, die es ermöglicht, durch die geladene Registrierung zu navigieren und enthält auch Plugins, die interessante Informationen innerhalb der geladenen Registrierung hervorheben.
 - [**Windows Registry Recovery**](https://www.mitec.cz/wrr.html): Eine weitere GUI-Anwendung, die in der Lage ist, wichtige Informationen aus der geladenen Registrierung zu extrahieren.
 
 ### Wiederherstellung gelöschter Elemente
@@ -301,7 +301,7 @@ Um diese Dateien zu inspizieren, können Sie das Tool [**PEcmd.exe**](https://gi
 **Superprefetch** hat dasselbe Ziel wie Prefetch, **Programme schneller zu laden**, indem vorhergesagt wird, was als Nächstes geladen wird. Es ersetzt jedoch nicht den Prefetch-Dienst.\
 Dieser Dienst generiert Datenbankdateien in `C:\Windows\Prefetch\Ag*.db`.
 
-In diesen Datenbanken finden Sie den **Namen** des **Programms**, die **Anzahl** der **Ausführungen**, die **geöffneten** **Dateien**, das **zugreifende** **Volumen**, den **kompletten** **Pfad**, **Zeitrahmen** und **Zeitstempel**.
+In diesen Datenbanken finden Sie den **Namen** des **Programms**, die **Anzahl** der **Ausführungen**, die **geöffneten** **Dateien**, das **zugreifende** **Volume**, den **kompletten** **Pfad**, **Zeitrahmen** und **Zeitstempel**.
 
 Sie können auf diese Informationen mit dem Tool [**CrowdResponse**](https://www.crowdstrike.com/resources/community-tools/crowdresponse/) zugreifen.
 
@@ -327,7 +327,7 @@ Sie können das Datum aus dieser Datei mit dem Tool [**srum_dump**](https://gith
 ```
 ### AppCompatCache (ShimCache)
 
-Der **AppCompatCache**, auch bekannt als **ShimCache**, ist Teil der **Application Compatibility Database**, die von **Microsoft** entwickelt wurde, um Probleme mit der Anwendungskompatibilität zu beheben. Dieses Systemkomponente zeichnet verschiedene Stücke von Dateimetadaten auf, die Folgendes umfassen:
+Der **AppCompatCache**, auch bekannt als **ShimCache**, ist Teil der **Application Compatibility Database**, die von **Microsoft** entwickelt wurde, um Probleme mit der Anwendungskompatibilität zu beheben. Diese Systemkomponente zeichnet verschiedene Stücke von Dateimetadaten auf, die Folgendes umfassen:
 
 - Vollständiger Pfad der Datei
 - Größe der Datei
@@ -335,7 +335,7 @@ Der **AppCompatCache**, auch bekannt als **ShimCache**, ist Teil der **Applicati
 - Letzte Aktualisierungszeit des ShimCache
 - Prozessausführungsflag
 
-Solche Daten werden in der Registrierung an bestimmten Orten basierend auf der Version des Betriebssystems gespeichert:
+Solche Daten werden im Registrierungseditor an bestimmten Orten basierend auf der Version des Betriebssystems gespeichert:
 
 - Für XP werden die Daten unter `SYSTEM\CurrentControlSet\Control\SessionManager\Appcompatibility\AppcompatCache` mit einer Kapazität von 96 Einträgen gespeichert.
 - Für Server 2003 sowie für Windows-Versionen 2008, 2012, 2016, 7, 8 und 10 ist der Speicherpfad `SYSTEM\CurrentControlSet\Control\SessionManager\AppcompatCache\AppCompatCache`, der 512 bzw. 1024 Einträge aufnehmen kann.
@@ -346,7 +346,7 @@ Um die gespeicherten Informationen zu analysieren, wird das [**AppCompatCachePar
 
 ### Amcache
 
-Die **Amcache.hve**-Datei ist im Wesentlichen ein Registrierungshive, der Details über Anwendungen protokolliert, die auf einem System ausgeführt wurden. Sie befindet sich typischerweise unter `C:\Windows\AppCompat\Programas\Amcache.hve`.
+Die **Amcache.hve**-Datei ist im Wesentlichen ein Registrierungs-Hive, der Details über Anwendungen protokolliert, die auf einem System ausgeführt wurden. Sie befindet sich typischerweise unter `C:\Windows\AppCompat\Programas\Amcache.hve`.
 
 Diese Datei ist bemerkenswert, da sie Aufzeichnungen über kürzlich ausgeführte Prozesse speichert, einschließlich der Pfade zu den ausführbaren Dateien und deren SHA1-Hashes. Diese Informationen sind von unschätzbarem Wert, um die Aktivität von Anwendungen auf einem System zu verfolgen.
 
@@ -396,18 +396,18 @@ Die Protokolle befinden sich in `C:\Windows\System32\config` vor Windows Vista u
 
 Der Speicherort der Ereignisdateien kann in der SYSTEM-Registrierung unter **`HKLM\SYSTEM\CurrentControlSet\services\EventLog\{Application|System|Security}`** gefunden werden.
 
-Sie können sie über die Windows-Ereignisanzeige (**`eventvwr.msc`**) oder mit anderen Tools wie [**Event Log Explorer**](https://eventlogxp.com) **oder** [**Evtx Explorer/EvtxECmd**](https://ericzimmerman.github.io/#!index.md)** visualisieren.**
+Sie können sie über die Windows-Ereignisanzeige (**`eventvwr.msc`**) oder mit anderen Tools wie [**Event Log Explorer**](https://eventlogxp.com) **oder** [**Evtx Explorer/EvtxECmd**](https://ericzimmerman.github.io/#!index.md)**.**
 
 ## Verständnis der Windows-Sicherheitsereignisprotokollierung
 
 Zugriffsereignisse werden in der Sicherheitskonfigurationsdatei aufgezeichnet, die sich unter `C:\Windows\System32\winevt\Security.evtx` befindet. Die Größe dieser Datei ist anpassbar, und wenn ihre Kapazität erreicht ist, werden ältere Ereignisse überschrieben. Aufgezeichnete Ereignisse umfassen Benutzeranmeldungen und -abmeldungen, Benutzeraktionen und Änderungen an Sicherheitseinstellungen sowie den Zugriff auf Dateien, Ordner und gemeinsame Assets.
 
-### Schlüsselereignis-IDs für die Benutzerauthentifizierung:
+### Wichtige Ereignis-IDs für die Benutzerauthentifizierung:
 
 - **EventID 4624**: Zeigt an, dass sich ein Benutzer erfolgreich authentifiziert hat.
 - **EventID 4625**: Signalisiert einen Authentifizierungsfehler.
 - **EventIDs 4634/4647**: Stellen Benutzerabmeldeereignisse dar.
-- **EventID 4672**: Bezeichnet eine Anmeldung mit administrativen Rechten.
+- **EventID 4672**: Bezeichnet die Anmeldung mit administrativen Rechten.
 
 #### Untertypen innerhalb von EventID 4634/4647:
 
@@ -437,7 +437,7 @@ Zugriffsereignisse werden in der Sicherheitskonfigurationsdatei aufgezeichnet, d
 - **0xC0000133**: Zeit-Synchronisationsprobleme - Große Zeitabweichungen zwischen Client und Server können auf ausgeklügeltere Angriffe wie Pass-the-Ticket hinweisen.
 - **0xC0000224**: Pflichtänderung des Passworts erforderlich - Häufige verpflichtende Änderungen könnten auf einen Versuch hinweisen, die Kontosicherheit zu destabilisieren.
 - **0xC0000225**: Zeigt einen Systemfehler an, nicht ein Sicherheitsproblem.
-- **0xC000015b**: Verweigerter Anmeldetyp - Zugriffsversuch mit unbefugtem Anmeldetyp, z. B. ein Benutzer, der versucht, einen Dienstanmeldeversuch auszuführen.
+- **0xC000015b**: Verweigerter Anmeldetyp - Zugriffsversuch mit unbefugtem Anmeldetyp, z. B. ein Benutzer, der versucht, einen Dienstanmeldetyp auszuführen.
 
 #### EventID 4616:
 
@@ -451,7 +451,7 @@ Zugriffsereignisse werden in der Sicherheitskonfigurationsdatei aufgezeichnet, d
 
 - **Protokolllöschung**: Sicherheitsprotokolle werden gelöscht, was oft ein Warnsignal für das Vertuschen illegaler Aktivitäten ist.
 
-#### EventIDs zur Verfolgung von USB-Geräten:
+#### Ereignis-IDs für die USB-Geräteverfolgung:
 
 - **20001 / 20003 / 10000**: Erste Verbindung des USB-Geräts.
 - **10100**: USB-Treiberaktualisierung.
@@ -479,7 +479,7 @@ Aufgezeichnet durch EventID 4616, können Änderungen an der Systemzeit die fore
 
 #### USB-Geräteverfolgung
 
-Nützliche System-Ereignis-IDs zur Verfolgung von USB-Geräten sind 20001/20003/10000 für die erste Nutzung, 10100 für Treiberaktualisierungen und EventID 112 von DeviceSetupManager für Einsteckzeitstempel.
+Nützliche System-Ereignis-IDs für die USB-Geräteverfolgung sind 20001/20003/10000 für die erste Nutzung, 10100 für Treiberaktualisierungen und EventID 112 von DeviceSetupManager für Einsteckzeitstempel.
 
 #### Systemstromereignisse
 

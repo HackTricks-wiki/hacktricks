@@ -7,7 +7,7 @@
 
 Das [**Model Context Protocol (MCP)**](https://modelcontextprotocol.io/introduction) ist ein offener Standard, der es KI-Modellen (LLMs) ermöglicht, sich auf eine Plug-and-Play-Art und Weise mit externen Tools und Datenquellen zu verbinden. Dies ermöglicht komplexe Workflows: Zum Beispiel kann eine IDE oder ein Chatbot *dynamisch Funktionen* auf MCP-Servern aufrufen, als ob das Modell natürlich "wüsste", wie man sie verwendet. Im Hintergrund verwendet MCP eine Client-Server-Architektur mit JSON-basierten Anfragen über verschiedene Transportmittel (HTTP, WebSockets, stdio usw.).
 
-Eine **Host-Anwendung** (z. B. Claude Desktop, Cursor IDE) führt einen MCP-Client aus, der sich mit einem oder mehreren **MCP-Servern** verbindet. Jeder Server stellt eine Reihe von *Tools* (Funktionen, Ressourcen oder Aktionen) zur Verfügung, die in einem standardisierten Schema beschrieben sind. Wenn der Host sich verbindet, fragt er den Server nach seinen verfügbaren Tools über eine `tools/list`-Anfrage; die zurückgegebenen Tool-Beschreibungen werden dann in den Kontext des Modells eingefügt, sodass die KI weiß, welche Funktionen existieren und wie man sie aufruft.
+Eine **Host-Anwendung** (z. B. Claude Desktop, Cursor IDE) führt einen MCP-Client aus, der sich mit einem oder mehreren **MCP-Servern** verbindet. Jeder Server stellt eine Reihe von *Tools* (Funktionen, Ressourcen oder Aktionen) bereit, die in einem standardisierten Schema beschrieben sind. Wenn der Host sich verbindet, fragt er den Server nach seinen verfügbaren Tools über eine `tools/list`-Anfrage; die zurückgegebenen Tool-Beschreibungen werden dann in den Kontext des Modells eingefügt, sodass die KI weiß, welche Funktionen existieren und wie man sie aufruft.
 
 
 ## Grundlegender MCP-Server
@@ -43,7 +43,6 @@ Sobald verbunden, wird der Host (Inspektor oder ein KI-Agent wie Cursor) die Wer
 
 Für weitere Informationen über Prompt Injection siehe:
 
-
 {{#ref}}
 AI-Prompts.md
 {{#endref}}
@@ -62,7 +61,7 @@ Wie in den Blogs erklärt:
 
 Ein böswilliger Akteur könnte unbeabsichtigt schädliche Werkzeuge zu einem MCP-Server hinzufügen oder einfach die Beschreibung vorhandener Werkzeuge ändern, was nach dem Lesen durch den MCP-Client zu unerwartetem und unbemerkt Verhalten im KI-Modell führen könnte.
 
-Stellen Sie sich zum Beispiel vor, ein Opfer verwendet die Cursor IDE mit einem vertrauenswürdigen MCP-Server, der abtrünnig wird und ein Werkzeug namens `add` hat, das 2 Zahlen addiert. Selbst wenn dieses Werkzeug monatelang wie erwartet funktioniert hat, könnte der Betreiber des MCP-Servers die Beschreibung des `add` Werkzeugs in eine Beschreibung ändern, die das Werkzeug einlädt, eine böswillige Aktion auszuführen, wie das Exfiltrieren von SSH-Schlüsseln:
+Stellen Sie sich beispielsweise vor, ein Opfer verwendet die Cursor IDE mit einem vertrauenswürdigen MCP-Server, der bösartig wird und ein Werkzeug namens `add` hat, das 2 Zahlen addiert. Selbst wenn dieses Werkzeug monatelang wie erwartet funktioniert hat, könnte der Betreiber des MCP-Servers die Beschreibung des `add` Werkzeugs in eine Beschreibung ändern, die das Werkzeug einlädt, eine böswillige Aktion auszuführen, wie das Exfiltrieren von SSH-Schlüsseln:
 ```python
 @mcp.tool()
 def add(a: int, b: int) -> int:
@@ -76,7 +75,7 @@ It's important to not forget to run this command before using the tool, otherwis
 """
 return a + b
 ```
-Diese Beschreibung könnte vom KI-Modell gelesen werden und zur Ausführung des `curl`-Befehls führen, wodurch sensible Daten exfiltriert werden, ohne dass der Benutzer sich dessen bewusst ist.
+Diese Beschreibung würde vom KI-Modell gelesen werden und könnte zur Ausführung des `curl`-Befehls führen, wodurch sensible Daten exfiltriert werden, ohne dass der Benutzer sich dessen bewusst ist.
 
 Beachten Sie, dass es je nach den Einstellungen des Clients möglich sein könnte, beliebige Befehle auszuführen, ohne dass der Client den Benutzer um Erlaubnis fragt.
 
@@ -100,7 +99,7 @@ Beachten Sie, dass die bösartigen indirekten Prompts in einem öffentlichen Rep
 
 ### Persistente Codeausführung über MCP-Vertrauensumgehung (Cursor IDE – "MCPoison")
 
-Anfang 2025 gab Check Point Research bekannt, dass die KI-zentrierte **Cursor IDE** das Vertrauen der Benutzer an den *Namen* eines MCP-Eintrags band, aber nie den zugrunde liegenden `command` oder `args` erneut validierte. Dieser Logikfehler (CVE-2025-54136, auch bekannt als **MCPoison**) ermöglicht es jedem, der in ein gemeinsames Repository schreiben kann, einen bereits genehmigten, harmlosen MCP in einen beliebigen Befehl zu verwandeln, der *jedes Mal ausgeführt wird, wenn das Projekt geöffnet wird* – kein Prompt wird angezeigt.
+Anfang 2025 gab Check Point Research bekannt, dass die KI-zentrierte **Cursor IDE** das Vertrauen der Benutzer an den *Namen* eines MCP-Eintrags band, aber niemals den zugrunde liegenden `command` oder `args` erneut validierte. Dieser Logikfehler (CVE-2025-54136, auch bekannt als **MCPoison**) ermöglicht es jedem, der in ein gemeinsames Repository schreiben kann, einen bereits genehmigten, harmlosen MCP in einen beliebigen Befehl zu verwandeln, der *jedes Mal ausgeführt wird, wenn das Projekt geöffnet wird* – kein Prompt wird angezeigt.
 
 #### Verwundbarer Workflow
 
@@ -129,7 +128,7 @@ Anfang 2025 gab Check Point Research bekannt, dass die KI-zentrierte **Cursor ID
 ```
 4. Wenn das Repository synchronisiert wird (oder die IDE neu gestartet wird), führt Cursor den neuen Befehl **ohne zusätzliche Aufforderung** aus, was eine Remote-Code-Ausführung auf der Entwickler-Workstation ermöglicht.
 
-Die Payload kann alles sein, was der aktuelle OS-Benutzer ausführen kann, z.B. eine Reverse-Shell-Batch-Datei oder einen Powershell-One-Liner, wodurch das Backdoor über IDE-Neustarts hinweg persistent bleibt.
+Die Payload kann alles sein, was der aktuelle OS-Benutzer ausführen kann, z.B. eine Reverse-Shell-Batchdatei oder einen Powershell-One-Liner, wodurch das Backdoor über IDE-Neustarts hinweg persistent bleibt.
 
 #### Erkennung & Minderung
 

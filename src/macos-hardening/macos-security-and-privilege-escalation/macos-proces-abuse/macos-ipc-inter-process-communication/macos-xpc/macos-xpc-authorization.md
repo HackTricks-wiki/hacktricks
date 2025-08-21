@@ -230,7 +230,7 @@ return error;
 ```
 Beachten Sie, dass die Funktion `authorizationRightForCommand` nur das zuvor kommentierte Objekt **`commandInfo`** überprüft, um **die Anforderungen zu überprüfen, um das Recht** zu erhalten, diese Methode aufzurufen. Dann wird sie **`AuthorizationCopyRights`** aufrufen, um zu überprüfen, **ob es die Rechte hat**, die Funktion aufzurufen (beachten Sie, dass die Flags die Interaktion mit dem Benutzer erlauben).
 
-In diesem Fall ist `kCommandKeyAuthRightDefault` definiert als `@kAuthorizationRuleClassAllow`, um die Funktion `readLicenseKeyAuthorization` aufzurufen. So **kann es jeder aufrufen**.
+In diesem Fall ist `kCommandKeyAuthRightDefault` auf `@kAuthorizationRuleClassAllow` definiert, um die Funktion `readLicenseKeyAuthorization` aufzurufen. So **kann es jeder aufrufen**.
 
 ### DB-Informationen
 
@@ -244,7 +244,7 @@ Dann können Sie lesen, wer auf das Recht zugreifen kann mit:
 ```bash
 security authorizationdb read com.apple.safaridriver.allow
 ```
-### Permissive Rechte
+### Erlaubte Rechte
 
 Sie können **alle Berechtigungskonfigurationen** [**hier**](https://www.dssw.co.uk/reference/authorization-rights/) finden, aber die Kombinationen, die keine Benutzerinteraktion erfordern, wären:
 
@@ -258,7 +258,7 @@ Sie können **alle Berechtigungskonfigurationen** [**hier**](https://www.dssw.co
 4. **'shared': 'true'**
 - Dieser Schlüssel gewährt keine Rechte ohne Authentifizierung. Stattdessen bedeutet es, wenn er auf `true` gesetzt ist, dass, sobald das Recht authentifiziert wurde, es unter mehreren Prozessen geteilt werden kann, ohne dass jeder einzelne sich erneut authentifizieren muss. Aber die ursprüngliche Gewährung des Rechts würde weiterhin eine Authentifizierung erfordern, es sei denn, sie wird mit anderen Schlüsseln wie `'authenticate-user': 'false'` kombiniert.
 
-Sie können [**dieses Skript verwenden**](https://gist.github.com/carlospolop/96ecb9e385a4667b9e40b24e878652f9), um die interessanten Rechte zu erhalten:
+Sie können [**dieses Skript**](https://gist.github.com/carlospolop/96ecb9e385a4667b9e40b24e878652f9) verwenden, um die interessanten Rechte zu erhalten:
 ```bash
 Rights with 'authenticate-user': 'false':
 is-admin (admin), is-admin-nonshared (admin), is-appstore (_appstore), is-developer (_developer), is-lpadmin (_lpadmin), is-root (run as root), is-session-owner (session owner), is-webdeveloper (_webdeveloper), system-identity-write-self (session owner), system-install-iap-software (run as root), system-install-software-iap (run as root)
@@ -329,7 +329,7 @@ cat /Library/LaunchDaemons/com.example.HelperTool.plist
 In diesem Beispiel wird erstellt:
 
 - Die Definition des Protokolls mit den Funktionen
-- Eine leere Authentifizierung, um um Zugriff zu bitten
+- Ein leeres Auth, um um Zugriff zu bitten
 - Eine Verbindung zum XPC-Dienst
 - Ein Aufruf der Funktion, wenn die Verbindung erfolgreich war
 ```objectivec

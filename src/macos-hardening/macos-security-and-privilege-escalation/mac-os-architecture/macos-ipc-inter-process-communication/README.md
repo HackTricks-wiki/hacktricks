@@ -18,12 +18,12 @@ Ein Prozess kann auch einen Portnamen mit bestimmten Rechten **an eine andere Ta
 
 Portrechte, die definieren, welche Operationen eine Task ausführen kann, sind entscheidend für diese Kommunikation. Die möglichen **Portrechte** sind ([Definitionen hier](https://docs.darlinghq.org/internals/macos-specifics/mach-ports.html)):
 
-- **Empfangsrecht**, das das Empfangen von Nachrichten ermöglicht, die an den Port gesendet werden. Mach-Ports sind MPSC (multiple-producer, single-consumer) Warteschlangen, was bedeutet, dass es im gesamten System **nur ein Empfangsrecht für jeden Port** geben kann (im Gegensatz zu Pipes, bei denen mehrere Prozesse alle Dateideskriptoren zum Leseende einer Pipe halten können).
-- Eine **Task mit dem Empfangsrecht** kann Nachrichten empfangen und **Senderechte erstellen**, die es ihr ermöglichen, Nachrichten zu senden. Ursprünglich hat nur die **eigene Task das Empfangsrecht über ihren Port**.
-- **Senderecht**, das das Senden von Nachrichten an den Port ermöglicht.
+- **Receive-Recht**, das das Empfangen von Nachrichten, die an den Port gesendet werden, erlaubt. Mach-Ports sind MPSC (multiple-producer, single-consumer) Warteschlangen, was bedeutet, dass es im gesamten System **nur ein Receive-Recht für jeden Port** geben kann (im Gegensatz zu Pipes, bei denen mehrere Prozesse alle Dateideskriptoren zum Leseende einer Pipe halten können).
+- Eine **Task mit dem Receive-Recht** kann Nachrichten empfangen und **Senderechte erstellen**, die es ihr ermöglichen, Nachrichten zu senden. Ursprünglich hat nur die **eigene Task das Receive-Recht über ihren Port**.
+- **Senderecht**, das das Senden von Nachrichten an den Port erlaubt.
 - Das Senderecht kann **kloniert** werden, sodass eine Task, die ein Senderecht besitzt, das Recht klonen und **einer dritten Task gewähren** kann.
-- **Send-einmal-Recht**, das das Senden einer Nachricht an den Port ermöglicht und dann verschwindet.
-- **Portset-Recht**, das ein _Portset_ anstelle eines einzelnen Ports bezeichnet. Das Dequeuen einer Nachricht aus einem Portset dequeuert eine Nachricht aus einem der enthaltenen Ports. Portsets können verwendet werden, um gleichzeitig auf mehreren Ports zu hören, ähnlich wie `select`/`poll`/`epoll`/`kqueue` in Unix.
+- **Send-once-Recht**, das das Senden einer Nachricht an den Port erlaubt und dann verschwindet.
+- **Port-Set-Recht**, das ein _Port-Set_ anstelle eines einzelnen Ports bezeichnet. Das Dequeuen einer Nachricht aus einem Port-Set dequeuert eine Nachricht aus einem der enthaltenen Ports. Port-Sets können verwendet werden, um gleichzeitig auf mehreren Ports zu hören, ähnlich wie `select`/`poll`/`epoll`/`kqueue` in Unix.
 - **Toter Name**, der kein tatsächliches Portrecht ist, sondern lediglich ein Platzhalter. Wenn ein Port zerstört wird, verwandeln sich alle bestehenden Portrechte für den Port in tote Namen.
 
 **Tasks können SEND-Rechte an andere übertragen**, wodurch diese in der Lage sind, Nachrichten zurückzusenden. **SEND-Rechte können auch geklont werden, sodass eine Task das Recht duplizieren und einer dritten Task geben kann**. Dies, kombiniert mit einem Zwischenprozess, der als **Bootstrap-Server** bekannt ist, ermöglicht eine effektive Kommunikation zwischen Tasks.
@@ -36,26 +36,26 @@ Datei-Ports ermöglichen es, Dateideskriptoren in Mac-Ports (unter Verwendung vo
 
 #### Schritte:
 
-Wie bereits erwähnt, ist zur Etablierung des Kommunikationskanals der **Bootstrap-Server** (**launchd** in mac) beteiligt.
+Wie bereits erwähnt, ist der **Bootstrap-Server** (**launchd** in mac) an der Etablierung des Kommunikationskanals beteiligt.
 
-1. Task **A** initiiert einen **neuen Port** und erhält dabei ein **EMPFANGSRECHT**.
-2. Task **A**, als Inhaber des Empfangsrechts, **generiert ein SENDERECHT für den Port**.
-3. Task **A** stellt eine **Verbindung** mit dem **Bootstrap-Server** her und gibt den **Servicenamen des Ports** sowie das **SENDERECHT** über ein Verfahren bekannt, das als Bootstrap-Registrierung bekannt ist.
-4. Task **B** interagiert mit dem **Bootstrap-Server**, um eine Bootstrap-**Suche nach dem Servicenamen** durchzuführen. Wenn erfolgreich, **dupliziert der Server das SENDERECHT**, das von Task A empfangen wurde, und **überträgt es an Task B**.
-5. Nach dem Erwerb eines SENDERECHTS ist Task **B** in der Lage, eine **Nachricht** zu **formulieren** und sie **an Task A** zu senden.
-6. Für eine bidirektionale Kommunikation generiert Task **B** normalerweise einen neuen Port mit einem **EMPFANGSRECHT** und einem **SENDERECHT** und gibt das **SENDERECHT an Task A** weiter, damit es Nachrichten an TASK B senden kann (bidirektionale Kommunikation).
+1. Task **A** initiiert einen **neuen Port** und erhält dabei ein **RECEIVE-Recht**.
+2. Task **A**, als Inhaber des RECEIVE-Rechts, **generiert ein SEND-Recht für den Port**.
+3. Task **A** stellt eine **Verbindung** mit dem **Bootstrap-Server** her und gibt den **Servicenamen des Ports** sowie das **SEND-Recht** über ein Verfahren bekannt, das als Bootstrap-Registrierung bekannt ist.
+4. Task **B** interagiert mit dem **Bootstrap-Server**, um eine Bootstrap-**Suche nach dem Servicenamen** durchzuführen. Wenn erfolgreich, **dupliziert der Server das SEND-Recht**, das von Task A empfangen wurde, und **überträgt es an Task B**.
+5. Nach dem Erwerb eines SEND-Rechts ist Task **B** in der Lage, eine **Nachricht** zu **formulieren** und sie **an Task A** zu senden.
+6. Für eine bidirektionale Kommunikation generiert Task **B** normalerweise einen neuen Port mit einem **RECEIVE**-Recht und einem **SEND**-Recht und gibt das **SEND-Recht an Task A** weiter, damit es Nachrichten an TASK B senden kann (bidirektionale Kommunikation).
 
 Der Bootstrap-Server **kann den** vom Task beanspruchten Servicenamen **nicht authentifizieren**. Das bedeutet, dass eine **Task** potenziell **jede System-Task impersonieren** könnte, indem sie fälschlicherweise **einen Autorisierungsservicenamen beansprucht** und dann jede Anfrage genehmigt.
 
-Dann speichert Apple die **Namen der systemeigenen Dienste** in sicheren Konfigurationsdateien, die sich in **SIP-geschützten** Verzeichnissen befinden: `/System/Library/LaunchDaemons` und `/System/Library/LaunchAgents`. Neben jedem Servicenamen wird auch die **assoziierte Binärdatei gespeichert**. Der Bootstrap-Server wird ein **EMPFANGSRECHT für jeden dieser Servicenamen** erstellen und halten.
+Dann speichert Apple die **Namen der systemeigenen Dienste** in sicheren Konfigurationsdateien, die sich in **SIP-geschützten** Verzeichnissen befinden: `/System/Library/LaunchDaemons` und `/System/Library/LaunchAgents`. Neben jedem Servicenamen wird auch die **assoziierte Binärdatei gespeichert**. Der Bootstrap-Server wird ein **RECEIVE-Recht für jeden dieser Servicenamen** erstellen und halten.
 
 Für diese vordefinierten Dienste unterscheidet sich der **Suchprozess leicht**. Wenn ein Servicename gesucht wird, startet launchd den Dienst dynamisch. Der neue Workflow ist wie folgt:
 
 - Task **B** initiiert eine Bootstrap-**Suche** nach einem Servicenamen.
 - **launchd** überprüft, ob die Task läuft, und wenn nicht, **startet** sie sie.
-- Task **A** (der Dienst) führt eine **Bootstrap-Check-in** durch. Hier erstellt der **Bootstrap-Server ein SENDERECHT**, behält es und **überträgt das EMPFANGSRECHT an Task A**.
-- launchd dupliziert das **SENDERECHT und sendet es an Task B**.
-- Task **B** generiert einen neuen Port mit einem **EMPFANGSRECHT** und einem **SENDERECHT** und gibt das **SENDERECHT an Task A** (den Dienst) weiter, damit es Nachrichten an TASK B senden kann (bidirektionale Kommunikation).
+- Task **A** (der Dienst) führt eine **Bootstrap-Check-in** durch. Hier erstellt der **Bootstrap-Server ein SEND-Recht, behält es und überträgt das RECEIVE-Recht an Task A**.
+- launchd dupliziert das **SEND-Recht und sendet es an Task B**.
+- Task **B** generiert einen neuen Port mit einem **RECEIVE**-Recht und einem **SEND**-Recht und gibt das **SEND-Recht an Task A** (den Dienst) weiter, damit es Nachrichten an TASK B senden kann (bidirektionale Kommunikation).
 
 Dieser Prozess gilt jedoch nur für vordefinierte System-Tasks. Nicht-System-Tasks funktionieren weiterhin wie ursprünglich beschrieben, was potenziell eine Impersonation ermöglichen könnte.
 
@@ -74,22 +74,22 @@ mach_port_name_t              msgh_voucher_port;
 mach_msg_id_t                 msgh_id;
 } mach_msg_header_t;
 ```
-Prozesse, die über ein _**Empfangsrecht**_ verfügen, können Nachrichten über einen Mach-Port empfangen. Umgekehrt wird den **Sendern** ein _**Senderecht**_ oder ein _**Send-einmal-Recht**_ gewährt. Das Send-einmal-Recht ist ausschließlich zum Senden einer einzelnen Nachricht gedacht, nach der es ungültig wird.
+Prozesse, die über ein _**receive right**_ verfügen, können Nachrichten über einen Mach-Port empfangen. Im Gegensatz dazu wird den **Sendern** ein _**send**_ oder ein _**send-once right**_ gewährt. Das send-once right ist ausschließlich zum Senden einer einzelnen Nachricht gedacht, nach der es ungültig wird.
 
-Um eine einfache **zweiseitige Kommunikation** zu erreichen, kann ein Prozess einen **Mach-Port** im Mach **Nachrichtenkopf** angeben, der als _Antwortport_ (**`msgh_local_port`**) bezeichnet wird, wo der **Empfänger** der Nachricht eine **Antwort** auf diese Nachricht senden kann. Die Bitflags in **`msgh_bits`** können verwendet werden, um anzuzeigen, dass ein **Send-einmal** **Recht** für diesen Port abgeleitet und übertragen werden soll (`MACH_MSG_TYPE_MAKE_SEND_ONCE`).
+Um eine einfache **bi-direktionale Kommunikation** zu erreichen, kann ein Prozess einen **mach port** im Mach **Nachrichtenkopf** angeben, der als _reply port_ (**`msgh_local_port`**) bezeichnet wird, wo der **Empfänger** der Nachricht eine **Antwort** auf diese Nachricht senden kann. Die Bitflags in **`msgh_bits`** können verwendet werden, um anzuzeigen, dass ein **send-once** **right** für diesen Port abgeleitet und übertragen werden sollte (`MACH_MSG_TYPE_MAKE_SEND_ONCE`).
 
 > [!TIP]
-> Beachten Sie, dass diese Art der zweiseitigen Kommunikation in XPC-Nachrichten verwendet wird, die eine Antwort erwarten (`xpc_connection_send_message_with_reply` und `xpc_connection_send_message_with_reply_sync`). Aber **normalerweise werden verschiedene Ports erstellt**, wie zuvor erklärt, um die zweiseitige Kommunikation zu ermöglichen.
+> Beachten Sie, dass diese Art der bi-direktionalen Kommunikation in XPC-Nachrichten verwendet wird, die eine Antwort erwarten (`xpc_connection_send_message_with_reply` und `xpc_connection_send_message_with_reply_sync`). Aber **normalerweise werden verschiedene Ports erstellt**, wie zuvor erklärt, um die bi-direktionale Kommunikation zu ermöglichen.
 
 Die anderen Felder des Nachrichtenkopfes sind:
 
 - `msgh_size`: die Größe des gesamten Pakets.
 - `msgh_remote_port`: der Port, über den diese Nachricht gesendet wird.
-- `msgh_voucher_port`: [Mach-Gutscheine](https://robert.sesek.com/2023/6/mach_vouchers.html).
+- `msgh_voucher_port`: [mach vouchers](https://robert.sesek.com/2023/6/mach_vouchers.html).
 - `msgh_id`: die ID dieser Nachricht, die vom Empfänger interpretiert wird.
 
 > [!CAUTION]
-> Beachten Sie, dass **Mach-Nachrichten über einen \_Mach-Port\_** gesendet werden, der ein **einzelner Empfänger**, **mehrere Sender** Kommunikationskanal ist, der im Mach-Kernel integriert ist. **Mehrere Prozesse** können **Nachrichten** an einen Mach-Port senden, aber zu jedem Zeitpunkt kann nur **ein einzelner Prozess** von ihm lesen.
+> Beachten Sie, dass **mach-Nachrichten über einen \_mach port**\_ gesendet werden, der einen **einzelnen Empfänger**, **mehrere Sender** Kommunikationskanal darstellt, der im Mach-Kernel integriert ist. **Mehrere Prozesse** können **Nachrichten** an einen Mach-Port senden, aber zu jedem Zeitpunkt kann nur **ein einzelner Prozess** von ihm lesen.
 
 ### Ports auflisten
 ```bash
@@ -99,7 +99,7 @@ Sie können dieses Tool auf iOS installieren, indem Sie es von [http://newosxboo
 
 ### Codebeispiel
 
-Beachten Sie, wie der **Sender** einen Port **zuweist**, ein **Senderecht** für den Namen `org.darlinghq.example` erstellt und es an den **Bootstrap-Server** sendet, während der Sender um das **Senderecht** dieses Namens bittet und es verwendet, um eine **Nachricht** zu **senden**.
+Beachten Sie, wie der **Sender** einen Port **zuweist**, ein **Senderecht** für den Namen `org.darlinghq.example` erstellt und es an den **Bootstrap-Server** sendet, während der Sender um das **Senderecht** dieses Namens bittet und es verwendet, um eine **Nachricht zu senden**.
 
 {{#tabs}}
 {{#tab name="receiver.c"}}
@@ -499,13 +499,13 @@ return 0;
 gcc -framework Foundation -framework Appkit sc_inject.m -o sc_inject
 ./inject <pi or string>
 ```
-### Dylib-Injektion in einem Thread über Task-Port
+### Dylib-Injektion in einem Thread über den Task-Port
 
 In macOS können **Threads** über **Mach** oder die **posix `pthread` API** manipuliert werden. Der Thread, den wir in der vorherigen Injektion erzeugt haben, wurde mit der Mach-API erstellt, daher ist er **nicht posix-konform**.
 
 Es war möglich, **einen einfachen Shellcode** zu injizieren, um einen Befehl auszuführen, da er **nicht mit posix** konformen APIs arbeiten musste, sondern nur mit Mach. **Komplexere Injektionen** würden erfordern, dass der **Thread** ebenfalls **posix-konform** ist.
 
-Um den **Thread** zu **verbessern**, sollte er **`pthread_create_from_mach_thread`** aufrufen, was **einen gültigen pthread** erstellt. Dann könnte dieser neue pthread **dlopen** aufrufen, um eine **dylib** aus dem System zu **laden**, sodass anstelle von neuem Shellcode, um verschiedene Aktionen auszuführen, benutzerdefinierte Bibliotheken geladen werden können.
+Um den **Thread zu verbessern**, sollte er **`pthread_create_from_mach_thread`** aufrufen, was **einen gültigen pthread** erstellt. Dann könnte dieser neue pthread **dlopen** aufrufen, um eine **dylib** aus dem System zu laden, sodass anstelle von neuem Shellcode, um verschiedene Aktionen auszuführen, benutzerdefinierte Bibliotheken geladen werden können.
 
 Sie finden **Beispiel-dylibs** in (zum Beispiel die, die ein Protokoll generiert und dann können Sie es abhören):
 

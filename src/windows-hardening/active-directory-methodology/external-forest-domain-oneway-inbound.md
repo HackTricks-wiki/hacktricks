@@ -1,4 +1,4 @@
-# Externer Wald-Domain - Einweg (Inbound) oder bidirektional
+# Externer Wald-Domain - Einweg (Eingehend) oder bidirektional
 
 {{#include ../../banners/hacktricks-training.md}}
 

@@ -6,7 +6,7 @@
 
 ## Verständnis des Diebstahls aktiver Benutzeranmeldeinformationen mit Zertifikaten – PERSIST1
 
-In einem Szenario, in dem ein Zertifikat, das die Domänenauthentifizierung ermöglicht, von einem Benutzer angefordert werden kann, hat ein Angreifer die Möglichkeit, dieses Zertifikat anzufordern und zu stehlen, um die Persistenz in einem Netzwerk aufrechtzuerhalten. Standardmäßig erlaubt die `User`-Vorlage in Active Directory solche Anfragen, obwohl sie manchmal deaktiviert sein kann.
+In einem Szenario, in dem ein Benutzer ein Zertifikat anfordern kann, das die Domänenauthentifizierung ermöglicht, hat ein Angreifer die Möglichkeit, dieses Zertifikat anzufordern und zu stehlen, um die Persistenz in einem Netzwerk aufrechtzuerhalten. Standardmäßig erlaubt die `User`-Vorlage in Active Directory solche Anfragen, obwohl sie manchmal deaktiviert sein kann.
 
 Mit [Certify](https://github.com/GhostPack/Certify) oder [Certipy](https://github.com/ly4k/Certipy) können Sie nach aktivierten Vorlagen suchen, die die Clientauthentifizierung ermöglichen, und dann eine anfordern:
 ```bash
@@ -46,7 +46,7 @@ Rubeus.exe asktgt /user:HOSTNAME$ /certificate:C:\Temp\host.pfx /password:Passw0
 ```
 ## Extending Persistence Through Certificate Renewal - PERSIST3
 
-Der Missbrauch der Gültigkeits- und Erneuerungszeiträume von Zertifikatvorlagen ermöglicht es einem Angreifer, langfristigen Zugriff zu behalten. Wenn Sie ein zuvor ausgestelltes Zertifikat und dessen privaten Schlüssel besitzen, können Sie es vor Ablauf erneuern, um ein frisches, langlebiges Credential zu erhalten, ohne zusätzliche Anforderungsartefakte zu hinterlassen, die mit dem ursprünglichen Prinzipal verbunden sind.
+Das Ausnutzen der Gültigkeits- und Erneuerungszeiträume von Zertifikatvorlagen ermöglicht es einem Angreifer, langfristigen Zugriff zu behalten. Wenn Sie ein zuvor ausgestelltes Zertifikat und dessen privaten Schlüssel besitzen, können Sie es vor Ablauf erneuern, um ein frisches, langlebiges Credential zu erhalten, ohne zusätzliche Anforderungsartefakte, die mit dem ursprünglichen Prinzipal verbunden sind, zu hinterlassen.
 ```bash
 # Renewal with Certipy (works with RPC/DCOM/WebEnrollment)
 # Provide the existing PFX and target the same CA/template when possible
@@ -57,20 +57,20 @@ certipy req -u 'john@corp.local' -p 'Passw0rd!' -ca 'CA-SERVER\CA-NAME' \
 # (use the serial/thumbprint of the cert to renew; reusekeys preserves the keypair)
 certreq -enroll -user -cert <SerialOrID> renew [reusekeys]
 ```
-> Betrieblicher Tipp: Verfolgen Sie die Laufzeiten von von Angreifern gehaltenen PFX-Dateien und erneuern Sie diese frühzeitig. Eine Erneuerung kann auch dazu führen, dass aktualisierte Zertifikate die moderne SID-Mapping-Erweiterung enthalten, wodurch sie unter strengeren DC-Mapping-Regeln verwendbar bleiben (siehe nächster Abschnitt).
+> Betrieblicher Tipp: Verfolgen Sie die Lebensdauer von von Angreifern gehaltenen PFX-Dateien und erneuern Sie diese frühzeitig. Die Erneuerung kann auch dazu führen, dass aktualisierte Zertifikate die moderne SID-Mapping-Erweiterung enthalten, wodurch sie unter strengeren DC-Mapping-Regeln verwendbar bleiben (siehe nächster Abschnitt).
 
 ## Pflanzung expliziter Zertifikat-Mappings (altSecurityIdentities) – PERSIST4
 
 Wenn Sie auf das Attribut `altSecurityIdentities` eines Zielkontos schreiben können, können Sie ein von einem Angreifer kontrolliertes Zertifikat explizit diesem Konto zuordnen. Dies bleibt auch nach Passwortänderungen bestehen und bleibt bei Verwendung starker Mapping-Formate unter der modernen DC-Durchsetzung funktionsfähig.
 
-Hochrangiger Ablauf:
+Überblick:
 
 1. Erhalten oder stellen Sie ein Client-Auth-Zertifikat aus, das Sie kontrollieren (z. B. melden Sie sich mit der `User`-Vorlage als sich selbst an).
 2. Extrahieren Sie einen starken Identifikator aus dem Zertifikat (Issuer+Serial, SKI oder SHA1-PublicKey).
-3. Fügen Sie eine explizite Zuordnung im `altSecurityIdentities` des Opfers mit diesem Identifikator hinzu.
+3. Fügen Sie eine explizite Zuordnung im `altSecurityIdentities` des Opferprinzips unter Verwendung dieses Identifikators hinzu.
 4. Authentifizieren Sie sich mit Ihrem Zertifikat; der DC ordnet es über die explizite Zuordnung dem Opfer zu.
 
-Beispiel (PowerShell) mit einer starken Issuer+Serial-Zuordnung:
+Beispiel (PowerShell) unter Verwendung einer starken Issuer+Serial-Zuordnung:
 ```powershell
 # Example values - reverse the issuer DN and serial as required by AD mapping format
 $Issuer  = 'DC=corp,DC=local,CN=CORP-DC-CA'
@@ -115,16 +115,16 @@ Die Widerrufung des Agentenzertifikats oder der Berechtigungen für Vorlagen ist
 
 Microsoft KB5014754 führte die starke Durchsetzung der Zertifikatzuordnung auf Domänencontrollern ein. Seit dem 11. Februar 2025 verwenden DCs standardmäßig die vollständige Durchsetzung und lehnen schwache/mehrdeutige Zuordnungen ab. Praktische Auswirkungen:
 
-- Zertifikate vor 2022, die die SID-Zuordnungs-Erweiterung nicht haben, können bei vollständiger Durchsetzung durch DCs an der impliziten Zuordnung scheitern. Angreifer können den Zugriff aufrechterhalten, indem sie entweder Zertifikate über AD CS erneuern (um die SID-Erweiterung zu erhalten) oder eine starke explizite Zuordnung in `altSecurityIdentities` (PERSIST4) einfügen.
+- Zertifikate vor 2022, die die SID-Zuordnungs-Erweiterung nicht haben, können bei DCs in voller Durchsetzung eine implizite Zuordnung fehlschlagen. Angreifer können den Zugriff aufrechterhalten, indem sie entweder Zertifikate über AD CS erneuern (um die SID-Erweiterung zu erhalten) oder eine starke explizite Zuordnung in `altSecurityIdentities` (PERSIST4) einfügen.
 - Explizite Zuordnungen mit starken Formaten (Issuer+Serial, SKI, SHA1-PublicKey) funktionieren weiterhin. Schwache Formate (Issuer/Subject, nur Subject, RFC822) können blockiert werden und sollten für die Persistenz vermieden werden.
 
 Administratoren sollten überwachen und alarmieren bei:
 - Änderungen an `altSecurityIdentities` und der Ausstellung/Erneuerung von Enrollment-Agent- und Benutzerzertifikaten.
-- CA-Ausgabeverzeichnissen für Anfragen im Namen von und ungewöhnliche Erneuerungsmuster.
+- CA-Ausstellungsprotokollen für Anfragen im Namen von und ungewöhnlichen Erneuerungsmustern.
 
 ## Referenzen
 
-- Microsoft. KB5014754: Änderungen bei der zertifikatbasierten Authentifizierung auf Windows-Domänencontrollern (Durchsetzungszeitplan und starke Zuordnungen).
+- Microsoft. KB5014754: Änderungen der zertifikatbasierten Authentifizierung auf Windows-Domänencontrollern (Durchsetzungszeitplan und starke Zuordnungen).
 https://support.microsoft.com/en-au/topic/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers-ad2c23b0-15d8-4340-a468-4d4f3b188f16
 - Certipy Wiki – Befehlsreferenz (`req -renew`, `auth`, `shadow`).
 https://github.com/ly4k/Certipy/wiki/08-%E2%80%90-Command-Reference

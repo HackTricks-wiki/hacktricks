@@ -12,7 +12,7 @@ Wenn Sie mehr über **runc** erfahren möchten, besuchen Sie die folgende Seite:
 
 ## PE
 
-Wenn Sie feststellen, dass `runc` auf dem Host installiert ist, können Sie möglicherweise **einen Container ausführen, der das Root-Verzeichnis / des Hosts einbindet**.
+Wenn Sie feststellen, dass `runc` auf dem Host installiert ist, können Sie möglicherweise **einen Container ausführen, der das Wurzelverzeichnis / des Hosts einbindet**.
 ```bash
 runc -help #Get help and see if runc is intalled
 runc spec #This will create the config.json file in your current folder

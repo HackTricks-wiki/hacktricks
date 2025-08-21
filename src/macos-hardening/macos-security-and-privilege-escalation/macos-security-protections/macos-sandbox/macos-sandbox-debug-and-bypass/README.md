@@ -17,18 +17,19 @@ Schließlich wird die Sandbox mit einem Aufruf von **`__sandbox_ms`** aktiviert,
 
 ### Umgehung des Quarantäneattributs
 
-**Dateien, die von sandboxed Prozessen erstellt werden**, erhalten das **Quarantäneattribut**, um ein Entkommen aus der Sandbox zu verhindern. Wenn es Ihnen jedoch gelingt, **einen `.app`-Ordner ohne das Quarantäneattribut** innerhalb einer sandboxed Anwendung zu erstellen, könnten Sie die App-Bündel-Binärdatei auf **`/bin/bash`** verweisen lassen und einige Umgebungsvariablen in der **plist** hinzufügen, um **`open`** zu missbrauchen, um **die neue App unsandboxed zu starten**.
+**Dateien, die von sandboxed Prozessen erstellt werden**, erhalten das **Quarantäneattribut**, um ein Entkommen aus der Sandbox zu verhindern. Wenn es Ihnen jedoch gelingt, **einen `.app`-Ordner ohne das Quarantäneattribut** innerhalb einer sandboxed Anwendung zu erstellen, könnten Sie die App-Bundle-Binärdatei auf **`/bin/bash`** verweisen lassen und einige Umgebungsvariablen in der **plist** hinzufügen, um **`open`** zu missbrauchen, um **die neue App unsandboxed zu starten**.
 
 Das wurde in [**CVE-2023-32364**](https://gergelykalman.com/CVE-2023-32364-a-macOS-sandbox-escape-by-mounting.html)**.**
 
 > [!CAUTION]
-> Daher können Sie im Moment, wenn Sie nur in der Lage sind, einen Ordner mit einem Namen, der auf **`.app`** endet, ohne ein Quarantäneattribut zu erstellen, die Sandbox umgehen, da macOS nur das **Quarantäne**-Attribut im **`.app`-Ordner** und in der **Hauptausführungsdatei** überprüft (und wir werden die Hauptausführungsdatei auf **`/bin/bash`** verweisen).
+> Daher können Sie im Moment, wenn Sie nur in der Lage sind, einen Ordner mit einem Namen zu erstellen, der auf **`.app`** endet, ohne ein Quarantäneattribut, die Sandbox umgehen, da macOS nur das **Quarantäne**-Attribut im **`.app`-Ordner** und in der **Hauptausführungsdatei** überprüft (und wir werden die Hauptausführungsdatei auf **`/bin/bash`** verweisen).
 >
-> Beachten Sie, dass, wenn ein .app-Bündel bereits autorisiert wurde, um ausgeführt zu werden (es hat ein Quarantäne-xttr mit dem autorisierten Ausführungsflag), Sie es auch missbrauchen könnten... es sei denn, Sie können jetzt nicht in **`.app`**-Bündel schreiben, es sei denn, Sie haben einige privilegierte TCC-Berechtigungen (die Sie in einer hochgradig sandboxed Umgebung nicht haben werden).
+> Beachten Sie, dass, wenn ein .app-Bundle bereits autorisiert wurde, um ausgeführt zu werden (es hat ein Quarantäne-xttr mit dem autorisierten Ausführungsflag), Sie es auch missbrauchen könnten... es sei denn, Sie können jetzt nicht in **`.app`**-Bundles schreiben, es sei denn, Sie haben einige privilegierte TCC-Berechtigungen (die Sie in einer hochgradig sandboxed Umgebung nicht haben werden).
 
 ### Missbrauch der Open-Funktionalität
 
-In den [**letzten Beispielen für die Umgehung der Word-Sandbox**](macos-office-sandbox-bypasses.md#word-sandbox-bypass-via-login-items-and-.zshenv) kann man sehen, wie die **`open`**-CLI-Funktionalität missbraucht werden könnte, um die Sandbox zu umgehen.
+In den [**letzten Beispielen der Word-Sandbox-Umgehung**](macos-office-sandbox-bypasses.md#word-sandbox-bypass-via-login-items-and-.zshenv) kann man sehen, wie die **`open`**-CLI-Funktionalität missbraucht werden könnte, um die Sandbox zu umgehen.
+
 
 {{#ref}}
 macos-office-sandbox-bypasses.md
@@ -47,6 +48,7 @@ Dafür benötigen Sie möglicherweise sogar **2 Schritte**: Um einen Prozess mit
 
 Überprüfen Sie diese Seite über **Auto-Start-Standorte**:
 
+
 {{#ref}}
 ../../../../macos-auto-start-locations.md
 {{#endref}}
@@ -54,6 +56,7 @@ Dafür benötigen Sie möglicherweise sogar **2 Schritte**: Um einen Prozess mit
 ### Missbrauch anderer Prozesse
 
 Wenn Sie von dem sandboxed Prozess in der Lage sind, **andere Prozesse zu kompromittieren**, die in weniger restriktiven Sandboxes (oder gar keinen) laufen, werden Sie in der Lage sein, in deren Sandboxes zu entkommen:
+
 
 {{#ref}}
 ../../../macos-proces-abuse/
@@ -208,7 +211,7 @@ NSLog(@"Read the target content:%@", [NSData dataWithContentsOfURL:targetURL]);
 [**Diese Forschung**](https://saagarjha.com/blog/2020/05/20/mac-app-store-sandbox-escape/) entdeckte 2 Möglichkeiten, die Sandbox zu umgehen. Da die Sandbox aus dem Userland angewendet wird, wenn die **libSystem**-Bibliothek geladen wird. Wenn ein Binary das Laden dieser Bibliothek vermeiden könnte, würde es niemals in die Sandbox gelangen:
 
 - Wenn das Binary **vollständig statisch kompiliert** wäre, könnte es das Laden dieser Bibliothek vermeiden.
-- Wenn das **Binary keine Bibliotheken laden müsste** (da der Linker auch in libSystem ist), müsste es libSystem nicht laden.
+- Wenn das **Binary keine Bibliotheken laden müsste** (da der Linker ebenfalls in libSystem ist), müsste es libSystem nicht laden.
 
 ### Shellcodes
 
@@ -323,7 +326,7 @@ __mac_syscall invoked. Policy: Quarantine, Call: 87
 __mac_syscall invoked. Policy: Sandbox, Call: 4
 Sandbox Bypassed!
 ```
-### Debug & bypass Sandbox with lldb
+### Debuggen & Umgehen des Sandboxes mit lldb
 
 Lass uns eine Anwendung kompilieren, die sandboxed sein sollte:
 

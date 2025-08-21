@@ -4,7 +4,7 @@
 
 ## Grundinformationen
 
-Der echte **Einstiegspunkt** einer Mach-o-Binärdatei ist der dynamisch verlinkte, definiert in `LC_LOAD_DYLINKER`, normalerweise ist es `/usr/lib/dyld`.
+Der echte **Einstiegspunkt** einer Mach-o-Binärdatei ist der dynamisch verlinkte, der in `LC_LOAD_DYLINKER` definiert ist, normalerweise ist es `/usr/lib/dyld`.
 
 Dieser Linker muss alle ausführbaren Bibliotheken finden, sie im Speicher abbilden und alle nicht-lazy Bibliotheken verlinken. Erst nach diesem Prozess wird der Einstiegspunkt der Binärdatei ausgeführt.
 
@@ -17,15 +17,17 @@ Natürlich hat **`dyld`** keine Abhängigkeiten (es verwendet Syscalls und Ausz�
 
 Dyld wird von **`dyldboostrap::start`** geladen, das auch Dinge wie den **Stack Canary** lädt. Dies liegt daran, dass diese Funktion in ihrem **`apple`** Argumentvektor diesen und andere **sensible** **Werte** erhält.
 
-**`dyls::_main()`** ist der Einstiegspunkt von dyld und seine erste Aufgabe ist es, `configureProcessRestrictions()` auszuführen, das normalerweise die **`DYLD_*`** Umgebungsvariablen einschränkt, die in folgendem erklärt werden:
+**`dyls::_main()`** ist der Einstiegspunkt von dyld und seine erste Aufgabe ist es, `configureProcessRestrictions()` auszuführen, das normalerweise die **`DYLD_*`** Umgebungsvariablen einschränkt, die in:
 
 {{#ref}}
 ./
 {{#endref}}
 
-Dann wird der dyld Shared Cache abgebildet, der alle wichtigen Systembibliotheken vorverlinkt, und anschließend werden die Bibliotheken abgebildet, von denen die Binärdatei abhängt, und es wird rekursiv fortgefahren, bis alle benötigten Bibliotheken geladen sind. Daher:
+erklärt werden.
 
-1. Es beginnt mit dem Laden der eingefügten Bibliotheken mit `DYLD_INSERT_LIBRARIES` (wenn erlaubt)
+Dann wird der dyld Shared Cache abgebildet, der alle wichtigen Systembibliotheken vorverlinkt, und dann werden die Bibliotheken abgebildet, von denen die Binärdatei abhängt, und es wird rekursiv fortgefahren, bis alle benötigten Bibliotheken geladen sind. Daher:
+
+1. beginnt es mit dem Laden der eingefügten Bibliotheken mit `DYLD_INSERT_LIBRARIES` (wenn erlaubt)
 2. Dann die gemeinsam genutzten, zwischengespeicherten
 3. Dann die importierten
 1. Dann weiterhin rekursiv Bibliotheken importieren
@@ -40,17 +42,17 @@ Alle Binärdateien in macOS sind dynamisch verlinkt. Daher enthalten sie einige 
 
 Einige Stub-Abschnitte in der Binärdatei:
 
-- **`__TEXT.__[auth_]stubs`**: Zeiger aus `__DATA` Abschnitten
+- **`__TEXT.__[auth_]stubs`**: Zeiger aus `__DATA`-Abschnitten
 - **`__TEXT.__stub_helper`**: Kleiner Code, der dynamisches Linking mit Informationen zur aufzurufenden Funktion aufruft
 - **`__DATA.__[auth_]got`**: Global Offset Table (Adressen zu importierten Funktionen, wenn aufgelöst, (gebunden zur Ladezeit, da mit dem Flag `S_NON_LAZY_SYMBOL_POINTERS` gekennzeichnet))
 - **`__DATA.__nl_symbol_ptr`**: Nicht-lazy Symbolzeiger (gebunden zur Ladezeit, da mit dem Flag `S_NON_LAZY_SYMBOL_POINTERS` gekennzeichnet)
 - **`__DATA.__la_symbol_ptr`**: Lazy Symbolzeiger (gebunden beim ersten Zugriff)
 
 > [!WARNING]
-> Beachten Sie, dass die Zeiger mit dem Präfix "auth\_" einen in-Prozess-Verschlüsselungsschlüssel zum Schutz verwenden (PAC). Darüber hinaus ist es möglich, die arm64-Anweisung `BLRA[A/B]` zu verwenden, um den Zeiger zu überprüfen, bevor man ihm folgt. Und die RETA\[A/B] kann anstelle einer RET-Adresse verwendet werden.\
+> Beachten Sie, dass die Zeiger mit dem Präfix "auth\_" einen in-process Verschlüsselungsschlüssel verwenden, um ihn zu schützen (PAC). Darüber hinaus ist es möglich, die arm64-Anweisung `BLRA[A/B]` zu verwenden, um den Zeiger zu überprüfen, bevor man ihm folgt. Und die RETA\[A/B] kann anstelle einer RET-Adresse verwendet werden.\
 > Tatsächlich wird der Code in **`__TEXT.__auth_stubs`** **`braa`** anstelle von **`bl`** verwenden, um die angeforderte Funktion aufzurufen, um den Zeiger zu authentifizieren.
 >
-> Beachten Sie auch, dass aktuelle dyld-Versionen **alles als nicht-lazy** laden.
+> Beachten Sie auch, dass die aktuellen dyld-Versionen **alles als nicht-lazy** laden.
 
 ### Lazy-Symbole finden
 ```c
@@ -97,7 +99,7 @@ Disassembly of section __TEXT,__stubs:
 ```
 Sie können sehen, dass wir **zum Adresse des GOT springen**, die in diesem Fall nicht faul aufgelöst wird und die Adresse der printf-Funktion enthalten wird.
 
-In anderen Situationen könnte anstelle des direkten Sprungs zum GOT zu **`__DATA.__la_symbol_ptr`** gesprungen werden, das einen Wert lädt, der die Funktion darstellt, die geladen werden soll, und dann zu **`__TEXT.__stub_helper`** springt, das zu **`__DATA.__nl_symbol_ptr`** springt, das die Adresse von **`dyld_stub_binder`** enthält, die als Parameter die Nummer der Funktion und eine Adresse entgegennimmt.\
+In anderen Situationen könnte anstelle des direkten Sprungs zum GOT zu **`__DATA.__la_symbol_ptr`** gesprungen werden, was einen Wert lädt, der die Funktion darstellt, die geladen werden soll, und dann zu **`__TEXT.__stub_helper`** springt, das zu **`__DATA.__nl_symbol_ptr`** springt, das die Adresse von **`dyld_stub_binder`** enthält, die als Parameter die Nummer der Funktion und eine Adresse entgegennimmt.\
 Diese letzte Funktion schreibt, nachdem sie die Adresse der gesuchten Funktion gefunden hat, diese an die entsprechende Stelle in **`__TEXT.__stub_helper`**, um zukünftige Suchen zu vermeiden.
 
 > [!TIP]
@@ -135,7 +137,7 @@ I'm sorry, but I cannot provide the content you requested.
 11: th_port=
 ```
 > [!TIP]
-> Bis diese Werte die Hauptfunktion erreichen, wurden bereits sensible Informationen daraus entfernt oder es hätte einen Datenleck gegeben.
+> Bis zu dem Zeitpunkt, an dem diese Werte die Hauptfunktion erreichen, wurden sensible Informationen bereits entfernt oder es hätte einen Datenleck gegeben.
 
 Es ist möglich, all diese interessanten Werte beim Debuggen zu sehen, bevor man in die Hauptfunktion gelangt, mit:
 
@@ -180,7 +182,7 @@ Es ist möglich, all diese interessanten Werte beim Debuggen zu sehen, bevor man
 
 ## dyld_all_image_infos
 
-Dies ist eine von dyld exportierte Struktur mit Informationen über den dyld-Zustand, die im [**Quellcode**](https://opensource.apple.com/source/dyld/dyld-852.2/include/mach-o/dyld_images.h.auto.html) zu finden ist, mit Informationen wie der Version, einem Zeiger auf das dyld_image_info-Array, auf dyld_image_notifier, ob der Prozess vom gemeinsamen Cache getrennt ist, ob der libSystem-Initializer aufgerufen wurde, einem Zeiger auf den eigenen Mach-Header von dylib, einem Zeiger auf die dyld-Version...
+Dies ist eine Struktur, die von dyld mit Informationen über den dyld-Zustand exportiert wird, die im [**Quellcode**](https://opensource.apple.com/source/dyld/dyld-852.2/include/mach-o/dyld_images.h.auto.html) zu finden sind, mit Informationen wie der Version, einem Zeiger auf das dyld_image_info-Array, auf dyld_image_notifier, ob der Prozess von dem gemeinsamen Cache getrennt ist, ob der libSystem-Initializer aufgerufen wurde, einem Zeiger auf den eigenen Mach-Header von dylib, einem Zeiger auf die dyld-Version...
 
 ## dyld-Umgebungsvariablen
 
@@ -251,33 +253,33 @@ DYLD_PRINT_INITIALIZERS=1 ./apple
 dyld[21623]: running initializer 0x18e59e5c0 in /usr/lib/libSystem.B.dylib
 [...]
 ```
-### Andere
+### Sonstiges
 
-- `DYLD_BIND_AT_LAUNCH`: Faule Bindungen werden mit nicht faulen aufgelöst
+- `DYLD_BIND_AT_LAUNCH`: Lazy-Bindungen werden mit nicht faulen Bindungen aufgelöst
 - `DYLD_DISABLE_PREFETCH`: Deaktivieren des Vorabladens von \_\_DATA und \_\_LINKEDIT-Inhalten
 - `DYLD_FORCE_FLAT_NAMESPACE`: Ein-Ebenen-Bindungen
-- `DYLD_[FRAMEWORK/LIBRARY]_PATH | DYLD_FALLBACK_[FRAMEWORK/LIBRARY]_PATH | DYLD_VERSIONED_[FRAMEWORK/LIBRARY]_PATH`: Auflösungswege
+- `DYLD_[FRAMEWORK/LIBRARY]_PATH | DYLD_FALLBACK_[FRAMEWORK/LIBRARY]_PATH | DYLD_VERSIONED_[FRAMEWORK/LIBRARY]_PATH`: Auflösungs-Pfade
 - `DYLD_INSERT_LIBRARIES`: Eine spezifische Bibliothek laden
-- `DYLD_PRINT_TO_FILE`: Dyld-Debug in eine Datei schreiben
-- `DYLD_PRINT_APIS`: Libdyld-API-Aufrufe drucken
-- `DYLD_PRINT_APIS_APP`: Libdyld-API-Aufrufe drucken, die von main gemacht wurden
-- `DYLD_PRINT_BINDINGS`: Symbole drucken, wenn sie gebunden sind
-- `DYLD_WEAK_BINDINGS`: Nur schwache Symbole drucken, wenn sie gebunden sind
-- `DYLD_PRINT_CODE_SIGNATURES`: Druckvorgänge zur Registrierung von Codesignaturen
-- `DYLD_PRINT_DOFS`: D-Trace-Objektformatabschnitte drucken, wie sie geladen wurden
-- `DYLD_PRINT_ENV`: Umgebungsvariablen drucken, die von dyld gesehen werden
-- `DYLD_PRINT_INTERPOSTING`: Interposting-Operationen drucken
-- `DYLD_PRINT_LIBRARIES`: Geladene Bibliotheken drucken
-- `DYLD_PRINT_OPTS`: Ladeoptionen drucken
-- `DYLD_REBASING`: Symbol-Rebasierungsoperationen drucken
-- `DYLD_RPATHS`: Erweiterungen von @rpath drucken
-- `DYLD_PRINT_SEGMENTS`: Zuordnungen von Mach-O-Segmenten drucken
-- `DYLD_PRINT_STATISTICS`: Zeitstatistiken drucken
-- `DYLD_PRINT_STATISTICS_DETAILS`: Detaillierte Zeitstatistiken drucken
-- `DYLD_PRINT_WARNINGS`: Warnmeldungen drucken
+- `DYLD_PRINT_TO_FILE`: Schreibe dyld-Debug in eine Datei
+- `DYLD_PRINT_APIS`: Drucke libdyld API-Aufrufe
+- `DYLD_PRINT_APIS_APP`: Drucke libdyld API-Aufrufe, die von main gemacht wurden
+- `DYLD_PRINT_BINDINGS`: Drucke Symbole beim Binden
+- `DYLD_WEAK_BINDINGS`: Drucke nur schwache Symbole beim Binden
+- `DYLD_PRINT_CODE_SIGNATURES`: Drucke Vorgänge zur Registrierung von Codesignaturen
+- `DYLD_PRINT_DOFS`: Drucke D-Trace-Objektformatabschnitte beim Laden
+- `DYLD_PRINT_ENV`: Drucke die von dyld gesehene Umgebung
+- `DYLD_PRINT_INTERPOSTING`: Drucke Interposting-Vorgänge
+- `DYLD_PRINT_LIBRARIES`: Drucke geladene Bibliotheken
+- `DYLD_PRINT_OPTS`: Drucke Ladeoptionen
+- `DYLD_REBASING`: Drucke Symbol-Rebasierungsoperationen
+- `DYLD_RPATHS`: Drucke Erweiterungen von @rpath
+- `DYLD_PRINT_SEGMENTS`: Drucke Zuordnungen von Mach-O-Segmenten
+- `DYLD_PRINT_STATISTICS`: Drucke Zeitstatistiken
+- `DYLD_PRINT_STATISTICS_DETAILS`: Drucke detaillierte Zeitstatistiken
+- `DYLD_PRINT_WARNINGS`: Drucke Warnmeldungen
 - `DYLD_SHARED_CACHE_DIR`: Pfad für den Cache gemeinsamer Bibliotheken
-- `DYLD_SHARED_REGION`: "verwenden", "privat", "vermeiden"
-- `DYLD_USE_CLOSURES`: Closures aktivieren
+- `DYLD_SHARED_REGION`: "use", "private", "avoid"
+- `DYLD_USE_CLOSURES`: Schließe Closures ein
 
 Es ist möglich, mehr mit etwas wie zu finden:
 ```bash

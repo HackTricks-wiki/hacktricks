@@ -8,7 +8,7 @@ Wenn Sie festgestellt haben, dass Sie **in einen Systempfad-Ordner schreiben kö
 
 Um dies zu tun, können Sie eine **Dll Hijacking** ausnutzen, bei der Sie eine **Bibliothek übernehmen**, die von einem Dienst oder Prozess mit **höheren Privilegien** als Ihren geladen wird. Da dieser Dienst eine Dll lädt, die wahrscheinlich nicht einmal im gesamten System existiert, wird er versuchen, sie aus dem Systempfad zu laden, in den Sie schreiben können.
 
-Für weitere Informationen darüber, **was Dll Hijacking ist**, siehe:
+Für weitere Informationen darüber, **was Dll Hijacking ist**, überprüfen Sie:
 
 {{#ref}}
 ./
@@ -18,7 +18,7 @@ Für weitere Informationen darüber, **was Dll Hijacking ist**, siehe:
 
 ### Finden einer fehlenden Dll
 
-Das erste, was Sie benötigen, ist, einen **Prozess zu identifizieren**, der mit **höheren Privilegien** als Sie läuft und versucht, eine **Dll aus dem Systempfad** zu laden, in den Sie schreiben können.
+Das erste, was Sie tun müssen, ist, **einen Prozess zu identifizieren**, der mit **höheren Privilegien** als Sie läuft und versucht, eine **Dll aus dem Systempfad** zu laden, in den Sie schreiben können.
 
 Das Problem in diesen Fällen ist, dass diese Prozesse wahrscheinlich bereits laufen. Um herauszufinden, welche Dlls den Diensten fehlen, müssen Sie procmon so schnell wie möglich starten (bevor die Prozesse geladen werden). Um fehlende .dlls zu finden, tun Sie Folgendes:
 
@@ -39,7 +39,7 @@ $newPath = "$envPath;$folderPath"
 [Environment]::SetEnvironmentVariable("PATH", $newPath, "Machine")
 }
 ```
-- Starten Sie **`procmon`** und gehen Sie zu **`Optionen`** --> **`Boot-Logging aktivieren`** und drücken Sie **`OK`** im Prompt.
+- Starten Sie **`procmon`** und gehen Sie zu **`Options`** --> **`Enable boot logging`** und drücken Sie **`OK`** im Prompt.
 - Dann **neustarten**. Wenn der Computer neu gestartet wird, beginnt **`procmon`** sofort mit der **Aufzeichnung** von Ereignissen.
 - Sobald **Windows** **gestartet ist, führen Sie `procmon`** erneut aus, es wird Ihnen mitteilen, dass es bereits läuft und wird **fragen, ob Sie die Ereignisse in einer Datei speichern** möchten. Sagen Sie **ja** und **speichern Sie die Ereignisse in einer Datei**.
 - **Nachdem** die **Datei** **generiert** wurde, **schließen** Sie das geöffnete **`procmon`**-Fenster und **öffnen Sie die Ereignisdatei**.
@@ -65,13 +65,13 @@ Nachdem ich dies gefunden hatte, stieß ich auf diesen interessanten Blogbeitrag
 
 ### Ausnutzung
 
-Um die **Berechtigungen zu erhöhen**, werden wir die Bibliothek **WptsExtensions.dll** hijacken. Mit dem **Pfad** und dem **Namen** müssen wir nur die **bösartige dll** **generieren**.
+Um die **Berechtigungen zu eskalieren**, werden wir die Bibliothek **WptsExtensions.dll** hijacken. Mit dem **Pfad** und dem **Namen** müssen wir nur die **bösartige dll** **generieren**.
 
 Sie können [**versuchen, eines dieser Beispiele zu verwenden**](#creating-and-compiling-dlls). Sie könnten Payloads ausführen wie: einen rev shell erhalten, einen Benutzer hinzufügen, ein Beacon ausführen...
 
 > [!WARNING]
 > Beachten Sie, dass **nicht alle Dienste** mit **`NT AUTHORITY\SYSTEM`** ausgeführt werden, einige werden auch mit **`NT AUTHORITY\LOCAL SERVICE`** ausgeführt, was **weniger Berechtigungen** hat und Sie **können keinen neuen Benutzer erstellen**, um seine Berechtigungen auszunutzen.\
-> Dieser Benutzer hat jedoch das **`seImpersonate`**-Privileg, sodass Sie die [**Potato-Suite zur Erhöhung der Berechtigungen verwenden können**](../roguepotato-and-printspoofer.md). In diesem Fall ist ein rev shell eine bessere Option, als zu versuchen, einen Benutzer zu erstellen.
+> Dieser Benutzer hat jedoch das **`seImpersonate`**-Privileg, sodass Sie die [**potato suite zur Eskalation von Berechtigungen verwenden können**](../roguepotato-and-printspoofer.md). In diesem Fall ist ein rev shell eine bessere Option, als zu versuchen, einen Benutzer zu erstellen.
 
 Zum Zeitpunkt des Schreibens wird der Dienst **Task Scheduler** mit **Nt AUTHORITY\SYSTEM** ausgeführt.
 

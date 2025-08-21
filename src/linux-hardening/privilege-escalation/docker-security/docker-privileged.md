@@ -59,7 +59,7 @@ mount  | grep '(ro'
 
 ### Maskierung über Kernel-Dateisysteme
 
-Das **/proc**-Dateisystem ist selektiv beschreibbar, aber aus Sicherheitsgründen sind bestimmte Teile durch Überlagerung mit **tmpfs** vor Lese- und Schreibzugriffen geschützt, um sicherzustellen, dass Containerprozesse nicht auf sensible Bereiche zugreifen können.
+Das **/proc**-Dateisystem ist selektiv beschreibbar, aber aus Sicherheitsgründen sind bestimmte Teile durch Überlagerung mit **tmpfs** vor Lese- und Schreibzugriff geschützt, sodass Containerprozesse nicht auf sensible Bereiche zugreifen können.
 
 > [!NOTE] > **tmpfs** ist ein Dateisystem, das alle Dateien im virtuellen Speicher speichert. tmpfs erstellt keine Dateien auf Ihrer Festplatte. Wenn Sie ein tmpfs-Dateisystem aushängen, gehen alle darin befindlichen Dateien für immer verloren.
 
@@ -92,7 +92,7 @@ Container-Engines starten die Container mit einer **begrenzten Anzahl von Fähig
 {{#endref}}
 
 {{#tabs}}
-{{#tab name="Innerhalb des Standardcontainers"}}
+{{#tab name="Inside default container"}}
 ```bash
 # docker run --rm -it alpine sh
 apk add -U libcap; capsh --print
@@ -119,7 +119,7 @@ Sie können die verfügbaren Berechtigungen für einen Container manipulieren, o
 
 ### Seccomp
 
-**Seccomp** ist nützlich, um die **syscalls** zu **beschränken**, die ein Container aufrufen kann. Ein standardmäßiges Seccomp-Profil ist standardmäßig aktiviert, wenn Docker-Container ausgeführt werden, aber im privilegierten Modus ist es deaktiviert. Erfahren Sie hier mehr über Seccomp:
+**Seccomp** ist nützlich, um die **syscalls**, die ein Container aufrufen kann, **einzuschränken**. Ein standardmäßiges Seccomp-Profil ist standardmäßig aktiviert, wenn Docker-Container ausgeführt werden, aber im privilegierten Modus ist es deaktiviert. Erfahren Sie hier mehr über Seccomp:
 
 
 {{#ref}}
@@ -164,8 +164,7 @@ apparmor.md
 ```
 ### SELinux
 
-Das Ausführen eines Containers mit dem `--privileged`-Flag deaktiviert **SELinux-Labels**, wodurch es das Label der Container-Engine erbt, typischerweise `unconfined`, was vollen Zugriff ähnlich der Container-Engine gewährt. Im rootlosen Modus verwendet es `container_runtime_t`, während im Root-Modus `spc_t` angewendet wird.
-
+Das Ausführen eines Containers mit dem `--privileged`-Flag deaktiviert **SELinux-Labels**, wodurch es das Label der Container-Engine erbt, typischerweise `unconfined`, was vollen Zugriff ähnlich der Container-Engine gewährt. Im rootlosen Modus wird `container_runtime_t` verwendet, während im Root-Modus `spc_t` angewendet wird.
 
 {{#ref}}
 ../selinux.md
@@ -174,11 +173,11 @@ Das Ausführen eines Containers mit dem `--privileged`-Flag deaktiviert **SELinu
 # You can manually disable selinux in docker with
 --security-opt label:disable
 ```
-## Was nicht betroffen ist
+## Was Nicht Beeinflusst
 
 ### Namespaces
 
-Namespaces sind **NICHT betroffen** von der `--privileged`-Option. Auch wenn sie keine Sicherheitsbeschränkungen aktiviert haben, **sehen sie beispielsweise nicht alle Prozesse im System oder im Host-Netzwerk**. Benutzer können einzelne Namespaces deaktivieren, indem sie die **`--pid=host`, `--net=host`, `--ipc=host`, `--uts=host`** Container-Engine-Flags verwenden.
+Namespaces sind **NICHT betroffen** von dem `--privileged` Flag. Auch wenn sie die Sicherheitsbeschränkungen nicht aktiviert haben, **sehen sie beispielsweise nicht alle Prozesse im System oder im Host-Netzwerk**. Benutzer können einzelne Namespaces deaktivieren, indem sie die **`--pid=host`, `--net=host`, `--ipc=host`, `--uts=host`** Container-Engine-Flags verwenden.
 
 {{#tabs}}
 {{#tab name="Inside default privileged container"}}

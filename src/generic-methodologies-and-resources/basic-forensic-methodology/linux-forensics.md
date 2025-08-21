@@ -11,7 +11,7 @@ Zunächst wird empfohlen, ein **USB** mit **gut bekannten Binaries und Bibliothe
 export PATH=/mnt/usb/bin:/mnt/usb/sbin
 export LD_LIBRARY_PATH=/mnt/usb/lib:/mnt/usb/lib64
 ```
-Sobald Sie das System so konfiguriert haben, dass es gute und bekannte Binärdateien verwendet, können Sie **einige grundlegende Informationen extrahieren**:
+Sobald Sie das System so konfiguriert haben, dass es gute und bekannte Binaries verwendet, können Sie **einige grundlegende Informationen extrahieren**:
 ```bash
 date #Date and time (Clock may be skewed, Might be at a different timezone)
 uname -a #OS info
@@ -33,7 +33,7 @@ find /directory -type f -mtime -1 -print #Find modified files during the last mi
 
 Während Sie die grundlegenden Informationen sammeln, sollten Sie nach seltsamen Dingen suchen, wie zum Beispiel:
 
-- **Root-Prozesse** laufen normalerweise mit niedrigen PIDs, also wenn Sie einen Root-Prozess mit einer großen PID finden, sollten Sie misstrauisch sein.
+- **Root-Prozesse** laufen normalerweise mit niedrigen PIDs, also wenn Sie einen Root-Prozess mit einer hohen PID finden, könnten Sie misstrauisch werden.
 - Überprüfen Sie die **registrierten Logins** von Benutzern ohne eine Shell in `/etc/passwd`.
 - Überprüfen Sie auf **Passworthashes** in `/etc/shadow` für Benutzer ohne eine Shell.
 
@@ -46,7 +46,7 @@ Um es zu **kompilieren**, müssen Sie den **gleichen Kernel** verwenden, den die
 > Denken Sie daran, dass Sie **LiME oder irgendetwas anderes** nicht auf der Zielmaschine installieren können, da dies mehrere Änderungen daran vornehmen würde.
 
 Wenn Sie also eine identische Version von Ubuntu haben, können Sie `apt-get install lime-forensics-dkms` verwenden.\
-In anderen Fällen müssen Sie [**LiME**](https://github.com/504ensicsLabs/LiME) von GitHub herunterladen und es mit den richtigen Kernel-Headern kompilieren. Um die **genauen Kernel-Header** der Zielmaschine zu erhalten, können Sie einfach das Verzeichnis `/lib/modules/<kernel version>` auf Ihre Maschine kopieren und dann LiME mit diesen kompilieren:
+In anderen Fällen müssen Sie [**LiME**](https://github.com/504ensicsLabs/LiME) von GitHub herunterladen und es mit den richtigen Kernel-Headern kompilieren. Um die **genauen Kernel-Header** der Zielmaschine zu erhalten, können Sie einfach das **Verzeichnis** `/lib/modules/<kernel version>` auf Ihre Maschine kopieren und dann LiME mit diesen kompilieren:
 ```bash
 make -C /lib/modules/<kernel version>/build M=$PWD
 sudo insmod lime.ko "path=/home/sansforensics/Desktop/mem_dump.bin format=lime"
@@ -57,14 +57,14 @@ LiME unterstützt 3 **Formate**:
 - Padded (gleich wie raw, aber mit Nullen in den rechten Bits)
 - Lime (empfohlenes Format mit Metadaten)
 
-LiME kann auch verwendet werden, um den **Dump über das Netzwerk zu senden**, anstatt ihn auf dem System zu speichern, indem man etwas wie `path=tcp:4444` verwendet.
+LiME kann auch verwendet werden, um den Dump über das Netzwerk zu **senden**, anstatt ihn auf dem System zu speichern, indem man etwas wie `path=tcp:4444` verwendet.
 
 ### Festplattenabbildung
 
 #### Herunterfahren
 
 Zunächst müssen Sie das **System herunterfahren**. Dies ist nicht immer eine Option, da das System manchmal ein Produktionsserver ist, den sich das Unternehmen nicht leisten kann, herunterzufahren.\
-Es gibt **2 Möglichkeiten**, das System herunterzufahren: ein **normales Herunterfahren** und ein **"Stecker ziehen" Herunterfahren**. Das erste ermöglicht es den **Prozessen, wie gewohnt zu beenden** und das **Dateisystem** zu **synchronisieren**, aber es könnte auch dem möglichen **Malware** ermöglichen, **Beweise zu vernichten**. Der "Stecker ziehen"-Ansatz kann **einige Informationsverluste** mit sich bringen (nicht viele Informationen werden verloren gehen, da wir bereits ein Abbild des Speichers erstellt haben) und die **Malware hat keine Möglichkeit**, etwas dagegen zu unternehmen. Daher, wenn Sie **verdächtigen**, dass es **Malware** geben könnte, führen Sie einfach den **`sync`** **Befehl** auf dem System aus und ziehen Sie den Stecker.
+Es gibt **2 Möglichkeiten**, das System herunterzufahren: ein **normales Herunterfahren** und ein **"Stecker ziehen" Herunterfahren**. Das erste ermöglicht es den **Prozessen, wie gewohnt zu beenden** und das **Dateisystem** zu **synchronisieren**, aber es erlaubt auch, dass mögliche **Malware** **Beweise zerstört**. Der "Stecker ziehen"-Ansatz kann **einige Informationsverluste** mit sich bringen (nicht viele Informationen werden verloren gehen, da wir bereits ein Abbild des Speichers gemacht haben) und die **Malware wird keine Gelegenheit haben**, etwas dagegen zu unternehmen. Daher, wenn Sie **vermuten**, dass es **Malware** geben könnte, führen Sie einfach den **`sync`** **Befehl** auf dem System aus und ziehen Sie den Stecker.
 
 #### Erstellen eines Abbilds der Festplatte
 
@@ -79,7 +79,7 @@ dcfldd if=/dev/sdc of=/media/usb/pc.image hash=sha256 hashwindow=1M hashlog=/med
 ```
 ### Disk Image Voranalyse
 
-Erstellung eines Abbilds einer Festplatte ohne weitere Daten.
+Erstellung eines Disk-Images ohne weitere Daten.
 ```bash
 #Find out if it's a disk image using "file" command
 file disk.img
@@ -197,7 +197,7 @@ cat /var/spool/cron/crontabs/*  \
 ls -l /usr/lib/cron/tabs/ /Library/LaunchAgents/ /Library/LaunchDaemons/ ~/Library/LaunchAgents/
 ```
 #### Hunt: Missbrauch von Cron/Anacron über 0anacron und verdächtige Stubs
-Angreifer bearbeiten häufig den 0anacron-Stubs, der in jedem /etc/cron.*/-Verzeichnis vorhanden ist, um eine periodische Ausführung sicherzustellen.
+Angreifer bearbeiten häufig den 0anacron-Stub, der in jedem /etc/cron.*/-Verzeichnis vorhanden ist, um eine periodische Ausführung sicherzustellen.
 ```bash
 # List 0anacron files and their timestamps/sizes
 for d in /etc/cron.*; do [ -f "$d/0anacron" ] && stat -c '%n %y %s' "$d/0anacron"; done
@@ -267,13 +267,13 @@ Linux-Systeme verfolgen Benutzeraktivitäten und Systemereignisse durch verschie
 - **/var/log/cron**: Protokolliert die Ausführung von Cron-Jobs.
 - **/var/log/daemon.log**: Verfolgt Aktivitäten von Hintergrunddiensten.
 - **/var/log/btmp**: Dokumentiert fehlgeschlagene Anmeldeversuche.
-- **/var/log/httpd/**: Enthält Apache HTTPD Fehler- und Zugriffsprotokolle.
+- **/var/log/httpd/**: Enthält Apache HTTPD-Fehler- und Zugriffsprotokolle.
 - **/var/log/mysqld.log** oder **/var/log/mysql.log**: Protokolliert Aktivitäten der MySQL-Datenbank.
 - **/var/log/xferlog**: Protokolliert FTP-Dateiübertragungen.
 - **/var/log/**: Überprüfen Sie hier immer auf unerwartete Protokolle.
 
-> [!TIPP]
-> Linux-Systemprotokolle und Auditsysteme können bei einem Eindringen oder Malware-Vorfall deaktiviert oder gelöscht werden. Da Protokolle auf Linux-Systemen im Allgemeinen einige der nützlichsten Informationen über böswillige Aktivitäten enthalten, löschen Eindringlinge sie routinemäßig. Daher ist es wichtig, beim Überprüfen der verfügbaren Protokolldateien nach Lücken oder nicht in der Reihenfolge befindlichen Einträgen zu suchen, die auf Löschungen oder Manipulationen hinweisen könnten.
+> [!TIP]
+> Linux-Systemprotokolle und Auditsysteme können bei einem Eindringen oder Malware-Vorfall deaktiviert oder gelöscht werden. Da Protokolle auf Linux-Systemen im Allgemeinen einige der nützlichsten Informationen über böswillige Aktivitäten enthalten, löschen Eindringlinge sie routinemäßig. Daher ist es wichtig, beim Überprüfen verfügbarer Protokolldateien nach Lücken oder nicht in der Reihenfolge befindlichen Einträgen zu suchen, die auf Löschung oder Manipulation hindeuten könnten.
 
 **Linux führt eine Befehlsverlauf für jeden Benutzer**:
 
@@ -287,15 +287,15 @@ Darüber hinaus bietet der Befehl `last -Faiwx` eine Liste der Benutzeranmeldung
 
 Überprüfen Sie Dateien, die zusätzliche Berechtigungen gewähren können:
 
-- Überprüfen Sie `/etc/sudoers` auf unerwartete Benutzerberechtigungen, die möglicherweise gewährt wurden.
-- Überprüfen Sie `/etc/sudoers.d/` auf unerwartete Benutzerberechtigungen, die möglicherweise gewährt wurden.
+- Überprüfen Sie `/etc/sudoers` auf unvorhergesehene Benutzerberechtigungen, die möglicherweise gewährt wurden.
+- Überprüfen Sie `/etc/sudoers.d/` auf unvorhergesehene Benutzerberechtigungen, die möglicherweise gewährt wurden.
 - Untersuchen Sie `/etc/groups`, um ungewöhnliche Gruppenmitgliedschaften oder Berechtigungen zu identifizieren.
 - Untersuchen Sie `/etc/passwd`, um ungewöhnliche Gruppenmitgliedschaften oder Berechtigungen zu identifizieren.
 
 Einige Apps generieren auch ihre eigenen Protokolle:
 
 - **SSH**: Überprüfen Sie _\~/.ssh/authorized_keys_ und _\~/.ssh/known_hosts_ auf unbefugte Remote-Verbindungen.
-- **Gnome Desktop**: Überprüfen Sie _\~/.recently-used.xbel_ auf kürzlich zugegriffene Dateien über Gnome-Anwendungen.
+- **Gnome Desktop**: Überprüfen Sie _\~/.recently-used.xbel_ auf kürzlich verwendete Dateien über Gnome-Anwendungen.
 - **Firefox/Chrome**: Überprüfen Sie den Browserverlauf und Downloads in _\~/.mozilla/firefox_ oder _\~/.config/google-chrome_ auf verdächtige Aktivitäten.
 - **VIM**: Überprüfen Sie _\~/.viminfo_ auf Nutzungsdetails, wie z.B. aufgerufene Dateipfade und Suchverlauf.
 - **Open Office**: Überprüfen Sie den Zugriff auf kürzlich verwendete Dokumente, die auf kompromittierte Dateien hinweisen könnten.
@@ -355,7 +355,7 @@ ls -laR --sort=time /bin```
 ls -lai /bin | sort -n```
 ````
 > [!TIP]
-> Beachten Sie, dass ein **Angreifer** die **Zeit** ändern kann, um **Dateien legitim erscheinen** zu lassen, aber er **kann** die **inode** **nicht** ändern. Wenn Sie feststellen, dass eine **Datei** angibt, dass sie zur **gleichen Zeit** wie die anderen Dateien im selben Ordner erstellt und geändert wurde, aber die **inode** **unerwartet größer** ist, dann wurden die **Zeitstempel dieser Datei geändert**.
+> Beachten Sie, dass ein **Angreifer** die **Zeit** **ändern** kann, um **Dateien legitim erscheinen** zu lassen, aber er **kann** die **inode** **nicht** ändern. Wenn Sie feststellen, dass eine **Datei** angibt, dass sie zur **gleichen Zeit** wie die anderen Dateien im selben Ordner erstellt und geändert wurde, aber die **inode** **unerwartet größer** ist, dann wurden die **Zeitstempel dieser Datei geändert**.
 
 ## Vergleich von Dateien verschiedener Dateisystemversionen
 
@@ -367,7 +367,7 @@ Um Dateisystemversionen zu vergleichen und Änderungen zu identifizieren, verwen
 ```bash
 git diff --no-index --diff-filter=A path/to/old_version/ path/to/new_version/
 ```
-- **Für modifizierte Inhalte**, listen Sie Änderungen auf, während Sie spezifische Zeilen ignorieren:
+- **Für modifizierte Inhalte**: Änderungen auflisten, während spezifische Zeilen ignoriert werden:
 ```bash
 git diff --no-index --diff-filter=M path/to/old_version/ path/to/new_version/ | grep -E "^\+" | grep -v "Installed-Time"
 ```

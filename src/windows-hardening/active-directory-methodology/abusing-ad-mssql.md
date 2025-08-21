@@ -3,11 +3,11 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 
-## **MSSQL Aufzählung / Entdeckung**
+## **MSSQL Enumeration / Entdeckung**
 
 ### Python
 
-Das [MSSQLPwner](https://github.com/ScorpionesLabs/MSSqlPwner) Tool basiert auf impacket und ermöglicht auch die Authentifizierung mit Kerberos-Tickets sowie Angriffe über Verknüpfungsketten.
+Das [MSSQLPwner](https://github.com/ScorpionesLabs/MSSqlPwner) Tool basiert auf impacket und ermöglicht auch die Authentifizierung mit Kerberos-Tickets sowie Angriffe über Linkketten.
 
 <figure><img src="https://raw.githubusercontent.com/ScorpionesLabs/MSSqlPwner/main/assets/interractive.png"></figure>
 ```shell
@@ -133,7 +133,7 @@ Get-SQLInstanceDomain | Get-SQLServerInfo -Verbose
 # Get DBs, test connections and get info in oneliner
 Get-SQLInstanceDomain | Get-SQLConnectionTest | ? { $_.Status -eq "Accessible" } | Get-SQLServerInfo
 ```
-## MSSQL Grundlegender Missbrauch
+## MSSQL Grundlegende Ausnutzung
 
 ### Zugriff auf DB
 ```bash
@@ -178,7 +178,7 @@ Invoke-SQLOSCmd -Instance "srv.sub.domain.local,1433" -Command "whoami" -RawResu
 
 Wenn eine MSSQL-Instanz von einer anderen MSSQL-Instanz als vertrauenswürdig (Datenbanklink) angesehen wird. Wenn der Benutzer über Berechtigungen für die vertrauenswürdige Datenbank verfügt, kann er **die Vertrauensbeziehung nutzen, um auch in der anderen Instanz Abfragen auszuführen**. Diese Vertrauensstellungen können verkettet werden, und irgendwann könnte der Benutzer in der Lage sein, eine falsch konfigurierte Datenbank zu finden, in der er Befehle ausführen kann.
 
-**Die Links zwischen Datenbanken funktionieren sogar über Forest-Vertrauensstellungen hinweg.**
+**Die Links zwischen Datenbanken funktionieren sogar über Waldvertrauensstellungen hinweg.**
 
 ### Powershell Missbrauch
 ```bash
@@ -247,7 +247,7 @@ EXEC sp_linkedservers;
 
 #### Führen Sie Abfragen in vertrauenswürdigem Link aus
 
-Führen Sie Abfragen über den Link aus (Beispiel: Finden Sie weitere Links in der neuen zugänglichen Instanz):
+Führen Sie Abfragen über den Link aus (Beispiel: Weitere Links in der neuen zugänglichen Instanz finden):
 ```sql
 select * from openquery("dcorp-sql1", 'select * from master..sysservers')
 ```

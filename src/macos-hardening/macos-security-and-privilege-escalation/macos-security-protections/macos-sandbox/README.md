@@ -4,11 +4,11 @@
 
 ## Grundlegende Informationen
 
-MacOS Sandbox (zunächst Seatbelt genannt) **beschränkt Anwendungen**, die innerhalb des Sandboxes ausgeführt werden, auf die **erlaubten Aktionen, die im Sandbox-Profil** festgelegt sind, mit dem die App ausgeführt wird. Dies hilft sicherzustellen, dass **die Anwendung nur auf erwartete Ressourcen zugreift**.
+MacOS Sandbox (anfänglich Seatbelt genannt) **beschränkt Anwendungen**, die innerhalb des Sandboxes ausgeführt werden, auf die **erlaubten Aktionen, die im Sandbox-Profil** festgelegt sind, mit dem die App ausgeführt wird. Dies hilft sicherzustellen, dass **die Anwendung nur auf erwartete Ressourcen zugreift**.
 
 Jede App mit der **Berechtigung** **`com.apple.security.app-sandbox`** wird innerhalb des Sandboxes ausgeführt. **Apple-Binärdateien** werden normalerweise innerhalb eines Sandboxes ausgeführt, und alle Anwendungen aus dem **App Store haben diese Berechtigung**. Daher werden mehrere Anwendungen innerhalb des Sandboxes ausgeführt.
 
-Um zu steuern, was ein Prozess tun oder nicht tun kann, hat der **Sandbox Hooks** in fast jeder Operation, die ein Prozess versuchen könnte (einschließlich der meisten Syscalls), unter Verwendung von **MACF**. Abhängig von den **Berechtigungen** der App kann der Sandbox jedoch permissiver mit dem Prozess umgehen.
+Um zu steuern, was ein Prozess tun oder nicht tun kann, hat der **Sandbox Hooks** in fast jede Operation, die ein Prozess versuchen könnte (einschließlich der meisten Syscalls), unter Verwendung von **MACF**. Allerdings kann der **Sandbox**, abhängig von den **Berechtigungen** der App, permissiver mit dem Prozess sein.
 
 Einige wichtige Komponenten des Sandboxes sind:
 
@@ -133,7 +133,7 @@ Hier finden Sie ein Beispiel:
 > [!TIP]
 > Überprüfen Sie diese [**Forschung**](https://reverse.put.as/2011/09/14/apple-sandbox-guide-v1-0/) **um weitere Aktionen zu überprüfen, die erlaubt oder verweigert werden könnten.**
 >
-> Beachten Sie, dass in der kompilierten Version eines Profils die Namen der Operationen durch ihre Einträge in einem Array ersetzt werden, das von der dylib und dem kext bekannt ist, wodurch die kompilierten Versionen kürzer und schwieriger zu lesen sind.
+> Beachten Sie, dass im kompilierten Version eines Profils die Namen der Operationen durch ihre Einträge in einem Array ersetzt werden, das von der dylib und dem kext bekannt ist, wodurch die kompilierte Version kürzer und schwieriger zu lesen ist.
 
 Wichtige **Systemdienste** laufen ebenfalls in ihrem eigenen benutzerdefinierten **Sandbox**, wie der Dienst `mdnsresponder`. Sie können diese benutzerdefinierten **Sandbox-Profile** einsehen unter:
 
@@ -200,7 +200,7 @@ log show --style syslog --predicate 'eventMessage contains[c] "sandbox"' --last 
 {{#endtabs}}
 
 > [!TIP]
-> Beachten Sie, dass die **von Apple verfasste** **Software**, die auf **Windows** läuft, **keine zusätzlichen Sicherheitsvorkehrungen** hat, wie z.B. die Anwendungssandboxierung.
+> Beachten Sie, dass die **von Apple verfasste** **Software**, die auf **Windows** läuft, **keine zusätzlichen Sicherheitsvorkehrungen** hat, wie z.B. Anwendungssandboxing.
 
 Beispiele für Umgehungen:
 
@@ -224,7 +224,7 @@ In `/tmp/trace.out` können Sie jede Sandbox-Prüfung sehen, die jedes Mal durch
 
 Es ist auch möglich, die Sandbox mit dem **`-t`** Parameter zu verfolgen: `sandbox-exec -t /path/trace.out -p "(version 1)" /bin/ls`
 
-#### Über API
+#### Über die API
 
 Die Funktion `sandbox_set_trace_path`, die von `libsystem_sandbox.dylib` exportiert wird, ermöglicht es, einen Trace-Dateinamen anzugeben, in den Sandbox-Prüfungen geschrieben werden.\
 Es ist auch möglich, etwas Ähnliches zu tun, indem man `sandbox_vtrace_enable()` aufruft und dann die Protokollfehler aus dem Puffer mit `sandbox_vtrace_report()` abruft.
@@ -237,15 +237,15 @@ Es ist auch möglich, etwas Ähnliches zu tun, indem man `sandbox_vtrace_enable(
 
 MacOS speichert System-Sandbox-Profile an zwei Orten: **/usr/share/sandbox/** und **/System/Library/Sandbox/Profiles**.
 
-Und wenn eine Drittanbieteranwendung das _**com.apple.security.app-sandbox**_ Recht hat, wendet das System das **/System/Library/Sandbox/Profiles/application.sb** Profil auf diesen Prozess an.
+Und wenn eine Drittanbieteranwendung das _**com.apple.security.app-sandbox**_ Entitlement hat, wendet das System das **/System/Library/Sandbox/Profiles/application.sb** Profil auf diesen Prozess an.
 
 In iOS wird das Standardprofil **container** genannt und wir haben keine SBPL-Textdarstellung. Im Speicher wird diese Sandbox als Erlauben/Verweigern-Binärbaum für jede Berechtigung aus der Sandbox dargestellt.
 
 ### Benutzerdefinierte SBPL in App Store-Apps
 
-Es könnte für Unternehmen möglich sein, ihre Apps **mit benutzerdefinierten Sandbox-Profilen** (anstatt mit dem Standardprofil) auszuführen. Sie müssen das Recht **`com.apple.security.temporary-exception.sbpl`** verwenden, das von Apple genehmigt werden muss.
+Es könnte für Unternehmen möglich sein, ihre Apps **mit benutzerdefinierten Sandbox-Profilen** (anstatt mit dem Standardprofil) auszuführen. Sie müssen das Entitlement **`com.apple.security.temporary-exception.sbpl`** verwenden, das von Apple genehmigt werden muss.
 
-Es ist möglich, die Definition dieses Rechts in **`/System/Library/Sandbox/Profiles/application.sb:`** zu überprüfen.
+Es ist möglich, die Definition dieses Entitlements in **`/System/Library/Sandbox/Profiles/application.sb:`** zu überprüfen.
 ```scheme
 (sandbox-array-entitlement
 "com.apple.security.temporary-exception.sbpl"
@@ -253,13 +253,13 @@ Es ist möglich, die Definition dieses Rechts in **`/System/Library/Sandbox/Prof
 (let* ((port (open-input-string string)) (sbpl (read port)))
 (with-transparent-redirection (eval sbpl)))))
 ```
-Dies wird **den String nach diesem Berechtigung** als Sandbox-Profil **eval**.
+Dies wird **den String nach diesem Recht** als Sandbox-Profil auswerten.
 
 ### Kompilieren & Dekompilieren eines Sandbox-Profils
 
 Das **`sandbox-exec`**-Tool verwendet die Funktionen `sandbox_compile_*` aus `libsandbox.dylib`. Die Hauptfunktionen, die exportiert werden, sind: `sandbox_compile_file` (erwartet einen Dateipfad, Parameter `-f`), `sandbox_compile_string` (erwartet einen String, Parameter `-p`), `sandbox_compile_name` (erwartet einen Namen eines Containers, Parameter `-n`), `sandbox_compile_entitlements` (erwartet Entitlements plist).
 
-Diese umgekehrte und [**Open-Source-Version des Tools sandbox-exec**](https://newosxbook.com/src.jl?tree=listings&file=/sandbox_exec.c) ermöglicht es, dass **`sandbox-exec`** in eine Datei das kompilierte Sandbox-Profil schreibt.
+Diese umgekehrte und [**Open-Source-Version des Tools sandbox-exec**](https://newosxbook.com/src.jl?tree=listings&file=/sandbox_exec.c) ermöglicht es, dass **`sandbox-exec`** das kompilierte Sandbox-Profil in eine Datei schreibt.
 
 Darüber hinaus kann es, um einen Prozess innerhalb eines Containers einzuschränken, `sandbox_spawnattrs_set[container/profilename]` aufrufen und einen Container oder ein bereits vorhandenes Profil übergeben.
 
@@ -267,7 +267,7 @@ Darüber hinaus kann es, um einen Prozess innerhalb eines Containers einzuschrä
 
 Auf macOS, im Gegensatz zu iOS, wo Prozesse von Anfang an durch den Kernel in einer Sandbox sind, **müssen Prozesse selbst in die Sandbox optieren**. Das bedeutet, dass ein Prozess auf macOS nicht durch die Sandbox eingeschränkt ist, bis er aktiv entscheidet, sie zu betreten, obwohl Apps aus dem App Store immer in einer Sandbox sind.
 
-Prozesse werden automatisch aus dem Userland in eine Sandbox gesetzt, wenn sie starten, wenn sie die Berechtigung haben: `com.apple.security.app-sandbox`. Für eine detaillierte Erklärung dieses Prozesses siehe:
+Prozesse werden automatisch aus dem Userland in eine Sandbox gesetzt, wenn sie starten, wenn sie das Recht haben: `com.apple.security.app-sandbox`. Für eine detaillierte Erklärung dieses Prozesses siehe:
 
 
 {{#ref}}
@@ -286,18 +286,18 @@ Erweiterungen ermöglichen es, einem Objekt weitere Berechtigungen zu geben, und
 - `sandbox_extension_issue_generic`
 - `sandbox_extension_issue_posix_ipc`
 
-Die Erweiterungen werden im zweiten MACF-Label-Slot gespeichert, der von den Prozessanmeldeinformationen zugänglich ist. Das folgende **`sbtool`** kann auf diese Informationen zugreifen.
+Die Erweiterungen werden im zweiten MACF-Label-Slot gespeichert, der von den Prozessanmeldeinformationen aus zugänglich ist. Das folgende **`sbtool`** kann auf diese Informationen zugreifen.
 
 Beachten Sie, dass Erweiterungen normalerweise von erlaubten Prozessen gewährt werden. Zum Beispiel wird `tccd` das Erweiterungstoken von `com.apple.tcc.kTCCServicePhotos` gewähren, wenn ein Prozess versucht hat, auf die Fotos zuzugreifen und in einer XPC-Nachricht erlaubt wurde. Dann muss der Prozess das Erweiterungstoken konsumieren, damit es hinzugefügt wird.\
 Beachten Sie, dass die Erweiterungstoken lange Hexadezimalzahlen sind, die die gewährten Berechtigungen kodieren. Sie haben jedoch die erlaubte PID nicht fest codiert, was bedeutet, dass jeder Prozess mit Zugriff auf das Token **von mehreren Prozessen konsumiert werden kann**.
 
-Beachten Sie, dass Erweiterungen auch sehr mit Berechtigungen verbunden sind, sodass das Vorhandensein bestimmter Berechtigungen automatisch bestimmte Erweiterungen gewähren kann.
+Beachten Sie, dass Erweiterungen auch sehr mit Rechten verbunden sind, sodass das Vorhandensein bestimmter Rechte automatisch bestimmte Erweiterungen gewähren kann.
 
 ### **Überprüfen der PID-Berechtigungen**
 
-[**Laut diesem**](https://www.youtube.com/watch?v=mG715HcDgO8&t=3011s) können die **`sandbox_check`**-Funktionen (es ist ein `__mac_syscall`) überprüfen, **ob eine Operation erlaubt ist oder nicht** durch die Sandbox in einer bestimmten PID, Audit-Token oder eindeutige ID.
+[**Laut diesem**](https://www.youtube.com/watch?v=mG715HcDgO8&t=3011s) können die **`sandbox_check`**-Funktionen (es ist ein `__mac_syscall`) überprüfen, **ob eine Operation in einer bestimmten PID, Audit-Token oder eindeutigen ID** von der Sandbox erlaubt ist oder nicht.
 
-Das [**Tool sbtool**](http://newosxbook.com/src.jl?tree=listings&file=sbtool.c) (finden Sie [hier kompiliert](https://newosxbook.com/articles/hitsb.html)) kann überprüfen, ob eine PID bestimmte Aktionen ausführen kann:
+Das [**Tool sbtool**](http://newosxbook.com/src.jl?tree=listings&file=sbtool.c) (finden Sie es [hier kompiliert](https://newosxbook.com/articles/hitsb.html)) kann überprüfen, ob eine PID bestimmte Aktionen ausführen kann:
 ```bash
 sbtool <pid> mach #Check mac-ports (got from launchd with an api)
 sbtool <pid> file /tmp #Check file access
@@ -316,9 +316,9 @@ Beachten Sie, dass zur Aufruf der Suspend-Funktion einige Berechtigungen überpr
 
 ## mac_syscall
 
-Dieser Systemaufruf (#381) erwartet ein erstes Argument vom Typ String, das das Modul angibt, das ausgeführt werden soll, und dann einen Code im zweiten Argument, der die auszuführende Funktion angibt. Das dritte Argument hängt dann von der ausgeführten Funktion ab.
+Dieser Systemaufruf (#381) erwartet ein String-Argument als ersten Parameter, das das Modul angibt, das ausgeführt werden soll, und dann einen Code im zweiten Argument, der die auszuführende Funktion angibt. Der dritte Parameter hängt dann von der ausgeführten Funktion ab.
 
-Der Funktionsaufruf `___sandbox_ms` umschließt `mac_syscall`, indem im ersten Argument `"Sandbox"` angegeben wird, genau wie `___sandbox_msp` ein Wrapper von `mac_set_proc` (#387) ist. Einige der von `___sandbox_ms` unterstützten Codes sind in dieser Tabelle zu finden:
+Der Funktionsaufruf `___sandbox_ms` umschließt `mac_syscall`, indem er im ersten Argument `"Sandbox"` angibt, genau wie `___sandbox_msp` ein Wrapper von `mac_set_proc` (#387) ist. Einige der unterstützten Codes von `___sandbox_ms` finden Sie in dieser Tabelle:
 
 - **set_profile (#0)**: Wendet ein kompiliertes oder benanntes Profil auf einen Prozess an.
 - **platform_policy (#1)**: Erzwingt plattformspezifische Richtlinienprüfungen (variiert zwischen macOS und iOS).
@@ -332,7 +332,7 @@ Der Funktionsaufruf `___sandbox_ms` umschließt `mac_syscall`, indem im ersten A
 - **extension_twiddle (#9)**: Passt eine bestehende Dateierweiterung an oder ändert sie (z.B. TextEdit, rtf, rtfd).
 - **suspend (#10)**: Unterbricht vorübergehend alle Sandbox-Prüfungen (erfordert entsprechende Berechtigungen).
 - **unsuspend (#11)**: Setzt alle zuvor unterbrochenen Sandbox-Prüfungen fort.
-- **passthrough_access (#12)**: Erlaubt direkten Durchgangszugriff auf eine Ressource, umgeht Sandbox-Prüfungen.
+- **passthrough_access (#12)**: Erlaubt direkten Passthrough-Zugriff auf eine Ressource, umgeht Sandbox-Prüfungen.
 - **set_container_path (#13)**: (nur iOS) Setzt einen Containerpfad für eine App-Gruppe oder eine Signatur-ID.
 - **container_map (#14)**: (nur iOS) Ruft einen Containerpfad von `containermanagerd` ab.
 - **sandbox_user_state_item_buffer_send (#15)**: (iOS 10+) Setzt Metadaten im Benutzermodus in der Sandbox.
@@ -361,7 +361,7 @@ Beachten Sie, dass in iOS die Kernel-Erweiterung **alle Profile hardcodiert** im
 
 **`Sandbox.kext`** verwendet mehr als hundert Hooks über MACF. Die meisten Hooks überprüfen nur einige triviale Fälle, die es ermöglichen, die Aktion auszuführen; andernfalls rufen sie **`cred_sb_evalutate`** mit den **Anmeldeinformationen** von MACF und einer Nummer auf, die der **Operation** entspricht, die ausgeführt werden soll, sowie einem **Puffer** für die Ausgabe.
 
-Ein gutes Beispiel dafür ist die Funktion **`_mpo_file_check_mmap`**, die **`mmap`** hookt und die Überprüfung startet, ob der neue Speicher beschreibbar sein wird (und wenn nicht, die Ausführung erlaubt), dann überprüft, ob er für den dyld Shared Cache verwendet wird, und wenn ja, die Ausführung erlaubt, und schließlich wird **`sb_evaluate_internal`** (oder einer seiner Wrapper) aufgerufen, um weitere Erlaubnisprüfungen durchzuführen.
+Ein gutes Beispiel dafür ist die Funktion **`_mpo_file_check_mmap`**, die **`mmap`** hookt und die überprüft, ob der neue Speicher beschreibbar sein wird (und wenn nicht, die Ausführung erlaubt), dann überprüft, ob er für den dyld Shared Cache verwendet wird, und wenn ja, die Ausführung erlaubt, und schließlich wird **`sb_evaluate_internal`** (oder einer seiner Wrapper) aufgerufen, um weitere Erlaubnisprüfungen durchzuführen.
 
 Darüber hinaus gibt es unter den Hunderten von Hooks, die Sandbox verwendet, 3, die besonders interessant sind:
 

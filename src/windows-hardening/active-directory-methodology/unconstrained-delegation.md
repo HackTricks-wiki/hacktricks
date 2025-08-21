@@ -36,8 +36,8 @@ Mehr Informationen: [https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/](h
 
 ### **Zwangs-Authentifizierung**
 
-Wenn ein Angreifer in der Lage ist, einen Computer zu **kompromittieren, der für "Unconstrained Delegation" erlaubt ist**, könnte er einen **Druckserver** **täuschen**, um sich **automatisch anzumelden** und dabei ein TGT im Speicher des Servers zu **speichern**.\
-Dann könnte der Angreifer einen **Pass the Ticket-Angriff durchführen, um** das Benutzerkonto des Druckserver-Computers zu **imitieren**.
+Wenn ein Angreifer in der Lage ist, einen Computer zu **kompromittieren, der für "Unconstrained Delegation" erlaubt ist**, könnte er einen **Druckserver** **täuschen**, um sich **automatisch anzumelden** und dabei ein TGT im Speicher des Servers zu speichern.\
+Dann könnte der Angreifer einen **Pass the Ticket-Angriff durchführen, um** das Benutzerkonto des Druckserver-Computers zu impersonieren.
 
 Um einen Druckserver dazu zu bringen, sich gegen eine beliebige Maschine anzumelden, kannst du [**SpoolSample**](https://github.com/leechristensen/SpoolSample) verwenden:
 ```bash

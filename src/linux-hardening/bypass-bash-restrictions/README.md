@@ -114,7 +114,7 @@ cat $(echo . | tr '!-0' '"-1')etc$(echo . | tr '!-0' '"-1')passwd
 ```bash
 bash<<<$(base64 -d<<<Y2F0IC9ldGMvcGFzc3dkIHwgZ3JlcCAzMw==)
 ```
-### Bypass mit Hex-Codierung
+### Bypass mit Hex-Encoding
 ```bash
 echo -e "\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64"
 cat `echo -e "\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64"`
@@ -145,7 +145,7 @@ Sie könnten **burpcollab** oder [**pingb**](http://pingb.in) verwenden, zum Bei
 ### Builtins
 
 Falls Sie keine externen Funktionen ausführen können und nur Zugriff auf eine **begrenzte Menge an Builtins haben, um RCE zu erhalten**, gibt es einige nützliche Tricks, um dies zu tun. Normalerweise **werden Sie nicht alle** der **Builtins** verwenden können, daher sollten Sie **alle Ihre Optionen kennen**, um zu versuchen, das Jail zu umgehen. Idee von [**devploit**](https://twitter.com/devploit).\
-Zuerst überprüfen Sie alle [**Shell-Builtins**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html)**.** Hier sind einige **Empfehlungen**:
+Zuerst überprüfen Sie alle [**Shell Builtins**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html)**.** Hier sind einige **Empfehlungen**:
 ```bash
 # Get list of builtins
 declare builtins
@@ -296,15 +296,13 @@ ln /f*
 ```
 ## Read-Only/Noexec/Distroless Bypass
 
-Wenn Sie sich in einem Dateisystem mit **read-only und noexec Schutzmaßnahmen** oder sogar in einem distroless Container befinden, gibt es dennoch Möglichkeiten, **willkürliche Binärdateien auszuführen, sogar eine Shell!:**
-
+Wenn Sie sich in einem Dateisystem mit **read-only und noexec Schutz** oder sogar in einem distroless Container befinden, gibt es dennoch Möglichkeiten, **willkürliche Binärdateien auszuführen, sogar eine Shell!:**
 
 {{#ref}}
 bypass-fs-protections-read-only-no-exec-distroless/
 {{#endref}}
 
-## Chroot & andere Jail-Bypässe
-
+## Chroot & andere Jails Bypass
 
 {{#ref}}
 ../privilege-escalation/escaping-from-limited-bash.md
@@ -312,7 +310,7 @@ bypass-fs-protections-read-only-no-exec-distroless/
 
 ## Space-Based Bash NOP Sled ("Bashsledding")
 
-Wenn eine Schwachstelle es Ihnen ermöglicht, ein Argument teilweise zu kontrollieren, das letztendlich `system()` oder eine andere Shell erreicht, wissen Sie möglicherweise nicht, an welcher genauen Offset-Ausführung Ihr Payload gelesen wird. Traditionelle NOP-Sleds (z. B. `\x90`) funktionieren in der Shell-Syntax **nicht**, aber Bash ignoriert harmlos führende Leerzeichen, bevor ein Befehl ausgeführt wird.
+Wenn eine Schwachstelle es Ihnen ermöglicht, ein Argument teilweise zu kontrollieren, das letztendlich `system()` oder eine andere Shell erreicht, wissen Sie möglicherweise nicht den genauen Offset, an dem die Ausführung beginnt, Ihre Nutzlast zu lesen. Traditionelle NOP-Sleds (z. B. `\x90`) funktionieren in der Shell-Syntax **nicht**, aber Bash ignoriert harmlos führende Leerzeichen, bevor ein Befehl ausgeführt wird.
 
 Daher können Sie einen *NOP sled für Bash* erstellen, indem Sie Ihren echten Befehl mit einer langen Folge von Leerzeichen oder Tabulatorzeichen voranstellen:
 ```bash

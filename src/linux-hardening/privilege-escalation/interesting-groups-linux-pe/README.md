@@ -22,18 +22,18 @@ sudo su
 ```
 ### PE - Methode 2
 
-Finden Sie alle SUID-Binärdateien und überprüfen Sie, ob die Binärdatei **Pkexec** vorhanden ist:
+Finde alle SUID-Binärdateien und überprüfe, ob die Binärdatei **Pkexec** vorhanden ist:
 ```bash
 find / -perm -4000 2>/dev/null
 ```
-Wenn Sie feststellen, dass die Binärdatei **pkexec eine SUID-Binärdatei ist** und Sie zur Gruppe **sudo** oder **admin** gehören, können Sie wahrscheinlich Binärdateien als sudo mit `pkexec` ausführen.\
-Das liegt daran, dass dies typischerweise die Gruppen innerhalb der **polkit-Richtlinie** sind. Diese Richtlinie identifiziert im Wesentlichen, welche Gruppen `pkexec` verwenden können. Überprüfen Sie dies mit:
+Wenn Sie feststellen, dass die Binärdatei **pkexec eine SUID-Binärdatei ist** und Sie zu **sudo** oder **admin** gehören, können Sie wahrscheinlich Binärdateien als sudo mit `pkexec` ausführen.\
+Das liegt daran, dass dies typischerweise die Gruppen sind, die in der **polkit-Richtlinie** enthalten sind. Diese Richtlinie identifiziert im Wesentlichen, welche Gruppen `pkexec` verwenden können. Überprüfen Sie dies mit:
 ```bash
 cat /etc/polkit-1/localauthority.conf.d/*
 ```
 Dort finden Sie, welche Gruppen berechtigt sind, **pkexec** auszuführen, und **standardmäßig** erscheinen in einigen Linux-Distributionen die Gruppen **sudo** und **admin**.
 
-Um **root zu werden, können Sie ausführen**:
+Um **Root zu werden, können Sie** ausführen:
 ```bash
 pkexec "/bin/sh" #You will be prompted for your user password
 ```
@@ -43,7 +43,7 @@ polkit-agent-helper-1: error response to PolicyKit daemon: GDBus.Error:org.freed
 ==== AUTHENTICATION FAILED ===
 Error executing command as another user: Not authorized
 ```
-**Es liegt nicht daran, dass Sie keine Berechtigungen haben, sondern daran, dass Sie ohne eine GUI nicht verbunden sind**. Und es gibt einen Workaround für dieses Problem hier: [https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). Sie benötigen **2 verschiedene SSH-Sitzungen**:
+**Es liegt nicht daran, dass Sie keine Berechtigungen haben, sondern weil Sie ohne eine GUI nicht verbunden sind**. Und es gibt eine Lösung für dieses Problem hier: [https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). Sie benötigen **2 verschiedene SSH-Sitzungen**:
 ```bash:session1
 echo $$ #Step1: Get current PID
 pkexec "/bin/bash" #Step 3, execute pkexec
@@ -56,7 +56,7 @@ pkttyagent --process <PID of session1> #Step 2, attach pkttyagent to session1
 ```
 ## Wheel-Gruppe
 
-**Manchmal** **findet man standardmäßig** in der **/etc/sudoers**-Datei diese Zeile:
+**Manchmal** finden Sie **standardmäßig** in der **/etc/sudoers**-Datei diese Zeile:
 ```
 %wheel	ALL=(ALL:ALL) ALL
 ```
@@ -88,7 +88,7 @@ $ echo $PATH
 ```
 Wenn wir einige Programme in `/usr/local` übernehmen können, können wir leicht Root-Rechte erlangen.
 
-Die Übernahme des `run-parts`-Programms ist ein einfacher Weg, um Root-Rechte zu erlangen, da die meisten Programme `run-parts` wie (crontab, bei SSH-Login) ausführen werden.
+Die Übernahme des `run-parts`-Programms ist ein einfacher Weg, um Root-Rechte zu erhalten, da die meisten Programme `run-parts` wie (crontab, bei SSH-Login) ausführen werden.
 ```bash
 $ cat /etc/crontab | grep run-parts
 17 *    * * *   root    cd / && run-parts --report /etc/cron.hourly
@@ -132,7 +132,7 @@ $ /bin/bash -p
 
 Dieses Privileg ist fast **äquivalent zu Root-Zugriff**, da Sie auf alle Daten innerhalb der Maschine zugreifen können.
 
-Dateien:`/dev/sd[a-z][1-9]`
+Files:`/dev/sd[a-z][1-9]`
 ```bash
 df -h #Find where "/" is mounted
 debugfs /dev/sda1
@@ -158,7 +158,7 @@ moshe    pts/1    10.10.14.44      02:53   24:07   0.06s  0.06s /bin/bash
 ```
 Die **tty1** bedeutet, dass der Benutzer **yossi physisch** an einem Terminal auf der Maschine angemeldet ist.
 
-Die **video-Gruppe** hat Zugriff auf die Anzeige des Bildschirmausgangs. Grundsätzlich können Sie die Bildschirme beobachten. Um dies zu tun, müssen Sie **das aktuelle Bild auf dem Bildschirm** in Rohdaten erfassen und die Auflösung ermitteln, die der Bildschirm verwendet. Die Bildschirmdaten können in `/dev/fb0` gespeichert werden, und Sie können die Auflösung dieses Bildschirms unter `/sys/class/graphics/fb0/virtual_size` finden.
+Die **Video-Gruppe** hat Zugriff auf die Anzeige der Bildschirmausgabe. Grundsätzlich können Sie die Bildschirme beobachten. Um dies zu tun, müssen Sie **das aktuelle Bild auf dem Bildschirm** in Rohdaten erfassen und die Auflösung ermitteln, die der Bildschirm verwendet. Die Bildschirmdaten können in `/dev/fb0` gespeichert werden, und Sie können die Auflösung dieses Bildschirms unter `/sys/class/graphics/fb0/virtual_size` finden.
 ```bash
 cat /dev/fb0 > /tmp/screen.raw
 cat /sys/class/graphics/fb0/virtual_size
@@ -167,7 +167,7 @@ Um das **raw image** zu **öffnen**, können Sie **GIMP** verwenden, die **`scre
 
 ![](<../../../images/image (463).png>)
 
-Ändern Sie dann die Breite und Höhe auf die Werte, die auf dem Bildschirm verwendet werden, und überprüfen Sie verschiedene Bildtypen (und wählen Sie den aus, der den Bildschirm am besten darstellt):
+Ändern Sie dann die Breite und Höhe auf die Werte, die auf dem Bildschirm verwendet werden, und überprüfen Sie verschiedene Bildtypen (und wählen Sie denjenigen aus, der den Bildschirm am besten darstellt):
 
 ![](<../../../images/image (317).png>)
 
@@ -223,6 +223,6 @@ Daher sollten Sie, wenn Sie einen Benutzer in dieser Gruppe kompromittiert haben
 ## Auth Gruppe
 
 Innerhalb von OpenBSD kann die **auth** Gruppe normalerweise in die Ordner _**/etc/skey**_ und _**/var/db/yubikey**_ schreiben, wenn sie verwendet werden.\
-Diese Berechtigungen können mit dem folgenden Exploit missbraucht werden, um **Privilegien** auf root zu eskalieren: [https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot](https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot)
+Diese Berechtigungen können mit dem folgenden Exploit missbraucht werden, um **Privilegien** auf root zu **eskalieren**: [https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot](https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot)
 
 {{#include ../../../banners/hacktricks-training.md}}

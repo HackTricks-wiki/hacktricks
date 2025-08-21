@@ -42,7 +42,7 @@ flipper-zero/fz-sub-ghz.md
 
 Automatische Garagentoröffner verwenden typischerweise eine drahtlose Fernbedienung, um das Garagentor zu öffnen und zu schließen. Die Fernbedienung **sendet ein Funksignal (RF)** an den Garagentoröffner, der den Motor aktiviert, um das Tor zu öffnen oder zu schließen.
 
-Es ist möglich, dass jemand ein Gerät namens Code Grabber verwendet, um das RF-Signal abzufangen und für später zu speichern. Dies wird als **Wiedergabeangriff** bezeichnet. Um diese Art von Angriff zu verhindern, verwenden viele moderne Garagentoröffner eine sicherere Verschlüsselungsmethode, die als **rollendes Code**-System bekannt ist.
+Es ist möglich, dass jemand ein Gerät namens Code Grabber verwendet, um das RF-Signal abzufangen und für später zu speichern. Dies wird als **Replay-Angriff** bezeichnet. Um diese Art von Angriff zu verhindern, verwenden viele moderne Garagentoröffner eine sicherere Verschlüsselungsmethode, die als **rollendes Code**-System bekannt ist.
 
 Das **RF-Signal wird typischerweise mit einem rollenden Code übertragen**, was bedeutet, dass sich der Code bei jeder Verwendung ändert. Dies macht es **schwierig**, dass jemand das Signal **abfängt** und es **verwendet**, um **unbefugten** Zugang zur Garage zu erhalten.
 
@@ -54,7 +54,7 @@ Im Grunde hört man auf den Knopf und **fängt das Signal ab, während die Fernb
 
 ### Vollständiger Link-Jamming-Angriff
 
-Ein Angreifer könnte das Signal in der Nähe des Fahrzeugs oder des Empfängers **stören**, sodass der **Empfänger den Code nicht tatsächlich „hören“ kann**, und sobald das passiert, kann man einfach den Code **abfangen und wiedergeben**, wenn man das Stören gestoppt hat.
+Ein Angreifer könnte das Signal in der Nähe des Fahrzeugs oder des Empfängers **stören**, sodass der **Empfänger den Code nicht tatsächlich „hören“ kann**, und sobald das passiert, kann man einfach den Code **abfangen und wieder abspielen**, wenn man das Jamming gestoppt hat.
 
 Das Opfer wird irgendwann die **Schlüssel verwenden, um das Auto abzuschließen**, aber dann hat der Angriff **genug „Tür schließen“-Codes aufgezeichnet**, die hoffentlich erneut gesendet werden können, um die Tür zu öffnen (eine **Änderung der Frequenz könnte erforderlich sein**, da es Autos gibt, die dieselben Codes zum Öffnen und Schließen verwenden, aber auf beide Befehle in unterschiedlichen Frequenzen hören).
 
@@ -66,7 +66,7 @@ Das Opfer wird irgendwann die **Schlüssel verwenden, um das Auto abzuschließen
 Dies ist eine **stealth Jamming-Technik**. Der Angreifer wird das Signal stören, sodass es nicht funktioniert, wenn das Opfer versucht, die Tür abzuschließen, aber der Angreifer wird **diesen Code aufzeichnen**. Dann wird das Opfer **versuchen, das Auto erneut abzuschließen**, indem es den Knopf drückt, und das Auto wird **diesen zweiten Code aufzeichnen**.\
 Sofort danach kann der **Angreifer den ersten Code senden** und das **Auto wird abschließen** (das Opfer wird denken, dass der zweite Druck es geschlossen hat). Dann wird der Angreifer in der Lage sein, den **zweiten gestohlenen Code zu senden, um** das Auto zu öffnen (vorausgesetzt, dass ein **„Auto schließen“-Code auch verwendet werden kann, um es zu öffnen**). Eine Änderung der Frequenz könnte erforderlich sein (da es Autos gibt, die dieselben Codes zum Öffnen und Schließen verwenden, aber auf beide Befehle in unterschiedlichen Frequenzen hören).
 
-Der Angreifer kann **den Empfänger des Autos stören und nicht seinen eigenen Empfänger**, denn wenn der Empfänger des Autos beispielsweise in einem 1 MHz-Breitband lauscht, wird der Angreifer nicht die genaue Frequenz stören, die von der Fernbedienung verwendet wird, sondern **eine nahe Frequenz in diesem Spektrum**, während der **Empfänger des Angreifers in einem kleineren Bereich lauscht**, wo er das Signal der Fernbedienung **ohne das Störsignal** hören kann.
+Der Angreifer kann **den Autoempfänger stören und nicht seinen Empfänger**, denn wenn der Autoempfänger beispielsweise in einem 1 MHz-Breitband lauscht, wird der Angreifer nicht die genaue Frequenz stören, die von der Fernbedienung verwendet wird, sondern **eine nahe Frequenz in diesem Spektrum**, während der **Empfänger des Angreifers in einem kleineren Bereich lauscht**, wo er das Signal der Fernbedienung **ohne das Störsignal** hören kann.
 
 > [!WARNING]
 > Andere Implementierungen, die in Spezifikationen gesehen wurden, zeigen, dass der **rollende Code ein Teil** des gesamten gesendeten Codes ist. Das heißt, der gesendete Code ist ein **24-Bit-Schlüssel**, wobei die ersten **12 der rollende Code** sind, die **zweiten 8 der Befehl** (wie abschließen oder aufschließen) und die letzten 4 die **Prüfziffer** sind. Fahrzeuge, die diesen Typ implementieren, sind auch von Natur aus anfällig, da der Angreifer lediglich das Segment des rollenden Codes ersetzen muss, um **jeden rollenden Code auf beiden Frequenzen verwenden zu können**.
@@ -76,7 +76,7 @@ Der Angreifer kann **den Empfänger des Autos stören und nicht seinen eigenen E
 
 ### Alarmton-Jamming-Angriff
 
-Tests gegen ein nachgerüstetes rollendes Codesystem, das in einem Auto installiert ist, **aktivierten sofort** durch **das Senden desselben Codes zweimal** den Alarm und die Wegfahrsperre und boten eine einzigartige **Denial-of-Service**-Möglichkeit. Ironischerweise war das Mittel zur **Deaktivierung des Alarms** und der Wegfahrsperre, **die Fernbedienung zu drücken**, was einem Angreifer die Möglichkeit gab, **fortlaufend DoS-Angriffe durchzuführen**. Oder man könnte diesen Angriff mit dem **vorherigen kombinieren, um mehr Codes zu erhalten**, da das Opfer den Angriff so schnell wie möglich stoppen möchte.
+Tests gegen ein nachgerüstetes rollendes Codesystem, das in einem Auto installiert ist, **aktivierten sofort das Alarmsystem** und die Wegfahrsperre, wenn **der gleiche Code zweimal gesendet wurde**, was eine einzigartige **Denial-of-Service**-Möglichkeit bietet. Ironischerweise war das Mittel zur **Deaktivierung des Alarms** und der Wegfahrsperre, die **Fernbedienung** zu **drücken**, was einem Angreifer die Möglichkeit gab, **fortlaufend DoS-Angriffe durchzuführen**. Oder man könnte diesen Angriff mit dem **vorherigen kombinieren, um mehr Codes zu erhalten**, da das Opfer den Angriff so schnell wie möglich stoppen möchte.
 
 ## Referenzen
 

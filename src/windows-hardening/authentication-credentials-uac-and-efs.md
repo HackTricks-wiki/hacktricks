@@ -9,9 +9,9 @@ Eine Anwendungs-Whitelist ist eine Liste genehmigter Softwareanwendungen oder au
 [AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) ist Microsofts **Lösung zur Anwendungs-Whitelist** und gibt Systemadministratoren die Kontrolle darüber, **welche Anwendungen und Dateien Benutzer ausführen können**. Es bietet **feingranulare Kontrolle** über ausführbare Dateien, Skripte, Windows-Installationsdateien, DLLs, verpackte Apps und Installationsprogramme für verpackte Apps.\
 Es ist üblich, dass Organisationen **cmd.exe und PowerShell.exe** sowie Schreibzugriff auf bestimmte Verzeichnisse blockieren, **aber das kann alles umgangen werden**.
 
-### Überprüfung
+### Überprüfen
 
-Überprüfen Sie, welche Dateien/Erweiterungen auf der schwarzen Liste stehen oder auf der Whitelist sind:
+Überprüfen Sie, welche Dateien/Erweiterungen auf der schwarzen Liste oder der weißen Liste stehen:
 ```bash
 Get-ApplockerPolicy -Effective -xml
 
@@ -36,7 +36,7 @@ C:\windows\tracing
 - Häufig **vertrauenswürdige** [**"LOLBAS's"**](https://lolbas-project.github.io/) Binärdateien können ebenfalls nützlich sein, um AppLocker zu umgehen.
 - **Schlecht geschriebene Regeln könnten ebenfalls umgangen werden**
 - Zum Beispiel, **`<FilePathCondition Path="%OSDRIVE%*\allowed*"/>`**, können Sie einen **Ordner namens `allowed`** überall erstellen und er wird erlaubt.
-- Organisationen konzentrieren sich oft darauf, **die `%System32%\WindowsPowerShell\v1.0\powershell.exe` ausführbare Datei zu blockieren**, vergessen jedoch die **anderen** [**PowerShell ausführbaren Standorte**](https://www.powershelladmin.com/wiki/PowerShell_Executables_File_System_Locations) wie `%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe` oder `PowerShell_ISE.exe`.
+- Organisationen konzentrieren sich oft darauf, die **`%System32%\WindowsPowerShell\v1.0\powershell.exe`** ausführbare Datei zu **blockieren**, vergessen jedoch die **anderen** [**PowerShell ausführbaren Standorte**](https://www.powershelladmin.com/wiki/PowerShell_Executables_File_System_Locations) wie **`%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe`** oder **`PowerShell_ISE.exe`**.
 - **DLL-Durchsetzung sehr selten aktiviert** aufgrund der zusätzlichen Belastung, die sie auf ein System ausüben kann, und der Menge an Tests, die erforderlich sind, um sicherzustellen, dass nichts kaputt geht. Daher wird die Verwendung von **DLLs als Hintertüren helfen, AppLocker zu umgehen**.
 - Sie können [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) oder [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) verwenden, um **Powershell**-Code in jedem Prozess auszuführen und AppLocker zu umgehen. Für weitere Informationen siehe: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode).
 
@@ -69,7 +69,7 @@ Es ist die Datenbank des Active Directory. Sie ist nur auf Domänencontrollern v
 
 ## Defender
 
-[**Microsoft Defender**](https://en.wikipedia.org/wiki/Microsoft_Defender) ist ein Antivirus, der in Windows 10 und Windows 11 sowie in Versionen von Windows Server verfügbar ist. Er **blockiert** gängige Pentesting-Tools wie **`WinPEAS`**. Es gibt jedoch Möglichkeiten, **diese Schutzmaßnahmen zu umgehen**.
+[**Microsoft Defender**](https://en.wikipedia.org/wiki/Microsoft_Defender) ist ein Antivirus, der in Windows 10 und Windows 11 sowie in Versionen von Windows Server verfügbar ist. Er **blockiert** gängige Pentesting-Tools wie **`WinPEAS`**. Es gibt jedoch Möglichkeiten, diese **Schutzmaßnahmen zu umgehen**.
 
 ### Check
 
@@ -103,7 +103,7 @@ sc query windefend
 ```
 ## Encrypted File System (EFS)
 
-EFS sichert Dateien durch Verschlüsselung, indem ein **symmetrischer Schlüssel** verwendet wird, der als **Dateiverschlüsselungsschlüssel (FEK)** bekannt ist. Dieser Schlüssel wird mit dem **öffentlichen Schlüssel** des Benutzers verschlüsselt und im $EFS **alternativen Datenstrom** der verschlüsselten Datei gespeichert. Wenn eine Entschlüsselung erforderlich ist, wird der entsprechende **private Schlüssel** des digitalen Zertifikats des Benutzers verwendet, um den FEK aus dem $EFS-Stream zu entschlüsseln. Weitere Details finden Sie [hier](https://en.wikipedia.org/wiki/Encrypting_File_System).
+EFS sichert Dateien durch Verschlüsselung, indem es einen **symmetrischen Schlüssel** verwendet, der als **Dateiverschlüsselungsschlüssel (FEK)** bekannt ist. Dieser Schlüssel wird mit dem **öffentlichen Schlüssel** des Benutzers verschlüsselt und im $EFS **alternativen Datenstrom** der verschlüsselten Datei gespeichert. Wenn eine Entschlüsselung erforderlich ist, wird der entsprechende **private Schlüssel** des digitalen Zertifikats des Benutzers verwendet, um den FEK aus dem $EFS-Stream zu entschlüsseln. Weitere Details finden Sie [hier](https://en.wikipedia.org/wiki/Encrypting_File_System).
 
 **Entschlüsselungsszenarien ohne Benutzerinitiierung** umfassen:
 
@@ -126,7 +126,7 @@ Diese Verschlüsselungsmethode ermöglicht **transparenten Zugriff** auf verschl
 Überprüfen Sie, **wer** Zugriff auf die Datei hat, indem Sie cipher /c \<file>\
 Sie können auch `cipher /e` und `cipher /d` in einem Ordner verwenden, um alle Dateien zu **verschlüsseln** und **zu entschlüsseln**.
 
-### EFS-Dateien entschlüsseln
+### Entschlüsseln von EFS-Dateien
 
 #### Als Autoritätssystem
 
@@ -140,7 +140,7 @@ https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files
 
 ## Group Managed Service Accounts (gMSA)
 
-Microsoft entwickelte **Group Managed Service Accounts (gMSA)**, um die Verwaltung von Dienstkonten in IT-Infrastrukturen zu vereinfachen. Im Gegensatz zu traditionellen Dienstkonten, die oft die Einstellung "**Passwort läuft niemals ab**" aktiviert haben, bieten gMSAs eine sicherere und verwaltbare Lösung:
+Microsoft entwickelte **Group Managed Service Accounts (gMSA)**, um die Verwaltung von Dienstkonten in IT-Infrastrukturen zu vereinfachen. Im Gegensatz zu traditionellen Dienstkonten, die oft die Einstellung "**Passwort läuft nie ab**" aktiviert haben, bieten gMSAs eine sicherere und verwaltbare Lösung:
 
 - **Automatische Passwortverwaltung**: gMSAs verwenden ein komplexes, 240-Zeichen-Passwort, das automatisch gemäß der Domänen- oder Computerpolitik geändert wird. Dieser Prozess wird vom Key Distribution Service (KDC) von Microsoft verwaltet, wodurch manuelle Passwortaktualisierungen entfallen.
 - **Erhöhte Sicherheit**: Diese Konten sind immun gegen Sperrungen und können nicht für interaktive Anmeldungen verwendet werden, was ihre Sicherheit erhöht.
@@ -183,7 +183,7 @@ $ExecutionContext.SessionState.LanguageMode
 Powershell -version 2
 ```
 In der aktuellen Windows-Version funktioniert dieser Bypass nicht, aber Sie können [**PSByPassCLM**](https://github.com/padovah4ck/PSByPassCLM) verwenden.\
-**Um es zu kompilieren, müssen Sie** **eine Referenz** _**hinzufügen**_ -> _Durchsuchen_ -> _Durchsuchen_ -> fügen Sie `C:\Windows\Microsoft.NET\assembly\GAC_MSIL\System.Management.Automation\v4.0_3.0.0.0\31bf3856ad364e35\System.Management.Automation.dll` hinzu und **ändern Sie das Projekt auf .Net4.5**.
+**Um es zu kompilieren, müssen Sie möglicherweise** **eine Referenz** _**hinzufügen**_ -> _Durchsuchen_ -> _Durchsuchen_ -> fügen Sie `C:\Windows\Microsoft.NET\assembly\GAC_MSIL\System.Management.Automation\v4.0_3.0.0.0\31bf3856ad364e35\System.Management.Automation.dll` hinzu und **ändern Sie das Projekt auf .Net4.5**.
 
 #### Direkter Bypass:
 ```bash

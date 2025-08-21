@@ -4,7 +4,7 @@
 
 ## TCC Privilegieneskalation
 
-Wenn Sie hier sind, um nach TCC-Privilegieneskalation zu suchen, gehen Sie zu:
+Wenn Sie hierher gekommen sind, um nach TCC-Privilegieneskalation zu suchen, gehen Sie zu:
 
 {{#ref}}
 macos-security-protections/macos-tcc/
@@ -39,7 +39,7 @@ chmod +x /opt/homebrew/bin/ls
 # victim
 sudo ls
 ```
-Beachten Sie, dass ein Benutzer, der das Terminal verwendet, höchstwahrscheinlich **Homebrew installiert** hat. Es ist also möglich, Binärdateien in **`/opt/homebrew/bin`** zu hijacken.
+Beachten Sie, dass ein Benutzer, der das Terminal verwendet, höchstwahrscheinlich **Homebrew installiert** hat. Daher ist es möglich, Binärdateien in **`/opt/homebrew/bin`** zu hijacken.
 
 ### Dock-Imitation
 
@@ -126,9 +126,9 @@ Einige Vorschläge:
 
 - Sie **können den Finder nicht aus dem Dock entfernen**, also wenn Sie ihn zum Dock hinzufügen möchten, könnten Sie den gefälschten Finder direkt neben den echten setzen. Dafür müssen Sie **den gefälschten Finder-Eintrag am Anfang des Dock-Arrays hinzufügen**.
 - Eine andere Möglichkeit ist, ihn nicht im Dock zu platzieren und ihn einfach zu öffnen, "Finder fragt, um den Finder zu steuern" ist nicht so seltsam.
-- Eine weitere Möglichkeit, um **ohne Passwortabfrage** auf root zu eskalieren, ist, den Finder wirklich nach dem Passwort zu fragen, um eine privilegierte Aktion auszuführen:
+- Eine weitere Möglichkeit, um **ohne Passwortabfrage** auf Root zu eskalieren, ist, den Finder wirklich nach dem Passwort zu fragen, um eine privilegierte Aktion auszuführen:
 - Bitten Sie den Finder, eine neue **`sudo`**-Datei nach **`/etc/pam.d`** zu kopieren (Die Eingabeaufforderung, die nach dem Passwort fragt, wird anzeigen, dass "Finder sudo kopieren möchte")
-- Bitten Sie den Finder, ein neues **Authorization Plugin** zu kopieren (Sie könnten den Dateinamen kontrollieren, sodass die Eingabeaufforderung, die nach dem Passwort fragt, anzeigen wird, dass "Finder Finder.bundle kopieren möchte")
+- Bitten Sie den Finder, ein neues **Authorization Plugin** zu kopieren (Sie könnten den Dateinamen steuern, sodass die Eingabeaufforderung, die nach dem Passwort fragt, anzeigt, dass "Finder Finder.bundle kopieren möchte")
 ```bash
 #!/bin/sh
 
@@ -206,7 +206,7 @@ killall Dock
 ### CVE-2020-9771 - mount_apfs TCC-Umgehung und Rechteausweitung
 
 **Jeder Benutzer** (auch unprivilegierte) kann einen Time Machine-Snapshot erstellen und einbinden und **auf ALLE Dateien** dieses Snapshots zugreifen.\
-Die **einzige Berechtigung**, die benötigt wird, ist, dass die verwendete Anwendung (wie `Terminal`) **Vollzugriff auf das Laufwerk** (FDA) benötigt (`kTCCServiceSystemPolicyAllfiles`), was von einem Administrator gewährt werden muss.
+Die **einzige Berechtigung**, die benötigt wird, ist, dass die verwendete Anwendung (wie `Terminal`) **Vollzugriff auf die Festplatte** (FDA) hat (`kTCCServiceSystemPolicyAllfiles`), was von einem Administrator gewährt werden muss.
 ```bash
 # Create snapshot
 tmutil localsnapshot

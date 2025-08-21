@@ -34,7 +34,7 @@ sc.exe \\TARGET start HTSvc
 sc.exe \\TARGET delete HTSvc
 ```
 Hinweise:
-- Erwarten Sie einen Timeout-Fehler beim Starten einer nicht-dienstlichen EXE; die Ausführung erfolgt dennoch.
+- Erwarten Sie einen Timeout-Fehler beim Starten einer nicht als Dienst ausgeführten EXE; die Ausführung erfolgt dennoch.
 - Um OPSEC-freundlicher zu bleiben, bevorzugen Sie dateilose Befehle (cmd /c, powershell -enc) oder löschen Sie abgelegte Artefakte.
 
 Finden Sie detailliertere Schritte in: https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/
@@ -60,11 +60,11 @@ PsExec64.exe -accepteula \\HOST -r WinSvc$ -s cmd.exe /c ipconfig
 \\live.sysinternals.com\tools\PsExec64.exe -accepteula \\HOST -s cmd.exe /c whoami
 ```
 OPSEC
-- Hinterlässt Ereignisse zur Installation/Deinstallation von Diensten (Dienstname oft PSEXESVC, es sei denn, -r wird verwendet) und erstellt C:\Windows\PSEXESVC.exe während der Ausführung.
+- Hinterlässt Ereignisse zur Installation/Deinstallation von Diensten (Der Dienstname ist oft PSEXESVC, es sei denn, -r wird verwendet) und erstellt C:\Windows\PSEXESVC.exe während der Ausführung.
 
 ### Impacket psexec.py (PsExec-ähnlich)
 
-- Verwendet einen eingebetteten RemCom-ähnlichen Dienst. Legt eine temporäre Dienst-Binärdatei (häufig randomisierter Name) über ADMIN$ ab, erstellt einen Dienst (standardmäßig oft RemComSvc) und leitet I/O über ein benanntes Pipe weiter.
+- Verwendet einen eingebetteten RemCom-ähnlichen Dienst. Legt eine temporäre Dienst-Binärdatei (häufig mit randomisiertem Namen) über ADMIN$ ab, erstellt einen Dienst (standardmäßig oft RemComSvc) und leitet I/O über ein benanntes Pipe weiter.
 ```bash
 # Password auth
 psexec.py DOMAIN/user:Password@HOST cmd.exe
@@ -115,11 +115,11 @@ Typische Host-/Netzwerkartefakte bei der Verwendung von PsExec-ähnlichen Techni
 
 Jagdmöglichkeiten
 - Alarm bei Dienstinstallationen, bei denen der ImagePath cmd.exe /c, powershell.exe oder TEMP-Standorte enthält.
-- Suchen nach Prozesskreationen, bei denen ParentImage C:\Windows\PSEXESVC.exe oder Kinder von services.exe sind, die als LOCAL SYSTEM Shells ausführen.
+- Suchen nach Prozesskreationen, bei denen ParentImage C:\Windows\PSEXESVC.exe oder Kinder von services.exe, die als LOCAL SYSTEM Shells ausführen, sind.
 - Benannte Pipes kennzeichnen, die mit -stdin/-stdout/-stderr enden oder bekannte PsExec-Klon-Pipenamen haben.
 
 ## Fehlersuche bei häufigen Fehlern
-- Zugriff verweigert (5) beim Erstellen von Diensten: nicht wirklich lokaler Administrator, UAC-Remotebeschränkungen für lokale Konten oder EDR-Manipulationsschutz auf dem Dienstbinary-Pfad.
+- Zugriff verweigert (5) beim Erstellen von Diensten: nicht wirklich lokaler Administrator, UAC-Remote-Beschränkungen für lokale Konten oder EDR-Tampering-Schutz auf dem Dienstbinary-Pfad.
 - Der Netzwerkpfad wurde nicht gefunden (53) oder konnte nicht zu ADMIN$ verbinden: Firewall blockiert SMB/RPC oder Administrationsfreigaben sind deaktiviert.
 - Kerberos schlägt fehl, aber NTLM ist blockiert: Verbindung über Hostname/FQDN (nicht IP) herstellen, richtige SPNs sicherstellen oder -k/-no-pass mit Tickets bei der Verwendung von Impacket bereitstellen.
 - Dienststart läuft ab, aber Payload wurde ausgeführt: zu erwarten, wenn es sich nicht um ein echtes Dienstbinary handelt; Ausgabe in eine Datei erfassen oder smbexec für Live-I/O verwenden.
@@ -127,18 +127,18 @@ Jagdmöglichkeiten
 ## Härtungsnotizen
 - Windows 11 24H2 und Windows Server 2025 erfordern standardmäßig SMB-Signierung für ausgehende (und Windows 11 eingehende) Verbindungen. Dies beeinträchtigt die legitime Verwendung von PsExec mit gültigen Anmeldeinformationen nicht, verhindert jedoch den Missbrauch von unsignierten SMB-Relay und kann Geräte beeinträchtigen, die keine Signierung unterstützen.
 - Neue SMB-Client-NTLM-Blockierung (Windows 11 24H2/Server 2025) kann NTLM-Fallback verhindern, wenn über IP oder zu Nicht-Kerberos-Servern verbunden wird. In gehärteten Umgebungen wird dies NTLM-basiertes PsExec/SMBExec brechen; verwenden Sie Kerberos (Hostname/FQDN) oder konfigurieren Sie Ausnahmen, wenn dies legitim erforderlich ist.
-- Prinzip der geringsten Privilegien: Minimieren Sie die Mitgliedschaft im lokalen Administrator, bevorzugen Sie Just-in-Time/Just-Enough Admin, erzwingen Sie LAPS und überwachen/benachrichtigen Sie über 7045-Dienstinstallationen.
+- Prinzip der minimalen Berechtigung: Minimieren Sie die Mitgliedschaft im lokalen Administrator, bevorzugen Sie Just-in-Time/Just-Enough Admin, setzen Sie LAPS durch und überwachen/benachrichtigen Sie über 7045-Dienstinstallationen.
 
 ## Siehe auch
 
-- WMI-basierte Remote-Ausführung (oft mehr fileless):
+- WMI-basiertes Remote-Exec (oft mehr fileless):
 
 
 {{#ref}}
 ./wmiexec.md
 {{#endref}}
 
-- WinRM-basierte Remote-Ausführung:
+- WinRM-basiertes Remote-Exec:
 
 
 {{#ref}}
@@ -150,6 +150,6 @@ Jagdmöglichkeiten
 ## Referenzen
 
 - PsExec - Sysinternals | Microsoft Learn: https://learn.microsoft.com/sysinternals/downloads/psexec
-- SMB-Sicherheits-Härtung in Windows Server 2025 & Windows 11 (Standardmäßig Signierung, NTLM-Blockierung): https://techcommunity.microsoft.com/blog/filecab/smb-security-hardening-in-windows-server-2025--windows-11/4226591
+- SMB-Sicherheits-Härtung in Windows Server 2025 & Windows 11 (Standardmäßig signieren, NTLM-Blockierung): https://techcommunity.microsoft.com/blog/filecab/smb-security-hardening-in-windows-server-2025--windows-11/4226591
 
 {{#include ../../banners/hacktricks-training.md}}

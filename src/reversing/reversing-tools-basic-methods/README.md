@@ -42,7 +42,7 @@ Mit einem umfassenden Add-In-Modell und einer API, die das Tool an Ihre genauen 
 
 ### [ILSpy](https://github.com/icsharpcode/ILSpy) & [dnSpy](https://github.com/dnSpy/dnSpy/releases)
 
-[ILSpy-Plugin für Visual Studio Code](https://github.com/icsharpcode/ilspy-vscode): Sie können es auf jedem Betriebssystem haben (Sie können es direkt aus VSCode installieren, es ist nicht notwendig, das Git herunterzuladen. Klicken Sie auf **Erweiterungen** und **suchen Sie nach ILSpy**).\
+[ILSpy-Plugin für Visual Studio Code](https://github.com/icsharpcode/ilspy-vscode): Sie können es auf jedem Betriebssystem haben (Sie können es direkt von VSCode installieren, es ist nicht notwendig, das Git herunterzuladen. Klicken Sie auf **Erweiterungen** und **suchen Sie nach ILSpy**).\
 Wenn Sie **dekompilieren**, **modifizieren** und **wieder kompilieren** müssen, können Sie [**dnSpy**](https://github.com/dnSpy/dnSpy/releases) oder einen aktiv gepflegten Fork davon, [**dnSpyEx**](https://github.com/dnSpyEx/dnSpy/releases), verwenden. (**Rechtsklick -> Methode ändern**, um etwas innerhalb einer Funktion zu ändern).
 
 ### DNSpy Logging
@@ -84,7 +84,7 @@ Wenn Ihre .NET-Anwendung von **IIS** **ausgeführt** wird, können Sie sie mit *
 ```
 iisreset /noforce
 ```
-Dann, um mit dem Debuggen zu beginnen, sollten Sie alle geöffneten Dateien schließen und im **Debug Tab** **Attach to Process...** auswählen:
+Dann sollten Sie, um mit dem Debuggen zu beginnen, alle geöffneten Dateien schließen und im **Debug Tab** **Attach to Process...** auswählen:
 
 ![](<../../images/image (318).png>)
 
@@ -127,14 +127,14 @@ Klicken Sie mit der rechten Maustaste auf ein beliebiges Modul im **Assembly Exp
 
 Wenn Sie dann mit dem Debuggen beginnen, **wird die Ausführung gestoppt, wenn jede DLL geladen wird**. Wenn rundll32 Ihre DLL lädt, wird die Ausführung gestoppt.
 
-Aber wie gelangen Sie zum Code der geladenen DLL? Mit dieser Methode weiß ich nicht wie.
+Aber wie gelangen Sie zum Code der geladenen DLL? Mit dieser Methode weiß ich nicht, wie.
 
 ### Verwendung von x64dbg/x32dbg
 
 - **Laden Sie rundll32** (64-Bit in C:\Windows\System32\rundll32.exe und 32-Bit in C:\Windows\SysWOW64\rundll32.exe)
 - **Ändern Sie die Befehlszeile** (_Datei --> Befehlszeile ändern_) und setzen Sie den Pfad der DLL und die Funktion, die Sie aufrufen möchten, zum Beispiel: "C:\Windows\SysWOW64\rundll32.exe" "Z:\shared\Cybercamp\rev2\\\14.ridii_2.dll",DLLMain
 - Ändern Sie _Optionen --> Einstellungen_ und wählen Sie "**DLL Entry**".
-- Starten Sie dann die Ausführung, der Debugger wird an jedem DLL-Hauptpunkt anhalten, irgendwann werden Sie **im DLL-Eintrag Ihrer DLL anhalten**. Von dort aus suchen Sie einfach nach den Punkten, an denen Sie einen Haltepunkt setzen möchten.
+- Starten Sie dann die Ausführung, der Debugger wird an jedem DLL-Hauptpunkt anhalten, und irgendwann werden Sie **im DLL-Eintrag Ihrer DLL anhalten**. Von dort aus suchen Sie einfach nach den Punkten, an denen Sie einen Haltepunkt setzen möchten.
 
 Beachten Sie, dass Sie, wenn die Ausführung aus irgendeinem Grund in win64dbg gestoppt wird, **sehen können, in welchem Code Sie sich befinden**, indem Sie **oben im win64dbg-Fenster** nachsehen:
 
@@ -150,7 +150,7 @@ Dann können Sie sehen, wann die Ausführung in der DLL gestoppt wurde, die Sie 
 cheat-engine.md
 {{#endref}}
 
-[**PiNCE**](https://github.com/korcankaraokcu/PINCE) ist ein Front-End/Reverse-Engineering-Tool für den GNU Project Debugger (GDB), das sich auf Spiele konzentriert. Es kann jedoch für alle reverse-engineeringbezogenen Dinge verwendet werden.
+[**PiNCE**](https://github.com/korcankaraokcu/PINCE) ist ein Front-End-/Reverse-Engineering-Tool für den GNU Project Debugger (GDB), das sich auf Spiele konzentriert. Es kann jedoch für alle reverse-engineeringbezogenen Dinge verwendet werden.
 
 [**Decompiler Explorer**](https://dogbolt.org/) ist ein Web-Frontend für eine Reihe von Decompilern. Dieser Webdienst ermöglicht es Ihnen, die Ausgaben verschiedener Decompiler bei kleinen ausführbaren Dateien zu vergleichen.
 
@@ -176,7 +176,7 @@ blobrunner.md
 
 ### Debugging eines Shellcodes mit jmp2it
 
-[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4) ist sehr ähnlich wie Blobrunner. Es wird den **Shellcode** in einem Speicherbereich **allokieren** und eine **ewige Schleife** starten. Sie müssen dann den **Debugger** an den Prozess anhängen, **starten, 2-5 Sekunden warten und stoppen**, und Sie werden sich in der **ewigen Schleife** wiederfinden. Springen Sie zur nächsten Anweisung der ewigen Schleife, da es ein Aufruf zum Shellcode sein wird, und schließlich werden Sie den Shellcode ausführen.
+[**jmp2it**](https://github.com/adamkramer/jmp2it/releases/tag/v1.4) ist sehr ähnlich wie Blobrunner. Es wird den **Shellcode** in einem Speicherbereich **allokieren** und eine **ewige Schleife** starten. Sie müssen dann den **Debugger** an den Prozess anhängen, **starten, 2-5 Sekunden warten und auf Stop drücken**, und Sie werden sich in der **ewigen Schleife** wiederfinden. Springen Sie zur nächsten Anweisung der ewigen Schleife, da es sich um einen Aufruf des Shellcodes handelt, und schließlich werden Sie den Shellcode ausführen.
 
 ![](<../../images/image (509).png>)
 
@@ -190,7 +190,7 @@ Beachten Sie, dass Cutter Ihnen erlaubt, "Datei öffnen" und "Shellcode öffnen"
 
 ![](<../../images/image (562).png>)
 
-Um die Emulation an dem Ort zu starten, an dem Sie möchten, setzen Sie dort einen Haltepunkt, und anscheinend wird Cutter die Emulation automatisch von dort aus starten:
+Um die Emulation an dem gewünschten Ort zu starten, setzen Sie dort einen Haltepunkt, und anscheinend wird Cutter die Emulation automatisch von dort aus starten:
 
 ![](<../../images/image (589).png>)
 
@@ -216,7 +216,7 @@ scDbg verfügt auch über einen grafischen Launcher, in dem Sie die gewünschten
 
 ![](<../../images/image (258).png>)
 
-Die **Create Dump**-Option erstellt einen Dump des finalen Shellcodes, wenn Änderungen am Shellcode dynamisch im Speicher vorgenommen werden (nützlich, um den dekodierten Shellcode herunterzuladen). Der **start offset** kann nützlich sein, um den Shellcode an einem bestimmten Offset zu starten. Die **Debug Shell**-Option ist nützlich, um den Shellcode mit dem scDbg-Terminal zu debuggen (ich finde jedoch, dass die zuvor erklärten Optionen besser dafür geeignet sind, da Sie Ida oder x64dbg verwenden können).
+Die **Create Dump**-Option erstellt einen Dump des finalen Shellcodes, wenn Änderungen am Shellcode dynamisch im Speicher vorgenommen werden (nützlich, um den dekodierten Shellcode herunterzuladen). Der **start offset** kann nützlich sein, um den Shellcode an einem bestimmten Offset zu starten. Die **Debug Shell**-Option ist nützlich, um den Shellcode mit dem scDbg-Terminal zu debuggen (ich finde jedoch, dass keine der zuvor erklärten Optionen besser dafür geeignet ist, da Sie Ida oder x64dbg verwenden können).
 
 ### Disassemblierung mit CyberChef
 
@@ -236,7 +236,7 @@ apt-get install libz3-dev
 ```
 Und [installiere keystone](https://github.com/keystone-engine/keystone/blob/master/docs/COMPILE-NIX.md) (`apt-get install cmake; mkdir build; cd build; ../make-share.sh; make install`)
 
-Wenn du an einem **CTF teilnimmst, könnte dieser Workaround, um die Flag zu finden,** sehr nützlich sein: [https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html](https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html)
+Wenn du an einem **CTF teilnimmst, könnte dieser Workaround, um die Flagge zu finden,** sehr nützlich sein: [https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html](https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html)
 
 ## Rust
 
@@ -245,7 +245,7 @@ Um den **Einstiegspunkt** zu finden, suche die Funktionen nach `::main` wie in:
 ![](<../../images/image (1080).png>)
 
 In diesem Fall hieß die Binärdatei authenticator, daher ist es ziemlich offensichtlich, dass dies die interessante Hauptfunktion ist.\
-Hast du den **Namen** der **aufgerufenen Funktionen**, suche sie im **Internet**, um mehr über ihre **Eingaben** und **Ausgaben** zu erfahren.
+Hast du den **Namen** der **Funktionen**, die aufgerufen werden, suche sie im **Internet**, um mehr über ihre **Eingaben** und **Ausgaben** zu erfahren.
 
 ## **Delphi**
 
@@ -257,7 +257,7 @@ Drücke einfach **ATL+f7** (Python-Plugin in IDA importieren) und wähle das Pyt
 
 Dieses Plugin führt die Binärdatei aus und löst die Funktionsnamen dynamisch zu Beginn des Debuggings auf. Nach dem Start des Debuggings drücke erneut die Starttaste (die grüne oder f9) und ein Haltepunkt wird am Anfang des echten Codes erreicht.
 
-Es ist auch sehr interessant, denn wenn du einen Knopf in der grafischen Anwendung drückst, stoppt der Debugger in der Funktion, die von diesem Knopf ausgeführt wird.
+Es ist auch sehr interessant, weil der Debugger stoppt, wenn du einen Knopf in der grafischen Anwendung drückst, in der Funktion, die von diesem Knopf ausgeführt wird.
 
 ## Golang
 
@@ -284,7 +284,7 @@ Wenn du die **Binärdatei** eines GBA-Spiels erhältst, kannst du verschiedene T
 - [**gba-ghidra-loader**](https://github.com/pudii/gba-ghidra-loader) - Ghidra-Plugin
 - [**GhidraGBA**](https://github.com/SiD3W4y/GhidraGBA) - Ghidra-Plugin
 
-In [**no$gba**](https://problemkaputt.de/gba.htm), in _**Optionen --> Emulationssetup --> Steuerungen**_ kannst du sehen, wie du die Tasten des Game Boy Advance **drücken** kannst.
+In [**no$gba**](https://problemkaputt.de/gba.htm), in _**Optionen --> Emulationssetup --> Steuerungen**_ kannst du sehen, wie du die **Tasten** des Game Boy Advance drücken kannst.
 
 ![](<../../images/image (581).png>)
 
@@ -374,7 +374,7 @@ Im vorherigen Code sehen Sie, dass wir **uVar1** (der Ort, an dem der **Wert des
 - Dann wird er mit dem **Wert 8** (**START**-Taste) verglichen: In der Herausforderung wird überprüft, ob der Code gültig ist, um die Flagge zu erhalten.
 - In diesem Fall wird die Variable **`DAT_030000d8`** mit 0xf3 verglichen, und wenn der Wert gleich ist, wird ein bestimmter Code ausgeführt.
 - In allen anderen Fällen wird ein Zähler (`DAT_030000d4`) überprüft. Es ist ein Zähler, weil er 1 hinzufügt, direkt nachdem er in den Code eingetreten ist.\
-**Wenn** weniger als 8, wird etwas gemacht, das **Werte zu** **`DAT_030000d8`** **hinzufügt** (im Grunde werden die Werte der gedrückten Tasten in dieser Variablen addiert, solange der Zähler weniger als 8 ist).
+**Wenn** weniger als 8, wird etwas gemacht, das **Werte** zu **`DAT_030000d8`** **hinzufügt** (im Grunde werden die Werte der gedrückten Tasten in dieser Variablen addiert, solange der Zähler weniger als 8 ist).
 
 In dieser Herausforderung mussten Sie also, wissend um die Werte der Tasten, eine **Kombination mit einer Länge kleiner als 8 drücken, deren resultierende Addition 0xf3 ist.**
 

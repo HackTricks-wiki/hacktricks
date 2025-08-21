@@ -4,10 +4,10 @@
 
 ## Squashing Basic Info
 
-NFS wird normalerweise (insbesondere unter Linux) dem angegebenen `uid` und `gid` des Clients, der auf die Dateien zugreift (wenn Kerberos nicht verwendet wird), vertrauen. Es gibt jedoch einige Konfigurationen, die auf dem Server gesetzt werden können, um **dieses Verhalten zu ändern**:
+NFS wird normalerweise (insbesondere unter Linux) dem angegebenen `uid` und `gid` des Clients, der auf die Dateien zugreift (wenn Kerberos nicht verwendet wird), vertrauen. Es gibt jedoch einige Konfigurationen, die auf dem Server eingestellt werden können, um **dieses Verhalten zu ändern**:
 
 - **`all_squash`**: Es squash alle Zugriffe, indem jeder Benutzer und jede Gruppe auf **`nobody`** (65534 unsigned / -2 signed) abgebildet wird. Daher ist jeder `nobody` und es werden keine Benutzer verwendet.
-- **`root_squash`/`no_all_squash`**: Dies ist standardmäßig unter Linux und **squasht nur den Zugriff mit uid 0 (root)**. Daher werden alle `UID` und `GID` vertraut, aber `0` wird auf `nobody` gesquasht (so ist keine Root-Imitation möglich).
+- **`root_squash`/`no_all_squash`**: Dies ist standardmäßig unter Linux und **squasht nur Zugriffe mit uid 0 (root)**. Daher werden alle `UID` und `GID` vertraut, aber `0` wird auf `nobody` gesquasht (so ist keine Root-Imitation möglich).
 - **``no_root_squash`**: Diese Konfiguration, wenn aktiviert, squasht nicht einmal den Root-Benutzer. Das bedeutet, dass Sie, wenn Sie ein Verzeichnis mit dieser Konfiguration einhängen, darauf als Root zugreifen können.
 
 In der **/etc/exports**-Datei, wenn Sie ein Verzeichnis finden, das als **no_root_squash** konfiguriert ist, können Sie **darauf zugreifen** **als Client** und **in dieses Verzeichnis schreiben**, **als ob** Sie der lokale **Root** der Maschine wären.
@@ -22,10 +22,10 @@ Für weitere Informationen über **NFS** überprüfen Sie:
 
 ### Remote Exploit
 
-Option 1 mit bash:
-- **Mounten Sie dieses Verzeichnis** auf einer Client-Maschine und **kopieren Sie als Root** die **/bin/bash**-Binary in den eingehängten Ordner und geben Sie ihr **SUID**-Rechte, und **führen Sie von der Opfer**-Maschine diese bash-Binary aus.
-- Beachten Sie, dass `no_root_squash` auf dem Server konfiguriert sein muss, um Root im NFS-Share zu sein.
-- Wenn es jedoch nicht aktiviert ist, könnten Sie zu einem anderen Benutzer eskalieren, indem Sie die Binary in den NFS-Share kopieren und ihr die SUID-Berechtigung als den Benutzer geben, zu dem Sie eskalieren möchten.
+Option 1 unter Verwendung von bash:
+- **Mounten Sie dieses Verzeichnis** auf einer Client-Maschine und **kopieren Sie als Root** die **/bin/bash**-Binary in den gemounteten Ordner und geben Sie ihr **SUID**-Rechte, und **führen Sie von der Opfer**-Maschine diese bash-Binary aus.
+- Beachten Sie, dass `no_root_squash` auf dem Server konfiguriert sein muss, um Root innerhalb des NFS-Teils zu sein.
+- Wenn es jedoch nicht aktiviert ist, könnten Sie zu einem anderen Benutzer eskalieren, indem Sie die Binary in den NFS-Teil kopieren und ihr die SUID-Berechtigung als den Benutzer geben, zu dem Sie eskalieren möchten.
 ```bash
 #Attacker, as root user
 mkdir /tmp/pe
@@ -38,7 +38,7 @@ chmod +s bash
 cd <SHAREDD_FOLDER>
 ./bash -p #ROOT shell
 ```
-Option 2 unter Verwendung von C kompiliertem Code:
+Option 2 mit C kompiliertem Code:
 - **Mounten Sie dieses Verzeichnis** auf einem Client-Rechner und **kopieren Sie als root** unser kompiliertes Payload in den gemounteten Ordner, das die SUID-Berechtigung ausnutzt, geben Sie ihm **SUID**-Rechte und **führen Sie von der Opfer**-Maschine diese Binärdatei aus (hier finden Sie einige [C SUID-Payloads](payloads-to-execute.md#c)).
 - Dieselben Einschränkungen wie zuvor.
 ```bash
@@ -59,12 +59,12 @@ cd <SHAREDD_FOLDER>
 > [!TIP]
 > Beachten Sie, dass Sie, wenn Sie einen **Tunnel von Ihrem Rechner zum Opferrechner erstellen können, die Remote-Version weiterhin verwenden können, um diese Privilegieneskalation durch Tunneln der erforderlichen Ports auszunutzen**.\
 > Der folgende Trick gilt, falls die Datei `/etc/exports` **eine IP angibt**. In diesem Fall **werden Sie auf keinen Fall** den **Remote-Exploit** verwenden können und müssen **diesen Trick ausnutzen**.\
-> Eine weitere erforderliche Bedingung, damit der Exploit funktioniert, ist, dass **der Export in `/etc/export`** **das `insecure`-Flag verwenden muss**.\
+> Eine weitere Voraussetzung, damit der Exploit funktioniert, ist, dass **der Export in `/etc/export`** **das `insecure`-Flag verwenden muss**.\
 > --_Ich bin mir nicht sicher, ob dieser Trick funktioniert, wenn `/etc/export` eine IP-Adresse angibt_--
 
 ### Grundinformationen
 
-Das Szenario beinhaltet das Ausnutzen eines gemounteten NFS-Teils auf einem lokalen Rechner, wobei eine Schwachstelle in der NFSv3-Spezifikation ausgenutzt wird, die es dem Client ermöglicht, seine uid/gid anzugeben, was potenziell unbefugten Zugriff ermöglicht. Der Exploit verwendet [libnfs](https://github.com/sahlberg/libnfs), eine Bibliothek, die das Fälschen von NFS RPC-Aufrufen ermöglicht.
+Das Szenario beinhaltet das Ausnutzen eines gemounteten NFS-Teils auf einem lokalen Rechner, wobei eine Schwachstelle in der NFSv3-Spezifikation ausgenutzt wird, die es dem Client ermöglicht, seine uid/gid anzugeben, was potenziell unbefugten Zugriff ermöglicht. Der Exploit nutzt [libnfs](https://github.com/sahlberg/libnfs), eine Bibliothek, die das Fälschen von NFS RPC-Aufrufen ermöglicht.
 
 #### Kompilieren der Bibliothek
 
@@ -77,7 +77,7 @@ gcc -fPIC -shared -o ld_nfs.so examples/ld_nfs.c -ldl -lnfs -I./include/ -L./lib
 ```
 #### Durchführung des Exploits
 
-Der Exploit besteht darin, ein einfaches C-Programm (`pwn.c`) zu erstellen, das die Berechtigungen auf root erhöht und dann eine Shell ausführt. Das Programm wird kompiliert, und die resultierende Binärdatei (`a.out`) wird im Share mit suid root platziert, wobei `ld_nfs.so` verwendet wird, um die uid in den RPC-Aufrufen zu fälschen:
+Der Exploit besteht darin, ein einfaches C-Programm (`pwn.c`) zu erstellen, das die Berechtigungen auf root erhöht und dann eine Shell ausführt. Das Programm wird kompiliert, und die resultierende Binärdatei (`a.out`) wird mit suid root im Share platziert, wobei `ld_nfs.so` verwendet wird, um die uid in den RPC-Aufrufen zu fälschen:
 
 1. **Kompiliere den Exploit-Code:**
 ```bash

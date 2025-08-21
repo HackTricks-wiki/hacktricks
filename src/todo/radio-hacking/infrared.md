@@ -53,7 +53,7 @@ In der Regel gibt es ein Preamble zu Beginn eines kodierten Pakets. Dies ermögl
 
 Dann werden die Daten übertragen. Die Struktur, Preamble und Bitkodierungsmethode werden durch das spezifische Protokoll bestimmt.
 
-**NEC-IR-Protokoll** enthält einen kurzen Befehl und einen Wiederholcode, der gesendet wird, solange die Taste gedrückt wird. Sowohl der Befehl als auch der Wiederholcode haben zu Beginn die gleiche Preamble.
+**NEC-IR-Protokoll** enthält einen kurzen Befehl und einen Wiederholcode, der gesendet wird, solange die Taste gedrückt ist. Sowohl der Befehl als auch der Wiederholcode haben zu Beginn die gleiche Preamble.
 
 Der **Befehl** von NEC besteht neben der Preamble aus einem Adressbyte und einem Befehlsnummernbyte, durch das das Gerät versteht, was ausgeführt werden muss. Adress- und Befehlsnummernbytes werden mit inversen Werten dupliziert, um die Integrität der Übertragung zu überprüfen. Am Ende des Befehls gibt es ein zusätzliches Stoppbit.
 
@@ -64,7 +64,7 @@ Für **Logik "0" und "1"** verwendet NEC die Pulsabstandskodierung: Zuerst wird 
 ### Klimaanlagen
 
 Im Gegensatz zu anderen Fernbedienungen **übertragen Klimaanlagen nicht nur den Code der gedrückten Taste**. Sie **übertragen auch alle Informationen**, wenn eine Taste gedrückt wird, um sicherzustellen, dass die **Klimaanlage und die Fernbedienung synchronisiert sind**.\
-Dies verhindert, dass eine auf 20ºC eingestellte Maschine mit einer Fernbedienung auf 21ºC erhöht wird und dann, wenn eine andere Fernbedienung, die immer noch die Temperatur von 20ºC hat, verwendet wird, um die Temperatur weiter zu erhöhen, sie auf 21ºC "erhöht" wird (und nicht auf 22ºC, weil sie denkt, dass sie auf 21ºC ist).
+Dies verhindert, dass eine auf 20ºC eingestellte Maschine mit einer Fernbedienung auf 21ºC erhöht wird und dann, wenn eine andere Fernbedienung, die immer noch die Temperatur von 20ºC hat, verwendet wird, die Temperatur weiter erhöht wird, sie auf 21ºC "erhöht" (und nicht auf 22ºC, weil sie denkt, dass sie auf 21ºC ist).
 
 ---
 
@@ -78,11 +78,11 @@ flipper-zero/fz-infrared.md
 
 ### Smart-TV / Set-Top-Box Übernahme (EvilScreen)
 
-Jüngste akademische Arbeiten (EvilScreen, 2022) haben gezeigt, dass **Multikanalfernbedienungen, die Infrarot mit Bluetooth oder Wi-Fi kombinieren, missbraucht werden können, um moderne Smart-TVs vollständig zu übernehmen**. Die Angriffsstränge kombinieren hochprivilegierte IR-Dienstcodes mit authentifizierten Bluetooth-Paketen, umgehen die Kanaltrennung und ermöglichen beliebige App-Starts, Mikrofonaktivierung oder Werkseinstellungen ohne physischen Zugriff. Acht gängige Fernseher von verschiedenen Anbietern — darunter ein Samsung-Modell, das die ISO/IEC 27001-Konformität beansprucht — wurden als anfällig bestätigt. Die Minderung erfordert Firmware-Updates des Herstellers oder das vollständige Deaktivieren ungenutzter IR-Empfänger.
+Jüngste akademische Arbeiten (EvilScreen, 2022) haben gezeigt, dass **Multikanalfernbedienungen, die Infrarot mit Bluetooth oder Wi-Fi kombinieren, missbraucht werden können, um moderne Smart-TVs vollständig zu übernehmen**. Die Angriffsstränge kombinieren hochprivilegierte IR-Dienstcodes mit authentifizierten Bluetooth-Paketen, umgehen die Kanaltrennung und ermöglichen beliebige App-Starts, Mikrofonaktivierung oder Werksreset ohne physischen Zugriff. Acht gängige Fernseher von verschiedenen Anbietern — darunter ein Samsung-Modell, das die ISO/IEC 27001-Konformität beansprucht — wurden als anfällig bestätigt. Die Minderung erfordert Firmware-Updates des Herstellers oder das vollständige Deaktivieren ungenutzter IR-Empfänger.
 
 ### Datenexfiltration über IR-LEDs (aIR-Jumper-Familie)
 
-Sicherheitskameras, Router oder sogar bösartige USB-Sticks enthalten oft **Nachtsicht-IR-LEDs**. Forschungen zeigen, dass Malware diese LEDs modulieren kann (<10–20 kbit/s mit einfachem OOK), um **Geheimnisse durch Wände und Fenster** zu exfiltrieren, zu einer externen Kamera, die mehrere Meter entfernt platziert ist. Da das Licht außerhalb des sichtbaren Spektrums liegt, bemerken die Betreiber es selten. Gegenmaßnahmen:
+Sicherheitskameras, Router oder sogar bösartige USB-Sticks enthalten oft **Nachtsicht-IR-LEDs**. Forschungen zeigen, dass Malware diese LEDs modulieren kann (<10–20 kbit/s mit einfachem OOK), um **Geheimnisse durch Wände und Fenster zu exfiltrieren** zu einer externen Kamera, die mehrere Meter entfernt platziert ist. Da das Licht außerhalb des sichtbaren Spektrums liegt, bemerken die Betreiber es selten. Gegenmaßnahmen:
 
 * Physisch IR-LEDs in sensiblen Bereichen abschirmen oder entfernen
 * Überwachen Sie den Duty-Cycle der Kamera-LED und die Firmware-Integrität

@@ -20,7 +20,7 @@ chmod -R 644 *.php
 ```
 `--reference=/root/secret``file` wird injiziert, wodurch *alle* übereinstimmenden Dateien den Besitz/die Berechtigungen von `/root/secret``file` erben.
 
-*PoC & Tool*: [`wildpwn`](https://github.com/localh0t/wildpwn) (kombinierter Angriff).
+*PoC & Tool*: [`wildpwn`](https://github.com/localh0t/wildpwn) (kombinierter Angriff).  
 Siehe auch das klassische DefenseCode-Papier für Details.
 
 ---
@@ -76,7 +76,7 @@ Wenn root etwas wie Folgendes ausführt:
 ```bash
 7za a /backup/`date +%F`.7z -t7z -snl -- *
 ```
-7-Zip wird versuchen, `root.txt` (→ `/etc/shadow`) als Dateiliste zu lesen und wird abbrechen, **während es den Inhalt auf stderr ausgibt**.
+7-Zip wird versuchen, `root.txt` (→ `/etc/shadow`) als Dateiliste zu lesen und wird abbrechen, **indem es den Inhalt auf stderr ausgibt**.
 
 ---
 
@@ -105,9 +105,9 @@ Diese Primitiven sind weniger verbreitet als die *tar/rsync/zip* Klassiker, aber
 
 ---
 
-## tcpdump-Rotationshaken (-G/-W/-z): RCE über argv-Injection in Wrappers
+## tcpdump-Rotations-Hooks (-G/-W/-z): RCE über argv-Injection in Wrappers
 
-Wenn eine eingeschränkte Shell oder ein Anbieter-Wrap einen `tcpdump`-Befehl erstellt, indem sie benutzerkontrollierte Felder (z. B. ein "Dateiname"-Parameter) ohne strikte Anführungszeichen/Validierung verknüpft, kannst du zusätzliche `tcpdump`-Flags schmuggeln. Die Kombination aus `-G` (zeitbasierte Rotation), `-W` (Anzahl der Dateien begrenzen) und `-z <cmd>` (Post-Rotate-Befehl) führt zu beliebiger Befehlsausführung als der Benutzer, der tcpdump ausführt (oft root auf Geräten).
+Wenn eine eingeschränkte Shell oder ein Vendor-Wrapper eine `tcpdump`-Befehlszeile erstellt, indem sie benutzerkontrollierte Felder (z. B. ein "Dateiname"-Parameter) ohne strikte Anführungszeichen/Validierung verknüpft, kannst du zusätzliche `tcpdump`-Flags schmuggeln. Die Kombination aus `-G` (zeitbasierte Rotation), `-W` (Anzahl der Dateien begrenzen) und `-z <cmd>` (Post-Rotate-Befehl) führt zu beliebiger Befehlsausführung als der Benutzer, der tcpdump ausführt (oft root auf Geräten).
 
 Voraussetzungen:
 
@@ -139,22 +139,21 @@ Details:
 
 No-removable-media Varianten:
 
-- Wenn Sie eine andere Primitive zum Schreiben von Dateien haben (z. B. einen separaten Befehlswrapper, der die Umleitung von Ausgaben ermöglicht), legen Sie Ihr Skript in einen bekannten Pfad und triggern Sie `-z /bin/sh /path/script.sh` oder `-z /path/script.sh`, je nach Plattformsemantik.
-- Einige Vendor-Wrappers rotieren zu vom Angreifer kontrollierbaren Standorten. Wenn Sie den rotierten Pfad beeinflussen können (symlink/verzeichnis traversal), können Sie `-z` steuern, um Inhalte auszuführen, die Sie vollständig kontrollieren, ohne externe Medien.
+- Wenn Sie eine andere primitive Methode zum Schreiben von Dateien haben (z. B. einen separaten Befehlswrapper, der die Umleitung von Ausgaben ermöglicht), legen Sie Ihr Skript in einen bekannten Pfad und triggern Sie `-z /bin/sh /path/script.sh` oder `-z /path/script.sh` je nach Plattformsemantik.
+- Einige Vendor-Wrappers rotieren zu vom Angreifer kontrollierbaren Standorten. Wenn Sie den rotierten Pfad beeinflussen können (Symlink/Verzeichnisdurchquerung), können Sie `-z` steuern, um Inhalte auszuführen, die Sie vollständig kontrollieren, ohne externe Medien.
 
-Hardening-Tipps für Anbieter:
+Härtungstipps für Anbieter:
 
-- Geben Sie niemals benutzerkontrollierte Zeichenfolgen direkt an `tcpdump` (oder ein beliebiges Tool) ohne strenge Allowlists weiter. Zitieren und validieren.
+- Geben Sie niemals benutzerkontrollierte Zeichenfolgen direkt an `tcpdump` (oder ein beliebiges Tool) ohne strenge Erlaubenlisten weiter. Zitieren und validieren.
 - Setzen Sie die `-z`-Funktionalität in Wrappers nicht aus; führen Sie tcpdump mit einer festen sicheren Vorlage aus und verbieten Sie zusätzliche Flags vollständig.
 - Reduzieren Sie die tcpdump-Berechtigungen (cap_net_admin/cap_net_raw nur) oder führen Sie es unter einem dedizierten unprivilegierten Benutzer mit AppArmor/SELinux-Einschränkung aus.
-
 
 ## Detection & Hardening
 
 1. **Deaktivieren Sie die Shell-Gloßierung** in kritischen Skripten: `set -f` (`set -o noglob`) verhindert die Wildcard-Erweiterung.
 2. **Zitieren oder Escapen** Sie Argumente: `tar -czf "$dst" -- *` ist *nicht* sicher — bevorzugen Sie `find . -type f -print0 | xargs -0 tar -czf "$dst"`.
 3. **Explizite Pfade**: Verwenden Sie `/var/www/html/*.log` anstelle von `*`, damit Angreifer keine Geschwisterdateien erstellen können, die mit `-` beginnen.
-4. **Minimalprivileg**: Führen Sie Backup-/Wartungsjobs nach Möglichkeit als unprivilegiertes Dienstkonto anstelle von root aus.
+4. **Minimalprivilegien**: Führen Sie Backup-/Wartungsjobs nach Möglichkeit als unprivilegiertes Dienstkonto anstelle von root aus.
 5. **Überwachung**: Die vorgefertigte Regel von Elastic *Potential Shell via Wildcard Injection* sucht nach `tar --checkpoint=*`, `rsync -e*` oder `zip --unzip-command`, die sofort von einem Shell-Kindprozess gefolgt werden. Die EQL-Abfrage kann für andere EDRs angepasst werden.
 
 ---

@@ -6,7 +6,7 @@
 adws-enumeration.md
 {{#endref}}
 
-> HINWEIS: Diese Seite gruppiert einige der nützlichsten Dienstprogramme zur **Enumeration** und **Visualisierung** von Active Directory-Beziehungen. Für die Sammlung über den stealthy **Active Directory Web Services (ADWS)**-Kanal siehe den obigen Verweis.
+> HINWEIS: Diese Seite gruppiert einige der nützlichsten Dienstprogramme zur **Enumeration** und **Visualisierung** von Active Directory-Beziehungen. Für die Sammlung über den stealthy **Active Directory Web Services (ADWS)** Kanal siehe den oben genannten Verweis.
 
 ---
 
@@ -56,13 +56,13 @@ SharpHound.exe --CollectionMethods All           # Full sweep (noisy)
 SharpHound.exe --CollectionMethods Group,LocalAdmin,Session,Trusts,ACL
 SharpHound.exe --Stealth --LDAP                      # Low noise LDAP only
 ```
-Die Sammler erzeugen JSON, das über die BloodHound GUI aufgenommen wird.
+Die Sammler erzeugen JSON, das über die BloodHound-GUI aufgenommen wird.
 
 ---
 
 ## Group3r
 
-[Group3r](https://github.com/Group3r/Group3r) enumeriert **Gruppenrichtlinienobjekte** und hebt Fehlkonfigurationen hervor.
+[Group3r](https://github.com/Group3r/Group3r) enumeriert **Group Policy Objects** und hebt Fehlkonfigurationen hervor.
 ```bash
 # Execute inside the domain
 Group3r.exe -f gpo.log   # -s to stdout

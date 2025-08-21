@@ -28,7 +28,7 @@ Der beste Ausgangspunkt, um über KI zu lernen, ist zu verstehen, wie die Hauptm
 
 ### LLMs-Architektur
 
-Auf der folgenden Seite finden Sie die Grundlagen jedes Komponenten, um ein einfaches LLM mit Transformatoren zu erstellen:
+Auf der folgenden Seite finden Sie die Grundlagen jedes Komponenten, um ein grundlegendes LLM mit Transformatoren zu erstellen:
 
 
 {{#ref}}
@@ -37,9 +37,9 @@ AI-llm-architecture/README.md
 
 ## KI-Sicherheit
 
-### KI-Risiko-Rahmenwerke
+### KI-Risikorahmen
 
-Im Moment sind die beiden Hauptrahmenwerke zur Bewertung der Risiken von KI-Systemen die OWASP ML Top 10 und das Google SAIF:
+Im Moment sind die beiden Hauptrahmen zur Bewertung der Risiken von KI-Systemen die OWASP ML Top 10 und das Google SAIF:
 
 
 {{#ref}}
@@ -57,7 +57,7 @@ AI-Prompts.md
 
 ### RCE von KI-Modellen
 
-Es ist sehr verbreitet, dass Entwickler und Unternehmen Modelle aus dem Internet herunterladen und ausführen. Allerdings kann das bloße Laden eines Modells ausreichen, um beliebigen Code auf dem System auszuführen. Dies ist ein sehr wichtiges Thema, um zu verstehen, wie man KI sicher nutzt und wie man sie angreift:
+Es ist sehr verbreitet, dass Entwickler und Unternehmen Modelle aus dem Internet herunterladen, jedoch kann das bloße Laden eines Modells ausreichen, um beliebigen Code auf dem System auszuführen. Dies ist ein sehr wichtiges Thema, um zu verstehen, wie man KI sicher nutzt und wie man sie angreift:
 
 
 {{#ref}}

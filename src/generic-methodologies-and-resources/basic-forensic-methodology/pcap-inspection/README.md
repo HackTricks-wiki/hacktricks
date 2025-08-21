@@ -96,7 +96,7 @@ Sie können Tools wie [https://github.com/lgandx/PCredz](https://github.com/lgan
 
 ### Suricata
 
-**Install and setup**
+**Installieren und einrichten**
 ```
 apt-get install suricata
 apt-get install oinkmaster
@@ -111,11 +111,11 @@ suricata -r packets.pcap -c /etc/suricata/suricata.yaml -k none -v -l log
 
 [**YaraPCAP**](https://github.com/kevthehermit/YaraPcap) ist ein Tool, das
 
-- Eine PCAP-Datei liest und Http-Streams extrahiert.
-- gzip komprimierte Streams dekomprimiert
-- Jede Datei mit yara scannt
-- Einen report.txt schreibt
-- Optional übereinstimmende Dateien in ein Verzeichnis speichert
+- eine PCAP-Datei liest und Http-Streams extrahiert.
+- gzip komprimierte Streams entpackt
+- jede Datei mit yara scannt
+- einen report.txt schreibt
+- optional übereinstimmende Dateien in ein Verzeichnis speichert
 
 ### Malware-Analyse
 

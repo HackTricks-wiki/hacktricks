@@ -4,7 +4,7 @@
 
 ## Intro
 
-iButton ist ein allgemeiner Name für einen elektronischen Identifizierungsschlüssel, der in einem **münzförmigen Metallgehäuse** verpackt ist. Er wird auch als **Dallas Touch** Memory oder Kontakt-Speicher bezeichnet. Obwohl er oft fälschlicherweise als „magnetischer“ Schlüssel bezeichnet wird, ist **nichts magnetisch** daran. Tatsächlich ist ein vollwertiger **Mikrochip**, der auf einem digitalen Protokoll arbeitet, im Inneren verborgen.
+iButton ist ein allgemeiner Name für einen elektronischen Identifizierungsschlüssel, der in einem **münzförmigen Metallgehäuse** verpackt ist. Er wird auch als **Dallas Touch** Memory oder Kontakt-Speicher bezeichnet. Obwohl er oft fälschlicherweise als „magnetischer“ Schlüssel bezeichnet wird, ist **nichts Magnetisches** darin. Tatsächlich ist ein vollwertiger **Mikrochip**, der auf einem digitalen Protokoll arbeitet, darin verborgen.
 
 <figure><img src="../../images/image (915).png" alt=""><figcaption></figcaption></figure>
 
@@ -22,9 +22,9 @@ Wenn der Schlüssel das Lesegerät erreicht, **kommen die Kontakte in Berührung
 
 Dallas-Schlüssel tauschen Daten über das 1-Wire-Protokoll aus. Mit nur einem Kontakt für die Datenübertragung (!!) in beide Richtungen, vom Master zum Slave und umgekehrt. Das 1-Wire-Protokoll funktioniert nach dem Master-Slave-Modell. In dieser Topologie initiiert der Master immer die Kommunikation und der Slave folgt seinen Anweisungen.
 
-Wenn der Schlüssel (Slave) den Gegensprecher (Master) kontaktiert, wird der Chip im Inneren des Schlüssels eingeschaltet, der vom Gegensprecher mit Strom versorgt wird, und der Schlüssel wird initialisiert. Danach fordert der Gegensprecher die Schlüssel-ID an. Im Folgenden werden wir diesen Prozess genauer betrachten.
+Wenn der Schlüssel (Slave) den Gegensprecher (Master) kontaktiert, wird der Chip im Schlüssel eingeschaltet, der vom Gegensprecher mit Strom versorgt wird, und der Schlüssel wird initialisiert. Danach fordert der Gegensprecher die Schlüssel-ID an. Im Folgenden werden wir diesen Prozess genauer betrachten.
 
-Flipper kann sowohl im Master- als auch im Slave-Modus arbeiten. Im Schlüssel-Lesemodus fungiert Flipper als Leser, das heißt, er arbeitet als Master. Und im Schlüssel-Emulationsmodus gibt sich der Flipper als Schlüssel aus, er befindet sich im Slave-Modus.
+Flipper kann sowohl im Master- als auch im Slave-Modus arbeiten. Im Schlüssel-Lesemodus fungiert Flipper als Lesegerät, das heißt, es arbeitet als Master. Und im Schlüssel-Emulationsmodus gibt sich der Flipper als Schlüssel aus, er befindet sich im Slave-Modus.
 
 ### Dallas-, Cyfral- & Metakom-Schlüssel
 

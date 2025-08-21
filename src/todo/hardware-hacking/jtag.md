@@ -19,7 +19,7 @@ Sobald geflasht, öffnen Sie den seriellen Monitor bei 115200 Baud und senden Si
 - `l` Loopbacks finden, um Fehlalarme zu vermeiden
 - `r` interne Pull-Ups umschalten, falls erforderlich
 - `s` nach TCK/TMS/TDI/TDO (und manchmal TRST/SRST) scannen
-- `y` IR brute-forcen, um nicht dokumentierte Opcodes zu entdecken
+- `y` IR brute-forcen, um undokumentierte Opcodes zu entdecken
 - `x` Boundary-Scan-Snapshot der Pin-Zustände
 
 ![](<../../images/image (939).png>)
@@ -85,8 +85,8 @@ Tipps
 ## Boundary-Scan-Tricks (EXTEST/SAMPLE)
 
 Selbst wenn der CPU-Debugzugang gesperrt ist, kann der Boundary-Scan weiterhin exponiert sein. Mit UrJTAG/OpenOCD können Sie:
-- SAMPLE verwenden, um den Zustand der Pins während des Betriebs des Systems zu erfassen (Busaktivität finden, Pin-Zuordnung bestätigen).
-- EXTEST verwenden, um Pins zu steuern (z. B. externe SPI-Flash-Leitungen über den MCU bit-bangen, um sie offline zu lesen, wenn die Board-Verkabelung dies zulässt).
+- SAMPLE, um den Zustand der Pins während des Betriebs des Systems zu erfassen (Busaktivität finden, Pin-Zuordnung bestätigen).
+- EXTEST, um Pins zu steuern (z. B. externe SPI-Flash-Leitungen über den MCU bit-bangen, um sie offline zu lesen, wenn die Board-Verkabelung dies zulässt).
 
 Minimaler UrJTAG-Flow mit einem FT2232x-Adapter:
 ```
@@ -110,8 +110,8 @@ Du benötigst die BSDL des Geräts, um die Bitreihenfolge der Boundary-Register 
 
 - JTAG/SWD in der Produktion dauerhaft deaktivieren oder sperren (z. B. STM32 RDP Level 2, ESP eFuses, die PAD JTAG deaktivieren, NXP/Nordic APPROTECT/DPAP).
 - Authentifizierte Debugging-Anforderungen (ARMv8.2‑A ADIv6 Debug-Authentifizierung, OEM-gesteuertes Challenge-Response) bei gleichzeitiger Beibehaltung des Zugangs zur Fertigung.
-- Keine einfachen Testpads routen; Testvias vergraben, Widerstände entfernen/bestücken, um TAP zu isolieren, Stecker mit Codierung oder Pogo-Pin-Befestigungen verwenden.
-- Power-on-Debug-Sperre: Gate den TAP hinter frühem ROM, das einen sicheren Bootvorgang durchsetzt.
+- Leichte Testpads nicht routen; Testvias vergraben, Widerstände entfernen/platzieren, um TAP zu isolieren, Connectoren mit Codierung oder Pogo-Pin-Befestigungen verwenden.
+- Power-on-Debug-Sperre: TAP hinter frühem ROM absperren, das einen sicheren Bootvorgang durchsetzt.
 
 ## Referenzen
 

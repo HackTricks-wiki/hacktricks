@@ -12,8 +12,8 @@ Dann wurde **`posix_spawn`** eingeführt, das **`vfork`** und **`execve`** in ei
 - `POSIX_SPAWN_RESETIDS`: Setzt effektive IDs auf reale IDs zurück
 - `POSIX_SPAWN_SETPGROUP`: Setzt die Prozessgruppen-Zugehörigkeit
 - `POSUX_SPAWN_SETSIGDEF`: Setzt das Standardverhalten für Signale
-- `POSIX_SPAWN_SETSIGMASK`: Setzt die Signalmaske
-- `POSIX_SPAWN_SETEXEC`: Exec im selben Prozess (wie `execve` mit mehr Optionen)
+- `POSIX_SPAWN_SETSIGMASK`: Setzt die Signalmasken
+- `POSIX_SPAWN_SETEXEC`: Führt im selben Prozess aus (wie `execve` mit mehr Optionen)
 - `POSIX_SPAWN_START_SUSPENDED`: Startet angehalten
 - `_POSIX_SPAWN_DISABLE_ASLR`: Startet ohne ASLR
 - `_POSIX_SPAWN_NANO_ALLOCATOR:` Verwendet den Nano-Allocator von libmalloc
@@ -34,7 +34,7 @@ PIDs, Prozessidentifikatoren, identifizieren einen einzigartigen Prozess. In XNU
 **Prozesse** können in **Gruppen** eingefügt werden, um die Handhabung zu erleichtern. Zum Beispiel werden Befehle in einem Shell-Skript in derselben Prozessgruppe sein, sodass es möglich ist, **sie zusammen zu signalisieren**, beispielsweise mit kill.\
 Es ist auch möglich, **Prozesse in Sitzungen zu gruppieren**. Wenn ein Prozess eine Sitzung startet (`setsid(2)`), werden die Kindprozesse in die Sitzung gesetzt, es sei denn, sie starten ihre eigene Sitzung.
 
-Koalition ist eine weitere Möglichkeit, Prozesse in Darwin zu gruppieren. Ein Prozess, der einer Koalition beitritt, kann auf Poolressourcen zugreifen, ein Hauptbuch teilen oder Jetsam gegenüberstehen. Koalitionen haben unterschiedliche Rollen: Führer, XPC-Dienst, Erweiterung.
+Koalition ist eine weitere Möglichkeit, Prozesse in Darwin zu gruppieren. Ein Prozess, der einer Koalition beitritt, ermöglicht den Zugriff auf Poolressourcen, teilt ein Hauptbuch oder steht Jetsam gegenüber. Koalitionen haben unterschiedliche Rollen: Führer, XPC-Dienst, Erweiterung.
 
 ### Berechtigungen & Personae
 
@@ -59,7 +59,7 @@ char     persona_name[MAXLOGNAME + 1];
 ## Threads Grundinformationen
 
 1. **POSIX-Threads (pthreads):** macOS unterstützt POSIX-Threads (`pthreads`), die Teil einer standardisierten Thread-API für C/C++ sind. Die Implementierung von pthreads in macOS befindet sich in `/usr/lib/system/libsystem_pthread.dylib`, die aus dem öffentlich verfügbaren `libpthread`-Projekt stammt. Diese Bibliothek bietet die notwendigen Funktionen zum Erstellen und Verwalten von Threads.
-2. **Threads erstellen:** Die Funktion `pthread_create()` wird verwendet, um neue Threads zu erstellen. Intern ruft diese Funktion `bsdthread_create()` auf, einen niedrigeren Systemaufruf, der spezifisch für den XNU-Kernel (auf dem macOS basiert) ist. Dieser Systemaufruf nimmt verschiedene Flags entgegen, die aus `pthread_attr` (Attributen) abgeleitet sind und das Verhalten des Threads, einschließlich der Planungsrichtlinien und der Stackgröße, spezifizieren.
+2. **Threads erstellen:** Die Funktion `pthread_create()` wird verwendet, um neue Threads zu erstellen. Intern ruft diese Funktion `bsdthread_create()` auf, einen niedrigeren Systemaufruf, der spezifisch für den XNU-Kernel (den Kernel, auf dem macOS basiert) ist. Dieser Systemaufruf nimmt verschiedene Flags entgegen, die aus `pthread_attr` (Attributen) abgeleitet sind und das Verhalten des Threads spezifizieren, einschließlich der Planungsrichtlinien und der Stackgröße.
 - **Standard-Stackgröße:** Die Standard-Stackgröße für neue Threads beträgt 512 KB, was für typische Operationen ausreichend ist, aber über Thread-Attribute angepasst werden kann, wenn mehr oder weniger Platz benötigt wird.
 3. **Thread-Initialisierung:** Die Funktion `__pthread_init()` ist während der Thread-Einrichtung entscheidend und nutzt das Argument `env[]`, um Umgebungsvariablen zu parsen, die Details über den Standort und die Größe des Stacks enthalten können.
 
@@ -111,7 +111,7 @@ Mach-O bietet auch eine spezifische API namens **`tlv_atexit`**, um thread-lokal
 
 ### Thread-Prioritäten
 
-Das Verständnis von Thread-Prioritäten beinhaltet, wie das Betriebssystem entscheidet, welche Threads wann ausgeführt werden. Diese Entscheidung wird durch das Prioritätsniveau beeinflusst, das jedem Thread zugewiesen ist. In macOS und Unix-ähnlichen Systemen wird dies mit Konzepten wie `nice`, `renice` und Quality of Service (QoS) Klassen gehandhabt.
+Das Verständnis von Thread-Prioritäten beinhaltet, wie das Betriebssystem entscheidet, welche Threads ausgeführt werden und wann. Diese Entscheidung wird durch das Prioritätsniveau beeinflusst, das jedem Thread zugewiesen ist. In macOS und Unix-ähnlichen Systemen wird dies mit Konzepten wie `nice`, `renice` und Quality of Service (QoS) Klassen gehandhabt.
 
 #### Nice und Renice
 
@@ -129,7 +129,7 @@ QoS-Klassen sind ein modernerer Ansatz zur Handhabung von Thread-Prioritäten, i
 1. **Benutzerinteraktiv:**
 - Diese Klasse ist für Aufgaben, die derzeit mit dem Benutzer interagieren oder sofortige Ergebnisse erfordern, um eine gute Benutzererfahrung zu bieten. Diese Aufgaben erhalten die höchste Priorität, um die Benutzeroberfläche reaktionsschnell zu halten (z. B. Animationen oder Ereignisbehandlung).
 2. **Benutzerinitiiert:**
-- Aufgaben, die der Benutzer initiiert und sofortige Ergebnisse erwartet, wie das Öffnen eines Dokuments oder das Klicken auf eine Schaltfläche, die Berechnungen erfordert. Diese haben eine hohe Priorität, liegen aber unter Benutzerinteraktiv.
+- Aufgaben, die der Benutzer initiiert und sofortige Ergebnisse erwartet, wie das Öffnen eines Dokuments oder das Klicken auf eine Schaltfläche, die Berechnungen erfordert. Diese haben eine hohe Priorität, liegen aber unter benutzerinteraktiven Aufgaben.
 3. **Dienstprogramm:**
 - Diese Aufgaben sind langlaufend und zeigen typischerweise einen Fortschrittsindikator an (z. B. Dateien herunterladen, Daten importieren). Sie haben eine niedrigere Priorität als benutzerinitiierte Aufgaben und müssen nicht sofort abgeschlossen werden.
 4. **Hintergrund:**
@@ -153,7 +153,7 @@ macos-library-injection/
 
 ### Funktionshooking
 
-Funktionshooking beinhaltet das **Abfangen von Funktionsaufrufen** oder Nachrichten innerhalb eines Softwarecodes. Durch das Hooken von Funktionen kann ein Angreifer das **Verhalten** eines Prozesses ändern, sensible Daten beobachten oder sogar die Ausführungsreihenfolge übernehmen.
+Funktionshooking beinhaltet das **Abfangen von Funktionsaufrufen** oder Nachrichten innerhalb eines Softwarecodes. Durch das Hooken von Funktionen kann ein Angreifer das **Verhalten** eines Prozesses ändern, sensible Daten beobachten oder sogar die Ausführungsreihenfolge kontrollieren.
 
 {{#ref}}
 macos-function-hooking.md

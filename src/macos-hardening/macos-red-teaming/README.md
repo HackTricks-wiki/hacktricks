@@ -90,7 +90,7 @@ Allerdings könnten **Anmeldeinformationen** diesen Skripten als **Parameter** �
 
 Das Skript [**JamfExplorer.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfExplorer.py) kann auf neue hinzugefügte Dateien und neue Prozessargumente hören.
 
-### macOS Remote Access
+### macOS Remote-Zugriff
 
 Und auch über **MacOS** "besondere" **Netzwerk** **Protokolle**:
 
@@ -138,7 +138,7 @@ Die drei Arten von MacOS-Benutzern sind:
 
 - **Lokale Benutzer** — Verwaltet durch den lokalen OpenDirectory-Dienst, sie sind in keiner Weise mit dem Active Directory verbunden.
 - **Netzwerkbenutzer** — Flüchtige Active Directory-Benutzer, die eine Verbindung zum DC-Server benötigen, um sich zu authentifizieren.
-- **Mobile Benutzer** — Active Directory-Benutzer mit einer lokalen Sicherung für ihre Anmeldeinformationen und Dateien.
+- **Mobile Benutzer** — Active Directory-Benutzer mit einem lokalen Backup für ihre Anmeldeinformationen und Dateien.
 
 Die lokalen Informationen über Benutzer und Gruppen werden im Ordner _/var/db/dslocal/nodes/Default._ gespeichert.\
 Zum Beispiel werden die Informationen über den Benutzer _mark_ in _/var/db/dslocal/nodes/Default/users/mark.plist_ und die Informationen über die Gruppe _admin_ in _/var/db/dslocal/nodes/Default/groups/admin.plist_ gespeichert.
@@ -186,7 +186,7 @@ Holen Sie sich ein TGT für einen bestimmten Benutzer und Dienst:
 bifrost --action asktgt --username [user] --domain [domain.com] \
 --hash [hash] --enctype [enctype] --keytab [/path/to/keytab]
 ```
-Sobald das TGT gesammelt ist, ist es möglich, es in die aktuelle Sitzung mit:
+Sobald das TGT gesammelt ist, ist es möglich, es in die aktuelle Sitzung mit einzufügen:
 ```bash
 bifrost --action asktgt --username test_lab_admin \
 --hash CF59D3256B62EE655F6430B0F80701EE05A0885B8B52E9C2480154AFA62E78 \
@@ -204,7 +204,7 @@ mount -t smbfs //server/folder /local/mount/point
 ```
 ## Zugriff auf den Schlüsselbund
 
-Der Schlüsselbund enthält höchstwahrscheinlich sensible Informationen, die, wenn sie ohne Aufforderung zuzugreifen, helfen könnten, eine Red Team-Übung voranzutreiben:
+Der Schlüsselbund enthält höchstwahrscheinlich sensible Informationen, die, wenn sie ohne Aufforderung abgerufen werden, dazu beitragen könnten, eine Red Team-Übung voranzutreiben:
 
 {{#ref}}
 macos-keychain.md
