@@ -4,7 +4,7 @@
 
 ## Aperçu
 
-Les Comptes de Service Gérés Délégués (**dMSA**) sont le successeur de nouvelle génération des **gMSA** qui seront inclus dans Windows Server 2025. Un flux de migration légitime permet aux administrateurs de remplacer un compte *ancien* (utilisateur, ordinateur ou compte de service) par un dMSA tout en préservant de manière transparente les autorisations. Le flux de travail est exposé via des cmdlets PowerShell telles que `Start-ADServiceAccountMigration` et `Complete-ADServiceAccountMigration` et repose sur deux attributs LDAP de l'**objet dMSA** :
+Les Comptes de Service Gérés Délégués (**dMSA**) sont le successeur de nouvelle génération des **gMSA** qui seront inclus dans Windows Server 2025. Un flux de travail de migration légitime permet aux administrateurs de remplacer un compte *ancien* (utilisateur, ordinateur ou compte de service) par un dMSA tout en préservant de manière transparente les autorisations. Le flux de travail est exposé via des cmdlets PowerShell telles que `Start-ADServiceAccountMigration` et `Complete-ADServiceAccountMigration` et repose sur deux attributs LDAP de l'**objet dMSA** :
 
 * **`msDS-ManagedAccountPrecededByLink`** – *lien DN* vers le compte remplacé (ancien).
 * **`msDS-DelegatedMSAState`**       – état de migration (`0` = aucun, `1` = en cours, `2` = *terminé*).
@@ -15,7 +15,7 @@ Cette technique a été nommée **BadSuccessor** par l'Unité 42 en 2025. Au mom
 
 ### Prérequis d'attaque
 
-1. Un compte qui est *autorisé* à créer des objets à l'intérieur **d'une Unité Organisationnelle (OU)** *et* a au moins l'un des éléments suivants :
+1. Un compte qui est *autorisé* à créer des objets à l'intérieur **d'une Unité Organisationnelle (OU)** *et* possède au moins l'un des éléments suivants :
 * `Create Child` → **`msDS-DelegatedManagedServiceAccount`** classe d'objet
 * `Create Child` → **`All Objects`** (création générique)
 2. Connectivité réseau à LDAP & Kerberos (scénario standard de domaine joint / attaque à distance).
@@ -47,11 +47,11 @@ Set-ADServiceAccount attacker_dMSA -Add \
 # 3. Mark the migration as *completed*
 Set-ADServiceAccount attacker_dMSA -Replace @{msDS-DelegatedMSAState=2}
 ```
-Après la réplication, l'attaquant peut simplement **se connecter** en tant que `attacker_dMSA$` ou demander un TGT Kerberos – Windows construira le jeton du compte *supprimé*.
+Après la réplication, l'attaquant peut simplement **se connecter** en tant que `attacker_dMSA$` ou demander un TGT Kerberos – Windows construira le jeton du compte *supplanté*.
 
 ### Automatisation
 
-Plusieurs PoCs publics englobent l'ensemble du flux de travail, y compris la récupération de mot de passe et la gestion des tickets :
+Plusieurs PoC publics englobent l'ensemble du flux de travail, y compris la récupération de mot de passe et la gestion des tickets :
 
 * SharpSuccessor (C#) – [https://github.com/logangoins/SharpSuccessor](https://github.com/logangoins/SharpSuccessor)
 * BadSuccessor.ps1 (PowerShell) – [https://github.com/LuemmelSec/Pentest-Tools-Collection/blob/main/tools/ActiveDirectory/BadSuccessor.ps1](https://github.com/LuemmelSec/Pentest-Tools-Collection/blob/main/tools/ActiveDirectory/BadSuccessor.ps1)
@@ -72,7 +72,7 @@ Activez **l'audit des objets** sur les UOs et surveillez les événements de sé
 
 * **5137** – Création de l'objet **dMSA**
 * **5136** – Modification de **`msDS-ManagedAccountPrecededByLink`**
-* **4662** – Changements d'attribut spécifiques
+* **4662** – Changements d'attributs spécifiques
 * GUID `2f5c138a-bd38-4016-88b4-0ec87cbb4919` → `msDS-DelegatedMSAState`
 * GUID `a0945b2b-57a2-43bd-b327-4d112a4e8bd1` → `msDS-ManagedAccountPrecededByLink`
 * **2946** – Délivrance de TGT pour le dMSA
@@ -81,11 +81,12 @@ La corrélation de `4662` (modification d'attribut), `4741` (création d'un comp
 
 ## Atténuation
 
-* Appliquez le principe du **moindre privilège** – déléguez uniquement la gestion des *comptes de service* à des rôles de confiance.
+* Appliquez le principe du **moindre privilège** – ne déléguez la gestion des *comptes de service* qu'à des rôles de confiance.
 * Supprimez `Create Child` / `msDS-DelegatedManagedServiceAccount` des UOs qui ne l'exigent pas explicitement.
 * Surveillez les ID d'événements listés ci-dessus et alertez sur les identités *non-Tier-0* créant ou modifiant des dMSA.
 
 ## Voir aussi
+
 
 {{#ref}}
 golden-dmsa-gmsa.md
@@ -93,9 +94,9 @@ golden-dmsa-gmsa.md
 
 ## Références
 
-- [Unit42 – Quand de bons comptes deviennent mauvais : Exploitation des comptes de service gérés délégués](https://unit42.paloaltonetworks.com/badsuccessor-attack-vector/)
+- [Unit42 – When Good Accounts Go Bad: Exploiting Delegated Managed Service Accounts](https://unit42.paloaltonetworks.com/badsuccessor-attack-vector/)
 - [SharpSuccessor PoC](https://github.com/logangoins/SharpSuccessor)
-- [BadSuccessor.ps1 – Collection d'outils de pentesting](https://github.com/LuemmelSec/Pentest-Tools-Collection/blob/main/tools/ActiveDirectory/BadSuccessor.ps1)
-- [Module BadSuccessor de NetExec](https://github.com/Pennyw0rth/NetExec/blob/main/nxc/modules/badsuccessor.py)
+- [BadSuccessor.ps1 – Pentest-Tools-Collection](https://github.com/LuemmelSec/Pentest-Tools-Collection/blob/main/tools/ActiveDirectory/BadSuccessor.ps1)
+- [NetExec BadSuccessor module](https://github.com/Pennyw0rth/NetExec/blob/main/nxc/modules/badsuccessor.py)
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -8,7 +8,7 @@
 
 ## Abus du service Spooler
 
-Si le service _**Print Spooler**_ est **activé**, vous pouvez utiliser des identifiants AD déjà connus pour **demander** au serveur d'impression du contrôleur de domaine une **mise à jour** sur les nouvelles tâches d'impression et lui dire simplement de **envoyer la notification à un système**.\
+Si le service _**Print Spooler**_ est **activé**, vous pouvez utiliser des identifiants AD déjà connus pour **demander** au serveur d'impression du contrôleur de domaine une **mise à jour** sur les nouvelles tâches d'impression et simplement lui dire de **envoyer la notification à un système**.\
 Notez que lorsque l'imprimante envoie la notification à des systèmes arbitraires, elle doit **s'authentifier contre** ce **système**. Par conséquent, un attaquant peut faire en sorte que le service _**Print Spooler**_ s'authentifie contre un système arbitraire, et le service **utilisera le compte d'ordinateur** dans cette authentification.
 
 ### Trouver des serveurs Windows sur le domaine
@@ -41,7 +41,7 @@ printerbug.py 'domain/username:password'@<Printer IP> <RESPONDERIP>
 ```
 ### Combinaison avec la Délégation Non Contraignante
 
-Si un attaquant a déjà compromis un ordinateur avec [Unconstrained Delegation](unconstrained-delegation.md), l'attaquant pourrait **faire authentifier l'imprimante contre cet ordinateur**. En raison de la délégation non contraignante, le **TGT** du **compte d'ordinateur de l'imprimante** sera **sauvegardé dans** la **mémoire** de l'ordinateur avec délégation non contraignante. Comme l'attaquant a déjà compromis cet hôte, il pourra **récupérer ce ticket** et en abuser ([Pass the Ticket](pass-the-ticket.md)).
+Si un attaquant a déjà compromis un ordinateur avec [Unconstrained Delegation](unconstrained-delegation.md), l'attaquant pourrait **faire authentifier l'imprimante contre cet ordinateur**. En raison de la délégation non contraignante, le **TGT** du **compte d'ordinateur de l'imprimante** sera **sauvegardé dans** la **mémoire** de l'ordinateur avec délégation non contraignante. Comme l'attaquant a déjà compromis cet hôte, il sera en mesure de **récupérer ce ticket** et de l'exploiter ([Pass the Ticket](pass-the-ticket.md)).
 
 ## Authentification RCP Forcée
 
@@ -51,9 +51,9 @@ https://github.com/p0dalirius/Coercer
 
 ## PrivExchange
 
-L'attaque `PrivExchange` est le résultat d'un défaut trouvé dans la **fonctionnalité `PushSubscription` du serveur Exchange**. Cette fonctionnalité permet au serveur Exchange d'être forcé par tout utilisateur de domaine ayant une boîte aux lettres à s'authentifier auprès de tout hôte fourni par le client via HTTP.
+L'attaque `PrivExchange` est le résultat d'un défaut trouvé dans la **fonctionnalité `PushSubscription` du serveur Exchange**. Cette fonctionnalité permet au serveur Exchange d'être forcé par tout utilisateur de domaine disposant d'une boîte aux lettres à s'authentifier auprès de tout hôte fourni par le client via HTTP.
 
-Par défaut, le **service Exchange s'exécute en tant que SYSTEM** et se voit accorder des privilèges excessifs (en particulier, il a des **privilèges WriteDacl sur le domaine avant la mise à jour cumulative de 2019**). Ce défaut peut être exploité pour permettre le **transfert d'informations vers LDAP et ensuite extraire la base de données NTDS du domaine**. Dans les cas où le transfert vers LDAP n'est pas possible, ce défaut peut encore être utilisé pour transférer et s'authentifier auprès d'autres hôtes au sein du domaine. L'exploitation réussie de cette attaque accorde un accès immédiat à l'Administrateur de Domaine avec n'importe quel compte utilisateur de domaine authentifié.
+Par défaut, le **service Exchange s'exécute en tant que SYSTEM** et se voit accorder des privilèges excessifs (en particulier, il dispose de **privilèges WriteDacl sur le domaine avant la mise à jour cumulative de 2019**). Ce défaut peut être exploité pour permettre le **transfert d'informations vers LDAP et ensuite extraire la base de données NTDS du domaine**. Dans les cas où le transfert vers LDAP n'est pas possible, ce défaut peut encore être utilisé pour transférer et s'authentifier auprès d'autres hôtes au sein du domaine. L'exploitation réussie de cette attaque accorde un accès immédiat à l'Administrateur de Domaine avec n'importe quel compte utilisateur de domaine authentifié.
 
 ## À l'intérieur de Windows
 
@@ -104,11 +104,12 @@ Si vous pouvez effectuer une attaque MitM sur un ordinateur et injecter du HTML 
 ```
 ## Autres façons de forcer et de phishing l'authentification NTLM
 
+
 {{#ref}}
 ../ntlm/places-to-steal-ntlm-creds.md
 {{#endref}}
 
-## Craquer NTLMv1
+## Craquage de NTLMv1
 
 Si vous pouvez capturer [les défis NTLMv1 lisez ici comment les craquer](../ntlm/index.html#ntlmv1-attack).\
 _Rappelez-vous que pour craquer NTLMv1, vous devez définir le défi Responder sur "1122334455667788"_

@@ -2,11 +2,12 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
+
 {{#ref}}
 adws-enumeration.md
 {{#endref}}
 
-> REMARQUE : Cette page regroupe certaines des utilitaires les plus utiles pour **énumérer** et **visualiser** les relations Active Directory. Pour la collecte via le canal discret **Active Directory Web Services (ADWS)**, consultez la référence ci-dessus.
+> REMARQUE : Cette page regroupe certaines des utilitaires les plus utiles pour **énumérer** et **visualiser** les relations Active Directory. Pour la collecte via le canal furtif **Active Directory Web Services (ADWS)**, consultez la référence ci-dessus.
 
 ---
 
@@ -56,13 +57,13 @@ SharpHound.exe --CollectionMethods All           # Full sweep (noisy)
 SharpHound.exe --CollectionMethods Group,LocalAdmin,Session,Trusts,ACL
 SharpHound.exe --Stealth --LDAP                      # Low noise LDAP only
 ```
-Les collecteurs génèrent du JSON qui est ingéré via l'interface BloodHound.
+Les collecteurs génèrent du JSON qui est ingéré via l'interface graphique de BloodHound.
 
 ---
 
 ## Group3r
 
-[Group3r](https://github.com/Group3r/Group3r) énumère les **objets de stratégie de groupe** et met en évidence les erreurs de configuration.
+[Group3r](https://github.com/Group3r/Group3r) énumère les **Group Policy Objects** et met en évidence les erreurs de configuration.
 ```bash
 # Execute inside the domain
 Group3r.exe -f gpo.log   # -s to stdout

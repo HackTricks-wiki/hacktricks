@@ -6,7 +6,7 @@
 
 C'est une fonctionnalité qu'un administrateur de domaine peut définir sur n'importe quel **ordinateur** à l'intérieur du domaine. Ensuite, chaque fois qu'un **utilisateur se connecte** à l'ordinateur, une **copie du TGT** de cet utilisateur va être **envoyée à l'intérieur du TGS** fourni par le DC **et sauvegardée en mémoire dans LSASS**. Donc, si vous avez des privilèges d'administrateur sur la machine, vous pourrez **extraire les tickets et usurper les utilisateurs** sur n'importe quelle machine.
 
-Ainsi, si un administrateur de domaine se connecte à un ordinateur avec la fonctionnalité "Unconstrained Delegation" activée, et que vous avez des privilèges d'administrateur local sur cette machine, vous pourrez extraire le ticket et usurper l'administrateur de domaine n'importe où (domain privesc).
+Ainsi, si un administrateur de domaine se connecte à un ordinateur avec la fonctionnalité "Unconstrained Delegation" activée, et que vous avez des privilèges d'administrateur local sur cette machine, vous pourrez extraire le ticket et usurper l'administrateur de domaine n'importe où (privesc de domaine).
 
 Vous pouvez **trouver des objets ordinateur avec cet attribut** en vérifiant si l'attribut [userAccountControl](<https://msdn.microsoft.com/en-us/library/ms680832(v=vs.85).aspx>) contient [ADS_UF_TRUSTED_FOR_DELEGATION](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>). Vous pouvez le faire avec un filtre LDAP de ‘(userAccountControl:1.2.840.113556.1.4.803:=524288)’, ce que fait powerview :
 ```bash
@@ -47,6 +47,7 @@ Si le TGT provient d'un contrôleur de domaine, vous pourriez effectuer une [**a
 [**Plus d'infos sur cette attaque sur ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/domain-compromise-via-dc-print-server-and-kerberos-delegation)
 
 Trouvez ici d'autres moyens de **forcer une authentification :**
+
 
 {{#ref}}
 printers-spooler-service-abuse.md

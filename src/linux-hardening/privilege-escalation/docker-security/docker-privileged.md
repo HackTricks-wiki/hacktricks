@@ -8,7 +8,7 @@ Lorsque vous exécutez un conteneur en mode privilégié, voici les protections 
 
 ### Monter /dev
 
-Dans un conteneur privilégié, tous les **dispositifs peuvent être accessibles dans `/dev/`**. Par conséquent, vous pouvez **échapper** en **montant** le disque de l'hôte.
+Dans un conteneur privilégié, tous les **périphériques peuvent être accessibles dans `/dev/`**. Par conséquent, vous pouvez **échapper** en **montant** le disque de l'hôte.
 
 {{#tabs}}
 {{#tab name="À l'intérieur du conteneur par défaut"}}
@@ -86,6 +86,7 @@ mount  | grep /proc.*tmpfs
 
 Les moteurs de conteneurs lancent les conteneurs avec un **nombre limité de capacités** pour contrôler ce qui se passe à l'intérieur du conteneur par défaut. Les conteneurs **privilégiés** ont **toutes** les **capacités** accessibles. Pour en savoir plus sur les capacités, lisez :
 
+
 {{#ref}}
 ../linux-capabilities.md
 {{#endref}}
@@ -162,7 +163,7 @@ apparmor.md
 ```
 ### SELinux
 
-Exécuter un conteneur avec le drapeau `--privileged` désactive les **étiquettes SELinux**, ce qui lui fait hériter de l'étiquette du moteur de conteneur, généralement `unconfined`, accordant un accès complet similaire à celui du moteur de conteneur. En mode sans privilèges, il utilise `container_runtime_t`, tandis qu'en mode root, `spc_t` est appliqué.
+Exécuter un conteneur avec le `--privileged` désactive les **étiquettes SELinux**, ce qui lui fait hériter de l'étiquette du moteur de conteneur, généralement `unconfined`, accordant un accès complet similaire à celui du moteur de conteneur. En mode sans privilèges, il utilise `container_runtime_t`, tandis qu'en mode root, `spc_t` est appliqué.
 
 {{#ref}}
 ../selinux.md
@@ -175,7 +176,7 @@ Exécuter un conteneur avec le drapeau `--privileged` désactive les **étiquett
 
 ### Espaces de noms
 
-Les espaces de noms ne sont **PAS affectés** par le drapeau `--privileged`. Même s'ils n'ont pas les contraintes de sécurité activées, ils **ne voient pas tous les processus sur le système ou le réseau hôte, par exemple**. Les utilisateurs peuvent désactiver des espaces de noms individuels en utilisant les drapeaux des moteurs de conteneurs **`--pid=host`, `--net=host`, `--ipc=host`, `--uts=host`**.
+Les espaces de noms **NE SONT PAS affectés** par le drapeau `--privileged`. Même s'ils n'ont pas les contraintes de sécurité activées, ils **ne voient pas tous les processus sur le système ou le réseau hôte, par exemple**. Les utilisateurs peuvent désactiver des espaces de noms individuels en utilisant les drapeaux des moteurs de conteneurs **`--pid=host`, `--net=host`, `--ipc=host`, `--uts=host`**.
 
 {{#tabs}}
 {{#tab name="À l'intérieur du conteneur privilégié par défaut"}}
@@ -188,7 +189,7 @@ PID   USER     TIME  COMMAND
 ```
 {{#endtab}}
 
-{{#tab name="À l'intérieur du conteneur --pid=host"}}
+{{#tab name="Inside --pid=host Container"}}
 ```bash
 # docker run --rm --privileged --pid=host -it alpine sh
 ps -ef

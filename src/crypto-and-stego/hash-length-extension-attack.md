@@ -1,4 +1,4 @@
-# Attaque par extension de longueur de hachage
+# Hash Length Extension Attack
 
 {{#include ../banners/hacktricks-training.md}}
 
@@ -6,7 +6,7 @@
 
 Imaginez un serveur qui **signe** des **données** en **ajoutant** un **secret** à des données en clair connues, puis en hachant ces données. Si vous savez :
 
-- **La longueur du secret** (cela peut également être bruteforced à partir d'une plage de longueurs donnée)
+- **La longueur du secret** (cela peut également être bruteforcé à partir d'une plage de longueurs donnée)
 - **Les données en clair**
 - **L'algorithme (et il est vulnérable à cette attaque)**
 - **Le remplissage est connu**
@@ -17,7 +17,7 @@ Alors, il est possible pour un **attaquant** d'**ajouter** des **données** et d
 
 ### Comment ?
 
-Fondamentalement, les algorithmes vulnérables génèrent les hachages en **hachant d'abord un bloc de données**, puis, **à partir** du **hachage** **précédemment** créé (état), ils **ajoutent le prochain bloc de données** et **le hachent**.
+Fondamentalement, les algorithmes vulnérables génèrent les hachages en **hachant d'abord un bloc de données**, puis, **à partir** du **hachage** (état) **précédemment** créé, ils **ajoutent le prochain bloc de données** et **le hachent**.
 
 Ensuite, imaginez que le secret est "secret" et que les données sont "data", le MD5 de "secretdata" est 6036708eba0d11f6ef52ad44e8b74d5b.\
 Si un attaquant veut ajouter la chaîne "append", il peut :
@@ -35,6 +35,6 @@ https://github.com/iagox86/hash_extender
 
 ### Références
 
-Vous pouvez trouver cette attaque bien expliquée sur [https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks](https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks)
+Vous pouvez trouver cette attaque bien expliquée dans [https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks](https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks)
 
 {{#include ../banners/hacktricks-training.md}}

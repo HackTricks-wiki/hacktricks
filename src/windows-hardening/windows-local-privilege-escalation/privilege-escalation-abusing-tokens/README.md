@@ -14,7 +14,7 @@ Si vous **ne savez pas ce que sont les Windows Access Tokens**, lisez cette page
 
 ### SeImpersonatePrivilege
 
-C'est un privilège détenu par tout processus qui permet l'imitation (mais pas la création) de tout token, à condition qu'un handle puisse être obtenu. Un token privilégié peut être acquis à partir d'un service Windows (DCOM) en l'incitant à effectuer une authentification NTLM contre un exploit, permettant ainsi l'exécution d'un processus avec des privilèges SYSTEM. Cette vulnérabilité peut être exploitée à l'aide de divers outils, tels que [juicy-potato](https://github.com/ohpe/juicy-potato), [RogueWinRM](https://github.com/antonioCoco/RogueWinRM) (qui nécessite que winrm soit désactivé), [SweetPotato](https://github.com/CCob/SweetPotato), [EfsPotato](https://github.com/zcgonvh/EfsPotato), [DCOMPotato](https://github.com/zcgonvh/DCOMPotato) et [PrintSpoofer](https://github.com/itm4n/PrintSpoofer).
+C'est un privilège détenu par tout processus qui permet l'imitation (mais pas la création) de tout token, à condition qu'un handle puisse être obtenu. Un token privilégié peut être acquis à partir d'un service Windows (DCOM) en l'incitant à effectuer une authentification NTLM contre un exploit, permettant ensuite l'exécution d'un processus avec des privilèges SYSTEM. Cette vulnérabilité peut être exploitée à l'aide de divers outils, tels que [juicy-potato](https://github.com/ohpe/juicy-potato), [RogueWinRM](https://github.com/antonioCoco/RogueWinRM) (qui nécessite que winrm soit désactivé), [SweetPotato](https://github.com/CCob/SweetPotato), [EfsPotato](https://github.com/zcgonvh/EfsPotato), [DCOMPotato](https://github.com/zcgonvh/DCOMPotato) et [PrintSpoofer](https://github.com/itm4n/PrintSpoofer).
 
 {{#ref}}
 ../roguepotato-and-printspoofer.md
@@ -36,7 +36,7 @@ Si vous avez activé ce token, vous pouvez utiliser **KERB_S4U_LOGON** pour obte
 
 ### SeBackupPrivilege
 
-Le système est amené à **accorder tous les droits de lecture** sur tout fichier (limité aux opérations de lecture) par ce privilège. Il est utilisé pour **lire les hachages de mot de passe des comptes Administrateur locaux** à partir du registre, après quoi des outils comme "**psexec**" ou "**wmiexec**" peuvent être utilisés avec le hachage (technique Pass-the-Hash). Cependant, cette technique échoue dans deux conditions : lorsque le compte Administrateur local est désactivé, ou lorsqu'une politique est en place qui retire les droits administratifs des Administrateurs locaux se connectant à distance.\
+Le système est amené à **accorder tous les accès en lecture** à tout fichier (limité aux opérations de lecture) par ce privilège. Il est utilisé pour **lire les hachages de mots de passe des comptes Administrateur locaux** à partir du registre, après quoi, des outils comme "**psexec**" ou "**wmiexec**" peuvent être utilisés avec le hachage (technique Pass-the-Hash). Cependant, cette technique échoue dans deux conditions : lorsque le compte Administrateur local est désactivé, ou lorsqu'une politique est en place qui retire les droits administratifs des Administrateurs locaux se connectant à distance.\
 Vous pouvez **abuser de ce privilège** avec :
 
 - [https://github.com/Hackplayers/PsCabesha-tools/blob/master/Privesc/Acl-FullControl.ps1](https://github.com/Hackplayers/PsCabesha-tools/blob/master/Privesc/Acl-FullControl.ps1)
@@ -50,7 +50,7 @@ Vous pouvez **abuser de ce privilège** avec :
 
 ### SeRestorePrivilege
 
-Ce privilège permet un **accès en écriture** à tout fichier système, indépendamment de la liste de contrôle d'accès (ACL) du fichier. Il ouvre de nombreuses possibilités d'escalade, y compris la capacité de **modifier des services**, effectuer du DLL Hijacking, et définir des **débogueurs** via les options d'exécution de fichiers d'image parmi diverses autres techniques.
+Le privilège permet un **accès en écriture** à tout fichier système, indépendamment de la liste de contrôle d'accès (ACL) du fichier. Cela ouvre de nombreuses possibilités d'escalade, y compris la capacité à **modifier des services**, effectuer du DLL Hijacking, et définir des **débogueurs** via les options d'exécution de fichiers d'image parmi diverses autres techniques.
 
 ### SeCreateTokenPrivilege
 
@@ -110,7 +110,7 @@ c:\inetpub\wwwwroot\web.config
 ```
 ### SeDebugPrivilege
 
-Ce privilège permet de **déboguer d'autres processus**, y compris de lire et d'écrire dans la mémoire. Diverses stratégies d'injection de mémoire, capables d'échapper à la plupart des solutions antivirus et de prévention des intrusions hôtes, peuvent être employées avec ce privilège.
+Ce privilège permet de **déboguer d'autres processus**, y compris de lire et d'écrire dans la mémoire. Diverses stratégies d'injection de mémoire, capables d'échapper à la plupart des solutions antivirus et de prévention des intrusions sur hôte, peuvent être employées avec ce privilège.
 
 #### Dump mémoire
 
@@ -136,7 +136,7 @@ import-module psgetsys.ps1; [MyProcess]::CreateProcessFromParent(<system_pid>,<c
 ```
 ### SeManageVolumePrivilege
 
-Le `SeManageVolumePrivilege` est un droit utilisateur Windows qui permet aux utilisateurs de gérer les volumes de disque, y compris leur création et leur suppression. Bien qu'il soit destiné aux administrateurs, s'il est accordé à des utilisateurs non administrateurs, il peut être exploité pour une élévation de privilèges.
+Le `SeManageVolumePrivilege` est un droit d'utilisateur Windows qui permet aux utilisateurs de gérer les volumes de disque, y compris de les créer et de les supprimer. Bien qu'il soit destiné aux administrateurs, s'il est accordé à des utilisateurs non administrateurs, il peut être exploité pour une élévation de privilèges.
 
 Il est possible de tirer parti de ce privilège pour manipuler les volumes, ce qui conduit à un accès complet au volume. L'[SeManageVolumeExploit](https://github.com/CsEnox/SeManageVolumeExploit) peut être utilisé pour donner un accès complet à tous les utilisateurs pour C:\
 
@@ -155,11 +155,11 @@ Si vous avez des tokens désactivés, vous pouvez utiliser le script [**EnableAl
 .\EnableAllTokenPrivs.ps1
 whoami /priv
 ```
-Or le **script** intégré dans ce [**post**](https://www.leeholmes.com/adjusting-token-privileges-in-powershell/).
+Ou le **script** intégré dans ce [**post**](https://www.leeholmes.com/adjusting-token-privileges-in-powershell/).
 
 ## Table
 
-La feuille de triche complète des privilèges de jeton est disponible à [https://github.com/gtworek/Priv2Admin](https://github.com/gtworek/Priv2Admin), le résumé ci-dessous ne listera que les moyens directs d'exploiter le privilège pour obtenir une session admin ou lire des fichiers sensibles.
+Feuille de triche complète des privilèges de jeton à [https://github.com/gtworek/Priv2Admin](https://github.com/gtworek/Priv2Admin), le résumé ci-dessous ne listera que les moyens directs d'exploiter le privilège pour obtenir une session admin ou lire des fichiers sensibles.
 
 | Privilège                  | Impact      | Outil                   | Chemin d'exécution                                                                                                                                                                                                                                                                                                                                     | Remarques                                                                                                                                                                                                                                                                                                                        |
 | -------------------------- | ----------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |

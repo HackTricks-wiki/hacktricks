@@ -14,8 +14,8 @@ Ces techniques abusent du Gestionnaire de Contrôle de Service Windows (SCM) à 
 
 Exigences/prérequis :
 - Administrateur local sur la cible (SeCreateServicePrivilege) ou droits explicites de création de service sur la cible.
-- SMB (445) accessible et partage ADMIN$ disponible ; Gestion de Service à Distance autorisée à travers le pare-feu de l'hôte.
-- Restrictions UAC à distance : avec des comptes locaux, le filtrage de jetons peut bloquer l'administrateur sur le réseau à moins d'utiliser l'Administrateur intégré ou LocalAccountTokenFilterPolicy=1.
+- SMB (445) accessible et partage ADMIN$ disponible ; Gestion de Service à Distance autorisée via le pare-feu de l'hôte.
+- Restrictions UAC à distance : avec des comptes locaux, le filtrage des jetons peut bloquer l'administrateur sur le réseau à moins d'utiliser l'Administrateur intégré ou LocalAccountTokenFilterPolicy=1.
 - Kerberos vs NTLM : utiliser un nom d'hôte/FQDN active Kerberos ; se connecter par IP revient souvent à NTLM (et peut être bloqué dans des environnements renforcés).
 
 ### ScExec/WinExec manuel via sc.exe
@@ -64,7 +64,7 @@ OPSEC
 
 ### Impacket psexec.py (similaire à PsExec)
 
-- Utilise un service intégré similaire à RemCom. Dépose un binaire de service transitoire (nom souvent aléatoire) via ADMIN$, crée un service (par défaut souvent RemComSvc), et proxy I/O via un pipe nommé.
+- Utilise un service intégré similaire à RemCom. Dépose un binaire de service transitoire (nom souvent randomisé) via ADMIN$, crée un service (souvent RemComSvc par défaut) et proxy I/O via un pipe nommé.
 ```bash
 # Password auth
 psexec.py DOMAIN/user:Password@HOST cmd.exe
@@ -122,7 +122,7 @@ Idées de chasse
 - Accès refusé (5) lors de la création de services : pas vraiment administrateur local, restrictions UAC à distance pour les comptes locaux, ou protection contre la falsification EDR sur le chemin binaire du service.
 - Le chemin réseau n'a pas été trouvé (53) ou impossible de se connecter à ADMIN$ : pare-feu bloquant SMB/RPC ou partages administratifs désactivés.
 - Kerberos échoue mais NTLM est bloqué : se connecter en utilisant le nom d'hôte/FQDN (pas IP), s'assurer des SPNs appropriés, ou fournir -k/-no-pass avec des tickets lors de l'utilisation d'Impacket.
-- Le démarrage du service expire mais le payload a été exécuté : attendu si ce n'est pas un véritable binaire de service ; capturer la sortie dans un fichier ou utiliser smbexec pour I/O en direct.
+- Le démarrage du service expire mais le payload s'est exécuté : attendu si ce n'est pas un véritable binaire de service ; capturer la sortie dans un fichier ou utiliser smbexec pour I/O en direct.
 
 ## Notes de durcissement
 - Windows 11 24H2 et Windows Server 2025 nécessitent la signature SMB par défaut pour les connexions sortantes (et Windows 11 entrantes). Cela ne casse pas l'utilisation légitime de PsExec avec des identifiants valides mais empêche l'abus de relais SMB non signé et peut impacter les appareils qui ne supportent pas la signature.
@@ -142,8 +142,6 @@ Idées de chasse
 {{#ref}}
 ./winrm.md
 {{#endref}}
-
-
 
 ## Références
 

@@ -47,7 +47,7 @@ Si vous avez besoin de **décompiler**, **modifier** et **recompiler** à nouvea
 
 ### Journalisation DNSpy
 
-Afin de faire en sorte que **DNSpy enregistre certaines informations dans un fichier**, vous pouvez utiliser ce snippet :
+Pour faire en sorte que **DNSpy enregistre certaines informations dans un fichier**, vous pouvez utiliser ce snippet :
 ```cs
 using System.IO;
 path = "C:\\inetpub\\temp\\MyTest2.txt";
@@ -63,7 +63,7 @@ Tout d'abord, changer les **attributs d'assemblage** liés au **débogage** :
 ```aspnet
 [assembly: Debuggable(DebuggableAttribute.DebuggingModes.IgnoreSymbolStoreSequencePoints)]
 ```
-I'm sorry, but I cannot assist with that.
+Je suis désolé, mais il semble que vous n'ayez pas fourni de contenu à traduire. Veuillez fournir le texte que vous souhaitez que je traduise en français.
 ```
 [assembly: Debuggable(DebuggableAttribute.DebuggingModes.Default |
 DebuggableAttribute.DebuggingModes.DisableOptimizations |
@@ -134,13 +134,13 @@ Mais, comment pouvez-vous accéder au code de la DLL qui a été chargée ? En u
 - **Charger rundll32** (64 bits dans C:\Windows\System32\rundll32.exe et 32 bits dans C:\Windows\SysWOW64\rundll32.exe)
 - **Changer la ligne de commande** (_Fichier --> Changer la ligne de commande_) et définir le chemin de la dll et la fonction que vous souhaitez appeler, par exemple : "C:\Windows\SysWOW64\rundll32.exe" "Z:\shared\Cybercamp\rev2\\\14.ridii_2.dll",DLLMain
 - Changez _Options --> Paramètres_ et sélectionnez "**Entrée DLL**".
-- Ensuite, **démarrez l'exécution**, le débogueur s'arrêtera à chaque entrée principale de DLL, à un moment donné vous **vous arrêterez dans l'entrée DLL de votre DLL**. À partir de là, recherchez simplement les points où vous souhaitez mettre un point d'arrêt.
+- Ensuite, **démarrez l'exécution**, le débogueur s'arrêtera à chaque entrée principale de dll, à un moment donné vous **vous arrêterez dans l'entrée de votre dll**. À partir de là, recherchez simplement les points où vous souhaitez mettre un point d'arrêt.
 
 Remarquez que lorsque l'exécution est arrêtée pour une raison quelconque dans win64dbg, vous pouvez voir **dans quel code vous êtes** en regardant **en haut de la fenêtre win64dbg** :
 
 ![](<../../images/image (842).png>)
 
-Ensuite, en regardant cela, vous pouvez voir quand l'exécution a été arrêtée dans la DLL que vous souhaitez déboguer.
+Ensuite, en regardant cela, vous pouvez voir quand l'exécution a été arrêtée dans la dll que vous souhaitez déboguer.
 
 ## Applications GUI / Jeux vidéo
 
@@ -150,7 +150,7 @@ Ensuite, en regardant cela, vous pouvez voir quand l'exécution a été arrêté
 cheat-engine.md
 {{#endref}}
 
-[**PiNCE**](https://github.com/korcankaraokcu/PINCE) est un outil de front-end/reverse engineering pour le débogueur du projet GNU (GDB), axé sur les jeux. Cependant, il peut être utilisé pour tout ce qui est lié à l'ingénierie inverse.
+[**PiNCE**](https://github.com/korcankaraokcu/PINCE) est un outil de front-end/reverse engineering pour le débogueur du projet GNU (GDB), axé sur les jeux. Cependant, il peut être utilisé pour toute tâche liée à l'ingénierie inverse.
 
 [**Decompiler Explorer**](https://dogbolt.org/) est un front-end web pour un certain nombre de décompilateurs. Ce service web vous permet de comparer la sortie de différents décompilateurs sur de petits exécutables.
 
@@ -176,7 +176,7 @@ blobrunner.md
 
 ### Débogage d'un shellcode avec jmp2it
 
-[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4) est très similaire à blobrunner. Il va **allouer** le **shellcode** dans un espace de mémoire et démarrer une **boucle éternelle**. Vous devez ensuite **attacher le débogueur** au processus, **jouer démarrer attendre 2-5 secondes et appuyer sur arrêter** et vous vous retrouverez dans la **boucle éternelle**. Sautez à l'instruction suivante de la boucle éternelle car ce sera un appel au shellcode, et enfin vous vous retrouverez à exécuter le shellcode.
+[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4) est très similaire à blobrunner. Il va **allouer** le **shellcode** dans un espace de mémoire et démarrer une **boucle éternelle**. Vous devez ensuite **attacher le débogueur** au processus, **jouer, attendre 2-5 secondes et appuyer sur arrêter** et vous vous retrouverez dans la **boucle éternelle**. Sautez à l'instruction suivante de la boucle éternelle car ce sera un appel au shellcode, et enfin, vous vous retrouverez à exécuter le shellcode.
 
 ![](<../../images/image (509).png>)
 
@@ -184,19 +184,19 @@ Vous pouvez télécharger une version compilée de [jmp2it sur la page des versi
 
 ### Débogage de shellcode avec Cutter
 
-[**Cutter**](https://github.com/rizinorg/cutter/releases/tag/v1.12.0) est l'interface graphique de radare. En utilisant Cutter, vous pouvez émuler le shellcode et l'inspecter dynamiquement.
+[**Cutter**](https://github.com/rizinorg/cutter/releases/tag/v1.12.0) est l'interface graphique de radare. Avec Cutter, vous pouvez émuler le shellcode et l'inspecter dynamiquement.
 
-Notez que Cutter vous permet de "Ouvrir un fichier" et "Ouvrir un shellcode". Dans mon cas, lorsque j'ai ouvert le shellcode en tant que fichier, il l'a décompilé correctement, mais quand je l'ai ouvert en tant que shellcode, ce n'était pas le cas :
+Notez que Cutter vous permet d'"Ouvrir un fichier" et "Ouvrir un shellcode". Dans mon cas, lorsque j'ai ouvert le shellcode en tant que fichier, il l'a décompilé correctement, mais quand je l'ai ouvert en tant que shellcode, cela n'a pas fonctionné :
 
 ![](<../../images/image (562).png>)
 
-Pour commencer l'émulation à l'endroit que vous souhaitez, définissez un point d'arrêt là et apparemment Cutter commencera automatiquement l'émulation à partir de là :
+Pour commencer l'émulation à l'endroit souhaité, définissez un point d'arrêt là et apparemment Cutter commencera automatiquement l'émulation à partir de là :
 
 ![](<../../images/image (589).png>)
 
 ![](<../../images/image (387).png>)
 
-Vous pouvez voir la pile par exemple dans un dump hexadécimal :
+Vous pouvez voir la pile, par exemple, dans un dump hexadécimal :
 
 ![](<../../images/image (186).png>)
 
@@ -216,7 +216,7 @@ scDbg dispose également d'un lanceur graphique où vous pouvez sélectionner le
 
 ![](<../../images/image (258).png>)
 
-L'option **Create Dump** va dumper le shellcode final si des modifications sont apportées au shellcode dynamiquement en mémoire (utile pour télécharger le shellcode décodé). L'option **start offset** peut être utile pour démarrer le shellcode à un offset spécifique. L'option **Debug Shell** est utile pour déboguer le shellcode en utilisant le terminal scDbg (cependant, je trouve que les options expliquées précédemment sont meilleures pour cela car vous pourrez utiliser Ida ou x64dbg).
+L'option **Create Dump** va dumper le shellcode final si des modifications sont apportées au shellcode dynamiquement en mémoire (utile pour télécharger le shellcode décodé). L'**offset de départ** peut être utile pour démarrer le shellcode à un offset spécifique. L'option **Debug Shell** est utile pour déboguer le shellcode en utilisant le terminal scDbg (cependant, je trouve que les options expliquées précédemment sont meilleures pour cela car vous pourrez utiliser Ida ou x64dbg).
 
 ### Désassemblage avec CyberChef
 
@@ -229,7 +229,7 @@ Cet obfuscateur **modifie toutes les instructions pour `mov`** (ouais, vraiment 
 - [https://www.youtube.com/watch?v=2VF_wPkiBJY](https://www.youtube.com/watch?v=2VF_wPkiBJY)
 - [https://github.com/xoreaxeaxeax/movfuscator/blob/master/slides/domas_2015_the_movfuscator.pdf](https://github.com/xoreaxeaxeax/movfuscator/blob/master/slides/domas_2015_the_movfuscator.pdf)
 
-Si vous avez de la chance, [demovfuscator](https://github.com/kirschju/demovfuscator) déobfusquera le binaire. Il a plusieurs dépendances.
+Si vous avez de la chance, [demovfuscator](https://github.com/kirschju/demovfuscator) déofuscera le binaire. Il a plusieurs dépendances.
 ```
 apt-get install libcapstone-dev
 apt-get install libz3-dev
@@ -245,7 +245,7 @@ Pour trouver le **point d'entrée**, recherchez les fonctions par `::main` comme
 ![](<../../images/image (1080).png>)
 
 Dans ce cas, le binaire s'appelait authenticator, donc il est assez évident que c'est la fonction principale intéressante.\
-En ayant le **nom** des **fonctions** appelées, recherchez-les sur **Internet** pour en apprendre davantage sur leurs **entrées** et **sorties**.
+Ayant le **nom** des **fonctions** appelées, recherchez-les sur **Internet** pour en apprendre davantage sur leurs **entrées** et **sorties**.
 
 ## **Delphi**
 
@@ -340,7 +340,7 @@ uVar2 = DAT_030004dc;
 uVar1 = *puVar6;
 if ((uVar1 & DAT_030004da & ~uVar4) != 0) {
 ```
-Le dernier if vérifie que **`uVar4`** est dans les **dernières clés** et n'est pas la clé actuelle, également appelée relâcher un bouton (la clé actuelle est stockée dans **`uVar1`**).
+Le dernier if vérifie si **`uVar4`** est dans les **dernières clés** et n'est pas la clé actuelle, également appelée relâcher un bouton (la clé actuelle est stockée dans **`uVar1`**).
 ```c
 if (uVar1 == 4) {
 DAT_030000d4 = 0;
@@ -381,6 +381,7 @@ Donc, dans ce défi, en connaissant les valeurs des boutons, vous deviez **appuy
 **Référence pour ce tutoriel :** [**https://exp.codes/Nostalgia/**](https://exp.codes/Nostalgia/)
 
 ## Game Boy
+
 
 {{#ref}}
 https://www.youtube.com/watch?v=VVbRe7wr3G4

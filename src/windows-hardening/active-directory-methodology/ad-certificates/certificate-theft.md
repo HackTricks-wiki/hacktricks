@@ -52,7 +52,7 @@ dpapi::masterkey /in:"C:\PATH\TO\KEY" /rpc
 # With mimikatz, if the user's password is known
 dpapi::masterkey /in:"C:\PATH\TO\KEY" /sid:accountSid /password:PASS
 ```
-Pour rationaliser le décryptage des fichiers masterkey et des fichiers de clé privée, la commande `certificates` de [**SharpDPAPI**](https://github.com/GhostPack/SharpDPAPI) s'avère bénéfique. Elle accepte `/pvk`, `/mkfile`, `/password` ou `{GUID}:KEY` comme arguments pour déchiffrer les clés privées et les certificats associés, générant ensuite un fichier `.pem`.
+Pour rationaliser le déchiffrement des fichiers masterkey et des fichiers de clé privée, la commande `certificates` de [**SharpDPAPI**](https://github.com/GhostPack/SharpDPAPI) s'avère utile. Elle accepte `/pvk`, `/mkfile`, `/password` ou `{GUID}:KEY` comme arguments pour déchiffrer les clés privées et les certificats associés, générant ensuite un fichier `.pem`.
 ```bash
 # Decrypting using SharpDPAPI
 SharpDPAPI.exe certificates /mkfile:C:\temp\mkeys.txt
@@ -70,11 +70,11 @@ Le déchiffrement manuel peut être réalisé en exécutant la commande `lsadump
 
 ## Recherche de fichiers de certificats – THEFT4
 
-Les certificats se trouvent parfois directement dans le système de fichiers, comme dans les partages de fichiers ou le dossier Téléchargements. Les types de fichiers de certificats les plus couramment rencontrés ciblant les environnements Windows sont les fichiers `.pfx` et `.p12`. Bien que moins fréquemment, des fichiers avec les extensions `.pkcs12` et `.pem` apparaissent également. D'autres extensions de fichiers liées aux certificats notables incluent :
+Les certificats se trouvent parfois directement dans le système de fichiers, comme dans des partages de fichiers ou le dossier Téléchargements. Les types de fichiers de certificats les plus couramment rencontrés ciblant les environnements Windows sont les fichiers `.pfx` et `.p12`. Bien que moins fréquemment, des fichiers avec les extensions `.pkcs12` et `.pem` apparaissent également. D'autres extensions de fichiers liées aux certificats notables incluent :
 
 - `.key` pour les clés privées,
 - `.crt`/`.cer` pour les certificats uniquement,
-- `.csr` pour les demandes de signature de certificat, qui ne contiennent pas de certificats ou de clés privées,
+- `.csr` pour les demandes de signature de certificat, qui ne contiennent pas de certificats ni de clés privées,
 - `.jks`/`.keystore`/`.keys` pour les keystores Java, qui peuvent contenir des certificats ainsi que des clés privées utilisées par des applications Java.
 
 Ces fichiers peuvent être recherchés à l'aide de PowerShell ou de l'invite de commande en cherchant les extensions mentionnées.
@@ -96,13 +96,13 @@ Le contenu donné explique une méthode pour le vol de crédentiels NTLM via PKI
 
 Pour soutenir l'authentification NTLM `MS-NLMP` pour les applications qui ne facilitent pas l'authentification Kerberos, le KDC est conçu pour renvoyer la fonction unidirectionnelle NTLM (OWF) de l'utilisateur dans le certificat d'attribut de privilège (PAC), spécifiquement dans le tampon `PAC_CREDENTIAL_INFO`, lorsque PKCA est utilisé. Par conséquent, si un compte s'authentifie et obtient un Ticket-Granting Ticket (TGT) via PKINIT, un mécanisme est intrinsèquement fourni qui permet à l'hôte actuel d'extraire le hachage NTLM du TGT pour maintenir les protocoles d'authentification hérités. Ce processus implique le déchiffrement de la structure `PAC_CREDENTIAL_DATA`, qui est essentiellement une représentation NDR sérialisée du texte en clair NTLM.
 
-L'utilitaire **Kekeo**, accessible à [https://github.com/gentilkiwi/kekeo](https://github.com/gentilkiwi/kekeo), est mentionné comme capable de demander un TGT contenant ces données spécifiques, facilitant ainsi la récupération du NTLM de l'utilisateur. La commande utilisée à cette fin est la suivante :
+L'utilitaire **Kekeo**, accessible à [https://github.com/gentilkiwi/kekeo](https://github.com/gentilkiwi/kekeo), est mentionné comme capable de demander un TGT contenant ces données spécifiques, facilitant ainsi la récupération du NTLM de l'utilisateur. La commande utilisée à cet effet est la suivante :
 ```bash
 tgt::pac /caname:generic-DC-CA /subject:genericUser /castore:current_user /domain:domain.local
 ```
 **`Rubeus`** peut également obtenir ces informations avec l'option **`asktgt [...] /getcredentials`**.
 
-De plus, il est noté que Kekeo peut traiter des certificats protégés par carte à puce, à condition que le code PIN puisse être récupéré, avec référence à [https://github.com/CCob/PinSwipe](https://github.com/CCob/PinSwipe). La même capacité est indiquée comme étant prise en charge par **Rubeus**, disponible à [https://github.com/GhostPack/Rubeus](https://github.com/GhostPack/Rubeus).
+De plus, il est noté que Kekeo peut traiter des certificats protégés par carte intelligente, à condition que le code PIN puisse être récupéré, avec référence à [https://github.com/CCob/PinSwipe](https://github.com/CCob/PinSwipe). La même capacité est indiquée comme étant prise en charge par **Rubeus**, disponible à [https://github.com/GhostPack/Rubeus](https://github.com/GhostPack/Rubeus).
 
 Cette explication résume le processus et les outils impliqués dans le vol de crédentiels NTLM via PKINIT, en se concentrant sur la récupération des hachages NTLM à travers le TGT obtenu en utilisant PKINIT, et les utilitaires qui facilitent ce processus.
 

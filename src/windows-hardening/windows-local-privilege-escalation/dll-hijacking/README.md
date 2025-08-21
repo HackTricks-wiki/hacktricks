@@ -39,9 +39,9 @@ Pour escalader les privilèges, la meilleure chance que nous avons est de pouvoi
 
 ### Dll Search Order
 
-**Dans la** [**documentation Microsoft**](https://docs.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-search-order#factors-that-affect-searching) **vous pouvez trouver comment les DLL sont chargées spécifiquement.**
+**À l'intérieur de la** [**documentation Microsoft**](https://docs.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-search-order#factors-that-affect-searching) **vous pouvez trouver comment les DLL sont chargées spécifiquement.**
 
-Les **applications Windows** recherchent des DLL en suivant un ensemble de **chemins de recherche prédéfinis**, respectant une séquence particulière. Le problème du DLL hijacking survient lorsqu'un DLL nuisible est stratégiquement placé dans l'un de ces répertoires, garantissant qu'il soit chargé avant le DLL authentique. Une solution pour prévenir cela est de s'assurer que l'application utilise des chemins absolus lorsqu'elle fait référence aux DLL dont elle a besoin.
+**Les applications Windows** recherchent des DLL en suivant un ensemble de **chemins de recherche prédéfinis**, respectant une séquence particulière. Le problème du DLL hijacking survient lorsqu'un DLL nuisible est stratégiquement placé dans l'un de ces répertoires, garantissant qu'il soit chargé avant le DLL authentique. Une solution pour prévenir cela est de s'assurer que l'application utilise des chemins absolus lorsqu'elle fait référence aux DLL dont elle a besoin.
 
 Vous pouvez voir l'**ordre de recherche des DLL sur les systèmes 32 bits** ci-dessous :
 
@@ -65,7 +65,7 @@ Il existe d'autres moyens de modifier l'ordre de recherche, mais je ne vais pas 
 Certaines exceptions à l'ordre de recherche standard des DLL sont notées dans la documentation Windows :
 
 - Lorsqu'un **DLL qui partage son nom avec un déjà chargé en mémoire** est rencontré, le système contourne la recherche habituelle. Au lieu de cela, il effectue une vérification de redirection et un manifeste avant de se rabattre sur le DLL déjà en mémoire. **Dans ce scénario, le système ne procède pas à une recherche pour le DLL**.
-- Dans les cas où le DLL est reconnu comme un **DLL connu** pour la version actuelle de Windows, le système utilisera sa version du DLL connu, ainsi que toutes ses DLL dépendantes, **en omettant le processus de recherche**. La clé de registre **HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\KnownDLLs** contient une liste de ces DLL connues.
+- Dans les cas où le DLL est reconnu comme un **DLL connu** pour la version actuelle de Windows, le système utilisera sa version du DLL connu, ainsi que toutes ses DLL dépendantes, **en omettant le processus de recherche**. La clé de registre **HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\KnownDLLs** contient une liste de ces DLL connus.
 - Si un **DLL a des dépendances**, la recherche de ces DLL dépendantes est effectuée comme si elles étaient indiquées uniquement par leurs **noms de module**, peu importe si le DLL initial a été identifié par un chemin complet.
 
 ### Escalating Privileges
@@ -73,7 +73,7 @@ Certaines exceptions à l'ordre de recherche standard des DLL sont notées dans 
 **Requirements** :
 
 - Identifier un processus qui fonctionne ou fonctionnera sous **différents privilèges** (mouvement horizontal ou latéral), qui **manque d'un DLL**.
-- S'assurer qu'un **accès en écriture** est disponible pour tout **répertoire** dans lequel le **DLL** sera **recherché**. Cet emplacement pourrait être le répertoire de l'exécutable ou un répertoire dans le chemin système.
+- Assurez-vous qu'un **accès en écriture** est disponible pour tout **répertoire** dans lequel le **DLL** sera **recherché**. Cet emplacement pourrait être le répertoire de l'exécutable ou un répertoire dans le chemin système.
 
 Oui, les exigences sont compliquées à trouver car **par défaut, il est un peu étrange de trouver un exécutable privilégié manquant d'un dll** et c'est encore **plus étrange d'avoir des permissions d'écriture sur un dossier de chemin système** (vous ne pouvez pas par défaut). Mais, dans des environnements mal configurés, cela est possible.\
 Dans le cas où vous avez de la chance et que vous remplissez les exigences, vous pourriez vérifier le projet [UACME](https://github.com/hfiref0x/UACME). Même si le **but principal du projet est de contourner UAC**, vous pourriez y trouver un **PoC** d'un Dll hijacking pour la version de Windows que vous pouvez utiliser (probablement juste en changeant le chemin du dossier où vous avez des permissions d'écriture).

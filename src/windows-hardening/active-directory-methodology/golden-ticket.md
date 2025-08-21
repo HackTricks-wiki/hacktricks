@@ -44,7 +44,7 @@ Get-DomainPolicy | select -expand KerberosPolicy
 ```
 Malheureusement, la durée de vie du TGT n'est pas enregistrée dans les 4769, donc vous ne trouverez pas cette information dans les journaux d'événements Windows. Cependant, ce que vous pouvez corréler est **de voir des 4769 sans un précédent 4768**. Il est **impossible de demander un TGS sans un TGT**, et s'il n'y a aucun enregistrement d'un TGT émis, nous pouvons en déduire qu'il a été forgé hors ligne.
 
-Afin de **contourner cette détection**, vérifiez les tickets diamond :
+Afin de **contourner cette détection**, vérifiez les tickets diamant :
 
 {{#ref}}
 diamond-ticket.md

@@ -22,7 +22,7 @@ navigator.clipboard.writeText(payload)
 }
 </script>
 ```
-Les anciennes campagnes utilisaient `document.execCommand('copy')`, les nouvelles s'appuient sur l'**API Clipboard** asynchrone (`navigator.clipboard.writeText`).
+Des campagnes plus anciennes utilisaient `document.execCommand('copy')`, les plus récentes s'appuient sur l'**API Clipboard** asynchrone (`navigator.clipboard.writeText`).
 
 ## Le Flux ClickFix / ClearFake
 
@@ -68,14 +68,15 @@ Les équipes bleues peuvent combiner la télémétrie du presse-papiers, de la c
 
 ## Atténuations
 
-1. Renforcement du navigateur – désactivez l'accès en écriture au presse-papiers (`dom.events.asyncClipboard.clipboardItem` etc.) ou exigez un geste de l'utilisateur.
-2. Sensibilisation à la sécurité – apprenez aux utilisateurs à *taper* des commandes sensibles ou à les coller d'abord dans un éditeur de texte.
-3. Mode de langue contraint PowerShell / Politique d'exécution + Contrôle des applications pour bloquer les lignes de commande arbitraires.
-4. Contrôles réseau – bloquez les requêtes sortantes vers des domaines de pastejacking et de C2 de logiciels malveillants connus.
+1. Renforcement du navigateur – désactiver l'accès en écriture au presse-papiers (`dom.events.asyncClipboard.clipboardItem` etc.) ou exiger un geste de l'utilisateur.
+2. Sensibilisation à la sécurité – apprendre aux utilisateurs à *taper* des commandes sensibles ou à les coller d'abord dans un éditeur de texte.
+3. Mode de langue contraint PowerShell / Politique d'exécution + Contrôle des applications pour bloquer les one-liners arbitraires.
+4. Contrôles réseau – bloquer les requêtes sortantes vers des domaines C2 de pastejacking et de malware connus.
 
-## Astuces connexes
+## Astuces Connexes
 
-* Le **Détournement d'invitation Discord** abuse souvent de la même approche ClickFix après avoir attiré les utilisateurs dans un serveur malveillant :
+* Le **Détournement d'Invitation Discord** abuse souvent de la même approche ClickFix après avoir attiré les utilisateurs dans un serveur malveillant :
+
 {{#ref}}
 discord-invite-hijacking.md
 {{#endref}}

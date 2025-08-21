@@ -4,7 +4,7 @@
 
 ## Intro
 
-iButton est un nom générique pour une clé d'identification électronique emballée dans un **conteneur métallique en forme de pièce**. Elle est également appelée **Dallas Touch** Memory ou mémoire de contact. Bien qu'elle soit souvent mal appelée clé « magnétique », il n'y a **rien de magnétique** à l'intérieur. En fait, un **microchip** complet fonctionnant sur un protocole numérique est caché à l'intérieur.
+iButton est un nom générique pour une clé d'identification électronique emballée dans un **conteneur en métal en forme de pièce**. Elle est également appelée **Dallas Touch** Memory ou mémoire de contact. Bien qu'elle soit souvent à tort qualifiée de clé « magnétique », il n'y a **rien de magnétique** à l'intérieur. En fait, un **microchip** complet fonctionnant sur un protocole numérique est caché à l'intérieur.
 
 <figure><img src="../../images/image (915).png" alt=""><figcaption></figcaption></figure>
 
@@ -22,7 +22,7 @@ Lorsque la clé atteint le lecteur, les **contacts se touchent** et la clé est 
 
 Les clés Dallas échangent des données en utilisant le protocole 1-wire. Avec un seul contact pour le transfert de données (!!) dans les deux sens, du maître à l'esclave et vice versa. Le protocole 1-wire fonctionne selon le modèle Maître-Esclave. Dans cette topologie, le Maître initie toujours la communication et l'Esclave suit ses instructions.
 
-Lorsque la clé (Esclave) entre en contact avec l'interphone (Maître), la puce à l'intérieur de la clé s'allume, alimentée par l'interphone, et la clé est initialisée. Ensuite, l'interphone demande l'ID de la clé. Nous examinerons ce processus plus en détail.
+Lorsque la clé (Esclave) entre en contact avec l'interphone (Maître), la puce à l'intérieur de la clé s'allume, alimentée par l'interphone, et la clé est initialisée. Ensuite, l'interphone demande l'ID de la clé. Nous allons examiner ce processus plus en détail.
 
 Flipper peut fonctionner à la fois en modes Maître et Esclave. En mode de lecture de clé, Flipper agit comme un lecteur, c'est-à-dire qu'il fonctionne comme un Maître. Et en mode d'émulation de clé, le flipper fait semblant d'être une clé, il est en mode Esclave.
 

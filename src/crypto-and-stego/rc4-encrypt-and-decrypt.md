@@ -1,3 +1,5 @@
+# RC4 Encrypt and Decrypt
+
 {{#include ../banners/hacktricks-training.md}}
 
 Si vous pouvez d'une manière ou d'une autre chiffrer un texte en clair en utilisant RC4, vous pouvez déchiffrer tout contenu chiffré par ce RC4 (en utilisant le même mot de passe) simplement en utilisant la fonction de chiffrement.

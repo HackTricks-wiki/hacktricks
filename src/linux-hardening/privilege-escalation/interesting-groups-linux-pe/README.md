@@ -6,7 +6,7 @@
 
 ### **PE - Méthode 1**
 
-**Parfois**, **par défaut (ou parce que certains logiciels en ont besoin)**, à l'intérieur du **/etc/sudoers** fichier, vous pouvez trouver certaines de ces lignes :
+**Parfois**, **par défaut (ou parce que certains logiciels en ont besoin)**, à l'intérieur du fichier **/etc/sudoers**, vous pouvez trouver certaines de ces lignes :
 ```bash
 # Allow members of group sudo to execute any command
 %sudo	ALL=(ALL:ALL) ALL
@@ -16,7 +16,7 @@
 ```
 Cela signifie que **tout utilisateur appartenant au groupe sudo ou admin peut exécuter n'importe quoi en tant que sudo**.
 
-Si c'est le cas, pour **devenir root, vous pouvez simplement exécuter**:
+Si c'est le cas, pour **devenir root, vous pouvez simplement exécuter** :
 ```
 sudo su
 ```
@@ -43,7 +43,7 @@ polkit-agent-helper-1: error response to PolicyKit daemon: GDBus.Error:org.freed
 ==== AUTHENTICATION FAILED ===
 Error executing command as another user: Not authorized
 ```
-**Ce n'est pas parce que vous n'avez pas les permissions mais parce que vous n'êtes pas connecté sans une interface graphique**. Et il y a une solution à ce problème ici : [https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). Vous avez besoin de **2 sessions ssh différentes** :
+**Ce n'est pas parce que vous n'avez pas de permissions mais parce que vous n'êtes pas connecté sans une interface graphique**. Et il existe une solution à ce problème ici : [https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). Vous avez besoin de **2 sessions ssh différentes** :
 ```bash:session1
 echo $$ #Step1: Get current PID
 pkexec "/bin/bash" #Step 3, execute pkexec
@@ -62,11 +62,11 @@ pkttyagent --process <PID of session1> #Step 2, attach pkttyagent to session1
 ```
 Cela signifie que **tout utilisateur appartenant au groupe wheel peut exécuter n'importe quoi en tant que sudo**.
 
-Si c'est le cas, pour **devenir root, vous pouvez simplement exécuter**:
+Si c'est le cas, pour **devenir root, vous pouvez simplement exécuter** :
 ```
 sudo su
 ```
-## Shadow Group
+## Groupe Shadow
 
 Les utilisateurs du **groupe shadow** peuvent **lire** le fichier **/etc/shadow** :
 ```
@@ -146,9 +146,9 @@ Notez qu'en utilisant debugfs, vous pouvez également **écrire des fichiers**. 
 debugfs -w /dev/sda1
 debugfs:  dump /tmp/asd1.txt /tmp/asd2.txt
 ```
-Cependant, si vous essayez de **écrire des fichiers appartenant à root** (comme `/etc/shadow` ou `/etc/passwd`), vous obtiendrez une erreur "**Permission denied**".
+Cependant, si vous essayez de **modifier des fichiers appartenant à root** (comme `/etc/shadow` ou `/etc/passwd`), vous obtiendrez une erreur "**Permission denied**".
 
-## Video Group
+## Groupe Vidéo
 
 En utilisant la commande `w`, vous pouvez trouver **qui est connecté au système** et cela affichera une sortie comme celle-ci :
 ```bash
@@ -199,7 +199,7 @@ Enfin, si aucune des suggestions précédentes ne vous convient, ou si elles ne 
 ../docker-security/
 {{#endref}}
 
-Si vous avez des permissions d'écriture sur le socket docker, lisez [**ce post sur la façon d'escalader les privilèges en abusant du socket docker**](../index.html#writable-docker-socket)**.**
+Si vous avez des permissions d'écriture sur le socket docker, lisez [**cet article sur la façon d'escalader les privilèges en abusant du socket docker**](../index.html#writable-docker-socket)**.**
 
 {{#ref}}
 https://github.com/KrustyHack/docker-privilege-escalation

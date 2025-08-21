@@ -4,7 +4,8 @@
 
 ## Escalade de privilèges TCC
 
-Si vous êtes venu ici à la recherche de l'escalade de privilèges TCC, allez à :
+Si vous êtes venu ici à la recherche d'une escalade de privilèges TCC, allez à :
+
 
 {{#ref}}
 macos-security-protections/macos-tcc/
@@ -13,6 +14,7 @@ macos-security-protections/macos-tcc/
 ## Privesc Linux
 
 Veuillez noter que **la plupart des astuces concernant l'escalade de privilèges affectant Linux/Unix affecteront également les machines MacOS**. Donc, voyez :
+
 
 {{#ref}}
 ../../linux-hardening/privilege-escalation/
@@ -49,7 +51,7 @@ En utilisant un peu de **ingénierie sociale**, vous pourriez **usurper par exem
 {{#tab name="Usurpation de Chrome"}}
 Quelques suggestions :
 
-- Vérifiez dans le Dock s'il y a un Chrome, et dans ce cas, **supprimez** cette entrée et **ajoutez** l'**entrée Chrome** **fausse** à la **même position** dans le tableau du Dock.
+- Vérifiez dans le Dock s'il y a un Chrome, et dans ce cas **supprimez** cette entrée et **ajoutez** l'**entrée Chrome** **fausse** à la **même position** dans le tableau du Dock.
 ```bash
 #!/bin/sh
 
@@ -231,6 +233,7 @@ Une explication plus détaillée peut être [**trouvée dans le rapport original
 ## Informations Sensibles
 
 Cela peut être utile pour élever les privilèges :
+
 
 {{#ref}}
 macos-files-folders-and-binaries/macos-sensitive-locations.md

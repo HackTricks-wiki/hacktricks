@@ -70,7 +70,7 @@ Vous pouvez lancer un processus qui **utilise des identifiants différents pour 
 ```
 runas /user:domain\username /netonly cmd.exe
 ```
-Ceci est utile si vous avez des identifiants utiles pour accéder à des objets dans le réseau, mais ces identifiants ne sont pas valides sur l'hôte actuel car ils ne seront utilisés que dans le réseau (sur l'hôte actuel, vos privilèges d'utilisateur actuels seront utilisés).
+Ceci est utile si vous avez des identifiants valables pour accéder à des objets dans le réseau, mais ces identifiants ne sont pas valides sur l'hôte actuel car ils ne seront utilisés que dans le réseau (sur l'hôte actuel, vos privilèges d'utilisateur actuels seront utilisés).
 
 ### Types de jetons
 
@@ -78,10 +78,10 @@ Il existe deux types de jetons disponibles :
 
 - **Jeton principal** : Il sert de représentation des informations d'identification de sécurité d'un processus. La création et l'association de jetons principaux avec des processus sont des actions qui nécessitent des privilèges élevés, soulignant le principe de séparation des privilèges. En général, un service d'authentification est responsable de la création de jetons, tandis qu'un service de connexion gère son association avec le shell du système d'exploitation de l'utilisateur. Il convient de noter que les processus héritent du jeton principal de leur processus parent lors de leur création.
 - **Jeton d'imitation** : Permet à une application serveur d'adopter temporairement l'identité du client pour accéder à des objets sécurisés. Ce mécanisme est stratifié en quatre niveaux de fonctionnement :
-- **Anonyme** : Accorde un accès au serveur similaire à celui d'un utilisateur non identifié.
+- **Anonyme** : Accorde l'accès au serveur similaire à celui d'un utilisateur non identifié.
 - **Identification** : Permet au serveur de vérifier l'identité du client sans l'utiliser pour l'accès aux objets.
 - **Imitation** : Permet au serveur d'opérer sous l'identité du client.
-- **Délégation** : Semblable à l'imitation, mais inclut la capacité d'étendre cette hypothèse d'identité aux systèmes distants avec lesquels le serveur interagit, garantissant la préservation des informations d'identification.
+- **Délégation** : Semblable à l'imitation, mais inclut la capacité d'étendre cette hypothèse d'identité aux systèmes distants avec lesquels le serveur interagit, garantissant la préservation des identifiants.
 
 #### Jetons d'imitation
 
@@ -90,6 +90,7 @@ En utilisant le module _**incognito**_ de metasploit, si vous avez suffisamment 
 ### Privilèges des jetons
 
 Apprenez quels **privilèges de jeton peuvent être abusés pour escalader les privilèges :**
+
 
 {{#ref}}
 privilege-escalation-abusing-tokens.md

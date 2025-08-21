@@ -4,7 +4,7 @@
 
 Cette page regroupe des **extraits de code C petits et autonomes** qui sont utiles lors de l'escalade de privilèges locaux sur Windows ou après une exploitation. Chaque payload est conçu pour être **facile à copier-coller**, nécessite uniquement l'API Windows / le runtime C, et peut être compilé avec `i686-w64-mingw32-gcc` (x86) ou `x86_64-w64-mingw32-gcc` (x64).
 
-> ⚠️  Ces payloads supposent que le processus dispose déjà des privilèges minimaux nécessaires pour effectuer l'action (par exemple, `SeDebugPrivilege`, `SeImpersonatePrivilege`, ou un contexte d'intégrité moyenne pour un contournement UAC). Ils sont destinés à des **environnements de red-team ou CTF** où l'exploitation d'une vulnérabilité a permis l'exécution de code natif arbitraire.
+> ⚠️  Ces payloads supposent que le processus dispose déjà des privilèges minimaux nécessaires pour effectuer l'action (par exemple, `SeDebugPrivilege`, `SeImpersonatePrivilege`, ou un contexte d'intégrité moyen pour un contournement UAC). Ils sont destinés à des **environnements de red-team ou CTF** où l'exploitation d'une vulnérabilité a permis l'exécution de code natif arbitraire.
 
 ---
 
@@ -115,6 +115,7 @@ return 0;
 }
 ```
 Pour une explication plus approfondie de son fonctionnement, voir :
+
 {{#ref}}
 sedebug-+-seimpersonate-copy-token.md
 {{#endref}}
@@ -122,7 +123,7 @@ sedebug-+-seimpersonate-copy-token.md
 ---
 
 ## Patch AMSI & ETW en mémoire (Évasion de défense)
-La plupart des moteurs AV/EDR modernes s'appuient sur **AMSI** et **ETW** pour inspecter les comportements malveillants. Patchant les deux interfaces tôt dans le processus actuel, cela empêche les charges utiles basées sur des scripts (par exemple, PowerShell, JScript) d'être scannées.
+La plupart des moteurs AV/EDR modernes s'appuient sur **AMSI** et **ETW** pour inspecter les comportements malveillants. Patchant les deux interfaces tôt dans le processus actuel, cela empêche les charges utiles basées sur des scripts (par exemple, PowerShell, JScript) d'être analysées.
 ```c
 // gcc -o patch_amsi.exe patch_amsi.c -lntdll
 #define _CRT_SECURE_NO_WARNINGS
@@ -149,7 +150,7 @@ MessageBoxA(NULL, "AMSI & ETW patched!", "OK", MB_OK);
 return 0;
 }
 ```
-*Le correctif ci-dessus est local au processus ; le lancement d'un nouveau PowerShell après l'avoir exécuté s'exécutera sans inspection AMSI/ETW.*
+*Le correctif ci-dessus est local au processus ; le lancement d'un nouveau PowerShell après l'avoir exécuté se fera sans inspection AMSI/ETW.*
 
 ---
 

@@ -10,11 +10,11 @@
 synology-encrypted-archive-decryption.md
 {{#endref}}
 
-Le firmware est un logiciel essentiel qui permet aux appareils de fonctionner correctement en gérant et en facilitant la communication entre les composants matériels et le logiciel avec lequel les utilisateurs interagissent. Il est stocké dans une mémoire permanente, garantissant que l'appareil peut accéder à des instructions vitales dès qu'il est allumé, ce qui conduit au lancement du système d'exploitation. L'examen et la modification potentielle du firmware sont une étape cruciale pour identifier les vulnérabilités de sécurité.
+Le firmware est un logiciel essentiel qui permet aux appareils de fonctionner correctement en gérant et en facilitant la communication entre les composants matériels et le logiciel avec lequel les utilisateurs interagissent. Il est stocké dans une mémoire permanente, garantissant que l'appareil peut accéder à des instructions vitales dès qu'il est allumé, ce qui conduit au lancement du système d'exploitation. L'examen et la modification potentielle du firmware sont une étape critique pour identifier les vulnérabilités de sécurité.
 
 ## **Collecte d'informations**
 
-**La collecte d'informations** est une étape initiale critique pour comprendre la composition d'un appareil et les technologies qu'il utilise. Ce processus implique la collecte de données sur :
+**La collecte d'informations** est une étape initiale cruciale pour comprendre la composition d'un appareil et les technologies qu'il utilise. Ce processus implique la collecte de données sur :
 
 - L'architecture CPU et le système d'exploitation qu'il utilise
 - Les spécificités du bootloader
@@ -35,7 +35,7 @@ L'obtention du firmware peut être abordée par divers moyens, chacun ayant son 
 - **En le construisant** à partir des instructions fournies
 - **En le téléchargeant** depuis des sites de support officiels
 - En utilisant des requêtes **Google dork** pour trouver des fichiers de firmware hébergés
-- Accéder directement au **stockage cloud**, avec des outils comme [S3Scanner](https://github.com/sa7mon/S3Scanner)
+- Accéder au **stockage cloud** directement, avec des outils comme [S3Scanner](https://github.com/sa7mon/S3Scanner)
 - Intercepter les **mises à jour** via des techniques de l'homme du milieu
 - **Extraire** depuis l'appareil via des connexions comme **UART**, **JTAG** ou **PICit**
 - **Sniffer** les requêtes de mise à jour dans la communication de l'appareil
@@ -66,7 +66,7 @@ Ou [**binvis.io**](https://binvis.io/#/) ([code](https://code.google.com/archive
 
 ### Récupération du Système de Fichiers
 
-Avec les outils commentés précédemment comme `binwalk -ev <bin>`, vous devriez avoir pu **extraire le système de fichiers**.\
+Avec les outils précédemment commentés comme `binwalk -ev <bin>`, vous devriez avoir pu **extraire le système de fichiers**.\
 Binwalk extrait généralement cela dans un **dossier nommé selon le type de système de fichiers**, qui est généralement l'un des suivants : squashfs, ubifs, romfs, rootfs, jffs2, yaffs2, cramfs, initramfs.
 
 #### Extraction Manuelle du Système de Fichiers
@@ -170,7 +170,7 @@ Le code source et les binaires compilés trouvés dans le système de fichiers d
 
 ## Émulation de Firmware pour Analyse Dynamique
 
-Le processus d'émulation de firmware permet une **analyse dynamique** soit du fonctionnement d'un dispositif, soit d'un programme individuel. Cette approche peut rencontrer des défis liés aux dépendances matérielles ou d'architecture, mais le transfert du système de fichiers racine ou de binaires spécifiques vers un dispositif avec une architecture et un ordre des octets correspondants, comme un Raspberry Pi, ou vers une machine virtuelle préconstruite, peut faciliter des tests supplémentaires.
+Le processus d'émulation de firmware permet une **analyse dynamique** soit du fonctionnement d'un appareil, soit d'un programme individuel. Cette approche peut rencontrer des défis liés aux dépendances matérielles ou d'architecture, mais le transfert du système de fichiers racine ou de binaires spécifiques vers un appareil avec une architecture et un ordre des octets correspondants, comme un Raspberry Pi, ou vers une machine virtuelle préconstruite, peut faciliter des tests supplémentaires.
 
 ### Émulation de Binaires Individuels
 
@@ -212,7 +212,7 @@ Développer un PoC pour les vulnérabilités identifiées nécessite une compré
 
 Des systèmes d'exploitation comme [AttifyOS](https://github.com/adi0x90/attifyos) et [EmbedOS](https://github.com/scriptingxss/EmbedOS) fournissent des environnements préconfigurés pour les tests de sécurité des firmwares, équipés des outils nécessaires.
 
-## Systèmes d'exploitation préparés pour analyser le firmware
+## OS préparés pour analyser le firmware
 
 - [**AttifyOS**](https://github.com/adi0x90/attifyos) : AttifyOS est une distribution destinée à vous aider à effectuer des évaluations de sécurité et des tests de pénétration des dispositifs Internet des objets (IoT). Elle vous fait gagner beaucoup de temps en fournissant un environnement préconfiguré avec tous les outils nécessaires chargés.
 - [**EmbedOS**](https://github.com/scriptingxss/EmbedOS) : Système d'exploitation de test de sécurité embarqué basé sur Ubuntu 18.04 préchargé avec des outils de test de sécurité des firmwares.
@@ -226,10 +226,10 @@ Flux de travail typique de l'attaque :
 1. **Obtenir une image signée plus ancienne**
    * La récupérer sur le portail de téléchargement public du fournisseur, CDN ou site de support.
    * L'extraire d'applications mobiles/de bureau compagnon (par exemple, à l'intérieur d'un APK Android sous `assets/firmware/`).
-   * La récupérer dans des dépôts tiers tels que VirusTotal, archives Internet, forums, etc.
+   * La récupérer à partir de dépôts tiers tels que VirusTotal, archives Internet, forums, etc.
 2. **Télécharger ou servir l'image au dispositif** via n'importe quel canal de mise à jour exposé :
    * Interface Web, API d'application mobile, USB, TFTP, MQTT, etc.
-   * De nombreux dispositifs IoT grand public exposent des points de terminaison HTTP(S) *non authentifiés* qui acceptent des blobs de firmware encodés en Base64, les décodent côté serveur et déclenchent la récupération/mise à niveau.
+   * De nombreux dispositifs IoT grand public exposent des points de terminaison HTTP(S) *non authentifiés* qui acceptent des blobs de firmware encodés en Base64, les décodent côté serveur et déclenchent la récupération/mise à jour.
 3. Après la rétrogradation, exploiter une vulnérabilité qui a été corrigée dans la version plus récente (par exemple, un filtre d'injection de commande qui a été ajouté plus tard).
 4. Optionnellement, flasher la dernière image ou désactiver les mises à jour pour éviter la détection une fois la persistance acquise.
 

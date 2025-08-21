@@ -8,13 +8,13 @@ Microsoft Word effectue une validation des données de fichier avant d'ouvrir un
 
 En général, les fichiers Word contenant des macros utilisent l'extension `.docm`. Cependant, il est possible de renommer le fichier en changeant l'extension du fichier tout en conservant ses capacités d'exécution de macro.\
 Par exemple, un fichier RTF ne prend pas en charge les macros, par conception, mais un fichier DOCM renommé en RTF sera traité par Microsoft Word et sera capable d'exécuter des macros.\
-Les mêmes mécanismes internes s'appliquent à tous les logiciels de la suite Microsoft Office (Excel, PowerPoint, etc.).
+Les mêmes internes et mécanismes s'appliquent à tous les logiciels de la suite Microsoft Office (Excel, PowerPoint, etc.).
 
 Vous pouvez utiliser la commande suivante pour vérifier quelles extensions vont être exécutées par certains programmes Office :
 ```bash
 assoc | findstr /i "word excel powerp"
 ```
-Fichiers DOCX faisant référence à un modèle distant (Fichier – Options – Compléments – Gérer : Modèles – Aller) qui inclut des macros peuvent également « exécuter » des macros.
+Fichiers DOCX faisant référence à un modèle distant (Fichier – Options – Compléments – Gérer : Modèles – Aller) qui inclut des macros peuvent également “exécuter” des macros.
 
 ### Chargement d'image externe
 
@@ -66,7 +66,7 @@ proc.Create "powershell <beacon line generated>
 ```
 #### Supprimer manuellement les métadonnées
 
-Allez dans **Fichier > Informations > Inspecter le document > Inspecter le document**, ce qui fera apparaître l'Inspecteur de documents. Cliquez sur **Inspecter** puis sur **Supprimer tout** à côté de **Propriétés du document et informations personnelles**.
+Allez dans **Fichier > Informations > Inspecter le document > Inspecter le document**, ce qui fera apparaître l'Inspecteur de document. Cliquez sur **Inspecter** puis sur **Supprimer tout** à côté de **Propriétés du document et informations personnelles**.
 
 #### Extension de document
 
@@ -140,13 +140,15 @@ self.close
 ```
 ## Forcer l'authentification NTLM
 
-Il existe plusieurs façons de **forcer l'authentification NTLM "à distance"**, par exemple, vous pourriez ajouter des **images invisibles** dans des e-mails ou du HTML que l'utilisateur va accéder (même HTTP MitM ?). Ou envoyer à la victime l'**adresse des fichiers** qui vont **déclencher** une **authentification** juste pour **ouvrir le dossier.**
+Il existe plusieurs façons de **forcer l'authentification NTLM "à distance"**, par exemple, vous pourriez ajouter des **images invisibles** dans des e-mails ou du HTML que l'utilisateur accédera (même HTTP MitM ?). Ou envoyer à la victime l'**adresse des fichiers** qui **déclencheront** une **authentification** juste pour **ouvrir le dossier.**
 
 **Vérifiez ces idées et plus dans les pages suivantes :**
+
 
 {{#ref}}
 ../../windows-hardening/active-directory-methodology/printers-spooler-service-abuse.md
 {{#endref}}
+
 
 {{#ref}}
 ../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md

@@ -2,7 +2,6 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-
 ## Linux Capabilities
 
 Les capacités Linux divisent **les privilèges root en unités plus petites et distinctes**, permettant aux processus d'avoir un sous-ensemble de privilèges. Cela minimise les risques en ne conférant pas de privilèges root complets inutilement.
@@ -11,7 +10,7 @@ Les capacités Linux divisent **les privilèges root en unités plus petites et 
 
 - Les utilisateurs normaux ont des permissions limitées, affectant des tâches comme l'ouverture d'un socket réseau qui nécessite un accès root.
 
-### Ensembles de Capabilités :
+### Ensembles de Capacités :
 
 1. **Héritées (CapInh)** :
 
@@ -22,7 +21,7 @@ Les capacités Linux divisent **les privilèges root en unités plus petites et 
 2. **Effectives (CapEff)** :
 
 - **But** : Représente les capacités réelles qu'un processus utilise à tout moment.
-- **Fonctionnalité** : C'est l'ensemble de capacités vérifié par le noyau pour accorder la permission pour diverses opérations. Pour les fichiers, cet ensemble peut être un indicateur indiquant si les capacités autorisées du fichier doivent être considérées comme effectives.
+- **Fonctionnalité** : C'est l'ensemble de capacités vérifié par le noyau pour accorder la permission pour diverses opérations. Pour les fichiers, cet ensemble peut être un indicateur indiquant si les capacités permises du fichier doivent être considérées comme effectives.
 - **Signification** : L'ensemble effectif est crucial pour les vérifications de privilèges immédiates, agissant comme l'ensemble actif de capacités qu'un processus peut utiliser.
 
 3. **Permises (CapPrm)** :
@@ -39,7 +38,7 @@ Les capacités Linux divisent **les privilèges root en unités plus petites et 
 
 5. **Ambiante (CapAmb)** :
 - **But** : Permet à certaines capacités d'être maintenues lors d'un appel système `execve`, ce qui entraînerait normalement une réinitialisation complète des capacités du processus.
-- **Fonctionnalité** : Assure que les programmes non-SUID qui n'ont pas de capacités de fichier associées peuvent conserver certains privilèges.
+- **Fonctionnalité** : Garantit que les programmes non-SUID qui n'ont pas de capacités de fichier associées peuvent conserver certains privilèges.
 - **Restrictions** : Les capacités dans cet ensemble sont soumises aux contraintes des ensembles héritables et permis, garantissant qu'elles ne dépassent pas les privilèges autorisés du processus.
 ```python
 # Code to demonstrate the interaction of different capability sets might look like this:
@@ -151,14 +150,14 @@ L'erreur montre clairement que la commande ping n'est pas autorisée à ouvrir u
 
 ### Supprimer des capacités
 
-Vous pouvez supprimer les capacités d'un binaire avec
+Vous pouvez supprimer des capacités d'un binaire avec
 ```bash
 setcap -r </path/to/binary>
 ```
-## Capacités Utilisateur
+## User Capabilities
 
-Apparemment, **il est possible d'assigner des capacités également aux utilisateurs**. Cela signifie probablement que chaque processus exécuté par l'utilisateur pourra utiliser les capacités de l'utilisateur.\
-Basé sur [ceci](https://unix.stackexchange.com/questions/454708/how-do-you-add-cap-sys-admin-permissions-to-user-in-centos-7), [ceci](http://manpages.ubuntu.com/manpages/bionic/man5/capability.conf.5.html) et [ceci](https://stackoverflow.com/questions/1956732/is-it-possible-to-configure-linux-capabilities-per-user), quelques fichiers doivent être configurés pour donner à un utilisateur certaines capacités, mais celui qui assigne les capacités à chaque utilisateur sera `/etc/security/capability.conf`.\
+Apparemment, **il est possible d'assigner des capacités aussi aux utilisateurs**. Cela signifie probablement que chaque processus exécuté par l'utilisateur pourra utiliser les capacités de l'utilisateur.\
+Basé sur [this](https://unix.stackexchange.com/questions/454708/how-do-you-add-cap-sys-admin-permissions-to-user-in-centos-7), [this ](http://manpages.ubuntu.com/manpages/bionic/man5/capability.conf.5.html)et [this ](https://stackoverflow.com/questions/1956732/is-it-possible-to-configure-linux-capabilities-per-user), quelques fichiers doivent être configurés pour donner à un utilisateur certaines capacités, mais celui qui assigne les capacités à chaque utilisateur sera `/etc/security/capability.conf`.\
 Exemple de fichier :
 ```bash
 # Simple
@@ -175,7 +174,7 @@ cap_sys_admin,22,25          jrsysadmin
 ```
 ## Capacités de l'environnement
 
-En compilant le programme suivant, il est possible de **lancer un shell bash dans un environnement qui fournit des capacités**.
+En compilant le programme suivant, il est possible de **lancer un shell bash à l'intérieur d'un environnement qui fournit des capacités**.
 ```c:ambient.c
 /*
 * Test program for the ambient capabilities
@@ -286,7 +285,7 @@ Les **binaries sensibles aux capacités n'utiliseront pas les nouvelles capacit�
 ## Capacités de service
 
 Par défaut, un **service s'exécutant en tant que root aura toutes les capacités assignées**, et dans certaines occasions, cela peut être dangereux.\
-Par conséquent, un **fichier de configuration de service** permet de **spécifier** les **capacités** que vous souhaitez qu'il ait, **et** l'**utilisateur** qui devrait exécuter le service pour éviter d'exécuter un service avec des privilèges inutiles :
+Par conséquent, un fichier de **configuration de service** permet de **spécifier** les **capacités** que vous souhaitez qu'il ait, **et** l'**utilisateur** qui doit exécuter le service pour éviter d'exécuter un service avec des privilèges inutiles :
 ```bash
 [Service]
 User=bob
@@ -338,7 +337,7 @@ setcap cap_setuid+ep /usr/bin/python2.7
 #Exploit
 /usr/bin/python2.7 -c 'import os; os.setuid(0); os.system("/bin/bash");'
 ```
-**Capacités** nécessaires à `tcpdump` pour **permettre à tout utilisateur de renifler les paquets** :
+**Capabilities** nécessaires à `tcpdump` pour **permettre à tout utilisateur de renifler des paquets** :
 ```bash
 setcap cap_net_raw,cap_net_admin=eip /usr/sbin/tcpdump
 getcap /usr/sbin/tcpdump
@@ -346,11 +345,11 @@ getcap /usr/sbin/tcpdump
 ```
 ### Le cas particulier des capacités "vides"
 
-[From the docs](https://man7.org/linux/man-pages/man7/capabilities.7.html) : Notez qu'il est possible d'assigner des ensembles de capacités vides à un fichier programme, et ainsi il est possible de créer un programme set-user-ID-root qui change l'identifiant utilisateur effectif et l'identifiant utilisateur sauvegardé du processus qui exécute le programme à 0, mais n'accorde aucune capacité à ce processus. En d'autres termes, si vous avez un binaire qui :
+[From the docs](https://man7.org/linux/man-pages/man7/capabilities.7.html) : Notez qu'il est possible d'assigner des ensembles de capacités vides à un fichier programme, et ainsi il est possible de créer un programme set-user-ID-root qui change l'ID utilisateur effectif et l'ID utilisateur sauvegardé du processus qui exécute le programme à 0, mais ne confère aucune capacité à ce processus. En d'autres termes, si vous avez un binaire qui :
 
 1. n'est pas possédé par root
 2. n'a pas de bits `SUID`/`SGID` définis
-3. a un ensemble de capacités vide (par exemple : `getcap myelf` retourne `myelf =ep`)
+3. a un ensemble de capacités vides (par exemple : `getcap myelf` retourne `myelf =ep`)
 
 alors **ce binaire s'exécutera en tant que root**.
 
@@ -363,7 +362,7 @@ alors **ce binaire s'exécutera en tant que root**.
 getcap -r / 2>/dev/null
 /usr/bin/python2.7 = cap_sys_admin+ep
 ```
-En utilisant Python, vous pouvez monter un fichier _passwd_ modifié par-dessus le vrai fichier _passwd_ :
+En utilisant Python, vous pouvez monter un fichier _passwd_ modifié par-dessus le vrai fichier _passwd_:
 ```bash
 cp /etc/passwd ./ #Create a copy of the passwd file
 openssl passwd -1 -salt abc password #Get hash of "password"
@@ -612,7 +611,7 @@ uid=0(root)
 gid=0(root)
 groups=0(root
 ```
-Listez les **processus** en cours d'exécution sur l'**hôte** `ps -eaf`
+Lister les **processus** en cours d'exécution sur l'**hôte** `ps -eaf`
 
 1. Obtenez l'**architecture** `uname -m`
 2. Trouvez un **shellcode** pour l'architecture ([https://www.exploit-db.com/exploits/41128](https://www.exploit-db.com/exploits/41128))
@@ -622,7 +621,7 @@ Listez les **processus** en cours d'exécution sur l'**hôte** `ps -eaf`
 
 ## CAP_SYS_MODULE
 
-**[`CAP_SYS_MODULE`](https://man7.org/linux/man-pages/man7/capabilities.7.html)** permet à un processus de **charger et décharger des modules du noyau (`init_module(2)`, `finit_module(2)` et `delete_module(2)` appels système)**, offrant un accès direct aux opérations de base du noyau. Cette capacité présente des risques de sécurité critiques, car elle permet l'escalade de privilèges et la compromission totale du système en permettant des modifications du noyau, contournant ainsi tous les mécanismes de sécurité Linux, y compris les modules de sécurité Linux et l'isolation des conteneurs.  
+**[`CAP_SYS_MODULE`](https://man7.org/linux/man-pages/man7/capabilities.7.html)** permet à un processus de **charger et décharger des modules du noyau (`init_module(2)`, `finit_module(2)` et `delete_module(2)` appels système)**, offrant un accès direct aux opérations de base du noyau. Cette capacité présente des risques de sécurité critiques, car elle permet l'escalade de privilèges et le compromis total du système en permettant des modifications du noyau, contournant ainsi tous les mécanismes de sécurité Linux, y compris les modules de sécurité Linux et l'isolation des conteneurs.  
 **Cela signifie que vous pouvez** **insérer/retirer des modules du noyau dans/du noyau de la machine hôte.**
 
 **Exemple avec binaire**
@@ -713,8 +712,8 @@ make -C /lib/modules/$(shell uname -r)/build M=$(PWD) clean
 > Le caractère vide avant chaque mot make dans le Makefile **doit être une tabulation, pas des espaces** !
 
 Exécutez `make` pour le compiler.
-```
-ake[1]: *** /lib/modules/5.10.0-kali7-amd64/build: No such file or directory.  Stop.
+```bash
+Make[1]: *** /lib/modules/5.10.0-kali7-amd64/build: No such file or directory.  Stop.
 
 sudo apt update
 sudo apt full-upgrade
@@ -738,7 +737,7 @@ Un autre exemple de cette technique peut être trouvé sur [https://www.cyberark
 
 **Exemple avec binaire**
 
-Le binaire pourra lire n'importe quel fichier. Donc, si un fichier comme tar a cette capacité, il pourra lire le fichier shadow :
+Le binaire sera capable de lire n'importe quel fichier. Donc, si un fichier comme tar a cette capacité, il pourra lire le fichier shadow :
 ```bash
 cd /etc
 tar -czf /tmp/shadow.tar.gz shadow #Compress show file in /tmp
@@ -758,7 +757,7 @@ Et pour lire un fichier, vous pourriez faire :
 ```python
 print(open("/etc/shadow", "r").read())
 ```
-**Exemple dans l'environnement (Docker breakout)**
+**Exemple dans l'environnement (évasion Docker)**
 
 Vous pouvez vérifier les capacités activées à l'intérieur du conteneur docker en utilisant :
 ```
@@ -775,7 +774,7 @@ groups=0(root)
 ```
 À l'intérieur de la sortie précédente, vous pouvez voir que la capacité **DAC_READ_SEARCH** est activée. En conséquence, le conteneur peut **déboguer des processus**.
 
-Vous pouvez apprendre comment l'exploitation suivante fonctionne dans [https://medium.com/@fun_cuddles/docker-breakout-exploit-analysis-a274fff0e6b3](https://medium.com/@fun_cuddles/docker-breakout-exploit-analysis-a274fff0e6b3), mais en résumé, **CAP_DAC_READ_SEARCH** nous permet non seulement de traverser le système de fichiers sans vérifications de permission, mais supprime également explicitement toutes les vérifications pour _**open_by_handle_at(2)**_ et **pourrait permettre à notre processus d'accéder à des fichiers sensibles ouverts par d'autres processus**.
+Vous pouvez apprendre comment l'exploitation suivante fonctionne dans [https://medium.com/@fun_cuddles/docker-breakout-exploit-analysis-a274fff0e6b3](https://medium.com/@fun_cuddles/docker-breakout-exploit-analysis-a274fff0e6b3) mais en résumé, **CAP_DAC_READ_SEARCH** nous permet non seulement de traverser le système de fichiers sans vérifications de permission, mais supprime également explicitement toutes les vérifications pour _**open_by_handle_at(2)**_ et **pourrait permettre à notre processus d'accéder à des fichiers sensibles ouverts par d'autres processus**.
 
 L'exploit original qui abuse de ces permissions pour lire des fichiers depuis l'hôte peut être trouvé ici : [http://stealth.openwall.net/xSports/shocker.c](http://stealth.openwall.net/xSports/shocker.c), ce qui suit est une **version modifiée qui vous permet d'indiquer le fichier que vous souhaitez lire comme premier argument et de le déverser dans un fichier.**
 ```c
@@ -940,7 +939,7 @@ return 0;
 
 Il y a beaucoup de fichiers que vous pouvez **écraser pour élever les privilèges,** [**vous pouvez trouver des idées ici**](payloads-to-execute.md#overwriting-a-file-to-escalate-privileges).
 
-**Exemple avec un binaire**
+**Exemple avec binaire**
 
 Dans cet exemple, vim a cette capacité, donc vous pouvez modifier n'importe quel fichier comme _passwd_, _sudoers_ ou _shadow_:
 ```bash
@@ -1112,7 +1111,7 @@ close(fd1);
 return 0;
 }
 ```
-Pour échapper au conteneur docker, vous pourriez **télécharger** les fichiers `/etc/shadow` et `/etc/passwd` depuis l'hôte, **ajouter** un **nouveau utilisateur** à ceux-ci, et utiliser **`shocker_write`** pour les écraser. Ensuite, **accéder** via **ssh**.
+Pour échapper au conteneur docker, vous pourriez **télécharger** les fichiers `/etc/shadow` et `/etc/passwd` depuis l'hôte, **ajouter** un **nouvel utilisateur**, et utiliser **`shocker_write`** pour les écraser. Ensuite, **accéder** via **ssh**.
 
 **Le code de cette technique a été copié du laboratoire "Abusing DAC_OVERRIDE Capability" de** [**https://www.pentesteracademy.com**](https://www.pentesteracademy.com)
 
@@ -1165,7 +1164,7 @@ os.system("/bin/bash")
 
 **Cela signifie qu'il est possible de définir l'identifiant de groupe effectif du processus créé.**
 
-Il y a beaucoup de fichiers que vous pouvez **écraser pour élever les privilèges,** [**vous pouvez trouver des idées ici**](payloads-to-execute.md#overwriting-a-file-to-escalate-privileges).
+Il existe de nombreux fichiers que vous pouvez **écraser pour élever les privilèges,** [**vous pouvez trouver des idées ici**](payloads-to-execute.md#overwriting-a-file-to-escalate-privileges).
 
 **Exemple avec un binaire**
 
@@ -1178,17 +1177,17 @@ find /etc -maxdepth 1 -perm /g=w -exec ls -lLd {} \; 2>/dev/null
 #Find every file readable by a group in /etc with a maxpath of 1
 find /etc -maxdepth 1 -perm /g=r -exec ls -lLd {} \; 2>/dev/null
 ```
-Une fois que vous avez trouvé un fichier que vous pouvez abuser (en lisant ou en écrivant) pour élever les privilèges, vous pouvez **obtenir un shell en impersonnant le groupe intéressant** avec :
+Une fois que vous avez trouvé un fichier que vous pouvez exploiter (en lisant ou en écrivant) pour élever les privilèges, vous pouvez **obtenir un shell en vous faisant passer pour le groupe intéressant** avec :
 ```python
 import os
 os.setgid(42)
 os.system("/bin/bash")
 ```
-Dans ce cas, le groupe shadow a été usurpé afin que vous puissiez lire le fichier `/etc/shadow`:
+Dans ce cas, le groupe shadow a été usurpé, vous pouvez donc lire le fichier `/etc/shadow`:
 ```bash
 cat /etc/shadow
 ```
-Si **docker** est installé, vous pourriez **vous faire passer** pour le **groupe docker** et en abuser pour communiquer avec le [**socket docker** et élever les privilèges](#writable-docker-socket).
+Si **docker** est installé, vous pourriez **imiter** le **groupe docker** et en abuser pour communiquer avec le [**socket docker** et élever les privilèges](#writable-docker-socket).
 
 ## CAP_SETFCAP
 
@@ -1228,7 +1227,7 @@ python setcapability.py /usr/bin/python2.7
 
 Une fois que vous avez la [capacité SETUID](linux-capabilities.md#cap_setuid), vous pouvez aller à sa section pour voir comment élever les privilèges.
 
-**Exemple avec l'environnement (Docker breakout)**
+**Exemple avec environnement (Docker breakout)**
 
 Par défaut, la capacité **CAP_SETFCAP est donnée au processus à l'intérieur du conteneur dans Docker**. Vous pouvez vérifier cela en faisant quelque chose comme :
 ```bash
@@ -1261,7 +1260,7 @@ Il semble que nous ne puissions ajouter à l'ensemble héritable que des capacit
 
 ## CAP_SYS_RAWIO
 
-[**CAP_SYS_RAWIO**](https://man7.org/linux/man-pages/man7/capabilities.7.html) fournit un certain nombre d'opérations sensibles, y compris l'accès à `/dev/mem`, `/dev/kmem` ou `/proc/kcore`, modifier `mmap_min_addr`, accéder aux appels système `ioperm(2)` et `iopl(2)`, et diverses commandes disque. Le `FIBMAP ioctl(2)` est également activé via cette capacité, ce qui a causé des problèmes dans le [passé](http://lkml.iu.edu/hypermail/linux/kernel/9907.0/0132.html). Selon la page de manuel, cela permet également au détenteur de `réaliser une gamme d'opérations spécifiques aux dispositifs sur d'autres dispositifs`.
+[**CAP_SYS_RAWIO**](https://man7.org/linux/man-pages/man7/capabilities.7.html) fournit un certain nombre d'opérations sensibles, y compris l'accès à `/dev/mem`, `/dev/kmem` ou `/proc/kcore`, modifier `mmap_min_addr`, accéder aux appels système `ioperm(2)` et `iopl(2)`, et diverses commandes disque. L'ioctl(2) `FIBMAP` est également activé via cette capacité, ce qui a causé des problèmes dans le [passé](http://lkml.iu.edu/hypermail/linux/kernel/9907.0/0132.html). Selon la page de manuel, cela permet également au détenteur de `réaliser une gamme d'opérations spécifiques aux dispositifs sur d'autres dispositifs`.
 
 Cela peut être utile pour **l'escalade de privilèges** et **le contournement de Docker.**
 
@@ -1271,7 +1270,7 @@ Cela peut être utile pour **l'escalade de privilèges** et **le contournement d
 
 **Exemple avec binaire**
 
-Supposons que le **`python`** binaire ait cette capacité. Si vous pouviez **également modifier une configuration de service ou de socket** (ou tout fichier de configuration lié à un service), vous pourriez y insérer une porte dérobée, puis tuer le processus lié à ce service et attendre que le nouveau fichier de configuration soit exécuté avec votre porte dérobée.
+Supposons que le **`python`** binaire ait cette capacité. Si vous pouviez **également modifier la configuration de certains services ou sockets** (ou tout fichier de configuration lié à un service), vous pourriez y insérer une porte dérobée, puis tuer le processus lié à ce service et attendre que le nouveau fichier de configuration soit exécuté avec votre porte dérobée.
 ```python
 #Use this python code to kill arbitrary processes
 import os
@@ -1297,7 +1296,7 @@ electron-cef-chromium-debugger-abuse.md
 
 **Exemple avec un binaire**
 
-Si **`python`** a cette capacité, il pourra écouter sur n'importe quel port et même se connecter à partir de celui-ci à n'importe quel autre port (certains services nécessitent des connexions à partir de ports de privilèges spécifiques)
+Si **`python`** a cette capacité, il pourra écouter sur n'importe quel port et même se connecter à partir de celui-ci à n'importe quel autre port (certains services nécessitent des connexions à partir de ports privilégiés spécifiques)
 
 {{#tabs}}
 {{#tab name="Listen"}}
@@ -1325,18 +1324,18 @@ s.connect(('10.10.10.10',500))
 
 ## CAP_NET_RAW
 
-La capacité [**CAP_NET_RAW**](https://man7.org/linux/man-pages/man7/capabilities.7.html) permet aux processus de **créer des sockets RAW et PACKET**, leur permettant de générer et d'envoyer des paquets réseau arbitraires. Cela peut entraîner des risques de sécurité dans des environnements conteneurisés, tels que le spoofing de paquets, l'injection de trafic et le contournement des contrôles d'accès réseau. Des acteurs malveillants pourraient exploiter cela pour interférer avec le routage des conteneurs ou compromettre la sécurité du réseau hôte, surtout sans protections adéquates de pare-feu. De plus, **CAP_NET_RAW** est crucial pour les conteneurs privilégiés afin de prendre en charge des opérations comme le ping via des requêtes ICMP RAW.
+[**CAP_NET_RAW**](https://man7.org/linux/man-pages/man7/capabilities.7.html) la capacité permet aux processus de **créer des sockets RAW et PACKET**, leur permettant de générer et d'envoyer des paquets réseau arbitraires. Cela peut entraîner des risques de sécurité dans des environnements conteneurisés, tels que le spoofing de paquets, l'injection de trafic et le contournement des contrôles d'accès réseau. Des acteurs malveillants pourraient exploiter cela pour interférer avec le routage des conteneurs ou compromettre la sécurité du réseau hôte, surtout sans protections de pare-feu adéquates. De plus, **CAP_NET_RAW** est crucial pour les conteneurs privilégiés afin de prendre en charge des opérations comme le ping via des requêtes ICMP RAW.
 
 **Cela signifie qu'il est possible d'intercepter le trafic.** Vous ne pouvez pas élever les privilèges directement avec cette capacité.
 
-**Exemple avec un binaire**
+**Exemple avec binaire**
 
 Si le binaire **`tcpdump`** a cette capacité, vous pourrez l'utiliser pour capturer des informations réseau.
 ```bash
 getcap -r / 2>/dev/null
 /usr/sbin/tcpdump = cap_net_raw+ep
 ```
-Notez que si l'**environnement** donne cette capacité, vous pourriez également utiliser **`tcpdump`** pour intercepter le trafic.
+Notez que si l'**environnement** donne cette capacité, vous pouvez également utiliser **`tcpdump`** pour intercepter le trafic.
 
 **Exemple avec le binaire 2**
 
@@ -1386,7 +1385,7 @@ count=count+1
 ```
 ## CAP_NET_ADMIN + CAP_NET_RAW
 
-[**CAP_NET_ADMIN**](https://man7.org/linux/man-pages/man7/capabilities.7.html) la capacité accorde au titulaire le pouvoir de **modifier les configurations réseau**, y compris les paramètres de pare-feu, les tables de routage, les autorisations de socket et les paramètres d'interface réseau au sein des espaces de noms réseau exposés. Elle permet également d'activer le **mode promiscuous** sur les interfaces réseau, permettant ainsi l'analyse des paquets à travers les espaces de noms.
+[**CAP_NET_ADMIN**](https://man7.org/linux/man-pages/man7/capabilities.7.html) la capacité accorde au titulaire le pouvoir de **modifier les configurations réseau**, y compris les paramètres de pare-feu, les tables de routage, les autorisations de socket et les paramètres d'interface réseau au sein des espaces de noms réseau exposés. Elle permet également d'activer le **mode promiscuous** sur les interfaces réseau, permettant l'analyse des paquets à travers les espaces de noms.
 
 **Exemple avec binaire**
 
@@ -1431,7 +1430,7 @@ fcntl.ioctl(fd, FS_IOC_SETFLAGS, f)
 f=open("/path/to/file.sh",'a+')
 f.write('New content for the file\n')
 ```
-> [!NOTE]
+> [!TIP]
 > Notez que généralement cet attribut immuable est défini et supprimé en utilisant :
 >
 > ```bash
@@ -1473,12 +1472,12 @@ Cette capacité permet d'effectuer des escalades de privilèges (via une lecture
 2. Avoir un accès initial au conteneur (privilégié (EUID 0), et `CAP_MKNOD` effectif).
 3. L'hôte et le conteneur doivent partager le même espace de noms utilisateur.
 
-**Étapes pour créer et accéder à un périphérique de bloc dans un conteneur :**
+**Étapes pour créer et accéder à un dispositif de bloc dans un conteneur :**
 
 1. **Sur l'hôte en tant qu'utilisateur standard :**
 
 - Déterminez votre ID utilisateur actuel avec `id`, par exemple, `uid=1000(standarduser)`.
-- Identifiez le périphérique cible, par exemple, `/dev/sdb`.
+- Identifiez le dispositif cible, par exemple, `/dev/sdb`.
 
 2. **À l'intérieur du conteneur en tant que `root` :**
 ```bash
@@ -1500,7 +1499,7 @@ ps aux | grep -i container_name | grep -i standarduser
 # Access the container's filesystem and the special block device
 head /proc/12345/root/dev/sdb
 ```
-Cette approche permet à l'utilisateur standard d'accéder et potentiellement de lire des données depuis `/dev/sdb` via le conteneur, en exploitant les espaces de noms d'utilisateur partagés et les permissions définies sur le périphérique.
+Cette approche permet à l'utilisateur standard d'accéder et potentiellement de lire des données depuis `/dev/sdb` à travers le conteneur, en exploitant les espaces de noms d'utilisateur partagés et les permissions définies sur le périphérique.
 
 ### CAP_SETPCAP
 
@@ -1508,9 +1507,9 @@ Cette approche permet à l'utilisateur standard d'accéder et potentiellement de
 
 **`CAP_SETPCAP`** est une capacité Linux qui permet à un processus de **modifier les ensembles de capacités d'un autre processus**. Elle accorde la possibilité d'ajouter ou de supprimer des capacités des ensembles de capacités effectifs, héritables et permis d'autres processus. Cependant, il existe certaines restrictions sur la façon dont cette capacité peut être utilisée.
 
-Un processus avec `CAP_SETPCAP` **ne peut accorder ou supprimer que des capacités qui se trouvent dans son propre ensemble de capacités permis**. En d'autres termes, un processus ne peut pas accorder une capacité à un autre processus s'il ne possède pas cette capacité lui-même. Cette restriction empêche un processus d'élever les privilèges d'un autre processus au-delà de son propre niveau de privilège.
+Un processus avec `CAP_SETPCAP` **ne peut accorder ou retirer que des capacités qui se trouvent dans son propre ensemble de capacités permis**. En d'autres termes, un processus ne peut pas accorder une capacité à un autre processus s'il ne possède pas cette capacité lui-même. Cette restriction empêche un processus d'élever les privilèges d'un autre processus au-delà de son propre niveau de privilège.
 
-De plus, dans les versions récentes du noyau, la capacité `CAP_SETPCAP` a été **encore restreinte**. Elle ne permet plus à un processus de modifier arbitrairement les ensembles de capacités d'autres processus. Au lieu de cela, elle **ne permet qu'à un processus de diminuer les capacités dans son propre ensemble de capacités permis ou l'ensemble de capacités permis de ses descendants**. Ce changement a été introduit pour réduire les risques de sécurité potentiels associés à cette capacité.
+De plus, dans les versions récentes du noyau, la capacité `CAP_SETPCAP` a été **encore restreinte**. Elle ne permet plus à un processus de modifier arbitrairement les ensembles de capacités d'autres processus. Au lieu de cela, elle **ne permet qu'à un processus de réduire les capacités dans son propre ensemble de capacités permis ou l'ensemble de capacités permis de ses descendants**. Ce changement a été introduit pour réduire les risques de sécurité potentiels associés à cette capacité.
 
 Pour utiliser `CAP_SETPCAP` efficacement, vous devez avoir la capacité dans votre ensemble de capacités effectif et les capacités cibles dans votre ensemble de capacités permis. Vous pouvez ensuite utiliser l'appel système `capset()` pour modifier les ensembles de capacités d'autres processus.
 

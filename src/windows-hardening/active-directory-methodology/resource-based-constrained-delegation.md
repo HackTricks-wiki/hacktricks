@@ -20,15 +20,15 @@ Cependant, si le **TGS** utilisé dans **S4U2Proxy** **n'est PAS Transférable**
 
 ### Structure de l'Attaque
 
-> Si vous avez **des privilèges d'écriture équivalents** sur un compte **Ordinateur**, vous pouvez obtenir un **accès privilégié** sur cette machine.
+> Si vous avez **des privilèges d'écriture équivalents** sur un **compte d'ordinateur**, vous pouvez obtenir **un accès privilégié** sur cette machine.
 
 Supposons que l'attaquant a déjà **des privilèges d'écriture équivalents sur l'ordinateur de la victime**.
 
-1. L'attaquant **compromet** un compte qui a un **SPN** ou **en crée un** (“Service A”). Notez que **tout** _Utilisateur Admin_ sans aucun autre privilège spécial peut **créer** jusqu'à 10 objets Ordinateur (**_MachineAccountQuota_**) et leur attribuer un **SPN**. Donc, l'attaquant peut simplement créer un objet Ordinateur et définir un SPN.
+1. L'attaquant **compromet** un compte qui a un **SPN** ou **en crée un** (“Service A”). Notez que **tout** _Utilisateur Admin_ sans aucun autre privilège spécial peut **créer** jusqu'à 10 objets d'ordinateur (**_MachineAccountQuota_**) et leur attribuer un **SPN**. Donc, l'attaquant peut simplement créer un objet d'ordinateur et définir un SPN.
 2. L'attaquant **abuse de son privilège d'ÉCRITURE** sur l'ordinateur de la victime (ServiceB) pour configurer **la délégation contraignante basée sur les ressources pour permettre à ServiceA d'imposer n'importe quel utilisateur** contre cet ordinateur de la victime (ServiceB).
 3. L'attaquant utilise Rubeus pour effectuer une **attaque S4U complète** (S4U2Self et S4U2Proxy) de Service A à Service B pour un utilisateur **avec un accès privilégié à Service B**.
-1. S4U2Self (depuis le compte SPN compromis/créé) : Demande un **TGS d'Administrateur à moi** (Non Transférable).
-2. S4U2Proxy : Utilise le **TGS non Transférable** de l'étape précédente pour demander un **TGS** de **l'Administrateur** à l'**hôte victime**.
+1. S4U2Self (depuis le compte SPN compromis/créé) : Demander un **TGS d'Administrateur pour moi** (Non Transférable).
+2. S4U2Proxy : Utiliser le **TGS non Transférable** de l'étape précédente pour demander un **TGS** de **l'Administrateur** au **hôte victime**.
 3. Même si vous utilisez un TGS non Transférable, comme vous exploitez la délégation contraignante basée sur les ressources, cela fonctionnera.
 4. L'attaquant peut **passer le ticket** et **imposer** l'utilisateur pour obtenir **l'accès au ServiceB de la victime**.
 
@@ -48,7 +48,7 @@ New-MachineAccount -MachineAccount SERVICEA -Password $(ConvertTo-SecureString '
 # Check if created
 Get-DomainComputer SERVICEA
 ```
-### Configuration de la délégation contrainte basée sur les ressources
+### Configurer la délégation contrainte basée sur les ressources
 
 **Utilisation du module PowerShell activedirectory**
 ```bash
@@ -70,7 +70,7 @@ msds-allowedtoactonbehalfofotheridentity
 ----------------------------------------
 {1, 0, 4, 128...}
 ```
-### Réalisation d'une attaque S4U complète (Windows/Rubeus)
+### Réaliser une attaque S4U complète (Windows/Rubeus)
 
 Tout d'abord, nous avons créé le nouvel objet Ordinateur avec le mot de passe `123456`, donc nous avons besoin du hash de ce mot de passe :
 ```bash
@@ -86,7 +86,7 @@ Vous pouvez générer plus de tickets pour plus de services en demandant une seu
 rubeus.exe s4u /user:FAKECOMPUTER$ /aes256:<AES 256 hash> /impersonateuser:administrator /msdsspn:cifs/victim.domain.local /altservice:krbtgt,cifs,host,http,winrm,RPCSS,wsman,ldap /domain:domain.local /ptt
 ```
 > [!CAUTION]
-> Notez que les utilisateurs ont un attribut appelé "**Cannot be delegated**". Si un utilisateur a cet attribut à True, vous ne pourrez pas l'imiter. Cette propriété peut être vue dans bloodhound.
+> Notez que les utilisateurs ont un attribut appelé "**Cannot be delegated**". Si un utilisateur a cet attribut à True, vous ne pourrez pas l'imiter. Cette propriété peut être vue dans BloodHound.
 
 ### Outils Linux : RBCD de bout en bout avec Impacket (2024+)
 
@@ -127,7 +127,7 @@ Apprenez-en plus sur les [**tickets de service disponibles ici**](silver-ticket.
 
 ### Énumérer les ordinateurs avec RBCD configuré
 
-PowerShell (décodage du SD pour résoudre les SIDs) :
+PowerShell (décodage du SD pour résoudre les SID) :
 ```powershell
 # List all computers with msDS-AllowedToActOnBehalfOfOtherIdentity set and resolve principals
 Import-Module ActiveDirectory

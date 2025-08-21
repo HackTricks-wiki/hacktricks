@@ -4,9 +4,9 @@
 
 ## Informations de base
 
-MacOS Sandbox (appelé initialement Seatbelt) **limite les applications** s'exécutant à l'intérieur du sandbox aux **actions autorisées spécifiées dans le profil Sandbox** avec lequel l'application s'exécute. Cela aide à garantir que **l'application n'accédera qu'aux ressources attendues**.
+Le Sandbox macOS (appelé initialement Seatbelt) **limite les applications** s'exécutant à l'intérieur du sandbox aux **actions autorisées spécifiées dans le profil Sandbox** avec lequel l'application s'exécute. Cela aide à garantir que **l'application n'accédera qu'aux ressources attendues**.
 
-Toute application avec l'**entitlement** **`com.apple.security.app-sandbox`** sera exécutée à l'intérieur du sandbox. **Les binaires Apple** sont généralement exécutés à l'intérieur d'un Sandbox, et toutes les applications de l'**App Store ont cet entitlement**. Ainsi, plusieurs applications seront exécutées à l'intérieur du sandbox.
+Toute application avec l'**entitlement** **`com.apple.security.app-sandbox`** sera exécutée à l'intérieur du sandbox. Les **binaires Apple** sont généralement exécutés à l'intérieur d'un Sandbox, et toutes les applications de l'**App Store ont cet entitlement**. Ainsi, plusieurs applications seront exécutées à l'intérieur du sandbox.
 
 Pour contrôler ce qu'un processus peut ou ne peut pas faire, le **Sandbox a des hooks** dans presque toutes les opérations qu'un processus pourrait essayer (y compris la plupart des syscalls) en utilisant **MACF**. Cependant, d**épendant** des **entitlements** de l'application, le Sandbox peut être plus permissif avec le processus.
 
@@ -54,7 +54,7 @@ drwx------   2 username  staff    64 Mar 24 18:02 SystemData
 drwx------   2 username  staff    64 Mar 24 18:02 tmp
 ```
 > [!CAUTION]
-> Notez que même si les symlinks sont là pour "s'échapper" du Sandbox et accéder à d'autres dossiers, l'App doit toujours **avoir les permissions** pour y accéder. Ces permissions se trouvent dans le **`.plist`** dans les `RedirectablePaths`.
+> Notez que même si les symlinks sont là pour "s'échapper" du Sandbox et accéder à d'autres dossiers, l'App doit toujours **avoir des permissions** pour y accéder. Ces permissions se trouvent dans le **`.plist`** dans les `RedirectablePaths`.
 
 Le **`SandboxProfileData`** est le profil de sandbox compilé CFData échappé en B64.
 ```bash
@@ -106,11 +106,11 @@ AAAhAboBAAAAAAgAAABZAO4B5AHjBMkEQAUPBSsGPwsgASABHgEgASABHwEf...
 [...]
 ```
 > [!WARNING]
-> Tout ce qui est créé/modifié par une application sandboxée recevra l'**attribut de quarantaine**. Cela empêchera un espace sandbox en déclenchant Gatekeeper si l'application sandbox essaie d'exécuter quelque chose avec **`open`**.
+> Tout ce qui est créé/modifié par une application en bac à sable recevra l'**attribut de quarantaine**. Cela empêchera un espace de bac à sable en déclenchant Gatekeeper si l'application en bac à sable essaie d'exécuter quelque chose avec **`open`**.
 
-## Profils de Sandbox
+## Profils de Bac à Sable
 
-Les profils de Sandbox sont des fichiers de configuration qui indiquent ce qui sera **autorisé/interdit** dans ce **Sandbox**. Il utilise le **Sandbox Profile Language (SBPL)**, qui utilise le langage de programmation [**Scheme**](<https://en.wikipedia.org/wiki/Scheme_(programming_language)>).
+Les profils de bac à sable sont des fichiers de configuration qui indiquent ce qui sera **autorisé/interdit** dans ce **bac à sable**. Il utilise le **Sandbox Profile Language (SBPL)**, qui utilise le langage de programmation [**Scheme**](<https://en.wikipedia.org/wiki/Scheme_(programming_language)>).
 
 Ici, vous pouvez trouver un exemple :
 ```scheme
@@ -135,7 +135,7 @@ Ici, vous pouvez trouver un exemple :
 >
 > Notez que dans la version compilée d'un profil, le nom des opérations est remplacé par leurs entrées dans un tableau connu par le dylib et le kext, rendant la version compilée plus courte et plus difficile à lire.
 
-Des **services système** importants s'exécutent également dans leur propre **sandbox** personnalisée, comme le service `mdnsresponder`. Vous pouvez consulter ces **profils de sandbox** personnalisés dans :
+Les **services système** importants s'exécutent également dans leur propre **sandbox** personnalisée, comme le service `mdnsresponder`. Vous pouvez consulter ces **profils de sandbox** personnalisés dans :
 
 - **`/usr/share/sandbox`**
 - **`/System/Library/Sandbox/Profiles`**
@@ -199,8 +199,8 @@ log show --style syslog --predicate 'eventMessage contains[c] "sandbox"' --last 
 {{#endtab}}
 {{#endtabs}}
 
-> [!NOTE]
-> Notez que le **logiciel** **développé par Apple** qui fonctionne sur **Windows** **n'a pas de précautions de sécurité supplémentaires**, telles que le sandboxing des applications.
+> [!TIP]
+> Notez que le **logiciel** **écrit par Apple** qui fonctionne sur **Windows** **n'a pas de précautions de sécurité supplémentaires**, telles que le sandboxing des applications.
 
 Exemples de contournements :
 
@@ -222,7 +222,7 @@ sandbox-exec -f /tmp/trace.sb /bin/ls
 ```
 Dans `/tmp/trace.out`, vous pourrez voir chaque vérification de sandbox effectuée chaque fois qu'elle a été appelée (donc, beaucoup de doublons).
 
-Il est également possible de tracer le sandbox en utilisant le **`-t`** paramètre : `sandbox-exec -t /path/trace.out -p "(version 1)" /bin/ls`
+Il est également possible de tracer le sandbox en utilisant le paramètre **`-t`** : `sandbox-exec -t /path/trace.out -p "(version 1)" /bin/ls`
 
 #### Via API
 
@@ -287,8 +287,8 @@ Les extensions permettent de donner des privilèges supplémentaires à un objet
 
 Les extensions sont stockées dans le deuxième emplacement d'étiquette MACF accessible depuis les informations d'identification du processus. Le **`sbtool`** suivant peut accéder à ces informations.
 
-Notez que les extensions sont généralement accordées par des processus autorisés, par exemple, `tccd` accordera le jeton d'extension de `com.apple.tcc.kTCCServicePhotos` lorsqu'un processus essaie d'accéder aux photos et a été autorisé dans un message XPC. Ensuite, le processus devra consommer le jeton d'extension pour qu'il soit ajouté.\
-Notez que les jetons d'extension sont de longs hexadécimaux qui codent les permissions accordées. Cependant, ils n'ont pas le PID autorisé codé en dur, ce qui signifie que tout processus ayant accès au jeton pourrait être **consommé par plusieurs processus**.
+Notez que les extensions sont généralement accordées par des processus autorisés, par exemple, `tccd` accordera le jeton d'extension de `com.apple.tcc.kTCCServicePhotos` lorsqu'un processus essaie d'accéder aux photos et a été autorisé dans un message XPC. Ensuite, le processus devra consommer le jeton d'extension pour qu'il soit ajouté à celui-ci.\
+Notez que les jetons d'extension sont de longs hexadécimaux qui codent les autorisations accordées. Cependant, ils n'ont pas le PID autorisé codé en dur, ce qui signifie que tout processus ayant accès au jeton pourrait être **consommé par plusieurs processus**.
 
 Notez que les extensions sont également très liées aux attributions, donc avoir certaines attributions pourrait automatiquement accorder certaines extensions.
 
@@ -337,7 +337,7 @@ L'appel de fonction `___sandbox_ms` enveloppe `mac_syscall` en indiquant dans le
 - **sandbox_user_state_item_buffer_send (#15)** : (iOS 10+) Définir des métadonnées en mode utilisateur dans le sandbox.
 - **inspect (#16)** : Fournir des informations de débogage sur un processus sandboxé.
 - **dump (#18)** : (macOS 11) Dump le profil actuel d'un sandbox pour analyse.
-- **vtrace (#19)** : Tracer les opérations de sandbox pour le suivi ou le débogage.
+- **vtrace (#19)** : Tracer les opérations de sandbox pour le monitoring ou le débogage.
 - **builtin_profile_deactivate (#20)** : (macOS < 11) Désactiver les profils nommés (par exemple, `pe_i_can_has_debugger`).
 - **check_bulk (#21)** : Effectuer plusieurs opérations `sandbox_check` en un seul appel.
 - **reference_retain_by_audit_token (#28)** : Créer une référence pour un jeton d'audit à utiliser dans les vérifications de sandbox.
@@ -360,19 +360,19 @@ Notez qu'en iOS, l'extension du noyau contient **tous les profils codés en dur*
 
 **`Sandbox.kext`** utilise plus d'une centaine de hooks via MACF. La plupart des hooks vérifieront simplement certains cas triviaux qui permettent d'effectuer l'action, sinon, elles appelleront **`cred_sb_evalutate`** avec les **identifiants** de MACF et un nombre correspondant à l'**opération** à effectuer et un **buffer** pour la sortie.
 
-Un bon exemple de cela est la fonction **`_mpo_file_check_mmap`** qui accroche **`mmap`** et qui commencera à vérifier si la nouvelle mémoire va être modifiable (et si ce n'est pas le cas, autoriser l'exécution), puis elle vérifiera si elle est utilisée pour le cache partagé dyld et si c'est le cas, autoriser l'exécution, et enfin, elle appellera **`sb_evaluate_internal`** (ou l'un de ses wrappers) pour effectuer d'autres vérifications d'autorisation.
+Un bon exemple de cela est la fonction **`_mpo_file_check_mmap`** qui accroche **`mmap`** et qui commencera à vérifier si la nouvelle mémoire va être modifiable (et si ce n'est pas le cas, autoriser l'exécution), puis elle vérifiera si elle est utilisée pour le cache partagé dyld et si c'est le cas, autoriser l'exécution, et enfin elle appellera **`sb_evaluate_internal`** (ou l'un de ses wrappers) pour effectuer d'autres vérifications d'autorisation.
 
 De plus, parmi les centaines de hooks utilisés par Sandbox, il y en a 3 en particulier qui sont très intéressants :
 
-- `mpo_proc_check_for` : Elle applique le profil si nécessaire et si elle n'a pas été appliquée précédemment.
-- `mpo_vnode_check_exec` : Appelée lorsqu'un processus charge le binaire associé, puis une vérification de profil est effectuée et également une vérification interdisant les exécutions SUID/SGID.
-- `mpo_cred_label_update_execve` : Cela est appelé lorsque l'étiquette est assignée. C'est le plus long car il est appelé lorsque le binaire est entièrement chargé mais n'a pas encore été exécuté. Il effectuera des actions telles que la création de l'objet sandbox, l'attachement de la structure sandbox aux identifiants kauth, la suppression de l'accès aux ports mach...
+- `mpo_proc_check_for` : Elle applique le profil si nécessaire et s'il n'a pas été appliqué précédemment.
+- `mpo_vnode_check_exec` : Appelée lorsqu'un processus charge le binaire associé, puis une vérification de profil est effectuée ainsi qu'une vérification interdisant les exécutions SUID/SGID.
+- `mpo_cred_label_update_execve` : Cela est appelé lorsque l'étiquette est assignée. C'est le plus long car il est appelé lorsque le binaire est entièrement chargé mais qu'il n'a pas encore été exécuté. Il effectuera des actions telles que la création de l'objet sandbox, l'attachement de la structure sandbox aux identifiants kauth, la suppression de l'accès aux ports mach...
 
 Notez que **`_cred_sb_evalutate`** est un wrapper autour de **`sb_evaluate_internal`** et cette fonction obtient les identifiants passés et effectue ensuite l'évaluation en utilisant la fonction **`eval`** qui évalue généralement le **profil de plateforme** qui est par défaut appliqué à tous les processus et ensuite le **profil de processus spécifique**. Notez que le profil de plateforme est l'un des principaux composants de **SIP** dans macOS.
 
 ## Sandboxd
 
-Sandbox dispose également d'un démon utilisateur en cours d'exécution exposant le service XPC Mach `com.apple.sandboxd` et liant le port spécial 14 (`HOST_SEATBELT_PORT`) que l'extension du noyau utilise pour communiquer avec lui. Il expose certaines fonctions en utilisant MIG.
+Sandbox dispose également d'un démon utilisateur en cours d'exécution exposant le service Mach XPC `com.apple.sandboxd` et liant le port spécial 14 (`HOST_SEATBELT_PORT`) que l'extension du noyau utilise pour communiquer avec lui. Il expose certaines fonctions en utilisant MIG.
 
 ## References
 

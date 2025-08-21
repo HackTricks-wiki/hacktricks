@@ -18,7 +18,7 @@ Permissions dans un **répertoire** :
 
 - Un parent **propriétaire de répertoire** dans le chemin est l'utilisateur
 - Un parent **propriétaire de répertoire** dans le chemin est un **groupe d'utilisateurs** avec **accès en écriture**
-- Un **groupe d'utilisateurs** a un accès **en écriture** au **fichier**
+- Un **groupe** d'utilisateurs a un accès **en écriture** au **fichier**
 
 Avec l'une des combinaisons précédentes, un attaquant pourrait **injecter** un **lien sym/hard** vers le chemin attendu pour obtenir un écriture arbitraire privilégiée.
 
@@ -60,15 +60,15 @@ Exemple :
 
 ### Fuite FD (pas de `O_CLOEXEC`)
 
-Si un appel à `open` n'a pas le drapeau `O_CLOEXEC`, le descripteur de fichier sera hérité par le processus enfant. Donc, si un processus privilégié ouvre un fichier privilégié et exécute un processus contrôlé par l'attaquant, l'attaquant **héritera le FD sur le fichier privilégié**.
+Si un appel à `open` n'a pas le drapeau `O_CLOEXEC`, le descripteur de fichier sera hérité par le processus enfant. Donc, si un processus privilégié ouvre un fichier privilégié et exécute un processus contrôlé par l'attaquant, l'attaquant **héritera du FD sur le fichier privilégié**.
 
-Si vous pouvez faire en sorte qu'un **processus ouvre un fichier ou un dossier avec des privilèges élevés**, vous pouvez abuser de **`crontab`** pour ouvrir un fichier dans `/etc/sudoers.d` avec **`EDITOR=exploit.py`**, de sorte que `exploit.py` obtiendra le FD vers le fichier à l'intérieur de `/etc/sudoers` et en abusant de celui-ci.
+Si vous pouvez faire en sorte qu'un **processus ouvre un fichier ou un dossier avec des privilèges élevés**, vous pouvez abuser de **`crontab`** pour ouvrir un fichier dans `/etc/sudoers.d` avec **`EDITOR=exploit.py`**, de sorte que `exploit.py` obtiendra le FD vers le fichier à l'intérieur de `/etc/sudoers` et l'abusera.
 
 Par exemple : [https://youtu.be/f1HA5QhLQ7Y?t=21098](https://youtu.be/f1HA5QhLQ7Y?t=21098), code : https://github.com/gergelykalman/CVE-2023-32428-a-macOS-LPE-via-MallocStackLogging
 
 ## Éviter les astuces xattrs de quarantaine
 
-### Supprimer cela
+### Supprimer
 ```bash
 xattr -d com.apple.quarantine /path/to/file_or_app
 ```
@@ -97,7 +97,7 @@ xattr: [Errno 1] Operation not permitted: '/tmp/mnt/lol'
 ```
 ### writeextattr ACL
 
-Cette ACL empêche l'ajout de `xattrs` au fichier.
+Cette ACL empêche d'ajouter des `xattrs` au fichier.
 ```bash
 rm -rf /tmp/test*
 echo test >/tmp/test
@@ -148,6 +148,7 @@ ls -le test
 
 Pas vraiment nécessaire mais je le laisse là juste au cas où :
 
+
 {{#ref}}
 macos-xattr-acls-extra-stuff.md
 {{#endref}}
@@ -173,7 +174,7 @@ csops(pid, 9, &status, 4); // CS_OPS_SET_STATUS
 status = SecTaskGetCodeSignStatus(SecTaskCreateFromSelf(0));
 NSLog(@"=====Inject successfully into %d(%@), csflags=0x%x", pid, exePath, status);
 ```
-## Contournement des signatures de code
+## Bypass Code Signatures
 
 Les bundles contiennent le fichier **`_CodeSignature/CodeResources`** qui contient le **hash** de chaque **fichier** dans le **bundle**. Notez que le hash de CodeResources est également **intégré dans l'exécutable**, donc nous ne pouvons pas y toucher non plus.
 
@@ -248,7 +249,7 @@ hdiutil detach /private/tmp/mnt 1>/dev/null
 # You can also create a dmg from an app using:
 hdiutil create -srcfolder justsome.app justsome.dmg
 ```
-Habituellement, macOS monte le disque en communiquant avec le service Mach `com.apple.DiskArbitration.diskarbitrationd` (fourni par `/usr/libexec/diskarbitrationd`). Si vous ajoutez le paramètre `-d` au fichier plist des LaunchDaemons et redémarrez, il stockera les journaux dans `/var/log/diskarbitrationd.log`.\
+Habituellement, macOS monte le disque en communiquant avec le service Mach `com.apple.DiskArbitrarion.diskarbitrariond` (fourni par `/usr/libexec/diskarbitrationd`). Si vous ajoutez le paramètre `-d` au fichier plist LaunchDaemons et redémarrez, il stockera des journaux dans `/var/log/diskarbitrationd.log`.\
 Cependant, il est possible d'utiliser des outils comme `hdik` et `hdiutil` pour communiquer directement avec le kext `com.apple.driver.DiskImages`.
 
 ## Écritures arbitraires
@@ -278,7 +279,7 @@ Vous pouvez **falsifier** une exécution de ce script avec : **`sudo periodic da
 </dict>
 </plist>
 ```
-Générez simplement le script `/Applications/Scripts/privesc.sh` avec les **commandes** que vous souhaitez exécuter en tant que root.
+Juste générez le script `/Applications/Scripts/privesc.sh` avec les **commandes** que vous aimeriez exécuter en tant que root.
 
 ### Fichier Sudoers
 
@@ -304,11 +305,11 @@ Cela créera le fichier `/etc/sudoers.d/lpe` avec des permissions 777. Le surplu
 
 Ensuite, écrivez dans `/etc/sudoers.d/lpe` la configuration nécessaire pour escalader les privilèges comme `%staff ALL=(ALL) NOPASSWD:ALL`.
 
-Puis, modifiez le fichier `/etc/cups/cups-files.conf` en indiquant `LogFilePerm 700` afin que le nouveau fichier sudoers devienne valide en invoquant `cupsctl`.
+Puis, modifiez le fichier `/etc/cups/cups-files.conf` en indiquant à nouveau `LogFilePerm 700` afin que le nouveau fichier sudoers devienne valide en invoquant `cupsctl`.
 
 ### Évasion du Sandbox
 
-Il est possible d'échapper au sandbox macOS avec un écriture arbitraire sur le FS. Pour quelques exemples, consultez la page [macOS Auto Start](../../../../macos-auto-start-locations.md), mais un cas courant est d'écrire un fichier de préférences Terminal dans `~/Library/Preferences/com.apple.Terminal.plist` qui exécute une commande au démarrage et de l'appeler en utilisant `open`.
+Il est possible d'échapper au sandbox macOS avec un écriture arbitraire sur le FS. Pour quelques exemples, consultez la page [macOS Auto Start](../../../../macos-auto-start-locations.md), mais un exemple courant est d'écrire un fichier de préférences Terminal dans `~/Library/Preferences/com.apple.Terminal.plist` qui exécute une commande au démarrage et de l'appeler en utilisant `open`.
 
 ## Générer des fichiers écrits par d'autres utilisateurs
 
@@ -326,7 +327,7 @@ echo $FILENAME
 ```
 ## Mémoire Partagée POSIX
 
-**La mémoire partagée POSIX** permet aux processus dans des systèmes d'exploitation conformes à POSIX d'accéder à une zone de mémoire commune, facilitant une communication plus rapide par rapport à d'autres méthodes de communication inter-processus. Cela implique de créer ou d'ouvrir un objet de mémoire partagée avec `shm_open()`, de définir sa taille avec `ftruncate()`, et de le mapper dans l'espace d'adresses du processus en utilisant `mmap()`. Les processus peuvent ensuite lire et écrire directement dans cette zone de mémoire. Pour gérer l'accès concurrent et prévenir la corruption des données, des mécanismes de synchronisation tels que des mutex ou des sémaphores sont souvent utilisés. Enfin, les processus désassocient et ferment la mémoire partagée avec `munmap()` et `close()`, et éventuellement suppriment l'objet de mémoire avec `shm_unlink()`. Ce système est particulièrement efficace pour un IPC rapide et efficace dans des environnements où plusieurs processus doivent accéder rapidement à des données partagées.
+**La mémoire partagée POSIX** permet aux processus dans des systèmes d'exploitation conformes à POSIX d'accéder à une zone de mémoire commune, facilitant une communication plus rapide par rapport à d'autres méthodes de communication inter-processus. Cela implique de créer ou d'ouvrir un objet de mémoire partagée avec `shm_open()`, de définir sa taille avec `ftruncate()`, et de le mapper dans l'espace d'adressage du processus en utilisant `mmap()`. Les processus peuvent ensuite lire et écrire directement dans cette zone de mémoire. Pour gérer l'accès concurrent et prévenir la corruption des données, des mécanismes de synchronisation tels que des mutex ou des sémaphores sont souvent utilisés. Enfin, les processus désassocient et ferment la mémoire partagée avec `munmap()` et `close()`, et éventuellement suppriment l'objet de mémoire avec `shm_unlink()`. Ce système est particulièrement efficace pour un IPC rapide et efficace dans des environnements où plusieurs processus doivent accéder rapidement à des données partagées.
 
 <details>
 

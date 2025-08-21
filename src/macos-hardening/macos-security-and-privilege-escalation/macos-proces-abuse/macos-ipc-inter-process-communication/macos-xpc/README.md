@@ -4,17 +4,17 @@
 
 ## Informations de base
 
-XPC, qui signifie XNU (le noyau utilisé par macOS) inter-Process Communication, est un cadre pour **la communication entre processus** sur macOS et iOS. XPC fournit un mécanisme pour effectuer des **appels de méthode sûrs et asynchrones entre différents processus** sur le système. C'est une partie du paradigme de sécurité d'Apple, permettant la **création d'applications séparées par privilèges** où chaque **composant** fonctionne avec **seulement les permissions dont il a besoin** pour faire son travail, limitant ainsi les dommages potentiels d'un processus compromis.
+XPC, qui signifie XNU (le noyau utilisé par macOS) inter-Process Communication, est un cadre pour **la communication entre processus** sur macOS et iOS. XPC fournit un mécanisme pour effectuer des **appels de méthode asynchrones et sécurisés entre différents processus** sur le système. C'est une partie du paradigme de sécurité d'Apple, permettant la **création d'applications séparées par privilèges** où chaque **composant** fonctionne avec **seulement les permissions nécessaires** pour accomplir sa tâche, limitant ainsi les dommages potentiels d'un processus compromis.
 
 XPC utilise une forme de communication inter-processus (IPC), qui est un ensemble de méthodes permettant à différents programmes s'exécutant sur le même système d'échanger des données.
 
 Les principaux avantages de XPC incluent :
 
-1. **Sécurité** : En séparant le travail en différents processus, chaque processus peut se voir accorder uniquement les permissions dont il a besoin. Cela signifie que même si un processus est compromis, il a une capacité limitée à causer des dommages.
+1. **Sécurité** : En séparant le travail en différents processus, chaque processus peut se voir accorder uniquement les permissions dont il a besoin. Cela signifie que même si un processus est compromis, sa capacité à causer des dommages est limitée.
 2. **Stabilité** : XPC aide à isoler les plantages au composant où ils se produisent. Si un processus plante, il peut être redémarré sans affecter le reste du système.
 3. **Performance** : XPC permet une concurrence facile, car différentes tâches peuvent être exécutées simultanément dans différents processus.
 
-Le seul **inconvénient** est que **séparer une application en plusieurs processus** les faisant communiquer via XPC est **moins efficace**. Mais dans les systèmes d'aujourd'hui, cela n'est presque pas perceptible et les avantages sont meilleurs.
+Le seul **inconvénient** est que **séparer une application en plusieurs processus** les faisant communiquer via XPC est **moins efficace**. Mais dans les systèmes d'aujourd'hui, cela n'est presque pas perceptible et les avantages l'emportent.
 
 ## Services XPC spécifiques à l'application
 
@@ -72,8 +72,8 @@ Chaque message XPC est un objet dictionnaire qui simplifie la sérialisation et 
 De plus, la fonction `xpc_copy_description(object)` peut être utilisée pour obtenir une représentation sous forme de chaîne de l'objet, ce qui peut être utile à des fins de débogage.\
 Ces objets ont également certaines méthodes à appeler comme `xpc_<object>_copy`, `xpc_<object>_equal`, `xpc_<object>_hash`, `xpc_<object>_serialize`, `xpc_<object>_deserialize`...
 
-Les `xpc_object_t` sont créés en appelant la fonction `xpc_<objetType>_create`, qui appelle en interne `_xpc_base_create(Class, Size)` où le type de la classe de l'objet (l'un de `XPC_TYPE_*`) et sa taille sont indiqués (40B supplémentaires seront ajoutés à la taille pour les métadonnées). Ce qui signifie que les données de l'objet commenceront à l'offset de 40B.\
-Par conséquent, le `xpc_<objectType>_t` est en quelque sorte une sous-classe du `xpc_object_t` qui serait une sous-classe de `os_object_t*`.
+Les `xpc_object_t` sont créés en appelant la fonction `xpc_<objetType>_create`, qui appelle en interne `_xpc_base_create(Class, Size)` où le type de la classe de l'objet (un des `XPC_TYPE_*`) et sa taille sont indiqués (40 octets supplémentaires seront ajoutés à la taille pour les métadonnées). Ce qui signifie que les données de l'objet commenceront à l'offset de 40 octets.\
+Par conséquent, le `xpc_<objectType>_t` est en quelque sorte une sous-classe de `xpc_object_t`, qui serait une sous-classe de `os_object_t*`.
 
 > [!WARNING]
 > Notez qu'il devrait être le développeur qui utilise `xpc_dictionary_[get/set]_<objectType>` pour obtenir ou définir le type et la valeur réelle d'une clé.
@@ -85,11 +85,11 @@ Il est possible de créer un serveur XPC en appelant `xpc_pipe_create()` ou `xpc
 
 Notez que l'objet **`xpc_pipe`** est un **`xpc_object_t`** avec des informations dans sa structure sur les deux ports Mach utilisés et le nom (le cas échéant). Le nom, par exemple, le démon `secinitd` dans son plist `/System/Library/LaunchDaemons/com.apple.secinitd.plist` configure le tuyau appelé `com.apple.secinitd`.
 
-Un exemple de **`xpc_pipe`** est le **bootstrap pipe** créé par **`launchd`** rendant possible le partage des ports Mach.
+Un exemple de **`xpc_pipe`** est le **tuyau bootstrap** créé par **`launchd`**, rendant possible le partage des ports Mach.
 
 - **`NSXPC*`**
 
-Ce sont des objets de haut niveau Objective-C qui permettent l'abstraction des connexions XPC.\
+Ce sont des objets de haut niveau en Objective-C qui permettent l'abstraction des connexions XPC.\
 De plus, il est plus facile de déboguer ces objets avec DTrace que les précédents.
 
 - **`GCD Queues`**
@@ -105,7 +105,7 @@ Ce fichier a d'autres clés de configuration comme `ServiceType` qui peut être 
 
 L'application tente de **se connecter** à un service XPC en utilisant `xpc_connection_create_mach_service`, puis launchd localise le démon et démarre **`xpcproxy`**. **`xpcproxy`** applique les restrictions configurées et crée le service avec les FDs et ports Mach fournis.
 
-Afin d'améliorer la vitesse de recherche du service XPC, un cache est utilisé.
+Pour améliorer la vitesse de recherche du service XPC, un cache est utilisé.
 
 Il est possible de tracer les actions de `xpcproxy` en utilisant :
 ```bash
@@ -116,11 +116,11 @@ L'utilitaire `xpcproxy` utilise le préfixe `0x22`, par exemple : `0x2200001c: x
 
 ## Messages d'événements XPC
 
-Les applications peuvent **s'abonner** à différents **messages** d'événements, leur permettant d'être **initiés à la demande** lorsque de tels événements se produisent. La **configuration** de ces services se fait dans les fichiers **plist launchd**, situés dans les **mêmes répertoires que les précédents** et contenant une clé **`LaunchEvent`** supplémentaire.
+Les applications peuvent **s'abonner** à différents **messages** d'événements, leur permettant d'être **initiés à la demande** lorsque de tels événements se produisent. La **configuration** de ces services se fait dans les fichiers **plist de launchd**, situés dans les **mêmes répertoires que les précédents** et contenant une clé **`LaunchEvent`** supplémentaire.
 
 ### Vérification du processus de connexion XPC
 
-Lorsqu'un processus essaie d'appeler une méthode via une connexion XPC, le **service XPC doit vérifier si ce processus est autorisé à se connecter**. Voici les méthodes courantes pour vérifier cela et les pièges courants :
+Lorsqu'un processus essaie d'appeler une méthode via une connexion XPC, le **service XPC doit vérifier si ce processus est autorisé à se connecter**. Voici les moyens courants de vérifier cela et les pièges courants :
 
 {{#ref}}
 macos-xpc-connecting-process-check/

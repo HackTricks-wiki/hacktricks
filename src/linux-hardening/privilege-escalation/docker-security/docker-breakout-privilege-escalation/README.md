@@ -5,14 +5,14 @@
 ## Énumération automatique & Évasion
 
 - [**linpeas**](https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS): Il peut également **énumérer les conteneurs**
-- [**CDK**](https://github.com/cdk-team/CDK#installationdelivery): Cet outil est assez **utile pour énumérer le conteneur dans lequel vous êtes et même essayer de s'échapper automatiquement**
-- [**amicontained**](https://github.com/genuinetools/amicontained): Outil utile pour obtenir les privilèges que le conteneur a afin de trouver des moyens de s'en échapper
+- [**CDK**](https://github.com/cdk-team/CDK#installationdelivery): Cet outil est assez **utile pour énumérer le conteneur dans lequel vous vous trouvez et même essayer de s'échapper automatiquement**
+- [**amicontained**](https://github.com/genuinetools/amicontained): Outil utile pour obtenir les privilèges que le conteneur a afin de trouver des moyens d'en sortir
 - [**deepce**](https://github.com/stealthcopter/deepce): Outil pour énumérer et s'échapper des conteneurs
 - [**grype**](https://github.com/anchore/grype): Obtenez les CVE contenues dans le logiciel installé dans l'image
 
 ## Évasion du socket Docker monté
 
-Si d'une manière ou d'une autre vous constatez que le **socket docker est monté** à l'intérieur du conteneur docker, vous pourrez vous en échapper.\
+Si d'une manière ou d'une autre vous constatez que le **socket docker est monté** à l'intérieur du conteneur docker, vous pourrez en sortir.\
 Cela se produit généralement dans des conteneurs docker qui, pour une raison quelconque, doivent se connecter au démon docker pour effectuer des actions.
 ```bash
 #Search the socket
@@ -33,12 +33,12 @@ nsenter --target 1 --mount --uts --ipc --net --pid -- bash
 # Get full privs in container without --privileged
 docker run -it -v /:/host/ --cap-add=ALL --security-opt apparmor=unconfined --security-opt seccomp=unconfined --security-opt label:disable --pid=host --userns=host --uts=host --cgroupns=host ubuntu chroot /host/ bash
 ```
-> [!NOTE]
+> [!TIP]
 > Dans le cas où le **socket docker est à un endroit inattendu**, vous pouvez toujours communiquer avec lui en utilisant la commande **`docker`** avec le paramètre **`-H unix:///path/to/docker.sock`**
 
 Le démon Docker peut également [écouter sur un port (par défaut 2375, 2376)](../../../../network-services-pentesting/2375-pentesting-docker.md) ou sur les systèmes basés sur Systemd, la communication avec le démon Docker peut se faire via le socket Systemd `fd://`.
 
-> [!NOTE]
+> [!TIP]
 > De plus, faites attention aux sockets d'exécution d'autres environnements d'exécution de haut niveau :
 >
 > - dockershim : `unix:///var/run/dockershim.sock`
@@ -48,9 +48,9 @@ Le démon Docker peut également [écouter sur un port (par défaut 2375, 2376)]
 > - rktlet : `unix:///var/run/rktlet.sock`
 > - ...
 
-## Abus de capacités pour évasion
+## Abus de capacités
 
-Vous devez vérifier les capacités du conteneur, s'il en a l'une des suivantes, vous pourriez être en mesure de vous échapper : **`CAP_SYS_ADMIN`**_,_ **`CAP_SYS_PTRACE`**, **`CAP_SYS_MODULE`**, **`DAC_READ_SEARCH`**, **`DAC_OVERRIDE, CAP_SYS_RAWIO`, `CAP_SYSLOG`, `CAP_NET_RAW`, `CAP_NET_ADMIN`**
+Vous devez vérifier les capacités du conteneur, s'il en a certaines des suivantes, vous pourriez être en mesure d'en sortir : **`CAP_SYS_ADMIN`**_,_ **`CAP_SYS_PTRACE`**, **`CAP_SYS_MODULE`**, **`DAC_READ_SEARCH`**, **`DAC_OVERRIDE, CAP_SYS_RAWIO`, `CAP_SYSLOG`, `CAP_NET_RAW`, `CAP_NET_ADMIN`**
 
 Vous pouvez vérifier les capacités actuelles du conteneur en utilisant **les outils automatiques mentionnés précédemment** ou :
 ```bash
@@ -62,7 +62,7 @@ Sur la page suivante, vous pouvez **en savoir plus sur les capacités linux** et
 ../../linux-capabilities.md
 {{#endref}}
 
-## Échapper des conteneurs privilégiés
+## Échapper des Conteneurs Privilégiés
 
 Un conteneur privilégié peut être créé avec le drapeau `--privileged` ou en désactivant des défenses spécifiques :
 
@@ -76,7 +76,7 @@ Un conteneur privilégié peut être créé avec le drapeau `--privileged` ou en
 - `--cgroupns=host`
 - `Mount /dev`
 
-Le drapeau `--privileged` réduit considérablement la sécurité du conteneur, offrant **un accès illimité aux périphériques** et contournant **plusieurs protections**. Pour une analyse détaillée, consultez la documentation sur les impacts complets de `--privileged`.
+Le drapeau `--privileged` réduit considérablement la sécurité du conteneur, offrant **un accès aux périphériques sans restriction** et contournant **plusieurs protections**. Pour une analyse détaillée, consultez la documentation sur les impacts complets de `--privileged`.
 
 {{#ref}}
 ../docker-privileged.md
@@ -92,9 +92,9 @@ docker run --rm -it --pid=host --privileged ubuntu bash
 ```
 ### Privilégié
 
-Juste avec le drapeau privilégié, vous pouvez essayer d'**accéder au disque de l'hôte** ou essayer d'**échapper en abusant de release_agent ou d'autres échappements**.
+Avec le drapeau privilégié, vous pouvez essayer d'**accéder au disque de l'hôte** ou essayer de **vous échapper en abusant de release_agent ou d'autres échappements**.
 
-Testez les contournements suivants dans un conteneur exécutant :
+Testez les contournements suivants dans un conteneur en exécutant :
 ```bash
 docker run --rm -it --privileged ubuntu bash
 ```
@@ -329,14 +329,16 @@ sensitive-mounts.md
 
 ### Montages arbitraires
 
-À plusieurs occasions, vous constaterez que le **conteneur a un volume monté depuis l'hôte**. Si ce volume n'est pas correctement configuré, vous pourriez être en mesure d'**accéder/modifier des données sensibles** : Lire des secrets, changer ssh authorized_keys…
+À plusieurs occasions, vous constaterez que le **conteneur a un volume monté depuis l'hôte**. Si ce volume n'est pas correctement configuré, vous pourriez être en mesure de **accéder/modifier des données sensibles** : Lire des secrets, changer ssh authorized_keys…
 ```bash
 docker run --rm -it -v /:/host ubuntu bash
 ```
-### Escalade de privilèges avec 2 shells et montage hôte
+Un autre exemple intéressant peut être trouvé dans [**ce blog**](https://projectdiscovery.io/blog/versa-concerto-authentication-bypass-rce) où il est indiqué que les dossiers `/usr/bin/` et `/bin/` de l'hôte sont montés à l'intérieur du conteneur, permettant à l'utilisateur root du conteneur de modifier des binaires à l'intérieur de ces dossiers. Par conséquent, si un cron job utilise un binaire de là, comme `/etc/cron.d/popularity-contest`, cela permet de s'échapper du conteneur en modifiant un binaire utilisé par le cron job.
 
-Si vous avez accès en tant que **root à l'intérieur d'un conteneur** qui a un dossier de l'hôte monté et que vous avez **échappé en tant qu'utilisateur non privilégié vers l'hôte** et que vous avez un accès en lecture sur le dossier monté.\
-Vous pouvez créer un **fichier bash suid** dans le **dossier monté** à l'intérieur du **conteneur** et **l'exécuter depuis l'hôte** pour escalader les privilèges.
+### Escalade de privilèges avec 2 shells et montage de l'hôte
+
+Si vous avez accès en tant que **root à l'intérieur d'un conteneur** qui a un dossier de l'hôte monté et que vous avez **échappé en tant qu'utilisateur non privilégié à l'hôte** et avez un accès en lecture sur le dossier monté.\
+Vous pouvez créer un **fichier bash suid** dans le **dossier monté** à l'intérieur du **conteneur** et **l'exécuter depuis l'hôte** pour privesc.
 ```bash
 cp /bin/bash . #From non priv inside mounted folder
 # You need to copy it from the host as the bash binaries might be diferent in the host and in the container
@@ -346,12 +348,12 @@ bash -p #From non priv inside mounted folder
 ```
 ### Escalade de privilèges avec 2 shells
 
-Si vous avez accès en tant que **root à l'intérieur d'un conteneur** et que vous avez **échappé en tant qu'utilisateur non privilégié vers l'hôte**, vous pouvez abuser des deux shells pour **privesc à l'intérieur de l'hôte** si vous avez la capacité MKNOD à l'intérieur du conteneur (c'est par défaut) comme [**expliqué dans ce post**](https://labs.withsecure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/).\
+Si vous avez accès en tant que **root à l'intérieur d'un conteneur** et que vous avez **échappé en tant qu'utilisateur non privilégié vers l'hôte**, vous pouvez abuser des deux shells pour **privesc à l'intérieur de l'hôte** si vous avez la capacité MKNOD à l'intérieur du conteneur (c'est par défaut) comme [**expliqué dans cet article**](https://labs.withsecure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/).\
 Avec une telle capacité, l'utilisateur root à l'intérieur du conteneur est autorisé à **créer des fichiers de périphériques de bloc**. Les fichiers de périphériques sont des fichiers spéciaux utilisés pour **accéder au matériel sous-jacent et aux modules du noyau**. Par exemple, le fichier de périphérique de bloc /dev/sda donne accès à **lire les données brutes sur le disque du système**.
 
-Docker protège contre l'utilisation abusive des périphériques de bloc à l'intérieur des conteneurs en appliquant une politique de cgroup qui **bloque les opérations de lecture/écriture sur les périphériques de bloc**. Néanmoins, si un périphérique de bloc est **créé à l'intérieur du conteneur**, il devient accessible de l'extérieur du conteneur via le **/proc/PID/root/** répertoire. Cet accès nécessite que **le propriétaire du processus soit le même** à l'intérieur et à l'extérieur du conteneur.
+Docker protège contre l'utilisation abusive des périphériques de bloc à l'intérieur des conteneurs en appliquant une politique de cgroup qui **bloque les opérations de lecture/écriture sur les périphériques de bloc**. Néanmoins, si un périphérique de bloc est **créé à l'intérieur du conteneur**, il devient accessible de l'extérieur du conteneur via le **répertoire /proc/PID/root/**. Cet accès nécessite que **le propriétaire du processus soit le même** à l'intérieur et à l'extérieur du conteneur.
 
-**Exploitation** exemple de ce [**writeup**](https://radboudinstituteof.pwning.nl/posts/htbunictfquals2021/goodgames/):
+**Exploitation** exemple de cette [**écriture**](https://radboudinstituteof.pwning.nl/posts/htbunictfquals2021/goodgames/):
 ```bash
 # On the container as root
 cd /
@@ -462,7 +464,7 @@ La deuxième technique expliquée dans le post [https://labs.withsecure.com/blog
 Dans le cas où vous pouvez exécuter `docker exec` en tant que root (probablement avec sudo), vous essayez d'escalader les privilèges en échappant d'un conteneur en abusant de CVE-2019-5736 (exploit [ici](https://github.com/Frichetten/CVE-2019-5736-PoC/blob/master/main.go)). Cette technique va essentiellement **écraser** le binaire _**/bin/sh**_ de l'**hôte** **depuis un conteneur**, donc quiconque exécutant docker exec peut déclencher le payload.
 
 Modifiez le payload en conséquence et construisez le main.go avec `go build main.go`. Le binaire résultant doit être placé dans le conteneur docker pour exécution.\
-Lors de l'exécution, dès qu'il affiche `[+] /bin/sh écrasé avec succès` vous devez exécuter ce qui suit depuis la machine hôte :
+Lors de l'exécution, dès qu'il affiche `[+] /bin/sh écrasé avec succès`, vous devez exécuter ce qui suit depuis la machine hôte :
 
 `docker exec -it <container-name> /bin/sh`
 
@@ -470,8 +472,8 @@ Cela déclenchera le payload qui est présent dans le fichier main.go.
 
 Pour plus d'informations : [https://blog.dragonsector.pl/2019/02/cve-2019-5736-escape-from-docker-and.html](https://blog.dragonsector.pl/2019/02/cve-2019-5736-escape-from-docker-and.html)
 
-> [!NOTE]
-> Il existe d'autres CVEs auxquelles le conteneur peut être vulnérable, vous pouvez trouver une liste dans [https://0xn3va.gitbook.io/cheat-sheets/container/escaping/cve-list](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/cve-list)
+> [!TIP]
+> Il existe d'autres CVEs auxquels le conteneur peut être vulnérable, vous pouvez trouver une liste dans [https://0xn3va.gitbook.io/cheat-sheets/container/escaping/cve-list](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/cve-list)
 
 ## Évasion personnalisée Docker
 

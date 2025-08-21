@@ -20,8 +20,8 @@ Les concepts clés au sein de **Active Directory** incluent :
 
 1. **Services de domaine** – Centralise le stockage des données et gère les interactions entre **utilisateurs** et **domaines**, y compris les fonctionnalités d'**authentification** et de **recherche**.
 2. **Services de certificats** – Supervise la création, la distribution et la gestion de **certificats numériques** sécurisés.
-3. **Services d'annuaire léger** – Prend en charge les applications activées par l'annuaire via le **protocole LDAP**.
-4. **Services de fédération d'annuaire** – Fournit des capacités de **connexion unique** pour authentifier les utilisateurs à travers plusieurs applications web en une seule session.
+3. **Services de répertoire léger** – Prend en charge les applications activées par le répertoire via le **protocole LDAP**.
+4. **Services de fédération de répertoire** – Fournit des capacités de **connexion unique** pour authentifier les utilisateurs à travers plusieurs applications web en une seule session.
 5. **Gestion des droits** – Aide à protéger le matériel protégé par des droits d'auteur en régulant sa distribution et son utilisation non autorisées.
 6. **Service DNS** – Crucial pour la résolution des **noms de domaine**.
 
@@ -71,8 +71,8 @@ Si vous avez juste accès à un environnement AD mais que vous n'avez pas de cr�
 - Accéder à l'hôte en [**abusant de l'attaque de relais**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack)
 - Rassembler des crédentiels **en exposant** [**de faux services UPnP avec evil-S**](../../generic-methodologies-and-resources/pentesting-network/spoofing-ssdp-and-upnp-devices.md)[**SDP**](https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856)
 - [**OSINT**](https://book.hacktricks.wiki/en/generic-methodologies-and-resources/external-recon-methodology/index.html) :
-- Extraire des noms d'utilisateur/noms à partir de documents internes, de réseaux sociaux, de services (principalement web) à l'intérieur des environnements de domaine et également à partir de sources disponibles publiquement.
-- Si vous trouvez les noms complets des employés de l'entreprise, vous pourriez essayer différentes **conventions de nom d'utilisateur AD** (**[lisez ceci](https://activedirectorypro.com/active-directory-user-naming-convention/)**). Les conventions les plus courantes sont : _NomPrénom_, _Nom.Prénom_, _NomPr_ (3 lettres de chaque), _Nom.Pr_, _NPrénom_, _N.Prénom_, _PrénomNom_, _Prénom.Nom_, _PrénomN_, _Prénom.N_, 3 _lettres aléatoires et 3 chiffres aléatoires_ (abc123).
+- Extraire des noms d'utilisateur/noms à partir de documents internes, de médias sociaux, de services (principalement web) à l'intérieur des environnements de domaine et également à partir de sources disponibles publiquement.
+- Si vous trouvez les noms complets des employés de l'entreprise, vous pourriez essayer différentes **conventions de nom d'utilisateur AD** (**[lisez ceci](https://activedirectorypro.com/active-directory-user-naming-convention/)**). Les conventions les plus courantes sont : _NomPrenom_, _Nom.Prenom_, _NomPr_ (3 lettres de chaque), _Nom.Pr_, _NPrenom_, _N.Prenom_, _PrenomNom_, _Prenom.Nom_, _PrenomN_, _Prenom.N_, 3 _lettres aléatoires et 3 chiffres aléatoires_ (abc123).
 - Outils :
 - [w0Tx/generate-ad-username](https://github.com/w0Tx/generate-ad-username)
 - [urbanadventurer/username-anarchy](https://github.com/urbanadventurer/username-anarchy)
@@ -81,7 +81,7 @@ Si vous avez juste accès à un environnement AD mais que vous n'avez pas de cr�
 
 - **Énumération SMB/LDAP anonyme :** Consultez les pages [**pentesting SMB**](../../network-services-pentesting/pentesting-smb/index.html) et [**pentesting LDAP**](../../network-services-pentesting/pentesting-ldap.md).
 - **Énumération Kerbrute** : Lorsqu'un **nom d'utilisateur invalide est demandé**, le serveur répondra en utilisant le code d'erreur **Kerberos** _KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN_, nous permettant de déterminer que le nom d'utilisateur était invalide. Les **noms d'utilisateur valides** provoqueront soit le **TGT dans une réponse AS-REP**, soit l'erreur _KRB5KDC_ERR_PREAUTH_REQUIRED_, indiquant que l'utilisateur doit effectuer une pré-authentification.
-- **Pas d'authentification contre MS-NRPC** : Utilisation du niveau d'auth = 1 (Pas d'authentification) contre l'interface MS-NRPC (Netlogon) sur les contrôleurs de domaine. La méthode appelle la fonction `DsrGetDcNameEx2` après avoir lié l'interface MS-NRPC pour vérifier si l'utilisateur ou l'ordinateur existe sans aucun crédentiel. L'outil [NauthNRPC](https://github.com/sud0Ru/NauthNRPC) implémente ce type d'énumération. La recherche peut être trouvée [ici](https://media.kasperskycontenthub.com/wp-content/uploads/sites/43/2024/05/22190247/A-journey-into-forgotten-Null-Session-and-MS-RPC-interfaces.pdf)
+- **Pas d'authentification contre MS-NRPC** : Utilisation du niveau d'authentification = 1 (Pas d'authentification) contre l'interface MS-NRPC (Netlogon) sur les contrôleurs de domaine. La méthode appelle la fonction `DsrGetDcNameEx2` après avoir lié l'interface MS-NRPC pour vérifier si l'utilisateur ou l'ordinateur existe sans aucun crédentiel. L'outil [NauthNRPC](https://github.com/sud0Ru/NauthNRPC) implémente ce type d'énumération. La recherche peut être trouvée [ici](https://media.kasperskycontenthub.com/wp-content/uploads/sites/43/2024/05/22190247/A-journey-into-forgotten-Null-Session-and-MS-RPC-interfaces.pdf)
 ```bash
 ./kerbrute_linux_amd64 userenum -d lab.ropnop.com --dc 10.10.10.10 usernames.txt #From https://github.com/ropnop/kerbrute/releases
 
@@ -114,7 +114,7 @@ Get-GlobalAddressList -ExchHostname [ip] -UserName [domain]\[username] -Password
 
 ### Connaître un ou plusieurs noms d'utilisateur
 
-D'accord, donc vous savez déjà que vous avez un nom d'utilisateur valide mais pas de mots de passe... Essayez alors :
+D'accord, donc vous savez que vous avez déjà un nom d'utilisateur valide mais pas de mots de passe... Essayez alors :
 
 - [**ASREPRoast**](asreproast.md) : Si un utilisateur **n'a pas** l'attribut _DONT_REQ_PREAUTH_, vous pouvez **demander un message AS_REP** pour cet utilisateur qui contiendra des données chiffrées par une dérivation du mot de passe de l'utilisateur.
 - [**Password Spraying**](password-spraying.md) : Essayons les mots de passe les plus **courants** avec chacun des utilisateurs découverts, peut-être qu'un utilisateur utilise un mauvais mot de passe (gardez à l'esprit la politique de mot de passe !).
@@ -124,7 +124,7 @@ D'accord, donc vous savez déjà que vous avez un nom d'utilisateur valide mais 
 password-spraying.md
 {{#endref}}
 
-### Poisoning LLMNR/NBT-NS
+### LLMNR/NBT-NS Poisoning
 
 Vous pourriez être en mesure d'**obtenir** des **hashes** de challenge pour cracker en **empoisonnant** certains protocoles du **réseau** :
 
@@ -132,13 +132,13 @@ Vous pourriez être en mesure d'**obtenir** des **hashes** de challenge pour cra
 ../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md
 {{#endref}}
 
-### Relais NTLM
+### NTLM Relay
 
 Si vous avez réussi à énumérer l'annuaire actif, vous aurez **plus d'emails et une meilleure compréhension du réseau**. Vous pourriez être en mesure de forcer des [**attaques de relais NTLM**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack) pour accéder à l'environnement AD.
 
 ### Voler des identifiants NTLM
 
-Si vous pouvez **accéder à d'autres PC ou partages** avec l'utilisateur **null ou invité**, vous pourriez **placer des fichiers** (comme un fichier SCF) qui, s'ils sont accédés, **déclencheront une authentification NTLM contre vous**, vous permettant ainsi de **voler** le **challenge NTLM** pour le cracker :
+Si vous pouvez **accéder à d'autres PC ou partages** avec l'**utilisateur null ou invité**, vous pourriez **placer des fichiers** (comme un fichier SCF) qui, s'ils sont accédés d'une manière ou d'une autre, **déclencheront une authentification NTLM contre vous** afin que vous puissiez **voler** le **challenge NTLM** pour le cracker :
 
 {{#ref}}
 ../ntlm/places-to-steal-ntlm-creds.md
@@ -176,7 +176,7 @@ Concernant [**ASREPRoast**](asreproast.md), vous pouvez maintenant trouver chaqu
 
 Il est très facile d'obtenir tous les noms d'utilisateur du domaine depuis Windows (`net user /domain`, `Get-DomainUser` ou `wmic useraccount get name,sid`). Sous Linux, vous pouvez utiliser : `GetADUsers.py -all -dc-ip 10.10.10.110 domain.com/username` ou `enum4linux -a -u "user" -p "password" <DC IP>`
 
-> Même si cette section d'énumération semble petite, c'est la partie la plus importante de tout. Accédez aux liens (principalement celui de cmd, powershell, powerview et BloodHound), apprenez à énumérer un domaine et pratiquez jusqu'à ce que vous vous sentiez à l'aise. Lors d'une évaluation, ce sera le moment clé pour trouver votre chemin vers DA ou pour décider que rien ne peut être fait.
+> Même si cette section d'énumération semble petite, c'est la partie la plus importante de tout. Accédez aux liens (principalement celui de cmd, powershell, powerview et BloodHound), apprenez à énumérer un domaine et pratiquez jusqu'à ce que vous vous sentiez à l'aise. Lors d'une évaluation, ce sera le moment clé pour trouver votre chemin vers DA ou décider que rien ne peut être fait.
 
 ### Kerberoast
 
@@ -220,7 +220,8 @@ Maintenant que vous avez quelques identifiants de base, vous devriez vérifier s
 
 ### Steal NTLM Creds
 
-Si vous pouvez **accéder à d'autres PC ou partages**, vous pourriez **placer des fichiers** (comme un fichier SCF) qui, s'ils sont accédés d'une manière ou d'une autre, **déclencheront une authentification NTLM contre vous**, vous permettant ainsi de **voler** le **challenge NTLM** pour le craquer :
+Si vous pouvez **accéder à d'autres PC ou partages**, vous pourriez **placer des fichiers** (comme un fichier SCF) qui, s'ils sont accédés d'une manière ou d'une autre, **déclencheront une authentification NTLM contre vous**, afin que vous puissiez **voler** le **challenge NTLM** pour le craquer :
+
 
 {{#ref}}
 ../ntlm/places-to-steal-ntlm-creds.md
@@ -229,6 +230,7 @@ Si vous pouvez **accéder à d'autres PC ou partages**, vous pourriez **placer d
 ### CVE-2021-1675/CVE-2021-34527 PrintNightmare
 
 Cette vulnérabilité a permis à tout utilisateur authentifié de **compromettre le contrôleur de domaine**.
+
 
 {{#ref}}
 printnightmare.md
@@ -254,13 +256,15 @@ Vous devez utiliser un **outil** qui va **effectuer** l'**authentification NTLM 
 
 Cette attaque vise à **utiliser le hachage NTLM de l'utilisateur pour demander des tickets Kerberos**, en alternative au Pass The Hash courant sur le protocole NTLM. Par conséquent, cela pourrait être particulièrement **utile dans les réseaux où le protocole NTLM est désactivé** et où seul **Kerberos est autorisé** comme protocole d'authentification.
 
+
 {{#ref}}
 over-pass-the-hash-pass-the-key.md
 {{#endref}}
 
 ### Pass the Ticket
 
-Dans la méthode d'attaque **Pass The Ticket (PTT)**, les attaquants **volent un ticket d'authentification d'un utilisateur** au lieu de ses mots de passe ou valeurs de hachage. Ce ticket volé est ensuite utilisé pour **usurper l'utilisateur**, obtenant un accès non autorisé aux ressources et services au sein d'un réseau.
+Dans la méthode d'attaque **Pass The Ticket (PTT)**, les attaquants **volent un ticket d'authentification d'utilisateur** au lieu de leur mot de passe ou de leurs valeurs de hachage. Ce ticket volé est ensuite utilisé pour **usurper l'utilisateur**, obtenant un accès non autorisé aux ressources et services au sein d'un réseau.
+
 
 {{#ref}}
 pass-the-ticket.md
@@ -290,7 +294,7 @@ abusing-ad-mssql.md
 ### Délégation Non Contraignante
 
 Si vous trouvez un objet Ordinateur avec l'attribut [ADS_UF_TRUSTED_FOR_DELEGATION](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>) et que vous avez des privilèges de domaine sur l'ordinateur, vous pourrez extraire les TGT de la mémoire de chaque utilisateur qui se connecte à l'ordinateur.\
-Ainsi, si un **Administrateur de Domaine se connecte à l'ordinateur**, vous pourrez extraire son TGT et vous faire passer pour lui en utilisant [Pass the Ticket](pass-the-ticket.md).\
+Donc, si un **Administrateur de Domaine se connecte à l'ordinateur**, vous pourrez extraire son TGT et vous l'approprier en utilisant [Pass the Ticket](pass-the-ticket.md).\
 Grâce à la délégation contrainte, vous pourriez même **compromettre automatiquement un serveur d'impression** (espérons qu'il s'agisse d'un DC).
 
 {{#ref}}
@@ -299,8 +303,8 @@ unconstrained-delegation.md
 
 ### Délégation Contraignante
 
-Si un utilisateur ou un ordinateur est autorisé à la "Délégation Contraignante", il pourra **se faire passer pour n'importe quel utilisateur pour accéder à certains services sur un ordinateur**.\
-Ensuite, si vous **compromettez le hash** de cet utilisateur/ordinateur, vous pourrez **vous faire passer pour n'importe quel utilisateur** (même des administrateurs de domaine) pour accéder à certains services.
+Si un utilisateur ou un ordinateur est autorisé à la "Délégation Contraignante", il pourra **s'approprier n'importe quel utilisateur pour accéder à certains services sur un ordinateur**.\
+Ensuite, si vous **compromettez le hash** de cet utilisateur/ordinateur, vous pourrez **s'approprier n'importe quel utilisateur** (même des administrateurs de domaine) pour accéder à certains services.
 
 {{#ref}}
 constrained-delegation.md
@@ -316,24 +320,24 @@ resource-based-constrained-delegation.md
 
 ### Abus des Permissions/ACLs
 
-L'utilisateur compromis pourrait avoir des **privilèges intéressants sur certains objets de domaine** qui pourraient vous permettre de **vous déplacer** latéralement/**d'escalader** des privilèges.
+L'utilisateur compromis pourrait avoir des **privilèges intéressants sur certains objets de domaine** qui pourraient vous permettre de **déplacer** latéralement/**escalader** des privilèges.
 
 {{#ref}}
 acl-persistence-abuse/
 {{#endref}}
 
-### Abus du service Spooler d'imprimante
+### Abus du service Spooler d'impression
 
-Découvrir un **service Spool** à l'écoute dans le domaine peut être **abusé** pour **acquérir de nouveaux identifiants** et **escalader des privilèges**.
+Découvrir un **service Spool à l'écoute** au sein du domaine peut être **abusé** pour **acquérir de nouveaux identifiants** et **escalader des privilèges**.
 
 {{#ref}}
 printers-spooler-service-abuse.md
 {{#endref}}
 
-### Abus des sessions de tiers
+### Abus des sessions tierces
 
-Si **d'autres utilisateurs** **accèdent** à la machine **compromise**, il est possible de **rassembler des identifiants depuis la mémoire** et même **injecter des balises dans leurs processus** pour se faire passer pour eux.\
-En général, les utilisateurs accéderont au système via RDP, donc voici comment effectuer quelques attaques sur les sessions RDP de tiers :
+Si **d'autres utilisateurs** **accèdent** à la machine **compromise**, il est possible de **rassembler des identifiants depuis la mémoire** et même **d'injecter des balises dans leurs processus** pour les usurper.\
+En général, les utilisateurs accéderont au système via RDP, donc voici comment effectuer quelques attaques sur des sessions RDP tierces :
 
 {{#ref}}
 rdp-sessions-abuse.md
@@ -367,11 +371,11 @@ ad-certificates/domain-escalation.md
 
 ### Dumping des Identifiants de Domaine
 
-Une fois que vous obtenez des privilèges **d'Administrateur de Domaine** ou même mieux **d'Administrateur d'Entreprise**, vous pouvez **dump** la **base de données de domaine** : _ntds.dit_.
+Une fois que vous obtenez des privilèges **Administrateur de Domaine** ou même mieux **Administrateur d'Entreprise**, vous pouvez **dump** la **base de données de domaine** : _ntds.dit_.
 
 [**Plus d'informations sur l'attaque DCSync peuvent être trouvées ici**](dcsync.md).
 
-[**Plus d'informations sur la façon de voler le NTDS.dit peuvent être trouvées ici**](https://github.com/carlospolop/hacktricks/blob/master/windows-hardening/active-directory-methodology/broken-reference/README.md)
+[**Plus d'informations sur comment voler le NTDS.dit peuvent être trouvées ici**](https://github.com/carlospolop/hacktricks/blob/master/windows-hardening/active-directory-methodology/broken-reference/README.md)
 
 ### Privesc comme Persistance
 
@@ -416,13 +420,13 @@ golden-ticket.md
 
 ### Diamond Ticket
 
-Ce sont comme des tickets dorés forgés d'une manière qui **contourne les mécanismes de détection des tickets dorés communs.**
+Ce sont comme des golden tickets forgés d'une manière qui **contourne les mécanismes de détection des golden tickets courants.**
 
 {{#ref}}
 diamond-ticket.md
 {{#endref}}
 
-### **Persistance de Compte par Certificats**
+### **Persistance des Comptes de Certificats**
 
 **Avoir des certificats d'un compte ou être capable de les demander** est un très bon moyen de pouvoir persister dans le compte des utilisateurs (même s'il change le mot de passe) :
 
@@ -430,7 +434,7 @@ diamond-ticket.md
 ad-certificates/account-persistence.md
 {{#endref}}
 
-### **Persistance de Domaine par Certificats**
+### **Persistance des Certificats de Domaine**
 
 **Utiliser des certificats est également possible pour persister avec des privilèges élevés à l'intérieur du domaine :**
 
@@ -442,7 +446,7 @@ ad-certificates/domain-persistence.md
 
 L'objet **AdminSDHolder** dans Active Directory assure la sécurité des **groupes privilégiés** (comme les Administrateurs de Domaine et les Administrateurs d'Entreprise) en appliquant une **Liste de Contrôle d'Accès (ACL)** standard à travers ces groupes pour prévenir les modifications non autorisées. Cependant, cette fonctionnalité peut être exploitée ; si un attaquant modifie l'ACL de l'AdminSDHolder pour donner un accès complet à un utilisateur ordinaire, cet utilisateur obtient un contrôle étendu sur tous les groupes privilégiés. Cette mesure de sécurité, censée protéger, peut donc se retourner contre elle, permettant un accès non autorisé à moins d'être étroitement surveillée.
 
-[**Plus d'informations sur le groupe AdminDSHolder ici.**](privileged-groups-and-token-privileges.md#adminsdholder-group)
+[**Plus d'informations sur le Groupe AdminDSHolder ici.**](privileged-groups-and-token-privileges.md#adminsdholder-group)
 
 ### Identifiants DSRM
 
@@ -496,7 +500,7 @@ dcshadow.md
 
 ### Persistance LAPS
 
-Auparavant, nous avons discuté de la façon d'escalader des privilèges si vous avez **assez de permissions pour lire les mots de passe LAPS**. Cependant, ces mots de passe peuvent également être utilisés pour **maintenir la persistance**.\
+Auparavant, nous avons discuté de la façon d'escalader des privilèges si vous avez **suffisamment de permissions pour lire les mots de passe LAPS**. Cependant, ces mots de passe peuvent également être utilisés pour **maintenir la persistance**.\
 Vérifiez :
 
 {{#ref}}
@@ -519,7 +523,7 @@ Dans un scénario typique, si un utilisateur souhaite accéder à un service dan
 2. DC1 émet un nouveau TGT si le client est authentifié avec succès.
 3. Le client demande ensuite un **TGT inter-realm** à DC1, qui est nécessaire pour accéder aux ressources dans le **Domaine 2**.
 4. Le TGT inter-realm est chiffré avec une **clé de confiance** partagée entre DC1 et DC2 dans le cadre de la confiance de domaine bidirectionnelle.
-5. Le client prend le TGT inter-realm au **Contrôleur de Domaine 2 (DC2)**.
+5. Le client prend le TGT inter-realm au **Contrôleur de Domaine (DC2)** du Domaine 2.
 6. DC2 vérifie le TGT inter-realm en utilisant sa clé de confiance partagée et, si valide, émet un **Ticket Granting Service (TGS)** pour le serveur dans le Domaine 2 auquel le client souhaite accéder.
 7. Enfin, le client présente ce TGS au serveur, qui est chiffré avec le hash du compte du serveur, pour obtenir l'accès au service dans le Domaine 2.
 
@@ -532,11 +536,11 @@ Si le Domaine A fait confiance au Domaine B, A est le domaine de confiance et B 
 **Différentes relations de confiance**
 
 - **Confiances Parent-Enfant** : C'est une configuration courante au sein de la même forêt, où un domaine enfant a automatiquement une confiance bidirectionnelle transitive avec son domaine parent. Essentiellement, cela signifie que les demandes d'authentification peuvent circuler sans heurts entre le parent et l'enfant.
-- **Confiances de Lien Croisé** : Appelées "confiances de raccourci", celles-ci sont établies entre des domaines enfants pour accélérer les processus de référence. Dans des forêts complexes, les références d'authentification doivent généralement voyager jusqu'à la racine de la forêt, puis redescendre vers le domaine cible. En créant des liens croisés, le voyage est raccourci, ce qui est particulièrement bénéfique dans des environnements géographiquement dispersés.
+- **Confiances de Lien Croisé** : Appelées "confiances de raccourci", celles-ci sont établies entre des domaines enfants pour accélérer les processus de référence. Dans des forêts complexes, les références d'authentification doivent généralement voyager jusqu'à la racine de la forêt, puis redescendre vers le domaine cible. En créant des liens croisés, le trajet est raccourci, ce qui est particulièrement bénéfique dans des environnements géographiquement dispersés.
 - **Confiances Externes** : Celles-ci sont mises en place entre différents domaines non liés et sont de nature non transitive. Selon [la documentation de Microsoft](<https://technet.microsoft.com/en-us/library/cc773178(v=ws.10).aspx>), les confiances externes sont utiles pour accéder à des ressources dans un domaine en dehors de la forêt actuelle qui n'est pas connecté par une confiance de forêt. La sécurité est renforcée grâce au filtrage SID avec des confiances externes.
 - **Confiances de Racine d'Arbre** : Ces confiances sont automatiquement établies entre le domaine racine de la forêt et une nouvelle racine d'arbre ajoutée. Bien qu'elles ne soient pas couramment rencontrées, les confiances de racine d'arbre sont importantes pour ajouter de nouveaux arbres de domaine à une forêt, leur permettant de maintenir un nom de domaine unique et garantissant une transitivité bidirectionnelle. Plus d'informations peuvent être trouvées dans [le guide de Microsoft](<https://technet.microsoft.com/en-us/library/cc773178(v=ws.10).aspx>).
 - **Confiances de Forêt** : Ce type de confiance est une confiance bidirectionnelle transitive entre deux domaines racines de forêt, appliquant également un filtrage SID pour renforcer les mesures de sécurité.
-- **Confiances MIT** : Ces confiances sont établies avec des domaines Kerberos conformes à [RFC4120](https://tools.ietf.org/html/rfc4120) non Windows. Les confiances MIT sont un peu plus spécialisées et s'adressent aux environnements nécessitant une intégration avec des systèmes basés sur Kerberos en dehors de l'écosystème Windows.
+- **Confiances MIT** : Ces confiances sont établies avec des domaines Kerberos conformes à [RFC4120](https://tools.ietf.org/html/rfc4120) non Windows. Les confiances MIT sont un peu plus spécialisées et s'adaptent aux environnements nécessitant une intégration avec des systèmes basés sur Kerberos en dehors de l'écosystème Windows.
 
 #### Autres différences dans les **relations de confiance**
 
@@ -554,7 +558,7 @@ Les attaquants pourraient accéder aux ressources dans un autre domaine par troi
 
 - **Membre de Groupe Local** : Les principaux pourraient être ajoutés à des groupes locaux sur des machines, comme le groupe "Administrateurs" sur un serveur, leur accordant un contrôle significatif sur cette machine.
 - **Membre de Groupe de Domaine Étranger** : Les principaux peuvent également être membres de groupes au sein du domaine étranger. Cependant, l'efficacité de cette méthode dépend de la nature de la confiance et de la portée du groupe.
-- **Listes de Contrôle d'Accès (ACLs)** : Les principaux pourraient être spécifiés dans une **ACL**, en particulier en tant qu'entités dans des **ACE** au sein d'un **DACL**, leur fournissant un accès à des ressources spécifiques. Pour ceux qui souhaitent approfondir les mécanismes des ACL, DACL et ACE, le document intitulé "[An ACE Up The Sleeve](https://specterops.io/assets/resources/an_ace_up_the_sleeve.pdf)" est une ressource précieuse.
+- **Listes de Contrôle d'Accès (ACLs)** : Les principaux pourraient être spécifiés dans une **ACL**, en particulier en tant qu'entités dans des **ACE** au sein d'un **DACL**, leur fournissant un accès à des ressources spécifiques. Pour ceux qui souhaitent approfondir les mécanismes des ACL, DACL et ACE, le document intitulé "[An ACE Up The Sleeve](https://specterops.io/assets/resources/an_ace_up_the_sleeve.pdf)" est une ressource inestimable.
 
 ### Trouver des utilisateurs/groupes externes avec des permissions
 
@@ -606,17 +610,18 @@ nltest /server:dc.sub.domain.local /domain_trusts /all_trusts
 
 Escaladez en tant qu'administrateur d'entreprise vers le domaine enfant/parent en abusant de la confiance avec l'injection de SID-History :
 
+
 {{#ref}}
 sid-history-injection.md
 {{#endref}}
 
 #### Exploiter le NC de Configuration écrivable
 
-Comprendre comment le Contexte de Nommage de Configuration (NC) peut être exploité est crucial. Le NC de Configuration sert de référentiel central pour les données de configuration dans les environnements Active Directory (AD). Ces données sont répliquées à chaque Contrôleur de Domaine (DC) au sein de la forêt, les DC écrivables maintenant une copie écrivable du NC de Configuration. Pour exploiter cela, il faut avoir **des privilèges SYSTEM sur un DC**, de préférence un DC enfant.
+Comprendre comment le Contexte de Nommage de Configuration (NC) peut être exploité est crucial. Le NC de Configuration sert de référentiel central pour les données de configuration à travers une forêt dans les environnements Active Directory (AD). Ces données sont répliquées à chaque Contrôleur de Domaine (DC) au sein de la forêt, les DC écrits maintenant une copie écrivable du NC de Configuration. Pour exploiter cela, il faut avoir **des privilèges SYSTEM sur un DC**, de préférence un DC enfant.
 
 **Lier GPO au site DC racine**
 
-Le conteneur Sites du NC de Configuration inclut des informations sur tous les sites des ordinateurs joints au domaine au sein de la forêt AD. En opérant avec des privilèges SYSTEM sur n'importe quel DC, les attaquants peuvent lier des GPO aux sites DC racines. Cette action compromet potentiellement le domaine racine en manipulant les politiques appliquées à ces sites.
+Le conteneur Sites du NC de Configuration inclut des informations sur tous les sites des ordinateurs joints au domaine au sein de la forêt AD. En opérant avec des privilèges SYSTEM sur n'importe quel DC, les attaquants peuvent lier des GPO aux sites DC racine. Cette action compromet potentiellement le domaine racine en manipulant les politiques appliquées à ces sites.
 
 Pour des informations approfondies, on peut explorer des recherches sur [Bypassing SID Filtering](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-4-bypass-sid-filtering-research).
 
@@ -626,11 +631,13 @@ Un vecteur d'attaque consiste à cibler les gMSA privilégiés au sein du domain
 
 Une analyse détaillée et un guide étape par étape peuvent être trouvés dans :
 
+
 {{#ref}}
 golden-dmsa-gmsa.md
 {{#endref}}
 
 Attaque MSA déléguée complémentaire (BadSuccessor – abus des attributs de migration) :
+
 
 {{#ref}}
 badsuccessor-dmsa-migration-abuse.md
@@ -679,7 +686,7 @@ TrustDirection  : Outbound        --> Outbound trust
 WhenCreated     : 2/19/2021 10:15:24 PM
 WhenChanged     : 2/19/2021 10:15:24 PM
 ```
-Dans ce scénario, **votre domaine** **fait confiance** à certains **privilèges** d'un principal d'un **domaine différent**.
+Dans ce scénario, **votre domaine** **fait confiance** à certains **privilèges** d'un principal provenant de **domaines différents**.
 
 Cependant, lorsqu'un **domaine est approuvé** par le domaine de confiance, le domaine approuvé **crée un utilisateur** avec un **nom prévisible** qui utilise comme **mot de passe le mot de passe approuvé**. Ce qui signifie qu'il est possible d'**accéder à un utilisateur du domaine de confiance pour entrer dans le domaine approuvé** afin de l'énumérer et d'essayer d'escalader plus de privilèges :
 
@@ -708,7 +715,7 @@ rdp-sessions-abuse.md
 - Pour les trusts inter-forêts, l'utilisation de l'authentification sélective garantit que les utilisateurs des deux forêts ne sont pas automatiquement authentifiés. Au lieu de cela, des autorisations explicites sont requises pour que les utilisateurs accèdent aux domaines et serveurs au sein du domaine ou de la forêt de confiance.
 - Il est important de noter que ces mesures ne protègent pas contre l'exploitation du Contexte de Nommage de Configuration (NC) modifiable ou les attaques sur le compte de confiance.
 
-[**Plus d'informations sur les trusts de domaine sur ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/child-domain-da-to-ea-in-parent-domain)
+[**Plus d'informations sur les trusts de domaine dans ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/child-domain-da-to-ea-in-parent-domain)
 
 ## AD -> Azure & Azure -> AD
 
@@ -741,7 +748,7 @@ https://cloud.hacktricks.wiki/en/pentesting-cloud/azure-security/az-lateral-move
 
 - **Contournement de la Détection Microsoft ATA** :
 - **Énumération des Utilisateurs** : Éviter l'énumération de session sur les Contrôleurs de Domaine pour prévenir la détection par l'ATA.
-- **Impersonation de Ticket** : Utiliser des clés **aes** pour la création de tickets aide à éviter la détection en ne rétrogradant pas à NTLM.
+- **Impersonation de Ticket** : Utiliser des clés **aes** pour la création de tickets aide à éviter la détection en ne rétrogradant pas vers NTLM.
 - **Attaques DCSync** : Il est conseillé d'exécuter à partir d'un non-Contrôleur de Domaine pour éviter la détection par l'ATA, car une exécution directe à partir d'un Contrôleur de Domaine déclenchera des alertes.
 
 ## Références

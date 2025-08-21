@@ -10,9 +10,9 @@ Bien que les cgroup namespaces ne soient pas un type de namespace séparé comme
 
 ### Comment ça fonctionne :
 
-1. Lorsqu'un nouveau cgroup namespace est créé, **il commence avec une vue de la hiérarchie cgroup basée sur le cgroup du processus créateur**. Cela signifie que les processus s'exécutant dans le nouveau cgroup namespace ne verront qu'un sous-ensemble de l'ensemble de la hiérarchie cgroup, limité à l'arborescence cgroup enracinée au cgroup du processus créateur.
-2. Les processus au sein d'un cgroup namespace **verront leur propre cgroup comme la racine de la hiérarchie**. Cela signifie que, du point de vue des processus à l'intérieur du namespace, leur propre cgroup apparaît comme la racine, et ils ne peuvent pas voir ou accéder aux cgroups en dehors de leur propre sous-arborescence.
-3. Les cgroup namespaces ne fournissent pas directement l'isolation des ressources ; **ils ne fournissent que l'isolation de la vue de la hiérarchie cgroup**. **Le contrôle et l'isolation des ressources sont toujours appliqués par les sous-systèmes cgroup** (par exemple, cpu, mémoire, etc.) eux-mêmes.
+1. Lorsqu'un nouveau cgroup namespace est créé, **il commence avec une vue de la hiérarchie cgroup basée sur le cgroup du processus créateur**. Cela signifie que les processus s'exécutant dans le nouveau cgroup namespace ne verront qu'un sous-ensemble de l'ensemble de la hiérarchie cgroup, limité à l'arbre cgroup enraciné au cgroup du processus créateur.
+2. Les processus au sein d'un cgroup namespace **verront leur propre cgroup comme la racine de la hiérarchie**. Cela signifie que, du point de vue des processus à l'intérieur du namespace, leur propre cgroup apparaît comme la racine, et ils ne peuvent pas voir ou accéder aux cgroups en dehors de leur propre sous-arbre.
+3. Les cgroup namespaces ne fournissent pas directement d'isolation des ressources ; **ils ne fournissent que l'isolation de la vue de la hiérarchie cgroup**. **Le contrôle et l'isolation des ressources sont toujours appliqués par les sous-systèmes cgroup** (par exemple, cpu, mémoire, etc.) eux-mêmes.
 
 Pour plus d'informations sur les CGroups, consultez :
 
@@ -69,7 +69,7 @@ sudo find /proc -maxdepth 3 -type l -name cgroup -exec readlink {} \; 2>/dev/nul
 # Find the processes with an specific namespace
 sudo find /proc -maxdepth 3 -type l -name cgroup -exec ls -l  {} \; 2>/dev/null | grep <ns-number>
 ```
-### Entrer dans un espace de noms CGroup
+### Entrez dans un espace de noms CGroup
 ```bash
 nsenter -C TARGET_PID --pid /bin/bash
 ```

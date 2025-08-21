@@ -2,6 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
+
 {{#ref}}
 README.md
 {{#endref}}
@@ -10,7 +11,7 @@ README.md
 
 [**JTAGenum**](https://github.com/cyphunk/JTAGenum) est un outil que vous pouvez charger sur un MCU compatible Arduino ou (expérimentalement) un Raspberry Pi pour forcer les pinouts JTAG inconnus et même énumérer les registres d'instructions.
 
-- Arduino : connectez les broches numériques D2–D11 à jusqu'à 10 pads/testpoints JTAG suspects, et GND Arduino à GND cible. Alimentez la cible séparément à moins que vous ne sachiez que le rail est sûr. Préférez la logique 3,3 V (par exemple, Arduino Due) ou utilisez un convertisseur de niveau/résistances en série lors de la sonde de cibles 1,8–3,3 V.
+- Arduino : connectez les broches numériques D2–D11 à jusqu'à 10 pads/testpoints JTAG suspects, et GND Arduino à GND cible. Alimentez la cible séparément à moins que vous ne sachiez que le rail est sûr. Préférez la logique 3,3 V (par exemple, Arduino Due) ou utilisez un convertisseur de niveau/résistances en série lors de la sonde des cibles 1,8–3,3 V.
 - Raspberry Pi : la version Pi expose moins de GPIO utilisables (donc les scans sont plus lents) ; vérifiez le dépôt pour la carte des broches actuelle et les contraintes.
 
 Une fois flashé, ouvrez le moniteur série à 115200 bauds et envoyez `h` pour obtenir de l'aide. Flux typique :
@@ -81,9 +82,9 @@ Tips
 - Utilisez `mdw/mdh/mdb` pour vérifier la mémoire avant de faire de longs dumps.
 - Pour les chaînes multi-appareils, définissez BYPASS sur les non-cibles ou utilisez un fichier de carte qui définit tous les TAPs.
 
-## Astuces de test de frontière (EXTEST/SAMPLE)
+## Astuces de scan de frontière (EXTEST/SAMPLE)
 
-Même lorsque l'accès de débogage du CPU est verrouillé, le test de frontière peut encore être exposé. Avec UrJTAG/OpenOCD, vous pouvez :
+Même lorsque l'accès de débogage du CPU est verrouillé, le scan de frontière peut encore être exposé. Avec UrJTAG/OpenOCD, vous pouvez :
 - SAMPLE pour prendre un instantané des états des broches pendant que le système fonctionne (trouver l'activité du bus, confirmer le mappage des broches).
 - EXTEST pour piloter des broches (par exemple, bit-bang des lignes SPI flash externes via le MCU pour les lire hors ligne si le câblage de la carte le permet).
 
@@ -108,7 +109,7 @@ Vous avez besoin du BSDL de l'appareil pour connaître l'ordre des bits des regi
 ## Défenses et durcissement (à quoi s'attendre sur des appareils réels)
 
 - Désactivez ou verrouillez définitivement le JTAG/SWD en production (par exemple, niveau 2 RDP STM32, eFuses ESP qui désactivent PAD JTAG, APPROTECT/DPAP NXP/Nordic).
-- Exigez une authentification de débogage (ARMv8.2‑A ADIv6 Debug Authentication, réponse au défi gérée par l'OEM) tout en conservant l'accès à la fabrication.
+- Exigez une authentification de débogage (ARMv8.2‑A ADIv6 Authentification de débogage, défi-réponse géré par l'OEM) tout en maintenant l'accès à la fabrication.
 - Ne pas acheminer de pads de test faciles ; enterrez les vias de test, retirez/remplissez les résistances pour isoler le TAP, utilisez des connecteurs avec clé ou des dispositifs à broches pogo.
 - Verrouillage de débogage à l'alimentation : placez le TAP derrière un ROM précoce imposant un démarrage sécurisé.
 

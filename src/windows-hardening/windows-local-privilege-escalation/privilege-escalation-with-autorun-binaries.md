@@ -41,12 +41,10 @@ Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 ../../generic-hacking/archive-extraction-path-traversal.md
 {{#endref}}
 
-
-
 ## Registre
 
 > [!TIP]
-> [Note à partir d'ici](https://answers.microsoft.com/en-us/windows/forum/all/delete-registry-key/d425ae37-9dcc-4867-b49c-723dcd15147f) : L'entrée de registre **Wow6432Node** indique que vous exécutez une version 64 bits de Windows. Le système d'exploitation utilise cette clé pour afficher une vue séparée de HKEY_LOCAL_MACHINE\SOFTWARE pour les applications 32 bits qui s'exécutent sur des versions 64 bits de Windows.
+> [Note à partir d'ici](https://answers.microsoft.com/en-us/windows/forum/all/delete-registry-key/d425ae37-9dcc-4867-b49c-723dcd15147f) : L'entrée de registre **Wow6432Node** indique que vous exécutez une version 64 bits de Windows. Le système d'exploitation utilise cette clé pour afficher une vue distincte de HKEY_LOCAL_MACHINE\SOFTWARE pour les applications 32 bits qui s'exécutent sur des versions Windows 64 bits.
 
 ### Exécutions
 
@@ -153,7 +151,7 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Wow6432Node\Microsoft\Windows\Ru
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders`
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders`
 
-Les raccourcis placés dans le dossier **Démarrage** déclencheront automatiquement le lancement de services ou d'applications lors de la connexion de l'utilisateur ou du redémarrage du système. L'emplacement du dossier **Démarrage** est défini dans le registre pour les portées **Machine locale** et **Utilisateur actuel**. Cela signifie que tout raccourci ajouté à ces emplacements **Démarrage** spécifiés garantira que le service ou le programme lié démarre après le processus de connexion ou de redémarrage, ce qui en fait une méthode simple pour programmer des programmes à s'exécuter automatiquement.
+Les raccourcis placés dans le dossier **Démarrage** déclencheront automatiquement le lancement de services ou d'applications lors de la connexion de l'utilisateur ou du redémarrage du système. L'emplacement du dossier **Démarrage** est défini dans le registre pour les portées **Local Machine** et **Current User**. Cela signifie que tout raccourci ajouté à ces emplacements **Démarrage** spécifiés garantira que le service ou le programme lié démarre après le processus de connexion ou de redémarrage, ce qui en fait une méthode simple pour programmer des programmes à s'exécuter automatiquement.
 
 > [!TIP]
 > Si vous pouvez écraser n'importe quel \[User] Shell Folder sous **HKLM**, vous pourrez le pointer vers un dossier contrôlé par vous et placer une porte dérobée qui sera exécutée chaque fois qu'un utilisateur se connecte au système, escaladant ainsi les privilèges.
@@ -203,14 +201,14 @@ Dans le Registre Windows sous `HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot`, 
 Étapes pour créer une option de démarrage pour démarrer automatiquement en "Mode sans échec avec invite de commande" :
 
 1. Changez les attributs du fichier `boot.ini` pour supprimer les drapeaux de lecture seule, système et caché : `attrib c:\boot.ini -r -s -h`
-2. Ouvrez `boot.ini` pour modification.
+2. Ouvrez `boot.ini` pour l'édition.
 3. Insérez une ligne comme : `multi(0)disk(0)rdisk(0)partition(1)\WINDOWS="Microsoft Windows XP Professional" /fastdetect /SAFEBOOT:MINIMAL(ALTERNATESHELL)`
 4. Enregistrez les modifications apportées à `boot.ini`.
 5. Réappliquez les attributs de fichier d'origine : `attrib c:\boot.ini +r +s +h`
 
 - **Exploit 1 :** Changer la clé de registre **AlternateShell** permet de configurer un shell de commande personnalisé, potentiellement pour un accès non autorisé.
-- **Exploit 2 (Permissions d'écriture sur PATH) :** Avoir des permissions d'écriture sur n'importe quelle partie de la variable système **PATH**, en particulier avant `C:\Windows\system32`, vous permet d'exécuter un `cmd.exe` personnalisé, qui pourrait être une porte dérobée si le système est démarré en mode sans échec.
-- **Exploit 3 (Permissions d'écriture sur PATH et boot.ini) :** L'accès en écriture à `boot.ini` permet un démarrage automatique en mode sans échec, facilitant l'accès non autorisé au prochain redémarrage.
+- **Exploit 2 (Permissions d'écriture sur le PATH) :** Avoir des permissions d'écriture sur n'importe quelle partie de la variable **PATH** du système, en particulier avant `C:\Windows\system32`, vous permet d'exécuter un `cmd.exe` personnalisé, qui pourrait être une porte dérobée si le système est démarré en mode sans échec.
+- **Exploit 3 (Permissions d'écriture sur le PATH et boot.ini) :** L'accès en écriture à `boot.ini` permet un démarrage automatique en mode sans échec, facilitant l'accès non autorisé au prochain redémarrage.
 
 Pour vérifier le paramètre **AlternateShell** actuel, utilisez ces commandes :
 ```bash
@@ -237,10 +235,10 @@ Au sein de ces clés, divers sous-clés existent, chacune correspondant à un co
 
 **Aperçus de sécurité :**
 
-- Modifier ou écrire dans une clé où **`IsInstalled`** est défini sur `"1"` avec un **`StubPath`** spécifique peut conduire à l'exécution non autorisée de commandes, potentiellement pour une élévation de privilèges.
-- Altérer le fichier binaire référencé dans n'importe quelle valeur de **`StubPath`** pourrait également permettre une élévation de privilèges, étant donné des autorisations suffisantes.
+- Modifier ou écrire dans une clé où **`IsInstalled`** est défini sur `"1"` avec un **`StubPath`** spécifique peut conduire à une exécution non autorisée de commandes, potentiellement pour une élévation de privilèges.
+- Altérer le fichier binaire référencé dans n'importe quelle valeur **`StubPath`** pourrait également permettre une élévation de privilèges, étant donné des autorisations suffisantes.
 
-Pour inspecter les configurations de **`StubPath`** à travers les composants Active Setup, ces commandes peuvent être utilisées :
+Pour inspecter les configurations **`StubPath`** à travers les composants Active Setup, ces commandes peuvent être utilisées :
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Active Setup\Installed Components" /s /v StubPath
 reg query "HKCU\SOFTWARE\Microsoft\Active Setup\Installed Components" /s /v StubPath

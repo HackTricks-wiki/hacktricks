@@ -2,17 +2,17 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Disposition de la hiérarchie des fichiers
+## Hiérarchie des fichiers
 
 - **/Applications** : Les applications installées devraient être ici. Tous les utilisateurs pourront y accéder.
 - **/bin** : Binaires de ligne de commande
-- **/cores** : S'il existe, il est utilisé pour stocker les dumps de noyau
+- **/cores** : S'il existe, il est utilisé pour stocker des dumps de cœur
 - **/dev** : Tout est traité comme un fichier, donc vous pouvez voir des périphériques matériels stockés ici.
 - **/etc** : Fichiers de configuration
-- **/Library** : Beaucoup de sous-répertoires et de fichiers liés aux préférences, caches et journaux peuvent être trouvés ici. Un dossier Library existe à la racine et dans le répertoire de chaque utilisateur.
+- **/Library** : De nombreux sous-répertoires et fichiers liés aux préférences, caches et journaux peuvent être trouvés ici. Un dossier Library existe à la racine et dans le répertoire de chaque utilisateur.
 - **/private** : Non documenté mais beaucoup des dossiers mentionnés sont des liens symboliques vers le répertoire privé.
 - **/sbin** : Binaires système essentiels (liés à l'administration)
-- **/System** : Fichiers pour faire fonctionner OS X. Vous ne devriez trouver principalement que des fichiers spécifiques à Apple ici (pas de tiers).
+- **/System** : Fichiers pour faire fonctionner OS X. Vous devriez trouver principalement des fichiers spécifiques à Apple ici (pas de tiers).
 - **/tmp** : Les fichiers sont supprimés après 3 jours (c'est un lien symbolique vers /private/tmp)
 - **/Users** : Répertoire personnel pour les utilisateurs.
 - **/usr** : Config et binaires système
@@ -22,14 +22,14 @@
 
 ### Dossiers d'applications
 
-- **Les applications système** se trouvent sous `/System/Applications`
-- **Les applications installées** sont généralement installées dans `/Applications` ou dans `~/Applications`
-- **Les données d'application** peuvent être trouvées dans `/Library/Application Support` pour les applications s'exécutant en tant que root et `~/Library/Application Support` pour les applications s'exécutant en tant qu'utilisateur.
+- Les **applications système** se trouvent sous `/System/Applications`
+- Les applications **installées** sont généralement installées dans `/Applications` ou dans `~/Applications`
+- Les **données d'application** peuvent être trouvées dans `/Library/Application Support` pour les applications s'exécutant en tant que root et `~/Library/Application Support` pour les applications s'exécutant en tant qu'utilisateur.
 - Les **démons** d'applications tierces qui **doivent s'exécuter en tant que root** se trouvent généralement dans `/Library/PrivilegedHelperTools/`
 - Les applications **sandboxées** sont mappées dans le dossier `~/Library/Containers`. Chaque application a un dossier nommé selon l'ID de bundle de l'application (`com.apple.Safari`).
 - Le **noyau** se trouve dans `/System/Library/Kernels/kernel`
-- **Les extensions de noyau d'Apple** se trouvent dans `/System/Library/Extensions`
-- **Les extensions de noyau tierces** sont stockées dans `/Library/Extensions`
+- Les **extensions de noyau d'Apple** se trouvent dans `/System/Library/Extensions`
+- Les **extensions de noyau tierces** sont stockées dans `/Library/Extensions`
 
 ### Fichiers avec des informations sensibles
 
@@ -58,10 +58,10 @@ macos-installers-abuse.md
 - `plutil -convert json ~/Library/Preferences/com.apple.screensaver.plist -o -`
 - **`.app`** : Applications Apple qui suivent une structure de répertoire (C'est un bundle).
 - **`.dylib`** : Bibliothèques dynamiques (comme les fichiers DLL de Windows)
-- **`.pkg`** : Sont les mêmes que xar (format d'archive extensible). La commande d'installation peut être utilisée pour installer le contenu de ces fichiers.
+- **`.pkg`** : Sont les mêmes que xar (format d'archive extensible). La commande d'installateur peut être utilisée pour installer le contenu de ces fichiers.
 - **`.DS_Store`** : Ce fichier est présent dans chaque répertoire, il sauvegarde les attributs et personnalisations du répertoire.
-- **`.Spotlight-V100`** : Ce dossier apparaît dans le répertoire racine de chaque volume du système.
-- **`.metadata_never_index`** : Si ce fichier est à la racine d'un volume, Spotlight ne l'indexera pas.
+- **`.Spotlight-V100`** : Ce dossier apparaît dans le répertoire racine de chaque volume sur le système.
+- **`.metadata_never_index`** : Si ce fichier est à la racine d'un volume, Spotlight n'indexera pas ce volume.
 - **`.noindex`** : Les fichiers et dossiers avec cette extension ne seront pas indexés par Spotlight.
 - **`.sdef`** : Fichiers à l'intérieur des bundles spécifiant comment il est possible d'interagir avec l'application depuis un AppleScript.
 
@@ -75,14 +75,14 @@ macos-bundles.md
 
 ## Cache de bibliothèque partagée Dyld (SLC)
 
-Sur macOS (et iOS), toutes les bibliothèques partagées du système, comme les frameworks et les dylibs, sont **combinées en un seul fichier**, appelé le **cache partagé dyld**. Cela améliore les performances, car le code peut être chargé plus rapidement.
+Sur macOS (et iOS), toutes les bibliothèques partagées système, comme les frameworks et les dylibs, sont **combinées en un seul fichier**, appelé le **cache partagé dyld**. Cela améliore les performances, car le code peut être chargé plus rapidement.
 
 Cela se trouve sur macOS dans `/System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/` et dans les versions plus anciennes, vous pourriez trouver le **cache partagé** dans **`/System/Library/dyld/`**.\
-Dans iOS, vous pouvez les trouver dans **`/System/Library/Caches/com.apple.dyld/`**.
+Sur iOS, vous pouvez les trouver dans **`/System/Library/Caches/com.apple.dyld/`**.
 
-Semblable au cache partagé dyld, le noyau et les extensions de noyau sont également compilés dans un cache de noyau, qui est chargé au démarrage.
+Similaire au cache partagé dyld, le noyau et les extensions de noyau sont également compilés dans un cache de noyau, qui est chargé au démarrage.
 
-Pour extraire les bibliothèques du cache partagé de fichiers dylib, il était possible d'utiliser le binaire [dyld_shared_cache_util](https://www.mbsplugins.de/files/dyld_shared_cache_util-dyld-733.8.zip) qui pourrait ne plus fonctionner aujourd'hui, mais vous pouvez également utiliser [**dyldextractor**](https://github.com/arandomdev/dyldextractor) :
+Pour extraire les bibliothèques du fichier unique du cache partagé dylib, il était possible d'utiliser le binaire [dyld_shared_cache_util](https://www.mbsplugins.de/files/dyld_shared_cache_util-dyld-733.8.zip) qui pourrait ne plus fonctionner aujourd'hui, mais vous pouvez également utiliser [**dyldextractor**](https://github.com/arandomdev/dyldextractor) :
 ```bash
 # dyld_shared_cache_util
 dyld_shared_cache_util -extract ~/shared_cache/ /System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/dyld_shared_cache_arm64e
@@ -93,14 +93,14 @@ dyldex_all [dyld_shared_cache_path] # Extract all
 # More options inside the readme
 ```
 > [!TIP]
-> Notez que même si l'outil `dyld_shared_cache_util` ne fonctionne pas, vous pouvez passer le **binaire dyld partagé à Hopper** et Hopper sera capable d'identifier toutes les bibliothèques et vous permettra de **sélectionner celle que vous** souhaitez enquêter :
+> Notez que même si l'outil `dyld_shared_cache_util` ne fonctionne pas, vous pouvez passer le **binaire dyld partagé à Hopper** et Hopper sera capable d'identifier toutes les bibliothèques et vous laissera **sélectionner celle que** vous souhaitez enquêter :
 
 <figure><img src="../../../images/image (1152).png" alt="" width="563"><figcaption></figcaption></figure>
 
 Certains extracteurs ne fonctionneront pas car les dylibs sont préliés avec des adresses codées en dur, donc ils pourraient sauter vers des adresses inconnues.
 
 > [!TIP]
-> Il est également possible de télécharger le cache de bibliothèque partagée d'autres appareils \*OS dans macos en utilisant un émulateur dans Xcode. Ils seront téléchargés dans : ls `$HOME/Library/Developer/Xcode/<*>OS\ DeviceSupport/<version>/Symbols/System/Library/Caches/com.apple.dyld/`, comme : `$HOME/Library/Developer/Xcode/iOS\ DeviceSupport/14.1\ (18A8395)/Symbols/System/Library/Caches/com.apple.dyld/dyld_shared_cache_arm64`
+> Il est également possible de télécharger le Cache de Bibliothèque Partagée d'autres appareils \*OS dans macos en utilisant un émulateur dans Xcode. Ils seront téléchargés dans : ls `$HOME/Library/Developer/Xcode/<*>OS\ DeviceSupport/<version>/Symbols/System/Library/Caches/com.apple.dyld/`, comme : `$HOME/Library/Developer/Xcode/iOS\ DeviceSupport/14.1\ (18A8395)/Symbols/System/Library/Caches/com.apple.dyld/dyld_shared_cache_arm64`
 
 ### Mapping SLC
 
@@ -121,16 +121,16 @@ En utilisant les variables d'environnement :
 
 ### Folder permissions
 
-Dans un **dossier**, **lire** permet de **lister**, **écrire** permet de **supprimer** et **écrire** des fichiers dessus, et **exécuter** permet de **traverser** le répertoire. Donc, par exemple, un utilisateur avec **la permission de lecture sur un fichier** à l'intérieur d'un répertoire où il **n'a pas la permission d'exécuter** **ne pourra pas lire** le fichier.
+Dans un **dossier**, **lire** permet de **lister**, **écrire** permet de **supprimer** et **écrire** des fichiers dessus, et **exécuter** permet de **traverser** le répertoire. Donc, par exemple, un utilisateur avec **permission de lecture sur un fichier** à l'intérieur d'un répertoire où il **n'a pas la permission d'exécuter** **ne pourra pas lire** le fichier.
 
 ### Flag modifiers
 
 Il existe certains drapeaux qui peuvent être définis dans les fichiers qui feront que le fichier se comportera différemment. Vous pouvez **vérifier les drapeaux** des fichiers à l'intérieur d'un répertoire avec `ls -lO /path/directory`
 
-- **`uchg`** : Connu sous le nom de **drapeau uchange**, il **empêchera toute action** de modification ou de suppression du **fichier**. Pour le définir, faites : `chflags uchg file.txt`
+- **`uchg`** : Connu sous le nom de drapeau **uchange**, il **empêchera toute action** de modification ou de suppression du **fichier**. Pour le définir, faites : `chflags uchg file.txt`
 - L'utilisateur root pourrait **supprimer le drapeau** et modifier le fichier.
 - **`restricted`** : Ce drapeau rend le fichier **protégé par SIP** (vous ne pouvez pas ajouter ce drapeau à un fichier).
-- **`Sticky bit`** : Si un répertoire a un bit collant, **seul** le **propriétaire du répertoire ou root peut renommer ou supprimer** des fichiers. En général, cela est défini sur le répertoire /tmp pour empêcher les utilisateurs ordinaires de supprimer ou de déplacer les fichiers d'autres utilisateurs.
+- **`Sticky bit`** : Si un répertoire a le bit collant, **seul** le **propriétaire du répertoire ou root peut renommer ou supprimer** des fichiers. Typiquement, cela est défini sur le répertoire /tmp pour empêcher les utilisateurs ordinaires de supprimer ou de déplacer les fichiers d'autres utilisateurs.
 
 Tous les drapeaux peuvent être trouvés dans le fichier `sys/stat.h` (trouvez-le en utilisant `mdfind stat.h | grep stat.h`) et sont :
 

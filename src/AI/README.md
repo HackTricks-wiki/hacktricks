@@ -1,8 +1,8 @@
-# IA en cybersécurité
+# IA en Cybersécurité
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Principaux algorithmes d'apprentissage automatique
+## Principaux Algorithmes d'Apprentissage Automatique
 
 Le meilleur point de départ pour apprendre sur l'IA est de comprendre comment fonctionnent les principaux algorithmes d'apprentissage automatique. Cela vous aidera à comprendre comment l'IA fonctionne, comment l'utiliser et comment l'attaquer :
 
@@ -32,7 +32,7 @@ AI-llm-architecture/README.md
 
 ## Sécurité de l'IA
 
-### Cadres de risque de l'IA
+### Cadres de Risque de l'IA
 
 À ce moment, les 2 principaux cadres pour évaluer les risques des systèmes d'IA sont l'OWASP ML Top 10 et le Google SAIF :
 
@@ -40,7 +40,7 @@ AI-llm-architecture/README.md
 AI-Risk-Frameworks.md
 {{#endref}}
 
-### Sécurité des prompts IA
+### Sécurité des Prompts d'IA
 
 Les LLMs ont fait exploser l'utilisation de l'IA ces dernières années, mais ils ne sont pas parfaits et peuvent être trompés par des prompts adverses. C'est un sujet très important pour comprendre comment utiliser l'IA en toute sécurité et comment l'attaquer :
 
@@ -48,23 +48,23 @@ Les LLMs ont fait exploser l'utilisation de l'IA ces dernières années, mais il
 AI-Prompts.md
 {{#endref}}
 
-### RCE des modèles IA
+### RCE des Modèles d'IA
 
-Il est très courant pour les développeurs et les entreprises d'exécuter des modèles téléchargés depuis Internet, cependant, simplement charger un modèle peut suffire à exécuter du code arbitraire sur le système. C'est un sujet très important pour comprendre comment utiliser l'IA en toute sécurité et comment l'attaquer :
+Il est très courant pour les développeurs et les entreprises d'exécuter des modèles téléchargés depuis Internet, cependant, le simple chargement d'un modèle peut suffire à exécuter du code arbitraire sur le système. C'est un sujet très important pour comprendre comment utiliser l'IA en toute sécurité et comment l'attaquer :
 
 {{#ref}}
 AI-Models-RCE.md
 {{#endref}}
 
-### Protocole de contexte des modèles IA
+### Protocole de Contexte des Modèles d'IA
 
-MCP (Model Context Protocol) est un protocole qui permet aux clients agents IA de se connecter à des outils externes et à des sources de données de manière plug-and-play. Cela permet des flux de travail complexes et des interactions entre les modèles IA et les systèmes externes :
+MCP (Model Context Protocol) est un protocole qui permet aux clients agents d'IA de se connecter à des outils externes et à des sources de données de manière plug-and-play. Cela permet des flux de travail complexes et des interactions entre les modèles d'IA et les systèmes externes :
 
 {{#ref}}
 AI-MCP-Servers.md
 {{#endref}}
 
-### Fuzzing assisté par IA et découverte automatisée de vulnérabilités
+### Fuzzing Assisté par IA & Découverte Automatisée de Vulnérabilités
 
 {{#ref}}
 AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md

@@ -6,7 +6,7 @@
 
 ### Informations de base
 
-Tout d'abord, il est recommandé d'avoir un **USB** avec des **binaires et bibliothèques bien connus** dessus (vous pouvez simplement obtenir ubuntu et copier les dossiers _/bin_, _/sbin_, _/lib,_ et _/lib64_), puis monter l'USB et modifier les variables d'environnement pour utiliser ces binaires :
+Tout d'abord, il est recommandé d'avoir une **clé USB** avec des **binaires et bibliothèques bien connus** dessus (vous pouvez simplement obtenir ubuntu et copier les dossiers _/bin_, _/sbin_, _/lib,_ et _/lib64_), puis monter la clé USB et modifier les variables d'environnement pour utiliser ces binaires :
 ```bash
 export PATH=/mnt/usb/bin:/mnt/usb/sbin
 export LD_LIBRARY_PATH=/mnt/usb/lib:/mnt/usb/lib64
@@ -31,7 +31,7 @@ find /directory -type f -mtime -1 -print #Find modified files during the last mi
 ```
 #### Informations suspectes
 
-Lors de l'obtention des informations de base, vous devez vérifier des éléments étranges tels que :
+Lors de l'obtention des informations de base, vous devez vérifier des choses étranges comme :
 
 - **Les processus root** s'exécutent généralement avec de faibles PIDS, donc si vous trouvez un processus root avec un grand PID, vous pouvez suspecter
 - Vérifiez les **connexions enregistrées** des utilisateurs sans shell dans `/etc/passwd`
@@ -54,7 +54,7 @@ sudo insmod lime.ko "path=/home/sansforensics/Desktop/mem_dump.bin format=lime"
 LiME prend en charge 3 **formats** :
 
 - Brut (chaque segment concaténé ensemble)
-- Rembourré (identique au brut, mais avec des zéros dans les bits de droite)
+- Padded (identique à brut, mais avec des zéros dans les bits de droite)
 - Lime (format recommandé avec des métadonnées)
 
 LiME peut également être utilisé pour **envoyer le dump via le réseau** au lieu de le stocker sur le système en utilisant quelque chose comme : `path=tcp:4444`
@@ -64,7 +64,7 @@ LiME peut également être utilisé pour **envoyer le dump via le réseau** au l
 #### Arrêt
 
 Tout d'abord, vous devrez **éteindre le système**. Ce n'est pas toujours une option car parfois le système sera un serveur de production que l'entreprise ne peut pas se permettre d'éteindre.\
-Il existe **2 façons** d'éteindre le système, un **arrêt normal** et un **arrêt "débrancher le câble"**. Le premier permettra aux **processus de se terminer comme d'habitude** et au **système de fichiers** d'être **synchronisé**, mais il permettra également au **malware** de **détruire des preuves**. L'approche "débrancher le câble" peut entraîner **une perte d'informations** (pas beaucoup d'infos vont être perdues car nous avons déjà pris une image de la mémoire) et le **malware n'aura aucune opportunité** d'agir. Par conséquent, si vous **soupçonnez** qu'il pourrait y avoir un **malware**, exécutez simplement la **commande** **`sync`** sur le système et débranchez le câble.
+Il existe **2 façons** d'éteindre le système, un **arrêt normal** et un **arrêt "débrancher"**. Le premier permettra aux **processus de se terminer comme d'habitude** et au **système de fichiers** d'être **synchronisé**, mais il permettra également au **malware** de **détruire des preuves**. L'approche "débrancher" peut entraîner **une certaine perte d'informations** (pas beaucoup d'infos vont être perdues car nous avons déjà pris une image de la mémoire) et le **malware n'aura aucune opportunité** d'agir. Par conséquent, si vous **soupçonnez** qu'il pourrait y avoir un **malware**, exécutez simplement la **commande** **`sync`** sur le système et débranchez.
 
 #### Prendre une image du disque
 
@@ -77,7 +77,7 @@ dd if=<subject device> of=<image file> bs=512
 dcfldd if=<subject device> of=<image file> bs=512 hash=<algorithm> hashwindow=<chunk size> hashlog=<hash file>
 dcfldd if=/dev/sdc of=/media/usb/pc.image hash=sha256 hashwindow=1M hashlog=/media/usb/pc.hashes
 ```
-### Analyse préliminaire de l'image disque
+### Pré-analyse de l'image disque
 
 Imager une image disque sans plus de données.
 ```bash
@@ -156,7 +156,7 @@ Pour rechercher efficacement des programmes installés sur les systèmes Debian 
 - Pour Debian, inspectez _**`/var/lib/dpkg/status`**_ et _**`/var/log/dpkg.log`**_ pour obtenir des détails sur les installations de paquets, en utilisant `grep` pour filtrer des informations spécifiques.
 - Les utilisateurs de RedHat peuvent interroger la base de données RPM avec `rpm -qa --root=/mntpath/var/lib/rpm` pour lister les paquets installés.
 
-Pour découvrir des logiciels installés manuellement ou en dehors de ces gestionnaires de paquets, explorez des répertoires comme _**`/usr/local`**_, _**`/opt`**_, _**`/usr/sbin`**_, _**`/usr/bin`**_, _**`/bin`**_, et _**`/sbin`**_. Combinez les listes de répertoires avec des commandes spécifiques au système pour identifier des exécutables non associés à des paquets connus, améliorant ainsi votre recherche de tous les programmes installés.
+Pour découvrir des logiciels installés manuellement ou en dehors de ces gestionnaires de paquets, explorez des répertoires comme _**`/usr/local`**_, _**`/opt`**_, _**`/usr/sbin`**_, _**`/usr/bin`**_, _**`/bin`**_, et _**`/sbin`**_. Combinez les listings de répertoires avec des commandes spécifiques au système pour identifier des exécutables non associés à des paquets connus, améliorant ainsi votre recherche de tous les programmes installés.
 ```bash
 # Debian package and log details
 cat /var/lib/dpkg/status | grep -E "Package:|Status:"
@@ -233,7 +233,7 @@ Chemins où un malware pourrait être installé en tant que service :
 - **/etc/systemd/system** : Un répertoire pour les scripts du gestionnaire de système et de service.
 - **/etc/systemd/system/multi-user.target.wants/** : Contient des liens vers des services qui doivent être démarrés dans un niveau d'exécution multi-utilisateur.
 - **/usr/local/etc/rc.d/** : Pour des services personnalisés ou tiers.
-- **\~/.config/autostart/** : Pour les applications de démarrage automatique spécifiques à l'utilisateur, qui peuvent être un endroit caché pour des malwares ciblant les utilisateurs.
+- **\~/.config/autostart/** : Pour les applications de démarrage automatique spécifiques à l'utilisateur, qui peuvent être un endroit caché pour des malwares ciblant l'utilisateur.
 - **/lib/systemd/system/** : Fichiers d'unité par défaut à l'échelle du système fournis par les paquets installés.
 
 ### Kernel Modules
@@ -262,7 +262,7 @@ Les systèmes Linux suivent les activités des utilisateurs et les événements 
 - **/var/log/boot.log** : Contient des messages de démarrage du système.
 - **/var/log/maillog** ou **/var/log/mail.log** : Journalise les activités du serveur de messagerie, utile pour suivre les services liés aux e-mails.
 - **/var/log/kern.log** : Stocke les messages du noyau, y compris les erreurs et avertissements.
-- **/var/log/dmesg** : Contient les messages des pilotes de périphériques.
+- **/var/log/dmesg** : Contient des messages des pilotes de périphériques.
 - **/var/log/faillog** : Enregistre les tentatives de connexion échouées, aidant dans les enquêtes sur les violations de sécurité.
 - **/var/log/cron** : Journalise les exécutions des tâches cron.
 - **/var/log/daemon.log** : Suit les activités des services en arrière-plan.
@@ -300,7 +300,7 @@ Certaines applications génèrent également leurs propres journaux :
 - **VIM** : Consultez _\~/.viminfo_ pour des détails d'utilisation, tels que les chemins de fichiers accédés et l'historique des recherches.
 - **Open Office** : Vérifiez l'accès récent aux documents qui pourrait indiquer des fichiers compromis.
 - **FTP/SFTP** : Examinez les journaux dans _\~/.ftp_history_ ou _\~/.sftp_history_ pour des transferts de fichiers qui pourraient être non autorisés.
-- **MySQL** : Enquêtez sur _\~/.mysql_history_ pour des requêtes MySQL exécutées, révélant potentiellement des activités de base de données non autorisées.
+- **MySQL** : Enquêtez sur _\~/.mysql_history_ pour des requêtes MySQL exécutées, révélant potentiellement des activités non autorisées dans la base de données.
 - **Less** : Analysez _\~/.lesshst_ pour l'historique d'utilisation, y compris les fichiers consultés et les commandes exécutées.
 - **Git** : Examinez _\~/.gitconfig_ et le projet _.git/logs_ pour des modifications des dépôts.
 
@@ -308,7 +308,7 @@ Certaines applications génèrent également leurs propres journaux :
 
 [**usbrip**](https://github.com/snovvcrash/usbrip) est un petit logiciel écrit en pur Python 3 qui analyse les fichiers journaux Linux (`/var/log/syslog*` ou `/var/log/messages*` selon la distribution) pour construire des tableaux d'historique des événements USB.
 
-Il est intéressant de **savoir tous les USB qui ont été utilisés** et cela sera plus utile si vous avez une liste autorisée d'USB pour trouver des "événements de violation" (l'utilisation d'USB qui ne figurent pas dans cette liste).
+Il est intéressant de **connaître tous les USB qui ont été utilisés** et cela sera plus utile si vous avez une liste autorisée d'USB pour trouver des "événements de violation" (l'utilisation d'USB qui ne figurent pas dans cette liste).
 
 ### Installation
 ```bash
@@ -327,7 +327,7 @@ Plus d'exemples et d'informations dans le github : [https://github.com/snovvcras
 
 ## Examiner les comptes utilisateurs et les activités de connexion
 
-Examinez le _**/etc/passwd**_, le _**/etc/shadow**_ et les **journaux de sécurité** pour des noms ou des comptes inhabituels créés et ou utilisés à proximité d'événements non autorisés connus. Vérifiez également les possibles attaques par force brute sur sudo.\
+Examinez le _**/etc/passwd**_, _**/etc/shadow**_ et les **journaux de sécurité** pour des noms ou des comptes inhabituels créés et ou utilisés à proximité d'événements non autorisés connus. Vérifiez également les possibles attaques par force brute sur sudo.\
 De plus, vérifiez des fichiers comme _**/etc/sudoers**_ et _**/etc/groups**_ pour des privilèges inattendus accordés aux utilisateurs.\
 Enfin, recherchez des comptes avec **aucun mot de passe** ou des **mots de passe facilement devinables**.
 
@@ -355,9 +355,9 @@ ls -laR --sort=time /bin```
 ls -lai /bin | sort -n```
 ````
 > [!TIP]
-> Notez qu'un **attaquant** peut **modifier** le **temps** pour faire en sorte que les **fichiers apparaissent** **légitimes**, mais il **ne peut pas** modifier l'**inode**. Si vous constatez qu'un **fichier** indique qu'il a été créé et modifié en **même temps** que le reste des fichiers dans le même dossier, mais que l'**inode** est **inattendu plus grand**, alors les **horodatages de ce fichier ont été modifiés**.
+> Notez qu'un **attaquant** peut **modifier** le **temps** pour faire **apparaître** les **fichiers** comme **légitimes**, mais il **ne peut pas** modifier l'**inode**. Si vous constatez qu'un **fichier** indique qu'il a été créé et modifié en même temps que le reste des fichiers dans le même dossier, mais que l'**inode** est **inattendu plus grand**, alors les **horodatages de ce fichier ont été modifiés**.
 
-## Comparer les fichiers de différentes versions de système de fichiers
+## Comparer des fichiers de différentes versions de système de fichiers
 
 ### Résumé de la comparaison des versions de système de fichiers
 
@@ -381,7 +381,7 @@ git diff --no-index --diff-filter=D path/to/old_version/ path/to/new_version/
 - `D`: Fichiers supprimés
 - `M`: Fichiers modifiés
 - `R`: Fichiers renommés
-- `T`: Changements de type (par exemple, fichier vers lien symbolique)
+- `T`: Changements de type (par exemple, fichier vers symlink)
 - `U`: Fichiers non fusionnés
 - `X`: Fichiers inconnus
 - `B`: Fichiers corrompus

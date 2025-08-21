@@ -43,20 +43,20 @@ Si vous souhaitez exécuter un binaire mais que le système de fichiers ne le pe
 
 ### Contournement FD + syscall exec
 
-Si vous avez des moteurs de script puissants dans la machine, tels que **Python**, **Perl** ou **Ruby**, vous pourriez télécharger le binaire à exécuter depuis la mémoire, le stocker dans un descripteur de fichier mémoire (`create_memfd` syscall), qui ne sera pas protégé par ces protections, puis appeler un **`exec` syscall** en indiquant le **fd comme fichier à exécuter**.
+Si vous avez des moteurs de script puissants dans la machine, tels que **Python**, **Perl** ou **Ruby**, vous pourriez télécharger le binaire à exécuter depuis la mémoire, le stocker dans un descripteur de fichier en mémoire (`create_memfd` syscall), qui ne sera pas protégé par ces protections, puis appeler un **syscall `exec`** en indiquant le **fd comme fichier à exécuter**.
 
 Pour cela, vous pouvez facilement utiliser le projet [**fileless-elf-exec**](https://github.com/nnsee/fileless-elf-exec). Vous pouvez lui passer un binaire et il générera un script dans le langage indiqué avec le **binaire compressé et encodé en b64** avec les instructions pour **le décoder et le décompresser** dans un **fd** créé en appelant le syscall `create_memfd` et un appel au **syscall exec** pour l'exécuter.
 
 > [!WARNING]
 > Cela ne fonctionne pas dans d'autres langages de script comme PHP ou Node car ils n'ont pas de **méthode par défaut pour appeler des syscalls bruts** depuis un script, donc il n'est pas possible d'appeler `create_memfd` pour créer le **fd mémoire** pour stocker le binaire.
 >
-> De plus, créer un **fd régulier** avec un fichier dans `/dev/shm` ne fonctionnera pas, car vous ne serez pas autorisé à l'exécuter en raison de la **protection pas d'exécution** qui s'appliquera.
+> De plus, créer un **fd régulier** avec un fichier dans `/dev/shm` ne fonctionnera pas, car vous ne serez pas autorisé à l'exécuter en raison de l'application de la **protection pas d'exécution**.
 
 ### DDexec / EverythingExec
 
 [**DDexec / EverythingExec**](https://github.com/arget13/DDexec) est une technique qui vous permet de **modifier la mémoire de votre propre processus** en écrasant son **`/proc/self/mem`**.
 
-Ainsi, **en contrôlant le code assembleur** qui est exécuté par le processus, vous pouvez écrire un **shellcode** et "muter" le processus pour **exécuter n'importe quel code arbitraire**.
+Ainsi, **en contrôlant le code d'assemblage** qui est exécuté par le processus, vous pouvez écrire un **shellcode** et "muter" le processus pour **exécuter n'importe quel code arbitraire**.
 
 > [!TIP]
 > **DDexec / EverythingExec** vous permettra de charger et **d'exécuter** votre propre **shellcode** ou **n'importe quel binaire** depuis **la mémoire**.
@@ -74,13 +74,13 @@ ddexec.md
 
 [**Memexec**](https://github.com/arget13/memexec) est la prochaine étape naturelle de DDexec. C'est un **DDexec shellcode démonisé**, donc chaque fois que vous souhaitez **exécuter un binaire différent**, vous n'avez pas besoin de relancer DDexec, vous pouvez simplement exécuter le shellcode memexec via la technique DDexec et ensuite **communiquer avec ce démon pour passer de nouveaux binaires à charger et exécuter**.
 
-Vous pouvez trouver un exemple sur la façon d'utiliser **memexec pour exécuter des binaires à partir d'un shell PHP inversé** dans [https://github.com/arget13/memexec/blob/main/a.php](https://github.com/arget13/memexec/blob/main/a.php).
+Vous pouvez trouver un exemple sur la façon d'utiliser **memexec pour exécuter des binaires à partir d'un shell inverse PHP** dans [https://github.com/arget13/memexec/blob/main/a.php](https://github.com/arget13/memexec/blob/main/a.php).
 
 ### Memdlopen
 
-Avec un objectif similaire à DDexec, la technique [**memdlopen**](https://github.com/arget13/memdlopen) permet une **manière plus facile de charger des binaires** en mémoire pour les exécuter ensuite. Cela pourrait même permettre de charger des binaires avec des dépendances.
+Avec un objectif similaire à DDexec, la technique [**memdlopen**](https://github.com/arget13/memdlopen) permet une **manière plus facile de charger des binaires** en mémoire pour les exécuter par la suite. Cela pourrait même permettre de charger des binaires avec des dépendances.
 
-## Distroless Bypass
+## Bypass Distroless
 
 ### Qu'est-ce que distroless
 
@@ -95,7 +95,7 @@ Dans un conteneur distroless, vous pourriez **même ne pas trouver `sh` ou `bash
 > [!WARNING]
 > Par conséquent, vous **ne pourrez pas** obtenir un **reverse shell** ou **énumérer** le système comme vous le faites habituellement.
 
-Cependant, si le conteneur compromis exécute par exemple un web flask, alors python est installé, et donc vous pouvez obtenir un **reverse shell Python**. S'il exécute node, vous pouvez obtenir un shell rev Node, et c'est la même chose avec presque n'importe quel **langage de script**.
+Cependant, si le conteneur compromis exécute par exemple un web flask, alors python est installé, et donc vous pouvez obtenir un **reverse shell Python**. S'il exécute node, vous pouvez obtenir un shell inverse Node, et c'est la même chose avec presque n'importe quel **langage de script**.
 
 > [!TIP]
 > En utilisant le langage de script, vous pourriez **énumérer le système** en utilisant les capacités du langage.
@@ -106,6 +106,5 @@ S'il n'y a **pas de protections `read-only/no-exec`**, vous pourriez abuser de v
 > Cependant, dans ce type de conteneurs, ces protections existeront généralement, mais vous pourriez utiliser les **techniques d'exécution en mémoire précédentes pour les contourner**.
 
 Vous pouvez trouver des **exemples** sur la façon d'**exploiter certaines vulnérabilités RCE** pour obtenir des **reverse shells** de langages de script et exécuter des binaires à partir de la mémoire dans [**https://github.com/carlospolop/DistrolessRCE**](https://github.com/carlospolop/DistrolessRCE).
-
 
 {{#include ../../../banners/hacktricks-training.md}}

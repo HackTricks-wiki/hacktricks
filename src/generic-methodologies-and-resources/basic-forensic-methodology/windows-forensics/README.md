@@ -1,30 +1,30 @@
-# Windows Artifacts
+# Artéfacts Windows
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Generic Windows Artifacts
+## Artéfacts Windows Généraux
 
-### Windows 10 Notifications
+### Notifications Windows 10
 
 Dans le chemin `\Users\<username>\AppData\Local\Microsoft\Windows\Notifications`, vous pouvez trouver la base de données `appdb.dat` (avant l'anniversaire de Windows) ou `wpndatabase.db` (après l'anniversaire de Windows).
 
 À l'intérieur de cette base de données SQLite, vous pouvez trouver la table `Notification` avec toutes les notifications (au format XML) qui peuvent contenir des données intéressantes.
 
-### Timeline
+### Chronologie
 
-Timeline est une caractéristique de Windows qui fournit un **historique chronologique** des pages web visitées, des documents modifiés et des applications exécutées.
+La chronologie est une caractéristique de Windows qui fournit un **historique chronologique** des pages web visitées, des documents modifiés et des applications exécutées.
 
 La base de données se trouve dans le chemin `\Users\<username>\AppData\Local\ConnectedDevicesPlatform\<id>\ActivitiesCache.db`. Cette base de données peut être ouverte avec un outil SQLite ou avec l'outil [**WxTCmd**](https://github.com/EricZimmerman/WxTCmd) **qui génère 2 fichiers pouvant être ouverts avec l'outil** [**TimeLine Explorer**](https://ericzimmerman.github.io/#!index.md).
 
-### ADS (Alternate Data Streams)
+### ADS (Flux de Données Alternatifs)
 
 Les fichiers téléchargés peuvent contenir l'**ADS Zone.Identifier** indiquant **comment** il a été **téléchargé** depuis l'intranet, internet, etc. Certains logiciels (comme les navigateurs) ajoutent généralement même **plus** **d'informations** comme l'**URL** d'où le fichier a été téléchargé.
 
-## **File Backups**
+## **Sauvegardes de Fichiers**
 
-### Recycle Bin
+### Corbeille
 
-Dans Vista/Win7/Win8/Win10, la **Recycle Bin** peut être trouvée dans le dossier **`$Recycle.bin`** à la racine du lecteur (`C:\$Recycle.bin`).\
+Dans Vista/Win7/Win8/Win10, la **Corbeille** se trouve dans le dossier **`$Recycle.bin`** à la racine du disque (`C:\$Recycle.bin`).\
 Lorsqu'un fichier est supprimé dans ce dossier, 2 fichiers spécifiques sont créés :
 
 - `$I{id}` : Informations sur le fichier (date de sa suppression)
@@ -40,7 +40,7 @@ Avec ces fichiers, vous pouvez utiliser l'outil [**Rifiuti**](https://github.com
 
 ### Copies de Volume Shadow
 
-La technologie Shadow Copy incluse dans Microsoft Windows peut créer des **copies de sauvegarde** ou des instantanés de fichiers ou de volumes d'ordinateur, même lorsqu'ils sont en cours d'utilisation.
+La copie Shadow est une technologie incluse dans Microsoft Windows qui peut créer des **copies de sauvegarde** ou des instantanés de fichiers ou de volumes informatiques, même lorsqu'ils sont en cours d'utilisation.
 
 Ces sauvegardes se trouvent généralement dans le `\System Volume Information` à la racine du système de fichiers et le nom est composé de **UIDs** montrés dans l'image suivante :
 
@@ -75,7 +75,7 @@ Lorsqu'un dossier est créé, un lien vers le dossier, vers le dossier parent et
 
 Ces fichiers de lien créés automatiquement **contiennent des informations sur l'origine** comme s'il s'agit d'un **fichier** **ou** d'un **dossier**, les **temps MAC** de ce fichier, les **informations de volume** où le fichier est stocké et le **dossier du fichier cible**. Ces informations peuvent être utiles pour récupérer ces fichiers en cas de suppression.
 
-De plus, la **date de création du lien** est la première **fois** que le fichier original a été **utilisé** et la **date** **modifiée** du fichier de lien est la **dernière** **fois** que le fichier d'origine a été utilisé.
+De plus, la **date de création du lien** est le premier **moment** où le fichier original a été **utilisé pour la première fois** et la **date modifiée** du fichier de lien est le **dernier moment** où le fichier d'origine a été utilisé.
 
 Pour inspecter ces fichiers, vous pouvez utiliser [**LinkParser**](http://4discovery.com/our-tools/).
 
@@ -122,11 +122,11 @@ Vous pouvez inspecter les jumplists en utilisant [**JumplistExplorer**](https://
 
 Il est possible d'identifier qu'un appareil USB a été utilisé grâce à la création de :
 
-- Dossier Récents de Windows
-- Dossier Récents de Microsoft Office
+- Dossier Récents Windows
+- Dossier Récents Microsoft Office
 - Jumplists
 
-Notez que certains fichiers LNK au lieu de pointer vers le chemin original, pointent vers le dossier WPDNSE :
+Notez que certains fichiers LNK au lieu de pointer vers le chemin d'origine, pointent vers le dossier WPDNSE :
 
 ![](<../../../images/image (218).png>)
 
@@ -140,7 +140,7 @@ Les fichiers dans le dossier WPDNSE sont une copie des originaux, donc ne surviv
 
 Vérifiez le fichier `C:\Windows\inf\setupapi.dev.log` pour obtenir les horodatages concernant le moment où la connexion USB a été produite (recherchez `Section start`).
 
-![](<../../../images/image (477) (2) (2) (2) (2) (2) (2) (2) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (14) (2).png>)
+![](<../../../images/image (477) (2) (2) (2) (2) (2) (2) (2) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (14) (2).png>)
 
 ### USB Detective
 
@@ -181,7 +181,7 @@ De plus, à l'intérieur des en-têtes `References` et `In-Reply-To`, vous pouve
 
 ### Application Mail Windows
 
-Cette application enregistre les emails en HTML ou en texte. Vous pouvez trouver les emails dans des sous-dossiers à l'intérieur de `\Users\<username>\AppData\Local\Comms\Unistore\data\3\`. Les emails sont enregistrés avec l'extension `.dat`.
+Cette application enregistre les emails en HTML ou texte. Vous pouvez trouver les emails dans des sous-dossiers à l'intérieur de `\Users\<username>\AppData\Local\Comms\Unistore\data\3\`. Les emails sont enregistrés avec l'extension `.dat`.
 
 Les **métadonnées** des emails et les **contacts** peuvent être trouvés à l'intérieur de la **base de données EDB** : `\Users\<username>\AppData\Local\Comms\UnistoreDB\store.vol`
 
@@ -213,7 +213,7 @@ Un **fichier OST** est généré par Microsoft Outlook lorsqu'il est configuré 
 
 ### Récupération des Pièces Jointes
 
-Les pièces jointes perdues peuvent être récupérées à partir de :
+Les pièces jointes perdues peuvent être récupérables à partir de :
 
 - Pour **IE10** : `%APPDATA%\Local\Microsoft\Windows\Temporary Internet Files\Content.Outlook`
 - Pour **IE11 et supérieur** : `%APPDATA%\Local\Microsoft\InetCache\Content.Outlook`
@@ -234,15 +234,15 @@ Le Registre Windows, stockant d'importantes données sur le système et l'activi
 
 - `%windir%\System32\Config` pour divers sous-clés `HKEY_LOCAL_MACHINE`.
 - `%UserProfile%{User}\NTUSER.DAT` pour `HKEY_CURRENT_USER`.
-- Les versions Vista et ultérieures sauvegardent les fichiers de registre `HKEY_LOCAL_MACHINE` dans `%Windir%\System32\Config\RegBack\`.
+- Windows Vista et les versions ultérieures sauvegardent les fichiers de registre `HKEY_LOCAL_MACHINE` dans `%Windir%\System32\Config\RegBack\`.
 - De plus, les informations sur l'exécution des programmes sont stockées dans `%UserProfile%\{User}\AppData\Local\Microsoft\Windows\USERCLASS.DAT` à partir de Windows Vista et Windows 2008 Server.
 
 ### Outils
 
 Certains outils sont utiles pour analyser les fichiers de registre :
 
-- **Éditeur de Registre** : Il est installé dans Windows. C'est une interface graphique pour naviguer dans le registre Windows de la session actuelle.
-- [**Registry Explorer**](https://ericzimmerman.github.io/#!index.md) : Il vous permet de charger le fichier de registre et de naviguer à travers eux avec une interface graphique. Il contient également des signets mettant en évidence les clés avec des informations intéressantes.
+- **Éditeur de Registre** : Il est installé dans Windows. C'est une interface graphique pour naviguer à travers le registre Windows de la session actuelle.
+- [**Registry Explorer**](https://ericzimmerman.github.io/#!index.md) : Il vous permet de charger le fichier de registre et de naviguer à travers eux avec une interface graphique. Il contient également des signets mettant en évidence des clés avec des informations intéressantes.
 - [**RegRipper**](https://github.com/keydet89/RegRipper3.0) : Encore une fois, il a une interface graphique qui permet de naviguer à travers le registre chargé et contient également des plugins qui mettent en évidence des informations intéressantes à l'intérieur du registre chargé.
 - [**Windows Registry Recovery**](https://www.mitec.cz/wrr.html) : Une autre application GUI capable d'extraire les informations importantes du registre chargé.
 
@@ -258,9 +258,10 @@ Chaque clé-valeur contient un **horodatage** indiquant la dernière fois qu'ell
 
 Le fichier/hive **SAM** contient les **utilisateurs, groupes et hachages de mots de passe des utilisateurs** du système.
 
-Dans `SAM\Domains\Account\Users`, vous pouvez obtenir le nom d'utilisateur, le RID, la dernière connexion, la dernière tentative de connexion échouée, le compteur de connexion, la politique de mot de passe et quand le compte a été créé. Pour obtenir les **hachages**, vous avez également **besoin** du fichier/hive **SYSTEM**.
+Dans `SAM\Domains\Account\Users`, vous pouvez obtenir le nom d'utilisateur, le RID, la dernière connexion, le dernier échec de connexion, le compteur de connexion, la politique de mot de passe et quand le compte a été créé. Pour obtenir les **hachages**, vous avez également **besoin** du fichier/hive **SYSTEM**.
 
 ### Entrées Intéressantes dans le Registre Windows
+
 
 {{#ref}}
 interesting-windows-registry-keys.md
@@ -298,7 +299,7 @@ Pour inspecter ces fichiers, vous pouvez utiliser l'outil [**PEcmd.exe**](https:
 
 ### Superprefetch
 
-**Superprefetch** a le même objectif que le prefetch, **charger les programmes plus rapidement** en prédisant ce qui va être chargé ensuite. Cependant, il ne remplace pas le service de prefetch.\
+**Superprefetch** a le même objectif que prefetch, **charger les programmes plus rapidement** en prédisant ce qui va être chargé ensuite. Cependant, il ne remplace pas le service de prefetch.\
 Ce service générera des fichiers de base de données dans `C:\Windows\Prefetch\Ag*.db`.
 
 Dans ces bases de données, vous pouvez trouver le **nom** du **programme**, le **nombre** d'**exécutions**, les **fichiers** **ouverts**, le **volume** **accédé**, le **chemin** **complet**, les **plages horaires** et les **horodatages**.
@@ -360,13 +361,13 @@ Le fichier CVS le plus intéressant généré est le `Amcache_Unassociated file 
 
 ### RecentFileCache
 
-Cet artefact ne peut être trouvé que dans W7 à `C:\Windows\AppCompat\Programs\RecentFileCache.bcf` et il contient des informations sur l'exécution récente de certains binaires.
+Cet artefact ne peut être trouvé que dans W7 dans `C:\Windows\AppCompat\Programs\RecentFileCache.bcf` et il contient des informations sur l'exécution récente de certains binaires.
 
 Vous pouvez utiliser l'outil [**RecentFileCacheParse**](https://github.com/EricZimmerman/RecentFileCacheParser) pour analyser le fichier.
 
 ### Tâches planifiées
 
-Vous pouvez les extraire de `C:\Windows\Tasks` ou `C:\Windows\System32\Tasks` et les lire en tant que XML.
+Vous pouvez les extraire de `C:\Windows\Tasks` ou `C:\Windows\System32\Tasks` et les lire au format XML.
 
 ### Services
 
@@ -377,9 +378,9 @@ Vous pouvez les trouver dans le registre sous `SYSTEM\ControlSet001\Services`. V
 Les applications installées peuvent être trouvées dans `\ProgramData\Microsoft\Windows\AppRepository\`\
 Ce dépôt a un **journal** avec **chaque application installée** dans le système à l'intérieur de la base de données **`StateRepository-Machine.srd`**.
 
-À l'intérieur de la table Application de cette base de données, il est possible de trouver les colonnes : "Application ID", "PackageNumber" et "Display Name". Ces colonnes contiennent des informations sur les applications préinstallées et installées et il peut être vérifié si certaines applications ont été désinstallées car les ID des applications installées devraient être séquentiels.
+À l'intérieur de la table Application de cette base de données, il est possible de trouver les colonnes : "Application ID", "PackageNumber" et "Display Name". Ces colonnes contiennent des informations sur les applications préinstallées et installées et il est possible de vérifier si certaines applications ont été désinstallées car les ID des applications installées devraient être séquentiels.
 
-Il est également possible de **trouver des applications installées** à l'intérieur du chemin du registre : `Software\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore\Applications\`\
+Il est également possible de **trouver des applications installées** dans le chemin du registre : `Software\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore\Applications\`\
 Et **des applications désinstallées** dans : `Software\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore\Deleted\`
 
 ## Événements Windows
@@ -434,8 +435,8 @@ Les événements d'accès sont enregistrés dans le fichier de configuration de 
 - **0xC0000070** : Violation des restrictions de station de travail - Pourrait être une tentative de connexion depuis un emplacement non autorisé.
 - **0xC0000193** : Expiration du compte - Tentatives d'accès avec des comptes utilisateurs expirés.
 - **0xC0000071** : Mot de passe expiré - Tentatives de connexion avec des mots de passe obsolètes.
-- **0xC0000133** : Problèmes de synchronisation horaire - Grandes divergences de temps entre le client et le serveur peuvent indiquer des attaques plus sophistiquées comme le pass-the-ticket.
-- **0xC0000224** : Changement de mot de passe obligatoire requis - Changements obligatoires fréquents pourraient suggérer une tentative de déstabiliser la sécurité du compte.
+- **0xC0000133** : Problèmes de synchronisation horaire - De grandes différences de temps entre le client et le serveur peuvent indiquer des attaques plus sophistiquées comme le pass-the-ticket.
+- **0xC0000224** : Changement de mot de passe obligatoire requis - Des changements obligatoires fréquents pourraient suggérer une tentative de déstabiliser la sécurité du compte.
 - **0xC0000225** : Indique un bug système plutôt qu'un problème de sécurité.
 - **0xC000015b** : Type de connexion refusé - Tentative d'accès avec un type de connexion non autorisé, comme un utilisateur essayant d'exécuter une connexion de service.
 
@@ -479,9 +480,9 @@ Enregistré par l'EventID 4616, les changements d'heure système peuvent compliq
 
 #### Suivi des appareils USB
 
-Les EventIDs système utiles pour le suivi des appareils USB incluent 20001/20003/10000 pour l'utilisation initiale, 10100 pour les mises à jour de pilotes, et l'EventID 112 de DeviceSetupManager pour les horodatages d'insertion.
+Les identifiants d'événements système utiles pour le suivi des appareils USB incluent 20001/20003/10000 pour l'utilisation initiale, 10100 pour les mises à jour de pilotes, et l'EventID 112 de DeviceSetupManager pour les horodatages d'insertion.
 
-#### Événements d'alimentation du système
+#### Événements d'alimentation système
 
 L'EventID 6005 indique le démarrage du système, tandis que l'EventID 6006 marque l'arrêt.
 

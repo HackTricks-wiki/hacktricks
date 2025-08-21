@@ -9,7 +9,7 @@ Une liste blanche d'applications est une liste de logiciels ou d'exécutables ap
 [AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) est la **solution de liste blanche d'applications** de Microsoft et donne aux administrateurs système le contrôle sur **quelles applications et fichiers les utilisateurs peuvent exécuter**. Elle fournit un **contrôle granulaire** sur les exécutables, les scripts, les fichiers d'installation Windows, les DLL, les applications empaquetées et les installateurs d'applications empaquetées.\
 Il est courant que les organisations **bloquent cmd.exe et PowerShell.exe** et l'accès en écriture à certains répertoires, **mais tout cela peut être contourné**.
 
-### Vérification
+### Vérifier
 
 Vérifiez quels fichiers/extensions sont sur liste noire/liste blanche :
 ```bash
@@ -48,7 +48,7 @@ Les identifiants locaux sont présents dans ce fichier, les mots de passe sont h
 
 ### Autorité de sécurité locale (LSA) - LSASS
 
-Les **identifiants** (hachés) sont **enregistrés** dans la **mémoire** de ce sous-système pour des raisons de connexion unique.\
+Les **identifiants** (hachés) sont **enregistrés** dans la **mémoire** de ce sous-système pour des raisons de Single Sign-On.\
 **LSA** administre la **politique de sécurité** locale (politique de mot de passe, permissions des utilisateurs...), **authentification**, **jetons d'accès**...\
 LSA sera celui qui **vérifiera** les identifiants fournis dans le fichier **SAM** (pour une connexion locale) et **communiquera** avec le **contrôleur de domaine** pour authentifier un utilisateur de domaine.
 
@@ -103,7 +103,7 @@ sc query windefend
 ```
 ## Système de fichiers chiffré (EFS)
 
-EFS sécurise les fichiers grâce au chiffrement, utilisant une **clé symétrique** connue sous le nom de **File Encryption Key (FEK)**. Cette clé est chiffrée avec la **clé publique** de l'utilisateur et stockée dans le $EFS **flux de données alternatif** du fichier chiffré. Lorsque le déchiffrement est nécessaire, la **clé privée** correspondante du certificat numérique de l'utilisateur est utilisée pour déchiffrer le FEK à partir du flux $EFS. Plus de détails peuvent être trouvés [ici](https://en.wikipedia.org/wiki/Encrypting_File_System).
+EFS sécurise les fichiers par le biais du chiffrement, utilisant une **clé symétrique** connue sous le nom de **File Encryption Key (FEK)**. Cette clé est chiffrée avec la **clé publique** de l'utilisateur et stockée dans le **flux de données alternatif** $EFS du fichier chiffré. Lorsque le déchiffrement est nécessaire, la **clé privée** correspondante du certificat numérique de l'utilisateur est utilisée pour déchiffrer le FEK à partir du flux $EFS. Plus de détails peuvent être trouvés [ici](https://en.wikipedia.org/wiki/Encrypting_File_System).
 
 **Scénarios de déchiffrement sans initiation de l'utilisateur** incluent :
 
@@ -116,7 +116,7 @@ Cette méthode de chiffrement permet un **accès transparent** aux fichiers chif
 
 - EFS utilise un FEK symétrique, chiffré avec la clé publique de l'utilisateur.
 - Le déchiffrement utilise la clé privée de l'utilisateur pour accéder au FEK.
-- Le déchiffrement automatique se produit dans des conditions spécifiques, comme le copier vers FAT32 ou la transmission sur le réseau.
+- Le déchiffrement automatique se produit dans des conditions spécifiques, comme la copie vers FAT32 ou la transmission sur le réseau.
 - Les fichiers chiffrés sont accessibles au propriétaire sans étapes supplémentaires.
 
 ### Vérifier les informations EFS
@@ -130,7 +130,7 @@ Vous pouvez également utiliser `cipher /e` et `cipher /d` dans un dossier pour 
 
 #### Être l'autorité système
 
-Cette méthode nécessite que l'**utilisateur victime** soit **en train d'exécuter** un **processus** à l'intérieur de l'hôte. Si c'est le cas, en utilisant une session `meterpreter`, vous pouvez usurper le jeton du processus de l'utilisateur (`impersonate_token` de `incognito`). Ou vous pourriez simplement `migrer` vers le processus de l'utilisateur.
+Cette méthode nécessite que l'**utilisateur victime** exécute un **processus** à l'intérieur de l'hôte. Si c'est le cas, en utilisant une session `meterpreter`, vous pouvez usurper le jeton du processus de l'utilisateur (`impersonate_token` de `incognito`). Ou vous pourriez simplement `migrate` vers le processus de l'utilisateur.
 
 #### Connaître le mot de passe de l'utilisateur
 
@@ -162,7 +162,7 @@ Aussi, consultez cette [page web](https://cube0x0.github.io/Relaying-for-gMSA/) 
 
 ## LAPS
 
-La **Local Administrator Password Solution (LAPS)**, disponible en téléchargement sur [Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899), permet la gestion des mots de passe des administrateurs locaux. Ces mots de passe, qui sont **randomisés**, uniques, et **régulièrement changés**, sont stockés de manière centralisée dans Active Directory. L'accès à ces mots de passe est restreint par des ACL aux utilisateurs autorisés. Avec des permissions suffisantes accordées, la capacité de lire les mots de passe des administrateurs locaux est fournie.
+La **Local Administrator Password Solution (LAPS)**, disponible en téléchargement sur [Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899), permet la gestion des mots de passe des administrateurs locaux. Ces mots de passe, qui sont **randomisés**, uniques et **régulièrement changés**, sont stockés de manière centralisée dans Active Directory. L'accès à ces mots de passe est restreint par des ACL aux utilisateurs autorisés. Avec des permissions suffisantes accordées, la capacité de lire les mots de passe des administrateurs locaux est fournie.
 
 {{#ref}}
 ../active-directory-methodology/laps.md
@@ -219,13 +219,13 @@ $command = "Write-Host 'My voice is my passport, verify me.'" $bytes = [System.T
 ```
 More can be found [here](https://blog.netspi.com/15-ways-to-bypass-the-powershell-execution-policy/)
 
-## Interface de fournisseur de support de sécurité (SSPI)
+## Interface de support de sécurité (SSPI)
 
 Est l'API qui peut être utilisée pour authentifier les utilisateurs.
 
-Le SSPI sera chargé de trouver le protocole adéquat pour deux machines qui souhaitent communiquer. La méthode préférée pour cela est Kerberos. Ensuite, le SSPI négociera quel protocole d'authentification sera utilisé, ces protocoles d'authentification sont appelés Fournisseur de support de sécurité (SSP), sont situés à l'intérieur de chaque machine Windows sous la forme d'un DLL et les deux machines doivent prendre en charge le même pour pouvoir communiquer.
+Le SSPI sera chargé de trouver le protocole adéquat pour deux machines qui souhaitent communiquer. La méthode préférée pour cela est Kerberos. Ensuite, le SSPI négociera quel protocole d'authentification sera utilisé, ces protocoles d'authentification sont appelés Security Support Provider (SSP), se trouvent à l'intérieur de chaque machine Windows sous la forme d'un DLL et les deux machines doivent prendre en charge le même pour pouvoir communiquer.
 
-### Principaux SSPs
+### Principaux SSP
 
 - **Kerberos** : Le préféré
 - %windir%\Windows\System32\kerberos.dll
@@ -240,9 +240,10 @@ Le SSPI sera chargé de trouver le protocole adéquat pour deux machines qui sou
 
 #### La négociation pourrait offrir plusieurs méthodes ou seulement une.
 
-## UAC - Contrôle de compte d'utilisateur
+## UAC - Contrôle de compte utilisateur
 
 [User Account Control (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) est une fonctionnalité qui permet un **message de consentement pour des activités élevées**.
+
 
 {{#ref}}
 uac-user-account-control.md

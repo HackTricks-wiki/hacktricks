@@ -8,7 +8,7 @@
 
 ## Évasions Chroot
 
-D'après [wikipedia](https://en.wikipedia.org/wiki/Chroot#Limitations) : Le mécanisme chroot **n'est pas destiné à défendre** contre la manipulation intentionnelle par des **utilisateurs privilégiés** (**root**). Sur la plupart des systèmes, les contextes chroot ne s'empilent pas correctement et les programmes chrootés **avec des privilèges suffisants peuvent effectuer un second chroot pour s'échapper**.\
+D'après [wikipedia](https://en.wikipedia.org/wiki/Chroot#Limitations) : Le mécanisme chroot n'est **pas destiné à défendre** contre la manipulation intentionnelle par des **utilisateurs privilégiés** (**root**). Sur la plupart des systèmes, les contextes chroot ne s'empilent pas correctement et les programmes chrootés **avec des privilèges suffisants peuvent effectuer un second chroot pour s'échapper**.\
 En général, cela signifie que pour s'échapper, vous devez être root à l'intérieur du chroot.
 
 > [!TIP]
@@ -76,7 +76,7 @@ system("/bin/bash");
 ```
 </details>
 
-### Root + fd sauvegardé
+### Root + Des fd sauvegardés
 
 > [!WARNING]
 > Cela est similaire au cas précédent, mais dans ce cas, l'**attaquant stocke un descripteur de fichier vers le répertoire courant** et ensuite **crée le chroot dans un nouveau dossier**. Enfin, comme il a **accès** à ce **FD** **en dehors** du chroot, il y accède et il **s'échappe**.
@@ -116,7 +116,7 @@ chroot(".");
 > - Exécuter chroot dans le processus enfant dans un dossier différent
 > - Dans le processus parent, créer un FD d'un dossier qui est en dehors du chroot du nouveau processus enfant
 > - Passer à l'enfant ce FD en utilisant l'UDS
-> - Le processus enfant chdir vers ce FD, et parce qu'il est en dehors de son chroot, il s'échappera de la prison
+> - Le processus enfant change de répertoire vers ce FD, et parce qu'il est en dehors de son chroot, il échappera à la prison
 
 ### Root + Mount
 
@@ -147,7 +147,7 @@ chroot(".");
 
 > [!WARNING]
 >
-> - Il y a longtemps, les utilisateurs pouvaient déboguer leurs propres processus depuis un processus d'eux-mêmes... mais cela n'est plus possible par défaut
+> - Il y a quelque temps, les utilisateurs pouvaient déboguer leurs propres processus depuis un processus d'eux-mêmes... mais cela n'est plus possible par défaut
 > - Quoi qu'il en soit, si c'est possible, vous pourriez ptrace dans un processus et exécuter un shellcode à l'intérieur ([voir cet exemple](linux-capabilities.md#cap_sys_ptrace)).
 
 ## Bash Jails
@@ -209,19 +209,21 @@ wget http://127.0.0.1:8080/sudoers -O /etc/sudoers
 [https://gtfobins.github.io](https://gtfobins.github.io)\
 **Il pourrait également être intéressant de consulter la page :**
 
+
 {{#ref}}
 ../bypass-bash-restrictions/
 {{#endref}}
 
-## Python Jails
+## Environnements Python
 
-Astuces sur l'évasion des jails python dans la page suivante :
+Astuces sur l'évasion des environnements python dans la page suivante :
+
 
 {{#ref}}
 ../../generic-methodologies-and-resources/python/bypass-python-sandboxes/
 {{#endref}}
 
-## Lua Jails
+## Environnements Lua
 
 Dans cette page, vous pouvez trouver les fonctions globales auxquelles vous avez accès à l'intérieur de lua : [https://www.gammon.com.au/scripts/doc.php?general=lua_base](https://www.gammon.com.au/scripts/doc.php?general=lua_base)
 

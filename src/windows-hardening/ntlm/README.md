@@ -11,7 +11,7 @@ Par défaut, le protocole d'authentification **Kerberos** est la méthode princi
 
 La présence de l'en-tête **"NTLMSSP"** dans les paquets réseau signale un processus d'authentification NTLM.
 
-Le support des protocoles d'authentification - LM, NTLMv1 et NTLMv2 - est facilité par une DLL spécifique située à `%windir%\Windows\System32\msv1\_0.dll`.
+Le support des protocoles d'authentification - LM, NTLMv1 et NTLMv2 - est facilité par un DLL spécifique situé à `%windir%\Windows\System32\msv1\_0.dll`.
 
 **Points clés** :
 
@@ -26,7 +26,7 @@ Vous pouvez vérifier et configurer quel protocole sera utilisé :
 
 ### GUI
 
-Exécutez _secpol.msc_ -> Politiques locales -> Options de sécurité -> Sécurité réseau : niveau d'authentification LAN Manager. Il y a 6 niveaux (de 0 à 5).
+Exécutez _secpol.msc_ -> Politiques locales -> Options de sécurité -> Sécurité du réseau : niveau d'authentification LAN Manager. Il y a 6 niveaux (de 0 à 5).
 
 ![](<../../images/image (919).png>)
 
@@ -64,7 +64,7 @@ L'authentification est comme celle mentionnée **avant mais** le **serveur** con
 
 La **longueur du défi est de 8 octets** et la **réponse fait 24 octets** de long.
 
-Le **hachage NT (16 octets)** est divisé en **3 parties de 7 octets chacune** (7B + 7B + (2B+0x00\*5)): la **dernière partie est remplie de zéros**. Ensuite, le **défi** est **chiffré séparément** avec chaque partie et les **octets chiffrés résultants sont joints**. Total : 8B + 8B + 8B = 24 Octets.
+Le **hachage NT (16 octets)** est divisé en **3 parties de 7 octets chacune** (7B + 7B + (2B+0x00\*5)): la **dernière partie est remplie de zéros**. Ensuite, le **défi** est **chiffré séparément** avec chaque partie et les **octets chiffrés résultants sont joints**. Total : 8B + 8B + 8B = 24 octets.
 
 **Problèmes** :
 
@@ -169,7 +169,7 @@ Si vous avez un **pcap qui a capturé un processus d'authentification réussi**,
 **Une fois que vous avez le hash de la victime**, vous pouvez l'utiliser pour **l'usurper**.\
 Vous devez utiliser un **outil** qui va **effectuer** l'**authentification NTLM en utilisant** ce **hash**, **ou** vous pourriez créer une nouvelle **sessionlogon** et **injecter** ce **hash** à l'intérieur de **LSASS**, de sorte que lorsque toute **authentification NTLM est effectuée**, ce **hash sera utilisé.** La dernière option est ce que fait mimikatz.
 
-**Veuillez, rappelez-vous que vous pouvez également effectuer des attaques Pass-the-Hash en utilisant des comptes d'ordinateur.**
+**Veuillez, vous rappeler que vous pouvez également effectuer des attaques Pass-the-Hash en utilisant des comptes d'ordinateur.**
 
 ### **Mimikatz**
 
@@ -177,7 +177,7 @@ Vous devez utiliser un **outil** qui va **effectuer** l'**authentification NTLM 
 ```bash
 Invoke-Mimikatz -Command '"sekurlsa::pth /user:username /domain:domain.tld /ntlm:NTLMhash /run:powershell.exe"'
 ```
-Cela lancera un processus qui appartiendra aux utilisateurs ayant lancé mimikatz, mais en interne dans LSASS, les identifiants sauvegardés sont ceux à l'intérieur des paramètres de mimikatz. Ensuite, vous pouvez accéder aux ressources réseau comme si vous étiez cet utilisateur (similaire à la méthode `runas /netonly`, mais vous n'avez pas besoin de connaître le mot de passe en clair).
+Cela lancera un processus qui appartiendra aux utilisateurs ayant lancé mimikatz, mais en interne dans LSASS, les identifiants enregistrés sont ceux à l'intérieur des paramètres de mimikatz. Ensuite, vous pouvez accéder aux ressources réseau comme si vous étiez cet utilisateur (similaire à l'astuce `runas /netonly`, mais vous n'avez pas besoin de connaître le mot de passe en clair).
 
 ### Pass-the-Hash depuis Linux
 
@@ -191,7 +191,7 @@ Vous pouvez télécharger [les binaires impacket pour Windows ici](https://githu
 - **psexec_windows.exe** `C:\AD\MyTools\psexec_windows.exe -hashes ":b38ff50264b74508085d82c69794a4d8" svcadmin@dcorp-mgmt.my.domain.local`
 - **wmiexec.exe** `wmiexec_windows.exe -hashes ":b38ff50264b74508085d82c69794a4d8" svcadmin@dcorp-mgmt.dollarcorp.moneycorp.local`
 - **atexec.exe** (Dans ce cas, vous devez spécifier une commande, cmd.exe et powershell.exe ne sont pas valides pour obtenir un shell interactif) `C:\AD\MyTools\atexec_windows.exe -hashes ":b38ff50264b74508085d82c69794a4d8" svcadmin@dcorp-mgmt.dollarcorp.moneycorp.local 'whoami'`
-- Il y a plusieurs autres binaires Impacket...
+- Il existe plusieurs autres binaires Impacket...
 
 ### Invoke-TheHash
 
@@ -231,6 +231,7 @@ wce.exe -s <username>:<domain>:<hash_lm>:<hash_nt>
 ```
 ### Exécution à distance manuelle de Windows avec nom d'utilisateur et mot de passe
 
+
 {{#ref}}
 ../lateral-movement/
 {{#endref}}
@@ -241,7 +242,7 @@ wce.exe -s <username>:<domain>:<hash_lm>:<hash_nt>
 
 ## Attaque de Monologue Interne
 
-L'attaque de Monologue Interne est une technique d'extraction de crédentiels discrète qui permet à un attaquant de récupérer des hachages NTLM depuis la machine d'une victime **sans interagir directement avec le processus LSASS**. Contrairement à Mimikatz, qui lit les hachages directement depuis la mémoire et est souvent bloqué par des solutions de sécurité des points de terminaison ou Credential Guard, cette attaque exploite **des appels locaux au package d'authentification NTLM (MSV1_0) via l'Interface de Fournisseur de Support de Sécurité (SSPI)**. L'attaquant commence par **rétrograder les paramètres NTLM** (par exemple, LMCompatibilityLevel, NTLMMinClientSec, RestrictSendingNTLMTraffic) pour s'assurer que NetNTLMv1 est autorisé. Il imite ensuite des jetons d'utilisateur existants obtenus à partir de processus en cours d'exécution et déclenche l'authentification NTLM localement pour générer des réponses NetNTLMv1 en utilisant un défi connu.
+L'attaque de Monologue Interne est une technique d'extraction de crédentiels discrète qui permet à un attaquant de récupérer des hachages NTLM depuis la machine d'une victime **sans interagir directement avec le processus LSASS**. Contrairement à Mimikatz, qui lit les hachages directement depuis la mémoire et est souvent bloqué par des solutions de sécurité des points de terminaison ou Credential Guard, cette attaque exploite **des appels locaux au package d'authentification NTLM (MSV1_0) via l'Interface de Fournisseur de Support de Sécurité (SSPI)**. L'attaquant commence par **rétrograder les paramètres NTLM** (par exemple, LMCompatibilityLevel, NTLMMinClientSec, RestrictSendingNTLMTraffic) pour s'assurer que NetNTLMv1 est autorisé. Il se fait ensuite passer pour des jetons d'utilisateur existants obtenus à partir de processus en cours d'exécution et déclenche l'authentification NTLM localement pour générer des réponses NetNTLMv1 en utilisant un défi connu.
 
 Après avoir capturé ces réponses NetNTLMv1, l'attaquant peut rapidement récupérer les hachages NTLM d'origine en utilisant **des tables arc-en-ciel précalculées**, permettant d'autres attaques Pass-the-Hash pour le mouvement latéral. Il est crucial de noter que l'attaque de Monologue Interne reste discrète car elle ne génère pas de trafic réseau, n'injecte pas de code et ne déclenche pas de vidages de mémoire directs, ce qui la rend plus difficile à détecter pour les défenseurs par rapport aux méthodes traditionnelles comme Mimikatz.
 
@@ -254,6 +255,7 @@ Le PoC peut être trouvé dans **[https://github.com/eladshamir/Internal-Monolog
 ## Relais NTLM et Répondeur
 
 **Lisez un guide plus détaillé sur la façon de réaliser ces attaques ici :**
+
 
 {{#ref}}
 ../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md
@@ -273,7 +275,7 @@ Microsoft a brisé la plupart des chaînes publiques avec MS08-068 (SMB→SMB), 
 1. Un attaquant enregistre un **enregistrement A DNS** dont l'étiquette encode un SPN marshalled – par exemple
 `srv11UWhRCAAAAAAAAAAAAAAAAAAAAAAAAAAAAwbEAYBAAAA → 10.10.10.50`
 2. La victime est contrainte de s'authentifier à ce nom d'hôte (PetitPotam, DFSCoerce, etc.).
-3. Lorsque le client SMB passe la chaîne cible `cifs/srv11UWhRCAAAAA…` à `lsasrv!LsapCheckMarshalledTargetInfo`, l'appel à `CredUnmarshalTargetInfo` **supprime** le blob sérialisé, laissant **`cifs/srv1`**.
+3. Lorsque le client SMB passe la chaîne cible `cifs/srv11UWhRCAAAAA…` à `lsasrv!LsapCheckMarshalledTargetInfo`, l'appel à `CredUnmarshalTargetInfo` **strip** le blob sérialisé, laissant **`cifs/srv1`**.
 4. `msv1_0!SspIsTargetLocalhost` (ou l'équivalent Kerberos) considère maintenant la cible comme *localhost* car la partie hôte courte correspond au nom de l'ordinateur (`SRV1`).
 5. Par conséquent, le serveur définit `NTLMSSP_NEGOTIATE_LOCAL_CALL` et injecte **le jeton d'accès SYSTEM de LSASS** dans le contexte (pour Kerberos, une clé de sous-session marquée SYSTEM est créée).
 6. Relayer cette authentification avec `ntlmrelayx.py` **ou** `krbrelayx.py` donne des droits SYSTEM complets sur le même hôte.
@@ -306,7 +308,7 @@ krbrelayx.py -t TARGET.DOMAIN.LOCAL -smb2support
 * Connexions SYSTEM Windows Event 4624/4648 immédiatement suivies d'écritures SMB distantes depuis le même hôte.
 
 ## References
-* [Synacktiv – NTLM Reflection is Dead, Long Live NTLM Reflection!](https://www.synacktiv.com/en/publications/la-reflexion-ntlm-est-morte-vive-la-reflexion-ntlm-analyse-approfondie-de-la-cve-2025.html)
+* [NTLM Reflection is Dead, Long Live NTLM Reflection!](https://www.synacktiv.com/en/publications/la-reflexion-ntlm-est-morte-vive-la-reflexion-ntlm-analyse-approfondie-de-la-cve-2025.html)
 * [MSRC – CVE-2025-33073](https://msrc.microsoft.com/update-guide/vulnerability/CVE-2025-33073)
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -6,7 +6,8 @@
 
 Si vous n'êtes pas familier avec macOS, vous devriez commencer par apprendre les bases de macOS :
 
-- Fichiers et **permissions** macOS spéciaux :
+- Fichiers et **permissions** spéciales macOS :
+
 
 {{#ref}}
 macos-files-folders-and-binaries/
@@ -14,11 +15,13 @@ macos-files-folders-and-binaries/
 
 - Utilisateurs **communs** de macOS
 
+
 {{#ref}}
 macos-users.md
 {{#endref}}
 
 - **AppleFS**
+
 
 {{#ref}}
 macos-applefs.md
@@ -26,11 +29,13 @@ macos-applefs.md
 
 - L'**architecture** du k**ernel**
 
+
 {{#ref}}
 mac-os-architecture/
 {{#endref}}
 
-- Services & **protocoles** réseau macOS communs
+- Services et **protocoles** réseau macOS communs
+
 
 {{#ref}}
 macos-protocols.md
@@ -43,17 +48,20 @@ macos-protocols.md
 
 Dans les entreprises, les systèmes **macOS** seront très probablement **gérés avec un MDM**. Par conséquent, du point de vue d'un attaquant, il est intéressant de savoir **comment cela fonctionne** :
 
+
 {{#ref}}
 ../macos-red-teaming/macos-mdm/
 {{#endref}}
 
 ### MacOS - Inspection, Débogage et Fuzzing
 
+
 {{#ref}}
 macos-apps-inspecting-debugging-and-fuzzing/
 {{#endref}}
 
 ## Protections de Sécurité MacOS
+
 
 {{#ref}}
 macos-security-protections/
@@ -75,6 +83,7 @@ Cela pourrait se produire dans les situations suivantes :
 
 Pour ce type de vulnérabilités, n'oubliez pas de **vérifier les installateurs `.pkg` vulnérables** :
 
+
 {{#ref}}
 macos-files-folders-and-binaries/macos-installers-abuse.md
 {{#endref}}
@@ -82,6 +91,7 @@ macos-files-folders-and-binaries/macos-installers-abuse.md
 ### Gestion des Extensions de Fichier & des Handlers d'URL
 
 Des applications étranges enregistrées par des extensions de fichier pourraient être abusées et différentes applications peuvent être enregistrées pour ouvrir des protocoles spécifiques
+
 
 {{#ref}}
 macos-file-extension-apps.md
@@ -100,6 +110,7 @@ Suivez ces liens pour trouver différentes façons de [**escalader les privilèg
 ## Escalade de Privilèges Traditionnelle macOS
 
 Bien sûr, du point de vue des équipes rouges, vous devriez également être intéressé par l'escalade vers root. Consultez le post suivant pour quelques indices :
+
 
 {{#ref}}
 macos-privilege-escalation.md

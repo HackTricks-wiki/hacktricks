@@ -20,7 +20,7 @@ Vous pouvez également consulter la page suivante pour apprendre **d'autres faç
 
 ### FreeIPA
 
-FreeIPA est une **alternative** open-source à Microsoft Windows **Active Directory**, principalement pour les environnements **Unix**. Il combine un **annuaire LDAP** complet avec un centre de distribution de clés Kerberos MIT pour une gestion similaire à Active Directory. Utilisant le système de certificats Dogtag pour la gestion des certificats CA et RA, il prend en charge l'**authentification multi-facteurs**, y compris les cartes intelligentes. SSSD est intégré pour les processus d'authentification Unix. En savoir plus à ce sujet dans :
+FreeIPA est une **alternative** open-source à Microsoft Windows **Active Directory**, principalement pour les environnements **Unix**. Il combine un **annuaire LDAP** complet avec un centre de distribution de clés **Kerberos** MIT pour une gestion similaire à Active Directory. Utilisant le système de certificats **Dogtag** pour la gestion des certificats CA et RA, il prend en charge l'authentification **multi-facteurs**, y compris les cartes intelligentes. SSSD est intégré pour les processus d'authentification Unix. En savoir plus à ce sujet dans :
 
 {{#ref}}
 ../freeipa-pentesting.md
@@ -97,7 +97,7 @@ Sur macOS, **`bifrost`** sert d'outil pour l'analyse des fichiers keytab.
 ```bash
 ./bifrost -action dump -source keytab -path /path/to/your/file
 ```
-En utilisant les informations de compte et de hachage extraites, des connexions aux serveurs peuvent être établies en utilisant des outils comme **`crackmapexec`**.
+En utilisant les informations de compte et de hachage extraites, des connexions aux serveurs peuvent être établies à l'aide d'outils comme **`crackmapexec`**.
 ```bash
 crackmapexec 10.XXX.XXX.XXX -u 'ServiceAccount$' -H "HashPlaceholder" -d "YourDOMAIN"
 ```

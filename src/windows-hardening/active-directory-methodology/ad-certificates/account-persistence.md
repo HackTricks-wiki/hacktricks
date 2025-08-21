@@ -32,7 +32,7 @@ Rubeus.exe asktgt /user:john /certificate:C:\Temp\cert.pfx /password:CertPass! /
 # Or with Certipy
 certipy auth -pfx user.pfx -dc-ip 10.0.0.10
 ```
-> Remarque : Combinée avec d'autres techniques (voir les sections THEFT), l'authentification basée sur des certificats permet un accès persistant sans toucher à LSASS et même depuis des contextes non élevés.
+> Remarque : Combinée avec d'autres techniques (voir les sections VOL), l'authentification basée sur des certificats permet un accès persistant sans toucher à LSASS et même depuis des contextes non élevés.
 
 ## Obtenir une persistance machine avec des certificats - PERSIST2
 
@@ -46,7 +46,7 @@ Rubeus.exe asktgt /user:HOSTNAME$ /certificate:C:\Temp\host.pfx /password:Passw0
 ```
 ## Étendre la persistance par le renouvellement de certificat - PERSIST3
 
-Abuser des périodes de validité et de renouvellement des modèles de certificat permet à un attaquant de maintenir un accès à long terme. Si vous possédez un certificat précédemment émis et sa clé privée, vous pouvez le renouveler avant son expiration pour obtenir un nouveau credential à long terme sans laisser d'artefacts de demande supplémentaires liés au principal d'origine.
+Abuser des périodes de validité et de renouvellement des modèles de certificats permet à un attaquant de maintenir un accès à long terme. Si vous possédez un certificat précédemment émis et sa clé privée, vous pouvez le renouveler avant son expiration pour obtenir un nouveau credential à long terme sans laisser d'artefacts de demande supplémentaires liés au principal d'origine.
 ```bash
 # Renewal with Certipy (works with RPC/DCOM/WebEnrollment)
 # Provide the existing PFX and target the same CA/template when possible
@@ -59,18 +59,18 @@ certreq -enroll -user -cert <SerialOrID> renew [reusekeys]
 ```
 > Conseil opérationnel : Suivez les durées de vie des fichiers PFX détenus par l'attaquant et renouvelez-les tôt. Le renouvellement peut également entraîner l'inclusion de l'extension de mappage SID moderne dans les certificats mis à jour, les rendant utilisables sous des règles de mappage DC plus strictes (voir la section suivante).
 
-## Plantage de Mappages de Certificats Explicites (altSecurityIdentities) – PERSIST4
+## Plantage de mappages de certificats explicites (altSecurityIdentities) – PERSIST4
 
 Si vous pouvez écrire dans l'attribut `altSecurityIdentities` d'un compte cible, vous pouvez mapper explicitement un certificat contrôlé par l'attaquant à ce compte. Cela persiste à travers les changements de mot de passe et, lorsqu'on utilise des formats de mappage forts, reste fonctionnel sous l'application moderne du DC.
 
 Flux de haut niveau :
 
 1. Obtenez ou émettez un certificat d'authentification client que vous contrôlez (par exemple, inscrivez le modèle `User` en tant que vous-même).
-2. Extrayez un identifiant fort du certificat (Émetteur+Numéro de série, SKI ou SHA1-Clé publique).
+2. Extrayez un identifiant fort du certificat (Issuer+Serial, SKI ou SHA1-PublicKey).
 3. Ajoutez un mappage explicite sur `altSecurityIdentities` du principal victime en utilisant cet identifiant.
 4. Authentifiez-vous avec votre certificat ; le DC le mappe à la victime via le mappage explicite.
 
-Exemple (PowerShell) utilisant un mappage fort Émetteur+Numéro de série :
+Exemple (PowerShell) utilisant un mappage fort Issuer+Serial :
 ```powershell
 # Example values - reverse the issuer DN and serial as required by AD mapping format
 $Issuer  = 'DC=corp,DC=local,CN=CORP-DC-CA'
@@ -86,7 +86,7 @@ certipy auth -pfx attacker_user.pfx -dc-ip 10.0.0.10
 ```
 Notes
 - Utilisez uniquement des types de mappage forts : X509IssuerSerialNumber, X509SKI ou X509SHA1PublicKey. Les formats faibles (Subject/Issuer, Subject-only, RFC822 email) sont obsolètes et peuvent être bloqués par la politique du DC.
-- La chaîne de certificats doit aboutir à une racine de confiance pour le DC. Les CAs d'entreprise dans NTAuth sont généralement de confiance ; certains environnements font également confiance aux CAs publics.
+- La chaîne de certificats doit se construire vers une racine de confiance pour le DC. Les CAs d'entreprise dans NTAuth sont généralement de confiance ; certains environnements font également confiance aux CAs publics.
 
 Pour plus d'informations sur les mappages explicites faibles et les chemins d'attaque, voir :
 
@@ -94,9 +94,9 @@ Pour plus d'informations sur les mappages explicites faibles et les chemins d'at
 domain-escalation.md
 {{#endref}}
 
-## Agent d'inscription comme persistance – PERSIST5
+## Enrollment Agent as Persistence – PERSIST5
 
-Si vous obtenez un certificat valide d'Agent de Demande de Certificat/Agent d'Inscription, vous pouvez créer de nouveaux certificats capables de se connecter au nom des utilisateurs à volonté et garder le PFX de l'agent hors ligne comme un jeton de persistance. Workflow d'abus :
+Si vous obtenez un certificat valide d'Agent de Demande de Certificat/Agent d'Inscription, vous pouvez créer de nouveaux certificats capables de connexion au nom des utilisateurs à volonté et garder le PFX de l'agent hors ligne comme un jeton de persistance. Workflow d'abus :
 ```bash
 # Request an Enrollment Agent cert (requires template rights)
 Certify.exe request /ca:CA-SERVER\CA-NAME /template:"Certificate Request Agent"
@@ -116,7 +116,7 @@ La révocation du certificat d'agent ou des autorisations de modèle est nécess
 Microsoft KB5014754 a introduit l'application stricte du mappage de certificats sur les contrôleurs de domaine. Depuis le 11 février 2025, les DC par défaut appliquent une application complète, rejetant les mappages faibles/ambiguës. Implications pratiques :
 
 - Les certificats d'avant 2022 qui manquent de l'extension de mappage SID peuvent échouer au mappage implicite lorsque les DC sont en application complète. Les attaquants peuvent maintenir l'accès en renouvelant les certificats via AD CS (pour obtenir l'extension SID) ou en plantant un mappage explicite fort dans `altSecurityIdentities` (PERSIST4).
-- Les mappages explicites utilisant des formats forts (Émetteur+Numéro de série, SKI, SHA1-Clé publique) continuent de fonctionner. Les formats faibles (Émetteur/Sujet, Sujet uniquement, RFC822) peuvent être bloqués et doivent être évités pour la persistance.
+- Les mappages explicites utilisant des formats forts (Issuer+Serial, SKI, SHA1-PublicKey) continuent de fonctionner. Les formats faibles (Issuer/Subject, Subject-only, RFC822) peuvent être bloqués et doivent être évités pour la persistance.
 
 Les administrateurs doivent surveiller et alerter sur :
 - Les changements dans `altSecurityIdentities` et l'émission/renouvellements des certificats d'agent d'inscription et d'utilisateur.
