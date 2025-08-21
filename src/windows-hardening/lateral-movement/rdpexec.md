@@ -8,11 +8,11 @@
 
 For more information check:
 
+
 {{#ref}}
 ../../network-services-pentesting/pentesting-rdp.md
 {{#endref}}
 
 {{#include ../../banners/hacktricks-training.md}}
-
 
 

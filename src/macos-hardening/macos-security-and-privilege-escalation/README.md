@@ -8,11 +8,13 @@ If you are not familiar with macOS, you should start learning the basics of macO
 
 - Special macOS **files & permissions:**
 
+
 {{#ref}}
 macos-files-folders-and-binaries/
 {{#endref}}
 
 - Common macOS **users**
+
 
 {{#ref}}
 macos-users.md
@@ -20,17 +22,20 @@ macos-users.md
 
 - **AppleFS**
 
+
 {{#ref}}
 macos-applefs.md
 {{#endref}}
 
 - The **architecture** of the k**ernel**
 
+
 {{#ref}}
 mac-os-architecture/
 {{#endref}}
 
 - Common macOS n**etwork services & protocols**
+
 
 {{#ref}}
 macos-protocols.md
@@ -43,17 +48,20 @@ macos-protocols.md
 
 In companies **macOS** systems are highly probably going to be **managed with a MDM**. Therefore, from the perspective of an attacker is interesting to know **how that works**:
 
+
 {{#ref}}
 ../macos-red-teaming/macos-mdm/
 {{#endref}}
 
 ### MacOS - Inspecting, Debugging and Fuzzing
 
+
 {{#ref}}
 macos-apps-inspecting-debugging-and-fuzzing/
 {{#endref}}
 
 ## MacOS Security Protections
+
 
 {{#ref}}
 macos-security-protections/
@@ -75,6 +83,7 @@ Being able to **create a file** that is going to be **used by root**, allows a u
 
 For this kind of vulnerabilities don't forget to **check vulnerable `.pkg` installers**:
 
+
 {{#ref}}
 macos-files-folders-and-binaries/macos-installers-abuse.md
 {{#endref}}
@@ -82,6 +91,7 @@ macos-files-folders-and-binaries/macos-installers-abuse.md
 ### File Extension & URL scheme app handlers
 
 Weird apps registered by file extensions could be abused and different applications can be register to open specific protocols
+
 
 {{#ref}}
 macos-file-extension-apps.md
@@ -101,6 +111,7 @@ Follow these links to find different was to [**escalate privileges in TCC**](mac
 
 Of course from a red teams perspective you should be also interested in escalating to root. Check the following post for some hints:
 
+
 {{#ref}}
 macos-privilege-escalation.md
 {{#endref}}
@@ -118,6 +129,5 @@ macos-privilege-escalation.md
 - [**https://www.youtube.com/watch?v=vMGiplQtjTY**](https://www.youtube.com/watch?v=vMGiplQtjTY)
 
 {{#include ../../banners/hacktricks-training.md}}
-
 
 

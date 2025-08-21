@@ -8,6 +8,7 @@
 
 If you don't know what Mach Messages are start checking this page:
 
+
 {{#ref}}
 ../../
 {{#endref}}
@@ -18,6 +19,7 @@ Mach messages are sent over a _mach port_, which is a **single receiver, multipl
 ## XPC Connection
 
 If you don't know how a XPC connection is established check:
+
 
 {{#ref}}
 ../
@@ -123,6 +125,5 @@ Below is a visual representation of the described attack scenario:
 - **Current Status**: The issue persists in iOS 17 and macOS 14, posing a challenge for those seeking to identify and understand it.
 
 {{#include ../../../../../../banners/hacktricks-training.md}}
-
 
 
