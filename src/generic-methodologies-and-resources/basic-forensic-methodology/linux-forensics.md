@@ -6,7 +6,7 @@
 
 ### Informações Básicas
 
-Primeiro de tudo, é recomendado ter um **USB** com **binaries e bibliotecas bem conhecidas** (você pode apenas pegar o ubuntu e copiar as pastas _/bin_, _/sbin_, _/lib,_ e _/lib64_), então monte o USB e modifique as variáveis de ambiente para usar esses binaries:
+Primeiramente, é recomendável ter um **USB** com **binaries e bibliotecas bem conhecidas** (você pode apenas obter o ubuntu e copiar as pastas _/bin_, _/sbin_, _/lib,_ e _/lib64_), então monte o USB e modifique as variáveis de ambiente para usar esses binaries:
 ```bash
 export PATH=/mnt/usb/bin:/mnt/usb/sbin
 export LD_LIBRARY_PATH=/mnt/usb/lib:/mnt/usb/lib64
@@ -42,11 +42,11 @@ Ao obter as informações básicas, você deve verificar coisas estranhas, como:
 Para obter a memória do sistema em execução, é recomendado usar [**LiME**](https://github.com/504ensicsLabs/LiME).\
 Para **compilá-lo**, você precisa usar o **mesmo kernel** que a máquina vítima está usando.
 
-> [!NOTE]
+> [!TIP]
 > Lembre-se de que você **não pode instalar LiME ou qualquer outra coisa** na máquina vítima, pois isso fará várias alterações nela
 
-Portanto, se você tiver uma versão idêntica do Ubuntu, pode usar `apt-get install lime-forensics-dkms`\
-Em outros casos, você precisa baixar [**LiME**](https://github.com/504ensicsLabs/LiME) do github e compilá-lo com os cabeçalhos de kernel corretos. Para **obter os cabeçalhos de kernel exatos** da máquina vítima, você pode simplesmente **copiar o diretório** `/lib/modules/<kernel version>` para sua máquina e, em seguida, **compilar** o LiME usando-os:
+Então, se você tiver uma versão idêntica do Ubuntu, pode usar `apt-get install lime-forensics-dkms`\
+Em outros casos, você precisa baixar [**LiME**](https://github.com/504ensicsLabs/LiME) do github e compilá-lo com os cabeçalhos de kernel corretos. Para **obter os cabeçalhos de kernel exatos** da máquina vítima, você pode simplesmente **copiar o diretório** `/lib/modules/<kernel version>` para sua máquina e, em seguida, **compilar** LiME usando-os:
 ```bash
 make -C /lib/modules/<kernel version>/build M=$PWD
 sudo insmod lime.ko "path=/home/sansforensics/Desktop/mem_dump.bin format=lime"
@@ -63,8 +63,8 @@ LiME também pode ser usado para **enviar o dump via rede** em vez de armazená-
 
 #### Desligando
 
-Primeiro de tudo, você precisará **desligar o sistema**. Isso nem sempre é uma opção, pois às vezes o sistema será um servidor de produção que a empresa não pode se dar ao luxo de desligar.\
-Existem **2 maneiras** de desligar o sistema, um **desligamento normal** e um **desligamento "puxar o plugue"**. O primeiro permitirá que os **processos sejam encerrados normalmente** e o **sistema de arquivos** seja **sincronizado**, mas também permitirá que o possível **malware** **destrua evidências**. A abordagem "puxar o plugue" pode acarretar **alguma perda de informação** (não muita informação será perdida, pois já tiramos uma imagem da memória) e o **malware não terá nenhuma oportunidade** de fazer algo a respeito. Portanto, se você **suspeitar** que pode haver um **malware**, apenas execute o **comando** **`sync`** no sistema e puxe o plugue.
+Primeiramente, você precisará **desligar o sistema**. Isso nem sempre é uma opção, pois às vezes o sistema será um servidor de produção que a empresa não pode se dar ao luxo de desligar.\
+Existem **2 maneiras** de desligar o sistema, um **desligamento normal** e um **desligamento "desconectar da tomada"**. O primeiro permitirá que os **processos sejam encerrados normalmente** e o **sistema de arquivos** seja **sincronizado**, mas também permitirá que o possível **malware** **destrua evidências**. A abordagem "desconectar da tomada" pode acarretar **alguma perda de informação** (não muita informação será perdida, pois já tiramos uma imagem da memória) e o **malware não terá nenhuma oportunidade** de fazer algo a respeito. Portanto, se você **suspeitar** que pode haver um **malware**, apenas execute o **comando** **`sync`** no sistema e desconecte da tomada.
 
 #### Tirando uma imagem do disco
 
@@ -151,7 +151,7 @@ malware-analysis.md
 
 ## Pesquisa de programas instalados
 
-Para pesquisar efetivamente programas instalados em sistemas Debian e RedHat, considere aproveitar logs do sistema e bancos de dados juntamente com verificações manuais em diretórios comuns.
+Para pesquisar efetivamente por programas instalados em sistemas Debian e RedHat, considere aproveitar logs do sistema e bancos de dados juntamente com verificações manuais em diretórios comuns.
 
 - Para Debian, inspecione _**`/var/lib/dpkg/status`**_ e _**`/var/log/dpkg.log`**_ para obter detalhes sobre instalações de pacotes, usando `grep` para filtrar informações específicas.
 - Usuários do RedHat podem consultar o banco de dados RPM com `rpm -qa --root=/mntpath/var/lib/rpm` para listar pacotes instalados.
@@ -196,6 +196,32 @@ cat /var/spool/cron/crontabs/*  \
 #MacOS
 ls -l /usr/lib/cron/tabs/ /Library/LaunchAgents/ /Library/LaunchDaemons/ ~/Library/LaunchAgents/
 ```
+#### Hunt: Abuso de Cron/Anacron via 0anacron e stubs suspeitos
+Os atacantes frequentemente editam o stub 0anacron presente em cada diretório /etc/cron.*/ para garantir a execução periódica.
+```bash
+# List 0anacron files and their timestamps/sizes
+for d in /etc/cron.*; do [ -f "$d/0anacron" ] && stat -c '%n %y %s' "$d/0anacron"; done
+
+# Look for obvious execution of shells or downloaders embedded in cron stubs
+grep -R --line-number -E 'curl|wget|/bin/sh|python|bash -c' /etc/cron.*/* 2>/dev/null
+```
+#### Hunt: SSH hardening rollback and backdoor shells
+Mudanças no sshd_config e nas shells de contas do sistema são comuns após a exploração para preservar o acesso.
+```bash
+# Root login enablement (flag "yes" or lax values)
+grep -E '^\s*PermitRootLogin' /etc/ssh/sshd_config
+
+# System accounts with interactive shells (e.g., games → /bin/sh)
+awk -F: '($7 ~ /bin\/(sh|bash|zsh)/ && $1 ~ /^(games|lp|sync|shutdown|halt|mail|operator)$/) {print}' /etc/passwd
+```
+#### Hunt: Marcadores de C2 na Nuvem (Dropbox/Cloudflare Tunnel)
+- Os beacons da API do Dropbox geralmente usam api.dropboxapi.com ou content.dropboxapi.com via HTTPS com tokens de Autorização: Bearer.
+- Procure no proxy/Zeek/NetFlow por egressos inesperados do Dropbox a partir de servidores.
+- O Cloudflare Tunnel (`cloudflared`) fornece C2 de backup sobre a porta 443 de saída.
+```bash
+ps aux | grep -E '[c]loudflared|trycloudflare'
+systemctl list-units | grep -i cloudflared
+```
 ### Serviços
 
 Caminhos onde um malware poderia ser instalado como um serviço:
@@ -218,7 +244,7 @@ Módulos do kernel Linux, frequentemente utilizados por malware como componentes
 - **/etc/modprobe.d**: Contém arquivos de configuração para controlar o carregamento de módulos.
 - **/etc/modprobe** e **/etc/modprobe.conf**: Arquivos para configurações globais de módulos.
 
-### Outros Locais de Autoinicialização
+### Outros Locais de Autostart
 
 O Linux emprega vários arquivos para executar automaticamente programas ao fazer login do usuário, potencialmente abrigando malware:
 
@@ -246,7 +272,7 @@ Sistemas Linux rastreiam atividades de usuários e eventos do sistema através d
 - **/var/log/xferlog**: Registra transferências de arquivos FTP.
 - **/var/log/**: Sempre verifique se há logs inesperados aqui.
 
-> [!NOTE]
+> [!TIP]
 > Logs do sistema Linux e subsistemas de auditoria podem ser desativados ou excluídos em um incidente de intrusão ou malware. Como os logs em sistemas Linux geralmente contêm algumas das informações mais úteis sobre atividades maliciosas, intrusos rotineiramente os excluem. Portanto, ao examinar os arquivos de log disponíveis, é importante procurar lacunas ou entradas fora de ordem que possam ser uma indicação de exclusão ou adulteração.
 
 **O Linux mantém um histórico de comandos para cada usuário**, armazenado em:
@@ -272,7 +298,7 @@ Alguns aplicativos também geram seus próprios logs:
 - **Gnome Desktop**: Verifique _\~/.recently-used.xbel_ para arquivos acessados recentemente via aplicativos Gnome.
 - **Firefox/Chrome**: Verifique o histórico do navegador e downloads em _\~/.mozilla/firefox_ ou _\~/.config/google-chrome_ para atividades suspeitas.
 - **VIM**: Revise _\~/.viminfo_ para detalhes de uso, como caminhos de arquivos acessados e histórico de pesquisa.
-- **Open Office**: Verifique o acesso recente a documentos que pode indicar arquivos comprometidos.
+- **Open Office**: Verifique o acesso recente a documentos que podem indicar arquivos comprometidos.
 - **FTP/SFTP**: Revise logs em _\~/.ftp_history_ ou _\~/.sftp_history_ para transferências de arquivos que podem ser não autorizadas.
 - **MySQL**: Investigue _\~/.mysql_history_ para consultas MySQL executadas, potencialmente revelando atividades não autorizadas no banco de dados.
 - **Less**: Analise _\~/.lesshst_ para histórico de uso, incluindo arquivos visualizados e comandos executados.
@@ -301,8 +327,8 @@ Mais exemplos e informações dentro do github: [https://github.com/snovvcrash/u
 
 ## Revisar Contas de Usuário e Atividades de Logon
 
-Examine o _**/etc/passwd**_, _**/etc/shadow**_ e **logs de segurança** em busca de nomes ou contas incomuns criadas e ou usadas em estreita proximidade com eventos não autorizados conhecidos. Além disso, verifique possíveis ataques de força bruta no sudo.\
-Além disso, verifique arquivos como _**/etc/sudoers**_ e _**/etc/groups**_ em busca de privilégios inesperados concedidos a usuários.\
+Examine o _**/etc/passwd**_, _**/etc/shadow**_ e **logs de segurança** em busca de nomes ou contas incomuns criadas e ou usadas em estreita proximidade com eventos não autorizados conhecidos. Além disso, verifique possíveis ataques de força bruta ao sudo.\
+Além disso, verifique arquivos como _**/etc/sudoers**_ e _**/etc/groups**_ para privilégios inesperados concedidos a usuários.\
 Finalmente, procure por contas com **sem senhas** ou **senhas facilmente adivinháveis**.
 
 ## Examinar Sistema de Arquivos
@@ -313,7 +339,7 @@ Ao investigar incidentes de malware, a estrutura do sistema de arquivos é uma f
 
 Para combater esses métodos anti-forenses, é essencial:
 
-- **Realizar uma análise de linha do tempo completa** usando ferramentas como **Autopsy** para visualizar linhas do tempo de eventos ou `mactime` do **Sleuth Kit** para dados detalhados da linha do tempo.
+- **Realizar uma análise de linha do tempo completa** usando ferramentas como **Autopsy** para visualizar linhas do tempo de eventos ou `mactime` do **Sleuth Kit** para dados de linha do tempo detalhados.
 - **Investigar scripts inesperados** no $PATH do sistema, que podem incluir scripts shell ou PHP usados por atacantes.
 - **Examinar `/dev` em busca de arquivos atípicos**, pois tradicionalmente contém arquivos especiais, mas pode abrigar arquivos relacionados a malware.
 - **Procurar por arquivos ou diretórios ocultos** com nomes como ".. " (ponto ponto espaço) ou "..^G" (ponto ponto controle-G), que podem ocultar conteúdo malicioso.
@@ -328,8 +354,8 @@ ls -laR --sort=time /bin```
 # Sort files in a directory by inode:
 ls -lai /bin | sort -n```
 ````
-> [!NOTE]
-> Note que um **atacante** pode **modificar** o **tempo** para fazer **arquivos parecerem** **legítimos**, mas ele **não pode** modificar o **inode**. Se você descobrir que um **arquivo** indica que foi criado e modificado ao **mesmo tempo** que o restante dos arquivos na mesma pasta, mas o **inode** é **inesperadamente maior**, então os **timestamps desse arquivo foram modificados**.
+> [!TIP]
+> Note que um **atacante** pode **modificar** o **tempo** para fazer **arquivos parecerem** **legítimos**, mas ele **não pode** modificar o **inode**. Se você descobrir que um **arquivo** indica que foi criado e modificado ao **mesmo tempo** que os demais arquivos na mesma pasta, mas o **inode** é **inesperadamente maior**, então os **timestamps desse arquivo foram modificados**.
 
 ## Comparar arquivos de diferentes versões de sistema de arquivos
 
@@ -349,10 +375,10 @@ git diff --no-index --diff-filter=M path/to/old_version/ path/to/new_version/ | 
 ```bash
 git diff --no-index --diff-filter=D path/to/old_version/ path/to/new_version/
 ```
-- **Opções de filtro** (`--diff-filter`) ajudam a restringir a mudanças específicas, como arquivos adicionados (`A`), deletados (`D`) ou modificados (`M`).
+- **Opções de filtro** (`--diff-filter`) ajudam a restringir a mudanças específicas, como arquivos adicionados (`A`), excluídos (`D`) ou modificados (`M`).
 - `A`: Arquivos adicionados
 - `C`: Arquivos copiados
-- `D`: Arquivos deletados
+- `D`: Arquivos excluídos
 - `M`: Arquivos modificados
 - `R`: Arquivos renomeados
 - `T`: Mudanças de tipo (por exemplo, arquivo para symlink)
@@ -366,5 +392,7 @@ git diff --no-index --diff-filter=D path/to/old_version/ path/to/new_version/
 - [https://www.plesk.com/blog/featured/linux-logs-explained/](https://www.plesk.com/blog/featured/linux-logs-explained/)
 - [https://git-scm.com/docs/git-diff#Documentation/git-diff.txt---diff-filterACDMRTUXB82308203](https://git-scm.com/docs/git-diff#Documentation/git-diff.txt---diff-filterACDMRTUXB82308203)
 - **Livro: Malware Forensics Field Guide for Linux Systems: Digital Forensics Field Guides**
+
+- [Red Canary – Patching for persistence: How DripDropper Linux malware moves through the cloud](https://redcanary.com/blog/threat-intelligence/dripdropper-linux-malware/)
 
 {{#include ../../banners/hacktricks-training.md}}

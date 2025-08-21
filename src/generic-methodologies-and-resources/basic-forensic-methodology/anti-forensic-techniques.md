@@ -9,7 +9,7 @@ Um atacante pode estar interessado em **alterar os carimbos de data/hora dos arq
 
 Ambos os atributos têm 4 carimbos de data/hora: **Modificação**, **acesso**, **criação** e **modificação do registro MFT** (MACE ou MACB).
 
-**Windows explorer** e outras ferramentas mostram as informações de **`$STANDARD_INFORMATION`**.
+**O explorador do Windows** e outras ferramentas mostram as informações de **`$STANDARD_INFORMATION`**.
 
 ### TimeStomp - Ferramenta Anti-forense
 
@@ -85,7 +85,7 @@ Esta é uma chave de registro que mantém datas e horas quando cada executável 
 
 Desativar o UserAssist requer duas etapas:
 
-1. Defina duas chaves de registro, `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackProgs` e `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackEnabled`, ambas para zero, a fim de sinalizar que queremos desativar o UserAssist.
+1. Defina duas chaves de registro, `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackProgs` e `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackEnabled`, ambas para zero, a fim de sinalizar que queremos o UserAssist desativado.
 2. Limpe suas subárvores de registro que se parecem com `HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\<hash>`.
 
 ### Desativar Carimbos de Data/Hora - Prefetch
@@ -109,7 +109,7 @@ Sempre que uma pasta é aberta a partir de um volume NTFS em um servidor Windows
 
 ### Excluir Histórico USB
 
-Todas as **Entradas de Dispositivos USB** são armazenadas no Registro do Windows sob a chave de registro **USBSTOR**, que contém subchaves que são criadas sempre que você conecta um dispositivo USB ao seu PC ou Laptop. Você pode encontrar esta chave aqui `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`. **Excluindo isso**, você excluirá o histórico USB.\
+Todas as **Entradas de Dispositivos USB** são armazenadas no Registro do Windows sob a chave de registro **USBSTOR**, que contém subchaves que são criadas sempre que você conecta um dispositivo USB ao seu PC ou Laptop. Você pode encontrar esta chave aqui `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`. **Excluir isso** você excluirá o histórico USB.\
 Você também pode usar a ferramenta [**USBDeview**](https://www.nirsoft.net/utils/usb_devices_view.html) para ter certeza de que as excluiu (e para excluí-las).
 
 Outro arquivo que salva informações sobre os USBs é o arquivo `setupapi.dev.log` dentro de `C:\Windows\INF`. Este também deve ser excluído.
@@ -117,11 +117,11 @@ Outro arquivo que salva informações sobre os USBs é o arquivo `setupapi.dev.l
 ### Desativar Cópias de Sombra
 
 **Liste** as cópias de sombra com `vssadmin list shadowstorage`\
-**Exclua**-as executando `vssadmin delete shadow`
+**Exclua** executando `vssadmin delete shadow`
 
 Você também pode excluí-las via GUI seguindo os passos propostos em [https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html](https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html)
 
-Para desativar cópias de sombra [passos a partir daqui](https://support.waters.com/KB_Inf/Other/WKB15560_How_to_disable_Volume_Shadow_Copy_Service_VSS_in_Windows):
+Para desativar cópias de sombra [passos daqui](https://support.waters.com/KB_Inf/Other/WKB15560_How_to_disable_Volume_Shadow_Copy_Service_VSS_in_Windows):
 
 1. Abra o programa Serviços digitando "serviços" na caixa de pesquisa de texto após clicar no botão iniciar do Windows.
 2. Na lista, encontre "Volume Shadow Copy", selecione-o e acesse Propriedades clicando com o botão direito.
@@ -198,7 +198,7 @@ type cobalt.bin > report.pdf:win32res.dll
 rem Execute directly
 wmic process call create "cmd /c report.pdf:win32res.dll"
 ```
-Enumere fluxos com `dir /R`, `Get-Item -Stream *` ou Sysinternals `streams64.exe`. Copiar o arquivo host para FAT/exFAT ou via SMB removerá o fluxo oculto e pode ser usado por investigadores para recuperar a carga útil.
+Enumere fluxos com `dir /R`, `Get-Item -Stream *`, ou Sysinternals `streams64.exe`. Copiar o arquivo host para FAT/exFAT ou via SMB removerá o fluxo oculto e pode ser usado por investigadores para recuperar a carga útil.
 
 ### BYOVD & “AuKill” (2023)
 
@@ -212,11 +212,88 @@ Mitigações: habilitar a lista de bloqueio de drivers vulneráveis da Microsoft
 
 ---
 
+## Linux Anti-Forensics: Auto-correção e Cloud C2 (2023–2025)
+
+### Auto-correção de serviços comprometidos para reduzir a detecção (Linux)  
+Os adversários cada vez mais “auto-corrigem” um serviço logo após explorá-lo para evitar re-exploração e suprimir detecções baseadas em vulnerabilidades. A ideia é substituir componentes vulneráveis pelos últimos binários/JARs legítimos upstream, de modo que os scanners relatem o host como corrigido enquanto a persistência e o C2 permanecem.
+
+Exemplo: Apache ActiveMQ OpenWire RCE (CVE‑2023‑46604)  
+- Após a exploração, os atacantes buscaram JARs legítimos do Maven Central (repo1.maven.org), deletaram JARs vulneráveis na instalação do ActiveMQ e reiniciaram o broker.  
+- Isso fechou a RCE inicial enquanto mantinha outros pontos de apoio (cron, alterações na configuração do SSH, implantes C2 separados).
+
+Exemplo operacional (ilustrativo)
+```bash
+# ActiveMQ install root (adjust as needed)
+AMQ_DIR=/opt/activemq
+cd "$AMQ_DIR"/lib
+
+# Fetch patched JARs from Maven Central (versions as appropriate)
+curl -fsSL -O https://repo1.maven.org/maven2/org/apache/activemq/activemq-client/5.18.3/activemq-client-5.18.3.jar
+curl -fsSL -O https://repo1.maven.org/maven2/org/apache/activemq/activemq-openwire-legacy/5.18.3/activemq-openwire-legacy-5.18.3.jar
+
+# Remove vulnerable files and ensure the service uses the patched ones
+rm -f activemq-client-5.18.2.jar activemq-openwire-legacy-5.18.2.jar || true
+ln -sf activemq-client-5.18.3.jar activemq-client.jar
+ln -sf activemq-openwire-legacy-5.18.3.jar activemq-openwire-legacy.jar
+
+# Apply changes without removing persistence
+systemctl restart activemq || service activemq restart
+```
+Forense/dicas de caça
+- Revise diretórios de serviços em busca de substituições de binários/JAR não programadas:
+- Debian/Ubuntu: `dpkg -V activemq` e compare hashes/caminhos de arquivos com espelhos de repositórios.
+- RHEL/CentOS: `rpm -Va 'activemq*'`
+- Procure por versões de JAR presentes no disco que não são de propriedade do gerenciador de pacotes, ou links simbólicos atualizados fora de banda.
+- Linha do tempo: `find "$AMQ_DIR" -type f -printf '%TY-%Tm-%Td %TH:%TM %p\n' | sort` para correlacionar ctime/mtime com a janela de comprometimento.
+- Histórico de shell/telemetria de processos: evidências de `curl`/`wget` para `repo1.maven.org` ou outros CDNs de artefatos imediatamente após a exploração inicial.
+- Gestão de mudanças: valide quem aplicou o “patch” e por quê, não apenas que uma versão corrigida está presente.
+
+### C2 de serviço em nuvem com tokens de portador e stagers anti-análise
+O comércio observado combinou múltiplos caminhos C2 de longo prazo e empacotamento anti-análise:
+- Carregadores ELF PyInstaller protegidos por senha para dificultar a análise em sandbox e análise estática (por exemplo, PYZ criptografado, extração temporária sob `/_MEI*`).
+- Indicadores: hits de `strings` como `PyInstaller`, `pyi-archive`, `PYZ-00.pyz`, `MEIPASS`.
+- Artefatos em tempo de execução: extração para `/tmp/_MEI*` ou caminhos personalizados `--runtime-tmpdir`.
+- C2 suportado por Dropbox usando tokens de portador OAuth codificados
+- Marcadores de rede: `api.dropboxapi.com` / `content.dropboxapi.com` com `Authorization: Bearer <token>`.
+- Caçar em proxy/NetFlow/Zeek/Suricata por HTTPS de saída para domínios do Dropbox a partir de cargas de trabalho de servidor que normalmente não sincronizam arquivos.
+- C2 paralelo/backup via tunelamento (por exemplo, Cloudflare Tunnel `cloudflared`), mantendo controle se um canal for bloqueado.
+- IOCs de host: processos/unidades `cloudflared`, configuração em `~/.cloudflared/*.json`, saída 443 para bordas do Cloudflare.
+
+### Persistência e “rollback de hardening” para manter acesso (exemplos de Linux)
+Os atacantes frequentemente combinam auto-correção com caminhos de acesso duráveis:
+- Cron/Anacron: edições no stub `0anacron` em cada diretório `/etc/cron.*/` para execução periódica.
+- Caçar:
+```bash
+for d in /etc/cron.*; do [ -f "$d/0anacron" ] && stat -c '%n %y %s' "$d/0anacron"; done
+grep -R --line-number -E 'curl|wget|python|/bin/sh' /etc/cron.*/* 2>/dev/null
+```
+- Rollback de hardening de configuração SSH: habilitando logins de root e alterando shells padrão para contas de baixo privilégio.
+- Caçar habilitação de login root:
+```bash
+grep -E '^\s*PermitRootLogin' /etc/ssh/sshd_config
+# valores de flag como "yes" ou configurações excessivamente permissivas
+```
+- Caçar por shells interativos suspeitos em contas do sistema (por exemplo, `games`):
+```bash
+awk -F: '($7 ~ /bin\/(sh|bash|zsh)/ && $1 ~ /^(games|lp|sync|shutdown|halt|mail|operator)$/) {print}' /etc/passwd
+```
+- Artefatos de beacon com nomes curtos e aleatórios (8 caracteres alfabéticos) gravados no disco que também contatam C2 em nuvem:
+- Caçar:
+```bash
+find / -maxdepth 3 -type f -regextype posix-extended -regex '.*/[A-Za-z]{8}$' \
+-exec stat -c '%n %s %y' {} \; 2>/dev/null | sort
+```
+
+Os defensores devem correlacionar esses artefatos com exposição externa e eventos de patching de serviços para descobrir auto-remediação anti-forense usada para ocultar a exploração inicial.
+
 ## Referências
 
-- Sophos X-Ops – “AuKill: A Weaponized Vulnerable Driver for Disabling EDR” (Março 2023)  
-https://news.sophos.com/en-us/2023/03/07/aukill-a-weaponized-vulnerable-driver-for-disabling-edr  
-- Red Canary – “Patching EtwEventWrite for Stealth: Detection & Hunting” (Junho 2024)  
-https://redcanary.com/blog/etw-patching-detection  
+- Sophos X-Ops – “AuKill: A Weaponized Vulnerable Driver for Disabling EDR” (Março 2023)
+https://news.sophos.com/en-us/2023/03/07/aukill-a-weaponized-vulnerable-driver-for-disabling-edr
+- Red Canary – “Patching EtwEventWrite for Stealth: Detection & Hunting” (Junho 2024)
+https://redcanary.com/blog/etw-patching-detection
+
+- [Red Canary – Patching for persistence: How DripDropper Linux malware moves through the cloud](https://redcanary.com/blog/threat-intelligence/dripdropper-linux-malware/)
+- [CVE‑2023‑46604 – Apache ActiveMQ OpenWire RCE (NVD)](https://nvd.nist.gov/vuln/detail/CVE-2023-46604)
 
 {{#include ../../banners/hacktricks-training.md}}
