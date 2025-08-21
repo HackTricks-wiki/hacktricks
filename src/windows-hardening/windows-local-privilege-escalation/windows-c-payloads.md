@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Hierdie bladsy versamel **klein, self-contained C snippette** wat handig is tydens Windows Lokale Privilege Escalation of post-exploitation. Elke payload is ontwerp om **copy-paste vriendelik** te wees, vereis slegs die Windows API / C runtime, en kan gecompileer word met `i686-w64-mingw32-gcc` (x86) of `x86_64-w64-mingw32-gcc` (x64).
+Hierdie bladsy versamel **klein, self-contained C snippette** wat handig is tydens Windows Local Privilege Escalation of post-exploitation. Elke payload is ontwerp om **copy-paste vriendelik** te wees, vereis slegs die Windows API / C runtime, en kan gekompileer word met `i686-w64-mingw32-gcc` (x86) of `x86_64-w64-mingw32-gcc` (x64).
 
 > ⚠️  Hierdie payloads neem aan dat die proses reeds die minimum regte het wat nodig is om die aksie uit te voer (bv. `SeDebugPrivilege`, `SeImpersonatePrivilege`, of medium-integrity konteks vir 'n UAC omseiling). Hulle is bedoel vir **red-team of CTF omgewings** waar die benutting van 'n kwesbaarheid arbitrêre inheemse kode-uitvoering gelewer het.
 
@@ -21,7 +21,7 @@ return 0;
 ---
 
 ## UAC Bypass – `fodhelper.exe` Registrasie Hijack (Medium → High integriteit)
-Wanneer die vertroude binêre **`fodhelper.exe`** uitgevoer word, vra dit die registrasie pad hieronder **sonder om die `DelegateExecute` werkwoord te filter**. Deur ons opdrag onder daardie sleutel te plant, kan 'n aanvaller UAC omseil *sonder* om 'n lêer na skyf te laat val.
+Wanneer die vertroude binêre **`fodhelper.exe`** uitgevoer word, vra dit die registrasie pad hieronder **sonder om die `DelegateExecute` werkwoord te filter**. Deur ons opdrag onder daardie sleutel te plant, kan 'n aanvaller UAC omseil *sonder* om 'n lêer na skyf te laat val nie.
 
 *Registrasie pad gevra deur `fodhelper.exe`*
 ```
@@ -65,7 +65,7 @@ return 0;
 
 ---
 
-## Genereer SYSTEM shell deur token duplisering (`SeDebugPrivilege` + `SeImpersonatePrivilege`)
+## Genereer SYSTEM-skaal via tokenduplisering (`SeDebugPrivilege` + `SeImpersonatePrivilege`)
 As die huidige proses **albei** `SeDebug` en `SeImpersonate` regte het (tipies vir baie diensrekeninge), kan jy die token van `winlogon.exe` steel, dit dupliseer, en 'n verhoogde proses begin:
 ```c
 // x86_64-w64-mingw32-gcc -O2 -o system_shell.exe system_shell.c -ladvapi32 -luser32
@@ -115,6 +115,7 @@ return 0;
 }
 ```
 Vir 'n dieper verduideliking van hoe dit werk, sien:
+
 {{#ref}}
 sedebug-+-seimpersonate-copy-token.md
 {{#endref}}
@@ -149,7 +150,7 @@ MessageBoxA(NULL, "AMSI & ETW patched!", "OK", MB_OK);
 return 0;
 }
 ```
-*Die bogenoemde opdatering is proses-lokaal; om 'n nuwe PowerShell te begin na dit uitgevoer is, sal sonder AMSI/ETW-inspeksie uitgevoer word.*
+*Die bogenoemde opdatering is proses-lokaal; om 'n nuwe PowerShell te begin na dit uitgevoer is, sal sonder AMSI/ETW-inspeksie werk.*
 
 ---
 

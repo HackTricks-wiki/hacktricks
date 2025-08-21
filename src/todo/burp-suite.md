@@ -1,14 +1,16 @@
+# Burp Suite
+
 {{#include ../banners/hacktricks-training.md}}
 
-# Basiese Payloads
+## Basiese Payloads
 
 - **Eenvoudige Lys:** Net 'n lys wat 'n inskrywing in elke lyn bevat
 - **Runtime Lêer:** 'n Lys wat tydens uitvoering gelees word (nie in geheue gelaai nie). Vir ondersteuning van groot lyste.
-- **Geval Wysiging:** Pas 'n paar veranderinge toe op 'n lys van stringe (Geen verandering, na laer, na HOOF, na Regte naam - Eerste hoofletter en die res na laer-, na Regte Naam - Eerste hoofletter en die res bly dieselfde-).
-- **Nommer:** Genereer nommers van X tot Y met 'n Z stap of ewekansig.
+- **Kasuswysiging:** Pas 'n paar veranderinge toe op 'n lys van stringe (Geen verandering, na kleinletters, na GROOTLETTER, na Eenvoudige naam - Eerste hoofletter en die res na kleinletters-, na Eenvoudige Naam - Eerste hoofletter en die res bly dieselfde-.
+- **Getalle:** Genereer getalle van X tot Y met Z stap of ewekansig.
 - **Brute Forcer:** Karakterstel, minimum & maksimum lengte.
 
-[https://github.com/0xC01DF00D/Collabfiltrator](https://github.com/0xC01DF00D/Collabfiltrator) : Payload om opdragte uit te voer en die uitvoer te verkry via DNS versoeke na burpcollab.
+[https://github.com/0xC01DF00D/Collabfiltrator](https://github.com/0xC01DF00D/Collabfiltrator) : Payload om opdragte uit te voer en die uitvoer via DNS versoeke na burpcollab te gryp.
 
 {{#ref}}
 https://medium.com/@ArtsSEC/burp-suite-exporter-462531be24e

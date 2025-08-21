@@ -63,14 +63,14 @@ certreq -enroll -user -cert <SerialOrID> renew [reusekeys]
 
 As jy na 'n teikenrekening se `altSecurityIdentities` attribuut kan skryf, kan jy 'n aanvaller-beheerde sertifikaat eksplisiet aan daardie rekening koppel. Dit bly bestaan oor wagwoordveranderings en, wanneer sterk kaartformate gebruik word, bly dit funksioneel onder moderne DC-afdwinging.
 
-Hoëvlak vloei:
+Hoofvlak vloei:
 
 1. Verkry of uitgee 'n kliënt-auth sertifikaat wat jy beheer (bv. registreer `User` sjabloon as jouself).
-2. Trek 'n sterk identifiseerder uit die sertifikaat (Uitgewer+Serienommer, SKI, of SHA1-Publieke Sleutel).
+2. Trek 'n sterk identifiseerder uit die sertifikaat (Uittreksel+Serieel, SKI, of SHA1-Publieke Sleutel).
 3. Voeg 'n eksplisiete kaarting by die slagoffer se `altSecurityIdentities` met behulp van daardie identifiseerder.
 4. Verifieer met jou sertifikaat; die DC koppel dit aan die slagoffer via die eksplisiete kaarting.
 
-Voorbeeld (PowerShell) met 'n sterk Uitgewer+Serienommer kaarting:
+Voorbeeld (PowerShell) met 'n sterk Uittreksel+Serieel kaarting:
 ```powershell
 # Example values - reverse the issuer DN and serial as required by AD mapping format
 $Issuer  = 'DC=corp,DC=local,CN=CORP-DC-CA'
@@ -85,8 +85,8 @@ Dan autentiseer met jou PFX. Certipy sal 'n TGT direk verkry:
 certipy auth -pfx attacker_user.pfx -dc-ip 10.0.0.10
 ```
 Notas
-- Gebruik slegs sterk kaarttipe: X509IssuerSerialNumber, X509SKI, of X509SHA1PublicKey. Swak formate (Subject/Issuer, Subject-only, RFC822 e-pos) is verouderd en kan deur DC-beleid geblokkeer word.
-- Die sertifikaatketting moet bou na 'n wortel wat deur die DC vertrou word. Enterprise CAs in NTAuth word tipies vertrou; sommige omgewings vertrou ook openbare CAs.
+- Gebruik slegs sterk kaartsoorte: X509IssuerSerialNumber, X509SKI, of X509SHA1PublicKey. Swak formate (Subject/Issuer, Subject-only, RFC822 e-pos) is verouderd en kan deur DC-beleid geblokkeer word.
+- Die sertifikaatketting moet na 'n wortel bou wat deur die DC vertrou word. Enterprise CAs in NTAuth word tipies vertrou; sommige omgewings vertrou ook openbare CAs.
 
 Vir meer oor swak eksplisiete kaartings en aanvalspaaie, sien:
 
@@ -94,9 +94,9 @@ Vir meer oor swak eksplisiete kaartings en aanvalspaaie, sien:
 domain-escalation.md
 {{#endref}}
 
-## Registrasie Agent as Volharding – PERSIST5
+## Registrasie-agent as Volharding – PERSIST5
 
-As jy 'n geldige Sertifikaatversoek Agent/Registrasie Agent sertifikaat verkry, kan jy nuwe aanmeldbare sertifikate namens gebruikers op aanvraag mint en die agent PFX aflyn hou as 'n volhardingstoken. Misbruik werkstroom:
+As jy 'n geldige Sertifikaatversoekagent/Registrasie-agent sertifikaat verkry, kan jy nuwe aanmeldbare sertifikate namens gebruikers op aanvraag skep en die agent PFX aflyn hou as 'n volhardingstoken. Misbruik werkstroom:
 ```bash
 # Request an Enrollment Agent cert (requires template rights)
 Certify.exe request /ca:CA-SERVER\CA-NAME /template:"Certificate Request Agent"
@@ -113,18 +113,18 @@ Die herroeping van die agentsertifikaat of sjabloon toestemmings is nodig om hie
 
 ## 2025 Sterk Sertifikaat Kaartlegging Handhaving: Impak op Volharding
 
-Microsoft KB5014754 het Sterk Sertifikaat Kaartlegging Handhaving op domeinbeheerders bekendgestel. Sedert 11 Februarie 2025, is DC's standaard op Volle Handhaving, wat swak/onduidelike kaartleggings verwerp. Praktiese implikasies:
+Microsoft KB5014754 het Sterk Sertifikaat Kaartlegging Handhaving op domeinbeheerder bekendgestel. Sedert 11 Februarie 2025, is DC's standaard op Volle Handhaving, wat swak/onduidelike kaartleggings verwerp. Praktiese implikasies:
 
-- Pre-2022 sertifikate wat die SID kaartlegging uitbreiding ontbreek, mag implisiete kaartlegging misluk wanneer DC's in Volle Handhaving is. Aanvallers kan toegang behou deur sertifikate te hernu via AD CS (om die SID uitbreiding te verkry) of deur 'n sterk eksplisiete kaartlegging in `altSecurityIdentities` te plant (PERSIST4).
-- Eksplisiete kaartleggings wat sterk formate gebruik (Issuer+Serial, SKI, SHA1-PublicKey) werk steeds. Swak formate (Issuer/Subject, Subject-only, RFC822) kan geblokkeer word en moet vermy word vir volharding.
+- Pre-2022 sertifikate wat die SID kaartlegging uitbreiding ontbreek, mag implisiete kaartlegging misluk wanneer DC's in Volle Handhaving is. Aanvallers kan toegang behou deur sertifikate deur AD CS te hernu (om die SID uitbreiding te verkry) of deur 'n sterk eksplisiete kaartlegging in `altSecurityIdentities` te plant (PERSIST4).
+- Eksplisiete kaartleggings wat sterk formate gebruik (Uitreiker+Serie, SKI, SHA1-Publieke Sleutel) werk steeds. Swak formate (Uitreiker/Onderwerp, Slegs Onderwerp, RFC822) kan geblokkeer word en moet vermy word vir volharding.
 
-Administrateurs moet monitor en waarsku oor:
+Administrateurs moet monitor en waarsku op:
 - Veranderinge aan `altSecurityIdentities` en die uitreiking/hernuwing van Registrasie Agent en Gebruiker sertifikate.
 - CA uitreikingslogs vir namens versoeke en ongewone hernuwing patrone.
 
 ## Verwysings
 
-- Microsoft. KB5014754: Sertifikaat-gebaseerde outentikasie veranderinge op Windows domeinbeheerders (handhaving tydlyn en sterk kaartleggings).
+- Microsoft. KB5014754: Sertifikaat-gebaseerde outentikasie veranderinge op Windows domeinbeheerder (handhaving tydlyn en sterk kaartleggings).
 https://support.microsoft.com/en-au/topic/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers-ad2c23b0-15d8-4340-a468-4d4f3b188f16
 - Certipy Wiki – Opdrag Verwysing (`req -renew`, `auth`, `shadow`).
 https://github.com/ly4k/Certipy/wiki/08-%E2%80%90-Command-Reference

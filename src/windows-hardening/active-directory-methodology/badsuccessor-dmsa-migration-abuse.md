@@ -7,22 +7,22 @@
 Delegated Managed Service Accounts (**dMSA**) is die volgende generasie opvolger van **gMSA** wat in Windows Server 2025 verskaf word. 'n Legitieme migrasieworkflow laat administrateurs toe om 'n *ou* rekening (gebruikers-, rekenaar- of diensrekening) met 'n dMSA te vervang terwyl toestemming deursigtig behou word. Die workflow word blootgestel deur PowerShell cmdlets soos `Start-ADServiceAccountMigration` en `Complete-ADServiceAccountMigration` en is afhanklik van twee LDAP-attribuut van die **dMSA objek**:
 
 * **`msDS-ManagedAccountPrecededByLink`** – *DN skakel* na die vervangde (ou) rekening.
-* **`msDS-DelegatedMSAState`**       – migrasiestaat (`0` = geen, `1` = in-proses, `2` = *voltooid*).
+* **`msDS-DelegatedMSAState`**       – migrasiestaat (`0` = geen, `1` = in proses, `2` = *voltooi*).
 
-As 'n aanvaller **enige** dMSA binne 'n OU kan skep en daardie 2 attribuut direk kan manipuleer, sal LSASS & die KDC die dMSA as 'n *opvolger* van die gekoppelde rekening behandel. Wanneer die aanvaller vervolgens as die dMSA autentiseer, **erf hulle al die voorregte van die gekoppelde rekening** – tot **Domain Admin** as die Administrateurrekening gekoppel is.
+As 'n aanvaller **enige** dMSA binne 'n OU kan skep en daardie 2 attribuut direk kan manipuleer, sal LSASS & die KDC die dMSA as 'n *opvolger* van die gekoppelde rekening behandel. Wanneer die aanvaller vervolgens as die dMSA autentiseer, **erf hulle al die voorregte van die gekoppelde rekening** – tot **Domein Admin** as die Administrateurrekening gekoppel is.
 
 Hierdie tegniek is **BadSuccessor** genoem deur Unit 42 in 2025. Ten tyde van skryf is daar **geen sekuriteitsopdatering** beskikbaar nie; slegs die verharding van OU-toestemmings verminder die probleem.
 
 ### Aanval vereistes
 
-1. 'n Rekening wat *toegelaat* word om voorwerpe binne **'n Organisatoriese Eenheid (OU)** te skep *en* ten minste een van die volgende het:
+1. 'n Rekening wat *toegelaat* word om voorwerpe binne **'n Organisatoriese Eenheid (OU)** te skep *en* het ten minste een van:
 * `Create Child` → **`msDS-DelegatedManagedServiceAccount`** objek klas
 * `Create Child` → **`All Objects`** (generiese skep)
-2. Netwerkverbinding na LDAP & Kerberos (standaard domein-verbonden scenario / afstandaanval).
+2. Netwerkverbinding na LDAP & Kerberos (standaard domein aangeslote scenario / afstandaanval).
 
 ## Opname van Kwetsbare OUs
 
-Unit 42 het 'n PowerShell-helper script vrygestel wat sekuriteitsbeskrywings van elke OU ontleed en die vereiste ACE's uitlig:
+Unit 42 het 'n PowerShell-helper skrip vrygestel wat sekuriteitsbeskrywings van elke OU ontleed en die vereiste ACE's uitlig:
 ```powershell
 Get-BadSuccessorOUPermissions.ps1 -Domain contoso.local
 ```
@@ -66,9 +66,9 @@ Rubeus ptt /ticket:<Base64TGT>
 # Access Domain Admin resources
 dir \\DC01\C$
 ```
-## Detectie & Jag
+## Ontdekking & Jag
 
-Enable **Object Auditing** op OUs en monitor vir die volgende Windows Veiligheid Gebeure:
+Aktiveer **Objek Ouditering** op OUs en monitor vir die volgende Windows Sekuriteit Gebeure:
 
 * **5137** – Skepping van die **dMSA** objek
 * **5136** – Wysiging van **`msDS-ManagedAccountPrecededByLink`**

@@ -4,11 +4,11 @@
 
 ## Unconstrained delegation
 
-Dit is 'n kenmerk wat 'n Domein Administrateur kan stel op enige **Rekenaar** binne die domein. Dan, wanneer 'n **gebruiker aanmeld** op die Rekenaar, gaan 'n **kopie van die TGT** van daardie gebruiker **binne die TGS** wat deur die DC **gestuur en in geheue in LSASS gestoor word**. So, as jy Administrateur regte op die masjien het, sal jy in staat wees om die **kaartjies te dump en die gebruikers te verteenwoordig** op enige masjien.
+Dit is 'n kenmerk wat 'n Domein Administrateur kan stel op enige **Rekenaar** binne die domein. Dan, wanneer 'n **gebruiker aanmeld** op die Rekenaar, sal 'n **kopie van die TGT** van daardie gebruiker **binne die TGS** wat deur die DC **gestuur word en in geheue in LSASS gestoor word**. So, as jy Administrateur regte op die masjien het, sal jy in staat wees om die **kaartjies te dump en die gebruikers na te doen** op enige masjien.
 
-So as 'n domein admin aanmeld op 'n Rekenaar met die "Unconstrained Delegation" kenmerk geaktiveer, en jy het plaaslike admin regte op daardie masjien, sal jy in staat wees om die kaartjie te dump en die Domein Admin enige plek te verteenwoordig (domein privesc).
+So as 'n domein admin aanmeld op 'n Rekenaar met die "Unconstrained Delegation" kenmerk geaktiveer, en jy het plaaslike admin regte op daardie masjien, sal jy in staat wees om die kaartjie te dump en die Domein Admin enige plek na te doen (domein privesc).
 
-Jy kan **Rekenaar-objekte met hierdie attribuut vind** deur te kyk of die [userAccountControl](<https://msdn.microsoft.com/en-us/library/ms680832(v=vs.85).aspx>) attribuut [ADS_UF_TRUSTED_FOR_DELEGATION](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>) bevat. Jy kan dit doen met 'n LDAP-filter van ‘(userAccountControl:1.2.840.113556.1.4.803:=524288)’, wat is wat powerview doen:
+Jy kan **Rekenaar objekte met hierdie attribuut vind** deur te kyk of die [userAccountControl](<https://msdn.microsoft.com/en-us/library/ms680832(v=vs.85).aspx>) attribuut [ADS_UF_TRUSTED_FOR_DELEGATION](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>) bevat. Jy kan dit doen met 'n LDAP filter van ‘(userAccountControl:1.2.840.113556.1.4.803:=524288)’, wat is wat powerview doen:
 ```bash
 # List unconstrained computers
 ## Powerview
@@ -36,10 +36,10 @@ Meer inligting: [https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/](https
 
 ### **Forceer Verifikasie**
 
-As 'n aanvaller in staat is om 'n **rekenaar wat toegelaat word vir "Onbeperkte Delegasie"** te **kompromitteer**, kan hy 'n **Druk bediener** **mislei** om **outomaties aan te meld** teen dit **terwyl 'n TGT** in die geheue van die bediener gestoor word.\
-Dan kan die aanvaller 'n **Pass the Ticket aanval uitvoer om** die gebruiker se Druk bediener rekenaarrekening na te volg.
+As 'n aanvaller in staat is om 'n rekenaar wat toegelaat word vir "Onbeperkte Delegasie" te **kompromitteer**, kan hy 'n **Print bediener** **mislei** om **outomaties aan te meld** teen dit **terwyl 'n TGT** in die geheue van die bediener gestoor word.\
+Dan kan die aanvaller 'n **Pass the Ticket aanval uitvoer om** die gebruiker se Print bediener rekenaarrekening na te doen.
 
-Om 'n druk bediener teen enige masjien aan te meld, kan jy [**SpoolSample**](https://github.com/leechristensen/SpoolSample):
+Om 'n print bediener teen enige masjien aan te meld, kan jy [**SpoolSample**](https://github.com/leechristensen/SpoolSample):
 ```bash
 .\SpoolSample.exe <printmachine> <unconstrinedmachine>
 ```
@@ -47,6 +47,7 @@ As die TGT van 'n domeinbeheerder is, kan jy 'n [**DCSync-aanval**](acl-persiste
 [**Meer inligting oor hierdie aanval in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/domain-compromise-via-dc-print-server-and-kerberos-delegation)
 
 Vind hier ander maniere om **'n outentisering te dwing:**
+
 
 {{#ref}}
 printers-spooler-service-abuse.md

@@ -1,12 +1,13 @@
-# BloodHound & Ander Aktiewe Gidsen Vir Directory Enumerasie
+# BloodHound & Ander Aktiewe Gidsen Tools
 
 {{#include ../../banners/hacktricks-training.md}}
+
 
 {{#ref}}
 adws-enumeration.md
 {{#endref}}
 
-> LET WEL: Hierdie bladsy groepeer sommige van die nuttigste nutsmiddels om **te enumerate** en **te visualiseer** Aktiewe Gidsenverhoudings. Vir versameling oor die stealthy **Aktiewe Gids Web Dienste (ADWS)** kanaal, kyk na die verwysing hierbo.
+> LET WEL: Hierdie bladsy groepeer sommige van die nuttigste nutsmiddels om **te enumerate** en **te visualiseer** Aktiewe Gids verhoudings. Vir versameling oor die stealthy **Active Directory Web Services (ADWS)** kanaal, kyk na die verwysing hierbo.
 
 ---
 
@@ -16,12 +17,12 @@ adws-enumeration.md
 
 * GUI-browsing van die gidsboom
 * Redigering van objekattributen & sekuriteitsbeskrywings
-* Snapshot skepping / vergelyking vir aflyn analise
+* Snapshot skepping / vergelyking vir offline analise
 
 ### Vinnige gebruik
 
 1. Begin die hulpmiddel en verbind met `dc01.corp.local` met enige domein akrediteer.
-2. Skep 'n aflyn snapshot via `File ➜ Create Snapshot`.
+2. Skep 'n offline snapshot via `File ➜ Create Snapshot`.
 3. Vergelyk twee snapshots met `File ➜ Compare` om toestemming verskuiwings op te spoor.
 
 ---

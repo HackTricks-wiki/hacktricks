@@ -12,7 +12,7 @@ Sagtes:
 
 Aanlyn:
 
-- Gebruik [https://webassembly.github.io/wabt/demo/wasm2wat/index.html](https://webassembly.github.io/wabt/demo/wasm2wat/index.html) om te **decompile** van wasm (binêr) na wat (duidelike teks)
+- Gebruik [https://webassembly.github.io/wabt/demo/wasm2wat/index.html](https://webassembly.github.io/wabt/demo/wasm2wat/index.html) om te **decompile** van wasm (binarie) na wat (duidelike teks)
 - Gebruik [https://webassembly.github.io/wabt/demo/wat2wasm/](https://webassembly.github.io/wabt/demo/wat2wasm/) om te **compile** van wat na wasm
 - jy kan ook probeer om [https://wwwg.github.io/web-wasmdec/](https://wwwg.github.io/web-wasmdec/) te gebruik om te decompile
 
@@ -25,9 +25,9 @@ Sagtes:
 
 ### [dotPeek](https://www.jetbrains.com/decompiler/)
 
-dotPeek is 'n decompiler wat **decompileer en ondersoek verskeie formate**, insluitend **biblioteke** (.dll), **Windows metadata lêers** (.winmd), en **uitvoerbare lêers** (.exe). Sodra dit gedecompileer is, kan 'n samestelling as 'n Visual Studio-projek (.csproj) gestoor word.
+dotPeek is 'n decompiler wat **decompileer en ondersoek verskeie formate**, insluitend **biblioteke** (.dll), **Windows metadata lêers** (.winmd), en **uitvoerbare lêers** (.exe). Sodra dit gedecompileer is, kan 'n assembly as 'n Visual Studio-projek (.csproj) gestoor word.
 
-Die voordeel hier is dat as 'n verlore bronskode herstel moet word uit 'n erfenis-samestelling, kan hierdie aksie tyd bespaar. Verder bied dotPeek handige navigasie deur die gedecompileerde kode, wat dit een van die perfekte hulpmiddels maak vir **Xamarin-algoritme-analise.**
+Die voordeel hier is dat as 'n verlore bronkode herstel moet word uit 'n erfenis assembly, kan hierdie aksie tyd bespaar. Verder bied dotPeek handige navigasie deur die gedecompileerde kode, wat dit een van die perfekte hulpmiddels maak vir **Xamarin-algoritme-analise.**
 
 ### [.NET Reflector](https://www.red-gate.com/products/reflector/)
 
@@ -36,7 +36,7 @@ Met 'n omvattende byvoegingmodel en 'n API wat die hulpmiddel uitbrei om aan jou
 - Bied insig in hoe die data deur 'n biblioteek of komponent vloei
 - Bied insig in die implementering en gebruik van .NET tale en raamwerke
 - Vind ongedokumenteerde en nie-blootgestelde funksionaliteit om meer uit die API's en tegnologieë te kry.
-- Vind afhanklikhede en verskillende samestellings
+- Vind afhanklikhede en verskillende assemblies
 - Spoor die presiese ligging van foute in jou kode, derdeparty-komponente, en biblioteke op.
 - Debugeer in die bron van al die .NET kode waarmee jy werk.
 
@@ -63,7 +63,7 @@ Eerstens, verander die **Assembly eienskappe** wat verband hou met **foutopspori
 ```aspnet
 [assembly: Debuggable(DebuggableAttribute.DebuggingModes.IgnoreSymbolStoreSequencePoints)]
 ```
-I'm sorry, but it seems that your message is incomplete. Could you please provide the text you would like me to translate?
+I'm sorry, but it seems that there is no content provided for translation. Please provide the text you would like me to translate to Afrikaans.
 ```
 [assembly: Debuggable(DebuggableAttribute.DebuggingModes.Default |
 DebuggableAttribute.DebuggingModes.DisableOptimizations |
@@ -132,9 +132,9 @@ Maar, hoe kan jy by die kode van die DLL wat gelaai is, kom? Met hierdie metode 
 ### Gebruik van x64dbg/x32dbg
 
 - **Laai rundll32** (64bits in C:\Windows\System32\rundll32.exe en 32 bits in C:\Windows\SysWOW64\rundll32.exe)
-- **Verander die Command Line** (_File --> Change Command Line_) en stel die pad van die dll en die funksie wat jy wil aanroep in, byvoorbeeld: "C:\Windows\SysWOW64\rundll32.exe" "Z:\shared\Cybercamp\rev2\\\14.ridii_2.dll",DLLMain
+- **Verander die Command Line** ( _File --> Change Command Line_ ) en stel die pad van die dll en die funksie wat jy wil aanroep in, byvoorbeeld: "C:\Windows\SysWOW64\rundll32.exe" "Z:\shared\Cybercamp\rev2\\\14.ridii_2.dll",DLLMain
 - Verander _Options --> Settings_ en kies "**DLL Entry**".
-- Dan **begin die uitvoering**, die debuggers sal by elke dll hoof stop, op 'n sekere punt sal jy **stop in die dll Entry van jou dll**. Van daar af, soek net die punte waar jy 'n breekpunt wil plaas.
+- Dan **begin die uitvoering**, die debugger sal by elke dll hoof stop, op 'n sekere punt sal jy **stop in die dll Entry van jou dll**. Van daar af, soek net die punte waar jy 'n breekpunt wil plaas.
 
 Let daarop dat wanneer die uitvoering om enige rede in win64dbg gestop word, jy kan sien **in watter kode jy is** deur na die **boonste deel van die win64dbg venster** te kyk:
 
@@ -152,7 +152,7 @@ cheat-engine.md
 
 [**PiNCE**](https://github.com/korcankaraokcu/PINCE) is 'n front-end/omgekeerde ingenieursgereedskap vir die GNU Project Debugger (GDB), gefokus op speletjies. Dit kan egter vir enige omgekeerde ingenieurswerk gebruik word.
 
-[**Decompiler Explorer**](https://dogbolt.org/) is 'n web front-end vir 'n aantal decompilers. Hierdie webdiens laat jou toe om die uitvoer van verskillende decompilers op klein uitvoerbare lêers te vergelyk.
+[**Decompiler Explorer**](https://dogbolt.org/) is 'n web front-end na 'n aantal decompilers. Hierdie webdiens laat jou toe om die uitvoer van verskillende decompilers op klein uitvoerbare lêers te vergelyk.
 
 ## ARM & MIPS
 
@@ -164,7 +164,7 @@ https://github.com/nongiach/arm_now
 
 ### Debugging 'n shellcode met blobrunner
 
-[**Blobrunner**](https://github.com/OALabs/BlobRunner) sal die **shellcode** binne 'n geheue ruimte **toewys**, jou die **geheue adres** waar die shellcode toegeken is **aanwys** en die uitvoering **stop**.\
+[**Blobrunner**](https://github.com/OALabs/BlobRunner) sal **toewys** die **shellcode** binne 'n geheue ruimte, sal jou die **geheue adres** waar die shellcode toegeken is **aanwys** en sal die uitvoering **stop**.\
 Dan moet jy 'n **debugger** (Ida of x64dbg) aan die proses koppel en 'n **breekpunt op die aangeduide geheue adres** plaas en die uitvoering **herbegin**. Op hierdie manier sal jy die shellcode debugg.
 
 Die releases github bladsy bevat zips wat die gecompileerde releases bevat: [https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)\
@@ -176,7 +176,7 @@ blobrunner.md
 
 ### Debugging 'n shellcode met jmp2it
 
-[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4) is baie soortgelyk aan blobrunner. Dit sal die **shellcode** binne 'n geheue ruimte **toewys**, en 'n **ewige lus** begin. Jy moet dan die **debugger** aan die proses koppel, **begin speel, wag 2-5 sekondes en druk stop** en jy sal jouself binne die **ewige lus** vind. Spring na die volgende instruksie van die ewige lus, aangesien dit 'n oproep na die shellcode sal wees, en uiteindelik sal jy jouself die shellcode uitvoer.
+[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4) is baie soortgelyk aan blobrunner. Dit sal **toewys** die **shellcode** binne 'n geheue ruimte, en 'n **ewige lus** begin. Jy moet dan die **debugger** aan die proses koppel, **begin speel, wag 2-5 sekondes en druk stop** en jy sal jouself binne die **ewige lus** vind. Spring na die volgende instruksie van die ewige lus, aangesien dit 'n oproep na die shellcode sal wees, en uiteindelik sal jy jouself die shellcode uitvoer.
 
 ![](<../../images/image (509).png>)
 
@@ -186,7 +186,7 @@ Jy kan 'n gecompileerde weergawe van [jmp2it binne die releases bladsy](https://
 
 [**Cutter**](https://github.com/rizinorg/cutter/releases/tag/v1.12.0) is die GUI van radare. Met cutter kan jy die shellcode emuleer en dit dinamies inspekteer.
 
-Let daarop dat Cutter jou toelaat om "Open File" en "Open Shellcode" te kies. In my geval, toe ek die shellcode as 'n lêer oopgemaak het, het dit dit korrek decompileer, maar toe ek dit as 'n shellcode oopgemaak het, het dit nie:
+Let daarop dat Cutter jou toelaat om "Open File" en "Open Shellcode" te doen. In my geval, toe ek die shellcode as 'n lêer oopgemaak het, het dit dit korrek decompiled, maar toe ek dit as 'n shellcode oopgemaak het, het dit nie:
 
 ![](<../../images/image (562).png>)
 
@@ -200,10 +200,10 @@ Jy kan die stapel byvoorbeeld binne 'n hex dump sien:
 
 ![](<../../images/image (186).png>)
 
-### Deobfuscating shellcode en die uitgevoerde funksies verkry
+### Deobfuscating shellcode en die uitgevoerde funksies kry
 
-Jy moet [**scdbg**](http://sandsprite.com/blogs/index.php?uid=7&pid=152) probeer.\
-Dit sal jou dinge vertel soos **watter funksies** die shellcode gebruik en of die shellcode **homself in geheue decodeer**.
+Jy moet probeer [**scdbg**](http://sandsprite.com/blogs/index.php?uid=7&pid=152).\
+Dit sal jou dinge vertel soos **watter funksies** die shellcode gebruik en of die shellcode **homself decodeer** in geheue.
 ```bash
 scdbg.exe -f shellcode # Get info
 scdbg.exe -f shellcode -r #show analysis report at end of run
@@ -216,7 +216,7 @@ scDbg het ook 'n grafiese laaier waar jy die opsies kan kies wat jy wil en die s
 
 ![](<../../images/image (258).png>)
 
-Die **Create Dump** opsie sal die finale shellcode dump as daar enige verandering aan die shellcode dinamies in geheue gemaak word (nuttig om die gedecodeerde shellcode af te laai). Die **start offset** kan nuttig wees om die shellcode by 'n spesifieke offset te begin. Die **Debug Shell** opsie is nuttig om die shellcode te debugeer met behulp van die scDbg terminal (ek vind egter enige van die opsies wat voorheen verduidelik is beter vir hierdie saak, aangesien jy Ida of x64dbg kan gebruik).
+Die **Create Dump** opsie sal die finale shellcode dump as enige verandering aan die shellcode dinamies in geheue gemaak word (nuttig om die gedecodeerde shellcode af te laai). Die **start offset** kan nuttig wees om die shellcode by 'n spesifieke offset te begin. Die **Debug Shell** opsie is nuttig om die shellcode te debugeer met behulp van die scDbg terminal (ek vind egter enige van die opsies wat voorheen verduidelik is beter vir hierdie saak, aangesien jy Ida of x64dbg kan gebruik).
 
 ### Disassembling using CyberChef
 
@@ -229,7 +229,7 @@ Hierdie obfuscator **wysig al die instruksies vir `mov`** (ja, regtig cool). Dit
 - [https://www.youtube.com/watch?v=2VF_wPkiBJY](https://www.youtube.com/watch?v=2VF_wPkiBJY)
 - [https://github.com/xoreaxeaxeax/movfuscator/blob/master/slides/domas_2015_the_movfuscator.pdf](https://github.com/xoreaxeaxeax/movfuscator/blob/master/slides/domas_2015_the_movfuscator.pdf)
 
-As jy gelukkig is, sal [demovfuscator](https://github.com/kirschju/demovfuscator) die binêre deofuskeer. Dit het verskeie afhanklikhede.
+As jy gelukkig is, sal [demovfuscator](https://github.com/kirschju/demovfuscator) die binêre deobfuskeer. Dit het verskeie afhanklikhede.
 ```
 apt-get install libcapstone-dev
 apt-get install libz3-dev
@@ -245,7 +245,7 @@ Om die **toegangspunt** te vind, soek die funksies deur `::main` soos in:
 ![](<../../images/image (1080).png>)
 
 In hierdie geval was die binêre genaamd authenticator, so dit is redelik duidelik dat dit die interessante hooffunksie is.\
-Met die **naam** van die **funksies** wat aangeroep word, soek daarna op die **Internet** om meer te leer oor hul **insette** en **uitsette**.
+Met die **naam** van die **funksies** wat aangeroep word, soek daarna op die **Internet** om meer te leer oor hul **invoere** en **uitvoere**.
 
 ## **Delphi**
 
@@ -257,7 +257,7 @@ Druk net **ATL+f7** (import python plugin in IDA) en kies die python plugin.
 
 Hierdie inprop sal die binêre uitvoer en funksiename dinamies aan die begin van die debuggery oplos. Na die begin van die debuggery, druk weer die Begin-knoppie (die groen een of f9) en 'n breekpunt sal aan die begin van die werklike kode tref.
 
-Dit is ook baie interessant omdat as jy 'n knoppie in die grafiese toepassing druk, die debugger sal stop in die funksie wat deur daardie knoppie uitgevoer word.
+Dit is ook baie interessant omdat as jy 'n knoppie in die grafiese toepassing druk, die debugger in die funksie wat deur daardie knoppie uitgevoer word, sal stop.
 
 ## Golang
 
@@ -269,7 +269,8 @@ Dit sal die name van die funksies oplos.
 
 ## Gecompileerde Python
 
-Op hierdie bladsy kan jy vind hoe om die python kode van 'n ELF/EXE python gecompileerde binêre te kry:
+Op hierdie bladsy kan jy vind hoe om die python kode van 'n ELF/EXE python gecompileerde binêre te verkry:
+
 
 {{#ref}}
 ../../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/.pyc.md
@@ -301,7 +302,7 @@ DOWN = 128
 R = 256
 L = 256
 ```
-So, in this kind of program, the interesting part will be **hoe die program die gebruiker invoer hanteer**. In die adres **0x4000130** sal jy die algemeen aangetrefde funksie vind: **KEYINPUT**.
+So, in hierdie tipe program, sal die interessante deel wees **hoe die program die gebruiker invoer hanteer**. In die adres **0x4000130** sal jy die algemeen aangetrefde funksie vind: **KEYINPUT**.
 
 ![](<../../images/image (447).png>)
 
@@ -374,7 +375,7 @@ In die vorige kode kan jy sien dat ons **uVar1** (die plek waar die **waarde van
 - Dan, dit word vergelyk met die **waarde 8** (**START** knoppie): In die uitdaging kontroleer dit of die kode geldig is om die vlag te kry.
 - In hierdie geval word die var **`DAT_030000d8`** met 0xf3 vergelyk en as die waarde dieselfde is, word 'n paar kode uitgevoer.
 - In enige ander gevalle, word 'n cont (`DAT_030000d4`) nagegaan. Dit is 'n cont omdat dit 1 byvoeg onmiddellik nadat dit in die kode ingaan.\
-**As** dit minder as 8 is, word iets wat **waardes byvoeg** tot **`DAT_030000d8`** gedoen (basies voeg dit die waardes van die knoppies wat in hierdie veranderlike gedruk is by solank die cont minder as 8 is).
+**As** minder as 8, word iets wat **byvoeg** waardes aan **`DAT_030000d8`** doen (basies voeg dit die waardes van die knoppies wat in hierdie veranderlike gedruk is by solank die cont minder as 8 is).
 
 So, in hierdie uitdaging, om die waardes van die knoppies te ken, moes jy 'n **kombinasie druk met 'n lengte kleiner as 8 wat die resultaat toevoeging 0xf3 is.**
 
@@ -382,11 +383,12 @@ So, in hierdie uitdaging, om die waardes van die knoppies te ken, moes jy 'n **k
 
 ## Game Boy
 
+
 {{#ref}}
 https://www.youtube.com/watch?v=VVbRe7wr3G4
 {{#endref}}
 
-## Kursusse
+## Cursusse
 
 - [https://github.com/0xZ0F/Z0FCourse_ReverseEngineering](https://github.com/0xZ0F/Z0FCourse_ReverseEngineering)
 - [https://github.com/malrev/ABD](https://github.com/malrev/ABD) (Binaire deobfuscation)

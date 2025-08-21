@@ -2,15 +2,16 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
+
 {{#ref}}
 README.md
 {{#endref}}
 
 ## JTAGenum
 
-[**JTAGenum**](https://github.com/cyphunk/JTAGenum) is 'n hulpmiddel wat jy op 'n Arduino-ondersteunde MCU of (eksperimenteel) 'n Raspberry Pi kan laai om onbekende JTAG pinouts te brute-force en selfs instruksie registers te tel.
+[**JTAGenum**](https://github.com/cyphunk/JTAGenum) is 'n hulpmiddel wat jy op 'n Arduino-ondersteunde MCU of (eksperimenteel) 'n Raspberry Pi kan laai om onbekende JTAG pinouts te brute-force en selfs instruksie registre te tel.
 
-- Arduino: koppel digitale pinne D2–D11 aan tot 10 vermoedelike JTAG pads/testpunte, en Arduino GND aan teiken GND. Voed die teiken apart, tensy jy weet die rail is veilig. Verkies 3.3 V logika (bv. Arduino Due) of gebruik 'n vlakverskuiwer/reeks weerstande wanneer jy 1.8–3.3 V teikens toets.
+- Arduino: koppel digitale pinne D2–D11 aan tot 10 vermoedelik JTAG pads/toetspunte, en Arduino GND aan teiken GND. Voed die teiken apart, tensy jy weet die rail is veilig. Verkies 3.3 V logika (bv. Arduino Due) of gebruik 'n vlakverskuiwer/reeks weerstande wanneer jy 1.8–3.3 V teikens toets.
 - Raspberry Pi: die Pi-bou stel minder bruikbare GPIO's bloot (so skande is stadiger); kyk na die repo vir die huidige pinkaart en beperkings.
 
 Sodra dit geflits is, open die seriële monitor by 115200 baud en stuur `h` vir hulp. Tipiese vloei:
@@ -29,7 +30,7 @@ Sodra dit geflits is, open die seriële monitor by 115200 baud en stuur `h` vir 
 
 
 
-As 'n geldige TAP gevind word, sal jy lyne sien wat met `FOUND!` begin wat ontdekte pinne aandui.
+As 'n geldige TAP gevind word, sal jy lyne sien wat begin met `FOUND!` wat ontdekte pinne aandui.
 
 Tips
 - Deel altyd grond, en moenie onbekende pinne bo teiken Vtref dryf nie. As jy twyfel, voeg 100–470 Ω reeks weerstande by kandidaat pinne.
@@ -62,7 +63,7 @@ Notes
 
 Sodra die TAP erken is en 'n teiken-skrip gekies is, kan jy die kern stop en geheuegebiede of interne flash dump. Voorbeelde (pas teiken, basisadresse en groottes aan):
 
-- Generiese teiken na init:
+- Generiese teiken na inisiëring:
 ```
 openocd -f interface/jlink.cfg -f target/stm32f1x.cfg \
 -c "init; reset halt; mdw 0x08000000 4; dump_image flash.bin 0x08000000 0x00100000; shutdown"
@@ -97,24 +98,24 @@ jtag> instruction EXTEST
 jtag> shift ir
 jtag> dr  <bit pattern for boundary register>
 ```
-U het die toestel BSDL nodig om die grensregister-bitsordening te ken. Wees versigtig dat sommige verskaffers grens-scan selle in produksie vergrendel.
+U het die toestel BSDL nodig om die grensregister-bietordering te ken. Wees versigtig dat sommige verskaffers grens-scan selle in produksie vergrendel.
 
 ## Moderne teikens en notas
 
 - ESP32‑S3/C3 sluit 'n inheemse USB‑JTAG-brug in; OpenOCD kan direk oor USB kommunikeer sonder 'n eksterne sonde. Baie gerieflik vir triage en dumps.
 - RISC‑V debug (v0.13+) word wyd deur OpenOCD ondersteun; verkies SBA vir geheue-toegang wanneer die kern nie veilig gestop kan word nie.
-- Baie MCU's implementeer debug-authentisering en lewensiklusstate. As JTAG dood lyk maar die krag korrek is, mag die toestel na 'n geslote toestand gesmelt wees of 'n geverifieerde sonde benodig.
+- Baie MCU's implementeer debug-outehentisering en lewensiklusstate. As JTAG dood lyk maar die krag korrek is, mag die toestel na 'n geslote toestand gesmelt wees of 'n geoutentiseerde sonde benodig.
 
 ## Verdedigings en versterking (wat om te verwag op werklike toestelle)
 
 - Deaktiveer of vergrendel JTAG/SWD permanent in produksie (bv. STM32 RDP vlak 2, ESP eFuses wat PAD JTAG deaktiveer, NXP/Nordic APPROTECT/DPAP).
-- Vereis geverifieerde debug (ARMv8.2‑A ADIv6 Debug Authentisering, OEM-beheerde uitdaging-reaksie) terwyl vervaardigings toegang behou word.
-- Moet nie maklike toets pads roete nie; begrawe toets vias, verwyder/populeer weerstande om TAP te isoleer, gebruik connectors met sleuteling of pogo-pin toebehore.
+- Vereis geoutentiseerde debug (ARMv8.2‑A ADIv6 Debug Authentication, OEM-beheerde uitdaging-reaksie) terwyl vervaardigings toegang behou word.
+- Moet nie maklike toetspads lei nie; begrawe toetsvias, verwyder/populeer weerstande om TAP te isoleer, gebruik connectors met sleuteling of pogo-pin toebehore.
 - Krag-aan debug vergrendeling: sluit die TAP agter vroeë ROM wat veilige opstart afdwing.
 
 ## Verwysings
 
 - OpenOCD Gebruikersgids – JTAG Opdragte en konfigurasie. https://openocd.org/doc-release/html/JTAG-Commands.html
-- Espressif ESP32‑S3 JTAG debugging (USB‑JTAG, OpenOCD gebruik). https://docs.espressif.com/projects/esp-idf/en/latest/esp32s3/api-guides/jtag-debugging/
+- Espressif ESP32‑S3 JTAG-debugging (USB‑JTAG, OpenOCD gebruik). https://docs.espressif.com/projects/esp-idf/en/latest/esp32s3/api-guides/jtag-debugging/
 
 {{#include ../../banners/hacktricks-training.md}}

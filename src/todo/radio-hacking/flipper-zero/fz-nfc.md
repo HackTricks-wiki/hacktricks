@@ -13,7 +13,7 @@ Vir inligting oor RFID en NFC, kyk na die volgende bladsy:
 ## Ondersteunde NFC-kaarte <a href="#id-9wrzi" id="id-9wrzi"></a>
 
 > [!CAUTION]
-> Behalwe vir NFC-kaarte ondersteun Flipper Zero **ander tipe Hoë-frekwensie kaarte** soos verskeie **Mifare** Classic en Ultralight en **NTAG**.
+> Behalwe vir NFC-kaarte ondersteun Flipper Zero **ander tipe hoë-frekwensie kaarte** soos verskeie **Mifare** Classic en Ultralight en **NTAG**.
 
 Nuwe tipes NFC-kaarte sal by die lys van ondersteunde kaarte gevoeg word. Flipper Zero ondersteun die volgende **NFC-kaarte tipe A** (ISO 14443A):
 
@@ -70,7 +70,7 @@ In die geval dat Flipper Zero nie in staat is om die tipe kaart van die lae-vlak
 #### EMV Bankkaarte (PayPass, payWave, Apple Pay, Google Pay) <a href="#emv-bank-cards-paypass-paywave-apple-pay-google-pay" id="emv-bank-cards-paypass-paywave-apple-pay-google-pay"></a>
 
 Behalwe om eenvoudig die UID te lees, kan jy baie meer data van 'n bankkaart onttrek. Dit is moontlik om **die volle kaartnommer** (die 16 syfers aan die voorkant van die kaart), **geldigheidsdatum**, en in sommige gevalle selfs die **eienaarsnaam** saam met 'n lys van die **mees onlangse transaksies** te verkry.\
-E however, jy **kan nie die CVV op hierdie manier lees nie** (die 3 syfers aan die agterkant van die kaart). Ook **bankkaarte is beskerm teen herhalingsaanvalle**, so om dit met Flipper te kopieer en dan te probeer emuleer om vir iets te betaal, sal nie werk nie.
+Echter, jy **kan nie die CVV op hierdie manier lees nie** (die 3 syfers aan die agterkant van die kaart). Ook **bankkaarte is beskerm teen herhalingsaanvalle**, so om dit met Flipper te kopieer en dan te probeer emuleer om vir iets te betaal, sal nie werk nie.
 
 ## Verwysings
 

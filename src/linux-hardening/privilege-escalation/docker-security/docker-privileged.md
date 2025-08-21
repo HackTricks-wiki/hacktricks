@@ -57,11 +57,11 @@ mount  | grep '(ro'
 {{#endtab}}
 {{#endtabs}}
 
-### Maskering oor kernlêerstelsels
+### Maskering oor kern lêerstelsels
 
-Die **/proc** lêerstelsel is selektief skryfbaar, maar vir sekuriteit is sekere dele beskerm teen skryf- en leestoegang deur dit met **tmpfs** te oorlaai, wat verseker dat houerprosesse nie toegang tot sensitiewe areas het nie.
+Die **/proc** lêerstelsel is selektief skryfbaar, maar vir sekuriteit is sekere dele beskerm teen skryf- en lees toegang deur dit met **tmpfs** te oorlaai, wat verseker dat houerprosesse nie toegang tot sensitiewe areas het nie.
 
-> [!NOTE] > **tmpfs** is 'n lêerstelsel wat al die lêers in virtuele geheue stoor. tmpfs skep nie enige lêers op jou hardeskyf nie. So as jy 'n tmpfs-lêerstelsel ontkoppel, gaan al die lêers wat daarin is vir altyd verlore.
+> [!NOTE] > **tmpfs** is 'n lêerstelsel wat al die lêers in virtuele geheue stoor. tmpfs skep nie enige lêers op jou hardeskyf nie. So as jy 'n tmpfs-lêerstelsel ontkoppel, gaan al die lêers wat daarin is vir altyd verlore. 
 
 {{#tabs}}
 {{#tab name="Inside default container"}}
@@ -85,6 +85,7 @@ mount  | grep /proc.*tmpfs
 ### Linux vermoëns
 
 Container enjinse begin die houers met 'n **beperkte aantal vermoëns** om te beheer wat binne die houer gebeur per standaard. **Bevoorregte** houers het **alle** die **vermoëns** beskikbaar. Om meer oor vermoëns te leer, lees:
+
 
 {{#ref}}
 ../linux-capabilities.md
@@ -120,6 +121,7 @@ Jy kan die vermoëns wat beskikbaar is vir 'n houer manipuleer sonder om in `--p
 
 **Seccomp** is nuttig om die **syscalls** wat 'n houer kan aanroep te **beperk**. 'n Standaard seccomp-profiel is standaard geaktiveer wanneer docker-houers loop, maar in privilige-modus is dit gedeaktiveer. Leer meer oor Seccomp hier:
 
+
 {{#ref}}
 seccomp.md
 {{#endref}}
@@ -151,7 +153,8 @@ Ook, let op dat wanneer Docker (of ander CRI's) in 'n **Kubernetes** kluster geb
 
 ### AppArmor
 
-**AppArmor** is 'n kernverbetering om **houers** tot 'n **beperkte** stel **hulpbronne** met **per-program profiele** te beperk. Wanneer jy met die `--privileged` vlag loop, is hierdie beskerming gedeaktiveer.
+**AppArmor** is 'n kernverbetering om **houers** te beperk tot 'n **beperkte** stel **hulpbronne** met **per-program profiele**. Wanneer jy met die `--privileged` vlag loop, is hierdie beskerming gedeaktiveer.
+
 
 {{#ref}}
 apparmor.md
@@ -162,7 +165,8 @@ apparmor.md
 ```
 ### SELinux
 
-Die uitvoering van 'n houer met die `--privileged` vlag deaktiveer **SELinux etikette**, wat veroorsaak dat dit die etiket van die houer enjin oorneem, tipies `unconfined`, wat volle toegang toelaat soortgelyk aan die houer enjin. In rootless modus gebruik dit `container_runtime_t`, terwyl in root modus, `spc_t` toegepas word.
+Die uitvoering van 'n houer met die `--privileged` vlag deaktiveer **SELinux etikette**, wat veroorsaak dat dit die etiket van die houer enjin, tipies `unconfined`, oorneem, wat volle toegang toelaat soortgelyk aan die houer enjin. In rootless modus, gebruik dit `container_runtime_t`, terwyl in root modus, `spc_t` toegepas word.
+
 
 {{#ref}}
 ../selinux.md
@@ -171,7 +175,7 @@ Die uitvoering van 'n houer met die `--privileged` vlag deaktiveer **SELinux eti
 # You can manually disable selinux in docker with
 --security-opt label:disable
 ```
-## Wat Nie Beïnvloed Word Nie
+## Wat Nie Beïnvloed Nie
 
 ### Namespaces
 
@@ -203,7 +207,7 @@ PID   USER     TIME  COMMAND
 
 ### Gebruiker naamruimte
 
-**Standaard gebruik container enjin nie gebruiker naamruimtes nie, behalwe vir rootlose houers**, wat dit benodig vir lêerstelsel montering en die gebruik van verskeie UID's. Gebruiker naamruimtes, wat noodsaaklik is vir rootlose houers, kan nie gedeaktiveer word nie en verbeter sekuriteit aansienlik deur voorregte te beperk.
+**Standaard gebruik container enjin nie gebruiker naamruimtes nie, behalwe vir rootlose houers**, wat dit benodig vir lêerstelsel montering en die gebruik van verskeie UID's. Gebruiker naamruimtes, wat integrale deel van rootlose houers is, kan nie gedeaktiveer word nie en verbeter sekuriteit aansienlik deur voorregte te beperk.
 
 ## Verwysings
 

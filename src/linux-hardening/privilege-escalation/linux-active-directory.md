@@ -14,6 +14,7 @@ As jy toegang het tot 'n AD in linux (of bash in Windows) kan jy probeer [https:
 
 Jy kan ook die volgende bladsy nagaan om **ander maniere te leer om AD vanaf linux te enumerate**:
 
+
 {{#ref}}
 ../../network-services-pentesting/pentesting-ldap.md
 {{#endref}}
@@ -21,6 +22,7 @@ Jy kan ook die volgende bladsy nagaan om **ander maniere te leer om AD vanaf lin
 ### FreeIPA
 
 FreeIPA is 'n oopbron **alternatief** vir Microsoft Windows **Active Directory**, hoofsaaklik vir **Unix** omgewings. Dit kombineer 'n volledige **LDAP gids** met 'n MIT **Kerberos** Sleutelverspreidingsentrum vir bestuur soortgelyk aan Active Directory. Dit gebruik die Dogtag **Sertifikaatsisteem** vir CA & RA sertifikaatbestuur, en ondersteun **multi-faktor** verifikasie, insluitend slimkaarte. SSSD is geïntegreer vir Unix verifikasieprosesse. Leer meer daaroor in:
+
 
 {{#ref}}
 ../freeipa-pentesting.md
@@ -31,6 +33,7 @@ FreeIPA is 'n oopbron **alternatief** vir Microsoft Windows **Active Directory**
 ### Pass The Ticket
 
 Op hierdie bladsy gaan jy verskillende plekke vind waar jy **kerberos kaartjies binne 'n linux gasheer kan vind**, op die volgende bladsy kan jy leer hoe om hierdie CCache kaartjie formate na Kirbi te transformeer (die formaat wat jy in Windows moet gebruik) en ook hoe om 'n PTT aanval uit te voer:
+
 
 {{#ref}}
 ../../windows-hardening/active-directory-methodology/pass-the-ticket.md
@@ -71,7 +74,7 @@ Die aanroep van **`SSSDKCMExtractor`** met die --database en --key parameters sa
 git clone https://github.com/fireeye/SSSDKCMExtractor
 python3 SSSDKCMExtractor.py --database secrets.ldb --key secrets.mkey
 ```
-Die **akkrediteringskas Kerberos blob kan omskep word in 'n bruikbare Kerberos CCache** lêer wat aan Mimikatz/Rubeus oorgedra kan word.
+Die **credential cache Kerberos blob kan in 'n bruikbare Kerberos CCache** lêer omgeskakel word wat aan Mimikatz/Rubeus oorgedra kan word.
 
 ### CCACHE kaartjie hergebruik vanaf keytab
 ```bash

@@ -6,7 +6,7 @@
 
 **Infrarooi lig is onsigbaar vir mense**. IR golflengte is van **0.7 tot 1000 mikron**. Huishoudelike afstandsbedienings gebruik 'n IR sein vir datatransmissie en werk in die golflengte reeks van 0.75..1.4 mikron. 'n Mikrocontroller in die afstandsbediening laat 'n infrarooi LED flits met 'n spesifieke frekwensie, wat die digitale sein in 'n IR sein omskakel.
 
-Om IR seine te ontvang, word 'n **fotoreceiver** gebruik. Dit **omskakel IR lig in spanning pulsasies**, wat reeds **digitale seine** is. Gewoonlik is daar 'n **donker ligfilter binne die ontvanger**, wat **slegs die gewenste golflengte deurlaat** en geraas uitsny.
+Om IR seine te ontvang, word 'n **fotoreceiver** gebruik. Dit **omskakel IR lig in spanning pulsies**, wat reeds **digitale seine** is. Gewoonlik is daar 'n **donker ligfilter binne die ontvanger**, wat **slegs die gewenste golflengte deurlaat** en geraas uitsny.
 
 ### Verskeidenheid van IR Protokolle <a href="#variety-of-ir-protocols" id="variety-of-ir-protocols"></a>
 
@@ -20,13 +20,13 @@ IR protokolle verskil in 3 faktore:
 
 **1. Pulsafstand Kodering**
 
-Bits word gekodeer deur die duur van die spasie tussen pulss te moduler. Die breedte van die puls self is konstant.
+Bits word gekodeer deur die duur van die spasie tussen pulsies te moduler. Die breedte van die puls self is konstant.
 
 <figure><img src="../../images/image (295).png" alt=""><figcaption></figcaption></figure>
 
 **2. Pulsbreedte Kodering**
 
-Bits word gekodeer deur die modulering van die pulsbreedte. Die breedte van die spasie na die pulsuitbarsting is konstant.
+Bits word gekodeer deur die pulsbreedte te moduler. Die breedte van die spasie na die pulsuitbarsting is konstant.
 
 <figure><img src="../../images/image (282).png" alt=""><figcaption></figcaption></figure>
 
@@ -64,7 +64,7 @@ Vir **logika "0" en "1"** gebruik NEC Pulsafstand Kodering: eerstens word 'n pul
 ### Lugversorgers
 
 In teenstelling met ander afstandsbedienings, **stuur lugversorgers nie net die kode van die ingedrukte knoppie nie**. Hulle **stuur ook al die inligting** wanneer 'n knoppie ingedruk word om te verseker dat die **lugversorgingsmasjien en die afstandsbediening gesinchroniseer is**.\
-Dit sal verhoed dat 'n masjien wat op 20ºC gestel is, verhoog word na 21ºC met een afstandsbediening, en dan wanneer 'n ander afstandsbediening, wat steeds die temperatuur as 20ºC het, gebruik word om die temperatuur verder te verhoog, dit "verhoog" dit na 21ºC (en nie na 22ºC nie, dinkend dit is op 21ºC).
+Dit sal verhoed dat 'n masjien wat op 20ºC gestel is, verhoog word na 21ºC met een afstandsbediening, en dan wanneer 'n ander afstandsbediening, wat steeds die temperatuur as 20ºC het, gebruik word om die temperatuur verder te verhoog, dit "verhoog" dit na 21ºC (en nie na 22ºC nie, dink dit is op 21ºC).
 
 ---
 
@@ -78,21 +78,21 @@ flipper-zero/fz-infrared.md
 
 ### Slim-TV / Set-top Box Oorneming (EvilScreen)
 
-Onlangse akademiese werk (EvilScreen, 2022) het getoon dat **multikanal afstandsbedienings wat Infrarooi met Bluetooth of Wi-Fi kombineer, misbruik kan word om moderne slim-TV's volledig oor te neem**. Die aanvalkettings verbind hoëprivilege IR dienskode saam met geverifieerde Bluetooth-pakkette, wat kanaal-isolasie omseil en willekeurige app-lancering, mikrofoonaktivering, of fabrieksherstel sonder fisiese toegang toelaat. Agt hoofstroom-TV's van verskillende verskaffers — insluitend 'n Samsung-model wat ISO/IEC 27001-nakoming beweer — is bevestig as kwesbaar. Mitigering vereis verskaffer firmware regstellings of die heeltemal deaktiveer van ongebruikte IR ontvangers.
+Onlangse akademiese werk (EvilScreen, 2022) het getoon dat **multikanal afstandsbedienings wat Infrarooi met Bluetooth of Wi-Fi kombineer, misbruik kan word om moderne slim-TV's volledig oor te neem**. Die aanvalkettings kombineer hoëprivilege IR dienskode met geverifieerde Bluetooth-pakkette, wat kanaal-isolasie omseil en willekeurige app-lanseer, mikrofoonaktivering, of fabrieksherstel sonder fisiese toegang toelaat. Agt hoofstroom-TV's van verskillende verskaffers — insluitend 'n Samsung-model wat ISO/IEC 27001-nakoming beweer — is bevestig as kwesbaar. Mitigering vereis verskaffer firmware regstellings of die heeltemal deaktiveer van ongebruikte IR ontvangers.
 
-### Lug-Gepaste Data Uitsending via IR LEDs (aIR-Jumper familie)
+### Lug-Gap Data Uitsifting via IR LED's (aIR-Jumper familie)
 
-Sekuriteitskameras, routers of selfs kwaadwillige USB-sticks sluit dikwels **nagvisie IR LEDs** in. Navorsing toon dat malware hierdie LEDs kan moduler (<10–20 kbit/s met eenvoudige OOK) om **geheime deur mure en vensters uit te stuur** na 'n eksterne kamera wat tien meter weg geplaas is. Omdat die lig buite die sigbare spektrum is, merk operateurs selde dit op. Teenmaatreëls:
+Sekuriteitskamara's, routers of selfs kwaadwillige USB-sticks sluit dikwels **nagvisie IR LED's** in. Navorsing toon dat malware hierdie LED's kan moduler (<10–20 kbit/s met eenvoudige OOK) om **geheime inligting deur mure en vensters uit te filter** na 'n eksterne kamera wat tien meter weg geplaas is. Omdat die lig buite die sigbare spektrum is, merk operateurs selde dit op. Teenmaatreëls:
 
-* Fisies beskerm of verwyder IR LEDs in sensitiewe areas
+* Fisies beskerm of verwyder IR LED's in sensitiewe areas
 * Monitor kamera LED pligsyklus en firmware integriteit
-* Plaas IR-snyfilters op vensters en toesigkameras
+* Plaas IR-snyfilters op vensters en toesig kameras
 
-'n Aanvaller kan ook sterk IR projekteerders gebruik om **opdragte** in die netwerk in te voer deur data terug na onveilige kameras te flits.
+'n Aanvaller kan ook sterk IR projekteerders gebruik om **opdragte** in die netwerk in te voer deur data terug te flits na onveilige kameras.
 
 ### Langafstand Brute-Force & Uitgebreide Protokolle met Flipper Zero 1.0
 
-Firmware 1.0 (September 2024) het **tientalle ekstra IR protokolle en opsionele eksterne versterkermodules** bygevoeg. Gekombineer met die universele-afstandsbediening brute-force modus, kan 'n Flipper die meeste openbare TV's/AC's tot 30 m van 'n hoëkragdiode deaktiveer of herkonfigureer.
+Firmware 1.0 (September 2024) het **tientalle ekstra IR protokolle en opsionele eksterne versterkermodules** bygevoeg. Gecombineer met die universele-afstandsbediening brute-force modus, kan 'n Flipper die meeste openbare TV's/AC's tot 30 m van 'n hoëkragdiode deaktiveer of herkonfigureer.
 
 ---
 
@@ -101,7 +101,7 @@ Firmware 1.0 (September 2024) het **tientalle ekstra IR protokolle en opsionele 
 ### Hardeware
 
 * **Flipper Zero** – draagbare transceiver met leer-, herhaal- en woordeboek-brute-force modi (sien hierbo).
-* **Arduino / ESP32** + IR LED / TSOP38xx ontvanger – goedkoop DIY ontleder/uitzender. Kombineer met die `Arduino-IRremote` biblioteek (v4.x ondersteun >40 protokolle).
+* **Arduino / ESP32** + IR LED / TSOP38xx ontvanger – goedkoop DIY ontleder/ transmitter. Kombineer met die `Arduino-IRremote` biblioteek (v4.x ondersteun >40 protokolle).
 * **Logika ontleders** (Saleae/FX2) – vang rou tyds wanneer protokol onbekend is.
 * **Slimfone met IR-blaster** (bv. Xiaomi) – vinnige veldtoets maar beperkte reeks.
 
@@ -120,7 +120,7 @@ delay(5000);
 * **IRscrutinizer / AnalysIR** – GUI dekoders wat rou vangste invoer en outomaties protokol identifiseer + Pronto/Arduino kode genereer.
 * **LIRC / ir-keytable (Linux)** – ontvang en inspuit IR vanaf die opdraglyn:
 ```bash
-sudo ir-keytable -p nec,rc5 -t   # live-dump gedecodeerde skandeerkodes
+sudo ir-keytable -p nec,rc5 -t   # live-dump gedecodeerde scankodes
 irsend SEND_ONCE samsung KEY_POWER
 ```
 
@@ -130,8 +130,8 @@ irsend SEND_ONCE samsung KEY_POWER
 
 * Deaktiveer of bedek IR ontvangers op toestelle wat in openbare ruimtes ontplooi word wanneer dit nie benodig word nie.
 * Handhaaf *pareer* of kriptografiese kontroles tussen slim-TV's en afstandsbedienings; isoleer bevoorregte “diens” kodes.
-* Plaas IR-snyfilters of deurlopende golfdetektore rondom geklassifiseerde areas om optiese geheime kanale te breek.
-* Monitor firmware integriteit van kameras/IoT toestelle wat kontroleerbare IR LEDs blootstel.
+* Plaas IR-snyfilters of deurlopende golfdetektore rondom geklassifiseerde areas om optiese verborge kanale te breek.
+* Monitor firmware integriteit van kameras/IoT toestelle wat kontroleerbare IR LED's blootstel.
 
 ## Verwysings
 

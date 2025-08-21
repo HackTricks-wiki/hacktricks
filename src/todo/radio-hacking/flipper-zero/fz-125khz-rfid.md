@@ -7,6 +7,7 @@
 
 Vir meer inligting oor hoe 125kHz etikette werk, kyk:
 
+
 {{#ref}}
 ../pentesting-rfid.md
 {{#endref}}
@@ -17,10 +18,10 @@ Vir meer inligting oor hierdie tipes etikette [**lees hierdie inleiding**](../pe
 
 ### Read
 
-Probeer om die **kaartinligting** te **lees**. Dan kan dit **emuleer** word.
+Probeer om die kaartinligting te **lees**. Dan kan dit **emuleer** word.
 
 > [!WARNING]
-> Let daarop dat sommige interkoms probeer om hulself te beskerm teen sleutelduplisering deur 'n skryfopdrag te stuur voordat hulle lees. As die skryf slaag, word daardie etiket as vals beskou. Wanneer Flipper RFID emuleer, is daar geen manier vir die leser om dit van die oorspronklike te onderskei nie, so sulke probleme ontstaan nie.
+> Let daarop dat sommige interkomme probeer om hulself te beskerm teen sleutelduplisering deur 'n skryfopdrag te stuur voordat hulle lees. As die skryf suksesvol is, word daardie etiket as vals beskou. Wanneer Flipper RFID emuleer, is daar geen manier vir die leser om dit van die oorspronklike te onderskei nie, so sulke probleme ontstaan nie.
 
 ### Add Manually
 
@@ -39,7 +40,7 @@ Die ander 2 kan brute-forced word as jy dit nie van die kaart kan lees nie.
 
 - **HID**
 
-Dieselfde gebeur in hierdie HID kaart waar slegs 2 van die 3 bytes op die kaart gedruk kan word.
+Dieselfde gebeur in hierdie HID-kaart waar slegs 2 van 3 bytes op die kaart gedruk kan word.
 
 <figure><img src="../../../images/image (1014).png" alt=""><figcaption></figcaption></figure>
 

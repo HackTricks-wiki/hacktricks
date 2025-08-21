@@ -10,7 +10,7 @@ roguepotato-and-printspoofer.md
 
 ## Juicy Potato (misbruik van die goue voorregte) <a href="#juicy-potato-abusing-the-golden-privileges" id="juicy-potato-abusing-the-golden-privileges"></a>
 
-_'n Gesuikerde weergawe van_ [_RottenPotatoNG_](https://github.com/breenmachine/RottenPotatoNG)_, met 'n bietjie sap, d.w.s. **nog 'n Plaaslike Voorreg Escalation hulpmiddel, van 'n Windows Diens Rekeninge na NT AUTHORITY\SYSTEM**_
+_'n Gesuikerde weergawe van_ [_RottenPotatoNG_](https://github.com/breenmachine/RottenPotatoNG)_, met 'n bietjie sap, d.w.s. **nog 'n Plaaslike Voorreg Escalatie hulpmiddel, van 'n Windows Diensrekening na NT AUTHORITY\SYSTEM**_
 
 #### Jy kan juicypotato aflaai van [https://ci.appveyor.com/project/ohpe/juicy-potato/build/artifacts](https://ci.appveyor.com/project/ohpe/juicy-potato/build/artifacts)
 
@@ -20,13 +20,13 @@ _'n Gesuikerde weergawe van_ [_RottenPotatoNG_](https://github.com/breenmachine/
 
 [RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG) en sy [variantes](https://github.com/decoder-it/lonelypotato) benut die voorregte eskalasieketting gebaseer op [`BITS`](<https://msdn.microsoft.com/en-us/library/windows/desktop/bb968799(v=vs.85).aspx>) [diens](https://github.com/breenmachine/RottenPotatoNG/blob/4eefb0dd89decb9763f2bf52c7a067440a9ec1f0/RottenPotatoEXE/MSFRottenPotato/MSFRottenPotato.cpp#L126) wat die MiTM luisteraar op `127.0.0.1:6666` het en wanneer jy `SeImpersonate` of `SeAssignPrimaryToken` voorregte het. Tydens 'n Windows weergawe hersiening het ons 'n opstelling gevind waar `BITS` doelbewus gedeaktiveer was en poort `6666` geneem is.
 
-Ons het besluit om [RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG) te wapen: **Sê hallo vir Juicy Potato**.
+Ons het besluit om [RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG) te wapen: **Sê hallo aan Juicy Potato**.
 
-> Vir die teorie, sien [Rotten Potato - Privilege Escalation from Service Accounts to SYSTEM](https://foxglovesecurity.com/2016/09/26/rotten-potato-privilege-escalation-from-service-accounts-to-system/) en volg die ketting van skakels en verwysings.
+> Vir die teorie, sien [Rotten Potato - Voorreg Eskalasie van Diensrekeninge na SYSTEM](https://foxglovesecurity.com/2016/09/26/rotten-potato-privilege-escalation-from-service-accounts-to-system/) en volg die ketting van skakels en verwysings.
 
 Ons het ontdek dat, behalwe `BITS`, daar 'n aantal COM bedieners is wat ons kan misbruik. Hulle moet net:
 
-1. deur die huidige gebruiker instantiëerbaar wees, normaalweg 'n “diens gebruiker” wat impersonasie voorregte het
+1. deur die huidige gebruiker instantiëerbaar wees, normaalweg 'n “diensgebruiker” wat impersonasie voorregte het
 2. die `IMarshal`-koppelvlak implementeer
 3. as 'n verhoogde gebruiker (SYSTEM, Administrateur, …) loop
 
@@ -39,15 +39,15 @@ JuicyPotato laat jou toe om:
 - **Teiken CLSID** _kies enige CLSID wat jy wil._ [_Hier_](http://ohpe.it/juicy-potato/CLSID/) _kan jy die lys vind wat volgens OS georganiseer is._
 - **COM Luisterpoort** _definieer die COM luisterpoort wat jy verkies (in plaas van die gemarshalled hardcoded 6666)_
 - **COM Luister IP adres** _bind die bediener op enige IP_
-- **Proses skepping modus** _afhangende van die impersonasie gebruiker se voorregte kan jy kies uit:_
-- `CreateProcessWithToken` (benodig `SeImpersonate`)
-- `CreateProcessAsUser` (benodig `SeAssignPrimaryToken`)
+- **Proses skepping modus** _afhangende van die geïmpersoniseerde gebruiker se voorregte kan jy kies uit:_
+- `CreateProcessWithToken` (het `SeImpersonate` nodig)
+- `CreateProcessAsUser` (het `SeAssignPrimaryToken` nodig)
 - `albei`
 - **Proses om te begin** _begin 'n uitvoerbare of skrip as die uitbuiting slaag_
 - **Proses Argument** _pas die begin proses argumente aan_
-- **RPC Server adres** _vir 'n stealthy benadering kan jy autentiseer by 'n eksterne RPC bediener_
-- **RPC Server poort** _nuttig as jy wil autentiseer by 'n eksterne bediener en die vuurmuur blokkeer poort `135`…_
-- **TOETS modus** _hoofsaaklik vir toetsdoeleindes, d.w.s. toets CLSIDs. Dit skep die DCOM en druk die gebruiker van die token. Sien_ [_hier vir toetsing_](http://ohpe.it/juicy-potato/Test/)
+- **RPC Bediener adres** _vir 'n stealthy benadering kan jy autentiseer by 'n eksterne RPC bediener_
+- **RPC Bediener poort** _nuttig as jy wil autentiseer by 'n eksterne bediener en die vuurmuur blokkeer poort `135`…_
+- **TOETS modus** _hoofsaaklik vir toetsdoeleindes, d.w.s. toets CLSIDs. Dit skep die DCOM en druk die gebruiker van die token. Sien_ [_hier vir toets_](http://ohpe.it/juicy-potato/Test/)
 
 ### Gebruik <a href="#usage" id="usage"></a>
 ```
@@ -68,11 +68,11 @@ Optional args:
 ```
 ### Finale gedagtes <a href="#final-thoughts" id="final-thoughts"></a>
 
-[**Uit juicy-potato Readme**](https://github.com/ohpe/juicy-potato/blob/master/README.md#final-thoughts)**:**
+[**Van juicy-potato Readme**](https://github.com/ohpe/juicy-potato/blob/master/README.md#final-thoughts)**:**
 
 As die gebruiker `SeImpersonate` of `SeAssignPrimaryToken` regte het, dan is jy **SYSTEM**.
 
-Dit is byna onmoontlik om die misbruik van al hierdie COM Servers te voorkom. Jy kan dink aan die aanpassing van die regte van hierdie voorwerpe via `DCOMCNFG`, maar goeie geluk, dit gaan uitdagend wees.
+Dit is byna onmoontlik om die misbruik van al hierdie COM Servers te voorkom. Jy kan oorweeg om die toestemmings van hierdie voorwerpe via `DCOMCNFG` te wysig, maar goeie geluk, dit gaan uitdagend wees.
 
 Die werklike oplossing is om sensitiewe rekeninge en toepassings wat onder die `* SERVICE` rekeninge loop, te beskerm. Om `DCOM` te stop, sal beslis hierdie uitbuiting beperk, maar kan 'n ernstige impak op die onderliggende OS hê.
 
@@ -80,7 +80,7 @@ Van: [http://ohpe.it/juicy-potato/](http://ohpe.it/juicy-potato/)
 
 ## Voorbeelde
 
-Nota: Besoek [hierdie bladsy](https://ohpe.it/juicy-potato/CLSID/) vir 'n lys van CLSIDs om te probeer.
+Let op: Besoek [hierdie bladsy](https://ohpe.it/juicy-potato/CLSID/) vir 'n lys van CLSIDs om te probeer.
 
 ### Kry 'n nc.exe omgekeerde skulp
 ```

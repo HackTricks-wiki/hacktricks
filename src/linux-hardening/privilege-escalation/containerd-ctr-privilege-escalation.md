@@ -6,6 +6,7 @@
 
 Gaan na die volgende skakel om te leer **wat is containerd** en `ctr`:
 
+
 {{#ref}}
 ../../network-services-pentesting/2375-pentesting-docker.md
 {{#endref}}
@@ -35,7 +36,7 @@ Jy kan 'n bevoorregte houer uitvoer as:
 ```bash
 ctr run --privileged --net-host -t registry:5000/modified-ubuntu:latest ubuntu bash
 ```
-Dan kan jy sommige van die tegnieke wat op die volgende bladsy genoem word gebruik om **daarvan te ontsnap deur bevoorregte vermoëns te misbruik**:
+Dan kan jy sommige van die tegnieke wat in die volgende bladsy genoem word gebruik om **daaruit te ontsnap deur bevoorregte vermoëns te misbruik**:
 
 {{#ref}}
 docker-security/

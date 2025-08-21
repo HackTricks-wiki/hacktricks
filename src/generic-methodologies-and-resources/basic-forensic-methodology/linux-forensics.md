@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Aanvanklike Inligting Versameling
+## Begin Inligting Versameling
 
 ### Basiese Inligting
 
@@ -11,7 +11,7 @@ Eerstens word dit aanbeveel om 'n **USB** te hê met **goeie bekende binaire en 
 export PATH=/mnt/usb/bin:/mnt/usb/sbin
 export LD_LIBRARY_PATH=/mnt/usb/lib:/mnt/usb/lib64
 ```
-Sodra jy die stelsel gekonfigureer het om goeie en bekende binaire lêers te gebruik, kan jy begin **basiese inligting te onttrek**:
+Sodra jy die stelsel gekonfigureer het om goeie en bekende binaire te gebruik, kan jy begin **inligting te onttrek**:
 ```bash
 date #Date and time (Clock may be skewed, Might be at a different timezone)
 uname -a #OS info
@@ -35,7 +35,7 @@ Terwyl jy die basiese inligting verkry, moet jy vir vreemde dinge kyk soos:
 
 - **Root prosesse** loop gewoonlik met lae PIDS, so as jy 'n root proses met 'n groot PID vind, kan jy vermoed
 - Kontroleer **geregistreerde aanmeldings** van gebruikers sonder 'n shell binne `/etc/passwd`
-- Kontroleer vir **wagwoord-hashes** binne `/etc/shadow` vir gebruikers sonder 'n shell
+- Kontroleer vir **wagwoord hashes** binne `/etc/shadow` vir gebruikers sonder 'n shell
 
 ### Geheue Dump
 
@@ -45,8 +45,8 @@ Om dit te **compileer**, moet jy die **dieselfde kern** gebruik wat die slagoffe
 > [!TIP]
 > Onthou dat jy **nie LiME of enige ander ding** op die slagoffer masjien kan installeer nie, aangesien dit verskeie veranderinge daaraan sal maak
 
-So, as jy 'n identiese weergawe van Ubuntu het, kan jy `apt-get install lime-forensics-dkms` gebruik\
-In ander gevalle moet jy [**LiME**](https://github.com/504ensicsLabs/LiME) van github aflaai en dit met die korrekte kernkoppe compileer. Om die **presiese kernkoppe** van die slagoffer masjien te verkry, kan jy net die **gids** `/lib/modules/<kernel version>` na jou masjien kopieer, en dan LiME met hulle **compileer**:
+So, as jy 'n identiese weergawe van Ubuntu het, kan jy `apt-get install lime-forensics-dkms` gebruik.\
+In ander gevalle moet jy [**LiME**](https://github.com/504ensicsLabs/LiME) van github aflaai en dit met die korrekte kernkoppe compileer. Om die **presiese kernkoppe** van die slagoffer masjien te verkry, kan jy net die **gids** `/lib/modules/<kernel version>` na jou masjien kopieer, en dan **compileer** LiME met hulle:
 ```bash
 make -C /lib/modules/<kernel version>/build M=$PWD
 sudo insmod lime.ko "path=/home/sansforensics/Desktop/mem_dump.bin format=lime"
@@ -59,12 +59,12 @@ LiME ondersteun 3 **formate**:
 
 LiME kan ook gebruik word om die **dump via netwerk te stuur** in plaas van dit op die stelsel te stoor met iets soos: `path=tcp:4444`
 
-### Disk Imaging
+### Skyf Beeldvorming
 
 #### Afsluiting
 
-Eerstens, jy sal moet **die stelsel afsluit**. Dit is nie altyd 'n opsie nie, aangesien sommige stelsels 'n produksieserver kan wees wat die maatskappy nie kan bekostig om af te sluit.\
-Daar is **2 maniere** om die stelsel af te sluit, 'n **normale afsluiting** en 'n **"trek die stekker" afsluiting**. Die eerste een sal die **prosesse toelaat om soos gewoonlik te beëindig** en die **filesystem** te **sinkroniseer**, maar dit sal ook die moontlike **malware** toelaat om **bewyse te vernietig**. Die "trek die stekker" benadering kan **sekere inligtingverlies** meebring (nie veel van die inligting gaan verlore wees nie aangesien ons reeds 'n beeld van die geheue geneem het) en die **malware sal nie enige geleentheid hê** om iets daaroor te doen nie. Daarom, as jy **vermoed** dat daar 'n **malware** mag wees, voer net die **`sync`** **opdrag** op die stelsel uit en trek die stekker.
+Eerstens, jy sal die **stelsel moet afsluit**. Dit is nie altyd 'n opsie nie, aangesien sommige stelsels 'n produksiebediener kan wees wat die maatskappy nie kan bekostig om af te sluit.\
+Daar is **2 maniere** om die stelsel af te sluit, 'n **normale afsluiting** en 'n **"trek die stekker" afsluiting**. Die eerste een sal die **prosesse toelaat om soos gewoonlik te beëindig** en die **filesystem** te **synchroniseer**, maar dit sal ook die moontlike **malware** toelaat om **bewyse te vernietig**. Die "trek die stekker" benadering kan **sekere inligtingverlies** meebring (nie veel van die inligting gaan verlore wees nie aangesien ons reeds 'n beeld van die geheue geneem het) en die **malware sal nie enige kans hê** om iets daaroor te doen nie. Daarom, as jy **vermoed** dat daar 'n **malware** mag wees, voer net die **`sync`** **opdrag** op die stelsel uit en trek die stekker.
 
 #### Neem 'n beeld van die skyf
 
@@ -77,9 +77,9 @@ dd if=<subject device> of=<image file> bs=512
 dcfldd if=<subject device> of=<image file> bs=512 hash=<algorithm> hashwindow=<chunk size> hashlog=<hash file>
 dcfldd if=/dev/sdc of=/media/usb/pc.image hash=sha256 hashwindow=1M hashlog=/media/usb/pc.hashes
 ```
-### Skyfbeeld pre-analise
+### Disk Image vooranalise
 
-Beeld 'n skyfbeeld met geen verdere data nie.
+Beeldvorming van 'n skyfbeeld met geen verdere data nie.
 ```bash
 #Find out if it's a disk image using "file" command
 file disk.img
@@ -154,9 +154,9 @@ malware-analysis.md
 Om effektief te soek na geïnstalleerde programme op beide Debian en RedHat stelsels, oorweeg om stelsellogs en databasisse saam met handmatige kontroles in algemene gidse te benut.
 
 - Vir Debian, ondersoek _**`/var/lib/dpkg/status`**_ en _**`/var/log/dpkg.log`**_ om besonderhede oor pakketinstallasies te verkry, met `grep` om vir spesifieke inligting te filter.
-- RedHat gebruikers kan die RPM-databasis ondervra met `rpm -qa --root=/mntpath/var/lib/rpm` om geïnstalleerde pakkette te lys.
+- RedHat gebruikers kan die RPM-databasis raadpleeg met `rpm -qa --root=/mntpath/var/lib/rpm` om geïnstalleerde pakkette te lys.
 
-Om sagteware wat handmatig of buite hierdie pakketbestuurders geïnstalleer is, te ontdek, verken gidse soos _**`/usr/local`**_, _**`/opt`**_, _**`/usr/sbin`**_, _**`/usr/bin`**_, _**`/bin`**_, en _**`/sbin`**_. Kombineer gidse met stelselspesifieke opdragte om uitvoerbare lêers te identifiseer wat nie met bekende pakkette geassosieer word nie, wat jou soektog na alle geïnstalleerde programme verbeter.
+Om sagteware wat handmatig of buite hierdie pakketbestuurders geïnstalleer is, te ontdek, verken gidse soos _**`/usr/local`**_, _**`/opt`**_, _**`/usr/sbin`**_, _**`/usr/bin`**_, _**`/bin`**_, en _**`/sbin`**_. Kombineer gidse met stelselspesifieke opdragte om uitvoerbare lêers te identifiseer wat nie met bekende pakkette geassosieer is nie, wat jou soektog na alle geïnstalleerde programme verbeter.
 ```bash
 # Debian package and log details
 cat /var/lib/dpkg/status | grep -E "Package:|Status:"
@@ -174,7 +174,7 @@ find / -type f -executable | grep <something>
 ```
 ## Herstel Verwyderde Loopende Binaries
 
-Stel jou 'n proses voor wat vanaf /tmp/exec uitgevoer is en toe verwyder is. Dit is moontlik om dit uit te trek.
+Stel jou 'n proses voor wat vanaf /tmp/exec uitgevoer is en toe verwyder is. Dit is moontlik om dit te onttrek.
 ```bash
 cd /proc/3746/ #PID with the exec file deleted
 head -1 maps #Get address of the file. It was 08048000-08049000
@@ -182,7 +182,7 @@ dd if=mem bs=1 skip=08048000 count=1000 of=/tmp/exec2 #Recorver it
 ```
 ## Inspekteer Autostart plekke
 
-### Geplande Take
+### Geskeduleerde Take
 ```bash
 cat /var/spool/cron/crontabs/*  \
 /var/spool/cron/atjobs \
@@ -196,7 +196,7 @@ cat /var/spool/cron/crontabs/*  \
 #MacOS
 ls -l /usr/lib/cron/tabs/ /Library/LaunchAgents/ /Library/LaunchDaemons/ ~/Library/LaunchAgents/
 ```
-#### Jag: Cron/Anacron misbruik via 0anacron en verdagte stubs
+#### Hunt: Cron/Anacron misbruik via 0anacron en verdagte stubs
 Aanvallers redigeer dikwels die 0anacron stub wat onder elke /etc/cron.*/ gids teenwoordig is om periodieke uitvoering te verseker.
 ```bash
 # List 0anacron files and their timestamps/sizes
@@ -228,13 +228,13 @@ Paaie waar 'n malware as 'n diens geïnstalleer kan word:
 
 - **/etc/inittab**: Roep inisialisering skripte aan soos rc.sysinit, wat verder na opstart skripte lei.
 - **/etc/rc.d/** en **/etc/rc.boot/**: Bevat skripte vir diens opstart, laasgenoemde word in ouer Linux weergawes gevind.
-- **/etc/init.d/**: Gebruik in sekere Linux weergawes soos Debian om opstart skripte te stoor.
+- **/etc/init.d/**: Gebruik in sekere Linux weergawes soos Debian vir die stoor van opstart skripte.
 - Dienste kan ook geaktiveer word via **/etc/inetd.conf** of **/etc/xinetd/**, afhangende van die Linux variasie.
 - **/etc/systemd/system**: 'n Gids vir stelsels en diens bestuurder skripte.
 - **/etc/systemd/system/multi-user.target.wants/**: Bevat skakels na dienste wat in 'n multi-gebruiker runlevel begin moet word.
 - **/usr/local/etc/rc.d/**: Vir pasgemaakte of derdeparty dienste.
-- **\~/.config/autostart/**: Vir gebruiker-spesifieke outomatiese opstart toepassings, wat 'n wegsteekplek vir gebruiker-gemikte malware kan wees.
-- **/lib/systemd/system/**: Stelselswye standaard eenheid lêers verskaf deur geïnstalleerde pakkette.
+- **\~/.config/autostart/**: Vir gebruiker-spesifieke outomatiese opstart toepassings, wat 'n wegsteekplek vir gebruiker-gerigte malware kan wees.
+- **/lib/systemd/system/**: Stelsel-wye standaard eenheid lêers verskaf deur geïnstalleerde pakkette.
 
 ### Kernel Modules
 
@@ -244,7 +244,7 @@ Linux kernel modules, dikwels deur malware as rootkit komponente gebruik, word b
 - **/etc/modprobe.d**: Bevat konfigurasie lêers om module laai te beheer.
 - **/etc/modprobe** en **/etc/modprobe.conf**: Lêers vir globale module instellings.
 
-### Ander Outostart Plekke
+### Ander Outomatiese Opstart Plekke
 
 Linux gebruik verskeie lêers om outomaties programme uit te voer wanneer 'n gebruiker aanmeld, wat moontlik malware kan huisves:
 
@@ -256,7 +256,7 @@ Linux gebruik verskeie lêers om outomaties programme uit te voer wanneer 'n geb
 
 Linux stelsels volg gebruiker aktiwiteite en stelsel gebeurtenisse deur verskeie log lêers. Hierdie logs is noodsaaklik om ongeoorloofde toegang, malware infeksies, en ander sekuriteitsvoorvalle te identifiseer. Sleutel log lêers sluit in:
 
-- **/var/log/syslog** (Debian) of **/var/log/messages** (RedHat): Vang stelselswye boodskappe en aktiwiteite.
+- **/var/log/syslog** (Debian) of **/var/log/messages** (RedHat): Vang stelsel-wye boodskappe en aktiwiteite.
 - **/var/log/auth.log** (Debian) of **/var/log/secure** (RedHat): Registreer autentikasie pogings, suksesvolle en mislukte aanmeldings.
 - Gebruik `grep -iE "session opened for|accepted password|new session|not in sudoers" /var/log/auth.log` om relevante autentikasie gebeurtenisse te filter.
 - **/var/log/boot.log**: Bevat stelsel opstart boodskappe.
@@ -269,11 +269,11 @@ Linux stelsels volg gebruiker aktiwiteite en stelsel gebeurtenisse deur verskeie
 - **/var/log/btmp**: Dokumenteer mislukte aanmeld pogings.
 - **/var/log/httpd/**: Bevat Apache HTTPD fout en toegang logs.
 - **/var/log/mysqld.log** of **/var/log/mysql.log**: Log MySQL databasis aktiwiteite.
-- **/var/log/xferlog**: Registreer FTP lêer oordragte.
+- **/var/log/xferlog**: Registreer FTP lêer oordrag.
 - **/var/log/**: Kontroleer altyd vir onverwagte logs hier.
 
 > [!TIP]
-> Linux stelsel logs en oudit subsisteme mag in 'n indringing of malware voorval gedeaktiveer of verwyder word. Omdat logs op Linux stelsels gewoonlik sommige van die nuttigste inligting oor kwaadwillige aktiwiteite bevat, verwyder indringers gereeld hulle. Daarom, wanneer beskikbare log lêers ondersoek word, is dit belangrik om te soek na gapings of uit die orde inskrywings wat 'n aanduiding van verwydering of manipulasie mag wees.
+> Linux stelsel logs en oudit subsisteme mag gedeaktiveer of verwyder word in 'n indringing of malware voorval. Omdat logs op Linux stelsels oor die algemeen sommige van die nuttigste inligting oor kwaadwillige aktiwiteite bevat, verwyder indringers gereeld hulle. Daarom, wanneer beskikbare log lêers ondersoek word, is dit belangrik om te soek na gapings of uit die orde inskrywings wat 'n aanduiding van verwydering of manipulasie mag wees.
 
 **Linux hou 'n opdrag geskiedenis vir elke gebruiker**, gestoor in:
 
@@ -295,18 +295,18 @@ Kontroleer lêers wat ekstra regte kan toeken:
 Sommige toepassings genereer ook hul eie logs:
 
 - **SSH**: Ondersoek _\~/.ssh/authorized_keys_ en _\~/.ssh/known_hosts_ vir ongeoorloofde afstandverbindinge.
-- **Gnome Desktop**: Kyk in _\~/.recently-used.xbel_ vir onlangs toeganklike lêers via Gnome toepassings.
+- **Gnome Desktop**: Kyk in _\~/.recently-used.xbel_ vir onlangs toegankelijke lêers via Gnome toepassings.
 - **Firefox/Chrome**: Kontroleer blaargeskiedenis en aflaaie in _\~/.mozilla/firefox_ of _\~/.config/google-chrome_ vir verdagte aktiwiteite.
 - **VIM**: Hersien _\~/.viminfo_ vir gebruik besonderhede, soos toeganklike lêer paaie en soek geskiedenis.
 - **Open Office**: Kontroleer vir onlangse dokument toegang wat moontlik gecompromitteerde lêers aandui.
-- **FTP/SFTP**: Hersien logs in _\~/.ftp_history_ of _\~/.sftp_history_ vir lêer oordragte wat moontlik ongeoorloofde is.
+- **FTP/SFTP**: Hersien logs in _\~/.ftp_history_ of _\~/.sftp_history_ vir lêer oordrag wat moontlik ongeoorloofde is.
 - **MySQL**: Ondersoek _\~/.mysql_history_ vir uitgevoerde MySQL vrae, wat moontlik ongeoorloofde databasis aktiwiteite onthul.
 - **Less**: Analiseer _\~/.lesshst_ vir gebruik geskiedenis, insluitend gesiene lêers en uitgevoerde opdragte.
 - **Git**: Ondersoek _\~/.gitconfig_ en projek _.git/logs_ vir veranderinge aan repositories.
 
 ### USB Logs
 
-[**usbrip**](https://github.com/snovvcrash/usbrip) is 'n klein stuk sagteware geskryf in suiwer Python 3 wat Linux log lêers (`/var/log/syslog*` of `/var/log/messages*` afhangende van die distro) ontleed om USB gebeurtenis geskiedenis tabelles te bou.
+[**usbrip**](https://github.com/snovvcrash/usbrip) is 'n klein stuk sagteware geskryf in suiwer Python 3 wat Linux log lêers (`/var/log/syslog*` of `/var/log/messages*` afhangende van die distro) ontleed om USB gebeurtenis geskiedenis tabelle te konstrueer.
 
 Dit is interessant om **alle USB's wat gebruik is** te weet en dit sal meer nuttig wees as jy 'n gemagtigde lys van USB's het om "oortreding gebeurtenisse" (die gebruik van USB's wat nie binne daardie lys is nie) te vind.
 
@@ -327,26 +327,26 @@ Meer voorbeelde en inligting binne die github: [https://github.com/snovvcrash/us
 
 ## Hersien Gebruikersrekeninge en Aanmeldaktiwiteite
 
-Ondersoek die _**/etc/passwd**_, _**/etc/shadow**_ en **sekuriteitslogboek** vir ongewone name of rekeninge wat geskep en of gebruik is in nabyheid van bekende ongeoorloofde gebeurtenisse. Kontroleer ook moontlike sudo brute-force aanvalle.\
+Ondersoek die _**/etc/passwd**_, _**/etc/shadow**_ en **sekuriteitslogboeke** vir ongewone name of rekeninge wat geskep of gebruik is in nabyheid van bekende ongeoorloofde gebeurtenisse. Kontroleer ook moontlike sudo brute-force aanvalle.\
 Boonop, kyk na lêers soos _**/etc/sudoers**_ en _**/etc/groups**_ vir onverwagte voorregte wat aan gebruikers gegee is.\
 Laastens, soek na rekeninge met **geen wagwoorde** of **maklik geraadpleegde** wagwoorde.
 
 ## Ondersoek Lêerstelsel
 
-### Ontleding van Lêerstelsels in Malware Ondersoek
+### Ontleding van Lêerstelselstrukture in Malware Ondersoek
 
-Wanneer daar ondersoek gedoen word na malware-voorvalle, is die struktuur van die lêerstelsel 'n belangrike bron van inligting, wat beide die volgorde van gebeurtenisse en die inhoud van die malware onthul. egter, malware-skeppers ontwikkel tegnieke om hierdie analise te hindernis, soos om lêer tydstempels te verander of die lêerstelsel te vermy vir datastoor.
+Wanneer daar ondersoek gedoen word na malware-voorvalle, is die struktuur van die lêerstelsel 'n belangrike bron van inligting, wat beide die volgorde van gebeurtenisse en die inhoud van die malware onthul. egter, malware-skeppers ontwikkel tegnieke om hierdie analise te hindernis, soos om lêer tydstempels te wysig of die lêerstelsel te vermy vir datastoor.
 
 Om hierdie anti-forensiese metodes te teenwerk, is dit noodsaaklik om:
 
 - **'n deeglike tydlynanalise uit te voer** met behulp van gereedskap soos **Autopsy** vir die visualisering van gebeurtenistydlyne of **Sleuth Kit's** `mactime` vir gedetailleerde tydlyn data.
 - **Ondersoek ongewone skripte** in die stelsel se $PATH, wat dalk skulp of PHP-skripte insluit wat deur aanvallers gebruik word.
-- **Ondersoek `/dev` vir ongewone lêers**, aangesien dit tradisioneel spesiale lêers bevat, maar dalk lêers wat met malware verband hou, kan huisves.
+- **Kyk na `/dev` vir ongewone lêers**, aangesien dit tradisioneel spesiale lêers bevat, maar dalk lêers wat met malware verband hou, kan huisves.
 - **Soek na versteekte lêers of gidse** met name soos ".. " (dot dot space) of "..^G" (dot dot control-G), wat kwaadwillige inhoud kan verberg.
 - **Identifiseer setuid root lêers** met die opdrag: `find / -user root -perm -04000 -print` Dit vind lêers met verhoogde voorregte, wat deur aanvallers misbruik kan word.
-- **Hersien verwydering tydstempels** in inode-tabelle om massalêer verwyderings op te spoor, wat moontlik die teenwoordigheid van rootkits of trojans aandui.
-- **Inspekteer opeenvolgende inodes** vir nabye kwaadwillige lêers nadat een geïdentifiseer is, aangesien hulle saam geplaas mag wees.
-- **Kontroleer algemene binêre gidse** (_/bin_, _/sbin_) vir onlangs gewysigde lêers, aangesien hierdie deur malware verander kan wees.
+- **Hersien verwydering tydstempels** in inode-tabelle om massalêerverwyderings op te spoor, wat moontlik die teenwoordigheid van rootkits of trojans aandui.
+- **Inspekteer opeenvolgende inodes** vir nabye kwaadwillige lêers nadat een geïdentifiseer is, aangesien hulle dalk saam geplaas is.
+- **Kontroleer algemene binêre gidse** (_/bin_, _/sbin_) vir onlangs gewysigde lêers, aangesien hierdie dalk deur malware verander is.
 ````bash
 # List recent files in a directory:
 ls -laR --sort=time /bin```
@@ -355,7 +355,7 @@ ls -laR --sort=time /bin```
 ls -lai /bin | sort -n```
 ````
 > [!TIP]
-> Let daarop dat 'n **aanvaller** die **tyd** kan **wysig** om **lêers** **legitiem** te laat lyk, maar hy **kan nie** die **inode** **wysig** nie. As jy vind dat 'n **lêer** aandui dat dit op die **dieselfde tyd** as die res van die lêers in dieselfde gids geskep en gewysig is, maar die **inode** is **onverwagte groter**, dan is die **tydstempels van daardie lêer gewysig**.
+> Let op dat 'n **aanvaller** die **tyd** kan **wysig** om **lêers te laat lyk** **legitiem**, maar hy kan nie die **inode** **wysig** nie. As jy vind dat 'n **lêer** aandui dat dit op die **selfde tyd** as die res van die lêers in die selfde gids geskep en gewysig is, maar die **inode** **onverwagte groter** is, dan is die **tydstempels van daardie lêer gewysig**.
 
 ## Vergelyk lêers van verskillende lêerstelsels
 

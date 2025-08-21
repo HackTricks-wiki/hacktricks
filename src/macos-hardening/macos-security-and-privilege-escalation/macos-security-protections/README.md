@@ -4,7 +4,7 @@
 
 ## Gatekeeper
 
-Gatekeeper word gewoonlik gebruik om die kombinasie van **Quarantine + Gatekeeper + XProtect** te verwys, 3 macOS sekuriteitsmodules wat sal probeer om **gebruikers te verhoed om potensieel kwaadwillige sagteware wat afgelaai is, uit te voer**.
+Gatekeeper word gewoonlik gebruik om te verwys na die kombinasie van **Quarantine + Gatekeeper + XProtect**, 3 macOS sekuriteitsmodules wat sal probeer om **gebruikers te verhoed om potensieel kwaadwillige sagteware wat afgelaai is, uit te voer**.
 
 Meer inligting in:
 
@@ -32,7 +32,7 @@ macos-sandbox/
 
 ### TCC - **Deursigtigheid, Toestemming, en Beheer**
 
-**TCC (Deursigtigheid, Toestemming, en Beheer)** is 'n sekuriteitsraamwerk. Dit is ontwerp om die **toestemmings** van toepassings te **bestuur**, spesifiek deur hul toegang tot sensitiewe funksies te reguleer. Dit sluit elemente in soos **liggingsdienste, kontakte, foto's, mikrofoon, kamera, toeganklikheid, en volle skyf toegang**. TCC verseker dat toepassings slegs toegang tot hierdie funksies kan verkry nadat hulle eksplisiete gebruikers toestemming verkry het, wat privaatheid en beheer oor persoonlike data versterk.
+**TCC (Deursigtigheid, Toestemming, en Beheer)** is 'n sekuriteitsraamwerk. Dit is ontwerp om **die toestemmings** van toepassings te **bestuur**, spesifiek deur hul toegang tot sensitiewe funksies te reguleer. Dit sluit elemente soos **liggingsdienste, kontakte, foto's, mikrofoon, kamera, toeganklikheid, en volle skyf toegang** in. TCC verseker dat toepassings slegs toegang tot hierdie funksies kan verkry nadat hulle eksplisiete gebruikers toestemming verkry het, wat privaatheid en beheer oor persoonlike data versterk.
 
 {{#ref}}
 macos-tcc/
@@ -40,7 +40,7 @@ macos-tcc/
 
 ### Begin/Omgewing Beperkings & Vertroue Kas
 
-Begin beperkings in macOS is 'n sekuriteitskenmerk om **prosesinisiëring te reguleer** deur te definieer **wie 'n proses kan begin**, **hoe**, en **van waar**. Ingevoerd in macOS Ventura, kategoriseer dit stelselbinaries in beperking kategorieë binne 'n **vertroue kas**. Elke uitvoerbare binêre het **reëls** vir sy **begin**, insluitend **self**, **ouer**, en **verantwoordelike** beperkings. Uitgebrei na derdeparty-apps as **Omgewing** Beperkings in macOS Sonoma, help hierdie kenmerke om potensiële stelselaanrandings te verminder deur prosesbeginvoorwaardes te regeer.
+Begin beperkings in macOS is 'n sekuriteitskenmerk om **prosesinisiëring te reguleer** deur te definieer **wie 'n proses kan begin**, **hoe**, en **van waar**. Ingevoerd in macOS Ventura, kategoriseer dit stelselbinaries in beperkingkategorieë binne 'n **vertroue kas**. Elke uitvoerbare binêre het **reëls** vir sy **begin**, insluitend **self**, **ouer**, en **verantwoordelike** beperkings. Uitgebrei na derdeparty-apps as **Omgewing** Beperkings in macOS Sonoma, help hierdie kenmerke om potensiële stelselaanrandings te verminder deur prosesbeginvoorwaardes te regeer.
 
 {{#ref}}
 macos-launch-environment-constraints.md
@@ -50,11 +50,11 @@ macos-launch-environment-constraints.md
 
 Die Kwaadwillige Sagteware Verwydering Gereedskap (MRT) is 'n ander deel van macOS se sekuriteitsinfrastruktuur. Soos die naam aandui, is MRT se hooffunksie om **bekende kwaadwillige sagteware van besmette stelsels te verwyder**.
 
-Sodra kwaadwillige sagteware op 'n Mac opgespoor word (of deur XProtect of op 'n ander manier), kan MRT gebruik word om die kwaadwillige sagteware outomaties te **verwyder**. MRT werk stil in die agtergrond en loop gewoonlik wanneer die stelsel opgedateer word of wanneer 'n nuwe kwaadwillige sagteware definisie afgelaai word (dit lyk asof die reëls wat MRT het om kwaadwillige sagteware op te spoor binne die binêre is).
+Sodra kwaadwillige sagteware op 'n Mac opgespoor word (hetsy deur XProtect of op 'n ander manier), kan MRT gebruik word om die **kwaadwillige sagteware outomaties te verwyder**. MRT werk stil in die agtergrond en loop tipies wanneer die stelsel opgedateer word of wanneer 'n nuwe kwaadwillige sagteware definisie afgelaai word (dit lyk asof die reëls wat MRT het om kwaadwillige sagteware op te spoor binne die binêre is).
 
 Terwyl beide XProtect en MRT deel van macOS se sekuriteitsmaatreëls is, voer hulle verskillende funksies uit:
 
-- **XProtect** is 'n preventiewe hulpmiddel. Dit **kontroleer lêers soos hulle afgelaai word** (deur sekere toepassings), en as dit enige bekende tipes kwaadwillige sagteware opspoor, **verhoed dit dat die lêer oopgemaak word**, en verhoed sodoende dat die kwaadwillige sagteware jou stelsel in die eerste plek besmet.
+- **XProtect** is 'n preventiewe hulpmiddel. Dit **kontroleer lêers soos hulle afgelaai word** (deur sekere toepassings), en as dit enige bekende tipes kwaadwillige sagteware opspoor, **verhoed dit dat die lêer oopgemaak word**, en verhoed dus dat die kwaadwillige sagteware jou stelsel in die eerste plek besmet.
 - **MRT**, aan die ander kant, is 'n **reaktiewe hulpmiddel**. Dit werk nadat kwaadwillige sagteware op 'n stelsel opgespoor is, met die doel om die oortredende sagteware te verwyder om die stelsel skoon te maak.
 
 Die MRT-toepassing is geleë in **`/Library/Apple/System/Library/CoreServices/MRT.app`**
@@ -69,7 +69,7 @@ Dit werk met 'n **daemon** geleë in `/System/Library/PrivateFrameworks/Backgrou
 
 Die manier waarop **`backgroundtaskmanagementd`** weet dat iets in 'n volhardende gids geïnstalleer is, is deur **die FSEvents te verkry** en 'n paar **handlers** daarvoor te skep.
 
-Boonop is daar 'n plist-lêer wat **bekende toepassings** bevat wat gereeld volhard, wat deur apple onderhou word en geleë is in: `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/attributions.plist`
+Boonop is daar 'n plist-lêer wat **bekende toepassings** bevat wat gereeld volhard, wat deur Apple onderhou word, geleë in: `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/attributions.plist`
 ```json
 [...]
 "us.zoom.ZoomDaemon" => {
@@ -85,14 +85,14 @@ Boonop is daar 'n plist-lêer wat **bekende toepassings** bevat wat gereeld volh
 }
 [...]
 ```
-### Opname
+### Enumerasie
 
-Dit is moontlik om **alle** die geconfigureerde agtergronditems wat die Apple cli-gereedskap uitvoer, op te som:
+Dit is moontlik om **alle** die geconfigureerde agtergronditems te **enumerate** met die Apple cli-tool:
 ```bash
 # The tool will always ask for the users password
 sfltool dumpbtm
 ```
-Boonop is dit ook moontlik om hierdie inligting te lys met [**DumpBTM**](https://github.com/objective-see/DumpBTM).
+Boonop, dit is ook moontlik om hierdie inligting te lys met [**DumpBTM**](https://github.com/objective-see/DumpBTM).
 ```bash
 # You need to grant the Terminal Full Disk Access for this to work
 chmod +x dumpBTM
@@ -103,7 +103,7 @@ Hierdie inligting word gestoor in **`/private/var/db/com.apple.backgroundtaskman
 
 ### Speel met BTM
 
-Wanneer 'n nuwe volharding gevind word, is daar 'n gebeurtenis van tipe **`ES_EVENT_TYPE_NOTIFY_BTM_LAUNCH_ITEM_ADD`**. Dus, enige manier om hierdie **gebeurtenis** te **voorkom** of die **agent om die gebruiker te waarsku** sal 'n aanvaller help om _**te omseil**_ BTM.
+Wanneer 'n nuwe volharding gevind word, is daar 'n gebeurtenis van tipe **`ES_EVENT_TYPE_NOTIFY_BTM_LAUNCH_ITEM_ADD`**. Enige manier om hierdie **gebeurtenis** te **voorkom** of die **agent om die gebruiker te waarsku** sal 'n aanvaller help om _**BTM te omseil**_.
 
 - **Herstel die databasis**: Die uitvoering van die volgende opdrag sal die databasis herstel (moet dit van die grond af herbou), egter, om een of ander rede, na die uitvoering hiervan, **sal geen nuwe volharding gewaarsku word totdat die stelsel herbegin word**.
 - **root** is vereis.

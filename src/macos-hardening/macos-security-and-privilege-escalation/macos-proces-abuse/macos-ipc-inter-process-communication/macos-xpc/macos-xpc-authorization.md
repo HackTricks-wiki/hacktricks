@@ -1,16 +1,16 @@
-# macOS XPC Owerheid
+# macOS XPC Authorization
 
 {{#include ../../../../../banners/hacktricks-training.md}}
 
-## XPC Owerheid
+## XPC Authorization
 
 Apple stel ook 'n ander manier voor om te verifieer of die verbindingsproses **toestemmings het om 'n blootgestelde XPC-metode aan te roep**.
 
-Wanneer 'n toepassing **aksies as 'n bevoorregte gebruiker moet uitvoer**, installeer dit gewoonlik 'n HelperTool as 'n XPC-diens as root, in plaas daarvan om die app as 'n bevoorregte gebruiker te laat loop, wat van die app af aangeroep kan word om daardie aksies uit te voer. Die app wat die diens aanroep, moet egter genoegsame owerheid hê.
+Wanneer 'n toepassing **aksies as 'n bevoorregte gebruiker moet uitvoer**, installeer dit gewoonlik 'n HelperTool as 'n XPC-diens as root wat vanaf die toepassing aangeroep kan word om daardie aksies uit te voer, eerder as om die toepassing as 'n bevoorregte gebruiker te laat loop. Die toepassing wat die diens aanroep, moet egter genoegsame magtiging hê.
 
-### ShouldAcceptNewConnection altyd JA
+### ShouldAcceptNewConnection altyd YES
 
-'n Voorbeeld kan gevind word in [EvenBetterAuthorizationSample](https://github.com/brenwell/EvenBetterAuthorizationSample). In `App/AppDelegate.m` probeer dit om te **verbinde** met die **HelperTool**. En in `HelperTool/HelperTool.m` sal die funksie **`shouldAcceptNewConnection`** **nie kontroleer** enige van die vereistes wat voorheen aangedui is nie. Dit sal altyd JA teruggee:
+'n Voorbeeld kan gevind word in [EvenBetterAuthorizationSample](https://github.com/brenwell/EvenBetterAuthorizationSample). In `App/AppDelegate.m` probeer dit om te **verbinde** met die **HelperTool**. En in `HelperTool/HelperTool.m` sal die funksie **`shouldAcceptNewConnection`** **nie** enige van die vereistes wat voorheen aangedui is, nagaan nie. Dit sal altyd YES teruggee:
 ```objectivec
 - (BOOL)listener:(NSXPCListener *)listener shouldAcceptNewConnection:(NSXPCConnection *)newConnection
 // Called by our XPC listener when a new connection comes in.  We configure the connection
@@ -62,7 +62,7 @@ if (self->_authRef) {
 [self.window makeKeyAndOrderFront:self];
 }
 ```
-Die funksie `setupAuthorizationRights` van `Common/Common.m` sal die regte van die aansoek in die auth-databasis `/var/db/auth.db` stoor. Let op hoe dit slegs die regte sal byvoeg wat nog nie in die databasis is nie:
+Die funksie `setupAuthorizationRights` van `Common/Common.m` sal die regte van die aansoek in die auth databasis `/var/db/auth.db` stoor. Let op hoe dit slegs die regte sal byvoeg wat nog nie in die databasis is nie:
 ```objectivec
 + (void)setupAuthorizationRights:(AuthorizationRef)authRef
 // See comment in header.
@@ -172,15 +172,15 @@ block(authRightName, authRightDefault, authRightDesc);
 }];
 }
 ```
-Dit beteken dat aan die einde van hierdie proses, die toestemmings wat binne `commandInfo` verklaar is, in `/var/db/auth.db` gestoor sal word. Let op hoe daar vir **elke metode** wat **verifikasie vereis**, **toestemming naam** en die **`kCommandKeyAuthRightDefault`** gevind kan word. Laasgenoemde **gee aan wie hierdie reg kan verkry**.
+Dit beteken dat aan die einde van hierdie proses, die toestemmings wat binne `commandInfo` verklaar is, in `/var/db/auth.db` gestoor sal word. Let op hoe daar vir **elke metode** wat **verifikasie** benodig, **toestemming naam** en die **`kCommandKeyAuthRightDefault`** gevind kan word. Laasgenoemde **aandui wie hierdie reg kan verkry**.
 
-Daar is verskillende skope om aan te dui wie toegang tot 'n reg kan hê. Sommige daarvan is gedefinieer in [AuthorizationDB.h](https://github.com/aosm/Security/blob/master/Security/libsecurity_authorization/lib/AuthorizationDB.h) (jy kan [almal daarvan hier vind](https://www.dssw.co.uk/reference/authorization-rights/)), maar as 'n opsomming:
+Daar is verskillende skope om aan te dui wie toegang tot 'n reg kan hê. Sommige daarvan is gedefinieer in [AuthorizationDB.h](https://github.com/aosm/Security/blob/master/Security/libsecurity_authorization/lib/AuthorizationDB.h) (jy kan [almal hiervan hier vind](https://www.dssw.co.uk/reference/authorization-rights/)), maar as 'n opsomming:
 
 <table><thead><tr><th width="284.3333333333333">Naam</th><th width="165">Waarde</th><th>Beskrywing</th></tr></thead><tbody><tr><td>kAuthorizationRuleClassAllow</td><td>allow</td><td>Enigeen</td></tr><tr><td>kAuthorizationRuleClassDeny</td><td>deny</td><td>Niks</td></tr><tr><td>kAuthorizationRuleIsAdmin</td><td>is-admin</td><td>Huidige gebruiker moet 'n admin wees (binne admin groep)</td></tr><tr><td>kAuthorizationRuleAuthenticateAsSessionUser</td><td>authenticate-session-owner</td><td>Vra gebruiker om te verifieer.</td></tr><tr><td>kAuthorizationRuleAuthenticateAsAdmin</td><td>authenticate-admin</td><td>Vra gebruiker om te verifieer. Hy moet 'n admin wees (binne admin groep)</td></tr><tr><td>kAuthorizationRightRule</td><td>rule</td><td>Spesifiseer reëls</td></tr><tr><td>kAuthorizationComment</td><td>comment</td><td>Spesifiseer 'n paar ekstra kommentaar oor die reg</td></tr></tbody></table>
 
 ### Regte Verifikasie
 
-In `HelperTool/HelperTool.m` kontroleer die funksie **`readLicenseKeyAuthorization`** of die oproeper gemagtig is om **so 'n metode uit te voer** deur die funksie **`checkAuthorization`** aan te roep. Hierdie funksie sal kontroleer of die **authData** wat deur die oproepende proses gestuur is, 'n **korrekte formaat** het en dan sal dit kontroleer **wat nodig is om die reg te verkry** om die spesifieke metode aan te roep. As alles goed gaan, sal die **teruggegee `error` `nil` wees**:
+In `HelperTool/HelperTool.m` kontroleer die funksie **`readLicenseKeyAuthorization`** of die oproeper gemagtig is om **so 'n metode** uit te voer deur die funksie **`checkAuthorization`** aan te roep. Hierdie funksie sal kontroleer of die **authData** wat deur die oproepende proses gestuur is, 'n **korrekte formaat** het en dan sal kyk **wat nodig is om die reg** te verkry om die spesifieke metode aan te roep. As alles goed gaan, sal die **teruggegee `error` `nil` wees**:
 ```objectivec
 - (NSError *)checkAuthorization:(NSData *)authData command:(SEL)command
 {
@@ -228,7 +228,7 @@ assert(junk == errAuthorizationSuccess);
 return error;
 }
 ```
-Let wel dat om die vereistes te **kontroleer om die regte** te verkry om daardie metode aan te roep, die funksie `authorizationRightForCommand` net die voorheen kommentaar objek **`commandInfo`** sal kontroleer. Dan sal dit **`AuthorizationCopyRights`** aanroep om te kontroleer **of dit die regte het** om die funksie aan te roep (let daarop dat die vlae interaksie met die gebruiker toelaat).
+Let wel dat om die **vereistes na te gaan om die regte** te verkry om daardie metode aan te roep, sal die funksie `authorizationRightForCommand` net die voorheen kommentaar objek **`commandInfo`** nagaan. Dan sal dit **`AuthorizationCopyRights`** aanroep om te kyk **of dit die regte het** om die funksie aan te roep (let daarop dat die vlae interaksie met die gebruiker toelaat).
 
 In hierdie geval, om die funksie `readLicenseKeyAuthorization` aan te roep, is die `kCommandKeyAuthRightDefault` gedefinieer as `@kAuthorizationRuleClassAllow`. So **enige iemand kan dit aanroep**.
 
@@ -252,11 +252,11 @@ Jy kan **alle die toestemmingskonfigurasies** [**hier**](https://www.dssw.co.uk/
 - Dit is die mees direkte sleutel. As dit op `false` gestel is, spesifiseer dit dat 'n gebruiker nie hoef te autentiseer om hierdie reg te verkry nie.
 - Dit word gebruik in **kombinasie met een van die 2 hieronder of om 'n groep aan te dui** waartoe die gebruiker moet behoort.
 2. **'allow-root': 'true'**
-- As 'n gebruiker as die wortelgebruiker (wat verhoogde regte het) werk, en hierdie sleutel op `true` gestel is, kan die wortelgebruiker moontlik hierdie reg verkry sonder verdere autentisering. Dit is egter tipies dat om 'n wortelgebruikerstatus te verkry, reeds autentisering vereis, so dit is nie 'n "geen autentisering" scenario vir die meeste gebruikers nie.
+- As 'n gebruiker as die wortelgebruiker werk (wat verhoogde regte het), en hierdie sleutel op `true` gestel is, kan die wortelgebruiker moontlik hierdie reg verkry sonder verdere autentisering. Dit is egter tipies dat om 'n wortelgebruikerstatus te verkry, reeds autentisering vereis, so dit is nie 'n "geen autentisering" scenario vir die meeste gebruikers nie.
 3. **'session-owner': 'true'**
-- As dit op `true` gestel is, sal die eienaar van die sessie (die tans ingelogde gebruiker) outomaties hierdie reg ontvang. Dit kan addisionele autentisering omseil as die gebruiker reeds ingelogde is.
+- As dit op `true` gestel is, sal die eienaar van die sessie (die tans ingelogde gebruiker) outomaties hierdie reg ontvang. Dit kan addisionele autentisering omseil as die gebruiker reeds ingelog is.
 4. **'shared': 'true'**
-- Hierdie sleutel verleen nie regte sonder autentisering nie. In plaas daarvan, as dit op `true` gestel is, beteken dit dat sodra die reg geverifieer is, dit onder verskeie prosesse gedeel kan word sonder dat elkeen weer moet autentiseer. Maar die aanvanklike toekenning van die reg sal steeds autentisering vereis tensy dit gekombineer word met ander sleutels soos `'authenticate-user': 'false'`.
+- Hierdie sleutel verleen nie regte sonder autentisering nie. In plaas daarvan, as dit op `true` gestel is, beteken dit dat sodra die reg geoutentiseer is, dit onder verskeie prosesse gedeel kan word sonder dat elkeen weer moet autentiseer. Maar die aanvanklike toekenning van die reg sal steeds autentisering vereis tensy dit gekombineer word met ander sleutels soos `'authenticate-user': 'false'`.
 
 Jy kan [**hierdie skrip gebruik**](https://gist.github.com/carlospolop/96ecb9e385a4667b9e40b24e878652f9) om die interessante regte te verkry:
 ```bash
@@ -269,17 +269,17 @@ com-apple-aosnotification-findmymac-remove, com-apple-diskmanagement-reservekek,
 Rights with 'session-owner': 'true':
 authenticate-session-owner, authenticate-session-owner-or-admin, authenticate-session-user, com-apple-safari-allow-apple-events-to-run-javascript, com-apple-safari-allow-javascript-in-smart-search-field, com-apple-safari-allow-unsigned-app-extensions, com-apple-safari-install-ephemeral-extensions, com-apple-safari-show-credit-card-numbers, com-apple-safari-show-passwords, com-apple-icloud-passwordreset, com-apple-icloud-passwordreset, is-session-owner, system-identity-write-self, use-login-window-ui
 ```
-## Omgekeerde Magtiging
+## Omgekeerde Owerheid
 
 ### Kontroleer of EvenBetterAuthorization gebruik word
 
-As jy die funksie: **`[HelperTool checkAuthorization:command:]`** vind, is dit waarskynlik dat die proses die voorheen genoemde skema vir magtiging gebruik:
+As jy die funksie: **`[HelperTool checkAuthorization:command:]`** vind, is dit waarskynlik dat die proses die voorheen genoemde skema vir owerheid gebruik:
 
 <figure><img src="../../../../../images/image (42).png" alt=""><figcaption></figcaption></figure>
 
 As hierdie funksie funksies aanroep soos `AuthorizationCreateFromExternalForm`, `authorizationRightForCommand`, `AuthorizationCopyRights`, `AuhtorizationFree`, gebruik dit [**EvenBetterAuthorizationSample**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L101-L154).
 
-Kontroleer die **`/var/db/auth.db`** om te sien of dit moontlik is om toestemming te verkry om 'n sekere bevoorregte aksie te bel sonder gebruikersinteraksie.
+Kontroleer die **`/var/db/auth.db`** om te sien of dit moontlik is om toestemming te kry om 'n sekere bevoorregte aksie te bel zonder gebruikersinteraksie.
 
 ### Protokol Kommunikasie
 
@@ -326,7 +326,7 @@ cat /Library/LaunchDaemons/com.example.HelperTool.plist
 ```
 ### Exploit Voorbeeld
 
-In hierdie voorbeeld is geskep:
+In hierdie voorbeeld word geskep:
 
 - Die definisie van die protokol met die funksies
 - 'n Leë auth om te gebruik om toegang te vra

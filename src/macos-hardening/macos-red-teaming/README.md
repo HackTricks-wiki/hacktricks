@@ -8,9 +8,10 @@
 - JAMF Pro: `jamf checkJSSConnection`
 - Kandji
 
-As jy daarin slaag om **administrateur akrediteer te kompromitteer** om toegang tot die bestuurplatform te verkry, kan jy **potensieel al die rekenaars kompromitteer** deur jou malware in die masjiene te versprei.
+As jy daarin slaag om **administrateur akrediteer te kompromitteer** om toegang tot die bestuurplatform te verkry, kan jy **potensieel al die rekenaars kompromitteer** deur jou malware op die masjiene te versprei.
 
 Vir red teaming in MacOS omgewings word dit sterk aanbeveel om 'n bietjie begrip te hê van hoe die MDMs werk:
+
 
 {{#ref}}
 macos-mdm/
@@ -24,17 +25,17 @@ Om jou eie MDM te laat loop, moet jy **jou CSR deur 'n verskaffer laat teken** w
 
 Om egter 'n toepassing op 'n geregistreerde toestel te installeer, moet dit steeds deur 'n ontwikkelaar rekening geteken wees... egter, by MDM registrasie voeg die **toestel die SSL sertifikaat van die MDM as 'n vertroude CA** by, sodat jy nou enigiets kan teken.
 
-Om die toestel in 'n MDM te registreer, moet jy 'n **`mobileconfig`** lêer as root installeer, wat via 'n **pkg** lêer afgelewer kan word (jy kan dit in zip komprimeer en wanneer dit van safari afgelaai word, sal dit ontkoppel word).
+Om die toestel in 'n MDM te registreer, moet jy 'n **`mobileconfig`** lêer as root installeer, wat via 'n **pkg** lêer afgelewer kan word (jy kan dit in zip komprimeer en wanneer dit van safari afgelaai word, sal dit uitgepak word).
 
 **Mythic agent Orthrus** gebruik hierdie tegniek.
 
 ### Misbruik van JAMF PRO
 
-JAMF kan **aangepaste skripte** (skripte wat deur die sysadmin ontwikkel is), **natuurlike payloads** (plaaslike rekening skepping, EFI wagwoord instel, lêer/proses monitering...) en **MDM** (toestel konfigurasies, toestel sertifikate...) uitvoer.
+JAMF kan **aangepaste skripte** (skripte wat deur die sysadmin ontwikkel is), **natuurlike payloads** (lokale rekening skepping, EFI wagwoord instel, lêer/proses monitering...) en **MDM** (toestel konfigurasies, toestel sertifikate...) uitvoer.
 
 #### JAMF self-registrasie
 
-Gaan na 'n bladsy soos `https://<company-name>.jamfcloud.com/enroll/` om te sien of hulle **self-registrasie geaktiveer** het. As hulle dit het, kan dit **om akrediteer vra om toegang te verkry**.
+Gaan na 'n bladsy soos `https://<company-name>.jamfcloud.com/enroll/` om te sien of hulle **self-registrasie geaktiveer** het. As hulle dit het, kan dit **om akrediteer vra**.
 
 Jy kan die skrip [**JamfSniper.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfSniper.py) gebruik om 'n wagwoord spuit aanval uit te voer.
 
@@ -46,7 +47,7 @@ Boonop, nadat jy die regte akrediteer gevind het, kan jy in staat wees om ander 
 
 <figure><img src="../../images/image (167).png" alt=""><figcaption></figcaption></figure>
 
-Die **`jamf`** binêre het die geheim bevat om die sleutelsak te open wat op die tydstip van die ontdekking **gedeel** was onder almal en dit was: **`jk23ucnq91jfu9aj`**.\
+Die **`jamf`** binêre het die geheim bevat om die sleutelsak te open wat ten tyde van die ontdekking **gedeel** was onder almal en dit was: **`jk23ucnq91jfu9aj`**.\
 Boonop, jamf **bly** as 'n **LaunchDaemon** in **`/Library/LaunchAgents/com.jamf.management.agent.plist`**
 
 #### JAMF Toestel Oorneming
@@ -60,7 +61,7 @@ plutil -convert xml1 -o - /Library/Preferences/com.jamfsoftware.jamf.plist
 <key>is_virtual_machine</key>
 <false/>
 <key>jss_url</key>
-<string>https://halbornasd.jamfcloud.com/</string>
+<string>https://subdomain-company.jamfcloud.com/</string>
 <key>last_management_framework_change_id</key>
 <integer>4</integer>
 [...]
@@ -72,12 +73,12 @@ sudo jamf policy -id 0
 
 # TODO: There is an ID, maybe it's possible to have the real jamf connection and another one to the C2
 ```
-#### JAMF Vervalsing
+#### JAMF Imitasie
 
-Om die **kommunikasie** tussen 'n toestel en JMF te **verval** het jy nodig:
+Om die **kommunikasie** tussen 'n toestel en JMF te **imiteer**, benodig jy:
 
 - Die **UUID** van die toestel: `ioreg -d2 -c IOPlatformExpertDevice | awk -F" '/IOPlatformUUID/{print $(NF-1)}'`
-- Die **JAMF sleutelhouer** van: `/Library/Application\ Support/Jamf/JAMF.keychain` wat die toestel sertifikaat bevat
+- Die **JAMF sleutelhouer** van: `/Library/Application\ Support/Jamf/JAMF.keychain` wat die toestelsertifikaat bevat
 
 Met hierdie inligting, **skep 'n VM** met die **gestole** Hardeware **UUID** en met **SIP gedeaktiveer**, plaas die **JAMF sleutelhouer,** **haak** die Jamf **agent** en steel sy inligting.
 
@@ -87,13 +88,14 @@ Met hierdie inligting, **skep 'n VM** met die **gestole** Hardeware **UUID** en 
 
 Jy kan ook die ligging `/Library/Application Support/Jamf/tmp/` monitor vir die **aangepaste skripte** wat admins mag wil uitvoer via Jamf, aangesien hulle **hier geplaas, uitgevoer en verwyder** word. Hierdie skripte **kan akrediteer** bevat.
 
-Echter, **akrediteer** kan aan hierdie skripte as **parameters** oorgedra word, so jy sal `ps aux | grep -i jamf` moet monitor (sonder om eers root te wees).
+E however, **akrediteer** kan deur hierdie skripte as **parameters** oorgedra word, so jy sal `ps aux | grep -i jamf` moet monitor (sonder om eers root te wees).
 
-Die skrip [**JamfExplorer.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfExplorer.py) kan luister vir nuwe lêers wat bygevoeg word en nuwe proses argumente.
+Die skrip [**JamfExplorer.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfExplorer.py) kan luister vir nuwe lêers wat bygevoeg word en nuwe prosesargumente.
 
-### macOS Afgeleë Toegang
+### macOS Afgeleide Toegang
 
 En ook oor **MacOS** "spesiale" **netwerk** **protokolle**:
+
 
 {{#ref}}
 ../macos-security-and-privilege-escalation/macos-protocols.md
@@ -103,27 +105,30 @@ En ook oor **MacOS** "spesiale" **netwerk** **protokolle**:
 
 In sommige gevalle sal jy vind dat die **MacOS rekenaar aan 'n AD** gekoppel is. In hierdie scenario moet jy probeer om die aktiewe gids te **enumerate** soos jy gewoond is. Vind 'n bietjie **hulp** in die volgende bladsye:
 
+
 {{#ref}}
 ../../network-services-pentesting/pentesting-ldap.md
 {{#endref}}
+
 
 {{#ref}}
 ../../windows-hardening/active-directory-methodology/
 {{#endref}}
 
+
 {{#ref}}
 ../../network-services-pentesting/pentesting-kerberos-88/
 {{#endref}}
 
-Sommige **lokale MacOS hulpmiddel** wat jou ook kan help is `dscl`:
+'n **lokale MacOS hulpmiddel** wat jou ook kan help is `dscl`:
 ```bash
 dscl "/Active Directory/[Domain]/All Domains" ls /
 ```
-Daar is ook 'n paar gereedskap voorberei vir MacOS om outomaties die AD te enumerate en met kerberos te speel:
+Ook is daar 'n paar gereedskap voorberei vir MacOS om die AD outomaties te evalueer en met kerberos te speel:
 
-- [**Machound**](https://github.com/XMCyber/MacHound): MacHound is 'n uitbreiding van die Bloodhound ouditgereedskap wat die versameling en opname van Active Directory verhoudings op MacOS gasheer toestelle moontlik maak.
+- [**Machound**](https://github.com/XMCyber/MacHound): MacHound is 'n uitbreiding van die Bloodhound ouditgereedskap wat die versameling en opname van Active Directory verhoudings op MacOS gasheer toestelle toelaat.
 - [**Bifrost**](https://github.com/its-a-feature/bifrost): Bifrost is 'n Objective-C projek wat ontwerp is om met die Heimdal krb5 APIs op macOS te kommunikeer. Die doel van die projek is om beter sekuriteitstoetsing rondom Kerberos op macOS toestelle moontlik te maak deur gebruik te maak van inheemse APIs sonder om enige ander raamwerk of pakkette op die teiken te vereis.
-- [**Orchard**](https://github.com/its-a-feature/Orchard): JavaScript for Automation (JXA) gereedskap om Active Directory te enumerate.
+- [**Orchard**](https://github.com/its-a-feature/Orchard): JavaScript for Automation (JXA) gereedskap om Active Directory evaluering te doen.
 
 ### Domein Inligting
 ```bash
@@ -134,7 +139,7 @@ echo show com.apple.opendirectoryd.ActiveDirectory | scutil
 Die drie tipes MacOS-gebruikers is:
 
 - **Plaaslike Gebruikers** — Bestuur deur die plaaslike OpenDirectory-diens, hulle is nie op enige manier aan die Active Directory gekoppel nie.
-- **Netwerk Gebruikers** — Vlugtige Active Directory-gebruikers wat 'n verbinding met die DC-bediener benodig om te autentiseer.
+- **Netwerk Gebruikers** — Volatile Active Directory-gebruikers wat 'n verbinding met die DC-bediener benodig om te autentiseer.
 - **Mobiele Gebruikers** — Active Directory-gebruikers met 'n plaaslike rugsteun vir hul akrediteer en lêers.
 
 Die plaaslike inligting oor gebruikers en groepe word gestoor in die gids _/var/db/dslocal/nodes/Default._\
@@ -142,8 +147,8 @@ Byvoorbeeld, die inligting oor die gebruiker genaamd _mark_ word gestoor in _/va
 
 Benewens die gebruik van die HasSession en AdminTo kante, **voeg MacHound drie nuwe kante** by die Bloodhound-databasis:
 
-- **CanSSH** - entiteit toegelaat om SSH na gasheer
-- **CanVNC** - entiteit toegelaat om VNC na gasheer
+- **CanSSH** - entiteit toegelaat om SSH na gasheer te maak
+- **CanVNC** - entiteit toegelaat om VNC na gasheer te maak
 - **CanAE** - entiteit toegelaat om AppleEvent-skripte op gasheer uit te voer
 ```bash
 #User enumeration
@@ -174,9 +179,9 @@ Kry wagwoorde met:
 ```bash
 bifrost --action askhash --username [name] --password [password] --domain [domain]
 ```
-Dit is moontlik om die **`Computer$`** wagwoord binne die Stelsel sleutelhouer te verkry.
+Dit is moontlik om die **`Computer$`** wagwoord binne die Stelsel sleutelketting te verkry.
 
-### Over-Pass-The-Hash
+### Oor-Pas-Dit-Die-Hash
 
 Kry 'n TGT vir 'n spesifieke gebruiker en diens:
 ```bash
@@ -194,14 +199,15 @@ bifrost --action asktgt --username test_lab_admin \
 bifrost --action asktgs --spn [service] --domain [domain.com] \
 --username [user] --hash [hash] --enctype [enctype]
 ```
-Met verkrygde dienskaartjies is dit moontlik om te probeer om toegang te verkry tot gedeeltes op ander rekenaars:
+Met verkregen dienskaartjies is dit moontlik om te probeer om toegang te verkry tot gedeeltes op ander rekenaars:
 ```bash
 smbutil view //computer.fqdn
 mount -t smbfs //server/folder /local/mount/point
 ```
-## Toegang tot die Sleutelketting
+## Toegang tot die Sleutelkettie
 
-Die Sleutelketing bevat hoogs waarskynlik sensitiewe inligting wat, indien toegang verkry word sonder om 'n prompt te genereer, kan help om 'n rooi span oefening vorentoe te beweeg:
+Die Sleutelkettie bevat hoogs waarskynlik sensitiewe inligting wat, indien toegang verkry word sonder om 'n prompt te genereer, kan help om 'n rooi span oefening vorentoe te beweeg:
+
 
 {{#ref}}
 macos-keychain.md
@@ -209,13 +215,13 @@ macos-keychain.md
 
 ## Eksterne Dienste
 
-MacOS Rooi Span is anders as 'n gewone Windows Rooi Span, aangesien **MacOS gewoonlik met verskeie eksterne platforms direk geïntegreer is**. 'n Algemene konfigurasie van MacOS is om toegang tot die rekenaar te verkry met **OneLogin gesinkroniseerde akrediteer, en toegang tot verskeie eksterne dienste** (soos github, aws...) via OneLogin.
+MacOS Rooi Span werk verskil van 'n gewone Windows Rooi Span, aangesien **MacOS gewoonlik direk met verskeie eksterne platforms geïntegreer is**. 'n Algemene konfigurasie van MacOS is om toegang tot die rekenaar te verkry met **OneLogin gesinkroniseerde akrediteer, en toegang tot verskeie eksterne dienste** (soos github, aws...) via OneLogin.
 
 ## Verskeie Rooi Span tegnieke
 
 ### Safari
 
-Wanneer 'n lêer in Safari afgelaai word, as dit 'n "veilige" lêer is, sal dit **outomaties geopen** word. So byvoorbeeld, as jy **'n zip aflaai**, sal dit outomaties uitgepak word:
+Wanneer 'n lêer in Safari afgelaai word, as dit 'n "veilige" lêer is, sal dit **automaties geopen** word. So byvoorbeeld, as jy **'n zip aflaai**, sal dit outomaties uitgepak word:
 
 <figure><img src="../../images/image (226).png" alt=""><figcaption></figcaption></figure>
 

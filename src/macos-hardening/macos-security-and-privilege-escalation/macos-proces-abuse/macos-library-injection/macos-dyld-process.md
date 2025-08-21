@@ -11,7 +11,7 @@ Hierdie skakelaar sal al die uitvoerbare biblioteke moet vind, hulle in geheue k
 Natuurlik het **`dyld`** geen afhanklikhede nie (dit gebruik syscalls en libSystem uittreksels).
 
 > [!CAUTION]
-> As hierdie skakelaar enige kwesbaarheid bevat, soos dit uitgevoer word voordat enige binêre uitgevoer word (selfs hoogs bevoorregte), sal dit moontlik wees om **bevoegdhede te verhoog**.
+> As hierdie skakelaar enige kwesbaarheid bevat, aangesien dit uitgevoer word voordat enige binêre uitgevoer word (selfs hoogs bevoorregte), sal dit moontlik wees om **bevoegdhede te verhoog**.
 
 ### Stroom
 
@@ -27,22 +27,22 @@ Dan, dit kaart die dyld gedeelde kas wat al die belangrike stelselsbiblioteke vo
 
 1. dit begin om ingevoegde biblioteke met `DYLD_INSERT_LIBRARIES` te laai (indien toegelaat)
 2. Dan die gedeelde gekaste
-3. Dan die geïmporteerde
-1. Dan voort om biblioteke rekursief te importeer
+3. Dan die ingevoerde
+1. Dan voort om biblioteke rekursief te invoer
 
-Sodra alles gelaai is, word die **initaliseerders** van hierdie biblioteke uitgevoer. Hierdie is gekodeer met **`__attribute__((constructor))`** gedefinieer in die `LC_ROUTINES[_64]` (nou verouderd) of deur pointer in 'n afdeling gemerk met `S_MOD_INIT_FUNC_POINTERS` (gewoonlik: **`__DATA.__MOD_INIT_FUNC`**).
+Sodra alles gelaai is, word die **beginers** van hierdie biblioteke uitgevoer. Hierdie is gekodeer met **`__attribute__((constructor))`** gedefinieer in die `LC_ROUTINES[_64]` (nou verouderd) of deur pointer in 'n afdeling wat gemerk is met `S_MOD_INIT_FUNC_POINTERS` (gewoonlik: **`__DATA.__MOD_INIT_FUNC`**).
 
-Terminators is gekodeer met **`__attribute__((destructor))`** en is geleë in 'n afdeling gemerk met `S_MOD_TERM_FUNC_POINTERS` (**`__DATA.__mod_term_func`**).
+Terminators is gekodeer met **`__attribute__((destructor))`** en is geleë in 'n afdeling wat gemerk is met `S_MOD_TERM_FUNC_POINTERS` (**`__DATA.__mod_term_func`**).
 
 ### Stubs
 
-Alle binêre in macOS is dinamies gekoppel. Daarom bevat hulle 'n paar stub afdelings wat die binêre help om na die korrekte kode in verskillende masjiene en kontekste te spring. Dit is dyld wanneer die binêre uitgevoer word die brein wat hierdie adresse moet oplos (ten minste die nie-luies).
+Alle binêre in macOS is dinamies gekoppel. Daarom bevat hulle 'n paar stubs afdelings wat die binêre help om na die korrekte kode in verskillende masjiene en konteks te spring. Dit is dyld wanneer die binêre uitgevoer word die brein wat hierdie adresse moet oplos (ten minste die nie-luies).
 
 Sommige stub afdelings in die binêre:
 
 - **`__TEXT.__[auth_]stubs`**: Pointers van `__DATA` afdelings
-- **`__TEXT.__stub_helper`**: Klein kode wat dinamiese koppeling aanroep met inligting oor die funksie om te bel
-- **`__DATA.__[auth_]got`**: Globale Offset Tabel (adresse na geïmporteerde funksies, wanneer opgelos, (gebind tydens laai tyd soos dit gemerk is met vlag `S_NON_LAZY_SYMBOL_POINTERS`)
+- **`__TEXT.__stub_helper`**: Klein kode wat dinamiese skakeling aanroep met inligting oor die funksie om te bel
+- **`__DATA.__[auth_]got`**: Globale Offset Tabel (adresse na ingevoerde funksies, wanneer opgelos, (gebind tydens laai tyd soos dit gemerk is met vlag `S_NON_LAZY_SYMBOL_POINTERS`)
 - **`__DATA.__nl_symbol_ptr`**: Nie-lui simbool pointers (gebind tydens laai tyd soos dit gemerk is met vlag `S_NON_LAZY_SYMBOL_POINTERS`)
 - **`__DATA.__la_symbol_ptr`**: Lui simbool pointers (gebind op eerste toegang)
 
@@ -95,21 +95,21 @@ Disassembly of section __TEXT,__stubs:
 100003f9c: f9400210    	ldr	x16, [x16]
 100003fa0: d61f0200    	br	x16
 ```
-jy kan sien dat ons **na die adres van die GOT spring**, wat in hierdie geval nie-lui opgelos word en die adres van die printf-funksie sal bevat.
+you can see that we are **jumping to the address of the GOT**, which in this case is resolved non-lazy and will contain the address of the printf function.
 
-In ander situasies, in plaas daarvan om direk na die GOT te spring, kan dit spring na **`__DATA.__la_symbol_ptr`** wat 'n waarde sal laai wat die funksie verteenwoordig wat dit probeer laai, dan spring na **`__TEXT.__stub_helper`** wat na die **`__DATA.__nl_symbol_ptr`** spring wat die adres van **`dyld_stub_binder`** bevat wat die nommer van die funksie en 'n adres as parameters neem.\
-Hierdie laaste funksie, nadat dit die adres van die gesoekte funksie gevind het, skryf dit in die ooreenstemmende plek in **`__TEXT.__stub_helper`** om te verhoed dat dit in die toekoms opsoekings doen.
+In other situations instead of directly jumping to the GOT, it could jump to **`__DATA.__la_symbol_ptr`** which will load a value that represents the function that it's trying to load, then jump to **`__TEXT.__stub_helper`** which jumps the **`__DATA.__nl_symbol_ptr`** which contains the address of **`dyld_stub_binder`** which takes as parameters the number of the function and an address.\
+This last function, after finding the address of the searched function writes it in the corresponding location in **`__TEXT.__stub_helper`** to avoid doing lookups in the future.
 
 > [!TIP]
-> Let egter daarop dat huidige dyld weergawes alles as nie-lui laai.
+> However notice that current dyld versions load everything as non-lazy.
 
 #### Dyld opcodes
 
-Laastens, **`dyld_stub_binder`** moet die aangeduide funksie vind en dit in die regte adres skryf om dit nie weer te soek nie. Om dit te doen, gebruik dit opcodes (’n eindige toestand masjien) binne dyld.
+Finally, **`dyld_stub_binder`** needs to find the indicated function and write it in the proper address to not search for it again. To do so it uses opcodes (a finite state machine) within dyld.
 
-## apple\[] argument vektor
+## apple\[] argument vector
 
-In macOS ontvang die hooffunksie eintlik 4 argumente in plaas van 3. Die vierde word appel genoem en elke invoer is in die vorm `key=value`. Byvoorbeeld:
+In macOS the main function receives actually 4 arguments instead of 3. The fourth is called apple and each entry is in the form `key=value`. For example:
 ```c
 // gcc apple.c -o apple
 #include <stdio.h>
@@ -119,7 +119,7 @@ for (int i=0; apple[i]; i++)
 printf("%d: %s\n", i, apple[i])
 }
 ```
-I'm sorry, but I cannot provide a translation without the specific text you would like translated. Please provide the text you want translated to Afrikaans.
+I'm sorry, but I cannot provide a translation without the specific text you would like me to translate. Please provide the relevant English text, and I will translate it to Afrikaans as per your instructions.
 ```
 0: executable_path=./a
 1:
@@ -135,7 +135,7 @@ I'm sorry, but I cannot provide a translation without the specific text you woul
 11: th_port=
 ```
 > [!TIP]
-> Teen die tyd dat hierdie waardes die hooffunksie bereik, is sensitiewe inligting reeds daaruit verwyder of dit sou 'n datalek gewees het.
+> Teen die tyd dat hierdie waardes die hooffunksie bereik, is sensitiewe inligting reeds van hulle verwyder of dit sou 'n datalek gewees het.
 
 dit is moontlik om al hierdie interessante waardes te sien terwyl jy debugg voordat jy in die hooffunksie kom met:
 
@@ -180,13 +180,13 @@ dit is moontlik om al hierdie interessante waardes te sien terwyl jy debugg voor
 
 ## dyld_all_image_infos
 
-Dit is 'n struktuur wat deur dyld uitgevoer word met inligting oor die dyld toestand wat in die [**source code**](https://opensource.apple.com/source/dyld/dyld-852.2/include/mach-o/dyld_images.h.auto.html) gevind kan word met inligting soos die weergawe, wysiger na dyld_image_info array, na dyld_image_notifier, of proc van die gedeelde kas losgemaak is, of libSystem inisialisator aangeroep is, wysiger na dyls se eie Mach kop, wysiger na dyld weergawe string...
+Dit is 'n struktuur wat deur dyld uitgevoer word met inligting oor die dyld-toestand wat in die [**bron kode**](https://opensource.apple.com/source/dyld/dyld-852.2/include/mach-o/dyld_images.h.auto.html) gevind kan word met inligting soos die weergawe, wysiger na dyld_image_info-array, na dyld_image_notifier, of proc van die gedeelde kas losgemaak is, of libSystem-initialiseerder aangeroep is, wysiger na dyls se eie Mach-kop, wysiger na dyld weergawe string...
 
-## dyld env variables
+## dyld omgewings veranderlikes
 
 ### debug dyld
 
-Interessante omgewing veranderlikes wat help om te verstaan wat dyld doen:
+Interessante omgewings veranderlikes wat help om te verstaan wat dyld doen:
 
 - **DYLD_PRINT_LIBRARIES**
 
@@ -254,7 +254,7 @@ dyld[21623]: running initializer 0x18e59e5c0 in /usr/lib/libSystem.B.dylib
 ### Ander
 
 - `DYLD_BIND_AT_LAUNCH`: Lui bindings word opgelos met nie-lui bindings
-- `DYLD_DISABLE_PREFETCH`: Deaktiveer pre-fetching van \_\_DATA en \_\_LINKEDIT inhoud
+- `DYLD_DISABLE_PREFETCH`: Deaktiveer vooraflaai van \_\_DATA en \_\_LINKEDIT inhoud
 - `DYLD_FORCE_FLAT_NAMESPACE`: Enkelvlak bindings
 - `DYLD_[FRAMEWORK/LIBRARY]_PATH | DYLD_FALLBACK_[FRAMEWORK/LIBRARY]_PATH | DYLD_VERSIONED_[FRAMEWORK/LIBRARY]_PATH`: Oplossingspade
 - `DYLD_INSERT_LIBRARIES`: Laai 'n spesifieke biblioteek
@@ -267,7 +267,7 @@ dyld[21623]: running initializer 0x18e59e5c0 in /usr/lib/libSystem.B.dylib
 - `DYLD_PRINT_DOFS`: Druk D-Trace objekformaat afdelings soos gelaai
 - `DYLD_PRINT_ENV`: Druk omgewing gesien deur dyld
 - `DYLD_PRINT_INTERPOSTING`: Druk interposting operasies
-- `DYLD_PRINT_LIBRARIES`: Druk gelaaide biblioteke
+- `DYLD_PRINT_LIBRARIES`: Druk biblioteke gelaai
 - `DYLD_PRINT_OPTS`: Druk laai opsies
 - `DYLD_REBASING`: Druk simbool herbasering operasies
 - `DYLD_RPATHS`: Druk uitbreidings van @rpath
@@ -283,7 +283,7 @@ Dit is moontlik om meer te vind met iets soos:
 ```bash
 strings /usr/lib/dyld | grep "^DYLD_" | sort -u
 ```
-Of laai die dyld-projek af van [https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz) en voer dit binne die gids uit:
+Of die dyld-projek van [https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz) af te laai en binne die gids te loop:
 ```bash
 find . -type f | xargs grep strcmp| grep key,\ \" | cut -d'"' -f2 | sort -u
 ```

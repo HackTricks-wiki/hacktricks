@@ -25,7 +25,7 @@ Die vorige beeld is die **uitset** wat deur die **gereedskap** gewys word waar d
 
 ### $LogFile
 
-**Alle metadata veranderinge aan 'n lêerstelsel word gelog** in 'n proses bekend as [write-ahead logging](https://en.wikipedia.org/wiki/Write-ahead_logging). Die gelogde metadata word in 'n lêer genaamd `**$LogFile**`, geleë in die wortelgids van 'n NTFS lêerstelsel, gehou. Gereedskap soos [LogFileParser](https://github.com/jschicht/LogFileParser) kan gebruik word om hierdie lêer te ontleed en veranderinge te identifiseer.
+**Alle metadata veranderinge aan 'n lêerstelsel word gelog** in 'n proses bekend as [write-ahead logging](https://en.wikipedia.org/wiki/Write-ahead_logging). Die gelogde metadata word in 'n lêer genaamd `**$LogFile**` gehou, geleë in die wortelgids van 'n NTFS lêerstelsel. Gereedskap soos [LogFileParser](https://github.com/jschicht/LogFileParser) kan gebruik word om hierdie lêer te ontleed en veranderinge te identifiseer.
 
 ![](<../../images/image (137).png>)
 
@@ -42,7 +42,7 @@ Met dieselfde gereedskap is dit moontlik om te identifiseer **tot watter tyd die
 
 ### `$STANDARD_INFORMATION` en `$FILE_NAME` vergelyking
 
-'n Ander manier om verdagte gewysigde lêers te identifiseer, sou wees om die tyd op albei eienskappe te vergelyk en te soek na **ongelykhede**.
+'n Ander manier om verdagte gewysigde lêers te identifiseer, sou wees om die tyd op albei eienskappe te vergelyk op soek na **ongelykhede**.
 
 ### Nanoseconds
 
@@ -65,7 +65,7 @@ Dan is dit moontlik om die slack ruimte te herstel met gereedskap soos FTK Image
 ## UsbKill
 
 Dit is 'n gereedskap wat die **rekenaar sal afskakel as enige verandering in die USB** poorte opgespoor word.\
-'n Manier om dit te ontdek, sou wees om die lopende prosesse te ondersoek en **elke python skrip wat loop te hersien**.
+'n Manier om dit te ontdek, sou wees om die lopende prosesse te inspekteer en **elke python skrip wat loop te hersien**.
 
 ## Live Linux Distributions
 
@@ -81,7 +81,7 @@ Dit is moontlik om verskeie Windows logging metodes te deaktiveer om die forensi
 
 ### Disable Timestamps - UserAssist
 
-Dit is 'n registriesleutel wat datums en ure behou wanneer elke eksekutabel deur die gebruiker uitgevoer is.
+Dit is 'n registriesleutel wat datums en ure behou wanneer elke uitvoerbare lêer deur die gebruiker uitgevoer is.
 
 Om UserAssist te deaktiveer, is twee stappe nodig:
 
@@ -95,12 +95,12 @@ Dit sal inligting oor die toepassings wat uitgevoer is, stoor met die doel om di
 - Voer `regedit` uit
 - Kies die lêer pad `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SessionManager\Memory Management\PrefetchParameters`
 - Regsklik op beide `EnablePrefetcher` en `EnableSuperfetch`
-- Kies Wysig op elk van hierdie om die waarde van 1 (of 3) na 0 te verander
+- Kies Wysig op elkeen van hierdie om die waarde van 1 (of 3) na 0 te verander
 - Herbegin
 
 ### Disable Timestamps - Last Access Time
 
-Wanneer 'n gids vanaf 'n NTFS volume op 'n Windows NT bediener geopen word, neem die stelsel die tyd om **'n tydstempel veld op elke gelysde gids op te dateer**, wat die laaste toegangstyd genoem word. Op 'n intensief gebruikte NTFS volume kan dit die prestasie beïnvloed.
+Wanneer 'n gids vanaf 'n NTFS volume op 'n Windows NT bediener geopen word, neem die stelsel die tyd om **'n tydstempel veld op elke gelysde gids op te dateer**, wat die laaste toegangstyd genoem word. Op 'n swaar gebruikte NTFS volume kan dit die prestasie beïnvloed.
 
 1. Maak die Registrie Redigeerder (Regedit.exe) oop.
 2. Blaai na `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem`.
@@ -125,9 +125,9 @@ Om skaduwe copies te deaktiveer [stappe van hier](https://support.waters.com/KB_
 
 1. Maak die Dienste program oop deur "dienste" in die teks soekboks te tik nadat jy op die Windows begin knoppie geklik het.
 2. Vind "Volume Shadow Copy" in die lys, kies dit, en toegang eienskappe deur regsklik.
-3. Kies Gedeaktiveer uit die "Opstart tipe" keuselys, en bevestig die verandering deur Toepas en OK te klik.
+3. Kies Gedeaktiveer van die "Opstart tipe" keuselys, en bevestig die verandering deur Toepas en OK te klik.
 
-Dit is ook moontlik om die konfigurasie van watter lêers in die skaduwe copy gekopieer gaan word in die registrie `HKLM\SYSTEM\CurrentControlSet\Control\BackupRestore\FilesNotToSnapshot` te wysig.
+Dit is ook moontlik om die konfigurasie van watter lêers in die skaduwee kopie gaan wees, in die registrie `HKLM\SYSTEM\CurrentControlSet\Control\BackupRestore\FilesNotToSnapshot` te wysig.
 
 ### Overwrite deleted files
 
@@ -158,7 +158,7 @@ Dit is ook moontlik om die konfigurasie van watter lêers in die skaduwe copy ge
 
 Onlangs weergawes van Windows 10/11 en Windows Server hou **ryke PowerShell forensiese artefakte** onder
 `Microsoft-Windows-PowerShell/Operational` (geleenthede 4104/4105/4106).
-Aanvallers kan hulle op-die-vlieg deaktiveer of uitvee:
+Aanvallers kan dit deaktiveer of op die vlug verwyder:
 ```powershell
 # Turn OFF ScriptBlock & Module logging (registry persistence)
 New-ItemProperty -Path "HKLM:\\SOFTWARE\\Microsoft\\PowerShell\\3\\PowerShellEngine" \
@@ -174,7 +174,7 @@ Verdedigers moet toesig hou oor veranderinge aan daardie registriesleutels en ho
 
 ### ETW (Event Tracing for Windows) Patch
 
-Eindpunt-sekuriteitsprodukte staat baie op ETW. 'n Gewilde 2024 ontwykingsmetode is om `ntdll!EtwEventWrite`/`EtwEventWriteFull` in geheue te patch sodat elke ETW-oproep `STATUS_SUCCESS` teruggee sonder om die gebeurtenis uit te stuur:
+Eindpunt-sekuriteitsprodukte staat baie op ETW. 'n Gewilde ontwykingsmetode in 2024 is om `ntdll!EtwEventWrite`/`EtwEventWriteFull` in geheue te patch sodat elke ETW-oproep `STATUS_SUCCESS` teruggee sonder om die gebeurtenis uit te stuur:
 ```c
 // 0xC3 = RET on x64
 unsigned char patch[1] = { 0xC3 };
@@ -205,19 +205,19 @@ AuKill.exe -e "C:\\Program Files\\Windows Defender\\MsMpEng.exe"
 AuKill.exe -k CrowdStrike
 ```
 Die bestuurder word daarna verwyder, wat minimale artefakte agterlaat.  
-Minderings: aktiveer die Microsoft kwesbare-bestuurder blokkelys (HVCI/SAC),  
-en waarsku oor kern-diens skepping vanaf gebruikers-skryfbare paaie.
+Mitigasies: aktiveer die Microsoft kwesbare-bestuurder blokkelys (HVCI/SAC),  
+en waarsku oor kern-diens skepping vanaf gebruikers-skryfbare paaie.  
 
----
+---  
 
-## Linux Anti-Forensics: Self-Patching en Cloud C2 (2023–2025)
+## Linux Anti-Forensics: Self-Patching en Cloud C2 (2023–2025)  
 
 ### Self‑patching gecompromitteerde dienste om opsporing te verminder (Linux)  
-Teenstanders "self‑patch" toenemend 'n diens reg na die uitbuiting daarvan om beide her-uitbuiting te voorkom en kwesbaarheid-gebaseerde opsporings te onderdruk. Die idee is om kwesbare komponente te vervang met die nuutste wettige opwaartse binêre/JARs, sodat skandeerders die gasheer as gepatchte rapporteer terwyl volharding en C2 bly.
+Teenstanders "self‑patch" toenemend 'n diens reg na die uitbuiting daarvan om beide her-uitbuiting te voorkom en kwesbaarheid-gebaseerde opsporings te onderdruk. Die idee is om kwesbare komponente te vervang met die nuutste wettige opwaartse binêre/JARs, sodat skandeerders die gasheer as gepatchte rapporteer terwyl volharding en C2 bly.  
 
 Voorbeeld: Apache ActiveMQ OpenWire RCE (CVE‑2023‑46604)  
 - Na die uitbuiting het aanvallers wettige JARs van Maven Central (repo1.maven.org) afgelaai, kwesbare JARs in die ActiveMQ installasie verwyder, en die broker herbegin.  
-- Dit het die aanvanklike RCE gesluit terwyl ander voetstukke (cron, SSH konfigurasiewijzigings, aparte C2 implante) gehandhaaf is.
+- Dit het die aanvanklike RCE gesluit terwyl ander voetstukke (cron, SSH konfigurasiewijzigings, aparte C2 implante) gehandhaaf is.  
 
 Operasionele voorbeeld (illustreer)
 ```bash
@@ -242,19 +242,19 @@ Forensiese/jag wenke
 - Debian/Ubuntu: `dpkg -V activemq` en vergelyk lêer hashes/paaie met repo spieëls.
 - RHEL/CentOS: `rpm -Va 'activemq*'`
 - Soek na JAR weergawes wat op skyf teenwoordig is wat nie deur die pakketbestuurder besit word nie, of simboliese skakels wat buite band opgedateer is.
-- Tydlyn: `find "$AMQ_DIR" -type f -printf '%TY-%Tm-%Td %TH:%TM %p\n' | sort` om ctime/mtime met die kompromie venster te korreleer.
+- Tydlyn: `find "$AMQ_DIR" -type f -printf '%TY-%Tm-%Td %TH:%TM %p\n' | sort` om ctime/mtime met kompromie venster te korreleer.
 - Shell geskiedenis/proses telemetrie: bewys van `curl`/`wget` na `repo1.maven.org` of ander artefak CDN's onmiddellik na die aanvanklike eksploitatie.
 - Veranderingsbestuur: valideer wie die “patch” toegepas het en hoekom, nie net dat 'n gepatchte weergawe teenwoordig is nie.
 
 ### Wolkdiens C2 met draer tokens en anti-analise stagers
-Geobserveerde handelsvaardighede het verskeie langafstand C2 paaie en anti-analise verpakking gekombineer:
-- Wagwoord-beskermde PyInstaller ELF laders om sandboks en statiese analise te hinder (bv. versleutelde PYZ, tydelike onttrekking onder `/_MEI*`).
+Geobserveerde handelsvaardighede gekombineer verskeie langafstand C2 paaie en anti-analise verpakking:
+- Wagwoord-beskermde PyInstaller ELF laders om sandboks en statiese analise te hinder (bv., versleutelde PYZ, tydelike onttrekking onder `/_MEI*`).
 - Aanwysers: `strings` treffers soos `PyInstaller`, `pyi-archive`, `PYZ-00.pyz`, `MEIPASS`.
 - Tydren artefakte: onttrekking na `/tmp/_MEI*` of pasgemaakte `--runtime-tmpdir` paaie.
 - Dropbox-ondersteunde C2 wat hardgecodeerde OAuth Draer tokens gebruik
 - Netwerkmerkers: `api.dropboxapi.com` / `content.dropboxapi.com` met `Authorization: Bearer <token>`.
-- Jag in proxy/NetFlow/Zeek/Suricata vir uitgaande HTTPS na Dropbox domeine van bediener werklading wat normaalweg nie lêers sinkroniseer nie.
-- Parallel/backup C2 via tonneling (bv. Cloudflare Tunnel `cloudflared`), hou beheer as een kanaal geblokkeer is.
+- Jag in proxy/NetFlow/Zeek/Suricata vir uitgaande HTTPS na Dropbox domeine van bediener werklas wat normaalweg nie lêers sinkroniseer nie.
+- Parallel/backup C2 via tonneling (bv., Cloudflare Tunnel `cloudflared`), hou beheer as een kanaal geblokkeer is.
 - Gasheer IOCs: `cloudflared` prosesse/eenhede, konfigurasie by `~/.cloudflared/*.json`, uitgaande 443 na Cloudflare kante.
 
 ### Volharding en “hardening rollback” om toegang te behou (Linux voorbeelde)
@@ -269,20 +269,20 @@ grep -R --line-number -E 'curl|wget|python|/bin/sh' /etc/cron.*/* 2>/dev/null
 - Jag vir wortel aanmeldings aktivering:
 ```bash
 grep -E '^\s*PermitRootLogin' /etc/ssh/sshd_config
-# vlag waardes soos "yes" of te toegeeflike instellings
+# vlag waardes soos "yes" of oormatig toelaatbare instellings
 ```
-- Jag vir verdagte interaktiewe skale op stelserekeninge (bv. `games`):
+- Jag vir verdagte interaktiewe skale op stelsels rekeninge (bv., `games`):
 ```bash
 awk -F: '($7 ~ /bin\/(sh|bash|zsh)/ && $1 ~ /^(games|lp|sync|shutdown|halt|mail|operator)$/) {print}' /etc/passwd
 ```
-- Willekeurige, kort-genaamde sein artefakte (8 alfabetiese karakters) wat na skyf gelaat word en ook met wolk C2 kontak maak:
+- Willekeurige, kort-gemerk beacon artefakte (8 alfabetiese karakters) wat na skyf gelaat word wat ook met wolk C2 kontak maak:
 - Jag:
 ```bash
 find / -maxdepth 3 -type f -regextype posix-extended -regex '.*/[A-Za-z]{8}$' \
 -exec stat -c '%n %s %y' {} \; 2>/dev/null | sort
 ```
 
-Verdedigers moet hierdie artefakte korreleer met eksterne blootstelling en diens patching gebeurtenisse om anti-forensiese self-remediëring wat gebruik word om die aanvanklike eksploitatie te verberg, te ontdek.
+Verdedigers moet hierdie artefakte korreleer met eksterne blootstelling en diens patching gebeurtenisse om anti-forensiese self-remediëring wat gebruik word om aanvanklike eksploitatie te verberg, te ontdek.
 
 ## Verwysings
 

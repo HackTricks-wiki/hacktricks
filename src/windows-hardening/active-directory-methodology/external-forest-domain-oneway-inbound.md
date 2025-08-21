@@ -1,12 +1,12 @@
-# Eksterne Bosdomein - Eenrigting (Inkomend) of bidireksioneel
+# Eksterne Woud-domein - Eenrigting (Inkomend) of bidireksioneel
 
 {{#include ../../banners/hacktricks-training.md}}
 
-In hierdie scenario vertrou 'n eksterne domein jou (of albei vertrou mekaar), sodat jy 'n soort toegang daaroor kan verkry.
+In hierdie scenario vertrou 'n eksterne domein jou (of albei vertrou mekaar), sodat jy 'n tipe toegang daaroor kan verkry.
 
 ## Enumerasie
 
-Eerstens moet jy die **vertroue** **enumerate**:
+Eerstens moet jy die **vertroue** **opnoem**:
 ```bash
 Get-DomainTrust
 SourceName      : a.domain.local   --> Current domain

@@ -4,7 +4,7 @@
 
 ## SID History Inspuiting Aanval
 
-Die fokus van die **SID History Inspuiting Aanval** is om **gebruikermigrasie tussen domeine** te ondersteun terwyl toegang tot hulpbronne van die vorige domein verseker word. Dit word bereik deur **die gebruiker se vorige Veiligheidsidentifiseerder (SID) in die SID Geskiedenis** van hul nuwe rekening in te sluit. Dit is belangrik om te noem dat hierdie proses gemanipuleer kan word om ongeoorloofde toegang te verleen deur die SID van 'n hoë-privilege groep (soos Enterprise Admins of Domain Admins) van die ouer domein by die SID Geskiedenis te voeg. Hierdie uitbuiting bied toegang tot alle hulpbronne binne die ouer domein.
+Die fokus van die **SID History Inspuiting Aanval** is om **gebruikermigrasie tussen domeine** te ondersteun terwyl toegang tot hulpbronne van die vorige domein verseker word. Dit word bereik deur **die gebruiker se vorige Veiligheidsidentifiseerder (SID) in die SID Geskiedenis** van hul nuwe rekening in te sluit. Dit is belangrik om te noem dat hierdie proses gemanipuleer kan word om ongeoorloofde toegang te verleen deur die SID van 'n hoë-privilege groep (soos Enterprise Admins of Domain Admins) van die ouerdomein by die SID Geskiedenis te voeg. Hierdie uitbuiting bied toegang tot alle hulpbronne binne die ouerdomein.
 
 Twee metodes bestaan om hierdie aanval uit te voer: deur die skep van 'n **Golden Ticket** of 'n **Diamond Ticket**.
 
@@ -20,9 +20,9 @@ Get-DomainGroup -Identity "Domain Admins" -Domain parent.io -Properties ObjectSi
 > Let daarop dat dit moontlik is om SID-geskiedenis in 'n vertrouensverhouding te deaktiveer, wat hierdie aanval sal laat misluk.
 
 Volgens die [**docs**](https://technet.microsoft.com/library/cc835085.aspx):
-- **Deaktiveer SIDHistory op woudvertroue** met die netdom-gereedskap (`netdom trust /domain: /EnableSIDHistory:no on the domain controller`)
-- **Pas SID Filter Quarantining toe op eksterne vertroue** met die netdom-gereedskap (`netdom trust /domain: /quarantine:yes on the domain controller`)
-- **Pas SID Filtering toe op domeinvertroue binne 'n enkele woud** word nie aanbeveel nie, aangesien dit 'n onondersteunde konfigurasie is en breekveranderinge kan veroorsaak. As 'n domein binne 'n woud onbetroubaar is, moet dit nie 'n lid van die woud wees nie. In hierdie situasie is dit nodig om eers die vertroude en onbetroubare domeine in aparte woude te verdeel waar SID Filtering op 'n interforest vertroue toegepas kan word.
+- **Deaktiveer SIDHistory op woudvertroue** met die netdom-tool (`netdom trust /domain: /EnableSIDHistory:no on the domain controller`)
+- **Pas SID Filter Quarantining toe op eksterne vertroue** met die netdom-tool (`netdom trust /domain: /quarantine:yes on the domain controller`)
+- **Pas SID Filtering toe op domeinvertroue binne 'n enkele woud** word nie aanbeveel nie, aangesien dit 'n onondersteunde konfigurasie is en breekveranderinge kan veroorsaak. As 'n domein binne 'n woud onbetroubaar is, moet dit nie 'n lid van die woud wees nie. In hierdie situasie is dit nodig om eers die vertroude en onbetroubare domeine in aparte woude te verdeel waar SID Filtering op 'n interwoudvertroue toegepas kan word.
 
 Kyk na hierdie pos vir meer inligting oor om dit te omseil: [**https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4**](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)
 
@@ -63,12 +63,14 @@ mimikatz.exe "kerberos::golden /user:Administrator /domain:<current_domain> /sid
 ```
 Vir meer inligting oor goue kaartjies, kyk:
 
+
 {{#ref}}
 golden-ticket.md
 {{#endref}}
 
 
 Vir meer inligting oor diamant kaartjies, kyk:
+
 
 {{#ref}}
 diamond-ticket.md
@@ -118,9 +120,9 @@ export KRB5CCNAME=hacker.ccache
 # psexec in domain controller of root
 psexec.py <child_domain>/Administrator@dc.root.local -k -no-pass -target-ip 10.10.10.10
 ```
-#### Automaties met [raiseChild.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/raiseChild.py)
+#### Outomaties met [raiseChild.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/raiseChild.py)
 
-Dit is 'n Impacket-skrip wat **die opgradering van kind na ouer domein outomatiseer**. Die skrip benodig:
+Dit is 'n Impacket-skrip wat **outomaties die opgradering van kind- na ouer-domein** sal uitvoer. Die skrip benodig:
 
 - Teikendomeinbeheerder
 - Kredensies vir 'n admin gebruiker in die kinddomein
@@ -128,10 +130,10 @@ Dit is 'n Impacket-skrip wat **die opgradering van kind na ouer domein outomatis
 Die vloei is:
 
 - Verkry die SID vir die Enterprise Admins-groep van die ouerdomein
-- Herwin die hash vir die KRBTGT-rekening in die kinddomein
-- Skep 'n Golden Ticket
+- Verkry die hash vir die KRBTGT-rekening in die kinddomein
+- Skep 'n Goue Teken
 - Meld aan by die ouerdomein
-- Herwin kredensies vir die Administrator-rekening in die ouerdomein
+- Verkry kredensies vir die Administrateurrekening in die ouerdomein
 - As die `target-exec` skakel gespesifiseer is, verifieer dit by die ouerdomein se Domeinbeheerder via Psexec.
 ```bash
 raiseChild.py -target-exec 10.10.10.10 <child_domain>/username

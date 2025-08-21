@@ -2,13 +2,13 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-> [!NOTE]
-> 'n Nota oor **PCAP** teenoor **PCAPNG**: daar is twee weergawes van die PCAP lêerformaat; **PCAPNG is nuwer en word nie deur alle gereedskap ondersteun nie**. Jy mag dalk 'n lêer van PCAPNG na PCAP moet omskakel met Wireshark of 'n ander kompatible gereedskap, om daarmee in sommige ander gereedskap te werk.
+> [!TIP]
+> 'n Nota oor **PCAP** teenoor **PCAPNG**: daar is twee weergawes van die PCAP lêerformaat; **PCAPNG is nuwer en word nie deur alle gereedskap ondersteun nie**. U mag 'n lêer van PCAPNG na PCAP moet omskakel met Wireshark of 'n ander kompatible gereedskap, om daarmee in sommige ander gereedskap te werk.
 
 ## Aanlyn gereedskap vir pcaps
 
-- As die kop van jou pcap **gebroke** is, moet jy probeer om dit te **herstel** met: [http://f00l.de/hacking/**pcapfix.php**](http://f00l.de/hacking/pcapfix.php)
-- Trek **inligting** uit en soek vir **kwaadaardige sagteware** binne 'n pcap in [**PacketTotal**](https://packettotal.com)
+- As die kop van u pcap **gebroke** is, moet u probeer om dit te **herstel** met: [http://f00l.de/hacking/**pcapfix.php**](http://f00l.de/hacking/pcapfix.php)
+- Trek **inligting** uit en soek vir **malware** binne 'n pcap in [**PacketTotal**](https://packettotal.com)
 - Soek vir **kwaadaardige aktiwiteit** met [**www.virustotal.com**](https://www.virustotal.com) en [**www.hybrid-analysis.com**](https://www.hybrid-analysis.com)
 - **Volledige pcap analise vanaf die blaaier in** [**https://apackets.com/**](https://apackets.com/)
 
@@ -18,10 +18,10 @@ Die volgende gereedskap is nuttig om statistieke, lêers, ens. uit te trek.
 
 ### Wireshark
 
-> [!NOTE]
-> **As jy 'n PCAP gaan analiseer, moet jy basies weet hoe om Wireshark te gebruik**
+> [!TIP]
+> **As u 'n PCAP gaan analiseer, moet u basies weet hoe om Wireshark te gebruik**
 
-Jy kan 'n paar Wireshark truuks vind in:
+U kan 'n paar Wireshark truuks vind in:
 
 {{#ref}}
 wireshark-tricks.md
@@ -58,7 +58,7 @@ Hierdie hulpmiddel is ook nuttig om **ander inligting te analiseer** uit die pak
 
 ### NetWitness Investigator
 
-Jy kan [**NetWitness Investigator van hier**](https://www.rsa.com/en-us/contact-us/netwitness-investigator-freeware) **aflaai (Dit werk in Windows)**.\
+Jy kan [**NetWitness Investigator van hier**](https://www.rsa.com/en-us/contact-us/netwitness-investigator-freeware) **aflaai** **(Dit werk in Windows)**.\
 Dit is 'n ander nuttige hulpmiddel wat **die pakkette analiseer** en die inligting op 'n nuttige manier sorteer om **te weet wat binne gebeur**.
 
 ### [BruteShark](https://github.com/odedshimon/BruteShark)
@@ -84,13 +84,14 @@ ngrep -I packets.pcap "^GET" "port 80 and tcp and host 192.168 and dst host 192.
 
 Die gebruik van algemene carving tegnieke kan nuttig wees om lêers en inligting uit die pcap te onttrek:
 
+
 {{#ref}}
 ../partitions-file-systems-carving/file-data-carving-recovery-tools.md
 {{#endref}}
 
 ### Capturing credentials
 
-Jy kan gereedskap soos [https://github.com/lgandx/PCredz](https://github.com/lgandx/PCredz) gebruik om akrediteerbare inligting uit 'n pcap of 'n lewende koppelvlak te parse.
+Jy kan gereedskap soos [https://github.com/lgandx/PCredz](https://github.com/lgandx/PCredz) gebruik om akrediteerbare inligting uit 'n pcap of 'n lewende koppelvlak te ontleed.
 
 ## Check Exploits/Malware
 
@@ -117,9 +118,10 @@ suricata -r packets.pcap -c /etc/suricata/suricata.yaml -k none -v -l log
 - 'n report.txt skryf
 - Opsioneel ooreenstemmende lêers na 'n gids stoor
 
-### Malware Analysis
+### Malware Analise
 
 Kyk of jy enige vingerafdruk van 'n bekende malware kan vind:
+
 
 {{#ref}}
 ../malware-analysis.md
@@ -127,11 +129,11 @@ Kyk of jy enige vingerafdruk van 'n bekende malware kan vind:
 
 ## Zeek
 
-> [Zeek](https://docs.zeek.org/en/master/about.html) is 'n passiewe, oopbron netwerkverkeeranaliseerder. Baie operateurs gebruik Zeek as 'n Netwerk Sekuriteitsmoniter (NSM) om ondersoeke van verdagte of kwaadwillige aktiwiteite te ondersteun. Zeek ondersteun ook 'n wye reeks verkeeranalise take buite die sekuriteitsdomein, insluitend prestasiemeting en probleemoplossing.
+> [Zeek](https://docs.zeek.org/en/master/about.html) is 'n passiewe, oopbron netwerkverkeer analiseerder. Baie operateurs gebruik Zeek as 'n Netwerk Sekuriteits Monitor (NSM) om ondersoeke van verdagte of kwaadwillige aktiwiteite te ondersteun. Zeek ondersteun ook 'n wye reeks verkeer analise take buite die sekuriteitsdomein, insluitend prestasiemeting en probleemoplossing.
 
 Basies, logs wat deur `zeek` geskep word, is nie **pcaps** nie. Daarom sal jy **ander hulpmiddels** moet gebruik om die logs te analiseer waar die **inligting** oor die pcaps is.
 
-### Connections Info
+### Verbinding Inligting
 ```bash
 #Get info about longest connections (add "grep udp" to see only udp traffic)
 #The longest connection might be of malware (constant reverse shell?)
@@ -198,15 +200,18 @@ cat dns.log | zeek-cut qtype_name | sort | uniq -c | sort -nr
 #See top DNS domain requested with rita
 rita show-exploded-dns -H --limit 10 zeek_logs
 ```
-## Ander pcap ontledings truuks
+## Ander pcap ontledingswenke
+
 
 {{#ref}}
 dnscat-exfiltration.md
 {{#endref}}
 
+
 {{#ref}}
 wifi-pcap-analysis.md
 {{#endref}}
+
 
 {{#ref}}
 usb-keystrokes.md

@@ -72,7 +72,7 @@ Die GUID Partisie Tabel, bekend as GPT, word verkies vir sy verbeterde vermoëns
 
 **Data Veerkragtigheid en Herstel**:
 
-- **Redundansie**: Anders as MBR, beperk GPT nie partisie en opstartdata tot 'n enkele plek nie. Dit repliseer hierdie data oor die skyf, wat data integriteit en veerkragtigheid verbeter.
+- **Oortolligheid**: Anders as MBR, beperk GPT nie partisie en opstartdata tot 'n enkele plek nie. Dit repliseer hierdie data oor die skyf, wat data integriteit en veerkragtigheid verbeter.
 - **Cyclic Redundancy Check (CRC)**: GPT gebruik CRC om data integriteit te verseker. Dit monitor aktief vir datakorruptie, en wanneer dit opgespoor word, probeer GPT om die gekorrupte data van 'n ander skyf ligging te herstel.
 
 **Beskermer MBR (LBA0)**:
@@ -119,7 +119,7 @@ Die partisie tabel kop definieer die bruikbare blokke op die skyf. Dit definieer
 | 0 (0x00)                    | 16 bytes | [Partisie tipe GUID](https://en.wikipedia.org/wiki/GUID_Partition_Table#Partition_type_GUIDs) (gemengde endian) |
 | 16 (0x10)                   | 16 bytes | Unieke partisie GUID (gemengde endian)                                                                          |
 | 32 (0x20)                   | 8 bytes  | Eerste LBA ([little endian](https://en.wikipedia.org/wiki/Little_endian))                                      |
-| 40 (0x28)                   | 8 bytes  | Laaste LBA (inclusief, gewoonlik onpare)                                                                             |
+| 40 (0x28)                   | 8 bytes  | Laaste LBA (inclusief, gewoonlik oneven)                                                                             |
 | 48 (0x30)                   | 8 bytes  | Kenmerk vlae (bv. bit 60 dui op lees-slegs)                                                               |
 | 56 (0x38)                   | 72 bytes | Partisie naam (36 [UTF-16](https://en.wikipedia.org/wiki/UTF-16)LE kode eenhede)                               |
 
@@ -149,7 +149,7 @@ As dit 'n **GPT tabel in plaas van 'n MBR** was, moet die handtekening _EFI PART
 
 ### FAT
 
-Die **FAT (Lêer Toewysing Tabel)** lêerstelsel is ontwerp rondom sy kernkomponent, die lêer toewysing tabel, wat aan die begin van die volume geleë is. Hierdie stelsel beskerm data deur **twee kopieë** van die tabel te handhaaf, wat data integriteit verseker selfs as een gekorrupteer is. Die tabel, saam met die wortel vouer, moet in 'n **vaste ligging** wees, wat noodsaaklik is vir die stelsel se opstartproses.
+Die **FAT (Lêer Toewysing Tabel)** lêerstelsel is ontwerp rondom sy kernkomponent, die lêer toewysing tabel, wat aan die begin van die volume geleë is. Hierdie stelsel beskerm data deur **twee kopieë** van die tabel te handhaaf, wat data integriteit verseker selfs as een gekorrupteer is. Die tabel, saam met die wortel gids, moet in 'n **vaste ligging** wees, wat noodsaaklik is vir die stelsel se opstartproses.
 
 Die basiese eenheid van berging in die lêerstelsel is 'n **kluster, gewoonlik 512B**, wat uit verskeie sektore bestaan. FAT het deur weergawes ontwikkel:
 
@@ -159,9 +159,9 @@ Die basiese eenheid van berging in die lêerstelsel is 'n **kluster, gewoonlik 5
 
 'n Belangrike beperking oor FAT weergawes is die **4GB maksimum lêergrootte**, wat deur die 32-bis veld wat vir lêergrootte berging gebruik word, opgelê word.
 
-Sleutelkomponente van die wortel gids, veral vir FAT12 en FAT16, sluit in:
+Belangrike komponente van die wortel gids, veral vir FAT12 en FAT16, sluit in:
 
-- **Lêer/Fouer Naam** (tot 8 karakters)
+- **Lêer/Gids Naam** (tot 8 karakters)
 - **Kenmerke**
 - **Skep, Wysig, en Laaste Toegang Datums**
 - **FAT Tabel Adres** (wat die begin kluster van die lêer aandui)
@@ -185,7 +185,7 @@ Sommige lêers bevat metadata. Hierdie inligting is oor die inhoud van die lêer
 
 Jy kan hulpmiddels soos [**exiftool**](https://exiftool.org) en [**Metadiver**](https://www.easymetadata.com/metadiver-2/) gebruik om die metadata van 'n lêer te verkry.
 
-## **Verwyderde Lêer Herstel**
+## **Verwyderde Lêers Herstel**
 
 ### Geregistreerde Verwyderde Lêers
 
@@ -199,7 +199,7 @@ file-data-carving-recovery-tools.md
 
 ### **Lêer Karving**
 
-**Lêer karving** is 'n tegniek wat probeer om **lêers in die massa data** te vind. Daar is 3 hoof maniere waarop hulpmiddels soos hierdie werk: **Gebaseer op lêer tipes handtekeninge en voetstappe**, gebaseer op lêer tipes **strukture** en gebaseer op die **inhoud** self.
+**Lêer karving** is 'n tegniek wat probeer om **lêers in die massa van data** te vind. Daar is 3 hoof maniere waarop hulpmiddels soos hierdie werk: **Gebaseer op lêer tipes koppe en voete**, gebaseer op lêer tipes **strukture** en gebaseer op die **inhoud** self.
 
 Let daarop dat hierdie tegniek **nie werk om gefragmenteerde lêers te herstel nie**. As 'n lêer **nie in aaneengeskakelde sektore gestoor is nie**, dan sal hierdie tegniek nie in staat wees om dit te vind of ten minste 'n deel daarvan nie.
 
@@ -212,7 +212,7 @@ file-data-carving-recovery-tools.md
 ### Data Stroom **C**arving
 
 Data Stroom Karving is soortgelyk aan Lêer Karving, maar **in plaas daarvan om na volledige lêers te soek, soek dit na interessante fragmente** van inligting.\
-Byvoorbeeld, in plaas daarvan om na 'n volledige lêer te soek wat geregistreerde URL's bevat, sal hierdie tegniek URL's soek.
+Byvoorbeeld, in plaas daarvan om na 'n volledige lêer te soek wat geregistreerde URL's bevat, sal hierdie tegniek na URL's soek.
 
 {{#ref}}
 file-data-carving-recovery-tools.md
@@ -220,8 +220,8 @@ file-data-carving-recovery-tools.md
 
 ### Veilige Verwydering
 
-Natuurlik, daar is maniere om **"veilig" lêers en dele van logs oor hulle te verwyder**. Byvoorbeeld, dit is moontlik om die **inhoud** van 'n lêer met rommeldata verskeie kere te oorskryf, en dan die **logs** van die **$MFT** en **$LOGFILE** oor die lêer te **verwyder**, en die **Volume Shadow Copies** te **verwyder**.\
-Jy mag opgemerk het dat selfs al voer jy daardie aksie uit, daar mag **ander dele wees waar die bestaan van die lêer steeds geregistreer is**, en dit is waar en deel van die forensiese professionele se werk is om hulle te vind.
+Natuurlik is daar maniere om lêers en 'n deel van logs oor hulle **"veilig" te verwyder**. Byvoorbeeld, dit is moontlik om die **inhoud** van 'n lêer met rommeldata verskeie kere te oorskryf, en dan die **logs** van die **$MFT** en **$LOGFILE** oor die lêer te **verwyder**, en die Volume Skadu Kopieë te **verwyder**.\
+Jy mag opgemerk het dat selfs wanneer jy daardie aksie uitvoer, daar dalk **ander dele is waar die bestaan van die lêer steeds geregistreer is**, en dit is waar en deel van die forensiese professionele se werk is om hulle te vind.
 
 ## Verwysings
 

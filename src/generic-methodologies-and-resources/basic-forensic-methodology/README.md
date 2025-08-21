@@ -18,7 +18,7 @@ malware-analysis.md
 
 ## Inspekteer 'n Beeld
 
-As jy 'n **forensiese beeld** van 'n toestel ontvang, kan jy begin **analiseer die partisies, lêer-stelsel** wat gebruik word en **herstel** potensieel **interessante lêers** (selfs verwyderde). Leer hoe in:
+As jy 'n **forensiese beeld** van 'n toestel ontvang, kan jy begin **analiseer die partisie, lêer-stelsel** wat gebruik word en **herstel** potensieel **interessante lêers** (selfs verwyderde). Leer hoe in:
 
 {{#ref}}
 partitions-file-systems-carving/
@@ -53,13 +53,13 @@ Ek wil 'n spesiale vermelding maak van die bladsy:
 specific-software-file-type-tricks/browser-artifacts.md
 {{#endref}}
 
-## Geheue Dump Inspekteer
+## Geheue Dump Inspeksie
 
 {{#ref}}
 memory-dump-analysis/
 {{#endref}}
 
-## Pcap Inspekteer
+## Pcap Inspeksie
 
 {{#ref}}
 pcap-inspection/

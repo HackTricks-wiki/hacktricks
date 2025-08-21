@@ -6,7 +6,7 @@
 
 ## Wat kan ek met 'n sertifikaat doen
 
-Voordat ons kyk hoe om die sertifikate te steel, het jy hier 'n bietjie inligting oor hoe om te vind waarvoor die sertifikaat nuttig is:
+Voordat ons kyk hoe om die sertifikate te steel, het jy hier 'n paar inligting oor hoe om te vind waarvoor die sertifikaat nuttig is:
 ```bash
 # Powershell
 $CertPath = "C:\path\to\cert.pfx"
@@ -20,13 +20,13 @@ certutil.exe -dump -v cert.pfx
 ```
 ## Eksportering van Sertifikate met die Crypto APIs – DIEF1
 
-In 'n **interaktiewe lessenaar sessie** kan die onttrekking van 'n gebruiker of masjien sertifikaat, saam met die privaat sleutel, maklik gedoen word, veral as die **privaat sleutel uitvoerbaar** is. Dit kan bereik word deur na die sertifikaat in `certmgr.msc` te navigeer, regsklik daarop te klik, en `All Tasks → Export` te kies om 'n wagwoord-beskermde .pfx-lêer te genereer.
+In 'n **interaktiewe lessenaar sessie** kan die ekstraksie van 'n gebruiker of masjien sertifikaat, saam met die private sleutel, maklik gedoen word, veral as die **private sleutel uitvoerbaar** is. Dit kan bereik word deur na die sertifikaat in `certmgr.msc` te navigeer, regsklik daarop te klik, en `All Tasks → Export` te kies om 'n wagwoord-beskermde .pfx-lêer te genereer.
 
 Vir 'n **programmatiese benadering** is gereedskap soos die PowerShell `ExportPfxCertificate` cmdlet of projekte soos [TheWover’s CertStealer C# project](https://github.com/TheWover/CertStealer) beskikbaar. Hierdie gebruik die **Microsoft CryptoAPI** (CAPI) of die Cryptography API: Next Generation (CNG) om met die sertifikaatwinkel te kommunikeer. Hierdie APIs bied 'n reeks kriptografiese dienste, insluitend dié wat nodig is vir sertifikaatberging en -verifikasie.
 
-As 'n privaat sleutel egter as nie-uitvoerbaar gestel is, sal beide CAPI en CNG normaalweg die onttrekking van sulke sertifikate blokkeer. Om hierdie beperking te omseil, kan gereedskap soos **Mimikatz** gebruik word. Mimikatz bied `crypto::capi` en `crypto::cng` opdragte om die onderskeie APIs te patch, wat die uitvoer van privaat sleutels moontlik maak. Spesifiek patch `crypto::capi` die CAPI binne die huidige proses, terwyl `crypto::cng` die geheue van **lsass.exe** teiken vir patching.
+As 'n private sleutel egter as nie-uitvoerbaar gestel is, sal beide CAPI en CNG normaalweg die ekstraksie van sulke sertifikate blokkeer. Om hierdie beperking te omseil, kan gereedskap soos **Mimikatz** gebruik word. Mimikatz bied `crypto::capi` en `crypto::cng` opdragte om die onderskeie APIs te patch, wat die uitvoer van private sleutels moontlik maak. Spesifiek patch `crypto::capi` die CAPI binne die huidige proses, terwyl `crypto::cng` die geheue van **lsass.exe** teiken vir patching.
 
-## Diefstal van Gebruiker Sertifikate via DPAPI – DIEF2
+## Gebruiker Sertifikaat Diefstal via DPAPI – DIEF2
 
 Meer inligting oor DPAPI in:
 
@@ -34,15 +34,15 @@ Meer inligting oor DPAPI in:
 ../../windows-local-privilege-escalation/dpapi-extracting-passwords.md
 {{#endref}}
 
-In Windows, **sertifikaat privaat sleutels word deur DPAPI beskerm**. Dit is belangrik om te erken dat die **berging plekke vir gebruiker en masjien privaat sleutels** verskillend is, en die lêerstrukture verskil afhangende van die kriptografiese API wat deur die bedryfstelsel gebruik word. **SharpDPAPI** is 'n gereedskap wat hierdie verskille outomaties kan navigeer wanneer dit die DPAPI blobs ontsleutel.
+In Windows, **sertifikaat private sleutels word deur DPAPI beskerm**. Dit is belangrik om te erken dat die **berging plekke vir gebruiker en masjien private sleutels** verskillend is, en die lêerstrukture verskil afhangende van die kriptografiese API wat deur die bedryfstelsel gebruik word. **SharpDPAPI** is 'n gereedskap wat hierdie verskille outomaties kan navigeer wanneer dit die DPAPI blobs ontsleutel.
 
-**Gebruiker sertifikate** is hoofsaaklik in die registrasie onder `HKEY_CURRENT_USER\SOFTWARE\Microsoft\SystemCertificates` gehuisves, maar sommige kan ook in die gids `%APPDATA%\Microsoft\SystemCertificates\My\Certificates` gevind word. Die ooreenstemmende **privaat sleutels** vir hierdie sertifikate word tipies gestoor in `%APPDATA%\Microsoft\Crypto\RSA\User SID\` vir **CAPI** sleutels en `%APPDATA%\Microsoft\Crypto\Keys\` vir **CNG** sleutels.
+**Gebruiker sertifikate** is hoofsaaklik in die register onder `HKEY_CURRENT_USER\SOFTWARE\Microsoft\SystemCertificates` gehuisves, maar sommige kan ook in die gids `%APPDATA%\Microsoft\SystemCertificates\My\Certificates` gevind word. Die ooreenstemmende **private sleutels** vir hierdie sertifikate word tipies gestoor in `%APPDATA%\Microsoft\Crypto\RSA\User SID\` vir **CAPI** sleutels en `%APPDATA%\Microsoft\Crypto\Keys\` vir **CNG** sleutels.
 
-Om 'n **sertifikaat en sy geassosieerde privaat sleutel** te **onttrek**, behels die proses:
+Om 'n **sertifikaat en sy geassosieerde private sleutel** te **ekstrak**, behels die proses:
 
 1. **Kies die teiken sertifikaat** uit die gebruiker se winkel en verkry sy sleutel winkel naam.
-2. **Vind die vereiste DPAPI masterkey** om die ooreenstemmende privaat sleutel te ontsleutel.
-3. **Ontsleutel die privaat sleutel** deur die platte teks DPAPI masterkey te gebruik.
+2. **Vind die vereiste DPAPI masterkey** om die ooreenstemmende private sleutel te ontsleutel.
+3. **Ontsleutel die private sleutel** deur die platte teks DPAPI masterkey te gebruik.
 
 Vir **die verkryging van die platte teks DPAPI masterkey**, kan die volgende benaderings gebruik word:
 ```bash
@@ -52,7 +52,7 @@ dpapi::masterkey /in:"C:\PATH\TO\KEY" /rpc
 # With mimikatz, if the user's password is known
 dpapi::masterkey /in:"C:\PATH\TO\KEY" /sid:accountSid /password:PASS
 ```
-Om die ontsleuteling van masterkey-lêers en privaat sleutel-lêers te stroomlyn, bewys die `certificates` opdrag van [**SharpDPAPI**](https://github.com/GhostPack/SharpDPAPI) nuttig te wees. Dit aanvaar `/pvk`, `/mkfile`, `/password`, of `{GUID}:KEY` as argumente om die privaat sleutels en gekoppelde sertifikate te ontsleutel, wat vervolgens 'n `.pem` lêer genereer.
+Om die ontsleuteling van masterkey-lêers en privaat sleutel-lêers te stroomlyn, bewys die `certificates` opdrag van [**SharpDPAPI**](https://github.com/GhostPack/SharpDPAPI) nuttig te wees. Dit aanvaar `/pvk`, `/mkfile`, `/password`, of `{GUID}:KEY` as argumente om die privaat sleutels en gekoppelde sertifikate te ontsleutel, wat daarna 'n `.pem` lêer genereer.
 ```bash
 # Decrypting using SharpDPAPI
 SharpDPAPI.exe certificates /mkfile:C:\temp\mkeys.txt
@@ -62,15 +62,15 @@ openssl pkcs12 -in cert.pem -keyex -CSP "Microsoft Enhanced Cryptographic Provid
 ```
 ## Masjien Sertifikaat Diefstal via DPAPI – THEFT3
 
-Masjien sertifikate wat deur Windows in die registrasie gestoor word by `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\SystemCertificates` en die geassosieerde private sleutels geleë in `%ALLUSERSPROFILE%\Application Data\Microsoft\Crypto\RSA\MachineKeys` (vir CAPI) en `%ALLUSERSPROFILE%\Application Data\Microsoft\Crypto\Keys` (vir CNG) word geënkripteer met die masjien se DPAPI meester sleutels. Hierdie sleutels kan nie met die domein se DPAPI rugsteun sleutel ontkrip word nie; eerder is die **DPAPI_SYSTEM LSA geheim**, waartoe slegs die SYSTEM gebruiker toegang het, nodig.
+Masjien sertifikate wat deur Windows in die registrasie gestoor word by `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\SystemCertificates` en die geassosieerde private sleutels geleë in `%ALLUSERSPROFILE%\Application Data\Microsoft\Crypto\RSA\MachineKeys` (vir CAPI) en `%ALLUSERSPROFILE%\Application Data\Microsoft\Crypto\Keys` (vir CNG) word geënkripteer met die masjien se DPAPI meester sleutels. Hierdie sleutels kan nie met die domein se DPAPI rugsteun sleutel ontcijfer word nie; eerder is die **DPAPI_SYSTEM LSA geheim**, waartoe slegs die SYSTEM gebruiker toegang het, benodig.
 
-Handmatige ontkripping kan bereik word deur die `lsadump::secrets` opdrag in **Mimikatz** uit te voer om die DPAPI_SYSTEM LSA geheim te onttrek, en daarna hierdie sleutel te gebruik om die masjien meester sleutels te ontkrip. Alternatiewelik kan Mimikatz se `crypto::certificates /export /systemstore:LOCAL_MACHINE` opdrag gebruik word na die patching van CAPI/CNG soos voorheen beskryf.
+Handmatige ontcijfering kan bereik word deur die `lsadump::secrets` opdrag in **Mimikatz** uit te voer om die DPAPI_SYSTEM LSA geheim te onttrek, en daarna hierdie sleutel te gebruik om die masjien meester sleutels te ontcijfer. Alternatiewelik kan Mimikatz se `crypto::certificates /export /systemstore:LOCAL_MACHINE` opdrag gebruik word nadat CAPI/CNG soos voorheen beskryf gepatch is.
 
-**SharpDPAPI** bied 'n meer geoutomatiseerde benadering met sy sertifikate opdrag. Wanneer die `/machine` vlag met verhoogde toestemmings gebruik word, eskaleer dit na SYSTEM, dump die DPAPI_SYSTEM LSA geheim, gebruik dit om die masjien DPAPI meester sleutels te ontkrip, en gebruik dan hierdie platte sleutels as 'n soek tabel om enige masjien sertifikaat private sleutels te ontkrip.
+**SharpDPAPI** bied 'n meer geoutomatiseerde benadering met sy sertifikate opdrag. Wanneer die `/machine` vlag met verhoogde toestemmings gebruik word, eskaleer dit na SYSTEM, dump die DPAPI_SYSTEM LSA geheim, gebruik dit om die masjien DPAPI meester sleutels te ontcijfer, en gebruik dan hierdie platte sleutels as 'n soek tabel om enige masjien sertifikaat private sleutels te ontcijfer.
 
 ## Vind Sertifikaat Lêers – THEFT4
 
-Sertifikate word soms direk binne die lêerstelsel gevind, soos in lêer deel of die Downloads gids. Die mees algemeen aangetrefde tipes sertifikaat lêers wat op Windows omgewings teikend is, is `.pfx` en `.p12` lêers. Alhoewel minder gereeld, verskyn lêers met uitbreidings `.pkcs12` en `.pem` ook. Bykomende noemenswaardige sertifikaat-verwante lêer uitbreidings sluit in:
+Sertifikate word soms direk binne die lêerstelsel gevind, soos in lêer deel of die Downloads gids. Die mees algemeen aangetrefde tipes sertifikaat lêers wat op Windows omgewings teikens is, is `.pfx` en `.p12` lêers. Alhoewel minder gereeld, verskyn lêers met uitbreidings `.pkcs12` en `.pem` ook. Bykomende noemenswaardige sertifikaat-verwante lêer uitbreidings sluit in:
 
 - `.key` vir private sleutels,
 - `.crt`/`.cer` vir sertifikate slegs,
@@ -94,7 +94,7 @@ john --wordlist=passwords.txt hash.txt
 
 Die gegewe inhoud verduidelik 'n metode vir NTLM kredensiaal diefstal via PKINIT, spesifiek deur die diefstal metode wat as THEFT5 geëtiketteer is. Hier is 'n herverduideliking in passiewe stem, met die inhoud geanonimiseer en saamgevat waar toepaslik:
 
-Om NTLM-outeentifikasie `MS-NLMP` te ondersteun vir toepassings wat nie Kerberos-outeentifikasie fasiliteer nie, is die KDC ontwerp om die gebruiker se NTLM eenrigting funksie (OWF) binne die privilege attribuut sertifikaat (PAC) terug te gee, spesifiek in die `PAC_CREDENTIAL_INFO` buffer, wanneer PKCA gebruik word. Gevolglik, indien 'n rekening autentiseer en 'n Ticket-Granting Ticket (TGT) via PKINIT verkry, word 'n meganisme inherente voorsien wat die huidige gasheer in staat stel om die NTLM hash uit die TGT te onttrek om legacy-outeentifikasie protokolle te ondersteun. Hierdie proses behels die ontsleuteling van die `PAC_CREDENTIAL_DATA` struktuur, wat essensieel 'n NDR geserialiseerde voorstelling van die NTLM platte teks is.
+Om NTLM verifikasie `MS-NLMP` te ondersteun vir toepassings wat nie Kerberos verifikasie fasiliteer nie, is die KDC ontwerp om die gebruiker se NTLM eenrigting funksie (OWF) binne die privilege attribuut sertifikaat (PAC) terug te gee, spesifiek in die `PAC_CREDENTIAL_INFO` buffer, wanneer PKCA gebruik word. Gevolglik, indien 'n rekening verifieer en 'n Ticket-Granting Ticket (TGT) via PKINIT verkry, word 'n meganisme inherent voorsien wat die huidige gasheer in staat stel om die NTLM hash uit die TGT te onttrek om legacy verifikasie protokolle te ondersteun. Hierdie proses behels die ontsleuteling van die `PAC_CREDENTIAL_DATA` struktuur, wat essensieel 'n NDR geserialiseerde voorstelling van die NTLM platte teks is.
 
 Die nut **Kekeo**, toeganklik by [https://github.com/gentilkiwi/kekeo](https://github.com/gentilkiwi/kekeo), word genoem as in staat om 'n TGT te versoek wat hierdie spesifieke data bevat, en so die onttrekking van die gebruiker se NTLM te fasiliteer. Die opdrag wat vir hierdie doel gebruik word, is soos volg:
 ```bash
