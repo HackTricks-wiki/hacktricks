@@ -331,6 +331,7 @@ INSERT INTO access (
 If you managed to get inside an app with some TCC permissions check the following page with TCC payloads to abuse them:
 
 
+
 {{#ref}}
 macos-tcc-payloads.md
 {{#endref}}
@@ -338,6 +339,7 @@ macos-tcc-payloads.md
 ### Apple Events
 
 Learn about Apple Events in:
+
 
 
 {{#ref}}
@@ -593,6 +595,7 @@ AllowApplicationsList.plist:
 ### TCC Bypasses
 
 
+
 {{#ref}}
 macos-tcc-bypasses/
 {{#endref}}
@@ -605,5 +608,4 @@ macos-tcc-bypasses/
 - [**https://www.sentinelone.com/labs/bypassing-macos-tcc-user-privacy-protections-by-accident-and-design/**](https://www.sentinelone.com/labs/bypassing-macos-tcc-user-privacy-protections-by-accident-and-design/)
 
 {{#include ../../../../banners/hacktricks-training.md}}
-
 

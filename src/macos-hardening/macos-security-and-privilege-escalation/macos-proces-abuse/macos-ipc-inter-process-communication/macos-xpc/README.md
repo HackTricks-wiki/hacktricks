@@ -127,6 +127,7 @@ Applications can **subscribe** to different event **messages**, enabling them to
 When a process tries to call a method from via an XPC connection, the **XPC service should check if that process is allowed to connect**. Here are the common ways to check that and the common pitfalls:
 
 
+
 {{#ref}}
 macos-xpc-connecting-process-check/
 {{#endref}}
@@ -134,6 +135,7 @@ macos-xpc-connecting-process-check/
 ## XPC Authorization
 
 Apple also allows apps to **configure some rights and how to get them** so if the calling process have them it would be **allowed to call a method** from the XPC service:
+
 
 
 {{#ref}}
@@ -486,5 +488,4 @@ The communication between BridgeOS and the host occurs through a dedicated IPv6 
 It's possible to find thee communications using `netstat`, `nettop` or the open source option, `netbottom`.
 
 {{#include ../../../../../banners/hacktricks-training.md}}
-
 

@@ -160,6 +160,7 @@ cat /proc/sys/kernel/randomize_va_space 2>/dev/null
 If you are inside a docker container you can try to escape from it:
 
 
+
 {{#ref}}
 docker-security/
 {{#endref}}
@@ -412,6 +413,7 @@ rsync -a *.sh rsync://host.back/src/rbd #You can create a file called "-e sh mys
 Read the following page for more wildcard exploitation tricks:
 
 
+
 {{#ref}}
 wildcards-spare-tricks.md
 {{#endref}}
@@ -566,6 +568,7 @@ socat - UNIX-CLIENT:/dev/socket #connect to UNIX-domain socket, irrespective of 
 **Exploitation example:**
 
 
+
 {{#ref}}
 socket-command-injection.md
 {{#endref}}
@@ -636,6 +639,7 @@ Note that if you have write permissions over the docker socket because you are *
 Check **more ways to break out from docker or abuse it to escalate privileges** in:
 
 
+
 {{#ref}}
 docker-security/
 {{#endref}}
@@ -645,6 +649,7 @@ docker-security/
 If you find that you can use the **`ctr`** command read the following page as **you may be able to abuse it to escalate privileges**:
 
 
+
 {{#ref}}
 containerd-ctr-privilege-escalation.md
 {{#endref}}
@@ -652,6 +657,7 @@ containerd-ctr-privilege-escalation.md
 ## **RunC** privilege escalation
 
 If you find that you can use the **`runc`** command read the following page as **you may be able to abuse it to escalate privileges**:
+
 
 
 {{#ref}}
@@ -680,6 +686,7 @@ Policies without a specified user or group apply universally, while "default" co
 ```
 
 **Learn how to enumerate and exploit a D-Bus communication here:**
+
 
 
 {{#ref}}
@@ -768,6 +775,7 @@ Some Linux versions were affected by a bug that allows users with **UID > INT_MA
 ### Groups
 
 Check if you are a **member of some group** that could grant you root privileges:
+
 
 
 {{#ref}}
@@ -1058,9 +1066,11 @@ The project collects legitimate functions of Unix binaries that can be abused to
 > sudo awk 'BEGIN {system("/bin/sh")}'
 
 
+
 {{#ref}}
 https://gtfobins.github.io/
 {{#endref}}
+
 
 
 {{#ref}}
@@ -1186,6 +1196,7 @@ If for some reason **a user has write permissions** on any of the paths indicate
 Take a look at **how to exploit this misconfiguration** in the following page:
 
 
+
 {{#ref}}
 ld.so.conf-example.md
 {{#endref}}
@@ -1233,6 +1244,7 @@ int __libc_start_main(int (*main) (int, char **, char **), int argc, char ** ubp
 
 Linux capabilities provide a **subset of the available root privileges to a process**. This effectively breaks up root **privileges into smaller and distinctive units**. Each of these units can then be independently granted to processes. This way the full set of privileges is reduced, decreasing the risks of exploitation.\
 Read the following page to **learn more about capabilities and how to abuse them**:
+
 
 
 {{#ref}}
@@ -1364,6 +1376,7 @@ The file `/etc/ssh_config` can **override** this **options** and allow or denied
 The file `/etc/sshd_config` can **allow** or **denied** ssh-agent forwarding with the keyword `AllowAgentForwarding` (default is allow).
 
 If you find that Forward Agent is configured in an environment read the following page as **you may be able to abuse it to escalate privileges**:
+
 
 
 {{#ref}}
@@ -1612,6 +1625,7 @@ On the other hand, `/etc/init` is associated with **Upstart**, a newer **service
 ### NFS Privilege escalation
 
 
+
 {{#ref}}
 nfs-no_root_squash-misconfiguration-pe.md
 {{#endref}}
@@ -1619,11 +1633,13 @@ nfs-no_root_squash-misconfiguration-pe.md
 ### Escaping from restricted Shells
 
 
+
 {{#ref}}
 escaping-from-limited-bash.md
 {{#endref}}
 
 ### Cisco - vmanage
+
 
 
 {{#ref}}
@@ -1678,6 +1694,7 @@ cisco-vmanage.md
 ## Android rooting frameworks: manager-channel abuse
 
 Android rooting frameworks commonly hook a syscall to expose privileged kernel functionality to a userspace manager. Weak manager authentication (e.g., signature checks based on FD-order or poor password schemes) can enable a local app to impersonate the manager and escalate to root on already-rooted devices. Learn more and exploitation details here:
+
 
 
 {{#ref}}

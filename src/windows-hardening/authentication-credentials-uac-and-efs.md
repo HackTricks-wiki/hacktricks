@@ -141,6 +141,7 @@ This way requires the **victim user** to be **running** a **process** inside the
 #### Knowing the users password
 
 
+
 {{#ref}}
 https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files
 {{#endref}}
@@ -172,6 +173,7 @@ Also, check this [web page](https://cube0x0.github.io/Relaying-for-gMSA/) about 
 ## LAPS
 
 The **Local Administrator Password Solution (LAPS)**, available for download from [Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899), enables the management of local Administrator passwords. These passwords, which are **randomized**, unique, and **regularly changed**, are stored centrally in Active Directory. Access to these passwords is restricted through ACLs to authorized users. With sufficient permissions granted, the ability to read local admin passwords is provided.
+
 
 
 {{#ref}}
@@ -263,6 +265,7 @@ The SSPI will be in charge of finding the adequate protocol for two machines tha
 ## UAC - User Account Control
 
 [User Account Control (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) is a feature that enables a **consent prompt for elevated activities**.
+
 
 
 {{#ref}}

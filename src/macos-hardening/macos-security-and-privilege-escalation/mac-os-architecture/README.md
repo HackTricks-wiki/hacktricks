@@ -36,11 +36,13 @@ Moreover, **Mach and BSD each maintain different security models**: **Mach's** s
 The I/O Kit is an open-source, object-oriented **device-driver framework** in the XNU kernel, handles **dynamically loaded device drivers**. It allows modular code to be added to the kernel on-the-fly, supporting diverse hardware.
 
 
+
 {{#ref}}
 macos-iokit.md
 {{#endref}}
 
 ### IPC - Inter Process Communication
+
 
 
 {{#ref}}
@@ -54,6 +56,7 @@ macOS is **super restrictive to load Kernel Extensions** (.kext) because of the 
 In the following page you can also see how to recover the `.kext` that macOS loads inside its **kernelcache**:
 
 
+
 {{#ref}}
 macos-kernel-extensions.md
 {{#endref}}
@@ -61,6 +64,7 @@ macos-kernel-extensions.md
 ### macOS System Extensions
 
 Instead of using Kernel Extensions macOS created the System Extensions, which offers in user level APIs to interact with the kernel. This way, developers can avoid to use kernel extensions.
+
 
 
 {{#ref}}
@@ -73,5 +77,4 @@ macos-system-extensions.md
 - [**https://taomm.org/vol1/analysis.html**](https://taomm.org/vol1/analysis.html)
 
 {{#include ../../../banners/hacktricks-training.md}}
-
 

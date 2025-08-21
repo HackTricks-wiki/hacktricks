@@ -151,9 +151,11 @@ There are several ways to **force NTLM authentication "remotely"**, for example,
 **Check these ideas and more in the following pages:**
 
 
+
 {{#ref}}
 ../../windows-hardening/active-directory-methodology/printers-spooler-service-abuse.md
 {{#endref}}
+
 
 
 {{#ref}}
@@ -168,5 +170,4 @@ Don't forget that you cannot only steal the hash or the authentication but also 
 - [**AD CS ESC8 (NTLM relay to certificates)**](../../windows-hardening/active-directory-methodology/ad-certificates/domain-escalation.md#ntlm-relay-to-ad-cs-http-endpoints-esc8)
 
 {{#include ../../banners/hacktricks-training.md}}
-
 

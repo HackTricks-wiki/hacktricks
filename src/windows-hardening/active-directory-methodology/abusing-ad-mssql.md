@@ -185,6 +185,7 @@ Check in the page mentioned in the **following section how to do this manually.*
 ### MSSQL Basic Hacking Tricks
 
 
+
 {{#ref}}
 ../../network-services-pentesting/pentesting-mssql-microsoft-sql-server/
 {{#endref}}
@@ -316,10 +317,10 @@ A strategy that many authors have come up with is to force a SYSTEM service to a
 ### SCCM Management Point NTLM Relay (OSD Secret Extraction)
 See how the default SQL roles of SCCM **Management Points** can be abused to dump Network Access Account and Task-Sequence secrets directly from the site database:
 
+
 {{#ref}}
 sccm-management-point-relay-sql-policy-secrets.md
 {{#endref}}
 
 {{#include ../../banners/hacktricks-training.md}}
-
 

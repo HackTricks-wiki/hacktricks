@@ -73,6 +73,7 @@ This will avoid that a machine set as 20ºC is increased to 21ºC with one remot
 You can attack Infrared with Flipper Zero:
 
 
+
 {{#ref}}
 flipper-zero/fz-infrared.md
 {{#endref}}

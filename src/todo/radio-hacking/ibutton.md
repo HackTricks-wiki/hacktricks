@@ -35,6 +35,7 @@ For information about how these keys works check the page [https://blog.flipperz
 iButtons can be attacked with Flipper Zero:
 
 
+
 {{#ref}}
 flipper-zero/fz-ibutton.md
 {{#endref}}
@@ -44,5 +45,4 @@ flipper-zero/fz-ibutton.md
 - [https://blog.flipperzero.one/taming-ibutton/](https://blog.flipperzero.one/taming-ibutton/)
 
 {{#include ../../banners/hacktricks-training.md}}
-
 
