@@ -20,7 +20,7 @@ También puedes consultar la siguiente página para aprender **otras formas de e
 
 ### FreeIPA
 
-FreeIPA es una **alternativa** de código abierto a **Active Directory** de Microsoft, principalmente para entornos **Unix**. Combina un **directorio LDAP** completo con un Centro de Distribución de Claves **Kerberos** de MIT para la gestión similar a Active Directory. Utiliza el **Sistema de Certificados** Dogtag para la gestión de certificados CA y RA, y admite autenticación **multifactor** que incluye tarjetas inteligentes. SSSD está integrado para procesos de autenticación Unix. Aprende más sobre ello en:
+FreeIPA es una **alternativa** de código abierto a Microsoft Windows **Active Directory**, principalmente para entornos **Unix**. Combina un **directorio LDAP** completo con un Centro de Distribución de Claves **Kerberos** de MIT para la gestión similar a Active Directory. Utiliza el **Sistema de Certificados** Dogtag para la gestión de certificados CA y RA, y admite autenticación **multifactor**, incluyendo tarjetas inteligentes. SSSD está integrado para procesos de autenticación Unix. Aprende más sobre ello en:
 
 {{#ref}}
 ../freeipa-pentesting.md

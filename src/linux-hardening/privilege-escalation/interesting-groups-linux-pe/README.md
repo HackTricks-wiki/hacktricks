@@ -6,7 +6,7 @@
 
 ### **PE - Método 1**
 
-**A veces**, **por defecto (o porque algún software lo necesita)** dentro del **/etc/sudoers** puedes encontrar algunas de estas líneas:
+**A veces**, **por defecto (o porque algún software lo necesita)** dentro del **/etc/sudoers** archivo puedes encontrar algunas de estas líneas:
 ```bash
 # Allow members of group sudo to execute any command
 %sudo	ALL=(ALL:ALL) ALL
@@ -16,7 +16,7 @@
 ```
 Esto significa que **cualquier usuario que pertenezca al grupo sudo o admin puede ejecutar cualquier cosa como sudo**.
 
-Si este es el caso, para **convertirse en root, solo puede ejecutar**:
+Si este es el caso, para **convertirse en root, simplemente puede ejecutar**:
 ```
 sudo su
 ```
@@ -68,7 +68,7 @@ sudo su
 ```
 ## Grupo Shadow
 
-Los usuarios del **grupo shadow** pueden **leer** el **/etc/shadow** archivo:
+Los usuarios del **grupo shadow** pueden **leer** el archivo **/etc/shadow**:
 ```
 -rw-r----- 1 root shadow 1824 Apr 26 19:10 /etc/shadow
 ```
@@ -86,7 +86,7 @@ $ echo $PATH
 # echo $PATH
 /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 ```
-Si podemos secuestrar algunos programas en `/usr/local`, podemos obtener fácilmente acceso root.
+Si podemos secuestrar algunos programas en `/usr/local`, podemos obtener acceso root fácilmente.
 
 Secuestrar el programa `run-parts` es una forma fácil de obtener acceso root, porque la mayoría de los programas ejecutarán un `run-parts` como (crontab, cuando se inicia sesión por ssh).
 ```bash
@@ -146,11 +146,11 @@ Tenga en cuenta que usando debugfs también puede **escribir archivos**. Por eje
 debugfs -w /dev/sda1
 debugfs:  dump /tmp/asd1.txt /tmp/asd2.txt
 ```
-Sin embargo, si intentas **escribir archivos propiedad de root** (como `/etc/shadow` o `/etc/passwd`), recibirás un error de "**Permiso denegado**".
+Sin embargo, si intentas **escribir archivos propiedad de root** (como `/etc/shadow` o `/etc/passwd`) recibirás un error de "**Permiso denegado**".
 
 ## Grupo de Video
 
-Usando el comando `w`, puedes encontrar **quién está conectado al sistema** y mostrará una salida como la siguiente:
+Usando el comando `w` puedes encontrar **quién está conectado al sistema** y mostrará una salida como la siguiente:
 ```bash
 USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU WHAT
 yossi    tty1                      22:16    5:13m  0.05s  0.04s -bash
@@ -167,13 +167,13 @@ Para **abrir** la **imagen en bruto** puedes usar **GIMP**, seleccionar el archi
 
 ![](<../../../images/image (463).png>)
 
-Luego modifica el Ancho y la Altura a los que se usan en la pantalla y verifica diferentes Tipos de Imagen (y selecciona el que muestre mejor la pantalla):
+Luego modifica el Ancho y Alto a los que se usan en la pantalla y verifica diferentes Tipos de Imagen (y selecciona el que muestre mejor la pantalla):
 
 ![](<../../../images/image (317).png>)
 
 ## Grupo Root
 
-Parece que por defecto **los miembros del grupo root** podrían tener acceso a **modificar** algunos archivos de configuración de **servicios** o algunos archivos de **bibliotecas** o **otras cosas interesantes** que podrían ser utilizadas para escalar privilegios...
+Parece que por defecto **los miembros del grupo root** podrían tener acceso a **modificar** algunos archivos de configuración de **servicios** o algunos archivos de **bibliotecas** u **otras cosas interesantes** que podrían ser utilizadas para escalar privilegios...
 
 **Verifica qué archivos pueden modificar los miembros de root**:
 ```bash
@@ -218,7 +218,7 @@ https://fosterelli.co/privilege-escalation-via-docker.html
 ## Grupo Adm
 
 Por lo general, los **miembros** del grupo **`adm`** tienen permisos para **leer archivos de registro** ubicados dentro de _/var/log/_.\
-Por lo tanto, si has comprometido a un usuario dentro de este grupo, definitivamente deberías **echar un vistazo a los registros**.
+Por lo tanto, si has comprometido a un usuario dentro de este grupo, definitivamente deberías **mirar los registros**.
 
 ## Grupo Auth
 

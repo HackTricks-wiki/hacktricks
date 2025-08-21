@@ -6,7 +6,7 @@
 
 Apple también propone otra forma de autenticar si el proceso de conexión tiene **permisos para llamar a un método XPC expuesto**.
 
-Cuando una aplicación necesita **ejecutar acciones como un usuario privilegiado**, en lugar de ejecutar la aplicación como un usuario privilegiado, generalmente instala como root un HelperTool como un servicio XPC que podría ser llamado desde la aplicación para realizar esas acciones. Sin embargo, la aplicación que llama al servicio debe tener suficiente autorización.
+Cuando una aplicación necesita **ejecutar acciones como un usuario privilegiado**, en lugar de ejecutar la aplicación como un usuario privilegiado, generalmente se instala como root un HelperTool como un servicio XPC que podría ser llamado desde la aplicación para realizar esas acciones. Sin embargo, la aplicación que llama al servicio debe tener suficiente autorización.
 
 ### ShouldAcceptNewConnection siempre YES
 
@@ -27,7 +27,7 @@ newConnection.exportedObject = self;
 return YES;
 }
 ```
-Para más información sobre cómo configurar correctamente esta verificación, consulte:
+Para más información sobre cómo configurar correctamente esta verificación:
 
 {{#ref}}
 macos-xpc-connecting-process-check/
@@ -180,7 +180,7 @@ Hay diferentes ámbitos para indicar quién puede acceder a un derecho. Algunos 
 
 ### Verificación de Derechos
 
-En `HelperTool/HelperTool.m` la función **`readLicenseKeyAuthorization`** verifica si el llamador está autorizado para **ejecutar tal método** llamando a la función **`checkAuthorization`**. Esta función comprobará que los **authData** enviados por el proceso llamador tienen un **formato correcto** y luego verificará **qué se necesita para obtener el derecho** para llamar al método específico. Si todo va bien, el **`error` devuelto será `nil`**:
+En `HelperTool/HelperTool.m`, la función **`readLicenseKeyAuthorization`** verifica si el llamador está autorizado para **ejecutar tal método** llamando a la función **`checkAuthorization`**. Esta función comprobará que los **authData** enviados por el proceso llamador tienen un **formato correcto** y luego verificará **qué se necesita para obtener el derecho** para llamar al método específico. Si todo va bien, el **`error` devuelto será `nil`**:
 ```objectivec
 - (NSError *)checkAuthorization:(NSData *)authData command:(SEL)command
 {
@@ -228,7 +228,7 @@ assert(junk == errAuthorizationSuccess);
 return error;
 }
 ```
-Tenga en cuenta que para **verificar los requisitos para obtener el derecho** a llamar a ese método, la función `authorizationRightForCommand` solo verificará el objeto de comentario previamente mencionado **`commandInfo`**. Luego, llamará a **`AuthorizationCopyRights`** para verificar **si tiene los derechos** para llamar a la función (tenga en cuenta que las banderas permiten la interacción con el usuario).
+Tenga en cuenta que para **verificar los requisitos para obtener el derecho** a llamar a ese método, la función `authorizationRightForCommand` solo verificará el objeto de comentario previamente mencionado **`commandInfo`**. Luego, llamará a **`AuthorizationCopyRights`** para verificar **si tiene los derechos** para llamar a la función (tenga en cuenta que las flags permiten la interacción con el usuario).
 
 En este caso, para llamar a la función `readLicenseKeyAuthorization`, el `kCommandKeyAuthRightDefault` se define como `@kAuthorizationRuleClassAllow`. Así que **cualquiera puede llamarlo**.
 
@@ -250,7 +250,7 @@ Puedes encontrar **todas las configuraciones de permisos** [**aquí**](https://w
 
 1. **'authenticate-user': 'false'**
 - Esta es la clave más directa. Si se establece en `false`, especifica que un usuario no necesita proporcionar autenticación para obtener este derecho.
-- Esto se utiliza en **combinación con uno de los 2 a continuación o indicando un grupo** al que el usuario debe pertenecer.
+- Se utiliza en **combinación con una de las 2 a continuación o indicando un grupo** al que el usuario debe pertenecer.
 2. **'allow-root': 'true'**
 - Si un usuario está operando como el usuario root (que tiene permisos elevados), y esta clave está establecida en `true`, el usuario root podría potencialmente obtener este derecho sin más autenticación. Sin embargo, típicamente, llegar a un estado de usuario root ya requiere autenticación, por lo que este no es un escenario de "sin autenticación" para la mayoría de los usuarios.
 3. **'session-owner': 'true'**
@@ -269,9 +269,9 @@ com-apple-aosnotification-findmymac-remove, com-apple-diskmanagement-reservekek,
 Rights with 'session-owner': 'true':
 authenticate-session-owner, authenticate-session-owner-or-admin, authenticate-session-user, com-apple-safari-allow-apple-events-to-run-javascript, com-apple-safari-allow-javascript-in-smart-search-field, com-apple-safari-allow-unsigned-app-extensions, com-apple-safari-install-ephemeral-extensions, com-apple-safari-show-credit-card-numbers, com-apple-safari-show-passwords, com-apple-icloud-passwordreset, com-apple-icloud-passwordreset, is-session-owner, system-identity-write-self, use-login-window-ui
 ```
-## Reversión de Autorización
+## Reversing Authorization
 
-### Verificando si se utiliza EvenBetterAuthorization
+### Checking if EvenBetterAuthorization is used
 
 Si encuentras la función: **`[HelperTool checkAuthorization:command:]`** probablemente el proceso esté utilizando el esquema mencionado anteriormente para la autorización:
 
@@ -281,17 +281,17 @@ Esto, si esta función está llamando a funciones como `AuthorizationCreateFromE
 
 Verifica el **`/var/db/auth.db`** para ver si es posible obtener permisos para llamar a alguna acción privilegiada sin interacción del usuario.
 
-### Comunicación de Protocolo
+### Protocol Communication
 
-Luego, necesitas encontrar el esquema de protocolo para poder establecer una comunicación con el servicio XPC.
+Luego, necesitas encontrar el esquema del protocolo para poder establecer una comunicación con el servicio XPC.
 
 La función **`shouldAcceptNewConnection`** indica el protocolo que se está exportando:
 
 <figure><img src="../../../../../images/image (44).png" alt=""><figcaption></figcaption></figure>
 
-En este caso, tenemos lo mismo que en EvenBetterAuthorizationSample, [**ver esta línea**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L94).
+En este caso, tenemos lo mismo que en EvenBetterAuthorizationSample, [**check this line**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L94).
 
-Sabiendo el nombre del protocolo utilizado, es posible **volcar su definición de encabezado** con:
+Sabiendo el nombre del protocolo utilizado, es posible **dump its header definition** con:
 ```bash
 class-dump /Library/PrivilegedHelperTools/com.example.HelperTool
 

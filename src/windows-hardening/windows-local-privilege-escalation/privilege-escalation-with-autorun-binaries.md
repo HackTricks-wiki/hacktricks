@@ -6,7 +6,7 @@
 
 ## WMIC
 
-**Wmic** se puede usar para ejecutar programas en **inicio**. Vea qué binarios están programados para ejecutarse al inicio con:
+**Wmic** se puede usar para ejecutar programas en **inicio**. Ver qué binarios están programados para ejecutarse al inicio con:
 ```bash
 wmic startup get caption,command 2>nul & ^
 Get-CimInstance Win32_StartupCommand | select Name, command, Location, User | fl
@@ -35,7 +35,8 @@ dir /b "%appdata%\Microsoft\Windows\Start Menu\Programs\Startup" 2>nul
 Get-ChildItem "C:\Users\All Users\Start Menu\Programs\Startup"
 Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 ```
-> **FYI**: Las vulnerabilidades de *traversal de ruta* en la extracción de archivos (como la que se abusó en WinRAR antes de la versión 7.13 – CVE-2025-8088) pueden ser aprovechadas para **depositar cargas útiles directamente dentro de estas carpetas de Inicio durante la descompresión**, lo que resulta en la ejecución de código en el próximo inicio de sesión del usuario. Para un análisis profundo de esta técnica, consulta:
+> **FYI**: Las vulnerabilidades de *traversal de ruta* en la extracción de archivos (como la que se abusó en WinRAR antes de la 7.13 – CVE-2025-8088) pueden ser aprovechadas para **depositar cargas útiles directamente dentro de estas carpetas de Inicio durante la descompresión**, resultando en la ejecución de código en el próximo inicio de sesión del usuario. Para un análisis profundo de esta técnica, consulta:
+
 
 {{#ref}}
 ../../generic-hacking/archive-extraction-path-traversal.md
@@ -50,7 +51,7 @@ Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 
 ### Ejecuciones
 
-**Conocido comúnmente** como registro AutoRun:
+Registro de AutoRun **comúnmente conocido**:
 
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\Run`
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\RunOnce`
@@ -87,7 +88,7 @@ En Windows Vista y versiones posteriores, las claves de registro **Run** y **Run
 reg add HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnceEx\\0001\\Depend /v 1 /d "C:\\temp\\evil.dll"
 ```
 > [!TIP]
-> **Explotación 1**: Si puedes escribir dentro de cualquiera de los registros mencionados en **HKLM**, puedes escalar privilegios cuando un usuario diferente inicia sesión.
+> **Explotación 1**: Si puedes escribir dentro de cualquiera de los registros mencionados dentro de **HKLM**, puedes escalar privilegios cuando un usuario diferente inicia sesión.
 
 > [!TIP]
 > **Explotación 2**: Si puedes sobrescribir cualquiera de los binarios indicados en cualquiera de los registros dentro de **HKLM**, puedes modificar ese binario con una puerta trasera cuando un usuario diferente inicia sesión y escalar privilegios.
@@ -182,7 +183,7 @@ Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVers
 > [!TIP]
 > Si puedes sobrescribir el valor del registro o el binario, podrás escalar privilegios.
 
-### Configuraciones de Política
+### Configuración de Políticas
 
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer`
 - `HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer`
@@ -198,7 +199,7 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Microsoft\Windows\CurrentVersion
 
 ### Cambiando el Símbolo del Sistema en Modo Seguro
 
-En el Registro de Windows bajo `HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot`, hay un valor **`AlternateShell`** que por defecto está configurado como `cmd.exe`. Esto significa que cuando eliges "Modo Seguro con Símbolo del Sistema" durante el inicio (presionando F8), se utiliza `cmd.exe`. Sin embargo, es posible configurar tu computadora para que inicie automáticamente en este modo sin necesidad de presionar F8 y seleccionarlo manualmente.
+En el Registro de Windows bajo `HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot`, hay un valor **`AlternateShell`** que está configurado por defecto a `cmd.exe`. Esto significa que cuando eliges "Modo Seguro con Símbolo del Sistema" durante el inicio (presionando F8), se utiliza `cmd.exe`. Sin embargo, es posible configurar tu computadora para que inicie automáticamente en este modo sin necesidad de presionar F8 y seleccionarlo manualmente.
 
 Pasos para crear una opción de arranque para iniciar automáticamente en "Modo Seguro con Símbolo del Sistema":
 
@@ -232,13 +233,13 @@ Dentro de estas claves, existen varias subclaves, cada una correspondiente a un 
 
 - **IsInstalled:**
 - `0` indica que el comando del componente no se ejecutará.
-- `1` significa que el comando se ejecutará una vez para cada usuario, que es el comportamiento predeterminado si falta el valor `IsInstalled`.
+- `1` significa que el comando se ejecutará una vez por cada usuario, que es el comportamiento predeterminado si falta el valor `IsInstalled`.
 - **StubPath:** Define el comando que será ejecutado por Active Setup. Puede ser cualquier línea de comando válida, como lanzar `notepad`.
 
 **Perspectivas de Seguridad:**
 
-- Modificar o escribir en una clave donde **`IsInstalled`** esté configurado como `"1"` con un **`StubPath`** específico puede llevar a la ejecución no autorizada de comandos, potencialmente para escalada de privilegios.
-- Alterar el archivo binario referenciado en cualquier valor de **`StubPath`** también podría lograr escalada de privilegios, dado que se tengan los permisos suficientes.
+- Modificar o escribir en una clave donde **`IsInstalled`** esté configurado como `"1"` con un **`StubPath`** específico puede llevar a la ejecución no autorizada de comandos, potencialmente para la escalada de privilegios.
+- Alterar el archivo binario referenciado en cualquier valor de **`StubPath`** también podría lograr la escalada de privilegios, dado que se tengan los permisos suficientes.
 
 Para inspeccionar las configuraciones de **`StubPath`** a través de los componentes de Active Setup, se pueden usar estos comandos:
 ```bash

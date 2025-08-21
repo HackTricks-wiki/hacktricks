@@ -6,6 +6,7 @@
 
 Para más información sobre qué es un iButton, consulta:
 
+
 {{#ref}}
 ../ibutton.md
 {{#endref}}
@@ -20,7 +21,7 @@ La parte **azul** de la siguiente imagen es cómo necesitarías **colocar el iBu
 
 ### Read
 
-En Modo de Lectura, el Flipper está esperando a que la llave iButton toque y es capaz de digerir cualquiera de los tres tipos de llaves: **Dallas, Cyfral y Metakom**. El Flipper **determinará el tipo de llave por sí mismo**. El nombre del protocolo de la llave se mostrará en la pantalla sobre el número de ID.
+En Modo de Lectura, el Flipper está esperando a que el iButton toque y es capaz de procesar cualquiera de los tres tipos de llaves: **Dallas, Cyfral y Metakom**. El Flipper **determinará el tipo de llave por sí mismo**. El nombre del protocolo de la llave se mostrará en la pantalla sobre el número de ID.
 
 ### Add manually
 
@@ -30,7 +31,7 @@ Es posible **agregar manualmente** un iButton de tipo: **Dallas, Cyfral y Metako
 
 Es posible **emular** iButtons guardados (leídos o agregados manualmente).
 
-> [!NOTE]
+> [!TIP]
 > Si no puedes hacer que los contactos esperados del Flipper Zero toquen el lector, puedes **usar el GPIO externo:**
 
 <figure><img src="../../../images/image (138).png" alt=""><figcaption></figcaption></figure>

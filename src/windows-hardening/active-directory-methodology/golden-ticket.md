@@ -6,7 +6,7 @@
 
 Un **ataque de Golden Ticket** consiste en la **creación de un Ticket Granting Ticket (TGT) legítimo impersonando a cualquier usuario** a través del uso del **hash NTLM de la cuenta krbtgt de Active Directory (AD)**. Esta técnica es particularmente ventajosa porque **permite el acceso a cualquier servicio o máquina** dentro del dominio como el usuario impersonado. Es crucial recordar que las **credenciales de la cuenta krbtgt nunca se actualizan automáticamente**.
 
-Para **adquirir el hash NTLM** de la cuenta krbtgt, se pueden emplear varios métodos. Puede ser extraído del **proceso del Servicio de Subsistema de Seguridad Local (LSASS)** o del **archivo de Servicios de Directorio NT (NTDS.dit)** ubicado en cualquier Controlador de Dominio (DC) dentro del dominio. Además, **ejecutar un ataque DCsync** es otra estrategia para obtener este hash NTLM, que se puede realizar utilizando herramientas como el **módulo lsadump::dcsync** en Mimikatz o el **script secretsdump.py** de Impacket. Es importante subrayar que para llevar a cabo estas operaciones, **normalmente se requieren privilegios de administrador de dominio o un nivel de acceso similar**.
+Para **adquirir el hash NTLM** de la cuenta krbtgt, se pueden emplear varios métodos. Puede ser extraído del **proceso del Servicio de Subsistema de Autoridad de Seguridad Local (LSASS)** o del **archivo de Servicios de Directorio NT (NTDS.dit)** ubicado en cualquier Controlador de Dominio (DC) dentro del dominio. Además, **ejecutar un ataque DCsync** es otra estrategia para obtener este hash NTLM, que se puede realizar utilizando herramientas como el **módulo lsadump::dcsync** en Mimikatz o el **script secretsdump.py** de Impacket. Es importante subrayar que para llevar a cabo estas operaciones, **normalmente se requieren privilegios de administrador de dominio o un nivel de acceso similar**.
 
 Aunque el hash NTLM sirve como un método viable para este propósito, se **recomienda encarecidamente** **forjar tickets utilizando las claves Kerberos del Estándar de Cifrado Avanzado (AES) (AES128 y AES256)** por razones de seguridad operativa.
 ```bash:From Linux
@@ -30,7 +30,7 @@ klist #List tickets in memory
 # Example using aes key
 kerberos::golden /user:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1-5-21-1874506631-3219952063-538504511 /aes256:430b2fdb13cc820d73ecf123dddd4c9d76425d4c2156b89ac551efb9d591a439 /ticket:golden.kirbi
 ```
-**Una vez** que tengas el **golden Ticket inyectado**, puedes acceder a los archivos compartidos **(C$)** y ejecutar servicios y WMI, por lo que podrías usar **psexec** o **wmiexec** para obtener un shell (parece que no puedes obtener un shell a través de winrm).
+**Una vez** que hayas inyectado el **golden Ticket**, puedes acceder a los archivos compartidos **(C$)** y ejecutar servicios y WMI, por lo que podrías usar **psexec** o **wmiexec** para obtener un shell (parece que no puedes obtener un shell a través de winrm).
 
 ### Eludir detecciones comunes
 

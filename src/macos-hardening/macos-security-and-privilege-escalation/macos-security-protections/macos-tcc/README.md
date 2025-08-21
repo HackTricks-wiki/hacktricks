@@ -20,13 +20,13 @@ ps -ef | grep tcc
 0   374     1   0 Thu07PM ??         2:01.66 /System/Library/PrivateFrameworks/TCC.framework/Support/tccd system
 501 63079     1   0  6:59PM ??         0:01.95 /System/Library/PrivateFrameworks/TCC.framework/Support/tccd
 ```
-Los **permisos** son **heredados de la aplicación padre** y los **permisos** son **seguros** basados en el **Bundle ID** y el **Developer ID**.
+Los permisos son **heredados de la aplicación padre** y los **permisos** son **seguros** basados en el **Bundle ID** y el **Developer ID**.
 
 ### Bases de datos TCC
 
 Las concesiones/denegaciones se almacenan en algunas bases de datos TCC:
 
-- La base de datos a nivel del sistema en **`/Library/Application Support/com.apple.TCC/TCC.db`**.
+- La base de datos a nivel de sistema en **`/Library/Application Support/com.apple.TCC/TCC.db`**.
 - Esta base de datos está **protegida por SIP**, por lo que solo un bypass de SIP puede escribir en ella.
 - La base de datos TCC del usuario **`$HOME/Library/Application Support/com.apple.TCC/TCC.db`** para preferencias por usuario.
 - Esta base de datos está protegida, por lo que solo los procesos con altos privilegios TCC, como Acceso Completo al Disco, pueden escribir en ella (pero no está protegida por SIP).
@@ -36,15 +36,15 @@ Las concesiones/denegaciones se almacenan en algunas bases de datos TCC:
 >
 > Sin embargo, recuerda que un proceso con estos altos privilegios (como **FDA** o **`kTCCServiceEndpointSecurityClient`**) podrá escribir en la base de datos TCC de los usuarios.
 
-- Hay una **tercera** base de datos TCC en **`/var/db/locationd/clients.plist`** para indicar los clientes permitidos para **acceder a los servicios de ubicación**.
+- Hay una **tercera** base de datos TCC en **`/var/db/locationd/clients.plist`** para indicar los clientes permitidos para **acceder a los servicios de localización**.
 - El archivo protegido por SIP **`/Users/carlospolop/Downloads/REG.db`** (también protegido del acceso de lectura con TCC), contiene la **ubicación** de todas las **bases de datos TCC válidas**.
 - El archivo protegido por SIP **`/Users/carlospolop/Downloads/MDMOverrides.plist`** (también protegido del acceso de lectura con TCC), contiene más permisos otorgados por TCC.
-- El archivo protegido por SIP **`/Library/Apple/Library/Bundles/TCC_Compatibility.bundle/Contents/Resources/AllowApplicationsList.plist`** (pero legible por cualquiera) es una lista de aplicaciones que requieren una excepción de TCC.
+- El archivo protegido por SIP **`/Library/Apple/Library/Bundles/TCC_Compatibility.bundle/Contents/Resources/AllowApplicationsList.plist`** (pero legible por cualquier persona) es una lista de aplicaciones que requieren una excepción de TCC.
 
 > [!TIP]
 > La base de datos TCC en **iOS** está en **`/private/var/mobile/Library/TCC/TCC.db`**.
 
-> [!NOTE]
+> [!TIP]
 > La **interfaz de usuario del centro de notificaciones** puede hacer **cambios en la base de datos TCC del sistema**:
 >
 > ```bash
@@ -102,7 +102,7 @@ sqlite> select * from access where client LIKE "%telegram%" and auth_value=0;
 {{#endtabs}}
 
 > [!TIP]
-> Al verificar ambas bases de datos, puedes comprobar los permisos que una aplicación ha permitido, ha prohibido o no tiene (lo pedirá).
+> Al verificar ambas bases de datos, puedes comprobar los permisos que una aplicación ha permitido, ha prohibido o no tiene (lo solicitará).
 
 - El **`service`** es la representación en cadena de la **permisión** de TCC
 - El **`client`** es el **ID del paquete** o **ruta al binario** con los permisos
@@ -184,7 +184,7 @@ tccutil reset All app.some.id
 # Reset the permissions granted to all apps
 tccutil reset All
 ```
-### Verificaciones de firma de TCC
+### TCC Signature Checks
 
 La **base de datos** de TCC almacena el **Bundle ID** de la aplicación, pero también **almacena** **información** sobre la **firma** para **asegurarse** de que la aplicación que solicita usar un permiso es la correcta.
 ```bash
@@ -203,7 +203,7 @@ csreq -t -r /tmp/telegram_csreq.bin
 
 ### Derechos y Permisos de TCC
 
-Las aplicaciones **no solo necesitan** **solicitar** y haber **recibido acceso** a algunos recursos, también necesitan **tener los derechos relevantes**.\
+Las aplicaciones **no solo necesitan** **solicitar** y haber sido **otorgadas acceso** a algunos recursos, también necesitan **tener los derechos relevantes**.\
 Por ejemplo, **Telegram** tiene el derecho `com.apple.security.device.camera` para solicitar **acceso a la cámara**. Una **aplicación** que **no tenga** este **derecho no podrá** acceder a la cámara (y el usuario ni siquiera será preguntado por los permisos).
 
 Sin embargo, para que las aplicaciones **accedan** a **ciertas carpetas de usuario**, como `~/Desktop`, `~/Downloads` y `~/Documents`, **no necesitan** tener ningún **derecho específico.** El sistema manejará el acceso de manera transparente y **pedirá al usuario** según sea necesario.
@@ -249,10 +249,10 @@ Filename,Header,App UUID
 otool -l /System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal| grep uuid
 uuid 769FD8F1-90E0-3206-808C-A8947BEBD6C3
 ```
-> [!NOTE]
+> [!TIP]
 > Es curioso que el atributo **`com.apple.macl`** sea gestionado por el **Sandbox**, no por tccd.
 >
-> También ten en cuenta que si mueves un archivo que permite el UUID de una aplicación en tu computadora a otra computadora, debido a que la misma aplicación tendrá diferentes UIDs, no otorgará acceso a esa aplicación.
+> También ten en cuenta que si mueves un archivo que permite el UUID de una aplicación en tu computadora a otra computadora, debido a que la misma aplicación tendrá diferentes UIDs, no se otorgará acceso a esa aplicación.
 
 El atributo extendido `com.apple.macl` **no se puede borrar** como otros atributos extendidos porque está **protegido por SIP**. Sin embargo, como [**se explica en esta publicación**](https://www.brunerd.com/blog/2020/01/07/track-and-tackle-com-apple-macl/), es posible desactivarlo **comprimendo** el archivo, **eliminándolo** y **descomprimiéndolo**.
 
@@ -345,7 +345,7 @@ EOD
 ```
 {{#endtab}}
 
-{{#tab name="Steal systems TCC.db"}}
+{{#tab name="Robar sistemas TCC.db"}}
 ```applescript
 osascript<<EOD
 tell application "Finder"
@@ -506,7 +506,7 @@ Si tienes **`kTCCServiceEndpointSecurityClient`**, tienes FDA. Fin.
 
 ### Base de Datos TCC de Usuario a FDA
 
-Obteniendo **permisos de escritura** sobre la base de datos **TCC** del **usuario** no puedes otorgarte permisos de **`FDA`**, solo el que vive en la base de datos del sistema puede otorgar eso.
+Obteniendo **permisos de escritura** sobre la base de datos **TCC** del usuario no **puedes** otorgarte permisos de **`FDA`**, solo el que vive en la base de datos del sistema puede otorgar eso.
 
 Pero puedes **dar** a ti mismo **`derechos de automatización al Finder`**, y abusar de la técnica anterior para escalar a FDA\*.
 
@@ -554,7 +554,8 @@ AllowApplicationsList.plist:
 </dict>
 </plist>
 ```
-### Bypasses de TCC
+### TCC Bypasses
+
 
 {{#ref}}
 macos-tcc-bypasses/

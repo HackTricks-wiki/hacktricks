@@ -180,7 +180,7 @@ subprocess.Popen('whoami', shell=True) # Calc.exe will pop up
 
 <details>
 
-<summary>Sobrescribiendo <strong><code>__kwdefaults__</code></strong></summary>
+<summary>Sobreescribiendo <strong><code>__kwdefaults__</code></strong></summary>
 
 **`__kwdefaults__`** es un atributo especial de todas las funciones, basado en la [documentación](https://docs.python.org/3/library/inspect.html) de Python, es un “mapeo de cualquier valor predeterminado para parámetros **solo de palabra clave**”. Contaminar este atributo nos permite controlar los valores predeterminados de los parámetros solo de palabra clave de una función, estos son los parámetros de la función que vienen después de \* o \*args.
 ```python
@@ -226,7 +226,7 @@ execute() #> Executing echo Polluted
 <summary>Sobrescribiendo el secreto de Flask a través de archivos</summary>
 
 Entonces, si puedes hacer una contaminación de clase sobre un objeto definido en el archivo python principal de la web pero **cuyo clase está definida en un archivo diferente** al principal. Porque para acceder a \_\_globals\_\_ en las cargas útiles anteriores necesitas acceder a la clase del objeto o métodos de la clase, podrás **acceder a los globals en ese archivo, pero no en el principal**. \
-Por lo tanto, **no podrás acceder al objeto global de la aplicación Flask** que definió la **clave secreta** en la página principal:
+Por lo tanto, **no podrás acceder al objeto global de la app de Flask** que definió la **clave secreta** en la página principal:
 ```python
 app = Flask(__name__, template_folder='templates')
 app.secret_key = '(:secret:)'

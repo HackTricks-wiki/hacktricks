@@ -29,7 +29,7 @@ securityContext:
 Sin embargo, incluso si el sistema de archivos está montado como ro, **`/dev/shm`** seguirá siendo escribible, por lo que es falso que no podamos escribir nada en el disco. Sin embargo, esta carpeta estará **montada con protección no-exec**, por lo que si descargas un binario aquí **no podrás ejecutarlo**.
 
 > [!WARNING]
-> Desde la perspectiva de un equipo rojo, esto hace que sea **complicado descargar y ejecutar** binarios que no están en el sistema ya (como puertas traseras o enumeradores como `kubectl`).
+> Desde la perspectiva de un equipo rojo, esto hace que sea **complicado descargar y ejecutar** binarios que no están ya en el sistema (como puertas traseras o enumeradores como `kubectl`).
 
 ## Easiest bypass: Scripts
 
@@ -45,10 +45,10 @@ Si deseas ejecutar un binario pero el sistema de archivos no lo permite, la mejo
 
 Si tienes algunos motores de script potentes dentro de la máquina, como **Python**, **Perl** o **Ruby**, podrías descargar el binario para ejecutarlo desde la memoria, almacenarlo en un descriptor de archivo de memoria (`create_memfd` syscall), que no estará protegido por esas protecciones y luego llamar a una **`exec` syscall** indicando el **fd como el archivo a ejecutar**.
 
-Para esto, puedes usar fácilmente el proyecto [**fileless-elf-exec**](https://github.com/nnsee/fileless-elf-exec). Puedes pasarle un binario y generará un script en el lenguaje indicado con el **binario comprimido y codificado en b64** con las instrucciones para **decodificar y descomprimirlo** en un **fd** creado llamando a la syscall `create_memfd` y una llamada a la syscall **exec** para ejecutarlo.
+Para esto, puedes usar fácilmente el proyecto [**fileless-elf-exec**](https://github.com/nnsee/fileless-elf-exec). Puedes pasarle un binario y generará un script en el lenguaje indicado con el **binario comprimido y codificado en b64** con las instrucciones para **decodificar y descomprimirlo** en un **fd** creado llamando a `create_memfd` syscall y una llamada a la **exec** syscall para ejecutarlo.
 
 > [!WARNING]
-> Esto no funciona en otros lenguajes de scripting como PHP o Node porque no tienen ninguna **manera predeterminada de llamar a syscalls en bruto** desde un script, por lo que no es posible llamar a `create_memfd` para crear el **fd de memoria** para almacenar el binario.
+> Esto no funciona en otros lenguajes de scripting como PHP o Node porque no tienen ninguna **manera predeterminada de llamar a syscalls en bruto** desde un script, por lo que no es posible llamar a `create_memfd` para crear el **memory fd** para almacenar el binario.
 >
 > Además, crear un **fd regular** con un archivo en `/dev/shm` no funcionará, ya que no se te permitirá ejecutarlo porque se aplicará la **protección no-exec**.
 
@@ -56,7 +56,7 @@ Para esto, puedes usar fácilmente el proyecto [**fileless-elf-exec**](https://g
 
 [**DDexec / EverythingExec**](https://github.com/arget13/DDexec) es una técnica que te permite **modificar la memoria de tu propio proceso** sobrescribiendo su **`/proc/self/mem`**.
 
-Por lo tanto, **controlando el código ensamblador** que se está ejecutando en el proceso, puedes escribir un **shellcode** y "mutar" el proceso para **ejecutar cualquier código arbitrario**.
+Por lo tanto, **controlando el código ensamblador** que se está ejecutando por el proceso, puedes escribir un **shellcode** y "mutar" el proceso para **ejecutar cualquier código arbitrario**.
 
 > [!TIP]
 > **DDexec / EverythingExec** te permitirá cargar y **ejecutar** tu propio **shellcode** o **cualquier binario** desde **memoria**.
@@ -74,7 +74,7 @@ ddexec.md
 
 [**Memexec**](https://github.com/arget13/memexec) es el siguiente paso natural de DDexec. Es un **DDexec shellcode demonizado**, por lo que cada vez que quieras **ejecutar un binario diferente** no necesitas relanzar DDexec, solo puedes ejecutar el shellcode de memexec a través de la técnica DDexec y luego **comunicarte con este demonio para pasar nuevos binarios para cargar y ejecutar**.
 
-Puedes encontrar un ejemplo de cómo usar **memexec para ejecutar binarios desde un shell reverso de PHP** en [https://github.com/arget13/memexec/blob/main/a.php](https://github.com/arget13/memexec/blob/main/a.php).
+Puedes encontrar un ejemplo de cómo usar **memexec para ejecutar binarios desde un reverse shell de PHP** en [https://github.com/arget13/memexec/blob/main/a.php](https://github.com/arget13/memexec/blob/main/a.php).
 
 ### Memdlopen
 
@@ -88,24 +88,23 @@ Los contenedores distroless contienen solo los **componentes mínimos necesarios
 
 El objetivo de los contenedores distroless es **reducir la superficie de ataque de los contenedores al eliminar componentes innecesarios** y minimizar el número de vulnerabilidades que pueden ser explotadas.
 
-### Shell Reverso
+### Reverse Shell
 
 En un contenedor distroless, es posible que **ni siquiera encuentres `sh` o `bash`** para obtener un shell regular. Tampoco encontrarás binarios como `ls`, `whoami`, `id`... todo lo que normalmente ejecutas en un sistema.
 
 > [!WARNING]
-> Por lo tanto, **no podrás** obtener un **shell reverso** o **enumerar** el sistema como lo haces normalmente.
+> Por lo tanto, **no** podrás obtener un **reverse shell** o **enumerar** el sistema como lo haces normalmente.
 
-Sin embargo, si el contenedor comprometido está ejecutando, por ejemplo, un flask web, entonces python está instalado, y por lo tanto puedes obtener un **shell reverso de Python**. Si está ejecutando node, puedes obtener un shell rev de Node, y lo mismo con casi cualquier **lenguaje de scripting**.
+Sin embargo, si el contenedor comprometido está ejecutando, por ejemplo, un flask web, entonces python está instalado, y por lo tanto puedes obtener un **reverse shell de Python**. Si está ejecutando node, puedes obtener un reverse shell de Node, y lo mismo con casi cualquier **lenguaje de scripting**.
 
 > [!TIP]
 > Usando el lenguaje de scripting podrías **enumerar el sistema** utilizando las capacidades del lenguaje.
 
-Si no hay protecciones de **`read-only/no-exec`**, podrías abusar de tu shell reverso para **escribir en el sistema de archivos tus binarios** y **ejecutarlos**.
+Si no hay protecciones de **`read-only/no-exec`**, podrías abusar de tu reverse shell para **escribir en el sistema de archivos tus binarios** y **ejecutarlos**.
 
 > [!TIP]
 > Sin embargo, en este tipo de contenedores, estas protecciones generalmente existirán, pero podrías usar las **técnicas de ejecución en memoria anteriores para eludirlas**.
 
-Puedes encontrar **ejemplos** sobre cómo **explotar algunas vulnerabilidades RCE** para obtener shells reversos de lenguajes de scripting y ejecutar binarios desde la memoria en [**https://github.com/carlospolop/DistrolessRCE**](https://github.com/carlospolop/DistrolessRCE).
-
+Puedes encontrar **ejemplos** sobre cómo **explotar algunas vulnerabilidades RCE** para obtener **reverse shells** de lenguajes de scripting y ejecutar binarios desde la memoria en [**https://github.com/carlospolop/DistrolessRCE**](https://github.com/carlospolop/DistrolessRCE).
 
 {{#include ../../../banners/hacktricks-training.md}}

@@ -6,7 +6,8 @@
 
 Si no estás familiarizado con macOS, deberías comenzar a aprender los conceptos básicos de macOS:
 
-- Archivos y **permisos especiales de macOS:**
+- **Archivos y permisos especiales de macOS:**
+
 
 {{#ref}}
 macos-files-folders-and-binaries/
@@ -14,23 +15,27 @@ macos-files-folders-and-binaries/
 
 - **Usuarios comunes de macOS**
 
+
 {{#ref}}
 macos-users.md
 {{#endref}}
 
 - **AppleFS**
 
+
 {{#ref}}
 macos-applefs.md
 {{#endref}}
 
-- La **arquitectura** del k**ernel**
+- La **arquitectura** del **kernel**
+
 
 {{#ref}}
 mac-os-architecture/
 {{#endref}}
 
-- Servicios y **protocolos de red comunes de macOS**
+- **Servicios y protocolos de red** comunes de macOS
+
 
 {{#ref}}
 macos-protocols.md
@@ -43,17 +48,20 @@ macos-protocols.md
 
 En las empresas, los sistemas **macOS** probablemente serán **gestionados con un MDM**. Por lo tanto, desde la perspectiva de un atacante, es interesante saber **cómo funciona eso**:
 
+
 {{#ref}}
 ../macos-red-teaming/macos-mdm/
 {{#endref}}
 
 ### MacOS - Inspección, Depuración y Fuzzing
 
+
 {{#ref}}
 macos-apps-inspecting-debugging-and-fuzzing/
 {{#endref}}
 
 ## Protecciones de Seguridad de MacOS
+
 
 {{#ref}}
 macos-security-protections/
@@ -75,13 +83,15 @@ Poder **crear un archivo** que va a ser **utilizado por root**, permite a un usu
 
 Para este tipo de vulnerabilidades, no olvides **verificar instaladores `.pkg` vulnerables**:
 
+
 {{#ref}}
 macos-files-folders-and-binaries/macos-installers-abuse.md
 {{#endref}}
 
-### Manejadores de Extensiones de Archivos y Esquemas de URL
+### Controladores de Aplicaciones de Extensión de Archivo y Esquema de URL
 
-Aplicaciones extrañas registradas por extensiones de archivo podrían ser abusadas y diferentes aplicaciones pueden registrarse para abrir protocolos específicos.
+Aplicaciones extrañas registradas por extensiones de archivo podrían ser abusadas y diferentes aplicaciones pueden registrarse para abrir protocolos específicos
+
 
 {{#ref}}
 macos-file-extension-apps.md
@@ -89,17 +99,18 @@ macos-file-extension-apps.md
 
 ## Escalación de Privilegios TCC / SIP en macOS
 
-En macOS, **las aplicaciones y binarios pueden tener permisos** para acceder a carpetas o configuraciones que los hacen más privilegiados que otros.
+En macOS, **las aplicaciones y binarios pueden tener permisos** para acceder a carpetas o configuraciones que les otorgan más privilegios que a otros.
 
 Por lo tanto, un atacante que quiera comprometer con éxito una máquina macOS necesitará **escalar sus privilegios TCC** (o incluso **eludir SIP**, dependiendo de sus necesidades).
 
-Estos privilegios generalmente se otorgan en forma de **derechos** con los que la aplicación está firmada, o la aplicación podría solicitar algunos accesos y después de que el **usuario los apruebe**, pueden encontrarse en las **bases de datos TCC**. Otra forma en que un proceso puede obtener estos privilegios es siendo un **hijo de un proceso** con esos **privilegios**, ya que generalmente son **heredados**.
+Estos privilegios generalmente se otorgan en forma de **entitlements** con los que la aplicación está firmada, o la aplicación podría solicitar algunos accesos y después de que el **usuario los apruebe**, pueden encontrarse en las **bases de datos TCC**. Otra forma en que un proceso puede obtener estos privilegios es siendo un **hijo de un proceso** con esos **privilegios**, ya que generalmente son **heredados**.
 
 Sigue estos enlaces para encontrar diferentes formas de [**escalar privilegios en TCC**](macos-security-protections/macos-tcc/index.html#tcc-privesc-and-bypasses), para [**eludir TCC**](macos-security-protections/macos-tcc/macos-tcc-bypasses/index.html) y cómo en el pasado [**se ha eludido SIP**](macos-security-protections/macos-sip.md#sip-bypasses).
 
 ## Escalación de Privilegios Tradicional en macOS
 
 Por supuesto, desde la perspectiva de un equipo rojo, también deberías estar interesado en escalar a root. Consulta la siguiente publicación para algunos consejos:
+
 
 {{#ref}}
 macos-privilege-escalation.md
@@ -111,7 +122,7 @@ macos-privilege-escalation.md
 
 ## Referencias
 
-- [**Respuesta a Incidentes de OS X: Scripting y Análisis**](https://www.amazon.com/OS-Incident-Response-Scripting-Analysis-ebook/dp/B01FHOHHVS)
+- [**OS X Incident Response: Scripting and Analysis**](https://www.amazon.com/OS-Incident-Response-Scripting-Analysis-ebook/dp/B01FHOHHVS)
 - [**https://taomm.org/vol1/analysis.html**](https://taomm.org/vol1/analysis.html)
 - [**https://github.com/NicolasGrimonpont/Cheatsheet**](https://github.com/NicolasGrimonpont/Cheatsheet)
 - [**https://assets.sentinelone.com/c/sentinal-one-mac-os-?x=FvGtLJ**](https://assets.sentinelone.com/c/sentinal-one-mac-os-?x=FvGtLJ)

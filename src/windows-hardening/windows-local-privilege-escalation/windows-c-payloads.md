@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Esta página recopila **fragmentos de C pequeños y autónomos** que son útiles durante la Escalación de Privilegios Local en Windows o post-explotación. Cada payload está diseñado para ser **amigable con copiar y pegar**, requiere solo la API de Windows / tiempo de ejecución de C, y se puede compilar con `i686-w64-mingw32-gcc` (x86) o `x86_64-w64-mingw32-gcc` (x64).
+Esta página recopila **fragmentos de C pequeños y autónomos** que son útiles durante la Escalación de Privilegios Local en Windows o post-explotación. Cada payload está diseñado para ser **amigable para copiar y pegar**, requiere solo la API de Windows / tiempo de ejecución de C, y se puede compilar con `i686-w64-mingw32-gcc` (x86) o `x86_64-w64-mingw32-gcc` (x64).
 
 > ⚠️  Estos payloads asumen que el proceso ya tiene los privilegios mínimos necesarios para realizar la acción (por ejemplo, `SeDebugPrivilege`, `SeImpersonatePrivilege`, o contexto de integridad media para un bypass de UAC). Están destinados a **entornos de red team o CTF** donde explotar una vulnerabilidad ha permitido la ejecución de código nativo arbitrario.
 
@@ -20,14 +20,14 @@ return 0;
 ```
 ---
 
-## UAC Bypass – `fodhelper.exe` Registro Hijack (Integridad Media → Alta)
+## Bypass de UAC – Secuestro de Registro de `fodhelper.exe` (Integridad Media → Alta)
 Cuando se ejecuta el binario de confianza **`fodhelper.exe`**, consulta la ruta del registro a continuación **sin filtrar el verbo `DelegateExecute`**. Al plantar nuestro comando bajo esa clave, un atacante puede eludir UAC *sin* dejar un archivo en el disco.
 
 *Ruta del registro consultada por `fodhelper.exe`*
 ```
 HKCU\Software\Classes\ms-settings\Shell\Open\command
 ```
-Un PoC mínimo que abre un `cmd.exe` elevado:
+Una PoC mínima que abre un `cmd.exe` elevado:
 ```c
 // x86_64-w64-mingw32-gcc -municode -s -O2 -o uac_fodhelper.exe uac_fodhelper.c
 #define _CRT_SECURE_NO_WARNINGS
@@ -115,6 +115,7 @@ return 0;
 }
 ```
 Para una explicación más profunda de cómo funciona eso, consulta:
+
 {{#ref}}
 sedebug-+-seimpersonate-copy-token.md
 {{#endref}}

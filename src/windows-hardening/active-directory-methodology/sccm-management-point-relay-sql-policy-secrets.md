@@ -58,7 +58,7 @@ proxychains mssqlclient.py CONTOSO/MP01$@10.10.10.15 -windows-auth
 ```
 Cambia a la base de datos **CM_<SiteCode>** (usa el código de sitio de 3 dígitos, por ejemplo, `CM_001`).
 
-### 3.1  Encontrar GUIDs de Computadora Desconocida (opcional)
+### 3.1  Encontrar GUIDs de Computadoras Desconocidas (opcional)
 ```sql
 USE CM_001;
 SELECT SMS_Unique_Identifier0
@@ -135,13 +135,15 @@ mismas mitigaciones utilizadas contra `PetitPotam`/`PrinterBug`).
 
 ---
 
-## Véase también
-* Fundamentos del relay NTLM:
+## Ver también
+* Fundamentos de relay NTLM:
+
 {{#ref}}
 ../ntlm/README.md
 {{#endref}}
 
 * Abuso de MSSQL y post-explotación:
+
 {{#ref}}
 abusing-ad-mssql.md
 {{#endref}}

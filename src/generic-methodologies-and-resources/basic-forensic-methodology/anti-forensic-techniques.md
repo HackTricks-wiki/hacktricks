@@ -2,14 +2,14 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Tiempos
+## Timestamps
 
 Un atacante puede estar interesado en **cambiar las marcas de tiempo de los archivos** para evitar ser detectado.\
 Es posible encontrar las marcas de tiempo dentro del MFT en los atributos `$STANDARD_INFORMATION` \_\_ y \_\_ `$FILE_NAME`.
 
 Ambos atributos tienen 4 marcas de tiempo: **Modificación**, **acceso**, **creación** y **modificación del registro MFT** (MACE o MACB).
 
-**Explorador de Windows** y otras herramientas muestran la información de **`$STANDARD_INFORMATION`**.
+**Windows explorer** y otras herramientas muestran la información de **`$STANDARD_INFORMATION`**.
 
 ### TimeStomp - Herramienta anti-forense
 
@@ -77,11 +77,11 @@ Estas distribuciones se **ejecutan dentro de la memoria RAM**. La única forma d
 
 ## Configuración de Windows
 
-Es posible deshabilitar varios métodos de registro de Windows para hacer que la investigación forense sea mucho más difícil.
+Es posible deshabilitar varios métodos de registro de Windows para dificultar mucho la investigación forense.
 
 ### Deshabilitar Marcas de Tiempo - UserAssist
 
-Esta es una clave de registro que mantiene las fechas y horas en que cada ejecutable fue ejecutado por el usuario.
+Esta es una clave de registro que mantiene fechas y horas cuando cada ejecutable fue ejecutado por el usuario.
 
 Deshabilitar UserAssist requiere dos pasos:
 
@@ -174,7 +174,7 @@ Los defensores deben monitorear los cambios en esas claves del registro y la eli
 
 ### Parche ETW (Event Tracing for Windows)
 
-Los productos de seguridad de endpoints dependen en gran medida de ETW. Un método de evasión popular en 2024 es parchear `ntdll!EtwEventWrite`/`EtwEventWriteFull` en memoria para que cada llamada a ETW devuelva `STATUS_SUCCESS` sin emitir el evento:
+Los productos de seguridad de endpoints dependen en gran medida de ETW. Un método de evasión popular de 2024 es parchear `ntdll!EtwEventWrite`/`EtwEventWriteFull` en memoria para que cada llamada a ETW devuelva `STATUS_SUCCESS` sin emitir el evento:
 ```c
 // 0xC3 = RET on x64
 unsigned char patch[1] = { 0xC3 };
@@ -184,7 +184,7 @@ patch, sizeof(patch), NULL);
 ```
 Public PoCs (por ejemplo, `EtwTiSwallow`) implementan la misma primitiva en PowerShell o C++.  
 Debido a que el parche es **local al proceso**, los EDR que se ejecutan dentro de otros procesos pueden pasarlo por alto.  
-Detección: comparar `ntdll` en memoria vs. en disco, o enganchar antes del modo de usuario.
+Detección: comparar `ntdll` en memoria vs. en disco, o enganchar antes del modo usuario.
 
 ### Revitalización de Flujos de Datos Alternativos (ADS)
 
@@ -242,15 +242,15 @@ Forense/caza consejos
 - RHEL/CentOS: `rpm -Va 'activemq*'`
 - Busque versiones de JAR presentes en el disco que no sean propiedad del gestor de paquetes, o enlaces simbólicos actualizados fuera de banda.
 - Línea de tiempo: `find "$AMQ_DIR" -type f -printf '%TY-%Tm-%Td %TH:%TM %p\n' | sort` para correlacionar ctime/mtime con la ventana de compromiso.
-- Historial de shell/telemetría de procesos: evidencia de `curl`/`wget` a `repo1.maven.org` u otros CDNs de artefactos inmediatamente después de la explotación inicial.
+- Historial de shell/telemetría de procesos: evidencia de `curl`/`wget` a `repo1.maven.org` u otros CDN de artefactos inmediatamente después de la explotación inicial.
 - Gestión de cambios: valide quién aplicó el “parche” y por qué, no solo que una versión parcheada esté presente.
 
-### C2 de servicio en la nube con tokens portadores y stagers anti-análisis
-El comercio observado combinó múltiples rutas C2 de largo recorrido y empaquetado anti-análisis:
+### C2 de servicio en la nube con tokens de portador y stagers anti-análisis
+El comercio observado combinó múltiples rutas C2 de largo alcance y empaquetado anti-análisis:
 - Cargadores ELF de PyInstaller protegidos por contraseña para dificultar el sandboxing y el análisis estático (por ejemplo, PYZ cifrado, extracción temporal bajo `/_MEI*`).
 - Indicadores: hits de `strings` como `PyInstaller`, `pyi-archive`, `PYZ-00.pyz`, `MEIPASS`.
 - Artefactos en tiempo de ejecución: extracción a `/tmp/_MEI*` o rutas personalizadas `--runtime-tmpdir`.
-- C2 respaldado por Dropbox utilizando tokens OAuth Bearer codificados.
+- C2 respaldado por Dropbox utilizando tokens de portador OAuth codificados.
 - Marcadores de red: `api.dropboxapi.com` / `content.dropboxapi.com` con `Authorization: Bearer <token>`.
 - Cace en proxy/NetFlow/Zeek/Suricata para HTTPS saliente a dominios de Dropbox desde cargas de trabajo de servidor que normalmente no sincronizan archivos.
 - C2 paralelo/respaldo a través de túneles (por ejemplo, Cloudflare Tunnel `cloudflared`), manteniendo el control si un canal es bloqueado.
@@ -265,7 +265,7 @@ for d in /etc/cron.*; do [ -f "$d/0anacron" ] && stat -c '%n %y %s' "$d/0anacron
 grep -R --line-number -E 'curl|wget|python|/bin/sh' /etc/cron.*/* 2>/dev/null
 ```
 - Rollback de endurecimiento de configuración SSH: habilitar inicios de sesión de root y alterar shells predeterminados para cuentas de bajo privilegio.
-- Cace para habilitar inicios de sesión de root:
+- Cace para habilitar el inicio de sesión de root:
 ```bash
 grep -E '^\s*PermitRootLogin' /etc/ssh/sshd_config
 # valores de bandera como "yes" o configuraciones excesivamente permisivas
@@ -285,12 +285,12 @@ Los defensores deben correlacionar estos artefactos con la exposición externa y
 
 ## Referencias
 
-- Sophos X-Ops – “AuKill: Un controlador vulnerable armado para deshabilitar EDR” (marzo de 2023)
+- Sophos X-Ops – “AuKill: A Weaponized Vulnerable Driver for Disabling EDR” (marzo de 2023)
 https://news.sophos.com/en-us/2023/03/07/aukill-a-weaponized-vulnerable-driver-for-disabling-edr
-- Red Canary – “Parcheando EtwEventWrite para sigilo: Detección y Caza” (junio de 2024)
+- Red Canary – “Patching EtwEventWrite for Stealth: Detection & Hunting” (junio de 2024)
 https://redcanary.com/blog/etw-patching-detection
 
-- [Red Canary – Parcheando para persistencia: Cómo el malware DripDropper de Linux se mueve a través de la nube](https://redcanary.com/blog/threat-intelligence/dripdropper-linux-malware/)
+- [Red Canary – Patching for persistence: How DripDropper Linux malware moves through the cloud](https://redcanary.com/blog/threat-intelligence/dripdropper-linux-malware/)
 - [CVE‑2023‑46604 – Apache ActiveMQ OpenWire RCE (NVD)](https://nvd.nist.gov/vuln/detail/CVE-2023-46604)
 
 {{#include ../../banners/hacktricks-training.md}}

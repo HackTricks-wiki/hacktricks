@@ -42,7 +42,7 @@ $newPath = "$envPath;$folderPath"
 - Inicie **`procmon`** y vaya a **`Opciones`** --> **`Habilitar registro de arranque`** y presione **`Aceptar`** en el aviso.
 - Luego, **reinicie**. Cuando la computadora se reinicie, **`procmon`** comenzará a **grabar** eventos lo antes posible.
 - Una vez que **Windows** esté **iniciado, ejecute `procmon`** nuevamente, le dirá que ha estado funcionando y le **preguntará si desea almacenar** los eventos en un archivo. Diga **sí** y **almacene los eventos en un archivo**.
-- **Después** de que se **genere** el **archivo**, **cierre** la ventana de **`procmon`** abierta y **abra el archivo de eventos**.
+- **Después** de que se **genere el archivo**, **cierre** la ventana de **`procmon`** abierta y **abra el archivo de eventos**.
 - Agregue estos **filtros** y encontrará todos los Dlls que algún **proceso intentó cargar** desde la carpeta de System Path escribible:
 
 <figure><img src="../../../images/image (945).png" alt=""><figcaption></figcaption></figure>
@@ -55,11 +55,11 @@ Ejecutando esto en una **máquina virtual (vmware) Windows 11** gratuita, obtuve
 
 En este caso, los .exe son inútiles, así que ignórelos, los DLLs perdidos eran de:
 
-| Servicio                         | Dll                | Línea de CMD                                                         |
-| ------------------------------- | ------------------ | -------------------------------------------------------------------- |
-| Programador de tareas (Schedule)       | WptsExtensions.dll | `C:\Windows\system32\svchost.exe -k netsvcs -p -s Schedule`          |
+| Servicio                         | Dll                | Línea de CMD                                                        |
+| ------------------------------- | ------------------ | ------------------------------------------------------------------ |
+| Programador de tareas (Schedule) | WptsExtensions.dll | `C:\Windows\system32\svchost.exe -k netsvcs -p -s Schedule`        |
 | Servicio de política de diagnóstico (DPS) | Unknown.DLL        | `C:\Windows\System32\svchost.exe -k LocalServiceNoNetwork -p -s DPS` |
-| ???                             | SharedRes.dll      | `C:\Windows\system32\svchost.exe -k UnistackSvcGroup`                |
+| ???                             | SharedRes.dll      | `C:\Windows\system32\svchost.exe -k UnistackSvcGroup`              |
 
 Después de encontrar esto, encontré esta interesante publicación de blog que también explica cómo [**abusar de WptsExtensions.dll para privesc**](https://juggernaut-sec.com/dll-hijacking/#Windows_10_Phantom_DLL_Hijacking_-_WptsExtensionsdll). Que es lo que **vamos a hacer ahora**.
 

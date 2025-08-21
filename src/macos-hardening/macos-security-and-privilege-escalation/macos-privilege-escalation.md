@@ -39,7 +39,7 @@ chmod +x /opt/homebrew/bin/ls
 # victim
 sudo ls
 ```
-Tenga en cuenta que un usuario que utiliza el terminal probablemente tendrá **Homebrew instalado**. Por lo tanto, es posible secuestrar binarios en **`/opt/homebrew/bin`**.
+Ten en cuenta que un usuario que utiliza el terminal probablemente tendrá **Homebrew instalado**. Por lo tanto, es posible secuestrar binarios en **`/opt/homebrew/bin`**.
 
 ### Suplantación del Dock
 
@@ -205,8 +205,8 @@ killall Dock
 
 ### CVE-2020-9771 - bypass de TCC de mount_apfs y escalación de privilegios
 
-**Cualquier usuario** (incluso los que no tienen privilegios) puede crear y montar un snapshot de Time Machine y **acceder a TODOS los archivos** de ese snapshot.\
-El **único privilegio** necesario es que la aplicación utilizada (como `Terminal`) tenga acceso **Full Disk Access** (FDA) (`kTCCServiceSystemPolicyAllfiles`), lo cual debe ser concedido por un administrador.
+**Cualquier usuario** (incluso los no privilegiados) puede crear y montar un snapshot de Time Machine y **acceder a TODOS los archivos** de ese snapshot.\
+El **único privilegio** necesario es que la aplicación utilizada (como `Terminal`) tenga acceso de **Acceso Completo al Disco** (FDA) (`kTCCServiceSystemPolicyAllfiles`), que debe ser concedido por un administrador.
 ```bash
 # Create snapshot
 tmutil localsnapshot
@@ -231,6 +231,7 @@ Una explicación más detallada se puede [**encontrar en el informe original**](
 ## Información Sensible
 
 Esto puede ser útil para escalar privilegios:
+
 
 {{#ref}}
 macos-files-folders-and-binaries/macos-sensitive-locations.md

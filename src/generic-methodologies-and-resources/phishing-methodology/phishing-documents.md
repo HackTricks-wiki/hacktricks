@@ -27,7 +27,7 @@ _**Categorías**: Enlaces y Referencias, **Nombres de campo**: includePicture, y
 
 Es posible usar macros para ejecutar código arbitrario desde el documento.
 
-#### Funciones de Carga Automática
+#### Funciones de Autocarga
 
 Cuanto más comunes sean, más probable es que el AV las detecte.
 
@@ -68,10 +68,10 @@ proc.Create "powershell <beacon line generated>
 
 Ve a **Archivo > Información > Inspeccionar documento > Inspeccionar documento**, lo que abrirá el Inspector de documentos. Haz clic en **Inspeccionar** y luego en **Eliminar todo** junto a **Propiedades del documento e información personal**.
 
-#### Extensión de Doc
+#### Extensión de documento
 
 Cuando termines, selecciona el menú desplegable **Guardar como tipo**, cambia el formato de **`.docx`** a **Word 97-2003 `.doc`**.\
-Haz esto porque **no puedes guardar macros dentro de un `.docx`** y hay un **estigma** **alrededor** de la extensión habilitada para macros **`.docm`** (por ejemplo, el ícono de miniatura tiene un enorme `!` y algunos gateways web/correo los bloquean por completo). Por lo tanto, esta **extensión heredada `.doc` es el mejor compromiso**.
+Haz esto porque **no puedes guardar macros dentro de un `.docx`** y hay un **estigma** **alrededor** de la extensión habilitada para macros **`.docm`** (por ejemplo, el ícono de miniatura tiene un gran `!` y algunos gateways web/correo los bloquean por completo). Por lo tanto, esta **extensión `.doc` heredada es el mejor compromiso**.
 
 #### Generadores de macros maliciosas
 
@@ -144,9 +144,11 @@ Hay varias formas de **forzar la autenticación NTLM "remotamente"**, por ejempl
 
 **Revisa estas ideas y más en las siguientes páginas:**
 
+
 {{#ref}}
 ../../windows-hardening/active-directory-methodology/printers-spooler-service-abuse.md
 {{#endref}}
+
 
 {{#ref}}
 ../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md

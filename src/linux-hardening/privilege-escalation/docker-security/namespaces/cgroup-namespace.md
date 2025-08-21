@@ -4,7 +4,7 @@
 
 ## Información Básica
 
-Un cgroup namespace es una característica del kernel de Linux que proporciona **aislamiento de jerarquías de cgroup para procesos que se ejecutan dentro de un namespace**. Los cgroups, abreviatura de **grupos de control**, son una característica del kernel que permite organizar procesos en grupos jerárquicos para gestionar y hacer cumplir **límites en los recursos del sistema** como CPU, memoria y E/S.
+Un cgroup namespace es una característica del núcleo de Linux que proporciona **aislamiento de jerarquías de cgroup para procesos que se ejecutan dentro de un namespace**. Los cgroups, abreviatura de **grupos de control**, son una característica del núcleo que permite organizar procesos en grupos jerárquicos para gestionar y hacer cumplir **límites en los recursos del sistema** como CPU, memoria y E/S.
 
 Aunque los cgroup namespaces no son un tipo de namespace separado como los otros que discutimos anteriormente (PID, mount, network, etc.), están relacionados con el concepto de aislamiento de namespace. **Los cgroup namespaces virtualizan la vista de la jerarquía de cgroup**, de modo que los procesos que se ejecutan dentro de un cgroup namespace tienen una vista diferente de la jerarquía en comparación con los procesos que se ejecutan en el host u otros namespaces.
 
@@ -34,7 +34,7 @@ Al montar una nueva instancia del sistema de archivos `/proc` si usas el paráme
 
 <summary>Error: bash: fork: Cannot allocate memory</summary>
 
-Cuando se ejecuta `unshare` sin la opción `-f`, se encuentra un error debido a la forma en que Linux maneja los nuevos espacios de nombres de PID (Identificación de Proceso). Los detalles clave y la solución se describen a continuación:
+Cuando se ejecuta `unshare` sin la opción `-f`, se encuentra un error debido a la forma en que Linux maneja los nuevos espacios de nombres de PID (ID de Proceso). Los detalles clave y la solución se describen a continuación:
 
 1. **Explicación del Problema**:
 
@@ -48,7 +48,7 @@ Cuando se ejecuta `unshare` sin la opción `-f`, se encuentra un error debido a 
 
 3. **Solución**:
 - El problema se puede resolver utilizando la opción `-f` con `unshare`. Esta opción hace que `unshare` cree un nuevo proceso después de crear el nuevo espacio de nombres de PID.
-- Ejecutar `%unshare -fp /bin/bash%` asegura que el comando `unshare` se convierta en PID 1 en el nuevo espacio de nombres. `/bin/bash` y sus procesos hijos están entonces contenidos de manera segura dentro de este nuevo espacio de nombres, previniendo la salida prematura de PID 1 y permitiendo la asignación normal de PID.
+- Ejecutar `%unshare -fp /bin/bash%` asegura que el comando `unshare` mismo se convierta en PID 1 en el nuevo espacio de nombres. `/bin/bash` y sus procesos hijos están entonces contenidos de manera segura dentro de este nuevo espacio de nombres, previniendo la salida prematura de PID 1 y permitiendo la asignación normal de PID.
 
 Al asegurarte de que `unshare` se ejecute con la bandera `-f`, el nuevo espacio de nombres de PID se mantiene correctamente, permitiendo que `/bin/bash` y sus subprocesos operen sin encontrar el error de asignación de memoria.
 
@@ -58,7 +58,7 @@ Al asegurarte de que `unshare` se ejecute con la bandera `-f`, el nuevo espacio 
 ```bash
 docker run -ti --name ubuntu1 -v /usr:/ubuntu1 ubuntu bash
 ```
-### Verifica en qué namespace está tu proceso
+### Verifica en qué namespace se encuentra tu proceso
 ```bash
 ls -l /proc/self/ns/cgroup
 lrwxrwxrwx 1 root root 0 Apr  4 21:19 /proc/self/ns/cgroup -> 'cgroup:[4026531835]'

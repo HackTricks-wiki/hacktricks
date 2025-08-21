@@ -11,7 +11,7 @@ Este enlazador necesitará localizar todas las bibliotecas ejecutables, mapeánd
 Por supuesto, **`dyld`** no tiene dependencias (utiliza syscalls y extractos de libSystem).
 
 > [!CAUTION]
-> Si este enlazador contiene alguna vulnerabilidad, dado que se ejecuta antes de ejecutar cualquier binario (incluso los altamente privilegiados), sería posible **escalar privilegios**.
+> Si este enlazador contiene alguna vulnerabilidad, ya que se ejecuta antes de ejecutar cualquier binario (incluso los altamente privilegiados), sería posible **escalar privilegios**.
 
 ### Flujo
 
@@ -25,12 +25,12 @@ Dyld será cargado por **`dyldboostrap::start`**, que también cargará cosas co
 
 Luego, mapea la caché compartida de dyld que preenlaza todas las bibliotecas del sistema importantes y luego mapea las bibliotecas de las que depende el binario y continúa recursivamente hasta que se carguen todas las bibliotecas necesarias. Por lo tanto:
 
-1. comienza a cargar bibliotecas insertadas con `DYLD_INSERT_LIBRARIES` (si se permite)
+1. comienza cargando bibliotecas insertadas con `DYLD_INSERT_LIBRARIES` (si se permite)
 2. Luego las compartidas en caché
 3. Luego las importadas
 1. Luego continúa importando bibliotecas recursivamente
 
-Una vez que todas están cargadas, se ejecutan los **inicializadores** de estas bibliotecas. Estos están codificados usando **`__attribute__((constructor))`** definidos en el `LC_ROUTINES[_64]` (ahora en desuso) o por puntero en una sección marcada con `S_MOD_INIT_FUNC_POINTERS` (generalmente: **`__DATA.__MOD_INIT_FUNC`**).
+Una vez que todas están cargadas, se ejecutan los **inicializadores** de estas bibliotecas. Estos están codificados usando **`__attribute__((constructor))`** definido en el `LC_ROUTINES[_64]` (ahora obsoleto) o por puntero en una sección marcada con `S_MOD_INIT_FUNC_POINTERS` (generalmente: **`__DATA.__MOD_INIT_FUNC`**).
 
 Los terminadores están codificados con **`__attribute__((destructor))`** y se encuentran en una sección marcada con `S_MOD_TERM_FUNC_POINTERS` (**`__DATA.__mod_term_func`**).
 
@@ -68,7 +68,7 @@ Interesante parte de desensamblaje:
 100003f80: 913e9000    	add	x0, x0, #4004
 100003f84: 94000005    	bl	0x100003f98 <_printf+0x100003f98>
 ```
-Es posible ver que el salto a la llamada a printf va a **`__TEXT.__stubs`**:
+Es posible ver que el salto a llamar a printf va a **`__TEXT.__stubs`**:
 ```bash
 objdump --section-headers ./load
 
@@ -142,7 +142,7 @@ es posible ver todos estos valores interesantes depurando antes de entrar en mai
 <pre><code>lldb ./apple
 
 <strong>(lldb) target create "./a"
-</strong>Ejecutable actual establecido en '/tmp/a' (arm64).
+</strong>El ejecutable actual se ha establecido en '/tmp/a' (arm64).
 (lldb) process launch -s
 [..]
 
@@ -190,7 +190,7 @@ Variables de entorno interesantes que ayudan a entender qué está haciendo dyld
 
 - **DYLD_PRINT_LIBRARIES**
 
-Verificar cada biblioteca que se carga:
+Verifica cada biblioteca que se carga:
 ```
 DYLD_PRINT_LIBRARIES=1 ./apple
 dyld[19948]: <9F848759-9AB8-3BD2-96A1-C069DC1FFD43> /private/tmp/a
@@ -289,6 +289,6 @@ find . -type f | xargs grep strcmp| grep key,\ \" | cut -d'"' -f2 | sort -u
 ```
 ## Referencias
 
-- [**\*OS Internals, Volume I: User Mode. Por Jonathan Levin**](https://www.amazon.com/MacOS-iOS-Internals-User-Mode/dp/099105556X)
+- [**\*OS Internals, Volume I: User Mode. By Jonathan Levin**](https://www.amazon.com/MacOS-iOS-Internals-User-Mode/dp/099105556X)
 
 {{#include ../../../../banners/hacktricks-training.md}}

@@ -1,4 +1,4 @@
-# Protecciones de Seguridad de macOS
+# macOS Security Protections
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -12,11 +12,11 @@ Más información en:
 macos-gatekeeper.md
 {{#endref}}
 
-## Límites de Procesos
+## Processes Limitants
 
 ### MACF
 
-### SIP - Protección de Integridad del Sistema
+### SIP - System Integrity Protection
 
 {{#ref}}
 macos-sip.md
@@ -24,13 +24,13 @@ macos-sip.md
 
 ### Sandbox
 
-El Sandbox de macOS **limita las aplicaciones** que se ejecutan dentro del sandbox a las **acciones permitidas especificadas en el perfil de Sandbox** con el que se está ejecutando la aplicación. Esto ayuda a garantizar que **la aplicación solo acceda a los recursos esperados**.
+MacOS Sandbox **limita las aplicaciones** que se ejecutan dentro del sandbox a las **acciones permitidas especificadas en el perfil de Sandbox** con el que se está ejecutando la aplicación. Esto ayuda a garantizar que **la aplicación solo accederá a los recursos esperados**.
 
 {{#ref}}
 macos-sandbox/
 {{#endref}}
 
-### TCC - **Transparencia, Consentimiento y Control**
+### TCC - **Transparency, Consent, and Control**
 
 **TCC (Transparencia, Consentimiento y Control)** es un marco de seguridad. Está diseñado para **gestionar los permisos** de las aplicaciones, regulando específicamente su acceso a funciones sensibles. Esto incluye elementos como **servicios de ubicación, contactos, fotos, micrófono, cámara, accesibilidad y acceso completo al disco**. TCC asegura que las aplicaciones solo puedan acceder a estas funciones después de obtener el consentimiento explícito del usuario, fortaleciendo así la privacidad y el control sobre los datos personales.
 
@@ -38,30 +38,30 @@ macos-sandbox/
 macos-tcc/
 {{#endref}}
 
-### Restricciones de Lanzamiento/Entorno y Caché de Confianza
+### Launch/Environment Constraints & Trust Cache
 
-Las restricciones de lanzamiento en macOS son una característica de seguridad para **regular la iniciación de procesos** definiendo **quién puede lanzar** un proceso, **cómo** y **desde dónde**. Introducidas en macOS Ventura, categorizan los binarios del sistema en categorías de restricción dentro de una **caché de confianza**. Cada binario ejecutable tiene **reglas** establecidas para su **lanzamiento**, incluyendo restricciones de **auto**, **padre** y **responsable**. Ampliadas a aplicaciones de terceros como **Restricciones de Entorno** en macOS Sonoma, estas características ayudan a mitigar posibles explotaciones del sistema al gobernar las condiciones de lanzamiento de procesos.
+Las restricciones de lanzamiento en macOS son una característica de seguridad para **regular la iniciación de procesos** definiendo **quién puede lanzar** un proceso, **cómo** y **desde dónde**. Introducidas en macOS Ventura, categorizan los binarios del sistema en categorías de restricción dentro de un **trust cache**. Cada binario ejecutable tiene **reglas** establecidas para su **lanzamiento**, incluyendo restricciones de **auto**, **padre** y **responsable**. Ampliadas a aplicaciones de terceros como **Environment** Constraints en macOS Sonoma, estas características ayudan a mitigar posibles explotaciones del sistema al gobernar las condiciones de lanzamiento de procesos.
 
 {{#ref}}
 macos-launch-environment-constraints.md
 {{#endref}}
 
-## MRT - Herramienta de Eliminación de Malware
+## MRT - Malware Removal Tool
 
-La Herramienta de Eliminación de Malware (MRT) es otra parte de la infraestructura de seguridad de macOS. Como su nombre indica, la función principal de MRT es **eliminar malware conocido de sistemas infectados**.
+La herramienta de eliminación de malware (MRT) es otra parte de la infraestructura de seguridad de macOS. Como su nombre indica, la función principal de MRT es **eliminar malware conocido de sistemas infectados**.
 
 Una vez que se detecta malware en un Mac (ya sea por XProtect o por otros medios), se puede usar MRT para **eliminar automáticamente el malware**. MRT opera silenciosamente en segundo plano y generalmente se ejecuta cada vez que se actualiza el sistema o cuando se descarga una nueva definición de malware (parece que las reglas que MRT tiene para detectar malware están dentro del binario).
 
 Mientras que tanto XProtect como MRT son parte de las medidas de seguridad de macOS, realizan funciones diferentes:
 
-- **XProtect** es una herramienta preventiva. **Verifica archivos a medida que se descargan** (a través de ciertas aplicaciones), y si detecta algún tipo de malware conocido, **previene que el archivo se abra**, evitando así que el malware infecte su sistema en primer lugar.
+- **XProtect** es una herramienta preventiva. **Verifica los archivos a medida que se descargan** (a través de ciertas aplicaciones), y si detecta algún tipo de malware conocido, **previene que el archivo se abra**, evitando así que el malware infecte su sistema en primer lugar.
 - **MRT**, por otro lado, es una **herramienta reactiva**. Opera después de que se ha detectado malware en un sistema, con el objetivo de eliminar el software ofensivo para limpiar el sistema.
 
 La aplicación MRT se encuentra en **`/Library/Apple/System/Library/CoreServices/MRT.app`**
 
-## Gestión de Tareas en Segundo Plano
+## Background Tasks Management
 
-**macOS** ahora **alerta** cada vez que una herramienta utiliza una **técnica bien conocida para persistir la ejecución de código** (como Elementos de Inicio de Sesión, Daemons...), para que el usuario sepa mejor **qué software está persistiendo**.
+**macOS** ahora **alerta** cada vez que una herramienta utiliza una **técnica bien conocida para persistir la ejecución de código** (como Login Items, Daemons...), para que el usuario sepa mejor **qué software está persistiendo**.
 
 <figure><img src="../../../images/image (1183).png" alt=""><figcaption></figcaption></figure>
 
@@ -87,7 +87,7 @@ Además, hay un archivo plist que contiene **aplicaciones bien conocidas** que f
 ```
 ### Enumeración
 
-Es posible **enumerar todos** los elementos de fondo configurados ejecutando la herramienta cli de Apple:
+Es posible **enumerar todos** los elementos de fondo configurados utilizando la herramienta cli de Apple:
 ```bash
 # The tool will always ask for the users password
 sfltool dumpbtm
@@ -99,13 +99,13 @@ chmod +x dumpBTM
 xattr -rc dumpBTM # Remove quarantine attr
 ./dumpBTM
 ```
-Esta información se está almacenando en **`/private/var/db/com.apple.backgroundtaskmanagement/BackgroundItems-v4.btm`** y el Terminal necesita FDA.
+Esta información se almacena en **`/private/var/db/com.apple.backgroundtaskmanagement/BackgroundItems-v4.btm`** y el Terminal necesita FDA.
 
 ### Manipulando BTM
 
 Cuando se encuentra una nueva persistencia, se genera un evento de tipo **`ES_EVENT_TYPE_NOTIFY_BTM_LAUNCH_ITEM_ADD`**. Por lo tanto, cualquier forma de **prevenir** que este **evento** sea enviado o que el **agente alerte** al usuario ayudará a un atacante a _**eludir**_ BTM.
 
-- **Restableciendo la base de datos**: Ejecutar el siguiente comando restablecerá la base de datos (debería reconstruirse desde cero), sin embargo, por alguna razón, después de ejecutar esto, **no se alertará sobre ninguna nueva persistencia hasta que el sistema se reinicie**.
+- **Restablecer la base de datos**: Ejecutar el siguiente comando restablecerá la base de datos (debería reconstruirse desde cero), sin embargo, por alguna razón, después de ejecutar esto, **no se alertará sobre ninguna nueva persistencia hasta que el sistema se reinicie**.
 - Se requiere **root**.
 ```bash
 # Reset the database

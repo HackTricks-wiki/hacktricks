@@ -8,7 +8,7 @@ Cuando se establece una conexión a un servicio XPC, el servidor verificará si 
 
 1. Verificar si el **proceso que se conecta está firmado con un certificado firmado por Apple** (solo otorgado por Apple).
 - Si esto **no se verifica**, un atacante podría crear un **certificado falso** para coincidir con cualquier otra verificación.
-2. Verificar si el proceso que se conecta está firmado con el **certificado de la organización** (verificación del ID de equipo).
+2. Verificar si el proceso que se conecta está firmado con el **certificado de la organización** (verificación del ID del equipo).
 - Si esto **no se verifica**, **cualquier certificado de desarrollador** de Apple puede ser utilizado para firmar y conectarse al servicio.
 3. Verificar si el proceso que se conecta **contiene un ID de paquete adecuado**.
 - Si esto **no se verifica**, cualquier herramienta **firmada por la misma organización** podría ser utilizada para interactuar con el servicio XPC.
@@ -51,7 +51,7 @@ return YES;
 ```
 El objeto NSXPCConnection tiene una propiedad **privada** **`auditToken`** (la que debería usarse pero podría cambiar) y una propiedad **pública** **`processIdentifier`** (la que no debería usarse).
 
-El proceso de conexión podría verificarse con algo como:
+El proceso de conexión podría ser verificado con algo como:
 ```objectivec
 [...]
 SecRequirementRef requirementRef = NULL;

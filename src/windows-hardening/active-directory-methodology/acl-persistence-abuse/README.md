@@ -6,16 +6,17 @@
 
 ## BadSuccessor
 
+
 {{#ref}}
 BadSuccessor.md
 {{#endref}}
 
-## **Derechos GenericAll en el Usuario**
+## **Derechos GenericAll en Usuario**
 
 Este privilegio otorga a un atacante control total sobre una cuenta de usuario objetivo. Una vez que se confirman los derechos `GenericAll` utilizando el comando `Get-ObjectAcl`, un atacante puede:
 
 - **Cambiar la Contraseña del Objetivo**: Usando `net user <username> <password> /domain`, el atacante puede restablecer la contraseña del usuario.
-- **Kerberoasting Dirigido**: Asignar un SPN a la cuenta del usuario para hacerla susceptible a kerberoasting, luego usar Rubeus y targetedKerberoast.py para extraer e intentar descifrar los hashes del ticket de concesión de tickets (TGT).
+- **Kerberoasting Dirigido**: Asignar un SPN a la cuenta del usuario para hacerla susceptible a kerberoasting, luego usar Rubeus y targetedKerberoast.py para extraer e intentar romper los hashes del ticket-granting ticket (TGT).
 ```bash
 Set-DomainObject -Credential $creds -Identity <username> -Set @{serviceprincipalname="fake/NOTHING"}
 .\Rubeus.exe kerberoast /user:<username> /nowrap
@@ -78,7 +79,7 @@ rpcclient -U KnownUsername 10.10.10.192
 ```
 ## **WriteOwner en Grupo**
 
-Si un atacante descubre que tiene derechos de `WriteOwner` sobre un grupo, puede cambiar la propiedad del grupo a sí mismo. Esto es particularmente impactante cuando el grupo en cuestión es `Domain Admins`, ya que cambiar la propiedad permite un control más amplio sobre los atributos y la membresía del grupo. El proceso implica identificar el objeto correcto a través de `Get-ObjectAcl` y luego usar `Set-DomainObjectOwner` para modificar el propietario, ya sea por SID o por nombre.
+Si un atacante descubre que tiene derechos de `WriteOwner` sobre un grupo, puede cambiar la propiedad del grupo a sí mismo. Esto es particularmente impactante cuando el grupo en cuestión es `Domain Admins`, ya que cambiar la propiedad permite un control más amplio sobre los atributos y la membresía del grupo. El proceso implica identificar el objeto correcto a través de `Get-ObjectAcl` y luego usar `Set-DomainObjectOwner` para modificar el propietario, ya sea por SID o nombre.
 ```bash
 Get-ObjectAcl -ResolveGUIDs | ? {$_.objectdn -eq "CN=Domain Admins,CN=Users,DC=offense,DC=local" -and $_.IdentityReference -eq "OFFENSE\spotless"}
 Set-DomainObjectOwner -Identity S-1-5-21-2552734371-813931464-1050690807-512 -OwnerIdentity "spotless" -Verbose
@@ -112,7 +113,7 @@ $ADSI.psbase.commitchanges()
 ```
 ## **Replicación en el Dominio (DCSync)**
 
-El ataque DCSync aprovecha permisos de replicación específicos en el dominio para imitar un Controlador de Dominio y sincronizar datos, incluyendo credenciales de usuario. Esta poderosa técnica requiere permisos como `DS-Replication-Get-Changes`, permitiendo a los atacantes extraer información sensible del entorno de AD sin acceso directo a un Controlador de Dominio. [**Aprende más sobre el ataque DCSync aquí.**](../dcsync.md)
+El ataque DCSync aprovecha permisos específicos de replicación en el dominio para imitar un Controlador de Dominio y sincronizar datos, incluyendo credenciales de usuario. Esta poderosa técnica requiere permisos como `DS-Replication-Get-Changes`, permitiendo a los atacantes extraer información sensible del entorno de AD sin acceso directo a un Controlador de Dominio. [**Aprende más sobre el ataque DCSync aquí.**](../dcsync.md)
 
 ## Delegación de GPO <a href="#gpo-delegation" id="gpo-delegation"></a>
 
@@ -163,11 +164,11 @@ La estructura de la tarea, como se muestra en el archivo de configuración XML g
 
 ### Usuarios y Grupos
 
-Los GPO también permiten la manipulación de membresías de usuarios y grupos en sistemas objetivo. Al editar directamente los archivos de políticas de Usuarios y Grupos, los atacantes pueden agregar usuarios a grupos privilegiados, como el grupo local `administrators`. Esto es posible a través de la delegación de permisos de gestión de GPO, que permite la modificación de archivos de políticas para incluir nuevos usuarios o cambiar las membresías de grupos.
+Los GPO también permiten la manipulación de membresías de usuarios y grupos en sistemas objetivo. Al editar directamente los archivos de políticas de Usuarios y Grupos, los atacantes pueden agregar usuarios a grupos privilegiados, como el grupo local de `administradores`. Esto es posible a través de la delegación de permisos de gestión de GPO, que permite la modificación de archivos de políticas para incluir nuevos usuarios o cambiar las membresías de grupos.
 
 El archivo de configuración XML para Usuarios y Grupos detalla cómo se implementan estos cambios. Al agregar entradas a este archivo, se pueden otorgar privilegios elevados a usuarios específicos en los sistemas afectados. Este método ofrece un enfoque directo para la escalada de privilegios a través de la manipulación de GPO.
 
-Además, se pueden considerar métodos adicionales para ejecutar código o mantener persistencia, como aprovechar scripts de inicio/cierre de sesión, modificar claves del registro para autoruns, instalar software a través de archivos .msi o editar configuraciones de servicios. Estas técnicas proporcionan diversas vías para mantener el acceso y controlar sistemas objetivo a través del abuso de GPOs.
+Además, se pueden considerar métodos adicionales para ejecutar código o mantener persistencia, como aprovechar scripts de inicio/cierre de sesión, modificar claves del registro para autorun, instalar software a través de archivos .msi, o editar configuraciones de servicios. Estas técnicas proporcionan diversas vías para mantener el acceso y controlar sistemas objetivo a través del abuso de GPOs.
 
 ## Referencias
 

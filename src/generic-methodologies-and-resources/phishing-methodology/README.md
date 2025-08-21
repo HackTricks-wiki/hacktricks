@@ -55,7 +55,7 @@ Hay una **posibilidad de que uno de algunos bits almacenados o en comunicación 
 
 Cuando este concepto se **aplica a las solicitudes DNS**, es posible que el **dominio recibido por el servidor DNS** no sea el mismo que el dominio solicitado inicialmente.
 
-Por ejemplo, una modificación de un solo bit en el dominio "windows.com" puede cambiarlo a "windnws.com."
+Por ejemplo, una modificación de un solo bit en el dominio "windows.com" puede cambiarlo a "windnws.com".
 
 Los atacantes pueden **aprovechar esto registrando múltiples dominios de bit-flipping** que son similares al dominio de la víctima. Su intención es redirigir a los usuarios legítimos a su propia infraestructura.
 
@@ -78,7 +78,7 @@ Para asegurarte de que el dominio expirado que vas a comprar **ya tiene un buen 
 - [https://anymailfinder.com/](https://anymailfinder.com)
 
 Para **descubrir más** direcciones de correo electrónico válidas o **verificar las que ya has descubierto**, puedes comprobar si puedes forzar por fuerza bruta los servidores smtp de la víctima. [Aprende cómo verificar/descubrir direcciones de correo electrónico aquí](../../network-services-pentesting/pentesting-smtp/index.html#username-bruteforce-enumeration).\
-Además, no olvides que si los usuarios utilizan **cualquier portal web para acceder a sus correos**, puedes verificar si es vulnerable a **fuerza bruta de nombres de usuario**, y explotar la vulnerabilidad si es posible.
+Además, no olvides que si los usuarios utilizan **cualquier portal web para acceder a sus correos**, puedes comprobar si es vulnerable a **fuerza bruta de nombres de usuario**, y explotar la vulnerabilidad si es posible.
 
 ## Configurando GoPhish
 
@@ -128,7 +128,7 @@ Luego agrega el dominio a los siguientes archivos:
 
 Finalmente, modifica los archivos **`/etc/hostname`** y **`/etc/mailname`** a tu nombre de dominio y **reinicia tu VPS.**
 
-Ahora, crea un **registro DNS A** de `mail.<domain>` apuntando a la **dirección IP** del VPS y un **registro DNS MX** apuntando a `mail.<domain>`
+Ahora, crea un **registro A de DNS** de `mail.<domain>` apuntando a la **dirección IP** del VPS y un **registro MX de DNS** apuntando a `mail.<domain>`
 
 Ahora probemos enviar un correo:
 ```bash
@@ -247,7 +247,7 @@ Este es el contenido que debe establecerse dentro de un registro TXT dentro del 
 ```bash
 v=spf1 mx a ip4:ip.ip.ip.ip ?all
 ```
-### Registro de Autenticación, Informe y Conformidad de Mensajes Basado en Dominio (DMARC)
+### Registro de Autenticación de Mensajes Basado en Dominio, Informes y Conformidad (DMARC)
 
 Debes **configurar un registro DMARC para el nuevo dominio**. Si no sabes qué es un registro DMARC [**lee esta página**](../../network-services-pentesting/pentesting-smtp/index.html#dmarc).
 
@@ -271,7 +271,7 @@ Este tutorial se basa en: [https://www.digitalocean.com/community/tutorials/how-
 ### Prueba tu puntuación de configuración de correo electrónico
 
 Puedes hacerlo usando [https://www.mail-tester.com/](https://www.mail-tester.com)\
-Solo accede a la página y envía un correo electrónico a la dirección que te den:
+Simplemente accede a la página y envía un correo electrónico a la dirección que te den:
 ```bash
 echo "This is the body of the email" | mail -s "This is the subject line" test-iimosa79z@srv1.mail-tester.com
 ```
@@ -313,7 +313,7 @@ La página [www.mail-tester.com](https://www.mail-tester.com) puede indicarte si
 
 > [!TIP]
 > Se recomienda utilizar la funcionalidad "**Enviar correo de prueba**" para comprobar que todo está funcionando.\
-> Recomendaría **enviar los correos de prueba a direcciones de 10min** para evitar ser incluido en la lista negra al hacer pruebas.
+> Recomendaría **enviar los correos de prueba a direcciones de 10min** para evitar ser incluido en la lista negra al realizar pruebas.
 
 ### Plantilla de correo electrónico
 
@@ -413,17 +413,17 @@ Aquí es donde herramientas como [**evilginx2**](https://github.com/kgretzky/evi
 
 1. **Suplantas el formulario de inicio de sesión** de la página web real.
 2. El usuario **envía** sus **credenciales** a tu página falsa y la herramienta las envía a la página web real, **verificando si las credenciales funcionan**.
-3. Si la cuenta está configurada con **2FA**, la página MitM lo pedirá y una vez que el **usuario lo introduce**, la herramienta lo enviará a la página web real.
-4. Una vez que el usuario está autenticado, tú (como atacante) habrás **capturado las credenciales, el 2FA, la cookie y cualquier información** de cada interacción mientras la herramienta realiza un MitM.
+3. Si la cuenta está configurada con **2FA**, la página MitM lo pedirá y una vez que el **usuario lo introduzca**, la herramienta lo enviará a la página web real.
+4. Una vez que el usuario esté autenticado, tú (como atacante) habrás **capturado las credenciales, el 2FA, la cookie y cualquier información** de cada interacción mientras la herramienta realiza un MitM.
 
 ### A través de VNC
 
-¿Qué pasaría si en lugar de **enviar a la víctima a una página maliciosa** con el mismo aspecto que la original, lo envías a una **sesión VNC con un navegador conectado a la página web real**? Podrás ver lo que hace, robar la contraseña, el MFA utilizado, las cookies...\
+¿Qué pasaría si en lugar de **enviar a la víctima a una página maliciosa** con la misma apariencia que la original, lo envías a una **sesión VNC con un navegador conectado a la página web real**? Podrás ver lo que hace, robar la contraseña, el MFA utilizado, las cookies...\
 Puedes hacer esto con [**EvilnVNC**](https://github.com/JoelGMSec/EvilnoVNC)
 
 ## Detectando la detección
 
-Obviamente, una de las mejores maneras de saber si te han descubierto es **buscar tu dominio en listas negras**. Si aparece listado, de alguna manera tu dominio fue detectado como sospechoso.\
+Obviamente, una de las mejores maneras de saber si te han descubierto es **buscar tu dominio dentro de listas negras**. Si aparece listado, de alguna manera tu dominio fue detectado como sospechoso.\
 Una forma fácil de verificar si tu dominio aparece en alguna lista negra es usar [https://malwareworld.com/](https://malwareworld.com)
 
 Sin embargo, hay otras formas de saber si la víctima está **buscando activamente actividad sospechosa de phishing en la red** como se explica en:
@@ -440,7 +440,7 @@ Usa [**Phishious** ](https://github.com/Rices/Phishious) para evaluar si tu corr
 
 ## Compromiso de Identidad de Alto Contacto (Restablecimiento de MFA de Help-Desk)
 
-Los conjuntos de intrusión modernos evitan cada vez más los señuelos por correo electrónico y **apuntan directamente al servicio de atención al cliente / flujo de recuperación de identidad** para derrotar el MFA. El ataque es completamente "vivir de la tierra": una vez que el operador posee credenciales válidas, pivotan con herramientas administrativas integradas; no se requiere malware.
+Los conjuntos de intrusión modernos evitan cada vez más los señuelos de correo electrónico y **apuntan directamente al servicio de atención al cliente / flujo de recuperación de identidad** para derrotar el MFA. El ataque es completamente "vivir de la tierra": una vez que el operador posee credenciales válidas, se desplaza con herramientas administrativas integradas; no se requiere malware.
 
 ### Flujo de ataque
 1. Reconocimiento de la víctima
@@ -450,7 +450,7 @@ Los conjuntos de intrusión modernos evitan cada vez más los señuelos por corr
 * Llama, usa Teams o chatea con el servicio de atención al cliente suplantando al objetivo (a menudo con **ID de llamada falsificada** o **voz clonada**).
 * Proporciona la PII recopilada previamente para pasar la verificación basada en el conocimiento.
 * Convence al agente para que **restablezca el secreto de MFA** o realice un **cambio de SIM** en un número de móvil registrado.
-3. Acciones inmediatas post-acceso (≤60 min en casos reales)
+3. Acciones inmediatas posteriores al acceso (≤60 min en casos reales)
 * Establece un punto de apoyo a través de cualquier portal SSO web.
 * Enumera AD / AzureAD con herramientas integradas (sin binarios descargados):
 ```powershell
@@ -463,14 +463,14 @@ Get-MgDirectoryRole | ft DisplayName,Id
 # Enumerar dispositivos a los que la cuenta puede iniciar sesión
 Get-MgUserRegisteredDevice -UserId <user@corp.local>
 ```
-* Movimiento lateral con **WMI**, **PsExec**, o agentes legítimos de **RMM** ya blanqueados en el entorno.
+* Movimiento lateral con **WMI**, **PsExec**, o agentes legítimos de **RMM** ya autorizados en el entorno.
 
 ### Detección y Mitigación
 * Trata la recuperación de identidad del servicio de atención al cliente como una **operación privilegiada** – requiere autenticación adicional y aprobación del gerente.
 * Despliega reglas de **Detección y Respuesta a Amenazas de Identidad (ITDR)** / **UEBA** que alerten sobre:
 * Método de MFA cambiado + autenticación desde un nuevo dispositivo / geo.
 * Elevación inmediata del mismo principal (usuario-→-administrador).
-* Graba las llamadas al servicio de atención al cliente y aplica un **callback a un número ya registrado** antes de cualquier restablecimiento.
+* Graba las llamadas al servicio de atención al cliente y aplica un **llamada de retorno a un número ya registrado** antes de cualquier restablecimiento.
 * Implementa **Just-In-Time (JIT) / Acceso Privilegiado** para que las cuentas recién restablecidas **no** hereden automáticamente tokens de alto privilegio.
 
 ---
@@ -478,7 +478,7 @@ Get-MgUserRegisteredDevice -UserId <user@corp.local>
 ## Decepción a Gran Escala – Envenenamiento SEO y Campañas “ClickFix”
 Los grupos de commodities compensan el costo de operaciones de alto contacto con ataques masivos que convierten **motores de búsqueda y redes publicitarias en el canal de entrega**.
 
-1. **El envenenamiento SEO / malvertising** empuja un resultado falso como `chromium-update[.]site` a los anuncios de búsqueda más altos.
+1. **Envenenamiento SEO / malvertising** empuja un resultado falso como `chromium-update[.]site` a los anuncios de búsqueda más altos.
 2. La víctima descarga un pequeño **cargador de primera etapa** (a menudo JS/HTA/ISO). Ejemplos vistos por Unit 42:
 * `RedLine stealer`
 * `Lumma stealer`
@@ -503,21 +503,21 @@ and child_image: *\\*.exe
 ## Operaciones de Phishing Mejoradas por IA
 Los atacantes ahora encadenan **APIs de LLM y clonación de voz** para señuelos completamente personalizados e interacción en tiempo real.
 
-| Capa | Ejemplo de uso por el actor de amenaza |
+| Capa | Ejemplo de uso por el actor de amenazas |
 |-------|-----------------------------|
 |Automatización|Generar y enviar >100 k correos / SMS con redacción aleatoria y enlaces de seguimiento.|
-|IA Generativa|Producir correos *únicos* que hacen referencia a M&A públicos, chistes internos de redes sociales; voz de CEO deep-fake en estafa de callback.|
+|IA Generativa|Producir correos *únicos* que hacen referencia a M&A públicos, bromas internas de redes sociales; voz de CEO deep-fake en estafa de devolución de llamada.|
 |IA Agente|Registrar dominios de forma autónoma, raspar inteligencia de código abierto, elaborar correos de siguiente etapa cuando una víctima hace clic pero no envía credenciales.|
 
 **Defensa:**
-• Agrega **banners dinámicos** que resalten mensajes enviados desde automatización no confiable (a través de anomalías ARC/DKIM).
+• Agrega **banners dinámicos** que resalten mensajes enviados desde automatización no confiable (a través de anomalías de ARC/DKIM).
 • Despliega **frases de desafío biométrico de voz** para solicitudes telefónicas de alto riesgo.
 • Simula continuamente señuelos generados por IA en programas de concienciación – las plantillas estáticas son obsoletas.
 
 ---
 
 ## Variante de Fatiga MFA / Bombardeo de Push – Restablecimiento Forzado
-Además del bombardeo clásico de push, los operadores simplemente **forzan un nuevo registro de MFA** durante la llamada al servicio de atención al cliente, anulando el token existente del usuario. Cualquier solicitud de inicio de sesión subsiguiente parece legítima para la víctima.
+Además del bombardeo clásico de push, los operadores simplemente **forzan un nuevo registro de MFA** durante la llamada al servicio de atención al cliente, anulando el token existente del usuario. Cualquier solicitud de inicio de sesión posterior parece legítima para la víctima.
 ```text
 [Attacker]  →  Help-Desk:  “I lost my phone while travelling, can you unenrol it so I can add a new authenticator?”
 [Help-Desk] →  AzureAD: ‘Delete existing methods’ → sends registration e-mail

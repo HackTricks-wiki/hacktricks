@@ -21,8 +21,8 @@ adws-enumeration.md
 ### Uso rápido
 
 1. Inicie la herramienta y conéctese a `dc01.corp.local` con cualquier credencial de dominio.
-2. Cree una instantánea fuera de línea a través de `Archivo ➜ Crear instantánea`.
-3. Compare dos instantáneas con `Archivo ➜ Comparar` para detectar desviaciones de permisos.
+2. Cree una instantánea fuera de línea a través de `File ➜ Create Snapshot`.
+3. Compare dos instantáneas con `File ➜ Compare` para detectar desviaciones de permisos.
 
 ---
 

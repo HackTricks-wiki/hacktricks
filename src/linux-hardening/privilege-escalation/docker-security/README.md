@@ -74,9 +74,9 @@ La firma de imágenes de Docker garantiza la seguridad e integridad de las imág
 
 - **Docker Content Trust** utiliza el proyecto Notary, basado en The Update Framework (TUF), para gestionar la firma de imágenes. Para más información, consulta [Notary](https://github.com/docker/notary) y [TUF](https://theupdateframework.github.io).
 - Para activar la confianza en el contenido de Docker, establece `export DOCKER_CONTENT_TRUST=1`. Esta función está desactivada por defecto en Docker versión 1.10 y posteriores.
-- Con esta función habilitada, solo se pueden descargar imágenes firmadas. El primer envío de imágenes requiere establecer frases de contraseña para las claves raíz y de etiquetado, con Docker también soportando Yubikey para una mayor seguridad. Más detalles se pueden encontrar [aquí](https://blog.docker.com/2015/11/docker-content-trust-yubikey/).
+- Con esta función habilitada, solo se pueden descargar imágenes firmadas. El primer envío de imágenes requiere establecer frases de paso para las claves raíz y de etiquetado, y Docker también admite Yubikey para una mayor seguridad. Más detalles se pueden encontrar [aquí](https://blog.docker.com/2015/11/docker-content-trust-yubikey/).
 - Intentar descargar una imagen no firmada con la confianza en el contenido habilitada resulta en un error "No trust data for latest".
-- Para los envíos de imágenes después del primero, Docker solicita la frase de contraseña de la clave del repositorio para firmar la imagen.
+- Para los envíos de imágenes posteriores al primero, Docker solicita la frase de paso de la clave del repositorio para firmar la imagen.
 
 Para respaldar tus claves privadas, utiliza el comando:
 ```bash
@@ -117,7 +117,7 @@ Current: cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setgid,ca
 **Seccomp**
 
 Está habilitado por defecto en Docker. Ayuda a **limitar aún más las syscalls** que el proceso puede llamar.\
-El **perfil Seccomp por defecto de Docker** se puede encontrar en [https://github.com/moby/moby/blob/master/profiles/seccomp/default.json](https://github.com/moby/moby/blob/master/profiles/seccomp/default.json)
+El **perfil de Seccomp predeterminado de Docker** se puede encontrar en [https://github.com/moby/moby/blob/master/profiles/seccomp/default.json](https://github.com/moby/moby/blob/master/profiles/seccomp/default.json)
 
 **AppArmor**
 
@@ -141,6 +141,7 @@ Docker utiliza los siguientes Namespaces del núcleo de Linux para lograr la ais
 
 Para **más información sobre los namespaces** consulta la siguiente página:
 
+
 {{#ref}}
 namespaces/
 {{#endref}}
@@ -148,7 +149,7 @@ namespaces/
 ### cgroups
 
 La característica del núcleo de Linux **cgroups** proporciona la capacidad de **restringir recursos como cpu, memoria, io, ancho de banda de red entre** un conjunto de procesos. Docker permite crear Contenedores utilizando la característica cgroup que permite el control de recursos para el Contenedor específico.\
-A continuación se muestra un Contenedor creado con memoria de espacio de usuario limitada a 500m, memoria del núcleo limitada a 50m, participación de cpu a 512, blkioweight a 400. La participación de CPU es una proporción que controla el uso de CPU del Contenedor. Tiene un valor predeterminado de 1024 y un rango entre 0 y 1024. Si tres Contenedores tienen la misma participación de CPU de 1024, cada Contenedor puede utilizar hasta el 33% de la CPU en caso de contención de recursos de CPU. blkio-weight es una proporción que controla el IO del Contenedor. Tiene un valor predeterminado de 500 y un rango entre 10 y 1000.
+A continuación se muestra un Contenedor creado con espacio de memoria de usuario limitado a 500m, memoria del núcleo limitada a 50m, participación de cpu a 512, blkioweight a 400. La participación de CPU es una proporción que controla el uso de CPU del Contenedor. Tiene un valor predeterminado de 1024 y un rango entre 0 y 1024. Si tres Contenedores tienen la misma participación de CPU de 1024, cada Contenedor puede utilizar hasta el 33% de la CPU en caso de contención de recursos de CPU. blkio-weight es una proporción que controla el IO del Contenedor. Tiene un valor predeterminado de 500 y un rango entre 10 y 1000.
 ```
 docker run -it -m 500M --kernel-memory 50M --cpu-shares 512 --blkio-weight 400 --name ubuntu1 ubuntu bash
 ```
@@ -166,9 +167,9 @@ cgroups.md
 
 ### Capacidades
 
-Las capacidades permiten **un control más fino sobre las capacidades que se pueden permitir** para el usuario root. Docker utiliza la función de capacidad del núcleo de Linux para **limitar las operaciones que se pueden realizar dentro de un contenedor** independientemente del tipo de usuario.
+Las capacidades permiten un **control más fino sobre las capacidades que se pueden permitir** para el usuario root. Docker utiliza la característica de capacidad del núcleo de Linux para **limitar las operaciones que se pueden realizar dentro de un contenedor** independientemente del tipo de usuario.
 
-Cuando se ejecuta un contenedor de Docker, el **proceso elimina capacidades sensibles que el proceso podría usar para escapar de la aislamiento**. Esto intenta asegurar que el proceso no podrá realizar acciones sensibles y escapar:
+Cuando se ejecuta un contenedor de Docker, el **proceso elimina capacidades sensibles que el proceso podría usar para escapar de la aislamiento**. Esto intenta asegurar que el proceso no pueda realizar acciones sensibles y escapar:
 
 {{#ref}}
 ../linux-capabilities.md
@@ -194,9 +195,9 @@ apparmor.md
 
 - **Sistema de Etiquetado**: SELinux asigna una etiqueta única a cada proceso y objeto del sistema de archivos.
 - **Aplicación de Políticas**: Aplica políticas de seguridad que definen qué acciones puede realizar una etiqueta de proceso sobre otras etiquetas dentro del sistema.
-- **Etiquetas de Proceso de Contenedor**: Cuando los motores de contenedores inician procesos de contenedor, generalmente se les asigna una etiqueta SELinux confinada, comúnmente `container_t`.
+- **Etiquetas de Procesos de Contenedor**: Cuando los motores de contenedor inician procesos de contenedor, generalmente se les asigna una etiqueta SELinux confinada, comúnmente `container_t`.
 - **Etiquetado de Archivos dentro de Contenedores**: Los archivos dentro del contenedor suelen estar etiquetados como `container_file_t`.
-- **Reglas de Política**: La política de SELinux asegura principalmente que los procesos con la etiqueta `container_t` solo puedan interactuar (leer, escribir, ejecutar) con archivos etiquetados como `container_file_t`.
+- **Reglas de Políticas**: La política de SELinux asegura principalmente que los procesos con la etiqueta `container_t` solo puedan interactuar (leer, escribir, ejecutar) con archivos etiquetados como `container_file_t`.
 
 Este mecanismo asegura que incluso si un proceso dentro de un contenedor se ve comprometido, está confinado a interactuar solo con objetos que tienen las etiquetas correspondientes, limitando significativamente el daño potencial de tales compromisos.
 
@@ -233,7 +234,7 @@ docker run -d --name malicious-container -c 512 busybox sh -c 'while true; do :;
 ```bash
 nc -lvp 4444 >/dev/null & while true; do cat /dev/urandom | nc <target IP> 4444; done
 ```
-## Banderas de Docker Interesantes
+## Banderas interesantes de Docker
 
 ### Banderas --privileged
 
@@ -274,7 +275,7 @@ Para más opciones de **`--security-opt`** consulta: [https://docs.docker.com/en
 
 ### Gestión de Secretos: Mejores Prácticas
 
-Es crucial evitar incrustar secretos directamente en las imágenes de Docker o usar variables de entorno, ya que estos métodos exponen tu información sensible a cualquiera con acceso al contenedor a través de comandos como `docker inspect` o `exec`.
+Es crucial evitar incrustar secretos directamente en las imágenes de Docker o usar variables de entorno, ya que estos métodos exponen tu información sensible a cualquiera que tenga acceso al contenedor a través de comandos como `docker inspect` o `exec`.
 
 **Los volúmenes de Docker** son una alternativa más segura, recomendada para acceder a información sensible. Pueden ser utilizados como un sistema de archivos temporal en memoria, mitigando los riesgos asociados con `docker inspect` y el registro. Sin embargo, los usuarios root y aquellos con acceso `exec` al contenedor aún podrían acceder a los secretos.
 
@@ -317,32 +318,32 @@ https://github.com/google/gvisor
 
 ### Kata Containers
 
-**Kata Containers** es una comunidad de código abierto que trabaja para construir un runtime de contenedores seguro con máquinas virtuales ligeras que se sienten y rinden como contenedores, pero que proporcionan **un aislamiento de carga de trabajo más fuerte utilizando tecnología de virtualización de hardware** como una segunda capa de defensa.
+**Kata Containers** es una comunidad de código abierto que trabaja para construir un runtime de contenedores seguro con máquinas virtuales ligeras que se sienten y funcionan como contenedores, pero que proporcionan **un aislamiento de carga de trabajo más fuerte utilizando tecnología de virtualización de hardware** como una segunda capa de defensa.
 
 {{#ref}}
 https://katacontainers.io/
 {{#endref}}
 
-### Resumen de Consejos
+### Consejos Resumidos
 
 - **No utilice la bandera `--privileged` ni monte un** [**socket de Docker dentro del contenedor**](https://raesene.github.io/blog/2016/03/06/The-Dangers-Of-Docker.sock/)**.** El socket de Docker permite crear contenedores, por lo que es una forma fácil de tomar el control total del host, por ejemplo, ejecutando otro contenedor con la bandera `--privileged`.
-- **No ejecute como root dentro del contenedor. Use un** [**usuario diferente**](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#user) **y** [**namespaces de usuario**](https://docs.docker.com/engine/security/userns-remap/)**.** El root en el contenedor es el mismo que en el host a menos que se remapee con namespaces de usuario. Está restringido ligeramente por, principalmente, namespaces de Linux, capacidades y cgroups.
-- [**Elimine todas las capacidades**](https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities) **(`--cap-drop=all`) y habilite solo las que son necesarias** (`--cap-add=...`). Muchas cargas de trabajo no necesitan capacidades y agregarlas aumenta el alcance de un posible ataque.
+- **No ejecute como root dentro del contenedor. Use un** [**usuario diferente**](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#user) **y** [**namespaces de usuario**](https://docs.docker.com/engine/security/userns-remap/)**.** El root en el contenedor es el mismo que en el host a menos que se remapee con namespaces de usuario. Está solo ligeramente restringido por, principalmente, namespaces de Linux, capacidades y cgroups.
+- [**Elimine todas las capacidades**](https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities) **(`--cap-drop=all`) y habilite solo las que son necesarias** (`--cap-add=...`). Muchas cargas de trabajo no necesitan ninguna capacidad y agregarlas aumenta el alcance de un posible ataque.
 - [**Utilice la opción de seguridad “no-new-privileges”**](https://raesene.github.io/blog/2019/06/01/docker-capabilities-and-no-new-privs/) para evitar que los procesos obtengan más privilegios, por ejemplo, a través de binarios suid.
 - [**Limite los recursos disponibles para el contenedor**](https://docs.docker.com/engine/reference/run/#runtime-constraints-on-resources)**.** Los límites de recursos pueden proteger la máquina de ataques de denegación de servicio.
 - **Ajuste** [**seccomp**](https://docs.docker.com/engine/security/seccomp/)**,** [**AppArmor**](https://docs.docker.com/engine/security/apparmor/) **(o SELinux)** perfiles para restringir las acciones y syscalls disponibles para el contenedor al mínimo requerido.
 - **Utilice** [**imágenes oficiales de Docker**](https://docs.docker.com/docker-hub/official_images/) **y requiera firmas** o construya las suyas propias basadas en ellas. No herede ni use imágenes [con puerta trasera](https://arstechnica.com/information-technology/2018/06/backdoored-images-downloaded-5-million-times-finally-removed-from-docker-hub/). También almacene claves raíz y frases de paso en un lugar seguro. Docker tiene planes para gestionar claves con UCP.
 - **Reconstruya regularmente** sus imágenes para **aplicar parches de seguridad al host y a las imágenes.**
 - Gestione sus **secretos sabiamente** para que sea difícil para el atacante acceder a ellos.
-- Si **expone el daemon de docker, use HTTPS** con autenticación de cliente y servidor.
-- En su Dockerfile, **prefiera COPY en lugar de ADD**. ADD extrae automáticamente archivos comprimidos y puede copiar archivos de URLs. COPY no tiene estas capacidades. Siempre que sea posible, evite usar ADD para no ser susceptible a ataques a través de URLs remotas y archivos Zip.
+- Si **expone el demonio de Docker, use HTTPS** con autenticación de cliente y servidor.
+- En su Dockerfile, **prefiera COPY en lugar de ADD**. ADD extrae automáticamente archivos comprimidos y puede copiar archivos desde URLs. COPY no tiene estas capacidades. Siempre que sea posible, evite usar ADD para no ser susceptible a ataques a través de URLs remotas y archivos Zip.
 - Tenga **contenedores separados para cada microservicio.**
 - **No ponga ssh** dentro del contenedor, “docker exec” se puede usar para ssh al contenedor.
 - Tenga **imágenes de contenedor más pequeñas.**
 
 ## Docker Breakout / Escalación de Privilegios
 
-Si está **dentro de un contenedor de docker** o tiene acceso a un usuario en el **grupo de docker**, podría intentar **escapar y escalar privilegios**:
+Si está **dentro de un contenedor de Docker** o tiene acceso a un usuario en el **grupo de Docker**, podría intentar **escapar y escalar privilegios**:
 
 {{#ref}}
 docker-breakout-privilege-escalation/
@@ -350,7 +351,7 @@ docker-breakout-privilege-escalation/
 
 ## Bypass del Plugin de Autenticación de Docker
 
-Si tiene acceso al socket de docker o tiene acceso a un usuario en el **grupo de docker pero sus acciones están siendo limitadas por un plugin de autenticación de docker**, verifique si puede **eludirlo:**
+Si tiene acceso al socket de Docker o tiene acceso a un usuario en el **grupo de Docker pero sus acciones están siendo limitadas por un plugin de autenticación de Docker**, verifique si puede **eludirlo:**
 
 {{#ref}}
 authz-and-authn-docker-access-authorization-plugin.md
@@ -359,7 +360,7 @@ authz-and-authn-docker-access-authorization-plugin.md
 ## Endurecimiento de Docker
 
 - La herramienta [**docker-bench-security**](https://github.com/docker/docker-bench-security) es un script que verifica docenas de mejores prácticas comunes en torno al despliegue de contenedores Docker en producción. Las pruebas son todas automatizadas y se basan en el [CIS Docker Benchmark v1.3.1](https://www.cisecurity.org/benchmark/docker/).\
-Necesita ejecutar la herramienta desde el host que ejecuta docker o desde un contenedor con suficientes privilegios. Descubra **cómo ejecutarlo en el README:** [**https://github.com/docker/docker-bench-security**](https://github.com/docker/docker-bench-security).
+Necesita ejecutar la herramienta desde el host que ejecuta Docker o desde un contenedor con suficientes privilegios. Descubra **cómo ejecutarlo en el README:** [**https://github.com/docker/docker-bench-security**](https://github.com/docker/docker-bench-security).
 
 ## Referencias
 

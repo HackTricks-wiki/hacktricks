@@ -20,9 +20,9 @@ Get-DomainGroup -Identity "Domain Admins" -Domain parent.io -Properties ObjectSi
 > Tenga en cuenta que es posible deshabilitar el historial de SID en una relación de confianza, lo que hará que este ataque falle.
 
 Según los [**docs**](https://technet.microsoft.com/library/cc835085.aspx):
-- **Deshabilitar SIDHistory en relaciones de confianza de bosque** utilizando la herramienta netdom (`netdom trust /domain: /EnableSIDHistory:no on the domain controller`)
-- **Aplicar cuarentena de filtro SID a relaciones de confianza externas** utilizando la herramienta netdom (`netdom trust /domain: /quarantine:yes on the domain controller`)
-- **Aplicar filtrado de SID a relaciones de confianza de dominio dentro de un solo bosque** no se recomienda, ya que es una configuración no soportada y puede causar cambios disruptivos. Si un dominio dentro de un bosque no es de confianza, entonces no debería ser miembro del bosque. En esta situación, es necesario primero dividir los dominios de confianza y no confiables en bosques separados donde se pueda aplicar el filtrado de SID a una relación de confianza interbosque.
+- **Deshabilitar SIDHistory en relaciones de confianza de bosque** utilizando la herramienta netdom (`netdom trust /domain: /EnableSIDHistory:no en el controlador de dominio`)
+- **Aplicar cuarentena de filtro SID a relaciones de confianza externas** utilizando la herramienta netdom (`netdom trust /domain: /quarantine:yes en el controlador de dominio`)
+- **Aplicar filtrado de SID a relaciones de confianza de dominio dentro de un solo bosque** no se recomienda, ya que es una configuración no soportada y puede causar cambios disruptivos. Si un dominio dentro de un bosque no es confiable, entonces no debería ser miembro del bosque. En esta situación, es necesario primero dividir los dominios confiables y no confiables en bosques separados donde se pueda aplicar el filtrado de SID a una relación de confianza interbosque.
 
 Consulte esta publicación para obtener más información sobre cómo eludir esto: [**https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4**](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)
 
@@ -63,12 +63,14 @@ mimikatz.exe "kerberos::golden /user:Administrator /domain:<current_domain> /sid
 ```
 Para más información sobre los tickets dorados, consulta:
 
+
 {{#ref}}
 golden-ticket.md
 {{#endref}}
 
 
 Para más información sobre los tickets de diamante, consulta:
+
 
 {{#ref}}
 diamond-ticket.md
@@ -127,8 +129,8 @@ Este es un script de Impacket que **automatiza la escalada de un dominio hijo a 
 
 El flujo es:
 
-- Obtiene el SID para el grupo de Administradores de la Empresa del dominio padre
-- Recupera el hash para la cuenta KRBTGT en el dominio hijo
+- Obtiene el SID del grupo de Administradores de la Empresa del dominio padre
+- Recupera el hash de la cuenta KRBTGT en el dominio hijo
 - Crea un Golden Ticket
 - Inicia sesión en el dominio padre
 - Recupera credenciales para la cuenta de Administrador en el dominio padre

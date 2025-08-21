@@ -4,7 +4,7 @@
 
 ## Descripción General
 
-Las Cuentas de Servicio Administradas Delegadas (**dMSA**) son el sucesor de próxima generación de **gMSA** que se envían en Windows Server 2025. Un flujo de trabajo de migración legítimo permite a los administradores reemplazar una cuenta *antigua* (cuenta de usuario, computadora o servicio) con un dMSA mientras se preservan las permisos de manera transparente. El flujo de trabajo se expone a través de cmdlets de PowerShell como `Start-ADServiceAccountMigration` y `Complete-ADServiceAccountMigration` y se basa en dos atributos LDAP del **objeto dMSA**:
+Las Cuentas de Servicio Administradas Delegadas (**dMSA**) son el sucesor de próxima generación de **gMSA** que se incluyen en Windows Server 2025. Un flujo de trabajo de migración legítimo permite a los administradores reemplazar una cuenta *antigua* (cuenta de usuario, computadora o servicio) con un dMSA mientras se preservan las permisos de manera transparente. El flujo de trabajo se expone a través de cmdlets de PowerShell como `Start-ADServiceAccountMigration` y `Complete-ADServiceAccountMigration` y se basa en dos atributos LDAP del **objeto dMSA**:
 
 * **`msDS-ManagedAccountPrecededByLink`** – *DN link* a la cuenta supersedida (antigua).
 * **`msDS-DelegatedMSAState`**       – estado de migración (`0` = ninguno, `1` = en progreso, `2` = *completado*).
@@ -68,7 +68,7 @@ dir \\DC01\C$
 ```
 ## Detección y Caza
 
-Habilite **Auditoría de Objetos** en las OUs y monitoree los siguientes Eventos de Seguridad de Windows:
+Habilite **Auditoría de Objetos** en OUs y monitoree los siguientes Eventos de Seguridad de Windows:
 
 * **5137** – Creación del objeto **dMSA**
 * **5136** – Modificación de **`msDS-ManagedAccountPrecededByLink`**
@@ -82,8 +82,8 @@ Correlacionar `4662` (modificación de atributo), `4741` (creación de una cuent
 ## Mitigación
 
 * Aplique el principio de **menor privilegio** – solo delegue la gestión de *Cuentas de Servicio* a roles de confianza.
-* Elimine `Create Child` / `msDS-DelegatedManagedServiceAccount` de las OUs que no lo requieran explícitamente.
-* Monitoree los ID de evento listados arriba y alerte sobre identidades *no-Tier-0* que creen o editen dMSAs.
+* Elimine `Create Child` / `msDS-DelegatedManagedServiceAccount` de OUs que no lo requieran explícitamente.
+* Monitoree los ID de eventos listados arriba y alerte sobre identidades *no-Tier-0* que creen o editen dMSAs.
 
 ## Véase también
 

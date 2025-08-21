@@ -132,7 +132,7 @@ r/r 16: secret.txt
 icat -i raw -f ext4 disk.img 16
 ThisisTheMasterSecret
 ```
-## Buscar malware conocido
+## Buscar Malware conocido
 
 ### Archivos del sistema modificados
 
@@ -153,7 +153,7 @@ malware-analysis.md
 
 Para buscar de manera efectiva programas instalados en sistemas Debian y RedHat, considera aprovechar los registros del sistema y bases de datos junto con verificaciones manuales en directorios comunes.
 
-- Para Debian, inspecciona _**`/var/lib/dpkg/status`**_ y _**`/var/log/dpkg.log`**_ para obtener detalles sobre las instalaciones de paquetes, utilizando `grep` para filtrar información específica.
+- Para Debian, inspecciona _**`/var/lib/dpkg/status`**_ y _**`/var/log/dpkg.log`**_ para obtener detalles sobre las instalaciones de paquetes, usando `grep` para filtrar información específica.
 - Los usuarios de RedHat pueden consultar la base de datos RPM con `rpm -qa --root=/mntpath/var/lib/rpm` para listar los paquetes instalados.
 
 Para descubrir software instalado manualmente o fuera de estos gestores de paquetes, explora directorios como _**`/usr/local`**_, _**`/opt`**_, _**`/usr/sbin`**_, _**`/usr/bin`**_, _**`/bin`**_ y _**`/sbin`**_. Combina listados de directorios con comandos específicos del sistema para identificar ejecutables no asociados con paquetes conocidos, mejorando tu búsqueda de todos los programas instalados.
@@ -196,7 +196,7 @@ cat /var/spool/cron/crontabs/*  \
 #MacOS
 ls -l /usr/lib/cron/tabs/ /Library/LaunchAgents/ /Library/LaunchDaemons/ ~/Library/LaunchAgents/
 ```
-#### Caza: abuso de Cron/Anacron a través de 0anacron y stubs sospechosos
+#### Hunt: Abuso de Cron/Anacron a través de 0anacron y stubs sospechosos
 Los atacantes a menudo editan el stub 0anacron presente en cada directorio /etc/cron.*/ para asegurar la ejecución periódica.
 ```bash
 # List 0anacron files and their timestamps/sizes
@@ -214,9 +214,9 @@ grep -E '^\s*PermitRootLogin' /etc/ssh/sshd_config
 # System accounts with interactive shells (e.g., games → /bin/sh)
 awk -F: '($7 ~ /bin\/(sh|bash|zsh)/ && $1 ~ /^(games|lp|sync|shutdown|halt|mail|operator)$/) {print}' /etc/passwd
 ```
-#### Hunt: Marcadores de C2 en la nube (Dropbox/Cloudflare Tunnel)
+#### Caza: Marcadores de C2 en la nube (Dropbox/Cloudflare Tunnel)
 - Las balizas de la API de Dropbox típicamente utilizan api.dropboxapi.com o content.dropboxapi.com a través de HTTPS con tokens de autorización: Bearer.
-- Busca en proxy/Zeek/NetFlow por egresos inesperados de Dropbox desde servidores.
+- Caza en proxy/Zeek/NetFlow para egress inesperado de Dropbox desde servidores.
 - Cloudflare Tunnel (`cloudflared`) proporciona C2 de respaldo a través de 443 saliente.
 ```bash
 ps aux | grep -E '[c]loudflared|trycloudflare'
@@ -246,7 +246,7 @@ Los módulos del kernel de Linux, a menudo utilizados por malware como component
 
 ### Otras Ubicaciones de Autoinicio
 
-Linux emplea varios archivos para ejecutar automáticamente programas al iniciar sesión el usuario, potencialmente albergando malware:
+Linux emplea varios archivos para ejecutar automáticamente programas al iniciar sesión del usuario, potencialmente albergando malware:
 
 - **/etc/profile.d/**\*, **/etc/profile**, y **/etc/bash.bashrc**: Se ejecutan para cualquier inicio de sesión de usuario.
 - **\~/.bashrc**, **\~/.bash_profile**, **\~/.profile**, y **\~/.config/autostart**: Archivos específicos del usuario que se ejecutan al iniciar sesión.
@@ -267,7 +267,7 @@ Los sistemas Linux rastrean las actividades de los usuarios y los eventos del si
 - **/var/log/cron**: Registra ejecuciones de trabajos cron.
 - **/var/log/daemon.log**: Rastrear actividades de servicios en segundo plano.
 - **/var/log/btmp**: Documenta intentos de inicio de sesión fallidos.
-- **/var/log/httpd/**: Contiene registros de errores y accesos de Apache HTTPD.
+- **/var/log/httpd/**: Contiene registros de errores y acceso de Apache HTTPD.
 - **/var/log/mysqld.log** o **/var/log/mysql.log**: Registra actividades de la base de datos MySQL.
 - **/var/log/xferlog**: Registra transferencias de archivos FTP.
 - **/var/log/**: Siempre verifica si hay registros inesperados aquí.
@@ -298,9 +298,9 @@ Algunas aplicaciones también generan sus propios registros:
 - **Gnome Desktop**: Revisa _\~/.recently-used.xbel_ para archivos accedidos recientemente a través de aplicaciones de Gnome.
 - **Firefox/Chrome**: Verifica el historial del navegador y las descargas en _\~/.mozilla/firefox_ o _\~/.config/google-chrome_ para actividades sospechosas.
 - **VIM**: Revisa _\~/.viminfo_ para detalles de uso, como rutas de archivos accedidos e historial de búsqueda.
-- **Open Office**: Verifica el acceso a documentos recientes que puedan indicar archivos comprometidos.
-- **FTP/SFTP**: Revisa registros en _\~/.ftp_history_ o _\~/.sftp_history_ para transferencias de archivos que podrían no estar autorizadas.
-- **MySQL**: Investiga _\~/.mysql_history_ para consultas de MySQL ejecutadas, que podrían revelar actividades no autorizadas en la base de datos.
+- **Open Office**: Verifica el acceso reciente a documentos que pueden indicar archivos comprometidos.
+- **FTP/SFTP**: Revisa registros en _\~/.ftp_history_ o _\~/.sftp_history_ para transferencias de archivos que podrían ser no autorizadas.
+- **MySQL**: Investiga _\~/.mysql_history_ para consultas MySQL ejecutadas, que podrían revelar actividades no autorizadas en la base de datos.
 - **Less**: Analiza _\~/.lesshst_ para el historial de uso, incluidos archivos vistos y comandos ejecutados.
 - **Git**: Examina _\~/.gitconfig_ y el proyecto _.git/logs_ para cambios en los repositorios.
 
@@ -333,7 +333,7 @@ Finalmente, busque cuentas con **sin contraseñas** o **contraseñas fácilmente
 
 ## Examinar el Sistema de Archivos
 
-### Análisis de Estructuras del Sistema de Archivos en la Investigación de Malware
+### Analizando Estructuras del Sistema de Archivos en la Investigación de Malware
 
 Al investigar incidentes de malware, la estructura del sistema de archivos es una fuente crucial de información, revelando tanto la secuencia de eventos como el contenido del malware. Sin embargo, los autores de malware están desarrollando técnicas para obstaculizar este análisis, como modificar las marcas de tiempo de los archivos o evitar el sistema de archivos para el almacenamiento de datos.
 

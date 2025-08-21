@@ -9,7 +9,7 @@
 ## Escapes de Chroot
 
 De [wikipedia](https://en.wikipedia.org/wiki/Chroot#Limitations): El mecanismo chroot **no está destinado a defenderse** contra manipulaciones intencionales por parte de **usuarios privilegiados** (**root**). En la mayoría de los sistemas, los contextos chroot no se apilan correctamente y los programas chrooted **con suficientes privilegios pueden realizar un segundo chroot para escapar**.\
-Generalmente, esto significa que para escapar necesitas ser root dentro del chroot.
+Por lo general, esto significa que para escapar necesitas ser root dentro del chroot.
 
 > [!TIP]
 > La **herramienta** [**chw00t**](https://github.com/earthquake/chw00t) fue creada para abusar de los siguientes escenarios y escapar de `chroot`.
@@ -17,11 +17,11 @@ Generalmente, esto significa que para escapar necesitas ser root dentro del chro
 ### Root + CWD
 
 > [!WARNING]
-> Si eres **root** dentro de un chroot **puedes escapar** creando **otro chroot**. Esto se debe a que 2 chroots no pueden coexistir (en Linux), así que si creas una carpeta y luego **creas un nuevo chroot** en esa nueva carpeta siendo **tú fuera de ella**, ahora estarás **fuera del nuevo chroot** y, por lo tanto, estarás en el FS.
+> Si eres **root** dentro de un chroot **puedes escapar** creando **otro chroot**. Esto se debe a que 2 chroots no pueden coexistir (en Linux), así que si creas una carpeta y luego **creas un nuevo chroot** en esa nueva carpeta estando **tú fuera de ella**, ahora estarás **fuera del nuevo chroot** y, por lo tanto, estarás en el FS.
 >
 > Esto ocurre porque generalmente chroot NO mueve tu directorio de trabajo al indicado, así que puedes crear un chroot pero estar fuera de él.
 
-Generalmente no encontrarás el binario `chroot` dentro de una cárcel chroot, pero **podrías compilar, subir y ejecutar** un binario:
+Por lo general, no encontrarás el binario `chroot` dentro de una cárcel chroot, pero **podrías compilar, subir y ejecutar** un binario:
 
 <details>
 
@@ -123,7 +123,7 @@ chroot(".");
 > [!WARNING]
 >
 > - Montando el dispositivo raíz (/) en un directorio dentro del chroot
-> - Chrooteando en ese directorio
+> - Chrooting en ese directorio
 >
 > Esto es posible en Linux
 
@@ -140,7 +140,7 @@ chroot(".");
 > [!WARNING]
 >
 > - Crea un Fork (proceso hijo) y chroot en una carpeta diferente más profunda en el FS y CD en ella
-> - Desde el proceso padre, mueve la carpeta donde se encuentra el proceso hijo a una carpeta anterior al chroot de los hijos
+> - Desde el proceso padre, mueve la carpeta donde está el proceso hijo a una carpeta anterior al chroot de los hijos
 > - Este proceso hijo se encontrará fuera del chroot
 
 ### ptrace
@@ -205,9 +205,10 @@ wget http://127.0.0.1:8080/sudoers -O /etc/sudoers
 ### Otros trucos
 
 [**https://fireshellsecurity.team/restricted-linux-shell-escaping-techniques/**](https://fireshellsecurity.team/restricted-linux-shell-escaping-techniques/)\
-[https://pen-testing.sans.org/blog/2012/0**b**6/06/escaping-restricted-linux-shells](https://pen-testing.sans.org/blog/2012/06/06/escaping-restricted-linux-shells**](https://pen-testing.sans.org/blog/2012/06/06/escaping-restricted-linux-shells)\
-[https://gtfobins.github.io](https://gtfobins.github.io/**](https/gtfobins.github.io)\
+[https://pen-testing.sans.org/blog/2012/06/06/escaping-restricted-linux-shells](https://pen-testing.sans.org/blog/2012/06/06/escaping-restricted-linux-shells)\
+[https://gtfobins.github.io](https://gtfobins.github.io)\
 **También podría ser interesante la página:**
+
 
 {{#ref}}
 ../bypass-bash-restrictions/
@@ -216,6 +217,7 @@ wget http://127.0.0.1:8080/sudoers -O /etc/sudoers
 ## Python Jails
 
 Trucos sobre cómo escapar de los python jails en la siguiente página:
+
 
 {{#ref}}
 ../../generic-methodologies-and-resources/python/bypass-python-sandboxes/
@@ -238,7 +240,7 @@ Enumerar funciones de una biblioteca:
 ```bash
 for k,v in pairs(string) do print(k,v) end
 ```
-Ten en cuenta que cada vez que ejecutas la línea de comando anterior en un **entorno lua diferente, el orden de las funciones cambia**. Por lo tanto, si necesitas ejecutar una función específica, puedes realizar un ataque de fuerza bruta cargando diferentes entornos lua y llamando a la primera función de la biblioteca:
+Ten en cuenta que cada vez que ejecutas la línea de comandos anterior en un **entorno lua diferente, el orden de las funciones cambia**. Por lo tanto, si necesitas ejecutar una función específica, puedes realizar un ataque de fuerza bruta cargando diferentes entornos lua y llamando a la primera función de la biblioteca:
 ```bash
 #In this scenario you could BF the victim that is generating a new lua environment
 #for every interaction with the following line and when you are lucky
@@ -249,7 +251,7 @@ for k,chr in pairs(string) do print(chr(0x6f,0x73,0x2e,0x65,0x78)) end
 #and "char" from string library, and the use both to execute a command
 for i in seq 1000; do echo "for k1,chr in pairs(string) do for k2,exec in pairs(os) do print(k1,k2) print(exec(chr(0x6f,0x73,0x2e,0x65,0x78,0x65,0x63,0x75,0x74,0x65,0x28,0x27,0x6c,0x73,0x27,0x29))) break end break end" | nc 10.10.10.10 10006 | grep -A5 "Code: char"; done
 ```
-**Obtener una shell lua interactiva**: Si estás dentro de una shell lua limitada, puedes obtener una nueva shell lua (y con suerte ilimitada) llamando:
+**Obtener un shell lua interactivo**: Si estás dentro de un shell lua limitado, puedes obtener un nuevo shell lua (y con suerte ilimitado) llamando:
 ```bash
 debug.debug()
 ```

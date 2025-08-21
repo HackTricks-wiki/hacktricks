@@ -2,7 +2,7 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-> [!NOTE]
+> [!TIP]
 > Una nota sobre **PCAP** vs **PCAPNG**: hay dos versiones del formato de archivo PCAP; **PCAPNG es más nuevo y no es compatible con todas las herramientas**. Es posible que necesite convertir un archivo de PCAPNG a PCAP usando Wireshark u otra herramienta compatible, para poder trabajar con él en algunas otras herramientas.
 
 ## Herramientas en línea para pcaps
@@ -18,7 +18,7 @@ Las siguientes herramientas son útiles para extraer estadísticas, archivos, et
 
 ### Wireshark
 
-> [!NOTE]
+> [!TIP]
 > **Si va a analizar un PCAP, básicamente debe saber cómo usar Wireshark**
 
 Puede encontrar algunos trucos de Wireshark en:
@@ -83,6 +83,7 @@ ngrep -I packets.pcap "^GET" "port 80 and tcp and host 192.168 and dst host 192.
 ### Carving
 
 Usar técnicas de carving comunes puede ser útil para extraer archivos e información del pcap:
+
 
 {{#ref}}
 ../partitions-file-systems-carving/file-data-carving-recovery-tools.md
@@ -200,13 +201,16 @@ rita show-exploded-dns -H --limit 10 zeek_logs
 ```
 ## Otras trucos de análisis de pcap
 
+
 {{#ref}}
 dnscat-exfiltration.md
 {{#endref}}
 
+
 {{#ref}}
 wifi-pcap-analysis.md
 {{#endref}}
+
 
 {{#ref}}
 usb-keystrokes.md

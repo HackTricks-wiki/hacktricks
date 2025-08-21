@@ -12,7 +12,7 @@
 
 ## Escape del Socket de Docker Montado
 
-Si de alguna manera encuentras que el **socket de docker está montado** dentro del contenedor de docker, podrás escapar de él.\
+Si de alguna manera descubres que el **socket de docker está montado** dentro del contenedor de docker, podrás escapar de él.\
 Esto suele ocurrir en contenedores de docker que por alguna razón necesitan conectarse al demonio de docker para realizar acciones.
 ```bash
 #Search the socket
@@ -33,12 +33,12 @@ nsenter --target 1 --mount --uts --ipc --net --pid -- bash
 # Get full privs in container without --privileged
 docker run -it -v /:/host/ --cap-add=ALL --security-opt apparmor=unconfined --security-opt seccomp=unconfined --security-opt label:disable --pid=host --userns=host --uts=host --cgroupns=host ubuntu chroot /host/ bash
 ```
-> [!NOTE]
+> [!TIP]
 > En caso de que el **socket de docker esté en un lugar inesperado**, aún puedes comunicarte con él usando el comando **`docker`** con el parámetro **`-H unix:///path/to/docker.sock`**
 
 El daemon de Docker también podría estar [escuchando en un puerto (por defecto 2375, 2376)](../../../../network-services-pentesting/2375-pentesting-docker.md) o en sistemas basados en Systemd, la comunicación con el daemon de Docker puede ocurrir a través del socket de Systemd `fd://`.
 
-> [!NOTE]
+> [!TIP]
 > Además, presta atención a los sockets de tiempo de ejecución de otros entornos de alto nivel:
 >
 > - dockershim: `unix:///var/run/dockershim.sock`
@@ -113,7 +113,7 @@ mount /dev/sda1 /mnt/hola
 
 #### Montaje de Disco - Poc2
 
-Dentro del contenedor, un atacante puede intentar obtener un acceso adicional al sistema operativo subyacente del host a través de un volumen hostPath escribible creado por el clúster. A continuación se presentan algunas cosas comunes que puedes verificar dentro del contenedor para ver si puedes aprovechar este vector de ataque:
+Dentro del contenedor, un atacante puede intentar obtener un acceso adicional al sistema operativo del host subyacente a través de un volumen hostPath escribible creado por el clúster. A continuación se presentan algunas cosas comunes que puedes verificar dentro del contenedor para ver si puedes aprovechar este vector de ataque:
 ```bash
 ### Check if You Can Write to a File-system
 echo 1 > /proc/sysrq-trigger
@@ -216,7 +216,7 @@ Encuentra una **explicación de la técnica** en:
 docker-release_agent-cgroups-escape.md
 {{#endref}}
 
-#### Escape Privilegiado Abusando de release_agent sin conocer la ruta relativa - PoC3
+#### Escape privilegiado abusando de release_agent sin conocer la ruta relativa - PoC3
 
 En los exploits anteriores, se **divulga la ruta absoluta del contenedor dentro del sistema de archivos del host**. Sin embargo, este no siempre es el caso. En casos donde **no conoces la ruta absoluta del contenedor dentro del host**, puedes usar esta técnica:
 
@@ -313,7 +313,7 @@ root        10     2  0 11:25 ?        00:00:00 [ksoftirqd/0]
 #### Escape de Privilegios Abusando de Montajes Sensibles
 
 Hay varios archivos que pueden estar montados que dan **información sobre el host subyacente**. Algunos de ellos pueden incluso indicar **algo que debe ser ejecutado por el host cuando sucede algo** (lo que permitirá a un atacante escapar del contenedor).\
-El abuso de estos archivos puede permitir que:
+El abuso de estos archivos puede permitir lo siguiente:
 
 - release_agent (ya cubierto antes)
 - [binfmt_misc](sensitive-mounts.md#proc-sys-fs-binfmt_misc)
@@ -333,10 +333,12 @@ En varias ocasiones encontrarás que el **contenedor tiene algún volumen montad
 ```bash
 docker run --rm -it -v /:/host ubuntu bash
 ```
-### Escalación de privilegios con 2 shells y montaje de host
+Otro ejemplo interesante se puede encontrar en [**este blog**](https://projectdiscovery.io/blog/versa-concerto-authentication-bypass-rce) donde se indica que las carpetas `/usr/bin/` y `/bin/` del host están montadas dentro del contenedor, lo que permite al usuario root del contenedor modificar binarios dentro de estas carpetas. Por lo tanto, si un trabajo cron está utilizando algún binario de allí, como `/etc/cron.d/popularity-contest`, esto permite escapar del contenedor al modificar un binario utilizado por el trabajo cron.
+
+### Escalación de privilegios con 2 shells y montaje del host
 
 Si tienes acceso como **root dentro de un contenedor** que tiene alguna carpeta del host montada y has **escapado como un usuario no privilegiado al host** y tienes acceso de lectura sobre la carpeta montada.\
-Puedes crear un **archivo suid de bash** en la **carpeta montada** dentro del **contenedor** y **ejecutarlo desde el host** para escalar privilegios.
+Puedes crear un **archivo suid de bash** en la **carpeta montada** dentro del **contenedor** y **ejecutarlo desde el host** para privesc.
 ```bash
 cp /bin/bash . #From non priv inside mounted folder
 # You need to copy it from the host as the bash binaries might be diferent in the host and in the container
@@ -346,12 +348,12 @@ bash -p #From non priv inside mounted folder
 ```
 ### Escalación de privilegios con 2 shells
 
-Si tienes acceso como **root dentro de un contenedor** y has **escapado como un usuario no privilegiado al host**, puedes abusar de ambas shells para **privesc dentro del host** si tienes la capacidad MKNOD dentro del contenedor (es por defecto) como [**se explica en esta publicación**](https://labs.withsecure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/).\
+Si tienes acceso como **root dentro de un contenedor** y has **escapado como un usuario no privilegiado al host**, puedes abusar de ambas shells para **privesc dentro del host** si tienes la capacidad MKNOD dentro del contenedor (es por defecto) como [**se explica en este post**](https://labs.withsecure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/).\
 Con tal capacidad, el usuario root dentro del contenedor puede **crear archivos de dispositivos de bloque**. Los archivos de dispositivos son archivos especiales que se utilizan para **acceder al hardware subyacente y a los módulos del kernel**. Por ejemplo, el archivo de dispositivo de bloque /dev/sda da acceso para **leer los datos en bruto del disco del sistema**.
 
-Docker protege contra el uso indebido de dispositivos de bloque dentro de los contenedores al hacer cumplir una política de cgroup que **bloquea las operaciones de lectura/escritura de dispositivos de bloque**. Sin embargo, si un dispositivo de bloque es **creado dentro del contenedor**, se vuelve accesible desde fuera del contenedor a través del **/proc/PID/root/** directorio. Este acceso requiere que el **propietario del proceso sea el mismo** tanto dentro como fuera del contenedor.
+Docker protege contra el uso indebido de dispositivos de bloque dentro de los contenedores al hacer cumplir una política de cgroup que **bloquea las operaciones de lectura/escritura de dispositivos de bloque**. Sin embargo, si un dispositivo de bloque es **creado dentro del contenedor**, se vuelve accesible desde fuera del contenedor a través del directorio **/proc/PID/root/**. Este acceso requiere que el **propietario del proceso sea el mismo** tanto dentro como fuera del contenedor.
 
-Ejemplo de **explotación** de este [**informe**](https://radboudinstituteof.pwning.nl/posts/htbunictfquals2021/goodgames/):
+Ejemplo de **explotación** de este [**writeup**](https://radboudinstituteof.pwning.nl/posts/htbunictfquals2021/goodgames/):
 ```bash
 # On the container as root
 cd /
@@ -440,12 +442,12 @@ docker run --rm -it --ipc=host ubuntu bash
 ```
 Con `hostIPC=true`, obtienes acceso a los recursos de comunicación entre procesos (IPC) del host, como **memoria compartida** en `/dev/shm`. Esto permite leer/escribir donde los mismos recursos IPC son utilizados por otros procesos del host o del pod. Usa `ipcs` para inspeccionar estos mecanismos IPC más a fondo.
 
-- **Inspeccionar /dev/shm** - Busca archivos en esta ubicación de memoria compartida: `ls -la /dev/shm`
+- **Inspeccionar /dev/shm** - Busca cualquier archivo en esta ubicación de memoria compartida: `ls -la /dev/shm`
 - **Inspeccionar instalaciones IPC existentes** – Puedes verificar si se están utilizando instalaciones IPC con `/usr/bin/ipcs`. Verifícalo con: `ipcs -a`
 
 ### Recuperar capacidades
 
-Si la syscall **`unshare`** no está prohibida, puedes recuperar todas las capacidades ejecutando:
+Si la llamada al sistema **`unshare`** no está prohibida, puedes recuperar todas las capacidades ejecutando:
 ```bash
 unshare -UrmCpf bash
 # Check them with
@@ -459,7 +461,7 @@ La segunda técnica explicada en la publicación [https://labs.withsecure.com/bl
 
 ### Exploit de Runc (CVE-2019-5736)
 
-En caso de que puedas ejecutar `docker exec` como root (probablemente con sudo), intenta escalar privilegios escapando de un contenedor abusando de CVE-2019-5736 (exploit [aquí](https://github.com/Frichetten/CVE-2019-5736-PoC/blob/master/main.go)). Esta técnica básicamente **sobrescribirá** el _**/bin/sh**_ binario del **host** **desde un contenedor**, por lo que cualquier persona que ejecute docker exec puede activar la carga útil.
+En caso de que puedas ejecutar `docker exec` como root (probablemente con sudo), intenta escalar privilegios escapando de un contenedor abusando de CVE-2019-5736 (exploit [aquí](https://github.com/Frichetten/CVE-2019-5736-PoC/blob/master/main.go)). Esta técnica básicamente **sobrescribirá** el binario _**/bin/sh**_ del **host** **desde un contenedor**, por lo que cualquier persona que ejecute docker exec puede activar la carga útil.
 
 Cambia la carga útil en consecuencia y construye el main.go con `go build main.go`. El binario resultante debe colocarse en el contenedor de docker para su ejecución.\
 Al ejecutarlo, tan pronto como muestre `[+] Overwritten /bin/sh successfully`, necesitas ejecutar lo siguiente desde la máquina host:
@@ -470,14 +472,14 @@ Esto activará la carga útil que está presente en el archivo main.go.
 
 Para más información: [https://blog.dragonsector.pl/2019/02/cve-2019-5736-escape-from-docker-and.html](https://blog.dragonsector.pl/2019/02/cve-2019-5736-escape-from-docker-and.html)
 
-> [!NOTE]
+> [!TIP]
 > Hay otros CVEs a los que el contenedor puede ser vulnerable, puedes encontrar una lista en [https://0xn3va.gitbook.io/cheat-sheets/container/escaping/cve-list](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/cve-list)
 
 ## Escape Personalizado de Docker
 
 ### Superficie de Escape de Docker
 
-- **Espacios de nombres:** El proceso debe estar **completamente separado de otros procesos** a través de espacios de nombres, por lo que no podemos escapar interactuando con otros procs debido a los espacios de nombres (por defecto no pueden comunicarse a través de IPCs, sockets unix, servicios de red, D-Bus, `/proc` de otros procs).
+- **Espacios de nombres:** El proceso debe estar **completamente separado de otros procesos** a través de espacios de nombres, por lo que no podemos escapar interactuando con otros procesos debido a los espacios de nombres (por defecto no pueden comunicarse a través de IPCs, sockets unix, servicios de red, D-Bus, `/proc` de otros procesos).
 - **Usuario root**: Por defecto, el usuario que ejecuta el proceso es el usuario root (sin embargo, sus privilegios son limitados).
 - **Capacidades**: Docker deja las siguientes capacidades: `cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_net_bind_service,cap_net_raw,cap_sys_chroot,cap_mknod,cap_audit_write,cap_setfcap=ep`
 - **Syscalls**: Estas son las syscalls que el **usuario root no podrá llamar** (debido a la falta de capacidades + Seccomp). Las otras syscalls podrían usarse para intentar escapar.
@@ -506,7 +508,7 @@ Para más información: [https://blog.dragonsector.pl/2019/02/cve-2019-5736-esca
 ```
 {{#endtab}}
 
-{{#tab name="syscalls arm64"}}
+{{#tab name="arm64 syscalls"}}
 ```
 0x029 -- pivot_root
 0x059 -- acct

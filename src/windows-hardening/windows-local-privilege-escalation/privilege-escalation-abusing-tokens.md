@@ -1,4 +1,4 @@
-# Abusing Tokens
+# Abuso de Tokens
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -14,7 +14,7 @@ access-tokens.md
 
 ### SeImpersonatePrivilege
 
-Este es un privilegio que posee cualquier proceso que permite la suplantación (pero no la creación) de cualquier token, dado que se puede obtener un handle para ello. Un token privilegiado se puede adquirir de un servicio de Windows (DCOM) induciéndolo a realizar autenticación NTLM contra un exploit, lo que permite posteriormente la ejecución de un proceso con privilegios de SYSTEM. Esta vulnerabilidad se puede explotar utilizando varias herramientas, como [juicy-potato](https://github.com/ohpe/juicy-potato), [RogueWinRM](https://github.com/antonioCoco/RogueWinRM) (que requiere que winrm esté deshabilitado), [SweetPotato](https://github.com/CCob/SweetPotato), y [PrintSpoofer](https://github.com/itm4n/PrintSpoofer).
+Este es un privilegio que posee cualquier proceso que permite la suplantación (pero no la creación) de cualquier token, dado que se puede obtener un handle para ello. Un token privilegiado se puede adquirir de un servicio de Windows (DCOM) induciéndolo a realizar autenticación NTLM contra un exploit, lo que permite posteriormente la ejecución de un proceso con privilegios de SYSTEM. Esta vulnerabilidad se puede explotar utilizando varias herramientas, como [juicy-potato](https://github.com/ohpe/juicy-potato), [RogueWinRM](https://github.com/antonioCoco/RogueWinRM) (que requiere que winrm esté deshabilitado), [SweetPotato](https://github.com/CCob/SweetPotato) y [PrintSpoofer](https://github.com/itm4n/PrintSpoofer).
 
 {{#ref}}
 roguepotato-and-printspoofer.md
@@ -32,11 +32,11 @@ Con el token, puedes crear un **nuevo proceso** con 'CreateProcessAsUser' o crea
 
 ### SeTcbPrivilege
 
-Si tienes habilitado este token, puedes usar **KERB_S4U_LOGON** para obtener un **token de suplantación** para cualquier otro usuario sin conocer las credenciales, **agregar un grupo arbitrario** (administradores) al token, establecer el **nivel de integridad** del token en "**medio**", y asignar este token al **hilo actual** (SetThreadToken).
+Si tienes habilitado este token, puedes usar **KERB_S4U_LOGON** para obtener un **token de suplantación** para cualquier otro usuario sin conocer las credenciales, **agregar un grupo arbitrario** (administradores) al token, establecer el **nivel de integridad** del token a "**medio**", y asignar este token al **hilo actual** (SetThreadToken).
 
 ### SeBackupPrivilege
 
-El sistema se ve obligado a **otorgar todo el acceso de lectura** a cualquier archivo (limitado a operaciones de lectura) por este privilegio. Se utiliza para **leer los hashes de contraseñas de cuentas de Administrador local** desde el registro, tras lo cual, herramientas como "**psexec**" o "**wmiexec**" pueden ser utilizadas con el hash (técnica Pass-the-Hash). Sin embargo, esta técnica falla bajo dos condiciones: cuando la cuenta de Administrador local está deshabilitada, o cuando hay una política que elimina los derechos administrativos de los Administradores locales que se conectan de forma remota.\
+El sistema se ve obligado a **otorgar acceso de lectura total** a cualquier archivo (limitado a operaciones de lectura) por este privilegio. Se utiliza para **leer los hashes de contraseñas de cuentas de Administrador local** desde el registro, tras lo cual, herramientas como "**psexec**" o "**wmiexec**" pueden ser utilizadas con el hash (técnica Pass-the-Hash). Sin embargo, esta técnica falla bajo dos condiciones: cuando la cuenta de Administrador local está deshabilitada, o cuando hay una política que elimina los derechos administrativos de los Administradores locales que se conectan de forma remota.\
 Puedes **abusar de este privilegio** con:
 
 - [https://github.com/Hackplayers/PsCabesha-tools/blob/master/Privesc/Acl-FullControl.ps1](https://github.com/Hackplayers/PsCabesha-tools/blob/master/Privesc/Acl-FullControl.ps1)
@@ -50,11 +50,11 @@ Puedes **abusar de este privilegio** con:
 
 ### SeRestorePrivilege
 
-Este privilegio proporciona permiso para **acceso de escritura** a cualquier archivo del sistema, independientemente de la Lista de Control de Acceso (ACL) del archivo. Abre numerosas posibilidades para la escalación, incluyendo la capacidad de **modificar servicios**, realizar DLL Hijacking, y establecer **depuradores** a través de Opciones de Ejecución de Archivos de Imagen entre varias otras técnicas.
+Este privilegio proporciona permiso para **acceso de escritura** a cualquier archivo del sistema, independientemente de la Lista de Control de Acceso (ACL) del archivo. Abre numerosas posibilidades para la escalación, incluyendo la capacidad de **modificar servicios**, realizar DLL Hijacking y establecer **depuradores** a través de Opciones de Ejecución de Archivos de Imagen, entre varias otras técnicas.
 
 ### SeCreateTokenPrivilege
 
-SeCreateTokenPrivilege es un permiso poderoso, especialmente útil cuando un usuario posee la capacidad de suplantar tokens, pero también en ausencia de SeImpersonatePrivilege. Esta capacidad depende de la habilidad para suplantar un token que representa al mismo usuario y cuyo nivel de integridad no excede el del proceso actual.
+SeCreateTokenPrivilege es un permiso poderoso, especialmente útil cuando un usuario tiene la capacidad de suplantar tokens, pero también en ausencia de SeImpersonatePrivilege. Esta capacidad depende de la habilidad para suplantar un token que representa al mismo usuario y cuyo nivel de integridad no excede el del proceso actual.
 
 **Puntos Clave:**
 
@@ -66,17 +66,17 @@ SeCreateTokenPrivilege es un permiso poderoso, especialmente útil cuando un usu
 
 Este privilegio permite **cargar y descargar controladores de dispositivos** con la creación de una entrada en el registro con valores específicos para `ImagePath` y `Type`. Dado que el acceso de escritura directo a `HKLM` (HKEY_LOCAL_MACHINE) está restringido, se debe utilizar `HKCU` (HKEY_CURRENT_USER) en su lugar. Sin embargo, para que `HKCU` sea reconocible por el núcleo para la configuración del controlador, se debe seguir un camino específico.
 
-Este camino es `\Registry\User\<RID>\System\CurrentControlSet\Services\DriverName`, donde `<RID>` es el Identificador Relativo del usuario actual. Dentro de `HKCU`, se debe crear todo este camino, y se deben establecer dos valores:
+Este camino es `\Registry\User\<RID>\System\CurrentControlSet\Services\DriverName`, donde `<RID>` es el Identificador Relativo del usuario actual. Dentro de `HKCU`, se debe crear todo este camino y establecer dos valores:
 
 - `ImagePath`, que es la ruta al binario que se va a ejecutar
 - `Type`, con un valor de `SERVICE_KERNEL_DRIVER` (`0x00000001`).
 
 **Pasos a Seguir:**
 
-1. Acceder a `HKCU` en lugar de `HKLM` debido al acceso de escritura restringido.
-2. Crear el camino `\Registry\User\<RID>\System\CurrentControlSet\Services\DriverName` dentro de `HKCU`, donde `<RID>` representa el Identificador Relativo del usuario actual.
-3. Establecer el `ImagePath` a la ruta de ejecución del binario.
-4. Asignar el `Type` como `SERVICE_KERNEL_DRIVER` (`0x00000001`).
+1. Accede a `HKCU` en lugar de `HKLM` debido al acceso de escritura restringido.
+2. Crea el camino `\Registry\User\<RID>\System\CurrentControlSet\Services\DriverName` dentro de `HKCU`, donde `<RID>` representa el Identificador Relativo del usuario actual.
+3. Establece el `ImagePath` a la ruta de ejecución del binario.
+4. Asigna el `Type` como `SERVICE_KERNEL_DRIVER` (`0x00000001`).
 ```python
 # Example Python code to set the registry values
 import winreg as reg
@@ -125,7 +125,7 @@ mimikatz # sekurlsa::logonpasswords
 ```
 #### RCE
 
-Si quieres obtener un shell `NT SYSTEM`, podrías usar:
+Si deseas obtener un shell de `NT SYSTEM`, podrías usar:
 
 - [**SeDebugPrivilege-Exploit (C++)**](https://github.com/bruno-1337/SeDebugPrivilege-Exploit)
 - [**SeDebugPrivilegePoC (C#)**](https://github.com/daem0nc0re/PrivFu/tree/main/PrivilegedOperations/SeDebugPrivilegePoC)

@@ -2,6 +2,8 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
+
+
 ## Silver ticket
 
 El ataque de **Silver Ticket** implica la explotación de tickets de servicio en entornos de Active Directory (AD). Este método se basa en **adquirir el hash NTLM de una cuenta de servicio**, como una cuenta de computadora, para falsificar un ticket de Servicio de Concesión de Tickets (TGS). Con este ticket falsificado, un atacante puede acceder a servicios específicos en la red, **suplantando a cualquier usuario**, generalmente con el objetivo de obtener privilegios administrativos. Se enfatiza que usar claves AES para falsificar tickets es más seguro y menos detectable.
@@ -43,14 +45,14 @@ El servicio CIFS se destaca como un objetivo común para acceder al sistema de a
 | ------------------------------------------ | ------------------------------------------------------------------------ |
 | WMI                                        | <p>HOST</p><p>RPCSS</p>                                                |
 | PowerShell Remoting                        | <p>HOST</p><p>HTTP</p><p>Dependiendo del SO también:</p><p>WSMAN</p><p>RPCSS</p> |
-| WinRM                                      | <p>HOST</p><p>HTTP</p><p>En algunas ocasiones puedes simplemente pedir: WINRM</p> |
+| WinRM                                      | <p>HOST</p><p>HTTP</p><p>En algunas ocasiones solo puedes pedir: WINRM</p> |
 | Tareas Programadas                         | HOST                                                                   |
 | Compartición de Archivos de Windows, también psexec | CIFS                                                                   |
 | Operaciones LDAP, incluido DCSync         | LDAP                                                                   |
-| Herramientas de Administración Remota de Windows | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                     |
+| Herramientas de Administración Remota de Windows | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                   |
 | Tickets Dorados                            | krbtgt                                                                 |
 
-Usando **Rubeus** puedes **solicitar todos** estos tickets usando el parámetro:
+Usando **Rubeus** puedes **pedir todos** estos tickets usando el parámetro:
 
 - `/altservice:host,RPCSS,http,wsman,cifs,ldap,krbtgt,winrm`
 
@@ -62,7 +64,7 @@ Usando **Rubeus** puedes **solicitar todos** estos tickets usando el parámetro:
 
 ## Persistencia
 
-Para evitar que las máquinas roten su contraseña cada 30 días, establece `HKLM\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters\DisablePasswordChange = 1` o podrías establecer `HKLM\SYSTEM\CurrentControlSet\Services\NetLogon\Parameters\MaximumPasswordAge` a un valor mayor de 30 días para indicar el período de rotación cuando la contraseña de las máquinas debe ser rotada.
+Para evitar que las máquinas roten su contraseña cada 30 días, establece `HKLM\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters\DisablePasswordChange = 1` o podrías establecer `HKLM\SYSTEM\CurrentControlSet\Services\NetLogon\Parameters\MaximumPasswordAge` a un valor mayor de 30 días para indicar el período de rotación cuando la contraseña de la máquina debe ser rotada.
 
 ## Abusando de los tickets de Servicio
 
@@ -70,7 +72,7 @@ En los siguientes ejemplos imaginemos que el ticket se recupera suplantando la c
 
 ### CIFS
 
-Con este ticket podrás acceder a la carpeta `C$` y `ADMIN$` a través de **SMB** (si están expuestas) y copiar archivos a una parte del sistema de archivos remoto simplemente haciendo algo como:
+Con este ticket podrás acceder a la carpeta `C$` y `ADMIN$` a través de **SMB** (si están expuestas) y copiar archivos a una parte del sistema de archivos remoto solo haciendo algo como:
 ```bash
 dir \\vulnerable.computer\C$
 dir \\vulnerable.computer\ADMIN$
@@ -136,6 +138,7 @@ Con este privilegio puedes volcar la base de datos del DC usando **DCSync**:
 mimikatz(commandline) # lsadump::dcsync /dc:pcdc.domain.local /domain:domain.local /user:krbtgt
 ```
 **Aprende más sobre DCSync** en la siguiente página:
+
 
 {{#ref}}
 dcsync.md

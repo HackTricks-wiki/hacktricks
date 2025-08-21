@@ -34,7 +34,7 @@ certipy auth -pfx user.pfx -dc-ip 10.0.0.10
 ```
 > Nota: Combinado con otras técnicas (ver secciones de THEFT), la autenticación basada en certificados permite acceso persistente sin tocar LSASS e incluso desde contextos no elevados.
 
-## Obtención de Persistencia de Máquina con Certificados - PERSIST2
+## Obtención de Persistencia en la Máquina con Certificados - PERSIST2
 
 Si un atacante tiene privilegios elevados en un host, puede inscribir la cuenta de máquina del sistema comprometido para un certificado utilizando la plantilla `Machine` predeterminada. Autenticarse como la máquina habilita S4U2Self para servicios locales y puede proporcionar persistencia duradera en el host:
 ```bash
@@ -66,11 +66,11 @@ Si puede escribir en el atributo `altSecurityIdentities` de una cuenta objetivo,
 Flujo de alto nivel:
 
 1. Obtenga o emita un certificado de autenticación de cliente que controle (por ejemplo, inscriba la plantilla `User` como usted mismo).
-2. Extraiga un identificador fuerte del certificado (Emisor+Serial, SKI o SHA1-ClavePública).
+2. Extraiga un identificador fuerte del certificado (Issuer+Serial, SKI o SHA1-PublicKey).
 3. Agregue un mapeo explícito en el `altSecurityIdentities` del principal víctima utilizando ese identificador.
 4. Autentíquese con su certificado; el DC lo mapea a la víctima a través del mapeo explícito.
 
-Ejemplo (PowerShell) utilizando un mapeo fuerte de Emisor+Serial:
+Ejemplo (PowerShell) utilizando un mapeo fuerte de Issuer+Serial:
 ```powershell
 # Example values - reverse the issuer DN and serial as required by AD mapping format
 $Issuer  = 'DC=corp,DC=local,CN=CORP-DC-CA'
@@ -116,10 +116,10 @@ La revocación del certificado del agente o los permisos de plantilla es necesar
 Microsoft KB5014754 introdujo la Aplicación de Mapeo de Certificados Fuertes en controladores de dominio. Desde el 11 de febrero de 2025, los DCs predeterminan la Aplicación Completa, rechazando mapeos débiles/ambiguos. Implicaciones prácticas:
 
 - Los certificados anteriores a 2022 que carecen de la extensión de mapeo SID pueden fallar en el mapeo implícito cuando los DCs están en Aplicación Completa. Los atacantes pueden mantener el acceso renovando certificados a través de AD CS (para obtener la extensión SID) o plantando un mapeo explícito fuerte en `altSecurityIdentities` (PERSIST4).
-- Los mapeos explícitos que utilizan formatos fuertes (Emisor+Serie, SKI, SHA1-ClavePública) continúan funcionando. Los formatos débiles (Emisor/Sujeto, Solo-Sujeto, RFC822) pueden ser bloqueados y deben evitarse para la persistencia.
+- Los mapeos explícitos que utilizan formatos fuertes (Emisor+Serie, SKI, SHA1-ClavePública) continúan funcionando. Los formatos débiles (Emisor/Sujeto, Solo-sujeto, RFC822) pueden ser bloqueados y deben evitarse para la persistencia.
 
 Los administradores deben monitorear y alertar sobre:
-- Cambios en `altSecurityIdentities` y emisión/renovaciones de certificados de Agente de Inscripción y Usuario.
+- Cambios en `altSecurityIdentities` y la emisión/renovaciones de certificados de Agente de Inscripción y Usuario.
 - Registros de emisión de CA para solicitudes en nombre de y patrones de renovación inusuales.
 
 ## Referencias

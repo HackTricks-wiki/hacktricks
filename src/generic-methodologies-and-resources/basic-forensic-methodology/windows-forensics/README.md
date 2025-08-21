@@ -1,32 +1,30 @@
-# Artefactos de Windows
-
-## Artefactos de Windows
+# Windows Artifacts
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Artefactos Genéricos de Windows
+## Generic Windows Artifacts
 
-### Notificaciones de Windows 10
+### Windows 10 Notifications
 
-En la ruta `\Users\<username>\AppData\Local\Microsoft\Windows\Notifications` puedes encontrar la base de datos `appdb.dat` (antes del aniversario de Windows) o `wpndatabase.db` (después del aniversario de Windows).
+En la ruta `\Users\<username>\AppData\Local\Microsoft\Windows\Notifications` puedes encontrar la base de datos `appdb.dat` (antes de la actualización de aniversario de Windows) o `wpndatabase.db` (después de la actualización de aniversario de Windows).
 
 Dentro de esta base de datos SQLite, puedes encontrar la tabla `Notification` con todas las notificaciones (en formato XML) que pueden contener datos interesantes.
 
-### Línea de Tiempo
+### Timeline
 
-La línea de tiempo es una característica de Windows que proporciona **historial cronológico** de páginas web visitadas, documentos editados y aplicaciones ejecutadas.
+Timeline es una característica de Windows que proporciona **historial cronológico** de páginas web visitadas, documentos editados y aplicaciones ejecutadas.
 
-La base de datos reside en la ruta `\Users\<username>\AppData\Local\ConnectedDevicesPlatform\<id>\ActivitiesCache.db`. Esta base de datos se puede abrir con una herramienta SQLite o con la herramienta [**WxTCmd**](https://github.com/EricZimmerman/WxTCmd) **que genera 2 archivos que se pueden abrir con la herramienta** [**TimeLine Explorer**](https://ericzimmerman.github.io/#!index.md).
+La base de datos se encuentra en la ruta `\Users\<username>\AppData\Local\ConnectedDevicesPlatform\<id>\ActivitiesCache.db`. Esta base de datos se puede abrir con una herramienta SQLite o con la herramienta [**WxTCmd**](https://github.com/EricZimmerman/WxTCmd) **que genera 2 archivos que se pueden abrir con la herramienta** [**TimeLine Explorer**](https://ericzimmerman.github.io/#!index.md).
 
-### ADS (Flujos de Datos Alternativos)
+### ADS (Alternate Data Streams)
 
 Los archivos descargados pueden contener el **ADS Zone.Identifier** que indica **cómo** fue **descargado** desde la intranet, internet, etc. Algunos programas (como navegadores) suelen poner incluso **más** **información** como la **URL** desde donde se descargó el archivo.
 
-## **Copias de Seguridad de Archivos**
+## **File Backups**
 
-### Papelera de Reciclaje
+### Recycle Bin
 
-En Vista/Win7/Win8/Win10 la **Papelera de Reciclaje** se puede encontrar en la carpeta **`$Recycle.bin`** en la raíz de la unidad (`C:\$Recycle.bin`).\
+En Vista/Win7/Win8/Win10 la **Recycle Bin** se puede encontrar en la carpeta **`$Recycle.bin`** en la raíz de la unidad (`C:\$Recycle.bin`).\
 Cuando se elimina un archivo en esta carpeta se crean 2 archivos específicos:
 
 - `$I{id}`: Información del archivo (fecha de cuando fue eliminado)
@@ -58,9 +56,9 @@ La entrada del registro `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Bac
 
 El registro `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\VSS` también contiene información de configuración sobre las `Copias de Sombra de Volumen`.
 
-### Archivos de Office AutoGuardados
+### Archivos AutoGuardados de Office
 
-Puedes encontrar los archivos de auto guardado de Office en: `C:\Usuarios\\AppData\Roaming\Microsoft{Excel|Word|Powerpoint}\`
+Puedes encontrar los archivos auto guardados de Office en: `C:\Usuarios\\AppData\Roaming\Microsoft{Excel|Word|Powerpoint}\`
 
 ## Elementos de Shell
 
@@ -128,7 +126,7 @@ Es posible identificar que se utilizó un dispositivo USB gracias a la creación
 - Carpeta Reciente de Microsoft Office
 - Jumplists
 
-Ten en cuenta que algunos archivos LNK en lugar de apuntar a la ruta original, apuntan a la carpeta WPDNSE:
+Nota que algunos archivos LNK en lugar de apuntar a la ruta original, apuntan a la carpeta WPDNSE:
 
 ![](<../../../images/image (218).png>)
 
@@ -142,7 +140,7 @@ Los archivos en la carpeta WPDNSE son una copia de los originales, por lo que no
 
 Consulta el archivo `C:\Windows\inf\setupapi.dev.log` para obtener las marcas de tiempo sobre cuándo se produjo la conexión USB (busca `Section start`).
 
-![](<../../../images/image (477) (2) (2) (2) (2) (2) (2) (2) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (14) (2).png>)
+![](<../../../images/image (477) (2) (2) (2) (2) (2) (2) (2) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (14) (2).png>)
 
 ### USB Detective
 
@@ -161,7 +159,7 @@ Se proporciona una captura de pantalla que muestra el contenido de la tarea: ![]
 **Componentes Clave y Configuraciones de la Tarea:**
 
 - **pnpclean.dll**: Este DLL es responsable del proceso de limpieza real.
-- **UseUnifiedSchedulingEngine**: Establecido en `TRUE`, indicando el uso del motor de programación de tareas genérico.
+- **UseUnifiedSchedulingEngine**: Configurado en `TRUE`, indicando el uso del motor de programación de tareas genérico.
 - **MaintenanceSettings**:
 - **Period ('P1M')**: Indica al Programador de Tareas que inicie la tarea de limpieza mensualmente durante el mantenimiento automático regular.
 - **Deadline ('P2M')**: Instruye al Programador de Tareas, si la tarea falla durante dos meses consecutivos, a ejecutar la tarea durante el mantenimiento automático de emergencia.
@@ -191,7 +189,7 @@ Los **metadatos** de los correos y los **contactos** se pueden encontrar dentro 
 
 ### Microsoft Outlook
 
-Cuando se utilizan servidores Exchange o clientes de Outlook, habrá algunos encabezados MAPI:
+Cuando se utilizan servidores de Exchange o clientes de Outlook, habrá algunos encabezados MAPI:
 
 - `Mapi-Client-Submit-Time`: Hora del sistema cuando se envió el correo
 - `Mapi-Conversation-Index`: Número de mensajes hijos del hilo y marca de tiempo de cada mensaje del hilo
@@ -232,7 +230,7 @@ Los adjuntos perdidos podrían ser recuperables de:
 
 ### Información del Registro de Windows
 
-El Registro de Windows, que almacena una extensa cantidad de datos sobre la actividad del sistema y del usuario, se encuentra dentro de archivos en:
+El Registro de Windows, que almacena una extensa cantidad de datos sobre el sistema y la actividad del usuario, se encuentra dentro de archivos en:
 
 - `%windir%\System32\Config` para varias subclaves de `HKEY_LOCAL_MACHINE`.
 - `%UserProfile%{User}\NTUSER.DAT` para `HKEY_CURRENT_USER`.
@@ -264,6 +262,7 @@ En `SAM\Domains\Account\Users` puedes obtener el nombre de usuario, el RID, el �
 
 ### Entradas Interesantes en el Registro de Windows
 
+
 {{#ref}}
 interesting-windows-registry-keys.md
 {{#endref}}
@@ -280,7 +279,7 @@ Dentro del registro `NTUSER.DAT` en la ruta `Software\Microsoft\Current Version\
 
 ### BAM (Moderador de Actividad en Segundo Plano)
 
-Puedes abrir el archivo `SYSTEM` con un editor de registro y dentro de la ruta `SYSTEM\CurrentControlSet\Services\bam\UserSettings\{SID}` puedes encontrar la información sobre las **aplicaciones ejecutadas por cada usuario** (nota el `{SID}` en la ruta) y a **qué hora** fueron ejecutadas (la hora está dentro del valor de datos del registro).
+Puedes abrir el archivo `SYSTEM` con un editor de registro y dentro de la ruta `SYSTEM\CurrentControlSet\Services\bam\UserSettings\{SID}` puedes encontrar la información sobre las **aplicaciones ejecutadas por cada usuario** (nota el `{SID}` en la ruta) y a **qué hora** fueron ejecutadas (la hora está dentro del valor de Datos del registro).
 
 ### Prefetch de Windows
 
@@ -337,7 +336,7 @@ El **AppCompatCache**, también conocido como **ShimCache**, forma parte de la *
 - Hora de última actualización del ShimCache
 - Bandera de ejecución del proceso
 
-Estos datos se almacenan en el registro en ubicaciones específicas según la versión del sistema operativo:
+Dicha información se almacena en el registro en ubicaciones específicas según la versión del sistema operativo:
 
 - Para XP, los datos se almacenan en `SYSTEM\CurrentControlSet\Control\SessionManager\Appcompatibility\AppcompatCache` con una capacidad para 96 entradas.
 - Para Server 2003, así como para las versiones de Windows 2008, 2012, 2016, 7, 8 y 10, la ruta de almacenamiento es `SYSTEM\CurrentControlSet\Control\SessionManager\AppcompatCache\AppCompatCache`, acomodando 512 y 1024 entradas, respectivamente.
@@ -388,7 +387,7 @@ Y **aplicaciones desinstaladas** en: `Software\Microsoft\Windows\CurrentVersion\
 
 La información que aparece dentro de los eventos de Windows es:
 
-- Qué sucedió
+- Lo que sucedió
 - Marca de tiempo (UTC + 0)
 - Usuarios involucrados
 - Hosts involucrados (nombre de host, IP)
@@ -411,26 +410,26 @@ Los eventos de acceso se registran en el archivo de configuración de seguridad 
 - **EventIDs 4634/4647**: Representan eventos de cierre de sesión de usuarios.
 - **EventID 4672**: Denota inicio de sesión con privilegios administrativos.
 
-#### Subtipos dentro de EventID 4634/4647:
+#### Subtipos dentro del EventID 4634/4647:
 
 - **Interactivo (2)**: Inicio de sesión directo del usuario.
 - **Red (3)**: Acceso a carpetas compartidas.
 - **Lote (4)**: Ejecución de procesos por lotes.
 - **Servicio (5)**: Lanzamientos de servicios.
 - **Proxy (6)**: Autenticación proxy.
-- **Desbloquear (7)**: Pantalla desbloqueada con una contraseña.
+- **Desbloqueo (7)**: Pantalla desbloqueada con una contraseña.
 - **Texto claro de red (8)**: Transmisión de contraseña en texto claro, a menudo desde IIS.
 - **Nuevas credenciales (9)**: Uso de diferentes credenciales para el acceso.
-- **Interactivo remoto (10)**: Inicio de sesión en escritorio remoto o servicios de terminal.
+- **Interactivo remoto (10)**: Inicio de sesión en servicios de escritorio remoto o terminal.
 - **Interactivo en caché (11)**: Inicio de sesión con credenciales en caché sin contacto con el controlador de dominio.
 - **Interactivo remoto en caché (12)**: Inicio de sesión remoto con credenciales en caché.
 - **Desbloqueo en caché (13)**: Desbloqueo con credenciales en caché.
 
-#### Códigos de estado y subestado para EventID 4625:
+#### Códigos de estado y subestado para el EventID 4625:
 
 - **0xC0000064**: El nombre de usuario no existe - Podría indicar un ataque de enumeración de nombres de usuario.
 - **0xC000006A**: Nombre de usuario correcto pero contraseña incorrecta - Posible intento de adivinanza de contraseña o fuerza bruta.
-- **0xC0000234**: Cuenta de usuario bloqueada - Puede seguir a un ataque de fuerza bruta que resulte en múltiples inicios de sesión fallidos.
+- **0xC0000234**: Cuenta de usuario bloqueada - Puede seguir a un ataque de fuerza bruta que resulta en múltiples inicios de sesión fallidos.
 - **0xC0000072**: Cuenta deshabilitada - Intentos no autorizados de acceder a cuentas deshabilitadas.
 - **0xC000006F**: Inicio de sesión fuera del tiempo permitido - Indica intentos de acceso fuera de las horas de inicio de sesión establecidas, un posible signo de acceso no autorizado.
 - **0xC0000070**: Violación de restricciones de estación de trabajo - Podría ser un intento de inicio de sesión desde una ubicación no autorizada.
@@ -447,7 +446,7 @@ Los eventos de acceso se registran en el archivo de configuración de seguridad 
 
 #### EventID 6005 y 6006:
 
-- **Inicio y apagado del sistema**: EventID 6005 indica que el sistema se está iniciando, mientras que EventID 6006 marca su apagado.
+- **Inicio y apagado del sistema**: El EventID 6005 indica que el sistema se está iniciando, mientras que el EventID 6006 marca su apagado.
 
 #### EventID 1102:
 
@@ -461,7 +460,7 @@ Los eventos de acceso se registran en el archivo de configuración de seguridad 
 
 Para ejemplos prácticos sobre cómo simular estos tipos de inicio de sesión y oportunidades de volcado de credenciales, consulta la [guía detallada de Altered Security](https://www.alteredsecurity.com/post/fantastic-windows-logon-types-and-where-to-find-credentials-in-them).
 
-Los detalles del evento, incluidos los códigos de estado y subestado, proporcionan más información sobre las causas del evento, particularmente notables en el Event ID 4625.
+Los detalles de los eventos, incluidos los códigos de estado y subestado, proporcionan más información sobre las causas de los eventos, particularmente notables en el Event ID 4625.
 
 ### Recuperando eventos de Windows
 
@@ -481,11 +480,11 @@ Registrado por EventID 4616, los cambios en la hora del sistema pueden complicar
 
 #### Seguimiento de dispositivos USB
 
-IDs de eventos del sistema útiles para el seguimiento de dispositivos USB incluyen 20001/20003/10000 para el uso inicial, 10100 para actualizaciones de controladores y EventID 112 de DeviceSetupManager para marcas de tiempo de inserción.
+Los System EventIDs útiles para el seguimiento de dispositivos USB incluyen 20001/20003/10000 para el uso inicial, 10100 para actualizaciones de controladores y EventID 112 de DeviceSetupManager para marcas de tiempo de inserción.
 
 #### Eventos de energía del sistema
 
-EventID 6005 indica el inicio del sistema, mientras que EventID 6006 marca el apagado.
+El EventID 6005 indica el inicio del sistema, mientras que el EventID 6006 marca el apagado.
 
 #### Eliminación de registros
 

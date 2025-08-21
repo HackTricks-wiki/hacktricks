@@ -6,18 +6,18 @@
 
 Permisos en un **directorio**:
 
-- **leer** - puedes **enumerar** las entradas del directorio
-- **escribir** - puedes **eliminar/escribir** **archivos** en el directorio y puedes **eliminar carpetas vacías**.
+- **lectura** - puedes **enumerar** las entradas del directorio
+- **escritura** - puedes **eliminar/escribir** **archivos** en el directorio y puedes **eliminar carpetas vacías**.
 - Pero **no puedes eliminar/modificar carpetas no vacías** a menos que tengas permisos de escritura sobre ellas.
 - **No puedes modificar el nombre de una carpeta** a menos que seas el propietario.
 - **ejecutar** - se te **permite atravesar** el directorio - si no tienes este derecho, no puedes acceder a ningún archivo dentro de él, ni en ningún subdirectorio.
 
-### Combinaciones peligrosas
+### Combinaciones Peligrosas
 
 **Cómo sobrescribir un archivo/carpeta propiedad de root**, pero:
 
-- Un **propietario de directorio** padre en la ruta es el usuario
-- Un **propietario de directorio** padre en la ruta es un **grupo de usuarios** con **acceso de escritura**
+- Un **propietario de directorio** en la ruta es el usuario
+- Un **propietario de directorio** en la ruta es un **grupo de usuarios** con **acceso de escritura**
 - Un **grupo** de usuarios tiene **acceso de escritura** al **archivo**
 
 Con cualquiera de las combinaciones anteriores, un atacante podría **inyectar** un **enlace simbólico/duro** en la ruta esperada para obtener una escritura arbitraria privilegiada.
@@ -28,9 +28,9 @@ Si hay archivos en un **directorio** donde **solo root tiene acceso R+X**, esos 
 
 Ejemplo en: [https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions](https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions)
 
-## Enlace simbólico / Enlace duro
+## Enlace Simbólico / Enlace Duro
 
-### Archivo/carpeta permisivo
+### Archivo/carpeta permisiva
 
 Si un proceso privilegiado está escribiendo datos en un **archivo** que podría ser **controlado** por un **usuario de menor privilegio**, o que podría haber sido **creado previamente** por un usuario de menor privilegio. El usuario podría simplemente **apuntarlo a otro archivo** a través de un enlace simbólico o duro, y el proceso privilegiado escribirá en ese archivo.
 
@@ -38,7 +38,7 @@ Consulta en las otras secciones donde un atacante podría **abusar de una escrit
 
 ### Abrir `O_NOFOLLOW`
 
-La bandera `O_NOFOLLOW` cuando se usa en la función `open` no seguirá un symlink en el último componente de la ruta, pero seguirá el resto de la ruta. La forma correcta de prevenir el seguimiento de symlinks en la ruta es utilizando la bandera `O_NOFOLLOW_ANY`.
+La bandera `O_NOFOLLOW` cuando es utilizada por la función `open` no seguirá un symlink en el último componente de la ruta, pero seguirá el resto de la ruta. La forma correcta de prevenir seguir symlinks en la ruta es utilizando la bandera `O_NOFOLLOW_ANY`.
 
 ## .fileloc
 
@@ -56,9 +56,9 @@ Ejemplo:
 </dict>
 </plist>
 ```
-## Descriptores de Archivo
+## Descriptores de Archivos
 
-### Filtración de FD (sin `O_CLOEXEC`)
+### Fuga de FD (sin `O_CLOEXEC`)
 
 Si una llamada a `open` no tiene la bandera `O_CLOEXEC`, el descriptor de archivo será heredado por el proceso hijo. Así que, si un proceso privilegiado abre un archivo privilegiado y ejecuta un proceso controlado por el atacante, el atacante **heredará el FD sobre el archivo privilegiado**.
 
@@ -148,6 +148,7 @@ ls -le test
 
 No es realmente necesario, pero lo dejo ahí por si acaso:
 
+
 {{#ref}}
 macos-xattr-acls-extra-stuff.md
 {{#endref}}
@@ -156,11 +157,11 @@ macos-xattr-acls-extra-stuff.md
 
 ### Bypass de verificaciones de binarios de plataforma
 
-Algunas verificaciones de seguridad comprueban si el binario es un **binario de plataforma**, por ejemplo, para permitir la conexión a un servicio XPC. Sin embargo, como se expone en un bypass en https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/, es posible eludir esta verificación obteniendo un binario de plataforma (como /bin/ls) e inyectando el exploit a través de dyld usando una variable de entorno `DYLD_INSERT_LIBRARIES`.
+Al algunas verificaciones de seguridad se les verifica si el binario es un **binario de plataforma**, por ejemplo, para permitir la conexión a un servicio XPC. Sin embargo, como se expone en un bypass en https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/, es posible eludir esta verificación obteniendo un binario de plataforma (como /bin/ls) e inyectando el exploit a través de dyld usando una variable de entorno `DYLD_INSERT_LIBRARIES`.
 
-### Bypass de las flags `CS_REQUIRE_LV` y `CS_FORCED_LV`
+### Bypass de flags `CS_REQUIRE_LV` y `CS_FORCED_LV`
 
-Es posible que un binario en ejecución modifique sus propias flags para eludir verificaciones con un código como:
+Es posible que un binario en ejecución modifique sus propios flags para eludir verificaciones con un código como:
 ```c
 // Code from https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/
 int pid = getpid();
@@ -248,12 +249,12 @@ hdiutil detach /private/tmp/mnt 1>/dev/null
 # You can also create a dmg from an app using:
 hdiutil create -srcfolder justsome.app justsome.dmg
 ```
-Usualmente, macOS monta discos hablando con el servicio Mach `com.apple.DiskArbitration.diskarbitrationd` (proporcionado por `/usr/libexec/diskarbitrationd`). Si se agrega el parámetro `-d` al archivo plist de LaunchDaemons y se reinicia, almacenará registros en `/var/log/diskarbitrationd.log`.\
-Sin embargo, es posible usar herramientas como `hdik` y `hdiutil` para comunicarse directamente con el kext `com.apple.driver.DiskImages`.
+Usualmente, macOS monta discos comunicándose con el servicio Mach `com.apple.DiskArbitrarion.diskarbitrariond` (proporcionado por `/usr/libexec/diskarbitrationd`). Si se agrega el parámetro `-d` al archivo plist de LaunchDaemons y se reinicia, almacenará registros en `/var/log/diskarbitrationd.log`.\
+Sin embargo, es posible utilizar herramientas como `hdik` y `hdiutil` para comunicarse directamente con el kext `com.apple.driver.DiskImages`.
 
 ## Escrituras Arbitrarias
 
-### Scripts sh Periódicos
+### Scripts sh periódicos
 
 Si tu script pudiera ser interpretado como un **script de shell**, podrías sobrescribir el **`/etc/periodic/daily/999.local`** script de shell que se activará todos los días.
 
@@ -304,7 +305,7 @@ Esto creará el archivo `/etc/sudoers.d/lpe` con permisos 777. La basura extra a
 
 Luego, escribe en `/etc/sudoers.d/lpe` la configuración necesaria para escalar privilegios como `%staff ALL=(ALL) NOPASSWD:ALL`.
 
-Luego, modifica el archivo `/etc/cups/cups-files.conf` nuevamente indicando `LogFilePerm 700` para que el nuevo archivo sudoers se vuelva válido invocando `cupsctl`.
+Luego, modifica el archivo `/etc/cups/cups-files.conf` nuevamente indicando `LogFilePerm 700` para que el nuevo archivo de sudoers se vuelva válido invocando `cupsctl`.
 
 ### Escape de Sandbox
 

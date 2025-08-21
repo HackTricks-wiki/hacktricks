@@ -6,7 +6,7 @@
 
 - **Lista Simple:** Solo una lista que contiene una entrada en cada línea
 - **Archivo en Tiempo de Ejecución:** Una lista leída en tiempo de ejecución (no cargada en memoria). Para soportar listas grandes.
-- **Modificación de Caso:** Aplicar algunos cambios a una lista de cadenas (Sin cambio, a minúsculas, a MAYÚSCULAS, a Nombre Propio - Primera letra en mayúscula y el resto en minúsculas-, a Nombre Propio -Primera letra en mayúscula y el resto permanece igual-).
+- **Modificación de Caso:** Aplicar algunos cambios a una lista de cadenas (Sin cambio, a minúsculas, a MAYÚSCULAS, a Nombre Propio - Primera letra en mayúscula y el resto en minúsculas-, a Nombre Propio - Primera letra en mayúscula y el resto permanece igual-).
 - **Números:** Generar números de X a Y usando Z pasos o aleatoriamente.
 - **Fuerza Bruta:** Conjunto de caracteres, longitud mínima y máxima.
 

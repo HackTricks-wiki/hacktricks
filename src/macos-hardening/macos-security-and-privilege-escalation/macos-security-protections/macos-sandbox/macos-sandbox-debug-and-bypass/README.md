@@ -24,11 +24,12 @@ Esto es lo que se hizo en [**CVE-2023-32364**](https://gergelykalman.com/CVE-202
 > [!CAUTION]
 > Por lo tanto, en este momento, si solo eres capaz de crear una carpeta con un nombre que termine en **`.app`** sin un atributo de cuarentena, puedes escapar del sandbox porque macOS solo **verifica** el **atributo de cuarentena** en la **carpeta `.app`** y en el **ejecutable principal** (y apuntaremos el ejecutable principal a **`/bin/bash`**).
 >
-> Ten en cuenta que si un paquete .app ya ha sido autorizado para ejecutarse (tiene un xttr de cuarentena con la bandera de autorizado para ejecutar activada), también podrías abusar de él... excepto que ahora no puedes escribir dentro de los paquetes **`.app`** a menos que tengas algunos permisos privilegiados de TCC (que no tendrás dentro de un sandbox alto).
+> Ten en cuenta que si un paquete .app ya ha sido autorizado para ejecutarse (tiene un atributo de cuarentena con la bandera de autorizado para ejecutar activada), también podrías abusar de él... excepto que ahora no puedes escribir dentro de los paquetes **`.app`** a menos que tengas algunos permisos privilegiados de TCC (que no tendrás dentro de un sandbox alto).
 
 ### Abusando de la funcionalidad Open
 
 En los [**últimos ejemplos de elusión del sandbox de Word**](macos-office-sandbox-bypasses.md#word-sandbox-bypass-via-login-items-and-.zshenv) se puede apreciar cómo la funcionalidad cli de **`open`** podría ser abusada para eludir el sandbox.
+
 
 {{#ref}}
 macos-office-sandbox-bypasses.md
@@ -37,7 +38,7 @@ macos-office-sandbox-bypasses.md
 ### Agentes/Daemon de Lanzamiento
 
 Incluso si una aplicación está **destinada a estar en sandbox** (`com.apple.security.app-sandbox`), es posible eludir el sandbox si se **ejecuta desde un LaunchAgent** (`~/Library/LaunchAgents`) por ejemplo.\
-Como se explicó en [**esta publicación**](https://www.vicarius.io/vsociety/posts/cve-2023-26818-sandbox-macos-tcc-bypass-w-telegram-using-dylib-injection-part-2-3?q=CVE-2023-26818), si deseas obtener persistencia con una aplicación que está en sandbox, podrías hacer que se ejecute automáticamente como un LaunchAgent y tal vez inyectar código malicioso a través de variables de entorno DyLib.
+Como se explica en [**esta publicación**](https://www.vicarius.io/vsociety/posts/cve-2023-26818-sandbox-macos-tcc-bypass-w-telegram-using-dylib-injection-part-2-3?q=CVE-2023-26818), si deseas obtener persistencia con una aplicación que está en sandbox, podrías hacer que se ejecute automáticamente como un LaunchAgent y tal vez inyectar código malicioso a través de variables de entorno DyLib.
 
 ### Abusando de las Ubicaciones de Inicio Automático
 
@@ -47,6 +48,7 @@ Para esto podrías necesitar incluso **2 pasos**: Hacer que un proceso con un **
 
 Consulta esta página sobre **Ubicaciones de Inicio Automático**:
 
+
 {{#ref}}
 ../../../../macos-auto-start-locations.md
 {{#endref}}
@@ -55,15 +57,16 @@ Consulta esta página sobre **Ubicaciones de Inicio Automático**:
 
 Si desde el proceso en sandbox puedes **comprometer otros procesos** que se ejecutan en sandboxes menos restrictivos (o ninguno), podrás escapar a sus sandboxes:
 
+
 {{#ref}}
 ../../../macos-proces-abuse/
 {{#endref}}
 
-### Servicios Mach del Sistema y del Usuario Disponibles
+### Servicios Mach del Sistema y del Usuario disponibles
 
 El sandbox también permite comunicarse con ciertos **servicios Mach** a través de XPC definidos en el perfil `application.sb`. Si puedes **abusar** de uno de estos servicios, podrías ser capaz de **escapar del sandbox**.
 
-Como se indica en [este informe](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/), la información sobre los servicios Mach se almacena en `/System/Library/xpc/launchd.plist`. Es posible encontrar todos los servicios Mach del Sistema y del Usuario buscando dentro de ese archivo por `<string>System</string>` y `<string>User</string>`.
+Como se indica en [este informe](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/), la información sobre los servicios Mach se almacena en `/System/Library/xpc/launchd.plist`. Es posible encontrar todos los servicios Mach del Sistema y del Usuario buscando dentro de ese archivo `<string>System</string>` y `<string>User</string>`.
 
 Además, es posible verificar si un servicio Mach está disponible para una aplicación en sandbox llamando a `bootstrap_look_up`:
 ```objectivec
@@ -96,7 +99,7 @@ Para **contactar un servicio XPC del dominio PID**, solo es necesario registrarl
 ```objectivec
 [[NSBundle bundleWithPath:@“/System/Library/PrivateFrameworks/ShoveService.framework"]load];
 ```
-Además, es posible encontrar todos los servicios Mach de **Application** buscando dentro de `System/Library/xpc/launchd.plist` por `<string>Application</string>`.
+Además, es posible encontrar todos los servicios Mach de **Application** buscando dentro de `System/Library/xpc/launchd.plist` para `<string>Application</string>`.
 
 Otra forma de encontrar servicios xpc válidos es verificar los que están en:
 ```bash
@@ -107,7 +110,7 @@ Varios ejemplos que abusan de esta técnica se pueden encontrar en el [**escrito
 
 #### /System/Library/PrivateFrameworks/StorageKit.framework/XPCServices/storagekitfsrunner.xpc
 
-Este servicio permite cada conexión XPC al devolver siempre `YES` y el método `runTask:arguments:withReply:` ejecuta un comando arbitrario con parámetros arbitrarios.
+Este servicio permite todas las conexiones XPC al devolver siempre `YES` y el método `runTask:arguments:withReply:` ejecuta un comando arbitrario con parámetros arbitrarios.
 
 La explotación fue "tan simple como":
 ```objectivec
@@ -130,9 +133,9 @@ NSLog(@"run task result:%@, error:%@", bSucc, error);
 ```
 #### /System/Library/PrivateFrameworks/AudioAnalyticsInternal.framework/XPCServices/AudioAnalyticsHelperService.xpc
 
-Este servicio XPC permitía a cada cliente siempre devolver YES y el método `createZipAtPath:hourThreshold:withReply:` básicamente permitía indicar la ruta a una carpeta para comprimir y la comprimiría en un archivo ZIP.
+Este servicio XPC permitía a cada cliente al devolver siempre YES y el método `createZipAtPath:hourThreshold:withReply:` básicamente permitía indicar la ruta a una carpeta para comprimir y la comprimiría en un archivo ZIP.
 
-Por lo tanto, es posible generar una estructura de carpeta de aplicación falsa, comprimirla, luego descomprimirla y ejecutarla para escapar del sandbox, ya que los nuevos archivos no tendrán el atributo de cuarentena.
+Por lo tanto, es posible generar una estructura de carpeta de aplicación falsa, comprimirla, luego descomprimirla y ejecutarla para escapar del sandbox ya que los nuevos archivos no tendrán el atributo de cuarentena.
 
 La explotación fue:
 ```objectivec
@@ -207,7 +210,7 @@ NSLog(@"Read the target content:%@", [NSData dataWithContentsOfURL:targetURL]);
 
 [**Esta investigación**](https://saagarjha.com/blog/2020/05/20/mac-app-store-sandbox-escape/) descubrió 2 formas de eludir el Sandbox. Debido a que el sandbox se aplica desde el espacio de usuario cuando se carga la biblioteca **libSystem**. Si un binario pudiera evitar cargarla, nunca sería sandboxed:
 
-- Si el binario estuviera **completamente compilado estáticamente**, podría evitar cargar esa biblioteca.
+- Si el binario estuviera **completamente compilado de forma estática**, podría evitar cargar esa biblioteca.
 - Si el **binario no necesitara cargar ninguna biblioteca** (porque el enlazador también está en libSystem), no necesitará cargar libSystem.
 
 ### Shellcodes
@@ -246,15 +249,16 @@ Tenga en cuenta que incluso si algunas **acciones** pueden ser **permitidas por 
 (global-name "com.apple.cfnetwork.cfnetworkagent")
 [...]
 ```
-### Interposting Bypass
+### Interposing Bypass
 
-Para más información sobre **Interposting** consulta:
+Para más información sobre **Interposing** consulta:
+
 
 {{#ref}}
 ../../../macos-proces-abuse/macos-function-hooking.md
 {{#endref}}
 
-#### Interpost `_libsecinit_initializer` para prevenir el sandbox
+#### Interponer `_libsecinit_initializer` para prevenir el sandbox
 ```c
 // gcc -dynamiclib interpose.c -o interpose.dylib
 
@@ -324,7 +328,7 @@ Sandbox Bypassed!
 ```
 ### Depurar y eludir Sandbox con lldb
 
-Compilaremos una aplicación que debería estar en sandbox: 
+Vamos a compilar una aplicación que debería estar en sandbox:
 
 {{#tabs}}
 {{#tab name="sand.c"}}

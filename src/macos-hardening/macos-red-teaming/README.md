@@ -2,7 +2,6 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-
 ## Abusando de MDMs
 
 - JAMF Pro: `jamf checkJSSConnection`
@@ -16,7 +15,7 @@ Para el red teaming en entornos MacOS, se recomienda tener un entendimiento de c
 macos-mdm/
 {{#endref}}
 
-### Usando MDM como un C2
+### Usando MDM como C2
 
 Un MDM tendrá permiso para instalar, consultar o eliminar perfiles, instalar aplicaciones, crear cuentas de administrador locales, establecer contraseña de firmware, cambiar la clave de FileVault...
 
@@ -24,9 +23,9 @@ Para ejecutar tu propio MDM necesitas **que tu CSR sea firmado por un proveedor*
 
 Sin embargo, para instalar una aplicación en un dispositivo inscrito, aún necesitas que esté firmada por una cuenta de desarrollador... sin embargo, al inscribir el dispositivo en un MDM, el **dispositivo agrega el certificado SSL del MDM como una CA de confianza**, por lo que ahora puedes firmar cualquier cosa.
 
-Para inscribir el dispositivo en un MDM, necesitas instalar un **`mobileconfig`** como root, que podría ser entregado a través de un archivo **pkg** (podrías comprimirlo en zip y cuando se descargue desde Safari se descomprimirá).
+Para inscribir el dispositivo en un MDM, necesitas instalar un archivo **`mobileconfig`** como root, que podría ser entregado a través de un archivo **pkg** (podrías comprimirlo en zip y cuando se descargue desde Safari se descomprimirá).
 
-**Mythic agent Orthrus** utiliza esta técnica.
+**El agente Mythic Orthrus** utiliza esta técnica.
 
 ### Abusando de JAMF PRO
 
@@ -34,7 +33,7 @@ JAMF puede ejecutar **scripts personalizados** (scripts desarrollados por el sys
 
 #### Autoinscripción de JAMF
 
-Ve a una página como `https://<company-name>.jamfcloud.com/enroll/` para ver si tienen **autoinscripción habilitada**. Si la tienen, podría **pedir credenciales para acceder**.
+Ve a una página como `https://<nombre-de-la-empresa>.jamfcloud.com/enroll/` para ver si tienen **autoinscripción habilitada**. Si la tienen, podría **pedir credenciales para acceder**.
 
 Podrías usar el script [**JamfSniper.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfSniper.py) para realizar un ataque de password spraying.
 
@@ -42,16 +41,16 @@ Además, después de encontrar credenciales adecuadas, podrías ser capaz de for
 
 ![](<../../images/image (107).png>)
 
-#### Autenticación de Dispositivo JAMF
+#### Autenticación de dispositivo JAMF
 
 <figure><img src="../../images/image (167).png" alt=""><figcaption></figcaption></figure>
 
 El **binario `jamf`** contenía el secreto para abrir el llavero que en el momento del descubrimiento estaba **compartido** entre todos y era: **`jk23ucnq91jfu9aj`**.\
 Además, jamf **persiste** como un **LaunchDaemon** en **`/Library/LaunchAgents/com.jamf.management.agent.plist`**
 
-#### Toma de Control de Dispositivo JAMF
+#### Toma de control del dispositivo JAMF
 
-La **URL** de **JSS** (Jamf Software Server) que **`jamf`** utilizará se encuentra en **`/Library/Preferences/com.jamfsoftware.jamf.plist`**.\
+La **URL** del **JSS** (Jamf Software Server) que **`jamf`** utilizará se encuentra en **`/Library/Preferences/com.jamfsoftware.jamf.plist`**.\
 Este archivo contiene básicamente la URL:
 ```bash
 plutil -convert xml1 -o - /Library/Preferences/com.jamfsoftware.jamf.plist
@@ -60,12 +59,12 @@ plutil -convert xml1 -o - /Library/Preferences/com.jamfsoftware.jamf.plist
 <key>is_virtual_machine</key>
 <false/>
 <key>jss_url</key>
-<string>https://halbornasd.jamfcloud.com/</string>
+<string>https://subdomain-company.jamfcloud.com/</string>
 <key>last_management_framework_change_id</key>
 <integer>4</integer>
 [...]
 ```
-Entonces, un atacante podría dejar un paquete malicioso (`pkg`) que **sobrescriba este archivo** al instalarlo, configurando la **URL a un listener de Mythic C2 desde un agente Typhon** para poder abusar de JAMF como C2.
+Entonces, un atacante podría dejar un paquete malicioso (`pkg`) que **sobrescriba este archivo** al instalarlo, configurando la **URL a un listener de Mythic C2 desde un agente de Typhon** para poder abusar de JAMF como C2.
 ```bash
 # After changing the URL you could wait for it to be reloaded or execute:
 sudo jamf policy -id 0
@@ -77,9 +76,9 @@ sudo jamf policy -id 0
 Para **suplantar la comunicación** entre un dispositivo y JMF necesitas:
 
 - El **UUID** del dispositivo: `ioreg -d2 -c IOPlatformExpertDevice | awk -F" '/IOPlatformUUID/{print $(NF-1)}'`
-- El **llavero de JAMF** de: `/Library/Application\ Support/Jamf/JAMF.keychain` que contiene el certificado del dispositivo
+- La **llave de cadena de JAMF** de: `/Library/Application\ Support/Jamf/JAMF.keychain` que contiene el certificado del dispositivo
 
-Con esta información, **crea una VM** con el **UUID** de Hardware **robado** y con **SIP deshabilitado**, coloca el **llavero de JAMF,** **intercepta** el **agente** de Jamf y roba su información.
+Con esta información, **crea una VM** con el **UUID** de Hardware **robado** y con **SIP deshabilitado**, coloca la **llave de cadena de JAMF,** **intercepta** el **agente** de Jamf y roba su información.
 
 #### Robo de secretos
 
@@ -93,7 +92,8 @@ El script [**JamfExplorer.py**](https://github.com/WithSecureLabs/Jamf-Attack-To
 
 ### Acceso Remoto a macOS
 
-Y también sobre los **protocolos** **"especiales"** de **red** de **MacOS**:
+Y también sobre los **protocolos** **de red** "especiales" de **MacOS**:
+
 
 {{#ref}}
 ../macos-security-and-privilege-escalation/macos-protocols.md
@@ -103,13 +103,16 @@ Y también sobre los **protocolos** **"especiales"** de **red** de **MacOS**:
 
 En algunas ocasiones encontrarás que el **computador MacOS está conectado a un AD**. En este escenario deberías intentar **enumerar** el directorio activo como estás acostumbrado. Encuentra algo de **ayuda** en las siguientes páginas:
 
+
 {{#ref}}
 ../../network-services-pentesting/pentesting-ldap.md
 {{#endref}}
 
+
 {{#ref}}
 ../../windows-hardening/active-directory-methodology/
 {{#endref}}
+
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-kerberos-88/
@@ -122,7 +125,7 @@ dscl "/Active Directory/[Domain]/All Domains" ls /
 También hay algunas herramientas preparadas para MacOS para enumerar automáticamente el AD y jugar con kerberos:
 
 - [**Machound**](https://github.com/XMCyber/MacHound): MacHound es una extensión de la herramienta de auditoría Bloodhound que permite recopilar e ingerir relaciones de Active Directory en hosts de MacOS.
-- [**Bifrost**](https://github.com/its-a-feature/bifrost): Bifrost es un proyecto en Objective-C diseñado para interactuar con las APIs Heimdal krb5 en macOS. El objetivo del proyecto es habilitar mejores pruebas de seguridad en torno a Kerberos en dispositivos macOS utilizando APIs nativas sin requerir ningún otro marco o paquetes en el objetivo.
+- [**Bifrost**](https://github.com/its-a-feature/bifrost): Bifrost es un proyecto en Objective-C diseñado para interactuar con las APIs de Heimdal krb5 en macOS. El objetivo del proyecto es permitir una mejor prueba de seguridad en torno a Kerberos en dispositivos macOS utilizando APIs nativas sin requerir ningún otro marco o paquetes en el objetivo.
 - [**Orchard**](https://github.com/its-a-feature/Orchard): Herramienta de JavaScript para Automatización (JXA) para hacer enumeración de Active Directory.
 
 ### Información del Dominio
@@ -168,7 +171,7 @@ dsconfigad -show
 ```
 Más información en [https://its-a-feature.github.io/posts/2018/01/Active-Directory-Discovery-with-a-Mac/](https://its-a-feature.github.io/posts/2018/01/Active-Directory-Discovery-with-a-Mac/)
 
-### Contraseña de Computer$
+### Computer$ password
 
 Obtén contraseñas usando:
 ```bash
@@ -209,7 +212,7 @@ macos-keychain.md
 
 ## Servicios Externos
 
-El Red Teaming en MacOS es diferente del Red Teaming regular en Windows, ya que generalmente **MacOS está integrado con varias plataformas externas directamente**. Una configuración común de MacOS es acceder a la computadora usando **credenciales sincronizadas de OneLogin y acceder a varios servicios externos** (como github, aws...) a través de OneLogin.
+El Red Teaming en MacOS es diferente del Red Teaming regular en Windows, ya que generalmente **MacOS está integrado con varias plataformas externas directamente**. Una configuración común de MacOS es acceder a la computadora utilizando **credenciales sincronizadas de OneLogin y acceder a varios servicios externos** (como github, aws...) a través de OneLogin.
 
 ## Técnicas Misceláneas de Red Team
 
@@ -226,6 +229,5 @@ Cuando se descarga un archivo en Safari, si es un archivo "seguro", se **abrirá
 - [**https://gist.github.com/its-a-feature/1a34f597fb30985a2742bb16116e74e0**](https://gist.github.com/its-a-feature/1a34f597fb30985a2742bb16116e74e0)
 - [**Come to the Dark Side, We Have Apples: Turning macOS Management Evil**](https://www.youtube.com/watch?v=pOQOh07eMxY)
 - [**OBTS v3.0: "An Attackers Perspective on Jamf Configurations" - Luke Roberts / Calum Hall**](https://www.youtube.com/watch?v=ju1IYWUv4ZA)
-
 
 {{#include ../../banners/hacktricks-training.md}}

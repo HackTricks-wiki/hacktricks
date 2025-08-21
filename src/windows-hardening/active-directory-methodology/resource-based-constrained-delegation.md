@@ -13,22 +13,22 @@ Otra diferencia importante de esta Delegación Constrain con respecto a las otra
 
 ### Nuevos Conceptos
 
-En la Delegación Constrain se mencionó que el **`TrustedToAuthForDelegation`** flag dentro del valor _userAccountControl_ del usuario es necesario para realizar un **S4U2Self.** Pero eso no es completamente cierto.\
-La realidad es que incluso sin ese valor, puedes realizar un **S4U2Self** contra cualquier usuario si eres un **servicio** (tienes un SPN) pero, si **tienes `TrustedToAuthForDelegation`** el TGS devuelto será **Forwardable** y si **no tienes** ese flag el TGS devuelto **no será** **Forwardable**.
+En la Delegación Constrain se mencionó que la **`TrustedToAuthForDelegation`** bandera dentro del valor _userAccountControl_ del usuario es necesaria para realizar un **S4U2Self.** Pero eso no es completamente cierto.\
+La realidad es que incluso sin ese valor, puedes realizar un **S4U2Self** contra cualquier usuario si eres un **servicio** (tienes un SPN) pero, si **tienes `TrustedToAuthForDelegation`** el TGS devuelto será **Forwardable** y si **no tienes** esa bandera el TGS devuelto **no será** **Forwardable**.
 
-Sin embargo, si el **TGS** utilizado en **S4U2Proxy** **NO es Forwardable** intentar abusar de una **delegación Constrain básica** **no funcionará**. Pero si estás tratando de explotar una **delegación Constrain basada en recursos, funcionará**.
+Sin embargo, si el **TGS** utilizado en **S4U2Proxy** **NO es Forwardable**, intentar abusar de una **delegación Constrain básica** **no funcionará**. Pero si estás tratando de explotar una **delegación Constrain basada en recursos, funcionará**.
 
 ### Estructura del Ataque
 
-> Si tienes **privilegios equivalentes de escritura** sobre una cuenta de **Computadora** puedes obtener **acceso privilegiado** en esa máquina.
+> Si tienes **privilegios equivalentes de escritura** sobre una cuenta de **Computadora**, puedes obtener **acceso privilegiado** en esa máquina.
 
 Supongamos que el atacante ya tiene **privilegios equivalentes de escritura sobre la computadora víctima**.
 
 1. El atacante **compromete** una cuenta que tiene un **SPN** o **crea uno** (“Servicio A”). Ten en cuenta que **cualquier** _Usuario Admin_ sin ningún otro privilegio especial puede **crear** hasta 10 objetos de Computadora (**_MachineAccountQuota_**) y establecerles un **SPN**. Así que el atacante puede simplemente crear un objeto de Computadora y establecer un SPN.
-2. El atacante **abusa de su privilegio de ESCRITURA** sobre la computadora víctima (ServicioB) para configurar **delegación constrain basada en recursos para permitir que ServicioA suplantar a cualquier usuario** contra esa computadora víctima (ServicioB).
-3. El atacante utiliza Rubeus para realizar un **ataque S4U completo** (S4U2Self y S4U2Proxy) desde Servicio A a Servicio B para un usuario **con acceso privilegiado a Servicio B**.
+2. El atacante **abusa de su privilegio de ESCRITURA** sobre la computadora víctima (ServicioB) para configurar **delegación constrain basada en recursos para permitir que ServiceA supla a cualquier usuario** contra esa computadora víctima (ServicioB).
+3. El atacante utiliza Rubeus para realizar un **ataque S4U completo** (S4U2Self y S4U2Proxy) desde el Servicio A al Servicio B para un usuario **con acceso privilegiado al Servicio B**.
 1. S4U2Self (desde la cuenta SPN comprometida/creada): Pide un **TGS de Administrador para mí** (No Forwardable).
-2. S4U2Proxy: Usa el **TGS no Forwardable** del paso anterior para pedir un **TGS** de **Administrador** para el **host víctima**.
+2. S4U2Proxy: Usa el **TGS no Forwardable** del paso anterior para pedir un **TGS** de **Administrador** al **host víctima**.
 3. Incluso si estás usando un TGS no Forwardable, como estás explotando la delegación constrain basada en recursos, funcionará.
 4. El atacante puede **pasar el ticket** y **suplantar** al usuario para obtener **acceso al ServicioB víctima**.
 
@@ -88,7 +88,7 @@ rubeus.exe s4u /user:FAKECOMPUTER$ /aes256:<AES 256 hash> /impersonateuser:admin
 > [!CAUTION]
 > Tenga en cuenta que los usuarios tienen un atributo llamado "**No se puede delegar**". Si un usuario tiene este atributo en True, no podrá impersonarlo. Esta propiedad se puede ver dentro de bloodhound.
 
-### Linux tooling: end-to-end RBCD with Impacket (2024+)
+### Herramientas de Linux: RBCD de extremo a extremo con Impacket (2024+)
 
 Si opera desde Linux, puede realizar toda la cadena RBCD utilizando las herramientas oficiales de Impacket:
 ```bash
@@ -115,7 +115,7 @@ Notas
 ### Accediendo
 
 La última línea de comando realizará el **ataque S4U completo e inyectará el TGS** desde Administrator al host víctima en **memoria**.\
-En este ejemplo, se solicitó un TGS para el servicio **CIFS** desde Administrator, por lo que podrá acceder a **C$**:
+En este ejemplo se solicitó un TGS para el servicio **CIFS** desde Administrator, por lo que podrá acceder a **C$**:
 ```bash
 ls \\victim.domain.local\C$
 ```
@@ -143,14 +143,14 @@ try { $name = $sid.Translate([System.Security.Principal.NTAccount]) } catch { $n
 }
 }
 ```
-Impacket (leer o vaciar con un solo comando):
+Impacket (leer o vaciar con un comando):
 ```bash
 # Read who can delegate to VICTIM
 impacket-rbcd -delegate-to 'VICTIM$' -action read 'domain.local/jdoe:Summer2025!'
 ```
 ### Limpieza / reinicio de RBCD
 
-- PowerShell (borrar el atributo):
+- PowerShell (limpiar el atributo):
 ```powershell
 Set-ADComputer $targetComputer -Clear 'msDS-AllowedToActOnBehalfOfOtherIdentity'
 # Or using the friendly property
@@ -178,11 +178,13 @@ impacket-rbcd -delegate-to 'VICTIM$' -action flush 'domain.local/jdoe:Summer2025
 
 - También puedes escribir el SD de RBCD sobre los Servicios Web de AD (ADWS) si LDAP está filtrado. Ver:
 
+
 {{#ref}}
 adws-enumeration.md
 {{#endref}}
 
-- Las cadenas de relé de Kerberos a menudo terminan en RBCD para lograr SYSTEM local en un solo paso. Ver ejemplos prácticos de extremo a extremo:
+- Las cadenas de relé de Kerberos frecuentemente terminan en RBCD para lograr SYSTEM local en un solo paso. Ver ejemplos prácticos de extremo a extremo:
+
 
 {{#ref}}
 ../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md
@@ -197,5 +199,6 @@ adws-enumeration.md
 - [https://posts.specterops.io/kerberosity-killed-the-domain-an-offensive-kerberos-overview-eb04b1402c61](https://posts.specterops.io/kerberosity-killed-the-domain-an-offensive-kerberos-overview-eb04b1402c61)
 - Impacket rbcd.py (oficial): https://github.com/fortra/impacket/blob/master/examples/rbcd.py
 - Hoja de trucos rápida de Linux con sintaxis reciente: https://tldrbins.github.io/rbcd/
+
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -25,7 +25,7 @@ El firmware es un software esencial que permite a los dispositivos operar correc
 - Diagramas arquitectónicos y de flujo
 - Evaluaciones de seguridad y vulnerabilidades identificadas
 
-Para este propósito, las herramientas de **inteligencia de código abierto (OSINT)** son invaluables, así como el análisis de cualquier componente de software de código abierto disponible a través de procesos de revisión manual y automatizada. Herramientas como [Coverity Scan](https://scan.coverity.com) y [LGTM de Semmle](https://lgtm.com/#explore) ofrecen análisis estático gratuito que se puede aprovechar para encontrar problemas potenciales.
+Para este propósito, las herramientas de **inteligencia de código abierto (OSINT)** son invaluables, al igual que el análisis de cualquier componente de software de código abierto disponible a través de procesos de revisión manual y automatizada. Herramientas como [Coverity Scan](https://scan.coverity.com) y [Semmle’s LGTM](https://lgtm.com/#explore) ofrecen análisis estático gratuito que se puede aprovechar para encontrar problemas potenciales.
 
 ## **Adquisición del Firmware**
 
@@ -35,7 +35,7 @@ Obtener firmware se puede abordar a través de varios medios, cada uno con su pr
 - **Construyéndolo** a partir de instrucciones proporcionadas
 - **Descargando** de sitios de soporte oficiales
 - Utilizando consultas de **Google dork** para encontrar archivos de firmware alojados
-- Accediendo a **almacenamiento en la nube** directamente, con herramientas como [S3Scanner](https://github.com/sa7mon/S3Scanner)
+- Accediendo al **almacenamiento en la nube** directamente, con herramientas como [S3Scanner](https://github.com/sa7mon/S3Scanner)
 - Interceptando **actualizaciones** a través de técnicas de hombre en el medio
 - **Extrayendo** del dispositivo a través de conexiones como **UART**, **JTAG** o **PICit**
 - **Esnifando** solicitudes de actualización dentro de la comunicación del dispositivo
@@ -66,7 +66,7 @@ O [**binvis.io**](https://binvis.io/#/) ([code](https://code.google.com/archive/
 
 ### Obtener el Sistema de Archivos
 
-Con las herramientas comentadas anteriormente como `binwalk -ev <bin>`, deberías haber podido **extraer el sistema de archivos**.\
+Con las herramientas comentadas anteriormente, como `binwalk -ev <bin>`, deberías haber podido **extraer el sistema de archivos**.\
 Binwalk generalmente lo extrae dentro de una **carpeta nombrada como el tipo de sistema de archivos**, que suele ser uno de los siguientes: squashfs, ubifs, romfs, rootfs, jffs2, yaffs2, cramfs, initramfs.
 
 #### Extracción Manual del Sistema de Archivos
@@ -161,7 +161,7 @@ Con el sistema de archivos extraído, comienza la búsqueda de fallos de segurid
 Varias herramientas ayudan a descubrir información sensible y vulnerabilidades dentro del sistema de archivos:
 
 - [**LinPEAS**](https://github.com/carlospolop/PEASS-ng) y [**Firmwalker**](https://github.com/craigz28/firmwalker) para la búsqueda de información sensible
-- [**The Firmware Analysis and Comparison Tool (FACT)**](https://github.com/fkie-cad/FACT_core) para un análisis completo de firmware
+- [**The Firmware Analysis and Comparison Tool (FACT)**](https://github.com/fkie-cad/FACT_core) para un análisis exhaustivo del firmware
 - [**FwAnalyzer**](https://github.com/cruise-automation/fwanalyzer), [**ByteSweep**](https://gitlab.com/bytesweep/bytesweep), [**ByteSweep-go**](https://gitlab.com/bytesweep/bytesweep-go) y [**EMBA**](https://github.com/e-m-b-a/emba) para análisis estático y dinámico
 
 ### Comprobaciones de Seguridad en Binarios Compilados
@@ -170,7 +170,7 @@ Tanto el código fuente como los binarios compilados encontrados en el sistema d
 
 ## Emulando Firmware para Análisis Dinámico
 
-El proceso de emular firmware permite un **análisis dinámico** ya sea de la operación de un dispositivo o de un programa individual. Este enfoque puede encontrar desafíos con dependencias de hardware o arquitectura, pero transferir el sistema de archivos raíz o binarios específicos a un dispositivo con arquitectura y endianness coincidentes, como una Raspberry Pi, o a una máquina virtual preconstruida, puede facilitar pruebas adicionales.
+El proceso de emular firmware permite un **análisis dinámico** ya sea del funcionamiento de un dispositivo o de un programa individual. Este enfoque puede encontrar desafíos con dependencias de hardware o arquitectura, pero transferir el sistema de archivos raíz o binarios específicos a un dispositivo con arquitectura y endianness coincidentes, como una Raspberry Pi, o a una máquina virtual preconstruida, puede facilitar pruebas adicionales.
 
 ### Emulando Binarios Individuales
 
@@ -186,7 +186,7 @@ Y para instalar las herramientas de emulación necesarias:
 ```bash
 sudo apt-get install qemu qemu-user qemu-user-static qemu-system-arm qemu-system-mips qemu-system-x86 qemu-utils
 ```
-Para MIPS (big-endian), se utiliza `qemu-mips`, y para binarios little-endian, `qemu-mipsel` sería la elección.
+Para MIPS (big-endian), se utiliza `qemu-mips`, y para binarios little-endian, la elección sería `qemu-mipsel`.
 
 #### Emulación de Arquitectura ARM
 
@@ -244,7 +244,7 @@ En el firmware vulnerable (degradado), el parámetro `md5` se concatena directam
 
 ### Extracción de Firmware de Aplicaciones Móviles
 
-Muchos proveedores empaquetan imágenes de firmware completas dentro de sus aplicaciones móviles complementarias para que la aplicación pueda actualizar el dispositivo a través de Bluetooth/Wi-Fi. Estos paquetes se almacenan comúnmente sin cifrar en el APK/APEX bajo rutas como `assets/fw/` o `res/raw/`. Herramientas como `apktool`, `ghidra` o incluso el simple `unzip` te permiten extraer imágenes firmadas sin tocar el hardware físico.
+Muchos proveedores agrupan imágenes de firmware completas dentro de sus aplicaciones móviles complementarias para que la aplicación pueda actualizar el dispositivo a través de Bluetooth/Wi-Fi. Estos paquetes se almacenan comúnmente sin cifrar en el APK/APEX bajo rutas como `assets/fw/` o `res/raw/`. Herramientas como `apktool`, `ghidra` o incluso el simple `unzip` te permiten extraer imágenes firmadas sin tocar el hardware físico.
 ```
 $ apktool d vendor-app.apk -o vendor-app
 $ ls vendor-app/assets/firmware
@@ -255,8 +255,8 @@ firmware_v1.3.11.490_signed.bin
 * ¿Está adecuadamente protegida la *autenticación/transporte del endpoint de actualización* (TLS + autenticación)?
 * ¿Compara el dispositivo **números de versión** o un **contador anti-retroceso monotónico** antes de flashear?
 * ¿Se verifica la imagen dentro de una cadena de arranque seguro (por ejemplo, firmas verificadas por código ROM)?
-* ¿El código de espacio de usuario realiza verificaciones adicionales de coherencia (por ejemplo, mapa de particiones permitido, número de modelo)?
-* ¿Los flujos de actualización *parciales* o *de respaldo* reutilizan la misma lógica de validación?
+* ¿El código de espacio de usuario realiza verificaciones adicionales de sensatez (por ejemplo, mapa de particiones permitido, número de modelo)?
+* ¿Los flujos de actualización *parcial* o *de respaldo* reutilizan la misma lógica de validación?
 
 > 💡  Si falta alguno de los anteriores, la plataforma probablemente sea vulnerable a ataques de retroceso.
 
@@ -272,7 +272,7 @@ Para practicar la detección de vulnerabilidades en firmware, utiliza los siguie
 - [https://blog.exploitlab.net/2018/01/dvar-damn-vulnerable-arm-router.html](https://blog.exploitlab.net/2018/01/dvar-damn-vulnerable-arm-router.html)
 - ARM-X
 - [https://github.com/therealsaumil/armx#downloads](https://github.com/therealsaumil/armx#downloads)
-- VM 2.0 de Azeria Labs
+- Azeria Labs VM 2.0
 - [https://azeria-labs.com/lab-vm-2-0/](https://azeria-labs.com/lab-vm-2-0/)
 - Dispositivo IoT Damn Vulnerable (DVID)
 - [https://github.com/Vulcainreo/DVID](https://github.com/Vulcainreo/DVID)

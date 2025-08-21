@@ -38,7 +38,7 @@ linux-forensics.md
 docker-forensics.md
 {{#endref}}
 
-## Inspección profunda de tipos de archivos específicos y Software
+## Inspección Profunda de Tipos de Archivos Específicos y Software
 
 Si tienes un **archivo** muy **sospechoso**, entonces **dependiendo del tipo de archivo y del software** que lo creó, varios **trucos** pueden ser útiles.\
 Lee la siguiente página para aprender algunos trucos interesantes:

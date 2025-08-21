@@ -4,23 +4,23 @@
 
 ## Información Básica
 
-XPC, que significa XNU (el núcleo utilizado por macOS) inter-Process Communication, es un marco para **la comunicación entre procesos** en macOS e iOS. XPC proporciona un mecanismo para realizar **llamadas a métodos seguras y asíncronas entre diferentes procesos** en el sistema. Es parte del paradigma de seguridad de Apple, permitiendo la **creación de aplicaciones con separación de privilegios** donde cada **componente** se ejecuta con **solo los permisos que necesita** para hacer su trabajo, limitando así el daño potencial de un proceso comprometido.
+XPC, que significa Comunicación Inter-Procesos de XNU (el núcleo utilizado por macOS), es un marco para **la comunicación entre procesos** en macOS e iOS. XPC proporciona un mecanismo para realizar **llamadas a métodos seguras y asíncronas entre diferentes procesos** en el sistema. Es parte del paradigma de seguridad de Apple, permitiendo la **creación de aplicaciones con privilegios separados** donde cada **componente** se ejecuta con **solo los permisos que necesita** para hacer su trabajo, limitando así el daño potencial de un proceso comprometido.
 
-XPC utiliza una forma de Inter-Process Communication (IPC), que es un conjunto de métodos para que diferentes programas que se ejecutan en el mismo sistema envíen datos de ida y vuelta.
+XPC utiliza una forma de Comunicación Inter-Procesos (IPC), que es un conjunto de métodos para que diferentes programas que se ejecutan en el mismo sistema envíen datos de ida y vuelta.
 
 Los principales beneficios de XPC incluyen:
 
 1. **Seguridad**: Al separar el trabajo en diferentes procesos, a cada proceso se le pueden otorgar solo los permisos que necesita. Esto significa que incluso si un proceso se ve comprometido, tiene una capacidad limitada para causar daño.
-2. **Estabilidad**: XPC ayuda a aislar los bloqueos al componente donde ocurren. Si un proceso falla, puede reiniciarse sin afectar al resto del sistema.
+2. **Estabilidad**: XPC ayuda a aislar los fallos al componente donde ocurren. Si un proceso falla, puede reiniciarse sin afectar al resto del sistema.
 3. **Rendimiento**: XPC permite una fácil concurrencia, ya que diferentes tareas pueden ejecutarse simultáneamente en diferentes procesos.
 
-El único **inconveniente** es que **separar una aplicación en varios procesos** que se comunican a través de XPC es **menos eficiente**. Pero en los sistemas actuales esto no es casi notable y los beneficios son mejores.
+El único **inconveniente** es que **separar una aplicación en varios procesos** que se comunican a través de XPC es **menos eficiente**. Pero en los sistemas de hoy, esto casi no es notable y los beneficios son mejores.
 
 ## Servicios XPC Específicos de la Aplicación
 
 Los componentes XPC de una aplicación están **dentro de la propia aplicación.** Por ejemplo, en Safari puedes encontrarlos en **`/Applications/Safari.app/Contents/XPCServices`**. Tienen la extensión **`.xpc`** (como **`com.apple.Safari.SandboxBroker.xpc`**) y **también son paquetes** con el binario principal dentro de él: `/Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/MacOS/com.apple.Safari.SandboxBroker` y un `Info.plist: /Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/Info.plist`
 
-Como podrías estar pensando, un **componente XPC tendrá diferentes derechos y privilegios** que los otros componentes XPC o el binario principal de la aplicación. EXCEPTO si un servicio XPC está configurado con [**JoinExistingSession**](https://developer.apple.com/documentation/bundleresources/information_property_list/xpcservice/joinexistingsession) establecido en “True” en su **Info.plist**. En este caso, el servicio XPC se ejecutará en la **misma sesión de seguridad que la aplicación** que lo llamó.
+Como podrías estar pensando, un **componente XPC tendrá diferentes derechos y privilegios** que los otros componentes XPC o el binario principal de la aplicación. EXCEPTO si un servicio XPC está configurado con [**JoinExistingSession**](https://developer.apple.com/documentation/bundleresources/information_property_list/xpcservice/joinexistingsession) establecido en “True” en su archivo **Info.plist**. En este caso, el servicio XPC se ejecutará en la **misma sesión de seguridad que la aplicación** que lo llamó.
 
 Los servicios XPC son **iniciados** por **launchd** cuando se requieren y **se apagan** una vez que todas las tareas están **completas** para liberar recursos del sistema. **Los componentes XPC específicos de la aplicación solo pueden ser utilizados por la aplicación**, reduciendo así el riesgo asociado con posibles vulnerabilidades.
 
@@ -68,7 +68,7 @@ Los que están en **`LaunchDameons`** son ejecutados por root. Así que si un pr
 
 - **`xpc_object_t`**
 
-Cada mensaje XPC es un objeto diccionario que simplifica la serialización y deserialización. Además, `libxpc.dylib` declara la mayoría de los tipos de datos, por lo que es posible hacer que los datos recibidos sean del tipo esperado. En la API de C, cada objeto es un `xpc_object_t` (y su tipo se puede verificar usando `xpc_get_type(object)`).\
+Cada mensaje XPC es un objeto diccionario que simplifica la serialización y deserialización. Además, `libxpc.dylib` declara la mayoría de los tipos de datos, por lo que es posible asegurarse de que los datos recibidos sean del tipo esperado. En la API de C, cada objeto es un `xpc_object_t` (y su tipo se puede verificar usando `xpc_get_type(object)`).\
 Además, la función `xpc_copy_description(object)` se puede usar para obtener una representación en cadena del objeto que puede ser útil para fines de depuración.\
 Estos objetos también tienen algunos métodos que se pueden llamar como `xpc_<object>_copy`, `xpc_<object>_equal`, `xpc_<object>_hash`, `xpc_<object>_serialize`, `xpc_<object>_deserialize`...
 
@@ -116,9 +116,9 @@ La utilidad `xpcproxy` utiliza el prefijo `0x22`, por ejemplo: `0x2200001c: xpcp
 
 ## Mensajes de Evento XPC
 
-Las aplicaciones pueden **suscribirse** a diferentes **mensajes** de evento, lo que les permite ser **iniciadas bajo demanda** cuando ocurren tales eventos. La **configuración** para estos servicios se realiza en los **archivos plist de launchd**, ubicados en los **mismos directorios que los anteriores** y que contienen una clave adicional **`LaunchEvent`**.
+Las aplicaciones pueden **suscribirse** a diferentes **mensajes de evento**, lo que les permite ser **iniciados bajo demanda** cuando ocurren tales eventos. La **configuración** para estos servicios se realiza en los archivos **plist de launchd**, ubicados en los **mismos directorios que los anteriores** y que contienen una clave adicional **`LaunchEvent`**.
 
-### Verificación del Proceso Conectado XPC
+### Verificación del Proceso de Conexión XPC
 
 Cuando un proceso intenta llamar a un método a través de una conexión XPC, el **servicio XPC debe verificar si ese proceso tiene permitido conectarse**. Aquí están las formas comunes de verificar eso y las trampas comunes:
 
@@ -128,7 +128,7 @@ macos-xpc-connecting-process-check/
 
 ## Autorización XPC
 
-Apple también permite que las aplicaciones **configuren algunos derechos y cómo obtenerlos**, por lo que si el proceso que llama los tiene, se le **permitiría llamar a un método** del servicio XPC:
+Apple también permite a las aplicaciones **configurar algunos derechos y cómo obtenerlos**, por lo que si el proceso que llama los tiene, se le **permitiría llamar a un método** del servicio XPC:
 
 {{#ref}}
 macos-xpc-authorization.md
@@ -440,11 +440,11 @@ return;
 ## Remote XPC
 
 Esta funcionalidad proporcionada por `RemoteXPC.framework` (de `libxpc`) permite comunicarse a través de XPC entre diferentes hosts.\
-Los servicios que admiten XPC remoto tendrán en su plist la clave UsesRemoteXPC como es el caso de `/System/Library/LaunchDaemons/com.apple.SubmitDiagInfo.plist`. Sin embargo, aunque el servicio estará registrado con `launchd`, es `UserEventAgent` con los plugins `com.apple.remoted.plugin` y `com.apple.remoteservicediscovery.events.plugin` los que proporcionan la funcionalidad.
+Los servicios que admiten XPC remoto tendrán en su plist la clave UsesRemoteXPC, como es el caso de `/System/Library/LaunchDaemons/com.apple.SubmitDiagInfo.plist`. Sin embargo, aunque el servicio estará registrado con `launchd`, es `UserEventAgent` con los plugins `com.apple.remoted.plugin` y `com.apple.remoteservicediscovery.events.plugin` los que proporcionan la funcionalidad.
 
 Además, el `RemoteServiceDiscovery.framework` permite obtener información del `com.apple.remoted.plugin` exponiendo funciones como `get_device`, `get_unique_device`, `connect`...
 
-Una vez que se utiliza connect y se recopila el socket `fd` del servicio, es posible usar la clase `remote_xpc_connection_*`.
+Una vez que se utiliza connect y se obtiene el socket `fd` del servicio, es posible usar la clase `remote_xpc_connection_*`.
 
 Es posible obtener información sobre servicios remotos utilizando la herramienta cli `/usr/libexec/remotectl` con parámetros como:
 ```bash

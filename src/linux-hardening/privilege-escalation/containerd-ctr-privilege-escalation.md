@@ -37,6 +37,7 @@ ctr run --privileged --net-host -t registry:5000/modified-ubuntu:latest ubuntu b
 ```
 Luego puedes usar algunas de las técnicas mencionadas en la siguiente página para **escapar de ella abusando de capacidades privilegiadas**:
 
+
 {{#ref}}
 docker-security/
 {{#endref}}
