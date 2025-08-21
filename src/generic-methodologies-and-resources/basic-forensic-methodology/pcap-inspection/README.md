@@ -24,6 +24,7 @@ The following tools are useful to extract statistics, files, etc.
 You can find some Wireshark tricks in:
 
 
+
 {{#ref}}
 wireshark-tricks.md
 {{#endref}}
@@ -94,6 +95,7 @@ ngrep -I packets.pcap "^GET" "port 80 and tcp and host 192.168 and dst host 192.
 Using common carving techniques can be useful to extract files and information from the pcap:
 
 
+
 {{#ref}}
 ../partitions-file-systems-carving/file-data-carving-recovery-tools.md
 {{#endref}}
@@ -134,6 +136,7 @@ suricata -r packets.pcap -c /etc/suricata/suricata.yaml -k none -v -l log
 ### Malware Analysis
 
 Check if you can find any fingerprint of a known malware:
+
 
 
 {{#ref}}
@@ -220,14 +223,17 @@ rita show-exploded-dns -H --limit 10 zeek_logs
 ## Other pcap analysis tricks
 
 
+
 {{#ref}}
 dnscat-exfiltration.md
 {{#endref}}
 
 
+
 {{#ref}}
 wifi-pcap-analysis.md
 {{#endref}}
+
 
 
 {{#ref}}
@@ -237,5 +243,4 @@ usb-keystrokes.md
 ​
 
 {{#include ../../../banners/hacktricks-training.md}}
-
 

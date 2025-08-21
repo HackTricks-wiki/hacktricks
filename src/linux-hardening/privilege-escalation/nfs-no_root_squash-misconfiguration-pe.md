@@ -16,6 +16,7 @@ In the **/etc/exports** file, if you find some directory that is configured as *
 For more information about **NFS** check:
 
 
+
 {{#ref}}
 ../../network-services-pentesting/nfs-service-pentesting.md
 {{#endref}}
@@ -142,5 +143,4 @@ drwxr-x---  6 1008 1009 1024 Apr  5  2017 9.3_old
 ```
 
 {{#include ../../banners/hacktricks-training.md}}
-
 

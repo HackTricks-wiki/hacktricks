@@ -7,6 +7,7 @@
 Go to the following link to learn **what is containerd** and `ctr`:
 
 
+
 {{#ref}}
 ../../network-services-pentesting/2375-pentesting-docker.md
 {{#endref}}
@@ -47,10 +48,10 @@ You can run a privileged container as:
 Then you can use some of the techniques mentioned in the following page to **escape from it abusing privileged capabilities**:
 
 
+
 {{#ref}}
 docker-security/
 {{#endref}}
 
 {{#include ../../banners/hacktricks-training.md}}
-
 

@@ -5,6 +5,7 @@
 ## Creating and Mounting an Image
 
 
+
 {{#ref}}
 ../../generic-methodologies-and-resources/basic-forensic-methodology/image-acquisition-and-mount.md
 {{#endref}}
@@ -12,6 +13,7 @@
 ## Malware Analysis
 
 This **isn't necessary the first step to perform once you have the image**. But you can use this malware analysis techniques independently if you have a file, a file-system image, memory image, pcap... so it's good to **keep these actions in mind**:
+
 
 
 {{#ref}}
@@ -23,6 +25,7 @@ malware-analysis.md
 if you are given a **forensic image** of a device you can start **analyzing the partitions, file-system** used and **recovering** potentially **interesting files** (even deleted ones). Learn how in:
 
 
+
 {{#ref}}
 partitions-file-systems-carving/
 {{#endref}}
@@ -30,14 +33,17 @@ partitions-file-systems-carving/
 Depending on the used OSs and even platform different interesting artifacts should be searched:
 
 
+
 {{#ref}}
 windows-forensics/
 {{#endref}}
 
 
+
 {{#ref}}
 linux-forensics.md
 {{#endref}}
+
 
 
 {{#ref}}
@@ -50,11 +56,13 @@ If you have very **suspicious** **file**, then **depending on the file-type and 
 Read the following page to learn some interesting tricks:
 
 
+
 {{#ref}}
 specific-software-file-type-tricks/
 {{#endref}}
 
 I want to do a special mention to the page:
+
 
 
 {{#ref}}
@@ -64,11 +72,13 @@ specific-software-file-type-tricks/browser-artifacts.md
 ## Memory Dump Inspection
 
 
+
 {{#ref}}
 memory-dump-analysis/
 {{#endref}}
 
 ## Pcap Inspection
+
 
 
 {{#ref}}
@@ -80,6 +90,7 @@ pcap-inspection/
 Keep in mind the possible use of anti-forensic techniques:
 
 
+
 {{#ref}}
 anti-forensic-techniques.md
 {{#endref}}
@@ -87,10 +98,10 @@ anti-forensic-techniques.md
 ## Threat Hunting
 
 
+
 {{#ref}}
 file-integrity-monitoring.md
 {{#endref}}
 
 {{#include ../../banners/hacktricks-training.md}}
-
 

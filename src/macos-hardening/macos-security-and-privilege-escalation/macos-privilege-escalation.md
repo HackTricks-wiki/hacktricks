@@ -7,6 +7,7 @@
 If you came here looking for TCC privilege escalation go to:
 
 
+
 {{#ref}}
 macos-security-protections/macos-tcc/
 {{#endref}}
@@ -14,6 +15,7 @@ macos-security-protections/macos-tcc/
 ## Linux Privesc
 
 Please note that **most of the tricks about privilege escalation affecting Linux/Unix will affect also MacOS** machines. So see:
+
 
 
 {{#ref}}
@@ -243,10 +245,10 @@ A more detailed explanation can be [**found in the original report**](https://th
 This can be useful to escalate privileges:
 
 
+
 {{#ref}}
 macos-files-folders-and-binaries/macos-sensitive-locations.md
 {{#endref}}
 
 {{#include ../../banners/hacktricks-training.md}}
-
 

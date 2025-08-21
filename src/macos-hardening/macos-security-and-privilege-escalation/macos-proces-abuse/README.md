@@ -152,6 +152,7 @@ MacOS, like any other operating system, provides a variety of methods and mechan
 Library Injection is a technique wherein an attacker **forces a process to load a malicious library**. Once injected, the library runs in the context of the target process, providing the attacker with the same permissions and access as the process.
 
 
+
 {{#ref}}
 macos-library-injection/
 {{#endref}}
@@ -159,6 +160,7 @@ macos-library-injection/
 ### Function Hooking
 
 Function Hooking involves **intercepting function calls** or messages within a software code. By hooking functions, an attacker can **modify the behavior** of a process, observe sensitive data, or even gain control over the execution flow.
+
 
 
 {{#ref}}
@@ -170,6 +172,7 @@ macos-function-hooking.md
 Inter Process Communication (IPC) refers to different methods by which separate processes **share and exchange data**. While IPC is fundamental for many legitimate applications, it can also be misused to subvert process isolation, leak sensitive information, or perform unauthorized actions.
 
 
+
 {{#ref}}
 macos-ipc-inter-process-communication/
 {{#endref}}
@@ -177,6 +180,7 @@ macos-ipc-inter-process-communication/
 ### Electron Applications Injection
 
 Electron applications executed with specific env variables could be vulnerable to process injection:
+
 
 
 {{#ref}}
@@ -188,6 +192,7 @@ macos-electron-applications-injection.md
 It's possible to use the flags `--load-extension` and `--use-fake-ui-for-media-stream` to perform a **man in the browser attack** allowing to steal keystrokes, traffic, cookies, inject scripts in pages...:
 
 
+
 {{#ref}}
 macos-chromium-injection.md
 {{#endref}}
@@ -195,6 +200,7 @@ macos-chromium-injection.md
 ### Dirty NIB
 
 NIB files **define user interface (UI) elements** and their interactions within an application. However, they can **execute arbitrary commands** and **Gatekeeper doesn't stop** an already executed application from being executed if a **NIB file is modified**. Therefore, they could be used to make arbitrary programs execute arbitrary commands:
+
 
 
 {{#ref}}
@@ -206,6 +212,7 @@ macos-dirty-nib.md
 It's possible to abuse certain java capabilities (like the **`_JAVA_OPTS`** env variable) to make a java application execute **arbitrary code/commands**.
 
 
+
 {{#ref}}
 macos-java-apps-injection.md
 {{#endref}}
@@ -213,6 +220,7 @@ macos-java-apps-injection.md
 ### .Net Applications Injection
 
 It's possible to inject code into .Net applications by **abusing the .Net debugging functionality** (not protected by macOS protections such as runtime hardening).
+
 
 
 {{#ref}}
@@ -224,6 +232,7 @@ macos-.net-applications-injection.md
 Check different options to make a Perl script execute arbitrary code in:
 
 
+
 {{#ref}}
 macos-perl-applications-injection.md
 {{#endref}}
@@ -231,6 +240,7 @@ macos-perl-applications-injection.md
 ### Ruby Injection
 
 I't also possible to abuse ruby env variables to make arbitrary scripts execute arbitrary code:
+
 
 
 {{#ref}}
@@ -285,4 +295,3 @@ Note that to call that function you need to be **the same uid** as the one runni
 - [https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f](https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f)
 
 {{#include ../../../banners/hacktricks-training.md}}
-
