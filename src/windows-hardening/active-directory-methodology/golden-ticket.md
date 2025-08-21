@@ -1,14 +1,14 @@
-# Zlatna karta
+# Golden Ticket
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Zlatna karta
+## Golden ticket
 
-Napad **Zlatna karta** se sastoji od **kreiranja legitimne Karte za dodeljivanje karata (TGT) koja imitira bilo kog korisnika** korišćenjem **NTLM heša Active Directory (AD) krbtgt naloga**. Ova tehnika je posebno korisna jer **omogućava pristup bilo kojoj usluzi ili mašini** unutar domena kao imitiranog korisnika. Važno je zapamtiti da se **akreditivi krbtgt naloga nikada automatski ne ažuriraju**.
+Napad **Golden Ticket** se sastoji od **kreiranja legitimnog Ticket Granting Ticket (TGT) koji imitira bilo kog korisnika** korišćenjem **NTLM heša Active Directory (AD) krbtgt naloga**. Ova tehnika je posebno korisna jer **omogućava pristup bilo kojoj usluzi ili mašini** unutar domena kao imitiranog korisnika. Važno je zapamtiti da se **akreditivi krbtgt naloga nikada automatski ne ažuriraju**.
 
-Da bi se **dobio NTLM heš** krbtgt naloga, mogu se koristiti različite metode. Može se izvući iz **procesa Local Security Authority Subsystem Service (LSASS)** ili iz **NT Directory Services (NTDS.dit) datoteke** koja se nalazi na bilo kom Kontroloru domena (DC) unutar domena. Pored toga, **izvođenje DCsync napada** je još jedna strategija za dobijanje ovog NTLM heša, koja se može izvesti korišćenjem alata kao što su **lsadump::dcsync modul** u Mimikatz ili **secretsdump.py skripta** od Impacket-a. Važno je naglasiti da za izvođenje ovih operacija **obično su potrebne privilegije domen admina ili sličan nivo pristupa**.
+Da bi se **dobio NTLM heš** krbtgt naloga, mogu se koristiti različite metode. Može se izvući iz **Local Security Authority Subsystem Service (LSASS) procesa** ili iz **NT Directory Services (NTDS.dit) datoteke** koja se nalazi na bilo kom Domain Controller (DC) unutar domena. Pored toga, **izvođenje DCsync napada** je još jedna strategija za dobijanje ovog NTLM heša, koja se može izvesti korišćenjem alata kao što su **lsadump::dcsync modul** u Mimikatz ili **secretsdump.py skripta** od Impacket. Važno je naglasiti da za izvođenje ovih operacija obično **sunt potrebne privilegije domen admina ili sličan nivo pristupa**.
 
-Iako NTLM heš služi kao izvodljiva metoda za ovu svrhu, **snažno se preporučuje** da se **falsifikuju karte koristeći ključeve Kerberos sa naprednom enkripcijom (AES) (AES128 i AES256)** iz razloga operativne sigurnosti.
+Iako NTLM heš služi kao izvodljiva metoda za ovu svrhu, **snažno se preporučuje** da se **falsifikuju karte koristeći Advanced Encryption Standard (AES) Kerberos ključeve (AES128 i AES256)** iz razloga operativne sigurnosti.
 ```bash:From Linux
 python ticketer.py -nthash 25b2076cda3bfd6209161a6c78a69c1c -domain-sid S-1-5-21-1339291983-1349129144-367733775 -domain jurassic.park stegosaurus
 export KRB5CCNAME=/root/impacket-examples/stegosaurus.ccache
@@ -44,7 +44,7 @@ Get-DomainPolicy | select -expand KerberosPolicy
 ```
 Nažalost, životni vek TGT-a nije zabeležen u 4769, tako da ovu informaciju nećete pronaći u Windows dnevnicima događaja. Međutim, ono što možete korelirati je **videti 4769 bez prethodnog 4768**. **Nije moguće zatražiti TGS bez TGT-a**, i ako nema zapisa o izdatom TGT-u, možemo zaključiti da je falsifikovan offline.
 
-Da biste **obišli ovu detekciju**, proverite dijamantske karte:
+Da biste **zaobišli ovu detekciju**, proverite dijamantske karte:
 
 {{#ref}}
 diamond-ticket.md
@@ -56,7 +56,7 @@ diamond-ticket.md
 - 4672: Prijava administratora
 - `Get-WinEvent -FilterHashtable @{Logname='Security';ID=4672} -MaxEvents 1 | Format-List –Property`
 
-Ostale male trikove koje odbrambeni timovi mogu primeniti je **uzbunjivanje na 4769 za osetljive korisnike** kao što je podrazumevani nalog administratora domena.
+Ostale male trikove koje odbrambeni timovi mogu primeniti je **alarmirati na 4769 za osetljive korisnike** kao što je podrazumevani nalog administratora domena.
 
 ## Reference
 

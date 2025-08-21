@@ -1,10 +1,11 @@
-# Containerd (ctr) eskalacija privilegija
+# Containerd (ctr) Privilege Escalation
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Osnovne informacije
 
 Idite na sledeći link da saznate **šta je containerd** i `ctr`:
+
 
 {{#ref}}
 ../../network-services-pentesting/2375-pentesting-docker.md

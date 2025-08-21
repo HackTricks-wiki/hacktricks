@@ -62,7 +62,7 @@ pkttyagent --process <PID of session1> #Step 2, attach pkttyagent to session1
 ```
 To znači da **bilo koji korisnik koji pripada grupi wheel može izvršavati bilo šta kao sudo**.
 
-Ako je to slučaj, da **postanete root možete jednostavno izvršiti**:
+Ako je to slučaj, da **postanete root, možete jednostavno izvršiti**:
 ```
 sudo su
 ```
@@ -72,7 +72,7 @@ Korisnici iz **grupe shadow** mogu **čitati** **/etc/shadow** datoteku:
 ```
 -rw-r----- 1 root shadow 1824 Apr 26 19:10 /etc/shadow
 ```
-So, pročitajte datoteku i pokušajte da **provalite neke hešove**.
+So, pročitajte datoteku i pokušajte da **provalite neke heševe**.
 
 ## Grupa osoblja
 
@@ -88,7 +88,7 @@ $ echo $PATH
 ```
 Ako možemo preuzeti neke programe u `/usr/local`, lako možemo dobiti root.
 
-Preuzimanje `run-parts` programa je jednostavan način da dobijemo root, jer većina programa pokreće `run-parts` kao (crontab, kada se prijavljuje ssh).
+Preuzimanje `run-parts` programa je način da lako dobijemo root, jer će većina programa pokrenuti `run-parts` kao (crontab, kada se prijavljuje ssh).
 ```bash
 $ cat /etc/crontab | grep run-parts
 17 *    * * *   root    cd / && run-parts --report /etc/cron.hourly
@@ -167,13 +167,13 @@ Da biste **otvorili** **sirovu sliku**, možete koristiti **GIMP**, odabrati **`
 
 ![](<../../../images/image (463).png>)
 
-Zatim modifikujte Širinu i Visinu na one koje koristi ekran i proverite različite Tipove slika (i odaberite onaj koji najbolje prikazuje ekran):
+Zatim promenite Širinu i Visinu na one koje se koriste na ekranu i proverite različite Tipove slika (i odaberite onaj koji bolje prikazuje ekran):
 
 ![](<../../../images/image (317).png>)
 
 ## Root Grupa
 
-Izgleda da po defaultu **članovi root grupe** mogu imati pristup da **modifikuju** neke **konfiguracione** datoteke usluga ili neke **biblioteke** ili **druge zanimljive stvari** koje se mogu koristiti za eskalaciju privilegija...
+Izgleda da po defaultu **članovi root grupe** mogu imati pristup **modifikaciji** nekih **konfiguracionih** datoteka servisa ili nekih **biblioteka** ili **drugih interesantnih stvari** koje se mogu koristiti za eskalaciju privilegija...
 
 **Proverite koje datoteke članovi root grupe mogu modifikovati**:
 ```bash
@@ -199,7 +199,7 @@ Na kraju, ako vam se ne sviđaju neki od prethodnih predloga, ili ne rade iz nek
 ../docker-security/
 {{#endref}}
 
-Ako imate dozvole za pisanje preko docker socket-a, pročitajte [**ovaj post o tome kako eskalirati privilegije zloupotrebom docker socket-a**](../index.html#writable-docker-socket)**.**
+Ako imate dozvole za pisanje preko docker socket-a pročitajte [**ovaj post o tome kako eskalirati privilegije zloupotrebom docker socket-a**](../index.html#writable-docker-socket)**.**
 
 {{#ref}}
 https://github.com/KrustyHack/docker-privilege-escalation
@@ -222,7 +222,7 @@ Stoga, ako ste kompromitovali korisnika unutar ove grupe, definitivno biste treb
 
 ## Auth grupa
 
-Unutar OpenBSD, **auth** grupa obično može da piše u foldere _**/etc/skey**_ i _**/var/db/yubikey**_ ako se koriste.\
-Ove dozvole se mogu zloupotrebiti sledećim exploitom da bi se **eskalirale privilegije** na root: [https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot](https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot)
+Unutar OpenBSD **auth** grupa obično može da piše u foldere _**/etc/skey**_ i _**/var/db/yubikey**_ ako se koriste.\
+Ove dozvole se mogu zloupotrebiti sa sledećim exploitom da bi se **eskalirale privilegije** na root: [https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot](https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot)
 
 {{#include ../../../banners/hacktricks-training.md}}

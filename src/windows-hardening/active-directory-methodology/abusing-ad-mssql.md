@@ -7,7 +7,7 @@
 
 ### Python
 
-Alat [MSSQLPwner](https://github.com/ScorpionesLabs/MSSqlPwner) se zasniva na impacket-u, i takođe omogućava autentifikaciju koristeći kerberos karte, i napad kroz lanac linkova.
+Alat [MSSQLPwner](https://github.com/ScorpionesLabs/MSSqlPwner) se zasniva na impacket-u, i takođe omogućava autentifikaciju koristeći kerberos karte, i napad kroz lanac veza.
 
 <figure><img src="https://raw.githubusercontent.com/ScorpionesLabs/MSSqlPwner/main/assets/interractive.png"></figure>
 ```shell
@@ -278,14 +278,15 @@ EXECUTE('EXECUTE(''sp_addsrvrolemember ''''hacker'''' , ''''sysadmin'''' '') AT 
 
 **MSSQL lokalni korisnik** obično ima posebnu vrstu privilegije nazvanu **`SeImpersonatePrivilege`**. Ovo omogućava nalogu da "imituje klijenta nakon autentifikacije".
 
-Strategija koju su mnogi autori osmislili je da primoraju SYSTEM servis da se autentifikuje na lažni ili man-in-the-middle servis koji napadač kreira. Ovaj lažni servis tada može da imitira SYSTEM servis dok pokušava da se autentifikuje.
+Strategija koju su mnogi autori osmislili je da primoraju SYSTEM servis da se autentifikuje na lažni ili man-in-the-middle servis koji napadač kreira. Ovaj lažni servis tada može imitirati SYSTEM servis dok pokušava da se autentifikuje.
 
 [SweetPotato](https://github.com/CCob/SweetPotato) ima kolekciju ovih različitih tehnika koje se mogu izvršiti putem Beacon-ove `execute-assembly` komande.
 
 
 
 ### SCCM Tačka Upravljanja NTLM Preusmeravanje (Ekstrakcija OSD Tajni)
-Pogledajte kako se podrazumevane SQL uloge SCCM **Tačaka Upravljanja** mogu zloupotrebiti za dumpovanje Network Access Account i Task-Sequence tajni direktno iz baze podataka sajta:
+Pogledajte kako se podrazumevane SQL uloge SCCM **Tačaka Upravljanja** mogu zloupotrebiti za dumpovanje tajni Network Access Account i Task-Sequence direktno iz baze podataka sajta:
+
 {{#ref}}
 sccm-management-point-relay-sql-policy-secrets.md
 {{#endref}}

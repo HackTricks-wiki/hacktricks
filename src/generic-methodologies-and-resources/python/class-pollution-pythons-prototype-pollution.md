@@ -1,4 +1,4 @@
-# Zagađenje Klasa (Pythonovo Zagađenje Prototipa)
+# Zagađenje Klasa (Zagađenje Prototipa u Pythonu)
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -61,7 +61,7 @@ USER_INPUT = {
 merge(USER_INPUT, emp)
 print(vars(emp)) #{'name': 'Ahemd', 'age': 23, 'manager': {'name': 'Sarah'}}
 ```
-## Primeri gadgeta
+## Gadget Examples
 
 <details>
 
@@ -182,7 +182,7 @@ subprocess.Popen('whoami', shell=True) # Calc.exe will pop up
 
 <summary>Prepisivanje <strong><code>__kwdefaults__</code></strong></summary>
 
-**`__kwdefaults__`** je posebna atribut svih funkcija, zasnovan na Python [dokumentaciji](https://docs.python.org/3/library/inspect.html), to je “mapiranje bilo kojih podrazumevanih vrednosti za **samo-ključeve** parametre”. Zagađivanje ovog atributa nam omogućava da kontrolišemo podrazumevane vrednosti parametara samo za ključeve funkcije, to su parametri funkcije koji dolaze posle \* ili \*args.
+**`__kwdefaults__`** je posebna atribut svih funkcija, zasnovan na Python [dokumentaciji](https://docs.python.org/3/library/inspect.html), to je “mapiranje svih podrazumevanih vrednosti za **samo-ključeve** parametre”. Zagađivanje ovog atributa nam omogućava da kontrolišemo podrazumevane vrednosti parametara samo za ključeve funkcije, to su parametri funkcije koji dolaze posle \* ili \*args.
 ```python
 from os import system
 import json
@@ -241,7 +241,7 @@ Koristite ovaj payload da **promenite `app.secret_key`** (ime u vašoj aplikacij
 
 </details>
 
-Proverite i sledeću stranicu za više read only gadgeta:
+Proverite takođe sledeću stranicu za više read only gadgets:
 
 {{#ref}}
 python-internal-read-gadgets.md

@@ -1,17 +1,17 @@
-# Ostali web trikovi
+# Other Web Tricks
 
 {{#include ../banners/hacktricks-training.md}}
 
 ### Host header
 
-Nekoliko puta back-end veruje **Host header** da izvrši neke radnje. Na primer, može koristiti njegovu vrednost kao **domen za slanje resetovanja lozinke**. Tako kada primite email sa linkom za resetovanje lozinke, domen koji se koristi je onaj koji ste stavili u Host header. Tada možete zatražiti resetovanje lozinke drugih korisnika i promeniti domen na onaj koji kontrolišete da biste ukrali njihove kodove za resetovanje lozinke. [WriteUp](https://medium.com/nassec-cybersecurity-writeups/how-i-was-able-to-take-over-any-users-account-with-host-header-injection-546fff6d0f2).
+Više puta back-end veruje **Host header** da izvrši neke radnje. Na primer, može koristiti njegovu vrednost kao **domen za slanje resetovanja lozinke**. Tako kada primite email sa linkom za resetovanje lozinke, domen koji se koristi je onaj koji ste stavili u Host header. Tada možete zatražiti resetovanje lozinke drugih korisnika i promeniti domen na onaj koji kontrolišete kako biste ukrali njihove kodove za resetovanje lozinke. [WriteUp](https://medium.com/nassec-cybersecurity-writeups/how-i-was-able-to-take-over-any-users-account-with-host-header-injection-546fff6d0f2).
 
 > [!WARNING]
-> Imajte na umu da je moguće da ne morate ni da čekate da korisnik klikne na link za resetovanje lozinke da biste dobili token, jer možda čak i **spam filteri ili drugi posrednički uređaji/botovi će kliknuti na njega da bi ga analizirali**.
+> Imajte na umu da je moguće da ne morate ni da čekate da korisnik klikne na link za resetovanje lozinke da biste dobili token, jer možda čak i **spam filteri ili drugi posrednički uređaji/botovi će kliknuti na njega da ga analiziraju**.
 
 ### Session booleans
 
-Nekada kada ispravno završite neku verifikaciju, back-end će **samo dodati boolean sa vrednošću "True" u sigurnosnu atribut vaše sesije**. Tada, druga tačka će znati da li ste uspešno prošli tu proveru.\
+Nekada kada ispravno završite neku verifikaciju, back-end će **samo dodati boolean sa vrednošću "True" u sigurnosni atribut vaše sesije**. Tada, druga tačka će znati da ste uspešno prošli tu proveru.\
 Međutim, ako **prođete proveru** i vašoj sesiji je dodeljena ta "True" vrednost u sigurnosnom atributu, možete pokušati da **pristupite drugim resursima** koji **zavise od istog atributa** ali za koje **ne biste trebali imati dozvole** za pristup. [WriteUp](https://medium.com/@ozguralp/a-less-known-attack-vector-second-order-idor-attacks-14468009781a).
 
 ### Register functionality

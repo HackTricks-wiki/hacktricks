@@ -20,15 +20,15 @@ adws-enumeration.md
 
 ### Brza upotreba
 
-1. Pokrenite alat i povežite se na `dc01.corp.local` sa bilo kojim domena kredencijalima.
-2. Kreirajte offline snimak putem `File ➜ Create Snapshot`.
+1. Pokrenite alat i povežite se sa `dc01.corp.local` koristeći bilo koje domenske kredencijale.
+2. Kreirajte snimak van mreže putem `File ➜ Create Snapshot`.
 3. Poređajte dva snimka sa `File ➜ Compare` da biste uočili promene u dozvolama.
 
 ---
 
 ## ADRecon
 
-[ADRecon](https://github.com/adrecon/ADRecon) izvlači veliki set artefakata iz domena (ACL-ovi, GPO-ovi, poverenja, CA šabloni …) i proizvodi **Excel izveštaj**.
+[ADRecon](https://github.com/adrecon/ADRecon) ekstrakuje veliki set artefakata iz domena (ACLs, GPOs, poverenja, CA šabloni …) i proizvodi **Excel izveštaj**.
 ```powershell
 # On a Windows host in the domain
 PS C:\> .\ADRecon.ps1 -OutputDir C:\Temp\ADRecon
@@ -71,7 +71,7 @@ Group3r.exe -f gpo.log   # -s to stdout
 
 ## PingCastle
 
-[PingCastle](https://www.pingcastle.com/documentation/) vrši **proveru zdravlja** Active Directory-a i generiše HTML izveštaj sa ocenom rizika.
+[PingCastle](https://www.pingcastle.com/documentation/) vrši **proveru zdravlja** Active Directory i generiše HTML izveštaj sa ocenom rizika.
 ```powershell
 PingCastle.exe --healthcheck --server corp.local --user bob --password "P@ssw0rd!"
 ```

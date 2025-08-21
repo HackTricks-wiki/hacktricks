@@ -6,7 +6,7 @@
 
 ## WMIC
 
-**Wmic** se može koristiti za pokretanje programa pri **pokretanju**. Pogledajte koji su binarni programi programirani da se pokrenu pri pokretanju sa:
+**Wmic** se može koristiti za pokretanje programa pri **pokretanju**. Pogledajte koje su binarne datoteke programirane da se pokrenu pri pokretanju sa:
 ```bash
 wmic startup get caption,command 2>nul & ^
 Get-CimInstance Win32_StartupCommand | select Name, command, Location, User | fl
@@ -24,9 +24,9 @@ Get-ScheduledTask | where {$_.TaskPath -notlike "\Microsoft*"} | ft TaskName,Tas
 #You can also write that content on a bat file that is being executed by a scheduled task
 schtasks /Create /RU "SYSTEM" /SC ONLOGON /TN "SchedPE" /TR "cmd /c net localgroup administrators user /add"
 ```
-## Fascikle
+## Folders
 
-Sve binarne datoteke smeštene u **Startup fascikle će biti izvršene prilikom pokretanja**. Uobičajene startup fascikle su one navedene u nastavku, ali startup fascikla je označena u registru. [Read this to learn where.](privilege-escalation-with-autorun-binaries.md#startup-path)
+Sve binarne datoteke smeštene u **Startup folderima će biti izvršene prilikom pokretanja**. Uobičajeni startup folderi su oni navedeni u nastavku, ali je startup folder označen u registru. [Read this to learn where.](privilege-escalation-with-autorun-binaries.md#startup-path)
 ```bash
 dir /b "C:\Documents and Settings\All Users\Start Menu\Programs\Startup" 2>nul
 dir /b "C:\Documents and Settings\%username%\Start Menu\Programs\Startup" 2>nul
@@ -35,13 +35,11 @@ dir /b "%appdata%\Microsoft\Windows\Start Menu\Programs\Startup" 2>nul
 Get-ChildItem "C:\Users\All Users\Start Menu\Programs\Startup"
 Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 ```
-> **FYI**: Ranjenje arhiva *putanja prolaza* ranjivosti (kao što je ona zloupotrebljena u WinRAR-u pre 7.13 – CVE-2025-8088) može se iskoristiti za **deponovanje payload-a direktno unutar ovih Startup folder-a tokom dekompresije**, što rezultira izvršavanjem koda prilikom sledećeg prijavljivanja korisnika. Za detaljno objašnjenje ove tehnike pogledajte:
+> **FYI**: Ranjenje arhiva *putanja prolaza* ranjivosti (kao što je ona zloupotrebljena u WinRAR-u pre 7.13 – CVE-2025-8088) može se iskoristiti za **deponovanje payload-a direktno unutar ovih Startup folder-a tokom dekompresije**, što rezultira izvršavanjem koda pri sledećem prijavljivanju korisnika. Za detaljno objašnjenje ove tehnike pogledajte:
 
 {{#ref}}
 ../../generic-hacking/archive-extraction-path-traversal.md
 {{#endref}}
-
-
 
 ## Registry
 
@@ -66,7 +64,7 @@ Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 
 Registri ključevi poznati kao **Run** i **RunOnce** su dizajnirani da automatski izvršavaju programe svaki put kada se korisnik prijavi u sistem. Komandna linija dodeljena kao podatkovna vrednost ključa je ograničena na 260 karaktera ili manje.
 
-**Servisni runs** (mogu kontrolisati automatsko pokretanje servisa tokom podizanja sistema):
+**Servisni radovi** (mogu kontrolisati automatsko pokretanje servisa tokom podizanja sistema):
 
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\RunServicesOnce`
 - `HKCU\Software\Microsoft\Windows\CurrentVersion\RunServicesOnce`
@@ -90,7 +88,7 @@ reg add HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnceEx\\0001\\Dep
 > **Eksploit 1**: Ako možete da pišete unutar bilo kog od pomenutih registra unutar **HKLM**, možete da eskalirate privilegije kada se drugi korisnik prijavi.
 
 > [!TIP]
-> **Eksploit 2**: Ako možete da prepišete bilo koji od binarnih fajlova navedenih u bilo kom registru unutar **HKLM**, možete da modifikujete taj binarni fajl sa backdoor-om kada se drugi korisnik prijavi i eskalirate privilegije.
+> **Eksploit 2**: Ako možete da prepišete bilo koji od binarnih fajlova navedenih u bilo kom od registra unutar **HKLM**, možete da modifikujete taj binarni fajl sa backdoor-om kada se drugi korisnik prijavi i eskalirate privilegije.
 ```bash
 #CMD
 reg query HKLM\Software\Microsoft\Windows\CurrentVersion\Run
@@ -172,7 +170,7 @@ Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion
 
 `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon`
 
-Obično je **Userinit** ključ postavljen na **userinit.exe**. Međutim, ako se ovaj ključ izmeni, navedeni izvršni fajl će takođe biti pokrenut od strane **Winlogon** prilikom prijavljivanja korisnika. Slično tome, **Shell** ključ je namenjen da upućuje na **explorer.exe**, koji je podrazumevani shell za Windows.
+Tipično, **Userinit** ključ je postavljen na **userinit.exe**. Međutim, ako se ovaj ključ izmeni, navedeni izvršni fajl će takođe biti pokrenut od strane **Winlogon** prilikom prijavljivanja korisnika. Slično tome, **Shell** ključ je namenjen da upućuje na **explorer.exe**, koji je podrazumevani shell za Windows.
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "Userinit"
 reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "Shell"
@@ -180,7 +178,7 @@ Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVers
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon' -Name "Shell"
 ```
 > [!TIP]
-> Ako možete da prepišete vrednost registra ili binarni fajl, moći ćete da podignete privilegije.
+> Ako možete da prepišete vrednost registra ili binarni fajl, moći ćete da eskalirate privilegije.
 
 ### Podešavanja politike
 
@@ -208,9 +206,9 @@ Koraci za kreiranje opcije za pokretanje u "Safe Mode with Command Prompt":
 4. Sačuvajte promene u `boot.ini`.
 5. Ponovo primenite originalne atribute datoteke: `attrib c:\boot.ini +r +s +h`
 
-- **Eksploatacija 1:** Promena **AlternateShell** registry ključa omogućava prilagođenu postavku komandne ljuske, potencijalno za neovlašćen pristup.
-- **Eksploatacija 2 (PATH Write Permissions):** Imati dozvole za pisanje u bilo koji deo sistema **PATH** promenljive, posebno pre `C:\Windows\system32`, omogućava vam da izvršite prilagođeni `cmd.exe`, što bi mogla biti zadnja vrata ako se sistem pokrene u Safe Mode.
-- **Eksploatacija 3 (PATH i boot.ini Write Permissions):** Pristup za pisanje u `boot.ini` omogućava automatsko pokretanje u Safe Mode, olakšavajući neovlašćen pristup prilikom sledećeg ponovnog pokretanja.
+- **Eksploit 1:** Promena **AlternateShell** registry ključa omogućava prilagođenu postavku komandne ljuske, potencijalno za neovlašćen pristup.
+- **Eksploit 2 (PATH Write Permissions):** Imati dozvole za pisanje u bilo koji deo sistema **PATH** promenljive, posebno pre `C:\Windows\system32`, omogućava vam da izvršite prilagođeni `cmd.exe`, koji bi mogao biti backdoor ako se sistem pokrene u Safe Mode.
+- **Eksploit 3 (PATH i boot.ini Write Permissions):** Pristup za pisanje u `boot.ini` omogućava automatsko pokretanje u Safe Mode, olakšavajući neovlašćen pristup prilikom sledećeg ponovnog pokretanja.
 
 Da proverite trenutnu **AlternateShell** postavku, koristite ove komande:
 ```bash
@@ -238,9 +236,9 @@ Unutar ovih ključeva postoje različiti podključevi, od kojih svaki odgovara s
 **Bezbednosni Uvidi:**
 
 - Modifikovanje ili pisanje u ključ gde je **`IsInstalled`** postavljeno na `"1"` sa specifičnim **`StubPath`** može dovesti do neovlašćenog izvršavanja komandi, potencijalno za eskalaciju privilegija.
-- Menjanje binarnog fajla na koji se poziva u bilo kojoj **`StubPath`** vrednosti takođe može postići eskalaciju privilegija, uz dovoljno dozvola.
+- Menjanje binarnog fajla na koji se poziva u bilo kojoj vrednosti **`StubPath`** takođe može postići eskalaciju privilegija, uz dovoljno dozvola.
 
-Da biste pregledali konfiguracije **`StubPath`** u Active Setup komponentama, mogu se koristiti sledeće komande:
+Da biste pregledali konfiguracije **`StubPath`** kroz Active Setup komponente, mogu se koristiti sledeće komande:
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Active Setup\Installed Components" /s /v StubPath
 reg query "HKCU\SOFTWARE\Microsoft\Active Setup\Installed Components" /s /v StubPath
@@ -255,7 +253,7 @@ Browser Helper Objects (BHOs) su DLL moduli koji dodaju dodatne funkcije Microso
 
 BHOs su kompatibilni sa Windows 10 putem Internet Explorer 11, ali nisu podržani u Microsoft Edge, podrazumevanom pretraživaču u novijim verzijama Windows-a.
 
-Da biste istražili BHOs registrovane na sistemu, možete pregledati sledeće registry ključeve:
+Da biste istražili BHOs registrovane na sistemu, možete pregledati sledeće registre:
 
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects`
 - `HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects`
@@ -284,7 +282,7 @@ reg query "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows NT\CurrentVersion\Font Dr
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Font Drivers'
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows NT\CurrentVersion\Font Drivers'
 ```
-### Otvorena Komanda
+### Open Command
 
 - `HKLM\SOFTWARE\Classes\htmlfile\shell\open\command`
 - `HKLM\SOFTWARE\Wow6432Node\Classes\htmlfile\shell\open\command`
@@ -294,7 +292,7 @@ reg query "HKLM\SOFTWARE\Wow6432Node\Classes\htmlfile\shell\open\command" /v ""
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Classes\htmlfile\shell\open\command' -Name ""
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Wow6432Node\Classes\htmlfile\shell\open\command' -Name ""
 ```
-### Opcije izvršavanja slika
+### Opcije izvršavanja slika datoteka
 ```
 HKLM\Software\Microsoft\Windows NT\CurrentVersion\Image File Execution Options
 HKLM\Software\Microsoft\Wow6432Node\Windows NT\CurrentVersion\Image File Execution Options
@@ -307,7 +305,7 @@ autorunsc.exe -m -nobanner -a * -ct /accepteula
 ```
 ## Više
 
-**Pronađite više Autoruns kao što su registri na** [**https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2**](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)
+**Pronađite više Autoruns kao što su registri u** [**https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2**](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)
 
 ## Reference
 

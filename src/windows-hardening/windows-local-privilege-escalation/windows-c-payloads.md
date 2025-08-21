@@ -66,7 +66,7 @@ return 0;
 ---
 
 ## Pokretanje SYSTEM ljuske putem duplikacije tokena (`SeDebugPrivilege` + `SeImpersonatePrivilege`)
-Ako trenutni proces ima **oba** privilegije `SeDebug` i `SeImpersonate` (tipično za mnoge naloge usluga), možete ukrasti token iz `winlogon.exe`, duplirati ga i pokrenuti proces sa povišenim privilegijama:
+Ako trenutni proces ima **oba** privilegije `SeDebug` i `SeImpersonate` (tipično za mnoge servisne naloge), možete ukrasti token iz `winlogon.exe`, duplirati ga i pokrenuti podignut proces:
 ```c
 // x86_64-w64-mingw32-gcc -O2 -o system_shell.exe system_shell.c -ladvapi32 -luser32
 #include <windows.h>
@@ -115,14 +115,15 @@ return 0;
 }
 ```
 Za dublje objašnjenje kako to funkcioniše, pogledajte:
+
 {{#ref}}
 sedebug-+-seimpersonate-copy-token.md
 {{#endref}}
 
 ---
 
-## Patchovanje AMSI i ETW u memoriji (Izbegavanje odbrane)
-Većina modernih AV/EDR motora oslanja se na **AMSI** i **ETW** za inspekciju malicioznih ponašanja. Patchovanje oba interfejsa rano unutar trenutnog procesa sprečava skeniranje payload-a zasnovanih na skriptama (npr. PowerShell, JScript).
+## AMSI i ETW zakrpa u memoriji (Izbegavanje odbrane)
+Većina modernih AV/EDR motora oslanja se na **AMSI** i **ETW** za inspekciju malicioznih ponašanja. Zakrivanje oba interfejsa rano unutar trenutnog procesa sprečava skeniranje skriptnih payload-a (npr. PowerShell, JScript).
 ```c
 // gcc -o patch_amsi.exe patch_amsi.c -lntdll
 #define _CRT_SECURE_NO_WARNINGS
@@ -149,7 +150,7 @@ MessageBoxA(NULL, "AMSI & ETW patched!", "OK", MB_OK);
 return 0;
 }
 ```
-*Zak patch iznad je lokalni za proces; pokretanje novog PowerShell-a nakon što se izvrši će se izvršiti bez AMSI/ETW inspekcije.*
+*Zak patch iznad je lokalni za proces; pokretanje novog PowerShell-a nakon što se to izvrši će se izvršiti bez AMSI/ETW inspekcije.*
 
 ---
 

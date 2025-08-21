@@ -6,7 +6,7 @@
 
 Delegirani upravljani servisni nalozi (**dMSA**) su naslednici **gMSA** koji dolaze sa Windows Server 2025. Legitimni radni tok migracije omogućava administratorima da zamene *stari* nalog (korisnički, računar ili servisni nalog) sa dMSA dok transparentno čuvaju dozvole. Radni tok se izlaže putem PowerShell cmdlet-a kao što su `Start-ADServiceAccountMigration` i `Complete-ADServiceAccountMigration` i oslanja se na dva LDAP atributa **dMSA objekta**:
 
-* **`msDS-ManagedAccountPrecededByLink`** – *DN link* ka prethodnom (starom) nalogu.
+* **`msDS-ManagedAccountPrecededByLink`** – *DN link* do prethodnog (starog) naloga.
 * **`msDS-DelegatedMSAState`**       – stanje migracije (`0` = nijedno, `1` = u toku, `2` = *završeno*).
 
 Ako napadač može da kreira **bilo koji** dMSA unutar OU i direktno manipuliše ta dva atributa, LSASS i KDC će tretirati dMSA kao *naslednika* povezanog naloga. Kada se napadač kasnije autentifikuje kao dMSA **nasleđuje sve privilegije povezanog naloga** – do **Domain Admin** ako je Administrator nalog povezan.
@@ -26,7 +26,7 @@ Unit 42 je objavio PowerShell pomoćni skript koji analizira bezbednosne deskrip
 ```powershell
 Get-BadSuccessorOUPermissions.ps1 -Domain contoso.local
 ```
-Ispod haube, skript pokreće paginiranu LDAP pretragu za `(objectClass=organizationalUnit)` i proverava svaki `nTSecurityDescriptor` za
+Ispod haube, skripta pokreće paginiranu LDAP pretragu za `(objectClass=organizationalUnit)` i proverava svaki `nTSecurityDescriptor` za
 
 * `ADS_RIGHT_DS_CREATE_CHILD` (0x0001)
 * `Active Directory Schema ID: 31ed51fa-77b1-4175-884a-5c6f3f6f34e8` (objekat klase *msDS-DelegatedManagedServiceAccount*)
@@ -47,7 +47,7 @@ Set-ADServiceAccount attacker_dMSA -Add \
 # 3. Mark the migration as *completed*
 Set-ADServiceAccount attacker_dMSA -Replace @{msDS-DelegatedMSAState=2}
 ```
-Nakon replikacije, napadač može jednostavno **prijaviti se** kao `attacker_dMSA$` ili zatražiti Kerberos TGT – Windows će izgraditi token *zamenjenog* naloga.
+Nakon replikacije, napadač može jednostavno **logon** kao `attacker_dMSA$` ili zatražiti Kerberos TGT – Windows će izgraditi token *supersedovanog* naloga.
 
 ### Automatizacija
 

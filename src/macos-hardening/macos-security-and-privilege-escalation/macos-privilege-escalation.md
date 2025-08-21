@@ -22,9 +22,9 @@ Imajte na umu da **većina trikova o eskalaciji privilegija koji utiču na Linux
 
 ### Sudo Hijacking
 
-Možete pronaći originalnu [Sudo Hijacking tehniku unutar posta o eskalaciji privilegija za Linux](../../linux-hardening/privilege-escalation/index.html#sudo-hijacking).
+Možete pronaći originalnu [Sudo Hijacking tehniku unutar posta o Linux eskalaciji privilegija](../../linux-hardening/privilege-escalation/index.html#sudo-hijacking).
 
-Međutim, macOS **održava** korisnikov **`PATH`** kada izvršava **`sudo`**. Što znači da bi drugi način za postizanje ovog napada bio da **otmete druge binarne datoteke** koje žrtva još uvek izvršava kada **pokreće sudo:**
+Međutim, macOS **održava** korisnikov **`PATH`** kada izvršava **`sudo`**. Što znači da bi drugi način da se postigne ovaj napad bio da se **otmu drugi binarni fajlovi** koje žrtva još uvek izvršava kada **pokreće sudo:**
 ```bash
 # Let's hijack ls in /opt/homebrew/bin, as this is usually already in the users PATH
 cat > /opt/homebrew/bin/ls <<EOF
@@ -41,9 +41,9 @@ sudo ls
 ```
 Napomena da korisnik koji koristi terminal verovatno ima **Homebrew instaliran**. Tako da je moguće preuzeti binarne datoteke u **`/opt/homebrew/bin`**.
 
-### Impersonacija Dock-a
+### Imitacija Dock-a
 
-Korišćenjem nekih **socijalnih inženjeringa** mogli biste **impersonirati na primer Google Chrome** unutar dock-a i zapravo izvršiti svoj skript:
+Korišćenjem nekih **socijalnih inženjeringa** mogli biste **imitirati, na primer, Google Chrome** unutar dock-a i zapravo izvršiti svoj skript:
 
 {{#tabs}}
 {{#tab name="Chrome Impersonation"}}
@@ -231,6 +231,7 @@ Detaljnije objašnjenje može se [**pronaći u originalnom izveštaju**](https:/
 ## Osetljive informacije
 
 Ovo može biti korisno za eskalaciju privilegija:
+
 
 {{#ref}}
 macos-files-folders-and-binaries/macos-sensitive-locations.md

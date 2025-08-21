@@ -4,15 +4,15 @@
 
 ## **GTFOBins**
 
-**Pretražite u** [**https://gtfobins.github.io/**](https://gtfobins.github.io) **da li možete izvršiti bilo koji binarni fajl sa "Shell" svojstvom**
+**Pretražite na** [**https://gtfobins.github.io/**](https://gtfobins.github.io) **da li možete izvršiti bilo koji binarni fajl sa "Shell" svojstvom**
 
-## Chroot izlazi
+## Chroot Izlazi
 
 Sa [wikipedia](https://en.wikipedia.org/wiki/Chroot#Limitations): Chroot mehanizam **nije namenjen da brani** od namernog manipulisanja od strane **privilegovanih** (**root**) **korisnika**. Na većini sistema, chroot konteksti se ne slažu pravilno i chrootovani programi **sa dovoljnim privilegijama mogu izvršiti drugi chroot da bi pobegli**.\
-Obično to znači da da biste pobegli, morate biti root unutar chroot-a.
+Obično to znači da da biste pobegli, morate biti root unutar chroot.
 
 > [!TIP]
-> **Alat** [**chw00t**](https://github.com/earthquake/chw00t) je kreiran da zloupotrebi sledeće scenarije i pobegne iz `chroot`.
+> **alat** [**chw00t**](https://github.com/earthquake/chw00t) je kreiran da zloupotrebi sledeće scenarije i pobegne iz `chroot`.
 
 ### Root + CWD
 
@@ -79,7 +79,7 @@ system("/bin/bash");
 ### Root + Sačuvani fd
 
 > [!WARNING]
-> Ovo je slično prethodnom slučaju, ali u ovom slučaju **napadač čuva deskriptor datoteke za trenutni direktorijum** i zatim **stvara chroot u novom folderu**. Na kraju, pošto ima **pristup** tom **FD** **van** chroot-a, pristupa mu i **beži**.
+> Ovo je slično prethodnom slučaju, ali u ovom slučaju **napadač čuva deskriptor datoteke za trenutni direktorijum** i zatim **stvara chroot u novom folderu**. Na kraju, pošto ima **pristup** tom **FD** **izvan** chroot-a, pristupa mu i **beži**.
 
 <details>
 
@@ -109,13 +109,13 @@ chroot(".");
 ### Root + Fork + UDS (Unix Domain Sockets)
 
 > [!WARNING]
-> FD može biti prosleđen preko Unix Domain Sockets, tako da:
+> FD se može preneti preko Unix Domain Sockets, tako da:
 >
 > - Kreirajte podproces (fork)
 > - Kreirajte UDS kako bi roditelj i dete mogli da komuniciraju
 > - Pokrenite chroot u podprocesu u drugom folderu
 > - U roditeljskom procesu, kreirajte FD foldera koji je van novog chroot-a podprocesa
-> - Prosledite tom podprocesu taj FD koristeći UDS
+> - Prenesite tom podprocesu taj FD koristeći UDS
 > - Podproces menja direktorijum na taj FD, i pošto je van svog chroot-a, pobegnuće iz zatvora
 
 ### Root + Mount
@@ -133,13 +133,13 @@ chroot(".");
 >
 > - Montirajte procfs u direktorijum unutar chroot-a (ako već nije)
 > - Potražite pid koji ima drugačiji root/cwd unos, kao: /proc/1/root
-> - Chrootujte u taj unos
+> - Chroot u taj unos
 
 ### Root(?) + Fork
 
 > [!WARNING]
 >
-> - Kreirajte Fork (podproces) i chrootujte u drugi folder dublje u FS i CD na njega
+> - Kreirajte Fork (podproces) i chroot u drugi folder dublje u FS i CD na njega
 > - Iz roditeljskog procesa, premestite folder u kojem se podproces nalazi u folder prethodni chroot-u dece
 > - Ovaj podproces će se naći van chroot-a
 
@@ -170,7 +170,7 @@ echo $PATH #See the path of the executables that you can use
 PATH=/usr/local/sbin:/usr/sbin:/sbin:/usr/local/bin:/usr/bin:/bin #Try to change the path
 echo /home/* #List directory
 ```
-### Korišćenje vim-a
+### Koristeći vim
 ```bash
 :set shell=/bin/sh
 :shell
@@ -209,6 +209,7 @@ wget http://127.0.0.1:8080/sudoers -O /etc/sudoers
 [https://gtfobins.github.io](https://gtfobins.github.io)\
 **Takođe bi mogla biti zanimljiva stranica:**
 
+
 {{#ref}}
 ../bypass-bash-restrictions/
 {{#endref}}
@@ -216,6 +217,7 @@ wget http://127.0.0.1:8080/sudoers -O /etc/sudoers
 ## Python zatvori
 
 Trikovi o izlasku iz python zatvora na sledećoj stranici:
+
 
 {{#ref}}
 ../../generic-methodologies-and-resources/python/bypass-python-sandboxes/
@@ -229,7 +231,7 @@ Na ovoj stranici možete pronaći globalne funkcije kojima imate pristup unutar 
 ```bash
 load(string.char(0x6f,0x73,0x2e,0x65,0x78,0x65,0x63,0x75,0x74,0x65,0x28,0x27,0x6c,0x73,0x27,0x29))()
 ```
-Nekoliko trikova za **pozivanje funkcija biblioteke bez korišćenja tačaka**:
+Neki trikovi za **pozivanje funkcija biblioteke bez korišćenja tačaka**:
 ```bash
 print(string.char(0x41, 0x42))
 print(rawget(string, "char")(0x41, 0x42))

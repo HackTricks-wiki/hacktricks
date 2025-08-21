@@ -3,7 +3,7 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 ## TL;DR
-Prisiljavanjem **System Center Configuration Manager (SCCM) Management Point (MP)** da se autentifikuje preko SMB/RPC i **preusmeravanjem** tog NTLM korisničkog naloga na **bazu podataka sajta (MSSQL)** dobijate `smsdbrole_MP` / `smsdbrole_MPUserSvc` prava. Ove uloge vam omogućavaju da pozivate skup procedura koje izlažu **Operating System Deployment (OSD)** policy blobove (akreditivi za Network Access Account, varijable Task-Sequence, itd.). Blobovi su heksadecimalno kodirani/šifrovani, ali se mogu dekodirati i dešifrovati pomoću **PXEthief**, što daje plaintext tajne.
+Prisiljavanjem **System Center Configuration Manager (SCCM) Management Point (MP)** da se autentifikuje preko SMB/RPC i **preusmeravanjem** tog NTLM korisničkog naloga na **bazu podataka sajta (MSSQL)** dobijate `smsdbrole_MP` / `smsdbrole_MPUserSvc` prava. Ove uloge vam omogućavaju da pozivate skup procedura koje izlažu **Operating System Deployment (OSD)** policy blobove (akreditivi za pristup mreži, varijable radnog toka, itd.). Blobovi su heksadecimalno kodirani/šifrovani, ali se mogu dekodirati i dešifrovati pomoću **PXEthief**, što daje tajne u običnom tekstu.
 
 Visok nivo lanca:
 1. Otkrijte MP & bazu podataka sajta ↦ neautentifikovani HTTP endpoint `/SMS_MP/.sms_aut?MPKEYINFORMATIONMEDIA`.
@@ -52,7 +52,7 @@ Kada se primorač aktivira, trebali biste videti nešto poput:
 ---
 
 ## 3. Identifikujte OSD politike putem sačuvanih procedura
-Povežite se preko SOCKS proxy-a (port 1080 po defaultu):
+Povežite se preko SOCKS proksija (port 1080 po defaultu):
 ```bash
 proxychains mssqlclient.py CONTOSO/MP01$@10.10.10.15 -windows-auth
 ```
@@ -72,9 +72,9 @@ EXEC MP_GetMachinePolicyAssignments N'e9cd8c06-cc50-4b05-a4b2-9c9b5a51bbe7', N''
 Svaki red sadrži `PolicyAssignmentID`, `Body` (hex), `PolicyID`, `PolicyVersion`.
 
 Fokusirajte se na politike:
-* **NAAConfig**  – kredencijali za Network Access Account
-* **TS_Sequence** – varijable Task Sequence (OSDJoinAccount/Password)
-* **CollectionSettings** – može sadržati račune za pokretanje
+* **NAAConfig**  – Akreditivi za nalog za pristup mreži
+* **TS_Sequence** – Varijable sekvence zadatka (OSDJoinAccount/Password)
+* **CollectionSettings** – Mogu sadržati naloge za izvršavanje
 
 ### 3.3  Preuzmite puni sadržaj
 Ako već imate `PolicyID` i `PolicyVersion`, možete preskočiti zahtev za clientID koristeći:
@@ -112,8 +112,8 @@ Ove uloge izlažu desetine EXEC dozvola, ključne koje se koriste u ovom napadu 
 | Stored Procedure | Svrha |
 |------------------|---------|
 | `MP_GetMachinePolicyAssignments` | Lista politika primenjenih na `clientID`. |
-| `MP_GetPolicyBody` / `MP_GetPolicyBodyAfterAuthorization` | Vraća kompletnu telo politike. |
-| `MP_GetListOfMPsInSiteOSD` | Vraćeno putem `MPKEYINFORMATIONMEDIA` putanje. |
+| `MP_GetPolicyBody` / `MP_GetPolicyBodyAfterAuthorization` | Vraća kompletno telo politike. |
+| `MP_GetListOfMPsInSiteOSD` | Vraćeno putem `MPKEYINFORMATIONMEDIA` puta. |
 
 Možete pregledati punu listu sa:
 ```sql
@@ -137,11 +137,13 @@ iste mere zaštite korišćene protiv `PetitPotam`/`PrinterBug`).
 
 ## Takođe pogledajte
 * Osnovi NTLM relja:
+
 {{#ref}}
 ../ntlm/README.md
 {{#endref}}
 
 * MSSQL zloupotreba i post-ekspolatacija:
+
 {{#ref}}
 abusing-ad-mssql.md
 {{#endref}}
@@ -149,7 +151,7 @@ abusing-ad-mssql.md
 
 
 ## Reference
-- [Želeo bih da razgovaram sa vašim menadžerom: Krađa tajni pomoću relja menadžment tačaka](https://specterops.io/blog/2025/07/15/id-like-to-speak-to-your-manager-stealing-secrets-with-management-point-relays/)
+- [Želeo bih da razgovaram sa vašim menadžerom: Krađa tajni pomoću relja tačaka upravljanja](https://specterops.io/blog/2025/07/15/id-like-to-speak-to-your-manager-stealing-secrets-with-management-point-relays/)
 - [PXEthief](https://github.com/MWR-CyberSec/PXEThief)
 - [Menadžer pogrešnih konfiguracija – ELEVATE-4 & ELEVATE-5](https://github.com/subat0mik/Misconfiguration-Manager)
 {{#include ../../banners/hacktricks-training.md}}

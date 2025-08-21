@@ -4,13 +4,13 @@
 
 ## XPC Authorization
 
-Apple takođe predlaže još jedan način za autentifikaciju da li povezani proces ima **dozvole da pozove izloženu XPC metodu**.
+Apple takođe predlaže još jedan način za autentifikaciju ako povezani proces ima **dozvole da pozove izloženu XPC metodu**.
 
-Kada aplikacija treba da **izvrši akcije kao privilegovani korisnik**, umesto da pokreće aplikaciju kao privilegovani korisnik, obično instalira kao root HelperTool kao XPC servis koji može biti pozvan iz aplikacije da izvrši te akcije. Međutim, aplikacija koja poziva servis treba da ima dovoljno autorizacije.
+Kada aplikacija treba da **izvrši radnje kao privilegovani korisnik**, umesto da pokreće aplikaciju kao privilegovani korisnik, obično instalira kao root HelperTool kao XPC servis koji može biti pozvan iz aplikacije da izvrši te radnje. Međutim, aplikacija koja poziva servis treba da ima dovoljno autorizacije.
 
-### ShouldAcceptNewConnection uvek YES
+### ShouldAcceptNewConnection uvek DA
 
-Primer se može naći u [EvenBetterAuthorizationSample](https://github.com/brenwell/EvenBetterAuthorizationSample). U `App/AppDelegate.m` pokušava da **poveže** sa **HelperTool**. A u `HelperTool/HelperTool.m` funkcija **`shouldAcceptNewConnection`** **neće proveriti** nijedan od prethodno navedenih zahteva. Uvek će vraćati YES:
+Primer se može naći u [EvenBetterAuthorizationSample](https://github.com/brenwell/EvenBetterAuthorizationSample). U `App/AppDelegate.m` pokušava da **poveže** sa **HelperTool**. A u `HelperTool/HelperTool.m` funkcija **`shouldAcceptNewConnection`** **neće proveriti** nijedan od prethodno navedenih zahteva. Uvek će vraćati DA:
 ```objectivec
 - (BOOL)listener:(NSXPCListener *)listener shouldAcceptNewConnection:(NSXPCConnection *)newConnection
 // Called by our XPC listener when a new connection comes in.  We configure the connection
@@ -172,15 +172,15 @@ block(authRightName, authRightDefault, authRightDesc);
 }];
 }
 ```
-To znači da će na kraju ovog procesa, dozvole deklarisane unutar `commandInfo` biti sačuvane u `/var/db/auth.db`. Obratite pažnju da možete pronaći za **svaku metodu** koja će **zahtevati autentifikaciju**, **ime dozvole** i **`kCommandKeyAuthRightDefault`**. Potonji **ukazuje ko može dobiti ovo pravo**.
+To znači da će na kraju ovog procesa, dozvole deklarisane unutar `commandInfo` biti sačuvane u `/var/db/auth.db`. Obratite pažnju da možete pronaći za **svaku metodu** koja će r**equirati autentifikaciju**, **ime dozvole** i **`kCommandKeyAuthRightDefault`**. Potonji **ukazuje ko može dobiti ovo pravo**.
 
-Postoje različiti opsezi koji ukazuju ko može pristupiti pravu. Neki od njih su definisani u [AuthorizationDB.h](https://github.com/aosm/Security/blob/master/Security/libsecurity_authorization/lib/AuthorizationDB.h) (možete pronaći [sve njih ovde](https://www.dssw.co.uk/reference/authorization-rights/)), ali kao sažetak:
+Postoje različiti opsezi koji ukazuju ko može pristupiti pravu. Neki od njih su definisani u [AuthorizationDB.h](https://github.com/aosm/Security/blob/master/Security/libsecurity_authorization/lib/AuthorizationDB.h) (možete pronaći [sve ovde](https://www.dssw.co.uk/reference/authorization-rights/)), ali kao sažetak:
 
 <table><thead><tr><th width="284.3333333333333">Ime</th><th width="165">Vrednost</th><th>Opis</th></tr></thead><tbody><tr><td>kAuthorizationRuleClassAllow</td><td>allow</td><td>Bilo ko</td></tr><tr><td>kAuthorizationRuleClassDeny</td><td>deny</td><td>Niko</td></tr><tr><td>kAuthorizationRuleIsAdmin</td><td>is-admin</td><td>Trenutni korisnik treba da bude admin (unutar admin grupe)</td></tr><tr><td>kAuthorizationRuleAuthenticateAsSessionUser</td><td>authenticate-session-owner</td><td>Traži od korisnika da se autentifikuje.</td></tr><tr><td>kAuthorizationRuleAuthenticateAsAdmin</td><td>authenticate-admin</td><td>Traži od korisnika da se autentifikuje. Mora biti admin (unutar admin grupe)</td></tr><tr><td>kAuthorizationRightRule</td><td>rule</td><td>Specifikujte pravila</td></tr><tr><td>kAuthorizationComment</td><td>comment</td><td>Specifikujte neke dodatne komentare o pravu</td></tr></tbody></table>
 
 ### Provera prava
 
-U `HelperTool/HelperTool.m` funkcija **`readLicenseKeyAuthorization`** proverava da li je pozivalac ovlašćen da **izvrši takvu metodu** pozivajući funkciju **`checkAuthorization`**. Ova funkcija će proveriti da li **authData** poslat od strane pozivnog procesa ima **ispravan format** i zatim će proveriti **šta je potrebno da se dobije pravo** da se pozove specifična metoda. Ako sve prođe dobro, **vraćena `greška` će biti `nil`**:
+U `HelperTool/HelperTool.m` funkcija **`readLicenseKeyAuthorization`** proverava da li je pozivalac autorizovan da **izvrši takvu metodu** pozivajući funkciju **`checkAuthorization`**. Ova funkcija će proveriti da li **authData** poslata od strane pozivnog procesa ima **ispravan format** i zatim će proveriti **šta je potrebno da se dobije pravo** da se pozove specifična metoda. Ako sve prođe dobro, **vraćena `error` će biti `nil`**:
 ```objectivec
 - (NSError *)checkAuthorization:(NSData *)authData command:(SEL)command
 {
@@ -230,7 +230,7 @@ return error;
 ```
 Napomena da će funkcija `authorizationRightForCommand` samo proveriti prethodno komentarisani objekat **`commandInfo`** da bi **proverila zahteve za dobijanje prava** da pozove tu metodu. Zatim će pozvati **`AuthorizationCopyRights`** da proveri **da li ima prava** da pozove funkciju (napomena da zastavice omogućavaju interakciju sa korisnikom).
 
-U ovom slučaju, da bi pozvala funkciju `readLicenseKeyAuthorization`, `kCommandKeyAuthRightDefault` je definisan kao `@kAuthorizationRuleClassAllow`. Tako da **bilo ko može da je pozove**.
+U ovom slučaju, da bi pozvala funkciju `readLicenseKeyAuthorization`, `kCommandKeyAuthRightDefault` je definisan kao `@kAuthorizationRuleClassAllow`. Tako da **svako može da je pozove**.
 
 ### DB Informacije
 
@@ -249,12 +249,12 @@ security authorizationdb read com.apple.safaridriver.allow
 Možete pronaći **sve konfiguracije dozvola** [**ovde**](https://www.dssw.co.uk/reference/authorization-rights/), ali kombinacije koje neće zahtevati interakciju korisnika bi bile:
 
 1. **'authenticate-user': 'false'**
-- Ovo je najdirektnija ključ. Ako je postavljeno na `false`, to označava da korisnik ne mora da pruži autentifikaciju da bi dobio ovu dozvolu.
+- Ovo je najdirektnija ključ. Ako je postavljen na `false`, to označava da korisnik ne mora da pruži autentifikaciju da bi dobio ovu dozvolu.
 - Ovo se koristi u **kombinaciji sa jednim od 2 ispod ili ukazujući na grupu** kojoj korisnik mora pripadati.
 2. **'allow-root': 'true'**
-- Ako korisnik radi kao root korisnik (koji ima povišene dozvole), i ovaj ključ je postavljen na `true`, root korisnik bi potencijalno mogao dobiti ovu dozvolu bez dalјe autentifikacije. Međutim, obično, dobijanje statusa root korisnika već zahteva autentifikaciju, tako da ovo nije scenario "bez autentifikacije" za većinu korisnika.
+- Ako korisnik radi kao root korisnik (koji ima povišene dozvole), i ovaj ključ je postavljen na `true`, root korisnik bi potencijalno mogao dobiti ovu dozvolu bez daljih autentifikacija. Međutim, obično, dobijanje statusa root korisnika već zahteva autentifikaciju, tako da ovo nije scenario "bez autentifikacije" za većinu korisnika.
 3. **'session-owner': 'true'**
-- Ako je postavljeno na `true`, vlasnik sesije (trenutno prijavljeni korisnik) bi automatski dobio ovu dozvolu. Ovo bi moglo zaobići dodatnu autentifikaciju ako je korisnik već prijavljen.
+- Ako je postavljen na `true`, vlasnik sesije (trenutno prijavljeni korisnik) bi automatski dobio ovu dozvolu. Ovo bi moglo zaobići dodatnu autentifikaciju ako je korisnik već prijavljen.
 4. **'shared': 'true'**
 - Ovaj ključ ne dodeljuje dozvole bez autentifikacije. Umesto toga, ako je postavljen na `true`, to znači da kada je dozvola autentifikovana, može se deliti među više procesa bez potrebe da se svaki od njih ponovo autentifikuje. Ali inicijalno dodeljivanje dozvole bi i dalje zahtevalo autentifikaciju osim ako nije kombinovano sa drugim ključevima kao što su `'authenticate-user': 'false'`.
 
@@ -269,9 +269,9 @@ com-apple-aosnotification-findmymac-remove, com-apple-diskmanagement-reservekek,
 Rights with 'session-owner': 'true':
 authenticate-session-owner, authenticate-session-owner-or-admin, authenticate-session-user, com-apple-safari-allow-apple-events-to-run-javascript, com-apple-safari-allow-javascript-in-smart-search-field, com-apple-safari-allow-unsigned-app-extensions, com-apple-safari-install-ephemeral-extensions, com-apple-safari-show-credit-card-numbers, com-apple-safari-show-passwords, com-apple-icloud-passwordreset, com-apple-icloud-passwordreset, is-session-owner, system-identity-write-self, use-login-window-ui
 ```
-## Obrtanje autorizacije
+## Reversing Authorization
 
-### Proveravanje da li se koristi EvenBetterAuthorization
+### Checking if EvenBetterAuthorization is used
 
 Ako pronađete funkciju: **`[HelperTool checkAuthorization:command:]`** verovatno je da proces koristi prethodno pomenutu šemu za autorizaciju:
 
@@ -281,17 +281,17 @@ Ako ova funkcija poziva funkcije kao što su `AuthorizationCreateFromExternalFor
 
 Proverite **`/var/db/auth.db`** da vidite da li je moguće dobiti dozvole za pozivanje neke privilegovane akcije bez interakcije korisnika.
 
-### Protokol komunikacije
+### Protocol Communication
 
 Zatim, potrebno je pronaći šemu protokola kako biste mogli uspostaviti komunikaciju sa XPC servisom.
 
-Funkcija **`shouldAcceptNewConnection`** ukazuje na protokol koji se izlaže:
+Funkcija **`shouldAcceptNewConnection`** ukazuje na protokol koji se izvozi:
 
 <figure><img src="../../../../../images/image (44).png" alt=""><figcaption></figcaption></figure>
 
 U ovom slučaju, imamo isto kao u EvenBetterAuthorizationSample, [**proverite ovu liniju**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L94).
 
-Znajući naziv korišćenog protokola, moguće je **izvršiti dump njegove definicije zaglavlja** sa:
+Znajući ime korišćenog protokola, moguće je **dumpovati njegovu definiciju zaglavlja** sa:
 ```bash
 class-dump /Library/PrivilegedHelperTools/com.example.HelperTool
 
@@ -409,7 +409,7 @@ NSLog(@"Response: %@", error);
 NSLog(@"Finished!");
 }
 ```
-## Drugi XPC privilegijski pomagači koji su zloupotrebljeni
+## Ostali XPC privilegijski pomagači koji su zloupotrebljeni
 
 - [https://blog.securelayer7.net/applied-endpointsecurity-framework-previlege-escalation/?utm_source=pocket_shared](https://blog.securelayer7.net/applied-endpointsecurity-framework-previlege-escalation/?utm_source=pocket_shared)
 

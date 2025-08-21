@@ -10,7 +10,7 @@
 synology-encrypted-archive-decryption.md
 {{#endref}}
 
-Firmware je osnovni softver koji omogućava uređajima da ispravno funkcionišu upravljajući i olakšavajući komunikaciju između hardverskih komponenti i softvera s kojim korisnici interaguju. Skladišti se u trajnoj memoriji, osiguravajući da uređaj može pristupiti vitalnim uputstvima od trenutka kada se uključi, što dovodi do pokretanja operativnog sistema. Istraživanje i potencijalno modifikovanje firmvera je kritičan korak u identifikaciji sigurnosnih ranjivosti.
+Firmware je osnovni softver koji omogućava uređajima da ispravno funkcionišu upravljajući i olakšavajući komunikaciju između hardverskih komponenti i softvera s kojim korisnici interaguju. Skladišti se u trajnoj memoriji, osiguravajući da uređaj može pristupiti vitalnim uputstvima od trenutka kada se uključi, što dovodi do pokretanja operativnog sistema. Istraživanje i potencijalno modifikovanje firmware-a je kritičan korak u identifikaciji sigurnosnih ranjivosti.
 
 ## **Prikupljanje informacija**
 
@@ -20,32 +20,32 @@ Firmware je osnovni softver koji omogućava uređajima da ispravno funkcionišu 
 - Specifikacijama bootloader-a
 - Rasporedu hardvera i tehničkim listovima
 - Metrikama koda i lokacijama izvora
-- Spoljim bibliotekama i tipovima licenci
+- Eksternim bibliotekama i tipovima licenci
 - Istorijama ažuriranja i regulatornim sertifikatima
 - Arhitektonskim i tokovnim dijagramima
 - Procjenama sigurnosti i identifikovanim ranjivostima
 
-U tu svrhu, **alatke za obaveštajne podatke otvorenog koda (OSINT)** su neprocenjive, kao i analiza bilo kojih dostupnih komponenti otvorenog koda kroz manuelne i automatske procese pregleda. Alati poput [Coverity Scan](https://scan.coverity.com) i [Semmle’s LGTM](https://lgtm.com/#explore) nude besplatnu statičku analizu koja se može iskoristiti za pronalaženje potencijalnih problema.
+U tu svrhu, **alatke za otvorene izvore (OSINT)** su neprocenjive, kao i analiza bilo kojih dostupnih komponenti otvorenog koda kroz manuelne i automatske procese pregleda. Alati poput [Coverity Scan](https://scan.coverity.com) i [Semmle’s LGTM](https://lgtm.com/#explore) nude besplatnu statičku analizu koja se može iskoristiti za pronalaženje potencijalnih problema.
 
-## **Sticanje firmvera**
+## **Sticanje firmware-a**
 
-Dobijanje firmvera može se pristupiti na različite načine, svaki sa svojim nivoom složenosti:
+Dobijanje firmware-a može se pristupiti na različite načine, svaki sa svojim nivoom složenosti:
 
-- **Direktno** od izvora (razvijači, proizvođači)
-- **Kreiranje** na osnovu datih uputstava
-- **Preuzimanje** sa zvaničnih sajtova podrške
-- Korišćenje **Google dork** upita za pronalaženje hostovanih firmver fajlova
-- Direktan pristup **cloud storage-u**, uz alate poput [S3Scanner](https://github.com/sa7mon/S3Scanner)
-- Presretanje **ažuriranja** putem tehnika man-in-the-middle
-- **Ekstrakcija** sa uređaja putem konekcija kao što su **UART**, **JTAG**, ili **PICit**
+- **Direktno** od izvora (razvijača, proizvođača)
+- **Kreiranjem** prema datim uputstvima
+- **Preuzimanjem** sa zvaničnih sajtova za podršku
+- Korišćenjem **Google dork** upita za pronalaženje hostovanih firmware datoteka
+- Direktnim pristupom **cloud storage-u**, uz alate poput [S3Scanner](https://github.com/sa7mon/S3Scanner)
+- Presretanjem **ažuriranja** putem tehnika man-in-the-middle
+- **Ekstrakcijom** sa uređaja putem konekcija kao što su **UART**, **JTAG**, ili **PICit**
 - **Sniffing** za zahteve za ažuriranje unutar komunikacije uređaja
-- Identifikovanje i korišćenje **hardkodiranih krajnjih tačaka za ažuriranje**
+- Identifikovanjem i korišćenjem **hardkodiranih krajnjih tačaka za ažuriranje**
 - **Dumping** sa bootloader-a ili mreže
-- **Uklanjanje i čitanje** čipa za skladištenje, kada sve drugo ne uspe, koristeći odgovarajuće hardverske alate
+- **Uklanjanjem i čitanjem** čipa za skladištenje, kada sve drugo ne uspe, koristeći odgovarajuće hardverske alate
 
-## Analiza firmvera
+## Analiza firmware-a
 
-Sada kada **imate firmver**, potrebno je da izvučete informacije o njemu kako biste znali kako da ga obradite. Različiti alati koje možete koristiti za to:
+Sada kada **imate firmware**, potrebno je da izvučete informacije o njemu kako biste znali kako da ga obradite. Različiti alati koje možete koristiti za to:
 ```bash
 file <bin>
 strings -n8 <bin>
@@ -71,7 +71,7 @@ Binwalk obično izvlači unutar **foldera nazvanog po tipu datotečnog sistema**
 
 #### Ručna Ekstrakcija Datotečnog Sistema
 
-Ponekad, binwalk **neće imati magični bajt datotečnog sistema u svojim potpisima**. U tim slučajevima, koristite binwalk da **pronađete offset datotečnog sistema i izrežete kompresovani datotečni sistem** iz binarnog fajla i **ručno ekstraktujete** datotečni sistem prema njegovom tipu koristeći sledeće korake.
+Ponekad, binwalk neće **imati magični bajt datotečnog sistema u svojim potpisima**. U tim slučajevima, koristite binwalk da **pronađete offset datotečnog sistema i izrežete kompresovani datotečni sistem** iz binarnog fajla i **ručno ekstraktujete** datotečni sistem prema njegovom tipu koristeći sledeće korake.
 ```
 $ binwalk DIR850L_REVB.bin
 
@@ -119,7 +119,7 @@ Fajlovi će biti u "`squashfs-root`" direktorijumu nakon toga.
 
 ## Analiza Firmvera
 
-Kada se firmver dobije, važno je da se razloži kako bi se razumeo njegova struktura i potencijalne ranjivosti. Ovaj proces uključuje korišćenje različitih alata za analizu i ekstrakciju vrednih podataka iz slike firmvera.
+Kada se firmver dobije, važno je da se razloži kako bi se razumeo njegova struktura i potencijalne ranjivosti. Ovaj proces uključuje korišćenje raznih alata za analizu i ekstrakciju vrednih podataka iz slike firmvera.
 
 ### Alati za Početnu Analizu
 
@@ -138,7 +138,7 @@ Za ekstrakciju **ugrađenih fajlova**, preporučuju se alati i resursi kao što 
 
 ### Ekstrakcija Fajl Sistema
 
-Koristeći `binwalk -ev <bin>`, obično se može ekstraktovati fajl sistem, često u direktorijum nazvan po tipu fajl sistema (npr. squashfs, ubifs). Međutim, kada **binwalk** ne prepozna tip fajl sistema zbog nedostajućih magic bajtova, ručna ekstrakcija je neophodna. To uključuje korišćenje `binwalk` za lociranje ofseta fajl sistema, a zatim `dd` komandu za izdvajanje fajl sistema:
+Koristeći `binwalk -ev <bin>`, obično se može ekstraktovati fajl sistem, često u direktorijum nazvan po tipu fajl sistema (npr. squashfs, ubifs). Međutim, kada **binwalk** ne prepozna tip fajl sistema zbog nedostajućih magičnih bajtova, ručna ekstrakcija je neophodna. To uključuje korišćenje `binwalk` za lociranje ofseta fajl sistema, a zatim `dd` komandu za izdvajanje fajl sistema:
 ```bash
 $ binwalk DIR850L_REVB.bin
 
@@ -170,7 +170,7 @@ I izvorni kod i kompajlirane binarne datoteke pronađene u datotečnom sistemu m
 
 ## Emulacija firmvera za dinamičku analizu
 
-Proces emulacije firmvera omogućava **dinamičku analizu** ili rada uređaja ili pojedinačnog programa. Ovaj pristup može naići na izazove sa zavisnostima od hardvera ili arhitekture, ali prenos korenskog datotečnog sistema ili specifičnih binarnih datoteka na uređaj sa odgovarajućom arhitekturom i redosledom bajtova, kao što je Raspberry Pi, ili na unapred izgrađenu virtuelnu mašinu, može olakšati dalja testiranja.
+Proces emulacije firmvera omogućava **dinamičku analizu** ili rada uređaja ili pojedinačnog programa. Ovaj pristup može naići na izazove sa zavisnostima hardvera ili arhitekture, ali prenos korenskog datotečnog sistema ili specifičnih binarnih datoteka na uređaj sa odgovarajućom arhitekturom i redosledom bajtova, kao što je Raspberry Pi, ili na unapred izgrađenu virtuelnu mašinu, može olakšati dalja testiranja.
 
 ### Emulacija pojedinačnih binarnih datoteka
 
@@ -190,7 +190,7 @@ Za MIPS (big-endian), koristi se `qemu-mips`, a za little-endian binarne datotek
 
 #### Emulacija ARM arhitekture
 
-Za ARM binarne datoteke, proces je sličan, koristeći emulator `qemu-arm` za emulaciju.
+Za ARM binarne datoteke, proces je sličan, pri čemu se koristi emulator `qemu-arm` za emulaciju.
 
 ### Emulacija celog sistema
 
@@ -198,15 +198,15 @@ Alati kao što su [Firmadyne](https://github.com/firmadyne/firmadyne), [Firmware
 
 ## Dinamička analiza u praksi
 
-U ovoj fazi koristi se stvarno ili emulirano okruženje uređaja za analizu. Ključno je održati pristup shell-u operativnom sistemu i datotečnom sistemu. Emulacija možda neće savršeno oponašati interakcije sa hardverom, što zahteva povremena ponovna pokretanja emulacije. Analiza treba da ponovo pregleda datotečni sistem, iskoristi izložene veb stranice i mrežne usluge, i istraži ranjivosti bootloader-a. Testovi integriteta firmvera su ključni za identifikaciju potencijalnih ranjivosti backdoor-a.
+U ovoj fazi se koristi stvarno ili emulirano okruženje uređaja za analizu. Ključno je održati pristup shell-u operativnom sistemu i datotečnom sistemu. Emulacija možda neće savršeno oponašati interakcije hardvera, što zahteva povremena ponovna pokretanja emulacije. Analiza treba da ponovo pregleda datotečni sistem, iskoristi izložene veb stranice i mrežne usluge, i istraži ranjivosti bootloader-a. Testovi integriteta firmvera su ključni za identifikaciju potencijalnih ranjivosti backdoor-a.
 
-## Tehnike analize u runtime-u
+## Tehnike analize u vreme izvođenja
 
-Analiza u runtime-u uključuje interakciju sa procesom ili binarnom datotekom u njenom operativnom okruženju, koristeći alate kao što su gdb-multiarch, Frida i Ghidra za postavljanje tačaka prekida i identifikaciju ranjivosti kroz fuzzing i druge tehnike.
+Analiza u vreme izvođenja uključuje interakciju sa procesom ili binarnom datotekom u njenom operativnom okruženju, koristeći alate kao što su gdb-multiarch, Frida i Ghidra za postavljanje tačaka prekida i identifikaciju ranjivosti kroz fuzzing i druge tehnike.
 
 ## Eksploatacija binarnih datoteka i dokaz koncepta
 
-Razvijanje PoC-a za identifikovane ranjivosti zahteva duboko razumevanje ciljne arhitekture i programiranje na nižim nivoima jezika. Zaštite u runtime-u u ugrađenim sistemima su retke, ali kada su prisutne, tehnike kao što su Return Oriented Programming (ROP) mogu biti neophodne.
+Razvijanje PoC-a za identifikovane ranjivosti zahteva duboko razumevanje ciljne arhitekture i programiranje u jezicima nižeg nivoa. Zaštite u vreme izvođenja u ugrađenim sistemima su retke, ali kada su prisutne, tehnike kao što su Return Oriented Programming (ROP) mogu biti neophodne.
 
 ## Pripremljeni operativni sistemi za analizu firmvera
 
@@ -214,12 +214,12 @@ Operativni sistemi kao što su [AttifyOS](https://github.com/adi0x90/attifyos) i
 
 ## Pripremljeni OS-ovi za analizu firmvera
 
-- [**AttifyOS**](https://github.com/adi0x90/attifyos): AttifyOS je distribucija namenjena da vam pomogne u izvođenju procene bezbednosti i penetracionog testiranja uređaja Interneta stvari (IoT). Štedi vam mnogo vremena pružajući unapred konfigurisano okruženje sa svim potrebnim alatima.
+- [**AttifyOS**](https://github.com/adi0x90/attifyos): AttifyOS je distribucija namenjena pomoći u proceni bezbednosti i penetracionom testiranju uređaja Interneta stvari (IoT). Štedi vam mnogo vremena pružajući unapred konfigurisano okruženje sa svim potrebnim alatima.
 - [**EmbedOS**](https://github.com/scriptingxss/EmbedOS): Operativni sistem za testiranje bezbednosti ugrađenih sistema zasnovan na Ubuntu 18.04, unapred učitan alatima za testiranje bezbednosti firmvera.
 
 ## Napadi na smanjenje verzije firmvera i nesigurni mehanizmi ažuriranja
 
-Čak i kada dobavljač implementira provere kriptografskih potpisa za slike firmvera, **zaštita od vraćanja verzije (downgrade) se često izostavlja**. Kada boot- ili recovery-loader samo proverava potpis sa ugrađenim javnim ključem, ali ne upoređuje *verziju* (ili monotoni brojač) slike koja se flešuje, napadač može legitimno instalirati **stariji, ranjivi firmver koji i dalje ima važeći potpis** i tako ponovo uvesti zakrpljene ranjivosti.
+Čak i kada dobavljač implementira provere kriptografskih potpisa za slike firmvera, **zaštita od povratka na stariju verziju (downgrade) se često izostavlja**. Kada boot- ili recovery-loader samo proverava potpis sa ugrađenim javnim ključem, ali ne upoređuje *verziju* (ili monotoni brojač) slike koja se flešuje, napadač može legitimno instalirati **stariji, ranjivi firmver koji i dalje ima važeći potpis** i tako ponovo uvesti zakrpljene ranjivosti.
 
 Tipični tok napada:
 
@@ -229,7 +229,7 @@ Tipični tok napada:
 * Preuzmite je iz trećih strana kao što su VirusTotal, internet arhive, forumi itd.
 2. **Otpremite ili poslužite sliku uređaju** putem bilo kojeg izloženog kanala za ažuriranje:
 * Web UI, API mobilne aplikacije, USB, TFTP, MQTT itd.
-* Mnogi potrošački IoT uređaji izlažu *neautentifikovane* HTTP(S) krajnje tačke koje prihvataju Base64-encoded firmware blob-ove, dekodiraju ih na serveru i pokreću oporavak/upgrade.
+* Mnogi potrošački IoT uređaji izlažu *neautentifikovane* HTTP(S) krajnje tačke koje prihvataju Base64-encoded firmware blobove, dekodiraju ih na serveru i pokreću oporavak/upgrade.
 3. Nakon smanjenja verzije, iskoristite ranjivost koja je zakrpljena u novijem izdanju (na primer, filter za injekciju komandi koji je dodat kasnije).
 4. Opcionalno, ponovo flešujte najnoviju sliku ili onemogućite ažuriranja kako biste izbegli otkrivanje nakon što se postigne postojanost.
 
@@ -240,11 +240,11 @@ Host: 192.168.0.1
 Content-Type: application/octet-stream
 Content-Length: 0
 ```
-U ranjivoj (smanjenoj) firmver verziji, `md5` parametar se direktno dodaje u shell komandu bez sanitizacije, što omogućava injekciju proizvoljnih komandi (ovde – omogućavanje SSH pristupa kao root). Kasnije verzije firmvera su uvele osnovni filter karaktera, ali odsustvo zaštite od smanjenja čini ispravku besmislenom.
+U ranjivoj (smanjenoj) firmver verziji, `md5` parametar se direktno dodaje u shell komandu bez sanitizacije, što omogućava injekciju proizvoljnih komandi (ovde – omogućavanje SSH pristupa kao root). Kasnije verzije firmvera su uvele osnovni filter za karaktere, ali odsustvo zaštite od smanjenja čini ispravku besmislenom.
 
 ### Ekstrakcija Firmvera Iz Mobilnih Aplikacija
 
-Mnogi prodavci pakiraju pune slike firmvera unutar svojih pratećih mobilnih aplikacija kako bi aplikacija mogla ažurirati uređaj putem Bluetooth/Wi-Fi. Ovi paketi se obično čuvaju nešifrovani u APK/APEX pod putanjama kao što su `assets/fw/` ili `res/raw/`. Alati kao što su `apktool`, `ghidra`, ili čak običan `unzip` omogućavaju vam da preuzmete potpisane slike bez dodirivanja fizičkog hardvera.
+Mnogi prodavci pakiraju pune slike firmvera unutar svojih pratećih mobilnih aplikacija kako bi aplikacija mogla ažurirati uređaj putem Bluetooth-a/Wi-Fi-a. Ovi paketi se obično čuvaju nešifrovani u APK/APEX-u pod putanjama kao što su `assets/fw/` ili `res/raw/`. Alati kao što su `apktool`, `ghidra`, ili čak običan `unzip` omogućavaju vam da preuzmete potpisane slike bez dodirivanja fizičkog hardvera.
 ```
 $ apktool d vendor-app.apk -o vendor-app
 $ ls vendor-app/assets/firmware
@@ -258,7 +258,7 @@ firmware_v1.3.11.490_signed.bin
 * Da li korisnički kod vrši dodatne provere (npr. dozvoljena mapa particija, broj modela)?
 * Da li *delimični* ili *rezervni* tokovi ažuriranja ponovo koriste istu logiku validacije?
 
-> 💡  Ako nešto od navedenog nedostaje, platforma je verovatno ranjiva na rollback napade.
+> 💡  Ako bilo šta od navedenog nedostaje, platforma je verovatno ranjiva na rollback napade.
 
 ## Vulnerable firmware to practice
 

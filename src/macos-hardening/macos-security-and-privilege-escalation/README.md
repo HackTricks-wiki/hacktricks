@@ -1,4 +1,4 @@
-# macOS Bezbednost i Eskalacija Privilegija
+# macOS Bezbednost & Eskalacija Privilegija
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -8,11 +8,13 @@ Ako niste upoznati sa macOS, trebali biste početi učiti osnove macOS-a:
 
 - Specijalni macOS **fajlovi i dozvole:**
 
+
 {{#ref}}
 macos-files-folders-and-binaries/
 {{#endref}}
 
 - Uobičajeni macOS **korisnici**
+
 
 {{#ref}}
 macos-users.md
@@ -20,17 +22,20 @@ macos-users.md
 
 - **AppleFS**
 
+
 {{#ref}}
 macos-applefs.md
 {{#endref}}
 
 - **Arhitektura** k**ernela**
 
+
 {{#ref}}
 mac-os-architecture/
 {{#endref}}
 
 - Uobičajene macOS n**etwork usluge i protokoli**
+
 
 {{#ref}}
 macos-protocols.md
@@ -43,17 +48,20 @@ macos-protocols.md
 
 U kompanijama **macOS** sistemi će verovatno biti **upravljani putem MDM-a**. Stoga, iz perspektive napadača, zanimljivo je znati **kako to funkcioniše**:
 
+
 {{#ref}}
 ../macos-red-teaming/macos-mdm/
 {{#endref}}
 
 ### MacOS - Istraživanje, Debagovanje i Fuzzing
 
+
 {{#ref}}
 macos-apps-inspecting-debugging-and-fuzzing/
 {{#endref}}
 
 ## MacOS Bezbednosne Zaštite
+
 
 {{#ref}}
 macos-security-protections/
@@ -63,7 +71,7 @@ macos-security-protections/
 
 ### Dozvole Fajlova
 
-Ako **proces koji se izvršava kao root piše** fajl koji može kontrolisati korisnik, korisnik bi to mogao zloupotrebiti da **eskalira privilegije**.\
+Ako **proces koji se izvršava kao root piše** fajl koji može kontrolisati korisnik, korisnik bi mogao da iskoristi ovo za **eskalaciju privilegija**.\
 To se može dogoditi u sledećim situacijama:
 
 - Fajl koji se koristi je već kreiran od strane korisnika (u vlasništvu korisnika)
@@ -71,17 +79,19 @@ To se može dogoditi u sledećim situacijama:
 - Fajl koji se koristi je unutar direktorijuma koji je u vlasništvu korisnika (korisnik može kreirati fajl)
 - Fajl koji se koristi je unutar direktorijuma koji je u vlasništvu root-a, ali korisnik ima pristup za pisanje zbog grupe (korisnik može kreirati fajl)
 
-Mogućnost da **kreirate fajl** koji će biti **koristen od strane root-a**, omogućava korisniku da **iskoristi njegov sadržaj** ili čak kreira **simlinkove/hardlinkove** da ga usmeri na drugo mesto.
+Mogućnost da **kreirate fajl** koji će biti **koristen od strane root-a**, omogućava korisniku da **iskoristi njegov sadržaj** ili čak kreira **simlinkove/hardlinkove** koji ga upućuju na drugo mesto.
 
 Za ovu vrstu ranjivosti ne zaboravite da **proverite ranjive `.pkg` instalere**:
+
 
 {{#ref}}
 macos-files-folders-and-binaries/macos-installers-abuse.md
 {{#endref}}
 
-### Rukovaoci aplikacija za ekstenzije fajlova i URL sheme
+### Rukovaoci aplikacija za ekstenzije fajlova i URL šeme
 
 Čudne aplikacije registrovane po ekstenzijama fajlova mogle bi biti zloupotrebljene, a različite aplikacije mogu biti registrovane da otvore specifične protokole
+
 
 {{#ref}}
 macos-file-extension-apps.md
@@ -93,13 +103,14 @@ U macOS-u **aplikacije i binarni fajlovi mogu imati dozvole** za pristup folderi
 
 Stoga, napadač koji želi uspešno da kompromituje macOS mašinu moraće da **eskalira svoje TCC privilegije** (ili čak **obiđe SIP**, u zavisnosti od njegovih potreba).
 
-Ove privilegije se obično daju u obliku **entiteta** sa kojima je aplikacija potpisana, ili aplikacija može zatražiti neke pristupe i nakon što **korisnik odobri** može ih pronaći u **TCC bazama podataka**. Drugi način na koji proces može dobiti ove privilegije je da bude **dete procesa** sa tim **privilegijama**, jer se obično **nasleđuju**.
+Ove privilegije se obično daju u obliku **entiteta** sa kojima je aplikacija potpisana, ili aplikacija može zatražiti neke pristupe i nakon što **korisnik odobri** iste, mogu se naći u **TCC bazama podataka**. Drugi način na koji proces može dobiti ove privilegije je da bude **dete procesa** sa tim **privilegijama**, jer se obično **nasleđuju**.
 
-Pratite ove linkove da pronađete različite načine za [**eskalaciju privilegija u TCC**](macos-security-protections/macos-tcc/index.html#tcc-privesc-and-bypasses), da [**obiđete TCC**](macos-security-protections/macos-tcc/macos-tcc-bypasses/index.html) i kako je u prošlosti [**SIP bio oboren**](macos-security-protections/macos-sip.md#sip-bypasses).
+Pratite ove linkove da pronađete različite načine za [**eskalaciju privilegija u TCC**](macos-security-protections/macos-tcc/index.html#tcc-privesc-and-bypasses), da [**obiđete TCC**](macos-security-protections/macos-tcc/macos-tcc-bypasses/index.html) i kako je u prošlosti [**SIP bio zaobiđen**](macos-security-protections/macos-sip.md#sip-bypasses).
 
 ## macOS Tradicionalna Eskalacija Privilegija
 
 Naravno, iz perspektive crvenih timova, trebali biste biti zainteresovani i za eskalaciju na root. Proverite sledeći post za neke savete:
+
 
 {{#ref}}
 macos-privilege-escalation.md

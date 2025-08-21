@@ -2,7 +2,7 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Uvod
+## Intro
 
 Za više informacija o tome šta je iButton pogledajte:
 
@@ -10,32 +10,32 @@ Za više informacija o tome šta je iButton pogledajte:
 ../ibutton.md
 {{#endref}}
 
-## Dizajn
+## Design
 
-**Plavi** deo sledeće slike je kako treba da **postavite pravi iButton** da bi Flipper mogao da **pročita.** **Zeleni** deo je kako treba da **dodirnete čitač** sa Flipper zero da bi **ispravno emulirali iButton**.
+**Plavi** deo sledeće slike je kako treba da **stavite pravi iButton** da bi Flipper mogao da **pročita.** **Zeleni** deo je kako treba da **dodirnete čitač** sa Flipper zero da bi **ispravno emulirali iButton**.
 
 <figure><img src="../../../images/image (565).png" alt=""><figcaption></figcaption></figure>
 
-## Akcije
+## Actions
 
-### Čitanje
+### Read
 
-U režimu čitanja Flipper čeka da iButton ključ dodirne i može da obradi bilo koji od tri tipa ključeva: **Dallas, Cyfral, i Metakom**. Flipper će **samo odrediti tip ključa**. Ime protokola ključa biće prikazano na ekranu iznad ID broja.
+U režimu čitanja Flipper čeka da iButton ključ dodirne i može da obradi bilo koji od tri tipa ključeva: **Dallas, Cyfral, i Metakom**. Flipper će **sama odrediti tip ključa**. Ime protokola ključa biće prikazano na ekranu iznad ID broja.
 
-### Ručno dodavanje
+### Add manually
 
 Moguće je **ručno dodati** iButton tipa: **Dallas, Cyfral, i Metakom**
 
-### **Emulacija**
+### **Emulate**
 
-Moguće je **emulirati** sačuvane iButtons (pročitane ili ručno dodate).
+Moguće je **emulirati** sačuvane iButton-e (pročitane ili ručno dodate).
 
-> [!NOTE]
-> Ako ne možete da ostvarite očekivane kontakte Flipper Zero sa čitačem, možete **koristiti spoljašnji GPIO:**
+> [!TIP]
+> Ako ne možete da ostvarite očekivane kontakte Flipper Zero da dodirne čitač, možete **koristiti eksterni GPIO:**
 
 <figure><img src="../../../images/image (138).png" alt=""><figcaption></figcaption></figure>
 
-## Reference
+## References
 
 - [https://blog.flipperzero.one/taming-ibutton/](https://blog.flipperzero.one/taming-ibutton/)
 

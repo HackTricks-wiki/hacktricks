@@ -4,7 +4,7 @@
 
 ## SID History Injection Attack
 
-Fokus **SID History Injection Attack** je pomoć **migraciji korisnika između domena** dok se osigurava nastavak pristupa resursima iz prethodne domene. To se postiže **uključivanjem prethodnog sigurnosnog identifikatora (SID) korisnika u SID History** njihovog novog naloga. Važno je napomenuti da se ovaj proces može manipulisati kako bi se omogućio neovlašćen pristup dodavanjem SID-a grupe sa visokim privilegijama (kao što su Enterprise Admins ili Domain Admins) iz matične domene u SID History. Ova eksploatacija omogućava pristup svim resursima unutar matične domene.
+Fokus **SID History Injection Attack** je pomoć **migraciji korisnika između domena** dok se osigurava nastavak pristupa resursima iz prethodne domene. To se postiže **uključivanjem prethodnog Security Identifier-a (SID) korisnika u SID History** njihovog novog naloga. Važno je napomenuti da se ovaj proces može manipulisati kako bi se omogućio neovlašćen pristup dodavanjem SID-a grupe sa visokim privilegijama (kao što su Enterprise Admins ili Domain Admins) iz matične domene u SID History. Ova eksploatacija omogućava pristup svim resursima unutar matične domene.
 
 Postoje dve metode za izvršavanje ovog napada: kroz kreiranje **Golden Ticket** ili **Diamond Ticket**.
 
@@ -12,7 +12,7 @@ Da bi se odredio SID za grupu **"Enterprise Admins"**, prvo je potrebno locirati
 
 Takođe možete koristiti grupe **Domain Admins**, koje se završavaju sa **512**.
 
-Drugi način da se pronađe SID grupe iz druge domene (na primer "Domain Admins") je sa:
+Drugi način da pronađete SID grupe iz druge domene (na primer "Domain Admins") je sa:
 ```bash
 Get-DomainGroup -Identity "Domain Admins" -Domain parent.io -Properties ObjectSid
 ```
@@ -22,7 +22,7 @@ Get-DomainGroup -Identity "Domain Admins" -Domain parent.io -Properties ObjectSi
 Prema [**docs**](https://technet.microsoft.com/library/cc835085.aspx):
 - **Onemogućavanje SIDHistory na šumskim poverenjima** korišćenjem netdom alata (`netdom trust /domain: /EnableSIDHistory:no on the domain controller`)
 - **Primena SID Filter Quarantining na spoljnim poverenjima** korišćenjem netdom alata (`netdom trust /domain: /quarantine:yes on the domain controller`)
-- **Primena SID filtriranja na domena poverenja unutar jedne šume** se ne preporučuje jer je to nepodržana konfiguracija i može izazvati prekidne promene. Ako je domena unutar šume nepouzdana, ne bi trebala biti član šume. U ovoj situaciji je neophodno prvo podeliti poverljive i nepouzdane domene u odvojene šume gde se može primeniti SID filtriranje na međušumskom poverenju.
+- **Primena SID filtriranja na domena poverenja unutar jedne šume** se ne preporučuje jer je to nepodržana konfiguracija i može izazvati prekidne promene. Ako je domen unutar šume nepouzdana, onda ne bi trebao biti član šume. U ovoj situaciji je neophodno prvo podeliti pouzdane i nepouzdane domene u odvojene šume gde se može primeniti SID filtriranje na međušumskom poverenju.
 
 Proverite ovaj post za više informacija o zaobilaženju ovoga: [**https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4**](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)
 
@@ -61,14 +61,16 @@ mimikatz.exe "kerberos::golden /user:Administrator /domain:<current_domain> /sid
 # The previous command will generate a file called ticket.kirbi
 # Just loading you can perform a dcsync attack agains the domain
 ```
-Za više informacija o zlatnim kartama proverite:
+Za više informacija o zlatnim karticama proverite:
+
 
 {{#ref}}
 golden-ticket.md
 {{#endref}}
 
 
-Za više informacija o dijamantskim kartama proverite:
+Za više informacija o dijamantskim karticama proverite:
+
 
 {{#ref}}
 diamond-ticket.md
@@ -123,15 +125,15 @@ psexec.py <child_domain>/Administrator@dc.root.local -k -no-pass -target-ip 10.1
 Ovo je Impacket skripta koja će **automatizovati eskalaciju sa child na parent domen**. Skripta zahteva:
 
 - Ciljni kontroler domena
-- Kredencijale za admin korisnika u child domenu
+- Akreditive za admin korisnika u child domenu
 
-Tok rada je:
+Tok je:
 
 - Dobija SID za grupu Enterprise Admins u parent domenu
 - Preuzima hash za KRBTGT nalog u child domenu
 - Kreira Zlatnu Ulaznicu
 - Prijavljuje se u parent domen
-- Preuzima kredencijale za Administrator nalog u parent domenu
+- Preuzima akreditive za Administrator nalog u parent domenu
 - Ako je `target-exec` prekidač specificiran, autentifikuje se na Kontroler Domenа parent domena putem Psexec.
 ```bash
 raiseChild.py -target-exec 10.10.10.10 <child_domain>/username

@@ -38,7 +38,7 @@ cpu              nbd0             pts              stdout           tty27       
 Datoteke sistema jezgra pružaju mehanizam za proces da modifikuje ponašanje jezgra. Međutim, kada su u pitanju procesi kontejnera, želimo da sprečimo da vrše bilo kakve promene na jezgru. Stoga, montiramo datoteke sistema jezgra kao **samo za čitanje** unutar kontejnera, osiguravajući da procesi kontejnera ne mogu modifikovati jezgro.
 
 {{#tabs}}
-{{#tab name="Unutar podrazumevanog kontejnera"}}
+{{#tab name="Inside default container"}}
 ```bash
 # docker run --rm -it alpine sh
 mount | grep '(ro'
@@ -49,7 +49,7 @@ cpuacct on /sys/fs/cgroup/cpuacct type cgroup (ro,nosuid,nodev,noexec,relatime,c
 ```
 {{#endtab}}
 
-{{#tab name="Unutar privilegovanog kontejnera"}}
+{{#tab name="Inside Privileged Container"}}
 ```bash
 # docker run --rm --privileged -it alpine sh
 mount  | grep '(ro'
@@ -59,7 +59,7 @@ mount  | grep '(ro'
 
 ### Maskiranje nad kernel datotečnim sistemima
 
-**/proc** datotečni sistem je selektivno zapisiv, ali iz bezbednosnih razloga, određeni delovi su zaštićeni od pisanja i čitanja preklapanjem sa **tmpfs**, osiguravajući da procesi u kontejneru ne mogu pristupiti osetljivim oblastima.
+**/proc** datotečni sistem je selektivno zapisiv, ali radi bezbednosti, određeni delovi su zaštićeni od pristupa za pisanje i čitanje preklapanjem sa **tmpfs**, osiguravajući da procesi u kontejneru ne mogu pristupiti osetljivim oblastima.
 
 > [!NOTE] > **tmpfs** je datotečni sistem koji čuva sve datoteke u virtuelnoj memoriji. tmpfs ne kreira nikakve datoteke na vašem hard disku. Dakle, ako odmontirate tmpfs datotečni sistem, sve datoteke koje se u njemu nalaze su izgubljene zauvek.
 
@@ -91,7 +91,7 @@ Kontejnerski motori pokreću kontejnere sa **ograničenim brojem sposobnosti** k
 {{#endref}}
 
 {{#tabs}}
-{{#tab name="Unutar defaultnog kontejnera"}}
+{{#tab name="Unutar default kontejnera"}}
 ```bash
 # docker run --rm -it alpine sh
 apk add -U libcap; capsh --print
@@ -102,7 +102,7 @@ Bounding set =cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setg
 ```
 {{#endtab}}
 
-{{#tab name="Unutar privilegovanog kontejnera"}}
+{{#tab name="Inside Privileged Container"}}
 ```bash
 # docker run --rm --privileged -it alpine sh
 apk add -U libcap; capsh --print
@@ -118,7 +118,7 @@ Možete manipulisati sposobnostima dostupnim kontejneru bez pokretanja u `--priv
 
 ### Seccomp
 
-**Seccomp** je koristan za **ograničavanje** **syscall-a** koje kontejner može pozvati. Podrazumevani seccomp profil je omogućen podrazumevano prilikom pokretanja docker kontejnera, ali u privilegovanom režimu je on onemogućen. Saznajte više o Seccomp-u ovde:
+**Seccomp** je koristan za **ograničavanje** **syscall-a** koje kontejner može pozvati. Podrazumevani seccomp profil je omogućen po defaultu kada se pokreću docker kontejneri, ali u privilegovanom režimu je on onemogućen. Saznajte više o Seccomp-u ovde:
 
 {{#ref}}
 seccomp.md
@@ -134,7 +134,7 @@ Seccomp_filters:	1
 ```
 {{#endtab}}
 
-{{#tab name="Unutar privilegovanog kontejnera"}}
+{{#tab name="Inside Privileged Container"}}
 ```bash
 # docker run --rm --privileged -it alpine sh
 grep Seccomp /proc/1/status
@@ -153,6 +153,7 @@ Takođe, imajte na umu da kada se Docker (ili drugi CRI) koriste u **Kubernetes*
 
 **AppArmor** je poboljšanje jezgra koje ograničava **kontejnere** na **ograničen** skup **resursa** sa **profilima po programu**. Kada pokrenete sa `--privileged` flagom, ova zaštita je onemogućena.
 
+
 {{#ref}}
 apparmor.md
 {{#endref}}
@@ -163,6 +164,7 @@ apparmor.md
 ### SELinux
 
 Pokretanje kontejnera sa `--privileged` zastavicom onemogućava **SELinux oznake**, uzrokujući da nasledi oznaku kontejnerskog motora, obično `unconfined`, što omogućava pun pristup sličan kontejnerskom motoru. U režimu bez root privilegija, koristi `container_runtime_t`, dok se u root režimu primenjuje `spc_t`.
+
 
 {{#ref}}
 ../selinux.md
@@ -175,7 +177,7 @@ Pokretanje kontejnera sa `--privileged` zastavicom onemogućava **SELinux oznake
 
 ### Namespaces
 
-Namespaces **NISU pogođeni** `--privileged` oznakom. Iako nemaju omogućena bezbednosna ograničenja, **ne vide sve procese na sistemu ili host mreži, na primer**. Korisnici mogu onemogućiti pojedinačne namespaces koristeći **`--pid=host`, `--net=host`, `--ipc=host`, `--uts=host`** oznake kontejnerskog motora.
+Namespaces **NISU pogođeni** `--privileged` oznakom. Iako nemaju omogućena bezbednosna ograničenja, **ne vide sve procese na sistemu ili na mreži hosta, na primer**. Korisnici mogu onemogućiti pojedinačne namespaces koristeći **`--pid=host`, `--net=host`, `--ipc=host`, `--uts=host`** oznake kontejnerskog motora.
 
 {{#tabs}}
 {{#tab name="Inside default privileged container"}}
@@ -188,7 +190,7 @@ PID   USER     TIME  COMMAND
 ```
 {{#endtab}}
 
-{{#tab name="Unutar --pid=host kontejnera"}}
+{{#tab name="Inside --pid=host Container"}}
 ```bash
 # docker run --rm --privileged --pid=host -it alpine sh
 ps -ef
@@ -203,7 +205,7 @@ PID   USER     TIME  COMMAND
 
 ### Korisnički prostor
 
-**Po defaultu, kontejnerski alati ne koriste korisničke prostore, osim za kontejnerе bez root privilegija**, koji ih zahtevaju za montiranje fajl sistema i korišćenje više UID-ova. Korisnički prostori, koji su ključni za kontejnerе bez root privilegija, ne mogu se onemogućiti i značajno poboljšavaju bezbednost ograničavanjem privilegija.
+**Po defaultu, motori kontejnera ne koriste korisničke prostore, osim za kontejnerе bez root privilegija**, koji ih zahtevaju za montiranje fajl sistema i korišćenje više UID-ova. Korisnički prostori, koji su ključni za kontejnerе bez root privilegija, ne mogu se onemogućiti i značajno poboljšavaju bezbednost ograničavanjem privilegija.
 
 ## Reference
 

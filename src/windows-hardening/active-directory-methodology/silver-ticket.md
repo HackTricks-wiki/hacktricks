@@ -9,8 +9,8 @@
 Napad **Silver Ticket** uključuje eksploataciju servisnih karata u Active Directory (AD) okruženjima. Ova metoda se oslanja na **dobijanje NTLM heša servisnog naloga**, kao što je nalog računara, kako bi se falsifikovala Ticket Granting Service (TGS) karta. Sa ovom falsifikovanom kartom, napadač može pristupiti specifičnim uslugama na mreži, **pretvarajući se da je bilo koji korisnik**, obično sa ciljem sticanja administratorskih privilegija. Naglašava se da je korišćenje AES ključeva za falsifikovanje karata sigurnije i manje uočljivo.
 
 > [!WARNING]
-> Silver Tickets su manje uočljivi od Golden Tickets jer zahtevaju samo **heš servisnog naloga**, a ne krbtgt nalog. Međutim, oni su ograničeni na specifičnu uslugu koju ciljaju. Štaviše, samo krađa lozinke korisnika.
-Pored toga, ako kompromitujete **lozinku naloga sa SPN** možete koristiti tu lozinku da kreirate Silver Ticket pretvarajući se da je bilo koji korisnik za tu uslugu.
+> Silver Tickets su manje uočljivi od Golden Tickets jer zahtevaju samo **heš servisnog naloga**, a ne krbtgt nalog. Međutim, ograničeni su na specifičnu uslugu koju ciljaju. Pored toga, samo krađa lozinke korisnika.
+Pored toga, ako kompromitujete **lozinku naloga sa SPN** možete koristiti tu lozinku da kreirate Silver Ticket pretvarajući se da ste bilo koji korisnik za tu uslugu.
 
 Za kreiranje karata koriste se različiti alati u zavisnosti od operativnog sistema:
 
@@ -37,19 +37,19 @@ mimikatz.exe "kerberos::ptt <TICKET_FILE>"
 # Obtain a shell
 .\PsExec.exe -accepteula \\<TARGET> cmd
 ```
-CIFS servis je istaknut kao uobičajeni cilj za pristupanje fajl sistemu žrtve, ali se i drugi servisi kao što su HOST i RPCSS takođe mogu iskoristiti za zadatke i WMI upite.
+CIFS servis se ističe kao uobičajeni cilj za pristupanje fajl sistemu žrtve, ali se i drugi servisi poput HOST i RPCSS mogu iskoristiti za zadatke i WMI upite.
 
 ## Dostupne Usluge
 
 | Tip Usluge                                 | Usluge Silver Tickets                                                      |
 | ------------------------------------------ | -------------------------------------------------------------------------- |
 | WMI                                        | <p>HOST</p><p>RPCSS</p>                                                   |
-| PowerShell Daljinsko Upravljanje           | <p>HOST</p><p>HTTP</p><p>U zavisnosti od OS-a takođe:</p><p>WSMAN</p><p>RPCSS</p> |
+| PowerShell Remoting                        | <p>HOST</p><p>HTTP</p><p>U zavisnosti od OS takođe:</p><p>WSMAN</p><p>RPCSS</p> |
 | WinRM                                      | <p>HOST</p><p>HTTP</p><p>U nekim slučajevima možete samo tražiti: WINRM</p> |
 | Zakazani Zadaci                            | HOST                                                                      |
 | Windows Deljenje Fajlova, takođe psexec   | CIFS                                                                      |
 | LDAP operacije, uključujući DCSync        | LDAP                                                                      |
-| Alati za Daljinsku Administraciju Windows-a| <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                        |
+| Windows Alati za Udaljenu Administraciju  | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                        |
 | Zlatni Tiketi                              | krbtgt                                                                    |
 
 Korišćenjem **Rubeus** možete **tražiti sve** ove tikete koristeći parametar:
@@ -64,7 +64,7 @@ Korišćenjem **Rubeus** možete **tražiti sve** ove tikete koristeći parameta
 
 ## Postojanost
 
-Da biste sprečili mašine da menjaju svoju lozinku svake 30 dana, postavite `HKLM\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters\DisablePasswordChange = 1` ili možete postaviti `HKLM\SYSTEM\CurrentControlSet\Services\NetLogon\Parameters\MaximumPasswordAge` na veću vrednost od 30 dana da biste označili period rotacije kada bi lozinka mašine trebala biti promenjena.
+Da biste sprečili mašine da menjaju svoju lozinku svake 30 dana, postavite `HKLM\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters\DisablePasswordChange = 1` ili možete postaviti `HKLM\SYSTEM\CurrentControlSet\Services\NetLogon\Parameters\MaximumPasswordAge` na veću vrednost od 30 dana da biste označili period rotacije kada bi lozinka mašine trebala da se menja.
 
 ## Zloupotreba Uslužnih Tiketa
 
@@ -138,6 +138,7 @@ Sa ovom privilegijom možete dumpovati DC bazu koristeći **DCSync**:
 mimikatz(commandline) # lsadump::dcsync /dc:pcdc.domain.local /domain:domain.local /user:krbtgt
 ```
 **Saznajte više o DCSync** na sledećoj stranici:
+
 
 {{#ref}}
 dcsync.md

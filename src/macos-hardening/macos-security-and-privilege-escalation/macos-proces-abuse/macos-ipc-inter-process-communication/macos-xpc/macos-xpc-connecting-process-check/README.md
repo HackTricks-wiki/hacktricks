@@ -7,7 +7,7 @@
 Kada se uspostavi veza sa XPC servisom, server će proveriti da li je veza dozvoljena. Ovo su provere koje bi obično izvršio:
 
 1. Proveri da li je **proces koji se povezuje potpisan Apple-ovim** sertifikatom (samo ga izdaje Apple).
-- Ako ovo **nije verifikovano**, napadač bi mogao da kreira **lažni sertifikat** koji bi odgovarao bilo kojoj drugoj proveri.
+- Ako ovo **nije verifikovano**, napadač bi mogao da kreira **lažni sertifikat** koji bi odgovarao bilo kojoj drugoj provere.
 2. Proveri da li je proces koji se povezuje potpisan **sertifikatom organizacije** (verifikacija tim ID-a).
 - Ako ovo **nije verifikovano**, **bilo koji developerski sertifikat** iz Apple-a može se koristiti za potpisivanje i povezivanje sa servisom.
 3. Proveri da li proces koji se povezuje **sadrži odgovarajući bundle ID**.
@@ -18,8 +18,8 @@ Kada se uspostavi veza sa XPC servisom, server će proveriti da li je veza dozvo
 1. Ako ovo **nije verifikovano**, klijent bi mogao biti **ranjiv na injekciju koda**.
 6. Proveri da li proces koji se povezuje ima **pravo** koje mu omogućava povezivanje sa servisom. Ovo se primenjuje na Apple binarne datoteke.
 7. **Verifikacija** mora biti **zasnovana** na **audit token-u klijenta** **umesto** na njegovom ID-u procesa (**PID**) pošto prvi sprečava **napade ponovne upotrebe PID-a**.
-- Developeri **retko koriste audit token** API poziv pošto je **privatan**, tako da Apple može **promeniti** u bilo kojem trenutku. Pored toga, korišćenje privatnog API-ja nije dozvoljeno u aplikacijama Mac App Store-a.
-- Ako se metoda **`processIdentifier`** koristi, može biti ranjiva.
+- Programeri **retko koriste audit token** API poziv pošto je **privatan**, tako da Apple može **promeniti** u bilo kojem trenutku. Pored toga, korišćenje privatnog API-ja nije dozvoljeno u aplikacijama iz Mac App Store-a.
+- Ako se koristi metoda **`processIdentifier`**, može biti ranjiva.
 - **`xpc_dictionary_get_audit_token`** treba koristiti umesto **`xpc_connection_get_audit_token`**, pošto bi poslednji mogao biti [ranjiv u određenim situacijama](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/).
 
 ### Communication Attacks
@@ -36,9 +36,9 @@ Za više informacija o napadu **`xpc_connection_get_audit_token`** proverite:
 macos-xpc_connection_get_audit_token-attack.md
 {{#endref}}
 
-### Trustcache - Prevencija napada na snižavanje
+### Trustcache - Prevencija Downgrade Napada
 
-Trustcache je odbrambena metoda uvedena u Apple Silicon mašinama koja čuva bazu podataka CDHSAH Apple binarnih datoteka tako da se samo dozvoljene neizmenjene binarne datoteke mogu izvršiti. Što sprečava izvršavanje sniženih verzija.
+Trustcache je odbrambena metoda uvedena na Apple Silicon mašinama koja čuva bazu podataka CDHSAH Apple binarnih datoteka tako da se samo dozvoljene neizmenjene binarne datoteke mogu izvršiti. Što sprečava izvršavanje downgrade verzija.
 
 ### Code Examples
 
@@ -71,7 +71,7 @@ SecCodeCheckValidity(code, kSecCSDefaultFlags, requirementRef);
 SecTaskRef taskRef = SecTaskCreateWithAuditToken(NULL, ((ExtendedNSXPCConnection*)newConnection).auditToken);
 SecTaskValidateForRequirement(taskRef, (__bridge CFStringRef)(requirementString))
 ```
-Ako programer ne želi da proveri verziju klijenta, mogao bi da proveri da klijent nije podložan procesnoj injekciji barem:
+Ako developer ne želi da proveri verziju klijenta, mogao bi da proveri da klijent nije ranjiv na procesnu injekciju barem:
 ```objectivec
 [...]
 CFDictionaryRef csInfo = NULL;

@@ -27,19 +27,19 @@ XNU **kernel** takođe **uključuje** značajnu količinu koda izvedenog iz **Fr
 - TCP/IP stek i soketi
 - Firewall i filtriranje paketa
 
-Razumevanje interakcije između BSD-a i Mach-a može biti složeno, zbog njihovih različitih konceptualnih okvira. Na primer, BSD koristi procese kao svoju osnovnu izvršnu jedinicu, dok Mach funkcioniše na osnovu niti. Ova razlika se pomiruje u XNU tako što se **svakom BSD procesu pridružuje Mach zadatak** koji sadrži tačno jednu Mach nit. Kada se koristi BSD-ov fork() sistemski poziv, BSD kod unutar kernela koristi Mach funkcije za kreiranje strukture zadatka i niti.
+Razumevanje interakcije između BSD-a i Mach-a može biti složeno, zbog njihovih različitih konceptualnih okvira. Na primer, BSD koristi procese kao svoju osnovnu izvršnu jedinicu, dok Mach funkcioniše na osnovu niti. Ova razlika se pomiruje u XNU tako što se **svakom BSD procesu pridružuje Mach zadatak** koji sadrži tačno jednu Mach nit. Kada se koristi BSD-ov fork() sistemski poziv, BSD kod unutar kernela koristi Mach funkcije za kreiranje zadatka i strukture niti.
 
 Štaviše, **Mach i BSD svaki održavaju različite bezbednosne modele**: **Mach-ov** bezbednosni model se zasniva na **pravima portova**, dok BSD-ov bezbednosni model funkcioniše na osnovu **vlasništva procesa**. Razlike između ova dva modela su povremeno rezultirale lokalnim ranjivostima za eskalaciju privilegija. Pored tipičnih sistemskih poziva, postoje i **Mach zamke koje omogućavaju programima u korisničkom prostoru da komuniciraju sa kernelom**. Ovi različiti elementi zajedno čine složenu, hibridnu arhitekturu macOS kernela.
 
-### I/O Kit - Drajveri
+### I/O Kit - Drivers
 
-I/O Kit je open-source, objektno-orijentisani **okvir za drajvere uređaja** u XNU kernelu, koji upravlja **dinamički učitanim drajverima uređaja**. Omogućava dodavanje modularnog koda u kernel u hodu, podržavajući raznovrsni hardver.
+I/O Kit je open-source, objektno orijentisan **okvir za drajvere uređaja** u XNU kernelu, koji upravlja **dinamički učitanim drajverima uređaja**. Omogućava dodavanje modularnog koda u kernel u hodu, podržavajući raznovrsni hardver.
 
 {{#ref}}
 macos-iokit.md
 {{#endref}}
 
-### IPC - Inter Procesna Komunikacija
+### IPC - Inter Process Communication
 
 {{#ref}}
 ../macos-proces-abuse/macos-ipc-inter-process-communication/

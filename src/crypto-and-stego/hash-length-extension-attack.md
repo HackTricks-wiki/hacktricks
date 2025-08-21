@@ -2,20 +2,20 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Sažetak napada
+## Summary of the attack
 
 Zamislite server koji **potpisuje** neke **podatke** tako što **dodaje** **tajnu** na neke poznate podatke u čistom tekstu i zatim hešira te podatke. Ako znate:
 
 - **Dužinu tajne** (to se može takođe bruteforce-ovati iz datog opsega dužine)
 - **Podatke u čistom tekstu**
-- **Algoritam (i da je ranjiv na ovaj napad)**
+- **Algoritam (i da je podložan ovom napadu)**
 - **Padding je poznat**
 - Obično se koristi podrazumevani, tako da ako su ispunjena druga 3 zahteva, ovo takođe jeste
 - Padding varira u zavisnosti od dužine tajne + podataka, zato je dužina tajne potrebna
 
 Tada je moguće da **napadač** **doda** **podatke** i **generiše** važeći **potpis** za **prethodne podatke + dodate podatke**.
 
-### Kako?
+### How?
 
 U suštini, ranjivi algoritmi generišu heševe tako što prvo **heširaju blok podataka**, a zatim, **iz** **prethodno** kreiranog **heša** (stanja), **dodaju sledeći blok podataka** i **heširaju ga**.
 
@@ -27,14 +27,14 @@ Ako napadač želi da doda string "append" može:
 - Dodati string "append"
 - Završiti heš i rezultantni heš će biti **važeći za "secret" + "data" + "padding" + "append"**
 
-### **Alat**
+### **Tool**
 
 {{#ref}}
 https://github.com/iagox86/hash_extender
 {{#endref}}
 
-### Reference
+### References
 
-Ovaj napad je dobro objašnjen na [https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks](https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks)
+Možete pronaći ovaj napad dobro objašnjen na [https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks](https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks)
 
 {{#include ../banners/hacktricks-training.md}}

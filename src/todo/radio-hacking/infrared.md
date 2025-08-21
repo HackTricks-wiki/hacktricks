@@ -2,9 +2,9 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Kako funkcioniše infracrveno <a href="#how-the-infrared-port-works" id="how-the-infrared-port-works"></a>
+## Kako funkcioniše infracrveno svetlo <a href="#how-the-infrared-port-works" id="how-the-infrared-port-works"></a>
 
-**Infracrvena svetlost je nevidljiva ljudima**. IR talasna dužina je od **0.7 do 1000 mikrona**. Daljinski upravljači koriste IR signal za prenos podataka i rade u opsegu talasnih dužina od 0.75..1.4 mikrona. Mikrokontroler u daljinskom upravljaču čini da infracrvena LED dioda trepće sa određenom frekvencijom, pretvarajući digitalni signal u IR signal.
+**Infracrveno svetlo je nevidljivo za ljude**. IR talasna dužina je od **0.7 do 1000 mikrona**. Daljinski upravljači koriste IR signal za prenos podataka i rade u opsegu talasnih dužina od 0.75..1.4 mikrona. Mikrokontroler u daljinskom upravljaču čini da infracrveni LED trepće sa određenom frekvencijom, pretvarajući digitalni signal u IR signal.
 
 Za prijem IR signala koristi se **fotoreceptor**. On **pretvara IR svetlost u naponske pulse**, koji su već **digitalni signali**. Obično, unutar prijemnika postoji **filter za tamnu svetlost**, koji propušta **samo željenu talasnu dužinu** i eliminiše šum.
 
@@ -41,7 +41,7 @@ Poznato je i kao Mančestersko kodiranje. Logička vrednost se definiše polarit
 > [!TIP]
 > Postoje IR protokoli koji **pokušavaju da postanu univerzalni** za nekoliko tipova uređaja. Najpoznatiji su RC5 i NEC. Nažalost, najpoznatiji **ne znači i najčešći**. U mom okruženju, sreo sam samo dva NEC daljinska upravljača i nijedan RC5.
 >
-> Proizvođači vole da koriste svoje jedinstvene IR protokole, čak i unutar iste grupe uređaja (na primer, TV kutije). Stoga, daljinski upravljači iz različitih kompanija, a ponekad i iz različitih modela iste kompanije, nisu u stanju da rade sa drugim uređajima istog tipa.
+> Proizvođači vole da koriste svoje jedinstvene IR protokole, čak i unutar iste grupe uređaja (na primer, TV kutije). Stoga, daljinski upravljači različitih kompanija, a ponekad i različitih modela iz iste kompanije, nisu u stanju da rade sa drugim uređajima istog tipa.
 
 ### Istraživanje IR signala
 
@@ -51,7 +51,7 @@ Najpouzdaniji način da se vidi kako izgleda IR signal daljinskog upravljača je
 
 Obično, na početku kodiranog paketa postoji preambula. Ovo omogućava prijemniku da odredi nivo pojačanja i pozadinsku buku. Takođe postoje protokoli bez preamble, na primer, Sharp.
 
-Zatim se prenose podaci. Struktura, preambula i način kodiranja bitova određeni su specifičnim protokolom.
+Zatim se prenose podaci. Struktura, preambula i metoda kodiranja bitova određeni su specifičnim protokolom.
 
 **NEC IR protokol** sadrži kratku komandu i kod ponavljanja, koji se šalje dok je dugme pritisnuto. I komanda i kod ponavljanja imaju istu preambulu na početku.
 
@@ -70,7 +70,7 @@ To će sprečiti da mašina postavljena na 20ºC bude povećana na 21ºC jednim 
 
 ## Napadi i ofanzivna istraživanja <a href="#attacks" id="attacks"></a>
 
-Možete napasti infracrveno sa Flipper Zero:
+Možete napasti infracrveno svetlo sa Flipper Zero:
 
 {{#ref}}
 flipper-zero/fz-infrared.md
@@ -78,21 +78,21 @@ flipper-zero/fz-infrared.md
 
 ### Preuzimanje Smart-TV / Set-top Box (EvilScreen)
 
-Nedavni akademski rad (EvilScreen, 2022) pokazao je da **višekanalni daljinski upravljači koji kombinuju infracrveno sa Bluetooth-om ili Wi-Fi-jem mogu biti zloupotrebljeni za potpuno preuzimanje modernih pametnih televizora**. Napadi povezuju IR servisne kodove visokih privilegija sa autentifikovanim Bluetooth paketima, zaobilazeći izolaciju kanala i omogućavajući pokretanje proizvoljnih aplikacija, aktivaciju mikrofona ili fabričko resetovanje bez fizičkog pristupa. Osam mainstream televizora različitih proizvođača — uključujući Samsung model koji tvrdi da je u skladu sa ISO/IEC 27001 — potvrđeno je kao ranjivo. Ublažavanje zahteva ispravke firmvera od strane proizvođača ili potpuno onemogućavanje neiskorišćenih IR prijemnika.
+Nedavni akademski rad (EvilScreen, 2022) pokazao je da **višekanalni daljinski upravljači koji kombinuju infracrveno sa Bluetooth-om ili Wi-Fi-jem mogu biti zloupotrebljeni za potpuno preuzimanje modernih pametnih televizora**. Napad povezuje IR servisne kodove visokih privilegija sa autentifikovanim Bluetooth paketima, zaobilazeći izolaciju kanala i omogućavajući pokretanje proizvoljnih aplikacija, aktivaciju mikrofona ili fabričko resetovanje bez fizičkog pristupa. Osam mainstream televizora različitih proizvođača — uključujući Samsung model koji tvrdi da je u skladu sa ISO/IEC 27001 — potvrđeno je kao ranjivo. Ublažavanje zahteva ispravke firmvera od strane proizvođača ili potpuno onemogućavanje neiskorišćenih IR prijemnika.
 
-### Ekstrakcija podataka iz vazduha putem IR LED dioda (aIR-Jumper porodica)
+### Ekstrakcija podataka iz vazduha putem IR LED-a (aIR-Jumper porodica)
 
-Sigurnosne kamere, ruteri ili čak zlonamerni USB stikovi često uključuju **infracrvene LED diode za noćno osvetljenje**. Istraživanja pokazuju da zlonamerni softver može modulirati ove LED diode (<10–20 kbit/s sa jednostavnim OOK) kako bi **izvukao tajne kroz zidove i prozore** do spoljne kamere postavljene na desetine metara daleko. Pošto je svetlost izvan vidljivog spektra, operateri retko primete. Protivmere:
+Sigurnosne kamere, ruteri ili čak zlonamerni USB stikovi često uključuju **infracrvene LED-ove za noćno osvetljenje**. Istraživanja pokazuju da zlonamerni softver može modulirati ove LED-ove (<10–20 kbit/s sa jednostavnim OOK) kako bi **izvukao tajne kroz zidove i prozore** do spoljne kamere postavljene na desetine metara daleko. Pošto je svetlost van vidljivog spektra, operateri retko primete. Protivmere:
 
-* Fizički zaštititi ili ukloniti IR LED diode u osetljivim područjima
-* Pratiti radni ciklus LED dioda kamera i integritet firmvera
+* Fizički zaštititi ili ukloniti IR LED-ove u osetljivim područjima
+* Pratiti radni ciklus LED-a kamere i integritet firmvera
 * Postaviti IR-cut filtere na prozore i nadzorne kamere
 
-Napadač takođe može koristiti jake IR projektore da **infiltrira** komande u mrežu tako što će bljeskati podatke nazad do nesigurnih kamera.
+Napadač takođe može koristiti jake IR projektore da **infiltrira** komande u mrežu bljeskanjem podataka nazad do nesigurnih kamera.
 
 ### Dugoročni brute-force i prošireni protokoli sa Flipper Zero 1.0
 
-Firmver 1.0 (septembar 2024) dodao je **desetine dodatnih IR protokola i opcionih spoljašnjih pojačivača**. U kombinaciji sa univerzalnim daljinskim upravljačem u režimu brute-force, Flipper može onemogućiti ili rekonfigurisati većinu javnih televizora/klimatizacija sa udaljenosti do 30 m koristeći visokopouzdani diodu.
+Firmver 1.0 (septembar 2024) dodao je **desetine dodatnih IR protokola i opcionih spoljašnjih pojačivača**. U kombinaciji sa univerzalnim daljinskim upravljačem u režimu brute-force, Flipper može onemogućiti ili rekonfigurisati većinu javnih televizora/klimatizacija sa udaljenosti do 30 m koristeći visokopouzdani diod.
 
 ---
 
@@ -100,9 +100,9 @@ Firmver 1.0 (septembar 2024) dodao je **desetine dodatnih IR protokola i opcioni
 
 ### Hardver
 
-* **Flipper Zero** – prenosivi transceiver sa režimima učenja, ponavljanja i rečnika-brute-force (vidi iznad).
+* **Flipper Zero** – prenosivi transiver sa režimima učenja, ponavljanja i rečničkog brute-force-a (vidi gore).
 * **Arduino / ESP32** + IR LED / TSOP38xx prijemnik – jeftin DIY analizer/trasnmitter. Kombinujte sa `Arduino-IRremote` bibliotekom (v4.x podržava >40 protokola).
-* **Logički analizeri** (Saleae/FX2) – hvataju sirove vremenske okvire kada je protokol nepoznat.
+* **Logički analizeri** (Saleae/FX2) – hvataju sirove vremenske intervale kada je protokol nepoznat.
 * **Pametni telefoni sa IR blasterom** (npr., Xiaomi) – brzi terenski test, ali ograničenog dometa.
 
 ### Softver
@@ -131,7 +131,7 @@ irsend SEND_ONCE samsung KEY_POWER
 * Onemogućiti ili pokriti IR prijemnike na uređajima postavljenim u javnim prostorima kada nisu potrebni.
 * Sprovoditi *pariranje* ili kriptografske provere između pametnih televizora i daljinskih upravljača; izolovati privilegovane “servisne” kodove.
 * Postaviti IR-cut filtere ili detektore kontinuiranih talasnih dužina oko klasifikovanih područja kako bi se prekinuli optički tajni kanali.
-* Pratiti integritet firmvera kamera/IoT uređaja koji izlažu kontrolisane IR LED diode.
+* Pratiti integritet firmvera kamera/IoT uređaja koji izlažu kontrolisane IR LED-ove.
 
 ## Reference
 

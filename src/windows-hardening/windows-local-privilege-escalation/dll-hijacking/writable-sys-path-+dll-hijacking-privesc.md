@@ -4,11 +4,11 @@
 
 ## Uvod
 
-Ako ste otkrili da možete **pisati u folderu System Path** (napomena: ovo neće raditi ako možete pisati u folderu User Path), moguće je da možete **povećati privilegije** u sistemu.
+Ako ste otkrili da možete **pisati u folderu System Path** (napomena: ovo neće raditi ako možete pisati u folderu User Path) moguće je da možete **povećati privilegije** u sistemu.
 
 Da biste to uradili, možete zloupotrebiti **Dll Hijacking** gde ćete **oteti biblioteku koja se učitava** od strane servisa ili procesa sa **većim privilegijama** od vaših, i pošto taj servis učitava Dll koji verovatno čak ni ne postoji u celom sistemu, pokušaće da ga učita iz System Path-a gde možete pisati.
 
-Za više informacija o **onome što je Dll Hijacking** pogledajte:
+Za više informacija o **onome što je Dll Hijacking** proverite:
 
 {{#ref}}
 ./
@@ -20,7 +20,7 @@ Za više informacija o **onome što je Dll Hijacking** pogledajte:
 
 Prva stvar koju treba da uradite je da **identifikujete proces** koji se izvršava sa **većim privilegijama** od vas i koji pokušava da **učita Dll iz System Path-a** u koji možete pisati.
 
-Problem u ovim slučajevima je što ti procesi verovatno već rade. Da biste pronašli koje Dll-ove nedostaju, treba da pokrenete procmon što je pre moguće (pre nego što se procesi učitaju). Dakle, da biste pronašli nedostajuće .dll-ove, uradite:
+Problem u ovim slučajevima je što ti procesi verovatno već rade. Da biste pronašli koje Dll-ove usluge nemaju, treba da pokrenete procmon što je pre moguće (pre nego što se procesi učitaju). Dakle, da biste pronašli nedostajuće .dll-ove uradite:
 
 - **Kreirajte** folder `C:\privesc_hijacking` i dodajte putanju `C:\privesc_hijacking` u **System Path env varijablu**. Ovo možete uraditi **ručno** ili sa **PS**:
 ```bash
@@ -40,14 +40,14 @@ $newPath = "$envPath;$folderPath"
 }
 ```
 - Pokrenite **`procmon`** i idite na **`Options`** --> **`Enable boot logging`** i pritisnite **`OK`** u prozoru.
-- Zatim, **ponovo pokrenite**. Kada se računar ponovo pokrene, **`procmon`** će početi da **snima** događaje odmah.
+- Zatim, **ponovo pokrenite**. Kada se računar ponovo pokrene, **`procmon`** će početi da **snima** događaje što je pre moguće.
 - Kada se **Windows** **pokrene, ponovo izvršite `procmon`**, reći će vam da je već u radu i **pitati vas da li želite da sačuvate** događaje u datoteci. Recite **da** i **sačuvajte događaje u datoteci**.
 - **Nakon** što je **datoteka** **generisana**, **zatvorite** otvoreni **`procmon`** prozor i **otvorite datoteku sa događajima**.
-- Dodajte ove **filtre** i pronaći ćete sve DLL-ove koje je neki **proces pokušao da učita** iz foldera sa zapisivim sistemskim putem:
+- Dodajte ove **filtre** i pronaći ćete sve Dll-ove koje je neki **proces pokušao da učita** iz foldera sa zapisivim sistemskim putem:
 
 <figure><img src="../../../images/image (945).png" alt=""><figcaption></figcaption></figure>
 
-### Propušteni DLL-ovi
+### Propušteni Dll-ovi
 
 Pokrećući ovo na besplatnoj **virtuelnoj (vmware) Windows 11 mašini** dobio sam ove rezultate:
 
@@ -55,11 +55,11 @@ Pokrećući ovo na besplatnoj **virtuelnoj (vmware) Windows 11 mašini** dobio s
 
 U ovom slučaju .exe su beskorisni, pa ih ignorisite, propušteni DLL-ovi su bili iz:
 
-| Usluga                          | DLL                | CMD linija                                                            |
-| ------------------------------- | ------------------ | --------------------------------------------------------------------- |
-| Task Scheduler (Raspored)      | WptsExtensions.dll | `C:\Windows\system32\svchost.exe -k netsvcs -p -s Schedule`           |
-| Diagnostic Policy Service (DPS) | Unknown.DLL        | `C:\Windows\System32\svchost.exe -k LocalServiceNoNetwork -p -s DPS`  |
-| ???                             | SharedRes.dll      | `C:\Windows\system32\svchost.exe -k UnistackSvcGroup`                 |
+| Usluga                          | Dll                | CMD linija                                                          |
+| ------------------------------- | ------------------ | ------------------------------------------------------------------ |
+| Task Scheduler (Raspored)      | WptsExtensions.dll | `C:\Windows\system32\svchost.exe -k netsvcs -p -s Schedule`       |
+| Diagnostic Policy Service (DPS) | Unknown.DLL        | `C:\Windows\System32\svchost.exe -k LocalServiceNoNetwork -p -s DPS` |
+| ???                             | SharedRes.dll      | `C:\Windows\system32\svchost.exe -k UnistackSvcGroup`             |
 
 Nakon što sam ovo pronašao, našao sam ovaj zanimljiv blog post koji takođe objašnjava kako da [**zloupotrebite WptsExtensions.dll za eskalaciju privilegija**](https://juggernaut-sec.com/dll-hijacking/#Windows_10_Phantom_DLL_Hijacking_-_WptsExtensionsdll). Što je ono što **sada planiramo da uradimo**.
 
@@ -75,8 +75,8 @@ Možete [**pokušati da koristite neki od ovih primera**](#creating-and-compilin
 
 U trenutku pisanja, usluga **Task Scheduler** se pokreće sa **Nt AUTHORITY\SYSTEM**.
 
-Nakon što ste **generisali maliciozni DLL** (_u mom slučaju sam koristio x64 rev shell i dobio sam shell nazad, ali ga je defender ubio jer je bio iz msfvenom_), sačuvajte ga u zapisivom sistemskom putu pod imenom **WptsExtensions.dll** i **ponovo pokrenite** računar (ili ponovo pokrenite uslugu ili uradite šta god je potrebno da ponovo pokrenete pogođenu uslugu/program).
+Nakon što ste **generisali maliciozni Dll** (_u mom slučaju sam koristio x64 rev shell i dobio sam shell nazad, ali ga je defender ubio jer je bio iz msfvenom_), sačuvajte ga u zapisivom sistemskom putu pod imenom **WptsExtensions.dll** i **ponovo pokrenite** računar (ili ponovo pokrenite uslugu ili uradite šta god je potrebno da ponovo pokrenete pogođenu uslugu/program).
 
-Kada se usluga ponovo pokrene, **dll bi trebao biti učitan i izvršen** (možete **ponovo koristiti** **procmon** trik da proverite da li je **biblioteka učitana kako se očekivalo**).
+Kada se usluga ponovo pokrene, **dll bi trebao biti učitan i izvršen** (možete **ponovo koristiti** trik sa **procmon** da proverite da li je **biblioteka učitana kako se očekivalo**).
 
 {{#include ../../../banners/hacktricks-training.md}}

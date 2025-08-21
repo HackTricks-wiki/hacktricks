@@ -3,30 +3,31 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
 
-## Uvod
+## Intro
 
 Za više informacija o tome kako 125kHz tagovi funkcionišu, proverite:
+
 
 {{#ref}}
 ../pentesting-rfid.md
 {{#endref}}
 
-## Akcije
+## Actions
 
 Za više informacija o ovim tipovima tagova [**pročitajte ovaj uvod**](../pentesting-rfid.md#low-frequency-rfid-tags-125khz).
 
-### Čitanje
+### Read
 
 Pokušava da **pročita** informacije sa kartice. Zatim može da je **emulira**.
 
 > [!WARNING]
-> Imajte na umu da neki interkomi pokušavaju da se zaštite od dupliranja ključeva slanjem komande za pisanje pre čitanja. Ako pisanje uspe, taj tag se smatra lažnim. Kada Flipper emulira RFID, ne postoji način za čitač da ga razlikuje od originalnog, tako da takvi problemi ne nastaju.
+> Imajte na umu da neki interkomi pokušavaju da se zaštite od duplikacije ključeva slanjem komande za pisanje pre čitanja. Ako pisanje uspe, taj tag se smatra lažnim. Kada Flipper emulira RFID, ne postoji način za čitač da ga razlikuje od originalnog, tako da takvi problemi ne nastaju.
 
-### Dodaj Ručno
+### Add Manually
 
 Možete kreirati **lažne kartice u Flipper Zero označavajući podatke** koje ručno unesete, a zatim ih emulirati.
 
-#### ID-ovi na karticama
+#### IDs on cards
 
 Ponekad, kada dobijete karticu, pronaći ćete ID (ili deo) napisan na vidljivom delu kartice.
 
@@ -43,11 +44,11 @@ Isto se dešava na ovoj HID kartici gde se samo 2 od 3 bajta mogu pronaći odšt
 
 <figure><img src="../../../images/image (1014).png" alt=""><figcaption></figcaption></figure>
 
-### Emuliraj/Piši
+### Emulate/Write
 
 Nakon **kopiranja** kartice ili **unošenja** ID-a **ručno**, moguće je **emulirati** je sa Flipper Zero ili **pisati** je na pravoj kartici.
 
-## Reference
+## References
 
 - [https://blog.flipperzero.one/rfid/](https://blog.flipperzero.one/rfid/)
 

@@ -4,12 +4,12 @@
 
 ## Partitions
 
-Hard disk ili **SSD disk može sadržati različite particije** sa ciljem fizičkog odvajanja podataka.\
+Hard disk ili **SSD disk može sadržati različite particije** sa ciljem fizičkog razdvajanja podataka.\
 **Minimalna** jedinica diska je **sektor** (normalno sastavljen od 512B). Tako da, veličina svake particije mora biti višekratnik te veličine.
 
 ### MBR (master Boot Record)
 
-Dodeljuje se u **prvom sektoru diska nakon 446B boot koda**. Ovaj sektor je ključan za označavanje PC-u šta i odakle treba da se montira particija.\
+Dodeljuje se u **prvom sektoru diska nakon 446B boot koda**. Ovaj sektor je bitan da bi se PC-ju naznačilo šta i odakle treba montirati particiju.\
 Omogućava do **4 particije** (najviše **samo 1** može biti aktivna/**bootable**). Međutim, ako vam je potrebno više particija, možete koristiti **proširene particije**. **Zadnji bajt** ovog prvog sektora je potpis boot zapisa **0x55AA**. Samo jedna particija može biti označena kao aktivna.\
 MBR omogućava **maksimalno 2.2TB**.
 
@@ -28,7 +28,7 @@ Od **bajtova 440 do 443** MBR-a možete pronaći **Windows Disk Signature** (ako
 | 0 (0x00)    | 446(0x1BE) | Boot code           |
 | 446 (0x1BE) | 16 (0x10)  | Prva particija     |
 | 462 (0x1CE) | 16 (0x10)  | Druga particija    |
-| 478 (0x1DE) | 16 (0x10)  | Treća particija    |
+| 478 (0x1DE) | 16 (0x10)  | Treća particija     |
 | 494 (0x1EE) | 16 (0x10)  | Četvrta particija   |
 | 510 (0x1FE) | 2 (0x2)    | Potpis 0x55 0xAA   |
 
@@ -41,17 +41,17 @@ Od **bajtova 440 do 443** MBR-a možete pronaći **Windows Disk Signature** (ako
 | 2 (0x02)  | 1 (0x01) | Početni sektor (bitovi 0-5); gornji bitovi cilindra (6- 7) |
 | 3 (0x03)  | 1 (0x01) | Početni cilindar najniži 8 bitova                     |
 | 4 (0x04)  | 1 (0x01) | Kod tipa particije (0x83 = Linux)                     |
-| 5 (0x05)  | 1 (0x01) | Kraj glave                                           |
-| 6 (0x06)  | 1 (0x01) | Kraj sektora (bitovi 0-5); gornji bitovi cilindra (6- 7)   |
-| 7 (0x07)  | 1 (0x01) | Kraj cilindra najniži 8 bitova                       |
-| 8 (0x08)  | 4 (0x04) | Sektori koji prethode particiji (little endian)      |
+| 5 (0x05)  | 1 (0x01) | Krajnja glava                                         |
+| 6 (0x06)  | 1 (0x01) | Krajnji sektor (bitovi 0-5); gornji bitovi cilindra (6- 7)   |
+| 7 (0x07)  | 1 (0x01) | Krajnji cilindar najniži 8 bitova                     |
+| 8 (0x08)  | 4 (0x04) | Sektori koji prethode particiji (mali endian)        |
 | 12 (0x0C) | 4 (0x04) | Sektori u particiji                                   |
 
-Da biste montirali MBR u Linux-u, prvo morate dobiti početni offset (možete koristiti `fdisk` i `p` komandu)
+Da biste montirali MBR u Linux-u, prvo morate dobiti početni offset (možete koristiti `fdisk` i komandu `p`)
 
-![](<../../../images/image (413) (3) (3) (3) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
+![](<../../../images/image (413) (3) (3) (3) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
-A zatim koristite sledeći kod
+I zatim koristite sledeći kod
 ```bash
 #Mount MBR in Linux
 mount -o ro,loop,offset=<Bytes>
@@ -67,8 +67,8 @@ mount -o ro,loop,offset=32256,noatime /path/to/image.dd /media/part/
 GUID tabela particija, poznata kao GPT, favorizovana je zbog svojih poboljšanih mogućnosti u poređenju sa MBR (Master Boot Record). Karakteristična po svom **globalno jedinstvenom identifikatoru** za particije, GPT se izdvaja na nekoliko načina:
 
 - **Lokacija i veličina**: I GPT i MBR počinju na **sektoru 0**. Međutim, GPT radi na **64bita**, u kontrastu sa MBR-ovih 32bita.
-- **Ograničenja particija**: GPT podržava do **128 particija** na Windows sistemima i može da primi do **9.4ZB** podataka.
-- **Imena particija**: Omogućava imenovanje particija sa do 36 Unicode karaktera.
+- **Ograničenja particija**: GPT podržava do **128 particija** na Windows sistemima i može da smesti do **9.4ZB** podataka.
+- **Imena particija**: Nudi mogućnost imenovanja particija sa do 36 Unicode karaktera.
 
 **Otpornost podataka i oporavak**:
 
@@ -83,13 +83,13 @@ GUID tabela particija, poznata kao GPT, favorizovana je zbog svojih poboljšanih
 
 **Hibridni MBR (LBA 0 + GPT)**
 
-[Sa Vikipedije](https://en.wikipedia.org/wiki/GUID_Partition_Table)
+[Sa Wikipedije](https://en.wikipedia.org/wiki/GUID_Partition_Table)
 
 U operativnim sistemima koji podržavaju **GPT-bazirano pokretanje putem BIOS** usluga umesto EFI, prvi sektor se takođe može koristiti za skladištenje prve faze **bootloader** koda, ali **modifikovan** da prepozna **GPT** **particije**. Bootloader u MBR-u ne sme da pretpostavlja veličinu sektora od 512 bajta.
 
 **Zaglavlje tabele particija (LBA 1)**
 
-[Sa Vikipedije](https://en.wikipedia.org/wiki/GUID_Partition_Table)
+[Sa Wikipedije](https://en.wikipedia.org/wiki/GUID_Partition_Table)
 
 Zaglavlje tabele particija definiše upotrebljive blokove na disku. Takođe definiše broj i veličinu unosa particija koji čine tabelu particija (offseti 80 i 84 u tabeli).
 
@@ -109,7 +109,7 @@ Zaglavlje tabele particija definiše upotrebljive blokove na disku. Takođe defi
 | 80 (0x50) | 4 bytes  | Broj unosa particija u nizu                                                                                                                                         |
 | 84 (0x54) | 4 bytes  | Veličina jednog unosa particije (obično 80h ili 128)                                                                                                                        |
 | 88 (0x58) | 4 bytes  | CRC32 niza unosa particija u little endian                                                                                                                            |
-| 92 (0x5C) | \*       | Rezervisano; mora biti nule za ostatak bloka (420 bajtova za veličinu sektora od 512 bajta; ali može biti više sa većim veličinama sektora)                                      |
+| 92 (0x5C) | \*       | Rezervisano; mora biti nule za ostatak bloka (420 bajta za veličinu sektora od 512 bajta; ali može biti više sa većim veličinama sektora)                                      |
 
 **Unosi particija (LBA 2–33)**
 
@@ -169,11 +169,11 @@ Ključne komponente korenskog direktorijuma, posebno za FAT12 i FAT16, uključuj
 
 ### EXT
 
-**Ext2** je najčešći sistem datoteka za **ne-journaled** particije (**particije koje se ne menjaju mnogo**) kao što je particija za pokretanje. **Ext3/4** su **journaled** i obično se koriste za **ostale particije**.
+**Ext2** je najčešći sistem datoteka za **ne-journal** particije (**particije koje se ne menjaju mnogo**) kao što je particija za pokretanje. **Ext3/4** su **journal** i obično se koriste za **ostale particije**.
 
 ## **Metapodaci**
 
-Neke datoteke sadrže metapodatke. Ove informacije se odnose na sadržaj datoteke koji ponekad može biti zanimljiv analitičaru, jer u zavisnosti od tipa datoteke, može sadržati informacije kao što su:
+Neke datoteke sadrže metapodatke. Ove informacije se odnose na sadržaj datoteke koji ponekad može biti zanimljiv analitičaru jer, u zavisnosti od tipa datoteke, može sadržati informacije kao što su:
 
 - Naslov
 - Verzija MS Office-a koja se koristi
@@ -187,7 +187,7 @@ Možete koristiti alate kao što su [**exiftool**](https://exiftool.org) i [**Me
 
 ## **Oporavak obrisanih datoteka**
 
-### Zapisane obrisane datoteke
+### Zabeležene obrisane datoteke
 
 Kao što je ranije viđeno, postoji nekoliko mesta gde je datoteka još uvek sačuvana nakon što je "obrisana". To je zato što obično brisanje datoteke iz sistema datoteka samo označava da je obrisana, ali podaci nisu dodirnuti. Tada je moguće ispitati registre datoteka (kao što je MFT) i pronaći obrisane datoteke.
 
@@ -199,7 +199,7 @@ file-data-carving-recovery-tools.md
 
 ### **File Carving**
 
-**File carving** je tehnika koja pokušava da **pronađe datoteke u masi podataka**. Postoje 3 glavna načina na koje alati poput ovog funkcionišu: **Na osnovu zaglavlja i podnožja tipova datoteka**, na osnovu **struktura** tipova datoteka i na osnovu **sadržaja** samog.
+**File carving** je tehnika koja pokušava da **pronađe datoteke u masi podataka**. Postoje 3 glavna načina na koje alati poput ovog funkcionišu: **Na osnovu zaglavlja i podnožja tipova datoteka**, na osnovu **struktura** tipova datoteka i na osnovu **sadržaja** same datoteke.
 
 Napomena da ova tehnika **ne funkcioniše za vraćanje fragmentisanih datoteka**. Ako datoteka **nije smeštena u kontiguitetne sektore**, tada ova tehnika neće moći da je pronađe ili barem deo nje.
 
@@ -221,7 +221,7 @@ file-data-carving-recovery-tools.md
 ### Sigurno brisanje
 
 Očigledno, postoje načini da se **"sigurno" obrišu datoteke i deo logova o njima**. Na primer, moguće je **prepisati sadržaj** datoteke sa smešnim podacima nekoliko puta, a zatim **ukloniti** **logove** iz **$MFT** i **$LOGFILE** o datoteci, i **ukloniti kopije senki volumena**.\
-Možda ćete primetiti da čak i obavljanjem te akcije može postojati **druge delove gde je postojanje datoteke još uvek zabeleženo**, i to je tačno, a deo posla forenzičkog stručnjaka je da ih pronađe.
+Možda ćete primetiti da čak i nakon izvođenja te akcije može postojati **drugi delovi gde je postojanje datoteke još uvek zabeleženo**, i to je tačno, a deo posla forenzičkog stručnjaka je da ih pronađe.
 
 ## Reference
 
@@ -229,6 +229,6 @@ Možda ćete primetiti da čak i obavljanjem te akcije može postojati **druge d
 - [http://ntfs.com/ntfs-permissions.htm](http://ntfs.com/ntfs-permissions.htm)
 - [https://www.osforensics.com/faqs-and-tutorials/how-to-scan-ntfs-i30-entries-deleted-files.html](https://www.osforensics.com/faqs-and-tutorials/how-to-scan-ntfs-i30-entries-deleted-files.html)
 - [https://docs.microsoft.com/en-us/windows-server/storage/file-server/volume-shadow-copy-service](https://docs.microsoft.com/en-us/windows-server/storage/file-server/volume-shadow-copy-service)
-- **iHackLabs Sertifikovani Digitalni Forenzika Windows**
+- **iHackLabs Sertifikovani Digitalni Forenzik Windows**
 
 {{#include ../../../banners/hacktricks-training.md}}

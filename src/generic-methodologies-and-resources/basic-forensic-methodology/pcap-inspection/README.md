@@ -2,12 +2,12 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-> [!NOTE]
+> [!TIP]
 > Napomena o **PCAP** vs **PCAPNG**: postoje dve verzije PCAP formata datoteka; **PCAPNG je noviji i nije podržan od svih alata**. Možda ćete morati da konvertujete datoteku iz PCAPNG u PCAP koristeći Wireshark ili neki drugi kompatibilni alat, kako biste mogli da radite s njom u nekim drugim alatima.
 
 ## Online alati za pcaps
 
-- Ako je zaglavlje vašeg pcap-a **pokvareno**, trebali biste pokušati da ga **popravite** koristeći: [http://f00l.de/hacking/**pcapfix.php**](http://f00l.de/hacking/pcapfix.php)
+- Ako je zaglavlje vašeg pcap-a **oštećeno**, trebali biste pokušati da ga **popravite** koristeći: [http://f00l.de/hacking/**pcapfix.php**](http://f00l.de/hacking/pcapfix.php)
 - Ekstrahujte **informacije** i tražite **malver** unutar pcap-a u [**PacketTotal**](https://packettotal.com)
 - Tražite **malicioznu aktivnost** koristeći [**www.virustotal.com**](https://www.virustotal.com) i [**www.hybrid-analysis.com**](https://www.hybrid-analysis.com)
 - **Potpuna pcap analiza iz pregledača u** [**https://apackets.com/**](https://apackets.com/)
@@ -18,7 +18,7 @@ Sledeći alati su korisni za ekstrakciju statistike, datoteka itd.
 
 ### Wireshark
 
-> [!NOTE]
+> [!TIP]
 > **Ako planirate da analizirate PCAP, osnovno je da znate kako da koristite Wireshark**
 
 Možete pronaći neke Wireshark trikove u:
@@ -33,7 +33,7 @@ Pcap analiza iz pregledača.
 
 ### Xplico Framework
 
-[**Xplico** ](https://github.com/xplico/xplico)_(samo linux)_ može **analizirati** **pcap** i ekstrahovati informacije iz njega. Na primer, iz pcap datoteke Xplico ekstrahuje svaku email poruku (POP, IMAP i SMTP protokoli), sav HTTP sadržaj, svaki VoIP poziv (SIP), FTP, TFTP, i tako dalje.
+[**Xplico** ](https://github.com/xplico/xplico)_(samo linux)_ može **analizirati** **pcap** i ekstrahovati informacije iz njega. Na primer, iz pcap datoteke Xplico ekstrahuje svaku email poruku (POP, IMAP i SMTP protokoli), sve HTTP sadržaje, svaki VoIP poziv (SIP), FTP, TFTP, i tako dalje.
 
 **Instalirajte**
 ```bash
@@ -53,7 +53,7 @@ Zatim kreirajte **novi slučaj**, kreirajte **novu sesiju** unutar slučaja i **
 
 ### NetworkMiner
 
-Poput Xplico, to je alat za **analizu i ekstrakciju objekata iz pcaps**. Ima besplatnu verziju koju možete **preuzeti** [**ovde**](https://www.netresec.com/?page=NetworkMiner). Radi sa **Windows**.\
+Kao Xplico, to je alat za **analizu i ekstrakciju objekata iz pcaps**. Ima besplatnu verziju koju možete **preuzeti** [**ovde**](https://www.netresec.com/?page=NetworkMiner). Radi sa **Windows**.\
 Ovaj alat je takođe koristan za dobijanje **druge analizirane informacije** iz paketa kako biste mogli brže saznati šta se dešava.
 
 ### NetWitness Investigator
@@ -64,7 +64,7 @@ Ovo je još jedan koristan alat koji **analizira pakete** i sortira informacije 
 ### [BruteShark](https://github.com/odedshimon/BruteShark)
 
 - Ekstrakcija i kodiranje korisničkih imena i lozinki (HTTP, FTP, Telnet, IMAP, SMTP...)
-- Ekstrakcija autentifikacionih hash-ova i njihovo razbijanje pomoću Hashcat (Kerberos, NTLM, CRAM-MD5, HTTP-Digest...)
+- Ekstrakcija autentifikacionih hash-eva i njihovo razbijanje koristeći Hashcat (Kerberos, NTLM, CRAM-MD5, HTTP-Digest...)
 - Izrada vizuelnog dijagrama mreže (Mrežni čvorovi i korisnici)
 - Ekstrakcija DNS upita
 - Rekonstrukcija svih TCP i UDP sesija
@@ -80,23 +80,24 @@ Ako **tražite** **nešto** unutar pcap-a, možete koristiti **ngrep**. Evo prim
 ```bash
 ngrep -I packets.pcap "^GET" "port 80 and tcp and host 192.168 and dst host 192.168 and src host 192.168"
 ```
-### Isecanje
+### Carving
 
-Korišćenje uobičajenih tehnika isecanja može biti korisno za ekstrakciju fajlova i informacija iz pcap:
+Korišćenje uobičajenih tehnika carving-a može biti korisno za ekstrakciju fajlova i informacija iz pcap-a:
+
 
 {{#ref}}
 ../partitions-file-systems-carving/file-data-carving-recovery-tools.md
 {{#endref}}
 
-### Hvatanje kredencijala
+### Capturing credentials
 
-Možete koristiti alate kao što je [https://github.com/lgandx/PCredz](https://github.com/lgandx/PCredz) za parsiranje kredencijala iz pcap-a ili sa aktivnog interfejsa.
+Možete koristiti alate kao što su [https://github.com/lgandx/PCredz](https://github.com/lgandx/PCredz) za parsiranje kredencijala iz pcap-a ili sa aktivnog interfejsa.
 
-## Proverite Eksploite/Malver
+## Check Exploits/Malware
 
 ### Suricata
 
-**Instalirajte i postavite**
+**Install and setup**
 ```
 apt-get install suricata
 apt-get install oinkmaster
@@ -111,15 +112,16 @@ suricata -r packets.pcap -c /etc/suricata/suricata.yaml -k none -v -l log
 
 [**YaraPCAP**](https://github.com/kevthehermit/YaraPcap) je alat koji
 
-- Čita PCAP datoteku i ekstrahuje Http tokove.
+- Čita PCAP datoteku i ekstraktuje Http tokove.
 - gzip dekompresuje sve kompresovane tokove
-- Skandira svaku datoteku sa yara
+- Skenira svaku datoteku sa yara
 - Piše report.txt
 - Opcionalno čuva odgovarajuće datoteke u direktorijum
 
 ### Malware Analysis
 
 Proverite da li možete pronaći bilo koji otisak poznatog malvera:
+
 
 {{#ref}}
 ../malware-analysis.md
@@ -129,7 +131,7 @@ Proverite da li možete pronaći bilo koji otisak poznatog malvera:
 
 > [Zeek](https://docs.zeek.org/en/master/about.html) je pasivni, open-source analizator mrežnog saobraćaja. Mnogi operateri koriste Zeek kao Mrežni Sigurnosni Monitor (NSM) za podršku istragama sumnjivih ili zlonamernih aktivnosti. Zeek takođe podržava širok spektar zadataka analize saobraćaja van domena sigurnosti, uključujući merenje performansi i rešavanje problema.
 
-U suštini, logovi koje kreira `zeek` nisu **pcaps**. Stoga ćete morati da koristite **druge alate** za analizu logova gde se nalaze **informacije** o pcaps. 
+U suštini, logovi koje kreira `zeek` nisu **pcaps**. Stoga ćete morati koristiti **druge alate** za analizu logova gde se nalaze **informacije** o pcaps. 
 
 ### Connections Info
 ```bash
@@ -200,13 +202,16 @@ rita show-exploded-dns -H --limit 10 zeek_logs
 ```
 ## Ostali trikovi analize pcap-a
 
+
 {{#ref}}
 dnscat-exfiltration.md
 {{#endref}}
 
+
 {{#ref}}
 wifi-pcap-analysis.md
 {{#endref}}
+
 
 {{#ref}}
 usb-keystrokes.md

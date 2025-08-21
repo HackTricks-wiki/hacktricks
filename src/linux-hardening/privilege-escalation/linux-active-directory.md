@@ -10,7 +10,7 @@ Linux mašina u AD može **čuvati različite CCACHE karte unutar fajlova. Ove k
 
 ### AD enumeracija sa linux-a
 
-Ako imate pristup AD-u u linux-u (ili bash-u u Windows-u), možete probati [https://github.com/lefayjey/linWinPwn](https://github.com/lefayjey/linWinPwn) da enumerišete AD.
+Ako imate pristup AD-u na linux-u (ili bash-u u Windows-u), možete probati [https://github.com/lefayjey/linWinPwn](https://github.com/lefayjey/linWinPwn) da enumerirate AD.
 
 Takođe možete proveriti sledeću stranicu da biste naučili **druge načine za enumeraciju AD-a sa linux-a**:
 
@@ -20,13 +20,13 @@ Takođe možete proveriti sledeću stranicu da biste naučili **druge načine za
 
 ### FreeIPA
 
-FreeIPA je open-source **alternativa** za Microsoft Windows **Active Directory**, uglavnom za **Unix** okruženja. Kombinuje kompletnu **LDAP direktoriju** sa MIT **Kerberos** Centrom za distribuciju ključeva za upravljanje sličnim Active Directory. Koristi Dogtag **Sistem sertifikata** za upravljanje CA i RA sertifikatima, podržava **višefaktorsku** autentifikaciju, uključujući pametne kartice. SSSD je integrisan za Unix procese autentifikacije. Saznajte više o tome u:
+FreeIPA je open-source **alternativa** za Microsoft Windows **Active Directory**, uglavnom za **Unix** okruženja. Kombinuje kompletnu **LDAP direktoriju** sa MIT **Kerberos** Centrom za distribuciju ključeva za upravljanje sličnim Active Directory. Koristi Dogtag **Sistem sertifikata** za upravljanje CA i RA sertifikatima, podržava **multi-factor** autentifikaciju, uključujući pametne kartice. SSSD je integrisan za Unix procese autentifikacije. Saznajte više o tome u:
 
 {{#ref}}
 ../freeipa-pentesting.md
 {{#endref}}
 
-## Igranje sa kartama
+## Igra sa kartama
 
 ### Pass The Ticket
 
@@ -38,7 +38,7 @@ Na ovoj stranici ćete pronaći različita mesta gde možete **pronaći kerberos
 
 ### CCACHE ponovna upotreba iz /tmp
 
-CCACHE fajlovi su binarni formati za **čuvanje Kerberos akreditiva** i obično se čuvaju sa 600 dozvolama u `/tmp`. Ovi fajlovi se mogu identifikovati po svom **formatu imena, `krb5cc_%{uid}`,** koji se odnosi na korisnikov UID. Za verifikaciju autentifikacione karte, **promenljiva okruženja `KRB5CCNAME`** treba da bude postavljena na putanju željenog fajla karte, omogućavajući njenu ponovnu upotrebu.
+CCACHE fajlovi su binarni formati za **čuvanje Kerberos kredencijala** i obično se čuvaju sa 600 dozvolama u `/tmp`. Ovi fajlovi se mogu identifikovati po svom **formatu imena, `krb5cc_%{uid}`,** koji se odnosi na korisnikov UID. Za verifikaciju autentifikacione karte, **promenljiva okruženja `KRB5CCNAME`** treba da bude postavljena na putanju željenog fajla karte, omogućavajući njenu ponovnu upotrebu.
 
 Prikazivanje trenutne karte koja se koristi za autentifikaciju sa `env | grep KRB5CCNAME`. Format je prenosiv i karta se može **ponovo koristiti postavljanjem promenljive okruženja** sa `export KRB5CCNAME=/tmp/ticket.ccache`. Format imena kerberos karte je `krb5cc_%{uid}` gde je uid korisnikov UID.
 ```bash
@@ -51,7 +51,7 @@ export KRB5CCNAME=/tmp/krb5cc_1000
 ```
 ### CCACHE ponovna upotreba karata iz keyring-a
 
-**Kerberos karte pohranjene u memoriji procesa mogu se izvući**, posebno kada je zaštita ptrace na mašini onemogućena (`/proc/sys/kernel/yama/ptrace_scope`). Koristan alat za ovu svrhu se može pronaći na [https://github.com/TarlogicSecurity/tickey](https://github.com/TarlogicSecurity/tickey), koji olakšava ekstrakciju injektovanjem u sesije i dumpovanjem karata u `/tmp`.
+**Kerberos karte pohranjene u memoriji procesa mogu se izvući**, posebno kada je zaštita ptrace-a na mašini onemogućena (`/proc/sys/kernel/yama/ptrace_scope`). Koristan alat za ovu svrhu se može pronaći na [https://github.com/TarlogicSecurity/tickey](https://github.com/TarlogicSecurity/tickey), koji olakšava ekstrakciju injektovanjem u sesije i dump-ovanjem karata u `/tmp`.
 
 Da biste konfigurisali i koristili ovaj alat, slede se koraci u nastavku:
 ```bash
@@ -71,7 +71,7 @@ Pozivanje **`SSSDKCMExtractor`** sa parametrima --database i --key će analizira
 git clone https://github.com/fireeye/SSSDKCMExtractor
 python3 SSSDKCMExtractor.py --database secrets.ldb --key secrets.mkey
 ```
-**Keš kredencijala Kerberos blob može biti konvertovan u upotrebljiv Kerberos CCache** fajl koji se može proslediti Mimikatz/Rubeus.
+**Keširanje kredencijala Kerberos blob može se konvertovati u upotrebljiv Kerberos CCache** fajl koji se može proslediti Mimikatz/Rubeus.
 
 ### CCACHE ponovna upotreba karte iz keytab-a
 ```bash
@@ -97,7 +97,7 @@ Na macOS-u, **`bifrost`** služi kao alat za analizu keytab datoteka.
 ```bash
 ./bifrost -action dump -source keytab -path /path/to/your/file
 ```
-Korišćenjem ekstraktovanih informacija o nalogu i hešu, mogu se uspostaviti veze sa serverima koristeći alate kao što je **`crackmapexec`**.
+Korišćenjem ekstraktovanih informacija o nalogu i hešu, mogu se uspostaviti veze sa serverima koristeći alate kao što su **`crackmapexec`**.
 ```bash
 crackmapexec 10.XXX.XXX.XXX -u 'ServiceAccount$' -H "HashPlaceholder" -d "YourDOMAIN"
 ```

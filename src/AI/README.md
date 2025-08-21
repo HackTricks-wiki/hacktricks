@@ -6,17 +6,21 @@
 
 Najbolja polazna tačka za učenje o AI je razumevanje kako glavni algoritmi mašinskog učenja funkcionišu. Ovo će vam pomoći da razumete kako AI funkcioniše, kako ga koristiti i kako ga napasti:
 
+
 {{#ref}}
 ./AI-Supervised-Learning-Algorithms.md
 {{#endref}}
+
 
 {{#ref}}
 ./AI-Unsupervised-Learning-Algorithms.md
 {{#endref}}
 
+
 {{#ref}}
 ./AI-Reinforcement-Learning-Algorithms.md
 {{#endref}}
+
 
 {{#ref}}
 ./AI-Deep-Learning.md
@@ -25,6 +29,7 @@ Najbolja polazna tačka za učenje o AI je razumevanje kako glavni algoritmi ma�
 ### Arhitektura LLM-ova
 
 Na sledećoj stranici naći ćete osnove svakog komponente za izgradnju osnovnog LLM koristeći transformere:
+
 
 {{#ref}}
 AI-llm-architecture/README.md
@@ -36,6 +41,7 @@ AI-llm-architecture/README.md
 
 U ovom trenutku, glavna 2 okvira za procenu rizika AI sistema su OWASP ML Top 10 i Google SAIF:
 
+
 {{#ref}}
 AI-Risk-Frameworks.md
 {{#endref}}
@@ -44,27 +50,31 @@ AI-Risk-Frameworks.md
 
 LLM-ovi su u poslednjim godinama doveli do eksplozije korišćenja AI, ali nisu savršeni i mogu biti prevareni zlonamernim upitima. Ovo je veoma važna tema za razumevanje kako koristiti AI bezbedno i kako ga napasti:
 
+
 {{#ref}}
 AI-Prompts.md
 {{#endref}}
 
-### RCE Modela AI
+### RCE AI Modela
 
 Veoma je uobičajeno da programeri i kompanije pokreću modele preuzete sa Interneta, međutim, samo učitavanje modela može biti dovoljno da se izvrši proizvoljan kod na sistemu. Ovo je veoma važna tema za razumevanje kako koristiti AI bezbedno i kako ga napasti:
+
 
 {{#ref}}
 AI-Models-RCE.md
 {{#endref}}
 
-### Protokol Konteksta Modela AI
+### Protokol Konteksta AI Modela
 
 MCP (Protokol Konteksta Modela) je protokol koji omogućava AI agent klijentima da se povežu sa spoljnim alatima i izvorima podataka na način "plug-and-play". Ovo omogućava složene radne tokove i interakcije između AI modela i spoljnih sistema:
+
 
 {{#ref}}
 AI-MCP-Servers.md
 {{#endref}}
 
-### AI-Pomoćno Fuzzing i Automatizovano Otkriće Ranljivosti
+### AI-Pomoćno Fuzzing & Automatizovano Otkriće Ranljivosti
+
 
 {{#ref}}
 AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md

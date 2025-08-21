@@ -2,21 +2,22 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
+
 {{#ref}}
 README.md
 {{#endref}}
 
 ## JTAGenum
 
-[**JTAGenum**](https://github.com/cyphunk/JTAGenum) je alat koji možete učitati na Arduino-kompatibilni MCU ili (eksperimentalno) Raspberry Pi da bi brute-forcovao nepoznate JTAG pinove i čak enumerisao registre instrukcija.
+[**JTAGenum**](https://github.com/cyphunk/JTAGenum) је alat koji možete učitati na Arduino-kompatibilni MCU ili (eksperimentalno) Raspberry Pi da bi brute-forcovao nepoznate JTAG pinove i čak enumerisao registre instrukcija.
 
-- Arduino: povežite digitalne pinove D2–D11 sa do 10 sumnjivih JTAG padova/testnih tačaka, i Arduino GND sa GND cilja. Napajajte cilj odvojeno osim ako ne znate da je napajanje sigurno. Preferirajte 3.3 V logiku (npr. Arduino Due) ili koristite level shifter/serijske otpornike kada ispitujete 1.8–3.3 V ciljeve.
+- Arduino: povežite digitalne pinove D2–D11 sa do 10 sumnjivih JTAG padova/testnih tačaka, i Arduino GND sa ciljnim GND. Napajajte cilj odvojeno osim ako ne znate da je napajanje sigurno. Preferirajte 3.3 V logiku (npr. Arduino Due) ili koristite level shifter/serijske otpornike kada ispitujete 1.8–3.3 V ciljeve.
 - Raspberry Pi: Pi verzija izlaže manje upotrebljivih GPIO-a (tako da su skeniranja sporija); proverite repozitorijum za trenutnu mapu pinova i ograničenja.
 
 Kada se učita, otvorite serijski monitor na 115200 baud i pošaljite `h` za pomoć. Tipičan tok:
 
 - `l` pronađite loopback-ove da izbegnete lažne pozitivne rezultate
-- `r` prebacite unutrašnje pull-up otpornike ako je potrebno
+- `r` prebacite interne pull-up otpornike ako je potrebno
 - `s` skenirajte za TCK/TMS/TDI/TDO (i ponekad TRST/SRST)
 - `y` brute-forcujte IR da otkrijete nedokumentovane opkode
 - `x` snapshot stanja pinova za boundary-scan
@@ -29,10 +30,10 @@ Kada se učita, otvorite serijski monitor na 115200 baud i pošaljite `h` za pom
 
 
 
-Ako se pronađe validan TAP, videćete linije koje počinju sa `FOUND!` koje označavaju otkrivene pinove.
+Ako je pronađen validan TAP, videćete linije koje počinju sa `FOUND!` koje označavaju otkrivene pinove.
 
 Saveti
-- Uvek delite uzemljenje, i nikada ne napajajte nepoznate pinove iznad ciljnog Vtref. Ako ste u nedoumici, dodajte serijske otpornike od 100–470 Ω na kandidate.
+- Uvek delite uzemljenje, i nikada ne napajajte nepoznate pinove iznad ciljnog Vtref. Ako ste u nedoumici, dodajte serijske otpornike od 100–470 Ω na kandidate pinove.
 - Ako uređaj koristi SWD/SWJ umesto 4-žičnog JTAG-a, JTAGenum možda neće moći da ga detektuje; pokušajte sa SWD alatima ili adapterom koji podržava SWJ-DP.
 
 ## Bezbednije lov na pinove i postavljanje hardvera
@@ -79,11 +80,11 @@ openocd -f board/esp32s3-builtin.cfg \
 ```
 Tips
 - Koristite `mdw/mdh/mdb` za proveru memorije pre dugih dump-ova.
-- Za višed uređaje, postavite BYPASS na neciljeve ili koristite datoteku ploče koja definiše sve TAP-ove.
+- Za višed uređaje, postavite BYPASS na neciljanim uređajima ili koristite datoteku ploče koja definiše sve TAP-ove.
 
 ## Trikovi sa granicama skeniranja (EXTEST/SAMPLE)
 
-Čak i kada je CPU debug pristup zaključan, granica skeniranja može biti izložena. Sa UrJTAG/OpenOCD možete:
+Čak i kada je CPU pristup za debagovanje zaključan, granica skeniranja može biti izložena. Sa UrJTAG/OpenOCD možete:
 - SAMPLE za snimanje stanja pinova dok sistem radi (pronađite aktivnost na magistrali, potvrdite mapiranje pinova).
 - EXTEST za upravljanje pinovima (npr., bit-bang eksternih SPI flash linija putem MCU-a da biste ih pročitali offline ako ožičenje ploče to omogućava).
 

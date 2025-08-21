@@ -10,7 +10,7 @@ roguepotato-and-printspoofer.md
 
 ## Juicy Potato (zloupotreba zlatnih privilegija) <a href="#juicy-potato-abusing-the-golden-privileges" id="juicy-potato-abusing-the-golden-privileges"></a>
 
-_Slađana verzija_ [_RottenPotatoNG_](https://github.com/breenmachine/RottenPotatoNG)_, sa malo soka, tj. **još jedan alat za lokalnu eskalaciju privilegija, od Windows servisnih naloga do NT AUTHORITY\SYSTEM**_
+_Slađena verzija_ [_RottenPotatoNG_](https://github.com/breenmachine/RottenPotatoNG)_, sa malo soka, tj. **još jedan alat za lokalnu eskalaciju privilegija, od Windows servisnih naloga do NT AUTHORITY\SYSTEM**_
 
 #### Možete preuzeti juicypotato sa [https://ci.appveyor.com/project/ohpe/juicy-potato/build/artifacts](https://ci.appveyor.com/project/ohpe/juicy-potato/build/artifacts)
 
@@ -18,7 +18,7 @@ _Slađana verzija_ [_RottenPotatoNG_](https://github.com/breenmachine/RottenPota
 
 [**Iz juicypotato Readme**](https://github.com/ohpe/juicy-potato/blob/master/README.md)**:**
 
-[RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG) i njene [varijante](https://github.com/decoder-it/lonelypotato) koriste lanac eskalacije privilegija zasnovan na [`BITS`](<https://msdn.microsoft.com/en-us/library/windows/desktop/bb968799(v=vs.85).aspx>) [servisu](https://github.com/breenmachine/RottenPotatoNG/blob/4eefb0dd89decb9763f2bf52c7a067440a9ec1f0/RottenPotatoEXE/MSFRottenPotato/MSFRottenPotato.cpp#L126) koji ima MiTM slušalac na `127.0.0.1:6666` i kada imate `SeImpersonate` ili `SeAssignPrimaryToken` privilegije. Tokom pregleda Windows verzije otkrili smo postavku gde je `BITS` namerno onemogućen i port `6666` je zauzet.
+[RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG) i njene [varijante](https://github.com/decoder-it/lonelypotato) koriste lanac eskalacije privilegija zasnovan na [`BITS`](<https://msdn.microsoft.com/en-us/library/windows/desktop/bb968799(v=vs.85).aspx>) [servisu](https://github.com/breenmachine/RottenPotatoNG/blob/4eefb0dd89decb9763f2bf52c7a067440a9ec1f0/RottenPotatoEXE/MSFRottenPotato/MSFRottenPotato.cpp#L126) koji ima MiTM slušalac na `127.0.0.1:6666` i kada imate privilegije `SeImpersonate` ili `SeAssignPrimaryToken`. Tokom pregleda Windows verzije otkrili smo postavku gde je `BITS` namerno onemogućen i port `6666` je zauzet.
 
 Odlučili smo da oružamo [RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG): **Pozdravite Juicy Potato**.
 
@@ -30,7 +30,7 @@ Otkrili smo da, osim `BITS`, postoji nekoliko COM servera koje možemo zloupotre
 2. implementiraju `IMarshal` interfejs
 3. rade kao uzvišeni korisnik (SYSTEM, Administrator, …)
 
-Nakon nekog testiranja dobili smo i testirali opširnu listu [zanimljivih CLSID-ova](http://ohpe.it/juicy-potato/CLSID/) na nekoliko verzija Windows-a.
+Nakon nekog testiranja dobili smo i testirali opsežnu listu [zanimljivih CLSID-ova](http://ohpe.it/juicy-potato/CLSID/) na nekoliko verzija Windows-a.
 
 ### Sočne informacije <a href="#juicy-details" id="juicy-details"></a>
 
@@ -74,11 +74,11 @@ Ako korisnik ima `SeImpersonate` ili `SeAssignPrimaryToken` privilegije, onda st
 
 Skoro je nemoguće sprečiti zloupotrebu svih ovih COM servera. Možete razmisliti o modifikaciji dozvola ovih objekata putem `DCOMCNFG`, ali srećno, ovo će biti izazovno.
 
-Pravo rešenje je zaštititi osetljive naloge i aplikacije koje rade pod `* SERVICE` nalozima. Zaustavljanje `DCOM` bi sigurno inhibiralo ovu eksploataciju, ali bi moglo imati ozbiljan uticaj na osnovni OS.
+Pravo rešenje je zaštititi osetljive naloge i aplikacije koje rade pod `* SERVICE` nalozima. Zaustavljanje `DCOM` bi sigurno sprečilo ovu eksploataciju, ali bi moglo imati ozbiljan uticaj na osnovni OS.
 
-From: [http://ohpe.it/juicy-potato/](http://ohpe.it/juicy-potato/)
+Iz: [http://ohpe.it/juicy-potato/](http://ohpe.it/juicy-potato/)
 
-## Examples
+## Primeri
 
 Napomena: Posetite [ovu stranicu](https://ohpe.it/juicy-potato/CLSID/) za listu CLSID-ova koje možete isprobati.
 
