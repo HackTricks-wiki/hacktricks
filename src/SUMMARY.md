@@ -326,6 +326,7 @@
 - [Android APK Checklist](mobile-pentesting/android-checklist.md)
 - [Android Applications Pentesting](mobile-pentesting/android-app-pentesting/README.md)
   - [Accessibility Services Abuse](mobile-pentesting/android-app-pentesting/accessibility-services-abuse.md)
+  - [Android Anti Instrumentation And Ssl Pinning Bypass](mobile-pentesting/android-app-pentesting/android-anti-instrumentation-and-ssl-pinning-bypass.md)
   - [Android Applications Basics](mobile-pentesting/android-app-pentesting/android-applications-basics.md)
   - [Android Task Hijacking](mobile-pentesting/android-app-pentesting/android-task-hijacking.md)
   - [ADB Commands](mobile-pentesting/android-app-pentesting/adb-commands.md)
