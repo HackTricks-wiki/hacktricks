@@ -99,6 +99,7 @@ mount  | grep /proc.*tmpfs
 Container engines launch the containers with a **limited number of capabilities** to control what goes on inside of the container by default. **Privileged** ones have **all** the **capabilities** accesible. To learn about capabilities read:
 
 
+
 {{#ref}}
 ../linux-capabilities.md
 {{#endref}}
@@ -136,6 +137,7 @@ You can manipulate the capabilities available to a container without running in 
 ### Seccomp
 
 **Seccomp** is useful to **limit** the **syscalls** a container can call. A default seccomp profile is enabled by default when running docker containers, but in privileged mode it is disabled. Learn more about Seccomp here:
+
 
 
 {{#ref}}
@@ -178,6 +180,7 @@ Also, note that when Docker (or other CRIs) are used in a **Kubernetes** cluster
 **AppArmor** is a kernel enhancement to confine **containers** to a **limited** set of **resources** with **per-program profiles**. When you run with the `--privileged` flag, this protection is disabled.
 
 
+
 {{#ref}}
 apparmor.md
 {{#endref}}
@@ -190,6 +193,7 @@ apparmor.md
 ### SELinux
 
 Running a container with the `--privileged` flag disables **SELinux labels**, causing it to inherit the label of the container engine, typically `unconfined`, granting full access similar to the container engine. In rootless mode, it uses `container_runtime_t`, while in root mode, `spc_t` is applied.
+
 
 
 {{#ref}}
@@ -244,5 +248,4 @@ PID   USER     TIME  COMMAND
 - [https://www.redhat.com/sysadmin/privileged-flag-container-engines](https://www.redhat.com/sysadmin/privileged-flag-container-engines)
 
 {{#include ../../../banners/hacktricks-training.md}}
-
 

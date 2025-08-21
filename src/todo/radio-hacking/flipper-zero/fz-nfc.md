@@ -7,6 +7,7 @@
 For info about RFID and NFC check the following page:
 
 
+
 {{#ref}}
 ../pentesting-rfid.md
 {{#endref}}
@@ -78,5 +79,4 @@ However, you **can't read the CVV this way** (the 3 digits on the back of the ca
 - [https://blog.flipperzero.one/rfid/](https://blog.flipperzero.one/rfid/)
 
 {{#include ../../../banners/hacktricks-training.md}}
-
 

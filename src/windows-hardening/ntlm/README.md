@@ -266,6 +266,7 @@ wce.exe -s <username>:<domain>:<hash_lm>:<hash_nt>
 ### Manual Windows remote execution with username and password
 
 
+
 {{#ref}}
 ../lateral-movement/
 {{#endref}}
@@ -289,6 +290,7 @@ The PoC can be found in **[https://github.com/eladshamir/Internal-Monologue](htt
 ## NTLM Relay and Responder
 
 **Read more detailed guide on how to perform those attacks here:**
+
 
 
 {{#ref}}

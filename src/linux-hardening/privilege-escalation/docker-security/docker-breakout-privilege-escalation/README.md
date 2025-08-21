@@ -65,6 +65,7 @@ capsh --print
 In the following page you can **learn more about linux capabilities** and how to abuse them to escape/escalate privileges:
 
 
+
 {{#ref}}
 ../../linux-capabilities.md
 {{#endref}}
@@ -84,6 +85,7 @@ A privileged container can be created with the flag `--privileged` or disabling 
 - `Mount /dev`
 
 The `--privileged` flag significantly lowers container security, offering **unrestricted device access** and bypassing **several protections**. For a detailed breakdown, refer to the documentation on `--privileged`'s full impacts.
+
 
 
 {{#ref}}
@@ -233,6 +235,7 @@ cat /output
 Find an **explanation of the technique** in:
 
 
+
 {{#ref}}
 docker-release_agent-cgroups-escape.md
 {{#endref}}
@@ -240,6 +243,7 @@ docker-release_agent-cgroups-escape.md
 #### Privileged Escape Abusing release_agent without known the relative path - PoC3
 
 In the previous exploits the **absolute path of the container inside the hosts filesystem is disclosed**. However, this isn’t always the case. In cases where you **don’t know the absolute path of the container inside the host** you can use this technique:
+
 
 
 {{#ref}}
@@ -348,6 +352,7 @@ The abuse of these files may allow that:
 - [modprobe](sensitive-mounts.md#proc-sys-kernel-modprobe)
 
 However, you can find **other sensitive files** to check for in this page:
+
 
 
 {{#ref}}
@@ -643,5 +648,4 @@ If you are in **userspace** (**no kernel exploit** involved) the way to find new
 - [https://bishopfox.com/blog/kubernetes-pod-privilege-escalation#Pod4](https://bishopfox.com/blog/kubernetes-pod-privilege-escalation#Pod4)
 
 {{#include ../../../../banners/hacktricks-training.md}}
-
 

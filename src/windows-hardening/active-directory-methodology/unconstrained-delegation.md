@@ -54,6 +54,7 @@ If the TGT if from a domain controller, you could perform a [**DCSync attack**](
 Find here other ways to **force an authentication:**
 
 
+
 {{#ref}}
 printers-spooler-service-abuse.md
 {{#endref}}
@@ -64,5 +65,4 @@ printers-spooler-service-abuse.md
 - Set "Account is sensitive and cannot be delegated" for privileged accounts.
 
 {{#include ../../banners/hacktricks-training.md}}
-
 

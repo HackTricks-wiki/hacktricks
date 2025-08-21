@@ -709,6 +709,7 @@ if __name__ == "__main__":
 You can check the output of this script on this page:
 
 
+
 {{#ref}}
 https://github.com/carlospolop/hacktricks/blob/master/generic-methodologies-and-resources/python/bypass-python-sandboxes/broken-reference/README.md
 {{#endref}}
@@ -765,6 +766,7 @@ class HAL9000(object):
 
 > [!CAUTION]
 > Check also the following page for gadgets that will r**ead sensitive information from Python internal objects**:
+
 
 
 {{#ref}}
@@ -1115,6 +1117,7 @@ f(42)
 Using tools like [**https://www.decompiler.com/**](https://www.decompiler.com) one can **decompile** given compiled python code.
 
 **Check out this tutorial**:
+
 
 
 {{#ref}}

