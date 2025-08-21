@@ -103,6 +103,7 @@ dumpbin /export /path/file.dll
 For a full guide on how to **abuse Dll Hijacking to escalate privileges** with permissions to write in a **System Path folder** check:
 
 
+
 {{#ref}}
 dll-hijacking/writable-sys-path-+dll-hijacking-privesc.md
 {{#endref}}
@@ -238,5 +239,4 @@ BOOL APIENTRY DllMain (HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReser
 
 
 {{#include ../../banners/hacktricks-training.md}}
-
 

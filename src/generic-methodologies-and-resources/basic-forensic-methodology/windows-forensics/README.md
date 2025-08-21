@@ -267,6 +267,7 @@ In `SAM\Domains\Account\Users` you can obtain the username, the RID, last login,
 ### Interesting entries in the Windows Registry
 
 
+
 {{#ref}}
 interesting-windows-registry-keys.md
 {{#endref}}
@@ -501,5 +502,4 @@ EventID 6005 indicates system startup, while EventID 6006 marks shutdown.
 Security EventID 1102 signals the deletion of logs, a critical event for forensic analysis.
 
 {{#include ../../../banners/hacktricks-training.md}}
-
 

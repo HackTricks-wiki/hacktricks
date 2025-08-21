@@ -7,6 +7,7 @@
 ### Related resources
 
 
+
 {{#ref}}
 synology-encrypted-archive-decryption.md
 {{#endref}}
@@ -61,6 +62,7 @@ fdisk -lu <bin> #lists a drives partition and filesystems if multiple
 If you don't find much with those tools check the **entropy** of the image with `binwalk -E <bin>`, if low entropy, then it's not likely to be encrypted. If high entropy, Its likely encrypted (or compressed in some way).
 
 Moreover, you can use these tools to extract **files embedded inside the firmware**:
+
 
 
 {{#ref}}
@@ -309,5 +311,4 @@ To practice discovering vulnerabilities in firmware, use the following vulnerabl
 - [https://www.attify-store.com/products/offensive-iot-exploitation](https://www.attify-store.com/products/offensive-iot-exploitation)
 
 {{#include ../../banners/hacktricks-training.md}}
-
 
