@@ -11,13 +11,13 @@ Entrambi gli attributi hanno 4 timestamp: **Modifica**, **accesso**, **creazione
 
 **Esplora file di Windows** e altri strumenti mostrano le informazioni da **`$STANDARD_INFORMATION`**.
 
-### TimeStomp - Strumento anti-forense
+### TimeStomp - Strumento Anti-forense
 
 Questo strumento **modifica** le informazioni sui timestamp all'interno di **`$STANDARD_INFORMATION`** **ma** **non** le informazioni all'interno di **`$FILE_NAME`**. Pertanto, è possibile **identificare** **attività** **sospette**.
 
 ### Usnjrnl
 
-Il **USN Journal** (Update Sequence Number Journal) è una funzionalità del NTFS (sistema di file Windows NT) che tiene traccia delle modifiche al volume. Lo strumento [**UsnJrnl2Csv**](https://github.com/jschicht/UsnJrnl2Csv) consente di esaminare queste modifiche.
+Il **USN Journal** (Registro del Numero di Sequenza di Aggiornamento) è una funzionalità del NTFS (sistema di file Windows NT) che tiene traccia delle modifiche al volume. Lo strumento [**UsnJrnl2Csv**](https://github.com/jschicht/UsnJrnl2Csv) consente di esaminare queste modifiche.
 
 ![](<../../images/image (801).png>)
 
@@ -48,7 +48,7 @@ Un altro modo per identificare file modificati sospetti sarebbe confrontare il t
 
 I timestamp **NTFS** hanno una **precisione** di **100 nanosecondi**. Quindi, trovare file con timestamp come 2010-10-10 10:10:**00.000:0000 è molto sospetto**.
 
-### SetMace - Strumento anti-forense
+### SetMace - Strumento Anti-forense
 
 Questo strumento può modificare entrambi gli attributi `$STARNDAR_INFORMATION` e `$FILE_NAME`. Tuttavia, a partire da Windows Vista, è necessario un OS live per modificare queste informazioni.
 
@@ -100,7 +100,7 @@ Questo salverà informazioni sulle applicazioni eseguite con l'obiettivo di migl
 
 ### Disabilitare Timestamp - Ultimo Tempo di Accesso
 
-Ogni volta che una cartella viene aperta da un volume NTFS su un server Windows NT, il sistema prende il tempo per **aggiornare un campo di timestamp su ciascuna cartella elencata**, chiamato ultimo tempo di accesso. Su un volume NTFS molto utilizzato, questo può influire sulle prestazioni.
+Ogni volta che una cartella viene aperta da un volume NTFS su un server Windows NT, il sistema impiega tempo per **aggiornare un campo di timestamp su ciascuna cartella elencata**, chiamato ultimo tempo di accesso. Su un volume NTFS molto utilizzato, questo può influire sulle prestazioni.
 
 1. Aprire l'Editor del Registro (Regedit.exe).
 2. Navigare a `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem`.
@@ -109,7 +109,7 @@ Ogni volta che una cartella viene aperta da un volume NTFS su un server Windows 
 
 ### Eliminare la Cronologia USB
 
-Tutti i **USB Device Entries** sono memorizzati nel Registro di Windows sotto la chiave di registro **USBSTOR** che contiene sottochiavi create ogni volta che si collega un dispositivo USB al PC o Laptop. Puoi trovare questa chiave qui `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`. **Eliminando questa** eliminerai la cronologia USB.\
+Tutti gli **USB Device Entries** sono memorizzati nel Registro di Windows sotto la chiave di registro **USBSTOR** che contiene sottochiavi create ogni volta che si collega un dispositivo USB al PC o Laptop. Puoi trovare questa chiave qui `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`. **Eliminando questa** eliminerai la cronologia USB.\
 Puoi anche utilizzare lo strumento [**USBDeview**](https://www.nirsoft.net/utils/usb_devices_view.html) per essere sicuro di averle eliminate (e per eliminarle).
 
 Un altro file che salva informazioni sugli USB è il file `setupapi.dev.log` all'interno di `C:\Windows\INF`. Questo dovrebbe essere eliminato.
@@ -143,7 +143,7 @@ Per disabilitare le copie shadow [passaggi da qui](https://support.waters.com/KB
 ### Disabilitare i registri eventi di Windows
 
 - `reg add 'HKLM\\SYSTEM\\CurrentControlSet\\Services\\eventlog' /v Start /t REG_DWORD /d 4 /f`
-- All'interno della sezione servizi disabilitare il servizio "Windows Event Log"
+- All'interno della sezione servizi disabilitare il servizio "Registro eventi di Windows"
 - `WEvtUtil.exec clear-log` o `WEvtUtil.exe cl`
 
 ### Disabilitare $UsnJrnl
@@ -154,7 +154,7 @@ Per disabilitare le copie shadow [passaggi da qui](https://support.waters.com/KB
 
 ## Logging Avanzato & Manomissione delle Tracce (2023-2025)
 
-### Logging ScriptBlock/Module di PowerShell
+### Logging di ScriptBlock/Modulo PowerShell
 
 Le versioni recenti di Windows 10/11 e Windows Server mantengono **artifacts forensi PowerShell ricchi** sotto
 `Microsoft-Windows-PowerShell/Operational` (eventi 4104/4105/4106).
@@ -182,7 +182,7 @@ WriteProcessMemory(GetCurrentProcess(),
 GetProcAddress(GetModuleHandleA("ntdll.dll"), "EtwEventWrite"),
 patch, sizeof(patch), NULL);
 ```
-Public PoCs (e.g. `EtwTiSwallow`) implementano la stessa primitiva in PowerShell o C++.  
+Public PoCs (e.g. `EtwTiSwallow`) implement the same primitive in PowerShell o C++.  
 Poiché la patch è **locale al processo**, gli EDR che girano all'interno di altri processi potrebbero non rilevarla.  
 Rilevamento: confrontare `ntdll` in memoria rispetto a quello su disco, o hookare prima della modalità utente.
 
@@ -209,11 +209,88 @@ Mitigazioni: abilitare la blocklist dei driver vulnerabili di Microsoft (HVCI/SA
 
 ---
 
-## Riferimenti
+## Linux Anti-Forensics: Auto-patch e Cloud C2 (2023–2025)
 
-- Sophos X-Ops – “AuKill: A Weaponized Vulnerable Driver for Disabling EDR” (marzo 2023)  
+### Auto-patching dei servizi compromessi per ridurre la rilevazione (Linux)  
+Gli avversari "auto-patchano" sempre più spesso un servizio subito dopo averlo sfruttato per prevenire ulteriori sfruttamenti e sopprimere le rilevazioni basate su vulnerabilità. L'idea è di sostituire i componenti vulnerabili con gli ultimi binari/JAR legittimi upstream, in modo che gli scanner segnalino l'host come patchato mentre la persistenza e il C2 rimangono.
+
+Esempio: Apache ActiveMQ OpenWire RCE (CVE‑2023‑46604)  
+- Dopo lo sfruttamento, gli attaccanti hanno prelevato JAR legittimi da Maven Central (repo1.maven.org), eliminato i JAR vulnerabili nell'installazione di ActiveMQ e riavviato il broker.  
+- Questo ha chiuso il RCE iniziale mantenendo altri punti di accesso (cron, modifiche alla configurazione SSH, impianti C2 separati).
+
+Esempio operativo (illustrativo)
+```bash
+# ActiveMQ install root (adjust as needed)
+AMQ_DIR=/opt/activemq
+cd "$AMQ_DIR"/lib
+
+# Fetch patched JARs from Maven Central (versions as appropriate)
+curl -fsSL -O https://repo1.maven.org/maven2/org/apache/activemq/activemq-client/5.18.3/activemq-client-5.18.3.jar
+curl -fsSL -O https://repo1.maven.org/maven2/org/apache/activemq/activemq-openwire-legacy/5.18.3/activemq-openwire-legacy-5.18.3.jar
+
+# Remove vulnerable files and ensure the service uses the patched ones
+rm -f activemq-client-5.18.2.jar activemq-openwire-legacy-5.18.2.jar || true
+ln -sf activemq-client-5.18.3.jar activemq-client.jar
+ln -sf activemq-openwire-legacy-5.18.3.jar activemq-openwire-legacy.jar
+
+# Apply changes without removing persistence
+systemctl restart activemq || service activemq restart
+```
+Forensic/hunting tips
+- Rivedere le directory di servizio per sostituzioni binarie/JAR non programmate:
+- Debian/Ubuntu: `dpkg -V activemq` e confrontare gli hash/percorsi dei file con i mirror del repository.
+- RHEL/CentOS: `rpm -Va 'activemq*'`
+- Cercare versioni JAR presenti su disco che non sono di proprietà del gestore di pacchetti, o collegamenti simbolici aggiornati fuori banda.
+- Timeline: `find "$AMQ_DIR" -type f -printf '%TY-%Tm-%Td %TH:%TM %p\n' | sort` per correlare ctime/mtime con la finestra di compromissione.
+- Cronologia della shell/telemetria dei processi: prove di `curl`/`wget` a `repo1.maven.org` o altri CDN di artefatti immediatamente dopo l'iniziale sfruttamento.
+- Gestione delle modifiche: convalidare chi ha applicato la “patch” e perché, non solo che una versione patchata è presente.
+
+### Cloud‑service C2 con bearer tokens e anti‑analysis stagers
+Il tradecraft osservato ha combinato più percorsi C2 a lungo termine e imballaggi anti-analisi:
+- Loader ELF PyInstaller protetti da password per ostacolare il sandboxing e l'analisi statica (ad es., PYZ crittografato, estrazione temporanea sotto `/_MEI*`).
+- Indicatori: colpi di `strings` come `PyInstaller`, `pyi-archive`, `PYZ-00.pyz`, `MEIPASS`.
+- Artefatti di runtime: estrazione in `/tmp/_MEI*` o percorsi personalizzati `--runtime-tmpdir`.
+- C2 supportato da Dropbox utilizzando token OAuth Bearer hardcoded
+- Marcatori di rete: `api.dropboxapi.com` / `content.dropboxapi.com` con `Authorization: Bearer <token>`.
+- Caccia in proxy/NetFlow/Zeek/Suricata per HTTPS in uscita verso domini Dropbox da carichi di lavoro del server che normalmente non sincronizzano file.
+- C2 parallelo/di backup tramite tunneling (ad es., Cloudflare Tunnel `cloudflared`), mantenendo il controllo se un canale è bloccato.
+- IOCs host: processi/unità `cloudflared`, configurazione in `~/.cloudflared/*.json`, uscita 443 verso gli edge di Cloudflare.
+
+### Persistenza e “rollback di indurimento” per mantenere l'accesso (esempi Linux)
+Gli attaccanti abbinano frequentemente l'auto-patching con percorsi di accesso durevoli:
+- Cron/Anacron: modifiche allo stub `0anacron` in ciascuna directory `/etc/cron.*/` per esecuzione periodica.
+- Caccia:
+```bash
+for d in /etc/cron.*; do [ -f "$d/0anacron" ] && stat -c '%n %y %s' "$d/0anacron"; done
+grep -R --line-number -E 'curl|wget|python|/bin/sh' /etc/cron.*/* 2>/dev/null
+```
+- Rollback dell'indurimento della configurazione SSH: abilitazione degli accessi root e modifica delle shell predefinite per account a bassa privilegio.
+- Caccia per l'abilitazione del login root:
+```bash
+grep -E '^\s*PermitRootLogin' /etc/ssh/sshd_config
+# valori di flag come "yes" o impostazioni eccessivamente permissive
+```
+- Caccia per shell interattive sospette su account di sistema (ad es., `games`):
+```bash
+awk -F: '($7 ~ /bin\/(sh|bash|zsh)/ && $1 ~ /^(games|lp|sync|shutdown|halt|mail|operator)$/) {print}' /etc/passwd
+```
+- Artefatti beacon casuali e con nomi brevi (8 caratteri alfabetici) lasciati su disco che contattano anche C2 cloud:
+- Caccia:
+```bash
+find / -maxdepth 3 -type f -regextype posix-extended -regex '.*/[A-Za-z]{8}$' \
+-exec stat -c '%n %s %y' {} \; 2>/dev/null | sort
+```
+
+I difensori dovrebbero correlare questi artefatti con esposizioni esterne ed eventi di patching dei servizi per scoprire l'auto-remediazione anti-forense utilizzata per nascondere lo sfruttamento iniziale.
+
+## References
+
+- Sophos X-Ops – “AuKill: A Weaponized Vulnerable Driver for Disabling EDR” (March 2023)
 https://news.sophos.com/en-us/2023/03/07/aukill-a-weaponized-vulnerable-driver-for-disabling-edr
-- Red Canary – “Patching EtwEventWrite for Stealth: Detection & Hunting” (giugno 2024)  
+- Red Canary – “Patching EtwEventWrite for Stealth: Detection & Hunting” (June 2024)
 https://redcanary.com/blog/etw-patching-detection
+
+- [Red Canary – Patching for persistence: How DripDropper Linux malware moves through the cloud](https://redcanary.com/blog/threat-intelligence/dripdropper-linux-malware/)
+- [CVE‑2023‑46604 – Apache ActiveMQ OpenWire RCE (NVD)](https://nvd.nist.gov/vuln/detail/CVE-2023-46604)
 
 {{#include ../../banners/hacktricks-training.md}}

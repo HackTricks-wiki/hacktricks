@@ -6,12 +6,12 @@
 
 ### Informazioni di Base
 
-Prima di tutto, è consigliato avere una **USB** con **binaries e librerie ben noti** (puoi semplicemente prendere ubuntu e copiare le cartelle _/bin_, _/sbin_, _/lib,_ e _/lib64_), poi monta la USB e modifica le variabili di ambiente per utilizzare quei binaries:
+Prima di tutto, è consigliato avere una **USB** con **binaries e librerie ben noti** (puoi semplicemente prendere ubuntu e copiare le cartelle _/bin_, _/sbin_, _/lib,_ e _/lib64_), poi monta la USB e modifica le variabili d'ambiente per utilizzare quei binaries:
 ```bash
 export PATH=/mnt/usb/bin:/mnt/usb/sbin
 export LD_LIBRARY_PATH=/mnt/usb/lib:/mnt/usb/lib64
 ```
-Una volta configurato il sistema per utilizzare binari buoni e conosciuti, puoi iniziare a **estrarre alcune informazioni di base**:
+Una volta che hai configurato il sistema per utilizzare binari buoni e noti, puoi iniziare a **estrarre alcune informazioni di base**:
 ```bash
 date #Date and time (Clock may be skewed, Might be at a different timezone)
 uname -a #OS info
@@ -42,10 +42,10 @@ Durante l'ottenimento delle informazioni di base, dovresti controllare cose stra
 Per ottenere la memoria del sistema in esecuzione, è consigliato utilizzare [**LiME**](https://github.com/504ensicsLabs/LiME).\
 Per **compilarlo**, devi utilizzare lo **stesso kernel** che la macchina vittima sta utilizzando.
 
-> [!NOTE]
+> [!TIP]
 > Ricorda che **non puoi installare LiME o qualsiasi altra cosa** nella macchina vittima poiché apporterà diverse modifiche ad essa
 
-Quindi, se hai una versione identica di Ubuntu puoi usare `apt-get install lime-forensics-dkms`\
+Quindi, se hai una versione identica di Ubuntu, puoi usare `apt-get install lime-forensics-dkms`\
 In altri casi, devi scaricare [**LiME**](https://github.com/504ensicsLabs/LiME) da github e compilarlo con le intestazioni del kernel corrette. Per **ottenere le intestazioni esatte del kernel** della macchina vittima, puoi semplicemente **copiare la directory** `/lib/modules/<kernel version>` sulla tua macchina, e poi **compilare** LiME utilizzando quelle:
 ```bash
 make -C /lib/modules/<kernel version>/build M=$PWD
@@ -64,11 +64,11 @@ LiME può anche essere utilizzato per **inviare il dump tramite rete** invece di
 #### Spegnimento
 
 Prima di tutto, è necessario **spegnere il sistema**. Questo non è sempre un'opzione poiché a volte il sistema sarà un server di produzione che l'azienda non può permettersi di spegnere.\
-Ci sono **2 modi** per spegnere il sistema, un **spegnimento normale** e uno **spegnimento "stacca la spina"**. Il primo permetterà ai **processi di terminare come al solito** e al **filesystem** di essere **synchronizzato**, ma permetterà anche al possibile **malware** di **distruggere le prove**. L'approccio "stacca la spina" può comportare **alcuna perdita di informazioni** (non molte informazioni andranno perse poiché abbiamo già preso un'immagine della memoria) e il **malware non avrà alcuna opportunità** di fare qualcosa al riguardo. Pertanto, se **sospetti** che ci possa essere un **malware**, esegui semplicemente il **comando** **`sync`** sul sistema e stacca la spina.
+Ci sono **2 modi** per spegnere il sistema, un **spegnimento normale** e uno **spegnimento "stacca la spina"**. Il primo permetterà ai **processi di terminare come al solito** e al **filesystem** di essere **synchronizzato**, ma permetterà anche al possibile **malware** di **distruggere le prove**. L'approccio "stacca la spina" può comportare **una certa perdita di informazioni** (non molte informazioni andranno perse poiché abbiamo già preso un'immagine della memoria) e il **malware non avrà alcuna opportunità** di fare qualcosa al riguardo. Pertanto, se **sospetti** che ci possa essere un **malware**, esegui semplicemente il **comando** **`sync`** sul sistema e stacca la spina.
 
 #### Prendere un'immagine del disco
 
-È importante notare che **prima di collegare il computer a qualsiasi cosa relativa al caso**, è necessario essere certi che verrà **montato come sola lettura** per evitare di modificare qualsiasi informazione.
+È importante notare che **prima di collegare il computer a qualsiasi cosa relativa al caso**, è necessario essere certi che verrà **montato in sola lettura** per evitare di modificare qualsiasi informazione.
 ```bash
 #Create a raw copy of the disk
 dd if=<subject device> of=<image file> bs=512
@@ -143,7 +143,7 @@ Linux offre strumenti per garantire l'integrità dei componenti di sistema, fond
 
 ### Rilevatori di Malware/Rootkit
 
-Leggi la pagina seguente per conoscere gli strumenti che possono essere utili per trovare malware:
+Leggi la seguente pagina per conoscere gli strumenti che possono essere utili per trovare malware:
 
 {{#ref}}
 malware-analysis.md
@@ -172,9 +172,9 @@ find /sbin/ –exec rpm -qf {} \; | grep "is not"
 # Find exacuable files
 find / -type f -executable | grep <something>
 ```
-## Recuperare Binaries Eseguiti Cancellati
+## Recuperare Binarie Eseguite Cancellate
 
-Immagina un processo che è stato eseguito da /tmp/exec e poi cancellato. È possibile estrarlo.
+Immagina un processo che è stato eseguito da /tmp/exec e poi cancellato. È possibile estrarlo
 ```bash
 cd /proc/3746/ #PID with the exec file deleted
 head -1 maps #Get address of the file. It was 08048000-08049000
@@ -196,6 +196,32 @@ cat /var/spool/cron/crontabs/*  \
 #MacOS
 ls -l /usr/lib/cron/tabs/ /Library/LaunchAgents/ /Library/LaunchDaemons/ ~/Library/LaunchAgents/
 ```
+#### Hunt: Abuso di Cron/Anacron tramite 0anacron e stub sospetti
+Gli attaccanti spesso modificano lo stub 0anacron presente in ciascuna directory /etc/cron.*/ per garantire l'esecuzione periodica.
+```bash
+# List 0anacron files and their timestamps/sizes
+for d in /etc/cron.*; do [ -f "$d/0anacron" ] && stat -c '%n %y %s' "$d/0anacron"; done
+
+# Look for obvious execution of shells or downloaders embedded in cron stubs
+grep -R --line-number -E 'curl|wget|/bin/sh|python|bash -c' /etc/cron.*/* 2>/dev/null
+```
+#### Hunt: SSH hardening rollback and backdoor shells
+Le modifiche a sshd_config e alle shell degli account di sistema sono comuni dopo l'exploitation per preservare l'accesso.
+```bash
+# Root login enablement (flag "yes" or lax values)
+grep -E '^\s*PermitRootLogin' /etc/ssh/sshd_config
+
+# System accounts with interactive shells (e.g., games → /bin/sh)
+awk -F: '($7 ~ /bin\/(sh|bash|zsh)/ && $1 ~ /^(games|lp|sync|shutdown|halt|mail|operator)$/) {print}' /etc/passwd
+```
+#### Hunt: Cloud C2 markers (Dropbox/Cloudflare Tunnel)
+- I beacon dell'API di Dropbox utilizzano tipicamente api.dropboxapi.com o content.dropboxapi.com su HTTPS con token di autorizzazione: Bearer.
+- Cerca in proxy/Zeek/NetFlow per egress inaspettati di Dropbox dai server.
+- Cloudflare Tunnel (`cloudflared`) fornisce C2 di backup su 443 in uscita.
+```bash
+ps aux | grep -E '[c]loudflared|trycloudflare'
+systemctl list-units | grep -i cloudflared
+```
 ### Servizi
 
 Percorsi in cui un malware potrebbe essere installato come servizio:
@@ -207,12 +233,12 @@ Percorsi in cui un malware potrebbe essere installato come servizio:
 - **/etc/systemd/system**: Una directory per gli script del gestore di sistema e servizi.
 - **/etc/systemd/system/multi-user.target.wants/**: Contiene collegamenti ai servizi che dovrebbero essere avviati in un livello di esecuzione multi-utente.
 - **/usr/local/etc/rc.d/**: Per servizi personalizzati o di terze parti.
-- **\~/.config/autostart/**: Per applicazioni di avvio automatico specifiche per l'utente, che possono essere un nascondiglio per malware mirati all'utente.
+- **\~/.config/autostart/**: Per applicazioni di avvio automatico specifiche dell'utente, che possono essere un nascondiglio per malware mirati all'utente.
 - **/lib/systemd/system/**: File di unità predefiniti a livello di sistema forniti dai pacchetti installati.
 
 ### Moduli del Kernel
 
-I moduli del kernel Linux, spesso utilizzati dal malware come componenti rootkit, vengono caricati all'avvio del sistema. Le directory e i file critici per questi moduli includono:
+I moduli del kernel Linux, spesso utilizzati dai malware come componenti rootkit, vengono caricati all'avvio del sistema. Le directory e i file critici per questi moduli includono:
 
 - **/lib/modules/$(uname -r)**: Contiene moduli per la versione del kernel in esecuzione.
 - **/etc/modprobe.d**: Contiene file di configurazione per controllare il caricamento dei moduli.
@@ -220,10 +246,10 @@ I moduli del kernel Linux, spesso utilizzati dal malware come componenti rootkit
 
 ### Altre Posizioni di Avvio Automatico
 
-Linux utilizza vari file per eseguire automaticamente programmi al momento del login dell'utente, potenzialmente ospitando malware:
+Linux utilizza vari file per eseguire automaticamente programmi al login dell'utente, potenzialmente ospitando malware:
 
 - **/etc/profile.d/**\*, **/etc/profile**, e **/etc/bash.bashrc**: Eseguiti per qualsiasi login utente.
-- **\~/.bashrc**, **\~/.bash_profile**, **\~/.profile**, e **\~/.config/autostart**: File specifici per l'utente che vengono eseguiti al loro login.
+- **\~/.bashrc**, **\~/.bash_profile**, **\~/.profile**, e **\~/.config/autostart**: File specifici dell'utente che vengono eseguiti al loro login.
 - **/etc/rc.local**: Viene eseguito dopo che tutti i servizi di sistema sono stati avviati, segnando la fine della transizione a un ambiente multiutente.
 
 ## Esaminare i Log
@@ -231,23 +257,23 @@ Linux utilizza vari file per eseguire automaticamente programmi al momento del l
 I sistemi Linux tracciano le attività degli utenti e gli eventi di sistema attraverso vari file di log. Questi log sono fondamentali per identificare accessi non autorizzati, infezioni da malware e altri incidenti di sicurezza. I file di log chiave includono:
 
 - **/var/log/syslog** (Debian) o **/var/log/messages** (RedHat): Catturano messaggi e attività a livello di sistema.
-- **/var/log/auth.log** (Debian) o **/var/log/secure** (RedHat): Registrano i tentativi di autenticazione, accessi riusciti e falliti.
+- **/var/log/auth.log** (Debian) o **/var/log/secure** (RedHat): Registrano tentativi di autenticazione, accessi riusciti e falliti.
 - Usa `grep -iE "session opened for|accepted password|new session|not in sudoers" /var/log/auth.log` per filtrare eventi di autenticazione rilevanti.
 - **/var/log/boot.log**: Contiene messaggi di avvio del sistema.
-- **/var/log/maillog** o **/var/log/mail.log**: Registra le attività del server di posta, utile per tracciare i servizi legati alla posta elettronica.
+- **/var/log/maillog** o **/var/log/mail.log**: Registra le attività del server di posta, utile per tracciare servizi legati alla posta elettronica.
 - **/var/log/kern.log**: Memorizza messaggi del kernel, inclusi errori e avvisi.
 - **/var/log/dmesg**: Contiene messaggi del driver del dispositivo.
-- **/var/log/faillog**: Registra i tentativi di accesso falliti, utile per le indagini su violazioni della sicurezza.
+- **/var/log/faillog**: Registra tentativi di accesso falliti, utile per indagini su violazioni della sicurezza.
 - **/var/log/cron**: Registra le esecuzioni dei job cron.
 - **/var/log/daemon.log**: Traccia le attività dei servizi in background.
-- **/var/log/btmp**: Documenta i tentativi di accesso falliti.
+- **/var/log/btmp**: Documenta tentativi di accesso falliti.
 - **/var/log/httpd/**: Contiene log di errore e accesso di Apache HTTPD.
 - **/var/log/mysqld.log** o **/var/log/mysql.log**: Registra le attività del database MySQL.
-- **/var/log/xferlog**: Registra i trasferimenti di file FTP.
+- **/var/log/xferlog**: Registra trasferimenti di file FTP.
 - **/var/log/**: Controlla sempre per log inaspettati qui.
 
-> [!NOTE]
-> I log di sistema Linux e i sottosistemi di audit potrebbero essere disabilitati o eliminati in un'intrusione o in un incidente di malware. Poiché i log sui sistemi Linux contengono generalmente alcune delle informazioni più utili sulle attività dannose, gli intrusi li eliminano regolarmente. Pertanto, quando si esaminano i file di log disponibili, è importante cercare lacune o voci fuori ordine che potrebbero essere un'indicazione di eliminazione o manomissione.
+> [!TIP]
+> I log di sistema Linux e i sottosistemi di audit possono essere disabilitati o eliminati in un incidente di intrusione o malware. Poiché i log sui sistemi Linux contengono generalmente alcune delle informazioni più utili sulle attività malevole, gli intrusi li eliminano di routine. Pertanto, quando si esaminano i file di log disponibili, è importante cercare lacune o voci fuori ordine che potrebbero essere un'indicazione di eliminazione o manomissione.
 
 **Linux mantiene una cronologia dei comandi per ogni utente**, memorizzata in:
 
@@ -301,13 +327,13 @@ More examples and info inside the github: [https://github.com/snovvcrash/usbrip]
 
 ## Rivedere gli Account Utente e le Attività di Accesso
 
-Esaminare il _**/etc/passwd**_, _**/etc/shadow**_ e i **log di sicurezza** per nomi o account insoliti creati e/o utilizzati in prossimità di eventi non autorizzati noti. Inoltre, controllare possibili attacchi di brute-force sudo.\
+Esaminare il _**/etc/passwd**_, _**/etc/shadow**_ e i **log di sicurezza** per nomi o account insoliti creati e/o utilizzati in prossimità di eventi non autorizzati noti. Inoltre, controllare possibili attacchi di brute-force su sudo.\
 Inoltre, controllare file come _**/etc/sudoers**_ e _**/etc/groups**_ per privilegi inaspettati concessi agli utenti.\
 Infine, cercare account con **nessuna password** o **password facilmente indovinabili**.
 
 ## Esaminare il File System
 
-### Analizzare le Strutture del File System nell'Investigazione di Malware
+### Analisi delle Strutture del File System nell'Investigazione di Malware
 
 Quando si indagano incidenti di malware, la struttura del file system è una fonte cruciale di informazioni, rivelando sia la sequenza degli eventi che il contenuto del malware. Tuttavia, gli autori di malware stanno sviluppando tecniche per ostacolare questa analisi, come modificare i timestamp dei file o evitare il file system per l'archiviazione dei dati.
 
@@ -316,10 +342,10 @@ Per contrastare questi metodi anti-forensi, è essenziale:
 - **Condurre un'analisi approfondita della timeline** utilizzando strumenti come **Autopsy** per visualizzare le timeline degli eventi o `mactime` di **Sleuth Kit** per dati dettagliati sulla timeline.
 - **Indagare su script inaspettati** nel $PATH del sistema, che potrebbero includere script shell o PHP utilizzati dagli attaccanti.
 - **Esaminare `/dev` per file atipici**, poiché tradizionalmente contiene file speciali, ma potrebbe ospitare file relativi al malware.
-- **Cercare file o directory nascosti** con nomi come ".. " (punto punto spazio) o "..^G" (punto punto controllo-G), che potrebbero nascondere contenuti dannosi.
+- **Cercare file o directory nascosti** con nomi come ".. " (punto punto spazio) o "..^G" (punto punto controllo-G), che potrebbero nascondere contenuti malevoli.
 - **Identificare file setuid root** utilizzando il comando: `find / -user root -perm -04000 -print` Questo trova file con permessi elevati, che potrebbero essere abusati dagli attaccanti.
-- **Rivedere i timestamp di cancellazione** nelle tabelle inode per individuare cancellazioni di massa di file, che potrebbero indicare la presenza di rootkit o trojan.
-- **Ispezionare inode consecutivi** per file dannosi vicini dopo averne identificato uno, poiché potrebbero essere stati collocati insieme.
+- **Rivedere i timestamp di cancellazione** nelle tabelle degli inode per individuare cancellazioni di massa di file, che potrebbero indicare la presenza di rootkit o trojan.
+- **Ispezionare inode consecutivi** per file malevoli vicini dopo averne identificato uno, poiché potrebbero essere stati collocati insieme.
 - **Controllare le directory binarie comuni** (_/bin_, _/sbin_) per file recentemente modificati, poiché questi potrebbero essere stati alterati da malware.
 ````bash
 # List recent files in a directory:
@@ -328,7 +354,7 @@ ls -laR --sort=time /bin```
 # Sort files in a directory by inode:
 ls -lai /bin | sort -n```
 ````
-> [!NOTE]
+> [!TIP]
 > Nota che un **attaccante** può **modificare** il **tempo** per far **apparire** i **file** **legittimi**, ma non può **modificare** l'**inode**. Se scopri che un **file** indica che è stato creato e modificato allo **stesso tempo** degli altri file nella stessa cartella, ma l'**inode** è **inaspettatamente più grande**, allora i **timestamp di quel file sono stati modificati**.
 
 ## Confronta file di diverse versioni del filesystem
@@ -366,5 +392,7 @@ git diff --no-index --diff-filter=D path/to/old_version/ path/to/new_version/
 - [https://www.plesk.com/blog/featured/linux-logs-explained/](https://www.plesk.com/blog/featured/linux-logs-explained/)
 - [https://git-scm.com/docs/git-diff#Documentation/git-diff.txt---diff-filterACDMRTUXB82308203](https://git-scm.com/docs/git-diff#Documentation/git-diff.txt---diff-filterACDMRTUXB82308203)
 - **Libro: Malware Forensics Field Guide for Linux Systems: Digital Forensics Field Guides**
+
+- [Red Canary – Patching for persistence: How DripDropper Linux malware moves through the cloud](https://redcanary.com/blog/threat-intelligence/dripdropper-linux-malware/)
 
 {{#include ../../banners/hacktricks-training.md}}
