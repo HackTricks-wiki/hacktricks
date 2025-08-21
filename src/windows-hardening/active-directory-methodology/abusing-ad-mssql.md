@@ -170,6 +170,7 @@ Proverite na stranici pomenutoj u **sledećem odeljku kako to uraditi ručno.**
 
 ### MSSQL Osnovne Hacking Tehnike
 
+
 {{#ref}}
 ../../network-services-pentesting/pentesting-mssql-microsoft-sql-server/
 {{#endref}}
@@ -180,7 +181,7 @@ Ako je MSSQL instanca pouzdana (povezana baza) od strane druge MSSQL instance. A
 
 **Povezane baze funkcionišu čak i preko šuma poverenja.**
 
-### Powershell Zloupotreba
+### Zloupotreba Powershell-a
 ```bash
 #Look for MSSQL links of an accessible instance
 Get-SQLServerLink -Instance dcorp-mssql -Verbose #Check for DatabaseLinkd > 0
@@ -230,9 +231,9 @@ Obratite pažnju da će metasploit pokušati da zloupotrebi samo `openquery()` f
 
 ### Ručno - Openquery()
 
-Sa **Linux**-a možete dobiti MSSQL konzolnu ljusku sa **sqsh** i **mssqlclient.py.**
+Sa **Linux-a** možete dobiti MSSQL konzolnu ljusku sa **sqsh** i **mssqlclient.py.**
 
-Sa **Windows**-a takođe možete pronaći linkove i izvršiti komande ručno koristeći **MSSQL klijent kao** [**HeidiSQL**](https://www.heidisql.com)
+Sa **Windows-a** takođe možete pronaći linkove i izvršiti komande ručno koristeći **MSSQL klijent kao** [**HeidiSQL**](https://www.heidisql.com)
 
 _Prijavite se koristeći Windows autentifikaciju:_
 
@@ -280,12 +281,10 @@ EXECUTE('EXECUTE(''sp_addsrvrolemember ''''hacker'''' , ''''sysadmin'''' '') AT 
 
 Strategija koju su mnogi autori osmislili je da primoraju SYSTEM servis da se autentifikuje na lažni ili man-in-the-middle servis koji napadač kreira. Ovaj lažni servis tada može imitirati SYSTEM servis dok pokušava da se autentifikuje.
 
-[SweetPotato](https://github.com/CCob/SweetPotato) ima kolekciju ovih različitih tehnika koje se mogu izvršiti putem Beacon-ove `execute-assembly` komande.
-
-
+[SweetPotato](https://github.com/CCob/SweetPotato) ima kolekciju ovih raznih tehnika koje se mogu izvršiti putem Beacon-ove `execute-assembly` komande.
 
 ### SCCM Tačka Upravljanja NTLM Preusmeravanje (Ekstrakcija OSD Tajni)
-Pogledajte kako se podrazumevane SQL uloge SCCM **Tačaka Upravljanja** mogu zloupotrebiti za dumpovanje tajni Network Access Account i Task-Sequence direktno iz baze podataka sajta:
+Pogledajte kako se podrazumevane SQL uloge SCCM **Tačaka Upravljanja** mogu zloupotrebiti za dumpovanje tajni Mrežnog Pristupnog Naloga i Task-Sequence direktno iz baze podataka sajta:
 
 {{#ref}}
 sccm-management-point-relay-sql-policy-secrets.md

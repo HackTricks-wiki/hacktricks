@@ -22,7 +22,7 @@ Dozvole u **direktorijumu**:
 
 Sa bilo kojom od prethodnih kombinacija, napadač bi mogao **ubaciti** **simboličku/tvrdu vezu** na očekivanu putanju da bi dobio privilegovano arbitrano pisanje.
 
-### Poseban slučaj foldera root R+X
+### Folder root R+X Poseban slučaj
 
 Ako postoje fajlovi u **direktorijumu** gde **samo root ima R+X pristup**, ti fajlovi su **nedostupni bilo kome drugom**. Tako da ranjivost koja omogućava **premestiti fajl koji je čitljiv od strane korisnika**, a koji ne može biti pročitan zbog te **restrikcije**, iz ovog foldera **u drugi**, može se iskoristiti da se pročitaju ti fajlovi.
 
@@ -60,7 +60,7 @@ Primer:
 
 ### Leak FD (no `O_CLOEXEC`)
 
-Ako poziv na `open` nema flag `O_CLOEXEC`, deskriptor datoteke će biti nasledđen od strane procesa deteta. Dakle, ako privilegovani proces otvori privilegovanu datoteku i izvrši proces koji kontroliše napadač, napadač će **naslediti FD nad privilegovanom datotekom**.
+Ako poziv `open` nema flag `O_CLOEXEC`, deskriptor datoteke će biti nasledđen od strane procesa deteta. Dakle, ako privilegovani proces otvori privilegovanu datoteku i izvrši proces koji kontroliše napadač, napadač će **naslediti FD nad privilegovanom datotekom**.
 
 Ako možete da naterate **proces da otvori datoteku ili folder sa visokim privilegijama**, možete zloupotrebiti **`crontab`** da otvorite datoteku u `/etc/sudoers.d` sa **`EDITOR=exploit.py`**, tako da će `exploit.py` dobiti FD do datoteke unutar `/etc/sudoers` i zloupotrebiti je.
 
@@ -74,7 +74,7 @@ xattr -d com.apple.quarantine /path/to/file_or_app
 ```
 ### uchg / uchange / uimmutable flag
 
-Ako fajl/folder ima ovu immutable atribut, neće biti moguće postaviti xattr na njega.
+Ako fajl/folder ima ovu nepromenljivu atribut, neće biti moguće postaviti xattr na njega.
 ```bash
 echo asd > /tmp/asd
 chflags uchg /tmp/asd # "chflags uchange /tmp/asd" or "chflags uimmutable /tmp/asd"
@@ -86,7 +86,7 @@ ls -lO /tmp/asd
 ```
 ### defvfs mount
 
-A **devfs** mount **ne podržava xattr**, više informacija u [**CVE-2023-32364**](https://gergelykalman.com/CVE-2023-32364-a-macOS-sandbox-escape-by-mounting.html)
+**devfs** mount **ne podržava xattr**, više informacija u [**CVE-2023-32364**](https://gergelykalman.com/CVE-2023-32364-a-macOS-sandbox-escape-by-mounting.html)
 ```bash
 mkdir /tmp/mnt
 mount_devfs -o noowners none "/tmp/mnt"
@@ -156,7 +156,7 @@ macos-xattr-acls-extra-stuff.md
 
 ### Obilaženje provere platformskih binarnih datoteka
 
-Neke sigurnosne provere proveravaju da li je binarna datoteka **platformska binarna datoteka**, na primer, da bi se omogućilo povezivanje na XPC servis. Međutim, kao što je izloženo u obilaženju na https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/, moguće je zaobići ovu proveru dobijanjem platformskih binarnih datoteka (kao što je /bin/ls) i injektovanjem eksploita putem dyld koristeći env varijablu `DYLD_INSERT_LIBRARIES`.
+Neke sigurnosne provere proveravaju da li je binarna datoteka **platformska binarna datoteka**, na primer, da bi se omogućilo povezivanje sa XPC servisom. Međutim, kao što je izloženo u obilaženju na https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/, moguće je zaobići ovu proveru dobijanjem platformskog binarnog fajla (kao što je /bin/ls) i injektovanjem eksploita putem dyld koristeći promenljivu okruženja `DYLD_INSERT_LIBRARIES`.
 
 ### Obilaženje zastavica `CS_REQUIRE_LV` i `CS_FORCED_LV`
 
@@ -175,7 +175,7 @@ NSLog(@"=====Inject successfully into %d(%@), csflags=0x%x", pid, exePath, statu
 ```
 ## Bypass Code Signatures
 
-Paketi sadrže datoteku **`_CodeSignature/CodeResources`** koja sadrži **hash** svake pojedinačne **datoteke** u **paketu**. Imajte na umu da je hash CodeResources takođe **ugrađen u izvršnu datoteku**, tako da ne možemo ni s tim da se igramo.
+Bundles sadrže datoteku **`_CodeSignature/CodeResources`** koja sadrži **hash** svake pojedinačne **datoteke** u **bundle-u**. Imajte na umu da je hash CodeResources takođe **ugrađen u izvršnu datoteku**, tako da ne možemo ni s tim da se igramo.
 
 Međutim, postoje neke datoteke čija se potpisivanje neće proveravati, ove imaju ključ omit u plist-u, kao:
 ```xml
@@ -326,7 +326,7 @@ echo $FILENAME
 ```
 ## POSIX Deljena Memorija
 
-**POSIX deljena memorija** omogućava procesima u POSIX-kompatibilnim operativnim sistemima da pristupaju zajedničkom memorijskom prostoru, olakšavajući bržu komunikaciju u poređenju sa drugim metodama međuprocesne komunikacije. To uključuje kreiranje ili otvaranje objekta deljene memorije pomoću `shm_open()`, postavljanje njegove veličine pomoću `ftruncate()`, i mapiranje u adresni prostor procesa koristeći `mmap()`. Procesi zatim mogu direktno čitati iz i pisati u ovaj memorijski prostor. Da bi se upravljalo konkurentnim pristupom i sprečila korupcija podataka, mehanizmi sinhronizacije kao što su mutexi ili semafori se često koriste. Na kraju, procesi demapiraju i zatvaraju deljenu memoriju pomoću `munmap()` i `close()`, i opcionalno uklanjaju objekat memorije pomoću `shm_unlink()`. Ovaj sistem je posebno efikasan za brzu IPC u okruženjima gde više procesa treba brzo da pristupi deljenim podacima.
+**POSIX deljena memorija** omogućava procesima u POSIX-kompatibilnim operativnim sistemima da pristupaju zajedničkom memorijskom prostoru, olakšavajući bržu komunikaciju u poređenju sa drugim metodama međuprocesne komunikacije. To uključuje kreiranje ili otvaranje objekta deljene memorije pomoću `shm_open()`, postavljanje njegove veličine pomoću `ftruncate()`, i mapiranje u adresni prostor procesa koristeći `mmap()`. Procesi zatim mogu direktno čitati i pisati u ovaj memorijski prostor. Da bi se upravljalo konkurentnim pristupom i sprečila korupcija podataka, mehanizmi sinhronizacije kao što su mutexi ili semafori se često koriste. Na kraju, procesi demapiraju i zatvaraju deljenu memoriju pomoću `munmap()` i `close()`, i opcionalno uklanjaju objekat memorije pomoću `shm_unlink()`. Ovaj sistem je posebno efikasan za brzu IPC u okruženjima gde više procesa treba brzo da pristupi deljenim podacima.
 
 <details>
 
@@ -378,7 +378,7 @@ return 0;
 
 <details>
 
-<summary>Primer potrošačkog koda</summary>
+<summary>Primer koda za potrošače</summary>
 ```c
 // gcc consumer.c -o consumer -lrt
 #include <fcntl.h>
@@ -424,11 +424,11 @@ return 0;
 
 **macOS zaštićeni deskriptori** su bezbednosna funkcija uvedena u macOS kako bi se poboljšala sigurnost i pouzdanost **operacija sa deskriptorima datoteka** u korisničkim aplikacijama. Ovi zaštićeni deskriptori pružaju način da se povežu specifična ograničenja ili "čuvari" sa deskriptorima datoteka, koja se sprovode od strane jezgra.
 
-Ova funkcija je posebno korisna za sprečavanje određenih klasa bezbednosnih ranjivosti kao što su **neovlašćen pristup datotekama** ili **trkačke uslove**. Ove ranjivosti se javljaju kada, na primer, jedan nit pristupa opisu datoteke dajući **drugom ranjivom niti pristup** ili kada deskriptor datoteke bude **nasleđen** od ranjivog procesa. Neke funkcije povezane sa ovom funkcionalnošću su:
+Ova funkcija je posebno korisna za sprečavanje određenih klasa bezbednosnih ranjivosti kao što su **neovlašćen pristup datotekama** ili **trke uslova**. Ove ranjivosti se javljaju kada, na primer, jedan nit pristupa opisu datoteke dajući **drugom ranjivom niti pristup** ili kada deskriptor datoteke bude **nasleđen** od ranjivog procesa. Neke funkcije povezane sa ovom funkcionalnošću su:
 
 - `guarded_open_np`: Otvara FD sa čuvarom
 - `guarded_close_np`: Zatvara ga
-- `change_fdguard_np`: Menja zastavice čuvara na deskriptoru (čak i uklanja zaštitu čuvara)
+- `change_fdguard_np`: Menja zastavice čuvara na deskriptoru (čak i uklanjajući zaštitu čuvara)
 
 ## Reference
 

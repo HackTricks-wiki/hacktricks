@@ -4,7 +4,7 @@
 
 ## Intro <a href="#ir-signal-receiver-in-flipper-zero" id="ir-signal-receiver-in-flipper-zero"></a>
 
-Za više informacija o tome kako funkcioniše infracrveno svetlo, proverite:
+Za više informacija o tome kako funkcioniše infracrveno svetlo, pogledajte:
 
 {{#ref}}
 ../infrared.md
@@ -26,7 +26,7 @@ Flipper Zero može se koristiti kao **univerzalni daljinski upravljač za kontro
 
 Dovoljno je pritisnuti dugme za napajanje u režimu Univerzalnog daljinskog upravljača, i Flipper će **uzastopno slati "Power Off"** komande svih TV-a koje poznaje: Sony, Samsung, Panasonic... i tako dalje. Kada TV primi svoj signal, reagovaće i isključiti se.
 
-Takav brute-force zahteva vreme. Što je rečnik veći, to će duže trajati da se završi. Nemoguće je saznati koji signal je tačno TV prepoznao, pošto nema povratne informacije od TV-a.
+Takav brute-force zahteva vreme. Što je rečnik veći, duže će trajati da se završi. Nemoguće je saznati koji signal je tačno TV prepoznao, pošto nema povratne informacije od TV-a.
 
 ### Learn New Remote
 

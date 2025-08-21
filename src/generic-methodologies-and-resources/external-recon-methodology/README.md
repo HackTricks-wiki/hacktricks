@@ -8,8 +8,8 @@
 
 Cilj ove faze je da se dobiju sve **kompanije koje poseduje glavna kompanija** i zatim sva **sredstva** tih kompanija. Da bismo to postigli, uradićemo sledeće:
 
-1. Pronaći akvizicije glavne kompanije, to će nam dati kompanije unutar opsega.
-2. Pronaći ASN (ako postoji) svake kompanije, to će nam dati IP opsege koje poseduje svaka kompanija.
+1. Pronaći akvizicije glavne kompanije, što će nam dati kompanije unutar opsega.
+2. Pronaći ASN (ako postoji) svake kompanije, što će nam dati IP opsege koje poseduje svaka kompanija.
 3. Koristiti obrnute whois pretrage da tražimo druge unose (imena organizacija, domene...) povezane sa prvim (ovo se može raditi rekurzivno).
 4. Koristiti druge tehnike kao što su shodan `org` i `ssl` filteri da tražimo druga sredstva (trik sa `ssl` se može raditi rekurzivno).
 
@@ -21,7 +21,7 @@ Druga opcija je da posetite **Wikipedia** stranicu glavne kompanije i potražite
 
 > U redu, u ovom trenutku trebali biste znati sve kompanije unutar opsega. Hajde da saznamo kako da pronađemo njihova sredstva.
 
-### **ASNovi**
+### **ASN-ovi**
 
 Broj autonomnog sistema (**ASN**) je **jedinstveni broj** dodeljen **autonomnom sistemu** (AS) od strane **Internet Assigned Numbers Authority (IANA)**.\
 **AS** se sastoji od **blokova** **IP adresa** koji imaju jasno definisanu politiku za pristup spoljnim mrežama i kojima upravlja jedna organizacija, ali se mogu sastojati od više operatera.
@@ -57,7 +57,7 @@ Možete pronaći IP i ASN domena koristeći [http://ipv4info.com/](http://ipv4in
 ### **Traženje ranjivosti**
 
 U ovom trenutku znamo **sve resurse unutar opsega**, tako da, ako vam je dozvoljeno, možete pokrenuti neki **skener ranjivosti** (Nessus, OpenVAS) na svim hostovima.\
-Takođe, možete pokrenuti neke [**port skenove**](../pentesting-network/index.html#discovering-hosts-from-the-outside) **ili koristiti usluge kao što je** shodan **da pronađete** otvorene portove **i u zavisnosti od onoga što pronađete, trebali biste** pogledati u ovu knjigu kako da pentestujete nekoliko mogućih usluga koje se izvode.\
+Takođe, možete pokrenuti neke [**port skenove**](../pentesting-network/index.html#discovering-hosts-from-the-outside) **ili koristiti usluge kao što je** shodan **da pronađete** otvorene portove **i u zavisnosti od onoga što pronađete, trebali biste** pogledati u ovoj knjizi kako da pentestujete nekoliko mogućih usluga koje se izvode.\
 **Takođe, vredi napomenuti da možete pripremiti neke** liste podrazumevanih korisničkih imena **i** lozinki **i pokušati da** bruteforce-ujete usluge sa [https://github.com/x90skysn3k/brutespray](https://github.com/x90skysn3k/brutespray).
 
 ## Domeni
@@ -93,7 +93,7 @@ Možete koristiti online alate kao što su:
 - [https://drs.whoisxmlapi.com/reverse-whois-search](https://drs.whoisxmlapi.com/reverse-whois-search) - Nije besplatno (samo **100 besplatnih** pretraga)
 - [https://www.domainiq.com/](https://www.domainiq.com) - Nije besplatno
 
-Možete automatizovati ovaj zadatak koristeći [**DomLink** ](https://github.com/vysecurity/DomLink)(zahteva whoxy API ključ).\
+Možete automatizovati ovaj zadatak koristeći [**DomLink** ](https://github.com/vysecurity/DomLink) (zahteva whoxy API ključ).\
 Takođe možete izvršiti neku automatsku obrnutu whois otkrivanje sa [amass](https://github.com/OWASP/Amass): `amass intel -d tesla.com -whois`
 
 **Napomena da možete koristiti ovu tehniku da otkrijete više imena domena svaki put kada pronađete novi domen.**
@@ -126,7 +126,7 @@ Pored toga, možete takođe pretraživati tehnologije koristeći favicon hash ka
 ```bash
 shodan search org:"Target" http.favicon.hash:116323821 --fields ip_str,port --separator " " | awk '{print $1":"$2}'
 ```
-Ovako možete **izračunati favicon hash** veba:
+Ovako možete **izračunati hash favicon-a** veba:
 ```python
 import mmh3
 import requests
@@ -171,7 +171,7 @@ Očigledno je uobičajeno da ljudi dodele poddomene IP-ovima koji pripadaju prov
 
 Kao što već znate ime organizacije koja poseduje IP prostor. Možete pretraživati po tim podacima u Shodanu koristeći: `org:"Tesla, Inc."` Proverite pronađene hostove za nove neočekivane domene u TLS sertifikatu.
 
-Možete pristupiti **TLS sertifikatu** glavne veb stranice, dobiti **ime organizacije** i zatim pretraživati to ime unutar **TLS sertifikata** svih veb stranica poznatih u **Shodanu** sa filtrima: `ssl:"Tesla Motors"` ili koristiti alat kao što je [**sslsearch**](https://github.com/HarshVaragiya/sslsearch).
+Možete pristupiti **TLS sertifikatu** glavne veb stranice, dobiti **ime organizacije** i zatim pretražiti to ime unutar **TLS sertifikata** svih veb stranica poznatih u **Shodanu** sa filtrima: `ssl:"Tesla Motors"` ili koristiti alat kao što je [**sslsearch**](https://github.com/HarshVaragiya/sslsearch).
 
 **Assetfinder**
 
@@ -181,7 +181,7 @@ Možete pristupiti **TLS sertifikatu** glavne veb stranice, dobiti **ime organiz
 
 Proverite za neki [domain takeover](../../pentesting-web/domain-subdomain-takeover.md#domain-takeover). Možda neka kompanija **koristi neku domenu** ali su **izgubili vlasništvo**. Samo je registrujte (ako je dovoljno jeftina) i obavestite kompaniju.
 
-Ako pronađete neku **domenu sa IP-om koji se razlikuje** od onih koje ste već pronašli u otkrivanju sredstava, trebali biste izvršiti **osnovno skeniranje ranjivosti** (koristeći Nessus ili OpenVAS) i neko [**port skeniranje**](../pentesting-network/index.html#discovering-hosts-from-the-outside) sa **nmap/masscan/shodan**. U zavisnosti od toga koji servisi rade, možete pronaći u **ovoj knjizi neke trikove za "napad" na njih**.\
+Ako pronađete neku **domenu sa IP-om koji se razlikuje** od onih koje ste već pronašli u otkrivanju sredstava, trebali biste izvršiti **osnovno skeniranje ranjivosti** (koristeći Nessus ili OpenVAS) i neko [**skeniranje portova**](../pentesting-network/index.html#discovering-hosts-from-the-outside) sa **nmap/masscan/shodan**. U zavisnosti od toga koji servisi rade, možete pronaći u **ovoj knjizi neke trikove za "napad" na njih**.\
 _Napomena da ponekad domena je hostovana unutar IP-a koji nije pod kontrolom klijenta, tako da nije u opsegu, budite oprezni._
 
 ## Poddomene
@@ -250,7 +250,7 @@ vita -d tesla.com
 ```bash
 theHarvester -d tesla.com -b "anubis, baidu, bing, binaryedge, bingapi, bufferoverun, censys, certspotter, crtsh, dnsdumpster, duckduckgo, fullhunt, github-code, google, hackertarget, hunter, intelx, linkedin, linkedin_links, n45ht, omnisint, otx, pentesttools, projectdiscovery, qwant, rapiddns, rocketreach, securityTrails, spyse, sublist3r, threatcrowd, threatminer, trello, twitter, urlscan, virustotal, yahoo, zoomeye"
 ```
-Postoje **drugi zanimljivi alati/API-ji** koji, iako nisu direktno specijalizovani za pronalaženje poddomena, mogu biti korisni za pronalaženje poddomena, kao što su:
+Postoje **drugi zanimljivi alati/API** koji, iako nisu direktno specijalizovani za pronalaženje poddomena, mogu biti korisni za pronalaženje poddomena, kao što su:
 
 - [**Crobat**](https://github.com/cgboal/sonarsearch)**:** Koristi API [https://sonar.omnisint.io](https://sonar.omnisint.io) za dobijanje poddomena
 ```bash
@@ -335,7 +335,7 @@ Takođe, IP adrese dobrih DNS resolvera. Da biste generisali listu pouzdanih DNS
 
 Najpreporučiviji alati za DNS brute-force su:
 
-- [**massdns**](https://github.com/blechschmidt/massdns): Ovo je bio prvi alat koji je efikasno izveo DNS brute-force. Veoma je brz, međutim sklon je lažnim pozitivnim rezultatima.
+- [**massdns**](https://github.com/blechschmidt/massdns): Ovo je bio prvi alat koji je efikasno izvršavao DNS brute-force. Veoma je brz, međutim sklon je lažnim pozitivnim rezultatima.
 ```bash
 sed 's/$/.domain.com/' subdomains.txt > bf-subdomains.txt
 ./massdns -r resolvers.txt -w /tmp/results.txt bf-subdomains.txt
@@ -353,24 +353,24 @@ shuffledns -d example.com -list example-subdomains.txt -r resolvers.txt
 ```
 puredns bruteforce all.txt domain.com
 ```
-- [**aiodnsbrute**](https://github.com/blark/aiodnsbrute) koristi asyncio za asinkrono brute force napad na imena domena.
+- [**aiodnsbrute**](https://github.com/blark/aiodnsbrute) koristi asyncio za asinkrono brute force-ovanje imena domena.
 ```
 aiodnsbrute -r resolvers -w wordlist.txt -vv -t 1024 domain.com
 ```
-### Druga runda DNS brute-force
+### Druga runda DNS Brute-Force
 
-Nakon što ste pronašli poddomenе koristeći otvorene izvore i brute-forcing, možete generisati varijacije pronađenih poddomena kako biste pokušali da pronađete još više. Nekoliko alata je korisno za ovu svrhu:
+Nakon što ste pronašli poddomene koristeći otvorene izvore i brute-forcing, možete generisati varijacije pronađenih poddomena kako biste pokušali da pronađete još više. Nekoliko alata je korisno za ovu svrhu:
 
-- [**dnsgen**](https://github.com/ProjectAnte/dnsgen)**:** Dajući domene i poddomene generiše permutacije.
+- [**dnsgen**](https://github.com/ProjectAnte/dnsgen)**:** Daje domene i poddomene generiše permutacije.
 ```bash
 cat subdomains.txt | dnsgen -
 ```
-- [**goaltdns**](https://github.com/subfinder/goaltdns): Dati domeni i subdomeni generišite permutacije.
+- [**goaltdns**](https://github.com/subfinder/goaltdns): Dati domeni i subdomeni generiši permutacije.
 - Možete dobiti goaltdns permutacije **wordlist** **ovde** [**here**](https://github.com/subfinder/goaltdns/blob/master/words.txt).
 ```bash
 goaltdns -l subdomains.txt -w /tmp/words-permutations.txt -o /tmp/final-words-s3.txt
 ```
-- [**gotator**](https://github.com/Josue87/gotator)**:** Dati domene i subdomene generiše permutacije. Ako nije naznačen fajl sa permutacijama, gotator će koristiti svoj.
+- [**gotator**](https://github.com/Josue87/gotator)**:** Dati domene i poddomene generiše permutacije. Ako nije naznačen fajl sa permutacijama, gotator će koristiti svoj.
 ```
 gotator -sub subdomains.txt -silent [-perm /tmp/words-permutations.txt]
 ```
@@ -385,7 +385,7 @@ altdns -i subdomains.txt -w /tmp/words-permutations.txt -o /tmp/asd3
 cat subdomains.txt | dmut -d /tmp/words-permutations.txt -w 100 \
 --dns-errorLimit 10 --use-pb --verbose -s /tmp/resolvers-trusted.txt
 ```
-- [**alterx**](https://github.com/projectdiscovery/alterx)**:** Na osnovu domena, **generiše nova potencijalna imena poddomena** na osnovu naznačenih obrazaca kako bi pokušao da otkrije više poddomena.
+- [**alterx**](https://github.com/projectdiscovery/alterx)**:** Na osnovu domena **generiše nova potencijalna imena poddomena** na osnovu naznačenih obrazaca kako bi pokušao da otkrije više poddomena.
 
 #### Generisanje pametnih permutacija
 
@@ -395,7 +395,7 @@ python3 main.py adobe.com adobe adobe.rules
 make_brute_list.sh adobe.rules adobe.brute
 puredns resolve adobe.brute --write adobe.valid
 ```
-- [**subzuf**](https://github.com/elceef/subzuf)**:** _subzuf_ je fuzzer za brute-force subdomena uparen sa izuzetno jednostavnim, ali efikasnim algoritmom vođenim DNS odgovorima. Koristi pruženi skup ulaznih podataka, kao što su prilagođena lista reči ili istorijski DNS/TLS zapisi, da precizno sintetizuje više odgovarajućih imena domena i dodatno ih proširuje u petlji na osnovu informacija prikupljenih tokom DNS skeniranja.
+- [**subzuf**](https://github.com/elceef/subzuf)**:** _subzuf_ je fuzzer za brute-force subdomena uparen sa izuzetno jednostavnom, ali efikasnom DNS odgovorom vođenom algoritmom. Koristi pruženi skup ulaznih podataka, kao što su prilagođena lista reči ili istorijski DNS/TLS zapisi, da precizno sintetizuje više odgovarajućih imena domena i dodatno ih proširuje u petlji na osnovu informacija prikupljenih tokom DNS skeniranja.
 ```
 echo www | subzuf facebook.com
 ```
@@ -413,11 +413,11 @@ https://trickest.com/blog/full-subdomain-brute-force-discovery-using-workflow/
 
 ### **VHosts / Virtuelni hostovi**
 
-Ako ste pronašli IP adresu koja sadrži **jednu ili više web stranica** koje pripadaju poddomenima, možete pokušati da **pronađete druge poddomene sa web stranicama na toj IP adresi** tražeći u **OSINT izvorima** za domene na toj IP adresi ili **brute-forcing VHost imena domena na toj IP adresi**.
+Ako ste pronašli IP adresu koja sadrži **jednu ili više web stranica** koje pripadaju poddomenima, možete pokušati da **pronađete druge poddomene sa web stranicama na toj IP adresi** tražeći u **OSINT izvorima** domene na IP-u ili **brute-forcing VHost imena domena na toj IP adresi**.
 
 #### OSINT
 
-Možete pronaći neke **VHosts na IP adresama koristeći** [**HostHunter**](https://github.com/SpiderLabs/HostHunter) **ili druge API-je**.
+Možete pronaći neke **VHosts na IP-ovima koristeći** [**HostHunter**](https://github.com/SpiderLabs/HostHunter) **ili druge API-je**.
 
 **Brute Force**
 
@@ -440,25 +440,25 @@ VHostScan -t example.com
 
 ### **CORS Brute Force**
 
-Ponekad ćete naići na stranice koje vraćaju samo zaglavlje _**Access-Control-Allow-Origin**_ kada je važeća domena/poddomena postavljena u _**Origin**_ zaglavlju. U ovim scenarijima, možete iskoristiti ovo ponašanje da **otkrijete** nove **poddomenе**.
+Ponekad ćete naići na stranice koje vraćaju samo zaglavlje _**Access-Control-Allow-Origin**_ kada je validna domena/poddomena postavljena u _**Origin**_ zaglavlju. U ovim scenarijima, možete iskoristiti ovo ponašanje da **otkrijete** nove **poddomenе**.
 ```bash
 ffuf -w subdomains-top1million-5000.txt -u http://10.10.10.208 -H 'Origin: http://FUZZ.crossfit.htb' -mr "Access-Control-Allow-Origin" -ignore-body
 ```
 ### **Brute Force na Buckets**
 
-Dok tražite **subdomene**, obratite pažnju da li se **upučuju** na bilo koju vrstu **bucketa**, i u tom slučaju [**proverite dozvole**](../../network-services-pentesting/pentesting-web/buckets/index.html)**.**\
-Takođe, kako ćete u ovom trenutku znati sve domene unutar opsega, pokušajte da [**brute force-ujete moguće nazive bucketa i proverite dozvole**](../../network-services-pentesting/pentesting-web/buckets/index.html).
+Dok tražite **subdomene**, obratite pažnju da li se **upučuju** na bilo koju vrstu **buckets**, i u tom slučaju [**proverite dozvole**](../../network-services-pentesting/pentesting-web/buckets/index.html)**.**\
+Takođe, kako ćete u ovom trenutku znati sve domene unutar opsega, pokušajte da [**brute force-ujete moguće nazive buckets i proverite dozvole**](../../network-services-pentesting/pentesting-web/buckets/index.html).
 
 ### **Monitorisanje**
 
-Možete **monitorisati** da li su **nove subdomene** domena kreirane praćenjem **Certificate Transparency** logova [**sublert** ](https://github.com/yassineaboukir/sublert/blob/master/sublert.py).
+Možete **monitorisati** da li su **nove subdomene** domena kreirane praćenjem **Certificate Transparency** logova [**sublert** ](https://github.com/yassineaboukir/sublert/blob/master/sublert.py)to radi.
 
 ### **Traženje ranjivosti**
 
 Proverite moguće [**preuzimanje subdomena**](../../pentesting-web/domain-subdomain-takeover.md#subdomain-takeover).\
 Ako se **subdomena** upućuje na neki **S3 bucket**, [**proverite dozvole**](../../network-services-pentesting/pentesting-web/buckets/index.html).
 
-Ako pronađete neku **subdomenu sa IP-om koji se razlikuje** od onih koje ste već pronašli u otkrivanju resursa, trebali biste izvršiti **osnovno skeniranje ranjivosti** (koristeći Nessus ili OpenVAS) i neko [**skeniranje portova**](../pentesting-network/index.html#discovering-hosts-from-the-outside) sa **nmap/masscan/shodan**. U zavisnosti od toga koji servisi rade, možete pronaći u **ovoj knjizi neke trikove za "napad" na njih**.\
+Ako pronađete bilo koju **subdomenu sa IP-jem koji se razlikuje** od onih koje ste već pronašli u otkrivanju resursa, trebali biste izvršiti **osnovno skeniranje ranjivosti** (koristeći Nessus ili OpenVAS) i neko [**skeniranje portova**](../pentesting-network/index.html#discovering-hosts-from-the-outside) sa **nmap/masscan/shodan**. U zavisnosti od toga koji servisi rade, možete pronaći u **ovoj knjizi neke trikove za "napad" na njih**.\
 _Napomena: ponekad je subdomena hostovana unutar IP-a koji nije pod kontrolom klijenta, tako da nije u opsegu, budite oprezni._
 
 ## IP-ovi
@@ -466,11 +466,11 @@ _Napomena: ponekad je subdomena hostovana unutar IP-a koji nije pod kontrolom kl
 U početnim koracima možda ste **pronašli neke IP opsege, domene i subdomene**.\
 Vreme je da **prikupite sve IP-ove iz tih opsega** i za **domene/subdomene (DNS upiti).**
 
-Koristeći usluge iz sledećih **besplatnih API-ja**, takođe možete pronaći **prethodne IP-ove koje su koristili domene i subdomene**. Ovi IP-ovi možda još uvek pripadaju klijentu (i mogu vam omogućiti da pronađete [**CloudFlare zaobilaženja**](../../network-services-pentesting/pentesting-web/uncovering-cloudflare.md))
+Koristeći usluge iz sledećih **besplatnih API-ja** možete takođe pronaći **prethodne IP-ove korišćene od strane domena i subdomena**. Ovi IP-ovi možda još uvek pripadaju klijentu (i mogu vam omogućiti da pronađete [**CloudFlare zaobilaženja**](../../network-services-pentesting/pentesting-web/uncovering-cloudflare.md))
 
 - [**https://securitytrails.com/**](https://securitytrails.com/)
 
-Takođe možete proveriti domene koje upućuju na određenu IP adresu koristeći alat [**hakip2host**](https://github.com/hakluke/hakip2host)
+Takođe možete proveriti za domene koje upućuju na određenu IP adresu koristeći alat [**hakip2host**](https://github.com/hakluke/hakip2host)
 
 ### **Traženje ranjivosti**
 
@@ -482,7 +482,7 @@ Takođe možete proveriti domene koje upućuju na određenu IP adresu koristeći
 
 > Pronašli smo sve kompanije i njihove resurse i znamo IP opsege, domene i subdomene unutar opsega. Vreme je da tražimo web servere.
 
-U prethodnim koracima verovatno ste već izvršili neku **recon analizu otkrivenih IP-ova i domena**, tako da ste možda **već pronašli sve moguće web servere**. Međutim, ako niste, sada ćemo videti neke **brze trikove za pretragu web servera** unutar opsega.
+U prethodnim koracima verovatno ste već izvršili neku **recon za IP-ove i domene koje ste otkrili**, tako da ste možda **već pronašli sve moguće web servere**. Međutim, ako niste, sada ćemo videti neke **brze trikove za pretragu web servera** unutar opsega.
 
 Molimo vas da napomenete da će ovo biti **orijentisano na otkrivanje web aplikacija**, tako da biste trebali **izvršiti skeniranje ranjivosti** i **skeniranje portova** takođe (**ako je dozvoljeno** od strane opsega).
 
@@ -498,7 +498,7 @@ Sada kada ste otkrili **sve web servere** prisutne u opsegu (među **IP-ovima** 
 
 Da biste sproveli predloženu ideju, možete koristiti [**EyeWitness**](https://github.com/FortyNorthSecurity/EyeWitness), [**HttpScreenshot**](https://github.com/breenmachine/httpscreenshot), [**Aquatone**](https://github.com/michenriksen/aquatone), [**Shutter**](https://shutter-project.org/downloads/third-party-packages/), [**Gowitness**](https://github.com/sensepost/gowitness) ili [**webscreenshot**](https://github.com/maaaaz/webscreenshot)**.**
 
-Pored toga, možete koristiti [**eyeballer**](https://github.com/BishopFox/eyeballer) da pregledate sve **snimke ekrana** i kažete vam **šta verovatno sadrži ranjivosti**, a šta ne.
+Pored toga, možete koristiti [**eyeballer**](https://github.com/BishopFox/eyeballer) da pregledate sve **screenshotove** i kažete vam **šta verovatno sadrži ranjivosti**, a šta ne.
 
 ## Public Cloud Assets
 
@@ -553,7 +553,7 @@ Procureni kredencijali su povezani sa hakovanjima kompanija gde je **osetljive i
 Kredencijali i API-ji mogu biti procureni u **javnim repozitorijumima** **kompanije** ili **korisnika** koji rade za tu github kompaniju.\
 Možete koristiti **alat** [**Leakos**](https://github.com/carlospolop/Leakos) da **preuzmete** sve **javne repozitorijume** jedne **organizacije** i njenih **razvijača** i automatski pokrenete [**gitleaks**](https://github.com/zricethezav/gitleaks) na njima.
 
-**Leakos** se takođe može koristiti za pokretanje **gitleaks** protiv svih **teksta** koji su **URL-ovi prosleđeni** njemu, jer ponekad **web stranice takođe sadrže tajne**.
+**Leakos** se takođe može koristiti za pokretanje **gitleaks** protiv svih **tekstova** koji su **URL-ovi prosleđeni** njemu, jer ponekad **web stranice takođe sadrže tajne**.
 
 #### Github Dorks
 
@@ -611,7 +611,7 @@ Dakle, već ste:
 5. Pronašli sve **IP-ove** (iz i **ne iz CDN-a**) unutar opsega.
 6. Pronašli sve **web servere** i napravili **screenshot** njih (ima li nešto čudno što vredi dubljeg pregleda?)
 7. Pronašli sve **potencijalne javne cloud resurse** koji pripadaju kompaniji.
-8. **Emailovi**, **procureni kredencijali**, i **procurene tajne** koje bi vam mogle doneti **veliku pobedu vrlo lako**.
+8. **Emailovi**, **procureni kredencijali** i **procurene tajne** koje bi vam mogle doneti **veliku pobedu vrlo lako**.
 9. **Pentesting svih web stranica koje ste pronašli**
 
 ## **Full Recon Automatic Tools**

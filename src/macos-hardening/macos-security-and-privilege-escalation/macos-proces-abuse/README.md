@@ -34,7 +34,7 @@ PIDs, identifikatori procesa, identifikuju jedinstveni proces. U XNU **PIDs** su
 **Procesi** mogu biti smešteni u **grupe** kako bi ih bilo lakše obraditi. Na primer, komande u shell skripti će biti u istoj grupi procesa tako da je moguće **signalizovati ih zajedno** koristeći kill, na primer.\
 Takođe je moguće **grupisati procese u sesije**. Kada proces započne sesiju (`setsid(2)`), dečiji procesi se postavljaju unutar sesije, osim ako ne započnu svoju sesiju.
 
-Koalicija je još jedan način grupisanja procesa u Darwinu. Proces koji se pridružuje koaliciji omogućava mu pristup resursima bazena, deljenje knjigovodstva ili suočavanje sa Jetsam-om. Koalicije imaju različite uloge: Vođa, XPC usluga, Ekstenzija.
+Koalicija je još jedan način grupisanja procesa u Darwinu. Proces koji se pridružuje koaliciji omogućava mu pristup resursima bazena, deljenje knjige ili suočavanje sa Jetsam-om. Koalicije imaju različite uloge: Vođa, XPC usluga, Ekstenzija.
 
 ### Credentials & Personae
 
@@ -59,7 +59,7 @@ char     persona_name[MAXLOGNAME + 1];
 ## Threads Basic Information
 
 1. **POSIX Threads (pthreads):** macOS podržava POSIX niti (`pthreads`), koje su deo standardnog API-ja za niti za C/C++. Implementacija pthreads u macOS-u se nalazi u `/usr/lib/system/libsystem_pthread.dylib`, koja dolazi iz javno dostupnog projekta `libpthread`. Ova biblioteka pruža potrebne funkcije za kreiranje i upravljanje nitima.
-2. **Kreiranje Niti:** Funkcija `pthread_create()` se koristi za kreiranje novih niti. Interno, ova funkcija poziva `bsdthread_create()`, što je sistemski poziv nižeg nivoa specifičan za XNU kernel (kernel na kojem se zasniva macOS). Ovaj sistemski poziv uzima razne zastavice izvedene iz `pthread_attr` (atributi) koje specificiraju ponašanje niti, uključujući politike raspoređivanja i veličinu steka.
+2. **Kreiranje Niti:** Funkcija `pthread_create()` se koristi za kreiranje novih niti. Interno, ova funkcija poziva `bsdthread_create()`, što je sistemski poziv nižeg nivoa specifičan za XNU kernel (kernel na kojem se zasniva macOS). Ovaj sistemski poziv uzima različite zastavice izvedene iz `pthread_attr` (atributi) koje specificiraju ponašanje niti, uključujući politike raspoređivanja i veličinu steka.
 - **Podrazumevana Veličina Steka:** Podrazumevana veličina steka za nove niti je 512 KB, što je dovoljno za tipične operacije, ali se može prilagoditi putem atributa niti ako je potrebno više ili manje prostora.
 3. **Inicijalizacija Niti:** Funkcija `__pthread_init()` je ključna tokom postavljanja niti, koristeći argument `env[]` za parsiranje promenljivih okruženja koje mogu uključivati detalje o lokaciji i veličini steka.
 
@@ -73,24 +73,24 @@ char     persona_name[MAXLOGNAME + 1];
 Da bi se upravljalo pristupom deljenim resursima i izbegle trke, macOS pruža nekoliko sinhronizacionih primitiva. Ovi su kritični u višedretvenim okruženjima kako bi se osigurala integritet podataka i stabilnost sistema:
 
 1. **Mutexes:**
-- **Regular Mutex (Signature: 0x4D555458):** Standardni mutex sa memorijskim otiskom od 60 bajta (56 bajta za mutex i 4 bajta za potpis).
-- **Fast Mutex (Signature: 0x4d55545A):** Sličan regularnom mutexu, ali optimizovan za brže operacije, takođe 60 bajta veličine.
+- **Regular Mutex (Signature: 0x4D555458):** Standardni mutex sa memorijskim otiskom od 60 bajtova (56 bajtova za mutex i 4 bajta za potpis).
+- **Fast Mutex (Signature: 0x4d55545A):** Sličan regularnom mutexu, ali optimizovan za brže operacije, takođe 60 bajtova u veličini.
 2. **Condition Variables:**
-- Koriste se za čekanje na određene uslove, sa veličinom od 44 bajta (40 bajta plus 4-bajtni potpis).
-- **Condition Variable Attributes (Signature: 0x434e4441):** Konfiguracijski atributi za promenljive uslova, veličine 12 bajta.
+- Koriste se za čekanje na određene uslove, sa veličinom od 44 bajta (40 bajtova plus 4-bajtni potpis).
+- **Condition Variable Attributes (Signature: 0x434e4441):** Konfiguracijski atributi za promenljive uslova, veličine 12 bajtova.
 3. **Once Variable (Signature: 0x4f4e4345):**
-- Osigurava da se deo inicijalizacionog koda izvrši samo jednom. Njegova veličina je 12 bajta.
+- Osigurava da se deo inicijalizacionog koda izvrši samo jednom. Njegova veličina je 12 bajtova.
 4. **Read-Write Locks:**
 - Omogućava više čitaoca ili jednog pisca u isto vreme, olakšavajući efikasan pristup deljenim podacima.
-- **Read Write Lock (Signature: 0x52574c4b):** Veličine 196 bajta.
-- **Read Write Lock Attributes (Signature: 0x52574c41):** Atributi za zaključavanje za čitanje i pisanje, veličine 20 bajta.
+- **Read Write Lock (Signature: 0x52574c4b):** Veličine 196 bajtova.
+- **Read Write Lock Attributes (Signature: 0x52574c41):** Atributi za zaključavanje za čitanje i pisanje, veličine 20 bajtova.
 
 > [!TIP]
 > Poslednja 4 bajta ovih objekata se koriste za detekciju prelivanja.
 
 ### Thread Local Variables (TLV)
 
-**Thread Local Variables (TLV)** u kontekstu Mach-O datoteka (format za izvršne datoteke u macOS-u) koriste se za deklarisanje promenljivih koje su specifične za **svaku nit** u višedretvenoj aplikaciji. Ovo osigurava da svaka nit ima svoju sopstvenu odvojenu instancu promenljive, pružajući način da se izbegnu konflikti i održi integritet podataka bez potrebe za eksplicitnim mehanizmima sinhronizacije poput mutexa.
+**Thread Local Variables (TLV)** u kontekstu Mach-O datoteka (format za izvršne datoteke u macOS-u) koriste se za deklarisanje promenljivih koje su specifične za **svaku nit** u višedretvenoj aplikaciji. Ovo osigurava da svaka nit ima svoju sopstvenu odvojenu instancu promenljive, pružajući način da se izbegnu konflikti i održi integritet podataka bez potrebe za eksplicitnim sinhronizacionim mehanizmima poput mutexa.
 
 U C i srodnim jezicima, možete deklarisati promenljivu lokalnu za nit koristeći **`__thread`** ključnu reč. Evo kako to funkcioniše u vašem primeru:
 ```c
@@ -124,12 +124,12 @@ Razumevanje prioriteta niti uključuje razmatranje kako operativni sistem odluč
 
 #### Klase kvaliteta usluge (QoS)
 
-QoS klase su moderniji pristup upravljanju prioritetima niti, posebno u sistemima kao što je macOS koji podržavaju **Grand Central Dispatch (GCD)**. QoS klase omogućavaju programerima da **kategorizuju** rad u različite nivoe na osnovu njihove važnosti ili hitnosti. macOS automatski upravlja prioritetom niti na osnovu ovih QoS klasa:
+QoS klase su moderniji pristup upravljanju prioritetima niti, posebno u sistemima kao što je macOS koji podržavaju **Grand Central Dispatch (GCD)**. QoS klase omogućavaju programerima da **kategorizuju** rad u različite nivoe na osnovu njihove važnosti ili hitnosti. macOS automatski upravlja prioritetima niti na osnovu ovih QoS klasa:
 
 1. **Interaktivni korisnik:**
 - Ova klasa je za zadatke koji trenutno komuniciraju sa korisnikom ili zahtevaju trenutne rezultate kako bi se obezbedilo dobro korisničko iskustvo. Ovi zadaci imaju najviši prioritet kako bi interfejs ostao responzivan (npr. animacije ili obrada događaja).
 2. **Inicirani od strane korisnika:**
-- Zadaci koje korisnik inicira i očekuje trenutne rezultate, kao što su otvaranje dokumenta ili klik na dugme koje zahteva proračune. Ovi su visoki prioritet, ali ispod interaktivnih korisnika.
+- Zadaci koje korisnik inicira i očekuje trenutne rezultate, kao što su otvaranje dokumenta ili klik na dugme koje zahteva proračune. Ovi su visoki prioritet, ali ispod interaktivnih korisničkih zadataka.
 3. **Korisnička usluga:**
 - Ovi zadaci su dugotrajni i obično prikazuju indikator napretka (npr. preuzimanje datoteka, uvoz podataka). Imaju niži prioritet od zadataka iniciranih od strane korisnika i ne moraju se završiti odmah.
 4. **Pozadinski:**
@@ -139,7 +139,7 @@ Korišćenjem QoS klasa, programeri ne moraju upravljati tačnim brojevima prior
 
 Pored toga, postoje različite **politike zakazivanja niti** koje definišu skup parametara zakazivanja koje zakazivač uzima u obzir. Ovo se može uraditi korišćenjem `thread_policy_[set/get]`. Ovo može biti korisno u napadima na uslove trke.
 
-## Zloupotreba procesa na MacOS-u
+## Zloupotreba procesa u MacOS-u
 
 MacOS, kao i svaki drugi operativni sistem, pruža razne metode i mehanizme za **interakciju, komunikaciju i deljenje podataka između procesa**. Dok su ove tehnike esencijalne za efikasno funkcionisanje sistema, mogu ih takođe zloupotrebiti pretnje da **izvrše zlonamerne aktivnosti**.
 
@@ -151,17 +151,17 @@ Ubrizgavanje biblioteka je tehnika u kojoj napadač **prisiljava proces da učit
 macos-library-injection/
 {{#endref}}
 
-### Hooking funkcija
+### Uhvatanje funkcija
 
-Hooking funkcija uključuje **presretanje poziva funkcija** ili poruka unutar softverskog koda. Presretanjem funkcija, napadač može **modifikovati ponašanje** procesa, posmatrati osetljive podatke ili čak preuzeti kontrolu nad tokom izvršenja.
+Uhvatanje funkcija uključuje **presretanje poziva funkcija** ili poruka unutar softverskog koda. Uhvatanjem funkcija, napadač može **modifikovati ponašanje** procesa, posmatrati osetljive podatke ili čak preuzeti kontrolu nad tokom izvršenja.
 
 {{#ref}}
 macos-function-hooking.md
 {{#endref}}
 
-### Komunikacija između procesa
+### Međuprocesna komunikacija
 
-Komunikacija između procesa (IPC) se odnosi na različite metode putem kojih odvojeni procesi **dele i razmenjuju podatke**. Dok je IPC fundamentalna za mnoge legitimne aplikacije, može se takođe zloupotrebiti za potkopavanje izolacije procesa, curenje osetljivih informacija ili izvršavanje neovlašćenih radnji.
+Međuprocesna komunikacija (IPC) se odnosi na različite metode putem kojih odvojeni procesi **dele i razmenjuju podatke**. Dok je IPC fundamentalna za mnoge legitimne aplikacije, može se takođe zloupotrebiti za potkopavanje izolacije procesa, curenje osetljivih informacija ili izvršavanje neovlašćenih radnji.
 
 {{#ref}}
 macos-ipc-inter-process-communication/
@@ -225,7 +225,7 @@ macos-ruby-applications-injection.md
 
 ### Ubrizgavanje Pythona
 
-Ako je env varijabla **`PYTHONINSPECT`** postavljena, python proces će preći u python CLI kada završi. Takođe je moguće koristiti **`PYTHONSTARTUP`** da označite python skriptu koja će se izvršiti na početku interaktivne sesije.\
+Ako je env varijabla **`PYTHONINSPECT`** postavljena, python proces će preći u python CLI kada završi. Takođe je moguće koristiti **`PYTHONSTARTUP`** da označi python skriptu koja će se izvršiti na početku interaktivne sesije.\
 Međutim, imajte na umu da **`PYTHONSTARTUP`** skripta neće biti izvršena kada **`PYTHONINSPECT`** kreira interaktivnu sesiju.
 
 Druge env varijable kao što su **`PYTHONPATH`** i **`PYTHONHOME`** takođe mogu biti korisne za izvršavanje proizvoljnog koda python komandom.
@@ -233,14 +233,14 @@ Druge env varijable kao što su **`PYTHONPATH`** i **`PYTHONHOME`** takođe mogu
 Napomena da izvršne datoteke kompajlirane sa **`pyinstaller`** neće koristiti ove varijable okruženja čak i ako se izvršavaju koristeći ugrađeni python.
 
 > [!CAUTION]
-> Generalno, nisam mogao pronaći način da nateram python da izvrši proizvoljan kod zloupotrebom varijabli okruženja.\
+> Generalno, nisam mogao pronaći način da se python izvrši sa proizvoljnim kodom zloupotrebom varijabli okruženja.\
 > Međutim, većina ljudi instalira python koristeći **Homebrew**, koji će instalirati python na **pisivo mesto** za podrazumevanog admin korisnika. Možete ga preuzeti sa nečim poput:
 >
 > ```bash
 > mv /opt/homebrew/bin/python3 /opt/homebrew/bin/python3.old
 > cat > /opt/homebrew/bin/python3 <<EOF
 > #!/bin/bash
-> # Dodatni hijacking kod
+> # Dodatni kod za preuzimanje
 > /opt/homebrew/bin/python3.old "$@"
 > EOF
 > chmod +x /opt/homebrew/bin/python3
@@ -255,13 +255,13 @@ Napomena da izvršne datoteke kompajlirane sa **`pyinstaller`** neće koristiti 
 [**Shield**](https://theevilbit.github.io/shield/) ([**Github**](https://github.com/theevilbit/Shield)) je aplikacija otvorenog koda koja može **detektovati i blokirati akcije ubrizgavanja procesa**:
 
 - Korišćenjem **varijabli okruženja**: Pratiće prisustvo bilo koje od sledećih varijabli okruženja: **`DYLD_INSERT_LIBRARIES`**, **`CFNETWORK_LIBRARY_PATH`**, **`RAWCAMERA_BUNDLE_PATH`** i **`ELECTRON_RUN_AS_NODE`**
-- Korišćenjem poziva **`task_for_pid`**: Da bi saznali kada jedan proces želi da dobije **task port drugog** koji omogućava ubrizgavanje koda u proces.
+- Korišćenjem poziva **`task_for_pid`**: Da bi saznao kada jedan proces želi da dobije **task port drugog** koji omogućava ubrizgavanje koda u proces.
 - **Parametri Electron aplikacija**: Neko može koristiti **`--inspect`**, **`--inspect-brk`** i **`--remote-debugging-port`** argumente komandne linije da pokrene Electron aplikaciju u režimu debagovanja, i tako ubrizga kod u nju.
-- Korišćenjem **simboličkih linkova** ili **hardlinkova**: Obično je najčešća zloupotreba **postavljanje linka sa našim korisničkim privilegijama**, i **usmeravanje na lokaciju sa višim privilegijama**. Detekcija je vrlo jednostavna za hardlink i simboličke linkove. Ako proces koji kreira link ima **drugi nivo privilegija** od ciljne datoteke, kreiramo **uzbunu**. Nažalost, u slučaju simboličkih linkova blokiranje nije moguće, jer nemamo informacije o odredištu linka pre kreiranja. Ovo je ograničenje Apple-ovog EndpointSecurity okvira.
+- Korišćenjem **simlinkova** ili **hardlinkova**: Tipično, najčešća zloupotreba je **postavljanje linka sa našim korisničkim privilegijama**, i **usmeravanje na lokaciju sa višim privilegijama**. Detekcija je vrlo jednostavna za hardlink i simlink. Ako proces koji kreira link ima **drugi nivo privilegija** od ciljne datoteke, kreiramo **uzbunu**. Nažalost, u slučaju simlinkova blokiranje nije moguće, jer nemamo informacije o odredištu linka pre kreiranja. Ovo je ograničenje Apple-ovog EndpointSecurity okvira.
 
 ### Pozivi koje prave drugi procesi
 
-U [**ovom blog postu**](https://knight.sc/reverse%20engineering/2019/04/15/detecting-task-modifications.html) možete pronaći kako je moguće koristiti funkciju **`task_name_for_pid`** da dobijete informacije o drugim **procesima koji ubrizgavaju kod u proces** i zatim dobijete informacije o tom drugom procesu.
+U [**ovom blog postu**](https://knight.sc/reverse%20engineering/2019/04/15/detecting-task-modifications.html) možete pronaći kako je moguće koristiti funkciju **`task_name_for_pid`** da dobije informacije o drugim **procesima koji ubrizgavaju kod u proces** i zatim dobije informacije o tom drugom procesu.
 
 Napomena da da biste pozvali tu funkciju, morate biti **isti uid** kao onaj koji pokreće proces ili **root** (i vraća informacije o procesu, ne način za ubrizgavanje koda).
 

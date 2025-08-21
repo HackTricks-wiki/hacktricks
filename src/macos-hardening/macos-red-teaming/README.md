@@ -23,9 +23,9 @@ MDM će imati dozvolu da instalira, postavlja upite ili uklanja profile, instali
 
 Da biste pokrenuli svoj MDM, potrebno je da **vaš CSR potpiše dobavljač** što možete pokušati da dobijete sa [**https://mdmcert.download/**](https://mdmcert.download/). A da biste pokrenuli svoj MDM za Apple uređaje, možete koristiti [**MicroMDM**](https://github.com/micromdm/micromdm).
 
-Međutim, da biste instalirali aplikaciju na registrovanom uređaju, još uvek je potrebno da bude potpisana od strane developerskog naloga... međutim, prilikom MDM registracije, **uređaj dodaje SSL certifikat MDM-a kao pouzdanu CA**, tako da sada možete potpisati bilo šta.
+Međutim, da biste instalirali aplikaciju na registrovanom uređaju, još uvek je potrebno da bude potpisana od strane developerskog naloga... međutim, prilikom MDM registracije, **uređaj dodaje SSL certifikat MDM-a kao pouzdan CA**, tako da sada možete potpisati bilo šta.
 
-Da biste registrovali uređaj u MDM, potrebno je da instalirate **`mobileconfig`** datoteku kao root, koja može biti isporučena putem **pkg** datoteke (možete je kompresovati u zip, a kada se preuzme iz safarija, biće dekompresovana).
+Da biste registrovali uređaj u MDM, potrebno je da instalirate **`mobileconfig`** datoteku kao root, koja se može isporučiti putem **pkg** datoteke (možete je kompresovati u zip, a kada se preuzme iz safarija, biće dekompresovana).
 
 **Mythic agent Orthrus** koristi ovu tehniku.
 
@@ -37,7 +37,7 @@ JAMF može pokretati **prilagođene skripte** (skripte koje je razvio sysadmin),
 
 Idite na stranicu kao što je `https://<company-name>.jamfcloud.com/enroll/` da vidite da li imaju **omogućenu samoregistraciju**. Ako imaju, može **tražiti akreditive za pristup**.
 
-Možete koristiti skriptu [**JamfSniper.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfSniper.py) da izvršite napad password spraying.
+Možete koristiti skriptu [**JamfSniper.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfSniper.py) da izvršite napad na lozinke.
 
 Štaviše, nakon pronalaženja odgovarajućih akreditiva, mogli biste biti u mogućnosti da brute-force-ujete druge korisničke naloge sa sledećim obrascem:
 
@@ -47,7 +47,7 @@ Možete koristiti skriptu [**JamfSniper.py**](https://github.com/WithSecureLabs/
 
 <figure><img src="../../images/image (167).png" alt=""><figcaption></figcaption></figure>
 
-**`jamf`** binarni fajl sadrži tajnu za otvaranje keychain-a koja je u vreme otkrića bila **deljena** među svima i to je bila: **`jk23ucnq91jfu9aj`**.\
+**`jamf`** binarni fajl sadržao je tajnu za otvaranje keychain-a koja je u vreme otkrića bila **deljena** među svima i to je bila: **`jk23ucnq91jfu9aj`**.\
 Štaviše, jamf **persistira** kao **LaunchDaemon** u **`/Library/LaunchAgents/com.jamf.management.agent.plist`**
 
 #### JAMF preuzimanje uređaja
@@ -78,9 +78,9 @@ sudo jamf policy -id 0
 Da biste **imitirali komunikaciju** između uređaja i JMF-a, potrebno je:
 
 - **UUID** uređaja: `ioreg -d2 -c IOPlatformExpertDevice | awk -F" '/IOPlatformUUID/{print $(NF-1)}'`
-- **JAMF ključanica** iz: `/Library/Application\ Support/Jamf/JAMF.keychain` koja sadrži sertifikat uređaja
+- **JAMF ključanica** sa: `/Library/Application\ Support/Jamf/JAMF.keychain` koja sadrži sertifikat uređaja
 
-Sa ovom informacijom, **napravite VM** sa **ukradenim** Hardver **UUID** i sa **onemogućenim SIP-om**, prebacite **JAMF ključanicu,** **hook**-ujte Jamf **agent** i ukradite njegove informacije.
+Sa ovom informacijom, **napravite VM** sa **ukradenim** Hardver **UUID** i sa **onemogućenim SIP**, prebacite **JAMF ključanicu,** **hook**-ujte Jamf **agent** i ukradite njegove informacije.
 
 #### Krađa tajni
 
@@ -126,9 +126,9 @@ dscl "/Active Directory/[Domain]/All Domains" ls /
 ```
 Takođe, postoje neki alati pripremljeni za MacOS koji automatski enumerišu AD i igraju se sa kerberosom:
 
-- [**Machound**](https://github.com/XMCyber/MacHound): MacHound je ekstenzija za Bloodhound alat za reviziju koja omogućava prikupljanje i unos odnosa Active Directory na MacOS hostovima.
+- [**Machound**](https://github.com/XMCyber/MacHound): MacHound je ekstenzija za alat za reviziju Bloodhound koja omogućava prikupljanje i unos odnosa Active Directory na MacOS hostovima.
 - [**Bifrost**](https://github.com/its-a-feature/bifrost): Bifrost je Objective-C projekat dizajniran za interakciju sa Heimdal krb5 API-ima na macOS-u. Cilj projekta je omogućiti bolje testiranje bezbednosti oko Kerberosa na macOS uređajima koristeći nativne API-je bez potrebe za bilo kojim drugim okvirom ili paketima na meti.
-- [**Orchard**](https://github.com/its-a-feature/Orchard): JavaScript za automatizaciju (JXA) alat za izvršavanje enumeracije Active Directory.
+- [**Orchard**](https://github.com/its-a-feature/Orchard): JavaScript za automatizaciju (JXA) alat za enumeraciju Active Directory.
 
 ### Informacije o domeni
 ```bash

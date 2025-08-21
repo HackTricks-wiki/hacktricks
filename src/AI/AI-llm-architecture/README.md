@@ -15,7 +15,7 @@ Trebalo bi da počnete čitanjem ovog posta za neke osnovne koncepte koje treba 
 ## 1. Tokenizacija
 
 > [!TIP]
-> Cilj ove inicijalne faze je veoma jednostavan: **Podeliti ulaz u tokene (ids) na način koji ima smisla**.
+> Cilj ove inicijalne faze je vrlo jednostavan: **Podeliti ulaz u tokene (ids) na način koji ima smisla**.
 
 {{#ref}}
 1.-tokenizing.md
@@ -24,7 +24,7 @@ Trebalo bi da počnete čitanjem ovog posta za neke osnovne koncepte koje treba 
 ## 2. Uzorkovanje Podataka
 
 > [!TIP]
-> Cilj ove druge faze je veoma jednostavan: **Uzorkovati ulazne podatke i pripremiti ih za fazu obuke obično razdvajanjem skupa podataka na rečenice određene dužine i generisanjem očekivanog odgovora.**
+> Cilj ove druge faze je vrlo jednostavan: **Uzorkovati ulazne podatke i pripremiti ih za fazu obuke obično razdvajanjem skupa podataka na rečenice određene dužine i generisanjem očekivanog odgovora.**
 
 {{#ref}}
 2.-data-sampling.md
@@ -33,7 +33,7 @@ Trebalo bi da počnete čitanjem ovog posta za neke osnovne koncepte koje treba 
 ## 3. Token Umetanja
 
 > [!TIP]
-> Cilj ove treće faze je veoma jednostavan: **Dodeliti svakom od prethodnih tokena u rečniku vektor željenih dimenzija za obuku modela.** Svaka reč u rečniku će biti tačka u prostoru X dimenzija.\
+> Cilj ove treće faze je vrlo jednostavan: **Dodeliti svakom od prethodnih tokena u rečniku vektor željenih dimenzija za obuku modela.** Svaka reč u rečniku će biti tačka u prostoru X dimenzija.\
 > Imajte na umu da je inicijalno pozicija svake reči u prostoru samo "nasumično" inicijalizovana i te pozicije su parametri koji se mogu obučavati (biće poboljšani tokom obuke).
 >
 > Štaviše, tokom umetanja tokena **stvara se još jedan sloj umetanja** koji predstavlja (u ovom slučaju) **apsolutnu poziciju reči u rečenici za obuku**. Na ovaj način, reč na različitim pozicijama u rečenici će imati različitu reprezentaciju (značenje).
@@ -45,7 +45,7 @@ Trebalo bi da počnete čitanjem ovog posta za neke osnovne koncepte koje treba 
 ## 4. Mehanizmi Pažnje
 
 > [!TIP]
-> Cilj ove četvrte faze je veoma jednostavan: **Primena nekih mehanizama pažnje**. Ovi će biti mnogo **ponovljenih slojeva** koji će **uhvatiti odnos reči u rečniku sa njenim susedima u trenutnoj rečenici koja se koristi za obuku LLM-a**.\
+> Cilj ove četvrte faze je vrlo jednostavan: **Primena nekih mehanizama pažnje**. Ovi će biti mnogi **ponovljeni slojevi** koji će **uhvatiti odnos reči u rečniku sa njenim susedima u trenutnoj rečenici koja se koristi za obuku LLM-a**.\
 > Za ovo se koristi mnogo slojeva, tako da će mnogo parametara koji se mogu obučavati uhvatiti ove informacije.
 
 {{#ref}}
@@ -55,7 +55,7 @@ Trebalo bi da počnete čitanjem ovog posta za neke osnovne koncepte koje treba 
 ## 5. LLM Arhitektura
 
 > [!TIP]
-> Cilj ove pete faze je veoma jednostavan: **Razviti arhitekturu celog LLM-a**. Spojiti sve, primeniti sve slojeve i kreirati sve funkcije za generisanje teksta ili transformaciju teksta u ID-ove i obrnuto.
+> Cilj ove pete faze je vrlo jednostavan: **Razviti arhitekturu celog LLM-a**. Spojiti sve, primeniti sve slojeve i kreirati sve funkcije za generisanje teksta ili transformaciju teksta u ID-ove i obrnuto.
 >
 > Ova arhitektura će se koristiti i za obuku i za predikciju teksta nakon što je obučena.
 
@@ -66,7 +66,7 @@ Trebalo bi da počnete čitanjem ovog posta za neke osnovne koncepte koje treba 
 ## 6. Predobuka i Učitavanje modela
 
 > [!TIP]
-> Cilj ove šeste faze je veoma jednostavan: **Obučiti model od nule**. Za ovo će se koristiti prethodna LLM arhitektura sa nekim petljama koje prolaze kroz skupove podataka koristeći definisane funkcije gubitka i optimizator za obuku svih parametara modela.
+> Cilj ove šeste faze je vrlo jednostavan: **Obučiti model od nule**. Za ovo će se koristiti prethodna LLM arhitektura sa nekim petljama koje prolaze kroz skupove podataka koristeći definisane funkcije gubitka i optimizator za obuku svih parametara modela.
 
 {{#ref}}
 6.-pre-training-and-loading-models.md

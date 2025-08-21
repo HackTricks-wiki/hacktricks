@@ -21,14 +21,14 @@ adws-enumeration.md
 ### Brza upotreba
 
 1. Pokrenite alat i povežite se sa `dc01.corp.local` koristeći bilo koje domenske kredencijale.
-2. Kreirajte snimak van mreže putem `File ➜ Create Snapshot`.
+2. Kreirajte offline snimak putem `File ➜ Create Snapshot`.
 3. Poređajte dva snimka sa `File ➜ Compare` da biste uočili promene u dozvolama.
 
 ---
 
 ## ADRecon
 
-[ADRecon](https://github.com/adrecon/ADRecon) ekstrakuje veliki set artefakata iz domena (ACLs, GPOs, poverenja, CA šabloni …) i proizvodi **Excel izveštaj**.
+[ADRecon](https://github.com/adrecon/ADRecon) izvlači veliki set artefakata iz domena (ACLs, GPOs, poverenja, CA šabloni …) i proizvodi **Excel izveštaj**.
 ```powershell
 # On a Windows host in the domain
 PS C:\> .\ADRecon.ps1 -OutputDir C:\Temp\ADRecon

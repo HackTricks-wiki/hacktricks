@@ -31,23 +31,23 @@ Razumevanje interakcije između BSD-a i Mach-a može biti složeno, zbog njihovi
 
 Štaviše, **Mach i BSD svaki održavaju različite bezbednosne modele**: **Mach-ov** bezbednosni model se zasniva na **pravima portova**, dok BSD-ov bezbednosni model funkcioniše na osnovu **vlasništva procesa**. Razlike između ova dva modela su povremeno rezultirale lokalnim ranjivostima za eskalaciju privilegija. Pored tipičnih sistemskih poziva, postoje i **Mach zamke koje omogućavaju programima u korisničkom prostoru da komuniciraju sa kernelom**. Ovi različiti elementi zajedno čine složenu, hibridnu arhitekturu macOS kernela.
 
-### I/O Kit - Drivers
+### I/O Kit - Drajveri
 
-I/O Kit je open-source, objektno orijentisan **okvir za drajvere uređaja** u XNU kernelu, koji upravlja **dinamički učitanim drajverima uređaja**. Omogućava dodavanje modularnog koda u kernel u hodu, podržavajući raznovrsni hardver.
+I/O Kit je open-source, objektno-orijentisani **okvir za drajvere uređaja** u XNU kernelu, koji upravlja **dinamički učitanim drajverima uređaja**. Omogućava dodavanje modularnog koda u kernel u hodu, podržavajući raznovrsni hardver.
 
 {{#ref}}
 macos-iokit.md
 {{#endref}}
 
-### IPC - Inter Process Communication
+### IPC - Inter Proces Komunikacija
 
 {{#ref}}
 ../macos-proces-abuse/macos-ipc-inter-process-communication/
 {{#endref}}
 
-## macOS Kernel Extensions
+## macOS Kernel Ekstenzije
 
-macOS je **super restriktivan za učitavanje Kernel Extensions** (.kext) zbog visokih privilegija sa kojima će kod raditi. U stvari, po defaultu je praktično nemoguće (osim ako se ne pronađe zaobilaženje).
+macOS je **super restriktivan za učitavanje Kernel Ekstenzija** (.kext) zbog visokih privilegija sa kojima će kod raditi. U stvari, po defaultu je praktično nemoguće (osim ako se ne pronađe zaobilaženje).
 
 Na sledećoj stranici možete takođe videti kako da povratite `.kext` koji macOS učitava unutar svog **kernelcache**:
 
@@ -55,15 +55,15 @@ Na sledećoj stranici možete takođe videti kako da povratite `.kext` koji macO
 macos-kernel-extensions.md
 {{#endref}}
 
-### macOS System Extensions
+### macOS Sistem Ekstenzije
 
-Umesto korišćenja Kernel Extensions, macOS je kreirao System Extensions, koje nude API-je na korisničkom nivou za interakciju sa kernelom. Na ovaj način, programeri mogu da izbegnu korišćenje kernel ekstenzija.
+Umesto korišćenja Kernel Ekstenzija, macOS je stvorio Sistem Ekstenzije, koje nude API-je na korisničkom nivou za interakciju sa kernelom. Na ovaj način, programeri mogu da izbegnu korišćenje kernel ekstenzija.
 
 {{#ref}}
 macos-system-extensions.md
 {{#endref}}
 
-## References
+## Reference
 
 - [**The Mac Hacker's Handbook**](https://www.amazon.com/-/es/Charlie-Miller-ebook-dp-B004U7MUMU/dp/B004U7MUMU/ref=mt_other?_encoding=UTF8&me=&qid=)
 - [**https://taomm.org/vol1/analysis.html**](https://taomm.org/vol1/analysis.html)

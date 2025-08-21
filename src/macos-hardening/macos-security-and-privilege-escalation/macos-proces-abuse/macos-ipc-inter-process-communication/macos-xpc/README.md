@@ -16,17 +16,17 @@ Primarne prednosti XPC-a uključuju:
 
 Jedini **nedostatak** je što je **razdvajanje aplikacije u nekoliko procesa** koji komuniciraju putem XPC **manje efikasno**. Ali u današnjim sistemima to gotovo nije primetno i prednosti su bolje.
 
-## Specifične XPC usluge aplikacije
+## Aplikacione specifične XPC usluge
 
 XPC komponente aplikacije su **unutar same aplikacije.** Na primer, u Safariju ih možete pronaći u **`/Applications/Safari.app/Contents/XPCServices`**. Imaju ekstenziju **`.xpc`** (kao **`com.apple.Safari.SandboxBroker.xpc`**) i **takođe su paketi** sa glavnim binarnim fajlom unutar njega: `/Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/MacOS/com.apple.Safari.SandboxBroker` i `Info.plist: /Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/Info.plist`
 
 Kao što možda mislite, **XPC komponenta će imati različite privilegije i ovlašćenja** od drugih XPC komponenti ili glavnog binarnog fajla aplikacije. OSIM ako je XPC usluga konfigurisana sa [**JoinExistingSession**](https://developer.apple.com/documentation/bundleresources/information_property_list/xpcservice/joinexistingsession) postavljenim na “True” u svom **Info.plist** fajlu. U ovom slučaju, XPC usluga će raditi u **istoim sigurnosnoj sesiji kao aplikacija** koja je poziva.
 
-XPC usluge se **pokreću** od strane **launchd** kada je to potrebno i **isključuju** se kada su svi zadaci **završeni** kako bi se oslobodili sistemski resursi. **Specifične XPC komponente aplikacije mogu koristiti samo aplikacija**, čime se smanjuje rizik povezan sa potencijalnim ranjivostima.
+XPC usluge se **pokreću** od strane **launchd** kada je to potrebno i **isključuju** se kada su svi zadaci **završeni** kako bi se oslobodili sistemski resursi. **Aplikacione specifične XPC komponente mogu koristiti samo aplikacija**, čime se smanjuje rizik povezan sa potencijalnim ranjivostima.
 
-## Sistem-wide XPC usluge
+## Sistem široke XPC usluge
 
-Sistem-wide XPC usluge su dostupne svim korisnicima. Ove usluge, bilo launchd ili Mach-tip, moraju biti **definisane u plist** fajlovima smeštenim u određenim direktorijumima kao što su **`/System/Library/LaunchDaemons`**, **`/Library/LaunchDaemons`**, **`/System/Library/LaunchAgents`**, ili **`/Library/LaunchAgents`**.
+Sistem široke XPC usluge su dostupne svim korisnicima. Ove usluge, bilo launchd ili Mach-tip, moraju biti **definisane u plist** fajlovima smeštenim u određenim direktorijumima kao što su **`/System/Library/LaunchDaemons`**, **`/Library/LaunchDaemons`**, **`/System/Library/LaunchAgents`**, ili **`/Library/LaunchAgents`**.
 
 Ovi plist fajlovi će imati ključ pod nazivom **`MachServices`** sa imenom usluge, i ključ pod nazivom **`Program`** sa putanjom do binarnog fajla:
 ```xml
@@ -81,15 +81,15 @@ Dakle, `xpc_<objectType>_t` je neka vrsta podklase `xpc_object_t` koja bi bila p
 - **`xpc_pipe`**
 
 **`xpc_pipe`** je FIFO cev koju procesi mogu koristiti za komunikaciju (komunikacija koristi Mach poruke).\
-Moguće je kreirati XPC server pozivajući `xpc_pipe_create()` ili `xpc_pipe_create_from_port()` da bi se kreirao koristeći specifičnu Mach port. Zatim, da bi primili poruke, moguće je pozvati `xpc_pipe_receive` i `xpc_pipe_try_receive`.
+Moguće je kreirati XPC server pozivajući `xpc_pipe_create()` ili `xpc_pipe_create_from_port()` da ga kreirate koristeći specifičnu Mach port. Zatim, da primite poruke, moguće je pozvati `xpc_pipe_receive` i `xpc_pipe_try_receive`.
 
-Napomena da je **`xpc_pipe`** objekat **`xpc_object_t`** sa informacijama u svojoj strukturi o dva korišćena Mach porta i imenu (ako postoji). Ime, na primer, daemon `secinitd` u svom plist-u `/System/Library/LaunchDaemons/com.apple.secinitd.plist` konfiguriše cev nazvanu `com.apple.secinitd`.
+Imajte na umu da je objekat **`xpc_pipe`** **`xpc_object_t`** sa informacijama u svojoj strukturi o dva korišćena Mach porta i imenu (ako postoji). Ime, na primer, demon `secinitd` u svom plist-u `/System/Library/LaunchDaemons/com.apple.secinitd.plist` konfiguriše cev nazvanu `com.apple.secinitd`.
 
 Primer **`xpc_pipe`** je **bootstrap pip**e koju kreira **`launchd`** čime se omogućava deljenje Mach portova.
 
 - **`NSXPC*`**
 
-Ovo su Objective-C objekti visokog nivoa koji omogućavaju apstrakciju XPC veza.\
+Ovo su objekti visokog nivoa u Objective-C koji omogućavaju apstrakciju XPC veza.\
 Štaviše, lakše je debagovati ove objekte sa DTrace nego prethodne.
 
 - **`GCD Queues`**
@@ -103,7 +103,7 @@ Ovaj fajl ima druge konfiguracione ključeve kao što su `ServiceType` koji mož
 
 ### Pokretanje Servisa
 
-Aplikacija pokušava da **poveže** sa XPC servisom koristeći `xpc_connection_create_mach_service`, zatim launchd locira daemon i pokreće **`xpcproxy`**. **`xpcproxy`** sprovodi konfigurisana ograničenja i pokreće servis sa obezbeđenim FDs i Mach portovima.
+Aplikacija pokušava da **poveže** sa XPC servisom koristeći `xpc_connection_create_mach_service`, zatim launchd locira demon i pokreće **`xpcproxy`**. **`xpcproxy`** sprovodi konfigurisana ograničenja i pokreće servis sa obezbeđenim FDs i Mach portovima.
 
 Da bi se poboljšala brzina pretrage XPC servisa, koristi se keš.
 
@@ -116,7 +116,7 @@ Alat `xpcproxy` koristi prefiks `0x22`, na primer: `0x2200001c: xpcproxy:will_do
 
 ## XPC Event Messages
 
-Aplikacije mogu **pretplatiti** se na različite događaje **poruke**, omogućavajući im da budu **inicirane na zahtev** kada se takvi događaji dogode. **Podešavanje** za ove usluge se vrši u **launchd plist datotekama**, smeštenim u **iste direktorijume kao prethodne** i sadrže dodatni **`LaunchEvent`** ključ.
+Aplikacije mogu **pretplatiti** na različite događaje **poruke**, omogućavajući im da budu **inicirane na zahtev** kada se takvi događaji dogode. **Podešavanje** za ove usluge se vrši u **launchd plist datotekama**, smeštenim u **iste direktorijume kao prethodne** i sadrže dodatni **`LaunchEvent`** ključ.
 
 ### XPC Connecting Process Check
 
@@ -281,7 +281,7 @@ sudo launchctl load /Library/LaunchDaemons/xyz.hacktricks.service.plist
 sudo launchctl unload /Library/LaunchDaemons/xyz.hacktricks.service.plist
 sudo rm /Library/LaunchDaemons/xyz.hacktricks.service.plist /tmp/xpc_server
 ```
-## XPC komunikacija Objective-C kod primer
+## XPC Communication Primerak koda u Objective-C
 
 {{#tabs}}
 {{#tab name="oc_xpc_server.m"}}
@@ -440,13 +440,13 @@ return;
 ## Remote XPC
 
 Ova funkcionalnost koju pruža `RemoteXPC.framework` (iz `libxpc`) omogućava komunikaciju putem XPC između različitih hostova.\
-Servisi koji podržavaju daljinski XPC će imati u svom plist ključ UsesRemoteXPC kao što je slučaj sa `/System/Library/LaunchDaemons/com.apple.SubmitDiagInfo.plist`. Međutim, iako će servis biti registrovan sa `launchd`, to je `UserEventAgent` sa pluginovima `com.apple.remoted.plugin` i `com.apple.remoteservicediscovery.events.plugin` koji pruža funkcionalnost.
+Usluge koje podržavaju daljinski XPC će imati u svom plist ključ UsesRemoteXPC kao što je slučaj sa `/System/Library/LaunchDaemons/com.apple.SubmitDiagInfo.plist`. Međutim, iako će usluga biti registrovana sa `launchd`, to je `UserEventAgent` sa pluginovima `com.apple.remoted.plugin` i `com.apple.remoteservicediscovery.events.plugin` koji pruža funkcionalnost.
 
-Pored toga, `RemoteServiceDiscovery.framework` omogućava dobijanje informacija iz `com.apple.remoted.plugin` izlažući funkcije kao što su `get_device`, `get_unique_device`, `connect`...
+Štaviše, `RemoteServiceDiscovery.framework` omogućava dobijanje informacija iz `com.apple.remoted.plugin` izlažući funkcije kao što su `get_device`, `get_unique_device`, `connect`...
 
-Kada se koristi connect i socket `fd` servisa se prikupi, moguće je koristiti klasu `remote_xpc_connection_*`.
+Kada se koristi connect i socket `fd` usluge se prikupi, moguće je koristiti klasu `remote_xpc_connection_*`.
 
-Moguće je dobiti informacije o daljinskim servisima koristeći cli alat `/usr/libexec/remotectl` koristeći parametre kao:
+Moguće je dobiti informacije o daljinskim uslugama koristeći cli alat `/usr/libexec/remotectl` koristeći parametre kao:
 ```bash
 /usr/libexec/remotectl list # Get bridge devices
 /usr/libexec/remotectl show ...# Get device properties and services

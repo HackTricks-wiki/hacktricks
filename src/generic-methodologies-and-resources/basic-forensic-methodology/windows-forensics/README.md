@@ -18,13 +18,13 @@ Baza podataka se nalazi u putanji `\Users\<username>\AppData\Local\ConnectedDevi
 
 ### ADS (Alternativni podaci)
 
-Preuzete datoteke mogu sadržati **ADS Zone.Identifier** koji ukazuje **kako** je **preuzeta** sa intraneta, interneta itd. Neki softver (kao što su pregledači) obično dodaju čak i **više** **informacija** kao što je **URL** sa kojeg je datoteka preuzeta.
+Preuzete datoteke mogu sadržati **ADS Zone.Identifier** koji ukazuje **kako** je **preuzeta** sa intraneta, interneta itd. Neki softver (kao što su pregledači) obično dodaju čak **više** **informacija** kao što je **URL** sa kojeg je datoteka preuzeta.
 
 ## **Backup datoteka**
 
 ### Korpa za otpatke
 
-U Vista/Win7/Win8/Win10 **Korpa za otpatke** može se pronaći u fascikli **`$Recycle.bin`** u korenu diska (`C:\$Recycle.bin`).\
+U Vista/Win7/Win8/Win10 **Korpa za otpatke** može se pronaći u folderu **`$Recycle.bin`** u korenu diska (`C:\$Recycle.bin`).\
 Kada se datoteka obriše u ovoj fascikli, kreiraju se 2 specifične datoteke:
 
 - `$I{id}`: Informacije o datoteci (datum kada je obrisana)
@@ -50,15 +50,15 @@ Montiranjem forenzičke slike sa **ArsenalImageMounter**, alat [**ShadowCopyView
 
 ![](<../../../images/image (576).png>)
 
-Unos u registru `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\BackupRestore` sadrži datoteke i ključeve **koje ne treba praviti rezervne kopije**:
+Registri `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\BackupRestore` sadrži datoteke i ključeve **koje ne treba praviti rezervne kopije**:
 
 ![](<../../../images/image (254).png>)
 
-Registri `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\VSS` takođe sadrže informacije o konfiguraciji `Volume Shadow Copies`.
+Registar `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\VSS` takođe sadrži informacije o konfiguraciji `Volume Shadow Copies`.
 
 ### Office AutoSaved Files
 
-Možete pronaći automatski sačuvane datoteke u: `C:\Usuarios\\AppData\Roaming\Microsoft{Excel|Word|Powerpoint}\`
+Možete pronaći automatski sačuvane datoteke u kancelariji na: `C:\Usuarios\\AppData\Roaming\Microsoft{Excel|Word|Powerpoint}\`
 
 ## Shell Items
 
@@ -73,9 +73,9 @@ Windows **automatski** **kreira** ove **prečice** kada korisnik **otvori, koris
 
 Kada se kreira folder, takođe se kreira veza do foldera, do roditeljskog foldera i do foldera bake.
 
-Ove automatski kreirane datoteke sa linkovima **sadrže informacije o poreklu** kao što su da li je to **datoteka** **ili** **folder**, **MAC** **vremena** te datoteke, **informacije o volumenu** gde je datoteka smeštena i **folder ciljne datoteke**. Ove informacije mogu biti korisne za oporavak tih datoteka u slučaju da su uklonjene.
+Ove automatski kreirane datoteke sa linkovima **sadrže informacije o poreklu** kao što su da li je to **datoteka** **ili** **folder**, **MAC** **vremena** te datoteke, **informacije o volumenu** gde se datoteka čuva i **folder ciljne datoteke**. Ove informacije mogu biti korisne za oporavak tih datoteka u slučaju da su uklonjene.
 
-Takođe, **datum kreiranja link** datoteke je prvi **put** kada je originalna datoteka **prvi put** **korisćena**, a **datum** **modifikacije** link datoteke je **poslednji** **put** kada je izvorna datoteka korišćena.
+Takođe, **datum kreiranja link** datoteke je prvi **put** kada je originalna datoteka **prvi** **put** **korisćena**, a **datum** **modifikacije** link datoteke je **poslednji** **put** kada je izvorna datoteka korišćena.
 
 Da biste inspektovali ove datoteke, možete koristiti [**LinkParser**](http://4discovery.com/our-tools/).
 
@@ -104,9 +104,9 @@ Ovo su nedavne datoteke koje su označene po aplikaciji. To je lista **nedavnih 
 
 **Jumplists** kreirane automatski se čuvaju u `C:\Users\{username}\AppData\Roaming\Microsoft\Windows\Recent\AutomaticDestinations\`. Jumplists su imenovane prema formatu `{id}.autmaticDestinations-ms` gde je početni ID ID aplikacije.
 
-Prilagođeni jumplists se čuvaju u `C:\Users\{username}\AppData\Roaming\Microsoft\Windows\Recent\CustomDestination\` i obično ih kreira aplikacija jer se nešto **važnog** dogodilo sa datotekom (možda označeno kao omiljeno).
+Prilagođene jumplists se čuvaju u `C:\Users\{username}\AppData\Roaming\Microsoft\Windows\Recent\CustomDestination\` i obično ih kreira aplikacija jer se nešto **važnog** dogodilo sa datotekom (možda označeno kao omiljeno).
 
-**Vreme kreiranja** bilo kog jumplista označava **prvi put kada je datoteka pristupljena** i **vreme modifikacije poslednji put**.
+**Vreme kreiranja** bilo koje jumplist-e označava **prvi put kada je datoteka pristupljena** i **vreme modifikacije poslednji put**.
 
 Možete pregledati jumplists koristeći [**JumplistExplorer**](https://ericzimmerman.github.io/#!index.md).
 
@@ -138,19 +138,19 @@ Datoteke u folderu WPDNSE su kopije originalnih, stoga neće preživeti restart 
 
 ### setupapi
 
-Proverite datoteku `C:\Windows\inf\setupapi.dev.log` da dobijete vremenske oznake o tome kada je USB konekcija napravljena (potražite `Section start`).
+Pogledajte datoteku `C:\Windows\inf\setupapi.dev.log` da dobijete vremenske oznake o tome kada je USB konekcija napravljena (potražite `Section start`).
 
 ![](<../../../images/image (477) (2) (2) (2) (2) (2) (2) (2) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (14) (2).png>)
 
 ### USB Detective
 
-[**USBDetective**](https://usbdetective.com) može se koristiti za dobijanje informacija o USB uređajima koji su bili povezani na sliku.
+[**USBDetective**](https://usbdetective.com) može se koristiti za dobijanje informacija o USB uređajima koji su povezani sa slikom.
 
 ![](<../../../images/image (452).png>)
 
 ### Plug and Play Cleanup
 
-Zakazana aktivnost poznata kao 'Plug and Play Cleanup' prvenstveno je dizajnirana za uklanjanje zastarelih verzija drajvera. Suprotno njenoj specificiranoj svrsi zadržavanja najnovije verzije drajvera, online izvori sugerišu da takođe cilja drajvere koji su bili neaktivni 30 dana. Kao rezultat, drajveri za uklonjive uređaje koji nisu povezani u poslednjih 30 dana mogu biti podložni brisanju.
+Zakazana aktivnost poznata kao 'Plug and Play Cleanup' prvenstveno je dizajnirana za uklanjanje zastarelih verzija drajvera. Suprotno njenoj specificiranoj svrsi zadržavanja najnovije verzije paketa drajvera, online izvori sugerišu da takođe cilja drajvere koji su bili neaktivni 30 dana. Kao rezultat, drajveri za uklonjive uređaje koji nisu povezani u poslednjih 30 dana mogu biti podložni brisanju.
 
 Zadatak se nalazi na sledećem putu: `C:\Windows\System32\Tasks\Microsoft\Windows\Plug and Play\Plug and Play Cleanup`.
 
@@ -194,9 +194,9 @@ Kada se koriste Exchange serveri ili Outlook klijenti, biće prisutni neki MAPI 
 - `Mapi-Client-Submit-Time`: Vreme sistema kada je email poslat
 - `Mapi-Conversation-Index`: Broj poruka u thread-u i vremenska oznaka svake poruke u thread-u
 - `Mapi-Entry-ID`: Identifikator poruke.
-- `Mappi-Message-Flags` i `Pr_last_Verb-Executed`: Informacije o MAPI klijentu (poruka pročitana? nije pročitana? odgovoreno? preusmereno? van kancelarije?)
+- `Mappi-Message-Flags` i `Pr_last_Verb-Executed`: Informacije o MAPI klijentu (da li je poruka pročitana? nije pročitana? odgovoreno? preusmereno? van kancelarije?)
 
-U Microsoft Outlook klijentu, sve poslate/primljene poruke, podaci o kontaktima i podaci o kalendaru čuvaju se u PST datoteci u:
+U Microsoft Outlook klijentu, sve poslate/primljene poruke, podaci o kontaktima i podaci o kalendaru se čuvaju u PST datoteci u:
 
 - `%USERPROFILE%\Local Settings\Application Data\Microsoft\Outlook` (WinXP)
 - `%USERPROFILE%\AppData\Local\Microsoft\Outlook`
@@ -224,9 +224,9 @@ Izgubljeni dodaci mogu biti dostupni iz:
 
 ### Image Thumbnails
 
-- **Windows XP i 8-8.1**: Pristup folderu sa sličicama generiše `thumbs.db` datoteku koja čuva prikaze slika, čak i nakon brisanja.
+- **Windows XP i 8-8.1**: Pristup folderu sa sličicama generiše `thumbs.db` datoteku koja čuva preglede slika, čak i nakon brisanja.
 - **Windows 7/10**: `thumbs.db` se kreira kada se pristupa preko mreže putem UNC puta.
-- **Windows Vista i noviji**: Prikazi sličica su centralizovani u `%userprofile%\AppData\Local\Microsoft\Windows\Explorer` sa datotekama imenovanim **thumbcache_xxx.db**. [**Thumbsviewer**](https://thumbsviewer.github.io) i [**ThumbCache Viewer**](https://thumbcacheviewer.github.io) su alati za pregled ovih datoteka.
+- **Windows Vista i noviji**: Pregledi sličica su centralizovani u `%userprofile%\AppData\Local\Microsoft\Windows\Explorer` sa datotekama imenovanim **thumbcache_xxx.db**. [**Thumbsviewer**](https://thumbsviewer.github.io) i [**ThumbCache Viewer**](https://thumbcacheviewer.github.io) su alati za pregled ovih datoteka.
 
 ### Windows Registry Information
 
@@ -248,7 +248,7 @@ Neki alati su korisni za analizu registry datoteka:
 
 ### Recovering Deleted Element
 
-Kada se ključ obriše, označen je kao takav, ali dok se prostor koji zauzima ne zatreba, neće biti uklonjen. Stoga, korišćenjem alata kao što je **Registry Explorer**, moguće je povratiti ove obrisane ključeve.
+Kada je ključ obrisan, označen je kao takav, ali dok prostor koji zauzima nije potreban, neće biti uklonjen. Stoga, korišćenjem alata kao što je **Registry Explorer**, moguće je povratiti ove obrisane ključeve.
 
 ### Last Write Time
 
@@ -258,7 +258,7 @@ Svaki Key-Value sadrži **vremensku oznaku** koja označava poslednji put kada j
 
 Datoteka/hive **SAM** sadrži **korisnike, grupe i heširane lozinke korisnika** sistema.
 
-U `SAM\Domains\Account\Users` možete dobiti korisničko ime, RID, poslednju prijavu, poslednji neuspešan pokušaj prijave, brojač prijava, politiku lozinki i kada je nalog kreiran. Da biste dobili **hešove**, takođe **trebate** datoteku/hive **SYSTEM**.
+U `SAM\Domains\Account\Users` možete dobiti korisničko ime, RID, poslednju prijavu, poslednji neuspešni logon, brojač prijava, politiku lozinki i kada je nalog kreiran. Da biste dobili **hešove**, takođe **trebate** datoteku/hive **SYSTEM**.
 
 ### Interesting entries in the Windows Registry
 
@@ -285,7 +285,7 @@ Možete otvoriti datoteku `SYSTEM` sa registry editorom i unutar puta `SYSTEM\Cu
 
 Prefetching je tehnika koja omogućava računaru da tiho **preuzme potrebne resurse potrebne za prikazivanje sadržaja** koji korisnik **može pristupiti u bliskoj budućnosti** kako bi se resursi mogli brže pristupiti.
 
-Windows prefetch se sastoji od kreiranja **kešova izvršenih programa** kako bi ih mogli brže učitati. Ovi keševi se kreiraju kao `.pf` datoteke unutar puta: `C:\Windows\Prefetch`. Postoji limit od 128 datoteka u XP/VISTA/WIN7 i 1024 datoteke u Win8/Win10.
+Windows prefetch se sastoji od kreiranja **kešova izvršenih programa** kako bi ih mogli brže učitati. Ovi keševi se kreiraju kao `.pf` datoteke unutar puta: `C:\Windows\Prefetch`. Postoji limit od 128 datoteka u XP/VISTA/WIN7 i 1024 datoteka u Win8/Win10.
 
 Ime datoteke se kreira kao `{program_name}-{hash}.pf` (heš se zasniva na putu i argumentima izvršnog fajla). U W10 ove datoteke su kompresovane. Imajte na umu da sama prisutnost datoteke ukazuje da je **program izvršen** u nekom trenutku.
 
@@ -330,7 +330,7 @@ Možete dobiti podatke iz ove datoteke koristeći alat [**srum_dump**](https://g
 
 **AppCompatCache**, poznat i kao **ShimCache**, deo je **Baze podataka o kompatibilnosti aplikacija** koju je razvila **Microsoft** kako bi se rešili problemi sa kompatibilnošću aplikacija. Ova sistemska komponenta beleži razne delove metapodataka o datotekama, koji uključuju:
 
-- Puni put do datoteke
+- Potpun put do datoteke
 - Veličinu datoteke
 - Vreme poslednje izmene pod **$Standard_Information** (SI)
 - Vreme poslednje ažuriranja ShimCache-a
@@ -339,7 +339,7 @@ Možete dobiti podatke iz ove datoteke koristeći alat [**srum_dump**](https://g
 Ovi podaci se čuvaju u registru na specifičnim lokacijama u zavisnosti od verzije operativnog sistema:
 
 - Za XP, podaci se čuvaju pod `SYSTEM\CurrentControlSet\Control\SessionManager\Appcompatibility\AppcompatCache` sa kapacitetom za 96 unosa.
-- Za Server 2003, kao i za verzije Windows-a 2008, 2012, 2016, 7, 8 i 10, putanja za skladištenje je `SYSTEM\CurrentControlSet\Control\SessionManager\AppcompatCache\AppCompatCache`, sa kapacitetom od 512 i 1024 unosa, respektivno.
+- Za Server 2003, kao i za Windows verzije 2008, 2012, 2016, 7, 8 i 10, putanja za skladištenje je `SYSTEM\CurrentControlSet\Control\SessionManager\AppcompatCache\AppCompatCache`, sa kapacitetom od 512 i 1024 unosa, respektivno.
 
 Za parsiranje sačuvanih informacija, preporučuje se korišćenje alata [**AppCompatCacheParser**](https://github.com/EricZimmerman/AppCompatCacheParser).
 
@@ -347,7 +347,7 @@ Za parsiranje sačuvanih informacija, preporučuje se korišćenje alata [**AppC
 
 ### Amcache
 
-Datoteka **Amcache.hve** je u suštini hives registrija koja beleži detalje o aplikacijama koje su izvršene na sistemu. Obično se nalazi na `C:\Windows\AppCompat\Programas\Amcache.hve`.
+Datoteka **Amcache.hve** je u suštini registri hives koji beleži detalje o aplikacijama koje su izvršene na sistemu. Obično se nalazi na `C:\Windows\AppCompat\Programas\Amcache.hve`.
 
 Ova datoteka je značajna jer čuva zapise o nedavno izvršenim procesima, uključujući puteve do izvršnih datoteka i njihove SHA1 hešove. Ove informacije su neprocenjive za praćenje aktivnosti aplikacija na sistemu.
 
@@ -383,7 +383,7 @@ Unutar tabele aplikacija ove baze podataka, moguće je pronaći kolone: "Applica
 Takođe je moguće **pronaći instaliranu aplikaciju** unutar registra na putu: `Software\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore\Applications\`\
 I **deinstalirane** **aplikacije** u: `Software\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore\Deleted\`
 
-## Windows Događaji
+## Windows događaji
 
 Informacije koje se pojavljuju unutar Windows događaja su:
 
@@ -401,7 +401,7 @@ Mogu se vizualizovati iz Windows Event Viewer-a (**`eventvwr.msc`**) ili sa drug
 
 ## Razumevanje Windows sigurnosnog logovanja događaja
 
-Događaji pristupa se beleže u datoteci sigurnosne konfiguracije koja se nalazi na `C:\Windows\System32\winevt\Security.evtx`. Veličina ove datoteke je prilagodljiva, a kada se dostigne njen kapacitet, stariji događaji se prepisuju. Beleženi događaji uključuju prijave i odjave korisnika, korisničke akcije i promene u sigurnosnim postavkama, kao i pristup datotekama, folderima i zajedničkim resursima.
+Događaji pristupa se beleže u datoteci sigurnosne konfiguracije koja se nalazi na `C:\Windows\System32\winevt\Security.evtx`. Veličina ove datoteke je prilagodljiva, a kada se dostigne njen kapacitet, stariji događaji se prepisuju. Beleženi događaji uključuju prijave i odjave korisnika, korisničke akcije i promene u sigurnosnim postavkama, kao i pristup datotekama, folderima i deljenim resursima.
 
 ### Ključni ID-evi događaja za autentifikaciju korisnika:
 
@@ -413,7 +413,7 @@ Događaji pristupa se beleže u datoteci sigurnosne konfiguracije koja se nalazi
 #### Podtipovi unutar EventID 4634/4647:
 
 - **Interaktivno (2)**: Direktna prijava korisnika.
-- **Mrežno (3)**: Pristup zajedničkim folderima.
+- **Mrežno (3)**: Pristup deljenim folderima.
 - **Serijski (4)**: Izvršavanje serijskih procesa.
 - **Servis (5)**: Pokretanje servisa.
 - **Proxy (6)**: Proxy autentifikacija.
@@ -462,21 +462,21 @@ Za praktične primere simulacije ovih tipova prijava i mogućnosti iskopavanja k
 
 Detalji događaja, uključujući status i podstatus kodove, pružaju dodatne uvide u uzroke događaja, posebno u Event ID 4625.
 
-### Oporavak Windows Događaja
+### Oporavak Windows događaja
 
 Da biste povećali šanse za oporavak obrisanih Windows događaja, preporučuje se da isključite sumnjivi računar direktnim isključivanjem. **Bulk_extractor**, alat za oporavak koji specificira ekstenziju `.evtx`, se preporučuje za pokušaj oporavka takvih događaja.
 
-### Identifikacija uobičajenih napada putem Windows Događaja
+### Identifikacija uobičajenih napada putem Windows događaja
 
 Za sveobuhvatan vodič o korišćenju Windows Event ID-ova u identifikaciji uobičajenih sajber napada, posetite [Red Team Recipe](https://redteamrecipe.com/event-codes/).
 
-#### Brute Force Napadi
+#### Brute Force napadi
 
 Identifikovani višestrukim zapisima EventID 4625, praćenim EventID 4624 ako napad uspe.
 
 #### Promena vremena
 
-Zabeležena EventID 4616, promene sistemskog vremena mogu otežati forenzičku analizu.
+Zabeležena od strane EventID 4616, promene u sistemskom vremenu mogu otežati forenzičku analizu.
 
 #### Praćenje USB uređaja
 

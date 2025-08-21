@@ -8,13 +8,13 @@
 ## Online alati za pcaps
 
 - Ako je zaglavlje vašeg pcap-a **oštećeno**, trebali biste pokušati da ga **popravite** koristeći: [http://f00l.de/hacking/**pcapfix.php**](http://f00l.de/hacking/pcapfix.php)
-- Ekstrahujte **informacije** i tražite **malver** unutar pcap-a u [**PacketTotal**](https://packettotal.com)
+- Izvucite **informacije** i tražite **malver** unutar pcap-a u [**PacketTotal**](https://packettotal.com)
 - Tražite **malicioznu aktivnost** koristeći [**www.virustotal.com**](https://www.virustotal.com) i [**www.hybrid-analysis.com**](https://www.hybrid-analysis.com)
 - **Potpuna pcap analiza iz pregledača u** [**https://apackets.com/**](https://apackets.com/)
 
-## Ekstrahovanje informacija
+## Izvlačenje informacija
 
-Sledeći alati su korisni za ekstrakciju statistike, datoteka itd.
+Sledeći alati su korisni za izvlačenje statistike, datoteka itd.
 
 ### Wireshark
 
@@ -33,7 +33,7 @@ Pcap analiza iz pregledača.
 
 ### Xplico Framework
 
-[**Xplico** ](https://github.com/xplico/xplico)_(samo linux)_ može **analizirati** **pcap** i ekstrahovati informacije iz njega. Na primer, iz pcap datoteke Xplico ekstrahuje svaku email poruku (POP, IMAP i SMTP protokoli), sve HTTP sadržaje, svaki VoIP poziv (SIP), FTP, TFTP, i tako dalje.
+[**Xplico** ](https://github.com/xplico/xplico)_(samo linux)_ može **analizirati** **pcap** i izvući informacije iz njega. Na primer, iz pcap datoteke Xplico izvlači svaku email poruku (POP, IMAP i SMTP protokoli), sav HTTP sadržaj, svaki VoIP poziv (SIP), FTP, TFTP, i tako dalje.
 
 **Instalirajte**
 ```bash
@@ -129,9 +129,9 @@ Proverite da li možete pronaći bilo koji otisak poznatog malvera:
 
 ## Zeek
 
-> [Zeek](https://docs.zeek.org/en/master/about.html) je pasivni, open-source analizator mrežnog saobraćaja. Mnogi operateri koriste Zeek kao Mrežni Sigurnosni Monitor (NSM) za podršku istragama sumnjivih ili zlonamernih aktivnosti. Zeek takođe podržava širok spektar zadataka analize saobraćaja van domena sigurnosti, uključujući merenje performansi i rešavanje problema.
+> [Zeek](https://docs.zeek.org/en/master/about.html) je pasivni, open-source analitičar mrežnog saobraćaja. Mnogi operateri koriste Zeek kao Mrežni sigurnosni monitor (NSM) za podršku istragama sumnjivih ili zlonamernih aktivnosti. Zeek takođe podržava širok spektar zadataka analize saobraćaja van domena sigurnosti, uključujući merenje performansi i rešavanje problema.
 
-U suštini, logovi koje kreira `zeek` nisu **pcaps**. Stoga ćete morati koristiti **druge alate** za analizu logova gde se nalaze **informacije** o pcaps. 
+U suštini, logovi koje kreira `zeek` nisu **pcaps**. Stoga ćete morati da koristite **druge alate** za analizu logova gde se nalaze **informacije** o pcaps. 
 
 ### Connections Info
 ```bash

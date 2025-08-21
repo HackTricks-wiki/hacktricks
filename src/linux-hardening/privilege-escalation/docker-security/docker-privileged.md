@@ -49,7 +49,7 @@ cpuacct on /sys/fs/cgroup/cpuacct type cgroup (ro,nosuid,nodev,noexec,relatime,c
 ```
 {{#endtab}}
 
-{{#tab name="Inside Privileged Container"}}
+{{#tab name="Unutar privilegovanog kontejnera"}}
 ```bash
 # docker run --rm --privileged -it alpine sh
 mount  | grep '(ro'
@@ -84,7 +84,7 @@ mount  | grep /proc.*tmpfs
 
 ### Linux sposobnosti
 
-Kontejnerski motori pokreću kontejnere sa **ograničenim brojem sposobnosti** kako bi kontrolisali šta se dešava unutar kontejnera po defaultu. **Privilegovani** imaju **sve** **sposobnosti** dostupne. Da biste saznali više o sposobnostima, pročitajte:
+Motori kontejnera pokreću kontejnere sa **ograničenim brojem sposobnosti** kako bi kontrolisali šta se dešava unutar kontejnera po defaultu. **Privilegovani** imaju **sve** **sposobnosti** dostupne. Da biste saznali više o sposobnostima, pročitajte:
 
 {{#ref}}
 ../linux-capabilities.md
@@ -102,7 +102,7 @@ Bounding set =cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setg
 ```
 {{#endtab}}
 
-{{#tab name="Inside Privileged Container"}}
+{{#tab name="Unutar privilegovanog kontejnera"}}
 ```bash
 # docker run --rm --privileged -it alpine sh
 apk add -U libcap; capsh --print
@@ -118,7 +118,7 @@ Možete manipulisati sposobnostima dostupnim kontejneru bez pokretanja u `--priv
 
 ### Seccomp
 
-**Seccomp** je koristan za **ograničavanje** **syscall-a** koje kontejner može pozvati. Podrazumevani seccomp profil je omogućen po defaultu kada se pokreću docker kontejneri, ali u privilegovanom režimu je on onemogućen. Saznajte više o Seccomp-u ovde:
+**Seccomp** je koristan za **ograničavanje** **syscalls** koje kontejner može pozvati. Podrazumevani seccomp profil je omogućen podrazumevano prilikom pokretanja docker kontejnera, ali u privilegovanom režimu je on onemogućen. Saznajte više o Seccomp-u ovde:
 
 {{#ref}}
 seccomp.md
@@ -134,7 +134,7 @@ Seccomp_filters:	1
 ```
 {{#endtab}}
 
-{{#tab name="Inside Privileged Container"}}
+{{#tab name="Unutar privilegovanog kontejnera"}}
 ```bash
 # docker run --rm --privileged -it alpine sh
 grep Seccomp /proc/1/status
@@ -177,7 +177,7 @@ Pokretanje kontejnera sa `--privileged` zastavicom onemogućava **SELinux oznake
 
 ### Namespaces
 
-Namespaces **NISU pogođeni** `--privileged` oznakom. Iako nemaju omogućena bezbednosna ograničenja, **ne vide sve procese na sistemu ili na mreži hosta, na primer**. Korisnici mogu onemogućiti pojedinačne namespaces koristeći **`--pid=host`, `--net=host`, `--ipc=host`, `--uts=host`** oznake kontejnerskog motora.
+Namespaces **NISU pogođeni** `--privileged` oznakom. Iako nemaju omogućena bezbednosna ograničenja, **ne vide sve procese na sistemu ili host mreži, na primer**. Korisnici mogu onemogućiti pojedinačne namespaces koristeći **`--pid=host`, `--net=host`, `--ipc=host`, `--uts=host`** oznake kontejnerskih motora.
 
 {{#tabs}}
 {{#tab name="Inside default privileged container"}}
@@ -205,7 +205,7 @@ PID   USER     TIME  COMMAND
 
 ### Korisnički prostor
 
-**Po defaultu, motori kontejnera ne koriste korisničke prostore, osim za kontejnerе bez root privilegija**, koji ih zahtevaju za montiranje fajl sistema i korišćenje više UID-ova. Korisnički prostori, koji su ključni za kontejnerе bez root privilegija, ne mogu se onemogućiti i značajno poboljšavaju bezbednost ograničavanjem privilegija.
+**Po defaultu, motori kontejnera ne koriste korisničke prostore, osim za kontejnerе bez root privilegija**, koji ih zahtevaju za montiranje fajl sistema i korišćenje više UID-ova. Korisnički prostori, koji su integralni za kontejnerе bez root privilegija, ne mogu se onemogućiti i značajno poboljšavaju bezbednost ograničavanjem privilegija.
 
 ## Reference
 

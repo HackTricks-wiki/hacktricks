@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-> [!WARNING] > **JuicyPotato ne radi** na Windows Server 2019 i Windows 10 verziji 1809 i novijim. Međutim, [**PrintSpoofer**](https://github.com/itm4n/PrintSpoofer)**,** [**RoguePotato**](https://github.com/antonioCoco/RoguePotato)**,** [**SharpEfsPotato**](https://github.com/bugch3ck/SharpEfsPotato) mogu se koristiti za **iskorišćavanje istih privilegija i dobijanje `NT AUTHORITY\SYSTEM`** nivo pristupa. _**Proverite:**_
+> [!WARNING] > **JuicyPotato ne radi** na Windows Server 2019 i Windows 10 verziji 1809 i novijim. Međutim, [**PrintSpoofer**](https://github.com/itm4n/PrintSpoofer)**,** [**RoguePotato**](https://github.com/antonioCoco/RoguePotato)**,** [**SharpEfsPotato**](https://github.com/bugch3ck/SharpEfsPotato) mogu se koristiti za **iskorišćavanje istih privilegija i dobijanje `NT AUTHORITY\SYSTEM`** nivo pristupa. _**Proveri:**_
 
 {{#ref}}
 roguepotato-and-printspoofer.md
@@ -34,7 +34,7 @@ Nakon nekog testiranja dobili smo i testirali opsežnu listu [zanimljivih CLSID-
 
 ### Sočne informacije <a href="#juicy-details" id="juicy-details"></a>
 
-JuicyPotato vam omogućava:
+JuicyPotato vam omogućava da:
 
 - **Ciljani CLSID** _izaberite bilo koji CLSID koji želite._ [_Ovde_](http://ohpe.it/juicy-potato/CLSID/) _možete pronaći listu organizovanu po OS-u._
 - **COM slušalac port** _definišite COM slušalac port koji preferirate (umesto marširanog hardkodiranog 6666)_
@@ -74,13 +74,13 @@ Ako korisnik ima `SeImpersonate` ili `SeAssignPrimaryToken` privilegije, onda st
 
 Skoro je nemoguće sprečiti zloupotrebu svih ovih COM servera. Možete razmisliti o modifikaciji dozvola ovih objekata putem `DCOMCNFG`, ali srećno, ovo će biti izazovno.
 
-Pravo rešenje je zaštititi osetljive naloge i aplikacije koje rade pod `* SERVICE` nalozima. Zaustavljanje `DCOM` bi sigurno sprečilo ovu eksploataciju, ali bi moglo imati ozbiljan uticaj na osnovni OS.
+Stvarno rešenje je zaštita osetljivih naloga i aplikacija koje rade pod `* SERVICE` nalozima. Zaustavljanje `DCOM` bi sigurno sprečilo ovu eksploataciju, ali bi moglo imati ozbiljan uticaj na osnovni OS.
 
-Iz: [http://ohpe.it/juicy-potato/](http://ohpe.it/juicy-potato/)
+From: [http://ohpe.it/juicy-potato/](http://ohpe.it/juicy-potato/)
 
-## Primeri
+## Examples
 
-Napomena: Posetite [ovu stranicu](https://ohpe.it/juicy-potato/CLSID/) za listu CLSID-ova koje možete isprobati.
+Note: Posetite [ovu stranicu](https://ohpe.it/juicy-potato/CLSID/) za listu CLSID-ova koje možete isprobati.
 
 ### Get a nc.exe reverse shell
 ```

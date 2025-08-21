@@ -6,7 +6,7 @@
 
 - **Jednostavna lista:** Samo lista koja sadrži jedan unos u svakoj liniji
 - **Runtime fajl:** Lista koja se čita u runtime-u (nije učitana u memoriju). Za podršku velikim listama.
-- **Izmena slučaja:** Primeni neke promene na listu stringova (Bez promene, na mala slova, na VELIKA SLOVA, na Prvo slovo - Prvo veliko slovo, a ostalo na mala slova-, na Prvo Ime - Prvo veliko slovo, a ostalo ostaje isto-).
+- **Izmena slučajeva:** Primeni neke promene na listu stringova (Bez promene, na mala slova, na VELIKA, na Prvo slovo - Prvo veliko, a ostalo malo-, na Prvo Ime - Prvo veliko, a ostalo ostaje isto-).
 - **Brojevi:** Generiši brojeve od X do Y koristeći Z korak ili nasumično.
 - **Brute Forcer:** Skup karaktera, minimalna i maksimalna dužina.
 

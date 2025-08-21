@@ -5,7 +5,7 @@
 ## Partitions
 
 Hard disk ili **SSD disk može sadržati različite particije** sa ciljem fizičkog razdvajanja podataka.\
-**Minimalna** jedinica diska je **sektor** (normalno sastavljen od 512B). Tako da, veličina svake particije mora biti višekratnik te veličine.
+**Minimalna** jedinica diska je **sektor** (normalno sastavljen od 512B). Tako da, veličina svake particije treba da bude višekratnik te veličine.
 
 ### MBR (master Boot Record)
 
@@ -26,32 +26,32 @@ Od **bajtova 440 do 443** MBR-a možete pronaći **Windows Disk Signature** (ako
 | Offset      | Length     | Item                |
 | ----------- | ---------- | ------------------- |
 | 0 (0x00)    | 446(0x1BE) | Boot code           |
-| 446 (0x1BE) | 16 (0x10)  | Prva particija     |
-| 462 (0x1CE) | 16 (0x10)  | Druga particija    |
-| 478 (0x1DE) | 16 (0x10)  | Treća particija     |
-| 494 (0x1EE) | 16 (0x10)  | Četvrta particija   |
-| 510 (0x1FE) | 2 (0x2)    | Potpis 0x55 0xAA   |
+| 446 (0x1BE) | 16 (0x10)  | First Partition     |
+| 462 (0x1CE) | 16 (0x10)  | Second Partition    |
+| 478 (0x1DE) | 16 (0x10)  | Third Partition     |
+| 494 (0x1EE) | 16 (0x10)  | Fourth Partition    |
+| 510 (0x1FE) | 2 (0x2)    | Signature 0x55 0xAA |
 
-**Format zapisa particije**
+**Partition Record Format**
 
 | Offset    | Length   | Item                                                   |
 | --------- | -------- | ------------------------------------------------------ |
-| 0 (0x00)  | 1 (0x01) | Aktivna oznaka (0x80 = bootable)                      |
-| 1 (0x01)  | 1 (0x01) | Početna glava                                         |
-| 2 (0x02)  | 1 (0x01) | Početni sektor (bitovi 0-5); gornji bitovi cilindra (6- 7) |
-| 3 (0x03)  | 1 (0x01) | Početni cilindar najniži 8 bitova                     |
-| 4 (0x04)  | 1 (0x01) | Kod tipa particije (0x83 = Linux)                     |
-| 5 (0x05)  | 1 (0x01) | Krajnja glava                                         |
-| 6 (0x06)  | 1 (0x01) | Krajnji sektor (bitovi 0-5); gornji bitovi cilindra (6- 7)   |
-| 7 (0x07)  | 1 (0x01) | Krajnji cilindar najniži 8 bitova                     |
-| 8 (0x08)  | 4 (0x04) | Sektori koji prethode particiji (mali endian)        |
-| 12 (0x0C) | 4 (0x04) | Sektori u particiji                                   |
+| 0 (0x00)  | 1 (0x01) | Active flag (0x80 = bootable)                          |
+| 1 (0x01)  | 1 (0x01) | Start head                                             |
+| 2 (0x02)  | 1 (0x01) | Start sector (bits 0-5); upper bits of cylinder (6- 7) |
+| 3 (0x03)  | 1 (0x01) | Start cylinder lowest 8 bits                           |
+| 4 (0x04)  | 1 (0x01) | Partition type code (0x83 = Linux)                     |
+| 5 (0x05)  | 1 (0x01) | End head                                               |
+| 6 (0x06)  | 1 (0x01) | End sector (bits 0-5); upper bits of cylinder (6- 7)   |
+| 7 (0x07)  | 1 (0x01) | End cylinder lowest 8 bits                             |
+| 8 (0x08)  | 4 (0x04) | Sectors preceding partition (little endian)            |
+| 12 (0x0C) | 4 (0x04) | Sectors in partition                                   |
 
-Da biste montirali MBR u Linux-u, prvo morate dobiti početni offset (možete koristiti `fdisk` i komandu `p`)
+Da biste montirali MBR u Linux-u, prvo morate dobiti start offset (možete koristiti `fdisk` i `p` komandu)
 
-![](<../../../images/image (413) (3) (3) (3) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
+![](<../../../images/image (413) (3) (3) (3) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
-I zatim koristite sledeći kod
+A zatim koristite sledeći kod
 ```bash
 #Mount MBR in Linux
 mount -o ro,loop,offset=<Bytes>
@@ -60,7 +60,7 @@ mount -o ro,loop,offset=32256,noatime /path/to/image.dd /media/part/
 ```
 **LBA (Logičko adresiranje blokova)**
 
-**Logičko adresiranje blokova** (**LBA**) je uobičajen sistem koji se koristi za **specifikaciju lokacije blokova** podataka koji se čuvaju na uređajima za skladištenje računara, obično na sekundarnim sistemima skladištenja kao što su hard diskovi. LBA je posebno jednostavan linearni sistem adresiranja; **blokovi se nalaze pomoću celobrojnog indeksa**, pri čemu je prvi blok LBA 0, drugi LBA 1, i tako dalje.
+**Logičko adresiranje blokova** (**LBA**) je uobičajen sistem koji se koristi za **određivanje lokacije blokova** podataka koji se čuvaju na uređajima za skladištenje računara, obično na sekundarnim sistemima skladištenja kao što su hard diskovi. LBA je posebno jednostavan linearni sistem adresiranja; **blokovi se nalaze pomoću celobrojnog indeksa**, pri čemu je prvi blok LBA 0, drugi LBA 1, i tako dalje.
 
 ### GPT (GUID tabela particija)
 
@@ -68,7 +68,7 @@ GUID tabela particija, poznata kao GPT, favorizovana je zbog svojih poboljšanih
 
 - **Lokacija i veličina**: I GPT i MBR počinju na **sektoru 0**. Međutim, GPT radi na **64bita**, u kontrastu sa MBR-ovih 32bita.
 - **Ograničenja particija**: GPT podržava do **128 particija** na Windows sistemima i može da smesti do **9.4ZB** podataka.
-- **Imena particija**: Nudi mogućnost imenovanja particija sa do 36 Unicode karaktera.
+- **Imena particija**: Omogućava imenovanje particija sa do 36 Unicode karaktera.
 
 **Otpornost podataka i oporavak**:
 
@@ -77,19 +77,19 @@ GUID tabela particija, poznata kao GPT, favorizovana je zbog svojih poboljšanih
 
 **Zaštitni MBR (LBA0)**:
 
-- GPT održava unazad kompatibilnost kroz zaštitni MBR. Ova funkcija se nalazi u prostoru nasleđenog MBR-a, ali je dizajnirana da spreči starije MBR-bazirane alate da greškom prepisuju GPT diskove, čime se štiti integritet podataka na GPT-formatiranim diskovima.
+- GPT održava unazad kompatibilnost putem zaštitnog MBR-a. Ova funkcija se nalazi u prostoru nasleđenog MBR-a, ali je dizajnirana da spreči starije MBR-bazirane alate da greškom prepisuju GPT diskove, čime se štiti integritet podataka na GPT-formatiranim diskovima.
 
 ![https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/GUID_Partition_Table_Scheme.svg/800px-GUID_Partition_Table_Scheme.svg.png](<../../../images/image (1062).png>)
 
 **Hibridni MBR (LBA 0 + GPT)**
 
-[Sa Wikipedije](https://en.wikipedia.org/wiki/GUID_Partition_Table)
+[Sa Vikipedije](https://en.wikipedia.org/wiki/GUID_Partition_Table)
 
 U operativnim sistemima koji podržavaju **GPT-bazirano pokretanje putem BIOS** usluga umesto EFI, prvi sektor se takođe može koristiti za skladištenje prve faze **bootloader** koda, ali **modifikovan** da prepozna **GPT** **particije**. Bootloader u MBR-u ne sme da pretpostavlja veličinu sektora od 512 bajta.
 
 **Zaglavlje tabele particija (LBA 1)**
 
-[Sa Wikipedije](https://en.wikipedia.org/wiki/GUID_Partition_Table)
+[Sa Vikipedije](https://en.wikipedia.org/wiki/GUID_Partition_Table)
 
 Zaglavlje tabele particija definiše upotrebljive blokove na disku. Takođe definiše broj i veličinu unosa particija koji čine tabelu particija (offseti 80 i 84 u tabeli).
 
@@ -109,7 +109,7 @@ Zaglavlje tabele particija definiše upotrebljive blokove na disku. Takođe defi
 | 80 (0x50) | 4 bytes  | Broj unosa particija u nizu                                                                                                                                         |
 | 84 (0x54) | 4 bytes  | Veličina jednog unosa particije (obično 80h ili 128)                                                                                                                        |
 | 88 (0x58) | 4 bytes  | CRC32 niza unosa particija u little endian                                                                                                                            |
-| 92 (0x5C) | \*       | Rezervisano; mora biti nule za ostatak bloka (420 bajta za veličinu sektora od 512 bajta; ali može biti više sa većim veličinama sektora)                                      |
+| 92 (0x5C) | \*       | Rezervisano; mora biti nule za ostatak bloka (420 bajtova za veličinu sektora od 512 bajta; ali može biti više sa većim veličinama sektora)                                      |
 
 **Unosi particija (LBA 2–33)**
 
@@ -135,7 +135,7 @@ Nakon montiranja forenzičke slike sa [**ArsenalImageMounter**](https://arsenalr
 
 ![](<../../../images/image (354).png>)
 
-Ako je to bila **GPT tabela umesto MBR-a**, trebala bi se pojaviti oznaka _EFI PART_ u **sektoru 1** (koji je na prethodnoj slici prazan).
+Ako je to bila **GPT tabela umesto MBR-a**, trebala bi se pojaviti potpis _EFI PART_ u **sektoru 1** (koji je na prethodnoj slici prazan).
 
 ## Sistemi datoteka
 
@@ -201,7 +201,7 @@ file-data-carving-recovery-tools.md
 
 **File carving** je tehnika koja pokušava da **pronađe datoteke u masi podataka**. Postoje 3 glavna načina na koje alati poput ovog funkcionišu: **Na osnovu zaglavlja i podnožja tipova datoteka**, na osnovu **struktura** tipova datoteka i na osnovu **sadržaja** same datoteke.
 
-Napomena da ova tehnika **ne funkcioniše za vraćanje fragmentisanih datoteka**. Ako datoteka **nije smeštena u kontiguitetne sektore**, tada ova tehnika neće moći da je pronađe ili barem deo nje.
+Napomena da ova tehnika **ne funkcioniše za vraćanje fragmentisanih datoteka**. Ako datoteka **nije smeštena u kontiguitetnim sektorima**, tada ova tehnika neće moći da je pronađe ili barem deo nje.
 
 Postoji nekoliko alata koje možete koristiti za file carving koji označavaju tipove datoteka koje želite da pretražujete.
 
@@ -221,7 +221,7 @@ file-data-carving-recovery-tools.md
 ### Sigurno brisanje
 
 Očigledno, postoje načini da se **"sigurno" obrišu datoteke i deo logova o njima**. Na primer, moguće je **prepisati sadržaj** datoteke sa smešnim podacima nekoliko puta, a zatim **ukloniti** **logove** iz **$MFT** i **$LOGFILE** o datoteci, i **ukloniti kopije senki volumena**.\
-Možda ćete primetiti da čak i nakon izvođenja te akcije može postojati **drugi delovi gde je postojanje datoteke još uvek zabeleženo**, i to je tačno, a deo posla forenzičkog stručnjaka je da ih pronađe.
+Možda ćete primetiti da čak i nakon izvođenja te akcije može postojati **druge delove gde je postojanje datoteke još uvek zabeleženo**, i to je tačno, a deo posla forenzičkog stručnjaka je da ih pronađe.
 
 ## Reference
 
@@ -229,6 +229,6 @@ Možda ćete primetiti da čak i nakon izvođenja te akcije može postojati **dr
 - [http://ntfs.com/ntfs-permissions.htm](http://ntfs.com/ntfs-permissions.htm)
 - [https://www.osforensics.com/faqs-and-tutorials/how-to-scan-ntfs-i30-entries-deleted-files.html](https://www.osforensics.com/faqs-and-tutorials/how-to-scan-ntfs-i30-entries-deleted-files.html)
 - [https://docs.microsoft.com/en-us/windows-server/storage/file-server/volume-shadow-copy-service](https://docs.microsoft.com/en-us/windows-server/storage/file-server/volume-shadow-copy-service)
-- **iHackLabs Sertifikovani Digitalni Forenzik Windows**
+- **iHackLabs Sertifikovani Digitalni Forenzika Windows**
 
 {{#include ../../../banners/hacktricks-training.md}}

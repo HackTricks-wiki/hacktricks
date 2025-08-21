@@ -4,7 +4,7 @@
 
 Ova stranica sakuplja **male, samostalne C isječke** koji su korisni tokom Windows lokalne eskalacije privilegija ili post-eksploatacije. Svaki payload je dizajniran da bude **prijateljski za kopiranje i lepljenje**, zahteva samo Windows API / C runtime, i može se kompajlirati sa `i686-w64-mingw32-gcc` (x86) ili `x86_64-w64-mingw32-gcc` (x64).
 
-> ⚠️  Ovi payloadi pretpostavljaju da proces već ima minimalne privilegije potrebne za izvršenje akcije (npr. `SeDebugPrivilege`, `SeImpersonatePrivilege`, ili kontekst srednje integriteta za zaobilaženje UAC). Namenjeni su za **red-team ili CTF okruženja** gde je iskorišćavanje ranjivosti dovelo do izvršenja proizvoljnog nativnog koda.
+> ⚠️  Ovi payloadi pretpostavljaju da proces već ima minimalne privilegije potrebne za izvršenje akcije (npr. `SeDebugPrivilege`, `SeImpersonatePrivilege`, ili kontekst srednje integriteta za UAC zaobilaženje). Namenjeni su za **red-team ili CTF okruženja** gde je iskorišćavanje ranjivosti dovelo do izvršenja proizvoljnog nativnog koda.
 
 ---
 
@@ -66,7 +66,7 @@ return 0;
 ---
 
 ## Pokretanje SYSTEM ljuske putem duplikacije tokena (`SeDebugPrivilege` + `SeImpersonatePrivilege`)
-Ako trenutni proces ima **oba** privilegije `SeDebug` i `SeImpersonate` (tipično za mnoge servisne naloge), možete ukrasti token iz `winlogon.exe`, duplirati ga i pokrenuti podignut proces:
+Ako trenutni proces ima **oba** privilegije `SeDebug` i `SeImpersonate` (tipično za mnoge naloge usluga), možete ukrasti token iz `winlogon.exe`, duplirati ga i pokrenuti podignut proces:
 ```c
 // x86_64-w64-mingw32-gcc -O2 -o system_shell.exe system_shell.c -ladvapi32 -luser32
 #include <windows.h>
@@ -150,7 +150,7 @@ MessageBoxA(NULL, "AMSI & ETW patched!", "OK", MB_OK);
 return 0;
 }
 ```
-*Zak patch iznad je lokalni za proces; pokretanje novog PowerShell-a nakon što se to izvrši će se izvršiti bez AMSI/ETW inspekcije.*
+*Zaključak iznad je lokalni za proces; pokretanje novog PowerShell-a nakon što se to izvrši će se izvršiti bez AMSI/ETW inspekcije.*
 
 ---
 

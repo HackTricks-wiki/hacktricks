@@ -30,15 +30,15 @@ klist #List tickets in memory
 # Example using aes key
 kerberos::golden /user:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1-5-21-1874506631-3219952063-538504511 /aes256:430b2fdb13cc820d73ecf123dddd4c9d76425d4c2156b89ac551efb9d591a439 /ticket:golden.kirbi
 ```
-**Kada** imate **injektovani zlatni tiket**, možete pristupiti deljenim datotekama **(C$)**, i izvršavati usluge i WMI, tako da možete koristiti **psexec** ili **wmiexec** da dobijete shell (izgleda da ne možete dobiti shell putem winrm).
+**Jednom** kada je **zlatna karta** ubačena, možete pristupiti deljenim datotekama **(C$)**, i izvršavati usluge i WMI, tako da možete koristiti **psexec** ili **wmiexec** da dobijete shell (izgleda da ne možete dobiti shell putem winrm).
 
 ### Obilaženje uobičajenih detekcija
 
-Najčešći načini za detekciju zlatnog tiketa su **inspekcija Kerberos saobraćaja** na mreži. Po defaultu, Mimikatz **potpisuje TGT na 10 godina**, što će se istaknuti kao anomalija u narednim TGS zahtevima napravljenim sa njim.
+Najčešći načini za detekciju zlatne karte su **inspekcija Kerberos saobraćaja** na mreži. Po defaultu, Mimikatz **potpisuje TGT na 10 godina**, što će se istaknuti kao anomalija u narednim TGS zahtevima napravljenim sa njom.
 
 `Lifetime : 3/11/2021 12:39:57 PM ; 3/9/2031 12:39:57 PM ; 3/9/2031 12:39:57 PM`
 
-Koristite parametre `/startoffset`, `/endin` i `/renewmax` da kontrolišete početni offset, trajanje i maksimalne obnavljanja (sve u minutima).
+Koristite parametre `/startoffset`, `/endin` i `/renewmax` da kontrolišete početni offset, trajanje i maksimalne obnove (sve u minutima).
 ```
 Get-DomainPolicy | select -expand KerberosPolicy
 ```
@@ -56,7 +56,7 @@ diamond-ticket.md
 - 4672: Prijava administratora
 - `Get-WinEvent -FilterHashtable @{Logname='Security';ID=4672} -MaxEvents 1 | Format-List –Property`
 
-Ostale male trikove koje odbrambeni timovi mogu primeniti je **alarmirati na 4769 za osetljive korisnike** kao što je podrazumevani nalog administratora domena.
+Ostale male trikove koje odbrambeni tim može da uradi je **da upozori na 4769 za osetljive korisnike** kao što je podrazumevani nalog administratora domena.
 
 ## Reference
 

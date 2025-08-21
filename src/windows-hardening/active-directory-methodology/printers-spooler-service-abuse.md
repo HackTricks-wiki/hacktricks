@@ -1,4 +1,4 @@
-# Force NTLM Privileged Authentication
+# Prisilna NTLM privilegovana autentifikacija
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -6,12 +6,12 @@
 
 [**SharpSystemTriggers**](https://github.com/cube0x0/SharpSystemTriggers) je **kolekcija** **okidača za daljinsku autentifikaciju** napisanih u C# koristeći MIDL kompajler kako bi se izbegle zavisnosti od trećih strana.
 
-## Spooler Service Abuse
+## Zloupotreba Spooler usluge
 
-Ako je _**Print Spooler**_ servis **omogućen,** možete koristiti neke već poznate AD akreditive da **zatražite** od štampača na kontroleru domena **ažuriranje** o novim poslovima štampe i jednostavno mu reći da **pošalje obaveštenje nekom sistemu**.\
-Napomena: kada štampač pošalje obaveštenje nekom proizvoljnom sistemu, mora da se **autentifikuje** protiv tog **sistema**. Stoga, napadač može naterati _**Print Spooler**_ servis da se autentifikuje protiv proizvoljnog sistema, a servis će **koristiti račun računara** u ovoj autentifikaciji.
+Ako je _**Print Spooler**_ usluga **omogućena,** možete koristiti neke već poznate AD akreditive da **zatražite** od štampača na kontroleru domena **ažuriranje** novih štampanja i jednostavno mu reći da **pošalje obaveštenje nekom sistemu**.\
+Napomena: kada štampač pošalje obaveštenje nekom proizvoljnom sistemu, mora da se **autentifikuje** protiv tog **sistema**. Stoga, napadač može naterati _**Print Spooler**_ uslugu da se autentifikuje protiv proizvoljnog sistema, a usluga će **koristiti račun računara** u ovoj autentifikaciji.
 
-### Finding Windows Servers on the domain
+### Pronalaženje Windows servera na domenu
 
 Koristeći PowerShell, dobijte listu Windows mašina. Serveri su obično prioritet, pa se fokusirajmo na njih:
 ```bash
@@ -19,7 +19,7 @@ Get-ADComputer -Filter {(OperatingSystem -like "*windows*server*") -and (Operati
 ```
 ### Pronalaženje Spooler usluga koje slušaju
 
-Koristeći malo modifikovani @mysmartlogin-ov (Vincent Le Toux) [SpoolerScanner](https://github.com/NotMedic/NetNTLMtoSilverTicket), proverite da li Spooler usluga sluša:
+Koristeći malo izmenjeni @mysmartlogin-ov (Vincent Le Toux) [SpoolerScanner](https://github.com/NotMedic/NetNTLMtoSilverTicket), proverite da li Spooler usluga sluša:
 ```bash
 . .\Get-SpoolStatus.ps1
 ForEach ($server in Get-Content servers.txt) {Get-SpoolStatus $server}

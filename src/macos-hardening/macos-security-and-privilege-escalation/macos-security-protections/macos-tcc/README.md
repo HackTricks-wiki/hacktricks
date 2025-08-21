@@ -10,7 +10,7 @@ Korisnici se susreću sa TCC kada aplikacije traže pristup zaštićenim funkcij
 
 ![Primer TCC obaveštenja](https://rainforest.engineering/images/posts/macos-tcc/tcc-prompt.png?1620047855)
 
-**TCC** se obrađuje od strane **demon**-a koji se nalazi u `/System/Library/PrivateFrameworks/TCC.framework/Support/tccd` i konfiguriše se u `/System/Library/LaunchDaemons/com.apple.tccd.system.plist` (registrujući mach servis `com.apple.tccd.system`).
+**TCC** se upravlja putem **demon-a** koji se nalazi u `/System/Library/PrivateFrameworks/TCC.framework/Support/tccd` i konfiguriše se u `/System/Library/LaunchDaemons/com.apple.tccd.system.plist` (registrujući mach servis `com.apple.tccd.system`).
 
 Postoji **tccd u režimu korisnika** koji se pokreće za svakog prijavljenog korisnika definisanog u `/System/Library/LaunchAgents/com.apple.tccd.plist`, registrujući mach servise `com.apple.tccd` i `com.apple.usernotifications.delegate.com.apple.tccd`.
 
@@ -28,13 +28,13 @@ Dozvole/odbijanja se zatim čuvaju u nekim TCC bazama podataka:
 
 - Sistem-wide baza podataka u **`/Library/Application Support/com.apple.TCC/TCC.db`**.
 - Ova baza podataka je **SIP zaštićena**, tako da samo SIP bypass može da piše u nju.
-- Korisnička TCC baza podataka **`$HOME/Library/Application Support/com.apple.TCC/TCC.db`** za per-user podešavanja.
+- Korisnička TCC baza podataka **`$HOME/Library/Application Support/com.apple.TCC/TCC.db`** za podešavanja po korisniku.
 - Ova baza podataka je zaštićena tako da samo procesi sa visokim TCC privilegijama kao što je Full Disk Access mogu da pišu u nju (ali nije zaštićena SIP-om).
 
 > [!WARNING]
 > Prethodne baze podataka su takođe **TCC zaštićene za pristup čitanju**. Tako da **nećete moći da pročitate** svoju redovnu korisničku TCC bazu podataka osim ako nije iz TCC privilegovanog procesa.
 >
-> Ipak, zapamtite da će proces sa ovim visokim privilegijama (kao što su **FDA** ili **`kTCCServiceEndpointSecurityClient`**) moći da piše u korisničku TCC bazu podataka.
+> Međutim, zapamtite da će proces sa ovim visokim privilegijama (kao što su **FDA** ili **`kTCCServiceEndpointSecurityClient`**) moći da piše u korisničku TCC bazu podataka.
 
 - Postoji **treća** TCC baza podataka u **`/var/db/locationd/clients.plist`** koja označava klijente kojima je dozvoljen **pristup uslugama lokacije**.
 - SIP zaštićena datoteka **`/Users/carlospolop/Downloads/REG.db`** (takođe zaštićena od pristupa čitanju sa TCC), sadrži **lokaciju** svih **validnih TCC baza podataka**.
@@ -54,7 +54,7 @@ Dozvole/odbijanja se zatim čuvaju u nekim TCC bazama podataka:
 > com.apple.rootless.storage.TCC
 > ```
 >
-> Ipak, korisnici mogu **brisati ili upititi pravila** pomoću **`tccutil`** komandne linijske alatke.
+> Međutim, korisnici mogu **brisati ili upititi pravila** pomoću **`tccutil`** komandne linijske alatke.
 
 #### Upit baze podataka
 
@@ -199,7 +199,7 @@ csreq -t -r /tmp/telegram_csreq.bin
 (anchor apple generic and certificate leaf[field.1.2.840.113635.100.6.1.9] /* exists */ or anchor apple generic and certificate 1[field.1.2.840.113635.100.6.2.6] /* exists */ and certificate leaf[field.1.2.840.113635.100.6.1.13] /* exists */ and certificate leaf[subject.OU] = "6N38VWS5BX") and identifier "ru.keepcoder.Telegram"
 ```
 > [!WARNING]
-> Stoga, druge aplikacije koje koriste isto ime i ID paketa neće moći da pristupe odobrenim dozvolama datim drugim aplikacijama.
+> Stoga, druge aplikacije koje koriste isto ime i ID paketa neće moći da pristupe dodeljenim dozvolama koje su date drugim aplikacijama.
 
 ### Dozvole i TCC Dozvole
 
@@ -229,7 +229,7 @@ Neke TCC dozvole su: kTCCServiceAppleEvents, kTCCServiceCalendar, kTCCServicePho
 ### Osetljiva nezaštićena mesta
 
 - $HOME (sam)
-- $HOME/.ssh, $HOME/.aws, itd.
+- $HOME/.ssh, $HOME/.aws, itd
 - /tmp
 
 ### Korisnička namera / com.apple.macl
@@ -264,7 +264,7 @@ Ako u nekom trenutku uspete da dobijete pristup za pisanje nad TCC bazom podatak
 
 <details>
 
-<summary>Umetanje u TCC primer</summary>
+<summary>Primer umetanja u TCC</summary>
 ```sql
 INSERT INTO access (
 service,
@@ -325,7 +325,7 @@ macos-apple-events.md
 ### Automatizacija (Finder) do FDA\*
 
 TCC naziv dozvole za Automatizaciju je: **`kTCCServiceAppleEvents`**\
-Ova specifična TCC dozvola takođe označava **aplikaciju koja može biti upravljana** unutar TCC baze podataka (tako da dozvole ne omogućavaju upravljanje svime).
+Ova specifična TCC dozvola takođe označava **aplikaciju koja može biti upravljana** unutar TCC baze podataka (tako da dozvole ne omogućavaju samo upravljanje svime).
 
 **Finder** je aplikacija koja **uvek ima FDA** (čak i ako se ne pojavljuje u UI), tako da ako imate **Automatizaciju** privilegije nad njom, možete zloupotrebiti njene privilegije da **izvršite neke radnje**.\
 U ovom slučaju vaša aplikacija bi trebala dozvolu **`kTCCServiceAppleEvents`** nad **`com.apple.Finder`**.
@@ -400,7 +400,7 @@ Isto se dešava sa **Script Editor aplikacijom,** može kontrolisati Finder, ali
 
 ### Automatizacija (SE) do nekih TCC
 
-**Sistem događaji mogu kreirati akcije za foldere, a akcije za foldere mogu pristupiti nekim TCC folderima** (Desktop, Documents & Downloads), tako da se skripta poput sledeće može koristiti za zloupotrebu ovog ponašanja:
+**Sistemski događaji mogu kreirati akcije za foldere, a akcije za foldere mogu pristupiti nekim TCC folderima** (Desktop, Documents & Downloads), tako da se skripta poput sledeće može koristiti za zloupotrebu ovog ponašanja:
 ```bash
 # Create script to execute with the action
 cat > "/tmp/script.js" <<EOD
@@ -506,26 +506,26 @@ Ako imate **`kTCCServiceEndpointSecurityClient`**, imate FDA. Kraj.
 
 ### User TCC DB za FDA
 
-Dobijajući **dozvole za pisanje** nad **user TCC** bazom podataka ne možete sebi dodeliti **`FDA`** dozvole, samo onaj koji živi u sistemskoj bazi može to dodeliti.
+Dobijajući **dozvole za pisanje** nad **user TCC** bazom, ne možete sebi dodeliti **`FDA`** dozvole, samo onaj koji živi u sistemskoj bazi može to da dodeli.
 
-Ali možete **možete** sebi dati **`Automation rights to Finder`**, i zloupotrebiti prethodnu tehniku da se uzdignete do FDA\*.
+Ali možete sebi **dati** **`Automation rights to Finder`**, i zloupotrebiti prethodnu tehniku da se eskalirate na FDA\*.
 
 ### **FDA do TCC dozvola**
 
 **Full Disk Access** je TCC naziv **`kTCCServiceSystemPolicyAllFiles`**
 
-Ne mislim da je ovo pravi privesc, ali samo u slučaju da to smatrate korisnim: Ako kontrolišete program sa FDA, možete **modifikovati korisničku TCC bazu podataka i dati sebi bilo koji pristup**. Ovo može biti korisno kao tehnika postojanosti u slučaju da izgubite svoje FDA dozvole.
+Ne mislim da je ovo pravi privesc, ali samo u slučaju da to smatrate korisnim: Ako kontrolišete program sa FDA, možete **modifikovati korisničku TCC bazu i dati sebi bilo koji pristup**. Ovo može biti korisno kao tehnika postojanosti u slučaju da izgubite svoje FDA dozvole.
 
 ### **SIP Bypass do TCC Bypass**
 
-Sistem **TCC baza podataka** je zaštićena **SIP**, zato samo procesi sa **navedenim privilegijama će moći da je modifikuju**. Stoga, ako napadač pronađe **SIP bypass** preko **fajla** (da može da modifikuje fajl koji je ograničen SIP-om), moći će da:
+Sistem **TCC baza** je zaštićena **SIP**, zato samo procesi sa **navedenim privilegijama će moći da je modifikuju**. Stoga, ako napadač pronađe **SIP bypass** preko **fajla** (da može da modifikuje fajl zaštićen SIP-om), moći će da:
 
-- **Ukloni zaštitu** TCC baze podataka i da sebi dodeli sve TCC dozvole. Mogao bi zloupotrebiti bilo koji od ovih fajlova, na primer:
-- TCC sistemska baza podataka
+- **Ukloni zaštitu** TCC baze, i da sebi dodeli sve TCC dozvole. Mogao bi zloupotrebiti bilo koji od ovih fajlova, na primer:
+- TCC sistemska baza
 - REG.db
 - MDMOverrides.plist
 
-Međutim, postoji još jedna opcija da zloupotrebi ovaj **SIP bypass da bi obišao TCC**, fajl `/Library/Apple/Library/Bundles/TCC_Compatibility.bundle/Contents/Resources/AllowApplicationsList.plist` je lista dozvoljenih aplikacija koje zahtevaju TCC izuzetak. Stoga, ako napadač može **ukloniti SIP zaštitu** sa ovog fajla i dodati svoju **vlastitu aplikaciju**, aplikacija će moći da obiđe TCC.\
+Međutim, postoji još jedna opcija da zloupotrebite ovaj **SIP bypass da obiđete TCC**, fajl `/Library/Apple/Library/Bundles/TCC_Compatibility.bundle/Contents/Resources/AllowApplicationsList.plist` je lista dozvoljenih aplikacija koje zahtevaju TCC izuzetak. Stoga, ako napadač može **ukloniti SIP zaštitu** sa ovog fajla i dodati svoju **vlastitu aplikaciju**, aplikacija će moći da obiđe TCC.\
 Na primer, da doda terminal:
 ```bash
 # Get needed info

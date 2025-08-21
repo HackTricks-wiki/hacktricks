@@ -8,7 +8,7 @@ Fokus **SID History Injection Attack** je pomoć **migraciji korisnika između d
 
 Postoje dve metode za izvršavanje ovog napada: kroz kreiranje **Golden Ticket** ili **Diamond Ticket**.
 
-Da bi se odredio SID za grupu **"Enterprise Admins"**, prvo je potrebno locirati SID matične domene. Nakon identifikacije, SID grupe Enterprise Admins može se konstruisati dodavanjem `-519` na SID matične domene. Na primer, ako je SID matične domene `S-1-5-21-280534878-1496970234-700767426`, rezultantni SID za grupu "Enterprise Admins" bi bio `S-1-5-21-280534878-1496970234-700767426-519`.
+Da bi se odredio SID za grupu **"Enterprise Admins"**, prvo je potrebno pronaći SID matične domene. Nakon identifikacije, SID grupe Enterprise Admins može se konstruisati dodavanjem `-519` na SID matične domene. Na primer, ako je SID matične domene `S-1-5-21-280534878-1496970234-700767426`, rezultantni SID za grupu "Enterprise Admins" bi bio `S-1-5-21-280534878-1496970234-700767426-519`.
 
 Takođe možete koristiti grupe **Domain Admins**, koje se završavaju sa **512**.
 
@@ -17,12 +17,12 @@ Drugi način da pronađete SID grupe iz druge domene (na primer "Domain Admins")
 Get-DomainGroup -Identity "Domain Admins" -Domain parent.io -Properties ObjectSid
 ```
 > [!WARNING]
-> Imajte na umu da je moguće onemogućiti SID istoriju u odnosu poverenja, što će učiniti ovaj napad neuspešnim.
+> Imajte na umu da je moguće onemogućiti SID istoriju u odnosu poverenja što će učiniti ovaj napad neuspešnim.
 
 Prema [**docs**](https://technet.microsoft.com/library/cc835085.aspx):
 - **Onemogućavanje SIDHistory na šumskim poverenjima** korišćenjem netdom alata (`netdom trust /domain: /EnableSIDHistory:no on the domain controller`)
 - **Primena SID Filter Quarantining na spoljnim poverenjima** korišćenjem netdom alata (`netdom trust /domain: /quarantine:yes on the domain controller`)
-- **Primena SID filtriranja na domena poverenja unutar jedne šume** se ne preporučuje jer je to nepodržana konfiguracija i može izazvati prekidne promene. Ako je domen unutar šume nepouzdana, onda ne bi trebao biti član šume. U ovoj situaciji je neophodno prvo podeliti pouzdane i nepouzdane domene u odvojene šume gde se može primeniti SID filtriranje na međušumskom poverenju.
+- **Primena SID filtriranja na domena poverenja unutar jedne šume** se ne preporučuje jer je to nepodržana konfiguracija i može izazvati prekidne promene. Ako je domena unutar šume nepouzdana, onda ne bi trebala biti član šume. U ovoj situaciji je neophodno prvo podeliti pouzdane i nepouzdane domene u odvojene šume gde se može primeniti SID filtriranje na međušumskom poverenju.
 
 Proverite ovaj post za više informacija o zaobilaženju ovoga: [**https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4**](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)
 
@@ -124,7 +124,7 @@ psexec.py <child_domain>/Administrator@dc.root.local -k -no-pass -target-ip 10.1
 
 Ovo je Impacket skripta koja će **automatizovati eskalaciju sa child na parent domen**. Skripta zahteva:
 
-- Ciljni kontroler domena
+- Ciljni domen kontroler
 - Akreditive za admin korisnika u child domenu
 
 Tok je:
@@ -134,7 +134,7 @@ Tok je:
 - Kreira Zlatnu Ulaznicu
 - Prijavljuje se u parent domen
 - Preuzima akreditive za Administrator nalog u parent domenu
-- Ako je `target-exec` prekidač specificiran, autentifikuje se na Kontroler Domenа parent domena putem Psexec.
+- Ako je `target-exec` prekidač specificiran, autentifikuje se na Domen Kontroler parent domena putem Psexec.
 ```bash
 raiseChild.py -target-exec 10.10.10.10 <child_domain>/username
 ```

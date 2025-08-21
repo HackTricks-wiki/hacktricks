@@ -10,7 +10,7 @@ Linux mašina u AD može **čuvati različite CCACHE karte unutar fajlova. Ove k
 
 ### AD enumeracija sa linux-a
 
-Ako imate pristup AD-u na linux-u (ili bash-u u Windows-u), možete probati [https://github.com/lefayjey/linWinPwn](https://github.com/lefayjey/linWinPwn) da enumerirate AD.
+Ako imate pristup AD-u na linux-u (ili bash-u na Windows-u), možete probati [https://github.com/lefayjey/linWinPwn](https://github.com/lefayjey/linWinPwn) da enumerišete AD.
 
 Takođe možete proveriti sledeću stranicu da biste naučili **druge načine za enumeraciju AD-a sa linux-a**:
 
@@ -30,7 +30,7 @@ FreeIPA je open-source **alternativa** za Microsoft Windows **Active Directory**
 
 ### Pass The Ticket
 
-Na ovoj stranici ćete pronaći različita mesta gde možete **pronaći kerberos karte unutar linux hosta**, na sledećoj stranici možete naučiti kako da transformišete formate ovih CCache karata u Kirbi (format koji treba da koristite u Windows-u) i takođe kako da izvršite PTT napad:
+Na ovoj stranici ćete pronaći različita mesta gde možete **pronaći kerberos karte unutar linux hosta**, na sledećoj stranici možete naučiti kako da transformišete formate ovih CCache karata u Kirbi (format koji treba da koristite na Windows-u) i takođe kako da izvršite PTT napad:
 
 {{#ref}}
 ../../windows-hardening/active-directory-methodology/pass-the-ticket.md
@@ -49,9 +49,9 @@ krb5cc_1000
 # Prepare to use it
 export KRB5CCNAME=/tmp/krb5cc_1000
 ```
-### CCACHE ponovna upotreba karata iz keyring-a
+### CCACHE ticket reuse from keyring
 
-**Kerberos karte pohranjene u memoriji procesa mogu se izvući**, posebno kada je zaštita ptrace-a na mašini onemogućena (`/proc/sys/kernel/yama/ptrace_scope`). Koristan alat za ovu svrhu se može pronaći na [https://github.com/TarlogicSecurity/tickey](https://github.com/TarlogicSecurity/tickey), koji olakšava ekstrakciju injektovanjem u sesije i dump-ovanjem karata u `/tmp`.
+**Kerberos karte pohranjene u memoriji procesa mogu se izvući**, posebno kada je zaštita ptrace na mašini onemogućena (`/proc/sys/kernel/yama/ptrace_scope`). Koristan alat za ovu svrhu se može pronaći na [https://github.com/TarlogicSecurity/tickey](https://github.com/TarlogicSecurity/tickey), koji olakšava ekstrakciju injektovanjem u sesije i dumpovanjem karata u `/tmp`.
 
 Da biste konfigurisali i koristili ovaj alat, slede se koraci u nastavku:
 ```bash
@@ -71,7 +71,7 @@ Pozivanje **`SSSDKCMExtractor`** sa parametrima --database i --key će analizira
 git clone https://github.com/fireeye/SSSDKCMExtractor
 python3 SSSDKCMExtractor.py --database secrets.ldb --key secrets.mkey
 ```
-**Keširanje kredencijala Kerberos blob može se konvertovati u upotrebljiv Kerberos CCache** fajl koji se može proslediti Mimikatz/Rubeus.
+**Keš kredencijala Kerberos blob može biti konvertovan u upotrebljiv Kerberos CCache** fajl koji se može proslediti Mimikatz/Rubeus.
 
 ### CCACHE ponovna upotreba karte iz keytab-a
 ```bash
@@ -97,7 +97,7 @@ Na macOS-u, **`bifrost`** služi kao alat za analizu keytab datoteka.
 ```bash
 ./bifrost -action dump -source keytab -path /path/to/your/file
 ```
-Korišćenjem ekstraktovanih informacija o nalogu i hešu, mogu se uspostaviti veze sa serverima koristeći alate kao što su **`crackmapexec`**.
+Korišćenjem ekstraktovanih informacija o nalogu i hešu, mogu se uspostaviti veze sa serverima koristeći alate kao što je **`crackmapexec`**.
 ```bash
 crackmapexec 10.XXX.XXX.XXX -u 'ServiceAccount$' -H "HashPlaceholder" -d "YourDOMAIN"
 ```

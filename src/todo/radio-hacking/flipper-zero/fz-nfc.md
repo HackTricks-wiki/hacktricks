@@ -52,7 +52,7 @@ Za uvod o NFC [**pročitajte ovu stranicu**](../pentesting-rfid.md#high-frequenc
 
 ### Čitanje
 
-Flipper Zero može **čitati NFC kartice**, međutim, **ne razume sve protokole** koji se zasnivaju na ISO 14443. Ipak, pošto je **UID niska atribut**, možete se naći u situaciji kada je **UID već pročitan, ali je visoko-nivo protokol za prenos podataka još uvek nepoznat**. Možete čitati, emulirati i ručno uneti UID koristeći Flipper za primitivne čitače koji koriste UID za autorizaciju.
+Flipper Zero može **čitati NFC kartice**, međutim, **ne razume sve protokole** koji se zasnivaju na ISO 14443. Ipak, pošto je **UID niska atribut**, možete se naći u situaciji kada je **UID već pročitan, ali je visoko-nivo protokol za prenos podataka još uvek nepoznat**. Možete čitati, emulirati i ručno unositi UID koristeći Flipper za primitivne čitače koji koriste UID za autorizaciju.
 
 #### Čitanje UID VS Čitanje Podataka Unutra <a href="#reading-the-uid-vs-reading-the-data-inside" id="reading-the-uid-vs-reading-the-data-inside"></a>
 
@@ -65,7 +65,7 @@ U Flipperu, čitanje 13.56 MHz oznaka može se podeliti na dva dela:
 
 ### Čitaj Specifično
 
-U slučaju da Flipper Zero nije u mogućnosti da pronađe tip kartice iz niskonivo podataka, u `Extra Actions` možete odabrati `Read Specific Card Type` i **ručno** **naznačiti tip kartice koju želite da pročitate**.
+U slučaju da Flipper Zero nije u mogućnosti da pronađe tip kartice iz niskonivo podataka, u `Dodatnim Akcijama` možete odabrati `Pročitaj Specifičan Tip Kartice` i **ručno** **naznačiti tip kartice koju želite da pročitate**.
 
 #### EMV Bankovne Kartice (PayPass, payWave, Apple Pay, Google Pay) <a href="#emv-bank-cards-paypass-paywave-apple-pay-google-pay" id="emv-bank-cards-paypass-paywave-apple-pay-google-pay"></a>
 

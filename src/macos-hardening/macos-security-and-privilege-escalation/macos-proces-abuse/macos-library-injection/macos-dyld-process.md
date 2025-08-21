@@ -30,7 +30,7 @@ Zatim, mapira dyld deljenu keš memoriju koja prelinkuje sve važne sistemske bi
 3. Zatim uvezene
 1. Zatim nastavlja sa rekurzivnim uvozom biblioteka
 
-Kada su sve učitane, pokreću se **inicijalizatori** ovih biblioteka. Ovi su kodirani koristeći **`__attribute__((constructor))`** definisano u `LC_ROUTINES[_64]` (sada zastarelo) ili putem pokazivača u sekciji označenoj sa `S_MOD_INIT_FUNC_POINTERS` (obično: **`__DATA.__MOD_INIT_FUNC`**).
+Kada su sve učitane, **inicijalizatori** ovih biblioteka se izvršavaju. Ovi su kodirani koristeći **`__attribute__((constructor))`** definisano u `LC_ROUTINES[_64]` (sada zastarelo) ili putem pokazivača u sekciji označenoj sa `S_MOD_INIT_FUNC_POINTERS` (obično: **`__DATA.__MOD_INIT_FUNC`**).
 
 Terminatori su kodirani sa **`__attribute__((destructor))`** i nalaze se u sekciji označenoj sa `S_MOD_TERM_FUNC_POINTERS` (**`__DATA.__mod_term_func`**).
 
@@ -43,8 +43,8 @@ Neke stub sekcije u binarnom fajlu:
 - **`__TEXT.__[auth_]stubs`**: Pokazivači iz `__DATA` sekcija
 - **`__TEXT.__stub_helper`**: Mali kod koji poziva dinamičko linkovanje sa informacijama o funkciji koja se poziva
 - **`__DATA.__[auth_]got`**: Globalna tabela ofseta (adrese do uvezenih funkcija, kada su rešene, (vezane tokom vremena učitavanja jer je označena sa oznakom `S_NON_LAZY_SYMBOL_POINTERS`)
-- **`__DATA.__nl_symbol_ptr`**: Ne-lazni pokazivači simbola (vezani tokom vremena učitavanja jer je označena sa oznakom `S_NON_LAZY_SYMBOL_POINTERS`)
-- **`__DATA.__la_symbol_ptr`**: Lazni pokazivači simbola (vezani pri prvom pristupu)
+- **`__DATA.__nl_symbol_ptr`**: Pokazivači na ne-lazne simbole (vezani tokom vremena učitavanja jer je označena sa oznakom `S_NON_LAZY_SYMBOL_POINTERS`)
+- **`__DATA.__la_symbol_ptr`**: Pokazivači na lenje simbole (vezani pri prvom pristupu)
 
 > [!WARNING]
 > Imajte na umu da pokazivači sa prefiksom "auth\_" koriste jedan ključ za enkripciju u procesu kako bi ga zaštitili (PAC). Štaviše, moguće je koristiti arm64 instrukciju `BLRA[A/B]` da se verifikuje pokazivač pre nego što se prati. A RETA\[A/B] može se koristiti umesto RET adrese.\
@@ -52,7 +52,7 @@ Neke stub sekcije u binarnom fajlu:
 >
 > Takođe, imajte na umu da trenutne verzije dyld učitavaju **sve kao ne-lazne**.
 
-### Pronalaženje laznih simbola
+### Pronalaženje lenjih simbola
 ```c
 //gcc load.c -o load
 #include <stdio.h>
@@ -105,11 +105,11 @@ Ova poslednja funkcija, nakon što pronađe adresu tražene funkcije, upisuje je
 
 #### Dyld opkodi
 
-Na kraju, **`dyld_stub_binder`** treba da pronađe naznačenu funkciju i upiše je na odgovarajuću adresu kako ne bi ponovo tražio. Da bi to uradio, koristi opkode (konačna stanja) unutar dyld.
+Na kraju, **`dyld_stub_binder`** treba da pronađe naznačenu funkciju i upiše je na odgovarajuću adresu kako ne bi ponovo tražio. Da bi to uradio, koristi opkode (konačna stanja) unutar dyld-a.
 
 ## apple\[] argument vektor
 
-U macOS glavna funkcija zapravo prima 4 argumenta umesto 3. Četvrti se zove apple i svaki unos je u formi `key=value`. Na primer:
+U macOS-u glavna funkcija zapravo prima 4 argumenta umesto 3. Četvrti se zove apple i svaki unos je u formi `key=value`. Na primer:
 ```c
 // gcc apple.c -o apple
 #include <stdio.h>
@@ -142,7 +142,7 @@ moguće je videti sve ove zanimljive vrednosti tokom debagovanja pre nego što s
 <pre><code>lldb ./apple
 
 <strong>(lldb) target create "./a"
-</strong>Trenutna izvršna datoteka postavljena na '/tmp/a' (arm64).
+</strong>Trenutni izvršni program postavljen na '/tmp/a' (arm64).
 (lldb) process launch -s
 [..]
 
@@ -180,7 +180,7 @@ moguće je videti sve ove zanimljive vrednosti tokom debagovanja pre nego što s
 
 ## dyld_all_image_infos
 
-Ovo je struktura koju izlaže dyld sa informacijama o stanju dyld-a koja se može naći u [**izvornom kodu**](https://opensource.apple.com/source/dyld/dyld-852.2/include/mach-o/dyld_images.h.auto.html) sa informacijama kao što su verzija, pokazivač na niz dyld_image_info, na dyld_image_notifier, da li je proc odvojen od zajedničkog keša, da li je pozvan inicijalizator libSystem, pokazivač na Mach zaglavlje dyls-a, pokazivač na dyld verziju stringa...
+Ovo je struktura koju izlaže dyld sa informacijama o stanju dyld-a koja se može naći u [**izvornom kodu**](https://opensource.apple.com/source/dyld/dyld-852.2/include/mach-o/dyld_images.h.auto.html) sa informacijama kao što su verzija, pokazivač na niz dyld_image_info, na dyld_image_notifier, da li je proc odvojen od zajedničkog keša, da li je pozvan inicijalizator libSystem, pokazivač na Mach header dyld-a, pokazivač na verziju dyld-a...
 
 ## dyld env variables
 
@@ -253,28 +253,28 @@ dyld[21623]: running initializer 0x18e59e5c0 in /usr/lib/libSystem.B.dylib
 ```
 ### Drugo
 
-- `DYLD_BIND_AT_LAUNCH`: Lenje vezivanje se rešava sa ne-lenim
+- `DYLD_BIND_AT_LAUNCH`: Lenje vezivanje se rešava sa neljenim
 - `DYLD_DISABLE_PREFETCH`: Onemogući pre-fetching \_\_DATA i \_\_LINKEDIT sadržaja
 - `DYLD_FORCE_FLAT_NAMESPACE`: Jednokratna vezivanja
 - `DYLD_[FRAMEWORK/LIBRARY]_PATH | DYLD_FALLBACK_[FRAMEWORK/LIBRARY]_PATH | DYLD_VERSIONED_[FRAMEWORK/LIBRARY]_PATH`: Putanje za rešavanje
 - `DYLD_INSERT_LIBRARIES`: Učitaj specifičnu biblioteku
 - `DYLD_PRINT_TO_FILE`: Zapiši dyld debug u datoteku
-- `DYLD_PRINT_APIS`: Ispiši libdyld API pozive
-- `DYLD_PRINT_APIS_APP`: Ispiši libdyld API pozive koje je napravio main
-- `DYLD_PRINT_BINDINGS`: Ispiši simbole kada su vezani
-- `DYLD_WEAK_BINDINGS`: Ispiši samo slabe simbole kada su vezani
-- `DYLD_PRINT_CODE_SIGNATURES`: Ispiši operacije registracije potpisa koda
-- `DYLD_PRINT_DOFS`: Ispiši D-Trace format sekcija objekta kao učitane
-- `DYLD_PRINT_ENV`: Ispiši env viđen od strane dyld
-- `DYLD_PRINT_INTERPOSTING`: Ispiši interposting operacije
-- `DYLD_PRINT_LIBRARIES`: Ispiši učitane biblioteke
-- `DYLD_PRINT_OPTS`: Ispiši opcije učitavanja
-- `DYLD_REBASING`: Ispiši operacije ponovnog vezivanja simbola
-- `DYLD_RPATHS`: Ispiši ekspanzije @rpath
-- `DYLD_PRINT_SEGMENTS`: Ispiši mape Mach-O segmenata
-- `DYLD_PRINT_STATISTICS`: Ispiši statistiku vremena
-- `DYLD_PRINT_STATISTICS_DETAILS`: Ispiši detaljnu statistiku vremena
-- `DYLD_PRINT_WARNINGS`: Ispiši poruke upozorenja
+- `DYLD_PRINT_APIS`: Ispisuj libdyld API pozive
+- `DYLD_PRINT_APIS_APP`: Ispisuj libdyld API pozive koje pravi main
+- `DYLD_PRINT_BINDINGS`: Ispisuj simbole kada su vezani
+- `DYLD_WEAK_BINDINGS`: Ispisuj samo slabe simbole kada su vezani
+- `DYLD_PRINT_CODE_SIGNATURES`: Ispisuj operacije registracije potpisa koda
+- `DYLD_PRINT_DOFS`: Ispisuj D-Trace format sekcija objekta kao učitane
+- `DYLD_PRINT_ENV`: Ispisuj env viđen od strane dyld
+- `DYLD_PRINT_INTERPOSTING`: Ispisuj interposting operacije
+- `DYLD_PRINT_LIBRARIES`: Ispisuj učitane biblioteke
+- `DYLD_PRINT_OPTS`: Ispisuj opcije učitavanja
+- `DYLD_REBASING`: Ispisuj operacije ponovnog vezivanja simbola
+- `DYLD_RPATHS`: Ispisuj ekspanzije @rpath
+- `DYLD_PRINT_SEGMENTS`: Ispisuj mape Mach-O segmenata
+- `DYLD_PRINT_STATISTICS`: Ispisuj statistiku vremena
+- `DYLD_PRINT_STATISTICS_DETAILS`: Ispisuj detaljnu statistiku vremena
+- `DYLD_PRINT_WARNINGS`: Ispisuj poruke upozorenja
 - `DYLD_SHARED_CACHE_DIR`: Putanja za korišćenje za keš zajedničkih biblioteka
 - `DYLD_SHARED_REGION`: "koristi", "privatno", "izbegavaj"
 - `DYLD_USE_CLOSURES`: Omogući zatvaranja

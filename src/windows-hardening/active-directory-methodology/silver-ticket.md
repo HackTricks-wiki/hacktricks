@@ -6,11 +6,11 @@
 
 ## Silver ticket
 
-Napad **Silver Ticket** uključuje eksploataciju servisnih karata u Active Directory (AD) okruženjima. Ova metoda se oslanja na **dobijanje NTLM heša servisnog naloga**, kao što je nalog računara, kako bi se falsifikovala Ticket Granting Service (TGS) karta. Sa ovom falsifikovanom kartom, napadač može pristupiti specifičnim uslugama na mreži, **pretvarajući se da je bilo koji korisnik**, obično sa ciljem sticanja administratorskih privilegija. Naglašava se da je korišćenje AES ključeva za falsifikovanje karata sigurnije i manje uočljivo.
+Napad **Silver Ticket** uključuje eksploataciju servisnih karata u Active Directory (AD) okruženjima. Ova metoda se oslanja na **sticanje NTLM haša servisnog naloga**, kao što je nalog računara, kako bi se falsifikovala Ticket Granting Service (TGS) karta. Sa ovom falsifikovanom kartom, napadač može pristupiti specifičnim uslugama na mreži, **pretvarajući se da je bilo koji korisnik**, obično sa ciljem sticanja administratorskih privilegija. Naglašava se da je korišćenje AES ključeva za falsifikovanje karata sigurnije i manje uočljivo.
 
 > [!WARNING]
-> Silver Tickets su manje uočljivi od Golden Tickets jer zahtevaju samo **heš servisnog naloga**, a ne krbtgt nalog. Međutim, ograničeni su na specifičnu uslugu koju ciljaju. Pored toga, samo krađa lozinke korisnika.
-Pored toga, ako kompromitujete **lozinku naloga sa SPN** možete koristiti tu lozinku da kreirate Silver Ticket pretvarajući se da ste bilo koji korisnik za tu uslugu.
+> Silver Tickets su manje uočljivi od Golden Tickets jer zahtevaju samo **haš servisnog naloga**, a ne krbtgt nalog. Međutim, ograničeni su na specifičnu uslugu koju ciljaju. Pored toga, samo krađa lozinke korisnika.
+Pored toga, ako kompromitujete **lozinku naloga sa SPN** možete koristiti tu lozinku da kreirate Silver Ticket pretvarajući se da je bilo koji korisnik za tu uslugu.
 
 Za kreiranje karata koriste se različiti alati u zavisnosti od operativnog sistema:
 
@@ -37,7 +37,7 @@ mimikatz.exe "kerberos::ptt <TICKET_FILE>"
 # Obtain a shell
 .\PsExec.exe -accepteula \\<TARGET> cmd
 ```
-CIFS servis se ističe kao uobičajeni cilj za pristupanje fajl sistemu žrtve, ali se i drugi servisi poput HOST i RPCSS mogu iskoristiti za zadatke i WMI upite.
+CIFS servis je istaknut kao uobičajeni cilj za pristupanje fajl sistemu žrtve, ali se i drugi servisi kao što su HOST i RPCSS takođe mogu iskoristiti za zadatke i WMI upite.
 
 ## Dostupne Usluge
 
@@ -45,11 +45,11 @@ CIFS servis se ističe kao uobičajeni cilj za pristupanje fajl sistemu žrtve, 
 | ------------------------------------------ | -------------------------------------------------------------------------- |
 | WMI                                        | <p>HOST</p><p>RPCSS</p>                                                   |
 | PowerShell Remoting                        | <p>HOST</p><p>HTTP</p><p>U zavisnosti od OS takođe:</p><p>WSMAN</p><p>RPCSS</p> |
-| WinRM                                      | <p>HOST</p><p>HTTP</p><p>U nekim slučajevima možete samo tražiti: WINRM</p> |
+| WinRM                                      | <p>HOST</p><p>HTTP</p><p>U nekim slučajevima možete jednostavno tražiti: WINRM</p> |
 | Zakazani Zadaci                            | HOST                                                                      |
 | Windows Deljenje Fajlova, takođe psexec   | CIFS                                                                      |
 | LDAP operacije, uključujući DCSync        | LDAP                                                                      |
-| Windows Alati za Udaljenu Administraciju  | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                        |
+| Windows Alati za Udaljenu Administraciju   | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                        |
 | Zlatni Tiketi                              | krbtgt                                                                    |
 
 Korišćenjem **Rubeus** možete **tražiti sve** ove tikete koristeći parametar:

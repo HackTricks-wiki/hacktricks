@@ -71,7 +71,7 @@ macos-security-protections/
 
 ### Dozvole Fajlova
 
-Ako **proces koji se izvršava kao root piše** fajl koji može kontrolisati korisnik, korisnik bi mogao da iskoristi ovo za **eskalaciju privilegija**.\
+Ako **proces koji se izvršava kao root piše** fajl koji može kontrolisati korisnik, korisnik bi to mogao zloupotrebiti da **eskalira privilegije**.\
 To se može dogoditi u sledećim situacijama:
 
 - Fajl koji se koristi je već kreiran od strane korisnika (u vlasništvu korisnika)
@@ -79,7 +79,7 @@ To se može dogoditi u sledećim situacijama:
 - Fajl koji se koristi je unutar direktorijuma koji je u vlasništvu korisnika (korisnik može kreirati fajl)
 - Fajl koji se koristi je unutar direktorijuma koji je u vlasništvu root-a, ali korisnik ima pristup za pisanje zbog grupe (korisnik može kreirati fajl)
 
-Mogućnost da **kreirate fajl** koji će biti **koristen od strane root-a**, omogućava korisniku da **iskoristi njegov sadržaj** ili čak kreira **simlinkove/hardlinkove** koji ga upućuju na drugo mesto.
+Mogućnost da **kreirate fajl** koji će biti **koristen od strane root-a**, omogućava korisniku da **iskoristi njegov sadržaj** ili čak kreira **simlinkove/hardlinkove** da ga usmeri na drugo mesto.
 
 Za ovu vrstu ranjivosti ne zaboravite da **proverite ranjive `.pkg` instalere**:
 
@@ -88,7 +88,7 @@ Za ovu vrstu ranjivosti ne zaboravite da **proverite ranjive `.pkg` instalere**:
 macos-files-folders-and-binaries/macos-installers-abuse.md
 {{#endref}}
 
-### Rukovaoci aplikacija za ekstenzije fajlova i URL šeme
+### Rukovaoci aplikacija za ekstenzije fajlova i URL sheme
 
 Čudne aplikacije registrovane po ekstenzijama fajlova mogle bi biti zloupotrebljene, a različite aplikacije mogu biti registrovane da otvore specifične protokole
 
@@ -103,9 +103,9 @@ U macOS-u **aplikacije i binarni fajlovi mogu imati dozvole** za pristup folderi
 
 Stoga, napadač koji želi uspešno da kompromituje macOS mašinu moraće da **eskalira svoje TCC privilegije** (ili čak **obiđe SIP**, u zavisnosti od njegovih potreba).
 
-Ove privilegije se obično daju u obliku **entiteta** sa kojima je aplikacija potpisana, ili aplikacija može zatražiti neke pristupe i nakon što **korisnik odobri** iste, mogu se naći u **TCC bazama podataka**. Drugi način na koji proces može dobiti ove privilegije je da bude **dete procesa** sa tim **privilegijama**, jer se obično **nasleđuju**.
+Ove privilegije se obično daju u obliku **entiteta** sa kojima je aplikacija potpisana, ili aplikacija može zatražiti neke pristupe i nakon što **korisnik odobri** oni se mogu naći u **TCC bazama podataka**. Drugi način na koji proces može dobiti ove privilegije je da bude **dete procesa** sa tim **privilegijama** jer se obično **nasleđuju**.
 
-Pratite ove linkove da pronađete različite načine za [**eskalaciju privilegija u TCC**](macos-security-protections/macos-tcc/index.html#tcc-privesc-and-bypasses), da [**obiđete TCC**](macos-security-protections/macos-tcc/macos-tcc-bypasses/index.html) i kako je u prošlosti [**SIP bio zaobiđen**](macos-security-protections/macos-sip.md#sip-bypasses).
+Pratite ove linkove da pronađete različite načine za [**eskalaciju privilegija u TCC**](macos-security-protections/macos-tcc/index.html#tcc-privesc-and-bypasses), da [**obiđete TCC**](macos-security-protections/macos-tcc/macos-tcc-bypasses/index.html) i kako je u prošlosti [**SIP bio obiđen**](macos-security-protections/macos-sip.md#sip-bypasses).
 
 ## macOS Tradicionalna Eskalacija Privilegija
 

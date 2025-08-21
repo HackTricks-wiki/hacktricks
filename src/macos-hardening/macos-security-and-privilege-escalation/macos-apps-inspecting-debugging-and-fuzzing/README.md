@@ -83,46 +83,46 @@ ldid -S/tmp/entl.xml <binary>
 ```
 ### SuspiciousPackage
 
-[**SuspiciousPackage**](https://mothersruin.com/software/SuspiciousPackage/get.html) је алат користан за инспекцију **.pkg** фајлова (инсталатера) и за преглед онога што се налази унутра пре инсталирања.\
-Ови инсталатери имају `preinstall` и `postinstall` bash скрипте које аутори малвера обично злоупотребљавају да **одрже** **малвер**.
+[**SuspiciousPackage**](https://mothersruin.com/software/SuspiciousPackage/get.html) je alat koji je koristan za inspekciju **.pkg** fajlova (instalatera) i za pregled sadržaja pre nego što ih instalirate.\
+Ovi instalateri imaju `preinstall` i `postinstall` bash skripte koje autori malvera obično zloupotrebljavaju da **održe** **malver**.
 
 ### hdiutil
 
-Овај алат омогућава **монтирање** Apple слика дискова (**.dmg**) да би их инспектовали пре него што покренете било шта:
+Ovaj alat omogućava **montiranje** Apple disk slika (**.dmg**) fajlova radi inspekcije pre nego što se bilo šta pokrene:
 ```bash
 hdiutil attach ~/Downloads/Firefox\ 58.0.2.dmg
 ```
-It will be mounted in `/Volumes`
+Biće montiran u `/Volumes`
 
-### Packed binaries
+### Pakovani binarni fajlovi
 
 - Proverite visoku entropiju
 - Proverite stringove (ako gotovo da nema razumljivih stringova, pakovano)
 - UPX pakera za MacOS generiše sekciju pod nazivom "\_\_XHDR"
 
-## Static Objective-C analysis
+## Staticka analiza Objective-C
 
-### Metadata
+### Metapodaci
 
 > [!CAUTION]
-> Imajte na umu da programi napisani u Objective-C **zadržavaju** svoje deklaracije klasa **kada** **se kompajliraju** u [Mach-O binaries](../macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md). Takve deklaracije klasa **uključuju** ime i tip:
+> Imajte na umu da programi napisani u Objective-C **zadržavaju** svoje deklaracije klasa **kada** **se kompajliraju** u [Mach-O binarne fajlove](../macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md). Takve deklaracije klasa **uključuju** ime i tip:
 
 - Definisani interfejsi
 - Metode interfejsa
-- Instance varijable interfejsa
+- Varijable instanci interfejsa
 - Definisani protokoli
 
 Imajte na umu da bi ova imena mogla biti obfuskirana kako bi se otežalo obrnuto inženjerstvo binarnog fajla.
 
-### Function calling
+### Pozivanje funkcija
 
-Kada se funkcija poziva u binarnom fajlu koji koristi Objective-C, kompajlirani kod umesto pozivanja te funkcije, poziva **`objc_msgSend`**. Koji će pozvati finalnu funkciju:
+Kada se funkcija poziva u binarnom fajlu koji koristi Objective-C, kompajlirani kod umesto pozivanja te funkcije, poziva **`objc_msgSend`**. Koji će pozvati konačnu funkciju:
 
 ![](<../../../images/image (305).png>)
 
 Parametri koje ova funkcija očekuje su:
 
-- Prvi parametar (**self**) je "pokazivač koji pokazuje na **instancu klase koja treba da primi poruku**". Ili jednostavnije rečeno, to je objekat na kojem se metoda poziva. Ako je metoda klasa metoda, ovo će biti instanca objekta klase (kao celina), dok će za instancu metodu, self pokazivati na instanciranu instancu klase kao objekat.
+- Prvi parametar (**self**) je "pokazivač koji pokazuje na **instancu klase koja treba da primi poruku**". Ili jednostavnije rečeno, to je objekat na kojem se metoda poziva. Ako je metoda metoda klase, ovo će biti instanca objekta klase (kao celina), dok će za metodu instance, self pokazivati na instanciranu instancu klase kao objekat.
 - Drugi parametar, (**op**), je "selektor metode koja obrađuje poruku". Ponovo, jednostavnije rečeno, ovo je samo **ime metode.**
 - Preostali parametri su bilo koji **vrednosti koje su potrebne metodi** (op).
 
@@ -134,21 +134,21 @@ arm64-basic-assembly.md
 
 x64:
 
-| **Argument**      | **Register**                                                    | **(for) objc_msgSend**                                 |
-| ----------------- | --------------------------------------------------------------- | ------------------------------------------------------ |
-| **1st argument**  | **rdi**                                                         | **self: objekat na kojem se metoda poziva**           |
-| **2nd argument**  | **rsi**                                                         | **op: ime metode**                                     |
-| **3rd argument**  | **rdx**                                                         | **1st argument to the method**                         |
-| **4th argument**  | **rcx**                                                         | **2nd argument to the method**                         |
-| **5th argument**  | **r8**                                                          | **3rd argument to the method**                         |
-| **6th argument**  | **r9**                                                          | **4th argument to the method**                         |
-| **7th+ argument** | <p><strong>rsp+</strong><br><strong>(na steku)</strong></p>   | **5th+ argument to the method**                        |
+| **Argument**      | **Registar**                                                  | **(za) objc_msgSend**                                 |
+| ----------------- | ------------------------------------------------------------- | ------------------------------------------------------ |
+| **1. argument**   | **rdi**                                                       | **self: objekat na kojem se metoda poziva**           |
+| **2. argument**   | **rsi**                                                       | **op: ime metode**                                    |
+| **3. argument**   | **rdx**                                                       | **1. argument za metodu**                             |
+| **4. argument**   | **rcx**                                                       | **2. argument za metodu**                             |
+| **5. argument**   | **r8**                                                        | **3. argument za metodu**                             |
+| **6. argument**   | **r9**                                                        | **4. argument za metodu**                             |
+| **7. i više**     | <p><strong>rsp+</strong><br><strong>(na steku)</strong></p> | **5. i više argumenata za metodu**                    |
 
-### Dump ObjectiveC metadata
+### Dump ObjectiveC metapodataka
 
 ### Dynadump
 
-[**Dynadump**](https://github.com/DerekSelander/dynadump) je alat za klasu-dump Objective-C binarnih fajlova. Github specificira dylibs, ali ovo takođe funkcioniše sa izvršnim fajlovima.
+[**Dynadump**](https://github.com/DerekSelander/dynadump) je alat za dumpovanje klasa Objective-C binarnih fajlova. Github specificira dylibs, ali ovo takođe funkcioniše sa izvršnim fajlovima.
 ```bash
 ./dynadump dump /path/to/bin
 ```
@@ -168,14 +168,14 @@ Stari je i neodržavan, tako da verovatno neće raditi ispravno.
 
 #### ICDump
 
-[**iCDump**](https://github.com/romainthomas/iCDump) je moderan i multiplatformski Objective-C dump. U poređenju sa postojećim alatima, iCDump može da radi nezavisno od Apple ekosistema i izlaže Python vezivanja.
+[**iCDump**](https://github.com/romainthomas/iCDump) je moderan i multiplatformski dump klasa za Objective-C. U poređenju sa postojećim alatima, iCDump može da radi nezavisno od Apple ekosistema i izlaže Python vezivanja.
 ```python
 import icdump
 metadata = icdump.objc.parse("/path/to/bin")
 
 print(metadata.to_decl())
 ```
-## Static Swift analiza
+## Staticka analiza Swifta
 
 Sa Swift binarnim datotekama, pošto postoji kompatibilnost sa Objective-C, ponekad možete izvući deklaracije koristeći [class-dump](https://github.com/nygard/class-dump/) ali ne uvek.
 
@@ -234,9 +234,9 @@ Njegov plist se nalazi u `/System/Library/LaunchDaemons/com.apple.sysdiagnose.pl
 
 ### Unified Logs
 
-MacOS generiše mnogo logova koji mogu biti veoma korisni kada se pokreće aplikacija koja pokušava da razume **šta radi**.
+MacOS generiše mnogo logova koji mogu biti veoma korisni kada pokrećete aplikaciju pokušavajući da razumete **šta ona radi**.
 
-Štaviše, postoje neki logovi koji će sadržati oznaku `<private>` da **sakriju** neke **korisničke** ili **računarske** **identifikacione** informacije. Međutim, moguće je **instalirati sertifikat da bi se otkrile ove informacije**. Pratite objašnjenja [**ovde**](https://superuser.com/questions/1532031/how-to-show-private-data-in-macos-unified-log).
+Pored toga, postoje neki logovi koji će sadržati oznaku `<private>` da **sakriju** neke **korisničke** ili **računarske** **identifikacione** informacije. Međutim, moguće je **instalirati sertifikat da bi se otkrile ove informacije**. Pratite objašnjenja [**ovde**](https://superuser.com/questions/1532031/how-to-show-private-data-in-macos-unified-log).
 
 ### Hopper
 
@@ -254,11 +254,11 @@ Desnim klikom na objekat koda možete videti **reference na/iz tog objekta** ili
 
 <figure><img src="../../../images/image (1117).png" alt=""><figcaption></figcaption></figure>
 
-Štaviše, u **donjem srednjem delu možete pisati python komande**.
+Pored toga, u **donjem srednjem delu možete pisati python komande**.
 
 #### Desni panel
 
-Na desnom panelu možete videti zanimljive informacije kao što su **istorija navigacije** (tako da znate kako ste došli do trenutne situacije), **call graf** gde možete videti sve **funkcije koje pozivaju ovu funkciju** i sve funkcije koje **ova funkcija poziva**, i informacije o **lokalnim varijablama**.
+Na desnom panelu možete videti zanimljive informacije kao što su **istorija navigacije** (tako da znate kako ste došli do trenutne situacije), **call graf** gde možete videti sve **funkcije koje pozivaju ovu funkciju** i sve funkcije koje **ova funkcija poziva**, i informacije o **lokalnim promenljivama**.
 
 ### dtrace
 
@@ -267,7 +267,7 @@ Omogućava korisnicima pristup aplikacijama na ekstremno **niskom nivou** i pru�
 DTrace koristi funkciju **`dtrace_probe_create`** za kreiranje probe za svaki sistemski poziv. Ove probe mogu biti aktivirane u **ulaznoj i izlaznoj tački svakog sistemskog poziva**. Interakcija sa DTrace se odvija kroz /dev/dtrace koji je dostupan samo za root korisnika.
 
 > [!TIP]
-> Da biste omogućili Dtrace bez potpunog onemogućavanja SIP zaštite, možete izvršiti u režimu oporavka: `csrutil enable --without dtrace`
+> Da omogućite Dtrace bez potpunog onemogućavanja SIP zaštite, možete izvršiti u režimu oporavka: `csrutil enable --without dtrace`
 >
 > Takođe možete **`dtrace`** ili **`dtruss`** binarne datoteke koje **ste sami kompajlirali**.
 
@@ -281,9 +281,9 @@ ID   PROVIDER            MODULE                          FUNCTION NAME
 43    profile                                                     profile-97
 44    profile                                                     profile-199
 ```
-Ime probe se sastoji od četiri dela: provajder, modul, funkcija i ime (`fbt:mach_kernel:ptrace:entry`). Ako ne navedete neki deo imena, Dtrace će taj deo primeniti kao džoker.
+Ime probe se sastoji od četiri dela: provajder, modul, funkcija i naziv (`fbt:mach_kernel:ptrace:entry`). Ako ne navedete neki deo imena, Dtrace će taj deo primeniti kao džoker.
 
-Da bismo konfigurisali DTrace da aktivira probe i da odredimo koje akcije da izvršimo kada se aktiviraju, moraćemo da koristimo D jezik.
+Da bismo konfigurisali DTrace da aktivira probe i da odredimo koje akcije da izvrši kada se aktiviraju, moraćemo da koristimo D jezik.
 
 Detaljnije objašnjenje i više primera možete pronaći na [https://illumos.org/books/dtrace/chp-intro.html](https://illumos.org/books/dtrace/chp-intro.html)
 
@@ -363,7 +363,7 @@ Da biste dobili ove informacije, moguće je koristiti Apple alat **`trace`** ili
 
 `ktrace_*` API-ji dolaze iz `libktrace.dylib` koji obavijaju one iz `Kdebug`. Tada klijent može jednostavno pozvati `ktrace_session_create` i `ktrace_events_[single/class]` da postavi povratne pozive na specifične kodove i zatim ga pokrenuti sa `ktrace_start`.
 
-Možete koristiti ovo čak i sa **SIP aktiviranim**
+Možete koristiti ovo čak i sa **aktiviranim SIP-om**
 
 Možete koristiti kao klijente alat `ktrace`:
 ```bash
@@ -375,7 +375,7 @@ Ili `tailspin`.
 
 Ovo se koristi za profilisanje na nivou kernela i izgrađeno je koristeći `Kdebug` pozive.
 
-U suštini, globalna promenljiva `kernel_debug_active` se proverava i ako je postavljena, poziva `kperf_kdebug_handler` sa `Kdebug` kodom i adresom kernel okvira koji poziva. Ako se `Kdebug` kod poklapa sa jednim od odabranih, dobijaju se "akcije" konfigurirane kao bitmap (proverite `osfmk/kperf/action.h` za opcije).
+U suštini, globalna promenljiva `kernel_debug_active` se proverava i ako je postavljena, poziva `kperf_kdebug_handler` sa `Kdebug` kodom i adresom kernel okvira koji poziva. Ako se `Kdebug` kod poklapa sa jednim od odabranih, dobijaju se "akcije" konfigurisane kao bitmap (proverite `osfmk/kperf/action.h` za opcije).
 
 Kperf takođe ima sysctl MIB tabelu: (kao root) `sysctl kperf`. Ovi kodovi se mogu naći u `osfmk/kperf/kperfbsd.c`.
 
@@ -387,8 +387,8 @@ Kperf takođe ima sysctl MIB tabelu: (kao root) `sysctl kperf`. Ovi kodovi se mo
 
 ### SpriteTree
 
-[**SpriteTree**](https://themittenmac.com/tools/) je alat koji prikazuje odnose između procesa.\
-Morate da pratite svoj mac sa komandom kao **`sudo eslogger fork exec rename create > cap.json`** (terminal koji pokreće ovo zahteva FDA). A zatim možete učitati json u ovaj alat da biste videli sve odnose:
+[**SpriteTree**](https://themittenmac.com/tools/) je alat koji štampa odnose između procesa.\
+Morate da pratite svoj mac sa komandom kao što je **`sudo eslogger fork exec rename create > cap.json`** (terminal koji pokreće ovo zahteva FDA). A zatim možete učitati json u ovaj alat da biste videli sve odnose:
 
 <figure><img src="../../../images/image (1182).png" alt="" width="375"><figcaption></figcaption></figure>
 
@@ -402,7 +402,7 @@ Morate da pratite svoj mac sa komandom kao **`sudo eslogger fork exec rename cre
 
 ### Apple Instruments
 
-[**Apple Instruments**](https://developer.apple.com/library/archive/documentation/Performance/Conceptual/CellularBestPractices/Appendix/Appendix.html) su deo Xcode-ovih razvojnog alata – koriste se za praćenje performansi aplikacija, identifikovanje curenja memorije i praćenje aktivnosti na datotečnom sistemu.
+[**Apple Instruments**](https://developer.apple.com/library/archive/documentation/Performance/Conceptual/CellularBestPractices/Appendix/Appendix.html) su deo Xcode-ovih razvojnog alata – koriste se za praćenje performansi aplikacija, identifikovanje curenja memorije i praćenje aktivnosti na fajl sistemu.
 
 ![](<../../../images/image (1138).png>)
 
@@ -420,7 +420,7 @@ Takođe proverava binarne procese protiv **virustotal** i prikazuje informacije 
 
 ## PT_DENY_ATTACH <a href="#page-title" id="page-title"></a>
 
-U [**ovom blog postu**](https://knight.sc/debugging/2019/06/03/debugging-apple-binaries-that-use-pt-deny-attach.html) možete pronaći primer o tome kako da **debug-ujete pokrenuti daemon** koji koristi **`PT_DENY_ATTACH`** da spreči debagovanje čak i kada je SIP onemogućen.
+U [**ovom blog postu**](https://knight.sc/debugging/2019/06/03/debugging-apple-binaries-that-use-pt-deny-attach.html) možete pronaći primer o tome kako da **debug-ujete pokrenuti daemon** koji koristi **`PT_DENY_ATTACH`** da spreči debagovanje čak i ako je SIP bio onemogućen.
 
 ### lldb
 
@@ -431,14 +431,14 @@ lldb -p 1122
 lldb -n malware.bin
 lldb -n malware.bin --waitfor
 ```
-Možete postaviti intel varijantu kada koristite lldb kreiranjem datoteke pod nazivom **`.lldbinit`** u vašem domaćem direktorijumu sa sledećom linijom:
+Možete postaviti intel varijantu kada koristite lldb kreiranjem datoteke pod nazivom **`.lldbinit`** u vašem domaćem folderu sa sledećom linijom:
 ```bash
 settings set target.x86-disassembly-flavor intel
 ```
 > [!WARNING]
 > Unutar lldb, dump-ujte proces sa `process save-core`
 
-<table data-header-hidden><thead><tr><th width="225"></th><th></th></tr></thead><tbody><tr><td><strong>(lldb) Komanda</strong></td><td><strong>Opis</strong></td></tr><tr><td><strong>run (r)</strong></td><td>Pokreće izvršavanje, koje će se nastaviti bez prekida dok se ne dostigne tačka prekida ili proces ne završi.</td></tr><tr><td><strong>process launch --stop-at-entry</strong></td><td>Pokreće izvršavanje zaustavljajući se na ulaznoj tački</td></tr><tr><td><strong>continue (c)</strong></td><td>Nastavlja izvršavanje debagovanog procesa.</td></tr><tr><td><strong>nexti (n / ni)</strong></td><td>Izvršava sledeću instrukciju. Ova komanda će preskočiti pozive funkcija.</td></tr><tr><td><strong>stepi (s / si)</strong></td><td>Izvršava sledeću instrukciju. Za razliku od nexti komande, ova komanda će ući u pozive funkcija.</td></tr><tr><td><strong>finish (f)</strong></td><td>Izvršava ostatak instrukcija u trenutnoj funkciji (“frame”) i vraća se i zaustavlja.</td></tr><tr><td><strong>control + c</strong></td><td>Pauzira izvršavanje. Ako je proces pokrenut (r) ili nastavljen (c), ovo će uzrokovati da se proces zaustavi ...gde god trenutno izvršava.</td></tr><tr><td><strong>breakpoint (b)</strong></td><td><p><code>b main</code> #Svaka funkcija koja se zove main</p><p><code>b <binname>`main</code> #Glavna funkcija binarnih datoteka</p><p><code>b set -n main --shlib <lib_name></code> #Glavna funkcija označenog binara</p><p><code>breakpoint set -r '\[NSFileManager .*\]$'</code> #Svaka NSFileManager metoda</p><p><code>breakpoint set -r '\[NSFileManager contentsOfDirectoryAtPath:.*\]$'</code></p><p><code>break set -r . -s libobjc.A.dylib</code> # Prekini u svim funkcijama te biblioteke</p><p><code>b -a 0x0000000100004bd9</code></p><p><code>br l</code> #Lista tačaka prekida</p><p><code>br e/dis <num></code> #Omogući/Onemogući tačku prekida</p><p>breakpoint delete <num></p></td></tr><tr><td><strong>help</strong></td><td><p>help breakpoint #Dobijte pomoć za komandu tačke prekida</p><p>help memory write #Dobijte pomoć za pisanje u memoriju</p></td></tr><tr><td><strong>reg</strong></td><td><p>reg read</p><p>reg read $rax</p><p>reg read $rax --format <<a href="https://lldb.llvm.org/use/variable.html#type-format">format</a>></p><p>reg write $rip 0x100035cc0</p></td></tr><tr><td><strong>x/s <reg/adresa u memoriji></strong></td><td>Prikazuje memoriju kao string koji se završava nulom.</td></tr><tr><td><strong>x/i <reg/adresa u memoriji></strong></td><td>Prikazuje memoriju kao instrukciju asemblera.</td></tr><tr><td><strong>x/b <reg/adresa u memoriji></strong></td><td>Prikazuje memoriju kao bajt.</td></tr><tr><td><strong>print object (po)</strong></td><td><p>Ovo će odštampati objekat na koji se referiše parametar</p><p>po $raw</p><p><code>{</code></p><p><code>dnsChanger = {</code></p><p><code>"affiliate" = "";</code></p><p><code>"blacklist_dns" = ();</code></p><p>Napomena da većina Apple-ovih Objective-C API-ja ili metoda vraća objekte, i stoga bi trebala biti prikazana putem komande “print object” (po). Ako po ne daje smislen izlaz, koristite <code>x/b</code></p></td></tr><tr><td><strong>memory</strong></td><td>memory read 0x000....<br>memory read $x0+0xf2a<br>memory write 0x100600000 -s 4 0x41414141 #Upiši AAAA na tu adresu<br>memory write -f s $rip+0x11f+7 "AAAA" #Upiši AAAA na adresu</td></tr><tr><td><strong>disassembly</strong></td><td><p>dis #Disas trenutnu funkciju</p><p>dis -n <funcname> #Disas funkciju</p><p>dis -n <funcname> -b <basename> #Disas funkciju<br>dis -c 6 #Disas 6 linija<br>dis -c 0x100003764 -e 0x100003768 # Od jedne adrese do druge<br>dis -p -c 4 # Počni u trenutnoj adresi disasembli</p></td></tr><tr><td><strong>parray</strong></td><td>parray 3 (char **)$x1 # Proveri niz od 3 komponente u x1 registru</td></tr><tr><td><strong>image dump sections</strong></td><td>Štampa mapu memorije trenutnog procesa</td></tr><tr><td><strong>image dump symtab <biblioteka></strong></td><td><code>image dump symtab CoreNLP</code> #Dobij adresu svih simbola iz CoreNLP</td></tr></tbody></table>
+<table data-header-hidden><thead><tr><th width="225"></th><th></th></tr></thead><tbody><tr><td><strong>(lldb) Komanda</strong></td><td><strong>Opis</strong></td></tr><tr><td><strong>run (r)</strong></td><td>Pokreće izvršavanje, koje će se nastaviti bez prekida dok se ne dostigne tačka prekida ili proces ne završi.</td></tr><tr><td><strong>process launch --stop-at-entry</strong></td><td>Pokreće izvršavanje zaustavljajući se na ulaznoj tački</td></tr><tr><td><strong>continue (c)</strong></td><td>Nastavlja izvršavanje debagovanog procesa.</td></tr><tr><td><strong>nexti (n / ni)</strong></td><td>Izvršava sledeću instrukciju. Ova komanda će preskočiti pozive funkcija.</td></tr><tr><td><strong>stepi (s / si)</strong></td><td>Izvršava sledeću instrukciju. Za razliku od nexti komande, ova komanda će ući u pozive funkcija.</td></tr><tr><td><strong>finish (f)</strong></td><td>Izvršava ostatak instrukcija u trenutnoj funkciji (“frame”) i vraća se i zaustavlja.</td></tr><tr><td><strong>control + c</strong></td><td>Pauzira izvršavanje. Ako je proces pokrenut (r) ili nastavljen (c), ovo će uzrokovati da se proces zaustavi ...gde god trenutno izvršava.</td></tr><tr><td><strong>breakpoint (b)</strong></td><td><p><code>b main</code> #Svaka funkcija koja se zove main</p><p><code>b <binname>`main</code> #Glavna funkcija binarnih datoteka</p><p><code>b set -n main --shlib <lib_name></code> #Glavna funkcija označenog binara</p><p><code>breakpoint set -r '\[NSFileManager .*\]$'</code> #Svaka NSFileManager metoda</p><p><code>breakpoint set -r '\[NSFileManager contentsOfDirectoryAtPath:.*\]$'</code></p><p><code>break set -r . -s libobjc.A.dylib</code> # Prekini u svim funkcijama te biblioteke</p><p><code>b -a 0x0000000100004bd9</code></p><p><code>br l</code> #Lista tačaka prekida</p><p><code>br e/dis <num></code> #Omogući/Onemogući tačku prekida</p><p>breakpoint delete <num></p></td></tr><tr><td><strong>help</strong></td><td><p>help breakpoint #Dobijte pomoć za komandu tačke prekida</p><p>help memory write #Dobijte pomoć za pisanje u memoriju</p></td></tr><tr><td><strong>reg</strong></td><td><p>reg read</p><p>reg read $rax</p><p>reg read $rax --format <<a href="https://lldb.llvm.org/use/variable.html#type-format">format</a>></p><p>reg write $rip 0x100035cc0</p></td></tr><tr><td><strong>x/s <reg/adresa u memoriji></strong></td><td>Prikazuje memoriju kao string koji se završava nulom.</td></tr><tr><td><strong>x/i <reg/adresa u memoriji></strong></td><td>Prikazuje memoriju kao instrukciju asemblera.</td></tr><tr><td><strong>x/b <reg/adresa u memoriji></strong></td><td>Prikazuje memoriju kao bajt.</td></tr><tr><td><strong>print object (po)</strong></td><td><p>Ovo će odštampati objekat na koji se referiše parametar</p><p>po $raw</p><p><code>{</code></p><p><code>dnsChanger = {</code></p><p><code>"affiliate" = "";</code></p><p><code>"blacklist_dns" = ();</code></p><p>Napomena da većina Apple-ovih Objective-C API-ja ili metoda vraća objekte, i stoga bi trebala biti prikazana putem komande “print object” (po). Ako po ne daje smislen izlaz, koristite <code>x/b</code></p></td></tr><tr><td><strong>memory</strong></td><td>memory read 0x000....<br>memory read $x0+0xf2a<br>memory write 0x100600000 -s 4 0x41414141 #Upiši AAAA na tu adresu<br>memory write -f s $rip+0x11f+7 "AAAA" #Upiši AAAA na adresu</td></tr><tr><td><strong>disassembly</strong></td><td><p>dis #Disas trenutnu funkciju</p><p>dis -n <funcname> #Disas funkciju</p><p>dis -n <funcname> -b <basename> #Disas funkciju<br>dis -c 6 #Disas 6 linija<br>dis -c 0x100003764 -e 0x100003768 # Od jedne adrese do druge<br>dis -p -c 4 # Počni u trenutnoj adresi disasemblerajući</p></td></tr><tr><td><strong>parray</strong></td><td>parray 3 (char **)$x1 # Proveri niz od 3 komponente u x1 registru</td></tr><tr><td><strong>image dump sections</strong></td><td>Štampa mapu memorije trenutnog procesa</td></tr><tr><td><strong>image dump symtab <biblioteka></strong></td><td><code>image dump symtab CoreNLP</code> #Dobij adresu svih simbola iz CoreNLP</td></tr></tbody></table>
 
 > [!TIP]
 > Kada pozivate funkciju **`objc_sendMsg`**, **rsi** registar sadrži **ime metode** kao string koji se završava nulom (“C”). Da biste odštampali ime putem lldb, uradite:
@@ -459,14 +459,14 @@ settings set target.x86-disassembly-flavor intel
 - Neki malveri takođe mogu **detektovati** da li je mašina **VMware** na osnovu MAC adrese (00:50:56).
 - Takođe je moguće otkriti **da li se proces debaguje** jednostavnim kodom kao što je:
 - `if(P_TRACED == (info.kp_proc.p_flag & P_TRACED)){ //proces se debaguje }`
-- Takođe može pozvati **`ptrace`** sistemski poziv sa **`PT_DENY_ATTACH`** flagom. Ovo **sprečava** deb**u**gger da se priključi i prati.
-- Možete proveriti da li je **`sysctl`** ili **`ptrace`** funkcija **importovana** (ali malver bi mogao da je importuje dinamički)
+- Takođe može pozvati **`ptrace`** sistemski poziv sa **`PT_DENY_ATTACH`** flagom. Ovo **sprečava** debager da se priključi i prati.
+- Možete proveriti da li je funkcija **`sysctl`** ili **`ptrace`** **importovana** (ali malver bi mogao da je importuje dinamički)
 - Kao što je navedeno u ovom izveštaju, “[Defeating Anti-Debug Techniques: macOS ptrace variants](https://alexomara.com/blog/defeating-anti-debug-techniques-macos-ptrace-variants/)” :\
 “_Poruka Process # exited with **status = 45 (0x0000002d)** obično je znak da je cilj debagovanja korišćenje **PT_DENY_ATTACH**_”
 
 ## Core Dumps
 
-Core dump-ovi se kreiraju ako:
+Core dumps se kreiraju ako:
 
 - `kern.coredump` sysctl je postavljen na 1 (po defaultu)
 - Ako proces nije suid/sgid ili `kern.sugid_coredump` je 1 (po defaultu je 0)
@@ -479,8 +479,8 @@ U tim slučajevima, core dump se generiše prema `kern.corefile` sysctl i običn
 ### [ReportCrash](https://ss64.com/osx/reportcrash.html)
 
 ReportCrash **analizira procese koji se ruše i čuva izveštaj o padu na disk**. Izveštaj o padu sadrži informacije koje mogu **pomoći programeru da dijagnostikuje** uzrok pada.\
-Za aplikacije i druge procese **koji se izvršavaju u kontekstu per-user launchd**, ReportCrash se pokreće kao LaunchAgent i čuva izveštaje o padu u korisnikovom `~/Library/Logs/DiagnosticReports/`\
-Za daemone, druge procese **koji se izvršavaju u kontekstu sistemskog launchd** i druge privilegovane procese, ReportCrash se pokreće kao LaunchDaemon i čuva izveštaje o padu u sistemskom `/Library/Logs/DiagnosticReports`
+Za aplikacije i druge procese **koji se izvršavaju u kontekstu per-user launchd**, ReportCrash se izvršava kao LaunchAgent i čuva izveštaje o padu u korisnikovom `~/Library/Logs/DiagnosticReports/`\
+Za demone, druge procese **koji se izvršavaju u sistemskom launchd kontekstu** i druge privilegovane procese, ReportCrash se izvršava kao LaunchDaemon i čuva izveštaje o padu u sistemskom `/Library/Logs/DiagnosticReports`
 
 Ako ste zabrinuti zbog izveštaja o padu **koji se šalju Apple-u**, možete ih onemogućiti. Ako ne, izveštaji o padu mogu biti korisni za **utvrđivanje kako je server pao**.
 ```bash
@@ -492,15 +492,15 @@ sudo launchctl unload -w /System/Library/LaunchDaemons/com.apple.ReportCrash.Roo
 launchctl load -w /System/Library/LaunchAgents/com.apple.ReportCrash.plist
 sudo launchctl load -w /System/Library/LaunchDaemons/com.apple.ReportCrash.Root.plist
 ```
-### Spavanje
+### Sleep
 
-Dok fuzzujete na MacOS-u, važno je ne dozvoliti Mac-u da spava:
+Dok fuzzing-a na MacOS-u, važno je ne dozvoliti Mac-u da pređe u stanje spavanja:
 
 - systemsetup -setsleep Never
 - pmset, System Preferences
 - [KeepingYouAwake](https://github.com/newmarcel/KeepingYouAwake)
 
-#### SSH Isključenje
+#### SSH Disconnect
 
 Ako fuzzujete putem SSH veze, važno je osigurati da sesija ne isključi. Tako da promenite sshd_config datoteku sa:
 

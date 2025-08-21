@@ -28,7 +28,7 @@ Starije kampanje su koristile `document.execCommand('copy')`, dok se novije osla
 
 1. Korisnik posećuje sajt sa tipografskom greškom ili kompromitovan sajt (npr. `docusign.sa[.]com`)
 2. Umetnuti **ClearFake** JavaScript poziva `unsecuredCopyToClipboard()` pomoćnu funkciju koja tiho čuva Base64-enkodiranu PowerShell jedinstvenu komandu u clipboard-u.
-3. HTML uputstva govore žrtvi da: *“Pritisnite **Win + R**, nalepite komandu i pritisnite Enter da biste rešili problem.”*
+3. HTML uputstva govore žrtvi: *“Pritisnite **Win + R**, nalepite komandu i pritisnite Enter da biste rešili problem.”*
 4. `powershell.exe` se izvršava, preuzimajući arhivu koja sadrži legitimni izvršni fajl plus zlonamerni DLL (klasično DLL sideloading).
 5. Loader dekriptuje dodatne faze, umetne shellcode i instalira postojanost (npr. zakazani zadatak) – na kraju pokreće NetSupport RAT / Latrodectus / Lumma Stealer.
 
@@ -47,7 +47,7 @@ Expand-Archive %TEMP%\f.zip -DestinationPath %TEMP%\f ;
 ```
 powershell -nop -enc <Base64>  # Cloud Identificator: 2031
 ```
-1. Preuzima `la.txt` pomoću **curl.exe**
+1. Preuzima `la.txt` sa **curl.exe**
 2. Izvršava JScript downloader unutar **cscript.exe**
 3. Preuzima MSI payload → postavlja `libcef.dll` pored potpisane aplikacije → DLL sideloading → shellcode → Latrodectus.
 
@@ -63,14 +63,14 @@ Plave ekipe mogu kombinovati telemetriju clipboard-a, kreiranja procesa i regist
 
 * Windows Registry: `HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\RunMRU` čuva istoriju **Win + R** komandi – tražite neobične Base64 / obfuskovane unose.
 * ID sigurnosnog događaja **4688** (Kreiranje procesa) gde je `ParentImage` == `explorer.exe` i `NewProcessName` u { `powershell.exe`, `wscript.exe`, `mshta.exe`, `curl.exe`, `cmd.exe` }.
-* ID događaja **4663** za kreiranje fajlova pod `%LocalAppData%\Microsoft\Windows\WinX\` ili privremenim folderima neposredno pre sumnjivog 4688 događaja.
+* Događaj ID **4663** za kreiranje fajlova pod `%LocalAppData%\Microsoft\Windows\WinX\` ili privremenim folderima neposredno pre sumnjivog događaja 4688.
 * EDR senzori clipboard-a (ako su prisutni) – korelacija `Clipboard Write` odmah nakon novog PowerShell procesa.
 
 ## Mogućnosti ublažavanja
 
 1. Ojačavanje pretraživača – onemogućiti pristup pisanju u clipboard (`dom.events.asyncClipboard.clipboardItem` itd.) ili zahtevati korisnički gest.
-2. Bezbednosna svest – obučiti korisnike da *kucaju* osetljive komande ili ih prvo nalepite u tekstualni editor.
-3. PowerShell Constrained Language Mode / Execution Policy + Kontrola aplikacija za blokiranje proizvoljnih jedne-linijskih komandi.
+2. Bezbednosna svest – podučiti korisnike da *kucaju* osetljive komande ili ih prvo nalepite u tekstualni editor.
+3. PowerShell Constrained Language Mode / Politika izvršenja + Kontrola aplikacija za blokiranje proizvoljnih jedne-linijskih komandi.
 4. Mrežne kontrole – blokirati odlazne zahteve ka poznatim pastejacking i malware C2 domenima.
 
 ## Povezani trikovi

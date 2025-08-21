@@ -6,7 +6,7 @@
 
 Svaki **korisnik prijavljen** na sistem **ima pristupni token sa bezbednosnim informacijama** za tu sesiju prijavljivanja. Sistem kreira pristupni token kada se korisnik prijavi. **Svaki proces izvršen** u ime korisnika **ima kopiju pristupnog tokena**. Token identifikuje korisnika, korisničke grupe i privilegije korisnika. Token takođe sadrži logon SID (Identifikator bezbednosti) koji identifikuje trenutnu sesiju prijavljivanja.
 
-Možete videti ove informacije izvršavanjem `whoami /all`
+Možete videti ove informacije izvršavajući `whoami /all`
 ```
 whoami /all
 
@@ -56,8 +56,8 @@ or using _Process Explorer_ from Sysinternals (select process and access"Securit
 
 ### Lokalni administrator
 
-Kada se lokalni administrator prijavi, **kreiraju se dva pristupna tokena**: jedan sa administratorskim pravima i drugi sa normalnim pravima. **Po defaultu**, kada ovaj korisnik izvrši proces, koristi se onaj sa **redovnim** (ne-administratorskim) **pravima**. Kada ovaj korisnik pokuša da **izvrši** bilo šta **kao administrator** ("Pokreni kao administrator" na primer), koristiće se **UAC** da zatraži dozvolu.\
-Ako želite da [**saznate više o UAC-u, pročitajte ovu stranicu**](../authentication-credentials-uac-and-efs/index.html#uac)**.**
+Kada se lokalni administrator prijavi, **kreiraju se dva pristupna tokena**: jedan sa administratorskim pravima i drugi sa normalnim pravima. **Po defaultu**, kada ovaj korisnik izvrši proces, koristi se onaj sa **redovnim** (ne-administratorskim) **pravima**. Kada ovaj korisnik pokuša da **izvrši** bilo šta **kao administrator** ("Run as Administrator" na primer), koristiće se **UAC** da zatraži dozvolu.\
+Ako želite da [**saznate više o UAC, pročitajte ovu stranicu**](../authentication-credentials-uac-and-efs/index.html#uac)**.**
 
 ### Impersonacija korisničkih kredencijala
 
@@ -96,7 +96,7 @@ Saznajte koje **privilegije tokena mogu biti zloupotrebljene za povišenje privi
 privilege-escalation-abusing-tokens.md
 {{#endref}}
 
-Pogledajte [**sve moguće privilegije tokena i neka objašnjenja na ovoj eksternoj stranici**](https://github.com/gtworek/Priv2Admin).
+Pogledajte [**sve moguće privilegije tokena i neka objašnjenja na ovoj spoljnoj stranici**](https://github.com/gtworek/Priv2Admin).
 
 ## Reference
 

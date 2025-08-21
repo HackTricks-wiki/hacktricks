@@ -24,7 +24,7 @@ Imajte na umu da **većina trikova o eskalaciji privilegija koji utiču na Linux
 
 Možete pronaći originalnu [Sudo Hijacking tehniku unutar posta o Linux eskalaciji privilegija](../../linux-hardening/privilege-escalation/index.html#sudo-hijacking).
 
-Međutim, macOS **održava** korisnikov **`PATH`** kada izvršava **`sudo`**. Što znači da bi drugi način da se postigne ovaj napad bio da se **otmu drugi binarni fajlovi** koje žrtva još uvek izvršava kada **pokreće sudo:**
+Međutim, macOS **održava** korisnikov **`PATH`** kada izvršava **`sudo`**. Što znači da bi drugi način da se postigne ovaj napad bio da se **otmu drugi binarni fajlovi** koje žrtva i dalje izvršava kada **pokreće sudo:**
 ```bash
 # Let's hijack ls in /opt/homebrew/bin, as this is usually already in the users PATH
 cat > /opt/homebrew/bin/ls <<EOF

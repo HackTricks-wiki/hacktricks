@@ -4,11 +4,11 @@
 
 ## Kako funkcionišu
 
-Ove tehnike zloupotrebljavaju Windows Service Control Manager (SCM) na daljinu preko SMB/RPC da izvrše komande na ciljanom hostu. Uobičajeni tok je:
+Ove tehnike zloupotrebljavaju Windows Service Control Manager (SCM) na daljinu preko SMB/RPC da izvrše komande na ciljanom hostu. Uobičajen tok je:
 
 1. Autentifikujte se na cilj i pristupite ADMIN$ deljenju preko SMB (TCP/445).
 2. Kopirajte izvršni fajl ili navedite LOLBAS komandnu liniju koju će servis izvršiti.
-3. Kreirajte servis na daljinu putem SCM (MS-SCMR preko \PIPE\svcctl) koji pokazuje na tu komandu ili binarni fajl.
+3. Kreirajte servis na daljinu putem SCM (MS-SCMR preko \PIPE\svcctl) koji upućuje na tu komandu ili binarni fajl.
 4. Pokrenite servis da izvrši payload i opcionalno uhvatite stdin/stdout preko imenovane cevi.
 5. Zaustavite servis i očistite (obrišite servis i sve preuzete binarne fajlove).
 
@@ -16,7 +16,7 @@ Zahtevi/preduslovi:
 - Lokalni administrator na cilju (SeCreateServicePrivilege) ili eksplicitna prava za kreiranje servisa na cilju.
 - SMB (445) dostupan i ADMIN$ deljenje dostupno; Upravljenje daljinskim servisima dozvoljeno kroz firewall hosta.
 - UAC daljinska ograničenja: sa lokalnim nalozima, filtriranje tokena može blokirati admin pristup preko mreže osim ako se koristi ugrađeni Administrator ili LocalAccountTokenFilterPolicy=1.
-- Kerberos vs NTLM: korišćenje imena hosta/FQDN omogućava Kerberos; povezivanje preko IP često se vraća na NTLM (i može biti blokirano u učvršćenim okruženjima).
+- Kerberos vs NTLM: korišćenje imena hosta/FQDN omogućava Kerberos; povezivanje preko IP adrese često se vraća na NTLM (i može biti blokirano u učvršćenim okruženjima).
 
 ### Ručni ScExec/WinExec putem sc.exe
 
@@ -33,17 +33,17 @@ sc.exe \\TARGET create HTSvc binPath= "C:\\Windows\\Temp\\payload.exe" start= de
 sc.exe \\TARGET start HTSvc
 sc.exe \\TARGET delete HTSvc
 ```
-Napomene:
-- Očekujte grešku vremenskog ograničenja prilikom pokretanja EXE-a koji nije servis; izvršenje se i dalje dešava.
+Notes:
+- Očekujte grešku zbog isteka vremena prilikom pokretanja EXE-a koji nije servis; izvršenje se i dalje dešava.
 - Da biste ostali više OPSEC-prijateljski, preferirajte komande bez datoteka (cmd /c, powershell -enc) ili obrišite preuzete artefakte.
 
-Pronađite detaljnije korake na: https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/
+Find more detailed steps in: https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/
 
-## Alati i primeri
+## Tooling and examples
 
 ### Sysinternals PsExec.exe
 
-- Klasičan alat za administraciju koji koristi SMB za preuzimanje PSEXESVC.exe u ADMIN$, instalira privremenu uslugu (podrazumevano ime PSEXESVC) i proksira I/O preko imenovanih cevi.
+- Klasičan admin alat koji koristi SMB za preuzimanje PSEXESVC.exe u ADMIN$, instalira privremenu uslugu (podrazumevano ime PSEXESVC) i proksira I/O preko imenovanih cevi.
 - Primeri korišćenja:
 ```cmd
 :: Interactive SYSTEM shell on remote host
@@ -60,11 +60,11 @@ PsExec64.exe -accepteula \\HOST -r WinSvc$ -s cmd.exe /c ipconfig
 \\live.sysinternals.com\tools\PsExec64.exe -accepteula \\HOST -s cmd.exe /c whoami
 ```
 OPSEC
-- Ostavlja događaje instalacije/deinstalacije servisa (Ime servisa često PSEXESVC osim ako nije korišćena opcija -r) i kreira C:\Windows\PSEXESVC.exe tokom izvršenja.
+- Ostavlja događaje instalacije/deinstalacije servisa (Ime servisa često PSEXESVC osim ako nije korišćena opcija -r) i kreira C:\Windows\PSEXESVC.exe tokom izvršavanja.
 
 ### Impacket psexec.py (slično PsExec-u)
 
-- Koristi ugrađenu uslugu sličnu RemCom-u. Postavlja privremeni binarni fajl servisa (obično sa nasumičnim imenom) putem ADMIN$, kreira servis (podrazumevano često RemComSvc) i proksira I/O preko imenovane cevi.
+- Koristi ugrađenu uslugu sličnu RemCom-u. Postavlja privremeni binarni fajl servisa (obično sa nasumičnim imenom) putem ADMIN$, kreira servis (podrazumevano često RemComSvc) i prosleđuje I/O preko imenovane cevi.
 ```bash
 # Password auth
 psexec.py DOMAIN/user:Password@HOST cmd.exe
@@ -83,14 +83,14 @@ Artifacts
 
 ### Impacket smbexec.py (SMBExec)
 
-- Kreira privremenu uslugu koja pokreće cmd.exe i koristi imenovanu cev za I/O. Generalno izbegava ispuštanje punog EXE tereta; izvršavanje komandi je polu-interaktivno.
+- Kreira privremenu uslugu koja pokreće cmd.exe i koristi imenovanu cev za I/O. Generalno izbegava ispuštanje pune EXE korisne opreme; izvršavanje komandi je polu-interaktivno.
 ```bash
 smbexec.py DOMAIN/user:Password@HOST
 smbexec.py -hashes LMHASH:NTHASH DOMAIN/user@HOST
 ```
 ### SharpLateral i SharpMove
 
-- [SharpLateral](https://github.com/mertdas/SharpLateral) (C#) implementira nekoliko metoda lateralnog kretanja uključujući izvršavanje zasnovano na servisima.
+- [SharpLateral](https://github.com/mertdas/SharpLateral) (C#) implementira nekoliko metoda lateralnog kretanja uključujući izvršavanje zasnovano na usluzi.
 ```cmd
 SharpLateral.exe redexec HOSTNAME C:\\Users\\Administrator\\Desktop\\malware.exe.exe malware.exe ServiceName
 ```
@@ -108,7 +108,7 @@ cme smb HOST -u USER -H NTHASH -x "ipconfig /all" --exec-method smbexec
 
 Tipični host/network artefakti prilikom korišćenja PsExec-sličnih tehnika:
 - Security 4624 (Logon Type 3) i 4672 (Special Privileges) na cilju za admin nalog koji se koristi.
-- Security 5140/5145 File Share i File Share Detailed događaji koji prikazuju ADMIN$ pristup i kreiranje/pisanje servisnih binarnih datoteka (npr., PSEXESVC.exe ili nasumične 8-znamenkaste .exe).
+- Security 5140/5145 File Share i File Share Detailed događaji koji prikazuju ADMIN$ pristup i kreiranje/pisanje servisnih binarnih fajlova (npr., PSEXESVC.exe ili nasumični 8-znamenkasti .exe).
 - Security 7045 Service Install na cilju: imena servisa kao što su PSEXESVC, RemComSvc, ili prilagođeni (-r / -service-name).
 - Sysmon 1 (Process Create) za services.exe ili sliku servisa, 3 (Network Connect), 11 (File Create) u C:\Windows\, 17/18 (Pipe Created/Connected) za cevi kao što su \\.\pipe\psexesvc, \\.\pipe\remcom_*, ili nasumične ekvivalente.
 - Registry artefakt za Sysinternals EULA: HKCU\Software\Sysinternals\PsExec\EulaAccepted=0x1 na hostu operatera (ako nije potisnuto).
@@ -119,10 +119,10 @@ Ideje za lov
 - Obeležiti imenovane cevi koje se završavaju sa -stdin/-stdout/-stderr ili poznatim imenima cevi PsExec klonova.
 
 ## Rešavanje uobičajenih grešaka
-- Pristup je odbijen (5) prilikom kreiranja servisa: nije pravi lokalni admin, UAC udaljena ograničenja za lokalne naloge, ili EDR zaštita od manipulacije na putanji servisne binarne datoteke.
+- Pristup je odbijen (5) prilikom kreiranja servisa: nije pravi lokalni admin, UAC udaljena ograničenja za lokalne naloge, ili EDR zaštita od manipulacije na putanji servisnog binarnog fajla.
 - Mrežni put nije pronađen (53) ili nije moglo da se poveže na ADMIN$: vatrozid blokira SMB/RPC ili su admin deljenja onemogućena.
-- Kerberos ne uspeva, ali NTLM je blokiran: povežite se koristeći hostname/FQDN (ne IP), osigurajte ispravne SPN-ove, ili obezbedite -k/-no-pass sa karticama prilikom korišćenja Impacket-a.
-- Početak servisa ističe, ali payload je izvršen: očekivano ako nije prava servisna binarna datoteka; snimite izlaz u datoteku ili koristite smbexec za live I/O.
+- Kerberos ne uspeva, ali NTLM je blokiran: povežite se koristeći hostname/FQDN (ne IP), osigurajte ispravne SPN-ove, ili obezbedite -k/-no-pass sa tiketima prilikom korišćenja Impacket-a.
+- Početak servisa ističe, ali payload je izvršen: očekivano ako nije pravi servisni binarni fajl; snimite izlaz u fajl ili koristite smbexec za live I/O.
 
 ## Beleške o učvršćivanju
 - Windows 11 24H2 i Windows Server 2025 zahtevaju SMB potpisivanje po defaultu za odlazne (i Windows 11 dolazne) veze. Ovo ne ometa legitimnu upotrebu PsExec-a sa validnim kredencijalima, ali sprečava zloupotrebu nesigniranog SMB relaya i može uticati na uređaje koji ne podržavaju potpisivanje.
@@ -131,7 +131,7 @@ Ideje za lov
 
 ## Takođe pogledajte
 
-- WMI-bazirani udaljeni exec (često više bez datoteka):
+- WMI-bazirani udaljeni exec (često više bezfajlovni):
 
 
 {{#ref}}

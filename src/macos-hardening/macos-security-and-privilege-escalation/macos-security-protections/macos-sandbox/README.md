@@ -30,7 +30,7 @@ drwx------@ 4 username  staff  128 Mar 25 14:14 com.apple.Accessibility-Settings
 drwx------@ 4 username  staff  128 Mar 25 14:10 com.apple.ActionKit.BundledIntentHandler
 [...]
 ```
-Unutar svake fascikle sa bundle id možete pronaći **plist** i **Data direktorijum** aplikacije sa strukturom koja oponaša Home fasciklu:
+Unutar svake fascikle sa bundle id možete pronaći **plist** i **Data direktorijum** aplikacije sa strukturom koja oponaša Home folder:
 ```bash
 cd /Users/username/Library/Containers/com.apple.Safari
 ls -la
@@ -54,7 +54,7 @@ drwx------   2 username  staff    64 Mar 24 18:02 SystemData
 drwx------   2 username  staff    64 Mar 24 18:02 tmp
 ```
 > [!CAUTION]
-> Imajte na umu da čak i ako su simboličke veze tu da "pobegnu" iz Sandbox-a i pristupe drugim folderima, aplikacija i dalje mora da **ima dozvole** da im pristupi. Ove dozvole su unutar **`.plist`** u `RedirectablePaths`.
+> Imajte na umu da čak i ako su simboličke veze prisutne da "pobegnu" iz Sandbox-a i pristupe drugim folderima, aplikacija i dalje mora **imati dozvole** da im pristupi. Ove dozvole se nalaze unutar **`.plist`** u `RedirectablePaths`.
 
 **`SandboxProfileData`** je kompajlirani sandbox profil CFData kodiran u B64.
 ```bash
@@ -141,7 +141,7 @@ Važne **sistemske usluge** takođe rade unutar svojih prilagođenih **sandbox-a
 - **`/System/Library/Sandbox/Profiles`**
 - Ostale sandbox profile možete proveriti na [https://github.com/s7ephen/OSX-Sandbox--Seatbelt--Profiles](https://github.com/s7ephen/OSX-Sandbox--Seatbelt--Profiles).
 
-**App Store** aplikacije koriste **profil** **`/System/Library/Sandbox/Profiles/application.sb`**. Možete proveriti u ovom profilu kako entiteti kao što je **`com.apple.security.network.server`** omogućavaju procesu korišćenje mreže.
+**App Store** aplikacije koriste **profil** **`/System/Library/Sandbox/Profiles/application.sb`**. Možete proveriti u ovom profilu kako ovlašćenja kao što je **`com.apple.security.network.server`** omogućavaju procesu da koristi mrežu.
 
 Zatim, neki **Apple daemon servisi** koriste različite profile smeštene u `/System/Library/Sandbox/Profiles/*.sb` ili `/usr/share/sandbox/*.sb`. Ovi sandbox-i se primenjuju u glavnoj funkciji koja poziva API `sandbox_init_XXX`.
 
@@ -226,8 +226,8 @@ Takođe je moguće pratiti sandbox koristeći **`-t`** parametar: `sandbox-exec 
 
 #### Putem API-ja
 
-Funkcija `sandbox_set_trace_path` koju izlaže `libsystem_sandbox.dylib` omogućava da se odredi ime datoteke za praćenje u koju će biti zapisane provere sandbox-a.\
-Takođe je moguće uraditi nešto slično pozivom `sandbox_vtrace_enable()` i zatim dobiti logove grešaka iz bafera pozivom `sandbox_vtrace_report()`.
+Funkcija `sandbox_set_trace_path` koju izlaže `libsystem_sandbox.dylib` omogućava da se odredi ime datoteke za praćenje u koju će se zapisivati sandbox provere.\
+Takođe je moguće uraditi nešto slično pozivajući `sandbox_vtrace_enable()` i zatim dobijajući logove grešaka iz bafera pozivajući `sandbox_vtrace_report()`.
 
 ### Inspekcija Sandbox-a
 
@@ -243,7 +243,7 @@ U iOS-u, podrazumevani profil se zove **container** i nemamo SBPL tekstualnu rep
 
 ### Prilagođeni SBPL u aplikacijama iz App Store-a
 
-Moguće je da kompanije učine da njihove aplikacije rade **sa prilagođenim Sandbox profilima** (umesto sa podrazumevanim). Moraju koristiti pravo **`com.apple.security.temporary-exception.sbpl`** koje mora biti odobreno od strane Apple-a.
+Moguće je da kompanije učine svoje aplikacije da rade **sa prilagođenim Sandbox profilima** (umesto sa podrazumevanim). Moraju koristiti pravo **`com.apple.security.temporary-exception.sbpl`** koje mora biti odobreno od strane Apple-a.
 
 Moguće je proveriti definiciju ovog prava u **`/System/Library/Sandbox/Profiles/application.sb:`**
 ```scheme
@@ -257,7 +257,7 @@ Ovo će **evalirati string nakon ovog prava** kao Sandbox profil.
 
 ### Kompajliranje i dekompajliranje Sandbox profila
 
-Alat **`sandbox-exec`** koristi funkcije `sandbox_compile_*` iz `libsandbox.dylib`. Glavne funkcije koje se izvoze su: `sandbox_compile_file` (očekuje putanju do datoteke, parametar `-f`), `sandbox_compile_string` (očekuje string, parametar `-p`), `sandbox_compile_name` (očekuje ime kontejnera, parametar `-n`), `sandbox_compile_entitlements` (očekuje entitlements plist).
+Alat **`sandbox-exec`** koristi funkcije `sandbox_compile_*` iz `libsandbox.dylib`. Glavne funkcije koje se izvoze su: `sandbox_compile_file` (očekuje putanju do datoteke, parametar `-f`), `sandbox_compile_string` (očekuje string, parametar `-p`), `sandbox_compile_name` (očekuje ime kontejnera, parametar `-n`), `sandbox_compile_entitlements` (očekuje plist prava).
 
 Ova obrnuta i [**open sourced verzija alata sandbox-exec**](https://newosxbook.com/src.jl?tree=listings&file=/sandbox_exec.c) omogućava da **`sandbox-exec`** piše u datoteku kompajlirani sandbox profil.
 
@@ -267,7 +267,7 @@ Pored toga, da bi se proces ograničio unutar kontejnera, može pozvati `sandbox
 
 Na macOS-u, za razliku od iOS-a gde su procesi od samog početka sandboxovani od strane kernela, **procesi moraju sami da se prijave za sandbox**. To znači da na macOS-u, proces nije ograničen sandbox-om dok aktivno ne odluči da uđe u njega, iako su aplikacije iz App Store-a uvek sandboxovane.
 
-Procesi se automatski sandboxuju iz userlanda kada počnu ako imaju pravo: `com.apple.security.app-sandbox`. Za detaljno objašnjenje ovog procesa pogledajte:
+Procesi se automatski sandboxuju iz userlanda kada se pokrenu ako imaju pravo: `com.apple.security.app-sandbox`. Za detaljno objašnjenje ovog procesa pogledajte:
 
 
 {{#ref}}
@@ -326,7 +326,7 @@ Poziv funkcije `___sandbox_ms` obavija `mac_syscall` označavajući u prvom argu
 - **note (#3)**: Dodaje anotaciju sandboxu.
 - **container (#4)**: Priključuje anotaciju sandboxu, obično za debagovanje ili identifikaciju.
 - **extension_issue (#5)**: Generiše novu ekstenziju za proces.
-- **extension_consume (#6)**: Potroši datu ekstenziju.
+- **extension_consume (#6)**: Potroši zadatu ekstenziju.
 - **extension_release (#7)**: Oslobađa memoriju vezanu za potrošenu ekstenziju.
 - **extension_update_file (#8)**: Menja parametre postojeće ekstenzije datoteke unutar sandboxa.
 - **extension_twiddle (#9)**: Prilagođava ili menja postojeću ekstenziju datoteke (npr. TextEdit, rtf, rtfd).
@@ -363,13 +363,13 @@ Napomena da u iOS kernel ekstenzija sadrži **hardkodirane sve profile** unutar 
 
 Dobar primer toga je funkcija **`_mpo_file_check_mmap`** koja hook-uje **`mmap`** i koja će početi da proverava da li nova memorija može biti zapisiva (i ako ne, dozvoliti izvršenje), zatim će proveriti da li se koristi za dyld deljenu keš memoriju i ako jeste, dozvoliti izvršenje, i konačno će pozvati **`sb_evaluate_internal`** (ili jedan od njegovih obavijača) da izvrši dalja provere dozvola.
 
-Štaviše, od stotina hook-ova koje Sandbox koristi, postoje 3 koja su posebno zanimljiva:
+Pored toga, od stotina hook-ova koje Sandbox koristi, postoje 3 koja su posebno zanimljiva:
 
 - `mpo_proc_check_for`: Primeni profil ako je potrebno i ako prethodno nije primenjen.
 - `mpo_vnode_check_exec`: Poziva se kada proces učita povezanu binarnu datoteku, zatim se vrši provera profila i takođe provera koja zabranjuje SUID/SGID izvršenja.
 - `mpo_cred_label_update_execve`: Ovo se poziva kada je oznaka dodeljena. Ovo je najduže jer se poziva kada je bina potpuno učitana, ali još nije izvršena. Izvršiće akcije kao što su kreiranje sandbox objekta, povezivanje sandbox strukture sa kauth akreditivima, uklanjanje pristupa mach portovima...
 
-Napomena da je **`_cred_sb_evalutate`** obavijač preko **`sb_evaluate_internal`** i ova funkcija uzima akreditive koji su prosleđeni i zatim vrši evaluaciju koristeći funkciju **`eval`** koja obično procenjuje **platformski profil** koji je po defaultu primenjen na sve procese, a zatim **specifični procesni profil**. Napomena da je platformski profil jedan od glavnih komponenti **SIP** u macOS.
+Napomena da je **`_cred_sb_evalutate`** obavijač preko **`sb_evaluate_internal`** i ova funkcija uzima akreditive koji su prosleđeni i zatim vrši evaluaciju koristeći funkciju **`eval`** koja obično procenjuje **platformski profil** koji je po defaultu primenjen na sve procese, a zatim **specifični procesni profil**. Napomena da je platformski profil jedan od glavnih komponenti **SIP** u macOS-u.
 
 ## Sandboxd
 

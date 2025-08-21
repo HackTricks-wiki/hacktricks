@@ -1,4 +1,4 @@
-# Zagađenje Klasa (Zagađenje Prototipa u Pythonu)
+# Zagađenje Klasa (Pythonovo Zagađenje Prototipa)
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -116,7 +116,7 @@ print(system_admin_emp.execute_command())
 
 <details>
 
-<summary>Zagađivanje drugih klasa i globalnih varijabli kroz <code>globals</code></summary>
+<summary>Zagađivanje drugih klasa i globalnih varijabli putem <code>globals</code></summary>
 ```python
 def merge(src, dst):
 # Recursive merge function
@@ -182,7 +182,7 @@ subprocess.Popen('whoami', shell=True) # Calc.exe will pop up
 
 <summary>Prepisivanje <strong><code>__kwdefaults__</code></strong></summary>
 
-**`__kwdefaults__`** je posebna atribut svih funkcija, zasnovan na Python [dokumentaciji](https://docs.python.org/3/library/inspect.html), to je “mapiranje svih podrazumevanih vrednosti za **samo-ključeve** parametre”. Zagađivanje ovog atributa nam omogućava da kontrolišemo podrazumevane vrednosti parametara samo za ključeve funkcije, to su parametri funkcije koji dolaze posle \* ili \*args.
+**`__kwdefaults__`** je posebna atribut svih funkcija, zasnovan na Python [dokumentaciji](https://docs.python.org/3/library/inspect.html), to je “mapiranje svih podrazumevanih vrednosti za **samo-ključeve** parametre”. Zagađivanje ovog atributa nam omogućava da kontrolišemo podrazumevane vrednosti parametara samo-ključeva funkcije, to su parametri funkcije koji dolaze posle \* ili \*args.
 ```python
 from os import system
 import json
@@ -225,7 +225,7 @@ execute() #> Executing echo Polluted
 
 <summary>Prepisivanje Flask tajne kroz fajlove</summary>
 
-Dakle, ako možete da izvršite klasu zagađenja nad objektom definisanim u glavnom python fajlu veba, ali **čija je klasa definisana u drugom fajlu** od glavnog. Zato što da biste pristupili \_\_globals\_\_ u prethodnim payload-ima, morate pristupiti klasi objekta ili metodama klase, moći ćete da **pristupite globalnim varijablama u tom fajlu, ali ne i u glavnom**. \
+Dakle, ako možete da izvršite class pollution nad objektom definisanim u glavnom python fajlu veba, ali **čija je klasa definisana u drugom fajlu** od glavnog. Zato što da biste pristupili \_\_globals\_\_ u prethodnim payload-ima, morate pristupiti klasi objekta ili metodama klase, moći ćete da **pristupite globals u tom fajlu, ali ne i u glavnom**. \
 Stoga, **nećete moći da pristupite globalnom objektu Flask aplikacije** koji je definisao **tajni ključ** na glavnoj stranici:
 ```python
 app = Flask(__name__, template_folder='templates')
@@ -237,7 +237,7 @@ Payload poput ovog [iz ovog izveštaja](https://ctftime.org/writeup/36082):
 ```python
 __init__.__globals__.__loader__.__init__.__globals__.sys.modules.__main__.app.secret_key
 ```
-Koristite ovaj payload da **promenite `app.secret_key`** (ime u vašoj aplikaciji može biti drugačije) kako biste mogli da potpisujete nove i privilegovanije flask kolačiće.
+Iskoristite ovaj payload da **promenite `app.secret_key`** (ime u vašoj aplikaciji može biti drugačije) kako biste mogli da potpisujete nove i privilegovanije flask kolačiće.
 
 </details>
 

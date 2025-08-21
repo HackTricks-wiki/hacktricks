@@ -8,7 +8,7 @@ Ovo je funkcija koju može postaviti Administrator domena na bilo koji **računa
 
 Dakle, ako se administrator domena prijavi na računar sa aktiviranom funkcijom "Unconstrained Delegation", i imate lokalne administratorske privilegije unutar te mašine, moći ćete da izvršite dump karte i da se pretvarate da ste Administrator domena bilo gde (domain privesc).
 
-Možete **pronaći objekte računara sa ovom atributom** proveravajući da li atribut [userAccountControl](<https://msdn.microsoft.com/en-us/library/ms680832(v=vs.85).aspx>) sadrži [ADS_UF_TRUSTED_FOR_DELEGATION](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>). To možete uraditi sa LDAP filtrima ‘(userAccountControl:1.2.840.113556.1.4.803:=524288)’, što je ono što radi powerview:
+Možete **pronaći objekte računara sa ovom atributom** proveravajući da li atribut [userAccountControl](<https://msdn.microsoft.com/en-us/library/ms680832(v=vs.85).aspx>) sadrži [ADS_UF_TRUSTED_FOR_DELEGATION](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>). To možete uraditi sa LDAP filtrima ‘(userAccountControl:1.2.840.113556.1.4.803:=524288)’, što je ono što powerview radi:
 ```bash
 # List unconstrained computers
 ## Powerview

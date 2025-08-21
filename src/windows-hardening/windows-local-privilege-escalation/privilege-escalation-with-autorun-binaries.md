@@ -6,12 +6,12 @@
 
 ## WMIC
 
-**Wmic** se može koristiti za pokretanje programa pri **pokretanju**. Pogledajte koje su binarne datoteke programirane da se pokrenu pri pokretanju sa:
+**Wmic** se može koristiti za pokretanje programa pri **pokretanju**. Pogledajte koji su binarni fajlovi programirani da se pokrenu pri pokretanju sa:
 ```bash
 wmic startup get caption,command 2>nul & ^
 Get-CimInstance Win32_StartupCommand | select Name, command, Location, User | fl
 ```
-## Zakazani Zadaci
+## Zakazani zadaci
 
 **Zadaci** mogu biti zakazani da se izvršavaju sa **određenom frekvencijom**. Pogledajte koji su binarni fajlovi zakazani za izvršavanje sa:
 ```bash
@@ -24,9 +24,9 @@ Get-ScheduledTask | where {$_.TaskPath -notlike "\Microsoft*"} | ft TaskName,Tas
 #You can also write that content on a bat file that is being executed by a scheduled task
 schtasks /Create /RU "SYSTEM" /SC ONLOGON /TN "SchedPE" /TR "cmd /c net localgroup administrators user /add"
 ```
-## Folders
+## Fascikle
 
-Sve binarne datoteke smeštene u **Startup folderima će biti izvršene prilikom pokretanja**. Uobičajeni startup folderi su oni navedeni u nastavku, ali je startup folder označen u registru. [Read this to learn where.](privilege-escalation-with-autorun-binaries.md#startup-path)
+Sve binarne datoteke smeštene u **Startup fascikle će biti izvršene prilikom pokretanja**. Uobičajene startup fascikle su one navedene u nastavku, ali startup fascikla je označena u registru. [Read this to learn where.](privilege-escalation-with-autorun-binaries.md#startup-path)
 ```bash
 dir /b "C:\Documents and Settings\All Users\Start Menu\Programs\Startup" 2>nul
 dir /b "C:\Documents and Settings\%username%\Start Menu\Programs\Startup" 2>nul
@@ -37,9 +37,12 @@ Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 ```
 > **FYI**: Ranjenje arhiva *putanja prolaza* ranjivosti (kao što je ona zloupotrebljena u WinRAR-u pre 7.13 – CVE-2025-8088) može se iskoristiti za **deponovanje payload-a direktno unutar ovih Startup folder-a tokom dekompresije**, što rezultira izvršavanjem koda pri sledećem prijavljivanju korisnika. Za detaljno objašnjenje ove tehnike pogledajte:
 
+
 {{#ref}}
 ../../generic-hacking/archive-extraction-path-traversal.md
 {{#endref}}
+
+
 
 ## Registry
 
@@ -88,7 +91,7 @@ reg add HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnceEx\\0001\\Dep
 > **Eksploit 1**: Ako možete da pišete unutar bilo kog od pomenutih registra unutar **HKLM**, možete da eskalirate privilegije kada se drugi korisnik prijavi.
 
 > [!TIP]
-> **Eksploit 2**: Ako možete da prepišete bilo koji od binarnih fajlova navedenih u bilo kom od registra unutar **HKLM**, možete da modifikujete taj binarni fajl sa backdoor-om kada se drugi korisnik prijavi i eskalirate privilegije.
+> **Eksploit 2**: Ako možete da prepišete bilo koji od binarnih fajlova navedenih u bilo kom registru unutar **HKLM**, možete da modifikujete taj binarni fajl sa backdoor-om kada se drugi korisnik prijavi i eskalirate privilegije.
 ```bash
 #CMD
 reg query HKLM\Software\Microsoft\Windows\CurrentVersion\Run
@@ -170,7 +173,7 @@ Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion
 
 `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon`
 
-Tipično, **Userinit** ključ je postavljen na **userinit.exe**. Međutim, ako se ovaj ključ izmeni, navedeni izvršni fajl će takođe biti pokrenut od strane **Winlogon** prilikom prijavljivanja korisnika. Slično tome, **Shell** ključ je namenjen da upućuje na **explorer.exe**, koji je podrazumevani shell za Windows.
+Obično je ključ **Userinit** postavljen na **userinit.exe**. Međutim, ako se ovaj ključ izmeni, navedeni izvršni fajl će takođe biti pokrenut od strane **Winlogon** prilikom prijavljivanja korisnika. Slično tome, ključ **Shell** je namenjen da upućuje na **explorer.exe**, koji je podrazumevani shell za Windows.
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "Userinit"
 reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "Shell"
@@ -194,9 +197,9 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Microsoft\Windows\CurrentVersion
 ```
 ### AlternateShell
 
-### Promena Safe Mode Command Prompt-a
+### Promena Safe Mode komandne linije
 
-U Windows Registry-ju pod `HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot`, postoji **`AlternateShell`** vrednost koja je podrazumevano postavljena na `cmd.exe`. To znači da kada izaberete "Safe Mode with Command Prompt" tokom pokretanja (pritiskom na F8), koristi se `cmd.exe`. Međutim, moguće je postaviti vaš računar da se automatski pokreće u ovom režimu bez potrebe da pritisnete F8 i ručno ga izaberete.
+U Windows Registry pod `HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot`, postoji **`AlternateShell`** vrednost koja je podrazumevano postavljena na `cmd.exe`. To znači da kada izaberete "Safe Mode with Command Prompt" tokom pokretanja (pritiskom na F8), koristi se `cmd.exe`. Međutim, moguće je postaviti vaš računar da se automatski pokrene u ovom režimu bez potrebe da pritisnete F8 i ručno ga izaberete.
 
 Koraci za kreiranje opcije za pokretanje u "Safe Mode with Command Prompt":
 
@@ -206,9 +209,9 @@ Koraci za kreiranje opcije za pokretanje u "Safe Mode with Command Prompt":
 4. Sačuvajte promene u `boot.ini`.
 5. Ponovo primenite originalne atribute datoteke: `attrib c:\boot.ini +r +s +h`
 
-- **Eksploit 1:** Promena **AlternateShell** registry ključa omogućava prilagođenu postavku komandne ljuske, potencijalno za neovlašćen pristup.
-- **Eksploit 2 (PATH Write Permissions):** Imati dozvole za pisanje u bilo koji deo sistema **PATH** promenljive, posebno pre `C:\Windows\system32`, omogućava vam da izvršite prilagođeni `cmd.exe`, koji bi mogao biti backdoor ako se sistem pokrene u Safe Mode.
-- **Eksploit 3 (PATH i boot.ini Write Permissions):** Pristup za pisanje u `boot.ini` omogućava automatsko pokretanje u Safe Mode, olakšavajući neovlašćen pristup prilikom sledećeg ponovnog pokretanja.
+- **Eksploatacija 1:** Promena **AlternateShell** registry ključa omogućava prilagođenu postavku komandne linije, potencijalno za neovlašćen pristup.
+- **Eksploatacija 2 (PATH Write Permissions):** Imati dozvole za pisanje u bilo koji deo sistema **PATH** promenljive, posebno pre `C:\Windows\system32`, omogućava vam da izvršite prilagođeni `cmd.exe`, koji bi mogao biti backdoor ako se sistem pokrene u Safe Mode.
+- **Eksploatacija 3 (PATH i boot.ini Write Permissions):** Pristup za pisanje u `boot.ini` omogućava automatsko pokretanje u Safe Mode, olakšavajući neovlašćen pristup pri sledećem ponovnom pokretanju.
 
 Da proverite trenutnu **AlternateShell** postavku, koristite ove komande:
 ```bash
@@ -236,9 +239,9 @@ Unutar ovih ključeva postoje različiti podključevi, od kojih svaki odgovara s
 **Bezbednosni Uvidi:**
 
 - Modifikovanje ili pisanje u ključ gde je **`IsInstalled`** postavljeno na `"1"` sa specifičnim **`StubPath`** može dovesti do neovlašćenog izvršavanja komandi, potencijalno za eskalaciju privilegija.
-- Menjanje binarnog fajla na koji se poziva u bilo kojoj vrednosti **`StubPath`** takođe može postići eskalaciju privilegija, uz dovoljno dozvola.
+- Menjanje binarnog fajla na koji se poziva u bilo kojoj **`StubPath`** vrednosti takođe može postići eskalaciju privilegija, uz dovoljno dozvola.
 
-Da biste pregledali konfiguracije **`StubPath`** kroz Active Setup komponente, mogu se koristiti sledeće komande:
+Da biste pregledali konfiguracije **`StubPath`** u Active Setup komponentama, mogu se koristiti sledeće komande:
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Active Setup\Installed Components" /s /v StubPath
 reg query "HKCU\SOFTWARE\Microsoft\Active Setup\Installed Components" /s /v StubPath
@@ -270,7 +273,7 @@ reg query "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\B
 - `HKLM\Software\Microsoft\Internet Explorer\Extensions`
 - `HKLM\Software\Wow6432Node\Microsoft\Internet Explorer\Extensions`
 
-Napomena da će registar sadržati 1 novi unos za svaki dll i biće predstavljen sa **CLSID**. Informacije o CLSID-u možete pronaći u `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`
+Napomena da će registar sadržati 1 novi unos po svakoj dll i biće predstavljen sa **CLSID**. Informacije o CLSID-u možete pronaći u `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`
 
 ### Font Drivers
 
@@ -292,14 +295,14 @@ reg query "HKLM\SOFTWARE\Wow6432Node\Classes\htmlfile\shell\open\command" /v ""
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Classes\htmlfile\shell\open\command' -Name ""
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Wow6432Node\Classes\htmlfile\shell\open\command' -Name ""
 ```
-### Opcije izvršavanja slika datoteka
+### Opcije izvršavanja slika
 ```
 HKLM\Software\Microsoft\Windows NT\CurrentVersion\Image File Execution Options
 HKLM\Software\Microsoft\Wow6432Node\Windows NT\CurrentVersion\Image File Execution Options
 ```
 ## SysInternals
 
-Napomena da su sve lokacije gde možete pronaći autorune **već pretražene od strane**[ **winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe). Međutim, za **opsežniju listu automatski izvršenih** fajlova možete koristiti [autoruns](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns) iz sysinternals:
+Napomena da su sve lokacije gde možete pronaći autorune **već pretražene od strane**[ **winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe). Međutim, za **opsežniju listu automatski izvršenih** fajlova možete koristiti [autoruns ](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns)iz systinternals:
 ```
 autorunsc.exe -m -nobanner -a * -ct /accepteula
 ```

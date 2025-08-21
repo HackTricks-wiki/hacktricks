@@ -16,7 +16,7 @@ macos-dyld-process.md
 
 ## **DYLD_INSERT_LIBRARIES**
 
-Ovo je kao [**LD_PRELOAD na Linuxu**](../../../../linux-hardening/privilege-escalation/index.html#ld_preload). Omogućava da se naznači proces koji će se pokrenuti da učita određenu biblioteku iz putanje (ako je env var omogućena)
+Ovo je kao [**LD_PRELOAD na Linuxu**](../../../../linux-hardening/privilege-escalation/index.html#ld_preload). Omogućava da se naznači proces koji će se pokrenuti da učita određenu biblioteku sa putanje (ako je env var omogućena)
 
 Ova tehnika se može takođe **koristiti kao ASEP tehnika** jer svaka aplikacija koja je instalirana ima plist pod nazivom "Info.plist" koji omogućava **dodeljivanje promenljivih okruženja** koristeći ključ pod nazivom `LSEnvironmental`.
 
@@ -64,7 +64,7 @@ macos-dyld-hijacking-and-dyld_insert_libraries.md
 Kao i na Windows-u, na MacOS-u takođe možete **oteti dylibs** da bi **aplikacije** **izvršavale** **arbitrarni** **kod** (pa, zapravo, od običnog korisnika to možda neće biti moguće jer bi vam mogla biti potrebna TCC dozvola da pišete unutar `.app` paketa i otmete biblioteku).\
 Međutim, način na koji **MacOS** aplikacije **učitavaju** biblioteke je **više ograničen** nego na Windows-u. To implicira da **malver** programeri i dalje mogu koristiti ovu tehniku za **neprimetnost**, ali verovatnoća da će moći da **zloupotrebe ovo za eskalaciju privilegija je mnogo manja**.
 
-Prvo, **češće** je pronaći da **MacOS binarne datoteke ukazuju na punu putanju** do biblioteka koje treba učitati. I drugo, **MacOS nikada ne pretražuje** u folderima **$PATH** za biblioteke.
+Prvo, **češće je** pronaći da **MacOS binarne datoteke ukazuju na punu putanju** do biblioteka koje treba učitati. I drugo, **MacOS nikada ne pretražuje** u folderima **$PATH** za biblioteke.
 
 **Glavni** deo **koda** vezan za ovu funkcionalnost je u **`ImageLoader::recursiveLoadLibraries`** u `ImageLoader.cpp`.
 
@@ -92,7 +92,7 @@ compatibility version 1.0.0
 - **Konfigurisano sa @rpath**: Mach-O binarne datoteke mogu imati komande **`LC_RPATH`** i **`LC_LOAD_DYLIB`**. Na osnovu **vrednosti** tih komandi, **biblioteke** će biti **učitane** iz **različitih direktorijuma**.
 - **`LC_RPATH`** sadrži putanje nekih foldera koji se koriste za učitavanje biblioteka od strane binarne datoteke.
 - **`LC_LOAD_DYLIB`** sadrži putanju do specifičnih biblioteka koje treba učitati. Ove putanje mogu sadržati **`@rpath`**, koje će biti **zamenjene** vrednostima u **`LC_RPATH`**. Ako postoji više putanja u **`LC_RPATH`**, svaka će biti korišćena za pretragu biblioteke za učitavanje. Primer:
-- Ako **`LC_LOAD_DYLIB`** sadrži `@rpath/library.dylib` i **`LC_RPATH`** sadrži `/application/app.app/Contents/Framework/v1/` i `/application/app.app/Contents/Framework/v2/`. Oba foldera će biti korišćena za učitavanje `library.dylib`**.** Ako biblioteka ne postoji u `[...]/v1/` i napadač bi mogao da je postavi tamo da otme učitavanje biblioteke u `[...]/v2/` jer se redosled putanja u **`LC_LOAD_DYLIB`** poštuje.
+- Ako **`LC_LOAD_DYLIB`** sadrži `@rpath/library.dylib` i **`LC_RPATH`** sadrži `/application/app.app/Contents/Framework/v1/` i `/application/app.app/Contents/Framework/v2/`. Oba foldera će biti korišćena za učitavanje `library.dylib`**.** Ako biblioteka ne postoji u `[...]/v1/` i napadač je može postaviti tamo da otme učitavanje biblioteke u `[...]/v2/` jer se redosled putanja u **`LC_LOAD_DYLIB`** poštuje.
 - **Pronađite rpath putanje i biblioteke** u binarnim datotekama sa: `otool -l </path/to/binary> | grep -E "LC_RPATH|LC_LOAD_DYLIB" -A 5`
 
 > [!NOTE] > **`@executable_path`**: Je **putanja** do direktorijuma koji sadrži **glavnu izvršnu datoteku**.
@@ -102,7 +102,7 @@ compatibility version 1.0.0
 > - Kada se koristi u izvršnoj datoteci, **`@loader_path`** je zapravo **isto** kao **`@executable_path`**.
 > - Kada se koristi u **dylib**, **`@loader_path`** daje **putanju** do **dylib**.
 
-Način za **escalaciju privilegija** zloupotrebom ove funkcionalnosti bio bi u retkom slučaju kada neka **aplikacija** koja se izvršava **od** **root-a** **traži** neku **biblioteku u nekom folderu gde napadač ima dozvole za pisanje.**
+Način za **eskalaciju privilegija** zloupotrebom ove funkcionalnosti bio bi u retkom slučaju kada se **aplikacija** izvršava **od** **root-a** i **traži** neku **biblioteku u nekom folderu gde napadač ima dozvole za pisanje.**
 
 > [!TIP]
 > Lep **skener** za pronalaženje **nedostajućih biblioteka** u aplikacijama je [**Dylib Hijack Scanner**](https://objective-see.com/products/dhs.html) ili [**CLI verzija**](https://github.com/pandazheng/DylibHijack).\
@@ -133,10 +133,10 @@ Iz **`man dlopen`**:
 > [!CAUTION]
 > Ako nema kose crte u imenu, postoje 2 načina da se izvrši hijacking:
 >
-> - Ako je bilo koji **`LC_RPATH`** **pisan** (ali potpis se proverava, tako da za ovo takođe treba da binarna datoteka bude neograničena)
+> - Ako je bilo koji **`LC_RPATH`** **pisan** (ali se potpis proverava, tako da za ovo takođe treba da binarna datoteka bude neograničena)
 > - Ako je binarna datoteka **neograničena** i tada je moguće učitati nešto iz CWD (ili zloupotrebiti jednu od pomenutih env promenljivih)
 
-- Kada putanja **izgleda kao putanja framework-a** (npr. `/stuff/foo.framework/foo`), ako je **`$DYLD_FRAMEWORK_PATH`** postavljen prilikom pokretanja, dyld će prvo tražiti u toj direktoriji za **delimičnu putanju framework-a** (npr. `foo.framework/foo`). Zatim, dyld će pokušati **datu putanju onako kako jeste** (koristeći trenutni radni direktorijum za relativne putanje). Na kraju, za stare binarne datoteke, dyld će pokušati neke rezervne opcije. Ako je **`$DYLD_FALLBACK_FRAMEWORK_PATH`** postavljen prilikom pokretanja, dyld će pretraživati te direktorijume. Inače, pretražiće **`/Library/Frameworks`** (na macOS-u ako je proces neograničen), zatim **`/System/Library/Frameworks`**.
+- Kada putanja **izgleda kao putanja okvira** (npr. `/stuff/foo.framework/foo`), ako je **`$DYLD_FRAMEWORK_PATH`** postavljen prilikom pokretanja, dyld će prvo tražiti u toj direktoriji za **delimičnu putanju okvira** (npr. `foo.framework/foo`). Zatim, dyld će pokušati **datu putanju onako kako jeste** (koristeći trenutni radni direktorijum za relativne putanje). Na kraju, za stare binarne datoteke, dyld će pokušati neke rezervne opcije. Ako je **`$DYLD_FALLBACK_FRAMEWORK_PATH`** postavljen prilikom pokretanja, dyld će pretraživati te direktorijume. Inače, pretražiće **`/Library/Frameworks`** (na macOS-u ako je proces neograničen), zatim **`/System/Library/Frameworks`**.
 1. `$DYLD_FRAMEWORK_PATH`
 2. data putanja (koristeći trenutni radni direktorijum za relativne putanje ako je neograničen)
 3. `$DYLD_FALLBACK_FRAMEWORK_PATH`
@@ -144,11 +144,11 @@ Iz **`man dlopen`**:
 5. `/System/Library/Frameworks`
 
 > [!CAUTION]
-> Ako je putanja framework, način da se otme bi bio:
+> Ako je putanja okvira, način da se otme bi bio:
 >
 > - Ako je proces **neograničen**, zloupotrebljavajući **relativnu putanju iz CWD** pomenutih env promenljivih (čak i ako nije rečeno u dokumentaciji, ako je proces ograničen DYLD\_\* env varijable su uklonjene)
 
-- Kada putanja **sadrži kosu crtu, ali nije putanja framework-a** (tj. puna putanja ili delimična putanja do dylib-a), dlopen() prvo gleda u (ako je postavljeno) **`$DYLD_LIBRARY_PATH`** (sa delom lista iz putanje). Zatim, dyld **pokušava datu putanju** (koristeći trenutni radni direktorijum za relativne putanje (ali samo za neograničene procese)). Na kraju, za starije binarne datoteke, dyld će pokušati rezervne opcije. Ako je **`$DYLD_FALLBACK_LIBRARY_PATH`** postavljen prilikom pokretanja, dyld će pretraživati u tim direktorijumima, inače, dyld će gledati u **`/usr/local/lib/`** (ako je proces neograničen), a zatim u **`/usr/lib/`**.
+- Kada putanja **sadrži kosu crtu, ali nije putanja okvira** (tj. puna putanja ili delimična putanja do dylib-a), dlopen() prvo gleda u (ako je postavljeno) **`$DYLD_LIBRARY_PATH`** (sa delom lista iz putanje). Zatim, dyld **pokušava datu putanju** (koristeći trenutni radni direktorijum za relativne putanje (ali samo za neograničene procese)). Na kraju, za starije binarne datoteke, dyld će pokušati rezervne opcije. Ako je **`$DYLD_FALLBACK_LIBRARY_PATH`** postavljen prilikom pokretanja, dyld će pretraživati u tim direktorijumima, inače, dyld će gledati u **`/usr/local/lib/`** (ako je proces neograničen), a zatim u **`/usr/lib/`**.
 1. `$DYLD_LIBRARY_PATH`
 2. data putanja (koristeći trenutni radni direktorijum za relativne putanje ako je neograničen)
 3. `$DYLD_FALLBACK_LIBRARY_PATH`
@@ -156,7 +156,7 @@ Iz **`man dlopen`**:
 5. `/usr/lib/`
 
 > [!CAUTION]
-> Ako ima kose crte u imenu i nije framework, način da se otme bi bio:
+> Ako ima kose crte u imenu i nije okvir, način da se otme bi bio:
 >
 > - Ako je binarna datoteka **neograničena** i tada je moguće učitati nešto iz CWD ili `/usr/local/lib` (ili zloupotrebiti jednu od pomenutih env promenljivih)
 
@@ -165,9 +165,9 @@ Iz **`man dlopen`**:
 >
 > Napomena: Ako je glavna izvršna datoteka **set\[ug]id binarna datoteka ili potpisana sa ovlašćenjima**, tada se **sve promenljive okruženja ignorišu**, i može se koristiti samo puna putanja ([proverite ograničenja DYLD_INSERT_LIBRARIES](macos-dyld-hijacking-and-dyld_insert_libraries.md#check-dyld_insert_librery-restrictions) za detaljnije informacije)
 >
-> Napomena: Apple platforme koriste "univerzalne" datoteke za kombinovanje 32-bitnih i 64-bitnih biblioteka. To znači da ne postoje **odvojene 32-bitne i 64-bitne putanje za pretragu**.
+> Napomena: Apple platforme koriste "univerzalne" datoteke za kombinovanje 32-bitnih i 64-bitnih biblioteka. To znači da ne postoje **odvojene 32-bitne i 64-bitne putanje pretrage**.
 >
-> Napomena: Na Apple platformama većina OS dylibs je **kombinovana u dyld keš** i ne postoje na disku. Stoga, pozivanje **`stat()`** da se proveri da li OS dylib postoji **neće raditi**. Međutim, **`dlopen_preflight()`** koristi iste korake kao **`dlopen()`** da pronađe kompatibilnu mach-o datoteku.
+> Napomena: Na Apple platformama većina OS dylib-ova je **kombinovana u dyld keš** i ne postoje na disku. Stoga, pozivanje **`stat()`** da se proveri da li OS dylib postoji **neće raditi**. Međutim, **`dlopen_preflight()`** koristi iste korake kao **`dlopen()`** da pronađe kompatibilnu mach-o datoteku.
 
 **Proverite putanje**
 
@@ -214,15 +214,15 @@ fprintf(stderr, "Error loading: %s\n\n\n", dlerror());
 return 0;
 }
 ```
-Ako ga kompajlirate i izvršite, možete videti **gde je svaka biblioteka neuspešno pretražena**. Takođe, možete **filtrirati FS logove**:
+Ako ga kompajlirate i izvršite, možete videti **gde je svaka biblioteka neuspešno pretraživana**. Takođe, možete **filtrirati FS logove**:
 ```bash
 sudo fs_usage | grep "dlopentest"
 ```
 ## Relative Path Hijacking
 
-Ako **privilegovani binarni/program** (kao SUID ili neki binarni sa moćnim ovlašćenjima) **učitava biblioteku sa relativnom putanjom** (na primer koristeći `@executable_path` ili `@loader_path`) i ima **onemogućenu validaciju biblioteka**, može biti moguće premestiti binarni fajl na lokaciju gde napadač može **modifikovati biblioteku učitanu sa relativnom putanjom**, i zloupotrebiti je da ubrizga kod u proces.
+Ako **privilegovani binarni/program** (kao SUID ili neki binarni sa moćnim ovlašćenjima) **učitava biblioteku sa relativnom putanjom** (na primer koristeći `@executable_path` ili `@loader_path`) i ima **onemogućenu validaciju biblioteka**, može biti moguće premestiti binarni fajl na lokaciju gde napadač može **modifikovati biblioteku sa relativnom putanjom** i zloupotrebiti je za injekciju koda u proces.
 
-## Prune `DYLD_*` and `LD_LIBRARY_PATH` env variables
+## Prune `DYLD_*` i `LD_LIBRARY_PATH` env varijable
 
 U fajlu `dyld-dyld-832.7.1/src/dyld2.cpp` moguće je pronaći funkciju **`pruneEnvironmentVariables`**, koja će ukloniti svaku env varijablu koja **počinje sa `DYLD_`** i **`LD_LIBRARY_PATH=`**.
 
@@ -282,7 +282,7 @@ DYLD_INSERT_LIBRARIES=inject.dylib ./hello
 # Remove suid
 sudo chmod -s hello
 ```
-### Section `__RESTRICT` sa segmentom `__restrict`
+### Section `__RESTRICT` with segment `__restrict`
 ```bash
 gcc -sectcreate __RESTRICT __restrict /dev/null hello.c -o hello-restrict
 DYLD_INSERT_LIBRARIES=inject.dylib ./hello-restrict

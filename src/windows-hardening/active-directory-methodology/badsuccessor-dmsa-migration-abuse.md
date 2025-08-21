@@ -4,9 +4,9 @@
 
 ## Pregled
 
-Delegirani upravljani servisni nalozi (**dMSA**) su naslednici **gMSA** koji dolaze sa Windows Server 2025. Legitimni radni tok migracije omogućava administratorima da zamene *stari* nalog (korisnički, računar ili servisni nalog) sa dMSA dok transparentno čuvaju dozvole. Radni tok se izlaže putem PowerShell cmdlet-a kao što su `Start-ADServiceAccountMigration` i `Complete-ADServiceAccountMigration` i oslanja se na dva LDAP atributa **dMSA objekta**:
+Delegirani upravljani servisni nalozi (**dMSA**) su naslednici **gMSA** nove generacije koji dolaze sa Windows Server 2025. Legitimni radni tok migracije omogućava administratorima da zamene *stari* nalog (korisnički, računar ili servisni nalog) sa dMSA dok transparentno čuvaju dozvole. Radni tok se izlaže putem PowerShell cmdlet-a kao što su `Start-ADServiceAccountMigration` i `Complete-ADServiceAccountMigration` i oslanja se na dva LDAP atributa **dMSA objekta**:
 
-* **`msDS-ManagedAccountPrecededByLink`** – *DN link* do prethodnog (starog) naloga.
+* **`msDS-ManagedAccountPrecededByLink`** – *DN link* ka prethodnom (starom) nalogu.
 * **`msDS-DelegatedMSAState`**       – stanje migracije (`0` = nijedno, `1` = u toku, `2` = *završeno*).
 
 Ako napadač može da kreira **bilo koji** dMSA unutar OU i direktno manipuliše ta dva atributa, LSASS i KDC će tretirati dMSA kao *naslednika* povezanog naloga. Kada se napadač kasnije autentifikuje kao dMSA **nasleđuje sve privilegije povezanog naloga** – do **Domain Admin** ako je Administrator nalog povezan.
@@ -47,7 +47,7 @@ Set-ADServiceAccount attacker_dMSA -Add \
 # 3. Mark the migration as *completed*
 Set-ADServiceAccount attacker_dMSA -Replace @{msDS-DelegatedMSAState=2}
 ```
-Nakon replikacije, napadač može jednostavno **logon** kao `attacker_dMSA$` ili zatražiti Kerberos TGT – Windows će izgraditi token *supersedovanog* naloga.
+Nakon replikacije, napadač može jednostavno **prijaviti se** kao `attacker_dMSA$` ili zatražiti Kerberos TGT – Windows će izgraditi token *zamenjenog* naloga.
 
 ### Automatizacija
 
@@ -75,7 +75,7 @@ Omogućite **Auditing objekata** na OU-ima i pratite sledeće Windows sigurnosne
 * **4662** – Promene specifičnih atributa
 * GUID `2f5c138a-bd38-4016-88b4-0ec87cbb4919` → `msDS-DelegatedMSAState`
 * GUID `a0945b2b-57a2-43bd-b327-4d112a4e8bd1` → `msDS-ManagedAccountPrecededByLink`
-* **2946** – Izdavanje TGT-a za dMSA
+* **2946** – Izdavanje TGT za dMSA
 
 Korelacija `4662` (izmena atributa), `4741` (kreiranje računa za računar/uslugu) i `4624` (naknadno prijavljivanje) brzo ističe BadSuccessor aktivnost. XDR rešenja kao što je **XSIAM** dolaze sa spremnim upitima (vidi reference).
 

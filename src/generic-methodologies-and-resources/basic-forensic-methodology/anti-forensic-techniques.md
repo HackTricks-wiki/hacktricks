@@ -31,36 +31,36 @@ Prethodna slika je **izlaz** prikazan od strane **alata** gde se može primetiti
 
 Ponovo, u izlazu alata moguće je videti da su **neke promene izvršene**.
 
-Korišćenjem istog alata moguće je identifikovati **na koji način su vremenske oznake modifikovane**:
+Korišćenjem istog alata moguće je identifikovati **kada su vremenske oznake modifikovane**:
 
 ![](<../../images/image (1089).png>)
 
 - CTIME: Vreme kreiranja datoteke
 - ATIME: Vreme modifikacije datoteke
-- MTIME: Modifikacija MFT registra datoteke
+- MTIME: Modifikacija registra datoteke MFT
 - RTIME: Vreme pristupa datoteci
 
 ### `$STANDARD_INFORMATION` i `$FILE_NAME` poređenje
 
-Još jedan način da se identifikuju sumnjive modifikovane datoteke bio bi da se uporede vremena na oba atributa tražeći **neusklađenosti**.
+Još jedan način da se identifikuju sumnjivo modifikovane datoteke bio bi da se uporede vremena na oba atributa tražeći **neusklađenosti**.
 
 ### Nanosekunde
 
-**NTFS** vremenske oznake imaju **preciznost** od **100 nanosekundi**. Stoga, pronalaženje datoteka sa vremenskim oznakama kao što je 2010-10-10 10:10:**00.000:0000 je veoma sumnjivo**.
+**NTFS** vremenske oznake imaju **preciznost** od **100 nanosekundi**. Stoga, pronalaženje datoteka sa vremenskim oznakama poput 2010-10-10 10:10:**00.000:0000 je veoma sumnjivo**.
 
 ### SetMace - Anti-forensic Tool
 
-Ovaj alat može modifikovati oba atributa `$STARNDAR_INFORMATION` i `$FILE_NAME`. Međutim, od Windows Vista, potrebno je da OS bude aktivan da bi se modifikovale ove informacije.
+Ovaj alat može modifikovati oba atributa `$STARNDAR_INFORMATION` i `$FILE_NAME`. Međutim, od Windows Vista, potrebno je da živi OS modifikuje ove informacije.
 
 ## Data Hiding
 
-NFTS koristi klaster i minimalnu veličinu informacija. To znači da ako datoteka koristi i klaster i po jedan i po, **preostala polovina nikada neće biti korišćena** dok se datoteka ne obriše. Stoga, moguće je **sakriti podatke u ovom slobodnom prostoru**.
+NFTS koristi klaster i minimalnu veličinu informacija. To znači da ako datoteka koristi i klaster i pola, **preostala polovina nikada neće biti korišćena** dok se datoteka ne obriše. Stoga, moguće je **sakriti podatke u ovom slobodnom prostoru**.
 
-Postoje alati kao što je slacker koji omogućavaju skrivanje podataka u ovom "skrivenom" prostoru. Međutim, analiza `$logfile` i `$usnjrnl` može pokazati da su neki podaci dodati:
+Postoje alati poput slacker koji omogućavaju skrivanje podataka u ovom "skrivenom" prostoru. Međutim, analiza `$logfile` i `$usnjrnl` može pokazati da su neki podaci dodati:
 
 ![](<../../images/image (1060).png>)
 
-Stoga, moguće je povratiti slobodan prostor koristeći alate kao što je FTK Imager. Imajte na umu da ovaj tip alata može sačuvati sadržaj obfuskovan ili čak enkriptovan.
+Stoga, moguće je povratiti slobodan prostor koristeći alate poput FTK Imager. Imajte na umu da ovaj tip alata može sačuvati sadržaj obfuskovan ili čak enkriptovan.
 
 ## UsbKill
 
@@ -77,7 +77,7 @@ Ove distribucije su **izvršene unutar RAM** memorije. Jedini način da ih otkri
 
 ## Windows Configuration
 
-Moguće je onemogućiti nekoliko metoda beleženja u Windows-u kako bi se otežala forenzička istraga.
+Moguće je onemogućiti nekoliko metoda beleženja u Windows-u kako bi se forenzička istraga učinila mnogo težom.
 
 ### Disable Timestamps - UserAssist
 
@@ -90,7 +90,7 @@ Onemogućavanje UserAssist zahteva dva koraka:
 
 ### Disable Timestamps - Prefetch
 
-Ovo će sačuvati informacije o aplikacijama koje su izvršene sa ciljem poboljšanja performansi Windows sistema. Međutim, ovo može biti korisno i za forenzičke prakse.
+Ovo će sačuvati informacije o aplikacijama izvršenim sa ciljem poboljšanja performansi Windows sistema. Međutim, ovo može biti korisno i za forenzičke prakse.
 
 - Izvršite `regedit`
 - Izaberite putanju datoteke `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SessionManager\Memory Management\PrefetchParameters`
@@ -132,7 +132,7 @@ Takođe je moguće modifikovati konfiguraciju koje datoteke će biti kopirane u 
 ### Overwrite deleted files
 
 - Možete koristiti **Windows alat**: `cipher /w:C` Ovo će označiti cipher da ukloni sve podatke iz dostupnog neiskorišćenog prostora na disku unutar C diska.
-- Takođe možete koristiti alate kao što je [**Eraser**](https://eraser.heidi.ie)
+- Takođe možete koristiti alate poput [**Eraser**](https://eraser.heidi.ie)
 
 ### Delete Windows event logs
 
@@ -170,7 +170,7 @@ New-ItemProperty -Path "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\PowerShel
 Get-WinEvent -LogName 'Microsoft-Windows-PowerShell/Operational' |
 Remove-WinEvent               # requires admin & Win11 23H2+
 ```
-Defenderi bi trebali pratiti promene na tim registrima i visoko obimno uklanjanje PowerShell događaja.
+Defenderi bi trebali pratiti promene na tim registrima i visoki obim uklanjanja PowerShell događaja.
 
 ### ETW (Event Tracing for Windows) Patch
 
@@ -182,14 +182,13 @@ WriteProcessMemory(GetCurrentProcess(),
 GetProcAddress(GetModuleHandleA("ntdll.dll"), "EtwEventWrite"),
 patch, sizeof(patch), NULL);
 ```
-Public PoCs (e.g. `EtwTiSwallow`) implement the same primitive in PowerShell or C++.
-Zbog toga što je zakrpa **lokalna za proces**, EDR-ovi koji rade unutar drugih procesa mogu to propustiti.
+Public PoCs (e.g. `EtwTiSwallow`) implement the same primitive in PowerShell or C++.  
+Zbog toga što je zakrpa **lokalna za proces**, EDR-ovi koji rade unutar drugih procesa mogu je propustiti.  
 Detekcija: uporediti `ntdll` u memoriji naspram na disku, ili hook pre korisničkog moda.
 
-### Oživljavanje alternativnih podataka (ADS)
+### Revival Alternativnih Podataka (ADS)
 
-Kampanje malvera u 2023. (npr. **FIN12** loaderi) su primećene kako postavljaju binarne datoteke druge faze
-unutar ADS-a da bi ostale van vidokruga tradicionalnih skenera:
+Malware kampanje u 2023. (npr. **FIN12** loaderi) su primećene kako postavljaju binarne datoteke druge faze unutar ADS-a da bi ostale van vidokruga tradicionalnih skenera:
 ```cmd
 rem Hide cobalt.bin inside an ADS of a PDF
 type cobalt.bin > report.pdf:win32res.dll
@@ -201,7 +200,7 @@ Enumerišite tokove sa `dir /R`, `Get-Item -Stream *`, ili Sysinternals `streams
 ### BYOVD & “AuKill” (2023)
 
 Bring-Your-Own-Vulnerable-Driver se sada rutinski koristi za **anti-forensics** u ransomware
-upadima. Open-source alat **AuKill** učitava potpisani, ali ranjivi drajver (`procexp152.sys`) da
+napadima. Open-source alat **AuKill** učitava potpisani, ali ranjivi drajver (`procexp152.sys`) da
 suspenduje ili prekine EDR i forenzičke senzore **pre nego što dođe do enkripcije i uništavanja logova**:
 ```cmd
 AuKill.exe -e "C:\\Program Files\\Windows Defender\\MsMpEng.exe"
@@ -215,11 +214,11 @@ Mere zaštite: omogućite Microsoftovu blok listu ranjivih vozača (HVCI/SAC) i 
 ## Linux Anti-Forensics: Samo-popravljanje i Cloud C2 (2023–2025)
 
 ### Samo-popravljanje kompromitovanih servisa za smanjenje detekcije (Linux)  
-Protivnici sve više "samo-popravljaju" servis odmah nakon što ga iskoriste kako bi sprečili ponovnu eksploataciju i suprimirali detekcije zasnovane na ranjivostima. Ideja je da se ranjivi komponenti zamene najnovijim legitimnim upstream binarnim datotekama/JAR-ovima, tako da skeneri prijavljuju host kao popravljen dok persistencija i C2 ostaju.
+Protivnici sve više "samo-popravljaju" servis odmah nakon što ga iskoriste kako bi sprečili ponovnu eksploataciju i suprimili detekcije zasnovane na ranjivostima. Ideja je da se ranjivi komponenti zamene najnovijim legitimnim upstream binarnim datotekama/JAR-ovima, tako da skeneri prijavljuju host kao popravljen dok persistencija i C2 ostaju.
 
 Primer: Apache ActiveMQ OpenWire RCE (CVE‑2023‑46604)  
 - Nakon eksploatacije, napadači su preuzeli legitimne JAR-ove sa Maven Central (repo1.maven.org), obrisali ranjive JAR-ove u ActiveMQ instalaciji i ponovo pokrenuli broker.  
-- Ovo je zatvorilo inicijalni RCE dok su se održavali drugi pristupi (cron, promene SSH konfiguracije, odvojeni C2 implantati).
+- Ovo je zatvorilo inicijalni RCE dok su se održali drugi uporišta (cron, promene SSH konfiguracije, odvojeni C2 implantati).
 
 Operativni primer (ilustrativno)
 ```bash
@@ -250,7 +249,7 @@ Forenzička/istraživačka uputstva
 
 ### Cloud‑service C2 sa bearer tokenima i anti‑analitičkim stagerima
 Posmatrano trgovanje kombinovalo je više dugoročnih C2 puteva i anti‑analitičko pakovanje:
-- Lozinkom zaštićeni PyInstaller ELF loaderi kako bi se otežalo korišćenje sandboxes i statička analiza (npr., enkriptovani PYZ, privremena ekstrakcija pod `/_MEI*`).
+- Loader-i PyInstaller ELF zaštićeni lozinkom kako bi se otežalo korišćenje sandboxes i statička analiza (npr., enkriptovani PYZ, privremena ekstrakcija pod `/_MEI*`).
 - Indikatori: `strings` hitovi kao što su `PyInstaller`, `pyi-archive`, `PYZ-00.pyz`, `MEIPASS`.
 - Artefakti u vreme izvršavanja: ekstrakcija u `/tmp/_MEI*` ili prilagođene `--runtime-tmpdir` putanje.
 - C2 podržan Dropbox-om koristeći hardkodirane OAuth Bearer tokene
@@ -267,7 +266,7 @@ Napadači često kombinuju samopročišćavanje sa trajnim pristupnim putevima:
 for d in /etc/cron.*; do [ -f "$d/0anacron" ] && stat -c '%n %y %s' "$d/0anacron"; done
 grep -R --line-number -E 'curl|wget|python|/bin/sh' /etc/cron.*/* 2>/dev/null
 ```
-- SSH konfiguracija hardening rollback: omogućavanje root prijava i menjanje podrazumevanih ljuski za nisko privilegovane naloge.
+- Hardening rollback SSH konfiguracije: omogućavanje root prijava i menjanje podrazumevanih ljuski za naloge sa niskim privilegijama.
 - Istražujte za omogućavanje root prijava:
 ```bash
 grep -E '^\s*PermitRootLogin' /etc/ssh/sshd_config

@@ -28,10 +28,10 @@ Moguće je **ručno dodati** iButton tipa: **Dallas, Cyfral, i Metakom**
 
 ### **Emulate**
 
-Moguće je **emulirati** sačuvane iButton-e (pročitane ili ručno dodate).
+Moguće je **emulirati** sačuvane iButtons (pročitane ili ručno dodate).
 
 > [!TIP]
-> Ako ne možete da ostvarite očekivane kontakte Flipper Zero da dodirne čitač, možete **koristiti eksterni GPIO:**
+> Ako ne možete da ostvarite očekivane kontakte Flipper Zero da dodirne čitač, možete **koristiti spoljašnji GPIO:**
 
 <figure><img src="../../../images/image (138).png" alt=""><figcaption></figcaption></figure>
 

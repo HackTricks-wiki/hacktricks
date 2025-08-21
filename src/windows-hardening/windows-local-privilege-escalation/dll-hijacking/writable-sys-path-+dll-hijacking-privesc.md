@@ -2,9 +2,9 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Uvod
+## Introduction
 
-Ako ste otkrili da možete **pisati u folderu System Path** (napomena: ovo neće raditi ako možete pisati u folderu User Path) moguće je da možete **povećati privilegije** u sistemu.
+Ako ste otkrili da možete **pisati u folderu System Path** (napomena: ovo neće raditi ako možete pisati u folderu User Path), moguće je da možete **povećati privilegije** u sistemu.
 
 Da biste to uradili, možete zloupotrebiti **Dll Hijacking** gde ćete **oteti biblioteku koja se učitava** od strane servisa ili procesa sa **većim privilegijama** od vaših, i pošto taj servis učitava Dll koji verovatno čak ni ne postoji u celom sistemu, pokušaće da ga učita iz System Path-a gde možete pisati.
 
@@ -14,15 +14,15 @@ Za više informacija o **onome što je Dll Hijacking** proverite:
 ./
 {{#endref}}
 
-## Povećanje privilegija sa Dll Hijacking
+## Privesc with Dll Hijacking
 
-### Pronalaženje nedostajuće Dll
+### Finding a missing Dll
 
 Prva stvar koju treba da uradite je da **identifikujete proces** koji se izvršava sa **većim privilegijama** od vas i koji pokušava da **učita Dll iz System Path-a** u koji možete pisati.
 
-Problem u ovim slučajevima je što ti procesi verovatno već rade. Da biste pronašli koje Dll-ove usluge nemaju, treba da pokrenete procmon što je pre moguće (pre nego što se procesi učitaju). Dakle, da biste pronašli nedostajuće .dll-ove uradite:
+Problem u ovim slučajevima je što ti procesi verovatno već rade. Da biste saznali koje Dll-ove usluge nemaju, treba da pokrenete procmon što je pre moguće (pre nego što se procesi učitaju). Dakle, da biste pronašli nedostajuće .dll-ove, uradite:
 
-- **Kreirajte** folder `C:\privesc_hijacking` i dodajte putanju `C:\privesc_hijacking` u **System Path env varijablu**. Ovo možete uraditi **ručno** ili sa **PS**:
+- **Kreirajte** folder `C:\privesc_hijacking` i dodajte putanju `C:\privesc_hijacking` u **System Path env variable**. Ovo možete uraditi **ručno** ili sa **PS**:
 ```bash
 # Set the folder path to create and check events for
 $folderPath = "C:\privesc_hijacking"
@@ -41,7 +41,7 @@ $newPath = "$envPath;$folderPath"
 ```
 - Pokrenite **`procmon`** i idite na **`Options`** --> **`Enable boot logging`** i pritisnite **`OK`** u prozoru.
 - Zatim, **ponovo pokrenite**. Kada se računar ponovo pokrene, **`procmon`** će početi da **snima** događaje što je pre moguće.
-- Kada se **Windows** **pokrene, ponovo izvršite `procmon`**, reći će vam da je već u radu i **pitati vas da li želite da sačuvate** događaje u datoteci. Recite **da** i **sačuvajte događaje u datoteci**.
+- Kada se **Windows** **pokrene, ponovo izvršite `procmon`**, reći će vam da je već radio i **pitati vas da li želite da sačuvate** događaje u datoteci. Recite **da** i **sačuvajte događaje u datoteci**.
 - **Nakon** što je **datoteka** **generisana**, **zatvorite** otvoreni **`procmon`** prozor i **otvorite datoteku sa događajima**.
 - Dodajte ove **filtre** i pronaći ćete sve Dll-ove koje je neki **proces pokušao da učita** iz foldera sa zapisivim sistemskim putem:
 
@@ -67,10 +67,10 @@ Nakon što sam ovo pronašao, našao sam ovaj zanimljiv blog post koji takođe o
 
 Dakle, da bismo **eskalirali privilegije**, planiramo da preuzmemo biblioteku **WptsExtensions.dll**. Imajući **putanju** i **ime**, samo treba da **generišemo maliciozni dll**.
 
-Možete [**pokušati da koristite neki od ovih primera**](#creating-and-compiling-dlls). Možete pokrenuti payload-e kao što su: dobiti rev shell, dodati korisnika, izvršiti beacon...
+Možete [**pokušati da koristite bilo koji od ovih primera**](#creating-and-compiling-dlls). Možete pokrenuti payload-e kao što su: dobiti rev shell, dodati korisnika, izvršiti beacon...
 
 > [!WARNING]
-> Imajte na umu da **ne pokreću se sve usluge** sa **`NT AUTHORITY\SYSTEM`**, neke se takođe pokreću sa **`NT AUTHORITY\LOCAL SERVICE`** što ima **manje privilegija** i nećete moći da kreirate novog korisnika** zloupotrebljavajući njegove dozvole.\
+> Imajte na umu da **ne pokreću se sve usluge** sa **`NT AUTHORITY\SYSTEM`**, neke se takođe pokreću sa **`NT AUTHORITY\LOCAL SERVICE`** što ima **manje privilegija** i nećete moći da kreirate novog korisnika zloupotrebljavajući njegove dozvole.\
 > Međutim, taj korisnik ima privilegiju **`seImpersonate`**, tako da možete koristiti [**potato suite za eskalaciju privilegija**](../roguepotato-and-printspoofer.md). Dakle, u ovom slučaju rev shell je bolja opcija nego pokušaj da se kreira korisnik.
 
 U trenutku pisanja, usluga **Task Scheduler** se pokreće sa **Nt AUTHORITY\SYSTEM**.

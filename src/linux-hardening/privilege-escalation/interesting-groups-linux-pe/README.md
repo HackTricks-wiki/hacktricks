@@ -43,7 +43,7 @@ polkit-agent-helper-1: error response to PolicyKit daemon: GDBus.Error:org.freed
 ==== AUTHENTICATION FAILED ===
 Error executing command as another user: Not authorized
 ```
-**Nije zato što nemate dozvole, već zato što niste povezani bez GUI-a**. I postoji rešenje za ovaj problem ovde: [https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). Potrebne su vam **2 različite ssh sesije**:
+**Nije zato što nemate dozvole, već zato što niste povezani bez GUI-a**. I postoji rešenje za ovaj problem ovde: [https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). Potrebno vam je **2 različite ssh sesije**:
 ```bash:session1
 echo $$ #Step1: Get current PID
 pkexec "/bin/bash" #Step 3, execute pkexec
@@ -56,7 +56,7 @@ pkttyagent --process <PID of session1> #Step 2, attach pkttyagent to session1
 ```
 ## Wheel Group
 
-**Ponekad**, **po defaultu** unutar **/etc/sudoers** fajla možete pronaći ovu liniju:
+**Ponekad**, **po defaultu** unutar **/etc/sudoers** datoteke možete pronaći ovu liniju:
 ```
 %wheel	ALL=(ALL:ALL) ALL
 ```
@@ -88,7 +88,7 @@ $ echo $PATH
 ```
 Ako možemo preuzeti neke programe u `/usr/local`, lako možemo dobiti root.
 
-Preuzimanje `run-parts` programa je način da lako dobijemo root, jer će većina programa pokrenuti `run-parts` kao (crontab, kada se prijavljuje ssh).
+Preuzimanje `run-parts` programa je jednostavan način da se dobije root, jer većina programa pokreće `run-parts` kao (crontab, kada se prijavljuje ssh).
 ```bash
 $ cat /etc/crontab | grep run-parts
 17 *    * * *   root    cd / && run-parts --report /etc/cron.hourly
@@ -167,13 +167,13 @@ Da biste **otvorili** **sirovu sliku**, možete koristiti **GIMP**, odabrati **`
 
 ![](<../../../images/image (463).png>)
 
-Zatim promenite Širinu i Visinu na one koje se koriste na ekranu i proverite različite Tipove slika (i odaberite onaj koji bolje prikazuje ekran):
+Zatim modifikujte Širinu i Visinu na one koje koristi ekran i proverite različite Tipove slika (i odaberite onaj koji bolje prikazuje ekran):
 
 ![](<../../../images/image (317).png>)
 
 ## Root Grupa
 
-Izgleda da po defaultu **članovi root grupe** mogu imati pristup **modifikaciji** nekih **konfiguracionih** datoteka servisa ili nekih **biblioteka** ili **drugih interesantnih stvari** koje se mogu koristiti za eskalaciju privilegija...
+Izgleda da po defaultu **članovi root grupe** mogu imati pristup da **modifikuju** neke **konfiguracione** datoteke usluga ili neke **biblioteke** ili **druge zanimljive stvari** koje se mogu koristiti za eskalaciju privilegija...
 
 **Proverite koje datoteke članovi root grupe mogu modifikovati**:
 ```bash
@@ -199,7 +199,7 @@ Na kraju, ako vam se ne sviđaju neki od prethodnih predloga, ili ne rade iz nek
 ../docker-security/
 {{#endref}}
 
-Ako imate dozvole za pisanje preko docker socket-a pročitajte [**ovaj post o tome kako eskalirati privilegije zloupotrebom docker socket-a**](../index.html#writable-docker-socket)**.**
+Ako imate dozvole za pisanje preko docker socket-a, pročitajte [**ovaj post o tome kako eskalirati privilegije zloupotrebom docker socket-a**](../index.html#writable-docker-socket)**.**
 
 {{#ref}}
 https://github.com/KrustyHack/docker-privilege-escalation
@@ -223,6 +223,6 @@ Stoga, ako ste kompromitovali korisnika unutar ove grupe, definitivno biste treb
 ## Auth grupa
 
 Unutar OpenBSD **auth** grupa obično može da piše u foldere _**/etc/skey**_ i _**/var/db/yubikey**_ ako se koriste.\
-Ove dozvole se mogu zloupotrebiti sa sledećim exploitom da bi se **eskalirale privilegije** na root: [https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot](https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot)
+Ove dozvole mogu biti zloupotrebljene sledećim eksploatom da bi se **eskalirale privilegije** na root: [https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot](https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot)
 
 {{#include ../../../banners/hacktricks-training.md}}
