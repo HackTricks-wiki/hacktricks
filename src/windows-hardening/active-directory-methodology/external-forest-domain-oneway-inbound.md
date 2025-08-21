@@ -1,4 +1,4 @@
-# Зовнішній ліс домену - односторонній (вхідний) або двосторонній
+# Зовнішній лісовий домен - односторонній (вхідний) або двосторонній
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -78,9 +78,9 @@ Get-DomainUser -SPN -Domain domain_name.local | select SamAccountName
 ```bash
 Enter-PSSession -ComputerName dc.external_domain.local -Credential domain\administrator
 ```
-### Зловживання SID Історією
+### Зловживання SID History
 
-Ви також можете зловживати [**SID Історією**](sid-history-injection.md) через лісовий довірчий зв'язок.
+Ви також можете зловживати [**SID History**](sid-history-injection.md) через лісовий довірчий зв'язок.
 
 Якщо користувача **мігрують з одного лісу в інший** і **фільтрація SID не ввімкнена**, стає можливим **додати SID з іншого лісу**, і цей **SID** буде **додано** до **токена користувача** під час автентифікації **через довірчий зв'язок**.
 

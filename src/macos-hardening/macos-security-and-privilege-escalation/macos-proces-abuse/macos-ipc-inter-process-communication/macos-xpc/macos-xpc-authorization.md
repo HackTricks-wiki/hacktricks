@@ -6,11 +6,11 @@
 
 Apple також пропонує інший спосіб аутентифікації, якщо підключений процес має **дозволи на виклик відкритого методу XPC**.
 
-Коли додаток потребує **виконання дій від імені привілейованого користувача**, замість того, щоб запускати додаток як привілейованого користувача, зазвичай він встановлює як root HelperTool як XPC сервіс, який може бути викликаний з додатка для виконання цих дій. Однак, додаток, що викликає сервіс, повинен мати достатню авторизацію.
+Коли додаток потребує **виконання дій від імені привілейованого користувача**, замість того, щоб запускати додаток як привілейованого користувача, зазвичай він встановлює як root HelperTool як XPC сервіс, який може бути викликаний з додатка для виконання цих дій. Однак додаток, що викликає сервіс, повинен мати достатню авторизацію.
 
 ### ShouldAcceptNewConnection завжди YES
 
-Приклад можна знайти в [EvenBetterAuthorizationSample](https://github.com/brenwell/EvenBetterAuthorizationSample). У `App/AppDelegate.m` він намагається **підключитися** до **HelperTool**. А в `HelperTool/HelperTool.m` функція **`shouldAcceptNewConnection`** **не перевірятиме** жодну з вимог, зазначених раніше. Вона завжди повертатиме YES:
+Приклад можна знайти в [EvenBetterAuthorizationSample](https://github.com/brenwell/EvenBetterAuthorizationSample). У `App/AppDelegate.m` він намагається **підключитися** до **HelperTool**. А в `HelperTool/HelperTool.m` функція **`shouldAcceptNewConnection`** **не перевірятиме** жодну з вимог, зазначених раніше. Вона завжди поверне YES:
 ```objectivec
 - (BOOL)listener:(NSXPCListener *)listener shouldAcceptNewConnection:(NSXPCConnection *)newConnection
 // Called by our XPC listener when a new connection comes in.  We configure the connection
@@ -27,7 +27,7 @@ newConnection.exportedObject = self;
 return YES;
 }
 ```
-Для отримання додаткової інформації про те, як правильно налаштувати цю перевірку, зверніться до:
+Для отримання додаткової інформації про те, як правильно налаштувати цю перевірку:
 
 {{#ref}}
 macos-xpc-connecting-process-check/
@@ -176,11 +176,11 @@ block(authRightName, authRightDefault, authRightDesc);
 
 Існують різні області, щоб вказати, хто може отримати право. Деякі з них визначені в [AuthorizationDB.h](https://github.com/aosm/Security/blob/master/Security/libsecurity_authorization/lib/AuthorizationDB.h) (ви можете знайти [всі з них тут](https://www.dssw.co.uk/reference/authorization-rights/)), але в загальному:
 
-<table><thead><tr><th width="284.3333333333333">Назва</th><th width="165">Значення</th><th>Опис</th></tr></thead><tbody><tr><td>kAuthorizationRuleClassAllow</td><td>allow</td><td>Будь-хто</td></tr><tr><td>kAuthorizationRuleClassDeny</td><td>deny</td><td>Ніхто</td></tr><tr><td>kAuthorizationRuleIsAdmin</td><td>is-admin</td><td>Поточний користувач повинен бути адміністратором (в групі адміністраторів)</td></tr><tr><td>kAuthorizationRuleAuthenticateAsSessionUser</td><td>authenticate-session-owner</td><td>Запитати користувача про аутентифікацію.</td></tr><tr><td>kAuthorizationRuleAuthenticateAsAdmin</td><td>authenticate-admin</td><td>Запитати користувача про аутентифікацію. Він повинен бути адміністратором (в групі адміністраторів)</td></tr><tr><td>kAuthorizationRightRule</td><td>rule</td><td>Вказати правила</td></tr><tr><td>kAuthorizationComment</td><td>comment</td><td>Вказати деякі додаткові коментарі щодо права</td></tr></tbody></table>
+<table><thead><tr><th width="284.3333333333333">Назва</th><th width="165">Значення</th><th>Опис</th></tr></thead><tbody><tr><td>kAuthorizationRuleClassAllow</td><td>дозволити</td><td>Будь-хто</td></tr><tr><td>kAuthorizationRuleClassDeny</td><td>заборонити</td><td>Ніхто</td></tr><tr><td>kAuthorizationRuleIsAdmin</td><td>is-admin</td><td>Поточний користувач повинен бути адміністратором (в групі адміністраторів)</td></tr><tr><td>kAuthorizationRuleAuthenticateAsSessionUser</td><td>authenticate-session-owner</td><td>Запитати користувача про аутентифікацію.</td></tr><tr><td>kAuthorizationRuleAuthenticateAsAdmin</td><td>authenticate-admin</td><td>Запитати користувача про аутентифікацію. Він повинен бути адміністратором (в групі адміністраторів)</td></tr><tr><td>kAuthorizationRightRule</td><td>rule</td><td>Вказати правила</td></tr><tr><td>kAuthorizationComment</td><td>comment</td><td>Вказати деякі додаткові коментарі щодо права</td></tr></tbody></table>
 
 ### Перевірка прав
 
-У `HelperTool/HelperTool.m` функція **`readLicenseKeyAuthorization`** перевіряє, чи має викликач право **виконати такий метод**, викликаючи функцію **`checkAuthorization`**. Ця функція перевірить, чи має **authData**, надіслане викликачем, **правильний формат**, а потім перевірить, **що потрібно для отримання права** на виклик конкретного методу. Якщо все йде добре, **повернене `error` буде `nil`**:
+У `HelperTool/HelperTool.m` функція **`readLicenseKeyAuthorization`** перевіряє, чи має викликач право **виконувати такий метод**, викликаючи функцію **`checkAuthorization`**. Ця функція перевірить, чи має **authData**, надіслане викликачем, **правильний формат**, а потім перевірить, **що потрібно для отримання права** на виклик конкретного методу. Якщо все йде добре, **повернене `error` буде `nil`**:
 ```objectivec
 - (NSError *)checkAuthorization:(NSData *)authData command:(SEL)command
 {
@@ -228,13 +228,13 @@ assert(junk == errAuthorizationSuccess);
 return error;
 }
 ```
-Зверніть увагу, що для **перевірки вимог для отримання** права викликати цей метод функція `authorizationRightForCommand` просто перевірить попередньо коментований об'єкт **`commandInfo`**. Потім вона викличе **`AuthorizationCopyRights`**, щоб перевірити **чи має вона права** на виклик функції (зверніть увагу, що прапори дозволяють взаємодію з користувачем).
+Зверніть увагу, що для **перевірки вимог для отримання** права викликати цей метод функція `authorizationRightForCommand` просто перевірить попередньо коментований об'єкт **`commandInfo`**. Потім вона викличе **`AuthorizationCopyRights`**, щоб перевірити, **чи має вона права** на виклик функції (зверніть увагу, що прапори дозволяють взаємодію з користувачем).
 
 У цьому випадку, щоб викликати функцію `readLicenseKeyAuthorization`, `kCommandKeyAuthRightDefault` визначено як `@kAuthorizationRuleClassAllow`. Отже, **будь-хто може її викликати**.
 
 ### Інформація про базу даних
 
-Було згадано, що ця інформація зберігається в `/var/db/auth.db`. Ви можете перерахувати всі збережені правила за допомогою:
+Було зазначено, що ця інформація зберігається в `/var/db/auth.db`. Ви можете перерахувати всі збережені правила за допомогою:
 ```sql
 sudo sqlite3 /var/db/auth.db
 SELECT name FROM rules;
@@ -244,7 +244,7 @@ SELECT name FROM rules WHERE name LIKE '%safari%';
 ```bash
 security authorizationdb read com.apple.safaridriver.allow
 ```
-### Дозволи
+### Permissive rights
 
 Ви можете знайти **всі конфігурації дозволів** [**тут**](https://www.dssw.co.uk/reference/authorization-rights/), але комбінації, які не вимагатимуть взаємодії з користувачем, будуть:
 
@@ -252,11 +252,11 @@ security authorizationdb read com.apple.safaridriver.allow
 - Це найпряміший ключ. Якщо встановлено `false`, це вказує на те, що користувач не повинен надавати аутентифікацію для отримання цього права.
 - Це використовується в **комбінації з одним з 2 нижче або вказуючи групу**, до якої повинен належати користувач.
 2. **'allow-root': 'true'**
-- Якщо користувач працює як кореневий користувач (який має підвищені дозволи), і цей ключ встановлено на `true`, кореневий користувач потенційно може отримати це право без подальшої аутентифікації. Однак, зазвичай, отримання статусу кореневого користувача вже вимагає аутентифікації, тому це не є сценарієм "без аутентифікації" для більшості користувачів.
+- Якщо користувач працює як root-користувач (який має підвищені дозволи), і цей ключ встановлено на `true`, root-користувач потенційно може отримати це право без подальшої аутентифікації. Однак, зазвичай, отримання статусу root-користувача вже вимагає аутентифікації, тому це не є сценарієм "без аутентифікації" для більшості користувачів.
 3. **'session-owner': 'true'**
 - Якщо встановлено на `true`, власник сесії (в даний момент увійшовший користувач) автоматично отримає це право. Це може обійти додаткову аутентифікацію, якщо користувач вже увійшов.
 4. **'shared': 'true'**
-- Цей ключ не надає прав без аутентифікації. Натомість, якщо встановлено на `true`, це означає, що після аутентифікації права їх можна ділити між кількома процесами без необхідності повторної аутентифікації для кожного з них. Але початкове надання права все ще вимагатиме аутентифікації, якщо не поєднано з іншими ключами, такими як `'authenticate-user': 'false'`.
+- Цей ключ не надає прав без аутентифікації. Натомість, якщо встановлено на `true`, це означає, що після того, як право було аутентифіковано, його можна ділити між кількома процесами без необхідності повторної аутентифікації для кожного з них. Але початкове надання права все ще вимагатиме аутентифікації, якщо не поєднано з іншими ключами, такими як `'authenticate-user': 'false'`.
 
 Ви можете [**використати цей скрипт**](https://gist.github.com/carlospolop/96ecb9e385a4667b9e40b24e878652f9) для отримання цікавих прав:
 ```bash
@@ -283,13 +283,13 @@ authenticate-session-owner, authenticate-session-owner-or-admin, authenticate-se
 
 ### Протокольна комунікація
 
-Потім вам потрібно знайти схему протоколу, щоб мати можливість встановити зв'язок з XPC-сервісом.
+Далі вам потрібно знайти схему протоколу, щоб мати можливість встановити зв'язок з XPC-сервісом.
 
 Функція **`shouldAcceptNewConnection`** вказує на експортований протокол:
 
 <figure><img src="../../../../../images/image (44).png" alt=""><figcaption></figcaption></figure>
 
-У цьому випадку ми маємо те ж саме, що й у EvenBetterAuthorizationSample, [**перевірте цю лінію**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L94).
+У цьому випадку ми маємо те ж саме, що і в EvenBetterAuthorizationSample, [**перевірте цю лінію**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L94).
 
 Знаючи назву використаного протоколу, можна **вивантажити його визначення заголовка** за допомогою:
 ```bash

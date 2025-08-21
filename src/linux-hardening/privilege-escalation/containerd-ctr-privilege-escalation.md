@@ -6,6 +6,7 @@
 
 Перейдіть за наступним посиланням, щоб дізнатися **що таке containerd** та `ctr`:
 
+
 {{#ref}}
 ../../network-services-pentesting/2375-pentesting-docker.md
 {{#endref}}
@@ -35,7 +36,8 @@ ctr run --mount type=bind,src=/,dst=/,options=rbind -t registry:5000/ubuntu:late
 ```bash
 ctr run --privileged --net-host -t registry:5000/modified-ubuntu:latest ubuntu bash
 ```
-Тоді ви можете використовувати деякі з технік, згаданих на наступній сторінці, щоб **втекти з нього, зловживаючи привілейованими можливостями**:
+Тоді ви можете використовувати деякі з технік, згаданих на наступній сторінці, щоб **вийти з нього, зловживаючи привілейованими можливостями**:
+
 
 {{#ref}}
 docker-security/

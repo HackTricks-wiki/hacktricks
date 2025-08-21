@@ -6,7 +6,7 @@
 
 Ці техніки зловживають Менеджером керування службами Windows (SCM) віддалено через SMB/RPC для виконання команд на цільовому хості. Загальний процес:
 
-1. Аутентифікація на цільовому хості та доступ до спільної папки ADMIN$ через SMB (TCP/445).
+1. Аутентифікація на цільовому хості та доступ до спільного ресурсу ADMIN$ через SMB (TCP/445).
 2. Копіювання виконуваного файлу або вказівка команди LOLBAS, яку служба виконає.
 3. Створення служби віддалено через SCM (MS-SCMR через \PIPE\svcctl), вказуючи на цю команду або двійковий файл.
 4. Запуск служби для виконання корисного навантаження та, за бажанням, захоплення stdin/stdout через іменований канал.
@@ -14,7 +14,7 @@
 
 Вимоги/попередні умови:
 - Локальний адміністратор на цільовому хості (SeCreateServicePrivilege) або явні права на створення служби на цільовому хості.
-- Доступний SMB (445) та спільна папка ADMIN$; Дозволене віддалене керування службами через брандмауер хоста.
+- Доступний SMB (445) та спільний ресурс ADMIN$; Дозволене віддалене керування службами через брандмауер хоста.
 - Обмеження UAC для віддалених: з локальними обліковими записами фільтрація токенів може блокувати адміністратора через мережу, якщо не використовувати вбудованого адміністратора або LocalAccountTokenFilterPolicy=1.
 - Kerberos проти NTLM: використання імені хоста/FQDN дозволяє Kerberos; підключення за IP часто повертається до NTLM (і може бути заблоковане в захищених середовищах).
 
@@ -33,18 +33,18 @@ sc.exe \\TARGET create HTSvc binPath= "C:\\Windows\\Temp\\payload.exe" start= de
 sc.exe \\TARGET start HTSvc
 sc.exe \\TARGET delete HTSvc
 ```
-Примітки:
-- Очікуйте помилку тайм-ауту при запуску EXE, що не є службою; виконання все ще відбувається.
+Notes:
+- Очікуйте помилку тайм-ауту при запуску неслужбового EXE; виконання все ще відбувається.
 - Щоб залишатися більш дружніми до OPSEC, надавайте перевагу безфайловим командам (cmd /c, powershell -enc) або видаляйте скинуті артефакти.
 
-Знайдіть більш детальні кроки в: https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/
+Find more detailed steps in: https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/
 
-## Інструменти та приклади
+## Tooling and examples
 
 ### Sysinternals PsExec.exe
 
 - Класичний інструмент адміністратора, який використовує SMB для скидання PSEXESVC.exe в ADMIN$, встановлює тимчасову службу (ім'я за замовчуванням PSEXESVC) і проксірує I/O через іменовані канали.
-- Приклади використання:
+- Example usages:
 ```cmd
 :: Interactive SYSTEM shell on remote host
 PsExec64.exe -accepteula \\HOST -s -i cmd.exe
@@ -108,7 +108,7 @@ cme smb HOST -u USER -H NTHASH -x "ipconfig /all" --exec-method smbexec
 
 Типові артефакти хоста/мережі при використанні технік, подібних до PsExec:
 - Security 4624 (Logon Type 3) та 4672 (Special Privileges) на цілі для облікового запису адміністратора, що використовується.
-- Security 5140/5145 події File Share та File Share Detailed, що показують доступ до ADMIN$ та створення/запис службових бінарних файлів (наприклад, PSEXESVC.exe або випадковий 8-символьний .exe).
+- Security 5140/5145 події File Share та File Share Detailed, що показують доступ до ADMIN$ та створення/запис бінарних файлів служб (наприклад, PSEXESVC.exe або випадковий 8-символьний .exe).
 - Security 7045 Service Install на цілі: імена служб, такі як PSEXESVC, RemComSvc або користувацькі (-r / -service-name).
 - Sysmon 1 (Process Create) для services.exe або зображення служби, 3 (Network Connect), 11 (File Create) в C:\Windows\, 17/18 (Pipe Created/Connected) для труб, таких як \\.\pipe\psexesvc, \\.\pipe\remcom_*, або випадкові еквіваленти.
 - Артефакт реєстру для EULA Sysinternals: HKCU\Software\Sysinternals\PsExec\EulaAccepted=0x1 на хості оператора (якщо не подавлено).
@@ -119,7 +119,7 @@ cme smb HOST -u USER -H NTHASH -x "ipconfig /all" --exec-method smbexec
 - Позначати іменовані труби, що закінчуються на -stdin/-stdout/-stderr або відомі імена труб-клонів PsExec.
 
 ## Troubleshooting common failures
-- Доступ заборонено (5) при створенні служб: не справжній локальний адміністратор, обмеження UAC для локальних облікових записів або захист від підробки EDR на шляху до бінарного файлу служби.
+- Доступ заборонено (5) при створенні служб: не справжній локальний адміністратор, обмеження UAC для локальних облікових записів або захист від підробки EDR на шляху бінарного файлу служби.
 - Мережева адреса не знайдена (53) або не вдалося підключитися до ADMIN$: брандмауер блокує SMB/RPC або адміністративні спільні ресурси вимкнені.
 - Kerberos не вдається, але NTLM заблоковано: підключайтеся за допомогою hostname/FQDN (не IP), забезпечте правильні SPN або надайте -k/-no-pass з квитками при використанні Impacket.
 - Час запуску служби вичерпано, але корисне навантаження виконано: очікується, якщо це не справжній бінарний файл служби; захопіть вихід у файл або використовуйте smbexec для живого I/O.
@@ -131,13 +131,15 @@ cme smb HOST -u USER -H NTHASH -x "ipconfig /all" --exec-method smbexec
 
 ## See also
 
-- WMI-based remote exec (often more fileless):
+- WMI-based remote exec (часто безфайловий):
+
 
 {{#ref}}
 ./wmiexec.md
 {{#endref}}
 
 - WinRM-based remote exec:
+
 
 {{#ref}}
 ./winrm.md
@@ -148,6 +150,6 @@ cme smb HOST -u USER -H NTHASH -x "ipconfig /all" --exec-method smbexec
 ## References
 
 - PsExec - Sysinternals | Microsoft Learn: https://learn.microsoft.com/sysinternals/downloads/psexec
-- SMB security hardening in Windows Server 2025 & Windows 11 (signing by default, NTLM blocking): https://techcommunity.microsoft.com/blog/filecab/smb-security-hardening-in-windows-server-2025--windows-11/4226591
+- SMB security hardening in Windows Server 2025 & Windows 11 (підписування за замовчуванням, блокування NTLM): https://techcommunity.microsoft.com/blog/filecab/smb-security-hardening-in-windows-server-2025--windows-11/4226591
 
 {{#include ../../banners/hacktricks-training.md}}

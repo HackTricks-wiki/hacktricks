@@ -1,4 +1,4 @@
-# BloodHound & Other Active Directory Enumeration Tools
+# BloodHound & Інші Інструменти Для Перерахунку Active Directory
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -6,7 +6,7 @@
 adws-enumeration.md
 {{#endref}}
 
-> NOTE: Ця сторінка об'єднує деякі з найкорисніших утиліт для **перерахунку** та **візуалізації** відносин Active Directory. Для збору через непомітний **Active Directory Web Services (ADWS)** канал перегляньте посилання вище.
+> ПРИМІТКА: Ця сторінка об'єднує деякі з найкорисніших утиліт для **перерахунку** та **візуалізації** відносин Active Directory. Для збору через непомітний **Active Directory Web Services (ADWS)** канал перегляньте посилання вище.
 
 ---
 
@@ -18,7 +18,7 @@ adws-enumeration.md
 * Редагування атрибутів об'єктів та дескрипторів безпеки
 * Створення / порівняння знімків для офлайн-аналізу
 
-### Quick usage
+### Швидке використання
 
 1. Запустіть інструмент і підключіться до `dc01.corp.local` з будь-якими обліковими даними домену.
 2. Створіть офлайн-знімок через `File ➜ Create Snapshot`.
@@ -28,7 +28,7 @@ adws-enumeration.md
 
 ## ADRecon
 
-[ADRecon](https://github.com/adrecon/ADRecon) витягує великий набір артефактів з домену (ACL, GPO, довіри, шаблони CA …) і створює **Excel звіт**.
+[ADRecon](https://github.com/adrecon/ADRecon) витягує великий набір артефактів з домену (ACL, GPO, довіри, шаблони CA тощо) і створює **Excel звіт**.
 ```powershell
 # On a Windows host in the domain
 PS C:\> .\ADRecon.ps1 -OutputDir C:\Temp\ADRecon
@@ -48,7 +48,7 @@ curl -L https://ghst.ly/getbhce | docker compose -f - up
 
 * `SharpHound.exe` / `Invoke-BloodHound` – нативний або PowerShell варіант
 * `AzureHound` – Azure AD перерахування
-* **SoaPy + BOFHound** – ADWS збір (див. посилання вгорі)
+* **SoaPy + BOFHound** – збір ADWS (див. посилання вгорі)
 
 #### Загальні режими SharpHound
 ```powershell

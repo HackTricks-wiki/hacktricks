@@ -1,44 +1,51 @@
-# Простори імен
+# Namespaces
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-### **PID простір імен**
+### **PID namespace**
+
 
 {{#ref}}
 pid-namespace.md
 {{#endref}}
 
-### **Mount простір імен**
+### **Mount namespace**
+
 
 {{#ref}}
 mount-namespace.md
 {{#endref}}
 
-### **Network простір імен**
+### **Network namespace**
+
 
 {{#ref}}
 network-namespace.md
 {{#endref}}
 
-### **IPC Простір імен**
+### **IPC Namespace**
+
 
 {{#ref}}
 ipc-namespace.md
 {{#endref}}
 
-### **UTS простір імен**
+### **UTS namespace**
+
 
 {{#ref}}
 uts-namespace.md
 {{#endref}}
 
-### Часовий простір імен
+### Time Namespace
+
 
 {{#ref}}
 time-namespace.md
 {{#endref}}
 
-### Простір імен користувача
+### User namespace
+
 
 {{#ref}}
 user-namespace.md

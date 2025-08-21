@@ -2,7 +2,7 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-> [!NOTE]
+> [!TIP]
 > Примітка про **PCAP** та **PCAPNG**: існує дві версії формату файлу PCAP; **PCAPNG є новішим і не підтримується всіма інструментами**. Вам може знадобитися конвертувати файл з PCAPNG в PCAP за допомогою Wireshark або іншого сумісного інструменту, щоб працювати з ним в деяких інших інструментах.
 
 ## Онлайн-інструменти для pcaps
@@ -18,10 +18,11 @@
 
 ### Wireshark
 
-> [!NOTE]
+> [!TIP]
 > **Якщо ви збираєтеся аналізувати PCAP, ви в основному повинні знати, як користуватися Wireshark**
 
 Ви можете знайти деякі трюки Wireshark у:
+
 
 {{#ref}}
 wireshark-tricks.md
@@ -33,9 +34,9 @@ wireshark-tricks.md
 
 ### Xplico Framework
 
-[**Xplico** ](https://github.com/xplico/xplico)_(тільки linux)_ може **аналізувати** **pcap** та витягувати інформацію з нього. Наприклад, з файлу pcap Xplico витягує кожен електронний лист (протоколи POP, IMAP та SMTP), весь HTTP контент, кожен VoIP дзвінок (SIP), FTP, TFTP тощо.
+[**Xplico** ](https://github.com/xplico/xplico)_(тільки linux)_ може **аналізувати** **pcap** та витягувати інформацію з нього. Наприклад, з файлу pcap Xplico витягує кожен електронний лист (протоколи POP, IMAP та SMTP), весь HTTP-контент, кожен VoIP дзвінок (SIP), FTP, TFTP тощо.
 
-**Встановити**
+**Встановіть**
 ```bash
 sudo bash -c 'echo "deb http://repo.xplico.org/ $(lsb_release -s -c) main" /etc/apt/sources.list'
 sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 791C25CE
@@ -53,20 +54,20 @@ sudo apt-get install xplico
 
 ### NetworkMiner
 
-Як і Xplico, це інструмент для **аналізу та витягування об'єктів з pcaps**. Він має безкоштовну версію, яку ви можете **завантажити** [**тут**](https://www.netresec.com/?page=NetworkMiner). Він працює з **Windows**.\
+Як і Xplico, це інструмент для **аналізу та вилучення об'єктів з pcaps**. Він має безкоштовну версію, яку ви можете **завантажити** [**тут**](https://www.netresec.com/?page=NetworkMiner). Він працює з **Windows**.\
 Цей інструмент також корисний для отримання **іншої інформації, проаналізованої** з пакетів, щоб мати можливість швидше зрозуміти, що відбувалося.
 
 ### NetWitness Investigator
 
-Ви можете завантажити [**NetWitness Investigator звідси**](https://www.rsa.com/en-us/contact-us/netwitness-investigator-freeware) **(Працює в Windows)**.\
+Ви можете завантажити [**NetWitness Investigator звідси**](https://www.rsa.com/en-us/contact-us/netwitness-investigator-freeware) **(Працює на Windows)**.\
 Це ще один корисний інструмент, який **аналізує пакети** та сортує інформацію у зручний спосіб, щоб **знати, що відбувається всередині**.
 
 ### [BruteShark](https://github.com/odedshimon/BruteShark)
 
-- Витягування та кодування імен користувачів і паролів (HTTP, FTP, Telnet, IMAP, SMTP...)
-- Витягування хешів аутентифікації та їх злом за допомогою Hashcat (Kerberos, NTLM, CRAM-MD5, HTTP-Digest...)
+- Вилучення та кодування імен користувачів і паролів (HTTP, FTP, Telnet, IMAP, SMTP...)
+- Вилучення хешів аутентифікації та їх злом за допомогою Hashcat (Kerberos, NTLM, CRAM-MD5, HTTP-Digest...)
 - Створення візуальної мережевої діаграми (мережеві вузли та користувачі)
-- Витягування DNS запитів
+- Вилучення DNS запитів
 - Відновлення всіх TCP та UDP сесій
 - Файлове карвінг
 
@@ -80,23 +81,23 @@ capinfos capture.pcap
 ```bash
 ngrep -I packets.pcap "^GET" "port 80 and tcp and host 192.168 and dst host 192.168 and src host 192.168"
 ```
-### Витягування
+### Carving
 
-Використання загальних технік витягування може бути корисним для вилучення файлів та інформації з pcap:
+Використання загальних технік карвінгу може бути корисним для витягування файлів та інформації з pcap:
 
 {{#ref}}
 ../partitions-file-systems-carving/file-data-carving-recovery-tools.md
 {{#endref}}
 
-### Захоплення облікових даних
+### Capturing credentials
 
-Ви можете використовувати інструменти, такі як [https://github.com/lgandx/PCredz](https://github.com/lgandx/PCredz), для парсингу облікових даних з pcap або з живого інтерфейсу.
+Ви можете використовувати інструменти, такі як [https://github.com/lgandx/PCredz](https://github.com/lgandx/PCredz), для парсингу облікових даних з pcap або живого інтерфейсу.
 
-## Перевірка експлойтів/Шкідливого ПЗ
+## Check Exploits/Malware
 
 ### Suricata
 
-**Встановлення та налаштування**
+**Install and setup**
 ```
 apt-get install suricata
 apt-get install oinkmaster
@@ -111,7 +112,7 @@ suricata -r packets.pcap -c /etc/suricata/suricata.yaml -k none -v -l log
 
 [**YaraPCAP**](https://github.com/kevthehermit/YaraPcap) - це інструмент, який
 
-- Читає файл PCAP і витягує Http потоки.
+- Читає файл PCAP і витягує HTTP потоки.
 - gzip розпаковує будь-які стиснуті потоки
 - Сканує кожен файл за допомогою yara
 - Пише report.txt
@@ -119,7 +120,7 @@ suricata -r packets.pcap -c /etc/suricata/suricata.yaml -k none -v -l log
 
 ### Malware Analysis
 
-Перевірте, чи можете ви знайти будь-який відбиток відомого шкідливого ПЗ:
+Перевірте, чи можете ви знайти будь-які відбитки відомого шкідливого ПЗ:
 
 {{#ref}}
 ../malware-analysis.md
@@ -127,7 +128,7 @@ suricata -r packets.pcap -c /etc/suricata/suricata.yaml -k none -v -l log
 
 ## Zeek
 
-> [Zeek](https://docs.zeek.org/en/master/about.html) - це пасивний, з відкритим вихідним кодом аналізатор мережевого трафіку. Багато операторів використовують Zeek як монітор безпеки мережі (NSM) для підтримки розслідувань підозрілої або шкідливої діяльності. Zeek також підтримує широкий спектр завдань аналізу трафіку поза межами безпекової сфери, включаючи вимірювання продуктивності та усунення несправностей.
+> [Zeek](https://docs.zeek.org/en/master/about.html) - це пасивний, відкритий аналізатор мережевого трафіку. Багато операторів використовують Zeek як монітор безпеки мережі (NSM) для підтримки розслідувань підозрілої або шкідливої діяльності. Zeek також підтримує широкий спектр завдань аналізу трафіку поза межами безпеки, включаючи вимірювання продуктивності та усунення неполадок.
 
 В основному, журнали, створені `zeek`, не є **pcaps**. Тому вам потрібно буде використовувати **інші інструменти** для аналізу журналів, де міститься **інформація** про pcaps.
 
@@ -200,13 +201,16 @@ rita show-exploded-dns -H --limit 10 zeek_logs
 ```
 ## Інші трюки аналізу pcap
 
+
 {{#ref}}
 dnscat-exfiltration.md
 {{#endref}}
 
+
 {{#ref}}
 wifi-pcap-analysis.md
 {{#endref}}
+
 
 {{#ref}}
 usb-keystrokes.md

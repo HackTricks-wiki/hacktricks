@@ -20,7 +20,7 @@ core     full     null     pts      shm      stdin    tty      zero
 ```
 {{#endtab}}
 
-{{#tab name="Всередині привілейованого контейнера"}}
+{{#tab name="Inside Privileged Container"}}
 ```bash
 # docker run --rm --privileged -it alpine sh
 ls /dev
@@ -35,7 +35,7 @@ cpu              nbd0             pts              stdout           tty27       
 
 ### Файлові системи ядра тільки для читання
 
-Файлові системи ядра забезпечують механізм для процесу, щоб змінити поведінку ядра. Однак, коли мова йде про процеси контейнера, ми хочемо запобігти їх внесенню будь-яких змін до ядра. Тому ми монтуємо файлові системи ядра як **тільки для читання** всередині контейнера, забезпечуючи, щоб процеси контейнера не могли змінювати ядро.
+Файлові системи ядра забезпечують механізм для процесу, щоб змінити поведінку ядра. Однак, коли йдеться про процеси контейнера, ми хочемо запобігти їх внесенню будь-яких змін до ядра. Тому ми монтуємо файлові системи ядра як **тільки для читання** всередині контейнера, забезпечуючи, що процеси контейнера не можуть змінювати ядро.
 
 {{#tabs}}
 {{#tab name="Inside default container"}}
@@ -49,7 +49,7 @@ cpuacct on /sys/fs/cgroup/cpuacct type cgroup (ro,nosuid,nodev,noexec,relatime,c
 ```
 {{#endtab}}
 
-{{#tab name="Всередині Привілейованого Контейнера"}}
+{{#tab name="Inside Privileged Container"}}
 ```bash
 # docker run --rm --privileged -it alpine sh
 mount  | grep '(ro'
@@ -74,7 +74,7 @@ tmpfs on /proc/keys type tmpfs (rw,nosuid,size=65536k,mode=755)
 ```
 {{#endtab}}
 
-{{#tab name="Всередині Привілейованого Контейнера"}}
+{{#tab name="Inside Privileged Container"}}
 ```bash
 # docker run --rm --privileged -it alpine sh
 mount  | grep /proc.*tmpfs
@@ -86,12 +86,13 @@ mount  | grep /proc.*tmpfs
 
 Контейнерні движки запускають контейнери з **обмеженою кількістю можливостей**, щоб контролювати, що відбувається всередині контейнера за замовчуванням. **Привілейовані** мають **всі** **можливості** доступні. Щоб дізнатися про можливості, прочитайте:
 
+
 {{#ref}}
 ../linux-capabilities.md
 {{#endref}}
 
 {{#tabs}}
-{{#tab name="Всередині контейнера за замовчуванням"}}
+{{#tab name="Всередині стандартного контейнера"}}
 ```bash
 # docker run --rm -it alpine sh
 apk add -U libcap; capsh --print
@@ -102,7 +103,7 @@ Bounding set =cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setg
 ```
 {{#endtab}}
 
-{{#tab name="Всередині Привілейованого Контейнера"}}
+{{#tab name="Inside Privileged Container"}}
 ```bash
 # docker run --rm --privileged -it alpine sh
 apk add -U libcap; capsh --print
@@ -118,7 +119,8 @@ Bounding set =cap_chown,cap_dac_override,cap_dac_read_search,cap_fowner,cap_fset
 
 ### Seccomp
 
-**Seccomp** корисний для **обмеження** **syscalls**, які контейнер може викликати. За замовчуванням профіль seccomp увімкнено при запуску контейнерів docker, але в режимі привілейованого доступу він вимкнений. Дізнайтеся більше про Seccomp тут:
+**Seccomp** корисний для **обмеження** **syscalls**, які контейнер може викликати. За замовчуванням профіль seccomp увімкнено при запуску контейнерів docker, але в привілейованому режимі він вимкнений. Дізнайтеся більше про Seccomp тут:
+
 
 {{#ref}}
 seccomp.md
@@ -134,7 +136,7 @@ Seccomp_filters:	1
 ```
 {{#endtab}}
 
-{{#tab name="Всередині привілейованого контейнера"}}
+{{#tab name="Inside Privileged Container"}}
 ```bash
 # docker run --rm --privileged -it alpine sh
 grep Seccomp /proc/1/status
@@ -162,7 +164,8 @@ apparmor.md
 ```
 ### SELinux
 
-Запуск контейнера з прапором `--privileged` вимикає **мітки SELinux**, що призводить до успадкування мітки від контейнерного движка, зазвичай `unconfined`, що надає повний доступ, подібний до контейнерного движка. У безкореневому режимі використовується `container_runtime_t`, тоді як у кореневому режимі застосовується `spc_t`.
+Запуск контейнера з прапором `--privileged` вимикає **мітки SELinux**, що призводить до успадкування мітки від контейнерного движка, зазвичай `unconfined`, надаючи повний доступ, подібний до контейнерного движка. У безкореневому режимі використовується `container_runtime_t`, тоді як у кореневому режимі застосовується `spc_t`.
+
 
 {{#ref}}
 ../selinux.md
@@ -175,10 +178,10 @@ apparmor.md
 
 ### Простори імен
 
-Простори імен **НЕ підлягають** впливу прапора `--privileged`. Навіть якщо у них не ввімкнені обмеження безпеки, вони **не бачать усіх процесів на системі або хост-мережі, наприклад**. Користувачі можуть вимкнути окремі простори імен, використовуючи прапори контейнерних движків **`--pid=host`, `--net=host`, `--ipc=host`, `--uts=host`**.
+Простори імен **НЕ підлягають** впливу прапора `--privileged`. Навіть якщо в них не активовані обмеження безпеки, вони **не бачать усіх процесів на системі або хост-мережі, наприклад**. Користувачі можуть вимкнути окремі простори імен, використовуючи прапори контейнерних движків **`--pid=host`, `--net=host`, `--ipc=host`, `--uts=host`**.
 
 {{#tabs}}
-{{#tab name="Всередині контейнера з привілеями за замовчуванням"}}
+{{#tab name="Inside default privileged container"}}
 ```bash
 # docker run --rm --privileged -it alpine sh
 ps -ef
@@ -188,7 +191,7 @@ PID   USER     TIME  COMMAND
 ```
 {{#endtab}}
 
-{{#tab name="Всередині --pid=host контейнера"}}
+{{#tab name="Inside --pid=host Container"}}
 ```bash
 # docker run --rm --privileged --pid=host -it alpine sh
 ps -ef

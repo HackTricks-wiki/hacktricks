@@ -1,14 +1,14 @@
-# Втеча з в'язниць
+# Вихід з в'язниць
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## **GTFOBins**
 
-**Шукайте в** [**https://gtfobins.github.io/**](https://gtfobins.github.io) **чи можете виконати будь-який бінар з властивістю "Shell"**
+**Шукайте в** [**https://gtfobins.github.io/**](https://gtfobins.github.io) **чи можете ви виконати будь-який бінар з властивістю "Shell"**
 
-## Втечі з Chroot
+## Втеча з Chroot
 
-З [wikipedia](https://en.wikipedia.org/wiki/Chroot#Limitations): Механізм chroot **не призначений для захисту** від навмисного втручання **привілейованих** (**root**) **користувачів**. На більшості систем контексти chroot не налаштовуються належним чином, і програми, що знаходяться в chroot, **з достатніми привілеями можуть виконати другий chroot для втечі**.\
+З [wikipedia](https://en.wikipedia.org/wiki/Chroot#Limitations): Механізм chroot **не призначений для захисту** від навмисного втручання **привілейованих** (**root**) **користувачів**. На більшості систем контексти chroot не коректно накладаються, і програми, що знаходяться в chroot, **з достатніми привілеями можуть виконати другий chroot для виходу**.\
 Зазвичай це означає, що для втечі вам потрібно бути root всередині chroot.
 
 > [!TIP]
@@ -79,7 +79,7 @@ system("/bin/bash");
 ### Root + Saved fd
 
 > [!WARNING]
-> Це подібно до попереднього випадку, але в цьому випадку **зловмисник зберігає дескриптор файлу для поточної директорії** і потім **створює chroot у новій папці**. Нарешті, оскільки він має **доступ** до цього **FD** **зовні** chroot, він отримує до нього доступ і **втікає**.
+> Це схоже на попередній випадок, але в цьому випадку **зловмисник зберігає дескриптор файлу для поточної директорії** і потім **створює chroot у новій папці**. Нарешті, оскільки він має **доступ** до цього **FD** **ззовні** chroot, він отримує до нього доступ і **втікає**.
 
 <details>
 
@@ -116,7 +116,7 @@ chroot(".");
 > - Запустіть chroot у дочірньому процесі в іншій папці
 > - У батьківському процесі створіть FD папки, яка знаходиться поза новим chroot дочірнього процесу
 > - Передайте дочірньому процесу цей FD за допомогою UDS
-> - Дочірній процес змінює директорію на цей FD, і оскільки він знаходиться поза своїм chroot, він втече з в'язниці
+> - Дочірній процес змінює каталог на цей FD, і оскільки він знаходиться поза своїм chroot, він втече з в'язниці
 
 ### Root + Mount
 
@@ -140,7 +140,7 @@ chroot(".");
 > [!WARNING]
 >
 > - Створіть Fork (дочірній процес) і chroot у іншу папку глибше в FS і CD на неї
-> - З батьківського процесу перемістіть папку, в якій знаходиться дочірній процес, у папку перед chroot дочірніх процесів
+> - З батьківського процесу перемістіть папку, в якій знаходиться дочірній процес, у папку перед chroot дітей
 > - Цей дочірній процес виявить себе поза chroot
 
 ### ptrace
@@ -162,7 +162,7 @@ env
 export
 pwd
 ```
-### Змінити PATH
+### Modify PATH
 
 Перевірте, чи можете ви змінити змінну середовища PATH
 ```bash
@@ -205,9 +205,10 @@ wget http://127.0.0.1:8080/sudoers -O /etc/sudoers
 ### Інші трюки
 
 [**https://fireshellsecurity.team/restricted-linux-shell-escaping-techniques/**](https://fireshellsecurity.team/restricted-linux-shell-escaping-techniques/)\
-[https://pen-testing.sans.org/blog/2012/0**b**6/06/escaping-restricted-linux-shells](https://pen-testing.sans.org/blog/2012/06/06/escaping-restricted-linux-shells**](https://pen-testing.sans.org/blog/2012/06/06/escaping-restricted-linux-shells)\
-[https://gtfobins.github.io](https://gtfobins.github.io/**](https/gtfobins.github.io)\
-**Також може бути цікавою сторінка:**
+[https://pen-testing.sans.org/blog/2012/06/06/escaping-restricted-linux-shells](https://pen-testing.sans.org/blog/2012/06/06/escaping-restricted-linux-shells)\
+[https://gtfobins.github.io](https://gtfobins.github.io)\
+**Цікавою може бути сторінка:**
+
 
 {{#ref}}
 ../bypass-bash-restrictions/
@@ -216,6 +217,7 @@ wget http://127.0.0.1:8080/sudoers -O /etc/sudoers
 ## Python Jails
 
 Трюки щодо втечі з python jails на наступній сторінці:
+
 
 {{#ref}}
 ../../generic-methodologies-and-resources/python/bypass-python-sandboxes/
@@ -238,7 +240,7 @@ print(rawget(string, "char")(0x41, 0x42))
 ```bash
 for k,v in pairs(string) do print(k,v) end
 ```
-Зверніть увагу, що щоразу, коли ви виконуєте попередній однолінійний код в **іншому середовищі lua, порядок функцій змінюється**. Тому, якщо вам потрібно виконати одну конкретну функцію, ви можете виконати грубу силу, завантажуючи різні середовища lua та викликаючи першу функцію бібліотеки:
+Зверніть увагу, що щоразу, коли ви виконуєте попередній однолінійний код у **іншому середовищі lua, порядок функцій змінюється**. Тому, якщо вам потрібно виконати одну конкретну функцію, ви можете виконати грубу силу, завантажуючи різні середовища lua та викликаючи першу функцію бібліотеки:
 ```bash
 #In this scenario you could BF the victim that is generating a new lua environment
 #for every interaction with the following line and when you are lucky
@@ -249,7 +251,7 @@ for k,chr in pairs(string) do print(chr(0x6f,0x73,0x2e,0x65,0x78)) end
 #and "char" from string library, and the use both to execute a command
 for i in seq 1000; do echo "for k1,chr in pairs(string) do for k2,exec in pairs(os) do print(k1,k2) print(exec(chr(0x6f,0x73,0x2e,0x65,0x78,0x65,0x63,0x75,0x74,0x65,0x28,0x27,0x6c,0x73,0x27,0x29))) break end break end" | nc 10.10.10.10 10006 | grep -A5 "Code: char"; done
 ```
-**Отримати інтерактивну lua оболонку**: Якщо ви знаходитесь всередині обмеженої lua оболонки, ви можете отримати нову lua оболонку (і, сподіваємось, без обмежень), викликавши:
+**Отримати інтерактивну lua оболонку**: Якщо ви знаходитесь всередині обмеженої lua оболонки, ви можете отримати нову lua оболонку (і, сподіваюсь, без обмежень), викликавши:
 ```bash
 debug.debug()
 ```

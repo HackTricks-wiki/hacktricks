@@ -1,4 +1,4 @@
-# RunC Привілейоване підвищення
+# RunC Privilege Escalation
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -12,7 +12,7 @@
 
 ## PE
 
-Якщо ви виявите, що `runc` встановлений на хості, ви можете **запустити контейнер, змонтувавши кореневу / папку хоста**.
+Якщо ви виявите, що `runc` встановлено на хості, ви можете **запустити контейнер, змонтувавши кореневу / папку хоста**.
 ```bash
 runc -help #Get help and see if runc is intalled
 runc spec #This will create the config.json file in your current folder
