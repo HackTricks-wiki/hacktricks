@@ -23,7 +23,7 @@
 
 - **Słowo kluczowe**: Nazwa domeny **zawiera** ważne **słowo kluczowe** oryginalnej domeny (np. zelster.com-management.com).
 - **poddomena z myślnikiem**: Zmień **kropkę na myślnik** w poddomenie (np. www-zelster.com).
-- **Nowe TLD**: Ta sama domena używająca **nowego TLD** (np. zelster.org).
+- **Nowe TLD**: Ta sama domena z użyciem **nowego TLD** (np. zelster.org).
 - **Homoglif**: **Zastępuje** literę w nazwie domeny **literami, które wyglądają podobnie** (np. zelfser.com).
 
 {{#ref}}
@@ -33,7 +33,7 @@ homograph-attacks.md
 - **Liczba pojedyncza/mnoga**: Dodaje lub usuwa „s” na końcu nazwy domeny (np. zeltsers.com).
 - **Ominięcie**: **Usuwa jedną** z liter z nazwy domeny (np. zelser.com).
 - **Powtórzenie:** **Powtarza jedną** z liter w nazwie domeny (np. zeltsser.com).
-- **Zastąpienie**: Jak homoglif, ale mniej dyskretny. Zastępuje jedną z liter w nazwie domeny, być może literą bliską oryginalnej literze na klawiaturze (np. zektser.com).
+- **Zamiana**: Jak homoglif, ale mniej dyskretny. Zastępuje jedną z liter w nazwie domeny, być może literą bliską oryginalnej literze na klawiaturze (np. zektser.com).
 - **Subdomenowana**: Wprowadza **kropkę** wewnątrz nazwy domeny (np. ze.lster.com).
 - **Wstawienie**: **Wstawia literę** do nazwy domeny (np. zerltser.com).
 - **Brak kropki**: Dołącz TLD do nazwy domeny. (np. zelstercom.com)
@@ -51,7 +51,7 @@ homograph-attacks.md
 
 ### Bitflipping
 
-Istnieje **możliwość, że jeden z bitów przechowywanych lub w komunikacji może zostać automatycznie zmieniony** z powodu różnych czynników, takich jak burze słoneczne, promieniowanie kosmiczne lub błędy sprzętowe.
+Istnieje **możliwość, że jeden z bitów przechowywanych lub w komunikacji może zostać automatycznie zmieniony** z powodu różnych czynników, takich jak wybuchy słoneczne, promieniowanie kosmiczne lub błędy sprzętowe.
 
 Gdy ten koncept jest **stosowany do zapytań DNS**, możliwe jest, że **domena odebrana przez serwer DNS** nie jest taka sama jak domena pierwotnie żądana.
 
@@ -63,8 +63,8 @@ Aby uzyskać więcej informacji, przeczytaj [https://www.bleepingcomputer.com/ne
 
 ### Kup zaufaną domenę
 
-Możesz poszukać na [https://www.expireddomains.net/](https://www.expireddomains.net) wygasłej domeny, którą mógłbyś użyć.\
-Aby upewnić się, że wygasła domena, którą zamierzasz kupić, **ma już dobre SEO**, możesz sprawdzić, jak jest sklasyfikowana w:
+Możesz poszukać na [https://www.expireddomains.net/](https://www.expireddomains.net) wygasłej domeny, którą mógłbyś wykorzystać.\
+Aby upewnić się, że wygasła domena, którą zamierzasz kupić, **ma już dobrą SEO**, możesz sprawdzić, jak jest sklasyfikowana w:
 
 - [http://www.fortiguard.com/webfilter](http://www.fortiguard.com/webfilter)
 - [https://urlfiltering.paloaltonetworks.com/query/](https://urlfiltering.paloaltonetworks.com/query/)
@@ -87,7 +87,7 @@ Ponadto nie zapomnij, że jeśli użytkownicy korzystają z **jakiegokolwiek por
 Możesz go pobrać z [https://github.com/gophish/gophish/releases/tag/v0.11.0](https://github.com/gophish/gophish/releases/tag/v0.11.0)
 
 Pobierz i rozpakuj go w `/opt/gophish` i uruchom `/opt/gophish/gophish`\
-Otrzymasz hasło dla użytkownika admina na porcie 3333 w wyjściu. Dlatego uzyskaj dostęp do tego portu i użyj tych danych logowania, aby zmienić hasło administratora. Może być konieczne tunelowanie tego portu do lokalnego:
+Otrzymasz hasło dla użytkownika admin na porcie 3333 w wyjściu. Dlatego uzyskaj dostęp do tego portu i użyj tych danych logowania, aby zmienić hasło administratora. Może być konieczne tunelowanie tego portu do lokalnego:
 ```bash
 ssh -L 3333:127.0.0.1:3333 <user>@<ip>
 ```
@@ -121,14 +121,14 @@ Następnie dodaj domenę do następujących plików:
 - **/etc/postfix/transport**
 - **/etc/postfix/virtual_regexp**
 
-**Zmień także wartości następujących zmiennych w /etc/postfix/main.cf**
+**Zmień również wartości następujących zmiennych w /etc/postfix/main.cf**
 
 `myhostname = <domain>`\
 `mydestination = $myhostname, <domain>, localhost.com, localhost`
 
 Na koniec zmodyfikuj pliki **`/etc/hostname`** i **`/etc/mailname`** na swoją nazwę domeny i **zrestartuj swój VPS.**
 
-Teraz stwórz **rekord A DNS** dla `mail.<domain>` wskazujący na **adres IP** VPS oraz **rekord MX DNS** wskazujący na `mail.<domain>`
+Teraz utwórz **rekord A DNS** dla `mail.<domain>` wskazujący na **adres IP** VPS oraz **rekord MX DNS** wskazujący na `mail.<domain>`
 
 Teraz przetestuj wysyłanie e-maila:
 ```bash
@@ -231,7 +231,7 @@ Im starsza domena, tym mniej prawdopodobne, że zostanie uznana za spam. Powinie
 
 Zauważ, że nawet jeśli musisz czekać tydzień, możesz teraz zakończyć konfigurację wszystkiego.
 
-### Skonfiguruj rekord odwrotnego DNS (rDNS)
+### Skonfiguruj rekord Reverse DNS (rDNS)
 
 Ustaw rekord rDNS (PTR), który rozwiązuje adres IP VPS na nazwę domeny.
 
@@ -239,7 +239,7 @@ Ustaw rekord rDNS (PTR), który rozwiązuje adres IP VPS na nazwę domeny.
 
 Musisz **skonfigurować rekord SPF dla nowej domeny**. Jeśli nie wiesz, czym jest rekord SPF [**przeczytaj tę stronę**](../../network-services-pentesting/pentesting-smtp/index.html#spf).
 
-Możesz użyć [https://www.spfwizard.net/](https://www.spfwizard.net), aby wygenerować swoją politykę SPF (użyj adresu IP maszyny VPS)
+Możesz użyć [https://www.spfwizard.net/](https://www.spfwizard.net) do wygenerowania swojej polityki SPF (użyj adresu IP maszyny VPS)
 
 ![](<../../images/image (1037).png>)
 
@@ -268,7 +268,7 @@ Ten samouczek oparty jest na: [https://www.digitalocean.com/community/tutorials/
 > v=DKIM1; h=sha256; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0wPibdqPtzYk81njjQCrChIcHzxOp8a1wjbsoNtka2X9QXCZs+iXkvw++QsWDtdYu3q0Ofnr0Yd/TmG/Y2bBGoEgeE+YTUG2aEgw8Xx42NLJq2D1pB2lRQPW4IxefROnXu5HfKSm7dyzML1gZ1U0pR5X4IZCH0wOPhIq326QjxJZm79E1nTh3xj" "Y9N/Dt3+fVnIbMupzXE216TdFuifKM6Tl6O/axNsbswMS1TH812euno8xRpsdXJzFlB9q3VbMkVWig4P538mHolGzudEBg563vv66U8D7uuzGYxYT4WS8NVm3QBMg0QKPWZaKp+bADLkOSB9J2nUpk4Aj9KB5swIDAQAB
 > ```
 
-### Testuj wynik konfiguracji swojego e-maila
+### Sprawdź wynik konfiguracji swojego e-maila
 
 Możesz to zrobić, korzystając z [https://www.mail-tester.com/](https://www.mail-tester.com)\
 Po prostu wejdź na stronę i wyślij e-mail na adres, który ci podadzą:
@@ -293,7 +293,7 @@ Authentication-Results: mx.google.com;
 spf=pass (google.com: domain of contact@example.com designates --- as permitted sender) smtp.mail=contact@example.com;
 dkim=pass header.i=@example.com;
 ```
-### ​Usuwanie z Czarnej Listy Spamhouse
+### Usuwanie z Czarnej Listy Spamhouse
 
 Strona [www.mail-tester.com](https://www.mail-tester.com) może wskazać, czy Twoja domena jest blokowana przez spamhouse. Możesz poprosić o usunięcie swojej domeny/IP pod adresem: ​[https://www.spamhaus.org/lookup/](https://www.spamhaus.org/lookup/)
 
@@ -307,7 +307,7 @@ Strona [www.mail-tester.com](https://www.mail-tester.com) może wskazać, czy Tw
 
 - Ustaw **nazwę identyfikującą** profil nadawcy
 - Zdecyduj, z którego konta będziesz wysyłać e-maile phishingowe. Sugestie: _noreply, support, servicedesk, salesforce..._
-- Możesz pozostawić puste nazwę użytkownika i hasło, ale upewnij się, że zaznaczyłeś Ignoruj błędy certyfikatu
+- Możesz pozostawić puste pole na nazwę użytkownika i hasło, ale upewnij się, że zaznaczyłeś Ignoruj błędy certyfikatu
 
 ![](<../../images/image (253) (1) (2) (1) (1) (2) (2) (3) (3) (5) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (15) (2).png>)
 
@@ -320,7 +320,7 @@ Strona [www.mail-tester.com](https://www.mail-tester.com) może wskazać, czy Tw
 - Ustaw **nazwę identyfikującą** szablon
 - Następnie napisz **temat** (nic dziwnego, po prostu coś, co można by się spodziewać w zwykłym e-mailu)
 - Upewnij się, że zaznaczyłeś "**Dodaj obrazek śledzący**"
-- Napisz **szablon e-maila** (możesz używać zmiennych, jak w poniższym przykładzie):
+- Napisz **szablon e-mail** (możesz używać zmiennych, jak w poniższym przykładzie):
 ```html
 <html>
 <head>
@@ -354,14 +354,14 @@ Zauważ, że **aby zwiększyć wiarygodność e-maila**, zaleca się użycie jak
 
 - Napisz **nazwę**
 - **Napisz kod HTML** strony internetowej. Zauważ, że możesz **importować** strony internetowe.
-- Zaznacz **Zbieraj przesłane dane** i **Zbieraj hasła**
+- Zaznacz **Zbieranie przesłanych danych** i **Zbieranie haseł**
 - Ustaw **przekierowanie**
 
 ![](<../../images/image (826).png>)
 
 > [!TIP]
 > Zazwyczaj będziesz musiał zmodyfikować kod HTML strony i przeprowadzić kilka testów lokalnie (może używając jakiegoś serwera Apache) **aż do uzyskania zadowalających wyników.** Następnie wpisz ten kod HTML w polu.\
-> Zauważ, że jeśli musisz **użyć jakichś statycznych zasobów** dla HTML (może jakieś strony CSS i JS), możesz je zapisać w _**/opt/gophish/static/endpoint**_ i następnie uzyskać do nich dostęp z _**/static/\<filename>**_
+> Zauważ, że jeśli potrzebujesz **użyć jakichś statycznych zasobów** dla HTML (może jakieś strony CSS i JS), możesz je zapisać w _**/opt/gophish/static/endpoint**_ i następnie uzyskać do nich dostęp z _**/static/\<filename>**_
 
 > [!TIP]
 > W przypadku przekierowania możesz **przekierować użytkowników na legitną główną stronę internetową** ofiary lub przekierować ich na _/static/migration.html_, na przykład, umieścić jakiś **kręcący się kółko** (**[**https://loading.io/**](https://loading.io)**) przez 5 sekund, a następnie wskazać, że proces zakończył się sukcesem**.
@@ -396,7 +396,7 @@ clone-a-website.md
 
 ## Dokumenty i pliki z backdoorem
 
-W niektórych ocenach phishingowych (głównie dla Red Teams) będziesz chciał również **wysłać pliki zawierające jakiś rodzaj backdoora** (może C2 lub po prostu coś, co wywoła autoryzację).\
+W niektórych ocenach phishingowych (głównie dla Red Teams) będziesz chciał również **wysłać pliki zawierające jakiś rodzaj backdoora** (może C2 lub może coś, co wywoła autoryzację).\
 Sprawdź następującą stronę w celu uzyskania przykładów:
 
 {{#ref}}
@@ -407,18 +407,18 @@ phishing-documents.md
 
 ### Poprzez Proxy MitM
 
-Poprzedni atak jest dość sprytny, ponieważ fałszuje prawdziwą stronę internetową i zbiera informacje podane przez użytkownika. Niestety, jeśli użytkownik nie wpisał poprawnego hasła lub jeśli aplikacja, którą sfałszowałeś, jest skonfigurowana z 2FA, **ta informacja nie pozwoli ci na podszywanie się pod oszukanego użytkownika**.
+Poprzedni atak jest dość sprytny, ponieważ fałszuje prawdziwą stronę internetową i zbiera informacje podane przez użytkownika. Niestety, jeśli użytkownik nie wpisał poprawnego hasła lub jeśli aplikacja, którą sfałszowałeś, jest skonfigurowana z 2FA, **te informacje nie pozwolą ci na podszywanie się pod oszukanego użytkownika**.
 
 Tutaj przydatne są narzędzia takie jak [**evilginx2**](https://github.com/kgretzky/evilginx2)**,** [**CredSniper**](https://github.com/ustayready/CredSniper) i [**muraena**](https://github.com/muraenateam/muraena). To narzędzie pozwoli ci wygenerować atak typu MitM. Zasadniczo atak działa w następujący sposób:
 
 1. **Podszywasz się pod formularz logowania** prawdziwej strony internetowej.
-2. Użytkownik **wysyła** swoje **dane logowania** na twoją fałszywą stronę, a narzędzie wysyła je do prawdziwej strony internetowej, **sprawdzając, czy dane logowania działają**.
-3. Jeśli konto jest skonfigurowane z **2FA**, strona MitM poprosi o to, a gdy **użytkownik wprowadzi** to, narzędzie wyśle to do prawdziwej strony internetowej.
-4. Gdy użytkownik jest uwierzytelniony, ty (jako atakujący) będziesz miał **przechwycone dane logowania, 2FA, ciasteczka i wszelkie informacje** z każdej interakcji, podczas gdy narzędzie wykonuje atak MitM.
+2. Użytkownik **wysyła** swoje **dane logowania** na twoją fałszywą stronę, a narzędzie wysyła je na prawdziwą stronę internetową, **sprawdzając, czy dane logowania działają**.
+3. Jeśli konto jest skonfigurowane z **2FA**, strona MitM poprosi o to, a gdy **użytkownik wprowadzi** to, narzędzie wyśle to na prawdziwą stronę internetową.
+4. Gdy użytkownik zostanie uwierzytelniony, ty (jako atakujący) będziesz miał **przechwycone dane logowania, 2FA, ciasteczka i wszelkie informacje** z każdej interakcji, podczas gdy narzędzie wykonuje atak MitM.
 
 ### Poprzez VNC
 
-Co jeśli zamiast **wysyłać ofiarę na złośliwą stronę** o takim samym wyglądzie jak oryginalna, wyślesz go do **sesji VNC z przeglądarką połączoną z prawdziwą stroną internetową**? Będziesz mógł zobaczyć, co robi, ukraść hasło, używane MFA, ciasteczka...\
+Co jeśli zamiast **wysyłać ofiarę na złośliwą stronę** o takim samym wyglądzie jak oryginalna, wyślesz go na **sesję VNC z przeglądarką połączoną z prawdziwą stroną internetową**? Będziesz mógł zobaczyć, co robi, ukraść hasło, używaną MFA, ciasteczka...\
 Możesz to zrobić za pomocą [**EvilnVNC**](https://github.com/JoelGMSec/EvilnoVNC)
 
 ## Wykrywanie wykrycia
@@ -436,23 +436,23 @@ Możesz **kupić domenę o bardzo podobnej nazwie** do domeny ofiary **i/lub wyg
 
 ### Oceń phishing
 
-Użyj [**Phishious** ](https://github.com/Rices/Phishious), aby ocenić, czy twój e-mail trafi do folderu spam lub czy zostanie zablokowany lub odniesie sukces.
+Użyj [**Phishious**](https://github.com/Rices/Phishious), aby ocenić, czy twój e-mail trafi do folderu spam lub czy zostanie zablokowany lub odniesie sukces.
 
-## Wysoka kompromitacja tożsamości (reset MFA w pomocy technicznej)
+## Wysoka kompromitacja tożsamości (reset MFA w help-desku)
 
-Nowoczesne zestawy intruzyjne coraz częściej pomijają całkowicie przynęty e-mailowe i **bezpośrednio celują w proces odzyskiwania tożsamości / pomocy technicznej**, aby pokonać MFA. Atak jest całkowicie "żyjący z ziemi": gdy operator posiada ważne dane logowania, przeskakuje z wbudowanymi narzędziami administracyjnymi – nie jest wymagane żadne złośliwe oprogramowanie.
+Nowoczesne zestawy intruzyjne coraz częściej pomijają całkowicie przynęty e-mailowe i **bezpośrednio celują w proces obsługi serwisowej / odzyskiwania tożsamości**, aby pokonać MFA. Atak jest całkowicie "żyjącym z ziemi": gdy operator posiada ważne dane logowania, przeskakuje z wbudowanymi narzędziami administracyjnymi – nie jest wymagane żadne złośliwe oprogramowanie.
 
 ### Przebieg ataku
 1. Rozpoznanie ofiary
-* Zbieraj dane osobowe i korporacyjne z LinkedIn, naruszeń danych, publicznego GitHub itp.
-* Zidentyfikuj tożsamości o wysokiej wartości (dyrektorzy, IT, finanse) i enumeruj **dokładny proces pomocy technicznej** dla resetowania hasła / MFA.
+* Zbieranie danych osobowych i korporacyjnych z LinkedIn, naruszeń danych, publicznego GitHub itp.
+* Identyfikacja tożsamości o wysokiej wartości (dyrektorzy, IT, finanse) i enumeracja **dokładnego procesu help-desku** dla resetowania hasła / MFA.
 2. Real-time social engineering
-* Zadzwoń, użyj Teams lub czatu z pomocą techniczną, podszywając się pod cel (często z **fałszywym identyfikatorem dzwoniącego** lub **sklonowanym głosem**).
-* Podaj wcześniej zebrane PII, aby przejść weryfikację opartą na wiedzy.
-* Przekonaj agenta do **zresetowania tajemnicy MFA** lub przeprowadzenia **zamiany SIM** na zarejestrowanym numerze telefonu.
+* Telefon, Teams lub czat z help-deskiem, podszywając się pod cel (często z **fałszywym identyfikatorem dzwoniącego** lub **sklonowanym głosem**).
+* Podanie wcześniej zebranych danych osobowych, aby przejść weryfikację opartą na wiedzy.
+* Przekonanie agenta do **zresetowania tajemnicy MFA** lub przeprowadzenia **zamiany SIM** na zarejestrowanym numerze telefonu.
 3. Natychmiastowe działania po uzyskaniu dostępu (≤60 min w rzeczywistych przypadkach)
-* Ustanów punkt zaczepienia przez dowolny portal SSO.
-* Enumeruj AD / AzureAD za pomocą wbudowanych narzędzi (żadne pliki binarne nie są zrzucane):
+* Ustanowienie przyczółka przez dowolny portal SSO.
+* Enumeracja AD / AzureAD za pomocą wbudowanych narzędzi (żadne pliki binarne nie są zrzucane):
 ```powershell
 # lista grup katalogowych i ról uprzywilejowanych
 Get-ADGroup -Filter * -Properties Members | ?{$_.Members -match $env:USERNAME}
@@ -460,23 +460,23 @@ Get-ADGroup -Filter * -Properties Members | ?{$_.Members -match $env:USERNAME}
 # AzureAD / Graph – lista ról katalogowych
 Get-MgDirectoryRole | ft DisplayName,Id
 
-# Enumeruj urządzenia, do których konto może się zalogować
+# Enumeracja urządzeń, do których konto może się zalogować
 Get-MgUserRegisteredDevice -UserId <user@corp.local>
 ```
 * Ruch boczny z **WMI**, **PsExec** lub legalnymi agentami **RMM**, które już są na białej liście w środowisku.
 
 ### Wykrywanie i łagodzenie
-* Traktuj odzyskiwanie tożsamości w pomocy technicznej jako **operację uprzywilejowaną** – wymagaj autoryzacji krokowej i zatwierdzenia menedżera.
+* Traktuj odzyskiwanie tożsamości w help-desku jako **operację uprzywilejowaną** – wymagaj autoryzacji i zatwierdzenia menedżera.
 * Wdrażaj zasady **Wykrywania i Reagowania na Zagrożenia Tożsamości (ITDR)** / **UEBA**, które alarmują o:
-* Zmiana metody MFA + autoryzacja z nowego urządzenia / geolokalizacji.
+* Zmiana metody MFA + uwierzytelnienie z nowego urządzenia / geolokalizacji.
 * Natychmiastowe podniesienie tego samego podmiotu (użytkownik-→-administrator).
-* Rejestruj rozmowy z pomocą techniczną i wymuszaj **oddzwonienie na już zarejestrowany numer** przed jakimkolwiek resetem.
-* Wdrażaj **Just-In-Time (JIT) / Uprzywilejowany dostęp**, aby nowo zresetowane konta **nie** dziedziczyły automatycznie tokenów o wysokim przywileju.
+* Nagrywanie rozmów z help-deskiem i egzekwowanie **oddzwonienia na już zarejestrowany numer** przed jakimkolwiek resetem.
+* Wdrażanie **Just-In-Time (JIT) / Uprzywilejowanego Dostępu**, aby nowo zresetowane konta **nie** dziedziczyły automatycznie tokenów o wysokim przywileju.
 
 ---
 
-## Dezinformacja na dużą skalę – SEO Poisoning i kampanie “ClickFix”
-Zespoły towarowe równoważą koszty operacji wysokiego kontaktu masowymi atakami, które przekształcają **wyszukiwarki i sieci reklamowe w kanał dostarczania**.
+## Dezinformacja na dużą skalę – SEO Poisoning i kampanie "ClickFix"
+Zespoły towarowe rekompensują koszty operacji wysokiego kontaktu masowymi atakami, które przekształcają **wyszukiwarki i sieci reklamowe w kanał dostarczania**.
 
 1. **SEO poisoning / malvertising** wypycha fałszywy wynik, taki jak `chromium-update[.]site`, na szczyt reklam wyszukiwania.
 2. Ofiara pobiera małego **ładowacza pierwszego etapu** (często JS/HTA/ISO). Przykłady widziane przez Unit 42:
@@ -489,7 +489,7 @@ Zespoły towarowe równoważą koszty operacji wysokiego kontaktu masowymi ataka
 * komponent utrzymania (klucz rejestru Run + zaplanowane zadanie)
 
 ### Wskazówki dotyczące wzmocnienia
-* Blokuj nowo zarejestrowane domeny i wymuszaj **Zaawansowane filtrowanie DNS / URL** na *reklamach wyszukiwania*, jak również w e-mailach.
+* Blokuj nowo zarejestrowane domeny i egzekwuj **Zaawansowane filtrowanie DNS / URL** na *reklamach wyszukiwania*, a także w e-mailach.
 * Ogranicz instalację oprogramowania do podpisanych pakietów MSI / Store, odmawiaj wykonania `HTA`, `ISO`, `VBS` zgodnie z polityką.
 * Monitoruj procesy potomne przeglądarek otwierające instalatory:
 ```yaml
@@ -500,14 +500,14 @@ and child_image: *\\*.exe
 
 ---
 
-## Operacje phishingowe wspomagane AI
+## Operacje phishingowe wzbogacone o AI
 Atakujący teraz łączą **LLM i API klonowania głosu** w celu uzyskania w pełni spersonalizowanych przynęt i interakcji w czasie rzeczywistym.
 
 | Warstwa | Przykład użycia przez aktora zagrożenia |
 |-------|-----------------------------|
-|Automatyzacja|Generuj i wysyłaj >100 k e-maili / SMS z losowymi sformułowaniami i linkami śledzącymi.|
-|Generatywna AI|Produkuj *jednorazowe* e-maile odnoszące się do publicznych M&A, wewnętrznych żartów z mediów społecznościowych; głos CEO w deep-fake w oszustwie telefonicznym.|
-|Agentic AI|Autonomicznie rejestruj domeny, zbieraj informacje z otwartych źródeł, twórz e-maile następnego etapu, gdy ofiara kliknie, ale nie poda danych logowania.|
+|Automatyzacja|Generowanie i wysyłanie >100 k e-maili / SMS z losowymi sformułowaniami i linkami śledzącymi.|
+|Generatywna AI|Produkcja *jednorazowych* e-maili odnoszących się do publicznych M&A, wewnętrznych żartów z mediów społecznościowych; głos CEO w deep-fake w oszustwie telefonicznym.|
+|Agentic AI|Autonomiczne rejestrowanie domen, zbieranie informacji z otwartych źródeł, tworzenie e-maili następnego etapu, gdy ofiara kliknie, ale nie poda danych logowania.|
 
 **Obrona:**
 • Dodaj **dynamiczne banery** podkreślające wiadomości wysyłane z nieufnej automatyzacji (poprzez anomalie ARC/DKIM).
@@ -516,8 +516,8 @@ Atakujący teraz łączą **LLM i API klonowania głosu** w celu uzyskania w pe�
 
 ---
 
-## Zmęczenie MFA / wariant Push Bombing – Wymuszony reset
-Oprócz klasycznego push-bombing, operatorzy po prostu **wymuszają nową rejestrację MFA** podczas rozmowy z pomocą techniczną, unieważniając istniejący token użytkownika. Każdy kolejny monit logowania wydaje się być legitymny dla ofiary.
+## Zmęczenie MFA / Wariant Push Bombing – Wymuszony reset
+Oprócz klasycznego push-bombing, operatorzy po prostu **wymuszają nową rejestrację MFA** podczas rozmowy z help-deskiem, unieważniając istniejący token użytkownika. Każdy kolejny monit logowania wydaje się być autentyczny dla ofiary.
 ```text
 [Attacker]  →  Help-Desk:  “I lost my phone while travelling, can you unenrol it so I can add a new authenticator?”
 [Help-Desk] →  AzureAD: ‘Delete existing methods’ → sends registration e-mail
@@ -527,7 +527,7 @@ Monitoruj zdarzenia AzureAD/AWS/Okta, w których **`deleteMFA` + `addMFA`** wyst
 
 ## Przechwytywanie schowka / Pastejacking
 
-Atakujący mogą cicho skopiować złośliwe polecenia do schowka ofiary z kompromitowanej lub fałszywej strony internetowej, a następnie oszukać użytkownika, aby wkleił je w **Win + R**, **Win + X** lub w oknie terminala, wykonując dowolny kod bez pobierania lub załączania.
+Atakujący mogą cicho skopiować złośliwe polecenia do schowka ofiary z kompromitowanej lub błędnie napisanej strony internetowej, a następnie oszukać użytkownika, aby wkleił je w **Win + R**, **Win + X** lub w oknie terminala, wykonując dowolny kod bez pobierania lub załączania.
 
 {{#ref}}
 clipboard-hijacking.md

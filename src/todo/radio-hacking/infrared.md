@@ -6,7 +6,7 @@
 
 **Światło podczerwone jest niewidoczne dla ludzi**. Długość fali IR wynosi od **0,7 do 1000 mikronów**. Piloty domowe używają sygnału IR do transmisji danych i działają w zakresie długości fal od 0,75 do 1,4 mikronów. Mikrokontroler w pilocie sprawia, że dioda LED podczerwieni miga z określoną częstotliwością, przekształcając sygnał cyfrowy w sygnał IR.
 
-Aby odbierać sygnały IR, używa się **fotoreceptora**. On **przekształca światło IR w impulsy napięciowe**, które są już **sygnałami cyfrowymi**. Zwykle w **odbiorniku znajduje się filtr ciemnego światła**, który przepuszcza **tylko pożądaną długość fali** i eliminuje szumy.
+Aby odbierać sygnały IR, używa się **fotoreceptora**. On **przekształca światło IR w impulsy napięciowe**, które są już **sygnałami cyfrowymi**. Zwykle wewnątrz odbiornika znajduje się **filtr ciemnego światła**, który przepuszcza **tylko pożądaną długość fali** i eliminuje szumy.
 
 ### Różnorodność protokołów IR <a href="#variety-of-ir-protocols" id="variety-of-ir-protocols"></a>
 
@@ -32,7 +32,7 @@ Bity są kodowane przez modulację szerokości impulsu. Szerokość przestrzeni 
 
 **3. Kodowanie fazowe**
 
-Znane również jako kodowanie Manchester. Wartość logiczna jest definiowana przez polaryzację przejścia między wybuchem impulsu a przestrzenią. "Przestrzeń do wybuchu impulsu" oznacza logikę "0", "wybuch impulsu do przestrzeni" oznacza logikę "1".
+Znane również jako kodowanie Manchester. Wartość logiczna jest definiowana przez polarność przejścia między wybuchem impulsu a przestrzenią. "Przestrzeń do wybuchu impulsu" oznacza logikę "0", "wybuch impulsu do przestrzeni" oznacza logikę "1".
 
 <figure><img src="../../images/image (634).png" alt=""><figcaption></figcaption></figure>
 
@@ -64,7 +64,7 @@ Dla **logiki "0" i "1"** NEC używa kodowania odległości impulsów: najpierw p
 ### Klimatyzatory
 
 W przeciwieństwie do innych pilotów, **klimatyzatory nie przesyłają tylko kodu naciśniętego przycisku**. Przesyłają również **wszystkie informacje**, gdy przycisk jest naciśnięty, aby zapewnić, że **urządzenie klimatyzacyjne i pilot są zsynchronizowane**.\
-To zapobiegnie sytuacji, w której urządzenie ustawione na 20ºC zostanie zwiększone do 21ºC za pomocą jednego pilota, a następnie, gdy użyty zostanie inny pilot, który nadal ma temperaturę 20ºC, temperatura zostanie "zwiększona" do 21ºC (a nie do 22ºC, myśląc, że jest w 21ºC).
+To zapobiegnie sytuacji, w której urządzenie ustawione na 20ºC zostanie zwiększone do 21ºC za pomocą jednego pilota, a następnie, gdy użyje się innego pilota, który nadal ma temperaturę 20ºC, temperatura zostanie "zwiększona" do 21ºC (a nie do 22ºC, myśląc, że jest w 21ºC).
 
 ---
 
@@ -76,13 +76,13 @@ Możesz zaatakować podczerwień za pomocą Flipper Zero:
 flipper-zero/fz-infrared.md
 {{#endref}}
 
-### Przejęcie Smart-TV / Dekodera (EvilScreen)
+### Przejęcie Smart-TV / Set-top Box (EvilScreen)
 
-Najnowsze prace akademickie (EvilScreen, 2022) wykazały, że **piloty wielokanałowe, które łączą podczerwień z Bluetooth lub Wi-Fi, mogą być nadużywane do pełnego przejęcia nowoczesnych smart-TV**. Atak łączy kody usług IR o wysokich uprawnieniach z uwierzytelnionymi pakietami Bluetooth, omijając izolację kanałów i umożliwiając uruchamianie dowolnych aplikacji, aktywację mikrofonu lub reset fabryczny bez dostępu fizycznego. Osiem popularnych telewizorów od różnych dostawców — w tym model Samsunga, który twierdzi, że spełnia normy ISO/IEC 27001 — zostało potwierdzonych jako podatne. Łagodzenie wymaga poprawek oprogramowania od producenta lub całkowitego wyłączenia nieużywanych odbiorników IR.
+Najnowsze prace akademickie (EvilScreen, 2022) wykazały, że **piloty wielokanałowe, które łączą podczerwień z Bluetooth lub Wi-Fi, mogą być nadużywane do całkowitego przejęcia nowoczesnych smart-TV**. Atak łączy kody usług IR o wysokich uprawnieniach z uwierzytelnionymi pakietami Bluetooth, omijając izolację kanałów i umożliwiając uruchamianie dowolnych aplikacji, aktywację mikrofonu lub reset fabryczny bez dostępu fizycznego. Osiem popularnych telewizorów od różnych dostawców — w tym model Samsunga, który twierdzi, że spełnia normy ISO/IEC 27001 — zostało potwierdzonych jako podatne. Łagodzenie wymaga poprawek oprogramowania od dostawcy lub całkowitego wyłączenia nieużywanych odbiorników IR.
 
 ### Ekstrakcja danych z powietrza za pomocą diod IR (rodzina aIR-Jumper)
 
-Kamery bezpieczeństwa, routery czy nawet złośliwe pendrive'y często zawierają **diodowe IR do nocnego widzenia**. Badania pokazują, że złośliwe oprogramowanie może modulować te diody (<10–20 kbit/s z prostym OOK), aby **ekstrahować sekrety przez ściany i okna** do zewnętrznej kamery umieszczonej kilkadziesiąt metrów dalej. Ponieważ światło znajduje się poza widzialnym spektrum, operatorzy rzadko to zauważają. Środki zaradcze:
+Kamery bezpieczeństwa, routery czy nawet złośliwe pendrive'y często zawierają **diodowe diody IR do nocnego widzenia**. Badania pokazują, że złośliwe oprogramowanie może modulować te diody (<10–20 kbit/s z prostym OOK), aby **ekstrahować tajemnice przez ściany i okna** do zewnętrznej kamery umieszczonej kilkadziesiąt metrów dalej. Ponieważ światło znajduje się poza widzialnym spektrum, operatorzy rzadko to zauważają. Środki zaradcze:
 
 * Fizycznie osłonić lub usunąć diody IR w wrażliwych obszarach
 * Monitorować cykl pracy diod LED kamery i integralność oprogramowania
@@ -100,7 +100,7 @@ Oprogramowanie 1.0 (wrzesień 2024) dodało **dziesiątki dodatkowych protokoł�
 
 ### Sprzęt
 
-* **Flipper Zero** – przenośny transceiver z trybami nauki, powtórzenia i brute-force słownikowego (patrz powyżej).
+* **Flipper Zero** – przenośny transceiver z trybami nauki, odtwarzania i brute-force słownikowego (patrz powyżej).
 * **Arduino / ESP32** + dioda IR / odbiornik TSOP38xx – tani analizator/nadajnik DIY. Połącz z biblioteką `Arduino-IRremote` (v4.x obsługuje >40 protokołów).
 * **Analizatory logiczne** (Saleae/FX2) – rejestrują surowe czasy, gdy protokół jest nieznany.
 * **Smartfony z IR-blasterem** (np. Xiaomi) – szybki test w terenie, ale ograniczony zasięg.
@@ -128,14 +128,14 @@ irsend SEND_ONCE samsung KEY_POWER
 
 ## Środki obronne <a href="#defense" id="defense"></a>
 
-* Wyłącz lub zakryj odbiorniki IR w urządzeniach używanych w przestrzeniach publicznych, gdy nie są wymagane.
+* Wyłącz lub zakryj odbiorniki IR w urządzeniach używanych w miejscach publicznych, gdy nie są wymagane.
 * Wymuszaj *parowanie* lub kontrole kryptograficzne między smart-TV a pilotami; izoluj uprzywilejowane kody "usługowe".
 * Zainstaluj filtry IR-cut lub detektory fal ciągłych wokół obszarów klasyfikowanych, aby przerwać optyczne kanały ukryte.
 * Monitoruj integralność oprogramowania kamer/urządzeń IoT, które eksponują kontrolowane diody IR.
 
 ## Odniesienia
 
-- [Post na blogu Flipper Zero Infrared](https://blog.flipperzero.one/infrared/)
+- [Flipper Zero Infrared blog post](https://blog.flipperzero.one/infrared/)
 - EvilScreen: Przejęcie Smart TV poprzez naśladowanie pilota (arXiv 2210.03014)
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -28,7 +28,7 @@ e.__class__.__base__.__base__.__qualname__ = 'Polluted_Company'
 print(d) #<__main__.Polluted_Developer object at 0x1041d2b80>
 print(c) #<__main__.Polluted_Company object at 0x1043a72b0>
 ```
-## Podstawowy przykład podatności
+## Podstawowy Przykład Luki
 ```python
 # Initial state
 class Employee: pass
@@ -182,7 +182,7 @@ subprocess.Popen('whoami', shell=True) # Calc.exe will pop up
 
 <summary>Nadpisywanie <strong><code>__kwdefaults__</code></strong></summary>
 
-**`__kwdefaults__`** jest specjalnym atrybutem wszystkich funkcji, opartym na dokumentacji Pythona [documentation](https://docs.python.org/3/library/inspect.html), jest to „mapowanie wszelkich wartości domyślnych dla **tylko-słownikowych** parametrów”. Zanieczyszczenie tego atrybutu pozwala nam kontrolować wartości domyślne parametrów tylko-słownikowych funkcji, są to parametry funkcji, które pojawiają się po \* lub \*args.
+**`__kwdefaults__`** jest specjalnym atrybutem wszystkich funkcji, opartym na dokumentacji Pythona, jest to „mapowanie wszelkich wartości domyślnych dla parametrów **tylko słów kluczowych**”. Zanieczyszczenie tego atrybutu pozwala nam kontrolować domyślne wartości parametrów tylko słów kluczowych funkcji, są to parametry funkcji, które pojawiają się po \* lub \*args.
 ```python
 from os import system
 import json

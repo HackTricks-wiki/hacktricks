@@ -54,18 +54,18 @@ To narzędzie może modyfikować oba atrybuty `$STARNDAR_INFORMATION` i `$FILE_N
 
 ## Ukrywanie Danych
 
-NFTS używa klastra i minimalnego rozmiaru informacji. Oznacza to, że jeśli plik zajmuje i używa klastra i pół, **pozostała połowa nigdy nie będzie używana** aż do usunięcia pliku. Wtedy możliwe jest **ukrycie danych w tej przestrzeni luzu**.
+NFTS używa klastra i minimalnego rozmiaru informacji. Oznacza to, że jeśli plik zajmuje i używa klastra i pół, **pozostała połowa nigdy nie będzie używana** aż do usunięcia pliku. Wtedy możliwe jest **ukrycie danych w tej przestrzeni luzem**.
 
 Istnieją narzędzia takie jak slacker, które pozwalają na ukrywanie danych w tej "ukrytej" przestrzeni. Jednak analiza `$logfile` i `$usnjrnl` może pokazać, że dodano pewne dane:
 
 ![](<../../images/image (1060).png>)
 
-Wtedy możliwe jest odzyskanie przestrzeni luzu za pomocą narzędzi takich jak FTK Imager. Należy zauważyć, że tego rodzaju narzędzie może zapisać zawartość w sposób zniekształcony lub nawet zaszyfrowany.
+Wtedy możliwe jest odzyskanie przestrzeni luzem za pomocą narzędzi takich jak FTK Imager. Należy zauważyć, że tego rodzaju narzędzie może zapisać zawartość w sposób zniekształcony lub nawet zaszyfrowany.
 
 ## UsbKill
 
-To narzędzie, które **wyłączy komputer, jeśli wykryje jakąkolwiek zmianę w portach USB**.\
-Sposobem na odkrycie tego byłoby sprawdzenie uruchomionych procesów i **przejrzenie każdego uruchomionego skryptu python**.
+To narzędzie, które **wyłączy komputer, jeśli wykryje jakiekolwiek zmiany w portach USB**.\
+Sposobem na odkrycie tego byłoby sprawdzenie uruchomionych procesów i **przejrzenie każdego uruchomionego skryptu Pythona**.
 
 ## Dystrybucje Live Linux
 
@@ -77,7 +77,7 @@ Te dystrybucje są **uruchamiane w pamięci RAM**. Jedynym sposobem na ich wykry
 
 ## Konfiguracja Windows
 
-Możliwe jest wyłączenie kilku metod logowania w systemie Windows, aby znacznie utrudnić dochodzenie forensyczne.
+Możliwe jest wyłączenie kilku metod logowania w Windows, aby znacznie utrudnić dochodzenie forensyczne.
 
 ### Wyłącz Znaczniki Czasu - UserAssist
 
@@ -102,32 +102,32 @@ To zapisze informacje o aplikacjach uruchamianych w celu poprawy wydajności sys
 
 Kiedy folder jest otwierany z woluminu NTFS na serwerze Windows NT, system zajmuje czas na **aktualizację pola znacznika czasu w każdym wymienionym folderze**, nazywanego czasem ostatniego dostępu. Na mocno używanym woluminie NTFS może to wpływać na wydajność.
 
-1. Otwórz Edytor Rejestru (Regedit.exe).
+1. Otwórz Edytor rejestru (Regedit.exe).
 2. Przejdź do `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem`.
 3. Poszukaj `NtfsDisableLastAccessUpdate`. Jeśli nie istnieje, dodaj ten DWORD i ustaw jego wartość na 1, co wyłączy ten proces.
-4. Zamknij Edytor Rejestru i uruchom ponownie serwer.
+4. Zamknij Edytor rejestru i uruchom ponownie serwer.
 
 ### Usuń Historię USB
 
 Wszystkie **Wpisy Urządzeń USB** są przechowywane w rejestrze Windows pod kluczem **USBSTOR**, który zawiera podklucze tworzone za każdym razem, gdy podłączasz urządzenie USB do swojego komputera lub laptopa. Możesz znaleźć ten klucz tutaj `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`. **Usunięcie tego** spowoduje usunięcie historii USB.\
-Możesz również użyć narzędzia [**USBDeview**](https://www.nirsoft.net/utils/usb_devices_view.html), aby upewnić się, że je usunąłeś (i aby je usunąć).
+Możesz również użyć narzędzia [**USBDeview**](https://www.nirsoft.net/utils/usb_devices_view.html), aby upewnić się, że je usunięto (i aby je usunąć).
 
 Innym plikiem, który zapisuje informacje o USB, jest plik `setupapi.dev.log` w `C:\Windows\INF`. Ten plik również powinien zostać usunięty.
 
 ### Wyłącz Kopie Cieni
 
-**Lista** kopii cieni za pomocą `vssadmin list shadowstorage`\
+**Wylistuj** kopie cieni za pomocą `vssadmin list shadowstorage`\
 **Usuń** je, uruchamiając `vssadmin delete shadow`
 
 Możesz również usunąć je za pomocą GUI, postępując zgodnie z krokami opisanymi w [https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html](https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html)
 
 Aby wyłączyć kopie cieni, [kroki stąd](https://support.waters.com/KB_Inf/Other/WKB15560_How_to_disable_Volume_Shadow_Copy_Service_VSS_in_Windows):
 
-1. Otwórz program Usługi, wpisując "usługi" w polu wyszukiwania tekstowego po kliknięciu przycisku start w Windows.
+1. Otwórz program Usługi, wpisując "usługi" w polu wyszukiwania tekstu po kliknięciu przycisku start w Windows.
 2. Z listy znajdź "Kopia Cienia Woluminu", wybierz ją, a następnie uzyskaj dostęp do Właściwości, klikając prawym przyciskiem myszy.
 3. Wybierz Wyłączone z rozwijanego menu "Typ uruchomienia", a następnie potwierdź zmianę, klikając Zastosuj i OK.
 
-Możliwe jest również modyfikowanie konfiguracji, które pliki będą kopiowane w kopii cienia w rejestrze `HKLM\SYSTEM\CurrentControlSet\Control\BackupRestore\FilesNotToSnapshot`
+Możliwe jest również modyfikowanie konfiguracji, które pliki mają być kopiowane w kopii cienia w rejestrze `HKLM\SYSTEM\CurrentControlSet\Control\BackupRestore\FilesNotToSnapshot`
 
 ### Nadpisz usunięte pliki
 
@@ -190,14 +190,14 @@ Wykrywanie: porównaj `ntdll` w pamięci z tym na dysku lub zainstaluj hook prze
 
 ### Odrodzenie Alternatywnych Strumieni Danych (ADS)
 
-Kampanie złośliwego oprogramowania w 2023 roku (np. **FIN12** loader) były widziane, gdy przygotowywały binaria drugiego etapu wewnątrz ADS, aby pozostać poza zasięgiem tradycyjnych skanerów:
+Kampanie złośliwego oprogramowania w 2023 roku (np. **FIN12** loadery) były widziane, gdy przygotowywały binaria drugiego etapu wewnątrz ADS, aby pozostać poza zasięgiem tradycyjnych skanerów:
 ```cmd
 rem Hide cobalt.bin inside an ADS of a PDF
 type cobalt.bin > report.pdf:win32res.dll
 rem Execute directly
 wmic process call create "cmd /c report.pdf:win32res.dll"
 ```
-Enumeruj strumienie za pomocą `dir /R`, `Get-Item -Stream *` lub Sysinternals `streams64.exe`. Skopiowanie pliku hosta na FAT/exFAT lub przez SMB usunie ukryty strumień i może być użyte przez śledczych do odzyskania ładunku.
+Enumeruj strumienie za pomocą `dir /R`, `Get-Item -Stream *` lub Sysinternals `streams64.exe`. Skopiowanie pliku hosta do FAT/exFAT lub przez SMB usunie ukryty strumień i może być użyte przez śledczych do odzyskania ładunku.
 
 ### BYOVD & “AuKill” (2023)
 
@@ -217,7 +217,7 @@ Sterownik jest usuwany później, pozostawiając minimalne artefakty.
 Przeciwnicy coraz częściej „samopatchują” usługę tuż po jej wykorzystaniu, aby zapobiec ponownemu wykorzystaniu i stłumić wykrycia oparte na podatnościach. Idea polega na zastąpieniu podatnych komponentów najnowszymi legalnymi binariami/JAR-ami z upstream, aby skanery zgłaszały hosta jako załatwionego, podczas gdy trwałość i C2 pozostają.
 
 Przykład: Apache ActiveMQ OpenWire RCE (CVE‑2023‑46604)  
-- Po wykorzystaniu, napastnicy pobrali legalne JAR-y z Maven Central (repo1.maven.org), usunęli podatne JAR-y w instalacji ActiveMQ i zrestartowali brokera.  
+- Po wykorzystaniu, napastnicy pobrali legalne JAR-y z Maven Central (repo1.maven.org), usunęli podatne JAR-y w instalacji ActiveMQ i ponownie uruchomili brokera.  
 - To zamknęło początkowe RCE, jednocześnie utrzymując inne punkty dostępu (cron, zmiany w konfiguracji SSH, oddzielne implanty C2).
 
 Przykład operacyjny (ilustracyjny)
@@ -248,25 +248,25 @@ Forensic/hunting tips
 - Zarządzanie zmianami: zweryfikuj, kto zastosował „łatkę” i dlaczego, a nie tylko, że obecna jest wersja z poprawką.
 
 ### Cloud‑service C2 with bearer tokens and anti‑analysis stagers
-Obserwowana technika łączyła wiele długoterminowych ścieżek C2 i pakowanie antyanalizacyjne:
+Obserwowana technika łączyła wiele długodystansowych ścieżek C2 i pakowanie antyanalizacyjne:
 - Ładowarki ELF PyInstaller chronione hasłem, aby utrudnić sandboxing i analizę statyczną (np. zaszyfrowany PYZ, tymczasowe wydobycie pod `/_MEI*`).
 - Wskaźniki: trafienia `strings` takie jak `PyInstaller`, `pyi-archive`, `PYZ-00.pyz`, `MEIPASS`.
 - Artefakty czasu wykonywania: wydobycie do `/tmp/_MEI*` lub niestandardowe ścieżki `--runtime-tmpdir`.
 - C2 wspierane przez Dropbox z zakodowanymi tokenami OAuth Bearer
-- Wskaźniki sieciowe: `api.dropboxapi.com` / `content.dropboxapi.com` z `Authorization: Bearer <token>`.
+- Markery sieciowe: `api.dropboxapi.com` / `content.dropboxapi.com` z `Authorization: Bearer <token>`.
 - Poluj w proxy/NetFlow/Zeek/Suricata na wychodzące HTTPS do domen Dropbox z obciążeń serwera, które normalnie nie synchronizują plików.
 - Równoległe/zapasowe C2 przez tunelowanie (np. Cloudflare Tunnel `cloudflared`), utrzymując kontrolę, jeśli jeden kanał jest zablokowany.
 - IOCs hosta: procesy/jednostki `cloudflared`, konfiguracja w `~/.cloudflared/*.json`, wychodzące 443 do krawędzi Cloudflare.
 
 ### Persistence and “hardening rollback” to maintain access (Linux examples)
-Napastnicy często łączą samopoprawianie z trwałymi ścieżkami dostępu:
+Napastnicy często łączą samodzielne łatanie z trwałymi ścieżkami dostępu:
 - Cron/Anacron: edycje stubu `0anacron` w każdym katalogu `/etc/cron.*/` dla okresowego wykonywania.
 - Poluj:
 ```bash
 for d in /etc/cron.*; do [ -f "$d/0anacron" ] && stat -c '%n %y %s' "$d/0anacron"; done
 grep -R --line-number -E 'curl|wget|python|/bin/sh' /etc/cron.*/* 2>/dev/null
 ```
-- Cofanie twardych zabezpieczeń konfiguracji SSH: włączenie logowania roota i zmiana domyślnych powłok dla kont o niskich uprawnieniach.
+- Przywracanie twardości konfiguracji SSH: włączanie logowania roota i zmiana domyślnych powłok dla kont o niskich uprawnieniach.
 - Poluj na włączenie logowania roota:
 ```bash
 grep -E '^\s*PermitRootLogin' /etc/ssh/sshd_config

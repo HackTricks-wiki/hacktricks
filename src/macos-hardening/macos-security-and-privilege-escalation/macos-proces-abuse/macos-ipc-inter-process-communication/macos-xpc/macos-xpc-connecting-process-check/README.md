@@ -6,17 +6,17 @@
 
 Gdy nawiązywane jest połączenie z usługą XPC, serwer sprawdzi, czy połączenie jest dozwolone. Oto kontrole, które zazwyczaj są przeprowadzane:
 
-1. Sprawdzenie, czy **proces łączący jest podpisany certyfikatem podpisanym przez Apple** (wydawanym tylko przez Apple).
+1. Sprawdź, czy **proces łączący jest podpisany certyfikatem podpisanym przez Apple** (wydawanym tylko przez Apple).
 - Jeśli **to nie jest zweryfikowane**, atakujący może stworzyć **fałszywy certyfikat**, aby dopasować się do innej kontroli.
-2. Sprawdzenie, czy proces łączący jest podpisany **certyfikatem organizacji** (weryfikacja ID zespołu).
+2. Sprawdź, czy proces łączący jest podpisany **certyfikatem organizacji** (weryfikacja ID zespołu).
 - Jeśli **to nie jest zweryfikowane**, **dowolny certyfikat dewelopera** z Apple może być użyty do podpisania i połączenia z usługą.
-3. Sprawdzenie, czy proces łączący **zawiera odpowiedni identyfikator pakietu**.
+3. Sprawdź, czy proces łączący **zawiera odpowiedni identyfikator pakietu**.
 - Jeśli **to nie jest zweryfikowane**, każde narzędzie **podpisane przez tę samą organizację** może być użyte do interakcji z usługą XPC.
-4. (4 lub 5) Sprawdzenie, czy proces łączący ma **odpowiedni numer wersji oprogramowania**.
+4. (4 lub 5) Sprawdź, czy proces łączący ma **odpowiedni numer wersji oprogramowania**.
 - Jeśli **to nie jest zweryfikowane**, stary, niebezpieczny klient, podatny na wstrzykiwanie procesów, może być użyty do połączenia z usługą XPC, nawet przy innych kontrolach.
-5. (4 lub 5) Sprawdzenie, czy proces łączący ma wzmocniony czas działania bez niebezpiecznych uprawnień (jak te, które pozwalają na ładowanie dowolnych bibliotek lub używanie zmiennych środowiskowych DYLD).
+5. (4 lub 5) Sprawdź, czy proces łączący ma wzmocniony czas działania bez niebezpiecznych uprawnień (jak te, które pozwalają na ładowanie dowolnych bibliotek lub używanie zmiennych środowiskowych DYLD).
 1. Jeśli **to nie jest zweryfikowane**, klient może być **podatny na wstrzykiwanie kodu**.
-6. Sprawdzenie, czy proces łączący ma **uprawnienie**, które pozwala mu połączyć się z usługą. Dotyczy to binariów Apple.
+6. Sprawdź, czy proces łączący ma **uprawnienie**, które pozwala mu połączyć się z usługą. To dotyczy binarnych plików Apple.
 7. **Weryfikacja** musi być **oparta** na **tokenie audytu klienta** **zamiast** na jego identyfikatorze procesu (**PID**), ponieważ ten pierwszy zapobiega **atakom na ponowne użycie PID**.
 - Deweloperzy **rzadko używają tokena audytu** w wywołaniach API, ponieważ jest on **prywatny**, więc Apple może **zmienić** go w dowolnym momencie. Dodatkowo, użycie prywatnych API nie jest dozwolone w aplikacjach Mac App Store.
 - Jeśli używana jest metoda **`processIdentifier`**, może być podatna.
@@ -38,7 +38,7 @@ macos-xpc_connection_get_audit_token-attack.md
 
 ### Trustcache - Downgrade Attacks Prevention
 
-Trustcache to metoda obronna wprowadzona w maszynach Apple Silicon, która przechowuje bazę danych CDHSAH binariów Apple, aby tylko dozwolone, niezmodyfikowane binaria mogły być wykonywane. Co zapobiega wykonywaniu wersji downgrade.
+Trustcache to metoda obronna wprowadzona w maszynach Apple Silicon, która przechowuje bazę danych CDHSAH binarnych plików Apple, aby tylko dozwolone, niezmodyfikowane binaria mogły być wykonywane. Co zapobiega wykonywaniu wersji downgrade.
 
 ### Code Examples
 

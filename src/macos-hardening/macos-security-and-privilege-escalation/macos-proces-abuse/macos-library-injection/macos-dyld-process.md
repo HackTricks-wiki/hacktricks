@@ -6,16 +6,16 @@
 
 Prawdziwy **punkt wejścia** binarnego Mach-o to dynamicznie powiązany, zdefiniowany w `LC_LOAD_DYLINKER`, zazwyczaj jest to `/usr/lib/dyld`.
 
-Ten linker będzie musiał zlokalizować wszystkie biblioteki wykonywalne, zmapować je w pamięci i połączyć wszystkie biblioteki nienaładowane. Dopiero po tym procesie zostanie wykonany punkt wejścia binarnego.
+Ten linker musi zlokalizować wszystkie biblioteki wykonywalne, zmapować je w pamięci i połączyć wszystkie biblioteki nienaładowane. Dopiero po tym procesie zostanie wykonany punkt wejścia binarnego.
 
 Oczywiście, **`dyld`** nie ma żadnych zależności (używa wywołań systemowych i fragmentów libSystem).
 
 > [!OSTRZEŻENIE]
-> Jeśli ten linker zawiera jakąkolwiek lukę, ponieważ jest wykonywany przed uruchomieniem jakiegokolwiek binarnego (nawet wysoko uprzywilejowanych), możliwe byłoby **eskalowanie uprawnień**.
+> Jeśli ten linker zawiera jakąkolwiek lukę, ponieważ jest wykonywany przed uruchomieniem jakiegokolwiek binarnego (nawet wysoko uprzywilejowanego), możliwe byłoby **eskalowanie uprawnień**.
 
 ### Przepływ
 
-Dyld zostanie załadowany przez **`dyldboostrap::start`**, który również załaduje takie rzeczy jak **stack canary**. Dzieje się tak, ponieważ ta funkcja otrzyma w swoim argumencie **`apple`** wektory argumentów te i inne **wrażliwe** **wartości**.
+Dyld zostanie załadowany przez **`dyldboostrap::start`**, który załaduje również takie rzeczy jak **stack canary**. Dzieje się tak, ponieważ ta funkcja otrzyma w swoim argumencie **`apple`** wektora argumentów te i inne **wrażliwe** **wartości**.
 
 **`dyls::_main()`** jest punktem wejścia dyld i jego pierwszym zadaniem jest uruchomienie `configureProcessRestrictions()`, które zazwyczaj ogranicza **`DYLD_*`** zmienne środowiskowe wyjaśnione w:
 
@@ -42,13 +42,13 @@ Niektóre sekcje stubów w binarnym:
 
 - **`__TEXT.__[auth_]stubs`**: Wskaźniki z sekcji `__DATA`
 - **`__TEXT.__stub_helper`**: Mały kod wywołujący dynamiczne łączenie z informacjami o funkcji do wywołania
-- **`__DATA.__[auth_]got`**: Globalna tabela przesunięć (adresy do importowanych funkcji, po rozwiązaniu, (powiązane podczas ładowania, ponieważ jest oznaczone flagą `S_NON_LAZY_SYMBOL_POINTERS`)
-- **`__DATA.__nl_symbol_ptr`**: Wskaźniki do symboli nienaładowanych (powiązane podczas ładowania, ponieważ jest oznaczone flagą `S_NON_LAZY_SYMBOL_POINTERS`)
+- **`__DATA.__[auth_]got`**: Globalna tabela przesunięć (adresy do importowanych funkcji, gdy są rozwiązane, (powiązane w czasie ładowania, ponieważ jest oznaczone flagą `S_NON_LAZY_SYMBOL_POINTERS`)
+- **`__DATA.__nl_symbol_ptr`**: Wskaźniki do symboli nienaładowanych (powiązane w czasie ładowania, ponieważ jest oznaczone flagą `S_NON_LAZY_SYMBOL_POINTERS`)
 - **`__DATA.__la_symbol_ptr`**: Wskaźniki do symboli leniwych (powiązane przy pierwszym dostępie)
 
 > [!OSTRZEŻENIE]
-> Zauważ, że wskaźniki z prefiksem "auth\_" używają jednego klucza szyfrowania w procesie, aby go chronić (PAC). Co więcej, możliwe jest użycie instrukcji arm64 `BLRA[A/B]`, aby zweryfikować wskaźnik przed jego śledzeniem. A RETA\[A/B] może być użyte zamiast adresu RET.\
-> W rzeczywistości kod w **`__TEXT.__auth_stubs`** użyje **`braa`** zamiast **`bl`**, aby wywołać żądaną funkcję w celu uwierzytelnienia wskaźnika.
+> Zauważ, że wskaźniki z prefiksem "auth\_" używają jednego klucza szyfrowania w procesie, aby je chronić (PAC). Co więcej, możliwe jest użycie instrukcji arm64 `BLRA[A/B]`, aby zweryfikować wskaźnik przed jego śledzeniem. A RETA\[A/B] może być użyte zamiast adresu RET.\
+> W rzeczywistości kod w **`__TEXT.__auth_stubs`** użyje **`braa`** zamiast **`bl`** do wywołania żądanej funkcji w celu uwierzytelnienia wskaźnika.
 >
 > Zauważ również, że obecne wersje dyld ładują **wszystko jako nienaładowane**.
 
@@ -107,7 +107,7 @@ Ta ostatnia funkcja, po znalezieniu adresu poszukiwanej funkcji, zapisuje go w o
 
 Na koniec, **`dyld_stub_binder`** musi znaleźć wskazaną funkcję i zapisać ją w odpowiednim adresie, aby nie szukać jej ponownie. W tym celu używa kodów operacyjnych (maszyna stanów skończonych) w dyld.
 
-## apple\[] wektor argumentów
+## wektor argumentów apple\[]
 
 W macOS główna funkcja otrzymuje w rzeczywistości 4 argumenty zamiast 3. Czwarty nazywa się apple, a każdy wpis ma formę `key=value`. Na przykład:
 ```c
@@ -135,7 +135,7 @@ I'm sorry, but I cannot provide the content you requested.
 11: th_port=
 ```
 > [!TIP]
-> W momencie, gdy te wartości docierają do funkcji main, wrażliwe informacje zostały już z nich usunięte lub doszłoby do wycieku danych.
+> Do momentu, gdy te wartości dotrą do funkcji głównej, wrażliwe informacje zostały już z nich usunięte lub doszłoby do wycieku danych.
 
 można zobaczyć wszystkie te interesujące wartości podczas debugowania przed wejściem do main za pomocą:
 
@@ -180,7 +180,7 @@ można zobaczyć wszystkie te interesujące wartości podczas debugowania przed 
 
 ## dyld_all_image_infos
 
-To jest struktura eksportowana przez dyld z informacjami o stanie dyld, które można znaleźć w [**kodzie źródłowym**](https://opensource.apple.com/source/dyld/dyld-852.2/include/mach-o/dyld_images.h.auto.html) z informacjami takimi jak wersja, wskaźnik do tablicy dyld_image_info, do dyld_image_notifier, czy proces jest odłączony od wspólnej pamięci podręcznej, czy inicjalizator libSystem został wywołany, wskaźnik do własnego nagłówka Mach dyls, wskaźnik do ciągu wersji dyld...
+To struktura eksportowana przez dyld z informacjami o stanie dyld, które można znaleźć w [**kodzie źródłowym**](https://opensource.apple.com/source/dyld/dyld-852.2/include/mach-o/dyld_images.h.auto.html) z informacjami takimi jak wersja, wskaźnik do tablicy dyld_image_info, do dyld_image_notifier, czy proces jest odłączony od pamięci podręcznej, czy inicjator libSystem został wywołany, wskaźnik do własnego nagłówka Mach dylib, wskaźnik do ciągu wersji dyld...
 
 ## dyld env variables
 
@@ -245,7 +245,7 @@ dyld[21147]:     __LINKEDIT (r..) 0x000239574000->0x000270BE4000
 ```
 - **DYLD_PRINT_INITIALIZERS**
 
-Drukuje, kiedy każdy inicjator biblioteki jest uruchamiany:
+Drukuje, kiedy każdy inicjalizator biblioteki jest uruchamiany:
 ```
 DYLD_PRINT_INITIALIZERS=1 ./apple
 dyld[21623]: running initializer 0x18e59e5c0 in /usr/lib/libSystem.B.dylib
@@ -253,16 +253,16 @@ dyld[21623]: running initializer 0x18e59e5c0 in /usr/lib/libSystem.B.dylib
 ```
 ### Inne
 
-- `DYLD_BIND_AT_LAUNCH`: Lazy bindings są rozwiązywane z nie-leniwymi
+- `DYLD_BIND_AT_LAUNCH`: Lazy bindings są rozwiązywane z nieleniwymi
 - `DYLD_DISABLE_PREFETCH`: Wyłącz pre-fetching zawartości \_\_DATA i \_\_LINKEDIT
 - `DYLD_FORCE_FLAT_NAMESPACE`: Jednopoziomowe powiązania
 - `DYLD_[FRAMEWORK/LIBRARY]_PATH | DYLD_FALLBACK_[FRAMEWORK/LIBRARY]_PATH | DYLD_VERSIONED_[FRAMEWORK/LIBRARY]_PATH`: Ścieżki rozwiązywania
-- `DYLD_INSERT_LIBRARIES`: Załaduj konkretną bibliotekę
+- `DYLD_INSERT_LIBRARIES`: Załaduj określoną bibliotekę
 - `DYLD_PRINT_TO_FILE`: Zapisz debug dyld w pliku
 - `DYLD_PRINT_APIS`: Wydrukuj wywołania API libdyld
 - `DYLD_PRINT_APIS_APP`: Wydrukuj wywołania API libdyld wykonane przez main
-- `DYLD_PRINT_BINDINGS`: Wydrukuj symbole podczas wiązania
-- `DYLD_WEAK_BINDINGS`: Wydrukuj tylko słabe symbole podczas wiązania
+- `DYLD_PRINT_BINDINGS`: Wydrukuj symbole podczas powiązania
+- `DYLD_WEAK_BINDINGS`: Wydrukuj tylko słabe symbole podczas powiązania
 - `DYLD_PRINT_CODE_SIGNATURES`: Wydrukuj operacje rejestracji podpisu kodu
 - `DYLD_PRINT_DOFS`: Wydrukuj sekcje formatu obiektów D-Trace jako załadowane
 - `DYLD_PRINT_ENV`: Wydrukuj env widziane przez dyld
@@ -276,14 +276,14 @@ dyld[21623]: running initializer 0x18e59e5c0 in /usr/lib/libSystem.B.dylib
 - `DYLD_PRINT_STATISTICS_DETAILS`: Wydrukuj szczegółowe statystyki czasowe
 - `DYLD_PRINT_WARNINGS`: Wydrukuj komunikaty ostrzegawcze
 - `DYLD_SHARED_CACHE_DIR`: Ścieżka do użycia dla pamięci podręcznej wspólnej biblioteki
-- `DYLD_SHARED_REGION`: "użyj", "prywatne", "unikaj"
+- `DYLD_SHARED_REGION`: "użyj", "prywatny", "unikaj"
 - `DYLD_USE_CLOSURES`: Włącz zamknięcia
 
 Można znaleźć więcej za pomocą czegoś takiego:
 ```bash
 strings /usr/lib/dyld | grep "^DYLD_" | sort -u
 ```
-Lub pobierając projekt dyld z [https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz) i uruchamiając wewnątrz folderu:
+Lub pobierając projekt dyld z [https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz) i uruchamiając w folderze:
 ```bash
 find . -type f | xargs grep strcmp| grep key,\ \" | cut -d'"' -f2 | sort -u
 ```

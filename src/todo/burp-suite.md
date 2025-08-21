@@ -1,10 +1,12 @@
+# Burp Suite
+
 {{#include ../banners/hacktricks-training.md}}
 
-# Podstawowe ładunki
+## Podstawowe ładunki
 
 - **Prosta lista:** Po prostu lista zawierająca wpis w każdej linii
-- **Plik w czasie rzeczywistym:** Lista odczytywana w czasie rzeczywistym (nie ładowana do pamięci). Do obsługi dużych list.
-- **Modyfikacja wielkości liter:** Zastosuj pewne zmiany do listy ciągów (brak zmiany, na małe litery, na DUŻE, na Właściwą nazwę - pierwsza litera wielka, reszta małe-, na Właściwą nazwę - pierwsza litera wielka, a reszta pozostaje taka sama-).
+- **Plik w czasie rzeczywistym:** Lista odczytywana w czasie rzeczywistym (nie ładowana do pamięci). Dla wsparcia dużych list.
+- **Modyfikacja wielkości liter:** Zastosuj pewne zmiany do listy ciągów (Bez zmian, na małe litery, na DUŻE, na Właściwą nazwę - pierwsza litera wielka, reszta małe-, na Właściwą nazwę - pierwsza litera wielka, a reszta pozostaje taka sama-).
 - **Liczby:** Generuj liczby od X do Y używając kroku Z lub losowo.
 - **Brute Forcer:** Zestaw znaków, minimalna i maksymalna długość.
 

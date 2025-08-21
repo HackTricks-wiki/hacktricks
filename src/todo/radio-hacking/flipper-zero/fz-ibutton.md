@@ -6,6 +6,7 @@
 
 Aby uzyskać więcej informacji na temat tego, czym jest iButton, sprawdź:
 
+
 {{#ref}}
 ../ibutton.md
 {{#endref}}
@@ -20,7 +21,7 @@ Aby uzyskać więcej informacji na temat tego, czym jest iButton, sprawdź:
 
 ### Read
 
-W trybie odczytu Flipper czeka na dotknięcie klucza iButton i jest w stanie przetworzyć dowolny z trzech typów kluczy: **Dallas, Cyfral i Metakom**. Flipper **samoistnie określi typ klucza**. Nazwa protokołu klucza zostanie wyświetlona na ekranie powyżej numeru ID.
+W trybie odczytu Flipper czeka na dotknięcie klucza iButton i jest w stanie przetworzyć dowolny z trzech typów kluczy: **Dallas, Cyfral i Metakom**. Flipper **samoistnie określi typ klucza**. Nazwa protokołu klucza będzie wyświetlana na ekranie powyżej numeru ID.
 
 ### Add manually
 
@@ -30,7 +31,7 @@ Możliwe jest **ręczne dodanie** iButtona typu: **Dallas, Cyfral i Metakom**
 
 Możliwe jest **emulowanie** zapisanych iButtonów (odczytanych lub dodanych ręcznie).
 
-> [!NOTE]
+> [!TIP]
 > Jeśli nie możesz sprawić, aby oczekiwane styki Flippera Zero dotknęły czytnika, możesz **użyć zewnętrznego GPIO:**
 
 <figure><img src="../../../images/image (138).png" alt=""><figcaption></figcaption></figure>

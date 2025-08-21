@@ -42,7 +42,7 @@ Użyj parametrów `/startoffset`, `/endin` i `/renewmax`, aby kontrolować przes
 ```
 Get-DomainPolicy | select -expand KerberosPolicy
 ```
-Niestety, czas życia TGT nie jest rejestrowany w 4769, więc nie znajdziesz tych informacji w dziennikach zdarzeń systemu Windows. Jednak to, co możesz skorelować, to **widzenie 4769 bez wcześniejszego 4768**. **Nie jest możliwe zażądanie TGS bez TGT**, a jeśli nie ma zapisu o wydaniu TGT, możemy wnioskować, że został on sfałszowany offline.
+Niestety, czas życia TGT nie jest rejestrowany w 4769, więc nie znajdziesz tych informacji w dziennikach zdarzeń systemu Windows. Jednak to, co możesz skorelować, to **widzenie 4769 bez wcześniejszego 4768**. **Nie można zażądać TGS bez TGT**, a jeśli nie ma zapisu o wydaniu TGT, możemy wnioskować, że został on sfałszowany offline.
 
 Aby **obejść to wykrywanie**, sprawdź bilety diamentowe:
 
@@ -58,7 +58,7 @@ diamond-ticket.md
 
 Inne małe sztuczki, które mogą zastosować obrońcy, to **powiadamianie o 4769 dla wrażliwych użytkowników**, takich jak domyślne konto administratora domeny.
 
-## Odniesienia
+## Referencje
 
 - [https://www.tarlogic.com/blog/how-to-attack-kerberos/](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-golden-tickets] (https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-golden-tickets)

@@ -17,7 +17,7 @@ Zazwyczaj oznacza to, że aby uciec, musisz być rootem wewnątrz chroot.
 ### Root + CWD
 
 > [!WARNING]
-> Jeśli jesteś **rootem** wewnątrz chroot, **możesz uciec**, tworząc **inny chroot**. Dzieje się tak, ponieważ 2 chrooty nie mogą współistnieć (w Linuxie), więc jeśli utworzysz folder, a następnie **stworzysz nowy chroot** w tym nowym folderze będąc **na zewnątrz**, będziesz teraz **na zewnątrz nowego chroot** i dlatego będziesz w FS.
+> Jeśli jesteś **rootem** wewnątrz chroot, **możesz uciec**, tworząc **inny chroot**. Dzieje się tak, ponieważ 2 chrooty nie mogą współistnieć (w Linuxie), więc jeśli utworzysz folder, a następnie **stworzysz nowy chroot** w tym nowym folderze będąc **na zewnątrz niego**, będziesz teraz **na zewnątrz nowego chroot** i dlatego będziesz w FS.
 >
 > Dzieje się tak, ponieważ zazwyczaj chroot NIE przenosi twojego katalogu roboczego do wskazanego, więc możesz utworzyć chroot, ale być na zewnątrz niego.
 
@@ -76,7 +76,7 @@ system("/bin/bash");
 ```
 </details>
 
-### Root + Saved fd
+### Root + Zapisany fd
 
 > [!WARNING]
 > To jest podobne do poprzedniego przypadku, ale w tym przypadku **atakujący przechowuje deskryptor pliku do bieżącego katalogu** i następnie **tworzy chroot w nowym folderze**. Ostatecznie, ponieważ ma **dostęp** do tego **FD** **poza** chroot, uzyskuje do niego dostęp i **ucieka**.
@@ -112,7 +112,7 @@ chroot(".");
 > FD może być przekazywane przez Unix Domain Sockets, więc:
 >
 > - Utwórz proces potomny (fork)
-> - Utwórz UDS, aby rodzic i dziecko mogły rozmawiać
+> - Utwórz UDS, aby rodzic i dziecko mogły się komunikować
 > - Uruchom chroot w procesie potomnym w innym folderze
 > - W procesie rodzica utwórz FD folderu, który znajduje się poza nowym chrootem procesu potomnego
 > - Przekaż do procesu potomnego ten FD za pomocą UDS
@@ -132,7 +132,7 @@ chroot(".");
 > [!WARNING]
 >
 > - Zamontuj procfs w katalogu wewnątrz chroot (jeśli jeszcze nie jest)
-> - Szukaj pid, który ma inny wpis root/cwd, na przykład: /proc/1/root
+> - Szukaj pid, który ma inną wpis root/cwd, na przykład: /proc/1/root
 > - Chrootuj do tego wpisu
 
 ### Root(?) + Fork
@@ -141,7 +141,7 @@ chroot(".");
 >
 > - Utwórz Fork (proces potomny) i chrootuj do innego folderu głębiej w FS i CD na nim
 > - Z procesu rodzica przenieś folder, w którym znajduje się proces potomny, do folderu poprzedzającego chroot dzieci
-> - Ten proces potomny znajdzie się poza chrootem
+> - Ten proces dziecięcy znajdzie się poza chrootem
 
 ### ptrace
 
@@ -162,7 +162,7 @@ env
 export
 pwd
 ```
-### Zmodyfikuj PATH
+### Modyfikacja PATH
 
 Sprawdź, czy możesz zmodyfikować zmienną środowiskową PATH
 ```bash
@@ -184,13 +184,13 @@ red /bin/bash
 ```
 ### Uzyskaj bash z SSH
 
-Jeśli uzyskujesz dostęp przez ssh, możesz użyć tego triku, aby wykonać powłokę bash:
+Jeśli uzyskujesz dostęp przez ssh, możesz użyć tego triku, aby uruchomić powłokę bash:
 ```bash
 ssh -t user@<IP> bash # Get directly an interactive shell
 ssh user@<IP> -t "bash --noprofile -i"
 ssh user@<IP> -t "() { :; }; sh -i "
 ```
-### Zadeklaruj
+### Deklaracja
 ```bash
 declare -n PATH; export PATH=/bin;bash -i
 
@@ -209,6 +209,7 @@ wget http://127.0.0.1:8080/sudoers -O /etc/sudoers
 [https://gtfobins.github.io](https://gtfobins.github.io)\
 **Może być również interesująca strona:**
 
+
 {{#ref}}
 ../bypass-bash-restrictions/
 {{#endref}}
@@ -217,13 +218,14 @@ wget http://127.0.0.1:8080/sudoers -O /etc/sudoers
 
 Sztuczki dotyczące ucieczki z piaskownic Pythona na następującej stronie:
 
+
 {{#ref}}
 ../../generic-methodologies-and-resources/python/bypass-python-sandboxes/
 {{#endref}}
 
 ## Lua Jails
 
-Na tej stronie możesz znaleźć globalne funkcje, do których masz dostęp wewnątrz lua: [https://www.gammon.com.au/scripts/doc.php?general=lua_base](https://www.gammon.com.au/scripts/doc.php?general=lua_base)
+Na tej stronie możesz znaleźć globalne funkcje, do których masz dostęp w lua: [https://www.gammon.com.au/scripts/doc.php?general=lua_base](https://www.gammon.com.au/scripts/doc.php?general=lua_base)
 
 **Eval z wykonaniem polecenia:**
 ```bash

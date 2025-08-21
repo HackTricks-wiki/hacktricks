@@ -26,7 +26,7 @@ Znajdź wszystkie binarki suid i sprawdź, czy istnieje binarka **Pkexec**:
 ```bash
 find / -perm -4000 2>/dev/null
 ```
-Jeśli odkryjesz, że binarny **pkexec jest binarnym SUID** i należysz do **sudo** lub **admin**, prawdopodobnie będziesz mógł wykonywać binaria jako sudo za pomocą `pkexec`.\
+Jeśli odkryjesz, że binarny **pkexec jest binarnym SUID** i należysz do **sudo** lub **admin**, prawdopodobnie możesz wykonywać binaria jako sudo za pomocą `pkexec`.\
 Dzieje się tak, ponieważ zazwyczaj są to grupy w ramach **polkit policy**. Ta polityka zasadniczo identyfikuje, które grupy mogą używać `pkexec`. Sprawdź to za pomocą:
 ```bash
 cat /etc/polkit-1/localauthority.conf.d/*
@@ -66,7 +66,7 @@ Jeśli tak jest, aby **stać się rootem, wystarczy wykonać**:
 ```
 sudo su
 ```
-## Grupa Shadow
+## Shadow Group
 
 Użytkownicy z **grupy shadow** mogą **czytać** plik **/etc/shadow**:
 ```
@@ -130,7 +130,7 @@ $ /bin/bash -p
 ```
 ## Grupa dysków
 
-To uprawnienie jest prawie **równoważne z dostępem root** ponieważ możesz uzyskać dostęp do wszystkich danych wewnątrz maszyny.
+To uprawnienie jest prawie **równoważne z dostępem root**, ponieważ możesz uzyskać dostęp do wszystkich danych wewnątrz maszyny.
 
 Pliki:`/dev/sd[a-z][1-9]`
 ```bash
@@ -193,7 +193,7 @@ echo 'toor:$1$.ZcF5ts0$i4k6rQYzeegUkacRCvfxC0:0:0:root:/root:/bin/sh' >> /etc/pa
 #Ifyou just want filesystem and network access you can startthe following container:
 docker run --rm -it --pid=host --net=host --privileged -v /:/mnt <imagename> chroot /mnt bashbash
 ```
-Na koniec, jeśli nie podoba Ci się żadna z wcześniejszych sugestii lub z jakiegoś powodu nie działają (firewall API dockera?), zawsze możesz spróbować **uruchomić uprzywilejowany kontener i uciec z niego**, jak wyjaśniono tutaj:
+Na koniec, jeśli nie podoba Ci się żadna z wcześniejszych sugestii lub z jakiegoś powodu nie działają (firewall API dockera?), zawsze możesz spróbować **uruchomić kontener z uprawnieniami i wydostać się z niego**, jak wyjaśniono tutaj:
 
 {{#ref}}
 ../docker-security/
@@ -217,7 +217,7 @@ https://fosterelli.co/privilege-escalation-via-docker.html
 
 ## Grupa Adm
 
-Zazwyczaj **członkowie** grupy **`adm`** mają uprawnienia do **czytania plików** dziennika znajdujących się w _/var/log/_.\
+Zazwyczaj **członkowie** grupy **`adm`** mają uprawnienia do **odczytu plików dziennika** znajdujących się w _/var/log/_.\
 Dlatego, jeśli skompromitowałeś użytkownika w tej grupie, zdecydowanie powinieneś **sprawdzić logi**.
 
 ## Grupa Auth

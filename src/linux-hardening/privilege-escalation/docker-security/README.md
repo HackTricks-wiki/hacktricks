@@ -2,9 +2,9 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## **Podstawowe zabezpieczenia silnika Docker**
+## **Podstawowe bezpieczeństwo silnika Docker**
 
-**Silnik Docker** wykorzystuje **Namespaces** i **Cgroups** jądra Linux do izolacji kontenerów, oferując podstawową warstwę zabezpieczeń. Dodatkową ochronę zapewniają **Capabilities dropping**, **Seccomp** oraz **SELinux/AppArmor**, co zwiększa izolację kontenerów. **Plugin autoryzacji** może dodatkowo ograniczyć działania użytkowników.
+**Silnik Docker** wykorzystuje **Namespaces** i **Cgroups** jądra Linux do izolacji kontenerów, oferując podstawową warstwę bezpieczeństwa. Dodatkową ochronę zapewniają **Capability dropping**, **Seccomp** oraz **SELinux/AppArmor**, wzmacniając izolację kontenerów. **Plugin autoryzacji** może dodatkowo ograniczyć działania użytkowników.
 
 ![Docker Security](https://sreeninet.files.wordpress.com/2016/03/dockersec1.png)
 
@@ -12,15 +12,15 @@
 
 Silnik Docker można uzyskać lokalnie za pomocą gniazda Unix lub zdalnie przy użyciu HTTP. W przypadku dostępu zdalnego istotne jest stosowanie HTTPS i **TLS**, aby zapewnić poufność, integralność i uwierzytelnienie.
 
-Silnik Docker, domyślnie, nasłuchuje na gnieździe Unix pod adresem `unix:///var/run/docker.sock`. W systemach Ubuntu opcje uruchamiania Dockera są definiowane w `/etc/default/docker`. Aby umożliwić zdalny dostęp do API Dockera i klienta, należy udostępnić demon Dockera przez gniazdo HTTP, dodając następujące ustawienia:
+Silnik Docker, domyślnie, nasłuchuje na gnieździe Unix pod `unix:///var/run/docker.sock`. W systemach Ubuntu opcje uruchamiania Dockera są definiowane w `/etc/default/docker`. Aby umożliwić zdalny dostęp do API Dockera i klienta, należy udostępnić demon Dockera przez gniazdo HTTP, dodając następujące ustawienia:
 ```bash
 DOCKER_OPTS="-D -H unix:///var/run/docker.sock -H tcp://192.168.56.101:2376"
 sudo service docker restart
 ```
-Jednakże, wystawianie demona Docker na HTTP nie jest zalecane z powodu obaw o bezpieczeństwo. Zaleca się zabezpieczenie połączeń za pomocą HTTPS. Istnieją dwa główne podejścia do zabezpieczenia połączenia:
+Jednakże, udostępnianie demona Docker przez HTTP nie jest zalecane z powodu obaw dotyczących bezpieczeństwa. Zaleca się zabezpieczenie połączeń za pomocą HTTPS. Istnieją dwa główne podejścia do zabezpieczania połączenia:
 
 1. Klient weryfikuje tożsamość serwera.
-2. Klient i serwer wzajemnie uwierzytelniają swoją tożsamość.
+2. Zarówno klient, jak i serwer wzajemnie uwierzytelniają swoją tożsamość.
 
 Certyfikaty są wykorzystywane do potwierdzenia tożsamości serwera. Aby uzyskać szczegółowe przykłady obu metod, zapoznaj się z [**tym przewodnikiem**](https://sreeninet.wordpress.com/2016/03/06/docker-security-part-3engine-access/).
 
@@ -40,7 +40,7 @@ Aby uzyskać więcej [**informacji, przeczytaj to**](https://docs.docker.com/eng
 
 - **`docker scan`**
 
-Polecenie **`docker scan`** pozwala na skanowanie istniejących obrazów Docker za pomocą nazwy lub ID obrazu. Na przykład, uruchom następujące polecenie, aby przeskanować obraz hello-world:
+Polecenie **`docker scan`** pozwala na skanowanie istniejących obrazów Docker za pomocą nazwy lub ID obrazu. Na przykład, uruchom następujące polecenie, aby zeskanować obraz hello-world:
 ```bash
 docker scan hello-world
 
@@ -74,7 +74,7 @@ Podpisywanie obrazów Docker zapewnia bezpieczeństwo i integralność obrazów 
 
 - **Docker Content Trust** wykorzystuje projekt Notary, oparty na The Update Framework (TUF), do zarządzania podpisywaniem obrazów. Więcej informacji można znaleźć w [Notary](https://github.com/docker/notary) i [TUF](https://theupdateframework.github.io).
 - Aby aktywować zaufanie do treści Docker, ustaw `export DOCKER_CONTENT_TRUST=1`. Ta funkcja jest domyślnie wyłączona w wersji Docker 1.10 i nowszych.
-- Po włączeniu tej funkcji można pobierać tylko podpisane obrazy. Początkowe przesyłanie obrazu wymaga ustawienia haseł dla kluczy głównych i tagujących, a Docker obsługuje również Yubikey dla zwiększonego bezpieczeństwa. Więcej szczegółów można znaleźć [tutaj](https://blog.docker.com/2015/11/docker-content-trust-yubikey/).
+- Po włączeniu tej funkcji można pobierać tylko podpisane obrazy. Początkowe przesyłanie obrazu wymaga ustawienia haseł dla kluczy root i tagujących, a Docker obsługuje również Yubikey dla zwiększonego bezpieczeństwa. Więcej szczegółów można znaleźć [tutaj](https://blog.docker.com/2015/11/docker-content-trust-yubikey/).
 - Próba pobrania niepodpisanego obrazu z włączonym zaufaniem do treści skutkuje błędem "No trust data for latest".
 - Przy przesyłaniu obrazów po pierwszym, Docker prosi o hasło klucza repozytorium, aby podpisać obraz.
 
@@ -82,9 +82,9 @@ Aby wykonać kopię zapasową swoich prywatnych kluczy, użyj polecenia:
 ```bash
 tar -zcvf private_keys_backup.tar.gz ~/.docker/trust/private
 ```
-Przy przełączaniu hostów Docker, konieczne jest przeniesienie kluczy root i repozytoriów, aby utrzymać operacje.
+When switching Docker hosts, it's necessary to move the root and repository keys to maintain operations.
 
-## Funkcje zabezpieczeń kontenerów
+## Containers Security Features
 
 <details>
 
@@ -96,19 +96,19 @@ W środowiskach kontenerowych izolacja projektów i ich procesów jest kluczowa 
 
 **Przestrzenie nazw**
 
-- **Cel**: Zapewnienie izolacji zasobów, takich jak procesy, sieć i systemy plików. Szczególnie w Docker, przestrzenie nazw utrzymują procesy kontenera oddzielone od hosta i innych kontenerów.
-- **Użycie `unshare`**: Komenda `unshare` (lub podstawowe wywołanie syscall) jest wykorzystywana do tworzenia nowych przestrzeni nazw, co zapewnia dodatkową warstwę izolacji. Jednak podczas gdy Kubernetes nie blokuje tego z natury, Docker to robi.
+- **Cel**: Zapewnienie izolacji zasobów, takich jak procesy, sieć i systemy plików. Szczególnie w Dockerze, przestrzenie nazw utrzymują procesy kontenera oddzielone od hosta i innych kontenerów.
+- **Użycie `unshare`**: Komenda `unshare` (lub podstawowe wywołanie systemowe) jest wykorzystywana do tworzenia nowych przestrzeni nazw, co zapewnia dodatkową warstwę izolacji. Jednak podczas gdy Kubernetes nie blokuje tego z założenia, Docker to robi.
 - **Ograniczenie**: Tworzenie nowych przestrzeni nazw nie pozwala procesowi na powrót do domyślnych przestrzeni nazw hosta. Aby przeniknąć do przestrzeni nazw hosta, zazwyczaj wymagany jest dostęp do katalogu `/proc` hosta, używając `nsenter` do wejścia.
 
 **Grupy kontrolne (CGroups)**
 
-- **Funkcja**: Głównie używane do alokacji zasobów między procesami.
+- **Funkcja**: Głównie używane do alokacji zasobów pomiędzy procesami.
 - **Aspekt bezpieczeństwa**: CGroups same w sobie nie oferują bezpieczeństwa izolacji, z wyjątkiem funkcji `release_agent`, która, jeśli jest źle skonfigurowana, może być potencjalnie wykorzystana do nieautoryzowanego dostępu.
 
 **Ograniczenie możliwości**
 
 - **Znaczenie**: To kluczowa funkcja zabezpieczeń dla izolacji procesów.
-- **Funkcjonalność**: Ogranicza działania, które proces root może wykonać, poprzez usunięcie niektórych możliwości. Nawet jeśli proces działa z uprawnieniami root, brak niezbędnych możliwości uniemożliwia mu wykonywanie uprzywilejowanych działań, ponieważ wywołania syscall zakończą się niepowodzeniem z powodu niewystarczających uprawnień.
+- **Funkcjonalność**: Ogranicza działania, które proces root może wykonać, poprzez usunięcie niektórych możliwości. Nawet jeśli proces działa z uprawnieniami roota, brak niezbędnych możliwości uniemożliwia mu wykonywanie działań uprzywilejowanych, ponieważ wywołania systemowe zakończą się niepowodzeniem z powodu niewystarczających uprawnień.
 
 To są **pozostałe możliwości** po usunięciu innych przez proces:
 ```
@@ -117,7 +117,7 @@ Current: cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setgid,ca
 **Seccomp**
 
 Jest domyślnie włączony w Dockerze. Pomaga **jeszcze bardziej ograniczyć syscalls**, które proces może wywołać.\
-**Domyślny profil Seccomp Docker** można znaleźć pod adresem [https://github.com/moby/moby/blob/master/profiles/seccomp/default.json](https://github.com/moby/moby/blob/master/profiles/seccomp/default.json)
+**Domyślny profil Seccomp Dockera** można znaleźć pod adresem [https://github.com/moby/moby/blob/master/profiles/seccomp/default.json](https://github.com/moby/moby/blob/master/profiles/seccomp/default.json)
 
 **AppArmor**
 
@@ -139,7 +139,8 @@ Docker wykorzystuje następujące Namespaces jądra Linux do osiągnięcia izola
 - ipc namespace
 - UTS namespace
 
-Aby uzyskać **więcej informacji na temat namespaces**, sprawdź następującą stronę:
+Aby **uzyskać więcej informacji o namespaces**, sprawdź następującą stronę:
+
 
 {{#ref}}
 namespaces/
@@ -148,78 +149,84 @@ namespaces/
 ### cgroups
 
 Funkcja jądra Linux **cgroups** zapewnia możliwość **ograniczenia zasobów, takich jak cpu, pamięć, io, przepustowość sieci** wśród zestawu procesów. Docker pozwala na tworzenie kontenerów z wykorzystaniem funkcji cgroup, co umożliwia kontrolę zasobów dla konkretnego kontenera.\
-Poniżej znajduje się kontener utworzony z ograniczoną pamięcią przestrzeni użytkownika do 500m, pamięcią jądra ograniczoną do 50m, udziałem CPU do 512, blkiowe ciężar do 400. Udział CPU to wskaźnik, który kontroluje wykorzystanie CPU przez kontener. Ma domyślną wartość 1024 i zakres od 0 do 1024. Jeśli trzy kontenery mają ten sam udział CPU wynoszący 1024, każdy kontener może zająć do 33% CPU w przypadku kontestacji zasobów CPU. blkio-weight to wskaźnik, który kontroluje IO kontenera. Ma domyślną wartość 500 i zakres od 10 do 1000.
+Poniżej znajduje się kontener utworzony z ograniczoną pamięcią przestrzeni użytkownika do 500m, pamięcią jądra ograniczoną do 50m, udziałem CPU do 512, blkiowe ciężar do 400. Udział CPU to stosunek, który kontroluje wykorzystanie CPU przez kontener. Ma domyślną wartość 1024 i zakres od 0 do 1024. Jeśli trzy kontenery mają ten sam udział CPU wynoszący 1024, każdy kontener może zająć do 33% CPU w przypadku kontestacji zasobów CPU. blkio-weight to stosunek, który kontroluje IO kontenera. Ma domyślną wartość 500 i zakres od 10 do 1000.
 ```
 docker run -it -m 500M --kernel-memory 50M --cpu-shares 512 --blkio-weight 400 --name ubuntu1 ubuntu bash
 ```
-Aby uzyskać cgroup kontenera, możesz zrobić:
+Aby uzyskać cgroup kontenera, możesz to zrobić:
 ```bash
 docker run -dt --rm denial sleep 1234 #Run a large sleep inside a Debian container
 ps -ef | grep 1234 #Get info about the sleep process
 ls -l /proc/<PID>/ns #Get the Group and the namespaces (some may be uniq to the hosts and some may be shred with it)
 ```
-Dla uzyskania dalszych informacji sprawdź:
+For more information check:
+
 
 {{#ref}}
 cgroups.md
 {{#endref}}
 
-### Uprawnienia
+### Capabilities
 
-Uprawnienia pozwalają na **dokładniejszą kontrolę nad uprawnieniami, które mogą być przyznane** użytkownikowi root. Docker wykorzystuje funkcję uprawnień jądra Linux do **ograniczenia operacji, które mogą być wykonywane wewnątrz kontenera**, niezależnie od typu użytkownika.
+Capabilities allow **finer control for the capabilities that can be allowed** for root user. Docker uses the Linux kernel capability feature to **limit the operations that can be done inside a Container** irrespective of the type of user.
 
-Gdy kontener dockerowy jest uruchamiany, **proces rezygnuje z wrażliwych uprawnień, które mógłby wykorzystać do ucieczki z izolacji**. To próbuje zapewnić, że proces nie będzie w stanie wykonywać wrażliwych działań i uciekać:
+When a docker container is run, the **process drops sensitive capabilities that the proccess could use to escape from the isolation**. This try to assure that the proccess won't be able to perform sensitive actions and escape:
+
 
 {{#ref}}
 ../linux-capabilities.md
 {{#endref}}
 
-### Seccomp w Dockerze
+### Seccomp in Docker
 
-To funkcja zabezpieczeń, która pozwala Dockerowi **ograniczyć syscalls**, które mogą być używane wewnątrz kontenera:
+This is a security feature that allows Docker to **limit the syscalls** that can be used inside the container:
+
 
 {{#ref}}
 seccomp.md
 {{#endref}}
 
-### AppArmor w Dockerze
+### AppArmor in Docker
 
-**AppArmor** to ulepszenie jądra, które ogranicza **kontenery** do **ograniczonego** zestawu **zasobów** z **profilami per-program**.:
+**AppArmor** to ulepszenie jądra, które ogranicza **kontenery** do **ograniczonego** zestawu **zasobów** z **profilami per program**.:
+
 
 {{#ref}}
 apparmor.md
 {{#endref}}
 
-### SELinux w Dockerze
+### SELinux in Docker
 
-- **System Etykietowania**: SELinux przypisuje unikalną etykietę każdemu procesowi i obiektowi systemu plików.
-- **Egzekwowanie Polityki**: Egzekwuje polityki zabezpieczeń, które definiują, jakie działania etykieta procesu może wykonywać na innych etykietach w systemie.
-- **Etykiety Procesów Kontenerów**: Gdy silniki kontenerów inicjują procesy kontenerów, zazwyczaj przypisywana jest im ograniczona etykieta SELinux, zwykle `container_t`.
-- **Etykietowanie Plików w Kontenerach**: Pliki wewnątrz kontenera są zazwyczaj etykietowane jako `container_file_t`.
-- **Reguły Polityki**: Polityka SELinux przede wszystkim zapewnia, że procesy z etykietą `container_t` mogą wchodzić w interakcje (czytać, pisać, wykonywać) tylko z plikami oznaczonymi jako `container_file_t`.
+- **System etykietowania**: SELinux przypisuje unikalną etykietę do każdego procesu i obiektu systemu plików.
+- **Egzekwowanie polityki**: Egzekwuje polityki bezpieczeństwa, które definiują, jakie działania etykieta procesu może wykonywać na innych etykietach w systemie.
+- **Etykiety procesów kontenerów**: Gdy silniki kontenerów inicjują procesy kontenerów, zazwyczaj przypisywana jest im ograniczona etykieta SELinux, zwykle `container_t`.
+- **Etykietowanie plików w kontenerach**: Pliki w kontenerze są zazwyczaj etykietowane jako `container_file_t`.
+- **Reguły polityki**: Polityka SELinux przede wszystkim zapewnia, że procesy z etykietą `container_t` mogą wchodzić w interakcje (czytać, pisać, wykonywać) tylko z plikami oznaczonymi jako `container_file_t`.
 
-Ten mechanizm zapewnia, że nawet jeśli proces wewnątrz kontenera zostanie skompromitowany, jest ograniczony do interakcji tylko z obiektami, które mają odpowiadające etykiety, znacznie ograniczając potencjalne szkody wynikające z takich kompromisów.
+Ten mechanizm zapewnia, że nawet jeśli proces w kontenerze zostanie skompromitowany, jest ograniczony do interakcji tylko z obiektami, które mają odpowiednie etykiety, znacznie ograniczając potencjalne szkody wynikające z takich kompromisów.
+
 
 {{#ref}}
 ../selinux.md
 {{#endref}}
 
-### AuthZ i AuthN
+### AuthZ & AuthN
 
-W Dockerze wtyczka autoryzacyjna odgrywa kluczową rolę w zabezpieczeniach, decydując, czy zezwolić na żądania do demona Docker. Decyzja ta podejmowana jest na podstawie analizy dwóch kluczowych kontekstów:
+In Docker, an authorization plugin plays a crucial role in security by deciding whether to allow or block requests to the Docker daemon. This decision is made by examining two key contexts:
 
-- **Kontekst Uwierzytelniania**: Zawiera szczegółowe informacje o użytkowniku, takie jak kim jest i jak się uwierzytelnił.
-- **Kontekst Komendy**: Zawiera wszystkie istotne dane związane z wysyłanym żądaniem.
+- **Kontekst uwierzytelniania**: To obejmuje szczegółowe informacje o użytkowniku, takie jak kim jest i jak się uwierzytelnił.
+- **Kontekst polecenia**: To obejmuje wszystkie istotne dane związane z wysyłanym żądaniem.
 
-Te konteksty pomagają zapewnić, że tylko legalne żądania od uwierzytelnionych użytkowników są przetwarzane, co zwiększa bezpieczeństwo operacji Docker.
+These contexts help ensure that only legitimate requests from authenticated users are processed, enhancing the security of Docker operations.
+
 
 {{#ref}}
 authz-and-authn-docker-access-authorization-plugin.md
 {{#endref}}
 
-## DoS z kontenera
+## DoS from a container
 
-Jeśli nie ograniczasz odpowiednio zasobów, które może wykorzystać kontener, skompromitowany kontener może spowodować DoS hosta, na którym działa.
+If you are not properly limiting the resources a container can use, a compromised container could DoS the host where it's running.
 
 - CPU DoS
 ```bash
@@ -229,7 +236,7 @@ sudo apt-get install -y stress-ng && stress-ng --vm 1 --vm-bytes 1G --verify -t 
 # While loop
 docker run -d --name malicious-container -c 512 busybox sh -c 'while true; do :; done'
 ```
-- Atak DoS na pasmo
+- Bandwidth DoS
 ```bash
 nc -lvp 4444 >/dev/null & while true; do cat /dev/urandom | nc <target IP> 4444; done
 ```
@@ -237,7 +244,7 @@ nc -lvp 4444 >/dev/null & while true; do cat /dev/urandom | nc <target IP> 4444;
 
 ### Flaga --privileged
 
-Na następnej stronie możesz się dowiedzieć **co oznacza flaga `--privileged`**:
+Na poniższej stronie możesz się dowiedzieć **co oznacza flaga `--privileged`**:
 
 {{#ref}}
 docker-privileged.md
@@ -268,25 +275,25 @@ docker run -it --security-opt=no-new-privileges:true nonewpriv
 # You can manually disable selinux in docker with
 --security-opt label:disable
 ```
-Aby uzyskać więcej opcji **`--security-opt`**, sprawdź: [https://docs.docker.com/engine/reference/run/#security-configuration](https://docs.docker.com/engine/reference/run/#security-configuration)
+Dla więcej opcji **`--security-opt`** sprawdź: [https://docs.docker.com/engine/reference/run/#security-configuration](https://docs.docker.com/engine/reference/run/#security-configuration)
 
-## Inne rozważania dotyczące bezpieczeństwa
+## Inne Rozważania Bezpieczeństwa
 
-### Zarządzanie sekretami: najlepsze praktyki
+### Zarządzanie Sekretami: Najlepsze Praktyki
 
 Konieczne jest unikanie osadzania sekretów bezpośrednio w obrazach Docker lub używania zmiennych środowiskowych, ponieważ te metody narażają Twoje wrażliwe informacje na dostęp dla każdego, kto ma dostęp do kontenera za pomocą poleceń takich jak `docker inspect` lub `exec`.
 
-**Wolumeny Docker** są bezpieczniejszą alternatywą, zalecaną do uzyskiwania dostępu do wrażliwych informacji. Mogą być wykorzystywane jako tymczasowy system plików w pamięci, co zmniejsza ryzyko związane z `docker inspect` i logowaniem. Jednak użytkownicy root i ci, którzy mają dostęp do `exec` w kontenerze, mogą nadal uzyskać dostęp do sekretów.
+**Wolumeny Docker** są bezpieczniejszą alternatywą, zalecaną do uzyskiwania dostępu do wrażliwych informacji. Mogą być wykorzystywane jako tymczasowy system plików w pamięci, łagodząc ryzyko związane z `docker inspect` i logowaniem. Jednak użytkownicy root i ci, którzy mają dostęp do `exec` w kontenerze, mogą nadal uzyskać dostęp do sekretów.
 
-**Sekrety Docker** oferują jeszcze bezpieczniejszą metodę obsługi wrażliwych informacji. W przypadku instancji wymagających sekretów podczas fazy budowy obrazu, **BuildKit** przedstawia efektywne rozwiązanie z obsługą sekretów w czasie budowy, co zwiększa szybkość budowy i zapewnia dodatkowe funkcje.
+**Sekrety Docker** oferują jeszcze bardziej bezpieczną metodę obsługi wrażliwych informacji. W przypadku instancji wymagających sekretów podczas fazy budowy obrazu, **BuildKit** przedstawia efektywne rozwiązanie z obsługą sekretów w czasie budowy, zwiększając prędkość budowy i oferując dodatkowe funkcje.
 
 Aby skorzystać z BuildKit, można go aktywować na trzy sposoby:
 
 1. Poprzez zmienną środowiskową: `export DOCKER_BUILDKIT=1`
 2. Poprzez prefiksowanie poleceń: `DOCKER_BUILDKIT=1 docker build .`
-3. Poprzez włączenie go domyślnie w konfiguracji Docker: `{ "features": { "buildkit": true } }`, a następnie ponowne uruchomienie Dockera.
+3. Poprzez włączenie go domyślnie w konfiguracji Docker: `{ "features": { "buildkit": true } }`, a następnie restart Docker.
 
-BuildKit umożliwia korzystanie z sekretów w czasie budowy za pomocą opcji `--secret`, zapewniając, że te sekrety nie są uwzględniane w pamięci podręcznej budowy obrazu ani w finalnym obrazie, używając polecenia takiego jak:
+BuildKit pozwala na użycie sekretów w czasie budowy z opcją `--secret`, zapewniając, że te sekrety nie są uwzględniane w pamięci podręcznej budowy obrazu ani w finalnym obrazie, używając polecenia takiego jak:
 ```bash
 docker build --secret my_key=my_value ,src=path/to/my_secret_file .
 ```
@@ -317,7 +324,7 @@ https://github.com/google/gvisor
 
 ### Kata Containers
 
-**Kata Containers** to społeczność open source, która pracuje nad budowaniem bezpiecznego runtime'u kontenerów z lekkimi maszynami wirtualnymi, które działają i zachowują się jak kontenery, ale zapewniają **silniejszą izolację obciążenia przy użyciu technologii wirtualizacji sprzętowej** jako drugiej warstwy obrony.
+**Kata Containers** to społeczność open source, która pracuje nad budową bezpiecznego runtime kontenerów z lekkimi maszynami wirtualnymi, które działają i zachowują się jak kontenery, ale zapewniają **silniejszą izolację obciążenia przy użyciu technologii wirtualizacji sprzętowej** jako drugiej warstwy obrony.
 
 {{#ref}}
 https://katacontainers.io/
@@ -326,19 +333,19 @@ https://katacontainers.io/
 ### Podsumowanie wskazówek
 
 - **Nie używaj flagi `--privileged` ani nie montuj** [**gniazda Docker wewnątrz kontenera**](https://raesene.github.io/blog/2016/03/06/The-Dangers-Of-Docker.sock/)**.** Gniazdo Docker umożliwia uruchamianie kontenerów, więc jest to łatwy sposób na przejęcie pełnej kontroli nad hostem, na przykład uruchamiając inny kontener z flagą `--privileged`.
-- **Nie uruchamiaj jako root wewnątrz kontenera. Użyj** [**innego użytkownika**](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#user) **i** [**przestrzeni nazw użytkowników**](https://docs.docker.com/engine/security/userns-remap/)**.** Root w kontenerze jest taki sam jak na hoście, chyba że jest przemapowany za pomocą przestrzeni nazw użytkowników. Jest on tylko lekko ograniczony przez, przede wszystkim, przestrzenie nazw Linuxa, możliwości i cgroups.
+- **Nie uruchamiaj jako root wewnątrz kontenera. Użyj** [**innego użytkownika**](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#user) **i** [**przestrzeni nazw użytkowników**](https://docs.docker.com/engine/security/userns-remap/)**.** Root w kontenerze jest taki sam jak na hoście, chyba że jest przemapowany za pomocą przestrzeni nazw użytkowników. Jest on tylko lekko ograniczony przez, głównie, przestrzenie nazw Linuxa, możliwości i cgroups.
 - [**Zrzuć wszystkie możliwości**](https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities) **(`--cap-drop=all`) i włącz tylko te, które są wymagane** (`--cap-add=...`). Wiele obciążeń nie potrzebuje żadnych możliwości, a ich dodanie zwiększa zakres potencjalnego ataku.
 - [**Użyj opcji bezpieczeństwa „no-new-privileges”**](https://raesene.github.io/blog/2019/06/01/docker-capabilities-and-no-new-privs/) aby zapobiec uzyskiwaniu przez procesy większych uprawnień, na przykład przez binaria suid.
 - [**Ogranicz zasoby dostępne dla kontenera**](https://docs.docker.com/engine/reference/run/#runtime-constraints-on-resources)**.** Limity zasobów mogą chronić maszynę przed atakami typu denial of service.
 - **Dostosuj** [**seccomp**](https://docs.docker.com/engine/security/seccomp/)**,** [**AppArmor**](https://docs.docker.com/engine/security/apparmor/) **(lub SELinux)** profile, aby ograniczyć działania i wywołania syscalls dostępne dla kontenera do minimum.
-- **Używaj** [**oficjalnych obrazów docker**](https://docs.docker.com/docker-hub/official_images/) **i wymagaj podpisów** lub buduj własne na ich podstawie. Nie dziedzicz ani nie używaj [obrazów z backdoorem](https://arstechnica.com/information-technology/2018/06/backdoored-images-downloaded-5-million-times-finally-removed-from-docker-hub/). Przechowuj również klucze root, hasła w bezpiecznym miejscu. Docker planuje zarządzać kluczami za pomocą UCP.
+- **Używaj** [**oficjalnych obrazów docker**](https://docs.docker.com/docker-hub/official_images/) **i wymagaj podpisów** lub buduj własne na ich podstawie. Nie dziedzicz ani nie używaj [obrazów z tylnymi drzwiami](https://arstechnica.com/information-technology/2018/06/backdoored-images-downloaded-5-million-times-finally-removed-from-docker-hub/). Przechowuj również klucze root, hasła w bezpiecznym miejscu. Docker planuje zarządzać kluczami za pomocą UCP.
 - **Regularnie** **przebudowuj** swoje obrazy, aby **zastosować poprawki bezpieczeństwa do hosta i obrazów.**
 - Zarządzaj swoimi **sekretami mądrze**, aby utrudnić atakującemu dostęp do nich.
 - Jeśli **udostępniasz demona docker, użyj HTTPS** z uwierzytelnianiem klienta i serwera.
 - W swoim Dockerfile, **preferuj COPY zamiast ADD**. ADD automatycznie wyodrębnia pliki skompresowane i może kopiować pliki z adresów URL. COPY nie ma tych możliwości. Kiedy to możliwe, unikaj używania ADD, aby nie być podatnym na ataki przez zdalne adresy URL i pliki Zip.
-- Miej **osobne kontenery dla każdego mikro-s**erwisu.
+- Miej **osobne kontenery dla każdego mikroserwisu.**
 - **Nie umieszczaj ssh** wewnątrz kontenera, „docker exec” może być używane do ssh do kontenera.
-- Miej **mniejsze** obrazy **kontenerów**.
+- Miej **mniejsze** obrazy **kontenerów.**
 
 ## Docker Breakout / Eskalacja uprawnień
 
@@ -348,7 +355,7 @@ Jeśli jesteś **wewnątrz kontenera docker** lub masz dostęp do użytkownika w
 docker-breakout-privilege-escalation/
 {{#endref}}
 
-## Ominięcie wtyczki uwierzytelniania Docker
+## Obejście wtyczki uwierzytelniania Docker
 
 Jeśli masz dostęp do gniazda docker lub masz dostęp do użytkownika w **grupie docker, ale twoje działania są ograniczone przez wtyczkę uwierzytelniania docker**, sprawdź, czy możesz **to obejść:**
 
@@ -356,10 +363,10 @@ Jeśli masz dostęp do gniazda docker lub masz dostęp do użytkownika w **grupi
 authz-and-authn-docker-access-authorization-plugin.md
 {{#endref}}
 
-## Wzmacnianie Docker
+## Utwardzanie Dockera
 
 - Narzędzie [**docker-bench-security**](https://github.com/docker/docker-bench-security) to skrypt, który sprawdza dziesiątki powszechnych najlepszych praktyk dotyczących wdrażania kontenerów Docker w produkcji. Testy są w pełni zautomatyzowane i oparte na [CIS Docker Benchmark v1.3.1](https://www.cisecurity.org/benchmark/docker/).\
-Musisz uruchomić narzędzie z hosta uruchamiającego docker lub z kontenera z wystarczającymi uprawnieniami. Dowiedz się **jak to uruchomić w README:** [**https://github.com/docker/docker-bench-security**](https://github.com/docker/docker-bench-security).
+Musisz uruchomić narzędzie z hosta uruchamiającego dockera lub z kontenera z wystarczającymi uprawnieniami. Dowiedz się **jak to uruchomić w README:** [**https://github.com/docker/docker-bench-security**](https://github.com/docker/docker-bench-security).
 
 ## Odnośniki
 

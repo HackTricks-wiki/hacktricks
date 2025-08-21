@@ -9,20 +9,20 @@ Delegowane Konta Usługowe (**dMSA**) są następną generacją następców **gM
 * **`msDS-ManagedAccountPrecededByLink`** – *link DN* do zastąpionego (starego) konta.
 * **`msDS-DelegatedMSAState`**       – stan migracji (`0` = brak, `1` = w toku, `2` = *ukończony*).
 
-Jeśli atakujący może stworzyć **jakiekolwiek** dMSA w obrębie OU i bezpośrednio manipulować tymi 2 atrybutami, LSASS i KDC będą traktować dMSA jako *następcę* powiązanego konta. Gdy atakujący następnie uwierzytelni się jako dMSA, **dziedziczy wszystkie uprawnienia powiązanego konta** – aż do **Administratora Domeny**, jeśli konto Administratora jest powiązane.
+Jeśli atakujący może stworzyć **jakiekolwiek** dMSA w obrębie OU i bezpośrednio manipulować tymi 2 atrybutami, LSASS i KDC będą traktować dMSA jako *następcę* powiązanego konta. Kiedy atakujący następnie uwierzytelni się jako dMSA, **dziedziczy wszystkie uprawnienia powiązanego konta** – aż do **Administratora Domeny**, jeśli konto Administratora jest powiązane.
 
 Technika ta została nazwana **BadSuccessor** przez Unit 42 w 2025 roku. W momencie pisania **żaden patch zabezpieczeń** nie jest dostępny; jedynie wzmocnienie uprawnień OU łagodzi problem.
 
 ### Wymagania wstępne ataku
 
 1. Konto, które jest *dozwolone* do tworzenia obiektów w **Jednostce Organizacyjnej (OU)** *i* ma przynajmniej jedno z:
-* `Create Child` → **`msDS-DelegatedManagedServiceAccount`** klasa obiektu
+* `Create Child` → **`msDS-DelegatedManagedServiceAccount`** klasa obiektów
 * `Create Child` → **`All Objects`** (ogólne tworzenie)
 2. Łączność sieciowa z LDAP i Kerberos (standardowy scenariusz dołączony do domeny / atak zdalny).
 
 ## Enumeracja podatnych OU
 
-Unit 42 opublikowało skrypt pomocniczy PowerShell, który analizuje deskryptory zabezpieczeń każdej OU i podkreśla wymagane ACE:
+Unit 42 wydało skrypt pomocniczy PowerShell, który analizuje deskryptory zabezpieczeń każdej OU i podkreśla wymagane ACE:
 ```powershell
 Get-BadSuccessorOUPermissions.ps1 -Domain contoso.local
 ```
@@ -33,7 +33,7 @@ Pod maską skrypt wykonuje paginowane wyszukiwanie LDAP dla `(objectClass=organi
 
 ## Kroki Eksploatacji
 
-Gdy zidentyfikowany zostanie zapisywalny OU, atak jest tylko 3 zapisami LDAP od celu:
+Gdy zidentyfikowane zostanie zapisywalne OU, atak jest tylko 3 zapisami LDAP od celu:
 ```powershell
 # 1. Create a new delegated MSA inside the delegated OU
 New-ADServiceAccount -Name attacker_dMSA \
@@ -68,7 +68,7 @@ dir \\DC01\C$
 ```
 ## Wykrywanie i Polowanie
 
-Włącz **Audyt Obiektów** na OU i monitoruj następujące zdarzenia zabezpieczeń systemu Windows:
+Włącz **Audyt Obiektów** w OU i monitoruj następujące zdarzenia zabezpieczeń systemu Windows:
 
 * **5137** – Utworzenie obiektu **dMSA**
 * **5136** – Modyfikacja **`msDS-ManagedAccountPrecededByLink`**
@@ -83,7 +83,7 @@ Korelacja `4662` (modyfikacja atrybutu), `4741` (utworzenie konta komputera/usł
 
 * Zastosuj zasadę **najmniejszych uprawnień** – deleguj zarządzanie *Konto Usługi* tylko zaufanym rolom.
 * Usuń `Create Child` / `msDS-DelegatedManagedServiceAccount` z OU, które tego nie wymagają.
-* Monitoruj identyfikatory zdarzeń wymienione powyżej i alarmuj o *tożsamościach spoza poziomu 0*, które tworzą lub edytują dMSA.
+* Monitoruj identyfikatory zdarzeń wymienione powyżej i alarmuj o *tożsamościach spoza Tier-0*, które tworzą lub edytują dMSA.
 
 ## Zobacz także
 

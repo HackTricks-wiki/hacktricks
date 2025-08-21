@@ -41,7 +41,7 @@ CIFS jest wyróżniane jako powszechny cel do uzyskania dostępu do systemu plik
 
 ## Dostępne usługi
 
-| Typ usługi                                 | Usługa Silver Tickets                                                      |
+| Typ usługi                                 | Usługi Silver Tickets                                                      |
 | ------------------------------------------ | -------------------------------------------------------------------------- |
 | WMI                                        | <p>HOST</p><p>RPCSS</p>                                                   |
 | Zdalne uruchamianie PowerShell            | <p>HOST</p><p>HTTP</p><p>W zależności od systemu operacyjnego także:</p><p>WSMAN</p><p>RPCSS</p> |
@@ -64,7 +64,7 @@ Używając **Rubeus**, możesz **poprosić o wszystkie** te bilety, używając p
 
 ## Utrzymywanie
 
-Aby uniknąć rotacji haseł maszyn co 30 dni, ustaw `HKLM\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters\DisablePasswordChange = 1` lub możesz ustawić `HKLM\SYSTEM\CurrentControlSet\Services\NetLogon\Parameters\MaximumPasswordAge` na większą wartość niż 30 dni, aby wskazać okres rotacji, kiedy hasło maszyny powinno być rotowane.
+Aby uniknąć rotacji haseł maszyn co 30 dni, ustaw `HKLM\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters\DisablePasswordChange = 1` lub możesz ustawić `HKLM\SYSTEM\CurrentControlSet\Services\NetLogon\Parameters\MaximumPasswordAge` na większą wartość niż 30 dni, aby wskazać okres rotacji, kiedy hasło maszyny powinno być zmieniane.
 
 ## Wykorzystywanie biletów usługowych
 
@@ -72,7 +72,7 @@ W poniższych przykładach wyobraźmy sobie, że bilet jest pobierany, podszywaj
 
 ### CIFS
 
-Dzięki temu biletowi będziesz mógł uzyskać dostęp do folderów `C$` i `ADMIN$` za pomocą **SMB** (jeśli są wystawione) i skopiować pliki do części zdalnego systemu plików, po prostu robiąc coś takiego:
+Dzięki temu biletowi będziesz mógł uzyskać dostęp do folderów `C$` i `ADMIN$` za pośrednictwem **SMB** (jeśli są wystawione) i skopiować pliki do części zdalnego systemu plików, wykonując coś takiego:
 ```bash
 dir \\vulnerable.computer\C$
 dir \\vulnerable.computer\ADMIN$
@@ -118,7 +118,7 @@ Znajdź **więcej informacji o wmiexec** na następującej stronie:
 
 ### HOST + WSMAN (WINRM)
 
-Dzięki dostępowi winrm do komputera możesz **uzyskać do niego dostęp** i nawet uruchomić PowerShell:
+Dzięki dostępowi winrm do komputera możesz **uzyskać do niego dostęp** i nawet uzyskać PowerShell:
 ```bash
 New-PSSession -Name PSC -ComputerName the.computer.name; Enter-PSSession PSC
 ```
@@ -138,6 +138,7 @@ Dzięki temu uprawnieniu możesz zrzucić bazę danych DC za pomocą **DCSync**:
 mimikatz(commandline) # lsadump::dcsync /dc:pcdc.domain.local /domain:domain.local /user:krbtgt
 ```
 **Dowiedz się więcej o DCSync** na następującej stronie:
+
 
 {{#ref}}
 dcsync.md

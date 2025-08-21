@@ -61,7 +61,7 @@ system("fodhelper.exe");
 return 0;
 }
 ```
-*Testowane na Windows 10 22H2 i Windows 11 23H2 (łatki z lipca 2025). Obejście nadal działa, ponieważ Microsoft nie naprawił brakującej kontroli integralności w ścieżce `DelegateExecute`.*
+*Testowane na Windows 10 22H2 i Windows 11 23H2 (łatki z lipca 2025). Obejście wciąż działa, ponieważ Microsoft nie naprawił brakującego sprawdzenia integralności w ścieżce `DelegateExecute`.*
 
 ---
 
@@ -115,6 +115,7 @@ return 0;
 }
 ```
 Dla głębszego wyjaśnienia, jak to działa, zobacz:
+
 {{#ref}}
 sedebug-+-seimpersonate-copy-token.md
 {{#endref}}
@@ -122,7 +123,7 @@ sedebug-+-seimpersonate-copy-token.md
 ---
 
 ## Łatka AMSI i ETW w pamięci (Unikanie obrony)
-Większość nowoczesnych silników AV/EDR polega na **AMSI** i **ETW** do inspekcji złośliwych zachowań. Łatka obu interfejsów na wczesnym etapie w bieżącym procesie zapobiega skanowaniu ładunków opartych na skryptach (np. PowerShell, JScript).
+Większość nowoczesnych silników AV/EDR polega na **AMSI** i **ETW** do inspekcji złośliwych zachowań. Łatwienie obu interfejsów na wczesnym etapie w bieżącym procesie zapobiega skanowaniu ładunków opartych na skryptach (np. PowerShell, JScript).
 ```c
 // gcc -o patch_amsi.exe patch_amsi.c -lntdll
 #define _CRT_SECURE_NO_WARNINGS

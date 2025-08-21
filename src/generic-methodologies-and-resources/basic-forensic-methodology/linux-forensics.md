@@ -11,7 +11,7 @@ Przede wszystkim zaleca się posiadanie **USB** z **dobrze znanymi binariami i b
 export PATH=/mnt/usb/bin:/mnt/usb/sbin
 export LD_LIBRARY_PATH=/mnt/usb/lib:/mnt/usb/lib64
 ```
-Gdy skonfigurujesz system do używania dobrych i znanych binariów, możesz zacząć **ekstrahować podstawowe informacje**:
+Gdy skonfigurujesz system do używania dobrych i znanych binarek, możesz zacząć **ekstrahować podstawowe informacje**:
 ```bash
 date #Date and time (Clock may be skewed, Might be at a different timezone)
 uname -a #OS info
@@ -64,7 +64,7 @@ LiME może być również używany do **wysyłania zrzutu przez sieć** zamiast 
 #### Wyłączanie
 
 Przede wszystkim musisz **wyłączyć system**. Nie zawsze jest to możliwe, ponieważ czasami system będzie serwerem produkcyjnym, którego firma nie może sobie pozwolić na wyłączenie.\
-Istnieją **2 sposoby** na wyłączenie systemu: **normalne wyłączenie** i **wyłączenie "wyciągnięciem wtyczki"**. Pierwsze pozwoli na **normalne zakończenie procesów** i **zsynchronizowanie systemu plików**, ale również umożliwi potencjalnemu **złośliwemu oprogramowaniu** **zniszczenie dowodów**. Podejście "wyciągnięcia wtyczki" może wiązać się z **utrata niektórych informacji** (nie wiele informacji zostanie utraconych, ponieważ już zrobiliśmy obraz pamięci) i **złośliwe oprogramowanie nie będzie miało żadnej możliwości** działania w tej sprawie. Dlatego, jeśli **podejrzewasz**, że może być **złośliwe oprogramowanie**, po prostu wykonaj **komendę `sync`** w systemie i wyciągnij wtyczkę.
+Istnieją **2 sposoby** na wyłączenie systemu: **normalne wyłączenie** i **wyłączenie "wyciągnięciem wtyczki"**. Pierwszy pozwoli na **normalne zakończenie procesów** i **synchronizację systemu plików**, ale również umożliwi potencjalnemu **złośliwemu oprogramowaniu** **zniszczenie dowodów**. Podejście "wyciągnięcia wtyczki" może wiązać się z **utrata niektórych informacji** (nie wiele informacji zostanie utraconych, ponieważ już zrobiliśmy obraz pamięci) i **złośliwe oprogramowanie nie będzie miało żadnej możliwości** działania w tej sprawie. Dlatego, jeśli **podejrzewasz**, że może być **złośliwe oprogramowanie**, po prostu wykonaj **komendę** **`sync`** w systemie i wyciągnij wtyczkę.
 
 #### Robienie obrazu dysku
 
@@ -215,8 +215,8 @@ grep -E '^\s*PermitRootLogin' /etc/ssh/sshd_config
 awk -F: '($7 ~ /bin\/(sh|bash|zsh)/ && $1 ~ /^(games|lp|sync|shutdown|halt|mail|operator)$/) {print}' /etc/passwd
 ```
 #### Hunt: Cloud C2 markers (Dropbox/Cloudflare Tunnel)
-- Beacony API Dropboxa zazwyczaj używają api.dropboxapi.com lub content.dropboxapi.com przez HTTPS z tokenami Authorization: Bearer.
-- Szukaj w proxy/Zeek/NetFlow nieoczekiwanego ruchu egress Dropboxa z serwerów.
+- Beacons API Dropbox zazwyczaj używają api.dropboxapi.com lub content.dropboxapi.com przez HTTPS z tokenami Authorization: Bearer.
+- Szukaj w proxy/Zeek/NetFlow nieoczekiwanego ruchu wychodzącego Dropbox z serwerów.
 - Cloudflare Tunnel (`cloudflared`) zapewnia zapasowe C2 przez outbound 443.
 ```bash
 ps aux | grep -E '[c]loudflared|trycloudflare'
@@ -231,9 +231,9 @@ systemctl list-units | grep -i cloudflared
 - **/etc/init.d/**: Używane w niektórych wersjach Linuksa, takich jak Debian, do przechowywania skryptów uruchamiających.
 - Usługi mogą być również aktywowane za pomocą **/etc/inetd.conf** lub **/etc/xinetd/**, w zależności od wariantu Linuksa.
 - **/etc/systemd/system**: Katalog dla skryptów menedżera systemu i usług.
-- **/etc/systemd/system/multi-user.target.wants/**: Zawiera linki do usług, które powinny być uruchamiane w trybie wielo-użytkownikowym.
+- **/etc/systemd/system/multi-user.target.wants/**: Zawiera linki do usług, które powinny być uruchamiane w poziomie uruchamiania wieloużytkownikowego.
 - **/usr/local/etc/rc.d/**: Dla usług niestandardowych lub firm trzecich.
-- **\~/.config/autostart/**: Dla aplikacji uruchamiających się automatycznie specyficznych dla użytkownika, które mogą być miejscem ukrycia złośliwego oprogramowania skierowanego na użytkownika.
+- **\~/.config/autostart/**: Dla aplikacji uruchamiających się automatycznie specyficznych dla użytkownika, które mogą być miejscem ukrycia złośliwego oprogramowania skierowanego na użytkowników.
 - **/lib/systemd/system/**: Domyślne pliki jednostek w systemie dostarczane przez zainstalowane pakiety.
 
 ### Moduły jądra
@@ -246,21 +246,21 @@ Moduły jądra Linuksa, często wykorzystywane przez złośliwe oprogramowanie j
 
 ### Inne lokalizacje autostartu
 
-Linux wykorzystuje różne pliki do automatycznego uruchamiania programów po zalogowaniu użytkownika, co może skrywać złośliwe oprogramowanie:
+Linux wykorzystuje różne pliki do automatycznego uruchamiania programów po zalogowaniu użytkownika, co może sprzyjać złośliwemu oprogramowaniu:
 
 - **/etc/profile.d/**\*, **/etc/profile**, i **/etc/bash.bashrc**: Wykonywane dla każdego logowania użytkownika.
 - **\~/.bashrc**, **\~/.bash_profile**, **\~/.profile**, i **\~/.config/autostart**: Pliki specyficzne dla użytkownika, które uruchamiają się po ich logowaniu.
-- **/etc/rc.local**: Uruchamia się po uruchomieniu wszystkich usług systemowych, oznaczając koniec przejścia do środowiska wielo-użytkownikowego.
+- **/etc/rc.local**: Uruchamia się po uruchomieniu wszystkich usług systemowych, oznaczając koniec przejścia do środowiska wieloużytkownikowego.
 
 ## Sprawdź logi
 
-Systemy Linux śledzą aktywności użytkowników i zdarzenia systemowe za pomocą różnych plików logów. Logi te są kluczowe do identyfikacji nieautoryzowanego dostępu, infekcji złośliwym oprogramowaniem i innych incydentów bezpieczeństwa. Kluczowe pliki logów obejmują:
+Systemy Linux śledzą aktywności użytkowników i zdarzenia systemowe za pomocą różnych plików dziennika. Logi te są kluczowe do identyfikacji nieautoryzowanego dostępu, infekcji złośliwym oprogramowaniem i innych incydentów bezpieczeństwa. Kluczowe pliki dziennika obejmują:
 
 - **/var/log/syslog** (Debian) lub **/var/log/messages** (RedHat): Zapisują wiadomości i aktywności w całym systemie.
 - **/var/log/auth.log** (Debian) lub **/var/log/secure** (RedHat): Rejestrują próby uwierzytelnienia, udane i nieudane logowania.
 - Użyj `grep -iE "session opened for|accepted password|new session|not in sudoers" /var/log/auth.log`, aby filtrować odpowiednie zdarzenia uwierzytelnienia.
 - **/var/log/boot.log**: Zawiera wiadomości o uruchamianiu systemu.
-- **/var/log/maillog** lub **/var/log/mail.log**: Rejestrują aktywności serwera pocztowego, przydatne do śledzenia usług związanych z pocztą elektroniczną.
+- **/var/log/maillog** lub **/var/log/mail.log**: Rejestruje aktywności serwera pocztowego, przydatne do śledzenia usług związanych z pocztą elektroniczną.
 - **/var/log/kern.log**: Przechowuje wiadomości jądra, w tym błędy i ostrzeżenia.
 - **/var/log/dmesg**: Zawiera wiadomości o sterownikach urządzeń.
 - **/var/log/faillog**: Rejestruje nieudane próby logowania, co pomaga w dochodzeniach dotyczących naruszeń bezpieczeństwa.
@@ -268,12 +268,12 @@ Systemy Linux śledzą aktywności użytkowników i zdarzenia systemowe za pomoc
 - **/var/log/daemon.log**: Śledzi aktywności usług w tle.
 - **/var/log/btmp**: Dokumentuje nieudane próby logowania.
 - **/var/log/httpd/**: Zawiera logi błędów i dostępu Apache HTTPD.
-- **/var/log/mysqld.log** lub **/var/log/mysql.log**: Rejestrują aktywności bazy danych MySQL.
+- **/var/log/mysqld.log** lub **/var/log/mysql.log**: Rejestruje aktywności bazy danych MySQL.
 - **/var/log/xferlog**: Rejestruje transfery plików FTP.
 - **/var/log/**: Zawsze sprawdzaj tutaj pod kątem nieoczekiwanych logów.
 
 > [!TIP]
-> Logi systemowe Linuksa i podsystemy audytowe mogą być wyłączone lub usunięte w przypadku incydentu włamania lub złośliwego oprogramowania. Ponieważ logi w systemach Linux zazwyczaj zawierają jedne z najbardziej użytecznych informacji o złośliwych działaniach, intruzi rutynowo je usuwają. Dlatego, przeglądając dostępne pliki logów, ważne jest, aby szukać luk lub nieuporządkowanych wpisów, które mogą wskazywać na usunięcie lub manipulację.
+> Logi systemowe Linuksa i podsystemy audytu mogą być wyłączone lub usunięte w przypadku incydentu włamania lub złośliwego oprogramowania. Ponieważ logi w systemach Linux zazwyczaj zawierają jedne z najbardziej użytecznych informacji o złośliwych działaniach, intruzi rutynowo je usuwają. Dlatego, przeglądając dostępne pliki dziennika, ważne jest, aby szukać luk lub nieuporządkowanych wpisów, które mogą wskazywać na usunięcie lub manipulację.
 
 **Linux utrzymuje historię poleceń dla każdego użytkownika**, przechowywaną w:
 
@@ -287,8 +287,8 @@ Ponadto, polecenie `last -Faiwx` dostarcza listę logowań użytkowników. Spraw
 
 Sprawdź pliki, które mogą przyznać dodatkowe uprawnienia:
 
-- Przejrzyj `/etc/sudoers` w poszukiwaniu nieprzewidzianych uprawnień użytkowników, które mogły zostać przyznane.
-- Przejrzyj `/etc/sudoers.d/` w poszukiwaniu nieprzewidzianych uprawnień użytkowników, które mogły zostać przyznane.
+- Przejrzyj `/etc/sudoers` w poszukiwaniu nieoczekiwanych uprawnień użytkowników, które mogły zostać przyznane.
+- Przejrzyj `/etc/sudoers.d/` w poszukiwaniu nieoczekiwanych uprawnień użytkowników, które mogły zostać przyznane.
 - Zbadaj `/etc/groups`, aby zidentyfikować wszelkie nietypowe członkostwa grupowe lub uprawnienia.
 - Zbadaj `/etc/passwd`, aby zidentyfikować wszelkie nietypowe członkostwa grupowe lub uprawnienia.
 
@@ -296,8 +296,8 @@ Niektóre aplikacje również generują własne logi:
 
 - **SSH**: Sprawdź _\~/.ssh/authorized_keys_ i _\~/.ssh/known_hosts_ pod kątem nieautoryzowanych połączeń zdalnych.
 - **Gnome Desktop**: Zajrzyj do _\~/.recently-used.xbel_ w poszukiwaniu ostatnio otwieranych plików za pomocą aplikacji Gnome.
-- **Firefox/Chrome**: Sprawdź historię przeglądarki i pobierania w _\~/.mozilla/firefox_ lub _\~/.config/google-chrome_ w poszukiwaniu podejrzanych działań.
-- **VIM**: Przejrzyj _\~/.viminfo_ w poszukiwaniu szczegółów użycia, takich jak ścieżki do otwieranych plików i historia wyszukiwania.
+- **Firefox/Chrome**: Sprawdź historię przeglądarki i pobierania w _\~/.mozilla/firefox_ lub _\~/.config/google-chrome_ pod kątem podejrzanych działań.
+- **VIM**: Przejrzyj _\~/.viminfo_ w poszukiwaniu szczegółów użycia, takich jak ścieżki otwieranych plików i historia wyszukiwania.
 - **Open Office**: Sprawdź dostęp do ostatnich dokumentów, co może wskazywać na skompromitowane pliki.
 - **FTP/SFTP**: Przejrzyj logi w _\~/.ftp_history_ lub _\~/.sftp_history_ w poszukiwaniu transferów plików, które mogą być nieautoryzowane.
 - **MySQL**: Zbadaj _\~/.mysql_history_ w poszukiwaniu wykonanych zapytań MySQL, co może ujawnić nieautoryzowane działania w bazie danych.
@@ -306,7 +306,7 @@ Niektóre aplikacje również generują własne logi:
 
 ### Logi USB
 
-[**usbrip**](https://github.com/snovvcrash/usbrip) to mały program napisany w czystym Pythonie 3, który analizuje pliki logów Linuksa (`/var/log/syslog*` lub `/var/log/messages*`, w zależności od dystrybucji) w celu skonstruowania tabel historii zdarzeń USB.
+[**usbrip**](https://github.com/snovvcrash/usbrip) to mały program napisany w czystym Pythonie 3, który analizuje pliki dziennika Linuksa (`/var/log/syslog*` lub `/var/log/messages*` w zależności od dystrybucji) w celu skonstruowania tabel historii zdarzeń USB.
 
 Interesujące jest **znalezienie wszystkich używanych USB** i będzie to bardziej przydatne, jeśli masz autoryzowaną listę USB, aby znaleźć "zdarzenia naruszenia" (użycie USB, które nie znajduje się na tej liście).
 
@@ -328,7 +328,7 @@ Więcej przykładów i informacji znajduje się w githubie: [https://github.com/
 ## Przegląd kont użytkowników i aktywności logowania
 
 Sprawdź _**/etc/passwd**_, _**/etc/shadow**_ oraz **dzienniki zabezpieczeń** w poszukiwaniu nietypowych nazw lub kont utworzonych i/lub używanych w bliskiej odległości od znanych nieautoryzowanych zdarzeń. Sprawdź również możliwe ataki brute-force na sudo.\
-Ponadto, sprawdź pliki takie jak _**/etc/sudoers**_ i _**/etc/groups**_ pod kątem nieoczekiwanych uprawnień przyznanych użytkownikom.\
+Ponadto, sprawdź pliki takie jak _**/etc/sudoers**_ i _**/etc/groups**_ w poszukiwaniu nieoczekiwanych uprawnień przyznanych użytkownikom.\
 Na koniec, poszukaj kont z **brakującymi hasłami** lub **łatwymi do odgadnięcia** hasłami.
 
 ## Zbadaj system plików
@@ -340,13 +340,13 @@ Podczas badania incydentów związanych z złośliwym oprogramowaniem, struktura
 Aby przeciwdziałać tym metodom antyforensycznym, istotne jest:
 
 - **Przeprowadzenie dokładnej analizy osi czasu** przy użyciu narzędzi takich jak **Autopsy** do wizualizacji osi czasu zdarzeń lub `mactime` z **Sleuth Kit** do szczegółowych danych osi czasu.
-- **Zbadanie nieoczekiwanych skryptów** w $PATH systemu, które mogą obejmować skrypty shell lub PHP używane przez atakujących.
-- **Sprawdzenie `/dev` pod kątem nietypowych plików**, ponieważ tradycyjnie zawiera specjalne pliki, ale może zawierać pliki związane z złośliwym oprogramowaniem.
+- **Badanie nieoczekiwanych skryptów** w $PATH systemu, które mogą obejmować skrypty shell lub PHP używane przez atakujących.
+- **Sprawdzenie `/dev` pod kątem nietypowych plików**, ponieważ tradycyjnie zawiera pliki specjalne, ale może zawierać pliki związane z złośliwym oprogramowaniem.
 - **Wyszukiwanie ukrytych plików lub katalogów** o nazwach takich jak ".. " (kropka kropka spacja) lub "..^G" (kropka kropka kontrola-G), które mogą ukrywać złośliwą zawartość.
 - **Identyfikacja plików setuid root** za pomocą polecenia: `find / -user root -perm -04000 -print` To znajduje pliki z podwyższonymi uprawnieniami, które mogą być nadużywane przez atakujących.
-- **Przegląd znaczników czasowych usunięcia** w tabelach inode, aby dostrzec masowe usunięcia plików, co może wskazywać na obecność rootkitów lub trojanów.
+- **Przeglądanie znaczników czasowych usunięcia** w tabelach inode w celu wykrycia masowych usunięć plików, co może wskazywać na obecność rootkitów lub trojanów.
 - **Inspekcja kolejnych inode** w poszukiwaniu pobliskich złośliwych plików po zidentyfikowaniu jednego, ponieważ mogły zostać umieszczone razem.
-- **Sprawdzenie typowych katalogów binarnych** (_/bin_, _/sbin_) pod kątem niedawno zmodyfikowanych plików, ponieważ mogły zostać zmienione przez złośliwe oprogramowanie.
+- **Sprawdzenie wspólnych katalogów binarnych** (_/bin_, _/sbin_) pod kątem niedawno zmodyfikowanych plików, ponieważ mogły zostać zmienione przez złośliwe oprogramowanie.
 ````bash
 # List recent files in a directory:
 ls -laR --sort=time /bin```
@@ -355,7 +355,7 @@ ls -laR --sort=time /bin```
 ls -lai /bin | sort -n```
 ````
 > [!TIP]
-> Zauważ, że **atakujący** może **zmodyfikować** **czas**, aby **pliki wyglądały** **na legalne**, ale **nie może** zmienić **inode**. Jeśli znajdziesz, że **plik** wskazuje, że został utworzony i zmodyfikowany w **tym samym czasie** co reszta plików w tym samym folderze, ale **inode** jest **niespodziewanie większy**, to **znaczniki czasu tego pliku zostały zmodyfikowane**.
+> Zauważ, że **atakujący** może **zmodyfikować** **czas**, aby **pliki wyglądały** **na legalne**, ale **nie może** zmienić **inode**. Jeśli odkryjesz, że **plik** wskazuje, że został utworzony i zmodyfikowany w **tym samym czasie** co pozostałe pliki w tym samym folderze, ale **inode** jest **niespodziewanie większy**, to **znaczniki czasu tego pliku zostały zmodyfikowane**.
 
 ## Porównaj pliki różnych wersji systemu plików
 

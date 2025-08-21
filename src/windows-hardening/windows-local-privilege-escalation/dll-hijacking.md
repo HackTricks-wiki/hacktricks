@@ -10,9 +10,9 @@ DLL Hijacking polega na manipulowaniu zaufaną aplikacją w celu załadowania z�
 
 ### Common Techniques
 
-Wykorzystywanych jest kilka metod do DLL hijacking, z których każda ma swoją skuteczność w zależności od strategii ładowania DLL aplikacji:
+W przypadku DLL hijacking stosuje się kilka metod, z których każda ma swoją skuteczność w zależności od strategii ładowania DLL aplikacji:
 
-1. **DLL Replacement**: Wymiana prawdziwego DLL na złośliwy, opcjonalnie z użyciem DLL Proxying w celu zachowania funkcjonalności oryginalnego DLL.
+1. **DLL Replacement**: Wymiana autentycznego DLL na złośliwy, opcjonalnie z użyciem DLL Proxying w celu zachowania funkcjonalności oryginalnego DLL.
 2. **DLL Search Order Hijacking**: Umieszczanie złośliwego DLL w ścieżce wyszukiwania przed legalnym, wykorzystując wzór wyszukiwania aplikacji.
 3. **Phantom DLL Hijacking**: Tworzenie złośliwego DLL, który aplikacja załadowuje, myśląc, że jest to nieistniejący wymagany DLL.
 4. **DLL Redirection**: Modyfikowanie parametrów wyszukiwania, takich jak `%PATH%` lub pliki `.exe.manifest` / `.exe.local`, aby skierować aplikację do złośliwego DLL.
@@ -31,33 +31,33 @@ i pokazując tylko **Aktywność systemu plików**:
 
 ![](<../../images/image (314).png>)
 
-Jeśli szukasz **brakujących dll w ogóle**, powinieneś **pozostawić** to uruchomione przez kilka **sekund**.\
-Jeśli szukasz **brakującego dll w konkretnej aplikacji**, powinieneś ustawić **inny filtr, taki jak "Nazwa procesu" "zawiera" "\<nazwa exec>", uruchomić go i zatrzymać rejestrowanie zdarzeń**.
+Jeśli szukasz **brakujących dll w ogóle**, powinieneś **pozostawić** to działające przez kilka **sekund**.\
+Jeśli szukasz **brakującego dll w konkretnym pliku wykonywalnym**, powinieneś ustawić **inny filtr, taki jak "Nazwa procesu" "zawiera" "\<nazwa exec>", wykonać go i zatrzymać rejestrowanie zdarzeń**.
 
 ## Exploiting Missing Dlls
 
-Aby eskalować uprawnienia, najlepszą szansą, jaką mamy, jest możliwość **napisania dll, który proces z uprawnieniami spróbuje załadować** w jakimś **miejscu, gdzie będzie szukany**. Dlatego będziemy mogli **napisać** dll w **folderze**, w którym **dll jest wyszukiwany przed** folderem, w którym znajduje się **oryginalny dll** (dziwny przypadek), lub będziemy mogli **napisać w jakimś folderze, gdzie dll będzie wyszukiwany**, a oryginalny **dll nie istnieje** w żadnym folderze.
+Aby eskalować uprawnienia, najlepszą szansą, jaką mamy, jest możliwość **napisania dll, który proces z uprawnieniami spróbuje załadować** w jednym z **miejsc, gdzie będzie wyszukiwany**. Dlatego będziemy mogli **napisać** dll w **folderze**, w którym **dll jest wyszukiwany przed** folderem, w którym znajduje się **oryginalny dll** (dziwny przypadek), lub będziemy mogli **napisać w jakimś folderze, w którym dll będzie wyszukiwany**, a oryginalny **dll nie istnieje** w żadnym folderze.
 
 ### Dll Search Order
 
 **W dokumentacji** [**Microsoftu**](https://docs.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-search-order#factors-that-affect-searching) **możesz znaleźć, jak DLL są ładowane konkretnie.**
 
-**Aplikacje Windows** szukają DLL, podążając za zestawem **zdefiniowanych ścieżek wyszukiwania**, przestrzegając określonej sekwencji. Problem z DLL hijacking pojawia się, gdy złośliwy DLL jest strategicznie umieszczany w jednym z tych katalogów, zapewniając, że zostanie załadowany przed autentycznym DLL. Rozwiązaniem, aby temu zapobiec, jest upewnienie się, że aplikacja używa ścieżek bezwzględnych, gdy odnosi się do wymaganych DLL.
+**Aplikacje Windows** szukają DLL, podążając za zestawem **zdefiniowanych ścieżek wyszukiwania**, przestrzegając określonej sekwencji. Problem z DLL hijacking pojawia się, gdy szkodliwy DLL jest strategicznie umieszczany w jednym z tych katalogów, zapewniając, że zostanie załadowany przed autentycznym DLL. Rozwiązaniem, aby temu zapobiec, jest upewnienie się, że aplikacja używa ścieżek bezwzględnych, gdy odnosi się do wymaganych DLL.
 
 Możesz zobaczyć **kolejność wyszukiwania DLL w systemach 32-bitowych** poniżej:
 
 1. Katalog, z którego aplikacja została załadowana.
 2. Katalog systemowy. Użyj funkcji [**GetSystemDirectory**](https://docs.microsoft.com/en-us/windows/desktop/api/sysinfoapi/nf-sysinfoapi-getsystemdirectorya), aby uzyskać ścieżkę do tego katalogu. (_C:\Windows\System32_)
-3. Katalog systemowy 16-bitowy. Nie ma funkcji, która uzyskuje ścieżkę do tego katalogu, ale jest on przeszukiwany. (_C:\Windows\System_)
+3. Katalog systemu 16-bitowego. Nie ma funkcji, która uzyskuje ścieżkę do tego katalogu, ale jest on przeszukiwany. (_C:\Windows\System_)
 4. Katalog Windows. Użyj funkcji [**GetWindowsDirectory**](https://docs.microsoft.com/en-us/windows/desktop/api/sysinfoapi/nf-sysinfoapi-getwindowsdirectorya), aby uzyskać ścieżkę do tego katalogu. (_C:\Windows_)
 5. Bieżący katalog.
-6. Katalogi wymienione w zmiennej środowiskowej PATH. Należy zauważyć, że nie obejmuje to ścieżki per-aplikacji określonej przez klucz rejestru **App Paths**. Klucz **App Paths** nie jest używany przy obliczaniu ścieżki wyszukiwania DLL.
+6. Katalogi wymienione w zmiennej środowiskowej PATH. Zauważ, że nie obejmuje to ścieżki per-aplikacji określonej przez klucz rejestru **App Paths**. Klucz **App Paths** nie jest używany przy obliczaniu ścieżki wyszukiwania DLL.
 
 To jest **domyślna** kolejność wyszukiwania z włączonym **SafeDllSearchMode**. Gdy jest wyłączony, bieżący katalog awansuje na drugie miejsce. Aby wyłączyć tę funkcję, utwórz wartość rejestru **HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager**\\**SafeDllSearchMode** i ustaw ją na 0 (domyślnie jest włączona).
 
 Jeśli funkcja [**LoadLibraryEx**](https://docs.microsoft.com/en-us/windows/desktop/api/LibLoaderAPI/nf-libloaderapi-loadlibraryexa) jest wywoływana z **LOAD_WITH_ALTERED_SEARCH_PATH**, wyszukiwanie zaczyna się w katalogu modułu wykonywalnego, który **LoadLibraryEx** ładuje.
 
-Na koniec zauważ, że **dll może być załadowany, wskazując bezwzględną ścieżkę zamiast tylko nazwy**. W takim przypadku ten dll **będzie wyszukiwany tylko w tej ścieżce** (jeśli dll ma jakieś zależności, będą one wyszukiwane tak, jakby były ładowane tylko po nazwie).
+Na koniec zauważ, że **dll może być załadowany, wskazując bezwzględną ścieżkę, a nie tylko nazwę**. W takim przypadku ten dll **będzie wyszukiwany tylko w tej ścieżce** (jeśli dll ma jakieś zależności, będą one wyszukiwane tak, jakby były załadowane tylko po nazwie).
 
 Istnieją inne sposoby na zmianę kolejności wyszukiwania, ale nie zamierzam ich tutaj wyjaśniać.
 
@@ -67,14 +67,14 @@ Niektóre wyjątki od standardowej kolejności wyszukiwania DLL są zauważane w
 
 - Gdy napotkany jest **DLL, który dzieli swoją nazwę z już załadowanym w pamięci**, system pomija zwykłe wyszukiwanie. Zamiast tego wykonuje sprawdzenie przekierowania i manifestu, zanim domyślnie przejdzie do DLL już w pamięci. **W tej sytuacji system nie przeprowadza wyszukiwania DLL**.
 - W przypadkach, gdy DLL jest rozpoznawany jako **znany DLL** dla bieżącej wersji Windows, system wykorzysta swoją wersję znanego DLL, wraz z wszelkimi jego zależnymi DLL, **pomijając proces wyszukiwania**. Klucz rejestru **HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\KnownDLLs** zawiera listę tych znanych DLL.
-- Jeśli **DLL ma zależności**, wyszukiwanie tych zależnych DLL odbywa się tak, jakby były wskazywane tylko przez swoje **nazwy modułów**, niezależnie od tego, czy początkowy DLL został zidentyfikowany przez pełną ścieżkę.
+- Jeśli **DLL ma zależności**, wyszukiwanie tych zależnych DLL odbywa się tak, jakby były wskazane tylko przez swoje **nazwy modułów**, niezależnie od tego, czy początkowy DLL został zidentyfikowany przez pełną ścieżkę.
 
 ### Escalating Privileges
 
 **Wymagania**:
 
 - Zidentyfikuj proces, który działa lub będzie działał z **innymi uprawnieniami** (ruch poziomy lub boczny), który **nie ma DLL**.
-- Upewnij się, że **dostęp do zapisu** jest dostępny dla dowolnego **katalogu**, w którym **DLL** będzie **wyszukiwany**. To miejsce może być katalogiem wykonywalnym lub katalogiem w ścieżce systemowej.
+- Upewnij się, że **dostęp do zapisu** jest dostępny dla dowolnego **katalogu**, w którym **DLL** będzie **wyszukiwany**. To miejsce może być katalogiem pliku wykonywalnego lub katalogiem w ścieżce systemowej.
 
 Tak, wymagania są skomplikowane do znalezienia, ponieważ **domyślnie dość dziwne jest znalezienie uprzywilejowanego pliku wykonywalnego bez dll** i jest jeszcze **dziwniejsze, aby mieć uprawnienia do zapisu w folderze ścieżki systemowej** (domyślnie nie możesz). Ale w źle skonfigurowanych środowiskach jest to możliwe.\
 W przypadku, gdy masz szczęście i spełniasz wymagania, możesz sprawdzić projekt [UACME](https://github.com/hfiref0x/UACME). Nawet jeśli **głównym celem projektu jest obejście UAC**, możesz tam znaleźć **PoC** DLL hijacking dla wersji Windows, której możesz użyć (prawdopodobnie zmieniając tylko ścieżkę folderu, w którym masz uprawnienia do zapisu).
@@ -101,13 +101,13 @@ dll-hijacking/writable-sys-path-+dll-hijacking-privesc.md
 
 ### Narzędzia automatyczne
 
-[**Winpeas**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS) sprawdzi, czy masz uprawnienia do zapisu w jakimkolwiek folderze w system PATH.\
+[**Winpeas** ](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)sprawdzi, czy masz uprawnienia do zapisu w jakimkolwiek folderze w system PATH.\
 Inne interesujące narzędzia automatyczne do odkrywania tej podatności to **funkcje PowerSploit**: _Find-ProcessDLLHijack_, _Find-PathDLLHijack_ i _Write-HijackDll._
 
 ### Przykład
 
-W przypadku znalezienia scenariusza do wykorzystania, jedną z najważniejszych rzeczy, aby skutecznie go wykorzystać, byłoby **stworzenie dll, która eksportuje przynajmniej wszystkie funkcje, które wykonywalny plik będzie z niej importować**. Tak czy inaczej, zauważ, że Dll Hijacking jest przydatny do [eskalacji z poziomu Medium Integrity do High **(obejście UAC)**](../authentication-credentials-uac-and-efs.md#uac) lub z [**High Integrity do SYSTEM**](#from-high-integrity-to-system)**.** Możesz znaleźć przykład **jak stworzyć ważną dll** w tym badaniu dotyczącym dll hijacking skoncentrowanym na dll hijacking do wykonania: [**https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows**](https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows)**.**\
-Ponadto, w **następnej sekcji** znajdziesz kilka **podstawowych kodów dll**, które mogą być przydatne jako **szablony** lub do stworzenia **dll z niepotrzebnymi funkcjami eksportowanymi**.
+W przypadku znalezienia scenariusza, który można wykorzystać, jedną z najważniejszych rzeczy, aby skutecznie go wykorzystać, będzie **stworzenie dll, która eksportuje przynajmniej wszystkie funkcje, które wykonywalny plik będzie z niej importować**. Tak czy inaczej, zauważ, że Dll Hijacking jest przydatny do [eskalacji z poziomu Medium Integrity do High **(obejście UAC)**](../authentication-credentials-uac-and-efs.md#uac) lub z [**High Integrity do SYSTEM**](#from-high-integrity-to-system)**.** Możesz znaleźć przykład **jak stworzyć ważną dll** w tym badaniu dotyczącym dll hijacking skoncentrowanym na dll hijacking do wykonania: [**https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows**](https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows)**.**\
+Ponadto, w **następnej sekcji** możesz znaleźć kilka **podstawowych kodów dll**, które mogą być przydatne jako **szablony** lub do stworzenia **dll z niepotrzebnymi funkcjami eksportowanymi**.
 
 ## **Tworzenie i kompilowanie Dlls**
 
@@ -133,7 +133,7 @@ msfvenom -p windows/adduser USER=privesc PASS=Attacker@123 -f dll -o msf.dll
 ```
 ### Twoje własne
 
-Zauważ, że w kilku przypadkach Dll, który kompilujesz, musi **eksportować kilka funkcji**, które będą ładowane przez proces ofiary; jeśli te funkcje nie istnieją, **plik binarny nie będzie w stanie ich załadować** i **eksploatacja zakończy się niepowodzeniem**.
+Zauważ, że w kilku przypadkach Dll, który kompilujesz, musi **eksportować kilka funkcji**, które będą ładowane przez proces ofiary; jeśli te funkcje nie istnieją, **plik binarny nie będzie w stanie ich załadować** i **eksploit się nie powiedzie**.
 ```c
 // Tested in Win10
 // i686-w64-mingw32-g++ dll.c -lws2_32 -o srrstr.dll -shared

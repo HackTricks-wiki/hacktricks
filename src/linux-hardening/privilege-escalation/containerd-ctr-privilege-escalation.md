@@ -6,6 +6,7 @@
 
 Przejdź do następującego linku, aby dowiedzieć się **czym jest containerd** i `ctr`:
 
+
 {{#ref}}
 ../../network-services-pentesting/2375-pentesting-docker.md
 {{#endref}}
@@ -17,7 +18,7 @@ jeśli odkryjesz, że host zawiera polecenie `ctr`:
 which ctr
 /usr/bin/ctr
 ```
-Możesz wylistować obrazy:
+Możesz wymienić obrazy:
 ```bash
 ctr image list
 REF                                  TYPE                                                 DIGEST                                                                  SIZE      PLATFORMS   LABELS

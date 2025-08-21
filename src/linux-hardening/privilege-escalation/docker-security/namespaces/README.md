@@ -4,11 +4,13 @@
 
 ### **Przestrzeń nazw PID**
 
+
 {{#ref}}
 pid-namespace.md
 {{#endref}}
 
 ### **Przestrzeń nazw montowania**
+
 
 {{#ref}}
 mount-namespace.md
@@ -16,11 +18,13 @@ mount-namespace.md
 
 ### **Przestrzeń nazw sieci**
 
+
 {{#ref}}
 network-namespace.md
 {{#endref}}
 
 ### **Przestrzeń nazw IPC**
+
 
 {{#ref}}
 ipc-namespace.md
@@ -28,17 +32,20 @@ ipc-namespace.md
 
 ### **Przestrzeń nazw UTS**
 
+
 {{#ref}}
 uts-namespace.md
 {{#endref}}
 
 ### Przestrzeń nazw czasu
 
+
 {{#ref}}
 time-namespace.md
 {{#endref}}
 
 ### Przestrzeń nazw użytkownika
+
 
 {{#ref}}
 user-namespace.md

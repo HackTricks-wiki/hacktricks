@@ -17,7 +17,7 @@ MBR pozwala na **maks. 2.2TB**.
 
 ![](<../../../images/image (304).png>)
 
-W **bajtach od 440 do 443** MBR możesz znaleźć **Podpis dysku Windows** (jeśli używany jest Windows). Litera logicznego dysku twardego zależy od Podpisu dysku Windows. Zmiana tego podpisu może uniemożliwić uruchomienie Windows (narzędzie: [**Active Disk Editor**](https://www.disk-editor.org/index.html)**)**.
+Od **bajtów 440 do 443** MBR możesz znaleźć **Podpis dysku Windows** (jeśli używany jest Windows). Litera logicznego dysku twardego zależy od Podpisu dysku Windows. Zmiana tego podpisu może uniemożliwić uruchomienie Windows (narzędzie: [**Active Disk Editor**](https://www.disk-editor.org/index.html)**)**.
 
 ![](<../../../images/image (310).png>)
 
@@ -35,17 +35,17 @@ W **bajtach od 440 do 443** MBR możesz znaleźć **Podpis dysku Windows** (jeś
 **Format rekordu partycji**
 
 | Offset    | Długość   | Element                                                  |
-| --------- | -------- | -------------------------------------------------------- |
-| 0 (0x00)  | 1 (0x01) | Flaga aktywności (0x80 = rozruchowa)                    |
-| 1 (0x01)  | 1 (0x01) | Głowica startowa                                         |
+| --------- | -------- | ------------------------------------------------------- |
+| 0 (0x00)  | 1 (0x01) | Flaga aktywności (0x80 = rozruchowa)                   |
+| 1 (0x01)  | 1 (0x01) | Głowica startowa                                        |
 | 2 (0x02)  | 1 (0x01) | Sektor startowy (bity 0-5); wyższe bity cylindra (6-7) |
-| 3 (0x03)  | 1 (0x01) | Cylindr startowy najniższe 8 bitów                       |
-| 4 (0x04)  | 1 (0x01) | Kod typu partycji (0x83 = Linux)                         |
-| 5 (0x05)  | 1 (0x01) | Głowica końcowa                                          |
-| 6 (0x06)  | 1 (0x01) | Sektor końcowy (bity 0-5); wyższe bity cylindra (6-7)   |
-| 7 (0x07)  | 1 (0x01) | Cylindr końcowy najniższe 8 bitów                        |
-| 8 (0x08)  | 4 (0x04) | Sektory poprzedzające partycję (little endian)          |
-| 12 (0x0C) | 4 (0x04) | Sektory w partycji                                       |
+| 3 (0x03)  | 1 (0x01) | Cylinder startowy najniższe 8 bitów                     |
+| 4 (0x04)  | 1 (0x01) | Kod typu partycji (0x83 = Linux)                        |
+| 5 (0x05)  | 1 (0x01) | Głowica końcowa                                         |
+| 6 (0x06)  | 1 (0x01) | Sektor końcowy (bity 0-5); wyższe bity cylindra (6-7)  |
+| 7 (0x07)  | 1 (0x01) | Cylinder końcowy najniższe 8 bitów                      |
+| 8 (0x08)  | 4 (0x04) | Sektory poprzedzające partycję (little endian)         |
+| 12 (0x0C) | 4 (0x04) | Sektory w partycji                                      |
 
 Aby zamontować MBR w systemie Linux, najpierw musisz uzyskać offset startowy (możesz użyć `fdisk` i polecenia `p`)
 
@@ -64,7 +64,7 @@ mount -o ro,loop,offset=32256,noatime /path/to/image.dd /media/part/
 
 ### GPT (GUID Partition Table)
 
-Tabela partycji GUID, znana jako GPT, jest preferowana ze względu na swoje ulepszone możliwości w porównaniu do MBR (Master Boot Record). Wyróżnia się dzięki **globalnie unikalnemu identyfikatorowi** dla partycji, GPT wyróżnia się na kilka sposobów:
+Tabela partycji GUID, znana jako GPT, jest preferowana ze względu na swoje ulepszone możliwości w porównaniu do MBR (Master Boot Record). Wyróżnia się **globalnie unikalnym identyfikatorem** dla partycji, GPT wyróżnia się w kilku aspektach:
 
 - **Lokalizacja i rozmiar**: Zarówno GPT, jak i MBR zaczynają się od **sektora 0**. Jednak GPT działa na **64 bitach**, w przeciwieństwie do 32 bitów MBR.
 - **Limity partycji**: GPT obsługuje do **128 partycji** w systemach Windows i pomieści do **9,4ZB** danych.
@@ -105,7 +105,7 @@ Nagłówek tabeli partycji definiuje użyteczne bloki na dysku. Definiuje równi
 | 40 (0x28) | 8 bajtów | Pierwsze użyteczne LBA dla partycji (ostatnie LBA głównej tabeli partycji + 1)                                                                                                       |
 | 48 (0x30) | 8 bajtów | Ostatnie użyteczne LBA (pierwsze LBA drugiej tabeli partycji − 1)                                                                                                                    |
 | 56 (0x38) | 16 bajtów| GUID dysku w mieszanym endianie                                                                                                                                                    |
-| 72 (0x48) | 8 bajtów | Początkowe LBA tablicy wpisów partycji (zawsze 2 w kopii głównej)                                                                                                     |
+| 72 (0x48) | 8 bajtów | Początkowe LBA tablicy wpisów partycji (zawsze 2 w głównej kopii)                                                                                                     |
 | 80 (0x50) | 4 bajty  | Liczba wpisów partycji w tablicy                                                                                                                                         |
 | 84 (0x54) | 4 bajty  | Rozmiar pojedynczego wpisu partycji (zazwyczaj 80h lub 128)                                                                                                                        |
 | 88 (0x58) | 4 bajty  | CRC32 tablicy wpisów partycji w little endian                                                                                                                            |
@@ -135,7 +135,7 @@ Po zamontowaniu obrazu forensycznego za pomocą [**ArsenalImageMounter**](https:
 
 ![](<../../../images/image (354).png>)
 
-Gdyby to była **tabela GPT zamiast MBR**, powinna pojawić się sygnatura _EFI PART_ w **sektorze 1** (który na poprzednim obrazie jest pusty).
+Gdyby to była **tabela GPT zamiast MBR**, powinien pojawić się podpis _EFI PART_ w **sektorze 1** (który na poprzednim obrazie jest pusty).
 
 ## Systemy plików
 
@@ -164,12 +164,12 @@ Kluczowe komponenty katalogu głównego, szczególnie dla FAT12 i FAT16, obejmuj
 - **Nazwa pliku/folderu** (do 8 znaków)
 - **Atrybuty**
 - **Daty utworzenia, modyfikacji i ostatniego dostępu**
-- **Adres tabeli FAT** (wskazujący na pierwszy klaster pliku)
+- **Adres tabeli FAT** (wskazujący na początkowy klaster pliku)
 - **Rozmiar pliku**
 
 ### EXT
 
-**Ext2** jest najczęściej używanym systemem plików dla **partycji bez dziennika** (**partycji, które nie zmieniają się zbytnio**) jak partycja rozruchowa. **Ext3/4** są **z dziennikiem** i są zazwyczaj używane dla **pozostałych partycji**.
+**Ext2** jest najczęściej używanym systemem plików dla **partycji bez dziennika** (**partycji, które nie zmieniają się zbyt często**) jak partycja rozruchowa. **Ext3/4** są **z dziennikiem** i są zazwyczaj używane dla **pozostałych partycji**.
 
 ## **Metadane**
 
@@ -201,7 +201,7 @@ file-data-carving-recovery-tools.md
 
 **File carving** to technika, która próbuje **znaleźć pliki w masie danych**. Istnieją 3 główne sposoby, w jakie działają takie narzędzia: **Na podstawie nagłówków i stopek typów plików**, na podstawie **struktur** typów plików oraz na podstawie **samej zawartości**.
 
-Należy zauważyć, że ta technika **nie działa w celu odzyskania fragmentowanych plików**. Jeśli plik **nie jest przechowywany w sąsiadujących sektorach**, to ta technika nie będzie w stanie go znaleźć lub przynajmniej jego części.
+Należy zauważyć, że ta technika **nie działa na odzyskiwanie fragmentowanych plików**. Jeśli plik **nie jest przechowywany w sąsiadujących sektorach**, to ta technika nie będzie w stanie go znaleźć lub przynajmniej jego części.
 
 Istnieje kilka narzędzi, które możesz użyć do carvingu plików, wskazując typy plików, które chcesz wyszukiwać.
 
@@ -209,9 +209,9 @@ Istnieje kilka narzędzi, które możesz użyć do carvingu plików, wskazując 
 file-data-carving-recovery-tools.md
 {{#endref}}
 
-### Carving strumieni danych
+### Carving strumienia danych **C**
 
-Carving strumieni danych jest podobny do carvingu plików, ale **zamiast szukać kompletnych plików, szuka interesujących fragmentów** informacji.\
+Carving strumienia danych jest podobny do carvingu plików, ale **zamiast szukać kompletnych plików, szuka interesujących fragmentów** informacji.\
 Na przykład, zamiast szukać kompletnego pliku zawierającego zarejestrowane adresy URL, ta technika będzie szukać adresów URL.
 
 {{#ref}}
@@ -223,7 +223,7 @@ file-data-carving-recovery-tools.md
 Oczywiście istnieją sposoby na **"bezpieczne" usunięcie plików i części logów o nich**. Na przykład, możliwe jest **nadpisanie zawartości** pliku danymi śmieciowymi kilka razy, a następnie **usunięcie** **logów** z **$MFT** i **$LOGFILE** dotyczących pliku oraz **usunięcie kopii cieni woluminu**.\
 Możesz zauważyć, że nawet wykonując tę akcję, mogą istnieć **inne części, w których istnienie pliku jest nadal zarejestrowane**, i to prawda, a częścią pracy profesjonalisty w dziedzinie forensyki jest ich znalezienie.
 
-## Referencje
+## Odniesienia
 
 - [https://en.wikipedia.org/wiki/GUID_Partition_Table](https://en.wikipedia.org/wiki/GUID_Partition_Table)
 - [http://ntfs.com/ntfs-permissions.htm](http://ntfs.com/ntfs-permissions.htm)

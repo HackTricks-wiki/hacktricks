@@ -11,7 +11,7 @@
 
 ### **Przegląd MDM (Zarządzanie Urządzeniami Mobilnymi)**
 
-[Zarządzanie Urządzeniami Mobilnymi](https://en.wikipedia.org/wiki/Mobile_device_management) (MDM) jest wykorzystywane do nadzorowania różnych urządzeń końcowych, takich jak smartfony, laptopy i tablety. Szczególnie dla platform Apple (iOS, macOS, tvOS) obejmuje zestaw specjalistycznych funkcji, interfejsów API i praktyk. Działanie MDM opiera się na kompatybilnym serwerze MDM, który jest dostępny komercyjnie lub jako open-source i musi wspierać [Protokół MDM](https://developer.apple.com/enterprise/documentation/MDM-Protocol-Reference.pdf). Kluczowe punkty obejmują:
+[Zarządzanie Urządzeniami Mobilnymi](https://en.wikipedia.org/wiki/Mobile_device_management) (MDM) jest wykorzystywane do nadzorowania różnych urządzeń końcowych, takich jak smartfony, laptopy i tablety. Szczególnie dla platform Apple (iOS, macOS, tvOS) obejmuje zestaw specjalistycznych funkcji, interfejsów API i praktyk. Działanie MDM opiera się na kompatybilnym serwerze MDM, który jest dostępny komercyjnie lub jako open-source, i musi wspierać [Protokół MDM](https://developer.apple.com/enterprise/documentation/MDM-Protocol-Reference.pdf). Kluczowe punkty obejmują:
 
 - Centralne zarządzanie urządzeniami.
 - Zależność od serwera MDM, który przestrzega protokołu MDM.
@@ -19,7 +19,7 @@
 
 ### **Podstawy DEP (Program Rejestracji Urządzeń)**
 
-[Program Rejestracji Urządzeń](https://www.apple.com/business/site/docs/DEP_Guide.pdf) (DEP) oferowany przez Apple upraszcza integrację Zarządzania Urządzeniami Mobilnymi (MDM) poprzez umożliwienie konfiguracji bezdotykowej dla urządzeń iOS, macOS i tvOS. DEP automatyzuje proces rejestracji, pozwalając urządzeniom na działanie od razu po wyjęciu z pudełka, z minimalną interwencją użytkownika lub administratora. Kluczowe aspekty obejmują:
+[Program Rejestracji Urządzeń](https://www.apple.com/business/site/docs/DEP_Guide.pdf) (DEP) oferowany przez Apple upraszcza integrację Zarządzania Urządzeniami Mobilnymi (MDM) poprzez umożliwienie konfiguracji bezdotykowej dla urządzeń iOS, macOS i tvOS. DEP automatyzuje proces rejestracji, pozwalając urządzeniom być operacyjnymi od razu po wyjęciu z pudełka, z minimalną interwencją użytkownika lub administratora. Kluczowe aspekty obejmują:
 
 - Umożliwia urządzeniom autonomiczne rejestrowanie się z wcześniej zdefiniowanym serwerem MDM po pierwszej aktywacji.
 - Głównie korzystne dla nowych urządzeń, ale również stosowane dla urządzeń poddawanych rekonfiguracji.
@@ -30,7 +30,7 @@
 Ważne jest, aby zauważyć, że łatwość rejestracji zapewniana przez DEP, choć korzystna, może również stwarzać ryzyko bezpieczeństwa. Jeśli środki ochronne nie są odpowiednio egzekwowane dla rejestracji MDM, napastnicy mogą wykorzystać ten uproszczony proces do zarejestrowania swojego urządzenia na serwerze MDM organizacji, podszywając się pod urządzenie korporacyjne.
 
 > [!CAUTION]
-> **Alert bezpieczeństwa**: Uproszczona rejestracja DEP może potencjalnie umożliwić nieautoryzowaną rejestrację urządzenia na serwerze MDM organizacji, jeśli odpowiednie zabezpieczenia nie są wdrożone.
+> **Alert bezpieczeństwa**: Uproszczona rejestracja DEP może potencjalnie umożliwić nieautoryzowaną rejestrację urządzenia na serwerze MDM organizacji, jeśli nie są wprowadzone odpowiednie zabezpieczenia.
 
 ### Podstawy Czym jest SCEP (Protokół Prostej Rejestracji Certyfikatów)?
 
@@ -42,7 +42,7 @@ Ważne jest, aby zauważyć, że łatwość rejestracji zapewniana przez DEP, ch
 - Oficjalny sposób Apple na **ustawianie/egzekwowanie konfiguracji systemu.**
 - Format pliku, który może zawierać wiele ładunków.
 - Oparty na listach właściwości (w rodzaju XML).
-- „może być podpisany i zaszyfrowany, aby zweryfikować ich pochodzenie, zapewnić ich integralność i chronić ich zawartość.” Podstawy — Strona 70, Przewodnik po Bezpieczeństwie iOS, styczeń 2018.
+- „może być podpisany i zaszyfrowany, aby zweryfikować ich pochodzenie, zapewnić integralność i chronić ich zawartość.” Podstawy — Strona 70, Przewodnik po Bezpieczeństwie iOS, styczeń 2018.
 
 ## Protokoły
 
@@ -60,7 +60,7 @@ Ważne jest, aby zauważyć, że łatwość rejestracji zapewniana przez DEP, ch
 - Tzw. [API "usługi chmurowej" DEP](https://developer.apple.com/enterprise/documentation/MDM-Protocol-Reference.pdf). Jest używane przez serwery MDM do kojarzenia profili DEP z konkretnymi urządzeniami.
 - [API DEP używane przez autoryzowanych sprzedawców Apple](https://applecareconnect.apple.com/api-docs/depuat/html/WSImpManual.html) do rejestracji urządzeń, sprawdzania statusu rejestracji i statusu transakcji.
 - Nieudokumentowane prywatne API DEP. Jest używane przez urządzenia Apple do żądania swojego profilu DEP. Na macOS, binarny `cloudconfigurationd` jest odpowiedzialny za komunikację przez to API.
-- Bardziej nowoczesne i oparte na **JSON** (w porównaniu do plist)
+- Bardziej nowoczesne i **oparte na JSON** (w porównaniu do plist)
 - Apple przyznaje dostawcy MDM **token OAuth**
 
 **API "usługi chmurowej" DEP**
@@ -75,7 +75,7 @@ Ważne jest, aby zauważyć, że łatwość rejestracji zapewniana przez DEP, ch
 
 ## Numer seryjny
 
-Urządzenia Apple wyprodukowane po 2010 roku zazwyczaj mają **12-znakowe alfanumeryczne** numery seryjne, przy czym **pierwsze trzy cyfry reprezentują miejsce produkcji**, następne **dwie** wskazują **rok** i **tydzień** produkcji, następne **trzy** cyfry dostarczają **unikalny** **identyfikator**, a **ostatnie** **cztery** cyfry reprezentują **numer modelu**.
+Urządzenia Apple wyprodukowane po 2010 roku zazwyczaj mają **12-znakowe alfanumeryczne** numery seryjne, z **pierwszymi trzema cyframi reprezentującymi miejsce produkcji**, następne **dwie** wskazujące **rok** i **tydzień** produkcji, następne **trzy** cyfry dostarczające **unikalny** **identyfikator**, a **ostatnie** **cztery** cyfry reprezentujące **numer modelu**.
 
 {{#ref}}
 macos-serial-number.md
@@ -135,8 +135,8 @@ Odpowiedź to słownik JSON z ważnymi danymi, takimi jak:
 
 ![](<../../../images/image (444).png>)
 
-- Żądanie wysyłane do **url podanego w profilu DEP**.
-- **Certyfikaty kotwiczne** są używane do **oceny zaufania**, jeśli są podane.
+- Żądanie wysłane do **url podanego w profilu DEP**.
+- **Certyfikaty kotwicy** są używane do **oceny zaufania**, jeśli są podane.
 - Przypomnienie: właściwość **anchor_certs** profilu DEP
 - **Żądanie to prosty .plist** z identyfikacją urządzenia
 - Przykłady: **UDID, wersja OS**.
@@ -144,7 +144,7 @@ Odpowiedź to słownik JSON z ważnymi danymi, takimi jak:
 - Podpisane za pomocą **certyfikatu tożsamości urządzenia (z APNS)**
 - **Łańcuch certyfikatów** zawiera wygasły **Apple iPhone Device CA**
 
-![](<../../../images/image (567) (1) (2) (2) (2) (2) (2) (2) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (2) (2).png>)
+![](<../../../images/image (567) (1) (2) (2) (2) (2) (2) (2) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (2) (2).png>)
 
 ### Krok 6: Instalacja profilu
 
@@ -169,7 +169,7 @@ Typowo, **profil aktywacji** dostarczany przez dostawcę MDM będzie **zawierał
 - Ładunek **zawiera kluczowe właściwości**:
 - - URL rejestracji MDM (**`CheckInURL`**)
 - URL polling komend MDM (**`ServerURL`**) + temat APNs do jego wywołania
-- Aby zainstalować ładunek MDM, żądanie jest wysyłane do **`CheckInURL`**
+- Aby zainstalować ładunek MDM, wysyłane jest żądanie do **`CheckInURL`**
 - Zrealizowane w **`mdmclient`**
 - Ładunek MDM może zależeć od innych ładunków
 - Umożliwia **przypinanie żądań do konkretnych certyfikatów**:
@@ -184,7 +184,7 @@ Typowo, **profil aktywacji** dostarczany przez dostawcę MDM będzie **zawierał
 
 - Po zakończeniu rejestracji MDM, dostawca może **wysyłać powiadomienia push za pomocą APNs**
 - Po odebraniu, obsługiwane przez **`mdmclient`**
-- Aby sprawdzić polecenia MDM, żądanie jest wysyłane do ServerURL
+- Aby sprawdzić polecenia MDM, wysyłane jest żądanie do ServerURL
 - Wykorzystuje wcześniej zainstalowany ładunek MDM:
 - **`ServerURLPinningCertificateUUIDs`** do przypinania żądania
 - **`IdentityCertificateUUID`** do certyfikatu klienta TLS

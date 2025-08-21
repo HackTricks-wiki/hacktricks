@@ -12,7 +12,7 @@ Maszyna linuxowa w AD może **przechowywać różne bilety CCACHE w plikach. Te 
 
 Jeśli masz dostęp do AD w linuxie (lub bashu w Windows), możesz spróbować [https://github.com/lefayjey/linWinPwn](https://github.com/lefayjey/linWinPwn) do enumeracji AD.
 
-Możesz również sprawdzić następującą stronę, aby poznać **inne sposoby enumeracji AD z linuxa**:
+Możesz również sprawdzić następującą stronę, aby dowiedzieć się o **innych sposobach enumeracji AD z linuxa**:
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-ldap.md
@@ -20,7 +20,7 @@ Możesz również sprawdzić następującą stronę, aby poznać **inne sposoby 
 
 ### FreeIPA
 
-FreeIPA to otwartoźródłowa **alternatywa** dla Microsoft Windows **Active Directory**, głównie dla środowisk **Unix**. Łączy kompletny **katalog LDAP** z centrum dystrybucji kluczy MIT **Kerberos** do zarządzania podobnego do Active Directory. Wykorzystując system certyfikatów Dogtag do zarządzania certyfikatami CA i RA, wspiera **uwierzytelnianie wieloskładnikowe**, w tym karty inteligentne. SSSD jest zintegrowany z procesami uwierzytelniania Unix. Dowiedz się więcej o tym w:
+FreeIPA to otwarte źródło **alternatywa** dla Microsoft Windows **Active Directory**, głównie dla środowisk **Unix**. Łączy kompletny **katalog LDAP** z MIT **Kerberos** Key Distribution Center do zarządzania podobnego do Active Directory. Wykorzystując system certyfikatów Dogtag do zarządzania certyfikatami CA i RA, wspiera **uwierzytelnianie wieloskładnikowe**, w tym karty inteligentne. SSSD jest zintegrowany z procesami uwierzytelniania Unix. Dowiedz się więcej o tym w:
 
 {{#ref}}
 ../freeipa-pentesting.md
@@ -30,7 +30,7 @@ FreeIPA to otwartoźródłowa **alternatywa** dla Microsoft Windows **Active Dir
 
 ### Pass The Ticket
 
-Na tej stronie znajdziesz różne miejsca, w których możesz **znaleźć bilety kerberos w hoście linuxowym**, na następnej stronie możesz nauczyć się, jak przekształcić te formaty biletów CCache na Kirbi (format, którego musisz użyć w Windows) oraz jak przeprowadzić atak PTT:
+Na tej stronie znajdziesz różne miejsca, w których możesz **znaleźć bilety kerberos w hoście linuxowym**, na następnej stronie możesz dowiedzieć się, jak przekształcić te formaty biletów CCache na Kirbi (format, którego musisz użyć w Windows) oraz jak przeprowadzić atak PTT:
 
 {{#ref}}
 ../../windows-hardening/active-directory-methodology/pass-the-ticket.md
@@ -51,7 +51,7 @@ export KRB5CCNAME=/tmp/krb5cc_1000
 ```
 ### CCACHE ticket reuse from keyring
 
-**Bilety Kerberos przechowywane w pamięci procesu mogą być wyodrębnione**, szczególnie gdy ochrona ptrace maszyny jest wyłączona (`/proc/sys/kernel/yama/ptrace_scope`). Przydatne narzędzie do tego celu znajduje się pod adresem [https://github.com/TarlogicSecurity/tickey](https://github.com/TarlogicSecurity/tickey), które ułatwia wyodrębnianie poprzez wstrzykiwanie do sesji i zrzucanie biletów do `/tmp`.
+**Bilety Kerberos przechowywane w pamięci procesu mogą być wyodrębnione**, szczególnie gdy ochrona ptrace maszyny jest wyłączona (`/proc/sys/kernel/yama/ptrace_scope`). Przydatne narzędzie do tego celu można znaleźć pod adresem [https://github.com/TarlogicSecurity/tickey](https://github.com/TarlogicSecurity/tickey), które ułatwia wyodrębnianie poprzez wstrzykiwanie do sesji i zrzucanie biletów do `/tmp`.
 
 Aby skonfigurować i używać tego narzędzia, należy postępować zgodnie z poniższymi krokami:
 ```bash
@@ -64,7 +64,7 @@ Ta procedura spróbuje wstrzyknąć do różnych sesji, wskazując na sukces pop
 
 ### Ponowne użycie biletu CCACHE z SSSD KCM
 
-SSSD utrzymuje kopię bazy danych pod ścieżką `/var/lib/sss/secrets/secrets.ldb`. Odpowiedni klucz jest przechowywany jako ukryty plik pod ścieżką `/var/lib/sss/secrets/.secrets.mkey`. Domyślnie klucz jest czytelny tylko, jeśli masz uprawnienia **root**.
+SSSD utrzymuje kopię bazy danych pod ścieżką `/var/lib/sss/secrets/secrets.ldb`. Odpowiedni klucz jest przechowywany jako ukryty plik pod ścieżką `/var/lib/sss/secrets/.secrets.mkey`. Domyślnie klucz jest czytelny tylko jeśli masz uprawnienia **root**.
 
 Wywołanie **`SSSDKCMExtractor`** z parametrami --database i --key zanalizuje bazę danych i **odszyfruje sekrety**.
 ```bash

@@ -1,15 +1,15 @@
-# Kontrole bezpieczeństwa systemu Windows
+# Windows Security Controls
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Polityka AppLocker
+## AppLocker Policy
 
 Lista dozwolonych aplikacji to lista zatwierdzonych aplikacji lub plików wykonywalnych, które mogą być obecne i uruchamiane w systemie. Celem jest ochrona środowiska przed szkodliwym złośliwym oprogramowaniem i niezatwierdzonym oprogramowaniem, które nie odpowiada specyficznym potrzebom biznesowym organizacji.
 
-[AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) to **rozwiązanie do białej listy aplikacji** firmy Microsoft, które daje administratorom systemów kontrolę nad **tym, które aplikacje i pliki mogą uruchamiać użytkownicy**. Zapewnia **szczegółową kontrolę** nad plikami wykonywalnymi, skryptami, plikami instalacyjnymi Windows, DLL, aplikacjami pakietowymi i instalatorami aplikacji pakietowych.\
+[AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) to **rozwiązanie do białej listy aplikacji** firmy Microsoft, które daje administratorom systemu kontrolę nad **tym, które aplikacje i pliki mogą uruchamiać użytkownicy**. Zapewnia **szczegółową kontrolę** nad plikami wykonywalnymi, skryptami, plikami instalacyjnymi Windows, DLL, aplikacjami pakietowymi i instalatorami aplikacji pakietowych.\
 Powszechną praktyką w organizacjach jest **blokowanie cmd.exe i PowerShell.exe** oraz zapisu do niektórych katalogów, **ale to wszystko można obejść**.
 
-### Sprawdzenie
+### Check
 
 Sprawdź, które pliki/rozszerzenia są na czarnej/białej liście:
 ```bash
@@ -20,7 +20,7 @@ Get-AppLockerPolicy -Effective | select -ExpandProperty RuleCollections
 $a = Get-ApplockerPolicy -effective
 $a.rulecollections
 ```
-Ta ścieżka rejestru zawiera konfiguracje i polityki stosowane przez AppLocker, zapewniając sposób na przeglądanie bieżącego zestawu reguł egzekwowanych w systemie:
+Ta ścieżka rejestru zawiera konfiguracje i polityki stosowane przez AppLocker, co umożliwia przeglądanie aktualnego zestawu reguł egzekwowanych w systemie:
 
 - `HKLM\Software\Policies\Microsoft\Windows\SrpV2`
 
@@ -37,7 +37,7 @@ C:\windows\tracing
 - **Słabo napisane zasady mogą być również obejście**
 - Na przykład, **`<FilePathCondition Path="%OSDRIVE%*\allowed*"/>`**, możesz stworzyć **folder o nazwie `allowed`** wszędzie, a będzie on dozwolony.
 - Organizacje często koncentrują się na **blokowaniu pliku wykonywalnego `%System32%\WindowsPowerShell\v1.0\powershell.exe`**, ale zapominają o **innych** [**lokacjach plików wykonywalnych PowerShell**](https://www.powershelladmin.com/wiki/PowerShell_Executables_File_System_Locations) takich jak `%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe` lub `PowerShell_ISE.exe`.
-- **Wymuszanie DLL rzadko włączane** z powodu dodatkowego obciążenia, jakie może nałożyć na system, oraz ilości testów wymaganych do zapewnienia, że nic się nie zepsuje. Dlatego użycie **DLL jako tylnej furtki pomoże w obejściu AppLocker**.
+- **Wymuszanie DLL rzadko włączone** z powodu dodatkowego obciążenia, jakie może nałożyć na system, oraz ilości testów wymaganych do zapewnienia, że nic się nie zepsuje. Dlatego użycie **DLL jako tylnej furtki pomoże w obejściu AppLocker**.
 - Możesz użyć [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) lub [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick), aby **wykonać kod Powershell** w dowolnym procesie i obejść AppLocker. Więcej informacji znajdziesz tutaj: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode).
 
 ## Przechowywanie poświadczeń
@@ -108,7 +108,7 @@ EFS zabezpiecza pliki poprzez szyfrowanie, wykorzystując **klucz symetryczny** 
 **Scenariusze odszyfrowania bez inicjacji użytkownika** obejmują:
 
 - Gdy pliki lub foldery są przenoszone do systemu plików, który nie obsługuje EFS, takiego jak [FAT32](https://en.wikipedia.org/wiki/File_Allocation_Table), są automatycznie odszyfrowywane.
-- Zaszyfrowane pliki wysyłane przez sieć za pomocą protokołu SMB/CIFS są odszyfrowywane przed transmisją.
+- Zaszyfrowane pliki przesyłane przez sieć za pomocą protokołu SMB/CIFS są odszyfrowywane przed transmisją.
 
 Ta metoda szyfrowania umożliwia **przezroczysty dostęp** do zaszyfrowanych plików dla właściciela. Jednak samo zmienienie hasła właściciela i zalogowanie się nie pozwoli na odszyfrowanie.
 
@@ -119,7 +119,7 @@ Ta metoda szyfrowania umożliwia **przezroczysty dostęp** do zaszyfrowanych pli
 - Automatyczne odszyfrowanie występuje w określonych warunkach, takich jak kopiowanie do FAT32 lub transmisja sieciowa.
 - Zaszyfrowane pliki są dostępne dla właściciela bez dodatkowych kroków.
 
-### Sprawdź informacje o EFS
+### Sprawdź informacje EFS
 
 Sprawdź, czy **użytkownik** **korzystał** z tej **usługi**, sprawdzając, czy istnieje ta ścieżka: `C:\users\<username>\appdata\roaming\Microsoft\Protect`
 
@@ -130,9 +130,10 @@ Możesz również użyć `cipher /e` i `cipher /d` w folderze, aby **szyfrować*
 
 #### Bycie systemem autoryzacyjnym
 
-Ta metoda wymaga, aby **użytkownik ofiary** **uruchamiał** **proces** wewnątrz hosta. Jeśli tak jest, używając sesji `meterpreter`, możesz udawać token procesu użytkownika (`impersonate_token` z `incognito`). Możesz też po prostu `migrate` do procesu użytkownika.
+Ta metoda wymaga, aby **użytkownik ofiary** **uruchamiał** **proces** wewnątrz hosta. Jeśli tak jest, używając sesji `meterpreter`, możesz podszyć się pod token procesu użytkownika (`impersonate_token` z `incognito`). Możesz też po prostu `migrate` do procesu użytkownika.
 
 #### Znając hasło użytkownika
+
 
 {{#ref}}
 https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files
@@ -142,7 +143,7 @@ https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files
 
 Microsoft opracował **Group Managed Service Accounts (gMSA)**, aby uprościć zarządzanie kontami serwisowymi w infrastrukturach IT. W przeciwieństwie do tradycyjnych kont serwisowych, które często mają włączoną opcję "**Hasło nigdy nie wygasa**", gMSA oferują bardziej bezpieczne i zarządzalne rozwiązanie:
 
-- **Automatyczne zarządzanie hasłami**: gMSA używają złożonego, 240-znakowego hasła, które automatycznie zmienia się zgodnie z polityką domeny lub komputera. Proces ten jest obsługiwany przez usługę dystrybucji kluczy Microsoftu (KDC), eliminując potrzebę ręcznych aktualizacji haseł.
+- **Automatyczne zarządzanie hasłami**: gMSA używają złożonego, 240-znakowego hasła, które automatycznie zmienia się zgodnie z polityką domeny lub komputera. Proces ten jest obsługiwany przez usługę dystrybucji kluczy Microsoft (KDC), eliminując potrzebę ręcznych aktualizacji haseł.
 - **Zwiększone bezpieczeństwo**: Te konta są odporne na zablokowania i nie mogą być używane do interaktywnych logowań, co zwiększa ich bezpieczeństwo.
 - **Wsparcie dla wielu hostów**: gMSA mogą być udostępniane na wielu hostach, co czyni je idealnymi dla usług działających na wielu serwerach.
 - **Możliwość zadań zaplanowanych**: W przeciwieństwie do zarządzanych kont serwisowych, gMSA wspierają uruchamianie zadań zaplanowanych.
@@ -168,7 +169,7 @@ Sprawdź także tę [stronę internetową](https://cube0x0.github.io/Relaying-fo
 ../active-directory-methodology/laps.md
 {{#endref}}
 
-## Tryb ograniczonego języka PS
+## Tryb ograniczonego języka PowerShell
 
 PowerShell [**Tryb ograniczonego języka**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/) **ogranicza wiele funkcji** potrzebnych do skutecznego korzystania z PowerShell, takich jak blokowanie obiektów COM, zezwalanie tylko na zatwierdzone typy .NET, przepływy pracy oparte na XAML, klasy PowerShell i inne.
 
@@ -235,7 +236,7 @@ SSPI będzie odpowiedzialne za znalezienie odpowiedniego protokołu dla dwóch m
 - %windir%\Windows\System32\Wdigest.dll
 - **Schannel**: SSL i TLS
 - %windir%\Windows\System32\Schannel.dll
-- **Negotiate**: Używane do negocjowania protokołu do użycia (Kerberos lub NTLM, przy czym Kerberos jest domyślnym)
+- **Negotiate**: Używane do negocjacji protokołu do użycia (Kerberos lub NTLM, przy czym Kerberos jest domyślnym)
 - %windir%\Windows\System32\lsasrv.dll
 
 #### Negocjacja może oferować kilka metod lub tylko jedną.

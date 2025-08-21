@@ -6,25 +6,27 @@
 
 Jeśli przyszedłeś tutaj szukając eskalacji uprawnień TCC, przejdź do:
 
+
 {{#ref}}
 macos-security-protections/macos-tcc/
 {{#endref}}
 
 ## Linux Privesc
 
-Należy zauważyć, że **większość sztuczek dotyczących eskalacji uprawnień wpływających na Linux/Unix wpłynie również na maszyny MacOS**. Zobacz więc:
+Proszę zauważyć, że **większość sztuczek dotyczących eskalacji uprawnień wpływających na Linux/Unix wpłynie również na maszyny MacOS**. Zobacz więc:
+
 
 {{#ref}}
 ../../linux-hardening/privilege-escalation/
 {{#endref}}
 
-## User Interaction
+## Interakcja z użytkownikiem
 
 ### Sudo Hijacking
 
-Możesz znaleźć oryginalną [technikę Sudo Hijacking w poście o eskalacji uprawnień w Linuxie](../../linux-hardening/privilege-escalation/index.html#sudo-hijacking).
+Możesz znaleźć oryginalną [technikę Sudo Hijacking w poście o eskalacji uprawnień Linux](../../linux-hardening/privilege-escalation/index.html#sudo-hijacking).
 
-Jednak macOS **zachowuje** **`PATH`** użytkownika, gdy wykonuje **`sudo`**. Co oznacza, że innym sposobem na przeprowadzenie tego ataku byłoby **przejęcie innych binarek**, które ofiara nadal wykona podczas **uruchamiania sudo:**
+Jednakże, macOS **zachowuje** **`PATH`** użytkownika, gdy wykonuje **`sudo`**. Co oznacza, że innym sposobem na przeprowadzenie tego ataku byłoby **przejęcie innych binarek**, które ofiara nadal wykona podczas **uruchamiania sudo:**
 ```bash
 # Let's hijack ls in /opt/homebrew/bin, as this is usually already in the users PATH
 cat > /opt/homebrew/bin/ls <<EOF
@@ -126,9 +128,9 @@ Kilka sugestii:
 
 - Nie **możesz usunąć Findera z Docka**, więc jeśli zamierzasz dodać go do Docka, możesz umieścić fałszywego Findera tuż obok prawdziwego. W tym celu musisz **dodać fałszywy wpis Findera na początku tablicy Docka**.
 - Inną opcją jest nie umieszczanie go w Docku i po prostu otwarcie go, "Finder prosi o kontrolę Findera" nie jest takie dziwne.
-- Inną opcją na **eskalację do roota bez pytania** o hasło za pomocą okna, jest sprawienie, by Finder naprawdę poprosił o hasło do wykonania uprzywilejowanej akcji:
-- Poproś Findera o skopiowanie do **`/etc/pam.d`** nowego pliku **`sudo`** (Okno pytające o hasło wskaże, że "Finder chce skopiować sudo")
-- Poproś Findera o skopiowanie nowego **Pluginu Autoryzacji** (Możesz kontrolować nazwę pliku, aby okno pytające o hasło wskazywało, że "Finder chce skopiować Finder.bundle")
+- Inną opcją na **eskalację do roota bez pytania** o hasło z oknem, które wygląda strasznie, jest sprawienie, by Finder naprawdę poprosił o hasło do wykonania uprzywilejowanej akcji:
+- Poproś Findera o skopiowanie do **`/etc/pam.d`** nowego pliku **`sudo`** (Okno z prośbą o hasło wskaże, że "Finder chce skopiować sudo")
+- Poproś Findera o skopiowanie nowego **Pluginu Autoryzacji** (Możesz kontrolować nazwę pliku, aby okno z prośbą o hasło wskazywało, że "Finder chce skopiować Finder.bundle")
 ```bash
 #!/bin/sh
 
@@ -205,7 +207,7 @@ killall Dock
 
 ### CVE-2020-9771 - obejście TCC mount_apfs i eskalacja uprawnień
 
-**Każdy użytkownik** (nawet bez uprawnień) może utworzyć i zamontować migawkę Time Machine oraz **uzyskać dostęp do WSZYSTKICH plików** tej migawki.\
+**Każdy użytkownik** (nawet nieuprzywilejowany) może utworzyć i zamontować migawkę Time Machine oraz **uzyskać dostęp do WSZYSTKICH plików** tej migawki.\
 **Jedynym wymaganym uprawnieniem** jest to, aby aplikacja używana (jak `Terminal`) miała dostęp **Full Disk Access** (FDA) (`kTCCServiceSystemPolicyAllfiles`), co musi być przyznane przez administratora.
 ```bash
 # Create snapshot
@@ -231,6 +233,7 @@ Bardziej szczegółowe wyjaśnienie można [**znaleźć w oryginalnym raporcie**
 ## Wrażliwe informacje
 
 To może być przydatne do eskalacji uprawnień:
+
 
 {{#ref}}
 macos-files-folders-and-binaries/macos-sensitive-locations.md

@@ -35,7 +35,7 @@ cpu              nbd0             pts              stdout           tty27       
 
 ### Systemy plików jądra tylko do odczytu
 
-Systemy plików jądra zapewniają mechanizm, który pozwala procesowi modyfikować zachowanie jądra. Jednak w przypadku procesów kontenerowych chcemy zapobiec ich wprowadzaniu jakichkolwiek zmian w jądrze. Dlatego montujemy systemy plików jądra jako **tylko do odczytu** w obrębie kontenera, zapewniając, że procesy kontenera nie mogą modyfikować jądra.
+Systemy plików jądra zapewniają mechanizm, dzięki któremu proces może modyfikować zachowanie jądra. Jednak w przypadku procesów kontenerowych chcemy zapobiec ich wprowadzaniu jakichkolwiek zmian w jądrze. Dlatego montujemy systemy plików jądra jako **tylko do odczytu** w kontenerze, zapewniając, że procesy kontenera nie mogą modyfikować jądra.
 
 {{#tabs}}
 {{#tab name="Wewnątrz domyślnego kontenera"}}
@@ -49,7 +49,7 @@ cpuacct on /sys/fs/cgroup/cpuacct type cgroup (ro,nosuid,nodev,noexec,relatime,c
 ```
 {{#endtab}}
 
-{{#tab name="Wewnątrz kontenera z uprawnieniami"}}
+{{#tab name="Inside Privileged Container"}}
 ```bash
 # docker run --rm --privileged -it alpine sh
 mount  | grep '(ro'
@@ -57,7 +57,7 @@ mount  | grep '(ro'
 {{#endtab}}
 {{#endtabs}}
 
-### Maskowanie nad systemami plików jądra
+### Maskowanie systemów plików jądra
 
 System plików **/proc** jest selektywnie zapisywalny, ale dla bezpieczeństwa, niektóre części są chronione przed dostępem do zapisu i odczytu poprzez nałożenie na nie **tmpfs**, co zapewnia, że procesy kontenera nie mogą uzyskać dostępu do wrażliwych obszarów.
 
@@ -74,7 +74,7 @@ tmpfs on /proc/keys type tmpfs (rw,nosuid,size=65536k,mode=755)
 ```
 {{#endtab}}
 
-{{#tab name="Wewnątrz kontenera z uprawnieniami"}}
+{{#tab name="Inside Privileged Container"}}
 ```bash
 # docker run --rm --privileged -it alpine sh
 mount  | grep /proc.*tmpfs
@@ -84,7 +84,7 @@ mount  | grep /proc.*tmpfs
 
 ### Możliwości Linuxa
 
-Silniki kontenerów uruchamiają kontenery z **ograniczoną liczbą możliwości**, aby kontrolować, co dzieje się wewnątrz kontenera domyślnie. **Privileged** mają **wszystkie** **możliwości** dostępne. Aby dowiedzieć się więcej o możliwościach, przeczytaj:
+Silniki kontenerowe uruchamiają kontenery z **ograniczoną liczbą możliwości**, aby kontrolować, co dzieje się wewnątrz kontenera domyślnie. **Privileged** mają **wszystkie** **możliwości** dostępne. Aby dowiedzieć się więcej o możliwościach, przeczytaj:
 
 {{#ref}}
 ../linux-capabilities.md
@@ -102,7 +102,7 @@ Bounding set =cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setg
 ```
 {{#endtab}}
 
-{{#tab name="Wewnątrz kontenera z uprawnieniami"}}
+{{#tab name="Inside Privileged Container"}}
 ```bash
 # docker run --rm --privileged -it alpine sh
 apk add -U libcap; capsh --print
@@ -114,11 +114,12 @@ Bounding set =cap_chown,cap_dac_override,cap_dac_read_search,cap_fowner,cap_fset
 {{#endtab}}
 {{#endtabs}}
 
-Możesz manipulować możliwościami dostępnymi dla kontenera bez uruchamiania w trybie `--privileged`, używając flag `--cap-add` i `--cap-drop`.
+Możesz manipulować uprawnieniami dostępnymi dla kontenera bez uruchamiania w trybie `--privileged`, używając flag `--cap-add` i `--cap-drop`.
 
 ### Seccomp
 
 **Seccomp** jest przydatny do **ograniczenia** **syscalli**, które kontener może wywołać. Domyślny profil seccomp jest włączony domyślnie podczas uruchamiania kontenerów docker, ale w trybie uprzywilejowanym jest wyłączony. Dowiedz się więcej o Seccomp tutaj:
+
 
 {{#ref}}
 seccomp.md
@@ -134,7 +135,7 @@ Seccomp_filters:	1
 ```
 {{#endtab}}
 
-{{#tab name="Wewnątrz kontenera z uprawnieniami"}}
+{{#tab name="Inside Privileged Container"}}
 ```bash
 # docker run --rm --privileged -it alpine sh
 grep Seccomp /proc/1/status
@@ -151,7 +152,7 @@ Również zauważ, że gdy Docker (lub inne CRI) są używane w klastrze **Kuber
 
 ### AppArmor
 
-**AppArmor** to ulepszenie jądra, które ogranicza **kontenery** do **ograniczonego** zestawu **zasobów** z **profilami per program**. Gdy uruchamiasz z flagą `--privileged`, ta ochrona jest wyłączona.
+**AppArmor** to ulepszenie jądra, które ogranicza **kontenery** do **ograniczonego** zestawu **zasobów** z **profilami per-programowymi**. Gdy uruchamiasz z flagą `--privileged`, ta ochrona jest wyłączona.
 
 {{#ref}}
 apparmor.md
@@ -162,7 +163,8 @@ apparmor.md
 ```
 ### SELinux
 
-Uruchomienie kontenera z flagą `--privileged` wyłącza **etykiety SELinux**, powodując, że dziedziczy on etykietę silnika kontenerowego, zazwyczaj `unconfined`, co przyznaje pełny dostęp podobny do silnika kontenerowego. W trybie bezrootowym używa `container_runtime_t`, podczas gdy w trybie rootowym stosuje `spc_t`.
+Uruchomienie kontenera z flagą `--privileged` wyłącza **etykiety SELinux**, powodując, że dziedziczy etykietę silnika kontenerowego, zazwyczaj `unconfined`, przyznając pełny dostęp podobny do silnika kontenerowego. W trybie bezrootowym używa `container_runtime_t`, podczas gdy w trybie rootowym stosuje `spc_t`.
+
 
 {{#ref}}
 ../selinux.md
@@ -175,7 +177,7 @@ Uruchomienie kontenera z flagą `--privileged` wyłącza **etykiety SELinux**, p
 
 ### Przestrzenie nazw
 
-Przestrzenie nazw **NIE są dotknięte** flagą `--privileged`. Chociaż nie mają włączonych ograniczeń bezpieczeństwa, **nie widzą wszystkich procesów w systemie ani sieci hosta, na przykład**. Użytkownicy mogą wyłączyć poszczególne przestrzenie nazw, używając flag silnika kontenerów **`--pid=host`, `--net=host`, `--ipc=host`, `--uts=host`**.
+Przestrzenie nazw **NIE są dotknięte** flagą `--privileged`. Mimo że nie mają włączonych ograniczeń bezpieczeństwa, **nie widzą wszystkich procesów w systemie ani hosta sieciowego, na przykład**. Użytkownicy mogą wyłączyć poszczególne przestrzenie nazw, używając flag kontenerów **`--pid=host`, `--net=host`, `--ipc=host`, `--uts=host`**.
 
 {{#tabs}}
 {{#tab name="Inside default privileged container"}}
@@ -201,9 +203,9 @@ PID   USER     TIME  COMMAND
 {{#endtab}}
 {{#endtabs}}
 
-### Przestrzeń użytkownika
+### Przestrzeń nazw użytkownika
 
-**Domyślnie silniki kontenerów nie wykorzystują przestrzeni użytkownika, z wyjątkiem kontenerów bezrootowych**, które wymagają ich do montowania systemu plików i używania wielu UID. Przestrzenie użytkownika, niezbędne dla kontenerów bezrootowych, nie mogą być wyłączane i znacznie zwiększają bezpieczeństwo, ograniczając uprawnienia.
+**Domyślnie silniki kontenerów nie wykorzystują przestrzeni nazw użytkowników, z wyjątkiem kontenerów bezrootowych**, które ich wymagają do montowania systemu plików i używania wielu UID. Przestrzenie nazw użytkowników, niezbędne dla kontenerów bezrootowych, nie mogą być wyłączane i znacznie zwiększają bezpieczeństwo poprzez ograniczenie uprawnień.
 
 ## Odniesienia
 

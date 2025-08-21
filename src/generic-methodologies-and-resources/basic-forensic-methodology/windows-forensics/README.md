@@ -1,33 +1,33 @@
-# Windows Artefakty
+# Windows Artifacts
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Ogólne Artefakty Windows
+## Generic Windows Artifacts
 
-### Powiadomienia Windows 10
+### Windows 10 Notifications
 
 W ścieżce `\Users\<username>\AppData\Local\Microsoft\Windows\Notifications` można znaleźć bazę danych `appdb.dat` (przed rocznicą Windows) lub `wpndatabase.db` (po rocznicy Windows).
 
-W tej bazie danych SQLite można znaleźć tabelę `Notification` z wszystkimi powiadomieniami (w formacie XML), które mogą zawierać interesujące dane.
+Wewnątrz tej bazy danych SQLite można znaleźć tabelę `Notification` ze wszystkimi powiadomieniami (w formacie XML), które mogą zawierać interesujące dane.
 
-### Oś czasu
+### Timeline
 
-Oś czasu to cecha Windows, która zapewnia **chronologiczną historię** odwiedzanych stron internetowych, edytowanych dokumentów i uruchamianych aplikacji.
+Timeline to cecha Windows, która zapewnia **chronologiczną historię** odwiedzanych stron internetowych, edytowanych dokumentów i uruchamianych aplikacji.
 
 Baza danych znajduje się w ścieżce `\Users\<username>\AppData\Local\ConnectedDevicesPlatform\<id>\ActivitiesCache.db`. Ta baza danych może być otwarta za pomocą narzędzia SQLite lub za pomocą narzędzia [**WxTCmd**](https://github.com/EricZimmerman/WxTCmd) **które generuje 2 pliki, które można otworzyć za pomocą narzędzia** [**TimeLine Explorer**](https://ericzimmerman.github.io/#!index.md).
 
-### ADS (Alternatywne Strumienie Danych)
+### ADS (Alternate Data Streams)
 
-Pobrane pliki mogą zawierać **ADS Zone.Identifier**, wskazujące **jak** zostały **pobrane** z intranetu, internetu itp. Niektóre oprogramowanie (jak przeglądarki) zazwyczaj dodaje nawet **więcej** **informacji**, takich jak **URL**, z którego plik został pobrany.
+Pobrane pliki mogą zawierać **ADS Zone.Identifier**, wskazujący **jak** został **pobrany** z intranetu, internetu itp. Niektóre oprogramowanie (jak przeglądarki) zazwyczaj dodaje nawet **więcej** **informacji**, takich jak **URL**, z którego plik został pobrany.
 
-## **Kopie zapasowe plików**
+## **File Backups**
 
-### Kosz
+### Recycle Bin
 
 W Vista/Win7/Win8/Win10 **Kosz** można znaleźć w folderze **`$Recycle.bin`** w głównym katalogu dysku (`C:\$Recycle.bin`).\
 Gdy plik jest usuwany w tym folderze, tworzone są 2 specyficzne pliki:
 
-- `$I{id}`: Informacje o pliku (data usunięcia)
+- `$I{id}`: Informacje o pliku (data, kiedy został usunięty)
 - `$R{id}`: Zawartość pliku
 
 ![](<../../../images/image (1029).png>)
@@ -38,7 +38,7 @@ Mając te pliki, można użyć narzędzia [**Rifiuti**](https://github.com/abelc
 ```
 ![](<../../../images/image (495) (1) (1) (1).png>)
 
-### Kopie zapasowe Shadow
+### Kopie zapasowe woluminów
 
 Shadow Copy to technologia zawarta w systemie Microsoft Windows, która może tworzyć **kopie zapasowe** lub migawki plików lub woluminów komputerowych, nawet gdy są one używane.
 
@@ -46,7 +46,7 @@ Te kopie zapasowe zazwyczaj znajdują się w `\System Volume Information` z kata
 
 ![](<../../../images/image (94).png>)
 
-Montaż obrazu forensycznego za pomocą **ArsenalImageMounter**, narzędzie [**ShadowCopyView**](https://www.nirsoft.net/utils/shadow_copy_view.html) może być użyte do inspekcji kopii zapasowej shadow i nawet **wyodrębnienia plików** z kopii zapasowych shadow.
+Montaż obrazu forensycznego za pomocą **ArsenalImageMounter**, narzędzie [**ShadowCopyView**](https://www.nirsoft.net/utils/shadow_copy_view.html) może być użyte do inspekcji kopii zapasowej i nawet **ekstrakcji plików** z kopii zapasowych shadow copy.
 
 ![](<../../../images/image (576).png>)
 
@@ -54,7 +54,7 @@ Wpis rejestru `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\BackupRestore
 
 ![](<../../../images/image (254).png>)
 
-Rejestr `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\VSS` również zawiera informacje konfiguracyjne dotyczące `Kopii zapasowych woluminów`.
+Rejestr `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\VSS` zawiera również informacje konfiguracyjne dotyczące `Kopii zapasowych woluminów`.
 
 ### Automatycznie zapisywane pliki Office
 
@@ -71,15 +71,15 @@ Windows **automatycznie** **tworzy** te **skrót** w momencie, gdy użytkownik *
 - Win7-Win10: `C:\Users\\AppData\Roaming\Microsoft\Windows\Recent\`
 - Office: `C:\Users\\AppData\Roaming\Microsoft\Office\Recent\`
 
-Gdy folder jest tworzony, tworzony jest również link do folderu, do folderu nadrzędnego i folderu dziadka.
+Gdy folder jest tworzony, tworzony jest również link do folderu, folderu nadrzędnego i folderu dziadka.
 
 Te automatycznie tworzone pliki linków **zawierają informacje o pochodzeniu**, takie jak to, czy jest to **plik** **czy** **folder**, **czasy MAC** tego pliku, **informacje o woluminie** miejsca, w którym plik jest przechowywany, oraz **folder pliku docelowego**. Te informacje mogą być przydatne do odzyskania tych plików w przypadku ich usunięcia.
 
-Ponadto, **data utworzenia pliku linku** to pierwszy **raz**, kiedy oryginalny plik był **po raz pierwszy** **używany**, a **data** **zmodyfikowana** pliku linku to **ostatni** **raz**, kiedy plik źródłowy był używany.
+Ponadto, **data utworzenia linku** to pierwszy **raz**, kiedy oryginalny plik był **po raz pierwszy** **używany**, a **data** **zmodyfikowana** pliku linku to **ostatni** **raz**, kiedy plik źródłowy był używany.
 
 Aby zbadać te pliki, możesz użyć [**LinkParser**](http://4discovery.com/our-tools/).
 
-W tym narzędziu znajdziesz **2 zestawy** znaczników czasu:
+W tym narzędziu znajdziesz **2 zestawy** znaczników czasowych:
 
 - **Pierwszy zestaw:**
 1. FileModifiedDate
@@ -90,7 +90,7 @@ W tym narzędziu znajdziesz **2 zestawy** znaczników czasu:
 2. LinkAccessDate
 3. LinkCreationDate.
 
-Pierwszy zestaw znaczników czasu odnosi się do **znaczników czasu samego pliku**. Drugi zestaw odnosi się do **znaczników czasu pliku powiązanego**.
+Pierwszy zestaw znaczników czasowych odnosi się do **znaczników czasowych samego pliku**. Drugi zestaw odnosi się do **znaczników czasowych pliku powiązanego**.
 
 Możesz uzyskać te same informacje, uruchamiając narzędzie CLI systemu Windows: [**LECmd.exe**](https://github.com/EricZimmerman/LECmd)
 ```
@@ -106,7 +106,7 @@ To są ostatnie pliki wskazywane dla każdej aplikacji. To lista **ostatnich pli
 
 Dostosowane jumplisty są przechowywane w `C:\Users\{username}\AppData\Roaming\Microsoft\Windows\Recent\CustomDestination\` i są tworzone przez aplikację zazwyczaj, ponieważ coś **ważnego** wydarzyło się z plikiem (może oznaczone jako ulubione).
 
-**Czas utworzenia** dowolnego jumplista wskazuje **pierwszy czas, kiedy plik był otwierany** oraz **czas modyfikacji ostatni raz**.
+**Czas utworzenia** dowolnego jumplista wskazuje **pierwszy czas, kiedy plik był otwierany** oraz **czas modyfikacji ostatniego otwarcia**.
 
 Możesz sprawdzić jumplisty używając [**JumplistExplorer**](https://ericzimmerman.github.io/#!index.md).
 
@@ -118,11 +118,11 @@ Możesz sprawdzić jumplisty używając [**JumplistExplorer**](https://ericzimme
 
 [**Śledź ten link, aby dowiedzieć się, czym są shellbags.**](interesting-windows-registry-keys.md#shellbags)
 
-## Użycie USB Windows
+## Użycie USB w systemie Windows
 
 Możliwe jest zidentyfikowanie, że urządzenie USB było używane dzięki utworzeniu:
 
-- Folderu Ostatnie w Windows
+- Folderu Ostatnie w systemie Windows
 - Folderu Ostatnie w Microsoft Office
 - Jumplistów
 
@@ -158,13 +158,13 @@ Zrzut ekranu przedstawiający zawartość zadania: ![](https://2.bp.blogspot.com
 
 **Kluczowe komponenty i ustawienia zadania:**
 
-- **pnpclean.dll**: Ten DLL odpowiada za rzeczywisty proces czyszczenia.
+- **pnpclean.dll**: Ten DLL jest odpowiedzialny za rzeczywisty proces czyszczenia.
 - **UseUnifiedSchedulingEngine**: Ustawione na `TRUE`, co wskazuje na użycie ogólnego silnika planowania zadań.
 - **MaintenanceSettings**:
 - **Okres ('P1M')**: Nakazuje Harmonogramowi Zadań uruchomienie zadania czyszczenia co miesiąc podczas regularnej konserwacji automatycznej.
 - **Termin ('P2M')**: Nakazuje Harmonogramowi Zadań, jeśli zadanie nie powiedzie się przez dwa kolejne miesiące, wykonać zadanie podczas awaryjnej konserwacji automatycznej.
 
-Ta konfiguracja zapewnia regularną konserwację i czyszczenie sterowników, z postanowieniami o ponownym podejmowaniu próby w przypadku kolejnych niepowodzeń.
+Ta konfiguracja zapewnia regularną konserwację i czyszczenie sterowników, z postanowieniami o ponownym podejmowaniu próby zadania w przypadku kolejnych niepowodzeń.
 
 **Aby uzyskać więcej informacji, sprawdź:** [**https://blog.1234n6.com/2018/07/windows-plug-and-play-cleanup.html**](https://blog.1234n6.com/2018/07/windows-plug-and-play-cleanup.html)
 
@@ -179,7 +179,7 @@ Ponadto, w nagłówkach `References` i `In-Reply-To` możesz znaleźć ID wiadom
 
 ![](<../../../images/image (593).png>)
 
-### Aplikacja Poczta Windows
+### Aplikacja Poczta systemu Windows
 
 Ta aplikacja zapisuje e-maile w formacie HTML lub tekstowym. Możesz znaleźć e-maile w podfolderach w `\Users\<username>\AppData\Local\Comms\Unistore\data\3\`. E-maile są zapisywane z rozszerzeniem `.dat`.
 
@@ -201,7 +201,7 @@ W kliencie Microsoft Outlook wszystkie wysłane/odebrane wiadomości, dane konta
 - `%USERPROFILE%\Local Settings\Application Data\Microsoft\Outlook` (WinXP)
 - `%USERPROFILE%\AppData\Local\Microsoft\Outlook`
 
-Ścieżka rejestru `HKEY_CURRENT_USER\Software\Microsoft\WindowsNT\CurrentVersion\Windows Messaging Subsystem\Profiles\Outlook` wskazuje plik, który jest używany.
+Ścieżka rejestru `HKEY_CURRENT_USER\Software\Microsoft\WindowsNT\CurrentVersion\Windows Messaging Subsystem\Profiles\Outlook` wskazuje na plik, który jest używany.
 
 Możesz otworzyć plik PST za pomocą narzędzia [**Kernel PST Viewer**](https://www.nucleustechnologies.com/es/visor-de-pst.html).
 
@@ -209,7 +209,7 @@ Możesz otworzyć plik PST za pomocą narzędzia [**Kernel PST Viewer**](https:/
 
 ### Pliki Microsoft Outlook OST
 
-Plik **OST** jest generowany przez Microsoft Outlook, gdy jest skonfigurowany z **IMAP** lub serwerem **Exchange**, przechowując podobne informacje do pliku PST. Plik ten jest synchronizowany z serwerem, zachowując dane przez **ostatnie 12 miesięcy** do **maksymalnego rozmiaru 50GB**, i znajduje się w tym samym katalogu co plik PST. Aby wyświetlić plik OST, można wykorzystać [**Kernel OST viewer**](https://www.nucleustechnologies.com/ost-viewer.html).
+Plik **OST** jest generowany przez Microsoft Outlook, gdy jest skonfigurowany z **IMAP** lub serwerem **Exchange**, przechowując podobne informacje do pliku PST. Plik ten jest synchronizowany z serwerem, zachowując dane przez **ostatnie 12 miesięcy** do **maksymalnego rozmiaru 50 GB**, i znajduje się w tym samym katalogu co plik PST. Aby wyświetlić plik OST, można wykorzystać [**Kernel OST viewer**](https://www.nucleustechnologies.com/ost-viewer.html).
 
 ### Przywracanie załączników
 
@@ -228,9 +228,9 @@ Zgubione załączniki mogą być odzyskiwane z:
 - **Windows 7/10**: `thumbs.db` jest tworzony, gdy uzyskuje się dostęp przez sieć za pomocą ścieżki UNC.
 - **Windows Vista i nowsze**: Podglądy miniatur są centralizowane w `%userprofile%\AppData\Local\Microsoft\Windows\Explorer` z plikami nazwanymi **thumbcache_xxx.db**. [**Thumbsviewer**](https://thumbsviewer.github.io) i [**ThumbCache Viewer**](https://thumbcacheviewer.github.io) to narzędzia do przeglądania tych plików.
 
-### Informacje w rejestrze Windows
+### Informacje w rejestrze systemu Windows
 
-Rejestr Windows, przechowujący obszerne dane o systemie i aktywności użytkownika, znajduje się w plikach w:
+Rejestr systemu Windows, przechowujący obszerne dane o systemie i aktywności użytkowników, znajduje się w plikach w:
 
 - `%windir%\System32\Config` dla różnych podkluczy `HKEY_LOCAL_MACHINE`.
 - `%UserProfile%{User}\NTUSER.DAT` dla `HKEY_CURRENT_USER`.
@@ -241,14 +241,14 @@ Rejestr Windows, przechowujący obszerne dane o systemie i aktywności użytkown
 
 Niektóre narzędzia są przydatne do analizy plików rejestru:
 
-- **Edytor rejestru**: Jest zainstalowany w Windows. To GUI do nawigacji przez rejestr Windows bieżącej sesji.
+- **Edytor rejestru**: Jest zainstalowany w systemie Windows. To GUI do nawigacji przez rejestr systemu Windows bieżącej sesji.
 - [**Registry Explorer**](https://ericzimmerman.github.io/#!index.md): Umożliwia załadowanie pliku rejestru i nawigację przez nie za pomocą GUI. Zawiera również zakładki podświetlające klucze z interesującymi informacjami.
 - [**RegRipper**](https://github.com/keydet89/RegRipper3.0): Ponownie, ma GUI, które pozwala na nawigację przez załadowany rejestr i zawiera również wtyczki, które podświetlają interesujące informacje w załadowanym rejestrze.
 - [**Windows Registry Recovery**](https://www.mitec.cz/wrr.html): Inna aplikacja GUI zdolna do wydobywania ważnych informacji z załadowanego rejestru.
 
 ### Przywracanie usuniętego elementu
 
-Gdy klucz jest usuwany, jest oznaczany jako taki, ale dopóki przestrzeń, którą zajmuje, nie jest potrzebna, nie zostanie usunięty. Dlatego przy użyciu narzędzi takich jak **Registry Explorer** możliwe jest odzyskanie tych usuniętych kluczy.
+Gdy klucz jest usuwany, jest oznaczany jako taki, ale dopóki przestrzeń, którą zajmuje, nie jest potrzebna, nie zostanie usunięty. Dlatego używając narzędzi takich jak **Registry Explorer**, możliwe jest odzyskanie tych usuniętych kluczy.
 
 ### Ostatni czas zapisu
 
@@ -260,7 +260,8 @@ Plik/hive **SAM** zawiera **użytkowników, grupy i hashe haseł użytkowników*
 
 W `SAM\Domains\Account\Users` możesz uzyskać nazwę użytkownika, RID, ostatnie logowanie, ostatnie nieudane logowanie, licznik logowania, politykę haseł i kiedy konto zostało utworzone. Aby uzyskać **hashe**, musisz również **mieć** plik/hive **SYSTEM**.
 
-### Interesujące wpisy w rejestrze Windows
+### Interesujące wpisy w rejestrze systemu Windows
+
 
 {{#ref}}
 interesting-windows-registry-keys.md
@@ -268,25 +269,25 @@ interesting-windows-registry-keys.md
 
 ## Wykonane programy
 
-### Podstawowe procesy Windows
+### Podstawowe procesy systemu Windows
 
-W [tym poście](https://jonahacks.medium.com/investigating-common-windows-processes-18dee5f97c1d) możesz dowiedzieć się o wspólnych procesach Windows, aby wykryć podejrzane zachowania.
+W [tym poście](https://jonahacks.medium.com/investigating-common-windows-processes-18dee5f97c1d) możesz dowiedzieć się o wspólnych procesach systemu Windows, aby wykryć podejrzane zachowania.
 
-### Ostatnie aplikacje Windows
+### Ostatnie aplikacje systemu Windows
 
-W rejestrze `NTUSER.DAT` w ścieżce `Software\Microsoft\Current Version\Search\RecentApps` możesz znaleźć podklucze z informacjami o **wykonanej aplikacji**, **ostatnim czasie**, kiedy była wykonywana, oraz **liczbie razy**, kiedy została uruchomiona.
+W rejestrze `NTUSER.DAT` w ścieżce `Software\Microsoft\Current Version\Search\RecentApps` możesz znaleźć podklucze z informacjami o **wykonanej aplikacji**, **ostatnim czasie** jej wykonania oraz **liczbie razy**, kiedy została uruchomiona.
 
 ### BAM (Moderator Aktywności w Tle)
 
-Możesz otworzyć plik `SYSTEM` za pomocą edytora rejestru, a w ścieżce `SYSTEM\CurrentControlSet\Services\bam\UserSettings\{SID}` możesz znaleźć informacje o **aplikacjach wykonywanych przez każdego użytkownika** (zauważ `{SID}` w ścieżce) oraz **o której godzinie** były wykonywane (czas znajduje się w wartości danych rejestru).
+Możesz otworzyć plik `SYSTEM` za pomocą edytora rejestru, a w ścieżce `SYSTEM\CurrentControlSet\Services\bam\UserSettings\{SID}` możesz znaleźć informacje o **aplikacjach wykonanych przez każdego użytkownika** (zauważ `{SID}` w ścieżce) oraz **o której godzinie** zostały wykonane (czas znajduje się w wartości danych rejestru).
 
-### Prefetch Windows
+### Prefetch systemu Windows
 
 Prefetching to technika, która pozwala komputerowi cicho **pobierać niezbędne zasoby potrzebne do wyświetlenia treści**, do której użytkownik **może uzyskać dostęp w niedalekiej przyszłości**, aby zasoby mogły być szybciej dostępne.
 
-Prefetch Windows polega na tworzeniu **cache'ów wykonanych programów**, aby móc je ładować szybciej. Te cache są tworzone jako pliki `.pf` w ścieżce: `C:\Windows\Prefetch`. Istnieje limit 128 plików w XP/VISTA/WIN7 i 1024 plików w Win8/Win10.
+Prefetch systemu Windows polega na tworzeniu **cache'ów wykonanych programów**, aby móc je ładować szybciej. Te cache są tworzone jako pliki `.pf` w ścieżce: `C:\Windows\Prefetch`. Istnieje limit 128 plików w XP/VISTA/WIN7 i 1024 plików w Win8/Win10.
 
-Nazwa pliku jest tworzona jako `{program_name}-{hash}.pf` (hash jest oparty na ścieżce i argumentach wykonywalnego). W W10 te pliki są skompresowane. Zauważ, że sama obecność pliku wskazuje, że **program był wykonywany** w pewnym momencie.
+Nazwa pliku jest tworzona jako `{program_name}-{hash}.pf` (hash jest oparty na ścieżce i argumentach wykonywalnych). W W10 te pliki są skompresowane. Zauważ, że sama obecność pliku wskazuje, że **program był wykonany** w pewnym momencie.
 
 Plik `C:\Windows\Prefetch\Layout.ini` zawiera **nazwy folderów plików, które są prefetchowane**. Ten plik zawiera **informacje o liczbie wykonania**, **datach** wykonania i **plikach** **otwartych** przez program.
 
@@ -327,7 +328,7 @@ Możesz uzyskać datę z tego pliku za pomocą narzędzia [**srum_dump**](https:
 ```
 ### AppCompatCache (ShimCache)
 
-**AppCompatCache**, znany również jako **ShimCache**, jest częścią **Application Compatibility Database** opracowanej przez **Microsoft** w celu rozwiązania problemów z kompatybilnością aplikacji. Ten komponent systemowy rejestruje różne metadane plików, które obejmują:
+**AppCompatCache**, znany również jako **ShimCache**, jest częścią **Application Compatibility Database** opracowanej przez **Microsoft** w celu rozwiązania problemów z kompatybilnością aplikacji. Ten komponent systemowy rejestruje różne informacje o plikach, które obejmują:
 
 - Pełna ścieżka do pliku
 - Rozmiar pliku
@@ -348,9 +349,9 @@ Aby przeanalizować przechowywane informacje, zaleca się użycie narzędzia [**
 
 Plik **Amcache.hve** jest zasadniczo hives rejestru, który rejestruje szczegóły dotyczące aplikacji, które zostały uruchomione w systemie. Zwykle znajduje się pod `C:\Windows\AppCompat\Programas\Amcache.hve`.
 
-Plik ten jest znany z przechowywania zapisów niedawno uruchomionych procesów, w tym ścieżek do plików wykonywalnych i ich skrótów SHA1. Informacje te są nieocenione do śledzenia aktywności aplikacji w systemie.
+Plik ten jest znany z przechowywania rekordów niedawno uruchomionych procesów, w tym ścieżek do plików wykonywalnych i ich skrótów SHA1. Informacje te są nieocenione do śledzenia aktywności aplikacji w systemie.
 
-Aby wyodrębnić i przeanalizować dane z **Amcache.hve**, można użyć narzędzia [**AmcacheParser**](https://github.com/EricZimmerman/AmcacheParser). Poniższe polecenie jest przykładem, jak użyć AmcacheParser do analizy zawartości pliku **Amcache.hve** i wyprowadzenia wyników w formacie CSV:
+Aby wyodrębnić i przeanalizować dane z **Amcache.hve**, można użyć narzędzia [**AmcacheParser**](https://github.com/EricZimmerman/AmcacheParser). Poniższe polecenie jest przykładem, jak użyć AmcacheParser do analizy zawartości pliku **Amcache.hve** i wyjścia wyników w formacie CSV:
 ```bash
 AmcacheParser.exe -f C:\Users\genericUser\Desktop\Amcache.hve --csv C:\Users\genericUser\Desktop\outputFolder
 ```
@@ -360,13 +361,13 @@ Najciekawszym plikiem CVS jest `Amcache_Unassociated file entries`.
 
 ### RecentFileCache
 
-Ten artefakt można znaleźć tylko w W7 w `C:\Windows\AppCompat\Programs\RecentFileCache.bcf` i zawiera informacje o niedawnych uruchomieniach niektórych binarnych plików.
+Ten artefakt można znaleźć tylko w W7 w `C:\Windows\AppCompat\Programs\RecentFileCache.bcf` i zawiera informacje o niedawnych wykonaniach niektórych binarnych plików.
 
 Możesz użyć narzędzia [**RecentFileCacheParse**](https://github.com/EricZimmerman/RecentFileCacheParser) do analizy pliku.
 
 ### Zaplanowane zadania
 
-Możesz je wyodrębnić z `C:\Windows\Tasks` lub `C:\Windows\System32\Tasks` i odczytać jako XML.
+Możesz je wyodrębnić z `C:\Windows\Tasks` lub `C:\Windows\System32\Tasks` i odczytać je jako XML.
 
 ### Usługi
 
@@ -377,7 +378,7 @@ Możesz je znaleźć w rejestrze pod `SYSTEM\ControlSet001\Services`. Możesz zo
 Zainstalowane aplikacje można znaleźć w `\ProgramData\Microsoft\Windows\AppRepository\`\
 To repozytorium ma **log** z **każdą zainstalowaną aplikacją** w systemie wewnątrz bazy danych **`StateRepository-Machine.srd`**.
 
-W tabeli Aplikacji tej bazy danych można znaleźć kolumny: "Application ID", "PackageNumber" i "Display Name". Kolumny te zawierają informacje o aplikacjach wstępnie zainstalowanych i zainstalowanych, a także można sprawdzić, czy niektóre aplikacje zostały odinstalowane, ponieważ identyfikatory zainstalowanych aplikacji powinny być sekwencyjne.
+W tabeli Aplikacji tej bazy danych można znaleźć kolumny: "Application ID", "PackageNumber" i "Display Name". Te kolumny zawierają informacje o aplikacjach wstępnie zainstalowanych i zainstalowanych, a także można sprawdzić, czy niektóre aplikacje zostały odinstalowane, ponieważ identyfikatory zainstalowanych aplikacji powinny być sekwencyjne.
 
 Można również **znaleźć zainstalowane aplikacje** w ścieżce rejestru: `Software\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore\Applications\`\
 A **odinstalowane** **aplikacje** w: `Software\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore\Deleted\`
@@ -390,7 +391,7 @@ Informacje, które pojawiają się w wydarzeniach Windows, to:
 - Znacznik czasu (UTC + 0)
 - Użytkownicy zaangażowani
 - Hosty zaangażowane (nazwa hosta, IP)
-- Aktywa dostępne (pliki, foldery, drukarki, usługi)
+- Zasoby dostępne (pliki, foldery, drukarki, usługi)
 
 Logi znajdują się w `C:\Windows\System32\config` przed Windows Vista i w `C:\Windows\System32\winevt\Logs` po Windows Vista. Przed Windows Vista logi zdarzeń były w formacie binarnym, a po nim są w **formacie XML** i używają rozszerzenia **.evtx**.
 
@@ -420,15 +421,15 @@ Zdarzenia dostępu są rejestrowane w pliku konfiguracyjnym zabezpieczeń znajdu
 - **Sieciowy tekst jawny (8)**: Przesyłanie hasła w postaci jawnej, często z IIS.
 - **Nowe poświadczenia (9)**: Użycie różnych poświadczeń do uzyskania dostępu.
 - **Zdalny interaktywny (10)**: Logowanie do pulpitu zdalnego lub usług terminalowych.
-- **Interaktywny z pamięci podręcznej (11)**: Logowanie z poświadczeniami z pamięci podręcznej bez kontaktu z kontrolerem domeny.
-- **Zdalny interaktywny z pamięci podręcznej (12)**: Zdalne logowanie z poświadczeniami z pamięci podręcznej.
-- **Odblokowanie z pamięci podręcznej (13)**: Odblokowanie z poświadczeniami z pamięci podręcznej.
+- **Interaktywny z pamięci podręcznej (11)**: Logowanie z pamięci podręcznej bez kontaktu z kontrolerem domeny.
+- **Zdalny interaktywny z pamięci podręcznej (12)**: Zdalne logowanie z pamięci podręcznej.
+- **Odblokowanie z pamięci podręcznej (13)**: Odblokowanie z pamięci podręcznej.
 
 #### Kody statusu i podstatusu dla EventID 4625:
 
 - **0xC0000064**: Nazwa użytkownika nie istnieje - Może wskazywać na atak na enumerację nazw użytkowników.
 - **0xC000006A**: Poprawna nazwa użytkownika, ale błędne hasło - Możliwa próba zgadywania hasła lub atak brute-force.
-- **0xC0000234**: Konto użytkownika zablokowane - Może nastąpić po ataku brute-force, skutkującym wieloma nieudanymi logowaniami.
+- **0xC0000234**: Konto użytkownika zablokowane - Może nastąpić po ataku brute-force skutkującym wieloma nieudanymi logowaniami.
 - **0xC0000072**: Konto wyłączone - Nieautoryzowane próby dostępu do wyłączonych kont.
 - **0xC000006F**: Logowanie poza dozwolonym czasem - Wskazuje na próby dostępu poza ustalonymi godzinami logowania, co może być oznaką nieautoryzowanego dostępu.
 - **0xC0000070**: Naruszenie ograniczeń stacji roboczej - Może być próbą logowania z nieautoryzowanej lokalizacji.
@@ -441,7 +442,7 @@ Zdarzenia dostępu są rejestrowane w pliku konfiguracyjnym zabezpieczeń znajdu
 
 #### EventID 4616:
 
-- **Zmiana czasu**: Modyfikacja czasu systemowego, co może zaciemnić chronologię zdarzeń.
+- **Zmiana czasu**: Modyfikacja czasu systemowego, może zaciemnić chronologię zdarzeń.
 
 #### EventID 6005 i 6006:
 
@@ -467,7 +468,7 @@ Aby zwiększyć szanse na odzyskanie usuniętych zdarzeń Windows, zaleca się w
 
 ### Identyfikacja powszechnych ataków za pomocą zdarzeń Windows
 
-Aby uzyskać kompleksowy przewodnik po wykorzystaniu identyfikatorów zdarzeń Windows w identyfikacji powszechnych ataków cybernetycznych, odwiedź [Red Team Recipe](https://redteamrecipe.com/event-codes/).
+Aby uzyskać kompleksowy przewodnik po wykorzystaniu identyfikatorów zdarzeń Windows do identyfikacji powszechnych ataków cybernetycznych, odwiedź [Red Team Recipe](https://redteamrecipe.com/event-codes/).
 
 #### Ataki brute force
 
@@ -475,18 +476,18 @@ Można je zidentyfikować po wielu rekordach EventID 4625, a następnie EventID 
 
 #### Zmiana czasu
 
-Rejestrowana przez EventID 4616, zmiany czasu systemowego mogą skomplikować analizę forensyczną.
+Rejestrowana przez EventID 4616, zmiany czasu systemowego mogą skomplikować analizę kryminalistyczną.
 
 #### Śledzenie urządzeń USB
 
 Użyteczne identyfikatory zdarzeń systemowych do śledzenia urządzeń USB obejmują 20001/20003/10000 dla pierwszego użycia, 10100 dla aktualizacji sterowników i EventID 112 z DeviceSetupManager dla znaczników czasowych włożenia.
 
-#### Wydarzenia zasilania systemu
+#### Zdarzenia zasilania systemu
 
 EventID 6005 wskazuje na uruchomienie systemu, podczas gdy EventID 6006 oznacza zamknięcie.
 
 #### Usunięcie logów
 
-Zdarzenie zabezpieczeń EventID 1102 sygnalizuje usunięcie logów, co jest krytycznym zdarzeniem dla analizy forensycznej.
+Zdarzenie zabezpieczeń EventID 1102 sygnalizuje usunięcie logów, co jest krytycznym zdarzeniem dla analizy kryminalistycznej.
 
 {{#include ../../../banners/hacktricks-training.md}}

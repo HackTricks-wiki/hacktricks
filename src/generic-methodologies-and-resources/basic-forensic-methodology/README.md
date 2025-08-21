@@ -10,7 +10,7 @@
 
 ## Analiza Złośliwego Oprogramowania
 
-To **nie jest koniecznie pierwszy krok do wykonania po uzyskaniu obrazu**. Ale możesz używać tych technik analizy złośliwego oprogramowania niezależnie, jeśli masz plik, obraz systemu plików, obraz pamięci, pcap... więc warto **mieć te działania na uwadze**:
+To **nie jest koniecznie pierwszy krok do wykonania, gdy masz obraz**. Ale możesz używać tych technik analizy złośliwego oprogramowania niezależnie, jeśli masz plik, obraz systemu plików, obraz pamięci, pcap... więc dobrze jest **mieć te działania na uwadze**:
 
 {{#ref}}
 malware-analysis.md
@@ -65,9 +65,9 @@ memory-dump-analysis/
 pcap-inspection/
 {{#endref}}
 
-## **Techniki Antykryminalistyczne**
+## **Techniki Anty-Kryminalistyczne**
 
-Pamiętaj o możliwym użyciu technik antykryminalistycznych:
+Pamiętaj o możliwym użyciu technik anty-kryminalistycznych:
 
 {{#ref}}
 anti-forensic-techniques.md

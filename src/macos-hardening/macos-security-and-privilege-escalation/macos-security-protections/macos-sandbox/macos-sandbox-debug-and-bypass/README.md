@@ -10,8 +10,8 @@ Na poprzednim obrazie można zaobserwować **jak sandbox będzie ładowany** gdy
 
 Kompilator połączy `/usr/lib/libSystem.B.dylib` z binarnym plikiem.
 
-Następnie **`libSystem.B`** będzie wywoływać inne funkcje, aż **`xpc_pipe_routine`** wyśle uprawnienia aplikacji do **`securityd`**. Securityd sprawdza, czy proces powinien być kwarantannowany w Sandboxie, a jeśli tak, to zostanie poddany kwarantannie.\
-Na koniec sandbox zostanie aktywowany przez wywołanie **`__sandbox_ms`**, które wywoła **`__mac_syscall`**.
+Następnie, **`libSystem.B`** będzie wywoływać inne funkcje, aż **`xpc_pipe_routine`** wyśle uprawnienia aplikacji do **`securityd`**. Securityd sprawdza, czy proces powinien być kwarantannowany wewnątrz Sandboxa, a jeśli tak, to zostanie poddany kwarantannie.\
+Na koniec, sandbox zostanie aktywowany przez wywołanie **`__sandbox_ms`**, które wywoła **`__mac_syscall`**.
 
 ## Możliwe obejścia
 
@@ -41,9 +41,9 @@ Jak wyjaśniono w [**tym poście**](https://www.vicarius.io/vsociety/posts/cve-2
 
 ### Nadużywanie lokalizacji Auto Start
 
-Jeśli proces sandboxowany może **zapisywać** w miejscu, w którym **później uruchomi się aplikacja bez sandboxa**, będzie mógł **uciec, po prostu umieszczając** tam binarny plik. Dobrym przykładem takich lokalizacji są `~/Library/LaunchAgents` lub `/System/Library/LaunchDaemons`.
+Jeśli proces sandboxowany może **zapisać** w miejscu, w którym **później uruchomi się aplikacja bez sandboxa**, będzie w stanie **uciec, po prostu umieszczając** tam binarny plik. Dobrym przykładem takich lokalizacji są `~/Library/LaunchAgents` lub `/System/Library/LaunchDaemons`.
 
-W tym celu możesz nawet potrzebować **2 kroków**: Aby proces z **bardziej liberalnym sandboxem** (`file-read*`, `file-write*`) wykonał twój kod, który faktycznie zapisze w miejscu, w którym będzie **wykonywany bez sandboxa**.
+Możesz nawet potrzebować **2 kroków**: Aby sprawić, że proces z **bardziej permissywnym sandboxem** (`file-read*`, `file-write*`) wykona twój kod, który faktycznie zapisze w miejscu, gdzie będzie **wykonywany bez sandboxa**.
 
 Sprawdź tę stronę o **lokacjach Auto Start**:
 
@@ -53,7 +53,7 @@ Sprawdź tę stronę o **lokacjach Auto Start**:
 
 ### Nadużywanie innych procesów
 
-Jeśli z procesu sandboxowego jesteś w stanie **skompromentować inne procesy** działające w mniej restrykcyjnych sandboxach (lub wcale), będziesz mógł uciec do ich sandboxów:
+Jeśli z procesu sandboxowego jesteś w stanie **skompromentować inne procesy** działające w mniej restrykcyjnych sandboxach (lub wcale), będziesz w stanie uciec do ich sandboxów:
 
 {{#ref}}
 ../../../macos-proces-abuse/
@@ -61,11 +61,11 @@ Jeśli z procesu sandboxowego jesteś w stanie **skompromentować inne procesy**
 
 ### Dostępne usługi Mach systemu i użytkownika
 
-Sandbox pozwala również na komunikację z niektórymi **usługami Mach** za pośrednictwem XPC zdefiniowanymi w profilu `application.sb`. Jeśli uda ci się **nadużyć** jedną z tych usług, możesz być w stanie **uciec z sandboxa**.
+Sandbox pozwala również na komunikację z niektórymi **usługami Mach** za pośrednictwem XPC zdefiniowanych w profilu `application.sb`. Jeśli uda ci się **nadużyć** jedną z tych usług, możesz być w stanie **uciec z sandboxa**.
 
-Jak wskazano w [tym opracowaniu](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/), informacje o usługach Mach są przechowywane w `/System/Library/xpc/launchd.plist`. Możliwe jest znalezienie wszystkich usług Mach systemu i użytkownika, przeszukując ten plik pod kątem `<string>System</string>` i `<string>User</string>`.
+Jak wskazano w [tym opisie](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/), informacje o usługach Mach są przechowywane w `/System/Library/xpc/launchd.plist`. Możliwe jest znalezienie wszystkich usług Mach systemu i użytkownika, przeszukując ten plik pod kątem `<string>System</string>` i `<string>User</string>`.
 
-Ponadto możliwe jest sprawdzenie, czy usługa Mach jest dostępna dla aplikacji sandboxowanej, wywołując `bootstrap_look_up`:
+Ponadto, możliwe jest sprawdzenie, czy usługa Mach jest dostępna dla aplikacji sandboxowanej, wywołując `bootstrap_look_up`:
 ```objectivec
 void checkService(const char *serviceName) {
 mach_port_t service_port = MACH_PORT_NULL;
@@ -103,7 +103,7 @@ Innym sposobem na znalezienie ważnych usług xpc jest sprawdzenie tych w:
 find /System/Library/Frameworks -name "*.xpc"
 find /System/Library/PrivateFrameworks -name "*.xpc"
 ```
-Kilka przykładów nadużywania tej techniki można znaleźć w [**oryginalnym opisie**](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/), jednak poniżej przedstawiono kilka podsumowanych przykładów.
+Kilka przykładów nadużywających tę technikę można znaleźć w [**oryginalnym opisie**](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/), jednak poniżej przedstawiono kilka podsumowanych przykładów.
 
 #### /System/Library/PrivateFrameworks/StorageKit.framework/XPCServices/storagekitfsrunner.xpc
 
@@ -130,9 +130,9 @@ NSLog(@"run task result:%@, error:%@", bSucc, error);
 ```
 #### /System/Library/PrivateFrameworks/AudioAnalyticsInternal.framework/XPCServices/AudioAnalyticsHelperService.xpc
 
-Ta usługa XPC pozwalała każdemu klientowi, zawsze zwracając YES, a metoda `createZipAtPath:hourThreshold:withReply:` zasadniczo pozwalała wskazać ścieżkę do folderu do skompresowania, a ona skompresuje go w pliku ZIP.
+Ta usługa XPC pozwalała każdemu klientowi zawsze zwracać YES, a metoda `createZipAtPath:hourThreshold:withReply:` zasadniczo pozwalała wskazać ścieżkę do folderu do skompresowania, a ona skompresuje go w pliku ZIP.
 
-Dlatego możliwe jest wygenerowanie fałszywej struktury folderów aplikacji, skompresowanie jej, a następnie dekompresja i uruchomienie jej w celu ucieczki z piaskownicy, ponieważ nowe pliki nie będą miały atrybutu kwarantanny.
+Dlatego możliwe jest wygenerowanie fałszywej struktury folderów aplikacji, skompresowanie jej, a następnie dekompresja i wykonanie jej, aby uciec z piaskownicy, ponieważ nowe pliki nie będą miały atrybutu kwarantanny.
 
 Eksploit był:
 ```objectivec
@@ -207,7 +207,7 @@ NSLog(@"Read the target content:%@", [NSData dataWithContentsOfURL:targetURL]);
 
 [**To badanie**](https://saagarjha.com/blog/2020/05/20/mac-app-store-sandbox-escape/) odkryło 2 sposoby na obejście Sandbox. Ponieważ sandbox jest stosowany z poziomu użytkownika, gdy biblioteka **libSystem** jest ładowana. Jeśli binarka mogłaby uniknąć jej załadowania, nigdy nie zostałaby objęta sandboxem:
 
-- Jeśli binarka była **całkowicie statycznie skompilowana**, mogłaby uniknąć ładowania tej biblioteki.
+- Jeśli binarka była **całkowicie statycznie skompilowana**, mogłaby uniknąć załadowania tej biblioteki.
 - Jeśli **binarka nie musiałaby ładować żadnych bibliotek** (ponieważ linker jest również w libSystem), nie będzie musiała ładować libSystem.
 
 ### Shellcode'y
@@ -217,7 +217,7 @@ Zauważ, że **nawet shellcode'y** w ARM64 muszą być linkowane w `libSystem.dy
 ld -o shell shell.o -macosx_version_min 13.0
 ld: dynamic executables or dylibs must link with libSystem.dylib for architecture arm64
 ```
-### Ograniczenia nieodziedziczone
+### Ograniczenia, które nie są dziedziczone
 
 Jak wyjaśniono w **[bonusie tego opracowania](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/)**, ograniczenie sandboxa takie jak:
 ```
@@ -232,7 +232,7 @@ echo '#!/bin/sh\n touch /tmp/sbx' > /tmp/poc.app/Contents/MacOS/poc
 chmod +x /tmp/poc.app/Contents/MacOS/poc
 open /tmp/poc.app
 ```
-Jednak oczywiście, ten nowy proces nie odziedziczy uprawnień ani przywilejów od procesu nadrzędnego.
+Jednak oczywiście, ten nowy proces nie odziedziczy uprawnień ani przywilejów z procesu nadrzędnego.
 
 ### Uprawnienia
 
@@ -249,6 +249,7 @@ Zauważ, że nawet jeśli niektóre **działania** mogą być **dozwolone przez 
 ### Interposting Bypass
 
 Aby uzyskać więcej informacji na temat **Interposting**, sprawdź:
+
 
 {{#ref}}
 ../../../macos-proces-abuse/macos-function-hooking.md
@@ -371,7 +372,7 @@ gcc -Xlinker -sectcreate -Xlinker __TEXT -Xlinker __info_plist -Xlinker Info.pli
 # Apply the entitlements via signing
 codesign -s <cert-name> --entitlements entitlements.xml sand
 ```
-> [!OSTRZEŻENIE]
+> [!CAUTION]
 > Aplikacja spróbuje **odczytać** plik **`~/Desktop/del.txt`**, co **Sandbox nie pozwoli**.\
 > Utwórz tam plik, ponieważ po ominięciu Sandbox będzie mogła go odczytać:
 >

@@ -1,4 +1,4 @@
-# Eskalacja uprawnień z Autoruns
+# Podnoszenie Uprawnień z Autoruns
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -24,9 +24,9 @@ Get-ScheduledTask | where {$_.TaskPath -notlike "\Microsoft*"} | ft TaskName,Tas
 #You can also write that content on a bat file that is being executed by a scheduled task
 schtasks /Create /RU "SYSTEM" /SC ONLOGON /TN "SchedPE" /TR "cmd /c net localgroup administrators user /add"
 ```
-## Folder
+## Folders
 
-Wszystkie pliki binarne znajdujące się w **folderach uruchamiania będą wykonywane przy starcie**. Typowe foldery uruchamiania to te wymienione w kontynuacji, ale folder uruchamiania jest wskazany w rejestrze. [Przeczytaj to, aby dowiedzieć się gdzie.](privilege-escalation-with-autorun-binaries.md#startup-path)
+Wszystkie pliki binarne znajdujące się w **folderach uruchamiania będą wykonywane przy starcie**. Typowe foldery uruchamiania to te wymienione w kontynuacji, ale folder uruchamiania jest wskazany w rejestrze. [Read this to learn where.](privilege-escalation-with-autorun-binaries.md#startup-path)
 ```bash
 dir /b "C:\Documents and Settings\All Users\Start Menu\Programs\Startup" 2>nul
 dir /b "C:\Documents and Settings\%username%\Start Menu\Programs\Startup" 2>nul
@@ -41,12 +41,10 @@ Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 ../../generic-hacking/archive-extraction-path-traversal.md
 {{#endref}}
 
-
-
 ## Rejestr
 
 > [!TIP]
-> [Uwaga stąd](https://answers.microsoft.com/en-us/windows/forum/all/delete-registry-key/d425ae37-9dcc-4867-b49c-723dcd15147f): Wpis rejestru **Wow6432Node** wskazuje, że używasz 64-bitowej wersji systemu Windows. System operacyjny używa tego klucza, aby wyświetlić oddzielny widok HKEY_LOCAL_MACHINE\SOFTWARE dla aplikacji 32-bitowych działających na 64-bitowych wersjach systemu Windows.
+> [Uwaga stąd](https://answers.microsoft.com/en-us/windows/forum/all/delete-registry-key/d425ae37-9dcc-4867-b49c-723dcd15147f): Wpis rejestru **Wow6432Node** wskazuje, że używasz 64-bitowej wersji systemu Windows. System operacyjny używa tego klucza do wyświetlania oddzielnego widoku HKEY_LOCAL_MACHINE\SOFTWARE dla aplikacji 32-bitowych działających na 64-bitowych wersjach systemu Windows.
 
 ### Uruchomienia
 
@@ -87,10 +85,10 @@ W systemach Windows Vista i nowszych klucze rejestru **Run** i **RunOnce** nie s
 reg add HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnceEx\\0001\\Depend /v 1 /d "C:\\temp\\evil.dll"
 ```
 > [!TIP]
-> **Eksploatacja 1**: Jeśli możesz pisać w którymkolwiek z wymienionych rejestrów w **HKLM**, możesz podnieść uprawnienia, gdy inny użytkownik się zaloguje.
+> **Eksploit 1**: Jeśli możesz pisać w którymkolwiek z wymienionych rejestrów w **HKLM**, możesz podnieść uprawnienia, gdy inny użytkownik się zaloguje.
 
 > [!TIP]
-> **Eksploatacja 2**: Jeśli możesz nadpisać którykolwiek z binarnych plików wskazanych w którymkolwiek z rejestrów w **HKLM**, możesz zmodyfikować ten plik binarny, dodając tylne drzwi, gdy inny użytkownik się zaloguje i podnieść uprawnienia.
+> **Eksploit 2**: Jeśli możesz nadpisać którykolwiek z binarnych plików wskazanych w którymkolwiek z rejestrów w **HKLM**, możesz zmodyfikować ten plik binarny, dodając tylne drzwi, gdy inny użytkownik się zaloguje i podnieść uprawnienia.
 ```bash
 #CMD
 reg query HKLM\Software\Microsoft\Windows\CurrentVersion\Run
@@ -153,7 +151,7 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Wow6432Node\Microsoft\Windows\Ru
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders`
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders`
 
-Skróty umieszczone w folderze **Startup** automatycznie uruchomią usługi lub aplikacje podczas logowania użytkownika lub ponownego uruchamiania systemu. Lokalizacja folderu **Startup** jest zdefiniowana w rejestrze zarówno dla zakresu **Local Machine**, jak i **Current User**. Oznacza to, że każdy skrót dodany do tych określonych lokalizacji **Startup** zapewni, że powiązana usługa lub program uruchomi się po procesie logowania lub ponownego uruchamiania, co czyni to prostą metodą planowania automatycznego uruchamiania programów.
+Skróty umieszczone w folderze **Startup** automatycznie uruchomią usługi lub aplikacje podczas logowania użytkownika lub ponownego uruchamiania systemu. Lokalizacja folderu **Startup** jest zdefiniowana w rejestrze zarówno dla zakresu **Local Machine**, jak i **Current User**. Oznacza to, że każdy skrót dodany do tych określonych lokalizacji **Startup** zapewni, że powiązana usługa lub program uruchomi się po procesie logowania lub ponownego uruchomienia, co czyni to prostą metodą planowania automatycznego uruchamiania programów.
 
 > [!TIP]
 > Jeśli możesz nadpisać dowolny \[User] Shell Folder w **HKLM**, będziesz mógł wskazać go na folder kontrolowany przez Ciebie i umieścić backdoora, który będzie wykonywany za każdym razem, gdy użytkownik zaloguje się do systemu, eskalując uprawnienia.
@@ -200,16 +198,16 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Microsoft\Windows\CurrentVersion
 
 W rejestrze systemu Windows pod `HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot` znajduje się wartość **`AlternateShell`** ustawiona domyślnie na `cmd.exe`. Oznacza to, że gdy wybierzesz "Tryb awaryjny z wierszem poleceń" podczas uruchamiania (naciskając F8), używany jest `cmd.exe`. Możliwe jest jednak skonfigurowanie komputera tak, aby automatycznie uruchamiał się w tym trybie bez potrzeby naciskania F8 i ręcznego wyboru.
 
-Kroki do utworzenia opcji uruchamiania w celu automatycznego uruchamiania w "Trybie awaryjnym z wierszem poleceń":
+Kroki do utworzenia opcji uruchamiania automatycznie w "Trybie awaryjnym z wierszem poleceń":
 
 1. Zmień atrybuty pliku `boot.ini`, aby usunąć flagi tylko do odczytu, systemowe i ukryte: `attrib c:\boot.ini -r -s -h`
 2. Otwórz `boot.ini` do edycji.
-3. Wstaw linię jak: `multi(0)disk(0)rdisk(0)partition(1)\WINDOWS="Microsoft Windows XP Professional" /fastdetect /SAFEBOOT:MINIMAL(ALTERNATESHELL)`
+3. Wstaw linię taką jak: `multi(0)disk(0)rdisk(0)partition(1)\WINDOWS="Microsoft Windows XP Professional" /fastdetect /SAFEBOOT:MINIMAL(ALTERNATESHELL)`
 4. Zapisz zmiany w `boot.ini`.
 5. Ponownie zastosuj oryginalne atrybuty pliku: `attrib c:\boot.ini +r +s +h`
 
 - **Eksploatacja 1:** Zmiana klucza rejestru **AlternateShell** pozwala na skonfigurowanie niestandardowego powłoki poleceń, co może prowadzić do nieautoryzowanego dostępu.
-- **Eksploatacja 2 (Uprawnienia do zapisu w PATH):** Posiadanie uprawnień do zapisu w dowolnej części zmiennej **PATH** systemu, szczególnie przed `C:\Windows\system32`, pozwala na uruchomienie niestandardowego `cmd.exe`, który może być tylnymi drzwiami, jeśli system zostanie uruchomiony w trybie awaryjnym.
+- **Eksploatacja 2 (Uprawnienia do zapisu w PATH):** Posiadanie uprawnień do zapisu w dowolnej części zmiennej systemowej **PATH**, szczególnie przed `C:\Windows\system32`, pozwala na uruchomienie niestandardowego `cmd.exe`, który może być tylnymi drzwiami, jeśli system zostanie uruchomiony w trybie awaryjnym.
 - **Eksploatacja 3 (Uprawnienia do zapisu w PATH i boot.ini):** Dostęp do zapisu w `boot.ini` umożliwia automatyczne uruchamianie w trybie awaryjnym, co ułatwia nieautoryzowany dostęp przy następnym uruchomieniu.
 
 Aby sprawdzić bieżące ustawienie **AlternateShell**, użyj tych poleceń:
@@ -219,7 +217,7 @@ Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Co
 ```
 ### Zainstalowany komponent
 
-Active Setup to funkcja w systemie Windows, która **inicjuje się przed pełnym załadowaniem środowiska pulpitu**. Priorytetowo wykonuje określone polecenia, które muszą zakończyć się przed kontynuowaniem logowania użytkownika. Proces ten zachodzi nawet przed uruchomieniem innych wpisów startowych, takich jak te w sekcjach rejestru Run lub RunOnce.
+Active Setup to funkcja w systemie Windows, która **inicjuje się przed pełnym załadowaniem środowiska pulpitu**. Priorytetowo wykonuje określone polecenia, które muszą zakończyć się przed kontynuowaniem logowania użytkownika. Proces ten zachodzi nawet przed wywołaniem innych wpisów uruchamiania, takich jak te w sekcjach rejestru Run lub RunOnce.
 
 Active Setup jest zarządzany przez następujące klucze rejestru:
 
@@ -238,9 +236,9 @@ W obrębie tych kluczy istnieje wiele podkluczy, z których każdy odpowiada kon
 **Wskazówki dotyczące bezpieczeństwa:**
 
 - Modyfikacja lub zapis do klucza, w którym **`IsInstalled`** jest ustawione na `"1"` z określonym **`StubPath`**, może prowadzić do nieautoryzowanego wykonania polecenia, potencjalnie w celu eskalacji uprawnień.
-- Zmiana pliku binarnego, do którego odnosi się jakakolwiek wartość **`StubPath`**, może również osiągnąć eskalację uprawnień, pod warunkiem posiadania odpowiednich uprawnień.
+- Zmiana pliku binarnego, do którego odnosi się jakakolwiek wartość **`StubPath`**, również może osiągnąć eskalację uprawnień, pod warunkiem posiadania odpowiednich uprawnień.
 
-Aby sprawdzić konfiguracje **`StubPath`** w komponentach Active Setup, można użyć tych poleceń:
+Aby sprawdzić konfiguracje **`StubPath`** w komponentach Active Setup, można użyć następujących poleceń:
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Active Setup\Installed Components" /s /v StubPath
 reg query "HKCU\SOFTWARE\Microsoft\Active Setup\Installed Components" /s /v StubPath

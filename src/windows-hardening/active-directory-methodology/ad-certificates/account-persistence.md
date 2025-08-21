@@ -44,7 +44,7 @@ Certify.exe request /ca:dc.theshire.local/theshire-DC-CA /template:Machine /mach
 # Authenticate as the machine using the issued PFX
 Rubeus.exe asktgt /user:HOSTNAME$ /certificate:C:\Temp\host.pfx /password:Passw0rd! /ptt
 ```
-## Rozszerzanie trwałości przez odnawianie certyfikatów - PERSIST3
+## Extending Persistence Through Certificate Renewal - PERSIST3
 
 Wykorzystanie okresów ważności i odnawiania szablonów certyfikatów pozwala atakującemu na utrzymanie długoterminowego dostępu. Jeśli posiadasz wcześniej wydany certyfikat i jego klucz prywatny, możesz go odnowić przed wygaśnięciem, aby uzyskać nowy, długoterminowy identyfikator bez pozostawiania dodatkowych artefaktów żądania związanych z oryginalnym podmiotem.
 ```bash
@@ -57,7 +57,7 @@ certipy req -u 'john@corp.local' -p 'Passw0rd!' -ca 'CA-SERVER\CA-NAME' \
 # (use the serial/thumbprint of the cert to renew; reusekeys preserves the keypair)
 certreq -enroll -user -cert <SerialOrID> renew [reusekeys]
 ```
-> Wskazówka operacyjna: Śledź czas trwania plików PFX posiadanych przez atakującego i odnawiaj je wcześnie. Odnowienie może również spowodować, że zaktualizowane certyfikaty będą zawierać nowoczesne rozszerzenie mapowania SID, co pozwala na ich użycie zgodnie z surowszymi zasadami mapowania DC (patrz następna sekcja).
+> Wskazówka operacyjna: Śledź czas trwania plików PFX posiadanych przez atakującego i odnawiaj je wcześniej. Odnowienie może również spowodować, że zaktualizowane certyfikaty będą zawierały nowoczesne rozszerzenie mapowania SID, co pozwoli na ich użycie zgodnie z surowszymi zasadami mapowania DC (patrz następna sekcja).
 
 ## Sadzenie jawnych mapowań certyfikatów (altSecurityIdentities) – PERSIST4
 
@@ -84,19 +84,19 @@ Następnie uwierzytelnij się za pomocą swojego PFX. Certipy uzyska TGT bezpoś
 ```bash
 certipy auth -pfx attacker_user.pfx -dc-ip 10.0.0.10
 ```
-Notes
+Notatki
 - Używaj tylko silnych typów mapowania: X509IssuerSerialNumber, X509SKI lub X509SHA1PublicKey. Słabe formaty (Subject/Issuer, Subject-only, RFC822 email) są przestarzałe i mogą być blokowane przez politykę DC.
 - Łańcuch certyfikatów musi prowadzić do zaufanego korzenia przez DC. CAs przedsiębiorstw w NTAuth są zazwyczaj zaufane; niektóre środowiska również ufają publicznym CAs.
 
-For more on weak explicit mappings and attack paths, see:
+Aby uzyskać więcej informacji na temat słabych jawnych mapowań i ścieżek ataku, zobacz:
 
 {{#ref}}
 domain-escalation.md
 {{#endref}}
 
-## Enrollment Agent as Persistence – PERSIST5
+## Agent rejestracji jako trwałość – PERSIST5
 
-If you obtain a valid Certificate Request Agent/Enrollment Agent certificate, you can mint new logon-capable certificates on behalf of users at will and keep the agent PFX offline as a persistence token. Abuse workflow:
+Jeśli uzyskasz ważny certyfikat Agenta Żądania Certyfikatu/Agenta Rejestracji, możesz w dowolnym momencie tworzyć nowe certyfikaty zdolne do logowania w imieniu użytkowników i przechowywać agenta PFX offline jako token trwałości. Workflow nadużycia:
 ```bash
 # Request an Enrollment Agent cert (requires template rights)
 Certify.exe request /ca:CA-SERVER\CA-NAME /template:"Certificate Request Agent"
@@ -113,9 +113,9 @@ Unieważnienie certyfikatu agenta lub uprawnień szablonu jest wymagane do usuni
 
 ## 2025 Silne egzekwowanie mapowania certyfikatów: wpływ na persystencję
 
-Microsoft KB5014754 wprowadził silne egzekwowanie mapowania certyfikatów na kontrolerach domeny. Od 11 lutego 2025 r. kontrolery domeny domyślnie stosują pełne egzekwowanie, odrzucając słabe/niejednoznaczne mapowania. Praktyczne implikacje:
+Microsoft KB5014754 wprowadził silne egzekwowanie mapowania certyfikatów na kontrolerach domeny. Od 11 lutego 2025 roku, DC domyślnie przechodzi na pełne egzekwowanie, odrzucając słabe/niejednoznaczne mapowania. Praktyczne implikacje:
 
-- Certyfikaty sprzed 2022 roku, które nie mają rozszerzenia mapowania SID, mogą nie działać w przypadku mapowania domyślnego, gdy kontrolery domeny są w pełnym egzekwowaniu. Atakujący mogą utrzymać dostęp, odnawiając certyfikaty przez AD CS (aby uzyskać rozszerzenie SID) lub sadząc silne jawne mapowanie w `altSecurityIdentities` (PERSIST4).
+- Certyfikaty sprzed 2022 roku, które nie mają rozszerzenia mapowania SID, mogą nie działać w przypadku mapowania domyślnego, gdy DC są w pełnym egzekwowaniu. Atakujący mogą utrzymać dostęp, odnawiając certyfikaty przez AD CS (aby uzyskać rozszerzenie SID) lub sadząc silne mapowanie jawne w `altSecurityIdentities` (PERSIST4).
 - Jawne mapowania używające silnych formatów (Issuer+Serial, SKI, SHA1-PublicKey) nadal działają. Słabe formaty (Issuer/Subject, Subject-only, RFC822) mogą być blokowane i powinny być unikać dla persystencji.
 
 Administratorzy powinni monitorować i ostrzegać o:

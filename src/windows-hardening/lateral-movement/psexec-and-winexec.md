@@ -9,18 +9,18 @@ Te techniki wykorzystują Menedżera Kontroli Usług Windows (SCM) zdalnie przez
 1. Uwierzytelnienie do celu i dostęp do udziału ADMIN$ przez SMB (TCP/445).
 2. Skopiowanie pliku wykonywalnego lub określenie linii poleceń LOLBAS, którą usługa uruchomi.
 3. Zdalne utworzenie usługi za pomocą SCM (MS-SCMR przez \PIPE\svcctl) wskazującej na to polecenie lub binarny plik.
-4. Uruchomienie usługi w celu wykonania ładunku i opcjonalne przechwycenie stdin/stdout przez nazwany potok.
-5. Zatrzymanie usługi i sprzątanie (usunięcie usługi i wszelkich skopiowanych binarnych plików).
+4. Uruchomienie usługi w celu wykonania ładunku i opcjonalnie przechwycenie stdin/stdout przez nazwany potok.
+5. Zatrzymanie usługi i sprzątanie (usunięcie usługi i wszelkich zrzutów binarnych).
 
 Wymagania/wymogi wstępne:
 - Lokalny administrator na docelowym hoście (SeCreateServicePrivilege) lub wyraźne prawa do tworzenia usług na docelowym hoście.
 - SMB (445) dostępny i udział ADMIN$ dostępny; zdalne zarządzanie usługami dozwolone przez zaporę hosta.
-- Ograniczenia UAC dla zdalnych: w przypadku lokalnych kont, filtrowanie tokenów może blokować dostęp administratora przez sieć, chyba że używa się wbudowanego Administratora lub LocalAccountTokenFilterPolicy=1.
+- Ograniczenia UAC dla zdalnych: w przypadku lokalnych kont, filtrowanie tokenów może blokować administratora w sieci, chyba że używa się wbudowanego Administratora lub LocalAccountTokenFilterPolicy=1.
 - Kerberos vs NTLM: użycie nazwy hosta/FQDN umożliwia Kerberos; łączenie przez IP często wraca do NTLM (i może być zablokowane w wzmocnionych środowiskach).
 
 ### Ręczne ScExec/WinExec za pomocą sc.exe
 
-Poniżej przedstawiono minimalne podejście do tworzenia usługi. Obraz usługi może być skopiowanym EXE lub LOLBAS, takim jak cmd.exe lub powershell.exe.
+Poniżej przedstawiono minimalne podejście do tworzenia usługi. Obraz usługi może być zrzutowanym EXE lub LOLBAS, takim jak cmd.exe lub powershell.exe.
 ```cmd
 :: Execute a one-liner without dropping a binary
 sc.exe \\TARGET create HTSvc binPath= "cmd.exe /c whoami > C:\\Windows\\Temp\\o.txt" start= demand
@@ -94,7 +94,7 @@ smbexec.py -hashes LMHASH:NTHASH DOMAIN/user@HOST
 ```cmd
 SharpLateral.exe redexec HOSTNAME C:\\Users\\Administrator\\Desktop\\malware.exe.exe malware.exe ServiceName
 ```
-- [SharpMove](https://github.com/0xthirteen/SharpMove) zawiera modyfikację/tworzenie usługi w celu zdalnego wykonania polecenia.
+- [SharpMove](https://github.com/0xthirteen/SharpMove) zawiera modyfikację/tworzenie usługi do zdalnego wykonywania polecenia.
 ```cmd
 SharpMove.exe action=modsvc computername=remote.host.local command="C:\windows\temp\payload.exe" amsi=true servicename=TestService
 SharpMove.exe action=startservice computername=remote.host.local servicename=TestService
@@ -115,29 +115,31 @@ Typowe artefakty hosta/sieci przy użyciu technik podobnych do PsExec:
 
 Pomysły na polowanie
 - Powiadomienie o instalacjach usług, gdzie ImagePath zawiera cmd.exe /c, powershell.exe lub lokalizacje TEMP.
-- Szukaj tworzenia procesów, gdzie ParentImage to C:\Windows\PSEXESVC.exe lub dzieci services.exe działających jako LOCAL SYSTEM wykonujących powłokę.
-- Oznacz nazwane rury kończące się na -stdin/-stdout/-stderr lub znane nazwy rur klonów PsExec.
+- Szukaj tworzenia procesów, gdzie ParentImage to C:\Windows\PSEXESVC.exe lub dzieci services.exe działających jako LOCAL SYSTEM wykonujących powłoki.
+- Oznaczaj nazwane rury kończące się na -stdin/-stdout/-stderr lub znane nazwy rur klonów PsExec.
 
 ## Rozwiązywanie typowych problemów
-- Odmowa dostępu (5) podczas tworzenia usług: brak prawdziwego lokalnego administratora, zdalne ograniczenia UAC dla lokalnych kont lub ochrona przed manipulacją EDR na ścieżce binariów usługi.
+- Odmowa dostępu (5) podczas tworzenia usług: brak prawdziwego lokalnego administratora, ograniczenia UAC dla lokalnych kont lub ochrona przed manipulacją EDR na ścieżce binariów usługi.
 - Ścieżka sieciowa nie została znaleziona (53) lub nie można połączyć się z ADMIN$: zapora blokująca SMB/RPC lub wyłączone udostępnianie administratora.
-- Kerberos nie działa, ale NTLM jest zablokowany: połącz się używając nazwy hosta/FQDN (nie IP), upewnij się, że SPN są poprawne, lub dostarcz -k/-no-pass z biletami podczas korzystania z Impacket.
+- Kerberos nie działa, ale NTLM jest zablokowany: połącz się używając nazwy hosta/FQDN (nie IP), upewnij się, że SPN są poprawne, lub dostarcz -k/-no-pass z biletami przy użyciu Impacket.
 - Rozpoczęcie usługi przekracza czas, ale ładunek działał: oczekiwane, jeśli nie jest to prawdziwy plik binarny usługi; przechwyć wyjście do pliku lub użyj smbexec do bieżącego I/O.
 
 ## Notatki dotyczące zabezpieczeń
-- Windows 11 24H2 i Windows Server 2025 wymagają podpisywania SMB domyślnie dla połączeń wychodzących (i Windows 11 przychodzących). Nie łamie to legalnego użycia PsExec z ważnymi poświadczeniami, ale zapobiega nadużywaniu niepodpisanego przekazywania SMB i może wpłynąć na urządzenia, które nie obsługują podpisywania.
-- Nowe blokowanie NTLM w kliencie SMB (Windows 11 24H2/Server 2025) może uniemożliwić powrót do NTLM podczas łączenia się przez IP lub do serwerów nie-Kerberos. W zabezpieczonych środowiskach to złamie oparte na NTLM PsExec/SMBExec; użyj Kerberos (nazwa hosta/FQDN) lub skonfiguruj wyjątki, jeśli jest to rzeczywiście potrzebne.
+- Windows 11 24H2 i Windows Server 2025 wymagają podpisywania SMB domyślnie dla połączeń wychodzących (i przychodzących w Windows 11). Nie wpływa to na legalne użycie PsExec z ważnymi poświadczeniami, ale zapobiega nadużywaniu niepodpisanego przekazywania SMB i może wpłynąć na urządzenia, które nie obsługują podpisywania.
+- Nowe blokowanie NTLM w kliencie SMB (Windows 11 24H2/Server 2025) może uniemożliwić powrót do NTLM przy łączeniu przez IP lub do serwerów nie-Kerberos. W zabezpieczonych środowiskach to złamie oparte na NTLM PsExec/SMBExec; użyj Kerberos (nazwa hosta/FQDN) lub skonfiguruj wyjątki, jeśli jest to rzeczywiście potrzebne.
 - Zasada najmniejszych uprawnień: minimalizuj członkostwo lokalnych administratorów, preferuj Just-in-Time/Just-Enough Admin, egzekwuj LAPS i monitoruj/powiadamiaj o instalacjach usług 7045.
 
 ## Zobacz także
 
 - Wykonanie zdalne oparte na WMI (często bardziej bezplikowe):
 
+
 {{#ref}}
 ./wmiexec.md
 {{#endref}}
 
 - Wykonanie zdalne oparte na WinRM:
+
 
 {{#ref}}
 ./winrm.md

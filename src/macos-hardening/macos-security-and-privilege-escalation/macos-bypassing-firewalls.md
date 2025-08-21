@@ -16,7 +16,7 @@ Poniższe techniki zostały znalezione jako działające w niektórych aplikacja
 
 ### **Użyj binarek podpisanych przez Apple**
 
-- Takich jak **`curl`**, ale także innych, jak **`whois`**
+- Takich jak **`curl`**, ale także innych, takich jak **`whois`**
 
 ### Znane domeny Apple
 
@@ -74,8 +74,8 @@ macos-proces-abuse/
 ## Ostatnie luki w zabezpieczeniach zapory macOS (2023-2025)
 
 ### Obejście filtra treści internetowej (Czas ekranowy) – **CVE-2024-44206**
-W lipcu 2024 roku Apple naprawił krytyczny błąd w Safari/WebKit, który zepsuł systemowy „Filtr treści internetowej” używany przez kontrolę rodzicielską Czas ekranowy. 
-Specjalnie przygotowane URI (na przykład z podwójnym kodowaniem URL „://”) nie jest rozpoznawane przez ACL Czasu ekranowego, ale jest akceptowane przez WebKit, więc żądanie jest wysyłane bez filtracji. Każdy proces, który może otworzyć URL (w tym kod w piaskownicy lub niepodpisany), może zatem uzyskać dostęp do domen, które są wyraźnie zablokowane przez użytkownika lub profil MDM.
+W lipcu 2024 roku Apple naprawił krytyczny błąd w Safari/WebKit, który zepsuł systemowy „Filtr treści internetowej” używany przez kontrolę rodzicielską Czasu ekranowego. 
+Specjalnie skonstruowany URI (na przykład z podwójnym kodowaniem URL „://”) nie jest rozpoznawany przez ACL Czasu ekranowego, ale jest akceptowany przez WebKit, więc żądanie jest wysyłane bez filtracji. Każdy proces, który może otworzyć URL (w tym kod w piaskownicy lub niepodpisany), może zatem uzyskać dostęp do domen, które są wyraźnie zablokowane przez użytkownika lub profil MDM.
 
 Praktyczny test (system bez poprawek):
 ```bash
@@ -83,7 +83,7 @@ open "http://attacker%2Ecom%2F./"   # should be blocked by Screen Time
 # if the patch is missing Safari will happily load the page
 ```
 ### Błąd kolejności reguł filtrów pakietów (PF) w wczesnym macOS 14 “Sonoma”
-Podczas cyklu beta macOS 14 Apple wprowadziło regresję w użytkowym opakowaniu wokół **`pfctl`**. Reguły, które zostały dodane z użyciem słowa kluczowego `quick` (używanego przez wiele przełączników kill-switch VPN), były cicho ignorowane, co powodowało wycieki ruchu, nawet gdy GUI VPN/firewall zgłaszało *zablokowane*. Błąd został potwierdzony przez kilku dostawców VPN i naprawiony w RC 2 (build 23A344).
+Podczas cyklu beta macOS 14 Apple wprowadziło regresję w przestrzeni użytkownika wokół **`pfctl`**. Reguły, które zostały dodane z użyciem słowa kluczowego `quick` (używanego przez wiele przełączników kill-switch VPN), były cicho ignorowane, co powodowało wycieki ruchu, nawet gdy GUI VPN/firewall zgłaszało *zablokowane*. Błąd został potwierdzony przez kilku dostawców VPN i naprawiony w RC 2 (build 23A344).
 
 Szybkie sprawdzenie wycieku:
 ```bash
@@ -91,8 +91,8 @@ pfctl -sr | grep quick       # rules are present…
 sudo tcpdump -n -i en0 not port 53   # …but packets still leave the interface
 ```
 ### Wykorzystywanie usług pomocniczych podpisanych przez Apple (legacy – przed macOS 11.2)
-Przed macOS 11.2 **`ContentFilterExclusionList`** pozwalał na ~50 binarnych plików Apple, takich jak **`nsurlsessiond`** i App Store, na ominięcie wszystkich zapór filtrujących gniazda wdrożonych za pomocą frameworka Network Extension (LuLu, Little Snitch itp.).
-Złośliwe oprogramowanie mogło po prostu uruchomić wykluczony proces—lub wstrzyknąć do niego kod—i tunelować swój własny ruch przez już dozwolone gniazdo. Apple całkowicie usunęło listę wykluczeń w macOS 11.2, ale technika ta jest nadal istotna w systemach, które nie mogą być zaktualizowane.
+Przed macOS 11.2 **`ContentFilterExclusionList`** pozwalał na ~50 binarnych plików Apple, takich jak **`nsurlsessiond`** i App Store, na ominięcie wszystkich zapór ogniowych filtrujących gniazda wdrożonych za pomocą frameworka Network Extension (LuLu, Little Snitch itp.).
+Złośliwe oprogramowanie mogło po prostu uruchomić wykluczony proces — lub wstrzyknąć do niego kod — i tunelować swój własny ruch przez już dozwolone gniazdo. Apple całkowicie usunęło listę wykluczeń w macOS 11.2, ale technika ta jest nadal istotna w systemach, które nie mogą być zaktualizowane.
 
 Przykład dowodu koncepcji (przed 11.2):
 ```python
