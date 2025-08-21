@@ -17,7 +17,7 @@ Geralmente, isso significa que para escapar você precisa ser root dentro do chr
 ### Root + CWD
 
 > [!WARNING]
-> Se você é **root** dentro de um chroot, você **pode escapar** criando **outro chroot**. Isso porque 2 chroots não podem coexistir (no Linux), então se você criar uma pasta e depois **criar um novo chroot** nessa nova pasta sendo **você fora dela**, agora você estará **fora do novo chroot** e, portanto, estará no FS.
+> Se você é **root** dentro de um chroot, você **pode escapar** criando **outro chroot**. Isso porque 2 chroots não podem coexistir (no Linux), então se você criar uma pasta e depois **criar um novo chroot** nessa nova pasta sendo **você fora dele**, agora você estará **fora do novo chroot** e, portanto, estará no FS.
 >
 > Isso ocorre porque geralmente o chroot NÃO move seu diretório de trabalho para o indicado, então você pode criar um chroot, mas estar fora dele.
 
@@ -112,11 +112,11 @@ chroot(".");
 > FD pode ser passado através de Unix Domain Sockets, então:
 >
 > - Crie um processo filho (fork)
-> - Crie UDS para que pai e filho possam se comunicar
+> - Crie UDS para que o pai e o filho possam se comunicar
 > - Execute chroot no processo filho em uma pasta diferente
 > - No processo pai, crie um FD de uma pasta que está fora do novo chroot do processo filho
 > - Passe para o processo filho esse FD usando o UDS
-> - O processo filho muda de diretório para esse FD, e como está fora do seu chroot, ele escapará da prisão
+> - O processo filho muda o diretório para esse FD, e como está fora do seu chroot, ele escapará da prisão
 
 ### Root + Mount
 
@@ -147,7 +147,7 @@ chroot(".");
 
 > [!WARNING]
 >
-> - Antigamente, os usuários podiam depurar seus próprios processos a partir de um processo deles mesmos... mas isso não é mais possível por padrão
+> - Há algum tempo, os usuários podiam depurar seus próprios processos a partir de um processo deles mesmos... mas isso não é mais possível por padrão
 > - De qualquer forma, se for possível, você poderia ptrace em um processo e executar um shellcode dentro dele ([veja este exemplo](linux-capabilities.md#cap_sys_ptrace)).
 
 ## Bash Jails
@@ -202,7 +202,7 @@ Você pode sobrescrever, por exemplo, o arquivo sudoers.
 ```bash
 wget http://127.0.0.1:8080/sudoers -O /etc/sudoers
 ```
-### Outras truques
+### Outros truques
 
 [**https://fireshellsecurity.team/restricted-linux-shell-escaping-techniques/**](https://fireshellsecurity.team/restricted-linux-shell-escaping-techniques/)\
 [https://pen-testing.sans.org/blog/2012/06/06/escaping-restricted-linux-shells](https://pen-testing.sans.org/blog/2012/06/06/escaping-restricted-linux-shells)\
@@ -251,7 +251,7 @@ for k,chr in pairs(string) do print(chr(0x6f,0x73,0x2e,0x65,0x78)) end
 #and "char" from string library, and the use both to execute a command
 for i in seq 1000; do echo "for k1,chr in pairs(string) do for k2,exec in pairs(os) do print(k1,k2) print(exec(chr(0x6f,0x73,0x2e,0x65,0x78,0x65,0x63,0x75,0x74,0x65,0x28,0x27,0x6c,0x73,0x27,0x29))) break end break end" | nc 10.10.10.10 10006 | grep -A5 "Code: char"; done
 ```
-**Obter shell lua interativo**: Se você estiver dentro de um shell lua limitado, pode obter um novo shell lua (e, esperançosamente, ilimitado) chamando:
+**Obter shell lua interativo**: Se você estiver dentro de um shell lua limitado, você pode obter um novo shell lua (e, esperançosamente, ilimitado) chamando:
 ```bash
 debug.debug()
 ```

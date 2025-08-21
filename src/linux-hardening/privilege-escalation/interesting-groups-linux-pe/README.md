@@ -56,11 +56,11 @@ pkttyagent --process <PID of session1> #Step 2, attach pkttyagent to session1
 ```
 ## Wheel Group
 
-**Às vezes**, **por padrão** dentro do **/etc/sudoers** você pode encontrar esta linha:
+**Às vezes**, **por padrão** dentro do arquivo **/etc/sudoers** você pode encontrar esta linha:
 ```
 %wheel	ALL=(ALL:ALL) ALL
 ```
-Isso significa que **qualquer usuário que pertence ao grupo wheel pode executar qualquer coisa como sudo**.
+Isso significa que **qualquer usuário que pertença ao grupo wheel pode executar qualquer coisa como sudo**.
 
 Se este for o caso, para **se tornar root você pode apenas executar**:
 ```
@@ -76,7 +76,7 @@ Então, leia o arquivo e tente **quebrar algumas hashes**.
 
 ## Grupo de Funcionários
 
-**staff**: Permite que usuários adicionem modificações locais ao sistema (`/usr/local`) sem precisar de privilégios de root (note que executáveis em `/usr/local/bin` estão na variável PATH de qualquer usuário, e podem "substituir" os executáveis em `/bin` e `/usr/bin` com o mesmo nome). Compare com o grupo "adm", que está mais relacionado a monitoramento/segurança. [\[source\]](https://wiki.debian.org/SystemGroups)
+**staff**: Permite que usuários adicionem modificações locais ao sistema (`/usr/local`) sem precisar de privilégios de root (note que executáveis em `/usr/local/bin` estão na variável PATH de qualquer usuário, e podem "substituir" os executáveis em `/bin` e `/usr/bin` com o mesmo nome). Compare com o grupo "adm", que está mais relacionado à monitoramento/segurança. [\[source\]](https://wiki.debian.org/SystemGroups)
 
 Em distribuições debian, a variável `$PATH` mostra que `/usr/local/` será executado com a maior prioridade, independentemente de você ser um usuário privilegiado ou não.
 ```bash
@@ -167,7 +167,7 @@ Para **abrir** a **imagem bruta**, você pode usar **GIMP**, selecionar o arquiv
 
 ![](<../../../images/image (463).png>)
 
-Em seguida, modifique a Largura e Altura para as que são usadas na tela e verifique diferentes Tipos de Imagem (e selecione o que melhor mostra a tela):
+Em seguida, modifique a Largura e Altura para as usadas na tela e verifique diferentes Tipos de Imagem (e selecione o que melhor mostra a tela):
 
 ![](<../../../images/image (317).png>)
 
@@ -181,7 +181,7 @@ find / -group root -perm -g=w 2>/dev/null
 ```
 ## Grupo Docker
 
-Você pode **montar o sistema de arquivos raiz da máquina host em um volume da instância**, de modo que, quando a instância inicia, ela carrega imediatamente um `chroot` nesse volume. Isso efetivamente lhe dá acesso root na máquina.
+Você pode **montar o sistema de arquivos raiz da máquina host em um volume da instância**, então quando a instância inicia, ela carrega imediatamente um `chroot` nesse volume. Isso efetivamente lhe dá acesso root na máquina.
 ```bash
 docker image #Get images from the docker service
 

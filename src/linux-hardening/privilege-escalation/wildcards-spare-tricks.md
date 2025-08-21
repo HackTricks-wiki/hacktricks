@@ -41,7 +41,7 @@ Uma vez que o root executa, por exemplo, `tar -czf /root/backup.tgz *`, `shell.s
 
 ### bsdtar / macOS 14+
 
-O `tar` padrão em versões recentes do macOS (baseado em `libarchive`) *não* implementa `--checkpoint`, mas você ainda pode alcançar a execução de código com a flag **--use-compress-program** que permite especificar um compressor externo.
+O `tar` padrão em versões recentes do macOS (baseado em `libarchive`) *não* implementa `--checkpoint`, mas você ainda pode conseguir a execução de código com a flag **--use-compress-program** que permite especificar um compressor externo.
 ```bash
 # macOS example
 touch "--use-compress-program=/bin/sh"
@@ -90,7 +90,7 @@ Injete a flag através de um nome de arquivo elaborado e aguarde o script de bac
 
 ---
 
-## Binaries adicionais vulneráveis à injeção de wildcard (lista rápida de 2023-2025)
+## Binaries adicionais vulneráveis à injeção de wildcard (lista rápida 2023-2025)
 
 Os seguintes comandos foram abusados em CTFs modernos e em ambientes reais. O payload é sempre criado como um *nome de arquivo* dentro de um diretório gravável que será processado posteriormente com um wildcard:
 

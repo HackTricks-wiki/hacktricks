@@ -16,7 +16,7 @@ Você deve começar lendo este post para alguns conceitos básicos que você dev
 ## 1. Tokenization
 
 > [!TIP]
-> O objetivo desta fase inicial é muito simples: **Dividir a entrada em tokens (ids) de uma forma que faça sentido**.
+> O objetivo desta fase inicial é muito simples: **Dividir a entrada em tokens (ids) de uma maneira que faça sentido**.
 
 
 {{#ref}}

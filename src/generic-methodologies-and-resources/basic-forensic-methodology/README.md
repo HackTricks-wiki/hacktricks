@@ -18,7 +18,7 @@ malware-analysis.md
 
 ## Inspecionando uma Imagem
 
-Se você receber uma **imagem forense** de um dispositivo, pode começar **a analisar as partições, o sistema de arquivos** utilizado e **recuperar** arquivos potencialmente **interessantes** (mesmo os deletados). Aprenda como em:
+Se você receber uma **imagem forense** de um dispositivo, pode começar **a analisar as partições, o sistema de arquivos** utilizado e **recuperar** potencialmente **arquivos interessantes** (mesmo os deletados). Aprenda como em:
 
 {{#ref}}
 partitions-file-systems-carving/

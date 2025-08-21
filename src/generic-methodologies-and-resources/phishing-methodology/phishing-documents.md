@@ -14,7 +14,7 @@ Você pode usar o seguinte comando para verificar quais extensões serão execut
 ```bash
 assoc | findstr /i "word excel powerp"
 ```
-DOCX files que referenciam um modelo remoto (Arquivo – Opções – Suplementos – Gerenciar: Modelos – Ir) que inclui macros podem “executar” macros também.
+DOCX files referencing a remote template (File –Options –Add-ins –Manage: Templates –Go) that includes macros can “execute” macros as well.
 
 ### Carregamento de Imagem Externa
 

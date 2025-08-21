@@ -24,7 +24,7 @@ Isso foi o que foi feito em [**CVE-2023-32364**](https://gergelykalman.com/CVE-2
 > [!CAUTION]
 > Portanto, no momento, se você for capaz de criar uma pasta com um nome terminando em **`.app`** sem um atributo de quarentena, você pode escapar do sandbox porque o macOS apenas **verifica** o **atributo de quarentena** na **pasta `.app`** e no **executável principal** (e nós apontaremos o executável principal para **`/bin/bash`**).
 >
-> Note que se um pacote .app já foi autorizado a ser executado (ele tem um xttr de quarentena com a flag de autorizado a executar ativada), você também pode abusar disso... exceto que agora você não pode escrever dentro de pacotes **`.app`** a menos que tenha algumas permissões TCC privilegiadas (que você não terá dentro de um sandbox alto).
+> Note que se um pacote .app já foi autorizado a ser executado (ele tem um xttr de quarentena com a flag de autorizado a executar ativada), você também poderia abusar disso... exceto que agora você não pode escrever dentro de pacotes **`.app`** a menos que tenha algumas permissões TCC privilegiadas (que você não terá dentro de um sandbox alto).
 
 ### Abusando da funcionalidade Open
 
@@ -37,7 +37,7 @@ macos-office-sandbox-bypasses.md
 ### Launch Agents/Daemons
 
 Mesmo que um aplicativo seja **destinado a ser sandboxed** (`com.apple.security.app-sandbox`), é possível contornar o sandbox se ele for **executado a partir de um LaunchAgent** (`~/Library/LaunchAgents`), por exemplo.\
-Como explicado em [**este post**](https://www.vicarius.io/vsociety/posts/cve-2023-26818-sandbox-macos-tcc-bypass-w-telegram-using-dylib-injection-part-2-3?q=CVE-2023-26818), se você quiser obter persistência com um aplicativo que está em sandbox, você pode fazê-lo ser executado automaticamente como um LaunchAgent e talvez injetar código malicioso via variáveis de ambiente DyLib.
+Como explicado em [**este post**](https://www.vicarius.io/vsociety/posts/cve-2023-26818-sandbox-macos-tcc-bypass-w-telegram-using-dylib-injection-part-2-3?q=CVE-2023-26818), se você quiser obter persistência com um aplicativo que está em sandbox, você poderia fazê-lo ser executado automaticamente como um LaunchAgent e talvez injetar código malicioso via variáveis de ambiente DyLib.
 
 ### Abusando de Locais de Auto Início
 
@@ -90,7 +90,7 @@ checkService(serviceName.UTF8String);
 ```
 ### Serviços Mach de PID disponíveis
 
-Esses serviços Mach foram inicialmente abusados para [escapar do sandbox neste artigo](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/). Naquela época, **todos os serviços XPC exigidos** por um aplicativo e seu framework eram visíveis no domínio PID do aplicativo (esses são Serviços Mach com `ServiceType` como `Application`).
+Esses serviços Mach foram inicialmente abusados para [escapar do sandbox neste artigo](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/). Naquela época, **todos os serviços XPC necessários** por um aplicativo e seu framework eram visíveis no domínio PID do aplicativo (esses são Serviços Mach com `ServiceType` como `Application`).
 
 Para **contatar um serviço XPC do domínio PID**, basta registrá-lo dentro do aplicativo com uma linha como:
 ```objectivec
@@ -207,7 +207,7 @@ NSLog(@"Read the target content:%@", [NSData dataWithContentsOfURL:targetURL]);
 
 [**Esta pesquisa**](https://saagarjha.com/blog/2020/05/20/mac-app-store-sandbox-escape/) descobriu 2 maneiras de contornar o Sandbox. Como o sandbox é aplicado a partir do userland quando a biblioteca **libSystem** é carregada. Se um binário puder evitar carregá-la, ele nunca será sandboxed:
 
-- Se o binário for **completamente compilado estaticamente**, ele poderá evitar o carregamento dessa biblioteca.
+- Se o binário for **completamente compilado estaticamente**, ele poderá evitar carregar essa biblioteca.
 - Se o **binário não precisar carregar nenhuma biblioteca** (porque o linker também está em libSystem), ele não precisará carregar libSystem.
 
 ### Shellcodes

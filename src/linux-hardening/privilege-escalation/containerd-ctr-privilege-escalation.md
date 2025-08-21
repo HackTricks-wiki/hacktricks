@@ -35,7 +35,7 @@ Você pode executar um contêiner privilegiado como:
 ```bash
 ctr run --privileged --net-host -t registry:5000/modified-ubuntu:latest ubuntu bash
 ```
-Então você pode usar algumas das técnicas mencionadas na página a seguir para **escapar disso abusando de capacidades privilegiadas**: 
+Então você pode usar algumas das técnicas mencionadas na página a seguir para **escapar dela abusando de capacidades privilegiadas**: 
 
 {{#ref}}
 docker-security/

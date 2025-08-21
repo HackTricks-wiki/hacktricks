@@ -4,11 +4,11 @@
 
 ## Squashing Basic Info
 
-O NFS geralmente (especialmente no Linux) confia no `uid` e `gid` indicados pelo cliente que se conecta para acessar os arquivos (se o kerberos não for usado). No entanto, existem algumas configurações que podem ser definidas no servidor para **mudar esse comportamento**:
+O NFS geralmente (especialmente no linux) confia no `uid` e `gid` indicados pelo cliente que se conecta para acessar os arquivos (se o kerberos não for usado). No entanto, existem algumas configurações que podem ser definidas no servidor para **mudar esse comportamento**:
 
-- **`all_squash`**: Ele reduz todos os acessos mapeando todos os usuários e grupos para **`nobody`** (65534 não assinado / -2 assinado). Portanto, todos são `nobody` e nenhum usuário é utilizado.
+- **`all_squash`**: Ele reduz todos os acessos mapeando todos os usuários e grupos para **`nobody`** (65534 unsigned / -2 signed). Portanto, todos são `nobody` e nenhum usuário é utilizado.
 - **`root_squash`/`no_all_squash`**: Este é o padrão no Linux e **apenas reduz o acesso com uid 0 (root)**. Portanto, qualquer `UID` e `GID` são confiáveis, mas `0` é reduzido para `nobody` (então nenhuma impersonação de root é possível).
-- **``no_root_squash`**: Esta configuração, se habilitada, não reduz nem mesmo o usuário root. Isso significa que se você montar um diretório com essa configuração, pode acessá-lo como root.
+- **`no_root_squash`**: Esta configuração, se habilitada, não reduz nem mesmo o usuário root. Isso significa que se você montar um diretório com essa configuração, poderá acessá-lo como root.
 
 No arquivo **/etc/exports**, se você encontrar algum diretório que está configurado como **no_root_squash**, então você pode **acessar** a partir de **um cliente** e **escrever dentro** desse diretório **como** se você fosse o **root** local da máquina.
 
@@ -23,9 +23,9 @@ Para mais informações sobre **NFS**, consulte:
 ### Remote Exploit
 
 Opção 1 usando bash:
-- **Montando esse diretório** em uma máquina cliente e **como root copiando** dentro da pasta montada o binário **/bin/bash** e dando a ele direitos **SUID**, e **executando a partir da máquina vítima** esse binário bash.
+- **Montando esse diretório** em uma máquina cliente, e **como root copiando** dentro da pasta montada o binário **/bin/bash** e dando a ele direitos **SUID**, e **executando a partir da máquina vítima** esse binário bash.
 - Observe que para ser root dentro do compartilhamento NFS, **`no_root_squash`** deve estar configurado no servidor.
-- No entanto, se não estiver habilitado, você pode escalar para outro usuário copiando o binário para o compartilhamento NFS e dando a ele a permissão SUID como o usuário para o qual deseja escalar.
+- No entanto, se não estiver habilitado, você pode escalar para outro usuário copiando o binário para o compartilhamento NFS e dando a ele a permissão SUID como o usuário para o qual você deseja escalar.
 ```bash
 #Attacker, as root user
 mkdir /tmp/pe
@@ -57,10 +57,10 @@ cd <SHAREDD_FOLDER>
 ### Exploit Local
 
 > [!TIP]
-> Note que se você puder criar um **túnel da sua máquina para a máquina da vítima, ainda poderá usar a versão Remota para explorar essa escalada de privilégio, tunelando as portas necessárias**.\
-> O seguinte truque é caso o arquivo `/etc/exports` **indique um IP**. Nesse caso, você **não poderá usar** de forma alguma o **exploit remoto** e precisará **abusar desse truque**.\
+> Note que se você puder criar um **túnel da sua máquina para a máquina da vítima, você ainda pode usar a versão Remota para explorar essa escalada de privilégio tunelando as portas necessárias**.\
+> O seguinte truque é caso o arquivo `/etc/exports` **indique um IP**. Nesse caso, você **não poderá usar** em nenhum caso o **exploit remoto** e precisará **abusar desse truque**.\
 > Outro requisito necessário para que o exploit funcione é que **a exportação dentro de `/etc/export`** **deve estar usando a flag `insecure`**.\
-> --_Não tenho certeza se, caso `/etc/export` esteja indicando um endereço IP, esse truque funcionará_--
+> --_Não tenho certeza se, caso `/etc/export` indique um endereço IP, esse truque funcionará_--
 
 ### Informações Básicas
 
@@ -68,7 +68,7 @@ O cenário envolve explorar um compartilhamento NFS montado em uma máquina loca
 
 #### Compilando a Biblioteca
 
-Os passos de compilação da biblioteca podem exigir ajustes com base na versão do kernel. Neste caso específico, as syscalls fallocate foram comentadas. O processo de compilação envolve os seguintes comandos:
+Os passos de compilação da biblioteca podem exigir ajustes com base na versão do kernel. Neste caso específico, as chamadas de sistema fallocate foram comentadas. O processo de compilação envolve os seguintes comandos:
 ```bash
 ./bootstrap
 ./configure

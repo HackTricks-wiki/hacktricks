@@ -8,7 +8,7 @@ O ataque **Silver Ticket** envolve a exploração de tickets de serviço em ambi
 
 > [!WARNING]
 > Silver Tickets são menos detectáveis do que Golden Tickets porque exigem apenas o **hash da conta de serviço**, não a conta krbtgt. No entanto, eles são limitados ao serviço específico que visam. Além disso, apenas roubar a senha de um usuário.
-Além disso, se você comprometer a **senha de uma conta com um SPN**, pode usar essa senha para criar um Silver Ticket impersonando qualquer usuário para aquele serviço.
+Além disso, se você comprometer a **senha de uma conta com um SPN**, pode usar essa senha para criar um Silver Ticket impersonando qualquer usuário para esse serviço.
 
 Para a criação de tickets, diferentes ferramentas são empregadas com base no sistema operacional:
 
@@ -39,15 +39,15 @@ O serviço CIFS é destacado como um alvo comum para acessar o sistema de arquiv
 
 ## Serviços Disponíveis
 
-| Tipo de Serviço                            | Tickets de Serviço Silver                                                  |
+| Tipo de Serviço                             | Tickets Silver do Serviço                                                  |
 | ------------------------------------------ | -------------------------------------------------------------------------- |
 | WMI                                        | <p>HOST</p><p>RPCSS</p>                                                    |
 | PowerShell Remoting                        | <p>HOST</p><p>HTTP</p><p>Dependendo do SO também:</p><p>WSMAN</p><p>RPCSS</p> |
 | WinRM                                      | <p>HOST</p><p>HTTP</p><p>Em algumas ocasiões você pode apenas pedir: WINRM</p> |
-| Tarefas Agendadas                         | HOST                                                                       |
+| Tarefas Agendadas                          | HOST                                                                       |
 | Compartilhamento de Arquivos do Windows, também psexec | CIFS                                                                       |
 | Operações LDAP, incluindo DCSync          | LDAP                                                                       |
-| Ferramentas de Administração de Servidor Remoto do Windows | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                         |
+| Ferramentas de Administração Remota do Windows | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                         |
 | Golden Tickets                             | krbtgt                                                                     |
 
 Usando **Rubeus** você pode **pedir todos** esses tickets usando o parâmetro:

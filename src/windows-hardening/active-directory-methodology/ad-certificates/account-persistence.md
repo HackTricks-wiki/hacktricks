@@ -34,7 +34,7 @@ certipy auth -pfx user.pfx -dc-ip 10.0.0.10
 ```
 > Nota: Combinado com outras técnicas (veja as seções de THEFT), a autenticação baseada em certificado permite acesso persistente sem tocar no LSASS e mesmo a partir de contextos não elevados.
 
-## Ganhando Persistência de Máquina com Certificados - PERSIST2
+## Obtendo Persistência de Máquina com Certificados - PERSIST2
 
 Se um atacante tiver privilégios elevados em um host, ele pode inscrever a conta de máquina do sistema comprometido para um certificado usando o modelo padrão `Machine`. Autenticar-se como a máquina habilita S4U2Self para serviços locais e pode fornecer persistência durável do host:
 ```bash
@@ -57,7 +57,7 @@ certipy req -u 'john@corp.local' -p 'Passw0rd!' -ca 'CA-SERVER\CA-NAME' \
 # (use the serial/thumbprint of the cert to renew; reusekeys preserves the keypair)
 certreq -enroll -user -cert <SerialOrID> renew [reusekeys]
 ```
-> Dica operacional: Acompanhe os prazos dos arquivos PFX mantidos pelo atacante e renove-os antecipadamente. A renovação também pode fazer com que os certificados atualizados incluam a extensão de mapeamento SID moderno, mantendo-os utilizáveis sob regras de mapeamento DC mais rigorosas (veja a próxima seção).
+> Dica operacional: Acompanhe os prazos de validade dos arquivos PFX mantidos pelo atacante e renove-os antecipadamente. A renovação também pode fazer com que os certificados atualizados incluam a extensão de mapeamento SID moderno, mantendo-os utilizáveis sob regras de mapeamento DC mais rigorosas (veja a próxima seção).
 
 ## Plantando Mapeamentos de Certificado Explícitos (altSecurityIdentities) – PERSIST4
 
@@ -115,10 +115,10 @@ Revogação do certificado do agente ou permissões do modelo é necessária par
 
 O KB5014754 da Microsoft introduziu a Aplicação Rigorosa de Mapeamento de Certificados em controladores de domínio. Desde 11 de fevereiro de 2025, os DCs padrão para Aplicação Total, rejeitando mapeamentos fracos/ambíguos. Implicações práticas:
 
-- Certificados anteriores a 2022 que não possuem a extensão de mapeamento SID podem falhar no mapeamento implícito quando os DCs estão em Aplicação Total. Ataques podem manter acesso renovando certificados através do AD CS (para obter a extensão SID) ou plantando um mapeamento explícito forte em `altSecurityIdentities` (PERSIST4).
+- Certificados anteriores a 2022 que não possuem a extensão de mapeamento SID podem falhar no mapeamento implícito quando os DCs estão em Aplicação Total. Os atacantes podem manter o acesso renovando certificados através do AD CS (para obter a extensão SID) ou plantando um mapeamento explícito forte em `altSecurityIdentities` (PERSIST4).
 - Mapeamentos explícitos usando formatos fortes (Issuer+Serial, SKI, SHA1-PublicKey) continuam a funcionar. Formatos fracos (Issuer/Subject, Subject-only, RFC822) podem ser bloqueados e devem ser evitados para persistência.
 
-Administradores devem monitorar e alertar sobre:
+Os administradores devem monitorar e alertar sobre:
 - Mudanças em `altSecurityIdentities` e emissão/renovações de certificados de Agente de Inscrição e Usuário.
 - Logs de emissão de CA para solicitações em nome de e padrões de renovação incomuns.
 

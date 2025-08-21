@@ -71,7 +71,7 @@ macos-security-protections/
 
 ### Permissões de Arquivo
 
-Se um **processo executado como root escreve** um arquivo que pode ser controlado por um usuário, o usuário pode abusar disso para **escalar privilégios**.\
+Se um **processo executando como root escreve** um arquivo que pode ser controlado por um usuário, o usuário pode abusar disso para **escalar privilégios**.\
 Isso pode ocorrer nas seguintes situações:
 
 - O arquivo usado já foi criado por um usuário (pertencente ao usuário)

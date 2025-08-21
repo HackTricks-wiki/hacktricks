@@ -1,25 +1,25 @@
-# Injeção de SID-History
+# SID-History Injection
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Ataque de Injeção de SID History
 
-O foco do **Ataque de Injeção de SID History** é auxiliar **na migração de usuários entre domínios** enquanto garante o acesso contínuo a recursos do domínio anterior. Isso é realizado **incorporando o Identificador de Segurança (SID) anterior do usuário ao SID History** de sua nova conta. Notavelmente, esse processo pode ser manipulado para conceder acesso não autorizado ao adicionar o SID de um grupo de alto privilégio (como Administradores de Empresa ou Administradores de Domínio) do domínio pai ao SID History. Essa exploração confere acesso a todos os recursos dentro do domínio pai.
+O foco do **Ataque de Injeção de SID History** é auxiliar **na migração de usuários entre domínios** enquanto garante o acesso contínuo a recursos do domínio anterior. Isso é realizado **incorporando o Identificador de Segurança (SID) anterior do usuário no SID History** de sua nova conta. Notavelmente, esse processo pode ser manipulado para conceder acesso não autorizado ao adicionar o SID de um grupo de alto privilégio (como Administradores de Empresa ou Administradores de Domínio) do domínio pai ao SID History. Essa exploração confere acesso a todos os recursos dentro do domínio pai.
 
 Existem dois métodos para executar esse ataque: através da criação de um **Golden Ticket** ou um **Diamond Ticket**.
 
-Para identificar o SID do grupo **"Administradores de Empresa"**, é necessário primeiro localizar o SID do domínio raiz. Após a identificação, o SID do grupo Administradores de Empresa pode ser construído anexando `-519` ao SID do domínio raiz. Por exemplo, se o SID do domínio raiz for `S-1-5-21-280534878-1496970234-700767426`, o SID resultante para o grupo "Administradores de Empresa" seria `S-1-5-21-280534878-1496970234-700767426-519`.
+Para identificar o SID do grupo **"Enterprise Admins"**, é necessário primeiro localizar o SID do domínio raiz. Após a identificação, o SID do grupo Enterprise Admins pode ser construído anexando `-519` ao SID do domínio raiz. Por exemplo, se o SID do domínio raiz for `S-1-5-21-280534878-1496970234-700767426`, o SID resultante para o grupo "Enterprise Admins" seria `S-1-5-21-280534878-1496970234-700767426-519`.
 
-Você também pode usar os grupos **Administradores de Domínio**, que terminam em **512**.
+Você também pode usar os grupos **Domain Admins**, que terminam em **512**.
 
-Outra maneira de encontrar o SID de um grupo do outro domínio (por exemplo, "Administradores de Domínio") é com:
+Outra maneira de encontrar o SID de um grupo do outro domínio (por exemplo, "Domain Admins") é com:
 ```bash
 Get-DomainGroup -Identity "Domain Admins" -Domain parent.io -Properties ObjectSid
 ```
 > [!WARNING]
 > Note que é possível desativar o histórico de SID em um relacionamento de confiança, o que fará com que este ataque falhe.
 
-De acordo com a [**docs**](https://technet.microsoft.com/library/cc835085.aspx):
+De acordo com os [**docs**](https://technet.microsoft.com/library/cc835085.aspx):
 - **Desativando o SIDHistory em florestas de confiança** usando a ferramenta netdom (`netdom trust /domain: /EnableSIDHistory:no no controlador de domínio`)
 - **Aplicando Quarentena de Filtro de SID a confianças externas** usando a ferramenta netdom (`netdom trust /domain: /quarantine:yes no controlador de domínio`)
 - **Aplicar Filtro de SID a confianças de domínio dentro de uma única floresta** não é recomendado, pois é uma configuração não suportada e pode causar mudanças drásticas. Se um domínio dentro de uma floresta não for confiável, ele não deve ser membro da floresta. Nessa situação, é necessário primeiro separar os domínios confiáveis e não confiáveis em florestas separadas onde o Filtro de SID pode ser aplicado a uma confiança interflorestal.
@@ -80,7 +80,7 @@ diamond-ticket.md
 .\kirbikator.exe lsa .\CIFS.mcorpdc.moneycorp.local.kirbi
 ls \\mcorp-dc.moneycorp.local\c$
 ```
-Escalar para DA de root ou administrador da empresa usando o hash KRBTGT do domínio comprometido:
+Escalar para DA de root ou administrador da Enterprise usando o hash KRBTGT do domínio comprometido:
 ```bash
 Invoke-Mimikatz -Command '"kerberos::golden /user:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1-5-211874506631-3219952063-538504511 /sids:S-1-5-21-280534878-1496970234700767426-519 /krbtgt:ff46a9d8bd66c6efd77603da26796f35 /ticket:C:\AD\Tools\krbtgt_tkt.kirbi"'
 

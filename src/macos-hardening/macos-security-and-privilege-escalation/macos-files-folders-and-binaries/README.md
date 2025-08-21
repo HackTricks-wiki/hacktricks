@@ -24,8 +24,8 @@
 
 - **Aplicativos do sistema** estão localizados em `/System/Applications`
 - **Aplicativos instalados** geralmente são instalados em `/Applications` ou em `~/Applications`
-- **Dados do aplicativo** podem ser encontrados em `/Library/Application Support` para os aplicativos executando como root e `~/Library/Application Support` para aplicativos executando como usuário.
-- **Daemons** de aplicativos de terceiros que **precisam ser executados como root** geralmente estão localizados em `/Library/PrivilegedHelperTools/`
+- **Dados do aplicativo** podem ser encontrados em `/Library/Application Support` para os aplicativos executando como root e `~/Library/Application Support` para aplicativos executando como o usuário.
+- Daemons de aplicativos de terceiros que **precisam ser executados como root** geralmente estão localizados em `/Library/PrivilegedHelperTools/`
 - Aplicativos **Sandboxed** são mapeados na pasta `~/Library/Containers`. Cada aplicativo tem uma pasta nomeada de acordo com o ID do bundle do aplicativo (`com.apple.Safari`).
 - O **kernel** está localizado em `/System/Library/Kernels/kernel`
 - **Extensões do kernel da Apple** estão localizadas em `/System/Library/Extensions`
@@ -52,7 +52,7 @@ macos-installers-abuse.md
 - **`.plist`**: Também conhecido como lista de propriedades, armazena informações em formato XML ou binário.
 - Pode ser XML ou binário. Os binários podem ser lidos com:
 - `defaults read config.plist`
-- `/usr/libexec/PlistBuddy -c print config.plsit`
+- `/usr/libexec/PlistBuddy -c print config.plist`
 - `plutil -p ~/Library/Preferences/com.apple.screensaver.plist`
 - `plutil -convert xml1 ~/Library/Preferences/com.apple.screensaver.plist -o -`
 - `plutil -convert json ~/Library/Preferences/com.apple.screensaver.plist -o -`
@@ -97,7 +97,7 @@ dyldex_all [dyld_shared_cache_path] # Extract all
 
 <figure><img src="../../../images/image (1152).png" alt="" width="563"><figcaption></figcaption></figure>
 
-Alguns extratores não funcionarão, pois as dylibs estão pré-linkadas com endereços codificados, portanto, podem estar pulando para endereços desconhecidos.
+Alguns extratores não funcionarão, pois as dylibs estão pré-vinculadas com endereços codificados, portanto, podem estar pulando para endereços desconhecidos.
 
 > [!TIP]
 > Também é possível baixar o Cache de Biblioteca Compartilhada de outros dispositivos \*OS no macos usando um emulador no Xcode. Eles serão baixados dentro de: ls `$HOME/Library/Developer/Xcode/<*>OS\ DeviceSupport/<version>/Symbols/System/Library/Caches/com.apple.dyld/`, como: `$HOME/Library/Developer/Xcode/iOS\ DeviceSupport/14.1\ (18A8395)/Symbols/System/Library/Caches/com.apple.dyld/dyld_shared_cache_arm64`
@@ -121,7 +121,7 @@ Usando as variáveis de ambiente:
 
 ### Permissões de Pasta
 
-Em uma **pasta**, **ler** permite **listá-la**, **escrever** permite **deletar** e **escrever** arquivos nela, e **executar** permite **navegar** pelo diretório. Portanto, por exemplo, um usuário com **permissão de leitura sobre um arquivo** dentro de um diretório onde ele **não tem permissão de execução** **não poderá ler** o arquivo.
+Em uma **pasta**, **ler** permite **listá-la**, **escrever** permite **deletar** e **escrever** arquivos nela, e **executar** permite **navegar** pelo diretório. Então, por exemplo, um usuário com **permissão de leitura sobre um arquivo** dentro de um diretório onde ele **não tem permissão de execução** **não poderá ler** o arquivo.
 
 ### Modificadores de Flag
 
@@ -235,7 +235,7 @@ universal-binaries-and-mach-o-format.md
 macos-memory-dumping.md
 {{#endref}}
 
-## Arquivos de Categoria de Risco do Mac OS
+## Categoria de Risco de Arquivos do Mac OS
 
 O diretório `/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/System` é onde as informações sobre o **risco associado a diferentes extensões de arquivo são armazenadas**. Este diretório categoriza arquivos em vários níveis de risco, influenciando como o Safari lida com esses arquivos ao serem baixados. As categorias são as seguintes:
 
@@ -250,7 +250,7 @@ O diretório `/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/S
 - **`/var/log/system.log`**: Log principal dos sistemas OSX. com.apple.syslogd.plist é responsável pela execução do syslogging (você pode verificar se está desativado procurando por "com.apple.syslogd" em `launchctl list`).
 - **`/private/var/log/asl/*.asl`**: Estes são os Logs do Sistema Apple que podem conter informações interessantes.
 - **`$HOME/Library/Preferences/com.apple.recentitems.plist`**: Armazena arquivos e aplicativos acessados recentemente através do "Finder".
-- **`$HOME/Library/Preferences/com.apple.loginitems.plsit`**: Armazena itens para iniciar na inicialização do sistema.
+- **`$HOME/Library/Preferences/com.apple.loginitems.plsit`**: Armazena itens a serem lançados na inicialização do sistema.
 - **`$HOME/Library/Logs/DiskUtility.log`**: Arquivo de log para o aplicativo DiskUtility (informações sobre drives, incluindo USBs).
 - **`/Library/Preferences/SystemConfiguration/com.apple.airport.preferences.plist`**: Dados sobre pontos de acesso sem fio.
 - **`/private/var/db/launchd.db/com.apple.launchd/overrides.plist`**: Lista de daemons desativados.

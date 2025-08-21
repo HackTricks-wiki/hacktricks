@@ -20,7 +20,7 @@ Você também pode verificar a seguinte página para aprender **outras maneiras 
 
 ### FreeIPA
 
-FreeIPA é uma **alternativa** de código aberto ao **Active Directory** da Microsoft, principalmente para ambientes **Unix**. Ele combina um **diretório LDAP** completo com um Centro de Distribuição de Chaves **Kerberos** da MIT para gerenciamento semelhante ao Active Directory. Utilizando o Dogtag **Certificate System** para gerenciamento de certificados CA & RA, suporta autenticação **multifatorial**, incluindo smartcards. O SSSD está integrado para processos de autenticação Unix. Saiba mais sobre isso em:
+FreeIPA é uma **alternativa** de código aberto ao **Active Directory** da Microsoft, principalmente para ambientes **Unix**. Ele combina um **diretório LDAP** completo com um Centro de Distribuição de Chaves **Kerberos** do MIT para gerenciamento semelhante ao Active Directory. Utilizando o Dogtag **Certificate System** para gerenciamento de certificados CA & RA, suporta autenticação **multifatorial**, incluindo smartcards. O SSSD está integrado para processos de autenticação Unix. Saiba mais sobre isso em:
 
 {{#ref}}
 ../freeipa-pentesting.md
@@ -62,7 +62,7 @@ make CONF=Release
 ```
 Este procedimento tentará injetar em várias sessões, indicando sucesso ao armazenar os tickets extraídos em `/tmp` com uma convenção de nomenclatura de `__krb_UID.ccache`.
 
-### Reutilização de ticket CCACHE do SSSD KCM
+### Reutilização de tickets CCACHE do SSSD KCM
 
 O SSSD mantém uma cópia do banco de dados no caminho `/var/lib/sss/secrets/secrets.ldb`. A chave correspondente é armazenada como um arquivo oculto no caminho `/var/lib/sss/secrets/.secrets.mkey`. Por padrão, a chave só é legível se você tiver permissões de **root**.
 
@@ -71,7 +71,7 @@ Invocar **`SSSDKCMExtractor`** com os parâmetros --database e --key irá analis
 git clone https://github.com/fireeye/SSSDKCMExtractor
 python3 SSSDKCMExtractor.py --database secrets.ldb --key secrets.mkey
 ```
-O **blob de cache de credenciais Kerberos pode ser convertido em um arquivo CCache Kerberos utilizável** que pode ser passado para Mimikatz/Rubeus.
+O **blob de cache de credenciais Kerberos pode ser convertido em um arquivo Kerberos CCache utilizável** que pode ser passado para Mimikatz/Rubeus.
 
 ### Reutilização de ticket CCACHE a partir do keytab
 ```bash

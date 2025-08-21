@@ -3,14 +3,14 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
 > [!TIP]
-> Uma nota sobre **PCAP** vs **PCAPNG**: existem duas versões do formato de arquivo PCAP; **PCAPNG é mais novo e não é suportado por todas as ferramentas**. Você pode precisar converter um arquivo de PCAPNG para PCAP usando o Wireshark ou outra ferramenta compatível, a fim de trabalhá-lo em algumas outras ferramentas.
+> Uma nota sobre **PCAP** vs **PCAPNG**: existem duas versões do formato de arquivo PCAP; **PCAPNG é mais novo e não é suportado por todas as ferramentas**. Você pode precisar converter um arquivo de PCAPNG para PCAP usando o Wireshark ou outra ferramenta compatível, a fim de trabalhar com ele em algumas outras ferramentas.
 
 ## Ferramentas online para pcaps
 
-- Se o cabeçalho do seu pcap estiver **quebrado**, você deve tentar **corrigi-lo** usando: [http://f00l.de/hacking/**pcapfix.php**](http://f00l.de/hacking/pcapfix.php)
+- Se o cabeçalho do seu pcap estiver **corrompido**, você deve tentar **corrigi-lo** usando: [http://f00l.de/hacking/**pcapfix.php**](http://f00l.de/hacking/pcapfix.php)
 - Extraia **informações** e procure por **malware** dentro de um pcap em [**PacketTotal**](https://packettotal.com)
 - Procure por **atividade maliciosa** usando [**www.virustotal.com**](https://www.virustotal.com) e [**www.hybrid-analysis.com**](https://www.hybrid-analysis.com)
-- **Análise completa de pcap do navegador em** [**https://apackets.com/**](https://apackets.com/)
+- **Análise completa de pcap a partir do navegador em** [**https://apackets.com/**](https://apackets.com/)
 
 ## Extrair Informações
 
@@ -29,9 +29,9 @@ wireshark-tricks.md
 
 ### [**https://apackets.com/**](https://apackets.com/)
 
-Análise de pcap do navegador.
+Análise de pcap a partir do navegador.
 
-### Xplico Framework
+### Framework Xplico
 
 [**Xplico** ](https://github.com/xplico/xplico)_(apenas linux)_ pode **analisar** um **pcap** e extrair informações dele. Por exemplo, de um arquivo pcap, o Xplico extrai cada e-mail (protocolos POP, IMAP e SMTP), todo o conteúdo HTTP, cada chamada VoIP (SIP), FTP, TFTP, e assim por diante.
 
@@ -104,7 +104,7 @@ apt-get install oinkmaster
 echo "url = http://rules.emergingthreats.net/open/suricata/emerging.rules.tar.gz" >> /etc/oinkmaster.conf
 oinkmaster -C /etc/oinkmaster.conf -o /etc/suricata/rules
 ```
-**Verificar pcap**
+**Verifique pcap**
 ```
 suricata -r packets.pcap -c /etc/suricata/suricata.yaml -k none -v -l log
 ```

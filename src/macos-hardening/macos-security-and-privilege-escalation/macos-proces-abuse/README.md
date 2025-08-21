@@ -39,7 +39,7 @@ Coalizão é outra maneira de agrupar processos no Darwin. Um processo que se ju
 ### Credenciais e Personas
 
 Cada processo mantém **credenciais** que **identificam seus privilégios** no sistema. Cada processo terá um `uid` primário e um `gid` primário (embora possa pertencer a vários grupos).\
-Também é possível mudar o id de usuário e o id de grupo se o binário tiver o bit `setuid/setgid`.\
+Também é possível mudar o id do usuário e do grupo se o binário tiver o bit `setuid/setgid`.\
 Existem várias funções para **definir novos uids/gids**.
 
 A syscall **`persona`** fornece um conjunto **alternativo** de **credenciais**. Adotar uma persona assume seu uid, gid e associações de grupo **de uma só vez**. No [**código-fonte**](https://github.com/apple/darwin-xnu/blob/main/bsd/sys/persona.h) é possível encontrar a struct:
@@ -59,7 +59,7 @@ char     persona_name[MAXLOGNAME + 1];
 ## Informações Básicas sobre Threads
 
 1. **POSIX Threads (pthreads):** o macOS suporta threads POSIX (`pthreads`), que fazem parte de uma API de threading padrão para C/C++. A implementação de pthreads no macOS é encontrada em `/usr/lib/system/libsystem_pthread.dylib`, que vem do projeto `libpthread` disponível publicamente. Esta biblioteca fornece as funções necessárias para criar e gerenciar threads.
-2. **Criando Threads:** A função `pthread_create()` é usada para criar novas threads. Internamente, essa função chama `bsdthread_create()`, que é uma chamada de sistema de nível inferior específica para o kernel XNU (o kernel no qual o macOS é baseado). Esta chamada de sistema aceita várias flags derivadas de `pthread_attr` (atributos) que especificam o comportamento da thread, incluindo políticas de agendamento e tamanho da pilha.
+2. **Criando Threads:** A função `pthread_create()` é usada para criar novas threads. Internamente, essa função chama `bsdthread_create()`, que é uma chamada de sistema de nível inferior específica para o kernel XNU (o kernel sobre o qual o macOS é baseado). Esta chamada de sistema aceita várias flags derivadas de `pthread_attr` (atributos) que especificam o comportamento da thread, incluindo políticas de agendamento e tamanho da pilha.
 - **Tamanho da Pilha Padrão:** O tamanho da pilha padrão para novas threads é de 512 KB, o que é suficiente para operações típicas, mas pode ser ajustado através de atributos de thread se mais ou menos espaço for necessário.
 3. **Inicialização da Thread:** A função `__pthread_init()` é crucial durante a configuração da thread, utilizando o argumento `env[]` para analisar variáveis de ambiente que podem incluir detalhes sobre a localização e o tamanho da pilha.
 
@@ -77,12 +77,12 @@ Para gerenciar o acesso a recursos compartilhados e evitar condições de corrid
 - **Mutex Rápido (Assinatura: 0x4d55545A):** Semelhante a um mutex regular, mas otimizado para operações mais rápidas, também com 60 bytes de tamanho.
 2. **Variáveis de Condição:**
 - Usadas para esperar que certas condições ocorram, com um tamanho de 44 bytes (40 bytes mais uma assinatura de 4 bytes).
-- **Atributos de Variável de Condição (Assinatura: 0x434e4441):** Atributos de configuração para variáveis de condição, com 12 bytes de tamanho.
+- **Atributos de Variável de Condição (Assinatura: 0x434e4441):** Atributos de configuração para variáveis de condição, com tamanho de 12 bytes.
 3. **Variável Once (Assinatura: 0x4f4e4345):**
-- Garante que um pedaço de código de inicialização seja executado apenas uma vez. Seu tamanho é de 12 bytes.
+- Garante que um trecho de código de inicialização seja executado apenas uma vez. Seu tamanho é de 12 bytes.
 4. **Locks de Leitura-Gravação:**
-- Permite múltiplos leitores ou um escritor por vez, facilitando o acesso eficiente a dados compartilhados.
-- **Lock de Leitura-Gravação (Assinatura: 0x52574c4b):** Com 196 bytes de tamanho.
+- Permitem múltiplos leitores ou um escritor por vez, facilitando o acesso eficiente a dados compartilhados.
+- **Lock de Leitura-Gravação (Assinatura: 0x52574c4b):** Com tamanho de 196 bytes.
 - **Atributos de Lock de Leitura-Gravação (Assinatura: 0x52574c41):** Atributos para locks de leitura-gravação, com 20 bytes de tamanho.
 
 > [!TIP]
@@ -107,7 +107,7 @@ No binário Mach-O, os dados relacionados a variáveis locais de thread são org
 - **`__DATA.__thread_vars`**: Esta seção contém os metadados sobre as variáveis locais de thread, como seus tipos e status de inicialização.
 - **`__DATA.__thread_bss`**: Esta seção é usada para variáveis locais de thread que não são explicitamente inicializadas. É uma parte da memória reservada para dados inicializados com zero.
 
-Mach-O também fornece uma API específica chamada **`tlv_atexit`** para gerenciar variáveis locais de thread quando uma thread sai. Esta API permite que você **registre destrutores**—funções especiais que limpam dados locais de thread quando uma thread termina.
+Mach-O também fornece uma API específica chamada **`tlv_atexit`** para gerenciar variáveis locais de thread quando uma thread sai. Esta API permite que você **registre destruidores**—funções especiais que limpam dados locais de thread quando uma thread termina.
 
 ### Prioridades de Thread
 
@@ -153,7 +153,7 @@ macos-library-injection/
 
 ### Hooking de Função
 
-O Hooking de Função envolve **interceptar chamadas de função** ou mensagens dentro de um código de software. Ao hookear funções, um atacante pode **modificar o comportamento** de um processo, observar dados sensíveis ou até mesmo ganhar controle sobre o fluxo de execução.
+O Hooking de Função envolve **interceptar chamadas de função** ou mensagens dentro de um código de software. Ao hookar funções, um atacante pode **modificar o comportamento** de um processo, observar dados sensíveis ou até mesmo ganhar controle sobre o fluxo de execução.
 
 {{#ref}}
 macos-function-hooking.md
@@ -177,7 +177,7 @@ macos-electron-applications-injection.md
 
 ### Injeção de Chromium
 
-É possível usar as flags `--load-extension` e `--use-fake-ui-for-media-stream` para realizar um **ataque man-in-the-browser** permitindo roubar pressionamentos de tecla, tráfego, cookies, injetar scripts em páginas...:
+É possível usar as flags `--load-extension` e `--use-fake-ui-for-media-stream` para realizar um **ataque man in the browser** permitindo roubar pressionamentos de tecla, tráfego, cookies, injetar scripts em páginas...:
 
 {{#ref}}
 macos-chromium-injection.md
@@ -225,16 +225,16 @@ macos-ruby-applications-injection.md
 
 ### Injeção de Python
 
-Se a variável de ambiente **`PYTHONINSPECT`** estiver definida, o processo Python entrará em um CLI Python assim que terminar. Também é possível usar **`PYTHONSTARTUP`** para indicar um script Python a ser executado no início de uma sessão interativa.\
+Se a variável de ambiente **`PYTHONINSPECT`** estiver definida, o processo python entrará em um cli python assim que terminar. Também é possível usar **`PYTHONSTARTUP`** para indicar um script python a ser executado no início de uma sessão interativa.\
 No entanto, observe que o script **`PYTHONSTARTUP`** não será executado quando **`PYTHONINSPECT`** criar a sessão interativa.
 
-Outras variáveis de ambiente, como **`PYTHONPATH`** e **`PYTHONHOME`**, também podem ser úteis para fazer um comando Python executar código arbitrário.
+Outras variáveis de ambiente, como **`PYTHONPATH`** e **`PYTHONHOME`**, também podem ser úteis para fazer um comando python executar código arbitrário.
 
-Observe que executáveis compilados com **`pyinstaller`** não usarão essas variáveis ambientais, mesmo que estejam sendo executados usando um Python embutido.
+Observe que executáveis compilados com **`pyinstaller`** não usarão essas variáveis ambientais, mesmo que estejam sendo executados usando um python embutido.
 
 > [!CAUTION]
-> No geral, não consegui encontrar uma maneira de fazer o Python executar código arbitrário abusando de variáveis de ambiente.\
-> No entanto, a maioria das pessoas instala Python usando **Homebrew**, que instalará Python em um **local gravável** para o usuário administrador padrão. Você pode sequestrá-lo com algo como:
+> No geral, não consegui encontrar uma maneira de fazer o python executar código arbitrário abusando de variáveis de ambiente.\
+> No entanto, a maioria das pessoas instala python usando **Homebrew**, que instalará python em um **local gravável** para o usuário admin padrão. Você pode sequestrá-lo com algo como:
 >
 > ```bash
 > mv /opt/homebrew/bin/python3 /opt/homebrew/bin/python3.old
@@ -246,7 +246,7 @@ Observe que executáveis compilados com **`pyinstaller`** não usarão essas var
 > chmod +x /opt/homebrew/bin/python3
 > ```
 >
-> Mesmo **root** executará este código ao executar o Python.
+> Mesmo **root** executará este código ao executar python.
 
 ## Detecção
 
@@ -255,15 +255,15 @@ Observe que executáveis compilados com **`pyinstaller`** não usarão essas var
 [**Shield**](https://theevilbit.github.io/shield/) ([**Github**](https://github.com/theevilbit/Shield)) é um aplicativo de código aberto que pode **detectar e bloquear ações de injeção de processos**:
 
 - Usando **Variáveis Ambientais**: Ele monitorará a presença de qualquer uma das seguintes variáveis ambientais: **`DYLD_INSERT_LIBRARIES`**, **`CFNETWORK_LIBRARY_PATH`**, **`RAWCAMERA_BUNDLE_PATH`** e **`ELECTRON_RUN_AS_NODE`**
-- Usando chamadas **`task_for_pid`**: Para descobrir quando um processo deseja obter o **port de tarefa de outro**, o que permite injetar código no processo.
+- Usando chamadas **`task_for_pid`**: Para descobrir quando um processo deseja obter o **port de tarefa de outro** que permite injetar código no processo.
 - **Parâmetros de aplicativos Electron**: Alguém pode usar os argumentos de linha de comando **`--inspect`**, **`--inspect-brk`** e **`--remote-debugging-port`** para iniciar um aplicativo Electron em modo de depuração e, assim, injetar código nele.
-- Usando **symlinks** ou **hardlinks**: Normalmente, o abuso mais comum é **colocar um link com nossos privilégios de usuário** e **apontá-lo para um local de maior privilégio**. A detecção é muito simples para ambos, hardlink e symlink. Se o processo que cria o link tiver um **nível de privilégio diferente** do arquivo de destino, criamos um **alerta**. Infelizmente, no caso de symlinks, o bloqueio não é possível, pois não temos informações sobre o destino do link antes da criação. Esta é uma limitação do framework EndpointSecurity da Apple.
+- Usando **symlinks** ou **hardlinks**: Normalmente, o abuso mais comum é **colocar um link com nossos privilégios de usuário** e **apontá-lo para um local de maior privilégio**. A detecção é muito simples tanto para hardlink quanto para symlink. Se o processo que cria o link tiver um **nível de privilégio diferente** do arquivo de destino, criamos um **alerta**. Infelizmente, no caso de symlinks, o bloqueio não é possível, pois não temos informações sobre o destino do link antes da criação. Esta é uma limitação do framework EndpointSecurity da Apple.
 
 ### Chamadas feitas por outros processos
 
-Neste [**post de blog**](https://knight.sc/reverse%20engineering/2019/04/15/detecting-task-modifications.html) você pode encontrar como é possível usar a função **`task_name_for_pid`** para obter informações sobre outros **processos que injetam código em um processo** e, em seguida, obter informações sobre esse outro processo.
+Em [**este post do blog**](https://knight.sc/reverse%20engineering/2019/04/15/detecting-task-modifications.html) você pode encontrar como é possível usar a função **`task_name_for_pid`** para obter informações sobre outros **processos que injetam código em um processo** e, em seguida, obter informações sobre esse outro processo.
 
-Observe que, para chamar essa função, você precisa ser **o mesmo uid** que o que está executando o processo ou **root** (e ela retorna informações sobre o processo, não uma maneira de injetar código).
+Observe que para chamar essa função você precisa ser **o mesmo uid** que o que está executando o processo ou **root** (e ela retorna informações sobre o processo, não uma maneira de injetar código).
 
 ## Referências
 

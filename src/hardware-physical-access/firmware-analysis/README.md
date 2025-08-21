@@ -45,7 +45,7 @@ Obter firmware pode ser abordado de várias maneiras, cada uma com seu próprio 
 
 ## Analisando o firmware
 
-Agora que você **tem o firmware**, precisa extrair informações sobre ele para saber como tratá-lo. Diferentes ferramentas que você pode usar para isso:
+Agora que você **tem o firmware**, você precisa extrair informações sobre ele para saber como tratá-lo. Diferentes ferramentas que você pode usar para isso:
 ```bash
 file <bin>
 strings -n8 <bin>
@@ -138,7 +138,7 @@ Para extrair **arquivos incorporados**, ferramentas e recursos como a documenta�
 
 ### Extraindo o Sistema de Arquivos
 
-Usando `binwalk -ev <bin>`, geralmente é possível extrair o sistema de arquivos, frequentemente em um diretório nomeado de acordo com o tipo de sistema de arquivos (por exemplo, squashfs, ubifs). No entanto, quando **binwalk** não consegue reconhecer o tipo de sistema de arquivos devido à falta de bytes mágicos, a extração manual é necessária. Isso envolve usar `binwalk` para localizar o deslocamento do sistema de arquivos, seguido do comando `dd` para extrair o sistema de arquivos:
+Usando `binwalk -ev <bin>`, geralmente é possível extrair o sistema de arquivos, frequentemente em um diretório nomeado de acordo com o tipo de sistema de arquivos (por exemplo, squashfs, ubifs). No entanto, quando **binwalk** não consegue reconhecer o tipo de sistema de arquivos devido à falta de bytes mágicos, a extração manual é necessária. Isso envolve usar `binwalk` para localizar o deslocamento do sistema de arquivos, seguido pelo comando `dd` para extrair o sistema de arquivos:
 ```bash
 $ binwalk DIR850L_REVB.bin
 
@@ -194,15 +194,15 @@ Para binários ARM, o processo é semelhante, com o emulador `qemu-arm` sendo ut
 
 ### Emulação de Sistema Completo
 
-Ferramentas como [Firmadyne](https://github.com/firmadyne/firmadyne), [Firmware Analysis Toolkit](https://github.com/attify/firmware-analysis-toolkit) e outras, facilitam a emulação completa de firmware, automatizando o processo e auxiliando na análise dinâmica.
+Ferramentas como [Firmadyne](https://github.com/firmadyne/firmadyne), [Firmware Analysis Toolkit](https://github.com/attify/firmware-analysis-toolkit) e outras, facilitam a emulação completa de firmware, automatizando o processo e ajudando na análise dinâmica.
 
 ## Análise Dinâmica na Prática
 
-Nesta fase, um ambiente de dispositivo real ou emulado é usado para análise. É essencial manter acesso ao shell do sistema operacional e ao sistema de arquivos. A emulação pode não imitar perfeitamente as interações de hardware, necessitando reinicializações ocasionais da emulação. A análise deve revisitar o sistema de arquivos, explorar páginas da web expostas e serviços de rede, e investigar vulnerabilidades do bootloader. Testes de integridade do firmware são críticos para identificar potenciais vulnerabilidades de backdoor.
+Nesta fase, um ambiente de dispositivo real ou emulado é usado para análise. É essencial manter acesso ao shell do sistema operacional e ao sistema de arquivos. A emulação pode não imitar perfeitamente as interações de hardware, necessitando de reinicializações ocasionais da emulação. A análise deve revisitar o sistema de arquivos, explorar páginas da web expostas e serviços de rede, e investigar vulnerabilidades do bootloader. Testes de integridade do firmware são críticos para identificar potenciais vulnerabilidades de backdoor.
 
 ## Técnicas de Análise em Tempo de Execução
 
-A análise em tempo de execução envolve interagir com um processo ou binário em seu ambiente operacional, usando ferramentas como gdb-multiarch, Frida e Ghidra para definir pontos de interrupção e identificar vulnerabilidades através de fuzzing e outras técnicas.
+A análise em tempo de execução envolve interagir com um processo ou binário em seu ambiente operacional, usando ferramentas como gdb-multiarch, Frida e Ghidra para definir pontos de interrupção e identificar vulnerabilidades por meio de fuzzing e outras técnicas.
 
 ## Exploração Binária e Prova de Conceito
 
@@ -240,7 +240,7 @@ Host: 192.168.0.1
 Content-Type: application/octet-stream
 Content-Length: 0
 ```
-No firmware vulnerável (rebaixado), o parâmetro `md5` é concatenado diretamente em um comando shell sem sanitização, permitindo a injeção de comandos arbitrários (aqui – habilitando o acesso root baseado em chave SSH). Versões de firmware posteriores introduziram um filtro básico de caracteres, mas a ausência de proteção contra rebaixamento torna a correção irrelevante.
+No firmware vulnerável (rebaixado), o parâmetro `md5` é concatenado diretamente em um comando de shell sem sanitização, permitindo a injeção de comandos arbitrários (aqui – habilitando o acesso root baseado em chave SSH). Versões posteriores do firmware introduziram um filtro básico de caracteres, mas a ausência de proteção contra rebaixamento torna a correção irrelevante.
 
 ### Extraindo Firmware de Aplicativos Móveis
 
@@ -256,7 +256,7 @@ firmware_v1.3.11.490_signed.bin
 * O dispositivo compara **números de versão** ou um **contador anti-rollback monotônico** antes de gravar?
 * A imagem é verificada dentro de uma cadeia de boot seguro (por exemplo, assinaturas verificadas pelo código ROM)?
 * O código do userland realiza verificações adicionais de sanidade (por exemplo, mapa de partição permitido, número do modelo)?
-* Os fluxos de atualização *parciais* ou *de backup* reutilizam a mesma lógica de validação?
+* Os fluxos de atualização *parcial* ou *backup* reutilizam a mesma lógica de validação?
 
 > 💡  Se algum dos itens acima estiver faltando, a plataforma provavelmente é vulnerável a ataques de rollback.
 

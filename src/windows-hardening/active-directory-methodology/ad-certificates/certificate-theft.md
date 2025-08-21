@@ -20,7 +20,7 @@ certutil.exe -dump -v cert.pfx
 ```
 ## Exportando Certificados Usando as APIs Crypto – THEFT1
 
-Em uma **sessão de desktop interativa**, extrair um certificado de usuário ou máquina, juntamente com a chave privada, pode ser feito facilmente, especialmente se a **chave privada for exportável**. Isso pode ser alcançado navegando até o certificado em `certmgr.msc`, clicando com o botão direito sobre ele e selecionando `All Tasks → Export` para gerar um arquivo .pfx protegido por senha.
+Em uma **sessão de desktop interativa**, extrair um certificado de usuário ou máquina, junto com a chave privada, pode ser feito facilmente, especialmente se a **chave privada for exportável**. Isso pode ser alcançado navegando até o certificado em `certmgr.msc`, clicando com o botão direito sobre ele e selecionando `All Tasks → Export` para gerar um arquivo .pfx protegido por senha.
 
 Para uma **abordagem programática**, ferramentas como o cmdlet PowerShell `ExportPfxCertificate` ou projetos como [TheWover’s CertStealer C# project](https://github.com/TheWover/CertStealer) estão disponíveis. Estas utilizam a **Microsoft CryptoAPI** (CAPI) ou a Cryptography API: Next Generation (CNG) para interagir com o armazenamento de certificados. Essas APIs fornecem uma gama de serviços criptográficos, incluindo aqueles necessários para armazenamento e autenticação de certificados.
 
@@ -42,9 +42,9 @@ Para **extrair um certificado e sua chave privada associada**, o processo envolv
 
 1. **Selecionar o certificado alvo** do armazenamento do usuário e recuperar seu nome de armazenamento de chave.
 2. **Localizar a masterkey DPAPI necessária** para descriptografar a chave privada correspondente.
-3. **Descriptografar a chave privada** utilizando a masterkey DPAPI em texto claro.
+3. **Descriptografar a chave privada** utilizando a masterkey DPAPI em texto simples.
 
-Para **adquirir a masterkey DPAPI em texto claro**, as seguintes abordagens podem ser usadas:
+Para **adquirir a masterkey DPAPI em texto simples**, as seguintes abordagens podem ser usadas:
 ```bash
 # With mimikatz, when running in the user's context
 dpapi::masterkey /in:"C:\PATH\TO\KEY" /rpc
@@ -64,13 +64,13 @@ openssl pkcs12 -in cert.pem -keyex -CSP "Microsoft Enhanced Cryptographic Provid
 
 Os certificados de máquina armazenados pelo Windows no registro em `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\SystemCertificates` e as chaves privadas associadas localizadas em `%ALLUSERSPROFILE%\Application Data\Microsoft\Crypto\RSA\MachineKeys` (para CAPI) e `%ALLUSERSPROFILE%\Application Data\Microsoft\Crypto\Keys` (para CNG) são criptografados usando as chaves mestres DPAPI da máquina. Essas chaves não podem ser descriptografadas com a chave de backup DPAPI do domínio; em vez disso, o **segredo LSA DPAPI_SYSTEM**, que apenas o usuário SYSTEM pode acessar, é necessário.
 
-A descriptografia manual pode ser realizada executando o comando `lsadump::secrets` no **Mimikatz** para extrair o segredo LSA DPAPI_SYSTEM e, em seguida, usando essa chave para descriptografar as chaves mestres da máquina. Alternativamente, o comando `crypto::certificates /export /systemstore:LOCAL_MACHINE` do Mimikatz pode ser usado após a correção do CAPI/CNG, conforme descrito anteriormente.
+A descriptografia manual pode ser realizada executando o comando `lsadump::secrets` no **Mimikatz** para extrair o segredo LSA DPAPI_SYSTEM e, subsequentemente, usando essa chave para descriptografar as chaves mestres da máquina. Alternativamente, o comando `crypto::certificates /export /systemstore:LOCAL_MACHINE` do Mimikatz pode ser usado após a correção do CAPI/CNG, conforme descrito anteriormente.
 
 **SharpDPAPI** oferece uma abordagem mais automatizada com seu comando de certificados. Quando a flag `/machine` é usada com permissões elevadas, ela se eleva para SYSTEM, despeja o segredo LSA DPAPI_SYSTEM, usa-o para descriptografar as chaves mestres DPAPI da máquina e, em seguida, emprega essas chaves em texto claro como uma tabela de consulta para descriptografar quaisquer chaves privadas de certificados de máquina.
 
 ## Encontrando Arquivos de Certificado – THEFT4
 
-Os certificados às vezes são encontrados diretamente no sistema de arquivos, como em compartilhamentos de arquivos ou na pasta Downloads. Os tipos de arquivos de certificado mais comumente encontrados direcionados a ambientes Windows são arquivos `.pfx` e `.p12`. Embora menos frequentemente, arquivos com extensões `.pkcs12` e `.pem` também aparecem. Outras extensões de arquivo relacionadas a certificados que merecem destaque incluem:
+Os certificados às vezes são encontrados diretamente no sistema de arquivos, como em compartilhamentos de arquivos ou na pasta Downloads. Os tipos de arquivos de certificado mais comumente encontrados direcionados a ambientes Windows são arquivos `.pfx` e `.p12`. Embora com menos frequência, arquivos com extensões `.pkcs12` e `.pem` também aparecem. Outras extensões de arquivo relacionadas a certificados que merecem destaque incluem:
 
 - `.key` para chaves privadas,
 - `.crt`/`.cer` para certificados apenas,
@@ -94,7 +94,7 @@ john --wordlist=passwords.txt hash.txt
 
 O conteúdo dado explica um método para roubo de credenciais NTLM via PKINIT, especificamente através do método de roubo rotulado como THEFT5. Aqui está uma reexplicação na voz passiva, com o conteúdo anonimizado e resumido onde aplicável:
 
-Para suportar a autenticação NTLM `MS-NLMP` para aplicações que não facilitam a autenticação Kerberos, o KDC é projetado para retornar a função unidirecional (OWF) NTLM do usuário dentro do certificado de atributo de privilégio (PAC), especificamente no buffer `PAC_CREDENTIAL_INFO`, quando o PKCA é utilizado. Consequentemente, se uma conta autenticar e garantir um Ticket-Granting Ticket (TGT) via PKINIT, um mecanismo é inerentemente fornecido que permite ao host atual extrair o hash NTLM do TGT para manter os protocolos de autenticação legados. Este processo envolve a descriptografia da estrutura `PAC_CREDENTIAL_DATA`, que é essencialmente uma representação serializada NDR do texto simples NTLM.
+Para suportar a autenticação NTLM `MS-NLMP` para aplicações que não facilitam a autenticação Kerberos, o KDC é projetado para retornar a função unidirecional (OWF) NTLM do usuário dentro do certificado de atributo de privilégio (PAC), especificamente no buffer `PAC_CREDENTIAL_INFO`, quando o PKCA é utilizado. Consequentemente, se uma conta autenticar e garantir um Ticket-Granting Ticket (TGT) via PKINIT, um mecanismo é inerentemente fornecido que permite ao host atual extrair o hash NTLM do TGT para manter os protocolos de autenticação legados. Este processo envolve a descriptografia da estrutura `PAC_CREDENTIAL_DATA`, que é essencialmente uma representação NDR serializada do texto plano NTLM.
 
 A utilidade **Kekeo**, acessível em [https://github.com/gentilkiwi/kekeo](https://github.com/gentilkiwi/kekeo), é mencionada como capaz de solicitar um TGT contendo esses dados específicos, facilitando assim a recuperação do NTLM do usuário. O comando utilizado para esse propósito é o seguinte:
 ```bash

@@ -14,7 +14,7 @@ As seguintes técnicas foram encontradas funcionando em alguns aplicativos de fi
 
 - Se o firewall pedir permissão ao usuário, faça o malware **clicar em permitir**
 
-### **Usar binários assinados pela Apple**
+### **Use binários assinados pela Apple**
 
 - Como **`curl`**, mas também outros como **`whois`**
 
@@ -26,7 +26,7 @@ O firewall pode estar permitindo conexões a domínios bem conhecidos da Apple, 
 
 Algumas ideias para tentar contornar firewalls
 
-### Verificar tráfego permitido
+### Verifique o tráfego permitido
 
 Saber o tráfego permitido ajudará você a identificar domínios potencialmente na lista branca ou quais aplicativos têm permissão para acessá-los.
 ```bash
@@ -76,7 +76,7 @@ macos-proces-abuse/
 
 ### Bypass do filtro de conteúdo da web (Tempo de Tela) – **CVE-2024-44206**
 Em julho de 2024, a Apple corrigiu um bug crítico no Safari/WebKit que quebrou o “filtro de conteúdo da web” em todo o sistema usado pelos controles parentais do Tempo de Tela. 
-Um URI especialmente elaborado (por exemplo, com “://” codificado em URL duplo) não é reconhecido pela ACL do Tempo de Tela, mas é aceito pelo WebKit, portanto, a solicitação é enviada sem filtragem. Qualquer processo que possa abrir uma URL (incluindo código sandboxed ou não assinado) pode, portanto, acessar domínios que estão explicitamente bloqueados pelo usuário ou por um perfil MDM.
+Uma URI especialmente elaborada (por exemplo, com “://” codificado em URL duplo) não é reconhecida pela ACL do Tempo de Tela, mas é aceita pelo WebKit, portanto, a solicitação é enviada sem filtragem. Qualquer processo que possa abrir uma URL (incluindo código sandboxed ou não assinado) pode, portanto, acessar domínios que estão explicitamente bloqueados pelo usuário ou por um perfil MDM.
 
 Teste prático (sistema não corrigido):
 ```bash
@@ -94,7 +94,7 @@ sudo tcpdump -n -i en0 not port 53   # …but packets still leave the interface
 ```
 ### Abusando de serviços auxiliares assinados pela Apple (legado – pré-macOS 11.2)
 Antes do macOS 11.2, a **`ContentFilterExclusionList`** permitia que ~50 binários da Apple, como **`nsurlsessiond`** e a App Store, contornassem todos os firewalls de filtro de soquete implementados com o framework Network Extension (LuLu, Little Snitch, etc.).
-Malware poderia simplesmente criar um processo excluído—ou injetar código nele—e tunnelar seu próprio tráfego sobre o soquete já permitido. A Apple removeu completamente a lista de exclusão no macOS 11.2, mas a técnica ainda é relevante em sistemas que não podem ser atualizados.
+Malware poderia simplesmente criar um processo excluído—ou injetar código nele—e tunnelizar seu próprio tráfego sobre o soquete já permitido. A Apple removeu completamente a lista de exclusão no macOS 11.2, mas a técnica ainda é relevante em sistemas que não podem ser atualizados.
 
 Exemplo de prova de conceito (pré-11.2):
 ```python

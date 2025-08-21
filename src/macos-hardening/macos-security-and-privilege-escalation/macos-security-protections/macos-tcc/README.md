@@ -4,7 +4,7 @@
 
 ## **Informações Básicas**
 
-**TCC (Transparência, Consentimento e Controle)** é um protocolo de segurança que se concentra na regulação das permissões de aplicativos. Seu papel principal é proteger recursos sensíveis como **serviços de localização, contatos, fotos, microfone, câmera, acessibilidade e acesso total ao disco**. Ao exigir o consentimento explícito do usuário antes de conceder acesso do aplicativo a esses elementos, o TCC melhora a privacidade e o controle do usuário sobre seus dados.
+**TCC (Transparência, Consentimento e Controle)** é um protocolo de segurança que se concentra na regulação das permissões de aplicativos. Seu papel principal é proteger recursos sensíveis como **serviços de localização, contatos, fotos, microfone, câmera, acessibilidade e acesso total ao disco**. Ao exigir consentimento explícito do usuário antes de conceder acesso do aplicativo a esses elementos, o TCC melhora a privacidade e o controle do usuário sobre seus dados.
 
 Os usuários encontram o TCC quando os aplicativos solicitam acesso a recursos protegidos. Isso é visível através de um prompt que permite aos usuários **aprovar ou negar o acesso**. Além disso, o TCC acomoda ações diretas do usuário, como **arrastar e soltar arquivos em um aplicativo**, para conceder acesso a arquivos específicos, garantindo que os aplicativos tenham acesso apenas ao que é explicitamente permitido.
 
@@ -12,7 +12,7 @@ Os usuários encontram o TCC quando os aplicativos solicitam acesso a recursos p
 
 **TCC** é gerenciado pelo **daemon** localizado em `/System/Library/PrivateFrameworks/TCC.framework/Support/tccd` e configurado em `/System/Library/LaunchDaemons/com.apple.tccd.system.plist` (registrando o serviço mach `com.apple.tccd.system`).
 
-Há um **tccd em modo usuário** em execução por usuário logado definido em `/System/Library/LaunchAgents/com.apple.tccd.plist` registrando os serviços mach `com.apple.tccd` e `com.apple.usernotifications.delegate.com.apple.tccd`.
+Há um **tccd em modo de usuário** em execução por usuário logado definido em `/System/Library/LaunchAgents/com.apple.tccd.plist` registrando os serviços mach `com.apple.tccd` e `com.apple.usernotifications.delegate.com.apple.tccd`.
 
 Aqui você pode ver o tccd rodando como sistema e como usuário:
 ```bash
@@ -26,7 +26,7 @@ As permissões são **herdadas do aplicativo pai** e as **permissões** são **m
 
 As permissões concedidas/negadas são então armazenadas em alguns bancos de dados TCC:
 
-- O banco de dados de sistema em **`/Library/Application Support/com.apple.TCC/TCC.db`**.
+- O banco de dados do sistema em **`/Library/Application Support/com.apple.TCC/TCC.db`**.
 - Este banco de dados é **protegido por SIP**, então apenas um bypass de SIP pode escrever nele.
 - O banco de dados TCC do usuário **`$HOME/Library/Application Support/com.apple.TCC/TCC.db`** para preferências por usuário.
 - Este banco de dados é protegido, então apenas processos com altos privilégios TCC, como Acesso Completo ao Disco, podem escrever nele (mas não é protegido por SIP).
@@ -186,7 +186,7 @@ tccutil reset All
 ```
 ### Verificações de Assinatura do TCC
 
-O **banco de dados** do TCC armazena o **Bundle ID** do aplicativo, mas também **armazena** **informações** sobre a **assinatura** para **garantir** que o aplicativo que solicita o uso de uma permissão é o correto.
+O **banco de dados** do TCC armazena o **Bundle ID** da aplicação, mas também **armazena** **informações** sobre a **assinatura** para **garantir** que o App que solicita o uso de uma permissão é o correto.
 ```bash
 # From sqlite
 sqlite> select service, client, hex(csreq) from access where auth_value=2;
@@ -204,7 +204,7 @@ csreq -t -r /tmp/telegram_csreq.bin
 ### Direitos e Permissões TCC
 
 Os aplicativos **não apenas precisam** **solicitar** e ter **acesso concedido** a alguns recursos, eles também precisam **ter os direitos relevantes**.\
-Por exemplo, **Telegram** tem o direito `com.apple.security.device.camera` para solicitar **acesso à câmera**. Um **aplicativo** que **não** tem esse **direito não poderá** acessar a câmera (e o usuário nem será solicitado a dar as permissões).
+Por exemplo, **Telegram** tem o direito `com.apple.security.device.camera` para solicitar **acesso à câmera**. Um **aplicativo** que **não** tiver esse **direito não poderá** acessar a câmera (e o usuário nem será solicitado a dar as permissões).
 
 No entanto, para que os aplicativos **acessam** **certas pastas do usuário**, como `~/Desktop`, `~/Downloads` e `~/Documents`, eles **não precisam** ter nenhum **direito específico.** O sistema lidará com o acesso de forma transparente e **pedirá ao usuário** conforme necessário.
 
@@ -254,13 +254,13 @@ uuid 769FD8F1-90E0-3206-808C-A8947BEBD6C3
 >
 > Também note que se você mover um arquivo que permite o UUID de um aplicativo no seu computador para outro computador, porque o mesmo aplicativo terá UIDs diferentes, não concederá acesso a esse aplicativo.
 
-O atributo estendido `com.apple.macl` **não pode ser limpo** como outros atributos estendidos porque é **protegido pelo SIP**. No entanto, como [**explicado neste post**](https://www.brunerd.com/blog/2020/01/07/track-and-tackle-com-apple-macl/), é possível desativá-lo **zipando** o arquivo, **deletando**-o e **deszipando**-o.
+O atributo estendido `com.apple.macl` **não pode ser limpo** como outros atributos estendidos porque é **protegido pelo SIP**. No entanto, como [**explicado neste post**](https://www.brunerd.com/blog/2020/01/07/track-and-tackle-com-apple-macl/), é possível desativá-lo **compactando** o arquivo, **deletando**-o e **descompactando**-o.
 
 ## TCC Privesc & Bypasses
 
 ### Inserir no TCC
 
-Se em algum momento você conseguir acesso de gravação a um banco de dados TCC, pode usar algo como o seguinte para adicionar uma entrada (remova os comentários):
+Se em algum momento você conseguir obter acesso de gravação a um banco de dados TCC, pode usar algo como o seguinte para adicionar uma entrada (remova os comentários):
 
 <details>
 
@@ -361,7 +361,7 @@ EOD
 Você poderia abusar disso para **escrever seu próprio banco de dados TCC de usuário**.
 
 > [!WARNING]
-> Com esta permissão, você poderá **pedir ao Finder para acessar pastas restritas do TCC** e lhe fornecer os arquivos, mas até onde sei, você **não poderá fazer o Finder executar código arbitrário** para abusar totalmente do seu acesso FDA.
+> Com esta permissão, você poderá **pedir ao Finder para acessar pastas restritas do TCC** e lhe dar os arquivos, mas até onde sei, você **não poderá fazer o Finder executar código arbitrário** para abusar totalmente do seu acesso FDA.
 >
 > Portanto, você não poderá abusar de todas as habilidades do FDA.
 
@@ -508,7 +508,7 @@ Se você tem **`kTCCServiceEndpointSecurityClient`**, você tem FDA. Fim.
 
 Obtendo **permissões de escrita** sobre o banco de dados **TCC do usuário**, você **não pode** conceder a si mesmo permissões de **`FDA`**, apenas aquele que vive no banco de dados do sistema pode conceder isso.
 
-Mas você pode **dar a si mesmo** **`direitos de Automação ao Finder`**, e abusar da técnica anterior para escalar para FDA\*.
+Mas você pode **dar** a si mesmo **`direitos de Automação ao Finder`**, e abusar da técnica anterior para escalar para FDA\*.
 
 ### **Permissões de FDA para TCC**
 
@@ -518,7 +518,7 @@ Eu não acho que isso seja uma verdadeira privesc, mas só para o caso de você 
 
 ### **Bypass de SIP para Bypass de TCC**
 
-O **banco de dados TCC** do sistema é protegido por **SIP**, por isso apenas processos com as **autorizações indicadas poderão modificá-lo**. Portanto, se um atacante encontrar um **bypass de SIP** sobre um **arquivo** (conseguir modificar um arquivo restrito por SIP), ele poderá:
+O **banco de dados TCC** do sistema é protegido por **SIP**, por isso apenas processos com as **habilitações indicadas poderão modificá-lo**. Portanto, se um atacante encontrar um **bypass de SIP** sobre um **arquivo** (conseguir modificar um arquivo restrito por SIP), ele poderá:
 
 - **Remover a proteção** de um banco de dados TCC e se dar todas as permissões TCC. Ele poderia abusar de qualquer um desses arquivos, por exemplo:
 - O banco de dados do sistema TCC

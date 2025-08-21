@@ -37,7 +37,7 @@ C:\windows\tracing
 - **Regras mal escritas também podem ser contornadas**
 - Por exemplo, **`<FilePathCondition Path="%OSDRIVE%*\allowed*"/>`**, você pode criar uma **pasta chamada `allowed`** em qualquer lugar e ela será permitida.
 - As organizações também costumam se concentrar em **bloquear o executável `%System32%\WindowsPowerShell\v1.0\powershell.exe`**, mas esquecem das **outras** [**localizações de executáveis do PowerShell**](https://www.powershelladmin.com/wiki/PowerShell_Executables_File_System_Locations) como `%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe` ou `PowerShell_ISE.exe`.
-- **A imposição de DLL raramente é ativada** devido à carga adicional que pode colocar em um sistema e à quantidade de testes necessários para garantir que nada quebre. Portanto, usar **DLLs como backdoors ajudará a contornar o AppLocker**.
+- **A imposição de DLLs raramente é ativada** devido à carga adicional que pode colocar em um sistema e à quantidade de testes necessários para garantir que nada quebre. Portanto, usar **DLLs como backdoors ajudará a contornar o AppLocker**.
 - Você pode usar [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) ou [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) para **executar código Powershell** em qualquer processo e contornar o AppLocker. Para mais informações, consulte: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode).
 
 ## Armazenamento de Credenciais
@@ -162,7 +162,7 @@ Além disso, verifique esta [página da web](https://cube0x0.github.io/Relaying-
 
 ## LAPS
 
-A **Solução de Senha do Administrador Local (LAPS)**, disponível para download na [Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899), permite a gestão de senhas de Administrador local. Essas senhas, que são **aleatórias**, únicas e **trocadas regularmente**, são armazenadas centralmente no Active Directory. O acesso a essas senhas é restrito através de ACLs a usuários autorizados. Com permissões suficientes concedidas, a capacidade de ler senhas de administrador local é fornecida.
+A **Solução de Senha do Administrador Local (LAPS)**, disponível para download no [Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899), permite a gestão de senhas de Administrador local. Essas senhas, que são **aleatórias**, únicas e **regularmente alteradas**, são armazenadas centralmente no Active Directory. O acesso a essas senhas é restrito através de ACLs a usuários autorizados. Com permissões suficientes concedidas, a capacidade de ler senhas de administrador local é fornecida.
 
 {{#ref}}
 active-directory-methodology/laps.md

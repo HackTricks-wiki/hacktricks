@@ -8,7 +8,6 @@
 
 Para mais informações, consulte:
 
-
 {{#ref}}
 ../../network-services-pentesting/pentesting-rdp.md
 {{#endref}}

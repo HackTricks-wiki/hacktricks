@@ -48,7 +48,7 @@ AI-Risk-Frameworks.md
 
 ### Segurança de Prompts de IA
 
-Os LLMs fizeram o uso de IA explodir nos últimos anos, mas não são perfeitos e podem ser enganados por prompts adversariais. Este é um tópico muito importante para entender como usar a IA de forma segura e como atacá-la:
+LLMs fizeram o uso de IA explodir nos últimos anos, mas não são perfeitos e podem ser enganados por prompts adversariais. Este é um tópico muito importante para entender como usar a IA de forma segura e como atacá-la:
 
 
 {{#ref}}

@@ -2,6 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
+
 ## Abusando de MDMs
 
 - JAMF Pro: `jamf checkJSSConnection`
@@ -10,6 +11,7 @@
 Se você conseguir **comprometer credenciais de administrador** para acessar a plataforma de gerenciamento, você pode **potencialmente comprometer todos os computadores** distribuindo seu malware nas máquinas.
 
 Para red teaming em ambientes MacOS, é altamente recomendável ter algum entendimento de como os MDMs funcionam:
+
 
 {{#ref}}
 macos-mdm/
@@ -23,13 +25,13 @@ Para executar seu próprio MDM, você precisa que **seu CSR seja assinado por um
 
 No entanto, para instalar um aplicativo em um dispositivo inscrito, você ainda precisa que ele seja assinado por uma conta de desenvolvedor... no entanto, após a inscrição no MDM, o **dispositivo adiciona o certificado SSL do MDM como uma CA confiável**, então você pode agora assinar qualquer coisa.
 
-Para inscrever o dispositivo em um MDM, você precisa instalar um arquivo **`mobileconfig`** como root, que pode ser entregue via um arquivo **pkg** (você pode compactá-lo em zip e, ao ser baixado do Safari, ele será descompactado).
+Para inscrever o dispositivo em um MDM, você precisa instalar um arquivo **`mobileconfig`** como root, que pode ser entregue via um arquivo **pkg** (você pode compactá-lo em zip e, quando baixado do safari, ele será descompactado).
 
 **Mythic agent Orthrus** usa essa técnica.
 
 ### Abusando do JAMF PRO
 
-O JAMF pode executar **scripts personalizados** (scripts desenvolvidos pelo sysadmin), **payloads nativos** (criação de conta local, definir senha EFI, monitoramento de arquivos/processos...) e **MDM** (configurações de dispositivo, certificados de dispositivo...).
+JAMF pode executar **scripts personalizados** (scripts desenvolvidos pelo sysadmin), **payloads nativos** (criação de conta local, definir senha EFI, monitoramento de arquivos/processos...) e **MDM** (configurações de dispositivo, certificados de dispositivo...).
 
 #### Auto-inscrição do JAMF
 

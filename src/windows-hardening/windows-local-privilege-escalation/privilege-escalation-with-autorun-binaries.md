@@ -48,7 +48,7 @@ Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 
 ### Execuções
 
-**Comumente conhecido** registro AutoRun:
+Registro AutoRun **comumente conhecido**:
 
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\Run`
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\RunOnce`
@@ -196,7 +196,7 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Microsoft\Windows\CurrentVersion
 
 ### Mudando o Prompt de Comando do Modo Seguro
 
-No Registro do Windows em `HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot`, há um valor **`AlternateShell`** definido por padrão como `cmd.exe`. Isso significa que, ao escolher "Modo Seguro com Prompt de Comando" durante a inicialização (pressionando F8), `cmd.exe` é utilizado. Mas, é possível configurar seu computador para iniciar automaticamente neste modo sem precisar pressionar F8 e selecioná-lo manualmente.
+No Registro do Windows em `HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot`, há um valor **`AlternateShell`** definido por padrão como `cmd.exe`. Isso significa que, ao escolher "Modo Seguro com Prompt de Comando" durante a inicialização (pressionando F8), `cmd.exe` é utilizado. No entanto, é possível configurar seu computador para iniciar automaticamente neste modo sem precisar pressionar F8 e selecioná-lo manualmente.
 
 Passos para criar uma opção de inicialização para iniciar automaticamente em "Modo Seguro com Prompt de Comando":
 
@@ -210,7 +210,7 @@ Passos para criar uma opção de inicialização para iniciar automaticamente em
 - **Exploit 2 (Permissões de Escrita no PATH):** Ter permissões de escrita em qualquer parte da variável **PATH** do sistema, especialmente antes de `C:\Windows\system32`, permite que você execute um `cmd.exe` personalizado, que pode ser uma porta dos fundos se o sistema for iniciado em Modo Seguro.
 - **Exploit 3 (Permissões de Escrita no PATH e boot.ini):** O acesso de escrita ao `boot.ini` permite a inicialização automática no Modo Seguro, facilitando o acesso não autorizado na próxima reinicialização.
 
-Para verificar a configuração atual de **AlternateShell**, use estes comandos:
+Para verificar a configuração atual do **AlternateShell**, use estes comandos:
 ```bash
 reg query HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot /v AlternateShell
 Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SafeBoot' -Name 'AlternateShell'
@@ -253,7 +253,7 @@ Os Objetos Auxiliares do Navegador (BHOs) são módulos DLL que adicionam recurs
 
 Os BHOs são compatíveis com o Windows 10 através do Internet Explorer 11, mas não são suportados no Microsoft Edge, o navegador padrão nas versões mais recentes do Windows.
 
-Para explorar os BHOs registrados em um sistema, você pode inspecionar as seguintes chaves do registro:
+Para explorar os BHOs registrados em um sistema, você pode inspecionar as seguintes chaves de registro:
 
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects`
 - `HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects`
@@ -270,7 +270,7 @@ reg query "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\B
 - `HKLM\Software\Microsoft\Internet Explorer\Extensions`
 - `HKLM\Software\Wow6432Node\Microsoft\Internet Explorer\Extensions`
 
-Note que o registro conterá 1 novo registro para cada dll e será representado pelo **CLSID**. Você pode encontrar as informações do CLSID em `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`
+Observe que o registro conterá 1 novo registro para cada dll e será representado pelo **CLSID**. Você pode encontrar as informações do CLSID em `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`
 
 ### Drivers de Fonte
 

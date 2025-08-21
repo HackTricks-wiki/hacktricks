@@ -71,7 +71,7 @@ Group3r.exe -f gpo.log   # -s to stdout
 
 ## PingCastle
 
-[PingCastle](https://www.pingcastle.com/documentation/) realiza uma **verificação de saúde** do Active Directory e gera um relatório em HTML com pontuação de risco.
+[PingCastle](https://www.pingcastle.com/documentation/) realiza um **health-check** do Active Directory e gera um relatório em HTML com pontuação de risco.
 ```powershell
 PingCastle.exe --healthcheck --server corp.local --user bob --password "P@ssw0rd!"
 ```

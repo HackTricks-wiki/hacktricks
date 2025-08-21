@@ -52,9 +52,9 @@ A Ferramenta de Remoção de Malware (MRT) é outra parte da infraestrutura de s
 
 Uma vez que o malware é detectado em um Mac (seja pelo XProtect ou por outros meios), o MRT pode ser usado para **remover automaticamente o malware**. O MRT opera silenciosamente em segundo plano e normalmente é executado sempre que o sistema é atualizado ou quando uma nova definição de malware é baixada (parece que as regras que o MRT tem para detectar malware estão dentro do binário).
 
-Enquanto o XProtect e o MRT são parte das medidas de segurança do macOS, eles desempenham funções diferentes:
+Enquanto o XProtect e o MRT fazem parte das medidas de segurança do macOS, eles desempenham funções diferentes:
 
-- **XProtect** é uma ferramenta preventiva. Ele **verifica arquivos à medida que são baixados** (via certos aplicativos) e, se detectar qualquer tipo conhecido de malware, **impede que o arquivo seja aberto**, evitando assim que o malware infecte seu sistema em primeiro lugar.
+- **XProtect** é uma ferramenta preventiva. Ele **verifica arquivos à medida que são baixados** (por meio de certos aplicativos) e, se detectar qualquer tipo conhecido de malware, **impede que o arquivo seja aberto**, evitando assim que o malware infecte seu sistema em primeiro lugar.
 - **MRT**, por outro lado, é uma **ferramenta reativa**. Ele opera após o malware ter sido detectado em um sistema, com o objetivo de remover o software ofensivo para limpar o sistema.
 
 O aplicativo MRT está localizado em **`/Library/Apple/System/Library/CoreServices/MRT.app`**
@@ -87,7 +87,7 @@ Além disso, há um arquivo plist que contém **aplicativos bem conhecidos** que
 ```
 ### Enumeração
 
-É possível **enumerar todos** os itens de fundo configurados executando a ferramenta cli da Apple:
+É possível **enumerar todos** os itens de fundo configurados usando a ferramenta cli da Apple:
 ```bash
 # The tool will always ask for the users password
 sfltool dumpbtm
@@ -99,7 +99,7 @@ chmod +x dumpBTM
 xattr -rc dumpBTM # Remove quarantine attr
 ./dumpBTM
 ```
-Esta informação está sendo armazenada em **`/private/var/db/com.apple.backgroundtaskmanagement/BackgroundItems-v4.btm`** e o Terminal precisa de FDA.
+Essas informações estão sendo armazenadas em **`/private/var/db/com.apple.backgroundtaskmanagement/BackgroundItems-v4.btm`** e o Terminal precisa de FDA.
 
 ### Brincando com BTM
 
@@ -124,7 +124,7 @@ kill -SIGSTOP 1011
 ps -o state 1011
 T
 ```
-- **Bug**: Se o **processo que criou a persistência existir rapidamente logo após ele**, o daemon tentará **obter informações** sobre isso, **falhará** e **não conseguirá enviar o evento** indicando que uma nova coisa está persistindo.
+- **Bug**: Se o **processo que criou a persistência existir rapidamente logo após isso**, o daemon tentará **obter informações** sobre ele, **falhará** e **não conseguirá enviar o evento** indicando que uma nova coisa está persistindo.
 
 Referências e **mais informações sobre BTM**:
 

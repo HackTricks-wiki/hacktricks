@@ -9,7 +9,7 @@ Um atacante pode estar interessado em **alterar os carimbos de data/hora dos arq
 
 Ambos os atributos têm 4 carimbos de data/hora: **Modificação**, **acesso**, **criação** e **modificação do registro MFT** (MACE ou MACB).
 
-**O explorador do Windows** e outras ferramentas mostram as informações de **`$STANDARD_INFORMATION`**.
+**Windows explorer** e outras ferramentas mostram as informações de **`$STANDARD_INFORMATION`**.
 
 ### TimeStomp - Ferramenta Anti-forense
 
@@ -54,7 +54,7 @@ Esta ferramenta pode modificar ambos os atributos `$STARNDAR_INFORMATION` e `$FI
 
 ## Ocultação de Dados
 
-O NFTS usa um cluster e o tamanho mínimo de informação. Isso significa que se um arquivo ocupa um e meio cluster, a **metade restante nunca será utilizada** até que o arquivo seja excluído. Portanto, é possível **ocultar dados neste espaço não utilizado**.
+O NFTS usa um cluster e o tamanho mínimo da informação. Isso significa que se um arquivo ocupa um e meio cluster, a **metade restante nunca será utilizada** até que o arquivo seja excluído. Portanto, é possível **ocultar dados neste espaço não utilizado**.
 
 Existem ferramentas como slacker que permitem ocultar dados neste espaço "oculto". No entanto, uma análise do `$logfile` e `$usnjrnl` pode mostrar que alguns dados foram adicionados:
 
@@ -125,7 +125,7 @@ Para desativar cópias de sombra [passos daqui](https://support.waters.com/KB_In
 
 1. Abra o programa Serviços digitando "serviços" na caixa de pesquisa de texto após clicar no botão iniciar do Windows.
 2. Na lista, encontre "Volume Shadow Copy", selecione-o e acesse Propriedades clicando com o botão direito.
-3. Escolha Desativado no menu suspenso "Tipo de Inicialização" e confirme a alteração clicando em Aplicar e OK.
+3. Escolha Desativado no menu suspenso "Tipo de inicialização" e confirme a alteração clicando em Aplicar e OK.
 
 Também é possível modificar a configuração de quais arquivos serão copiados na cópia de sombra no registro `HKLM\SYSTEM\CurrentControlSet\Control\BackupRestore\FilesNotToSnapshot`
 
@@ -190,7 +190,7 @@ Detecção: compare `ntdll` na memória vs. no disco, ou faça hook antes do mod
 
 ### Revitalização de Fluxos de Dados Alternativos (ADS)
 
-Campanhas de malware em 2023 (e.g. **FIN12** loaders) foram vistas preparando binários de segunda fase
+Campanhas de malware em 2023 (e.g. **FIN12** loaders) foram vistas preparando binários de segundo estágio
 dentro de ADS para se manter fora da vista de scanners tradicionais:
 ```cmd
 rem Hide cobalt.bin inside an ADS of a PDF
@@ -198,7 +198,7 @@ type cobalt.bin > report.pdf:win32res.dll
 rem Execute directly
 wmic process call create "cmd /c report.pdf:win32res.dll"
 ```
-Enumere fluxos com `dir /R`, `Get-Item -Stream *`, ou Sysinternals `streams64.exe`. Copiar o arquivo host para FAT/exFAT ou via SMB removerá o fluxo oculto e pode ser usado por investigadores para recuperar a carga útil.
+Enumere fluxos com `dir /R`, `Get-Item -Stream *` ou Sysinternals `streams64.exe`. Copiar o arquivo host para FAT/exFAT ou via SMB removerá o fluxo oculto e pode ser usado por investigadores para recuperar a carga útil.
 
 ### BYOVD & “AuKill” (2023)
 
@@ -215,10 +215,10 @@ Mitigações: habilitar a lista de bloqueio de drivers vulneráveis da Microsoft
 ## Linux Anti-Forensics: Auto-correção e Cloud C2 (2023–2025)
 
 ### Auto-correção de serviços comprometidos para reduzir a detecção (Linux)  
-Os adversários cada vez mais “auto-corrigem” um serviço logo após explorá-lo para evitar re-exploração e suprimir detecções baseadas em vulnerabilidades. A ideia é substituir componentes vulneráveis pelos últimos binários/JARs legítimos upstream, de modo que os scanners relatem o host como corrigido enquanto a persistência e o C2 permanecem.
+Os adversários cada vez mais "auto-corrigem" um serviço logo após explorá-lo para evitar re-exploração e suprimir detecções baseadas em vulnerabilidades. A ideia é substituir componentes vulneráveis pelos últimos binários/JARs legítimos upstream, para que os scanners relatem o host como corrigido enquanto a persistência e o C2 permanecem.
 
 Exemplo: Apache ActiveMQ OpenWire RCE (CVE‑2023‑46604)  
-- Após a exploração, os atacantes buscaram JARs legítimos do Maven Central (repo1.maven.org), deletaram JARs vulneráveis na instalação do ActiveMQ e reiniciaram o broker.  
+- Após a exploração, os atacantes buscaram JARs legítimos no Maven Central (repo1.maven.org), deletaram JARs vulneráveis na instalação do ActiveMQ e reiniciaram o broker.  
 - Isso fechou a RCE inicial enquanto mantinha outros pontos de apoio (cron, alterações na configuração do SSH, implantes C2 separados).
 
 Exemplo operacional (ilustrativo)

@@ -38,7 +38,7 @@ macos-xpc_connection_get_audit_token-attack.md
 
 ### Trustcache - Downgrade Attacks Prevention
 
-Trustcache é um método defensivo introduzido em máquinas Apple Silicon que armazena um banco de dados de CDHSAH de binários da Apple, de modo que apenas binários não modificados permitidos possam ser executados. Isso previne a execução de versões anteriores.
+Trustcache é um método defensivo introduzido em máquinas Apple Silicon que armazena um banco de dados de CDHSAH de binários da Apple, de modo que apenas binários não modificados permitidos possam ser executados. Isso previne a execução de versões de downgrade.
 
 ### Code Examples
 

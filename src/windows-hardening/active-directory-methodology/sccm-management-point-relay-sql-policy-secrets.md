@@ -3,7 +3,7 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 ## TL;DR
-Ao forçar um **System Center Configuration Manager (SCCM) Management Point (MP)** a autenticar via SMB/RPC e **revezar** essa conta de máquina NTLM para o **banco de dados do site (MSSQL)**, você obtém direitos `smsdbrole_MP` / `smsdbrole_MPUserSvc`. Esses papéis permitem que você chame um conjunto de procedimentos armazenados que expõem blobs de política de **Implantação do Sistema Operacional (OSD)** (credenciais da Conta de Acesso à Rede, variáveis de Sequência de Tarefas, etc.). Os blobs são codificados/encriptados em hex, mas podem ser decodificados e descriptografados com **PXEthief**, resultando em segredos em texto claro.
+Ao forçar um **System Center Configuration Manager (SCCM) Management Point (MP)** a autenticar via SMB/RPC e **revezar** essa conta de máquina NTLM para o **banco de dados do site (MSSQL)**, você obtém direitos `smsdbrole_MP` / `smsdbrole_MPUserSvc`. Esses papéis permitem que você chame um conjunto de procedimentos armazenados que expõem blobs de política de **Implantação do Sistema Operacional (OSD)** (credenciais da Conta de Acesso à Rede, variáveis de Sequência de Tarefas, etc.). Os blobs são codificados/criptografados em hex, mas podem ser decodificados e descriptografados com **PXEthief**, resultando em segredos em texto claro.
 
 Cadeia de alto nível:
 1. Descubra MP & DB do site ↦ endpoint HTTP não autenticado `/SMS_MP/.sms_aut?MPKEYINFORMATIONMEDIA`.
@@ -110,7 +110,7 @@ Ao relatar, o login é mapeado para:
 Essas funções expõem dezenas de permissões EXEC, as principais usadas neste ataque são:
 
 | Procedimento Armazenado | Propósito |
-|-------------------------|----------|
+|--------------------------|----------|
 | `MP_GetMachinePolicyAssignments` | Listar políticas aplicadas a um `clientID`. |
 | `MP_GetPolicyBody` / `MP_GetPolicyBodyAfterAuthorization` | Retornar o corpo completo da política. |
 | `MP_GetListOfMPsInSiteOSD` | Retornado pelo caminho `MPKEYINFORMATIONMEDIA`. |

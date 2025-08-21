@@ -10,7 +10,7 @@ Permissões em um **diretório**:
 - **escrita** - você pode **deletar/escrever** **arquivos** no diretório e pode **deletar pastas vazias**.
 - Mas você **não pode deletar/modificar pastas não vazias** a menos que tenha permissões de escrita sobre elas.
 - Você **não pode modificar o nome de uma pasta** a menos que a possua.
-- **execução** - você está **autorizado a percorrer** o diretório - se você não tiver esse direito, não poderá acessar nenhum arquivo dentro dele, ou em quaisquer subdiretórios.
+- **execução** - você está **autorizado a percorrer** o diretório - se você não tiver esse direito, não pode acessar nenhum arquivo dentro dele, ou em quaisquer subdiretórios.
 
 ### Combinações Perigosas
 
@@ -62,7 +62,7 @@ Exemplo:
 
 Se uma chamada para `open` não tiver a flag `O_CLOEXEC`, o descritor de arquivo será herdado pelo processo filho. Assim, se um processo privilegiado abrir um arquivo privilegiado e executar um processo controlado pelo atacante, o atacante **herdará o FD sobre o arquivo privilegiado**.
 
-Se você conseguir fazer um **processo abrir um arquivo ou uma pasta com altos privilégios**, você pode abusar do **`crontab`** para abrir um arquivo em `/etc/sudoers.d` com **`EDITOR=exploit.py`**, assim o `exploit.py` obterá o FD para o arquivo dentro de `/etc/sudoers` e abusará dele.
+Se você conseguir fazer um **processo abrir um arquivo ou uma pasta com altos privilégios**, você pode abusar do **`crontab`** para abrir um arquivo em `/etc/sudoers.d` com **`EDITOR=exploit.py`**, de modo que o `exploit.py` obterá o FD para o arquivo dentro de `/etc/sudoers` e abusará dele.
 
 Por exemplo: [https://youtu.be/f1HA5QhLQ7Y?t=21098](https://youtu.be/f1HA5QhLQ7Y?t=21098), código: https://github.com/gergelykalman/CVE-2023-32428-a-macOS-LPE-via-MallocStackLogging
 
@@ -156,7 +156,7 @@ macos-xattr-acls-extra-stuff.md
 
 ### Bypass de verificações de binários de plataforma
 
-Algumas verificações de segurança checam se o binário é um **binário de plataforma**, por exemplo, para permitir a conexão a um serviço XPC. No entanto, como exposto em um bypass em https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/, é possível contornar essa verificação obtendo um binário de plataforma (como /bin/ls) e injetar o exploit via dyld usando uma variável de ambiente `DYLD_INSERT_LIBRARIES`.
+Algumas verificações de segurança checam se o binário é um **binário de plataforma**, por exemplo, para permitir a conexão a um serviço XPC. No entanto, como exposto em um bypass em https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/, é possível contornar essa verificação obtendo um binário de plataforma (como /bin/ls) e injetando o exploit via dyld usando uma variável de ambiente `DYLD_INSERT_LIBRARIES`.
 
 ### Bypass das flags `CS_REQUIRE_LV` e `CS_FORCED_LV`
 
@@ -248,8 +248,8 @@ hdiutil detach /private/tmp/mnt 1>/dev/null
 # You can also create a dmg from an app using:
 hdiutil create -srcfolder justsome.app justsome.dmg
 ```
-Normalmente, o macOS monta discos conversando com o `com.apple.DiskArbitrarion.diskarbitrariond` serviço Mach (fornecido por `/usr/libexec/diskarbitrationd`). Se adicionar o parâmetro `-d` ao arquivo plist do LaunchDaemons e reiniciar, ele armazenará logs em `/var/log/diskarbitrationd.log`.\
-No entanto, é possível usar ferramentas como `hdik` e `hdiutil` para se comunicar diretamente com o `com.apple.driver.DiskImages` kext.
+Normalmente, o macOS monta discos conversando com o serviço Mach `com.apple.DiskArbitration.diskarbitrationd` (fornecido por `/usr/libexec/diskarbitrationd`). Se você adicionar o parâmetro `-d` ao arquivo plist do LaunchDaemons e reiniciar, ele armazenará logs em `/var/log/diskarbitrationd.log`.\
+No entanto, é possível usar ferramentas como `hdik` e `hdiutil` para se comunicar diretamente com o kext `com.apple.driver.DiskImages`.
 
 ## Escritas Arbitrárias
 
@@ -286,7 +286,7 @@ Se você tiver **escrita arbitrária**, você pode criar um arquivo dentro da pa
 
 ### PATH files
 
-O arquivo **`/etc/paths`** é um dos principais locais que preenche a variável de ambiente PATH. Você deve ser root para sobrescrevê-lo, mas se um script de **processo privilegiado** estiver executando algum **comando sem o caminho completo**, você pode ser capaz de **sequestar** isso modificando este arquivo.
+O arquivo **`/etc/paths`** é um dos principais lugares que preenche a variável de ambiente PATH. Você deve ser root para sobrescrevê-lo, mas se um script de **processo privilegiado** estiver executando algum **comando sem o caminho completo**, você pode ser capaz de **sequestar** isso modificando este arquivo.
 
 Você também pode escrever arquivos em **`/etc/paths.d`** para carregar novas pastas na variável de ambiente `PATH`.
 
@@ -324,13 +324,13 @@ MallocStackLogging=1 MallocStackLoggingDirectory=$DIRNAME MallocStackLoggingDont
 FILENAME=$(ls "$DIRNAME")
 echo $FILENAME
 ```
-## POSIX Shared Memory
+## Memória Compartilhada POSIX
 
-**A memória compartilhada POSIX** permite que processos em sistemas operacionais compatíveis com POSIX acessem uma área de memória comum, facilitando uma comunicação mais rápida em comparação com outros métodos de comunicação entre processos. Envolve a criação ou abertura de um objeto de memória compartilhada com `shm_open()`, definindo seu tamanho com `ftruncate()`, e mapeando-o no espaço de endereços do processo usando `mmap()`. Os processos podem então ler e escrever diretamente nesta área de memória. Para gerenciar o acesso concorrente e prevenir a corrupção de dados, mecanismos de sincronização como mutexes ou semáforos são frequentemente utilizados. Finalmente, os processos desmapeiam e fecham a memória compartilhada com `munmap()` e `close()`, e opcionalmente removem o objeto de memória com `shm_unlink()`. Este sistema é especialmente eficaz para IPC eficiente e rápido em ambientes onde múltiplos processos precisam acessar dados compartilhados rapidamente.
+**Memória compartilhada POSIX** permite que processos em sistemas operacionais compatíveis com POSIX acessem uma área de memória comum, facilitando uma comunicação mais rápida em comparação com outros métodos de comunicação entre processos. Envolve a criação ou abertura de um objeto de memória compartilhada com `shm_open()`, definindo seu tamanho com `ftruncate()`, e mapeando-o no espaço de endereços do processo usando `mmap()`. Os processos podem então ler e escrever diretamente nesta área de memória. Para gerenciar o acesso concorrente e prevenir a corrupção de dados, mecanismos de sincronização como mutexes ou semáforos são frequentemente utilizados. Finalmente, os processos desmapeiam e fecham a memória compartilhada com `munmap()` e `close()`, e opcionalmente removem o objeto de memória com `shm_unlink()`. Este sistema é especialmente eficaz para IPC eficiente e rápido em ambientes onde múltiplos processos precisam acessar dados compartilhados rapidamente.
 
 <details>
 
-<summary>Producer Code Example</summary>
+<summary>Exemplo de Código do Produtor</summary>
 ```c
 // gcc producer.c -o producer -lrt
 #include <fcntl.h>
@@ -420,7 +420,7 @@ return 0;
 ```
 </details>
 
-## Descritores Protegidos do macOS
+## macOS Descritores Protegidos
 
 **Descritores protegidos do macOS** são um recurso de segurança introduzido no macOS para aumentar a segurança e a confiabilidade das **operações de descritores de arquivo** em aplicativos de usuário. Esses descritores protegidos fornecem uma maneira de associar restrições específicas ou "guardas" com descritores de arquivo, que são aplicadas pelo kernel.
 

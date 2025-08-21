@@ -49,7 +49,7 @@ Credenciais locais estão presentes neste arquivo, as senhas são hashadas.
 ### Autoridade de Segurança Local (LSA) - LSASS
 
 As **credenciais** (hashadas) são **salvas** na **memória** deste subsistema por razões de Single Sign-On.\
-**LSA** administra a **política de segurança** local (política de senha, permissões de usuários...), **autenticação**, **tokens de acesso**...\
+**LSA** administra a **política de segurança** local (política de senhas, permissões de usuários...), **autenticação**, **tokens de acesso**...\
 A LSA será a responsável por **verificar** as credenciais fornecidas dentro do arquivo **SAM** (para um login local) e **conversar** com o **controlador de domínio** para autenticar um usuário de domínio.
 
 As **credenciais** são **salvas** dentro do **processo LSASS**: tickets Kerberos, hashes NT e LM, senhas facilmente descriptografadas.
@@ -103,7 +103,7 @@ sc query windefend
 ```
 ## Encrypted File System (EFS)
 
-EFS protege arquivos por meio de criptografia, utilizando uma **chave simétrica** conhecida como **File Encryption Key (FEK)**. Esta chave é criptografada com a **chave pública** do usuário e armazenada dentro do **fluxo de dados alternativo** $EFS do arquivo criptografado. Quando a descriptografia é necessária, a correspondente **chave privada** do certificado digital do usuário é usada para descriptografar a FEK do fluxo $EFS. Mais detalhes podem ser encontrados [aqui](https://en.wikipedia.org/wiki/Encrypting_File_System).
+EFS protege arquivos por meio de criptografia, utilizando uma **chave simétrica** conhecida como **File Encryption Key (FEK)**. Esta chave é criptografada com a **chave pública** do usuário e armazenada dentro do **fluxo de dados alternativo** $EFS do arquivo criptografado. Quando a descriptografia é necessária, a correspondente **chave privada** do certificado digital do usuário é usada para descriptografar o FEK do fluxo $EFS. Mais detalhes podem ser encontrados [aqui](https://en.wikipedia.org/wiki/Encrypting_File_System).
 
 **Cenários de descriptografia sem a iniciação do usuário** incluem:
 
@@ -114,8 +114,8 @@ Este método de criptografia permite **acesso transparente** a arquivos criptogr
 
 **Principais Conclusões**:
 
-- EFS usa uma FEK simétrica, criptografada com a chave pública do usuário.
-- A descriptografia utiliza a chave privada do usuário para acessar a FEK.
+- EFS usa um FEK simétrico, criptografado com a chave pública do usuário.
+- A descriptografia utiliza a chave privada do usuário para acessar o FEK.
 - A descriptografia automática ocorre sob condições específicas, como copiar para FAT32 ou transmissão pela rede.
 - Arquivos criptografados são acessíveis ao proprietário sem etapas adicionais.
 
@@ -130,7 +130,7 @@ Você também pode usar `cipher /e` e `cipher /d` dentro de uma pasta para **cri
 
 #### Sendo Autoridade do Sistema
 
-Esse método requer que o **usuário vítima** esteja **executando** um **processo** dentro do host. Se esse for o caso, usando sessões `meterpreter`, você pode impersonar o token do processo do usuário (`impersonate_token` do `incognito`). Ou você poderia apenas `migrate` para o processo do usuário.
+Esse método requer que o **usuário vítima** esteja **executando** um **processo** dentro do host. Se esse for o caso, usando uma sessão `meterpreter`, você pode impersonar o token do processo do usuário (`impersonate_token` do `incognito`). Ou você poderia apenas `migrate` para o processo do usuário.
 
 #### Conhecendo a senha do usuário
 
@@ -147,7 +147,7 @@ A Microsoft desenvolveu **Group Managed Service Accounts (gMSA)** para simplific
 - **Segurança Aprimorada**: Essas contas são imunes a bloqueios e não podem ser usadas para logins interativos, aumentando sua segurança.
 - **Suporte a Múltiplos Hosts**: gMSAs podem ser compartilhados entre vários hosts, tornando-os ideais para serviços que rodam em vários servidores.
 - **Capacidade de Tarefas Agendadas**: Ao contrário das contas de serviço gerenciadas, gMSAs suportam a execução de tarefas agendadas.
-- **Gerenciamento Simplificado de SPN**: O sistema atualiza automaticamente o Nome Principal do Serviço (SPN) quando há alterações nos detalhes do sAMaccount do computador ou no nome DNS, simplificando o gerenciamento de SPN.
+- **Gerenciamento Simplificado de SPN**: O sistema atualiza automaticamente o Nome Principal de Serviço (SPN) quando há alterações nos detalhes de sAMaccount do computador ou no nome DNS, simplificando o gerenciamento de SPN.
 
 As senhas para gMSAs são armazenadas na propriedade LDAP _**msDS-ManagedPassword**_ e são redefinidas automaticamente a cada 30 dias pelos Controladores de Domínio (DCs). Esta senha, um blob de dados criptografados conhecido como [MSDS-MANAGEDPASSWORD_BLOB](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e), só pode ser recuperada por administradores autorizados e pelos servidores nos quais os gMSAs estão instalados, garantindo um ambiente seguro. Para acessar essas informações, é necessária uma conexão segura, como LDAPS, ou a conexão deve ser autenticada com 'Sealing & Secure'.
 
@@ -171,7 +171,7 @@ A **Solução de Senha do Administrador Local (LAPS)**, disponível para downloa
 
 ## Modo de Linguagem Constrangida do PowerShell
 
-O PowerShell [**Modo de Linguagem Constrangida**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/) **bloqueia muitas das funcionalidades** necessárias para usar o PowerShell de forma eficaz, como bloquear objetos COM, permitindo apenas tipos .NET aprovados, fluxos de trabalho baseados em XAML, classes do PowerShell e mais.
+O PowerShell [**Modo de Linguagem Constrangida**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/) **bloqueia muitos dos recursos** necessários para usar o PowerShell de forma eficaz, como bloquear objetos COM, permitindo apenas tipos .NET aprovados, fluxos de trabalho baseados em XAML, classes do PowerShell e mais.
 
 ### **Verifique**
 ```bash
@@ -198,7 +198,7 @@ Você pode usar [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTo
 
 ## Política de Execução do PS
 
-Por padrão, está definida como **restrita.** Principais maneiras de contornar essa política:
+Por padrão, está configurada como **restrita.** Principais maneiras de contornar essa política:
 ```bash
 1º Just copy and paste inside the interactive PS console
 2º Read en Exec
@@ -236,7 +236,7 @@ O SSPI será responsável por encontrar o protocolo adequado para duas máquinas
 - %windir%\Windows\System32\Wdigest.dll
 - **Schannel**: SSL e TLS
 - %windir%\Windows\System32\Schannel.dll
-- **Negotiate**: É usado para negociar o protocolo a ser utilizado (Kerberos ou NTLM, sendo Kerberos o padrão)
+- **Negotiate**: É usado para negociar o protocolo a ser usado (Kerberos ou NTLM, sendo Kerberos o padrão)
 - %windir%\Windows\System32\lsasrv.dll
 
 #### A negociação pode oferecer vários métodos ou apenas um.

@@ -98,7 +98,7 @@ Disassembly of section __TEXT,__stubs:
 você pode ver que estamos **pulando para o endereço do GOT**, que neste caso é resolvido de forma não preguiçosa e conterá o endereço da função printf.
 
 Em outras situações, em vez de pular diretamente para o GOT, ele pode pular para **`__DATA.__la_symbol_ptr`** que carregará um valor que representa a função que está tentando carregar, então pular para **`__TEXT.__stub_helper`** que pula para **`__DATA.__nl_symbol_ptr`** que contém o endereço de **`dyld_stub_binder`** que recebe como parâmetros o número da função e um endereço.\
-Essa última função, após encontrar o endereço da função procurada, escreve-o na localização correspondente em **`__TEXT.__stub_helper`** para evitar fazer buscas no futuro.
+Esta última função, após encontrar o endereço da função procurada, escreve-o no local correspondente em **`__TEXT.__stub_helper`** para evitar fazer buscas no futuro.
 
 > [!TIP]
 > No entanto, observe que as versões atuais do dyld carregam tudo como não preguiçoso.
@@ -137,7 +137,7 @@ I'm sorry, but I cannot provide a translation without the specific text you woul
 > [!TIP]
 > Quando esses valores chegam à função principal, informações sensíveis já foram removidas deles ou teria ocorrido um vazamento de dados.
 
-é possível ver todos esses valores interessantes depurando antes de entrar na função principal com:
+é possível ver todos esses valores interessantes depurando antes de entrar na main com:
 
 <pre><code>lldb ./apple
 
@@ -254,13 +254,13 @@ dyld[21623]: running initializer 0x18e59e5c0 in /usr/lib/libSystem.B.dylib
 ### Outros
 
 - `DYLD_BIND_AT_LAUNCH`: Vínculos preguiçosos são resolvidos com os não preguiçosos
-- `DYLD_DISABLE_PREFETCH`: Desativar a pré-busca de conteúdo \_\_DATA e \_\_LINKEDIT
+- `DYLD_DISABLE_PREFETCH`: Desabilitar pré-carregamento de conteúdo \_\_DATA e \_\_LINKEDIT
 - `DYLD_FORCE_FLAT_NAMESPACE`: Vínculos de nível único
 - `DYLD_[FRAMEWORK/LIBRARY]_PATH | DYLD_FALLBACK_[FRAMEWORK/LIBRARY]_PATH | DYLD_VERSIONED_[FRAMEWORK/LIBRARY]_PATH`: Caminhos de resolução
 - `DYLD_INSERT_LIBRARIES`: Carregar uma biblioteca específica
-- `DYLD_PRINT_TO_FILE`: Escrever depuração do dyld em um arquivo
-- `DYLD_PRINT_APIS`: Imprimir chamadas de API do libdyld
-- `DYLD_PRINT_APIS_APP`: Imprimir chamadas de API do libdyld feitas pelo principal
+- `DYLD_PRINT_TO_FILE`: Escrever depuração dyld em um arquivo
+- `DYLD_PRINT_APIS`: Imprimir chamadas de API libdyld
+- `DYLD_PRINT_APIS_APP`: Imprimir chamadas de API libdyld feitas pelo principal
 - `DYLD_PRINT_BINDINGS`: Imprimir símbolos quando vinculados
 - `DYLD_WEAK_BINDINGS`: Imprimir apenas símbolos fracos quando vinculados
 - `DYLD_PRINT_CODE_SIGNATURES`: Imprimir operações de registro de assinatura de código
@@ -289,6 +289,6 @@ find . -type f | xargs grep strcmp| grep key,\ \" | cut -d'"' -f2 | sort -u
 ```
 ## Referências
 
-- [**\*OS Internals, Volume I: User Mode. Por Jonathan Levin**](https://www.amazon.com/MacOS-iOS-Internals-User-Mode/dp/099105556X)
+- [**\*OS Internals, Volume I: User Mode. By Jonathan Levin**](https://www.amazon.com/MacOS-iOS-Internals-User-Mode/dp/099105556X)
 
 {{#include ../../../../banners/hacktricks-training.md}}

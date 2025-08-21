@@ -18,14 +18,14 @@ Para mais informações sobre esses tipos de tags [**leia esta introdução**](.
 
 ### Read
 
-Tenta **ler** as informações do cartão. Então, pode **emular** elas.
+Tenta **ler** as informações do cartão. Então pode **emular** elas.
 
 > [!WARNING]
 > Note que alguns intercomunicadores tentam se proteger contra a duplicação de chaves enviando um comando de gravação antes de ler. Se a gravação for bem-sucedida, essa tag é considerada falsa. Quando o Flipper emula RFID, não há como o leitor distinguir isso do original, então não ocorrem tais problemas.
 
 ### Add Manually
 
-Você pode criar **cartões falsos no Flipper Zero indicando os dados** manualmente e então emulá-los.
+Você pode criar **cartões falsos no Flipper Zero indicando os dados** que você insere manualmente e então emulá-los.
 
 #### IDs on cards
 
@@ -34,7 +34,7 @@ Você pode criar **cartões falsos no Flipper Zero indicando os dados** manualme
 - **EM Marin**
 
 Por exemplo, neste cartão EM-Marin, é possível **ler os últimos 3 de 5 bytes em claro**.\
-Os outros 2 podem ser forçados por força bruta se você não conseguir lê-los do cartão.
+Os outros 2 podem ser forçados por brute-force se você não conseguir lê-los do cartão.
 
 <figure><img src="../../../images/image (104).png" alt=""><figcaption></figcaption></figure>
 

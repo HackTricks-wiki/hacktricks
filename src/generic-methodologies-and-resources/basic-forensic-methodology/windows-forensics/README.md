@@ -6,7 +6,7 @@
 
 ### Notificações do Windows 10
 
-No caminho `\Users\<username>\AppData\Local\Microsoft\Windows\Notifications` você pode encontrar o banco de dados `appdb.dat` (antes do aniversário do Windows) ou `wpndatabase.db` (após o Aniversário do Windows).
+No caminho `\Users\<username>\AppData\Local\Microsoft\Windows\Notifications` você pode encontrar o banco de dados `appdb.dat` (antes do aniversário do Windows) ou `wpndatabase.db` (após o aniversário do Windows).
 
 Dentro deste banco de dados SQLite, você pode encontrar a tabela `Notification` com todas as notificações (em formato XML) que podem conter dados interessantes.
 
@@ -248,17 +248,17 @@ Algumas ferramentas são úteis para analisar os arquivos de registro:
 
 ### Recuperando Elemento Excluído
 
-Quando uma chave é excluída, ela é marcada como tal, mas até que o espaço que ocupa seja necessário, não será removida. Portanto, usando ferramentas como **Registry Explorer**, é possível recuperar essas chaves excluídas.
+Quando uma chave é excluída, ela é marcada como tal, mas até que o espaço que está ocupando seja necessário, não será removida. Portanto, usando ferramentas como **Registry Explorer**, é possível recuperar essas chaves excluídas.
 
 ### Último Tempo de Escrita
 
-Cada Key-Value contém um **timestamp** indicando a última vez que foi modificado.
+Cada Par-Chave contém um **timestamp** indicando a última vez que foi modificado.
 
 ### SAM
 
 O arquivo/hive **SAM** contém os **usuários, grupos e hashes de senhas dos usuários** do sistema.
 
-Em `SAM\Domains\Account\Users` você pode obter o nome de usuário, o RID, o último login, o último logon falhado, o contador de logins, a política de senhas e quando a conta foi criada. Para obter os **hashes**, você também **precisa** do arquivo/hive **SYSTEM**.
+Em `SAM\Domains\Account\Users` você pode obter o nome de usuário, o RID, último login, último logon falhado, contador de logins, política de senhas e quando a conta foi criada. Para obter os **hashes**, você também **precisa** do arquivo/hive **SYSTEM**.
 
 ### Entradas Interessantes no Registro do Windows
 
@@ -275,13 +275,13 @@ Em [este post](https://jonahacks.medium.com/investigating-common-windows-process
 
 ### Aplicativos Recentes do Windows
 
-Dentro do registro `NTUSER.DAT` no caminho `Software\Microsoft\Current Version\Search\RecentApps` você pode subchaves com informações sobre o **aplicativo executado**, **última vez** que foi executado, e **número de vezes** que foi lançado.
+Dentro do registro `NTUSER.DAT` no caminho `Software\Microsoft\Current Version\Search\RecentApps` você pode subchaves com informações sobre o **aplicativo executado**, **última vez** que foi executado e **número de vezes** que foi iniciado.
 
 ### BAM (Moderador de Atividade em Segundo Plano)
 
 Você pode abrir o arquivo `SYSTEM` com um editor de registro e dentro do caminho `SYSTEM\CurrentControlSet\Services\bam\UserSettings\{SID}` você pode encontrar as informações sobre os **aplicativos executados por cada usuário** (note o `{SID}` no caminho) e **a que horas** foram executados (a hora está dentro do valor de Dados do registro).
 
-### Windows Prefetch
+### Prefetch do Windows
 
 Prefetching é uma técnica que permite que um computador **busque silenciosamente os recursos necessários para exibir conteúdo** que um usuário **pode acessar em um futuro próximo**, para que os recursos possam ser acessados mais rapidamente.
 
@@ -297,9 +297,9 @@ Para inspecionar esses arquivos, você pode usar a ferramenta [**PEcmd.exe**](ht
 ```
 ![](<../../../images/image (315).png>)
 
-### Superfetch
+### Superprefetch
 
-**Superfetch** tem o mesmo objetivo que o prefetch, **carregar programas mais rápido** prevendo o que será carregado a seguir. No entanto, não substitui o serviço de prefetch.\
+**Superprefetch** tem o mesmo objetivo que o prefetch, **carregar programas mais rápido** prevendo o que será carregado a seguir. No entanto, não substitui o serviço de prefetch.\
 Este serviço gerará arquivos de banco de dados em `C:\Windows\Prefetch\Ag*.db`.
 
 Nestes bancos de dados, você pode encontrar o **nome** do **programa**, **número** de **execuções**, **arquivos** **abertos**, **volume** **acessado**, **caminho** **completo**, **períodos** e **timestamps**.
@@ -349,7 +349,7 @@ Para analisar as informações armazenadas, a ferramenta [**AppCompatCacheParser
 
 O arquivo **Amcache.hve** é essencialmente um hive de registro que registra detalhes sobre aplicativos que foram executados em um sistema. Ele é tipicamente encontrado em `C:\Windows\AppCompat\Programas\Amcache.hve`.
 
-Este arquivo é notável por armazenar registros de processos recentemente executados, incluindo os caminhos para os arquivos executáveis e seus hashes SHA1. Essas informações são inestimáveis para rastrear a atividade de aplicativos em um sistema.
+Este arquivo é notável por armazenar registros de processos executados recentemente, incluindo os caminhos para os arquivos executáveis e seus hashes SHA1. Essas informações são inestimáveis para rastrear a atividade de aplicativos em um sistema.
 
 Para extrair e analisar os dados do **Amcache.hve**, a ferramenta [**AmcacheParser**](https://github.com/EricZimmerman/AmcacheParser) pode ser usada. O seguinte comando é um exemplo de como usar o AmcacheParser para analisar o conteúdo do arquivo **Amcache.hve** e gerar os resultados em formato CSV:
 ```bash
@@ -464,7 +464,7 @@ Os detalhes do evento, incluindo códigos de status e substatus, fornecem mais i
 
 ### Recuperando Eventos do Windows
 
-Para aumentar as chances de recuperar Eventos do Windows deletados, é aconselhável desligar o computador suspeito desconectando-o diretamente. **Bulk_extractor**, uma ferramenta de recuperação que especifica a extensão `.evtx`, é recomendada para tentar recuperar tais eventos.
+Para aumentar as chances de recuperar Eventos do Windows excluídos, é aconselhável desligar o computador suspeito desconectando-o diretamente. **Bulk_extractor**, uma ferramenta de recuperação que especifica a extensão `.evtx`, é recomendada para tentar recuperar tais eventos.
 
 ### Identificando Ataques Comuns via Eventos do Windows
 

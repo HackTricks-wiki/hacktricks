@@ -6,7 +6,7 @@
 
 **Active Directory** serve como uma tecnologia fundamental, permitindo que **administradores de rede** criem e gerenciem de forma eficiente **domínios**, **usuários** e **objetos** dentro de uma rede. É projetado para escalar, facilitando a organização de um grande número de usuários em **grupos** e **subgrupos** gerenciáveis, enquanto controla os **direitos de acesso** em vários níveis.
 
-A estrutura do **Active Directory** é composta por três camadas principais: **domínios**, **árvores** e **florestas**. Um **domínio** abrange uma coleção de objetos, como **usuários** ou **dispositivos**, que compartilham um banco de dados comum. **Árvores** são grupos desses domínios ligados por uma estrutura compartilhada, e uma **floresta** representa a coleção de várias árvores, interconectadas por **relações de confiança**, formando a camada mais alta da estrutura organizacional. Direitos específicos de **acesso** e **comunicação** podem ser designados em cada um desses níveis.
+A estrutura do **Active Directory** é composta por três camadas principais: **domínios**, **árvores** e **florestas**. Um **domínio** abrange uma coleção de objetos, como **usuários** ou **dispositivos**, que compartilham um banco de dados comum. **Árvores** são grupos desses domínios ligados por uma estrutura compartilhada, e uma **floresta** representa a coleção de várias árvores, interconectadas por meio de **relações de confiança**, formando a camada mais alta da estrutura organizacional. Direitos específicos de **acesso** e **comunicação** podem ser designados em cada um desses níveis.
 
 Os conceitos-chave dentro do **Active Directory** incluem:
 
@@ -22,7 +22,7 @@ Os conceitos-chave dentro do **Active Directory** incluem:
 2. **Serviços de Certificado** – Supervisiona a criação, distribuição e gestão de **certificados digitais** seguros.
 3. **Serviços de Diretório Leve** – Suporta aplicações habilitadas para diretório através do **protocolo LDAP**.
 4. **Serviços de Federação de Diretório** – Fornece capacidades de **single-sign-on** para autenticar usuários em várias aplicações web em uma única sessão.
-5. **Gestão de Direitos** – Ajuda a proteger material protegido por direitos autorais, regulando sua distribuição e uso não autorizados.
+5. **Gestão de Direitos** – Ajuda a proteger material com direitos autorais regulando sua distribuição e uso não autorizados.
 6. **Serviço DNS** – Crucial para a resolução de **nomes de domínio**.
 
 Para uma explicação mais detalhada, consulte: [**TechTerms - Definição de Active Directory**](https://techterms.com/definition/active_directory)
@@ -48,7 +48,7 @@ Se você apenas tiver acesso a um ambiente AD, mas não tiver credenciais/sessõ
 - Enumerar DNS pode fornecer informações sobre servidores chave no domínio, como web, impressoras, compartilhamentos, vpn, mídia, etc.
 - `gobuster dns -d domain.local -t 25 -w /opt/Seclist/Discovery/DNS/subdomain-top2000.txt`
 - Dê uma olhada na [**Metodologia de Pentesting**](../../generic-methodologies-and-resources/pentesting-methodology.md) para encontrar mais informações sobre como fazer isso.
-- **Verifique o acesso nulo e de convidado em serviços smb** (isso não funcionará em versões modernas do Windows):
+- **Verifique o acesso anônimo e de convidado em serviços smb** (isso não funcionará em versões modernas do Windows):
 - `enum4linux -a -u "" -p "" <DC IP> && enum4linux -a -u "guest" -p "" <DC IP>`
 - `smbmap -u "" -p "" -P 445 -H <DC IP> && smbmap -u "guest" -p "" -P 445 -H <DC IP>`
 - `smbclient -U '%' -L //<DC IP> && smbclient -U 'guest%' -L //`
@@ -59,7 +59,7 @@ Se você apenas tiver acesso a um ambiente AD, mas não tiver credenciais/sessõ
 ../../network-services-pentesting/pentesting-smb/
 {{#endref}}
 
-- **Enumerar Ldap**
+- **Enumerar LDAP**
 - `nmap -n -sV --script "ldap* and not brute" -p 389 <DC IP>`
 - Um guia mais detalhado sobre como enumerar LDAP pode ser encontrado aqui (preste **atenção especial ao acesso anônimo**):
 
@@ -81,8 +81,8 @@ Se você apenas tiver acesso a um ambiente AD, mas não tiver credenciais/sessõ
 
 ### Enumeração de usuários
 
-- **Enumeração SMB/LDAP anônima:** Verifique as páginas de [**pentesting SMB**](../../network-services-pentesting/pentesting-smb/index.html) e [**pentesting LDAP**](../../network-services-pentesting/pentesting-ldap.md).
-- **Enumeração Kerbrute**: Quando um **nome de usuário inválido é solicitado**, o servidor responderá usando o código de erro **Kerberos** _KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN_, permitindo-nos determinar que o nome de usuário era inválido. **Nomes de usuários válidos** gerarão uma resposta **TGT em um AS-REP** ou o erro _KRB5KDC_ERR_PREAUTH_REQUIRED_, indicando que o usuário deve realizar a pré-autenticação.
+- **Enumeração anônima SMB/LDAP:** Verifique as páginas de [**pentesting SMB**](../../network-services-pentesting/pentesting-smb/index.html) e [**pentesting LDAP**](../../network-services-pentesting/pentesting-ldap.md).
+- **Enumeração Kerbrute**: Quando um **nome de usuário inválido é solicitado**, o servidor responderá usando o código de erro **Kerberos** _KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN_, permitindo-nos determinar que o nome de usuário era inválido. **Nomes de usuários válidos** resultarão em uma resposta **TGT em um AS-REP** ou no erro _KRB5KDC_ERR_PREAUTH_REQUIRED_, indicando que o usuário precisa realizar a pré-autenticação.
 - **Sem Autenticação contra MS-NRPC**: Usando auth-level = 1 (Sem autenticação) contra a interface MS-NRPC (Netlogon) em controladores de domínio. O método chama a função `DsrGetDcNameEx2` após vincular a interface MS-NRPC para verificar se o usuário ou computador existe sem credenciais. A ferramenta [NauthNRPC](https://github.com/sud0Ru/NauthNRPC) implementa esse tipo de enumeração. A pesquisa pode ser encontrada [aqui](https://media.kasperskycontenthub.com/wp-content/uploads/sites/43/2024/05/22190247/A-journey-into-forgotten-Null-Session-and-MS-RPC-interfaces.pdf)
 ```bash
 ./kerbrute_linux_amd64 userenum -d lab.ropnop.com --dc 10.10.10.10 usernames.txt #From https://github.com/ropnop/kerbrute/releases
@@ -116,10 +116,10 @@ Get-GlobalAddressList -ExchHostname [ip] -UserName [domain]\[username] -Password
 
 ### Conhecendo um ou vários nomes de usuários
 
-Ok, então você sabe que já tem um nome de usuário válido, mas sem senhas... Então tente:
+Ok, então você já sabe que tem um nome de usuário válido, mas sem senhas... Então tente:
 
 - [**ASREPRoast**](asreproast.md): Se um usuário **não tiver** o atributo _DONT_REQ_PREAUTH_, você pode **solicitar uma mensagem AS_REP** para esse usuário que conterá alguns dados criptografados por uma derivação da senha do usuário.
-- [**Password Spraying**](password-spraying.md): Vamos tentar as senhas **mais comuns** com cada um dos usuários descobertos, talvez algum usuário esteja usando uma senha fraca (lembre-se da política de senhas!).
+- [**Password Spraying**](password-spraying.md): Vamos tentar as senhas mais **comuns** com cada um dos usuários descobertos, talvez algum usuário esteja usando uma senha fraca (lembre-se da política de senhas!).
 - Note que você também pode **spray servidores OWA** para tentar obter acesso aos servidores de e-mail dos usuários.
 
 {{#ref}}
@@ -169,7 +169,7 @@ Em relação ao [**ASREPRoast**](asreproast.md), você agora pode encontrar todo
 - **Outras ferramentas automatizadas de enumeração AD são:** [**AD Explorer**](bloodhound.md#ad-explorer)**,** [**ADRecon**](bloodhound.md#adrecon)**,** [**Group3r**](bloodhound.md#group3r)**,** [**PingCastle**](bloodhound.md#pingcastle)**.**
 - [**Registros DNS do AD**](ad-dns-records.md), pois podem conter informações interessantes.
 - Uma **ferramenta com GUI** que você pode usar para enumerar o diretório é **AdExplorer.exe** do **SysInternal** Suite.
-- Você também pode pesquisar no banco de dados LDAP com **ldapsearch** para procurar credenciais nos campos _userPassword_ & _unixUserPassword_, ou até mesmo por _Description_. cf. [Senha no comentário do usuário AD em PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md#password-in-ad-user-comment) para outros métodos.
+- Você também pode pesquisar no banco de dados LDAP com **ldapsearch** para procurar credenciais nos campos _userPassword_ e _unixUserPassword_, ou até mesmo por _Description_. cf. [Senha no comentário do usuário AD em PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md#password-in-ad-user-comment) para outros métodos.
 - Se você estiver usando **Linux**, também pode enumerar o domínio usando [**pywerview**](https://github.com/the-useless-one/pywerview).
 - Você também pode tentar ferramentas automatizadas como:
 - [**tomcarver16/ADSearch**](https://github.com/tomcarver16/ADSearch)
@@ -281,19 +281,19 @@ Se você tem o **hash** ou a **senha** de um **administrador local**, deve tenta
 crackmapexec smb --local-auth 10.10.10.10/23 -u administrator -H 10298e182387f9cab376ecd08491764a0 | grep +
 ```
 > [!WARNING]
-> Note que isso é bastante **barulhento** e **LAPS** **mitigaria** isso.
+> Note que isso é bastante **barulhento** e o **LAPS** **mitigaria** isso.
 
 ### Abuso de MSSQL e Links Confiáveis
 
 Se um usuário tiver privilégios para **acessar instâncias MSSQL**, ele poderá usá-las para **executar comandos** no host MSSQL (se estiver rodando como SA), **roubar** o **hash** NetNTLM ou até mesmo realizar um **ataque** de **relay**.\
-Além disso, se uma instância MSSQL for confiável (link de banco de dados) por uma instância MSSQL diferente. Se o usuário tiver privilégios sobre o banco de dados confiável, ele poderá **usar o relacionamento de confiança para executar consultas também na outra instância**. Essas confianças podem ser encadeadas e, em algum momento, o usuário pode ser capaz de encontrar um banco de dados mal configurado onde pode executar comandos.\
+Além disso, se uma instância MSSQL for confiável (link de banco de dados) por uma instância MSSQL diferente. Se o usuário tiver privilégios sobre o banco de dados confiável, ele poderá **usar a relação de confiança para executar consultas também na outra instância**. Essas confianças podem ser encadeadas e, em algum momento, o usuário pode ser capaz de encontrar um banco de dados mal configurado onde pode executar comandos.\
 **Os links entre bancos de dados funcionam até mesmo através de confianças de floresta.**
 
 {{#ref}}
 abusing-ad-mssql.md
 {{#endref}}
 
-### Delegação Inconstrangida
+### Delegação Não Restrita
 
 Se você encontrar qualquer objeto de Computador com o atributo [ADS_UF_TRUSTED_FOR_DELEGATION](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>) e você tiver privilégios de domínio no computador, você poderá despejar TGTs da memória de todos os usuários que fazem login no computador.\
 Portanto, se um **Administrador de Domínio fizer login no computador**, você poderá despejar seu TGT e se passar por ele usando [Pass the Ticket](pass-the-ticket.md).\
@@ -303,18 +303,18 @@ Graças à delegação restrita, você poderia até mesmo **comprometer automati
 unconstrained-delegation.md
 {{#endref}}
 
-### Delegação Constrangida
+### Delegação Restrita
 
-Se um usuário ou computador for permitido para "Delegação Constrangida", ele poderá **se passar por qualquer usuário para acessar alguns serviços em um computador**.\
+Se um usuário ou computador for permitido para "Delegação Restrita", ele poderá **se passar por qualquer usuário para acessar alguns serviços em um computador**.\
 Então, se você **comprometer o hash** deste usuário/computador, você poderá **se passar por qualquer usuário** (até mesmo administradores de domínio) para acessar alguns serviços.
 
 {{#ref}}
 constrained-delegation.md
 {{#endref}}
 
-### Delegação Constrangida Baseada em Recursos
+### Delegação Baseada em Recursos
 
-Ter privilégio de **WRITE** em um objeto do Active Directory de um computador remoto permite a obtenção de execução de código com **privilégios elevados**:
+Ter privilégio de **GRAVAÇÃO** em um objeto do Active Directory de um computador remoto permite a execução de código com **privilégios elevados**:
 
 {{#ref}}
 resource-based-constrained-delegation.md
@@ -330,7 +330,7 @@ acl-persistence-abuse/
 
 ### Abuso do serviço Spooler de Impressoras
 
-Descobrir um **serviço Spool** escutando dentro do domínio pode ser **abusado** para **adquirir novas credenciais** e **escalar privilégios**.
+Descobrir um **serviço Spool ouvindo** dentro do domínio pode ser **abusado** para **adquirir novas credenciais** e **escalar privilégios**.
 
 {{#ref}}
 printers-spooler-service-abuse.md
@@ -347,7 +347,7 @@ rdp-sessions-abuse.md
 
 ### LAPS
 
-**LAPS** fornece um sistema para gerenciar a **senha do Administrador local** em computadores associados ao domínio, garantindo que seja **randomizada**, única e frequentemente **alterada**. Essas senhas são armazenadas no Active Directory e o acesso é controlado através de ACLs apenas para usuários autorizados. Com permissões suficientes para acessar essas senhas, a mudança para outros computadores se torna possível.
+**LAPS** fornece um sistema para gerenciar a **senha do Administrador local** em computadores associados ao domínio, garantindo que seja **randomizada**, única e frequentemente **alterada**. Essas senhas são armazenadas no Active Directory e o acesso é controlado através de ACLs apenas para usuários autorizados. Com permissões suficientes para acessar essas senhas, a transição para outros computadores se torna possível.
 
 {{#ref}}
 laps.md
@@ -355,7 +355,7 @@ laps.md
 
 ### Roubo de Certificados
 
-**Coletar certificados** da máquina comprometida pode ser uma maneira de escalar privilégios dentro do ambiente:
+**Coletar certificados** da máquina comprometida pode ser uma forma de escalar privilégios dentro do ambiente:
 
 {{#ref}}
 ad-certificates/certificate-theft.md
@@ -373,7 +373,7 @@ ad-certificates/domain-escalation.md
 
 ### Despejo de Credenciais de Domínio
 
-Uma vez que você obtenha privilégios de **Administrador de Domínio** ou até mesmo melhores privilégios de **Administrador Empresarial**, você pode **despejar** o **banco de dados do domínio**: _ntds.dit_.
+Uma vez que você obtenha privilégios de **Administrador de Domínio** ou até mesmo melhores **Administradores de Empresa**, você pode **despejar** o **banco de dados do domínio**: _ntds.dit_.
 
 [**Mais informações sobre o ataque DCSync podem ser encontradas aqui**](dcsync.md).
 
@@ -430,7 +430,7 @@ diamond-ticket.md
 
 ### **Persistência de Conta de Certificados**
 
-**Ter certificados de uma conta ou ser capaz de solicitá-los** é uma maneira muito boa de poder persistir na conta dos usuários (mesmo que ele mude a senha):
+**Ter certificados de uma conta ou ser capaz de solicitá-los** é uma maneira muito boa de conseguir persistir na conta dos usuários (mesmo que ele mude a senha):
 
 {{#ref}}
 ad-certificates/account-persistence.md
@@ -446,7 +446,7 @@ ad-certificates/domain-persistence.md
 
 ### Grupo AdminSDHolder
 
-O objeto **AdminSDHolder** no Active Directory garante a segurança de **grupos privilegiados** (como Administradores de Domínio e Administradores Empresariais) aplicando uma **Lista de Controle de Acesso (ACL)** padrão em todos esses grupos para evitar alterações não autorizadas. No entanto, esse recurso pode ser explorado; se um atacante modificar a ACL do AdminSDHolder para dar acesso total a um usuário comum, esse usuário ganha controle extenso sobre todos os grupos privilegiados. Essa medida de segurança, destinada a proteger, pode, portanto, ter o efeito oposto, permitindo acesso indevido, a menos que monitorado de perto.
+O objeto **AdminSDHolder** no Active Directory garante a segurança de **grupos privilegiados** (como Administradores de Domínio e Administradores de Empresa) aplicando uma **Lista de Controle de Acesso (ACL)** padrão em todos esses grupos para evitar alterações não autorizadas. No entanto, esse recurso pode ser explorado; se um atacante modificar a ACL do AdminSDHolder para dar acesso total a um usuário comum, esse usuário ganha controle extenso sobre todos os grupos privilegiados. Essa medida de segurança, destinada a proteger, pode, portanto, ter o efeito oposto, permitindo acesso indevido, a menos que seja monitorada de perto.
 
 [**Mais informações sobre o Grupo AdminDSHolder aqui.**](privileged-groups-and-token-privileges.md#adminsdholder-group)
 
@@ -468,7 +468,7 @@ acl-persistence-abuse/
 
 ### Descritores de Segurança
 
-Os **descritores de segurança** são usados para **armazenar** as **permissões** que um **objeto** tem **sobre** um **objeto**. Se você puder apenas **fazer** uma **pequena mudança** no **descritor de segurança** de um objeto, você pode obter privilégios muito interessantes sobre esse objeto sem precisar ser membro de um grupo privilegiado.
+Os **descritores de segurança** são usados para **armazenar** as **permissões** que um **objeto** tem **sobre** um **objeto**. Se você puder apenas **fazer** uma **pequena alteração** no **descritor de segurança** de um objeto, você pode obter privilégios muito interessantes sobre esse objeto sem precisar ser membro de um grupo privilegiado.
 
 {{#ref}}
 security-descriptors.md
@@ -476,7 +476,7 @@ security-descriptors.md
 
 ### Skeleton Key
 
-Altere o **LSASS** na memória para estabelecer uma **senha universal**, concedendo acesso a todas as contas de domínio.
+Alterar **LSASS** na memória para estabelecer uma **senha universal**, concedendo acesso a todas as contas de domínio.
 
 {{#ref}}
 skeleton-key.md
@@ -484,7 +484,7 @@ skeleton-key.md
 
 ### SSP Personalizado
 
-[Aprenda o que é um SSP (Provedor de Suporte de Segurança) aqui.](../authentication-credentials-uac-and-efs/index.html#security-support-provider-interface-sspi)\
+[Saiba o que é um SSP (Provedor de Suporte de Segurança) aqui.](../authentication-credentials-uac-and-efs/index.html#security-support-provider-interface-sspi)\
 Você pode criar seu **próprio SSP** para **capturar** em **texto claro** as **credenciais** usadas para acessar a máquina.
 
 {{#ref}}
@@ -539,8 +539,8 @@ Se o Domínio A confiar no Domínio B, A é o domínio confiador e B é o confi�
 
 - **Confianças Pai-Filho**: Esta é uma configuração comum dentro da mesma floresta, onde um domínio filho automaticamente tem uma confiança transitiva bidirecional com seu domínio pai. Essencialmente, isso significa que as solicitações de autenticação podem fluir sem problemas entre o pai e o filho.
 - **Confianças de Cross-link**: Referidas como "confianças de atalho", estas são estabelecidas entre domínios filhos para acelerar processos de referência. Em florestas complexas, as referências de autenticação normalmente precisam viajar até a raiz da floresta e depois descer até o domínio alvo. Ao criar cross-links, a jornada é encurtada, o que é especialmente benéfico em ambientes geograficamente dispersos.
-- **Confianças Externas**: Estas são configuradas entre diferentes domínios não relacionados e são não transitivas por natureza. De acordo com [a documentação da Microsoft](<https://technet.microsoft.com/en-us/library/cc773178(v=ws.10).aspx>), as confianças externas são úteis para acessar recursos em um domínio fora da floresta atual que não está conectado por uma confiança de floresta. A segurança é reforçada através da filtragem de SID com confianças externas.
-- **Confianças de Raiz de Árvore**: Essas confianças são automaticamente estabelecidas entre o domínio raiz da floresta e uma nova raiz de árvore adicionada. Embora não sejam comumente encontradas, as confianças de raiz de árvore são importantes para adicionar novas árvores de domínio a uma floresta, permitindo que mantenham um nome de domínio exclusivo e garantindo transitividade bidirecional. Mais informações podem ser encontradas no [guia da Microsoft](<https://technet.microsoft.com/en-us/library/cc773178(v=ws.10).aspx>).
+- **Confianças Externas**: Estas são configuradas entre diferentes domínios não relacionados e são não transitivas por natureza. De acordo com a [documentação da Microsoft](<https://technet.microsoft.com/en-us/library/cc773178(v=ws.10).aspx>), as confianças externas são úteis para acessar recursos em um domínio fora da floresta atual que não está conectado por uma confiança de floresta. A segurança é reforçada através da filtragem de SID com confianças externas.
+- **Confianças de Raiz de Árvore**: Essas confianças são estabelecidas automaticamente entre o domínio raiz da floresta e uma nova raiz de árvore adicionada. Embora não sejam comumente encontradas, as confianças de raiz de árvore são importantes para adicionar novas árvores de domínio a uma floresta, permitindo que mantenham um nome de domínio exclusivo e garantindo a transitividade bidirecional. Mais informações podem ser encontradas no [guia da Microsoft](<https://technet.microsoft.com/en-us/library/cc773178(v=ws.10).aspx>).
 - **Confianças de Floresta**: Este tipo de confiança é uma confiança transitiva bidirecional entre dois domínios raiz de floresta, também aplicando filtragem de SID para melhorar as medidas de segurança.
 - **Confianças MIT**: Essas confianças são estabelecidas com domínios Kerberos não-Windows, [compatíveis com RFC4120](https://tools.ietf.org/html/rfc4120). As confianças MIT são um pouco mais especializadas e atendem a ambientes que exigem integração com sistemas baseados em Kerberos fora do ecossistema Windows.
 
@@ -551,10 +551,10 @@ Se o Domínio A confiar no Domínio B, A é o domínio confiador e B é o confi�
 
 ### Caminho de Ataque
 
-1. **Enumere** as relações de confiança
+1. **Enumerar** as relações de confiança
 2. Verifique se algum **principal de segurança** (usuário/grupo/computador) tem **acesso** a recursos do **outro domínio**, talvez por entradas ACE ou por estar em grupos do outro domínio. Procure por **relações entre domínios** (a confiança foi criada para isso, provavelmente).
 1. Kerberoast, neste caso, poderia ser outra opção.
-3. **Comprometa** as **contas** que podem **pivotar** entre domínios.
+3. **Comprometer** as **contas** que podem **pivotar** entre domínios.
 
 Os atacantes poderiam acessar recursos em outro domínio através de três mecanismos principais:
 
@@ -619,7 +619,7 @@ sid-history-injection.md
 
 #### Explorar NC de Configuração gravável
 
-Entender como o Contexto de Nomeação de Configuração (NC) pode ser explorado é crucial. O NC de Configuração serve como um repositório central para dados de configuração em ambientes Active Directory (AD). Esses dados são replicados para todos os Controladores de Domínio (DC) dentro da floresta, com DCs graváveis mantendo uma cópia gravável do NC de Configuração. Para explorar isso, é necessário ter **privilégios de SYSTEM em um DC**, preferencialmente um DC filho.
+Entender como o Contexto de Nomeação de Configuração (NC) pode ser explorado é crucial. O NC de Configuração serve como um repositório central para dados de configuração em ambientes Active Directory (AD). Esses dados são replicados para cada Controlador de Domínio (DC) dentro da floresta, com DCs graváveis mantendo uma cópia gravável do NC de Configuração. Para explorar isso, é necessário ter **privilégios de SYSTEM em um DC**, preferencialmente um DC filho.
 
 **Vincular GPO ao site do DC raiz**
 
@@ -629,7 +629,7 @@ Para informações detalhadas, pode-se explorar pesquisas sobre [Bypassing SID F
 
 **Comprometer qualquer gMSA na floresta**
 
-Um vetor de ataque envolve direcionar gMSAs privilegiadas dentro do domínio. A chave raiz KDS, essencial para calcular as senhas de gMSAs, é armazenada dentro do NC de Configuração. Com privilégios de SYSTEM em qualquer DC, é possível acessar a chave raiz KDS e calcular as senhas para qualquer gMSA na floresta.
+Um vetor de ataque envolve direcionar gMSAs privilegiadas dentro do domínio. A chave KDS Root, essencial para calcular as senhas de gMSAs, é armazenada dentro do NC de Configuração. Com privilégios de SYSTEM em qualquer DC, é possível acessar a chave KDS Root e calcular as senhas para qualquer gMSA na floresta.
 
 Análise detalhada e orientações passo a passo podem ser encontradas em:
 
@@ -651,9 +651,9 @@ Pesquisa externa adicional: [Golden gMSA Trust Attacks](https://improsec.com/tec
 
 Esse método requer paciência, aguardando a criação de novos objetos AD privilegiados. Com privilégios de SYSTEM, um atacante pode modificar o Esquema AD para conceder a qualquer usuário controle total sobre todas as classes. Isso pode levar a acesso não autorizado e controle sobre objetos AD recém-criados.
 
-Leitura adicional está disponível sobre [Schema Change Trust Attacks](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-6-schema-change-trust-attack-from-child-to-parent).
+Leitura adicional está disponível em [Schema Change Trust Attacks](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-6-schema-change-trust-attack-from-child-to-parent).
 
-**De DA para EA com ADCS ESC5**
+**De DA a EA com ADCS ESC5**
 
 A vulnerabilidade ADCS ESC5 visa o controle sobre objetos de Infraestrutura de Chave Pública (PKI) para criar um modelo de certificado que permite autenticação como qualquer usuário dentro da floresta. Como os objetos PKI residem no NC de Configuração, comprometer um DC filho gravável permite a execução de ataques ESC5.
 
@@ -688,9 +688,9 @@ TrustDirection  : Outbound        --> Outbound trust
 WhenCreated     : 2/19/2021 10:15:24 PM
 WhenChanged     : 2/19/2021 10:15:24 PM
 ```
-Neste cenário, **seu domínio** está **confiando** alguns **privilegios** a um principal de **domínios diferentes**.
+Neste cenário, **seu domínio** está **confiando** alguns **privilégios** a um principal de **domínios diferentes**.
 
-No entanto, quando um **domínio é confiável** pelo domínio confiador, o domínio confiável **cria um usuário** com um **nome previsível** que usa como **senha a senha confiável**. O que significa que é possível **acessar um usuário do domínio confiador para entrar no confiável** para enumerá-lo e tentar escalar mais privilégios:
+No entanto, quando um **domínio é confiável** pelo domínio confiável, o domínio confiável **cria um usuário** com um **nome previsível** que usa como **senha a senha confiável**. O que significa que é possível **acessar um usuário do domínio confiável para entrar no domínio confiável** para enumerá-lo e tentar escalar mais privilégios:
 
 {{#ref}}
 external-forest-domain-one-way-outbound.md
@@ -714,7 +714,7 @@ rdp-sessions-abuse.md
 
 ### **Autenticação Seletiva:**
 
-- Para confianças inter-floresta, a utilização da Autenticação Seletiva garante que usuários das duas florestas não sejam autenticados automaticamente. Em vez disso, permissões explícitas são necessárias para que os usuários acessem domínios e servidores dentro do domínio ou floresta confiadora.
+- Para confianças inter-floresta, a utilização da Autenticação Seletiva garante que os usuários das duas florestas não sejam autenticados automaticamente. Em vez disso, permissões explícitas são necessárias para que os usuários acessem domínios e servidores dentro do domínio ou floresta confiável.
 - É importante notar que essas medidas não protegem contra a exploração do Contexto de Nomeação de Configuração (NC) gravável ou ataques à conta de confiança.
 
 [**Mais informações sobre confianças de domínio em ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/child-domain-da-to-ea-in-parent-domain)
@@ -733,25 +733,25 @@ https://cloud.hacktricks.wiki/en/pentesting-cloud/azure-security/az-lateral-move
 
 - **Restrições de Administradores de Domínio**: Recomenda-se que os Administradores de Domínio só possam fazer login em Controladores de Domínio, evitando seu uso em outros hosts.
 - **Privilégios de Conta de Serviço**: Serviços não devem ser executados com privilégios de Administrador de Domínio (DA) para manter a segurança.
-- **Limitação Temporal de Privilégios**: Para tarefas que requerem privilégios de DA, sua duração deve ser limitada. Isso pode ser alcançado por: `Add-ADGroupMember -Identity ‘Domain Admins’ -Members newDA -MemberTimeToLive (New-TimeSpan -Minutes 20)`
+- **Limitação Temporal de Privilégios**: Para tarefas que exigem privilégios de DA, sua duração deve ser limitada. Isso pode ser alcançado por: `Add-ADGroupMember -Identity ‘Domain Admins’ -Members newDA -MemberTimeToLive (New-TimeSpan -Minutes 20)`
 
-### **Implementando Técnicas de Engano**
+### **Implementando Técnicas de Decepção**
 
-- Implementar engano envolve a configuração de armadilhas, como usuários ou computadores iscas, com características como senhas que não expiram ou são marcadas como Confiáveis para Delegação. Uma abordagem detalhada inclui a criação de usuários com direitos específicos ou adicioná-los a grupos de alto privilégio.
+- Implementar decepção envolve a configuração de armadilhas, como usuários ou computadores iscas, com características como senhas que não expiram ou são marcadas como Confiáveis para Delegação. Uma abordagem detalhada inclui a criação de usuários com direitos específicos ou adicioná-los a grupos de alto privilégio.
 - Um exemplo prático envolve o uso de ferramentas como: `Create-DecoyUser -UserFirstName user -UserLastName manager-uncommon -Password Pass@123 | DeployUserDeception -UserFlag PasswordNeverExpires -GUID d07da11f-8a3d-42b6-b0aa-76c962be719a -Verbose`
-- Mais sobre a implementação de técnicas de engano pode ser encontrado em [Deploy-Deception no GitHub](https://github.com/samratashok/Deploy-Deception).
+- Mais sobre a implementação de técnicas de decepção pode ser encontrado em [Deploy-Deception no GitHub](https://github.com/samratashok/Deploy-Deception).
 
-### **Identificando Engano**
+### **Identificando Decepção**
 
 - **Para Objetos de Usuário**: Indicadores suspeitos incluem ObjectSID atípico, logons infrequentes, datas de criação e contagens baixas de senhas incorretas.
-- **Indicadores Gerais**: Comparar atributos de objetos iscas potenciais com os de objetos genuínos pode revelar inconsistências. Ferramentas como [HoneypotBuster](https://github.com/JavelinNetworks/HoneypotBuster) podem ajudar a identificar tais enganos.
+- **Indicadores Gerais**: Comparar atributos de objetos iscas potenciais com os de objetos genuínos pode revelar inconsistências. Ferramentas como [HoneypotBuster](https://github.com/JavelinNetworks/HoneypotBuster) podem ajudar a identificar tais decepções.
 
 ### **Evitando Sistemas de Detecção**
 
-- **Bypass de Detecção do Microsoft ATA**:
+- **Desvio de Detecção do Microsoft ATA**:
 - **Enumeração de Usuários**: Evitar a enumeração de sessões em Controladores de Domínio para prevenir a detecção do ATA.
 - **Impersonação de Ticket**: Utilizar chaves **aes** para a criação de tickets ajuda a evitar a detecção ao não rebaixar para NTLM.
-- **Ataques DCSync**: Executar a partir de um não-Controlador de Domínio para evitar a detecção do ATA é aconselhável, pois a execução direta a partir de um Controlador de Domínio acionará alertas.
+- **Ataques DCSync**: Executar a partir de um controlador de domínio não é recomendado para evitar a detecção do ATA, pois a execução direta a partir de um Controlador de Domínio acionará alertas.
 
 ## Referências
 

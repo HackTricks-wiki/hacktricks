@@ -66,7 +66,7 @@ return (pip.main,(["list"],))
 
 print(base64.b64encode(pickle.dumps(P(), protocol=0)))
 ```
-Para mais informações sobre como o pickle funciona, verifique isso: [https://checkoway.net/musings/pickle/](https://checkoway.net/musings/pickle/)
+Para mais informações sobre como o pickle funciona, confira isso: [https://checkoway.net/musings/pickle/](https://checkoway.net/musings/pickle/)
 
 ### Pacote Pip
 
@@ -91,7 +91,7 @@ Reverse.tar (1).gz
 > [!WARNING]
 > Note que exec permite strings multilinha e ";", mas eval não permite (verifique o operador walrus)
 
-Se certos caracteres forem proibidos, você pode usar a **representação hex/octal/B64** para **burlar** a restrição:
+Se certos caracteres forem proibidos, você pode usar a representação **hex/octal/B64** para **burlar** a restrição:
 ```python
 exec("print('RCE'); __import__('os').system('ls')") #Using ";"
 exec("print('RCE')\n__import__('os').system('ls')") #Using "\n"
@@ -137,7 +137,7 @@ df.query("@pd.annotations.__class__.__init__.__globals__['__builtins__']['eval']
 ```
 ## Bypassando proteções através de codificações (UTF-7)
 
-Em [**este artigo**](https://blog.arkark.dev/2022/11/18/seccon-en/#misc-latexipy), o UFT-7 é usado para carregar e executar código python arbitrário dentro de uma aparente sandbox:
+Em [**este artigo**](https://blog.arkark.dev/2022/11/18/seccon-en/#misc-latexipy), o UTF-7 é usado para carregar e executar código python arbitrário dentro de uma aparente sandbox:
 ```python
 assert b"+AAo-".decode("utf_7") == "\n"
 
@@ -375,7 +375,7 @@ __builtins__["__import__"]("os").system("ls")
 # There are lots of other payloads that can be abused to execute commands
 # See them below
 ```
-## Globals e locais
+## Globals e locals
 
 Verificar os **`globals`** e **`locals`** é uma boa maneira de saber o que você pode acessar.
 ```python
@@ -483,7 +483,7 @@ Podemos fazer a mesma coisa com **outras bibliotecas** que sabemos que podem ser
 #pdb
 [ x.__init__.__globals__ for x in ''.__class__.__base__.__subclasses__() if "wrapper" not in str(x.__init__) and "pdb" in x.__init__.__globals__ ][0]["pdb"].os.system("ls")
 ```
-Além disso, poderíamos até pesquisar quais módulos estão carregando bibliotecas maliciosas:
+Além disso, poderíamos até procurar quais módulos estão carregando bibliotecas maliciosas:
 ```python
 bad_libraries_names = ["os", "commands", "subprocess", "pty", "importlib", "imp", "sys", "builtins", "pip", "pdb"]
 for b in bad_libraries_names:
@@ -660,7 +660,7 @@ Você pode verificar a saída deste script nesta página:
 https://github.com/carlospolop/hacktricks/blob/master/generic-methodologies-and-resources/python/bypass-python-sandboxes/broken-reference/README.md
 {{#endref}}
 
-## Python Format String
+## Formato de String em Python
 
 Se você **enviar** uma **string** para o python que vai ser **formatada**, você pode usar `{}` para acessar **informações internas do python.** Você pode usar os exemplos anteriores para acessar globals ou builtins, por exemplo.
 ```python
@@ -743,7 +743,7 @@ Você tem mais como isso na seção [**Execução Python sem chamadas**](#python
 Uma vulnerabilidade de string de formato em python não permite executar funções (não permite o uso de parênteses), então não é possível obter RCE como `'{0.system("/bin/sh")}'.format(os)`.\
 No entanto, é possível usar `[]`. Portanto, se uma biblioteca python comum tiver um método **`__getitem__`** ou **`__getattr__`** que executa código arbitrário, é possível abusar deles para obter RCE.
 
-Procurando por um gadget assim em python, o artigo sugere esta [**consulta de busca no Github**](https://github.com/search?q=repo%3Apython%2Fcpython+%2Fdef+%28__getitem__%7C__getattr__%29%2F+path%3ALib%2F+-path%3ALib%2Ftest%2F&type=code). Onde ele encontrou este [aqui](https://github.com/python/cpython/blob/43303e362e3a7e2d96747d881021a14c7f7e3d0b/Lib/ctypes/__init__.py#L463):
+Procurando por um gadget assim em python, o artigo propõe esta [**consulta de busca no Github**](https://github.com/search?q=repo%3Apython%2Fcpython+%2Fdef+%28__getitem__%7C__getattr__%29%2F+path%3ALib%2F+-path%3ALib%2Ftest%2F&type=code). Onde ele encontrou este [aqui](https://github.com/python/cpython/blob/43303e362e3a7e2d96747d881021a14c7f7e3d0b/Lib/ctypes/__init__.py#L463):
 ```python
 class LibraryLoader(object):
 def __init__(self, dlltype):
@@ -774,7 +774,7 @@ O desafio na verdade explora outra vulnerabilidade no servidor que permite criar
 ## Dissecando Objetos Python
 
 > [!TIP]
-> Se você quer **aprender** sobre **bytecode python** em profundidade, leia este **incrível** post sobre o tópico: [**https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d**](https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d)
+> Se você quer **aprender** sobre **bytecode python** em profundidade, leia este **incrível** post sobre o tema: [**https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d**](https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d)
 
 Em alguns CTFs, você pode receber o nome de uma **função personalizada onde a flag** reside e você precisa ver os **internos** da **função** para extraí-la.
 
@@ -899,7 +899,7 @@ dis.dis(get_flag)
 44 LOAD_CONST               0 (None)
 47 RETURN_VALUE
 ```
-Observe que **se você não puder importar `dis` no sandbox do python** você pode obter o **bytecode** da função (`get_flag.func_code.co_code`) e **desmontá-lo** localmente. Você não verá o conteúdo das variáveis sendo carregadas (`LOAD_CONST`), mas pode inferi-las a partir de (`get_flag.func_code.co_consts`), pois `LOAD_CONST` também indica o deslocamento da variável sendo carregada.
+Observe que **se você não puder importar `dis` no sandbox do python** você pode obter o **bytecode** da função (`get_flag.func_code.co_code`) e **desmontá-lo** localmente. Você não verá o conteúdo das variáveis sendo carregadas (`LOAD_CONST`), mas pode inferi-las a partir de (`get_flag.func_code.co_consts`), pois `LOAD_CONST` também informa o deslocamento da variável que está sendo carregada.
 ```python
 dis.dis('d\x01\x00}\x01\x00d\x02\x00}\x02\x00d\x03\x00d\x04\x00g\x02\x00}\x03\x00|\x00\x00|\x02\x00k\x02\x00r(\x00d\x05\x00Sd\x06\x00Sd\x00\x00S')
 0 LOAD_CONST          1 (1)
@@ -923,7 +923,7 @@ dis.dis('d\x01\x00}\x01\x00d\x02\x00}\x02\x00d\x03\x00d\x04\x00g\x02\x00}\x03\x0
 ```
 ## Compilando Python
 
-Agora, vamos imaginar que de alguma forma você pode **extrair as informações sobre uma função que você não pode executar**, mas você **precisa** **executá-la**.\
+Agora, vamos imaginar que de alguma forma você pode **extrair as informações sobre uma função que não pode executar** mas você **precisa** **executá-la**.\
 Como no exemplo a seguir, você **pode acessar o objeto de código** dessa função, mas apenas lendo o desmonte você **não sabe como calcular a flag** (_imagine uma função `calc_flag` mais complexa_)
 ```python
 def get_flag(some_input):
@@ -958,7 +958,7 @@ mydict = {}
 mydict['__builtins__'] = __builtins__
 function_type(code_obj, mydict, None, None, None)("secretcode")
 ```
-> [!DICA]
+> [!TIP]
 > Dependendo da versão do python, os **parâmetros** de `code_type` podem ter uma **ordem diferente**. A melhor maneira de saber a ordem dos parâmetros na versão do python que você está executando é rodar:
 >
 > ```
@@ -969,7 +969,7 @@ function_type(code_obj, mydict, None, None, None)("secretcode")
 
 ### Recriando uma função vazada
 
-> [!AVISO]
+> [!WARNING]
 > No exemplo a seguir, vamos pegar todos os dados necessários para recriar a função diretamente do objeto de código da função. Em um **exemplo real**, todos os **valores** para executar a função **`code_type`** é o que **você precisará vazar**.
 ```python
 fc = get_flag.__code__
@@ -1032,7 +1032,7 @@ Usando ferramentas como [**https://www.decompiler.com/**](https://www.decompiler
 ../../basic-forensic-methodology/specific-software-file-type-tricks/.pyc.md
 {{#endref}}
 
-## Misc Python
+## Python Diverso
 
 ### Assert
 

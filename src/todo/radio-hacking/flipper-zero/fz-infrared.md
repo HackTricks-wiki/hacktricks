@@ -26,7 +26,7 @@ O Flipper Zero pode ser usado como um **controle remoto universal para controlar
 
 Basta pressionar o botão de energia no modo Controle Remoto Universal, e o Flipper **enviará sequencialmente os comandos "Desligar"** de todas as TVs que conhece: Sony, Samsung, Panasonic... e assim por diante. Quando a TV recebe seu sinal, ela reagirá e desligará.
 
-Esse ataque de força bruta leva tempo. Quanto maior o dicionário, mais tempo levará para terminar. É impossível descobrir qual sinal exatamente a TV reconheceu, uma vez que não há feedback da TV.
+Esse método de força bruta leva tempo. Quanto maior o dicionário, mais tempo levará para terminar. É impossível descobrir qual sinal exatamente a TV reconheceu, uma vez que não há feedback da TV.
 
 ### Aprender Novo Controle Remoto
 

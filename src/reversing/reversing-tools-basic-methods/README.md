@@ -27,11 +27,11 @@ Software:
 
 dotPeek é um descompilador que **descompila e examina múltiplos formatos**, incluindo **bibliotecas** (.dll), **arquivos de metadados do Windows** (.winmd) e **executáveis** (.exe). Uma vez descompilado, um assembly pode ser salvo como um projeto do Visual Studio (.csproj).
 
-O mérito aqui é que se um código fonte perdido requer restauração de um assembly legado, essa ação pode economizar tempo. Além disso, dotPeek fornece navegação prática por todo o código descompilado, tornando-o uma das ferramentas perfeitas para **análise de algoritmos Xamarin.**
+O mérito aqui é que se um código fonte perdido requer restauração a partir de um assembly legado, essa ação pode economizar tempo. Além disso, dotPeek fornece navegação prática por todo o código descompilado, tornando-o uma das ferramentas perfeitas para **análise de algoritmos Xamarin.**
 
 ### [.NET Reflector](https://www.red-gate.com/products/reflector/)
 
-Com um modelo de add-in abrangente e uma API que estende a ferramenta para atender às suas necessidades exatas, .NET Reflector economiza tempo e simplifica o desenvolvimento. Vamos dar uma olhada na infinidade de serviços de engenharia reversa que esta ferramenta fornece:
+Com um modelo de add-in abrangente e uma API que estende a ferramenta para atender às suas necessidades exatas, .NET Reflector economiza tempo e simplifica o desenvolvimento. Vamos dar uma olhada na infinidade de serviços de engenharia reversa que esta ferramenta oferece:
 
 - Fornece uma visão de como os dados fluem através de uma biblioteca ou componente
 - Fornece insights sobre a implementação e uso de linguagens e frameworks .NET
@@ -47,7 +47,7 @@ Se você precisar **descompilar**, **modificar** e **recompilar** novamente, pod
 
 ### Registro do DNSpy
 
-Para fazer **DNSpy registrar algumas informações em um arquivo**, você pode usar este trecho:
+Para fazer **o DNSpy registrar algumas informações em um arquivo**, você pode usar este trecho:
 ```cs
 using System.IO;
 path = "C:\\inetpub\\temp\\MyTest2.txt";
@@ -78,9 +78,9 @@ Em seguida, salve o novo arquivo via _**File >> Save module...**_:
 
 ![](<../../images/image (602).png>)
 
-Isso é necessário porque, se você não fizer isso, em **runtime** várias **optimisations** serão aplicadas ao código e pode ser possível que, ao depurar, um **break-point nunca seja atingido** ou algumas **variáveis não existam**.
+Isso é necessário porque, se você não fizer isso, durante a **execução** várias **otimizações** serão aplicadas ao código e pode ser possível que, ao depurar, um **ponto de interrupção nunca seja atingido** ou algumas **variáveis não existam**.
 
-Então, se sua aplicação .NET estiver sendo **run** pelo **IIS**, você pode **restart** com:
+Então, se sua aplicação .NET estiver sendo **executada** pelo **IIS**, você pode **reiniciá-la** com:
 ```
 iisreset /noforce
 ```
@@ -88,7 +88,7 @@ Então, para começar a depuração, você deve fechar todos os arquivos abertos
 
 ![](<../../images/image (318).png>)
 
-Em seguida, selecione **w3wp.exe** para anexar ao **IIS server** e clique em **attach**:
+Em seguida, selecione **w3wp.exe** para se conectar ao **IIS server** e clique em **attach**:
 
 ![](<../../images/image (113).png>)
 
@@ -125,7 +125,7 @@ Clique com o botão direito em qualquer módulo no **Assembly Explorer** e cliqu
 
 ![](<../../images/image (704).png>)
 
-Então, quando você começar a depurar, **a execução será interrompida quando cada DLL for carregada**, então, quando o rundll32 carregar sua DLL, a execução será interrompida.
+Então, quando você começar a depurar, **a execução será interrompida quando cada DLL for carregada**, e quando o rundll32 carregar sua DLL, a execução será interrompida.
 
 Mas, como você pode chegar ao código da DLL que foi carregada? Usando este método, eu não sei como.
 
@@ -186,7 +186,7 @@ Você pode baixar uma versão compilada de [jmp2it na página de lançamentos](h
 
 [**Cutter**](https://github.com/rizinorg/cutter/releases/tag/v1.12.0) é a GUI do radare. Usando o cutter, você pode emular o shellcode e inspecioná-lo dinamicamente.
 
-Observe que o Cutter permite que você "Abra Arquivo" e "Abra Shellcode". No meu caso, quando eu abri o shellcode como um arquivo, ele o decompilou corretamente, mas quando eu o abri como um shellcode, não:
+Observe que o Cutter permite que você "Abra Arquivo" e "Abra Shellcode". No meu caso, quando abri o shellcode como um arquivo, ele o decompilou corretamente, mas quando o abri como um shellcode, não:
 
 ![](<../../images/image (562).png>)
 
@@ -280,11 +280,11 @@ Nesta página você pode encontrar como obter o código python de um binário py
 Se você obtiver o **binário** de um jogo GBA, pode usar diferentes ferramentas para **emular** e **depurar**:
 
 - [**no$gba**](https://problemkaputt.de/gba.htm) (_Baixe a versão de depuração_) - Contém um depurador com interface
-- [**mgba** ](https://mgba.io)- Contém um depurador CLI
+- [**mgba** ](https://mgba.io) - Contém um depurador CLI
 - [**gba-ghidra-loader**](https://github.com/pudii/gba-ghidra-loader) - Plugin Ghidra
 - [**GhidraGBA**](https://github.com/SiD3W4y/GhidraGBA) - Plugin Ghidra
 
-Em [**no$gba**](https://problemkaputt.de/gba.htm), em _**Options --> Emulation Setup --> Controls**_** ** você pode ver como pressionar os **botões** do Game Boy Advance
+Em [**no$gba**](https://problemkaputt.de/gba.htm), em _**Options --> Emulation Setup --> Controls**_ você pode ver como pressionar os **botões** do Game Boy Advance
 
 ![](<../../images/image (581).png>)
 
@@ -328,7 +328,7 @@ FUN_08000dd0(&DAT_02009584,0x6000000,&DAT_030000dc);
 FUN_08000354(&DAT_030000dc,0x3c);
 uVar4 = DAT_030004d8;
 ```
-Este código foi encontrado:
+Foi encontrado este código:
 ```c
 do {
 DAT_030004da = uVar4; //This is the last key pressed
@@ -373,7 +373,7 @@ No código anterior, você pode ver que estamos comparando **uVar1** (o lugar on
 - Primeiro, é comparado com o **valor 4** (**botão SELECT**): No desafio, este botão limpa a tela.
 - Em seguida, é comparado com o **valor 8** (**botão START**): No desafio, isso verifica se o código é válido para obter a flag.
 - Neste caso, a var **`DAT_030000d8`** é comparada com 0xf3 e, se o valor for o mesmo, algum código é executado.
-- Em qualquer outro caso, um cont (`DAT_030000d4`) é verificado. É um cont porque está adicionando 1 logo após entrar no código.\
+- Em qualquer outro caso, algum cont (`DAT_030000d4`) é verificado. É um cont porque está adicionando 1 logo após entrar no código.\
 **Se** for menor que 8, algo que envolve **adicionar** valores a **`DAT_030000d8`** é feito (basicamente, está adicionando os valores das teclas pressionadas nesta variável enquanto o cont for menor que 8).
 
 Portanto, neste desafio, sabendo os valores dos botões, você precisava **pressionar uma combinação com um comprimento menor que 8 que a adição resultante seja 0xf3.**

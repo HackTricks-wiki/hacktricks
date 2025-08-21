@@ -77,7 +77,7 @@ dd if=<subject device> of=<image file> bs=512
 dcfldd if=<subject device> of=<image file> bs=512 hash=<algorithm> hashwindow=<chunk size> hashlog=<hash file>
 dcfldd if=/dev/sdc of=/media/usb/pc.image hash=sha256 hashwindow=1M hashlog=/media/usb/pc.hashes
 ```
-### Pré-análise da Imagem do Disco
+### Pré-análise de Imagem de Disco
 
 Imaginando uma imagem de disco sem mais dados.
 ```bash
@@ -151,7 +151,7 @@ malware-analysis.md
 
 ## Pesquisa de programas instalados
 
-Para pesquisar efetivamente programas instalados em sistemas Debian e RedHat, considere aproveitar logs do sistema e bancos de dados juntamente com verificações manuais em diretórios comuns.
+Para pesquisar efetivamente por programas instalados em sistemas Debian e RedHat, considere aproveitar logs do sistema e bancos de dados juntamente com verificações manuais em diretórios comuns.
 
 - Para Debian, inspecione _**`/var/lib/dpkg/status`**_ e _**`/var/log/dpkg.log`**_ para obter detalhes sobre instalações de pacotes, usando `grep` para filtrar informações específicas.
 - Usuários do RedHat podem consultar o banco de dados RPM com `rpm -qa --root=/mntpath/var/lib/rpm` para listar pacotes instalados.
@@ -174,7 +174,7 @@ find / -type f -executable | grep <something>
 ```
 ## Recuperar Binários em Execução Deletados
 
-Imagine um processo que foi executado de /tmp/exec e depois deletado. É possível extrair isso.
+Imagine um processo que foi executado de /tmp/exec e então deletado. É possível extrair isso.
 ```bash
 cd /proc/3746/ #PID with the exec file deleted
 head -1 maps #Get address of the file. It was 08048000-08049000
@@ -196,7 +196,7 @@ cat /var/spool/cron/crontabs/*  \
 #MacOS
 ls -l /usr/lib/cron/tabs/ /Library/LaunchAgents/ /Library/LaunchDaemons/ ~/Library/LaunchAgents/
 ```
-#### Caça: Abuso de Cron/Anacron via 0anacron e stubs suspeitos
+#### Hunt: Abuso de Cron/Anacron via 0anacron e stubs suspeitos
 Os atacantes frequentemente editam o stub 0anacron presente em cada diretório /etc/cron.*/ para garantir a execução periódica.
 ```bash
 # List 0anacron files and their timestamps/sizes
@@ -205,7 +205,7 @@ for d in /etc/cron.*; do [ -f "$d/0anacron" ] && stat -c '%n %y %s' "$d/0anacron
 # Look for obvious execution of shells or downloaders embedded in cron stubs
 grep -R --line-number -E 'curl|wget|/bin/sh|python|bash -c' /etc/cron.*/* 2>/dev/null
 ```
-#### Hunt: SSH hardening rollback and backdoor shells
+#### Hunt: Reforço de SSH, rollback e shells de backdoor
 Mudanças no sshd_config e nas shells de contas do sistema são comuns após a exploração para preservar o acesso.
 ```bash
 # Root login enablement (flag "yes" or lax values)
@@ -216,7 +216,7 @@ awk -F: '($7 ~ /bin\/(sh|bash|zsh)/ && $1 ~ /^(games|lp|sync|shutdown|halt|mail|
 ```
 #### Hunt: Marcadores de C2 na Nuvem (Dropbox/Cloudflare Tunnel)
 - Os beacons da API do Dropbox geralmente usam api.dropboxapi.com ou content.dropboxapi.com via HTTPS com tokens de Autorização: Bearer.
-- Procure no proxy/Zeek/NetFlow por egressos inesperados do Dropbox a partir de servidores.
+- Procure em proxy/Zeek/NetFlow por egressos inesperados do Dropbox a partir de servidores.
 - O Cloudflare Tunnel (`cloudflared`) fornece C2 de backup sobre a porta 443 de saída.
 ```bash
 ps aux | grep -E '[c]loudflared|trycloudflare'
@@ -246,10 +246,10 @@ Módulos do kernel Linux, frequentemente utilizados por malware como componentes
 
 ### Outros Locais de Autostart
 
-O Linux emprega vários arquivos para executar automaticamente programas na entrada do usuário, potencialmente abrigando malware:
+O Linux emprega vários arquivos para executar automaticamente programas ao fazer login do usuário, potencialmente abrigando malware:
 
 - **/etc/profile.d/**\*, **/etc/profile**, e **/etc/bash.bashrc**: Executados para qualquer login de usuário.
-- **\~/.bashrc**, **\~/.bash_profile**, **\~/.profile**, e **\~/.config/autostart**: Arquivos específicos do usuário que são executados na entrada.
+- **\~/.bashrc**, **\~/.bash_profile**, **\~/.profile**, e **\~/.config/autostart**: Arquivos específicos do usuário que são executados ao fazer login.
 - **/etc/rc.local**: Executa após todos os serviços do sistema terem sido iniciados, marcando o fim da transição para um ambiente multiusuário.
 
 ## Examinar Logs
@@ -273,7 +273,7 @@ Sistemas Linux rastreiam atividades de usuários e eventos do sistema através d
 - **/var/log/**: Sempre verifique se há logs inesperados aqui.
 
 > [!TIP]
-> Logs do sistema Linux e subsistemas de auditoria podem ser desativados ou excluídos em um incidente de intrusão ou malware. Como os logs em sistemas Linux geralmente contêm algumas das informações mais úteis sobre atividades maliciosas, intrusos rotineiramente os excluem. Portanto, ao examinar os arquivos de log disponíveis, é importante procurar lacunas ou entradas fora de ordem que possam ser uma indicação de exclusão ou adulteração.
+> Logs do sistema Linux e subsistemas de auditoria podem ser desativados ou excluídos em um incidente de intrusão ou malware. Como os logs em sistemas Linux geralmente contêm algumas das informações mais úteis sobre atividades maliciosas, intrusos rotineiramente os excluem. Portanto, ao examinar os arquivos de log disponíveis, é importante procurar lacunas ou entradas fora de ordem que possam ser uma indicação de exclusão ou manipulação.
 
 **O Linux mantém um histórico de comandos para cada usuário**, armazenado em:
 
@@ -302,11 +302,11 @@ Alguns aplicativos também geram seus próprios logs:
 - **FTP/SFTP**: Revise logs em _\~/.ftp_history_ ou _\~/.sftp_history_ para transferências de arquivos que podem ser não autorizadas.
 - **MySQL**: Investigue _\~/.mysql_history_ para consultas MySQL executadas, potencialmente revelando atividades não autorizadas no banco de dados.
 - **Less**: Analise _\~/.lesshst_ para histórico de uso, incluindo arquivos visualizados e comandos executados.
-- **Git**: Examine _\~/.gitconfig_ e projeto _.git/logs_ para alterações em repositórios.
+- **Git**: Examine _\~/.gitconfig_ e o projeto _.git/logs_ para alterações em repositórios.
 
-### Logs de USB
+### Logs USB
 
-[**usbrip**](https://github.com/snovvcrash/usbrip) é um pequeno software escrito em Python puro que analisa arquivos de log do Linux (`/var/log/syslog*` ou `/var/log/messages*` dependendo da distribuição) para construir tabelas de histórico de eventos USB.
+[**usbrip**](https://github.com/snovvcrash/usbrip) é um pequeno software escrito em Python 3 puro que analisa arquivos de log do Linux (`/var/log/syslog*` ou `/var/log/messages*` dependendo da distribuição) para construir tabelas de histórico de eventos USB.
 
 É interessante **saber todos os USBs que foram usados** e será mais útil se você tiver uma lista autorizada de USBs para encontrar "eventos de violação" (o uso de USBs que não estão dentro dessa lista).
 
@@ -329,7 +329,7 @@ Mais exemplos e informações dentro do github: [https://github.com/snovvcrash/u
 
 Examine o _**/etc/passwd**_, _**/etc/shadow**_ e **logs de segurança** em busca de nomes ou contas incomuns criadas e ou usadas em estreita proximidade com eventos não autorizados conhecidos. Além disso, verifique possíveis ataques de força bruta ao sudo.\
 Além disso, verifique arquivos como _**/etc/sudoers**_ e _**/etc/groups**_ para privilégios inesperados concedidos a usuários.\
-Por fim, procure por contas com **sem senhas** ou **senhas facilmente adivinháveis**.
+Finalmente, procure por contas com **sem senhas** ou **senhas facilmente adivinháveis**.
 
 ## Examinar Sistema de Arquivos
 
@@ -375,16 +375,16 @@ git diff --no-index --diff-filter=M path/to/old_version/ path/to/new_version/ | 
 ```bash
 git diff --no-index --diff-filter=D path/to/old_version/ path/to/new_version/
 ```
-- **Opções de filtro** (`--diff-filter`) ajudam a restringir a mudanças específicas, como arquivos adicionados (`A`), deletados (`D`) ou modificados (`M`).
+- **Opções de filtro** (`--diff-filter`) ajudam a restringir a mudanças específicas, como arquivos adicionados (`A`), excluídos (`D`) ou modificados (`M`).
 - `A`: Arquivos adicionados
 - `C`: Arquivos copiados
-- `D`: Arquivos deletados
+- `D`: Arquivos excluídos
 - `M`: Arquivos modificados
 - `R`: Arquivos renomeados
 - `T`: Mudanças de tipo (por exemplo, arquivo para symlink)
 - `U`: Arquivos não mesclados
 - `X`: Arquivos desconhecidos
-- `B`: Arquivos quebrados
+- `B`: Arquivos corrompidos
 
 ## Referências
 

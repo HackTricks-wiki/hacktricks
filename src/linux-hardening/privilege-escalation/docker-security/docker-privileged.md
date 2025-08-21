@@ -35,7 +35,7 @@ cpu              nbd0             pts              stdout           tty27       
 
 ### Sistemas de arquivos do kernel somente leitura
 
-Os sistemas de arquivos do kernel fornecem um mecanismo para um processo modificar o comportamento do kernel. No entanto, quando se trata de processos de contêiner, queremos impedir que eles façam quaisquer alterações no kernel. Portanto, montamos sistemas de arquivos do kernel como **somente leitura** dentro do contêiner, garantindo que os processos do contêiner não possam modificar o kernel.
+Os sistemas de arquivos do kernel fornecem um mecanismo para que um processo modifique o comportamento do kernel. No entanto, quando se trata de processos de contêiner, queremos impedir que eles façam quaisquer alterações no kernel. Portanto, montamos sistemas de arquivos do kernel como **somente leitura** dentro do contêiner, garantindo que os processos do contêiner não possam modificar o kernel.
 
 {{#tabs}}
 {{#tab name="Dentro do contêiner padrão"}}
@@ -85,6 +85,7 @@ mount  | grep /proc.*tmpfs
 ### Capacidades do Linux
 
 Os mecanismos de contêiner lançam os contêineres com um **número limitado de capacidades** para controlar o que acontece dentro do contêiner por padrão. Os **privilegiados** têm **todas** as **capacidades** acessíveis. Para aprender sobre capacidades, leia:
+
 
 {{#ref}}
 ../linux-capabilities.md
@@ -147,7 +148,7 @@ Seccomp_filters:	0
 # You can manually disable seccomp in docker with
 --security-opt seccomp=unconfined
 ```
-Além disso, note que quando o Docker (ou outros CRIs) são usados em um cluster de **Kubernetes**, o **filtro seccomp está desativado por padrão**.
+Além disso, note que quando o Docker (ou outros CRIs) são usados em um cluster **Kubernetes**, o **filtro seccomp está desativado por padrão**.
 
 ### AppArmor
 

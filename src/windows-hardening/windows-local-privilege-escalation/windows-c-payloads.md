@@ -123,7 +123,7 @@ sedebug-+-seimpersonate-copy-token.md
 ---
 
 ## Patch AMSI & ETW em Memória (Evasão de Defesa)
-A maioria dos motores AV/EDR modernos depende do **AMSI** e do **ETW** para inspecionar comportamentos maliciosos. Fazer patch em ambas as interfaces cedo dentro do processo atual impede que payloads baseados em script (por exemplo, PowerShell, JScript) sejam escaneados.
+A maioria dos motores AV/EDR modernos depende de **AMSI** e **ETW** para inspecionar comportamentos maliciosos. Fazer patch em ambas as interfaces cedo dentro do processo atual impede que payloads baseados em script (por exemplo, PowerShell, JScript) sejam escaneados.
 ```c
 // gcc -o patch_amsi.exe patch_amsi.c -lntdll
 #define _CRT_SECURE_NO_WARNINGS

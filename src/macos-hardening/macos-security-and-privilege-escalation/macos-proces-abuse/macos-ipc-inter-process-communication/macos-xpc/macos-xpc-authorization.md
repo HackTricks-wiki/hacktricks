@@ -252,7 +252,7 @@ Você pode encontrar **todas as configurações de permissões** [**aqui**](http
 - Esta é a chave mais direta. Se definida como `false`, especifica que um usuário não precisa fornecer autenticação para obter esse direito.
 - Isso é usado em **combinação com uma das 2 abaixo ou indicando um grupo** ao qual o usuário deve pertencer.
 2. **'allow-root': 'true'**
-- Se um usuário estiver operando como o usuário root (que tem permissões elevadas), e esta chave estiver definida como `true`, o usuário root poderia potencialmente obter esse direito sem mais autenticação. No entanto, tipicamente, alcançar o status de usuário root já requer autenticação, então este não é um cenário de "sem autenticação" para a maioria dos usuários.
+- Se um usuário estiver operando como o usuário root (que tem permissões elevadas), e esta chave estiver definida como `true`, o usuário root poderia potencialmente obter esse direito sem mais autenticação. No entanto, tipicamente, alcançar um status de usuário root já requer autenticação, então este não é um cenário de "sem autenticação" para a maioria dos usuários.
 3. **'session-owner': 'true'**
 - Se definida como `true`, o proprietário da sessão (o usuário atualmente logado) obteria automaticamente esse direito. Isso pode contornar a autenticação adicional se o usuário já estiver logado.
 4. **'shared': 'true'**

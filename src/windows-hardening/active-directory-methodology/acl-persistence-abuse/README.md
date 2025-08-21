@@ -58,7 +58,7 @@ net user spotless /domain; Add-NetGroupUser -UserName spotless -GroupName "domai
 ```
 ## **WriteProperty (Auto-Membresia)**
 
-Um privilégio semelhante, isso permite que atacantes se adicionem diretamente a grupos modificando as propriedades do grupo se eles tiverem o direito de `WriteProperty` sobre esses grupos. A confirmação e execução desse privilégio são realizadas com:
+Um privilégio semelhante, isso permite que atacantes se adicionem diretamente a grupos modificando as propriedades do grupo se tiverem o direito de `WriteProperty` nesses grupos. A confirmação e execução desse privilégio são realizadas com:
 ```bash
 Get-ObjectAcl -ResolveGUIDs | ? {$_.objectdn -eq "CN=Domain Admins,CN=Users,DC=offense,DC=local" -and $_.IdentityReference -eq "OFFENSE\spotless"}
 net group "domain admins" spotless /add /domain
@@ -159,11 +159,11 @@ Atualizações de GPO normalmente ocorrem a cada 90 minutos. Para acelerar esse 
 
 Ao inspecionar as Tarefas Agendadas para uma GPO específica, como a `Misconfigured Policy`, a adição de tarefas como `evilTask` pode ser confirmada. Essas tarefas são criadas através de scripts ou ferramentas de linha de comando com o objetivo de modificar o comportamento do sistema ou escalar privilégios.
 
-A estrutura da tarefa, conforme mostrado no arquivo de configuração XML gerado pelo `New-GPOImmediateTask`, descreve os detalhes da tarefa agendada - incluindo o comando a ser executado e seus gatilhos. Este arquivo representa como as tarefas agendadas são definidas e gerenciadas dentro das GPOs, fornecendo um método para executar comandos ou scripts arbitrários como parte da aplicação da política.
+A estrutura da tarefa, conforme mostrado no arquivo de configuração XML gerado pelo `New-GPOImmediateTask`, descreve os detalhes da tarefa agendada - incluindo o comando a ser executado e seus gatilhos. Este arquivo representa como as tarefas agendadas são definidas e gerenciadas dentro das GPOs, fornecendo um método para executar comandos ou scripts arbitrários como parte da aplicação de políticas.
 
 ### Usuários e Grupos
 
-As GPOs também permitem a manipulação de membros de usuários e grupos nos sistemas alvo. Ao editar os arquivos de política de Usuários e Grupos diretamente, os atacantes podem adicionar usuários a grupos privilegiados, como o grupo local `administrators`. Isso é possível através da delegação de permissões de gerenciamento de GPO, que permite a modificação dos arquivos de política para incluir novos usuários ou alterar a filiação a grupos.
+As GPOs também permitem a manipulação de membros de usuários e grupos nos sistemas alvo. Ao editar os arquivos de política de Usuários e Grupos diretamente, atacantes podem adicionar usuários a grupos privilegiados, como o grupo local `administrators`. Isso é possível através da delegação de permissões de gerenciamento de GPO, que permite a modificação dos arquivos de política para incluir novos usuários ou alterar a filiação a grupos.
 
 O arquivo de configuração XML para Usuários e Grupos descreve como essas mudanças são implementadas. Ao adicionar entradas a este arquivo, usuários específicos podem receber privilégios elevados em sistemas afetados. Este método oferece uma abordagem direta para escalonamento de privilégios através da manipulação de GPO.
 

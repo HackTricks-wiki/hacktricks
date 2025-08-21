@@ -36,10 +36,10 @@ docker run -it -v /:/host/ --cap-add=ALL --security-opt apparmor=unconfined --se
 > [!TIP]
 > Caso o **docker socket esteja em um lugar inesperado**, você ainda pode se comunicar com ele usando o comando **`docker`** com o parâmetro **`-H unix:///path/to/docker.sock`**
 
-O daemon do Docker também pode estar [ouvindo em uma porta (por padrão 2375, 2376)](../../../../network-services-pentesting/2375-pentesting-docker.md) ou em sistemas baseados em Systemd, a comunicação com o daemon do Docker pode ocorrer através do socket do Systemd `fd://`.
+O daemon do Docker pode também [estar ouvindo em uma porta (por padrão 2375, 2376)](../../../../network-services-pentesting/2375-pentesting-docker.md) ou em sistemas baseados em Systemd, a comunicação com o daemon do Docker pode ocorrer através do socket do Systemd `fd://`.
 
 > [!TIP]
-> Além disso, preste atenção aos sockets de tempo de execução de outros runtimes de alto nível:
+> Além disso, preste atenção aos sockets de runtime de outros runtimes de alto nível:
 >
 > - dockershim: `unix:///var/run/dockershim.sock`
 > - containerd: `unix:///run/containerd/containerd.sock`
@@ -113,7 +113,7 @@ E voilà! Agora você pode acessar o sistema de arquivos do host porque ele est�
 
 #### Montando Disco - Poc2
 
-Dentro do contêiner, um atacante pode tentar obter mais acesso ao sistema operacional subjacente do host por meio de um volume hostPath gravável criado pelo cluster. Abaixo estão algumas coisas comuns que você pode verificar dentro do contêiner para ver se pode aproveitar esse vetor de ataque:
+Dentro do contêiner, um atacante pode tentar obter mais acesso ao sistema operacional subjacente do host por meio de um volume hostPath gravável criado pelo cluster. Abaixo estão algumas coisas comuns que você pode verificar dentro do contêiner para ver se você pode aproveitar esse vetor de ataque:
 ```bash
 ### Check if You Can Write to a File-system
 echo 1 > /proc/sysrq-trigger
@@ -351,7 +351,7 @@ bash -p #From non priv inside mounted folder
 Se você tiver acesso como **root dentro de um container** e tiver **escapado como um usuário não privilegiado para o host**, você pode abusar de ambas as shells para **privesc dentro do host** se você tiver a capacidade MKNOD dentro do container (é por padrão) como [**explicado neste post**](https://labs.withsecure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/).\
 Com tal capacidade, o usuário root dentro do container é permitido **criar arquivos de dispositivo de bloco**. Arquivos de dispositivo são arquivos especiais que são usados para **acessar hardware subjacente e módulos do kernel**. Por exemplo, o arquivo de dispositivo de bloco /dev/sda dá acesso para **ler os dados brutos no disco do sistema**.
 
-O Docker protege contra o uso indevido de dispositivos de bloco dentro dos containers, aplicando uma política de cgroup que **bloqueia operações de leitura/gravação de dispositivos de bloco**. No entanto, se um dispositivo de bloco for **criado dentro do container**, ele se torna acessível de fora do container através do diretório **/proc/PID/root/**. Esse acesso requer que o **proprietário do processo seja o mesmo** tanto dentro quanto fora do container.
+O Docker protege contra o uso indevido de dispositivos de bloco dentro de containers, aplicando uma política de cgroup que **bloqueia operações de leitura/gravação de dispositivos de bloco**. No entanto, se um dispositivo de bloco for **criado dentro do container**, ele se torna acessível de fora do container através do diretório **/proc/PID/root/**. Esse acesso requer que o **proprietário do processo seja o mesmo** tanto dentro quanto fora do container.
 
 Exemplo de **exploração** deste [**writeup**](https://radboudinstituteof.pwning.nl/posts/htbunictfquals2021/goodgames/):
 ```bash
@@ -434,13 +434,13 @@ Como nos seguintes exemplos:
 - [Writeup: How to contact Google SRE: Dropping a shell in cloud SQL](https://offensi.com/2020/08/18/how-to-contact-google-sre-dropping-a-shell-in-cloud-sql/)
 - [Metadata service MITM allows root privilege escalation (EKS / GKE)](https://blog.champtar.fr/Metadata_MITM_root_EKS_GKE/)
 
-Você também poderá acessar **serviços de rede vinculados ao localhost** dentro do host ou até mesmo acessar as **permissões de metadados do nó** (que podem ser diferentes das que um contêiner pode acessar).
+Você também poderá acessar **serviços de rede vinculados ao localhost** dentro do host ou até mesmo acessar as **permissões de metadados do nó** (que podem ser diferentes daquelas que um contêiner pode acessar).
 
 ### hostIPC
 ```bash
 docker run --rm -it --ipc=host ubuntu bash
 ```
-Com `hostIPC=true`, você ganha acesso aos recursos de comunicação entre processos (IPC) do host, como **memória compartilhada** em `/dev/shm`. Isso permite leitura/gravação onde os mesmos recursos IPC são usados por outros processos do host ou do pod. Use `ipcs` para inspecionar esses mecanismos IPC mais a fundo.
+Com `hostIPC=true`, você ganha acesso aos recursos de comunicação entre processos (IPC) do host, como **memória compartilhada** em `/dev/shm`. Isso permite ler/escrever onde os mesmos recursos IPC são usados por outros processos do host ou do pod. Use `ipcs` para inspecionar esses mecanismos IPC mais a fundo.
 
 - **Inspecionar /dev/shm** - Procure por quaisquer arquivos nesta localização de memória compartilhada: `ls -la /dev/shm`
 - **Inspecionar instalações IPC existentes** – Você pode verificar se alguma instalação IPC está sendo usada com `/usr/bin/ipcs`. Verifique com: `ipcs -a`
@@ -455,7 +455,7 @@ cat /proc/self/status | grep CapEff
 ```
 ### Abuso de namespace de usuário via symlink
 
-A segunda técnica explicada no post [https://labs.withsecure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/](https://labs.withsecure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/) indica como você pode abusar de montagens vinculadas com namespaces de usuário, para afetar arquivos dentro do host (neste caso específico, deletar arquivos).
+A segunda técnica explicada no post [https://labs.withsecure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/](https://labs.withsecure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/) indica como você pode abusar de montagens bind com namespaces de usuário, para afetar arquivos dentro do host (neste caso específico, deletar arquivos).
 
 ## CVEs
 

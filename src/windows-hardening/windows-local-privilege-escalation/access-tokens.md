@@ -56,7 +56,7 @@ ou usando _Process Explorer_ da Sysinternals (selecione o processo e acesse a ab
 
 ### Administrador local
 
-Quando um administrador local faz login, **dois tokens de acesso são criados**: um com direitos de administrador e outro com direitos normais. **Por padrão**, quando esse usuário executa um processo, o que possui **direitos regulares** (não-administrador) **é utilizado**. Quando esse usuário tenta **executar** qualquer coisa **como administrador** ("Executar como Administrador", por exemplo), o **UAC** será usado para pedir permissão.\
+Quando um administrador local faz login, **dois tokens de acesso são criados**: um com direitos de administrador e outro com direitos normais. **Por padrão**, quando esse usuário executa um processo, o que possui **direitos regulares** (não-administrador) **é utilizado**. Quando esse usuário tenta **executar** qualquer coisa **como administrador** ("Executar como Administrador", por exemplo), o **UAC** será utilizado para pedir permissão.\
 Se você quiser [**saber mais sobre o UAC, leia esta página**](../authentication-credentials-uac-and-efs/index.html#uac)**.**
 
 ### Impersonação de usuário com credenciais
@@ -65,12 +65,12 @@ Se você tiver **credenciais válidas de qualquer outro usuário**, pode **criar
 ```
 runas /user:domain\username cmd.exe
 ```
-O **access token** também possui uma **referência** das sessões de logon dentro do **LSASS**, isso é útil se o processo precisar acessar alguns objetos da rede.\
+O **token de acesso** também possui uma **referência** das sessões de logon dentro do **LSASS**, isso é útil se o processo precisar acessar alguns objetos da rede.\
 Você pode iniciar um processo que **usa credenciais diferentes para acessar serviços de rede** usando:
 ```
 runas /user:domain\username /netonly cmd.exe
 ```
-Isso é útil se você tiver credenciais úteis para acessar objetos na rede, mas essas credenciais não são válidas dentro do host atual, pois serão usadas apenas na rede (no host atual, os privilégios do seu usuário atual serão utilizados).
+Isso é útil se você tiver credenciais válidas para acessar objetos na rede, mas essas credenciais não são válidas dentro do host atual, pois serão usadas apenas na rede (no host atual, os privilégios do seu usuário atual serão utilizados).
 
 ### Tipos de tokens
 
@@ -81,7 +81,7 @@ Existem dois tipos de tokens disponíveis:
 - **Anônimo**: Concede acesso ao servidor semelhante ao de um usuário não identificado.
 - **Identificação**: Permite que o servidor verifique a identidade do cliente sem utilizá-la para acesso a objetos.
 - **Impersonação**: Permite que o servidor opere sob a identidade do cliente.
-- **Delegação**: Semelhante à Impersonação, mas inclui a capacidade de estender essa assunção de identidade para sistemas remotos com os quais o servidor interage, garantindo a preservação das credenciais.
+- **Delegação**: Semelhante à Impersonação, mas inclui a capacidade de estender essa assunção de identidade a sistemas remotos com os quais o servidor interage, garantindo a preservação das credenciais.
 
 #### Tokens de Impersonação
 

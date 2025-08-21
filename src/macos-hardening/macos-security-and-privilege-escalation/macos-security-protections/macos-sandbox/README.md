@@ -143,7 +143,7 @@ Importantes **serviços do sistema** também são executados dentro de seu próp
 
 Aplicativos da **App Store** usam o **perfil** **`/System/Library/Sandbox/Profiles/application.sb`**. Você pode verificar neste perfil como direitos como **`com.apple.security.network.server`** permitem que um processo use a rede.
 
-Em seguida, alguns **serviços de daemon da Apple** usam perfis diferentes localizados em `/System/Library/Sandbox/Profiles/*.sb` ou `/usr/share/sandbox/*.sb`. Esses sandboxes são aplicados na função principal que chama a API `sandbox_init_XXX`.
+Então, alguns **serviços de daemon da Apple** usam perfis diferentes localizados em `/System/Library/Sandbox/Profiles/*.sb` ou `/usr/share/sandbox/*.sb`. Esses sandboxes são aplicados na função principal que chama a API `sandbox_init_XXX`.
 
 **SIP** é um perfil de Sandbox chamado platform_profile em `/System/Library/Sandbox/rootless.conf`.
 
@@ -237,15 +237,15 @@ Também é possível fazer algo semelhante chamando `sandbox_vtrace_enable()` e,
 
 O MacOS armazena perfis de sandbox do sistema em dois locais: **/usr/share/sandbox/** e **/System/Library/Sandbox/Profiles**.
 
-E se um aplicativo de terceiros tiver a _**com.apple.security.app-sandbox**_ autorização, o sistema aplica o perfil **/System/Library/Sandbox/Profiles/application.sb** a esse processo.
+E se um aplicativo de terceiros carregar a _**com.apple.security.app-sandbox**_ concessão, o sistema aplica o perfil **/System/Library/Sandbox/Profiles/application.sb** a esse processo.
 
 No iOS, o perfil padrão é chamado **container** e não temos a representação de texto SBPL. Na memória, esse sandbox é representado como uma árvore binária Allow/Deny para cada permissão do sandbox.
 
 ### SBPL Personalizado em aplicativos da App Store
 
-Pode ser possível para empresas fazerem seus aplicativos rodarem **com perfis de Sandbox personalizados** (em vez do padrão). Elas precisam usar a autorização **`com.apple.security.temporary-exception.sbpl`** que precisa ser autorizada pela Apple.
+Pode ser possível para empresas fazerem seus aplicativos rodarem **com perfis de Sandbox personalizados** (em vez do padrão). Elas precisam usar a concessão **`com.apple.security.temporary-exception.sbpl`** que precisa ser autorizada pela Apple.
 
-É possível verificar a definição dessa autorização em **`/System/Library/Sandbox/Profiles/application.sb:`**
+É possível verificar a definição dessa concessão em **`/System/Library/Sandbox/Profiles/application.sb:`**
 ```scheme
 (sandbox-array-entitlement
 "com.apple.security.temporary-exception.sbpl"
@@ -257,7 +257,7 @@ Isso irá **avaliar a string após esta concessão** como um perfil de Sandbox.
 
 ### Compilando e descompilando um Perfil de Sandbox
 
-A ferramenta **`sandbox-exec`** utiliza as funções `sandbox_compile_*` da `libsandbox.dylib`. As principais funções exportadas são: `sandbox_compile_file` (espera um caminho de arquivo, parâmetro `-f`), `sandbox_compile_string` (espera uma string, parâmetro `-p`), `sandbox_compile_name` (espera um nome de um contêiner, parâmetro `-n`), `sandbox_compile_entitlements` (espera um plist de concessões).
+A ferramenta **`sandbox-exec`** utiliza as funções `sandbox_compile_*` da `libsandbox.dylib`. As principais funções exportadas são: `sandbox_compile_file` (espera um caminho de arquivo, parâmetro `-f`), `sandbox_compile_string` (espera uma string, parâmetro `-p`), `sandbox_compile_name` (espera um nome de um contêiner, parâmetro `-n`), `sandbox_compile_entitlements` (espera plist de concessões).
 
 Esta versão revertida e [**open source da ferramenta sandbox-exec**](https://newosxbook.com/src.jl?tree=listings&file=/sandbox_exec.c) permite que **`sandbox-exec`** escreva em um arquivo o perfil de sandbox compilado.
 
@@ -265,7 +265,7 @@ Além disso, para confinar um processo dentro de um contêiner, pode chamar `san
 
 ## Depurar e Bypass Sandbox
 
-No macOS, ao contrário do iOS, onde os processos são isolados desde o início pelo kernel, **os processos devem optar por entrar no sandbox**. Isso significa que no macOS, um processo não é restrito pelo sandbox até que decida ativamente entrar nele, embora os aplicativos da App Store estejam sempre isolados.
+No macOS, ao contrário do iOS, onde os processos são isolados desde o início pelo kernel, **os processos devem optar pelo sandbox por conta própria**. Isso significa que no macOS, um processo não é restrito pelo sandbox até que decida ativamente entrar nele, embora os aplicativos da App Store estejam sempre isolados.
 
 Os processos são automaticamente isolados do userland quando começam se tiverem a concessão: `com.apple.security.app-sandbox`. Para uma explicação detalhada desse processo, consulte:
 
@@ -368,7 +368,7 @@ Além disso, dos centenas de hooks que a Sandbox usa, há 3 em particular que s�
 - `mpo_vnode_check_exec`: Chamado quando um processo carrega o binário associado, então uma verificação de perfil é realizada e também uma verificação que proíbe execuções SUID/SGID.
 - `mpo_cred_label_update_execve`: Isso é chamado quando o rótulo é atribuído. Este é o mais longo, pois é chamado quando o binário está totalmente carregado, mas ainda não foi executado. Ele realizará ações como criar o objeto sandbox, anexar a estrutura da sandbox às credenciais kauth, remover o acesso a portas mach...
 
-Observe que **`_cred_sb_evalutate`** é um wrapper sobre **`sb_evaluate_internal`** e essa função obtém as credenciais passadas e, em seguida, realiza a avaliação usando a função **`eval`**, que geralmente avalia o **perfil da plataforma**, que por padrão é aplicado a todos os processos e, em seguida, o **perfil de processo específico**. Observe que o perfil da plataforma é um dos principais componentes do **SIP** no macOS.
+Observe que **`_cred_sb_evalutate`** é um wrapper sobre **`sb_evaluate_internal`** e essa função recebe as credenciais passadas e, em seguida, realiza a avaliação usando a função **`eval`**, que geralmente avalia o **perfil da plataforma**, que por padrão é aplicado a todos os processos e, em seguida, o **perfil de processo específico**. Observe que o perfil da plataforma é um dos principais componentes do **SIP** no macOS.
 
 ## Sandboxd
 

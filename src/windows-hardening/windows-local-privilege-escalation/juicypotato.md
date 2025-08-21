@@ -8,7 +8,7 @@
 roguepotato-and-printspoofer.md
 {{#endref}}
 
-## Juicy Potato (abusando dos privilégios de ouro) <a href="#juicy-potato-abusing-the-golden-privileges" id="juicy-potato-abusing-the-golden-privileges"></a>
+## Juicy Potato (abusando dos privilégios dourados) <a href="#juicy-potato-abusing-the-golden-privileges" id="juicy-potato-abusing-the-golden-privileges"></a>
 
 _Uma versão adoçada de_ [_RottenPotatoNG_](https://github.com/breenmachine/RottenPotatoNG)_, com um pouco de suco, ou seja, **outro ferramenta de Escalação de Privilégios Locais, de Contas de Serviço do Windows para NT AUTHORITY\SYSTEM**_
 
@@ -22,13 +22,13 @@ _Uma versão adoçada de_ [_RottenPotatoNG_](https://github.com/breenmachine/Rot
 
 Decidimos armar [RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG): **Diga olá para Juicy Potato**.
 
-> Para a teoria, veja [Rotten Potato - Escalação de Privilégios de Contas de Serviço para SYSTEM](https://foxglovesecurity.com/2016/09/26/rotten-potato-privilege-escalation-from-service-accounts-to-system/) e siga a cadeia de links e referências.
+> Para a teoria, veja [Rotten Potato - Escalonamento de Privilégios de Contas de Serviço para SYSTEM](https://foxglovesecurity.com/2016/09/26/rotten-potato-privilege-escalation-from-service-accounts-to-system/) e siga a cadeia de links e referências.
 
-Descobrimos que, além de `BITS`, há vários servidores COM que podemos abusar. Eles só precisam:
+Descobrimos que, além de `BITS`, existem vários servidores COM que podemos abusar. Eles só precisam:
 
 1. ser instanciáveis pelo usuário atual, normalmente um “usuário de serviço” que tem privilégios de impersonação
 2. implementar a interface `IMarshal`
-3. rodar como um usuário elevado (SYSTEM, Administrador, …)
+3. ser executados como um usuário elevado (SYSTEM, Administrador, …)
 
 Após alguns testes, obtivemos e testamos uma lista extensa de [CLSID’s interessantes](http://ohpe.it/juicy-potato/CLSID/) em várias versões do Windows.
 
@@ -37,7 +37,7 @@ Após alguns testes, obtivemos e testamos uma lista extensa de [CLSID’s intere
 JuicyPotato permite que você:
 
 - **CLSID de destino** _escolha qualquer CLSID que você quiser._ [_Aqui_](http://ohpe.it/juicy-potato/CLSID/) _você pode encontrar a lista organizada por SO._
-- **Porta de escuta COM** _defina a porta de escuta COM que preferir (em vez do 6666 codificado)_
+- **Porta de escuta COM** _defina a porta de escuta COM que você prefere (em vez do 6666 codificado na marshalling)_
 - **Endereço IP de escuta COM** _vincule o servidor a qualquer IP_
 - **Modo de criação de processo** _dependendo dos privilégios do usuário impersonado, você pode escolher entre:_
 - `CreateProcessWithToken` (precisa de `SeImpersonate`)
@@ -72,9 +72,9 @@ Optional args:
 
 Se o usuário tiver privilégios `SeImpersonate` ou `SeAssignPrimaryToken`, então você é **SYSTEM**.
 
-É quase impossível prevenir o abuso de todos esses Servidores COM. Você pode pensar em modificar as permissões desses objetos via `DCOMCNFG`, mas boa sorte, isso vai ser desafiador.
+É quase impossível prevenir o abuso de todos esses Servidores COM. Você poderia pensar em modificar as permissões desses objetos via `DCOMCNFG`, mas boa sorte, isso vai ser desafiador.
 
-A solução real é proteger contas e aplicativos sensíveis que são executados sob as contas `* SERVICE`. Parar o `DCOM` certamente inibiria esse exploit, mas poderia ter um impacto sério no sistema operacional subjacente.
+A solução real é proteger contas e aplicativos sensíveis que rodam sob as contas `* SERVICE`. Parar o `DCOM` certamente inibiria esse exploit, mas poderia ter um impacto sério no sistema operacional subjacente.
 
 De: [http://ohpe.it/juicy-potato/](http://ohpe.it/juicy-potato/)
 

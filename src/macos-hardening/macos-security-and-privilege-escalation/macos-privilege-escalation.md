@@ -2,9 +2,9 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Escalação de Privilégios TCC
+## Escalação de Privilégios do TCC
 
-Se você veio aqui procurando por escalação de privilégios TCC, vá para:
+Se você veio aqui procurando por escalação de privilégios do TCC, vá para:
 
 {{#ref}}
 macos-security-protections/macos-tcc/
@@ -201,7 +201,7 @@ killall Dock
 {{#endtab}}
 {{#endtabs}}
 
-## TCC - Escalação de Privilégios de Root
+## TCC - Escalação de Privilégios Root
 
 ### CVE-2020-9771 - bypass do TCC do mount_apfs e escalonamento de privilégios
 

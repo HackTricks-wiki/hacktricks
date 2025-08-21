@@ -32,7 +32,7 @@ Os bits são codificados pela modulação da largura do pulso. A largura do espa
 
 **3. Codificação de Fase**
 
-Também é conhecida como codificação Manchester. O valor lógico é definido pela polaridade da transição entre o estouro do pulso e o espaço. "Espaço para estouro de pulso" denota lógica "0", "estouro de pulso para espaço" denota lógica "1".
+É também conhecida como codificação Manchester. O valor lógico é definido pela polaridade da transição entre o estouro do pulso e o espaço. "Espaço para estouro de pulso" denota lógica "0", "estouro de pulso para espaço" denota lógica "1".
 
 <figure><img src="../../images/image (634).png" alt=""><figcaption></figcaption></figure>
 
@@ -63,7 +63,7 @@ Para **lógica "0" e "1"**, o NEC usa Codificação por Distância de Pulso: pri
 
 ### Ar Condicionado
 
-Ao contrário de outros controles remotos, **os ar condicionados não transmitem apenas o código do botão pressionado**. Eles também **transmitem todas as informações** quando um botão é pressionado para garantir que a **máquina de ar condicionado e o controle remoto estejam sincronizados**.\
+Diferente de outros controles remotos, **os ar condicionados não transmitem apenas o código do botão pressionado**. Eles também **transmitem todas as informações** quando um botão é pressionado para garantir que a **máquina de ar condicionado e o controle remoto estejam sincronizados**.\
 Isso evitará que uma máquina configurada para 20ºC seja aumentada para 21ºC com um controle remoto, e então, quando outro controle remoto, que ainda tem a temperatura como 20ºC, for usado para aumentar mais a temperatura, ela "aumentará" para 21ºC (e não para 22ºC pensando que está em 21ºC).
 
 ---
@@ -82,11 +82,11 @@ Trabalhos acadêmicos recentes (EvilScreen, 2022) demonstraram que **controles r
 
 ### Exfiltração de Dados Air-Gapped via LEDs IR (família aIR-Jumper)
 
-Câmeras de segurança, roteadores ou até mesmo pen drives maliciosos frequentemente incluem **LEDs IR de visão noturna**. Pesquisas mostram que malware pode modular esses LEDs (<10–20 kbit/s com OOK simples) para **exfiltrar segredos através de paredes e janelas** para uma câmera externa colocada a dezenas de metros de distância. Como a luz está fora do espectro visível, os operadores raramente notam. Medidas de contra-ataque:
+Câmeras de segurança, roteadores ou até mesmo pen drives maliciosos frequentemente incluem **LEDs IR de visão noturna**. Pesquisas mostram que malware pode modular esses LEDs (<10–20 kbit/s com OOK simples) para **exfiltrar segredos através de paredes e janelas** para uma câmera externa colocada a dezenas de metros de distância. Como a luz está fora do espectro visível, os operadores raramente notam. Medidas de contra:
 
 * Proteger fisicamente ou remover LEDs IR em áreas sensíveis
 * Monitorar o ciclo de trabalho do LED da câmera e a integridade do firmware
-* Implantar filtros IR-cut em janelas e câmeras de vigilância
+* Implantar filtros de corte IR em janelas e câmeras de vigilância
 
 Um atacante também pode usar projetores IR fortes para **infiltrar** comandos na rede piscando dados de volta para câmeras inseguras.
 
@@ -130,7 +130,7 @@ irsend SEND_ONCE samsung KEY_POWER
 
 * Desativar ou cobrir receptores IR em dispositivos implantados em espaços públicos quando não forem necessários.
 * Impor *pareamento* ou verificações criptográficas entre smart-TVs e controles remotos; isolar códigos de “serviço” privilegiados.
-* Implantar filtros IR-cut ou detectores de onda contínua em áreas classificadas para quebrar canais ópticos encobertos.
+* Implantar filtros de corte IR ou detectores de onda contínua em áreas classificadas para quebrar canais ópticos encobertos.
 * Monitorar a integridade do firmware de câmeras/aparelhos IoT que expõem LEDs IR controláveis.
 
 ## Referências

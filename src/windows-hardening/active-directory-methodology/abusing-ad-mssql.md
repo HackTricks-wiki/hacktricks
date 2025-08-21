@@ -247,7 +247,7 @@ EXEC sp_linkedservers;
 
 #### Execute queries in trustable link
 
-Execute consultas através do link (exemplo: encontre mais links na nova instância acessível):
+Execute queries através do link (exemplo: encontre mais links na nova instância acessível):
 ```sql
 select * from openquery("dcorp-sql1", 'select * from master..sysservers')
 ```
@@ -282,10 +282,8 @@ Uma estratégia que muitos autores desenvolveram é forçar um serviço do SYSTE
 
 [SweetPotato](https://github.com/CCob/SweetPotato) possui uma coleção dessas várias técnicas que podem ser executadas via comando `execute-assembly` do Beacon.
 
-
-
 ### NTLM Relay do Ponto de Gerenciamento SCCM (Extração de Segredos OSD)
-Veja como os papéis SQL padrão do SCCM **Pontos de Gerenciamento** podem ser abusados para despejar a Conta de Acesso à Rede e segredos de Sequência de Tarefas diretamente do banco de dados do site:
+Veja como os papéis SQL padrão dos **Pontos de Gerenciamento** do SCCM podem ser abusados para despejar a Conta de Acesso à Rede e segredos de Sequência de Tarefas diretamente do banco de dados do site:
 
 {{#ref}}
 sccm-management-point-relay-sql-policy-secrets.md
