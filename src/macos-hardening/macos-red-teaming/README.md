@@ -12,6 +12,7 @@ If you manage to **compromise admin credentials** to access the management platf
 
 For red teaming in MacOS environments it's highly recommended to have some understanding of how the MDMs work:
 
+
 {{#ref}}
 macos-mdm/
 {{#endref}}
@@ -99,6 +100,7 @@ The script [**JamfExplorer.py**](https://github.com/WithSecureLabs/Jamf-Attack-T
 
 And also about **MacOS** "special" **network** **protocols**:
 
+
 {{#ref}}
 ../macos-security-and-privilege-escalation/macos-protocols.md
 {{#endref}}
@@ -107,13 +109,16 @@ And also about **MacOS** "special" **network** **protocols**:
 
 In some occasions you will find that the **MacOS computer is connected to an AD**. In this scenario you should try to **enumerate** the active directory as you are use to it. Find some **help** in the following pages:
 
+
 {{#ref}}
 ../../network-services-pentesting/pentesting-ldap.md
 {{#endref}}
 
+
 {{#ref}}
 ../../windows-hardening/active-directory-methodology/
 {{#endref}}
+
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-kerberos-88/
@@ -223,6 +228,7 @@ mount -t smbfs //server/folder /local/mount/point
 
 The Keychain highly probably contains sensitive information that if accessed without generating a prompt could help to move forward a red team exercise:
 
+
 {{#ref}}
 macos-keychain.md
 {{#endref}}
@@ -249,6 +255,5 @@ When a file is downloaded in Safari, if its a "safe" file, it will be **automati
 
 
 {{#include ../../banners/hacktricks-training.md}}
-
 
 

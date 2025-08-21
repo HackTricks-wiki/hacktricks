@@ -142,12 +142,14 @@ WHERE  dp.name IN ('smsdbrole_MP','smsdbrole_MPUserSvc')
 
 ## See also
 * NTLM relay fundamentals:
-  {{#ref}}
+  
+{{#ref}}
   ../ntlm/README.md
   {{#endref}}
 
 * MSSQL abuse & post-exploitation:
-  {{#ref}}
+  
+{{#ref}}
   abusing-ad-mssql.md
   {{#endref}}
 

@@ -43,6 +43,7 @@ Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 
 > **FYI**: Archive extraction *path traversal* vulnerabilities (such as the one abused in WinRAR prior to 7.13 – CVE-2025-8088) can be leveraged to **deposit payloads directly inside these Startup folders during decompression**, resulting in code execution on the next user logon.  For a deep-dive into this technique see:
 
+
 {{#ref}}
 ../../generic-hacking/archive-extraction-path-traversal.md
 {{#endref}}
@@ -349,6 +350,5 @@ autorunsc.exe -m -nobanner -a * -ct /accepteula
 
 
 {{#include ../../banners/hacktricks-training.md}}
-
 
 

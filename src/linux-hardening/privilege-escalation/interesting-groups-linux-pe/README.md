@@ -235,21 +235,25 @@ docker run --rm -it --pid=host --net=host --privileged -v /:/mnt <imagename> chr
 
 Finally, if you don't like any of the suggestions of before, or they aren't working for some reason (docker api firewall?) you could always try to **run a privileged container and escape from it** as explained here:
 
+
 {{#ref}}
 ../docker-security/
 {{#endref}}
 
 If you have write permissions over the docker socket read [**this post about how to escalate privileges abusing the docker socket**](../index.html#writable-docker-socket)**.**
 
+
 {{#ref}}
 https://github.com/KrustyHack/docker-privilege-escalation
 {{#endref}}
+
 
 {{#ref}}
 https://fosterelli.co/privilege-escalation-via-docker.html
 {{#endref}}
 
 ## lxc/lxd Group
+
 
 {{#ref}}
 ./
@@ -266,4 +270,3 @@ Inside OpenBSD the **auth** group usually can write in the folders _**/etc/skey*
 These permissions may be abused with the following exploit to **escalate privileges** to root: [https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot](https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot)
 
 {{#include ../../../banners/hacktricks-training.md}}
-
