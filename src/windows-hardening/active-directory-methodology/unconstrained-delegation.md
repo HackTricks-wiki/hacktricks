@@ -48,6 +48,7 @@ Rubeus.exe monitor /interval:10 [/filteruser:<username>] #Check every 10s for ne
 
 Βρείτε εδώ άλλους τρόπους για να **επιβάλετε μια αυθεντικοποίηση:**
 
+
 {{#ref}}
 printers-spooler-service-abuse.md
 {{#endref}}

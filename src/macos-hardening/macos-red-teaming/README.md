@@ -12,6 +12,7 @@
 
 Για red teaming σε περιβάλλοντα MacOS, συνιστάται έντονα να έχετε κάποια κατανόηση του πώς λειτουργούν τα MDMs:
 
+
 {{#ref}}
 macos-mdm/
 {{#endref}}
@@ -20,9 +21,9 @@ macos-mdm/
 
 Ένα MDM θα έχει άδεια να εγκαθιστά, να ερωτά ή να αφαιρεί προφίλ, να εγκαθιστά εφαρμογές, να δημιουργεί τοπικούς λογαριασμούς διαχειριστή, να ορίζει κωδικό πρόσβασης firmware, να αλλάζει το κλειδί FileVault...
 
-Για να τρέξετε το δικό σας MDM, χρειάζεστε να **υπογραφεί το CSR σας από έναν προμηθευτή** που θα μπορούσατε να προσπαθήσετε να αποκτήσετε με [**https://mdmcert.download/**](https://mdmcert.download/). Και για να τρέξετε το δικό σας MDM για συσκευές Apple, θα μπορούσατε να χρησιμοποιήσετε [**MicroMDM**](https://github.com/micromdm/micromdm).
+Για να τρέξετε το δικό σας MDM, χρειάζεστε **το CSR σας υπογεγραμμένο από έναν προμηθευτή** που θα μπορούσατε να προσπαθήσετε να αποκτήσετε με [**https://mdmcert.download/**](https://mdmcert.download/). Και για να τρέξετε το δικό σας MDM για συσκευές Apple, μπορείτε να χρησιμοποιήσετε [**MicroMDM**](https://github.com/micromdm/micromdm).
 
-Ωστόσο, για να εγκαταστήσετε μια εφαρμογή σε μια εγγεγραμμένη συσκευή, χρειάζεται ακόμα να είναι υπογεγραμμένη από έναν λογαριασμό προγραμματιστή... ωστόσο, κατά την εγγραφή MDM, η **συσκευή προσθέτει το SSL cert του MDM ως αξιόπιστη CA**, οπότε μπορείτε τώρα να υπογράψετε οτιδήποτε.
+Ωστόσο, για να εγκαταστήσετε μια εφαρμογή σε μια εγγεγραμμένη συσκευή, χρειάζεται ακόμα να είναι υπογεγραμμένη από έναν λογαριασμό προγραμματιστή... ωστόσο, κατά την εγγραφή MDM, η **συσκευή προσθέτει το SSL cert του MDM ως αξιόπιστο CA**, οπότε μπορείτε τώρα να υπογράψετε οτιδήποτε.
 
 Για να εγγραφεί η συσκευή σε ένα MDM, χρειάζεται να εγκαταστήσετε ένα **`mobileconfig`** αρχείο ως root, το οποίο θα μπορούσε να παραδοθεί μέσω ενός **pkg** αρχείου (μπορείτε να το συμπιέσετε σε zip και όταν κατεβεί από το safari θα αποσυμπιεστεί).
 
@@ -30,11 +31,11 @@ macos-mdm/
 
 ### Κατάχρηση JAMF PRO
 
-Η JAMF μπορεί να εκτελεί **προσαρμοσμένα σενάρια** (σενάρια που αναπτύχθηκαν από τον sysadmin), **εγγενή payloads** (δημιουργία τοπικού λογαριασμού, ορισμός κωδικού EFI, παρακολούθηση αρχείων/διεργασιών...) και **MDM** (ρυθμίσεις συσκευής, πιστοποιητικά συσκευής...).
+Η JAMF μπορεί να εκτελεί **προσαρμοσμένα σενάρια** (σενάρια που αναπτύχθηκαν από τον sysadmin), **εγγενή payloads** (δημιουργία τοπικού λογαριασμού, ορισμός κωδικού EFI, παρακολούθηση αρχείων/διαδικασιών...) και **MDM** (ρυθμίσεις συσκευής, πιστοποιητικά συσκευής...).
 
 #### Αυτοεγγραφή JAMF
 
-Πηγαίνετε σε μια σελίδα όπως `https://<company-name>.jamfcloud.com/enroll/` για να δείτε αν έχουν **ενεργοποιήσει την αυτοεγγραφή**. Αν την έχουν, μπορεί να **ζητήσει διαπιστευτήρια για πρόσβαση**.
+Πηγαίνετε σε μια σελίδα όπως `https://<company-name>.jamfcloud.com/enroll/` για να δείτε αν έχουν **ενεργοποιήσει την αυτοεγγραφή**. Αν το έχουν, μπορεί να **ζητήσει διαπιστευτήρια για πρόσβαση**.
 
 Μπορείτε να χρησιμοποιήσετε το σενάριο [**JamfSniper.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfSniper.py) για να εκτελέσετε μια επίθεση password spraying.
 
@@ -46,7 +47,7 @@ macos-mdm/
 
 <figure><img src="../../images/image (167).png" alt=""><figcaption></figcaption></figure>
 
-Το **`jamf`** δυαδικό περιείχε το μυστικό για να ανοίξει το keychain, το οποίο κατά την ανακάλυψη ήταν **κοινό** σε όλους και ήταν: **`jk23ucnq91jfu9aj`**.\
+Το **`jamf`** δυαδικό περιείχε το μυστικό για να ανοίξει το keychain το οποίο κατά την ανακάλυψη ήταν **κοινό** μεταξύ όλων και ήταν: **`jk23ucnq91jfu9aj`**.\
 Επιπλέον, το jamf **επιμένει** ως **LaunchDaemon** στο **`/Library/LaunchAgents/com.jamf.management.agent.plist`**
 
 #### Κατάληψη Συσκευής JAMF
@@ -60,12 +61,12 @@ plutil -convert xml1 -o - /Library/Preferences/com.jamfsoftware.jamf.plist
 <key>is_virtual_machine</key>
 <false/>
 <key>jss_url</key>
-<string>https://halbornasd.jamfcloud.com/</string>
+<string>https://subdomain-company.jamfcloud.com/</string>
 <key>last_management_framework_change_id</key>
 <integer>4</integer>
 [...]
 ```
-Έτσι, ένας επιτιθέμενος θα μπορούσε να ρίξει ένα κακόβουλο πακέτο (`pkg`) που **επικαλύπτει αυτό το αρχείο** κατά την εγκατάσταση, ρυθμίζοντας το **URL σε έναν Mythic C2 listener από έναν Typhon agent** για να μπορεί τώρα να εκμεταλλευτεί το JAMF ως C2.
+Έτσι, ένας επιτιθέμενος θα μπορούσε να ρίξει ένα κακόβουλο πακέτο (`pkg`) που **επικαλύπτει αυτό το αρχείο** κατά την εγκατάσταση, ρυθμίζοντας το **URL σε έναν Mythic C2 listener από έναν Typhon agent** ώστε να μπορεί τώρα να εκμεταλλευτεί το JAMF ως C2.
 ```bash
 # After changing the URL you could wait for it to be reloaded or execute:
 sudo jamf policy -id 0
@@ -85,9 +86,9 @@ sudo jamf policy -id 0
 
 <figure><img src="../../images/image (1025).png" alt=""><figcaption><p>a</p></figcaption></figure>
 
-Μπορείς επίσης να παρακολουθείς την τοποθεσία `/Library/Application Support/Jamf/tmp/` για τα **custom scripts** που οι διαχειριστές μπορεί να θέλουν να εκτελέσουν μέσω Jamf καθώς **τοποθετούνται εδώ, εκτελούνται και αφαιρούνται**. Αυτά τα scripts **μπορεί να περιέχουν διαπιστευτήρια**.
+Μπορείς επίσης να παρακολουθήσεις την τοποθεσία `/Library/Application Support/Jamf/tmp/` για τα **custom scripts** που οι διαχειριστές μπορεί να θέλουν να εκτελέσουν μέσω Jamf καθώς **τοποθετούνται εδώ, εκτελούνται και αφαιρούνται**. Αυτά τα scripts **μπορεί να περιέχουν διαπιστευτήρια**.
 
-Ωστόσο, τα **διαπιστευτήρια** μπορεί να περάσουν σε αυτά τα scripts ως **παράμετροι**, οπότε θα χρειαστεί να παρακολουθείς `ps aux | grep -i jamf` (χωρίς καν να είσαι root).
+Ωστόσο, τα **διαπιστευτήρια** μπορεί να περάσουν σε αυτά τα scripts ως **παράμετροι**, οπότε θα χρειαστεί να παρακολουθήσεις `ps aux | grep -i jamf` (χωρίς καν να είσαι root).
 
 Το script [**JamfExplorer.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfExplorer.py) μπορεί να ακούει για νέα αρχεία που προστίθενται και νέα επιχειρήματα διαδικασίας.
 
@@ -95,21 +96,25 @@ sudo jamf policy -id 0
 
 Και επίσης για τα **MacOS** "ειδικά" **δίκτυα** **πρωτοκόλλων**:
 
+
 {{#ref}}
 ../macos-security-and-privilege-escalation/macos-protocols.md
 {{#endref}}
 
 ## Active Directory
 
-Σε ορισμένες περιπτώσεις θα διαπιστώσεις ότι ο **υπολογιστής MacOS είναι συνδεδεμένος σε ένα AD**. Σε αυτό το σενάριο θα πρέπει να προσπαθήσεις να **καταγράψεις** τον ενεργό κατάλογο όπως είσαι συνηθισμένος. Βρες κάποια **βοήθεια** στις παρακάτω σελίδες:
+Σε ορισμένες περιπτώσεις θα διαπιστώσεις ότι ο **MacOS υπολογιστής είναι συνδεδεμένος σε ένα AD**. Σε αυτό το σενάριο θα πρέπει να προσπαθήσεις να **καταγράψεις** τον ενεργό κατάλογο όπως είσαι συνηθισμένος. Βρες κάποια **βοήθεια** στις παρακάτω σελίδες:
+
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-ldap.md
 {{#endref}}
 
+
 {{#ref}}
 ../../windows-hardening/active-directory-methodology/
 {{#endref}}
+
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-kerberos-88/
@@ -119,13 +124,13 @@ sudo jamf policy -id 0
 ```bash
 dscl "/Active Directory/[Domain]/All Domains" ls /
 ```
-Επίσης, υπάρχουν μερικά εργαλεία προετοιμασμένα για MacOS για αυτόματη καταμέτρηση του AD και αλληλεπίδραση με το kerberos:
+Επίσης, υπάρχουν μερικά εργαλεία προετοιμασμένα για MacOS που επιτρέπουν την αυτόματη καταμέτρηση του AD και την αλληλεπίδραση με το kerberos:
 
 - [**Machound**](https://github.com/XMCyber/MacHound): Το MacHound είναι μια επέκταση του εργαλείου ελέγχου Bloodhound που επιτρέπει τη συλλογή και την εισαγωγή σχέσεων Active Directory σε MacOS hosts.
 - [**Bifrost**](https://github.com/its-a-feature/bifrost): Το Bifrost είναι ένα έργο Objective-C σχεδιασμένο για να αλληλεπιδρά με τα APIs Heimdal krb5 σε macOS. Ο στόχος του έργου είναι να επιτρέψει καλύτερη ασφάλεια δοκιμών γύρω από το Kerberos σε συσκευές macOS χρησιμοποιώντας εγγενή APIs χωρίς να απαιτείται κανένα άλλο πλαίσιο ή πακέτα στον στόχο.
-- [**Orchard**](https://github.com/its-a-feature/Orchard): Εργαλείο JavaScript for Automation (JXA) για την καταμέτρηση Active Directory.
+- [**Orchard**](https://github.com/its-a-feature/Orchard): Εργαλείο JavaScript for Automation (JXA) για την καταμέτρηση του Active Directory.
 
-### Πληροφορίες Τομέα
+### Domain Information
 ```bash
 echo show com.apple.opendirectoryd.ActiveDirectory | scutil
 ```
@@ -133,8 +138,8 @@ echo show com.apple.opendirectoryd.ActiveDirectory | scutil
 
 Οι τρεις τύποι χρηστών MacOS είναι:
 
-- **Τοπικοί Χρήστες** — Διαχειρίζονται από την τοπική υπηρεσία OpenDirectory, δεν είναι συνδεδεμένοι με κανέναν τρόπο στο Active Directory.
-- **Δικτυακοί Χρήστες** — Μεταβλητοί χρήστες Active Directory που απαιτούν σύνδεση με τον διακομιστή DC για αυθεντικοποίηση.
+- **Τοπικοί Χρήστες** — Διαχειρίζονται από την τοπική υπηρεσία OpenDirectory, δεν συνδέονται με κανέναν τρόπο με το Active Directory.
+- **Δικτυακοί Χρήστες** — Μεταβλητοί χρήστες Active Directory που απαιτούν σύνδεση με τον διακομιστή DC για να αυθεντικοποιηθούν.
 - **Κινητοί Χρήστες** — Χρήστες Active Directory με τοπικό αντίγραφο ασφαλείας για τα διαπιστευτήρια και τα αρχεία τους.
 
 Οι τοπικές πληροφορίες σχετικά με τους χρήστες και τις ομάδες αποθηκεύονται στον φάκελο _/var/db/dslocal/nodes/Default._\
@@ -174,7 +179,7 @@ dsconfigad -show
 ```bash
 bifrost --action askhash --username [name] --password [password] --domain [domain]
 ```
-Είναι δυνατόν να αποκτήσετε τον κωδικό πρόσβασης **`Computer$`** μέσα από το System keychain.
+Είναι δυνατή η πρόσβαση στον **`Computer$`** κωδικό πρόσβασης μέσα στο System keychain.
 
 ### Over-Pass-The-Hash
 
@@ -194,7 +199,7 @@ bifrost --action asktgt --username test_lab_admin \
 bifrost --action asktgs --spn [service] --domain [domain.com] \
 --username [user] --hash [hash] --enctype [enctype]
 ```
-Με τα αποκτηθέντα εισιτήρια υπηρεσίας είναι δυνατή η προσπάθεια πρόσβασης σε κοινές χρήσεις σε άλλους υπολογιστές:
+Με τα αποκτηθέντα εισιτήρια υπηρεσίας είναι δυνατή η προσπάθεια πρόσβασης σε κοινόχρηστα αρχεία σε άλλους υπολογιστές:
 ```bash
 smbutil view //computer.fqdn
 mount -t smbfs //server/folder /local/mount/point
@@ -209,7 +214,7 @@ macos-keychain.md
 
 ## Εξωτερικές Υπηρεσίες
 
-Η Red Teaming στο MacOS διαφέρει από τη συνηθισμένη Red Teaming στα Windows, καθώς συνήθως **το MacOS είναι ενσωματωμένο με πολλές εξωτερικές πλατφόρμες απευθείας**. Μια κοινή ρύθμιση του MacOS είναι η πρόσβαση στον υπολογιστή χρησιμοποιώντας **συνδεδεμένα διαπιστευτήρια OneLogin και πρόσβαση σε πολλές εξωτερικές υπηρεσίες** (όπως github, aws...) μέσω του OneLogin.
+Η Red Teaming στο MacOS διαφέρει από τη συνηθισμένη Red Teaming στα Windows, καθώς συνήθως **το MacOS είναι ενσωματωμένο με πολλές εξωτερικές πλατφόρμες απευθείας**. Μια κοινή ρύθμιση του MacOS είναι η πρόσβαση στον υπολογιστή χρησιμοποιώντας **συνδεδεμένα διαπιστευτήρια OneLogin και πρόσβαση σε πολλές εξωτερικές υπηρεσίες** (όπως το github, aws...) μέσω του OneLogin.
 
 ## Διάφορες τεχνικές Red Team
 

@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Basic information
+## Βασικές πληροφορίες
 
 Αν θέλετε να μάθετε περισσότερα για το **runc** ελέγξτε την παρακάτω σελίδα:
 
@@ -12,7 +12,7 @@
 
 ## PE
 
-Αν διαπιστώσετε ότι το `runc` είναι εγκατεστημένο στον host, μπορεί να είστε σε θέση να **τρέξετε ένα container που να προσαρτά τον ριζικό φάκελο / του host**.
+Αν διαπιστώσετε ότι το `runc` είναι εγκατεστημένο στον host, μπορεί να είστε σε θέση να **τρέξετε ένα κοντέινερ που να προσαρτά τον ριζικό φάκελο / του host**.
 ```bash
 runc -help #Get help and see if runc is intalled
 runc spec #This will create the config.json file in your current folder

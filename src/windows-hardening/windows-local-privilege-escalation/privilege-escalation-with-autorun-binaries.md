@@ -1,4 +1,4 @@
-# Ανύψωση Δικαιωμάτων με Autoruns
+# Privilege Escalation with Autoruns
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -41,12 +41,10 @@ Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 ../../generic-hacking/archive-extraction-path-traversal.md
 {{#endref}}
 
-
-
 ## Registry
 
 > [!TIP]
-> [Σημείωση από εδώ](https://answers.microsoft.com/en-us/windows/forum/all/delete-registry-key/d425ae37-9dcc-4867-b49c-723dcd15147f): Η καταχώρηση μητρώου **Wow6432Node** υποδεικνύει ότι εκτελείτε μια έκδοση Windows 64-bit. Το λειτουργικό σύστημα χρησιμοποιεί αυτό το κλειδί για να εμφανίσει μια ξεχωριστή προβολή του HKEY_LOCAL_MACHINE\SOFTWARE για εφαρμογές 32-bit που εκτελούνται σε εκδόσεις Windows 64-bit.
+> [Σημείωση από εδώ](https://answers.microsoft.com/en-us/windows/forum/all/delete-registry-key/d425ae37-9dcc-4867-b49c-723dcd15147f): Η καταχώρηση μητρώου **Wow6432Node** υποδεικνύει ότι εκτελείτε μια 64-bit έκδοση των Windows. Το λειτουργικό σύστημα χρησιμοποιεί αυτό το κλειδί για να εμφανίσει μια ξεχωριστή προβολή του HKEY_LOCAL_MACHINE\SOFTWARE για εφαρμογές 32-bit που εκτελούνται σε 64-bit εκδόσεις των Windows.
 
 ### Runs
 
@@ -82,7 +80,7 @@ Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 - `HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\RunOnceEx`
 - `HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunOnceEx`
 
-Στα Windows Vista και σε μεταγενέστερες εκδόσεις, τα κλειδιά μητρώου **Run** και **RunOnce** δεν δημιουργούνται αυτόματα. Οι καταχωρήσεις σε αυτά τα κλειδιά μπορούν είτε να ξεκινούν απευθείας προγράμματα είτε να τα καθορίζουν ως εξαρτήσεις. Για παράδειγμα, για να φορτώσετε ένα αρχείο DLL κατά την σύνδεση, μπορείτε να χρησιμοποιήσετε το κλειδί μητρώου **RunOnceEx** μαζί με ένα κλειδί "Depend". Αυτό αποδεικνύεται προσθέτοντας μια καταχώρηση μητρώου για να εκτελέσετε το "C:\temp\evil.dll" κατά την εκκίνηση του συστήματος:
+Στα Windows Vista και σε μεταγενέστερες εκδόσεις, τα κλειδιά μητρώου **Run** και **RunOnce** δεν δημιουργούνται αυτόματα. Οι καταχωρήσεις σε αυτά τα κλειδιά μπορούν είτε να ξεκινούν απευθείας προγράμματα είτε να τα καθορίζουν ως εξαρτήσεις. Για παράδειγμα, για να φορτώσετε ένα αρχείο DLL κατά την είσοδο, μπορείτε να χρησιμοποιήσετε το κλειδί μητρώου **RunOnceEx** μαζί με ένα κλειδί "Depend". Αυτό αποδεικνύεται προσθέτοντας μια καταχώρηση μητρώου για να εκτελέσετε το "C:\temp\evil.dll" κατά την εκκίνηση του συστήματος:
 ```
 reg add HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnceEx\\0001\\Depend /v 1 /d "C:\\temp\\evil.dll"
 ```
@@ -153,7 +151,7 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Wow6432Node\Microsoft\Windows\Ru
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders`
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders`
 
-Οι συντομεύσεις που τοποθετούνται στον φάκελο **Startup** θα ενεργοποιούν αυτόματα υπηρεσίες ή εφαρμογές κατά τη διάρκεια της σύνδεσης του χρήστη ή της επανεκκίνησης του συστήματος. Η τοποθεσία του φακέλου **Startup** ορίζεται στο μητρώο για τους τομείς **Local Machine** και **Current User**. Αυτό σημαίνει ότι οποιαδήποτε συντόμευση προστεθεί σε αυτές τις καθορισμένες τοποθεσίες **Startup** θα διασφαλίσει ότι η συνδεδεμένη υπηρεσία ή πρόγραμμα θα ξεκινήσει μετά τη διαδικασία σύνδεσης ή επανεκκίνησης, καθιστώντας το μια απλή μέθοδο για τον προγραμματισμό προγραμμάτων να εκτελούνται αυτόματα.
+Οι συντομεύσεις που τοποθετούνται στον φάκελο **Startup** θα ενεργοποιούν αυτόματα υπηρεσίες ή εφαρμογές κατά τη διάρκεια της σύνδεσης του χρήστη ή της επανεκκίνησης του συστήματος. Η τοποθεσία του φακέλου **Startup** ορίζεται στο μητρώο για τους τομείς **Local Machine** και **Current User**. Αυτό σημαίνει ότι οποιαδήποτε συντόμευση προστεθεί σε αυτές τις καθορισμένες τοποθεσίες **Startup** θα διασφαλίσει ότι η συνδεδεμένη υπηρεσία ή πρόγραμμα θα ξεκινήσει μετά τη διαδικασία σύνδεσης ή επανεκκίνησης, καθιστώντας το μια απλή μέθοδο για τον προγραμματισμό εκτέλεσης προγραμμάτων αυτόματα.
 
 > [!TIP]
 > Αν μπορείτε να αντικαταστήσετε οποιοδήποτε \[User] Shell Folder κάτω από **HKLM**, θα μπορείτε να το κατευθύνετε σε έναν φάκελο που ελέγχετε και να τοποθετήσετε μια backdoor που θα εκτελείται κάθε φορά που ένας χρήστης συνδέεται στο σύστημα, κλιμακώνοντας τα δικαιώματα.
@@ -208,7 +206,7 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Microsoft\Windows\CurrentVersion
 4. Αποθηκεύστε τις αλλαγές στο `boot.ini`.
 5. Επαναφέρετε τα αρχικά χαρακτηριστικά του αρχείου: `attrib c:\boot.ini +r +s +h`
 
-- **Εκμετάλλευση 1:** Η αλλαγή της κλειδί μητρώου **AlternateShell** επιτρέπει τη ρύθμιση προσαρμοσμένης γραμμής εντολών, ενδεχομένως για μη εξουσιοδοτημένη πρόσβαση.
+- **Εκμετάλλευση 1:** Η αλλαγή της κλειδώματος μητρώου **AlternateShell** επιτρέπει τη ρύθμιση προσαρμοσμένης γραμμής εντολών, ενδεχομένως για μη εξουσιοδοτημένη πρόσβαση.
 - **Εκμετάλλευση 2 (Δικαιώματα Εγγραφής PATH):** Η ύπαρξη δικαιωμάτων εγγραφής σε οποιοδήποτε μέρος της μεταβλητής συστήματος **PATH**, ειδικά πριν από το `C:\Windows\system32`, σας επιτρέπει να εκτελέσετε ένα προσαρμοσμένο `cmd.exe`, το οποίο θα μπορούσε να είναι μια πίσω πόρτα αν το σύστημα ξεκινήσει σε Ασφαλή Λειτουργία.
 - **Εκμετάλλευση 3 (Δικαιώματα Εγγραφής PATH και boot.ini):** Η πρόσβαση εγγραφής στο `boot.ini` επιτρέπει την αυτόματη εκκίνηση σε Ασφαλή Λειτουργία, διευκολύνοντας τη μη εξουσιοδοτημένη πρόσβαση κατά την επόμενη επανεκκίνηση.
 
@@ -228,10 +226,10 @@ Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Co
 - `HKCU\SOFTWARE\Microsoft\Active Setup\Installed Components`
 - `HKCU\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components`
 
-Μέσα σε αυτά τα κλειδιά, υπάρχουν διάφορα υποκλειδιά, το καθένα από τα οποία αντιστοιχεί σε ένα συγκεκριμένο συστατικό. Οι τιμές κλειδιών που είναι ιδιαίτερα ενδιαφέρουσες περιλαμβάνουν:
+Μέσα σε αυτά τα κλειδιά, υπάρχουν διάφορα υποκλειδιά, το καθένα από τα οποία αντιστοιχεί σε ένα συγκεκριμένο συστατικό. Οι τιμές κλειδιών που έχουν ιδιαίτερο ενδιαφέρον περιλαμβάνουν:
 
 - **IsInstalled:**
-- `0` υποδεικνύει ότι η εντολή του συστατικού δεν θα εκτελεστεί.
+- `0` υποδηλώνει ότι η εντολή του συστατικού δεν θα εκτελεστεί.
 - `1` σημαίνει ότι η εντολή θα εκτελεστεί μία φορά για κάθε χρήστη, που είναι η προεπιλεγμένη συμπεριφορά αν η τιμή `IsInstalled` λείπει.
 - **StubPath:** Ορίζει την εντολή που θα εκτελείται από το Active Setup. Μπορεί να είναι οποιαδήποτε έγκυρη γραμμή εντολών, όπως η εκκίνηση του `notepad`.
 
@@ -251,18 +249,18 @@ reg query "HKCU\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components
 
 ### Overview of Browser Helper Objects (BHOs)
 
-Τα Browser Helper Objects (BHOs) είναι DLL modules που προσθέτουν επιπλέον δυνατότητες στον Internet Explorer της Microsoft. Φορτώνονται στον Internet Explorer και τον Windows Explorer σε κάθε εκκίνηση. Ωστόσο, η εκτέλεσή τους μπορεί να αποκλειστεί ρυθμίζοντας το κλειδί **NoExplorer** σε 1, αποτρέποντάς τα από το να φορτωθούν με τις περιπτώσεις του Windows Explorer.
+Τα Browser Helper Objects (BHOs) είναι DLL modules που προσθέτουν επιπλέον δυνατότητες στον Internet Explorer της Microsoft. Φορτώνονται στον Internet Explorer και τον Windows Explorer σε κάθε εκκίνηση. Ωστόσο, η εκτέλεσή τους μπορεί να αποκλειστεί ρυθμίζοντας το **NoExplorer** key σε 1, αποτρέποντάς τα από το να φορτωθούν με τις περιπτώσεις του Windows Explorer.
 
-Τα BHOs είναι συμβατά με τα Windows 10 μέσω του Internet Explorer 11 αλλά δεν υποστηρίζονται στο Microsoft Edge, τον προεπιλεγμένο περιηγητή σε νεότερες εκδόσεις των Windows.
+Τα BHOs είναι συμβατά με τα Windows 10 μέσω του Internet Explorer 11 αλλά δεν υποστηρίζονται στον Microsoft Edge, τον προεπιλεγμένο περιηγητή σε νεότερες εκδόσεις των Windows.
 
-Για να εξερευνήσετε τα BHOs που είναι καταχωρημένα σε ένα σύστημα, μπορείτε να ελέγξετε τα παρακάτω κλειδιά μητρώου:
+Για να εξερευνήσετε τα BHOs που είναι καταχωρημένα σε ένα σύστημα, μπορείτε να ελέγξετε τα εξής κλειδιά μητρώου:
 
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects`
 - `HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects`
 
 Κάθε BHO εκπροσωπείται από το **CLSID** του στο μητρώο, που λειτουργεί ως μοναδικός αναγνωριστικός αριθμός. Λεπτομερείς πληροφορίες σχετικά με κάθε CLSID μπορούν να βρεθούν κάτω από `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`.
 
-Για την αναζήτηση BHOs στο μητρώο, μπορούν να χρησιμοποιηθούν οι παρακάτω εντολές:
+Για την αναζήτηση BHOs στο μητρώο, μπορούν να χρησιμοποιηθούν οι εξής εντολές:
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects" /s
 reg query "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects" /s
@@ -301,13 +299,13 @@ HKLM\Software\Microsoft\Wow6432Node\Windows NT\CurrentVersion\Image File Executi
 ```
 ## SysInternals
 
-Σημειώστε ότι όλοι οι ιστότοποι όπου μπορείτε να βρείτε autoruns έχουν **ήδη ερευνηθεί από**[ **winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe). Ωστόσο, για μια **πιο ολοκληρωμένη λίστα με αυτόματα εκτελούμενα** αρχεία μπορείτε να χρησιμοποιήσετε [autoruns ](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns)από τα sysinternals:
+Σημειώστε ότι όλοι οι ιστότοποι όπου μπορείτε να βρείτε autoruns έχουν **ήδη ερευνηθεί από**[ **winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe). Ωστόσο, για μια **πιο ολοκληρωμένη λίστα με αυτόματα εκτελούμενα** αρχεία μπορείτε να χρησιμοποιήσετε [autoruns ](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns)από τα systinternals:
 ```
 autorunsc.exe -m -nobanner -a * -ct /accepteula
 ```
 ## Περισσότερα
 
-**Βρείτε περισσότερα Autoruns όπως οι καταχωρήσεις σε** [**https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2**](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)
+**Βρείτε περισσότερα Autoruns όπως οι καταχωρήσεις στο** [**https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2**](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)
 
 ## Αναφορές
 

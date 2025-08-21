@@ -105,7 +105,7 @@ echo "ls\x09-l" | bash
 $u $u # This will be saved in the history and can be used as a space, please notice that the $u variable is undefined
 uname!-1\-a # This equals to uname -a
 ```
-### Παράκαμψη της κάθετης και της οριζόντιας γραμμής
+### Παράκαμψη της αντίστροφης και της κανονικής κάθετης γραμμής
 ```bash
 cat ${HOME:0:1}etc${HOME:0:1}passwd
 cat $(echo . | tr '!-0' '"-1')etc$(echo . | tr '!-0' '"-1')passwd
@@ -145,7 +145,7 @@ echo ${PATH:0:1} #/
 ### Builtins
 
 Σε περίπτωση που δεν μπορείτε να εκτελέσετε εξωτερικές συναρτήσεις και έχετε πρόσβαση μόνο σε ένα **περιορισμένο σύνολο builtins για να αποκτήσετε RCE**, υπάρχουν μερικά χρήσιμα κόλπα για να το κάνετε. Συνήθως **δεν θα μπορείτε να χρησιμοποιήσετε όλα** τα **builtins**, οπότε θα πρέπει να **γνωρίζετε όλες τις επιλογές σας** για να προσπαθήσετε να παρακάμψετε τη φυλακή. Ιδέα από [**devploit**](https://twitter.com/devploit).\
-Πρώτα απ' όλα ελέγξτε όλα τα [**shell builtins**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html)**.** Στη συνέχεια, εδώ έχετε μερικές **συστάσεις**:
+Πρώτα απ' όλα, ελέγξτε όλα τα [**shell builtins**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html)**.** Στη συνέχεια, εδώ έχετε μερικές **συστάσεις**:
 ```bash
 # Get list of builtins
 declare builtins
@@ -310,7 +310,7 @@ bypass-fs-protections-read-only-no-exec-distroless/
 
 ## Space-Based Bash NOP Sled ("Bashsledding")
 
-Όταν μια ευπάθεια σας επιτρέπει να ελέγξετε εν μέρει ένα επιχείρημα που τελικά φτάνει στο `system()` ή σε άλλο shell, μπορεί να μην γνωρίζετε την ακριβή απόσταση στην οποία η εκτέλεση αρχίζει να διαβάζει το payload σας.  Οι παραδοσιακοί NOP sleds (π.χ. `\x90`) **δεν** λειτουργούν στη σύνταξη του shell, αλλά το Bash θα αγνοήσει αβλαβώς τα αρχικά κενά πριν εκτελέσει μια εντολή.
+Όταν μια ευπάθεια σας επιτρέπει να ελέγξετε εν μέρει ένα επιχείρημα που τελικά φτάνει στο `system()` ή σε άλλο shell, μπορεί να μην γνωρίζετε την ακριβή απόσταση στην οποία η εκτέλεση αρχίζει να διαβάζει το payload σας. Οι παραδοσιακοί NOP sleds (π.χ. `\x90`) **δεν** λειτουργούν στη σύνταξη του shell, αλλά το Bash θα αγνοήσει αβλαβώς τα αρχικά κενά πριν εκτελέσει μια εντολή.
 
 Επομένως, μπορείτε να δημιουργήσετε ένα *NOP sled για το Bash* προσθέτοντας ένα μακρύ σύνολο κενών ή χαρακτήρων tab πριν από την πραγματική σας εντολή:
 ```bash
@@ -333,7 +333,7 @@ bypass-fs-protections-read-only-no-exec-distroless/
 - [https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
 - [https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
 - [https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
-- [https://www.secjuice.com/web-application-firewall-waf-evasion/](https://www.secjuice.com/web-application-firewall-waf-evasion/)
+- [https://www.secjuice.com/web-application-firewall-waf-evasion/](https://www.secju
 
 - [Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
 

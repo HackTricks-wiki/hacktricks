@@ -14,7 +14,7 @@
 ### New Concepts
 
 Πίσω στην Constrained Delegation είχε αναφερθεί ότι η **`TrustedToAuthForDelegation`** σημαία μέσα στην τιμή _userAccountControl_ του χρήστη είναι απαραίτητη για να εκτελέσετε ένα **S4U2Self.** Αλλά αυτό δεν είναι εντελώς αλήθεια.\
-Η πραγματικότητα είναι ότι ακόμη και χωρίς αυτή την τιμή, μπορείτε να εκτελέσετε ένα **S4U2Self** εναντίον οποιουδήποτε χρήστη αν είστε μια **υπηρεσία** (έχετε ένα SPN) αλλά, αν έχετε **`TrustedToAuthForDelegation`** το επιστρεφόμενο TGS θα είναι **Forwardable** και αν **δεν έχετε** αυτή τη σημαία το επιστρεφόμενο TGS **δεν θα** είναι **Forwardable**.
+Η πραγματικότητα είναι ότι ακόμα και χωρίς αυτή την τιμή, μπορείτε να εκτελέσετε ένα **S4U2Self** εναντίον οποιουδήποτε χρήστη αν είστε μια **υπηρεσία** (έχετε ένα SPN) αλλά, αν έχετε **`TrustedToAuthForDelegation`** το επιστρεφόμενο TGS θα είναι **Forwardable** και αν **δεν έχετε** αυτή τη σημαία το επιστρεφόμενο TGS **δεν θα** είναι **Forwardable**.
 
 Ωστόσο, αν το **TGS** που χρησιμοποιείται στο **S4U2Proxy** είναι **NOT Forwardable** προσπαθώντας να εκμεταλλευτείτε μια **βασική Constrain Delegation** δεν **θα λειτουργήσει**. Αλλά αν προσπαθείτε να εκμεταλλευτείτε μια **Resource-Based constrain delegation, θα λειτουργήσει**.
 
@@ -24,13 +24,13 @@
 
 Υποθέστε ότι ο επιτιθέμενος έχει ήδη **δικαιώματα εγγραφής ισοδύναμα στον υπολογιστή θύμα**.
 
-1. Ο επιτιθέμενος **παραβιάζει** έναν λογαριασμό που έχει ένα **SPN** ή **δημιουργεί έναν** (“Service A”). Σημειώστε ότι **οποιοσδήποτε** _Admin User_ χωρίς κανένα άλλο ειδικό προνόμιο μπορεί να **δημιουργήσει** μέχρι 10 αντικείμενα Υπολογιστή (**_MachineAccountQuota_**) και να τους ορίσει ένα **SPN**. Έτσι, ο επιτιθέμενος μπορεί απλά να δημιουργήσει ένα αντικείμενο Υπολογιστή και να ορίσει ένα SPN.
+1. Ο επιτιθέμενος **παραβιάζει** έναν λογαριασμό που έχει ένα **SPN** ή **δημιουργεί έναν** (“Service A”). Σημειώστε ότι **οποιοσδήποτε** _Admin User_ χωρίς καμία άλλη ειδική προνόμια μπορεί να **δημιουργήσει** μέχρι 10 αντικείμενα Υπολογιστή (**_MachineAccountQuota_**) και να τους ορίσει ένα **SPN**. Έτσι, ο επιτιθέμενος μπορεί απλά να δημιουργήσει ένα αντικείμενο Υπολογιστή και να ορίσει ένα SPN.
 2. Ο επιτιθέμενος **καταχράται το δικαίωμα ΕΓΓΡΑΦΗΣ** του στον υπολογιστή θύμα (ServiceB) για να ρυθμίσει **resource-based constrained delegation ώστε να επιτρέψει στο ServiceA να παριστάνει οποιονδήποτε χρήστη** εναντίον αυτού του υπολογιστή θύμα (ServiceB).
 3. Ο επιτιθέμενος χρησιμοποιεί το Rubeus για να εκτελέσει μια **πλήρη επίθεση S4U** (S4U2Self και S4U2Proxy) από το Service A στο Service B για έναν χρήστη **με προνομιακή πρόσβαση στο Service B**.
-1. S4U2Self (από τον λογαριασμό SPN που παραβιάστηκε/δημιουργήθηκε): Ζητήστε ένα **TGS του Διαχειριστή για μένα** (Not Forwardable).
-2. S4U2Proxy: Χρησιμοποιήστε το **όχι Forwardable TGS** του προηγούμενου βήματος για να ζητήσετε ένα **TGS** από τον **Διαχειριστή** προς τον **υπολογιστή θύμα**.
-3. Ακόμη και αν χρησιμοποιείτε ένα όχι Forwardable TGS, καθώς εκμεταλλεύεστε την Resource-based constrained delegation, θα λειτουργήσει.
-4. Ο επιτιθέμενος μπορεί να **περάσει το εισιτήριο** και να **παριστάνει** τον χρήστη για να αποκτήσει **πρόσβαση στην υπηρεσία θύμα ServiceB**.
+1. S4U2Self (από τον λογαριασμό SPN που παραβιάστηκε/δημιουργήθηκε): Ζητήστε ένα **TGS του Administrator για μένα** (Not Forwardable).
+2. S4U2Proxy: Χρησιμοποιήστε το **όχι Forwardable TGS** του προηγούμενου βήματος για να ζητήσετε ένα **TGS** από τον **Administrator** προς τον **υπολογιστή θύμα**.
+3. Ακόμα και αν χρησιμοποιείτε ένα όχι Forwardable TGS, καθώς εκμεταλλεύεστε την Resource-based constrained delegation, θα λειτουργήσει.
+4. Ο επιτιθέμενος μπορεί να **περάσει το εισιτήριο** και να **παριστάνει** τον χρήστη για να αποκτήσει **πρόσβαση στο θύμα ServiceB**.
 
 Για να ελέγξετε το _**MachineAccountQuota**_ του τομέα μπορείτε να χρησιμοποιήσετε:
 ```bash
@@ -86,11 +86,11 @@ rubeus.exe s4u /user:FAKECOMPUTER$ /aes256:<aes256 hash> /aes128:<aes128 hash> /
 rubeus.exe s4u /user:FAKECOMPUTER$ /aes256:<AES 256 hash> /impersonateuser:administrator /msdsspn:cifs/victim.domain.local /altservice:krbtgt,cifs,host,http,winrm,RPCSS,wsman,ldap /domain:domain.local /ptt
 ```
 > [!CAUTION]
-> Σημειώστε ότι οι χρήστες έχουν ένα χαρακτηριστικό που ονομάζεται "**Cannot be delegated**". Εάν ένας χρήστης έχει αυτό το χαρακτηριστικό σε True, δεν θα μπορείτε να τον προσποιηθείτε. Αυτή η ιδιότητα μπορεί να προβληθεί μέσα από το bloodhound.
+> Σημειώστε ότι οι χρήστες έχουν ένα χαρακτηριστικό που ονομάζεται "**Δεν μπορεί να ανατεθεί**". Εάν ένας χρήστης έχει αυτό το χαρακτηριστικό σε True, δεν θα μπορείτε να τον προσποιηθείτε. Αυτή η ιδιότητα μπορεί να φαίνεται μέσα στο bloodhound.
 
 ### Linux tooling: end-to-end RBCD with Impacket (2024+)
 
-Εάν λειτουργείτε από Linux, μπορείτε να εκτελέσετε την πλήρη αλυσίδα RBCD χρησιμοποιώντας τα επίσημα εργαλεία Impacket:
+If you operate from Linux, you can perform the full RBCD chain using the official Impacket tools:
 ```bash
 # 1) Create attacker-controlled machine account (respects MachineAccountQuota)
 impacket-addcomputer -computer-name 'FAKE01$' -computer-pass 'P@ss123' -dc-ip 192.168.56.10 'domain.local/jdoe:Summer2025!'
@@ -167,22 +167,24 @@ impacket-rbcd -delegate-to 'VICTIM$' -action flush 'domain.local/jdoe:Summer2025
 
 - **`KDC_ERR_ETYPE_NOTSUPP`**: Αυτό σημαίνει ότι το kerberos είναι ρυθμισμένο να μην χρησιμοποιεί DES ή RC4 και παρέχετε μόνο το hash RC4. Παρέχετε στον Rubeus τουλάχιστον το hash AES256 (ή απλά παρέχετε του τα hashes rc4, aes128 και aes256). Παράδειγμα: `[Rubeus.Program]::MainString("s4u /user:FAKECOMPUTER /aes256:CC648CF0F809EE1AA25C52E963AC0487E87AC32B1F71ACC5304C73BF566268DA /aes128:5FC3D06ED6E8EA2C9BB9CC301EA37AD4 /rc4:EF266C6B963C0BB683941032008AD47F /impersonateuser:Administrator /msdsspn:CIFS/M3DC.M3C.LOCAL /ptt".split())`
 - **`KRB_AP_ERR_SKEW`**: Αυτό σημαίνει ότι η ώρα του τρέχοντος υπολογιστή είναι διαφορετική από αυτήν του DC και το kerberos δεν λειτουργεί σωστά.
-- **`preauth_failed`**: Αυτό σημαίνει ότι το δεδομένο όνομα χρήστη + hashes δεν λειτουργούν για είσοδο. Ίσως να ξεχάσατε να βάλετε το "$" μέσα στο όνομα χρήστη κατά την παραγωγή των hashes (`.\Rubeus.exe hash /password:123456 /user:FAKECOMPUTER$ /domain:domain.local`)
+- **`preauth_failed`**: Αυτό σημαίνει ότι το δοθέν όνομα χρήστη + hashes δεν λειτουργούν για είσοδο. Μπορεί να έχετε ξεχάσει να βάλετε το "$" μέσα στο όνομα χρήστη κατά την παραγωγή των hashes (`.\Rubeus.exe hash /password:123456 /user:FAKECOMPUTER$ /domain:domain.local`)
 - **`KDC_ERR_BADOPTION`**: Αυτό μπορεί να σημαίνει:
 - Ο χρήστης που προσπαθείτε να μιμηθείτε δεν μπορεί να έχει πρόσβαση στην επιθυμητή υπηρεσία (επειδή δεν μπορείτε να τον μιμηθείτε ή επειδή δεν έχει αρκετά δικαιώματα)
 - Η ζητούμενη υπηρεσία δεν υπάρχει (αν ζητήσετε ένα εισιτήριο για winrm αλλά το winrm δεν εκτελείται)
 - Ο ψεύτικος υπολογιστής που δημιουργήθηκε έχει χάσει τα δικαιώματά του πάνω στον ευάλωτο διακομιστή και πρέπει να τα επιστρέψετε.
-- Καταχράστε κλασικό KCD; θυμηθείτε ότι το RBCD λειτουργεί με μη αναστρέψιμα S4U2Self εισιτήρια, ενώ το KCD απαιτεί αναστρέψιμα.
+- Καταχράστε το κλασικό KCD; θυμηθείτε ότι το RBCD λειτουργεί με μη αναστρέψιμα S4U2Self εισιτήρια, ενώ το KCD απαιτεί αναστρέψιμα.
 
 ## Notes, relays and alternatives
 
 - Μπορείτε επίσης να γράψετε το RBCD SD πάνω από τις Υπηρεσίες Ιστού AD (ADWS) αν το LDAP είναι φιλτραρισμένο. Δείτε:
+
 
 {{#ref}}
 adws-enumeration.md
 {{#endref}}
 
 - Οι αλυσίδες αναμετάδοσης Kerberos συχνά καταλήγουν σε RBCD για να επιτύχουν το τοπικό SYSTEM σε ένα βήμα. Δείτε πρακτικά παραδείγματα από άκρο σε άκρο:
+
 
 {{#ref}}
 ../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md
@@ -197,5 +199,6 @@ adws-enumeration.md
 - [https://posts.specterops.io/kerberosity-killed-the-domain-an-offensive-kerberos-overview-eb04b1402c61](https://posts.specterops.io/kerberosity-killed-the-domain-an-offensive-kerberos-overview-eb04b1402c61)
 - Impacket rbcd.py (official): https://github.com/fortra/impacket/blob/master/examples/rbcd.py
 - Quick Linux cheatsheet with recent syntax: https://tldrbins.github.io/rbcd/
+
 
 {{#include ../../banners/hacktricks-training.md}}

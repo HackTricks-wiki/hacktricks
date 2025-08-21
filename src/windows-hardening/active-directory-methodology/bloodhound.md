@@ -2,33 +2,34 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
+
 {{#ref}}
 adws-enumeration.md
 {{#endref}}
 
-> ΣΗΜΕΙΩΣΗ: Αυτή η σελίδα ομαδοποιεί μερικά από τα πιο χρήσιμα εργαλεία για **καταμέτρηση** και **οπτικοποίηση** σχέσεων Active Directory. Για συλλογή μέσω του stealthy **Active Directory Web Services (ADWS)** καναλιού, ελέγξτε την αναφορά παραπάνω.
+> ΣΗΜΕΙΩΣΗ: Αυτή η σελίδα ομαδοποιεί μερικά από τα πιο χρήσιμα εργαλεία για **enumerate** και **visualise** τις σχέσεις του Active Directory. Για συλλογή μέσω του stealthy **Active Directory Web Services (ADWS)** καναλιού, ελέγξτε την αναφορά παραπάνω.
 
 ---
 
 ## AD Explorer
 
-[AD Explorer](https://docs.microsoft.com/en-us/sysinternals/downloads/adexplorer) (Sysinternals) είναι ένας προηγμένος **θεατής & επεξεργαστής AD** που επιτρέπει:
+[AD Explorer](https://docs.microsoft.com/en-us/sysinternals/downloads/adexplorer) (Sysinternals) είναι ένας προηγμένος **AD viewer & editor** που επιτρέπει:
 
-* GUI περιήγηση του δέντρου καταλόγου
-* Επεξεργασία χαρακτηριστικών αντικειμένων & περιγραφών ασφαλείας
-* Δημιουργία / σύγκριση στιγμιότυπων για ανάλυση εκτός σύνδεσης
+* GUI browsing του δέντρου καταλόγου
+* Επεξεργασία χαρακτηριστικών αντικειμένων & ασφάλειας
+* Δημιουργία / σύγκριση στιγμιότυπων για offline ανάλυση
 
-### Γρήγορη χρήση
+### Quick usage
 
 1. Ξεκινήστε το εργαλείο και συνδεθείτε στο `dc01.corp.local` με οποιαδήποτε διαπιστευτήρια τομέα.
-2. Δημιουργήστε ένα στιγμιότυπο εκτός σύνδεσης μέσω `File ➜ Create Snapshot`.
+2. Δημιουργήστε ένα offline στιγμιότυπο μέσω `File ➜ Create Snapshot`.
 3. Συγκρίνετε δύο στιγμιότυπα με `File ➜ Compare` για να εντοπίσετε αποκλίσεις δικαιωμάτων.
 
 ---
 
 ## ADRecon
 
-[ADRecon](https://github.com/adrecon/ADRecon) εξάγει ένα μεγάλο σύνολο αντικειμένων από έναν τομέα (ACLs, GPOs, trusts, CA templates …) και παράγει μια **έκθεση Excel**.
+[ADRecon](https://github.com/adrecon/ADRecon) εξάγει ένα μεγάλο σύνολο αντικειμένων από έναν τομέα (ACLs, GPOs, trusts, CA templates …) και παράγει μια **Excel report**.
 ```powershell
 # On a Windows host in the domain
 PS C:\> .\ADRecon.ps1 -OutputDir C:\Temp\ADRecon
@@ -46,9 +47,9 @@ curl -L https://ghst.ly/getbhce | docker compose -f - up
 ```
 ### Collectors
 
-* `SharpHound.exe` / `Invoke-BloodHound` – εγγενής ή παραλλαγή PowerShell
-* `AzureHound` – καταμέτρηση Azure AD
-* **SoaPy + BOFHound** – συλλογή ADWS (δείτε τον σύνδεσμο στην κορυφή)
+* `SharpHound.exe` / `Invoke-BloodHound` – εγγενής ή PowerShell παραλλαγή
+* `AzureHound` – Azure AD καταμέτρηση
+* **SoaPy + BOFHound** – ADWS συλλογή (δείτε τον σύνδεσμο στην κορυφή)
 
 #### Κοινές λειτουργίες SharpHound
 ```powershell

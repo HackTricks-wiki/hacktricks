@@ -1,38 +1,49 @@
+# Τεχνικές για Συγκεκριμένα Λογισμικά/Τύπους Αρχείων
+
 {{#include ../../../banners/hacktricks-training.md}}
 
-Εδώ μπορείτε να βρείτε ενδιαφέροντα κόλπα για συγκεκριμένους τύπους αρχείων και/ή λογισμικό:
+Εδώ μπορείτε να βρείτε ενδιαφέρουσες τεχνικές για συγκεκριμένους τύπους αρχείων και/ή λογισμικό:
+
 
 {{#ref}}
 .pyc.md
 {{#endref}}
 
+
 {{#ref}}
 browser-artifacts.md
 {{#endref}}
+
 
 {{#ref}}
 desofuscation-vbs-cscript.exe.md
 {{#endref}}
 
+
 {{#ref}}
 local-cloud-storage.md
 {{#endref}}
+
 
 {{#ref}}
 office-file-analysis.md
 {{#endref}}
 
+
 {{#ref}}
 pdf-file-analysis.md
 {{#endref}}
+
 
 {{#ref}}
 png-tricks.md
 {{#endref}}
 
+
 {{#ref}}
 video-and-audio-file-analysis.md
 {{#endref}}
+
 
 {{#ref}}
 zips-tricks.md

@@ -2,12 +2,12 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-> [!NOTE]
-> Μια σημείωση σχετικά με το **PCAP** και το **PCAPNG**: υπάρχουν δύο εκδόσεις της μορφής αρχείου PCAP; **Το PCAPNG είναι πιο νέο και δεν υποστηρίζεται από όλα τα εργαλεία**. Μπορεί να χρειαστεί να μετατρέψετε ένα αρχείο από PCAPNG σε PCAP χρησιμοποιώντας το Wireshark ή κάποιο άλλο συμβατό εργαλείο, προκειμένου να εργαστείτε με αυτό σε κάποια άλλα εργαλεία.
+> [!TIP]
+> Μια σημείωση σχετικά με το **PCAP** και το **PCAPNG**: υπάρχουν δύο εκδόσεις της μορφής αρχείου PCAP; **Το PCAPNG είναι πιο νέο και δεν υποστηρίζεται από όλα τα εργαλεία**. Μπορεί να χρειαστεί να μετατρέψετε ένα αρχείο από PCAPNG σε PCAP χρησιμοποιώντας το Wireshark ή κάποιο άλλο συμβατό εργαλείο, προκειμένου να εργαστείτε με αυτό σε άλλα εργαλεία.
 
 ## Online tools for pcaps
 
-- Αν η κεφαλίδα του pcap σας είναι **κατεστραμμένη**, θα πρέπει να προσπαθήσετε να την **διορθώσετε** χρησιμοποιώντας: [http://f00l.de/hacking/**pcapfix.php**](http://f00l.de/hacking/pcapfix.php)
+- Αν η κεφαλίδα του pcap είναι **κατεστραμμένη**, θα πρέπει να προσπαθήσετε να την **διορθώσετε** χρησιμοποιώντας: [http://f00l.de/hacking/**pcapfix.php**](http://f00l.de/hacking/pcapfix.php)
 - Εξαγάγετε **πληροφορίες** και αναζητήστε **malware** μέσα σε ένα pcap στο [**PacketTotal**](https://packettotal.com)
 - Αναζητήστε **κακόβουλη δραστηριότητα** χρησιμοποιώντας [**www.virustotal.com**](https://www.virustotal.com) και [**www.hybrid-analysis.com**](https://www.hybrid-analysis.com)
 - **Πλήρης ανάλυση pcap από τον περιηγητή στο** [**https://apackets.com/**](https://apackets.com/)
@@ -18,10 +18,11 @@
 
 ### Wireshark
 
-> [!NOTE]
+> [!TIP]
 > **Αν πρόκειται να αναλύσετε ένα PCAP, πρέπει βασικά να ξέρετε πώς να χρησιμοποιείτε το Wireshark**
 
 Μπορείτε να βρείτε μερικά κόλπα του Wireshark στο:
+
 
 {{#ref}}
 wireshark-tricks.md
@@ -35,7 +36,7 @@ wireshark-tricks.md
 
 [**Xplico** ](https://github.com/xplico/xplico)_(μόνο linux)_ μπορεί να **αναλύσει** ένα **pcap** και να εξαγάγει πληροφορίες από αυτό. Για παράδειγμα, από ένα αρχείο pcap, το Xplico εξάγει κάθε email (πρωτόκολλα POP, IMAP και SMTP), όλα τα περιεχόμενα HTTP, κάθε κλήση VoIP (SIP), FTP, TFTP, κ.λπ.
 
-**Εγκατάσταση**
+**Εγκαταστήστε**
 ```bash
 sudo bash -c 'echo "deb http://repo.xplico.org/ $(lsb_release -s -c) main" /etc/apt/sources.list'
 sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 791C25CE
@@ -47,9 +48,9 @@ sudo apt-get install xplico
 /etc/init.d/apache2 restart
 /etc/init.d/xplico start
 ```
-Η πρόσβαση στο _**127.0.0.1:9876**_ με διαπιστευτήρια _**xplico:xplico**_
+Access to _**127.0.0.1:9876**_ with credentials _**xplico:xplico**_
 
-Στη συνέχεια, δημιουργήστε μια **νέα υπόθεση**, δημιουργήστε μια **νέα συνεδρία** μέσα στην υπόθεση και **ανεβάστε το pcap** αρχείο.
+Then create a **new case**, create a **new session** inside the case and **upload the pcap** file.
 
 ### NetworkMiner
 
@@ -67,7 +68,7 @@ sudo apt-get install xplico
 - Εξαγωγή κατακερματισμένων κωδικών αυθεντικοποίησης και σπάσιμο τους χρησιμοποιώντας το Hashcat (Kerberos, NTLM, CRAM-MD5, HTTP-Digest...)
 - Δημιουργία οπτικού διαγράμματος δικτύου (Κόμβοι δικτύου & χρήστες)
 - Εξαγωγή ερωτημάτων DNS
-- Ανακατασκευή όλων των TCP & UDP Συνεδριών
+- Ανακατασκευή όλων των TCP & UDP συνεδριών
 - File Carving
 
 ### Capinfos
@@ -76,7 +77,7 @@ capinfos capture.pcap
 ```
 ### Ngrep
 
-Αν **ψάχνετε** για **κάτι** μέσα στο pcap μπορείτε να χρησιμοποιήσετε το **ngrep**. Ακολουθεί ένα παράδειγμα χρησιμοποιώντας τα κύρια φίλτρα:
+Αν **ψάχνετε** για **κάτι** μέσα στο pcap μπορείτε να χρησιμοποιήσετε **ngrep**. Ακολουθεί ένα παράδειγμα χρησιμοποιώντας τα κύρια φίλτρα:
 ```bash
 ngrep -I packets.pcap "^GET" "port 80 and tcp and host 192.168 and dst host 192.168 and src host 192.168"
 ```
@@ -96,7 +97,7 @@ ngrep -I packets.pcap "^GET" "port 80 and tcp and host 192.168 and dst host 192.
 
 ### Suricata
 
-**Εγκατάσταση και ρύθμιση**
+**Install and setup**
 ```
 apt-get install suricata
 apt-get install oinkmaster
@@ -127,7 +128,7 @@ suricata -r packets.pcap -c /etc/suricata/suricata.yaml -k none -v -l log
 
 ## Zeek
 
-> [Zeek](https://docs.zeek.org/en/master/about.html) είναι ένας παθητικός, ανοιχτού κώδικα αναλυτής δικτυακής κίνησης. Πολλοί χειριστές χρησιμοποιούν το Zeek ως Δίκτυο Ασφαλείας Monitor (NSM) για να υποστηρίξουν τις έρευνες για ύποπτη ή κακόβουλη δραστηριότητα. Το Zeek υποστηρίζει επίσης μια ευρεία γκάμα εργασιών ανάλυσης κίνησης πέρα από τον τομέα της ασφάλειας, συμπεριλαμβανομένης της μέτρησης απόδοσης και της αποσφαλμάτωσης.
+> [Zeek](https://docs.zeek.org/en/master/about.html) είναι ένας παθητικός, ανοιχτού κώδικα αναλυτής δικτυακής κίνησης. Πολλοί χειριστές χρησιμοποιούν το Zeek ως Δίκτυο Ασφαλείας Monitor (NSM) για να υποστηρίξουν έρευνες για ύποπτη ή κακόβουλη δραστηριότητα. Το Zeek υποστηρίζει επίσης ένα ευρύ φάσμα εργασιών ανάλυσης κίνησης πέρα από τον τομέα της ασφάλειας, συμπεριλαμβανομένης της μέτρησης απόδοσης και της αποσφαλμάτωσης.
 
 Βασικά, τα αρχεία καταγραφής που δημιουργούνται από το `zeek` δεν είναι **pcaps**. Επομένως, θα χρειαστεί να χρησιμοποιήσετε **άλλα εργαλεία** για να αναλύσετε τα αρχεία καταγραφής όπου οι **πληροφορίες** σχετικά με τα pcaps είναι.
 
@@ -200,13 +201,16 @@ rita show-exploded-dns -H --limit 10 zeek_logs
 ```
 ## Άλλες τεχνικές ανάλυσης pcap
 
+
 {{#ref}}
 dnscat-exfiltration.md
 {{#endref}}
 
+
 {{#ref}}
 wifi-pcap-analysis.md
 {{#endref}}
+
 
 {{#ref}}
 usb-keystrokes.md
