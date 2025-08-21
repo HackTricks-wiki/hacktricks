@@ -6,7 +6,7 @@
 
 ### Basic Information
 
-우선, **좋은 알려진 바이너리와 라이브러리**가 있는 **USB**를 준비하는 것이 좋습니다 (우분투를 가져와서 _/bin_, _/sbin_, _/lib,_ 및 _/lib64_ 폴더를 복사할 수 있습니다), 그런 다음 USB를 마운트하고 환경 변수를 수정하여 해당 바이너리를 사용합니다:
+우선, **좋은 알려진 바이너리와 라이브러리**가 있는 **USB**를 준비하는 것이 좋습니다 (우분투를 다운로드하고 _/bin_, _/sbin_, _/lib,_ 및 _/lib64_ 폴더를 복사하면 됩니다). 그런 다음 USB를 마운트하고 환경 변수를 수정하여 해당 바이너리를 사용합니다:
 ```bash
 export PATH=/mnt/usb/bin:/mnt/usb/sbin
 export LD_LIBRARY_PATH=/mnt/usb/lib:/mnt/usb/lib64
@@ -34,16 +34,16 @@ find /directory -type f -mtime -1 -print #Find modified files during the last mi
 기본 정보를 얻는 동안 다음과 같은 이상한 사항을 확인해야 합니다:
 
 - **루트 프로세스**는 일반적으로 낮은 PID로 실행되므로, 큰 PID를 가진 루트 프로세스를 발견하면 의심할 수 있습니다.
-- `/etc/passwd` 내에서 셸이 없는 사용자의 **등록된 로그인**을 확인하십시오.
-- 셸이 없는 사용자의 `/etc/shadow` 내에서 **비밀번호 해시**를 확인하십시오.
+- `/etc/passwd` 내에 쉘이 없는 사용자의 **등록된 로그인**을 확인하십시오.
+- 쉘이 없는 사용자의 `/etc/shadow` 내에 **비밀번호 해시**를 확인하십시오.
 
 ### 메모리 덤프
 
 실행 중인 시스템의 메모리를 얻으려면 [**LiME**](https://github.com/504ensicsLabs/LiME)를 사용하는 것이 좋습니다.\
-**컴파일**하려면 피해자 머신이 사용하는 **동일한 커널**을 사용해야 합니다.
+이를 **컴파일**하려면 피해자 머신이 사용하는 **동일한 커널**을 사용해야 합니다.
 
-> [!NOTE]
-> 피해자 머신에 **LiME 또는 다른 어떤 것**도 설치할 수 없음을 기억하십시오. 이는 여러 가지 변경을 초래할 것입니다.
+> [!TIP]
+> 피해자 머신에 **LiME 또는 다른 것을 설치할 수 없**다는 점을 기억하십시오. 이는 여러 가지 변경을 초래할 수 있습니다.
 
 따라서 동일한 버전의 Ubuntu가 있다면 `apt-get install lime-forensics-dkms`를 사용할 수 있습니다.\
 다른 경우에는 [**LiME**](https://github.com/504ensicsLabs/LiME)를 github에서 다운로드하고 올바른 커널 헤더로 컴파일해야 합니다. 피해자 머신의 **정확한 커널 헤더**를 얻으려면 `/lib/modules/<kernel version>` 디렉토리를 귀하의 머신으로 **복사**한 다음, 이를 사용하여 LiME를 **컴파일**하면 됩니다:
@@ -53,8 +53,8 @@ sudo insmod lime.ko "path=/home/sansforensics/Desktop/mem_dump.bin format=lime"
 ```
 LiME는 3가지 **형식**을 지원합니다:
 
-- Raw (모든 세그먼트를 연결한 것)
-- Padded (raw와 동일하지만 오른쪽 비트에 제로가 추가됨)
+- Raw (모든 세그먼트가 함께 연결됨)
+- Padded (raw와 동일하지만 오른쪽 비트에 0이 추가됨)
 - Lime (메타데이터가 포함된 추천 형식)
 
 LiME는 또한 **시스템에 저장하는 대신 네트워크를 통해 덤프를 전송**하는 데 사용할 수 있습니다. 예: `path=tcp:4444`
@@ -63,12 +63,12 @@ LiME는 또한 **시스템에 저장하는 대신 네트워크를 통해 덤프�
 
 #### 시스템 종료
 
-우선, **시스템을 종료**해야 합니다. 이는 항상 가능한 옵션이 아니며, 경우에 따라 시스템이 회사가 종료할 수 없는 프로덕션 서버일 수 있습니다.\
+우선, **시스템을 종료해야** 합니다. 이는 항상 가능한 옵션이 아니며, 때때로 시스템이 회사가 종료할 수 없는 프로덕션 서버일 수 있습니다.\
 시스템을 종료하는 방법은 **정상 종료**와 **"플러그를 뽑는" 종료**의 **2가지 방법**이 있습니다. 첫 번째 방법은 **프로세스가 정상적으로 종료**되고 **파일 시스템**이 **동기화**되도록 허용하지만, 가능한 **악성코드**가 **증거를 파괴**할 수 있게 합니다. "플러그를 뽑는" 접근 방식은 **일부 정보 손실**을 초래할 수 있습니다(메모리 이미지를 이미 가져왔기 때문에 많은 정보가 손실되지는 않을 것입니다) 그리고 **악성코드가 아무것도 할 기회가 없습니다**. 따라서 **악성코드**가 있을 것으로 **의심**되는 경우, 시스템에서 **`sync`** **명령**을 실행하고 플러그를 뽑으십시오.
 
 #### 디스크 이미지 가져오기
 
-**사건과 관련된 어떤 것에 컴퓨터를 연결하기 전에** 반드시 **읽기 전용으로 마운트**될 것인지 확인하는 것이 중요합니다.
+**사건과 관련된 어떤 것에 컴퓨터를 연결하기 전에** 반드시 **읽기 전용으로 마운트**될 것인지 확인하는 것이 중요합니다. 정보를 수정하지 않기 위해서입니다.
 ```bash
 #Create a raw copy of the disk
 dd if=<subject device> of=<image file> bs=512
@@ -156,7 +156,7 @@ Debian 및 RedHat 시스템에서 설치된 프로그램을 효과적으로 검�
 - Debian의 경우, 패키지 설치에 대한 세부 정보를 가져오기 위해 _**`/var/lib/dpkg/status`**_ 및 _**`/var/log/dpkg.log`**_를 검사하고, `grep`을 사용하여 특정 정보를 필터링하십시오.
 - RedHat 사용자는 `rpm -qa --root=/mntpath/var/lib/rpm`로 RPM 데이터베이스를 쿼리하여 설치된 패키지를 나열할 수 있습니다.
 
-패키지 관리자 외부에서 수동으로 설치된 소프트웨어를 발견하려면 _**`/usr/local`**_, _**`/opt`**_, _**`/usr/sbin`**_, _**`/usr/bin`**_, _**`/bin`**_, 및 _**`/sbin`**_과 같은 디렉토리를 탐색하십시오. 디렉토리 목록과 시스템 특정 명령을 결합하여 알려진 패키지와 관련이 없는 실행 파일을 식별하여 모든 설치된 프로그램 검색을 강화하십시오.
+패키지 관리자 외부에서 수동으로 설치된 소프트웨어를 발견하려면 _**`/usr/local`**_, _**`/opt`**_, _**`/usr/sbin`**_, _**`/usr/bin`**_, _**`/bin`**_, 및 _**`/sbin`**_과 같은 디렉토리를 탐색하십시오. 디렉토리 목록과 시스템 특정 명령을 결합하여 알려진 패키지와 관련이 없는 실행 파일을 식별하여 모든 설치된 프로그램을 검색하는 데 도움을 줄 수 있습니다.
 ```bash
 # Debian package and log details
 cat /var/lib/dpkg/status | grep -E "Package:|Status:"
@@ -196,19 +196,45 @@ cat /var/spool/cron/crontabs/*  \
 #MacOS
 ls -l /usr/lib/cron/tabs/ /Library/LaunchAgents/ /Library/LaunchDaemons/ ~/Library/LaunchAgents/
 ```
+#### Hunt: Cron/Anacron 남용 via 0anacron 및 의심스러운 스텁
+공격자는 종종 각 /etc/cron.*/ 디렉토리 아래에 있는 0anacron 스텁을 편집하여 주기적인 실행을 보장합니다.
+```bash
+# List 0anacron files and their timestamps/sizes
+for d in /etc/cron.*; do [ -f "$d/0anacron" ] && stat -c '%n %y %s' "$d/0anacron"; done
+
+# Look for obvious execution of shells or downloaders embedded in cron stubs
+grep -R --line-number -E 'curl|wget|/bin/sh|python|bash -c' /etc/cron.*/* 2>/dev/null
+```
+#### Hunt: SSH 하드닝 롤백 및 백도어 셸
+sshd_config 및 시스템 계정 셸에 대한 변경은 액세스를 유지하기 위해 일반적인 포스트 익스플로잇입니다.
+```bash
+# Root login enablement (flag "yes" or lax values)
+grep -E '^\s*PermitRootLogin' /etc/ssh/sshd_config
+
+# System accounts with interactive shells (e.g., games → /bin/sh)
+awk -F: '($7 ~ /bin\/(sh|bash|zsh)/ && $1 ~ /^(games|lp|sync|shutdown|halt|mail|operator)$/) {print}' /etc/passwd
+```
+#### Hunt: Cloud C2 markers (Dropbox/Cloudflare Tunnel)
+- Dropbox API 비콘은 일반적으로 HTTPS를 통해 api.dropboxapi.com 또는 content.dropboxapi.com을 사용하며, Authorization: Bearer 토큰을 사용합니다.
+- 서버에서 예상치 못한 Dropbox 이탈을 위해 proxy/Zeek/NetFlow에서 검색합니다.
+- Cloudflare Tunnel (`cloudflared`)는 아웃바운드 443을 통해 백업 C2를 제공합니다.
+```bash
+ps aux | grep -E '[c]loudflared|trycloudflare'
+systemctl list-units | grep -i cloudflared
+```
 ### 서비스
 
 악성 코드가 서비스로 설치될 수 있는 경로:
 
-- **/etc/inittab**: rc.sysinit과 같은 초기화 스크립트를 호출하여 추가적으로 시작 스크립트로 안내합니다.
+- **/etc/inittab**: rc.sysinit과 같은 초기화 스크립트를 호출하여 추가적인 시작 스크립트로 안내합니다.
 - **/etc/rc.d/** 및 **/etc/rc.boot/**: 서비스 시작을 위한 스크립트를 포함하며, 후자는 구버전 리눅스에서 발견됩니다.
 - **/etc/init.d/**: Debian과 같은 특정 리눅스 버전에서 시작 스크립트를 저장하는 데 사용됩니다.
-- 서비스는 리눅스 변형에 따라 **/etc/inetd.conf** 또는 **/etc/xinetd/**를 통해 활성화될 수도 있습니다.
+- 서비스는 리눅스 변형에 따라 **/etc/inetd.conf** 또는 **/etc/xinetd/**를 통해 활성화될 수 있습니다.
 - **/etc/systemd/system**: 시스템 및 서비스 관리자 스크립트를 위한 디렉토리입니다.
 - **/etc/systemd/system/multi-user.target.wants/**: 다중 사용자 실행 수준에서 시작해야 하는 서비스에 대한 링크를 포함합니다.
 - **/usr/local/etc/rc.d/**: 사용자 정의 또는 타사 서비스용입니다.
 - **\~/.config/autostart/**: 사용자 특정 자동 시작 애플리케이션을 위한 것으로, 사용자 타겟 악성 코드의 은신처가 될 수 있습니다.
-- **/lib/systemd/system/**: 설치된 패키지에서 제공하는 시스템 전체 기본 유닛 파일입니다.
+- **/lib/systemd/system/**: 설치된 패키지에서 제공하는 시스템 전체의 기본 유닛 파일입니다.
 
 ### 커널 모듈
 
@@ -230,12 +256,12 @@ ls -l /usr/lib/cron/tabs/ /Library/LaunchAgents/ /Library/LaunchDaemons/ ~/Libra
 
 리눅스 시스템은 다양한 로그 파일을 통해 사용자 활동 및 시스템 이벤트를 추적합니다. 이러한 로그는 무단 접근, 악성 코드 감염 및 기타 보안 사건을 식별하는 데 중요합니다. 주요 로그 파일은 다음과 같습니다:
 
-- **/var/log/syslog** (Debian) 또는 **/var/log/messages** (RedHat): 시스템 전체 메시지 및 활동을 캡처합니다.
-- **/var/log/auth.log** (Debian) 또는 **/var/log/secure** (RedHat): 인증 시도, 성공 및 실패한 로그인 기록.
-- 관련 인증 이벤트를 필터링하려면 `grep -iE "session opened for|accepted password|new session|not in sudoers" /var/log/auth.log`를 사용합니다.
+- **/var/log/syslog** (Debian) 또는 **/var/log/messages** (RedHat): 시스템 전체의 메시지 및 활동을 캡처합니다.
+- **/var/log/auth.log** (Debian) 또는 **/var/log/secure** (RedHat): 인증 시도, 성공 및 실패한 로그인 기록을 남깁니다.
+- `grep -iE "session opened for|accepted password|new session|not in sudoers" /var/log/auth.log`를 사용하여 관련 인증 이벤트를 필터링합니다.
 - **/var/log/boot.log**: 시스템 시작 메시지를 포함합니다.
 - **/var/log/maillog** 또는 **/var/log/mail.log**: 이메일 서버 활동을 기록하며, 이메일 관련 서비스를 추적하는 데 유용합니다.
-- **/var/log/kern.log**: 오류 및 경고를 포함한 커널 메시지를 저장합니다.
+- **/var/log/kern.log**: 커널 메시지를 저장하며, 오류 및 경고를 포함합니다.
 - **/var/log/dmesg**: 장치 드라이버 메시지를 보유합니다.
 - **/var/log/faillog**: 실패한 로그인 시도를 기록하여 보안 침해 조사에 도움을 줍니다.
 - **/var/log/cron**: 크론 작업 실행을 기록합니다.
@@ -246,8 +272,8 @@ ls -l /usr/lib/cron/tabs/ /Library/LaunchAgents/ /Library/LaunchDaemons/ ~/Libra
 - **/var/log/xferlog**: FTP 파일 전송을 기록합니다.
 - **/var/log/**: 여기에서 예상치 못한 로그를 항상 확인하십시오.
 
-> [!NOTE]
-> 리눅스 시스템 로그 및 감사 하위 시스템은 침입 또는 악성 코드 사건에서 비활성화되거나 삭제될 수 있습니다. 리눅스 시스템의 로그는 악의적인 활동에 대한 가장 유용한 정보를 포함하고 있기 때문에, 침입자는 이를 정기적으로 삭제합니다. 따라서 사용 가능한 로그 파일을 검사할 때는 삭제 또는 변조의 징후가 될 수 있는 간격이나 순서가 어긋난 항목을 찾는 것이 중요합니다.
+> [!TIP]
+> 리눅스 시스템 로그 및 감사 하위 시스템은 침입 또는 악성 코드 사건에서 비활성화되거나 삭제될 수 있습니다. 리눅스 시스템의 로그는 일반적으로 악의적인 활동에 대한 가장 유용한 정보를 포함하므로, 침입자는 이를 정기적으로 삭제합니다. 따라서 사용 가능한 로그 파일을 검사할 때는 삭제 또는 변조의 징후가 될 수 있는 간격이나 순서가 어긋난 항목을 찾는 것이 중요합니다.
 
 **리눅스는 각 사용자의 명령 기록을 유지합니다**, 저장 위치는 다음과 같습니다:
 
@@ -257,32 +283,32 @@ ls -l /usr/lib/cron/tabs/ /Library/LaunchAgents/ /Library/LaunchDaemons/ ~/Libra
 - \~/.python_history
 - \~/.\*\_history
 
-또한, `last -Faiwx` 명령은 사용자 로그인 목록을 제공합니다. 알 수 없거나 예상치 못한 로그인을 확인하십시오.
+또한, `last -Faiwx` 명령은 사용자 로그인 목록을 제공합니다. 이를 통해 알 수 없는 또는 예상치 못한 로그인을 확인하십시오.
 
 추가 권한을 부여할 수 있는 파일을 확인하십시오:
 
-- 예상치 못한 사용자 권한이 부여되었는지 확인하려면 `/etc/sudoers`를 검토하십시오.
-- 예상치 못한 사용자 권한이 부여되었는지 확인하려면 `/etc/sudoers.d/`를 검토하십시오.
-- 비정상적인 그룹 구성원 또는 권한을 식별하기 위해 `/etc/groups`를 검사하십시오.
-- 비정상적인 그룹 구성원 또는 권한을 식별하기 위해 `/etc/passwd`를 검사하십시오.
+- `/etc/sudoers`에서 예상치 못한 사용자 권한이 부여되었는지 검토합니다.
+- `/etc/sudoers.d/`에서 예상치 못한 사용자 권한이 부여되었는지 검토합니다.
+- `/etc/groups`를 검사하여 비정상적인 그룹 구성원 또는 권한을 식별합니다.
+- `/etc/passwd`를 검사하여 비정상적인 그룹 구성원 또는 권한을 식별합니다.
 
 일부 앱은 자체 로그를 생성합니다:
 
-- **SSH**: 무단 원격 연결을 위해 _\~/.ssh/authorized_keys_ 및 _\~/.ssh/known_hosts_를 검사하십시오.
-- **Gnome Desktop**: Gnome 애플리케이션을 통해 최근에 접근한 파일을 위해 _\~/.recently-used.xbel_를 확인하십시오.
-- **Firefox/Chrome**: 의심스러운 활동을 위해 _\~/.mozilla/firefox_ 또는 _\~/.config/google-chrome_에서 브라우저 기록 및 다운로드를 확인하십시오.
-- **VIM**: 접근한 파일 경로 및 검색 기록과 같은 사용 세부정보를 위해 _\~/.viminfo_를 검토하십시오.
-- **Open Office**: 손상된 파일을 나타낼 수 있는 최근 문서 접근을 확인하십시오.
-- **FTP/SFTP**: 무단 파일 전송이 있을 수 있는 _\~/.ftp_history_ 또는 _\~/.sftp_history_의 로그를 검토하십시오.
-- **MySQL**: 무단 데이터베이스 활동을 드러낼 수 있는 실행된 MySQL 쿼리를 위해 _\~/.mysql_history_를 조사하십시오.
-- **Less**: 본 파일 및 실행된 명령을 포함한 사용 기록을 위해 _\~/.lesshst_를 분석하십시오.
-- **Git**: 리포지토리에 대한 변경 사항을 위해 _\~/.gitconfig_ 및 프로젝트 _.git/logs_를 검사하십시오.
+- **SSH**: _\~/.ssh/authorized_keys_ 및 _\~/.ssh/known_hosts_를 검사하여 무단 원격 연결을 확인합니다.
+- **Gnome Desktop**: Gnome 애플리케이션을 통해 최근에 접근한 파일을 위해 _\~/.recently-used.xbel_를 확인합니다.
+- **Firefox/Chrome**: _\~/.mozilla/firefox_ 또는 _\~/.config/google-chrome_에서 브라우저 기록 및 다운로드를 확인하여 의심스러운 활동을 찾습니다.
+- **VIM**: 접근한 파일 경로 및 검색 기록과 같은 사용 세부정보를 위해 _\~/.viminfo_를 검토합니다.
+- **Open Office**: 손상된 파일을 나타낼 수 있는 최근 문서 접근을 확인합니다.
+- **FTP/SFTP**: 무단 파일 전송이 있을 수 있는 _\~/.ftp_history_ 또는 _\~/.sftp_history_의 로그를 검토합니다.
+- **MySQL**: 실행된 MySQL 쿼리를 위해 _\~/.mysql_history_를 조사하여 무단 데이터베이스 활동을 드러낼 수 있습니다.
+- **Less**: 본 파일 및 실행된 명령을 포함한 사용 기록을 위해 _\~/.lesshst_를 분석합니다.
+- **Git**: 리포지토리 변경 사항을 위해 _\~/.gitconfig_ 및 프로젝트 _.git/logs_를 검사합니다.
 
 ### USB 로그
 
-[**usbrip**](https://github.com/snovvcrash/usbrip)는 USB 이벤트 기록 테이블을 구성하기 위해 리눅스 로그 파일(`/var/log/syslog*` 또는 `/var/log/messages*`, 배포판에 따라 다름)을 파싱하는 순수 Python 3로 작성된 작은 소프트웨어입니다.
+[**usbrip**](https://github.com/snovvcrash/usbrip)는 리눅스 로그 파일(`/var/log/syslog*` 또는 배포판에 따라 `/var/log/messages*`)을 파싱하여 USB 이벤트 이력 테이블을 구성하는 순수 Python 3로 작성된 작은 소프트웨어입니다.
 
-모든 USB 사용 내역을 아는 것은 흥미롭고, "위반 사건"(목록에 없는 USB 사용)을 찾기 위해 승인된 USB 목록이 있으면 더 유용할 것입니다.
+모든 USB 사용 내역을 아는 것은 흥미롭고, "위반 사건"(목록에 없는 USB 사용)을 찾기 위해 승인된 USB 목록이 있다면 더욱 유용할 것입니다.
 
 ### 설치
 ```bash
@@ -301,7 +327,7 @@ usbrip ids search --pid 0002 --vid 0e0f #Search for pid AND vid
 
 ## 사용자 계정 및 로그인 활동 검토
 
-_**/etc/passwd**_, _**/etc/shadow**_ 및 **보안 로그**에서 비정상적인 이름이나 계정을 조사하고, 알려진 무단 이벤트와 가까운 시기에 생성되거나 사용된 계정을 확인하세요. 또한 가능한 sudo 무차별 대입 공격을 확인하세요.\
+_**/etc/passwd**_, _**/etc/shadow**_ 및 **보안 로그**에서 비정상적인 이름이나 계정을 확인하고, 알려진 무단 이벤트와 가까운 시기에 생성되거나 사용된 계정을 찾아보세요. 또한, 가능한 sudo 무차별 대입 공격을 확인하세요.\
 또한, _**/etc/sudoers**_ 및 _**/etc/groups**_와 같은 파일에서 사용자에게 부여된 예상치 못한 권한을 확인하세요.\
 마지막으로, **비밀번호가 없는** 계정이나 **쉽게 추측할 수 있는** 비밀번호를 가진 계정을 찾아보세요.
 
@@ -309,18 +335,18 @@ _**/etc/passwd**_, _**/etc/shadow**_ 및 **보안 로그**에서 비정상적인
 
 ### 악성 코드 조사에서 파일 시스템 구조 분석
 
-악성 코드 사건을 조사할 때, 파일 시스템의 구조는 사건의 순서와 악성 코드의 내용을 드러내는 중요한 정보 출처입니다. 그러나 악성 코드 작성자들은 파일 타임스탬프를 수정하거나 데이터 저장을 위해 파일 시스템을 피하는 등의 분석을 방해하는 기술을 개발하고 있습니다.
+악성 코드 사건을 조사할 때, 파일 시스템의 구조는 사건의 순서와 악성 코드의 내용을 드러내는 중요한 정보 출처입니다. 그러나 악성 코드 작성자들은 파일 타임스탬프를 수정하거나 데이터 저장을 위해 파일 시스템을 회피하는 등의 분석을 방해하는 기술을 개발하고 있습니다.
 
 이러한 반법의 방법에 대응하기 위해서는 다음이 필수적입니다:
 
 - **Autopsy**와 같은 도구를 사용하여 사건 타임라인을 시각화하거나 **Sleuth Kit의** `mactime`을 사용하여 상세한 타임라인 데이터를 통해 철저한 타임라인 분석을 수행하세요.
 - 공격자가 사용할 수 있는 셸 또는 PHP 스크립트를 포함할 수 있는 시스템의 $PATH에서 **예상치 못한 스크립트**를 조사하세요.
-- **/dev에서 비정상적인 파일**을 검사하세요. 전통적으로 특수 파일을 포함하지만, 악성 코드 관련 파일이 있을 수 있습니다.
-- **".. " (dot dot space)** 또는 **"..^G" (dot dot control-G)**와 같은 이름을 가진 숨겨진 파일이나 디렉토리를 검색하여 악성 콘텐츠를 숨길 수 있습니다.
+- **/dev에서 비정상적인 파일**을 검사하세요. 전통적으로 특별한 파일을 포함하지만, 악성 코드 관련 파일이 있을 수 있습니다.
+- **".. " (점 점 공백)** 또는 **"..^G" (점 점 제어-G)**와 같은 이름을 가진 숨겨진 파일이나 디렉토리를 검색하여 악성 콘텐츠를 숨길 수 있습니다.
 - 공격자가 악용할 수 있는 권한이 상승된 파일을 찾기 위해 다음 명령어를 사용하여 **setuid root 파일**을 식별하세요: `find / -user root -perm -04000 -print`
-- 루트킷이나 트로이 목마의 존재를 나타낼 수 있는 대량 파일 삭제를 감지하기 위해 inode 테이블에서 **삭제 타임스탬프**를 검토하세요.
-- 하나의 악성 파일을 식별한 후, 인접한 악성 파일을 찾기 위해 **연속적인 inode**를 검사하세요. 이들은 함께 배치되었을 수 있습니다.
-- 악성 코드에 의해 변경될 수 있는 최근 수정된 파일을 찾기 위해 **일반 바이너리 디렉토리** (_/bin_, _/sbin_)를 확인하세요.
+- 루트킷이나 트로이 목마의 존재를 나타낼 수 있는 대량 파일 삭제를 감지하기 위해 inode 테이블의 삭제 타임스탬프를 검토하세요.
+- 하나의 악성 파일을 식별한 후 인접한 악성 파일을 찾기 위해 **연속적인 inode**를 검사하세요. 이들은 함께 배치되었을 수 있습니다.
+- 악성 코드에 의해 변경될 수 있는 최근 수정된 파일을 찾기 위해 일반적인 바이너리 디렉토리 (_/bin_, _/sbin_)를 확인하세요.
 ````bash
 # List recent files in a directory:
 ls -laR --sort=time /bin```
@@ -328,8 +354,8 @@ ls -laR --sort=time /bin```
 # Sort files in a directory by inode:
 ls -lai /bin | sort -n```
 ````
-> [!NOTE]
-> 공격자가 **시간**을 **수정**하여 **파일이 합법적으로 보이게** 할 수 있지만, **inode**는 **수정**할 수 없습니다. 동일한 폴더의 나머지 파일과 **동일한 시간**에 생성 및 수정된 것으로 표시된 **파일**을 발견했지만 **inode**가 **예상보다 더 크다면**, 해당 **파일의 타임스탬프가 수정된 것입니다**.
+> [!TIP]
+> 공격자가 **시간**을 **수정**하여 **파일이 합법적으로 보이게** 할 수 있지만, **inode**는 **수정할 수 없습니다**. 동일한 폴더의 나머지 파일과 **동일한 시간**에 생성 및 수정된 것으로 표시된 **파일**을 발견했지만 **inode**가 **예상보다 크면**, 해당 **파일의 타임스탬프가 수정된 것입니다**.
 
 ## 서로 다른 파일 시스템 버전 비교
 
@@ -341,7 +367,7 @@ ls -lai /bin | sort -n```
 ```bash
 git diff --no-index --diff-filter=A path/to/old_version/ path/to/new_version/
 ```
-- **수정된 내용**: 변경 사항을 특정 줄을 무시하고 나열하십시오.
+- **수정된 내용**: 변경 사항을 특정 줄을 무시하고 나열합니다.
 ```bash
 git diff --no-index --diff-filter=M path/to/old_version/ path/to/new_version/ | grep -E "^\+" | grep -v "Installed-Time"
 ```
@@ -349,7 +375,7 @@ git diff --no-index --diff-filter=M path/to/old_version/ path/to/new_version/ | 
 ```bash
 git diff --no-index --diff-filter=D path/to/old_version/ path/to/new_version/
 ```
-- **필터 옵션** (`--diff-filter`)은 추가된 (`A`), 삭제된 (`D`), 또는 수정된 (`M`) 파일과 같은 특정 변경 사항으로 좁히는 데 도움이 됩니다.
+- **필터 옵션** (`--diff-filter`)은 추가된 (`A`), 삭제된 (`D`), 또는 수정된 (`M`) 파일과 같은 특정 변경 사항으로 좁히는 데 도움을 줍니다.
 - `A`: 추가된 파일
 - `C`: 복사된 파일
 - `D`: 삭제된 파일
@@ -365,6 +391,8 @@ git diff --no-index --diff-filter=D path/to/old_version/ path/to/new_version/
 - [https://cdn.ttgtmedia.com/rms/security/Malware%20Forensics%20Field%20Guide%20for%20Linux%20Systems_Ch3.pdf](https://cdn.ttgtmedia.com/rms/security/Malware%20Forensics%20Field%20Guide%20for%20Linux%20Systems_Ch3.pdf)
 - [https://www.plesk.com/blog/featured/linux-logs-explained/](https://www.plesk.com/blog/featured/linux-logs-explained/)
 - [https://git-scm.com/docs/git-diff#Documentation/git-diff.txt---diff-filterACDMRTUXB82308203](https://git-scm.com/docs/git-diff#Documentation/git-diff.txt---diff-filterACDMRTUXB82308203)
-- **책: Linux 시스템을 위한 악성코드 포렌식 필드 가이드: 디지털 포렌식 필드 가이드**
+- **책: Malware Forensics Field Guide for Linux Systems: Digital Forensics Field Guides**
+
+- [Red Canary – Patching for persistence: How DripDropper Linux malware moves through the cloud](https://redcanary.com/blog/threat-intelligence/dripdropper-linux-malware/)
 
 {{#include ../../banners/hacktricks-training.md}}
