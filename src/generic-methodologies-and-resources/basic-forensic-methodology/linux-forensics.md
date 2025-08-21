@@ -6,7 +6,7 @@
 
 ### Temel Bilgiler
 
-Öncelikle, üzerinde **iyi bilinen ikili dosyalar ve kütüphaneler bulunan bir **USB** bulundurmanız önerilir** (sadece ubuntu alıp _/bin_, _/sbin_, _/lib,_ ve _/lib64_ klasörlerini kopyalayabilirsiniz), ardından USB'yi bağlayın ve bu ikili dosyaları kullanmak için ortam değişkenlerini değiştirin:
+Öncelikle, üzerinde **iyi bilinen ikili dosyalar ve kütüphaneler bulunan** bir **USB**'ye sahip olmanız önerilir (sadece ubuntu alıp _/bin_, _/sbin_, _/lib,_ ve _/lib64_ klasörlerini kopyalayabilirsiniz), ardından USB'yi bağlayın ve bu ikili dosyaları kullanmak için ortam değişkenlerini değiştirin:
 ```bash
 export PATH=/mnt/usb/bin:/mnt/usb/sbin
 export LD_LIBRARY_PATH=/mnt/usb/lib:/mnt/usb/lib64
@@ -33,8 +33,8 @@ find /directory -type f -mtime -1 -print #Find modified files during the last mi
 
 Temel bilgileri elde ederken, tuhaf şeyler için kontrol etmelisiniz:
 
-- **Root süreçleri** genellikle düşük PID'lerle çalışır, bu nedenle büyük bir PID'ye sahip bir root süreci bulursanız şüphelenebilirsiniz.
-- `/etc/passwd` içinde shell'i olmayan kullanıcıların **kayıtlı oturum açmalarını** kontrol edin.
+- **Root süreçleri** genellikle düşük PID'lerle çalışır, bu yüzden büyük bir PID'ye sahip bir root süreci bulursanız şüphelenebilirsiniz.
+- `/etc/passwd` içinde shell'i olmayan kullanıcıların **kayıtlı girişlerini** kontrol edin.
 - Shell'i olmayan kullanıcılar için `/etc/shadow` içinde **şifre hash'lerini** kontrol edin.
 
 ### Bellek Dökümü
@@ -42,11 +42,11 @@ Temel bilgileri elde ederken, tuhaf şeyler için kontrol etmelisiniz:
 Çalışan sistemin belleğini elde etmek için [**LiME**](https://github.com/504ensicsLabs/LiME) kullanmanız önerilir.\
 Bunu **derlemek** için, kurban makinesinin kullandığı **aynı çekirdek** ile çalışmalısınız.
 
-> [!NOTE]
+> [!TIP]
 > Kurban makinesine **LiME veya başka bir şey** yükleyemeyeceğinizi unutmayın, çünkü bu makinede birçok değişiklik yapacaktır.
 
 Bu nedenle, eğer aynı Ubuntu sürümüne sahipseniz `apt-get install lime-forensics-dkms` kullanabilirsiniz.\
-Diğer durumlarda, [**LiME**](https://github.com/504ensicsLabs/LiME) 'yi github'dan indirip doğru çekirdek başlıkları ile derlemeniz gerekir. Kurban makinesinin **tam çekirdek başlıklarını** elde etmek için, sadece `/lib/modules/<kernel version>` dizinini makinenize **kopyalayabilir** ve ardından bunları kullanarak LiME'yi **derleyebilirsiniz**:
+Diğer durumlarda, [**LiME**](https://github.com/504ensicsLabs/LiME) github'dan indirmeniz ve doğru çekirdek başlıkları ile derlemeniz gerekir. Kurban makinesinin **tam çekirdek başlıklarını** elde etmek için, sadece `/lib/modules/<kernel version>` dizinini makinenize **kopyalayabilir** ve ardından bunları kullanarak LiME'yi **derleyebilirsiniz**:
 ```bash
 make -C /lib/modules/<kernel version>/build M=$PWD
 sudo insmod lime.ko "path=/home/sansforensics/Desktop/mem_dump.bin format=lime"
@@ -54,7 +54,7 @@ sudo insmod lime.ko "path=/home/sansforensics/Desktop/mem_dump.bin format=lime"
 LiME 3 **formatı** destekler:
 
 - Ham (her segment bir araya getirilmiş)
-- Doldurulmuş (ham ile aynı, ancak sağ bitlerde sıfırlarla)
+- Doldurulmuş (ham ile aynı, ancak sağ bitlerde sıfırlar ile)
 - Lime (meta verilerle önerilen format)
 
 LiME ayrıca **dökümü ağ üzerinden göndermek için** de kullanılabilir, bunu yapmak için şöyle bir şey kullanabilirsiniz: `path=tcp:4444`
@@ -63,12 +63,12 @@ LiME ayrıca **dökümü ağ üzerinden göndermek için** de kullanılabilir, b
 
 #### Sistemi kapatma
 
-Öncelikle, **sistemi kapatmanız** gerekecek. Bu her zaman bir seçenek değildir çünkü bazen sistem, şirketin kapatmayı göze alamayacağı bir üretim sunucusu olabilir.\
-Sistemi kapatmanın **2 yolu** vardır, bir **normal kapatma** ve bir **"fişi çekme" kapatması**. İlk yöntem, **işlemlerin normal şekilde sonlanmasına** ve **dosya sisteminin** **senkronize edilmesine** izin verir, ancak aynı zamanda olası **kötü amaçlı yazılımın** **delilleri yok etmesine** de olanak tanır. "Fişi çekme" yaklaşımı, **bazı bilgi kaybı** taşıyabilir (bilgilerin çoğu kaybolmayacak çünkü zaten belleğin bir görüntüsünü aldık) ve **kötü amaçlı yazılımın** bununla ilgili bir şey yapma fırsatı olmayacaktır. Bu nedenle, eğer **kötü amaçlı yazılım** olabileceğinden **şüpheleniyorsanız**, sistemde **`sync`** **komutunu** çalıştırın ve fişi çekin.
+Öncelikle, **sistemi kapatmanız** gerekecek. Bu her zaman bir seçenek değildir çünkü bazı durumlarda sistem, şirketin kapatmayı göze alamayacağı bir üretim sunucusu olabilir.\
+Sistemi kapatmanın **2 yolu** vardır, bir **normal kapatma** ve bir **"fişi çekme" kapatması**. İlk yöntem, **işlemlerin normal şekilde sonlanmasına** ve **dosya sisteminin** **senkronize edilmesine** izin verir, ancak aynı zamanda olası **kötü amaçlı yazılımın** **kanıtları yok etmesine** de olanak tanır. "Fişi çekme" yaklaşımı, **bazı bilgi kaybı** taşıyabilir (bilgilerin çoğu kaybolmayacak çünkü zaten belleğin bir görüntüsünü aldık) ve **kötü amaçlı yazılımın** bununla ilgili bir şey yapma fırsatı olmayacaktır. Bu nedenle, eğer **kötü amaçlı yazılım** olabileceğinden **şüpheleniyorsanız**, sistemde **`sync`** **komutunu** çalıştırın ve fişi çekin.
 
 #### Diskin görüntüsünü alma
 
-**Bilgisayarınızı davayla ilgili herhangi bir şeye bağlamadan önce**, bunun **sadece okunur olarak** bağlanacağından emin olmanız önemlidir, böylece herhangi bir bilgiyi değiştirmemiş olursunuz.
+**Dava ile ilgili herhangi bir şeye bilgisayarınızı bağlamadan önce**, bunun **sadece okunur olarak monte edileceğinden** emin olmanız önemlidir, böylece herhangi bir bilgiyi değiştirmemiş olursunuz.
 ```bash
 #Create a raw copy of the disk
 dd if=<subject device> of=<image file> bs=512
@@ -139,7 +139,7 @@ ThisisTheMasterSecret
 Linux, potansiyel olarak sorunlu dosyaları tespit etmek için sistem bileşenlerinin bütünlüğünü sağlamak için araçlar sunar.
 
 - **RedHat tabanlı sistemler**: Kapsamlı bir kontrol için `rpm -Va` kullanın.
-- **Debian tabanlı sistemler**: İlk doğrulama için `dpkg --verify` kullanın, ardından `debsums | grep -v "OK$"` (önce `apt-get install debsums` ile `debsums` yükledikten sonra) ile herhangi bir sorunu tespit edin.
+- **Debian tabanlı sistemler**: İlk doğrulama için `dpkg --verify` kullanın, ardından `debsums | grep -v "OK$"` (önce `debsums`'ı `apt-get install debsums` ile yükledikten sonra) ile herhangi bir sorunu tespit edin.
 
 ### Kötü Amaçlı Yazılım/Rootkit Tespit Cihazları
 
@@ -151,7 +151,7 @@ malware-analysis.md
 
 ## Yüklenmiş Programları Ara
 
-Debian ve RedHat sistemlerinde yüklenmiş programları etkili bir şekilde aramak için, sistem günlüklerini ve veritabanlarını manuel kontrollerle birlikte kullanmayı düşünün.
+Debian ve RedHat sistemlerinde yüklenmiş programları etkili bir şekilde aramak için, sistem günlüklerini ve veritabanlarını kullanmanın yanı sıra yaygın dizinlerde manuel kontroller yapmayı düşünün.
 
 - Debian için, paket yüklemeleri hakkında bilgi almak için _**`/var/lib/dpkg/status`**_ ve _**`/var/log/dpkg.log`**_ dosyalarını kontrol edin, belirli bilgileri filtrelemek için `grep` kullanın.
 - RedHat kullanıcıları, yüklenmiş paketleri listelemek için `rpm -qa --root=/mntpath/var/lib/rpm` ile RPM veritabanını sorgulayabilir.
@@ -174,13 +174,13 @@ find / -type f -executable | grep <something>
 ```
 ## Silinmiş Çalışan İkili Dosyaları Kurtarma
 
-/tmp/exec konumundan çalıştırılan ve ardından silinen bir süreci hayal edin. Onu çıkarmak mümkündür.
+/tmp/exec' den çalıştırılan ve ardından silinen bir süreci hayal edin. Onu çıkarmak mümkündür.
 ```bash
 cd /proc/3746/ #PID with the exec file deleted
 head -1 maps #Get address of the file. It was 08048000-08049000
 dd if=mem bs=1 skip=08048000 count=1000 of=/tmp/exec2 #Recorver it
 ```
-## Autostart konumlarını denetle
+## Autostart konumlarını İncele
 
 ### Zamanlanmış Görevler
 ```bash
@@ -196,14 +196,40 @@ cat /var/spool/cron/crontabs/*  \
 #MacOS
 ls -l /usr/lib/cron/tabs/ /Library/LaunchAgents/ /Library/LaunchDaemons/ ~/Library/LaunchAgents/
 ```
+#### Hunt: Cron/Anacron kötüye kullanımı 0anacron ve şüpheli stub'lar aracılığıyla
+Saldırganlar genellikle her /etc/cron.*/ dizininde bulunan 0anacron stub'unu düzenleyerek periyodik yürütmeyi garanti ederler.
+```bash
+# List 0anacron files and their timestamps/sizes
+for d in /etc/cron.*; do [ -f "$d/0anacron" ] && stat -c '%n %y %s' "$d/0anacron"; done
+
+# Look for obvious execution of shells or downloaders embedded in cron stubs
+grep -R --line-number -E 'curl|wget|/bin/sh|python|bash -c' /etc/cron.*/* 2>/dev/null
+```
+#### Hunt: SSH hardening rollback and backdoor shells
+sshd_config ve sistem hesap kabuklarındaki değişiklikler, erişimi korumak için yaygın olarak post‑exploitation'da yapılır.
+```bash
+# Root login enablement (flag "yes" or lax values)
+grep -E '^\s*PermitRootLogin' /etc/ssh/sshd_config
+
+# System accounts with interactive shells (e.g., games → /bin/sh)
+awk -F: '($7 ~ /bin\/(sh|bash|zsh)/ && $1 ~ /^(games|lp|sync|shutdown|halt|mail|operator)$/) {print}' /etc/passwd
+```
+#### Hunt: Cloud C2 işaretleri (Dropbox/Cloudflare Tunnel)
+- Dropbox API işaretleri genellikle api.dropboxapi.com veya content.dropboxapi.com'u HTTPS üzerinden Authorization: Bearer tokenları ile kullanır.
+- Sunuculardan beklenmeyen Dropbox çıkışları için proxy/Zeek/NetFlow'da avlanın.
+- Cloudflare Tunnel (`cloudflared`), çıkış 443 üzerinden yedek C2 sağlar.
+```bash
+ps aux | grep -E '[c]loudflared|trycloudflare'
+systemctl list-units | grep -i cloudflared
+```
 ### Hizmetler
 
-Kötü amaçlı yazılımın bir hizmet olarak kurulabileceği yollar:
+Kötü amaçlı yazılımların bir hizmet olarak kurulabileceği yollar:
 
 - **/etc/inittab**: rc.sysinit gibi başlatma betiklerini çağırır, daha sonra başlatma betiklerine yönlendirir.
 - **/etc/rc.d/** ve **/etc/rc.boot/**: Hizmet başlatma betiklerini içerir, ikincisi daha eski Linux sürümlerinde bulunur.
 - **/etc/init.d/**: Debian gibi belirli Linux sürümlerinde başlatma betiklerini depolamak için kullanılır.
-- Hizmetler ayrıca Linux varyantına bağlı olarak **/etc/inetd.conf** veya **/etc/xinetd/** üzerinden de etkinleştirilebilir.
+- Hizmetler, Linux varyantına bağlı olarak **/etc/inetd.conf** veya **/etc/xinetd/** üzerinden de etkinleştirilebilir.
 - **/etc/systemd/system**: Sistem ve hizmet yöneticisi betikleri için bir dizin.
 - **/etc/systemd/system/multi-user.target.wants/**: Çok kullanıcılı çalışma seviyesinde başlatılması gereken hizmetlere bağlantılar içerir.
 - **/usr/local/etc/rc.d/**: Özel veya üçüncü taraf hizmetler için.
@@ -212,7 +238,7 @@ Kötü amaçlı yazılımın bir hizmet olarak kurulabileceği yollar:
 
 ### Çekirdek Modülleri
 
-Kötü amaçlı yazılım tarafından genellikle rootkit bileşenleri olarak kullanılan Linux çekirdek modülleri, sistem önyüklemesi sırasında yüklenir. Bu modüller için kritik dizinler ve dosyalar şunlardır:
+Kötü amaçlı yazılımlar tarafından genellikle rootkit bileşenleri olarak kullanılan Linux çekirdek modülleri, sistem önyüklemesi sırasında yüklenir. Bu modüller için kritik dizinler ve dosyalar şunlardır:
 
 - **/lib/modules/$(uname -r)**: Çalışan çekirdek sürümü için modülleri tutar.
 - **/etc/modprobe.d**: Modül yüklemeyi kontrol etmek için yapılandırma dosyalarını içerir.
@@ -220,7 +246,7 @@ Kötü amaçlı yazılım tarafından genellikle rootkit bileşenleri olarak kul
 
 ### Diğer Otomatik Başlatma Yerleri
 
-Linux, kullanıcı girişi sırasında programları otomatik olarak çalıştırmak için çeşitli dosyalar kullanır, bu da kötü amaçlı yazılımları barındırma potansiyeline sahiptir:
+Linux, kullanıcı girişi sırasında programları otomatik olarak çalıştırmak için çeşitli dosyalar kullanır, bu da kötü amaçlı yazılımlara ev sahipliği yapabilir:
 
 - **/etc/profile.d/**\*, **/etc/profile**, ve **/etc/bash.bashrc**: Herhangi bir kullanıcı girişi için çalıştırılır.
 - **\~/.bashrc**, **\~/.bash_profile**, **\~/.profile**, ve **\~/.config/autostart**: Kullanıcıya özgü dosyalar, kullanıcı girişinde çalışır.
@@ -228,7 +254,7 @@ Linux, kullanıcı girişi sırasında programları otomatik olarak çalıştır
 
 ## Günlükleri İnceleyin
 
-Linux sistemleri, kullanıcı etkinliklerini ve sistem olaylarını çeşitli günlük dosyaları aracılığıyla takip eder. Bu günlükler, yetkisiz erişim, kötü amaçlı yazılım enfeksiyonları ve diğer güvenlik olaylarını tanımlamak için kritik öneme sahiptir. Anahtar günlük dosyaları şunlardır:
+Linux sistemleri, kullanıcı etkinliklerini ve sistem olaylarını çeşitli günlük dosyaları aracılığıyla takip eder. Bu günlükler, yetkisiz erişimi, kötü amaçlı yazılım enfeksiyonlarını ve diğer güvenlik olaylarını tanımlamak için kritik öneme sahiptir. Anahtar günlük dosyaları şunlardır:
 
 - **/var/log/syslog** (Debian) veya **/var/log/messages** (RedHat): Sistem genelindeki mesajları ve etkinlikleri yakalar.
 - **/var/log/auth.log** (Debian) veya **/var/log/secure** (RedHat): Kimlik doğrulama girişimlerini, başarılı ve başarısız girişleri kaydeder.
@@ -237,7 +263,7 @@ Linux sistemleri, kullanıcı etkinliklerini ve sistem olaylarını çeşitli g�
 - **/var/log/maillog** veya **/var/log/mail.log**: E-posta sunucusu etkinliklerini kaydeder, e-posta ile ilgili hizmetleri takip etmek için yararlıdır.
 - **/var/log/kern.log**: Hata ve uyarılar da dahil olmak üzere çekirdek mesajlarını saklar.
 - **/var/log/dmesg**: Aygıt sürücü mesajlarını tutar.
-- **/var/log/faillog**: Başarısız giriş girişimlerini kaydeder, güvenlik ihlali soruşturmalarına yardımcı olur.
+- **/var/log/faillog**: Başarısız giriş girişimlerini kaydeder, güvenlik ihlali araştırmalarında yardımcı olur.
 - **/var/log/cron**: Cron işlerinin yürütülmelerini kaydeder.
 - **/var/log/daemon.log**: Arka plan hizmeti etkinliklerini takip eder.
 - **/var/log/btmp**: Başarısız giriş girişimlerini belgeler.
@@ -246,8 +272,8 @@ Linux sistemleri, kullanıcı etkinliklerini ve sistem olaylarını çeşitli g�
 - **/var/log/xferlog**: FTP dosya transferlerini kaydeder.
 - **/var/log/**: Burada beklenmedik günlükleri her zaman kontrol edin.
 
-> [!NOTE]
-> Linux sistem günlükleri ve denetim alt sistemleri, bir ihlal veya kötü amaçlı yazılım olayında devre dışı bırakılabilir veya silinebilir. Çünkü Linux sistemlerindeki günlükler genellikle kötü niyetli etkinlikler hakkında en yararlı bilgileri içerir, saldırganlar bunları düzenli olarak siler. Bu nedenle, mevcut günlük dosyalarını incelerken, silinme veya müdahale belirtisi olabilecek boşluklar veya düzensiz girişler aramak önemlidir.
+> [!TIP]
+> Linux sistem günlükleri ve denetim alt sistemleri, bir ihlal veya kötü amaçlı yazılım olayı sırasında devre dışı bırakılabilir veya silinebilir. Çünkü Linux sistemlerindeki günlükler genellikle kötü niyetli etkinlikler hakkında en yararlı bilgileri içerir, bu nedenle saldırganlar bunları düzenli olarak siler. Bu nedenle, mevcut günlük dosyalarını incelerken, silinme veya müdahale belirtisi olabilecek boşluklar veya düzensiz girişler aramak önemlidir.
 
 **Linux, her kullanıcı için bir komut geçmişi tutar**, şu dosyalarda saklanır:
 
@@ -259,10 +285,10 @@ Linux sistemleri, kullanıcı etkinliklerini ve sistem olaylarını çeşitli g�
 
 Ayrıca, `last -Faiwx` komutu kullanıcı girişlerinin bir listesini sağlar. Bilinmeyen veya beklenmedik girişler için kontrol edin.
 
-Ek rprivilejeleri verebilecek dosyaları kontrol edin:
+Ek rprivileges verebilecek dosyaları kontrol edin:
 
-- Verilen beklenmedik kullanıcı ayrıcalıkları için `/etc/sudoers` dosyasını gözden geçirin.
-- Verilen beklenmedik kullanıcı ayrıcalıkları için `/etc/sudoers.d/` dosyasını gözden geçirin.
+- Beklenmedik kullanıcı ayrıcalıkları verilmiş olabileceğinden `/etc/sudoers` dosyasını gözden geçirin.
+- Beklenmedik kullanıcı ayrıcalıkları verilmiş olabileceğinden `/etc/sudoers.d/` dosyasını gözden geçirin.
 - Herhangi bir olağandışı grup üyeliği veya izinleri tanımlamak için `/etc/groups` dosyasını inceleyin.
 - Herhangi bir olağandışı grup üyeliği veya izinleri tanımlamak için `/etc/passwd` dosyasını inceleyin.
 
@@ -270,9 +296,9 @@ Bazı uygulamalar ayrıca kendi günlüklerini oluşturur:
 
 - **SSH**: Yetkisiz uzaktan bağlantılar için _\~/.ssh/authorized_keys_ ve _\~/.ssh/known_hosts_ dosyalarını inceleyin.
 - **Gnome Masaüstü**: Gnome uygulamaları aracılığıyla yakın zamanda erişilen dosyalar için _\~/.recently-used.xbel_ dosyasını kontrol edin.
-- **Firefox/Chrome**: Şüpheli etkinlikler için _\~/.mozilla/firefox_ veya _\~/.config/google-chrome_ dizinlerinde tarayıcı geçmişi ve indirmeleri kontrol edin.
-- **VIM**: Erişim sağlanan dosya yolları ve arama geçmişi gibi kullanım detayları için _\~/.viminfo_ dosyasını gözden geçirin.
-- **Open Office**: Tehdit altındaki dosyaları gösterebilecek yakın tarihli belge erişimlerini kontrol edin.
+- **Firefox/Chrome**: Şüpheli etkinlikler için _\~/.mozilla/firefox_ veya _\~/.config/google-chrome_ dizinlerinde tarayıcı geçmişini ve indirmeleri kontrol edin.
+- **VIM**: Erişilen dosya yolları ve arama geçmişi gibi kullanım detayları için _\~/.viminfo_ dosyasını gözden geçirin.
+- **Open Office**: Tehlikeye atılmış dosyaları gösterebilecek yakın tarihli belge erişimlerini kontrol edin.
 - **FTP/SFTP**: Yetkisiz olabilecek dosya transferleri için _\~/.ftp_history_ veya _\~/.sftp_history_ dosyalarını gözden geçirin.
 - **MySQL**: Yetkisiz veritabanı etkinliklerini ortaya çıkarabilecek yürütülen MySQL sorguları için _\~/.mysql_history_ dosyasını araştırın.
 - **Less**: Görüntülenen dosyalar ve yürütülen komutlar dahil olmak üzere kullanım geçmişi için _\~/.lesshst_ dosyasını analiz edin.
@@ -282,7 +308,7 @@ Bazı uygulamalar ayrıca kendi günlüklerini oluşturur:
 
 [**usbrip**](https://github.com/snovvcrash/usbrip), USB olay geçmişi tabloları oluşturmak için Linux günlük dosyalarını (`/var/log/syslog*` veya `/var/log/messages*` dağıtıma bağlı olarak) ayrıştıran saf Python 3 ile yazılmış küçük bir yazılımdır.
 
-Kullanılan tüm USB'leri **bilmek** ilginçtir ve "ihlal olaylarını" bulmak için yetkilendirilmiş bir USB listesine sahip olursanız daha faydalı olacaktır (o listedeki USB'lerin dışındaki USB'lerin kullanımı). 
+Kullanılan tüm USB'leri **bilmek** ilginçtir ve "ihlal olaylarını" bulmak için yetkilendirilmiş bir USB listesine sahip olmanız daha faydalı olacaktır (o listedeki USB'lerin dışındaki USB'lerin kullanımı). 
 
 ### Kurulum
 ```bash
@@ -297,29 +323,29 @@ usbrip events history --pid 0002 --vid 0e0f --user kali #Search by pid OR vid OR
 usbrip ids download #Downlaod database
 usbrip ids search --pid 0002 --vid 0e0f #Search for pid AND vid
 ```
-Daha fazla örnek ve bilgi github'da: [https://github.com/snovvcrash/usbrip](https://github.com/snovvcrash/usbrip)
+Daha fazla örnek ve bilgi için github'a bakın: [https://github.com/snovvcrash/usbrip](https://github.com/snovvcrash/usbrip)
 
-## Kullanıcı Hesaplarını ve Giriş Aktivitelerini Gözden Geçirme
+## Kullanıcı Hesaplarını ve Giriş Aktivitelerini Gözden Geçirin
 
 _**/etc/passwd**_, _**/etc/shadow**_ ve **güvenlik günlüklerini** olağandışı isimler veya bilinen yetkisiz olaylarla yakın zamanda oluşturulmuş veya kullanılmış hesaplar için inceleyin. Ayrıca, olası sudo brute-force saldırılarını kontrol edin.\
 Ayrıca, kullanıcılara verilen beklenmedik ayrıcalıkları kontrol etmek için _**/etc/sudoers**_ ve _**/etc/groups**_ gibi dosyaları kontrol edin.\
 Son olarak, **şifresiz** veya **kolay tahmin edilebilen** şifreleri olan hesapları arayın.
 
-## Dosya Sistemini İnceleme
+## Dosya Sistemini İnceleyin
 
 ### Kötü Amaçlı Yazılım Soruşturmasında Dosya Sistemi Yapılarını Analiz Etme
 
 Kötü amaçlı yazılım olaylarını araştırırken, dosya sisteminin yapısı, olayların sırasını ve kötü amaçlı yazılımın içeriğini ortaya çıkaran kritik bir bilgi kaynağıdır. Ancak, kötü amaçlı yazılım yazarları, dosya zaman damgalarını değiştirmek veya veri depolamak için dosya sisteminden kaçınmak gibi bu analizi engellemek için teknikler geliştirmektedir.
 
-Bu anti-forensic yöntemlere karşı koymak için, şunları yapmak önemlidir:
+Bu anti-forensic yöntemlere karşı koymak için, aşağıdakileri yapmak önemlidir:
 
-- **Olay zaman çizelgelerini görselleştirmek için** **Autopsy** gibi araçlar kullanarak **kapsamlı bir zaman çizelgesi analizi** gerçekleştirin veya detaylı zaman çizelgesi verileri için **Sleuth Kit'in** `mactime` aracını kullanın.
+- **Olay zaman çizelgelerini görselleştirmek için** **Autopsy** gibi araçlar kullanarak kapsamlı bir zaman çizelgesi analizi yapın veya detaylı zaman çizelgesi verileri için **Sleuth Kit'in** `mactime` aracını kullanın.
 - **Sistemin $PATH'inde beklenmedik betikleri** araştırın; bu, saldırganlar tarafından kullanılan shell veya PHP betiklerini içerebilir.
-- **Atypik dosyalar için `/dev`'i inceleyin**, çünkü genellikle özel dosyalar içerir, ancak kötü amaçlı yazılımla ilgili dosyaları barındırabilir.
+- **Atypik dosyalar için `/dev`'i inceleyin**; çünkü genellikle özel dosyalar içerir, ancak kötü amaçlı yazılımla ilgili dosyalar da barındırabilir.
 - **Kötü amaçlı içeriği gizleyebilecek** ".. " (nokta nokta boşluk) veya "..^G" (nokta nokta kontrol-G) gibi isimlere sahip gizli dosyaları veya dizinleri arayın.
 - **Yükseltilmiş izinlere sahip setuid root dosyalarını** bulmak için şu komutu kullanın: `find / -user root -perm -04000 -print` Bu, saldırganlar tarafından kötüye kullanılabilecek yüksek izinlere sahip dosyaları bulur.
 - **Kütük tablolarındaki silme zaman damgalarını** gözden geçirerek, kök kitleri veya trojanların varlığını gösterebilecek kitlesel dosya silme işlemlerini tespit edin.
-- **Birini belirledikten sonra** yan yana kötü amaçlı dosyalar için ardışık inode'ları inceleyin; çünkü bunlar birlikte yerleştirilmiş olabilir.
+- **Bir kötü amaçlı dosya tespit edildikten sonra** yan yana bulunan inodları inceleyin; çünkü bunlar birlikte yerleştirilmiş olabilir.
 - **Son zamanlarda değiştirilmiş dosyalar için yaygın ikili dizinleri** (_/bin_, _/sbin_) kontrol edin; çünkü bunlar kötü amaçlı yazılım tarafından değiştirilmiş olabilir.
 ````bash
 # List recent files in a directory:
@@ -328,8 +354,8 @@ ls -laR --sort=time /bin```
 # Sort files in a directory by inode:
 ls -lai /bin | sort -n```
 ````
-> [!NOTE]
-> Bir **saldırganın** **dosyaları meşru** göstermek için **zamanı değiştirebileceğini**, ancak **inode'u** **değiştiremeyeceğini** unutmayın. Eğer bir **dosyanın** aynı klasördeki diğer dosyalarla **aynı zamanda** oluşturulup değiştirildiğini gösteriyorsa, ancak **inode** **beklenmedik şekilde büyükse**, o zaman **o dosyanın zaman damgaları değiştirilmiştir**.
+> [!TIP]
+> Bir **saldırganın** **zamanı** **değiştirerek** **dosyaların meşru görünmesini** sağlayabileceğini, ancak **inode'u** **değiştiremeyeceğini** unutmayın. Eğer bir **dosyanın** aynı klasördeki diğer dosyalarla **aynı zamanda** oluşturulup değiştirildiğini gösteriyorsa, ancak **inode** **beklenmedik şekilde büyükse**, o zaman **o dosyanın zaman damgaları değiştirilmiştir**.
 
 ## Farklı dosya sistemi sürümlerini karşılaştırma
 
@@ -366,5 +392,7 @@ git diff --no-index --diff-filter=D path/to/old_version/ path/to/new_version/
 - [https://www.plesk.com/blog/featured/linux-logs-explained/](https://www.plesk.com/blog/featured/linux-logs-explained/)
 - [https://git-scm.com/docs/git-diff#Documentation/git-diff.txt---diff-filterACDMRTUXB82308203](https://git-scm.com/docs/git-diff#Documentation/git-diff.txt---diff-filterACDMRTUXB82308203)
 - **Kitap: Linux Sistemleri için Kötü Amaçlı Yazılım Adli Bilişim Alan Rehberi**
+
+- [Red Canary – Süreklilik için yamanma: DripDropper Linux kötü amaçlı yazılımının bulut üzerinden nasıl hareket ettiği](https://redcanary.com/blog/threat-intelligence/dripdropper-linux-malware/)
 
 {{#include ../../banners/hacktricks-training.md}}
