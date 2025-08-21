@@ -12,7 +12,7 @@ macos-security-protections/macos-tcc/
 
 ## Linux Privesc
 
-Bitte beachten Sie, dass **die meisten Tricks zur Privilegieneskalation, die Linux/Unix betreffen, auch MacOS**-Maschinen betreffen werden. Sehen Sie sich also an:
+Bitte beachten Sie, dass **die meisten Tricks zur Privilegieneskalation, die Linux/Unix betreffen, auch MacOS**-Maschinen betreffen werden. Schauen Sie sich also an:
 
 {{#ref}}
 ../../linux-hardening/privilege-escalation/
@@ -39,14 +39,14 @@ chmod +x /opt/homebrew/bin/ls
 # victim
 sudo ls
 ```
-Beachten Sie, dass ein Benutzer, der das Terminal verwendet, höchstwahrscheinlich **Homebrew installiert** hat. Daher ist es möglich, Binärdateien in **`/opt/homebrew/bin`** zu hijacken.
+Beachten Sie, dass ein Benutzer, der das Terminal verwendet, höchstwahrscheinlich **Homebrew installiert** hat. Es ist also möglich, Binärdateien in **`/opt/homebrew/bin`** zu hijacken.
 
 ### Dock-Imitation
 
 Mit etwas **Social Engineering** könnten Sie **zum Beispiel Google Chrome imitieren** und tatsächlich Ihr eigenes Skript ausführen:
 
 {{#tabs}}
-{{#tab name="Chrome Impersonation"}}
+{{#tab name="Chrome-Imitation"}}
 Einige Vorschläge:
 
 - Überprüfen Sie im Dock, ob es ein Chrome gibt, und entfernen Sie in diesem Fall **diesen Eintrag** und **fügen Sie** den **falschen** **Chrome-Eintrag an derselben Stelle** im Dock-Array hinzu.
@@ -124,9 +124,9 @@ killall Dock
 {{#tab name="Finder Impersonation"}}
 Einige Vorschläge:
 
-- Sie **können den Finder nicht aus dem Dock entfernen**, also wenn Sie ihn zum Dock hinzufügen möchten, könnten Sie den gefälschten Finder direkt neben den echten setzen. Dazu müssen Sie **den gefälschten Finder-Eintrag am Anfang des Dock-Arrays hinzufügen**.
+- Sie **können den Finder nicht aus dem Dock entfernen**, also wenn Sie ihn zum Dock hinzufügen möchten, könnten Sie den gefälschten Finder direkt neben den echten setzen. Dafür müssen Sie **den gefälschten Finder-Eintrag am Anfang des Dock-Arrays hinzufügen**.
 - Eine andere Möglichkeit ist, ihn nicht im Dock zu platzieren und ihn einfach zu öffnen, "Finder fragt, um den Finder zu steuern" ist nicht so seltsam.
-- Eine weitere Möglichkeit, um **ohne Passwortabfrage** auf Root zu eskalieren, ist, den Finder wirklich nach dem Passwort zu fragen, um eine privilegierte Aktion auszuführen:
+- Eine weitere Möglichkeit, um **ohne Passwortabfrage** auf root zu eskalieren, ist, den Finder wirklich nach dem Passwort zu fragen, um eine privilegierte Aktion auszuführen:
 - Bitten Sie den Finder, eine neue **`sudo`**-Datei nach **`/etc/pam.d`** zu kopieren (Die Eingabeaufforderung, die nach dem Passwort fragt, wird anzeigen, dass "Finder sudo kopieren möchte")
 - Bitten Sie den Finder, ein neues **Authorization Plugin** zu kopieren (Sie könnten den Dateinamen kontrollieren, sodass die Eingabeaufforderung, die nach dem Passwort fragt, anzeigen wird, dass "Finder Finder.bundle kopieren möchte")
 ```bash
@@ -206,7 +206,7 @@ killall Dock
 ### CVE-2020-9771 - mount_apfs TCC-Umgehung und Rechteausweitung
 
 **Jeder Benutzer** (auch unprivilegierte) kann einen Time Machine-Snapshot erstellen und einbinden und **auf ALLE Dateien** dieses Snapshots zugreifen.\
-Die **einzige Berechtigung**, die benötigt wird, ist, dass die verwendete Anwendung (wie `Terminal`) **Vollzugriff auf die Festplatte** (FDA) benötigt (`kTCCServiceSystemPolicyAllfiles`), was von einem Administrator gewährt werden muss.
+Die **einzige Berechtigung**, die benötigt wird, ist, dass die verwendete Anwendung (wie `Terminal`) **Vollzugriff auf das Laufwerk** (FDA) benötigt (`kTCCServiceSystemPolicyAllfiles`), was von einem Administrator gewährt werden muss.
 ```bash
 # Create snapshot
 tmutil localsnapshot
@@ -226,11 +226,12 @@ mkdir /tmp/snap
 # Access it
 ls /tmp/snap/Users/admin_user # This will work
 ```
-Eine detailliertere Erklärung kann [**im Originalbericht gefunden werden**](https://theevilbit.github.io/posts/cve_2020_9771/)**.**
+Eine detailliertere Erklärung kann [**im ursprünglichen Bericht**](https://theevilbit.github.io/posts/cve_2020_9771/)** gefunden werden.**
 
 ## Sensible Informationen
 
 Dies kann nützlich sein, um Privilegien zu eskalieren:
+
 
 {{#ref}}
 macos-files-folders-and-binaries/macos-sensitive-locations.md

@@ -8,6 +8,7 @@
 
 Sie sollten mit dem Lesen dieses Beitrags beginnen, um einige grundlegende Konzepte zu verstehen, die Sie wissen sollten:
 
+
 {{#ref}}
 0.-basic-llm-concepts.md
 {{#endref}}
@@ -16,6 +17,7 @@ Sie sollten mit dem Lesen dieses Beitrags beginnen, um einige grundlegende Konze
 
 > [!TIP]
 > Das Ziel dieser ersten Phase ist sehr einfach: **Teilen Sie die Eingabe in Tokens (IDs) auf eine Weise, die Sinn macht**.
+
 
 {{#ref}}
 1.-tokenizing.md
@@ -26,6 +28,7 @@ Sie sollten mit dem Lesen dieses Beitrags beginnen, um einige grundlegende Konze
 > [!TIP]
 > Das Ziel dieser zweiten Phase ist sehr einfach: **Proben Sie die Eingabedaten und bereiten Sie sie für die Trainingsphase vor, indem Sie den Datensatz normalerweise in Sätze einer bestimmten Länge unterteilen und auch die erwartete Antwort generieren.**
 
+
 {{#ref}}
 2.-data-sampling.md
 {{#endref}}
@@ -34,9 +37,10 @@ Sie sollten mit dem Lesen dieses Beitrags beginnen, um einige grundlegende Konze
 
 > [!TIP]
 > Das Ziel dieser dritten Phase ist sehr einfach: **Weisen Sie jedem der vorherigen Tokens im Vokabular einen Vektor der gewünschten Dimensionen zu, um das Modell zu trainieren.** Jedes Wort im Vokabular wird einen Punkt in einem Raum von X Dimensionen haben.\
-> Beachten Sie, dass die Position jedes Wortes im Raum zunächst "zufällig" initialisiert wird und diese Positionen trainierbare Parameter sind (werden während des Trainings verbessert).
+> Beachten Sie, dass die Position jedes Wortes im Raum zunächst "zufällig" initialisiert wird und diese Positionen trainierbare Parameter sind (während des Trainings verbessert werden).
 >
 > Darüber hinaus wird während des Token-Embeddings **eine weitere Schicht von Embeddings erstellt**, die (in diesem Fall) die **absolute Position des Wortes im Trainingssatz** darstellt. Auf diese Weise hat ein Wort an verschiedenen Positionen im Satz eine unterschiedliche Darstellung (Bedeutung).
+
 
 {{#ref}}
 3.-token-embeddings.md
@@ -46,7 +50,8 @@ Sie sollten mit dem Lesen dieses Beitrags beginnen, um einige grundlegende Konze
 
 > [!TIP]
 > Das Ziel dieser vierten Phase ist sehr einfach: **Wenden Sie einige Aufmerksamkeitsmechanismen an**. Diese werden viele **wiederholte Schichten** sein, die die **Beziehung eines Wortes im Vokabular zu seinen Nachbarn im aktuellen Satz, der zum Trainieren des LLM verwendet wird, erfassen**.\
-> Viele Schichten werden dafür verwendet, sodass viele trainierbare Parameter diese Informationen erfassen werden.
+> Es werden viele Schichten dafür verwendet, sodass viele trainierbare Parameter diese Informationen erfassen werden.
+
 
 {{#ref}}
 4.-attention-mechanisms.md
@@ -59,6 +64,7 @@ Sie sollten mit dem Lesen dieses Beitrags beginnen, um einige grundlegende Konze
 >
 > Diese Architektur wird sowohl für das Training als auch für die Vorhersage von Text nach dem Training verwendet.
 
+
 {{#ref}}
 5.-llm-architecture.md
 {{#endref}}
@@ -66,7 +72,8 @@ Sie sollten mit dem Lesen dieses Beitrags beginnen, um einige grundlegende Konze
 ## 6. Vortraining & Laden von Modellen
 
 > [!TIP]
-> Das Ziel dieser sechsten Phase ist sehr einfach: **Trainieren Sie das Modell von Grund auf**. Dazu wird die vorherige LLM-Architektur mit einigen Schleifen über die Datensätze verwendet, wobei die definierten Verlustfunktionen und der Optimierer verwendet werden, um alle Parameter des Modells zu trainieren.
+> Das Ziel dieser sechsten Phase ist sehr einfach: **Trainieren Sie das Modell von Grund auf neu**. Dazu wird die vorherige LLM-Architektur mit einigen Schleifen über die Datensätze verwendet, wobei die definierten Verlustfunktionen und der Optimierer verwendet werden, um alle Parameter des Modells zu trainieren.
+
 
 {{#ref}}
 6.-pre-training-and-loading-models.md
@@ -77,6 +84,7 @@ Sie sollten mit dem Lesen dieses Beitrags beginnen, um einige grundlegende Konze
 > [!TIP]
 > Die Verwendung von **LoRA reduziert die benötigte Berechnung** erheblich, um **bereits trainierte Modelle fein abzustimmen**.
 
+
 {{#ref}}
 7.0.-lora-improvements-in-fine-tuning.md
 {{#endref}}
@@ -84,7 +92,8 @@ Sie sollten mit dem Lesen dieses Beitrags beginnen, um einige grundlegende Konze
 ## 7.1. Feintuning für Klassifikation
 
 > [!TIP]
-> Das Ziel dieses Abschnitts ist zu zeigen, wie man ein bereits vortrainiertes Modell fein abstimmt, sodass das LLM anstelle von neuem Text die **Wahrscheinlichkeiten des gegebenen Textes für jede der gegebenen Kategorien** (wie ob ein Text Spam ist oder nicht) angibt.
+> Das Ziel dieses Abschnitts ist zu zeigen, wie man ein bereits vortrainiertes Modell fein abstimmt, sodass das LLM anstelle von neuem Text die **Wahrscheinlichkeiten des gegebenen Textes für jede der angegebenen Kategorien** (wie ob ein Text Spam ist oder nicht) angibt.
+
 
 {{#ref}}
 7.1.-fine-tuning-for-classification.md
@@ -94,6 +103,7 @@ Sie sollten mit dem Lesen dieses Beitrags beginnen, um einige grundlegende Konze
 
 > [!TIP]
 > Das Ziel dieses Abschnitts ist zu zeigen, wie man ein **bereits vortrainiertes Modell fein abstimmt, um Anweisungen zu befolgen**, anstatt nur Text zu generieren, zum Beispiel, um auf Aufgaben als Chatbot zu antworten.
+
 
 {{#ref}}
 7.2.-fine-tuning-to-follow-instructions.md

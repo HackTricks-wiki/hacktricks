@@ -2,7 +2,6 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-
 ## Missbrauch von MDMs
 
 - JAMF Pro: `jamf checkJSSConnection`
@@ -30,7 +29,7 @@ Um das Gerät in ein MDM zu registrieren, müssen Sie eine **`mobileconfig`**-Da
 
 ### Missbrauch von JAMF PRO
 
-JAMF kann **benutzerdefinierte Skripte** (Skripte, die vom Sysadmin entwickelt wurden), **native Payloads** (Erstellung lokaler Konten, EFI-Passwort festlegen, Datei-/Prozessüberwachung...) und **MDM** (Gerätekonfigurationen, Gerätezertifikate...) ausführen.
+JAMF kann **benutzerdefinierte Skripte** (Skripte, die vom Sysadmin entwickelt wurden), **native Payloads** (Erstellung lokaler Konten, Festlegen des EFI-Passworts, Datei-/Prozessüberwachung...) und **MDM** (Gerätekonfigurationen, Gerätezertifikate...) ausführen.
 
 #### JAMF Selbstregistrierung
 
@@ -46,7 +45,7 @@ Darüber hinaus könnten Sie nach dem Finden geeigneter Anmeldeinformationen in 
 
 <figure><img src="../../images/image (167).png" alt=""><figcaption></figcaption></figure>
 
-Die **`jamf`**-Binärdatei enthielt das Geheimnis, um den Schlüsselbund zu öffnen, das zum Zeitpunkt der Entdeckung **unter allen geteilt** wurde und war: **`jk23ucnq91jfu9aj`**.\
+Die **`jamf`**-Binary enthielt das Geheimnis, um den Schlüsselbund zu öffnen, das zum Zeitpunkt der Entdeckung unter allen **geteilt** wurde und war: **`jk23ucnq91jfu9aj`**.\
 Darüber hinaus **persistiert** jamf als **LaunchDaemon** in **`/Library/LaunchAgents/com.jamf.management.agent.plist`**.
 
 #### JAMF Geräteübernahme
@@ -60,12 +59,12 @@ plutil -convert xml1 -o - /Library/Preferences/com.jamfsoftware.jamf.plist
 <key>is_virtual_machine</key>
 <false/>
 <key>jss_url</key>
-<string>https://halbornasd.jamfcloud.com/</string>
+<string>https://subdomain-company.jamfcloud.com/</string>
 <key>last_management_framework_change_id</key>
 <integer>4</integer>
 [...]
 ```
-Ein Angreifer könnte ein bösartiges Paket (`pkg`) ablegen, das **diese Datei überschreibt**, wenn es installiert wird, und die **URL auf einen Mythic C2-Listener von einem Typhon-Agenten** setzt, um JAMF als C2 auszunutzen.
+Ein Angreifer könnte ein bösartiges Paket (`pkg`) ablegen, das **diese Datei überschreibt**, wenn es installiert wird, und die **URL auf einen Mythic C2-Listener von einem Typhon-Agenten** setzt, um JAMF als C2 missbrauchen zu können.
 ```bash
 # After changing the URL you could wait for it to be reloaded or execute:
 sudo jamf policy -id 0
@@ -85,15 +84,16 @@ Mit diesen Informationen **erstellen Sie eine VM** mit der **gestohlenen** Hardw
 
 <figure><img src="../../images/image (1025).png" alt=""><figcaption><p>a</p></figcaption></figure>
 
-Sie könnten auch den Speicherort `/Library/Application Support/Jamf/tmp/` überwachen, um die **benutzerdefinierten Skripte** zu finden, die Administratoren möglicherweise über Jamf ausführen möchten, da sie **hier platziert, ausgeführt und entfernt** werden. Diese Skripte **könnten Anmeldeinformationen enthalten**.
+Sie könnten auch den Speicherort `/Library/Application Support/Jamf/tmp/` überwachen, um die **benutzerdefinierten Skripte** zu erfassen, die Administratoren möglicherweise über Jamf ausführen möchten, da sie **hier platziert, ausgeführt und entfernt** werden. Diese Skripte **könnten Anmeldeinformationen** enthalten.
 
-Allerdings könnten **Anmeldeinformationen** diesen Skripten als **Parameter** übergeben werden, daher müssten Sie `ps aux | grep -i jamf` überwachen (ohne sogar root zu sein).
+Allerdings könnten **Anmeldeinformationen** diesen Skripten als **Parameter** übergeben werden, sodass Sie `ps aux | grep -i jamf` überwachen müssten (ohne sogar root zu sein).
 
 Das Skript [**JamfExplorer.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfExplorer.py) kann auf neue hinzugefügte Dateien und neue Prozessargumente hören.
 
-### macOS Remote-Zugriff
+### macOS Remote Access
 
 Und auch über **MacOS** "besondere" **Netzwerk** **Protokolle**:
+
 
 {{#ref}}
 ../macos-security-and-privilege-escalation/macos-protocols.md
@@ -103,13 +103,16 @@ Und auch über **MacOS** "besondere" **Netzwerk** **Protokolle**:
 
 In einigen Fällen werden Sie feststellen, dass der **MacOS-Computer mit einem AD verbunden ist**. In diesem Szenario sollten Sie versuchen, das Active Directory zu **enumerieren**, wie Sie es gewohnt sind. Finden Sie etwas **Hilfe** auf den folgenden Seiten:
 
+
 {{#ref}}
 ../../network-services-pentesting/pentesting-ldap.md
 {{#endref}}
 
+
 {{#ref}}
 ../../windows-hardening/active-directory-methodology/
 {{#endref}}
+
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-kerberos-88/
@@ -119,7 +122,7 @@ Ein **lokales MacOS-Tool**, das Ihnen ebenfalls helfen kann, ist `dscl`:
 ```bash
 dscl "/Active Directory/[Domain]/All Domains" ls /
 ```
-Außerdem gibt es einige Tools, die für MacOS vorbereitet sind, um automatisch das AD zu enumerieren und mit Kerberos zu spielen:
+Auch gibt es einige Tools, die für MacOS vorbereitet sind, um automatisch das AD zu enumerieren und mit Kerberos zu arbeiten:
 
 - [**Machound**](https://github.com/XMCyber/MacHound): MacHound ist eine Erweiterung des Bloodhound-Audit-Tools, das das Sammeln und Verarbeiten von Active Directory-Beziehungen auf MacOS-Hosts ermöglicht.
 - [**Bifrost**](https://github.com/its-a-feature/bifrost): Bifrost ist ein Objective-C-Projekt, das entwickelt wurde, um mit den Heimdal krb5 APIs auf macOS zu interagieren. Das Ziel des Projekts ist es, bessere Sicherheitstests rund um Kerberos auf macOS-Geräten unter Verwendung nativer APIs zu ermöglichen, ohne dass andere Frameworks oder Pakete auf dem Ziel erforderlich sind.
@@ -135,7 +138,7 @@ Die drei Arten von MacOS-Benutzern sind:
 
 - **Lokale Benutzer** — Verwaltet durch den lokalen OpenDirectory-Dienst, sie sind in keiner Weise mit dem Active Directory verbunden.
 - **Netzwerkbenutzer** — Flüchtige Active Directory-Benutzer, die eine Verbindung zum DC-Server benötigen, um sich zu authentifizieren.
-- **Mobile Benutzer** — Active Directory-Benutzer mit einem lokalen Backup für ihre Anmeldeinformationen und Dateien.
+- **Mobile Benutzer** — Active Directory-Benutzer mit einer lokalen Sicherung für ihre Anmeldeinformationen und Dateien.
 
 Die lokalen Informationen über Benutzer und Gruppen werden im Ordner _/var/db/dslocal/nodes/Default._ gespeichert.\
 Zum Beispiel werden die Informationen über den Benutzer _mark_ in _/var/db/dslocal/nodes/Default/users/mark.plist_ und die Informationen über die Gruppe _admin_ in _/var/db/dslocal/nodes/Default/groups/admin.plist_ gespeichert.
@@ -183,7 +186,7 @@ Holen Sie sich ein TGT für einen bestimmten Benutzer und Dienst:
 bifrost --action asktgt --username [user] --domain [domain.com] \
 --hash [hash] --enctype [enctype] --keytab [/path/to/keytab]
 ```
-Sobald das TGT gesammelt ist, kann es mit folgender Methode in die aktuelle Sitzung injiziert werden:
+Sobald das TGT gesammelt ist, ist es möglich, es in die aktuelle Sitzung mit:
 ```bash
 bifrost --action asktgt --username test_lab_admin \
 --hash CF59D3256B62EE655F6430B0F80701EE05A0885B8B52E9C2480154AFA62E78 \
@@ -201,7 +204,7 @@ mount -t smbfs //server/folder /local/mount/point
 ```
 ## Zugriff auf den Schlüsselbund
 
-Der Schlüsselbund enthält höchstwahrscheinlich sensible Informationen, die, wenn sie ohne Aufforderung zuzugreifen, helfen könnten, eine Red Team Übung voranzutreiben:
+Der Schlüsselbund enthält höchstwahrscheinlich sensible Informationen, die, wenn sie ohne Aufforderung zuzugreifen, helfen könnten, eine Red Team-Übung voranzutreiben:
 
 {{#ref}}
 macos-keychain.md
@@ -211,7 +214,7 @@ macos-keychain.md
 
 MacOS Red Teaming unterscheidet sich von einem regulären Windows Red Teaming, da **MacOS normalerweise direkt mit mehreren externen Plattformen integriert ist**. Eine gängige Konfiguration von MacOS besteht darin, auf den Computer mit **OneLogin synchronisierten Anmeldeinformationen zuzugreifen und mehrere externe Dienste** (wie github, aws...) über OneLogin zu nutzen.
 
-## Verschiedene Red Team Techniken
+## Verschiedene Red Team-Techniken
 
 ### Safari
 
@@ -226,6 +229,5 @@ Wenn eine Datei in Safari heruntergeladen wird und es sich um eine "sichere" Dat
 - [**https://gist.github.com/its-a-feature/1a34f597fb30985a2742bb16116e74e0**](https://gist.github.com/its-a-feature/1a34f597fb30985a2742bb16116e74e0)
 - [**Come to the Dark Side, We Have Apples: Turning macOS Management Evil**](https://www.youtube.com/watch?v=pOQOh07eMxY)
 - [**OBTS v3.0: "An Attackers Perspective on Jamf Configurations" - Luke Roberts / Calum Hall**](https://www.youtube.com/watch?v=ju1IYWUv4ZA)
-
 
 {{#include ../../banners/hacktricks-training.md}}

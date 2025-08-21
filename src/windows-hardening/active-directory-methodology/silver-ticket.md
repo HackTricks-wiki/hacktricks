@@ -6,7 +6,7 @@
 
 ## Silver ticket
 
-Der **Silver Ticket**-Angriff beinhaltet die Ausnutzung von Diensttickets in Active Directory (AD)-Umgebungen. Diese Methode basiert auf dem **Erwerb des NTLM-Hashes eines Dienstkontos**, wie z.B. eines Computer-Kontos, um ein Ticket Granting Service (TGS) Ticket zu fälschen. Mit diesem gefälschten Ticket kann ein Angreifer auf bestimmte Dienste im Netzwerk zugreifen und **jede Benutzeridentität nachahmen**, wobei typischerweise administrative Berechtigungen angestrebt werden. Es wird betont, dass die Verwendung von AES-Schlüsseln zur Fälschung von Tickets sicherer und weniger nachweisbar ist.
+Der **Silver Ticket**-Angriff beinhaltet die Ausnutzung von Diensttickets in Active Directory (AD)-Umgebungen. Diese Methode basiert auf dem **Erwerb des NTLM-Hashes eines Dienstkontos**, wie z.B. eines Computer-Kontos, um ein Ticket Granting Service (TGS) Ticket zu fälschen. Mit diesem gefälschten Ticket kann ein Angreifer auf bestimmte Dienste im Netzwerk zugreifen und **jede Benutzeridentität nachahmen**, wobei typischerweise administrative Privilegien angestrebt werden. Es wird betont, dass die Verwendung von AES-Schlüsseln zur Fälschung von Tickets sicherer und weniger nachweisbar ist.
 
 > [!WARNING]
 > Silver Tickets sind weniger nachweisbar als Golden Tickets, da sie nur den **Hash des Dienstkontos** benötigen, nicht das krbtgt-Konto. Sie sind jedoch auf den spezifischen Dienst beschränkt, den sie anvisieren. Darüber hinaus reicht es aus, nur das Passwort eines Benutzers zu stehlen. 
@@ -41,16 +41,16 @@ Der CIFS-Dienst wird als häufiges Ziel hervorgehoben, um auf das Dateisystem de
 
 ## Verfügbare Dienste
 
-| Diensttyp                                  | Dienst Silber-Tickets                                                      |
-| ------------------------------------------ | -------------------------------------------------------------------------- |
-| WMI                                        | <p>HOST</p><p>RPCSS</p>                                                   |
+| Diensttyp                                  | Dienst-Silber-Tickets                                                    |
+| ------------------------------------------ | ----------------------------------------------------------------------- |
+| WMI                                        | <p>HOST</p><p>RPCSS</p>                                               |
 | PowerShell Remoting                        | <p>HOST</p><p>HTTP</p><p>Je nach Betriebssystem auch:</p><p>WSMAN</p><p>RPCSS</p> |
 | WinRM                                      | <p>HOST</p><p>HTTP</p><p>In einigen Fällen können Sie einfach nachfragen: WINRM</p> |
-| Geplante Aufgaben                          | HOST                                                                      |
-| Windows-Dateifreigabe, auch psexec        | CIFS                                                                      |
-| LDAP-Operationen, einschließlich DCSync   | LDAP                                                                      |
-| Windows Remote Server Administration Tools  | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                        |
-| Goldene Tickets                            | krbtgt                                                                    |
+| Geplante Aufgaben                          | HOST                                                                  |
+| Windows-Dateifreigabe, auch psexec        | CIFS                                                                  |
+| LDAP-Operationen, einschließlich DCSync   | LDAP                                                                  |
+| Windows Remote Server Administration Tools  | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                    |
+| Goldene Tickets                            | krbtgt                                                                |
 
 Mit **Rubeus** können Sie **alle** diese Tickets mit dem Parameter anfordern:
 
@@ -72,7 +72,7 @@ In den folgenden Beispielen stellen wir uns vor, dass das Ticket unter Verwendun
 
 ### CIFS
 
-Mit diesem Ticket können Sie auf den `C$`- und `ADMIN$`-Ordner über **SMB** zugreifen (wenn sie exponiert sind) und Dateien in einen Teil des Remote-Dateisystems kopieren, indem Sie einfach etwas tun wie:
+Mit diesem Ticket können Sie auf den `C$` und `ADMIN$`-Ordner über **SMB** zugreifen (wenn sie exponiert sind) und Dateien in einen Teil des Remote-Dateisystems kopieren, indem Sie einfach etwas tun wie:
 ```bash
 dir \\vulnerable.computer\C$
 dir \\vulnerable.computer\ADMIN$
@@ -138,6 +138,7 @@ Mit diesem Privileg können Sie die DC-Datenbank mit **DCSync** dumpen:
 mimikatz(commandline) # lsadump::dcsync /dc:pcdc.domain.local /domain:domain.local /user:krbtgt
 ```
 **Erfahren Sie mehr über DCSync** auf der folgenden Seite:
+
 
 {{#ref}}
 dcsync.md

@@ -12,7 +12,7 @@ Von [wikipedia](https://en.wikipedia.org/wiki/Chroot#Limitations): Der chroot-Me
 Normalerweise bedeutet dies, dass du root innerhalb des chroot sein musst, um auszubrechen.
 
 > [!TIP]
-> Das **Werkzeug** [**chw00t**](https://github.com/earthquake/chw00t) wurde entwickelt, um die folgenden Szenarien auszunutzen und aus `chroot` auszubrechen.
+> Das **Tool** [**chw00t**](https://github.com/earthquake/chw00t) wurde entwickelt, um die folgenden Szenarien auszunutzen und aus `chroot` auszubrechen.
 
 ### Root + CWD
 
@@ -79,7 +79,7 @@ system("/bin/bash");
 ### Root + Gespeicherter fd
 
 > [!WARNING]
-> Dies ist ähnlich wie im vorherigen Fall, aber in diesem Fall **speichert der Angreifer einen Dateideskriptor für das aktuelle Verzeichnis** und **erstellt das chroot in einem neuen Ordner**. Schließlich hat er **Zugriff** auf diesen **FD** **außerhalb** des chroot, er greift darauf zu und **entkommt**.
+> Dies ist ähnlich wie im vorherigen Fall, aber in diesem Fall **speichert der Angreifer einen Dateideskriptor für das aktuelle Verzeichnis** und **erstellt dann das chroot in einem neuen Ordner**. Schließlich hat er **Zugriff** auf diesen **FD** **außerhalb** des chroot, er greift darauf zu und **entkommt**.
 
 <details>
 
@@ -116,7 +116,7 @@ chroot(".");
 > - Führe chroot im Kindprozess in einem anderen Ordner aus
 > - Erstelle im Elternprozess einen FD eines Ordners, der außerhalb des neuen chroot des Kindprozesses liegt
 > - Übergebe diesen FD an den Kindprozess über die UDS
-> - Der Kindprozess wechselt in das Verzeichnis dieses FD, und da es außerhalb seines chroot ist, wird er aus dem Gefängnis entkommen
+> - Der Kindprozess wechselt in diesen FD, und da er außerhalb seines chroot ist, wird er aus dem Gefängnis entkommen
 
 ### Root + Mount
 
@@ -131,7 +131,7 @@ chroot(".");
 
 > [!WARNING]
 >
-> - Montiere procfs in ein Verzeichnis innerhalb des chroot (falls es noch nicht geschehen ist)
+> - Montiere procfs in ein Verzeichnis innerhalb des chroot (falls noch nicht geschehen)
 > - Suche nach einer PID, die einen anderen root/cwd-Eintrag hat, wie: /proc/1/root
 > - Chroote in diesen Eintrag
 
@@ -147,7 +147,7 @@ chroot(".");
 
 > [!WARNING]
 >
-> - Vor einiger Zeit konnten Benutzer ihre eigenen Prozesse von einem eigenen Prozess debuggen... aber das ist standardmäßig nicht mehr möglich
+> - Vor einiger Zeit konnten Benutzer ihre eigenen Prozesse von einem Prozess aus debuggen... aber das ist standardmäßig nicht mehr möglich
 > - Wenn es jedoch möglich ist, könntest du ptrace in einen Prozess und einen Shellcode darin ausführen ([siehe dieses Beispiel](linux-capabilities.md#cap_sys_ptrace)).
 
 ## Bash Jails
@@ -175,9 +175,9 @@ echo /home/* #List directory
 :set shell=/bin/sh
 :shell
 ```
-### Skript erstellen
+### Erstelle Skript
 
-Überprüfen Sie, ob Sie eine ausführbare Datei mit _/bin/bash_ als Inhalt erstellen können.
+Überprüfe, ob du eine ausführbare Datei mit _/bin/bash_ als Inhalt erstellen kannst
 ```bash
 red /bin/bash
 > w wx/path #Write /bin/bash in a writable and executable path
@@ -209,13 +209,15 @@ wget http://127.0.0.1:8080/sudoers -O /etc/sudoers
 [https://gtfobins.github.io](https://gtfobins.github.io)\
 **Es könnte auch interessant sein, die Seite zu besuchen:**
 
+
 {{#ref}}
 ../bypass-bash-restrictions/
 {{#endref}}
 
 ## Python Jails
 
-Tricks zum Entkommen aus Python-Jails auf der folgenden Seite:
+Tricks zum Entkommen aus Python-Jails finden Sie auf der folgenden Seite:
+
 
 {{#ref}}
 ../../generic-methodologies-and-resources/python/bypass-python-sandboxes/
@@ -229,7 +231,7 @@ Auf dieser Seite finden Sie die globalen Funktionen, auf die Sie innerhalb von L
 ```bash
 load(string.char(0x6f,0x73,0x2e,0x65,0x78,0x65,0x63,0x75,0x74,0x65,0x28,0x27,0x6c,0x73,0x27,0x29))()
 ```
-Einige Tricks, um **Funktionen einer Bibliothek aufzurufen, ohne Punkte zu verwenden**:
+Einige Tricks, um **Funktionen einer Bibliothek ohne Verwendung von Punkten aufzurufen**:
 ```bash
 print(string.char(0x41, 0x42))
 print(rawget(string, "char")(0x41, 0x42))
@@ -238,7 +240,7 @@ Auflisten von Funktionen einer Bibliothek:
 ```bash
 for k,v in pairs(string) do print(k,v) end
 ```
-Beachten Sie, dass sich bei jeder Ausführung der vorherigen Einzeiler in einer **anderen Lua-Umgebung die Reihenfolge der Funktionen ändert**. Daher können Sie, wenn Sie eine bestimmte Funktion ausführen müssen, einen Brute-Force-Angriff durchführen, indem Sie verschiedene Lua-Umgebungen laden und die erste Funktion der Bibliothek aufrufen:
+Beachten Sie, dass sich **die Reihenfolge der Funktionen ändert**, jedes Mal, wenn Sie die vorherige Einzeiler in einer **anderen Lua-Umgebung ausführen**. Daher können Sie, wenn Sie eine bestimmte Funktion ausführen müssen, einen Brute-Force-Angriff durchführen, indem Sie verschiedene Lua-Umgebungen laden und die erste Funktion der Bibliothek aufrufen:
 ```bash
 #In this scenario you could BF the victim that is generating a new lua environment
 #for every interaction with the following line and when you are lucky

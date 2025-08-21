@@ -33,7 +33,7 @@ find /directory -type f -mtime -1 -print #Find modified files during the last mi
 
 Während Sie die grundlegenden Informationen sammeln, sollten Sie nach seltsamen Dingen suchen, wie zum Beispiel:
 
-- **Root-Prozesse** laufen normalerweise mit niedrigen PIDs, also wenn Sie einen Root-Prozess mit einer hohen PID finden, könnten Sie Verdacht schöpfen.
+- **Root-Prozesse** laufen normalerweise mit niedrigen PIDs, also wenn Sie einen Root-Prozess mit einer großen PID finden, sollten Sie misstrauisch sein.
 - Überprüfen Sie die **registrierten Logins** von Benutzern ohne eine Shell in `/etc/passwd`.
 - Überprüfen Sie auf **Passworthashes** in `/etc/shadow` für Benutzer ohne eine Shell.
 
@@ -57,18 +57,18 @@ LiME unterstützt 3 **Formate**:
 - Padded (gleich wie raw, aber mit Nullen in den rechten Bits)
 - Lime (empfohlenes Format mit Metadaten)
 
-LiME kann auch verwendet werden, um den Dump über das **Netzwerk zu senden**, anstatt ihn auf dem System zu speichern, indem man etwas wie `path=tcp:4444` verwendet.
+LiME kann auch verwendet werden, um den **Dump über das Netzwerk zu senden**, anstatt ihn auf dem System zu speichern, indem man etwas wie `path=tcp:4444` verwendet.
 
 ### Festplattenabbildung
 
 #### Herunterfahren
 
 Zunächst müssen Sie das **System herunterfahren**. Dies ist nicht immer eine Option, da das System manchmal ein Produktionsserver ist, den sich das Unternehmen nicht leisten kann, herunterzufahren.\
-Es gibt **2 Möglichkeiten**, das System herunterzufahren: ein **normales Herunterfahren** und ein **"Stecker ziehen" Herunterfahren**. Das erste ermöglicht es den **Prozessen, wie gewohnt zu beenden** und das **Dateisystem** zu **synchronisieren**, aber es könnte auch dem möglichen **Malware** erlauben, **Beweise zu vernichten**. Der "Stecker ziehen"-Ansatz kann **einige Informationsverluste** mit sich bringen (nicht viele Informationen werden verloren gehen, da wir bereits ein Abbild des Speichers gemacht haben) und die **Malware wird keine Gelegenheit haben**, etwas dagegen zu unternehmen. Daher, wenn Sie **vermuten**, dass es **Malware** geben könnte, führen Sie einfach den **`sync`** **Befehl** auf dem System aus und ziehen Sie den Stecker.
+Es gibt **2 Möglichkeiten**, das System herunterzufahren: ein **normales Herunterfahren** und ein **"Stecker ziehen" Herunterfahren**. Das erste ermöglicht es den **Prozessen, wie gewohnt zu beenden** und das **Dateisystem** zu **synchronisieren**, aber es könnte auch dem möglichen **Malware** ermöglichen, **Beweise zu vernichten**. Der "Stecker ziehen"-Ansatz kann **einige Informationsverluste** mit sich bringen (nicht viele Informationen werden verloren gehen, da wir bereits ein Abbild des Speichers erstellt haben) und die **Malware hat keine Möglichkeit**, etwas dagegen zu unternehmen. Daher, wenn Sie **verdächtigen**, dass es **Malware** geben könnte, führen Sie einfach den **`sync`** **Befehl** auf dem System aus und ziehen Sie den Stecker.
 
 #### Erstellen eines Abbilds der Festplatte
 
-Es ist wichtig zu beachten, dass **bevor Sie Ihren Computer mit etwas in Verbindung bringen, das mit dem Fall zu tun hat**, Sie sicherstellen müssen, dass er als **nur lesen** gemountet wird, um zu vermeiden, dass Informationen verändert werden.
+Es ist wichtig zu beachten, dass Sie **bevor Sie Ihren Computer mit etwas, das mit dem Fall zu tun hat, verbinden**, sicherstellen müssen, dass er als **schreibgeschützt** **gemountet** wird, um zu vermeiden, dass Informationen verändert werden.
 ```bash
 #Create a raw copy of the disk
 dd if=<subject device> of=<image file> bs=512
@@ -206,7 +206,7 @@ for d in /etc/cron.*; do [ -f "$d/0anacron" ] && stat -c '%n %y %s' "$d/0anacron
 grep -R --line-number -E 'curl|wget|/bin/sh|python|bash -c' /etc/cron.*/* 2>/dev/null
 ```
 #### Hunt: SSH-Härtung Rollback und Backdoor-Shells
-Änderungen an sshd_config und Systemkonto-Shells sind häufige Maßnahmen nach der Ausnutzung, um den Zugriff zu erhalten.
+Änderungen an sshd_config und Systemkonto-Shells sind nach der Ausnutzung üblich, um den Zugriff zu erhalten.
 ```bash
 # Root login enablement (flag "yes" or lax values)
 grep -E '^\s*PermitRootLogin' /etc/ssh/sshd_config
@@ -244,7 +244,7 @@ Linux-Kernel-Module, die oft von Malware als Rootkit-Komponenten verwendet werde
 - **/etc/modprobe.d**: Enthält Konfigurationsdateien zur Steuerung des Modul-Ladens.
 - **/etc/modprobe** und **/etc/modprobe.conf**: Dateien für globale Moduleinstellungen.
 
-### Weitere Autostart-Standorte
+### Andere Autostart-Standorte
 
 Linux verwendet verschiedene Dateien, um Programme automatisch beim Benutzer-Login auszuführen, die möglicherweise Malware beherbergen:
 
@@ -267,13 +267,13 @@ Linux-Systeme verfolgen Benutzeraktivitäten und Systemereignisse durch verschie
 - **/var/log/cron**: Protokolliert die Ausführung von Cron-Jobs.
 - **/var/log/daemon.log**: Verfolgt Aktivitäten von Hintergrunddiensten.
 - **/var/log/btmp**: Dokumentiert fehlgeschlagene Anmeldeversuche.
-- **/var/log/httpd/**: Enthält Apache HTTPD-Fehler- und Zugriffsprotokolle.
+- **/var/log/httpd/**: Enthält Apache HTTPD Fehler- und Zugriffsprotokolle.
 - **/var/log/mysqld.log** oder **/var/log/mysql.log**: Protokolliert Aktivitäten der MySQL-Datenbank.
 - **/var/log/xferlog**: Protokolliert FTP-Dateiübertragungen.
 - **/var/log/**: Überprüfen Sie hier immer auf unerwartete Protokolle.
 
-> [!TIP]
-> Linux-Systemprotokolle und Auditsysteme können in einem Eindringungs- oder Malware-Vorfall deaktiviert oder gelöscht werden. Da Protokolle auf Linux-Systemen im Allgemeinen einige der nützlichsten Informationen über böswillige Aktivitäten enthalten, löschen Eindringlinge sie routinemäßig. Daher ist es wichtig, beim Überprüfen der verfügbaren Protokolldateien nach Lücken oder nicht in der Reihenfolge befindlichen Einträgen zu suchen, die auf Löschung oder Manipulation hinweisen könnten.
+> [!TIPP]
+> Linux-Systemprotokolle und Auditsysteme können bei einem Eindringen oder Malware-Vorfall deaktiviert oder gelöscht werden. Da Protokolle auf Linux-Systemen im Allgemeinen einige der nützlichsten Informationen über böswillige Aktivitäten enthalten, löschen Eindringlinge sie routinemäßig. Daher ist es wichtig, beim Überprüfen der verfügbaren Protokolldateien nach Lücken oder nicht in der Reihenfolge befindlichen Einträgen zu suchen, die auf Löschungen oder Manipulationen hinweisen könnten.
 
 **Linux führt eine Befehlsverlauf für jeden Benutzer**:
 
@@ -298,7 +298,7 @@ Einige Apps generieren auch ihre eigenen Protokolle:
 - **Gnome Desktop**: Überprüfen Sie _\~/.recently-used.xbel_ auf kürzlich zugegriffene Dateien über Gnome-Anwendungen.
 - **Firefox/Chrome**: Überprüfen Sie den Browserverlauf und Downloads in _\~/.mozilla/firefox_ oder _\~/.config/google-chrome_ auf verdächtige Aktivitäten.
 - **VIM**: Überprüfen Sie _\~/.viminfo_ auf Nutzungsdetails, wie z.B. aufgerufene Dateipfade und Suchverlauf.
-- **Open Office**: Überprüfen Sie auf den Zugriff auf kürzlich verwendete Dokumente, die auf kompromittierte Dateien hinweisen könnten.
+- **Open Office**: Überprüfen Sie den Zugriff auf kürzlich verwendete Dokumente, die auf kompromittierte Dateien hinweisen könnten.
 - **FTP/SFTP**: Überprüfen Sie Protokolle in _\~/.ftp_history_ oder _\~/.sftp_history_ auf möglicherweise unbefugte Dateiübertragungen.
 - **MySQL**: Untersuchen Sie _\~/.mysql_history_ auf ausgeführte MySQL-Abfragen, die möglicherweise unbefugte Datenbankaktivitäten offenbaren.
 - **Less**: Analysieren Sie _\~/.lesshst_ auf Nutzungshistorie, einschließlich angezeigter Dateien und ausgeführter Befehle.
@@ -355,11 +355,11 @@ ls -laR --sort=time /bin```
 ls -lai /bin | sort -n```
 ````
 > [!TIP]
-> Beachten Sie, dass ein **Angreifer** die **Zeit** **ändern** kann, um **Dateien legitim erscheinen** zu lassen, aber er **kann** die **inode** **nicht** ändern. Wenn Sie feststellen, dass eine **Datei** angibt, dass sie zur **gleichen Zeit** wie die anderen Dateien im selben Ordner erstellt und geändert wurde, aber die **inode** **unerwartet größer** ist, dann wurden die **Zeitstempel dieser Datei geändert**.
+> Beachten Sie, dass ein **Angreifer** die **Zeit** ändern kann, um **Dateien legitim erscheinen** zu lassen, aber er **kann** die **inode** **nicht** ändern. Wenn Sie feststellen, dass eine **Datei** angibt, dass sie zur **gleichen Zeit** wie die anderen Dateien im selben Ordner erstellt und geändert wurde, aber die **inode** **unerwartet größer** ist, dann wurden die **Zeitstempel dieser Datei geändert**.
 
 ## Vergleich von Dateien verschiedener Dateisystemversionen
 
-### Zusammenfassung des Dateisystemversionsvergleichs
+### Zusammenfassung des Vergleichs von Dateisystemversionen
 
 Um Dateisystemversionen zu vergleichen und Änderungen zu identifizieren, verwenden wir vereinfachte `git diff`-Befehle:
 

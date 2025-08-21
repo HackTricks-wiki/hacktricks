@@ -14,13 +14,15 @@ Wenn Sie Zugriff auf ein AD in Linux (oder Bash in Windows) haben, können Sie [
 
 Sie können auch die folgende Seite überprüfen, um **andere Möglichkeiten zur Enumeration von AD aus Linux** zu lernen:
 
+
 {{#ref}}
 ../../network-services-pentesting/pentesting-ldap.md
 {{#endref}}
 
 ### FreeIPA
 
-FreeIPA ist eine Open-Source-**Alternative** zu Microsoft Windows **Active Directory**, hauptsächlich für **Unix**-Umgebungen. Es kombiniert ein vollständiges **LDAP-Verzeichnis** mit einem MIT **Kerberos** Key Distribution Center für die Verwaltung ähnlich wie Active Directory. Es nutzt das Dogtag **Zertifikatssystem** für CA- und RA-Zertifikatsmanagement und unterstützt **Multi-Faktor**-Authentifizierung, einschließlich Smartcards. SSSD ist für Unix-Authentifizierungsprozesse integriert. Erfahren Sie mehr darüber in:
+FreeIPA ist eine Open-Source-**Alternative** zu Microsoft Windows **Active Directory**, hauptsächlich für **Unix**-Umgebungen. Es kombiniert ein vollständiges **LDAP-Verzeichnis** mit einem MIT **Kerberos** Key Distribution Center für eine Verwaltung ähnlich wie bei Active Directory. Es nutzt das Dogtag **Zertifikatssystem** für CA- und RA-Zertifikatsmanagement und unterstützt **Multi-Faktor**-Authentifizierung, einschließlich Smartcards. SSSD ist für Unix-Authentifizierungsprozesse integriert. Erfahren Sie mehr darüber in:
+
 
 {{#ref}}
 ../freeipa-pentesting.md
@@ -32,13 +34,14 @@ FreeIPA ist eine Open-Source-**Alternative** zu Microsoft Windows **Active Direc
 
 Auf dieser Seite finden Sie verschiedene Orte, an denen Sie **Kerberos-Tickets auf einem Linux-Host finden können**. Auf der folgenden Seite können Sie lernen, wie Sie diese CCache-Ticketformate in Kirbi (das Format, das Sie in Windows verwenden müssen) umwandeln und auch, wie Sie einen PTT-Angriff durchführen:
 
+
 {{#ref}}
 ../../windows-hardening/active-directory-methodology/pass-the-ticket.md
 {{#endref}}
 
 ### CCACHE-Ticket-Wiederverwendung aus /tmp
 
-CCACHE-Dateien sind binäre Formate zum **Speichern von Kerberos-Anmeldeinformationen**, die typischerweise mit 600 Berechtigungen in `/tmp` gespeichert werden. Diese Dateien können an ihrem **Namensformat, `krb5cc_%{uid}`,** identifiziert werden, das mit der UID des Benutzers korreliert. Für die Überprüfung des Authentifizierungstickets sollte die **Umgebungsvariable `KRB5CCNAME`** auf den Pfad der gewünschten Ticketdatei gesetzt werden, um deren Wiederverwendung zu ermöglichen.
+CCACHE-Dateien sind binäre Formate zum **Speichern von Kerberos-Anmeldeinformationen**, die typischerweise mit 600 Berechtigungen in `/tmp` gespeichert werden. Diese Dateien können durch ihr **Namensformat, `krb5cc_%{uid}`,** identifiziert werden, das mit der UID des Benutzers korreliert. Für die Überprüfung des Authentifizierungstickets sollte die **Umgebungsvariable `KRB5CCNAME`** auf den Pfad der gewünschten Ticketdatei gesetzt werden, um deren Wiederverwendung zu ermöglichen.
 
 Listen Sie das aktuelle Ticket, das für die Authentifizierung verwendet wird, mit `env | grep KRB5CCNAME` auf. Das Format ist portabel und das Ticket kann **durch Setzen der Umgebungsvariable** mit `export KRB5CCNAME=/tmp/ticket.ccache` wiederverwendet werden. Das Kerberos-Ticket-Namensformat ist `krb5cc_%{uid}`, wobei uid die Benutzer-UID ist.
 ```bash
@@ -49,7 +52,7 @@ krb5cc_1000
 # Prepare to use it
 export KRB5CCNAME=/tmp/krb5cc_1000
 ```
-### CCACHE Ticket-Wiederverwendung aus dem Schlüsselbund
+### CCACHE Ticket-Wiederverwendung aus dem Keyring
 
 **Kerberos-Tickets, die im Speicher eines Prozesses gespeichert sind, können extrahiert werden**, insbesondere wenn der ptrace-Schutz der Maschine deaktiviert ist (`/proc/sys/kernel/yama/ptrace_scope`). Ein nützliches Tool für diesen Zweck ist unter [https://github.com/TarlogicSecurity/tickey](https://github.com/TarlogicSecurity/tickey) zu finden, das die Extraktion erleichtert, indem es in Sitzungen injiziert und Tickets in `/tmp` dumpet.
 
@@ -62,7 +65,7 @@ make CONF=Release
 ```
 Dieses Verfahren wird versuchen, in verschiedene Sitzungen zu injizieren, wobei der Erfolg durch das Speichern der extrahierten Tickets in `/tmp` mit einer Namenskonvention von `__krb_UID.ccache` angezeigt wird.
 
-### CCACHE-Ticket-Wiederverwendung von SSSD KCM
+### CCACHE Ticket-Wiederverwendung von SSSD KCM
 
 SSSD hält eine Kopie der Datenbank unter dem Pfad `/var/lib/sss/secrets/secrets.ldb`. Der entsprechende Schlüssel wird als versteckte Datei unter dem Pfad `/var/lib/sss/secrets/.secrets.mkey` gespeichert. Standardmäßig ist der Schlüssel nur lesbar, wenn Sie **root**-Berechtigungen haben.
 
@@ -81,7 +84,7 @@ klist -k /etc/krb5.keytab
 ```
 ### Konten aus /etc/krb5.keytab extrahieren
 
-Servicekonto-Schlüssel, die für Dienste mit Root-Rechten unerlässlich sind, werden sicher in **`/etc/krb5.keytab`**-Dateien gespeichert. Diese Schlüssel, ähnlich wie Passwörter für Dienste, erfordern strikte Vertraulichkeit.
+Dienstkontoschlüssel, die für Dienste mit Root-Rechten unerlässlich sind, werden sicher in **`/etc/krb5.keytab`**-Dateien gespeichert. Diese Schlüssel, ähnlich wie Passwörter für Dienste, erfordern strikte Vertraulichkeit.
 
 Um den Inhalt der Keytab-Datei zu überprüfen, kann **`klist`** verwendet werden. Das Tool ist dafür ausgelegt, Schlüsseldetails anzuzeigen, einschließlich des **NT Hash** für die Benutzerauthentifizierung, insbesondere wenn der Schlüsseltyp als 23 identifiziert wird.
 ```bash

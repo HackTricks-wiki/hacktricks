@@ -26,7 +26,7 @@ schtasks /Create /RU "SYSTEM" /SC ONLOGON /TN "SchedPE" /TR "cmd /c net localgro
 ```
 ## Ordner
 
-Alle Binaries, die sich in den **Startup-Ordnern befinden, werden beim Start ausgeführt**. Die gängigen Startup-Ordner sind die, die im Folgenden aufgeführt sind, aber der Startup-Ordner ist im Registrierungseditor angegeben. [Read this to learn where.](privilege-escalation-with-autorun-binaries.md#startup-path)
+Alle Binaries, die sich in den **Startup-Ordnern befinden, werden beim Start ausgeführt**. Die gängigen Startup-Ordner sind die, die im Folgenden aufgeführt sind, aber der Startup-Ordner ist in der Registrierung angegeben. [Read this to learn where.](privilege-escalation-with-autorun-binaries.md#startup-path)
 ```bash
 dir /b "C:\Documents and Settings\All Users\Start Menu\Programs\Startup" 2>nul
 dir /b "C:\Documents and Settings\%username%\Start Menu\Programs\Startup" 2>nul
@@ -41,16 +41,14 @@ Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 ../../generic-hacking/archive-extraction-path-traversal.md
 {{#endref}}
 
-
-
-## Registrierung
+## Registry
 
 > [!TIP]
 > [Hinweis von hier](https://answers.microsoft.com/en-us/windows/forum/all/delete-registry-key/d425ae37-9dcc-4867-b49c-723dcd15147f): Der **Wow6432Node** Registrierungseintrag zeigt an, dass Sie eine 64-Bit Windows-Version ausführen. Das Betriebssystem verwendet diesen Schlüssel, um eine separate Ansicht von HKEY_LOCAL_MACHINE\SOFTWARE für 32-Bit-Anwendungen anzuzeigen, die auf 64-Bit Windows-Versionen ausgeführt werden.
 
-### Ausführungen
+### Runs
 
-**Allgemein bekanntes** AutoRun-Registrierung:
+**Allgemein bekannt** AutoRun-Registrierung:
 
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\Run`
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\RunOnce`
@@ -64,9 +62,9 @@ Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 - `HKLM\Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Install\Software\Microsoft\Windows\CurrentVersion\Runonce`
 - `HKLM\Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Install\Software\Microsoft\Windows\CurrentVersion\RunonceEx`
 
-Registrierungsschlüssel, die als **Run** und **RunOnce** bekannt sind, sind dafür ausgelegt, Programme automatisch auszuführen, jedes Mal wenn ein Benutzer sich im System anmeldet. Die Befehlszeile, die als Datenwert eines Schlüssels zugewiesen ist, ist auf 260 Zeichen oder weniger beschränkt.
+Registrierungsschlüssel, die als **Run** und **RunOnce** bekannt sind, sind dafür ausgelegt, Programme automatisch auszuführen, jedes Mal, wenn sich ein Benutzer im System anmeldet. Die Befehlszeile, die als Datenwert eines Schlüssels zugewiesen ist, ist auf 260 Zeichen oder weniger beschränkt.
 
-**Service-Ausführungen** (können den automatischen Start von Diensten während des Bootvorgangs steuern):
+**Service runs** (kann den automatischen Start von Diensten während des Bootvorgangs steuern):
 
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\RunServicesOnce`
 - `HKCU\Software\Microsoft\Windows\CurrentVersion\RunServicesOnce`
@@ -82,7 +80,7 @@ Registrierungsschlüssel, die als **Run** und **RunOnce** bekannt sind, sind daf
 - `HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\RunOnceEx`
 - `HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunOnceEx`
 
-In Windows Vista und späteren Versionen werden die **Run** und **RunOnce** Registrierungsschlüssel nicht automatisch generiert. Einträge in diesen Schlüsseln können entweder Programme direkt starten oder sie als Abhängigkeiten angeben. Zum Beispiel, um eine DLL-Datei beim Login zu laden, könnte man den **RunOnceEx** Registrierungsschlüssel zusammen mit einem "Depend"-Schlüssel verwenden. Dies wird demonstriert, indem ein Registrierungseintrag hinzugefügt wird, um "C:\temp\evil.dll" während des Systemstarts auszuführen:
+In Windows Vista und späteren Versionen werden die **Run** und **RunOnce** Registrierungsschlüssel nicht automatisch generiert. Einträge in diesen Schlüsseln können entweder Programme direkt starten oder sie als Abhängigkeiten angeben. Zum Beispiel könnte man, um eine DLL-Datei beim Login zu laden, den **RunOnceEx** Registrierungsschlüssel zusammen mit einem "Depend"-Schlüssel verwenden. Dies wird demonstriert, indem ein Registrierungseintrag hinzugefügt wird, um "C:\temp\evil.dll" während des Systemstarts auszuführen:
 ```
 reg add HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnceEx\\0001\\Depend /v 1 /d "C:\\temp\\evil.dll"
 ```
@@ -90,7 +88,7 @@ reg add HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnceEx\\0001\\Dep
 > **Exploit 1**: Wenn Sie in einen der genannten Registrierungszweige innerhalb von **HKLM** schreiben können, können Sie die Berechtigungen erhöhen, wenn sich ein anderer Benutzer anmeldet.
 
 > [!TIP]
-> **Exploit 2**: Wenn Sie eine der angegebenen Binärdateien in einem der Registrierungszweige innerhalb von **HKLM** überschreiben können, können Sie diese Binärdatei mit einem Backdoor modifizieren, wenn sich ein anderer Benutzer anmeldet, und die Berechtigungen erhöhen.
+> **Exploit 2**: Wenn Sie eine der angegebenen Binärdateien in einem der Registrierungszweige innerhalb von **HKLM** überschreiben können, können Sie diese Binärdatei mit einem Hintertür versehen, wenn sich ein anderer Benutzer anmeldet, und die Berechtigungen erhöhen.
 ```bash
 #CMD
 reg query HKLM\Software\Microsoft\Windows\CurrentVersion\Run
@@ -156,7 +154,7 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Wow6432Node\Microsoft\Windows\Ru
 Verknüpfungen, die im **Startup**-Ordner platziert werden, lösen automatisch das Starten von Diensten oder Anwendungen während der Benutzeranmeldung oder des Systemneustarts aus. Der Speicherort des **Startup**-Ordners ist in der Registrierung sowohl für den **Local Machine**- als auch für den **Current User**-Bereich definiert. Das bedeutet, dass jede Verknüpfung, die an diesen angegebenen **Startup**-Standorten hinzugefügt wird, sicherstellt, dass der verlinkte Dienst oder das Programm nach dem Anmelde- oder Neustartprozess gestartet wird, was es zu einer einfachen Methode macht, Programme automatisch auszuführen.
 
 > [!TIP]
-> Wenn Sie einen beliebigen \[User] Shell Folder unter **HKLM** überschreiben können, können Sie ihn auf einen von Ihnen kontrollierten Ordner verweisen und ein Backdoor platzieren, das jedes Mal ausgeführt wird, wenn ein Benutzer sich im System anmeldet, wodurch Privilegien erhöht werden.
+> Wenn Sie einen beliebigen \[User] Shell Folder unter **HKLM** überschreiben können, können Sie ihn auf einen von Ihnen kontrollierten Ordner verweisen und ein Backdoor platzieren, das jedes Mal ausgeführt wird, wenn ein Benutzer sich im System anmeldet, wodurch Privilegien eskaliert werden.
 ```bash
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders" /v "Common Startup"
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" /v "Common Startup"
@@ -198,7 +196,7 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Microsoft\Windows\CurrentVersion
 
 ### Ändern der Eingabeaufforderung im abgesicherten Modus
 
-Im Windows-Registrierungseditor unter `HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot` gibt es einen **`AlternateShell`** Wert, der standardmäßig auf `cmd.exe` gesetzt ist. Das bedeutet, wenn Sie beim Start "Abgesicherter Modus mit Eingabeaufforderung" wählen (durch Drücken von F8), wird `cmd.exe` verwendet. Es ist jedoch möglich, Ihren Computer so einzurichten, dass er automatisch in diesem Modus startet, ohne dass Sie F8 drücken und es manuell auswählen müssen.
+Im Windows-Registrierungseditor unter `HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot` gibt es einen **`AlternateShell`** Wert, der standardmäßig auf `cmd.exe` gesetzt ist. Das bedeutet, dass beim Auswählen von "Abgesicherter Modus mit Eingabeaufforderung" während des Starts (durch Drücken von F8) `cmd.exe` verwendet wird. Es ist jedoch möglich, Ihren Computer so einzurichten, dass er automatisch in diesem Modus startet, ohne dass Sie F8 drücken und es manuell auswählen müssen.
 
 Schritte zum Erstellen einer Boot-Option für den automatischen Start im "Abgesicherten Modus mit Eingabeaufforderung":
 
@@ -219,7 +217,7 @@ Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Co
 ```
 ### Installierte Komponente
 
-Active Setup ist eine Funktion in Windows, die **vor dem vollständigen Laden der Desktop-Umgebung initiiert wird**. Sie priorisiert die Ausführung bestimmter Befehle, die abgeschlossen sein müssen, bevor die Benutzeranmeldung fortgesetzt wird. Dieser Prozess erfolgt sogar noch bevor andere Starteinträge, wie die in den Registry-Bereichen Run oder RunOnce, ausgelöst werden.
+Active Setup ist eine Funktion in Windows, die **vor dem vollständigen Laden der Desktop-Umgebung initiiert wird**. Sie priorisiert die Ausführung bestimmter Befehle, die abgeschlossen sein müssen, bevor die Benutzeranmeldung fortgesetzt wird. Dieser Prozess erfolgt sogar vor anderen Starteinträgen, wie denen in den Registry-Bereichen Run oder RunOnce.
 
 Active Setup wird über die folgenden Registrierungs-Schlüssel verwaltet:
 
@@ -260,7 +258,7 @@ Um BHOs, die auf einem System registriert sind, zu erkunden, können Sie die fol
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects`
 - `HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects`
 
-Jeder BHO wird durch seine **CLSID** in der Registrierung dargestellt, die als eindeutiger Identifikator dient. Detaillierte Informationen zu jeder CLSID finden Sie unter `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`.
+Jedes BHO wird durch seine **CLSID** in der Registrierung dargestellt, die als eindeutiger Identifikator dient. Detaillierte Informationen zu jeder CLSID finden Sie unter `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`.
 
 Um BHOs in der Registrierung abzufragen, können diese Befehle verwendet werden:
 ```bash
@@ -274,7 +272,7 @@ reg query "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\B
 
 Beachten Sie, dass die Registrierung für jede DLL einen neuen Registrierungseintrag enthalten wird, der durch die **CLSID** dargestellt wird. Sie können die CLSID-Informationen in `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}` finden.
 
-### Schriftarten-Treiber
+### Schriftarttreiber
 
 - `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Font Drivers`
 - `HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows NT\CurrentVersion\Font Drivers`

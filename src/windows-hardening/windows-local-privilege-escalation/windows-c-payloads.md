@@ -21,7 +21,7 @@ return 0;
 ---
 
 ## UAC Bypass – `fodhelper.exe` Registry Hijack (Medium → High integrity)
-Wenn die vertrauenswürdige Binärdatei **`fodhelper.exe`** ausgeführt wird, fragt sie den folgenden Registrierungspfad **ohne das `DelegateExecute`-Verb zu filtern**. Indem wir unseren Befehl unter diesem Schlüssel platzieren, kann ein Angreifer UAC *ohne* das Ablegen einer Datei auf der Festplatte umgehen.
+Wenn die vertrauenswürdige Binärdatei **`fodhelper.exe`** ausgeführt wird, fragt sie den folgenden Registrierungspfad **ohne den `DelegateExecute`-Befehl zu filtern**. Indem wir unseren Befehl unter diesem Schlüssel platzieren, kann ein Angreifer UAC *ohne* das Ablegen einer Datei auf der Festplatte umgehen.
 
 *Registry path queried by `fodhelper.exe`*
 ```
@@ -66,7 +66,7 @@ return 0;
 ---
 
 ## SYSTEM-Shell über Token-Duplikation erzeugen (`SeDebugPrivilege` + `SeImpersonatePrivilege`)
-Wenn der aktuelle Prozess **beide** Privilegien `SeDebug` und `SeImpersonate` hält (typisch für viele Dienstkonten), können Sie das Token von `winlogon.exe` stehlen, es duplizieren und einen erhöhten Prozess starten:
+Wenn der aktuelle Prozess **beide** Privilegien `SeDebug` und `SeImpersonate` besitzt (typisch für viele Dienstkonten), können Sie das Token von `winlogon.exe` stehlen, es duplizieren und einen erhöhten Prozess starten:
 ```c
 // x86_64-w64-mingw32-gcc -O2 -o system_shell.exe system_shell.c -ladvapi32 -luser32
 #include <windows.h>
@@ -115,6 +115,7 @@ return 0;
 }
 ```
 Für eine tiefere Erklärung, wie das funktioniert, siehe:
+
 {{#ref}}
 sedebug-+-seimpersonate-copy-token.md
 {{#endref}}
@@ -155,6 +156,6 @@ return 0;
 
 ## Referenzen
 * Ron Bowes – “Fodhelper UAC Bypass Deep Dive” (2024)
-* SplinterCode – “AMSI Bypass 2023: Der kleinste Patch ist immer noch ausreichend” (BlackHat Asia 2023)
+* SplinterCode – “AMSI Bypass 2023: Der kleinste Patch reicht immer noch aus” (BlackHat Asia 2023)
 
 {{#include ../../banners/hacktricks-training.md}}

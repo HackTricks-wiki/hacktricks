@@ -20,7 +20,7 @@ IR-Protokolle unterscheiden sich in 3 Faktoren:
 
 **1. Pulsabstandskodierung**
 
-Bits werden durch Modulation der Dauer des Abstands zwischen den Pulsen kodiert. Die Breite des Pulses selbst ist konstant.
+Bits werden kodiert, indem die Dauer des Abstands zwischen den Pulsen moduliert wird. Die Breite des Pulses selbst ist konstant.
 
 <figure><img src="../../images/image (295).png" alt=""><figcaption></figcaption></figure>
 
@@ -36,7 +36,7 @@ Es ist auch als Manchester-Kodierung bekannt. Der logische Wert wird durch die P
 
 <figure><img src="../../images/image (634).png" alt=""><figcaption></figcaption></figure>
 
-**4. Kombination der vorherigen und anderer Exoten**
+**4. Kombination der vorherigen und anderer exotischer Methoden**
 
 > [!TIP]
 > Es gibt IR-Protokolle, die **versuchen, universell** für mehrere Gerätetypen zu werden. Die bekanntesten sind RC5 und NEC. Leider bedeutet das bekannteste **nicht das häufigste**. In meiner Umgebung habe ich nur zwei NEC-Fernbedienungen und keine RC5 gesehen.
@@ -53,7 +53,7 @@ In der Regel gibt es ein Preamble zu Beginn eines kodierten Pakets. Dies ermögl
 
 Dann werden die Daten übertragen. Die Struktur, Preamble und Bitkodierungsmethode werden durch das spezifische Protokoll bestimmt.
 
-**NEC-IR-Protokoll** enthält einen kurzen Befehl und einen Wiederholcode, der gesendet wird, solange die Taste gedrückt ist. Sowohl der Befehl als auch der Wiederholcode haben zu Beginn die gleiche Preamble.
+**NEC-IR-Protokoll** enthält einen kurzen Befehl und einen Wiederholcode, der gesendet wird, solange die Taste gedrückt wird. Sowohl der Befehl als auch der Wiederholcode haben zu Beginn die gleiche Preamble.
 
 Der **Befehl** von NEC besteht neben der Preamble aus einem Adressbyte und einem Befehlsnummernbyte, durch das das Gerät versteht, was ausgeführt werden muss. Adress- und Befehlsnummernbytes werden mit inversen Werten dupliziert, um die Integrität der Übertragung zu überprüfen. Am Ende des Befehls gibt es ein zusätzliches Stoppbit.
 
@@ -64,7 +64,7 @@ Für **Logik "0" und "1"** verwendet NEC die Pulsabstandskodierung: Zuerst wird 
 ### Klimaanlagen
 
 Im Gegensatz zu anderen Fernbedienungen **übertragen Klimaanlagen nicht nur den Code der gedrückten Taste**. Sie **übertragen auch alle Informationen**, wenn eine Taste gedrückt wird, um sicherzustellen, dass die **Klimaanlage und die Fernbedienung synchronisiert sind**.\
-Dies verhindert, dass eine auf 20ºC eingestellte Maschine mit einer Fernbedienung auf 21ºC erhöht wird und dann, wenn eine andere Fernbedienung, die immer noch die Temperatur von 20ºC hat, verwendet wird, die Temperatur weiter erhöht wird, sie auf 21ºC "erhöht" (und nicht auf 22ºC, weil sie denkt, dass sie auf 21ºC ist).
+Dies verhindert, dass eine auf 20ºC eingestellte Maschine mit einer Fernbedienung auf 21ºC erhöht wird und dann, wenn eine andere Fernbedienung, die immer noch die Temperatur von 20ºC hat, verwendet wird, um die Temperatur weiter zu erhöhen, sie auf 21ºC "erhöht" wird (und nicht auf 22ºC, weil sie denkt, dass sie auf 21ºC ist).
 
 ---
 
@@ -78,9 +78,9 @@ flipper-zero/fz-infrared.md
 
 ### Smart-TV / Set-Top-Box Übernahme (EvilScreen)
 
-Jüngste akademische Arbeiten (EvilScreen, 2022) haben gezeigt, dass **Multikanalfernbedienungen, die Infrarot mit Bluetooth oder Wi-Fi kombinieren, missbraucht werden können, um moderne Smart-TVs vollständig zu übernehmen**. Der Angriff verknüpft hochprivilegierte IR-Dienstcodes mit authentifizierten Bluetooth-Paketen, um die Kanaltrennung zu umgehen und beliebige App-Starts, Mikrofonaktivierungen oder Werkseinstellungen ohne physischen Zugriff zu ermöglichen. Acht gängige Fernseher von verschiedenen Anbietern — darunter ein Samsung-Modell, das die ISO/IEC 27001-Konformität beansprucht — wurden als anfällig bestätigt. Die Minderung erfordert Firmware-Updates des Herstellers oder das vollständige Deaktivieren ungenutzter IR-Empfänger.
+Jüngste akademische Arbeiten (EvilScreen, 2022) haben gezeigt, dass **Multikanalfernbedienungen, die Infrarot mit Bluetooth oder Wi-Fi kombinieren, missbraucht werden können, um moderne Smart-TVs vollständig zu übernehmen**. Die Angriffsstränge kombinieren hochprivilegierte IR-Dienstcodes mit authentifizierten Bluetooth-Paketen, umgehen die Kanaltrennung und ermöglichen beliebige App-Starts, Mikrofonaktivierung oder Werkseinstellungen ohne physischen Zugriff. Acht gängige Fernseher von verschiedenen Anbietern — darunter ein Samsung-Modell, das die ISO/IEC 27001-Konformität beansprucht — wurden als anfällig bestätigt. Die Minderung erfordert Firmware-Updates des Herstellers oder das vollständige Deaktivieren ungenutzter IR-Empfänger.
 
-### Air-Gapped Datenexfiltration über IR-LEDs (aIR-Jumper Familie)
+### Datenexfiltration über IR-LEDs (aIR-Jumper-Familie)
 
 Sicherheitskameras, Router oder sogar bösartige USB-Sticks enthalten oft **Nachtsicht-IR-LEDs**. Forschungen zeigen, dass Malware diese LEDs modulieren kann (<10–20 kbit/s mit einfachem OOK), um **Geheimnisse durch Wände und Fenster** zu exfiltrieren, zu einer externen Kamera, die mehrere Meter entfernt platziert ist. Da das Licht außerhalb des sichtbaren Spektrums liegt, bemerken die Betreiber es selten. Gegenmaßnahmen:
 
@@ -92,7 +92,7 @@ Ein Angreifer kann auch starke IR-Projektoren verwenden, um **Befehle** in das N
 
 ### Langstrecken-Brute-Force & Erweiterte Protokolle mit Flipper Zero 1.0
 
-Firmware 1.0 (September 2024) fügte **Dutzende zusätzlicher IR-Protokolle und optionale externe Verstärkermodule** hinzu. In Kombination mit dem Brute-Force-Modus der Universalfernbedienung kann ein Flipper die meisten öffentlichen Fernseher/Klimaanlagen aus bis zu 30 m mit einer Hochleistungsdiode deaktivieren oder neu konfigurieren.
+Die Firmware 1.0 (September 2024) fügte **Dutzende zusätzlicher IR-Protokolle und optionale externe Verstärkermodule** hinzu. In Kombination mit dem Brute-Force-Modus der Universalfernbedienung kann ein Flipper die meisten öffentlichen Fernseher/Klimaanlagen aus bis zu 30 m mit einer Hochleistungsdiode deaktivieren oder neu konfigurieren.
 
 ---
 
@@ -101,7 +101,7 @@ Firmware 1.0 (September 2024) fügte **Dutzende zusätzlicher IR-Protokolle und 
 ### Hardware
 
 * **Flipper Zero** – tragbarer Transceiver mit Lern-, Wiederhol- und Wörterbuch-Brute-Force-Modi (siehe oben).
-* **Arduino / ESP32** + IR-LED / TSOP38xx-Empfänger – günstiger DIY-Analysator/Transmitter. Kombinieren Sie mit der `Arduino-IRremote`-Bibliothek (v4.x unterstützt >40 Protokolle).
+* **Arduino / ESP32** + IR-LED / TSOP38xx-Empfänger – günstiger DIY-Analysator/Transmitter. Kombinieren Sie es mit der `Arduino-IRremote`-Bibliothek (v4.x unterstützt >40 Protokolle).
 * **Logikanalysatoren** (Saleae/FX2) – erfassen Sie rohe Zeitmessungen, wenn das Protokoll unbekannt ist.
 * **Smartphones mit IR-Blaster** (z. B. Xiaomi) – schneller Feldtest, aber begrenzte Reichweite.
 
@@ -135,7 +135,7 @@ irsend SEND_ONCE samsung KEY_POWER
 
 ## Referenzen
 
-- [Flipper Zero Infrarot Blogbeitrag](https://blog.flipperzero.one/infrared/)
-- EvilScreen: Smart TV Übernahme durch Nachahmung der Fernbedienung (arXiv 2210.03014)
+- [Flipper Zero Infrarot-Blogbeitrag](https://blog.flipperzero.one/infrared/)
+- EvilScreen: Smart-TV-Hijacking durch Nachahmung der Fernbedienung (arXiv 2210.03014)
 
 {{#include ../../banners/hacktricks-training.md}}

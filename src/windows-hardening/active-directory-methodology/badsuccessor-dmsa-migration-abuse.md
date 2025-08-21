@@ -1,4 +1,4 @@
-# BadSuccessor: Privilegieneskalation durch Missbrauch der Migration von delegierten MSA
+# BadSuccessor: Privilegieneskalation durch Missbrauch der Migration delegierter MSA
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -68,7 +68,7 @@ dir \\DC01\C$
 ```
 ## Detection & Hunting
 
-Aktivieren Sie **Objektüberwachung** für OUs und überwachen Sie die folgenden Windows-Sicherheitsereignisse:
+Aktivieren Sie **Objektauditing** für OUs und überwachen Sie die folgenden Windows-Sicherheitsereignisse:
 
 * **5137** – Erstellung des **dMSA**-Objekts
 * **5136** – Änderung von **`msDS-ManagedAccountPrecededByLink`**
@@ -77,7 +77,7 @@ Aktivieren Sie **Objektüberwachung** für OUs und überwachen Sie die folgenden
 * GUID `a0945b2b-57a2-43bd-b327-4d112a4e8bd1` → `msDS-ManagedAccountPrecededByLink`
 * **2946** – TGT-Ausstellung für das dMSA
 
-Die Korrelation von `4662` (Attributänderung), `4741` (Erstellung eines Computer-/Dienstkontos) und `4624` (darauffolgende Anmeldung) hebt schnell BadSuccessor-Aktivitäten hervor. XDR-Lösungen wie **XSIAM** liefern sofort einsatzbereite Abfragen (siehe Referenzen).
+Die Korrelation von `4662` (Attributänderung), `4741` (Erstellung eines Computer-/Dienstkontos) und `4624` (darauffolgende Anmeldung) hebt schnell BadSuccessor-Aktivitäten hervor. XDR-Lösungen wie **XSIAM** werden mit einsatzbereiten Abfragen geliefert (siehe Referenzen).
 
 ## Mitigation
 
@@ -86,6 +86,7 @@ Die Korrelation von `4662` (Attributänderung), `4741` (Erstellung eines Compute
 * Überwachen Sie die oben aufgeführten Ereignis-IDs und alarmieren Sie bei *nicht-Tier-0*-Identitäten, die dMSAs erstellen oder bearbeiten.
 
 ## See also
+
 
 {{#ref}}
 golden-dmsa-gmsa.md

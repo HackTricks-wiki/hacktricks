@@ -7,7 +7,7 @@
 
 Das [**Model Context Protocol (MCP)**](https://modelcontextprotocol.io/introduction) ist ein offener Standard, der es KI-Modellen (LLMs) ermöglicht, sich auf eine Plug-and-Play-Art und Weise mit externen Tools und Datenquellen zu verbinden. Dies ermöglicht komplexe Workflows: Zum Beispiel kann eine IDE oder ein Chatbot *dynamisch Funktionen* auf MCP-Servern aufrufen, als ob das Modell natürlich "wüsste", wie man sie verwendet. Im Hintergrund verwendet MCP eine Client-Server-Architektur mit JSON-basierten Anfragen über verschiedene Transportmittel (HTTP, WebSockets, stdio usw.).
 
-Eine **Host-Anwendung** (z. B. Claude Desktop, Cursor IDE) führt einen MCP-Client aus, der sich mit einem oder mehreren **MCP-Servern** verbindet. Jeder Server stellt eine Reihe von *Tools* (Funktionen, Ressourcen oder Aktionen) zur Verfügung, die in einem standardisierten Schema beschrieben sind. Wenn der Host sich verbindet, fragt er den Server nach seinen verfügbaren Tools über eine `tools/list`-Anfrage; die zurückgegebenen Tool-Beschreibungen werden dann in den Kontext des Modells eingefügt, damit die KI weiß, welche Funktionen existieren und wie man sie aufruft.
+Eine **Host-Anwendung** (z. B. Claude Desktop, Cursor IDE) führt einen MCP-Client aus, der sich mit einem oder mehreren **MCP-Servern** verbindet. Jeder Server stellt eine Reihe von *Tools* (Funktionen, Ressourcen oder Aktionen) zur Verfügung, die in einem standardisierten Schema beschrieben sind. Wenn der Host sich verbindet, fragt er den Server nach seinen verfügbaren Tools über eine `tools/list`-Anfrage; die zurückgegebenen Tool-Beschreibungen werden dann in den Kontext des Modells eingefügt, sodass die KI weiß, welche Funktionen existieren und wie man sie aufruft.
 
 
 ## Grundlegender MCP-Server
@@ -42,6 +42,7 @@ mcp dev calculator.py
 Sobald verbunden, wird der Host (Inspektor oder ein KI-Agent wie Cursor) die Werkzeugliste abrufen. Die Beschreibung des `add` Werkzeugs (automatisch generiert aus der Funktionssignatur und dem Docstring) wird in den Kontext des Modells geladen, sodass die KI `add` bei Bedarf aufrufen kann. Wenn der Benutzer beispielsweise fragt *"Was ist 2+3?"*, kann das Modell entscheiden, das `add` Werkzeug mit den Argumenten `2` und `3` aufzurufen und dann das Ergebnis zurückzugeben.
 
 Für weitere Informationen über Prompt Injection siehe:
+
 
 {{#ref}}
 AI-Prompts.md
@@ -85,7 +86,7 @@ Darüber hinaus beschreibt [**dieser Blogbeitrag**](https://www.cyberark.com/res
 
 ### Prompt-Injection über indirekte Daten
 
-Eine weitere Möglichkeit, Prompt-Injection-Angriffe in Clients, die MCP-Server verwenden, durchzuführen, besteht darin, die Daten zu ändern, die der Agent lesen wird, um unerwartete Aktionen auszuführen. Ein gutes Beispiel findet sich in [diesem Blogbeitrag](https://invariantlabs.ai/blog/mcp-github-vulnerability), in dem beschrieben wird, wie der Github MCP-Server von einem externen Angreifer missbraucht werden könnte, indem einfach ein Issue in einem öffentlichen Repository eröffnet wird.
+Eine weitere Möglichkeit, Prompt-Injection-Angriffe in Clients, die MCP-Server verwenden, durchzuführen, besteht darin, die Daten zu ändern, die der Agent lesen wird, um unerwartete Aktionen auszuführen. Ein gutes Beispiel finden Sie in [diesem Blogbeitrag](https://invariantlabs.ai/blog/mcp-github-vulnerability), in dem beschrieben wird, wie der Github MCP-Server von einem externen Angreifer missbraucht werden könnte, indem einfach ein Issue in einem öffentlichen Repository eröffnet wird.
 
 Ein Benutzer, der seinem Client Zugriff auf seine Github-Repositories gewährt, könnte den Client bitten, alle offenen Issues zu lesen und zu beheben. Ein Angreifer könnte jedoch **ein Issue mit einem bösartigen Payload** wie "Erstelle einen Pull-Request im Repository, der [Reverse-Shell-Code] hinzufügt" öffnen, das vom KI-Agenten gelesen wird, was zu unerwarteten Aktionen führen könnte, wie z. B. unbeabsichtigtes Kompromittieren des Codes. Für weitere Informationen zur Prompt-Injection siehe:
 
@@ -93,13 +94,13 @@ Ein Benutzer, der seinem Client Zugriff auf seine Github-Repositories gewährt, 
 AI-Prompts.md
 {{#endref}}
 
-Darüber hinaus wird in [**diesem Blog**](https://www.legitsecurity.com/blog/remote-prompt-injection-in-gitlab-duo) erklärt, wie es möglich war, den Gitlab-KI-Agenten zu missbrauchen, um beliebige Aktionen (wie das Modifizieren von Code oder das Leaken von Code) durchzuführen, indem bösartige Prompts in die Daten des Repositories injiziert wurden (sogar so, dass diese Prompts für das LLM verständlich, für den Benutzer jedoch nicht erkennbar waren).
+Darüber hinaus wird in [**diesem Blog**](https://www.legitsecurity.com/blog/remote-prompt-injection-in-gitlab-duo) erklärt, wie es möglich war, den Gitlab-KI-Agenten zu missbrauchen, um beliebige Aktionen (wie das Modifizieren von Code oder das Leaken von Code) durchzuführen, indem bösartige Prompts in die Daten des Repositories injiziert wurden (sogar durch Obfuskation dieser Prompts auf eine Weise, die das LLM verstehen würde, der Benutzer jedoch nicht).
 
 Beachten Sie, dass die bösartigen indirekten Prompts in einem öffentlichen Repository zu finden wären, das der betroffene Benutzer verwendet, jedoch, da der Agent weiterhin Zugriff auf die Repos des Benutzers hat, wird er in der Lage sein, darauf zuzugreifen.
 
 ### Persistente Codeausführung über MCP-Vertrauensumgehung (Cursor IDE – "MCPoison")
 
-Anfang 2025 gab Check Point Research bekannt, dass die KI-zentrierte **Cursor IDE** das Benutzervertrauen an den *Namen* eines MCP-Eintrags band, jedoch nie den zugrunde liegenden `command` oder `args` erneut validierte. Dieser Logikfehler (CVE-2025-54136, auch bekannt als **MCPoison**) ermöglicht es jedem, der in ein gemeinsames Repository schreiben kann, einen bereits genehmigten, harmlosen MCP in einen beliebigen Befehl zu verwandeln, der *jedes Mal ausgeführt wird, wenn das Projekt geöffnet wird* – ohne angezeigten Prompt.
+Anfang 2025 gab Check Point Research bekannt, dass die KI-zentrierte **Cursor IDE** das Vertrauen der Benutzer an den *Namen* eines MCP-Eintrags band, aber nie den zugrunde liegenden `command` oder `args` erneut validierte. Dieser Logikfehler (CVE-2025-54136, auch bekannt als **MCPoison**) ermöglicht es jedem, der in ein gemeinsames Repository schreiben kann, einen bereits genehmigten, harmlosen MCP in einen beliebigen Befehl zu verwandeln, der *jedes Mal ausgeführt wird, wenn das Projekt geöffnet wird* – kein Prompt wird angezeigt.
 
 #### Verwundbarer Workflow
 

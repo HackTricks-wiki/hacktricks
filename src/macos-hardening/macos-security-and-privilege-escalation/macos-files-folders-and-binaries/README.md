@@ -12,7 +12,7 @@
 - **/Library**: Viele Unterverzeichnisse und Dateien, die mit Einstellungen, Caches und Protokollen zu tun haben, finden sich hier. Ein Library-Ordner existiert im Root-Verzeichnis und im Verzeichnis jedes Benutzers.
 - **/private**: Nicht dokumentiert, aber viele der genannten Ordner sind symbolische Links zum privaten Verzeichnis.
 - **/sbin**: Essentielle System-Binaries (bezogen auf die Verwaltung)
-- **/System**: Dateien, um OS X auszuführen. Hier sollten hauptsächlich nur Apple-spezifische Dateien zu finden sein (keine Drittanbieter).
+- **/System**: Dateien, um OS X auszuführen. Hier sollten hauptsächlich nur Apple-spezifische Dateien (keine Drittanbieter) zu finden sein.
 - **/tmp**: Dateien werden nach 3 Tagen gelöscht (es ist ein symbolischer Link zu /private/tmp)
 - **/Users**: Heimatverzeichnis für Benutzer.
 - **/usr**: Konfigurations- und System-Binaries
@@ -23,7 +23,7 @@
 ### Anwendungsordner
 
 - **Systemanwendungen** befinden sich unter `/System/Applications`
-- **Installierte** Anwendungen sind normalerweise in `/Applications` oder in `~/Applications` installiert.
+- **Installierte** Anwendungen werden normalerweise in `/Applications` oder in `~/Applications` installiert.
 - **Anwendungsdaten** finden sich in `/Library/Application Support` für Anwendungen, die als Root ausgeführt werden, und in `~/Library/Application Support` für Anwendungen, die als Benutzer ausgeführt werden.
 - Drittanbieteranwendungen **Dämonen**, die **als Root ausgeführt werden müssen**, befinden sich normalerweise in `/Library/PrivilegedHelperTools/`
 - **Sandboxed** Apps sind im Ordner `~/Library/Containers` abgebildet. Jede App hat einen Ordner, der nach der Bundle-ID der Anwendung benannt ist (`com.apple.Safari`).
@@ -59,11 +59,11 @@ macos-installers-abuse.md
 - **`.app`**: Apple-Anwendungen, die der Verzeichnisstruktur folgen (es ist ein Bundle).
 - **`.dylib`**: Dynamische Bibliotheken (wie Windows DLL-Dateien)
 - **`.pkg`**: Sind dasselbe wie xar (eXtensible Archive Format). Der Installer-Befehl kann verwendet werden, um den Inhalt dieser Dateien zu installieren.
-- **`.DS_Store`**: Diese Datei befindet sich in jedem Verzeichnis, sie speichert die Attribute und Anpassungen des Verzeichnisses.
+- **`.DS_Store`**: Diese Datei befindet sich in jedem Verzeichnis und speichert die Attribute und Anpassungen des Verzeichnisses.
 - **`.Spotlight-V100`**: Dieser Ordner erscheint im Root-Verzeichnis jedes Volumes im System.
 - **`.metadata_never_index`**: Wenn sich diese Datei im Root eines Volumes befindet, wird Spotlight dieses Volume nicht indizieren.
 - **`.noindex`**: Dateien und Ordner mit dieser Erweiterung werden von Spotlight nicht indiziert.
-- **`.sdef`**: Dateien innerhalb von Bundles, die angeben, wie mit der Anwendung über ein AppleScript interagiert werden kann.
+- **`.sdef`**: Dateien innerhalb von Bundles, die angeben, wie es möglich ist, mit der Anwendung über ein AppleScript zu interagieren.
 
 ### macOS Bundles
 
@@ -82,7 +82,7 @@ In iOS finden Sie sie in **`/System/Library/Caches/com.apple.dyld/`**.
 
 Ähnlich wie der dyld shared cache sind der Kernel und die Kernel-Erweiterungen ebenfalls in einem Kernel-Cache kompiliert, der beim Booten geladen wird.
 
-Um die Bibliotheken aus der einzelnen Datei des dylib shared cache zu extrahieren, war es möglich, das Binary [dyld_shared_cache_util](https://www.mbsplugins.de/files/dyld_shared_cache_util-dyld-733.8.zip) zu verwenden, das möglicherweise heutzutage nicht mehr funktioniert, aber Sie können auch [**dyldextractor**](https://github.com/arandomdev/dyldextractor) verwenden:
+Um die Bibliotheken aus dem einzelnen Datei-dylib-Shared-Cache zu extrahieren, war es möglich, das Binärprogramm [dyld_shared_cache_util](https://www.mbsplugins.de/files/dyld_shared_cache_util-dyld-733.8.zip) zu verwenden, das heutzutage möglicherweise nicht mehr funktioniert, aber Sie können auch [**dyldextractor**](https://github.com/arandomdev/dyldextractor) verwenden:
 ```bash
 # dyld_shared_cache_util
 dyld_shared_cache_util -extract ~/shared_cache/ /System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/dyld_shared_cache_arm64e
@@ -93,7 +93,7 @@ dyldex_all [dyld_shared_cache_path] # Extract all
 # More options inside the readme
 ```
 > [!TIP]
-> Beachten Sie, dass selbst wenn das Tool `dyld_shared_cache_util` nicht funktioniert, Sie das **gemeinsame dyld-Binärformat an Hopper übergeben** können und Hopper in der Lage sein wird, alle Bibliotheken zu identifizieren und Ihnen zu **ermöglichen, auszuwählen, welche Sie** untersuchen möchten:
+> Beachten Sie, dass selbst wenn das Tool `dyld_shared_cache_util` nicht funktioniert, Sie das **geteilte dyld-Binärformat an Hopper übergeben** können und Hopper in der Lage sein wird, alle Bibliotheken zu identifizieren und Ihnen zu **ermöglichen, auszuwählen, welche Sie** untersuchen möchten:
 
 <figure><img src="../../../images/image (1152).png" alt="" width="563"><figcaption></figcaption></figure>
 
@@ -108,7 +108,7 @@ Einige Extraktoren funktionieren möglicherweise nicht, da dylibs mit fest codie
 
 Beachten Sie, dass selbst wenn das SLC beim ersten Gebrauch verschoben wird, alle **Prozesse** die **gleiche Kopie** verwenden, was den ASLR-Schutz **eliminierte**, wenn der Angreifer in der Lage war, Prozesse im System auszuführen. Dies wurde in der Vergangenheit tatsächlich ausgenutzt und mit einem Shared Region Pager behoben.
 
-Branch-Pools sind kleine Mach-O dylibs, die kleine Räume zwischen Bildzuordnungen schaffen, wodurch es unmöglich wird, die Funktionen zu interponieren.
+Branch-Pools sind kleine Mach-O dylibs, die kleine Räume zwischen Bildzuordnungen schaffen, was es unmöglich macht, die Funktionen zu interponieren.
 
 ### Override SLCs
 
@@ -121,7 +121,7 @@ Verwendung der Umgebungsvariablen:
 
 ### Ordners Berechtigungen
 
-In einem **Ordner** erlaubt **lesen**, ihn **aufzulisten**, **schreiben** erlaubt das **Löschen** und **Schreiben** von Dateien darin, und **ausführen** erlaubt das **Durchqueren** des Verzeichnisses. Ein Benutzer mit **Lesezugriff auf eine Datei** in einem Verzeichnis, in dem er **keine Ausführungsberechtigung** hat, **wird die Datei nicht lesen können**.
+In einem **Ordner** ermöglicht **lesen** das **Auflisten**, **schreiben** erlaubt das **Löschen** und **schreiben** von Dateien darin, und **ausführen** erlaubt das **Durchqueren** des Verzeichnisses. Ein Benutzer mit **Lesezugriff auf eine Datei** in einem Verzeichnis, in dem er **keine Ausführungsberechtigung** hat, **wird die Datei nicht lesen können**.
 
 ### Flag-Modifikatoren
 
@@ -130,9 +130,9 @@ Es gibt einige Flags, die in den Dateien gesetzt werden können, die das Verhalt
 - **`uchg`**: Bekannt als **uchange**-Flag, wird **jede Aktion** zum Ändern oder Löschen der **Datei** verhindern. Um es zu setzen, tun Sie: `chflags uchg file.txt`
 - Der Root-Benutzer könnte **das Flag entfernen** und die Datei ändern.
 - **`restricted`**: Dieses Flag schützt die Datei **durch SIP** (Sie können dieses Flag nicht zu einer Datei hinzufügen).
-- **`Sticky bit`**: Wenn ein Verzeichnis mit Sticky Bit, **kann nur** der **Verzeichnisbesitzer oder Root Dateien umbenennen oder löschen**. Typischerweise wird dies im /tmp-Verzeichnis gesetzt, um zu verhindern, dass normale Benutzer die Dateien anderer Benutzer löschen oder verschieben.
+- **`Sticky bit`**: Wenn ein Verzeichnis mit Sticky-Bit, **kann nur** der **Verzeichnisbesitzer oder Root Dateien umbenennen oder löschen**. Typischerweise wird dies im /tmp-Verzeichnis gesetzt, um zu verhindern, dass normale Benutzer die Dateien anderer Benutzer löschen oder verschieben.
 
-Alle Flags sind in der Datei `sys/stat.h` zu finden (finden Sie sie mit `mdfind stat.h | grep stat.h`) und sind:
+Alle Flags finden Sie in der Datei `sys/stat.h` (finden Sie sie mit `mdfind stat.h | grep stat.h`) und sind:
 
 - `UF_SETTABLE` 0x0000ffff: Maske der vom Eigentümer änderbaren Flags.
 - `UF_NODUMP` 0x00000001: Datei nicht dumpen.
@@ -152,11 +152,11 @@ Alle Flags sind in der Datei `sys/stat.h` zu finden (finden Sie sie mit `mdfind 
 - `SF_RESTRICTED` 0x00080000: Berechtigung erforderlich zum Schreiben.
 - `SF_NOUNLINK` 0x00100000: Element darf nicht entfernt, umbenannt oder gemountet werden.
 - `SF_FIRMLINK` 0x00800000: Datei ist ein Firmlink.
-- `SF_DATALESS` 0x40000000: Datei ist ein dataloses Objekt.
+- `SF_DATALESS` 0x40000000: Datei ist ein dataless Objekt.
 
 ### **Datei-ACLs**
 
-Datei-**ACLs** enthalten **ACE** (Access Control Entries), bei denen granularere Berechtigungen verschiedenen Benutzern zugewiesen werden können.
+Datei **ACLs** enthalten **ACE** (Access Control Entries), wo detailliertere **Berechtigungen** verschiedenen Benutzern zugewiesen werden können.
 
 Es ist möglich, einem **Verzeichnis** diese Berechtigungen zu gewähren: `list`, `search`, `add_file`, `add_subdirectory`, `delete_child`, `delete_child`.\
 Und für eine **Datei**: `read`, `write`, `append`, `execute`.
@@ -166,7 +166,7 @@ Wenn die Datei ACLs enthält, werden Sie **ein "+" finden, wenn Sie die Berechti
 ls -ld Movies
 drwx------+   7 username  staff     224 15 Apr 19:42 Movies
 ```
-Sie können die **ACLs** der Datei mit folgendem Befehl lesen:
+Sie können **die ACLs** der Datei mit folgendem Befehl lesen:
 ```bash
 ls -lde Movies
 drwx------+ 7 username  staff  224 15 Apr 19:42 Movies
@@ -183,15 +183,15 @@ Erweiterte Attribute haben einen Namen und einen beliebigen gewünschten Wert un
 - `com.apple.resourceFork`: Kompatibilität mit Resource Fork. Auch sichtbar als `filename/..namedfork/rsrc`
 - `com.apple.quarantine`: MacOS: Gatekeeper-Quarantänemechanismus (III/6)
 - `metadata:*`: MacOS: verschiedene Metadaten, wie `_backup_excludeItem` oder `kMD*`
-- `com.apple.lastuseddate` (#PS): Letztes Dateinutzungsdatum
+- `com.apple.lastuseddate` (#PS): Datum der letzten Dateinutzung
 - `com.apple.FinderInfo`: MacOS: Finder-Informationen (z.B. Farb-Tags)
 - `com.apple.TextEncoding`: Gibt die Textkodierung von ASCII-Textdateien an
 - `com.apple.logd.metadata`: Wird von logd für Dateien in `/var/db/diagnostics` verwendet
 - `com.apple.genstore.*`: Generational storage (`/.DocumentRevisions-V100` im Wurzelverzeichnis des Dateisystems)
-- `com.apple.rootless`: MacOS: Wird von System Integrity Protection verwendet, um Dateien zu kennzeichnen (III/10)
+- `com.apple.rootless`: MacOS: Wird von der System Integrity Protection verwendet, um Dateien zu kennzeichnen (III/10)
 - `com.apple.uuidb.boot-uuid`: logd-Markierungen von Boot-Epochen mit eindeutiger UUID
 - `com.apple.decmpfs`: MacOS: Transparente Dateikompression (II/7)
-- `com.apple.cprotect`: \*OS: Verschlüsselungsdaten pro Datei (III/11)
+- `com.apple.cprotect`: \*OS: Per-Datei-Verschlüsselungsdaten (III/11)
 - `com.apple.installd.*`: \*OS: Metadaten, die von installd verwendet werden, z.B. `installType`, `uniqueInstallID`
 
 ### Resource Forks | macOS ADS
@@ -221,7 +221,7 @@ Das Tool afscexpand kann verwendet werden, um eine Datei zwangsweise zu dekompri
 
 ## **Universelle Binaries &** Mach-o Format
 
-Mac OS-Binaries werden normalerweise als **universelle Binaries** kompiliert. Eine **universelle Binary** kann **mehrere Architekturen in derselben Datei unterstützen**.
+Mac OS-Binaries werden normalerweise als **universelle Binaries** kompiliert. Ein **universelles Binary** kann **mehrere Architekturen in derselben Datei unterstützen**.
 
 {{#ref}}
 universal-binaries-and-mach-o-format.md

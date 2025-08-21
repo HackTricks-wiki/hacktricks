@@ -1,4 +1,4 @@
-# Umgehen von FS-Schutzmaßnahmen: schreibgeschützt / keine Ausführung / Distroless
+# Bypass FS protections: read-only / no-exec / Distroless
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -9,9 +9,9 @@ In den folgenden Videos finden Sie die auf dieser Seite erwähnten Techniken aus
 - [**DEF CON 31 - Exploring Linux Memory Manipulation for Stealth and Evasion**](https://www.youtube.com/watch?v=poHirez8jk4)
 - [**Stealth intrusions with DDexec-ng & in-memory dlopen() - HackTricks Track 2023**](https://www.youtube.com/watch?v=VM_gjjiARaU)
 
-## schreibgeschütztes / keine Ausführung-Szenario
+## read-only / no-exec scenario
 
-Es ist immer häufiger anzutreffen, dass Linux-Maschinen mit **schreibgeschütztem (ro) Dateisystemschutz** gemountet werden, insbesondere in Containern. Das liegt daran, dass es so einfach ist, einen Container mit einem schreibgeschützten Dateisystem zu starten, indem man **`readOnlyRootFilesystem: true`** im `securitycontext` festlegt:
+Es ist immer häufiger anzutreffen, dass Linux-Maschinen mit **read-only (ro) Dateisystemschutz** gemountet werden, insbesondere in Containern. Das liegt daran, dass es so einfach ist, einen Container mit ro Dateisystem zu betreiben, wie **`readOnlyRootFilesystem: true`** im `securitycontext` festzulegen:
 
 <pre class="language-yaml"><code class="lang-yaml">apiVersion: v1
 kind: Pod
@@ -26,37 +26,37 @@ securityContext:
 </strong>    command: ["sh", "-c", "while true; do sleep 1000; done"]
 </code></pre>
 
-Allerdings wird, selbst wenn das Dateisystem als ro gemountet ist, **`/dev/shm`** weiterhin beschreibbar sein, sodass es falsch ist zu sagen, dass wir nichts auf die Festplatte schreiben können. Diese Ordner werden jedoch **mit no-exec-Schutz gemountet**, sodass Sie hier eine Binärdatei herunterladen können, aber **sie nicht ausführen können**.
+Allerdings, selbst wenn das Dateisystem als ro gemountet ist, bleibt **`/dev/shm`** beschreibbar, sodass es nicht wahr ist, dass wir nichts auf die Festplatte schreiben können. Diese Ordner werden jedoch **mit no-exec-Schutz** gemountet, sodass Sie hier eine Binärdatei herunterladen, aber **sie nicht ausführen können**.
 
 > [!WARNING]
-> Aus der Perspektive eines Red Teams macht dies das **Herunterladen und Ausführen** von Binärdateien, die sich nicht bereits im System befinden (wie Backdoors oder Aufzähler wie `kubectl`), **kompliziert**.
+> Aus der Perspektive eines Red Teams macht dies das **Herunterladen und Ausführen** von Binärdateien, die sich nicht bereits im System befinden (wie Backdoors oder Enumerator wie `kubectl`), **kompliziert**.
 
-## Einfachster Umgehungsweg: Skripte
+## Easiest bypass: Scripts
 
-Beachten Sie, dass ich von Binärdateien gesprochen habe, Sie können **jedes Skript ausführen**, solange der Interpreter auf der Maschine vorhanden ist, wie ein **Shell-Skript**, wenn `sh` vorhanden ist, oder ein **Python**-Skript, wenn `python` installiert ist.
+Beachten Sie, dass ich von Binärdateien gesprochen habe, Sie können **jedes Skript ausführen**, solange der Interpreter auf der Maschine vorhanden ist, wie ein **Shell-Skript**, wenn `sh` vorhanden ist, oder ein **Python** **Skript**, wenn `python` installiert ist.
 
-Allerdings reicht das nicht aus, um Ihre Binär-Backdoor oder andere Binärwerkzeuge, die Sie möglicherweise ausführen müssen, zu starten.
+Allerdings reicht das nicht aus, um Ihre Binär-Backdoor oder andere Binärwerkzeuge auszuführen, die Sie möglicherweise benötigen.
 
-## Speicherumgehungen
+## Memory Bypasses
 
-Wenn Sie eine Binärdatei ausführen möchten, aber das Dateisystem dies nicht zulässt, ist der beste Weg, dies zu tun, indem Sie **sie aus dem Speicher ausführen**, da die **Schutzmaßnahmen dort nicht gelten**.
+Wenn Sie eine Binärdatei ausführen möchten, aber das Dateisystem dies nicht zulässt, ist der beste Weg, dies zu tun, indem Sie **es aus dem Speicher ausführen**, da die **Schutzmaßnahmen dort nicht gelten**.
 
-### FD + exec syscall Umgehung
+### FD + exec syscall bypass
 
 Wenn Sie einige leistungsstarke Skript-Engines auf der Maschine haben, wie **Python**, **Perl** oder **Ruby**, könnten Sie die Binärdatei herunterladen, um sie aus dem Speicher auszuführen, sie in einem Speicher-Dateideskriptor (`create_memfd` syscall) speichern, der nicht durch diese Schutzmaßnahmen geschützt ist, und dann einen **`exec` syscall** aufrufen, der den **fd als die auszuführende Datei angibt**.
 
-Dafür können Sie leicht das Projekt [**fileless-elf-exec**](https://github.com/nnsee/fileless-elf-exec) verwenden. Sie können ihm eine Binärdatei übergeben, und es wird ein Skript in der angegebenen Sprache generiert, das die **Binärdatei komprimiert und b64 kodiert** mit den Anweisungen zum **Dekodieren und Dekomprimieren** in einem **fd**, das durch den Aufruf des `create_memfd` syscalls erstellt wurde, und einem Aufruf des **exec** syscalls, um es auszuführen.
+Dafür können Sie leicht das Projekt [**fileless-elf-exec**](https://github.com/nnsee/fileless-elf-exec) verwenden. Sie können ihm eine Binärdatei übergeben, und es wird ein Skript in der angegebenen Sprache generiert, das die **Binärdatei komprimiert und b64 kodiert** mit den Anweisungen, um **es zu dekodieren und zu dekomprimieren** in einem **fd**, der durch den Aufruf des `create_memfd` syscalls erstellt wurde, und einem Aufruf des **exec** syscalls, um es auszuführen.
 
 > [!WARNING]
-> Dies funktioniert nicht in anderen Skriptsprache wie PHP oder Node, da sie keine **Standardmethode haben, um rohe syscalls** aus einem Skript aufzurufen, sodass es nicht möglich ist, `create_memfd` aufzurufen, um den **Speicher fd** zu erstellen, um die Binärdatei zu speichern.
+> Dies funktioniert nicht in anderen Skriptsprache wie PHP oder Node, da sie keine **Standardmethode haben, um rohe Syscalls** aus einem Skript aufzurufen, sodass es nicht möglich ist, `create_memfd` aufzurufen, um den **Speicher-fd** zu erstellen, um die Binärdatei zu speichern.
 >
-> Darüber hinaus wird das Erstellen eines **regulären fd** mit einer Datei in `/dev/shm` nicht funktionieren, da Sie es nicht ausführen dürfen, da der **no-exec-Schutz** gilt.
+> Darüber hinaus funktioniert das Erstellen eines **regulären fds** mit einer Datei in `/dev/shm` nicht, da Sie es nicht ausführen dürfen, da der **no-exec-Schutz** gilt.
 
 ### DDexec / EverythingExec
 
 [**DDexec / EverythingExec**](https://github.com/arget13/DDexec) ist eine Technik, die es Ihnen ermöglicht, **den Speicher Ihres eigenen Prozesses zu modifizieren**, indem Sie dessen **`/proc/self/mem`** überschreiben.
 
-Daher können Sie, indem Sie **den Assembly-Code** kontrollieren, der vom Prozess ausgeführt wird, einen **Shellcode** schreiben und den Prozess "mutieren", um **beliebigen Code auszuführen**.
+Daher können Sie, indem Sie **den Assembly-Code** steuern, der vom Prozess ausgeführt wird, einen **Shellcode** schreiben und den Prozess "mutieren", um **beliebigen Code auszuführen**.
 
 > [!TIP]
 > **DDexec / EverythingExec** ermöglicht es Ihnen, Ihren eigenen **Shellcode** oder **jede Binärdatei** aus dem **Speicher** zu laden und **auszuführen**.
@@ -72,7 +72,7 @@ ddexec.md
 
 ### MemExec
 
-[**Memexec**](https://github.com/arget13/memexec) ist der natürliche nächste Schritt von DDexec. Es ist ein **DDexec Shellcode-Dämon**, sodass Sie jedes Mal, wenn Sie **eine andere Binärdatei ausführen** möchten, DDexec nicht neu starten müssen. Sie können einfach den Memexec-Shellcode über die DDexec-Technik ausführen und dann **mit diesem Dämon kommunizieren, um neue Binärdateien zu laden und auszuführen**.
+[**Memexec**](https://github.com/arget13/memexec) ist der natürliche nächste Schritt von DDexec. Es ist ein **DDexec Shellcode demonisiert**, sodass Sie jedes Mal, wenn Sie **eine andere Binärdatei ausführen** möchten, DDexec nicht neu starten müssen. Sie können einfach den Memexec-Shellcode über die DDexec-Technik ausführen und dann **mit diesem Dämon kommunizieren, um neue Binärdateien zu laden und auszuführen**.
 
 Sie finden ein Beispiel, wie Sie **memexec verwenden, um Binärdateien von einem PHP-Reverse-Shell auszuführen** unter [https://github.com/arget13/memexec/blob/main/a.php](https://github.com/arget13/memexec/blob/main/a.php).
 

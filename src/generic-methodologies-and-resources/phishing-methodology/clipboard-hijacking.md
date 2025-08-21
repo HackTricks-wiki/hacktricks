@@ -29,8 +29,8 @@ navigator.clipboard.writeText(payload)
 1. Der Benutzer besucht eine typosquatted oder kompromittierte Seite (z.B. `docusign.sa[.]com`)
 2. Injizierte **ClearFake** JavaScript ruft einen `unsecuredCopyToClipboard()` Helfer auf, der stillschweigend eine Base64-kodierte PowerShell-Einzeiler in die Zwischenablage speichert.
 3. HTML-Anweisungen sagen dem Opfer: *„Drücken Sie **Win + R**, fügen Sie den Befehl ein und drücken Sie Enter, um das Problem zu lösen.”*
-4. `powershell.exe` wird ausgeführt und lädt ein Archiv herunter, das eine legitime ausführbare Datei sowie eine bösartige DLL enthält (klassisches DLL-Sideloading).
-5. Der Loader entschlüsselt zusätzliche Stufen, injiziert Shellcode und installiert Persistenz (z.B. geplante Aufgabe) – letztendlich wird NetSupport RAT / Latrodectus / Lumma Stealer ausgeführt.
+4. `powershell.exe` wird ausgeführt und lädt ein Archiv herunter, das eine legitime ausführbare Datei plus eine bösartige DLL enthält (klassisches DLL-Sideloading).
+5. Der Loader entschlüsselt zusätzliche Stufen, injiziert Shellcode und installiert Persistenz (z.B. geplanter Task) – letztendlich wird NetSupport RAT / Latrodectus / Lumma Stealer ausgeführt.
 
 ### Beispiel NetSupport RAT Chain
 ```powershell
@@ -69,13 +69,14 @@ Blue-Teams können Clipboard-, Prozess-Erstellungs- und Registrierungs-Telemetri
 ## Minderung
 
 1. Browser-Härtung – deaktivieren Sie den Schreibzugriff auf die Zwischenablage (`dom.events.asyncClipboard.clipboardItem` usw.) oder verlangen Sie eine Benutzerinteraktion.
-2. Sicherheitsbewusstsein – schulen Sie Benutzer, sensible Befehle *einzutippen* oder sie zuerst in einen Texteditor einzufügen.
+2. Sicherheitsbewusstsein – schulen Sie Benutzer, sensible Befehle *einzugeben* oder sie zuerst in einen Texteditor einzufügen.
 3. PowerShell Constrained Language Mode / Ausführungsrichtlinie + Anwendungssteuerung, um willkürliche Einzeiler zu blockieren.
 4. Netzwerksteuerungen – blockieren Sie ausgehende Anfragen an bekannte Pastejacking- und Malware-C2-Domains.
 
 ## Verwandte Tricks
 
 * **Discord Invite Hijacking** missbraucht oft denselben ClickFix-Ansatz, nachdem Benutzer in einen bösartigen Server gelockt wurden:
+
 {{#ref}}
 discord-invite-hijacking.md
 {{#endref}}

@@ -9,9 +9,9 @@ Eine Anwendungs-Whitelist ist eine Liste genehmigter Softwareanwendungen oder au
 [AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) ist Microsofts **Lösung zur Anwendungs-Whitelist** und gibt Systemadministratoren die Kontrolle darüber, **welche Anwendungen und Dateien Benutzer ausführen können**. Es bietet **feingranulare Kontrolle** über ausführbare Dateien, Skripte, Windows-Installationsdateien, DLLs, verpackte Apps und Installationsprogramme für verpackte Apps.\
 Es ist üblich, dass Organisationen **cmd.exe und PowerShell.exe** sowie Schreibzugriff auf bestimmte Verzeichnisse blockieren, **aber das kann alles umgangen werden**.
 
-### Überprüfung
+### Überprüfen
 
-Überprüfen Sie, welche Dateien/Erweiterungen auf der schwarzen Liste/weißen Liste stehen:
+Überprüfen Sie, welche Dateien/Erweiterungen auf der schwarzen Liste stehen oder auf der Whitelist sind:
 ```bash
 Get-ApplockerPolicy -Effective -xml
 
@@ -20,7 +20,7 @@ Get-AppLockerPolicy -Effective | select -ExpandProperty RuleCollections
 $a = Get-ApplockerPolicy -effective
 $a.rulecollections
 ```
-Dieser Registrierungspfad enthält die Konfigurationen und Richtlinien, die von AppLocker angewendet werden, und bietet eine Möglichkeit, die aktuellen Regeln zu überprüfen, die auf dem System durchgesetzt werden:
+Dieser Registrierungspfad enthält die Konfigurationen und Richtlinien, die von AppLocker angewendet werden, und bietet eine Möglichkeit, die aktuelle Regelmenge zu überprüfen, die auf dem System durchgesetzt wird:
 
 - `HKLM\Software\Policies\Microsoft\Windows\SrpV2`
 
@@ -36,7 +36,7 @@ C:\windows\tracing
 - Häufig **vertrauenswürdige** [**"LOLBAS's"**](https://lolbas-project.github.io/) Binärdateien können ebenfalls nützlich sein, um AppLocker zu umgehen.
 - **Schlecht geschriebene Regeln könnten ebenfalls umgangen werden**
 - Zum Beispiel, **`<FilePathCondition Path="%OSDRIVE%*\allowed*"/>`**, können Sie einen **Ordner namens `allowed`** überall erstellen und er wird erlaubt.
-- Organisationen konzentrieren sich oft darauf, die **`%System32%\WindowsPowerShell\v1.0\powershell.exe`** ausführbare Datei zu blockieren, vergessen jedoch die **anderen** [**PowerShell ausführbaren Standorte**](https://www.powershelladmin.com/wiki/PowerShell_Executables_File_System_Locations) wie `%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe` oder `PowerShell_ISE.exe`.
+- Organisationen konzentrieren sich oft darauf, die **`%System32%\WindowsPowerShell\v1.0\powershell.exe`** ausführbare Datei zu **blockieren**, vergessen jedoch die **anderen** [**PowerShell ausführbaren Standorte**](https://www.powershelladmin.com/wiki/PowerShell_Executables_File_System_Locations) wie **`%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe`** oder **`PowerShell_ISE.exe`**.
 - **DLL-Durchsetzung sehr selten aktiviert** aufgrund der zusätzlichen Belastung, die sie auf ein System ausüben kann, und der Menge an Tests, die erforderlich sind, um sicherzustellen, dass nichts kaputt geht. Daher wird die Verwendung von **DLLs als Hintertüren helfen, AppLocker zu umgehen**.
 - Sie können [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) oder [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) verwenden, um **Powershell**-Code in jedem Prozess auszuführen und AppLocker zu umgehen. Für weitere Informationen siehe: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode).
 
@@ -58,7 +58,7 @@ Die **Anmeldeinformationen** werden im **Prozess LSASS** gespeichert: Kerberos-T
 
 LSA könnte einige Anmeldeinformationen auf der Festplatte speichern:
 
-- Passwort des Computerkontos des Active Directory (unerreichbarer Domänencontroller).
+- Passwort des Computerkontos des Active Directory (nicht erreichbarer Domänencontroller).
 - Passwörter der Konten von Windows-Diensten
 - Passwörter für geplante Aufgaben
 - Mehr (Passwort von IIS-Anwendungen...)
@@ -119,14 +119,14 @@ Diese Verschlüsselungsmethode ermöglicht **transparenten Zugriff** auf verschl
 - Automatische Entschlüsselung erfolgt unter bestimmten Bedingungen, wie z.B. beim Kopieren nach FAT32 oder bei der Netzwerkübertragung.
 - Verschlüsselte Dateien sind für den Eigentümer ohne zusätzliche Schritte zugänglich.
 
-### EFS-Informationen überprüfen
+### Überprüfen Sie EFS-Informationen
 
 Überprüfen Sie, ob ein **Benutzer** diesen **Dienst** genutzt hat, indem Sie überprüfen, ob dieser Pfad existiert: `C:\users\<username>\appdata\roaming\Microsoft\Protect`
 
-Überprüfen Sie, **wer** Zugriff auf die Datei hat, indem Sie cipher /c \<file>\ verwenden.\
+Überprüfen Sie, **wer** Zugriff auf die Datei hat, indem Sie cipher /c \<file>\
 Sie können auch `cipher /e` und `cipher /d` innerhalb eines Ordners verwenden, um alle Dateien zu **verschlüsseln** und **zu entschlüsseln**.
 
-### EFS-Dateien entschlüsseln
+### Entschlüsseln von EFS-Dateien
 
 #### Als Autoritätssystem
 
@@ -158,7 +158,7 @@ Sie können dieses Passwort mit [**GMSAPasswordReader**](https://github.com/rvaz
 ```
 [**Weitere Informationen finden Sie in diesem Beitrag**](https://cube0x0.github.io/Relaying-for-gMSA/)
 
-Überprüfen Sie auch diese [Webseite](https://cube0x0.github.io/Relaying-for-gMSA/) zur Durchführung eines **NTLM-Relay-Angriffs**, um das **Passwort** von **gMSA** zu **lesen**.
+Überprüfen Sie auch diese [Webseite](https://cube0x0.github.io/Relaying-for-gMSA/) darüber, wie man einen **NTLM-Relay-Angriff** durchführt, um das **Passwort** von **gMSA** zu **lesen**.
 
 ## LAPS
 
@@ -195,7 +195,7 @@ C:\Windows\Microsoft.NET\Framework64\v4.0.30319\InstallUtil.exe /logfile= /LogTo
 ```
 Sie können [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) oder [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) verwenden, um **Powershell**-Code in jedem Prozess auszuführen und den eingeschränkten Modus zu umgehen. Für weitere Informationen siehe: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode).
 
-## PS-Ausführungsrichtlinie
+## PS Ausführungsrichtlinie
 
 Standardmäßig ist sie auf **restricted** eingestellt. Hauptwege, um diese Richtlinie zu umgehen:
 ```bash
@@ -223,7 +223,7 @@ Mehr kann [hier](https://blog.netspi.com/15-ways-to-bypass-the-powershell-execut
 
 Ist die API, die zur Authentifizierung von Benutzern verwendet werden kann.
 
-Die SSPI ist dafür verantwortlich, das geeignete Protokoll für zwei Maschinen zu finden, die kommunizieren möchten. Die bevorzugte Methode dafür ist Kerberos. Dann wird die SSPI aushandeln, welches Authentifizierungsprotokoll verwendet wird, diese Authentifizierungsprotokolle werden als Security Support Provider (SSP) bezeichnet, befinden sich in jeder Windows-Maschine in Form einer DLL und beide Maschinen müssen dasselbe unterstützen, um kommunizieren zu können.
+Die SSPI ist dafür verantwortlich, das geeignete Protokoll für zwei Maschinen zu finden, die kommunizieren möchten. Die bevorzugte Methode dafür ist Kerberos. Dann wird die SSPI aushandeln, welches Authentifizierungsprotokoll verwendet wird, diese Authentifizierungsprotokolle werden Security Support Provider (SSP) genannt, befinden sich in jeder Windows-Maschine in Form einer DLL und beide Maschinen müssen dasselbe unterstützen, um kommunizieren zu können.
 
 ### Haupt-SSPs
 

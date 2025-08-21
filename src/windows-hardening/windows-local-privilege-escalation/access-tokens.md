@@ -4,7 +4,7 @@
 
 ## Access Tokens
 
-Jeder **angemeldete Benutzer** im System **besitzt ein Zugriffstoken mit Sicherheitsinformationen** für diese Anmeldesitzung. Das System erstellt ein Zugriffstoken, wenn der Benutzer sich anmeldet. **Jeder Prozess, der** im Namen des Benutzers **ausgeführt wird, hat eine Kopie des Zugriffstokens**. Das Token identifiziert den Benutzer, die Gruppen des Benutzers und die Berechtigungen des Benutzers. Ein Token enthält auch eine Anmelde-SID (Security Identifier), die die aktuelle Anmeldesitzung identifiziert.
+Jeder **angemeldete Benutzer** im System **besitzt ein Zugriffstoken mit Sicherheitsinformationen** für diese Anmeldesitzung. Das System erstellt ein Zugriffstoken, wenn sich der Benutzer anmeldet. **Jeder Prozess, der** im Namen des Benutzers **ausgeführt wird, hat eine Kopie des Zugriffstokens**. Das Token identifiziert den Benutzer, die Gruppen des Benutzers und die Berechtigungen des Benutzers. Ein Token enthält auch eine Anmelde-SID (Security Identifier), die die aktuelle Anmeldesitzung identifiziert.
 
 Sie können diese Informationen mit `whoami /all` anzeigen.
 ```
@@ -56,7 +56,7 @@ oder mit _Process Explorer_ von Sysinternals (Prozess auswählen und den Tab "Si
 
 ### Lokaler Administrator
 
-Wenn sich ein lokaler Administrator anmeldet, **werden zwei Zugriffstoken erstellt**: Eines mit Administratorrechten und eines mit normalen Rechten. **Standardmäßig** wird, wenn dieser Benutzer einen Prozess ausführt, das mit **regulären** (nicht-Administrator) **Rechten verwendet**. Wenn dieser Benutzer versucht, etwas **als Administrator** auszuführen ("Als Administrator ausführen" zum Beispiel), wird die **UAC** verwendet, um um Erlaubnis zu fragen.\
+Wenn sich ein lokaler Administrator anmeldet, **werden zwei Zugriffstoken erstellt**: Eines mit Administratorrechten und eines mit normalen Rechten. **Standardmäßig** wird, wenn dieser Benutzer einen Prozess ausführt, das mit **regulären** (nicht-administrator) **Rechten verwendet**. Wenn dieser Benutzer versucht, etwas **als Administrator** auszuführen ("Als Administrator ausführen" zum Beispiel), wird die **UAC** verwendet, um um Erlaubnis zu fragen.\
 Wenn Sie [**mehr über die UAC erfahren möchten, lesen Sie diese Seite**](../authentication-credentials-uac-and-efs/index.html#uac)**.**
 
 ### Benutzerimpersonation mit Anmeldeinformationen
@@ -77,19 +77,20 @@ Dies ist nützlich, wenn Sie nützliche Anmeldeinformationen haben, um auf Objek
 Es gibt zwei Arten von Tokens:
 
 - **Primäres Token**: Es dient als Darstellung der Sicherheitsanmeldeinformationen eines Prozesses. Die Erstellung und Zuordnung von primären Tokens zu Prozessen sind Aktionen, die erhöhte Privilegien erfordern, was das Prinzip der Privilegientrennung betont. Typischerweise ist ein Authentifizierungsdienst für die Token-Erstellung verantwortlich, während ein Anmeldedienst dessen Zuordnung zur Betriebssystem-Shell des Benutzers übernimmt. Es ist erwähnenswert, dass Prozesse das primäre Token ihres übergeordneten Prozesses bei der Erstellung erben.
-- **Impersonation Token**: Ermöglicht einer Serveranwendung, vorübergehend die Identität des Clients anzunehmen, um auf sichere Objekte zuzugreifen. Dieser Mechanismus ist in vier Betriebsstufen unterteilt:
+- **Impersonation Token**: Ermöglicht einer Serveranwendung, vorübergehend die Identität des Clients anzunehmen, um auf sichere Objekte zuzugreifen. Dieser Mechanismus ist in vier Betriebsebenen unterteilt:
 - **Anonym**: Gewährt dem Server Zugriff ähnlich dem eines nicht identifizierten Benutzers.
 - **Identifikation**: Ermöglicht es dem Server, die Identität des Clients zu überprüfen, ohne sie für den Objektzugriff zu nutzen.
 - **Impersonation**: Ermöglicht es dem Server, unter der Identität des Clients zu arbeiten.
-- **Delegation**: Ähnlich wie Impersonation, umfasst jedoch die Fähigkeit, diese Identitätsübernahme auf entfernte Systeme auszudehnen, mit denen der Server interagiert, um die Anmeldeinformationen zu bewahren.
+- **Delegation**: Ähnlich wie Impersonation, umfasst jedoch die Fähigkeit, diese Identitätsannahme auf entfernte Systeme auszudehnen, mit denen der Server interagiert, um die Anmeldeinformationen zu bewahren.
 
 #### Impersonate Tokens
 
-Mit dem _**incognito**_ Modul von Metasploit können Sie, wenn Sie über ausreichende Privilegien verfügen, andere **Tokens** leicht **auflisten** und **imitieren**. Dies könnte nützlich sein, um **Aktionen auszuführen, als ob Sie der andere Benutzer wären**. Sie könnten auch mit dieser Technik **Privilegien erhöhen**.
+Mit dem _**incognito**_ Modul von Metasploit können Sie, wenn Sie über ausreichende Privilegien verfügen, andere **Tokens** leicht **auflisten** und **nachahmen**. Dies könnte nützlich sein, um **Aktionen auszuführen, als ob Sie der andere Benutzer wären**. Sie könnten auch mit dieser Technik **Privilegien erhöhen**.
 
 ### Token-Privilegien
 
 Erfahren Sie, welche **Token-Privilegien missbraucht werden können, um Privilegien zu erhöhen:**
+
 
 {{#ref}}
 privilege-escalation-abusing-tokens.md

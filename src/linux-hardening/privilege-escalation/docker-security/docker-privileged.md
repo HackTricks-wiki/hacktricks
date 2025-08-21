@@ -20,7 +20,7 @@ core     full     null     pts      shm      stdin    tty      zero
 ```
 {{#endtab}}
 
-{{#tab name="Innerhalb des privilegierten Containers"}}
+{{#tab name="Inside Privileged Container"}}
 ```bash
 # docker run --rm --privileged -it alpine sh
 ls /dev
@@ -35,7 +35,7 @@ cpu              nbd0             pts              stdout           tty27       
 
 ### Schreibgeschützte Kernel-Dateisysteme
 
-Kernel-Dateisysteme bieten einen Mechanismus, um das Verhalten des Kernels durch einen Prozess zu ändern. Wenn es jedoch um Containerprozesse geht, möchten wir verhindern, dass sie Änderungen am Kernel vornehmen. Daher montieren wir Kernel-Dateisysteme als **schreibgeschützt** innerhalb des Containers, um sicherzustellen, dass die Containerprozesse den Kernel nicht ändern können.
+Kernel-Dateisysteme bieten einen Mechanismus, um das Verhalten des Kernels durch einen Prozess zu ändern. Wenn es jedoch um Containerprozesse geht, wollen wir verhindern, dass sie Änderungen am Kernel vornehmen. Daher mounten wir Kernel-Dateisysteme als **schreibgeschützt** innerhalb des Containers, um sicherzustellen, dass die Containerprozesse den Kernel nicht modifizieren können.
 
 {{#tabs}}
 {{#tab name="Inside default container"}}
@@ -49,7 +49,7 @@ cpuacct on /sys/fs/cgroup/cpuacct type cgroup (ro,nosuid,nodev,noexec,relatime,c
 ```
 {{#endtab}}
 
-{{#tab name="Innerhalb des privilegierten Containers"}}
+{{#tab name="Inside Privileged Container"}}
 ```bash
 # docker run --rm --privileged -it alpine sh
 mount  | grep '(ro'
@@ -59,7 +59,7 @@ mount  | grep '(ro'
 
 ### Maskierung über Kernel-Dateisysteme
 
-Das **/proc**-Dateisystem ist selektiv beschreibbar, aber aus Sicherheitsgründen sind bestimmte Teile durch Überlagerung mit **tmpfs** vor Lese- und Schreibzugriff geschützt, sodass Containerprozesse nicht auf sensible Bereiche zugreifen können.
+Das **/proc**-Dateisystem ist selektiv beschreibbar, aber aus Sicherheitsgründen sind bestimmte Teile durch Überlagerung mit **tmpfs** vor Lese- und Schreibzugriffen geschützt, um sicherzustellen, dass Containerprozesse nicht auf sensible Bereiche zugreifen können.
 
 > [!NOTE] > **tmpfs** ist ein Dateisystem, das alle Dateien im virtuellen Speicher speichert. tmpfs erstellt keine Dateien auf Ihrer Festplatte. Wenn Sie ein tmpfs-Dateisystem aushängen, gehen alle darin befindlichen Dateien für immer verloren.
 
@@ -86,12 +86,13 @@ mount  | grep /proc.*tmpfs
 
 Container-Engines starten die Container mit einer **begrenzten Anzahl von Fähigkeiten**, um standardmäßig zu kontrollieren, was im Inneren des Containers passiert. **Privilegierte** haben **alle** **Fähigkeiten** zugänglich. Um mehr über Fähigkeiten zu erfahren, lesen Sie:
 
+
 {{#ref}}
 ../linux-capabilities.md
 {{#endref}}
 
 {{#tabs}}
-{{#tab name="Inside default container"}}
+{{#tab name="Innerhalb des Standardcontainers"}}
 ```bash
 # docker run --rm -it alpine sh
 apk add -U libcap; capsh --print
@@ -102,7 +103,7 @@ Bounding set =cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setg
 ```
 {{#endtab}}
 
-{{#tab name="Innerhalb des privilegierten Containers"}}
+{{#tab name="Inside Privileged Container"}}
 ```bash
 # docker run --rm --privileged -it alpine sh
 apk add -U libcap; capsh --print
@@ -114,11 +115,12 @@ Bounding set =cap_chown,cap_dac_override,cap_dac_read_search,cap_fowner,cap_fset
 {{#endtab}}
 {{#endtabs}}
 
-Sie können die für einen Container verfügbaren Berechtigungen manipulieren, ohne im `--privileged`-Modus zu laufen, indem Sie die Flags `--cap-add` und `--cap-drop` verwenden.
+Sie können die verfügbaren Berechtigungen für einen Container manipulieren, ohne im `--privileged` Modus zu laufen, indem Sie die Flags `--cap-add` und `--cap-drop` verwenden.
 
 ### Seccomp
 
 **Seccomp** ist nützlich, um die **syscalls** zu **beschränken**, die ein Container aufrufen kann. Ein standardmäßiges Seccomp-Profil ist standardmäßig aktiviert, wenn Docker-Container ausgeführt werden, aber im privilegierten Modus ist es deaktiviert. Erfahren Sie hier mehr über Seccomp:
+
 
 {{#ref}}
 seccomp.md
@@ -134,7 +136,7 @@ Seccomp_filters:	1
 ```
 {{#endtab}}
 
-{{#tab name="Innerhalb des privilegierten Containers"}}
+{{#tab name="Inside Privileged Container"}}
 ```bash
 # docker run --rm --privileged -it alpine sh
 grep Seccomp /proc/1/status
@@ -147,7 +149,7 @@ Seccomp_filters:	0
 # You can manually disable seccomp in docker with
 --security-opt seccomp=unconfined
 ```
-Beachten Sie auch, dass der **seccomp-Filter standardmäßig deaktiviert ist**, wenn Docker (oder andere CRIs) in einem **Kubernetes**-Cluster verwendet werden.
+Auch zu beachten ist, dass wenn Docker (oder andere CRIs) in einem **Kubernetes**-Cluster verwendet werden, der **seccomp-Filter standardmäßig deaktiviert ist**.
 
 ### AppArmor
 
@@ -162,7 +164,8 @@ apparmor.md
 ```
 ### SELinux
 
-Das Ausführen eines Containers mit dem `--privileged`-Flag deaktiviert **SELinux-Labels**, wodurch er das Label der Container-Engine erbt, typischerweise `unconfined`, was vollen Zugriff ähnlich der Container-Engine gewährt. Im rootlosen Modus wird `container_runtime_t` verwendet, während im Root-Modus `spc_t` angewendet wird.
+Das Ausführen eines Containers mit dem `--privileged`-Flag deaktiviert **SELinux-Labels**, wodurch es das Label der Container-Engine erbt, typischerweise `unconfined`, was vollen Zugriff ähnlich der Container-Engine gewährt. Im rootlosen Modus verwendet es `container_runtime_t`, während im Root-Modus `spc_t` angewendet wird.
+
 
 {{#ref}}
 ../selinux.md
@@ -171,11 +174,11 @@ Das Ausführen eines Containers mit dem `--privileged`-Flag deaktiviert **SELinu
 # You can manually disable selinux in docker with
 --security-opt label:disable
 ```
-## Was Nicht Beeinflusst
+## Was nicht betroffen ist
 
 ### Namespaces
 
-Namespaces sind **NICHT betroffen** von der `--privileged` Flagge. Auch wenn sie die Sicherheitsbeschränkungen nicht aktiviert haben, **sehen sie beispielsweise nicht alle Prozesse im System oder im Host-Netzwerk**. Benutzer können einzelne Namespaces deaktivieren, indem sie die **`--pid=host`, `--net=host`, `--ipc=host`, `--uts=host`** Container-Engine-Flags verwenden.
+Namespaces sind **NICHT betroffen** von der `--privileged`-Option. Auch wenn sie keine Sicherheitsbeschränkungen aktiviert haben, **sehen sie beispielsweise nicht alle Prozesse im System oder im Host-Netzwerk**. Benutzer können einzelne Namespaces deaktivieren, indem sie die **`--pid=host`, `--net=host`, `--ipc=host`, `--uts=host`** Container-Engine-Flags verwenden.
 
 {{#tabs}}
 {{#tab name="Inside default privileged container"}}

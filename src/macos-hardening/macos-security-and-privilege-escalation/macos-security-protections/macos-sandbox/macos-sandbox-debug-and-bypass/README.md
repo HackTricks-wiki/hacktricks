@@ -6,9 +6,9 @@
 
 <figure><img src="../../../../../images/image (901).png" alt=""><figcaption><p>Bild von <a href="http://newosxbook.com/files/HITSB.pdf">http://newosxbook.com/files/HITSB.pdf</a></p></figcaption></figure>
 
-Im vorherigen Bild ist es möglich zu beobachten, **wie der Sandbox geladen wird**, wenn eine Anwendung mit dem Recht **`com.apple.security.app-sandbox`** ausgeführt wird.
+Im vorherigen Bild ist zu beobachten, **wie der Sandbox geladen wird**, wenn eine Anwendung mit dem Recht **`com.apple.security.app-sandbox`** ausgeführt wird.
 
-Der Compiler verlinkt `/usr/lib/libSystem.B.dylib` mit der Binärdatei.
+Der Compiler verknüpft `/usr/lib/libSystem.B.dylib` mit der Binärdatei.
 
 Dann wird **`libSystem.B`** mehrere andere Funktionen aufrufen, bis die **`xpc_pipe_routine`** die Berechtigungen der App an **`securityd`** sendet. Securityd überprüft, ob der Prozess innerhalb der Sandbox quarantiniert werden soll, und wenn ja, wird er quarantiniert.\
 Schließlich wird die Sandbox mit einem Aufruf von **`__sandbox_ms`** aktiviert, der **`__mac_syscall`** aufruft.
@@ -17,14 +17,14 @@ Schließlich wird die Sandbox mit einem Aufruf von **`__sandbox_ms`** aktiviert,
 
 ### Umgehung des Quarantäneattributs
 
-**Dateien, die von sandboxed Prozessen erstellt werden**, erhalten das **Quarantäneattribut**, um ein Entkommen aus der Sandbox zu verhindern. Wenn es Ihnen jedoch gelingt, **einen `.app`-Ordner ohne das Quarantäneattribut** innerhalb einer sandboxed Anwendung zu erstellen, könnten Sie die App-Bundle-Binärdatei auf **`/bin/bash`** verweisen lassen und einige Umgebungsvariablen in der **plist** hinzufügen, um **`open`** zu missbrauchen, um **die neue App unsandboxed zu starten**.
+**Dateien, die von sandboxed Prozessen erstellt werden**, erhalten das **Quarantäneattribut**, um ein Entkommen aus der Sandbox zu verhindern. Wenn es Ihnen jedoch gelingt, **einen `.app`-Ordner ohne das Quarantäneattribut** innerhalb einer sandboxed Anwendung zu erstellen, könnten Sie die App-Bündel-Binärdatei auf **`/bin/bash`** verweisen lassen und einige Umgebungsvariablen in der **plist** hinzufügen, um **`open`** zu missbrauchen, um **die neue App unsandboxed zu starten**.
 
 Das wurde in [**CVE-2023-32364**](https://gergelykalman.com/CVE-2023-32364-a-macOS-sandbox-escape-by-mounting.html)**.**
 
 > [!CAUTION]
-> Daher können Sie im Moment, wenn Sie nur in der Lage sind, einen Ordner mit einem Namen zu erstellen, der auf **`.app`** endet, ohne ein Quarantäneattribut, die Sandbox umgehen, da macOS nur das **Quarantäne**-Attribut im **`.app`-Ordner** und in der **Hauptausführungsdatei** überprüft (und wir werden die Hauptausführungsdatei auf **`/bin/bash`** verweisen).
+> Daher können Sie im Moment, wenn Sie nur in der Lage sind, einen Ordner mit einem Namen, der auf **`.app`** endet, ohne ein Quarantäneattribut zu erstellen, die Sandbox umgehen, da macOS nur das **Quarantäne**-Attribut im **`.app`-Ordner** und in der **Hauptausführungsdatei** überprüft (und wir werden die Hauptausführungsdatei auf **`/bin/bash`** verweisen).
 >
-> Beachten Sie, dass, wenn ein .app-Bundle bereits autorisiert wurde, um ausgeführt zu werden (es hat ein Quarantäne-xttr mit dem autorisierten Ausführungsflag), Sie es auch missbrauchen könnten... es sei denn, Sie können jetzt nicht in **`.app`**-Bundles schreiben, es sei denn, Sie haben einige privilegierte TCC-Berechtigungen (die Sie in einer Sandbox nicht haben werden).
+> Beachten Sie, dass, wenn ein .app-Bündel bereits autorisiert wurde, um ausgeführt zu werden (es hat ein Quarantäne-xttr mit dem autorisierten Ausführungsflag), Sie es auch missbrauchen könnten... es sei denn, Sie können jetzt nicht in **`.app`**-Bündel schreiben, es sei denn, Sie haben einige privilegierte TCC-Berechtigungen (die Sie in einer hochgradig sandboxed Umgebung nicht haben werden).
 
 ### Missbrauch der Open-Funktionalität
 
@@ -53,7 +53,7 @@ Dafür benötigen Sie möglicherweise sogar **2 Schritte**: Um einen Prozess mit
 
 ### Missbrauch anderer Prozesse
 
-Wenn Sie von dem sandboxed Prozess aus in der Lage sind, **andere Prozesse zu kompromittieren**, die in weniger restriktiven Sandboxes (oder gar keiner) laufen, werden Sie in der Lage sein, in deren Sandboxes zu entkommen:
+Wenn Sie von dem sandboxed Prozess in der Lage sind, **andere Prozesse zu kompromittieren**, die in weniger restriktiven Sandboxes (oder gar keinen) laufen, werden Sie in der Lage sein, in deren Sandboxes zu entkommen:
 
 {{#ref}}
 ../../../macos-proces-abuse/
@@ -92,7 +92,7 @@ checkService(serviceName.UTF8String);
 
 Diese Mach-Dienste wurden zunächst missbraucht, um [aus dem Sandbox in diesem Bericht zu entkommen](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/). Zu diesem Zeitpunkt waren **alle XPC-Dienste, die** von einer Anwendung und ihrem Framework benötigt wurden, im PID-Domain der App sichtbar (das sind Mach-Dienste mit `ServiceType` als `Application`).
 
-Um einen **PID-Domain XPC-Dienst** zu kontaktieren, muss er einfach innerhalb der App mit einer Zeile wie dieser registriert werden:
+Um **einen PID-Domain XPC-Dienst zu kontaktieren**, muss er einfach innerhalb der App mit einer Zeile wie folgt registriert werden:
 ```objectivec
 [[NSBundle bundleWithPath:@“/System/Library/PrivateFrameworks/ShoveService.framework"]load];
 ```
@@ -130,7 +130,7 @@ NSLog(@"run task result:%@, error:%@", bSucc, error);
 ```
 #### /System/Library/PrivateFrameworks/AudioAnalyticsInternal.framework/XPCServices/AudioAnalyticsHelperService.xpc
 
-Dieser XPC-Dienst erlaubte jedem Client, indem er immer YES zurückgab, und die Methode `createZipAtPath:hourThreshold:withReply:` erlaubte im Grunde, den Pfad zu einem Ordner anzugeben, der komprimiert werden sollte, und er komprimierte ihn in eine ZIP-Datei.
+Dieser XPC-Dienst erlaubte jedem Client, indem er immer YES zurückgab, und die Methode `createZipAtPath:hourThreshold:withReply:` erlaubte im Grunde, den Pfad zu einem Ordner anzugeben, der komprimiert werden sollte, und er wird ihn in einer ZIP-Datei komprimieren.
 
 Daher ist es möglich, eine gefälschte App-Ordnerstruktur zu erstellen, sie zu komprimieren, dann zu dekomprimieren und auszuführen, um den Sandbox zu verlassen, da die neuen Dateien nicht das Quarantäneattribut haben.
 
@@ -208,7 +208,7 @@ NSLog(@"Read the target content:%@", [NSData dataWithContentsOfURL:targetURL]);
 [**Diese Forschung**](https://saagarjha.com/blog/2020/05/20/mac-app-store-sandbox-escape/) entdeckte 2 Möglichkeiten, die Sandbox zu umgehen. Da die Sandbox aus dem Userland angewendet wird, wenn die **libSystem**-Bibliothek geladen wird. Wenn ein Binary das Laden dieser Bibliothek vermeiden könnte, würde es niemals in die Sandbox gelangen:
 
 - Wenn das Binary **vollständig statisch kompiliert** wäre, könnte es das Laden dieser Bibliothek vermeiden.
-- Wenn das **Binary keine Bibliotheken laden müsste** (da der Linker ebenfalls in libSystem ist), müsste es libSystem nicht laden.
+- Wenn das **Binary keine Bibliotheken laden müsste** (da der Linker auch in libSystem ist), müsste es libSystem nicht laden.
 
 ### Shellcodes
 
@@ -236,7 +236,7 @@ Allerdings wird dieser neue Prozess natürlich keine Berechtigungen oder Privile
 
 ### Berechtigungen
 
-Beachten Sie, dass einige **Aktionen** möglicherweise **durch den Sandbox** erlaubt sind, wenn eine Anwendung eine spezifische **Berechtigung** hat, wie zum Beispiel:
+Beachten Sie, dass einige **Aktionen** möglicherweise **durch den Sandbox** erlaubt sind, wenn eine Anwendung eine spezifische **Berechtigung** hat, wie in:
 ```scheme
 (when (entitlement "com.apple.security.network.client")
 (allow network-outbound (remote ip))
@@ -249,6 +249,7 @@ Beachten Sie, dass einige **Aktionen** möglicherweise **durch den Sandbox** erl
 ### Interposting Bypass
 
 Für weitere Informationen über **Interposting** siehe:
+
 
 {{#ref}}
 ../../../macos-proces-abuse/macos-function-hooking.md
@@ -278,7 +279,7 @@ DYLD_INSERT_LIBRARIES=./interpose.dylib ./sand
 _libsecinit_initializer called
 Sandbox Bypassed!
 ```
-#### Interpost `__mac_syscall`, um den Sandbox zu verhindern
+#### Interpost `__mac_syscall`, um die Sandbox zu verhindern
 ```c:interpose.c
 // gcc -dynamiclib interpose.c -o interpose.dylib
 
@@ -322,9 +323,9 @@ __mac_syscall invoked. Policy: Quarantine, Call: 87
 __mac_syscall invoked. Policy: Sandbox, Call: 4
 Sandbox Bypassed!
 ```
-### Debuggen & Umgehen des Sandboxes mit lldb
+### Debug & bypass Sandbox with lldb
 
-Lass uns eine Anwendung kompilieren, die im Sandbox-Modus laufen sollte:
+Lass uns eine Anwendung kompilieren, die sandboxed sein sollte:
 
 {{#tabs}}
 {{#tab name="sand.c"}}
@@ -456,7 +457,7 @@ Process 2517 resuming
 Sandbox Bypassed!
 Process 2517 exited with status = 0 (0x00000000)
 ```
-> [!WARNING] > **Selbst wenn der Sandbox umgangen wird,** wird TCC den Benutzer fragen, ob er dem Prozess erlauben möchte, Dateien vom Desktop zu lesen.
+> [!WARNING] > **Selbst mit dem umgangenem Sandbox wird TCC** den Benutzer fragen, ob er dem Prozess erlauben möchte, Dateien vom Desktop zu lesen
 
 ## References
 

@@ -3,7 +3,7 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 ## TL;DR
-Durch das Zwingen eines **System Center Configuration Manager (SCCM) Management Point (MP)** zur Authentifizierung über SMB/RPC und das **Relaying** dieses NTLM-Maschinenkontos an die **Site-Datenbank (MSSQL)** erhalten Sie `smsdbrole_MP` / `smsdbrole_MPUserSvc` Rechte. Diese Rollen ermöglichen es Ihnen, eine Reihe von gespeicherten Prozeduren aufzurufen, die **Operating System Deployment (OSD)**-Policy-Blobs (Anmeldeinformationen für Netzwerkzugangskonten, Task-Sequence-Variablen usw.) offenlegen. Die Blobs sind hex-encodiert/verschlüsselt, können jedoch mit **PXEthief** decodiert und entschlüsselt werden, was Klartextgeheimnisse ergibt.
+Durch das Zwingen eines **System Center Configuration Manager (SCCM) Management Point (MP)** zur Authentifizierung über SMB/RPC und das **Relaying** dieses NTLM-Maschinenkontos zur **Site-Datenbank (MSSQL)** erhalten Sie `smsdbrole_MP` / `smsdbrole_MPUserSvc` Rechte. Diese Rollen ermöglichen es Ihnen, eine Reihe von gespeicherten Prozeduren aufzurufen, die **Operating System Deployment (OSD)**-Policy-Blobs (Anmeldeinformationen für Netzwerkzugangskonten, Task-Sequence-Variablen usw.) offenlegen. Die Blobs sind hex-encodiert/verschlüsselt, können jedoch mit **PXEthief** decodiert und entschlüsselt werden, was Klartextgeheimnisse ergibt.
 
 High-Level-Kette:
 1. Entdecken Sie MP & Site DB ↦ nicht authentifizierter HTTP-Endpunkt `/SMS_MP/.sms_aut?MPKEYINFORMATIONMEDIA`.
@@ -73,7 +73,7 @@ Jede Zeile enthält `PolicyAssignmentID`, `Body` (hex), `PolicyID`, `PolicyVersi
 
 Fokussieren Sie sich auf Richtlinien:
 * **NAAConfig**  – Netzwerkzugangskonto-Credentials
-* **TS_Sequence** – Tasksequenzvariablen (OSDJoinAccount/Password)
+* **TS_Sequence** – Task Sequenzvariablen (OSDJoinAccount/Password)
 * **CollectionSettings** – Kann Run-as-Konten enthalten
 
 ### 3.3  Vollständigen Body abrufen
@@ -102,7 +102,7 @@ NetworkAccessPassword: P4ssw0rd123
 ```
 ---
 
-## 5. Relevante SQL-Rollen & Verfahren
+## 5. Relevante SQL-Rollen & -verfahren
 Beim Relay wird der Login zugeordnet zu:
 * `smsdbrole_MP`
 * `smsdbrole_MPUserSvc`
@@ -137,11 +137,13 @@ die gleichen Milderungsmaßnahmen, die gegen `PetitPotam`/`PrinterBug` verwendet
 
 ## Siehe auch
 * NTLM-Relay-Grundlagen:
+
 {{#ref}}
 ../ntlm/README.md
 {{#endref}}
 
 * MSSQL-Missbrauch & Post-Exploitation:
+
 {{#ref}}
 abusing-ad-mssql.md
 {{#endref}}

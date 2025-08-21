@@ -20,9 +20,9 @@ certutil.exe -dump -v cert.pfx
 ```
 ## Exportieren von Zertifikaten mit den Crypto-APIs – THEFT1
 
-In einer **interaktiven Desktop-Sitzung** kann das Extrahieren eines Benutzer- oder Maschinenzertifikats zusammen mit dem privaten Schlüssel einfach durchgeführt werden, insbesondere wenn der **private Schlüssel exportierbar** ist. Dies kann erreicht werden, indem man zu dem Zertifikat in `certmgr.msc` navigiert, mit der rechten Maustaste darauf klickt und `Alle Aufgaben → Exportieren` auswählt, um eine passwortgeschützte .pfx-Datei zu erstellen.
+In einer **interaktiven Desktop-Sitzung** kann das Extrahieren eines Benutzer- oder Maschinenzertifikats zusammen mit dem privaten Schlüssel einfach durchgeführt werden, insbesondere wenn der **private Schlüssel exportierbar** ist. Dies kann erreicht werden, indem man zu dem Zertifikat in `certmgr.msc` navigiert, mit der rechten Maustaste darauf klickt und `Alle Aufgaben → Exportieren` auswählt, um eine passwortgeschützte .pfx-Datei zu generieren.
 
-Für einen **programmgesteuerten Ansatz** stehen Tools wie das PowerShell-Cmdlet `ExportPfxCertificate` oder Projekte wie [TheWover’s CertStealer C# project](https://github.com/TheWover/CertStealer) zur Verfügung. Diese nutzen die **Microsoft CryptoAPI** (CAPI) oder die Cryptography API: Next Generation (CNG), um mit dem Zertifikatspeicher zu interagieren. Diese APIs bieten eine Reihe von kryptografischen Diensten, einschließlich derjenigen, die für die Speicherung und Authentifizierung von Zertifikaten erforderlich sind.
+Für einen **programmgesteuerten Ansatz** stehen Tools wie das PowerShell `ExportPfxCertificate` Cmdlet oder Projekte wie [TheWover’s CertStealer C# project](https://github.com/TheWover/CertStealer) zur Verfügung. Diese nutzen die **Microsoft CryptoAPI** (CAPI) oder die Cryptography API: Next Generation (CNG), um mit dem Zertifikatspeicher zu interagieren. Diese APIs bieten eine Reihe von kryptografischen Diensten, einschließlich derjenigen, die für die Speicherung und Authentifizierung von Zertifikaten erforderlich sind.
 
 Wenn jedoch ein privater Schlüssel als nicht exportierbar festgelegt ist, blockieren sowohl CAPI als auch CNG normalerweise die Extraktion solcher Zertifikate. Um diese Einschränkung zu umgehen, können Tools wie **Mimikatz** eingesetzt werden. Mimikatz bietet die Befehle `crypto::capi` und `crypto::cng`, um die jeweiligen APIs zu patchen, was die Exportation von privaten Schlüsseln ermöglicht. Insbesondere patcht `crypto::capi` die CAPI innerhalb des aktuellen Prozesses, während `crypto::cng` den Speicher von **lsass.exe** zum Patchen anvisiert.
 
@@ -34,15 +34,15 @@ Weitere Informationen zu DPAPI in:
 ../../windows-local-privilege-escalation/dpapi-extracting-passwords.md
 {{#endref}}
 
-In Windows werden **private Schlüssel von Zertifikaten durch DPAPI geschützt**. Es ist wichtig zu erkennen, dass die **Speicherorte für Benutzer- und Maschinenprivate Schlüssel** unterschiedlich sind und die Dateistrukturen je nach der vom Betriebssystem verwendeten kryptografischen API variieren. **SharpDPAPI** ist ein Tool, das diese Unterschiede automatisch navigieren kann, wenn es darum geht, die DPAPI-Blobs zu entschlüsseln.
+In Windows werden **private Schlüssel von Zertifikaten durch DPAPI geschützt**. Es ist wichtig zu erkennen, dass die **Speicherorte für Benutzer- und Maschinenprivate Schlüssel** unterschiedlich sind und die Dateistrukturen je nach der vom Betriebssystem verwendeten kryptografischen API variieren. **SharpDPAPI** ist ein Tool, das diese Unterschiede automatisch navigieren kann, wenn es die DPAPI-Blobs entschlüsselt.
 
 **Benutzerzertifikate** befinden sich überwiegend in der Registrierung unter `HKEY_CURRENT_USER\SOFTWARE\Microsoft\SystemCertificates`, einige sind jedoch auch im Verzeichnis `%APPDATA%\Microsoft\SystemCertificates\My\Certificates` zu finden. Die entsprechenden **privaten Schlüssel** für diese Zertifikate werden typischerweise in `%APPDATA%\Microsoft\Crypto\RSA\User SID\` für **CAPI**-Schlüssel und `%APPDATA%\Microsoft\Crypto\Keys\` für **CNG**-Schlüssel gespeichert.
 
-Um ein **Zertifikat und seinen zugehörigen privaten Schlüssel** zu extrahieren, umfasst der Prozess:
+Um **ein Zertifikat und seinen zugehörigen privaten Schlüssel zu extrahieren**, umfasst der Prozess:
 
 1. **Auswählen des Zielzertifikats** aus dem Benutzerstore und Abrufen des Schlüsselspeichernamens.
 2. **Lokalisieren des erforderlichen DPAPI-Masterkeys**, um den entsprechenden privaten Schlüssel zu entschlüsseln.
-3. **Entschlüsseln des privaten Schlüssels** durch Nutzung des Klartext-DPAPI-Masterkeys.
+3. **Entschlüsseln des privaten Schlüssels** durch die Verwendung des Klartext-DPAPI-Masterkeys.
 
 Für **den Erwerb des Klartext-DPAPI-Masterkeys** können die folgenden Ansätze verwendet werden:
 ```bash
@@ -52,7 +52,7 @@ dpapi::masterkey /in:"C:\PATH\TO\KEY" /rpc
 # With mimikatz, if the user's password is known
 dpapi::masterkey /in:"C:\PATH\TO\KEY" /sid:accountSid /password:PASS
 ```
-Um die Entschlüsselung von Masterkey-Dateien und privaten Schlüsseldateien zu optimieren, erweist sich der Befehl `certificates` von [**SharpDPAPI**](https://github.com/GhostPack/SharpDPAPI) als nützlich. Er akzeptiert `/pvk`, `/mkfile`, `/password` oder `{GUID}:KEY` als Argumente, um die privaten Schlüssel und die zugehörigen Zertifikate zu entschlüsseln und anschließend eine `.pem`-Datei zu generieren.
+Um die Entschlüsselung von Masterkey-Dateien und privaten Schlüsseldateien zu optimieren, erweist sich der Befehl `certificates` von [**SharpDPAPI**](https://github.com/GhostPack/SharpDPAPI) als nützlich. Er akzeptiert die Argumente `/pvk`, `/mkfile`, `/password` oder `{GUID}:KEY`, um die privaten Schlüssel und die zugehörigen Zertifikate zu entschlüsseln und anschließend eine `.pem`-Datei zu generieren.
 ```bash
 # Decrypting using SharpDPAPI
 SharpDPAPI.exe certificates /mkfile:C:\temp\mkeys.txt
@@ -79,7 +79,7 @@ Zertifikate werden manchmal direkt im Dateisystem gefunden, z. B. in Dateifreiga
 
 Diese Dateien können mit PowerShell oder der Eingabeaufforderung gesucht werden, indem nach den genannten Erweiterungen gesucht wird.
 
-In Fällen, in denen eine PKCS#12-Zertifikatdatei gefunden wird und sie durch ein Passwort geschützt ist, ist die Extraktion eines Hashs durch die Verwendung von `pfx2john.py` möglich, das unter [fossies.org](https://fossies.org/dox/john-1.9.0-jumbo-1/pfx2john_8py_source.html) verfügbar ist. Anschließend kann JohnTheRipper verwendet werden, um zu versuchen, das Passwort zu knacken.
+In Fällen, in denen eine PKCS#12-Zertifikatdatei gefunden wird und sie durch ein Passwort geschützt ist, ist die Extraktion eines Hashes durch die Verwendung von `pfx2john.py` möglich, das unter [fossies.org](https://fossies.org/dox/john-1.9.0-jumbo-1/pfx2john_8py_source.html) verfügbar ist. Anschließend kann JohnTheRipper verwendet werden, um zu versuchen, das Passwort zu knacken.
 ```bash
 # Example command to search for certificate files in PowerShell
 Get-ChildItem -Recurse -Path C:\Users\ -Include *.pfx, *.p12, *.pkcs12, *.pem, *.key, *.crt, *.cer, *.csr, *.jks, *.keystore, *.keys
@@ -90,13 +90,13 @@ pfx2john.py certificate.pfx > hash.txt
 # Command to crack the hash with JohnTheRipper
 john --wordlist=passwords.txt hash.txt
 ```
-## NTLM Credential Theft via PKINIT – THEFT5 (UnPAC den Hash)
+## NTLM Credential Theft via PKINIT – THEFT5 (UnPAC the hash)
 
 Der gegebene Inhalt erklärt eine Methode zum Diebstahl von NTLM-Anmeldeinformationen über PKINIT, insbesondere durch die Diebstahlmethode, die als THEFT5 bezeichnet wird. Hier ist eine erneute Erklärung in passiver Stimme, wobei der Inhalt anonymisiert und zusammengefasst wurde, wo dies zutreffend ist:
 
-Um die NTLM-Authentifizierung `MS-NLMP` für Anwendungen zu unterstützen, die keine Kerberos-Authentifizierung ermöglichen, ist der KDC so konzipiert, dass er die NTLM-Einwegfunktion (OWF) des Benutzers im Privilegienattributzertifikat (PAC) zurückgibt, insbesondere im `PAC_CREDENTIAL_INFO`-Puffer, wenn PKCA verwendet wird. Folglich, wenn ein Konto sich authentifiziert und ein Ticket-Granting Ticket (TGT) über PKINIT sichert, wird ein Mechanismus bereitgestellt, der es dem aktuellen Host ermöglicht, den NTLM-Hash aus dem TGT zu extrahieren, um die Legacy-Authentifizierungsprotokolle aufrechtzuerhalten. Dieser Prozess umfasst die Entschlüsselung der `PAC_CREDENTIAL_DATA`-Struktur, die im Wesentlichen eine NDR-serialisierte Darstellung des NTLM-Plaintexts ist.
+Um die NTLM-Authentifizierung `MS-NLMP` für Anwendungen zu unterstützen, die keine Kerberos-Authentifizierung ermöglichen, ist der KDC so konzipiert, dass er die NTLM-Einwegfunktion (OWF) des Benutzers im Privilegienattributzertifikat (PAC) zurückgibt, insbesondere im `PAC_CREDENTIAL_INFO`-Puffer, wenn PKCA verwendet wird. Folglich wird, wenn ein Konto sich authentifiziert und ein Ticket-Granting Ticket (TGT) über PKINIT sichert, ein Mechanismus bereitgestellt, der es dem aktuellen Host ermöglicht, den NTLM-Hash aus dem TGT zu extrahieren, um die Legacy-Authentifizierungsprotokolle aufrechtzuerhalten. Dieser Prozess umfasst die Entschlüsselung der `PAC_CREDENTIAL_DATA`-Struktur, die im Wesentlichen eine NDR-serialisierte Darstellung des NTLM-Plaintexts ist.
 
-Das Tool **Kekeo**, verfügbar unter [https://github.com/gentilkiwi/kekeo](https://github.com/gentilkiwi/kekeo), wird erwähnt, da es in der Lage ist, ein TGT anzufordern, das diese spezifischen Daten enthält, und somit die Abfrage der NTLM-Anmeldeinformationen des Benutzers erleichtert. Der für diesen Zweck verwendete Befehl lautet wie folgt:
+Das Tool **Kekeo**, das unter [https://github.com/gentilkiwi/kekeo](https://github.com/gentilkiwi/kekeo) verfügbar ist, wird erwähnt, da es in der Lage ist, ein TGT anzufordern, das diese spezifischen Daten enthält, und somit die Wiederbeschaffung des NTLM des Benutzers erleichtert. Der für diesen Zweck verwendete Befehl lautet wie folgt:
 ```bash
 tgt::pac /caname:generic-DC-CA /subject:genericUser /castore:current_user /domain:domain.local
 ```

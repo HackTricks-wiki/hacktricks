@@ -53,13 +53,13 @@ Ich möchte die Seite besonders erwähnen:
 specific-software-file-type-tricks/browser-artifacts.md
 {{#endref}}
 
-## Speicher-Dump-Inspektion
+## Überprüfung von Speicher-Dumps
 
 {{#ref}}
 memory-dump-analysis/
 {{#endref}}
 
-## Pcap-Inspektion
+## Pcap-Überprüfung
 
 {{#ref}}
 pcap-inspection/

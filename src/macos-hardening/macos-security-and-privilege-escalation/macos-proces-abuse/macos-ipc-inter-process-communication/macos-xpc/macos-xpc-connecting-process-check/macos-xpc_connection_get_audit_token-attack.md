@@ -4,9 +4,10 @@
 
 **Für weitere Informationen siehe den Originalbeitrag:** [**https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/**](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/). Dies ist eine Zusammenfassung:
 
-## Grundlegende Informationen zu Mach-Nachrichten
+## Mach-Nachrichten Grundinformationen
 
 Wenn Sie nicht wissen, was Mach-Nachrichten sind, beginnen Sie mit dieser Seite:
+
 
 {{#ref}}
 ../../
@@ -18,6 +19,7 @@ Mach-Nachrichten werden über einen _mach port_ gesendet, der ein **einzelner Em
 ## XPC-Verbindung
 
 Wenn Sie nicht wissen, wie eine XPC-Verbindung hergestellt wird, überprüfen Sie:
+
 
 {{#ref}}
 ../
@@ -33,22 +35,22 @@ Was für Sie interessant zu wissen ist, dass **XPCs Abstraktion eine Eins-zu-Ein
 
 Obwohl die vorherige Situation vielversprechend klingt, gibt es einige Szenarien, in denen dies keine Probleme verursachen wird ([von hier](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing)):
 
-- Audit-Tokens werden oft für eine Autorisierungsprüfung verwendet, um zu entscheiden, ob eine Verbindung akzeptiert werden soll. Da dies über eine Nachricht an den Dienstport erfolgt, ist **noch keine Verbindung hergestellt**. Weitere Nachrichten auf diesem Port werden einfach als zusätzliche Verbindungsanfragen behandelt. Daher sind alle **Prüfungen vor der Annahme einer Verbindung nicht anfällig** (das bedeutet auch, dass innerhalb von `-listener:shouldAcceptNewConnection:` das Audit-Token sicher ist). Wir suchen daher **nach XPC-Verbindungen, die spezifische Aktionen überprüfen**.
+- Audit-Tokens werden oft für eine Autorisierungsprüfung verwendet, um zu entscheiden, ob eine Verbindung akzeptiert werden soll. Da dies über eine Nachricht an den Dienstport geschieht, ist **noch keine Verbindung hergestellt**. Weitere Nachrichten auf diesem Port werden einfach als zusätzliche Verbindungsanfragen behandelt. Daher sind alle **Prüfungen vor der Annahme einer Verbindung nicht anfällig** (das bedeutet auch, dass innerhalb von `-listener:shouldAcceptNewConnection:` das Audit-Token sicher ist). Wir suchen daher **nach XPC-Verbindungen, die spezifische Aktionen überprüfen**.
 - XPC-Ereignis-Handler werden synchron behandelt. Das bedeutet, dass der Ereignis-Handler für eine Nachricht abgeschlossen sein muss, bevor er für die nächste aufgerufen wird, selbst bei parallelen Dispatch-Warteschlangen. Daher kann innerhalb eines **XPC-Ereignis-Handlers das Audit-Token nicht von anderen normalen (nicht-Antwort!) Nachrichten überschrieben werden**.
 
 Zwei verschiedene Methoden, wie dies ausgenutzt werden könnte:
 
 1. Variante 1:
-- **Exploit** **verbindet** sich mit Dienst **A** und Dienst **B**
-- Dienst **B** kann eine **privilegierte Funktionalität** in Dienst A aufrufen, die der Benutzer nicht kann
-- Dienst **A** ruft **`xpc_connection_get_audit_token`** auf, während er _**nicht**_ im **Ereignis-Handler** für eine Verbindung in einem **`dispatch_async`** ist.
-- So könnte eine **andere** Nachricht das **Audit-Token überschreiben**, weil es asynchron außerhalb des Ereignis-Handlers dispatcht wird.
+- **Exploit** **stellt eine Verbindung** zu Dienst **A** und Dienst **B** her.
+- Dienst **B** kann eine **privilegierte Funktionalität** in Dienst A aufrufen, die der Benutzer nicht kann.
+- Dienst **A** ruft **`xpc_connection_get_audit_token`** auf, während er _**nicht**_ innerhalb des **Ereignis-Handlers** für eine Verbindung in einem **`dispatch_async`** ist.
+- So könnte eine **andere** Nachricht das **Audit-Token überschreiben**, da es asynchron außerhalb des Ereignis-Handlers dispatcht wird.
 - Der Exploit übergibt an **Dienst B das SEND-Recht an Dienst A**.
 - So wird Dienst **B** tatsächlich die **Nachrichten** an Dienst **A** **senden**.
 - Der **Exploit** versucht, die **privilegierte Aktion** **aufzurufen**. In einem RC **prüft** Dienst **A** die Autorisierung dieser **Aktion**, während **Dienst B das Audit-Token überschreibt** (was dem Exploit Zugriff auf die privilegierte Aktion gibt).
 2. Variante 2:
-- Dienst **B** kann eine **privilegierte Funktionalität** in Dienst A aufrufen, die der Benutzer nicht kann
-- Der Exploit verbindet sich mit **Dienst A**, der dem Exploit eine **Nachricht sendet, die eine Antwort erwartet** in einem bestimmten **Antwortport**.
+- Dienst **B** kann eine **privilegierte Funktionalität** in Dienst A aufrufen, die der Benutzer nicht kann.
+- Der Exploit verbindet sich mit **Dienst A**, der dem Exploit eine **Nachricht sendet, die eine Antwort** in einem bestimmten **Antwortport** erwartet.
 - Der Exploit sendet **Dienst** B eine Nachricht, die **diesen Antwortport** übergibt.
 - Wenn Dienst **B antwortet**, **sendet** er die Nachricht an Dienst A, **während** der **Exploit** eine andere **Nachricht an Dienst A** sendet, die versucht, eine **privilegierte Funktionalität** zu erreichen und erwartet, dass die Antwort von Dienst B das Audit-Token im perfekten Moment überschreibt (Race Condition).
 
@@ -57,16 +59,16 @@ Zwei verschiedene Methoden, wie dies ausgenutzt werden könnte:
 Szenario:
 
 - Zwei Mach-Dienste **`A`** und **`B`**, zu denen wir beide eine Verbindung herstellen können (basierend auf dem Sandbox-Profil und den Autorisierungsprüfungen vor der Annahme der Verbindung).
-- _**A**_ muss eine **Autorisierungsprüfung** für eine spezifische Aktion haben, die **`B`** übergeben kann (aber unsere App nicht).
-- Zum Beispiel, wenn B einige **Befugnisse** hat oder als **root** läuft, könnte es ihm erlauben, A zu bitten, eine privilegierte Aktion auszuführen.
+- _**A**_ muss eine **Autorisierungsprüfung** für eine spezifische Aktion haben, die **`B`** übergeben kann (aber unsere App kann das nicht).
+- Zum Beispiel, wenn B einige **Berechtigungen** hat oder als **root** läuft, könnte es ihm erlauben, A zu bitten, eine privilegierte Aktion auszuführen.
 - Für diese Autorisierungsprüfung erhält **`A`** das Audit-Token asynchron, indem es beispielsweise `xpc_connection_get_audit_token` von **`dispatch_async`** aufruft.
 
 > [!CAUTION]
-> In diesem Fall könnte ein Angreifer eine **Race Condition** auslösen, indem er einen **Exploit** ausführt, der **A auffordert, eine Aktion** mehrmals auszuführen, während er **B Nachrichten an `A`** senden lässt. Wenn die RC **erfolgreich** ist, wird das **Audit-Token** von **B** im Speicher kopiert, **während** die Anfrage unseres **Exploits** von A **bearbeitet** wird, was ihm **Zugriff auf die privilegierte Aktion gibt, die nur B anfordern konnte**.
+> In diesem Fall könnte ein Angreifer eine **Race Condition** auslösen, indem er einen **Exploit** erstellt, der **A auffordert, eine Aktion** mehrmals auszuführen, während er **B Nachrichten an `A`** senden lässt. Wenn die RC **erfolgreich** ist, wird das **Audit-Token** von **B** im Speicher kopiert, **während** die Anfrage unseres **Exploits** von A **bearbeitet** wird, was ihm **Zugriff auf die privilegierte Aktion gibt, die nur B anfordern konnte**.
 
 Dies geschah mit **`A`** als `smd` und **`B`** als `diagnosticd`. Die Funktion [`SMJobBless`](https://developer.apple.com/documentation/servicemanagement/1431078-smjobbless?language=objc) von smb kann verwendet werden, um ein neues privilegiertes Hilfsprogramm (als **root**) zu installieren. Wenn ein **Prozess, der als root läuft,** **smd** kontaktiert, werden keine weiteren Prüfungen durchgeführt.
 
-Daher ist der Dienst **B** **`diagnosticd`**, da er als **root** läuft und verwendet werden kann, um einen Prozess zu **überwachen**, sodass, sobald die Überwachung begonnen hat, er **mehrere Nachrichten pro Sekunde sendet.**
+Daher ist der Dienst **B** **`diagnosticd`**, da er als **root** läuft und verwendet werden kann, um einen Prozess zu **überwachen**, sodass, sobald die Überwachung begonnen hat, er **mehrere Nachrichten pro Sekunde senden wird.**
 
 Um den Angriff durchzuführen:
 
@@ -81,16 +83,16 @@ Um den Angriff durchzuführen:
 
 ## Variante 2: Antwortweiterleitung
 
-In einer XPC (Cross-Process Communication)-Umgebung, obwohl Ereignis-Handler nicht gleichzeitig ausgeführt werden, hat die Behandlung von Antwortnachrichten ein einzigartiges Verhalten. Insbesondere gibt es zwei verschiedene Methoden zum Senden von Nachrichten, die eine Antwort erwarten:
+In einer XPC (Interprozesskommunikation) Umgebung, obwohl Ereignis-Handler nicht gleichzeitig ausgeführt werden, hat die Behandlung von Antwortnachrichten ein einzigartiges Verhalten. Insbesondere gibt es zwei verschiedene Methoden zum Senden von Nachrichten, die eine Antwort erwarten:
 
 1. **`xpc_connection_send_message_with_reply`**: Hier wird die XPC-Nachricht empfangen und auf einer bestimmten Warteschlange verarbeitet.
 2. **`xpc_connection_send_message_with_reply_sync`**: Im Gegensatz dazu wird bei dieser Methode die XPC-Nachricht empfangen und auf der aktuellen Dispatch-Warteschlange verarbeitet.
 
-Diese Unterscheidung ist entscheidend, da sie die Möglichkeit eröffnet, dass **Antwortpakete gleichzeitig mit der Ausführung eines XPC-Ereignis-Handlers analysiert werden**. Bemerkenswerterweise implementiert `_xpc_connection_set_creds` zwar eine Sperre, um gegen die teilweise Überschreibung des Audit-Tokens zu schützen, jedoch erstreckt sich dieser Schutz nicht auf das gesamte Verbindungsobjekt. Folglich entsteht eine Schwachstelle, bei der das Audit-Token während des Zeitraums zwischen der Analyse eines Pakets und der Ausführung seines Ereignis-Handlers ersetzt werden kann.
+Diese Unterscheidung ist entscheidend, da sie die Möglichkeit eröffnet, dass **Antwortpakete gleichzeitig mit der Ausführung eines XPC-Ereignis-Handlers analysiert werden**. Bemerkenswerterweise implementiert `_xpc_connection_set_creds` zwar eine Sperre, um gegen die teilweise Überschreibung des Audit-Tokens zu schützen, jedoch erstreckt sich dieser Schutz nicht auf das gesamte Verbindungsobjekt. Folglich entsteht eine Verwundbarkeit, bei der das Audit-Token während des Zeitraums zwischen der Analyse eines Pakets und der Ausführung seines Ereignis-Handlers ersetzt werden kann.
 
-Um diese Schwachstelle auszunutzen, ist die folgende Einrichtung erforderlich:
+Um diese Verwundbarkeit auszunutzen, ist die folgende Einrichtung erforderlich:
 
-- Zwei Mach-Dienste, bezeichnet als **`A`** und **`B`**, die beide eine Verbindung herstellen können.
+- Zwei Mach-Dienste, die als **`A`** und **`B`** bezeichnet werden, die beide eine Verbindung herstellen können.
 - Dienst **`A`** sollte eine Autorisierungsprüfung für eine spezifische Aktion enthalten, die nur **`B`** ausführen kann (die Anwendung des Benutzers kann dies nicht).
 - Dienst **`A`** sollte eine Nachricht senden, die eine Antwort erwartet.
 - Der Benutzer kann eine Nachricht an **`B`** senden, auf die er antworten wird.
@@ -98,7 +100,7 @@ Um diese Schwachstelle auszunutzen, ist die folgende Einrichtung erforderlich:
 Der Ausbeutungsprozess umfasst die folgenden Schritte:
 
 1. Warten Sie, bis Dienst **`A`** eine Nachricht sendet, die eine Antwort erwartet.
-2. Anstatt direkt an **`A`** zu antworten, wird der Antwortport gehijackt und verwendet, um eine Nachricht an Dienst **`B`** zu senden.
+2. Anstatt direkt an **`A`** zu antworten, wird der Antwortport entführt und verwendet, um eine Nachricht an Dienst **`B`** zu senden.
 3. Anschließend wird eine Nachricht mit der verbotenen Aktion gesendet, in der Erwartung, dass sie gleichzeitig mit der Antwort von **`B`** verarbeitet wird.
 
 Unten ist eine visuelle Darstellung des beschriebenen Angriffszenarios:
@@ -114,12 +116,12 @@ Unten ist eine visuelle Darstellung des beschriebenen Angriffszenarios:
 - **Analysetools**: Tools wie IDA/Ghidra wurden verwendet, um erreichbare Mach-Dienste zu untersuchen, aber der Prozess war zeitaufwendig und kompliziert durch Aufrufe, die den dyld Shared Cache betreffen.
 - **Scripting-Einschränkungen**: Versuche, die Analyse für Aufrufe von `xpc_connection_get_audit_token` aus `dispatch_async`-Blöcken zu skripten, wurden durch Komplexitäten beim Parsen von Blöcken und Interaktionen mit dem dyld Shared Cache behindert.
 
-## Der Fix <a href="#the-fix" id="the-fix"></a>
+## Die Lösung <a href="#the-fix" id="the-fix"></a>
 
-- **Gemeldete Probleme**: Ein Bericht wurde an Apple über die allgemeinen und spezifischen Probleme, die in `smd` gefunden wurden, eingereicht.
+- **Gemeldete Probleme**: Ein Bericht wurde an Apple eingereicht, der die allgemeinen und spezifischen Probleme innerhalb von `smd` detailliert.
 - **Apples Antwort**: Apple hat das Problem in `smd` behoben, indem es `xpc_connection_get_audit_token` durch `xpc_dictionary_get_audit_token` ersetzt hat.
-- **Art des Fixes**: Die Funktion `xpc_dictionary_get_audit_token` gilt als sicher, da sie das Audit-Token direkt aus der Mach-Nachricht abruft, die mit der empfangenen XPC-Nachricht verbunden ist. Sie ist jedoch nicht Teil der öffentlichen API, ähnlich wie `xpc_connection_get_audit_token`.
-- **Fehlen eines umfassenderen Fixes**: Es bleibt unklar, warum Apple keinen umfassenderen Fix implementiert hat, wie das Verwerfen von Nachrichten, die nicht mit dem gespeicherten Audit-Token der Verbindung übereinstimmen. Die Möglichkeit legitimer Änderungen des Audit-Tokens in bestimmten Szenarien (z. B. Verwendung von `setuid`) könnte ein Faktor sein.
+- **Art der Lösung**: Die Funktion `xpc_dictionary_get_audit_token` gilt als sicher, da sie das Audit-Token direkt aus der Mach-Nachricht abruft, die mit der empfangenen XPC-Nachricht verbunden ist. Sie ist jedoch nicht Teil der öffentlichen API, ähnlich wie `xpc_connection_get_audit_token`.
+- **Fehlen einer umfassenderen Lösung**: Es bleibt unklar, warum Apple keine umfassendere Lösung implementiert hat, wie das Verwerfen von Nachrichten, die nicht mit dem gespeicherten Audit-Token der Verbindung übereinstimmen. Die Möglichkeit legitimer Änderungen des Audit-Tokens in bestimmten Szenarien (z. B. Verwendung von `setuid`) könnte ein Faktor sein.
 - **Aktueller Status**: Das Problem besteht weiterhin in iOS 17 und macOS 14 und stellt eine Herausforderung für diejenigen dar, die versuchen, es zu identifizieren und zu verstehen.
 
 {{#include ../../../../../../banners/hacktricks-training.md}}

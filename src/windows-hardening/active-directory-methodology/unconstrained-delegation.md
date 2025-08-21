@@ -36,8 +36,8 @@ Mehr Informationen: [https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/](h
 
 ### **Zwangs-Authentifizierung**
 
-Wenn ein Angreifer in der Lage ist, einen Computer zu **kompromittieren, der für "Unconstrained Delegation" erlaubt ist**, könnte er einen **Druckserver** **täuschen**, um sich **automatisch anzumelden** und ein **TGT** im Speicher des Servers zu speichern.\
-Dann könnte der Angreifer einen **Pass the Ticket-Angriff durchführen, um** das Benutzerkonto des Druckserver-Computers zu impersonieren.
+Wenn ein Angreifer in der Lage ist, einen Computer zu **kompromittieren, der für "Unconstrained Delegation" erlaubt ist**, könnte er einen **Druckserver** **täuschen**, um sich **automatisch anzumelden** und dabei ein TGT im Speicher des Servers zu **speichern**.\
+Dann könnte der Angreifer einen **Pass the Ticket-Angriff durchführen, um** das Benutzerkonto des Druckserver-Computers zu **imitieren**.
 
 Um einen Druckserver dazu zu bringen, sich gegen eine beliebige Maschine anzumelden, kannst du [**SpoolSample**](https://github.com/leechristensen/SpoolSample) verwenden:
 ```bash
@@ -47,6 +47,7 @@ Wenn das TGT von einem Domänencontroller stammt, könnten Sie einen [**DCSync-A
 [**Weitere Informationen zu diesem Angriff auf ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/domain-compromise-via-dc-print-server-and-kerberos-delegation)
 
 Hier finden Sie weitere Möglichkeiten, um **eine Authentifizierung zu erzwingen:**
+
 
 {{#ref}}
 printers-spooler-service-abuse.md

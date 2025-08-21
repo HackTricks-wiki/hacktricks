@@ -2,14 +2,14 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-> [!NOTE]
+> [!TIP]
 > Eine Anmerkung zu **PCAP** vs **PCAPNG**: Es gibt zwei Versionen des PCAP-Dateiformats; **PCAPNG ist neuer und wird nicht von allen Tools unterstützt**. Möglicherweise müssen Sie eine Datei von PCAPNG in PCAP mit Wireshark oder einem anderen kompatiblen Tool konvertieren, um sie in einigen anderen Tools verwenden zu können.
 
 ## Online-Tools für pcaps
 
-- Wenn der Header Ihres pcaps **beschädigt** ist, sollten Sie versuchen, ihn mit: [http://f00l.de/hacking/**pcapfix.php**](http://f00l.de/hacking/pcapfix.php) zu **reparieren**.
-- **Informationen** extrahieren und nach **Malware** in einem pcap in [**PacketTotal**](https://packettotal.com) suchen.
-- Nach **bösartiger Aktivität** suchen mit [**www.virustotal.com**](https://www.virustotal.com) und [**www.hybrid-analysis.com**](https://www.hybrid-analysis.com).
+- Wenn der Header Ihres pcaps **beschädigt** ist, sollten Sie versuchen, ihn mit [http://f00l.de/hacking/**pcapfix.php**](http://f00l.de/hacking/pcapfix.php) zu **reparieren**.
+- Extrahieren Sie **Informationen** und suchen Sie nach **Malware** in einem pcap in [**PacketTotal**](https://packettotal.com).
+- Suchen Sie nach **bösartiger Aktivität** mit [**www.virustotal.com**](https://www.virustotal.com) und [**www.hybrid-analysis.com**](https://www.hybrid-analysis.com).
 - **Vollständige pcap-Analyse aus dem Browser in** [**https://apackets.com/**](https://apackets.com/).
 
 ## Informationen extrahieren
@@ -18,7 +18,7 @@ Die folgenden Tools sind nützlich, um Statistiken, Dateien usw. zu extrahieren.
 
 ### Wireshark
 
-> [!NOTE]
+> [!TIP]
 > **Wenn Sie ein PCAP analysieren möchten, müssen Sie im Grunde wissen, wie man Wireshark verwendet.**
 
 Sie finden einige Wireshark-Tricks in:
@@ -33,7 +33,7 @@ Pcap-Analyse aus dem Browser.
 
 ### Xplico Framework
 
-[**Xplico** ](https://github.com/xplico/xplico)_(nur Linux)_ kann **ein** **pcap** **analysieren** und Informationen daraus extrahieren. Zum Beispiel extrahiert Xplico aus einer pcap-Datei jede E-Mail (POP, IMAP und SMTP-Protokolle), alle HTTP-Inhalte, jeden VoIP-Anruf (SIP), FTP, TFTP usw.
+[**Xplico** ](https://github.com/xplico/xplico)_(nur Linux)_ kann **ein pcap analysieren** und Informationen daraus extrahieren. Zum Beispiel extrahiert Xplico aus einer pcap-Datei jede E-Mail (POP, IMAP und SMTP-Protokolle), alle HTTP-Inhalte, jeden VoIP-Anruf (SIP), FTP, TFTP usw.
 
 **Installieren**
 ```bash
@@ -53,7 +53,7 @@ Erstellen Sie dann einen **neuen Fall**, erstellen Sie eine **neue Sitzung** inn
 
 ### NetworkMiner
 
-Wie Xplico ist es ein Tool zur **Analyse und Extraktion von Objekten aus pcaps**. Es hat eine kostenlose Edition, die Sie **hier** [**herunterladen**](https://www.netresec.com/?page=NetworkMiner) können. Es funktioniert mit **Windows**.\
+Wie Xplico ist es ein Tool, um **pcaps zu analysieren und Objekte zu extrahieren**. Es hat eine kostenlose Edition, die Sie **hier** [**herunterladen**](https://www.netresec.com/?page=NetworkMiner) können. Es funktioniert mit **Windows**.\
 Dieses Tool ist auch nützlich, um **andere Informationen aus den Paketen zu analysieren**, um schneller zu verstehen, was passiert ist.
 
 ### NetWitness Investigator
@@ -67,7 +67,7 @@ Dies ist ein weiteres nützliches Tool, das **die Pakete analysiert** und die In
 - Authentifizierungshashes extrahieren und mit Hashcat knacken (Kerberos, NTLM, CRAM-MD5, HTTP-Digest...)
 - Erstellen eines visuellen Netzwerkdiagramms (Netzwerkknoten & Benutzer)
 - DNS-Abfragen extrahieren
-- Alle TCP- und UDP-Sitzungen rekonstruieren
+- Alle TCP- & UDP-Sitzungen rekonstruieren
 - File Carving
 
 ### Capinfos
@@ -96,7 +96,7 @@ Sie können Tools wie [https://github.com/lgandx/PCredz](https://github.com/lgan
 
 ### Suricata
 
-**Installieren und einrichten**
+**Install and setup**
 ```
 apt-get install suricata
 apt-get install oinkmaster
@@ -111,11 +111,11 @@ suricata -r packets.pcap -c /etc/suricata/suricata.yaml -k none -v -l log
 
 [**YaraPCAP**](https://github.com/kevthehermit/YaraPcap) ist ein Tool, das
 
-- eine PCAP-Datei liest und Http-Streams extrahiert.
-- gzip komprimierte Streams entpackt
-- jede Datei mit yara scannt
-- einen report.txt schreibt
-- optional übereinstimmende Dateien in ein Verzeichnis speichert
+- Eine PCAP-Datei liest und Http-Streams extrahiert.
+- gzip komprimierte Streams dekomprimiert
+- Jede Datei mit yara scannt
+- Einen report.txt schreibt
+- Optional übereinstimmende Dateien in ein Verzeichnis speichert
 
 ### Malware-Analyse
 
@@ -127,9 +127,9 @@ suricata -r packets.pcap -c /etc/suricata/suricata.yaml -k none -v -l log
 
 ## Zeek
 
-> [Zeek](https://docs.zeek.org/en/master/about.html) ist ein passiver, Open-Source-Netzwerkverkehrsanalysator. Viele Betreiber verwenden Zeek als Netzwerk-Sicherheitsmonitor (NSM), um Untersuchungen zu verdächtigen oder bösartigen Aktivitäten zu unterstützen. Zeek unterstützt auch eine Vielzahl von Verkehrsanalysaufgaben über den Sicherheitsbereich hinaus, einschließlich Leistungsbewertung und Fehlersuche.
+> [Zeek](https://docs.zeek.org/en/master/about.html) ist ein passiver, Open-Source-Netzwerkverkehrsanalysator. Viele Betreiber verwenden Zeek als Network Security Monitor (NSM), um Untersuchungen zu verdächtigen oder bösartigen Aktivitäten zu unterstützen. Zeek unterstützt auch eine Vielzahl von Verkehrsanalysaufgaben über den Sicherheitsbereich hinaus, einschließlich Leistungsbewertung und Fehlersuche.
 
-Im Grunde genommen sind die von `zeek` erstellten Protokolle keine **pcaps**. Daher müssen Sie **andere Tools** verwenden, um die Protokolle zu analysieren, in denen die **Informationen** über die pcaps enthalten sind.
+Grundsätzlich sind die von `zeek` erstellten Protokolle keine **pcaps**. Daher müssen Sie **andere Tools** verwenden, um die Protokolle zu analysieren, in denen die **Informationen** über die pcaps enthalten sind.
 
 ### Verbindungsinformationen
 ```bash
@@ -200,13 +200,16 @@ rita show-exploded-dns -H --limit 10 zeek_logs
 ```
 ## Andere pcap-Analyse-Tricks
 
+
 {{#ref}}
 dnscat-exfiltration.md
 {{#endref}}
 
+
 {{#ref}}
 wifi-pcap-analysis.md
 {{#endref}}
+
 
 {{#ref}}
 usb-keystrokes.md

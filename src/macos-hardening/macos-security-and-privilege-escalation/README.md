@@ -8,11 +8,13 @@ Wenn Sie mit macOS nicht vertraut sind, sollten Sie die Grundlagen von macOS ler
 
 - Besondere macOS **Dateien & Berechtigungen:**
 
+
 {{#ref}}
 macos-files-folders-and-binaries/
 {{#endref}}
 
 - Häufige macOS **Benutzer**
+
 
 {{#ref}}
 macos-users.md
@@ -20,17 +22,20 @@ macos-users.md
 
 - **AppleFS**
 
+
 {{#ref}}
 macos-applefs.md
 {{#endref}}
 
 - Die **Architektur** des k**ernels**
 
+
 {{#ref}}
 mac-os-architecture/
 {{#endref}}
 
 - Häufige macOS n**etzwerkdienste & Protokolle**
+
 
 {{#ref}}
 macos-protocols.md
@@ -43,17 +48,20 @@ macos-protocols.md
 
 In Unternehmen werden **macOS** Systeme höchstwahrscheinlich **mit einem MDM verwaltet**. Daher ist es aus der Perspektive eines Angreifers interessant zu wissen, **wie das funktioniert**:
 
+
 {{#ref}}
 ../macos-red-teaming/macos-mdm/
 {{#endref}}
 
 ### MacOS - Inspektion, Debugging und Fuzzing
 
+
 {{#ref}}
 macos-apps-inspecting-debugging-and-fuzzing/
 {{#endref}}
 
 ## MacOS Sicherheitsmaßnahmen
+
 
 {{#ref}}
 macos-security-protections/
@@ -75,13 +83,15 @@ In der Lage zu sein, eine **Datei zu erstellen**, die von **root verwendet wird*
 
 Für diese Art von Schwachstellen vergessen Sie nicht, **anfällige `.pkg` Installer** zu überprüfen:
 
+
 {{#ref}}
 macos-files-folders-and-binaries/macos-installers-abuse.md
 {{#endref}}
 
 ### Dateierweiterung & URL-Schema-App-Handler
 
-Seltsame Apps, die durch Dateierweiterungen registriert sind, könnten missbraucht werden, und verschiedene Anwendungen können registriert werden, um spezifische Protokolle zu öffnen.
+Seltsame Apps, die durch Dateierweiterungen registriert sind, könnten missbraucht werden, und verschiedene Anwendungen können registriert werden, um spezifische Protokolle zu öffnen
+
 
 {{#ref}}
 macos-file-extension-apps.md
@@ -95,11 +105,12 @@ Daher muss ein Angreifer, der eine macOS-Maschine erfolgreich kompromittieren m�
 
 Diese Berechtigungen werden normalerweise in Form von **Entitlements** vergeben, mit denen die Anwendung signiert ist, oder die Anwendung könnte einige Zugriffe angefordert haben, und nachdem der **Benutzer diese genehmigt hat**, können sie in den **TCC-Datenbanken** gefunden werden. Eine andere Möglichkeit, wie ein Prozess diese Berechtigungen erhalten kann, besteht darin, ein **Kind eines Prozesses** mit diesen **Berechtigungen** zu sein, da sie normalerweise **vererbt** werden.
 
-Folgen Sie diesen Links, um verschiedene Möglichkeiten zu finden, um [**Berechtigungen in TCC zu eskalieren**](macos-security-protections/macos-tcc/index.html#tcc-privesc-and-bypasses), um [**TCC zu umgehen**](macos-security-protections/macos-tcc/macos-tcc-bypasses/index.html) und wie in der Vergangenheit [**SIP umgangen wurde**](macos-security-protections/macos-sip.md#sip-bypasses).
+Folgen Sie diesen Links, um verschiedene Möglichkeiten zu finden, [**Privilegien in TCC zu eskalieren**](macos-security-protections/macos-tcc/index.html#tcc-privesc-and-bypasses), um [**TCC zu umgehen**](macos-security-protections/macos-tcc/macos-tcc-bypasses/index.html) und wie in der Vergangenheit [**SIP umgangen wurde**](macos-security-protections/macos-sip.md#sip-bypasses).
 
 ## macOS Traditionelle Privilegieneskalation
 
 Natürlich sollten Sie aus der Perspektive eines Red Teams auch daran interessiert sein, zu root zu eskalieren. Überprüfen Sie den folgenden Beitrag für einige Hinweise:
+
 
 {{#ref}}
 macos-privilege-escalation.md

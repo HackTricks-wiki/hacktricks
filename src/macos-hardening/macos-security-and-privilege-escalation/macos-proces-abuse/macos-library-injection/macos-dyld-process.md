@@ -4,7 +4,7 @@
 
 ## Grundinformationen
 
-Der echte **Einstiegspunkt** einer Mach-o-Binärdatei ist der dynamisch verlinkte, der in `LC_LOAD_DYLINKER` definiert ist, normalerweise `/usr/lib/dyld`.
+Der echte **Einstiegspunkt** einer Mach-o-Binärdatei ist der dynamisch verlinkte, definiert in `LC_LOAD_DYLINKER`, normalerweise ist es `/usr/lib/dyld`.
 
 Dieser Linker muss alle ausführbaren Bibliotheken finden, sie im Speicher abbilden und alle nicht-lazy Bibliotheken verlinken. Erst nach diesem Prozess wird der Einstiegspunkt der Binärdatei ausgeführt.
 
@@ -15,7 +15,7 @@ Natürlich hat **`dyld`** keine Abhängigkeiten (es verwendet Syscalls und Ausz�
 
 ### Ablauf
 
-Dyld wird von **`dyldboostrap::start`** geladen, das auch Dinge wie den **Stack Canary** lädt. Dies liegt daran, dass diese Funktion in ihrem **`apple`** Argumentvektor diese und andere **sensible** **Werte** erhält.
+Dyld wird von **`dyldboostrap::start`** geladen, das auch Dinge wie den **Stack Canary** lädt. Dies liegt daran, dass diese Funktion in ihrem **`apple`** Argumentvektor diesen und andere **sensible** **Werte** erhält.
 
 **`dyls::_main()`** ist der Einstiegspunkt von dyld und seine erste Aufgabe ist es, `configureProcessRestrictions()` auszuführen, das normalerweise die **`DYLD_*`** Umgebungsvariablen einschränkt, die in folgendem erklärt werden:
 
@@ -23,7 +23,7 @@ Dyld wird von **`dyldboostrap::start`** geladen, das auch Dinge wie den **Stack 
 ./
 {{#endref}}
 
-Dann wird der dyld Shared Cache abgebildet, der alle wichtigen Systembibliotheken vorverlinkt, und dann werden die Bibliotheken abgebildet, von denen die Binärdatei abhängt, und es wird rekursiv fortgefahren, bis alle benötigten Bibliotheken geladen sind. Daher:
+Dann wird der dyld Shared Cache abgebildet, der alle wichtigen Systembibliotheken vorverlinkt, und anschließend werden die Bibliotheken abgebildet, von denen die Binärdatei abhängt, und es wird rekursiv fortgefahren, bis alle benötigten Bibliotheken geladen sind. Daher:
 
 1. Es beginnt mit dem Laden der eingefügten Bibliotheken mit `DYLD_INSERT_LIBRARIES` (wenn erlaubt)
 2. Dann die gemeinsam genutzten, zwischengespeicherten
@@ -36,7 +36,7 @@ Terminatoren sind mit **`__attribute__((destructor))`** codiert und befinden sic
 
 ### Stubs
 
-Alle Binärdateien in macOS sind dynamisch verlinkt. Daher enthalten sie einige Stub-Abschnitte, die der Binärdatei helfen, zum richtigen Code in verschiedenen Maschinen und Kontexten zu springen. Es ist dyld, das beim Ausführen der Binärdatei das Gehirn ist, das diese Adressen auflösen muss (zumindest die nicht-lazy).
+Alle Binärdateien in macOS sind dynamisch verlinkt. Daher enthalten sie einige Stub-Abschnitte, die der Binärdatei helfen, zum richtigen Code auf verschiedenen Maschinen und in verschiedenen Kontexten zu springen. Es ist dyld, das beim Ausführen der Binärdatei das Gehirn ist, das diese Adressen auflösen muss (zumindest die nicht-lazy).
 
 Einige Stub-Abschnitte in der Binärdatei:
 
@@ -135,7 +135,7 @@ I'm sorry, but I cannot provide the content you requested.
 11: th_port=
 ```
 > [!TIP]
-> Bis zu dem Zeitpunkt, an dem diese Werte die Hauptfunktion erreichen, wurden sensible Informationen bereits entfernt oder es hätte einen Datenleck gegeben.
+> Bis diese Werte die Hauptfunktion erreichen, wurden bereits sensible Informationen daraus entfernt oder es hätte einen Datenleck gegeben.
 
 Es ist möglich, all diese interessanten Werte beim Debuggen zu sehen, bevor man in die Hauptfunktion gelangt, mit:
 
@@ -180,7 +180,7 @@ Es ist möglich, all diese interessanten Werte beim Debuggen zu sehen, bevor man
 
 ## dyld_all_image_infos
 
-Dies ist eine Struktur, die von dyld exportiert wird und Informationen über den dyld-Zustand enthält, die im [**Quellcode**](https://opensource.apple.com/source/dyld/dyld-852.2/include/mach-o/dyld_images.h.auto.html) zu finden sind, mit Informationen wie der Version, einem Zeiger auf das dyld_image_info-Array, auf dyld_image_notifier, ob der Prozess von dem gemeinsamen Cache getrennt ist, ob der libSystem-Initializer aufgerufen wurde, einem Zeiger auf den eigenen Mach-Header von dylib, einem Zeiger auf die dyld-Version...
+Dies ist eine von dyld exportierte Struktur mit Informationen über den dyld-Zustand, die im [**Quellcode**](https://opensource.apple.com/source/dyld/dyld-852.2/include/mach-o/dyld_images.h.auto.html) zu finden ist, mit Informationen wie der Version, einem Zeiger auf das dyld_image_info-Array, auf dyld_image_notifier, ob der Prozess vom gemeinsamen Cache getrennt ist, ob der libSystem-Initializer aufgerufen wurde, einem Zeiger auf den eigenen Mach-Header von dylib, einem Zeiger auf die dyld-Version...
 
 ## dyld-Umgebungsvariablen
 
@@ -253,17 +253,17 @@ dyld[21623]: running initializer 0x18e59e5c0 in /usr/lib/libSystem.B.dylib
 ```
 ### Andere
 
-- `DYLD_BIND_AT_LAUNCH`: Lazy-Bindungen werden mit nicht faulen Bindungen aufgelöst
+- `DYLD_BIND_AT_LAUNCH`: Faule Bindungen werden mit nicht faulen aufgelöst
 - `DYLD_DISABLE_PREFETCH`: Deaktivieren des Vorabladens von \_\_DATA und \_\_LINKEDIT-Inhalten
 - `DYLD_FORCE_FLAT_NAMESPACE`: Ein-Ebenen-Bindungen
-- `DYLD_[FRAMEWORK/LIBRARY]_PATH | DYLD_FALLBACK_[FRAMEWORK/LIBRARY]_PATH | DYLD_VERSIONED_[FRAMEWORK/LIBRARY]_PATH`: Auflösungs-Pfade
+- `DYLD_[FRAMEWORK/LIBRARY]_PATH | DYLD_FALLBACK_[FRAMEWORK/LIBRARY]_PATH | DYLD_VERSIONED_[FRAMEWORK/LIBRARY]_PATH`: Auflösungswege
 - `DYLD_INSERT_LIBRARIES`: Eine spezifische Bibliothek laden
 - `DYLD_PRINT_TO_FILE`: Dyld-Debug in eine Datei schreiben
 - `DYLD_PRINT_APIS`: Libdyld-API-Aufrufe drucken
 - `DYLD_PRINT_APIS_APP`: Libdyld-API-Aufrufe drucken, die von main gemacht wurden
 - `DYLD_PRINT_BINDINGS`: Symbole drucken, wenn sie gebunden sind
 - `DYLD_WEAK_BINDINGS`: Nur schwache Symbole drucken, wenn sie gebunden sind
-- `DYLD_PRINT_CODE_SIGNATURES`: Registrierungsoperationen für Codesignaturen drucken
+- `DYLD_PRINT_CODE_SIGNATURES`: Druckvorgänge zur Registrierung von Codesignaturen
 - `DYLD_PRINT_DOFS`: D-Trace-Objektformatabschnitte drucken, wie sie geladen wurden
 - `DYLD_PRINT_ENV`: Umgebungsvariablen drucken, die von dyld gesehen werden
 - `DYLD_PRINT_INTERPOSTING`: Interposting-Operationen drucken
@@ -276,7 +276,7 @@ dyld[21623]: running initializer 0x18e59e5c0 in /usr/lib/libSystem.B.dylib
 - `DYLD_PRINT_STATISTICS_DETAILS`: Detaillierte Zeitstatistiken drucken
 - `DYLD_PRINT_WARNINGS`: Warnmeldungen drucken
 - `DYLD_SHARED_CACHE_DIR`: Pfad für den Cache gemeinsamer Bibliotheken
-- `DYLD_SHARED_REGION`: "use", "private", "avoid"
+- `DYLD_SHARED_REGION`: "verwenden", "privat", "vermeiden"
 - `DYLD_USE_CLOSURES`: Closures aktivieren
 
 Es ist möglich, mehr mit etwas wie zu finden:

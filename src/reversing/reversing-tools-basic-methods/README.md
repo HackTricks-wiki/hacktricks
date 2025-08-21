@@ -25,7 +25,7 @@ Software:
 
 ### [dotPeek](https://www.jetbrains.com/decompiler/)
 
-dotPeek ist ein Decompiler, der **mehrere Formate dekompiliert und untersucht**, einschließlich **Bibliotheken** (.dll), **Windows-Metadaten-Dateien** (.winmd) und **ausführbaren Dateien** (.exe). Nach der Dekomplierung kann ein Assembly als Visual Studio-Projekt (.csproj) gespeichert werden.
+dotPeek ist ein Decompiler, der **mehrere Formate dekompiliert und untersucht**, einschließlich **Bibliotheken** (.dll), **Windows-Metadatendateien** (.winmd) und **ausführbaren Dateien** (.exe). Nach der Dekomplierung kann ein Assembly als Visual Studio-Projekt (.csproj) gespeichert werden.
 
 Der Vorteil hier ist, dass, wenn ein verlorener Quellcode aus einem Legacy-Assembly wiederhergestellt werden muss, diese Aktion Zeit sparen kann. Darüber hinaus bietet dotPeek eine praktische Navigation durch den dekompilierten Code, was es zu einem der perfekten Werkzeuge für die **Xamarin-Algorithmusanalyse** macht.
 
@@ -38,11 +38,11 @@ Mit einem umfassenden Add-In-Modell und einer API, die das Tool an Ihre genauen 
 - Findet undocumented und unexposed Funktionalitäten, um mehr aus den verwendeten APIs und Technologien herauszuholen.
 - Findet Abhängigkeiten und verschiedene Assemblies
 - Verfolgt den genauen Standort von Fehlern in Ihrem Code, Drittanbieterkomponenten und Bibliotheken.
-- Debuggt in die Quelle allen .NET-Codes, mit dem Sie arbeiten.
+- Debuggt in die Quelle des gesamten .NET-Codes, mit dem Sie arbeiten.
 
 ### [ILSpy](https://github.com/icsharpcode/ILSpy) & [dnSpy](https://github.com/dnSpy/dnSpy/releases)
 
-[ILSpy-Plugin für Visual Studio Code](https://github.com/icsharpcode/ilspy-vscode): Sie können es auf jedem Betriebssystem haben (Sie können es direkt von VSCode installieren, es ist nicht notwendig, das Git herunterzuladen. Klicken Sie auf **Erweiterungen** und **suchen Sie nach ILSpy**).\
+[ILSpy-Plugin für Visual Studio Code](https://github.com/icsharpcode/ilspy-vscode): Sie können es auf jedem Betriebssystem haben (Sie können es direkt aus VSCode installieren, es ist nicht notwendig, das Git herunterzuladen. Klicken Sie auf **Erweiterungen** und **suchen Sie nach ILSpy**).\
 Wenn Sie **dekompilieren**, **modifizieren** und **wieder kompilieren** müssen, können Sie [**dnSpy**](https://github.com/dnSpy/dnSpy/releases) oder einen aktiv gepflegten Fork davon, [**dnSpyEx**](https://github.com/dnSpyEx/dnSpy/releases), verwenden. (**Rechtsklick -> Methode ändern**, um etwas innerhalb einer Funktion zu ändern).
 
 ### DNSpy Logging
@@ -57,7 +57,7 @@ File.AppendAllText(path, "Password: " + password + "\n");
 
 Um Code mit DNSpy zu debuggen, müssen Sie:
 
-Zuerst die **Assembly-Attribute** ändern, die sich auf **Debugging** beziehen:
+Zuerst die **Assembly-Attribute** im Zusammenhang mit **Debugging** ändern:
 
 ![](<../../images/image (973).png>)
 ```aspnet
@@ -80,11 +80,11 @@ Speichern Sie dann die neue Datei über _**Datei >> Modul speichern...**_:
 
 Dies ist notwendig, da, wenn Sie dies nicht tun, zur **Laufzeit** mehrere **Optimierungen** auf den Code angewendet werden und es möglich sein könnte, dass beim Debuggen ein **Break-Point niemals erreicht wird** oder einige **Variablen nicht existieren**.
 
-Wenn Ihre .NET-Anwendung von **IIS** **ausgeführt** wird, können Sie sie mit:
+Wenn Ihre .NET-Anwendung von **IIS** **ausgeführt** wird, können Sie sie mit **neustarten**:
 ```
 iisreset /noforce
 ```
-Dann sollten Sie, um mit dem Debuggen zu beginnen, alle geöffneten Dateien schließen und im **Debug Tab** **Attach to Process...** auswählen:
+Dann, um mit dem Debuggen zu beginnen, sollten Sie alle geöffneten Dateien schließen und im **Debug Tab** **Attach to Process...** auswählen:
 
 ![](<../../images/image (318).png>)
 
@@ -127,7 +127,7 @@ Klicken Sie mit der rechten Maustaste auf ein beliebiges Modul im **Assembly Exp
 
 Wenn Sie dann mit dem Debuggen beginnen, **wird die Ausführung gestoppt, wenn jede DLL geladen wird**. Wenn rundll32 Ihre DLL lädt, wird die Ausführung gestoppt.
 
-Aber wie gelangen Sie zum Code der geladenen DLL? Mit dieser Methode weiß ich es nicht.
+Aber wie gelangen Sie zum Code der geladenen DLL? Mit dieser Methode weiß ich nicht wie.
 
 ### Verwendung von x64dbg/x32dbg
 
@@ -150,7 +150,7 @@ Dann können Sie sehen, wann die Ausführung in der DLL gestoppt wurde, die Sie 
 cheat-engine.md
 {{#endref}}
 
-[**PiNCE**](https://github.com/korcankaraokcu/PINCE) ist ein Front-End-/Reverse-Engineering-Tool für den GNU Project Debugger (GDB), das sich auf Spiele konzentriert. Es kann jedoch für alle reverse-engineeringbezogenen Dinge verwendet werden.
+[**PiNCE**](https://github.com/korcankaraokcu/PINCE) ist ein Front-End/Reverse-Engineering-Tool für den GNU Project Debugger (GDB), das sich auf Spiele konzentriert. Es kann jedoch für alle reverse-engineeringbezogenen Dinge verwendet werden.
 
 [**Decompiler Explorer**](https://dogbolt.org/) ist ein Web-Frontend für eine Reihe von Decompilern. Dieser Webdienst ermöglicht es Ihnen, die Ausgaben verschiedener Decompiler bei kleinen ausführbaren Dateien zu vergleichen.
 
@@ -168,7 +168,7 @@ https://github.com/nongiach/arm_now
 Dann müssen Sie einen **Debugger** (Ida oder x64dbg) an den Prozess anhängen und einen **Haltepunkt an der angegebenen Speicheradresse** setzen und die Ausführung **fortsetzen**. Auf diese Weise debuggen Sie den Shellcode.
 
 Die Veröffentlichungsseite auf GitHub enthält ZIP-Dateien mit den kompilierten Versionen: [https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)\
-Sie finden eine leicht modifizierte Version von Blobrunner unter dem folgenden Link. Um es zu kompilieren, erstellen Sie einfach **ein C/C++-Projekt in Visual Studio Code, kopieren Sie den Code und bauen Sie es**.
+Sie finden eine leicht modifizierte Version von Blobrunner unter dem folgenden Link. Um es zu kompilieren, **erstellen Sie einfach ein C/C++-Projekt in Visual Studio Code, kopieren Sie den Code und bauen Sie es**.
 
 {{#ref}}
 blobrunner.md
@@ -176,7 +176,7 @@ blobrunner.md
 
 ### Debugging eines Shellcodes mit jmp2it
 
-[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4) ist sehr ähnlich wie Blobrunner. Es wird den **Shellcode** in einem Speicherbereich **allokieren** und eine **ewige Schleife** starten. Sie müssen dann den **Debugger** an den Prozess anhängen, **spielen Sie Start, warten Sie 2-5 Sekunden und drücken Sie Stop**, und Sie werden sich in der **ewigen Schleife** wiederfinden. Springen Sie zur nächsten Anweisung der ewigen Schleife, da es ein Aufruf zum Shellcode sein wird, und schließlich werden Sie den Shellcode ausführen.
+[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4) ist sehr ähnlich wie Blobrunner. Es wird den **Shellcode** in einem Speicherbereich **allokieren** und eine **ewige Schleife** starten. Sie müssen dann den **Debugger** an den Prozess anhängen, **starten, 2-5 Sekunden warten und stoppen**, und Sie werden sich in der **ewigen Schleife** wiederfinden. Springen Sie zur nächsten Anweisung der ewigen Schleife, da es ein Aufruf zum Shellcode sein wird, und schließlich werden Sie den Shellcode ausführen.
 
 ![](<../../images/image (509).png>)
 
@@ -236,7 +236,7 @@ apt-get install libz3-dev
 ```
 Und [installiere keystone](https://github.com/keystone-engine/keystone/blob/master/docs/COMPILE-NIX.md) (`apt-get install cmake; mkdir build; cd build; ../make-share.sh; make install`)
 
-Wenn du an einem **CTF teilnimmst, könnte dieser Workaround, um die Flagge zu finden,** sehr nützlich sein: [https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html](https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html)
+Wenn du an einem **CTF teilnimmst, könnte dieser Workaround, um die Flag zu finden,** sehr nützlich sein: [https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html](https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html)
 
 ## Rust
 
@@ -245,7 +245,7 @@ Um den **Einstiegspunkt** zu finden, suche die Funktionen nach `::main` wie in:
 ![](<../../images/image (1080).png>)
 
 In diesem Fall hieß die Binärdatei authenticator, daher ist es ziemlich offensichtlich, dass dies die interessante Hauptfunktion ist.\
-Hast du den **Namen** der **Funktionen**, die aufgerufen werden, suche sie im **Internet**, um mehr über ihre **Eingaben** und **Ausgaben** zu erfahren.
+Hast du den **Namen** der **aufgerufenen Funktionen**, suche sie im **Internet**, um mehr über ihre **Eingaben** und **Ausgaben** zu erfahren.
 
 ## **Delphi**
 
@@ -257,7 +257,7 @@ Drücke einfach **ATL+f7** (Python-Plugin in IDA importieren) und wähle das Pyt
 
 Dieses Plugin führt die Binärdatei aus und löst die Funktionsnamen dynamisch zu Beginn des Debuggings auf. Nach dem Start des Debuggings drücke erneut die Starttaste (die grüne oder f9) und ein Haltepunkt wird am Anfang des echten Codes erreicht.
 
-Es ist auch sehr interessant, weil der Debugger stoppt, wenn du einen Knopf in der grafischen Anwendung drückst, in der Funktion, die von diesem Knopf ausgeführt wird.
+Es ist auch sehr interessant, denn wenn du einen Knopf in der grafischen Anwendung drückst, stoppt der Debugger in der Funktion, die von diesem Knopf ausgeführt wird.
 
 ## Golang
 
@@ -284,7 +284,7 @@ Wenn du die **Binärdatei** eines GBA-Spiels erhältst, kannst du verschiedene T
 - [**gba-ghidra-loader**](https://github.com/pudii/gba-ghidra-loader) - Ghidra-Plugin
 - [**GhidraGBA**](https://github.com/SiD3W4y/GhidraGBA) - Ghidra-Plugin
 
-In [**no$gba**](https://problemkaputt.de/gba.htm), in _**Optionen --> Emulationssetup --> Steuerungen**_ kannst du sehen, wie du die **Tasten** des Game Boy Advance drücken kannst.
+In [**no$gba**](https://problemkaputt.de/gba.htm), in _**Optionen --> Emulationssetup --> Steuerungen**_ kannst du sehen, wie du die Tasten des Game Boy Advance **drücken** kannst.
 
 ![](<../../images/image (581).png>)
 
@@ -368,19 +368,20 @@ FUN_08000864();
 if (uVar1 == 0x10) {
 DAT_030000d8 = DAT_030000d8 + 0x3a;
 ```
-Im vorherigen Code sehen Sie, dass wir **uVar1** (der Ort, an dem der **Wert des gedrückten Buttons** gespeichert ist) mit einigen Werten vergleichen:
+Im vorherigen Code sehen Sie, dass wir **uVar1** (der Ort, an dem der **Wert des gedrückten Buttons** ist) mit einigen Werten vergleichen:
 
 - Zuerst wird er mit dem **Wert 4** (**SELECT**-Taste) verglichen: In der Herausforderung löscht dieser Button den Bildschirm.
 - Dann wird er mit dem **Wert 8** (**START**-Taste) verglichen: In der Herausforderung wird überprüft, ob der Code gültig ist, um die Flagge zu erhalten.
 - In diesem Fall wird die Variable **`DAT_030000d8`** mit 0xf3 verglichen, und wenn der Wert gleich ist, wird ein bestimmter Code ausgeführt.
 - In allen anderen Fällen wird ein Zähler (`DAT_030000d4`) überprüft. Es ist ein Zähler, weil er 1 hinzufügt, direkt nachdem er in den Code eingetreten ist.\
-**Wenn** weniger als 8, wird etwas gemacht, das **Werte** zu **`DAT_030000d8`** **hinzufügt** (im Grunde werden die Werte der gedrückten Tasten in dieser Variablen addiert, solange der Zähler weniger als 8 ist).
+**Wenn** weniger als 8, wird etwas gemacht, das **Werte zu** **`DAT_030000d8`** **hinzufügt** (im Grunde werden die Werte der gedrückten Tasten in dieser Variablen addiert, solange der Zähler weniger als 8 ist).
 
-In dieser Herausforderung mussten Sie also, unter Berücksichtigung der Werte der Tasten, eine **Kombination mit einer Länge von weniger als 8 drücken, deren resultierende Addition 0xf3 ergibt.**
+In dieser Herausforderung mussten Sie also, wissend um die Werte der Tasten, eine **Kombination mit einer Länge kleiner als 8 drücken, deren resultierende Addition 0xf3 ist.**
 
 **Referenz für dieses Tutorial:** [**https://exp.codes/Nostalgia/**](https://exp.codes/Nostalgia/)
 
 ## Game Boy
+
 
 {{#ref}}
 https://www.youtube.com/watch?v=VVbRe7wr3G4

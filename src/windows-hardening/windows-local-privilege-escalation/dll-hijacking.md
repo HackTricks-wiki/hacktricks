@@ -14,14 +14,14 @@ Es werden mehrere Methoden für DLL Hijacking eingesetzt, wobei jede je nach DLL
 
 1. **DLL-Ersetzung**: Austausch einer echten DLL gegen eine bösartige, optional unter Verwendung von DLL Proxying, um die Funktionalität der ursprünglichen DLL zu erhalten.
 2. **DLL-Suchreihenfolge-Hijacking**: Platzierung der bösartigen DLL in einem Suchpfad vor der legitimen, um das Suchmuster der Anwendung auszunutzen.
-3. **Phantom-DLL-Hijacking**: Erstellung einer bösartigen DLL, die von einer Anwendung geladen wird, in der Annahme, es handele sich um eine nicht vorhandene erforderliche DLL.
-4. **DLL-Umleitung**: Modifizierung von Suchparametern wie `%PATH%` oder `.exe.manifest` / `.exe.local`-Dateien, um die Anwendung auf die bösartige DLL zu lenken.
-5. **WinSxS DLL-Ersetzung**: Ersetzung der legitimen DLL durch eine bösartige im WinSxS-Verzeichnis, eine Methode, die oft mit DLL Side-Loading in Verbindung gebracht wird.
+3. **Phantom-DLL-Hijacking**: Erstellen einer bösartigen DLL, die von einer Anwendung geladen wird, die denkt, es sei eine nicht vorhandene erforderliche DLL.
+4. **DLL-Umleitung**: Modifizieren von Suchparametern wie `%PATH%` oder `.exe.manifest` / `.exe.local`-Dateien, um die Anwendung auf die bösartige DLL zu lenken.
+5. **WinSxS DLL-Ersetzung**: Ersetzen der legitimen DLL durch eine bösartige im WinSxS-Verzeichnis, eine Methode, die oft mit DLL Side-Loading in Verbindung gebracht wird.
 6. **Relative Pfad DLL Hijacking**: Platzierung der bösartigen DLL in einem benutzerkontrollierten Verzeichnis mit der kopierten Anwendung, ähnlich den Techniken der Binary Proxy Execution.
 
-## Fehlende Dlls finden
+## Fehlende DLLs finden
 
-Der häufigste Weg, um fehlende Dlls in einem System zu finden, besteht darin, [procmon](https://docs.microsoft.com/en-us/sysinternals/downloads/procmon) von Sysinternals auszuführen und die **folgenden 2 Filter** einzustellen:
+Der häufigste Weg, um fehlende DLLs in einem System zu finden, besteht darin, [procmon](https://docs.microsoft.com/en-us/sysinternals/downloads/procmon) von Sysinternals auszuführen und die **folgenden 2 Filter** einzustellen:
 
 ![](<../../images/image (311).png>)
 
@@ -31,18 +31,18 @@ und nur die **Dateisystemaktivität** anzuzeigen:
 
 ![](<../../images/image (314).png>)
 
-Wenn Sie nach **fehlenden Dlls im Allgemeinen** suchen, lassen Sie dies einige **Sekunden** laufen.\
-Wenn Sie nach einer **fehlenden Dll in einer bestimmten ausführbaren Datei** suchen, sollten Sie **einen anderen Filter wie "Prozessname" "enthält" "\<exec name>" setzen, es ausführen und die Ereignisaufnahme stoppen**.
+Wenn Sie nach **fehlenden DLLs im Allgemeinen** suchen, lassen Sie dies einige **Sekunden** laufen.\
+Wenn Sie nach einer **fehlenden DLL in einer bestimmten ausführbaren Datei** suchen, sollten Sie **einen anderen Filter wie "Prozessname" "enthält" "\<exec name>" setzen, es ausführen und die Ereignisaufnahme stoppen**.
 
-## Ausnutzen fehlender Dlls
+## Ausnutzen fehlender DLLs
 
-Um die Privilegien zu eskalieren, haben wir die beste Chance, wenn wir in der Lage sind, **eine DLL zu schreiben, die ein privilegierter Prozess versuchen wird zu laden** an einem **Ort, wo sie gesucht wird**. Daher werden wir in der Lage sein, **eine DLL in einem** **Ordner** zu **schreiben**, wo die **DLL zuerst gesucht wird** bevor der Ordner, in dem die **ursprüngliche DLL** ist (seltsamer Fall), oder wir werden in der Lage sein, **in einen Ordner zu schreiben, wo die DLL gesucht wird** und die ursprüngliche **DLL nicht in einem Ordner existiert**.
+Um die Privilegien zu eskalieren, haben wir die beste Chance, wenn wir in der Lage sind, **eine DLL zu schreiben, die ein privilegierter Prozess versuchen wird zu laden** an einem **Ort, wo sie gesucht wird**. Daher werden wir in der Lage sein, **eine DLL in einem** **Ordner** zu **schreiben**, wo die **DLL zuerst gesucht wird** bevor der Ordner, wo die **ursprüngliche DLL** ist (seltsamer Fall), oder wir werden in der Lage sein, **in einen Ordner zu schreiben, wo die DLL gesucht wird** und die ursprüngliche **DLL nicht in irgendeinem Ordner existiert**.
 
 ### DLL-Suchreihenfolge
 
 **In der** [**Microsoft-Dokumentation**](https://docs.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-search-order#factors-that-affect-searching) **finden Sie, wie die DLLs spezifisch geladen werden.**
 
-**Windows-Anwendungen** suchen nach DLLs, indem sie einer Reihe von **vordefinierten Suchpfaden** folgen, die einer bestimmten Reihenfolge entsprechen. Das Problem des DLL Hijacking tritt auf, wenn eine schädliche DLL strategisch in einem dieser Verzeichnisse platziert wird, um sicherzustellen, dass sie vor der authentischen DLL geladen wird. Eine Lösung zur Vermeidung dessen ist, sicherzustellen, dass die Anwendung absolute Pfade verwendet, wenn sie auf die benötigten DLLs verweist.
+**Windows-Anwendungen** suchen nach DLLs, indem sie einer Reihe von **vordefinierten Suchpfaden** folgen, die einer bestimmten Reihenfolge entsprechen. Das Problem des DLL Hijackings tritt auf, wenn eine schädliche DLL strategisch in einem dieser Verzeichnisse platziert wird, um sicherzustellen, dass sie vor der authentischen DLL geladen wird. Eine Lösung zur Vermeidung dessen ist, sicherzustellen, dass die Anwendung absolute Pfade verwendet, wenn sie auf die benötigten DLLs verweist.
 
 Sie können die **DLL-Suchreihenfolge auf 32-Bit**-Systemen unten sehen:
 
@@ -65,7 +65,7 @@ Es gibt andere Möglichkeiten, die Suchreihenfolge zu ändern, aber ich werde si
 
 Bestimmte Ausnahmen von der standardmäßigen DLL-Suchreihenfolge sind in der Windows-Dokumentation vermerkt:
 
-- Wenn eine **DLL, die denselben Namen wie eine bereits im Speicher geladene DLL hat**, auftritt, umgeht das System die übliche Suche. Stattdessen wird eine Überprüfung auf Umleitung und ein Manifest durchgeführt, bevor auf die bereits im Speicher befindliche DLL zurückgegriffen wird. **In diesem Szenario führt das System keine Suche nach der DLL durch**.
+- Wenn eine **DLL, die denselben Namen wie eine bereits im Speicher geladene hat**, gefunden wird, umgeht das System die übliche Suche. Stattdessen wird eine Überprüfung auf Umleitung und ein Manifest durchgeführt, bevor auf die bereits im Speicher befindliche DLL zurückgegriffen wird. **In diesem Szenario führt das System keine Suche nach der DLL durch**.
 - In Fällen, in denen die DLL als **bekannte DLL** für die aktuelle Windows-Version erkannt wird, verwendet das System seine Version der bekannten DLL sowie alle abhängigen DLLs, **ohne den Suchprozess durchzuführen**. Der Registrierungsschlüssel **HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\KnownDLLs** enthält eine Liste dieser bekannten DLLs.
 - Sollte eine **DLL Abhängigkeiten haben**, wird die Suche nach diesen abhängigen DLLs so durchgeführt, als ob sie nur durch ihre **Modulnamen** angegeben wären, unabhängig davon, ob die ursprüngliche DLL über einen vollständigen Pfad identifiziert wurde.
 
@@ -76,8 +76,8 @@ Bestimmte Ausnahmen von der standardmäßigen DLL-Suchreihenfolge sind in der Wi
 - Identifizieren Sie einen Prozess, der unter **unterschiedlichen Privilegien** (horizontale oder laterale Bewegung) arbeitet oder arbeiten wird, der **eine DLL** **fehlt**.
 - Stellen Sie sicher, dass **Schreibzugriff** für ein **Verzeichnis** verfügbar ist, in dem die **DLL** **gesucht wird**. Dieser Ort könnte das Verzeichnis der ausführbaren Datei oder ein Verzeichnis innerhalb des Systempfads sein.
 
-Ja, die Anforderungen sind kompliziert zu finden, da **es standardmäßig seltsam ist, eine privilegierte ausführbare Datei ohne eine DLL zu finden** und es ist sogar **noch seltsamer, Schreibberechtigungen für einen Systempfad-Ordner zu haben** (standardmäßig können Sie das nicht). Aber in falsch konfigurierten Umgebungen ist dies möglich.\
-Falls Sie Glück haben und die Anforderungen erfüllen, könnten Sie das [UACME](https://github.com/hfiref0x/UACME) Projekt überprüfen. Auch wenn das **Hauptziel des Projekts darin besteht, UAC zu umgehen**, finden Sie dort möglicherweise einen **PoC** für ein DLL-Hijacking für die Windows-Version, die Sie verwenden können (wahrscheinlich nur den Pfad des Ordners ändern, in dem Sie Schreibberechtigungen haben).
+Ja, die Anforderungen sind kompliziert zu finden, da **es standardmäßig seltsam ist, eine privilegierte ausführbare Datei ohne eine DLL zu finden** und es ist sogar **noch seltsamer, Schreibberechtigungen in einem Systempfad-Ordner zu haben** (standardmäßig können Sie das nicht). Aber in falsch konfigurierten Umgebungen ist dies möglich.\
+Falls Sie Glück haben und die Anforderungen erfüllen, könnten Sie das [UACME](https://github.com/hfiref0x/UACME) Projekt überprüfen. Auch wenn das **Hauptziel des Projekts darin besteht, UAC zu umgehen**, finden Sie dort möglicherweise einen **PoC** für ein DLL Hijacking für die Windows-Version, die Sie verwenden können (wahrscheinlich müssen Sie nur den Pfad des Ordners ändern, in dem Sie Schreibberechtigungen haben).
 
 Beachten Sie, dass Sie **Ihre Berechtigungen in einem Ordner überprüfen können**, indem Sie:
 ```bash
@@ -101,7 +101,7 @@ dll-hijacking/writable-sys-path-+dll-hijacking-privesc.md
 
 ### Automatisierte Werkzeuge
 
-[**Winpeas** ](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS) überprüft, ob Sie Schreibberechtigungen für einen Ordner im System-PATH haben.\
+[**Winpeas**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS) überprüft, ob Sie Schreibberechtigungen für einen Ordner im System-PATH haben.\
 Andere interessante automatisierte Werkzeuge zur Entdeckung dieser Schwachstelle sind **PowerSploit-Funktionen**: _Find-ProcessDLLHijack_, _Find-PathDLLHijack_ und _Write-HijackDll._
 
 ### Beispiel

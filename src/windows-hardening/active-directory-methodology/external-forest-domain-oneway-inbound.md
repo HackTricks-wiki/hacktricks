@@ -1,4 +1,4 @@
-# Externer Wald-Domain - Einweg (Eingehend) oder bidirektional
+# Externer Wald-Domain - Einweg (Inbound) oder bidirektional
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -70,7 +70,7 @@ Get-DomainUser -SPN -Domain domain_name.local | select SamAccountName
 ./
 {{#endref}}
 
-## Identitätsübernahme
+## Identitätsdiebstahl
 
 ### Anmeldung
 

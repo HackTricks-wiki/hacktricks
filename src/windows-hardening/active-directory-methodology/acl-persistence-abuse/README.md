@@ -25,9 +25,9 @@ Set-DomainObject -Credential $creds -Identity <username> -Clear serviceprincipal
 ```bash
 Set-DomainObject -Identity <username> -XOR @{UserAccountControl=4194304}
 ```
-## **GenericAll-Rechte auf Gruppe**
+## **GenericAll-Rechte in der Gruppe**
 
-Dieses Privileg ermöglicht es einem Angreifer, Gruppenmitgliedschaften zu manipulieren, wenn er `GenericAll`-Rechte auf einer Gruppe wie `Domain Admins` hat. Nachdem der Angreifer den distinguished name der Gruppe mit `Get-NetGroup` identifiziert hat, kann er:
+Dieses Privileg ermöglicht es einem Angreifer, Gruppenmitgliedschaften zu manipulieren, wenn er `GenericAll`-Rechte in einer Gruppe wie `Domain Admins` hat. Nachdem der Angreifer den Distinguished Name der Gruppe mit `Get-NetGroup` identifiziert hat, kann er:
 
 - **Sich Selbst zur Domain-Admins-Gruppe Hinzufügen**: Dies kann über direkte Befehle oder mithilfe von Modulen wie Active Directory oder PowerSploit erfolgen.
 ```bash
@@ -46,7 +46,7 @@ Das Halten dieser Berechtigungen auf einem Computerobjekt oder einem Benutzerkon
 
 Wenn ein Benutzer `WriteProperty`-Rechte auf alle Objekte für eine bestimmte Gruppe (z. B. `Domain Admins`) hat, kann er:
 
-- **Sich Selbst zur Domain Admins Gruppe Hinzufügen**: Erreichbar durch die Kombination der Befehle `net user` und `Add-NetGroupUser`, ermöglicht diese Methode eine Privilegieneskalation innerhalb der Domäne.
+- **Sich Selbst zur Domain Admins Gruppe Hinzufügen**: Erreichbar durch die Kombination der Befehle `net user` und `Add-NetGroupUser`, ermöglicht diese Methode die Eskalation von Berechtigungen innerhalb der Domäne.
 ```bash
 net user spotless /domain; Add-NetGroupUser -UserName spotless -GroupName "domain admins" -Domain "offense.local"; net user spotless /domain
 ```
@@ -65,7 +65,7 @@ net group "domain admins" spotless /add /domain
 ```
 ## **ForceChangePassword**
 
-Das Halten des `ExtendedRight` für einen Benutzer für `User-Force-Change-Password` ermöglicht Passwortzurücksetzungen, ohne das aktuelle Passwort zu kennen. Die Überprüfung dieses Rechts und dessen Ausnutzung kann über PowerShell oder alternative Befehlszeilentools erfolgen, die mehrere Methoden zum Zurücksetzen des Passworts eines Benutzers bieten, einschließlich interaktiver Sitzungen und Einzeiler für nicht-interaktive Umgebungen. Die Befehle reichen von einfachen PowerShell-Aufrufen bis hin zur Verwendung von `rpcclient` auf Linux, was die Vielseitigkeit der Angriffsvektoren demonstriert.
+Das Halten des `ExtendedRight` für einen Benutzer für `User-Force-Change-Password` ermöglicht Passwortzurücksetzungen, ohne das aktuelle Passwort zu kennen. Die Überprüfung dieses Rechts und dessen Ausnutzung kann über PowerShell oder alternative Befehlszeilentools erfolgen, die mehrere Methoden zum Zurücksetzen des Benutzerpassworts anbieten, einschließlich interaktiver Sitzungen und Einzeiler für nicht-interaktive Umgebungen. Die Befehle reichen von einfachen PowerShell-Aufrufen bis hin zur Verwendung von `rpcclient` auf Linux, was die Vielseitigkeit der Angriffsvektoren demonstriert.
 ```bash
 Get-ObjectAcl -SamAccountName delegate -ResolveGUIDs | ? {$_.IdentityReference -eq "OFFENSE\spotless"}
 Set-DomainUserPassword -Identity delegate -Verbose
@@ -118,7 +118,7 @@ Der DCSync-Angriff nutzt spezifische Replikationsberechtigungen in der Domäne, 
 
 ### GPO-Delegation
 
-Delegierter Zugriff zur Verwaltung von Gruppenrichtlinienobjekten (GPOs) kann erhebliche Sicherheitsrisiken darstellen. Wenn beispielsweise ein Benutzer wie `offense\spotless` GPO-Verwaltungsrechte delegiert bekommt, kann er über Berechtigungen wie **WriteProperty**, **WriteDacl** und **WriteOwner** verfügen. Diese Berechtigungen können für böswillige Zwecke missbraucht werden, wie mit PowerView identifiziert: `bash Get-ObjectAcl -ResolveGUIDs | ? {$_.IdentityReference -eq "OFFENSE\spotless"}`
+Delegierter Zugriff zur Verwaltung von Gruppenrichtlinienobjekten (GPOs) kann erhebliche Sicherheitsrisiken darstellen. Wenn beispielsweise ein Benutzer wie `offense\spotless` die GPO-Verwaltungsrechte delegiert bekommt, kann er über Berechtigungen wie **WriteProperty**, **WriteDacl** und **WriteOwner** verfügen. Diese Berechtigungen können für böswillige Zwecke missbraucht werden, wie mit PowerView identifiziert: `bash Get-ObjectAcl -ResolveGUIDs | ? {$_.IdentityReference -eq "OFFENSE\spotless"}`
 
 ### GPO-Berechtigungen auflisten
 
@@ -163,7 +163,7 @@ Die Struktur der Aufgabe, wie sie in der XML-Konfigurationsdatei dargestellt ist
 
 ### Benutzer und Gruppen
 
-GPOs ermöglichen auch die Manipulation von Benutzer- und Gruppenmitgliedschaften auf Zielsystemen. Durch das direkte Bearbeiten der Richtliniendateien für Benutzer und Gruppen können Angreifer Benutzer zu privilegierten Gruppen, wie der lokalen Gruppe `administrators`, hinzufügen. Dies ist durch die Delegation von GPO-Verwaltungsberechtigungen möglich, die die Modifikation von Richtliniendateien erlaubt, um neue Benutzer hinzuzufügen oder Gruppenmitgliedschaften zu ändern.
+GPOs ermöglichen auch die Manipulation von Benutzer- und Gruppenmitgliedschaften auf Zielsystemen. Durch das direkte Bearbeiten der Richtliniendateien für Benutzer und Gruppen können Angreifer Benutzer zu privilegierten Gruppen, wie der lokalen `administrators`-Gruppe, hinzufügen. Dies ist möglich durch die Delegation von GPO-Verwaltungsberechtigungen, die die Modifikation von Richtliniendateien erlaubt, um neue Benutzer hinzuzufügen oder Gruppenmitgliedschaften zu ändern.
 
 Die XML-Konfigurationsdatei für Benutzer und Gruppen beschreibt, wie diese Änderungen umgesetzt werden. Durch das Hinzufügen von Einträgen zu dieser Datei können bestimmten Benutzern erhöhte Berechtigungen auf betroffenen Systemen gewährt werden. Diese Methode bietet einen direkten Ansatz zur Eskalation von Berechtigungen durch GPO-Manipulation.
 

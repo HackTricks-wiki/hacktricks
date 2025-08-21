@@ -2,9 +2,10 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Grundinformationen
+## Grundlegende Informationen
 
 Gehe zu folgendem Link, um zu lernen **was containerd** und `ctr` ist:
+
 
 {{#ref}}
 ../../network-services-pentesting/2375-pentesting-docker.md
@@ -12,7 +13,7 @@ Gehe zu folgendem Link, um zu lernen **was containerd** und `ctr` ist:
 
 ## PE 1
 
-Wenn du feststellst, dass ein Host den `ctr` Befehl enthält:
+Wenn du feststellst, dass ein Host den Befehl `ctr` enthält:
 ```bash
 which ctr
 /usr/bin/ctr
@@ -35,7 +36,7 @@ Sie können einen privilegierten Container wie folgt ausführen:
 ```bash
 ctr run --privileged --net-host -t registry:5000/modified-ubuntu:latest ubuntu bash
 ```
-Dann können Sie einige der auf der folgenden Seite genannten Techniken verwenden, um **daraus zu entkommen, indem Sie privilegierte Fähigkeiten ausnutzen**: 
+Dann können Sie einige der auf der folgenden Seite genannten Techniken verwenden, um **daraus zu entkommen, indem Sie privilegierte Fähigkeiten ausnutzen**:
 
 {{#ref}}
 docker-security/

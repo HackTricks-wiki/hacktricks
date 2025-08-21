@@ -24,21 +24,21 @@ Mit einer der vorherigen Kombinationen könnte ein Angreifer einen **sym/hard li
 
 ### Ordner root R+X Sonderfall
 
-Wenn es Dateien in einem **Verzeichnis** gibt, in dem **nur root R+X-Zugriff hat**, sind diese **für niemanden sonst zugänglich**. Eine Schwachstelle, die es ermöglicht, eine von einem Benutzer lesbare Datei, die aufgrund dieser **Einschränkung** nicht gelesen werden kann, von diesem Ordner **in einen anderen** zu verschieben, könnte missbraucht werden, um diese Dateien zu lesen.
+Wenn es Dateien in einem **Verzeichnis** gibt, in dem **nur root R+X-Zugriff hat**, sind diese **für niemanden sonst zugänglich**. Eine Schwachstelle, die es ermöglicht, eine von einem Benutzer lesbare Datei, die aufgrund dieser **Einschränkung** nicht gelesen werden kann, aus diesem Ordner **in einen anderen** zu verschieben, könnte ausgenutzt werden, um diese Dateien zu lesen.
 
-Beispiel in: [https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions](https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions)
+Beispiel unter: [https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions](https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions)
 
-## Symbolischer Link / Harte Links
+## Symbolischer Link / Harte Verknüpfung
 
-### Nachsichtige Datei/Ordner
+### Erlaubte Datei/Ordner
 
-Wenn ein privilegierter Prozess Daten in eine **Datei** schreibt, die von einem **weniger privilegierten Benutzer** **kontrolliert** werden könnte oder die **zuvor von einem weniger privilegierten Benutzer erstellt** wurde. Der Benutzer könnte einfach **auf eine andere Datei** über einen symbolischen oder harten Link **verweisen**, und der privilegierte Prozess wird in dieser Datei schreiben.
+Wenn ein privilegierter Prozess Daten in eine **Datei** schreibt, die von einem **weniger privilegierten Benutzer** **kontrolliert** werden könnte oder die **zuvor** von einem weniger privilegierten Benutzer erstellt wurde. Der Benutzer könnte einfach **auf eine andere Datei** über einen symbolischen oder harten Link **verweisen**, und der privilegierte Prozess wird in dieser Datei schreiben.
 
-Überprüfen Sie in den anderen Abschnitten, wo ein Angreifer **einen beliebigen Schreibzugriff missbrauchen könnte, um Privilegien zu eskalieren**.
+Überprüfen Sie in den anderen Abschnitten, wo ein Angreifer **einen beliebigen Schreibzugriff ausnutzen könnte, um Privilegien zu eskalieren**.
 
-### Offenes `O_NOFOLLOW`
+### Offen `O_NOFOLLOW`
 
-Das Flag `O_NOFOLLOW`, wenn es von der Funktion `open` verwendet wird, folgt einem Symlink im letzten Pfadkomponenten nicht, aber es folgt dem Rest des Pfades. Der richtige Weg, um das Folgen von Symlinks im Pfad zu verhindern, ist die Verwendung des Flags `O_NOFOLLOW_ANY`.
+Das Flag `O_NOFOLLOW`, wenn es von der Funktion `open` verwendet wird, folgt einem Symlink im letzten Pfadkomponenten nicht, folgt aber dem Rest des Pfades. Der richtige Weg, um das Folgen von Symlinks im Pfad zu verhindern, ist die Verwendung des Flags `O_NOFOLLOW_ANY`.
 
 ## .fileloc
 
@@ -72,7 +72,7 @@ Zum Beispiel: [https://youtu.be/f1HA5QhLQ7Y?t=21098](https://youtu.be/f1HA5QhLQ7
 ```bash
 xattr -d com.apple.quarantine /path/to/file_or_app
 ```
-### uchg / uchange / uimmutable flag
+### uchg / uchange / uimmutable-Flag
 
 Wenn eine Datei/ein Ordner dieses unveränderliche Attribut hat, ist es nicht möglich, ein xattr darauf zu setzen.
 ```bash
@@ -148,6 +148,7 @@ ls -le test
 
 Nicht wirklich notwendig, aber ich lasse es hier, nur für den Fall:
 
+
 {{#ref}}
 macos-xattr-acls-extra-stuff.md
 {{#endref}}
@@ -156,7 +157,7 @@ macos-xattr-acls-extra-stuff.md
 
 ### Umgehung von Plattform-Binärprüfungen
 
-Einige Sicherheitsprüfungen überprüfen, ob die Binärdatei eine **Plattform-Binärdatei** ist, um beispielsweise die Verbindung zu einem XPC-Dienst zu ermöglichen. Wie in einer Umgehung in https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/ dargelegt, ist es möglich, diese Prüfung zu umgehen, indem man eine Plattform-Binärdatei (wie /bin/ls) erhält und den Exploit über dyld mit einer Umgebungsvariable `DYLD_INSERT_LIBRARIES` injiziert.
+Einige Sicherheitsprüfungen überprüfen, ob die Binärdatei eine **Plattform-Binärdatei** ist, um beispielsweise die Verbindung zu einem XPC-Dienst zu ermöglichen. Wie in einer Umgehung in https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/ dargelegt, ist es möglich, diese Überprüfung zu umgehen, indem man eine Plattform-Binärdatei (wie /bin/ls) erhält und den Exploit über dyld mit einer Umgebungsvariable `DYLD_INSERT_LIBRARIES` injiziert.
 
 ### Umgehung der Flags `CS_REQUIRE_LV` und `CS_FORCED_LV`
 
@@ -221,7 +222,7 @@ Es gibt jedoch einige Dateien, deren Signatur nicht überprüft wird; diese habe
 ...
 </dict>
 ```
-Es ist möglich, die Signatur einer Ressource über die CLI mit folgendem Befehl zu berechnen:
+Es ist möglich, die Signatur einer Ressource über die CLI mit zu berechnen:
 ```bash
 openssl dgst -binary -sha1 /System/Cryptexes/App/System/Applications/Safari.app/Contents/Resources/AppIcon.icns | openssl base64
 ```
@@ -248,7 +249,7 @@ hdiutil detach /private/tmp/mnt 1>/dev/null
 # You can also create a dmg from an app using:
 hdiutil create -srcfolder justsome.app justsome.dmg
 ```
-Normalerweise mountet macOS Festplatten, indem es mit dem `com.apple.DiskArbitration.diskarbitrariond` Mach-Dienst (bereitgestellt von `/usr/libexec/diskarbitrationd`) kommuniziert. Wenn man den Parameter `-d` zur LaunchDaemons plist-Datei hinzufügt und neu startet, werden die Protokolle in `/var/log/diskarbitrationd.log` gespeichert.\
+Normalerweise mountet macOS Festplatten, indem es mit dem `com.apple.DiskArbitrarion.diskarbitrariond` Mach-Dienst (bereitgestellt von `/usr/libexec/diskarbitrationd`) kommuniziert. Wenn man den Parameter `-d` zur LaunchDaemons plist-Datei hinzufügt und neu startet, werden die Protokolle in `/var/log/diskarbitrationd.log` gespeichert.\
 Es ist jedoch möglich, Tools wie `hdik` und `hdiutil` zu verwenden, um direkt mit dem `com.apple.driver.DiskImages` kext zu kommunizieren.
 
 ## Arbiträre Schreibvorgänge
@@ -257,7 +258,7 @@ Es ist jedoch möglich, Tools wie `hdik` und `hdiutil` zu verwenden, um direkt m
 
 Wenn Ihr Skript als **Shell-Skript** interpretiert werden könnte, könnten Sie das **`/etc/periodic/daily/999.local`** Shell-Skript überschreiben, das jeden Tag ausgelöst wird.
 
-Sie können eine Ausführung dieses Skripts vortäuschen mit: **`sudo periodic daily`**
+Sie können eine Ausführung dieses Skripts fälschen mit: **`sudo periodic daily`**
 
 ### Daemons
 
@@ -278,23 +279,23 @@ Schreiben Sie einen beliebigen **LaunchDaemon** wie **`/Library/LaunchDaemons/xy
 </dict>
 </plist>
 ```
-Erstellen Sie einfach das Skript `/Applications/Scripts/privesc.sh` mit den **Befehlen**, die Sie als root ausführen möchten.
+Generiere einfach das Skript `/Applications/Scripts/privesc.sh` mit den **Befehlen**, die du als root ausführen möchtest.
 
 ### Sudoers-Datei
 
-Wenn Sie **willkürlichen Schreibzugriff** haben, könnten Sie eine Datei im Ordner **`/etc/sudoers.d/`** erstellen, die Ihnen **sudo**-Rechte gewährt.
+Wenn du **willkürlichen Schreibzugriff** hast, könntest du eine Datei im Ordner **`/etc/sudoers.d/`** erstellen, die dir **sudo**-Rechte gewährt.
 
 ### PATH-Dateien
 
-Die Datei **`/etc/paths`** ist einer der Hauptorte, die die PATH-Umgebungsvariable befüllen. Sie müssen root sein, um sie zu überschreiben, aber wenn ein Skript von einem **privilegierten Prozess** einen **Befehl ohne den vollständigen Pfad** ausführt, könnten Sie in der Lage sein, es zu **übernehmen**, indem Sie diese Datei ändern.
+Die Datei **`/etc/paths`** ist einer der Hauptorte, die die PATH-Umgebungsvariable befüllen. Du musst root sein, um sie zu überschreiben, aber wenn ein Skript von einem **privilegierten Prozess** einen **Befehl ohne den vollständigen Pfad** ausführt, könntest du in der Lage sein, es zu **übernehmen**, indem du diese Datei änderst.
 
-Sie können auch Dateien in **`/etc/paths.d`** schreiben, um neue Ordner in die `PATH`-Umgebungsvariable zu laden.
+Du kannst auch Dateien in **`/etc/paths.d`** schreiben, um neue Ordner in die `PATH`-Umgebungsvariable zu laden.
 
 ### cups-files.conf
 
 Diese Technik wurde in [diesem Bericht](https://www.kandji.io/blog/macos-audit-story-part1) verwendet.
 
-Erstellen Sie die Datei `/etc/cups/cups-files.conf` mit folgendem Inhalt:
+Erstelle die Datei `/etc/cups/cups-files.conf` mit folgendem Inhalt:
 ```
 ErrorLog /etc/sudoers.d/lpe
 LogFilePerm 777
@@ -302,17 +303,17 @@ LogFilePerm 777
 ```
 Dies wird die Datei `/etc/sudoers.d/lpe` mit den Berechtigungen 777 erstellen. Der zusätzliche Müll am Ende dient dazu, die Erstellung des Fehlerprotokolls auszulösen.
 
-Dann schreibe in `/etc/sudoers.d/lpe` die benötigte Konfiguration, um Privilegien zu eskalieren, wie `%staff ALL=(ALL) NOPASSWD:ALL`.
+Dann schreibe in `/etc/sudoers.d/lpe` die benötigte Konfiguration, um die Berechtigungen zu eskalieren, wie `%staff ALL=(ALL) NOPASSWD:ALL`.
 
 Ändere dann die Datei `/etc/cups/cups-files.conf` erneut und gebe `LogFilePerm 700` an, damit die neue sudoers-Datei gültig wird, wenn `cupsctl` aufgerufen wird.
 
 ### Sandbox Escape
 
-Es ist möglich, die macOS-Sandbox mit einem FS-arbiträren Schreibzugriff zu verlassen. Für einige Beispiele siehe die Seite [macOS Auto Start](../../../../macos-auto-start-locations.md), aber ein gängiger ist, eine Terminal-Präferenzdatei in `~/Library/Preferences/com.apple.Terminal.plist` zu schreiben, die einen Befehl beim Start ausführt und sie mit `open` aufruft.
+Es ist möglich, die macOS-Sandbox mit einem FS-arbiträren Schreibzugriff zu umgehen. Für einige Beispiele siehe die Seite [macOS Auto Start](../../../../macos-auto-start-locations.md), aber ein gängiger ist, eine Terminal-Präferenzdatei in `~/Library/Preferences/com.apple.Terminal.plist` zu schreiben, die einen Befehl beim Start ausführt, und sie mit `open` aufzurufen.
 
 ## Generiere beschreibbare Dateien als andere Benutzer
 
-Dies wird eine Datei erzeugen, die root gehört und von mir beschreibbar ist ([**code from here**](https://github.com/gergelykalman/brew-lpe-via-periodic/blob/main/brew_lpe.sh)). Dies könnte auch als Privilegieneskalation funktionieren:
+Dies wird eine Datei erzeugen, die root gehört und von mir beschreibbar ist ([**code from here**](https://github.com/gergelykalman/brew-lpe-via-periodic/blob/main/brew_lpe.sh)). Dies könnte auch als privesc funktionieren:
 ```bash
 DIRNAME=/usr/local/etc/periodic/daily
 
@@ -326,7 +327,7 @@ echo $FILENAME
 ```
 ## POSIX Shared Memory
 
-**POSIX Shared Memory** ermöglicht es Prozessen in POSIX-konformen Betriebssystemen, auf einen gemeinsamen Speicherbereich zuzugreifen, was eine schnellere Kommunikation im Vergleich zu anderen Methoden der interprozessualen Kommunikation erleichtert. Es beinhaltet das Erstellen oder Öffnen eines Shared Memory-Objekts mit `shm_open()`, das Festlegen seiner Größe mit `ftruncate()` und das Mappen in den Adressraum des Prozesses mit `mmap()`. Prozesse können dann direkt aus diesem Speicherbereich lesen und in ihn schreiben. Um den gleichzeitigen Zugriff zu verwalten und Datenkorruption zu verhindern, werden häufig Synchronisationsmechanismen wie Mutexes oder Semaphoren verwendet. Schließlich entmappen und schließen Prozesse den Shared Memory mit `munmap()` und `close()`, und entfernen optional das Speicherobjekt mit `shm_unlink()`. Dieses System ist besonders effektiv für effiziente, schnelle IPC in Umgebungen, in denen mehrere Prozesse schnell auf gemeinsame Daten zugreifen müssen.
+**POSIX Shared Memory** ermöglicht es Prozessen in POSIX-konformen Betriebssystemen, auf einen gemeinsamen Speicherbereich zuzugreifen, was eine schnellere Kommunikation im Vergleich zu anderen Methoden der interprozesslichen Kommunikation erleichtert. Es beinhaltet das Erstellen oder Öffnen eines Shared Memory-Objekts mit `shm_open()`, das Festlegen seiner Größe mit `ftruncate()` und das Mappen in den Adressraum des Prozesses mit `mmap()`. Prozesse können dann direkt aus diesem Speicherbereich lesen und in ihn schreiben. Um den gleichzeitigen Zugriff zu verwalten und Datenkorruption zu verhindern, werden häufig Synchronisationsmechanismen wie Mutexes oder Semaphoren verwendet. Schließlich entmappen und schließen die Prozesse den Shared Memory mit `munmap()` und `close()`, und entfernen optional das Speicherobjekt mit `shm_unlink()`. Dieses System ist besonders effektiv für effiziente, schnelle IPC in Umgebungen, in denen mehrere Prozesse schnell auf gemeinsame Daten zugreifen müssen.
 
 <details>
 
@@ -424,11 +425,11 @@ return 0;
 
 **macOS geschützte Deskriptoren** sind eine Sicherheitsfunktion, die in macOS eingeführt wurde, um die Sicherheit und Zuverlässigkeit von **Dateideskriptoroperationen** in Benutzeranwendungen zu verbessern. Diese geschützten Deskriptoren bieten eine Möglichkeit, spezifische Einschränkungen oder "Wächter" mit Dateideskriptoren zu verknüpfen, die vom Kernel durchgesetzt werden.
 
-Diese Funktion ist besonders nützlich, um bestimmte Klassen von Sicherheitsanfälligkeiten wie **unbefugten Dateizugriff** oder **Rennbedingungen** zu verhindern. Diese Anfälligkeiten treten auf, wenn beispielsweise ein Thread auf eine Dateibeschreibung zugreift und **einem anderen anfälligen Thread Zugriff darauf gewährt** oder wenn ein Dateideskriptor von einem anfälligen Kindprozess **vererbt** wird. Einige Funktionen, die mit dieser Funktionalität zusammenhängen, sind:
+Diese Funktion ist besonders nützlich, um bestimmte Klassen von Sicherheitsanfälligkeiten wie **unauthorized file access** oder **race conditions** zu verhindern. Diese Anfälligkeiten treten auf, wenn beispielsweise ein Thread auf eine Dateibeschreibung zugreift und **einem anderen anfälligen Thread Zugriff darauf gewährt** oder wenn ein Dateideskriptor von einem anfälligen Kindprozess **vererbt** wird. Einige Funktionen, die mit dieser Funktionalität zusammenhängen, sind:
 
 - `guarded_open_np`: Öffnet einen FD mit einem Wächter
 - `guarded_close_np`: Schließt ihn
-- `change_fdguard_np`: Ändert die Wächterflags auf einem Deskriptor (sogar den Wächterschutz entfernen)
+- `change_fdguard_np`: Ändert die Wächterflags auf einem Deskriptor (sogar das Entfernen des Wächter-Schutzes)
 
 ## Referenzen
 

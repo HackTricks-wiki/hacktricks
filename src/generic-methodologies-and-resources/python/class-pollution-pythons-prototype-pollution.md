@@ -4,7 +4,7 @@
 
 ## Grundlegendes Beispiel
 
-Überprüfen Sie, wie es möglich ist, Klassen von Objekten mit Zeichenfolgen zu verschmutzen:
+Überprüfen Sie, wie es möglich ist, Klassen von Objekten mit Strings zu verschmutzen:
 ```python
 class Company: pass
 class Developer(Company): pass
@@ -65,7 +65,7 @@ print(vars(emp)) #{'name': 'Ahemd', 'age': 23, 'manager': {'name': 'Sarah'}}
 
 <details>
 
-<summary>Erstellen eines Standardwerts für Klassenattribute zu RCE (subprocess)</summary>
+<summary>Erstellen eines Standardwerts für Klassenattribute für RCE (subprocess)</summary>
 ```python
 from os import popen
 class Employee: pass # Creating an empty class
@@ -225,13 +225,13 @@ execute() #> Executing echo Polluted
 
 <summary>Überschreiben des Flask-Geheimnisses über Dateien hinweg</summary>
 
-Wenn Sie also eine Klassenverschmutzung über ein Objekt durchführen können, das in der Haupt-Python-Datei des Webs definiert ist, aber **dessen Klasse in einer anderen Datei** als der Hauptdatei definiert ist. Denn um auf \_\_globals\_\_ in den vorherigen Payloads zuzugreifen, müssen Sie auf die Klasse des Objekts oder die Methoden der Klasse zugreifen, werden Sie in der Lage sein, **auf die Globals in dieser Datei zuzugreifen, aber nicht in der Hauptdatei**. \
-Daher werden Sie **nicht in der Lage sein, auf das globale Flask-App-Objekt** zuzugreifen, das den **Geheimschlüssel** auf der Hauptseite definiert:
+Wenn Sie also eine Klassenverschmutzung über ein Objekt durchführen können, das in der Haupt-Python-Datei der Webanwendung definiert ist, aber **dessen Klasse in einer anderen Datei** als der Hauptdatei definiert ist. Denn um auf \_\_globals\_\_ in den vorherigen Payloads zuzugreifen, müssen Sie auf die Klasse des Objekts oder die Methoden der Klasse zugreifen, werden Sie in der Lage sein, **auf die Globals in dieser Datei zuzugreifen, aber nicht in der Hauptdatei**. \
+Daher **werden Sie nicht in der Lage sein, auf das globale Flask-App-Objekt** zuzugreifen, das den **Geheimschlüssel** auf der Hauptseite definiert hat:
 ```python
 app = Flask(__name__, template_folder='templates')
 app.secret_key = '(:secret:)'
 ```
-In diesem Szenario benötigen Sie ein Gadget, um Dateien zu durchlaufen, um auf das Hauptobjekt **`app.secret_key`** zuzugreifen, um den Flask-Geheimschlüssel zu ändern und in der Lage zu sein, [**Privilegien zu eskalieren**, indem Sie diesen Schlüssel kennen](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).
+In diesem Szenario benötigen Sie ein Gadget, um Dateien zu durchlaufen, um auf das Hauptobjekt zuzugreifen, um **auf das globale Objekt `app.secret_key`** zuzugreifen, um den Flask-Geheimschlüssel zu ändern und in der Lage zu sein, [**Privilegien zu eskalieren**, wenn Sie diesen Schlüssel kennen](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).
 
 Eine Payload wie diese [aus diesem Bericht](https://ctftime.org/writeup/36082):
 ```python

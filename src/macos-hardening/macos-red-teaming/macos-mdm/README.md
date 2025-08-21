@@ -15,11 +15,11 @@
 
 - Zentralisierte Kontrolle über Geräte.
 - Abhängigkeit von einem MDM-Server, der dem MDM-Protokoll entspricht.
-- Fähigkeit des MDM-Servers, verschiedene Befehle an Geräte zu senden, z. B. remote Datenlöschung oder Konfigurationsinstallation.
+- Fähigkeit des MDM-Servers, verschiedene Befehle an Geräte zu senden, z. B. zur Fernlöschung von Daten oder zur Installation von Konfigurationen.
 
 ### **Grundlagen des DEP (Device Enrollment Program)**
 
-Das [Device Enrollment Program](https://www.apple.com/business/site/docs/DEP_Guide.pdf) (DEP), das von Apple angeboten wird, vereinfacht die Integration von Mobile Device Management (MDM), indem es eine Zero-Touch-Konfiguration für iOS-, macOS- und tvOS-Geräte ermöglicht. DEP automatisiert den Registrierungsprozess, sodass Geräte direkt nach dem Auspacken betriebsbereit sind, mit minimalem Benutzer- oder Administrationsaufwand. Wesentliche Aspekte sind:
+Das [Device Enrollment Program](https://www.apple.com/business/site/docs/DEP_Guide.pdf) (DEP), das von Apple angeboten wird, vereinfacht die Integration von Mobile Device Management (MDM), indem es eine Zero-Touch-Konfiguration für iOS-, macOS- und tvOS-Geräte ermöglicht. DEP automatisiert den Registrierungsprozess, sodass Geräte sofort einsatzbereit sind, ohne dass Benutzer oder Administratoren eingreifen müssen. Wesentliche Aspekte sind:
 
 - Ermöglicht es Geräten, sich autonom bei einem vordefinierten MDM-Server bei der ersten Aktivierung zu registrieren.
 - Primär vorteilhaft für brandneue Geräte, aber auch anwendbar für Geräte, die neu konfiguriert werden.
@@ -48,8 +48,8 @@ Es ist wichtig zu beachten, dass die durch DEP gebotene einfache Registrierung, 
 
 ### MDM
 
-- Kombination aus APNs (**Apple-Servern**) + RESTful API (**MDM** **Anbieter**-Servern)
-- **Kommunikation** erfolgt zwischen einem **Gerät** und einem Server, der mit einem **Geräteverwaltungsprodukt** verbunden ist
+- Kombination aus APNs (**Apple-Server**n) + RESTful API (**MDM** **Anbieter**-Server)
+- **Kommunikation** erfolgt zwischen einem **Gerät** und einem Server, der mit einem **Geräteverwaltungs**-**produkt** verbunden ist
 - **Befehle** werden vom MDM an das Gerät in **plist-kodierten Dictionaries** übermittelt
 - Überall über **HTTPS**. MDM-Server können (und sind normalerweise) gepinnt.
 - Apple gewährt dem MDM-Anbieter ein **APNs-Zertifikat** zur Authentifizierung
@@ -69,7 +69,7 @@ Es ist wichtig zu beachten, dass die durch DEP gebotene einfache Registrierung, 
 - synchronisiert Geräteaufzeichnungen von Apple zum MDM-Server
 - synchronisiert „DEP-Profile“ von MDM-Server zu Apple (später an das Gerät geliefert)
 - Ein DEP „Profil“ enthält:
-- MDM-Anbieter-Server-URL
+- URL des MDM-Anbieter-Servers für das Aktivierungsprofil
 - Zusätzliche vertrauenswürdige Zertifikate für die Server-URL (optionales Pinning)
 - Zusätzliche Einstellungen (z. B. welche Bildschirme im Setup-Assistenten übersprungen werden sollen)
 
@@ -107,7 +107,7 @@ oder beim Ausführen von `sudo profiles show -type enrollment`
 - Aktivierungsdatensatz ist der interne Name für **DEP „Profil“**
 - Beginnt, sobald das Gerät mit dem Internet verbunden ist
 - Angetrieben von **`CPFetchActivationRecord`**
-- Implementiert durch **`cloudconfigurationd`** über XPC. Der **"Setup-Assistent"** (wenn das Gerät zum ersten Mal gebootet wird) oder der **`profiles`**-Befehl wird **diesen Daemon kontaktieren**, um den Aktivierungsdatensatz abzurufen.
+- Implementiert durch **`cloudconfigurationd`** über XPC. Der **"Setup-Assistent"** (wenn das Gerät zum ersten Mal gebootet wird) oder der **`profiles`**-Befehl wird **dieses Daemon** kontaktieren, um den Aktivierungsdatensatz abzurufen.
 - LaunchDaemon (läuft immer als root)
 
 Es folgen einige Schritte, um den Aktivierungsdatensatz durch **`MCTeslaConfigurationFetcher`** abzurufen. Dieser Prozess verwendet eine Verschlüsselung namens **Absinthe**
@@ -120,7 +120,7 @@ Es folgen einige Schritte, um den Aktivierungsdatensatz durch **`MCTeslaConfigur
 1. POST [https://iprofiles.apple.com/session](https://iprofiles.apple.com/session)
 4. Sitzung einrichten (**`NACKeyEstablishment`**)
 5. Anfrage stellen
-1. POST an [https://iprofiles.apple.com/macProfile](https://iprofiles.apple.com/macProfile) und die Daten `{ "action": "RequestProfileConfiguration", "sn": "" }` senden
+1. POST an [https://iprofiles.apple.com/macProfile](https://iprofiles.apple.com/macProfile) mit den Daten `{ "action": "RequestProfileConfiguration", "sn": "" }`
 2. Die JSON-Payload wird mit Absinthe (**`NACSign`**) verschlüsselt
 3. Alle Anfragen über HTTPs, integrierte Root-Zertifikate werden verwendet
 
@@ -128,7 +128,7 @@ Es folgen einige Schritte, um den Aktivierungsdatensatz durch **`MCTeslaConfigur
 
 Die Antwort ist ein JSON-Dictionary mit einigen wichtigen Daten wie:
 
-- **url**: URL des MDM-Anbieterhosts für das Aktivierungsprofil
+- **url**: URL des MDM-Anbieter-Hosts für das Aktivierungsprofil
 - **anchor-certs**: Array von DER-Zertifikaten, die als vertrauenswürdige Anker verwendet werden
 
 ### **Schritt 5: Abruf des Profils**
@@ -138,7 +138,7 @@ Die Antwort ist ein JSON-Dictionary mit einigen wichtigen Daten wie:
 - Anfrage wird an **url gesendet, die im DEP-Profil angegeben ist**.
 - **Ankerzertifikate** werden verwendet, um **Vertrauen zu bewerten**, falls bereitgestellt.
 - Erinnerung: die **anchor_certs**-Eigenschaft des DEP-Profils
-- **Anfrage ist eine einfache .plist** mit Geräteidentifikation
+- **Anfrage ist ein einfaches .plist** mit Geräteidentifikation
 - Beispiele: **UDID, OS-Version**.
 - CMS-signiert, DER-kodiert
 - Signiert mit dem **Geräteidentitätszertifikat (von APNS)**
@@ -151,7 +151,7 @@ Die Antwort ist ein JSON-Dictionary mit einigen wichtigen Daten wie:
 - Nach dem Abruf wird das **Profil im System gespeichert**
 - Dieser Schritt beginnt automatisch (wenn im **Setup-Assistenten**)
 - Angetrieben von **`CPInstallActivationProfile`**
-- Implementiert von mdmclient über XPC
+- Implementiert durch mdmclient über XPC
 - LaunchDaemon (als root) oder LaunchAgent (als Benutzer), je nach Kontext
 - Konfigurationsprofile haben mehrere Payloads zur Installation
 - Das Framework hat eine pluginbasierte Architektur zur Installation von Profilen
@@ -164,9 +164,9 @@ Typischerweise wird das **Aktivierungsprofil**, das von einem MDM-Anbieter berei
 
 - `com.apple.mdm`: um das Gerät in MDM zu **registrieren**
 - `com.apple.security.scep`: um ein **Client-Zertifikat** sicher an das Gerät bereitzustellen.
-- `com.apple.security.pem`: um **vertrauenswürdige CA-Zertifikate** im System-Schlüsselbund des Geräts zu installieren.
-- Installation der MDM-Payload entspricht dem **MDM-Check-in in der Dokumentation**
-- Payload **enthält wichtige Eigenschaften**:
+- `com.apple.security.pem`: um vertrauenswürdige CA-Zertifikate im System-Schlüsselbund des Geräts zu **installieren**.
+- Die Installation der MDM-Payload entspricht dem **MDM-Check-in in der Dokumentation**
+- Die Payload **enthält wichtige Eigenschaften**:
 - - MDM-Check-In-URL (**`CheckInURL`**)
 - MDM-Befehlsabfrage-URL (**`ServerURL`**) + APNs-Thema, um es auszulösen
 - Um die MDM-Payload zu installieren, wird eine Anfrage an **`CheckInURL`** gesendet

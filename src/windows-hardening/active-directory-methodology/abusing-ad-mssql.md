@@ -3,11 +3,11 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 
-## **MSSQL Enumeration / Entdeckung**
+## **MSSQL Aufzählung / Entdeckung**
 
 ### Python
 
-Das [MSSQLPwner](https://github.com/ScorpionesLabs/MSSqlPwner) Tool basiert auf impacket und ermöglicht auch die Authentifizierung mit Kerberos-Tickets sowie Angriffe über Linkketten.
+Das [MSSQLPwner](https://github.com/ScorpionesLabs/MSSqlPwner) Tool basiert auf impacket und ermöglicht auch die Authentifizierung mit Kerberos-Tickets sowie Angriffe über Verknüpfungsketten.
 
 <figure><img src="https://raw.githubusercontent.com/ScorpionesLabs/MSSqlPwner/main/assets/interractive.png"></figure>
 ```shell
@@ -133,7 +133,7 @@ Get-SQLInstanceDomain | Get-SQLServerInfo -Verbose
 # Get DBs, test connections and get info in oneliner
 Get-SQLInstanceDomain | Get-SQLConnectionTest | ? { $_.Status -eq "Accessible" } | Get-SQLServerInfo
 ```
-## MSSQL Grundlegende Ausnutzung
+## MSSQL Grundlegender Missbrauch
 
 ### Zugriff auf DB
 ```bash
@@ -178,7 +178,7 @@ Invoke-SQLOSCmd -Instance "srv.sub.domain.local,1433" -Command "whoami" -RawResu
 
 Wenn eine MSSQL-Instanz von einer anderen MSSQL-Instanz als vertrauenswürdig (Datenbanklink) angesehen wird. Wenn der Benutzer über Berechtigungen für die vertrauenswürdige Datenbank verfügt, kann er **die Vertrauensbeziehung nutzen, um auch in der anderen Instanz Abfragen auszuführen**. Diese Vertrauensstellungen können verkettet werden, und irgendwann könnte der Benutzer in der Lage sein, eine falsch konfigurierte Datenbank zu finden, in der er Befehle ausführen kann.
 
-**Die Links zwischen Datenbanken funktionieren sogar über Waldvertrauensstellungen hinweg.**
+**Die Links zwischen Datenbanken funktionieren sogar über Forest-Vertrauensstellungen hinweg.**
 
 ### Powershell Missbrauch
 ```bash
@@ -226,7 +226,7 @@ Sie können vertrauenswürdige Links einfach mit Metasploit überprüfen.
 msf> use exploit/windows/mssql/mssql_linkcrawler
 [msf> set DEPLOY true] #Set DEPLOY to true if you want to abuse the privileges to obtain a meterpreter session
 ```
-Beachten Sie, dass Metasploit nur versuchen wird, die `openquery()`-Funktion in MSSQL auszunutzen (wenn Sie also keinen Befehl mit `openquery()` ausführen können, müssen Sie die `EXECUTE`-Methode **manuell** ausprobieren, um Befehle auszuführen, siehe mehr dazu unten.)
+Beachten Sie, dass Metasploit nur versuchen wird, die Funktion `openquery()` in MSSQL auszunutzen (wenn Sie also keinen Befehl mit `openquery()` ausführen können, müssen Sie die `EXECUTE`-Methode **manuell** ausprobieren, um Befehle auszuführen, siehe mehr dazu unten.)
 
 ### Manuell - Openquery()
 
@@ -245,14 +245,14 @@ EXEC sp_linkedservers;
 ```
 ![](<../../images/image (716).png>)
 
-#### Abfragen über vertrauenswürdigen Link ausführen
+#### Führen Sie Abfragen in vertrauenswürdigem Link aus
 
-Führen Sie Abfragen über den Link aus (Beispiel: Weitere Links in der neuen zugänglichen Instanz finden):
+Führen Sie Abfragen über den Link aus (Beispiel: Finden Sie weitere Links in der neuen zugänglichen Instanz):
 ```sql
 select * from openquery("dcorp-sql1", 'select * from master..sysservers')
 ```
 > [!WARNING]
-> Überprüfen Sie, wo doppelte und einfache Anführungszeichen verwendet werden. Es ist wichtig, sie auf diese Weise zu verwenden.
+> Überprüfen Sie, wo doppelte und einfache Anführungszeichen verwendet werden, es ist wichtig, sie auf diese Weise zu verwenden.
 
 ![](<../../images/image (643).png>)
 
@@ -284,6 +284,7 @@ Eine Strategie, die viele Autoren entwickelt haben, besteht darin, einen SYSTEM-
 
 ### SCCM Management Point NTLM Relay (OSD Geheimnisextraktion)
 Sehen Sie, wie die Standard-SQL-Rollen von SCCM **Management Points** missbraucht werden können, um Network Access Account und Task-Sequence-Geheimnisse direkt aus der Standortdatenbank zu dumpen:
+
 {{#ref}}
 sccm-management-point-relay-sql-policy-secrets.md
 {{#endref}}
