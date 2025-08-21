@@ -2,23 +2,24 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
+
 {{#ref}}
 README.md
 {{#endref}}
 
 ## JTAGenum
 
-[**JTAGenum**](https://github.com/cyphunk/JTAGenum), bilinmeyen JTAG pin düzenlerini zorlamak ve hatta talimat kayıtlarını numaralandırmak için bir Arduino uyumlu MCU veya (deneysel olarak) bir Raspberry Pi'ye yükleyebileceğiniz bir araçtır.
+[**JTAGenum**](https://github.com/cyphunk/JTAGenum) bilinmeyen JTAG pinout'larını brute-force ile denemek ve hatta talimat kayıtlarını numaralandırmak için bir Arduino uyumlu MCU veya (deneysel olarak) bir Raspberry Pi'ye yükleyebileceğiniz bir araçtır.
 
-- Arduino: dijital pinleri D2–D11'i 10'a kadar şüpheli JTAG pad/test noktalarına bağlayın ve Arduino GND'yi hedef GND'ye bağlayın. Hedefi ayrı bir şekilde besleyin, aksi takdirde rayın güvenli olduğunu bilmiyorsanız. 3.3 V mantığını tercih edin (örneğin, Arduino Due) veya 1.8–3.3 V hedefleri incelerken bir seviye dönüştürücü/seri dirençler kullanın.
-- Raspberry Pi: Pi yapısı daha az kullanılabilir GPIO'lar sunar (bu nedenle taramalar daha yavaştır); güncel pin haritası ve kısıtlamalar için repoyu kontrol edin.
+- Arduino: dijital pinleri D2–D11'i 10'a kadar şüpheli JTAG pad'lerine/test noktalarına bağlayın ve Arduino GND'yi hedef GND'ye bağlayın. Hedefi ayrı bir şekilde besleyin, aksi takdirde rayın güvenli olduğunu bilmiyorsanız. 3.3 V mantığını tercih edin (örneğin, Arduino Due) veya 1.8–3.3 V hedefleri incelerken bir seviye dönüştürücü/seri dirençler kullanın.
+- Raspberry Pi: Pi yapısı daha az kullanılabilir GPIO sunar (bu nedenle taramalar daha yavaştır); güncel pin haritası ve kısıtlamalar için repoyu kontrol edin.
 
-Yüklendikten sonra, 115200 baud hızında seri monitörü açın ve yardım için `h` gönderin. Tipik akış:
+Flashtan sonra, 115200 baud hızında seri monitörü açın ve yardım için `h` gönderin. Tipik akış:
 
-- `l` yanlış pozitifleri önlemek için döngü geri dönüşlerini bulun
-- `r` gerekiyorsa dahili pull-up'ları değiştirin
-- `s` TCK/TMS/TDI/TDO (ve bazen TRST/SRST) için tarama yapın
-- `y` belgelenmemiş opcode'ları keşfetmek için IR'yi zorlayın
+- `l` yanlış pozitifleri önlemek için döngü geri dönüşlerini bul
+- `r` gerekiyorsa dahili pull-up'ları değiştir
+- `s` TCK/TMS/TDI/TDO (ve bazen TRST/SRST) için tarama yap
+- `y` belgelenmemiş opcode'ları keşfetmek için IR'yi brute-force ile dene
 - `x` pin durumlarının sınır tarama anlık görüntüsü
 
 ![](<../../images/image (939).png>)
@@ -27,13 +28,15 @@ Yüklendikten sonra, 115200 baud hızında seri monitörü açın ve yardım iç
 
 ![](<../../images/image (774).png>)
 
+
+
 Geçerli bir TAP bulunursa, keşfedilen pinleri gösteren `FOUND!` ile başlayan satırlar göreceksiniz.
 
 İpuçları
 - Her zaman toprak paylaşın ve bilinmeyen pinleri hedef Vtref'in üzerine çıkarmayın. Şüphe durumunda, aday pinlerde 100–470 Ω seri dirençler ekleyin.
 - Cihaz 4 telli JTAG yerine SWD/SWJ kullanıyorsa, JTAGenum bunu tespit edemeyebilir; SWD araçlarını veya SWJ-DP'yi destekleyen bir adaptörü deneyin.
 
-## Daha güvenli pin avı ve donanım kurulumu
+## Daha güvenli pin avlama ve donanım kurulumu
 
 - Öncelikle bir multimetre ile Vtref ve GND'yi belirleyin. Birçok adaptör, I/O voltajını ayarlamak için Vtref'e ihtiyaç duyar.
 - Seviye kaydırma: itme-çekme sinyalleri için tasarlanmış iki yönlü seviye kaydırıcıları tercih edin (JTAG hatları açık-drenaj değildir). JTAG için otomatik yönlendirme I2C kaydırıcılarından kaçının.
@@ -95,15 +98,15 @@ jtag> instruction EXTEST
 jtag> shift ir
 jtag> dr  <bit pattern for boundary register>
 ```
-Cihazın sınır kaydı bit sıralamasını bilmek için BSDL'ye ihtiyacınız var. Bazı satıcıların üretimde sınır tarama hücrelerini kilitlediğine dikkat edin.
+Bölge kayıt bit sıralamasını bilmek için cihaz BSDL'ye ihtiyacınız var. Bazı satıcıların üretimde sınır tarama hücrelerini kilitlediğine dikkat edin.
 
 ## Modern hedefler ve notlar
 
-- ESP32‑S3/C3, yerel bir USB‑JTAG köprüsü içerir; OpenOCD, harici bir prob olmadan doğrudan USB üzerinden iletişim kurabilir. Tahlil ve döküm için çok kullanışlı.
+- ESP32‑S3/C3, yerel bir USB‑JTAG köprüsü içerir; OpenOCD, harici bir prob olmadan doğrudan USB üzerinden iletişim kurabilir. Tahlil ve dökümler için çok kullanışlı.
 - RISC‑V hata ayıklama (v0.13+) OpenOCD tarafından geniş ölçüde desteklenmektedir; çekirdek güvenli bir şekilde durdurulamadığında bellek erişimi için SBA'yı tercih edin.
 - Birçok MCU, hata ayıklama kimlik doğrulaması ve yaşam döngüsü durumları uygular. JTAG ölü görünüyorsa ancak güç doğruysa, cihaz kapalı bir duruma kilitlenmiş olabilir veya kimlik doğrulaması yapılmış bir prob gerektirebilir.
 
-## Savunmalar ve güçlendirme (gerçek cihazlarda ne beklenir)
+## Savunmalar ve güçlendirme (gerçek cihazlarda ne beklenmeli)
 
 - Üretimde JTAG/SWD'yi kalıcı olarak devre dışı bırakın veya kilitleyin (örneğin, STM32 RDP seviye 2, PAD JTAG'ı devre dışı bırakan ESP eFuses, NXP/Nordic APPROTECT/DPAP).
 - Üretim erişimini korurken kimlik doğrulamalı hata ayıklama gerektirin (ARMv8.2‑A ADIv6 Hata Ayıklama Kimlik Doğrulaması, OEM yönetimli zorluk-cevap).

@@ -1,4 +1,4 @@
-# macOS Güvenliği ve Yetki Yükseltme
+# macOS Güvenliği & Yetki Yükseltme
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -6,7 +6,8 @@
 
 Eğer macOS ile tanışık değilseniz, macOS'un temellerini öğrenmeye başlamalısınız:
 
-- Özel macOS **dosyaları ve izinleri:**
+- Özel macOS **dosyaları & izinleri:**
+
 
 {{#ref}}
 macos-files-folders-and-binaries/
@@ -14,11 +15,13 @@ macos-files-folders-and-binaries/
 
 - Yaygın macOS **kullanıcıları**
 
+
 {{#ref}}
 macos-users.md
 {{#endref}}
 
 - **AppleFS**
+
 
 {{#ref}}
 macos-applefs.md
@@ -26,22 +29,25 @@ macos-applefs.md
 
 - **kernel**'ın **mimari**si
 
+
 {{#ref}}
 mac-os-architecture/
 {{#endref}}
 
-- Yaygın macOS **ağ hizmetleri ve protokolleri**
+- Yaygın macOS **ağ hizmetleri & protokolleri**
+
 
 {{#ref}}
 macos-protocols.md
 {{#endref}}
 
 - **Açık kaynak** macOS: [https://opensource.apple.com/](https://opensource.apple.com/)
-- Bir `tar.gz` indirmek için bir URL'yi [https://opensource.apple.com/**source**/dyld/](https://opensource.apple.com/source/dyld/) gibi [https://opensource.apple.com/**tarballs**/dyld/**dyld-852.2.tar.gz**](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz) şeklinde değiştirin.
+- Bir `tar.gz` indirmek için, bir URL'yi [https://opensource.apple.com/**source**/dyld/](https://opensource.apple.com/source/dyld/) gibi [https://opensource.apple.com/**tarballs**/dyld/**dyld-852.2.tar.gz**](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz) şeklinde değiştirin.
 
 ### MacOS MDM
 
 Şirketlerde **macOS** sistemlerinin büyük olasılıkla **bir MDM ile yönetileceği** düşünülmektedir. Bu nedenle, bir saldırgan açısından **nasıl çalıştığını** bilmek ilginçtir:
+
 
 {{#ref}}
 ../macos-red-teaming/macos-mdm/
@@ -49,11 +55,13 @@ macos-protocols.md
 
 ### MacOS - İnceleme, Hata Ayıklama ve Fuzzing
 
+
 {{#ref}}
 macos-apps-inspecting-debugging-and-fuzzing/
 {{#endref}}
 
 ## MacOS Güvenlik Koruma Önlemleri
+
 
 {{#ref}}
 macos-security-protections/
@@ -63,7 +71,7 @@ macos-security-protections/
 
 ### Dosya İzinleri
 
-Eğer bir **root olarak çalışan bir süreç** bir dosya yazıyorsa ve bu dosya bir kullanıcı tarafından kontrol edilebiliyorsa, kullanıcı bunu **yetkileri yükseltmek için** kötüye kullanabilir.\
+Eğer bir **root olarak çalışan süreç** bir dosya yazıyorsa ve bu dosya bir kullanıcı tarafından kontrol edilebiliyorsa, kullanıcı bunu **yetkileri yükseltmek için** kötüye kullanabilir.\
 Bu aşağıdaki durumlarda gerçekleşebilir:
 
 - Kullanılan dosya zaten bir kullanıcı tarafından oluşturulmuş (kullanıcıya ait)
@@ -73,15 +81,17 @@ Bu aşağıdaki durumlarda gerçekleşebilir:
 
 **root** tarafından **kullanılacak bir dosya** oluşturabilmek, bir kullanıcının **içeriğinden faydalanmasına** veya hatta başka bir yere işaret etmek için **sembolik/sert bağlantılar** oluşturmasına olanak tanır.
 
-Bu tür güvenlik açıkları için **savunmasız `.pkg` yükleyicilerini kontrol etmeyi** unutmayın:
+Bu tür güvenlik açıkları için **kırılgan `.pkg` yükleyicilerini kontrol etmeyi** unutmayın:
+
 
 {{#ref}}
 macos-files-folders-and-binaries/macos-installers-abuse.md
 {{#endref}}
 
-### Dosya Uzantısı ve URL şeması uygulama işleyicileri
+### Dosya Uzantısı & URL şeması uygulama işleyicileri
 
 Dosya uzantılarıyla kaydedilen garip uygulamalar kötüye kullanılabilir ve farklı uygulamalar belirli protokolleri açmak için kaydedilebilir.
+
 
 {{#ref}}
 macos-file-extension-apps.md
@@ -95,11 +105,12 @@ Bu nedenle, bir macOS makinesini başarılı bir şekilde ele geçirmek isteyen 
 
 Bu ayrıcalıklar genellikle uygulamanın imzalandığı **haklar** şeklinde verilir veya uygulama bazı erişimler talep edebilir ve **kullanıcı onayladıktan** sonra **TCC veritabanlarında** bulunabilir. Bir sürecin bu ayrıcalıkları elde etmenin bir diğer yolu, bu **ayrıcalıklara** sahip bir sürecin **çocuğu** olmaktır, çünkü genellikle **miras alınırlar**.
 
-Farklı yolları bulmak için bu bağlantılara göz atın [**TCC'de yetki yükseltme**](macos-security-protections/macos-tcc/index.html#tcc-privesc-and-bypasses), [**TCC'yi atlamak**](macos-security-protections/macos-tcc/macos-tcc-bypasses/index.html) ve geçmişte [**SIP'nin nasıl aşıldığı**](macos-security-protections/macos-sip.md#sip-bypasses).
+Farklı yolları bulmak için bu bağlantılara göz atın [**TCC'de yetki yükseltme**](macos-security-protections/macos-tcc/index.html#tcc-privesc-and-bypasses), [**TCC'yi atlamak**](macos-security-protections/macos-tcc/macos-tcc-bypasses/index.html) ve geçmişte [**SIP'nin nasıl atlandığı**](macos-security-protections/macos-sip.md#sip-bypasses).
 
 ## macOS Geleneksel Yetki Yükseltme
 
-Elbette, bir kırmızı takım perspektifinden root'a yükselmekle de ilgilenmelisiniz. Bazı ipuçları için aşağıdaki gönderiyi kontrol edin:
+Elbette, bir kırmızı takım perspektifinden root'a yükseltme ile de ilgilenmelisiniz. Bazı ipuçları için aşağıdaki gönderiye göz atın:
+
 
 {{#ref}}
 macos-privilege-escalation.md

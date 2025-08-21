@@ -4,11 +4,11 @@
 
 ## **GTFOBins**
 
-**"Shell" özelliğine sahip herhangi bir ikili dosyayı çalıştırıp çalıştıramayacağınızı** [**https://gtfobins.github.io/**](https://gtfobins.github.io) **adresinde arayın**
+**"Shell" özelliğine sahip herhangi bir ikili dosyayı çalıştırıp çalıştıramayacağınızı kontrol etmek için** [**https://gtfobins.github.io/**](https://gtfobins.github.io) **adresinde arama yapın**
 
 ## Chroot Kaçışları
 
-[wikipedia](https://en.wikipedia.org/wiki/Chroot#Limitations)'dan: Chroot mekanizması **yetkili** (**root**) **kullanıcılar** tarafından kasıtlı müdahalelere karşı **savunma yapmak için** tasarlanmamıştır. Çoğu sistemde, chroot bağlamları düzgün bir şekilde yığılmamaktadır ve yeterli ayrıcalıklara sahip chroot edilmiş programlar **çıkmak için ikinci bir chroot gerçekleştirebilir**.\
+[wikipedia](https://en.wikipedia.org/wiki/Chroot#Limitations)'dan: Chroot mekanizması **yetkili** (**root**) **kullanıcılar** tarafından kasıtlı müdahalelere karşı **savunma yapmak için tasarlanmamıştır**. Çoğu sistemde, chroot bağlamları düzgün bir şekilde yığılmamaktadır ve yeterli ayrıcalıklara sahip chroot edilmiş programlar **çıkmak için ikinci bir chroot gerçekleştirebilir**.\
 Genellikle bu, kaçış yapmak için chroot içinde root olmanız gerektiği anlamına gelir.
 
 > [!TIP]
@@ -21,7 +21,7 @@ Genellikle bu, kaçış yapmak için chroot içinde root olmanız gerektiği anl
 >
 > Bu, genellikle chroot'un çalışma dizininizi belirtilen yere taşımadığı için olur, bu nedenle bir chroot oluşturabilirsiniz ama onun dışında olursunuz.
 
-Genellikle bir chroot hapishanesinde `chroot` ikili dosyasını bulamazsınız, ancak bir ikili dosyayı **derleyebilir, yükleyebilir ve çalıştırabilirsiniz**:
+Genellikle bir chroot hapishanesinde `chroot` ikili dosyasını bulamazsınız, ancak bir ikili dosyayı **derleyip, yükleyip ve çalıştırabilirsiniz**:
 
 <details>
 
@@ -79,7 +79,7 @@ system("/bin/bash");
 ### Root + Kaydedilmiş fd
 
 > [!WARNING]
-> Bu, önceki duruma benzer, ancak bu durumda **saldırgan mevcut dizine bir dosya tanımlayıcısı kaydeder** ve ardından **yeni bir klasörde chroot oluşturur**. Son olarak, chroot'un **dışında** o **FD'ye** **erişimi** olduğundan, ona erişir ve **kaçış** yapar.
+> Bu, önceki duruma benzer, ancak bu durumda **saldırgan mevcut dizine bir dosya tanımlayıcısı kaydeder** ve ardından **yeni bir klasörde chroot oluşturur**. Son olarak, chroot'un **dışında** o **FD**'ye **erişimi** olduğundan, ona erişir ve **kaçış** eder.
 
 <details>
 
@@ -116,7 +116,7 @@ chroot(".");
 > - Çocuk işlemde farklı bir klasörde chroot çalıştır
 > - Ebeveyn işlemde, yeni çocuk işlem chroot'unun dışında bir klasörün FD'sini oluştur
 > - Bu FD'yi UDS kullanarak çocuk işleme geçir
-> - Çocuk işlem bu FD'ye chdir yapar ve çünkü chroot'unun dışındadır, hapisten kaçar
+> - Çocuk işlem bu FD'ye chdir yapar ve çünkü chroot'unun dışındadır, hapisten kaçacaktır
 
 ### Root + Mount
 
@@ -177,12 +177,12 @@ echo /home/* #List directory
 ```
 ### Script oluştur
 
-_/bin/bash_ içeriği ile çalıştırılabilir bir dosya oluşturup oluşturamayacağınızı kontrol edin.
+_/bin/bash_ içeriği ile çalıştırılabilir bir dosya oluşturup oluşturamayacağınızı kontrol edin
 ```bash
 red /bin/bash
 > w wx/path #Write /bin/bash in a writable and executable path
 ```
-### SSH ile bash alın
+### SSH Üzerinden Bash Elde Etme
 
 Eğer ssh üzerinden erişiyorsanız, bir bash shell'i çalıştırmak için bu hileyi kullanabilirsiniz:
 ```bash
@@ -205,9 +205,10 @@ wget http://127.0.0.1:8080/sudoers -O /etc/sudoers
 ### Diğer hileler
 
 [**https://fireshellsecurity.team/restricted-linux-shell-escaping-techniques/**](https://fireshellsecurity.team/restricted-linux-shell-escaping-techniques/)\
-[https://pen-testing.sans.org/blog/2012/06/06/escaping-restricted-linux-shells](https://pen-testing.sans.org/blog/2012/06/06/escaping-restricted-linux-shells)\
-[https://gtfobins.github.io](https://gtfobins.github.io)\
-**Ayrıca şu sayfa ilginç olabilir:**
+[https://pen-testing.sans.org/blog/2012/0**b**6/06/escaping-restricted-linux-shells](https://pen-testing.sans.org/blog/2012/06/06/escaping-restricted-linux-shells**](https://pen-testing.sans.org/blog/2012/06/06/escaping-restricted-linux-shells)\
+[https://gtfobins.github.io](https://gtfobins.github.io/**](https/gtfobins.github.io)\
+**Sayfa da ilginç olabilir:**
+
 
 {{#ref}}
 ../bypass-bash-restrictions/
@@ -216,6 +217,7 @@ wget http://127.0.0.1:8080/sudoers -O /etc/sudoers
 ## Python Jails
 
 Python hapishanelerinden kaçış hakkında hileler aşağıdaki sayfada:
+
 
 {{#ref}}
 ../../generic-methodologies-and-resources/python/bypass-python-sandboxes/
@@ -229,16 +231,16 @@ Bu sayfada lua içinde erişebileceğiniz global fonksiyonları bulabilirsiniz: 
 ```bash
 load(string.char(0x6f,0x73,0x2e,0x65,0x78,0x65,0x63,0x75,0x74,0x65,0x28,0x27,0x6c,0x73,0x27,0x29))()
 ```
-Bir kütüphanenin **nokta kullanmadan fonksiyonlarını çağırmak için bazı ipuçları**:
+Bir kütüphanenin **nokta kullanmadan fonksiyonlarını çağırmanın bazı hileleri**:
 ```bash
 print(string.char(0x41, 0x42))
 print(rawget(string, "char")(0x41, 0x42))
 ```
-Bir kütüphanenin fonksiyonlarını listele:
+Bir kütüphanenin işlevlerini listele:
 ```bash
 for k,v in pairs(string) do print(k,v) end
 ```
-Not edin ki, önceki tek satırı **farklı bir lua ortamında her çalıştırdığınızda fonksiyonların sırası değişir**. Bu nedenle, belirli bir fonksiyonu çalıştırmanız gerekiyorsa, farklı lua ortamlarını yükleyerek ve le library'nin ilk fonksiyonunu çağırarak bir brute force saldırısı gerçekleştirebilirsiniz:
+Not edin ki, önceki tek satırı **farklı bir lua ortamında her çalıştırdığınızda fonksiyonların sırası değişir**. Bu nedenle, belirli bir fonksiyonu çalıştırmanız gerekiyorsa, farklı lua ortamlarını yükleyerek ve le library'nin ilk fonksiyonunu çağırarak bir kaba kuvvet saldırısı gerçekleştirebilirsiniz:
 ```bash
 #In this scenario you could BF the victim that is generating a new lua environment
 #for every interaction with the following line and when you are lucky

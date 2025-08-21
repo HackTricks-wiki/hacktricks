@@ -6,7 +6,7 @@
 
 Microsoft Word, bir dosyayı açmadan önce dosya veri doğrulaması yapar. Veri doğrulaması, OfficeOpenXML standardına karşı veri yapısı tanımlaması şeklinde gerçekleştirilir. Veri yapısı tanımlaması sırasında herhangi bir hata oluşursa, analiz edilen dosya açılmayacaktır.
 
-Genellikle, makrolar içeren Word dosyaları `.docm` uzantısını kullanır. Ancak, dosya uzantısını değiştirerek dosyayı yeniden adlandırmak ve makro çalıştırma yeteneklerini korumak mümkündür.\
+Genellikle, makrolar içeren Word dosyaları `.docm` uzantısını kullanır. Ancak, dosya uzantısını değiştirerek dosyanın adını değiştirmek ve makro çalıştırma yeteneklerini korumak mümkündür.\
 Örneğin, bir RTF dosyası tasarımı gereği makroları desteklemez, ancak RTF olarak yeniden adlandırılan bir DOCM dosyası Microsoft Word tarafından işlenecek ve makro çalıştırma yeteneğine sahip olacaktır.\
 Aynı iç yapılar ve mekanizmalar Microsoft Office Suite'in (Excel, PowerPoint vb.) tüm yazılımlarına uygulanır.
 
@@ -14,7 +14,7 @@ Aşağıdaki komutu kullanarak bazı Ofis programları tarafından hangi uzantı
 ```bash
 assoc | findstr /i "word excel powerp"
 ```
-DOCX dosyaları, makroları içeren uzak bir şablona atıfta bulunuyorsa (Dosya – Seçenekler – Eklentiler – Yönet: Şablonlar – Git) makroları "çalıştırabilir".
+DOCX dosyaları, makroları içeren uzaktan bir şablona atıfta bulunuyorsa (Dosya – Seçenekler – Eklentiler – Yönet: Şablonlar – Git) makroları “çalıştırabilir”.
 
 ### Harici Görüntü Yükleme
 
@@ -66,12 +66,12 @@ proc.Create "powershell <beacon line generated>
 ```
 #### Manually remove metadata
 
-**Dosya > Bilgi > Belgeyi Denetle > Belgeyi Denetle** yolunu izleyin, bu Belge Denetleyicisini açacaktır. **Denetle** butonuna tıklayın ve ardından **Belge Özellikleri ve Kişisel Bilgileri Kaldır** kısmının yanındaki **Tümünü Kaldır** seçeneğine tıklayın.
+**Dosya > Bilgi > Belgeyi Denetle > Belgeyi Denetle** yolunu izleyin, bu Belge Denetleyicisini açacaktır. **Denetle** butonuna tıklayın ve ardından **Belge Özellikleri ve Kişisel Bilgileri** yanında **Tümünü Kaldır** seçeneğine tıklayın.
 
 #### Doc Extension
 
-İşlem tamamlandığında, **Farklı Kaydet** türü açılır menüsünden, formatı **`.docx`**'den **Word 97-2003 `.doc`**'ye değiştirin.\
-Bunu yapın çünkü **`.docx`** içinde makroları kaydedemezsiniz ve **`.docm`** uzantısı etrafında bir **stigma** vardır (örneğin, küçük resim simgesi büyük bir `!` içerir ve bazı web/e-posta geçitleri bunları tamamen engeller). Bu nedenle, bu **eski `.doc` uzantısı en iyi uzlaşmadır**.
+İşlem tamamlandığında, **Farklı Kaydet** türü açılır menüsünden formatı **`.docx`**'den **Word 97-2003 `.doc`**'e değiştirin.\
+Bunu yapın çünkü **`.docx`** içinde makro kaydedemezsiniz ve makro etkin **`.docm`** uzantısı etrafında bir **stigma** vardır (örneğin, küçük resim simgesi büyük bir `!` içerir ve bazı web/e-posta geçitleri bunları tamamen engeller). Bu nedenle, bu **eski `.doc` uzantısı en iyi uzlaşmadır**.
 
 #### Malicious Macros Generators
 
@@ -81,7 +81,7 @@ Bunu yapın çünkü **`.docx`** içinde makroları kaydedemezsiniz ve **`.docm`
 
 ## HTA Files
 
-HTA, **HTML ve betik dilleri (VBScript ve JScript gibi)** birleştiren bir Windows programıdır. Kullanıcı arayüzünü oluşturur ve bir "tamamen güvenilir" uygulama olarak çalışır, bir tarayıcının güvenlik modelinin kısıtlamaları olmadan.
+HTA, **HTML ve betik dilleri (VBScript ve JScript gibi)** birleştiren bir Windows programıdır. Kullanıcı arayüzünü oluşturur ve bir "tamamen güvenilir" uygulama olarak çalıştırılır, bir tarayıcının güvenlik modelinin kısıtlamaları olmadan.
 
 HTA, genellikle **Internet Explorer** ile birlikte **kurulan** **`mshta.exe`** kullanılarak çalıştırılır, bu da **`mshta`'nın IE'ye bağımlı** olduğu anlamına gelir. Eğer kaldırılmışsa, HTA'lar çalıştırılamayacaktır.
 ```html
@@ -144,9 +144,11 @@ self.close
 
 **Bu fikirleri ve daha fazlasını aşağıdaki sayfalarda kontrol edin:**
 
+
 {{#ref}}
 ../../windows-hardening/active-directory-methodology/printers-spooler-service-abuse.md
 {{#endref}}
+
 
 {{#ref}}
 ../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md

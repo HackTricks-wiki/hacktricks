@@ -6,10 +6,10 @@
 
 Delegeli Yönetilen Hizmet Hesapları (**dMSA**), Windows Server 2025'te sunulan **gMSA**'nın bir sonraki nesil halefidir. Meşru bir göç iş akışı, yöneticilerin *eski* bir hesabı (kullanıcı, bilgisayar veya hizmet hesabı) dMSA ile değiştirirken izinleri şeffaf bir şekilde korumasına olanak tanır. İş akışı, `Start-ADServiceAccountMigration` ve `Complete-ADServiceAccountMigration` gibi PowerShell cmdlet'leri aracılığıyla açığa çıkar ve **dMSA nesnesinin** iki LDAP niteliğine dayanır:
 
-* **`msDS-ManagedAccountPrecededByLink`** – *DN bağlantısı* ile geçersiz kılınan (eski) hesap.
+* **`msDS-ManagedAccountPrecededByLink`** – *DN bağlantısı* ile geçersiz kılınan (eski) hesaba.
 * **`msDS-DelegatedMSAState`**       – göç durumu (`0` = yok, `1` = devam ediyor, `2` = *tamamlandı*).
 
-Eğer bir saldırgan, bir OU içinde **herhangi bir** dMSA oluşturabilir ve bu 2 niteliği doğrudan manipüle edebilirse, LSASS ve KDC dMSA'yı bağlantılı hesabın *halef* olarak kabul eder. Saldırgan daha sonra dMSA olarak kimlik doğruladığında **bağlantılı hesabın tüm ayrıcalıklarını devralır** – eğer Yönetici hesabı bağlantılıysa **Domain Admin**'e kadar.
+Eğer bir saldırgan, bir OU içinde **herhangi bir** dMSA oluşturabilir ve bu 2 niteliği doğrudan manipüle edebilirse, LSASS ve KDC dMSA'yı bağlı hesabın *halef* olarak kabul eder. Saldırgan daha sonra dMSA olarak kimlik doğruladığında **bağlı hesabın tüm ayrıcalıklarını devralır** – eğer Yönetici hesabı bağlıysa **Domain Admin**'e kadar.
 
 Bu teknik, 2025'te Unit 42 tarafından **BadSuccessor** olarak adlandırılmıştır. Yazma anında **hiçbir güvenlik yaması** mevcut değildir; yalnızca OU izinlerinin güçlendirilmesi sorunu hafifletir.
 
@@ -26,10 +26,10 @@ Unit 42, her OU'nun güvenlik tanımlarını ayrıştıran ve gerekli ACE'leri v
 ```powershell
 Get-BadSuccessorOUPermissions.ps1 -Domain contoso.local
 ```
-Arka planda, script `(objectClass=organizationalUnit)` için sayfalı bir LDAP araması yapar ve her `nTSecurityDescriptor`'ı kontrol eder
+Arka planda, script `(objectClass=organizationalUnit)` için sayfalı bir LDAP araması yapar ve her `nTSecurityDescriptor`'ı kontrol eder:
 
 * `ADS_RIGHT_DS_CREATE_CHILD` (0x0001)
-* `Active Directory Şeması ID: 31ed51fa-77b1-4175-884a-5c6f3f6f34e8` (nesne sınıfı *msDS-DelegatedManagedServiceAccount*)
+* `Active Directory Schema ID: 31ed51fa-77b1-4175-884a-5c6f3f6f34e8` (nesne sınıfı *msDS-DelegatedManagedServiceAccount*)
 
 ## Sömürü Adımları
 
@@ -47,7 +47,7 @@ Set-ADServiceAccount attacker_dMSA -Add \
 # 3. Mark the migration as *completed*
 Set-ADServiceAccount attacker_dMSA -Replace @{msDS-DelegatedMSAState=2}
 ```
-Replike edildikten sonra, saldırgan basitçe **logon** olarak `attacker_dMSA$` oturum açabilir veya bir Kerberos TGT talep edebilir – Windows, *superseded* hesabının token'ını oluşturacaktır.
+Replikasyondan sonra, saldırgan basitçe `attacker_dMSA$` olarak **giriş yapabilir** veya bir Kerberos TGT talep edebilir – Windows, *geçersiz kılınmış* hesabın jetonunu oluşturacaktır.
 
 ### Otomasyon
 
@@ -77,7 +77,7 @@ OU'larda **Nesne Denetimi**'ni etkinleştirin ve aşağıdaki Windows Güvenlik 
 * GUID `a0945b2b-57a2-43bd-b327-4d112a4e8bd1` → `msDS-ManagedAccountPrecededByLink`
 * **2946** – dMSA için TGT verilmesi
 
-`4662` (nitelik değişikliği), `4741` (bir bilgisayar/hizmet hesabının oluşturulması) ve `4624` (sonraki oturum açma) olaylarını ilişkilendirmek, BadSuccessor etkinliğini hızlı bir şekilde vurgular. **XSIAM** gibi XDR çözümleri, kullanıma hazır sorgularla birlikte gelir (bkz. referanslar).
+`4662` (nitelik değişikliği), `4741` (bir bilgisayar/hizmet hesabının oluşturulması) ve `4624` (sonraki oturum açma) olaylarını ilişkilendirmek, BadSuccessor etkinliğini hızlı bir şekilde vurgular. **XSIAM** gibi XDR çözümleri, kullanıma hazır sorgularla birlikte gelir (referanslara bakın).
 
 ## Azaltma
 

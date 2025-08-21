@@ -12,23 +12,23 @@ adws-enumeration.md
 
 ## AD Explorer
 
-[AD Explorer](https://docs.microsoft.com/en-us/sysinternals/downloads/adexplorer) (Sysinternals), aşağıdakileri sağlayan gelişmiş bir **AD görüntüleyici ve editör**'dür:
+[AD Explorer](https://docs.microsoft.com/en-us/sysinternals/downloads/adexplorer) (Sysinternals), aşağıdakileri sağlayan gelişmiş bir **AD görüntüleyici ve editörü**'dür:
 
 * Dizin ağacının GUI taraması
-* Nesne özniteliklerinin ve güvenlik tanımlarının düzenlenmesi
+* Nesne nitelikleri ve güvenlik tanımlayıcılarının düzenlenmesi
 * Çevrimdışı analiz için anlık görüntü oluşturma / karşılaştırma
 
 ### Hızlı kullanım
 
 1. Aracı başlatın ve herhangi bir alan kimlik bilgisi ile `dc01.corp.local`'a bağlanın.
-2. `File ➜ Create Snapshot` ile çevrimdışı bir anlık görüntü oluşturun.
+2. `File ➜ Create Snapshot` aracılığıyla çevrimdışı bir anlık görüntü oluşturun.
 3. İzin farklılıklarını tespit etmek için `File ➜ Compare` ile iki anlık görüntüyü karşılaştırın.
 
 ---
 
 ## ADRecon
 
-[ADRecon](https://github.com/adrecon/ADRecon), bir alan (ACL'ler, GPO'lar, güvenler, CA şablonları ...) üzerinden büyük bir artefakt seti çıkarır ve bir **Excel raporu** üretir.
+[ADRecon](https://github.com/adrecon/ADRecon), bir alanın büyük bir artefakt setini (ACL'ler, GPO'lar, güvenler, CA şablonları ...) çıkarır ve bir **Excel raporu** üretir.
 ```powershell
 # On a Windows host in the domain
 PS C:\> .\ADRecon.ps1 -OutputDir C:\Temp\ADRecon
@@ -62,7 +62,7 @@ Toplayıcılar, BloodHound GUI aracılığıyla alınan JSON üretir.
 
 ## Group3r
 
-[Group3r](https://github.com/Group3r/Group3r), **Group Policy Objects**'ı listeleyerek yanlış yapılandırmaları vurgular.
+[Group3r](https://github.com/Group3r/Group3r), **Grup Politika Nesnelerini** listeleyerek yanlış yapılandırmaları vurgular.
 ```bash
 # Execute inside the domain
 Group3r.exe -f gpo.log   # -s to stdout

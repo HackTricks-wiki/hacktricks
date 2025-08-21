@@ -4,11 +4,13 @@
 
 ### **PID ad alanı**
 
+
 {{#ref}}
 pid-namespace.md
 {{#endref}}
 
 ### **Mount ad alanı**
+
 
 {{#ref}}
 mount-namespace.md
@@ -16,11 +18,13 @@ mount-namespace.md
 
 ### **Ağ ad alanı**
 
+
 {{#ref}}
 network-namespace.md
 {{#endref}}
 
 ### **IPC Ad Alanı**
+
 
 {{#ref}}
 ipc-namespace.md
@@ -28,17 +32,20 @@ ipc-namespace.md
 
 ### **UTS ad alanı**
 
+
 {{#ref}}
 uts-namespace.md
 {{#endref}}
 
 ### Zaman Ad Alanı
 
+
 {{#ref}}
 time-namespace.md
 {{#endref}}
 
 ### Kullanıcı ad alanı
+
 
 {{#ref}}
 user-namespace.md

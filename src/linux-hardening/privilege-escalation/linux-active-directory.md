@@ -14,6 +14,7 @@ Linux'ta (veya Windows'ta bash'te) bir AD'ye erişiminiz varsa, AD'yi listelemek
 
 Ayrıca **linux'tan AD'yi listelemenin diğer yollarını** öğrenmek için aşağıdaki sayfayı kontrol edebilirsiniz:
 
+
 {{#ref}}
 ../../network-services-pentesting/pentesting-ldap.md
 {{#endref}}
@@ -21,6 +22,7 @@ Ayrıca **linux'tan AD'yi listelemenin diğer yollarını** öğrenmek için aş
 ### FreeIPA
 
 FreeIPA, Microsoft Windows **Active Directory** için açık kaynaklı bir **alternatif** olup, esasen **Unix** ortamları için tasarlanmıştır. Active Directory'ye benzer yönetim için tam bir **LDAP dizini** ile bir MIT **Kerberos** Anahtar Dağıtım Merkezi'ni birleştirir. CA ve RA sertifika yönetimi için Dogtag **Sertifika Sistemi** kullanarak, akıllı kartlar da dahil olmak üzere **çok faktörlü** kimlik doğrulamayı destekler. Unix kimlik doğrulama süreçleri için SSSD entegre edilmiştir. Daha fazla bilgi için:
+
 
 {{#ref}}
 ../freeipa-pentesting.md
@@ -32,15 +34,16 @@ FreeIPA, Microsoft Windows **Active Directory** için açık kaynaklı bir **alt
 
 Bu sayfada, **bir linux ana bilgisayarında kerberos biletlerini bulabileceğiniz farklı yerleri** bulacaksınız, bir sonraki sayfada bu CCache bilet formatlarını Kirbi'ye (Windows'ta kullanmanız gereken format) nasıl dönüştüreceğinizi ve ayrıca bir PTT saldırısı nasıl gerçekleştireceğinizi öğrenebilirsiniz:
 
+
 {{#ref}}
 ../../windows-hardening/active-directory-methodology/pass-the-ticket.md
 {{#endref}}
 
-### /tmp'den CCACHE bilet yeniden kullanımı
+### /tmp'den CCACHE biletinin yeniden kullanımı
 
-CCACHE dosyaları, **Kerberos kimlik bilgilerini saklamak için** kullanılan ikili formatlardır ve genellikle `/tmp` içinde 600 izinleriyle saklanır. Bu dosyalar, kullanıcının UID'si ile ilişkili olan **isim formatları, `krb5cc_%{uid}`,** ile tanımlanabilir. Kimlik doğrulama biletinin doğrulanması için, **çevre değişkeni `KRB5CCNAME`** istenen bilet dosyasının yoluna ayarlanmalıdır, bu da yeniden kullanımını sağlar.
+CCACHE dosyaları, **Kerberos kimlik bilgilerini saklamak için** kullanılan ikili formatlardır ve genellikle `/tmp` içinde 600 izinleri ile saklanır. Bu dosyalar, kullanıcının UID'si ile ilişkili olan **isim formatlarıyla** tanımlanabilir, `krb5cc_%{uid}`. Kimlik doğrulama biletinin doğrulanması için, **çevre değişkeni `KRB5CCNAME`** istenen bilet dosyasının yoluna ayarlanmalıdır, bu da yeniden kullanımını sağlar.
 
-Kimlik doğrulama için kullanılan mevcut bileti `env | grep KRB5CCNAME` ile listeleyin. Format taşınabilir ve bilet, **çevre değişkenini ayarlayarak** yeniden kullanılabilir: `export KRB5CCNAME=/tmp/ticket.ccache`. Kerberos bilet adı formatı `krb5cc_%{uid}` şeklindedir; burada uid, kullanıcının UID'sidir.
+Kimlik doğrulama için kullanılan mevcut bileti `env | grep KRB5CCNAME` ile listeleyin. Format taşınabilir ve bilet, **çevre değişkenini ayarlayarak** yeniden kullanılabilir: `export KRB5CCNAME=/tmp/ticket.ccache`. Kerberos bilet adı formatı `krb5cc_%{uid}` olup, uid kullanıcı UID'sidir.
 ```bash
 # Find tickets
 ls /tmp/ | grep krb5cc
@@ -60,7 +63,7 @@ cd tickey/tickey
 make CONF=Release
 /tmp/tickey -i
 ```
-Bu prosedür, çeşitli oturumlara enjekte etmeyi deneyecek ve başarıyı `/tmp` dizininde `__krb_UID.ccache` adlandırma kuralıyla çıkarılan biletleri depolayarak gösterecektir.
+Bu prosedür, çeşitli oturumlara enjekte etmeyi deneyecek ve başarıyı, çıkarılan biletleri `/tmp` dizininde `__krb_UID.ccache` adlandırma kuralıyla saklayarak gösterecektir.
 
 ### SSSD KCM'den CCACHE bilet yeniden kullanımı
 
@@ -81,14 +84,14 @@ klist -k /etc/krb5.keytab
 ```
 ### /etc/krb5.keytab dosyasından hesapları çıkar
 
-Kök ayrıcalıklarıyla çalışan hizmetler için gerekli olan hizmet hesabı anahtarları, **`/etc/krb5.keytab`** dosyalarında güvenli bir şekilde saklanır. Bu anahtarlar, hizmetler için şifreler gibi, sıkı bir gizlilik gerektirir.
+Kök ayrıcalıklarıyla çalışan hizmetler için gerekli olan hizmet hesap anahtarları, **`/etc/krb5.keytab`** dosyalarında güvenli bir şekilde saklanır. Bu anahtarlar, hizmetler için şifreler gibi, sıkı bir gizlilik gerektirir.
 
 Keytab dosyasının içeriğini incelemek için **`klist`** kullanılabilir. Bu araç, anahtar türü 23 olarak belirlendiğinde, kullanıcı kimlik doğrulaması için **NT Hash** dahil olmak üzere anahtar detaylarını görüntülemek üzere tasarlanmıştır.
 ```bash
 klist.exe -t -K -e -k FILE:C:/Path/to/your/krb5.keytab
 # Output includes service principal details and the NT Hash
 ```
-Linux kullanıcıları için, **`KeyTabExtract`** RC4 HMAC hash'ini çıkarmak için işlevsellik sunar; bu, NTLM hash yeniden kullanımında kullanılabilir.
+Linux kullanıcıları için, **`KeyTabExtract`** RC4 HMAC hash'ini çıkarmak için işlevsellik sunar; bu, NTLM hash yeniden kullanımı için kullanılabilir.
 ```bash
 python3 keytabextract.py krb5.keytab
 # Expected output varies based on hash availability

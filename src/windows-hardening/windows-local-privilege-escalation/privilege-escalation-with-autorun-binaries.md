@@ -35,18 +35,16 @@ dir /b "%appdata%\Microsoft\Windows\Start Menu\Programs\Startup" 2>nul
 Get-ChildItem "C:\Users\All Users\Start Menu\Programs\Startup"
 Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 ```
-> **FYI**: Arşiv çıkarma *path traversal* güvenlik açıkları (örneğin, WinRAR'da 7.13'ten önce kötüye kullanılan – CVE-2025-8088) **dekompresyon sırasında bu Başlangıç klasörlerinin içine doğrudan yükler bırakmak için** kullanılabilir, bu da bir sonraki kullanıcı oturum açıldığında kod yürütülmesine neden olur. Bu tekniğe derinlemesine bir bakış için:
+> **FYI**: Arşiv çıkarma *path traversal* güvenlik açıkları (örneğin, WinRAR'da 7.13'ten önce kötüye kullanılan - CVE-2025-8088) **dekompresyon sırasında bu Başlangıç klasörlerinin içine doğrudan yükler bırakmak için** kullanılabilir, bu da bir sonraki kullanıcı oturum açıldığında kod yürütülmesine neden olur. Bu tekniğe derinlemesine bir bakış için:
 
 {{#ref}}
 ../../generic-hacking/archive-extraction-path-traversal.md
 {{#endref}}
 
-
-
 ## Kayıt Defteri
 
 > [!TIP]
-> [Buradan not](https://answers.microsoft.com/en-us/windows/forum/all/delete-registry-key/d425ae37-9dcc-4867-b49c-723dcd15147f): **Wow6432Node** kayıt defteri girişi, 64-bit bir Windows sürümü çalıştırdığınızı gösterir. İşletim sistemi, bu anahtarı 64-bit Windows sürümlerinde çalışan 32-bit uygulamalar için HKEY_LOCAL_MACHINE\SOFTWARE'ın ayrı bir görünümünü göstermek için kullanır.
+> [Buradan not](https://answers.microsoft.com/en-us/windows/forum/all/delete-registry-key/d425ae37-9dcc-4867-b49c-723dcd15147f): **Wow6432Node** kayıt defteri girişi, 64-bit Windows sürümü çalıştırdığınızı gösterir. İşletim sistemi, 64-bit Windows sürümlerinde çalışan 32-bit uygulamalar için HKEY_LOCAL_MACHINE\SOFTWARE'ün ayrı bir görünümünü göstermek için bu anahtarı kullanır.
 
 ### Çalıştırmalar
 
@@ -66,7 +64,7 @@ Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 
 **Run** ve **RunOnce** olarak bilinen kayıt defteri anahtarları, her kullanıcı sisteme giriş yaptığında programları otomatik olarak çalıştırmak için tasarlanmıştır. Bir anahtarın veri değeri olarak atanan komut satırı 260 karakter veya daha az ile sınırlıdır.
 
-**Hizmet çalıştırmaları** (açılış sırasında hizmetlerin otomatik başlatılmasını kontrol edebilir):
+**Hizmet çalıştırmaları** (önyükleme sırasında hizmetlerin otomatik başlangıcını kontrol edebilir):
 
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\RunServicesOnce`
 - `HKCU\Software\Microsoft\Windows\CurrentVersion\RunServicesOnce`
@@ -87,10 +85,10 @@ Windows Vista ve sonraki sürümlerde, **Run** ve **RunOnce** kayıt defteri ana
 reg add HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnceEx\\0001\\Depend /v 1 /d "C:\\temp\\evil.dll"
 ```
 > [!TIP]
-> **Exploit 1**: Eğer **HKLM** içindeki belirtilen kayıt defterlerinden herhangi birine yazabiliyorsanız, farklı bir kullanıcı oturum açtığında ayrıcalıkları artırabilirsiniz.
+> **Exploit 1**: Eğer **HKLM** içindeki belirtilen kayıt defterlerinden birine yazabiliyorsanız, farklı bir kullanıcı oturum açtığında ayrıcalıkları artırabilirsiniz.
 
 > [!TIP]
-> **Exploit 2**: Eğer **HKLM** içindeki herhangi bir kayıt defterinde belirtilen ikili dosyalardan herhangi birini üzerine yazabiliyorsanız, farklı bir kullanıcı oturum açtığında o ikili dosyayı bir arka kapı ile değiştirebilir ve ayrıcalıkları artırabilirsiniz.
+> **Exploit 2**: Eğer **HKLM** içindeki herhangi bir kayıt defterinde belirtilen ikili dosyalardan birini üzerine yazabiliyorsanız, farklı bir kullanıcı oturum açtığında o ikili dosyayı bir arka kapı ile değiştirebilir ve ayrıcalıkları artırabilirsiniz.
 ```bash
 #CMD
 reg query HKLM\Software\Microsoft\Windows\CurrentVersion\Run
@@ -156,7 +154,7 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Wow6432Node\Microsoft\Windows\Ru
 **Başlangıç** klasörüne yerleştirilen kısayollar, kullanıcı oturumu açıldığında veya sistem yeniden başlatıldığında hizmetlerin veya uygulamaların otomatik olarak başlatılmasını tetikler. **Başlangıç** klasörünün konumu, hem **Yerel Makine** hem de **Geçerli Kullanıcı** kapsamları için kayıt defterinde tanımlanmıştır. Bu, belirtilen **Başlangıç** konumlarına eklenen her kısayolun, bağlantılı hizmetin veya programın oturum açma veya yeniden başlatma sürecinden sonra başlamasını sağlayacağı anlamına gelir; bu da programların otomatik olarak çalıştırılmasını planlamak için basit bir yöntemdir.
 
 > [!TIP]
-> Eğer **HKLM** altındaki herhangi bir \[User] Shell Folder'ı geçersiz kılabiliyorsanız, bunu kontrol ettiğiniz bir klasöre yönlendirebilir ve bir arka kapı yerleştirerek, kullanıcı sisteme giriş yaptığında her seferinde çalıştırılmasını sağlayabilirsiniz.
+> Eğer **HKLM** altında herhangi bir \[User] Shell Folder'ı geçersiz kılabiliyorsanız, bunu kontrol ettiğiniz bir klasöre yönlendirebilir ve bir arka kapı yerleştirerek, bir kullanıcı sisteme giriş yaptığında her seferinde çalıştırılmasını sağlayabilirsiniz.
 ```bash
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders" /v "Common Startup"
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" /v "Common Startup"
@@ -198,18 +196,18 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Microsoft\Windows\CurrentVersion
 
 ### Güvenli Mod Komut İstemcisini Değiştirme
 
-Windows Kayıt Defteri'nde `HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot` altında varsayılan olarak **`AlternateShell`** değeri `cmd.exe` olarak ayarlanmıştır. Bu, başlangıçta "Komut İstemcisi ile Güvenli Mod" seçeneğini seçtiğinizde (F8 tuşuna basarak) `cmd.exe`'nin kullanıldığı anlamına gelir. Ancak, bilgisayarınızı bu modda otomatik olarak başlatacak şekilde ayarlamak mümkündür; böylece F8'e basıp manuel olarak seçmenize gerek kalmaz.
+Windows Kayıt Defteri'nde `HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot` altında varsayılan olarak **`AlternateShell`** değeri `cmd.exe` olarak ayarlanmıştır. Bu, başlangıçta "Komut İstemcisi ile Güvenli Mod" seçeneğini seçtiğinizde (F8 tuşuna basarak) `cmd.exe`'nin kullanıldığı anlamına gelir. Ancak, F8'e basmadan ve manuel olarak seçmeden bu modda otomatik olarak başlatmak için bilgisayarınızı ayarlamak mümkündür.
 
 "Komut İstemcisi ile Güvenli Mod"da otomatik olarak başlatmak için bir önyükleme seçeneği oluşturma adımları:
 
-1. `boot.ini` dosyasının özelliklerini, salt okunur, sistem ve gizli bayrakları kaldıracak şekilde değiştirin: `attrib c:\boot.ini -r -s -h`
+1. `boot.ini` dosyasının özelliklerini yalnızca okunur, sistem ve gizli bayrakları kaldıracak şekilde değiştirin: `attrib c:\boot.ini -r -s -h`
 2. `boot.ini` dosyasını düzenlemek için açın.
 3. Aşağıdaki gibi bir satır ekleyin: `multi(0)disk(0)rdisk(0)partition(1)\WINDOWS="Microsoft Windows XP Professional" /fastdetect /SAFEBOOT:MINIMAL(ALTERNATESHELL)`
 4. `boot.ini` dosyasındaki değişiklikleri kaydedin.
 5. Orijinal dosya özelliklerini yeniden uygulayın: `attrib c:\boot.ini +r +s +h`
 
-- **Exploit 1:** **AlternateShell** kayıt defteri anahtarını değiştirmek, yetkisiz erişim için potansiyel olarak özel komut kabuğu kurulumu sağlar.
-- **Exploit 2 (PATH Yazma İzinleri):** Sistem **PATH** değişkeninin herhangi bir bölümünde yazma izinlerine sahip olmak, özellikle `C:\Windows\system32`'den önce, özel bir `cmd.exe` çalıştırmanıza olanak tanır; bu, sistem Güvenli Mod'da başlatıldığında bir arka kapı olabilir.
+- **Exploit 1:** **AlternateShell** kayıt defteri anahtarını değiştirmek, yetkisiz erişim için potansiyel olarak özel komut kabuğu ayarlamaya olanak tanır.
+- **Exploit 2 (PATH Yazma İzinleri):** Sistem **PATH** değişkeninin herhangi bir bölümünde yazma izinlerine sahip olmak, özellikle `C:\Windows\system32`'den önce, özel bir `cmd.exe` çalıştırmanıza olanak tanır; bu, sistem Güvenli Modda başlatıldığında bir arka kapı olabilir.
 - **Exploit 3 (PATH ve boot.ini Yazma İzinleri):** `boot.ini`'ye yazma erişimi, otomatik Güvenli Mod başlatmayı sağlar ve bir sonraki yeniden başlatmada yetkisiz erişimi kolaylaştırır.
 
 Mevcut **AlternateShell** ayarını kontrol etmek için bu komutları kullanın:
@@ -232,13 +230,13 @@ Bu anahtarlar içinde, her biri belirli bir bileşene karşılık gelen çeşitl
 
 - **IsInstalled:**
 - `0`, bileşenin komutunun yürütülmeyeceğini gösterir.
-- `1`, komutun her kullanıcı için bir kez yürütüleceğini belirtir; bu, `IsInstalled` değeri eksikse varsayılan davranıştır.
+- `1`, komutun her kullanıcı için bir kez yürütüleceği anlamına gelir; bu, `IsInstalled` değeri eksikse varsayılan davranıştır.
 - **StubPath:** Active Setup tarafından yürütülecek komutu tanımlar. `notepad` gibi geçerli bir komut satırı olabilir.
 
 **Güvenlik İçgörüleri:**
 
-- **`IsInstalled`** değeri `"1"` olarak ayarlanmış bir anahtarı değiştirmek veya yazmak, yetkisiz komut yürütülmesine yol açabilir ve bu da ayrıcalık yükseltmesine neden olabilir.
-- Herhangi bir **`StubPath`** değerinde referans verilen ikili dosyanın değiştirilmesi de yeterli izinler varsa ayrıcalık yükseltmesine ulaşabilir.
+- **`IsInstalled`** değeri `"1"` olarak ayarlanmış bir anahtarı değiştirmek veya yazmak, yetkisiz komut yürütülmesine yol açabilir; bu, ayrıcalık yükseltmesi için potansiyel bir fırsattır.
+- Herhangi bir **`StubPath`** değerinde referans verilen ikili dosyanın değiştirilmesi de yeterli izinler varsa ayrıcalık yükseltmesi sağlayabilir.
 
 Active Setup bileşenleri arasındaki **`StubPath`** yapılandırmalarını incelemek için bu komutlar kullanılabilir:
 ```bash
@@ -249,9 +247,9 @@ reg query "HKCU\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components
 ```
 ### Tarayıcı Yardımcı Nesneleri
 
-### Tarayıcı Yardımcı Nesneleri (BHO'lar) Hakkında Genel Bilgi
+### Tarayıcı Yardımcı Nesneleri (BHO) Genel Bakış
 
-Tarayıcı Yardımcı Nesneleri (BHO'lar), Microsoft'un Internet Explorer'ına ekstra özellikler ekleyen DLL modülleridir. Her başlatmada Internet Explorer ve Windows Gezgini'ne yüklenirler. Ancak, **NoExplorer** anahtarını 1 olarak ayarlayarak yürütmeleri engellenebilir, bu da onların Windows Gezgini örnekleriyle yüklenmesini önler.
+Tarayıcı Yardımcı Nesneleri (BHO), Microsoft'un Internet Explorer'ına ekstra özellikler ekleyen DLL modülleridir. Her başlatmada Internet Explorer ve Windows Gezgini'ne yüklenirler. Ancak, **NoExplorer** anahtarını 1 olarak ayarlayarak yürütmeleri engellenebilir, bu da onların Windows Gezgini örnekleriyle yüklenmesini önler.
 
 BHO'lar, Windows 10 ile Internet Explorer 11 aracılığıyla uyumludur, ancak daha yeni Windows sürümlerinde varsayılan tarayıcı olan Microsoft Edge'de desteklenmezler.
 
@@ -272,7 +270,7 @@ reg query "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\B
 - `HKLM\Software\Microsoft\Internet Explorer\Extensions`
 - `HKLM\Software\Wow6432Node\Microsoft\Internet Explorer\Extensions`
 
-Kayıt defterinin her bir dll için 1 yeni kayıt içereceğini ve bunun **CLSID** ile temsil edileceğini unutmayın. CLSID bilgilerini `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}` içinde bulabilirsiniz.
+Not edin ki, kayıt defteri her bir dll için 1 yeni kayıt içerecek ve bu **CLSID** ile temsil edilecektir. CLSID bilgilerini `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}` içinde bulabilirsiniz.
 
 ### Font Sürücüleri
 

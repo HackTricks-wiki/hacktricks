@@ -2,14 +2,12 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-
-
 ## Silver ticket
 
 **Silver Ticket** saldırısı, Active Directory (AD) ortamlarında hizmet biletlerinin istismarını içerir. Bu yöntem, bir Ticket Granting Service (TGS) bileti oluşturmak için **bir hizmet hesabının NTLM hash'ini edinmeye** dayanır; bu, bir bilgisayar hesabı gibi bir hizmet hesabı olabilir. Bu sahte bilet ile bir saldırgan, genellikle yönetici ayrıcalıkları hedefleyerek, ağdaki belirli hizmetlere **herhangi bir kullanıcıyı taklit ederek** erişebilir. Biletleri sahtelemek için AES anahtarlarının kullanılmasının daha güvenli ve daha az tespit edilebilir olduğu vurgulanmaktadır.
 
 > [!WARNING]
-> Silver Ticket'lar, yalnızca **hizmet hesabının hash'ini** gerektirdikleri için Golden Ticket'lara göre daha az tespit edilebilirler, krbtgt hesabını gerektirmezler. Ancak, hedefledikleri belirli hizmetle sınırlıdırlar. Ayrıca, sadece bir kullanıcının şifresini çalmak yeterlidir. 
+> Silver Ticket'lar, yalnızca **hizmet hesabının hash'ini** gerektirdikleri için Golden Ticket'lara göre daha az tespit edilebilirler; krbtgt hesabına ihtiyaç duymazlar. Ancak, hedefledikleri belirli hizmetle sınırlıdırlar. Ayrıca, yalnızca bir kullanıcının şifresini çalmak yeterlidir. 
 Ayrıca, bir **hesabın şifresini bir SPN ile ele geçirirseniz**, o şifreyi kullanarak o hizmete herhangi bir kullanıcıyı taklit eden bir Silver Ticket oluşturabilirsiniz.
 
 Bilet oluşturma için, işletim sistemine bağlı olarak farklı araçlar kullanılmaktadır:
@@ -64,7 +62,7 @@ CIFS servisi, kurbanın dosya sistemine erişim için yaygın bir hedef olarak �
 
 ## Süreklilik
 
-Makinelerin her 30 günde bir şifrelerini değiştirmesini önlemek için `HKLM\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters\DisablePasswordChange = 1` ayarını yapabilir veya `HKLM\SYSTEM\CurrentControlSet\Services\NetLogon\Parameters\MaximumPasswordAge` değerini 30 günden daha büyük bir değere ayarlayarak makinelerin şifresinin ne zaman değiştirilmesi gerektiğini belirtebilirsiniz.
+Makinelerin her 30 günde bir şifrelerini değiştirmesini önlemek için `HKLM\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters\DisablePasswordChange = 1` ayarını yapabilir veya `HKLM\SYSTEM\CurrentControlSet\Services\NetLogon\Parameters\MaximumPasswordAge` değerini 30 günden daha büyük bir değere ayarlayarak makinelerin şifresinin ne zaman değiştirileceğini belirtebilirsiniz.
 
 ## Hizmet biletlerini kötüye kullanma
 
@@ -72,7 +70,7 @@ Aşağıdaki örneklerde, biletin yönetici hesabını taklit ederek alındığ�
 
 ### CIFS
 
-Bu bilet ile `C$` ve `ADMIN$` klasörlerine **SMB** üzerinden (eğer açığa çıkmışlarsa) erişebilir ve uzaktaki dosya sisteminin bir kısmına dosyaları kopyalayabilirsiniz, sadece şunu yaparak:
+Bu bilet ile `C$` ve `ADMIN$` klasörlerine **SMB** üzerinden (eğer açığa çıkmışlarsa) erişebilir ve uzaktaki dosya sisteminin bir kısmına dosyaları kopyalayabilirsiniz, sadece şöyle bir şey yaparak:
 ```bash
 dir \\vulnerable.computer\C$
 dir \\vulnerable.computer\ADMIN$
@@ -110,7 +108,7 @@ Invoke-WmiMethod win32_process -ComputerName $Computer -name create -argumentlis
 #You can also use wmic
 wmic remote.computer.local list full /format:list
 ```
-Daha fazla bilgi için **wmiexec** hakkında aşağıdaki sayfaya bakın:
+Daha fazla **wmiexec hakkında bilgi** için aşağıdaki sayfayı ziyaret edin:
 
 {{#ref}}
 ../lateral-movement/wmiexec.md
@@ -138,6 +136,7 @@ Bu ayrıcalıkla **DCSync** kullanarak DC veritabanını dökebilirsiniz:
 mimikatz(commandline) # lsadump::dcsync /dc:pcdc.domain.local /domain:domain.local /user:krbtgt
 ```
 **DCSync hakkında daha fazla bilgi edinin** aşağıdaki sayfada:
+
 
 {{#ref}}
 dcsync.md

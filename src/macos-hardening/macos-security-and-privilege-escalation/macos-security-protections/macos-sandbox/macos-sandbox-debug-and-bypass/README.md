@@ -10,25 +10,26 @@
 
 Derleyici, `/usr/lib/libSystem.B.dylib` dosyasını ikili dosyaya bağlayacaktır.
 
-Daha sonra, **`libSystem.B`**, **`xpc_pipe_routine`** uygulamanın yetkilerini **`securityd`**'ye gönderene kadar diğer birkaç fonksiyonu çağıracaktır. Securityd, sürecin Sandbox içinde karantinaya alınması gerekip gerekmediğini kontrol eder ve eğer öyleyse, karantinaya alır.\
+Daha sonra, **`libSystem.B`**, **`xpc_pipe_routine`** uygulamanın yetkilerini **`securityd`**'ye göndermeden önce birkaç başka fonksiyonu çağıracaktır. Securityd, sürecin Sandbox içinde karantinaya alınması gerekip gerekmediğini kontrol eder ve eğer öyleyse, karantinaya alır.\
 Son olarak, sandbox, **`__sandbox_ms`** çağrısıyla etkinleştirilecek ve bu da **`__mac_syscall`**'ı çağıracaktır.
 
 ## Olası Bypass'ler
 
 ### Karantina niteliğini atlama
 
-**Sandbox'lı süreçler tarafından oluşturulan dosyalar**, sandbox kaçışını önlemek için **karantina niteliği** eklenir. Ancak, eğer bir sandbox'lı uygulama içinde **karantina niteliği olmayan bir `.app` klasörü oluşturmayı başarırsanız**, uygulama paketinin ikili dosyasını **`/bin/bash`**'e yönlendirebilir ve **plist** içinde bazı çevre değişkenleri ekleyerek **`open`** komutunu kötüye kullanarak **yeni uygulamayı sandbox'sız başlatabilirsiniz**.
+**Sandbox'lı süreçler tarafından oluşturulan dosyalar**, sandbox'tan kaçışları önlemek için **karantina niteliği** eklenir. Ancak, eğer bir sandbox'lı uygulama içinde **karantina niteliği olmayan bir `.app` klasörü oluşturmayı başarırsanız**, uygulama paketinin ikili dosyasını **`/bin/bash`**'e işaret edebilir ve **plist** içinde bazı çevre değişkenleri ekleyerek **`open`** komutunu kötüye kullanarak **yeni uygulamayı sandbox'sız başlatabilirsiniz**.
 
 Bu, [**CVE-2023-32364**](https://gergelykalman.com/CVE-2023-32364-a-macOS-sandbox-escape-by-mounting.html)**'te yapılan şeydir.**
 
 > [!CAUTION]
-> Bu nedenle, şu anda, eğer sadece **karantina niteliği** olmayan bir isimle biten bir **`.app`** klasörü oluşturabiliyorsanız, sandbox'tan kaçabilirsiniz çünkü macOS yalnızca **`.app` klasörü** ve **ana çalıştırılabilir** dosyada **karantina** niteliğini **kontrol eder** (ve biz ana çalıştırılabilir dosyayı **`/bin/bash`**'e yönlendireceğiz).
+> Bu nedenle, şu anda, eğer sadece **karantina niteliği olmayan** bir isimle biten **`.app`** klasörü oluşturabiliyorsanız, sandbox'tan kaçabilirsiniz çünkü macOS yalnızca **`.app` klasöründeki** ve **ana çalıştırılabilir dosyadaki** **karantina** niteliğini **kontrol eder** (ve biz ana çalıştırılabilir dosyayı **`/bin/bash`**'e işaret edeceğiz).
 >
-> Eğer bir .app paketi zaten çalıştırılmak üzere yetkilendirilmişse (çalıştırılmak üzere yetkilendirilmiş bayrağı olan bir karantina xttr'ı varsa), bunu da kötüye kullanabilirsiniz... tek farkla ki artık **`.app`** paketleri içinde yazamazsınız, eğer bazı ayrıcalıklı TCC izinleriniz yoksa (ki bunlar yüksek bir sandbox içinde olmayacaktır).
+> Eğer bir .app paketi zaten çalıştırılmak üzere yetkilendirilmişse (çalıştırma yetkisi olan bir karantina xttr'ye sahipse), bunu da kötüye kullanabilirsiniz... tek farkla ki artık **`.app`** paketleri içinde yazamazsınız, eğer bazı ayrıcalıklı TCC izinleriniz yoksa (ki bunlar yüksek bir sandbox içinde olmayacaktır).
 
 ### Open işlevselliğini kötüye kullanma
 
-[**Word sandbox bypass**](macos-office-sandbox-bypasses.md#word-sandbox-bypass-via-login-items-and-.zshenv) son örneklerinde, **`open`** cli işlevselliğinin sandbox'ı atlamak için nasıl kötüye kullanılabileceği görülebilir.
+[**Son Word sandbox bypass örneklerinde**](macos-office-sandbox-bypasses.md#word-sandbox-bypass-via-login-items-and-.zshenv), **`open`** cli işlevselliğinin sandbox'ı atlamak için nasıl kötüye kullanılabileceği görülebilir.
+
 
 {{#ref}}
 macos-office-sandbox-bypasses.md
@@ -37,15 +38,16 @@ macos-office-sandbox-bypasses.md
 ### Başlatma Ajanları/Daemon'ları
 
 Bir uygulama **sandbox'lı olacak şekilde tasarlanmışsa** (`com.apple.security.app-sandbox`), örneğin bir LaunchAgent'tan **çalıştırıldığında** sandbox'ı atlamak mümkündür.\
-[**bu yazıda**](https://www.vicarius.io/vsociety/posts/cve-2023-26818-sandbox-macos-tcc-bypass-w-telegram-using-dylib-injection-part-2-3?q=CVE-2023-26818) açıklandığı gibi, sandbox'lı bir uygulama ile kalıcılık kazanmak istiyorsanız, otomatik olarak bir LaunchAgent olarak çalıştırılmasını sağlayabilir ve belki de DyLib çevre değişkenleri aracılığıyla kötü niyetli kod enjekte edebilirsiniz.
+[**Bu yazıda**](https://www.vicarius.io/vsociety/posts/cve-2023-26818-sandbox-macos-tcc-bypass-w-telegram-using-dylib-injection-part-2-3?q=CVE-2023-26818) açıklandığı gibi, sandbox'lı bir uygulama ile kalıcılık kazanmak istiyorsanız, otomatik olarak bir LaunchAgent olarak çalıştırılmasını sağlayabilir ve belki de DyLib çevre değişkenleri aracılığıyla kötü niyetli kod enjekte edebilirsiniz.
 
 ### Otomatik Başlatma Konumlarını Kötüye Kullanma
 
-Eğer bir sandbox'lı süreç, **sonrasında bir sandbox'sız uygulamanın ikili dosyasını çalıştıracağı** bir yere **yazabiliyorsa**, oraya ikili dosyayı yerleştirerek **kaçabilir**. Bu tür konumların iyi bir örneği `~/Library/LaunchAgents` veya `/System/Library/LaunchDaemons`'dır.
+Eğer bir sandbox'lı süreç, **sonrasında bir sandbox'sız uygulamanın ikili dosyasını çalıştıracağı** bir yere **yazabiliyorsa**, sadece oraya ikili dosyayı yerleştirerek **kaçabilir**. Bu tür konumların iyi bir örneği `~/Library/LaunchAgents` veya `/System/Library/LaunchDaemons`'dır.
 
 Bunun için belki de **2 adım** gerekebilir: Daha **izinli bir sandbox** (`file-read*`, `file-write*`) ile bir sürecin kodunuzu çalıştırmasını sağlamak ve bu kodun aslında **sandbox'sız çalıştırılacağı** bir yere yazmasını sağlamak.
 
 **Otomatik Başlatma konumları** hakkında bu sayfayı kontrol edin:
+
 
 {{#ref}}
 ../../../../macos-auto-start-locations.md
@@ -53,7 +55,8 @@ Bunun için belki de **2 adım** gerekebilir: Daha **izinli bir sandbox** (`file
 
 ### Diğer süreçleri kötüye kullanma
 
-Eğer o sandbox sürecinden, daha az kısıtlayıcı sandbox'larda (veya hiç) çalışan **diğer süreçleri tehlikeye atabiliyorsanız**, onların sandbox'larından kaçabilirsiniz:
+Eğer o sandbox sürecinden, daha az kısıtlayıcı sandbox'larda (veya hiç) çalışan **diğer süreçleri tehlikeye atabiliyorsanız**, onların sandbox'larından kaçabileceksiniz:
+
 
 {{#ref}}
 ../../../macos-proces-abuse/
@@ -61,7 +64,7 @@ Eğer o sandbox sürecinden, daha az kısıtlayıcı sandbox'larda (veya hiç) �
 
 ### Mevcut Sistem ve Kullanıcı Mach hizmetleri
 
-Sandbox, ayrıca `application.sb` profilinde tanımlanan belirli **Mach hizmetleri** ile iletişim kurmaya da izin verir. Eğer bu hizmetlerden birini **kötüye kullanmayı** başarırsanız, **sandbox'tan kaçabilirsiniz**.
+Sandbox, `application.sb` profilinde tanımlanan belirli **Mach hizmetleri** ile iletişim kurmaya da izin verir. Eğer bu hizmetlerden birini **kötüye kullanmayı** başarırsanız, **sandbox'tan kaçabilirsiniz**.
 
 [Bu yazıda](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/) belirtildiği gibi, Mach hizmetleri hakkında bilgi `/System/Library/xpc/launchd.plist` dosyasında saklanır. Tüm Sistem ve Kullanıcı Mach hizmetlerini bulmak için o dosyada `<string>System</string>` ve `<string>User</string>` araması yapabilirsiniz.
 
@@ -92,11 +95,11 @@ checkService(serviceName.UTF8String);
 
 Bu Mach hizmetleri, [bu yazıda sandbox'tan kaçmak için ilk olarak istismar edildi](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/). O zaman, **bir uygulama ve çerçevesi tarafından gereken tüm XPC hizmetleri** uygulamanın PID alanında görünür durumdaydı (bunlar `ServiceType` olarak `Application` olan Mach Hizmetleridir).
 
-Bir **PID Domain XPC hizmeti ile iletişim kurmak için**, uygulama içinde şu şekilde kaydetmek yeterlidir:
+Bir **PID Domain XPC hizmeti ile iletişim kurmak için**, uygulama içinde şu gibi bir satırla kaydetmek yeterlidir:
 ```objectivec
 [[NSBundle bundleWithPath:@“/System/Library/PrivateFrameworks/ShoveService.framework"]load];
 ```
-Ayrıca, tüm **Application** Mach hizmetlerini `System/Library/xpc/launchd.plist` içinde `<string>Application</string>` arayarak bulmak mümkündür.
+Ayrıca, tüm **Application** Mach hizmetlerini bulmak için `System/Library/xpc/launchd.plist` içinde `<string>Application</string>` aramak mümkündür.
 
 Geçerli xpc hizmetlerini bulmanın bir diğer yolu ise şunları kontrol etmektir:
 ```bash
@@ -173,7 +176,7 @@ break;
 ```
 #### /System/Library/PrivateFrameworks/WorkflowKit.framework/XPCServices/ShortcutsFileAccessHelper.xpc
 
-Bu XPC servisi, `extendAccessToURL:completion:` yöntemi aracılığıyla XPC istemcisine keyfi bir URL'ye okuma ve yazma erişimi verme imkanı tanır ve bu yöntem herhangi bir bağlantıyı kabul eder. XPC servisi FDA'ya sahip olduğundan, bu izinlerin kötüye kullanılması TCC'yi tamamen atlatmak için mümkündür.
+Bu XPC servisi, `extendAccessToURL:completion:` yöntemi aracılığıyla XPC istemcisine keyfi bir URL'ye okuma ve yazma erişimi vermeye olanak tanır ve bu yöntem herhangi bir bağlantıyı kabul eder. XPC servisi FDA'ya sahip olduğundan, bu izinlerin kötüye kullanılması TCC'yi tamamen atlatmak için mümkündür.
 
 Sömürü şuydu:
 ```objectivec
@@ -210,9 +213,9 @@ NSLog(@"Read the target content:%@", [NSData dataWithContentsOfURL:targetURL]);
 - Eğer ikili **tamamen statik olarak derlenmişse**, o kütüphaneyi yüklemekten kaçınabilir.
 - Eğer **ikili herhangi bir kütüphaneyi yüklemeye ihtiyaç duymuyorsa** (çünkü bağlayıcı da libSystem'dadır), libSystem'i yüklemesine gerek kalmaz.
 
-### Shell Kodları
+### Shellcode'lar
 
-**Shell kodlarının** ARM64'te bile `libSystem.dylib` içinde bağlanması gerektiğini unutmayın:
+**Shellcode'ların** ARM64'te bile `libSystem.dylib` içinde bağlanması gerektiğini unutmayın:
 ```bash
 ld -o shell shell.o -macosx_version_min 13.0
 ld: dynamic executables or dylibs must link with libSystem.dylib for architecture arm64
@@ -225,7 +228,7 @@ ld: dynamic executables or dylibs must link with libSystem.dylib for architectur
 (allow default)
 (deny file-write* (literal "/private/tmp/sbx"))
 ```
-yeni bir sürecin örneğin çalıştırılmasıyla atlatılabilir:
+şu şekilde yeni bir süreç tarafından atlatılabilir:
 ```bash
 mkdir -p /tmp/poc.app/Contents/MacOS
 echo '#!/bin/sh\n touch /tmp/sbx' > /tmp/poc.app/Contents/MacOS/poc
@@ -249,6 +252,7 @@ Bir uygulama belirli bir **hakka** sahipse, bazı **hareketlerin** **sandbox tar
 ### Interposting Bypass
 
 Daha fazla bilgi için **Interposting** kontrol edin:
+
 
 {{#ref}}
 ../../../macos-proces-abuse/macos-function-hooking.md
@@ -324,7 +328,7 @@ Sandbox Bypassed!
 ```
 ### Debug & bypass Sandbox with lldb
 
-Sandbox'lanması gereken bir uygulama derleyelim:
+Sandbox'lı olması gereken bir uygulama derleyelim:
 
 {{#tabs}}
 {{#tab name="sand.c"}}
@@ -373,7 +377,7 @@ codesign -s <cert-name> --entitlements entitlements.xml sand
 ```
 > [!CAUTION]
 > Uygulama **`~/Desktop/del.txt`** dosyasını **Sandbox'ın izin vermeyeceği** şekilde **okumaya** çalışacak.\
-> Sandbox aşıldığında okuyabilmesi için orada bir dosya oluşturun:
+> Sandbox aşıldığında okunabilmesi için orada bir dosya oluşturun:
 >
 > ```bash
 > echo "Sandbox Bypassed" > ~/Desktop/del.txt

@@ -7,30 +7,32 @@
 Bir XPC hizmetine bağlantı kurulduğunda, sunucu bağlantının izinli olup olmadığını kontrol eder. Genellikle gerçekleştireceği kontroller şunlardır:
 
 1. Bağlanan **sürecin Apple imzalı** bir sertifika ile imzalanıp imzalanmadığını kontrol et.
-- Eğer bu **doğrulanmazsa**, bir saldırgan **sahte bir sertifika** oluşturarak diğer kontrollerle eşleşebilir.
+- Eğer bu **doğrulanmazsa**, bir saldırgan **herhangi bir diğer kontrolü** karşılamak için **sahte bir sertifika** oluşturabilir.
 2. Bağlanan sürecin **kuruluşun sertifikası** ile imzalanıp imzalanmadığını kontrol et (takım ID doğrulaması).
 - Eğer bu **doğrulanmazsa**, Apple'dan alınan **herhangi bir geliştirici sertifikası** imzalamak için kullanılabilir ve hizmete bağlanabilir.
 3. Bağlanan sürecin **uygun bir paket kimliğine** sahip olup olmadığını kontrol et.
 - Eğer bu **doğrulanmazsa**, aynı kuruluş tarafından **imzalanmış herhangi bir araç** XPC hizmeti ile etkileşimde bulunmak için kullanılabilir.
 4. (4 veya 5) Bağlanan sürecin **uygun bir yazılım sürüm numarasına** sahip olup olmadığını kontrol et.
 - Eğer bu **doğrulanmazsa**, eski, güvensiz istemciler, süreç enjeksiyonuna karşı savunmasız olarak XPC hizmetine bağlanmak için kullanılabilir, diğer kontroller mevcut olsa bile.
-5. (4 veya 5) Bağlanan sürecin tehlikeli yetkilendirmeleri olmayan **sertleştirilmiş çalışma zamanı** olup olmadığını kontrol et (örneğin, rastgele kütüphanelerin yüklenmesine veya DYLD env vars kullanmaya izin verenler gibi).
+5. (4 veya 5) Bağlanan sürecin tehlikeli yetkilere sahip olmadan **sertifikalı çalışma zamanı** olup olmadığını kontrol et (örneğin, rastgele kütüphaneleri yüklemeye veya DYLD ortam değişkenlerini kullanmaya izin verenler gibi).
 1. Eğer bu **doğrulanmazsa**, istemci **kod enjeksiyonuna karşı savunmasız** olabilir.
-6. Bağlanan sürecin hizmete bağlanmasına izin veren bir **yetkilendirme** olup olmadığını kontrol et. Bu, Apple ikili dosyaları için geçerlidir.
-7. **Doğrulama**, bağlanan **istemcinin denetim belirtecine** **dayanmalıdır** ve süreç kimliğine (**PID**) **değil** çünkü ilki **PID yeniden kullanım saldırılarını** önler.
-- Geliştiriciler **denetim belirteci** API çağrısını nadiren kullanır çünkü bu **özel**dir, bu nedenle Apple istediği zaman **değiştirebilir**. Ayrıca, özel API kullanımı Mac App Store uygulamalarında yasaklanmıştır.
+6. Bağlanan sürecin hizmete bağlanmasına izin veren bir **yetkiye** sahip olup olmadığını kontrol et. Bu, Apple ikili dosyaları için geçerlidir.
+7. **Doğrulama**, bağlanan **istemcinin denetim belirtecine** **dayanmalıdır** ve sürecin kimliği (**PID**) yerine kullanılmalıdır, çünkü bu, **PID yeniden kullanım saldırılarını** önler.
+- Geliştiriciler **denetim belirteci** API çağrısını **nadiren** kullanır çünkü bu **özel** bir çağrıdır, bu nedenle Apple istediği zaman **değiştirebilir**. Ayrıca, özel API kullanımı Mac App Store uygulamalarında yasaktır.
 - **`processIdentifier`** yöntemi kullanılıyorsa, savunmasız olabilir.
 - **`xpc_dictionary_get_audit_token`** yerine **`xpc_connection_get_audit_token`** kullanılmalıdır, çünkü sonuncusu da [belirli durumlarda savunmasız olabilir](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/).
 
 ### İletişim Saldırıları
 
-PID yeniden kullanım saldırısı hakkında daha fazla bilgi için kontrol edin:
+PID yeniden kullanım saldırısı hakkında daha fazla bilgi için kontrol et:
+
 
 {{#ref}}
 macos-pid-reuse.md
 {{#endref}}
 
-**`xpc_connection_get_audit_token`** saldırısı hakkında daha fazla bilgi için kontrol edin:
+Daha fazla bilgi için **`xpc_connection_get_audit_token`** saldırısını kontrol et:
+
 
 {{#ref}}
 macos-xpc_connection_get_audit_token-attack.md
@@ -38,7 +40,7 @@ macos-xpc_connection_get_audit_token-attack.md
 
 ### Trustcache - Aşağı Dönüş Saldırıları Önleme
 
-Trustcache, yalnızca izin verilen değiştirilmemiş ikili dosyaların çalıştırılmasını sağlamak için Apple Silicon makinelerinde tanıtılan bir savunma yöntemidir ve Apple ikili dosyalarının CDHSAH veritabanını depolar. Bu, aşağı sürüm versiyonlarının çalıştırılmasını önler.
+Trustcache, yalnızca izin verilen değiştirilmemiş ikili dosyaların çalıştırılmasını sağlamak için Apple Silicon makinelerinde tanıtılan savunma yöntemidir ve Apple ikili dosyalarının CDHSAH veritabanını depolar. Bu, aşağı sürüm versiyonlarının çalıştırılmasını önler.
 
 ### Kod Örnekleri
 
@@ -49,7 +51,7 @@ Sunucu bu **doğrulamayı** **`shouldAcceptNewConnection`** adlı bir işlevde u
 return YES;
 }
 ```
-NSXPCConnection nesnesinin **özel** bir özelliği **`auditToken`** (kullanılması gereken ama değişebilecek olan) ve **genel** bir özelliği **`processIdentifier`** (kullanılmaması gereken) vardır.
+NSXPCConnection nesnesinin **özel** bir **`auditToken`** (kullanılması gereken ama değişebilecek olan) ve **genel** bir **`processIdentifier`** (kullanılmaması gereken) özelliği vardır.
 
 Bağlanan süreç, şöyle bir şeyle doğrulanabilir:
 ```objectivec

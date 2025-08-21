@@ -4,11 +4,11 @@
 
 ## Ne Etkiler
 
-Bir konteyneri ayrıcalıklı olarak çalıştırdığınızda, devre dışı bıraktığınız korumalar şunlardır:
+Bir konteyneri yetkili olarak çalıştırdığınızda, devre dışı bıraktığınız korumalar şunlardır:
 
 ### Mount /dev
 
-Ayrıcalıklı bir konteynerde, tüm **cihazlar `/dev/` içinde erişilebilir**. Bu nedenle, **diskin** ana makineden **mount edilmesiyle** **kaçabilirsiniz**. 
+Yetkili bir konteynerde, tüm **cihazlar `/dev/` içinde erişilebilir**. Bu nedenle, **diskin** ana makineden **mount edilmesiyle** **kaçabilirsiniz**.
 
 {{#tabs}}
 {{#tab name="Inside default container"}}
@@ -20,7 +20,7 @@ core     full     null     pts      shm      stdin    tty      zero
 ```
 {{#endtab}}
 
-{{#tab name="İçeride Yetkili Konteyner"}}
+{{#tab name="İçeride Ayrıcalıklı Konteyner"}}
 ```bash
 # docker run --rm --privileged -it alpine sh
 ls /dev
@@ -49,7 +49,7 @@ cpuacct on /sys/fs/cgroup/cpuacct type cgroup (ro,nosuid,nodev,noexec,relatime,c
 ```
 {{#endtab}}
 
-{{#tab name="İçeride Yetkili Konteyner"}}
+{{#tab name="İçinde Ayrıcalıklı Konteyner"}}
 ```bash
 # docker run --rm --privileged -it alpine sh
 mount  | grep '(ro'
@@ -57,11 +57,11 @@ mount  | grep '(ro'
 {{#endtab}}
 {{#endtabs}}
 
-### Çekirdek dosya sistemlerini maskeleme
+### Kernel dosya sistemlerini maskeleme
 
 **/proc** dosya sistemi seçici olarak yazılabilir, ancak güvenlik için, belirli kısımlar **tmpfs** ile örtülerek yazma ve okuma erişiminden korunur, bu da konteyner süreçlerinin hassas alanlara erişememesini sağlar.
 
-> [!NOTE] > **tmpfs**, tüm dosyaları sanal bellekte depolayan bir dosya sistemidir. tmpfs, sabit diskinizde herhangi bir dosya oluşturmaz. Bu nedenle, bir tmpfs dosya sistemini kaldırırsanız, içinde bulunan tüm dosyalar sonsuza dek kaybolur.
+> [!NOTE] > **tmpfs**, tüm dosyaları sanal bellekte depolayan bir dosya sistemidir. tmpfs, sabit diskinizde herhangi bir dosya oluşturmaz. Bu nedenle, bir tmpfs dosya sistemini ayırırsanız, içinde bulunan tüm dosyalar sonsuza dek kaybolur.
 
 {{#tabs}}
 {{#tab name="Inside default container"}}
@@ -74,7 +74,7 @@ tmpfs on /proc/keys type tmpfs (rw,nosuid,size=65536k,mode=755)
 ```
 {{#endtab}}
 
-{{#tab name="İçeride Yetkili Konteyner"}}
+{{#tab name="Inside Privileged Container"}}
 ```bash
 # docker run --rm --privileged -it alpine sh
 mount  | grep /proc.*tmpfs
@@ -84,7 +84,8 @@ mount  | grep /proc.*tmpfs
 
 ### Linux yetenekleri
 
-Konteyner motorları, konteynerin içinde neler olduğunu kontrol etmek için konteynerleri **sınırlı sayıda yetenekle** başlatır. **Ayrıcalıklı** olanlar **tüm** **yeteneklere** erişim sağlar. Yetenekler hakkında bilgi edinmek için okuyun:
+Konteyner motorları, konteynerin içinde neler olacağını kontrol etmek için konteynerleri **sınırlı sayıda yetenekle** başlatır. **Ayrıcalıklı** olanlar **tüm** **yeteneklere** erişime sahiptir. Yetenekler hakkında bilgi edinmek için okuyun:
+
 
 {{#ref}}
 ../linux-capabilities.md
@@ -102,7 +103,7 @@ Bounding set =cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setg
 ```
 {{#endtab}}
 
-{{#tab name="İçinde Yetkili Konteyner"}}
+{{#tab name="Inside Privileged Container"}}
 ```bash
 # docker run --rm --privileged -it alpine sh
 apk add -U libcap; capsh --print
@@ -114,11 +115,12 @@ Bounding set =cap_chown,cap_dac_override,cap_dac_read_search,cap_fowner,cap_fset
 {{#endtab}}
 {{#endtabs}}
 
-Bir konteynerin kullanılabilir yeteneklerini `--privileged` modda çalıştırmadan `--cap-add` ve `--cap-drop` bayraklarını kullanarak manipüle edebilirsiniz.
+Bir konteynerin kullanılabilir yeteneklerini `--privileged` modunda çalıştırmadan `--cap-add` ve `--cap-drop` bayraklarını kullanarak manipüle edebilirsiniz.
 
 ### Seccomp
 
-**Seccomp**, bir konteynerin çağırabileceği **syscall'ları** **sınırlamak** için faydalıdır. Docker konteynerleri çalıştırıldığında varsayılan olarak bir seccomp profili etkinleştirilir, ancak ayrıcalıklı modda devre dışı bırakılır. Seccomp hakkında daha fazla bilgi edinin:
+**Seccomp**, bir konteynerin çağırabileceği **syscall'ları** **sınırlamak** için faydalıdır. Docker konteynerleri çalıştırıldığında varsayılan olarak bir seccomp profili etkinleştirilir, ancak ayrıcalıklı modda devre dışıdır. Seccomp hakkında daha fazla bilgi edinin:
+
 
 {{#ref}}
 seccomp.md
@@ -134,7 +136,7 @@ Seccomp_filters:	1
 ```
 {{#endtab}}
 
-{{#tab name="İçeride Yetkili Konteyner"}}
+{{#tab name="Inside Privileged Container"}}
 ```bash
 # docker run --rm --privileged -it alpine sh
 grep Seccomp /proc/1/status
@@ -147,11 +149,11 @@ Seccomp_filters:	0
 # You can manually disable seccomp in docker with
 --security-opt seccomp=unconfined
 ```
-Ayrıca, Docker (veya diğer CRI'ler) bir **Kubernetes** kümesinde kullanıldığında, **seccomp filtresi varsayılan olarak devre dışıdır.**
+Ayrıca, **Kubernetes** kümesinde Docker (veya diğer CRI'ler) kullanıldığında, **seccomp filtresi varsayılan olarak devre dışıdır.**
 
 ### AppArmor
 
-**AppArmor**, **konteynerleri** **sınırlı** bir **kaynak** kümesine **per-program profilleri** ile sınırlamak için bir çekirdek geliştirmesidir. `--privileged` bayrağı ile çalıştığınızda, bu koruma devre dışıdır.
+**AppArmor**, **kapsayıcıları** **sınırlı** bir **kaynak** kümesine **per-program profilleri** ile sınırlamak için bir çekirdek geliştirmesidir. `--privileged` bayrağı ile çalıştığınızda, bu koruma devre dışıdır.
 
 {{#ref}}
 apparmor.md
@@ -188,7 +190,7 @@ PID   USER     TIME  COMMAND
 ```
 {{#endtab}}
 
-{{#tab name="İçeride --pid=host Konteyner"}}
+{{#tab name="Inside --pid=host Container"}}
 ```bash
 # docker run --rm --privileged --pid=host -it alpine sh
 ps -ef

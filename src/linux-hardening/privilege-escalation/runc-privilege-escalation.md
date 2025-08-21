@@ -4,13 +4,13 @@
 
 ## Temel bilgiler
 
-Eğer **runc** hakkında daha fazla bilgi edinmek istiyorsanız, aşağıdaki sayfayı kontrol edin:
+Eğer **runc** hakkında daha fazla bilgi edinmek istiyorsanız, lütfen aşağıdaki sayfayı kontrol edin:
 
 {{#ref}}
 ../../network-services-pentesting/2375-pentesting-docker.md
 {{#endref}}
 
-## YY
+## YÜKSELTME
 
 Eğer `runc`'ın hostta kurulu olduğunu bulursanız, **hostun kök / klasörünü monte eden bir konteyner çalıştırabilirsiniz**.
 ```bash

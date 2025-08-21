@@ -2,9 +2,9 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Bu sayfa, Windows Yerel Yetki Yükseltme veya sonrası için kullanışlı olan **küçük, bağımsız C parçalarını** toplar. Her payload, **kopyala-yapıştır dostu** olacak şekilde tasarlanmıştır, yalnızca Windows API / C çalışma zamanı gerektirir ve `i686-w64-mingw32-gcc` (x86) veya `x86_64-w64-mingw32-gcc` (x64) ile derlenebilir.
+Bu sayfa, Windows Yerel Yetki Yükseltme veya sonrası için kullanışlı olan **küçük, bağımsız C parçacıklarını** toplar. Her payload, **kopyala-yapıştır dostu** olacak şekilde tasarlanmıştır, yalnızca Windows API / C çalışma zamanı gerektirir ve `i686-w64-mingw32-gcc` (x86) veya `x86_64-w64-mingw32-gcc` (x64) ile derlenebilir.
 
-> ⚠️  Bu payloadlar, işlemin gerekli minimum ayrıcalıklara sahip olduğunu varsayar (örneğin, `SeDebugPrivilege`, `SeImpersonatePrivilege` veya UAC atlatması için orta bütünlük bağlamı). Bunlar, bir güvenlik açığını istismar etmenin rastgele yerel kod yürütmesine yol açtığı **kırmızı takım veya CTF ayarları** için tasarlanmıştır.
+> ⚠️  Bu payload'lar, işlemin gerekli minimum ayrıcalıklara sahip olduğunu varsayar (örneğin, `SeDebugPrivilege`, `SeImpersonatePrivilege` veya UAC atlatması için orta bütünlük bağlamı). Bunlar, bir güvenlik açığını istismar etmenin rastgele yerel kod yürütmesine yol açtığı **kırmızı takım veya CTF ayarları** için tasarlanmıştır.
 
 ---
 
@@ -114,7 +114,8 @@ if (dupToken) CloseHandle(dupToken);
 return 0;
 }
 ```
-Daha derin bir açıklama için bakınız:
+Daha derin bir açıklama için:
+
 {{#ref}}
 sedebug-+-seimpersonate-copy-token.md
 {{#endref}}

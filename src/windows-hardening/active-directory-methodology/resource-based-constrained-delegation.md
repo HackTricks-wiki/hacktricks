@@ -2,36 +2,37 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
+
 ## Resource-based Constrained Delegation Temelleri
 
-Bu, temel [Constrained Delegation](constrained-delegation.md) ile benzerdir ancak **bir nesneye** **bir makineye karşı herhangi bir kullanıcıyı taklit etme** izni vermek yerine, Resource-based Constrained Delegation **nesnede** **ona karşı herhangi bir kullanıcıyı taklit edebilecek olanı** **belirler**.
+Bu, temel [Constrained Delegation](constrained-delegation.md) ile benzerdir ancak **bir nesneye** **bir makineye karşı herhangi bir kullanıcıyı taklit etme** izni vermek yerine, Resource-based Constrained Delegation **nesne üzerinde herhangi bir kullanıcıyı taklit etme yetkisini belirler**.
 
-Bu durumda, kısıtlı nesne, ona karşı herhangi bir diğer kullanıcıyı taklit edebilecek kullanıcının adıyla birlikte _**msDS-AllowedToActOnBehalfOfOtherIdentity**_ adlı bir niteliğe sahip olacaktır.
+Bu durumda, kısıtlı nesne, herhangi bir kullanıcıyı taklit edebilecek kullanıcının adını içeren _**msDS-AllowedToActOnBehalfOfOtherIdentity**_ adlı bir niteliğe sahip olacaktır.
 
-Bu Kısıtlı Delegasyonun diğer delegasyonlardan önemli bir farkı, **makine hesabı üzerinde yazma izinlerine sahip** herhangi bir kullanıcının (_GenericAll/GenericWrite/WriteDacl/WriteProperty/etc_) **_msDS-AllowedToActOnBehalfOfOtherIdentity_** değerini ayarlayabilmesidir (Diğer Delegasyon türlerinde alan adı yöneticisi ayrıcalıkları gerekiyordu).
+Bu Kısıtlı Delegasyonun diğer delegasyonlardan önemli bir farkı, **bir makine hesabı üzerinde yazma izinlerine sahip** herhangi bir kullanıcının **_msDS-AllowedToActOnBehalfOfOtherIdentity_** değerini ayarlayabilmesidir (_GenericAll/GenericWrite/WriteDacl/WriteProperty/ vb.). (Diğer Delegasyon türlerinde alan yöneticisi ayrıcalıkları gerekiyordu).
 
 ### Yeni Kavramlar
 
-Kısıtlı Delegasyon'da, kullanıcının _userAccountControl_ değerindeki **`TrustedToAuthForDelegation`** bayrağının bir **S4U2Self** gerçekleştirmek için gerekli olduğu söylenmişti. Ancak bu tamamen doğru değil.\
-Gerçek şu ki, o değer olmadan bile, eğer bir **hizmet** (bir SPN'e sahipseniz) iseniz, herhangi bir kullanıcıya karşı **S4U2Self** gerçekleştirebilirsiniz, ancak eğer **`TrustedToAuthForDelegation`** bayrağına sahipseniz, dönen TGS **Forwardable** olacaktır ve eğer o bayrağa sahip değilseniz, dönen TGS **Forwardable** **olmayacaktır**.
+Kısıtlı Delegasyon'da, kullanıcının _userAccountControl_ değerindeki **`TrustedToAuthForDelegation`** bayrağının **S4U2Self** gerçekleştirmek için gerekli olduğu belirtilmişti. Ancak bu tamamen doğru değil.\
+Gerçek şu ki, o değer olmadan bile, eğer bir **hizmet** (bir SPN'e sahipseniz) iseniz, herhangi bir kullanıcıya karşı **S4U2Self** gerçekleştirebilirsiniz, ancak eğer **`TrustedToAuthForDelegation`** varsa, dönen TGS **Forwardable** olacaktır ve eğer o bayrağa sahip değilseniz, dönen TGS **Forwardable** **olmayacaktır**.
 
-Ancak, **S4U2Proxy**'de kullanılan **TGS** **Forwardable DEĞİLSE**, temel bir **Constrain Delegation**'ı kötüye kullanmaya çalışmak **çalışmayacaktır**. Ama eğer bir **Resource-Based constrain delegation**'ı istismar etmeye çalışıyorsanız, bu **çalışacaktır**.
+Ancak, **S4U2Proxy**'de kullanılan **TGS** **Forwardable DEĞİLSE**, temel bir **Kısıtlı Delegasyon** istismar etmeye çalışmak **çalışmayacaktır**. Ancak, bir **Resource-Based kısıtlı delegasyonu** istismar etmeye çalışıyorsanız, bu **çalışacaktır**.
 
 ### Saldırı Yapısı
 
 > Eğer bir **Bilgisayar** hesabı üzerinde **yazma eşdeğer ayrıcalıklarına** sahipseniz, o makinede **ayrılmış erişim** elde edebilirsiniz.
 
-Saldırganın zaten **kurban bilgisayarı üzerinde yazma eşdeğer ayrıcalıklarına** sahip olduğunu varsayalım.
+Saldırganın zaten **kurban bilgisayar üzerinde yazma eşdeğer ayrıcalıklarına** sahip olduğunu varsayalım.
 
-1. Saldırgan, bir **SPN**'ye sahip bir hesabı **ele geçirir** veya **oluşturur** (“Hizmet A”). Herhangi bir _Admin User_'ın başka bir özel ayrıcalığı olmadan **10 Bilgisayar nesnesi** (**_MachineAccountQuota_**) oluşturabileceğini ve bunlara bir **SPN** ayarlayabileceğini unutmayın. Bu nedenle, saldırgan sadece bir Bilgisayar nesnesi oluşturup bir SPN ayarlayabilir.
-2. Saldırgan, kurban bilgisayar (ServiceB) üzerindeki **yazma ayrıcalığını** kötüye kullanarak **resource-based constrained delegation'ı yapılandırır ve ServiceA'nın o kurban bilgisayar (ServiceB) üzerinde herhangi bir kullanıcıyı taklit etmesine izin verir**.
-3. Saldırgan, Service A'dan Service B'ye, **Service B'ye ayrıcalıklı erişimi olan bir kullanıcı** için **tam bir S4U saldırısı** gerçekleştirmek üzere Rubeus'u kullanır.
+1. Saldırgan, bir **SPN**'ye sahip bir hesabı **ele geçirir** veya **oluşturur** (“Hizmet A”). Herhangi bir _Admin User_'ın başka bir özel ayrıcalığı olmadan **10 Bilgisayar nesnesi** (**_MachineAccountQuota_**) oluşturabileceğini ve bunlara bir **SPN** atayabileceğini unutmayın. Bu nedenle, saldırgan sadece bir Bilgisayar nesnesi oluşturup bir SPN atayabilir.
+2. Saldırgan, kurban bilgisayar (ServiceB) üzerindeki **yazma ayrıcalığını** kullanarak **HizmetA'nın o kurban bilgisayar (ServiceB) üzerinde herhangi bir kullanıcıyı taklit etmesine izin verecek şekilde kaynak tabanlı kısıtlı delegasyonu yapılandırır**.
+3. Saldırgan, **Service B**'ye **ayrılmış erişimi olan bir kullanıcı** için Service A'dan Service B'ye **tam bir S4U saldırısı** gerçekleştirmek için Rubeus'u kullanır.
    1. S4U2Self (ele geçirilen/oluşturulan SPN'den): **Yönetici için bana bir TGS iste** (Forwardable DEĞİL).
-   2. S4U2Proxy: Önceki adımda **Forwardable DEĞİL** olan TGS'yi kullanarak **Yönetici**'den **kurban ana bilgisayara** bir **TGS** istemek.
-   3. Forwardable DEĞİL bir TGS kullanıyor olsanız bile, Resource-based constrained delegation'ı istismar ettiğiniz için bu **çalışacaktır**.
+   2. S4U2Proxy: Önceki adımın **Forwardable DEĞİL** TGS'sini kullanarak **Yönetici**'den **kurban ana bilgisayara** bir **TGS** istemek.
+   3. Forwardable DEĞİL bir TGS kullanıyor olsanız bile, Resource-based kısıtlı delegasyonu istismar ettiğiniz için bu **çalışacaktır**.
    4. Saldırgan, **ticket'ı geçirebilir** ve **kullanıcıyı taklit ederek** **kurban ServiceB'ye erişim** elde edebilir.
 
-Alan adının _**MachineAccountQuota**_ değerini kontrol etmek için şunu kullanabilirsiniz:
+Alanınızdaki _**MachineAccountQuota**_ değerini kontrol etmek için şunu kullanabilirsiniz:
 ```bash
 Get-DomainObject -Identity "dc=domain,dc=local" -Domain domain.local | select MachineAccountQuota
 ```
@@ -109,12 +110,12 @@ impacket-secretsdump -k -no-pass Administrator@victim.domain.local
 Notlar
 - LDAP imzalama/LDAPS zorunluysa, `impacket-rbcd -use-ldaps ...` kullanın.
 - AES anahtarlarını tercih edin; birçok modern alan RC4'ü kısıtlar. Impacket ve Rubeus her ikisi de yalnızca AES akışlarını destekler.
-- Impacket bazı araçlar için `sname` ("AnySPN") değerini yeniden yazabilir, ancak mümkün olduğunda doğru SPN'yi elde edin (örneğin, CIFS/LDAP/HTTP/HOST/MSSQLSvc).
+- Impacket bazı araçlar için `sname` ("AnySPN")'yi yeniden yazabilir, ancak mümkün olduğunda doğru SPN'yi elde edin (örneğin, CIFS/LDAP/HTTP/HOST/MSSQLSvc).
 
 ### Erişim
 
 Son komut satırı **tam S4U saldırısını gerçekleştirecek ve TGS'yi** Yönetici'den kurban makinesine **belleğe** enjekte edecektir.\
-Bu örnekte, Yönetici'den **CIFS** hizmeti için bir TGS talep edilmiştir, böylece **C$**'ye erişebileceksiniz:
+Bu örnekte, Yönetici'den **CIFS** hizmeti için bir TGS talep edildi, böylece **C$**'ye erişebileceksiniz:
 ```bash
 ls \\victim.domain.local\C$
 ```
@@ -164,7 +165,7 @@ impacket-rbcd -delegate-to 'VICTIM$' -action flush 'domain.local/jdoe:Summer2025
 ```
 ## Kerberos Hataları
 
-- **`KDC_ERR_ETYPE_NOTSUPP`**: Bu, kerberos'un DES veya RC4 kullanmayacak şekilde yapılandırıldığı ve yalnızca RC4 hash'ini sağladığınız anlamına gelir. Rubeus'a en az AES256 hash'ini (veya sadece rc4, aes128 ve aes256 hash'lerini sağlayın) verin. Örnek: `[Rubeus.Program]::MainString("s4u /user:FAKECOMPUTER /aes256:CC648CF0F809EE1AA25C52E963AC0487E87AC32B1F71ACC5304C73BF566268DA /aes128:5FC3D06ED6E8EA2C9BB9CC301EA37AD4 /rc4:EF266C6B963C0BB683941032008AD47F /impersonateuser:Administrator /msdsspn:CIFS/M3DC.M3C.LOCAL /ptt".split())`
+- **`KDC_ERR_ETYPE_NOTSUPP`**: Bu, kerberos'un DES veya RC4 kullanmayacak şekilde yapılandırıldığı ve yalnızca RC4 hash'i sağladığınız anlamına gelir. Rubeus'a en az AES256 hash'ini (veya sadece rc4, aes128 ve aes256 hash'lerini sağlayın) verin. Örnek: `[Rubeus.Program]::MainString("s4u /user:FAKECOMPUTER /aes256:CC648CF0F809EE1AA25C52E963AC0487E87AC32B1F71ACC5304C73BF566268DA /aes128:5FC3D06ED6E8EA2C9BB9CC301EA37AD4 /rc4:EF266C6B963C0BB683941032008AD47F /impersonateuser:Administrator /msdsspn:CIFS/M3DC.M3C.LOCAL /ptt".split())`
 - **`KRB_AP_ERR_SKEW`**: Bu, mevcut bilgisayarın zamanının DC'nin zamanından farklı olduğu ve kerberos'un düzgün çalışmadığı anlamına gelir.
 - **`preauth_failed`**: Bu, verilen kullanıcı adı + hash'lerin giriş yapmak için çalışmadığı anlamına gelir. Hash'leri oluştururken kullanıcı adının içine "$" koymayı unutmuş olabilirsiniz (`.\Rubeus.exe hash /password:123456 /user:FAKECOMPUTER$ /domain:domain.local`)
 - **`KDC_ERR_BADOPTION`**: Bu, şunları ifade edebilir:
@@ -195,6 +196,6 @@ adws-enumeration.md
 - [https://stealthbits.com/blog/resource-based-constrained-delegation-abuse/](https://stealthbits.com/blog/resource-based-constrained-delegation-abuse/)
 - [https://posts.specterops.io/kerberosity-killed-the-domain-an-offensive-kerberos-overview-eb04b1402c61](https://posts.specterops.io/kerberosity-killed-the-domain-an-offensive-kerberos-overview-eb04b1402c61)
 - Impacket rbcd.py (resmi): https://github.com/fortra/impacket/blob/master/examples/rbcd.py
-- Son güncel sözdizimi ile hızlı Linux kılavuzu: https://tldrbins.github.io/rbcd/
+- Son sözdizimi ile hızlı Linux kılavuzu: https://tldrbins.github.io/rbcd/
 
 {{#include ../../banners/hacktricks-training.md}}

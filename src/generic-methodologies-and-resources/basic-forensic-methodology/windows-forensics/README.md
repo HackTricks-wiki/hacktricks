@@ -6,7 +6,7 @@
 
 ### Windows 10 Notifications
 
-Yolda `\Users\<username>\AppData\Local\Microsoft\Windows\Notifications` veritabanı `appdb.dat` (Windows yıldönümünden önce) veya `wpndatabase.db` (Windows Yıldönümünden sonra) bulunabilir.
+Yol `\Users\<username>\AppData\Local\Microsoft\Windows\Notifications` içinde `appdb.dat` (Windows anniversary öncesi) veya `wpndatabase.db` (Windows Anniversary sonrası) veritabanını bulabilirsiniz.
 
 Bu SQLite veritabanının içinde, ilginç veriler içerebilecek tüm bildirimlerin (XML formatında) bulunduğu `Notification` tablosunu bulabilirsiniz.
 
@@ -14,7 +14,7 @@ Bu SQLite veritabanının içinde, ilginç veriler içerebilecek tüm bildirimle
 
 Timeline, ziyaret edilen web sayfalarının, düzenlenen belgelerin ve çalıştırılan uygulamaların **kronolojik geçmişini** sağlayan bir Windows özelliğidir.
 
-Veritabanı, yolda `\Users\<username>\AppData\Local\ConnectedDevicesPlatform\<id>\ActivitiesCache.db` bulunur. Bu veritabanı bir SQLite aracıyla veya [**WxTCmd**](https://github.com/EricZimmerman/WxTCmd) aracıyla açılabilir **ve bu araç 2 dosya oluşturur** [**TimeLine Explorer**](https://ericzimmerman.github.io/#!index.md) aracıyla açılabilir.
+Veritabanı, yol `\Users\<username>\AppData\Local\ConnectedDevicesPlatform\<id>\ActivitiesCache.db` içinde yer almaktadır. Bu veritabanı bir SQLite aracıyla veya [**WxTCmd**](https://github.com/EricZimmerman/WxTCmd) aracıyla açılabilir **ve bu araç 2 dosya oluşturur** [**TimeLine Explorer**](https://ericzimmerman.github.io/#!index.md) aracıyla açılabilir.
 
 ### ADS (Alternate Data Streams)
 
@@ -24,7 +24,7 @@ Veritabanı, yolda `\Users\<username>\AppData\Local\ConnectedDevicesPlatform\<id
 
 ### Recycle Bin
 
-Vista/Win7/Win8/Win10'da **Recycle Bin** kök dizinde **`$Recycle.bin`** klasöründe bulunabilir (`C:\$Recycle.bin`).\
+Vista/Win7/Win8/Win10'da **Recycle Bin**, sürücünün kökünde **`$Recycle.bin`** klasöründe bulunabilir (`C:\$Recycle.bin`).\
 Bu klasörde bir dosya silindiğinde 2 özel dosya oluşturulur:
 
 - `$I{id}`: Dosya bilgileri (silindiği tarih)
@@ -40,13 +40,13 @@ Bu dosyalara sahip olduğunuzda, silinen dosyaların orijinal adresini ve silind
 
 ### Hacim Gölgesi Kopyaları
 
-Gölge Kopyası, Microsoft Windows'a dahil olan ve bilgisayar dosyalarının veya hacimlerinin **yedek kopyalarını** veya anlık görüntülerini oluşturabilen bir teknolojidir; bu, dosyalar kullanılırken bile mümkündür.
+Gölge Kopyası, Microsoft Windows'ta yer alan ve bilgisayar dosyalarının veya hacimlerinin **yedek kopyalarını** veya anlık görüntülerini oluşturabilen bir teknolojidir; bu, dosyalar kullanılırken bile mümkündür.
 
 Bu yedekler genellikle dosya sisteminin kökünden `\System Volume Information` içinde bulunur ve isimleri aşağıdaki resimde gösterilen **UID'lerden** oluşur:
 
 ![](<../../../images/image (94).png>)
 
-**ArsenalImageMounter** ile adli görüntüyü monte ederek, [**ShadowCopyView**](https://www.nirsoft.net/utils/shadow_copy_view.html) aracı bir gölge kopyasını incelemek ve hatta gölge kopyası yedeklerinden **dosyaları çıkarmak** için kullanılabilir.
+**ArsenalImageMounter** ile adli görüntüyü monte ederek, [**ShadowCopyView**](https://www.nirsoft.net/utils/shadow_copy_view.html) aracı, bir gölge kopyasını incelemek ve hatta gölge kopyası yedeklerinden **dosyaları çıkarmak** için kullanılabilir.
 
 ![](<../../../images/image (576).png>)
 
@@ -73,9 +73,9 @@ Windows, kullanıcı bir dosyayı **açtığında, kullandığında veya oluştu
 
 Bir klasör oluşturulduğunda, klasöre, üst klasöre ve büyük üst klasöre bir bağlantı da oluşturulur.
 
-Bu otomatik olarak oluşturulan bağlantı dosyaları, **bir dosya** **veya** **bir klasör** olup olmadığı, o dosyanın **MAC** **zamanları**, dosyanın saklandığı yerin **hacim bilgisi** ve **hedef dosyanın klasörü** gibi **kaynak hakkında bilgi** **içerir**. Bu bilgi, dosyalar silinirse kurtarmak için yararlı olabilir.
+Bu otomatik olarak oluşturulan bağlantı dosyaları, **bir dosya** **mi** yoksa **bir klasör** **mü** olduğu gibi, dosyanın **MAC** **zamanlarını**, dosyanın nerede saklandığına dair **hacim bilgilerini** ve **hedef dosyanın klasörünü** içeren **kaynak hakkında bilgi** **barındırır**. Bu bilgiler, dosyalar silinirse kurtarmak için faydalı olabilir.
 
-Ayrıca, bağlantı dosyasının **oluşturulma tarihi**, orijinal dosyanın **ilk** **kullanıldığı** **zaman** ve bağlantı dosyasının **değiştirilme tarihi**, kaynak dosyanın en son **kullanıldığı** **zamandır**.
+Ayrıca, bağlantı dosyasının **oluşturulma tarihi**, orijinal dosyanın **ilk** **kullanıldığı** **zamanı** ve bağlantı dosyasının **değiştirilme tarihi**, kaynak dosyanın en son **kullanıldığı** **zamanı** gösterir.
 
 Bu dosyaları incelemek için [**LinkParser**](http://4discovery.com/our-tools/) kullanabilirsiniz.
 
@@ -150,7 +150,7 @@ USB bağlantısının ne zaman gerçekleştiğine dair zaman damgalarını almak
 
 ### Tak ve Çalıştır Temizleme
 
-'Tak ve Çalıştır Temizleme' olarak bilinen planlı görev, esasen eski sürücü sürümlerinin kaldırılması için tasarlanmıştır. En son sürücü paket sürümünü koruma amacıyla belirtilmiş olmasına rağmen, çevrimiçi kaynaklar, 30 gündür etkin olmayan sürücüleri de hedef aldığını önermektedir. Bu nedenle, son 30 günde bağlanmamış çıkarılabilir cihazların sürücüleri silinme riski taşımaktadır.
+'Tak ve Çalıştır Temizleme' olarak bilinen planlı görev, esasen eski sürücü sürümlerinin kaldırılması için tasarlanmıştır. En son sürücü paket sürümünü koruma amacıyla belirtilmiş olmasına rağmen, çevrimiçi kaynaklar, 30 gündür etkin olmayan sürücüleri de hedef aldığını önermektedir. Sonuç olarak, son 30 günde bağlanmamış çıkarılabilir cihazların sürücüleri silinme riski taşımaktadır.
 
 Görev aşağıdaki yolda bulunmaktadır: `C:\Windows\System32\Tasks\Microsoft\Windows\Plug and Play\Plug and Play Cleanup`.
 
@@ -161,8 +161,8 @@ Görevin içeriğini gösteren bir ekran görüntüsü sağlanmıştır: ![](htt
 - **pnpclean.dll**: Bu DLL, gerçek temizleme işlemini gerçekleştirir.
 - **UseUnifiedSchedulingEngine**: `TRUE` olarak ayarlanmıştır, genel görev zamanlama motorunun kullanıldığını gösterir.
 - **MaintenanceSettings**:
-- **Period ('P1M')**: Görev Zamanlayıcı'nın, düzenli Otomatik bakım sırasında temizleme görevini aylık olarak başlatmasını yönlendirir.
-- **Deadline ('P2M')**: Görev Zamanlayıcı'ya, görev iki ardışık ay boyunca başarısız olursa, acil Otomatik bakım sırasında görevi yürütmesini talimat verir.
+- **Period ('P1M')**: Görev Zamanlayıcısına, temizleme görevini her ay düzenli Otomatik bakım sırasında başlatmasını yönlendirir.
+- **Deadline ('P2M')**: Görev Zamanlayıcısına, görev iki ardışık ay boyunca başarısız olursa, acil Otomatik bakım sırasında görevi yürütmesini talimat verir.
 
 Bu yapılandırma, sürücülerin düzenli bakımını ve temizliğini sağlar ve ardışık hatalar durumunda görevi yeniden denemek için önlemler içerir.
 
@@ -170,9 +170,9 @@ Bu yapılandırma, sürücülerin düzenli bakımını ve temizliğini sağlar v
 
 ## E-postalar
 
-E-postalar **2 ilginç kısım içerir: Başlıklar ve e-postanın içeriği**. **Başlıklarda** aşağıdaki bilgileri bulabilirsiniz:
+E-postalar **2 ilginç kısım içerir: Başlıklar ve e-postanın içeriği**. **Başlıklarda** aşağıdaki gibi bilgiler bulabilirsiniz:
 
-- **Kim** e-postaları gönderdi (e-posta adresi, IP, e-postayı yönlendiren sunucular)
+- **Kim** e-postaları gönderdi (e-posta adresi, IP, e-postayı yönlendiren mail sunucuları)
 - **Ne zaman** e-posta gönderildi
 
 Ayrıca, `References` ve `In-Reply-To` başlıkları içinde mesajların ID'sini bulabilirsiniz:
@@ -181,11 +181,11 @@ Ayrıca, `References` ve `In-Reply-To` başlıkları içinde mesajların ID'sini
 
 ### Windows Mail Uygulaması
 
-Bu uygulama, e-postaları HTML veya metin olarak kaydeder. E-postaları `\Users\<username>\AppData\Local\Comms\Unistore\data\3\` içindeki alt klasörlerde bulabilirsiniz. E-postalar `.dat` uzantısıyla kaydedilir.
+Bu uygulama e-postaları HTML veya metin olarak kaydeder. E-postaları `\Users\<username>\AppData\Local\Comms\Unistore\data\3\` içindeki alt klasörlerde bulabilirsiniz. E-postalar `.dat` uzantısıyla kaydedilir.
 
 E-postaların **meta verileri** ve **kişiler** `\Users\<username>\AppData\Local\Comms\UnistoreDB\store.vol` içindeki **EDB veritabanında** bulunabilir.
 
-Dosyanın uzantısını `.vol`'dan `.edb`'ye değiştirin ve [ESEDatabaseView](https://www.nirsoft.net/utils/ese_database_view.html) aracını kullanarak açabilirsiniz. `Message` tablosunda e-postaları görebilirsiniz.
+**Uzantıyı** `.vol`'dan `.edb`'ye değiştirin ve [ESEDatabaseView](https://www.nirsoft.net/utils/ese_database_view.html) aracını kullanarak açabilirsiniz. `Message` tablosunda e-postaları görebilirsiniz.
 
 ### Microsoft Outlook
 
@@ -196,7 +196,7 @@ Exchange sunucuları veya Outlook istemcileri kullanıldığında bazı MAPI ba�
 - `Mapi-Entry-ID`: Mesaj tanımlayıcısı.
 - `Mappi-Message-Flags` ve `Pr_last_Verb-Executed`: MAPI istemcisi hakkında bilgi (mesaj okundu mu? okunmadı mı? yanıtlandı mı? yönlendirildi mi? ofis dışında mı?)
 
-Microsoft Outlook istemcisinde, gönderilen/alınan tüm mesajlar, kişiler verileri ve takvim verileri, aşağıdaki konumda bir PST dosyasında saklanır:
+Microsoft Outlook istemcisinde, gönderilen/alınan tüm mesajlar, kişi verileri ve takvim verileri, aşağıdaki konumda bir PST dosyasında saklanır:
 
 - `%USERPROFILE%\Local Settings\Application Data\Microsoft\Outlook` (WinXP)
 - `%USERPROFILE%\AppData\Local\Microsoft\Outlook`
@@ -209,7 +209,7 @@ PST dosyasını [**Kernel PST Viewer**](https://www.nucleustechnologies.com/es/v
 
 ### Microsoft Outlook OST Dosyaları
 
-Bir **OST dosyası**, Microsoft Outlook tarafından **IMAP** veya bir **Exchange** sunucusu ile yapılandırıldığında oluşturulur ve PST dosyasına benzer bilgileri saklar. Bu dosya, sunucu ile senkronize edilir, **son 12 ay** için verileri saklar ve **maksimum boyutu 50GB**'dır ve PST dosyası ile aynı dizinde bulunur. Bir OST dosyasını görüntülemek için [**Kernel OST viewer**](https://www.nucleustechnologies.com/ost-viewer.html) kullanılabilir.
+Bir **OST dosyası**, Microsoft Outlook'un **IMAP** veya bir **Exchange** sunucusu ile yapılandırıldığında oluşturulur ve PST dosyasına benzer bilgileri saklar. Bu dosya, sunucu ile senkronize edilir, **son 12 ay** için verileri saklar ve **maksimum 50GB** boyutundadır ve PST dosyası ile aynı dizinde bulunur. Bir OST dosyasını görüntülemek için [**Kernel OST viewer**](https://www.nucleustechnologies.com/ost-viewer.html) kullanılabilir.
 
 ### Ekleri Kurtarma
 
@@ -222,11 +222,11 @@ Kaybolan ekler şunlardan kurtarılabilir:
 
 **Thunderbird**, verileri saklamak için **MBOX dosyaları** kullanır ve bu dosyalar `\Users\%USERNAME%\AppData\Roaming\Thunderbird\Profiles` konumundadır.
 
-### Görüntü Küçültmeleri
+### Resim Küçültmeleri
 
-- **Windows XP ve 8-8.1**: Küçültme içeren bir klasöre erişmek, silinmiş olsa bile görüntü önizlemelerini saklayan bir `thumbs.db` dosyası oluşturur.
-- **Windows 7/10**: `thumbs.db`, UNC yolu üzerinden erişildiğinde oluşturulur.
-- **Windows Vista ve daha yeni**: Küçültme önizlemeleri, `%userprofile%\AppData\Local\Microsoft\Windows\Explorer` içinde **thumbcache_xxx.db** adında dosyalarla merkezi olarak saklanır. Bu dosyaları görüntülemek için [**Thumbsviewer**](https://thumbsviewer.github.io) ve [**ThumbCache Viewer**](https://thumbcacheviewer.github.io) araçları kullanılabilir.
+- **Windows XP ve 8-8.1**: Küçültme içeren bir klasöre erişmek, silinmiş olsa bile resim önizlemelerini saklayan bir `thumbs.db` dosyası oluşturur.
+- **Windows 7/10**: `thumbs.db`, UNC yolu üzerinden ağa erişildiğinde oluşturulur.
+- **Windows Vista ve daha yeni**: Küçültme önizlemeleri, `%userprofile%\AppData\Local\Microsoft\Windows\Explorer` içinde **thumbcache_xxx.db** adında dosyalarla merkezi olarak saklanır. [**Thumbsviewer**](https://thumbsviewer.github.io) ve [**ThumbCache Viewer**](https://thumbcacheviewer.github.io) bu dosyaları görüntülemek için araçlardır.
 
 ### Windows Kayıt Bilgileri
 
@@ -256,11 +256,11 @@ Her Anahtar-Değer, en son ne zaman değiştirildiğini gösteren bir **zaman da
 
 ### SAM
 
-**SAM** dosyası/hive, sistemin **kullanıcılar, gruplar ve kullanıcı parolaları** hash'lerini içerir.
+**SAM** dosyası/hive, sistemin **kullanıcıları, grupları ve kullanıcı parolalarının** hash'lerini içerir.
 
-`SAM\Domains\Account\Users` içinde kullanıcı adını, RID'yi, son giriş zamanını, son başarısız oturumu, giriş sayacını, parola politikasını ve hesabın ne zaman oluşturulduğunu elde edebilirsiniz. **Hash'leri** almak için ayrıca **SYSTEM** dosyasına/hive'ye de **ihtiyacınız vardır**.
+`SAM\Domains\Account\Users` içinde kullanıcı adını, RID'yi, son giriş zamanını, son başarısız oturumu, giriş sayacını, parola politikasını ve hesabın ne zaman oluşturulduğunu elde edebilirsiniz. **Hash'leri** almak için ayrıca **SYSTEM** dosyasına/hive'ye **ihtiyacınız vardır**.
 
-### Windows Kayıt Defterindeki İlginç Girişler
+### Windows Kayıt Defterindeki İlginç Girdiler
 
 {{#ref}}
 interesting-windows-registry-keys.md
@@ -274,15 +274,15 @@ interesting-windows-registry-keys.md
 
 ### Windows Son Uygulamalar
 
-Kayıt defteri `NTUSER.DAT` içinde `Software\Microsoft\Current Version\Search\RecentApps` yolunda, **çalıştırılan uygulama**, **son çalıştırma zamanı** ve **kaç kez** başlatıldığına dair bilgiler içeren alt anahtarlar bulabilirsiniz.
+Kayıt defteri `NTUSER.DAT` içinde `Software\Microsoft\Current Version\Search\RecentApps` yolunda, **çalıştırılan uygulama**, **son çalıştırma zamanı** ve **kaç kez** başlatıldığı hakkında bilgi içeren alt anahtarlar bulabilirsiniz.
 
 ### BAM (Arka Plan Etkinlik Modaratörü)
 
-`SYSTEM` dosyasını bir kayıt defteri düzenleyici ile açabilir ve `SYSTEM\CurrentControlSet\Services\bam\UserSettings\{SID}` yolunda **her kullanıcı tarafından çalıştırılan uygulamalar** hakkında bilgileri bulabilirsiniz (yoldaki `{SID}`'yi not edin) ve **ne zaman** çalıştırıldıklarını (zaman, kayıt defterinin Veri değerinin içinde) görebilirsiniz.
+`SYSTEM` dosyasını bir kayıt defteri düzenleyici ile açabilir ve `SYSTEM\CurrentControlSet\Services\bam\UserSettings\{SID}` yolunda **her kullanıcı tarafından çalıştırılan uygulamalar** hakkında bilgi bulabilirsiniz (yoldaki `{SID}`'yi not edin) ve **ne zaman** çalıştırıldıklarını (zaman, kayıt defterinin Veri değerinin içinde) görebilirsiniz.
 
 ### Windows Prefetch
 
-Önceden alma, bir bilgisayarın, bir kullanıcının **yakın gelecekte erişebileceği içerikleri görüntülemek için gerekli kaynakları sessizce almasına** olanak tanıyan bir tekniktir, böylece kaynaklara daha hızlı erişilebilir.
+Önceden alma, bir bilgisayarın kullanıcının **yakın gelecekte erişebileceği içerikleri görüntülemek için gerekli kaynakları sessizce almasına** olanak tanıyan bir tekniktir, böylece kaynaklara daha hızlı erişilebilir.
 
 Windows önceden alma, **çalıştırılan programların önbelleklerini** oluşturarak daha hızlı yüklenmelerini sağlar. Bu önbellekler, `C:\Windows\Prefetch` yolunda `.pf` dosyaları olarak oluşturulur. XP/VISTA/WIN7'de 128 dosya ve Win8/Win10'da 1024 dosya sınırı vardır.
 
@@ -298,7 +298,7 @@ Bu dosyaları incelemek için [**PEcmd.exe**](https://github.com/EricZimmerman/P
 
 ### Superprefetch
 
-**Superprefetch**, önceden yükleme ile aynı amaca sahiptir, **programları daha hızlı yüklemek** için neyin yükleneceğini tahmin eder. Ancak, önceden yükleme hizmetinin yerini almaz.\
+**Superprefetch**, prefetch ile aynı amaca sahiptir, **programları daha hızlı yüklemek** için neyin yükleneceğini tahmin eder. Ancak, prefetch hizmetinin yerini almaz.\
 Bu hizmet, `C:\Windows\Prefetch\Ag*.db` konumunda veritabanı dosyaları oluşturur.
 
 Bu veritabanlarında **programın adı**, **çalıştırma sayısı**, **açılan dosyalar**, **erişilen hacim**, **tam yol**, **zaman dilimleri** ve **zaman damgaları** bulunabilir.
@@ -307,7 +307,7 @@ Bu bilgilere [**CrowdResponse**](https://www.crowdstrike.com/resources/community
 
 ### SRUM
 
-**Sistem Kaynak Kullanım İzleyici** (SRUM), **bir süreç tarafından tüketilen kaynakları** **izler**. W8'de ortaya çıkmış ve verileri `C:\Windows\System32\sru\SRUDB.dat` konumunda bir ESE veritabanında saklar.
+**Sistem Kaynak Kullanım İzleyici** (SRUM) **bir süreç tarafından tüketilen kaynakları** **izler**. W8'de ortaya çıkmıştır ve verileri `C:\Windows\System32\sru\SRUDB.dat` konumunda bir ESE veritabanında saklar.
 
 Aşağıdaki bilgileri sağlar:
 
@@ -335,12 +335,12 @@ Bu dosyadan tarihi [**srum_dump**](https://github.com/MarkBaggett/srum-dump) ara
 - ShimCache'in Son Güncellenme zamanı
 - İşlem Çalıştırma Bayrağı
 
-Bu tür veriler, işletim sisteminin sürümüne bağlı olarak kayıt defterinde belirli konumlarda saklanır:
+Bu tür veriler, işletim sisteminin sürümüne bağlı olarak belirli konumlarda kayıt defterinde saklanır:
 
 - XP için, veriler `SYSTEM\CurrentControlSet\Control\SessionManager\Appcompatibility\AppcompatCache` altında 96 giriş kapasitesi ile saklanır.
 - Server 2003 için, ayrıca Windows sürümleri 2008, 2012, 2016, 7, 8 ve 10 için, depolama yolu `SYSTEM\CurrentControlSet\Control\SessionManager\AppcompatCache\AppCompatCache` olup, sırasıyla 512 ve 1024 giriş kapasitesine sahiptir.
 
-Saklanan bilgileri ayrıştırmak için, [**AppCompatCacheParser** aracı](https://github.com/EricZimmerman/AppCompatCacheParser) kullanılması önerilir.
+Saklanan bilgileri ayrıştırmak için, [**AppCompatCacheParser** tool](https://github.com/EricZimmerman/AppCompatCacheParser) kullanılması önerilir.
 
 ![](<../../../images/image (75).png>)
 
@@ -350,7 +350,7 @@ Saklanan bilgileri ayrıştırmak için, [**AppCompatCacheParser** aracı](https
 
 Bu dosya, yürütülen süreçlerin kayıtlarını, yürütülebilir dosyaların yollarını ve SHA1 hash'lerini saklamasıyla dikkat çekmektedir. Bu bilgi, bir sistemdeki uygulamaların etkinliğini izlemek için değerlidir.
 
-**Amcache.hve** dosyasından veri çıkarmak ve analiz etmek için, [**AmcacheParser**](https://github.com/EricZimmerman/AmcacheParser) aracı kullanılabilir. Aşağıdaki komut, AmcacheParser'ı **Amcache.hve** dosyasının içeriğini ayrıştırmak ve sonuçları CSV formatında çıkarmak için nasıl kullanacağınıza dair bir örnektir:
+**Amcache.hve** dosyasından veri çıkarmak ve analiz etmek için, [**AmcacheParser**](https://github.com/EricZimmerman/AmcacheParser) aracı kullanılabilir. Aşağıdaki komut, AmcacheParser'ı kullanarak **Amcache.hve** dosyasının içeriğini ayrıştırmak ve sonuçları CSV formatında çıkarmak için bir örnektir:
 ```bash
 AmcacheParser.exe -f C:\Users\genericUser\Desktop\Amcache.hve --csv C:\Users\genericUser\Desktop\outputFolder
 ```
@@ -360,26 +360,26 @@ AmcacheParser.exe -f C:\Users\genericUser\Desktop\Amcache.hve --csv C:\Users\gen
 
 ### RecentFileCache
 
-Bu artefakt yalnızca W7'de `C:\Windows\AppCompat\Programs\RecentFileCache.bcf` konumunda bulunabilir ve bazı ikili dosyaların son çalıştırılması hakkında bilgi içerir.
+Bu artefakt yalnızca W7'de `C:\Windows\AppCompat\Programs\RecentFileCache.bcf` içinde bulunabilir ve bazı ikili dosyaların son çalıştırılması hakkında bilgi içerir.
 
 Dosyayı ayrıştırmak için [**RecentFileCacheParse**](https://github.com/EricZimmerman/RecentFileCacheParser) aracını kullanabilirsiniz.
 
 ### Planlı görevler
 
-Bunları `C:\Windows\Tasks` veya `C:\Windows\System32\Tasks` konumundan çıkarabilir ve XML olarak okuyabilirsiniz.
+Bunları `C:\Windows\Tasks` veya `C:\Windows\System32\Tasks` içinden çıkarabilir ve XML olarak okuyabilirsiniz.
 
 ### Hizmetler
 
-Bunları `SYSTEM\ControlSet001\Services` kayıt defterinde bulabilirsiniz. Ne zaman ve neyin çalıştırılacağını görebilirsiniz.
+Bunları `SYSTEM\ControlSet001\Services` altında kayıt defterinde bulabilirsiniz. Ne zaman ve neyin çalıştırılacağını görebilirsiniz.
 
 ### **Windows Store**
 
-Yüklenen uygulamalar `\ProgramData\Microsoft\Windows\AppRepository\` konumunda bulunabilir. Bu depo, sistemdeki **her yüklü uygulama** ile ilgili bir **log** içerir ve bu log **`StateRepository-Machine.srd`** veritabanındadır.
+Yüklenen uygulamalar `\ProgramData\Microsoft\Windows\AppRepository\` içinde bulunabilir. Bu depo, sistemdeki **her yüklü uygulama** ile ilgili bir **log** içerir ve bu log **`StateRepository-Machine.srd`** veritabanındadır.
 
 Bu veritabanının Uygulama tablosunda "Application ID", "PackageNumber" ve "Display Name" sütunlarını bulmak mümkündür. Bu sütunlar, önceden yüklenmiş ve yüklenmiş uygulamalar hakkında bilgi içerir ve bazı uygulamaların kaldırılıp kaldırılmadığını bulmak mümkündür çünkü yüklü uygulamaların kimlikleri sıralı olmalıdır.
 
 Ayrıca, kayıt defteri yolunda yüklü uygulamaları bulmak da mümkündür: `Software\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore\Applications\`\
-Ve **kaldırılmış** **uygulamaları**: `Software\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore\Deleted\`
+Ve **kaldırılmış** **uygulamalar** için: `Software\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore\Deleted\`
 
 ## Windows Olayları
 
@@ -388,23 +388,23 @@ Windows olayları içinde görünen bilgiler şunlardır:
 - Ne oldu
 - Zaman damgası (UTC + 0)
 - İlgili kullanıcılar
-- İlgili ana bilgisayarlar (hostname, IP)
+- İlgili ana bilgisayarlar (ana bilgisayar adı, IP)
 - Erişilen varlıklar (dosyalar, klasör, yazıcı, hizmetler)
 
-Loglar, Windows Vista'dan önce `C:\Windows\System32\config` konumunda ve Windows Vista'dan sonra `C:\Windows\System32\winevt\Logs` konumunda bulunmaktadır. Windows Vista'dan önce, olay logları ikili formatta, sonrasında ise **XML formatında** ve **.evtx** uzantısını kullanarak kaydedilmiştir.
+Loglar, Windows Vista'dan önce `C:\Windows\System32\config` içinde ve Windows Vista'dan sonra `C:\Windows\System32\winevt\Logs` içinde bulunmaktadır. Windows Vista'dan önce, olay logları ikili formatta ve sonrasında **XML formatında** ve **.evtx** uzantısını kullanmaktadır.
 
-Olay dosyalarının konumu, **`HKLM\SYSTEM\CurrentControlSet\services\EventLog\{Application|System|Security}`** kayıt defterinde bulunabilir.
+Olay dosyalarının yeri, SYSTEM kayıt defterinde **`HKLM\SYSTEM\CurrentControlSet\services\EventLog\{Application|System|Security}`** bulunabilir.
 
 Windows Olay Görüntüleyici (**`eventvwr.msc`**) veya [**Event Log Explorer**](https://eventlogxp.com) **veya** [**Evtx Explorer/EvtxECmd**](https://ericzimmerman.github.io/#!index.md)** gibi diğer araçlarla görselleştirilebilir.
 
-## Windows Güvenlik Olay Kaydı Anlama
+## Windows Güvenlik Olay Kaydını Anlamak
 
-Erişim olayları, `C:\Windows\System32\winevt\Security.evtx` konumundaki güvenlik yapılandırma dosyasında kaydedilir. Bu dosyanın boyutu ayarlanabilir ve kapasitesi dolduğunda, daha eski olaylar üzerine yazılır. Kaydedilen olaylar, kullanıcı girişleri ve çıkışları, kullanıcı eylemleri ve güvenlik ayarlarındaki değişiklikler ile dosya, klasör ve paylaşılan varlık erişimlerini içerir.
+Erişim olayları, `C:\Windows\System32\winevt\Security.evtx` konumundaki güvenlik yapılandırma dosyasında kaydedilir. Bu dosyanın boyutu ayarlanabilir ve kapasitesi dolduğunda, daha eski olaylar üzerine yazılır. Kaydedilen olaylar, kullanıcı girişleri ve çıkışları, kullanıcı eylemleri ve güvenlik ayarlarında yapılan değişiklikler ile dosya, klasör ve paylaşılan varlık erişimlerini içerir.
 
 ### Kullanıcı Kimlik Doğrulaması için Ana Olay Kimlikleri:
 
-- **EventID 4624**: Kullanıcının başarıyla kimlik doğruladığını gösterir.
-- **EventID 4625**: Kimlik doğrulama hatasını belirtir.
+- **EventID 4624**: Bir kullanıcının başarıyla kimlik doğruladığını gösterir.
+- **EventID 4625**: Bir kimlik doğrulama hatasını işaret eder.
 - **EventIDs 4634/4647**: Kullanıcı çıkış olaylarını temsil eder.
 - **EventID 4672**: Yönetici ayrıcalıklarıyla giriş yapıldığını belirtir.
 
@@ -425,17 +425,17 @@ Erişim olayları, `C:\Windows\System32\winevt\Security.evtx` konumundaki güven
 
 #### EventID 4625 için Durum ve Alt Durum Kodları:
 
-- **0xC0000064**: Kullanıcı adı mevcut değil - Bir kullanıcı adı tahsis etme saldırısını gösterebilir.
-- **0xC000006A**: Doğru kullanıcı adı ama yanlış şifre - Olası şifre tahmin etme veya kaba kuvvet denemesi.
-- **0xC0000234**: Kullanıcı hesabı kilitlendi - Birden fazla başarısız girişle sonuçlanan bir kaba kuvvet saldırısını takip edebilir.
-- **0xC0000072**: Hesap devre dışı bırakıldı - Devre dışı bırakılmış hesaplara yetkisiz erişim girişimleri.
+- **0xC0000064**: Kullanıcı adı mevcut değil - Bir kullanıcı adı tahmin saldırısını gösterebilir.
+- **0xC000006A**: Doğru kullanıcı adı ama yanlış şifre - Olası şifre tahmin veya kaba kuvvet denemesi.
+- **0xC0000234**: Kullanıcı hesabı kilitlenmiş - Birden fazla başarısız girişle sonuçlanan bir kaba kuvvet saldırısını takip edebilir.
+- **0xC0000072**: Hesap devre dışı - Devre dışı bırakılmış hesaplara yetkisiz erişim girişimleri.
 - **0xC000006F**: İzin verilen zaman dışında oturum açma - Belirlenen giriş saatleri dışında erişim girişimlerini gösterir, yetkisiz erişim belirtisi olabilir.
 - **0xC0000070**: İş istasyonu kısıtlamalarının ihlali - Yetkisiz bir yerden giriş yapma girişimi olabilir.
-- **0xC0000193**: Hesap süresi doldu - Süresi dolmuş kullanıcı hesapları ile erişim girişimleri.
+- **0xC0000193**: Hesap süresi dolmuş - Süresi dolmuş kullanıcı hesapları ile erişim girişimleri.
 - **0xC0000071**: Süresi dolmuş şifre - Eski şifrelerle giriş girişimleri.
-- **0xC0000133**: Zaman senkronizasyon sorunları - İstemci ve sunucu arasında büyük zaman farklılıkları, daha karmaşık saldırıların (pass-the-ticket gibi) belirtisi olabilir.
-- **0xC0000224**: Zorunlu şifre değişikliği gereklidir - Sık sık zorunlu değişiklikler, hesap güvenliğini bozma girişimini gösterebilir.
-- **0xC0000225**: Bir sistem hatasını belirtir, güvenlik sorunu değil.
+- **0xC0000133**: Zaman senkronizasyon sorunları - İstemci ve sunucu arasında büyük zaman farklılıkları, daha karmaşık saldırıların, örneğin pass-the-ticket, belirtisi olabilir.
+- **0xC0000224**: Zorunlu şifre değişikliği gereklidir - Sık zorunlu değişiklikler, hesap güvenliğini bozma girişimini gösterebilir.
+- **0xC0000225**: Bir sistem hatasını gösterir, güvenlik sorunu değil.
 - **0xC000015b**: Reddedilen oturum açma türü - Yetkisiz oturum açma türü ile erişim girişimi, örneğin bir kullanıcının bir hizmet oturumu başlatmaya çalışması.
 
 #### EventID 4616:
@@ -444,7 +444,7 @@ Erişim olayları, `C:\Windows\System32\winevt\Security.evtx` konumundaki güven
 
 #### EventID 6005 ve 6006:
 
-- **Sistem Başlangıcı ve Kapatılması**: EventID 6005 sistemin başlatıldığını, EventID 6006 ise kapatıldığını belirtir.
+- **Sistem Başlangıcı ve Kapatılması**: EventID 6005 sistemin başlatıldığını, EventID 6006 ise kapatıldığını gösterir.
 
 #### EventID 1102:
 
@@ -462,7 +462,7 @@ Olay detayları, durum ve alt durum kodları, özellikle Event ID 4625'te olay n
 
 ### Windows Olaylarını Kurtarma
 
-Silinmiş Windows Olaylarını kurtarma şansını artırmak için, şüpheli bilgisayarı doğrudan fişini çekerek kapatmak önerilir. **Bulk_extractor**, `.evtx` uzantısını belirten bir kurtarma aracı olarak, bu tür olayları kurtarmak için önerilir.
+Silinmiş Windows Olaylarını kurtarma şansını artırmak için, şüpheli bilgisayarı doğrudan fişini çekerek kapatmak önerilir. **Bulk_extractor**, `.evtx` uzantısını belirten bir kurtarma aracı olarak, bu tür olayları kurtarmak için önerilmektedir.
 
 ### Windows Olayları Aracılığıyla Yaygın Saldırıları Tanımlama
 
@@ -482,7 +482,7 @@ USB cihaz takibi için yararlı Sistem Olay Kimlikleri, ilk kullanım için 2000
 
 #### Sistem Güç Olayları
 
-EventID 6005 sistem başlangıcını, EventID 6006 ise kapanmayı belirtir.
+EventID 6005 sistem başlangıcını, EventID 6006 ise kapanmayı gösterir.
 
 #### Log Silme
 

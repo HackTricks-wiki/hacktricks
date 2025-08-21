@@ -4,7 +4,7 @@
 
 ## TCC Yetki Yükseltme
 
-Eğer buraya TCC yetki yükseltmesi aramak için geldiyseniz, şu adrese gidin:
+Eğer buraya TCC yetki yükseltme arayışıyla geldiyseniz, şu adrese gidin:
 
 {{#ref}}
 macos-security-protections/macos-tcc/
@@ -12,7 +12,7 @@ macos-security-protections/macos-tcc/
 
 ## Linux Privesc
 
-Lütfen **yetki yükseltme ile ilgili çoğu numaranın Linux/Unix'i etkilediği gibi MacOS** makinelerini de etkileyeceğini unutmayın. Bu yüzden bakın:
+Lütfen unutmayın ki **Linux/Unix üzerinde yetki yükseltme ile ilgili olan çoğu hile, MacOS** makinelerini de etkileyecektir. Bu yüzden bakın:
 
 {{#ref}}
 ../../linux-hardening/privilege-escalation/
@@ -24,7 +24,7 @@ Lütfen **yetki yükseltme ile ilgili çoğu numaranın Linux/Unix'i etkilediği
 
 Orijinal [Sudo Ele Geçirme tekniğini Linux Yetki Yükseltme yazısında bulabilirsiniz](../../linux-hardening/privilege-escalation/index.html#sudo-hijacking).
 
-Ancak, macOS **kullanıcının** **`PATH`**'ini **`sudo`** komutunu çalıştırdığında **korur**. Bu da, bu saldırıyı gerçekleştirmenin başka bir yolunun, mağdurun **sudo** çalıştırırken **başka ikili dosyaları ele geçirmek** olabileceği anlamına gelir:
+Ancak, macOS **kullanıcının** **`PATH`**'ini **`sudo`** komutunu çalıştırdığında **korur**. Bu da, bu saldırıyı gerçekleştirmenin başka bir yolunun, mağdurun **sudo** ile çalıştırdığı **diğer ikili dosyaları ele geçirmek** olabileceği anlamına gelir:
 ```bash
 # Let's hijack ls in /opt/homebrew/bin, as this is usually already in the users PATH
 cat > /opt/homebrew/bin/ls <<EOF
@@ -43,13 +43,13 @@ Not edin ki terminal kullanan bir kullanıcının **Homebrew yüklü olma olası
 
 ### Dock Taklidi
 
-Bazı **sosyal mühendislik** teknikleri kullanarak dock içinde **örneğin Google Chrome'u taklit edebilir** ve aslında kendi scriptinizi çalıştırabilirsiniz:
+Bazı **sosyal mühendislik** kullanarak, dock içinde **örneğin Google Chrome'u taklit edebilir** ve aslında kendi scriptinizi çalıştırabilirsiniz:
 
 {{#tabs}}
 {{#tab name="Chrome Impersonation"}}
 Bazı öneriler:
 
-- Dock'ta bir Chrome olup olmadığını kontrol edin, eğer varsa o girişi **kaldırın** ve Dock dizisinde **aynı konuma** **sahte** **Chrome girişini ekleyin**.
+- Dock'ta bir Chrome olup olmadığını kontrol edin, bu durumda o girişi **kaldırın** ve Dock dizisinde **aynı konuma** **sahte** **Chrome girişini ekleyin**.
 ```bash
 #!/bin/sh
 
@@ -124,8 +124,8 @@ killall Dock
 {{#tab name="Finder Impersonation"}}
 Bazı öneriler:
 
-- **Finder'ı Dock'tan kaldıramazsınız**, bu yüzden eğer Dock'a ekleyecekseniz, sahte Finder'ı gerçek Finder'ın hemen yanına koyabilirsiniz. Bunun için **sahte Finder girişini Dock dizisinin başına eklemeniz gerekir**.
-- Diğer bir seçenek, onu Dock'a yerleştirmemek ve sadece açmaktır; "Finder'ın Finder'ı kontrol etmesi için izin istemesi" o kadar da garip değil.
+- Dock'tan Finder'ı **kaldıramazsınız**, bu yüzden eğer Dock'a ekleyecekseniz, sahte Finder'ı gerçek olanın hemen yanına koyabilirsiniz. Bunun için **sahte Finder girişini Dock dizisinin başına eklemeniz gerekir**.
+- Diğer bir seçenek, Dock'a yerleştirmemek ve sadece açmaktır; "Finder'ın Finder'ı kontrol etmesi için izin istemesi" o kadar da garip değil.
 - Şifreyi korkunç bir kutu ile sormadan **root'a yükselmek** için başka bir seçenek, Finder'ın gerçekten bir ayrıcalıklı işlem gerçekleştirmek için şifre istemesini sağlamaktır:
 - Finder'dan **`/etc/pam.d`** dizinine yeni bir **`sudo`** dosyası kopyalamasını isteyin (Şifre isteyen istem, "Finder sudo'yu kopyalamak istiyor" diye belirtecektir)
 - Finder'dan yeni bir **Authorization Plugin** kopyalamasını isteyin (Dosya adını kontrol edebilirsiniz, böylece şifre isteyen istem "Finder Finder.bundle'ı kopyalamak istiyor" diye belirtecektir)
@@ -205,7 +205,7 @@ killall Dock
 
 ### CVE-2020-9771 - mount_apfs TCC atlatma ve yetki yükseltme
 
-**Herhangi bir kullanıcı** (hatta yetkisiz olanlar bile) bir zaman makinesi anlık görüntüsü oluşturabilir ve bu anlık görüntünün **TÜM dosyalarına** erişebilir.\
+**Herhangi bir kullanıcı** (hatta yetkisiz olanlar bile) bir zaman makinesi anlık görüntüsü oluşturabilir ve bunu monte edebilir, anlık görüntünün **TÜM dosyalarına** erişebilir.\
 Gerekli olan **tek yetki**, kullanılan uygulamanın (örneğin `Terminal`) **Tam Disk Erişimi** (FDA) erişimine sahip olmasıdır (`kTCCServiceSystemPolicyAllfiles`), bu da bir yönetici tarafından verilmelidir.
 ```bash
 # Create snapshot
@@ -231,6 +231,7 @@ Daha ayrıntılı bir açıklama [**orijinal raporda**](https://theevilbit.githu
 ## Hassas Bilgiler
 
 Bu, ayrıcalıkları artırmak için faydalı olabilir:
+
 
 {{#ref}}
 macos-files-folders-and-binaries/macos-sensitive-locations.md

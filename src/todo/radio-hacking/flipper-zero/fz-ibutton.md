@@ -12,7 +12,7 @@ iButton nedir hakkında daha fazla bilgi için kontrol edin:
 
 ## Design
 
-Aşağıdaki resmin **mavi** kısmı, Flipper'ın **okuyabilmesi için gerçek iButton'ı** nasıl **yerleştirmeniz gerektiğini** gösterir. **Yeşil** kısım ise Flipper Zero'nun **iButton'ı doğru bir şekilde taklit etmek için okuyucuya nasıl** **dokunması gerektiğini** gösterir.
+Aşağıdaki resmin **mavi** kısmı, Flipper'ın **okuyabilmesi için gerçek iButton'ı** nasıl **yerleştirmeniz gerektiğini** gösterir. **Yeşil** kısım ise Flipper zero ile okuyucuya **doğru bir şekilde iButton'ı taklit etmek için** nasıl **dokunmanız gerektiğini** gösterir.
 
 <figure><img src="../../../images/image (565).png" alt=""><figcaption></figcaption></figure>
 
@@ -20,7 +20,7 @@ Aşağıdaki resmin **mavi** kısmı, Flipper'ın **okuyabilmesi için gerçek i
 
 ### Read
 
-Okuma Modunda Flipper, iButton anahtarının dokunmasını bekliyor ve üç tür anahtarı sindirebiliyor: **Dallas, Cyfral ve Metakom**. Flipper, anahtarın türünü **kendisi belirleyecektir**. Anahtar protokolünün adı, ID numarasının üzerinde ekranda görüntülenecektir.
+Okuma Modu'nda Flipper, iButton anahtarının dokunmasını bekler ve üç tür anahtarı sindirebilir: **Dallas, Cyfral ve Metakom**. Flipper, anahtarın türünü **kendisi belirleyecektir**. Anahtar protokolünün adı, ID numarasının üzerinde ekranda görüntülenecektir.
 
 ### Add manually
 
@@ -30,7 +30,7 @@ Okuma Modunda Flipper, iButton anahtarının dokunmasını bekliyor ve üç tür
 
 Kaydedilmiş iButton'ları (okunan veya manuel olarak eklenen) **taklit etmek** mümkündür.
 
-> [!NOTE]
+> [!TIP]
 > Flipper Zero'nun beklenen temaslarının okuyucuya dokunmasını sağlayamazsanız, **harici GPIO'yu kullanabilirsiniz:**
 
 <figure><img src="../../../images/image (138).png" alt=""><figcaption></figcaption></figure>

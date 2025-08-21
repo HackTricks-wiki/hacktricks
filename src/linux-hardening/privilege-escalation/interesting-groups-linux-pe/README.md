@@ -78,7 +78,7 @@ So, dosyayı okuyun ve bazı **hash'leri kırmaya** çalışın.
 
 **staff**: Kullanıcıların kök ayrıcalıkları olmadan sisteme yerel değişiklikler eklemelerine izin verir (`/usr/local`) (not: `/usr/local/bin` içindeki çalıştırılabilir dosyalar, herhangi bir kullanıcının PATH değişkenindedir ve aynı isimdeki `/bin` ve `/usr/bin` içindeki çalıştırılabilir dosyaların "üstüne yazabilir"). "adm" grubu ile karşılaştırın, bu grup daha çok izleme/güvenlik ile ilgilidir. [\[source\]](https://wiki.debian.org/SystemGroups)
 
-Debian dağıtımlarında, `$PATH` değişkeni `/usr/local/`'un en yüksek öncelikle çalıştırılacağını gösterir, ayrıcalıklı bir kullanıcı olup olmadığınıza bakılmaksızın.
+Debian dağıtımlarında, `$PATH` değişkeni `/usr/local/`'un en yüksek öncelikle çalıştırılacağını gösterir, ister ayrıcalıklı bir kullanıcı olun ister olmayın.
 ```bash
 $ echo $PATH
 /usr/local/sbin:/usr/sbin:/sbin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games
@@ -130,7 +130,7 @@ $ /bin/bash -p
 ```
 ## Disk Group
 
-Bu ayrıcalık neredeyse **root erişimine eşdeğerdir** çünkü makinenin içindeki tüm verilere erişebilirsiniz.
+Bu ayrıcalık neredeyse **root erişimi ile eşdeğerdir** çünkü makinenin içindeki tüm verilere erişebilirsiniz.
 
 Dosyalar:`/dev/sd[a-z][1-9]`
 ```bash
@@ -156,14 +156,14 @@ USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU WHAT
 yossi    tty1                      22:16    5:13m  0.05s  0.04s -bash
 moshe    pts/1    10.10.14.44      02:53   24:07   0.06s  0.06s /bin/bash
 ```
-**tty1**, kullanıcının **yossi'nin makinedeki bir terminale fiziksel olarak giriş yaptığını** ifade eder.
+**tty1**, kullanıcının **yossi'nin makinedeki bir terminale fiziksel olarak giriş yaptığını** gösterir.
 
 **video grubu**, ekran çıktısını görüntüleme erişimine sahiptir. Temelde ekranları gözlemleyebilirsiniz. Bunu yapmak için, ekranın **mevcut görüntüsünü ham veri olarak yakalamanız** ve ekranın kullandığı çözünürlüğü almanız gerekir. Ekran verileri `/dev/fb0`'da kaydedilebilir ve bu ekranın çözünürlüğünü `/sys/class/graphics/fb0/virtual_size`'da bulabilirsiniz.
 ```bash
 cat /dev/fb0 > /tmp/screen.raw
 cat /sys/class/graphics/fb0/virtual_size
 ```
-**Ham görüntüyü açmak için** **GIMP**'i kullanabilir, **`screen.raw`** dosyasını seçebilir ve dosya türü olarak **Ham görüntü verisi**'ni seçebilirsiniz:
+**Ham görüntüyü açmak için** **GIMP** kullanabilir, **`screen.raw`** dosyasını seçebilir ve dosya türü olarak **Ham görüntü verisi** seçebilirsiniz:
 
 ![](<../../../images/image (463).png>)
 
@@ -217,12 +217,12 @@ https://fosterelli.co/privilege-escalation-via-docker.html
 
 ## Adm Grubu
 
-Genellikle **`adm`** grubunun **üyeleri** _/var/log/_ dizininde bulunan **log** dosyalarını **okuma** izinlerine sahiptir.\
-Bu nedenle, eğer bu grupta bir kullanıcıyı ele geçirdiyseniz, kesinlikle **loglara göz atmalısınız**.
+Genellikle **`adm`** grubunun **üyesi** olanlar _/var/log/_ dizininde bulunan **log** dosyalarını **okuma** izinlerine sahiptir.\
+Bu nedenle, bu grupta bir kullanıcıyı ele geçirdiyseniz, kesinlikle **loglara göz atmalısınız**.
 
 ## Auth grubu
 
-OpenBSD içinde **auth** grubu genellikle _**/etc/skey**_ ve _**/var/db/yubikey**_ dizinlerinde yazma iznine sahiptir, eğer kullanılıyorsa.\
+OpenBSD içinde **auth** grubu genellikle _**/etc/skey**_ ve _**/var/db/yubikey**_ dizinlerine yazma iznine sahiptir, eğer kullanılıyorsa.\
 Bu izinler, root'a **yetki yükseltmek** için aşağıdaki istismar ile kötüye kullanılabilir: [https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot](https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot)
 
 {{#include ../../../banners/hacktricks-training.md}}

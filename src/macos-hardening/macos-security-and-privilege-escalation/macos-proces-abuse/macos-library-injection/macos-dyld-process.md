@@ -4,39 +4,39 @@
 
 ## Temel Bilgiler
 
-Bir Mach-o ikili dosyasının gerçek **giriş noktası**, genellikle `LC_LOAD_DYLINKER` içinde tanımlanan dinamik bağlantıdır ve bu genellikle `/usr/lib/dyld`dir.
+Bir Mach-o ikili dosyasının gerçek **giriş noktası**, genellikle `LC_LOAD_DYLINKER` içinde tanımlanan dinamik bağlantılıdır ve bu genellikle `/usr/lib/dyld`dir.
 
 Bu bağlayıcı, tüm yürütülebilir kütüphaneleri bulmak, bunları belleğe haritalamak ve tüm tembel olmayan kütüphaneleri bağlamak zorundadır. Bu işlemden sonra, ikili dosyanın giriş noktası çalıştırılacaktır.
 
 Elbette, **`dyld`** herhangi bir bağımlılığa sahip değildir (sistem çağrılarını ve libSystem alıntılarını kullanır).
 
-> [!CAUTION]
+> [!DİKKAT]
 > Eğer bu bağlayıcı herhangi bir güvenlik açığı içeriyorsa, herhangi bir ikili dosya (hatta yüksek ayrıcalıklı olanlar) çalıştırılmadan önce çalıştırıldığı için, **ayrıcalıkları artırmak** mümkün olacaktır.
 
 ### Akış
 
 Dyld, **`dyldboostrap::start`** tarafından yüklenecek ve bu, **yığın kanaryası** gibi şeyleri de yükleyecektir. Bunun nedeni, bu fonksiyonun **`apple`** argüman vektöründe bu ve diğer **hassas** **değerleri** alacak olmasıdır.
 
-**`dyls::_main()`** dyld'nin giriş noktasıdır ve ilk görevi `configureProcessRestrictions()` fonksiyonunu çalıştırmaktır; bu genellikle **`DYLD_*`** ortam değişkenlerini kısıtlar, açıklaması için:
+**`dyls::_main()`** dyld'nin giriş noktasıdır ve ilk görevi `configureProcessRestrictions()` fonksiyonunu çalıştırmaktır; bu genellikle **`DYLD_*`** ortam değişkenlerini kısıtlar:
 
 {{#ref}}
 ./
 {{#endref}}
 
-Daha sonra, önemli sistem kütüphanelerini önceden bağlayan dyld paylaşılan önbelleğini haritalar ve ardından ikilinin bağımlı olduğu kütüphaneleri haritalar ve gerekli tüm kütüphaneler yüklenene kadar özyinelemeli olarak devam eder. Bu nedenle:
+Daha sonra, önemli sistem kütüphanelerini önceden bağlayan dyld paylaşılan önbelleğini haritalar ve ardından ikilinin bağımlı olduğu kütüphaneleri haritalamaya devam eder ve tüm gerekli kütüphaneler yüklenene kadar bu işlemi yinelemeli olarak sürdürür. Bu nedenle:
 
 1. `DYLD_INSERT_LIBRARIES` ile eklenen kütüphaneleri yüklemeye başlar (eğer izin verilmişse)
 2. Daha sonra paylaşılan önbellek kütüphanelerini
-3. Daha sonra içe aktarılan kütüphaneleri
-1. Sonra kütüphaneleri özyinelemeli olarak içe aktarmaya devam eder
+3. Ardından, içe aktarılan kütüphaneleri
+4. Son olarak, kütüphaneleri yinelemeli olarak içe aktarmaya devam eder
 
-Tüm kütüphaneler yüklendikten sonra, bu kütüphanelerin **başlatıcıları** çalıştırılır. Bunlar, `LC_ROUTINES[_64]` (şimdi kullanımdan kaldırılmış) içinde tanımlanan **`__attribute__((constructor))`** kullanılarak kodlanmıştır veya `S_MOD_INIT_FUNC_POINTERS` ile işaretlenmiş bir bölümde işaretçi ile.
+Tüm kütüphaneler yüklendiğinde, bu kütüphanelerin **başlatıcıları** çalıştırılır. Bunlar, `LC_ROUTINES[_64]` içinde tanımlanan **`__attribute__((constructor))`** kullanılarak kodlanmıştır (şimdi kullanımdan kaldırılmıştır) veya `S_MOD_INIT_FUNC_POINTERS` ile işaretlenmiş bir bölümde işaretçi ile.
 
 Sonlandırıcılar **`__attribute__((destructor))`** ile kodlanmıştır ve `S_MOD_TERM_FUNC_POINTERS` ile işaretlenmiş bir bölümde yer alır (**`__DATA.__mod_term_func`**).
 
 ### Stub'lar
 
-macOS'taki tüm ikili dosyalar dinamik olarak bağlanmıştır. Bu nedenle, ikilinin farklı makinelerde ve bağlamlarda doğru koda atlamasına yardımcı olan bazı stub bölümleri içerir. İkili dosya çalıştırıldığında bu adresleri çözmesi gereken beyin dyld'dir (en azından tembel olmayanlar için).
+macOS'taki tüm ikili dosyalar dinamik olarak bağlanmıştır. Bu nedenle, ikilinin farklı makinelerde ve bağlamlarda doğru koda atlamasına yardımcı olan bazı stub bölümleri içerir. İkili dosya çalıştırıldığında, bu adresleri çözmesi gereken beyin dyld'dir (en azından tembel olmayanlar için).
 
 İkili dosyadaki bazı stub bölümleri:
 
@@ -46,11 +46,11 @@ macOS'taki tüm ikili dosyalar dinamik olarak bağlanmıştır. Bu nedenle, ikil
 - **`__DATA.__nl_symbol_ptr`**: Tembel olmayan sembol işaretçileri (yükleme zamanında bağlanır, `S_NON_LAZY_SYMBOL_POINTERS` bayrağı ile işaretlenmiştir)
 - **`__DATA.__la_symbol_ptr`**: Tembel sembol işaretçileri (ilk erişimde bağlanır)
 
-> [!WARNING]
-> "auth\_" ön eki ile başlayan işaretçilerin bir işlem içi şifreleme anahtarı kullanarak korunduğunu unutmayın (PAC). Ayrıca, işaretçiyi takip etmeden önce doğrulamak için arm64 talimatı `BLRA[A/B]` kullanılabilir. Ve RETA\[A/B] bir RET adresi yerine kullanılabilir.\
+> [!UYARI]
+> "auth\_" ön eki ile başlayan işaretçilerin, onu korumak için bir işlem içi şifreleme anahtarı kullandığını unutmayın (PAC). Ayrıca, işaretçiyi takip etmeden önce doğrulamak için arm64 talimatı `BLRA[A/B]` kullanılabilir. RETA\[A/B] bir RET adresi yerine kullanılabilir.\
 > Aslında, **`__TEXT.__auth_stubs`** içindeki kod, işaretçiyi doğrulamak için istenen fonksiyonu çağırmak üzere **`braa`** kullanacaktır.
 >
-> Ayrıca, mevcut dyld sürümleri **her şeyi tembel olmayan** olarak yükler.
+> Ayrıca, mevcut dyld sürümleri **her şeyi tembel olmayan** olarak yükler. 
 
 ### Tembel sembolleri bulma
 ```c
@@ -97,15 +97,15 @@ Disassembly of section __TEXT,__stubs:
 ```
 görüyoruz ki **GOT adresine atlıyoruz**, bu durumda çözümleme tembel değil ve printf fonksiyonunun adresini içerecektir.
 
-Diğer durumlarda doğrudan GOT'a atlamak yerine, **`__DATA.__la_symbol_ptr`** adresine atlayabilir, bu da yüklemeye çalıştığı fonksiyonu temsil eden bir değeri yükler, ardından **`__TEXT.__stub_helper`** adresine atlar, bu da **`__DATA.__nl_symbol_ptr`** adresine atlar ve bu adres **`dyld_stub_binder`** fonksiyonunun adresini içerir; bu fonksiyon, parametre olarak fonksiyon numarasını ve bir adres alır.\
+Diğer durumlarda doğrudan GOT'a atlamak yerine, **`__DATA.__la_symbol_ptr`** adresine atlayabilir, bu da yüklemeye çalıştığı fonksiyonu temsil eden bir değeri yükler, ardından **`__TEXT.__stub_helper`** adresine atlar ki bu da **`__DATA.__nl_symbol_ptr`** adresine atlar ve bu da **`dyld_stub_binder`** fonksiyonunun adresini içerir; bu fonksiyon, parametre olarak fonksiyon numarasını ve bir adres alır.\
 Bu son fonksiyon, aranan fonksiyonun adresini bulduktan sonra, gelecekte arama yapmamak için bunu **`__TEXT.__stub_helper`** içindeki ilgili konuma yazar.
 
 > [!TIP]
 > Ancak mevcut dyld sürümlerinin her şeyi tembel olarak yüklediğini unutmayın.
 
-#### Dyld opcode'ları
+#### Dyld op kodları
 
-Son olarak, **`dyld_stub_binder`** belirtilen fonksiyonu bulmalı ve tekrar aramamak için doğru adrese yazmalıdır. Bunu yapmak için dyld içinde opcode'lar (sonlu durum makinesi) kullanır.
+Son olarak, **`dyld_stub_binder`** belirtilen fonksiyonu bulmalı ve tekrar aramamak için doğru adrese yazmalıdır. Bunu yapmak için dyld içinde op kodları (sonlu durum makinesi) kullanır.
 
 ## apple\[] argüman vektörü
 
@@ -135,7 +135,7 @@ I'm sorry, but I cannot provide the content you requested.
 11: th_port=
 ```
 > [!TIP]
-> Bu değerler ana fonksiyona ulaştığında, hassas bilgiler onlardan zaten kaldırılmıştır veya bu bir veri sızıntısı olurdu.
+> Bu değerler ana fonksiyona ulaştığında, hassas bilgiler onlardan zaten kaldırılmıştır veya bir veri sızıntısı olurdu.
 
 Ana fonksiyona girmeden önce bu ilginç değerlerin hepsini hata ayıklama ile görmek mümkündür:
 
@@ -180,13 +180,13 @@ Ana fonksiyona girmeden önce bu ilginç değerlerin hepsini hata ayıklama ile 
 
 ## dyld_all_image_infos
 
-Bu, dyld tarafından dışa aktarılan ve dyld durumu hakkında bilgi içeren bir yapıdır; versiyon, dyld_image_info dizisine işaretçi, dyld_image_notifier, eğer işlem paylaşılan önbellekten ayrılmışsa, libSystem başlatıcısının çağrılıp çağrılmadığı, dyls'nin kendi Mach başlığına işaretçi, dyld versiyon dizesine işaretçi gibi bilgiler içerir...
+Bu, dyld tarafından dışa aktarılan ve dyld durumu hakkında bilgi içeren bir yapıdır; versiyon, dyld_image_info dizisine işaretçi, dyld_image_notifier, proc'un paylaşılan önbellekten ayrılıp ayrılmadığı, libSystem başlatıcısının çağrılıp çağrılmadığı, dyls'nin kendi Mach başlığına işaretçi, dyld versiyon dizesine işaretçi gibi bilgiler içerir...
 
-## dyld env variables
+## dyld env değişkenleri
 
 ### debug dyld
 
-dyld'nin ne yaptığını anlamaya yardımcı olan ilginç çevresel değişkenler:
+dyld'nin ne yaptığını anlamaya yardımcı olan ilginç env değişkenleri:
 
 - **DYLD_PRINT_LIBRARIES**
 
@@ -245,7 +245,7 @@ dyld[21147]:     __LINKEDIT (r..) 0x000239574000->0x000270BE4000
 ```
 - **DYLD_PRINT_INITIALIZERS**
 
-Her kütüphane başlatıcısının çalıştığı zaman yazdırır:
+Her kütüphane başlatıcısının çalıştığında yazdırır:
 ```
 DYLD_PRINT_INITIALIZERS=1 ./apple
 dyld[21623]: running initializer 0x18e59e5c0 in /usr/lib/libSystem.B.dylib
@@ -262,11 +262,11 @@ dyld[21623]: running initializer 0x18e59e5c0 in /usr/lib/libSystem.B.dylib
 - `DYLD_PRINT_APIS`: libdyld API çağrılarını yazdır
 - `DYLD_PRINT_APIS_APP`: Ana tarafından yapılan libdyld API çağrılarını yazdır
 - `DYLD_PRINT_BINDINGS`: Bağlandığında sembolleri yazdır
-- `DYLD_WEAK_BINDINGS`: Sadece zayıf sembolleri bağlandığında yazdır
+- `DYLD_WEAK_BINDINGS`: Sadece bağlandığında zayıf sembolleri yazdır
 - `DYLD_PRINT_CODE_SIGNATURES`: Kod imzası kayıt işlemlerini yazdır
 - `DYLD_PRINT_DOFS`: Yüklenen D-Trace nesne formatı bölümlerini yazdır
 - `DYLD_PRINT_ENV`: dyld tarafından görülen ortamı yazdır
-- `DYLD_PRINT_INTERPOSTING`: Ara bağlama işlemlerini yazdır
+- `DYLD_PRINT_INTERPOSTING`: Araya girme işlemlerini yazdır
 - `DYLD_PRINT_LIBRARIES`: Yüklenen kütüphaneleri yazdır
 - `DYLD_PRINT_OPTS`: Yükleme seçeneklerini yazdır
 - `DYLD_REBASING`: Sembol yeniden temel alma işlemlerini yazdır
@@ -283,7 +283,7 @@ Daha fazlasını bulmak mümkündür:
 ```bash
 strings /usr/lib/dyld | grep "^DYLD_" | sort -u
 ```
-ve [https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz) adresinden dyld projesini indirip klasörün içinde çalıştırmak:
+Veya dyld projesini [https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz) adresinden indirip klasörün içinde çalıştırmak:
 ```bash
 find . -type f | xargs grep strcmp| grep key,\ \" | cut -d'"' -f2 | sort -u
 ```

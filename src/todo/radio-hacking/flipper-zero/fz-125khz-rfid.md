@@ -3,51 +3,52 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
 
-## Giriş
+## Intro
 
 125kHz etiketlerinin nasıl çalıştığı hakkında daha fazla bilgi için kontrol edin:
+
 
 {{#ref}}
 ../pentesting-rfid.md
 {{#endref}}
 
-## Eylemler
+## Actions
 
 Bu tür etiketler hakkında daha fazla bilgi için [**bu girişi okuyun**](../pentesting-rfid.md#low-frequency-rfid-tags-125khz).
 
-### Oku
+### Read
 
-Kart bilgisini **okumaya** çalışır. Sonra bunları **taklit** edebilir.
+Kart bilgisini **okumaya** çalışır. Ardından, bunları **taklit** edebilir.
 
 > [!WARNING]
-> Bazı interkomların, okuma işleminden önce bir yazma komutu göndererek anahtar kopyalamaya karşı kendilerini korumaya çalıştığını unutmayın. Yazma başarılı olursa, o etiket sahte olarak kabul edilir. Flipper RFID'yi taklit ettiğinde, okuyucunun bunu orijinalinden ayırt etmesi için bir yol yoktur, bu nedenle böyle bir sorun ortaya çıkmaz.
+> Bazı interkomların, okuma işleminden önce bir yazma komutu göndererek anahtar çoğaltımına karşı kendilerini korumaya çalıştığını unutmayın. Yazma başarılı olursa, o etiket sahte olarak kabul edilir. Flipper RFID'yi taklit ettiğinde, okuyucunun bunu orijinalinden ayırt etmesi için bir yolu yoktur, bu nedenle böyle bir sorun ortaya çıkmaz.
 
-### Manuel Ekle
+### Add Manually
 
 Flipper Zero'da **verileri belirterek sahte kartlar oluşturabilirsiniz** ve ardından bunu taklit edebilirsiniz.
 
-#### Kartlardaki Kimlikler
+#### IDs on cards
 
-Bazen, bir kart aldığınızda, kartın görünür kısmında ID'sini (veya bir kısmını) bulabilirsiniz.
+Bazen, bir kart aldığınızda, kartta görünür şekilde ID'sinin (veya bir kısmının) yazılı olduğunu bulabilirsiniz.
 
 - **EM Marin**
 
-Örneğin, bu EM-Marin kartında fiziksel kartta **son 3'ü 5 baytın açık bir şekilde okunması mümkündür**.\
+Örneğin, bu EM-Marin kartında fiziksel kartta **son 3'ü 5 baytın açık bir şekilde okumak mümkündür**.\
 Diğer 2'si karttan okuyamazsanız brute-force ile bulunabilir.
 
 <figure><img src="../../../images/image (104).png" alt=""><figcaption></figcaption></figure>
 
 - **HID**
 
-Bu HID kartında da aynı durum geçerlidir; burada yalnızca 3 bayttan 2'si kartta basılı olarak bulunabilir.
+Bu HID kartında da yalnızca 3 bayttan 2'sinin kartta basılı olarak bulunabildiği durum aynıdır.
 
 <figure><img src="../../../images/image (1014).png" alt=""><figcaption></figcaption></figure>
 
-### Taklit/Yaz
+### Emulate/Write
 
-Bir kartı **kopyaladıktan** veya ID'yi **manuel olarak** girdikten sonra, Flipper Zero ile bunu **taklit** etmek veya gerçek bir karta **yazmak** mümkündür.
+Bir kartı **kopyaladıktan** veya ID'yi **manuel olarak** girdikten sonra, Flipper Zero ile **taklit** etmek veya bunu gerçek bir karta **yazmak** mümkündür.
 
-## Referanslar
+## References
 
 - [https://blog.flipperzero.one/rfid/](https://blog.flipperzero.one/rfid/)
 

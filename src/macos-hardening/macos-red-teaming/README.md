@@ -1,16 +1,15 @@
-# macOS Kırmızı Takım
+# macOS Red Teaming
 
 {{#include ../../banners/hacktricks-training.md}}
-
 
 ## MDM'leri Kötüye Kullanma
 
 - JAMF Pro: `jamf checkJSSConnection`
 - Kandji
 
-Eğer yönetim platformuna erişmek için **yönetici kimlik bilgilerini ele geçirirseniz**, makinelerdeki kötü amaçlı yazılımınızı dağıtarak **tüm bilgisayarları tehlikeye atabilirsiniz**.
+Eğer yönetim platformuna erişmek için **yönetici kimlik bilgilerini ele geçirirseniz**, makinelerde kötü amaçlı yazılımınızı dağıtarak **tüm bilgisayarları tehlikeye atabilirsiniz**.
 
-MacOS ortamlarında kırmızı takım çalışması için MDM'lerin nasıl çalıştığına dair bir anlayışa sahip olmak şiddetle tavsiye edilir:
+MacOS ortamlarında red teaming yapmak için MDM'lerin nasıl çalıştığına dair bir anlayışa sahip olmak şiddetle tavsiye edilir:
 
 {{#ref}}
 macos-mdm/
@@ -18,13 +17,13 @@ macos-mdm/
 
 ### MDM'yi C2 Olarak Kullanma
 
-Bir MDM, profilleri yüklemek, sorgulamak veya kaldırmak, uygulamaları yüklemek, yerel yönetici hesapları oluşturmak, firmware şifresi ayarlamak, FileVault anahtarını değiştirmek için izne sahip olacaktır...
+Bir MDM, profilleri yüklemek, sorgulamak veya kaldırmak, uygulamaları yüklemek, yerel yönetici hesapları oluşturmak, firmware şifresi ayarlamak, FileVault anahtarını değiştirmek için izinlere sahip olacaktır...
 
-Kendi MDM'nizi çalıştırmak için **CSR'nizin bir satıcı tarafından imzalanması** gerekir, bunu [**https://mdmcert.download/**](https://mdmcert.download/) ile elde etmeye çalışabilirsiniz. Apple cihazları için kendi MDM'nizi çalıştırmak için [**MicroMDM**](https://github.com/micromdm/micromdm) kullanabilirsiniz.
+Kendi MDM'nizi çalıştırmak için **CSR'nizin bir satıcı tarafından imzalanması** gerekir; bunu [**https://mdmcert.download/**](https://mdmcert.download/) ile almaya çalışabilirsiniz. Apple cihazları için kendi MDM'nizi çalıştırmak için [**MicroMDM**](https://github.com/micromdm/micromdm) kullanabilirsiniz.
 
 Ancak, kayıtlı bir cihazda bir uygulama yüklemek için, hala bir geliştirici hesabı tarafından imzalanmış olması gerekir... ancak, MDM kaydı sırasında **cihaz MDM'nin SSL sertifikasını güvenilir CA olarak ekler**, böylece artık her şeyi imzalayabilirsiniz.
 
-Cihazı bir MDM'ye kaydetmek için, **`mobileconfig`** dosyasını root olarak yüklemeniz gerekir, bu bir **pkg** dosyası aracılığıyla teslim edilebilir (zip içinde sıkıştırabilir ve Safari'den indirildiğinde açılacaktır).
+Cihazı bir MDM'ye kaydetmek için, **`mobileconfig`** dosyasını root olarak yüklemeniz gerekir; bu, bir **pkg** dosyası aracılığıyla teslim edilebilir (zip dosyasına sıkıştırabilir ve Safari'den indirildiğinde açılacaktır).
 
 **Mythic agent Orthrus** bu tekniği kullanır.
 
@@ -42,7 +41,7 @@ Ayrıca, uygun kimlik bilgilerini bulduktan sonra, diğer kullanıcı adlarını
 
 ![](<../../images/image (107).png>)
 
-#### JAMF cihaz Kimlik Doğrulama
+#### JAMF Cihaz Kimlik Doğrulaması
 
 <figure><img src="../../images/image (167).png" alt=""><figcaption></figcaption></figure>
 
@@ -60,12 +59,12 @@ plutil -convert xml1 -o - /Library/Preferences/com.jamfsoftware.jamf.plist
 <key>is_virtual_machine</key>
 <false/>
 <key>jss_url</key>
-<string>https://halbornasd.jamfcloud.com/</string>
+<string>https://subdomain-company.jamfcloud.com/</string>
 <key>last_management_framework_change_id</key>
 <integer>4</integer>
 [...]
 ```
-Bu nedenle, bir saldırgan, yüklendiğinde bu dosyayı **üstüne yazan** kötü niyetli bir paket (`pkg`) bırakabilir ve **URL'yi bir Typhon ajanından bir Mythic C2 dinleyicisine** ayarlayarak JAMF'i C2 olarak kötüye kullanma imkanı elde edebilir.
+Bu nedenle, bir saldırgan, yüklendiğinde bu dosyayı **üstüne yazan** kötü niyetli bir paket (`pkg`) bırakabilir ve **URL'yi bir Typhon ajanından bir Mythic C2 dinleyicisine** ayarlayarak JAMF'i C2 olarak kötüye kullanabilir.
 ```bash
 # After changing the URL you could wait for it to be reloaded or execute:
 sudo jamf policy -id 0
@@ -93,7 +92,7 @@ Ancak, **kimlik bilgileri** bu betiklere **parametreler** olarak geçebilir, bu 
 
 ### macOS Uzaktan Erişim
 
-Ve ayrıca **MacOS** "özel" **ağ** **protokolleri** hakkında:
+Ayrıca **MacOS** "özel" **ağ** **protokolleri** hakkında:
 
 {{#ref}}
 ../macos-security-and-privilege-escalation/macos-protocols.md
@@ -101,7 +100,7 @@ Ve ayrıca **MacOS** "özel" **ağ** **protokolleri** hakkında:
 
 ## Active Directory
 
-Bazı durumlarda **MacOS bilgisayarının bir AD'ye bağlı olduğunu** göreceksiniz. Bu senaryoda, aktif dizini **numaralandırmaya** çalışmalısınız. Aşağıdaki sayfalarda bazı **yardımlar** bulabilirsiniz:
+Bazı durumlarda **MacOS bilgisayarının bir AD'ye bağlı olduğunu** görebilirsiniz. Bu senaryoda, aktif dizini **numaralandırmaya** çalışmalısınız. Aşağıdaki sayfalarda bazı **yardımlar** bulabilirsiniz:
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-ldap.md
@@ -119,13 +118,13 @@ Size yardımcı olabilecek bazı **yerel MacOS araçları** `dscl` olabilir:
 ```bash
 dscl "/Active Directory/[Domain]/All Domains" ls /
 ```
-Ayrıca, MacOS için AD'yi otomatik olarak listelemek ve kerberos ile oynamak için hazırlanmış bazı araçlar vardır:
+Ayrıca, AD'yi otomatik olarak listelemek ve kerberos ile oynamak için MacOS için hazırlanmış bazı araçlar vardır:
 
-- [**Machound**](https://github.com/XMCyber/MacHound): MacHound, MacOS hostlarında Active Directory ilişkilerini toplamak ve almak için Bloodhound denetim aracına bir ektir.
-- [**Bifrost**](https://github.com/its-a-feature/bifrost): Bifrost, macOS'taki Heimdal krb5 API'leri ile etkileşimde bulunmak için tasarlanmış bir Objective-C projesidir. Projenin amacı, hedefte başka bir çerçeve veya paket gerektirmeden, macOS cihazlarında Kerberos etrafında daha iyi güvenlik testleri yapmaktır.
-- [**Orchard**](https://github.com/its-a-feature/Orchard): Active Directory listeleme yapmak için JavaScript for Automation (JXA) aracı.
+- [**Machound**](https://github.com/XMCyber/MacHound): MacHound, MacOS ana bilgisayarlarında Active Directory ilişkilerini toplamak ve almak için Bloodhound denetim aracına bir uzantıdır.
+- [**Bifrost**](https://github.com/its-a-feature/bifrost): Bifrost, macOS'taki Heimdal krb5 API'leri ile etkileşimde bulunmak için tasarlanmış bir Objective-C projesidir. Projenin amacı, hedefte başka bir çerçeve veya paket gerektirmeden yerel API'ler kullanarak macOS cihazlarında Kerberos etrafında daha iyi güvenlik testleri yapmaktır.
+- [**Orchard**](https://github.com/its-a-feature/Orchard): Active Directory listeleme yapmak için JavaScript for Automation (JXA) aracı. 
 
-### Alan Bilgisi
+### Domain Bilgisi
 ```bash
 echo show com.apple.opendirectoryd.ActiveDirectory | scutil
 ```
@@ -134,11 +133,11 @@ echo show com.apple.opendirectoryd.ActiveDirectory | scutil
 MacOS kullanıcılarının üç türü vardır:
 
 - **Yerel Kullanıcılar** — Yerel OpenDirectory hizmeti tarafından yönetilir, Active Directory ile herhangi bir bağlantıları yoktur.
-- **Ağ Kullanıcıları** — DC sunucusuna bağlanarak kimlik doğrulaması gerektiren geçici Active Directory kullanıcılarıdır.
+- **Ağ Kullanıcıları** — Kimlik doğrulamak için DC sunucusuna bağlantı gerektiren geçici Active Directory kullanıcılarıdır.
 - **Mobil Kullanıcılar** — Kimlik bilgileri ve dosyaları için yerel bir yedekleme olan Active Directory kullanıcılarıdır.
 
-Kullanıcılar ve gruplar hakkında yerel bilgiler _/var/db/dslocal/nodes/Default_ klasöründe saklanır.\
-Örneğin, _mark_ adlı kullanıcının bilgileri _/var/db/dslocal/nodes/Default/users/mark.plist_ dosyasında ve _admin_ grubunun bilgileri _/var/db/dslocal/nodes/Default/groups/admin.plist_ dosyasında saklanmaktadır.
+Kullanıcılar ve gruplar hakkında yerel bilgiler _/var/db/dslocal/nodes/Default._ klasöründe saklanır.\
+Örneğin, _mark_ adlı kullanıcının bilgileri _/var/db/dslocal/nodes/Default/users/mark.plist_ dosyasında ve _admin_ grubunun bilgileri _/var/db/dslocal/nodes/Default/groups/admin.plist_ dosyasında bulunur.
 
 HasSession ve AdminTo kenarlarını kullanmanın yanı sıra, **MacHound, Bloodhound veritabanına üç yeni kenar ekler**:
 
@@ -226,6 +225,5 @@ Safari'de bir dosya indirildiğinde, eğer "güvenli" bir dosya ise, **otomatik 
 - [**https://gist.github.com/its-a-feature/1a34f597fb30985a2742bb16116e74e0**](https://gist.github.com/its-a-feature/1a34f597fb30985a2742bb16116e74e0)
 - [**Come to the Dark Side, We Have Apples: Turning macOS Management Evil**](https://www.youtube.com/watch?v=pOQOh07eMxY)
 - [**OBTS v3.0: "An Attackers Perspective on Jamf Configurations" - Luke Roberts / Calum Hall**](https://www.youtube.com/watch?v=ju1IYWUv4ZA)
-
 
 {{#include ../../banners/hacktricks-training.md}}

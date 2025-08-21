@@ -1,10 +1,10 @@
-# Access Tokens
+# Erişim Jetonları
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Access Tokens
+## Erişim Jetonları
 
-Her **sisteme giriş yapmış kullanıcı**, o oturum için **güvenlik bilgileriyle bir erişim belirteci** taşır. Sistem, kullanıcı giriş yaptığında bir erişim belirteci oluşturur. **Kullanıcı adına yürütülen her işlem**, **erişim belirtecinin bir kopyasına** sahiptir. Belirteç, kullanıcıyı, kullanıcının gruplarını ve kullanıcının ayrıcalıklarını tanımlar. Bir belirteç ayrıca, mevcut oturum açma işlemini tanımlayan bir oturum açma SID'si (Güvenlik Tanımlayıcısı) içerir.
+Her **sisteme giriş yapmış kullanıcı**, o oturum için **güvenlik bilgileriyle bir erişim jetonu taşır**. Sistem, kullanıcı giriş yaptığında bir erişim jetonu oluşturur. **Kullanıcı adına yürütülen her işlem**, **erişim jetonunun bir kopyasına sahiptir**. Jeton, kullanıcıyı, kullanıcının gruplarını ve kullanıcının ayrıcalıklarını tanımlar. Bir jeton ayrıca, mevcut oturum açma işlemini tanımlayan bir oturum açma SID'si (Güvenlik Tanımlayıcısı) içerir.
 
 Bu bilgiyi `whoami /all` komutunu çalıştırarak görebilirsiniz.
 ```
@@ -70,13 +70,13 @@ Ağ hizmetlerine erişmek için **farklı kimlik bilgileri kullanan** bir işlem
 ```
 runas /user:domain\username /netonly cmd.exe
 ```
-Bu, ağdaki nesnelere erişim için geçerli kimlik bilgilerine sahip olduğunuzda faydalıdır, ancak bu kimlik bilgileri mevcut ana bilgisayar içinde geçerli değildir, çünkü yalnızca ağda kullanılacaktır (mevcut ana bilgisayarda mevcut kullanıcı ayrıcalıkları kullanılacaktır).
+Bu, ağdaki nesnelere erişim için geçerli kimlik bilgilerine sahipseniz faydalıdır, ancak bu kimlik bilgileri mevcut ana bilgisayar içinde geçerli değildir, çünkü yalnızca ağda kullanılacaktır (mevcut ana bilgisayarda mevcut kullanıcı ayrıcalıkları kullanılacaktır).
 
 ### Token Türleri
 
 İki tür token mevcuttur:
 
-- **Birincil Token**: Bir sürecin güvenlik kimlik bilgilerini temsil eder. Birincil tokenların oluşturulması ve süreçlerle ilişkilendirilmesi, ayrıcalık ayrımını vurgulayan yükseltilmiş ayrıcalıklar gerektiren eylemlerdir. Genellikle, bir kimlik doğrulama hizmeti token oluşturma ile sorumluyken, bir oturum açma hizmeti bunun kullanıcı işletim sistemi kabuğu ile ilişkilendirilmesini yönetir. Süreçlerin, oluşturulduklarında ebeveyn süreçlerinin birincil tokenını miras aldığını belirtmekte fayda var.
+- **Birincil Token**: Bir sürecin güvenlik kimlik bilgilerini temsil eder. Birincil tokenların oluşturulması ve süreçlerle ilişkilendirilmesi, ayrıcalık ayrımı ilkesini vurgulayan, yükseltilmiş ayrıcalıklar gerektiren eylemlerdir. Genellikle, bir kimlik doğrulama hizmeti token oluşturma işlemlerinden sorumluyken, bir oturum açma hizmeti, tokenın kullanıcının işletim sistemi kabuğuyla ilişkilendirilmesinden sorumludur. Süreçlerin, oluşturulduklarında ebeveyn süreçlerinin birincil tokenını miras aldığını belirtmek gerekir.
 - **Taklit Token**: Bir sunucu uygulamasının, güvenli nesnelere erişim için istemcinin kimliğini geçici olarak benimsemesini sağlar. Bu mekanizma dört işlem seviyesine ayrılmıştır:
 - **Anonim**: Sunucuya, tanımlanamayan bir kullanıcınınki gibi erişim izni verir.
 - **Kimlik Doğrulama**: Sunucunun, nesne erişimi için kullanmadan istemcinin kimliğini doğrulamasına olanak tanır.
@@ -91,11 +91,12 @@ Metasploit'in _**incognito**_ modülünü kullanarak yeterli ayrıcalıklara sah
 
 Hangi **token ayrıcalıklarının ayrıcalıkları yükseltmek için kötüye kullanılabileceğini öğrenin:**
 
+
 {{#ref}}
 privilege-escalation-abusing-tokens.md
 {{#endref}}
 
-[**Tüm olası token ayrıcalıklarına ve bazı tanımlara bu dış sayfada göz atın**](https://github.com/gtworek/Priv2Admin).
+[**tüm olası token ayrıcalıklarına ve bu dış sayfadaki bazı tanımlara**](https://github.com/gtworek/Priv2Admin) göz atın.
 
 ## Referanslar
 

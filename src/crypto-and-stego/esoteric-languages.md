@@ -1,10 +1,10 @@
-# Esoterik diller
+# Esoteric languages
 
 {{#include ../banners/hacktricks-training.md}}
 
 ## [Esolangs Wiki](https://esolangs.org/wiki/Main_Page)
 
-Daha fazla esoterik dil aramak için o wikiye göz atın.
+Daha fazla esoterik dil aramak için o wiki'yi kontrol edin.
 
 ## Malbolge
 ```

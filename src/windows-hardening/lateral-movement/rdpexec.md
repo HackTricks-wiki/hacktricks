@@ -4,7 +4,7 @@
 
 ## Nasıl Çalışır
 
-**RDPexec**, RDP kullanarak sisteme giriş yaparak komutları çalıştırmak için temelde bir yöntemdir.
+**RDPexec**, temelde RDP kullanarak sisteme giriş yaparak komutları çalıştırmaktır.
 
 Daha fazla bilgi için kontrol edin:
 

