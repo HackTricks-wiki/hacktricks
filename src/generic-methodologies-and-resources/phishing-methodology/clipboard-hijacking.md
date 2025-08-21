@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-> "Non incollare mai nulla che non hai copiato tu stesso." – un consiglio vecchio ma ancora valido
+> "Non incollare mai nulla che non hai copiato tu stesso." – consiglio vecchio ma ancora valido
 
 ## Panoramica
 
@@ -26,10 +26,10 @@ Le campagne più vecchie utilizzavano `document.execCommand('copy')`, quelle pi�
 
 ## Il Flusso ClickFix / ClearFake
 
-1. L'utente visita un sito con typo o compromesso (ad es. `docusign.sa[.]com`)
+1. L'utente visita un sito con errori di battitura o compromesso (ad es. `docusign.sa[.]com`)
 2. Il JavaScript **ClearFake** iniettato chiama un helper `unsecuredCopyToClipboard()` che memorizza silenziosamente una riga di comando PowerShell codificata in Base64 negli appunti.
 3. Le istruzioni HTML dicono alla vittima di: *“Premere **Win + R**, incollare il comando e premere Invio per risolvere il problema.”*
-4. `powershell.exe` viene eseguito, scaricando un archivio che contiene un eseguibile legittimo più un DLL malevolo (classico sideloading di DLL).
+4. `powershell.exe` viene eseguito, scaricando un archivio che contiene un eseguibile legittimo più un DLL malevolo (classico DLL sideloading).
 5. Il loader decripta fasi aggiuntive, inietta shellcode e installa persistenza (ad es. attività pianificata) – eseguendo infine NetSupport RAT / Latrodectus / Lumma Stealer.
 
 ### Esempio di Catena NetSupport RAT
@@ -76,6 +76,7 @@ I blue team possono combinare il monitoraggio degli appunti, la creazione di pro
 ## Trucchi Correlati
 
 * **Discord Invite Hijacking** spesso abusa dello stesso approccio ClickFix dopo aver attirato gli utenti in un server malevolo:
+
 {{#ref}}
 discord-invite-hijacking.md
 {{#endref}}

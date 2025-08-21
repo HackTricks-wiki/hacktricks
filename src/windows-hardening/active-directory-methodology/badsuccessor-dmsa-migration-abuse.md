@@ -4,9 +4,9 @@
 
 ## Panoramica
 
-Gli Account di Servizio Gestiti Delegati (**dMSA**) sono il successore di nuova generazione degli **gMSA** che verranno inclusi in Windows Server 2025. Un flusso di lavoro di migrazione legittimo consente agli amministratori di sostituire un account *vecchio* (utente, computer o account di servizio) con un dMSA preservando in modo trasparente i permessi. Il flusso di lavoro è esposto tramite cmdlet PowerShell come `Start-ADServiceAccountMigration` e `Complete-ADServiceAccountMigration` e si basa su due attributi LDAP dell'**oggetto dMSA**:
+I Delegated Managed Service Accounts (**dMSA**) sono il successore di nuova generazione dei **gMSA** che verranno inclusi in Windows Server 2025. Un flusso di lavoro di migrazione legittimo consente agli amministratori di sostituire un account *vecchio* (utente, computer o account di servizio) con un dMSA mantenendo in modo trasparente i permessi. Il flusso di lavoro è esposto tramite cmdlet PowerShell come `Start-ADServiceAccountMigration` e `Complete-ADServiceAccountMigration` e si basa su due attributi LDAP dell'**oggetto dMSA**:
 
-* **`msDS-ManagedAccountPrecededByLink`** – *DN link* all'account superato (vecchio).
+* **`msDS-ManagedAccountPrecededByLink`** – *DN link* all'account superseded (vecchio).
 * **`msDS-DelegatedMSAState`**       – stato di migrazione (`0` = nessuno, `1` = in corso, `2` = *completato*).
 
 Se un attaccante può creare **qualsiasi** dMSA all'interno di un OU e manipolare direttamente quei 2 attributi, LSASS e il KDC tratteranno il dMSA come un *successore* dell'account collegato. Quando l'attaccante si autentica successivamente come dMSA **eredita tutti i privilegi dell'account collegato** – fino a **Domain Admin** se l'account Administrator è collegato.
@@ -47,11 +47,11 @@ Set-ADServiceAccount attacker_dMSA -Add \
 # 3. Mark the migration as *completed*
 Set-ADServiceAccount attacker_dMSA -Replace @{msDS-DelegatedMSAState=2}
 ```
-Dopo la replicazione, l'attaccante può semplicemente **logon** come `attacker_dMSA$` o richiedere un TGT Kerberos – Windows costruirà il token dell'account *superseded*.
+Dopo la replicazione, l'attaccante può semplicemente **logon** come `attacker_dMSA$` o richiedere un Kerberos TGT – Windows costruirà il token dell'account *superseded*.
 
 ### Automazione
 
-Diverse PoC pubbliche racchiudono l'intero flusso di lavoro, inclusi il recupero della password e la gestione dei ticket:
+Diverse PoC pubbliche avvolgono l'intero flusso di lavoro, inclusi il recupero della password e la gestione dei ticket:
 
 * SharpSuccessor (C#) – [https://github.com/logangoins/SharpSuccessor](https://github.com/logangoins/SharpSuccessor)
 * BadSuccessor.ps1 (PowerShell) – [https://github.com/LuemmelSec/Pentest-Tools-Collection/blob/main/tools/ActiveDirectory/BadSuccessor.ps1](https://github.com/LuemmelSec/Pentest-Tools-Collection/blob/main/tools/ActiveDirectory/BadSuccessor.ps1)
@@ -81,7 +81,7 @@ Correlare `4662` (modifica dell'attributo), `4741` (creazione di un account comp
 
 ## Mitigazione
 
-* Applica il principio del **minimo privilegio** – delega la gestione degli *Account di Servizio* solo a ruoli fidati.
+* Applica il principio del **minimo privilegio** – delega solo la gestione degli *Account di Servizio* a ruoli fidati.
 * Rimuovi `Create Child` / `msDS-DelegatedManagedServiceAccount` da OUs che non lo richiedono esplicitamente.
 * Monitora gli ID evento elencati sopra e invia avvisi su identità *non-Tier-0* che creano o modificano dMSA.
 

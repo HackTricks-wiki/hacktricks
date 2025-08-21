@@ -4,7 +4,7 @@
 
 ## TCC Privilege Escalation
 
-Se sei venuto qui cercando l'escalation dei privilegi TCC vai a:
+Se sei arrivato qui cercando l'escalation dei privilegi TCC vai a:
 
 {{#ref}}
 macos-security-protections/macos-tcc/
@@ -22,7 +22,7 @@ Si prega di notare che **la maggior parte dei trucchi sull'escalation dei privil
 
 ### Sudo Hijacking
 
-Puoi trovare la [tecnica originale di Sudo Hijacking all'interno del post sull'escalation dei privilegi di Linux](../../linux-hardening/privilege-escalation/index.html#sudo-hijacking).
+Puoi trovare la tecnica originale [Sudo Hijacking all'interno del post sull'escalation dei privilegi di Linux](../../linux-hardening/privilege-escalation/index.html#sudo-hijacking).
 
 Tuttavia, macOS **mantiene** il **`PATH`** dell'utente quando esegue **`sudo`**. Il che significa che un altro modo per realizzare questo attacco sarebbe **di dirottare altri binari** che la vittima eseguirà quando **esegue sudo:**
 ```bash
@@ -46,10 +46,10 @@ Nota che un utente che utilizza il terminale avrà molto probabilmente **Homebre
 Utilizzando un po' di **ingegneria sociale** potresti **impersonare ad esempio Google Chrome** all'interno del dock ed eseguire effettivamente il tuo script:
 
 {{#tabs}}
-{{#tab name="Chrome Impersonation"}}
+{{#tab name="Impersonificazione di Chrome"}}
 Alcuni suggerimenti:
 
-- Controlla nel Dock se c'è un Chrome, e in tal caso **rimuovi** quella voce e **aggiungi** la **voce falsa** **Chrome nella stessa posizione** nell'array del Dock.
+- Controlla nel Dock se c'è un Chrome e, in tal caso, **rimuovi** quella voce e **aggiungi** la **voce falsa** **Chrome nella stessa posizione** nell'array del Dock.
 ```bash
 #!/bin/sh
 
@@ -231,6 +231,7 @@ Una spiegazione più dettagliata può essere [**trovata nel rapporto originale**
 ## Informazioni Sensibili
 
 Questo può essere utile per elevare i privilegi:
+
 
 {{#ref}}
 macos-files-folders-and-binaries/macos-sensitive-locations.md

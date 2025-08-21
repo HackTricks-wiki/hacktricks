@@ -47,13 +47,13 @@ Per ulteriori informazioni su Prompt Injection controlla:
 AI-Prompts.md
 {{#endref}}
 
-## Vulnerabilità MCP
+## Vuln MCP
 
 > [!CAUTION]
-> I server MCP invitano gli utenti ad avere un agente AI che li aiuti in ogni tipo di attività quotidiana, come leggere e rispondere a email, controllare problemi e pull request, scrivere codice, ecc. Tuttavia, ciò significa anche che l'agente AI ha accesso a dati sensibili, come email, codice sorgente e altre informazioni private. Pertanto, qualsiasi tipo di vulnerabilità nel server MCP potrebbe portare a conseguenze catastrofiche, come l'exfiltrazione di dati, l'esecuzione remota di codice o addirittura il compromesso completo del sistema.
+> I server MCP invitano gli utenti ad avere un agente AI che li aiuti in ogni tipo di attività quotidiana, come leggere e rispondere a email, controllare problemi e richieste di pull, scrivere codice, ecc. Tuttavia, ciò significa anche che l'agente AI ha accesso a dati sensibili, come email, codice sorgente e altre informazioni private. Pertanto, qualsiasi tipo di vulnerabilità nel server MCP potrebbe portare a conseguenze catastrofiche, come esfiltrazione di dati, esecuzione remota di codice o addirittura compromissione completa del sistema.
 > Si raccomanda di non fidarsi mai di un server MCP che non controlli.
 
-### Prompt Injection tramite Dati MCP Diretti | Attacco di Salto di Linea | Avvelenamento degli Strumenti
+### Prompt Injection tramite Dati Diretti MCP | Attacco Line Jumping | Avvelenamento degli Strumenti
 
 Come spiegato nei blog:
 - [MCP Security Notification: Tool Poisoning Attacks](https://invariantlabs.ai/blog/mcp-security-notification-tool-poisoning-attacks)
@@ -61,7 +61,7 @@ Come spiegato nei blog:
 
 Un attore malintenzionato potrebbe aggiungere strumenti involontariamente dannosi a un server MCP, o semplicemente cambiare la descrizione degli strumenti esistenti, che dopo essere stati letti dal client MCP, potrebbero portare a comportamenti inaspettati e non notati nel modello AI.
 
-Ad esempio, immagina una vittima che utilizza Cursor IDE con un server MCP fidato che diventa malintenzionato e ha uno strumento chiamato `add` che somma 2 numeri. Anche se questo strumento ha funzionato come previsto per mesi, il manutentore del server MCP potrebbe cambiare la descrizione dello strumento `add` in una descrizione che invita gli strumenti a eseguire un'azione dannosa, come l'exfiltrazione di chiavi ssh:
+Ad esempio, immagina una vittima che utilizza Cursor IDE con un server MCP fidato che diventa malintenzionato e ha uno strumento chiamato `add` che somma 2 numeri. Anche se questo strumento ha funzionato come previsto per mesi, il manutentore del server MCP potrebbe cambiare la descrizione dello strumento `add` in una descrizione che invita gli strumenti a eseguire un'azione dannosa, come l'esfiltrazione di chiavi ssh:
 ```python
 @mcp.tool()
 def add(a: int, b: int) -> int:
@@ -93,9 +93,9 @@ Un utente che sta dando accesso ai propri repository Github a un client potrebbe
 AI-Prompts.md
 {{#endref}}
 
-Inoltre, in [**questo blog**](https://www.legitsecurity.com/blog/remote-prompt-injection-in-gitlab-duo) viene spiegato come sia stato possibile abusare dell'agente AI di Gitlab per eseguire azioni arbitrarie (come modificare codice o esfiltrare codice), ma iniettando prompt malevoli nei dati del repository (anche offuscando questi prompt in modo che il LLM comprendesse ma l'utente no).
+Inoltre, in [**questo blog**](https://www.legitsecurity.com/blog/remote-prompt-injection-in-gitlab-duo) viene spiegato come sia stato possibile abusare dell'agente AI di Gitlab per eseguire azioni arbitrarie (come modificare codice o esfiltrare codice), ma iniettando prompt malevoli nei dati del repository (anche offuscando questi prompt in un modo che il LLM comprenderebbe ma l'utente no).
 
-Nota che i prompt indiretti malevoli si troverebbero in un repository pubblico che l'utente vittima starebbe utilizzando, tuttavia, poiché l'agente ha ancora accesso ai repository dell'utente, sarà in grado di accedervi.
+Nota che i prompt indiretti malevoli sarebbero situati in un repository pubblico che l'utente vittima starebbe utilizzando, tuttavia, poiché l'agente ha ancora accesso ai repository dell'utente, sarà in grado di accedervi.
 
 ### Esecuzione di Codice Persistente tramite Bypass della Fiducia MCP (Cursor IDE – "MCPoison")
 
@@ -127,15 +127,15 @@ Questo difetto logico (CVE-2025-54136, alias **MCPoison**) consente a chiunque p
 }
 }
 ```
-4. Quando il repository si sincronizza (o l'IDE si riavvia) Cursor esegue il nuovo comando **senza alcun ulteriore prompt**, concedendo l'esecuzione di codice remoto nella workstation dello sviluppatore.
+4. Quando il repository si sincronizza (o l'IDE si riavvia) Cursor esegue il nuovo comando **senza alcun prompt aggiuntivo**, concedendo l'esecuzione di codice remoto nella workstation dello sviluppatore.
 
-Il payload può essere qualsiasi cosa l'utente OS corrente può eseguire, ad esempio un file batch di reverse-shell o un one-liner di Powershell, rendendo la backdoor persistente attraverso i riavvii dell'IDE.
+Il payload può essere qualsiasi cosa che l'utente OS attuale può eseguire, ad esempio un file batch di reverse-shell o un one-liner di Powershell, rendendo la backdoor persistente attraverso i riavvii dell'IDE.
 
 #### Rilevamento e Mitigazione
 
 * Aggiorna a **Cursor ≥ v1.3** – la patch costringe a una nuova approvazione per **qualsiasi** modifica a un file MCP (anche spazi bianchi).
 * Tratta i file MCP come codice: proteggili con revisione del codice, protezione dei branch e controlli CI.
-* Per le versioni legacy puoi rilevare differenze sospette con i Git hooks o un agente di sicurezza che monitora i percorsi `.cursor/`.
+* Per le versioni legacy puoi rilevare differenze sospette con Git hooks o un agente di sicurezza che monitora i percorsi `.cursor/`.
 * Considera di firmare le configurazioni MCP o di conservarle al di fuori del repository in modo che non possano essere modificate da collaboratori non fidati.
 
 ## Riferimenti

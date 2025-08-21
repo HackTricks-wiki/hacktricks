@@ -4,14 +4,14 @@
 
 ## AppLocker Policy
 
-Un elenco di autorizzazione delle applicazioni è un elenco di applicazioni software o eseguibili approvati che possono essere presenti ed eseguiti su un sistema. L'obiettivo è proteggere l'ambiente da malware dannoso e software non approvato che non si allinea con le specifiche esigenze aziendali di un'organizzazione.
+Un elenco di autorizzazione delle applicazioni è un elenco di applicazioni software o eseguibili approvati che possono essere presenti ed eseguiti su un sistema. L'obiettivo è proteggere l'ambiente da malware dannosi e software non approvato che non si allinea con le specifiche esigenze aziendali di un'organizzazione.
 
 [AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) è la **soluzione di autorizzazione delle applicazioni** di Microsoft e offre agli amministratori di sistema il controllo su **quali applicazioni e file gli utenti possono eseguire**. Fornisce **controllo granulare** su eseguibili, script, file di installazione di Windows, DLL, app confezionate e installatori di app confezionate.\
 È comune per le organizzazioni **bloccare cmd.exe e PowerShell.exe** e l'accesso in scrittura a determinate directory, **ma tutto questo può essere aggirato**.
 
 ### Check
 
-Controlla quali file/estensioni sono nella lista nera/nella lista bianca:
+Controlla quali file/estensioni sono nella lista nera/bianca:
 ```bash
 Get-ApplockerPolicy -Effective -xml
 
@@ -33,14 +33,14 @@ C:\Windows\System32\spool\drivers\color
 C:\Windows\Tasks
 C:\windows\tracing
 ```
-- I comuni **binaries** **"LOLBAS's"** possono essere utili per bypassare AppLocker.
-- **Regole scritte male possono anche essere bypassate**
+- I comuni **binaries** [**"LOLBAS's"**](https://lolbas-project.github.io/) di **fiducia** possono essere utili per bypassare AppLocker.
+- **Regole scritte male potrebbero anche essere bypassate**
 - Ad esempio, **`<FilePathCondition Path="%OSDRIVE%*\allowed*"/>`**, puoi creare una **cartella chiamata `allowed`** ovunque e sarà consentita.
-- Le organizzazioni spesso si concentrano sul **blocco dell'eseguibile `%System32%\WindowsPowerShell\v1.0\powershell.exe`**, ma dimenticano le **altre** **posizioni degli eseguibili di PowerShell** come `%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe` o `PowerShell_ISE.exe`.
-- **L'applicazione delle DLL è molto raramente abilitata** a causa del carico aggiuntivo che può mettere su un sistema e della quantità di test necessari per garantire che nulla si rompa. Quindi utilizzare **DLL come backdoor aiuterà a bypassare AppLocker**.
-- Puoi usare **ReflectivePick** o **SharpPick** per **eseguire codice Powershell** in qualsiasi processo e bypassare AppLocker. Per ulteriori informazioni controlla: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode).
+- Le organizzazioni spesso si concentrano sul **blocco dell'eseguibile `%System32%\WindowsPowerShell\v1.0\powershell.exe`**, ma dimenticano le **altre** [**posizioni eseguibili di PowerShell**](https://www.powershelladmin.com/wiki/PowerShell_Executables_File_System_Locations) come `%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe` o `PowerShell_ISE.exe`.
+- **L'applicazione delle DLL è molto raramente abilitata** a causa del carico aggiuntivo che può comportare su un sistema e della quantità di test necessari per garantire che nulla si rompa. Quindi utilizzare **DLL come backdoor aiuterà a bypassare AppLocker**.
+- Puoi usare [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) o [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) per **eseguire codice Powershell** in qualsiasi processo e bypassare AppLocker. Per ulteriori informazioni controlla: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode).
 
-## Archiviazione delle Credenziali
+## Archiviazione delle credenziali
 
 ### Security Accounts Manager (SAM)
 
@@ -107,7 +107,7 @@ EFS protegge i file attraverso la crittografia, utilizzando una **chiave simmetr
 
 **Scenari di decrittazione senza iniziativa dell'utente** includono:
 
-- Quando file o cartelle vengono spostati in un file system non EFS, come [FAT32](https://en.wikipedia.org/wiki/File_Allocation_Table), vengono automaticamente decrittografati.
+- Quando file o cartelle vengono spostati su un file system non EFS, come [FAT32](https://en.wikipedia.org/wiki/File_Allocation_Table), vengono automaticamente decrittografati.
 - I file crittografati inviati attraverso la rete tramite il protocollo SMB/CIFS vengono decrittografati prima della trasmissione.
 
 Questo metodo di crittografia consente un **accesso trasparente** ai file crittografati per il proprietario. Tuttavia, cambiare semplicemente la password del proprietario e accedere non permetterà la decrittazione.
@@ -116,7 +116,7 @@ Questo metodo di crittografia consente un **accesso trasparente** ai file critto
 
 - EFS utilizza una FEK simmetrica, crittografata con la chiave pubblica dell'utente.
 - La decrittazione impiega la chiave privata dell'utente per accedere alla FEK.
-- La decrittazione automatica avviene in condizioni specifiche, come la copia su FAT32 o la trasmissione in rete.
+- La decrittazione automatica avviene in determinate condizioni, come la copia su FAT32 o la trasmissione in rete.
 - I file crittografati sono accessibili al proprietario senza passaggi aggiuntivi.
 
 ### Controlla le informazioni EFS
@@ -195,9 +195,9 @@ C:\Windows\Microsoft.NET\Framework64\v4.0.30319\InstallUtil.exe /logfile= /LogTo
 ```
 Puoi usare [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) o [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) per **eseguire codice Powershell** in qualsiasi processo e bypassare la modalità vincolata. Per ulteriori informazioni controlla: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode).
 
-## PS Execution Policy
+## Politica di Esecuzione PS
 
-Per impostazione predefinita è impostato su **restricted.** I principali modi per bypassare questa politica:
+Per impostazione predefinita è impostata su **restricted.** I principali modi per bypassare questa politica:
 ```bash
 1º Just copy and paste inside the interactive PS console
 2º Read en Exec
@@ -243,6 +243,7 @@ L'SSPI sarà responsabile della ricerca del protocollo adeguato per due macchine
 ## UAC - User Account Control
 
 [User Account Control (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) è una funzionalità che abilita un **messaggio di consenso per attività elevate**.
+
 
 {{#ref}}
 uac-user-account-control.md

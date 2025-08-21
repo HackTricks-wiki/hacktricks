@@ -2,18 +2,17 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-
 ## Basics of Resource-based Constrained Delegation
 
 Questo è simile alla base [Constrained Delegation](constrained-delegation.md) ma **invece** di dare permessi a un **oggetto** per **impersonare qualsiasi utente contro una macchina**. La Resource-based Constrained Delegation **imposta** nell'**oggetto chi può impersonare qualsiasi utente contro di esso**.
 
 In questo caso, l'oggetto vincolato avrà un attributo chiamato _**msDS-AllowedToActOnBehalfOfOtherIdentity**_ con il nome dell'utente che può impersonare qualsiasi altro utente contro di esso.
 
-Un'altra importante differenza tra questa Constrained Delegation e le altre deleghe è che qualsiasi utente con **permessi di scrittura su un account macchina** (_GenericAll/GenericWrite/WriteDacl/WriteProperty/etc_) può impostare il **_msDS-AllowedToActOnBehalfOfOtherIdentity_** (nelle altre forme di Delegation erano necessari privilegi di amministratore di dominio).
+Un'altra importante differenza tra questa Constrained Delegation e le altre deleghe è che qualsiasi utente con **permessi di scrittura su un account macchina** (_GenericAll/GenericWrite/WriteDacl/WriteProperty/etc_) può impostare il **_msDS-AllowedToActOnBehalfOfOtherIdentity_** (Negli altri tipi di Delegation era necessario avere privilegi di amministratore di dominio).
 
 ### New Concepts
 
-Tornando alla Constrained Delegation, si è detto che il **`TrustedToAuthForDelegation`** flag all'interno del valore _userAccountControl_ dell'utente è necessario per eseguire un **S4U2Self.** Ma non è completamente vero.\
+Nella Constrained Delegation è stato detto che il **`TrustedToAuthForDelegation`** flag all'interno del valore _userAccountControl_ dell'utente è necessario per eseguire un **S4U2Self.** Ma non è completamente vero.\
 La realtà è che anche senza quel valore, puoi eseguire un **S4U2Self** contro qualsiasi utente se sei un **servizio** (hai un SPN) ma, se hai **`TrustedToAuthForDelegation`** il TGS restituito sarà **Forwardable** e se **non hai** quel flag il TGS restituito **non sarà** **Forwardable**.
 
 Tuttavia, se il **TGS** utilizzato in **S4U2Proxy** **NON è Forwardable**, cercare di abusare di una **basic Constrain Delegation** **non funzionerà**. Ma se stai cercando di sfruttare una **Resource-Based constrain delegation, funzionerà**.
@@ -171,18 +170,20 @@ impacket-rbcd -delegate-to 'VICTIM$' -action flush 'domain.local/jdoe:Summer2025
 - **`KDC_ERR_BADOPTION`**: Questo può significare:
 - L'utente che stai cercando di impersonare non può accedere al servizio desiderato (perché non puoi impersonarlo o perché non ha privilegi sufficienti)
 - Il servizio richiesto non esiste (se chiedi un ticket per winrm ma winrm non è in esecuzione)
-- Il computer fittizio creato ha perso i suoi privilegi sul server vulnerabile e devi ripristinarli.
-- Stai abusando del KCD classico; ricorda che RBCD funziona con ticket S4U2Self non trasferibili, mentre KCD richiede ticket trasferibili.
+- Il fakecomputer creato ha perso i suoi privilegi sul server vulnerabile e devi restituirli.
+- Stai abusando del KCD classico; ricorda che RBCD funziona con ticket S4U2Self non inoltrabili, mentre KCD richiede ticket inoltrabili.
 
 ## Note, relay e alternative
 
 - Puoi anche scrivere il RBCD SD su AD Web Services (ADWS) se LDAP è filtrato. Vedi:
+
 
 {{#ref}}
 adws-enumeration.md
 {{#endref}}
 
 - Le catene di relay di Kerberos finiscono frequentemente in RBCD per ottenere SYSTEM locale in un solo passaggio. Vedi esempi pratici end-to-end:
+
 
 {{#ref}}
 ../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md
@@ -197,5 +198,6 @@ adws-enumeration.md
 - [https://posts.specterops.io/kerberosity-killed-the-domain-an-offensive-kerberos-overview-eb04b1402c61](https://posts.specterops.io/kerberosity-killed-the-domain-an-offensive-kerberos-overview-eb04b1402c61)
 - Impacket rbcd.py (ufficiale): https://github.com/fortra/impacket/blob/master/examples/rbcd.py
 - Quick Linux cheatsheet with recent syntax: https://tldrbins.github.io/rbcd/
+
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -4,21 +4,21 @@
 
 ## Combinazioni di permessi POSIX
 
-I permessi in una **directory**:
+Permessi in una **directory**:
 
 - **read** - puoi **enumerare** le voci della directory
 - **write** - puoi **eliminare/scrivere** **file** nella directory e puoi **eliminare cartelle vuote**.
-- Ma non puoi **eliminare/modificare cartelle non vuote** a meno che tu non abbia permessi di scrittura su di essa.
+- Ma non puoi **eliminare/modificare cartelle non vuote** a meno che tu non abbia permessi di scrittura su di esse.
 - Non puoi **modificare il nome di una cartella** a meno che tu non sia il proprietario.
 - **execute** - ti è **consentito di attraversare** la directory - se non hai questo diritto, non puoi accedere a nessun file al suo interno, né in alcuna sottodirectory.
 
-### Combinazioni pericolose
+### Combinazioni Pericolose
 
 **Come sovrascrivere un file/cartella di proprietà di root**, ma:
 
-- Un **proprietario** della **directory** nel percorso è l'utente
-- Un **proprietario** della **directory** nel percorso è un **gruppo di utenti** con **accesso in scrittura**
-- Un **gruppo** di utenti ha **accesso in scrittura** al **file**
+- Un **proprietario della directory** genitore nel percorso è l'utente
+- Un **proprietario della directory** genitore nel percorso è un **gruppo di utenti** con **accesso in scrittura**
+- Un **gruppo di utenti** ha accesso in **scrittura** al **file**
 
 Con una delle combinazioni precedenti, un attaccante potrebbe **iniettare** un **link simbolico/duro** nel percorso previsto per ottenere una scrittura arbitraria privilegiata.
 
@@ -28,11 +28,11 @@ Se ci sono file in una **directory** dove **solo root ha accesso R+X**, questi *
 
 Esempio in: [https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions](https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions)
 
-## Link simbolico / Link duro
+## Link Simbolico / Link Duro
 
 ### File/cartella permissivi
 
-Se un processo privilegiato sta scrivendo dati in un **file** che potrebbe essere **controllato** da un **utente con privilegi inferiori**, o che potrebbe essere **stato precedentemente creato** da un utente con privilegi inferiori. L'utente potrebbe semplicemente **puntarlo a un altro file** tramite un link simbolico o duro, e il processo privilegiato scriverà su quel file.
+Se un processo privilegiato sta scrivendo dati in un **file** che potrebbe essere **controllato** da un **utente con privilegi inferiori**, o che potrebbe essere **stato creato precedentemente** da un utente con privilegi inferiori. L'utente potrebbe semplicemente **puntarlo a un altro file** tramite un link simbolico o duro, e il processo privilegiato scriverà su quel file.
 
 Controlla nelle altre sezioni dove un attaccante potrebbe **sfruttare una scrittura arbitraria per elevare i privilegi**.
 
@@ -62,7 +62,7 @@ Esempio:
 
 Se una chiamata a `open` non ha il flag `O_CLOEXEC`, il file descriptor sarà ereditato dal processo figlio. Quindi, se un processo privilegiato apre un file privilegiato ed esegue un processo controllato dall'attaccante, l'attaccante **erediterà il FD sul file privilegiato**.
 
-Se riesci a far **aprire a un processo un file o una cartella con privilegi elevati**, puoi abusare di **`crontab`** per aprire un file in `/etc/sudoers.d` con **`EDITOR=exploit.py`**, in modo che `exploit.py` ottenga il FD al file all'interno di `/etc/sudoers` e lo abusi.
+Se puoi far sì che un **processo apra un file o una cartella con privilegi elevati**, puoi abusare di **`crontab`** per aprire un file in `/etc/sudoers.d` con **`EDITOR=exploit.py`**, in modo che `exploit.py` ottenga il FD al file all'interno di `/etc/sudoers` e lo abusi.
 
 Ad esempio: [https://youtu.be/f1HA5QhLQ7Y?t=21098](https://youtu.be/f1HA5QhLQ7Y?t=21098), codice: https://github.com/gergelykalman/CVE-2023-32428-a-macOS-LPE-via-MallocStackLogging
 
@@ -122,7 +122,7 @@ ls -le /tmp/test
 
 Il formato di file **AppleDouble** copia un file inclusi i suoi ACE.
 
-Nel [**codice sorgente**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html) è possibile vedere che la rappresentazione testuale dell'ACL memorizzata all'interno dell'xattr chiamato **`com.apple.acl.text`** verrà impostata come ACL nel file decompresso. Quindi, se hai compresso un'applicazione in un file zip con formato di file **AppleDouble** con un ACL che impedisce ad altri xattrs di essere scritti... l'xattr di quarantena non è stato impostato nell'applicazione:
+Nel [**codice sorgente**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html) è possibile vedere che la rappresentazione testuale dell'ACL memorizzata all'interno dell'xattr chiamato **`com.apple.acl.text`** verrà impostata come ACL nel file decompresso. Quindi, se hai compresso un'applicazione in un file zip con formato di file **AppleDouble** con un ACL che impedisce ad altri xattr di essere scritti... l'xattr di quarantena non è stato impostato nell'applicazione:
 
 Controlla il [**rapporto originale**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/) per ulteriori informazioni.
 
@@ -146,7 +146,8 @@ ls -le test
 ```
 (Note che anche se questo funziona, la sandbox scrive l'attributo xattr di quarantena prima)
 
-Non è davvero necessario, ma lo lascio lì giusto in caso:
+Non è davvero necessario, ma lo lascio lì giusto per caso:
+
 
 {{#ref}}
 macos-xattr-acls-extra-stuff.md
@@ -259,7 +260,7 @@ Se il tuo script può essere interpretato come uno **script shell**, puoi sovras
 
 Puoi **fingere** un'esecuzione di questo script con: **`sudo periodic daily`**
 
-### Daemons
+### Demoni
 
 Scrivi un **LaunchDaemon** arbitrario come **`/Library/LaunchDaemons/xyz.hacktricks.privesc.plist`** con un plist che esegue uno script arbitrario come:
 ```xml
@@ -278,7 +279,7 @@ Scrivi un **LaunchDaemon** arbitrario come **`/Library/LaunchDaemons/xyz.hacktri
 </dict>
 </plist>
 ```
-Genera semplicemente lo script `/Applications/Scripts/privesc.sh` con i **comandi** che desideri eseguire come root.
+Just generate the script `/Applications/Scripts/privesc.sh` con i **comandi** che desideri eseguire come root.
 
 ### Sudoers File
 
@@ -292,7 +293,7 @@ Puoi anche scrivere file in **`/etc/paths.d`** per caricare nuove cartelle nella
 
 ### cups-files.conf
 
-Questa tecnica è stata utilizzata in [questo writeup](https://www.kandji.io/blog/macos-audit-story-part1).
+Questa tecnica è stata utilizzata in [this writeup](https://www.kandji.io/blog/macos-audit-story-part1).
 
 Crea il file `/etc/cups/cups-files.conf` con il seguente contenuto:
 ```
@@ -420,17 +421,17 @@ return 0;
 ```
 </details>
 
-## macOS Descrittori Protetti
+## macOS Guarded Descriptors
 
-**macOS descrittori protetti** sono una funzionalità di sicurezza introdotta in macOS per migliorare la sicurezza e l'affidabilità delle **operazioni sui descrittori di file** nelle applicazioni utente. Questi descrittori protetti forniscono un modo per associare restrizioni specifiche o "guardie" ai descrittori di file, che sono applicate dal kernel.
+**macOS guarded descriptors** sono una funzionalità di sicurezza introdotta in macOS per migliorare la sicurezza e l'affidabilità delle **operazioni sui descrittori di file** nelle applicazioni utente. Questi descrittori protetti forniscono un modo per associare restrizioni specifiche o "guardie" ai descrittori di file, che sono applicate dal kernel.
 
 Questa funzionalità è particolarmente utile per prevenire determinate classi di vulnerabilità di sicurezza come **accesso non autorizzato ai file** o **condizioni di gara**. Queste vulnerabilità si verificano quando, ad esempio, un thread accede a una descrizione di file dando **accesso a un altro thread vulnerabile** o quando un descrittore di file è **ereditato** da un processo figlio vulnerabile. Alcune funzioni relative a questa funzionalità sono:
 
 - `guarded_open_np`: Apre un FD con una guardia
-- `guarded_close_np`: Chiude
+- `guarded_close_np`: Chiudilo
 - `change_fdguard_np`: Cambia i flag di guardia su un descrittore (anche rimuovendo la protezione della guardia)
 
-## Riferimenti
+## References
 
 - [https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/](https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/)
 

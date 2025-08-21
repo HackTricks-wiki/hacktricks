@@ -10,8 +10,8 @@ Immagina un server che **firma** alcuni **dati** **aggiungendo** un **segreto** 
 - **I dati di testo chiaro**
 - **L'algoritmo (e è vulnerabile a questo attacco)**
 - **Il padding è noto**
-- Di solito viene utilizzato un padding predefinito, quindi se gli altri 3 requisiti sono soddisfatti, anche questo lo è
-- Il padding varia a seconda della lunghezza del segreto + dati, ecco perché è necessaria la lunghezza del segreto
+- Di solito viene utilizzato un predefinito, quindi se gli altri 3 requisiti sono soddisfatti, anche questo lo è
+- Il padding varia a seconda della lunghezza del segreto+dati, ecco perché è necessaria la lunghezza del segreto
 
 Allora, è possibile per un **attaccante** **aggiungere** **dati** e **generare** una **firma** valida per i **dati precedenti + dati aggiunti**.
 

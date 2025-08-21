@@ -2,6 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
+
 {{#ref}}
 README.md
 {{#endref}}
@@ -18,7 +19,7 @@ Una volta flashato, apri il monitor seriale a 115200 baud e invia `h` per aiuto.
 - `l` trova loopback per evitare falsi positivi
 - `r` attiva/disattiva pull-up interni se necessario
 - `s` scansiona per TCK/TMS/TDI/TDO (e talvolta TRST/SRST)
-- `y` forza IR per scoprire opcode non documentati
+- `y` forzatura IR per scoprire opcode non documentati
 - `x` snapshot di boundary-scan degli stati dei pin
 
 ![](<../../images/image (939).png>)
@@ -50,7 +51,7 @@ OpenOCD è l'OSS de facto per JTAG/SWD. Con un adattatore supportato puoi scansi
 openocd -f interface/jlink.cfg -c "transport select jtag; adapter speed 1000" \
 -c "init; scan_chain; shutdown"
 ```
-- ESP32‑S3 USB‑JTAG integrato (nessun sondino esterno richiesto):
+- ESP32‑S3 USB‑JTAG integrato (nessuna sonda esterna richiesta):
 ```
 openocd -f board/esp32s3-builtin.cfg -c "init; scan_chain; shutdown"
 ```
@@ -101,16 +102,16 @@ Hai bisogno del BSDL del dispositivo per conoscere l'ordinamento dei bit del reg
 
 ## Obiettivi moderni e note
 
-- ESP32‑S3/C3 include un ponte USB‑JTAG nativo; OpenOCD può comunicare direttamente tramite USB senza una sonda esterna. Molto conveniente per la triage e i dump.
+- ESP32‑S3/C3 include un ponte USB‑JTAG nativo; OpenOCD può comunicare direttamente tramite USB senza una sonda esterna. Molto comodo per la triage e i dump.
 - Il debug RISC‑V (v0.13+) è ampiamente supportato da OpenOCD; preferisci SBA per l'accesso alla memoria quando il core non può essere arrestato in modo sicuro.
 - Molti MCU implementano l'autenticazione del debug e stati del ciclo di vita. Se JTAG sembra morto ma l'alimentazione è corretta, il dispositivo potrebbe essere fuso in uno stato chiuso o richiedere una sonda autenticata.
 
 ## Difese e indurimento (cosa aspettarsi su dispositivi reali)
 
-- Disabilita o blocca permanentemente JTAG/SWD in produzione (ad es., livello 2 RDP STM32, eFuses ESP che disabilitano PAD JTAG, APPROTECT/DPAP NXP/Nordic).
+- Disabilita o blocca permanentemente JTAG/SWD in produzione (ad es., STM32 RDP livello 2, ESP eFuses che disabilitano PAD JTAG, NXP/Nordic APPROTECT/DPAP).
 - Richiedi debug autenticato (ARMv8.2‑A ADIv6 Debug Authentication, sfida-risposta gestita da OEM) mantenendo l'accesso alla produzione.
 - Non instradare pad di test facili; seppellire via di test, rimuovere/popolare resistori per isolare TAP, utilizzare connettori con chiavi o fixture a pogo-pin.
-- Blocco del debug all'accensione: controlla il TAP dietro ROM iniziali che impongono l'avvio sicuro.
+- Blocco del debug all'accensione: controlla il TAP dietro il ROM iniziale che impone l'avvio sicuro.
 
 ## Riferimenti
 

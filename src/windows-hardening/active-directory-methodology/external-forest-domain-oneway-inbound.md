@@ -82,7 +82,7 @@ Enter-PSSession -ComputerName dc.external_domain.local -Credential domain\admini
 
 Puoi anche abusare della [**Storia SID**](sid-history-injection.md) attraverso un trust di foresta.
 
-Se un utente viene **migrato da una foresta a un'altra** e **il filtro SID non è abilitato**, diventa possibile **aggiungere un SID dall'altra foresta**, e questo **SID** sarà **aggiunto** al **token dell'utente** durante l'autenticazione **attraverso il trust**.
+Se un utente viene migrato **da una foresta a un'altra** e **il filtro SID non è abilitato**, diventa possibile **aggiungere un SID dall'altra foresta**, e questo **SID** sarà **aggiunto** al **token dell'utente** durante l'autenticazione **attraverso il trust**.
 
 > [!WARNING]
 > Come promemoria, puoi ottenere la chiave di firma con

@@ -4,13 +4,13 @@
 
 ## Partizioni
 
-Un hard disk o un **SSD può contenere diverse partizioni** con l'obiettivo di separare fisicamente i dati.\
+Un hard disk o un **disco SSD possono contenere diverse partizioni** con l'obiettivo di separare fisicamente i dati.\
 L'unità **minima** di un disco è il **settore** (normalmente composto da 512B). Quindi, ogni dimensione di partizione deve essere un multiplo di quella dimensione.
 
 ### MBR (master Boot Record)
 
 È allocato nel **primo settore del disco dopo i 446B del codice di avvio**. Questo settore è essenziale per indicare al PC cosa e da dove una partizione dovrebbe essere montata.\
-Permette fino a **4 partizioni** (al massimo **solo 1** può essere attiva/**avviabile**). Tuttavia, se hai bisogno di più partizioni puoi utilizzare **partizioni estese**. L'**ultimo byte** di questo primo settore è la firma del boot record **0x55AA**. Solo una partizione può essere contrassegnata come attiva.\
+Permette fino a **4 partizioni** (al massimo **solo 1** può essere attiva/**avviabile**). Tuttavia, se hai bisogno di più partizioni, puoi utilizzare **partizioni estese**. L'**ultimo byte** di questo primo settore è la firma del record di avvio **0x55AA**. Solo una partizione può essere contrassegnata come attiva.\
 MBR consente **max 2.2TB**.
 
 ![](<../../../images/image (350).png>)
@@ -26,10 +26,10 @@ Dai **byte 440 ai 443** dell'MBR puoi trovare la **Windows Disk Signature** (se 
 | Offset      | Lunghezza   | Voce                |
 | ----------- | ----------- | ------------------- |
 | 0 (0x00)    | 446(0x1BE)  | Codice di avvio     |
-| 446 (0x1BE) | 16 (0x10)   | Prima Partizione    |
+| 446 (0x1BE) | 16 (0x10)   | Prima Partizione     |
 | 462 (0x1CE) | 16 (0x10)   | Seconda Partizione  |
-| 478 (0x1DE) | 16 (0x10)   | Terza Partizione    |
-| 494 (0x1EE) | 16 (0x10)   | Quarta Partizione   |
+| 478 (0x1DE) | 16 (0x10)   | Terza Partizione     |
+| 494 (0x1EE) | 16 (0x10)   | Quarta Partizione    |
 | 510 (0x1FE) | 2 (0x2)     | Firma 0x55 0xAA     |
 
 **Formato del Record di Partizione**
@@ -47,9 +47,9 @@ Dai **byte 440 ai 443** dell'MBR puoi trovare la **Windows Disk Signature** (se 
 | 8 (0x08)  | 4 (0x04) | Settori precedenti la partizione (little endian)      |
 | 12 (0x0C) | 4 (0x04) | Settori nella partizione                               |
 
-Per montare un MBR in Linux devi prima ottenere l'offset di inizio (puoi usare `fdisk` e il comando `p`)
+Per montare un MBR in Linux, devi prima ottenere l'offset di inizio (puoi usare `fdisk` e il comando `p`)
 
-![](<../../../images/image (413) (3) (3) (3) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
+![](<../../../images/image (413) (3) (3) (3) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
 E poi usa il seguente codice
 ```bash
@@ -73,11 +73,11 @@ La GUID Partition Table, nota come GPT, è preferita per le sue capacità avanza
 **Resilienza e Recupero dei Dati**:
 
 - **Ridondanza**: A differenza di MBR, GPT non limita i dati di partizionamento e avvio a un solo luogo. Replica questi dati su tutto il disco, migliorando l'integrità e la resilienza dei dati.
-- **Controllo di Ridondanza Ciclomica (CRC)**: GPT utilizza il CRC per garantire l'integrità dei dati. Monitora attivamente la corruzione dei dati e, quando viene rilevata, GPT tenta di recuperare i dati corrotti da un'altra posizione del disco.
+- **Controllo di Ridondanza Ciclica (CRC)**: GPT utilizza il CRC per garantire l'integrità dei dati. Monitora attivamente la corruzione dei dati e, quando viene rilevata, GPT tenta di recuperare i dati corrotti da un'altra posizione del disco.
 
 **MBR Protettivo (LBA0)**:
 
-- GPT mantiene la compatibilità retroattiva attraverso un MBR protettivo. Questa funzione risiede nello spazio MBR legacy ma è progettata per prevenire che le utilità basate su MBR più vecchie sovrascrivano erroneamente i dischi GPT, proteggendo così l'integrità dei dati sui dischi formattati GPT.
+- GPT mantiene la compatibilità retroattiva attraverso un MBR protettivo. Questa funzione risiede nello spazio MBR legacy ma è progettata per prevenire che le utility basate su MBR più vecchie sovrascrivano erroneamente i dischi GPT, proteggendo così l'integrità dei dati sui dischi formattati GPT.
 
 ![https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/GUID_Partition_Table_Scheme.svg/800px-GUID_Partition_Table_Scheme.svg.png](<../../../images/image (1062).png>)
 
@@ -157,23 +157,23 @@ L'unità di archiviazione di base del file system è un **cluster, di solito 512
 - **FAT16**, che migliora a indirizzi a 16 bit, consentendo così di ospitare fino a 65.517 cluster.
 - **FAT32**, che avanza ulteriormente con indirizzi a 32 bit, consentendo un impressionante 268.435.456 cluster per volume.
 
-Una limitazione significativa in tutte le versioni FAT è la **dimensione massima del file di 4GB**, imposta dal campo a 32 bit utilizzato per la memorizzazione della dimensione del file.
+Una limitazione significativa in tutte le versioni di FAT è la **dimensione massima del file di 4GB**, imposta dal campo a 32 bit utilizzato per la memorizzazione della dimensione del file.
 
 I componenti chiave della directory radice, in particolare per FAT12 e FAT16, includono:
 
 - **Nome del File/Cartella** (fino a 8 caratteri)
 - **Attributi**
-- **Date di creazione, modifica e ultimo accesso**
+- **Date di Creazione, Modifica e Ultimo Accesso**
 - **Indirizzo della Tabella FAT** (che indica il cluster iniziale del file)
 - **Dimensione del File**
 
 ### EXT
 
-**Ext2** è il file system più comune per le partizioni **non journaling** (**partizioni che non cambiano molto**) come la partizione di avvio. **Ext3/4** sono **journaling** e sono utilizzati solitamente per le **altre partizioni**.
+**Ext2** è il file system più comune per **partizioni non journaling** (**partizioni che non cambiano molto**) come la partizione di avvio. **Ext3/4** sono **journaling** e vengono solitamente utilizzati per le **altre partizioni**.
 
 ## **Metadata**
 
-Alcuni file contengono metadati. Queste informazioni riguardano il contenuto del file che a volte potrebbe essere interessante per un analista poiché, a seconda del tipo di file, potrebbe contenere informazioni come:
+Al alcuni file contengono metadati. Queste informazioni riguardano il contenuto del file che a volte potrebbe essere interessante per un analista poiché, a seconda del tipo di file, potrebbe contenere informazioni come:
 
 - Titolo
 - Versione di MS Office utilizzata
@@ -203,7 +203,7 @@ file-data-carving-recovery-tools.md
 
 Nota che questa tecnica **non funziona per recuperare file frammentati**. Se un file **non è memorizzato in settori contigui**, allora questa tecnica non sarà in grado di trovarlo o almeno parte di esso.
 
-Ci sono diversi strumenti che puoi utilizzare per il file carving indicando i tipi di file che desideri cercare.
+Ci sono diversi strumenti che puoi utilizzare per il file Carving indicando i tipi di file che desideri cercare.
 
 {{#ref}}
 file-data-carving-recovery-tools.md
@@ -220,7 +220,7 @@ file-data-carving-recovery-tools.md
 
 ### Cancellazione Sicura
 
-Ovviamente, ci sono modi per **cancellare "in modo sicuro" file e parte dei registri su di essi**. Ad esempio, è possibile **sovrascrivere il contenuto** di un file con dati spazzatura più volte, e poi **rimuovere** i **registri** dal **$MFT** e **$LOGFILE** riguardanti il file, e **rimuovere le Copie Shadow del Volume**.\
+Ovviamente, ci sono modi per **"cancellare in modo sicuro" file e parte dei registri su di essi**. Ad esempio, è possibile **sovrascrivere il contenuto** di un file con dati spazzatura più volte, e poi **rimuovere** i **registri** dal **$MFT** e **$LOGFILE** riguardanti il file, e **rimuovere le Copie Shadow del Volume**.\
 Potresti notare che anche eseguendo quell'azione potrebbero esserci **altre parti in cui l'esistenza del file è ancora registrata**, e questo è vero e parte del lavoro del professionista forense è trovarle.
 
 ## Riferimenti

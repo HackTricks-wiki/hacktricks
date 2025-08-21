@@ -7,6 +7,7 @@
 
 Per ulteriori informazioni su come funzionano i tag a 125kHz controlla:
 
+
 {{#ref}}
 ../pentesting-rfid.md
 {{#endref}}
@@ -24,7 +25,7 @@ Cerca di **leggere** le informazioni della scheda. Poi può **emularle**.
 
 ### Add Manually
 
-Puoi creare **schede false in Flipper Zero indicando i dati** manualmente e poi emularle.
+Puoi creare **schede false in Flipper Zero indicando i dati** manualmente e poi emularli.
 
 #### IDs on cards
 
@@ -32,8 +33,8 @@ A volte, quando ottieni una scheda, troverai l'ID (o parte di esso) scritto sull
 
 - **EM Marin**
 
-Ad esempio, in questa scheda EM-Marin nella scheda fisica è possibile **leggere gli ultimi 3 di 5 byte in chiaro**.\
-Gli altri 2 possono essere forzati a bruteforce se non puoi leggerli dalla scheda.
+Ad esempio, in questa scheda EM-Marin è possibile **leggere gli ultimi 3 di 5 byte in chiaro**.\
+Gli altri 2 possono essere forzati se non riesci a leggerli dalla scheda.
 
 <figure><img src="../../../images/image (104).png" alt=""><figcaption></figcaption></figure>
 

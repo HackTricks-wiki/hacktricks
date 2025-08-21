@@ -27,7 +27,7 @@ Il [Device Enrollment Program](https://www.apple.com/business/site/docs/DEP_Guid
 
 ### **Considerazione sulla Sicurezza**
 
-È fondamentale notare che la facilità di registrazione fornita dal DEP, sebbene vantaggiosa, può anche comportare rischi per la sicurezza. Se le misure protettive non sono adeguatamente applicate per la registrazione MDM, gli attaccanti potrebbero sfruttare questo processo semplificato per registrare il proprio dispositivo sul server MDM dell'organizzazione, spacciandosi per un dispositivo aziendale.
+È fondamentale notare che la facilità di registrazione fornita dal DEP, sebbene vantaggiosa, può anche comportare rischi per la sicurezza. Se le misure protettive non vengono adeguatamente applicate per la registrazione MDM, gli attaccanti potrebbero sfruttare questo processo semplificato per registrare il proprio dispositivo sul server MDM dell'organizzazione, spacciandosi per un dispositivo aziendale.
 
 > [!CAUTION]
 > **Avviso di Sicurezza**: La registrazione semplificata del DEP potrebbe consentire la registrazione non autorizzata di dispositivi sul server MDM dell'organizzazione se non sono in atto le giuste misure di protezione.
@@ -42,7 +42,7 @@ Il [Device Enrollment Program](https://www.apple.com/business/site/docs/DEP_Guid
 - Il modo ufficiale di Apple per **impostare/applicare la configurazione di sistema.**
 - Formato di file che può contenere più payload.
 - Basato su elenchi di proprietà (il tipo XML).
-- “possono essere firmati e crittografati per convalidare la loro origine, garantire la loro integrità e proteggere i loro contenuti.” Fondamenti — Pagina 70, iOS Security Guide, gennaio 2018.
+- “può essere firmato e crittografato per convalidare la loro origine, garantire la loro integrità e proteggere i loro contenuti.” Fondamenti — Pagina 70, iOS Security Guide, gennaio 2018.
 
 ## Protocolli
 
@@ -56,7 +56,7 @@ Il [Device Enrollment Program](https://www.apple.com/business/site/docs/DEP_Guid
 
 ### DEP
 
-- **3 API**: 1 per rivenditori, 1 per fornitori MDM, 1 per identità del dispositivo (non documentata):
+- **3 API**: 1 per i rivenditori, 1 per i fornitori MDM, 1 per l'identità del dispositivo (non documentata):
 - La cosiddetta [API "cloud service" DEP](https://developer.apple.com/enterprise/documentation/MDM-Protocol-Reference.pdf). Questa è utilizzata dai server MDM per associare i profili DEP a dispositivi specifici.
 - L'[API DEP utilizzata dai Rivenditori Autorizzati Apple](https://applecareconnect.apple.com/api-docs/depuat/html/WSImpManual.html) per registrare dispositivi, controllare lo stato di registrazione e controllare lo stato delle transazioni.
 - L'API privata DEP non documentata. Questa è utilizzata dai dispositivi Apple per richiedere il proprio profilo DEP. Su macOS, il binario `cloudconfigurationd` è responsabile della comunicazione su questa API.
@@ -70,12 +70,12 @@ Il [Device Enrollment Program](https://www.apple.com/business/site/docs/DEP_Guid
 - sincronizza i “profili DEP” da Apple al server MDM (forniti da Apple al dispositivo in seguito)
 - Un “profilo” DEP contiene:
 - URL del server del fornitore MDM
-- Certificati aggiuntivi di fiducia per l'URL del server (pinning opzionale)
+- Certificati di fiducia aggiuntivi per l'URL del server (pinning opzionale)
 - Impostazioni extra (ad es. quali schermate saltare nell'Assistente Configurazione)
 
 ## Numero di Serie
 
-I dispositivi Apple prodotti dopo il 2010 hanno generalmente numeri di serie **alfanumerici di 12 caratteri**, con le **prime tre cifre che rappresentano il luogo di produzione**, le successive **due** che indicano l'**anno** e la **settimana** di produzione, le successive **tre** cifre forniscono un **identificatore unico**, e le **ultime** **quattro** cifre rappresentano il **numero di modello**.
+I dispositivi Apple prodotti dopo il 2010 hanno generalmente numeri di serie **alfanumerici di 12 caratteri**, con le **prime tre cifre che rappresentano il luogo di produzione**, le successive **due** che indicano l'**anno** e la **settimana** di produzione, le successive **tre** cifre forniscono un **identificatore** **unico**, e le **ultime** **quattro** cifre rappresentano il **numero di modello**.
 
 {{#ref}}
 macos-serial-number.md
@@ -85,7 +85,7 @@ macos-serial-number.md
 
 1. Creazione del record del dispositivo (Rivenditore, Apple): Viene creato il record per il nuovo dispositivo
 2. Assegnazione del record del dispositivo (Cliente): Il dispositivo viene assegnato a un server MDM
-3. Sincronizzazione del record del dispositivo (fornitore MDM): MDM sincronizza i record dei dispositivi e invia i profili DEP ad Apple
+3. Sincronizzazione del record del dispositivo (Fornitore MDM): MDM sincronizza i record dei dispositivi e invia i profili DEP ad Apple
 4. Check-in DEP (Dispositivo): Il dispositivo ottiene il suo profilo DEP
 5. Recupero del profilo (Dispositivo)
 6. Installazione del profilo (Dispositivo) a. incl. payload MDM, SCEP e root CA
@@ -93,11 +93,11 @@ macos-serial-number.md
 
 ![](<../../../images/image (694).png>)
 
-Il file `/Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk/System/Library/PrivateFrameworks/ConfigurationProfiles.framework/ConfigurationProfiles.tbd` esporta funzioni che possono essere considerate **"passaggi" di alto livello** del processo di registrazione.
+Il file `/Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk/System/Library/PrivateFrameworks/ConfigurationProfiles.framework/ConfigurationProfiles.tbd` esporta funzioni che possono essere considerate **"passaggi"** di alto livello del processo di registrazione.
 
 ### Passo 4: Check-in DEP - Ottenere il Record di Attivazione
 
-Questa parte del processo si verifica quando un **utente avvia un Mac per la prima volta** (o dopo un ripristino completo)
+Questa parte del processo si verifica quando un **utente avvia un Mac per la prima volta** (o dopo una cancellazione completa)
 
 ![](<../../../images/image (1044).png>)
 
@@ -107,7 +107,7 @@ o quando si esegue `sudo profiles show -type enrollment`
 - Il Record di Attivazione è il nome interno per il **"profilo" DEP**
 - Inizia non appena il dispositivo è connesso a Internet
 - Guidato da **`CPFetchActivationRecord`**
-- Implementato da **`cloudconfigurationd`** tramite XPC. L'**"Assistente Configurazione"** (quando il dispositivo viene avviato per la prima volta) o il comando **`profiles`** contatteranno questo demone per recuperare il record di attivazione.
+- Implementato da **`cloudconfigurationd`** tramite XPC. L'**"Assistente Configurazione"** (quando il dispositivo viene avviato per la prima volta) o il comando **`profiles`** contatterà questo demone per recuperare il record di attivazione.
 - LaunchDaemon (gira sempre come root)
 
 Segue alcuni passaggi per ottenere il Record di Attivazione eseguiti da **`MCTeslaConfigurationFetcher`**. Questo processo utilizza una crittografia chiamata **Absinthe**
@@ -136,7 +136,7 @@ La risposta è un dizionario JSON con alcuni dati importanti come:
 ![](<../../../images/image (444).png>)
 
 - Richiesta inviata all'**url fornito nel profilo DEP**.
-- **Certificati ancorati** sono utilizzati per **valutare la fiducia** se forniti.
+- **Certificati di ancoraggio** sono utilizzati per **valutare la fiducia** se forniti.
 - Promemoria: la proprietà **anchor_certs** del profilo DEP
 - **La richiesta è un semplice .plist** con identificazione del dispositivo
 - Esempi: **UDID, versione OS**.
@@ -144,7 +144,7 @@ La risposta è un dizionario JSON con alcuni dati importanti come:
 - Firmato utilizzando il **certificato di identità del dispositivo (da APNS)**
 - La **catena di certificati** include un **Apple iPhone Device CA** scaduto
 
-![](<../../../images/image (567) (1) (2) (2) (2) (2) (2) (2) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (2) (2).png>)
+![](<../../../images/image (567) (1) (2) (2) (2) (2) (2) (2) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (2) (2).png>)
 
 ### Passo 6: Installazione del Profilo
 
@@ -194,7 +194,7 @@ Tipicamente, il **profilo di attivazione** fornito da un fornitore MDM includer�
 ### Registrazione di Dispositivi in Altre Organizzazioni
 
 Come commentato in precedenza, per cercare di registrare un dispositivo in un'organizzazione **è necessario solo un Numero di Serie appartenente a quell'Organizzazione**. Una volta che il dispositivo è registrato, diverse organizzazioni installeranno dati sensibili sul nuovo dispositivo: certificati, applicazioni, password WiFi, configurazioni VPN [e così via](https://developer.apple.com/enterprise/documentation/Configuration-Profile-Reference.pdf).\
-Pertanto, questo potrebbe essere un pericoloso punto di ingresso per gli attaccanti se il processo di registrazione non è correttamente protetto:
+Pertanto, questo potrebbe essere un punto di ingresso pericoloso per gli attaccanti se il processo di registrazione non è correttamente protetto:
 
 {{#ref}}
 enrolling-devices-in-other-organisations.md

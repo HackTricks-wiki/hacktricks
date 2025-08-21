@@ -12,6 +12,7 @@ Se riesci a **compromettere le credenziali di amministratore** per accedere alla
 
 Per il red teaming in ambienti MacOS è altamente raccomandato avere una certa comprensione di come funzionano gli MDM:
 
+
 {{#ref}}
 macos-mdm/
 {{#endref}}
@@ -24,7 +25,7 @@ Per eseguire il tuo MDM devi **far firmare il tuo CSR da un fornitore** che potr
 
 Tuttavia, per installare un'applicazione in un dispositivo registrato, hai ancora bisogno che sia firmata da un account sviluppatore... tuttavia, al momento della registrazione MDM, il **dispositivo aggiunge il certificato SSL dell'MDM come CA fidata**, quindi ora puoi firmare qualsiasi cosa.
 
-Per registrare il dispositivo in un MDM, devi installare un file **`mobileconfig`** come root, che potrebbe essere consegnato tramite un file **pkg** (puoi comprimerlo in zip e quando scaricato da safari verrà decompresso).
+Per registrare il dispositivo in un MDM, devi installare un **`mobileconfig`** file come root, che potrebbe essere consegnato tramite un **pkg** file (puoi comprimerlo in zip e quando scaricato da safari verrà decompresso).
 
 **Mythic agent Orthrus** utilizza questa tecnica.
 
@@ -34,7 +35,7 @@ JAMF può eseguire **script personalizzati** (script sviluppati dall'amministrat
 
 #### Auto-registrazione JAMF
 
-Vai su una pagina come `https://<company-name>.jamfcloud.com/enroll/` per vedere se hanno **abilitata l'auto-registrazione**. Se ce l'hanno, potrebbe **richiedere credenziali per accedere**.
+Vai su una pagina come `https://<company-name>.jamfcloud.com/enroll/` per vedere se hanno **l'auto-registrazione abilitata**. Se ce l'hanno, potrebbe **richiedere credenziali per accedere**.
 
 Potresti usare lo script [**JamfSniper.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfSniper.py) per eseguire un attacco di password spraying.
 
@@ -60,7 +61,7 @@ plutil -convert xml1 -o - /Library/Preferences/com.jamfsoftware.jamf.plist
 <key>is_virtual_machine</key>
 <false/>
 <key>jss_url</key>
-<string>https://halbornasd.jamfcloud.com/</string>
+<string>https://subdomain-company.jamfcloud.com/</string>
 <key>last_management_framework_change_id</key>
 <integer>4</integer>
 [...]
@@ -95,6 +96,7 @@ Lo script [**JamfExplorer.py**](https://github.com/WithSecureLabs/Jamf-Attack-To
 
 E anche riguardo ai **protocollo** **di rete** "speciali" di **MacOS**:
 
+
 {{#ref}}
 ../macos-security-and-privilege-escalation/macos-protocols.md
 {{#endref}}
@@ -103,27 +105,30 @@ E anche riguardo ai **protocollo** **di rete** "speciali" di **MacOS**:
 
 In alcune occasioni scoprirai che il **computer MacOS è connesso a un AD**. In questo scenario dovresti cercare di **enumerare** l'active directory come sei abituato a fare. Trova qualche **aiuto** nelle seguenti pagine:
 
+
 {{#ref}}
 ../../network-services-pentesting/pentesting-ldap.md
 {{#endref}}
+
 
 {{#ref}}
 ../../windows-hardening/active-directory-methodology/
 {{#endref}}
 
+
 {{#ref}}
 ../../network-services-pentesting/pentesting-kerberos-88/
 {{#endref}}
 
-Alcuni **strumenti locali di MacOS** che potrebbero anche aiutarti sono `dscl`:
+Un **tool locale MacOS** che potrebbe anche aiutarti è `dscl`:
 ```bash
 dscl "/Active Directory/[Domain]/All Domains" ls /
 ```
-Inoltre, ci sono alcuni strumenti preparati per MacOS per enumerare automaticamente l'AD e interagire con kerberos:
+Anche ci sono alcuni strumenti preparati per MacOS per enumerare automaticamente l'AD e interagire con kerberos:
 
-- [**Machound**](https://github.com/XMCyber/MacHound): MacHound è un'estensione dello strumento di auditing Bloodhound che consente di raccogliere e ingerire le relazioni di Active Directory sugli host MacOS.
+- [**Machound**](https://github.com/XMCyber/MacHound): MacHound è un'estensione dello strumento di auditing Bloodhound che consente di raccogliere e ingerire le relazioni di Active Directory su host MacOS.
 - [**Bifrost**](https://github.com/its-a-feature/bifrost): Bifrost è un progetto Objective-C progettato per interagire con le API Heimdal krb5 su macOS. L'obiettivo del progetto è abilitare test di sicurezza migliori attorno a Kerberos sui dispositivi macOS utilizzando API native senza richiedere alcun altro framework o pacchetti sul target.
-- [**Orchard**](https://github.com/its-a-feature/Orchard): Strumento JavaScript per l'automazione (JXA) per fare enumerazione di Active Directory.
+- [**Orchard**](https://github.com/its-a-feature/Orchard): Strumento JavaScript for Automation (JXA) per fare enumerazione di Active Directory.
 
 ### Informazioni sul Dominio
 ```bash
@@ -138,7 +143,7 @@ I tre tipi di utenti MacOS sono:
 - **Utenti Mobili** — Utenti Active Directory con un backup locale per le loro credenziali e file.
 
 Le informazioni locali sugli utenti e sui gruppi sono memorizzate nella cartella _/var/db/dslocal/nodes/Default._\
-Ad esempio, le informazioni sull'utente chiamato _mark_ sono memorizzate in _/var/db/dslocal/nodes/Default/users/mark.plist_ e le informazioni sul gruppo _admin_ sono in _/var/db/dslocal/nodes/Default/groups/admin.plist_.
+Ad esempio, le informazioni sull'utente chiamato _mark_ sono memorizzate in _/var/db/dslocal/nodes/Default/users/mark.plist_ e le informazioni sul gruppo _admin_ si trovano in _/var/db/dslocal/nodes/Default/groups/admin.plist_.
 
 Oltre a utilizzare i bordi HasSession e AdminTo, **MacHound aggiunge tre nuovi bordi** al database Bloodhound:
 
@@ -194,7 +199,7 @@ bifrost --action asktgt --username test_lab_admin \
 bifrost --action asktgs --spn [service] --domain [domain.com] \
 --username [user] --hash [hash] --enctype [enctype]
 ```
-Con i ticket di servizio ottenuti è possibile provare ad accedere alle condivisioni in altri computer:
+Con i ticket di servizio ottenuti, è possibile provare ad accedere alle condivisioni su altri computer:
 ```bash
 smbutil view //computer.fqdn
 mount -t smbfs //server/folder /local/mount/point
@@ -226,6 +231,5 @@ Quando un file viene scaricato in Safari, se è un file "sicuro", verrà **apert
 - [**https://gist.github.com/its-a-feature/1a34f597fb30985a2742bb16116e74e0**](https://gist.github.com/its-a-feature/1a34f597fb30985a2742bb16116e74e0)
 - [**Come to the Dark Side, We Have Apples: Turning macOS Management Evil**](https://www.youtube.com/watch?v=pOQOh07eMxY)
 - [**OBTS v3.0: "An Attackers Perspective on Jamf Configurations" - Luke Roberts / Calum Hall**](https://www.youtube.com/watch?v=ju1IYWUv4ZA)
-
 
 {{#include ../../banners/hacktricks-training.md}}

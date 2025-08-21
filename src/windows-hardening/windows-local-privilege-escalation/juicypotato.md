@@ -24,9 +24,9 @@ Abbiamo deciso di armare [RottenPotatoNG](https://github.com/breenmachine/Rotten
 
 > Per la teoria, vedi [Rotten Potato - Privilege Escalation from Service Accounts to SYSTEM](https://foxglovesecurity.com/2016/09/26/rotten-potato-privilege-escalation-from-service-accounts-to-system/) e segui la catena di link e riferimenti.
 
-Abbiamo scoperto che, oltre a `BITS`, ci sono diversi server COM che possiamo sfruttare. Devono solo:
+Abbiamo scoperto che, oltre a `BITS`, ci sono diversi server COM che possiamo abusare. Devono solo:
 
-1. essere istanziabili dall'utente corrente, normalmente un "utente di servizio" che ha privilegi di impersonificazione
+1. essere istanziabili dall'utente corrente, normalmente un “utente di servizio” che ha privilegi di impersonificazione
 2. implementare l'interfaccia `IMarshal`
 3. essere eseguiti come utente elevato (SYSTEM, Amministratore, …)
 
@@ -37,7 +37,7 @@ Dopo alcuni test abbiamo ottenuto e testato un elenco esteso di [CLSID interessa
 JuicyPotato ti consente di:
 
 - **CLSID di destinazione** _scegli qualsiasi CLSID tu voglia._ [_Qui_](http://ohpe.it/juicy-potato/CLSID/) _puoi trovare l'elenco organizzato per OS._
-- **Porta di ascolto COM** _definisci la porta di ascolto COM che preferisci (anziché il 6666 hardcoded)_
+- **Porta di ascolto COM** _definisci la porta di ascolto COM che preferisci (invece della hardcoded 6666)_
 - **Indirizzo IP di ascolto COM** _collega il server a qualsiasi IP_
 - **Modalità di creazione del processo** _a seconda dei privilegi dell'utente impersonato puoi scegliere tra:_
 - `CreateProcessWithToken` (richiede `SeImpersonate`)

@@ -1,4 +1,4 @@
-# Uscire dalle Carceri
+# Uscita dalle Jails
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -17,11 +17,11 @@ Di solito questo significa che per uscire devi essere root all'interno del chroo
 ### Root + CWD
 
 > [!WARNING]
-> Se sei **root** all'interno di un chroot puoi **uscire** creando **un altro chroot**. Questo perché 2 chroot non possono coesistere (in Linux), quindi se crei una cartella e poi **crei un nuovo chroot** su quella nuova cartella essendo **tu all'esterno di essa**, ora sarai **fuori dal nuovo chroot** e quindi sarai nel FS.
+> Se sei **root** all'interno di un chroot puoi **uscire** creando **un altro chroot**. Questo perché 2 chroot non possono coesistere (in Linux), quindi se crei una cartella e poi **crei un nuovo chroot** su quella nuova cartella essendo **fuori di essa**, ora sarai **fuori dal nuovo chroot** e quindi sarai nel FS.
 >
-> Questo si verifica perché di solito chroot NON sposta la tua directory di lavoro in quella indicata, quindi puoi creare un chroot ma essere all'esterno di esso.
+> Questo avviene perché di solito chroot NON sposta la tua directory di lavoro in quella indicata, quindi puoi creare un chroot ma essere fuori di esso.
 
-Di solito non troverai il binario `chroot` all'interno di una prigione chroot, ma **potresti compilare, caricare ed eseguire** un binario:
+Di solito non troverai il binario `chroot` all'interno di una jail chroot, ma **potresti compilare, caricare ed eseguire** un binario:
 
 <details>
 
@@ -76,7 +76,7 @@ system("/bin/bash");
 ```
 </details>
 
-### Root + fd salvato
+### Root + Saved fd
 
 > [!WARNING]
 > Questo è simile al caso precedente, ma in questo caso l'**attaccante memorizza un descrittore di file nella directory corrente** e poi **crea il chroot in una nuova cartella**. Infine, poiché ha **accesso** a quel **FD** **al di fuori** del chroot, vi accede e **escapa**.
@@ -109,14 +109,14 @@ chroot(".");
 ### Root + Fork + UDS (Unix Domain Sockets)
 
 > [!WARNING]
-> FD può essere passato attraverso Unix Domain Sockets, quindi:
+> FD può essere passato tramite Unix Domain Sockets, quindi:
 >
 > - Crea un processo figlio (fork)
 > - Crea UDS in modo che il genitore e il figlio possano comunicare
 > - Esegui chroot nel processo figlio in una cartella diversa
 > - Nel processo genitore, crea un FD di una cartella che si trova al di fuori del nuovo chroot del processo figlio
 > - Passa a quel processo figlio quell'FD utilizzando l'UDS
-> - Il processo figlio cambia directory in quell'FD, e poiché è al di fuori del suo chroot, evaderà dalla prigione
+> - Il processo figlio cambia directory in quell'FD, e poiché è al di fuori del suo chroot, evaderà la prigione
 
 ### Root + Mount
 
@@ -139,7 +139,7 @@ chroot(".");
 
 > [!WARNING]
 >
-> - Crea un Fork (processo figlio) e chroot in una cartella diversa più profonda nel FS e CD su di essa
+> - Crea un Fork (processo figlio) e chroot in una cartella diversa più in profondità nel FS e CD su di essa
 > - Dal processo genitore, sposta la cartella in cui si trova il processo figlio in una cartella precedente al chroot dei figli
 > - Questo processo figlio si troverà al di fuori del chroot
 
@@ -198,7 +198,7 @@ BASH_CMDS[shell]=/bin/bash;shell -i
 ```
 ### Wget
 
-Puoi sovrascrivere ad esempio il file sudoers.
+Puoi sovrascrivere ad esempio il file sudoers
 ```bash
 wget http://127.0.0.1:8080/sudoers -O /etc/sudoers
 ```
@@ -209,6 +209,7 @@ wget http://127.0.0.1:8080/sudoers -O /etc/sudoers
 [https://gtfobins.github.io](https://gtfobins.github.io)\
 **Potrebbe essere interessante anche la pagina:**
 
+
 {{#ref}}
 ../bypass-bash-restrictions/
 {{#endref}}
@@ -216,6 +217,7 @@ wget http://127.0.0.1:8080/sudoers -O /etc/sudoers
 ## Carceri Python
 
 Trucchi su come evadere dalle carceri python nella seguente pagina:
+
 
 {{#ref}}
 ../../generic-methodologies-and-resources/python/bypass-python-sandboxes/
@@ -238,7 +240,7 @@ Elenca le funzioni di una libreria:
 ```bash
 for k,v in pairs(string) do print(k,v) end
 ```
-Nota che ogni volta che esegui il precedente one liner in un **ambiente lua diverso, l'ordine delle funzioni cambia**. Pertanto, se hai bisogno di eseguire una funzione specifica, puoi effettuare un attacco di forza bruta caricando diversi ambienti lua e chiamando la prima funzione della libreria:
+Nota che ogni volta che esegui la riga di comando precedente in un **ambiente lua diverso, l'ordine delle funzioni cambia**. Pertanto, se hai bisogno di eseguire una funzione specifica, puoi effettuare un attacco di forza bruta caricando diversi ambienti lua e chiamando la prima funzione della libreria:
 ```bash
 #In this scenario you could BF the victim that is generating a new lua environment
 #for every interaction with the following line and when you are lucky

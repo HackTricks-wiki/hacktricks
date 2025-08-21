@@ -35,7 +35,7 @@ sc.exe \\TARGET delete HTSvc
 ```
 Note:
 - Aspettati un errore di timeout quando avvii un EXE non di servizio; l'esecuzione avviene comunque.
-- Per rimanere più OPSEC-friendly, preferisci comandi senza file (cmd /c, powershell -enc) o elimina gli artefatti lasciati.
+- Per rimanere più OPSEC-friendly, preferisci comandi senza file (cmd /c, powershell -enc) o elimina gli artefatti creati.
 
 Trova ulteriori passaggi dettagliati in: https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/
 
@@ -60,7 +60,7 @@ PsExec64.exe -accepteula \\HOST -r WinSvc$ -s cmd.exe /c ipconfig
 \\live.sysinternals.com\tools\PsExec64.exe -accepteula \\HOST -s cmd.exe /c whoami
 ```
 OPSEC
-- Lascia eventi di installazione/disinstallazione del servizio (il nome del servizio è spesso PSEXESVC a meno che non venga utilizzato -r) e crea C:\Windows\PSEXESVC.exe durante l'esecuzione.
+- Lascia eventi di installazione/disinstallazione del servizio (Il nome del servizio è spesso PSEXESVC a meno che non venga utilizzato -r) e crea C:\Windows\PSEXESVC.exe durante l'esecuzione.
 
 ### Impacket psexec.py (simile a PsExec)
 
@@ -83,7 +83,7 @@ Artifacts
 
 ### Impacket smbexec.py (SMBExec)
 
-- Crea un servizio temporaneo che avvia cmd.exe e utilizza un pipe nominato per I/O. In genere evita di scaricare un payload EXE completo; l'esecuzione dei comandi è semi-interattiva.
+- Crea un servizio temporaneo che avvia cmd.exe e utilizza una pipe denominata per I/O. In genere evita di scaricare un payload EXE completo; l'esecuzione dei comandi è semi-interattiva.
 ```bash
 smbexec.py DOMAIN/user:Password@HOST
 smbexec.py -hashes LMHASH:NTHASH DOMAIN/user@HOST
@@ -115,14 +115,14 @@ Artefatti tipici di host/rete quando si utilizzano tecniche simili a PsExec:
 
 Idee di ricerca
 - Allerta su installazioni di servizi dove l'ImagePath include cmd.exe /c, powershell.exe, o posizioni TEMP.
-- Cerca creazioni di processi dove ParentImage è C:\Windows\PSEXESVC.exe o figli di services.exe in esecuzione come LOCAL SYSTEM che eseguono shell.
-- Segnala pipe nominate che terminano con -stdin/-stdout/-stderr o nomi di pipe clone di PsExec ben noti.
+- Cerca creazioni di processi dove ParentImage è C:\Windows\PSEXESVC.exe o figli di services.exe in esecuzione come SYSTEM LOCALE che eseguono shell.
+- Segnala pipe nominate che terminano con -stdin/-stdout/-stderr o nomi di pipe ben noti di clone PsExec.
 
 ## Risoluzione dei problemi comuni
-- Accesso negato (5) durante la creazione di servizi: non è un vero admin locale, restrizioni UAC remote per account locali, o protezione da manomissione EDR sul percorso del binario di servizio.
+- Accesso negato (5) durante la creazione di servizi: non è realmente admin locale, restrizioni remote UAC per account locali, o protezione da manomissione EDR sul percorso del binario di servizio.
 - Il percorso di rete non è stato trovato (53) o non è stato possibile connettersi a ADMIN$: firewall che blocca SMB/RPC o condivisioni admin disabilitate.
 - Kerberos fallisce ma NTLM è bloccato: connettersi utilizzando hostname/FQDN (non IP), assicurarsi che SPN siano corretti, o fornire -k/-no-pass con i biglietti quando si utilizza Impacket.
-- L'avvio del servizio scade ma il payload è stato eseguito: previsto se non è un vero binario di servizio; catturare l'output in un file o utilizzare smbexec per I/O live.
+- L'avvio del servizio scade ma il payload è stato eseguito: previsto se non è un vero binario di servizio; catturare l'output in un file o utilizzare smbexec per I/O dal vivo.
 
 ## Note di indurimento
 - Windows 11 24H2 e Windows Server 2025 richiedono la firma SMB per impostazione predefinita per le connessioni in uscita (e Windows 11 in entrata). Questo non interrompe l'uso legittimo di PsExec con credenziali valide ma previene l'abuso di relay SMB non firmati e può influenzare i dispositivi che non supportano la firma.
@@ -133,11 +133,13 @@ Idee di ricerca
 
 - Esecuzione remota basata su WMI (spesso più senza file):
 
+
 {{#ref}}
 ./wmiexec.md
 {{#endref}}
 
 - Esecuzione remota basata su WinRM:
+
 
 {{#ref}}
 ./winrm.md

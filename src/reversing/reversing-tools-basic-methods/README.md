@@ -27,7 +27,7 @@ Software:
 
 dotPeek è un decompilatore che **decompila ed esamina più formati**, inclusi **librerie** (.dll), **file di metadati di Windows** (.winmd) e **eseguibili** (.exe). Una volta decompilato, un'assembly può essere salvato come progetto di Visual Studio (.csproj).
 
-Il merito qui è che se un codice sorgente perso richiede ripristino da un'assembly legacy, questa azione può far risparmiare tempo. Inoltre, dotPeek fornisce una navigazione utile attraverso il codice decompilato, rendendolo uno degli strumenti perfetti per **l'analisi degli algoritmi Xamarin.**
+Il merito qui è che se un codice sorgente perso richiede ripristino da un'assembly legacy, questa azione può far risparmiare tempo. Inoltre, dotPeek fornisce una navigazione utile attraverso il codice decompilato, rendendolo uno degli strumenti perfetti per l'**analisi degli algoritmi Xamarin.**
 
 ### [.NET Reflector](https://www.red-gate.com/products/reflector/)
 
@@ -43,9 +43,9 @@ Con un modello di add-in completo e un'API che estende lo strumento per soddisfa
 ### [ILSpy](https://github.com/icsharpcode/ILSpy) & [dnSpy](https://github.com/dnSpy/dnSpy/releases)
 
 [Plugin ILSpy per Visual Studio Code](https://github.com/icsharpcode/ilspy-vscode): Puoi averlo in qualsiasi OS (puoi installarlo direttamente da VSCode, non è necessario scaricare il git. Clicca su **Estensioni** e **cerca ILSpy**).\
-Se hai bisogno di **decompilare**, **modificare** e **ricompilare** di nuovo puoi usare [**dnSpy**](https://github.com/dnSpy/dnSpy/releases) o un fork attivamente mantenuto di esso, [**dnSpyEx**](https://github.com/dnSpyEx/dnSpy/releases). (**Clic destro -> Modifica Metodo** per cambiare qualcosa all'interno di una funzione).
+Se hai bisogno di **decompilare**, **modificare** e **ricompilare** di nuovo puoi usare [**dnSpy**](https://github.com/dnSpy/dnSpy/releases) o un fork attivamente mantenuto di esso, [**dnSpyEx**](https://github.com/dnSpyEx/dnSpy/releases). (**Tasto destro -> Modifica Metodo** per cambiare qualcosa all'interno di una funzione).
 
-### Logging di DNSpy
+### Registrazione di DNSpy
 
 Per far sì che **DNSpy registri alcune informazioni in un file**, puoi usare questo snippet:
 ```cs
@@ -111,7 +111,7 @@ Fai clic con il tasto destro su qualsiasi modulo in **Assembly Explorer** e clic
 [https://github.com/skylot/jadx](https://github.com/skylot/jadx)\
 [https://github.com/java-decompiler/jd-gui/releases](https://github.com/java-decompiler/jd-gui/releases)
 
-## Debugging DLLs
+## Debugging DLL
 
 ### Usando IDA
 
@@ -134,7 +134,7 @@ Ma, come puoi arrivare al codice della DLL che è stata caricata? Usando questo 
 - **Carica rundll32** (64bit in C:\Windows\System32\rundll32.exe e 32 bit in C:\Windows\SysWOW64\rundll32.exe)
 - **Cambia la Command Line** (_File --> Change Command Line_) e imposta il percorso della dll e la funzione che desideri chiamare, ad esempio: "C:\Windows\SysWOW64\rundll32.exe" "Z:\shared\Cybercamp\rev2\\\14.ridii_2.dll",DLLMain
 - Cambia _Options --> Settings_ e seleziona "**DLL Entry**".
-- Poi **avvia l'esecuzione**, il debugger si fermerà in ogni main della dll, a un certo punto ti fermerai **nell'Entry della dll**. Da lì, cerca i punti in cui desideri impostare un breakpoint.
+- Poi **avvia l'esecuzione**, il debugger si fermerà in ogni main della dll, a un certo punto ti fermerai **nell'Entry della dll**. Da lì, cerca i punti in cui desideri mettere un breakpoint.
 
 Nota che quando l'esecuzione si ferma per qualsiasi motivo in win64dbg puoi vedere **in quale codice ti trovi** guardando **in cima alla finestra di win64dbg**:
 
@@ -165,7 +165,7 @@ https://github.com/nongiach/arm_now
 ### Debugging di uno shellcode con blobrunner
 
 [**Blobrunner**](https://github.com/OALabs/BlobRunner) **allochera** lo **shellcode** all'interno di uno spazio di memoria, ti **indicherà** l'**indirizzo di memoria** dove lo shellcode è stato allocato e **fermerà** l'esecuzione.\
-Poi, devi **attaccare un debugger** (Ida o x64dbg) al processo e impostare un **breakpoint all'indirizzo di memoria indicato** e **riprendere** l'esecuzione. In questo modo stai eseguendo il debug dello shellcode.
+Poi, devi **attaccare un debugger** (Ida o x64dbg) al processo e mettere un **breakpoint all'indirizzo di memoria indicato** e **riprendere** l'esecuzione. In questo modo stai eseguendo il debug dello shellcode.
 
 La pagina delle release di github contiene zip con le release compilate: [https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)\
 Puoi trovare una versione leggermente modificata di Blobrunner nel seguente link. Per compilarla, basta **creare un progetto C/C++ in Visual Studio Code, copiare e incollare il codice e compilarlo**.
@@ -176,7 +176,7 @@ blobrunner.md
 
 ### Debugging di uno shellcode con jmp2it
 
-[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4) è molto simile a blobrunner. **Allochera** lo **shellcode** all'interno di uno spazio di memoria e avvierà un **ciclo eterno**. Devi quindi **attaccare il debugger** al processo, **premere start, attendere 2-5 secondi e premere stop** e ti troverai all'interno del **ciclo eterno**. Salta alla prossima istruzione del ciclo eterno poiché sarà una chiamata allo shellcode, e infine ti troverai ad eseguire lo shellcode.
+[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4) è molto simile a blobrunner. **Allochera** lo **shellcode** all'interno di uno spazio di memoria e avvierà un **ciclo eterno**. Devi quindi **attaccare il debugger** al processo, **giocare avviare attendere 2-5 secondi e premere stop** e ti troverai all'interno del **ciclo eterno**. Salta alla prossima istruzione del ciclo eterno poiché sarà una chiamata allo shellcode, e infine ti troverai ad eseguire lo shellcode.
 
 ![](<../../images/image (509).png>)
 
@@ -186,7 +186,7 @@ Puoi scaricare una versione compilata di [jmp2it nella pagina delle release](htt
 
 [**Cutter**](https://github.com/rizinorg/cutter/releases/tag/v1.12.0) è l'interfaccia grafica di radare. Usando cutter puoi emulare lo shellcode e ispezionarlo dinamicamente.
 
-Nota che Cutter ti consente di "Open File" e "Open Shellcode". Nel mio caso, quando ho aperto lo shellcode come file, l'ha decompilato correttamente, ma quando l'ho aperto come shellcode non l'ha fatto:
+Nota che Cutter ti consente di "Aprire File" e "Aprire Shellcode". Nel mio caso, quando ho aperto lo shellcode come file, l'ha decompilato correttamente, ma quando l'ho aperto come shellcode non l'ha fatto:
 
 ![](<../../images/image (562).png>)
 
@@ -216,15 +216,15 @@ scDbg dispone anche di un launcher grafico dove puoi selezionare le opzioni desi
 
 ![](<../../images/image (258).png>)
 
-L'opzione **Create Dump** eseguirà il dump del shellcode finale se viene apportata qualche modifica al shellcode dinamicamente in memoria (utile per scaricare il shellcode decodificato). L'**start offset** può essere utile per avviare il shellcode a un offset specifico. L'opzione **Debug Shell** è utile per eseguire il debug del shellcode utilizzando il terminale scDbg (tuttavia, trovo che nessuna delle opzioni spiegate prima sia migliore per questo scopo, poiché potrai utilizzare Ida o x64dbg).
+L'opzione **Create Dump** eseguirà il dump del shellcode finale se viene apportata qualche modifica al shellcode dinamicamente in memoria (utile per scaricare il shellcode decodificato). L'**start offset** può essere utile per avviare il shellcode a un offset specifico. L'opzione **Debug Shell** è utile per eseguire il debug del shellcode utilizzando il terminale scDbg (tuttavia, trovo che nessuna delle opzioni spiegate prima sia migliore per questo scopo, poiché sarai in grado di utilizzare Ida o x64dbg).
 
 ### Disassemblaggio usando CyberChef
 
-Carica il tuo file di shellcode come input e usa la seguente ricetta per decompilarlo: [https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)](<https://gchq.github.io/CyberChef/index.html#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)>)
+Carica il tuo file shellcode come input e utilizza la seguente ricetta per decompilarlo: [https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)](<https://gchq.github.io/CyberChef/index.html#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)>)
 
 ## [Movfuscator](https://github.com/xoreaxeaxeax/movfuscator)
 
-Questo offuscante **modifica tutte le istruzioni per `mov`** (sì, davvero figo). Utilizza anche interruzioni per cambiare i flussi di esecuzione. Per ulteriori informazioni su come funziona:
+Questo offuscatore **modifica tutte le istruzioni per `mov`** (sì, davvero figo). Utilizza anche interruzioni per cambiare i flussi di esecuzione. Per ulteriori informazioni su come funziona:
 
 - [https://www.youtube.com/watch?v=2VF_wPkiBJY](https://www.youtube.com/watch?v=2VF_wPkiBJY)
 - [https://github.com/xoreaxeaxeax/movfuscator/blob/master/slides/domas_2015_the_movfuscator.pdf](https://github.com/xoreaxeaxeax/movfuscator/blob/master/slides/domas_2015_the_movfuscator.pdf)
@@ -251,17 +251,17 @@ Avendo il **nome** delle **funzioni** chiamate, cercale su **Internet** per cono
 
 Per i binari compilati in Delphi puoi usare [https://github.com/crypto2011/IDR](https://github.com/crypto2011/IDR)
 
-Se devi fare reverse engineering di un binario Delphi ti suggerirei di usare il plugin IDA [https://github.com/Coldzer0/IDA-For-Delphi](https://github.com/Coldzer0/IDA-For-Delphi)
+Se devi fare reverse a un binario Delphi ti consiglio di usare il plugin IDA [https://github.com/Coldzer0/IDA-For-Delphi](https://github.com/Coldzer0/IDA-For-Delphi)
 
 Premi semplicemente **ATL+f7** (importa il plugin python in IDA) e seleziona il plugin python.
 
-Questo plugin eseguirà il binario e risolverà i nomi delle funzioni dinamicamente all'inizio del debug. Dopo aver avviato il debug premi di nuovo il pulsante Start (quello verde o f9) e un breakpoint si attiverà all'inizio del codice reale.
+Questo plugin eseguirà il binario e risolverà i nomi delle funzioni dinamicamente all'inizio del debug. Dopo aver avviato il debug premi di nuovo il pulsante Start (quello verde o f9) e un breakpoint verrà attivato all'inizio del codice reale.
 
 È anche molto interessante perché se premi un pulsante nell'applicazione grafica il debugger si fermerà nella funzione eseguita da quel pulsante.
 
 ## Golang
 
-Se devi fare reverse engineering di un binario Golang ti suggerirei di usare il plugin IDA [https://github.com/sibears/IDAGolangHelper](https://github.com/sibears/IDAGolangHelper)
+Se devi fare reverse a un binario Golang ti consiglio di usare il plugin IDA [https://github.com/sibears/IDAGolangHelper](https://github.com/sibears/IDAGolangHelper)
 
 Premi semplicemente **ATL+f7** (importa il plugin python in IDA) e seleziona il plugin python.
 
@@ -271,13 +271,14 @@ Questo risolverà i nomi delle funzioni.
 
 In questa pagina puoi trovare come ottenere il codice python da un binario python compilato ELF/EXE:
 
+
 {{#ref}}
 ../../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/.pyc.md
 {{#endref}}
 
 ## GBA - Game Body Advance
 
-Se ottieni il **binario** di un gioco GBA puoi usare diversi strumenti per **emularlo** e **debuggarlo**:
+Se ottieni il **binario** di un gioco GBA puoi usare diversi strumenti per **emulare** e **debuggarlo**:
 
 - [**no$gba**](https://problemkaputt.de/gba.htm) (_Scarica la versione di debug_) - Contiene un debugger con interfaccia
 - [**mgba** ](https://mgba.io)- Contiene un debugger CLI
@@ -301,7 +302,7 @@ DOWN = 128
 R = 256
 L = 256
 ```
-Quindi, in questo tipo di programma, la parte interessante sarà **come il programma gestisce l'input dell'utente**. All'indirizzo **0x4000130** troverai la funzione comunemente presente: **KEYINPUT**.
+Quindi, in questo tipo di programma, la parte interessante sarà **come il programma gestisce l'input dell'utente**. All'indirizzo **0x4000130** troverai la funzione comunemente trovata: **KEYINPUT**.
 
 ![](<../../images/image (447).png>)
 
@@ -381,6 +382,7 @@ Quindi, in questa sfida, conoscendo i valori dei pulsanti, dovevi **premere una 
 **Riferimento per questo tutorial:** [**https://exp.codes/Nostalgia/**](https://exp.codes/Nostalgia/)
 
 ## Game Boy
+
 
 {{#ref}}
 https://www.youtube.com/watch?v=VVbRe7wr3G4

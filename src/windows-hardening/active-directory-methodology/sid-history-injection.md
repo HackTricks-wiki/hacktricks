@@ -4,7 +4,7 @@
 
 ## Attacco di Iniezione della Storia SID
 
-L'obiettivo dell'**Attacco di Iniezione della Storia SID** è facilitare **la migrazione degli utenti tra domini** garantendo al contempo l'accesso continuo alle risorse del precedente dominio. Questo viene realizzato **incorporando il precedente Identificatore di Sicurezza (SID) dell'utente nella Storia SID** del loro nuovo account. È importante notare che questo processo può essere manipolato per concedere accesso non autorizzato aggiungendo il SID di un gruppo ad alta privilegio (come gli Enterprise Admins o i Domain Admins) dal dominio principale alla Storia SID. Questa sfruttamento conferisce accesso a tutte le risorse all'interno del dominio principale.
+L'obiettivo dell'**Attacco di Iniezione della Storia SID** è facilitare **la migrazione degli utenti tra i domini** garantendo al contempo l'accesso continuo alle risorse del precedente dominio. Questo viene realizzato **incorporando il precedente Identificatore di Sicurezza (SID) dell'utente nella Storia SID** del loro nuovo account. È importante notare che questo processo può essere manipolato per concedere accesso non autorizzato aggiungendo il SID di un gruppo ad alta privilegio (come gli Enterprise Admins o i Domain Admins) dal dominio principale alla Storia SID. Questa sfruttamento conferisce accesso a tutte le risorse all'interno del dominio principale.
 
 Esistono due metodi per eseguire questo attacco: attraverso la creazione di un **Golden Ticket** o di un **Diamond Ticket**.
 
@@ -63,12 +63,14 @@ mimikatz.exe "kerberos::golden /user:Administrator /domain:<current_domain> /sid
 ```
 Per ulteriori informazioni sui golden tickets controlla:
 
+
 {{#ref}}
 golden-ticket.md
 {{#endref}}
 
 
 Per ulteriori informazioni sui diamond tickets controlla:
+
 
 {{#ref}}
 diamond-ticket.md

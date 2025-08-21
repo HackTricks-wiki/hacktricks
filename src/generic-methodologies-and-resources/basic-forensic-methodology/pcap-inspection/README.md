@@ -1,8 +1,8 @@
-# Ispezione Pcap
+# Pcap Inspection
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-> [!NOTE]
+> [!TIP]
 > Una nota su **PCAP** vs **PCAPNG**: ci sono due versioni del formato di file PCAP; **PCAPNG è più recente e non supportato da tutti gli strumenti**. Potresti dover convertire un file da PCAPNG a PCAP utilizzando Wireshark o un altro strumento compatibile, per poter lavorare con esso in alcuni altri strumenti.
 
 ## Strumenti online per pcaps
@@ -18,7 +18,7 @@ I seguenti strumenti sono utili per estrarre statistiche, file, ecc.
 
 ### Wireshark
 
-> [!NOTE]
+> [!TIP]
 > **Se intendi analizzare un PCAP devi sostanzialmente sapere come usare Wireshark**
 
 Puoi trovare alcuni trucchi di Wireshark in:
@@ -29,7 +29,7 @@ wireshark-tricks.md
 
 ### [**https://apackets.com/**](https://apackets.com/)
 
-Analisi pcap dal browser.
+Analisi del pcap dal browser.
 
 ### Xplico Framework
 
@@ -58,7 +58,7 @@ Questo strumento è anche utile per ottenere **altre informazioni analizzate** d
 
 ### NetWitness Investigator
 
-Puoi scaricare [**NetWitness Investigator da qui**](https://www.rsa.com/en-us/contact-us/netwitness-investigator-freeware) **(Funziona in Windows)**.\
+Puoi scaricare [**NetWitness Investigator da qui**](https://www.rsa.com/en-us/contact-us/netwitness-investigator-freeware) **(Funziona su Windows)**.\
 Questo è un altro strumento utile che **analizza i pacchetti** e ordina le informazioni in un modo utile per **sapere cosa sta succedendo all'interno**.
 
 ### [BruteShark](https://github.com/odedshimon/BruteShark)
@@ -83,6 +83,7 @@ ngrep -I packets.pcap "^GET" "port 80 and tcp and host 192.168 and dst host 192.
 ### Carving
 
 Utilizzare tecniche di carving comuni può essere utile per estrarre file e informazioni dal pcap:
+
 
 {{#ref}}
 ../partitions-file-systems-carving/file-data-carving-recovery-tools.md
@@ -120,6 +121,7 @@ suricata -r packets.pcap -c /etc/suricata/suricata.yaml -k none -v -l log
 ### Malware Analysis
 
 Controlla se riesci a trovare qualche impronta di un malware noto:
+
 
 {{#ref}}
 ../malware-analysis.md
@@ -200,13 +202,16 @@ rita show-exploded-dns -H --limit 10 zeek_logs
 ```
 ## Altri trucchi per l'analisi pcap
 
+
 {{#ref}}
 dnscat-exfiltration.md
 {{#endref}}
 
+
 {{#ref}}
 wifi-pcap-analysis.md
 {{#endref}}
+
 
 {{#ref}}
 usb-keystrokes.md

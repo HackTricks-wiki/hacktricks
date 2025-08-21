@@ -11,7 +11,7 @@ Prima di tutto, è consigliato avere una **USB** con **binaries e librerie ben n
 export PATH=/mnt/usb/bin:/mnt/usb/sbin
 export LD_LIBRARY_PATH=/mnt/usb/lib:/mnt/usb/lib64
 ```
-Una volta che hai configurato il sistema per utilizzare binari buoni e noti, puoi iniziare a **estrarre alcune informazioni di base**:
+Una volta configurato il sistema per utilizzare binari buoni e noti, puoi iniziare a **estrarre alcune informazioni di base**:
 ```bash
 date #Date and time (Clock may be skewed, Might be at a different timezone)
 uname -a #OS info
@@ -45,8 +45,8 @@ Per **compilarlo**, devi utilizzare lo **stesso kernel** che la macchina vittima
 > [!TIP]
 > Ricorda che **non puoi installare LiME o qualsiasi altra cosa** nella macchina vittima poiché apporterà diverse modifiche ad essa
 
-Quindi, se hai una versione identica di Ubuntu, puoi usare `apt-get install lime-forensics-dkms`\
-In altri casi, devi scaricare [**LiME**](https://github.com/504ensicsLabs/LiME) da github e compilarlo con le intestazioni del kernel corrette. Per **ottenere le intestazioni esatte del kernel** della macchina vittima, puoi semplicemente **copiare la directory** `/lib/modules/<kernel version>` sulla tua macchina, e poi **compilare** LiME utilizzando quelle:
+Quindi, se hai una versione identica di Ubuntu puoi usare `apt-get install lime-forensics-dkms`\
+In altri casi, devi scaricare [**LiME**](https://github.com/504ensicsLabs/LiME) da github e compilarlo con i corretti header del kernel. Per **ottenere gli header esatti del kernel** della macchina vittima, puoi semplicemente **copiare la directory** `/lib/modules/<kernel version>` sulla tua macchina, e poi **compilare** LiME utilizzandoli:
 ```bash
 make -C /lib/modules/<kernel version>/build M=$PWD
 sudo insmod lime.ko "path=/home/sansforensics/Desktop/mem_dump.bin format=lime"
@@ -172,7 +172,7 @@ find /sbin/ –exec rpm -qf {} \; | grep "is not"
 # Find exacuable files
 find / -type f -executable | grep <something>
 ```
-## Recuperare Binarie Eseguite Cancellate
+## Recuperare i Binaries Eseguiti Cancellati
 
 Immagina un processo che è stato eseguito da /tmp/exec e poi cancellato. È possibile estrarlo
 ```bash
@@ -197,7 +197,7 @@ cat /var/spool/cron/crontabs/*  \
 ls -l /usr/lib/cron/tabs/ /Library/LaunchAgents/ /Library/LaunchDaemons/ ~/Library/LaunchAgents/
 ```
 #### Hunt: Abuso di Cron/Anacron tramite 0anacron e stub sospetti
-Gli attaccanti spesso modificano lo stub 0anacron presente in ciascuna directory /etc/cron.*/ per garantire l'esecuzione periodica.
+Gli attaccanti spesso modificano lo stub 0anacron presente in ogni directory /etc/cron.*/ per garantire l'esecuzione periodica.
 ```bash
 # List 0anacron files and their timestamps/sizes
 for d in /etc/cron.*; do [ -f "$d/0anacron" ] && stat -c '%n %y %s' "$d/0anacron"; done
@@ -217,7 +217,7 @@ awk -F: '($7 ~ /bin\/(sh|bash|zsh)/ && $1 ~ /^(games|lp|sync|shutdown|halt|mail|
 #### Hunt: Cloud C2 markers (Dropbox/Cloudflare Tunnel)
 - I beacon dell'API di Dropbox utilizzano tipicamente api.dropboxapi.com o content.dropboxapi.com su HTTPS con token di autorizzazione: Bearer.
 - Cerca in proxy/Zeek/NetFlow per egress inaspettati di Dropbox dai server.
-- Cloudflare Tunnel (`cloudflared`) fornisce C2 di backup su 443 in uscita.
+- Cloudflare Tunnel (`cloudflared`) fornisce C2 di backup su outbound 443.
 ```bash
 ps aux | grep -E '[c]loudflared|trycloudflare'
 systemctl list-units | grep -i cloudflared
@@ -263,17 +263,17 @@ I sistemi Linux tracciano le attività degli utenti e gli eventi di sistema attr
 - **/var/log/maillog** o **/var/log/mail.log**: Registra le attività del server di posta, utile per tracciare servizi legati alla posta elettronica.
 - **/var/log/kern.log**: Memorizza messaggi del kernel, inclusi errori e avvisi.
 - **/var/log/dmesg**: Contiene messaggi del driver del dispositivo.
-- **/var/log/faillog**: Registra tentativi di accesso falliti, utile per indagini su violazioni della sicurezza.
+- **/var/log/faillog**: Registra i tentativi di accesso falliti, utile per indagini su violazioni della sicurezza.
 - **/var/log/cron**: Registra le esecuzioni dei job cron.
 - **/var/log/daemon.log**: Traccia le attività dei servizi in background.
-- **/var/log/btmp**: Documenta tentativi di accesso falliti.
+- **/var/log/btmp**: Documenta i tentativi di accesso falliti.
 - **/var/log/httpd/**: Contiene log di errore e accesso di Apache HTTPD.
 - **/var/log/mysqld.log** o **/var/log/mysql.log**: Registra le attività del database MySQL.
-- **/var/log/xferlog**: Registra trasferimenti di file FTP.
+- **/var/log/xferlog**: Registra i trasferimenti di file FTP.
 - **/var/log/**: Controlla sempre per log inaspettati qui.
 
 > [!TIP]
-> I log di sistema Linux e i sottosistemi di audit possono essere disabilitati o eliminati in un incidente di intrusione o malware. Poiché i log sui sistemi Linux contengono generalmente alcune delle informazioni più utili sulle attività malevole, gli intrusi li eliminano di routine. Pertanto, quando si esaminano i file di log disponibili, è importante cercare lacune o voci fuori ordine che potrebbero essere un'indicazione di eliminazione o manomissione.
+> I log di sistema Linux e i sottosistemi di audit potrebbero essere disabilitati o eliminati in un incidente di intrusione o malware. Poiché i log sui sistemi Linux contengono generalmente alcune delle informazioni più utili sulle attività malevole, gli intrusi li eliminano di routine. Pertanto, quando si esaminano i file di log disponibili, è importante cercare lacune o voci fuori ordine che potrebbero essere un'indicazione di eliminazione o manomissione.
 
 **Linux mantiene una cronologia dei comandi per ogni utente**, memorizzata in:
 
@@ -325,28 +325,28 @@ usbrip ids search --pid 0002 --vid 0e0f #Search for pid AND vid
 ```
 More examples and info inside the github: [https://github.com/snovvcrash/usbrip](https://github.com/snovvcrash/usbrip)
 
-## Rivedere gli Account Utente e le Attività di Accesso
+## Review User Accounts and Logon Activities
 
 Esaminare il _**/etc/passwd**_, _**/etc/shadow**_ e i **log di sicurezza** per nomi o account insoliti creati e/o utilizzati in prossimità di eventi non autorizzati noti. Inoltre, controllare possibili attacchi di brute-force su sudo.\
 Inoltre, controllare file come _**/etc/sudoers**_ e _**/etc/groups**_ per privilegi inaspettati concessi agli utenti.\
 Infine, cercare account con **nessuna password** o **password facilmente indovinabili**.
 
-## Esaminare il File System
+## Examine File System
 
-### Analisi delle Strutture del File System nell'Investigazione di Malware
+### Analyzing File System Structures in Malware Investigation
 
 Quando si indagano incidenti di malware, la struttura del file system è una fonte cruciale di informazioni, rivelando sia la sequenza degli eventi che il contenuto del malware. Tuttavia, gli autori di malware stanno sviluppando tecniche per ostacolare questa analisi, come modificare i timestamp dei file o evitare il file system per l'archiviazione dei dati.
 
 Per contrastare questi metodi anti-forensi, è essenziale:
 
-- **Condurre un'analisi approfondita della timeline** utilizzando strumenti come **Autopsy** per visualizzare le timeline degli eventi o `mactime` di **Sleuth Kit** per dati dettagliati sulla timeline.
+- **Condurre un'analisi della timeline approfondita** utilizzando strumenti come **Autopsy** per visualizzare le timeline degli eventi o `mactime` di **Sleuth Kit** per dati dettagliati sulla timeline.
 - **Indagare su script inaspettati** nel $PATH del sistema, che potrebbero includere script shell o PHP utilizzati dagli attaccanti.
-- **Esaminare `/dev` per file atipici**, poiché tradizionalmente contiene file speciali, ma potrebbe ospitare file relativi al malware.
-- **Cercare file o directory nascosti** con nomi come ".. " (punto punto spazio) o "..^G" (punto punto controllo-G), che potrebbero nascondere contenuti malevoli.
+- **Esaminare `/dev` per file atipici**, poiché tradizionalmente contiene file speciali, ma potrebbe ospitare file correlati al malware.
+- **Cercare file o directory nascosti** con nomi come ".. " (punto punto spazio) o "..^G" (punto punto controllo-G), che potrebbero nascondere contenuti dannosi.
 - **Identificare file setuid root** utilizzando il comando: `find / -user root -perm -04000 -print` Questo trova file con permessi elevati, che potrebbero essere abusati dagli attaccanti.
-- **Rivedere i timestamp di cancellazione** nelle tabelle degli inode per individuare cancellazioni di massa di file, che potrebbero indicare la presenza di rootkit o trojan.
-- **Ispezionare inode consecutivi** per file malevoli vicini dopo averne identificato uno, poiché potrebbero essere stati collocati insieme.
-- **Controllare le directory binarie comuni** (_/bin_, _/sbin_) per file recentemente modificati, poiché questi potrebbero essere stati alterati da malware.
+- **Esaminare i timestamp di cancellazione** nelle tabelle degli inode per individuare cancellazioni di massa di file, che potrebbero indicare la presenza di rootkit o trojan.
+- **Ispezionare inode consecutivi** per file dannosi vicini dopo averne identificato uno, poiché potrebbero essere stati collocati insieme.
+- **Controllare le directory binarie comuni** (_/bin_, _/sbin_) per file recentemente modificati, poiché questi potrebbero essere stati alterati dal malware.
 ````bash
 # List recent files in a directory:
 ls -laR --sort=time /bin```

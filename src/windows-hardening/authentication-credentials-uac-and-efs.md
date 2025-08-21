@@ -4,14 +4,14 @@
 
 ## AppLocker Policy
 
-Un elenco di autorizzazione delle applicazioni è un elenco di applicazioni software o eseguibili approvati che possono essere presenti ed eseguiti su un sistema. L'obiettivo è proteggere l'ambiente da malware dannoso e software non approvato che non si allinea con le specifiche esigenze aziendali di un'organizzazione.
+Un elenco di applicazioni approvate è un elenco di software o eseguibili autorizzati a essere presenti e in esecuzione su un sistema. L'obiettivo è proteggere l'ambiente da malware dannoso e software non approvato che non si allinea con le specifiche esigenze aziendali di un'organizzazione.
 
-[AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) è la **soluzione di autorizzazione delle applicazioni** di Microsoft e offre agli amministratori di sistema il controllo su **quali applicazioni e file gli utenti possono eseguire**. Fornisce **controllo granulare** su eseguibili, script, file di installazione di Windows, DLL, app confezionate e installatori di app confezionate.\
+[AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) è la **soluzione di whitelisting delle applicazioni** di Microsoft e offre agli amministratori di sistema il controllo su **quali applicazioni e file gli utenti possono eseguire**. Fornisce **controllo granulare** su eseguibili, script, file di installazione di Windows, DLL, app confezionate e installer di app confezionate.\
 È comune per le organizzazioni **bloccare cmd.exe e PowerShell.exe** e l'accesso in scrittura a determinate directory, **ma tutto questo può essere aggirato**.
 
 ### Check
 
-Controlla quali file/estensioni sono nella lista nera/nella lista bianca:
+Controlla quali file/estensioni sono nella lista nera/bianca:
 ```bash
 Get-ApplockerPolicy -Effective -xml
 
@@ -36,11 +36,11 @@ C:\windows\tracing
 - I comuni **binaries** **"LOLBAS's"** possono essere utili per bypassare AppLocker.
 - **Regole scritte male possono anche essere bypassate**
 - Ad esempio, **`<FilePathCondition Path="%OSDRIVE%*\allowed*"/>`**, puoi creare una **cartella chiamata `allowed`** ovunque e sarà consentita.
-- Le organizzazioni spesso si concentrano sul **blocco dell'eseguibile `%System32%\WindowsPowerShell\v1.0\powershell.exe`**, ma dimenticano le **altre** **posizioni degli eseguibili di PowerShell** come `%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe` o `PowerShell_ISE.exe`.
+- Le organizzazioni spesso si concentrano sul **blocco dell'eseguibile `%System32%\WindowsPowerShell\v1.0\powershell.exe`**, ma dimenticano le **altre** **posizioni eseguibili di PowerShell** come `%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe` o `PowerShell_ISE.exe`.
 - **L'applicazione delle DLL è molto raramente abilitata** a causa del carico aggiuntivo che può mettere su un sistema e della quantità di test necessari per garantire che nulla si rompa. Quindi utilizzare **DLL come backdoor aiuterà a bypassare AppLocker**.
 - Puoi usare **ReflectivePick** o **SharpPick** per **eseguire codice Powershell** in qualsiasi processo e bypassare AppLocker. Per ulteriori informazioni controlla: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode).
 
-## Archiviazione delle credenziali
+## Archiviazione delle Credenziali
 
 ### Security Accounts Manager (SAM)
 
@@ -69,7 +69,7 @@ LSA potrebbe salvare su disco alcune credenziali:
 
 ## Defender
 
-[**Microsoft Defender**](https://en.wikipedia.org/wiki/Microsoft_Defender) è un Antivirus disponibile in Windows 10 e Windows 11, e nelle versioni di Windows Server. **Blocca** strumenti comuni di pentesting come **`WinPEAS`**. Tuttavia, ci sono modi per **bypassare queste protezioni**.
+**Microsoft Defender** è un Antivirus disponibile in Windows 10 e Windows 11, e nelle versioni di Windows Server. **Blocca** strumenti comuni di pentesting come **`WinPEAS`**. Tuttavia, ci sono modi per **bypassare queste protezioni**.
 
 ### Controllo
 
@@ -103,7 +103,7 @@ sc query windefend
 ```
 ## Encrypted File System (EFS)
 
-EFS protegge i file attraverso la crittografia, utilizzando una **chiave simmetrica** nota come **File Encryption Key (FEK)**. Questa chiave è crittografata con la **chiave pubblica** dell'utente e memorizzata all'interno del $EFS **flusso di dati alternativi** del file crittografato. Quando è necessaria la decrittazione, viene utilizzata la corrispondente **chiave privata** del certificato digitale dell'utente per decrittografare la FEK dal flusso $EFS. Maggiori dettagli possono essere trovati [qui](https://en.wikipedia.org/wiki/Encrypting_File_System).
+EFS protegge i file tramite crittografia, utilizzando una **chiave simmetrica** nota come **File Encryption Key (FEK)**. Questa chiave è crittografata con la **chiave pubblica** dell'utente e memorizzata all'interno del $EFS **flusso di dati alternativi** del file crittografato. Quando è necessaria la decrittazione, viene utilizzata la corrispondente **chiave privata** del certificato digitale dell'utente per decrittografare la FEK dal flusso $EFS. Maggiori dettagli possono essere trovati [qui](https://en.wikipedia.org/wiki/Encrypting_File_System).
 
 **Scenari di decrittazione senza iniziativa dell'utente** includono:
 
@@ -128,11 +128,11 @@ Puoi anche usare `cipher /e` e `cipher /d` all'interno di una cartella per **cri
 
 ### Decrittazione dei file EFS
 
-#### Essere Autorità di Sistema
+#### Essere Authority System
 
 Questo metodo richiede che l'**utente vittima** stia **eseguendo** un **processo** all'interno dell'host. Se è così, utilizzando una sessione `meterpreter` puoi impersonare il token del processo dell'utente (`impersonate_token` da `incognito`). Oppure potresti semplicemente `migrate` al processo dell'utente.
 
-#### Conoscere la password degli utenti
+#### Conoscere la password dell'utente
 
 {{#ref}}
 https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files
@@ -140,15 +140,15 @@ https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files
 
 ## Group Managed Service Accounts (gMSA)
 
-Microsoft ha sviluppato **Group Managed Service Accounts (gMSA)** per semplificare la gestione degli account di servizio nelle infrastrutture IT. A differenza degli account di servizio tradizionali che spesso hanno l'impostazione "**Password mai scaduta**" abilitata, i gMSA offrono una soluzione più sicura e gestibile:
+Microsoft ha sviluppato **Group Managed Service Accounts (gMSA)** per semplificare la gestione degli account di servizio nelle infrastrutture IT. A differenza degli account di servizio tradizionali che spesso hanno l'impostazione "**Password never expire**" abilitata, i gMSA offrono una soluzione più sicura e gestibile:
 
 - **Gestione automatica delle password**: i gMSA utilizzano una password complessa di 240 caratteri che cambia automaticamente in base alla politica del dominio o del computer. Questo processo è gestito dal Key Distribution Service (KDC) di Microsoft, eliminando la necessità di aggiornamenti manuali delle password.
-- **Sicurezza migliorata**: questi account sono immuni ai blocchi e non possono essere utilizzati per accessi interattivi, migliorando la loro sicurezza.
+- **Sicurezza migliorata**: questi account sono immuni a blocchi e non possono essere utilizzati per accessi interattivi, migliorando la loro sicurezza.
 - **Supporto per più host**: i gMSA possono essere condivisi tra più host, rendendoli ideali per servizi in esecuzione su più server.
 - **Capacità di attività pianificate**: a differenza degli account di servizio gestiti, i gMSA supportano l'esecuzione di attività pianificate.
 - **Gestione semplificata degli SPN**: il sistema aggiorna automaticamente il Service Principal Name (SPN) quando ci sono modifiche ai dettagli sAMaccount del computer o al nome DNS, semplificando la gestione degli SPN.
 
-Le password per i gMSA sono memorizzate nella proprietà LDAP _**msDS-ManagedPassword**_ e vengono automaticamente reimpostate ogni 30 giorni dai Domain Controllers (DC). Questa password, un blob di dati crittografati noto come [MSDS-MANAGEDPASSWORD_BLOB](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e), può essere recuperata solo da amministratori autorizzati e dai server su cui sono installati i gMSA, garantendo un ambiente sicuro. Per accedere a queste informazioni, è necessaria una connessione sicura come LDAPS, oppure la connessione deve essere autenticata con 'Sealing & Secure'.
+Le password per i gMSA sono memorizzate nella proprietà LDAP _**msDS-ManagedPassword**_ e vengono automaticamente reimpostate ogni 30 giorni dai Domain Controllers (DC). Questa password, un blob di dati crittografato noto come [MSDS-MANAGEDPASSWORD_BLOB](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e), può essere recuperata solo da amministratori autorizzati e dai server su cui sono installati i gMSA, garantendo un ambiente sicuro. Per accedere a queste informazioni, è necessaria una connessione sicura come LDAPS, oppure la connessione deve essere autenticata con 'Sealing & Secure'.
 
 ![https://cube0x0.github.io/Relaying-for-gMSA/](../images/asd1.png)
 
@@ -162,7 +162,7 @@ Inoltre, controlla questa [pagina web](https://cube0x0.github.io/Relaying-for-gM
 
 ## LAPS
 
-La **Local Administrator Password Solution (LAPS)**, disponibile per il download da [Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899), consente la gestione delle password degli amministratori locali. Queste password, che sono **randomizzate**, uniche e **cambiate regolarmente**, sono memorizzate centralmente in Active Directory. L'accesso a queste password è limitato tramite ACL a utenti autorizzati. Con permessi sufficienti, è possibile leggere le password degli amministratori locali.
+La **Local Administrator Password Solution (LAPS)**, disponibile per il download da [Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899), consente la gestione delle password degli amministratori locali. Queste password, che sono **randomizzate**, uniche e **cambiate regolarmente**, sono memorizzate centralmente in Active Directory. L'accesso a queste password è limitato tramite ACL a utenti autorizzati. Con permessi sufficienti, è fornita la possibilità di leggere le password degli amministratori locali.
 
 {{#ref}}
 active-directory-methodology/laps.md
@@ -183,7 +183,7 @@ $ExecutionContext.SessionState.LanguageMode
 Powershell -version 2
 ```
 In Windows attuali, quel bypass non funzionerà, ma puoi usare [**PSByPassCLM**](https://github.com/padovah4ck/PSByPassCLM).\
-**Per compilarlo potresti aver bisogno** **di** _**Aggiungere un Riferimento**_ -> _Sfoglia_ -> _Sfoglia_ -> aggiungi `C:\Windows\Microsoft.NET\assembly\GAC_MSIL\System.Management.Automation\v4.0_3.0.0.0\31bf3856ad364e35\System.Management.Automation.dll` e **cambiare il progetto a .Net4.5**.
+**Per compilarlo potresti aver bisogno di** **_Aggiungere un Riferimento_** -> _Sfoglia_ -> _Sfoglia_ -> aggiungi `C:\Windows\Microsoft.NET\assembly\GAC_MSIL\System.Management.Automation\v4.0_3.0.0.0\31bf3856ad364e35\System.Management.Automation.dll` e **cambiare il progetto in .Net4.5**.
 
 #### Bypass diretto:
 ```bash
@@ -197,7 +197,7 @@ Puoi usare [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/t
 
 ## Politica di Esecuzione PS
 
-Per impostazione predefinita è impostata su **restricted.** I principali modi per bypassare questa politica:
+Per impostazione predefinita è impostata su **riservata.** I principali modi per bypassare questa politica:
 ```bash
 1º Just copy and paste inside the interactive PS console
 2º Read en Exec
@@ -243,6 +243,7 @@ L'SSPI sarà responsabile della ricerca del protocollo adeguato per due macchine
 ## UAC - User Account Control
 
 [User Account Control (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) è una funzionalità che abilita un **messaggio di consenso per attività elevate**.
+
 
 {{#ref}}
 authentication-credentials-uac-and-efs/uac-user-account-control.md

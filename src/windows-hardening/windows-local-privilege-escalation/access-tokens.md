@@ -50,13 +50,13 @@ SeUndockPrivilege             Remove computer from docking station Disabled
 SeIncreaseWorkingSetPrivilege Increase a process working set       Disabled
 SeTimeZonePrivilege           Change the time zone                 Disabled
 ```
-or usando _Process Explorer_ di Sysinternals (seleziona il processo e accedi alla scheda "Sicurezza"):
+o utilizzando _Process Explorer_ di Sysinternals (seleziona il processo e accedi alla scheda "Sicurezza"):
 
 ![](<../../images/image (772).png>)
 
 ### Amministratore locale
 
-Quando un amministratore locale accede, **vengono creati due token di accesso**: uno con diritti di amministratore e l'altro con diritti normali. **Per impostazione predefinita**, quando questo utente esegue un processo, viene utilizzato quello con diritti **regolari** (non amministratore). Quando questo utente cerca di **eseguire** qualsiasi cosa **come amministratore** ("Esegui come amministratore" ad esempio), verrà utilizzato il **UAC** per chiedere il permesso.\
+Quando un amministratore locale accede, **vengono creati due token di accesso**: uno con diritti di amministratore e l'altro con diritti normali. **Per impostazione predefinita**, quando questo utente esegue un processo, viene utilizzato quello con diritti **regolari** (non amministratore). Quando questo utente cerca di **eseguire** qualsiasi cosa **come amministratore** ("Esegui come amministratore", ad esempio), verrà utilizzato il **UAC** per chiedere il permesso.\
 Se vuoi [**saperne di più sul UAC leggi questa pagina**](../authentication-credentials-uac-and-efs/index.html#uac)**.**
 
 ### Impersonificazione delle credenziali utente
@@ -70,26 +70,27 @@ Puoi avviare un processo che **utilizza credenziali diverse per accedere ai serv
 ```
 runas /user:domain\username /netonly cmd.exe
 ```
-Questo è utile se hai credenziali utili per accedere a oggetti nella rete, ma quelle credenziali non sono valide all'interno dell'host attuale poiché saranno utilizzate solo nella rete (nell'host attuale verranno utilizzati i privilegi dell'utente corrente).
+Questo è utile se hai credenziali valide per accedere a oggetti nella rete, ma quelle credenziali non sono valide all'interno dell'host attuale poiché verranno utilizzate solo nella rete (nell'host attuale verranno utilizzati i privilegi dell'utente corrente).
 
 ### Tipi di token
 
 Ci sono due tipi di token disponibili:
 
-- **Primary Token**: Serve come rappresentazione delle credenziali di sicurezza di un processo. La creazione e l'associazione di token primari con i processi sono azioni che richiedono privilegi elevati, sottolineando il principio della separazione dei privilegi. Tipicamente, un servizio di autenticazione è responsabile della creazione del token, mentre un servizio di accesso gestisce la sua associazione con la shell del sistema operativo dell'utente. Vale la pena notare che i processi ereditano il token primario del loro processo padre al momento della creazione.
-- **Impersonation Token**: Consente a un'applicazione server di adottare temporaneamente l'identità del client per accedere a oggetti sicuri. Questo meccanismo è stratificato in quattro livelli di operazione:
-- **Anonymous**: Concede accesso al server simile a quello di un utente non identificato.
-- **Identification**: Consente al server di verificare l'identità del client senza utilizzarla per l'accesso agli oggetti.
-- **Impersonation**: Abilita il server a operare sotto l'identità del client.
-- **Delegation**: Simile a Impersonation ma include la possibilità di estendere questa assunzione di identità a sistemi remoti con cui il server interagisce, garantendo la preservazione delle credenziali.
+- **Token Primario**: Serve come rappresentazione delle credenziali di sicurezza di un processo. La creazione e l'associazione di token primari con i processi sono azioni che richiedono privilegi elevati, sottolineando il principio della separazione dei privilegi. Tipicamente, un servizio di autenticazione è responsabile della creazione del token, mentre un servizio di accesso gestisce la sua associazione con la shell del sistema operativo dell'utente. Vale la pena notare che i processi ereditano il token primario del loro processo padre al momento della creazione.
+- **Token di Impersonificazione**: Consente a un'applicazione server di adottare temporaneamente l'identità del cliente per accedere a oggetti sicuri. Questo meccanismo è stratificato in quattro livelli di operazione:
+- **Anonimo**: Concede accesso al server simile a quello di un utente non identificato.
+- **Identificazione**: Consente al server di verificare l'identità del cliente senza utilizzarla per l'accesso agli oggetti.
+- **Impersonificazione**: Abilita il server a operare sotto l'identità del cliente.
+- **Delegazione**: Simile all'Impersonificazione, ma include la capacità di estendere questa assunzione di identità a sistemi remoti con cui il server interagisce, garantendo la preservazione delle credenziali.
 
-#### Impersonate Tokens
+#### Token di Impersonificazione
 
-Utilizzando il modulo _**incognito**_ di metasploit, se hai abbastanza privilegi, puoi facilmente **elencare** e **impersonare** altri **token**. Questo potrebbe essere utile per eseguire **azioni come se fossi l'altro utente**. Potresti anche **escalare i privilegi** con questa tecnica.
+Utilizzando il modulo _**incognito**_ di metasploit, se hai abbastanza privilegi, puoi facilmente **elencare** e **impersonificare** altri **token**. Questo potrebbe essere utile per eseguire **azioni come se fossi l'altro utente**. Potresti anche **escalare i privilegi** con questa tecnica.
 
 ### Privilegi del Token
 
 Scopri quali **privilegi del token possono essere abusati per escalare i privilegi:**
+
 
 {{#ref}}
 privilege-escalation-abusing-tokens.md

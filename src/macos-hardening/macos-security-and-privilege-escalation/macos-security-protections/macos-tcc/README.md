@@ -24,7 +24,7 @@ I permessi sono **ereditati dall'applicazione padre** e i **permessi** sono **tr
 
 ### Database TCC
 
-Le autorizzazioni/negazioni sono quindi memorizzate in alcuni database TCC:
+Le autorizzazioni/rifiuti sono quindi memorizzati in alcuni database TCC:
 
 - Il database a livello di sistema in **`/Library/Application Support/com.apple.TCC/TCC.db`**.
 - Questo database è **protetto da SIP**, quindi solo un bypass SIP può scriverci.
@@ -44,8 +44,8 @@ Le autorizzazioni/negazioni sono quindi memorizzate in alcuni database TCC:
 > [!TIP]
 > Il database TCC in **iOS** si trova in **`/private/var/mobile/Library/TCC/TCC.db`**.
 
-> [!NOTE]
-> L'**interfaccia del centro notifiche** può apportare **modifiche nel database TCC di sistema**:
+> [!TIP]
+> L'**interfaccia del centro notifiche** può apportare **modifiche al database TCC di sistema**:
 >
 > ```bash
 > codesign -dv --entitlements :- /System/Library/PrivateFrameworks/TCC.framework/> Support/tccd
@@ -171,12 +171,12 @@ echo "X'$REQ_HEX'"
 ```
 - Per ulteriori informazioni sui **altri campi** della tabella [**controlla questo post del blog**](https://www.rainforestqa.com/blog/macos-tcc-db-deep-dive).
 
-Puoi anche controllare i **permessi già concessi** alle app in `System Preferences --> Security & Privacy --> Privacy --> Files and Folders`.
+Puoi anche controllare le **autorizzazioni già concesse** alle app in `System Preferences --> Security & Privacy --> Privacy --> Files and Folders`.
 
 > [!TIP]
 > Gli utenti _possono_ **eliminare o interrogare le regole** utilizzando **`tccutil`**.
 
-#### Ripristina i permessi TCC
+#### Ripristina le autorizzazioni TCC
 ```bash
 # You can reset all the permissions given to an application with
 tccutil reset All app.some.id
@@ -186,7 +186,7 @@ tccutil reset All
 ```
 ### Controlli della Firma TCC
 
-Il **database** TCC memorizza il **Bundle ID** dell'applicazione, ma memorizza anche **informazioni** sulla **firma** per **assicurarsi** che l'App che richiede di utilizzare un permesso sia quella corretta.
+Il TCC **database** memorizza il **Bundle ID** dell'applicazione, ma **memorizza** anche **informazioni** sulla **firma** per **assicurarsi** che l'App che richiede di utilizzare un permesso sia quella corretta.
 ```bash
 # From sqlite
 sqlite> select service, client, hex(csreq) from access where auth_value=2;
@@ -206,7 +206,7 @@ csreq -t -r /tmp/telegram_csreq.bin
 Le app **non hanno solo bisogno** di **richiedere** e di avere **accesso** a alcune risorse, ma devono anche **avere i diritti pertinenti**.\
 Ad esempio, **Telegram** ha il diritto `com.apple.security.device.camera` per richiedere **accesso alla fotocamera**. Un **app** che **non ha** questo **diritto non potrà** accedere alla fotocamera (e l'utente non verrà nemmeno chiesto per i permessi).
 
-Tuttavia, per le app per **accedere** a **determinate cartelle utente**, come `~/Desktop`, `~/Downloads` e `~/Documents`, **non hanno bisogno** di avere diritti specifici. Il sistema gestirà l'accesso in modo trasparente e **chiederà all'utente** secondo necessità.
+Tuttavia, per le app che devono **accedere** a **determinate cartelle utente**, come `~/Desktop`, `~/Downloads` e `~/Documents`, **non hanno bisogno** di avere diritti specifici. Il sistema gestirà l'accesso in modo trasparente e **chiederà all'utente** secondo necessità.
 
 Le app di Apple **non genereranno richieste**. Contengono **diritti pre-concessi** nella loro lista di **diritti**, il che significa che **non genereranno mai un popup**, **né** appariranno in nessuna delle **banche dati TCC**. Ad esempio:
 ```bash
@@ -219,7 +219,7 @@ codesign -dv --entitlements :- /System/Applications/Calendar.app
 <string>kTCCServiceAddressBook</string>
 </array>
 ```
-Questo eviterà che Calendar chieda all'utente di accedere ai promemoria, al calendario e alla rubrica.
+Questo eviterà che Calendar chieda all'utente di accedere a promemoria, calendario e rubrica.
 
 > [!TIP]
 > Oltre ad alcune documentazioni ufficiali sugli entitlement, è anche possibile trovare informazioni **interessanti sugli entitlement in** [**https://newosxbook.com/ent.jl**](https://newosxbook.com/ent.jl)
@@ -249,10 +249,10 @@ Filename,Header,App UUID
 otool -l /System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal| grep uuid
 uuid 769FD8F1-90E0-3206-808C-A8947BEBD6C3
 ```
-> [!NOTE]
+> [!TIP]
 > È curioso che l'attributo **`com.apple.macl`** sia gestito dal **Sandbox**, non da tccd.
 >
-> Nota anche che se sposti un file che consente l'UUID di un'app nel tuo computer a un altro computer, poiché la stessa app avrà UIDs diversi, non concederà accesso a quell'app.
+> Nota anche che se sposti un file che consente l'UUID di un'app nel tuo computer a un computer diverso, poiché la stessa app avrà UIDs diversi, non concederà accesso a quell'app.
 
 L'attributo esteso `com.apple.macl` **non può essere cancellato** come altri attributi estesi perché è **protetto da SIP**. Tuttavia, come [**spiegato in questo post**](https://www.brunerd.com/blog/2020/01/07/track-and-tackle-com-apple-macl/), è possibile disabilitarlo **zippando** il file, **eliminandolo** e **decomprendendolo**.
 
@@ -310,6 +310,7 @@ strftime('%s', 'now') -- last_reminded with default current timestamp
 
 Se sei riuscito a entrare in un'app con alcune autorizzazioni TCC, controlla la seguente pagina con i payload TCC per abusarne:
 
+
 {{#ref}}
 macos-tcc-payloads.md
 {{#endref}}
@@ -317,6 +318,7 @@ macos-tcc-payloads.md
 ### Eventi Apple
 
 Scopri di più sugli Eventi Apple in:
+
 
 {{#ref}}
 macos-apple-events.md
@@ -331,7 +333,7 @@ Questa specifica autorizzazione TCC indica anche l'**applicazione che può esser
 In questo caso, la tua app avrebbe bisogno dell'autorizzazione **`kTCCServiceAppleEvents`** su **`com.apple.Finder`**.
 
 {{#tabs}}
-{{#tab name="Furto del TCC.db degli utenti"}}
+{{#tab name="Rubare il TCC.db degli utenti"}}
 ```applescript
 # This AppleScript will copy the system TCC database into /tmp
 osascript<<EOD
@@ -361,7 +363,7 @@ EOD
 Potresti abusare di questo per **scrivere il tuo database TCC utente**.
 
 > [!WARNING]
-> Con questo permesso sarai in grado di **chiedere a Finder di accedere alle cartelle TCC riservate** e darti i file, ma per quanto ne so **non sarai in grado di far eseguire a Finder codice arbitrario** per abusare completamente del suo accesso FDA.
+> Con questo permesso sarai in grado di **chiedere a Finder di accedere alle cartelle TCC riservate** e darti i file, ma per quanto ne so **non sarai in grado di far eseguire a Finder codice arbitrario** per sfruttare completamente il suo accesso FDA.
 >
 > Pertanto, non sarai in grado di abusare delle piene capacità FDA.
 
@@ -442,11 +444,11 @@ EOD
 touch "$HOME/Desktop/file"
 rm "$HOME/Desktop/file"
 ```
-### Automazione (SE) + Accessibilità (**`kTCCServicePostEvent`|**`kTCCServiceAccessibility`**)** per FDA\*
+### Automazione (SE) + Accessibilità (**`kTCCServicePostEvent`|**`kTCCServiceAccessibility`**)** a FDA\*
 
 L'automazione su **`System Events`** + Accessibilità (**`kTCCServicePostEvent`**) consente di inviare **sequenze di tasti ai processi**. In questo modo potresti abusare di Finder per modificare il TCC.db degli utenti o per concedere FDA a un'app arbitraria (anche se potrebbe essere richiesta una password per questo).
 
-Esempio di sovrascrittura del TCC.db degli utenti da parte di Finder:
+Esempio di sovrascrittura del TCC.db degli utenti tramite Finder:
 ```applescript
 -- store the TCC.db file to copy in /tmp
 osascript <<EOF
@@ -555,6 +557,7 @@ AllowApplicationsList.plist:
 </plist>
 ```
 ### TCC Bypasses
+
 
 {{#ref}}
 macos-tcc-bypasses/

@@ -1,80 +1,80 @@
-# macOS IPC - Comunicazione tra Processi
+# macOS IPC - Inter Process Communication
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## Messaggi Mach tramite Porte
+## Mach messaging via Ports
 
-### Informazioni di Base
+### Basic Information
 
-Mach utilizza **compiti** come la **più piccola unità** per la condivisione delle risorse, e ogni compito può contenere **più thread**. Questi **compiti e thread sono mappati 1:1 a processi e thread POSIX**.
+Mach utilizza **task** come **unità più piccola** per la condivisione delle risorse, e ogni task può contenere **più thread**. Questi **task e thread sono mappati 1:1 a processi e thread POSIX**.
 
-La comunicazione tra compiti avviene tramite la Comunicazione Inter-Processo Mach (IPC), utilizzando canali di comunicazione unidirezionali. **I messaggi vengono trasferiti tra porte**, che fungono da **code di messaggi** gestite dal kernel.
+La comunicazione tra task avviene tramite Mach Inter-Process Communication (IPC), utilizzando canali di comunicazione unidirezionali. **I messaggi vengono trasferiti tra porte**, che fungono da **code di messaggi** gestite dal kernel.
 
-Una **porta** è l'elemento **base** dell'IPC Mach. Può essere utilizzata per **inviare messaggi e riceverli**.
+Una **porta** è l'elemento **base** di Mach IPC. Può essere utilizzata per **inviare messaggi e riceverli**.
 
 Ogni processo ha una **tabella IPC**, in cui è possibile trovare le **porte mach del processo**. Il nome di una porta mach è in realtà un numero (un puntatore all'oggetto kernel).
 
-Un processo può anche inviare un nome di porta con alcuni diritti **a un compito diverso** e il kernel farà apparire questa voce nella **tabella IPC dell'altro compito**.
+Un processo può anche inviare un nome di porta con alcuni diritti **a un task diverso** e il kernel farà apparire questa voce nella **tabella IPC dell'altro task**.
 
-### Diritti di Porta
+### Port Rights
 
-I diritti di porta, che definiscono quali operazioni un compito può eseguire, sono fondamentali per questa comunicazione. I possibili **diritti di porta** sono ([definizioni da qui](https://docs.darlinghq.org/internals/macos-specifics/mach-ports.html)):
+I diritti di porta, che definiscono quali operazioni un task può eseguire, sono fondamentali per questa comunicazione. I possibili **diritti di porta** sono ([definizioni da qui](https://docs.darlinghq.org/internals/macos-specifics/mach-ports.html)):
 
-- **Diritto di ricezione**, che consente di ricevere messaggi inviati alla porta. Le porte Mach sono code MPSC (produttore multiplo, consumatore singolo), il che significa che può esserci **solo un diritto di ricezione per ogni porta** nell'intero sistema (a differenza delle pipe, dove più processi possono detenere descrittori di file per l'estremità di lettura di una pipe).
-- Un **compito con il diritto di ricezione** può ricevere messaggi e **creare diritti di invio**, consentendogli di inviare messaggi. Inizialmente solo il **proprio compito ha il diritto di ricezione sulla sua porta**.
+- **Diritto di ricezione**, che consente di ricevere messaggi inviati alla porta. Le porte Mach sono code MPSC (multiple-producer, single-consumer), il che significa che può esserci solo **un diritto di ricezione per ogni porta** nell'intero sistema (a differenza delle pipe, dove più processi possono detenere descrittori di file per l'estremità di lettura di una pipe).
+- Un **task con il diritto di ricezione** può ricevere messaggi e **creare diritti di invio**, consentendogli di inviare messaggi. Inizialmente solo il **proprio task ha il diritto di ricezione sulla sua porta**.
 - Se il proprietario del diritto di ricezione **muore** o lo uccide, il **diritto di invio diventa inutile (nome morto)**.
 - **Diritto di invio**, che consente di inviare messaggi alla porta.
-- Il diritto di invio può essere **clonato** in modo che un compito che possiede un diritto di invio possa clonare il diritto e **concederlo a un terzo compito**.
+- Il diritto di invio può essere **clonato** in modo che un task che possiede un diritto di invio possa clonare il diritto e **concederlo a un terzo task**.
 - Si noti che i **diritti di porta** possono anche essere **trasmessi** tramite messaggi Mac.
 - **Diritto di invio una sola volta**, che consente di inviare un messaggio alla porta e poi scompare.
 - Questo diritto **non può** essere **clonato**, ma può essere **spostato**.
-- **Diritto di insieme di porte**, che denota un _insieme di porte_ piuttosto che una singola porta. Dequeuing un messaggio da un insieme di porte dequeues un messaggio da una delle porte che contiene. Gli insiemi di porte possono essere utilizzati per ascoltare su più porte contemporaneamente, molto simile a `select`/`poll`/`epoll`/`kqueue` in Unix.
+- **Diritto di insieme di porte**, che denota un _insieme di porte_ piuttosto che una singola porta. Dequeuing un messaggio da un insieme di porte estrae un messaggio da una delle porte che contiene. Gli insiemi di porte possono essere utilizzati per ascoltare su più porte simultaneamente, molto simile a `select`/`poll`/`epoll`/`kqueue` in Unix.
 - **Nome morto**, che non è un vero e proprio diritto di porta, ma semplicemente un segnaposto. Quando una porta viene distrutta, tutti i diritti di porta esistenti per la porta si trasformano in nomi morti.
 
-**I compiti possono trasferire diritti di INVIO ad altri**, consentendo loro di inviare messaggi di ritorno. **I diritti di INVIO possono anche essere clonati, quindi un compito può duplicare e dare il diritto a un terzo compito**. Questo, combinato con un processo intermedio noto come **bootstrap server**, consente una comunicazione efficace tra i compiti.
+**I task possono trasferire diritti di INVIO ad altri**, consentendo loro di inviare messaggi di ritorno. **I diritti di INVIO possono anche essere clonati, quindi un task può duplicare e dare il diritto a un terzo task**. Questo, combinato con un processo intermedio noto come **bootstrap server**, consente una comunicazione efficace tra i task.
 
-### Porte di File
+### File Ports
 
-Le porte di file consentono di incapsulare descrittori di file in porte Mac (utilizzando diritti di porta Mach). È possibile creare un `fileport` da un FD dato utilizzando `fileport_makeport` e creare un FD da un fileport utilizzando `fileport_makefd`.
+Le porte file consentono di incapsulare descrittori di file in porte Mac (utilizzando diritti di porta Mach). È possibile creare un `fileport` da un FD dato utilizzando `fileport_makeport` e creare un FD da un fileport utilizzando `fileport_makefd`.
 
-### Stabilire una comunicazione
+### Establishing a communication
 
-Come accennato in precedenza, è possibile inviare diritti utilizzando messaggi Mach, tuttavia, **non è possibile inviare un diritto senza avere già un diritto** per inviare un messaggio Mach. Quindi, come viene stabilita la prima comunicazione?
+Come accennato in precedenza, è possibile inviare diritti utilizzando messaggi Mach, tuttavia, **non puoi inviare un diritto senza avere già un diritto** per inviare un messaggio Mach. Quindi, come viene stabilita la prima comunicazione?
 
 Per questo, il **bootstrap server** (**launchd** in mac) è coinvolto, poiché **chiunque può ottenere un diritto di INVIO al bootstrap server**, è possibile chiedergli un diritto per inviare un messaggio a un altro processo:
 
-1. Il compito **A** crea una **nuova porta**, ottenendo il **DIRITTO DI RICEZIONE** su di essa.
-2. Il compito **A**, essendo il detentore del diritto di ricezione, **genera un diritto di INVIO per la porta**.
-3. Il compito **A** stabilisce una **connessione** con il **bootstrap server**, e **gli invia il diritto di INVIO** per la porta che ha generato all'inizio.
+1. Il task **A** crea una **nuova porta**, ottenendo il **DIRITTO DI RICEZIONE** su di essa.
+2. Il task **A**, essendo il detentore del diritto di ricezione, **genera un diritto di INVIO per la porta**.
+3. Il task **A** stabilisce una **connessione** con il **bootstrap server**, e **gli invia il diritto di INVIO** per la porta che ha generato all'inizio.
 - Ricorda che chiunque può ottenere un diritto di INVIO al bootstrap server.
-4. Il compito A invia un messaggio `bootstrap_register` al bootstrap server per **associare la porta data a un nome** come `com.apple.taska`
-5. Il compito **B** interagisce con il **bootstrap server** per eseguire una **ricerca bootstrap per il nome del servizio** (`bootstrap_lookup`). Affinché il bootstrap server possa rispondere, il compito B gli invierà un **diritto di INVIO a una porta che ha precedentemente creato** all'interno del messaggio di ricerca. Se la ricerca ha successo, il **server duplica il diritto di INVIO** ricevuto dal compito A e **lo trasmette al compito B**.
+4. Il task A invia un messaggio `bootstrap_register` al bootstrap server per **associare la porta data a un nome** come `com.apple.taska`
+5. Il task **B** interagisce con il **bootstrap server** per eseguire un bootstrap **lookup per il nome del servizio** (`bootstrap_lookup`). Affinché il bootstrap server possa rispondere, il task B gli invierà un **diritto di INVIO a una porta che ha precedentemente creato** all'interno del messaggio di lookup. Se il lookup ha successo, il **server duplica il diritto di INVIO** ricevuto dal Task A e **lo trasmette al Task B**.
 - Ricorda che chiunque può ottenere un diritto di INVIO al bootstrap server.
-6. Con questo diritto di INVIO, **il compito B** è in grado di **inviare** un **messaggio** **al compito A**.
-7. Per una comunicazione bidirezionale, di solito il compito **B** genera una nuova porta con un **DIRITTO DI RICEZIONE** e un **DIRITTO DI INVIO**, e dà il **DIRITTO DI INVIO al compito A** in modo che possa inviare messaggi al COMPITO B (comunicazione bidirezionale).
+6. Con questo diritto di INVIO, **Task B** è in grado di **inviare** un **messaggio** **al Task A**.
+7. Per una comunicazione bidirezionale, di solito il task **B** genera una nuova porta con un **DIRITTO DI RICEZIONE** e un **DIRITTO DI INVIO**, e dà il **DIRITTO DI INVIO al Task A** in modo che possa inviare messaggi al TASK B (comunicazione bidirezionale).
 
-Il bootstrap server **non può autenticare** il nome del servizio rivendicato da un compito. Ciò significa che un **compito** potrebbe potenzialmente **impersonare qualsiasi compito di sistema**, come rivendicare falsamente un nome di servizio di autorizzazione e poi approvare ogni richiesta.
+Il bootstrap server **non può autenticare** il nome del servizio rivendicato da un task. Questo significa che un **task** potrebbe potenzialmente **impersonare qualsiasi task di sistema**, come rivendicare falsamente un nome di servizio di autorizzazione e poi approvare ogni richiesta.
 
-Successivamente, Apple memorizza i **nomi dei servizi forniti dal sistema** in file di configurazione sicuri, situati in directory **protette da SIP**: `/System/Library/LaunchDaemons` e `/System/Library/LaunchAgents`. Accanto a ciascun nome di servizio, è anche memorizzato il **binario associato**. Il bootstrap server creerà e manterrà un **DIRITTO DI RICEZIONE per ciascuno di questi nomi di servizio**.
+Poi, Apple memorizza i **nomi dei servizi forniti dal sistema** in file di configurazione sicuri, situati in directory **protette da SIP**: `/System/Library/LaunchDaemons` e `/System/Library/LaunchAgents`. Accanto a ciascun nome di servizio, il **binario associato è anche memorizzato**. Il bootstrap server creerà e manterrà un **DIRITTO DI RICEZIONE per ciascuno di questi nomi di servizio**.
 
-Per questi servizi predefiniti, il **processo di ricerca differisce leggermente**. Quando un nome di servizio viene cercato, launchd avvia il servizio dinamicamente. Il nuovo flusso di lavoro è il seguente:
+Per questi servizi predefiniti, il **processo di lookup differisce leggermente**. Quando un nome di servizio viene cercato, launchd avvia il servizio dinamicamente. Il nuovo flusso di lavoro è il seguente:
 
-- Il compito **B** avvia una **ricerca bootstrap** per un nome di servizio.
-- **launchd** controlla se il compito è in esecuzione e, se non lo è, **lo avvia**.
-- Il compito **A** (il servizio) esegue un **check-in bootstrap** (`bootstrap_check_in()`). Qui, il **bootstrap** server crea un diritto di INVIO, lo trattiene e **trasferisce il diritto di RICEZIONE al compito A**.
-- launchd duplica il **DIRITTO DI INVIO e lo invia al compito B**.
-- Il compito **B** genera una nuova porta con un **DIRITTO DI RICEZIONE** e un **DIRITTO DI INVIO**, e dà il **DIRITTO DI INVIO al compito A** (il svc) in modo che possa inviare messaggi al COMPITO B (comunicazione bidirezionale).
+- Il task **B** avvia un bootstrap **lookup** per un nome di servizio.
+- **launchd** controlla se il task è in esecuzione e, se non lo è, **lo avvia**.
+- Il task **A** (il servizio) esegue un **bootstrap check-in** (`bootstrap_check_in()`). Qui, il **bootstrap** server crea un diritto di INVIO, lo trattiene e **trasferisce il diritto di RICEZIONE al Task A**.
+- launchd duplica il **diritto di INVIO e lo invia al Task B**.
+- Il task **B** genera una nuova porta con un **DIRITTO DI RICEZIONE** e un **DIRITTO DI INVIO**, e dà il **DIRITTO DI INVIO al Task A** (il svc) in modo che possa inviare messaggi al TASK B (comunicazione bidirezionale).
 
-Tuttavia, questo processo si applica solo ai compiti di sistema predefiniti. I compiti non di sistema operano ancora come descritto originariamente, il che potrebbe potenzialmente consentire l'impersonificazione.
+Tuttavia, questo processo si applica solo ai task di sistema predefiniti. I task non di sistema operano ancora come descritto originariamente, il che potrebbe potenzialmente consentire l'impersonificazione.
 
 > [!CAUTION]
-> Pertanto, launchd non dovrebbe mai bloccarsi o l'intero sistema si bloccherà.
+> Pertanto, launchd non dovrebbe mai andare in crash o l'intero sistema andrà in crash.
 
-### Un Messaggio Mach
+### A Mach Message
 
-[Trova ulteriori informazioni qui](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/)
+[Find more info here](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/)
 
-La funzione `mach_msg`, essenzialmente una chiamata di sistema, è utilizzata per inviare e ricevere messaggi Mach. La funzione richiede che il messaggio da inviare sia l'argomento iniziale. Questo messaggio deve iniziare con una struttura `mach_msg_header_t`, seguita dal contenuto del messaggio effettivo. La struttura è definita come segue:
+La funzione `mach_msg`, essenzialmente una chiamata di sistema, viene utilizzata per inviare e ricevere messaggi Mach. La funzione richiede che il messaggio da inviare sia il primo argomento. Questo messaggio deve iniziare con una struttura `mach_msg_header_t`, seguita dal contenuto del messaggio effettivo. La struttura è definita come segue:
 ```c
 typedef struct {
 mach_msg_bits_t               msgh_bits;
@@ -89,11 +89,11 @@ I process che possiedono un _**diritto di ricezione**_ possono ricevere messaggi
 
 Il campo iniziale **`msgh_bits`** è un bitmap:
 
-- Il primo bit (il più significativo) è utilizzato per indicare che un messaggio è complesso (ne parleremo più avanti)
-- Il 3° e il 4° sono utilizzati dal kernel
-- I **5 bit meno significativi del 2° byte** possono essere utilizzati per **voucher**: un altro tipo di porta per inviare combinazioni chiave/valore.
-- I **5 bit meno significativi del 3° byte** possono essere utilizzati per **porta locale**
-- I **5 bit meno significativi del 4° byte** possono essere utilizzati per **porta remota**
+- Il primo bit (il più significativo) è usato per indicare che un messaggio è complesso (ne parleremo più avanti)
+- Il 3° e il 4° sono usati dal kernel
+- I **5 bit meno significativi del 2° byte** possono essere usati per **voucher**: un altro tipo di porta per inviare combinazioni chiave/valore.
+- I **5 bit meno significativi del 3° byte** possono essere usati per **porta locale**
+- I **5 bit meno significativi del 4° byte** possono essere usati per **porta remota**
 
 I tipi che possono essere specificati nel voucher, nelle porte locali e remote sono (da [**mach/message.h**](https://opensource.apple.com/source/xnu/xnu-7195.81.3/osfmk/mach/message.h.auto.html)):
 ```c
@@ -110,7 +110,7 @@ I tipi che possono essere specificati nel voucher, nelle porte locali e remote s
 ```
 Per esempio, `MACH_MSG_TYPE_MAKE_SEND_ONCE` può essere utilizzato per **indicare** che un **diritto di invio una sola volta** dovrebbe essere derivato e trasferito per questa porta. Può anche essere specificato `MACH_PORT_NULL` per impedire al destinatario di poter rispondere.
 
-Per ottenere una facile **comunicazione bi-direzionale**, un processo può specificare una **mach port** nell'intestazione del **messaggio mach** chiamata _porta di risposta_ (**`msgh_local_port`**) dove il **ricevitore** del messaggio può **inviare una risposta** a questo messaggio.
+Per ottenere una facile **comunicazione bi-direzionale**, un processo può specificare una **mach port** nell'intestazione del **messaggio mach** chiamata _porta di risposta_ (**`msgh_local_port`**) dove il **ricevente** del messaggio può **inviare una risposta** a questo messaggio.
 
 > [!TIP]
 > Nota che questo tipo di comunicazione bi-direzionale è utilizzato nei messaggi XPC che si aspettano una risposta (`xpc_connection_send_message_with_reply` e `xpc_connection_send_message_with_reply_sync`). Ma **di solito vengono create porte diverse** come spiegato in precedenza per creare la comunicazione bi-direzionale.
@@ -120,10 +120,10 @@ Gli altri campi dell'intestazione del messaggio sono:
 - `msgh_size`: la dimensione dell'intero pacchetto.
 - `msgh_remote_port`: la porta sulla quale questo messaggio è inviato.
 - `msgh_voucher_port`: [mach vouchers](https://robert.sesek.com/2023/6/mach_vouchers.html).
-- `msgh_id`: l'ID di questo messaggio, che è interpretato dal ricevitore.
+- `msgh_id`: l'ID di questo messaggio, che è interpretato dal ricevente.
 
 > [!CAUTION]
-> Nota che **i messaggi mach sono inviati su una `mach port`**, che è un canale di comunicazione **a singolo ricevitore**, **multi-inviatore** integrato nel kernel mach. **Più processi** possono **inviare messaggi** a una mach port, ma in qualsiasi momento solo **un singolo processo può leggere** da essa.
+> Nota che **i messaggi mach vengono inviati su una `mach port`**, che è un canale di comunicazione **a singolo ricevente**, **multi-inviatore** integrato nel kernel mach. **Più processi** possono **inviare messaggi** a una mach port, ma in qualsiasi momento solo **un singolo processo può leggere** da essa.
 
 I messaggi sono quindi formati dall'intestazione **`mach_msg_header_t`** seguita dal **corpo** e dal **trailer** (se presente) e possono concedere il permesso di rispondere. In questi casi, il kernel deve solo passare il messaggio da un'attività all'altra.
 
@@ -205,7 +205,7 @@ frame #8: 0x000000018e59e6ac libSystem.B.dylib`libSystem_initializer + 236
 frame #9: 0x0000000181a1d5c8 dyld`invocation function for block in dyld4::Loader::findAndRunAllInitializers(dyld4::RuntimeState&) const::$_0::operator()() const + 168
 </code></pre>
 
-Per ottenere gli argomenti di **`mach_msg`**, controlla i registri. Questi sono gli argomenti (da [mach/message.h](https://opensource.apple.com/source/xnu/xnu-7195.81.3/osfmk/mach/message.h.auto.html)):
+Per ottenere gli argomenti di **`mach_msg`** controlla i registri. Questi sono gli argomenti (da [mach/message.h](https://opensource.apple.com/source/xnu/xnu-7195.81.3/osfmk/mach/message.h.auto.html)):
 ```c
 __WATCHOS_PROHIBITED __TVOS_PROHIBITED
 extern mach_msg_return_t        mach_msg(
@@ -267,7 +267,7 @@ name      ipc-object    rights     flags   boost  reqs  recv  send sonce oref  q
 +     send        --------        ---            1         <-                                       0x00002603  (74295) passd
 [...]
 ```
-Il **nome** è il nome predefinito assegnato alla porta (controlla come **aumenta** nei primi 3 byte). L'**`ipc-object`** è l'**identificatore** unico **offuscato** della porta.\
+Il **nome** è il nome predefinito assegnato alla porta (controlla come sta **aumentando** nei primi 3 byte). L'**`ipc-object`** è l'**identificatore** unico **offuscato** della porta.\
 Nota anche come le porte con solo diritti di **`send`** stanno **identificando il proprietario** (nome della porta + pid).\
 Nota anche l'uso di **`+`** per indicare **altri compiti collegati alla stessa porta**.
 
@@ -424,7 +424,7 @@ Quelle che iniziano **dal** numero **8** sono **di proprietà dei demoni di sist
 - `host_virtual_physical_table_info`: Tabella delle pagine Virtuali/Fisiche (richiede MACH_VMDEBUG)
 - `host_statistics`: Ottieni statistiche dell'host
 - `mach_memory_info`: Ottieni layout della memoria del kernel
-- **Porte Privilege**: Un processo con diritto **SEND** su questa porta può eseguire **azioni privilegiate** come mostrare dati di avvio o tentare di caricare un'estensione del kernel. Il **processo deve essere root** per ottenere questo permesso.
+- **Porte Privilege host**: Un processo con diritto **SEND** su questa porta può eseguire **azioni privilegiate** come mostrare dati di avvio o tentare di caricare un'estensione del kernel. Il **processo deve essere root** per ottenere questo permesso.
 - Inoltre, per chiamare l'API **`kext_request`** è necessario avere altri diritti **`com.apple.private.kext*`** che sono concessi solo ai binari Apple.
 - Altre routine che possono essere chiamate sono:
 - `host_get_boot_info`: Ottieni `machine_boot_info()`
@@ -451,8 +451,6 @@ world.*/
 #define TASK_WIRED_LEDGER_PORT	5	/* Wired resource ledger for task. */
 #define TASK_PAGED_LEDGER_PORT	6	/* Paged resource ledger for task. */
 ```
-Da [qui](https://web.mit.edu/darwin/src/modules/xnu/osfmk/man/task_get_special_port.html):
-
 - **TASK_KERNEL_PORT**\[diritto di invio task-self]: La porta utilizzata per controllare questo task. Usata per inviare messaggi che influenzano il task. Questa è la porta restituita da **mach_task_self (vedi Task Ports qui sotto)**.
 - **TASK_BOOTSTRAP_PORT**\[diritto di invio bootstrap]: La porta di bootstrap del task. Usata per inviare messaggi che richiedono il ritorno di altre porte di servizio di sistema.
 - **TASK_HOST_NAME_PORT**\[diritto di invio host-self]: La porta utilizzata per richiedere informazioni sull'host contenitore. Questa è la porta restituita da **mach_host_self**.
@@ -461,7 +459,7 @@ Da [qui](https://web.mit.edu/darwin/src/modules/xnu/osfmk/man/task_get_special_p
 
 ### Task Ports
 
-Originariamente Mach non aveva "processi", aveva "tasks" che erano considerati più come un contenitore di thread. Quando Mach è stato fuso con BSD **ogni task era correlato a un processo BSD**. Pertanto, ogni processo BSD ha i dettagli necessari per essere un processo e ogni task Mach ha anche il suo funzionamento interno (eccetto per il pid 0 inesistente che è il `kernel_task`).
+Originariamente Mach non aveva "processi", aveva "task" che erano considerati più come un contenitore di thread. Quando Mach è stato fuso con BSD **ogni task era correlato a un processo BSD**. Pertanto, ogni processo BSD ha i dettagli necessari per essere un processo e ogni task Mach ha anche il suo funzionamento interno (eccetto per il pid 0 inesistente che è il `kernel_task`).
 
 Ci sono due funzioni molto interessanti relative a questo:
 
@@ -483,12 +481,12 @@ Per eseguire azioni all'interno del task, il task ha bisogno di un diritto di `S
 
 Inoltre, la task_port è anche la porta **`vm_map`** che consente di **leggere e manipolare la memoria** all'interno di un task con funzioni come `vm_read()` e `vm_write()`. Questo significa fondamentalmente che un task con diritti di INVIO sulla task_port di un task diverso sarà in grado di **iniettare codice in quel task**.
 
-Ricorda che poiché il **kernel è anche un task**, se qualcuno riesce a ottenere un **diritto di INVIO** sul **`kernel_task`**, sarà in grado di far eseguire al kernel qualsiasi cosa (jailbreak).
+Ricorda che poiché il **kernel è anche un task**, se qualcuno riesce a ottenere un **permesso di INVIO** sul **`kernel_task`**, sarà in grado di far eseguire al kernel qualsiasi cosa (jailbreak).
 
 - Chiama `mach_task_self()` per **ottenere il nome** per questa porta per il task chiamante. Questa porta è solo **ereditata** attraverso **`exec()`**; un nuovo task creato con `fork()` ottiene una nuova porta task (come caso speciale, un task ottiene anche una nuova porta task dopo `exec()` in un binario suid). L'unico modo per generare un task e ottenere la sua porta è eseguire il ["port swap dance"](https://robert.sesek.com/2014/1/changes_to_xnu_mach_ipc.html) mentre si esegue un `fork()`.
 - Queste sono le restrizioni per accedere alla porta (da `macos_task_policy` dal binario `AppleMobileFileIntegrity`):
-- Se l'app ha l'**entitlement `com.apple.security.get-task-allow`**, i processi dello **stesso utente possono accedere alla porta task** (comunemente aggiunto da Xcode per il debug). Il processo di **notarizzazione** non lo consentirà per le versioni di produzione.
-- Le app con l'**entitlement `com.apple.system-task-ports`** possono ottenere la **porta task per qualsiasi** processo, tranne il kernel. Nelle versioni precedenti era chiamato **`task_for_pid-allow`**. Questo è concesso solo alle applicazioni Apple.
+- Se l'app ha il **diritto `com.apple.security.get-task-allow`** i processi dello **stesso utente possono accedere alla porta task** (comunemente aggiunto da Xcode per il debug). Il processo di **notarizzazione** non lo consentirà per le versioni di produzione.
+- Le app con il diritto **`com.apple.system-task-ports`** possono ottenere la **porta task per qualsiasi** processo, tranne il kernel. Nelle versioni precedenti era chiamato **`task_for_pid-allow`**. Questo è concesso solo alle applicazioni Apple.
 - **Root può accedere alle porte task** delle applicazioni **non** compilate con un runtime **indurito** (e non da Apple).
 
 **La porta del nome del task:** Una versione non privilegiata della _porta task_. Riferisce al task, ma non consente di controllarlo. L'unica cosa che sembra essere disponibile attraverso di essa è `task_info()`.
@@ -509,6 +507,7 @@ Qualsiasi thread può ottenere questa porta chiamando **`mach_thread_sef`**.
 ### Shellcode Injection in thread via Task port
 
 Puoi prendere un shellcode da:
+
 
 {{#ref}}
 ../../macos-apps-inspecting-debugging-and-fuzzing/arm64-basic-assembly.md
@@ -560,7 +559,7 @@ return 0;
 {{#endtab}}
 {{#endtabs}}
 
-**Compila** il programma precedente e aggiungi i **diritti** per poter iniettare codice con lo stesso utente (se no dovrai usare **sudo**).
+**Compila** il programma precedente e aggiungi i **diritti** per poter iniettare codice con lo stesso utente (altrimenti dovrai usare **sudo**).
 
 <details>
 
@@ -770,7 +769,7 @@ gcc -framework Foundation -framework Appkit sc_inject.m -o sc_inject
 ./inject <pi or string>
 ```
 > [!TIP]
-> Per far funzionare questo su iOS, hai bisogno del diritto `dynamic-codesigning` per poter creare un'eseguibile in memoria scrivibile.
+> Per far funzionare questo su iOS, hai bisogno del diritto `dynamic-codesigning` per poter rendere eseguibile un'area di memoria scrivibile.
 
 ### Iniezione di Dylib in thread tramite Task port
 
@@ -780,7 +779,8 @@ In macOS **i thread** possono essere manipolati tramite **Mach** o utilizzando *
 
 Pertanto, per **migliorare il thread**, dovrebbe chiamare **`pthread_create_from_mach_thread`** che **creerà un pthread valido**. Poi, questo nuovo pthread potrebbe **chiamare dlopen** per **caricare un dylib** dal sistema, quindi invece di scrivere nuovo shellcode per eseguire azioni diverse, è possibile caricare librerie personalizzate.
 
-Puoi trovare **dylibs di esempio** in (ad esempio quello che genera un log e poi puoi ascoltarlo):
+Puoi trovare **dylibs di esempio** in (ad esempio, quello che genera un log e poi puoi ascoltarlo):
+
 
 {{#ref}}
 ../macos-library-injection/macos-dyld-hijacking-and-dyld_insert_libraries.md
@@ -1068,19 +1068,20 @@ gcc -framework Foundation -framework Appkit dylib_injector.m -o dylib_injector
 
 In questa tecnica un thread del processo viene hijackato:
 
+
 {{#ref}}
 macos-thread-injection-via-task-port.md
 {{#endref}}
 
 ### Task Port Injection Detection
 
-Quando si chiama `task_for_pid` o `thread_create_*` si incrementa un contatore nella struct task dal kernel che può essere accessibile dalla modalità utente chiamando task_info(task, TASK_EXTMOD_INFO, ...)
+Quando si chiama `task_for_pid` o `thread_create_*` si incrementa un contatore nella struct task del kernel che può essere accessibile dalla modalità utente chiamando task_info(task, TASK_EXTMOD_INFO, ...)
 
 ## Exception Ports
 
 Quando si verifica un'eccezione in un thread, questa eccezione viene inviata al porto di eccezione designato del thread. Se il thread non la gestisce, allora viene inviata ai porti di eccezione del task. Se il task non la gestisce, allora viene inviata al porto host che è gestito da launchd (dove verrà riconosciuta). Questo è chiamato triage delle eccezioni.
 
-Nota che alla fine, di solito, se non gestita correttamente, la segnalazione finirà per essere gestita dal demone ReportCrash. Tuttavia, è possibile che un altro thread nello stesso task gestisca l'eccezione, questo è ciò che fanno gli strumenti di reportistica degli arresti come `PLCreashReporter`.
+Nota che alla fine, di solito, se non gestita correttamente, il report finirà per essere gestito dal demone ReportCrash. Tuttavia, è possibile che un altro thread nello stesso task gestisca l'eccezione, questo è ciò che fanno gli strumenti di reportistica degli arresti come `PLCreashReporter`.
 
 ## Other Objects
 
@@ -1222,6 +1223,7 @@ XPC, which stands for XNU (the kernel used by macOS) inter-Process Communication
 
 For more information about how this **communication work** on how it **could be vulnerable** check:
 
+
 {{#ref}}
 macos-xpc/
 {{#endref}}
@@ -1233,6 +1235,7 @@ MIG was created to **simplify the process of Mach IPC** code creation. This is b
 MIC basically **generates the needed code** for server and client to communicate with a given definition (in IDL -Interface Definition language-). Even if the generated code is ugly, a developer will just need to import it and his code will be much simpler than before.
 
 For more info check:
+
 
 {{#ref}}
 macos-mig-mach-interface-generator.md

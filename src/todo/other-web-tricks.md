@@ -7,7 +7,7 @@
 Diverse volte il back-end si fida dell'**intestazione Host** per eseguire alcune azioni. Ad esempio, potrebbe utilizzare il suo valore come **dominio per inviare un ripristino della password**. Quindi, quando ricevi un'email con un link per ripristinare la tua password, il dominio utilizzato è quello che hai inserito nell'intestazione Host. Poi, puoi richiedere il ripristino della password di altri utenti e cambiare il dominio in uno controllato da te per rubare i loro codici di ripristino della password. [WriteUp](https://medium.com/nassec-cybersecurity-writeups/how-i-was-able-to-take-over-any-users-account-with-host-header-injection-546fff6d0f2).
 
 > [!WARNING]
-> Nota che è possibile che non sia nemmeno necessario aspettare che l'utente clicchi sul link per ripristinare la password per ottenere il token, poiché anche **i filtri antispam o altri dispositivi/bot intermedi potrebbero cliccarci sopra per analizzarlo**.
+> Nota che è possibile che tu non debba nemmeno aspettare che l'utente clicchi sul link per ripristinare la password per ottenere il token, poiché anche **i filtri antispam o altri dispositivi/bot intermedi potrebbero cliccarci sopra per analizzarlo**.
 
 ### Booleani di sessione
 
@@ -20,9 +20,9 @@ Prova a registrarti come un utente già esistente. Prova anche a utilizzare cara
 
 ### Prendere il controllo delle email
 
-Registrati con un'email, prima di confermarla cambia l'email, poi, se la nuova email di conferma viene inviata alla prima email registrata, puoi prendere il controllo di qualsiasi email. Oppure, se puoi abilitare la seconda email che conferma la prima, puoi anche prendere il controllo di qualsiasi account.
+Registrati con un'email, prima di confermarla cambia l'email, poi, se la nuova email di conferma viene inviata alla prima email registrata, puoi prendere il controllo di qualsiasi email. Oppure, se puoi abilitare la seconda email confermando la prima, puoi anche prendere il controllo di qualsiasi account.
 
-### Accesso al servicedesk interno delle aziende che utilizzano Atlassian
+### Accesso al servizio interno delle aziende che utilizzano Atlassian
 
 {{#ref}}
 https://yourcompanyname.atlassian.net/servicedesk/customer/user/login

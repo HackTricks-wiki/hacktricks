@@ -10,11 +10,11 @@ Il DLL Hijacking comporta la manipolazione di un'applicazione fidata per caricar
 
 ### Common Techniques
 
-Vengono impiegati diversi metodi per il DLL hijacking, ciascuno con la propria efficacia a seconda della strategia di caricamento del DLL dell'applicazione:
+Vengono impiegati diversi metodi per il DLL hijacking, ognuno con la propria efficacia a seconda della strategia di caricamento del DLL dell'applicazione:
 
 1. **DLL Replacement**: Sostituzione di un DLL genuino con uno malevolo, utilizzando eventualmente il DLL Proxying per preservare la funzionalità del DLL originale.
 2. **DLL Search Order Hijacking**: Posizionamento del DLL malevolo in un percorso di ricerca davanti a quello legittimo, sfruttando il modello di ricerca dell'applicazione.
-3. **Phantom DLL Hijacking**: Creazione di un DLL malevolo affinché un'applicazione lo carichi, pensando che sia un DLL richiesto non esistente.
+3. **Phantom DLL Hijacking**: Creazione di un DLL malevolo per un'applicazione da caricare, pensando che sia un DLL richiesto non esistente.
 4. **DLL Redirection**: Modifica dei parametri di ricerca come `%PATH%` o file `.exe.manifest` / `.exe.local` per indirizzare l'applicazione al DLL malevolo.
 5. **WinSxS DLL Replacement**: Sostituzione del DLL legittimo con un corrispondente malevolo nella directory WinSxS, un metodo spesso associato al DLL side-loading.
 6. **Relative Path DLL Hijacking**: Posizionamento del DLL malevolo in una directory controllata dall'utente con l'applicazione copiata, somigliante alle tecniche di Binary Proxy Execution.
@@ -36,15 +36,15 @@ Se stai cercando un **dll mancante all'interno di un eseguibile specifico** dovr
 
 ## Exploiting Missing Dlls
 
-Per poter elevare i privilegi, la migliore possibilità che abbiamo è quella di **scrivere un dll che un processo privilegiato cercherà di caricare** in qualche **luogo dove verrà cercato**. Pertanto, saremo in grado di **scrivere** un dll in una **cartella** dove il **dll viene cercato prima** della cartella dove si trova il **dll originale** (caso strano), oppure saremo in grado di **scrivere in qualche cartella dove il dll verrà cercato** e il **dll originale non esiste** in nessuna cartella.
+Per poter elevare i privilegi, la migliore possibilità che abbiamo è quella di **scrivere un dll che un processo privilegiato cercherà di caricare** in alcuni **luoghi dove verrà cercato**. Pertanto, saremo in grado di **scrivere** un dll in una **cartella** dove il **dll viene cercato prima** della cartella dove si trova il **dll originale** (caso strano), oppure saremo in grado di **scrivere in qualche cartella dove il dll verrà cercato** e il **dll originale non esiste** in nessuna cartella.
 
 ### Dll Search Order
 
 **All'interno della** [**documentazione Microsoft**](https://docs.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-search-order#factors-that-affect-searching) **puoi trovare come i DLL vengono caricati specificamente.**
 
-**Le applicazioni Windows** cercano i DLL seguendo un insieme di **percorsi di ricerca predefiniti**, aderendo a una particolare sequenza. Il problema del DLL hijacking sorge quando un DLL dannoso è posizionato strategicamente in una di queste directory, assicurando che venga caricato prima del DLL autentico. Una soluzione per prevenire questo è garantire che l'applicazione utilizzi percorsi assoluti quando si riferisce ai DLL di cui ha bisogno.
+**Le applicazioni Windows** cercano i DLL seguendo un insieme di **percorsi di ricerca predefiniti**, aderendo a una particolare sequenza. Il problema del DLL hijacking sorge quando un DLL dannoso è strategicamente posizionato in una di queste directory, assicurando che venga caricato prima del DLL autentico. Una soluzione per prevenire questo è garantire che l'applicazione utilizzi percorsi assoluti quando si riferisce ai DLL di cui ha bisogno.
 
-Puoi vedere l'**ordine di ricerca dei DLL su sistemi a 32 bit** qui sotto:
+Puoi vedere l'**ordine di ricerca dei DLL sui sistemi a 32 bit** qui sotto:
 
 1. La directory da cui l'applicazione è stata caricata.
 2. La directory di sistema. Usa la funzione [**GetSystemDirectory**](https://docs.microsoft.com/en-us/windows/desktop/api/sysinfoapi/nf-sysinfoapi-getsystemdirectorya) per ottenere il percorso di questa directory.(_C:\Windows\System32_)
@@ -58,16 +58,16 @@ Questo è l'**ordine di ricerca predefinito** con **SafeDllSearchMode** abilitat
 
 Se la funzione [**LoadLibraryEx**](https://docs.microsoft.com/en-us/windows/desktop/api/LibLoaderAPI/nf-libloaderapi-loadlibraryexa) viene chiamata con **LOAD_WITH_ALTERED_SEARCH_PATH**, la ricerca inizia nella directory del modulo eseguibile che **LoadLibraryEx** sta caricando.
 
-Infine, nota che **un dll potrebbe essere caricato indicando il percorso assoluto invece del solo nome**. In quel caso, quel dll è **cercato solo in quel percorso** (se il dll ha dipendenze, queste verranno cercate come se fossero state caricate solo per nome).
+Infine, nota che **un dll potrebbe essere caricato indicando il percorso assoluto invece del solo nome**. In quel caso, quel dll è **cercato solo in quel percorso** (se il dll ha dipendenze, queste verranno cercate come appena caricate per nome).
 
-Ci sono altri modi per alterare l'ordine di ricerca, ma non spiegherò qui.
+Ci sono altri modi per alterare i modi di alterare l'ordine di ricerca, ma non li spiegherò qui.
 
 #### Exceptions on dll search order from Windows docs
 
 Alcune eccezioni all'ordine di ricerca standard dei DLL sono annotate nella documentazione di Windows:
 
-- Quando si incontra un **DLL che condivide il proprio nome con uno già caricato in memoria**, il sistema salta la ricerca abituale. Invece, esegue un controllo per la reindirizzazione e un manifesto prima di tornare al DLL già in memoria. **In questo scenario, il sistema non esegue una ricerca per il DLL**.
-- Nei casi in cui il DLL è riconosciuto come un **DLL noto** per la versione corrente di Windows, il sistema utilizzerà la sua versione del DLL noto, insieme a qualsiasi dei suoi DLL dipendenti, **saltando il processo di ricerca**. La chiave di registro **HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\KnownDLLs** contiene un elenco di questi DLL noti.
+- Quando si incontra un **DLL che condivide il proprio nome con uno già caricato in memoria**, il sistema bypassa la ricerca abituale. Invece, esegue un controllo per la reindirizzazione e un manifesto prima di tornare al DLL già in memoria. **In questo scenario, il sistema non esegue una ricerca per il DLL**.
+- Nei casi in cui il DLL è riconosciuto come un **DLL noto** per la versione corrente di Windows, il sistema utilizzerà la sua versione del DLL noto, insieme a qualsiasi DLL dipendente, **saltando il processo di ricerca**. La chiave di registro **HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\KnownDLLs** contiene un elenco di questi DLL noti.
 - Se un **DLL ha dipendenze**, la ricerca di questi DLL dipendenti viene condotta come se fossero indicati solo dai loro **nomi di modulo**, indipendentemente dal fatto che il DLL iniziale sia stato identificato tramite un percorso completo.
 
 ### Escalating Privileges
@@ -77,8 +77,8 @@ Alcune eccezioni all'ordine di ricerca standard dei DLL sono annotate nella docu
 - Identificare un processo che opera o opererà con **privilegi diversi** (movimento orizzontale o laterale), che **manca di un DLL**.
 - Assicurarsi che ci sia **accesso in scrittura** per qualsiasi **directory** in cui il **DLL** sarà **cercato**. Questa posizione potrebbe essere la directory dell'eseguibile o una directory all'interno del percorso di sistema.
 
-Sì, i requisiti sono complicati da trovare poiché **per impostazione predefinita è piuttosto strano trovare un eseguibile privilegiato mancante di un dll** ed è ancora **più strano avere permessi di scrittura su una cartella di sistema** (non puoi per impostazione predefinita). Ma, in ambienti mal configurati, questo è possibile.\
-Nel caso tu sia fortunato e ti trovi a soddisfare i requisiti, potresti controllare il progetto [UACME](https://github.com/hfiref0x/UACME). Anche se il **principale obiettivo del progetto è bypassare UAC**, potresti trovare lì un **PoC** di un Dll hijacking per la versione di Windows che puoi utilizzare (probabilmente cambiando solo il percorso della cartella in cui hai permessi di scrittura).
+Sì, i requisiti sono complicati da trovare poiché **per impostazione predefinita è piuttosto strano trovare un eseguibile privilegiato mancante di un dll** ed è ancora **più strano avere permessi di scrittura su una cartella di percorso di sistema** (non puoi per impostazione predefinita). Ma, in ambienti mal configurati, questo è possibile.\
+Nel caso tu sia fortunato e ti trovi a soddisfare i requisiti, potresti controllare il progetto [UACME](https://github.com/hfiref0x/UACME). Anche se il **principale obiettivo del progetto è bypassare UAC**, potresti trovare lì un **PoC** di un Dll hijacking per la versione di Windows che puoi utilizzare (probabilmente cambiando solo il percorso della cartella dove hai permessi di scrittura).
 
 Nota che puoi **controllare i tuoi permessi in una cartella** facendo:
 ```bash

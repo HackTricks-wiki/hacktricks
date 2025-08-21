@@ -45,7 +45,7 @@ Come menzionato, per stabilire il canale di comunicazione, è coinvolto il **boo
 5. Dopo aver acquisito un diritto di INVIO, il Compito **B** è in grado di **formulare** un **messaggio** e inviarlo **al Compito A**.
 6. Per una comunicazione bidirezionale, di solito il compito **B** genera una nuova porta con un **diritto di RICEZIONE** e un **diritto di INVIO**, e concede il **diritto di INVIO al Compito A** in modo che possa inviare messaggi al COMPITO B (comunicazione bidirezionale).
 
-Il bootstrap server **non può autenticare** il nome del servizio rivendicato da un compito. Ciò significa che un **compito** potrebbe potenzialmente **impersonare qualsiasi compito di sistema**, come rivendicare falsamente un nome di servizio di autorizzazione e poi approvare ogni richiesta.
+Il bootstrap server **non può autenticare** il nome del servizio rivendicato da un compito. Questo significa che un **compito** potrebbe potenzialmente **impersonare qualsiasi compito di sistema**, come rivendicare falsamente un nome di servizio di autorizzazione e poi approvare ogni richiesta.
 
 Successivamente, Apple memorizza i **nomi dei servizi forniti dal sistema** in file di configurazione sicuri, situati in directory **protette da SIP**: `/System/Library/LaunchDaemons` e `/System/Library/LaunchAgents`. Accanto a ciascun nome di servizio, è anche memorizzato il **binario associato**. Il bootstrap server creerà e manterrà un **diritto di RICEZIONE per ciascuno di questi nomi di servizio**.
 
@@ -63,7 +63,7 @@ Tuttavia, questo processo si applica solo ai compiti di sistema predefiniti. I c
 
 [Trova ulteriori informazioni qui](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/)
 
-La funzione `mach_msg`, essenzialmente una chiamata di sistema, è utilizzata per inviare e ricevere messaggi Mach. La funzione richiede che il messaggio da inviare sia l'argomento iniziale. Questo messaggio deve iniziare con una struttura `mach_msg_header_t`, seguita dal contenuto del messaggio effettivo. La struttura è definita come segue:
+La funzione `mach_msg`, essenzialmente una chiamata di sistema, è utilizzata per inviare e ricevere messaggi Mach. La funzione richiede che il messaggio da inviare sia l'argomento iniziale. Questo messaggio deve iniziare con una struttura `mach_msg_header_t`, seguita dal contenuto effettivo del messaggio. La struttura è definita come segue:
 ```c
 typedef struct {
 mach_msg_bits_t               msgh_bits;
@@ -74,12 +74,12 @@ mach_port_name_t              msgh_voucher_port;
 mach_msg_id_t                 msgh_id;
 } mach_msg_header_t;
 ```
-I process che possiedono un _**diritto di ricezione**_ possono ricevere messaggi su una porta Mach. Al contrario, ai **mittenti** viene concesso un _**diritto di invio**_ o un _**diritto di invio una sola volta**_. Il diritto di invio una sola volta è esclusivamente per inviare un singolo messaggio, dopo di che diventa invalido.
+I process che possiedono un _**diritto di ricezione**_ possono ricevere messaggi su una porta Mach. Al contrario, ai **mittenti** viene concesso un _**diritto di invio**_ o un _**diritto di invio-una-volta**_. Il diritto di invio-una-volta è esclusivamente per l'invio di un singolo messaggio, dopo il quale diventa non valido.
 
-Per ottenere una facile **comunicazione bidirezionale**, un processo può specificare una **porta mach** nell'**intestazione del messaggio** chiamata _porta di risposta_ (**`msgh_local_port`**) dove il **ricevente** del messaggio può **inviare una risposta** a questo messaggio. I bitflags in **`msgh_bits`** possono essere utilizzati per **indicare** che un **diritto di invio una sola volta** dovrebbe essere derivato e trasferito per questa porta (`MACH_MSG_TYPE_MAKE_SEND_ONCE`).
+Per ottenere una facile **comunicazione bi-direzionale**, un processo può specificare una **porta mach** nell'**intestazione del messaggio** chiamata _porta di risposta_ (**`msgh_local_port`**) dove il **ricevente** del messaggio può **inviare una risposta** a questo messaggio. I bitflags in **`msgh_bits`** possono essere utilizzati per **indicare** che un **diritto di invio-una-volta** dovrebbe essere derivato e trasferito per questa porta (`MACH_MSG_TYPE_MAKE_SEND_ONCE`).
 
 > [!TIP]
-> Nota che questo tipo di comunicazione bidirezionale è utilizzato nei messaggi XPC che si aspettano una risposta (`xpc_connection_send_message_with_reply` e `xpc_connection_send_message_with_reply_sync`). Ma **di solito vengono create porte diverse** come spiegato in precedenza per creare la comunicazione bidirezionale.
+> Nota che questo tipo di comunicazione bi-direzionale è utilizzato nei messaggi XPC che si aspettano una risposta (`xpc_connection_send_message_with_reply` e `xpc_connection_send_message_with_reply_sync`). Ma **di solito vengono create porte diverse** come spiegato in precedenza per creare la comunicazione bi-direzionale.
 
 Gli altri campi dell'intestazione del messaggio sono:
 
@@ -232,7 +232,7 @@ printf("Sent a message\n");
 - Inoltre, per chiamare l'API **`kext_request`** è necessario avere altri diritti **`com.apple.private.kext*`** che sono concessi solo ai binari Apple.
 - **Porta nome task:** Una versione non privilegiata della _porta task_. Riferisce al task, ma non consente di controllarlo. L'unica cosa che sembra essere disponibile attraverso di essa è `task_info()`.
 - **Porta task** (nota anche come porta kernel)**:** Con permesso di Invio su questa porta è possibile controllare il task (leggere/scrivere memoria, creare thread...).
-- Chiama `mach_task_self()` per **ottenere il nome** di questa porta per il task chiamante. Questa porta è solo **ereditaria** attraverso **`exec()`**; un nuovo task creato con `fork()` ottiene una nuova porta task (come caso speciale, un task ottiene anche una nuova porta task dopo `exec()` in un binario suid). L'unico modo per generare un task e ottenere la sua porta è eseguire il ["port swap dance"](https://robert.sesek.com/2014/1/changes_to_xnu_mach_ipc.html) mentre si esegue un `fork()`.
+- Chiama `mach_task_self()` per **ottenere il nome** di questa porta per il task chiamante. Questa porta è solo **eredita** attraverso **`exec()`**; un nuovo task creato con `fork()` ottiene una nuova porta task (come caso speciale, un task ottiene anche una nuova porta task dopo `exec()` in un binario suid). L'unico modo per generare un task e ottenere la sua porta è eseguire il ["port swap dance"](https://robert.sesek.com/2014/1/changes_to_xnu_mach_ipc.html) mentre si esegue un `fork()`.
 - Queste sono le restrizioni per accedere alla porta (da `macos_task_policy` dal binario `AppleMobileFileIntegrity`):
 - Se l'app ha il diritto **`com.apple.security.get-task-allow`**, i processi dello **stesso utente possono accedere alla porta task** (comunemente aggiunto da Xcode per il debug). Il processo di **notarizzazione** non lo consentirà per le versioni di produzione.
 - Le app con il diritto **`com.apple.system-task-ports`** possono ottenere la **porta task per qualsiasi** processo, tranne il kernel. Nelle versioni precedenti era chiamato **`task_for_pid-allow`**. Questo è concesso solo alle applicazioni Apple.
@@ -241,6 +241,7 @@ printf("Sent a message\n");
 ### Iniezione di Shellcode in thread tramite Porta task
 
 Puoi prendere un shellcode da:
+
 
 {{#ref}}
 ../../macos-apps-inspecting-debugging-and-fuzzing/arm64-basic-assembly.md
@@ -292,7 +293,7 @@ return 0;
 {{#endtab}}
 {{#endtabs}}
 
-**Compila** il programma precedente e aggiungi le **entitlements** per poter iniettare codice con lo stesso utente (altrimenti dovrai usare **sudo**).
+**Compila** il programma precedente e aggiungi i **diritti** per poter iniettare codice con lo stesso utente (se no dovrai usare **sudo**).
 
 <details>
 
@@ -504,9 +505,10 @@ In macOS **i thread** possono essere manipolati tramite **Mach** o utilizzando *
 
 È stato possibile **iniettare un semplice shellcode** per eseguire un comando perché **non doveva funzionare con api** conformi a posix, solo con Mach. **Iniezioni più complesse** richiederebbero che il **thread** fosse anche **conforme a posix**.
 
-Pertanto, per **migliorare il thread** dovrebbe chiamare **`pthread_create_from_mach_thread`** che **creerà un pthread valido**. Poi, questo nuovo pthread potrebbe **chiamare dlopen** per **caricare una dylib** dal sistema, quindi invece di scrivere nuovo shellcode per eseguire diverse azioni è possibile caricare librerie personalizzate.
+Pertanto, per **migliorare il thread** dovrebbe chiamare **`pthread_create_from_mach_thread`** che **creerà un pthread valido**. Poi, questo nuovo pthread potrebbe **chiamare dlopen** per **caricare un dylib** dal sistema, quindi invece di scrivere nuovo shellcode per eseguire diverse azioni è possibile caricare librerie personalizzate.
 
-Puoi trovare **dylibs di esempio** in (ad esempio quella che genera un log e poi puoi ascoltarlo):
+Puoi trovare **esempi di dylibs** in (ad esempio quello che genera un log e poi puoi ascoltarlo):
+
 
 {{#ref}}
 ../../macos-dyld-hijacking-and-dyld_insert_libraries.md
@@ -794,6 +796,7 @@ gcc -framework Foundation -framework Appkit dylib_injector.m -o dylib_injector
 
 In questa tecnica un thread del processo viene hijacked:
 
+
 {{#ref}}
 ../../macos-proces-abuse/macos-ipc-inter-process-communication/macos-thread-injection-via-task-port.md
 {{#endref}}
@@ -802,9 +805,10 @@ In questa tecnica un thread del processo viene hijacked:
 
 ### Informazioni di base
 
-XPC, che sta per XNU (il kernel utilizzato da macOS) inter-Process Communication, è un framework per **la comunicazione tra processi** su macOS e iOS. XPC fornisce un meccanismo per effettuare **chiamate di metodo sicure e asincrone tra diversi processi** sul sistema. Fa parte del paradigma di sicurezza di Apple, consentendo la **creazione di applicazioni separate per privilegi** in cui ogni **componente** viene eseguito con **solo i permessi necessari** per svolgere il proprio lavoro, limitando così il potenziale danno derivante da un processo compromesso.
+XPC, che sta per XNU (il kernel utilizzato da macOS) inter-Process Communication, è un framework per **la comunicazione tra processi** su macOS e iOS. XPC fornisce un meccanismo per effettuare **chiamate a metodi sicure e asincrone tra diversi processi** sul sistema. Fa parte del paradigma di sicurezza di Apple, consentendo la **creazione di applicazioni separate per privilegi** in cui ogni **componente** viene eseguito con **solo i permessi necessari** per svolgere il proprio lavoro, limitando così il potenziale danno derivante da un processo compromesso.
 
 Per ulteriori informazioni su come questa **comunicazione funziona** e su come potrebbe **essere vulnerabile**, controlla:
+
 
 {{#ref}}
 ../../macos-proces-abuse/macos-ipc-inter-process-communication/macos-xpc/
@@ -812,9 +816,10 @@ Per ulteriori informazioni su come questa **comunicazione funziona** e su come p
 
 ## MIG - Mach Interface Generator
 
-MIG è stato creato per **semplificare il processo di creazione del codice Mach IPC**. Fondamentalmente **genera il codice necessario** affinché server e client comunichino con una definizione data. Anche se il codice generato è brutto, un sviluppatore dovrà solo importarlo e il suo codice sarà molto più semplice di prima.
+MIG è stato creato per **semplificare il processo di creazione del codice Mach IPC**. Fondamentalmente **genera il codice necessario** affinché server e client comunichino con una data definizione. Anche se il codice generato è brutto, uno sviluppatore dovrà solo importarlo e il suo codice sarà molto più semplice di prima.
 
 Per ulteriori informazioni, controlla:
+
 
 {{#ref}}
 ../../macos-proces-abuse/macos-ipc-inter-process-communication/macos-mig-mach-interface-generator.md

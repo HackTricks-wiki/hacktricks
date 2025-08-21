@@ -6,11 +6,11 @@
 
 Apple propone anche un altro modo per autenticare se il processo di connessione ha **permessi per chiamare un metodo XPC esposto**.
 
-Quando un'applicazione ha bisogno di **eseguire azioni come un utente privilegiato**, invece di eseguire l'app come un utente privilegiato, di solito installa come root un HelperTool come servizio XPC che può essere chiamato dall'app per eseguire quelle azioni. Tuttavia, l'app che chiama il servizio dovrebbe avere abbastanza autorizzazione.
+Quando un'applicazione ha bisogno di **eseguire azioni come utente privilegiato**, invece di eseguire l'app come utente privilegiato, di solito installa come root un HelperTool come servizio XPC che può essere chiamato dall'app per eseguire quelle azioni. Tuttavia, l'app che chiama il servizio dovrebbe avere abbastanza autorizzazione.
 
 ### ShouldAcceptNewConnection sempre YES
 
-Un esempio può essere trovato in [EvenBetterAuthorizationSample](https://github.com/brenwell/EvenBetterAuthorizationSample). In `App/AppDelegate.m` prova a **connettersi** al **HelperTool**. E in `HelperTool/HelperTool.m` la funzione **`shouldAcceptNewConnection`** **non controllerà** nessuno dei requisiti indicati in precedenza. Restituirà sempre YES:
+Un esempio può essere trovato in [EvenBetterAuthorizationSample](https://github.com/brenwell/EvenBetterAuthorizationSample). In `App/AppDelegate.m` cerca di **connettersi** al **HelperTool**. E in `HelperTool/HelperTool.m` la funzione **`shouldAcceptNewConnection`** **non controllerà** nessuno dei requisiti indicati in precedenza. Restituirà sempre YES:
 ```objectivec
 - (BOOL)listener:(NSXPCListener *)listener shouldAcceptNewConnection:(NSXPCConnection *)newConnection
 // Called by our XPC listener when a new connection comes in.  We configure the connection
@@ -35,7 +35,7 @@ macos-xpc-connecting-process-check/
 
 ### Diritti dell'applicazione
 
-Tuttavia, c'è un po' di **autorizzazione in corso quando viene chiamato un metodo dal HelperTool**.
+Tuttavia, c'è una **autorizzazione in corso quando viene chiamato un metodo dal HelperTool**.
 
 La funzione **`applicationDidFinishLaunching`** di `App/AppDelegate.m` creerà un riferimento di autorizzazione vuoto dopo che l'app è stata avviata. Questo dovrebbe sempre funzionare.\
 Poi, cercherà di **aggiungere alcuni diritti** a quel riferimento di autorizzazione chiamando `setupAuthorizationRights`:
@@ -228,7 +228,7 @@ assert(junk == errAuthorizationSuccess);
 return error;
 }
 ```
-Nota che per **controllare i requisiti per ottenere il diritto** di chiamare quel metodo, la funzione `authorizationRightForCommand` controllerà solo l'oggetto commentato in precedenza **`commandInfo`**. Poi, chiamerà **`AuthorizationCopyRights`** per verificare **se ha i diritti** di chiamare la funzione (nota che i flag consentono l'interazione con l'utente).
+Nota che per **verificare i requisiti per ottenere il diritto** di chiamare quel metodo, la funzione `authorizationRightForCommand` controllerà solo l'oggetto commento precedente **`commandInfo`**. Poi, chiamerà **`AuthorizationCopyRights`** per verificare **se ha i diritti** di chiamare la funzione (nota che i flag consentono l'interazione con l'utente).
 
 In questo caso, per chiamare la funzione `readLicenseKeyAuthorization`, il `kCommandKeyAuthRightDefault` è definito come `@kAuthorizationRuleClassAllow`. Quindi **chiunque può chiamarlo**.
 
@@ -240,17 +240,17 @@ sudo sqlite3 /var/db/auth.db
 SELECT name FROM rules;
 SELECT name FROM rules WHERE name LIKE '%safari%';
 ```
-Poi, puoi leggere chi può accedere al diritto con:
+Quindi, puoi leggere chi può accedere al diritto con:
 ```bash
 security authorizationdb read com.apple.safaridriver.allow
 ```
-### Diritti permissivi
+### Permessi permissivi
 
 Puoi trovare **tutte le configurazioni dei permessi** [**qui**](https://www.dssw.co.uk/reference/authorization-rights/), ma le combinazioni che non richiederanno interazione da parte dell'utente sarebbero:
 
 1. **'authenticate-user': 'false'**
 - Questa è la chiave più diretta. Se impostata su `false`, specifica che un utente non ha bisogno di fornire autenticazione per ottenere questo diritto.
-- Questo è usato in **combinazione con una delle 2 sotto o indicando un gruppo** a cui l'utente deve appartenere.
+- Questo viene utilizzato in **combinazione con una delle 2 sotto o indicando un gruppo** a cui l'utente deve appartenere.
 2. **'allow-root': 'true'**
 - Se un utente opera come utente root (che ha permessi elevati), e questa chiave è impostata su `true`, l'utente root potrebbe potenzialmente ottenere questo diritto senza ulteriore autenticazione. Tuttavia, tipicamente, ottenere lo stato di utente root richiede già autenticazione, quindi questo non è uno scenario di "nessuna autenticazione" per la maggior parte degli utenti.
 3. **'session-owner': 'true'**
@@ -258,7 +258,7 @@ Puoi trovare **tutte le configurazioni dei permessi** [**qui**](https://www.dssw
 4. **'shared': 'true'**
 - Questa chiave non concede diritti senza autenticazione. Invece, se impostata su `true`, significa che una volta che il diritto è stato autenticato, può essere condiviso tra più processi senza che ciascuno debba ri-autenticarsi. Ma la concessione iniziale del diritto richiederebbe comunque autenticazione a meno che non sia combinata con altre chiavi come `'authenticate-user': 'false'`.
 
-Puoi [**usare questo script**](https://gist.github.com/carlospolop/96ecb9e385a4667b9e40b24e878652f9) per ottenere i diritti interessanti:
+Puoi [**utilizzare questo script**](https://gist.github.com/carlospolop/96ecb9e385a4667b9e40b24e878652f9) per ottenere i diritti interessanti:
 ```bash
 Rights with 'authenticate-user': 'false':
 is-admin (admin), is-admin-nonshared (admin), is-appstore (_appstore), is-developer (_developer), is-lpadmin (_lpadmin), is-root (run as root), is-session-owner (session owner), is-webdeveloper (_webdeveloper), system-identity-write-self (session owner), system-install-iap-software (run as root), system-install-software-iap (run as root)
@@ -271,7 +271,7 @@ authenticate-session-owner, authenticate-session-owner-or-admin, authenticate-se
 ```
 ## Reversing Authorization
 
-### Controllare se EvenBetterAuthorization è utilizzato
+### Checking if EvenBetterAuthorization is used
 
 Se trovi la funzione: **`[HelperTool checkAuthorization:command:]`** è probabile che il processo stia utilizzando lo schema di autorizzazione precedentemente menzionato:
 
@@ -289,9 +289,9 @@ La funzione **`shouldAcceptNewConnection`** indica il protocollo che viene espor
 
 <figure><img src="../../../../../images/image (44).png" alt=""><figcaption></figcaption></figure>
 
-In questo caso, abbiamo lo stesso di EvenBetterAuthorizationSample, [**controlla questa riga**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L94).
+In questo caso, abbiamo lo stesso di EvenBetterAuthorizationSample, [**check this line**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L94).
 
-Sapendo il nome del protocollo utilizzato, è possibile **dumpare la sua definizione dell'intestazione** con:
+Sapendo il nome del protocollo utilizzato, è possibile **dump its header definition** con:
 ```bash
 class-dump /Library/PrivilegedHelperTools/com.example.HelperTool
 
@@ -329,7 +329,7 @@ cat /Library/LaunchDaemons/com.example.HelperTool.plist
 In questo esempio viene creato:
 
 - La definizione del protocollo con le funzioni
-- Un'autenticazione vuota da utilizzare per richiedere l'accesso
+- Un'autenticazione vuota da utilizzare per richiedere accesso
 - Una connessione al servizio XPC
 - Una chiamata alla funzione se la connessione è stata effettuata con successo
 ```objectivec

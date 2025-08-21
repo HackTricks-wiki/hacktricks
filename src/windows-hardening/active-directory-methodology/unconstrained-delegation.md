@@ -48,6 +48,7 @@ Se il TGT proviene da un controller di dominio, puoi eseguire un [**attacco DCSy
 
 Trova qui altri modi per **forzare un'autenticazione:**
 
+
 {{#ref}}
 printers-spooler-service-abuse.md
 {{#endref}}

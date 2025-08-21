@@ -27,7 +27,7 @@ Il firmware è un software essenziale che consente ai dispositivi di funzionare 
 
 A questo scopo, gli strumenti di **intelligence open-source (OSINT)** sono inestimabili, così come l'analisi di eventuali componenti software open-source disponibili attraverso processi di revisione manuale e automatizzati. Strumenti come [Coverity Scan](https://scan.coverity.com) e [Semmle’s LGTM](https://lgtm.com/#explore) offrono analisi statica gratuita che possono essere sfruttate per trovare potenziali problemi.
 
-## **Acquisizione del Firmware**
+## **Acquisire il Firmware**
 
 Ottenere il firmware può essere affrontato attraverso vari mezzi, ognuno con il proprio livello di complessità:
 
@@ -66,7 +66,7 @@ Oppure [**binvis.io**](https://binvis.io/#/) ([code](https://code.google.com/arc
 
 ### Ottenere il Filesystem
 
-Con gli strumenti commentati in precedenza come `binwalk -ev <bin>` dovresti essere stato in grado di **estrarre il filesystem**.\
+Con gli strumenti precedentemente commentati come `binwalk -ev <bin>` dovresti essere stato in grado di **estrarre il filesystem**.\
 Binwalk di solito lo estrae all'interno di una **cartella chiamata come il tipo di filesystem**, che di solito è uno dei seguenti: squashfs, ubifs, romfs, rootfs, jffs2, yaffs2, cramfs, initramfs.
 
 #### Estrazione Manuale del Filesystem
@@ -97,7 +97,7 @@ Alternativamente, il seguente comando potrebbe essere eseguito.
 
 `$ dd if=DIR850L_REVB.bin bs=1 skip=$((0x1A0094)) of=dir.squashfs`
 
-- Per squashfs (usato nell'esempio sopra)
+- Per squashfs (utilizzato nell'esempio sopra)
 
 `$ unsquashfs dir.squashfs`
 
@@ -134,7 +134,7 @@ fdisk -lu <bin> #lists partitions and filesystems, if there are multiple
 ```
 Per valutare lo stato della crittografia dell'immagine, si controlla l'**entropia** con `binwalk -E <bin>`. Un'entropia bassa suggerisce una mancanza di crittografia, mentre un'entropia alta indica una possibile crittografia o compressione.
 
-Per estrarre i **file incorporati**, si raccomandano strumenti e risorse come la documentazione di **file-data-carving-recovery-tools** e **binvis.io** per l'ispezione dei file.
+Per estrarre i **file incorporati**, si raccomandano strumenti e risorse come la documentazione **file-data-carving-recovery-tools** e **binvis.io** per l'ispezione dei file.
 
 ### Estrazione del Filesystem
 
@@ -162,7 +162,7 @@ Diverse strumenti assistono nel rivelare informazioni sensibili e vulnerabilità
 
 - [**LinPEAS**](https://github.com/carlospolop/PEASS-ng) e [**Firmwalker**](https://github.com/craigz28/firmwalker) per la ricerca di informazioni sensibili
 - [**The Firmware Analysis and Comparison Tool (FACT)**](https://github.com/fkie-cad/FACT_core) per un'analisi completa del firmware
-- [**FwAnalyzer**](https://github.com/cruise-automation/fwanalyzer), [**ByteSweep**](https://gitlab.com/bytesweep/bytesweep), [**ByteSweep-go**](https://gitlab.com/bytesweep/bytesweep-go) e [**EMBA**](https://github.com/e-m-b-a/emba) per analisi statica e dinamica
+- [**FwAnalyzer**](https://github.com/cruise-automation/fwanalyzer), [**ByteSweep**](https://gitlab.com/bytesweep/bytesweep), [**ByteSweep-go**](https://gitlab.com/bytesweep/bytesweep-go), e [**EMBA**](https://github.com/e-m-b-a/emba) per analisi statica e dinamica
 
 ### Controlli di Sicurezza sui Binari Compilati
 
@@ -186,7 +186,7 @@ E per installare gli strumenti di emulazione necessari:
 ```bash
 sudo apt-get install qemu qemu-user qemu-user-static qemu-system-arm qemu-system-mips qemu-system-x86 qemu-utils
 ```
-Per MIPS (big-endian), si utilizza `qemu-mips`, e per i binari little-endian, la scelta sarebbe `qemu-mipsel`.
+Per MIPS (big-endian), si utilizza `qemu-mips`, e per i binari little-endian, `qemu-mipsel` sarebbe la scelta.
 
 #### Emulazione dell'Architettura ARM
 
@@ -200,22 +200,22 @@ Strumenti come [Firmadyne](https://github.com/firmadyne/firmadyne), [Firmware An
 
 A questo stadio, viene utilizzato un ambiente di dispositivo reale o emulato per l'analisi. È essenziale mantenere l'accesso shell al sistema operativo e al filesystem. L'emulazione potrebbe non imitare perfettamente le interazioni hardware, rendendo necessari occasionali riavvii dell'emulazione. L'analisi dovrebbe riesaminare il filesystem, sfruttare le pagine web e i servizi di rete esposti, ed esplorare le vulnerabilità del bootloader. I test di integrità del firmware sono critici per identificare potenziali vulnerabilità di backdoor.
 
-## Tecniche di Analisi Runtime
+## Tecniche di Analisi in Esecuzione
 
-L'analisi runtime implica l'interazione con un processo o un binario nel suo ambiente operativo, utilizzando strumenti come gdb-multiarch, Frida e Ghidra per impostare breakpoint e identificare vulnerabilità attraverso fuzzing e altre tecniche.
+L'analisi in esecuzione implica l'interazione con un processo o un binario nel suo ambiente operativo, utilizzando strumenti come gdb-multiarch, Frida e Ghidra per impostare punti di interruzione e identificare vulnerabilità attraverso fuzzing e altre tecniche.
 
 ## Sfruttamento Binario e Proof-of-Concept
 
-Sviluppare un PoC per vulnerabilità identificate richiede una profonda comprensione dell'architettura target e programmazione in linguaggi di basso livello. Le protezioni runtime binarie nei sistemi embedded sono rare, ma quando presenti, tecniche come il Return Oriented Programming (ROP) possono essere necessarie.
+Sviluppare un PoC per le vulnerabilità identificate richiede una profonda comprensione dell'architettura target e programmazione in linguaggi di basso livello. Le protezioni in esecuzione binaria nei sistemi embedded sono rare, ma quando presenti, tecniche come il Return Oriented Programming (ROP) possono essere necessarie.
 
 ## Sistemi Operativi Preparati per l'Analisi del Firmware
 
-Sistemi operativi come [AttifyOS](https://github.com/adi0x90/attifyos) e [EmbedOS](https://github.com/scriptingxss/EmbedOS) forniscono ambienti preconfigurati per il testing della sicurezza del firmware, dotati degli strumenti necessari.
+Sistemi operativi come [AttifyOS](https://github.com/adi0x90/attifyos) e [EmbedOS](https://github.com/scriptingxss/EmbedOS) forniscono ambienti pre-configurati per il testing della sicurezza del firmware, dotati degli strumenti necessari.
 
 ## OS Preparati per Analizzare il Firmware
 
-- [**AttifyOS**](https://github.com/adi0x90/attifyos): AttifyOS è una distribuzione destinata ad aiutarti a eseguire valutazioni di sicurezza e penetration testing di dispositivi Internet of Things (IoT). Ti fa risparmiare molto tempo fornendo un ambiente preconfigurato con tutti gli strumenti necessari caricati.
-- [**EmbedOS**](https://github.com/scriptingxss/EmbedOS): Sistema operativo per il testing della sicurezza embedded basato su Ubuntu 18.04 precaricato con strumenti per il testing della sicurezza del firmware.
+- [**AttifyOS**](https://github.com/adi0x90/attifyos): AttifyOS è una distribuzione destinata ad aiutarti a eseguire valutazioni di sicurezza e penetration testing di dispositivi Internet of Things (IoT). Ti fa risparmiare molto tempo fornendo un ambiente pre-configurato con tutti gli strumenti necessari caricati.
+- [**EmbedOS**](https://github.com/scriptingxss/EmbedOS): Sistema operativo per il testing della sicurezza embedded basato su Ubuntu 18.04 pre-caricato con strumenti per il testing della sicurezza del firmware.
 
 ## Attacchi di Downgrade del Firmware e Meccanismi di Aggiornamento Insicuri
 
@@ -230,7 +230,7 @@ Flusso di attacco tipico:
 2. **Caricare o servire l'immagine al dispositivo** tramite qualsiasi canale di aggiornamento esposto:
 * Interfaccia Web, API dell'app mobile, USB, TFTP, MQTT, ecc.
 * Molti dispositivi IoT consumer espongono endpoint HTTP(S) *non autenticati* che accettano blob di firmware codificati in Base64, li decodificano lato server e attivano il ripristino/aggiornamento.
-3. Dopo il downgrade, sfruttare una vulnerabilità che è stata corretta nella versione più recente (ad esempio, un filtro di injection di comandi che è stato aggiunto successivamente).
+3. Dopo il downgrade, sfruttare una vulnerabilità che è stata corretta nella versione più recente (ad esempio, un filtro di iniezione di comandi che è stato aggiunto successivamente).
 4. Facoltativamente, flashare l'immagine più recente o disabilitare gli aggiornamenti per evitare il rilevamento una volta ottenuta la persistenza.
 
 ### Esempio: Iniezione di Comandi Dopo il Downgrade
@@ -240,7 +240,7 @@ Host: 192.168.0.1
 Content-Type: application/octet-stream
 Content-Length: 0
 ```
-Nel firmware vulnerabile (downgradato), il parametro `md5` è concatenato direttamente in un comando shell senza sanificazione, consentendo l'iniezione di comandi arbitrari (qui – abilitando l'accesso root basato su chiave SSH). Le versioni firmware successive hanno introdotto un filtro di caratteri di base, ma l'assenza di protezione contro il downgrade rende la correzione inutile.
+Nel firmware vulnerabile (downgradato), il parametro `md5` è concatenato direttamente in un comando shell senza sanificazione, consentendo l'iniezione di comandi arbitrari (qui – abilitazione dell'accesso root basato su chiave SSH). Le versioni firmware successive hanno introdotto un filtro di caratteri di base, ma l'assenza di protezione contro il downgrade rende la correzione inutile.
 
 ### Estrazione del Firmware da App Mobili
 

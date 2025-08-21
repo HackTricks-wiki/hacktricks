@@ -24,7 +24,7 @@ macos-sip.md
 
 ### Sandbox
 
-MacOS Sandbox **limita le applicazioni** in esecuzione all'interno della sandbox alle **azioni consentite specificate nel profilo Sandbox** con cui l'app è in esecuzione. Questo aiuta a garantire che **l'applicazione accederà solo alle risorse previste**.
+La Sandbox di macOS **limita le applicazioni** in esecuzione all'interno della sandbox alle **azioni consentite specificate nel profilo Sandbox** con cui l'app è in esecuzione. Questo aiuta a garantire che **l'applicazione accederà solo alle risorse previste**.
 
 {{#ref}}
 macos-sandbox/
@@ -40,7 +40,7 @@ macos-tcc/
 
 ### Launch/Environment Constraints & Trust Cache
 
-Le restrizioni di avvio in macOS sono una funzionalità di sicurezza per **regolare l'inizio dei processi** definendo **chi può avviare** un processo, **come** e **da dove**. Introdotte in macOS Ventura, categorizzano i binari di sistema in categorie di vincolo all'interno di un **trust cache**. Ogni binario eseguibile ha **regole** stabilite per il suo **avvio**, comprese le restrizioni **self**, **parent** e **responsible**. Estese alle app di terze parti come **Environment** Constraints in macOS Sonoma, queste funzionalità aiutano a mitigare potenziali sfruttamenti del sistema regolando le condizioni di avvio dei processi.
+I vincoli di avvio in macOS sono una funzionalità di sicurezza per **regolare l'inizio dei processi** definendo **chi può avviare** un processo, **come** e **da dove**. Introdotti in macOS Ventura, categorizzano i binari di sistema in categorie di vincolo all'interno di un **trust cache**. Ogni binario eseguibile ha **regole** impostate per il suo **avvio**, inclusi vincoli di **self**, **parent** e **responsible**. Estesi alle app di terze parti come **Environment** Constraints in macOS Sonoma, queste funzionalità aiutano a mitigare potenziali sfruttamenti del sistema governando le condizioni di avvio dei processi.
 
 {{#ref}}
 macos-launch-environment-constraints.md
@@ -50,18 +50,18 @@ macos-launch-environment-constraints.md
 
 Il Malware Removal Tool (MRT) è un'altra parte dell'infrastruttura di sicurezza di macOS. Come suggerisce il nome, la funzione principale di MRT è **rimuovere malware conosciuti da sistemi infetti**.
 
-Una volta che il malware viene rilevato su un Mac (sia da XProtect che da altri mezzi), MRT può essere utilizzato per **rimuovere automaticamente il malware**. MRT opera silenziosamente in background e di solito viene eseguito ogni volta che il sistema viene aggiornato o quando viene scaricata una nuova definizione di malware (sembra che le regole che MRT ha per rilevare il malware siano all'interno del binario).
+Una volta che il malware viene rilevato su un Mac (sia da XProtect che da altri mezzi), MRT può essere utilizzato per **rimuovere automaticamente il malware**. MRT opera silenziosamente in background e di solito viene eseguito ogni volta che il sistema viene aggiornato o quando viene scaricata una nuova definizione di malware (sembra che le regole che MRT deve seguire per rilevare il malware siano all'interno del binario).
 
 Sebbene sia XProtect che MRT facciano parte delle misure di sicurezza di macOS, svolgono funzioni diverse:
 
-- **XProtect** è uno strumento preventivo. **Controlla i file mentre vengono scaricati** (tramite determinate applicazioni) e, se rileva tipi noti di malware, **impedisce l'apertura del file**, prevenendo così l'infezione del sistema in primo luogo.
+- **XProtect** è uno strumento preventivo. **Controlla i file mentre vengono scaricati** (tramite determinate applicazioni) e, se rileva tipi noti di malware, **impedisce l'apertura del file**, prevenendo così l'infezione del sistema da parte del malware in primo luogo.
 - **MRT**, d'altra parte, è uno **strumento reattivo**. Opera dopo che il malware è stato rilevato su un sistema, con l'obiettivo di rimuovere il software offensivo per ripulire il sistema.
 
 L'applicazione MRT si trova in **`/Library/Apple/System/Library/CoreServices/MRT.app`**
 
 ## Background Tasks Management
 
-**macOS** ora **avvisa** ogni volta che uno strumento utilizza una **tecnica ben nota per persistere nell'esecuzione del codice** (come Login Items, Daemons...), così l'utente sa meglio **quale software sta persistendo**.
+**macOS** ora **avvisa** ogni volta che uno strumento utilizza una **tecnica nota per persistere nell'esecuzione del codice** (come Login Items, Daemons...), così l'utente sa meglio **quale software sta persistendo**.
 
 <figure><img src="../../../images/image (1183).png" alt=""><figcaption></figcaption></figure>
 
@@ -69,7 +69,7 @@ Questo funziona con un **daemon** situato in `/System/Library/PrivateFrameworks/
 
 Il modo in cui **`backgroundtaskmanagementd`** sa che qualcosa è installato in una cartella persistente è **ottenendo gli FSEvents** e creando alcuni **handler** per questi.
 
-Inoltre, c'è un file plist che contiene **applicazioni ben note** che persistono frequentemente mantenute da Apple situato in: `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/attributions.plist`
+Inoltre, c'è un file plist che contiene **applicazioni ben note** che persistono frequentemente mantenuto da Apple situato in: `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/attributions.plist`
 ```json
 [...]
 "us.zoom.ZoomDaemon" => {
@@ -92,7 +92,7 @@ Inoltre, c'è un file plist che contiene **applicazioni ben note** che persiston
 # The tool will always ask for the users password
 sfltool dumpbtm
 ```
-Inoltre, è anche possibile elencare queste informazioni con [**DumpBTM**](https://github.com/objective-see/DumpBTM).
+Inoltre, è possibile elencare queste informazioni con [**DumpBTM**](https://github.com/objective-see/DumpBTM).
 ```bash
 # You need to grant the Terminal Full Disk Access for this to work
 chmod +x dumpBTM
@@ -124,9 +124,9 @@ kill -SIGSTOP 1011
 ps -o state 1011
 T
 ```
-- **Bug**: Se il **processo che ha creato la persistenza esiste rapidamente dopo di esso**, il demone cercherà di **ottenere informazioni** su di esso, **fallirà** e **non sarà in grado di inviare l'evento** che indica che una nuova cosa sta persistendo.
+- **Bug**: Se il **processo che ha creato la persistenza esiste rapidamente dopo di esso**, il daemon cercherà di **ottenere informazioni** su di esso, **fallirà** e **non sarà in grado di inviare l'evento** che indica che una nuova cosa sta persistendo.
 
-Riferimenti e **ulteriori informazioni su BTM**:
+Riferimenti e **maggiori informazioni su BTM**:
 
 - [https://youtu.be/9hjUmT031tc?t=26481](https://youtu.be/9hjUmT031tc?t=26481)
 - [https://www.patreon.com/posts/new-developer-77420730?l=fr](https://www.patreon.com/posts/new-developer-77420730?l=fr)

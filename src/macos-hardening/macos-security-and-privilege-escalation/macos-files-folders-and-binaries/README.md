@@ -1,15 +1,15 @@
-# macOS File, Cartelle, Binaries & Memoria
+# macOS Files, Folders, Binaries & Memory
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Layout gerarchico dei file
+## File hierarchy layout
 
 - **/Applications**: Le app installate dovrebbero trovarsi qui. Tutti gli utenti potranno accedervi.
 - **/bin**: Binaries da linea di comando
 - **/cores**: Se esiste, viene utilizzato per memorizzare i core dump
 - **/dev**: Tutto è trattato come un file, quindi potresti vedere i dispositivi hardware memorizzati qui.
 - **/etc**: File di configurazione
-- **/Library**: Qui si possono trovare molte sottodirectory e file relativi a preferenze, cache e log. Una cartella Library esiste nella root e in ogni directory utente.
+- **/Library**: Qui si possono trovare molte sottodirectory e file relativi a preferenze, cache e log. Una cartella Library esiste nella root e nella directory di ogni utente.
 - **/private**: Non documentato, ma molte delle cartelle menzionate sono collegamenti simbolici alla directory privata.
 - **/sbin**: Binaries di sistema essenziali (relativi all'amministrazione)
 - **/System**: File per far funzionare OS X. Qui dovresti trovare principalmente solo file specifici di Apple (non di terze parti).
@@ -17,21 +17,21 @@
 - **/Users**: Directory home per gli utenti.
 - **/usr**: Config e binaries di sistema
 - **/var**: File di log
-- **/Volumes**: Le unità montate appariranno qui.
+- **/Volumes**: I dischi montati appariranno qui.
 - **/.vol**: Eseguendo `stat a.txt` ottieni qualcosa come `16777223 7545753 -rw-r--r-- 1 username wheel ...` dove il primo numero è l'id del volume in cui esiste il file e il secondo è il numero inode. Puoi accedere al contenuto di questo file tramite /.vol/ con quelle informazioni eseguendo `cat /.vol/16777223/7545753`
 
-### Cartelle delle Applicazioni
+### Applications Folders
 
-- **Le applicazioni di sistema** si trovano sotto `/System/Applications`
+- **Le applicazioni di sistema** si trovano in `/System/Applications`
 - **Le applicazioni installate** sono solitamente installate in `/Applications` o in `~/Applications`
 - **I dati delle applicazioni** possono essere trovati in `/Library/Application Support` per le applicazioni in esecuzione come root e `~/Library/Application Support` per le applicazioni in esecuzione come utente.
-- Le **daemon** delle applicazioni di terze parti che **devono essere eseguite come root** si trovano solitamente in `/Library/PrivilegedHelperTools/`
+- I **daemon** delle applicazioni di terze parti che **devono essere eseguiti come root** si trovano solitamente in `/Library/PrivilegedHelperTools/`
 - Le app **sandboxed** sono mappate nella cartella `~/Library/Containers`. Ogni app ha una cartella denominata secondo l'ID del bundle dell'applicazione (`com.apple.Safari`).
 - Il **kernel** si trova in `/System/Library/Kernels/kernel`
 - **Le estensioni del kernel di Apple** si trovano in `/System/Library/Extensions`
 - **Le estensioni del kernel di terze parti** sono memorizzate in `/Library/Extensions`
 
-### File con Informazioni Sensibili
+### Files with Sensitive Information
 
 MacOS memorizza informazioni come le password in diversi luoghi:
 
@@ -39,13 +39,13 @@ MacOS memorizza informazioni come le password in diversi luoghi:
 macos-sensitive-locations.md
 {{#endref}}
 
-### Installer pkg Vulnerabili
+### Vulnerable pkg installers
 
 {{#ref}}
 macos-installers-abuse.md
 {{#endref}}
 
-## Estensioni Specifiche di OS X
+## OS X Specific Extensions
 
 - **`.dmg`**: I file Apple Disk Image sono molto frequenti per gli installer.
 - **`.kext`**: Deve seguire una struttura specifica ed è la versione OS X di un driver. (è un bundle)
@@ -65,7 +65,7 @@ macos-installers-abuse.md
 - **`.noindex`**: File e cartelle con questa estensione non verranno indicizzati da Spotlight.
 - **`.sdef`**: File all'interno dei bundle che specificano come è possibile interagire con l'applicazione da un AppleScript.
 
-### Bundle di macOS
+### macOS Bundles
 
 Un bundle è una **directory** che **sembra un oggetto in Finder** (un esempio di Bundle sono i file `*.app`).
 
@@ -73,14 +73,14 @@ Un bundle è una **directory** che **sembra un oggetto in Finder** (un esempio d
 macos-bundles.md
 {{#endref}}
 
-## Cache della Libreria Condivisa Dyld (SLC)
+## Dyld Shared Library Cache (SLC)
 
-Su macOS (e iOS) tutte le librerie condivise di sistema, come framework e dylibs, sono **combinati in un unico file**, chiamato **cache condivisa dyld**. Questo migliora le prestazioni, poiché il codice può essere caricato più rapidamente.
+Su macOS (e iOS) tutte le librerie condivise di sistema, come framework e dylibs, sono **combinati in un unico file**, chiamato **dyld shared cache**. Questo migliora le prestazioni, poiché il codice può essere caricato più rapidamente.
 
-Questo si trova in macOS in `/System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/` e nelle versioni più vecchie potresti trovare la **cache condivisa** in **`/System/Library/dyld/`**.\
+Questo si trova in macOS in `/System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/` e nelle versioni precedenti potresti trovare la **shared cache** in **`/System/Library/dyld/`**.\
 In iOS puoi trovarli in **`/System/Library/Caches/com.apple.dyld/`**.
 
-Simile alla cache condivisa dyld, il kernel e le estensioni del kernel sono anche compilati in una cache del kernel, che viene caricata all'avvio.
+Simile alla dyld shared cache, il kernel e le estensioni del kernel sono anche compilati in una cache del kernel, che viene caricata all'avvio.
 
 Per estrarre le librerie dal file unico della cache condivisa dylib, era possibile utilizzare il binario [dyld_shared_cache_util](https://www.mbsplugins.de/files/dyld_shared_cache_util-dyld-733.8.zip) che potrebbe non funzionare al giorno d'oggi, ma puoi anche usare [**dyldextractor**](https://github.com/arandomdev/dyldextractor):
 ```bash
@@ -93,22 +93,22 @@ dyldex_all [dyld_shared_cache_path] # Extract all
 # More options inside the readme
 ```
 > [!TIP]
-> Nota che anche se lo strumento `dyld_shared_cache_util` non funziona, puoi passare il **binary dyld condiviso a Hopper** e Hopper sarà in grado di identificare tutte le librerie e permetterti di **selezionare quale** vuoi investigare:
+> Nota che anche se lo strumento `dyld_shared_cache_util` non funziona, puoi passare il **binary condiviso dyld a Hopper** e Hopper sarà in grado di identificare tutte le librerie e permetterti di **selezionare quale** vuoi investigare:
 
 <figure><img src="../../../images/image (1152).png" alt="" width="563"><figcaption></figcaption></figure>
 
 Alcuni estrattori non funzioneranno poiché le dylibs sono precollegate con indirizzi hardcoded e quindi potrebbero saltare a indirizzi sconosciuti.
 
 > [!TIP]
-> È anche possibile scaricare la Cache delle Librerie Condivise di altri dispositivi \*OS in macos utilizzando un emulatore in Xcode. Saranno scaricati all'interno di: ls `$HOME/Library/Developer/Xcode/<*>OS\ DeviceSupport/<version>/Symbols/System/Library/Caches/com.apple.dyld/`, come: `$HOME/Library/Developer/Xcode/iOS\ DeviceSupport/14.1\ (18A8395)/Symbols/System/Library/Caches/com.apple.dyld/dyld_shared_cache_arm64`
+> È anche possibile scaricare la Shared Library Cache di altri dispositivi \*OS in macos utilizzando un emulatore in Xcode. Saranno scaricati all'interno di: ls `$HOME/Library/Developer/Xcode/<*>OS\ DeviceSupport/<version>/Symbols/System/Library/Caches/com.apple.dyld/`, come: `$HOME/Library/Developer/Xcode/iOS\ DeviceSupport/14.1\ (18A8395)/Symbols/System/Library/Caches/com.apple.dyld/dyld_shared_cache_arm64`
 
 ### Mapping SLC
 
 **`dyld`** utilizza la syscall **`shared_region_check_np`** per sapere se l'SLC è stato mappato (che restituisce l'indirizzo) e **`shared_region_map_and_slide_np`** per mappare l'SLC.
 
-Nota che anche se l'SLC è scivolato al primo utilizzo, tutti i **processi** utilizzano la **stessa copia**, il che **elimina la protezione ASLR** se l'attaccante è in grado di eseguire processi nel sistema. Questo è stato effettivamente sfruttato in passato ed è stato corretto con il pager della regione condivisa.
+Nota che anche se l'SLC è scivolato al primo utilizzo, tutti i **processi** utilizzano la **stessa copia**, il che **elimina la protezione ASLR** se l'attaccante è in grado di eseguire processi nel sistema. Questo è stato effettivamente sfruttato in passato e corretto con il pager della regione condivisa.
 
-I branch pool sono piccole dylibs Mach-O che creano piccoli spazi tra le mappature delle immagini rendendo impossibile l'interposizione delle funzioni.
+I branch pool sono piccole Mach-O dylibs che creano piccoli spazi tra le mappature delle immagini rendendo impossibile l'interposizione delle funzioni.
 
 ### Override SLCs
 
@@ -117,13 +117,13 @@ Utilizzando le variabili di ambiente:
 - **`DYLD_DHARED_REGION=private DYLD_SHARED_CACHE_DIR=</path/dir> DYLD_SHARED_CACHE_DONT_VALIDATE=1`** -> Questo permetterà di caricare una nuova cache di librerie condivise.
 - **`DYLD_SHARED_CACHE_DIR=avoid`** e sostituire manualmente le librerie con symlink alla cache condivisa con quelle reali (dovrai estrarle).
 
-## Permessi Speciali dei File
+## Special File Permissions
 
-### Permessi delle Cartelle
+### Folder permissions
 
-In una **cartella**, il **permesso di lettura** consente di **elencarla**, il **permesso di scrittura** consente di **eliminare** e **scrivere** file al suo interno, e il **permesso di esecuzione** consente di **attraversare** la directory. Quindi, ad esempio, un utente con **permesso di lettura su un file** all'interno di una directory in cui non ha **permesso di esecuzione** **non sarà in grado di leggere** il file.
+In una **cartella**, **la lettura** consente di **elencarla**, **la scrittura** consente di **eliminare** e **scrivere** file al suo interno, e **l'esecuzione** consente di **traversare** la directory. Quindi, ad esempio, un utente con **permesso di lettura su un file** all'interno di una directory in cui **non ha permesso di esecuzione** **non sarà in grado di leggere** il file.
 
-### Modificatori di Flag
+### Flag modifiers
 
 Ci sono alcuni flag che possono essere impostati nei file che faranno comportare il file in modo diverso. Puoi **controllare i flag** dei file all'interno di una directory con `ls -lO /path/directory`
 
@@ -138,7 +138,7 @@ Tutti i flag possono essere trovati nel file `sys/stat.h` (trovalo usando `mdfin
 - `UF_NODUMP` 0x00000001: Non eseguire il dump del file.
 - `UF_IMMUTABLE` 0x00000002: Il file non può essere modificato.
 - `UF_APPEND` 0x00000004: Le scritture nel file possono solo aggiungere.
-- `UF_OPAQUE` 0x00000008: La directory è opaca rispetto all'unione.
+- `UF_OPAQUE` 0x00000008: La directory è opaca rispetto a union.
 - `UF_COMPRESSED` 0x00000020: Il file è compresso (alcuni file system).
 - `UF_TRACKED` 0x00000040: Nessuna notifica per eliminazioni/rinominazioni per file con questo impostato.
 - `UF_DATAVAULT` 0x00000080: È richiesta un'autorizzazione per la lettura e la scrittura.
@@ -156,12 +156,12 @@ Tutti i flag possono essere trovati nel file `sys/stat.h` (trovalo usando `mdfin
 
 ### **File ACLs**
 
-Le **ACLs** dei file contengono **ACE** (Access Control Entries) dove possono essere assegnati permessi **più granulari** a diversi utenti.
+Le **ACL** dei file contengono **ACE** (Access Control Entries) dove possono essere assegnati permessi **più granulari** a diversi utenti.
 
 È possibile concedere a una **directory** questi permessi: `list`, `search`, `add_file`, `add_subdirectory`, `delete_child`, `delete_child`.\
 E a un **file**: `read`, `write`, `append`, `execute`.
 
-Quando il file contiene ACLs troverai **un "+" quando elenchi i permessi come in**:
+Quando il file contiene ACL, troverai **un "+" quando elenchi i permessi come in**:
 ```bash
 ls -ld Movies
 drwx------+   7 username  staff     224 15 Apr 19:42 Movies
@@ -176,7 +176,7 @@ Puoi trovare **tutti i file con ACL** con (questo è molto lento):
 ```bash
 ls -RAle / 2>/dev/null | grep -E -B1 "\d: "
 ```
-### Attributi Estesi
+### Extended Attributes
 
 Gli attributi estesi hanno un nome e un valore desiderato, e possono essere visualizzati usando `ls -@` e manipolati usando il comando `xattr`. Alcuni attributi estesi comuni sono:
 
@@ -188,15 +188,15 @@ Gli attributi estesi hanno un nome e un valore desiderato, e possono essere visu
 - `com.apple.TextEncoding`: Specifica la codifica del testo dei file di testo ASCII
 - `com.apple.logd.metadata`: Utilizzato da logd su file in `/var/db/diagnostics`
 - `com.apple.genstore.*`: Archiviazione generazionale (`/.DocumentRevisions-V100` nella radice del filesystem)
-- `com.apple.rootless`: MacOS: Utilizzato da System Integrity Protection per etichettare il file (III/10)
+- `com.apple.rootless`: MacOS: Utilizzato dalla Protezione dell'Integrità di Sistema per etichettare il file (III/10)
 - `com.apple.uuidb.boot-uuid`: marcature logd delle epoche di avvio con UUID unici
-- `com.apple.decmpfs`: MacOS: compressione trasparente dei file (II/7)
-- `com.apple.cprotect`: \*OS: Dati di crittografia per file singoli (III/11)
+- `com.apple.decmpfs`: MacOS: Compressione trasparente dei file (II/7)
+- `com.apple.cprotect`: \*OS: Dati di crittografia per file (III/11)
 - `com.apple.installd.*`: \*OS: Metadati utilizzati da installd, ad es., `installType`, `uniqueInstallID`
 
-### Fork delle Risorse | macOS ADS
+### Resource Forks | macOS ADS
 
-Questo è un modo per ottenere **Stream di Dati Alternativi in MacOS**. Puoi salvare contenuti all'interno di un attributo esteso chiamato **com.apple.ResourceFork** all'interno di un file salvandolo in **file/..namedfork/rsrc**.
+Questo è un modo per ottenere **Alternate Data Streams in MacOS**. Puoi salvare contenuti all'interno di un attributo esteso chiamato **com.apple.ResourceFork** all'interno di un file salvandolo in **file/..namedfork/rsrc**.
 ```bash
 echo "Hello" > a.txt
 echo "Hello Mac ADS" > a.txt/..namedfork/rsrc

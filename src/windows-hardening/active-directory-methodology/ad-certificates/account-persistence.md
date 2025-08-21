@@ -4,7 +4,7 @@
 
 **Questo è un piccolo riassunto dei capitoli sulla persistenza degli account della fantastica ricerca di [https://specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://specterops.io/assets/resources/Certified_Pre-Owned.pdf)**
 
-## Comprendere il Furto di Credenziali Utente Attive con Certificati – PERSIST1
+## Comprendere il Furto delle Credenziali Utente Attive con i Certificati – PERSIST1
 
 In uno scenario in cui un certificato che consente l'autenticazione del dominio può essere richiesto da un utente, un attaccante ha l'opportunità di richiedere e rubare questo certificato per mantenere la persistenza su una rete. Per impostazione predefinita, il modello `User` in Active Directory consente tali richieste, anche se a volte può essere disabilitato.
 
@@ -61,7 +61,7 @@ certreq -enroll -user -cert <SerialOrID> renew [reusekeys]
 
 ## Piantare Mappature di Certificati Espliciti (altSecurityIdentities) – PERSIST4
 
-Se puoi scrivere nell'attributo `altSecurityIdentities` di un account target, puoi mappare esplicitamente un certificato controllato dall'attaccante a quell'account. Questo persiste attraverso le modifiche della password e, quando si utilizzano formati di mapping forti, rimane funzionale sotto l'applicazione moderna del DC.
+Se puoi scrivere nell'attributo `altSecurityIdentities` di un account target, puoi mappare esplicitamente un certificato controllato dall'attaccante a quell'account. Questo persiste attraverso i cambiamenti di password e, quando si utilizzano formati di mapping forti, rimane funzionale sotto l'applicazione moderna del DC.
 
 Flusso ad alto livello:
 
@@ -85,7 +85,7 @@ Quindi autentica con il tuo PFX. Certipy otterrà un TGT direttamente:
 certipy auth -pfx attacker_user.pfx -dc-ip 10.0.0.10
 ```
 Note
-- Utilizzare solo tipi di mapping forti: X509IssuerSerialNumber, X509SKI o X509SHA1PublicKey. I formati deboli (Subject/Issuer, solo Subject, email RFC822) sono deprecati e possono essere bloccati dalla policy DC.
+- Utilizzare solo tipi di mapping forti: X509IssuerSerialNumber, X509SKI o X509SHA1PublicKey. I formati deboli (Subject/Issuer, solo Subject, email RFC822) sono deprecati e possono essere bloccati dalla politica DC.
 - La catena di certificati deve costruirsi su un root fidato dal DC. Le CA aziendali in NTAuth sono tipicamente fidate; alcuni ambienti fidano anche le CA pubbliche.
 
 Per ulteriori informazioni sui mapping espliciti deboli e sui percorsi di attacco, vedere:
@@ -109,7 +109,7 @@ Certify.exe request /ca:CA-SERVER\CA-NAME /template:User \
 certipy req -u 'john@corp.local' -p 'Passw0rd!' -ca 'CA-SERVER\CA-NAME' \
 -template 'User' -on-behalf-of 'CORP/victim' -pfx agent.pfx -out victim_onbo.pfx
 ```
-Revocare il certificato dell'agente o le autorizzazioni del modello è necessario per espellere questa persistenza.
+La revoca del certificato dell'agente o delle autorizzazioni del modello è necessaria per espellere questa persistenza.
 
 ## 2025 Enforcement della Mappatura dei Certificati Forti: Impatto sulla Persistenza
 
@@ -119,7 +119,7 @@ Microsoft KB5014754 ha introdotto l'Enforcement della Mappatura dei Certificati 
 - Le mappature esplicite che utilizzano formati forti (Issuer+Serial, SKI, SHA1-PublicKey) continuano a funzionare. I formati deboli (Issuer/Subject, Subject-only, RFC822) possono essere bloccati e dovrebbero essere evitati per la persistenza.
 
 Gli amministratori dovrebbero monitorare e allertare su:
-- Modifiche a `altSecurityIdentities` e emissione/rinnovi di certificati per Agenti di Registrazione e Utenti.
+- Modifiche a `altSecurityIdentities` e emissione/rinnovi di certificati per l'Agente di Registrazione e per l'Utente.
 - Log di emissione della CA per richieste per conto di terzi e schemi di rinnovo insoliti.
 
 ## Riferimenti

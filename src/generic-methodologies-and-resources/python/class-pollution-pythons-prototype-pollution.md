@@ -182,7 +182,7 @@ subprocess.Popen('whoami', shell=True) # Calc.exe will pop up
 
 <summary>Sovrascrittura di <strong><code>__kwdefaults__</code></strong></summary>
 
-**`__kwdefaults__`** è un attributo speciale di tutte le funzioni, basato sulla [documentazione](https://docs.python.org/3/library/inspect.html) di Python, è una “mappatura di eventuali valori predefiniti per i parametri **solo parola chiave**”. Inquinare questo attributo ci consente di controllare i valori predefiniti dei parametri solo parola chiave di una funzione, questi sono i parametri della funzione che vengono dopo \* o \*args.
+**`__kwdefaults__`** è un attributo speciale di tutte le funzioni, basato sulla [documentazione](https://docs.python.org/3/library/inspect.html) di Python, è una “mappatura di eventuali valori predefiniti per i parametri **solo parola chiave**”. Inquinare questo attributo ci consente di controllare i valori predefiniti dei parametri solo parola chiave di una funzione, questi sono i parametri della funzione che seguono \* o \*args.
 ```python
 from os import system
 import json
@@ -223,7 +223,7 @@ execute() #> Executing echo Polluted
 
 <details>
 
-<summary>Sovrascrittura della chiave segreta di Flask tra i file</summary>
+<summary>Sovrascrittura del segreto di Flask tra i file</summary>
 
 Quindi, se puoi fare una class pollution su un oggetto definito nel file python principale del web ma **la cui classe è definita in un file diverso** da quello principale. Perché per accedere a \_\_globals\_\_ nei payload precedenti devi accedere alla classe dell'oggetto o ai metodi della classe, sarai in grado di **accedere ai globals in quel file, ma non in quello principale**. \
 Pertanto, **non sarai in grado di accedere all'oggetto globale dell'app Flask** che ha definito la **chiave segreta** nella pagina principale:

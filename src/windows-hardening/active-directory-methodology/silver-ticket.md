@@ -6,11 +6,11 @@
 
 ## Silver ticket
 
-L'attacco **Silver Ticket** comporta lo sfruttamento dei ticket di servizio negli ambienti Active Directory (AD). Questo metodo si basa su **acquisire l'hash NTLM di un account di servizio**, come un account computer, per forgiare un ticket del Ticket Granting Service (TGS). Con questo ticket falsificato, un attaccante può accedere a servizi specifici sulla rete, **impersonando qualsiasi utente**, tipicamente puntando a privilegi amministrativi. È sottolineato che l'uso di chiavi AES per forgiare ticket è più sicuro e meno rilevabile.
+L'attacco **Silver Ticket** comporta lo sfruttamento dei ticket di servizio negli ambienti Active Directory (AD). Questo metodo si basa su **acquisire l'hash NTLM di un account di servizio**, come un account computer, per forgiare un ticket del Ticket Granting Service (TGS). Con questo ticket falsificato, un attaccante può accedere a servizi specifici sulla rete, **impersonando qualsiasi utente**, tipicamente puntando a privilegi amministrativi. Si sottolinea che l'uso di chiavi AES per forgiare ticket è più sicuro e meno rilevabile.
 
 > [!WARNING]
 > I Silver Tickets sono meno rilevabili dei Golden Tickets perché richiedono solo l'**hash dell'account di servizio**, non l'account krbtgt. Tuttavia, sono limitati al servizio specifico che mirano. Inoltre, basta rubare la password di un utente.
-Inoltre, se comprometti la **password di un account con un SPN**, puoi usare quella password per creare un Silver Ticket impersonando qualsiasi utente per quel servizio.
+Inoltre, se comprometti la **password di un account con un SPN**, puoi utilizzare quella password per creare un Silver Ticket impersonando qualsiasi utente per quel servizio.
 
 Per la creazione di ticket, vengono impiegati diversi strumenti in base al sistema operativo:
 
@@ -59,7 +59,7 @@ Utilizzando **Rubeus** puoi **richiedere tutti** questi biglietti utilizzando il
 ### ID Evento Biglietti Silver
 
 - 4624: Accesso all'Account
-- 4634: Disconnessione dell'Account
+- 4634: Disconnessione dall'Account
 - 4672: Accesso Amministratore
 
 ## Persistenza
@@ -72,13 +72,14 @@ Negli esempi seguenti immaginiamo che il biglietto venga recuperato impersonando
 
 ### CIFS
 
-Con questo biglietto sarai in grado di accedere alle cartelle `C$` e `ADMIN$` tramite **SMB** (se sono esposte) e copiare file in una parte del file system remoto semplicemente facendo qualcosa come:
+Con questo biglietto sarai in grado di accedere alla cartella `C$` e `ADMIN$` tramite **SMB** (se sono esposte) e copiare file in una parte del file system remoto semplicemente facendo qualcosa come:
 ```bash
 dir \\vulnerable.computer\C$
 dir \\vulnerable.computer\ADMIN$
 copy afile.txt \\vulnerable.computer\C$\Windows\Temp
 ```
 Potrai anche ottenere una shell all'interno dell'host o eseguire comandi arbitrari utilizzando **psexec**:
+
 
 {{#ref}}
 ../lateral-movement/psexec-and-winexec.md
@@ -118,7 +119,7 @@ Trova **ulteriori informazioni su wmiexec** nella seguente pagina:
 
 ### HOST + WSMAN (WINRM)
 
-Con accesso winrm su un computer puoi **accedervi** e persino ottenere un PowerShell:
+Con l'accesso winrm a un computer puoi **accedervi** e persino ottenere un PowerShell:
 ```bash
 New-PSSession -Name PSC -ComputerName the.computer.name; Enter-PSSession PSC
 ```
@@ -138,6 +139,7 @@ Con questo privilegio puoi eseguire il dump del database DC utilizzando **DCSync
 mimikatz(commandline) # lsadump::dcsync /dc:pcdc.domain.local /domain:domain.local /user:krbtgt
 ```
 **Scopri di più su DCSync** nella seguente pagina:
+
 
 {{#ref}}
 dcsync.md

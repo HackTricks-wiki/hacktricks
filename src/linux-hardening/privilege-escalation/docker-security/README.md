@@ -10,7 +10,7 @@ Il **motore Docker** utilizza i **Namespaces** e i **Cgroups** del kernel Linux 
 
 ### Accesso Sicuro al Motore Docker
 
-Il motore Docker può essere accessibile localmente tramite un socket Unix o remotamente utilizzando HTTP. Per l'accesso remoto, è essenziale utilizzare HTTPS e **TLS** per garantire riservatezza, integrità e autenticazione.
+Il motore Docker può essere accesso localmente tramite un socket Unix o remotamente utilizzando HTTP. Per l'accesso remoto, è essenziale utilizzare HTTPS e **TLS** per garantire riservatezza, integrità e autenticazione.
 
 Il motore Docker, per impostazione predefinita, ascolta sul socket Unix a `unix:///var/run/docker.sock`. Nei sistemi Ubuntu, le opzioni di avvio di Docker sono definite in `/etc/default/docker`. Per abilitare l'accesso remoto all'API e al client Docker, esporre il demone Docker su un socket HTTP aggiungendo le seguenti impostazioni:
 ```bash
@@ -68,17 +68,17 @@ snyk container test <image> --json-file-output=<output file> --severity-threshol
 ```bash
 clair-scanner -w example-alpine.yaml --ip YOUR_LOCAL_IP alpine:3.5
 ```
-### Firma dell'immagine Docker
+### Firma delle Immagini Docker
 
-La firma dell'immagine Docker garantisce la sicurezza e l'integrità delle immagini utilizzate nei container. Ecco una spiegazione condensata:
+La firma delle immagini Docker garantisce la sicurezza e l'integrità delle immagini utilizzate nei container. Ecco una spiegazione condensata:
 
 - **Docker Content Trust** utilizza il progetto Notary, basato su The Update Framework (TUF), per gestire la firma delle immagini. Per ulteriori informazioni, vedere [Notary](https://github.com/docker/notary) e [TUF](https://theupdateframework.github.io).
 - Per attivare la fiducia nei contenuti Docker, impostare `export DOCKER_CONTENT_TRUST=1`. Questa funzione è disattivata per impostazione predefinita nelle versioni di Docker 1.10 e successive.
-- Con questa funzione attivata, possono essere scaricate solo immagini firmate. Il primo push dell'immagine richiede l'impostazione di frasi segrete per le chiavi root e di tagging, con Docker che supporta anche Yubikey per una maggiore sicurezza. Maggiori dettagli possono essere trovati [qui](https://blog.docker.com/2015/11/docker-content-trust-yubikey/).
+- Con questa funzione attivata, possono essere scaricate solo immagini firmate. La prima spinta dell'immagine richiede l'impostazione delle frasi di accesso per le chiavi root e di tagging, con Docker che supporta anche Yubikey per una maggiore sicurezza. Maggiori dettagli possono essere trovati [qui](https://blog.docker.com/2015/11/docker-content-trust-yubikey/).
 - Tentare di scaricare un'immagine non firmata con la fiducia nei contenuti attivata risulta in un errore "No trust data for latest".
-- Per i push delle immagini dopo il primo, Docker richiede la frase segreta della chiave del repository per firmare l'immagine.
+- Per le spinte delle immagini dopo la prima, Docker richiede la frase di accesso della chiave del repository per firmare l'immagine.
 
-Per eseguire il backup delle tue chiavi private, usa il comando:
+Per eseguire il backup delle tue chiavi private, utilizza il comando:
 ```bash
 tar -zcvf private_keys_backup.tar.gz ~/.docker/trust/private
 ```
@@ -108,9 +108,9 @@ Negli ambienti containerizzati, isolare i progetti e i loro processi è fondamen
 **Riduzione delle Capacità**
 
 - **Importanza**: È una funzionalità di sicurezza cruciale per l'isolamento dei processi.
-- **Funzionalità**: Limita le azioni che un processo root può eseguire riducendo certe capacità. Anche se un processo viene eseguito con privilegi di root, la mancanza delle capacità necessarie impedisce l'esecuzione di azioni privilegiate, poiché le syscall falliranno a causa di permessi insufficienti.
+- **Funzionalità**: Limita le azioni che un processo root può eseguire riducendo alcune capacità. Anche se un processo viene eseguito con privilegi di root, la mancanza delle capacità necessarie impedisce l'esecuzione di azioni privilegiate, poiché le syscall falliranno a causa di permessi insufficienti.
 
-Queste sono le **capacità rimanenti** dopo che il processo ha ridotto le altre:
+Queste sono le **capacità rimanenti** dopo che il processo ha eliminato le altre:
 ```
 Current: cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_net_bind_service,cap_net_raw,cap_sys_chroot,cap_mknod,cap_audit_write,cap_setfcap=ep
 ```
@@ -129,7 +129,7 @@ Questo permetterà di ridurre le capacità, le syscalls, l'accesso a file e cart
 
 ### Namespaces
 
-I **Namespaces** sono una funzionalità del kernel Linux che **partiziona le risorse del kernel** in modo tale che un insieme di **processi** **veda** un insieme di **risorse** mentre un **altro** insieme di **processi** vede un **insieme** diverso di risorse. La funzionalità funziona avendo lo stesso namespace per un insieme di risorse e processi, ma quei namespace si riferiscono a risorse distinte. Le risorse possono esistere in più spazi.
+I **Namespaces** sono una funzionalità del kernel Linux che **partiziona le risorse del kernel** in modo tale che un insieme di **processi** **veda** un insieme di **risorse** mentre **un altro** insieme di **processi** vede un **insieme** diverso di risorse. La funzionalità funziona avendo lo stesso namespace per un insieme di risorse e processi, ma quei namespace si riferiscono a risorse distinte. Le risorse possono esistere in più spazi.
 
 Docker utilizza i seguenti Namespaces del kernel Linux per ottenere l'isolamento dei Container:
 
@@ -141,13 +141,14 @@ Docker utilizza i seguenti Namespaces del kernel Linux per ottenere l'isolamento
 
 Per **maggiori informazioni sui namespaces** controlla la seguente pagina:
 
+
 {{#ref}}
 namespaces/
 {{#endref}}
 
 ### cgroups
 
-La funzionalità del kernel Linux **cgroups** fornisce la capacità di **ristretto risorse come cpu, memoria, io, larghezza di banda di rete tra** un insieme di processi. Docker consente di creare Container utilizzando la funzionalità cgroup che consente il controllo delle risorse per il Container specifico.\
+La funzionalità del kernel Linux **cgroups** fornisce la capacità di **ristretta risorse come cpu, memoria, io, larghezza di banda di rete tra** un insieme di processi. Docker consente di creare Container utilizzando la funzionalità cgroup che consente il controllo delle risorse per il Container specifico.\
 Di seguito è riportato un Container creato con la memoria dello spazio utente limitata a 500m, la memoria del kernel limitata a 50m, la condivisione della cpu a 512, il blkioweight a 400. La condivisione della CPU è un rapporto che controlla l'uso della CPU del Container. Ha un valore predefinito di 1024 e un intervallo tra 0 e 1024. Se tre Container hanno la stessa condivisione della CPU di 1024, ciascun Container può utilizzare fino al 33% della CPU in caso di contesa delle risorse CPU. Il blkio-weight è un rapporto che controlla l'IO del Container. Ha un valore predefinito di 500 e un intervallo tra 10 e 1000.
 ```
 docker run -it -m 500M --kernel-memory 50M --cpu-shares 512 --blkio-weight 400 --name ubuntu1 ubuntu bash
@@ -168,7 +169,7 @@ cgroups.md
 
 Le capacità consentono un **controllo più fine delle capacità che possono essere consentite** per l'utente root. Docker utilizza la funzionalità di capacità del kernel Linux per **limitare le operazioni che possono essere eseguite all'interno di un Container** indipendentemente dal tipo di utente.
 
-Quando un container docker viene eseguito, il **processo abbandona capacità sensibili che il processo potrebbe utilizzare per sfuggire all'isolamento**. Questo cerca di garantire che il processo non sarà in grado di eseguire azioni sensibili e fuggire:
+Quando un container docker viene eseguito, il **processo abbandona capacità sensibili che il processo potrebbe utilizzare per sfuggire all'isolamento**. Questo cerca di garantire che il processo non possa eseguire azioni sensibili e fuggire:
 
 {{#ref}}
 ../linux-capabilities.md
@@ -184,7 +185,7 @@ seccomp.md
 
 ### AppArmor in Docker
 
-**AppArmor** è un miglioramento del kernel per confinare **i container** a un **insieme limitato** di **risorse** con **profili per programma**.:
+**AppArmor** è un miglioramento del kernel per confinare **i container** a un **insieme limitato di risorse** con **profili per programma**.:
 
 {{#ref}}
 apparmor.md
@@ -194,7 +195,7 @@ apparmor.md
 
 - **Sistema di Etichettatura**: SELinux assegna un'etichetta unica a ogni processo e oggetto del filesystem.
 - **Applicazione delle Politiche**: Applica politiche di sicurezza che definiscono quali azioni un'etichetta di processo può eseguire su altre etichette all'interno del sistema.
-- **Etichette dei Processi del Container**: Quando i motori dei container avviano processi del container, di solito viene assegnata un'etichetta SELinux confinata, comunemente `container_t`.
+- **Etichette dei Processi del Container**: Quando i motori dei container avviano processi del container, vengono tipicamente assegnate un'etichetta SELinux confinata, comunemente `container_t`.
 - **Etichettatura dei File all'interno dei Container**: I file all'interno del container sono solitamente etichettati come `container_file_t`.
 - **Regole di Politica**: La politica SELinux garantisce principalmente che i processi con l'etichetta `container_t` possano interagire solo (leggere, scrivere, eseguire) con file etichettati come `container_file_t`.
 
@@ -235,7 +236,7 @@ nc -lvp 4444 >/dev/null & while true; do cat /dev/urandom | nc <target IP> 4444;
 ```
 ## Flag Docker Interessanti
 
-### --privileged flag
+### Flag --privileged
 
 Nella pagina seguente puoi imparare **cosa implica il flag `--privileged`**:
 
@@ -247,7 +248,7 @@ docker-privileged.md
 
 #### no-new-privileges
 
-Se stai eseguendo un container in cui un attaccante riesce ad accedere come utente a bassa privilegio. Se hai un **binary suid mal configurato**, l'attaccante potrebbe abusarne e **escalare i privilegi all'interno** del container. Questo potrebbe permettergli di fuggire da esso.
+Se stai eseguendo un container in cui un attaccante riesce ad accedere come utente a basso privilegio. Se hai un **binary suid mal configurato**, l'attaccante potrebbe abusarne e **escalare i privilegi all'interno** del container. Questo potrebbe permettergli di fuggire da esso.
 
 Eseguire il container con l'opzione **`no-new-privileges`** abilitata **prevenirà questo tipo di escalation dei privilegi**.
 ```
@@ -270,15 +271,15 @@ docker run -it --security-opt=no-new-privileges:true nonewpriv
 ```
 Per ulteriori opzioni **`--security-opt`** controlla: [https://docs.docker.com/engine/reference/run/#security-configuration](https://docs.docker.com/engine/reference/run/#security-configuration)
 
-## Altre Considerazioni sulla Sicurezza
+## Altre Considerazioni di Sicurezza
 
 ### Gestione dei Segreti: Migliori Pratiche
 
 È fondamentale evitare di incorporare segreti direttamente nelle immagini Docker o di utilizzare variabili d'ambiente, poiché questi metodi espongono le tue informazioni sensibili a chiunque abbia accesso al container tramite comandi come `docker inspect` o `exec`.
 
-**I volumi Docker** sono un'alternativa più sicura, raccomandata per accedere a informazioni sensibili. Possono essere utilizzati come un filesystem temporaneo in memoria, mitigando i rischi associati a `docker inspect` e al logging. Tuttavia, gli utenti root e quelli con accesso `exec` al container potrebbero comunque accedere ai segreti.
+I **volumi Docker** sono un'alternativa più sicura, raccomandata per accedere a informazioni sensibili. Possono essere utilizzati come un filesystem temporaneo in memoria, mitigando i rischi associati a `docker inspect` e al logging. Tuttavia, gli utenti root e quelli con accesso `exec` al container potrebbero comunque accedere ai segreti.
 
-**I segreti Docker** offrono un metodo ancora più sicuro per gestire informazioni sensibili. Per le istanze che richiedono segreti durante la fase di build dell'immagine, **BuildKit** presenta una soluzione efficiente con supporto per segreti a tempo di build, migliorando la velocità di build e fornendo funzionalità aggiuntive.
+I **segreti Docker** offrono un metodo ancora più sicuro per gestire informazioni sensibili. Per le istanze che richiedono segreti durante la fase di costruzione dell'immagine, **BuildKit** presenta una soluzione efficiente con supporto per segreti a tempo di costruzione, migliorando la velocità di costruzione e fornendo funzionalità aggiuntive.
 
 Per sfruttare BuildKit, può essere attivato in tre modi:
 
@@ -286,7 +287,7 @@ Per sfruttare BuildKit, può essere attivato in tre modi:
 2. Prefissando i comandi: `DOCKER_BUILDKIT=1 docker build .`
 3. Abilitandolo per impostazione predefinita nella configurazione di Docker: `{ "features": { "buildkit": true } }`, seguito da un riavvio di Docker.
 
-BuildKit consente l'uso di segreti a tempo di build con l'opzione `--secret`, assicurando che questi segreti non siano inclusi nella cache di build dell'immagine o nell'immagine finale, utilizzando un comando come:
+BuildKit consente l'uso di segreti a tempo di costruzione con l'opzione `--secret`, assicurando che questi segreti non siano inclusi nella cache di costruzione dell'immagine o nell'immagine finale, utilizzando un comando come:
 ```bash
 docker build --secret my_key=my_value ,src=path/to/my_secret_file .
 ```
@@ -309,7 +310,7 @@ Negli ambienti Kubernetes, i segreti sono supportati nativamente e possono esser
 
 ### gVisor
 
-**gVisor** è un kernel applicativo, scritto in Go, che implementa una parte sostanziale della superficie di sistema Linux. Include un runtime [Open Container Initiative (OCI)](https://www.opencontainers.org) chiamato `runsc` che fornisce un **confine di isolamento tra l'applicazione e il kernel host**. Il runtime `runsc` si integra con Docker e Kubernetes, rendendo semplice l'esecuzione di container sandboxed.
+**gVisor** è un kernel applicativo, scritto in Go, che implementa una parte sostanziale della superficie del sistema Linux. Include un runtime [Open Container Initiative (OCI)](https://www.opencontainers.org) chiamato `runsc` che fornisce un **confine di isolamento tra l'applicazione e il kernel host**. Il runtime `runsc` si integra con Docker e Kubernetes, rendendo semplice l'esecuzione di container in sandbox.
 
 {{#ref}}
 https://github.com/google/gvisor
@@ -325,22 +326,22 @@ https://katacontainers.io/
 
 ### Suggerimenti Riassuntivi
 
-- **Non utilizzare il flag `--privileged` o montare un** [**socket Docker all'interno del container**](https://raesene.github.io/blog/2016/03/06/The-Dangers-Of-Docker.sock/)**.** Lo socket docker consente di avviare container, quindi è un modo semplice per prendere il controllo completo dell'host, ad esempio, eseguendo un altro container con il flag `--privileged`.
-- **Non eseguire come root all'interno del container. Utilizza un** [**utente diverso**](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#user) **e** [**namespace utente**](https://docs.docker.com/engine/security/userns-remap/)**.** Il root nel container è lo stesso dell'host a meno che non venga rimappato con gli namespace utente. È solo leggermente limitato da, principalmente, namespace Linux, capacità e cgroups.
+- **Non utilizzare il flag `--privileged` o montare un** [**socket Docker all'interno del container**](https://raesene.github.io/blog/2016/03/06/The-Dangers-Of-Docker.sock/)**.** Lo socket docker consente di avviare container, quindi è un modo semplice per prendere il pieno controllo dell'host, ad esempio, eseguendo un altro container con il flag `--privileged`.
+- **Non eseguire come root all'interno del container. Utilizzare un** [**utente diverso**](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#user) **e** [**namespace utente**](https://docs.docker.com/engine/security/userns-remap/)**.** Il root nel container è lo stesso che sull'host a meno che non venga rimappato con i namespace utente. È solo leggermente limitato da, principalmente, namespace Linux, capacità e cgroups.
 - [**Elimina tutte le capacità**](https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities) **(`--cap-drop=all`) e abilita solo quelle necessarie** (`--cap-add=...`). Molti carichi di lavoro non necessitano di capacità e aggiungerle aumenta l'ambito di un potenziale attacco.
 - [**Utilizza l'opzione di sicurezza “no-new-privileges”**](https://raesene.github.io/blog/2019/06/01/docker-capabilities-and-no-new-privs/) per impedire ai processi di acquisire più privilegi, ad esempio tramite binari suid.
 - [**Limita le risorse disponibili per il container**](https://docs.docker.com/engine/reference/run/#runtime-constraints-on-resources)**.** I limiti delle risorse possono proteggere la macchina da attacchi di denial of service.
-- **Regola i profili** [**seccomp**](https://docs.docker.com/engine/security/seccomp/)**,** [**AppArmor**](https://docs.docker.com/engine/security/apparmor/) **(o SELinux)** per limitare le azioni e le syscalls disponibili per il container al minimo necessario.
+- **Regola** [**seccomp**](https://docs.docker.com/engine/security/seccomp/)**,** [**AppArmor**](https://docs.docker.com/engine/security/apparmor/) **(o SELinux)** profili per limitare le azioni e le syscalls disponibili per il container al minimo necessario.
 - **Utilizza** [**immagini docker ufficiali**](https://docs.docker.com/docker-hub/official_images/) **e richiedi firme** o costruisci le tue basate su di esse. Non ereditare o utilizzare immagini [backdoored](https://arstechnica.com/information-technology/2018/06/backdoored-images-downloaded-5-million-times-finally-removed-from-docker-hub/). Inoltre, conserva le chiavi root e le frasi di accesso in un luogo sicuro. Docker ha piani per gestire le chiavi con UCP.
 - **Ricostruisci regolarmente** le tue immagini per **applicare patch di sicurezza all'host e alle immagini.**
 - Gestisci i tuoi **segreti con saggezza** in modo che sia difficile per l'attaccante accedervi.
 - Se **esponi il demone docker utilizza HTTPS** con autenticazione client e server.
 - Nel tuo Dockerfile, **preferisci COPY invece di ADD**. ADD estrae automaticamente i file compressi e può copiare file da URL. COPY non ha queste capacità. Ogni volta che è possibile, evita di utilizzare ADD per non essere suscettibile ad attacchi tramite URL remoti e file Zip.
-- Avere **container separati per ogni micro-servizio**
+- Avere **container separati per ogni micro-s**ervizio.
 - **Non mettere ssh** all'interno del container, “docker exec” può essere utilizzato per ssh nel Container.
-- Avere **immagini di container più piccole**
+- Avere **immagini di container più piccole**.
 
-## Docker Breakout / Privilege Escalation
+## Docker Breakout / Escalation dei Privilegi
 
 Se sei **all'interno di un container docker** o hai accesso a un utente nel **gruppo docker**, potresti provare a **fuggire e aumentare i privilegi**:
 
@@ -356,9 +357,9 @@ Se hai accesso allo socket docker o hai accesso a un utente nel **gruppo docker 
 authz-and-authn-docker-access-authorization-plugin.md
 {{#endref}}
 
-## Hardening Docker
+## Indurimento di Docker
 
-- Lo strumento [**docker-bench-security**](https://github.com/docker/docker-bench-security) è uno script che controlla dozzine di best practices comuni per il deployment di container Docker in produzione. I test sono tutti automatizzati e si basano sul [CIS Docker Benchmark v1.3.1](https://www.cisecurity.org/benchmark/docker/).\
+- Lo strumento [**docker-bench-security**](https://github.com/docker/docker-bench-security) è uno script che controlla dozzine di pratiche migliori comuni per il deployment di container Docker in produzione. I test sono tutti automatizzati e si basano sul [CIS Docker Benchmark v1.3.1](https://www.cisecurity.org/benchmark/docker/).\
 Devi eseguire lo strumento dall'host che esegue docker o da un container con privilegi sufficienti. Scopri **come eseguirlo nel README:** [**https://github.com/docker/docker-bench-security**](https://github.com/docker/docker-bench-security).
 
 ## Riferimenti

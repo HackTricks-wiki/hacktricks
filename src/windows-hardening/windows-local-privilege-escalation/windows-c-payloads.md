@@ -115,6 +115,7 @@ return 0;
 }
 ```
 Per una spiegazione più approfondita su come funziona, vedere:
+
 {{#ref}}
 sedebug-+-seimpersonate-copy-token.md
 {{#endref}}

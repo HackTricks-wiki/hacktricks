@@ -6,7 +6,8 @@
 
 Se non sei familiare con macOS, dovresti iniziare a imparare le basi di macOS:
 
-- File e **permessi speciali di macOS:**
+- **File e permessi speciali di macOS:**
+
 
 {{#ref}}
 macos-files-folders-and-binaries/
@@ -14,11 +15,13 @@ macos-files-folders-and-binaries/
 
 - **Utenti comuni di macOS**
 
+
 {{#ref}}
 macos-users.md
 {{#endref}}
 
 - **AppleFS**
+
 
 {{#ref}}
 macos-applefs.md
@@ -26,11 +29,13 @@ macos-applefs.md
 
 - L'**architettura** del k**ernel**
 
+
 {{#ref}}
 mac-os-architecture/
 {{#endref}}
 
-- Servizi e **protocolli di rete comuni di macOS**
+- **Servizi e protocolli di rete** comuni di macOS
+
 
 {{#ref}}
 macos-protocols.md
@@ -39,9 +44,10 @@ macos-protocols.md
 - **Opensource** macOS: [https://opensource.apple.com/](https://opensource.apple.com/)
 - Per scaricare un `tar.gz`, cambia un URL come [https://opensource.apple.com/**source**/dyld/](https://opensource.apple.com/source/dyld/) in [https://opensource.apple.com/**tarballs**/dyld/**dyld-852.2.tar.gz**](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz)
 
-### MDM di MacOS
+### MDM MacOS
 
 Nelle aziende, i sistemi **macOS** saranno molto probabilmente **gestiti con un MDM**. Pertanto, dal punto di vista di un attaccante, è interessante sapere **come funziona**:
+
 
 {{#ref}}
 ../macos-red-teaming/macos-mdm/
@@ -49,11 +55,13 @@ Nelle aziende, i sistemi **macOS** saranno molto probabilmente **gestiti con un 
 
 ### MacOS - Ispezione, Debugging e Fuzzing
 
+
 {{#ref}}
 macos-apps-inspecting-debugging-and-fuzzing/
 {{#endref}}
 
-## Protezioni di Sicurezza di MacOS
+## Protezioni di Sicurezza MacOS
+
 
 {{#ref}}
 macos-security-protections/
@@ -69,19 +77,21 @@ Questo potrebbe verificarsi nelle seguenti situazioni:
 - Il file utilizzato era già stato creato da un utente (di proprietà dell'utente)
 - Il file utilizzato è scrivibile dall'utente a causa di un gruppo
 - Il file utilizzato si trova all'interno di una directory di proprietà dell'utente (l'utente potrebbe creare il file)
-- Il file utilizzato si trova all'interno di una directory di proprietà di root ma l'utente ha accesso in scrittura su di essa a causa di un gruppo (l'utente potrebbe creare il file)
+- Il file utilizzato si trova all'interno di una directory di proprietà di root, ma l'utente ha accesso in scrittura su di essa a causa di un gruppo (l'utente potrebbe creare il file)
 
-Essere in grado di **creare un file** che sarà **utilizzato da root**, consente a un utente di **sfruttare il suo contenuto** o persino creare **symlink/hardlink** per puntarlo in un'altra posizione.
+Essere in grado di **creare un file** che sarà **utilizzato da root**, consente a un utente di **sfruttare il suo contenuto** o persino di creare **symlink/hardlink** per puntarlo in un altro posto.
 
 Per questo tipo di vulnerabilità non dimenticare di **controllare gli installer `.pkg` vulnerabili**:
+
 
 {{#ref}}
 macos-files-folders-and-binaries/macos-installers-abuse.md
 {{#endref}}
 
-### Gestori di App per Estensioni di File e Schemi URL
+### Gestori di Estensioni di File e URL
 
 App strane registrate da estensioni di file potrebbero essere abusate e diverse applicazioni possono essere registrate per aprire protocolli specifici
+
 
 {{#ref}}
 macos-file-extension-apps.md
@@ -89,23 +99,24 @@ macos-file-extension-apps.md
 
 ## Escalation dei Privilegi TCC / SIP di macOS
 
-In macOS **le applicazioni e i binari possono avere permessi** per accedere a cartelle o impostazioni che li rendono più privilegiati di altri.
+In macOS, **le applicazioni e i binari possono avere permessi** per accedere a cartelle o impostazioni che li rendono più privilegiati di altri.
 
 Pertanto, un attaccante che desidera compromettere con successo una macchina macOS dovrà **escalare i suoi privilegi TCC** (o persino **bypassare SIP**, a seconda delle sue necessità).
 
-Questi privilegi sono solitamente concessi sotto forma di **diritti** con cui l'applicazione è firmata, oppure l'applicazione potrebbe aver richiesto alcuni accessi e dopo che il **utente li approva** possono essere trovati nei **database TCC**. Un altro modo in cui un processo può ottenere questi privilegi è essendo un **figlio di un processo** con quei **privilegi**, poiché di solito sono **ereditati**.
+Questi privilegi sono solitamente concessi sotto forma di **diritti** con cui l'applicazione è firmata, oppure l'applicazione potrebbe richiedere alcuni accessi e dopo che il **utente li approva**, possono essere trovati nei **database TCC**. Un altro modo in cui un processo può ottenere questi privilegi è essendo un **figlio di un processo** con quei **privilegi**, poiché di solito sono **ereditati**.
 
 Segui questi link per trovare diversi modi per [**escalare i privilegi in TCC**](macos-security-protections/macos-tcc/index.html#tcc-privesc-and-bypasses), per [**bypassare TCC**](macos-security-protections/macos-tcc/macos-tcc-bypasses/index.html) e come in passato [**SIP è stato bypassato**](macos-security-protections/macos-sip.md#sip-bypasses).
 
-## Escalation Tradizionale dei Privilegi di macOS
+## Escalation Tradizionale dei Privilegi in macOS
 
 Certo, dal punto di vista di un red team, dovresti essere anche interessato a escalare a root. Controlla il seguente post per alcuni suggerimenti:
+
 
 {{#ref}}
 macos-privilege-escalation.md
 {{#endref}}
 
-## Conformità di macOS
+## Conformità macOS
 
 - [https://github.com/usnistgov/macos_security](https://github.com/usnistgov/macos_security)
 

@@ -4,7 +4,7 @@
 
 ## Intro
 
-iButton è un nome generico per una chiave di identificazione elettronica racchiusa in un **contenitore metallico a forma di moneta**. È anche chiamata **Dallas Touch** Memory o memoria a contatto. Anche se spesso viene erroneamente definita come una chiave “magnetica”, non c'è **nulla di magnetico** in essa. Infatti, un **microchip** a tutti gli effetti che opera su un protocollo digitale è nascosto all'interno.
+iButton è un nome generico per una chiave di identificazione elettronica racchiusa in un **contenitore metallico a forma di moneta**. È anche chiamata **Dallas Touch** Memory o memoria a contatto. Anche se spesso viene erroneamente chiamata chiave “magnetica”, non c'è **niente di magnetico** in essa. Infatti, un **microchip** a tutti gli effetti che opera su un protocollo digitale è nascosto all'interno.
 
 <figure><img src="../../images/image (915).png" alt=""><figcaption></figcaption></figure>
 
@@ -24,7 +24,7 @@ Le chiavi Dallas scambiano dati utilizzando il protocollo 1-wire. Con solo un co
 
 Quando la chiave (Slave) contatta il citofono (Master), il chip all'interno della chiave si accende, alimentato dal citofono, e la chiave viene inizializzata. Successivamente, il citofono richiede l'ID della chiave. Ora esamineremo questo processo in modo più dettagliato.
 
-Flipper può funzionare sia in modalità Master che Slave. In modalità lettura della chiave, Flipper agisce come un lettore, cioè funziona come un Master. E in modalità emulazione della chiave, il flipper finge di essere una chiave, è in modalità Slave.
+Flipper può funzionare sia in modalità Master che Slave. In modalità lettura della chiave, Flipper agisce come lettore, cioè funziona come Master. E in modalità emulazione della chiave, il flipper finge di essere una chiave, è in modalità Slave.
 
 ### Dallas, Cyfral & Metakom keys
 
@@ -33,6 +33,7 @@ Per informazioni su come funzionano queste chiavi, controlla la pagina [https://
 ### Attacks
 
 Gli iButton possono essere attaccati con Flipper Zero:
+
 
 {{#ref}}
 flipper-zero/fz-ibutton.md

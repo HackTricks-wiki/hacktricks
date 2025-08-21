@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Office Documents
+## Documenti Office
 
 Microsoft Word esegue la convalida dei dati del file prima di aprire un file. La convalida dei dati viene eseguita sotto forma di identificazione della struttura dei dati, rispetto allo standard OfficeOpenXML. Se si verifica un errore durante l'identificazione della struttura dei dati, il file in analisi non verrà aperto.
 
@@ -14,7 +14,7 @@ Puoi utilizzare il seguente comando per controllare quali estensioni verranno es
 ```bash
 assoc | findstr /i "word excel powerp"
 ```
-DOCX files che fanno riferimento a un modello remoto (File – Opzioni – Componenti aggiuntivi – Gestisci: Modelli – Vai) che include macro possono “eseguire” anche le macro.
+DOCX file che fanno riferimento a un modello remoto (File –Opzioni –Componenti aggiuntivi –Gestisci: Modelli –Vai) che include macro possono “eseguire” anche le macro.
 
 ### Caricamento Immagine Esterna
 
@@ -23,7 +23,7 @@ _**Categorie**: Collegamenti e Riferimenti, **Nomi dei campi**: includePicture, 
 
 ![](<../../images/image (155).png>)
 
-### Backdoor Macro
+### Macro Backdoor
 
 È possibile utilizzare le macro per eseguire codice arbitrario dal documento.
 
@@ -66,7 +66,7 @@ proc.Create "powershell <beacon line generated>
 ```
 #### Rimuovere manualmente i metadati
 
-Vai su **File > Info > Ispeziona documento > Ispeziona documento**, che aprirà l'Ispezione documento. Clicca su **Ispeziona** e poi su **Rimuovi tutto** accanto a **Proprietà del documento e informazioni personali**.
+Vai su **File > Info > Ispeziona documento > Ispeziona documento**, che aprirà l'Ispezione documento. Clicca su **Ispeziona** e poi su **Rimuovi tutto** accanto a **Proprietà documento e informazioni personali**.
 
 #### Estensione Doc
 
@@ -83,7 +83,7 @@ Fallo perché **non puoi salvare macro all'interno di un `.docx`** e c'è uno **
 
 Un HTA è un programma Windows che **combina HTML e linguaggi di scripting (come VBScript e JScript)**. Genera l'interfaccia utente ed esegue come un'applicazione "completamente fidata", senza i vincoli del modello di sicurezza di un browser.
 
-Un HTA viene eseguito utilizzando **`mshta.exe`**, che è tipicamente **installato** insieme a **Internet Explorer**, rendendo **`mshta` dipendente da IE**. Quindi, se è stato disinstallato, gli HTA non saranno in grado di essere eseguiti.
+Un HTA viene eseguito utilizzando **`mshta.exe`**, che è tipicamente **installato** insieme a **Internet Explorer**, rendendo **`mshta` dipendente da IE**. Quindi, se è stato disinstallato, gli HTA non saranno in grado di eseguire.
 ```html
 <--! Basic HTA Execution -->
 <html>
@@ -140,13 +140,15 @@ self.close
 ```
 ## Forzare l'autenticazione NTLM
 
-Ci sono diversi modi per **forzare l'autenticazione NTLM "da remoto"**, ad esempio, potresti aggiungere **immagini invisibili** a email o HTML che l'utente accederà (anche HTTP MitM?). Oppure inviare alla vittima l'**indirizzo dei file** che **attiveranno** un'**autenticazione** solo per **aprire la cartella.**
+Ci sono diversi modi per **forzare l'autenticazione NTLM "da remoto"**, ad esempio, potresti aggiungere **immagini invisibili** a email o HTML che l'utente accederà (anche HTTP MitM?). Oppure inviare alla vittima l'**indirizzo di file** che **attiveranno** un'**autenticazione** solo per **aprire la cartella.**
 
 **Controlla queste idee e altro nelle seguenti pagine:**
+
 
 {{#ref}}
 ../../windows-hardening/active-directory-methodology/printers-spooler-service-abuse.md
 {{#endref}}
+
 
 {{#ref}}
 ../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md
@@ -157,6 +159,6 @@ Ci sono diversi modi per **forzare l'autenticazione NTLM "da remoto"**, ad esemp
 Non dimenticare che non puoi solo rubare l'hash o l'autenticazione ma anche **eseguire attacchi di relay NTLM**:
 
 - [**Attacchi di relay NTLM**](../pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#ntml-relay-attack)
-- [**AD CS ESC8 (relay NTLM a certificati)**](../../windows-hardening/active-directory-methodology/ad-certificates/domain-escalation.md#ntlm-relay-to-ad-cs-http-endpoints-esc8)
+- [**AD CS ESC8 (relay NTLM ai certificati)**](../../windows-hardening/active-directory-methodology/ad-certificates/domain-escalation.md#ntlm-relay-to-ad-cs-http-endpoints-esc8)
 
 {{#include ../../banners/hacktricks-training.md}}

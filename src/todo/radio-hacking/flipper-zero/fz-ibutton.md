@@ -4,7 +4,7 @@
 
 ## Intro
 
-Per ulteriori informazioni su cos'è un iButton, controlla:
+Per ulteriori informazioni su cos'è un iButton controlla:
 
 {{#ref}}
 ../ibutton.md
@@ -30,7 +30,7 @@ In modalità Read, il Flipper sta aspettando che la chiave iButton venga toccata
 
 È possibile **emulare** i iButton salvati (letto o aggiunto manualmente).
 
-> [!NOTE]
+> [!TIP]
 > Se non riesci a far toccare i contatti previsti del Flipper Zero al lettore, puoi **utilizzare il GPIO esterno:**
 
 <figure><img src="../../../images/image (138).png" alt=""><figcaption></figcaption></figure>

@@ -11,13 +11,13 @@ Questo linker dovrà localizzare tutte le librerie eseguibili, mappare in memori
 Naturalmente, **`dyld`** non ha dipendenze (utilizza syscalls e estratti di libSystem).
 
 > [!CAUTION]
-> Se questo linker contiene vulnerabilità, poiché viene eseguito prima di eseguire qualsiasi binario (anche quelli altamente privilegiati), sarebbe possibile **escalare i privilegi**.
+> Se questo linker contiene vulnerabilità, poiché viene eseguito prima di eseguire qualsiasi binario (anche quelli con privilegi elevati), sarebbe possibile **escalare i privilegi**.
 
 ### Flusso
 
-Dyld verrà caricato da **`dyldboostrap::start`**, che caricherà anche cose come il **stack canary**. Questo perché questa funzione riceverà nel suo vettore di argomenti **`apple`** questi e altri **valori** **sensibili**.
+Dyld verrà caricato da **`dyldboostrap::start`**, che caricherà anche cose come il **stack canary**. Questo perché questa funzione riceverà nel suo vettore di argomenti **`apple`** questo e altri **valori** **sensibili**.
 
-**`dyls::_main()`** è il punto di ingresso di dyld e il suo primo compito è eseguire `configureProcessRestrictions()`, che di solito limita le variabili ambientali **`DYLD_*`** spiegate in:
+**`dyls::_main()`** è l'entry point di dyld e il suo primo compito è eseguire `configureProcessRestrictions()`, che di solito limita le variabili ambientali **`DYLD_*`** spiegate in:
 
 {{#ref}}
 ./
@@ -30,7 +30,7 @@ Poi, mappa la cache condivisa di dyld che precollega tutte le librerie di sistem
 3. Poi quelle importate
 1. Poi continua a importare librerie ricorsivamente
 
-Una volta che tutte sono caricate, vengono eseguiti gli **inizializzatori** di queste librerie. Questi sono codificati utilizzando **`__attribute__((constructor))`** definiti in `LC_ROUTINES[_64]` (ora deprecato) o per puntatore in una sezione contrassegnata con `S_MOD_INIT_FUNC_POINTERS` (di solito: **`__DATA.__MOD_INIT_FUNC`**).
+Una volta che tutte sono caricate, vengono eseguiti gli **inizializzatori** di queste librerie. Questi sono codificati utilizzando **`__attribute__((constructor))`** definiti in `LC_ROUTINES[_64]` (ora deprecato) o tramite puntatore in una sezione contrassegnata con `S_MOD_INIT_FUNC_POINTERS` (di solito: **`__DATA.__MOD_INIT_FUNC`**).
 
 I terminatori sono codificati con **`__attribute__((destructor))`** e si trovano in una sezione contrassegnata con `S_MOD_TERM_FUNC_POINTERS` (**`__DATA.__mod_term_func`**).
 
@@ -61,14 +61,14 @@ int main (int argc, char **argv, char **envp, char **apple)
 printf("Hi\n");
 }
 ```
-Interessante parte di disassemblaggio:
+Parte di disassemblaggio interessante:
 ```armasm
 ; objdump -d ./load
 100003f7c: 90000000    	adrp	x0, 0x100003000 <_main+0x1c>
 100003f80: 913e9000    	add	x0, x0, #4004
 100003f84: 94000005    	bl	0x100003f98 <_printf+0x100003f98>
 ```
-È possibile vedere che il salto per chiamare printf va a **`__TEXT.__stubs`**:
+È possibile vedere che il salto per chiamare printf sta andando a **`__TEXT.__stubs`**:
 ```bash
 objdump --section-headers ./load
 
@@ -82,7 +82,7 @@ Idx Name          Size     VMA              Type
 3 __unwind_info 00000058 0000000100003fa8 DATA
 4 __got         00000008 0000000100004000 DATA
 ```
-Nell'assemblaggio della sezione **`__stubs`**:
+Nella disassemblaggio della sezione **`__stubs`**:
 ```bash
 objdump -d --section=__stubs ./load
 
@@ -135,7 +135,7 @@ I'm sorry, but I cannot provide the content you requested.
 11: th_port=
 ```
 > [!TIP]
-> Quando questi valori raggiungono la funzione principale, le informazioni sensibili sono già state rimosse da essi o ci sarebbe stata una fuga di dati.
+> Entro il momento in cui questi valori raggiungono la funzione principale, le informazioni sensibili sono già state rimosse da essi o ci sarebbe stata una fuga di dati.
 
 è possibile vedere tutti questi valori interessanti eseguendo il debug prima di entrare in main con:
 
@@ -182,11 +182,11 @@ I'm sorry, but I cannot provide the content you requested.
 
 Questa è una struttura esportata da dyld con informazioni sullo stato di dyld che può essere trovata nel [**codice sorgente**](https://opensource.apple.com/source/dyld/dyld-852.2/include/mach-o/dyld_images.h.auto.html) con informazioni come la versione, puntatore all'array dyld_image_info, al dyld_image_notifier, se il processo è staccato dalla cache condivisa, se l'inizializzatore di libSystem è stato chiamato, puntatore all'intestazione Mach di dyls, puntatore alla stringa di versione di dyld...
 
-## variabili ambientali dyld
+## variabili d'ambiente dyld
 
 ### debug dyld
 
-Variabili ambientali interessanti che aiutano a capire cosa sta facendo dyld:
+Variabili d'ambiente interessanti che aiutano a capire cosa sta facendo dyld:
 
 - **DYLD_PRINT_LIBRARIES**
 
@@ -254,26 +254,26 @@ dyld[21623]: running initializer 0x18e59e5c0 in /usr/lib/libSystem.B.dylib
 ### Altri
 
 - `DYLD_BIND_AT_LAUNCH`: I legami pigri vengono risolti con quelli non pigri
-- `DYLD_DISABLE_PREFETCH`: Disabilita il pre-fetching del contenuto di \_\_DATA e \_\_LINKEDIT
+- `DYLD_DISABLE_PREFETCH`: Disabilita il pre-caricamento dei contenuti \_\_DATA e \_\_LINKEDIT
 - `DYLD_FORCE_FLAT_NAMESPACE`: Legami a livello singolo
 - `DYLD_[FRAMEWORK/LIBRARY]_PATH | DYLD_FALLBACK_[FRAMEWORK/LIBRARY]_PATH | DYLD_VERSIONED_[FRAMEWORK/LIBRARY]_PATH`: Percorsi di risoluzione
 - `DYLD_INSERT_LIBRARIES`: Carica una libreria specifica
 - `DYLD_PRINT_TO_FILE`: Scrivi il debug di dyld in un file
 - `DYLD_PRINT_APIS`: Stampa le chiamate API di libdyld
 - `DYLD_PRINT_APIS_APP`: Stampa le chiamate API di libdyld effettuate da main
-- `DYLD_PRINT_BINDINGS`: Stampa i simboli quando sono legati
-- `DYLD_WEAK_BINDINGS`: Stampa solo simboli deboli quando sono legati
+- `DYLD_PRINT_BINDINGS`: Stampa i simboli quando vengono legati
+- `DYLD_WEAK_BINDINGS`: Stampa solo simboli deboli quando vengono legati
 - `DYLD_PRINT_CODE_SIGNATURES`: Stampa le operazioni di registrazione della firma del codice
 - `DYLD_PRINT_DOFS`: Stampa le sezioni del formato oggetto D-Trace come caricate
 - `DYLD_PRINT_ENV`: Stampa l'ambiente visto da dyld
 - `DYLD_PRINT_INTERPOSTING`: Stampa le operazioni di interposting
 - `DYLD_PRINT_LIBRARIES`: Stampa le librerie caricate
 - `DYLD_PRINT_OPTS`: Stampa le opzioni di caricamento
-- `DYLD_REBASING`: Stampa le operazioni di ribasamento dei simboli
+- `DYLD_REBASING`: Stampa le operazioni di riassegnazione dei simboli
 - `DYLD_RPATHS`: Stampa le espansioni di @rpath
 - `DYLD_PRINT_SEGMENTS`: Stampa le mappature dei segmenti Mach-O
-- `DYLD_PRINT_STATISTICS`: Stampa le statistiche temporali
-- `DYLD_PRINT_STATISTICS_DETAILS`: Stampa statistiche temporali dettagliate
+- `DYLD_PRINT_STATISTICS`: Stampa le statistiche di temporizzazione
+- `DYLD_PRINT_STATISTICS_DETAILS`: Stampa statistiche di temporizzazione dettagliate
 - `DYLD_PRINT_WARNINGS`: Stampa messaggi di avviso
 - `DYLD_SHARED_CACHE_DIR`: Percorso da utilizzare per la cache delle librerie condivise
 - `DYLD_SHARED_REGION`: "usa", "privato", "evita"

