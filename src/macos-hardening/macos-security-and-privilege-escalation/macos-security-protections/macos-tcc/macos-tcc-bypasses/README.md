@@ -35,6 +35,7 @@ Moreover, it's possible to **remove the legit app from the Dock and put the fake
 
 More info and PoC in:
 
+
 {{#ref}}
 ../../../macos-privilege-escalation.md
 {{#endref}}
@@ -71,6 +72,7 @@ For more **information** about the exploit to **get icloud tokens** from that en
 An app with the **`kTCCServiceAppleEvents`** permission will be able to **control other Apps**. This means that it could be able to **abuse the permissions granted to the other Apps**.
 
 For more info about Apple Scripts check:
+
 
 {{#ref}}
 macos-apple-scripts.md
@@ -261,6 +263,7 @@ For more info check the [**original report**](https://www.microsoft.com/en-us/se
 ## By process injection
 
 There are different techniques to inject code inside a process and abuse its TCC privileges:
+
 
 {{#ref}}
 ../../../macos-proces-abuse/
@@ -508,6 +511,7 @@ The folder **`/var/db/locationd/` wasn't protected from DMG mounting** so it was
 
 ## By startup apps
 
+
 {{#ref}}
 ../../../../macos-auto-start-locations.md
 {{#endref}}
@@ -536,5 +540,4 @@ Another way using [**CoreGraphics events**](https://objectivebythesea.org/v2/tal
 - [**Knockout Win Against TCC - 20+ NEW Ways to Bypass Your MacOS Privacy Mechanisms**](https://www.youtube.com/watch?v=a9hsxPdRxsY)
 
 {{#include ../../../../../banners/hacktricks-training.md}}
-
 

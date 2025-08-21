@@ -52,6 +52,7 @@ Take it to the top
 Whisper my world
 ```
 
+
 {{#ref}}
 https://codewithrockstar.com/
 {{#endref}}
@@ -69,4 +70,3 @@ Kukarek
 ```
 
 {{#include ../banners/hacktricks-training.md}}
-

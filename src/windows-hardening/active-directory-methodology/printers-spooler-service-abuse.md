@@ -55,6 +55,7 @@ If an attacker has already compromised a computer with [Unconstrained Delegation
 
 ## RCP Force authentication
 
+
 {{#ref}}
 https://github.com/p0dalirius/Coercer
 {{#endref}}
@@ -125,6 +126,7 @@ If you can perform a MitM attack to a computer and inject HTML in a page he will
 ```
 
 ## Other ways to force and phish NTLM authentication
+
 
 {{#ref}}
 ../ntlm/places-to-steal-ntlm-creds.md
