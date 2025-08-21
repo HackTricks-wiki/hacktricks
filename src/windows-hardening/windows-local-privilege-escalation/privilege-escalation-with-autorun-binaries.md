@@ -1,4 +1,4 @@
-# Escalade de privilèges avec Autoruns
+# Élévation de privilèges avec Autoruns
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -26,7 +26,7 @@ schtasks /Create /RU "SYSTEM" /SC ONLOGON /TN "SchedPE" /TR "cmd /c net localgro
 ```
 ## Dossiers
 
-Tous les binaires situés dans les **dossiers de démarrage vont être exécutés au démarrage**. Les dossiers de démarrage courants sont ceux énumérés ci-dessous, mais le dossier de démarrage est indiqué dans le registre. [Read this to learn where.](privilege-escalation-with-autorun-binaries.md#startup-path)
+Tous les binaires situés dans les **dossiers de démarrage seront exécutés au démarrage**. Les dossiers de démarrage courants sont ceux énumérés ci-dessous, mais le dossier de démarrage est indiqué dans le registre. [Read this to learn where.](privilege-escalation-with-autorun-binaries.md#startup-path)
 ```bash
 dir /b "C:\Documents and Settings\All Users\Start Menu\Programs\Startup" 2>nul
 dir /b "C:\Documents and Settings\%username%\Start Menu\Programs\Startup" 2>nul
@@ -35,14 +35,22 @@ dir /b "%appdata%\Microsoft\Windows\Start Menu\Programs\Startup" 2>nul
 Get-ChildItem "C:\Users\All Users\Start Menu\Programs\Startup"
 Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 ```
+> **FYI** : Les vulnérabilités de *traversée de chemin* lors de l'extraction d'archives (comme celle exploitée dans WinRAR avant la version 7.13 – CVE-2025-8088) peuvent être utilisées pour **déposer des charges utiles directement dans ces dossiers de démarrage lors de la décompression**, entraînant une exécution de code lors de la prochaine connexion utilisateur. Pour une analyse approfondie de cette technique, voir :
+
+{{#ref}}
+../../generic-hacking/archive-extraction-path-traversal.md
+{{#endref}}
+
+
+
 ## Registre
 
-> [!NOTE]
-> [Note from here](https://answers.microsoft.com/en-us/windows/forum/all/delete-registry-key/d425ae37-9dcc-4867-b49c-723dcd15147f) : L'entrée de registre **Wow6432Node** indique que vous exécutez une version 64 bits de Windows. Le système d'exploitation utilise cette clé pour afficher une vue séparée de HKEY_LOCAL_MACHINE\SOFTWARE pour les applications 32 bits qui s'exécutent sur des versions Windows 64 bits.
+> [!TIP]
+> [Note à partir d'ici](https://answers.microsoft.com/en-us/windows/forum/all/delete-registry-key/d425ae37-9dcc-4867-b49c-723dcd15147f) : L'entrée de registre **Wow6432Node** indique que vous exécutez une version 64 bits de Windows. Le système d'exploitation utilise cette clé pour afficher une vue séparée de HKEY_LOCAL_MACHINE\SOFTWARE pour les applications 32 bits qui s'exécutent sur des versions 64 bits de Windows.
 
 ### Exécutions
 
-**Connu sous le nom de** registre AutoRun :
+Registre AutoRun **communément connu** :
 
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\Run`
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\RunOnce`
@@ -58,7 +66,7 @@ Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 
 Les clés de registre connues sous le nom de **Run** et **RunOnce** sont conçues pour exécuter automatiquement des programmes chaque fois qu'un utilisateur se connecte au système. La ligne de commande assignée en tant que valeur de données d'une clé est limitée à 260 caractères ou moins.
 
-**Exécutions de service** (peut contrôler le démarrage automatique des services lors du démarrage) :
+**Exécutions de service** (peuvent contrôler le démarrage automatique des services lors du démarrage) :
 
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\RunServicesOnce`
 - `HKCU\Software\Microsoft\Windows\CurrentVersion\RunServicesOnce`
@@ -78,10 +86,10 @@ Sur Windows Vista et les versions ultérieures, les clés de registre **Run** et
 ```
 reg add HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnceEx\\0001\\Depend /v 1 /d "C:\\temp\\evil.dll"
 ```
-> [!NOTE]
+> [!TIP]
 > **Exploitation 1** : Si vous pouvez écrire dans l'un des registres mentionnés dans **HKLM**, vous pouvez élever les privilèges lorsqu'un autre utilisateur se connecte.
 
-> [!NOTE]
+> [!TIP]
 > **Exploitation 2** : Si vous pouvez écraser l'un des binaires indiqués dans l'un des registres dans **HKLM**, vous pouvez modifier ce binaire avec une porte dérobée lorsqu'un autre utilisateur se connecte et élever les privilèges.
 ```bash
 #CMD
@@ -145,9 +153,9 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Wow6432Node\Microsoft\Windows\Ru
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders`
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders`
 
-Les raccourcis placés dans le dossier **Démarrage** déclencheront automatiquement le lancement de services ou d'applications lors de la connexion de l'utilisateur ou du redémarrage du système. L'emplacement du dossier **Démarrage** est défini dans le registre pour les portées **Local Machine** et **Current User**. Cela signifie que tout raccourci ajouté à ces emplacements **Démarrage** spécifiés garantira que le service ou le programme lié démarre après le processus de connexion ou de redémarrage, ce qui en fait une méthode simple pour programmer des programmes à s'exécuter automatiquement.
+Les raccourcis placés dans le dossier **Démarrage** déclencheront automatiquement le lancement de services ou d'applications lors de la connexion de l'utilisateur ou du redémarrage du système. L'emplacement du dossier **Démarrage** est défini dans le registre pour les portées **Machine locale** et **Utilisateur actuel**. Cela signifie que tout raccourci ajouté à ces emplacements **Démarrage** spécifiés garantira que le service ou le programme lié démarre après le processus de connexion ou de redémarrage, ce qui en fait une méthode simple pour programmer des programmes à s'exécuter automatiquement.
 
-> [!NOTE]
+> [!TIP]
 > Si vous pouvez écraser n'importe quel \[User] Shell Folder sous **HKLM**, vous pourrez le pointer vers un dossier contrôlé par vous et placer une porte dérobée qui sera exécutée chaque fois qu'un utilisateur se connecte au système, escaladant ainsi les privilèges.
 ```bash
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders" /v "Common Startup"
@@ -160,7 +168,7 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Microsoft\Windows\CurrentVersion
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders' -Name "Common Startup"
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders' -Name "Common Startup"
 ```
-### Clés Winlogon
+### Winlogon Keys
 
 `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon`
 
@@ -171,7 +179,7 @@ reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "Shell
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon' -Name "Userinit"
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon' -Name "Shell"
 ```
-> [!NOTE]
+> [!TIP]
 > Si vous pouvez écraser la valeur du registre ou le binaire, vous pourrez élever les privilèges.
 
 ### Paramètres de politique
@@ -201,8 +209,8 @@ Dans le Registre Windows sous `HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot`, 
 5. Réappliquez les attributs de fichier d'origine : `attrib c:\boot.ini +r +s +h`
 
 - **Exploit 1 :** Changer la clé de registre **AlternateShell** permet de configurer un shell de commande personnalisé, potentiellement pour un accès non autorisé.
-- **Exploit 2 (Permissions d'écriture PATH) :** Avoir des permissions d'écriture sur n'importe quelle partie de la variable **PATH** du système, en particulier avant `C:\Windows\system32`, vous permet d'exécuter un `cmd.exe` personnalisé, qui pourrait être une porte dérobée si le système est démarré en mode sans échec.
-- **Exploit 3 (Permissions d'écriture PATH et boot.ini) :** L'accès en écriture à `boot.ini` permet un démarrage automatique en mode sans échec, facilitant l'accès non autorisé au prochain redémarrage.
+- **Exploit 2 (Permissions d'écriture sur PATH) :** Avoir des permissions d'écriture sur n'importe quelle partie de la variable système **PATH**, en particulier avant `C:\Windows\system32`, vous permet d'exécuter un `cmd.exe` personnalisé, qui pourrait être une porte dérobée si le système est démarré en mode sans échec.
+- **Exploit 3 (Permissions d'écriture sur PATH et boot.ini) :** L'accès en écriture à `boot.ini` permet un démarrage automatique en mode sans échec, facilitant l'accès non autorisé au prochain redémarrage.
 
 Pour vérifier le paramètre **AlternateShell** actuel, utilisez ces commandes :
 ```bash
@@ -220,7 +228,7 @@ Active Setup est géré à travers les clés de registre suivantes :
 - `HKCU\SOFTWARE\Microsoft\Active Setup\Installed Components`
 - `HKCU\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components`
 
-Dans ces clés, divers sous-clés existent, chacune correspondant à un composant spécifique. Les valeurs clés d'un intérêt particulier incluent :
+Au sein de ces clés, divers sous-clés existent, chacune correspondant à un composant spécifique. Les valeurs clés d'un intérêt particulier incluent :
 
 - **IsInstalled :**
 - `0` indique que la commande du composant ne s'exécutera pas.
@@ -229,10 +237,10 @@ Dans ces clés, divers sous-clés existent, chacune correspondant à un composan
 
 **Aperçus de sécurité :**
 
-- Modifier ou écrire dans une clé où **`IsInstalled`** est défini sur `"1"` avec un **`StubPath`** spécifique peut entraîner l'exécution non autorisée de commandes, potentiellement pour une élévation de privilèges.
-- Altérer le fichier binaire référencé dans toute valeur **`StubPath`** pourrait également permettre une élévation de privilèges, si les permissions sont suffisantes.
+- Modifier ou écrire dans une clé où **`IsInstalled`** est défini sur `"1"` avec un **`StubPath`** spécifique peut conduire à l'exécution non autorisée de commandes, potentiellement pour une élévation de privilèges.
+- Altérer le fichier binaire référencé dans n'importe quelle valeur de **`StubPath`** pourrait également permettre une élévation de privilèges, étant donné des autorisations suffisantes.
 
-Pour inspecter les configurations **`StubPath`** à travers les composants Active Setup, ces commandes peuvent être utilisées :
+Pour inspecter les configurations de **`StubPath`** à travers les composants Active Setup, ces commandes peuvent être utilisées :
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Active Setup\Installed Components" /s /v StubPath
 reg query "HKCU\SOFTWARE\Microsoft\Active Setup\Installed Components" /s /v StubPath
@@ -243,7 +251,7 @@ reg query "HKCU\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components
 
 ### Aperçu des Objets d'Aide au Navigateur (BHO)
 
-Les Objets d'Aide au Navigateur (BHO) sont des modules DLL qui ajoutent des fonctionnalités supplémentaires à Internet Explorer de Microsoft. Ils se chargent dans Internet Explorer et l'Explorateur Windows à chaque démarrage. Cependant, leur exécution peut être bloquée en définissant la clé **NoExplorer** à 1, les empêchant de se charger avec les instances de l'Explorateur Windows.
+Les Objets d'Aide au Navigateur (BHO) sont des modules DLL qui ajoutent des fonctionnalités supplémentaires à Internet Explorer de Microsoft. Ils se chargent dans Internet Explorer et Windows Explorer à chaque démarrage. Cependant, leur exécution peut être bloquée en définissant la clé **NoExplorer** à 1, les empêchant de se charger avec les instances de Windows Explorer.
 
 Les BHO sont compatibles avec Windows 10 via Internet Explorer 11 mais ne sont pas pris en charge dans Microsoft Edge, le navigateur par défaut des versions plus récentes de Windows.
 
@@ -293,13 +301,13 @@ HKLM\Software\Microsoft\Wow6432Node\Windows NT\CurrentVersion\Image File Executi
 ```
 ## SysInternals
 
-Notez que tous les sites où vous pouvez trouver des autoruns ont **déjà été recherchés par** [**winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe). Cependant, pour une **liste plus complète des fichiers auto-exécutés**, vous pourriez utiliser [autoruns](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns) de Sysinternals :
+Notez que tous les sites où vous pouvez trouver des autoruns sont **déjà recherchés par** [**winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe). Cependant, pour une **liste plus complète des fichiers auto-exécutés**, vous pourriez utiliser [autoruns](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns) de Sysinternals :
 ```
 autorunsc.exe -m -nobanner -a * -ct /accepteula
 ```
 ## Plus
 
-**Trouvez plus d'Autoruns comme les enregistrements dans** [**https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2**](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)
+**Trouvez plus d'Autoruns comme des enregistrements dans** [**https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2**](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)
 
 ## Références
 

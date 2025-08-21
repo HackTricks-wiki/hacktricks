@@ -4,6 +4,12 @@
 
 ## **Introduction**
 
+### Ressources connexes
+
+{{#ref}}
+synology-encrypted-archive-decryption.md
+{{#endref}}
+
 Le firmware est un logiciel essentiel qui permet aux appareils de fonctionner correctement en gérant et en facilitant la communication entre les composants matériels et le logiciel avec lequel les utilisateurs interagissent. Il est stocké dans une mémoire permanente, garantissant que l'appareil peut accéder à des instructions vitales dès qu'il est allumé, ce qui conduit au lancement du système d'exploitation. L'examen et la modification potentielle du firmware sont une étape cruciale pour identifier les vulnérabilités de sécurité.
 
 ## **Collecte d'informations**
@@ -29,13 +35,13 @@ L'obtention du firmware peut être abordée par divers moyens, chacun ayant son 
 - **En le construisant** à partir des instructions fournies
 - **En le téléchargeant** depuis des sites de support officiels
 - En utilisant des requêtes **Google dork** pour trouver des fichiers de firmware hébergés
-- En accédant directement au **stockage cloud**, avec des outils comme [S3Scanner](https://github.com/sa7mon/S3Scanner)
-- En interceptant les **mises à jour** via des techniques de l'homme du milieu
-- **En extrayant** de l'appareil par des connexions comme **UART**, **JTAG** ou **PICit**
-- **En reniflant** les demandes de mise à jour dans la communication de l'appareil
-- En identifiant et en utilisant des **points de terminaison de mise à jour codés en dur**
-- **En dumpant** depuis le bootloader ou le réseau
-- **En retirant et en lisant** la puce de stockage, lorsque tout le reste échoue, en utilisant des outils matériels appropriés
+- Accéder directement au **stockage cloud**, avec des outils comme [S3Scanner](https://github.com/sa7mon/S3Scanner)
+- Intercepter les **mises à jour** via des techniques de l'homme du milieu
+- **Extraire** depuis l'appareil via des connexions comme **UART**, **JTAG** ou **PICit**
+- **Sniffer** les requêtes de mise à jour dans la communication de l'appareil
+- Identifier et utiliser des **points de terminaison de mise à jour codés en dur**
+- **Dumping** depuis le bootloader ou le réseau
+- **Retirer et lire** la puce de stockage, lorsque tout le reste échoue, en utilisant des outils matériels appropriés
 
 ## Analyser le firmware
 
@@ -60,7 +66,7 @@ Ou [**binvis.io**](https://binvis.io/#/) ([code](https://code.google.com/archive
 
 ### Récupération du Système de Fichiers
 
-Avec les outils précédemment commentés comme `binwalk -ev <bin>`, vous devriez avoir pu **extraire le système de fichiers**.\
+Avec les outils commentés précédemment comme `binwalk -ev <bin>`, vous devriez avoir pu **extraire le système de fichiers**.\
 Binwalk extrait généralement cela dans un **dossier nommé selon le type de système de fichiers**, qui est généralement l'un des suivants : squashfs, ubifs, romfs, rootfs, jffs2, yaffs2, cramfs, initramfs.
 
 #### Extraction Manuelle du Système de Fichiers
@@ -77,7 +83,7 @@ DECIMAL HEXADECIMAL DESCRIPTION
 1704052 0x1A0074 PackImg section delimiter tag, little endian size: 32256 bytes; big endian size: 8257536 bytes
 1704084 0x1A0094 Squashfs filesystem, little endian, version 4.0, compression:lzma, size: 8256900 bytes, 2688 inodes, blocksize: 131072 bytes, created: 2016-07-12 02:28:41
 ```
-Exécutez la **commande dd** suivante pour extraire le système de fichiers Squashfs.
+Exécutez la commande **dd** suivante pour extraire le système de fichiers Squashfs.
 ```
 $ dd if=DIR850L_REVB.bin bs=1 skip=1704084 of=dir.squashfs
 
@@ -126,7 +132,7 @@ hexdump -C -n 512 <bin> > hexdump.out
 hexdump -C <bin> | head #useful for finding signatures in the header
 fdisk -lu <bin> #lists partitions and filesystems, if there are multiple
 ```
-Pour évaluer l'état de l'encryption de l'image, l'**entropie** est vérifiée avec `binwalk -E <bin>`. Une faible entropie suggère un manque d'encryption, tandis qu'une haute entropie indique une possible encryption ou compression.
+Pour évaluer l'état de chiffrement de l'image, l'**entropie** est vérifiée avec `binwalk -E <bin>`. Une faible entropie suggère un manque de chiffrement, tandis qu'une haute entropie indique un possible chiffrement ou compression.
 
 Pour extraire des **fichiers intégrés**, des outils et ressources comme la documentation **file-data-carving-recovery-tools** et **binvis.io** pour l'inspection des fichiers sont recommandés.
 
@@ -138,7 +144,7 @@ $ binwalk DIR850L_REVB.bin
 
 $ dd if=DIR850L_REVB.bin bs=1 skip=1704084 of=dir.squashfs
 ```
-Ensuite, en fonction du type de système de fichiers (par exemple, squashfs, cpio, jffs2, ubifs), différentes commandes sont utilisées pour extraire manuellement le contenu.
+Après cela, en fonction du type de système de fichiers (par exemple, squashfs, cpio, jffs2, ubifs), différentes commandes sont utilisées pour extraire manuellement le contenu.
 
 ### Analyse du Système de Fichiers
 
@@ -146,17 +152,17 @@ Une fois le système de fichiers extrait, la recherche de failles de sécurité 
 
 **Emplacements clés** et **éléments** à inspecter incluent :
 
-- **etc/shadow** et **etc/passwd** pour les identifiants des utilisateurs
+- **etc/shadow** et **etc/passwd** pour les identifiants utilisateurs
 - Certificats SSL et clés dans **etc/ssl**
 - Fichiers de configuration et scripts pour d'éventuelles vulnérabilités
 - Binaires intégrés pour une analyse plus approfondie
-- Serveurs web et binaires courants des appareils IoT
+- Serveurs web et binaires courants des dispositifs IoT
 
 Plusieurs outils aident à découvrir des informations sensibles et des vulnérabilités au sein du système de fichiers :
 
 - [**LinPEAS**](https://github.com/carlospolop/PEASS-ng) et [**Firmwalker**](https://github.com/craigz28/firmwalker) pour la recherche d'informations sensibles
 - [**The Firmware Analysis and Comparison Tool (FACT)**](https://github.com/fkie-cad/FACT_core) pour une analyse complète du firmware
-- [**FwAnalyzer**](https://github.com/cruise-automation/fwanalyzer), [**ByteSweep**](https://gitlab.com/bytesweep/bytesweep), [**ByteSweep-go**](https://gitlab.com/bytesweep/bytesweep-go), et [**EMBA**](https://github.com/e-m-b-a/emba) pour une analyse statique et dynamique
+- [**FwAnalyzer**](https://github.com/cruise-automation/fwanalyzer), [**ByteSweep**](https://gitlab.com/bytesweep/bytesweep), [**ByteSweep-go**](https://gitlab.com/bytesweep/bytesweep-go), et [**EMBA**](https://github.com/e-m-b-a/emba) pour l'analyse statique et dynamique
 
 ### Vérifications de Sécurité sur les Binaires Compilés
 
@@ -164,11 +170,11 @@ Le code source et les binaires compilés trouvés dans le système de fichiers d
 
 ## Émulation de Firmware pour Analyse Dynamique
 
-Le processus d'émulation de firmware permet une **analyse dynamique** soit du fonctionnement d'un appareil, soit d'un programme individuel. Cette approche peut rencontrer des défis liés aux dépendances matérielles ou d'architecture, mais le transfert du système de fichiers racine ou de binaires spécifiques vers un appareil avec une architecture et un ordre d'octets correspondants, comme un Raspberry Pi, ou vers une machine virtuelle préconstruite, peut faciliter des tests supplémentaires.
+Le processus d'émulation de firmware permet une **analyse dynamique** soit du fonctionnement d'un dispositif, soit d'un programme individuel. Cette approche peut rencontrer des défis liés aux dépendances matérielles ou d'architecture, mais le transfert du système de fichiers racine ou de binaires spécifiques vers un dispositif avec une architecture et un ordre des octets correspondants, comme un Raspberry Pi, ou vers une machine virtuelle préconstruite, peut faciliter des tests supplémentaires.
 
 ### Émulation de Binaires Individuels
 
-Pour examiner des programmes uniques, il est crucial d'identifier l'ordre d'octets et l'architecture CPU du programme.
+Pour examiner des programmes uniques, il est crucial d'identifier l'ordre des octets et l'architecture CPU du programme.
 
 #### Exemple avec l'Architecture MIPS
 
@@ -192,7 +198,7 @@ Des outils comme [Firmadyne](https://github.com/firmadyne/firmadyne), [Firmware 
 
 ## Analyse dynamique en pratique
 
-À ce stade, un environnement de dispositif réel ou émulé est utilisé pour l'analyse. Il est essentiel de maintenir un accès shell au système d'exploitation et au système de fichiers. L'émulation peut ne pas imiter parfaitement les interactions matérielles, nécessitant des redémarrages d'émulation occasionnels. L'analyse doit revisiter le système de fichiers, exploiter les pages web et services réseau exposés, et explorer les vulnérabilités du bootloader. Les tests d'intégrité du firmware sont critiques pour identifier les vulnérabilités potentielles de porte dérobée.
+À ce stade, un environnement de dispositif réel ou émulé est utilisé pour l'analyse. Il est essentiel de maintenir un accès shell au système d'exploitation et au système de fichiers. L'émulation peut ne pas imiter parfaitement les interactions matérielles, nécessitant des redémarrages d'émulation occasionnels. L'analyse doit revisiter le système de fichiers, exploiter les pages web et services réseau exposés, et explorer les vulnérabilités du chargeur de démarrage. Les tests d'intégrité du firmware sont critiques pour identifier les vulnérabilités potentielles de porte dérobée.
 
 ## Techniques d'analyse à l'exécution
 
@@ -204,12 +210,55 @@ Développer un PoC pour les vulnérabilités identifiées nécessite une compré
 
 ## Systèmes d'exploitation préparés pour l'analyse de firmware
 
-Des systèmes d'exploitation comme [AttifyOS](https://github.com/adi0x90/attifyos) et [EmbedOS](https://github.com/scriptingxss/EmbedOS) fournissent des environnements préconfigurés pour les tests de sécurité du firmware, équipés des outils nécessaires.
+Des systèmes d'exploitation comme [AttifyOS](https://github.com/adi0x90/attifyos) et [EmbedOS](https://github.com/scriptingxss/EmbedOS) fournissent des environnements préconfigurés pour les tests de sécurité des firmwares, équipés des outils nécessaires.
 
-## OS préparés pour analyser le firmware
+## Systèmes d'exploitation préparés pour analyser le firmware
 
-- [**AttifyOS**](https://github.com/adi0x90/attifyos) : AttifyOS est une distribution destinée à vous aider à effectuer une évaluation de sécurité et un test de pénétration des dispositifs Internet des objets (IoT). Elle vous fait gagner beaucoup de temps en fournissant un environnement préconfiguré avec tous les outils nécessaires chargés.
-- [**EmbedOS**](https://github.com/scriptingxss/EmbedOS) : Système d'exploitation de test de sécurité embarqué basé sur Ubuntu 18.04 préchargé avec des outils de test de sécurité du firmware.
+- [**AttifyOS**](https://github.com/adi0x90/attifyos) : AttifyOS est une distribution destinée à vous aider à effectuer des évaluations de sécurité et des tests de pénétration des dispositifs Internet des objets (IoT). Elle vous fait gagner beaucoup de temps en fournissant un environnement préconfiguré avec tous les outils nécessaires chargés.
+- [**EmbedOS**](https://github.com/scriptingxss/EmbedOS) : Système d'exploitation de test de sécurité embarqué basé sur Ubuntu 18.04 préchargé avec des outils de test de sécurité des firmwares.
+
+## Attaques de rétrogradation de firmware et mécanismes de mise à jour non sécurisés
+
+Même lorsqu'un fournisseur met en œuvre des vérifications de signature cryptographique pour les images de firmware, **la protection contre le retour à une version antérieure (rétrogradation) est souvent omise**. Lorsque le chargeur de démarrage ou de récupération ne vérifie que la signature avec une clé publique intégrée mais ne compare pas la *version* (ou un compteur monotone) de l'image flashée, un attaquant peut légitimement installer un **firmware plus ancien et vulnérable qui porte toujours une signature valide** et ainsi réintroduire des vulnérabilités corrigées.
+
+Flux de travail typique de l'attaque :
+
+1. **Obtenir une image signée plus ancienne**
+   * La récupérer sur le portail de téléchargement public du fournisseur, CDN ou site de support.
+   * L'extraire d'applications mobiles/de bureau compagnon (par exemple, à l'intérieur d'un APK Android sous `assets/firmware/`).
+   * La récupérer dans des dépôts tiers tels que VirusTotal, archives Internet, forums, etc.
+2. **Télécharger ou servir l'image au dispositif** via n'importe quel canal de mise à jour exposé :
+   * Interface Web, API d'application mobile, USB, TFTP, MQTT, etc.
+   * De nombreux dispositifs IoT grand public exposent des points de terminaison HTTP(S) *non authentifiés* qui acceptent des blobs de firmware encodés en Base64, les décodent côté serveur et déclenchent la récupération/mise à niveau.
+3. Après la rétrogradation, exploiter une vulnérabilité qui a été corrigée dans la version plus récente (par exemple, un filtre d'injection de commande qui a été ajouté plus tard).
+4. Optionnellement, flasher la dernière image ou désactiver les mises à jour pour éviter la détection une fois la persistance acquise.
+
+### Exemple : Injection de commande après rétrogradation
+```http
+POST /check_image_and_trigger_recovery?md5=1; echo 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC...' >> /root/.ssh/authorized_keys HTTP/1.1
+Host: 192.168.0.1
+Content-Type: application/octet-stream
+Content-Length: 0
+```
+Dans le firmware vulnérable (rétrogradé), le paramètre `md5` est concaténé directement dans une commande shell sans assainissement, permettant l'injection de commandes arbitraires (ici – l'activation de l'accès root basé sur une clé SSH). Les versions ultérieures du firmware ont introduit un filtre de caractères de base, mais l'absence de protection contre la rétrogradation rend la correction inutile.
+
+### Extraction de Firmware à partir d'Applications Mobiles
+
+De nombreux fournisseurs regroupent des images de firmware complètes à l'intérieur de leurs applications mobiles compagnon afin que l'application puisse mettre à jour l'appareil via Bluetooth/Wi-Fi. Ces paquets sont généralement stockés non chiffrés dans l'APK/APEX sous des chemins comme `assets/fw/` ou `res/raw/`. Des outils tels que `apktool`, `ghidra`, ou même un simple `unzip` vous permettent d'extraire des images signées sans toucher au matériel physique.
+```
+$ apktool d vendor-app.apk -o vendor-app
+$ ls vendor-app/assets/firmware
+firmware_v1.3.11.490_signed.bin
+```
+### Liste de contrôle pour évaluer la logique de mise à jour
+
+* Le transport/l'authentification de l'*endpoint de mise à jour* est-il adéquatement protégé (TLS + authentification) ?
+* L'appareil compare-t-il les **numéros de version** ou un **compteur anti-rollback monotone** avant de flasher ?
+* L'image est-elle vérifiée dans une chaîne de démarrage sécurisé (par exemple, signatures vérifiées par le code ROM) ?
+* Le code en espace utilisateur effectue-t-il des vérifications supplémentaires de validité (par exemple, carte de partition autorisée, numéro de modèle) ?
+* Les flux de mise à jour *partiels* ou *de sauvegarde* réutilisent-ils la même logique de validation ?
+
+> 💡  Si l'un des éléments ci-dessus est manquant, la plateforme est probablement vulnérable aux attaques de rollback.
 
 ## Firmware vulnérable pour pratiquer
 
@@ -232,6 +281,7 @@ Pour pratiquer la découverte de vulnérabilités dans le firmware, utilisez les
 
 - [https://scriptingxss.gitbook.io/firmware-security-testing-methodology/](https://scriptingxss.gitbook.io/firmware-security-testing-methodology/)
 - [Practical IoT Hacking: The Definitive Guide to Attacking the Internet of Things](https://www.amazon.co.uk/Practical-IoT-Hacking-F-Chantzis/dp/1718500904)
+- [Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
 
 ## Formation et Certificat
 

