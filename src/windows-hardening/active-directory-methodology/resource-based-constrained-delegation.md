@@ -204,11 +204,13 @@ impacket-rbcd -delegate-to 'VICTIM$' -action flush 'domain.local/jdoe:Summer2025
 
 - You can also write the RBCD SD over AD Web Services (ADWS) if LDAP is filtered. See:
 
+
 {{#ref}}
 adws-enumeration.md
 {{#endref}}
 
 - Kerberos relay chains frequently end in RBCD to achieve local SYSTEM in one step. See practical end-to-end examples:
+
 
 {{#ref}}
 ../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md

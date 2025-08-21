@@ -250,6 +250,7 @@ int main() {
 
 You can grab a shellcode from:
 
+
 {{#ref}}
 ../../macos-apps-inspecting-debugging-and-fuzzing/arm64-basic-assembly.md
 {{#endref}}
@@ -523,6 +524,7 @@ It was possible to **inject a simple shellcode** to execute a command because it
 Therefore, to **improve the thread** it should call **`pthread_create_from_mach_thread`** which will **create a valid pthread**. Then, this new pthread could **call dlopen** to **load a dylib** from the system, so instead of writing new shellcode to perform different actions it's possible to load custom libraries.
 
 You can find **example dylibs** in (for example the one that generates a log and then you can listen to it):
+
 
 {{#ref}}
 ../../macos-dyld-hijacking-and-dyld_insert_libraries.md
@@ -814,6 +816,7 @@ gcc -framework Foundation -framework Appkit dylib_injector.m -o dylib_injector
 
 In this technique a thread of the process is hijacked:
 
+
 {{#ref}}
 ../../macos-proces-abuse/macos-ipc-inter-process-communication/macos-thread-injection-via-task-port.md
 {{#endref}}
@@ -826,6 +829,7 @@ XPC, which stands for XNU (the kernel used by macOS) inter-Process Communication
 
 For more information about how this **communication work** on how it **could be vulnerable** check:
 
+
 {{#ref}}
 ../../macos-proces-abuse/macos-ipc-inter-process-communication/macos-xpc/
 {{#endref}}
@@ -835,6 +839,7 @@ For more information about how this **communication work** on how it **could be 
 MIG was created to **simplify the process of Mach IPC** code creation. It basically **generates the needed code** for server and client to communicate with a given definition. Even if the generated code is ugly, a developer will just need to import it and his code will be much simpler than before.
 
 For more info check:
+
 
 {{#ref}}
 ../../macos-proces-abuse/macos-ipc-inter-process-communication/macos-mig-mach-interface-generator.md
@@ -849,6 +854,5 @@ For more info check:
 - [https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/)
 
 {{#include ../../../../banners/hacktricks-training.md}}
-
 
 

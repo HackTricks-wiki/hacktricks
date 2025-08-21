@@ -1413,6 +1413,7 @@ kill -s SIGUSR1 <nodejs-ps>
 # After an URL to access the debugger will appear. e.g. ws://127.0.0.1:9229/45ea962a-29dd-4cdd-be08-a6827840553d
 ```
 
+
 {{#ref}}
 electron-cef-chromium-debugger-abuse.md
 {{#endref}}
@@ -1674,6 +1675,5 @@ In summary, `CAP_SETPCAP` allows a process to modify the capability sets of othe
 
 ​
 {{#include ../../banners/hacktricks-training.md}}
-
 
 
