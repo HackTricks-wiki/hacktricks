@@ -14,7 +14,7 @@ Aşağıdaki komutu kullanarak bazı Ofis programları tarafından hangi uzantı
 ```bash
 assoc | findstr /i "word excel powerp"
 ```
-DOCX dosyaları, makroları içeren uzaktan bir şablona atıfta bulunuyorsa (Dosya – Seçenekler – Eklentiler – Yönet: Şablonlar – Git) makroları “çalıştırabilir”.
+DOCX dosyaları, makroları içeren uzak bir şablona atıfta bulunuyorsa (Dosya – Seçenekler – Eklentiler – Yönet: Şablonlar – Git) makroları “çalıştırabilir”.
 
 ### Harici Görüntü Yükleme
 
@@ -66,11 +66,11 @@ proc.Create "powershell <beacon line generated>
 ```
 #### Manually remove metadata
 
-**Dosya > Bilgi > Belgeyi Denetle > Belgeyi Denetle** yolunu izleyin, bu Belge Denetleyicisini açacaktır. **Denetle** butonuna tıklayın ve ardından **Belge Özellikleri ve Kişisel Bilgileri** yanında **Tümünü Kaldır** seçeneğine tıklayın.
+**Dosya > Bilgi > Belgeyi Denetle > Belgeyi Denetle** yolunu izleyin, bu Belge Denetleyicisini açacaktır. **Denetle** butonuna tıklayın ve ardından **Belge Özellikleri ve Kişisel Bilgileri Kaldır** kısmının yanındaki **Tümünü Kaldır** butonuna tıklayın.
 
 #### Doc Extension
 
-İşlem tamamlandığında, **Farklı Kaydet** türü açılır menüsünden formatı **`.docx`**'den **Word 97-2003 `.doc`**'e değiştirin.\
+İşlem tamamlandığında, **Farklı Kaydet** türü açılır menüsünden formatı **`.docx`**'den **Word 97-2003 `.doc`**'ye değiştirin.\
 Bunu yapın çünkü **`.docx`** içinde makro kaydedemezsiniz ve makro etkin **`.docm`** uzantısı etrafında bir **stigma** vardır (örneğin, küçük resim simgesi büyük bir `!` içerir ve bazı web/e-posta geçitleri bunları tamamen engeller). Bu nedenle, bu **eski `.doc` uzantısı en iyi uzlaşmadır**.
 
 #### Malicious Macros Generators

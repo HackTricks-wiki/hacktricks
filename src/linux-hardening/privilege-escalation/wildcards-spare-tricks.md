@@ -8,7 +8,7 @@
 
 ## chown / chmod
 
-`--reference` bayrağını kötüye kullanarak **rastgele bir dosyanın sahipliğini/grubunu veya izin bitlerini kopyalayabilirsiniz**:
+`--reference` bayrağını kötüye kullanarak **rastgele bir dosyanın sahibi/grubu veya izin bitlerini kopyalayabilirsiniz**:
 ```bash
 # attacker-controlled directory
 touch "--reference=/root/secret``file"   # ← filename becomes an argument
@@ -21,7 +21,7 @@ chmod -R 644 *.php
 `--reference=/root/secret``file` enjekte edilir, bu da `/root/secret``file`'ın sahiplik/izinlerini *tüm* eşleşen dosyaların miras almasına neden olur.
 
 *PoC & araç*: [`wildpwn`](https://github.com/localh0t/wildpwn) (birleşik saldırı).
-Ayrıntılar için klasik DefenseCode makalesine de bakın.
+Ayrıca detaylar için klasik DefenseCode makalesine bakın.
 
 ---
 
@@ -41,18 +41,18 @@ Bir kez root çalıştırdığında e.g. `tar -czf /root/backup.tgz *`, `shell.s
 
 ### bsdtar / macOS 14+
 
-Son macOS'taki varsayılan `tar` (`libarchive` tabanlı) `--checkpoint`'i *uygulamaz*, ancak dış bir sıkıştırıcı belirtmenize olanak tanıyan **--use-compress-program** bayrağı ile yine de kod yürütme elde edebilirsiniz.
+Son macOS'taki varsayılan `tar` (`libarchive` tabanlı) `--checkpoint`'i *uygulamaz*, ancak dış bir sıkıştırıcı belirtmenize olanak tanıyan **--use-compress-program** bayrağı ile kod yürütme elde edebilirsiniz.
 ```bash
 # macOS example
 touch "--use-compress-program=/bin/sh"
 ```
-Yetkili bir betik `tar -cf backup.tar *` çalıştırdığında, `/bin/sh` başlatılacaktır.
+Bir ayrıcalıklı betik `tar -cf backup.tar *` çalıştırdığında, `/bin/sh` başlatılacaktır.
 
 ---
 
 ## rsync
 
-`rsync`, `-e` veya `--rsync-path` ile başlayan komut satırı bayrakları aracılığıyla uzak kabuğu veya hatta uzak ikili dosyayı geçersiz kılmanıza olanak tanır:
+`rsync`, uzaktan kabuğu veya hatta uzaktan ikili dosyayı `-e` veya `--rsync-path` ile başlayan komut satırı bayrakları aracılığıyla geçersiz kılmanıza olanak tanır:
 ```bash
 # attacker-controlled directory
 touch "-e sh shell.sh"        # -e <cmd> => use <cmd> instead of ssh
@@ -65,7 +65,7 @@ Eğer root daha sonra dizini `rsync -az * backup:/srv/` ile arşivlerse, enjekte
 
 ## 7-Zip / 7z / 7za
 
-Ayrıca, ayrıcalıklı script *savunmacı* bir şekilde joker karakteri `--` ile öne eklese bile (seçenek ayrıştırmasını durdurmak için), 7-Zip formatı **dosya liste dosyalarını** dosya adını `@` ile öne ekleyerek destekler. Bunu bir symlink ile birleştirmek, *rastgele dosyaları dışarı aktarmanıza* olanak tanır:
+Ayrıca, ayrıcalıklı script *savunmacı* bir şekilde joker karakteri `--` ile öne eklese bile (seçenek ayrıştırmasını durdurmak için), 7-Zip formatı **dosya liste dosyalarını** dosya adını `@` ile öne ekleyerek destekler. Bunu bir symlink ile birleştirmek, *rastgele dosyaları dışarı sızdırmanıza* olanak tanır:
 ```bash
 # directory writable by low-priv user
 cd /path/controlled
@@ -82,7 +82,7 @@ Eğer root, şöyle bir şey çalıştırırsa:
 
 ## zip
 
-`zip`, arşiv test edileceğinde sistem kabuğuna *kelimesi kelimesine* iletilen `--unzip-command` bayrağını destekler:
+`zip`, arşiv test edileceği zaman sistem kabuğuna *kelimesi kelimesine* iletilen `--unzip-command` bayrağını destekler:
 ```bash
 zip result.zip files -T --unzip-command "sh -c id"
 ```
@@ -101,18 +101,18 @@ Aşağıdaki komutlar modern CTF'lerde ve gerçek ortamlarda kötüye kullanılm
 | `git`   | `-c core.sshCommand=<cmd>` | SSH üzerinden git ile komut çalıştırma |
 | `scp`   | `-S <cmd>` | ssh yerine keyfi bir program başlat |
 
-Bu primitifler *tar/rsync/zip* klasiklerinden daha az yaygındır ancak avlanırken kontrol edilmeye değer.
+Bu primitifler *tar/rsync/zip* klasiklerinden daha az yaygındır ama avlanırken kontrol edilmeye değer.
 
 ---
 
 ## tcpdump döngü kancaları (-G/-W/-z): argv enjeksiyonu ile RCE
 
-Kısıtlı bir shell veya satıcı sarmalayıcı, kullanıcı tarafından kontrol edilen alanları (örneğin, "dosya adı" parametresi) katmanlaştırarak bir `tcpdump` komut satırı oluşturduğunda, ekstra `tcpdump` bayraklarını gizlice ekleyebilirsiniz. `-G` (zaman tabanlı döngü), `-W` (dosya sayısını sınırlama) ve `-z <cmd>` (döngü sonrası komut) kombinasyonu, tcpdump'ı çalıştıran kullanıcı olarak keyfi komut çalıştırma sağlar (genellikle cihazlarda root).
+Kısıtlı bir shell veya satıcı sargısı, kullanıcı kontrolündeki alanları (örneğin, "dosya adı" parametresi) katlayarak bir `tcpdump` komut satırı oluşturduğunda, ekstra `tcpdump` bayraklarını gizlice sokabilirsiniz. `-G` (zaman tabanlı döngü), `-W` (dosya sayısını sınırlama) ve `-z <cmd>` (döngü sonrası komut) kombinasyonu, tcpdump'ı çalıştıran kullanıcı olarak keyfi komut çalıştırma sağlar (genellikle cihazlarda root).
 
 Ön koşullar:
 
 - `tcpdump`'a geçirilen `argv`'yi etkileyebilirsiniz (örneğin, `/debug/tcpdump --filter=... --file-name=<HERE>` aracılığıyla).
-- Sarmalayıcı, dosya adı alanındaki boşlukları veya `-` ile başlayan token'ları temizlemez.
+- Sargı, dosya adı alanındaki boşlukları veya `-` ile başlayan token'ları temizlemez.
 
 Klasik PoC (yazılabilir bir yoldan ters shell scripti çalıştırır):
 ```sh
@@ -134,7 +134,7 @@ printf x | nc -u -6 [victim_ipv6] 1234
 ```
 Detaylar:
 
-- `-G 1 -W 1`, ilk eşleşen paket sonrası hemen döndürmeyi zorlar.
+- `-G 1 -W 1` ilk eşleşen paket sonrası hemen döndürmeyi zorlar.
 - `-z <cmd>` her döngüde bir kez post-rotate komutunu çalıştırır. Birçok yapı `<cmd> <savefile>` şeklinde çalıştırır. Eğer `<cmd>` bir script/yorumlayıcı ise, argüman işleme yükleminizle eşleştiğinden emin olun.
 
 Kaldırılamayan medya varyantları:

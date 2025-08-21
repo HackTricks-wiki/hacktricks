@@ -4,15 +4,15 @@
 
 ## **GTFOBins**
 
-**"Shell" özelliğine sahip herhangi bir ikili dosyayı çalıştırıp çalıştıramayacağınızı kontrol etmek için** [**https://gtfobins.github.io/**](https://gtfobins.github.io) **adresinde arama yapın**
+**"Shell" özelliğine sahip herhangi bir ikili dosyayı çalıştırıp çalıştıramayacağınızı** [**https://gtfobins.github.io/**](https://gtfobins.github.io) **adresinde arayın**
 
 ## Chroot Kaçışları
 
-[wikipedia](https://en.wikipedia.org/wiki/Chroot#Limitations)'dan: Chroot mekanizması **yetkili** (**root**) **kullanıcılar** tarafından kasıtlı müdahalelere karşı **savunma yapmak için tasarlanmamıştır**. Çoğu sistemde, chroot bağlamları düzgün bir şekilde yığılmamaktadır ve yeterli ayrıcalıklara sahip chroot edilmiş programlar **çıkmak için ikinci bir chroot gerçekleştirebilir**.\
+[wikipedia](https://en.wikipedia.org/wiki/Chroot#Limitations) adresinden: Chroot mekanizması, **yetkili** (**root**) **kullanıcılar** tarafından kasıtlı müdahalelere karşı **savunma yapmak için** tasarlanmamıştır. Çoğu sistemde, chroot bağlamları düzgün bir şekilde yığılmamaktadır ve yeterli ayrıcalıklara sahip chroot edilmiş programlar **çıkmak için ikinci bir chroot gerçekleştirebilir**.\
 Genellikle bu, kaçış yapmak için chroot içinde root olmanız gerektiği anlamına gelir.
 
 > [!TIP]
-> **chw00t** [**aracı**](https://github.com/earthquake/chw00t), aşağıdaki senaryoları kötüye kullanmak ve `chroot`'tan kaçmak için oluşturulmuştur.
+> **chw00t** [**aracı**](https://github.com/earthquake/chw00t), aşağıdaki senaryoları kötüye kullanmak ve `chroot`'dan kaçmak için oluşturulmuştur.
 
 ### Root + CWD
 
@@ -79,7 +79,7 @@ system("/bin/bash");
 ### Root + Kaydedilmiş fd
 
 > [!WARNING]
-> Bu, önceki duruma benzer, ancak bu durumda **saldırgan mevcut dizine bir dosya tanımlayıcısı kaydeder** ve ardından **yeni bir klasörde chroot oluşturur**. Son olarak, chroot'un **dışında** o **FD**'ye **erişimi** olduğundan, ona erişir ve **kaçış** eder.
+> Bu, önceki duruma benzer, ancak bu durumda **saldırgan mevcut dizine bir dosya tanımlayıcısı kaydediyor** ve ardından **yeni bir klasörde chroot oluşturuyor**. Son olarak, chroot'un **dışında** o **FD**'ye **erişimi** olduğu için ona erişiyor ve **kaçıyor**.
 
 <details>
 
@@ -164,7 +164,7 @@ pwd
 ```
 ### PATH'i Değiştir
 
-PATH ortam değişkenini değiştirebilir misiniz kontrol edin
+PATH ortam değişkenini değiştirip değiştiremeyeceğinizi kontrol edin.
 ```bash
 echo $PATH #See the path of the executables that you can use
 PATH=/usr/local/sbin:/usr/sbin:/sbin:/usr/local/bin:/usr/bin:/bin #Try to change the path
@@ -177,7 +177,7 @@ echo /home/* #List directory
 ```
 ### Script oluştur
 
-_/bin/bash_ içeriği ile çalıştırılabilir bir dosya oluşturup oluşturamayacağınızı kontrol edin
+_/bin/bash_ içeriği ile çalıştırılabilir bir dosya oluşturup oluşturamayacağını kontrol et
 ```bash
 red /bin/bash
 > w wx/path #Write /bin/bash in a writable and executable path

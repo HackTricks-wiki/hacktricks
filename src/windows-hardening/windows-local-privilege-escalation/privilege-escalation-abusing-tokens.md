@@ -14,7 +14,7 @@ access-tokens.md
 
 ### SeImpersonatePrivilege
 
-Bu, herhangi bir tokenın taklit edilmesine (ancak oluşturulmasına değil) izin veren bir ayrıcalıktır; bunun için bir handle elde edilmesi gerekir. Ayrıcalıklı bir token, bir Windows hizmetinden (DCOM) NTLM kimlik doğrulaması yaptırılarak elde edilebilir ve bu, SYSTEM ayrıcalıklarıyla bir sürecin çalıştırılmasını sağlar. Bu güvenlik açığı, [juicy-potato](https://github.com/ohpe/juicy-potato), [RogueWinRM](https://github.com/antonioCoco/RogueWinRM) (winrm'nin devre dışı bırakılmasını gerektirir), [SweetPotato](https://github.com/CCob/SweetPotato) ve [PrintSpoofer](https://github.com/itm4n/PrintSpoofer) gibi çeşitli araçlar kullanılarak istismar edilebilir.
+Bu, herhangi bir tokenın taklit edilmesine (ancak oluşturulmasına değil) izin veren bir ayrıcalıktır; bunun için bir handle elde edilmesi gerekir. Ayrıcalıklı bir token, bir Windows hizmetinden (DCOM) NTLM kimlik doğrulaması yaptırılarak elde edilebilir ve bu da bir sürecin SYSTEM ayrıcalıklarıyla çalıştırılmasını sağlar. Bu güvenlik açığı, [juicy-potato](https://github.com/ohpe/juicy-potato), [RogueWinRM](https://github.com/antonioCoco/RogueWinRM) (winrm'nin devre dışı bırakılmasını gerektirir), [SweetPotato](https://github.com/CCob/SweetPotato) ve [PrintSpoofer](https://github.com/itm4n/PrintSpoofer) gibi çeşitli araçlar kullanılarak istismar edilebilir.
 
 {{#ref}}
 roguepotato-and-printspoofer.md
@@ -26,8 +26,8 @@ juicypotato.md
 
 ### SeAssignPrimaryPrivilege
 
-Bu, **SeImpersonatePrivilege** ile çok benzer olup, ayrıcalıklı bir token elde etmek için **aynı yöntemi** kullanır.\
-Daha sonra, bu ayrıcalık **yeni/askıya alınmış bir sürece** birincil token atamaya izin verir. Ayrıcalıklı taklit token ile birincil token türetebilirsiniz (DuplicateTokenEx).\
+Bu, **SeImpersonatePrivilege** ile çok benzer, ayrıcalıklı bir token elde etmek için **aynı yöntemi** kullanır.\
+Bu ayrıcalık, **yeni/askıya alınmış bir sürece** birincil token atamaya izin verir. Ayrıcalıklı taklit token ile birincil token türetebilirsiniz (DuplicateTokenEx).\
 Token ile, 'CreateProcessAsUser' ile **yeni bir süreç** oluşturabilir veya askıya alınmış bir süreç oluşturup **tokenı ayarlayabilirsiniz** (genel olarak, çalışan bir sürecin birincil tokenını değiştiremezsiniz).
 
 ### SeTcbPrivilege
@@ -36,13 +36,13 @@ Bu token etkinleştirildiğinde, **KERB_S4U_LOGON** kullanarak herhangi bir kull
 
 ### SeBackupPrivilege
 
-Bu ayrıcalık, herhangi bir dosyaya (okuma işlemleri ile sınırlı) **tüm okuma erişim** kontrolü vermek için sistemin zorlanmasına neden olur. Bu, yerel Yönetici hesaplarının şifre karma değerlerini kayıt defterinden **okumak** için kullanılır; ardından, "**psexec**" veya "**wmiexec**" gibi araçlar hash ile kullanılabilir (Pass-the-Hash tekniği). Ancak, bu teknik iki koşul altında başarısız olur: Yerel Yönetici hesabı devre dışı bırakıldığında veya uzaktan bağlanan Yerel Yöneticilerden yönetim haklarını kaldıran bir politika uygulandığında.\
+Bu ayrıcalık, herhangi bir dosyaya (okuma işlemleriyle sınırlı) **tüm okuma erişim** kontrolü verilmesini sağlar. Bu, yerel Yönetici hesaplarının şifre karma değerlerini kayıt defterinden **okumak** için kullanılır; ardından, "**psexec**" veya "**wmiexec**" gibi araçlar hash ile kullanılabilir (Pass-the-Hash tekniği). Ancak, bu teknik iki koşul altında başarısız olur: Yerel Yönetici hesabı devre dışı bırakıldığında veya uzaktan bağlanan Yerel Yöneticilerden yönetim haklarını kaldıran bir politika uygulandığında.\
 Bu ayrıcalığı **kötüye kullanabilirsiniz**:
 
 - [https://github.com/Hackplayers/PsCabesha-tools/blob/master/Privesc/Acl-FullControl.ps1](https://github.com/Hackplayers/PsCabesha-tools/blob/master/Privesc/Acl-FullControl.ps1)
 - [https://github.com/giuliano108/SeBackupPrivilege/tree/master/SeBackupPrivilegeCmdLets/bin/Debug](https://github.com/giuliano108/SeBackupPrivilege/tree/master/SeBackupPrivilegeCmdLets/bin/Debug)
 - **IppSec**'i takip ederek [https://www.youtube.com/watch?v=IfCysW0Od8w\&t=2610\&ab_channel=IppSec](https://www.youtube.com/watch?v=IfCysW0Od8w&t=2610&ab_channel=IppSec)
-- Ya da aşağıdaki **yedek operatörlerle ayrıcalıkları artırma** bölümünde açıklandığı gibi:
+- Ya da **Yedek Operatörleri ile ayrıcalıkları artırma** bölümünde açıklandığı gibi:
 
 {{#ref}}
 ../active-directory-methodology/privileged-groups-and-token-privileges.md
@@ -50,26 +50,26 @@ Bu ayrıcalığı **kötüye kullanabilirsiniz**:
 
 ### SeRestorePrivilege
 
-Bu ayrıcalık, dosyanın Erişim Kontrol Listesi (ACL) ne olursa olsun, herhangi bir sistem dosyasına **yazma erişimi** sağlar. Bu, **hizmetleri değiştirme**, DLL Hijacking yapma ve çeşitli diğer teknikler arasında Görüntü Dosyası Uygulama Seçenekleri aracılığıyla **hata ayıklayıcılar** ayarlama gibi birçok yükseltme olanağı sunar.
+Bu ayrıcalık, dosyanın Erişim Kontrol Listesi (ACL) ne olursa olsun, herhangi bir sistem dosyasına **yazma erişimi** sağlar. Bu, **hizmetleri değiştirme**, DLL Hijacking yapma ve çeşitli diğer teknikler arasında **hata ayıklayıcılar** ayarlama gibi birçok yükseltme olanağı sunar.
 
 ### SeCreateTokenPrivilege
 
-SeCreateTokenPrivilege, özellikle bir kullanıcının tokenları taklit etme yeteneğine sahip olduğunda güçlü bir izin olup, SeImpersonatePrivilege yokluğunda da faydalıdır. Bu yetenek, aynı kullanıcıyı temsil eden ve bütünlük seviyesi mevcut sürecin seviyesini aşmayan bir tokenı taklit etme yeteneğine dayanır.
+SeCreateTokenPrivilege, özellikle bir kullanıcının tokenları taklit etme yeteneğine sahip olduğunda güçlü bir izindir, ancak SeImpersonatePrivilege yoksa da kullanışlıdır. Bu yetenek, aynı kullanıcıyı temsil eden ve bütünlük seviyesi mevcut sürecin seviyesini aşmayan bir tokenı taklit etme yeteneğine dayanır.
 
 **Ana Noktalar:**
 
-- **SeImpersonatePrivilege olmadan taklit:** Belirli koşullar altında tokenları taklit ederek EoP için SeCreateTokenPrivilege'den yararlanmak mümkündür.
+- **SeImpersonatePrivilege olmadan taklit:** Belirli koşullar altında tokenları taklit ederek EoP için SeCreateTokenPrivilege'i kullanmak mümkündür.
 - **Token Taklit Koşulları:** Başarılı taklit, hedef tokenın aynı kullanıcıya ait olmasını ve bütünlük seviyesinin taklit etmeye çalışan sürecin bütünlük seviyesinden az veya eşit olmasını gerektirir.
 - **Taklit Tokenların Oluşturulması ve Değiştirilmesi:** Kullanıcılar bir taklit token oluşturabilir ve bunu ayrıcalıklı bir grubun SID'sini (Güvenlik Tanımlayıcısı) ekleyerek geliştirebilir.
 
 ### SeLoadDriverPrivilege
 
-Bu ayrıcalık, `ImagePath` ve `Type` için belirli değerlerle bir kayıt defteri girişi oluşturarak **cihaz sürücülerini yükleme ve boşaltma** izni verir. `HKLM` (HKEY_LOCAL_MACHINE) üzerinde doğrudan yazma erişimi kısıtlandığından, bunun yerine `HKCU` (HKEY_CURRENT_USER) kullanılmalıdır. Ancak, `HKCU`'nun sürücü yapılandırması için çekirdek tarafından tanınabilmesi için belirli bir yol izlenmelidir.
+Bu ayrıcalık, belirli değerlerle `ImagePath` ve `Type` için bir kayıt defteri girişi oluşturarak **cihaz sürücülerini yükleme ve boşaltma** izni verir. `HKLM` (HKEY_LOCAL_MACHINE) üzerinde doğrudan yazma erişimi kısıtlandığından, bunun yerine `HKCU` (HKEY_CURRENT_USER) kullanılmalıdır. Ancak, `HKCU`'nun sürücü yapılandırması için çekirdek tarafından tanınabilmesi için belirli bir yol izlenmelidir.
 
 Bu yol `\Registry\User\<RID>\System\CurrentControlSet\Services\DriverName` şeklindedir; burada `<RID>`, mevcut kullanıcının Göreceli Tanımlayıcısıdır. `HKCU` içinde, bu tüm yol oluşturulmalı ve iki değer ayarlanmalıdır:
 
 - `ImagePath`, yürütülecek ikili dosyanın yolu
-- `Type`, değeri `SERVICE_KERNEL_DRIVER` (`0x00000001`) olarak.
+- `Type`, değeri `SERVICE_KERNEL_DRIVER` (`0x00000001`).
 
 **İzlenecek Adımlar:**
 
@@ -92,7 +92,7 @@ Daha fazla bu ayrıcalığı kötüye kullanma yolu için [https://www.ired.team
 
 ### SeTakeOwnershipPrivilege
 
-Bu, **SeRestorePrivilege** ile benzerdir. Temel işlevi, bir sürecin **bir nesnenin mülkiyetini üstlenmesine** izin vermek olup, WRITE_OWNER erişim hakları sağlanarak açık takdir erişimi gereksinimini aşar. Süreç, önce yazma amacıyla hedef kayıt anahtarının mülkiyetini güvence altına almayı, ardından yazma işlemlerini etkinleştirmek için DACL'yi değiştirmeyi içerir.
+Bu, **SeRestorePrivilege** ile benzerdir. Temel işlevi, bir sürecin **bir nesnenin mülkiyetini üstlenmesine** izin vermek olup, WRITE_OWNER erişim hakları sağlanarak açık takdir erişim gereksinimini aşar. Süreç, önce yazma amacıyla hedef kayıt anahtarının mülkiyetini güvence altına almayı, ardından yazma işlemlerini etkinleştirmek için DACL'yi değiştirmeyi içerir.
 ```bash
 takeown /f 'C:\some\file.txt' #Now the file is owned by you
 icacls 'C:\some\file.txt' /grant <your_username>:F #Now you have full access
@@ -138,11 +138,11 @@ import-module psgetsys.ps1; [MyProcess]::CreateProcessFromParent(<system_pid>,<c
 ```
 whoami /priv
 ```
-**Devre Dışı Görünen Tokenler** etkinleştirilebilir, aslında _Etkin_ ve _Devre Dışı_ tokenlerini istismar edebilirsiniz.
+**Devre Dışı Görünen Token'lar** etkinleştirilebilir, aslında _Etkin_ ve _Devre Dışı_ token'ları kötüye kullanabilirsiniz.
 
-### Tüm Tokenleri Etkinleştir
+### Tüm Token'ları Etkinleştir
 
-Eğer devre dışı tokenleriniz varsa, tüm tokenleri etkinleştirmek için [**EnableAllTokenPrivs.ps1**](https://raw.githubusercontent.com/fashionproof/EnableAllTokenPrivs/master/EnableAllTokenPrivs.ps1) scriptini kullanabilirsiniz:
+Eğer devre dışı token'larınız varsa, tüm token'ları etkinleştirmek için [**EnableAllTokenPrivs.ps1**](https://raw.githubusercontent.com/fashionproof/EnableAllTokenPrivs/master/EnableAllTokenPrivs.ps1) script'ini kullanabilirsiniz:
 ```bash
 .\EnableAllTokenPrivs.ps1
 whoami /priv
@@ -155,13 +155,13 @@ Full token privileges cheatsheet at [https://github.com/gtworek/Priv2Admin](http
 
 | Privilege                  | Impact      | Tool                    | Execution path                                                                                                                                                                                                                                                                                                                                     | Remarks                                                                                                                                                                                                                                                                                                                        |
 | -------------------------- | ----------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **`SeAssignPrimaryToken`** | _**Admin**_ | 3rd party tool          | _"Bu, bir kullanıcının token'ları taklit etmesine ve potato.exe, rottenpotato.exe ve juicypotato.exe gibi araçlar kullanarak nt sistemine yükselmesine izin verecektir."_                                                                                                                                                                      | Thank you [Aurélien Chalot](https://twitter.com/Defte_) for the update. I will try to re-phrase it to something more recipe-like soon.                                                                                                                                                                                         |
+| **`SeAssignPrimaryToken`** | _**Admin**_ | 3rd party tool          | _"Bu, bir kullanıcının token'ları taklit etmesine ve potato.exe, rottenpotato.exe ve juicypotato.exe gibi araçlar kullanarak nt sistemine yükselmesine izin verecektir"_                                                                                                                                                                      | Thank you [Aurélien Chalot](https://twitter.com/Defte_) for the update. I will try to re-phrase it to something more recipe-like soon.                                                                                                                                                                                         |
 | **`SeBackup`**             | **Threat**  | _**Built-in commands**_ | `robocopy /b` ile hassas dosyaları okuyun                                                                                                                                                                                                                                                                                                             | <p>- %WINDIR%\MEMORY.DMP dosyasını okuyabiliyorsanız daha ilginç olabilir.<br><br>- <code>SeBackupPrivilege</code> (ve robocopy) açık dosyalarla çalışırken yardımcı değildir.<br><br>- Robocopy, /b parametresi ile çalışmak için hem SeBackup hem de SeRestore'ye ihtiyaç duyar.</p>                                                                      |
 | **`SeCreateToken`**        | _**Admin**_ | 3rd party tool          | `NtCreateToken` ile yerel yönetici hakları da dahil olmak üzere keyfi bir token oluşturun.                                                                                                                                                                                                                                                        |                                                                                                                                                                                                                                                                                                                                |
 | **`SeDebug`**              | _**Admin**_ | **PowerShell**          | `lsass.exe` token'ını kopyalayın.                                                                                                                                                                                                                                                                                                                   | Script to be found at [FuzzySecurity](https://github.com/FuzzySecurity/PowerShell-Suite/blob/master/Conjure-LSASS.ps1)                                                                                                                                                                                                         |
-| **`SeLoadDriver`**         | _**Admin**_ | 3rd party tool          | <p>1. <code>szkg64.sys</code> gibi hatalı bir çekirdek sürücüsü yükleyin.<br>2. Sürücü zafiyetini istismar edin.<br><br>Alternatif olarak, bu ayrıcalık, <code>ftlMC</code> yerleşik komutunu kullanarak güvenlikle ilgili sürücüleri boşaltmak için de kullanılabilir. Yani: <code>fltMC sysmondrv</code></p>                                   | <p>1. <code>szkg64</code> zafiyeti <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-15732">CVE-2018-15732</a> olarak listelenmiştir.<br>2. <code>szkg64</code> <a href="https://www.greyhathacker.net/?p=1025">istismar kodu</a> <a href="https://twitter.com/parvezghh">Parvez Anwar</a> tarafından oluşturulmuştur.</p> |
+| **`SeLoadDriver`**         | _**Admin**_ | 3rd party tool          | <p>1. <code>szkg64.sys</code> gibi hatalı bir çekirdek sürücüsü yükleyin.<br>2. Sürücü zafiyetini istismar edin.<br><br>Alternatif olarak, bu ayrıcalık, <code>ftlMC</code> yerleşik komutunu kullanarak güvenlikle ilgili sürücüleri boşaltmak için kullanılabilir. Yani: <code>fltMC sysmondrv</code></p>                                   | <p>1. <code>szkg64</code> zafiyeti <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-15732">CVE-2018-15732</a> olarak listelenmiştir.<br>2. <code>szkg64</code> <a href="https://www.greyhathacker.net/?p=1025">istismar kodu</a> <a href="https://twitter.com/parvezghh">Parvez Anwar</a> tarafından oluşturulmuştur.</p> |
 | **`SeRestore`**            | _**Admin**_ | **PowerShell**          | <p>1. SeRestore ayrıcalığı ile PowerShell/ISE başlatın.<br>2. <a href="https://github.com/gtworek/PSBits/blob/master/Misc/EnableSeRestorePrivilege.ps1">Enable-SeRestorePrivilege</a> ile ayrıcalığı etkinleştirin.<br>3. utilman.exe'yi utilman.old olarak yeniden adlandırın.<br>4. cmd.exe'yi utilman.exe olarak yeniden adlandırın.<br>5. Konsolu kilitleyin ve Win+U tuşlarına basın.</p> | <p>Saldırı bazı AV yazılımları tarafından tespit edilebilir.</p><p>Alternatif yöntem, aynı ayrıcalığı kullanarak "Program Files" içinde depolanan hizmet ikili dosyalarını değiştirmeye dayanır.</p>                                                                                                                                                            |
-| **`SeTakeOwnership`**      | _**Admin**_ | _**Built-in commands**_ | <p>1. <code>takeown.exe /f "%windir%\system32"</code><br>2. <code>icalcs.exe "%windir%\system32" /grant "%username%":F</code><br>3. cmd.exe'yi utilman.exe olarak yeniden adlandırın.<br>4. Konsolu kilitleyin ve Win+U tuşlarına basın.</p>                                                                                                          | <p>Saldırı bazı AV yazılımları tarafından tespit edilebilir.</p><p>Alternatif yöntem, aynı ayrıcalığı kullanarak "Program Files" içinde depolanan hizmet ikili dosyalarını değiştirmeye dayanır.</p>                                                                                                                                                           |
+| **`SeTakeOwnership`**      | _**Admin**_ | _**Built-in commands**_ | <p>1. <code>takeown.exe /f "%windir%\system32"</code><br>2. <code>icalcs.exe "%windir%\system32" /grant "%username%":F</code><br>3. cmd.exe'yi utilman.exe olarak yeniden adlandırın.<br>4. Konsolu kilitleyin ve Win+U tuşlarına basın.</p>                                                                                                        | <p>Saldırı bazı AV yazılımları tarafından tespit edilebilir.</p><p>Alternatif yöntem, aynı ayrıcalığı kullanarak "Program Files" içinde depolanan hizmet ikili dosyalarını değiştirmeye dayanır.</p>                                                                                                                                                           |
 | **`SeTcb`**                | _**Admin**_ | 3rd party tool          | <p>Token'ları yerel yönetici hakları ile manipüle edin. SeImpersonate gerektirebilir.</p><p>Doğrulanması gerekiyor.</p>                                                                                                                                                                                                                                     |                                                                                                                                                                                                                                                                                                                                |
 
 ## Reference

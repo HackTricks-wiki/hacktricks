@@ -17,9 +17,9 @@ macos-mdm/
 
 ### MDM'yi C2 Olarak Kullanma
 
-Bir MDM, profilleri yüklemek, sorgulamak veya kaldırmak, uygulamaları yüklemek, yerel yönetici hesapları oluşturmak, firmware şifresi ayarlamak, FileVault anahtarını değiştirmek için izinlere sahip olacaktır...
+Bir MDM, profilleri yüklemek, sorgulamak veya kaldırmak, uygulamaları yüklemek, yerel yönetici hesapları oluşturmak, firmware şifresi ayarlamak, FileVault anahtarını değiştirmek için izne sahip olacaktır...
 
-Kendi MDM'nizi çalıştırmak için **CSR'nizin bir satıcı tarafından imzalanması** gerekir; bunu [**https://mdmcert.download/**](https://mdmcert.download/) ile almaya çalışabilirsiniz. Apple cihazları için kendi MDM'nizi çalıştırmak için [**MicroMDM**](https://github.com/micromdm/micromdm) kullanabilirsiniz.
+Kendi MDM'nizi çalıştırmak için **CSR'nizin bir satıcı tarafından imzalanması** gerekir; bunu [**https://mdmcert.download/**](https://mdmcert.download/) ile elde etmeye çalışabilirsiniz. Apple cihazları için kendi MDM'nizi çalıştırmak için [**MicroMDM**](https://github.com/micromdm/micromdm) kullanabilirsiniz.
 
 Ancak, kayıtlı bir cihazda bir uygulama yüklemek için, hala bir geliştirici hesabı tarafından imzalanmış olması gerekir... ancak, MDM kaydı sırasında **cihaz MDM'nin SSL sertifikasını güvenilir CA olarak ekler**, böylece artık her şeyi imzalayabilirsiniz.
 
@@ -37,7 +37,7 @@ JAMF, **özel betikler** (sistem yöneticisi tarafından geliştirilen betikler)
 
 Bir şifre püskürtme saldırısı gerçekleştirmek için [**JamfSniper.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfSniper.py) betiğini kullanabilirsiniz.
 
-Ayrıca, uygun kimlik bilgilerini bulduktan sonra, diğer kullanıcı adlarını brute-force ile denemek için aşağıdaki formu kullanabilirsiniz:
+Ayrıca, uygun kimlik bilgilerini bulduktan sonra, diğer kullanıcı adlarını brute-force ile ele geçirebilirsiniz:
 
 ![](<../../images/image (107).png>)
 
@@ -50,7 +50,7 @@ Ayrıca, jamf **`/Library/LaunchAgents/com.jamf.management.agent.plist`** içind
 
 #### JAMF Cihaz Ele Geçirme
 
-**JSS** (Jamf Software Server) **URL'si** **`jamf`** tarafından kullanılacak olan **`/Library/Preferences/com.jamfsoftware.jamf.plist`** dosyasında bulunmaktadır.\
+**JSS** (Jamf Software Server) **URL'si** **`jamf`** tarafından **`/Library/Preferences/com.jamfsoftware.jamf.plist`** içinde bulunur.\
 Bu dosya temelde URL'yi içerir:
 ```bash
 plutil -convert xml1 -o - /Library/Preferences/com.jamfsoftware.jamf.plist
@@ -64,7 +64,7 @@ plutil -convert xml1 -o - /Library/Preferences/com.jamfsoftware.jamf.plist
 <integer>4</integer>
 [...]
 ```
-Bu nedenle, bir saldırgan, yüklendiğinde bu dosyayı **üstüne yazan** kötü niyetli bir paket (`pkg`) bırakabilir ve **URL'yi bir Typhon ajanından bir Mythic C2 dinleyicisine** ayarlayarak JAMF'i C2 olarak kötüye kullanabilir.
+Bu nedenle, bir saldırgan, yüklendiğinde bu dosyayı **üst üste yazan** kötü niyetli bir paket (`pkg`) bırakabilir ve **URL'yi bir Typhon ajanından bir Mythic C2 dinleyicisine** ayarlayarak JAMF'ı C2 olarak kötüye kullanabilir.
 ```bash
 # After changing the URL you could wait for it to be reloaded or execute:
 sudo jamf policy -id 0
@@ -118,13 +118,13 @@ Size yardımcı olabilecek bazı **yerel MacOS araçları** `dscl` olabilir:
 ```bash
 dscl "/Active Directory/[Domain]/All Domains" ls /
 ```
-Ayrıca, AD'yi otomatik olarak listelemek ve kerberos ile oynamak için MacOS için hazırlanmış bazı araçlar vardır:
+Ayrıca, MacOS için AD'yi otomatik olarak listelemek ve kerberos ile oynamak için hazırlanmış bazı araçlar vardır:
 
 - [**Machound**](https://github.com/XMCyber/MacHound): MacHound, MacOS ana bilgisayarlarında Active Directory ilişkilerini toplamak ve almak için Bloodhound denetim aracına bir uzantıdır.
 - [**Bifrost**](https://github.com/its-a-feature/bifrost): Bifrost, macOS'taki Heimdal krb5 API'leri ile etkileşimde bulunmak için tasarlanmış bir Objective-C projesidir. Projenin amacı, hedefte başka bir çerçeve veya paket gerektirmeden yerel API'ler kullanarak macOS cihazlarında Kerberos etrafında daha iyi güvenlik testleri yapmaktır.
 - [**Orchard**](https://github.com/its-a-feature/Orchard): Active Directory listeleme yapmak için JavaScript for Automation (JXA) aracı. 
 
-### Domain Bilgisi
+### Alan Bilgisi
 ```bash
 echo show com.apple.opendirectoryd.ActiveDirectory | scutil
 ```
@@ -202,6 +202,7 @@ mount -t smbfs //server/folder /local/mount/point
 
 Anahtarlık, bir istem oluşturulmadan erişildiğinde, bir kırmızı takım egzersizini ilerletmeye yardımcı olabilecek hassas bilgileri yüksek olasılıkla içerir:
 
+
 {{#ref}}
 macos-keychain.md
 {{#endref}}
@@ -225,5 +226,6 @@ Safari'de bir dosya indirildiğinde, eğer "güvenli" bir dosya ise, **otomatik 
 - [**https://gist.github.com/its-a-feature/1a34f597fb30985a2742bb16116e74e0**](https://gist.github.com/its-a-feature/1a34f597fb30985a2742bb16116e74e0)
 - [**Come to the Dark Side, We Have Apples: Turning macOS Management Evil**](https://www.youtube.com/watch?v=pOQOh07eMxY)
 - [**OBTS v3.0: "An Attackers Perspective on Jamf Configurations" - Luke Roberts / Calum Hall**](https://www.youtube.com/watch?v=ju1IYWUv4ZA)
+
 
 {{#include ../../banners/hacktricks-training.md}}

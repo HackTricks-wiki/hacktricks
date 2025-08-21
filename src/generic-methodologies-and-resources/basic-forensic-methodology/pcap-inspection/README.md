@@ -7,7 +7,7 @@
 
 ## Pcap'lar için çevrimiçi araçlar
 
-- Pcap'ınızın başlığı **bozuksa**, bunu düzeltmek için şunu deneyin: [http://f00l.de/hacking/**pcapfix.php**](http://f00l.de/hacking/pcapfix.php)
+- Pcap'ınızın başlığı **bozuksa**, bunu düzeltmek için şunu kullanmalısınız: [http://f00l.de/hacking/**pcapfix.php**](http://f00l.de/hacking/pcapfix.php)
 - Bir pcap içindeki **bilgileri** çıkarın ve **kötü amaçlı yazılım** arayın [**PacketTotal**](https://packettotal.com) içinde
 - [**www.virustotal.com**](https://www.virustotal.com) ve [**www.hybrid-analysis.com**](https://www.hybrid-analysis.com) kullanarak **kötü niyetli etkinlik** arayın
 - **Tarayıcıdan tam pcap analizi için** [**https://apackets.com/**](https://apackets.com/)
@@ -21,7 +21,8 @@ Aşağıdaki araçlar istatistikleri, dosyaları vb. çıkarmak için faydalıd�
 > [!TIP]
 > **Bir PCAP'ı analiz edecekseniz, temelde Wireshark'ı nasıl kullanacağınızı bilmelisiniz**
 
-Wireshark ipuçlarını şurada bulabilirsiniz:
+Wireshark ile ilgili bazı ipuçlarını bulabilirsiniz:
+
 
 {{#ref}}
 wireshark-tricks.md
@@ -53,13 +54,13 @@ Ardından **yeni bir vaka** oluşturun, vaka içinde **yeni bir oturum** oluştu
 
 ### NetworkMiner
 
-Xplico gibi, **pcap'lerden nesneleri analiz etmek ve çıkarmak** için bir araçtır. **Buradan** [**indirin**](https://www.netresec.com/?page=NetworkMiner). **Windows** ile çalışır.\
-Bu araç, paketlerden **diğer analiz edilen bilgileri** almak için de faydalıdır, böylece ne olduğunu **daha hızlı** bir şekilde anlayabilirsiniz.
+Xplico gibi, **pcap'lerden nesneleri analiz etmek ve çıkarmak** için bir araçtır. **Buradan** [**indirebileceğiniz**] (https://www.netresec.com/?page=NetworkMiner) ücretsiz bir sürümü vardır. **Windows** ile çalışır.\
+Bu araç, paketlerden **diğer bilgileri analiz etmek** için de faydalıdır, böylece ne olduğunu **daha hızlı** bir şekilde anlayabilirsiniz.
 
 ### NetWitness Investigator
 
 [**NetWitness Investigator'ı buradan indirin**](https://www.rsa.com/en-us/contact-us/netwitness-investigator-freeware) **(Windows'ta çalışır)**.\
-Bu, paketleri **analiz eden** ve bilgileri **içeride ne olduğunu bilmek için** faydalı bir şekilde sıralayan başka bir yararlı araçtır.
+Bu, paketleri **analiz eden** ve bilgileri **içeride neler olduğunu bilmek için** faydalı bir şekilde sıralayan başka bir kullanışlı araçtır.
 
 ### [BruteShark](https://github.com/odedshimon/BruteShark)
 
@@ -67,7 +68,7 @@ Bu, paketleri **analiz eden** ve bilgileri **içeride ne olduğunu bilmek için*
 - Kimlik doğrulama hash'lerini çıkarmak ve Hashcat kullanarak kırmak (Kerberos, NTLM, CRAM-MD5, HTTP-Digest...)
 - Görsel bir ağ diyagramı oluşturmak (Ağ düğümleri ve kullanıcılar)
 - DNS sorgularını çıkarmak
-- Tüm TCP ve UDP oturumlarını yeniden yapılandırmak
+- Tüm TCP ve UDP oturumlarını yeniden oluşturmak
 - Dosya Kesme
 
 ### Capinfos
@@ -90,7 +91,7 @@ Yaygın carving tekniklerini kullanmak, pcap'ten dosyaları ve bilgileri çıkar
 
 ### Capturing credentials
 
-Bir pcap veya canlı bir arayüzden kimlik bilgilerini ayrıştırmak için [https://github.com/lgandx/PCredz](https://github.com/lgandx/PCredz) gibi araçları kullanabilirsiniz.
+Bir pcap veya canlı arayüzden kimlik bilgilerini ayrıştırmak için [https://github.com/lgandx/PCredz](https://github.com/lgandx/PCredz) gibi araçları kullanabilirsiniz.
 
 ## Check Exploits/Malware
 
@@ -103,7 +104,7 @@ apt-get install oinkmaster
 echo "url = http://rules.emergingthreats.net/open/suricata/emerging.rules.tar.gz" >> /etc/oinkmaster.conf
 oinkmaster -C /etc/oinkmaster.conf -o /etc/suricata/rules
 ```
-**Pcap'ı kontrol et**
+**pcap kontrol et**
 ```
 suricata -r packets.pcap -c /etc/suricata/suricata.yaml -k none -v -l log
 ```
@@ -114,7 +115,7 @@ suricata -r packets.pcap -c /etc/suricata/suricata.yaml -k none -v -l log
 - Bir PCAP Dosyasını okur ve Http Akışlarını çıkarır.
 - gzip, sıkıştırılmış akışları açar
 - Her dosyayı yara ile tarar
-- bir report.txt yazar
+- report.txt dosyasını yazar
 - İsteğe bağlı olarak eşleşen dosyaları bir Dizin'e kaydeder
 
 ### Malware Analysis
@@ -129,7 +130,7 @@ Bilinen bir kötü amaçlı yazılımın herhangi bir parmak izini bulup bulamay
 
 > [Zeek](https://docs.zeek.org/en/master/about.html) pasif, açık kaynaklı bir ağ trafiği analizörüdür. Birçok operatör, şüpheli veya kötü niyetli etkinliklerin araştırmalarını desteklemek için Zeek'i Ağ Güvenliği İzleyici (NSM) olarak kullanır. Zeek ayrıca güvenlik alanının ötesinde, performans ölçümü ve sorun giderme dahil olmak üzere geniş bir trafik analizi görevini destekler.
 
-Temelde, `zeek` tarafından oluşturulan günlükler **pcap** değildir. Bu nedenle, **pcap'lar** hakkında **bilgilerin** bulunduğu günlükleri analiz etmek için **diğer araçlar** kullanmanız gerekecektir.
+Temelde, `zeek` tarafından oluşturulan günlükler **pcap** değildir. Bu nedenle, **pcap'ler** hakkında **bilgi** içeren günlükleri analiz etmek için **diğer araçlar** kullanmanız gerekecektir.
 
 ### Connections Info
 ```bash
@@ -181,7 +182,7 @@ Score,Source IP,Destination IP,Connections,Avg Bytes,Intvl Range,Size Range,Top 
 1,10.55.100.111,165.227.216.194,20054,92,29,52,1,52,7774,20053,0,0,0,0
 0.838,10.55.200.10,205.251.194.64,210,69,29398,4,300,70,109,205,0,0,0,0
 ```
-### DNS bilgisi
+### DNS bilgileri
 ```bash
 #Get info about each DNS request performed
 cat dns.log | zeek-cut -c id.orig_h query qtype_name answers

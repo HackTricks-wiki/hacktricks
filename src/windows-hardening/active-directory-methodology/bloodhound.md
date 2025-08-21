@@ -6,7 +6,7 @@
 adws-enumeration.md
 {{#endref}}
 
-> NOT: Bu sayfa, Active Directory ilişkilerini **enumerate** ve **visualise** etmek için en kullanışlı araçlardan bazılarını gruplar. Gizli **Active Directory Web Services (ADWS)** kanalı üzerinden toplama için yukarıdaki referansa bakın.
+> NOT: Bu sayfa, Active Directory ilişkilerini **enumerate** ve **görselleştirmek** için en kullanışlı araçlardan bazılarını gruplar. Gizli **Active Directory Web Services (ADWS)** kanalı üzerinden toplama için yukarıdaki referansa bakın.
 
 ---
 
@@ -15,7 +15,7 @@ adws-enumeration.md
 [AD Explorer](https://docs.microsoft.com/en-us/sysinternals/downloads/adexplorer) (Sysinternals), aşağıdakileri sağlayan gelişmiş bir **AD görüntüleyici ve editörü**'dür:
 
 * Dizin ağacının GUI taraması
-* Nesne nitelikleri ve güvenlik tanımlayıcılarının düzenlenmesi
+* Nesne özniteliklerinin ve güvenlik tanımlarının düzenlenmesi
 * Çevrimdışı analiz için anlık görüntü oluşturma / karşılaştırma
 
 ### Hızlı kullanım
@@ -28,7 +28,7 @@ adws-enumeration.md
 
 ## ADRecon
 
-[ADRecon](https://github.com/adrecon/ADRecon), bir alanın büyük bir artefakt setini (ACL'ler, GPO'lar, güvenler, CA şablonları ...) çıkarır ve bir **Excel raporu** üretir.
+[ADRecon](https://github.com/adrecon/ADRecon), bir alan (ACL'ler, GPO'lar, güvenler, CA şablonları ...) üzerinden büyük bir artefakt seti çıkarır ve bir **Excel raporu** üretir.
 ```powershell
 # On a Windows host in the domain
 PS C:\> .\ADRecon.ps1 -OutputDir C:\Temp\ADRecon
@@ -56,7 +56,7 @@ SharpHound.exe --CollectionMethods All           # Full sweep (noisy)
 SharpHound.exe --CollectionMethods Group,LocalAdmin,Session,Trusts,ACL
 SharpHound.exe --Stealth --LDAP                      # Low noise LDAP only
 ```
-Toplayıcılar, BloodHound GUI aracılığıyla alınan JSON üretir.
+Toplayıcılar, BloodHound GUI aracılığıyla alınan JSON'lar üretir.
 
 ---
 

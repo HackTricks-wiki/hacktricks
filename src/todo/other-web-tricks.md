@@ -4,7 +4,7 @@
 
 ### Host başlığı
 
-Birçok kez arka uç, bazı işlemleri gerçekleştirmek için **Host başlığına** güvenir. Örneğin, bu değeri **şifre sıfırlama için gönderilecek alan adı** olarak kullanabilir. Yani, şifrenizi sıfırlamak için bir bağlantı içeren bir e-posta aldığınızda, kullanılan alan adı Host başlığında girdiğiniz alandır. Ardından, diğer kullanıcıların şifre sıfırlama taleplerini yapabilir ve alan adını kontrolünüz altındaki bir alan adıyla değiştirerek şifre sıfırlama kodlarını çalabilirsiniz. [WriteUp](https://medium.com/nassec-cybersecurity-writeups/how-i-was-able-to-take-over-any-users-account-with-host-header-injection-546fff6d0f2).
+Birçok kez arka uç, bazı işlemleri gerçekleştirmek için **Host başlığına** güvenir. Örneğin, bu değeri **şifre sıfırlama için kullanılacak alan adı** olarak kullanabilir. Yani, şifrenizi sıfırlamak için bir bağlantı içeren bir e-posta aldığınızda, kullanılan alan adı Host başlığına koyduğunuz alandır. Ardından, diğer kullanıcıların şifre sıfırlama taleplerini yapabilir ve alan adını kontrolünüz altındaki bir alan adıyla değiştirerek şifre sıfırlama kodlarını çalabilirsiniz. [WriteUp](https://medium.com/nassec-cybersecurity-writeups/how-i-was-able-to-take-over-any-users-account-with-host-header-injection-546fff6d0f2).
 
 > [!WARNING]
 > Kullanıcının şifre sıfırlama bağlantısına tıklamasını beklemenize gerek kalmadan token'ı alabileceğinizi unutmayın, çünkü belki de **spam filtreleri veya diğer ara cihazlar/botlar bunu analiz etmek için tıklayacaktır**.
@@ -12,7 +12,7 @@ Birçok kez arka uç, bazı işlemleri gerçekleştirmek için **Host başlığ�
 ### Oturum boolean'ları
 
 Bazen bazı doğrulamaları doğru bir şekilde tamamladığınızda arka uç, oturumunuza bir güvenlik niteliğine "True" değeriyle **sadece bir boolean ekler**. Ardından, farklı bir uç nokta bu kontrolü başarıyla geçip geçmediğinizi bilecektir.\
-Ancak, eğer **kontrolden geçerseniz** ve oturumunuza güvenlik niteliğinde "True" değeri verilirse, **erişim izniniz olmaması gereken** ancak **aynı niteliğe bağlı olan diğer kaynaklara erişmeyi** deneyebilirsiniz. [WriteUp](https://medium.com/@ozguralp/a-less-known-attack-vector-second-order-idor-attacks-14468009781a).
+Ancak, eğer **kontrolü geçerseniz** ve oturumunuza güvenlik niteliğinde "True" değeri verilirse, **erişim izniniz olmaması gereken** ancak **aynı niteliğe bağlı olan diğer kaynaklara erişmeyi** deneyebilirsiniz. [WriteUp](https://medium.com/@ozguralp/a-less-known-attack-vector-second-order-idor-attacks-14468009781a).
 
 ### Kayıt işlevselliği
 
@@ -20,7 +20,7 @@ Zaten mevcut bir kullanıcı olarak kaydolmayı deneyin. Eşdeğer karakterler (
 
 ### E-postaları ele geçirme
 
-Bir e-posta kaydedin, onaylamadan önce e-postayı değiştirin, ardından, yeni onay e-postası ilk kaydedilen e-postaya gönderilirse, herhangi bir e-postayı ele geçirebilirsiniz. Ya da eğer ikinci e-postayı birincisini onaylamak için etkinleştirebilirseniz, herhangi bir hesabı da ele geçirebilirsiniz.
+Bir e-posta kaydedin, onaylamadan önce e-postayı değiştirin, ardından, yeni onay e-postası ilk kaydedilen e-postaya gönderilirse, herhangi bir e-postayı ele geçirebilirsiniz. Ya da ikinci e-postayı birincisini onaylayacak şekilde etkinleştirebilirseniz, herhangi bir hesabı da ele geçirebilirsiniz.
 
 ### Atlassian kullanan şirketlerin İç Servis Masasına Erişim
 

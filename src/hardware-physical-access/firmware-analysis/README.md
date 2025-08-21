@@ -10,7 +10,7 @@
 synology-encrypted-archive-decryption.md
 {{#endref}}
 
-Firmware, cihazların doğru bir şekilde çalışmasını sağlayan ve donanım bileşenleri ile kullanıcıların etkileşimde bulunduğu yazılım arasında iletişimi yöneten temel yazılımdır. Kalıcı bellekte depolanır, böylece cihaz açıldığında kritik talimatlara erişebilir ve işletim sisteminin başlatılmasını sağlar. Firmware'i incelemek ve potansiyel olarak değiştirmek, güvenlik açıklarını belirlemede kritik bir adımdır.
+Firmware, cihazların doğru bir şekilde çalışmasını sağlayan ve donanım bileşenleri ile kullanıcıların etkileşimde bulunduğu yazılım arasında iletişimi yönetip kolaylaştıran temel yazılımdır. Kalıcı bellekte depolanır, böylece cihaz açıldığında kritik talimatlara erişebilir ve işletim sisteminin başlatılmasını sağlar. Firmware'i incelemek ve potansiyel olarak değiştirmek, güvenlik açıklarını belirlemede kritik bir adımdır.
 
 ## **Bilgi Toplama**
 
@@ -31,7 +31,7 @@ Bu amaçla, **açık kaynak istihbaratı (OSINT)** araçları çok değerlidir; 
 
 Firmware edinme, her biri kendi karmaşıklık seviyesine sahip çeşitli yollarla gerçekleştirilebilir:
 
-- **Doğrudan** kaynaktan (geliştiriciler, üreticiler)
+- **Kaynak** (geliştiriciler, üreticiler) üzerinden **doğrudan**
 - Verilen talimatlardan **oluşturarak**
 - Resmi destek sitelerinden **indirerek**
 - Barındırılan firmware dosyalarını bulmak için **Google dork** sorguları kullanarak
@@ -66,7 +66,7 @@ Veya dosyayı incelemek için [**binvis.io**](https://binvis.io/#/) ([code](http
 
 ### Dosya Sistemini Alma
 
-Önceki bahsedilen araçlarla `binwalk -ev <bin>` kullanarak **dosya sistemini çıkarmış olmalısınız**.\
+Daha önce bahsedilen araçlarla `binwalk -ev <bin>` kullanarak **dosya sistemini çıkarmış olmalısınız**.\
 Binwalk genellikle bunu **dosya sistemi türüyle adlandırılan bir klasörün içine çıkarır**, bu genellikle aşağıdakilerden biridir: squashfs, ubifs, romfs, rootfs, jffs2, yaffs2, cramfs, initramfs.
 
 #### Manuel Dosya Sistemi Çıkartma
@@ -123,7 +123,7 @@ Firmware elde edildikten sonra, yapısını ve potansiyel zayıflıklarını anl
 
 ### İlk Analiz Araçları
 
-İlk inceleme için bir dizi komut sağlanmıştır ( `<bin>` olarak adlandırılan ikili dosya için). Bu komutlar dosya türlerini tanımlamaya, dizeleri çıkarmaya, ikili verileri analiz etmeye ve bölüm ile dosya sistemi detaylarını anlamaya yardımcı olur:
+İlk inceleme için bir dizi komut sağlanmıştır ( `<bin>` olarak adlandırılan ikili dosya için). Bu komutlar dosya türlerini tanımlamaya, dizeleri çıkarmaya, ikili verileri analiz etmeye ve bölüm ile dosya sistemi ayrıntılarını anlamaya yardımcı olur:
 ```bash
 file <bin>
 strings -n8 <bin>
@@ -138,7 +138,7 @@ Görüntünün şifreleme durumunu değerlendirmek için **entropy** `binwalk -E
 
 ### Dosya Sistemini Çıkarma
 
-`binwalk -ev <bin>` kullanarak genellikle dosya sistemi çıkarılabilir, genellikle dosya sistemi türüyle adlandırılan bir dizine (örneğin, squashfs, ubifs) çıkarılır. Ancak, **binwalk** sihirli baytların eksikliği nedeniyle dosya sistemi türünü tanımadığında, manuel çıkarım gereklidir. Bu, dosya sisteminin ofsetini bulmak için `binwalk` kullanmayı ve ardından dosya sistemini çıkarmak için `dd` komutunu kullanmayı içerir:
+`binwalk -ev <bin>` kullanarak genellikle dosya sistemi çıkarılabilir, genellikle dosya sistemi türüyle adlandırılan bir dizine (örneğin, squashfs, ubifs) çıkarılır. Ancak, **binwalk** sihirli baytların eksikliği nedeniyle dosya sistemi türünü tanımadığında, manuel çıkarım gereklidir. Bu, dosya sisteminin ofsetini bulmak için `binwalk` kullanmayı ve ardından dosya sistemini çıkarmak için `dd` komutunu içermektedir:
 ```bash
 $ binwalk DIR850L_REVB.bin
 
@@ -158,7 +158,7 @@ Dosya sistemi çıkarıldıktan sonra, güvenlik açıkları arayışına başla
 - Daha fazla analiz için gömülü ikililer
 - Yaygın IoT cihazı web sunucuları ve ikilileri
 
-Dosya sistemi içindeki hassas bilgileri ve güvenlik açıklarını ortaya çıkarmaya yardımcı olan birkaç araç vardır:
+Dosya sistemi içindeki hassas bilgileri ve güvenlik açıklarını ortaya çıkarmaya yardımcı olan birkaç araç bulunmaktadır:
 
 - [**LinPEAS**](https://github.com/carlospolop/PEASS-ng) ve [**Firmwalker**](https://github.com/craigz28/firmwalker) hassas bilgi arayışı için
 - [**The Firmware Analysis and Comparison Tool (FACT)**](https://github.com/fkie-cad/FACT_core) kapsamlı firmware analizi için
@@ -166,11 +166,11 @@ Dosya sistemi içindeki hassas bilgileri ve güvenlik açıklarını ortaya çı
 
 ### Derlenmiş İkililer Üzerinde Güvenlik Kontrolleri
 
-Dosya sisteminde bulunan hem kaynak kodu hem de derlenmiş ikililer güvenlik açıkları açısından incelenmelidir. **checksec.sh** gibi araçlar Unix ikilileri için ve **PESecurity** Windows ikilileri için, istismar edilebilecek korumasız ikilileri tanımlamaya yardımcı olur.
+Dosya sisteminde bulunan hem kaynak kodu hem de derlenmiş ikililer güvenlik açıkları açısından incelenmelidir. Unix ikilileri için **checksec.sh** ve Windows ikilileri için **PESecurity** gibi araçlar, istismar edilebilecek korumasız ikilileri tanımlamaya yardımcı olur.
 
 ## Dinamik Analiz için Firmware Taklit Etme
 
-Firmware taklit etme süreci, bir cihazın çalışmasının veya bireysel bir programın **dinamik analizini** sağlar. Bu yaklaşım, donanım veya mimari bağımlılıkları ile zorluklarla karşılaşabilir, ancak kök dosya sistemini veya belirli ikilileri, Raspberry Pi gibi eşleşen mimari ve endianlıkta bir cihaza veya önceden oluşturulmuş bir sanal makineye aktarmak, daha fazla test yapmayı kolaylaştırabilir.
+Firmware taklit etme süreci, bir cihazın çalışması veya bireysel bir programın **dinamik analizini** sağlar. Bu yaklaşım, donanım veya mimari bağımlılıkları ile zorluklarla karşılaşabilir, ancak kök dosya sistemini veya belirli ikilileri, Raspberry Pi gibi eşleşen mimari ve endianlıkta bir cihaza veya önceden oluşturulmuş bir sanal makineye aktarmak, daha fazla test yapmayı kolaylaştırabilir.
 
 ### Bireysel İkilileri Taklit Etme
 
@@ -212,14 +212,14 @@ Belirlenen zafiyetler için bir PoC geliştirmek, hedef mimarinin derin bir anla
 
 [AttifyOS](https://github.com/adi0x90/attifyos) ve [EmbedOS](https://github.com/scriptingxss/EmbedOS) gibi işletim sistemleri, gerekli araçlarla donatılmış firmware güvenlik testleri için önceden yapılandırılmış ortamlar sağlar.
 
-## Firmware Analiz Etmek için Hazırlanmış OS'ler
+## Firmware Analizi için Hazırlanmış OS'ler
 
 - [**AttifyOS**](https://github.com/adi0x90/attifyos): AttifyOS, Nesnelerin İnterneti (IoT) cihazlarının güvenlik değerlendirmesi ve penetrasyon testleri yapmanıza yardımcı olmak için tasarlanmış bir dağıtımdır. Tüm gerekli araçların yüklü olduğu önceden yapılandırılmış bir ortam sunarak size çok zaman kazandırır.
-- [**EmbedOS**](https://github.com/scriptingxss/EmbedOS): Gömülü güvenlik test işletim sistemi, firmware güvenlik test araçları ile önceden yüklenmiş Ubuntu 18.04 tabanlıdır.
+- [**EmbedOS**](https://github.com/scriptingxss/EmbedOS): Gömülü güvenlik testi işletim sistemi, firmware güvenlik test araçları ile önceden yüklenmiş Ubuntu 18.04 tabanlıdır.
 
 ## Firmware Geri Alma Saldırıları ve Güvensiz Güncelleme Mekanizmaları
 
-Bir satıcı firmware görüntüleri için kriptografik imza kontrolleri uygulasa bile, **sürüm geri alma (downgrade) koruması sıklıkla atlanır**. Önyükleme veya kurtarma yükleyici yalnızca gömülü bir genel anahtar ile imzayı doğruluyorsa ancak *sürümü* (veya monotonik bir sayacı) karşılaştırmıyorsa, bir saldırgan geçerli bir imzaya sahip **daha eski, savunmasız bir firmware'i meşru bir şekilde yükleyebilir** ve böylece yamanmış zafiyetleri yeniden tanıtabilir.
+Bir satıcı firmware görüntüleri için kriptografik imza kontrolleri uygulasa bile, **sürüm geri alma (downgrade) koruması sıklıkla atlanır**. Önyükleme veya kurtarma yükleyici yalnızca gömülü bir genel anahtar ile imzayı doğruluyorsa ancak *sürümü* (veya monotonik sayacı) karşılaştırmıyorsa, bir saldırgan **geçerli bir imzaya sahip olan daha eski, savunmasız bir firmware'i meşru bir şekilde yükleyebilir** ve böylece yamanmış zafiyetleri yeniden tanıtabilir.
 
 Tipik saldırı iş akışı:
 
@@ -229,7 +229,7 @@ Tipik saldırı iş akışı:
 * Bunu VirusTotal, internet arşivleri, forumlar vb. gibi üçüncü taraf depolardan alın.
 2. **Görüntüyü cihaza yükleyin veya sunun** herhangi bir açık güncelleme kanalı aracılığıyla:
 * Web UI, mobil uygulama API'si, USB, TFTP, MQTT vb.
-* Birçok tüketici IoT cihazı, Base64 kodlu firmware blob'larını kabul eden *kimlik doğrulaması yapılmamış* HTTP(S) uç noktaları açar, bunları sunucu tarafında çözer ve kurtarma/güncelleme işlemini tetikler.
+* Birçok tüketici IoT cihazı, Base64 kodlu firmware blob'larını kabul eden *kimlik doğrulaması yapılmamış* HTTP(S) uç noktaları açar, bunları sunucu tarafında çözer ve kurtarma/güncellemeyi tetikler.
 3. Geri alma işleminden sonra, daha yeni sürümde yamanmış bir zafiyeti istismar edin (örneğin, daha sonra eklenen bir komut enjekte etme filtresi).
 4. İsteğe bağlı olarak, en son görüntüyü geri yükleyin veya kalıcılık sağlandıktan sonra tespiti önlemek için güncellemeleri devre dışı bırakın.
 
@@ -252,10 +252,10 @@ firmware_v1.3.11.490_signed.bin
 ```
 ### Güncelleme Mantığını Değerlendirme Kontrol Listesi
 
-* *Güncelleme uç noktası* için taşıma/kimlik doğrulama yeterince korunmuş mu (TLS + kimlik doğrulama)?
-* Cihaz, flaşlamadan önce **sürüm numaralarını** veya **monotonik geri alma sayacını** karşılaştırıyor mu?
+* *güncelleme uç noktası* için taşıma/kimlik doğrulama yeterince korunmuş mu (TLS + kimlik doğrulama)?
+* Cihaz, flaşlamadan önce **sürüm numaralarını** veya **monotonik geri alma önleyici sayacı** karşılaştırıyor mu?
 * Görüntü, güvenli bir önyükleme zinciri içinde doğrulanıyor mu (örneğin, ROM kodu tarafından imzalar kontrol ediliyor mu)?
-* Kullanıcı alanı kodu ek güvenlik kontrolleri gerçekleştiriyor mu (örneğin, izin verilen bölüm haritası, model numarası)?
+* Kullanıcı alanı kodu ek güvenlik kontrolleri yapıyor mu (örneğin, izin verilen bölüm haritası, model numarası)?
 * *Kısmi* veya *yedek* güncelleme akışları aynı doğrulama mantığını yeniden kullanıyor mu?
 
 > 💡  Yukarıdakilerden herhangi biri eksikse, platform muhtemelen geri alma saldırılarına karşı savunmasızdır.

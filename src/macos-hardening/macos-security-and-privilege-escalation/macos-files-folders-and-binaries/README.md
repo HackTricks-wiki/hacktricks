@@ -45,11 +45,11 @@ macos-sensitive-locations.md
 macos-installers-abuse.md
 {{#endref}}
 
-## OS X Özel Uzantıları
+## OS X'e Özgü Uzantılar
 
 - **`.dmg`**: Apple Disk Image dosyaları yükleyiciler için çok yaygındır.
 - **`.kext`**: Belirli bir yapıyı takip etmelidir ve OS X sürümünde bir sürücüdür. (bu bir pakettir)
-- **`.plist`**: XML veya ikili formatta bilgi saklayan özellik listesi olarak da bilinir.
+- **`.plist`**: XML veya ikili formatta bilgi saklayan property list olarak da bilinir.
 - XML veya ikili olabilir. İkili olanlar şu komutlarla okunabilir:
 - `defaults read config.plist`
 - `/usr/libexec/PlistBuddy -c print config.plist`
@@ -58,7 +58,7 @@ macos-installers-abuse.md
 - `plutil -convert json ~/Library/Preferences/com.apple.screensaver.plist -o -`
 - **`.app`**: Dizin yapısını takip eden Apple uygulamaları (bu bir pakettir).
 - **`.dylib`**: Dinamik kütüphaneler (Windows DLL dosyaları gibi)
-- **`.pkg`**: xar (eXtensible Archive format) ile aynıdır. Yükleyici komutu, bu dosyaların içeriğini yüklemek için kullanılabilir.
+- **`.pkg`**: xar (eXtensible Archive format) ile aynıdır. Bu dosyaların içeriğini yüklemek için yükleyici komutu kullanılabilir.
 - **`.DS_Store`**: Bu dosya her dizinde bulunur, dizinin özelliklerini ve özelleştirmelerini kaydeder.
 - **`.Spotlight-V100`**: Bu klasör, sistemdeki her hacmin kök dizininde görünür.
 - **`.metadata_never_index`**: Bu dosya bir hacmin kökünde bulunuyorsa, Spotlight o hacmi dizinlemez.
@@ -75,7 +75,7 @@ macos-bundles.md
 
 ## Dyld Paylaşılan Kütüphane Önbelleği (SLC)
 
-macOS'ta (ve iOS'ta) tüm sistem paylaşılan kütüphaneleri, çerçeveler ve dylib'ler, **tek bir dosyada birleştirilmiştir**, buna **dyld paylaşılan önbellek** denir. Bu, performansı artırır, çünkü kod daha hızlı yüklenebilir.
+macOS (ve iOS) üzerinde tüm sistem paylaşılan kütüphaneleri, çerçeveler ve dylib'ler, **tek bir dosyada birleştirilmiştir**, buna **dyld paylaşılan önbellek** denir. Bu, performansı artırır, çünkü kod daha hızlı yüklenebilir.
 
 Bu, macOS'ta `/System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/` içinde bulunur ve eski sürümlerde **paylaşılan önbelleği** **`/System/Library/dyld/`** içinde bulabilirsiniz.\
 iOS'ta bunları **`/System/Library/Caches/com.apple.dyld/`** içinde bulabilirsiniz.
@@ -93,18 +93,18 @@ dyldex_all [dyld_shared_cache_path] # Extract all
 # More options inside the readme
 ```
 > [!TIP]
-> `dyld_shared_cache_util` aracının çalışmaması durumunda, **paylaşılan dyld ikili dosyasını Hopper'a** iletebileceğinizi ve Hopper'ın tüm kütüphaneleri tanıyıp **hangi kütüphaneyi** incelemek istediğinizi **seçmenize** izin vereceğini unutmayın:
+> `dyld_shared_cache_util` aracının çalışmaması durumunda, **paylaşılan dyld ikilisini Hopper'a** iletebileceğinizi ve Hopper'ın tüm kütüphaneleri tanıyıp **hangi kütüphaneyi** incelemek istediğinizi **seçmenize** izin vereceğini unutmayın:
 
 <figure><img src="../../../images/image (1152).png" alt="" width="563"><figcaption></figcaption></figure>
 
-Bazı çıkarıcılar çalışmayabilir çünkü dylib'ler, bilinmeyen adreslere atlama yapabilecek şekilde, sabit kodlanmış adreslerle önceden bağlanmıştır.
+Bazı çıkarıcılar çalışmayabilir çünkü dylib'ler, bilinmeyen adreslere atlama yapabilecekleri için sabit kodlanmış adreslerle önceden bağlanmıştır.
 
 > [!TIP]
 > Xcode'da bir emülatör kullanarak macos'ta diğer \*OS cihazlarının Paylaşılan Kütüphane Önbelleğini indirmenin de mümkün olduğunu unutmayın. Bunlar şu dizinde indirilecektir: ls `$HOME/Library/Developer/Xcode/<*>OS\ DeviceSupport/<version>/Symbols/System/Library/Caches/com.apple.dyld/`, örneğin: `$HOME/Library/Developer/Xcode/iOS\ DeviceSupport/14.1\ (18A8395)/Symbols/System/Library/Caches/com.apple.dyld/dyld_shared_cache_arm64`
 
 ### SLC Haritalama
 
-**`dyld`**, SLC'nin haritalanıp haritalanmadığını bilmek için **`shared_region_check_np`** sistem çağrısını kullanır (bu adresi döndürür) ve SLC'yi haritalamak için **`shared_region_map_and_slide_np`** kullanır.
+**`dyld`** SLC'nin haritalanıp haritalanmadığını bilmek için **`shared_region_check_np`** sistem çağrısını kullanır (bu adresi döndürür) ve SLC'yi haritalamak için **`shared_region_map_and_slide_np`** kullanır.
 
 SLC ilk kullanımda kaydırılsa bile, tüm **işlemler** **aynı kopyayı** kullanır, bu da saldırganın sistemde işlemleri çalıştırabilmesi durumunda **ASLR** korumasını **ortadan kaldırır**. Bu geçmişte gerçekten istismar edildi ve paylaşılan bölge sayfası ile düzeltildi.
 
@@ -115,19 +115,19 @@ Branch havuzları, görüntü haritalamaları arasında küçük alanlar oluştu
 Aşağıdaki çevre değişkenlerini kullanarak:
 
 - **`DYLD_DHARED_REGION=private DYLD_SHARED_CACHE_DIR=</path/dir> DYLD_SHARED_CACHE_DONT_VALIDATE=1`** -> Bu, yeni bir paylaşılan kütüphane önbelleği yüklemeye izin verecektir.
-- **`DYLD_SHARED_CACHE_DIR=avoid`** ve kütüphaneleri gerçek olanlarla paylaşılan önbelleğe sembolik bağlantılarla manuel olarak değiştirmek (bunları çıkarmanız gerekecek).
+- **`DYLD_SHARED_CACHE_DIR=avoid`** ve kütüphaneleri gerçek olanlarla paylaşılan önbelleğe simlinklerle manuel olarak değiştirmek (bunları çıkarmanız gerekecek).
 
 ## Özel Dosya İzinleri
 
 ### Klasör izinleri
 
-Bir **klasörde**, **okuma** onu **listelemeye** izin verir, **yazma** dosyaları **silme** ve **yazma** izni verir, ve **çalıştırma** dizinde **gezinmeye** izin verir. Örneğin, bir kullanıcı bir dizinde **çalıştırma** iznine sahip olmadığı bir dosya üzerinde **okuma iznine** sahip olsa bile, dosyayı **okuyamaz**.
+Bir **klasörde**, **okuma** onu **listelemeye** izin verir, **yazma** dosyaları **silme** ve **yazma** işlemlerine izin verir, ve **çalıştırma** dizinde **gezinmeye** izin verir. Örneğin, bir kullanıcı bir dizinde **çalıştırma** iznine sahip olmadığı bir dosya üzerinde **okuma iznine** sahip olsa bile, dosyayı **okuyamaz**.
 
 ### Bayrak değiştiricileri
 
-Dosyalarda farklı davranmalarını sağlayacak bazı bayraklar ayarlanabilir. Bir dizindeki dosyaların **bayraklarını kontrol edebilirsiniz**: `ls -lO /path/directory`
+Dosyalarda ayarlanabilecek bazı bayraklar vardır, bu bayraklar dosyanın farklı davranmasına neden olur. Bir dizindeki dosyaların **bayraklarını kontrol edebilirsiniz** `ls -lO /path/directory` ile.
 
-- **`uchg`**: **uchange** bayrağı, **dosyanın** değiştirilmesini veya silinmesini **önler**. Ayarlamak için: `chflags uchg file.txt`
+- **`uchg`**: **uchange** bayrağı olarak bilinir ve **dosyanın** değiştirilmesini veya silinmesini **engeller**. Ayarlamak için: `chflags uchg file.txt`
 - Root kullanıcısı **bayrağı kaldırabilir** ve dosyayı değiştirebilir.
 - **`restricted`**: Bu bayrak dosyanın **SIP tarafından korunmasını** sağlar (bu bayrağı bir dosyaya ekleyemezsiniz).
 - **`Sticky bit`**: Eğer bir dizin sticky bit'e sahipse, **yalnızca** **dizin sahibi veya root dosyaları yeniden adlandırabilir veya silebilir**. Genellikle bu, sıradan kullanıcıların diğer kullanıcıların dosyalarını silmesini veya taşınmasını önlemek için /tmp dizininde ayarlanır.
@@ -150,7 +150,7 @@ Tüm bayraklar `sys/stat.h` dosyasında bulunabilir (bunu `mdfind stat.h | grep 
 - `SF_IMMUTABLE` 0x00020000: Dosya değiştirilemez.
 - `SF_APPEND` 0x00040000: Dosyaya yazma yalnızca ekleme yapabilir.
 - `SF_RESTRICTED` 0x00080000: Yazma için yetki gereklidir.
-- `SF_NOUNLINK` 0x00100000: Öğe kaldırılmayacak, yeniden adlandırılamayacak veya bağlanamayacak.
+- `SF_NOUNLINK` 0x00100000: Öğe kaldırılmayabilir, yeniden adlandırılamaz veya bağlanamaz.
 - `SF_FIRMLINK` 0x00800000: Dosya bir firmlink'tir.
 - `SF_DATALESS` 0x40000000: Dosya dataless nesnedir.
 
@@ -213,11 +213,11 @@ find / -type f -exec ls -ld {} \; 2>/dev/null | grep -E "[x\-]@ " | awk '{printf
 ```
 ### decmpfs
 
-Genişletilmiş özellik `com.apple.decmpfs`, dosyanın şifreli olarak saklandığını gösterir, `ls -l` **boyutunu 0** olarak raporlayacak ve sıkıştırılmış veriler bu özellik içinde yer alacaktır. Dosya her erişildiğinde bellek içinde şifresi çözülecektir.
+Genişletilmiş özellik `com.apple.decmpfs`, dosyanın şifreli olarak saklandığını gösterir, `ls -l` **boyutunun 0** olduğunu bildirecek ve sıkıştırılmış veriler bu özellik içinde yer alacaktır. Dosya her erişildiğinde, bellek içinde şifresi çözülecektir.
 
-Bu özellik, `ls -lO` ile sıkıştırılmış olarak görülebilir çünkü sıkıştırılmış dosyalar `UF_COMPRESSED` bayrağı ile de etiketlenir. Eğer bir sıkıştırılmış dosya `chflags nocompressed </path/to/file>` ile kaldırılırsa, sistem dosyanın sıkıştırıldığını bilmeyecek ve bu nedenle veriyi açıp erişemeyecektir (gerçekten boş olduğunu düşünecektir).
+Bu özellik `ls -lO` ile sıkıştırılmış olarak görülebilir çünkü sıkıştırılmış dosyalar `UF_COMPRESSED` bayrağı ile etiketlenir. Eğer bir sıkıştırılmış dosya `chflags nocompressed </path/to/file>` ile kaldırılırsa, sistem dosyanın sıkıştırıldığını bilmeyecek ve bu nedenle veriyi açıp erişemeyecektir (gerçekte boş olduğunu düşünecektir).
 
-Afscexpand aracı, bir dosyayı zorla açmak için kullanılabilir.
+Alet afscexpand, bir dosyayı zorla açmak için kullanılabilir.
 
 ## **Evrensel ikililer &** Mach-o Formatı
 
@@ -237,16 +237,16 @@ macos-memory-dumping.md
 
 ## Risk Kategorisi Dosyaları Mac OS
 
-`/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/System` dizini, **farklı dosya uzantılarıyla ilişkili risk hakkında bilgilerin saklandığı yerdir**. Bu dizin, dosyaları çeşitli risk seviyelerine ayırarak Safari'nin bu dosyaları indirdikten sonra nasıl işleyeceğini etkiler. Kategoriler şunlardır:
+`/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/System` dizini, **farklı dosya uzantılarıyla ilişkili risk hakkında bilgilerin saklandığı yerdir**. Bu dizin, dosyaları çeşitli risk seviyelerine ayırarak, Safari'nin bu dosyaları indirdikten sonra nasıl işleyeceğini etkiler. Kategoriler şunlardır:
 
 - **LSRiskCategorySafe**: Bu kategorideki dosyalar **tamamen güvenli** olarak kabul edilir. Safari, bu dosyaları indirdikten sonra otomatik olarak açacaktır.
 - **LSRiskCategoryNeutral**: Bu dosyalar uyarı içermez ve Safari tarafından **otomatik olarak açılmaz**.
 - **LSRiskCategoryUnsafeExecutable**: Bu kategori altındaki dosyalar, dosyanın bir uygulama olduğunu belirten **bir uyarı tetikler**. Bu, kullanıcıyı uyarmak için bir güvenlik önlemidir.
-- **LSRiskCategoryMayContainUnsafeExecutable**: Bu kategori, bir yürütülebilir içerebilecek dosyalar, örneğin arşivler için geçerlidir. Safari, tüm içeriklerin güvenli veya nötr olduğunu doğrulayamazsa **bir uyarı tetikler**.
+- **LSRiskCategoryMayContainUnsafeExecutable**: Bu kategori, bir yürütülebilir içerebilecek dosyalar, örneğin arşivler içindir. Safari, tüm içeriklerin güvenli veya nötr olduğunu doğrulayamazsa **bir uyarı tetikler**.
 
 ## Günlük dosyaları
 
-- **`$HOME/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV2`**: İndirilen dosyalar hakkında, nereden indirildikleri gibi bilgiler içerir.
+- **`$HOME/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV2`**: İndirilen dosyalar hakkında, nereden indirildikleri gibi bilgileri içerir.
 - **`/var/log/system.log`**: OSX sistemlerinin ana günlüğü. com.apple.syslogd.plist, syslogging'in yürütülmesinden sorumludur (devre dışı olup olmadığını kontrol etmek için `launchctl list` içinde "com.apple.syslogd" arayabilirsiniz).
 - **`/private/var/log/asl/*.asl`**: İlginç bilgiler içerebilecek Apple Sistem Günlükleridir.
 - **`$HOME/Library/Preferences/com.apple.recentitems.plist`**: "Finder" aracılığıyla en son erişilen dosyaları ve uygulamaları saklar.

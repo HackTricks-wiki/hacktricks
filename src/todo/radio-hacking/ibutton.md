@@ -4,7 +4,7 @@
 
 ## Intro
 
-iButton, **madeni para şeklinde metal bir kap** içinde paketlenmiş bir elektronik kimlik anahtarının genel adıdır. Aynı zamanda **Dallas Touch** Memory veya temas belleği olarak da adlandırılır. Sıklıkla “mıknatıslı” anahtar olarak yanlış bir şekilde anılsa da, içinde **mıknatıslı** hiçbir şey yoktur. Aslında, içinde dijital bir protokolle çalışan tam teşekküllü bir **mikroçip** gizlidir.
+iButton, **madeni para şeklinde metal bir kap** içinde paketlenmiş bir elektronik kimlik anahtarının genel adıdır. Aynı zamanda **Dallas Touch** Memory veya temas belleği olarak da adlandırılır. Sıklıkla “mıknatıslı” anahtar olarak yanlış bir şekilde anılsa da, içinde **mıknatıslı** hiçbir şey yoktur. Aslında, içinde dijital bir protokol üzerinde çalışan tam teşekküllü bir **mikroçip** gizlidir.
 
 <figure><img src="../../images/image (915).png" alt=""><figcaption></figcaption></figure>
 
@@ -22,7 +22,7 @@ Anahtar okuyucuya ulaştığında, **temas noktaları birbirine değiyor** ve an
 
 Dallas anahtarları, 1-wire protokolünü kullanarak veri alışverişi yapar. Veri transferi için sadece bir temas noktası (!!) ile, hem ana cihazdan köle cihaza hem de tersine. 1-wire protokolü, Master-Slave modeline göre çalışır. Bu topolojide, Master her zaman iletişimi başlatır ve Slave onun talimatlarını takip eder.
 
-Anahtar (Slave) interkom (Master) ile temas ettiğinde, anahtarın içindeki çip açılır, interkom tarafından güç sağlanır ve anahtar başlatılır. Ardından interkom anahtar kimliğini talep eder. Bu süreci daha ayrıntılı olarak inceleyeceğiz.
+Anahtar (Slave) interkomla (Master) temas ettiğinde, anahtarın içindeki çip açılır, interkom tarafından güç sağlanır ve anahtar başlatılır. Ardından interkom anahtar kimliğini talep eder. Bu süreci daha ayrıntılı olarak inceleyeceğiz.
 
 Flipper, hem Master hem de Slave modlarında çalışabilir. Anahtar okuma modunda, Flipper bir okuyucu olarak hareket eder, yani Master olarak çalışır. Anahtar emülasyon modunda ise, Flipper bir anahtar gibi davranır, Slave modundadır.
 

@@ -41,9 +41,9 @@ Bu sayfada, **bir linux ana bilgisayarında kerberos biletlerini bulabileceğini
 
 ### /tmp'den CCACHE biletinin yeniden kullanımı
 
-CCACHE dosyaları, **Kerberos kimlik bilgilerini saklamak için** kullanılan ikili formatlardır ve genellikle `/tmp` içinde 600 izinleri ile saklanır. Bu dosyalar, kullanıcının UID'si ile ilişkili olan **isim formatlarıyla** tanımlanabilir, `krb5cc_%{uid}`. Kimlik doğrulama biletinin doğrulanması için, **çevre değişkeni `KRB5CCNAME`** istenen bilet dosyasının yoluna ayarlanmalıdır, bu da yeniden kullanımını sağlar.
+CCACHE dosyaları, **Kerberos kimlik bilgilerini saklamak için** kullanılan ikili formatlardır ve genellikle `/tmp` içinde 600 izinleri ile saklanır. Bu dosyalar, kullanıcının UID'si ile ilişkili olan **isim formatları `krb5cc_%{uid}`** ile tanımlanabilir. Kimlik doğrulama biletinin doğrulanması için, **ortam değişkeni `KRB5CCNAME`** istenen bilet dosyasının yoluna ayarlanmalıdır, bu da yeniden kullanımını sağlar.
 
-Kimlik doğrulama için kullanılan mevcut bileti `env | grep KRB5CCNAME` ile listeleyin. Format taşınabilir ve bilet, **çevre değişkenini ayarlayarak** yeniden kullanılabilir: `export KRB5CCNAME=/tmp/ticket.ccache`. Kerberos bilet adı formatı `krb5cc_%{uid}` olup, uid kullanıcı UID'sidir.
+Kimlik doğrulama için kullanılan mevcut biletleri `env | grep KRB5CCNAME` ile listeleyin. Format taşınabilir ve bilet, ortam değişkenini `export KRB5CCNAME=/tmp/ticket.ccache` ile ayarlayarak **yeniden kullanılabilir**. Kerberos bilet adı formatı `krb5cc_%{uid}` şeklindedir; burada uid, kullanıcının UID'sidir.
 ```bash
 # Find tickets
 ls /tmp/ | grep krb5cc
@@ -63,7 +63,7 @@ cd tickey/tickey
 make CONF=Release
 /tmp/tickey -i
 ```
-Bu prosedür, çeşitli oturumlara enjekte etmeyi deneyecek ve başarıyı, çıkarılan biletleri `/tmp` dizininde `__krb_UID.ccache` adlandırma kuralıyla saklayarak gösterecektir.
+Bu prosedür, çeşitli oturumlara enjekte etmeyi deneyecek ve başarıyı `/tmp` dizininde `__krb_UID.ccache` adlandırma kuralıyla çıkarılan biletleri depolayarak gösterecektir.
 
 ### SSSD KCM'den CCACHE bilet yeniden kullanımı
 

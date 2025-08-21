@@ -8,7 +8,7 @@
 
 Bu saldırıyı gerçekleştirmek için iki yöntem vardır: ya bir **Golden Ticket** ya da bir **Diamond Ticket** oluşturmak.
 
-**"Enterprise Admins"** grubunun SID'sini belirlemek için, önce kök alanın SID'sini bulmak gerekir. Tanımlamanın ardından, Enterprise Admins grup SID'si kök alanın SID'sine `-519` eklenerek oluşturulabilir. Örneğin, kök alan SID'si `S-1-5-21-280534878-1496970234-700767426` ise, "Enterprise Admins" grubunun sonuçta elde edilen SID'si `S-1-5-21-280534878-1496970234-700767426-519` olacaktır.
+**"Enterprise Admins"** grubunun SID'sini belirlemek için, önce kök alanın SID'sini bulmak gerekir. Tanımlamanın ardından, Enterprise Admins grubunun SID'si, kök alanın SID'sine `-519` eklenerek oluşturulabilir. Örneğin, kök alan SID'si `S-1-5-21-280534878-1496970234-700767426` ise, "Enterprise Admins" grubunun sonuçta elde edilen SID'si `S-1-5-21-280534878-1496970234-700767426-519` olacaktır.
 
 Ayrıca, **512** ile biten **Domain Admins** gruplarını da kullanabilirsiniz.
 
@@ -22,7 +22,7 @@ Get-DomainGroup -Identity "Domain Admins" -Domain parent.io -Properties ObjectSi
 [**docs**](https://technet.microsoft.com/library/cc835085.aspx) göre:
 - **Orman güvenlerinde SIDHistory'yi devre dışı bırakma** netdom aracı kullanılarak (`netdom trust /domain: /EnableSIDHistory:no on the domain controller`)
 - **Dış güvenlere SID Filtreleme Karantinası uygulama** netdom aracı kullanılarak (`netdom trust /domain: /quarantine:yes on the domain controller`)
-- **Tek bir orman içindeki alan güvenlerine SID Filtreleme uygulamak** önerilmez çünkü bu desteklenmeyen bir yapılandırmadır ve kırıcı değişikliklere neden olabilir. Eğer bir orman içindeki bir alan güvenilir değilse, o ormanın üyesi olmamalıdır. Bu durumda, güvenilir ve güvenilir olmayan alanların ayrı ormanlara bölünmesi ve burada SID Filtrelemenin bir interforest güvenine uygulanması gereklidir.
+- **Tek bir orman içindeki alan güvenlerine SID Filtreleme uygulamak** önerilmez çünkü bu desteklenmeyen bir yapılandırmadır ve kırıcı değişikliklere neden olabilir. Eğer bir orman içindeki bir alan güvenilir değilse, o ormanın üyesi olmamalıdır. Bu durumda, güvenilir ve güvenilir olmayan alanların ayrı ormanlara bölünmesi ve burada SID Filtrelemenin bir ara orman güvenine uygulanması gereklidir.
 
 Bu konuda daha fazla bilgi için bu gönderiyi kontrol edin: [**https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4**](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)
 
@@ -80,7 +80,7 @@ diamond-ticket.md
 .\kirbikator.exe lsa .\CIFS.mcorpdc.moneycorp.local.kirbi
 ls \\mcorp-dc.moneycorp.local\c$
 ```
-Kompromize edilmiş alanın KRBTGT hash'ini kullanarak root veya Enterprise admin'e yükseltin:
+Kompromize edilmiş alanın KRBTGT hash'ini kullanarak kök veya Enterprise admin'e yükseltin:
 ```bash
 Invoke-Mimikatz -Command '"kerberos::golden /user:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1-5-211874506631-3219952063-538504511 /sids:S-1-5-21-280534878-1496970234700767426-519 /krbtgt:ff46a9d8bd66c6efd77603da26796f35 /ticket:C:\AD\Tools\krbtgt_tkt.kirbi"'
 
@@ -122,12 +122,12 @@ psexec.py <child_domain>/Administrator@dc.root.local -k -no-pass -target-ip 10.1
 ```
 #### Automatic using [raiseChild.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/raiseChild.py)
 
-Bu, **çocuk alanından ebeveyn alanına yükseltmeyi otomatikleştiren** bir Impacket betiğidir. Betik şunları gerektirir:
+Bu, **çocuk alanından ebeveyn alanına yükseltmeyi otomatikleştiren** bir Impacket betiğidir. Betiğin ihtiyaçları:
 
 - Hedef alan denetleyicisi
 - Çocuk alanındaki bir yönetici kullanıcısı için kimlik bilgileri
 
-Akış şudur:
+Akış şu şekildedir:
 
 - Ebeveyn alanının Enterprise Admins grubunun SID'sini alır
 - Çocuk alanındaki KRBTGT hesabının hash'ini alır

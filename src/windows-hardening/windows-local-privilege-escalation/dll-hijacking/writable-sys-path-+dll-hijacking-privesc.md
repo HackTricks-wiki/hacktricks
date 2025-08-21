@@ -18,11 +18,11 @@ Bunu yapmak için, **sizinle daha fazla yetkiye sahip** bir hizmet veya işlem t
 
 ### Finding a missing Dll
 
-İhtiyacınız olan ilk şey, **yazma yetkinizden daha fazla yetkiye sahip** bir işlemi **Sistem Yolundan Dll yüklemeye** çalışan bir **işlem** olarak **belirlemektir**.
+İhtiyacınız olan ilk şey, **yazma yetkinizden daha fazla yetkiye sahip** bir işlemi **Sistem Yolundan Dll yüklemeye** çalışan bir işlemi **belirlemektir**.
 
-Bu durumlarda sorun, muhtemelen bu işlemlerin zaten çalışıyor olmasıdır. Hangi Dll'lerin hizmetlerden eksik olduğunu bulmak için, procmon'u mümkün olan en kısa sürede (işlemler yüklenmeden önce) başlatmalısınız. Eksik .dll'leri bulmak için:
+Bu durumlarda sorun, muhtemelen bu işlemlerin zaten çalışıyor olmasıdır. Hangi Dll'lerin hizmetlerden eksik olduğunu bulmak için, mümkün olan en kısa sürede (işlemler yüklenmeden önce) procmon'u başlatmalısınız. Eksik .dll'leri bulmak için:
 
-- `C:\privesc_hijacking` klasörünü **oluşturun** ve `C:\privesc_hijacking` yolunu **Sistem Yolu ortam değişkenine** ekleyin. Bunu **manuel olarak** veya **PS** ile yapabilirsiniz:
+- **C:\privesc_hijacking** klasörünü **oluşturun** ve `C:\privesc_hijacking` yolunu **Sistem Yolü ortam değişkenine** ekleyin. Bunu **manuel olarak** veya **PS** ile yapabilirsiniz:
 ```bash
 # Set the folder path to create and check events for
 $folderPath = "C:\privesc_hijacking"
@@ -40,7 +40,7 @@ $newPath = "$envPath;$folderPath"
 }
 ```
 - **`procmon`**'u başlatın ve **`Options`** --> **`Enable boot logging`**'e gidin ve istemde **`OK`**'ye basın.
-- Sonra, **yeniden başlatın**. Bilgisayar yeniden başlatıldığında **`procmon`** olayları mümkün olan en kısa sürede **kaydetmeye** başlayacaktır.
+- Sonra, **yeniden başlatın**. Bilgisayar yeniden başladığında **`procmon`** olayları mümkün olan en kısa sürede **kaydetmeye** başlayacaktır.
 - **Windows** **başladıktan sonra `procmon`'u** tekrar çalıştırın, çalıştığını söyleyecek ve olayları bir dosyada saklamak isteyip istemediğinizi **soracaktır**. **Evet** deyin ve olayları bir dosyada **saklayın**.
 - **Dosya** **oluşturulduktan sonra**, açılan **`procmon`** penceresini **kapayın** ve **olay dosyasını** **açın**.
 - Bu **filtreleri** ekleyin ve yazılabilir Sistem Yolu klasöründen bazı **proseslerin yüklemeye çalıştığı** tüm DLL'leri bulacaksınız:
@@ -55,27 +55,27 @@ $newPath = "$envPath;$folderPath"
 
 Bu durumda .exe'ler işe yaramaz, bu yüzden onları göz ardı edin, kaçırılan DLL'ler şunlardı:
 
-| Servis                          | DLL                | CMD satırı                                                            |
-| ------------------------------- | ------------------ | --------------------------------------------------------------------- |
-| Görev Zamanlayıcı (Schedule)   | WptsExtensions.dll | `C:\Windows\system32\svchost.exe -k netsvcs -p -s Schedule`           |
-| Tanılayıcı Politika Servisi (DPS) | Unknown.DLL        | `C:\Windows\System32\svchost.exe -k LocalServiceNoNetwork -p -s DPS`  |
-| ???                             | SharedRes.dll      | `C:\Windows\system32\svchost.exe -k UnistackSvcGroup`                 |
+| Servis                          | DLL                | CMD satırı                                                          |
+| ------------------------------- | ------------------ | ------------------------------------------------------------------ |
+| Görev Zamanlayıcı (Schedule)   | WptsExtensions.dll | `C:\Windows\system32\svchost.exe -k netsvcs -p -s Schedule`       |
+| Tanılayıcı Politika Servisi (DPS) | Unknown.DLL        | `C:\Windows\System32\svchost.exe -k LocalServiceNoNetwork -p -s DPS` |
+| ???                             | SharedRes.dll      | `C:\Windows\system32\svchost.exe -k UnistackSvcGroup`             |
 
-Bunu bulduktan sonra, **privesc** için WptsExtensions.dll'yi nasıl [**istismar edeceğinizi**](https://juggernaut-sec.com/dll-hijacking/#Windows_10_Phantom_DLL_Hijacking_-_WptsExtensionsdll) açıklayan ilginç bir blog yazısı buldum. Şimdi **bunu yapacağız**.
+Bunu bulduktan sonra, **privesc için WptsExtensions.dll'yi nasıl kötüye kullanacağınızı** açıklayan ilginç bir blog yazısı buldum. Şimdi **yapacağımız şey** bu.
 
-### İstismar
+### Sömürü
 
 Yani, **yetkileri artırmak** için **WptsExtensions.dll** kütüphanesini ele geçireceğiz. **Yolu** ve **adı** bildiğimiz için sadece **kötü niyetli dll'yi** **oluşturmamız** gerekiyor.
 
 [**Bu örneklerden herhangi birini kullanmayı deneyebilirsiniz**](#creating-and-compiling-dlls). Rev shell almak, bir kullanıcı eklemek, bir beacon çalıştırmak gibi yükleri çalıştırabilirsiniz...
 
 > [!WARNING]
-> Tüm hizmetlerin **`NT AUTHORITY\SYSTEM`** ile çalışmadığını unutmayın, bazıları **`NT AUTHORITY\LOCAL SERVICE`** ile de çalışıyor ve bu da **daha az yetkiye** sahip olduğundan yeni bir kullanıcı oluşturup izinlerini istismar edemezsiniz.\
-> Ancak, o kullanıcının **`seImpersonate`** yetkisi var, bu yüzden [**potato suite ile yetkileri artırabilirsiniz**](../roguepotato-and-printspoofer.md). Bu durumda, bir rev shell, bir kullanıcı oluşturmaya çalışmaktan daha iyi bir seçenektir.
+> Tüm hizmetlerin **`NT AUTHORITY\SYSTEM`** ile çalışmadığını unutmayın, bazıları **`NT AUTHORITY\LOCAL SERVICE`** ile de çalışır ki bu da **daha az yetkiye** sahiptir ve **yeni bir kullanıcı oluşturamazsınız** ve izinlerini kötüye kullanamazsınız.\
+> Ancak, o kullanıcının **`seImpersonate`** yetkisi vardır, bu yüzden **yetkileri artırmak için potato suite**'i kullanabilirsiniz. Bu durumda, bir rev shell, bir kullanıcı oluşturmaya çalışmaktan daha iyi bir seçenektir.
 
-Yazma anında **Görev Zamanlayıcı** hizmeti **Nt AUTHORITY\SYSTEM** ile çalışıyor.
+Yazma anında **Görev Zamanlayıcı** hizmeti **Nt AUTHORITY\SYSTEM** ile çalışmaktadır.
 
-**Kötü niyetli DLL'yi** (_benim durumumda x64 rev shell kullandım ve bir shell aldım ama defender onu msfvenom'dan olduğu için öldürdü_) yazılabilir Sistem Yolu'na **WptsExtensions.dll** adıyla kaydedin ve bilgisayarı **yeniden başlatın** (veya hizmeti yeniden başlatın ya da etkilenen hizmet/programı yeniden çalıştırmak için ne gerekiyorsa yapın).
+**Kötü niyetli DLL'yi** (_benim durumumda x64 rev shell kullandım ve bir shell aldım ama defender bunu msfvenom'dan olduğu için öldürdü_) yazılabilir Sistem Yolu'na **WptsExtensions.dll** adıyla kaydedin ve bilgisayarı **yeniden başlatın** (veya hizmeti yeniden başlatın ya da etkilenen hizmet/programı yeniden çalıştırmak için ne gerekiyorsa yapın).
 
 Hizmet yeniden başlatıldığında, **dll yüklenmeli ve çalıştırılmalıdır** (kütüphanenin **beklendiği gibi yüklendiğini kontrol etmek için **procmon** numarasını **kullanabilirsiniz**).
 

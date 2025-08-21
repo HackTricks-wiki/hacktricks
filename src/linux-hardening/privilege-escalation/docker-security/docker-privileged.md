@@ -4,11 +4,11 @@
 
 ## Ne Etkiler
 
-Bir konteyneri yetkili olarak çalıştırdığınızda, devre dışı bıraktığınız korumalar şunlardır:
+Bir konteyneri ayrıcalıklı olarak çalıştırdığınızda, devre dışı bıraktığınız korumalar şunlardır:
 
 ### Mount /dev
 
-Yetkili bir konteynerde, tüm **cihazlar `/dev/` içinde erişilebilir**. Bu nedenle, **diskin** ana makineden **mount edilmesiyle** **kaçabilirsiniz**.
+Ayrıcalıklı bir konteynerde, tüm **cihazlar `/dev/` içinde erişilebilir**. Bu nedenle, **diskin** ana makineden **mount edilmesiyle** **kaçabilirsiniz**.
 
 {{#tabs}}
 {{#tab name="Inside default container"}}
@@ -20,7 +20,7 @@ core     full     null     pts      shm      stdin    tty      zero
 ```
 {{#endtab}}
 
-{{#tab name="İçeride Ayrıcalıklı Konteyner"}}
+{{#tab name="Inside Privileged Container"}}
 ```bash
 # docker run --rm --privileged -it alpine sh
 ls /dev
@@ -33,9 +33,9 @@ cpu              nbd0             pts              stdout           tty27       
 {{#endtab}}
 {{#endtabs}}
 
-### Sadece okunur çekirdek dosya sistemleri
+### Sadece okunabilir çekirdek dosya sistemleri
 
-Çekirdek dosya sistemleri, bir sürecin çekirdeğin davranışını değiştirmesi için bir mekanizma sağlar. Ancak, konteyner süreçleri söz konusu olduğunda, onların çekirdekte herhangi bir değişiklik yapmalarını önlemek istiyoruz. Bu nedenle, çekirdek dosya sistemlerini konteyner içinde **sadece okunur** olarak monte ediyoruz ve böylece konteyner süreçlerinin çekirdeği değiştirmesini engelliyoruz.
+Çekirdek dosya sistemleri, bir sürecin çekirdeğin davranışını değiştirmesi için bir mekanizma sağlar. Ancak, konteyner süreçleri söz konusu olduğunda, onların çekirdekte herhangi bir değişiklik yapmalarını önlemek istiyoruz. Bu nedenle, çekirdek dosya sistemlerini konteyner içinde **sadece okunabilir** olarak monte ediyoruz ve böylece konteyner süreçlerinin çekirdeği değiştirmesini engelliyoruz.
 
 {{#tabs}}
 {{#tab name="Inside default container"}}
@@ -49,7 +49,7 @@ cpuacct on /sys/fs/cgroup/cpuacct type cgroup (ro,nosuid,nodev,noexec,relatime,c
 ```
 {{#endtab}}
 
-{{#tab name="İçinde Ayrıcalıklı Konteyner"}}
+{{#tab name="Inside Privileged Container"}}
 ```bash
 # docker run --rm --privileged -it alpine sh
 mount  | grep '(ro'
@@ -59,7 +59,7 @@ mount  | grep '(ro'
 
 ### Kernel dosya sistemlerini maskeleme
 
-**/proc** dosya sistemi seçici olarak yazılabilir, ancak güvenlik için, belirli kısımlar **tmpfs** ile örtülerek yazma ve okuma erişiminden korunur, bu da konteyner süreçlerinin hassas alanlara erişememesini sağlar.
+**/proc** dosya sistemi seçici olarak yazılabilir, ancak güvenlik için, belirli kısımlar **tmpfs** ile örtülerek yazma ve okuma erişiminden korunur; bu, konteyner süreçlerinin hassas alanlara erişememesini sağlar.
 
 > [!NOTE] > **tmpfs**, tüm dosyaları sanal bellekte depolayan bir dosya sistemidir. tmpfs, sabit diskinizde herhangi bir dosya oluşturmaz. Bu nedenle, bir tmpfs dosya sistemini ayırırsanız, içinde bulunan tüm dosyalar sonsuza dek kaybolur.
 
@@ -84,7 +84,7 @@ mount  | grep /proc.*tmpfs
 
 ### Linux yetenekleri
 
-Konteyner motorları, konteynerin içinde neler olacağını kontrol etmek için konteynerleri **sınırlı sayıda yetenekle** başlatır. **Ayrıcalıklı** olanlar **tüm** **yeteneklere** erişime sahiptir. Yetenekler hakkında bilgi edinmek için okuyun:
+Konteyner motorları, konteynerin içinde neler olacağını kontrol etmek için konteynerleri **sınırlı sayıda yetenekle** başlatır. **Ayrıcalıklı** olanlar ise **tüm** **yeteneklere** erişime sahiptir. Yetenekler hakkında bilgi edinmek için okuyun:
 
 
 {{#ref}}
@@ -115,7 +115,7 @@ Bounding set =cap_chown,cap_dac_override,cap_dac_read_search,cap_fowner,cap_fset
 {{#endtab}}
 {{#endtabs}}
 
-Bir konteynerin kullanılabilir yeteneklerini `--privileged` modunda çalıştırmadan `--cap-add` ve `--cap-drop` bayraklarını kullanarak manipüle edebilirsiniz.
+Bir konteynerin kullanılabilir yeteneklerini `--privileged` modda çalıştırmadan `--cap-add` ve `--cap-drop` bayraklarını kullanarak manipüle edebilirsiniz.
 
 ### Seccomp
 
@@ -153,7 +153,7 @@ Ayrıca, **Kubernetes** kümesinde Docker (veya diğer CRI'ler) kullanıldığı
 
 ### AppArmor
 
-**AppArmor**, **kapsayıcıları** **sınırlı** bir **kaynak** kümesine **per-program profilleri** ile sınırlamak için bir çekirdek geliştirmesidir. `--privileged` bayrağı ile çalıştığınızda, bu koruma devre dışıdır.
+**AppArmor**, **konteynerleri** **sınırlı** bir **kaynak** kümesine **program başına profillerle** sınırlamak için bir çekirdek geliştirmesidir. `--privileged` bayrağı ile çalıştığınızda, bu koruma devre dışıdır.
 
 {{#ref}}
 apparmor.md
@@ -180,7 +180,7 @@ apparmor.md
 Ad alanları **`--privileged`** bayrağından **ETKİLENMEZ**. Güvenlik kısıtlamaları etkin olmasa da, **örneğin sistemdeki veya ana ağdaki tüm süreçleri göremezler**. Kullanıcılar, **`--pid=host`, `--net=host`, `--ipc=host`, `--uts=host`** konteyner motoru bayraklarını kullanarak bireysel ad alanlarını devre dışı bırakabilirler.
 
 {{#tabs}}
-{{#tab name="Inside default privileged container"}}
+{{#tab name="Varsayılan ayrıcalıklı konteynerin içinde"}}
 ```bash
 # docker run --rm --privileged -it alpine sh
 ps -ef

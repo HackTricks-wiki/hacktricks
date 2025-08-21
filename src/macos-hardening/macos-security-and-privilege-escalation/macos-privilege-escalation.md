@@ -12,7 +12,7 @@ macos-security-protections/macos-tcc/
 
 ## Linux Privesc
 
-Lütfen unutmayın ki **Linux/Unix üzerinde yetki yükseltme ile ilgili olan çoğu hile, MacOS** makinelerini de etkileyecektir. Bu yüzden bakın:
+Lütfen **yetki yükseltme ile ilgili çoğu numaranın Linux/Unix'i etkilediği gibi MacOS** makinelerini de etkileyeceğini unutmayın. Bu yüzden:
 
 {{#ref}}
 ../../linux-hardening/privilege-escalation/
@@ -24,7 +24,7 @@ Lütfen unutmayın ki **Linux/Unix üzerinde yetki yükseltme ile ilgili olan ç
 
 Orijinal [Sudo Ele Geçirme tekniğini Linux Yetki Yükseltme yazısında bulabilirsiniz](../../linux-hardening/privilege-escalation/index.html#sudo-hijacking).
 
-Ancak, macOS **kullanıcının** **`PATH`**'ini **`sudo`** komutunu çalıştırdığında **korur**. Bu da, bu saldırıyı gerçekleştirmenin başka bir yolunun, mağdurun **sudo** ile çalıştırdığı **diğer ikili dosyaları ele geçirmek** olabileceği anlamına gelir:
+Ancak, macOS **kullanıcının** **`PATH`**'ini **`sudo`** komutunu çalıştırdığında **korur**. Bu da, bu saldırıyı gerçekleştirmenin başka bir yolunun, mağdurun **sudo** çalıştırırken hala çalıştıracağı **diğer ikili dosyaları ele geçirmek** olabileceği anlamına gelir:
 ```bash
 # Let's hijack ls in /opt/homebrew/bin, as this is usually already in the users PATH
 cat > /opt/homebrew/bin/ls <<EOF
@@ -43,7 +43,7 @@ Not edin ki terminal kullanan bir kullanıcının **Homebrew yüklü olma olası
 
 ### Dock Taklidi
 
-Bazı **sosyal mühendislik** kullanarak, dock içinde **örneğin Google Chrome'u taklit edebilir** ve aslında kendi scriptinizi çalıştırabilirsiniz:
+Bazı **sosyal mühendislik** yöntemleri kullanarak dock içinde **örneğin Google Chrome'u taklit edebilir** ve aslında kendi scriptinizi çalıştırabilirsiniz:
 
 {{#tabs}}
 {{#tab name="Chrome Impersonation"}}
@@ -124,7 +124,7 @@ killall Dock
 {{#tab name="Finder Impersonation"}}
 Bazı öneriler:
 
-- Dock'tan Finder'ı **kaldıramazsınız**, bu yüzden eğer Dock'a ekleyecekseniz, sahte Finder'ı gerçek olanın hemen yanına koyabilirsiniz. Bunun için **sahte Finder girişini Dock dizisinin başına eklemeniz gerekir**.
+- Dock'tan Finder'ı **kaldıramazsınız**, bu yüzden eğer Dock'a ekleyecekseniz, sahte Finder'ı gerçek olanın hemen yanına koyabilirsiniz. Bunun için **sahte Finder girişini Dock dizisinin başına eklemeniz** gerekiyor.
 - Diğer bir seçenek, Dock'a yerleştirmemek ve sadece açmaktır; "Finder'ın Finder'ı kontrol etmesi için izin istemesi" o kadar da garip değil.
 - Şifreyi korkunç bir kutu ile sormadan **root'a yükselmek** için başka bir seçenek, Finder'ın gerçekten bir ayrıcalıklı işlem gerçekleştirmek için şifre istemesini sağlamaktır:
 - Finder'dan **`/etc/pam.d`** dizinine yeni bir **`sudo`** dosyası kopyalamasını isteyin (Şifre isteyen istem, "Finder sudo'yu kopyalamak istiyor" diye belirtecektir)
@@ -205,7 +205,7 @@ killall Dock
 
 ### CVE-2020-9771 - mount_apfs TCC atlatma ve yetki yükseltme
 
-**Herhangi bir kullanıcı** (hatta yetkisiz olanlar bile) bir zaman makinesi anlık görüntüsü oluşturabilir ve bunu monte edebilir, anlık görüntünün **TÜM dosyalarına** erişebilir.\
+**Herhangi bir kullanıcı** (hatta yetkisiz olanlar bile) bir zaman makinesi anlık görüntüsü oluşturabilir ve bunu monte edebilir, **o anlık görüntünün TÜM dosyalarına** erişebilir.\
 Gerekli olan **tek yetki**, kullanılan uygulamanın (örneğin `Terminal`) **Tam Disk Erişimi** (FDA) erişimine sahip olmasıdır (`kTCCServiceSystemPolicyAllfiles`), bu da bir yönetici tarafından verilmelidir.
 ```bash
 # Create snapshot

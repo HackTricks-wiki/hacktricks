@@ -2,13 +2,14 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
+
+
 ## Silver ticket
 
 **Silver Ticket** saldırısı, Active Directory (AD) ortamlarında hizmet biletlerinin istismarını içerir. Bu yöntem, bir Ticket Granting Service (TGS) bileti oluşturmak için **bir hizmet hesabının NTLM hash'ini edinmeye** dayanır; bu, bir bilgisayar hesabı gibi bir hizmet hesabı olabilir. Bu sahte bilet ile bir saldırgan, genellikle yönetici ayrıcalıkları hedefleyerek, ağdaki belirli hizmetlere **herhangi bir kullanıcıyı taklit ederek** erişebilir. Biletleri sahtelemek için AES anahtarlarının kullanılmasının daha güvenli ve daha az tespit edilebilir olduğu vurgulanmaktadır.
 
 > [!WARNING]
-> Silver Ticket'lar, yalnızca **hizmet hesabının hash'ini** gerektirdikleri için Golden Ticket'lara göre daha az tespit edilebilirler; krbtgt hesabına ihtiyaç duymazlar. Ancak, hedefledikleri belirli hizmetle sınırlıdırlar. Ayrıca, yalnızca bir kullanıcının şifresini çalmak yeterlidir. 
-Ayrıca, bir **hesabın şifresini bir SPN ile ele geçirirseniz**, o şifreyi kullanarak o hizmete herhangi bir kullanıcıyı taklit eden bir Silver Ticket oluşturabilirsiniz.
+> Silver Tickets, yalnızca **hizmet hesabının hash'ini** gerektirdiğinden, krbtgt hesabını gerektirmediğinden, Golden Tickets'tan daha az tespit edilebilir. Ancak, hedefledikleri belirli hizmetle sınırlıdırlar. Ayrıca, yalnızca bir kullanıcının şifresini çalmakla kalmaz. Ayrıca, bir **hesabın şifresini bir SPN ile ele geçirirseniz**, o şifreyi kullanarak o hizmete herhangi bir kullanıcıyı taklit eden bir Silver Ticket oluşturabilirsiniz.
 
 Bilet oluşturma için, işletim sistemine bağlı olarak farklı araçlar kullanılmaktadır:
 
@@ -50,7 +51,7 @@ CIFS servisi, kurbanın dosya sistemine erişim için yaygın bir hedef olarak �
 | Windows Uzak Sunucu Yönetim Araçları      | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                     |
 | Altın Biletler                             | krbtgt                                                                 |
 
-**Rubeus** kullanarak bu biletlerin hepsini aşağıdaki parametre ile **isteyebilirsiniz**:
+**Rubeus** kullanarak bu biletlerin hepsini aşağıdaki parametre ile isteyebilirsiniz:
 
 - `/altservice:host,RPCSS,http,wsman,cifs,ldap,krbtgt,winrm`
 
@@ -77,6 +78,7 @@ dir \\vulnerable.computer\ADMIN$
 copy afile.txt \\vulnerable.computer\C$\Windows\Temp
 ```
 Ayrıca, **psexec** kullanarak ana bilgisayar içinde bir shell elde edebilir veya rastgele komutlar çalıştırabilirsiniz:
+
 
 {{#ref}}
 ../lateral-movement/psexec-and-winexec.md
@@ -120,14 +122,14 @@ Winrm erişimi ile bir bilgisayara **erişebilir** ve hatta bir PowerShell alabi
 ```bash
 New-PSSession -Name PSC -ComputerName the.computer.name; Enter-PSSession PSC
 ```
-Aşağıdaki sayfayı kontrol ederek **winrm kullanarak uzaktan bir host ile bağlantı kurmanın daha fazla yolunu** öğrenin:
+Aşağıdaki sayfayı kontrol ederek **winrm kullanarak uzaktan bir ana bilgisayara bağlanmanın daha fazla yolunu** öğrenin:
 
 {{#ref}}
 ../lateral-movement/winrm.md
 {{#endref}}
 
 > [!WARNING]
-> **winrm'nin uzaktan bilgisayarda aktif ve dinliyor olması gerektiğini** unutmayın.
+> **winrm'nin uzaktaki bilgisayarda aktif ve dinliyor olması gerektiğini** unutmayın.
 
 ### LDAP
 

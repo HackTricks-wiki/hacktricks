@@ -10,19 +10,19 @@
 
 Derleyici, `/usr/lib/libSystem.B.dylib` dosyasını ikili dosyaya bağlayacaktır.
 
-Daha sonra, **`libSystem.B`**, **`xpc_pipe_routine`** uygulamanın yetkilerini **`securityd`**'ye göndermeden önce birkaç başka fonksiyonu çağıracaktır. Securityd, sürecin Sandbox içinde karantinaya alınması gerekip gerekmediğini kontrol eder ve eğer öyleyse, karantinaya alır.\
+Ardından, **`libSystem.B`** diğer birkaç fonksiyonu çağıracak ve **`xpc_pipe_routine`** uygulamanın yetkilerini **`securityd`**'ye gönderecektir. Securityd, sürecin Sandbox içinde karantinaya alınması gerekip gerekmediğini kontrol eder ve eğer öyleyse, karantinaya alır.\
 Son olarak, sandbox, **`__sandbox_ms`** çağrısıyla etkinleştirilecek ve bu da **`__mac_syscall`**'ı çağıracaktır.
 
 ## Olası Bypass'ler
 
 ### Karantina niteliğini atlama
 
-**Sandbox'lı süreçler tarafından oluşturulan dosyalar**, sandbox'tan kaçışları önlemek için **karantina niteliği** eklenir. Ancak, eğer bir sandbox'lı uygulama içinde **karantina niteliği olmayan bir `.app` klasörü oluşturmayı başarırsanız**, uygulama paketinin ikili dosyasını **`/bin/bash`**'e işaret edebilir ve **plist** içinde bazı çevre değişkenleri ekleyerek **`open`** komutunu kötüye kullanarak **yeni uygulamayı sandbox'sız başlatabilirsiniz**.
+**Sandbox'lı süreçler tarafından oluşturulan dosyalar**, sandbox'tan kaçışları önlemek için **karantina niteliği** eklenir. Ancak, bir sandbox'lı uygulama içinde **karantina niteliği olmayan bir `.app` klasörü oluşturmayı başarırsanız**, uygulama paketinin ikili dosyasını **`/bin/bash`**'e yönlendirebilir ve **plist** içinde bazı çevre değişkenleri ekleyerek **yeni uygulamayı sandbox'sız başlatmak için `open`'i kötüye kullanabilirsiniz**.
 
 Bu, [**CVE-2023-32364**](https://gergelykalman.com/CVE-2023-32364-a-macOS-sandbox-escape-by-mounting.html)**'te yapılan şeydir.**
 
 > [!CAUTION]
-> Bu nedenle, şu anda, eğer sadece **karantina niteliği olmayan** bir isimle biten **`.app`** klasörü oluşturabiliyorsanız, sandbox'tan kaçabilirsiniz çünkü macOS yalnızca **`.app` klasöründeki** ve **ana çalıştırılabilir dosyadaki** **karantina** niteliğini **kontrol eder** (ve biz ana çalıştırılabilir dosyayı **`/bin/bash`**'e işaret edeceğiz).
+> Bu nedenle, şu anda, sadece **karantina niteliği olmayan** bir isimle biten **`.app`** klasörü oluşturabiliyorsanız, sandbox'tan kaçabilirsiniz çünkü macOS yalnızca **`.app` klasöründeki** ve **ana çalıştırılabilir dosyadaki** **karantina** niteliğini **kontrol eder** (ve biz ana çalıştırılabilir dosyayı **`/bin/bash`**'e yönlendireceğiz).
 >
 > Eğer bir .app paketi zaten çalıştırılmak üzere yetkilendirilmişse (çalıştırma yetkisi olan bir karantina xttr'ye sahipse), bunu da kötüye kullanabilirsiniz... tek farkla ki artık **`.app`** paketleri içinde yazamazsınız, eğer bazı ayrıcalıklı TCC izinleriniz yoksa (ki bunlar yüksek bir sandbox içinde olmayacaktır).
 
@@ -42,9 +42,9 @@ Bir uygulama **sandbox'lı olacak şekilde tasarlanmışsa** (`com.apple.securit
 
 ### Otomatik Başlatma Konumlarını Kötüye Kullanma
 
-Eğer bir sandbox'lı süreç, **sonrasında bir sandbox'sız uygulamanın ikili dosyasını çalıştıracağı** bir yere **yazabiliyorsa**, sadece oraya ikili dosyayı yerleştirerek **kaçabilir**. Bu tür konumların iyi bir örneği `~/Library/LaunchAgents` veya `/System/Library/LaunchDaemons`'dır.
+Eğer bir sandbox'lı süreç, **sonrasında bir sandbox'sız uygulamanın ikili dosyasını çalıştıracağı** bir yere **yazabiliyorsa**, ikili dosyayı oraya yerleştirerek **kaçabilir**. Bu tür konumların iyi bir örneği `~/Library/LaunchAgents` veya `/System/Library/LaunchDaemons`'dır.
 
-Bunun için belki de **2 adım** gerekebilir: Daha **izinli bir sandbox** (`file-read*`, `file-write*`) ile bir sürecin kodunuzu çalıştırmasını sağlamak ve bu kodun aslında **sandbox'sız çalıştırılacağı** bir yere yazmasını sağlamak.
+Bunun için belki de **2 adım** gerekebilir: Daha **izinli bir sandbox** (`file-read*`, `file-write*`) ile bir sürecin kodunuzu çalıştırmasını sağlamak ve bu kodun aslında **sandbox'sız çalıştırılacak** bir yere yazmasını sağlamak.
 
 **Otomatik Başlatma konumları** hakkında bu sayfayı kontrol edin:
 
@@ -55,7 +55,7 @@ Bunun için belki de **2 adım** gerekebilir: Daha **izinli bir sandbox** (`file
 
 ### Diğer süreçleri kötüye kullanma
 
-Eğer o sandbox sürecinden, daha az kısıtlayıcı sandbox'larda (veya hiç) çalışan **diğer süreçleri tehlikeye atabiliyorsanız**, onların sandbox'larından kaçabileceksiniz:
+Eğer o sandbox sürecinden, daha az kısıtlayıcı sandbox'larda (veya hiç) çalışan **diğer süreçleri tehlikeye atabiliyorsanız**, onların sandbox'larından kaçabilirsiniz:
 
 
 {{#ref}}
@@ -64,7 +64,7 @@ Eğer o sandbox sürecinden, daha az kısıtlayıcı sandbox'larda (veya hiç) �
 
 ### Mevcut Sistem ve Kullanıcı Mach hizmetleri
 
-Sandbox, `application.sb` profilinde tanımlanan belirli **Mach hizmetleri** ile iletişim kurmaya da izin verir. Eğer bu hizmetlerden birini **kötüye kullanmayı** başarırsanız, **sandbox'tan kaçabilirsiniz**.
+Sandbox, `application.sb` profilinde tanımlanan belirli **Mach hizmetleri** ile iletişim kurmaya da izin verir. Bu hizmetlerden birini **kötüye kullanmayı** başarırsanız, **sandbox'tan kaçabilirsiniz**.
 
 [Bu yazıda](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/) belirtildiği gibi, Mach hizmetleri hakkında bilgi `/System/Library/xpc/launchd.plist` dosyasında saklanır. Tüm Sistem ve Kullanıcı Mach hizmetlerini bulmak için o dosyada `<string>System</string>` ve `<string>User</string>` araması yapabilirsiniz.
 
@@ -93,13 +93,13 @@ checkService(serviceName.UTF8String);
 ```
 ### Mevcut PID Mach hizmetleri
 
-Bu Mach hizmetleri, [bu yazıda sandbox'tan kaçmak için ilk olarak istismar edildi](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/). O zaman, **bir uygulama ve çerçevesi tarafından gereken tüm XPC hizmetleri** uygulamanın PID alanında görünür durumdaydı (bunlar `ServiceType` olarak `Application` olan Mach Hizmetleridir).
+Bu Mach hizmetleri, [bu yazıda sandbox'tan kaçmak için ilk olarak istismar edildi](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/). O zaman, bir uygulama ve çerçevesi tarafından **gerekli olan tüm XPC hizmetleri** uygulamanın PID alanında görünür durumdaydı (bunlar `ServiceType` olarak `Application` olan Mach Hizmetleridir).
 
-Bir **PID Domain XPC hizmeti ile iletişim kurmak için**, uygulama içinde şu gibi bir satırla kaydetmek yeterlidir:
+Bir **PID Domain XPC hizmetiyle iletişim kurmak** için, uygulama içinde şu şekilde kaydetmek yeterlidir:
 ```objectivec
 [[NSBundle bundleWithPath:@“/System/Library/PrivateFrameworks/ShoveService.framework"]load];
 ```
-Ayrıca, tüm **Application** Mach hizmetlerini bulmak için `System/Library/xpc/launchd.plist` içinde `<string>Application</string>` aramak mümkündür.
+Ayrıca, tüm **Application** Mach hizmetlerini bulmak için `System/Library/xpc/launchd.plist` içinde `<string>Application</string>` araması yaparak bulmak mümkündür.
 
 Geçerli xpc hizmetlerini bulmanın bir diğer yolu ise şunları kontrol etmektir:
 ```bash
@@ -176,7 +176,7 @@ break;
 ```
 #### /System/Library/PrivateFrameworks/WorkflowKit.framework/XPCServices/ShortcutsFileAccessHelper.xpc
 
-Bu XPC servisi, `extendAccessToURL:completion:` yöntemi aracılığıyla XPC istemcisine keyfi bir URL'ye okuma ve yazma erişimi vermeye olanak tanır ve bu yöntem herhangi bir bağlantıyı kabul eder. XPC servisi FDA'ya sahip olduğundan, bu izinlerin kötüye kullanılması TCC'yi tamamen atlatmak için mümkündür.
+Bu XPC servisi, `extendAccessToURL:completion:` yöntemi aracılığıyla XPC istemcisine keyfi bir URL'ye okuma ve yazma erişimi verme imkanı tanır ve bu yöntem herhangi bir bağlantıyı kabul eder. XPC servisi FDA'ya sahip olduğundan, bu izinlerin kötüye kullanılması TCC'yi tamamen atlatmak için mümkündür.
 
 Sömürü şuydu:
 ```objectivec
@@ -282,7 +282,7 @@ DYLD_INSERT_LIBRARIES=./interpose.dylib ./sand
 _libsecinit_initializer called
 Sandbox Bypassed!
 ```
-#### Interpost `__mac_syscall` Sandbox'ı önlemek için
+#### Interpost `__mac_syscall` Sandbox'ı Önlemek için
 ```c:interpose.c
 // gcc -dynamiclib interpose.c -o interpose.dylib
 
@@ -460,7 +460,7 @@ Process 2517 resuming
 Sandbox Bypassed!
 Process 2517 exited with status = 0 (0x00000000)
 ```
-> [!WARNING] > **Sandbox atlatılsa bile TCC** kullanıcıdan sürecin masaüstünden dosya okumak isteyip istemediğini soracaktır.
+> [!WARNING] > **Sandbox atlatılsa bile TCC**, kullanıcının masaüstünden dosyaları okumak için işlemi izin verip vermek istemediğini soracaktır.
 
 ## References
 

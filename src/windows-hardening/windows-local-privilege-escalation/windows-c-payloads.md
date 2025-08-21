@@ -2,9 +2,9 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Bu sayfa, Windows Yerel Yetki Yükseltme veya sonrası için kullanışlı olan **küçük, bağımsız C parçacıklarını** toplar. Her payload, **kopyala-yapıştır dostu** olacak şekilde tasarlanmıştır, yalnızca Windows API / C çalışma zamanı gerektirir ve `i686-w64-mingw32-gcc` (x86) veya `x86_64-w64-mingw32-gcc` (x64) ile derlenebilir.
+Bu sayfa, **Windows Yerel Yetki Yükseltme** veya sonrası için kullanışlı olan **küçük, bağımsız C parçacıklarını** toplar. Her payload, **kopyala-yapıştır dostu** olacak şekilde tasarlanmıştır, yalnızca Windows API / C çalışma zamanı gerektirir ve `i686-w64-mingw32-gcc` (x86) veya `x86_64-w64-mingw32-gcc` (x64) ile derlenebilir.
 
-> ⚠️  Bu payload'lar, işlemin gerekli minimum ayrıcalıklara sahip olduğunu varsayar (örneğin, `SeDebugPrivilege`, `SeImpersonatePrivilege` veya UAC atlatması için orta bütünlük bağlamı). Bunlar, bir güvenlik açığını istismar etmenin rastgele yerel kod yürütmesine yol açtığı **kırmızı takım veya CTF ayarları** için tasarlanmıştır.
+> ⚠️  Bu payload'lar, işlemin gerekli minimum yetkilere sahip olduğunu varsayar (örneğin, `SeDebugPrivilege`, `SeImpersonatePrivilege` veya UAC atlatması için orta düzey bütünlük bağlamı). Bunlar, bir güvenlik açığını istismar etmenin rastgele yerel kod yürütmesine yol açtığı **kırmızı takım veya CTF ortamları** için tasarlanmıştır.
 
 ---
 
@@ -27,7 +27,7 @@ Güvenilir ikili **`fodhelper.exe`** çalıştırıldığında, aşağıdaki kay
 ```
 HKCU\Software\Classes\ms-settings\Shell\Open\command
 ```
-Minimal bir PoC, yükseltilmiş `cmd.exe` açar:
+Bir yükseltilmiş `cmd.exe` açan minimal PoC:
 ```c
 // x86_64-w64-mingw32-gcc -municode -s -O2 -o uac_fodhelper.exe uac_fodhelper.c
 #define _CRT_SECURE_NO_WARNINGS
@@ -65,8 +65,8 @@ return 0;
 
 ---
 
-## Token çoğaltma ile SYSTEM shell başlatma (`SeDebugPrivilege` + `SeImpersonatePrivilege`)
-Eğer mevcut işlem **her iki** `SeDebug` ve `SeImpersonate` ayrıcalıklarına sahipse (birçok hizmet hesabı için tipik), `winlogon.exe`'den token'ı çalabilir, çoğaltabilir ve yükseltilmiş bir işlem başlatabilirsiniz:
+## Token çoğaltma ile SYSTEM shell oluşturma (`SeDebugPrivilege` + `SeImpersonatePrivilege`)
+Eğer mevcut süreç **her iki** `SeDebug` ve `SeImpersonate` ayrıcalıklarına sahipse (birçok hizmet hesabı için tipik), `winlogon.exe`'den token'ı çalabilir, çoğaltabilir ve yükseltilmiş bir süreç başlatabilirsiniz:
 ```c
 // x86_64-w64-mingw32-gcc -O2 -o system_shell.exe system_shell.c -ladvapi32 -luser32
 #include <windows.h>

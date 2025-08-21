@@ -2,13 +2,15 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
+
+
 ## Temel Bilgiler
 
 DLL Hijacking, güvenilir bir uygulamanın kötü niyetli bir DLL yüklemesini sağlamak için manipüle edilmesini içerir. Bu terim, **DLL Spoofing, Injection ve Side-Loading** gibi birkaç taktiği kapsar. Genellikle kod yürütme, kalıcılık sağlama ve daha az yaygın olarak ayrıcalık yükseltme için kullanılır. Burada yükseltmeye odaklanılsa da, kaçırma yöntemi hedefler arasında tutarlıdır.
 
 ### Yaygın Teknikler
 
-DLL hijacking için birkaç yöntem kullanılmaktadır, her biri uygulamanın DLL yükleme stratejisine bağlı olarak etkinliği değişir:
+DLL hijacking için birkaç yöntem kullanılmaktadır, her birinin etkinliği uygulamanın DLL yükleme stratejisine bağlıdır:
 
 1. **DLL Değiştirme**: Gerçek bir DLL'i kötü niyetli bir DLL ile değiştirmek, isteğe bağlı olarak orijinal DLL'in işlevselliğini korumak için DLL Proxying kullanmak.
 2. **DLL Arama Sırası Kaçırma**: Kötü niyetli DLL'i meşru olanın önünde bir arama yoluna yerleştirmek, uygulamanın arama desenini istismar etmek.
@@ -34,13 +36,13 @@ Eğer **belirli bir yürütülebilir dosya içinde eksik bir dll** arıyorsanız
 
 ## Eksik Dll'leri İstismar Etme
 
-Ayrıcalıkları yükseltmek için en iyi şansımız, **bir ayrıcalıklı sürecin yüklemeye çalışacağı bir dll yazabilmektir** ve bu dll'in **arama yapılacak bir yerde** olmasıdır. Bu nedenle, **orijinal dll'in** bulunduğu dizinden önce **arama yapılacak bir dizine** bir dll yazabileceğiz (garip bir durum), ya da **arama yapılacak bir dizinde** yazabileceğiz ve orijinal **dll herhangi bir dizinde mevcut olmayacak**.
+Ayrıcalıkları yükseltmek için en iyi şansımız, **bir ayrıcalıklı sürecin yüklemeye çalışacağı bir dll yazabilmektir** ve bu dll'in **arama yapılacak bir yerde** olmasıdır. Bu nedenle, **orijinal dll'in** bulunduğu dizinden önce **arama yapılacak bir dizine** bir dll yazabileceğiz (garip bir durum), ya da **dll'in arama yapılacağı bir dizinde** yazabileceğiz ve orijinal **dll hiçbir dizinde mevcut olmayacak**.
 
 ### DLL Arama Sırası
 
 **DLL'lerin nasıl yüklendiğini** [**Microsoft belgelerinde**](https://docs.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-search-order#factors-that-affect-searching) bulabilirsiniz.
 
-**Windows uygulamaları**, belirli bir sıraya uyarak **önceden tanımlanmış arama yolları** setini takip ederek DLL'leri arar. DLL hijacking sorunu, zararlı bir DLL'in bu dizinlerden birine stratejik olarak yerleştirilmesiyle ortaya çıkar, böylece gerçek DLL'den önce yüklenmesi sağlanır. Bunu önlemenin bir çözümü, uygulamanın ihtiyaç duyduğu DLL'lere atıfta bulunurken mutlak yollar kullanmasını sağlamaktır.
+**Windows uygulamaları**, belirli bir sıraya uyarak **önceden tanımlanmış arama yolları** setini takip ederek DLL'leri arar. DLL hijacking sorunu, zararlı bir DLL'in bu dizinlerden birine stratejik olarak yerleştirilmesiyle ortaya çıkar, bu da onun gerçek DLL'den önce yüklenmesini sağlar. Bunu önlemenin bir çözümü, uygulamanın ihtiyaç duyduğu DLL'lere atıfta bulunurken mutlak yollar kullanmasını sağlamaktır.
 
 Aşağıda **32-bit** sistemlerde **DLL arama sırasını** görebilirsiniz:
 
@@ -65,16 +67,16 @@ Standart DLL arama sırasına belirli istisnalar Windows belgelerinde belirtilmi
 
 - **Bellekte zaten yüklenmiş bir DLL ile aynı adı paylaşan bir DLL** ile karşılaşıldığında, sistem genellikle aramayı atlar. Bunun yerine, yönlendirme ve bir manifest kontrolü yapar ve ardından bellekteki zaten yüklenmiş DLL'e geri döner. **Bu senaryoda, sistem DLL için bir arama yapmaz**.
 - DLL, mevcut Windows sürümü için **bilinen bir DLL** olarak tanındığında, sistem, arama sürecini atlayarak, bilinen DLL'in kendi sürümünü ve bağımlı DLL'lerini kullanır. Kayıt defteri anahtarı **HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\KnownDLLs**, bu bilinen DLL'lerin bir listesini tutar.
-- Eğer bir **DLL bağımlılıkları varsa**, bu bağımlı DLL'ler, ilk DLL tam bir yol ile tanımlanmış olsa bile, yalnızca **modül adlarıyla** gösteriliyormuş gibi aranır.
+- Eğer bir **DLL bağımlılıklara sahipse**, bu bağımlı DLL'ler için arama, yalnızca **modül adlarıyla** belirtilmiş gibi yapılır, ilk DLL'in tam yol ile tanımlanıp tanımlanmadığına bakılmaksızın.
 
 ### Ayrıcalıkları Yükseltme
 
 **Gereksinimler**:
 
-- **Farklı ayrıcalıklar** altında çalışan veya çalışacak bir süreci (yatay veya yan hareket) belirleyin, bu süreç **bir DLL'den yoksun** olmalıdır.
-- **DLL**'nin **arama yapılacak** herhangi bir **dizinde** **yazma erişiminin** mevcut olduğundan emin olun. Bu konum, yürütülebilir dosyanın dizini veya sistem yolundaki bir dizin olabilir.
+- **Farklı ayrıcalıklar** altında çalışan veya çalışacak bir süreci (yatay veya yan hareket) tanımlayın, bu süreç **bir DLL'den yoksun** olmalıdır.
+- **DLL**'nin **arama yapılacağı** herhangi bir **dizinde** **yazma erişiminin** mevcut olduğundan emin olun. Bu konum, yürütülebilir dosyanın dizini veya sistem yolundaki bir dizin olabilir.
 
-Evet, gereksinimler bulması zor çünkü **varsayılan olarak, ayrıcalıklı bir yürütülebilir dosyanın eksik bir dll bulması garip** ve **bir sistem yolu dizininde yazma izinlerine sahip olmak daha da garip** (varsayılan olarak olamaz). Ancak, yanlış yapılandırılmış ortamlarda bu mümkündür.\
+Evet, gereksinimler bulması zor çünkü **varsayılan olarak, ayrıcalıklı bir yürütülebilir dosyanın eksik bir dll bulması garip** ve **sistem yolu dizininde yazma izinlerine sahip olmak daha da garip** (varsayılan olarak olamaz). Ancak, yanlış yapılandırılmış ortamlarda bu mümkündür.\
 Eğer şanslıysanız ve gereksinimleri karşıladığınızı bulursanız, [UACME](https://github.com/hfiref0x/UACME) projesine göz atabilirsiniz. Projenin **ana hedefi UAC'yi atlatmak** olsa da, orada kullanabileceğiniz Windows sürümü için bir Dll hijacking **PoC** bulabilirsiniz (muhtemelen sadece yazma izinlerinizin olduğu dizinin yolunu değiştirerek).
 
 Bir dizindeki **izinlerinizi kontrol edebileceğinizi** unutmayın:
@@ -93,18 +95,19 @@ dumpbin /export /path/file.dll
 ```
 Tam yetkileri artırmak için **Dll Hijacking'i nasıl kötüye kullanacağınız** hakkında tam bir rehber için **System Path klasöründe yazma izinlerinizin olup olmadığını kontrol edin**:
 
+
 {{#ref}}
 dll-hijacking/writable-sys-path-+dll-hijacking-privesc.md
 {{#endref}}
 
 ### Otomatik araçlar
 
-[**Winpeas**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS), sistem PATH içindeki herhangi bir klasörde yazma izinlerinizin olup olmadığını kontrol edecektir.\
+[**Winpeas** ](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS), sistem PATH içindeki herhangi bir klasörde yazma izinlerinizin olup olmadığını kontrol edecektir.\
 Bu açığı keşfetmek için diğer ilginç otomatik araçlar **PowerSploit fonksiyonlarıdır**: _Find-ProcessDLLHijack_, _Find-PathDLLHijack_ ve _Write-HijackDll._
 
 ### Örnek
 
-Eğer istismar edilebilir bir senaryo bulursanız, başarılı bir şekilde istismar etmek için en önemli şeylerden biri, **çalıştırılacak dosyanın içe aktaracağı tüm fonksiyonları en azından dışa aktaran bir dll oluşturmak** olacaktır. Yine de, Dll Hijacking'in, [Orta Bütünlük seviyesinden Yüksek **(UAC'yi atlayarak)**](../authentication-credentials-uac-and-efs.md#uac) veya [**Yüksek Bütünlükten SYSTEM'e**](#from-high-integrity-to-system)** geçiş yapmak için kullanışlı olduğunu unutmayın.** Geçerli bir dll oluşturma hakkında bir örneği, yürütme için dll hijacking'e odaklanan bu dll hijacking çalışmasında bulabilirsiniz: [**https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows**](https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows)**.**\
+Eğer istismar edilebilir bir senaryo bulursanız, başarılı bir şekilde istismar etmek için en önemli şeylerden biri **çalıştırılacak dosyanın içe aktaracağı tüm fonksiyonları en azından dışa aktaran bir dll oluşturmak** olacaktır. Yine de, Dll Hijacking'in [Orta Bütünlük seviyesinden Yüksek **(UAC'yi atlayarak)**](../authentication-credentials-uac-and-efs.md#uac) veya [**Yüksek Bütünlükten SYSTEM'e**](#from-high-integrity-to-system)** geçmek için kullanışlı olduğunu unutmayın.** Geçerli bir dll oluşturmanın nasıl yapılacağına dair bir örneği, yürütme için dll hijacking'e odaklanan bu dll hijacking çalışmasında bulabilirsiniz: [**https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows**](https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows)**.**\
 Ayrıca, **bir sonraki bölümde** bazı **temel dll kodları** bulabilirsiniz; bunlar **şablon** olarak veya **gerekli olmayan dışa aktarılan fonksiyonlarla bir dll oluşturmak** için faydalı olabilir.
 
 ## **Dll Oluşturma ve Derleme**
@@ -113,7 +116,7 @@ Ayrıca, **bir sonraki bölümde** bazı **temel dll kodları** bulabilirsiniz; 
 
 Temelde bir **Dll proxy**, yüklendiğinde **kötü niyetli kodunuzu çalıştırabilen** ama aynı zamanda **gerçek kütüphaneye yapılan tüm çağrıları ileterek** **beklendiği gibi** **açığa çıkaran** ve **çalışan** bir Dll'dir.
 
-[**DLLirant**](https://github.com/redteamsocietegenerale/DLLirant) veya [**Spartacus**](https://github.com/Accenture/Spartacus) aracıyla, aslında **bir çalıştırılabilir dosya belirtebilir ve proxify etmek istediğiniz kütüphaneyi seçebilir** ve **proxified dll oluşturabilirsiniz** veya **Dll'yi belirtebilir ve** **proxified dll oluşturabilirsiniz**.
+[**DLLirant**](https://github.com/redteamsocietegenerale/DLLirant) veya [**Spartacus**](https://github.com/Accenture/Spartacus) aracıyla, aslında **bir çalıştırılabilir dosya belirtebilir ve proxify etmek istediğiniz kütüphaneyi seçebilir** ve **proxified dll oluşturabilirsiniz** veya **Dll'i belirtebilir ve** **proxified dll oluşturabilirsiniz**.
 
 ### **Meterpreter**
 
@@ -131,7 +134,7 @@ msfvenom -p windows/adduser USER=privesc PASS=Attacker@123 -f dll -o msf.dll
 ```
 ### Kendi
 
-Birçok durumda, derlediğiniz Dll'nin, kurban süreci tarafından yüklenecek **birkaç fonksiyonu dışa aktarması** gerektiğini unutmayın; eğer bu fonksiyonlar yoksa, **ikili dosya bunları yükleyemeyecek** ve **sömürü başarısız olacaktır**.
+Dll'yi derlediğinizde, kurban süreci tarafından yüklenecek **birkaç fonksiyonu dışa aktarmanız** gerektiğini unutmayın; eğer bu fonksiyonlar yoksa **ikili dosya bunları yükleyemeyecek** ve **sömürü başarısız olacaktır**.
 ```c
 // Tested in Win10
 // i686-w64-mingw32-g++ dll.c -lws2_32 -o srrstr.dll -shared

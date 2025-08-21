@@ -10,9 +10,9 @@
 
 ### Docker Motoruna Güvenli Erişim
 
-Docker motoruna, yerel olarak bir Unix soketi üzerinden veya uzaktan HTTP kullanarak erişilebilir. Uzaktan erişim için, gizliliği, bütünlüğü ve kimlik doğrulamayı sağlamak amacıyla HTTPS ve **TLS** kullanmak önemlidir.
+Docker motoruna, yerel olarak bir Unix soketi üzerinden veya uzaktan HTTP kullanarak erişilebilir. Uzaktan erişim için, gizlilik, bütünlük ve kimlik doğrulamasını sağlamak amacıyla HTTPS ve **TLS** kullanmak önemlidir.
 
-Docker motoru, varsayılan olarak `unix:///var/run/docker.sock` adresindeki Unix soketinde dinler. Ubuntu sistemlerinde, Docker'ın başlangıç seçenekleri `/etc/default/docker` dosyasında tanımlanmıştır. Docker API'sine ve istemcisine uzaktan erişimi etkinleştirmek için, aşağıdaki ayarları ekleyerek Docker daemon'unu bir HTTP soketi üzerinden açın:
+Docker motoru, varsayılan olarak `unix:///var/run/docker.sock` adresindeki Unix soketinde dinler. Ubuntu sistemlerinde, Docker'ın başlangıç seçenekleri `/etc/default/docker` dosyasında tanımlanmıştır. Docker API'sine ve istemcisine uzaktan erişimi etkinleştirmek için, Docker daemon'unu bir HTTP soketi üzerinden açmak amacıyla aşağıdaki ayarları ekleyin:
 ```bash
 DOCKER_OPTS="-D -H unix:///var/run/docker.sock -H tcp://192.168.56.101:2376"
 sudo service docker restart
@@ -30,11 +30,11 @@ Konteyner görüntüleri özel veya genel depolarda saklanabilir. Docker, kontey
 
 - [**Docker Hub**](https://hub.docker.com): Docker'dan bir genel kayıt hizmeti.
 - [**Docker Registry**](https://github.com/docker/distribution): Kullanıcıların kendi kayıtlarını barındırmalarına olanak tanıyan açık kaynaklı bir proje.
-- [**Docker Trusted Registry**](https://www.docker.com/docker-trusted-registry): Rol tabanlı kullanıcı kimlik doğrulaması ve LDAP dizin hizmetleri ile entegrasyon sunan Docker'ın ticari kayıt teklifi.
+- [**Docker Trusted Registry**](https://www.docker.com/docker-trusted-registry): Rol tabanlı kullanıcı kimlik doğrulaması ve LDAP dizin hizmetleri ile entegrasyon sunan Docker'ın ticari kayıt hizmeti.
 
 ### Görüntü Tarama
 
-Konteynerler, ya temel görüntü nedeniyle ya da temel görüntünün üzerine kurulu yazılım nedeniyle **güvenlik açıklarına** sahip olabilir. Docker, konteynerlerin güvenlik taramasını yapan ve açıkları listeleyen **Nautilus** adında bir proje üzerinde çalışıyor. Nautilus, her konteyner görüntü katmanını güvenlik açıkları deposu ile karşılaştırarak güvenlik açıklarını tanımlar.
+Konteynerler, ya temel görüntü nedeniyle ya da temel görüntünün üzerine kurulu yazılım nedeniyle **güvenlik açıklarına** sahip olabilir. Docker, konteynerlerin güvenlik taramasını yapan ve açıkları listeleyen **Nautilus** adında bir proje üzerinde çalışmaktadır. Nautilus, her konteyner görüntü katmanını güvenlik açıkları deposu ile karşılaştırarak güvenlik açıklarını tanımlar.
 
 Daha fazla [**bilgi için bunu okuyun**](https://docs.docker.com/engine/scan/).
 
@@ -74,7 +74,7 @@ Docker görüntü imzalama, konteynerlerde kullanılan görüntülerin güvenli�
 
 - **Docker Content Trust**, görüntü imzalamayı yönetmek için The Update Framework (TUF) tabanlı Notary projesini kullanır. Daha fazla bilgi için [Notary](https://github.com/docker/notary) ve [TUF](https://theupdateframework.github.io) sayfalarına bakın.
 - Docker içerik güvenini etkinleştirmek için `export DOCKER_CONTENT_TRUST=1` ayarını yapın. Bu özellik, Docker sürüm 1.10 ve sonrasında varsayılan olarak kapalıdır.
-- Bu özellik etkinleştirildiğinde, yalnızca imzalı görüntüler indirilebilir. İlk görüntü itmesi, kök ve etiketleme anahtarları için şifreler ayarlamayı gerektirir; Docker ayrıca artırılmış güvenlik için Yubikey'i destekler. Daha fazla ayrıntı [burada](https://blog.docker.com/2015/11/docker-content-trust-yubikey/) bulunabilir.
+- Bu özellik etkinleştirildiğinde, yalnızca imzalı görüntüler indirilebilir. İlk görüntü itmesi, kök ve etiketleme anahtarları için şifre belirlemeyi gerektirir; Docker ayrıca artırılmış güvenlik için Yubikey'i destekler. Daha fazla ayrıntı [burada](https://blog.docker.com/2015/11/docker-content-trust-yubikey/) bulunabilir.
 - İçerik güveni etkinken imzasız bir görüntü çekmeye çalışmak "No trust data for latest" hatası ile sonuçlanır.
 - İlk görüntü itmesinden sonraki itmeler için, Docker görüntüyü imzalamak için depo anahtarının şifresini ister.
 
@@ -82,7 +82,7 @@ Docker görüntü imzalama, konteynerlerde kullanılan görüntülerin güvenli�
 ```bash
 tar -zcvf private_keys_backup.tar.gz ~/.docker/trust/private
 ```
-Docker ana bilgisayarlarını değiştirirken, işlemleri sürdürmek için kök ve depo anahtarlarını taşımak gereklidir.
+Docker anahtarlarını ve depo anahtarlarını taşımak, işlemleri sürdürmek için gereklidir.
 
 ## Konteyner Güvenlik Özellikleri
 
@@ -94,21 +94,21 @@ Docker ana bilgisayarlarını değiştirirken, işlemleri sürdürmek için kök
 
 Konteynerleştirilmiş ortamlarda, projelerin ve süreçlerinin izole edilmesi güvenlik ve kaynak yönetimi için çok önemlidir. İşte ana kavramların basitleştirilmiş bir açıklaması:
 
-**Ad Alanları (Namespaces)**
+**İsim Alanları**
 
-- **Amaç**: Süreçler, ağ ve dosya sistemleri gibi kaynakların izolasyonunu sağlamak. Özellikle Docker'da, ad alanları bir konteynerin süreçlerini ana bilgisayardan ve diğer konteynerlerden ayrı tutar.
-- **`unshare` Kullanımı**: Yeni ad alanları oluşturmak için `unshare` komutu (veya temel syscall) kullanılır, bu da ek bir izolasyon katmanı sağlar. Ancak, Kubernetes bunu doğrudan engellemese de, Docker engeller.
-- **Sınırlama**: Yeni ad alanları oluşturmak, bir sürecin ana bilgisayarın varsayılan ad alanlarına geri dönmesine izin vermez. Ana bilgisayar ad alanlarına girmek için genellikle ana bilgisayarın `/proc` dizinine erişim gereklidir ve giriş için `nsenter` kullanılır.
+- **Amaç**: Süreçler, ağ ve dosya sistemleri gibi kaynakların izolasyonunu sağlamak. Özellikle Docker'da, isim alanları bir konteynerin süreçlerini ana makineden ve diğer konteynerlerden ayrı tutar.
+- **`unshare` Kullanımı**: Yeni isim alanları oluşturmak için `unshare` komutu (veya temel syscall) kullanılır, bu da ek bir izolasyon katmanı sağlar. Ancak, Kubernetes bunu doğrudan engellemese de, Docker engeller.
+- **Sınırlama**: Yeni isim alanları oluşturmak, bir sürecin ana makinenin varsayılan isim alanlarına geri dönmesine izin vermez. Ana makine isim alanlarına girmek için genellikle ana makinenin `/proc` dizinine erişim gereklidir ve giriş için `nsenter` kullanılır.
 
 **Kontrol Grupları (CGroups)**
 
 - **Fonksiyon**: Öncelikle süreçler arasında kaynak tahsis etmek için kullanılır.
-- **Güvenlik Boyutu**: CGruplar kendileri izolasyon güvenliği sunmaz, yalnızca yanlış yapılandırıldığında yetkisiz erişim için istismar edilebilecek `release_agent` özelliği vardır.
+- **Güvenlik Boyutu**: CGroups kendileri izolasyon güvenliği sağlamaz, yalnızca yanlış yapılandırıldığında yetkisiz erişim için istismar edilebilecek `release_agent` özelliği vardır.
 
-**Yetenek Düşürme (Capability Drop)**
+**Yetenek Düşürme**
 
 - **Önemi**: Süreç izolasyonu için kritik bir güvenlik özelliğidir.
-- **Fonksiyonalite**: Belirli yetenekleri düşürerek kök sürecin gerçekleştirebileceği eylemleri kısıtlar. Bir süreç kök ayrıcalıklarıyla çalışsa bile, gerekli yeteneklere sahip olmaması, ayrıcalıklı eylemleri gerçekleştirmesini engeller, çünkü sistem çağrıları yetersiz izinler nedeniyle başarısız olur.
+- **Fonksiyonalite**: Belirli yetenekleri düşürerek bir root sürecinin gerçekleştirebileceği eylemleri kısıtlar. Bir süreç root ayrıcalıklarıyla çalışsa bile, gerekli yeteneklere sahip olmaması, ayrıcalıklı eylemleri gerçekleştirmesini engeller, çünkü syscalls yetersiz izinler nedeniyle başarısız olur.
 
 Bunlar, süreç diğerlerini düşürdükten sonra **kalan yeteneklerdir**:
 ```
@@ -121,7 +121,7 @@ Docker'da varsayılan olarak etkinleştirilmiştir. Bu, **süreçlerin çağıra
 
 **AppArmor**
 
-Docker, etkinleştirebileceğiniz bir şablona sahiptir: [https://github.com/moby/moby/tree/master/profiles/apparmor](https://github.com/moby/moby/tree/master/profiles/apparmor)
+Docker'ı etkinleştirebileceğiniz bir şablon vardır: [https://github.com/moby/moby/tree/master/profiles/apparmor](https://github.com/moby/moby/tree/master/profiles/apparmor)
 
 Bu, yetenekleri, syscalls'ı, dosyalara ve klasörlere erişimi azaltmanıza olanak tanır...
 
@@ -129,9 +129,9 @@ Bu, yetenekleri, syscalls'ı, dosyalara ve klasörlere erişimi azaltmanıza ola
 
 ### Namespaces
 
-**Namespaces**, **çekirdek kaynaklarını** **bölümlere ayıran** Linux çekirdek özelliğidir; böylece bir **işlem** kümesi bir **kaynak** kümesini **görürken**, **diğer** bir **işlem** kümesi **farklı** bir kaynak kümesini görür. Bu özellik, bir kaynak ve işlem kümesi için aynı namespace'e sahip olarak çalışır, ancak bu namespace'ler farklı kaynaklara atıfta bulunur. Kaynaklar birden fazla alanda var olabilir.
+**Namespaces**, Linux çekirdeğinin bir özelliğidir ve **çekirdek kaynaklarını** **bölümlere ayırır**; böylece bir **işlem** kümesi bir **kaynak** kümesini **görürken**, **diğer** bir **işlem** kümesi **farklı** bir kaynak kümesini görür. Bu özellik, bir kaynak ve işlem kümesi için aynı namespace'e sahip olarak çalışır, ancak bu namespace'ler farklı kaynaklara atıfta bulunur. Kaynaklar birden fazla alanda var olabilir.
 
-Docker, konteyner izolasyonu sağlamak için aşağıdaki Linux çekirdek Namespaces'ını kullanır:
+Docker, konteyner izolasyonu sağlamak için aşağıdaki Linux çekirdek Namespaces'lerini kullanır:
 
 - pid namespace
 - mount namespace
@@ -177,7 +177,7 @@ Bir docker konteyneri çalıştırıldığında, **işlem, izolasyondan kaçmak 
 
 ### Docker'da Seccomp
 
-Bu, Docker'ın konteyner içinde kullanılabilecek **sistem çağrılarını sınırlamasına** olanak tanıyan bir güvenlik özelliğidir:
+Bu, Docker'ın konteyner içinde kullanılabilecek **syscall'ları sınırlamasına** olanak tanıyan bir güvenlik özelliğidir:
 
 {{#ref}}
 seccomp.md
@@ -185,7 +185,7 @@ seccomp.md
 
 ### Docker'da AppArmor
 
-**AppArmor**, **konteynerleri** **sınırlı** bir **kaynak** setine **per-program profilleri** ile hapsetmek için bir çekirdek geliştirmesidir:
+**AppArmor**, **konteynerleri** **sınırlı** bir **kaynak** setine **program başına profillerle** hapsetmek için bir çekirdek geliştirmesidir:
 
 {{#ref}}
 apparmor.md
@@ -207,10 +207,10 @@ Bu mekanizma, bir konteyner içindeki bir işlem tehlikeye girse bile, yalnızca
 
 ### AuthZ & AuthN
 
-Docker'da, bir yetkilendirme eklentisi, Docker daemon'a yapılan istekleri kabul etme veya engelleme kararında kritik bir rol oynar. Bu karar, iki ana bağlamı inceleyerek verilir:
+Docker'da, bir yetkilendirme eklentisi, Docker daemon'una yapılan istekleri kabul etme veya engelleme kararında kritik bir rol oynar. Bu karar, iki ana bağlamı inceleyerek verilir:
 
 - **Kimlik Doğrulama Bağlamı**: Bu, kullanıcının kim olduğu ve kendini nasıl kimlik doğruladığı gibi kapsamlı bilgileri içerir.
-- **Komut Bağlamı**: Bu, yapılan istekle ilgili tüm ilgili verileri içerir.
+- **Komut Bağlamı**: Bu, yapılan istekle ilgili tüm ilgili verileri kapsar.
 
 Bu bağlamlar, yalnızca kimlik doğrulaması yapılmış kullanıcıların meşru isteklerinin işlenmesini sağlamaya yardımcı olur ve Docker işlemlerinin güvenliğini artırır.
 
@@ -285,10 +285,10 @@ Gizli bilgileri doğrudan Docker imajlarına gömmekten veya ortam değişkenler
 BuildKit'i kullanmak için üç şekilde etkinleştirilebilir:
 
 1. Bir ortam değişkeni aracılığıyla: `export DOCKER_BUILDKIT=1`
-2. Komutları önekleyerek: `DOCKER_BUILDKIT=1 docker build .`
+2. Komutları ön ekleyerek: `DOCKER_BUILDKIT=1 docker build .`
 3. Docker yapılandırmasında varsayılan olarak etkinleştirerek: `{ "features": { "buildkit": true } }`, ardından Docker'ı yeniden başlatarak.
 
-BuildKit, `--secret` seçeneği ile yapı zamanı gizli bilgilerin kullanılmasına olanak tanır ve bu gizli bilgilerin imaj oluşturma önbelleğine veya nihai imaja dahil edilmemesini sağlar, şu komutla:
+BuildKit, `--secret` seçeneği ile yapı zamanı gizli bilgilerin kullanılmasına olanak tanır ve bu gizli bilgilerin imaj oluşturma önbelleğine veya nihai imaja dahil edilmediğinden emin olur, şu komutla:
 ```bash
 docker build --secret my_key=my_value ,src=path/to/my_secret_file .
 ```
@@ -311,7 +311,7 @@ Kubernetes ortamlarında, gizli bilgiler yerel olarak desteklenir ve [Helm-Secre
 
 ### gVisor
 
-**gVisor**, Go dilinde yazılmış bir uygulama çekirdeğidir ve Linux sistem yüzeyinin önemli bir kısmını uygular. Uygulama ile ana makine çekirdeği arasında **izolasyon sınırı** sağlayan `runsc` adlı bir [Open Container Initiative (OCI)](https://www.opencontainers.org) çalışma zamanı içerir. `runsc` çalışma zamanı, Docker ve Kubernetes ile entegre olur ve kumanda edilmiş konteynerleri çalıştırmayı basit hale getirir.
+**gVisor**, Go dilinde yazılmış bir uygulama çekirdeğidir ve Linux sistem yüzeyinin önemli bir kısmını uygular. Uygulama ile ana makine çekirdeği arasında **izolasyon sınırı** sağlayan `runsc` adlı bir [Open Container Initiative (OCI)](https://www.opencontainers.org) çalışma zamanı içerir. `runsc` çalışma zamanı, Docker ve Kubernetes ile entegre olup, kumanda edilmiş konteynerleri çalıştırmayı basit hale getirir.
 
 {{#ref}}
 https://github.com/google/gvisor
@@ -319,7 +319,7 @@ https://github.com/google/gvisor
 
 ### Kata Containers
 
-**Kata Containers**, hafif sanal makinelerle güvenli bir konteyner çalışma zamanı oluşturmak için çalışan açık kaynak topluluğudur. Bu sanal makineler, konteynerler gibi hissettiren ve performans gösteren, ancak **donanım sanallaştırma** teknolojisini ikinci bir savunma katmanı olarak kullanarak **daha güçlü iş yükü izolasyonu** sağlayan bir yapıdır.
+**Kata Containers**, hafif sanal makinelerle güvenli bir konteyner çalışma zamanı oluşturmak için çalışan açık kaynaklı bir topluluktur. Bu sanal makineler, konteynerler gibi hissettiren ve performans gösteren, ancak **donanım sanallaştırması** teknolojisini ikinci bir savunma katmanı olarak kullanarak **daha güçlü iş yükü izolasyonu** sağlayan bir yapıdır.
 
 {{#ref}}
 https://katacontainers.io/
@@ -333,11 +333,11 @@ https://katacontainers.io/
 - [**“no-new-privileges” güvenlik seçeneğini kullanın**](https://raesene.github.io/blog/2019/06/01/docker-capabilities-and-no-new-privs/) **işlemlerin daha fazla yetki kazanmasını önlemek için, örneğin suid ikili dosyaları aracılığıyla.**
 - [**Konteynere sunulan kaynakları sınırlayın**](https://docs.docker.com/engine/reference/run/#runtime-constraints-on-resources)**.** Kaynak sınırları, makineyi hizmet reddi saldırılarından koruyabilir.
 - **Kısıtlamaları en aza indirmek için** [**seccomp**](https://docs.docker.com/engine/security/seccomp/)**,** [**AppArmor**](https://docs.docker.com/engine/security/apparmor/) **(veya SELinux)** profillerini ayarlayın.
-- **[**Resmi docker görüntülerini kullanın**](https://docs.docker.com/docker-hub/official_images/) **ve imzaları gerektirin** veya bunlara dayanarak kendi görüntülerinizi oluşturun. [**Arka kapılı**](https://arstechnica.com/information-technology/2018/06/backdoored-images-downloaded-5-million-times-finally-removed-from-docker-hub/) görüntüleri miras almayın veya kullanmayın. Ayrıca, root anahtarlarını ve şifreleri güvenli bir yerde saklayın. Docker, anahtarları UCP ile yönetmeyi planlıyor.
+- **Resmi docker görüntülerini kullanın** [**ve imzaları gerektirin**](https://docs.docker.com/docker-hub/official_images/) **veya bunlara dayanarak kendi görüntülerinizi oluşturun.** [Backdoored](https://arstechnica.com/information-technology/2018/06/backdoored-images-downloaded-5-million-times-finally-removed-from-docker-hub/) görüntüleri miras almayın veya kullanmayın. Ayrıca, root anahtarlarını ve şifrelerini güvenli bir yerde saklayın. Docker, anahtarları UCP ile yönetmeyi planlıyor.
 - **Düzenli olarak** **görüntülerinizi yeniden oluşturun** **güvenlik yamalarını ana makineye ve görüntülere uygulamak için.**
 - **Gizli bilgilerinizi akıllıca yönetin** böylece saldırganların bunlara erişmesi zor olur.
 - Eğer **docker daemon'u açığa çıkarıyorsanız HTTPS kullanın** istemci ve sunucu kimlik doğrulaması ile.
-- Dockerfile'ınızda, **ADD yerine COPY'yi tercih edin**. ADD, otomatik olarak sıkıştırılmış dosyaları çıkarır ve URL'lerden dosya kopyalayabilir. COPY bu yeteneklere sahip değildir. Mümkün olduğunca, uzaktan URL'ler ve Zip dosyaları aracılığıyla saldırılara maruz kalmamak için ADD kullanmaktan kaçının.
+- Dockerfile'ınızda, **ADD yerine COPY'yi tercih edin**. ADD, otomatik olarak sıkıştırılmış dosyaları çıkarır ve URL'lerden dosya kopyalayabilir. COPY bu yeteneklere sahip değildir. Mümkün olduğunda, uzaktan URL'ler ve Zip dosyaları aracılığıyla saldırılara maruz kalmamak için ADD kullanmaktan kaçının.
 - Her mikro hizmet için **ayrı konteynerler** oluşturun.
 - **Konteyner içinde ssh bulundurmayın**, “docker exec” kullanılarak konteynere ssh yapılabilir.
 - **Daha küçük** konteyner **görüntüleri** oluşturun.
@@ -350,9 +350,9 @@ Eğer **bir docker konteynerinin içindeyseniz** veya **docker grubunda** bir ku
 docker-breakout-privilege-escalation/
 {{#endref}}
 
-## Docker Kimlik Doğrulama Eklentisi Bypass
+## Docker Kimlik Doğrulama Eklentisi Atlatma
 
-Eğer docker soketine erişiminiz varsa veya **docker grubunda** bir kullanıcıya erişiminiz varsa ancak eylemleriniz bir docker kimlik doğrulama eklentisi tarafından kısıtlanıyorsa, **bypass edip edemeyeceğinizi kontrol edin:**
+Eğer docker soketine erişiminiz varsa veya **docker grubunda** bir kullanıcıya erişiminiz varsa ancak eylemleriniz bir docker kimlik doğrulama eklentisi tarafından kısıtlanıyorsa, **bunu atlatıp atlatamayacağınızı kontrol edin:**
 
 {{#ref}}
 authz-and-authn-docker-access-authorization-plugin.md

@@ -12,7 +12,7 @@ iButton nedir hakkında daha fazla bilgi için kontrol edin:
 
 ## Design
 
-Aşağıdaki resmin **mavi** kısmı, Flipper'ın **okuyabilmesi için gerçek iButton'ı** nasıl **yerleştirmeniz gerektiğini** gösterir. **Yeşil** kısım ise Flipper zero ile okuyucuya **doğru bir şekilde iButton'ı taklit etmek için** nasıl **dokunmanız gerektiğini** gösterir.
+Aşağıdaki resmin **mavi** kısmı, Flipper'ın **okuyabilmesi için gerçek iButton'ı** nasıl **yerleştirmeniz gerektiğini** gösterir. **Yeşil** kısım ise Flipper Zero ile okuyucuya **doğru bir şekilde iButton'ı taklit etmek için** nasıl **dokunmanız gerektiğini** gösterir.
 
 <figure><img src="../../../images/image (565).png" alt=""><figcaption></figcaption></figure>
 
@@ -20,7 +20,7 @@ Aşağıdaki resmin **mavi** kısmı, Flipper'ın **okuyabilmesi için gerçek i
 
 ### Read
 
-Okuma Modu'nda Flipper, iButton anahtarının dokunmasını bekler ve üç tür anahtarı sindirebilir: **Dallas, Cyfral ve Metakom**. Flipper, anahtarın türünü **kendisi belirleyecektir**. Anahtar protokolünün adı, ID numarasının üzerinde ekranda görüntülenecektir.
+Okuma Modunda Flipper, iButton anahtarının dokunmasını bekler ve üç tür anahtarı sindirebilir: **Dallas, Cyfral ve Metakom**. Flipper, anahtarın türünü **kendisi belirleyecektir**. Anahtar protokolünün adı, ID numarasının üzerinde ekranda görüntülenecektir.
 
 ### Add manually
 

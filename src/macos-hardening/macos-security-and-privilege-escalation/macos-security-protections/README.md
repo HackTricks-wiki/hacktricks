@@ -4,7 +4,7 @@
 
 ## Gatekeeper
 
-Gatekeeper genellikle **Quarantine + Gatekeeper + XProtect** kombinasyonunu ifade etmek için kullanılır; bu, potansiyel olarak kötü niyetli yazılımların çalıştırılmasını **önlemeye** çalışan 3 macOS güvenlik modülüdür.
+Gatekeeper genellikle **Quarantine + Gatekeeper + XProtect** kombinasyonunu ifade etmek için kullanılır; bu, kullanıcıların **potansiyel olarak zararlı yazılımları çalıştırmalarını engellemeye** çalışan 3 macOS güvenlik modülüdür.
 
 Daha fazla bilgi için:
 
@@ -26,7 +26,7 @@ macos-sip.md
 
 ### Sandbox
 
-MacOS Sandbox, sandbox içinde çalışan uygulamaları, uygulamanın çalıştığı Sandbox profilinde belirtilen **izin verilen eylemlerle** **sınırlamaktadır**. Bu, **uygulamanın yalnızca beklenen kaynaklara erişmesini** sağlamaya yardımcı olur.
+MacOS Sandbox, uygulamaların sandbox içinde yalnızca **uygulamanın çalıştığı Sandbox profilinde belirtilen izin verilen eylemlerle** sınırlı olmasını sağlar. Bu, **uygulamanın yalnızca beklenen kaynaklara erişmesini** sağlamaya yardımcı olur.
 
 
 {{#ref}}
@@ -35,16 +35,16 @@ macos-sandbox/
 
 ### TCC - **Şeffaflık, Onay ve Kontrol**
 
-**TCC (Şeffaflık, Onay ve Kontrol)** bir güvenlik çerçevesidir. Uygulamaların **izinlerini yönetmek** için tasarlanmıştır; özellikle hassas özelliklere erişimlerini düzenleyerek. Bu, **konum hizmetleri, kişiler, fotoğraflar, mikrofon, kamera, erişilebilirlik ve tam disk erişimi** gibi unsurları içerir. TCC, uygulamaların bu özelliklere yalnızca açık kullanıcı onayı aldıktan sonra erişebileceğini garanti ederek, kişisel veriler üzerindeki gizlilik ve kontrolü artırır.
+**TCC (Şeffaflık, Onay ve Kontrol)** bir güvenlik çerçevesidir. Uygulamaların **izinlerini yönetmek** için tasarlanmıştır, özellikle de hassas özelliklere erişimlerini düzenleyerek. Bu, **konum hizmetleri, kişiler, fotoğraflar, mikrofon, kamera, erişilebilirlik ve tam disk erişimi** gibi unsurları içerir. TCC, uygulamaların bu özelliklere yalnızca açık kullanıcı onayı aldıktan sonra erişebileceğini garanti ederek, kişisel veriler üzerindeki gizlilik ve kontrolü artırır.
 
 
 {{#ref}}
 macos-tcc/
 {{#endref}}
 
-### Başlatma/Ortam Kısıtlamaları & Güven Cache'i
+### Başlatma/Ortam Kısıtlamaları ve Güven Kataloğu
 
-macOS'taki başlatma kısıtlamaları, bir sürecin **başlatılmasını düzenlemek** için bir güvenlik özelliğidir; **kimin** bir süreci başlatabileceğini, **nasıl** ve **nereden** tanımlayarak. macOS Ventura ile tanıtılan bu özellikler, sistem ikili dosyalarını bir **güven cache'i** içinde kısıtlama kategorilerine ayırır. Her yürütülebilir ikili dosya, **başlatma** için belirli **kurallara** sahiptir; bunlar arasında **kendisi**, **ebeveyn** ve **sorumlu** kısıtlamaları bulunur. macOS Sonoma'da üçüncü taraf uygulamalara **Ortam** Kısıtlamaları olarak genişletilen bu özellikler, süreç başlatma koşullarını yöneterek potansiyel sistem istismarlarını azaltmaya yardımcı olur.
+macOS'taki başlatma kısıtlamaları, bir sürecin **başlatılmasını düzenlemek** için bir güvenlik özelliğidir; **kimin** bir süreci başlatabileceğini, **nasıl** ve **nereden** tanımlar. macOS Ventura ile tanıtılan bu özellikler, sistem ikili dosyalarını bir **güven kataloğu** içinde kısıtlama kategorilerine ayırır. Her yürütülebilir ikili dosya, **başlatma** için belirli **kurallara** sahiptir; bunlar arasında **kendisi**, **ebeveyn** ve **sorumlu** kısıtlamaları bulunur. Üçüncü taraf uygulamalara **Ortam** Kısıtlamaları olarak genişletilen bu özellikler, süreç başlatma koşullarını yöneterek potansiyel sistem istismarlarını azaltmaya yardımcı olur.
 
 
 {{#ref}}
@@ -60,21 +60,21 @@ Bir Mac'te kötü amaçlı yazılım tespit edildiğinde (ya XProtect ya da baş
 Hem XProtect hem de MRT, macOS'un güvenlik önlemlerinin bir parçası olmasına rağmen, farklı işlevler yerine getirir:
 
 - **XProtect**, önleyici bir araçtır. Dosyaları **indirilirken kontrol eder** (belirli uygulamalar aracılığıyla) ve bilinen kötü amaçlı yazılım türlerini tespit ederse, dosyanın açılmasını **engeller**, böylece kötü amaçlı yazılımın sisteminizi enfekte etmesini önler.
-- **MRT** ise, **reaktif bir araçtır**. Kötü amaçlı yazılım bir sistemde tespit edildikten sonra çalışır ve amacı, sistemin temizlenmesi için sorunlu yazılımı kaldırmaktır.
+- **MRT** ise, **reaktif bir araçtır**. Kötü amaçlı yazılım bir sistemde tespit edildikten sonra çalışır ve amacı, sistemin temizlenmesi için zararlı yazılımı kaldırmaktır.
 
 MRT uygulaması **`/Library/Apple/System/Library/CoreServices/MRT.app`** konumundadır.
 
 ## Arka Plan Görevleri Yönetimi
 
-**macOS**, artık bir aracın bilinen bir **teknik kullanarak kod yürütmesini sürdürdüğünde** (örneğin Giriş Öğeleri, Daemon'lar...) her seferinde **uyarıda bulunur**, böylece kullanıcı **hangi yazılımın sürdüğünü** daha iyi bilir.
+**macOS**, artık bir aracın bilinen bir **teknik kullanarak kod yürütmesini sürdürdüğünde** (örneğin Giriş Öğeleri, Daemon'lar...) her seferinde **kullanıcıyı uyarır**, böylece kullanıcı **hangi yazılımın sürdüğünü** daha iyi bilir.
 
 <figure><img src="../../../images/image (1183).png" alt=""><figcaption></figcaption></figure>
 
 Bu, `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/backgroundtaskmanagementd` konumundaki bir **daemon** ile çalışır ve **ajan** `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Support/BackgroundTaskManagementAgent.app` konumundadır.
 
-**`backgroundtaskmanagementd`**'nin bir şeyin kalıcı bir klasörde yüklü olduğunu bilme şekli, **FSEvents** alarak ve bunlar için bazı **işleyiciler** oluşturarak gerçekleşir.
+**`backgroundtaskmanagementd`**'nin bir şeyin kalıcı bir klasöre yüklü olduğunu bilme şekli, **FSEvents** alarak ve bunlar için bazı **işleyiciler** oluşturarak gerçekleşir.
 
-Ayrıca, apple tarafından sıkça sürdürülen **bilinen uygulamaları** içeren bir plist dosyası vardır; bu dosya `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/attributions.plist` konumundadır.
+Ayrıca, Apple tarafından bakım yapılan ve sıkça kalıcı olan **bilinen uygulamaları** içeren bir plist dosyası vardır; bu dosya `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/attributions.plist` konumundadır.
 ```json
 [...]
 "us.zoom.ZoomDaemon" => {
@@ -116,7 +116,7 @@ Yeni bir kalıcılık bulunduğunda **`ES_EVENT_TYPE_NOTIFY_BTM_LAUNCH_ITEM_ADD`
 # Reset the database
 sfltool resettbtm
 ```
-- **Ajanı Durdur**: Ajanı durdurmak için bir durdurma sinyali göndermek mümkündür, böylece **yeni tespitler bulunduğunda kullanıcıyı uyarmayacaktır**.
+- **Ajansı Durdur**: Ajansa bir durdurma sinyali göndermek mümkündür, böylece **yeni tespitler bulunduğunda kullanıcıyı uyarmayacaktır**.
 ```bash
 # Get PID
 pgrep BackgroundTaskManagementAgent

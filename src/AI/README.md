@@ -40,9 +40,9 @@ Bu anda, AI sistemlerinin risklerini değerlendirmek için ana 2 çerçeve OWASP
 AI-Risk-Frameworks.md
 {{#endref}}
 
-### AI İstemleri Güvenliği
+### AI Promt Güvenliği
 
-LLM'ler son yıllarda AI kullanımını patlattı, ancak mükemmel değillerdir ve düşmanca istemlerle kandırılabilirler. Bu, AI'yı güvenli bir şekilde kullanmayı ve ona nasıl saldırılacağını anlamak için çok önemli bir konudur:
+LLM'ler son yıllarda AI kullanımını patlattı, ancak mükemmel değiller ve düşmanca promtlar tarafından kandırılabilirler. Bu, AI'yı güvenli bir şekilde kullanmayı ve ona nasıl saldırılacağını anlamak için çok önemli bir konudur:
 
 {{#ref}}
 AI-Prompts.md
@@ -58,7 +58,7 @@ AI-Models-RCE.md
 
 ### AI Modeli Bağlam Protokolü
 
-MCP (Model Bağlam Protokolü), AI ajanı istemcilerinin harici araçlar ve veri kaynaklarıyla tak-çalıştır tarzında bağlantı kurmasını sağlayan bir protokoldür. Bu, AI modelleri ile harici sistemler arasında karmaşık iş akışları ve etkileşimler sağlar:
+MCP (Model Bağlam Protokolü), AI ajanı istemcilerinin harici araçlar ve veri kaynaklarıyla tak-çalıştır tarzında bağlantı kurmasına olanak tanıyan bir protokoldür. Bu, AI modelleri ile harici sistemler arasında karmaşık iş akışları ve etkileşimler sağlar:
 
 {{#ref}}
 AI-MCP-Servers.md

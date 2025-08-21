@@ -34,7 +34,7 @@ macos-applefs.md
 mac-os-architecture/
 {{#endref}}
 
-- Yaygın macOS **ağ hizmetleri & protokolleri**
+- Yaygın macOS n**etwork hizmetleri & protokolleri**
 
 
 {{#ref}}
@@ -42,11 +42,11 @@ macos-protocols.md
 {{#endref}}
 
 - **Açık kaynak** macOS: [https://opensource.apple.com/](https://opensource.apple.com/)
-- Bir `tar.gz` indirmek için, bir URL'yi [https://opensource.apple.com/**source**/dyld/](https://opensource.apple.com/source/dyld/) gibi [https://opensource.apple.com/**tarballs**/dyld/**dyld-852.2.tar.gz**](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz) şeklinde değiştirin.
+- Bir `tar.gz` indirmek için bir URL'yi [https://opensource.apple.com/**source**/dyld/](https://opensource.apple.com/source/dyld/) adresinden [https://opensource.apple.com/**tarballs**/dyld/**dyld-852.2.tar.gz**](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz) adresine değiştirin.
 
 ### MacOS MDM
 
-Şirketlerde **macOS** sistemlerinin büyük olasılıkla **bir MDM ile yönetileceği** düşünülmektedir. Bu nedenle, bir saldırgan açısından **nasıl çalıştığını** bilmek ilginçtir:
+Şirketlerde **macOS** sistemleri büyük olasılıkla **bir MDM ile yönetilecektir**. Bu nedenle, bir saldırgan açısından **nasıl çalıştığını** bilmek ilginçtir:
 
 
 {{#ref}}
@@ -71,17 +71,17 @@ macos-security-protections/
 
 ### Dosya İzinleri
 
-Eğer bir **root olarak çalışan süreç** bir dosya yazıyorsa ve bu dosya bir kullanıcı tarafından kontrol edilebiliyorsa, kullanıcı bunu **yetkileri yükseltmek için** kötüye kullanabilir.\
+Eğer bir **root olarak çalışan bir işlem** bir dosya yazıyorsa ve bu dosya bir kullanıcı tarafından kontrol edilebiliyorsa, kullanıcı bunu **yetkileri yükseltmek için** kötüye kullanabilir.\
 Bu aşağıdaki durumlarda gerçekleşebilir:
 
 - Kullanılan dosya zaten bir kullanıcı tarafından oluşturulmuş (kullanıcıya ait)
-- Kullanılan dosya, bir grup nedeniyle kullanıcı tarafından yazılabilir
-- Kullanılan dosya, kullanıcıya ait bir dizin içinde (kullanıcı dosyayı oluşturabilir)
-- Kullanılan dosya, root'a ait bir dizin içinde ancak kullanıcı bir grup nedeniyle üzerinde yazma erişimine sahip (kullanıcı dosyayı oluşturabilir)
+- Kullanılan dosya bir grup nedeniyle kullanıcı tarafından yazılabilir
+- Kullanılan dosya, kullanıcının oluşturabileceği bir dizin içinde
+- Kullanılan dosya root'a ait bir dizin içinde ancak kullanıcı bir grup nedeniyle üzerinde yazma erişimine sahip (kullanıcı dosyayı oluşturabilir)
 
-**root** tarafından **kullanılacak bir dosya** oluşturabilmek, bir kullanıcının **içeriğinden faydalanmasına** veya hatta başka bir yere işaret etmek için **sembolik/sert bağlantılar** oluşturmasına olanak tanır.
+**root** tarafından **kullanılacak bir dosya** oluşturabilmek, bir kullanıcının **içeriğinden faydalanmasına** veya hatta başka bir yere işaret eden **sembolik/sert bağlantılar** oluşturmasına olanak tanır.
 
-Bu tür güvenlik açıkları için **kırılgan `.pkg` yükleyicilerini kontrol etmeyi** unutmayın:
+Bu tür zafiyetler için **savunmasız `.pkg` yükleyicilerini kontrol etmeyi** unutmayın:
 
 
 {{#ref}}
@@ -103,9 +103,9 @@ macOS'ta **uygulamalar ve ikili dosyalar**, diğerlerinden daha ayrıcalıklı o
 
 Bu nedenle, bir macOS makinesini başarılı bir şekilde ele geçirmek isteyen bir saldırgan, **TCC ayrıcalıklarını yükseltmek** (veya ihtiyaçlarına bağlı olarak **SIP'yi atlamak**) zorundadır.
 
-Bu ayrıcalıklar genellikle uygulamanın imzalandığı **haklar** şeklinde verilir veya uygulama bazı erişimler talep edebilir ve **kullanıcı onayladıktan** sonra **TCC veritabanlarında** bulunabilir. Bir sürecin bu ayrıcalıkları elde etmenin bir diğer yolu, bu **ayrıcalıklara** sahip bir sürecin **çocuğu** olmaktır, çünkü genellikle **miras alınırlar**.
+Bu ayrıcalıklar genellikle uygulamanın imzalandığı **haklar** şeklinde verilir veya uygulama bazı erişimler talep edebilir ve **kullanıcı onayladıktan** sonra **TCC veritabanlarında** bulunabilir. Bir işlemin bu ayrıcalıkları elde etmenin bir diğer yolu, bu **ayrıcalıklara** sahip bir işlemin **çocuğu** olmaktır, çünkü genellikle **miras alınırlar**.
 
-Farklı yolları bulmak için bu bağlantılara göz atın [**TCC'de yetki yükseltme**](macos-security-protections/macos-tcc/index.html#tcc-privesc-and-bypasses), [**TCC'yi atlamak**](macos-security-protections/macos-tcc/macos-tcc-bypasses/index.html) ve geçmişte [**SIP'nin nasıl atlandığı**](macos-security-protections/macos-sip.md#sip-bypasses).
+Farklı yolları bulmak için bu bağlantılara göz atın [**TCC'de yetki yükseltme**](macos-security-protections/macos-tcc/index.html#tcc-privesc-and-bypasses), [**TCC'yi atlama**](macos-security-protections/macos-tcc/macos-tcc-bypasses/index.html) ve geçmişte [**SIP'nin nasıl atlandığı**](macos-security-protections/macos-sip.md#sip-bypasses).
 
 ## macOS Geleneksel Yetki Yükseltme
 

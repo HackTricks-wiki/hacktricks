@@ -60,7 +60,7 @@ mount -o ro,loop,offset=32256,noatime /path/to/image.dd /media/part/
 ```
 **LBA (Mantıksal blok adresleme)**
 
-**Mantıksal blok adresleme** (**LBA**), bilgisayar depolama cihazlarında, genellikle sabit disk sürücüleri gibi ikincil depolama sistemlerinde depolanan veri bloklarının **konumunu belirtmek için** kullanılan yaygın bir şemadır. LBA, özellikle basit bir lineer adresleme şemasına sahiptir; **bloklar bir tam sayı indeksi ile konumlandırılır**, ilk blok LBA 0, ikinci LBA 1 şeklindedir.
+**Mantıksal blok adresleme** (**LBA**), bilgisayar depolama cihazlarında, genellikle sabit disk sürücüleri gibi ikincil depolama sistemlerinde depolanan veri bloklarının **konumunu belirtmek için** kullanılan yaygın bir şemadır. LBA, özellikle basit bir doğrusal adresleme şemasına sahiptir; **bloklar bir tam sayı indeksi ile konumlandırılır**, ilk blok LBA 0, ikinci LBA 1 şeklinde devam eder.
 
 ### GPT (GUID Bölüm Tablosu)
 
@@ -98,17 +98,17 @@ Bölüm tablosu başlığı, diskteki kullanılabilir blokları tanımlar. Ayrı
 | 0 (0x00)  | 8 bayt   | İmza ("EFI PART", 45h 46h 49h 20h 50h 41h 52h 54h veya 0x5452415020494645ULL[ ](https://en.wikipedia.org/wiki/GUID_Partition_Table#_note-8)küçük sonlu makinelerde) |
 | 8 (0x08)  | 4 bayt   | UEFI 2.8 için Revizyon 1.0 (00h 00h 01h 00h)                                                                                                                                  |
 | 12 (0x0C) | 4 bayt   | Küçük sonlu (bayt cinsinden, genellikle 5Ch 00h 00h 00h veya 92 bayt) başlık boyutu                                                                                                 |
-| 16 (0x10) | 4 bayt   | [CRC32](https://en.wikipedia.org/wiki/CRC32) başlığın CRC'si (ofset +0'dan başlık boyutuna kadar) küçük sonlu, bu alan hesaplama sırasında sıfırlanır                             |
+| 16 (0x10) | 4 bayt   | [CRC32](https://en.wikipedia.org/wiki/CRC32) başlığın (ofset +0'dan başlık boyutuna kadar) küçük sonlu, bu alan hesaplama sırasında sıfırlanır                             |
 | 20 (0x14) | 4 bayt   | Ayrılmış; sıfır olmalıdır                                                                                                                                                       |
-| 24 (0x18) | 8 bayt   | Mevcut LBA (bu başlık kopyasının konumu)                                                                                                                                   |
+| 24 (0x18) | 8 bayt   | Geçerli LBA (bu başlık kopyasının konumu)                                                                                                                                   |
 | 32 (0x20) | 8 bayt   | Yedek LBA (diğer başlık kopyasının konumu)                                                                                                                               |
 | 40 (0x28) | 8 bayt   | Bölümler için ilk kullanılabilir LBA (birincil bölüm tablosunun son LBA'sı + 1)                                                                                                       |
 | 48 (0x30) | 8 bayt   | Son kullanılabilir LBA (ikincil bölüm tablosunun ilk LBA'sı − 1)                                                                                                                    |
-| 56 (0x38) | 16 bayt  | Disk GUID'i karışık sonlu                                                                                                                                                    |
-| 72 (0x48) | 8 bayt   | Bir dizi bölüm girişinin başlangıç LBA'sı (her zaman birincil kopyada 2)                                                                                                     |
-| 80 (0x50) | 4 bayt   | Dizi içindeki bölüm girişlerinin sayısı                                                                                                                                         |
+| 56 (0x38) | 16 bayt  | Disk GUID karışık sonlu                                                                                                                                                    |
+| 72 (0x48) | 8 bayt   | Bölüm girişlerinin bir dizisinin başlangıç LBA'sı (her zaman birincil kopyada 2)                                                                                                     |
+| 80 (0x50) | 4 bayt   | Dizideki bölüm girişlerinin sayısı                                                                                                                                         |
 | 84 (0x54) | 4 bayt   | Tek bir bölüm girişinin boyutu (genellikle 80h veya 128)                                                                                                                        |
-| 88 (0x58) | 4 bayt   | Küçük sonlu bölüm girişleri dizisinin CRC32'si                                                                                                                            |
+| 88 (0x58) | 4 bayt   | Bölüm girişleri dizisinin küçük sonlu CRC32'si                                                                                                                            |
 | 92 (0x5C) | \*       | Ayrılmış; blokun geri kalanında sıfır olmalıdır (512 baytlık bir sektör boyutu için 420 bayt; ancak daha büyük sektör boyutları ile daha fazla olabilir)                                      |
 
 **Bölüm girişleri (LBA 2–33)**
@@ -117,10 +117,10 @@ Bölüm tablosu başlığı, diskteki kullanılabilir blokları tanımlar. Ayrı
 | ------------------------- | -------- | ------------------------------------------------------------------------------------------------------------- |
 | Ofset                     | Uzunluk  | İçerik                                                                                                      |
 | 0 (0x00)                  | 16 bayt  | [Bölüm türü GUID](https://en.wikipedia.org/wiki/GUID_Partition_Table#Partition_type_GUIDs) (karışık sonlu) |
-| 16 (0x10)                 | 16 bayt  | Benzersiz bölüm GUID'i (karışık sonlu)                                                                          |
+| 16 (0x10)                 | 16 bayt  | Benzersiz bölüm GUID (karışık sonlu)                                                                          |
 | 32 (0x20)                 | 8 bayt   | İlk LBA ([küçük sonlu](https://en.wikipedia.org/wiki/Little_endian))                                      |
 | 40 (0x28)                 | 8 bayt   | Son LBA (dahil, genellikle tek)                                                                             |
-| 48 (0x30)                 | 8 bayt   | Nitelik bayrakları (örneğin, 60. bit yalnızca okunur anlamına gelir)                                                               |
+| 48 (0x30)                 | 8 bayt   | Nitelik bayrakları (örneğin, bit 60 yalnızca okunur)                                                               |
 | 56 (0x38)                 | 72 bayt  | Bölüm adı (36 [UTF-16](https://en.wikipedia.org/wiki/UTF-16)LE kod birimi)                               |
 
 **Bölüm Türleri**
@@ -131,7 +131,7 @@ Daha fazla bölüm türü için [https://en.wikipedia.org/wiki/GUID_Partition_Ta
 
 ### İnceleme
 
-[**ArsenalImageMounter**](https://arsenalrecon.com/downloads/) ile adli görüntüyü monte ettikten sonra, Windows aracı [**Active Disk Editor**](https://www.disk-editor.org/index.html)**'ı** kullanarak ilk sektörü inceleyebilirsiniz. Aşağıdaki görüntüde **sektör 0**'da bir **MBR** tespit edilmiştir ve yorumlanmıştır:
+[**ArsenalImageMounter**](https://arsenalrecon.com/downloads/) ile adli görüntüyü monte ettikten sonra, Windows aracı [**Active Disk Editor**](https://www.disk-editor.org/index.html)** kullanarak ilk sektörü inceleyebilirsiniz. Aşağıdaki görüntüde **sektör 0**'da bir **MBR** tespit edilmiştir ve yorumlanmıştır:
 
 ![](<../../../images/image (354).png>)
 
@@ -149,7 +149,7 @@ Eğer bir **MBR yerine bir GPT tablosu** olsaydı, **sektör 1**'de _EFI PART_ i
 
 ### FAT
 
-**FAT (Dosya Tahsis Tablosu)** dosya sistemi, temel bileşeni olan dosya tahsis tablosu etrafında tasarlanmıştır ve hacmin başlangıcında yer alır. Bu sistem, verileri **iki kopya** tutarak korur ve birinin bozulması durumunda veri bütünlüğünü sağlar. Tablo, kök klasör ile birlikte **sabit bir konumda** olmalıdır; bu, sistemin başlatma süreci için kritik öneme sahiptir.
+**FAT (Dosya Tahsis Tablosu)** dosya sistemi, temel bileşeni olan dosya tahsis tablosu etrafında tasarlanmıştır ve bu tablo hacmin başlangıcında yer alır. Bu sistem, verileri **iki kopya** tutarak korur ve birinin bozulması durumunda veri bütünlüğünü sağlar. Tablo, kök klasör ile birlikte **sabit bir konumda** olmalıdır; bu, sistemin başlatma süreci için kritik öneme sahiptir.
 
 Dosya sisteminin temel depolama birimi bir **küme, genellikle 512B**'dir ve birden fazla sektörden oluşur. FAT, sürümler boyunca evrim geçirmiştir:
 
@@ -157,7 +157,7 @@ Dosya sisteminin temel depolama birimi bir **küme, genellikle 512B**'dir ve bir
 - **FAT16**, 16 bit adreslere yükseltilmiştir ve böylece 65,517 kümeye kadar destekler.
 - **FAT32**, 32 bit adreslerle daha da ilerleyerek her hacim için etkileyici bir şekilde 268,435,456 kümeye izin verir.
 
-FAT sürümleri arasında önemli bir sınırlama, **4GB maksimum dosya boyutu**'dur; bu, dosya boyutu depolamak için kullanılan 32 bit alan tarafından dayatılmaktadır.
+FAT sürümleri arasında önemli bir sınırlama, dosya boyutu depolamak için kullanılan 32 bit alan nedeniyle **4GB maksimum dosya boyutudur**.
 
 FAT12 ve FAT16 için kök dizininin temel bileşenleri şunlardır:
 
@@ -173,7 +173,7 @@ FAT12 ve FAT16 için kök dizininin temel bileşenleri şunlardır:
 
 ## **Meta Veriler**
 
-Bazı dosyalar meta veriler içerir. Bu bilgiler, dosyanın içeriği hakkında olup, bazen bir analist için ilginç olabilir; dosya türüne bağlı olarak, aşağıdaki gibi bilgiler içerebilir:
+Bazı dosyalar meta veriler içerir. Bu bilgiler, dosyanın içeriği hakkında olup, bazen bir analist için ilginç olabilir; çünkü dosya türüne bağlı olarak şunları içerebilir:
 
 - Başlık
 - Kullanılan MS Office Versiyonu
@@ -187,9 +187,9 @@ Bir dosyanın meta verilerini almak için [**exiftool**](https://exiftool.org) v
 
 ## **Silinmiş Dosyaların Kurtarılması**
 
-### Kaydedilen Silinmiş Dosyalar
+### Günlük Kayıtlı Silinmiş Dosyalar
 
-Daha önce görüldüğü gibi, bir dosya "silindikten" sonra hala kaydedildiği birkaç yer vardır. Bunun nedeni, genellikle bir dosyanın dosya sisteminden silinmesinin sadece silindiği olarak işaretlenmesidir, ancak veriye dokunulmaz. Bu nedenle, dosyaların kayıtlarını (MFT gibi) incelemek ve silinmiş dosyaları bulmak mümkündür.
+Daha önce görüldüğü gibi, dosya "silindikten" sonra hala kaydedilen birkaç yer vardır. Bunun nedeni, genellikle bir dosyanın dosya sisteminden silinmesinin sadece silindi olarak işaretlenmesidir, ancak veriye dokunulmaz. Bu nedenle, dosyaların kayıtlarını (MFT gibi) incelemek ve silinmiş dosyaları bulmak mümkündür.
 
 Ayrıca, işletim sistemi genellikle dosya sistemi değişiklikleri ve yedeklemeleri hakkında çok fazla bilgi kaydeder, bu nedenle dosyayı veya mümkün olduğunca fazla bilgiyi kurtarmak için bunları kullanmaya çalışmak mümkündür.
 
@@ -199,7 +199,7 @@ file-data-carving-recovery-tools.md
 
 ### **Dosya Oymacılığı**
 
-**Dosya oymacılığı**, **veri yığınında dosyaları bulmaya çalışan** bir tekniktir. Bu tür araçların çalıştığı 3 ana yol vardır: **Dosya türü başlıkları ve sonları** temelinde, dosya türü **yapıları** temelinde ve **içerik** temelinde.
+**Dosya oymacılığı**, **veri yığınında dosyaları bulmaya** çalışan bir tekniktir. Bu tür araçların çalıştığı 3 ana yol vardır: **Dosya türü başlıkları ve alt başlıklarına dayalı**, dosya türü **yapılarına** dayalı ve **içerik** kendisine dayalı.
 
 Bu tekniğin **parçalanmış dosyaları geri almak için çalışmadığını** unutmayın. Eğer bir dosya **bitişik sektörlerde depolanmamışsa**, bu teknik onu veya en azından bir kısmını bulamayacaktır.
 
@@ -212,7 +212,7 @@ file-data-carving-recovery-tools.md
 ### Veri Akışı **C**arving
 
 Veri Akışı Oymacılığı, Dosya Oymacılığına benzer, ancak **tam dosyalar aramak yerine, ilginç bilgi parçalarını arar**.\
-Örneğin, kaydedilmiş URL'leri içeren bir tam dosya aramak yerine, bu teknik URL'leri arayacaktır.
+Örneğin, günlük kaydedilmiş URL'leri içeren bir tam dosya aramak yerine, bu teknik URL'leri arayacaktır.
 
 {{#ref}}
 file-data-carving-recovery-tools.md
@@ -220,7 +220,7 @@ file-data-carving-recovery-tools.md
 
 ### Güvenli Silme
 
-Açıkça, dosyaları ve bunlarla ilgili logların bir kısmını **"güvenli" bir şekilde silmenin** yolları vardır. Örneğin, bir dosyanın içeriğini birkaç kez çöp verilerle **üst üste yazmak** ve ardından dosya ile ilgili **$MFT** ve **$LOGFILE**'dan **logları kaldırmak** ve **Hacim Gölge Kopyalarını** **kaldırmak** mümkündür.\
+Açıkça, dosyaları ve bunlarla ilgili günlüklerin bir kısmını **"güvenli" bir şekilde silmenin yolları vardır**. Örneğin, bir dosyanın içeriğini birkaç kez gereksiz verilerle **üst üste yazmak** ve ardından dosya ile ilgili **$MFT** ve **$LOGFILE**'dan **günlükleri kaldırmak** ve **Hacim Gölge Kopyalarını** **kaldırmak** mümkündür.\
 Bu işlemi gerçekleştirirken, dosyanın varlığının hala **diğer parçalarda kaydedilmiş olabileceğini** fark edebilirsiniz ve bu doğrudur; adli uzmanların işi bunları bulmaktır.
 
 ## Referanslar

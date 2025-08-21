@@ -43,7 +43,7 @@ polkit-agent-helper-1: error response to PolicyKit daemon: GDBus.Error:org.freed
 ==== AUTHENTICATION FAILED ===
 Error executing command as another user: Not authorized
 ```
-**İzinlerinizin olmaması nedeniyle değil, bir GUI olmadan bağlı olmadığınız için**. Bu sorun için bir çözüm burada: [https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). **2 farklı ssh oturumuna** ihtiyacınız var:
+**İzinleriniz olmadığı için değil, GUI olmadan bağlı olmadığınız için**. Bu sorun için bir çözüm burada: [https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). **2 farklı ssh oturumuna** ihtiyacınız var:
 ```bash:session1
 echo $$ #Step1: Get current PID
 pkexec "/bin/bash" #Step 3, execute pkexec
@@ -96,7 +96,7 @@ $ cat /etc/crontab | grep run-parts
 47 6    * * 7   root    test -x /usr/sbin/anacron || { cd / && run-parts --report /etc/cron.weekly; }
 52 6    1 * *   root    test -x /usr/sbin/anacron || { cd / && run-parts --report /etc/cron.monthly; }
 ```
-veya Yeni bir ssh oturumu açıldığında.
+veya yeni bir ssh oturumu açıldığında.
 ```bash
 $ pspy64
 2024/02/01 22:02:08 CMD: UID=0     PID=1      | init [2]
@@ -181,7 +181,7 @@ find / -group root -perm -g=w 2>/dev/null
 ```
 ## Docker Grubu
 
-Ana makinenin kök dosya sistemini bir örneğin hacmine **monte edebilirsiniz**, böylece örnek başladığında hemen o hacme `chroot` yükler. Bu, makinede size kök erişimi sağlar.
+**Ana makinenin kök dosya sistemini bir örneğin hacmine bağlayabilirsiniz**, böylece örnek başladığında hemen o hacme `chroot` yükler. Bu, makinede size kök erişimi sağlar.
 ```bash
 docker image #Get images from the docker service
 
@@ -199,7 +199,7 @@ Son olarak, eğer daha önceki önerilerden hiçbiri hoşunuza gitmiyorsa veya b
 ../docker-security/
 {{#endref}}
 
-Eğer docker soketi üzerinde yazma izinleriniz varsa [**docker soketini kötüye kullanarak yetki yükseltme hakkında bu yazıyı**](../index.html#writable-docker-socket)** okuyun.**
+Eğer docker soketi üzerinde yazma izinleriniz varsa [**docker soketini kötüye kullanarak nasıl yetki yükseltebileceğinizi anlatan bu yazıyı**](../index.html#writable-docker-socket)** okuyun.**
 
 {{#ref}}
 https://github.com/KrustyHack/docker-privilege-escalation
@@ -217,12 +217,12 @@ https://fosterelli.co/privilege-escalation-via-docker.html
 
 ## Adm Grubu
 
-Genellikle **`adm`** grubunun **üyesi** olanlar _/var/log/_ dizininde bulunan **log** dosyalarını **okuma** izinlerine sahiptir.\
-Bu nedenle, bu grupta bir kullanıcıyı ele geçirdiyseniz, kesinlikle **loglara göz atmalısınız**.
+Genellikle **`adm`** grubunun **üyeleri** _/var/log/_ dizininde bulunan **log** dosyalarını **okuma** izinlerine sahiptir.\
+Bu nedenle, eğer bu grupta bir kullanıcıyı ele geçirdiyseniz, kesinlikle **loglara göz atmalısınız**.
 
 ## Auth grubu
 
-OpenBSD içinde **auth** grubu genellikle _**/etc/skey**_ ve _**/var/db/yubikey**_ dizinlerine yazma iznine sahiptir, eğer kullanılıyorsa.\
+OpenBSD içinde **auth** grubu genellikle _**/etc/skey**_ ve _**/var/db/yubikey**_ dizinlerinde yazma iznine sahiptir, eğer kullanılıyorsa.\
 Bu izinler, root'a **yetki yükseltmek** için aşağıdaki istismar ile kötüye kullanılabilir: [https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot](https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot)
 
 {{#include ../../../banners/hacktricks-training.md}}

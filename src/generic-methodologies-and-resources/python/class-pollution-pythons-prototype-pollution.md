@@ -4,7 +4,7 @@
 
 ## Temel Örnek
 
-Dizelerle nesne sınıflarının nasıl kirletilebileceğini kontrol edin:
+Dize ile nesne sınıflarını nasıl kirletebileceğinizi kontrol edin:
 ```python
 class Company: pass
 class Developer(Company): pass
@@ -65,7 +65,7 @@ print(vars(emp)) #{'name': 'Ahemd', 'age': 23, 'manager': {'name': 'Sarah'}}
 
 <details>
 
-<summary>Sınıf özelliği varsayılan değerini RCE (subprocess) olarak oluşturma</summary>
+<summary>Sınıf özelliği varsayılan değerini RCE (subprocess) oluşturma</summary>
 ```python
 from os import popen
 class Employee: pass # Creating an empty class
@@ -148,7 +148,7 @@ print(NotAccessibleClass) #> <class '__main__.PollutedClass'>
 
 <details>
 
-<summary>Keyfi alt süreç yürütme</summary>
+<summary>Rastgele alt süreç yürütme</summary>
 ```python
 import subprocess, json
 
@@ -226,12 +226,12 @@ execute() #> Executing echo Polluted
 <summary>Flask gizli anahtarını dosyalar arasında geçersiz kılma</summary>
 
 Yani, eğer web'in ana python dosyasında tanımlı bir nesne üzerinde bir sınıf kirlenmesi yapabiliyorsanız ama **sınıfı ana dosyadan farklı bir dosyada tanımlıysa**. Çünkü önceki yüklerde \_\_globals\_\_'a erişmek için nesnenin sınıfına veya sınıfın yöntemlerine erişmeniz gerekiyor, o dosyadaki **globals'a erişebileceksiniz, ama ana dosyadaki globals'a erişemeyeceksiniz**. \
-Bu nedenle, **ana sayfadaki gizli anahtarı tanımlayan Flask uygulaması global nesnesine erişemeyeceksiniz**:
+Bu nedenle, **ana sayfada tanımlı olan Flask uygulama global nesnesine erişemeyeceksiniz**:
 ```python
 app = Flask(__name__, template_folder='templates')
 app.secret_key = '(:secret:)'
 ```
-Bu senaryoda, Flask gizli anahtarını değiştirmek ve bu anahtarı bilerek [**yetki yükseltmek**](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign) için ana dosyaya ulaşmak üzere dosyaları geçmek için bir alete ihtiyacınız var `app.secret_key` **global nesnesine erişmek**. 
+Bu senaryoda, Flask gizli anahtarını değiştirmek ve bu anahtarı bilerek [**yetki yükseltmek**](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign) için ana dosyaya ulaşmak üzere dosyaları geçmek için bir alete ihtiyacınız var **global nesne `app.secret_key`**. 
 
 Bu yazıdan [şu şekilde bir yük](https://ctftime.org/writeup/36082):
 ```python
@@ -241,7 +241,7 @@ Bu yükü kullanarak **`app.secret_key`**'i (uygulamanızdaki adı farklı olabi
 
 </details>
 
-Ayrıca daha fazla okuma için aşağıdaki sayfayı kontrol edin:
+Ayrıca daha fazla yalnızca okunabilir gadget için aşağıdaki sayfayı kontrol edin:
 
 {{#ref}}
 python-internal-read-gadgets.md

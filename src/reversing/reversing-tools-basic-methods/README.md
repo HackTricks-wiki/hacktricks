@@ -1,8 +1,8 @@
-# Reversing Tools & Basic Methods
+# Tersine Mühendislik Araçları ve Temel Yöntemler
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## ImGui Tabanlı Tersine Çevirme Araçları
+## ImGui Tabanlı Tersine Mühendislik Araçları
 
 Yazılım:
 
@@ -14,7 +14,7 @@ Yazılım:
 
 - **wasm** (ikili) formatından **wat** (düz metin) formatına **decompile** etmek için [https://webassembly.github.io/wabt/demo/wasm2wat/index.html](https://webassembly.github.io/wabt/demo/wasm2wat/index.html) kullanın
 - **wat** formatından **wasm** formatına **compile** etmek için [https://webassembly.github.io/wabt/demo/wat2wasm/](https://webassembly.github.io/wabt/demo/wat2wasm/) kullanın
-- Ayrıca decompile etmek için [https://wwwg.github.io/web-wasmdec/](https://wwwg.github.io/web-wasmdec/) kullanmayı deneyebilirsiniz
+- **decompile** etmek için [https://wwwg.github.io/web-wasmdec/](https://wwwg.github.io/web-wasmdec/) kullanmayı da deneyebilirsiniz
 
 Yazılım:
 
@@ -25,17 +25,17 @@ Yazılım:
 
 ### [dotPeek](https://www.jetbrains.com/decompiler/)
 
-dotPeek, **kütüphaneler** (.dll), **Windows meta veri dosyaları** (.winmd) ve **çalıştırılabilir dosyalar** (.exe) dahil olmak üzere **birden fazla formatı decompile ve inceleyen** bir decompiler'dır. Decompile edildikten sonra, bir assembly Visual Studio projesi (.csproj) olarak kaydedilebilir.
+dotPeek, **kütüphaneler** (.dll), **Windows meta veri dosyaları** (.winmd) ve **çalıştırılabilir dosyalar** (.exe) dahil olmak üzere **birden fazla formatı decompile** eden ve inceleyen bir decompiler'dır. Decompile edildikten sonra, bir assembly Visual Studio projesi (.csproj) olarak kaydedilebilir.
 
-Buradaki avantaj, kaybolmuş bir kaynak kodunun eski bir assembly'den geri yüklenmesi gerektiğinde, bu işlemin zaman kazandırmasıdır. Ayrıca, dotPeek, decompile edilmiş kod boyunca kullanışlı bir navigasyon sağlar ve bu da onu **Xamarin algoritma analizi** için mükemmel araçlardan biri yapar.
+Buradaki avantaj, kaybolmuş bir kaynak kodunun eski bir assembly'den geri yüklenmesi gerektiğinde, bu işlemin zaman kazandırmasıdır. Ayrıca, dotPeek, decompile edilmiş kod boyunca pratik bir navigasyon sağlar ve bu da onu **Xamarin algoritma analizi** için mükemmel araçlardan biri yapar.
 
 ### [.NET Reflector](https://www.red-gate.com/products/reflector/)
 
-Kapsamlı bir eklenti modeli ve aracı tam ihtiyaçlarınıza uyacak şekilde genişleten bir API ile .NET reflector, zaman kazandırır ve geliştirmeyi basitleştirir. Bu aracın sunduğu tersine mühendislik hizmetlerine bir göz atalım:
+Kapsamlı bir eklenti modeli ve aracı tam ihtiyaçlarınıza uyacak şekilde genişleten bir API ile .NET Reflector, zaman kazandırır ve geliştirmeyi basitleştirir. Bu aracın sunduğu tersine mühendislik hizmetlerine bir göz atalım:
 
 - Bir kütüphane veya bileşen içindeki veri akışının nasıl olduğunu anlamanızı sağlar
 - .NET dilleri ve çerçevelerinin uygulanması ve kullanımı hakkında bilgi verir
-- API'lerden ve kullanılan teknolojilerden daha fazla yararlanmak için belgelenmemiş ve açığa çıkarılmamış işlevselliği bulur.
+- Kullanılan API'lerden ve teknolojilerden daha fazla yararlanmak için belgelenmemiş ve açığa çıkarılmamış işlevselliği bulur.
 - Bağımlılıkları ve farklı assembly'leri bulur
 - Kodunuzdaki, üçüncü taraf bileşenlerdeki ve kütüphanelerdeki hataların tam yerini takip eder.
 - Çalıştığınız tüm .NET kodunun kaynağına hata ayıklama yapar.
@@ -43,11 +43,11 @@ Kapsamlı bir eklenti modeli ve aracı tam ihtiyaçlarınıza uyacak şekilde ge
 ### [ILSpy](https://github.com/icsharpcode/ILSpy) & [dnSpy](https://github.com/dnSpy/dnSpy/releases)
 
 [Visual Studio Code için ILSpy eklentisi](https://github.com/icsharpcode/ilspy-vscode): Herhangi bir işletim sisteminde kullanabilirsiniz (VSCode'dan doğrudan yükleyebilirsiniz, git indirmeye gerek yok. **Extensions**'a tıklayın ve **ILSpy**'yi arayın).\
-Eğer **decompile**, **modify** ve tekrar **recompile** etmeniz gerekiyorsa [**dnSpy**](https://github.com/dnSpy/dnSpy/releases) veya onun aktif olarak bakımı yapılan bir çatalı olan [**dnSpyEx**](https://github.com/dnSpyEx/dnSpy/releases) kullanabilirsiniz. (**Sağ Tık -> Method'u Değiştir** ile bir fonksiyonun içindeki bir şeyi değiştirebilirsiniz).
+**decompile**, **modify** ve tekrar **recompile** etmeniz gerekiyorsa [**dnSpy**](https://github.com/dnSpy/dnSpy/releases) veya onun aktif olarak bakımı yapılan bir çatalı olan [**dnSpyEx**](https://github.com/dnSpyEx/dnSpy/releases) kullanabilirsiniz. (**Sağ Tık -> Method'u Değiştir** ile bir fonksiyonun içindeki bir şeyi değiştirebilirsiniz).
 
-### DNSpy Logging
+### DNSpy Günlüğü
 
-**DNSpy'nin bir dosyaya bazı bilgileri kaydetmesi** için bu kod parçasını kullanabilirsiniz:
+**DNSpy'nin bir dosyaya bazı bilgileri günlüğe kaydetmesi** için bu kod parçasını kullanabilirsiniz:
 ```cs
 using System.IO;
 path = "C:\\inetpub\\temp\\MyTest2.txt";
@@ -80,7 +80,7 @@ Ardından yeni dosyayı _**File >> Save module...**_ ile kaydedin:
 
 Bu gereklidir çünkü bunu yapmazsanız, **runtime** sırasında koda birkaç **optimizasyon** uygulanacak ve hata ayıklama sırasında bir **break-point asla vurulmayabilir** veya bazı **değişkenler mevcut olmayabilir**.
 
-Ardından, eğer .NET uygulamanız **IIS** tarafından **çalıştırılıyorsa**, bunu **restart** edebilirsiniz:
+Ardından, .NET uygulamanız **IIS** tarafından **çalıştırılıyorsa**, bunu **restart** edebilirsiniz:
 ```
 iisreset /noforce
 ```
@@ -88,7 +88,7 @@ Sonra, hata ayıklamaya başlamak için tüm açık dosyaları kapatmalısınız
 
 ![](<../../images/image (318).png>)
 
-Ardından **IIS sunucusuna** bağlanmak için **w3wp.exe**'yi seçin ve **attach** butonuna tıklayın:
+Ardından **IIS server**'a bağlanmak için **w3wp.exe**'yi seçin ve **attach** butonuna tıklayın:
 
 ![](<../../images/image (113).png>)
 
@@ -136,7 +136,7 @@ Ama, yüklenen DLL'nin koduna nasıl ulaşabilirsiniz? Bu yöntemi kullanarak, n
 - _Options --> Settings_ kısmını değiştirin ve "**DLL Girişi**" seçeneğini seçin.
 - Ardından **yürütmeyi başlatın**, hata ayıklayıcı her DLL ana fonksiyonunda duracak, bir noktada **DLL'nizin girişinde duracaksınız**. Oradan, bir kesme noktası koymak istediğiniz yerleri arayın.
 
-Yürütme herhangi bir nedenle win64dbg'de durdurulduğunda, **hangi kodda** olduğunuzu **win64dbg penceresinin üst kısmında** görebilirsiniz:
+Yürütme herhangi bir nedenle win64dbg'de durdurulduğunda, **nerede olduğunuzu** görebilirsiniz, **win64dbg penceresinin üst kısmında**:
 
 ![](<../../images/image (842).png>)
 
@@ -164,8 +164,8 @@ https://github.com/nongiach/arm_now
 
 ### Blobrunner ile bir shellcode'u hata ayıklama
 
-[**Blobrunner**](https://github.com/OALabs/BlobRunner) **shellcode'u** bir bellek alanında **ayıracak**, shellcode'un ayrıldığı **bellek adresini** size **gösterecek** ve yürütmeyi **durduracak**.\
-Ardından, bir **hata ayıklayıcıyı** (Ida veya x64dbg) sürece eklemeniz ve belirtilen bellek adresinde bir **kesme noktası** koymanız ve yürütmeyi **devam ettirmeniz** gerekir. Bu şekilde shellcode'u hata ayıklayacaksınız.
+[**Blobrunner**](https://github.com/OALabs/BlobRunner) **shellcode'u** bir bellek alanında **ayıracak**, size shellcode'un ayrıldığı **bellek adresini** **gösterecek** ve yürütmeyi **durduracak**.\
+Ardından, bir **hata ayıklayıcıyı** (Ida veya x64dbg) sürece eklemeli ve belirtilen bellek adresinde bir **kesme noktası** koymalı ve yürütmeyi **devam ettirmelisiniz**. Bu şekilde shellcode'u hata ayıklayacaksınız.
 
 Yayınlar github sayfası, derlenmiş sürümleri içeren zip dosyaları içerir: [https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)\
 Blobrunner'ın biraz değiştirilmiş bir versiyonunu aşağıdaki bağlantıda bulabilirsiniz. Derlemek için sadece **Visual Studio Code'da bir C/C++ projesi oluşturun, kodu kopyalayıp yapıştırın ve derleyin**.
@@ -176,7 +176,7 @@ blobrunner.md
 
 ### jmp2it ile bir shellcode'u hata ayıklama
 
-[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4) blobrunner'a çok benzer. **shellcode'u** bir bellek alanında **ayıracak** ve bir **sonsuz döngü** başlatacaktır. Ardından, sürece **hata ayıklayıcıyı eklemeniz**, **oyunu başlatmanız, 2-5 saniye beklemeniz ve durdurmanız** gerekir ve kendinizi **sonsuz döngüde** bulacaksınız. Sonsuz döngünün bir sonraki talimatına atlayın çünkü bu shellcode'a bir çağrı olacaktır ve sonunda shellcode'u yürütmeye başlayacaksınız.
+[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4) blobrunner'a çok benzer. **shellcode'u** bir bellek alanında **ayıracak** ve bir **sonsuz döngü** başlatacaktır. Ardından, **hata ayıklayıcıyı** sürece eklemeli, **başlat düğmesine basmalı, 2-5 saniye beklemeli ve durdurmalısınız** ve kendinizi **sonsuz döngüde** bulacaksınız. Sonsuz döngünün bir sonraki talimatına atlayın çünkü bu shellcode'a bir çağrı olacaktır ve sonunda shellcode'u yürütmeye başlayacaksınız.
 
 ![](<../../images/image (509).png>)
 
@@ -203,7 +203,7 @@ Emülasyonu istediğiniz yerden başlatmak için oraya bir kesme noktası koyun 
 ### Shellcode'u deşifre etme ve yürütülen fonksiyonları alma
 
 [**scdbg**](http://sandsprite.com/blogs/index.php?uid=7&pid=152) denemelisiniz.\
-Shellcode'un hangi **fonksiyonları** kullandığını ve shellcode'un bellekte kendini **şifreleyip şifrelemediğini** size söyleyecektir.
+Shellcode'un hangi **fonksiyonları** kullandığını ve shellcode'un bellekte **kendini çözümleyip çözümlemediğini** size söyleyecektir.
 ```bash
 scdbg.exe -f shellcode # Get info
 scdbg.exe -f shellcode -r #show analysis report at end of run
@@ -216,7 +216,7 @@ scDbg ayrıca istediğiniz seçenekleri seçip shellcode'u çalıştırabileceğ
 
 ![](<../../images/image (258).png>)
 
-**Create Dump** seçeneği, shellcode'da dinamik olarak herhangi bir değişiklik yapıldığında son shellcode'u dökecektir (kodlanmış shellcode'u indirmek için faydalıdır). **start offset** shellcode'u belirli bir offset'ten başlatmak için faydalı olabilir. **Debug Shell** seçeneği, shellcode'u scDbg terminali kullanarak hata ayıklamak için faydalıdır (ancak bu konuda daha önce açıklanan seçeneklerin herhangi birinin daha iyi olduğunu düşünüyorum çünkü Ida veya x64dbg kullanabileceksiniz).
+**Create Dump** seçeneği, shellcode'da dinamik olarak herhangi bir değişiklik yapıldığında son shellcode'u dökecektir (kodlanmış shellcode'u indirmek için faydalıdır). **start offset** shellcode'u belirli bir ofsetten başlatmak için faydalı olabilir. **Debug Shell** seçeneği, shellcode'u scDbg terminali kullanarak hata ayıklamak için faydalıdır (ancak bu konuda daha önce açıklanan seçeneklerin herhangi birinin daha iyi olduğunu düşünüyorum çünkü Ida veya x64dbg kullanabileceksiniz).
 
 ### CyberChef kullanarak ayrıştırma
 
@@ -224,12 +224,12 @@ Shellcode dosyanızı girdi olarak yükleyin ve onu decompile etmek için aşağ
 
 ## [Movfuscator](https://github.com/xoreaxeaxeax/movfuscator)
 
-Bu obfuscator **`mov` için tüm talimatları değiştirir** (evet, gerçekten havalı). Ayrıca yürütme akışlarını değiştirmek için kesintiler kullanır. Nasıl çalıştığı hakkında daha fazla bilgi için:
+Bu obfuscator **tüm `mov` talimatlarını değiştirir** (evet, gerçekten havalı). Ayrıca yürütme akışlarını değiştirmek için kesintiler kullanır. Nasıl çalıştığı hakkında daha fazla bilgi için:
 
 - [https://www.youtube.com/watch?v=2VF_wPkiBJY](https://www.youtube.com/watch?v=2VF_wPkiBJY)
 - [https://github.com/xoreaxeaxeax/movfuscator/blob/master/slides/domas_2015_the_movfuscator.pdf](https://github.com/xoreaxeaxeax/movfuscator/blob/master/slides/domas_2015_the_movfuscator.pdf)
 
-Şanslıysanız [demovfuscator](https://github.com/kirschju/demovfuscator) ikiliyi deobfuscate edecektir. Birkaç bağımlılığı vardır.
+Şanslıysanız [demovfuscator](https://github.com/kirschju/demovfuscator) ikiliyi deofuscate edecektir. Birkaç bağımlılığı vardır.
 ```
 apt-get install libcapstone-dev
 apt-get install libz3-dev
@@ -245,7 +245,7 @@ Eğer bir **CTF oynuyorsanız, bayrağı bulmak için bu geçici çözüm** çok
 ![](<../../images/image (1080).png>)
 
 Bu durumda ikili dosya authenticator olarak adlandırıldığından, bu ilginç ana fonksiyon olduğu oldukça açıktır.\
-Çağrılan **fonksiyonların** **isimlerini** öğrendikten sonra, **girdi** ve **çıktıları** hakkında bilgi edinmek için bunları **İnternet**'te arayın.
+Çağrılan **fonksiyonların** **isimlerini** bildiğinizde, **girdileri** ve **çıktıları** öğrenmek için bunları **İnternet**'te arayın.
 
 ## **Delphi**
 
@@ -255,9 +255,9 @@ Eğer bir Delphi ikili dosyasını tersine mühendislik yapmanız gerekiyorsa, I
 
 Sadece **ATL+f7** tuşlarına basın (IDA'da python eklentisini içe aktarın) ve python eklentisini seçin.
 
-Bu eklenti, ikili dosyayı çalıştıracak ve hata ayıklamanın başlangıcında fonksiyon isimlerini dinamik olarak çözecektir. Hata ayıklamayı başlattıktan sonra tekrar Başlat butonuna (yeşil olan veya f9) basın ve gerçek kodun başında bir kesme noktası oluşacaktır.
+Bu eklenti, ikili dosyayı çalıştıracak ve hata ayıklamanın başlangıcında fonksiyon isimlerini dinamik olarak çözecektir. Hata ayıklamayı başlattıktan sonra tekrar Başlat butonuna (yeşil olan veya f9) basın ve gerçek kodun başlangıcında bir kesme noktası oluşacaktır.
 
-Ayrıca, grafik uygulamada bir butona bastığınızda, hata ayıklayıcı o buton tarafından yürütülen fonksiyonda duracaktır.
+Ayrıca, grafik uygulamada bir düğmeye bastığınızda, hata ayıklayıcı o düğmeyi çalıştıran fonksiyonda duracaktır.
 
 ## Golang
 
@@ -269,7 +269,7 @@ Bu, fonksiyonların isimlerini çözecektir.
 
 ## Derlenmiş Python
 
-Bu sayfada, bir ELF/EXE python derlenmiş ikili dosyasından python kodunu nasıl alacağınızı bulabilirsiniz:
+Bu sayfada bir ELF/EXE python derlenmiş ikili dosyasından python kodunu nasıl alacağınızı bulabilirsiniz:
 
 {{#ref}}
 ../../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/.pyc.md
@@ -277,14 +277,14 @@ Bu sayfada, bir ELF/EXE python derlenmiş ikili dosyasından python kodunu nası
 
 ## GBA - Oyun Vücut İleri
 
-Eğer bir GBA oyununun **ikilisini** alırsanız, bunu **emüle** etmek ve **hata ayıklamak** için farklı araçlar kullanabilirsiniz:
+Eğer bir GBA oyununun **ikilisini** alırsanız, **emüle** etmek ve **hata ayıklamak** için farklı araçlar kullanabilirsiniz:
 
-- [**no$gba**](https://problemkaputt.de/gba.htm) (_Hata ayıklama sürümünü indirin_) - Arayüz ile birlikte bir hata ayıklayıcı içerir
-- [**mgba** ](https://mgba.io) - CLI hata ayıklayıcı içerir
+- [**no$gba**](https://problemkaputt.de/gba.htm) (_Hata ayıklama sürümünü indirin_) - Arayüze sahip bir hata ayıklayıcı içerir
+- [**mgba** ](https://mgba.io)- CLI hata ayıklayıcı içerir
 - [**gba-ghidra-loader**](https://github.com/pudii/gba-ghidra-loader) - Ghidra eklentisi
 - [**GhidraGBA**](https://github.com/SiD3W4y/GhidraGBA) - Ghidra eklentisi
 
-[**no$gba**](https://problemkaputt.de/gba.htm) içinde, _**Seçenekler --> Emülasyon Ayarı --> Kontroller**_** ** kısmında Game Boy Advance **butonlarına** nasıl basılacağını görebilirsiniz.
+[**no$gba**](https://problemkaputt.de/gba.htm) içinde, _**Seçenekler --> Emülasyon Ayarı --> Kontroller**_** ** kısmında Game Boy Advance **düğmelerine** nasıl basılacağını görebilirsiniz.
 
 ![](<../../images/image (581).png>)
 
@@ -370,13 +370,13 @@ DAT_030000d8 = DAT_030000d8 + 0x3a;
 ```
 Önceki kodda **uVar1**'in (**basılı düğmenin değeri**) bazı değerlerle karşılaştırıldığını görebilirsiniz:
 
-- İlk olarak, **değer 4** ile karşılaştırılıyor (**SELECT** düğmesi): Bu zorlukta bu düğme ekranı temizliyor.
-- Sonra, **değer 8** ile karşılaştırılıyor (**START** düğmesi): Bu zorlukta bu, kodun bayrağı almak için geçerli olup olmadığını kontrol ediyor.
-- Bu durumda **`DAT_030000d8`** değişkeni 0xf3 ile karşılaştırılıyor ve değer aynıysa bazı kodlar çalıştırılıyor.
+- İlk olarak, **değer 4** ile karşılaştırılıyor (**SELECT** düğmesi): Bu düğme, bu görevde ekranı temizliyor.
+- Sonra, **değer 8** ile karşılaştırılıyor (**START** düğmesi): Bu görevde, kodun bayrağı almak için geçerli olup olmadığını kontrol ediyor.
+- Bu durumda **`DAT_030000d8`** 0xf3 ile karşılaştırılıyor ve değer aynıysa bazı kodlar çalıştırılıyor.
 - Diğer durumlarda, bazı cont (`DAT_030000d4`) kontrol ediliyor. Bu bir cont çünkü koda girdikten hemen sonra 1 ekliyor.\
-**E**ğer 8'den küçükse, **`DAT_030000d8`**'e değer eklemeyi içeren bir işlem yapılıyor (temelde, cont 8'den küçük olduğu sürece bu değişkende basılan tuşların değerlerini topluyor).
+**8'den az** bir değer olduğunda, **`DAT_030000d8`**'e **değer ekleme** ile ilgili bir işlem yapılıyor (temelde, cont 8'den küçük olduğu sürece, bu değişkende basılan tuşların değerlerini topluyor).
 
-Bu zorlukta, düğmelerin değerlerini bilerek, **sonuçta toplamı 0xf3 olan 8'den daha kısa bir kombinasyonu basmanız gerekiyordu.**
+Bu nedenle, bu görevde, düğmelerin değerlerini bilerek, **sonuçta 0xf3 olan 8'den küçük bir uzunlukta bir kombinasyon basmanız gerekiyordu.**
 
 **Bu eğitim için referans:** [**https://exp.codes/Nostalgia/**](https://exp.codes/Nostalgia/)
 

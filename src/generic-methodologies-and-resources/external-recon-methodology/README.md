@@ -6,16 +6,16 @@
 
 > Yani, bir şirkete ait her şeyin kapsamda olduğu söylendi ve bu şirketin aslında neye sahip olduğunu anlamak istiyorsunuz.
 
-Bu aşamanın amacı, **ana şirketin sahip olduğu tüm şirketleri** ve ardından bu şirketlerin **varlıklarını** elde etmektir. Bunu yapmak için:
+Bu aşamanın amacı, **ana şirket tarafından sahip olunan tüm şirketleri** ve ardından bu şirketlerin **varlıklarını** elde etmektir. Bunu yapmak için:
 
 1. Ana şirketin satın almalarını bulmak, bu bize kapsam içindeki şirketleri verecektir.
 2. Her şirketin ASN'sini (varsa) bulmak, bu bize her şirketin sahip olduğu IP aralıklarını verecektir.
-3. İlkine bağlı diğer girişleri (organizasyon isimleri, alan adları...) aramak için ters whois sorgulamaları kullanmak (bu, yinelemeli olarak yapılabilir).
+3. İlkine bağlı diğer girişleri (organizasyon isimleri, alan adları...) aramak için ters whois sorgulamaları kullanmak (bu yinelemeli olarak yapılabilir).
 4. Diğer varlıkları aramak için shodan `org` ve `ssl` filtreleri gibi diğer teknikleri kullanmak (bu `ssl` hilesi yinelemeli olarak yapılabilir).
 
 ### **Satın Almalar**
 
-Öncelikle, **ana şirketin sahip olduğu diğer şirketleri** bilmemiz gerekiyor.\
+Öncelikle, **ana şirket tarafından sahip olunan diğer şirketlerin** hangileri olduğunu bilmemiz gerekiyor.\
 Bir seçenek, [https://www.crunchbase.com/](https://www.crunchbase.com) adresini ziyaret etmek, **ana şirketi** **arama** yapmak ve "**satın almalar**" sekmesine **tıklamak**. Orada ana şirket tarafından edinilen diğer şirketleri göreceksiniz.\
 Diğer bir seçenek, ana şirketin **Wikipedia** sayfasını ziyaret etmek ve **satın almaları** aramaktır.
 
@@ -27,14 +27,14 @@ Otonom sistem numarası (**ASN**), **Internet Assigned Numbers Authority (IANA)*
 Bir **AS**, dış ağlara erişim için belirgin bir politikaya sahip olan ve tek bir organizasyon tarafından yönetilen **IP adresleri blokları** içerir, ancak birden fazla operatörden oluşabilir.
 
 **Şirketin herhangi bir ASN atayıp atamadığını bulmak** ve **IP aralıklarını** öğrenmek ilginçtir. Kapsam içindeki tüm **hostlar** üzerinde bir **zafiyet testi** gerçekleştirmek ve bu IP'ler içinde **alan adlarını** aramak ilginç olacaktır.\
-**Şirket adı**, **IP** veya **alan adı** ile [**https://bgp.he.net/**](https://bgp.he.net)**'de** arama yapabilirsiniz.\
-**Şirketin bulunduğu bölgeye bağlı olarak, bu bağlantılar daha fazla veri toplamak için faydalı olabilir:** [**AFRINIC**](https://www.afrinic.net) **(Afrika),** [**Arin**](https://www.arin.net/about/welcome/region/)**(Kuzey Amerika),** [**APNIC**](https://www.apnic.net) **(Asya),** [**LACNIC**](https://www.lacnic.net) **(Latin Amerika),** [**RIPE NCC**](https://www.ripe.net) **(Avrupa). Her neyse, muhtemelen tüm** faydalı bilgiler **(IP aralıkları ve Whois)** zaten ilk bağlantıda görünmektedir.
+**Şirket adı**, **IP** veya **alan adı** ile [**https://bgp.he.net/**](https://bgp.he.net)** adresinde **arama** yapabilirsiniz.\
+**Şirketin bulunduğu bölgeye bağlı olarak bu bağlantılar daha fazla veri toplamak için faydalı olabilir:** [**AFRINIC**](https://www.afrinic.net) **(Afrika),** [**Arin**](https://www.arin.net/about/welcome/region/)**(Kuzey Amerika),** [**APNIC**](https://www.apnic.net) **(Asya),** [**LACNIC**](https://www.lacnic.net) **(Latin Amerika),** [**RIPE NCC**](https://www.ripe.net) **(Avrupa). Her neyse, muhtemelen tüm** faydalı bilgiler **(IP aralıkları ve Whois)** zaten ilk bağlantıda görünmektedir.
 ```bash
 #You can try "automate" this with amass, but it's not very recommended
 amass intel -org tesla
 amass intel -asn 8911,50313,394161
 ```
-Ayrıca, [**BBOT**](https://github.com/blacklanternsecurity/bbot)**'nin** alt alan adları belirlemesi, taramanın sonunda ASN'leri otomatik olarak toplar ve özetler.
+Ayrıca, [**BBOT**](https://github.com/blacklanternsecurity/bbot)**'nin** alt alan adlarını belirleme işlemi, taramanın sonunda ASN'leri otomatik olarak toplar ve özetler.
 ```bash
 bbot -t tesla.com -f subdomain-enum
 ...
@@ -51,10 +51,10 @@ bbot -t tesla.com -f subdomain-enum
 [INFO] bbot.modules.asn: +----------+---------------------+--------------+----------------+----------------------------+-----------+
 
 ```
-You can find the IP ranges of an organisation also using [http://asnlookup.com/](http://asnlookup.com) (it has free API).\
+You can find the IP ranges of an organisation also using [http://asnlookup.com/](http://asnlookup.com) (ücretsiz API'si var).\
 You can find the IP and ASN of a domain using [http://ipv4info.com/](http://ipv4info.com).
 
-### **Zafiyetleri Arama**
+### **Zafiyetleri Aramak**
 
 Bu noktada **kapsam içindeki tüm varlıkları** biliyoruz, bu yüzden izin verilirse tüm hostlar üzerinde bazı **zafiyet tarayıcıları** (Nessus, OpenVAS) başlatabilirsiniz.\
 Ayrıca, bazı [**port taramaları**](../pentesting-network/index.html#discovering-hosts-from-the-outside) **başlatabilir veya** shodan **gibi hizmetleri kullanarak** açık portları **bulabilirsiniz ve bulduklarınıza bağlı olarak bu kitapta çeşitli hizmetleri nasıl pentest edeceğinize bakmalısınız.**\
@@ -66,44 +66,44 @@ Ayrıca, bazı [**port taramaları**](../pentesting-network/index.html#discoveri
 
 _Lütfen, aşağıda önerilen tekniklerde alt alan adlarını da bulabileceğinizi ve bu bilginin küçümsenmemesi gerektiğini unutmayın._
 
-Öncelikle her şirketin **ana alan adı**(larını) aramalısınız. Örneğin, _Tesla Inc._ için _tesla.com_ olacaktır.
+Öncelikle her şirketin **ana alan**(lar)ını aramalısınız. Örneğin, _Tesla Inc._ için _tesla.com_ olacaktır.
 
 ### **Ters DNS**
 
-Alan adlarının tüm IP aralıklarını bulduğunuzda, bu **IP'ler üzerinde daha fazla alan adı bulmak için** **ters dns sorgulamaları** yapmayı deneyebilirsiniz. Kurbanın bazı dns sunucularını veya bazı iyi bilinen dns sunucularını (1.1.1.1, 8.8.8.8) kullanmaya çalışın.
+Alan adlarının tüm IP aralıklarını bulduğunuzda, bu **IP'ler üzerinde daha fazla alan bulmak için** **ters dns sorgulamaları** yapmayı deneyebilirsiniz. Kurbanın bazı dns sunucularını veya bazı tanınmış dns sunucularını (1.1.1.1, 8.8.8.8) kullanmaya çalışın.
 ```bash
 dnsrecon -r <DNS Range> -n <IP_DNS>   #DNS reverse of all of the addresses
 dnsrecon -d facebook.com -r 157.240.221.35/24 #Using facebooks dns
 dnsrecon -r 157.240.221.35/24 -n 1.1.1.1 #Using cloudflares dns
 dnsrecon -r 157.240.221.35/24 -n 8.8.8.8 #Using google dns
 ```
-Bu işlemin çalışması için, yöneticinin PTR'yi manuel olarak etkinleştirmesi gerekir.\
-Bu bilgi için çevrimiçi bir araç da kullanabilirsiniz: [http://ptrarchive.com/](http://ptrarchive.com)
+For this to work, the administrator has to enable manually the PTR.\
+You can also use a online tool for this info: [http://ptrarchive.com/](http://ptrarchive.com)
 
-### **Ters Whois (döngü)**
+### **Ters Whois (loop)**
 
-Bir **whois** içinde **kuruluş adı**, **adres**, **e-postalar**, telefon numaraları gibi birçok ilginç **bilgi** bulabilirsiniz... Ancak daha da ilginç olan, bu alanlardan herhangi biriyle **ters whois sorguları** yaparsanız **şirketle ilgili daha fazla varlık** bulabilmenizdir (örneğin, aynı e-postanın göründüğü diğer whois kayıtları).\
-Aşağıdaki çevrimiçi araçları kullanabilirsiniz:
+Inside a **whois** you can find a lot of interesting **bilgiler** like **organizasyon adı**, **adres**, **e-postalar**, telefon numaraları... Ama daha da ilginç olanı, **bu alanlardan herhangi biriyle ters whois sorguları yaparsanız, şirkete ait daha fazla varlık bulabilirsiniz** (örneğin, aynı e-postanın göründüğü diğer whois kayıtları).\
+You can use online tools like:
 
 - [https://viewdns.info/reversewhois/](https://viewdns.info/reversewhois/) - **Ücretsiz**
 - [https://domaineye.com/reverse-whois](https://domaineye.com/reverse-whois) - **Ücretsiz**
 - [https://www.reversewhois.io/](https://www.reversewhois.io) - **Ücretsiz**
 - [https://www.whoxy.com/](https://www.whoxy.com) - **Ücretsiz** web, ücretsiz olmayan API.
 - [http://reversewhois.domaintools.com/](http://reversewhois.domaintools.com) - Ücretsiz değil
-- [https://drs.whoisxmlapi.com/reverse-whois-search](https://drs.whoisxmlapi.com/reverse-whois-search) - Ücretsiz değil (sadece **100 ücretsiz** arama)
-- [https://www.domainiq.com/](https://www.domainiq.com) - Ücretsiz değil
+- [https://drs.whoisxmlapi.com/reverse-whois-search](https://drs.whoisxmlapi.com/reverse-whois-search) - Ücretsiz Değil (sadece **100 ücretsiz** arama)
+- [https://www.domainiq.com/](https://www.domainiq.com) - Ücretsiz Değil
 
-Bu görevi [**DomLink** ](https://github.com/vysecurity/DomLink) kullanarak otomatikleştirebilirsiniz (bir whoxy API anahtarı gerektirir).\
-Ayrıca [amass](https://github.com/OWASP/Amass) ile bazı otomatik ters whois keşifleri gerçekleştirebilirsiniz: `amass intel -d tesla.com -whois`
+You can automate this task using [**DomLink** ](https://github.com/vysecurity/DomLink)(requires a whoxy API key).\
+You can also perform some automatic reverse whois discovery with [amass](https://github.com/OWASP/Amass): `amass intel -d tesla.com -whois`
 
-**Bu tekniği her yeni alan adı bulduğunuzda daha fazla alan adı keşfetmek için kullanabileceğinizi unutmayın.**
+**Bu tekniği her yeni alan bulduğunuzda daha fazla alan adı keşfetmek için kullanabileceğinizi unutmayın.**
 
 ### **İzleyiciler**
 
-Eğer 2 farklı sayfada **aynı izleyicinin aynı ID'sini** bulursanız, **her iki sayfanın** da **aynı ekip tarafından yönetildiğini** varsayabilirsiniz.\
-Örneğin, birkaç sayfada aynı **Google Analytics ID'sini** veya aynı **Adsense ID'sini** görüyorsanız.
+If find the **same ID of the same tracker** in 2 different pages you can suppose that **both pages** are **managed by the same team**.\
+For example, if you see the same **Google Analytics ID** or the same **Adsense ID** on several pages.
 
-Bu izleyicilerle ve daha fazlasıyla arama yapmanıza olanak tanıyan bazı sayfalar ve araçlar vardır:
+There are some pages and tools that let you search by these trackers and more:
 
 - [**Udon**](https://github.com/dhn/udon)
 - [**BuiltWith**](https://builtwith.com)
@@ -113,7 +113,7 @@ Bu izleyicilerle ve daha fazlasıyla arama yapmanıza olanak tanıyan bazı sayf
 
 ### **Favicon**
 
-Hedefimize ait ilgili alan adlarını ve alt alan adlarını aynı favicon simgesi hash'ini arayarak bulabileceğimizi biliyor muydunuz? Bu, [@m4ll0k2](https://twitter.com/m4ll0k2) tarafından yapılan [favihash.py](https://github.com/m4ll0k/Bug-Bounty-Toolz/blob/master/favihash.py) aracının tam olarak yaptığı şeydir. İşte nasıl kullanacağınız:
+Did you know that we can find related domains and sub domains to our target by looking for the same favicon icon hash? This is exactly what [favihash.py](https://github.com/m4ll0k/Bug-Bounty-Toolz/blob/master/favihash.py) tool made by [@m4ll0k2](https://twitter.com/m4ll0k2) does. Here’s how to use it:
 ```bash
 cat my_targets.txt | xargs -I %% bash -c 'echo "http://%%/favicon.ico"' > targets.txt
 python3 favihash.py -f https://target/favicon.ico -t targets.txt -s
@@ -141,37 +141,37 @@ return fhash
 ```
 ### **Copyright / Uniq string**
 
-Farklı web siteleri arasında **paylaşılabilecek dizgeleri** arayın. **Telif hakkı dizgesi** iyi bir örnek olabilir. Ardından bu dizgeyi **google**, diğer **tarayıcılar** veya hatta **shodan** üzerinde arayın: `shodan search http.html:"Copyright string"`
+Farklı web siteleri arasında **paylaşılabilecek dizgileri** arayın. **Telif hakkı dizgisi** iyi bir örnek olabilir. Ardından bu dizgiyi **google**, diğer **tarayıcılarda** veya hatta **shodan**'da arayın: `shodan search http.html:"Copyright string"`
 
 ### **CRT Time**
 
-Bir cron işi olması yaygındır.
+Bir cron job'a sahip olmak yaygındır.
 ```bash
 # /etc/crontab
 37 13 */10 * * certbot renew --post-hook "systemctl reload nginx"
 ```
-sunucudaki tüm alan adı sertifikalarını yenilemek. Bu, bunun için kullanılan CA'nın geçerlilik süresinde oluşturulma zamanını ayarlamaması durumunda bile, **sertifika şeffaflık günlüklerinde aynı şirkete ait alan adlarını bulmanın mümkün olduğunu** gösterir.\
+sunucudaki tüm alan adı sertifikalarını yenilemek. Bu, bu işlem için kullanılan CA'nın geçerlilik süresinde oluşturulma zamanını ayarlamasa bile, **sertifika şeffaflık günlüklerinde aynı şirkete ait alan adlarını bulmanın mümkün olduğu** anlamına gelir.\
 Daha fazla bilgi için bu [**yazıya göz atın**](https://swarm.ptsecurity.com/discovering-domains-via-a-time-correlation-attack/).
 
 ### Mail DMARC bilgileri
 
-**DMARC bilgilerini paylaşan alan adlarını ve alt alan adlarını** bulmak için [https://dmarc.live/info/google.com](https://dmarc.live/info/google.com) gibi bir web sitesi veya [https://github.com/Tedixx/dmarc-subdomains](https://github.com/Tedixx/dmarc-subdomains) gibi bir araç kullanabilirsiniz.
+Aynı dmarc bilgilerini paylaşan **alan adlarını ve alt alan adlarını bulmak için** [https://dmarc.live/info/google.com](https://dmarc.live/info/google.com) gibi bir web sitesi veya [https://github.com/Tedixx/dmarc-subdomains](https://github.com/Tedixx/dmarc-subdomains) gibi bir araç kullanabilirsiniz.
 
 ### **Pasif Ele Geçirme**
 
-Görünüşe göre, insanların alt alan adlarını bulut sağlayıcılarına ait IP'lere ataması ve bir noktada **o IP adresini kaybetmesi ama DNS kaydını silmeyi unutmaları** yaygındır. Bu nedenle, sadece bir bulutta (örneğin Digital Ocean) **bir VM oluşturduğunuzda**, aslında **bazı alt alan adlarını ele geçiriyor olacaksınız**.
+Görünüşe göre, insanların alt alan adlarını bulut sağlayıcılarına ait IP'lere ataması ve bir noktada **o IP adresini kaybetmesi ama DNS kaydını silmeyi unutmaları** yaygındır. Bu nedenle, sadece bir bulutta (örneğin Digital Ocean) **bir VM oluşturmak**, aslında **bazı alt alan adlarını ele geçirmek** anlamına gelir.
 
 [**Bu yazı**](https://kmsec.uk/blog/passive-takeover/) bununla ilgili bir hikaye anlatıyor ve **DigitalOcean'da bir VM oluşturan**, **yeni makinenin** **IPv4'ünü alan** ve **buna işaret eden alt alan adı kayıtlarını Virustotal'da arayan** bir script öneriyor.
 
 ### **Diğer yollar**
 
-**Bu tekniği her yeni alan adı bulduğunuzda daha fazla alan adı keşfetmek için kullanabileceğinizi unutmayın.**
+**Yeni bir alan adı bulduğunuzda daha fazla alan adı keşfetmek için bu tekniği kullanabileceğinizi unutmayın.**
 
 **Shodan**
 
-IP alanına sahip olan kuruluşun adını zaten bildiğiniz için, bu veriyi shodan'da aramak için: `org:"Tesla, Inc."` kullanabilirsiniz. TLS sertifikasında yeni beklenmedik alan adları için bulunan hostları kontrol edin.
+IP alanına sahip olan kuruluşun adını zaten bildiğiniz için, bu veriyi shodan'da aramak için: `org:"Tesla, Inc."` kullanabilirsiniz. TLS sertifikasındaki yeni beklenmedik alan adları için bulunan hostları kontrol edin.
 
-Ana web sayfasının **TLS sertifikasına** erişebilir, **Kuruluş adını** alabilir ve ardından **shodan** tarafından bilinen tüm web sayfalarının **TLS sertifikalarında** o adı arayabilirsiniz. Filtre ile: `ssl:"Tesla Motors"` veya [**sslsearch**](https://github.com/HarshVaragiya/sslsearch) gibi bir araç kullanabilirsiniz.
+Ana web sayfasının **TLS sertifikasına** erişebilir, **Kuruluş adını** alabilir ve ardından **shodan** tarafından bilinen tüm web sayfalarının **TLS sertifikaları** içinde o adı arayabilirsiniz. Filtre: `ssl:"Tesla Motors"` veya [**sslsearch**](https://github.com/HarshVaragiya/sslsearch) gibi bir araç kullanabilirsiniz.
 
 **Assetfinder**
 
@@ -179,9 +179,9 @@ Ana web sayfasının **TLS sertifikasına** erişebilir, **Kuruluş adını** al
 
 ### **Zafiyetleri Aramak**
 
-Bazı [alan adı ele geçirme](../../pentesting-web/domain-subdomain-takeover.md#domain-takeover) durumlarını kontrol edin. Belki de bir şirket **bir alan adı kullanıyor** ama **sahipliğini kaybetmiştir**. Bunu kaydedin (eğer yeterince ucuzsa) ve şirkete bildirin.
+Bazı [alan adı ele geçirme](../../pentesting-web/domain-subdomain-takeover.md#domain-takeover) durumlarını kontrol edin. Belki bir şirket **bir alan adı kullanıyor** ama **sahipliğini kaybetmiştir**. Sadece kaydedin (eğer yeterince ucuzsa) ve şirkete bildirin.
 
-Eğer bulduğunuz varlık keşfinde zaten bulduğunuz IP'lerden farklı bir IP'ye sahip herhangi bir **alan adı** bulursanız, **temel bir zafiyet taraması** (Nessus veya OpenVAS kullanarak) ve bazı [**port taramaları**](../pentesting-network/index.html#discovering-hosts-from-the-outside) ile **nmap/masscan/shodan** yapmalısınız. Hangi hizmetlerin çalıştığına bağlı olarak, **bu kitapta "saldırmak" için bazı ipuçları bulabilirsiniz**.\
+Eğer bulduğunuz varlık keşfinde zaten bulduğunuz IP'lerden farklı bir IP'ye sahip herhangi bir **alan adı** bulursanız, **temel bir zafiyet taraması** (Nessus veya OpenVAS kullanarak) ve bazı [**port taramaları**](../pentesting-network/index.html#discovering-hosts-from-the-outside) ile **nmap/masscan/shodan** yapmalısınız. Hangi hizmetlerin çalıştığına bağlı olarak, **bu kitapta "onlara saldırmak" için bazı ipuçları** bulabilirsiniz.\
 _Domain'in, müşterinin kontrolünde olmayan bir IP içinde barındırıldığını ve bu nedenle kapsamda olmadığını unutmayın, dikkatli olun._
 
 ## Alt Alan Adları
@@ -282,12 +282,12 @@ curl -s "https://crt.sh/?q=%25.$1" \
 }
 crt tesla.com
 ```
-- [**gau**](https://github.com/lc/gau)**:** belirli bir alan adı için AlienVault'un Açık Tehdit Değişimi, Wayback Machine ve Common Crawl'dan bilinen URL'leri alır.
+- [**gau**](https://github.com/lc/gau)**:** Verilen bir alan adı için AlienVault'un Açık Tehdit Değişimi, Wayback Machine ve Common Crawl'dan bilinen URL'leri alır.
 ```bash
 # Get subdomains from GAUs found URLs
 gau --subs tesla.com | cut -d "/" -f 3 | sort -u
 ```
-- [**SubDomainizer**](https://github.com/nsonaniya2010/SubDomainizer) **&** [**subscraper**](https://github.com/Cillian-Collins/subscraper): Web'de JS dosyalarını arayıp oradan alt alan adlarını çıkarırlar.
+- [**SubDomainizer**](https://github.com/nsonaniya2010/SubDomainizer) **&** [**subscraper**](https://github.com/Cillian-Collins/subscraper): Web'de JS dosyalarını ararlar ve buradan alt alan adlarını çıkarırlar.
 ```bash
 # Get only subdomains from SubDomainizer
 python3 SubDomainizer.py -u https://tesla.com | grep tesla.com
@@ -315,15 +315,15 @@ python3 DomainTrail.py -d example.com
 - [**securitytrails.com**](https://securitytrails.com/) alt alanlar ve IP geçmişi aramak için ücretsiz bir API sunmaktadır.
 - [**chaos.projectdiscovery.io**](https://chaos.projectdiscovery.io/#/)
 
-Bu proje, **bug-bounty programlarıyla ilgili tüm alt alanları ücretsiz olarak** sunmaktadır. Bu verilere [chaospy](https://github.com/dr-0x0x/chaospy) kullanarak da erişebilirsiniz veya bu projenin kullandığı kapsamı [https://github.com/projectdiscovery/chaos-public-program-list](https://github.com/projectdiscovery/chaos-public-program-list) üzerinden de görebilirsiniz.
+Bu proje, **bug-bounty programlarıyla ilgili tüm alt alanları ücretsiz olarak** sunmaktadır. Bu verilere ayrıca [chaospy](https://github.com/dr-0x0x/chaospy) kullanarak veya bu projenin kullandığı kapsamı [https://github.com/projectdiscovery/chaos-public-program-list](https://github.com/projectdiscovery/chaos-public-program-list) erişerek ulaşabilirsiniz.
 
 Bu araçların birçokunun **karşılaştırmasını** burada bulabilirsiniz: [https://blog.blacklanternsecurity.com/p/subdomain-enumeration-tool-face-off](https://blog.blacklanternsecurity.com/p/subdomain-enumeration-tool-face-off)
 
 ### **DNS Brute force**
 
-Olası alt alan adlarını kullanarak DNS sunucularını brute-force ile yeni **alt alanlar** bulmaya çalışalım.
+Yeni **alt alanları** bulmak için DNS sunucularını olası alt alan adları ile brute-force yapmayı deneyelim.
 
-Bu işlem için bazı **yaygın alt alan adları kelime listelerine** ihtiyacınız olacak:
+Bu işlem için bazı **yaygın alt alan kelime listelerine** ihtiyacınız olacak:
 
 - [https://gist.github.com/jhaddix/86a06c5dc309d08580a018c66354a056](https://gist.github.com/jhaddix/86a06c5dc309d08580a018c66354a056)
 - [https://wordlists-cdn.assetnote.io/data/manual/best-dns-wordlist.txt](https://wordlists-cdn.assetnote.io/data/manual/best-dns-wordlist.txt)
@@ -345,7 +345,7 @@ grep -E "tesla.com. [0-9]+ IN A .+" /tmp/results.txt
 ```
 gobuster dns -d mysite.com -t 50 -w subdomains.txt
 ```
-- [**shuffledns**](https://github.com/projectdiscovery/shuffledns), go dilinde yazılmış `massdns` etrafında bir sarmalayıcıdır; geçerli alt alan adlarını aktif brute force kullanarak listelemenizi sağlar ve ayrıca alt alan adlarını joker karakter desteği ile çözümleyip kolay girdi-çıktı desteği sunar.
+- [**shuffledns**](https://github.com/projectdiscovery/shuffledns), `massdns` etrafında yazılmış bir go wrapper'ıdır ve aktif brute force kullanarak geçerli alt alan adlarını listelemenizi sağlar, ayrıca alt alan adlarını wildcard yönetimi ile çözümleyebilir ve kolay girdi-çıktı desteği sunar.
 ```
 shuffledns -d example.com -list example-subdomains.txt -r resolvers.txt
 ```
@@ -353,7 +353,7 @@ shuffledns -d example.com -list example-subdomains.txt -r resolvers.txt
 ```
 puredns bruteforce all.txt domain.com
 ```
-- [**aiodnsbrute**](https://github.com/blark/aiodnsbrute) asenkron olarak alan adlarını zorlamak için asyncio kullanır.
+- [**aiodnsbrute**](https://github.com/blark/aiodnsbrute) alan adlarını asenkron olarak zorlamak için asyncio kullanır.
 ```
 aiodnsbrute -r resolvers -w wordlist.txt -vv -t 1024 domain.com
 ```
@@ -366,7 +366,7 @@ Açık kaynaklar ve kaba kuvvet kullanarak alt alan adlarını bulduktan sonra, 
 cat subdomains.txt | dnsgen -
 ```
 - [**goaltdns**](https://github.com/subfinder/goaltdns): Verilen alan adları ve alt alan adları için permutasyonlar oluşturur.
-- goaltdns permutasyonlarını **wordlist** olarak [**buradan**](https://github.com/subfinder/goaltdns/blob/master/words.txt) alabilirsiniz.
+- goaltdns permutasyonlarını **wordlist** olarak **buradan** alabilirsiniz [**here**](https://github.com/subfinder/goaltdns/blob/master/words.txt).
 ```bash
 goaltdns -l subdomains.txt -w /tmp/words-permutations.txt -o /tmp/final-words-s3.txt
 ```
@@ -374,22 +374,22 @@ goaltdns -l subdomains.txt -w /tmp/words-permutations.txt -o /tmp/final-words-s3
 ```
 gotator -sub subdomains.txt -silent [-perm /tmp/words-permutations.txt]
 ```
-- [**altdns**](https://github.com/infosec-au/altdns): Alt alan adlarının permütasyonlarını oluşturmanın yanı sıra, bunları çözmeye de çalışabilir (ancak önceki yorumlanan araçları kullanmak daha iyidir).
-- altdns permütasyonlarını **wordlist** burada [**burada**](https://github.com/infosec-au/altdns/blob/master/words.txt) alabilirsiniz.
+- [**altdns**](https://github.com/infosec-au/altdns): Alt alan adlarının permütasyonlarını oluşturmanın yanı sıra, bunları çözmeye de çalışabilir (ancak daha önce bahsedilen araçları kullanmak daha iyidir).
+- altdns permütasyonlarını **wordlist** burada [**burada**](https://github.com/infosec-au/altdns/blob/master/words.txt) bulabilirsiniz.
 ```
 altdns -i subdomains.txt -w /tmp/words-permutations.txt -o /tmp/asd3
 ```
-- [**dmut**](https://github.com/bp0lr/dmut): Alt alan adlarının permütasyonlarını, mutasyonlarını ve değişikliklerini gerçekleştirmek için başka bir araç. Bu araç sonucu brute force ile elde edecektir (dns wild card'ı desteklemez).
+- [**dmut**](https://github.com/bp0lr/dmut): Alt alanların permütasyonlarını, mutasyonlarını ve değişikliklerini gerçekleştirmek için başka bir araç. Bu araç sonucu brute force ile elde edecektir (dns wild card'ı desteklemez).
 - dmut permütasyonları kelime listesini [**buradan**](https://raw.githubusercontent.com/bp0lr/dmut/main/words.txt) alabilirsiniz.
 ```bash
 cat subdomains.txt | dmut -d /tmp/words-permutations.txt -w 100 \
 --dns-errorLimit 10 --use-pb --verbose -s /tmp/resolvers-trusted.txt
 ```
-- [**alterx**](https://github.com/projectdiscovery/alterx)**:** Belirtilen kalıplara dayanarak bir alan adı temelinde **yeni potansiyel alt alan adı isimleri üretir** ve daha fazla alt alan adı keşfetmeye çalışır.
+- [**alterx**](https://github.com/projectdiscovery/alterx)**:** Belirtilen kalıplara dayanarak bir alan adı üzerinden **yeni potansiyel alt alan adı isimleri üretir** ve daha fazla alt alan adı keşfetmeye çalışır.
 
 #### Akıllı permütasyonlar üretimi
 
-- [**regulator**](https://github.com/cramppet/regulator): Daha fazla bilgi için bu [**yazıyı**](https://cramppet.github.io/regulator/index.html) okuyun, ancak temelde **keşfedilen alt alan adlarının** **ana parçalarını** alacak ve daha fazla alt alan adı bulmak için bunları karıştıracaktır.
+- [**regulator**](https://github.com/cramppet/regulator): Daha fazla bilgi için bu [**gönderiyi**](https://cramppet.github.io/regulator/index.html) okuyun, ancak temelde **keşfedilen alt alan adlarının** **ana parçalarını** alacak ve daha fazla alt alan adı bulmak için bunları karıştıracaktır.
 ```bash
 python3 main.py adobe.com adobe adobe.rules
 make_brute_list.sh adobe.rules adobe.brute
@@ -413,7 +413,7 @@ https://trickest.com/blog/full-subdomain-brute-force-discovery-using-workflow/
 
 ### **VHosts / Sanal Ana Bilgiler**
 
-Eğer bir IP adresinde **bir veya birkaç web sayfası** bulduysanız, **o IP'deki diğer alt alanları bulmaya çalışabilirsiniz**. Bunun için **OSINT kaynaklarında** bir IP'deki alan adlarını arayabilir veya **o IP'deki VHost alan adlarını brute-force yapabilirsiniz**.
+Eğer bir IP adresinde **bir veya birkaç web sayfası** bulduysanız, o IP'deki **diğer alt alanları bulmaya çalışabilirsiniz**. Bunun için **OSINT kaynaklarında** bir IP'deki alan adlarını arayabilir veya **o IP'deki VHost alan adlarını brute-force yapabilirsiniz**.
 
 #### OSINT
 
@@ -421,7 +421,7 @@ Bazı **VHosts'ları IP'lerde bulmak için** [**HostHunter**](https://github.com
 
 **Brute Force**
 
-Eğer bazı alt alanların bir web sunucusunda gizli olabileceğinden şüpheleniyorsanız, brute force yapmayı deneyebilirsiniz:
+Eğer bazı alt alanların bir web sunucusunda gizli olabileceğinden şüpheleniyorsanız, onu brute force yapmayı deneyebilirsiniz:
 ```bash
 ffuf -c -w /path/to/wordlist -u http://victim.com -H "Host: FUZZ.victim.com"
 
@@ -451,20 +451,20 @@ Ayrıca, bu noktada kapsam içindeki tüm alan adlarını bildiğiniz için, [**
 
 ### **Monitorization**
 
-Bir alan adının **yeni alt alanları** oluşturulup oluşturulmadığını **Certificate Transparency** Loglarını izleyerek **izleyebilirsiniz** [**sublert** ](https://github.com/yassineaboukir/sublert/blob/master/sublert.py) bunu yapar.
+Bir alan adının **yeni alt alanları** oluşturulup oluşturulmadığını **Certificate Transparency** Log'larını izleyerek **izleyebilirsiniz** [**sublert** ](https://github.com/yassineaboukir/sublert/blob/master/sublert.py) bunu yapar.
 
-### **Güvenlik açıklarını arama**
+### **Vulnerabilities Arama**
 
 Mümkün olan [**alt alan ele geçirmelerini**](../../pentesting-web/domain-subdomain-takeover.md#subdomain-takeover) kontrol edin.\
 Eğer **alt alan** bir **S3 bucket**'a işaret ediyorsa, [**izinleri kontrol edin**](../../network-services-pentesting/pentesting-web/buckets/index.html).
 
 Eğer keşif sırasında bulduğunuz varlıklardan farklı bir IP'ye sahip herhangi bir **alt alan** bulursanız, **temel bir güvenlik açığı taraması** (Nessus veya OpenVAS kullanarak) ve bazı [**port taramaları**](../pentesting-network/index.html#discovering-hosts-from-the-outside) **nmap/masscan/shodan** ile gerçekleştirmelisiniz. Hangi hizmetlerin çalıştığına bağlı olarak, **bu kitapta "saldırmak" için bazı ipuçları bulabilirsiniz**.\
-_Bazen alt alanın, müşterinin kontrolünde olmayan bir IP içinde barındırıldığını unutmayın, bu nedenle kapsamda değildir, dikkatli olun._
+_Dikkat edin ki bazen alt alan, müşterinin kontrolünde olmayan bir IP içinde barındırılmaktadır, bu nedenle kapsamda değildir, dikkatli olun._
 
 ## IP'ler
 
 Başlangıç adımlarında **bazı IP aralıkları, alan adları ve alt alanlar** bulmuş olabilirsiniz.\
-Artık bu aralıklardan **tüm IP'leri toplama** ve **alan adları/alt alanlar için (DNS sorguları)** zamanı.
+Artık bu aralıklardan **tüm IP'leri toplama** ve **alan adları/alt alanlar (DNS sorguları)** için **toplama** zamanı.
 
 Aşağıdaki **ücretsiz API'lerden** hizmetler kullanarak, **alan adları ve alt alanlar tarafından kullanılan önceki IP'leri** de bulabilirsiniz. Bu IP'ler hala müşteri tarafından sahiplenilmiş olabilir (ve [**CloudFlare bypass'larını**](../../network-services-pentesting/pentesting-web/uncovering-cloudflare.md) bulmanıza yardımcı olabilir).
 
@@ -472,37 +472,37 @@ Aşağıdaki **ücretsiz API'lerden** hizmetler kullanarak, **alan adları ve al
 
 Ayrıca, belirli bir IP adresine işaret eden alan adlarını kontrol etmek için [**hakip2host**](https://github.com/hakluke/hakip2host) aracını kullanabilirsiniz.
 
-### **Güvenlik açıklarını arama**
+### **Vulnerabilities Arama**
 
 **CDN'lere ait olmayan tüm IP'leri port taraması yapın** (çünkü burada ilginç bir şey bulma olasılığınız çok düşük). Keşfedilen çalışan hizmetlerde **güvenlik açıkları bulma** şansınız olabilir.
 
-**Host'ları tarama hakkında bir** [**rehber**](../pentesting-network/index.html) **bulun.**
+**Host'ları tarama hakkında bir** [**kılavuz**](../pentesting-network/index.html) **bulun.**
 
 ## Web sunucuları avı
 
 > Tüm şirketleri ve varlıklarını bulduk ve kapsam içindeki IP aralıklarını, alan adlarını ve alt alanları biliyoruz. Artık web sunucularını arama zamanı.
 
-Önceki adımlarda muhtemelen keşfedilen **IP'ler ve alan adları üzerinde bazı keşifler** yaptınız, bu nedenle **mümkün olan tüm web sunucularını** zaten bulmuş olabilirsiniz. Ancak, eğer bulmadıysanız, şimdi kapsam içinde **web sunucularını aramak için bazı hızlı ipuçlarını** göreceğiz.
+Önceki adımlarda muhtemelen keşfedilen **IP'ler ve alan adları üzerinde bazı keşifler** yaptınız, bu nedenle **mümkün olan tüm web sunucularını** zaten bulmuş olabilirsiniz. Ancak, bulmadıysanız, şimdi kapsam içinde web sunucularını aramak için bazı **hızlı ipuçlarını** göreceğiz.
 
 Lütfen, bunun **web uygulamaları keşfine yönelik** olacağını unutmayın, bu nedenle **güvenlik açığı** ve **port taraması** da yapmalısınız (**kapsam tarafından izin veriliyorsa**).
 
-**Web** sunucularına ilişkin **açık portları** keşfetmek için [**masscan** ile hızlı bir yöntem burada**](../pentesting-network/index.html#http-port-discovery) bulunmaktadır.\
-Web sunucularını aramak için başka bir dostça araç [**httprobe**](https://github.com/tomnomnom/httprobe)**,** [**fprobe**](https://github.com/theblackturtle/fprobe) ve [**httpx**](https://github.com/projectdiscovery/httpx)dir. Sadece bir alan adı listesi geçiyorsunuz ve port 80 (http) ve 443 (https) ile bağlantı kurmaya çalışıyor. Ayrıca, diğer portları denemesi için belirtebilirsiniz:
+**Web** sunucularına ilişkin **açık portları** keşfetmek için [**masscan** ile hızlı bir yöntem**](../pentesting-network/index.html#http-port-discovery) burada bulunabilir.\
+Web sunucularını aramak için başka bir dost araç [**httprobe**](https://github.com/tomnomnom/httprobe)**,** [**fprobe**](https://github.com/theblackturtle/fprobe) ve [**httpx**](https://github.com/projectdiscovery/httpx)dir. Sadece bir alan adı listesi geçiyorsunuz ve port 80 (http) ve 443 (https) ile bağlantı kurmaya çalışıyor. Ayrıca, diğer portları denemesi için belirtebilirsiniz:
 ```bash
 cat /tmp/domains.txt | httprobe #Test all domains inside the file for port 80 and 443
 cat /tmp/domains.txt | httprobe -p http:8080 -p https:8443 #Check port 80, 443 and 8080 and 8443
 ```
 ### **Ekran Görüntüleri**
 
-Artık kapsamda bulunan **tüm web sunucularını** (şirketin **IP'leri** ve tüm **alan adları** ile **alt alan adları** arasında) keşfettiğinize göre, muhtemelen **nereden başlayacağınızı bilmiyorsunuz**. Bu yüzden, basit tutalım ve hepsinin ekran görüntülerini almaya başlayalım. **Ana sayfaya** bir **göz atarak**, daha **savunmasız** olma eğiliminde olan **garip** uç noktalar bulabilirsiniz.
+Artık kapsamda bulunan **tüm web sunucularını** (şirketin **IP'leri** ve tüm **alan adları** ve **alt alan adları** arasında) keşfettiğinize göre, muhtemelen **nereden başlayacağınızı bilmiyorsunuz**. Bu yüzden, basit tutalım ve hepsinin ekran görüntülerini almaya başlayalım. **Ana sayfaya** sadece **bir göz atarak**, daha **savunmasız** olma eğiliminde olan **garip** uç noktalar bulabilirsiniz.
 
 Önerilen fikri gerçekleştirmek için [**EyeWitness**](https://github.com/FortyNorthSecurity/EyeWitness), [**HttpScreenshot**](https://github.com/breenmachine/httpscreenshot), [**Aquatone**](https://github.com/michenriksen/aquatone), [**Shutter**](https://shutter-project.org/downloads/third-party-packages/), [**Gowitness**](https://github.com/sensepost/gowitness) veya [**webscreenshot**](https://github.com/maaaaz/webscreenshot)**'i** kullanabilirsiniz.
 
-Ayrıca, **screenshot**'lar üzerinde çalışmak için [**eyeballer**](https://github.com/BishopFox/eyeballer) kullanarak **zayıf noktalar** içerebilecek olanları belirleyebilirsiniz.
+Ayrıca, ardından [**eyeballer**](https://github.com/BishopFox/eyeballer) kullanarak tüm **ekran görüntülerini** inceleyebilir ve **hangi alanların muhtemelen zafiyet içerebileceğini** belirleyebilirsiniz.
 
 ## Kamu Bulut Varlıkları
 
-Bir şirkete ait potansiyel bulut varlıklarını bulmak için, o şirketi tanımlayan bir **anahtar kelime listesi** ile başlamalısınız. Örneğin, bir kripto şirketi için şu kelimeleri kullanabilirsiniz: `"crypto", "wallet", "dao", "<domain_name>", <"subdomain_names">`.
+Bir şirkete ait potansiyel bulut varlıklarını bulmak için **o şirketi tanımlayan anahtar kelimelerle bir listeye başlamalısınız**. Örneğin, bir kripto şirketi için şu kelimeleri kullanabilirsiniz: `"crypto", "wallet", "dao", "<domain_name>", <"subdomain_names">`.
 
 Ayrıca, **kova** içinde kullanılan **yaygın kelimelerin** kelime listelerine de ihtiyacınız olacak:
 
@@ -512,26 +512,26 @@ Ayrıca, **kova** içinde kullanılan **yaygın kelimelerin** kelime listelerine
 
 Sonra, bu kelimelerle **permutasyonlar** oluşturmalısınız (daha fazla bilgi için [**İkinci Tur DNS Brute-Force**](#second-dns-bruteforce-round) bölümüne bakın).
 
-Elde edilen kelime listeleri ile [**cloud_enum**](https://github.com/initstring/cloud_enum)**,** [**CloudScraper**](https://github.com/jordanpotti/CloudScraper)**,** [**cloudlist**](https://github.com/projectdiscovery/cloudlist) **ve** [**S3Scanner**](https://github.com/sa7mon/S3Scanner)** gibi araçlar kullanabilirsiniz.**
+Elde edilen kelime listeleriyle [**cloud_enum**](https://github.com/initstring/cloud_enum)**,** [**CloudScraper**](https://github.com/jordanpotti/CloudScraper)**,** [**cloudlist**](https://github.com/projectdiscovery/cloudlist) **ve** [**S3Scanner**](https://github.com/sa7mon/S3Scanner)** gibi araçları kullanabilirsiniz.**
 
-Bulut Varlıkları ararken, yalnızca AWS'deki kovalara değil, **daha fazlasına** da bakmalısınız.
+Bulut Varlıkları ararken, **AWS'deki kovalardan daha fazlasını aramalısınız**.
 
-### **Zayıf Noktaları Arama**
+### **Zafiyet Arayışı**
 
-**Açık kova veya bulut işlevleri** gibi şeyler bulursanız, bunlara **erişmeli** ve size ne sunduklarını görmeli ve bunları kötüye kullanıp kullanamayacağınızı denemelisiniz.
+**Açık kova veya maruz kalmış bulut işlevleri** gibi şeyler bulursanız, **onlara erişmeli** ve size ne sunduklarını görmeli ve bunları kötüye kullanıp kullanamayacağınızı denemelisiniz.
 
 ## E-postalar
 
-Kapsamdaki **alan adları** ve **alt alan adları** ile, **e-postaları aramaya başlamak için** ihtiyacınız olan her şeye sahipsiniz. Bir şirketin e-postalarını bulmak için en iyi çalışan **API'ler** ve **araçlar** şunlardır:
+Kapsamdaki **alan adları** ve **alt alan adları** ile, **e-postaları aramaya başlamak için ihtiyacınız olan her şeye sahipsiniz**. Bir şirketin e-postalarını bulmak için en iyi çalışan **API'ler** ve **araçlar** şunlardır:
 
-- [**theHarvester**](https://github.com/laramies/theHarvester) - API'ler ile
+- [**theHarvester**](https://github.com/laramies/theHarvester) - API'lerle
 - [**https://hunter.io/**](https://hunter.io/) API'si (ücretsiz sürüm)
 - [**https://app.snov.io/**](https://app.snov.io/) API'si (ücretsiz sürüm)
 - [**https://minelead.io/**](https://minelead.io/) API'si (ücretsiz sürüm)
 
-### **Zayıf Noktaları Arama**
+### **Zafiyet Arayışı**
 
-E-postalar, **web girişleri ve kimlik doğrulama hizmetleri** (SSH gibi) için **brute-force** yaparken faydalı olacaktır. Ayrıca, **phishing** için de gereklidir. Ayrıca, bu API'ler e-posta sahibinin arkasındaki kişi hakkında daha fazla **bilgi** sağlayacaktır, bu da phishing kampanyası için faydalıdır.
+E-postalar, **web girişleri ve kimlik doğrulama hizmetleri** (SSH gibi) için **brute-force** yaparken faydalı olacaktır. Ayrıca, **phishing** için de gereklidir. Ayrıca, bu API'ler e-posta arkasındaki kişi hakkında daha fazla **bilgi** sağlayacaktır, bu da phishing kampanyası için faydalıdır.
 
 ## Kimlik Bilgisi Sızıntıları
 
@@ -540,24 +540,24 @@ E-postalar, **web girişleri ve kimlik doğrulama hizmetleri** (SSH gibi) için 
 - [https://leak-lookup.com](https://leak-lookup.com/account/login)
 - [https://www.dehashed.com/](https://www.dehashed.com/)
 
-### **Zayıf Noktaları Arama**
+### **Zafiyet Arayışı**
 
 **Geçerli sızdırılmış** kimlik bilgileri bulursanız, bu çok kolay bir kazanımdır.
 
-## Gizli Bilgiler Sızıntıları
+## Gizli Bilgi Sızıntıları
 
-Kimlik bilgisi sızıntıları, **hassas bilgilerin sızdırıldığı ve satıldığı** şirketlerin hacklenmesi ile ilgilidir. Ancak, şirketler, bu veritabanlarında yer almayan **diğer sızıntılardan** da etkilenebilir:
+Kimlik bilgisi sızıntıları, **hassas bilgilerin sızdırıldığı ve satıldığı** şirketlerin hacklenmesiyle ilgilidir. Ancak, şirketler, bu veritabanlarında yer almayan **diğer sızıntılardan** da etkilenebilir:
 
 ### Github Sızıntıları
 
-Kimlik bilgileri ve API'ler, **şirketin** veya o github şirketinde çalışan **kullanıcıların** **açık havuzlarında** sızdırılabilir.\
-Bir **kuruluşun** ve onun **geliştiricilerinin** tüm **açık reposunu** **indirmek** için [**Leakos**](https://github.com/carlospolop/Leakos) aracını kullanabilir ve bunlar üzerinde otomatik olarak [**gitleaks**](https://github.com/zricethezav/gitleaks) çalıştırabilirsiniz.
+Kimlik bilgileri ve API'ler, **şirketin** veya o github şirketinde çalışan **kullanıcıların** **açık kaynaklı depolarında** sızdırılabilir.\
+Bir **organizasyonun** ve **geliştiricilerinin** tüm **açık reposunu** **indirmek** için [**Leakos**](https://github.com/carlospolop/Leakos) aracını kullanabilir ve bunlar üzerinde otomatik olarak [**gitleaks**](https://github.com/zricethezav/gitleaks) çalıştırabilirsiniz.
 
-**Leakos**, bazen **web sayfalarının da gizli bilgiler** içerebileceğinden, kendisine **sağlanan URL'ler** üzerinden **gitleaks** çalıştırmak için de kullanılabilir.
+**Leakos**, bazen **web sayfalarının da gizli bilgiler içerebileceği** için, kendisine **sağlanan URL'ler** üzerinden **gitleaks** çalıştırmak için de kullanılabilir.
 
 #### Github Dorks
 
-Ayrıca, saldırdığınız kuruluşta arayabileceğiniz potansiyel **github dorks** için bu **sayfayı** kontrol edin:
+Ayrıca, saldırdığınız organizasyonda arayabileceğiniz potansiyel **github dorks** için bu **sayfayı** kontrol edin:
 
 {{#ref}}
 github-leaked-secrets.md
@@ -565,22 +565,22 @@ github-leaked-secrets.md
 
 ### Paste Sızıntıları
 
-Bazen saldırganlar veya sadece çalışanlar, **şirket içeriğini bir paste sitesinde** **yayınlayabilirler**. Bu, **hassas bilgiler** içerebilir veya içermeyebilir, ancak aramak için çok ilginçtir.\
-Birden fazla paste sitesinde aynı anda aramak için [**Pastos**](https://github.com/carlospolop/Pastos) aracını kullanabilirsiniz.
+Bazen saldırganlar veya sadece çalışanlar, **şirket içeriğini bir paste sitesinde yayınlayabilir**. Bu, **hassas bilgiler** içerebilir veya içermeyebilir, ancak aramak için çok ilginçtir.\
+Birden fazla paste sitesinde aynı anda arama yapmak için [**Pastos**](https://github.com/carlospolop/Pastos) aracını kullanabilirsiniz.
 
 ### Google Dorks
 
-Eski ama altın değerindeki google dorks, **orada olmaması gereken** **açık bilgileri** bulmak için her zaman faydalıdır. Tek sorun, [**google-hacking-database**](https://www.exploit-db.com/google-hacking-database) içinde çalıştırılamayacak kadar çok **binlerce** sorgu bulunmasıdır. Bu yüzden, en sevdiğiniz 10 tanesini alabilir veya hepsini çalıştırmak için [**Gorks**](https://github.com/carlospolop/Gorks) gibi bir **araç** kullanabilirsiniz.
+Eski ama altın değerindeki google dorks, **orada olmaması gereken maruz kalmış bilgileri** bulmak için her zaman faydalıdır. Tek sorun, [**google-hacking-database**](https://www.exploit-db.com/google-hacking-database) içinde manuel olarak çalıştıramayacağınız birkaç **binlerce** olası sorgu bulunmasıdır. Bu yüzden, en sevdiğiniz 10 tanesini alabilir veya hepsini çalıştırmak için [**Gorks**](https://github.com/carlospolop/Gorks) gibi bir **araç** kullanabilirsiniz.
 
-_Not: Tüm veritabanını düzenli Google tarayıcısı kullanarak çalıştırmayı bekleyen araçlar asla bitmeyecek, çünkü Google sizi çok kısa sürede engelleyecektir._
+_Not: Tüm veritabanını normal Google tarayıcısını kullanarak çalıştırmayı bekleyen araçlar asla bitmeyecek, çünkü Google sizi çok kısa sürede engelleyecektir._
 
-### **Zayıf Noktaları Arama**
+### **Zafiyet Arayışı**
 
 **Geçerli sızdırılmış** kimlik bilgileri veya API token'ları bulursanız, bu çok kolay bir kazanımdır.
 
-## Kamu Kod Zayıflıkları
+## Kamu Kod Zafiyetleri
 
-Eğer şirketin **açık kaynak kodu** olduğunu bulduysanız, bunu **analiz edebilir** ve üzerinde **zayıf noktalar** arayabilirsiniz.
+Eğer şirketin **açık kaynak kodu** olduğunu bulursanız, bunu **analiz edebilir** ve üzerinde **zafiyetler** arayabilirsiniz.
 
 **Dile bağlı olarak**, kullanabileceğiniz farklı **araçlar** vardır:
 
@@ -588,15 +588,15 @@ Eğer şirketin **açık kaynak kodu** olduğunu bulduysanız, bunu **analiz ede
 ../../network-services-pentesting/pentesting-web/code-review-tools.md
 {{#endref}}
 
-Ayrıca, **açık havuzları taramanıza** olanak tanıyan ücretsiz hizmetler de vardır:
+Ayrıca, **açık kaynaklı depoları taramanıza** olanak tanıyan ücretsiz hizmetler de vardır:
 
 - [**Snyk**](https://app.snyk.io/)
 
 ## [**Web Pentesting Metodolojisi**](../../network-services-pentesting/pentesting-web/index.html)
 
-**Hata avcıları** tarafından bulunan **zayıf noktaların** çoğu **web uygulamalarında** yer almaktadır, bu yüzden bu noktada bir **web uygulaması test metodolojisi** hakkında konuşmak istiyorum ve bu bilgiyi [**burada bulabilirsiniz**](../../network-services-pentesting/pentesting-web/index.html).
+**Hata avcıları tarafından bulunan zafiyetlerin** çoğunluğu **web uygulamalarında** yer almaktadır, bu yüzden bu noktada bir **web uygulaması test metodolojisi** hakkında konuşmak istiyorum ve bu bilgiyi [**burada bulabilirsiniz**](../../network-services-pentesting/pentesting-web/index.html).
 
-Ayrıca, [**Web Otomatik Tarayıcıları açık kaynak araçları**](../../network-services-pentesting/pentesting-web/index.html#automatic-scanners) bölümüne özel bir atıfta bulunmak istiyorum, çünkü, çok hassas zayıf noktaları bulmalarını beklememelisiniz, ancak bazı başlangıç web bilgileri elde etmek için **iş akışlarına** uygulamak için faydalıdırlar.
+Ayrıca, [**Web Otomatik Tarayıcıları açık kaynak araçları**](../../network-services-pentesting/pentesting-web/index.html#automatic-scanners) bölümüne özel bir atıfta bulunmak istiyorum, çünkü, çok hassas zafiyetler bulmalarını beklememelisiniz, ancak **bazı başlangıç web bilgileri elde etmek için iş akışlarına entegre etmekte faydalıdırlar.**
 
 ## Tekrar
 
@@ -605,14 +605,14 @@ Ayrıca, [**Web Otomatik Tarayıcıları açık kaynak araçları**](../../netwo
 Artık şunları buldunuz:
 
 1. Kapsamdaki **tüm şirketleri** buldunuz
-2. Şirketlere ait **tüm varlıkları** buldunuz (ve kapsamda bazı zayıflık taramaları gerçekleştirdiniz)
+2. Şirketlere ait **tüm varlıkları** buldunuz (ve kapsamda ise bazı zafiyet taramaları gerçekleştirdiniz)
 3. Şirketlere ait **tüm alan adlarını** buldunuz
 4. Alan adlarının **tüm alt alan adlarını** buldunuz (herhangi bir alt alan ele geçirme?)
 5. Kapsamdaki **tüm IP'leri** (CDN'lerden ve **CDN'lerden olmayan**) buldunuz.
 6. **Tüm web sunucularını** buldunuz ve bunların **ekran görüntülerini** aldınız (daha derin bir incelemeyi gerektiren garip bir şey var mı?)
 7. Şirkete ait **potansiyel kamu bulut varlıklarını** buldunuz.
 8. **E-postalar**, **kimlik bilgisi sızıntıları** ve **gizli sızıntılar** size **çok kolay bir büyük kazanç** sağlayabilir.
-9. Bulduğunuz **tüm webleri pentest ettiniz**
+9. Bulduğunuz **tüm web sitelerini pentest ettiniz**
 
 ## **Tam Recon Otomatik Araçlar**
 

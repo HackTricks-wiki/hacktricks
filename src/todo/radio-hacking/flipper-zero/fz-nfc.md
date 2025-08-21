@@ -15,7 +15,7 @@ RFID ve NFC hakkında bilgi için aşağıdaki sayfayı kontrol edin:
 > [!CAUTION]
 > NFC kartları dışında Flipper Zero, birkaç **Mifare** Classic ve Ultralight ile **NTAG** gibi **diğer yüksek frekanslı kart türlerini** destekler.
 
-Yeni NFC kart türleri desteklenen kartlar listesine eklenecektir. Flipper Zero, aşağıdaki **NFC kart türü A** (ISO 14443A) destekler:
+Yeni NFC kart türleri desteklenen kartlar listesine eklenecektir. Flipper Zero, aşağıdaki **NFC kart türü A**'yı (ISO 14443A) destekler:
 
 - **Banka kartları (EMV)** — yalnızca UID, SAK ve ATQA'yı okumak, kaydetmeden.
 - **Bilinmeyen kartlar** — (UID, SAK, ATQA) okuyup bir UID'yi taklit edebilir.
@@ -42,7 +42,7 @@ Bilinmeyen kart okuma ekranıBilinmeyen NFC kartları için Flipper Zero yalnız
 
 ### NFC kart türleri B, F ve V <a href="#wyg51" id="wyg51"></a>
 
-**NFC kart türleri B, F ve V** için Flipper Zero yalnızca **bir UID'yi okuyup görüntüleyebilir** ve kaydedemez.
+**NFC kart türleri B, F ve V** için Flipper Zero yalnızca **bir UID'yi okuyup görüntüleyebilir** ve bunu kaydedemez.
 
 <figure><img src="https://archbee.imgix.net/3StCFqarJkJQZV-7N79yY/zBU55Fyj50TFO4U7S-OXH_screenshot-2022-08-12-at-182540.png?auto=format&ixlib=react-9.1.1&h=1080&w=2704" alt=""><figcaption></figcaption></figure>
 
@@ -52,20 +52,20 @@ NFC hakkında bir giriş için [**bu sayfayı okuyun**](../pentesting-rfid.md#hi
 
 ### Oku
 
-Flipper Zero **NFC kartlarını okuyabilir**, ancak **ISO 14443'e dayanan tüm protokolleri anlamaz**. Ancak, **UID düşük seviyeli bir özellik olduğundan**, **UID zaten okunmuşken, yüksek seviyeli veri aktarım protokolü hala bilinmiyor** durumunda kalabilirsiniz. UID'yi yetkilendirme için kullanan ilkel okuyucular için Flipper ile UID'yi okuyabilir, taklit edebilir ve manuel olarak girebilirsiniz.
+Flipper Zero **NFC kartlarını okuyabilir**, ancak **ISO 14443'e dayanan tüm protokolleri anlamaz**. Ancak, **UID düşük seviyeli bir özellik olduğundan**, **UID zaten okunmuş olabilir, ancak yüksek seviyeli veri aktarım protokolü hala bilinmiyor olabilir**. UID'yi yetkilendirme için kullanan ilkel okuyucular için Flipper ile UID'yi okuyabilir, taklit edebilir ve manuel olarak girebilirsiniz.
 
 #### UID Okuma VS İçerideki Veriyi Okuma <a href="#reading-the-uid-vs-reading-the-data-inside" id="reading-the-uid-vs-reading-the-data-inside"></a>
 
 <figure><img src="../../../images/image (217).png" alt=""><figcaption></figcaption></figure>
 
-Flipper'da, 13.56 MHz etiketlerini okuma iki parçaya ayrılabilir:
+Flipper'da 13.56 MHz etiketlerini okumak iki parçaya ayrılabilir:
 
 - **Düşük seviyeli okuma** — yalnızca UID, SAK ve ATQA'yı okur. Flipper, karttan okunan bu veriye dayanarak yüksek seviyeli protokolü tahmin etmeye çalışır. Bununla %100 emin olamazsınız, çünkü bu belirli faktörlere dayanan bir varsayımdır.
-- **Yüksek seviyeli okuma** — kartın belleğinden belirli bir yüksek seviyeli protokol kullanarak verileri okur. Bu, bir Mifare Ultralight'tan veri okumak, bir Mifare Classic'ten sektörleri okumak veya PayPass/Apple Pay'den kartın özelliklerini okumak olacaktır.
+- **Yüksek seviyeli okuma** — kartın belleğinden belirli bir yüksek seviyeli protokol kullanarak verileri okur. Bu, bir Mifare Ultralight üzerindeki verileri okumak, bir Mifare Classic'ten sektörleri okumak veya PayPass/Apple Pay'den kartın özelliklerini okumak anlamına gelir.
 
 ### Belirli Okuma
 
-Flipper Zero, düşük seviyeli verilerden kart türünü bulamıyorsa, `Ekstra Eylemler` bölümünde `Belirli Kart Türünü Oku` seçeneğini seçebilir ve **manuel olarak** **okumak istediğiniz kart türünü belirtebilirsiniz**.
+Flipper Zero, düşük seviyeli verilerden kart türünü bulamıyorsa, `Ekstra Eylemler` bölümünde `Belirli Kart Türünü Oku` seçeneğini seçebilir ve **manuel olarak okumak istediğiniz kart türünü belirtebilirsiniz**.
 
 #### EMV Banka Kartları (PayPass, payWave, Apple Pay, Google Pay) <a href="#emv-bank-cards-paypass-paywave-apple-pay-google-pay" id="emv-bank-cards-paypass-paywave-apple-pay-google-pay"></a>
 

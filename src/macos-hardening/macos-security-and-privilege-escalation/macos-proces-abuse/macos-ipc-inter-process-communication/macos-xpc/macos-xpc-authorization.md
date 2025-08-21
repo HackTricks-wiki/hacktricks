@@ -6,7 +6,7 @@
 
 Apple, bağlanan işlemin **açık bir XPC yöntemini çağırma izinlerine sahip olup olmadığını** doğrulamak için başka bir yol önerir.
 
-Bir uygulama **ayrılmış bir kullanıcı olarak eylemler gerçekleştirmesi** gerektiğinde, genellikle uygulamayı ayrıcalıklı bir kullanıcı olarak çalıştırmak yerine, bu eylemleri gerçekleştirmek için uygulamadan çağrılabilecek bir XPC hizmeti olarak kök olarak bir HelperTool yükler. Ancak, hizmeti çağıran uygulamanın yeterli yetkilendirmeye sahip olması gerekir.
+Bir uygulama **ayrılmış bir kullanıcı olarak eylemler gerçekleştirmesi** gerektiğinde, genellikle uygulamayı ayrıcalıklı bir kullanıcı olarak çalıştırmak yerine, bu eylemleri gerçekleştirmek için uygulamadan çağrılabilecek bir XPC hizmeti olarak kök olarak bir HelperTool kurar. Ancak, hizmeti çağıran uygulamanın yeterli yetkilendirmeye sahip olması gerekir.
 
 ### ShouldAcceptNewConnection her zaman YES
 
@@ -176,11 +176,11 @@ Bu, bu sürecin sonunda `commandInfo` içinde belirtilen izinlerin `/var/db/auth
 
 Bir hakkın kimler tarafından erişilebileceğini belirtmek için farklı kapsamlar vardır. Bunlardan bazıları [AuthorizationDB.h](https://github.com/aosm/Security/blob/master/Security/libsecurity_authorization/lib/AuthorizationDB.h) içinde tanımlanmıştır (hepsini [burada bulabilirsiniz](https://www.dssw.co.uk/reference/authorization-rights/)), ancak özet olarak:
 
-<table><thead><tr><th width="284.3333333333333">Ad</th><th width="165">Değer</th><th>Açıklama</th></tr></thead><tbody><tr><td>kAuthorizationRuleClassAllow</td><td>allow</td><td>Herkes</td></tr><tr><td>kAuthorizationRuleClassDeny</td><td>deny</td><td>Hiç kimse</td></tr><tr><td>kAuthorizationRuleIsAdmin</td><td>is-admin</td><td>Mevcut kullanıcı bir admin olmalıdır (admin grubunda)</td></tr><tr><td>kAuthorizationRuleAuthenticateAsSessionUser</td><td>authenticate-session-owner</td><td>Kullanıcıdan kimlik doğrulaması yapması istenir.</td></tr><tr><td>kAuthorizationRuleAuthenticateAsAdmin</td><td>authenticate-admin</td><td>Kullanıcıdan kimlik doğrulaması yapması istenir. Admin olmalıdır (admin grubunda)</td></tr><tr><td>kAuthorizationRightRule</td><td>rule</td><td>Kural belirtin</td></tr><tr><td>kAuthorizationComment</td><td>comment</td><td>Hakkın üzerine bazı ek yorumlar belirtin</td></tr></tbody></table>
+<table><thead><tr><th width="284.3333333333333">Ad</th><th width="165">Değer</th><th>Açıklama</th></tr></thead><tbody><tr><td>kAuthorizationRuleClassAllow</td><td>allow</td><td>Herkes</td></tr><tr><td>kAuthorizationRuleClassDeny</td><td>deny</td><td>Hiç kimse</td></tr><tr><td>kAuthorizationRuleIsAdmin</td><td>is-admin</td><td>Mevcut kullanıcı bir admin olmalıdır (admin grubunda)</td></tr><tr><td>kAuthorizationRuleAuthenticateAsSessionUser</td><td>authenticate-session-owner</td><td>Kullanıcıdan kimlik doğrulaması yapması istenir.</td></tr><tr><td>kAuthorizationRuleAuthenticateAsAdmin</td><td>authenticate-admin</td><td>Kullanıcıdan kimlik doğrulaması yapması istenir. Admin olmalıdır (admin grubunda)</td></tr><tr><td>kAuthorizationRightRule</td><td>rule</td><td>Kuralları belirtin</td></tr><tr><td>kAuthorizationComment</td><td>comment</td><td>Hakkın üzerine bazı ek yorumlar belirtin</td></tr></tbody></table>
 
 ### Hakların Doğrulanması
 
-`HelperTool/HelperTool.m` içinde **`readLicenseKeyAuthorization`** fonksiyonu, çağrının **böyle bir yöntemi** **çalıştırmak** için yetkilendirilip yetkilendirilmediğini kontrol eder ve **`checkAuthorization`** fonksiyonunu çağırır. Bu fonksiyon, çağıran süreç tarafından gönderilen **authData**'nın **doğru formatta** olup olmadığını kontrol eder ve ardından belirli yöntemi çağırmak için **neye ihtiyaç olduğunu** kontrol eder. Her şey yolunda giderse, **dönen `error` `nil` olacaktır**:
+`HelperTool/HelperTool.m` içinde **`readLicenseKeyAuthorization`** fonksiyonu, çağrıyı yapanın **böyle bir yöntemi çalıştırmak için yetkili olup olmadığını** kontrol eder ve **`checkAuthorization`** fonksiyonunu çağırır. Bu fonksiyon, çağrıyı yapan süreç tarafından gönderilen **authData**'nın **doğru formatta** olup olmadığını kontrol eder ve ardından belirli bir yöntemi çağırmak için **neye ihtiyaç olduğunu** kontrol eder. Her şey yolunda giderse, **dönen `error` `nil` olacaktır**:
 ```objectivec
 - (NSError *)checkAuthorization:(NSData *)authData command:(SEL)command
 {
@@ -228,9 +228,9 @@ assert(junk == errAuthorizationSuccess);
 return error;
 }
 ```
-Not edin ki **o yöntemi çağırma hakkını almak için gereksinimleri kontrol etmek** amacıyla `authorizationRightForCommand` fonksiyonu sadece daha önceki yorum nesnesi **`commandInfo`**'yu kontrol edecektir. Ardından, **`AuthorizationCopyRights`** fonksiyonunu çağırarak **fonksiyonu çağırma haklarına sahip olup olmadığını** kontrol edecektir (bayrakların kullanıcı ile etkileşime izin verdiğini unutmayın).
+Not edin ki **o yöntemi çağırma hakkını elde etmek için gereksinimleri kontrol etmek** amacıyla `authorizationRightForCommand` fonksiyonu sadece daha önceki yorum nesnesini **`commandInfo`** kontrol edecektir. Ardından, fonksiyonu çağırma **hakkına sahip olup olmadığını kontrol etmek için** **`AuthorizationCopyRights`** çağrılacaktır (bayrakların kullanıcı ile etkileşime izin verdiğini unutmayın).
 
-Bu durumda, `readLicenseKeyAuthorization` fonksiyonunu çağırmak için `kCommandKeyAuthRightDefault` değeri `@kAuthorizationRuleClassAllow` olarak tanımlanmıştır. Yani **herkes bunu çağırabilir**.
+Bu durumda, `readLicenseKeyAuthorization` fonksiyonunu çağırmak için `kCommandKeyAuthRightDefault` `@kAuthorizationRuleClassAllow` olarak tanımlanmıştır. Yani **herkes bunu çağırabilir**.
 
 ### DB Bilgileri
 
@@ -240,7 +240,7 @@ sudo sqlite3 /var/db/auth.db
 SELECT name FROM rules;
 SELECT name FROM rules WHERE name LIKE '%safari%';
 ```
-Sonra, bu hakka kimin erişebileceğini okuyabilirsiniz:
+Sonra, bu hakka kimin erişebileceğini şu şekilde okuyabilirsiniz:
 ```bash
 security authorizationdb read com.apple.safaridriver.allow
 ```
@@ -250,9 +250,9 @@ security authorizationdb read com.apple.safaridriver.allow
 
 1. **'authenticate-user': 'false'**
 - Bu en doğrudan anahtardır. `false` olarak ayarlandığında, bir kullanıcının bu hakkı elde etmek için kimlik doğrulaması sağlaması gerekmediğini belirtir.
-- Bu, kullanıcının ait olması gereken 2 aşağıdaki ile **birlikte** kullanılır.
+- Bu, kullanıcının ait olması gereken bir grup ile birlikte **aşağıdaki 2'den biriyle** kombinasyon halinde kullanılır.
 2. **'allow-root': 'true'**
-- Bir kullanıcı root kullanıcı olarak çalışıyorsa (yükseltilmiş izinlere sahip) ve bu anahtar `true` olarak ayarlandıysa, root kullanıcı bu hakkı daha fazla kimlik doğrulaması olmadan elde edebilir. Ancak genellikle, root kullanıcı statüsüne ulaşmak zaten kimlik doğrulaması gerektirdiğinden, bu çoğu kullanıcı için "kimlik doğrulaması yok" senaryosu değildir.
+- Bir kullanıcı root kullanıcı olarak çalışıyorsa (yükseltilmiş izinlere sahip) ve bu anahtar `true` olarak ayarlandıysa, root kullanıcı bu hakkı daha fazla kimlik doğrulaması olmadan elde edebilir. Ancak, genellikle root kullanıcı statüsüne ulaşmak zaten kimlik doğrulaması gerektirdiğinden, bu çoğu kullanıcı için "kimlik doğrulaması yok" senaryosu değildir.
 3. **'session-owner': 'true'**
 - `true` olarak ayarlandığında, oturumun sahibi (şu anda oturum açmış kullanıcı) otomatik olarak bu hakkı alır. Kullanıcı zaten oturum açmışsa, bu ek kimlik doğrulamasını atlayabilir.
 4. **'shared': 'true'**
@@ -273,7 +273,7 @@ authenticate-session-owner, authenticate-session-owner-or-admin, authenticate-se
 
 ### EvenBetterAuthorization'ın Kullanılıp Kullanılmadığını Kontrol Etme
 
-Eğer **`[HelperTool checkAuthorization:command:]`** fonksiyonunu bulursanız, muhtemelen süreç daha önce bahsedilen yetkilendirme şemasını kullanıyordur:
+Eğer **`[HelperTool checkAuthorization:command:]`** fonksiyonunu bulursanız, muhtemelen süreç daha önce bahsedilen yetkilendirme şemasını kullanıyor:
 
 <figure><img src="../../../../../images/image (42).png" alt=""><figcaption></figcaption></figure>
 
@@ -285,11 +285,11 @@ Kullanıcı etkileşimi olmadan bazı ayrıcalıklı eylemleri çağırmak için
 
 Sonra, XPC servisi ile iletişim kurabilmek için protokol şemasını bulmanız gerekiyor.
 
-**`shouldAcceptNewConnection`** fonksiyonu, dışa aktarılan protokolü belirtir:
+**`shouldAcceptNewConnection`** fonksiyonu, dışa aktarılan protokolü gösterir:
 
 <figure><img src="../../../../../images/image (44).png" alt=""><figcaption></figcaption></figure>
 
-Bu durumda, EvenBetterAuthorizationSample'daki ile aynıyız, [**bu satıra bakın**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L94).
+Bu durumda, EvenBetterAuthorizationSample'daki ile aynıyız, [**bu satırı kontrol edin**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L94).
 
 Kullanılan protokolün adını bildiğinizde, **başlık tanımını dökme** işlemini gerçekleştirmek mümkündür:
 ```bash
@@ -330,7 +330,7 @@ Bu örnekte oluşturulur:
 
 - Fonksiyonlarla birlikte protokolün tanımı
 - Erişim istemek için kullanılacak boş bir auth
-- XPC servisine bir bağlantı
+- XPC hizmetine bir bağlantı
 - Bağlantı başarılıysa fonksiyona bir çağrı
 ```objectivec
 // gcc -framework Foundation -framework Security expl.m -o expl

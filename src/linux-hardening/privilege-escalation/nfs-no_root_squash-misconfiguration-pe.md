@@ -7,8 +7,8 @@
 NFS genellikle (özellikle linux'ta) dosyalara erişim sağlamak için istemci tarafından belirtilen `uid` ve `gid`'ye güvenir (kerberos kullanılmıyorsa). Ancak, sunucuda bu davranışı **değiştirebilecek** bazı yapılandırmalar vardır:
 
 - **`all_squash`**: Tüm erişimleri her kullanıcı ve grubu **`nobody`** (65534 unsigned / -2 signed) olarak eşleştirerek sıkıştırır. Bu nedenle, herkes `nobody`'dir ve kullanıcı kullanılmaz.
-- **`root_squash`/`no_all_squash`**: Bu, Linux'ta varsayılandır ve **sadece uid 0 (root) ile erişimi sıkıştırır**. Bu nedenle, herhangi bir `UID` ve `GID` güvenilir, ancak `0` `nobody`'ye sıkıştırılır (bu nedenle root taklidi mümkün değildir).
-- **`no_root_squash`**: Bu yapılandırma etkinleştirildiğinde, root kullanıcısını bile sıkıştırmaz. Bu, bu yapılandırma ile bir dizini monte ederseniz, root olarak erişebileceğiniz anlamına gelir.
+- **`root_squash`/`no_all_squash`**: Bu, Linux'ta varsayılandır ve **yalnızca uid 0 (root) ile erişimi sıkıştırır**. Bu nedenle, herhangi bir `UID` ve `GID` güvenilir, ancak `0` `nobody`'ye sıkıştırılır (bu nedenle root taklidi mümkün değildir).
+- **`no_root_squash`**: Bu yapılandırma etkinleştirildiğinde, root kullanıcısını bile sıkıştırmaz. Bu, bu yapılandırma ile bir dizini bağlarsanız, root olarak erişebileceğiniz anlamına gelir.
 
 **/etc/exports** dosyasında, **no_root_squash** olarak yapılandırılmış bir dizin bulursanız, o dizine **istemci olarak erişebilir** ve o dizin içinde **yerel makinenin** **root**'uymuş gibi **yazabilirsiniz**.
 
@@ -23,7 +23,7 @@ NFS genellikle (özellikle linux'ta) dosyalara erişim sağlamak için istemci t
 ### Remote Exploit
 
 Seçenek 1 bash kullanarak:
-- **O dizini** bir istemci makinesinde **monte ederek**, ve **root olarak monte edilen klasöre** **/bin/bash** ikili dosyasını kopyalayarak ve ona **SUID** hakları vererek, **kurban** makineden o bash ikili dosyasını çalıştırarak.
+- **O dizini** bir istemci makinesinde **bağlayarak**, ve **root olarak** bağlı klasöre **/bin/bash** ikili dosyasını kopyalayarak ve ona **SUID** hakları vererek, **kurban** makineden o bash ikili dosyasını çalıştırarak.
 - NFS paylaşımında root olmak için, sunucuda **`no_root_squash`** yapılandırılmış olmalıdır.
 - Ancak, etkinleştirilmezse, ikili dosyayı NFS paylaşımına kopyalayarak ve yükselmek istediğiniz kullanıcı olarak SUID izni vererek başka bir kullanıcıya yükseltebilirsiniz.
 ```bash
@@ -39,7 +39,7 @@ cd <SHAREDD_FOLDER>
 ./bash -p #ROOT shell
 ```
 Seçenek 2, C derlenmiş kod kullanarak:
-- **O dizini** bir istemci makinesine **bağlamak** ve **root olarak** bağlı klasöre SUID iznini kötüye kullanacak derlenmiş yükümüzü kopyalamak, ona **SUID** hakları vermek ve **kurban** makineden o ikili dosyayı çalıştırmak (burada bazı [C SUID yüklerini](payloads-to-execute.md#c) bulabilirsiniz).
+- **O dizini** bir istemci makinesinde **bağlamak** ve **root olarak** bağlı klasöre SUID iznini kötüye kullanacak derlenmiş yükümüzü kopyalamak, ona **SUID** hakları vermek ve **kurban** makineden o ikiliyi çalıştırmak (burada bazı [C SUID yüklerini](payloads-to-execute.md#c) bulabilirsiniz).
 - Önceki gibi aynı kısıtlamalar.
 ```bash
 #Attacker, as root user
@@ -54,21 +54,21 @@ chmod +s payload
 cd <SHAREDD_FOLDER>
 ./payload #ROOT shell
 ```
-### Yerel Sömürü
+### Local Exploit
 
 > [!TIP]
-> Makinenizden kurban makinesine bir **tünel oluşturabiliyorsanız, bu ayrıcalık yükseltmesini istismar etmek için uzaktan versiyonu kullanmaya devam edebilirsiniz, gerekli portları tünelleyerek**.\
+> Makinenizden kurban makinesine bir **tünel oluşturabiliyorsanız, bu ayrıcalık yükseltmesini istismar etmek için uzaktan versiyonu kullanmaya devam edebilirsiniz**.\
 > Aşağıdaki hile, dosya `/etc/exports` **bir IP gösteriyorsa** geçerlidir. Bu durumda **uzaktan istismarı kullanamayacaksınız** ve **bu hileyi kötüye kullanmanız gerekecek**.\
-> İstismarın çalışması için bir diğer gerekli şart, **`/etc/export` içindeki ihracatın `insecure` bayrağını kullanmasıdır**.\
+> İstismarın çalışması için bir diğer gereklilik, **`/etc/export` içindeki ihracatın** **`insecure` bayrağını kullanmasıdır**.\
 > --_Eğer `/etc/export` bir IP adresi gösteriyorsa bu hilenin işe yarayıp yaramayacağından emin değilim_--
 
-### Temel Bilgiler
+### Basic Information
 
-Senaryo, yerel bir makinede monte edilmiş bir NFS paylaşımını istismar etmeyi içeriyor ve NFSv3 spesifikasyonundaki bir hatayı kullanarak istemcinin uid/gid belirtmesine izin veriyor, bu da yetkisiz erişimi mümkün kılabilir. İstismar, NFS RPC çağrılarını sahtelemek için kullanılan [libnfs](https://github.com/sahlberg/libnfs) kütüphanesini içerir.
+Senaryo, yerel bir makinede monte edilmiş bir NFS paylaşımını istismar etmeyi içerir ve NFSv3 spesifikasyonundaki bir hatayı kullanarak istemcinin uid/gid belirtmesine olanak tanır, bu da yetkisiz erişimi mümkün kılabilir. İstismar, NFS RPC çağrılarını sahtelemek için kullanılan [libnfs](https://github.com/sahlberg/libnfs) kütüphanesini kullanmayı içerir.
 
-#### Kütüphaneyi Derleme
+#### Compiling the Library
 
-Kütüphane derleme adımları, çekirdek sürümüne bağlı olarak ayarlamalar gerektirebilir. Bu özel durumda, fallocate sistem çağrıları yorum satırına alınmıştı. Derleme süreci aşağıdaki komutları içerir:
+Kütüphane derleme adımları, çekirdek sürümüne bağlı olarak ayarlamalar gerektirebilir. Bu özel durumda, fallocate sistem çağrıları yorum satırına alınmıştır. Derleme süreci aşağıdaki komutları içerir:
 ```bash
 ./bootstrap
 ./configure
@@ -99,7 +99,7 @@ LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chmod u+s nfs:/
 ```
 ### Bonus: NFShell için Gizli Dosya Erişimi
 
-Root erişimi elde edildikten sonra, sahipliği değiştirmeden (iz bırakmamak için) NFS paylaşımı ile etkileşimde bulunmak için bir Python betiği (nfsh.py) kullanılır. Bu betik, erişilen dosyanın uid'sini eşleştirerek, paylaşım üzerindeki dosyalarla izin sorunları olmadan etkileşimde bulunulmasını sağlar:
+Root erişimi elde edildikten sonra, sahipliği değiştirmeden NFS paylaşımı ile etkileşimde bulunmak için (iz bırakmamak için) bir Python betiği (nfsh.py) kullanılır. Bu betik, erişilen dosyanın uid'sini eşleştirerek, paylaşım üzerindeki dosyalarla izin sorunları olmadan etkileşimde bulunulmasını sağlar:
 ```python
 #!/usr/bin/env python
 # script from https://www.errno.fr/nfs_privesc.html

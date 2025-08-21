@@ -3,7 +3,7 @@
 {{#include ../../../../banners/hacktricks-training.md}}
 
 > [!CAUTION]
-> **dyld kodu açık kaynaklıdır** ve [https://opensource.apple.com/source/dyld/](https://opensource.apple.com/source/dyld/) adresinden bulunabilir ve **şu URL gibi** bir tar ile indirilebilir: [https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz)
+> **dyld kodu açık kaynaklıdır** ve [https://opensource.apple.com/source/dyld/](https://opensource.apple.com/source/dyld/) adresinde bulunabilir ve **şu URL gibi** bir tar ile indirilebilir: [https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz)
 
 ## **Dyld Süreci**
 
@@ -16,7 +16,7 @@ macos-dyld-process.md
 
 ## **DYLD_INSERT_LIBRARIES**
 
-Bu, [**Linux'taki LD_PRELOAD**](../../../../linux-hardening/privilege-escalation/index.html#ld_preload) gibidir. Bir sürecin çalıştırılacağını belirtmek için bir yoldan belirli bir kütüphaneyi yüklemesine izin verir (eğer ortam değişkeni etkinse).
+Bu, [**Linux'taki LD_PRELOAD**](../../../../linux-hardening/privilege-escalation/index.html#ld_preload) gibidir. Bir sürecin çalıştırılacağını belirtmek için belirli bir kütüphaneyi bir yoldan yüklemesine izin verir (eğer ortam değişkeni etkinse).
 
 Bu teknik ayrıca **ASEP tekniği olarak da kullanılabilir** çünkü her kurulu uygulamanın "Info.plist" adında bir plist'i vardır ve bu, `LSEnvironmental` adında bir anahtar kullanarak **çevresel değişkenlerin atanmasına** izin verir.
 
@@ -36,14 +36,14 @@ Bu teknik ayrıca **ASEP tekniği olarak da kullanılabilir** çünkü her kurul
 
 ### Kütüphane Doğrulaması
 
-İkili dosya **`DYLD_INSERT_LIBRARIES`** ortam değişkenini kullanmaya izin verse bile, eğer ikili dosya yüklenecek kütüphanenin imzasını kontrol ediyorsa, özel bir kütüphaneyi yüklemeyecektir.
+İkili dosya **`DYLD_INSERT_LIBRARIES`** ortam değişkenini kullanmaya izin verse bile, ikili dosya yüklenecek kütüphanenin imzasını kontrol ederse, özel bir kütüphaneyi yüklemeyecektir.
 
-Özel bir kütüphaneyi yüklemek için, ikili dosyanın aşağıdaki **yetkilerden birine** sahip olması gerekir:
+Özel bir kütüphaneyi yüklemek için, ikili dosyanın **aşağıdaki yetkilerden birine** sahip olması gerekir:
 
 - [`com.apple.security.cs.disable-library-validation`](../../macos-security-protections/macos-dangerous-entitlements.md#com.apple.security.cs.disable-library-validation)
 - [`com.apple.private.security.clear-library-validation`](../../macos-security-protections/macos-dangerous-entitlements.md#com.apple.private.security.clear-library-validation)
 
-ya da ikili dosya **hardened runtime bayrağına** veya **kütüphane doğrulama bayrağına** sahip **olmamalıdır**.
+veya ikili dosya **hardened runtime bayrağına** veya **kütüphane doğrulama bayrağına** sahip **olmamalıdır**.
 
 Bir ikilinin **hardened runtime** olup olmadığını `codesign --display --verbose <bin>` ile kontrol edebilirsiniz, **`CodeDirectory`** içinde bayrak runtime'ı kontrol ederek: **`CodeDirectory v=20500 size=767 flags=0x10000(runtime) hashes=13+7 location=embedded`**
 
@@ -56,31 +56,31 @@ Bunu (kötüye) kullanma ve kısıtlamaları kontrol etme örneğini bulabilirsi
 macos-dyld-hijacking-and-dyld_insert_libraries.md
 {{#endref}}
 
-## Dylib Hijacking
+## Dylib Ele Geçirme
 
 > [!CAUTION]
-> Dylib hijacking saldırıları gerçekleştirmek için **önceki Kütüphane Doğrulama kısıtlamalarının da geçerli olduğunu** unutmayın.
+> Dylib ele geçirme saldırıları gerçekleştirmek için **önceki Kütüphane Doğrulama kısıtlamalarının da geçerli olduğunu** unutmayın.
 
-Windows'ta olduğu gibi, MacOS'ta da **dylib'leri ele geçirebilir** ve **uygulamaların** **rastgele** **kod** **çalıştırmasını** sağlayabilirsiniz (aslında, normal bir kullanıcıdan bu mümkün olmayabilir çünkü bir `.app` paketinin içine yazmak ve bir kütüphaneyi ele geçirmek için bir TCC iznine ihtiyacınız olabilir).\
+Windows'ta olduğu gibi, MacOS'ta da **dylib'leri ele geçirebilirsiniz** ve **uygulamaların** **rastgele** **kod** **çalıştırmasını** sağlayabilirsiniz (aslında, normal bir kullanıcıdan bu mümkün olmayabilir çünkü bir `.app` paketinin içine yazmak ve bir kütüphaneyi ele geçirmek için bir TCC iznine ihtiyacınız olabilir).\
 Ancak, **MacOS** uygulamalarının kütüphaneleri **yükleme** şekli **Windows'tan daha kısıtlıdır**. Bu, **kötü amaçlı yazılım** geliştiricilerinin bu tekniği **gizlilik** için kullanabileceği anlamına gelir, ancak **yetkileri artırmak için bunu kötüye kullanma olasılığı çok daha düşüktür**.
 
 Öncelikle, **MacOS ikililerinin kütüphaneleri yüklemek için tam yolu belirtmesi** daha yaygındır. İkincisi, **MacOS asla** kütüphaneler için **$PATH** klasörlerinde arama yapmaz.
 
-Bu işlevselliğe ilişkin **kodun** ana kısmı **`ImageLoader::recursiveLoadLibraries`** içinde yer almaktadır.
+Bu işlevselliğe ilişkin **kodun** ana kısmı **`ImageLoader::recursiveLoadLibraries`** içinde `ImageLoader.cpp` dosyasındadır.
 
 Bir macho ikili dosyasının kütüphaneleri yüklemek için kullanabileceği **4 farklı başlık Komutu** vardır:
 
 - **`LC_LOAD_DYLIB`** komutu, bir dylib yüklemek için yaygın komuttur.
-- **`LC_LOAD_WEAK_DYLIB`** komutu, önceki gibi çalışır, ancak dylib bulunamazsa, yürütme hatasız devam eder.
+- **`LC_LOAD_WEAK_DYLIB`** komutu, önceki gibi çalışır, ancak dylib bulunamazsa, yürütme herhangi bir hata olmadan devam eder.
 - **`LC_REEXPORT_DYLIB`** komutu, farklı bir kütüphaneden sembolleri proxy'ler (veya yeniden ihraç eder).
 - **`LC_LOAD_UPWARD_DYLIB`** komutu, iki kütüphanenin birbirine bağımlı olduğu durumlarda kullanılır (bu, _yukarı bağımlılık_ olarak adlandırılır).
 
-Ancak, **2 tür dylib hijacking** vardır:
+Ancak, **2 tür dylib ele geçirme** vardır:
 
-- **Eksik zayıf bağlantılı kütüphaneler**: Bu, uygulamanın **LC_LOAD_WEAK_DYLIB** ile yapılandırılmış olmayan bir kütüphaneyi yüklemeye çalışacağı anlamına gelir. Sonra, **bir saldırgan bir dylib'i beklenen yere yerleştirirse, yüklenir**.
+- **Eksik zayıf bağlantılı kütüphaneler**: Bu, uygulamanın **LC_LOAD_WEAK_DYLIB** ile yapılandırılmış bir kütüphaneyi yüklemeye çalışacağı anlamına gelir. Sonra, **bir saldırgan bir dylib'i beklenen yere yerleştirirse, yüklenir**.
 - Bağlantının "zayıf" olması, kütüphane bulunmasa bile uygulamanın çalışmaya devam edeceği anlamına gelir.
-- Bununla ilgili **kod**, `ImageLoaderMachO::doGetDependentLibraries` fonksiyonundadır; burada `lib->required` yalnızca `LC_LOAD_WEAK_DYLIB` doğru olduğunda `false` olur.
-- **Zayıf bağlantılı kütüphaneleri** ikililerde bulmak için (kötüye kullanma kütüphaneleri oluşturma örneğiniz daha sonra var):
+- Bununla ilgili **kod**, `ImageLoaderMachO::doGetDependentLibraries` fonksiyonundadır ve burada `lib->required` yalnızca `LC_LOAD_WEAK_DYLIB` doğru olduğunda `false` olur.
+- İkili dosyalarda **zayıf bağlantılı kütüphaneleri** bulmak için (sonra ele geçirme kütüphaneleri oluşturma örneğiniz var):
 - ```bash
 otool -l </path/to/bin> | grep LC_LOAD_WEAK_DYLIB -A 5 cmd LC_LOAD_WEAK_DYLIB
 cmdsize 56
@@ -91,21 +91,21 @@ compatibility version 1.0.0
 ```
 - **@rpath ile yapılandırılmış**: Mach-O ikili dosyaları **`LC_RPATH`** ve **`LC_LOAD_DYLIB`** komutlarına sahip olabilir. Bu komutların **değerlerine** dayanarak, **kütüphaneler** **farklı dizinlerden** **yüklenir**.
 - **`LC_RPATH`**, ikili dosya tarafından kütüphaneleri yüklemek için kullanılan bazı klasörlerin yollarını içerir.
-- **`LC_LOAD_DYLIB`**, yüklenmesi gereken belirli kütüphanelerin yolunu içerir. Bu yollar **`@rpath`** içerebilir; bu, **`LC_RPATH`** içindeki değerlerle **değiştirilecektir**. **`LC_RPATH`** içinde birden fazla yol varsa, her biri yüklenmesi gereken kütüphaneyi aramak için kullanılacaktır. Örnek:
+- **`LC_LOAD_DYLIB`**, yüklenmesi gereken belirli kütüphanelerin yolunu içerir. Bu yollar **`@rpath`** içerebilir, bu da **`LC_RPATH`** içindeki değerlerle **değiştirilecektir**. **`LC_RPATH`** içinde birden fazla yol varsa, her biri yüklenmesi gereken kütüphaneyi aramak için kullanılacaktır. Örnek:
 - Eğer **`LC_LOAD_DYLIB`** `@rpath/library.dylib` içeriyorsa ve **`LC_RPATH`** `/application/app.app/Contents/Framework/v1/` ve `/application/app.app/Contents/Framework/v2/` içeriyorsa. Her iki klasör de `library.dylib` yüklemek için kullanılacaktır. Eğer kütüphane `[...]/v1/` içinde yoksa, bir saldırgan oraya yerleştirerek `[...]/v2/` içindeki kütüphanenin yüklenmesini ele geçirebilir çünkü **`LC_LOAD_DYLIB`** içindeki yolların sırası takip edilir.
-- **rpath yollarını ve kütüphaneleri** ikililerde bulmak için: `otool -l </path/to/binary> | grep -E "LC_RPATH|LC_LOAD_DYLIB" -A 5`
+- İkili dosyalarda **rpath yollarını ve kütüphaneleri** bulmak için: `otool -l </path/to/binary> | grep -E "LC_RPATH|LC_LOAD_DYLIB" -A 5`
 
-> [!NOTE] > **`@executable_path`**: **ana yürütülebilir dosyanın** bulunduğu dizinin **yoludur**.
+> [!NOTE] > **`@executable_path`**: **Ana yürütülebilir dosyanın** bulunduğu dizinin **yoludur**.
 >
-> **`@loader_path`**: **yükleme komutunu içeren** **Mach-O ikili dosyasının** bulunduğu **dizinin yoludur**.
+> **`@loader_path`**: **Yükleme komutunu içeren** **Mach-O ikili dosyasının** bulunduğu **dizinin yoludur**.
 >
 > - Bir yürütülebilir dosyada kullanıldığında, **`@loader_path`** etkili bir şekilde **`@executable_path`** ile **aynıdır**.
 > - Bir **dylib** içinde kullanıldığında, **`@loader_path`** **dylib'in** **yolunu** verir.
 
-Bu işlevselliği kötüye kullanarak **yetkileri artırmanın** yolu, **root** tarafından **çalıştırılan** bir **uygulamanın**, saldırganın yazma izinlerine sahip olduğu bir **dizinde** bazı **kütüphaneleri arıyor olması** durumunda olacaktır.
+Bu işlevselliği kötüye kullanarak **yetkileri artırmanın** yolu, **root** tarafından **çalıştırılan** bir **uygulamanın**, saldırganın yazma izinlerine sahip olduğu bir **klasörde** bazı **kütüphaneleri arıyor olması** durumunda olacaktır.
 
 > [!TIP]
-> Uygulamalardaki **eksik kütüphaneleri** bulmak için güzel bir **tarayıcı** [**Dylib Hijack Scanner**](https://objective-see.com/products/dhs.html) veya bir [**CLI versiyonu**](https://github.com/pandazheng/DylibHijack) vardır.\
+> Uygulamalardaki **eksik kütüphaneleri** bulmak için güzel bir **tarayıcı** [**Dylib Hijack Scanner**](https://objective-see.com/products/dhs.html) veya bir [**CLI versiyonu**](https://github.com/pandazheng/DylibHijack).\
 > Bu teknikle ilgili **teknik detaylar** içeren güzel bir **rapor** [**burada**](https://www.virusbulletin.com/virusbulletin/2015/03/dylib-hijacking-os-x) bulunabilir.
 
 **Örnek**
@@ -115,10 +115,10 @@ Bu işlevselliği kötüye kullanarak **yetkileri artırmanın** yolu, **root** 
 macos-dyld-hijacking-and-dyld_insert_libraries.md
 {{#endref}}
 
-## Dlopen Hijacking
+## Dlopen Ele Geçirme
 
 > [!CAUTION]
-> Dlopen hijacking saldırıları gerçekleştirmek için **önceki Kütüphane Doğrulama kısıtlamalarının da geçerli olduğunu** unutmayın.
+> Dlopen ele geçirme saldırıları gerçekleştirmek için **önceki Kütüphane Doğrulama kısıtlamalarının da geçerli olduğunu** unutmayın.
 
 **`man dlopen`**'dan:
 
@@ -131,12 +131,12 @@ macos-dyld-hijacking-and-dyld_insert_libraries.md
 6. `/usr/lib/`
 
 > [!CAUTION]
-> Eğer isimde eğik çizgi yoksa, bir ele geçirme yapmak için 2 yol olacaktır:
+> Eğer isimde eğik çizgi yoksa, ele geçirme yapmak için 2 yol olacaktır:
 >
 > - Eğer herhangi bir **`LC_RPATH`** **yazılabilir** ise (ancak imza kontrol edilir, bu nedenle bunun için ikilinin de kısıtlı olmaması gerekir)
-> - Eğer ikili dosya **kısıtlı değilse** ve o zaman CWD'den bir şey yüklemek mümkünse (veya bahsedilen ortam değişkenlerinden birini kötüye kullanarak)
+> - Eğer ikili dosya **kısıtlı değilse** ve o zaman CWD'den bir şey yüklemek mümkünse (veya belirtilen ortam değişkenlerinden birini kötüye kullanarak)
 
-- Yol **bir çerçeve** yolu gibi görünüyorsa (örneğin, `/stuff/foo.framework/foo`), eğer **`$DYLD_FRAMEWORK_PATH`** başlatıldığında ayarlandıysa, dyld önce **o dizinde** **çerçeve kısmi yolunu** (örneğin, `foo.framework/foo`) arayacaktır. Sonra, dyld **sağlanan yolu olduğu gibi** deneyecektir (göreceli yollar için geçerli çalışma dizinini kullanarak). Son olarak, eski ikililer için, dyld bazı yedeklemeleri deneyecektir. Eğer **`$DYLD_FALLBACK_FRAMEWORK_PATH`** başlatıldığında ayarlandıysa, dyld o dizinlerde arama yapacaktır. Aksi takdirde, **`/Library/Frameworks`** içinde arama yapacaktır (macOS'ta süreç kısıtlı değilse), sonra **`/System/Library/Frameworks`** içinde.
+- Yol **bir çerçeve** yolu gibi görünüyorsa (örneğin, `/stuff/foo.framework/foo`), eğer **`$DYLD_FRAMEWORK_PATH`** başlatıldığında ayarlandıysa, dyld önce **o dizinde** **çerçeve kısmi yolunu** (örneğin, `foo.framework/foo`) arayacaktır. Sonra, dyld **sağlanan yolu olduğu gibi** deneyecektir (göreceli yollar için geçerli çalışma dizinini kullanarak). Son olarak, eski ikililer için, dyld bazı yedeklemeleri deneyecektir. Eğer **`$DYLD_FALLBACK_FRAMEWORK_PATH`** başlatıldığında ayarlandıysa, dyld o dizinlerde arama yapacaktır. Aksi takdirde, **`/Library/Frameworks`** (macOS'ta süreç kısıtlı değilse) ve sonra **`/System/Library/Frameworks`** içinde arama yapacaktır.
 1. `$DYLD_FRAMEWORK_PATH`
 2. sağlanan yol (eğer kısıtlı değilse göreceli yollar için geçerli çalışma dizinini kullanarak)
 3. `$DYLD_FALLBACK_FRAMEWORK_PATH`
@@ -144,11 +144,11 @@ macos-dyld-hijacking-and-dyld_insert_libraries.md
 5. `/System/Library/Frameworks`
 
 > [!CAUTION]
-> Eğer bir çerçeve yolu varsa, onu ele geçirmenin yolu:
+> Eğer bir çerçeve yolu ise, ele geçirmenin yolu:
 >
-> - Eğer süreç **kısıtlı değilse**, CWD'den **göreceli yolu** kötüye kullanarak, bahsedilen ortam değişkenlerini (belgelere göre söylenmese de, eğer süreç kısıtlıysa DYLD\_\* ortam değişkenleri kaldırılır)
+> - Eğer süreç **kısıtlı değilse**, CWD'den **göreceli yolu** kötüye kullanarak belirtilen ortam değişkenleri (belgelerde söylenmese de, eğer süreç kısıtlıysa DYLD\_\* ortam değişkenleri kaldırılır)
 
-- Yol **bir eğik çizgi içeriyorsa ama bir çerçeve yolu değilse** (yani bir dylib'e tam veya kısmi bir yol), dlopen() önce (eğer ayarlandıysa) **`$DYLD_LIBRARY_PATH`** içinde (yolun yaprak kısmıyla) bakar. Sonra, dyld **sağlanan yolu dener** (geçerli çalışma dizinini göreceli yollar için kullanarak (ancak yalnızca kısıtlı olmayan süreçler için)). Son olarak, eski ikililer için, dyld yedeklemeleri deneyecektir. Eğer **`$DYLD_FALLBACK_LIBRARY_PATH`** başlatıldığında ayarlandıysa, dyld o dizinlerde arama yapacaktır, aksi takdirde dyld **`/usr/local/lib/`** içinde (eğer süreç kısıtlı değilse) ve sonra **`/usr/lib/`** içinde arama yapacaktır.
+- Yol **bir eğik çizgi içeriyorsa ama bir çerçeve yolu değilse** (yani bir dylib'e tam veya kısmi bir yol), dlopen() önce (eğer ayarlandıysa) **`$DYLD_LIBRARY_PATH`** içinde (yolun yaprak kısmıyla) arar. Sonra, dyld **sağlanan yolu dener** (eğer kısıtlı olmayan süreçler için göreceli yollar kullanarak). Son olarak, eski ikililer için, dyld yedeklemeleri deneyecektir. Eğer **`$DYLD_FALLBACK_LIBRARY_PATH`** başlatıldığında ayarlandıysa, dyld o dizinlerde arama yapacaktır, aksi takdirde dyld **`/usr/local/lib/`** içinde (eğer süreç kısıtlı değilse) ve sonra **`/usr/lib/`** içinde arama yapacaktır.
 1. `$DYLD_LIBRARY_PATH`
 2. sağlanan yol (eğer kısıtlı değilse göreceli yollar için geçerli çalışma dizinini kullanarak)
 3. `$DYLD_FALLBACK_LIBRARY_PATH`
@@ -156,18 +156,18 @@ macos-dyld-hijacking-and-dyld_insert_libraries.md
 5. `/usr/lib/`
 
 > [!CAUTION]
-> Eğer isimde eğik çizgiler varsa ve çerçeve değilse, onu ele geçirmenin yolu:
+> Eğer isimde eğik çizgiler varsa ve çerçeve değilse, ele geçirmenin yolu:
 >
-> - Eğer ikili dosya **kısıtlı değilse** ve o zaman CWD'den veya `/usr/local/lib`'den bir şey yüklemek mümkünse (veya bahsedilen ortam değişkenlerinden birini kötüye kullanarak)
+> - Eğer ikili dosya **kısıtlı değilse** ve o zaman CWD'den veya `/usr/local/lib`'den bir şey yüklemek mümkünse (veya belirtilen ortam değişkenlerinden birini kötüye kullanarak)
 
 > [!TIP]
 > Not: **dlopen aramasını kontrol etmek için** yapılandırma dosyası yoktur.
 >
-> Not: Eğer ana yürütülebilir dosya bir **set\[ug]id ikilisi veya yetkilerle kod imzalanmışsa**, o zaman **tüm ortam değişkenleri yok sayılır** ve yalnızca tam bir yol kullanılabilir ([DYLD_INSERT_LIBRARIES kısıtlamalarını kontrol edin](macos-dyld-hijacking-and-dyld_insert_libraries.md#check-dyld_insert_librery-restrictions) daha ayrıntılı bilgi için)
+> Not: Eğer ana yürütülebilir dosya bir **set\[ug]id ikilisi veya yetkilerle kod imzalanmışsa**, o zaman **tüm ortam değişkenleri yok sayılır** ve yalnızca tam bir yol kullanılabilir ([DYLD_INSERT_LIBRARIES kısıtlamalarını kontrol edin](macos-dyld-hijacking-and-dyld_insert_libraries.md#check-dyld_insert_librery-restrictions) için daha ayrıntılı bilgi)
 >
-> Not: Apple platformları, 32-bit ve 64-bit kütüphaneleri birleştirmek için "evrensel" dosyalar kullanır. Bu, **ayrı 32-bit ve 64-bit arama yolları olmadığı** anlamına gelir.
+> Not: Apple platformları, 32-bit ve 64-bit kütüphaneleri birleştirmek için "evrensel" dosyalar kullanır. Bu, **ayrı 32-bit ve 64-bit arama yolları** olmadığı anlamına gelir.
 >
-> Not: Apple platformlarında çoğu OS dylib **dyld önbelleğine** **birleştirilmiştir** ve disk üzerinde mevcut değildir. Bu nedenle, bir OS dylib'in mevcut olup olmadığını önceden kontrol etmek için **`stat()`** çağrısı **çalışmaz**. Ancak, **`dlopen_preflight()`**, uyumlu bir macho dosyasını bulmak için **`dlopen()`** ile aynı adımları kullanır.
+> Not: Apple platformlarında çoğu OS dylib **dyld önbelleğine** **birleştirilmiştir** ve disk üzerinde mevcut değildir. Bu nedenle, bir OS dylib'in var olup olmadığını önceden kontrol etmek için **`stat()`** çağrısı **çalışmaz**. Ancak, **`dlopen_preflight()`**, uyumlu bir macho dosyasını bulmak için **`dlopen()`** ile aynı adımları kullanır.
 
 **Yolları Kontrol Et**
 
@@ -220,7 +220,7 @@ sudo fs_usage | grep "dlopentest"
 ```
 ## Göreli Yol Hijacking
 
-Eğer bir **ayrılmış ikili/uygulama** (örneğin bir SUID veya güçlü yetkilere sahip bir ikili) **göreli bir yol** kütüphanesi yüklüyorsa (örneğin `@executable_path` veya `@loader_path` kullanarak) ve **Kütüphane Doğrulaması devre dışıysa**, saldırganın **göreli yol yüklü kütüphaneyi** değiştirebileceği ve sürece kod enjekte etmek için bunu kötüye kullanabileceği bir durum söz konusu olabilir.
+Eğer bir **ayrımcı ikili/uygulama** (örneğin bir SUID veya güçlü yetkilere sahip bir ikili) **göreli yol** kütüphanesi yüklüyorsa (örneğin `@executable_path` veya `@loader_path` kullanarak) ve **Kütüphane Doğrulaması devre dışıysa**, saldırganın **göreli yol yüklü kütüphaneyi** değiştirebileceği ve sürece kod enjekte etmek için bunu kötüye kullanabileceği bir durum oluşabilir.
 
 ## `DYLD_*` ve `LD_LIBRARY_PATH` çevre değişkenlerini temizle
 
@@ -282,7 +282,7 @@ DYLD_INSERT_LIBRARIES=inject.dylib ./hello
 # Remove suid
 sudo chmod -s hello
 ```
-### Section `__RESTRICT` with segment `__restrict`
+### Bölüm `__RESTRICT` ile segment `__restrict`
 ```bash
 gcc -sectcreate __RESTRICT __restrict /dev/null hello.c -o hello-restrict
 DYLD_INSERT_LIBRARIES=inject.dylib ./hello-restrict
@@ -310,7 +310,7 @@ codesign -f -s <cert-name> --option=restrict hello-signed
 DYLD_INSERT_LIBRARIES=inject.dylib ./hello-signed # Won't work
 ```
 > [!CAUTION]
-> Dikkat edin ki, **`0x0(none)`** bayraklarıyla imzalanmış ikili dosyalar olsa bile, çalıştırıldıklarında dinamik olarak **`CS_RESTRICT`** bayrağını alabilirler ve bu nedenle bu teknik onlarda çalışmayacaktır.
+> **`0x0(none)`** bayraklarıyla imzalanmış ikili dosyalar olsa bile, çalıştırıldıklarında dinamik olarak **`CS_RESTRICT`** bayrağını alabileceklerini unutmayın ve bu nedenle bu teknik onlarda çalışmayacaktır.
 >
 > Bir işlemin bu bayrağa sahip olup olmadığını kontrol edebilirsiniz (get [**csops here**](https://github.com/axelexic/CSOps)):
 >

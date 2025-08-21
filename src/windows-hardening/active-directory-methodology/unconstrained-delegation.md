@@ -4,7 +4,7 @@
 
 ## Unconstrained delegation
 
-Bu, bir Alan Yöneticisi'nin alan içindeki herhangi bir **Bilgisayar** için ayarlayabileceği bir özelliktir. Daha sonra, bir **kullanıcı Bilgisayara giriş yaptığında**, o kullanıcının **TGT'sinin bir kopyası** DC tarafından sağlanan **TGS'ye gönderilecek** ve **LSASS'ta bellekte saklanacaktır**. Bu nedenle, makinede Yöneticilik ayrıcalıklarınız varsa, **biletleri dökebilir ve kullanıcıları taklit edebilirsiniz**.
+Bu, bir Alan Yöneticisinin alan içindeki herhangi bir **Bilgisayar** için ayarlayabileceği bir özelliktir. Daha sonra, bir **kullanıcı Bilgisayara giriş yaptığında**, o kullanıcının **TGT'sinin bir kopyası**, DC tarafından sağlanan **TGS'ye gönderilecek** ve **LSASS'ta bellekte saklanacaktır**. Bu nedenle, makinede Yönetici ayrıcalıklarınız varsa, **biletleri dökebilir ve kullanıcıları taklit edebilirsiniz**.
 
 Bu nedenle, "Unconstrained Delegation" özelliği etkinleştirilmiş bir Bilgisayara giriş yapan bir alan yöneticisi varsa ve o makinede yerel yönetici ayrıcalıklarınız varsa, bileti dökebilir ve Alan Yöneticisini her yerde taklit edebilirsiniz (alan privesc).
 
@@ -30,20 +30,20 @@ kerberos::list /export #Another way
 Rubeus.exe dump
 Rubeus.exe monitor /interval:10 [/filteruser:<username>] #Check every 10s for new TGTs
 ```
-Administrator (veya kurban kullanıcı) biletini bellekte **Mimikatz** veya **Rubeus** ile yükleyin **[**Pass the Ticket**](pass-the-ticket.md)**.**\
+Administrator (veya kurban kullanıcı) biletini **Mimikatz** veya **Rubeus** ile belleğe yükleyin **[Pass the Ticket](pass-the-ticket.md)** için.\
 Daha fazla bilgi: [https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/](https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/)\
 [**Ired.team'de Kısıtlanmamış delegasyon hakkında daha fazla bilgi.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/domain-compromise-via-unrestricted-kerberos-delegation)
 
 ### **Zorla Kimlik Doğrulama**
 
 Eğer bir saldırgan **"Kısıtlanmamış Delegasyon"** için izin verilen bir bilgisayarı **ele geçirebilirse**, bir **Yazıcı sunucusunu** **otomatik olarak giriş yapmaya** **kandırabilir** ve sunucunun belleğinde bir TGT **kaydedebilir**.\
-Sonrasında, saldırgan kullanıcı Yazıcı sunucu bilgisayar hesabını **taklit etmek için bir Pass the Ticket saldırısı** gerçekleştirebilir.
+Sonra, saldırgan kullanıcı Yazıcı sunucu bilgisayar hesabını taklit etmek için **Pass the Ticket saldırısı** gerçekleştirebilir.
 
 Bir yazıcı sunucusunun herhangi bir makineye giriş yapmasını sağlamak için [**SpoolSample**](https://github.com/leechristensen/SpoolSample) kullanabilirsiniz:
 ```bash
 .\SpoolSample.exe <printmachine> <unconstrinedmachine>
 ```
-Eğer TGT bir etki alanı denetleyicisinden geliyorsa, bir [**DCSync attack**](acl-persistence-abuse/index.html#dcsync) gerçekleştirebilir ve DC'den tüm hash'leri elde edebilirsiniz.\
+Eğer TGT bir etki alanı denetleyicisinden (domain controller) geliyorsa, [**DCSync saldırısı**](acl-persistence-abuse/index.html#dcsync) gerçekleştirebilir ve DC'den tüm hash'leri elde edebilirsiniz.\
 [**Bu saldırı hakkında daha fazla bilgi ired.team'de.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/domain-compromise-via-dc-print-server-and-kerberos-delegation)
 
 Burada **kimlik doğrulamayı zorlamanın** diğer yollarını bulun:
@@ -55,7 +55,7 @@ printers-spooler-service-abuse.md
 
 ### Mitigasyon
 
-- DA/Admin oturum açmalarını belirli hizmetlerle sınırlayın
-- Ayrıcalıklı hesaplar için "Hesap hassastır ve devredilemez" ayarını yapın.
+- DA/Yönetici oturum açmalarını belirli hizmetlerle sınırlayın
+- Ayrıcalıklı hesaplar için "Hesap hassas ve devredilemez" ayarını yapın.
 
 {{#include ../../banners/hacktricks-training.md}}

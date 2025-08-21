@@ -4,9 +4,9 @@
 
 ## Temel Bilgiler
 
-XPC, macOS tarafından kullanılan XNU (çekirdek) arasındaki İletişim için bir çerçevedir ve **işlemler arası iletişim** sağlar. XPC, sistemdeki farklı işlemler arasında **güvenli, asenkron yöntem çağrıları** yapma mekanizması sunar. Bu, her bir **bileşenin** işini yapmak için **sadece ihtiyaç duyduğu izinlerle** çalıştığı **ayrılmış ayrıcalıklarla uygulamaların** oluşturulmasına olanak tanıyan Apple'ın güvenlik paradigmasının bir parçasıdır; böylece tehlikeye atılmış bir işlemin potansiyel zararını sınırlamaktadır.
+XPC, macOS tarafından kullanılan XNU (çekirdek) arasındaki İletişim için bir çerçevedir ve **işlemler arasında iletişim** sağlar. XPC, sistemdeki farklı işlemler arasında **güvenli, asenkron yöntem çağrıları** yapma mekanizması sunar. Bu, her bir **bileşenin** işini yapmak için **sadece ihtiyaç duyduğu izinlerle** çalıştığı **ayrılmış ayrıcalıklarla uygulamaların** oluşturulmasına olanak tanıyarak, tehlikeye atılmış bir işlemin potansiyel zararını sınırlayan Apple'ın güvenlik paradigmasının bir parçasıdır.
 
-XPC, aynı sistemde çalışan farklı programların veri göndermesi ve alması için bir dizi yöntem olan İşlemler Arası İletişim (IPC) biçimini kullanır.
+XPC, aynı sistemde çalışan farklı programların veri göndermesi ve alması için bir dizi yöntem olan bir İletişim (IPC) biçimi kullanır.
 
 XPC'nin başlıca faydaları şunlardır:
 
@@ -20,9 +20,9 @@ Tek **dezavantaj**, **bir uygulamayı birkaç işleme ayırmanın** ve bunların
 
 Bir uygulamanın XPC bileşenleri **uygulamanın kendisinin içindedir.** Örneğin, Safari'de bunları **`/Applications/Safari.app/Contents/XPCServices`** içinde bulabilirsiniz. **`.xpc`** uzantısına sahiptirler (örneğin **`com.apple.Safari.SandboxBroker.xpc`**) ve ana ikili dosya ile birlikte **paketler** halinde bulunurlar: `/Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/MacOS/com.apple.Safari.SandboxBroker` ve bir `Info.plist: /Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/Info.plist`
 
-Bir **XPC bileşeninin diğer XPC bileşenlerinden veya ana uygulama ikili dosyasından** farklı haklar ve ayrıcalıklara sahip olacağını düşünebilirsiniz. BİR XPC hizmeti, **Info.plist** dosyasında **JoinExistingSession** [**True**](https://developer.apple.com/documentation/bundleresources/information_property_list/xpcservice/joinexistingsession) olarak ayarlandığında hariçtir. Bu durumda, XPC hizmeti, onu çağıran uygulama ile **aynı güvenlik oturumunda** çalışacaktır.
+Bir **XPC bileşeninin diğer XPC bileşenlerinden veya ana uygulama ikili dosyasından farklı haklara ve ayrıcalıklara sahip olacağını** düşünebilirsiniz. BİR XPC hizmeti, **Info.plist** dosyasında **JoinExistingSession** [**True**](https://developer.apple.com/documentation/bundleresources/information_property_list/xpcservice/joinexistingsession) olarak ayarlandığında hariçtir. Bu durumda, XPC hizmeti, onu çağıran uygulama ile **aynı güvenlik oturumunda** çalışacaktır.
 
-XPC hizmetleri, gerektiğinde **launchd** tarafından **başlatılır** ve tüm görevler **tamamlandığında** sistem kaynaklarını serbest bırakmak için **kapalı** tutulur. **Uygulama özel XPC bileşenleri yalnızca uygulama tarafından kullanılabilir**, böylece potansiyel güvenlik açıklarıyla ilişkili riski azaltır.
+XPC hizmetleri, gerektiğinde **launchd** tarafından **başlatılır** ve tüm görevler **tamamlandığında** sistem kaynaklarını serbest bırakmak için **kapalı** hale getirilir. **Uygulama özel XPC bileşenleri yalnızca uygulama tarafından kullanılabilir**, böylece potansiyel güvenlik açıklarıyla ilişkili riski azaltır.
 
 ## Sistem Genelinde XPC hizmetleri
 
@@ -72,7 +72,7 @@ Her XPC mesajı, serileştirme ve serileştirmeyi basitleştiren bir sözlük ne
 Ayrıca, `xpc_copy_description(object)` fonksiyonu, hata ayıklama amaçları için yararlı olabilecek nesnenin bir dize temsilini almak için kullanılabilir.\
 Bu nesnelerin ayrıca `xpc_<object>_copy`, `xpc_<object>_equal`, `xpc_<object>_hash`, `xpc_<object>_serialize`, `xpc_<object>_deserialize` gibi çağrılacak bazı yöntemleri vardır...
 
-`xpc_object_t` nesneleri, `xpc_<objetType>_create` fonksiyonu çağrılarak oluşturulur; bu fonksiyon, nesnenin sınıf türünü (bir `XPC_TYPE_*`'dan biri) ve boyutunu (metadata için ekstra 40B eklenir) belirten `_xpc_base_create(Class, Size)`'yi içten çağırır. Bu, nesnenin verisinin 40B'lik bir ofsetten başlayacağı anlamına gelir.\
+`xpc_object_t` nesneleri, `xpc_<objetType>_create` fonksiyonu çağrılarak oluşturulur; bu fonksiyon, nesnenin sınıf türünü (bir `XPC_TYPE_*`'dan biri) ve boyutunu (metadata için ekstra 40B eklenir) belirten `_xpc_base_create(Class, Size)` fonksiyonunu içten çağırır. Bu, nesnenin verisinin 40B'lik bir ofsetten başlayacağı anlamına gelir.\
 Bu nedenle, `xpc_<objectType>_t`, `os_object_t*`'nin bir alt sınıfı olan `xpc_object_t`'nin bir alt sınıfı gibidir.
 
 > [!WARNING]
@@ -90,7 +90,7 @@ Bir **`xpc_pipe`** örneği, **`launchd`** tarafından oluşturulan **bootstrap 
 - **`NSXPC*`**
 
 Bunlar, XPC bağlantılarının soyutlanmasını sağlayan Objective-C yüksek seviyeli nesnelerdir.\
-Ayrıca, bu nesneleri DTrace ile önceki nesnelerden daha kolay hata ayıklamak mümkündür.
+Ayrıca, bu nesneleri DTrace ile hata ayıklamak, önceki nesnelerden daha kolaydır.
 
 - **`GCD Kuyrukları`**
 
@@ -99,7 +99,7 @@ XPC, mesajları iletmek için GCD kullanır, ayrıca `xpc.transactionq`, `xpc.io
 ## XPC Hizmetleri
 
 Bunlar, diğer projelerin **`XPCServices`** klasöründe bulunan **`.xpc`** uzantılı paketlerdir ve `Info.plist` dosyasında `CFBundlePackageType` **`XPC!`** olarak ayarlanmıştır.\
-Bu dosya, uygulama, kullanıcı, sistem veya bir sandbox tanımlayabilen `_SandboxProfile` gibi diğer yapılandırma anahtarlarına sahiptir veya hizmete erişmek için gerekli olan yetkilendirmeleri veya kimlikleri belirtebilen `_AllowedClients` anahtarına sahiptir. Bu ve diğer yapılandırma seçenekleri, hizmet başlatıldığında yapılandırmak için yararlı olacaktır.
+Bu dosya, uygulama, kullanıcı, sistem veya bir sandbox tanımlayabilen `_SandboxProfile` gibi diğer yapılandırma anahtarlarına sahiptir veya hizmete erişmek için gerekli olan haklar veya kimlikleri belirtebilen `_AllowedClients` anahtarına sahiptir. Bu ve diğer yapılandırma seçenekleri, hizmet başlatıldığında yapılandırmak için yararlı olacaktır.
 
 ### Bir Hizmeti Başlatma
 
@@ -116,7 +116,7 @@ XPC kütüphanesi, `xpc_ktrace_pid0` ve `xpc_ktrace_pid1` çağrılarıyla eylem
 
 ## XPC Olay Mesajları
 
-Uygulamalar, böyle olaylar gerçekleştiğinde **talep üzerine başlatılmalarını** sağlayan farklı olay **mesajlarına** **abone** olabilirler. Bu hizmetlerin **kurulumu**, **önceki dosyalarla aynı dizinlerde** bulunan **launchd plist dosyalarında** yapılır ve ekstra bir **`LaunchEvent`** anahtarı içerir.
+Uygulamalar, böyle olaylar gerçekleştiğinde **talep üzerine başlatılabilen** farklı olay **mesajlarına** **abone** olabilirler. Bu hizmetlerin **kurulumu**, **önceki dosyalarla aynı dizinlerde** bulunan **launchd plist dosyalarında** yapılır ve ekstra bir **`LaunchEvent`** anahtarı içerir.
 
 ### XPC Bağlantı Süreci Kontrolü
 
@@ -128,7 +128,7 @@ macos-xpc-connecting-process-check/
 
 ## XPC Yetkilendirmesi
 
-Apple, uygulamaların **bazı hakları yapılandırmalarına ve bunları nasıl alacaklarına** izin verir, böylece çağrılan süreç bu haklara sahipse, XPC hizmetinden bir yöntemi **çağırmasına izin verilir**:
+Apple, uygulamaların **bazı hakları yapılandırmasına ve bunları nasıl alacaklarına** izin verir, böylece çağrılan süreç bu haklara sahipse, XPC hizmetinden bir yöntemi **çağırmasına izin verilir**:
 
 {{#ref}}
 macos-xpc-authorization.md
@@ -440,13 +440,13 @@ return;
 ## Remote XPC
 
 `RemoteXPC.framework` (from `libxpc`) tarafından sağlanan bu işlevsellik, farklı ana bilgisayarlar aracılığıyla XPC ile iletişim kurmayı sağlar.\
-Uzaktan XPC'yi destekleyen hizmetler, plist'lerinde `/System/Library/LaunchDaemons/com.apple.SubmitDiagInfo.plist` durumunda olduğu gibi UsesRemoteXPC anahtarına sahip olacaktır. Ancak, hizmet `launchd` ile kaydedilmiş olsa da, işlevselliği sağlayan `UserEventAgent`'dır; bu, `com.apple.remoted.plugin` ve `com.apple.remoteservicediscovery.events.plugin` eklentileri ile birlikte çalışır.
+Uzaktan XPC'yi destekleyen hizmetler, plist'lerinde `UsesRemoteXPC` anahtarına sahip olacaktır; bu, `/System/Library/LaunchDaemons/com.apple.SubmitDiagInfo.plist` dosyasında olduğu gibi. Ancak, hizmet `launchd` ile kaydedilmiş olsa da, işlevselliği sağlayan `UserEventAgent`'dir; bu, `com.apple.remoted.plugin` ve `com.apple.remoteservicediscovery.events.plugin` eklentilerini içerir.
 
-Ayrıca, `RemoteServiceDiscovery.framework`, `get_device`, `get_unique_device`, `connect` gibi işlevleri açığa çıkaran `com.apple.remoted.plugin`'den bilgi almayı sağlar...
+Ayrıca, `RemoteServiceDiscovery.framework`, `com.apple.remoted.plugin`'den bilgi almayı sağlar ve `get_device`, `get_unique_device`, `connect` gibi işlevleri açığa çıkarır...
 
 Bağlantı kullanıldığında ve hizmetin soket `fd`'si toplandığında, `remote_xpc_connection_*` sınıfı kullanılabilir.
 
-Uzaktan hizmetler hakkında bilgi almak için `/usr/libexec/remotectl` cli aracını şu parametrelerle kullanmak mümkündür:
+Uzaktan hizmetler hakkında bilgi almak için `/usr/libexec/remotectl` cli aracını kullanarak şu parametreler ile bilgi almak mümkündür:
 ```bash
 /usr/libexec/remotectl list # Get bridge devices
 /usr/libexec/remotectl show ...# Get device properties and services

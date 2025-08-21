@@ -46,15 +46,15 @@ docker-forensics.md
 
 ## Belirli Dosya Türleri ve Yazılımlarının Derin İncelemesi
 
-Eğer çok **şüpheli** bir **dosyanız** varsa, o zaman **dosya türüne ve onu oluşturan yazılıma** bağlı olarak birkaç **hile** faydalı olabilir.\
-Bazı ilginç hileleri öğrenmek için aşağıdaki sayfayı okuyun:
+Eğer çok **şüpheli** bir **dosyanız** varsa, o zaman **dosya türüne ve onu oluşturan yazılıma** bağlı olarak birkaç **numara** faydalı olabilir.\
+Bazı ilginç numaraları öğrenmek için aşağıdaki sayfayı okuyun:
 
 
 {{#ref}}
 specific-software-file-type-tricks/
 {{#endref}}
 
-Özel olarak şu sayfayı belirtmek istiyorum:
+Özellikle şu sayfayı belirtmek istiyorum:
 
 
 {{#ref}}
@@ -84,7 +84,7 @@ Anti-adli tekniklerin olası kullanımını aklınızda bulundurun:
 anti-forensic-techniques.md
 {{#endref}}
 
-## Tehdit Avcılığı
+## Tehdit Avı
 
 
 {{#ref}}
