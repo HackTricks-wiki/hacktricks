@@ -47,7 +47,7 @@ Set-ADServiceAccount attacker_dMSA -Add \
 # 3. Mark the migration as *completed*
 Set-ADServiceAccount attacker_dMSA -Replace @{msDS-DelegatedMSAState=2}
 ```
-प्रतिलिपि के बाद, हमलावर बस **logon** कर सकता है `attacker_dMSA$` के रूप में या Kerberos TGT का अनुरोध कर सकता है - Windows *superseded* खाते का टोकन बनाएगा।
+प्रतिलिपि के बाद, हमलावर बस `attacker_dMSA$` के रूप में **logon** कर सकता है या Kerberos TGT का अनुरोध कर सकता है - Windows *superseded* खाते का टोकन बनाएगा।
 
 ### Automation
 
@@ -68,7 +68,7 @@ dir \\DC01\C$
 ```
 ## Detection & Hunting
 
-**Object Auditing** को OUs पर सक्षम करें और निम्नलिखित Windows Security Events की निगरानी करें:
+**ऑब्जेक्ट ऑडिटिंग** को OUs पर सक्षम करें और निम्नलिखित Windows सुरक्षा घटनाओं की निगरानी करें:
 
 * **5137** – **dMSA** ऑब्जेक्ट का निर्माण
 * **5136** – **`msDS-ManagedAccountPrecededByLink`** का संशोधन
@@ -81,11 +81,12 @@ dir \\DC01\C$
 
 ## Mitigation
 
-* **least privilege** के सिद्धांत को लागू करें – केवल विश्वसनीय भूमिकाओं को *Service Account* प्रबंधन का प्रतिनिधित्व दें।
+* **कम से कम विशेषाधिकार** के सिद्धांत को लागू करें – केवल विश्वसनीय भूमिकाओं को *सेवा खाता* प्रबंधन का प्रतिनिधित्व दें।
 * OUs से `Create Child` / `msDS-DelegatedManagedServiceAccount` को हटा दें जो स्पष्ट रूप से इसकी आवश्यकता नहीं है।
-* ऊपर सूचीबद्ध इवेंट IDs की निगरानी करें और dMSAs बनाने या संपादित करने वाले *non-Tier-0* पहचान पर अलर्ट करें।
+* ऊपर सूचीबद्ध घटना आईडी की निगरानी करें और dMSAs बनाने या संपादित करने वाले *गैर-टियर-0* पहचान पर अलर्ट करें।
 
 ## See also
+
 
 {{#ref}}
 golden-dmsa-gmsa.md

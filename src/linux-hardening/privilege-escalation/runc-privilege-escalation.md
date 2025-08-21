@@ -1,10 +1,11 @@
-# RunC Privilege Escalation
+# RunC विशेषाधिकार वृद्धि
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Basic information
+## बुनियादी जानकारी
 
 यदि आप **runc** के बारे में अधिक जानना चाहते हैं तो निम्नलिखित पृष्ठ देखें:
+
 
 {{#ref}}
 ../../network-services-pentesting/2375-pentesting-docker.md

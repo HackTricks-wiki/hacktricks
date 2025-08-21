@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-यह पृष्ठ **छोटे, आत्म-contained C स्निप्पेट्स** को इकट्ठा करता है जो Windows Local Privilege Escalation या post-exploitation के दौरान सहायक होते हैं। प्रत्येक payload को **कॉपी-पेस्ट के लिए अनुकूलित** किया गया है, केवल Windows API / C runtime की आवश्यकता होती है, और इसे `i686-w64-mingw32-gcc` (x86) या `x86_64-w64-mingw32-gcc` (x64) के साथ संकलित किया जा सकता है।
+यह पृष्ठ **छोटे, आत्म-contained C स्निप्पेट्स** को इकट्ठा करता है जो Windows Local Privilege Escalation या post-exploitation के दौरान सहायक होते हैं। प्रत्येक payload को **कॉपी-पेस्ट के अनुकूल** बनाने के लिए डिज़ाइन किया गया है, केवल Windows API / C runtime की आवश्यकता होती है, और इसे `i686-w64-mingw32-gcc` (x86) या `x86_64-w64-mingw32-gcc` (x64) के साथ संकलित किया जा सकता है।
 
 > ⚠️  ये payloads मानते हैं कि प्रक्रिया के पास कार्रवाई करने के लिए आवश्यक न्यूनतम विशेषाधिकार पहले से ही हैं (जैसे `SeDebugPrivilege`, `SeImpersonatePrivilege`, या UAC बायपास के लिए मध्यम-इंटीग्रिटी संदर्भ)। ये **रेड-टीम या CTF सेटिंग्स** के लिए अभिप्रेत हैं जहां एक भेद्यता का शोषण करने से मनमाना स्थानीय कोड निष्पादन हुआ है।
 
@@ -27,7 +27,7 @@ return 0;
 ```
 HKCU\Software\Classes\ms-settings\Shell\Open\command
 ```
-एक न्यूनतम PoC जो एक उन्नत `cmd.exe` को पॉप करता है:
+एक न्यूनतम PoC जो एक ऊंचा `cmd.exe` पॉप करता है:
 ```c
 // x86_64-w64-mingw32-gcc -municode -s -O2 -o uac_fodhelper.exe uac_fodhelper.c
 #define _CRT_SECURE_NO_WARNINGS
@@ -115,6 +115,7 @@ return 0;
 }
 ```
 For a deeper explanation of how that works see:
+
 {{#ref}}
 sedebug-+-seimpersonate-copy-token.md
 {{#endref}}
@@ -122,7 +123,7 @@ sedebug-+-seimpersonate-copy-token.md
 ---
 
 ## In-Memory AMSI & ETW Patch (Defence Evasion)
-अधिकांश आधुनिक AV/EDR इंजन **AMSI** और **ETW** पर निर्भर करते हैं ताकि दुर्भावनापूर्ण व्यवहारों की जांच की जा सके। वर्तमान प्रक्रिया के अंदर दोनों इंटरफेस को जल्दी पैच करना स्क्रिप्ट-आधारित पेलोड (जैसे PowerShell, JScript) को स्कैन होने से रोकता है।
+अधिकांश आधुनिक AV/EDR इंजन **AMSI** और **ETW** पर निर्भर करते हैं ताकि दुर्भावनापूर्ण व्यवहारों की जांच की जा सके। वर्तमान प्रक्रिया के भीतर दोनों इंटरफेस को जल्दी पैच करना स्क्रिप्ट-आधारित पेलोड (जैसे PowerShell, JScript) को स्कैन होने से रोकता है।
 ```c
 // gcc -o patch_amsi.exe patch_amsi.c -lntdll
 #define _CRT_SECURE_NO_WARNINGS
@@ -149,7 +150,7 @@ MessageBoxA(NULL, "AMSI & ETW patched!", "OK", MB_OK);
 return 0;
 }
 ```
-*ऊपर दिया गया पैच प्रक्रिया-स्थानीय है; इसे चलाने के बाद एक नया PowerShell उत्पन्न करने पर AMSI/ETW निरीक्षण के बिना निष्पादित होगा।*
+*ऊपर दिया गया पैच प्रक्रिया-स्थानीय है; इसे चलाने के बाद एक नया PowerShell उत्पन्न करना AMSI/ETW निरीक्षण के बिना निष्पादित करेगा।*
 
 ---
 

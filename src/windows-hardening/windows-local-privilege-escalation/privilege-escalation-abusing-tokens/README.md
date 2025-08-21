@@ -14,7 +14,7 @@
 
 ### SeImpersonatePrivilege
 
-यह विशेषाधिकार किसी भी प्रक्रिया द्वारा धारण किया जाता है जो किसी भी टोकन का अनुकरण (लेकिन निर्माण नहीं) करने की अनुमति देता है, बशर्ते कि इसके लिए एक हैंडल प्राप्त किया जा सके। एक विशेषाधिकार प्राप्त टोकन को Windows सेवा (DCOM) से NTLM प्रमाणीकरण को एक एक्सप्लॉइट के खिलाफ प्रदर्शन करने के लिए प्रेरित करके प्राप्त किया जा सकता है, जिससे SYSTEM विशेषाधिकार के साथ एक प्रक्रिया के निष्पादन की अनुमति मिलती है। इस भेद्यता का लाभ विभिन्न उपकरणों का उपयोग करके उठाया जा सकता है, जैसे [juicy-potato](https://github.com/ohpe/juicy-potato), [RogueWinRM](https://github.com/antonioCoco/RogueWinRM) (जिसके लिए winrm को अक्षम करना आवश्यक है), [SweetPotato](https://github.com/CCob/SweetPotato), [EfsPotato](https://github.com/zcgonvh/EfsPotato), [DCOMPotato](https://github.com/zcgonvh/DCOMPotato) और [PrintSpoofer](https://github.com/itm4n/PrintSpoofer).
+यह विशेषाधिकार किसी भी प्रक्रिया द्वारा धारण किया जाता है जो किसी भी टोकन का अनुकरण (लेकिन निर्माण नहीं) करने की अनुमति देता है, बशर्ते कि इसके लिए एक हैंडल प्राप्त किया जा सके। एक विशेषाधिकार प्राप्त टोकन को Windows सेवा (DCOM) से NTLM प्रमाणीकरण को एक एक्सप्लॉइट के खिलाफ प्रदर्शन करने के लिए प्रेरित करके प्राप्त किया जा सकता है, जिससे SYSTEM विशेषाधिकार के साथ एक प्रक्रिया के निष्पादन की अनुमति मिलती है। इस भेद्यता का लाभ विभिन्न उपकरणों का उपयोग करके उठाया जा सकता है, जैसे [juicy-potato](https://github.com/ohpe/juicy-potato), [RogueWinRM](https://github.com/antonioCoco/RogueWinRM) (जिसके लिए winrm को बंद करना आवश्यक है), [SweetPotato](https://github.com/CCob/SweetPotato), [EfsPotato](https://github.com/zcgonvh/EfsPotato), [DCOMPotato](https://github.com/zcgonvh/DCOMPotato) और [PrintSpoofer](https://github.com/itm4n/PrintSpoofer).
 
 {{#ref}}
 ../roguepotato-and-printspoofer.md
@@ -27,7 +27,7 @@
 ### SeAssignPrimaryPrivilege
 
 यह **SeImpersonatePrivilege** के समान है, यह एक विशेषाधिकार प्राप्त टोकन प्राप्त करने के लिए **समान विधि** का उपयोग करेगा।\
-फिर, यह विशेषाधिकार **एक प्राथमिक टोकन** को एक नए/स्थगित प्रक्रिया को असाइन करने की अनुमति देता है। विशेषाधिकार प्राप्त अनुकरण टोकन के साथ आप एक प्राथमिक टोकन (DuplicateTokenEx) उत्पन्न कर सकते हैं।\
+फिर, यह विशेषाधिकार **एक नए/स्थगित प्रक्रिया** को एक प्राथमिक टोकन असाइन करने की अनुमति देता है। विशेषाधिकार प्राप्त अनुकरण टोकन के साथ आप एक प्राथमिक टोकन (DuplicateTokenEx) उत्पन्न कर सकते हैं।\
 इस टोकन के साथ, आप 'CreateProcessAsUser' के साथ एक **नई प्रक्रिया** बना सकते हैं या एक प्रक्रिया को स्थगित कर सकते हैं और **टोकन सेट कर सकते हैं** (सामान्यतः, आप एक चल रही प्रक्रिया के प्राथमिक टोकन को संशोधित नहीं कर सकते)।
 
 ### SeTcbPrivilege
@@ -36,13 +36,13 @@
 
 ### SeBackupPrivilege
 
-यह विशेषाधिकार किसी भी फ़ाइल (पढ़ने के संचालन तक सीमित) के लिए **सभी पढ़ने की पहुंच** नियंत्रण प्रदान करता है। इसका उपयोग **स्थानीय व्यवस्थापक** खातों के पासवर्ड हैश को रजिस्ट्री से पढ़ने के लिए किया जाता है, जिसके बाद, जैसे उपकरणों का उपयोग किया जा सकता है "**psexec**" या "**wmiexec**" हैश के साथ (Pass-the-Hash तकनीक)। हालाँकि, यह तकनीक दो स्थितियों में विफल होती है: जब स्थानीय व्यवस्थापक खाता अक्षम होता है, या जब एक नीति लागू होती है जो दूरस्थ रूप से कनेक्ट करने वाले स्थानीय व्यवस्थापकों से प्रशासनिक अधिकार हटा देती है।\
+यह विशेषाधिकार किसी भी फ़ाइल (पढ़ने के संचालन तक सीमित) को **सभी पढ़ने की पहुंच** नियंत्रण देने के लिए प्रणाली को प्रेरित करता है। इसका उपयोग **स्थानीय व्यवस्थापक** खातों के पासवर्ड हैश को रजिस्ट्री से पढ़ने के लिए किया जाता है, जिसके बाद, "**psexec**" या "**wmiexec**" जैसे उपकरणों का उपयोग हैश के साथ किया जा सकता है (Pass-the-Hash तकनीक)। हालाँकि, यह तकनीक दो स्थितियों में विफल होती है: जब स्थानीय व्यवस्थापक खाता अक्षम होता है, या जब एक नीति लागू होती है जो दूरस्थ रूप से कनेक्ट करने वाले स्थानीय व्यवस्थापकों से प्रशासनिक अधिकार हटा देती है।\
 आप इस विशेषाधिकार का **दुरुपयोग** कर सकते हैं:
 
 - [https://github.com/Hackplayers/PsCabesha-tools/blob/master/Privesc/Acl-FullControl.ps1](https://github.com/Hackplayers/PsCabesha-tools/blob/master/Privesc/Acl-FullControl.ps1)
 - [https://github.com/giuliano108/SeBackupPrivilege/tree/master/SeBackupPrivilegeCmdLets/bin/Debug](https://github.com/giuliano108/SeBackupPrivilege/tree/master/SeBackupPrivilegeCmdLets/bin/Debug)
 - **IppSec** का पालन करते हुए [https://www.youtube.com/watch?v=IfCysW0Od8w\&t=2610\&ab_channel=IppSec](https://www.youtube.com/watch?v=IfCysW0Od8w&t=2610&ab_channel=IppSec)
-- या जैसा कि समझाया गया है **Backup Operators के साथ विशेषाधिकार बढ़ाने** के अनुभाग में:
+- या जैसा कि **Backup Operators के साथ विशेषाधिकार बढ़ाने** के अनुभाग में समझाया गया है:
 
 {{#ref}}
 ../../active-directory-methodology/privileged-groups-and-token-privileges.md
@@ -64,16 +64,16 @@ SeCreateTokenPrivilege एक शक्तिशाली अनुमति ह
 
 ### SeLoadDriverPrivilege
 
-यह विशेषाधिकार **डिवाइस ड्राइवरों को लोड और अनलोड** करने की अनुमति देता है, जिसमें `ImagePath` और `Type` के लिए विशिष्ट मानों के साथ एक रजिस्ट्री प्रविष्टि का निर्माण शामिल है। चूंकि `HKLM` (HKEY_LOCAL_MACHINE) पर सीधे लिखने की पहुंच प्रतिबंधित है, इसलिए `HKCU` (HKEY_CURRENT_USER) का उपयोग किया जाना चाहिए। हालाँकि, ड्राइवर कॉन्फ़िगरेशन के लिए `HKCU` को कर्नेल द्वारा मान्यता प्राप्त कराने के लिए एक विशिष्ट पथ का पालन करना आवश्यक है।
+यह विशेषाधिकार **डिवाइस ड्राइवरों को लोड और अनलोड** करने की अनुमति देता है, जिसमें `ImagePath` और `Type` के लिए विशिष्ट मानों के साथ एक रजिस्ट्री प्रविष्टि का निर्माण शामिल है। चूंकि `HKLM` (HKEY_LOCAL_MACHINE) पर सीधे लिखने की पहुंच प्रतिबंधित है, इसलिए `HKCU` (HKEY_CURRENT_USER) का उपयोग किया जाना चाहिए। हालाँकि, ड्राइवर कॉन्फ़िगरेशन के लिए `HKCU` को कर्नेल द्वारा मान्यता प्राप्त करने के लिए, एक विशिष्ट पथ का पालन करना आवश्यक है।
 
-यह पथ `\Registry\User\<RID>\System\CurrentControlSet\Services\DriverName` है, जहाँ `<RID>` वर्तमान उपयोगकर्ता का सापेक्ष पहचानकर्ता है। `HKCU` के अंदर, इस पूरे पथ का निर्माण किया जाना चाहिए, और दो मान सेट करने की आवश्यकता है:
+यह पथ `\Registry\User\<RID>\System\CurrentControlSet\Services\DriverName` है, जहाँ `<RID>` वर्तमान उपयोगकर्ता का सापेक्ष पहचानकर्ता है। `HKCU` के अंदर, इस पूरे पथ को बनाना होगा, और दो मान सेट करने होंगे:
 
 - `ImagePath`, जो निष्पादित होने वाले बाइनरी का पथ है
 - `Type`, जिसका मान `SERVICE_KERNEL_DRIVER` (`0x00000001`) है।
 
 **अनुसरण करने के चरण:**
 
-1. प्रतिबंधित लेखन पहुंच के कारण `HKLM` के बजाय `HKCU` तक पहुंचें।
+1. प्रतिबंधित लेखन पहुंच के कारण `HKLM` के बजाय `HKCU` तक पहुँचें।
 2. `HKCU` के भीतर `\Registry\User\<RID>\System\CurrentControlSet\Services\DriverName` पथ बनाएं, जहाँ `<RID>` वर्तमान उपयोगकर्ता का सापेक्ष पहचानकर्ता है।
 3. `ImagePath` को बाइनरी के निष्पादन पथ पर सेट करें।
 4. `Type` को `SERVICE_KERNEL_DRIVER` (`0x00000001`) के रूप में असाइन करें।
@@ -125,7 +125,7 @@ mimikatz # sekurlsa::logonpasswords
 ```
 #### RCE
 
-यदि आप `NT SYSTEM` शेल प्राप्त करना चाहते हैं तो आप उपयोग कर सकते हैं:
+यदि आप `NT SYSTEM` शेल प्राप्त करना चाहते हैं, तो आप उपयोग कर सकते हैं:
 
 - [**SeDebugPrivilege-Exploit (C++)**](https://github.com/bruno-1337/SeDebugPrivilege-Exploit)
 - [**SeDebugPrivilegePoC (C#)**](https://github.com/daem0nc0re/PrivFu/tree/main/PrivilegedOperations/SeDebugPrivilegePoC)
@@ -140,7 +140,7 @@ import-module psgetsys.ps1; [MyProcess]::CreateProcessFromParent(<system_pid>,<c
 
 इस विशेषाधिकार का उपयोग वॉल्यूम को हेरफेर करने के लिए किया जा सकता है, जिससे पूर्ण वॉल्यूम एक्सेस प्राप्त होता है। [SeManageVolumeExploit](https://github.com/CsEnox/SeManageVolumeExploit) का उपयोग सभी उपयोगकर्ताओं को C:\ के लिए पूर्ण एक्सेस देने के लिए किया जा सकता है।
 
-इसके अतिरिक्त, [इस Medium लेख](https://medium.com/@raphaeltzy13/exploiting-semanagevolumeprivilege-with-dll-hijacking-windows-privilege-escalation-1a4f28372d37) में वर्णित प्रक्रिया `SeManageVolumePrivilege` के साथ DLL हाइजैकिंग का उपयोग करके विशेषाधिकार बढ़ाने का वर्णन करती है। एक पेलोड DLL `C:\Windows\System32\wbem\tzres.dll` को रखकर और `systeminfo` को कॉल करके DLL को निष्पादित किया जाता है।
+इसके अतिरिक्त, [इस Medium लेख](https://medium.com/@raphaeltzy13/exploiting-semanagevolumeprivilege-with-dll-hijacking-windows-privilege-escalation-1a4f28372d37) में वर्णित प्रक्रिया `SeManageVolumePrivilege` के साथ DLL हाइजैकिंग का उपयोग करके विशेषाधिकार बढ़ाने का वर्णन करती है। एक पेलोड DLL `C:\Windows\System32\wbem\tzres.dll` रखकर और `systeminfo` को कॉल करके DLL निष्पादित किया जाता है।
 
 ## Check privileges
 ```
@@ -165,12 +165,12 @@ Full token privileges cheatsheet at [https://github.com/gtworek/Priv2Admin](http
 | -------------------------- | ----------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **`SeAssignPrimaryToken`** | _**Admin**_ | 3rd party tool          | _"यह एक उपयोगकर्ता को टोकन का अनुकरण करने और potato.exe, rottenpotato.exe और juicypotato.exe जैसे उपकरणों का उपयोग करके nt सिस्टम पर प्रिवेस्क करने की अनुमति देगा"_                                                                                                                                                                                                      | Thank you [Aurélien Chalot](https://twitter.com/Defte_) for the update. I will try to re-phrase it to something more recipe-like soon.                                                                                                                                                                                         |
 | **`SeBackup`**             | **Threat**  | _**Built-in commands**_ | संवेदनशील फ़ाइलों को `robocopy /b` के साथ पढ़ें                                                                                                                                                                                                                                                                                                             | <p>- यदि आप %WINDIR%\MEMORY.DMP पढ़ सकते हैं तो यह अधिक दिलचस्प हो सकता है<br><br>- <code>SeBackupPrivilege</code> (और robocopy) खुली फ़ाइलों के मामले में सहायक नहीं है।<br><br>- Robocopy को /b पैरामीटर के साथ काम करने के लिए SeBackup और SeRestore दोनों की आवश्यकता होती है।</p>                                                                      |
-| **`SeCreateToken`**        | _**Admin**_ | 3rd party tool          | `NtCreateToken` के साथ स्थानीय प्रशासनिक अधिकारों सहित मनमाने टोकन बनाएं।                                                                                                                                                                                                                                                                          |                                                                                                                                                                                                                                                                                                                                |
+| **`SeCreateToken`**        | _**Admin**_ | 3rd party tool          | `NtCreateToken` के साथ स्थानीय प्रशासनिक अधिकारों सहित मनमाना टोकन बनाएं।                                                                                                                                                                                                                                                                          |                                                                                                                                                                                                                                                                                                                                |
 | **`SeDebug`**              | _**Admin**_ | **PowerShell**          | `lsass.exe` टोकन को डुप्लिकेट करें।                                                                                                                                                                                                                                                                                                                   | Script to be found at [FuzzySecurity](https://github.com/FuzzySecurity/PowerShell-Suite/blob/master/Conjure-LSASS.ps1)                                                                                                                                                                                                         |
 | **`SeLoadDriver`**         | _**Admin**_ | 3rd party tool          | <p>1. <code>szkg64.sys</code> जैसे बग्गी कर्नेल ड्राइवर को लोड करें<br>2. ड्राइवर की भेद्यता का शोषण करें<br><br>वैकल्पिक रूप से, इस विशेषता का उपयोग <code>ftlMC</code> अंतर्निहित कमांड के साथ सुरक्षा-संबंधित ड्राइवरों को अनलोड करने के लिए किया जा सकता है। यानी: <code>fltMC sysmondrv</code></p>                                                                           | <p>1. <code>szkg64</code> भेद्यता को <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-15732">CVE-2018-15732</a> के रूप में सूचीबद्ध किया गया है<br>2. <code>szkg64</code> <a href="https://www.greyhathacker.net/?p=1025">शोषण कोड</a> को <a href="https://twitter.com/parvezghh">Parvez Anwar</a> द्वारा बनाया गया था</p> |
 | **`SeRestore`**            | _**Admin**_ | **PowerShell**          | <p>1. SeRestore विशेषता के साथ PowerShell/ISE लॉन्च करें।<br>2. <a href="https://github.com/gtworek/PSBits/blob/master/Misc/EnableSeRestorePrivilege.ps1">Enable-SeRestorePrivilege</a> के साथ विशेषता सक्षम करें।<br>3. utilman.exe का नाम बदलकर utilman.old करें<br>4. cmd.exe का नाम बदलकर utilman.exe करें<br>5. कंसोल को लॉक करें और Win+U दबाएं</p> | <p>हमला कुछ AV सॉफ़्टवेयर द्वारा पता लगाया जा सकता है।</p><p>वैकल्पिक विधि उसी विशेषता का उपयोग करके "Program Files" में संग्रहीत सेवा बाइनरी को प्रतिस्थापित करने पर निर्भर करती है</p>                                                                                                                                                            |
 | **`SeTakeOwnership`**      | _**Admin**_ | _**Built-in commands**_ | <p>1. <code>takeown.exe /f "%windir%\system32"</code><br>2. <code>icalcs.exe "%windir%\system32" /grant "%username%":F</code><br>3. cmd.exe का नाम बदलकर utilman.exe करें<br>4. कंसोल को लॉक करें और Win+U दबाएं</p>                                                                                                                                       | <p>हमला कुछ AV सॉफ़्टवेयर द्वारा पता लगाया जा सकता है।</p><p>वैकल्पिक विधि उसी विशेषता का उपयोग करके "Program Files" में संग्रहीत सेवा बाइनरी को प्रतिस्थापित करने पर निर्भर करती है।</p>                                                                                                                                                           |
-| **`SeTcb`**                | _**Admin**_ | 3rd party tool          | <p>टोकन को स्थानीय प्रशासनिक अधिकारों के साथ शामिल करने के लिए हेरफेर करें। SeImpersonate की आवश्यकता हो सकती है।</p><p>पुष्टि की जानी है।</p>                                                                                                                                                                                                                                     |                                                                                                                                                                                                                                                                                                                                |
+| **`SeTcb`**                | _**Admin**_ | 3rd party tool          | <p>टोकनों को इस तरह से हेरफेर करें कि स्थानीय प्रशासनिक अधिकार शामिल हों। SeImpersonate की आवश्यकता हो सकती है।</p><p>पुष्टि की जानी है।</p>                                                                                                                                                                                                                                     |                                                                                                                                                                                                                                                                                                                                |
 
 ## Reference
 

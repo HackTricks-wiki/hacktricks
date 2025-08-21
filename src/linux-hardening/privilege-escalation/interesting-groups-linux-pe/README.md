@@ -27,7 +27,7 @@ sudo su
 find / -perm -4000 2>/dev/null
 ```
 यदि आप पाते हैं कि बाइनरी **pkexec एक SUID बाइनरी है** और आप **sudo** या **admin** समूह में हैं, तो आप संभवतः `pkexec` का उपयोग करके बाइनरी को sudo के रूप में निष्पादित कर सकते हैं।\
-यह इसलिए है क्योंकि आमतौर पर ये **polkit नीति** के भीतर समूह होते हैं। यह नीति मूल रूप से पहचानती है कि कौन से समूह `pkexec` का उपयोग कर सकते हैं। इसे जांचें:
+यह इसलिए है क्योंकि आमतौर पर ये **polkit नीति** के अंदर समूह होते हैं। यह नीति मूल रूप से पहचानती है कि कौन से समूह `pkexec` का उपयोग कर सकते हैं। इसे जांचें:
 ```bash
 cat /etc/polkit-1/localauthority.conf.d/*
 ```
@@ -60,7 +60,7 @@ pkttyagent --process <PID of session1> #Step 2, attach pkttyagent to session1
 ```
 %wheel	ALL=(ALL:ALL) ALL
 ```
-इसका मतलब है कि **कोई भी उपयोगकर्ता जो व्हील समूह का सदस्य है, वह sudo के रूप में कुछ भी निष्पादित कर सकता है**।
+इसका मतलब है कि **कोई भी उपयोगकर्ता जो व्हील समूह का सदस्य है, वह कुछ भी sudo के रूप में निष्पादित कर सकता है**।
 
 यदि ऐसा है, तो **रूट बनने के लिए आप बस निष्पादित कर सकते हैं**:
 ```
@@ -68,7 +68,7 @@ sudo su
 ```
 ## Shadow Group
 
-**शैडो** समूह के उपयोगकर्ता **/etc/shadow** फ़ाइल को **पढ़** सकते हैं:
+**group shadow** के उपयोगकर्ता **/etc/shadow** फ़ाइल को **पढ़** सकते हैं:
 ```
 -rw-r----- 1 root shadow 1824 Apr 26 19:10 /etc/shadow
 ```
@@ -86,7 +86,7 @@ $ echo $PATH
 # echo $PATH
 /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 ```
-यदि हम `/usr/local` में कुछ प्रोग्राम को हाईजैक कर सकते हैं, तो हम आसानी से रूट प्राप्त कर सकते हैं।
+यदि हम `/usr/local` में कुछ प्रोग्रामों को हाईजैक कर सकते हैं, तो हम आसानी से रूट प्राप्त कर सकते हैं।
 
 `run-parts` प्रोग्राम को हाईजैक करना रूट प्राप्त करने का एक आसान तरीका है, क्योंकि अधिकांश प्रोग्राम `run-parts` को चलाएंगे जैसे (क्रॉनटैब, जब SSH लॉगिन होता है)।
 ```bash
@@ -130,7 +130,7 @@ $ /bin/bash -p
 ```
 ## Disk Group
 
-यह विशेषाधिकार लगभग **रूट एक्सेस के समान** है क्योंकि आप मशीन के अंदर सभी डेटा तक पहुँच सकते हैं।
+यह विशेषाधिकार लगभग **रूट एक्सेस के बराबर** है क्योंकि आप मशीन के अंदर सभी डेटा तक पहुँच सकते हैं।
 
 Files:`/dev/sd[a-z][1-9]`
 ```bash
@@ -181,7 +181,7 @@ find / -group root -perm -g=w 2>/dev/null
 ```
 ## Docker Group
 
-आप **होस्ट मशीन के रूट फाइल सिस्टम को एक इंस्टेंस के वॉल्यूम में माउंट कर सकते हैं**, इसलिए जब इंस्टेंस शुरू होता है, तो यह तुरंत उस वॉल्यूम में `chroot` लोड करता है। इससे आपको मशीन पर रूट मिल जाता है।
+आप **होस्ट मशीन के रूट फ़ाइल सिस्टम को एक इंस्टेंस के वॉल्यूम में माउंट कर सकते हैं**, इसलिए जब इंस्टेंस शुरू होता है, तो यह तुरंत उस वॉल्यूम में `chroot` लोड करता है। इससे आपको मशीन पर रूट मिल जाता है।
 ```bash
 docker image #Get images from the docker service
 
@@ -193,13 +193,13 @@ echo 'toor:$1$.ZcF5ts0$i4k6rQYzeegUkacRCvfxC0:0:0:root:/root:/bin/sh' >> /etc/pa
 #Ifyou just want filesystem and network access you can startthe following container:
 docker run --rm -it --pid=host --net=host --privileged -v /:/mnt <imagename> chroot /mnt bashbash
 ```
-अंत में, यदि आपको पहले के किसी भी सुझाव पसंद नहीं हैं, या वे किसी कारण से काम नहीं कर रहे हैं (docker api firewall?) तो आप हमेशा **एक विशेषाधिकार प्राप्त कंटेनर चलाने और उससे भागने** की कोशिश कर सकते हैं जैसा कि यहां समझाया गया है:
+अंत में, यदि आपको पहले के किसी भी सुझाव पसंद नहीं हैं, या वे किसी कारण से काम नहीं कर रहे हैं (docker api firewall?) तो आप हमेशा **एक विशेषाधिकार प्राप्त कंटेनर चलाने और उससे भागने** की कोशिश कर सकते हैं जैसा कि यहाँ समझाया गया है:
 
 {{#ref}}
 ../docker-security/
 {{#endref}}
 
-यदि आपके पास docker socket पर लिखने की अनुमति है तो [**इस पोस्ट को पढ़ें कि कैसे docker socket का दुरुपयोग करके विशेषाधिकार बढ़ाएं**](../index.html#writable-docker-socket)**.**
+यदि आपके पास docker socket पर लिखने की अनुमति है तो [**इस पोस्ट को पढ़ें कि कैसे docker socket का दुरुपयोग करके विशेषाधिकार बढ़ाएं**](../index.html#writable-docker-socket)**.** 
 
 {{#ref}}
 https://github.com/KrustyHack/docker-privilege-escalation
@@ -222,7 +222,7 @@ https://fosterelli.co/privilege-escalation-via-docker.html
 
 ## Auth समूह
 
-OpenBSD के अंदर **auth** समूह आमतौर पर _**/etc/skey**_ और _**/var/db/yubikey**_ फ़ोल्डरों में लिख सकता है यदि उनका उपयोग किया जाता है।\
+OpenBSD के भीतर **auth** समूह आमतौर पर _**/etc/skey**_ और _**/var/db/yubikey**_ फ़ोल्डरों में लिख सकता है यदि उनका उपयोग किया जाता है।\
 इन अनुमतियों का दुरुपयोग निम्नलिखित एक्सप्लॉइट के साथ **विशेषाधिकार बढ़ाने** के लिए किया जा सकता है: [https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot](https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot)
 
 {{#include ../../../banners/hacktricks-training.md}}

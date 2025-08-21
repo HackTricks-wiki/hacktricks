@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-इस परिदृश्य में एक बाहरी डोमेन आप पर भरोसा कर रहा है (या दोनों एक-दूसरे पर भरोसा कर रहे हैं), इसलिए आप इसके ऊपर कुछ प्रकार की पहुंच प्राप्त कर सकते हैं।
+इस परिदृश्य में, एक बाहरी डोमेन आप पर भरोसा कर रहा है (या दोनों एक-दूसरे पर भरोसा कर रहे हैं), इसलिए आप इसके ऊपर कुछ प्रकार की पहुंच प्राप्त कर सकते हैं।
 
 ## Enumeration
 
@@ -56,13 +56,13 @@ IsDomain     : True
 # You may also enumerate where foreign groups and/or users have been assigned
 # local admin access via Restricted Group by enumerating the GPOs in the foreign domain.
 ```
-पिछली गणना में यह पाया गया कि उपयोगकर्ता **`crossuser`** **`External Admins`** समूह के अंदर है, जिसके पास **DC of the external domain** के अंदर **Admin access** है।
+In the previous enumeration it was found that the user **`crossuser`** is inside the **`External Admins`** group who has **Admin access** inside the **DC of the external domain**.
 
-## प्रारंभिक पहुंच
+## Initial Access
 
-यदि आप अपने उपयोगकर्ता के लिए अन्य डोमेन में कोई **विशेष** पहुंच नहीं पा रहे हैं, तो आप अभी भी AD विधि में वापस जा सकते हैं और **एक अप्रिविलेज्ड उपयोगकर्ता से प्रिवेस्क** करने की कोशिश कर सकते हैं (उदाहरण के लिए, केरबेरोस्टिंग जैसी चीजें):
+यदि आप **दूसरे डोमेन** में अपने उपयोगकर्ता की कोई **विशेष** पहुंच नहीं पा रहे हैं, तो आप अभी भी AD पद्धति पर वापस जा सकते हैं और **एक अप्रिविलेज्ड उपयोगकर्ता से प्रिवेस्क** करने की कोशिश कर सकते हैं (उदाहरण के लिए, केरबेरोस्टिंग जैसी चीजें):
 
-आप **Powerview functions** का उपयोग करके `-Domain` पैरामीटर के साथ **अन्य डोमेन** को **गणना** करने के लिए कर सकते हैं जैसे:
+आप **Powerview functions** का उपयोग करके `-Domain` पैरामीटर के साथ **दूसरे डोमेन** को **enumerate** कर सकते हैं जैसे:
 ```bash
 Get-DomainUser -SPN -Domain domain_name.local | select SamAccountName
 ```
@@ -82,7 +82,7 @@ Enter-PSSession -ComputerName dc.external_domain.local -Credential domain\admini
 
 आप एक जंगल ट्रस्ट के पार [**SID इतिहास**](sid-history-injection.md) का भी दुरुपयोग कर सकते हैं।
 
-यदि एक उपयोगकर्ता **एक जंगल से दूसरे जंगल में** स्थानांतरित किया जाता है और **SID फ़िल्टरिंग सक्षम नहीं है**, तो **दूसरे जंगल से एक SID जोड़ना** संभव हो जाता है, और यह **SID** **उपयोगकर्ता के टोकन** में **जोड़ दिया जाएगा** जब **ट्रस्ट** के पार प्रमाणीकरण किया जाएगा।
+यदि एक उपयोगकर्ता **एक जंगल से दूसरे जंगल में** माइग्रेट किया जाता है और **SID फ़िल्टरिंग सक्षम नहीं है**, तो **दूसरे जंगल से एक SID जोड़ना** संभव हो जाता है, और यह **SID** **विश्वास** के पार प्रमाणीकरण करते समय **उपयोगकर्ता के टोकन** में **जोड़ दिया जाएगा**।
 
 > [!WARNING]
 > याद दिलाने के लिए, आप साइनिंग की प्राप्त कर सकते हैं
@@ -91,7 +91,7 @@ Enter-PSSession -ComputerName dc.external_domain.local -Credential domain\admini
 > Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.domain.local
 > ```
 
-आप **वर्तमान डोमेन** के उपयोगकर्ता का **TGT** अनुकरण करते हुए **विश्वसनीय** कुंजी के साथ **साइन** कर सकते हैं।
+आप **वर्तमान डोमेन** के उपयोगकर्ता का **TGT अनुकरण** करने के लिए **विश्वसनीय** कुंजी के साथ **साइन** कर सकते हैं।
 ```bash
 # Get a TGT for the cross-domain privileged user to the other domain
 Invoke-Mimikatz -Command '"kerberos::golden /user:<username> /domain:<current domain> /SID:<current domain SID> /rc4:<trusted key> /target:<external.domain> /ticket:C:\path\save\ticket.kirbi"'

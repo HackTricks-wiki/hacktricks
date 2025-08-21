@@ -1,4 +1,4 @@
-# BloodHound & अन्य Active Directory Enumeration Tools
+# BloodHound & Other Active Directory Enumeration Tools
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -18,7 +18,7 @@ adws-enumeration.md
 * ऑब्जेक्ट विशेषताओं और सुरक्षा वर्णनकर्ताओं का संपादन
 * ऑफ़लाइन विश्लेषण के लिए स्नैपशॉट निर्माण / तुलना
 
-### त्वरित उपयोग
+### Quick usage
 
 1. उपकरण शुरू करें और किसी भी डोमेन क्रेडेंशियल के साथ `dc01.corp.local` से कनेक्ट करें।
 2. `File ➜ Create Snapshot` के माध्यम से एक ऑफ़लाइन स्नैपशॉट बनाएं।
@@ -28,7 +28,7 @@ adws-enumeration.md
 
 ## ADRecon
 
-[ADRecon](https://github.com/adrecon/ADRecon) एक डोमेन से एक बड़े सेट के आर्टिफैक्ट (ACLs, GPOs, trusts, CA templates …) को निकालता है और एक **Excel रिपोर्ट** उत्पन्न करता है।
+[ADRecon](https://github.com/adrecon/ADRecon) एक डोमेन से एक बड़े सेट के आर्टिफैक्ट (ACLs, GPOs, trusts, CA templates …) को निकालता है और एक **Excel report** उत्पन्न करता है।
 ```powershell
 # On a Windows host in the domain
 PS C:\> .\ADRecon.ps1 -OutputDir C:\Temp\ADRecon
@@ -56,7 +56,7 @@ SharpHound.exe --CollectionMethods All           # Full sweep (noisy)
 SharpHound.exe --CollectionMethods Group,LocalAdmin,Session,Trusts,ACL
 SharpHound.exe --Stealth --LDAP                      # Low noise LDAP only
 ```
-कलेक्टर्स JSON उत्पन्न करते हैं जिसे BloodHound GUI के माध्यम से ग्रहण किया जाता है।
+संग्रहकर्ता JSON उत्पन्न करते हैं जिसे BloodHound GUI के माध्यम से ग्रहण किया जाता है।
 
 ---
 
@@ -71,7 +71,7 @@ Group3r.exe -f gpo.log   # -s to stdout
 
 ## PingCastle
 
-[PingCastle](https://www.pingcastle.com/documentation/) Active Directory का **health-check** करता है और जोखिम स्कोरिंग के साथ एक HTML रिपोर्ट उत्पन्न करता है।
+[PingCastle](https://www.pingcastle.com/documentation/) Active Directory का **स्वास्थ्य-चेक** करता है और जोखिम स्कोरिंग के साथ एक HTML रिपोर्ट उत्पन्न करता है।
 ```powershell
 PingCastle.exe --healthcheck --server corp.local --user bob --password "P@ssw0rd!"
 ```

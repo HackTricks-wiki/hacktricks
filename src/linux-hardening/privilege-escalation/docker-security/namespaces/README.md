@@ -1,44 +1,51 @@
-# नामस्थान
+# Namespaces
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-### **PID नामस्थान**
+### **PID namespace**
+
 
 {{#ref}}
 pid-namespace.md
 {{#endref}}
 
-### **माउंट नामस्थान**
+### **Mount namespace**
+
 
 {{#ref}}
 mount-namespace.md
 {{#endref}}
 
-### **नेटवर्क नामस्थान**
+### **Network namespace**
+
 
 {{#ref}}
 network-namespace.md
 {{#endref}}
 
-### **IPC नामस्थान**
+### **IPC Namespace**
+
 
 {{#ref}}
 ipc-namespace.md
 {{#endref}}
 
-### **UTS नामस्थान**
+### **UTS namespace**
+
 
 {{#ref}}
 uts-namespace.md
 {{#endref}}
 
-### समय नामस्थान
+### Time Namespace
+
 
 {{#ref}}
 time-namespace.md
 {{#endref}}
 
-### उपयोगकर्ता नामस्थान
+### User namespace
+
 
 {{#ref}}
 user-namespace.md
