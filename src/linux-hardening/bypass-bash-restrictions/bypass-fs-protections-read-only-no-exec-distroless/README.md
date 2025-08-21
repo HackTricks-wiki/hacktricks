@@ -11,7 +11,7 @@
 
 ## 只读 / 无执行场景
 
-越来越多的Linux机器以**只读（ro）文件系统保护**的方式挂载，特别是在容器中。这是因为运行一个只读文件系统的容器就像在`securitycontext`中设置**`readOnlyRootFilesystem: true`**一样简单：
+越来越多的Linux机器以**只读（ro）文件系统保护**的方式挂载，特别是在容器中。这是因为运行一个ro文件系统的容器就像在`securitycontext`中设置**`readOnlyRootFilesystem: true`**一样简单：
 
 <pre class="language-yaml"><code class="lang-yaml">apiVersion: v1
 kind: Pod
@@ -26,10 +26,10 @@ securityContext:
 </strong>    command: ["sh", "-c", "while true; do sleep 1000; done"]
 </code></pre>
 
-然而，即使文件系统以ro挂载，**`/dev/shm`**仍然是可写的，因此我们不能在磁盘上写入的说法是错误的。然而，这个文件夹将被**挂载为无执行保护**，因此如果您在这里下载一个二进制文件，您**将无法执行它**。
+然而，即使文件系统以ro方式挂载，**`/dev/shm`**仍然是可写的，因此我们不能写入磁盘的说法是错误的。然而，这个文件夹将会**以无执行保护挂载**，所以如果您在这里下载一个二进制文件，您**将无法执行它**。
 
 > [!WARNING]
-> 从红队的角度来看，这使得**下载和执行**系统中尚不存在的二进制文件（如后门或枚举器如`kubectl`）变得**复杂**。
+> 从红队的角度来看，这使得**下载和执行**系统中尚不存在的二进制文件（如后门或像`kubectl`这样的枚举器）变得**复杂**。
 
 ## 最简单的绕过：脚本
 
@@ -43,20 +43,20 @@ securityContext:
 
 ### FD + exec系统调用绕过
 
-如果您在机器内部有一些强大的脚本引擎，例如**Python**、**Perl**或**Ruby**，您可以将二进制文件下载到内存中执行，将其存储在内存文件描述符中（`create_memfd`系统调用），这不会受到这些保护的限制，然后调用**`exec`系统调用**，指明**fd作为要执行的文件**。
+如果您在机器内部有一些强大的脚本引擎，例如**Python**、**Perl**或**Ruby**，您可以将二进制文件下载到内存中执行，将其存储在内存文件描述符中（`create_memfd`系统调用），这不会受到这些保护的限制，然后调用**`exec`系统调用**，将**fd作为要执行的文件**。
 
-为此，您可以轻松使用项目[**fileless-elf-exec**](https://github.com/nnsee/fileless-elf-exec)。您可以传递一个二进制文件，它将生成一个指定语言的脚本，**二进制文件经过压缩和b64编码**，并包含**解码和解压缩它**的指令，使用调用`create_memfd`系统调用创建的**fd**和调用**exec**系统调用来运行它。
+为此，您可以轻松使用项目[**fileless-elf-exec**](https://github.com/nnsee/fileless-elf-exec)。您可以传递一个二进制文件，它将生成一个指定语言的脚本，**二进制文件经过压缩和b64编码**，并包含**解码和解压缩**它的指令，使用调用`create_memfd`系统调用创建的**fd**，以及调用**exec**系统调用来运行它。
 
 > [!WARNING]
 > 这在其他脚本语言中不起作用，例如PHP或Node，因为它们没有任何**默认方式从脚本调用原始系统调用**，因此无法调用`create_memfd`来创建**内存fd**以存储二进制文件。
 >
-> 此外，使用`/dev/shm`中的文件创建**常规fd**将不起作用，因为您将无法运行它，因为**无执行保护**将适用。
+> 此外，使用`/dev/shm`中的文件创建**常规fd**也不起作用，因为您将无法运行它，因为**无执行保护**将适用。
 
 ### DDexec / EverythingExec
 
-[**DDexec / EverythingExec**](https://github.com/arget13/DDexec)是一种技术，允许您通过覆盖**`/proc/self/mem`**来**修改您自己进程的内存**。
+[**DDexec / EverythingExec**](https://github.com/arget13/DDexec)是一种技术，允许您通过覆盖其**`/proc/self/mem`**来**修改您自己的进程的内存**。
 
-因此，**控制正在被进程执行的汇编代码**，您可以编写**shellcode**并“变异”进程以**执行任何任意代码**。
+因此，**控制正在被进程执行的汇编代码**，您可以编写**shellcode**并“变异”该进程以**执行任何任意代码**。
 
 > [!TIP]
 > **DDexec / EverythingExec**将允许您加载并**执行**您自己的**shellcode**或**任何二进制文件**从**内存**中。
@@ -78,7 +78,7 @@ ddexec.md
 
 ### Memdlopen
 
-与 DDexec 具有类似目的的 [**memdlopen**](https://github.com/arget13/memdlopen) 技术允许以 **更简单的方式加载二进制文件** 到内存中以便稍后执行。它甚至可以允许加载具有依赖关系的二进制文件。
+与 DDexec 目的相似， [**memdlopen**](https://github.com/arget13/memdlopen) 技术允许以 **更简单的方式在内存中加载二进制文件** 以便后续执行。它甚至可以加载带有依赖项的二进制文件。
 
 ## Distroless Bypass
 
@@ -90,12 +90,12 @@ Distroless 容器的目标是 **通过消除不必要的组件来减少容器的
 
 ### 反向 Shell
 
-在 distroless 容器中，您可能 **甚至找不到 `sh` 或 `bash`** 来获取常规 shell。您也不会找到诸如 `ls`、`whoami`、`id` 等二进制文件……您通常在系统中运行的所有内容。
+在 distroless 容器中，您可能 **甚至找不到 `sh` 或 `bash`** 来获取常规 shell。您也不会找到 `ls`、`whoami`、`id` 等二进制文件……您通常在系统中运行的所有内容。
 
 > [!WARNING]
 > 因此，您 **将无法** 获取 **反向 shell** 或 **枚举** 系统，如您通常所做的那样。
 
-然而，如果被攻陷的容器正在运行例如 flask web，那么 python 已安装，因此您可以获取 **Python 反向 shell**。如果它正在运行 node，您可以获取 Node 反向 shell，几乎任何 **脚本语言** 也是如此。
+然而，如果被攻陷的容器正在运行例如 flask web，那么 python 已安装，因此您可以获取 **Python 反向 shell**。如果它正在运行 node，您可以获取 Node rev shell，其他大多数 **脚本语言** 也是如此。
 
 > [!TIP]
 > 使用脚本语言，您可以 **使用语言功能枚举系统**。

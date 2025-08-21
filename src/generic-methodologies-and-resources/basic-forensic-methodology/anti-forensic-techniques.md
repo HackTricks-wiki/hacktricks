@@ -21,15 +21,15 @@
 
 ![](<../../images/image (801).png>)
 
-上图是**工具**显示的**输出**，可以观察到对文件进行了一些**更改**。
+上图是**工具**显示的**输出**，可以观察到对文件进行了**某些更改**。
 
 ### $LogFile
 
-**对文件系统的所有元数据更改都会被记录**，这一过程称为[写前日志](https://en.wikipedia.org/wiki/Write-ahead_logging)。记录的元数据保存在名为`**$LogFile**`的文件中，该文件位于NTFS文件系统的根目录。可以使用[LogFileParser](https://github.com/jschicht/LogFileParser)等工具解析此文件并识别更改。
+**对文件系统的所有元数据更改都会被记录**，这一过程称为[预写日志](https://en.wikipedia.org/wiki/Write-ahead_logging)。记录的元数据保存在名为`**$LogFile**`的文件中，该文件位于NTFS文件系统的根目录。可以使用[LogFileParser](https://github.com/jschicht/LogFileParser)等工具解析此文件并识别更改。
 
 ![](<../../images/image (137).png>)
 
-同样，在工具的输出中可以看到**进行了一些更改**。
+同样，在工具的输出中可以看到**某些更改已被执行**。
 
 使用同一工具可以识别**时间戳被修改到哪个时间**：
 
@@ -46,17 +46,17 @@
 
 ### 纳秒
 
-**NTFS**时间戳的**精度**为**100纳秒**。因此，找到时间戳为2010-10-10 10:10:**00.000:0000的文件是非常可疑的。
+**NTFS**时间戳的**精度**为**100纳秒**。因此，找到时间戳像2010-10-10 10:10:**00.000:0000的文件是非常可疑的**。
 
 ### SetMace - 反取证工具
 
-该工具可以修改两个属性`$STARNDAR_INFORMATION`和`$FILE_NAME`。然而，从Windows Vista开始，必须在实时操作系统中修改此信息。
+该工具可以修改两个属性`$STARNDAR_INFORMATION`和`$FILE_NAME`。然而，从Windows Vista开始，必须在活动操作系统中修改此信息。
 
 ## 数据隐藏
 
 NFTS使用集群和最小信息大小。这意味着如果一个文件占用一个半集群，**剩下的半个集群将永远不会被使用**，直到文件被删除。因此，可以在这个松弛空间中**隐藏数据**。
 
-有像slacker这样的工具可以在这个“隐藏”空间中隐藏数据。然而，对`$logfile`和`$usnjrnl`的分析可以显示一些数据被添加：
+有像slacker这样的工具可以在这个“隐藏”空间中隐藏数据。然而，对`$logfile`和`$usnjrnl`的分析可以显示某些数据已被添加：
 
 ![](<../../images/image (1060).png>)
 
@@ -69,7 +69,7 @@ NFTS使用集群和最小信息大小。这意味着如果一个文件占用一�
 
 ## 实时Linux发行版
 
-这些发行版在**RAM**内存中**执行**。检测它们的唯一方法是**如果NTFS文件系统以写权限挂载**。如果仅以读权限挂载，则无法检测到入侵。
+这些发行版在**RAM**内存中**执行**。检测它们的唯一方法是**在NTFS文件系统以写入权限挂载的情况下**。如果仅以读取权限挂载，则无法检测到入侵。
 
 ## 安全删除
 
@@ -100,32 +100,32 @@ NFTS使用集群和最小信息大小。这意味着如果一个文件占用一�
 
 ### 禁用时间戳 - 最后访问时间
 
-每当从Windows NT服务器上的NTFS卷打开文件夹时，系统会花时间**更新每个列出文件夹的时间戳字段**，称为最后访问时间。在一个使用频繁的NTFS卷上，这可能会影响性能。
+每当从Windows NT服务器上的NTFS卷打开文件夹时，系统会花时间**更新每个列出文件夹的时间戳字段**，称为最后访问时间。在使用频繁的NTFS卷上，这可能会影响性能。
 
 1. 打开注册表编辑器（Regedit.exe）。
 2. 浏览到`HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem`。
 3. 查找`NtfsDisableLastAccessUpdate`。如果不存在，请添加此DWORD并将其值设置为1，这将禁用该过程。
 4. 关闭注册表编辑器，并重启服务器。
 
-### 删除USB历史
+### 删除USB历史记录
 
-所有**USB设备条目**都存储在Windows注册表的**USBSTOR**注册表项下，该项包含在您将USB设备插入PC或笔记本电脑时创建的子键。您可以在这里找到此键`HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`。**删除此项**将删除USB历史。\
+所有**USB设备条目**都存储在Windows注册表中的**USBSTOR**注册表项下，该项包含在您将USB设备插入PC或笔记本电脑时创建的子键。您可以在这里找到此键`HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`。**删除此项**将删除USB历史记录。\
 您还可以使用工具[**USBDeview**](https://www.nirsoft.net/utils/usb_devices_view.html)确保您已删除它们（并删除它们）。
 
-另一个保存USB信息的文件是`C:\Windows\INF`中的文件`setupapi.dev.log`。这也应该被删除。
+另一个保存USB信息的文件是`C:\Windows\INF`中的`setupapi.dev.log`。这也应该被删除。
 
 ### 禁用影子副本
 
 **列出**影子副本使用`vssadmin list shadowstorage`\
 **删除**它们运行`vssadmin delete shadow`
 
-您还可以通过GUI删除它们，按照[https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html](https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html)中提出的步骤。
+您还可以通过GUI删除它们，按照[https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html](https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html)中提出的步骤进行操作。
 
-要禁用影子副本，请参阅[此处的步骤](https://support.waters.com/KB_Inf/Other/WKB15560_How_to_disable_Volume_Shadow_Copy_Service_VSS_in_Windows)：
+要禁用影子副本，请[按照此处的步骤](https://support.waters.com/KB_Inf/Other/WKB15560_How_to_disable_Volume_Shadow_Copy_Service_VSS_in_Windows)：
 
-1. 通过在单击Windows开始按钮后在文本搜索框中输入“services”打开服务程序。
+1. 通过在点击Windows开始按钮后在文本搜索框中输入“services”打开服务程序。
 2. 从列表中找到“卷影复制”，选择它，然后右键单击访问属性。
-3. 从“启动类型”下拉菜单中选择禁用，然后通过单击应用和确定确认更改。
+3. 从“启动类型”下拉菜单中选择禁用，然后通过点击应用和确定确认更改。
 
 还可以在注册表`HKLM\SYSTEM\CurrentControlSet\Control\BackupRestore\FilesNotToSnapshot`中修改将要在影子副本中复制的文件的配置。
 
@@ -156,7 +156,7 @@ NFTS使用集群和最小信息大小。这意味着如果一个文件占用一�
 
 ### PowerShell脚本块/模块日志记录
 
-最近版本的Windows 10/11和Windows Server在`Microsoft-Windows-PowerShell/Operational`下保留**丰富的PowerShell取证文物**（事件4104/4105/4106）。攻击者可以实时禁用或清除它们：
+Windows 10/11和Windows Server的最新版本在`Microsoft-Windows-PowerShell/Operational`（事件4104/4105/4106）下保留**丰富的PowerShell取证文物**。攻击者可以实时禁用或清除它们：
 ```powershell
 # Turn OFF ScriptBlock & Module logging (registry persistence)
 New-ItemProperty -Path "HKLM:\\SOFTWARE\\Microsoft\\PowerShell\\3\\PowerShellEngine" \
@@ -180,11 +180,11 @@ WriteProcessMemory(GetCurrentProcess(),
 GetProcAddress(GetModuleHandleA("ntdll.dll"), "EtwEventWrite"),
 patch, sizeof(patch), NULL);
 ```
-公共 PoCs (例如 `EtwTiSwallow`) 在 PowerShell 或 C++ 中实现相同的原语。由于补丁是 **进程本地** 的，运行在其他进程中的 EDR 可能会错过它。检测：比较内存中的 `ntdll` 与磁盘上的，或在用户模式之前进行钩子。
+公共 PoCs（例如 `EtwTiSwallow`）在 PowerShell 或 C++ 中实现相同的原语。由于补丁是 **进程本地** 的，运行在其他进程中的 EDR 可能会错过它。检测：比较内存中的 `ntdll` 与磁盘上的 `ntdll`，或在用户模式之前进行钩子。
 
 ### 备用数据流 (ADS) 复兴
 
-2023 年的恶意软件活动（例如 **FIN12** 加载程序）已被发现将第二阶段二进制文件放置在 ADS 中，以避开传统扫描器：
+2023 年的恶意软件活动（例如 **FIN12** 加载程序）已被发现将第二阶段二进制文件放置在 ADS 中，以避免传统扫描器的检测：
 ```cmd
 rem Hide cobalt.bin inside an ADS of a PDF
 type cobalt.bin > report.pdf:win32res.dll
@@ -192,28 +192,28 @@ rem Execute directly
 wmic process call create "cmd /c report.pdf:win32res.dll"
 ```
 使用 `dir /R`、`Get-Item -Stream *` 或 Sysinternals `streams64.exe` 枚举流。
-将主机文件复制到 FAT/exFAT 或通过 SMB 将删除隐藏流，并可供调查人员恢复有效负载。
+将主机文件复制到 FAT/exFAT 或通过 SMB 将删除隐藏流，并可被调查人员用于恢复有效负载。
 
 ### BYOVD & “AuKill” (2023)
 
-自带易受攻击驱动程序现在常用于勒索软件入侵中的 **反取证**。
+自带易受攻击驱动程序（Bring-Your-Own-Vulnerable-Driver）现在在勒索软件入侵中常用于 **反取证**。
 开源工具 **AuKill** 加载一个已签名但易受攻击的驱动程序 (`procexp152.sys`)，以在 **加密和日志销毁之前** 暂停或终止 EDR 和取证传感器：
 ```cmd
 AuKill.exe -e "C:\\Program Files\\Windows Defender\\MsMpEng.exe"
 AuKill.exe -k CrowdStrike
 ```
 驱动程序随后被移除，留下最小的痕迹。  
-缓解措施：启用 Microsoft 漏洞驱动程序黑名单 (HVCI/SAC)，并对来自用户可写路径的内核服务创建进行警报。
+缓解措施：启用 Microsoft 脆弱驱动程序黑名单 (HVCI/SAC)，并对来自用户可写路径的内核服务创建进行警报。
 
 ---
 
 ## Linux 反取证：自我修补和云 C2 (2023–2025)
 
 ### 自我修补被攻陷的服务以减少检测 (Linux)  
-对手越来越多地在利用服务后立即“自我修补”，以防止重新利用并抑制基于漏洞的检测。其思路是用最新的合法上游二进制文件/JAR 替换易受攻击的组件，从而使扫描器报告主机已修补，同时保持持久性和 C2。
+对手越来越多地在利用服务后立即“自我修补”，以防止重新利用并抑制基于漏洞的检测。其思路是用最新的合法上游二进制文件/JAR 替换脆弱组件，从而使扫描器报告主机已修补，同时保持持久性和 C2。
 
 示例：Apache ActiveMQ OpenWire RCE (CVE‑2023‑46604)  
-- 后期利用，攻击者从 Maven Central (repo1.maven.org) 获取合法的 JAR，删除 ActiveMQ 安装中的易受攻击 JAR，并重启代理。  
+- 后利用阶段，攻击者从 Maven Central (repo1.maven.org) 获取合法的 JAR，删除 ActiveMQ 安装中的脆弱 JAR，并重启代理。  
 - 这关闭了初始 RCE，同时保持其他立足点 (cron、SSH 配置更改、单独的 C2 植入)。
 
 操作示例（说明性）
@@ -236,16 +236,16 @@ systemctl restart activemq || service activemq restart
 ```
 法医/狩猎技巧
 - 检查服务目录以寻找未计划的二进制/JAR 替换：
-- Debian/Ubuntu: `dpkg -V activemq` 并将文件哈希/路径与仓库镜像进行比较。
+- Debian/Ubuntu: `dpkg -V activemq` 并与仓库镜像比较文件哈希/路径。
 - RHEL/CentOS: `rpm -Va 'activemq*'`
-- 查找磁盘上存在但不被包管理器拥有的 JAR 版本，或更新的符号链接。
+- 查找磁盘上存在但不被包管理器拥有的 JAR 版本，或已更新的符号链接。
 - 时间线：`find "$AMQ_DIR" -type f -printf '%TY-%Tm-%Td %TH:%TM %p\n' | sort` 以关联 ctime/mtime 与妥协窗口。
-- Shell 历史/进程遥测：在初始利用后立即有 `curl`/`wget` 到 `repo1.maven.org` 或其他工件 CDN 的证据。
-- 变更管理：验证谁应用了“补丁”以及原因，而不仅仅是补丁版本的存在。
+- Shell 历史/进程遥测：在初始利用后立即有证据表明使用了 `curl`/`wget` 访问 `repo1.maven.org` 或其他工件 CDN。
+- 变更管理：验证谁应用了“补丁”以及原因，而不仅仅是确认存在已修补版本。
 
-### 带有承载令牌和反分析启动器的云服务 C2
+### 带有持有者令牌和反分析启动程序的云服务 C2
 观察到的交易技巧结合了多个长期 C2 路径和反分析打包：
-- 密码保护的 PyInstaller ELF 加载器以阻碍沙箱和静态分析（例如，加密的 PYZ，临时提取到 `/_MEI*`）。
+- 密码保护的 PyInstaller ELF 加载程序以阻碍沙箱和静态分析（例如，加密的 PYZ，临时提取到 `/_MEI*` 下）。
 - 指标：`strings` 命中如 `PyInstaller`、`pyi-archive`、`PYZ-00.pyz`、`MEIPASS`。
 - 运行时工件：提取到 `/tmp/_MEI*` 或自定义 `--runtime-tmpdir` 路径。
 - 使用硬编码 OAuth Bearer 令牌的 Dropbox 支持的 C2

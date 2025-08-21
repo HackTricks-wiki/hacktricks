@@ -8,7 +8,7 @@
 - JAMF Pro: `jamf checkJSSConnection`
 - Kandji
 
-如果你成功**获取管理员凭据**以访问管理平台，你可以**潜在地危害所有计算机**，通过在机器上分发恶意软件。
+如果你成功**获取管理员凭据**以访问管理平台，你可以**潜在地危害所有计算机**，通过在机器中分发恶意软件。
 
 在 MacOS 环境中进行红队活动，强烈建议对 MDM 的工作原理有一定了解：
 
@@ -22,19 +22,19 @@ MDM 将有权限安装、查询或删除配置文件，安装应用程序，创�
 
 为了运行自己的 MDM，你需要**你的 CSR 由供应商签名**，你可以尝试通过 [**https://mdmcert.download/**](https://mdmcert.download/) 获取。要为 Apple 设备运行自己的 MDM，你可以使用 [**MicroMDM**](https://github.com/micromdm/micromdm)。
 
-然而，要在注册设备上安装应用程序，你仍然需要它由开发者帐户签名... 然而，在 MDM 注册时，**设备将 MDM 的 SSL 证书添加为受信任的 CA**，所以你现在可以签署任何东西。
+然而，要在注册设备上安装应用程序，你仍然需要它由开发者帐户签名... 然而，在 MDM 注册时，**设备将 MDM 的 SSL 证书添加为受信任的 CA**，因此你现在可以签署任何内容。
 
-要将设备注册到 MDM，你需要以 root 身份安装一个**`mobileconfig`** 文件，这可以通过**pkg** 文件传递（你可以将其压缩为 zip，当从 Safari 下载时会被解压）。
+要将设备注册到 MDM，你需要以 root 身份安装一个 **`mobileconfig`** 文件，这可以通过 **pkg** 文件传递（你可以将其压缩为 zip，当从 Safari 下载时会被解压）。
 
 **Mythic agent Orthrus** 使用了这种技术。
 
 ### 滥用 JAMF PRO
 
-JAMF 可以运行**自定义脚本**（由系统管理员开发的脚本）、**本地有效载荷**（本地帐户创建、设置 EFI 密码、文件/进程监控...）和**MDM**（设备配置、设备证书...）。
+JAMF 可以运行 **自定义脚本**（由系统管理员开发的脚本）、**本地有效载荷**（本地帐户创建、设置 EFI 密码、文件/进程监控...）和 **MDM**（设备配置、设备证书...）。
 
 #### JAMF 自助注册
 
-访问 `https://<company-name>.jamfcloud.com/enroll/` 这样的页面，查看他们是否启用了**自助注册**。如果启用了，可能会**要求输入凭据以访问**。
+访问 `https://<company-name>.jamfcloud.com/enroll/` 这样的页面，查看他们是否启用了 **自助注册**。如果启用了，可能会**要求输入凭据以访问**。
 
 你可以使用脚本 [**JamfSniper.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfSniper.py) 执行密码喷洒攻击。
 
@@ -47,7 +47,7 @@ JAMF 可以运行**自定义脚本**（由系统管理员开发的脚本）、**
 <figure><img src="../../images/image (167).png" alt=""><figcaption></figcaption></figure>
 
 **`jamf`** 二进制文件包含打开钥匙串的秘密，在发现时是**共享**给每个人的，内容是：**`jk23ucnq91jfu9aj`**。\
-此外，jamf **持久化**为**LaunchDaemon** 在 **`/Library/LaunchAgents/com.jamf.management.agent.plist`**
+此外，jamf **持久化**为 **LaunchDaemon** 在 **`/Library/LaunchAgents/com.jamf.management.agent.plist`**
 
 #### JAMF 设备接管
 
@@ -60,12 +60,12 @@ plutil -convert xml1 -o - /Library/Preferences/com.jamfsoftware.jamf.plist
 <key>is_virtual_machine</key>
 <false/>
 <key>jss_url</key>
-<string>https://halbornasd.jamfcloud.com/</string>
+<string>https://subdomain-company.jamfcloud.com/</string>
 <key>last_management_framework_change_id</key>
 <integer>4</integer>
 [...]
 ```
-因此，攻击者可以放置一个恶意包（`pkg`），在安装时**覆盖此文件**，将**URL设置为来自Typhon代理的Mythic C2监听器**，以便能够滥用JAMF作为C2。
+因此，攻击者可以放置一个恶意包（`pkg`），在安装时**覆盖此文件**，将**URL设置为来自Typhon代理的Mythic C2监听器**，从而能够滥用JAMF作为C2。
 ```bash
 # After changing the URL you could wait for it to be reloaded or execute:
 sudo jamf policy -id 0
@@ -79,7 +79,7 @@ sudo jamf policy -id 0
 - 设备的 **UUID**: `ioreg -d2 -c IOPlatformExpertDevice | awk -F" '/IOPlatformUUID/{print $(NF-1)}'`
 - **JAMF 密钥链**来自: `/Library/Application\ Support/Jamf/JAMF.keychain`，其中包含设备证书
 
-有了这些信息，**创建一个虚拟机**，使用**被盗**的硬件**UUID**，并且**禁用 SIP**，放置**JAMF 密钥链，** **hook** Jamf **代理**并窃取其信息。
+有了这些信息，**创建一个虚拟机**，使用**被盗**的硬件**UUID**并且**禁用 SIP**，放置**JAMF 密钥链，** **hook** Jamf **代理**并窃取其信息。
 
 #### 秘密窃取
 
@@ -119,11 +119,11 @@ sudo jamf policy -id 0
 ```bash
 dscl "/Active Directory/[Domain]/All Domains" ls /
 ```
-还为MacOS准备了一些工具，以自动枚举AD并与kerberos进行交互：
+此外，还有一些为MacOS准备的工具，可以自动枚举AD并与kerberos进行交互：
 
 - [**Machound**](https://github.com/XMCyber/MacHound)：MacHound是Bloodhound审计工具的扩展，允许在MacOS主机上收集和摄取Active Directory关系。
-- [**Bifrost**](https://github.com/its-a-feature/bifrost)：Bifrost是一个Objective-C项目，旨在与macOS上的Heimdal krb5 API进行交互。该项目的目标是使用本机API在macOS设备上进行更好的Kerberos安全测试，而无需在目标上要求任何其他框架或软件包。
-- [**Orchard**](https://github.com/its-a-feature/Orchard)：用于Active Directory枚举的JavaScript自动化（JXA）工具。
+- [**Bifrost**](https://github.com/its-a-feature/bifrost)：Bifrost是一个Objective-C项目，旨在与macOS上的Heimdal krb5 API进行交互。该项目的目标是使用本地API在macOS设备上进行更好的Kerberos安全测试，而无需在目标上要求任何其他框架或软件包。
+- [**Orchard**](https://github.com/its-a-feature/Orchard)：用于进行Active Directory枚举的JavaScript自动化（JXA）工具。
 
 ### 域信息
 ```bash
@@ -166,7 +166,11 @@ dscl "/Active Directory/TEST/All Domains" read "/Groups/[groupname]"
 #Domain Information
 dsconfigad -show
 ```
-更多信息请访问 [https://its-a-feature.github.io/posts/2018/
+更多信息请访问 [https://its-a-feature.github.io/posts/2018/01/Active-Directory-Discovery-with-a-Mac/](https://its-a-feature.github.io/posts/2018/01/Active-Directory-Discovery-with-a-Mac/)
+
+### Computer$ 密码
+
+使用以下方法获取密码：
 ```bash
 bifrost --action askhash --username [name] --password [password] --domain [domain]
 ```
@@ -190,7 +194,7 @@ bifrost --action asktgt --username test_lab_admin \
 bifrost --action asktgs --spn [service] --domain [domain.com] \
 --username [user] --hash [hash] --enctype [enctype]
 ```
-通过获得的服务票证，可以尝试访问其他计算机上的共享：
+通过获取的服务票证，可以尝试访问其他计算机上的共享：
 ```bash
 smbutil view //computer.fqdn
 mount -t smbfs //server/folder /local/mount/point
@@ -215,13 +219,12 @@ MacOS 红队与常规 Windows 红队不同，因为通常 **MacOS 直接与多�
 
 <figure><img src="../../images/image (226).png" alt=""><figcaption></figcaption></figure>
 
-## 参考
+## 参考文献
 
 - [**https://www.youtube.com/watch?v=IiMladUbL6E**](https://www.youtube.com/watch?v=IiMladUbL6E)
 - [**https://medium.com/xm-cyber/introducing-machound-a-solution-to-macos-active-directory-based-attacks-2a425f0a22b6**](https://medium.com/xm-cyber/introducing-machound-a-solution-to-macos-active-directory-based-attacks-2a425f0a22b6)
 - [**https://gist.github.com/its-a-feature/1a34f597fb30985a2742bb16116e74e0**](https://gist.github.com/its-a-feature/1a34f597fb30985a2742bb16116e74e0)
 - [**Come to the Dark Side, We Have Apples: Turning macOS Management Evil**](https://www.youtube.com/watch?v=pOQOh07eMxY)
 - [**OBTS v3.0: "An Attackers Perspective on Jamf Configurations" - Luke Roberts / Calum Hall**](https://www.youtube.com/watch?v=ju1IYWUv4ZA)
-
 
 {{#include ../../banners/hacktricks-training.md}}

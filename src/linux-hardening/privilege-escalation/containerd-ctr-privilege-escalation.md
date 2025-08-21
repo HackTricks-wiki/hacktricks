@@ -4,7 +4,7 @@
 
 ## 基本信息
 
-前往以下链接了解 **什么是 containerd** 和 `ctr`：
+访问以下链接了解 **什么是 containerd** 和 `ctr`：
 
 {{#ref}}
 ../../network-services-pentesting/2375-pentesting-docker.md

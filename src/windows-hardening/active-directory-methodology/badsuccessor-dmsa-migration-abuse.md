@@ -1,32 +1,32 @@
-# BadSuccessor: 通过委托的MSA迁移滥用进行特权升级
+# BadSuccessor: Privilege Escalation via Delegated MSA Migration Abuse
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## 概述
 
-委托的托管服务账户（**dMSA**）是**gMSA**的下一代继任者，随Windows Server 2025发布。合法的迁移工作流程允许管理员用dMSA替换*旧*账户（用户、计算机或服务账户），同时透明地保留权限。该工作流程通过PowerShell cmdlets暴露，如`Start-ADServiceAccountMigration`和`Complete-ADServiceAccountMigration`，并依赖于**dMSA对象**的两个LDAP属性：
+委派的托管服务账户 (**dMSA**) 是 **gMSA** 的下一代继任者，随 Windows Server 2025 发布。 合法的迁移工作流程允许管理员用 dMSA 替换 *旧* 账户（用户、计算机或服务账户），同时透明地保留权限。 该工作流程通过 PowerShell cmdlets 公开，例如 `Start-ADServiceAccountMigration` 和 `Complete-ADServiceAccountMigration`，并依赖于 **dMSA 对象** 的两个 LDAP 属性：
 
-* **`msDS-ManagedAccountPrecededByLink`** – *DN链接*到被取代的（旧）账户。
-* **`msDS-DelegatedMSAState`**       – 迁移状态（`0` = 无，`1` = 进行中，`2` = *已完成*）。
+* **`msDS-ManagedAccountPrecededByLink`** – *DN 链接* 到被取代的（旧）账户。
+* **`msDS-DelegatedMSAState`**       – 迁移状态 (`0` = 无, `1` = 进行中, `2` = *已完成*)。
 
-如果攻击者可以在OU中创建**任何**dMSA并直接操纵这两个属性，LSASS和KDC将把dMSA视为链接账户的*继任者*。当攻击者随后以dMSA身份进行身份验证时，**他们继承了链接账户的所有权限**——如果管理员账户被链接，则最高可达**域管理员**。
+如果攻击者可以在 OU 中创建 **任何** dMSA 并直接操纵这两个属性，LSASS 和 KDC 将把 dMSA 视为链接账户的 *继任者*。 当攻击者随后以 dMSA 身份进行身份验证时，**他们继承了链接账户的所有权限** – 如果管理员账户被链接，则最高可达 **域管理员**。
 
-该技术在2025年被Unit 42称为**BadSuccessor**。在撰写时**没有安全补丁**可用；只有加强OU权限可以缓解此问题。
+该技术在 2025 年被 Unit 42 称为 **BadSuccessor**。 在撰写时 **没有安全补丁** 可用；只有加强 OU 权限可以缓解此问题。
 
 ### 攻击前提条件
 
-1. 一个*被允许*在**组织单位（OU）**内创建对象的账户*并且*至少具有以下之一：
-* `Create Child` → **`msDS-DelegatedManagedServiceAccount`**对象类
-* `Create Child` → **`All Objects`**（通用创建）
-2. 与LDAP和Kerberos的网络连接（标准域加入场景/远程攻击）。
+1. 一个 *被允许* 在 **组织单位 (OU)** 内创建对象的账户 *并且* 至少具有以下之一：
+* `Create Child` → **`msDS-DelegatedManagedServiceAccount`** 对象类
+* `Create Child` → **`All Objects`** （通用创建）
+2. 与 LDAP 和 Kerberos 的网络连接（标准域加入场景 / 远程攻击）。
 
-## 枚举易受攻击的OU
+## 枚举易受攻击的 OU
 
-Unit 42发布了一个PowerShell辅助脚本，解析每个OU的安全描述符并突出显示所需的ACE：
+Unit 42 发布了一个 PowerShell 辅助脚本，解析每个 OU 的安全描述符并突出显示所需的 ACEs：
 ```powershell
 Get-BadSuccessorOUPermissions.ps1 -Domain contoso.local
 ```
-在后台，脚本运行一个分页的 LDAP 搜索 `(objectClass=organizationalUnit)` 并检查每个 `nTSecurityDescriptor` 是否具有
+在底层，脚本运行一个分页的 LDAP 搜索 `(objectClass=organizationalUnit)` 并检查每个 `nTSecurityDescriptor` 是否具有
 
 * `ADS_RIGHT_DS_CREATE_CHILD` (0x0001)
 * `Active Directory Schema ID: 31ed51fa-77b1-4175-884a-5c6f3f6f34e8` (对象类 *msDS-DelegatedManagedServiceAccount*)
@@ -83,9 +83,10 @@ dir \\DC01\C$
 
 * 应用**最小权限**原则 – 仅将*服务账户*管理委派给受信任的角色。
 * 从不明确需要的OUs中移除`Create Child` / `msDS-DelegatedManagedServiceAccount`。
-* 监控上述事件ID，并对*非Tier-0*身份创建或编辑dMSA进行警报。
+* 监控上述事件ID，并对创建或编辑dMSA的*非Tier-0*身份发出警报。
 
 ## 另见
+
 
 {{#ref}}
 golden-dmsa-gmsa.md

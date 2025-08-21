@@ -4,9 +4,9 @@
 
 一台 Linux 机器也可以存在于 Active Directory 环境中。
 
-在 AD 中的 Linux 机器可能会 **在文件中存储不同的 CCACHE 票证。这些票证可以像其他 kerberos 票证一样被使用和滥用**。为了读取这些票证，您需要是票证的用户所有者或 **root** 用户。
+在 AD 中的 Linux 机器可能会 **在文件中存储不同的 CCACHE 票证。这些票证可以像其他任何 kerberos 票证一样被使用和滥用**。为了读取这些票证，您需要是票证的用户所有者或 **root** 用户。
 
-## 枚举
+## Enumeration
 
 ### 从 Linux 进行 AD 枚举
 
@@ -20,7 +20,7 @@
 
 ### FreeIPA
 
-FreeIPA 是一个开源的 **替代品**，用于 Microsoft Windows **Active Directory**，主要针对 **Unix** 环境。它结合了一个完整的 **LDAP 目录** 和一个 MIT **Kerberos** 密钥分发中心，管理方式类似于 Active Directory。利用 Dogtag **证书系统** 进行 CA 和 RA 证书管理，支持 **多因素** 身份验证，包括智能卡。SSSD 集成用于 Unix 身份验证过程。了解更多信息：
+FreeIPA 是一个开源的 **替代品**，用于 Microsoft Windows **Active Directory**，主要用于 **Unix** 环境。它结合了一个完整的 **LDAP 目录** 和一个 MIT **Kerberos** 密钥分发中心，管理方式类似于 Active Directory。利用 Dogtag **证书系统** 进行 CA 和 RA 证书管理，支持 **多因素** 身份验证，包括智能卡。SSSD 集成用于 Unix 身份验证过程。了解更多信息：
 
 {{#ref}}
 ../freeipa-pentesting.md
@@ -51,7 +51,7 @@ export KRB5CCNAME=/tmp/krb5cc_1000
 ```
 ### CCACHE 票据重用来自密钥环
 
-**存储在进程内存中的 Kerberos 票据可以被提取**，特别是在机器的 ptrace 保护被禁用时（`/proc/sys/kernel/yama/ptrace_scope`）。一个有用的工具可以在 [https://github.com/TarlogicSecurity/tickey](https://github.com/TarlogicSecurity/tickey) 找到，它通过注入会话并将票据转储到 `/tmp` 来便于提取。
+**存储在进程内存中的 Kerberos 票据可以被提取**，特别是在机器的 ptrace 保护被禁用时（`/proc/sys/kernel/yama/ptrace_scope`）。一个有用的工具可以在 [https://github.com/TarlogicSecurity/tickey](https://github.com/TarlogicSecurity/tickey) 找到，它通过注入会话并将票据转储到 `/tmp` 来方便提取。
 
 要配置和使用此工具，请按照以下步骤进行：
 ```bash
@@ -62,9 +62,9 @@ make CONF=Release
 ```
 此过程将尝试注入到各种会话中，通过将提取的票证存储在 `/tmp` 中，命名约定为 `__krb_UID.ccache` 来指示成功。
 
-### 来自 SSSD KCM 的 CCACHE 票证重用
+### 来自SSSD KCM的CCACHE票证重用
 
-SSSD 在路径 `/var/lib/sss/secrets/secrets.ldb` 处维护数据库的副本。相应的密钥存储为隐藏文件，路径为 `/var/lib/sss/secrets/.secrets.mkey`。默认情况下，只有在您具有 **root** 权限时，才能读取该密钥。
+SSSD在路径 `/var/lib/sss/secrets/secrets.ldb` 处维护数据库的副本。相应的密钥存储为隐藏文件，路径为 `/var/lib/sss/secrets/.secrets.mkey`。默认情况下，只有在您具有 **root** 权限时，才能读取该密钥。
 
 使用 **`SSSDKCMExtractor`** 及 --database 和 --key 参数将解析数据库并 **解密秘密**。
 ```bash

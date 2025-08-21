@@ -61,7 +61,7 @@ Flipper Zero可以**读取NFC卡**，但是它**不理解所有基于ISO 14443�
 在Flipper中，读取13.56 MHz标签可以分为两个部分：
 
 - **低级读取** — 仅读取UID、SAK和ATQA。Flipper尝试根据从卡片读取的数据猜测高级协议。您不能对此100%确定，因为这只是基于某些因素的假设。
-- **高级读取** — 使用特定的高级协议从卡片的内存中读取数据。这将是读取Mifare Ultralight上的数据、从Mifare Classic读取扇区或从PayPass/Apple Pay读取卡片属性。
+- **高级读取** — 使用特定的高级协议从卡片的内存中读取数据。这将是读取Mifare Ultralight上的数据、从Mifare Classic读取扇区，或从PayPass/Apple Pay读取卡片的属性。
 
 ### Read Specific
 

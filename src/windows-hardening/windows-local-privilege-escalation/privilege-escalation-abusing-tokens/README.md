@@ -36,13 +36,13 @@
 
 ### SeBackupPrivilege
 
-此特权使系统能够**授予对任何文件的所有读取访问**控制（仅限读取操作）。它用于**从注册表中读取本地管理员**帐户的密码哈希，随后可以使用“**psexec**”或“**wmiexec**”与哈希一起使用（Pass-the-Hash技术）。但是，在两种情况下，此技术会失败：当本地管理员帐户被禁用时，或当有政策规定从远程连接的本地管理员中移除管理权限时。\
+此特权使系统能够**授予对任何文件的所有读取访问**控制（仅限读取操作）。它用于**从注册表中读取本地管理员**帐户的密码哈希，随后可以使用“**psexec**”或“**wmiexec**”与哈希一起使用（Pass-the-Hash技术）。但是，当本地管理员帐户被禁用或存在政策从远程连接的本地管理员中删除管理权限时，此技术将失败。\
 你可以通过以下方式**滥用此特权**：
 
 - [https://github.com/Hackplayers/PsCabesha-tools/blob/master/Privesc/Acl-FullControl.ps1](https://github.com/Hackplayers/PsCabesha-tools/blob/master/Privesc/Acl-FullControl.ps1)
 - [https://github.com/giuliano108/SeBackupPrivilege/tree/master/SeBackupPrivilegeCmdLets/bin/Debug](https://github.com/giuliano108/SeBackupPrivilege/tree/master/SeBackupPrivilegeCmdLets/bin/Debug)
 - 关注**IppSec**在 [https://www.youtube.com/watch?v=IfCysW0Od8w\&t=2610\&ab_channel=IppSec](https://www.youtube.com/watch?v=IfCysW0Od8w&t=2610&ab_channel=IppSec)
-- 或如在以下内容中解释的**使用备份操作员提升权限**部分：
+- 或如在以下内容中解释的**通过备份操作员提升权限**部分：
 
 {{#ref}}
 ../../active-directory-methodology/privileged-groups-and-token-privileges.md
@@ -50,11 +50,11 @@
 
 ### SeRestorePrivilege
 
-此特权提供对任何系统文件的**写访问**权限，无论文件的访问控制列表（ACL）如何。它为提升权限打开了许多可能性，包括**修改服务**、执行DLL劫持以及通过图像文件执行选项设置**调试器**等各种其他技术。
+此特权提供对任何系统文件的**写访问**权限，无论文件的访问控制列表（ACL）如何。它为提升权限打开了许多可能性，包括**修改服务**、执行DLL劫持和通过图像文件执行选项设置**调试器**等各种其他技术。
 
 ### SeCreateTokenPrivilege
 
-SeCreateTokenPrivilege是一个强大的权限，特别是在用户拥有impersonate令牌的能力时，但在没有SeImpersonatePrivilege的情况下也很有用。此能力依赖于能够对表示同一用户的令牌进行impersonation，并且其完整性级别不超过当前进程的完整性级别。
+SeCreateTokenPrivilege是一个强大的权限，特别是在用户具备impersonate令牌的能力时，但在没有SeImpersonatePrivilege的情况下也很有用。此能力依赖于能够对表示同一用户的令牌进行impersonation，并且其完整性级别不超过当前进程的完整性级别。
 
 **关键点：**
 
@@ -71,7 +71,7 @@ SeCreateTokenPrivilege是一个强大的权限，特别是在用户拥有imperso
 - `ImagePath`，即要执行的二进制文件的路径
 - `Type`，值为`SERVICE_KERNEL_DRIVER`（`0x00000001`）。
 
-**步骤：**
+**遵循的步骤：**
 
 1. 由于写访问受限，访问`HKCU`而不是`HKLM`。
 2. 在`HKCU`中创建路径`\Registry\User\<RID>\System\CurrentControlSet\Services\DriverName`，其中`<RID>`表示当前用户的相对标识符。
@@ -110,13 +110,13 @@ c:\inetpub\wwwwroot\web.config
 ```
 ### SeDebugPrivilege
 
-此权限允许**调试其他进程**，包括读取和写入内存。可以使用此权限采用各种内存注入策略，能够规避大多数杀毒软件和主机入侵防御解决方案。
+此权限允许**调试其他进程**，包括读取和写入内存。可以使用此权限采用各种内存注入策略，能够规避大多数防病毒和主机入侵防御解决方案。
 
 #### Dump memory
 
-您可以使用 [ProcDump](https://docs.microsoft.com/en-us/sysinternals/downloads/procdump) 来自 [SysInternals Suite](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite) 或 [SharpDump](https://github.com/GhostPack/SharpDump) 来**捕获进程的内存**。具体来说，这可以应用于**本地安全授权子系统服务 ([LSASS](https://en.wikipedia.org/wiki/Local_Security_Authority_Subsystem_Service))** 进程，该进程负责在用户成功登录系统后存储用户凭据。
+您可以使用[ProcDump](https://docs.microsoft.com/en-us/sysinternals/downloads/procdump)来自[SysInternals Suite](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite)或[SharpDump](https://github.com/GhostPack/SharpDump)来**捕获进程的内存**。具体来说，这可以应用于**本地安全授权子系统服务（[LSASS](https://en.wikipedia.org/wiki/Local_Security_Authority_Subsystem_Service)）**进程，该进程负责在用户成功登录系统后存储用户凭据。
 
-然后，您可以在 mimikatz 中加载此转储以获取密码：
+然后，您可以在mimikatz中加载此转储以获取密码：
 ```
 mimikatz.exe
 mimikatz # log
@@ -138,7 +138,7 @@ import-module psgetsys.ps1; [MyProcess]::CreateProcessFromParent(<system_pid>,<c
 
 `SeManageVolumePrivilege` 是一个 Windows 用户权限，允许用户管理磁盘卷，包括创建和删除它们。虽然该权限是为管理员设计的，但如果授予非管理员用户，则可能被利用进行权限提升。
 
-可以利用此权限来操纵卷，从而获得对卷的完全访问权限。可以使用 [SeManageVolumeExploit](https://github.com/CsEnox/SeManageVolumeExploit) 为所有用户提供 C:\ 的完全访问权限。
+可以利用此权限来操纵卷，从而获得对卷的完全访问权限。可以使用 [SeManageVolumeExploit](https://github.com/CsEnox/SeManageVolumeExploit) 为所有用户提供对 C:\ 的完全访问权限。
 
 此外，[这篇 Medium 文章](https://medium.com/@raphaeltzy13/exploiting-semanagevolumeprivilege-with-dll-hijacking-windows-privilege-escalation-1a4f28372d37) 中概述的过程描述了如何结合使用 DLL 劫持和 `SeManageVolumePrivilege` 来提升权限。通过放置有效负载 DLL `C:\Windows\System32\wbem\tzres.dll` 并调用 `systeminfo`，该 DLL 被执行。
 
@@ -146,35 +146,35 @@ import-module psgetsys.ps1; [MyProcess]::CreateProcessFromParent(<system_pid>,<c
 ```
 whoami /priv
 ```
-**显示为禁用的令牌**可以被启用，实际上你可以利用_启用_和_禁用_的令牌。
+**显示为禁用的令牌**可以被启用，您实际上可以利用_启用_和_禁用_令牌。
 
 ### 启用所有令牌
 
-如果你有禁用的令牌，你可以使用脚本 [**EnableAllTokenPrivs.ps1**](https://raw.githubusercontent.com/fashionproof/EnableAllTokenPrivs/master/EnableAllTokenPrivs.ps1) 来启用所有令牌：
+如果您有禁用的令牌，您可以使用脚本 [**EnableAllTokenPrivs.ps1**](https://raw.githubusercontent.com/fashionproof/EnableAllTokenPrivs/master/EnableAllTokenPrivs.ps1) 来启用所有令牌：
 ```bash
 .\EnableAllTokenPrivs.ps1
 whoami /priv
 ```
-Or the **script** embed in this [**post**](https://www.leeholmes.com/adjusting-token-privileges-in-powershell/).
+或在这个 [**帖子**](https://www.leeholmes.com/adjusting-token-privileges-in-powershell/) 中嵌入的 **脚本**。
 
-## Table
+## 表格
 
 完整的令牌权限备忘单在 [https://github.com/gtworek/Priv2Admin](https://github.com/gtworek/Priv2Admin)，下面的摘要将仅列出直接利用该权限以获得管理员会话或读取敏感文件的方法。
 
-| Privilege                  | Impact      | Tool                    | Execution path                                                                                                                                                                                                                                                                                                                                     | Remarks                                                                                                                                                                                                                                                                                                                        |
-| -------------------------- | ----------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **`SeAssignPrimaryToken`** | _**Admin**_ | 3rd party tool          | _"这将允许用户模拟令牌并使用工具如 potato.exe、rottenpotato.exe 和 juicypotato.exe 提升到 nt 系统"_                                                                                                                                                                                                                                      | 感谢 [Aurélien Chalot](https://twitter.com/Defte_) 的更新。我会尽快尝试将其重新表述为更像食谱的内容。                                                                                                                                                                                                                     |
-| **`SeBackup`**             | **Threat**  | _**Built-in commands**_ | 使用 `robocopy /b` 读取敏感文件                                                                                                                                                                                                                                                                                                             | <p>- 如果可以读取 %WINDIR%\MEMORY.DMP，可能会更有趣<br><br>- <code>SeBackupPrivilege</code>（和 robocopy）在打开文件时没有帮助。<br><br>- Robocopy 需要同时具有 SeBackup 和 SeRestore 才能使用 /b 参数。</p>                                                                      |
-| **`SeCreateToken`**        | _**Admin**_ | 3rd party tool          | 使用 `NtCreateToken` 创建任意令牌，包括本地管理员权限。                                                                                                                                                                                                                                                                                      |                                                                                                                                                                                                                                                                                                                                |
-| **`SeDebug`**              | _**Admin**_ | **PowerShell**          | 复制 `lsass.exe` 令牌。                                                                                                                                                                                                                                                                                                                   | 脚本可以在 [FuzzySecurity](https://github.com/FuzzySecurity/PowerShell-Suite/blob/master/Conjure-LSASS.ps1) 找到                                                                                                                                                                                                         |
-| **`SeLoadDriver`**         | _**Admin**_ | 3rd party tool          | <p>1. 加载有缺陷的内核驱动程序，如 <code>szkg64.sys</code><br>2. 利用驱动程序漏洞<br><br>或者，该权限可用于卸载与安全相关的驱动程序，使用 <code>ftlMC</code> 内置命令。即：<code>fltMC sysmondrv</code></p>                                                                           | <p>1. <code>szkg64</code> 漏洞被列为 <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-15732">CVE-2018-15732</a><br>2. <code>szkg64</code> <a href="https://www.greyhathacker.net/?p=1025">利用代码</a> 是由 <a href="https://twitter.com/parvezghh">Parvez Anwar</a> 创建的</p> |
-| **`SeRestore`**            | _**Admin**_ | **PowerShell**          | <p>1. 启动 PowerShell/ISE，并具有 SeRestore 权限。<br>2. 使用 <a href="https://github.com/gtworek/PSBits/blob/master/Misc/EnableSeRestorePrivilege.ps1">Enable-SeRestorePrivilege</a> 启用该权限。<br>3. 将 utilman.exe 重命名为 utilman.old<br>4. 将 cmd.exe 重命名为 utilman.exe<br>5. 锁定控制台并按 Win+U</p> | <p>攻击可能会被某些 AV 软件检测到。</p><p>替代方法依赖于使用相同权限替换存储在 "Program Files" 中的服务二进制文件</p>                                                                                                                                                            |
-| **`SeTakeOwnership`**      | _**Admin**_ | _**Built-in commands**_ | <p>1. <code>takeown.exe /f "%windir%\system32"</code><br>2. <code>icalcs.exe "%windir%\system32" /grant "%username%":F</code><br>3. 将 cmd.exe 重命名为 utilman.exe<br>4. 锁定控制台并按 Win+U</p>                                                                                                                                       | <p>攻击可能会被某些 AV 软件检测到。</p><p>替代方法依赖于使用相同权限替换存储在 "Program Files" 中的服务二进制文件。</p>                                                                                                                                                           |
-| **`SeTcb`**                | _**Admin**_ | 3rd party tool          | <p>操纵令牌以包含本地管理员权限。可能需要 SeImpersonate。</p><p>待验证。</p>                                                                                                                                                                                                                                     |                                                                                                                                                                                                                                                                                                                                |
+| 权限                      | 影响        | 工具                    | 执行路径                                                                                                                                                                                                                                                                                                                                     | 备注                                                                                                                                                                                                                                                                                                                        |
+| ------------------------ | ----------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **`SeAssignPrimaryToken`** | _**管理员**_ | 第三方工具              | _"这将允许用户模拟令牌并使用诸如 potato.exe、rottenpotato.exe 和 juicypotato.exe 等工具提升到 nt 系统"_                                                                                                                                                                                                      | 感谢 [Aurélien Chalot](https://twitter.com/Defte_) 的更新。我会尽快尝试将其重新表述为更像食谱的内容。                                                                                                                                                                                         |
+| **`SeBackup`**             | **威胁**    | _**内置命令**_         | 使用 `robocopy /b` 读取敏感文件                                                                                                                                                                                                                                                                                                             | <p>- 如果您可以读取 %WINDIR%\MEMORY.DMP，可能会更有趣<br><br>- <code>SeBackupPrivilege</code>（和 robocopy）在打开文件时没有帮助。<br><br>- Robocopy 需要同时具有 SeBackup 和 SeRestore 才能使用 /b 参数。</p>                                                                      |
+| **`SeCreateToken`**        | _**管理员**_ | 第三方工具              | 使用 `NtCreateToken` 创建任意令牌，包括本地管理员权限。                                                                                                                                                                                                                                                                          |                                                                                                                                                                                                                                                                                                                                |
+| **`SeDebug`**              | _**管理员**_ | **PowerShell**          | 复制 `lsass.exe` 令牌。                                                                                                                                                                                                                                                                                                                   | 脚本可以在 [FuzzySecurity](https://github.com/FuzzySecurity/PowerShell-Suite/blob/master/Conjure-LSASS.ps1) 找到                                                                                                                                                                                                         |
+| **`SeLoadDriver`**         | _**管理员**_ | 第三方工具              | <p>1. 加载有缺陷的内核驱动程序，如 <code>szkg64.sys</code><br>2. 利用驱动程序漏洞<br><br>或者，该权限可用于卸载与安全相关的驱动程序，使用 <code>ftlMC</code> 内置命令。即：<code>fltMC sysmondrv</code></p>                                                                           | <p>1. <code>szkg64</code> 漏洞被列为 <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-15732">CVE-2018-15732</a><br>2. <code>szkg64</code> <a href="https://www.greyhathacker.net/?p=1025">利用代码</a> 是由 <a href="https://twitter.com/parvezghh">Parvez Anwar</a> 创建的</p> |
+| **`SeRestore`**            | _**管理员**_ | **PowerShell**          | <p>1. 启动 PowerShell/ISE，并具有 SeRestore 权限。<br>2. 使用 <a href="https://github.com/gtworek/PSBits/blob/master/Misc/EnableSeRestorePrivilege.ps1">Enable-SeRestorePrivilege</a> 启用该权限。<br>3. 将 utilman.exe 重命名为 utilman.old<br>4. 将 cmd.exe 重命名为 utilman.exe<br>5. 锁定控制台并按 Win+U</p> | <p>攻击可能会被某些 AV 软件检测到。</p><p>替代方法依赖于使用相同权限替换存储在 "Program Files" 中的服务二进制文件</p>                                                                                                                                                            |
+| **`SeTakeOwnership`**      | _**管理员**_ | _**内置命令**_         | <p>1. <code>takeown.exe /f "%windir%\system32"</code><br>2. <code>icalcs.exe "%windir%\system32" /grant "%username%":F</code><br>3. 将 cmd.exe 重命名为 utilman.exe<br>4. 锁定控制台并按 Win+U</p>                                                                                                                                       | <p>攻击可能会被某些 AV 软件检测到。</p><p>替代方法依赖于使用相同权限替换存储在 "Program Files" 中的服务二进制文件。</p>                                                                                                                                                           |
+| **`SeTcb`**                | _**管理员**_ | 第三方工具              | <p>操纵令牌以包含本地管理员权限。可能需要 SeImpersonate。</p><p>待确认。</p>                                                                                                                                                                                                                                     |                                                                                                                                                                                                                                                                                                                                |
 
-## Reference
+## 参考
 
 - 查看定义 Windows 令牌的此表： [https://github.com/gtworek/Priv2Admin](https://github.com/gtworek/Priv2Admin)
-- 查看 [**这篇论文**](https://github.com/hatRiot/token-priv/blob/master/abusing_token_eop_1.0.txt) 关于使用令牌的权限提升。
+- 查看关于使用令牌进行 privesc 的 [**这篇论文**](https://github.com/hatRiot/token-priv/blob/master/abusing_token_eop_1.0.txt)。
 
 {{#include ../../../banners/hacktricks-training.md}}

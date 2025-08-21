@@ -237,7 +237,7 @@ app.secret_key = '(:secret:)'
 ```python
 __init__.__globals__.__loader__.__init__.__globals__.sys.modules.__main__.app.secret_key
 ```
-使用此有效载荷来**更改 `app.secret_key`**（您应用中的名称可能不同），以便能够签署新的和更具特权的 flask cookies。
+使用此有效载荷来**更改 `app.secret_key`**（您应用中的名称可能不同），以便能够签署新的和更具权限的 flask cookies。
 
 </details>
 

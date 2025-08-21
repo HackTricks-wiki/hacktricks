@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-此页面收集了**小型、自包含的 C 代码片段**，在 Windows 本地权限提升或后期利用中非常方便。每个有效载荷旨在**便于复制粘贴**，仅需 Windows API / C 运行时，并且可以使用 `i686-w64-mingw32-gcc` (x86) 或 `x86_64-w64-mingw32-gcc` (x64) 编译。
+此页面收集了**小型、自包含的 C 代码片段**，在 Windows 本地权限提升或后期利用中非常方便。每个有效载荷都设计为**易于复制粘贴**，仅需 Windows API / C 运行时，并且可以使用 `i686-w64-mingw32-gcc` (x86) 或 `x86_64-w64-mingw32-gcc` (x64) 编译。
 
 > ⚠️  这些有效载荷假设进程已经具有执行该操作所需的最低权限（例如 `SeDebugPrivilege`、`SeImpersonatePrivilege` 或用于 UAC 绕过的中等完整性上下文）。它们旨在用于**红队或 CTF 环境**，在这些环境中，利用漏洞已实现任意本地代码执行。
 
@@ -21,7 +21,7 @@ return 0;
 ---
 
 ## UAC 绕过 – `fodhelper.exe` 注册表劫持 (中 → 高完整性)
-当受信任的二进制文件 **`fodhelper.exe`** 被执行时，它会查询下面的注册表路径 **而不过滤 `DelegateExecute` 动词**。通过在该键下植入我们的命令，攻击者可以绕过 UAC *而不* 将文件写入磁盘。
+当受信任的二进制文件 **`fodhelper.exe`** 被执行时，它会查询以下注册表路径 **而不过滤 `DelegateExecute` 动词**。通过在该键下植入我们的命令，攻击者可以绕过 UAC *而不* 将文件写入磁盘。
 
 *`fodhelper.exe` 查询的注册表路径*
 ```
@@ -115,6 +115,7 @@ return 0;
 }
 ```
 对于其工作原理的更深入解释，请参见：
+
 {{#ref}}
 sedebug-+-seimpersonate-copy-token.md
 {{#endref}}

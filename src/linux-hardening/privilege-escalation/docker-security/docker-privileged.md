@@ -2,13 +2,13 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## 影响
+## 影响因素
 
-当您以特权模式运行容器时，您正在禁用以下保护：
+当你以特权模式运行容器时，你正在禁用以下保护：
 
 ### 挂载 /dev
 
-在特权容器中，所有的 **设备可以在 `/dev/` 中访问**。因此，您可以通过 **挂载** 主机的磁盘来 **逃逸**。
+在特权容器中，所有的 **设备可以在 `/dev/` 中访问**。因此，你可以通过 **挂载** 主机的磁盘来 **逃逸**。
 
 {{#tabs}}
 {{#tab name="Inside default container"}}
@@ -49,7 +49,7 @@ cpuacct on /sys/fs/cgroup/cpuacct type cgroup (ro,nosuid,nodev,noexec,relatime,c
 ```
 {{#endtab}}
 
-{{#tab name="内部特权容器"}}
+{{#tab name="Inside Privileged Container"}}
 ```bash
 # docker run --rm --privileged -it alpine sh
 mount  | grep '(ro'
@@ -59,7 +59,7 @@ mount  | grep '(ro'
 
 ### 遮蔽内核文件系统
 
-**/proc** 文件系统是选择性可写的，但出于安全考虑，某些部分通过覆盖 **tmpfs** 进行保护，确保容器进程无法访问敏感区域。
+**/proc** 文件系统是选择性可写的，但出于安全原因，某些部分通过用 **tmpfs** 进行覆盖而屏蔽了写入和读取访问，确保容器进程无法访问敏感区域。
 
 > [!NOTE] > **tmpfs** 是一个将所有文件存储在虚拟内存中的文件系统。tmpfs 不会在你的硬盘上创建任何文件。因此，如果你卸载一个 tmpfs 文件系统，里面的所有文件将永远丢失。
 
@@ -74,7 +74,7 @@ tmpfs on /proc/keys type tmpfs (rw,nosuid,size=65536k,mode=755)
 ```
 {{#endtab}}
 
-{{#tab name="内部特权容器"}}
+{{#tab name="Inside Privileged Container"}}
 ```bash
 # docker run --rm --privileged -it alpine sh
 mount  | grep /proc.*tmpfs
@@ -82,9 +82,9 @@ mount  | grep /proc.*tmpfs
 {{#endtab}}
 {{#endtabs}}
 
-### Linux 能力
+### Linux capabilities
 
-容器引擎以 **有限数量的能力** 启动容器，以控制默认情况下容器内部发生的事情。 **特权** 容器具有 **所有** 可访问的 **能力**。要了解能力，请阅读：
+容器引擎以**有限的能力**启动容器，以控制容器内部的操作。**特权**容器具有**所有**可用的**能力**。要了解能力，请阅读：
 
 {{#ref}}
 ../linux-capabilities.md
@@ -102,7 +102,7 @@ Bounding set =cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setg
 ```
 {{#endtab}}
 
-{{#tab name="内部特权容器"}}
+{{#tab name="Inside Privileged Container"}}
 ```bash
 # docker run --rm --privileged -it alpine sh
 apk add -U libcap; capsh --print
@@ -114,11 +114,12 @@ Bounding set =cap_chown,cap_dac_override,cap_dac_read_search,cap_fowner,cap_fset
 {{#endtab}}
 {{#endtabs}}
 
-您可以通过使用 `--cap-add` 和 `--cap-drop` 标志来操纵容器可用的能力，而无需以 `--privileged` 模式运行。
+您可以通过使用 `--cap-add` 和 `--cap-drop` 标志来操控容器可用的能力，而无需以 `--privileged` 模式运行。
 
 ### Seccomp
 
 **Seccomp** 对于 **限制** 容器可以调用的 **syscalls** 非常有用。默认情况下，在运行 docker 容器时启用默认的 seccomp 配置文件，但在特权模式下它是禁用的。有关 Seccomp 的更多信息，请访问：
+
 
 {{#ref}}
 seccomp.md
@@ -134,7 +135,7 @@ Seccomp_filters:	1
 ```
 {{#endtab}}
 
-{{#tab name="内部特权容器"}}
+{{#tab name="Inside Privileged Container"}}
 ```bash
 # docker run --rm --privileged -it alpine sh
 grep Seccomp /proc/1/status
@@ -162,7 +163,7 @@ apparmor.md
 ```
 ### SELinux
 
-运行带有 `--privileged` 标志的容器会禁用 **SELinux 标签**，使其继承容器引擎的标签，通常为 `unconfined`，授予与容器引擎相似的完全访问权限。在无根模式下，它使用 `container_runtime_t`，而在根模式下，应用 `spc_t`。
+运行带有 `--privileged` 标志的容器会禁用 **SELinux 标签**，使其继承容器引擎的标签，通常为 `unconfined`，从而授予与容器引擎相似的完全访问权限。在无根模式下，它使用 `container_runtime_t`，而在根模式下，应用 `spc_t`。
 
 {{#ref}}
 ../selinux.md
@@ -188,7 +189,7 @@ PID   USER     TIME  COMMAND
 ```
 {{#endtab}}
 
-{{#tab name="内部 --pid=host 容器"}}
+{{#tab name="Inside --pid=host Container"}}
 ```bash
 # docker run --rm --privileged --pid=host -it alpine sh
 ps -ef

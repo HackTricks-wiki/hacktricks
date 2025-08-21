@@ -30,16 +30,16 @@ kerberos::list /export #Another way
 Rubeus.exe dump
 Rubeus.exe monitor /interval:10 [/filteruser:<username>] #Check every 10s for new TGTs
 ```
-加载管理员（或受害者用户）的票证到内存中，使用**Mimikatz**或**Rubeus**进行[**票证传递**](pass-the-ticket.md)。\
-更多信息：[https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/](https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/)\
-[**关于不受约束委派的更多信息在ired.team。**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/domain-compromise-via-unrestricted-kerberos-delegation)
+加载管理员（或受害者用户）的票证到内存中，使用 **Mimikatz** 或 **Rubeus** 进行 [**Pass the Ticket**](pass-the-ticket.md)**.**\
+更多信息: [https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/](https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/)\
+[**关于不受限委派的更多信息在ired.team。**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/domain-compromise-via-unrestricted-kerberos-delegation)
 
 ### **强制认证**
 
-如果攻击者能够**攻陷一个被允许进行“无约束委派”的计算机**，他可以**欺骗**一个**打印服务器**，使其**自动登录**并**在服务器的内存中保存TGT**。\
-然后，攻击者可以执行**票证传递攻击以冒充**用户打印服务器计算机帐户。
+如果攻击者能够 **攻陷一个被允许进行“无约束委派”的计算机**，他可以 **欺骗** 一个 **打印服务器** 使其 **自动登录**，并在服务器的内存中 **保存一个 TGT**。\
+然后，攻击者可以执行 **Pass the Ticket 攻击以冒充** 用户打印服务器计算机账户。
 
-要使打印服务器登录到任何机器，可以使用[**SpoolSample**](https://github.com/leechristensen/SpoolSample)：
+要使打印服务器登录到任何机器，可以使用 [**SpoolSample**](https://github.com/leechristensen/SpoolSample):
 ```bash
 .\SpoolSample.exe <printmachine> <unconstrinedmachine>
 ```
@@ -47,6 +47,7 @@ Rubeus.exe monitor /interval:10 [/filteruser:<username>] #Check every 10s for ne
 [**有关此攻击的更多信息，请访问 ired.team。**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/domain-compromise-via-dc-print-server-and-kerberos-delegation)
 
 在这里找到其他 **强制身份验证** 的方法：
+
 
 {{#ref}}
 printers-spooler-service-abuse.md

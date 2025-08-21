@@ -8,7 +8,7 @@
 
 ## Chroot 逃逸
 
-来自 [wikipedia](https://en.wikipedia.org/wiki/Chroot#Limitations)：chroot 机制**并不旨在防御**来自**特权**（**root**）**用户**的故意篡改。在大多数系统中，chroot 上下文不能正确堆叠，具有足够权限的 chroot 程序**可能会执行第二次 chroot 以突破**。\
+来自 [wikipedia](https://en.wikipedia.org/wiki/Chroot#Limitations)：chroot 机制**并不旨在防御**来自**特权**（**root**）**用户**的故意篡改。在大多数系统中，chroot 上下文无法正确堆叠，具有足够权限的 chroot 程序**可能会执行第二次 chroot 以突破**。\
 通常这意味着要逃脱，你需要在 chroot 内部是 root。
 
 > [!TIP]
@@ -17,9 +17,9 @@
 ### Root + CWD
 
 > [!WARNING]
-> 如果你在 chroot 内部是**root**，你**可以逃脱**，创建**另一个 chroot**。这是因为两个 chroot 不能共存（在 Linux 中），所以如果你创建一个文件夹，然后在那个新文件夹上**创建一个新的 chroot**，而你**在外面**，你现在将**在新的 chroot 之外**，因此你将处于文件系统中。
+> 如果你在 chroot 内部是 **root**，你**可以逃脱**，通过创建**另一个 chroot**。这是因为两个 chroot 不能共存（在 Linux 中），所以如果你创建一个文件夹，然后**在那个新文件夹上创建一个新的 chroot**，而你**在外面**，你现在将**在新的 chroot 之外**，因此你将处于文件系统中。
 >
-> 这发生是因为通常 chroot 并不会将你的工作目录移动到指定的目录，所以你可以创建一个 chroot，但在它之外。
+> 这发生是因为通常 chroot 并不会将你的工作目录移动到指定的目录，所以你可以创建一个 chroot，但在它外面。
 
 通常你不会在 chroot 监狱中找到 `chroot` 二进制文件，但你**可以编译、上传并执行**一个二进制文件：
 
@@ -114,16 +114,16 @@ chroot(".");
 > - 创建一个子进程 (fork)
 > - 创建 UDS 以便父进程和子进程可以通信
 > - 在子进程中在不同的文件夹中运行 chroot
-> - 在父进程中，创建一个位于新子进程 chroot 之外的文件夹的 FD
+> - 在父进程中，创建一个在新子进程 chroot 之外的文件夹的 FD
 > - 通过 UDS 将该 FD 传递给子进程
-> - 子进程 chdir 到该 FD，因为它在其 chroot 之外，因此将逃离监狱
+> - 子进程 chdir 到该 FD，因为它在其 chroot 之外，它将逃脱监禁
 
 ### Root + Mount
 
 > [!WARNING]
 >
 > - 将根设备 (/) 挂载到 chroot 内的一个目录
-> - chroot 到该目录
+> - 进入该目录的 chroot
 >
 > 这在 Linux 中是可能的
 
@@ -133,13 +133,13 @@ chroot(".");
 >
 > - 将 procfs 挂载到 chroot 内的一个目录 (如果尚未挂载)
 > - 查找具有不同 root/cwd 条目的 pid，例如：/proc/1/root
-> - chroot 到该条目
+> - 进入该条目的 chroot
 
 ### Root(?) + Fork
 
 > [!WARNING]
 >
-> - 创建一个 Fork (子进程) 并 chroot 到文件系统中更深处的不同文件夹并在其上 CD
+> - 创建一个 Fork (子进程) 并 chroot 到文件系统中更深的不同文件夹并在其上 CD
 > - 从父进程中，将子进程所在的文件夹移动到子进程 chroot 之前的文件夹
 > - 这个子进程将发现自己在 chroot 之外
 
@@ -154,7 +154,7 @@ chroot(".");
 
 ### Enumeration
 
-获取有关监狱的信息：
+获取关于监禁的信息：
 ```bash
 echo $SHELL
 echo $PATH
@@ -182,9 +182,9 @@ echo /home/* #List directory
 red /bin/bash
 > w wx/path #Write /bin/bash in a writable and executable path
 ```
-### 通过 SSH 获取 bash
+### 从SSH获取bash
 
-如果您通过 ssh 访问，可以使用这个技巧来执行 bash shell：
+如果您通过ssh访问，可以使用这个技巧来执行bash shell：
 ```bash
 ssh -t user@<IP> bash # Get directly an interactive shell
 ssh user@<IP> -t "bash --noprofile -i"
@@ -238,7 +238,7 @@ print(rawget(string, "char")(0x41, 0x42))
 ```bash
 for k,v in pairs(string) do print(k,v) end
 ```
-请注意，每次在**不同的 lua 环境中执行前面的单行代码时，函数的顺序会改变**。因此，如果您需要执行一个特定的函数，可以通过加载不同的 lua 环境并调用库的第一个函数来进行暴力攻击：
+请注意，每次在**不同的lua环境中执行前面的单行代码时，函数的顺序会改变**。因此，如果您需要执行一个特定的函数，可以通过加载不同的lua环境并调用le library的第一个函数来进行暴力攻击：
 ```bash
 #In this scenario you could BF the victim that is generating a new lua environment
 #for every interaction with the following line and when you are lucky
@@ -249,7 +249,7 @@ for k,chr in pairs(string) do print(chr(0x6f,0x73,0x2e,0x65,0x78)) end
 #and "char" from string library, and the use both to execute a command
 for i in seq 1000; do echo "for k1,chr in pairs(string) do for k2,exec in pairs(os) do print(k1,k2) print(exec(chr(0x6f,0x73,0x2e,0x65,0x78,0x65,0x63,0x75,0x74,0x65,0x28,0x27,0x6c,0x73,0x27,0x29))) break end break end" | nc 10.10.10.10 10006 | grep -A5 "Code: char"; done
 ```
-**获取交互式 lua shell**：如果您在一个受限的 lua shell 中，可以通过调用以下命令获取一个新的 lua shell（并希望是无限的）：
+**获取交互式 lua shell**: 如果你在一个受限的 lua shell 中，可以通过调用来获取一个新的 lua shell（希望是无限的）：
 ```bash
 debug.debug()
 ```

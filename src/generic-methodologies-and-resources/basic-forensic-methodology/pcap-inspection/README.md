@@ -2,13 +2,13 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-> [!NOTE]
+> [!TIP]
 > 关于 **PCAP** 与 **PCAPNG** 的说明：PCAP 文件格式有两个版本；**PCAPNG 是较新的，并不是所有工具都支持**。您可能需要使用 Wireshark 或其他兼容工具将文件从 PCAPNG 转换为 PCAP，以便在某些其他工具中使用。
 
 ## 在线工具用于 pcaps
 
 - 如果您的 pcap 的 **头部**是 **损坏的**，您应该尝试使用：[http://f00l.de/hacking/**pcapfix.php**](http://f00l.de/hacking/pcapfix.php) **修复**它
-- 在 [**PacketTotal**](https://packettotal.com) 中提取 **信息** 并搜索 **恶意软件**
+- 在 [**PacketTotal**](https://packettotal.com) 中提取 **信息** 并搜索 pcap 内的 **恶意软件**
 - 使用 [**www.virustotal.com**](https://www.virustotal.com) 和 [**www.hybrid-analysis.com**](https://www.hybrid-analysis.com) 搜索 **恶意活动**
 - 在 [**https://apackets.com/**](https://apackets.com/) 中 **从浏览器进行完整的 pcap 分析**
 
@@ -18,7 +18,7 @@
 
 ### Wireshark
 
-> [!NOTE]
+> [!TIP]
 > **如果您要分析 PCAP，您基本上必须知道如何使用 Wireshark**
 
 您可以在以下位置找到一些 Wireshark 技巧：
@@ -47,18 +47,18 @@ sudo apt-get install xplico
 /etc/init.d/apache2 restart
 /etc/init.d/xplico start
 ```
-访问 _**127.0.0.1:9876**_，凭证为 _**xplico:xplico**_
+访问 _**127.0.0.1:9876**_，使用凭据 _**xplico:xplico**_
 
 然后创建一个 **新案例**，在案例中创建一个 **新会话** 并 **上传 pcap** 文件。
 
 ### NetworkMiner
 
-像 Xplico 一样，它是一个 **分析和提取 pcaps 中对象** 的工具。它有一个免费版可以 **下载** [**这里**](https://www.netresec.com/?page=NetworkMiner)。它在 **Windows** 上工作。\
+像 Xplico 一样，它是一个 **分析和提取 pcaps 中对象** 的工具。它有一个免费版，你可以 **下载** [**这里**](https://www.netresec.com/?page=NetworkMiner)。它适用于 **Windows**。\
 这个工具也有助于从数据包中获取 **其他信息分析**，以便能够更 **快速** 地了解发生了什么。
 
 ### NetWitness Investigator
 
-您可以从 [**这里下载 NetWitness Investigator**](https://www.rsa.com/en-us/contact-us/netwitness-investigator-freeware) **（它在 Windows 上工作）**。\
+你可以从 [**这里下载 NetWitness Investigator**](https://www.rsa.com/en-us/contact-us/netwitness-investigator-freeware) **（它适用于 Windows）**。\
 这是另一个有用的工具，**分析数据包** 并以有用的方式整理信息，以 **了解内部发生的事情**。
 
 ### [BruteShark](https://github.com/odedshimon/BruteShark)
@@ -80,23 +80,23 @@ capinfos capture.pcap
 ```bash
 ngrep -I packets.pcap "^GET" "port 80 and tcp and host 192.168 and dst host 192.168 and src host 192.168"
 ```
-### 切割
+### Carving
 
-使用常见的切割技术可以从 pcap 中提取文件和信息：
+使用常见的雕刻技术可以从 pcap 中提取文件和信息：
 
 {{#ref}}
 ../partitions-file-systems-carving/file-data-carving-recovery-tools.md
 {{#endref}}
 
-### 捕获凭证
+### Capturing credentials
 
-您可以使用工具如 [https://github.com/lgandx/PCredz](https://github.com/lgandx/PCredz) 从 pcap 或实时接口中解析凭证。
+您可以使用工具如 [https://github.com/lgandx/PCredz](https://github.com/lgandx/PCredz) 从 pcap 或实时接口中解析凭据。
 
-## 检查漏洞/恶意软件
+## Check Exploits/Malware
 
 ### Suricata
 
-**安装和设置**
+**Install and setup**
 ```
 apt-get install suricata
 apt-get install oinkmaster
@@ -200,13 +200,16 @@ rita show-exploded-dns -H --limit 10 zeek_logs
 ```
 ## 其他 pcap 分析技巧
 
+
 {{#ref}}
 dnscat-exfiltration.md
 {{#endref}}
 
+
 {{#ref}}
 wifi-pcap-analysis.md
 {{#endref}}
+
 
 {{#ref}}
 usb-keystrokes.md

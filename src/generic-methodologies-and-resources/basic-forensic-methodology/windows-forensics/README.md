@@ -2,29 +2,29 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Generic Windows Artifacts
+## 通用 Windows 伪影
 
-### Windows 10 Notifications
+### Windows 10 通知
 
 在路径 `\Users\<username>\AppData\Local\Microsoft\Windows\Notifications` 中，您可以找到数据库 `appdb.dat`（在 Windows 周年更新之前）或 `wpndatabase.db`（在 Windows 周年更新之后）。
 
-在这个 SQLite 数据库中，您可以找到 `Notification` 表，其中包含所有可能包含有趣数据的通知（以 XML 格式）。
+在这个 SQLite 数据库中，您可以找到 `Notification` 表，里面包含所有的通知（以 XML 格式），可能包含有趣的数据。
 
-### Timeline
+### 时间线
 
-Timeline 是 Windows 的一个特性，提供 **访问过的网页、编辑的文档和执行的应用程序的时间顺序历史**。
+时间线是 Windows 的一个特性，提供 **访问过的网页、编辑的文档和执行的应用程序的时间顺序历史**。
 
-数据库位于路径 `\Users\<username>\AppData\Local\ConnectedDevicesPlatform\<id>\ActivitiesCache.db`。这个数据库可以使用 SQLite 工具或工具 [**WxTCmd**](https://github.com/EricZimmerman/WxTCmd) 打开，**该工具生成 2 个可以使用工具** [**TimeLine Explorer**](https://ericzimmerman.github.io/#!index.md) **打开的文件**。
+数据库位于路径 `\Users\<username>\AppData\Local\ConnectedDevicesPlatform\<id>\ActivitiesCache.db`。这个数据库可以用 SQLite 工具打开，或者用工具 [**WxTCmd**](https://github.com/EricZimmerman/WxTCmd) **生成的 2 个文件，这些文件可以用工具** [**TimeLine Explorer**](https://ericzimmerman.github.io/#!index.md) **打开**。
 
-### ADS (Alternate Data Streams)
+### ADS（备用数据流）
 
-下载的文件可能包含 **ADS Zone.Identifier**，指示 **它是如何** 从内网、互联网等 **下载的**。一些软件（如浏览器）通常会提供更多 **信息**，例如文件下载的 **URL**。
+下载的文件可能包含 **ADS Zone.Identifier**，指示 **它是如何** 从内网、互联网等 **下载的**。一些软件（如浏览器）通常会提供更多的信息，例如文件下载的 **URL**。
 
-## **File Backups**
+## **文件备份**
 
-### Recycle Bin
+### 回收站
 
-在 Vista/Win7/Win8/Win10 中，**回收站**可以在驱动器根目录的文件夹 **`$Recycle.bin`** 中找到（`C:\$Recycle.bin`）。\
+在 Vista/Win7/Win8/Win10 中，**回收站** 可以在驱动器根目录的文件夹 **`$Recycle.bin`** 中找到（`C:\$Recycle.bin`）。\
 当在此文件夹中删除文件时，会创建 2 个特定文件：
 
 - `$I{id}`: 文件信息（删除日期}
@@ -38,46 +38,46 @@ Timeline 是 Windows 的一个特性，提供 **访问过的网页、编辑的�
 ```
 ![](<../../../images/image (495) (1) (1) (1).png>)
 
-### 卷影副本
+### 卷影复制
 
-卷影副本是微软Windows中包含的一项技术，可以创建计算机文件或卷的**备份副本**或快照，即使在使用中也可以。
+卷影复制是微软Windows中包含的一项技术，可以创建计算机文件或卷的**备份副本**或快照，即使在使用时也可以。
 
-这些备份通常位于文件系统根目录下的`\System Volume Information`中，名称由以下图像中显示的**UIDs**组成：
+这些备份通常位于文件系统根目录下的 `\System Volume Information` 中，名称由以下图像中显示的**UIDs**组成：
 
 ![](<../../../images/image (94).png>)
 
-使用**ArsenalImageMounter**挂载取证镜像后，可以使用工具[**ShadowCopyView**](https://www.nirsoft.net/utils/shadow_copy_view.html)检查卷影副本，甚至**提取文件**。
+使用**ArsenalImageMounter**挂载取证镜像后，可以使用工具 [**ShadowCopyView**](https://www.nirsoft.net/utils/shadow_copy_view.html) 检查卷影复制，甚至**提取文件**。
 
 ![](<../../../images/image (576).png>)
 
-注册表项`HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\BackupRestore`包含**不备份**的文件和键：
+注册表项 `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\BackupRestore` 包含**不备份**的文件和键：
 
 ![](<../../../images/image (254).png>)
 
-注册表`HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\VSS`也包含有关`卷影副本`的配置信息。
+注册表 `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\VSS` 还包含有关 `卷影复制` 的配置信息。
 
-### Office自动保存的文件
+### Office 自动保存文件
 
-您可以在以下位置找到Office自动保存的文件：`C:\Usuarios\\AppData\Roaming\Microsoft{Excel|Word|Powerpoint}\`
+您可以在以下位置找到Office自动保存的文件： `C:\Usuarios\\AppData\Roaming\Microsoft{Excel|Word|Powerpoint}\`
 
-## Shell项目
+## Shell 项
 
-Shell项目是包含有关如何访问另一个文件的信息的项目。
+Shell 项是包含有关如何访问另一个文件的信息的项。
 
 ### 最近文档 (LNK)
 
-Windows会在用户**打开、使用或创建文件**时**自动****创建**这些**快捷方式**：
+Windows **自动** **创建** 这些 **快捷方式** 当用户 **打开、使用或创建文件** 时，位置如下：
 
 - Win7-Win10: `C:\Users\\AppData\Roaming\Microsoft\Windows\Recent\`
 - Office: `C:\Users\\AppData\Roaming\Microsoft\Office\Recent\`
 
-当创建一个文件夹时，也会创建指向该文件夹、父文件夹和祖父文件夹的链接。
+当创建文件夹时，还会创建指向该文件夹、父文件夹和祖父文件夹的链接。
 
-这些自动创建的链接文件**包含有关来源的信息**，例如它是**文件**还是**文件夹**、该文件的**MAC** **时间**、文件存储的**卷信息**以及**目标文件的文件夹**。这些信息在文件被删除的情况下可以用于恢复这些文件。
+这些自动创建的链接文件**包含有关来源的信息**，例如它是一个**文件** **还是**一个**文件夹**，该文件的**MAC** **时间**，文件存储的**卷信息**以及**目标文件的文件夹**。这些信息在文件被删除的情况下可以用于恢复这些文件。
 
-此外，链接文件的**创建日期**是原始文件**首次****使用**的**时间**，而链接文件的**修改日期**是原始文件**最后****使用**的**时间**。
+此外，链接文件的**创建日期**是原始文件**首次** **使用**的**时间**，而链接文件的**修改日期**是原始文件**最后** **使用**的**时间**。
 
-要检查这些文件，您可以使用[**LinkParser**](http://4discovery.com/our-tools/)。
+要检查这些文件，您可以使用 [**LinkParser**](http://4discovery.com/our-tools/)。
 
 在此工具中，您将找到**2组**时间戳：
 
@@ -92,7 +92,7 @@ Windows会在用户**打开、使用或创建文件**时**自动****创建**这�
 
 第一组时间戳引用的是**文件本身的时间戳**。第二组引用的是**链接文件的时间戳**。
 
-您可以通过运行Windows CLI工具[**LECmd.exe**](https://github.com/EricZimmerman/LECmd)获取相同的信息。
+您可以通过运行Windows CLI工具 [**LECmd.exe**](https://github.com/EricZimmerman/LECmd) 获取相同的信息。
 ```
 LECmd.exe -d C:\Users\student\Desktop\LNKs --csv C:\Users\student\Desktop\LNKs
 ```
@@ -106,7 +106,7 @@ LECmd.exe -d C:\Users\student\Desktop\LNKs --csv C:\Users\student\Desktop\LNKs
 
 自定义的 jumplists 存储在 `C:\Users\{username}\AppData\Roaming\Microsoft\Windows\Recent\CustomDestination\`，通常是因为文件发生了某些 **重要** 事件（可能被标记为收藏）。
 
-任何 jumplist 的 **创建时间** 表示 **文件首次访问的时间**，**修改时间** 表示最后一次访问的时间。
+任何 jumplist 的 **创建时间** 表示 **文件首次访问的时间**，**修改时间为最后一次**。
 
 您可以使用 [**JumplistExplorer**](https://ericzimmerman.github.io/#!index.md) 检查 jumplists。
 
@@ -126,7 +126,7 @@ LECmd.exe -d C:\Users\student\Desktop\LNKs --csv C:\Users\student\Desktop\LNKs
 - Microsoft Office Recent Folder
 - Jumplists
 
-请注意，某些 LNK 文件不是指向原始路径，而是指向 WPDNSE 文件夹：
+请注意，一些 LNK 文件不是指向原始路径，而是指向 WPDNSE 文件夹：
 
 ![](<../../../images/image (218).png>)
 
@@ -134,13 +134,13 @@ WPDNSE 文件夹中的文件是原始文件的副本，因此在 PC 重启后不
 
 ### 注册表信息
 
-[查看此页面以了解](interesting-windows-registry-keys.md#usb-information) 哪些注册表键包含有关 USB 连接设备的有趣信息。
+[查看此页面以了解](interesting-windows-registry-keys.md#usb-information) 哪些注册表键包含有关连接的 USB 设备的有趣信息。
 
 ### setupapi
 
 检查文件 `C:\Windows\inf\setupapi.dev.log` 以获取 USB 连接产生的时间戳（搜索 `Section start`）。
 
-![](<../../../images/image (477) (2) (2) (2) (2) (2) (2) (2) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (14) (2).png>)
+![](<../../../images/image (477) (2) (2) (2) (2) (2) (2) (2) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (14) (2).png>)
 
 ### USB Detective
 
@@ -148,9 +148,9 @@ WPDNSE 文件夹中的文件是原始文件的副本，因此在 PC 重启后不
 
 ![](<../../../images/image (452).png>)
 
-### 插拔清理
+### Plug and Play Cleanup
 
-名为“插拔清理”的计划任务主要用于删除过时的驱动程序版本。与其指定的保留最新驱动程序包版本的目的相反，在线来源表明它还会针对过去 30 天未活动的驱动程序。因此，过去 30 天未连接的可移动设备的驱动程序可能会被删除。
+名为“Plug and Play Cleanup”的计划任务主要用于删除过时的驱动程序版本。与其指定的保留最新驱动程序包版本的目的相反，在线来源表明它还针对过去 30 天未活动的驱动程序。因此，过去 30 天未连接的可移动设备的驱动程序可能会被删除。
 
 该任务位于以下路径：`C:\Windows\System32\Tasks\Microsoft\Windows\Plug and Play\Plug and Play Cleanup`。
 
@@ -170,7 +170,7 @@ WPDNSE 文件夹中的文件是原始文件的副本，因此在 PC 重启后不
 
 ## 电子邮件
 
-电子邮件包含 **2 个有趣的部分：电子邮件的标题和内容**。在 **标题** 中，您可以找到以下信息：
+电子邮件包含 **两个有趣的部分：电子邮件的标题和内容**。在 **标题** 中，您可以找到以下信息：
 
 - **谁** 发送了电子邮件（电子邮件地址、IP、重定向电子邮件的邮件服务器）
 - **何时** 发送了电子邮件
@@ -179,7 +179,7 @@ WPDNSE 文件夹中的文件是原始文件的副本，因此在 PC 重启后不
 
 ![](<../../../images/image (593).png>)
 
-### Windows 邮件应用
+### Windows Mail 应用
 
 此应用程序以 HTML 或文本格式保存电子邮件。您可以在 `\Users\<username>\AppData\Local\Comms\Unistore\data\3\` 的子文件夹中找到电子邮件。电子邮件以 `.dat` 扩展名保存。
 
@@ -194,7 +194,7 @@ WPDNSE 文件夹中的文件是原始文件的副本，因此在 PC 重启后不
 - `Mapi-Client-Submit-Time`：发送电子邮件时系统的时间
 - `Mapi-Conversation-Index`：线程的子消息数量和每条消息的时间戳
 - `Mapi-Entry-ID`：消息标识符。
-- `Mappi-Message-Flags` 和 `Pr_last_Verb-Executed`：有关 MAPI 客户端的信息（消息已读？未读？已回复？已重定向？不在办公室？）
+- `Mappi-Message-Flags` 和 `Pr_last_Verb-Executed`：有关 MAPI 客户端的信息（消息已读？未读？已回复？重定向？不在办公室？）
 
 在 Microsoft Outlook 客户端中，所有发送/接收的消息、联系人数据和日历数据都存储在 PST 文件中，路径为：
 
@@ -211,12 +211,12 @@ WPDNSE 文件夹中的文件是原始文件的副本，因此在 PC 重启后不
 
 **OST 文件** 是 Microsoft Outlook 在配置为 **IMAP** 或 **Exchange** 服务器时生成的，存储与 PST 文件类似的信息。此文件与服务器同步，保留 **过去 12 个月** 的数据，最大大小为 50GB，并位于与 PST 文件相同的目录中。要查看 OST 文件，可以使用 [**Kernel OST viewer**](https://www.nucleustechnologies.com/ost-viewer.html)。
 
-### 恢复附件
+### 检索附件
 
 丢失的附件可能可以从以下位置恢复：
 
 - 对于 **IE10**：`%APPDATA%\Local\Microsoft\Windows\Temporary Internet Files\Content.Outlook`
-- 对于 **IE11 及更高版本**：`%APPDATA%\Local\Microsoft\InetCache\Content.Outlook`
+- 对于 **IE11 及以上**：`%APPDATA%\Local\Microsoft\InetCache\Content.Outlook`
 
 ### Thunderbird MBOX 文件
 
@@ -242,7 +242,7 @@ Windows 注册表存储大量系统和用户活动数据，包含在以下文件
 一些工具对于分析注册表文件非常有用：
 
 - **注册表编辑器**：它安装在 Windows 中。它是一个 GUI，用于浏览当前会话的 Windows 注册表。
-- [**Registry Explorer**](https://ericzimmerman.github.io/#!index.md)：它允许您加载注册表文件并通过 GUI 浏览。它还包含书签，突出显示具有有趣信息的键。
+- [**Registry Explorer**](https://ericzimmerman.github.io/#!index.md)：它允许您加载注册表文件并通过 GUI 浏览它们。它还包含书签，突出显示具有有趣信息的键。
 - [**RegRipper**](https://github.com/keydet89/RegRipper3.0)：同样，它具有一个 GUI，允许浏览加载的注册表，并且还包含突出显示加载的注册表中有趣信息的插件。
 - [**Windows 注册表恢复**](https://www.mitec.cz/wrr.html)：另一个 GUI 应用程序，能够从加载的注册表中提取重要信息。
 
@@ -262,6 +262,7 @@ Windows 注册表存储大量系统和用户活动数据，包含在以下文件
 
 ### Windows 注册表中的有趣条目
 
+
 {{#ref}}
 interesting-windows-registry-keys.md
 {{#endref}}
@@ -274,9 +275,9 @@ interesting-windows-registry-keys.md
 
 ### Windows Recent APPs
 
-在注册表 `NTUSER.DAT` 中的路径 `Software\Microsoft\Current Version\Search\RecentApps` 中，您可以找到有关 **执行的应用程序**、**最后一次** 执行的时间和 **启动次数** 的子键。
+在注册表 `NTUSER.DAT` 的路径 `Software\Microsoft\Current Version\Search\RecentApps` 中，您可以找到有关 **执行的应用程序**、**最后一次** 执行的时间和 **启动次数** 的子键。
 
-### BAM（后台活动调节器）
+### BAM (后台活动调节器)
 
 您可以使用注册表编辑器打开 `SYSTEM` 文件，在路径 `SYSTEM\CurrentControlSet\Services\bam\UserSettings\{SID}` 中找到有关 **每个用户执行的应用程序** 的信息（注意路径中的 `{SID}`）以及 **它们执行的时间**（时间在注册表的 Data 值中）。
 
@@ -290,7 +291,7 @@ Windows 预取由创建 **已执行程序的缓存** 组成，以便能够更快
 
 文件 `C:\Windows\Prefetch\Layout.ini` 包含 **被预取文件的文件夹名称**。该文件包含 **执行次数**、**执行日期** 和 **程序打开的文件** 的信息。
 
-要检查这些文件，您可以使用工具 [**PEcmd.exe**](https://github.com/EricZimmerman/PECmd)：
+要检查这些文件，您可以使用工具 [**PEcmd.exe**](https://github.com/EricZimmerman/PECmd):
 ```bash
 .\PECmd.exe -d C:\Users\student\Desktop\Prefetch --html "C:\Users\student\Desktop\out_folder"
 ```
@@ -340,7 +341,7 @@ Windows 预取由创建 **已执行程序的缓存** 组成，以便能够更快
 - 对于 XP，数据存储在 `SYSTEM\CurrentControlSet\Control\SessionManager\Appcompatibility\AppcompatCache` 下，最多可容纳 96 个条目。
 - 对于 Server 2003，以及 Windows 版本 2008、2012、2016、7、8 和 10，存储路径为 `SYSTEM\CurrentControlSet\Control\SessionManager\AppcompatCache\AppCompatCache`，分别可容纳 512 和 1024 个条目。
 
-要解析存储的信息，建议使用 [**AppCompatCacheParser** tool](https://github.com/EricZimmerman/AppCompatCacheParser)。
+要解析存储的信息，推荐使用 [**AppCompatCacheParser** tool](https://github.com/EricZimmerman/AppCompatCacheParser)。
 
 ![](<../../../images/image (75).png>)
 
@@ -380,19 +381,19 @@ AmcacheParser.exe -f C:\Users\genericUser\Desktop\Amcache.hve --csv C:\Users\gen
 在该数据库的应用程序表中，可以找到列：“Application ID”、“PackageNumber”和“Display Name”。这些列包含有关预安装和已安装应用程序的信息，如果某些应用程序被卸载，可以找到，因为已安装应用程序的 ID 应该是连续的。
 
 您还可以在注册表路径 `Software\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore\Applications\` 中 **找到已安装的应用程序**，\
-在 `Software\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore\Deleted\` 中 **找到已卸载的应用程序**。
+并在 `Software\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore\Deleted\` 中找到 **已卸载的应用程序**。
 
 ## Windows 事件
 
 Windows 事件中出现的信息包括：
 
 - 发生了什么
-- 时间戳（UTC + 0）
+- 时间戳 (UTC + 0)
 - 相关用户
-- 相关主机（主机名，IP）
-- 访问的资产（文件，文件夹，打印机，服务）
+- 相关主机 (主机名，IP)
+- 访问的资产 (文件，文件夹，打印机，服务)
 
-日志位于 `C:\Windows\System32\config`（在 Windows Vista 之前）和 `C:\Windows\System32\winevt\Logs`（在 Windows Vista 之后）。在 Windows Vista 之前，事件日志是二进制格式，之后则为 **XML 格式**，并使用 **.evtx** 扩展名。
+日志位于 `C:\Windows\System32\config`（在 Windows Vista 之前）和 `C:\Windows\System32\winevt\Logs`（在 Windows Vista 之后）。在 Windows Vista 之前，事件日志是二进制格式，而之后则是 **XML 格式**，并使用 **.evtx** 扩展名。
 
 事件文件的位置可以在 SYSTEM 注册表中找到，路径为 **`HKLM\SYSTEM\CurrentControlSet\services\EventLog\{Application|System|Security}`**。
 
@@ -427,11 +428,11 @@ Windows 事件中出现的信息包括：
 #### EventID 4625 的状态和子状态代码：
 
 - **0xC0000064**：用户名不存在 - 可能表示用户名枚举攻击。
-- **0xC000006A**：正确的用户名但密码错误 - 可能是密码猜测或暴力破解尝试。
+- **0xC000006A**：正确的用户名但错误的密码 - 可能是密码猜测或暴力破解尝试。
 - **0xC0000234**：用户账户被锁定 - 可能是在暴力攻击后导致多次登录失败。
-- **0xC0000072**：账户已禁用 - 未经授权尝试访问禁用账户。
+- **0xC0000072**：账户被禁用 - 未经授权访问禁用账户的尝试。
 - **0xC000006F**：在允许的时间外登录 - 表示在设定的登录时间之外的访问尝试，可能是未经授权的访问迹象。
-- **0xC0000070**：违反工作站限制 - 可能是尝试从未经授权的位置登录。
+- **0xC0000070**：违反工作站限制 - 可能是从未经授权的位置尝试登录。
 - **0xC0000193**：账户过期 - 使用过期用户账户的访问尝试。
 - **0xC0000071**：密码过期 - 使用过时密码的登录尝试。
 - **0xC0000133**：时间同步问题 - 客户端和服务器之间的大时间差异可能表明更复杂的攻击，如票据传递攻击。

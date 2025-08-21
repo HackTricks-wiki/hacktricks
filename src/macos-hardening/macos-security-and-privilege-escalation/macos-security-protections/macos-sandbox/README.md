@@ -4,9 +4,9 @@
 
 ## 基本信息
 
-MacOS Sandbox（最初称为 Seatbelt）**限制在沙箱内运行的应用程序**只能执行**沙箱配置文件中指定的允许操作**。这有助于确保**应用程序仅访问预期的资源**。
+MacOS Sandbox（最初称为 Seatbelt）**限制应用程序**在沙箱内运行时只能执行**沙箱配置文件中指定的允许操作**。这有助于确保**应用程序仅访问预期的资源**。
 
-任何具有**权限** **`com.apple.security.app-sandbox`**的应用程序将会在沙箱内执行。**Apple 二进制文件**通常在沙箱内执行，所有来自**App Store**的应用程序都有该权限。因此，多个应用程序将在沙箱内执行。
+任何具有**权限** **`com.apple.security.app-sandbox`**的应用程序都将在沙箱内执行。**Apple 二进制文件**通常在沙箱内执行，所有来自**App Store**的应用程序都有该权限。因此，多个应用程序将在沙箱内执行。
 
 为了控制进程可以或不能做什么，**沙箱在几乎所有进程可能尝试的操作中都有钩子**（包括大多数系统调用），使用**MACF**。然而，**根据**应用程序的**权限**，沙箱可能对进程更加宽松。
 
@@ -54,9 +54,9 @@ drwx------   2 username  staff    64 Mar 24 18:02 SystemData
 drwx------   2 username  staff    64 Mar 24 18:02 tmp
 ```
 > [!CAUTION]
-> 请注意，即使符号链接存在以“逃离”沙箱并访问其他文件夹，应用程序仍然需要**具有权限**才能访问它们。这些权限在`RedirectablePaths`中的**`.plist`**内。
+> 请注意，即使符号链接存在以“逃离”沙盒并访问其他文件夹，应用程序仍然需要**具有权限**才能访问它们。这些权限在`RedirectablePaths`中的**`.plist`**内。
 
-**`SandboxProfileData`**是编译后的沙箱配置文件CFData，已转义为B64。
+**`SandboxProfileData`**是编译后的沙盒配置文件CFData，已转义为B64。
 ```bash
 # Get container config
 ## You need FDA to access the file, not even just root can read it
@@ -110,9 +110,9 @@ AAAhAboBAAAAAAgAAABZAO4B5AHjBMkEQAUPBSsGPwsgASABHgEgASABHwEf...
 
 ## 沙盒配置文件
 
-沙盒配置文件是指示在该**沙盒**中将被**允许/禁止**的配置文件。它使用**沙盒配置文件语言 (SBPL)**，该语言使用[**Scheme**](<https://en.wikipedia.org/wiki/Scheme_(programming_language)>) 编程语言。
+沙盒配置文件是指示在该**沙盒**中将被**允许/禁止**的内容的配置文件。它使用**沙盒配置文件语言 (SBPL)**，该语言使用[**Scheme**](<https://en.wikipedia.org/wiki/Scheme_(programming_language)>) 编程语言。
 
-这里有一个示例：
+这里可以找到一个示例：
 ```scheme
 (version 1) ; First you get the version
 
@@ -199,19 +199,19 @@ log show --style syslog --predicate 'eventMessage contains[c] "sandbox"' --last 
 {{#endtab}}
 {{#endtabs}}
 
-> [!NOTE]
+> [!TIP]
 > 请注意，**Apple 编写的** **软件** 在 **Windows** 上 **没有额外的安全措施**，例如应用程序沙箱。
 
 绕过示例：
 
 - [https://lapcatsoftware.com/articles/sandbox-escape.html](https://lapcatsoftware.com/articles/sandbox-escape.html)
-- [https://desi-jarvis.medium.com/office365-macos-sandbox-escape-fcce4fa4123c](https://desi-jarvis.medium.com/office365-macos-sandbox-escape-fcce4fa4123c)（他们能够写入以 `~$` 开头的沙箱外部文件）。
+- [https://desi-jarvis.medium.com/office365-macos-sandbox-escape-fcce4fa4123c](https://desi-jarvis.medium.com/office365-macos-sandbox-escape-fcce4fa4123c) (他们能够写入以 `~$` 开头的沙箱外文件)。
 
 ### 沙箱跟踪
 
 #### 通过配置文件
 
-可以跟踪每次检查操作时沙箱执行的所有检查。为此，只需创建以下配置文件：
+可以跟踪沙箱每次检查操作时执行的所有检查。为此，只需创建以下配置文件：
 ```scheme:trace.sb
 (version 1)
 (trace /tmp/trace.out)
@@ -227,7 +227,7 @@ sandbox-exec -f /tmp/trace.sb /bin/ls
 #### 通过 API
 
 `libsystem_sandbox.dylib` 导出的函数 `sandbox_set_trace_path` 允许指定一个跟踪文件名，沙箱检查将写入该文件。\
-还可以通过调用 `sandbox_vtrace_enable()` 做类似的事情，然后通过调用 `sandbox_vtrace_report()` 从缓冲区获取日志错误。
+还可以通过调用 `sandbox_vtrace_enable()` 来做类似的事情，然后通过调用 `sandbox_vtrace_report()` 从缓冲区获取日志错误。
 
 ### 沙箱检查
 
@@ -243,9 +243,9 @@ MacOS 将系统沙箱配置文件存储在两个位置：**/usr/share/sandbox/**
 
 ### App Store 应用中的自定义 SBPL
 
-公司可能会使其应用程序 **使用自定义沙箱配置文件**（而不是默认配置文件）。他们需要使用权限 **`com.apple.security.temporary-exception.sbpl`**，该权限需要得到苹果的授权。
+公司可能会使其应用程序 **使用自定义沙箱配置文件**（而不是默认配置文件）。他们需要使用权限 **`com.apple.security.temporary-exception.sbpl`**，该权限需要得到 Apple 的授权。
 
-可以在 **`/System/Library/Sandbox/Profiles/application.sb:`** 中检查该权限的定义。
+可以在 **`/System/Library/Sandbox/Profiles/application.sb:`** 中检查此权限的定义。
 ```scheme
 (sandbox-array-entitlement
 "com.apple.security.temporary-exception.sbpl"
@@ -259,15 +259,15 @@ MacOS 将系统沙箱配置文件存储在两个位置：**/usr/share/sandbox/**
 
 **`sandbox-exec`** 工具使用 `libsandbox.dylib` 中的 `sandbox_compile_*` 函数。导出的主要函数有：`sandbox_compile_file`（期望文件路径，参数 `-f`），`sandbox_compile_string`（期望字符串，参数 `-p`），`sandbox_compile_name`（期望容器名称，参数 `-n`），`sandbox_compile_entitlements`（期望权限 plist）。
 
-这个反向和[**开源版本的工具 sandbox-exec**](https://newosxbook.com/src.jl?tree=listings&file=/sandbox_exec.c) 允许 **`sandbox-exec`** 将编译的沙箱配置文件写入文件。
+这个反向和[**开源版本的工具 sandbox-exec**](https://newosxbook.com/src.jl?tree=listings&file=/sandbox_exec.c) 允许 **`sandbox-exec`** 将编译的沙箱配置文件写入文件中。
 
 此外，为了将进程限制在容器内，它可能会调用 `sandbox_spawnattrs_set[container/profilename]` 并传递一个容器或现有配置文件。
 
 ## 调试和绕过沙箱
 
-在 macOS 上，与 iOS 不同，iOS 中的进程从一开始就被内核沙箱化，**进程必须自行选择进入沙箱**。这意味着在 macOS 上，进程在主动决定进入沙箱之前不会受到沙箱的限制，尽管 App Store 应用始终是沙箱化的。
+在 macOS 上，与 iOS 不同，iOS 中的进程从一开始就被内核沙箱化，**进程必须自己选择进入沙箱**。这意味着在 macOS 上，进程在主动决定进入沙箱之前不会受到沙箱的限制，尽管 App Store 应用始终是沙箱化的。
 
-如果进程具有权限 `com.apple.security.app-sandbox`，则在启动时会自动从用户空间沙箱化。有关此过程的详细说明，请查看：
+如果进程具有权限：`com.apple.security.app-sandbox`，则在启动时会自动从用户空间沙箱化。有关此过程的详细说明，请查看：
 
 {{#ref}}
 macos-sandbox-debug-and-bypass/
@@ -294,7 +294,7 @@ macos-sandbox-debug-and-bypass/
 
 ### **检查 PID 权限**
 
-[**根据这个**](https://www.youtube.com/watch?v=mG715HcDgO8&t=3011s)，**`sandbox_check`** 函数（它是一个 `__mac_syscall`）可以检查**某个 PID、审计令牌或唯一 ID 是否允许某个操作**。
+[**根据这个**](https://www.youtube.com/watch?v=mG715HcDgO8&t=3011s)，**`sandbox_check`** 函数（它是一个 `__mac_syscall`）可以检查**在特定 PID、审计令牌或唯一 ID 下某个操作是否被沙箱允许**。
 
 [**工具 sbtool**](http://newosxbook.com/src.jl?tree=listings&file=sbtool.c)（在[这里编译](https://newosxbook.com/articles/hitsb.html)）可以检查某个 PID 是否可以执行某些操作：
 ```bash
@@ -317,13 +317,13 @@ sbtool <pid> all
 
 此系统调用 (#381) 期望第一个参数为一个字符串，指示要运行的模块，然后第二个参数为一个代码，指示要运行的函数。第三个参数将取决于执行的函数。
 
-函数 `___sandbox_ms` 调用封装了 `mac_syscall`，在第一个参数中指示 `"Sandbox"`，就像 `___sandbox_msp` 是 `mac_set_proc` (#387) 的封装一样。然后，`___sandbox_ms` 支持的一些代码可以在下表中找到：
+函数 `___sandbox_ms` 调用包装了 `mac_syscall`，在第一个参数中指示 `"Sandbox"`，就像 `___sandbox_msp` 是 `mac_set_proc` (#387) 的包装器一样。然后，`___sandbox_ms` 支持的一些代码可以在此表中找到：
 
 - **set_profile (#0)**: 将编译或命名的配置文件应用于进程。
 - **platform_policy (#1)**: 强制执行特定于平台的策略检查（在 macOS 和 iOS 之间有所不同）。
 - **check_sandbox (#2)**: 执行特定沙箱操作的手动检查。
 - **note (#3)**: 向沙箱添加注释。
-- **container (#4)**: 将注释附加到沙箱，通常用于调试或识别。
+- **container (#4)**: 向沙箱附加注释，通常用于调试或识别。
 - **extension_issue (#5)**: 为进程生成新扩展。
 - **extension_consume (#6)**: 消耗给定的扩展。
 - **extension_release (#7)**: 释放与已消耗扩展相关的内存。
@@ -345,30 +345,30 @@ sbtool <pid> all
 - **rootless_allows_task_for_pid (#30)**: 验证是否允许 `task_for_pid`（类似于 `csr` 检查）。
 - **rootless_whitelist_push (#31)**: （macOS）应用系统完整性保护（SIP）清单文件。
 - **rootless_whitelist_check (preflight) (#32)**: 在执行之前检查 SIP 清单文件。
-- **rootless_protected_volume (#33)**: （macOS）将 SIP 保护应用于磁盘或分区。
-- **rootless_mkdir_protected (#34)**: 将 SIP/DataVault 保护应用于目录创建过程。
+- **rootless_protected_volume (#33)**: （macOS）对磁盘或分区应用 SIP 保护。
+- **rootless_mkdir_protected (#34)**: 对目录创建过程应用 SIP/DataVault 保护。
 
 ## Sandbox.kext
 
 请注意，在 iOS 中，内核扩展包含 **硬编码的所有配置文件**，以避免被修改。以下是内核扩展中的一些有趣函数：
 
-- **`hook_policy_init`**: 它挂钩 `mpo_policy_init`，并在 `mac_policy_register` 之后被调用。它执行沙箱的大部分初始化。它还初始化 SIP。
-- **`hook_policy_initbsd`**: 它设置 sysctl 接口，注册 `security.mac.sandbox.sentinel`、`security.mac.sandbox.audio_active` 和 `security.mac.sandbox.debug_mode`（如果与 `PE_i_can_has_debugger` 一起引导）。
+- **`hook_policy_init`**: 它钩住 `mpo_policy_init`，并在 `mac_policy_register` 之后调用。它执行沙箱的大部分初始化。它还初始化 SIP。
+- **`hook_policy_initbsd`**: 它设置 sysctl 接口，注册 `security.mac.sandbox.sentinel`、`security.mac.sandbox.audio_active` 和 `security.mac.sandbox.debug_mode`（如果以 `PE_i_can_has_debugger` 启动）。
 - **`hook_policy_syscall`**: 它由 `mac_syscall` 调用，第一个参数为 "Sandbox"，第二个参数为指示操作的代码。使用 switch 来根据请求的代码查找要运行的代码。
 
 ### MACF Hooks
 
 **`Sandbox.kext`** 通过 MACF 使用了超过一百个钩子。大多数钩子只会检查一些微不足道的情况，如果允许执行该操作，则会调用 **`cred_sb_evalutate`**，并传入来自 MACF 的 **凭据** 和一个对应于要执行的 **操作** 的数字，以及一个用于输出的 **缓冲区**。
 
-一个很好的例子是函数 **`_mpo_file_check_mmap`**，它挂钩了 **`mmap`**，并将开始检查新内存是否可写（如果不可写则允许执行），然后检查它是否用于 dyld 共享缓存，如果是，则允许执行，最后调用 **`sb_evaluate_internal`**（或其一个封装）以执行进一步的允许检查。
+一个很好的例子是函数 **`_mpo_file_check_mmap`**，它钩住了 **`mmap`**，并将开始检查新内存是否可写（如果不可写则允许执行），然后检查它是否用于 dyld 共享缓存，如果是，则允许执行，最后调用 **`sb_evaluate_internal`**（或其包装器之一）以执行进一步的允许检查。
 
 此外，在沙箱使用的数百个钩子中，有三个特别有趣：
 
 - `mpo_proc_check_for`: 如果需要并且之前未应用，则应用配置文件。
 - `mpo_vnode_check_exec`: 当进程加载相关二进制文件时调用，然后执行配置文件检查，并检查禁止 SUID/SGID 执行。
-- `mpo_cred_label_update_execve`: 当分配标签时调用。这是最长的一个，因为它在二进制文件完全加载但尚未执行时调用。它将执行诸如创建沙箱对象、将沙箱结构附加到 kauth 凭据、移除对 mach 端口的访问等操作。
+- `mpo_cred_label_update_execve`: 当标签被分配时调用。这是最长的一个，因为它在二进制文件完全加载但尚未执行时调用。它将执行诸如创建沙箱对象、将沙箱结构附加到 kauth 凭据、移除对 mach 端口的访问等操作。
 
-请注意 **`_cred_sb_evalutate`** 是 **`sb_evaluate_internal`** 的封装，该函数获取传入的凭据，然后使用 **`eval`** 函数执行评估，该函数通常评估默认应用于所有进程的 **平台配置文件**，然后是 **特定进程配置文件**。请注意，平台配置文件是 **SIP** 在 macOS 中的主要组成部分之一。
+请注意，**`_cred_sb_evalutate`** 是 **`sb_evaluate_internal`** 的包装器，该函数获取传递的凭据，然后使用 **`eval`** 函数执行评估，该函数通常评估默认应用于所有进程的 **平台配置文件**，然后是 **特定进程配置文件**。请注意，平台配置文件是 **SIP** 在 macOS 中的主要组成部分之一。
 
 ## Sandboxd
 

@@ -6,7 +6,7 @@
 
 苹果还提出了另一种方法来验证连接进程是否具有 **调用暴露的 XPC 方法的权限**。
 
-当应用程序需要 **以特权用户身份执行操作** 时，通常不会以特权用户身份运行该应用程序，而是作为 root 安装一个 HelperTool 作为 XPC 服务，可以从应用程序调用以执行这些操作。然而，调用该服务的应用程序应该具有足够的授权。
+当应用程序需要 **以特权用户身份执行操作** 时，它通常不会以特权用户身份运行，而是作为 root 安装一个 HelperTool 作为 XPC 服务，可以从应用程序调用以执行这些操作。然而，调用该服务的应用程序应该具有足够的授权。
 
 ### ShouldAcceptNewConnection 始终为 YES
 
@@ -27,7 +27,8 @@ newConnection.exportedObject = self;
 return YES;
 }
 ```
-有关如何正确配置此检查的更多信息，请参见：
+有关如何正确配置此检查的更多信息：
+
 
 {{#ref}}
 macos-xpc-connecting-process-check/
@@ -35,7 +36,7 @@ macos-xpc-connecting-process-check/
 
 ### 应用程序权限
 
-然而，当调用 HelperTool 的方法时，确实存在一些 **授权**。
+然而，当调用 HelperTool 中的方法时，确实会进行一些 **授权**。
 
 `App/AppDelegate.m` 中的 **`applicationDidFinishLaunching`** 函数将在应用程序启动后创建一个空的授权引用。这应该始终有效。\
 然后，它将尝试通过调用 `setupAuthorizationRights` 来 **添加一些权限** 到该授权引用：
@@ -62,7 +63,7 @@ if (self->_authRef) {
 [self.window makeKeyAndOrderFront:self];
 }
 ```
-`setupAuthorizationRights` 函数来自 `Common/Common.m`，将把应用程序的权限存储在授权数据库 `/var/db/auth.db` 中。请注意，它只会添加尚未在数据库中的权限：
+函数 `setupAuthorizationRights` 来自 `Common/Common.m`，将把应用程序的权限存储在授权数据库 `/var/db/auth.db` 中。请注意，它只会添加尚未在数据库中的权限：
 ```objectivec
 + (void)setupAuthorizationRights:(AuthorizationRef)authRef
 // See comment in header.
@@ -94,7 +95,7 @@ assert(blockErr == errAuthorizationSuccess);
 }];
 }
 ```
-函数 `enumerateRightsUsingBlock` 用于获取应用程序权限，这些权限在 `commandInfo` 中定义：
+函数 `enumerateRightsUsingBlock` 用于获取在 `commandInfo` 中定义的应用程序权限：
 ```objectivec
 static NSString * kCommandKeyAuthRightName    = @"authRightName";
 static NSString * kCommandKeyAuthRightDefault = @"authRightDefault";
@@ -172,9 +173,9 @@ block(authRightName, authRightDefault, authRightDesc);
 }];
 }
 ```
-这意味着在这个过程结束时，`commandInfo` 中声明的权限将存储在 `/var/db/auth.db` 中。请注意，您可以找到 **每种方法** 需要 **身份验证** 的 **权限名称** 和 **`kCommandKeyAuthRightDefault`**。后者 **指示谁可以获得此权限**。
+这意味着在这个过程结束时，`commandInfo` 中声明的权限将存储在 `/var/db/auth.db` 中。请注意，您可以找到 **每种方法** 需要 **身份验证**、**权限名称** 和 **`kCommandKeyAuthRightDefault`**。后者 **指示谁可以获得此权限**。
 
-有不同的范围来指示谁可以访问某个权限。其中一些在 [AuthorizationDB.h](https://github.com/aosm/Security/blob/master/Security/libsecurity_authorization/lib/AuthorizationDB.h) 中定义（您可以在 [这里找到所有权限](https://www.dssw.co.uk/reference/authorization-rights/)），但总结如下：
+有不同的范围来指示谁可以访问某个权限。其中一些在 [AuthorizationDB.h](https://github.com/aosm/Security/blob/master/Security/libsecurity_authorization/lib/AuthorizationDB.h) 中定义（您可以在 [这里找到所有内容](https://www.dssw.co.uk/reference/authorization-rights/)），但总结如下：
 
 <table><thead><tr><th width="284.3333333333333">名称</th><th width="165">值</th><th>描述</th></tr></thead><tbody><tr><td>kAuthorizationRuleClassAllow</td><td>allow</td><td>任何人</td></tr><tr><td>kAuthorizationRuleClassDeny</td><td>deny</td><td>没有人</td></tr><tr><td>kAuthorizationRuleIsAdmin</td><td>is-admin</td><td>当前用户需要是管理员（在管理员组内）</td></tr><tr><td>kAuthorizationRuleAuthenticateAsSessionUser</td><td>authenticate-session-owner</td><td>要求用户进行身份验证。</td></tr><tr><td>kAuthorizationRuleAuthenticateAsAdmin</td><td>authenticate-admin</td><td>要求用户进行身份验证。他需要是管理员（在管理员组内）</td></tr><tr><td>kAuthorizationRightRule</td><td>rule</td><td>指定规则</td></tr><tr><td>kAuthorizationComment</td><td>comment</td><td>指定一些关于权限的额外评论</td></tr></tbody></table>
 
@@ -252,7 +253,7 @@ security authorizationdb read com.apple.safaridriver.allow
 - 这是最直接的键。如果设置为`false`，则表示用户不需要提供身份验证即可获得此权限。
 - 这与下面的两个中的一个或指示用户必须属于的组结合使用。
 2. **'allow-root': 'true'**
-- 如果用户以root用户身份操作（具有提升的权限），并且此键设置为`true`，则root用户可能在没有进一步身份验证的情况下获得此权限。然而，通常情况下，获得root用户状态已经需要身份验证，因此对于大多数用户来说，这并不是一个“无身份验证”的场景。
+- 如果用户以根用户身份操作（具有提升的权限），并且此键设置为`true`，则根用户可能在没有进一步身份验证的情况下获得此权限。然而，通常情况下，获得根用户状态已经需要身份验证，因此对于大多数用户来说，这并不是一个“无身份验证”的场景。
 3. **'session-owner': 'true'**
 - 如果设置为`true`，会话的所有者（当前登录的用户）将自动获得此权限。如果用户已经登录，这可能会绕过额外的身份验证。
 4. **'shared': 'true'**
@@ -291,7 +292,7 @@ authenticate-session-owner, authenticate-session-owner-or-admin, authenticate-se
 
 在这种情况下，我们与 EvenBetterAuthorizationSample 中的相同，[**查看这一行**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L94)。
 
-知道所使用的协议名称后，可以使用以下命令 **转储其头文件定义**：
+知道所使用的协议名称后，可以使用以下命令 **转储其头部定义**：
 ```bash
 class-dump /Library/PrivilegedHelperTools/com.example.HelperTool
 
@@ -329,7 +330,7 @@ cat /Library/LaunchDaemons/com.example.HelperTool.plist
 在此示例中创建了：
 
 - 协议的定义及其函数
-- 一个空的身份验证以请求访问
+- 一个空的授权，用于请求访问
 - 与 XPC 服务的连接
 - 如果连接成功，则调用该函数
 ```objectivec

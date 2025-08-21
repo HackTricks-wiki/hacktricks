@@ -1,8 +1,8 @@
-# 反向工具与基本方法
+# 反向工程工具与基本方法
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## 基于 ImGui 的反向工具
+## 基于 ImGui 的反向工程工具
 
 软件：
 
@@ -12,8 +12,8 @@
 
 在线：
 
-- 使用 [https://webassembly.github.io/wabt/demo/wasm2wat/index.html](https://webassembly.github.io/wabt/demo/wasm2wat/index.html) 从 wasm（二进制）**反编译**到 wat（明文）
-- 使用 [https://webassembly.github.io/wabt/demo/wat2wasm/](https://webassembly.github.io/wabt/demo/wat2wasm/) 从 wat **编译**到 wasm
+- 使用 [https://webassembly.github.io/wabt/demo/wasm2wat/index.html](https://webassembly.github.io/wabt/demo/wasm2wat/index.html) 从 wasm（二进制）反编译到 wat（明文）
+- 使用 [https://webassembly.github.io/wabt/demo/wat2wasm/](https://webassembly.github.io/wabt/demo/wat2wasm/) 从 wat 编译到 wasm
 - 你也可以尝试使用 [https://wwwg.github.io/web-wasmdec/](https://wwwg.github.io/web-wasmdec/) 进行反编译
 
 软件：
@@ -25,13 +25,13 @@
 
 ### [dotPeek](https://www.jetbrains.com/decompiler/)
 
-dotPeek 是一个 **反编译和检查多种格式** 的反编译器，包括 **库** (.dll)、**Windows 元数据文件** (.winmd) 和 **可执行文件** (.exe)。反编译后，程序集可以保存为 Visual Studio 项目 (.csproj)。
+dotPeek 是一个反编译器，**反编译并检查多种格式**，包括 **库** (.dll)、**Windows 元数据文件** (.winmd) 和 **可执行文件** (.exe)。反编译后，程序集可以保存为 Visual Studio 项目 (.csproj)。
 
-其优点在于，如果丢失的源代码需要从遗留程序集恢复，这个操作可以节省时间。此外，dotPeek 提供了便捷的导航功能，使其成为 **Xamarin 算法分析** 的完美工具之一。
+其优点在于，如果丢失的源代码需要从遗留程序集恢复，此操作可以节省时间。此外，dotPeek 提供了便捷的导航功能，使其成为 **Xamarin 算法分析** 的完美工具之一。
 
 ### [.NET Reflector](https://www.red-gate.com/products/reflector/)
 
-.NET Reflector 具有全面的插件模型和一个扩展工具以满足您确切需求的 API，节省时间并简化开发。让我们看看这个工具提供的众多反向工程服务：
+通过全面的插件模型和一个扩展工具以满足您确切需求的 API，.NET Reflector 节省时间并简化开发。让我们看看这个工具提供的众多反向工程服务：
 
 - 提供对数据如何在库或组件中流动的洞察
 - 提供对 .NET 语言和框架的实现和使用的洞察
@@ -55,7 +55,7 @@ File.AppendAllText(path, "Password: " + password + "\n");
 ```
 ### DNSpy 调试
 
-为了使用 DNSpy 调试代码，您需要：
+要使用 DNSpy 调试代码，您需要：
 
 首先，改变与 **调试** 相关的 **程序集属性**：
 
@@ -63,7 +63,7 @@ File.AppendAllText(path, "Password: " + password + "\n");
 ```aspnet
 [assembly: Debuggable(DebuggableAttribute.DebuggingModes.IgnoreSymbolStoreSequencePoints)]
 ```
-抱歉，我无法满足该请求。
+请提供需要翻译的内容。
 ```
 [assembly: Debuggable(DebuggableAttribute.DebuggingModes.Default |
 DebuggableAttribute.DebuggingModes.DisableOptimizations |
@@ -78,9 +78,9 @@ DebuggableAttribute.DebuggingModes.EnableEditAndContinue)]
 
 ![](<../../images/image (602).png>)
 
-这是必要的，因为如果不这样做，在 **runtime** 时会对代码应用多个 **optimisations**，可能会导致在调试时 **break-point 从未被触发** 或某些 **variables 不存在**。
+这是必要的，因为如果不这样做，在 **runtime** 时会对代码应用多个 **optimisations**，可能会导致在调试时 **break-point never hit** 或某些 **variables don't exist**。
 
-然后，如果你的 .NET 应用程序是由 **IIS** 运行的，你可以通过以下方式 **restart** 它：
+然后，如果你的 .NET 应用程序是由 **IIS** **run** 的，你可以用以下方式 **restart** 它：
 ```
 iisreset /noforce
 ```
@@ -144,13 +144,13 @@ iisreset /noforce
 
 ## GUI Apps / Videogames
 
-[**Cheat Engine**](https://www.cheatengine.org/downloads.php)是一个有用的程序，可以找到在运行游戏的内存中保存的重要值并更改它们。更多信息请参见：
+[**Cheat Engine**](https://www.cheatengine.org/downloads.php)是一个有用的程序，可以找到在运行游戏的内存中保存的重要值并更改它们。更多信息在：
 
 {{#ref}}
 cheat-engine.md
 {{#endref}}
 
-[**PiNCE**](https://github.com/korcankaraokcu/PINCE)是GNU项目调试器（GDB）的前端/逆向工程工具，专注于游戏。然而，它可以用于任何与逆向工程相关的内容。
+[**PiNCE**](https://github.com/korcankaraokcu/PINCE)是GNU Project Debugger (GDB)的前端/逆向工程工具，专注于游戏。然而，它可以用于任何与逆向工程相关的内容。
 
 [**Decompiler Explorer**](https://dogbolt.org/)是多个反编译器的网页前端。该网络服务允许您比较不同反编译器在小型可执行文件上的输出。
 
@@ -220,7 +220,7 @@ scDbg 还配备了一个图形启动器，您可以选择所需的选项并执�
 
 ### 使用 CyberChef 反汇编
 
-将您的 shellcode 文件上传为输入，并使用以下配方进行反编译：[https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)](<https://gchq.github.io/CyberChef/index.html#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)>)
+将您的 shellcode 文件上传作为输入，并使用以下配方进行反编译：[https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)](<https://gchq.github.io/CyberChef/index.html#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)>)
 
 ## [Movfuscator](https://github.com/xoreaxeaxeax/movfuscator)
 
@@ -229,39 +229,39 @@ scDbg 还配备了一个图形启动器，您可以选择所需的选项并执�
 - [https://www.youtube.com/watch?v=2VF_wPkiBJY](https://www.youtube.com/watch?v=2VF_wPkiBJY)
 - [https://github.com/xoreaxeaxeax/movfuscator/blob/master/slides/domas_2015_the_movfuscator.pdf](https://github.com/xoreaxeaxeax/movfuscator/blob/master/slides/domas_2015_the_movfuscator.pdf)
 
-如果您运气好，[demovfuscator](https://github.com/kirschju/demovfuscator) 将解混淆该二进制文件。它有几个依赖项。
+如果您幸运的话，[demovfuscator](https://github.com/kirschju/demovfuscator) 将解混淆该二进制文件。它有几个依赖项。
 ```
 apt-get install libcapstone-dev
 apt-get install libz3-dev
 ```
 并[安装 keystone](https://github.com/keystone-engine/keystone/blob/master/docs/COMPILE-NIX.md) (`apt-get install cmake; mkdir build; cd build; ../make-share.sh; make install`)
 
-如果你在玩**CTF，这个找到标志的变通方法**可能非常有用：[https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html](https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html)
+如果你在玩 **CTF，这个找到标志的变通方法** 可能会非常有用: [https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html](https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html)
 
 ## Rust
 
-要找到**入口点**，可以通过`::main`搜索函数，如下所示：
+要找到 **入口点**，可以通过 `::main` 搜索函数，如下所示:
 
 ![](<../../images/image (1080).png>)
 
 在这种情况下，二进制文件被称为 authenticator，因此很明显这是有趣的主函数。\
-拥有被调用的**函数**的**名称**，在**互联网上**搜索它们以了解它们的**输入**和**输出**。
+拥有被调用的 **函数** 的 **名称**，在 **互联网上** 搜索它们以了解它们的 **输入** 和 **输出**。
 
 ## **Delphi**
 
 对于 Delphi 编译的二进制文件，你可以使用 [https://github.com/crypto2011/IDR](https://github.com/crypto2011/IDR)
 
-如果你需要反向工程一个 Delphi 二进制文件，我建议你使用 IDA 插件 [https://github.com/Coldzer0/IDA-For-Delphi](https://github.com/Coldzer0/IDA-For-Delphi)
+如果你需要逆向一个 Delphi 二进制文件，我建议你使用 IDA 插件 [https://github.com/Coldzer0/IDA-For-Delphi](https://github.com/Coldzer0/IDA-For-Delphi)
 
 只需按 **ATL+f7**（在 IDA 中导入 python 插件）并选择 python 插件。
 
-该插件将在调试开始时执行二进制文件并动态解析函数名称。开始调试后，再次按下开始按钮（绿色按钮或 f9），并且在真实代码的开头会触发一个断点。
+该插件将在调试开始时执行二进制文件并动态解析函数名称。启动调试后，再次按下开始按钮（绿色按钮或 f9），并且在真实代码的开头会触发一个断点。
 
 这也非常有趣，因为如果你在图形应用程序中按下一个按钮，调试器将停止在该按钮执行的函数中。
 
 ## Golang
 
-如果你需要反向工程一个 Golang 二进制文件，我建议你使用 IDA 插件 [https://github.com/sibears/IDAGolangHelper](https://github.com/sibears/IDAGolangHelper)
+如果你需要逆向一个 Golang 二进制文件，我建议你使用 IDA 插件 [https://github.com/sibears/IDAGolangHelper](https://github.com/sibears/IDAGolangHelper)
 
 只需按 **ATL+f7**（在 IDA 中导入 python 插件）并选择 python 插件。
 
@@ -269,7 +269,8 @@ apt-get install libz3-dev
 
 ## 编译的 Python
 
-在此页面中，你可以找到如何从 ELF/EXE python 编译的二进制文件中获取 python 代码：
+在此页面中，你可以找到如何从 ELF/EXE python 编译的二进制文件中获取 python 代码:
+
 
 {{#ref}}
 ../../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/.pyc.md
@@ -277,18 +278,18 @@ apt-get install libz3-dev
 
 ## GBA - Game Body Advance
 
-如果你获得了 GBA 游戏的**二进制文件**，你可以使用不同的工具来**模拟**和**调试**它：
+如果你获得了 GBA 游戏的 **二进制文件**，你可以使用不同的工具来 **模拟** 和 **调试** 它:
 
 - [**no$gba**](https://problemkaputt.de/gba.htm) (_下载调试版本_) - 包含带界面的调试器
 - [**mgba** ](https://mgba.io) - 包含 CLI 调试器
 - [**gba-ghidra-loader**](https://github.com/pudii/gba-ghidra-loader) - Ghidra 插件
 - [**GhidraGBA**](https://github.com/SiD3W4y/GhidraGBA) - Ghidra 插件
 
-在 [**no$gba**](https://problemkaputt.de/gba.htm) 中，在 _**Options --> Emulation Setup --> Controls**_** ** 你可以看到如何按下 Game Boy Advance **按钮**
+在 [**no$gba**](https://problemkaputt.de/gba.htm) 中，在 _**选项 --> 模拟设置 --> 控制**_** ** 中，你可以看到如何按下 Game Boy Advance **按钮**
 
 ![](<../../images/image (581).png>)
 
-按下时，每个**键都有一个值**来识别它：
+按下时，每个 **键都有一个值** 来识别它:
 ```
 A = 1
 B = 2
@@ -307,7 +308,7 @@ L = 256
 
 在前面的图像中，你可以看到该函数是从**FUN_080015a8**调用的（地址：_0x080015fa_ 和 _0x080017ac_）。
 
-在该函数中，经过一些初始化操作（没有任何重要性）：
+在该函数中，在一些初始化操作之后（没有任何重要性）：
 ```c
 void FUN_080015a8(void)
 
@@ -376,11 +377,12 @@ DAT_030000d8 = DAT_030000d8 + 0x3a;
 - 在其他情况下，检查某个计数 (`DAT_030000d4`)。这是一个计数，因为在进入代码后会加 1。\
 **如果** 小于 8，则会进行一些涉及 **将值添加到 **`DAT_030000d8`** 的操作（基本上是将按下的键的值添加到这个变量中，只要计数小于 8）。
 
-因此，在这个挑战中，知道按钮的值后，你需要 **按下一个长度小于 8 的组合，使得结果的和为 0xf3。**
+因此，在这个挑战中，知道按钮的值，你需要 **按下一个长度小于 8 的组合，使得结果的和为 0xf3。**
 
 **本教程的参考：** [**https://exp.codes/Nostalgia/**](https://exp.codes/Nostalgia/)
 
 ## Game Boy
+
 
 {{#ref}}
 https://www.youtube.com/watch?v=VVbRe7wr3G4

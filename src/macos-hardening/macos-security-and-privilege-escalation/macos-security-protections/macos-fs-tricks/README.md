@@ -7,7 +7,7 @@
 **目录**中的权限：
 
 - **读取** - 你可以 **枚举** 目录条目
-- **写入** - 你可以 **删除/写入** 目录中的 **文件**，并且可以 **删除空文件夹**。
+- **写入** - 你可以 **删除/写入** 目录中的 **文件**，并且你可以 **删除空文件夹**。
 - 但你 **不能删除/修改非空文件夹**，除非你对其拥有写入权限。
 - 你 **不能修改文件夹的名称**，除非你拥有它。
 - **执行** - 你被 **允许遍历** 目录 - 如果你没有这个权限，你无法访问其中的任何文件或任何子目录。
@@ -24,7 +24,7 @@
 
 ### 文件夹 root R+X 特殊情况
 
-如果在一个 **目录** 中有文件，**只有 root 拥有 R+X 访问权限**，那么这些文件对 **其他人不可访问**。因此，允许 **将用户可读的文件** 移动的漏洞，因该 **限制** 而无法读取，从这个文件夹 **到另一个文件夹**，可能被滥用以读取这些文件。
+如果在一个 **目录** 中，**只有 root 拥有 R+X 访问权限**，那么这些文件对 **其他任何人** 都是 **不可访问的**。因此，允许 **将一个用户可读的文件** 从这个文件夹 **移动到另一个文件夹** 的漏洞，可能会被滥用以读取这些文件。
 
 示例在：[https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions](https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions)
 
@@ -32,13 +32,13 @@
 
 ### 宽松的文件/文件夹
 
-如果一个特权进程正在 **文件** 中写入数据，而该文件可能被 **低特权用户控制**，或者可能是 **之前由低特权用户创建**。用户可以通过符号链接或硬链接 **指向另一个文件**，特权进程将会在该文件上写入。
+如果一个特权进程正在写入一个 **文件**，该文件可能被 **低特权用户控制**，或者可能是 **之前由低特权用户创建**。用户可以通过符号链接或硬链接 **指向另一个文件**，特权进程将会在该文件上写入。
 
-查看其他部分，攻击者可能 **滥用任意写入以提升特权**。
+查看其他部分，攻击者可能会 **滥用任意写入以提升特权**。
 
 ### 打开 `O_NOFOLLOW`
 
-当 `open` 函数使用标志 `O_NOFOLLOW` 时，不会在最后路径组件中跟随符号链接，但会跟随路径的其余部分。防止在路径中跟随符号链接的正确方法是使用标志 `O_NOFOLLOW_ANY`。
+当 `open` 函数使用标志 `O_NOFOLLOW` 时，它不会跟随最后路径组件中的符号链接，但会跟随路径的其余部分。防止在路径中跟随符号链接的正确方法是使用标志 `O_NOFOLLOW_ANY`。
 
 ## .fileloc
 
@@ -58,11 +58,11 @@
 ```
 ## 文件描述符
 
-### 泄漏 FD (无 `O_CLOEXEC`)
+### 泄漏 FD (没有 `O_CLOEXEC`)
 
 如果调用 `open` 时没有标志 `O_CLOEXEC`，文件描述符将被子进程继承。因此，如果一个特权进程打开一个特权文件并执行一个由攻击者控制的进程，攻击者将 **继承对特权文件的 FD**。
 
-如果你能让一个 **进程以高权限打开一个文件或文件夹**，你可以利用 **`crontab`** 以 **`EDITOR=exploit.py`** 打开 `/etc/sudoers.d` 中的一个文件，这样 `exploit.py` 将获得对 `/etc/sudoers` 中的文件的 FD 并加以利用。
+如果你能让一个 **进程以高权限打开一个文件或文件夹**，你可以利用 **`crontab`** 在 `/etc/sudoers.d` 中打开一个文件，使用 **`EDITOR=exploit.py`**，这样 `exploit.py` 将获得对 `/etc/sudoers` 中文件的 FD 并加以利用。
 
 例如: [https://youtu.be/f1HA5QhLQ7Y?t=21098](https://youtu.be/f1HA5QhLQ7Y?t=21098)，代码: https://github.com/gergelykalman/CVE-2023-32428-a-macOS-LPE-via-MallocStackLogging
 
@@ -86,7 +86,7 @@ ls -lO /tmp/asd
 ```
 ### defvfs mount
 
-A **devfs** mount **不支持 xattr**，更多信息请参见 [**CVE-2023-32364**](https://gergelykalman.com/CVE-2023-32364-a-macOS-sandbox-escape-by-mounting.html)
+一个 **devfs** 挂载 **不支持 xattr**，更多信息请参见 [**CVE-2023-32364**](https://gergelykalman.com/CVE-2023-32364-a-macOS-sandbox-escape-by-mounting.html)
 ```bash
 mkdir /tmp/mnt
 mount_devfs -o noowners none "/tmp/mnt"
@@ -120,13 +120,13 @@ ls -le /tmp/test
 ```
 ### **com.apple.acl.text xattr + AppleDouble**
 
-**AppleDouble** 文件格式复制一个文件及其 ACEs。
+**AppleDouble** 文件格式复制文件及其 ACE。
 
-在 [**源代码**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html) 中可以看到，存储在名为 **`com.apple.acl.text`** 的 xattr 中的 ACL 文本表示将被设置为解压缩文件中的 ACL。因此，如果你将一个应用程序压缩成一个带有 ACL 的 **AppleDouble** 文件格式的 zip 文件，该 ACL 阻止其他 xattrs 被写入... 那么隔离 xattr 并没有被设置到应用程序中：
+在 [**源代码**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html) 中可以看到，存储在名为 **`com.apple.acl.text`** 的 xattr 中的 ACL 文本表示将被设置为解压缩文件中的 ACL。因此，如果您将一个应用程序压缩成一个带有 ACL 的 **AppleDouble** 文件格式的 zip 文件，该 ACL 阻止其他 xattrs 被写入... 那么隔离 xattr 并没有被设置到应用程序中：
 
 查看 [**原始报告**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/) 以获取更多信息。
 
-要复制这个，我们首先需要获取正确的 acl 字符串：
+要复制这一点，我们首先需要获取正确的 acl 字符串：
 ```bash
 # Everything will be happening here
 mkdir /tmp/temp_xattrs
@@ -148,6 +148,7 @@ ls -le test
 
 Not really needed but I leave it there just in case:
 
+
 {{#ref}}
 macos-xattr-acls-extra-stuff.md
 {{#endref}}
@@ -156,11 +157,11 @@ macos-xattr-acls-extra-stuff.md
 
 ### 绕过平台二进制检查
 
-一些安全检查会检查二进制文件是否为 **平台二进制**，例如允许连接到 XPC 服务。然而，如在 https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/ 中所述，可以通过获取一个平台二进制（如 /bin/ls）并通过 dyld 使用环境变量 `DYLD_INSERT_LIBRARIES` 注入漏洞来绕过此检查。
+一些安全检查会检查二进制文件是否为**平台二进制**，例如允许连接到XPC服务。然而，如在https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/中所述，可以通过获取一个平台二进制（如/bin/ls）并通过dyld使用环境变量`DYLD_INSERT_LIBRARIES`注入漏洞来绕过此检查。
 
-### 绕过标志 `CS_REQUIRE_LV` 和 `CS_FORCED_LV`
+### 绕过标志`CS_REQUIRE_LV`和`CS_FORCED_LV`
 
-执行中的二进制文件可以修改其自身的标志，以通过如下代码绕过检查：
+执行中的二进制文件可以修改其自身的标志，以绕过检查，代码如下：
 ```c
 // Code from https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/
 int pid = getpid();
@@ -227,7 +228,7 @@ openssl dgst -binary -sha1 /System/Cryptexes/App/System/Applications/Safari.app/
 ```
 ## Mount dmgs
 
-用户可以挂载一个自定义的 dmg，即使是在某些现有文件夹之上。这就是您如何创建一个包含自定义内容的自定义 dmg 包：
+用户可以挂载一个自定义的 dmg，即使是在某些现有文件夹上。这就是您如何创建一个包含自定义内容的自定义 dmg 包：
 ```bash
 # Create the volume
 hdiutil create /private/tmp/tmp.dmg -size 2m -ov -volname CustomVolName -fs APFS 1>/dev/null
@@ -248,8 +249,8 @@ hdiutil detach /private/tmp/mnt 1>/dev/null
 # You can also create a dmg from an app using:
 hdiutil create -srcfolder justsome.app justsome.dmg
 ```
-通常，macOS 通过 `com.apple.DiskArbitrarion.diskarbitrariond` Mach 服务（由 `/usr/libexec/diskarbitrationd` 提供）挂载磁盘。如果在 LaunchDaemons plist 文件中添加参数 `-d` 并重启，它将把日志存储在 `/var/log/diskarbitrationd.log` 中。\
-然而，可以使用像 `hdik` 和 `hdiutil` 这样的工具直接与 `com.apple.driver.DiskImages` kext 通信。
+通常，macOS 通过与 `com.apple.DiskArbitrarion.diskarbitrariond` Mach 服务（由 `/usr/libexec/diskarbitrationd` 提供）进行通信来挂载磁盘。如果在 LaunchDaemons plist 文件中添加参数 `-d` 并重启，它将把日志存储在 `/var/log/diskarbitrationd.log` 中。\
+然而，可以使用像 `hdik` 和 `hdiutil` 这样的工具直接与 `com.apple.driver.DiskImages` kext 进行通信。
 
 ## 任意写入
 
@@ -257,7 +258,7 @@ hdiutil create -srcfolder justsome.app justsome.dmg
 
 如果您的脚本可以被解释为 **shell 脚本**，您可以覆盖 **`/etc/periodic/daily/999.local`** shell 脚本，该脚本将每天触发。
 
-您可以用以下命令 **伪造** 该脚本的执行：**`sudo periodic daily`**
+您可以通过以下方式 **伪造** 此脚本的执行：**`sudo periodic daily`**
 
 ### 守护进程
 
@@ -278,15 +279,15 @@ hdiutil create -srcfolder justsome.app justsome.dmg
 </dict>
 </plist>
 ```
-只需生成脚本 `/Applications/Scripts/privesc.sh`，并在其中添加您希望以 root 身份运行的 **命令**。
+生成脚本 `/Applications/Scripts/privesc.sh`，其中包含您希望以 root 身份运行的 **命令**。
 
 ### Sudoers 文件
 
-如果您具有 **任意写入** 权限，您可以在 **`/etc/sudoers.d/`** 文件夹中创建一个文件，从而授予自己 **sudo** 权限。
+如果您具有 **任意写入** 权限，您可以在 **`/etc/sudoers.d/`** 文件夹中创建一个文件，授予自己 **sudo** 权限。
 
 ### PATH 文件
 
-文件 **`/etc/paths`** 是填充 PATH 环境变量的主要位置之一。您必须是 root 才能覆盖它，但如果 **特权进程** 执行某些 **命令而没有完整路径**，您可能能够通过修改此文件来 **劫持** 它。
+文件 **`/etc/paths`** 是填充 PATH 环境变量的主要位置之一。您必须是 root 才能覆盖它，但如果 **特权进程** 执行某个 **命令而没有完整路径**，您可能能够通过修改此文件来 **劫持** 它。
 
 您还可以在 **`/etc/paths.d`** 中写入文件，以将新文件夹加载到 `PATH` 环境变量中。
 
@@ -302,17 +303,17 @@ LogFilePerm 777
 ```
 这将创建文件 `/etc/sudoers.d/lpe`，权限为 777。末尾的额外垃圾是为了触发错误日志的创建。
 
-然后，在 `/etc/sudoers.d/lpe` 中写入所需的配置以提升权限，如 `%staff ALL=(ALL) NOPASSWD:ALL`。
+然后，在 `/etc/sudoers.d/lpe` 中写入所需的配置以提升权限，例如 `%staff ALL=(ALL) NOPASSWD:ALL`。
 
 然后，再次修改文件 `/etc/cups/cups-files.conf`，指示 `LogFilePerm 700`，以便新的 sudoers 文件在调用 `cupsctl` 时变得有效。
 
-### 沙盒逃逸
+### 沙箱逃逸
 
-可以通过 FS 任意写入来逃逸 macOS 沙盒。有关一些示例，请查看页面 [macOS Auto Start](../../../../macos-auto-start-locations.md)，但一个常见的例子是在 `~/Library/Preferences/com.apple.Terminal.plist` 中写入一个终端首选项文件，该文件在启动时执行命令，并使用 `open` 调用它。
+可以通过 FS 任意写入来逃逸 macOS 沙箱。有关一些示例，请查看页面 [macOS Auto Start](../../../../macos-auto-start-locations.md)，但一个常见的方法是在 `~/Library/Preferences/com.apple.Terminal.plist` 中写入一个终端首选项文件，该文件在启动时执行一个命令，并使用 `open` 调用它。
 
 ## 生成其他用户可写文件
 
-这将生成一个属于 root 的文件，我可以写入（[**代码来自这里**](https://github.com/gergelykalman/brew-lpe-via-periodic/blob/main/brew_lpe.sh)）。这也可能作为权限提升的手段：
+这将生成一个属于 root 的文件，我可以写入（[**代码来自这里**](https://github.com/gergelykalman/brew-lpe-via-periodic/blob/main/brew_lpe.sh)）。这也可能作为特权提升有效：
 ```bash
 DIRNAME=/usr/local/etc/periodic/daily
 
@@ -424,7 +425,7 @@ return 0;
 
 **macOS 受保护描述符** 是在 macOS 中引入的一项安全功能，旨在增强用户应用程序中 **文件描述符操作** 的安全性和可靠性。这些受保护的描述符提供了一种将特定限制或“保护”与文件描述符关联的方法，这些限制由内核强制执行。
 
-此功能特别有助于防止某些类别的安全漏洞，例如 **未经授权的文件访问** 或 **竞争条件**。这些漏洞发生在例如一个线程正在访问一个文件描述符，导致 **另一个易受攻击的线程对其访问**，或者当一个文件描述符被 **继承** 给一个易受攻击的子进程时。与此功能相关的一些函数包括：
+此功能特别有助于防止某些类别的安全漏洞，例如 **未经授权的文件访问** 或 **竞争条件**。这些漏洞发生在例如一个线程正在访问文件描述符，导致 **另一个脆弱线程对其的访问**，或者当文件描述符被 **继承** 给一个脆弱的子进程时。与此功能相关的一些函数包括：
 
 - `guarded_open_np`: 以保护方式打开文件描述符
 - `guarded_close_np`: 关闭它

@@ -1,10 +1,10 @@
-# 神秘语言
+# Esoteric languages
 
 {{#include ../banners/hacktricks-training.md}}
 
 ## [Esolangs Wiki](https://esolangs.org/wiki/Main_Page)
 
-查看该维基以搜索更多神秘语言
+查看该维基以搜索更多晦涩语言
 
 ## Malbolge
 ```

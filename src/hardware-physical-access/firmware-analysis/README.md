@@ -41,7 +41,7 @@ synology-encrypted-archive-decryption.md
 - 在设备通信中**嗅探**更新请求
 - 识别并使用**硬编码的更新端点**
 - 从引导加载程序或网络**转储**
-- 在所有其他方法失败时，使用适当的硬件工具**拆卸并读取**存储芯片
+- 在万不得已时，使用适当的硬件工具**拆卸并读取**存储芯片
 
 ## 分析固件
 
@@ -194,11 +194,11 @@ sudo apt-get install qemu qemu-user qemu-user-static qemu-system-arm qemu-system
 
 ### 完整系统仿真
 
-像 [Firmadyne](https://github.com/firmadyne/firmadyne)、[Firmware Analysis Toolkit](https://github.com/attify/firmware-analysis-toolkit) 等工具，促进了完整固件仿真，自动化了过程并帮助进行动态分析。
+像 [Firmadyne](https://github.com/firmadyne/firmadyne)、[Firmware Analysis Toolkit](https://github.com/attify/firmware-analysis-toolkit) 等工具，促进完整固件仿真，自动化过程并帮助进行动态分析。
 
 ## 实践中的动态分析
 
-在这个阶段，使用真实或仿真的设备环境进行分析。保持对操作系统和文件系统的 shell 访问是至关重要的。仿真可能无法完美模拟硬件交互，因此需要偶尔重新启动仿真。分析应重新访问文件系统，利用暴露的网页和网络服务，并探索引导加载程序漏洞。固件完整性测试对于识别潜在后门漏洞至关重要。
+在这个阶段，使用真实或仿真的设备环境进行分析。保持对操作系统和文件系统的 shell 访问是至关重要的。仿真可能无法完美模拟硬件交互，因此需要偶尔重启仿真。分析应重新访问文件系统，利用暴露的网页和网络服务，并探索引导加载程序漏洞。固件完整性测试对于识别潜在后门漏洞至关重要。
 
 ## 运行时分析技术
 
@@ -206,27 +206,27 @@ sudo apt-get install qemu qemu-user qemu-user-static qemu-system-arm qemu-system
 
 ## 二进制利用和概念验证
 
-为识别的漏洞开发 PoC 需要对目标架构和低级语言编程有深入理解。嵌入式系统中的二进制运行时保护很少见，但在存在时，可能需要使用如返回导向编程（ROP）等技术。
+为识别的漏洞开发 PoC 需要对目标架构的深入理解以及使用低级语言编程。嵌入式系统中的二进制运行时保护很少见，但在存在时，可能需要使用如返回导向编程（ROP）等技术。
 
 ## 准备好的操作系统用于固件分析
 
-操作系统如 [AttifyOS](https://github.com/adi0x90/attifyos) 和 [EmbedOS](https://github.com/scriptingxss/EmbedOS) 提供了预配置的固件安全测试环境，配备必要的工具。
+像 [AttifyOS](https://github.com/adi0x90/attifyos) 和 [EmbedOS](https://github.com/scriptingxss/EmbedOS) 这样的操作系统提供了预配置的固件安全测试环境，配备必要的工具。
 
-## 准备好的操作系统用于分析固件
+## 准备好的操作系统分析固件
 
-- [**AttifyOS**](https://github.com/adi0x90/attifyos)：AttifyOS 是一个旨在帮助您对物联网（IoT）设备进行安全评估和渗透测试的发行版。它通过提供一个预配置的环境，加载所有必要的工具，节省了您大量时间。
+- [**AttifyOS**](https://github.com/adi0x90/attifyos)：AttifyOS 是一个旨在帮助您对物联网（IoT）设备进行安全评估和渗透测试的发行版。它通过提供一个预配置的环境，加载所有必要工具，节省了您大量时间。
 - [**EmbedOS**](https://github.com/scriptingxss/EmbedOS)：基于 Ubuntu 18.04 的嵌入式安全测试操作系统，预装固件安全测试工具。
 
 ## 固件降级攻击与不安全的更新机制
 
-即使供应商对固件镜像实施了加密签名检查，**版本回滚（降级）保护通常被省略**。当引导或恢复加载程序仅使用嵌入的公钥验证签名，但不比较正在闪存的镜像的 *版本*（或单调计数器）时，攻击者可以合法地安装一个 **较旧的、仍然具有有效签名的易受攻击的固件**，从而重新引入已修补的漏洞。
+即使供应商对固件镜像实施了加密签名检查，**版本回滚（降级）保护通常被省略**。当引导或恢复加载程序仅验证嵌入的公钥签名，但不比较正在闪存的镜像的 *版本*（或单调计数器）时，攻击者可以合法地安装一个 **较旧的、仍然具有有效签名的易受攻击的固件**，从而重新引入已修补的漏洞。
 
 典型攻击工作流程：
 
 1. **获取较旧的签名镜像**
    * 从供应商的公共下载门户、CDN 或支持网站获取。
    * 从伴随的移动/桌面应用程序中提取（例如，在 Android APK 的 `assets/firmware/` 中）。
-   * 从第三方存储库如 VirusTotal、互联网档案、论坛等获取。
+   * 从第三方存储库如 VirusTotal、互联网档案、论坛等检索。
 2. **通过任何暴露的更新通道将镜像上传或提供给设备**：
    * Web UI、移动应用 API、USB、TFTP、MQTT 等。
    * 许多消费类 IoT 设备暴露 *未认证* 的 HTTP(S) 端点，接受 Base64 编码的固件块，服务器端解码并触发恢复/升级。
@@ -240,11 +240,11 @@ Host: 192.168.0.1
 Content-Type: application/octet-stream
 Content-Length: 0
 ```
-在易受攻击的（降级）固件中，`md5` 参数直接连接到 shell 命令中而没有进行清理，从而允许注入任意命令（在这里 - 启用基于 SSH 密钥的 root 访问）。后来的固件版本引入了基本的字符过滤器，但缺乏降级保护使得修复变得无效。
+在易受攻击的（降级）固件中，`md5` 参数直接连接到 shell 命令中而没有进行清理，从而允许注入任意命令（在这里 - 启用基于 SSH 的 root 访问）。后来的固件版本引入了基本的字符过滤器，但缺乏降级保护使得修复变得无效。
 
 ### 从移动应用提取固件
 
-许多供应商将完整的固件映像捆绑在其配套的移动应用程序中，以便应用可以通过蓝牙/Wi-Fi 更新设备。这些包通常以未加密的形式存储在 APK/APEX 中，路径如 `assets/fw/` 或 `res/raw/`。工具如 `apktool`、`ghidra`，甚至普通的 `unzip` 允许您在不接触物理硬件的情况下提取签名的映像。
+许多供应商将完整的固件映像捆绑在其配套的移动应用程序中，以便应用程序可以通过蓝牙/Wi-Fi 更新设备。这些包通常以未加密的形式存储在 APK/APEX 中，路径如 `assets/fw/` 或 `res/raw/`。工具如 `apktool`、`ghidra`，甚至普通的 `unzip` 允许您在不接触物理硬件的情况下提取签名的映像。
 ```
 $ apktool d vendor-app.apk -o vendor-app
 $ ls vendor-app/assets/firmware
@@ -254,7 +254,7 @@ firmware_v1.3.11.490_signed.bin
 
 * *更新端点* 的传输/认证是否得到充分保护（TLS + 认证）？
 * 设备在刷写之前是否比较 **版本号** 或 **单调反回滚计数器**？
-* 镜像是否在安全启动链中进行验证（例如，ROM代码检查签名）？
+* 镜像是否在安全启动链中得到验证（例如，ROM代码检查签名）？
 * 用户空间代码是否执行额外的合理性检查（例如，允许的分区映射、型号）？
 * *部分* 或 *备份* 更新流程是否重用相同的验证逻辑？
 

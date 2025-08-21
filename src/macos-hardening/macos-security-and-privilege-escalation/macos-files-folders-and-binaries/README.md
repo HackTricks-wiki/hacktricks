@@ -12,7 +12,7 @@
 - **/Library**: 可以在此找到许多与偏好设置、缓存和日志相关的子目录和文件。根目录和每个用户目录中都有一个 Library 文件夹。
 - **/private**: 未记录，但许多提到的文件夹是指向私有目录的符号链接。
 - **/sbin**: 重要的系统二进制文件（与管理相关）
-- **/System**: 使 OS X 运行的文件。您在这里主要会找到仅与 Apple 相关的文件（而非第三方）。
+- **/System**: 使 OS X 运行的文件。您在此处主要会找到 Apple 特定的文件（而非第三方）。
 - **/tmp**: 文件在 3 天后被删除（这是指向 /private/tmp 的软链接）
 - **/Users**: 用户的主目录。
 - **/usr**: 配置和系统二进制文件
@@ -25,7 +25,7 @@
 - **系统应用程序** 位于 `/System/Applications` 下
 - **已安装** 的应用程序通常安装在 `/Applications` 或 `~/Applications` 中
 - **应用程序数据** 可以在 `/Library/Application Support` 中找到，适用于以 root 身份运行的应用程序，以及在 `~/Library/Application Support` 中找到，适用于以用户身份运行的应用程序。
-- 需要以 root 身份运行的第三方应用程序 **守护进程** 通常位于 `/Library/PrivilegedHelperTools/`
+- 第三方应用程序 **守护进程** 需要以 root 身份运行，通常位于 `/Library/PrivilegedHelperTools/`
 - **沙盒** 应用程序映射到 `~/Library/Containers` 文件夹。每个应用程序都有一个根据应用程序的包 ID 命名的文件夹（`com.apple.Safari`）。
 - **内核** 位于 `/System/Library/Kernels/kernel`
 - **Apple 的内核扩展** 位于 `/System/Library/Extensions`
@@ -58,7 +58,7 @@ macos-installers-abuse.md
 - `plutil -convert json ~/Library/Preferences/com.apple.screensaver.plist -o -`
 - **`.app`**: Apple 应用程序，遵循目录结构（这是一个包）。
 - **`.dylib`**: 动态库（如 Windows DLL 文件）
-- **`.pkg`**: 与 xar（可扩展归档格式）相同。可以使用安装命令安装这些文件的内容。
+- **`.pkg`**: 与 xar（可扩展归档格式）相同。安装命令可用于安装这些文件的内容。
 - **`.DS_Store`**: 此文件位于每个目录中，保存目录的属性和自定义设置。
 - **`.Spotlight-V100`**: 此文件夹出现在系统中每个卷的根目录上。
 - **`.metadata_never_index`**: 如果此文件位于卷的根目录，Spotlight 将不会索引该卷。
@@ -75,7 +75,7 @@ macos-bundles.md
 
 ## Dyld 共享库缓存 (SLC)
 
-在 macOS（和 iOS）中，所有系统共享库，如框架和 dylibs，**合并为一个单一文件**，称为 **dyld 共享缓存**。这提高了性能，因为代码可以更快加载。
+在 macOS（和 iOS）中，所有系统共享库，如框架和 dylibs，**合并为一个单一文件**，称为 **dyld 共享缓存**。这提高了性能，因为代码可以更快地加载。
 
 在 macOS 中，这位于 `/System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/`，在旧版本中，您可能会在 **`/System/Library/dyld/`** 中找到 **共享缓存**。\
 在 iOS 中，您可以在 **`/System/Library/Caches/com.apple.dyld/`** 中找到它们。
@@ -93,7 +93,7 @@ dyldex_all [dyld_shared_cache_path] # Extract all
 # More options inside the readme
 ```
 > [!TIP]
-> 请注意，即使 `dyld_shared_cache_util` 工具无法工作，您仍然可以将 **共享 dyld 二进制文件传递给 Hopper**，Hopper 将能够识别所有库并让您 **选择要调查的库**：
+> 请注意，即使 `dyld_shared_cache_util` 工具无法工作，您也可以将 **共享的 dyld 二进制文件传递给 Hopper**，Hopper 将能够识别所有库并让您 **选择要调查的库**：
 
 <figure><img src="../../../images/image (1152).png" alt="" width="563"><figcaption></figcaption></figure>
 
@@ -104,9 +104,9 @@ dyldex_all [dyld_shared_cache_path] # Extract all
 
 ### 映射 SLC
 
-**`dyld`** 使用系统调用 **`shared_region_check_np`** 来知道 SLC 是否已映射（返回地址），并使用 **`shared_region_map_and_slide_np`** 来映射 SLC。
+**`dyld`** 使用系统调用 **`shared_region_check_np`** 来知道 SLC 是否已被映射（返回地址），并使用 **`shared_region_map_and_slide_np`** 来映射 SLC。
 
-请注意，即使 SLC 在第一次使用时滑动，所有 **进程** 也使用 **相同的副本**，这 **消除了 ASLR** 保护，如果攻击者能够在系统中运行进程。这在过去实际上被利用过，并通过共享区域分页器修复。
+请注意，即使 SLC 在第一次使用时被滑动，所有 **进程** 也使用 **相同的副本**，这 **消除了 ASLR** 保护，如果攻击者能够在系统中运行进程。这在过去实际上被利用过，并通过共享区域分页器修复。
 
 分支池是小的 Mach-O dylibs，它在映像映射之间创建小空间，使得无法插入函数。
 
@@ -115,64 +115,64 @@ dyldex_all [dyld_shared_cache_path] # Extract all
 使用环境变量：
 
 - **`DYLD_DHARED_REGION=private DYLD_SHARED_CACHE_DIR=</path/dir> DYLD_SHARED_CACHE_DONT_VALIDATE=1`** -> 这将允许加载新的共享库缓存
-- **`DYLD_SHARED_CACHE_DIR=avoid`** 并手动用指向共享缓存的符号链接替换库（您需要提取它们）
+- **`DYLD_SHARED_CACHE_DIR=avoid`** 并手动用指向共享缓存的符号链接替换库与真实库（您需要提取它们）
 
 ## 特殊文件权限
 
 ### 文件夹权限
 
-在一个 **文件夹** 中，**读取** 允许 **列出它**，**写入** 允许 **删除** 和 **写入** 其中的文件，**执行** 允许 **遍历** 目录。因此，例如，具有 **文件的读取权限** 的用户在没有 **执行权限** 的目录中 **将无法读取** 该文件。
+在一个 **文件夹** 中，**读取** 允许 **列出它**，**写入** 允许 **删除** 和 **写入** 文件，**执行** 允许 **遍历** 目录。因此，例如，具有 **文件的读取权限** 的用户在一个他 **没有执行** 权限的目录中 **将无法读取** 该文件。
 
 ### 标志修饰符
 
-文件中可以设置一些标志，使文件表现得不同。您可以使用 `ls -lO /path/directory` **检查目录中文件的标志**。
+在文件中可以设置一些标志，这将使文件表现得不同。您可以使用 `ls -lO /path/directory` **检查文件的标志**。
 
 - **`uchg`**：被称为 **uchange** 标志将 **防止任何操作** 更改或删除 **文件**。要设置它，请执行：`chflags uchg file.txt`
-- root 用户可以 **删除标志** 并修改文件
-- **`restricted`**：此标志使文件受到 **SIP 保护**（您无法将此标志添加到文件）。
-- **`Sticky bit`**：如果目录具有粘滞位，**只有** 该 **目录的所有者或 root 可以重命名或删除** 文件。通常，这在 /tmp 目录上设置，以防止普通用户删除或移动其他用户的文件。
+- 根用户可以 **删除标志** 并修改文件
+- **`restricted`**：此标志使文件 **受到 SIP 保护**（您无法将此标志添加到文件）。
+- **`Sticky bit`**：如果目录具有粘滞位，**只有** 该 **目录的所有者或根用户可以重命名或删除** 文件。通常，这在 /tmp 目录上设置，以防止普通用户删除或移动其他用户的文件。
 
-所有标志可以在文件 `sys/stat.h` 中找到（使用 `mdfind stat.h | grep stat.h` 查找），并且是：
+所有标志可以在文件 `sys/stat.h` 中找到（使用 `mdfind stat.h | grep stat.h` 查找）并且是：
 
-- `UF_SETTABLE` 0x0000ffff：可更改的所有者标志的掩码。
-- `UF_NODUMP` 0x00000001：不转储文件。
-- `UF_IMMUTABLE` 0x00000002：文件不可更改。
-- `UF_APPEND` 0x00000004：对文件的写入只能追加。
-- `UF_OPAQUE` 0x00000008：目录在联合方面是透明的。
-- `UF_COMPRESSED` 0x00000020：文件被压缩（某些文件系统）。
-- `UF_TRACKED` 0x00000040：对于设置此标志的文件，不会有删除/重命名的通知。
-- `UF_DATAVAULT` 0x00000080：读取和写入需要权限。
-- `UF_HIDDEN` 0x00008000：提示该项不应在 GUI 中显示。
-- `SF_SUPPORTED` 0x009f0000：超级用户支持标志的掩码。
-- `SF_SETTABLE` 0x3fff0000：超级用户可更改标志的掩码。
-- `SF_SYNTHETIC` 0xc0000000：系统只读合成标志的掩码。
-- `SF_ARCHIVED` 0x00010000：文件已归档。
-- `SF_IMMUTABLE` 0x00020000：文件不可更改。
-- `SF_APPEND` 0x00040000：对文件的写入只能追加。
-- `SF_RESTRICTED` 0x00080000：写入需要权限。
-- `SF_NOUNLINK` 0x00100000：项目不可被删除、重命名或挂载。
-- `SF_FIRMLINK` 0x00800000：文件是 firmlink。
-- `SF_DATALESS` 0x40000000：文件是无数据对象。
+- `UF_SETTABLE` 0x0000ffff: 可更改的所有者标志的掩码。
+- `UF_NODUMP` 0x00000001: 不转储文件。
+- `UF_IMMUTABLE` 0x00000002: 文件不可更改。
+- `UF_APPEND` 0x00000004: 对文件的写入只能追加。
+- `UF_OPAQUE` 0x00000008: 目录在联合方面是透明的。
+- `UF_COMPRESSED` 0x00000020: 文件被压缩（某些文件系统）。
+- `UF_TRACKED` 0x00000040: 对于设置了此标志的文件，不会有删除/重命名的通知。
+- `UF_DATAVAULT` 0x00000080: 读取和写入需要权限。
+- `UF_HIDDEN` 0x00008000: 提示该项不应在 GUI 中显示。
+- `SF_SUPPORTED` 0x009f0000: 超级用户支持标志的掩码。
+- `SF_SETTABLE` 0x3fff0000: 超级用户可更改标志的掩码。
+- `SF_SYNTHETIC` 0xc0000000: 系统只读合成标志的掩码。
+- `SF_ARCHIVED` 0x00010000: 文件已归档。
+- `SF_IMMUTABLE` 0x00020000: 文件不可更改。
+- `SF_APPEND` 0x00040000: 对文件的写入只能追加。
+- `SF_RESTRICTED` 0x00080000: 写入需要权限。
+- `SF_NOUNLINK` 0x00100000: 项目不可被移除、重命名或挂载。
+- `SF_FIRMLINK` 0x00800000: 文件是一个 firmlink。
+- `SF_DATALESS` 0x40000000: 文件是无数据对象。
 
 ### **文件 ACLs**
 
 文件 **ACLs** 包含 **ACE**（访问控制条目），可以为不同用户分配更 **细粒度的权限**。
 
-可以为 **目录** 授予这些权限：`list`、`search`、`add_file`、`add_subdirectory`、`delete_child`、`delete_child`。\
-对于 **文件**：`read`、`write`、`append`、`execute`。
+可以授予 **目录** 这些权限：`list`、`search`、`add_file`、`add_subdirectory`、`delete_child`、`delete_child`。\
+而对于 **文件**：`read`、`write`、`append`、`execute`。
 
-当文件包含 ACLs 时，您将 **在列出权限时找到一个 "+"，如**：
+当文件包含 ACLs 时，您将在列出权限时 **看到一个 "+"**，例如：
 ```bash
 ls -ld Movies
 drwx------+   7 username  staff     224 15 Apr 19:42 Movies
 ```
-您可以使用以下命令**读取文件的 ACL**：
+您可以使用以下命令**读取文件的ACL**：
 ```bash
 ls -lde Movies
 drwx------+ 7 username  staff  224 15 Apr 19:42 Movies
 0: group:everyone deny delete
 ```
-您可以找到 **所有具有 ACL 的文件**（这非常慢）：
+您可以使用（这非常慢）找到 **所有带有 ACL 的文件**：
 ```bash
 ls -RAle / 2>/dev/null | grep -E -B1 "\d: "
 ```
@@ -187,7 +187,7 @@ ls -RAle / 2>/dev/null | grep -E -B1 "\d: "
 - `com.apple.FinderInfo`: MacOS: Finder 信息（例如，颜色标签）
 - `com.apple.TextEncoding`: 指定 ASCII 文本文件的文本编码
 - `com.apple.logd.metadata`: logd 在 `/var/db/diagnostics` 中使用的文件
-- `com.apple.genstore.*`: 代际存储（`/.DocumentRevisions-V100` 在文件系统根目录中）
+- `com.apple.genstore.*`: 代际存储（文件系统根目录中的 `/.DocumentRevisions-V100`）
 - `com.apple.rootless`: MacOS: 由系统完整性保护用于标记文件 (III/10)
 - `com.apple.uuidb.boot-uuid`: logd 对具有唯一 UUID 的启动时期的标记
 - `com.apple.decmpfs`: MacOS: 透明文件压缩 (II/7)
@@ -215,7 +215,7 @@ find / -type f -exec ls -ld {} \; 2>/dev/null | grep -E "[x\-]@ " | awk '{printf
 
 扩展属性 `com.apple.decmpfs` 表示文件是加密存储的，`ls -l` 将报告 **大小为 0**，压缩数据存储在此属性中。每当访问该文件时，它将在内存中解密。
 
-此属性可以通过 `ls -lO` 查看，标记为压缩，因为压缩文件也带有标志 `UF_COMPRESSED`。如果通过 `chflags nocompressed </path/to/file>` 删除压缩文件的此标志，系统将不知道该文件是压缩的，因此无法解压并访问数据（它会认为该文件实际上是空的）。
+可以使用 `ls -lO` 查看此属性，标记为压缩，因为压缩文件也带有标志 `UF_COMPRESSED`。如果通过 `chflags nocompressed </path/to/file>` 删除压缩文件的此标志，系统将不知道该文件是压缩的，因此无法解压并访问数据（它会认为文件实际上是空的）。
 
 工具 afscexpand 可用于强制解压文件。
 
@@ -246,7 +246,7 @@ macos-memory-dumping.md
 
 ## Log files
 
-- **`$HOME/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV2`**：包含有关下载文件的信息，例如它们的下载 URL。
+- **`$HOME/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV2`**：包含有关下载文件的信息，例如下载来源的 URL。
 - **`/var/log/system.log`**：OSX 系统的主日志。com.apple.syslogd.plist 负责执行 syslogging（您可以通过在 `launchctl list` 中查找 "com.apple.syslogd" 来检查它是否被禁用）。
 - **`/private/var/log/asl/*.asl`**：这些是 Apple 系统日志，可能包含有趣的信息。
 - **`$HOME/Library/Preferences/com.apple.recentitems.plist`**：通过 "Finder" 存储最近访问的文件和应用程序。

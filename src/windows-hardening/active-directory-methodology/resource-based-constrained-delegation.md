@@ -5,11 +5,11 @@
 
 ## Basics of Resource-based Constrained Delegation
 
-这与基本的 [Constrained Delegation](constrained-delegation.md) 类似，但**不是**给一个**对象**权限以**冒充任何用户对抗一台机器**。资源基础的约束委托**设置**在**能够冒充任何用户对抗它的对象**中。
+这与基本的 [Constrained Delegation](constrained-delegation.md) 类似，但**不是**将权限授予一个**对象**以**冒充任何用户对抗一台机器**。资源基础约束委托**设置**在**能够冒充任何用户的对象**上。
 
 在这种情况下，受限对象将具有一个名为 _**msDS-AllowedToActOnBehalfOfOtherIdentity**_ 的属性，包含可以冒充任何其他用户的用户的名称。
 
-与其他委托的另一个重要区别是，任何对计算机帐户具有**写权限**的用户（_GenericAll/GenericWrite/WriteDacl/WriteProperty/etc_）都可以设置 **_msDS-AllowedToActOnBehalfOfOtherIdentity_**（在其他形式的委托中，您需要域管理员权限）。
+与其他委托的另一个重要区别是，任何具有**计算机帐户的写权限**（_GenericAll/GenericWrite/WriteDacl/WriteProperty/etc_）的用户都可以设置 **_msDS-AllowedToActOnBehalfOfOtherIdentity_**（在其他形式的委托中，您需要域管理员权限）。
 
 ### New Concepts
 
@@ -20,17 +20,17 @@
 
 ### Attack structure
 
-> 如果您对**计算机**帐户具有**写等效权限**，则可以在该机器上获得**特权访问**。
+> 如果您对**计算机**帐户具有**写入等效权限**，则可以在该机器上获得**特权访问**。
 
-假设攻击者已经对受害计算机具有**写等效权限**。
+假设攻击者已经对受害计算机具有**写入等效权限**。
 
 1. 攻击者**破坏**一个具有**SPN**的帐户或**创建一个**（“服务 A”）。请注意，**任何**_管理员用户_在没有其他特殊权限的情况下，可以**创建**最多 10 个计算机对象（**_MachineAccountQuota_**）并为其设置一个 **SPN**。因此，攻击者可以创建一个计算机对象并设置一个 SPN。
-2. 攻击者**滥用其对受害计算机（ServiceB）的写权限**，以配置**基于资源的约束委托，允许 ServiceA 冒充任何用户**对抗该受害计算机（ServiceB）。
-3. 攻击者使用 Rubeus 执行**完整的 S4U 攻击**（S4U2Self 和 S4U2Proxy），从服务 A 到服务 B，针对具有**对服务 B 的特权访问**的用户。
-   1. S4U2Self（来自被破坏/创建的 SPN 帐户）：请求**管理员的 TGS 给我**（不可转发）。
-   2. S4U2Proxy：使用前一步的**不可转发 TGS**请求**管理员**到**受害主机**的**TGS**。
-   3. 即使您使用的是不可转发的 TGS，由于您正在利用基于资源的约束委托，它将有效。
-   4. 攻击者可以**传递票证**并**冒充**用户以获得对**受害者 ServiceB**的**访问**。
+2. 攻击者**滥用**其对受害计算机（ServiceB）的写权限，以配置**基于资源的约束委托，允许 ServiceA 冒充任何用户**对抗该受害计算机（ServiceB）。
+3. 攻击者使用 Rubeus 执行**完整的 S4U 攻击**（S4U2Self 和 S4U2Proxy），从服务 A 到服务 B 针对具有**对服务 B 的特权访问**的用户。
+1. S4U2Self（来自被破坏/创建的 SPN 帐户）：请求**管理员的 TGS 给我**（不可转发）。
+2. S4U2Proxy：使用前一步的**不可转发 TGS**请求从**管理员**到**受害主机**的**TGS**。
+3. 即使您使用的是不可转发的 TGS，由于您正在利用基于资源的约束委托，它将有效。
+4. 攻击者可以**传票**并**冒充**用户以获得对**受害 ServiceB**的**访问**。
 
 要检查域的 _**MachineAccountQuota**_，您可以使用：
 ```bash
@@ -72,7 +72,7 @@ msds-allowedtoactonbehalfofotheridentity
 ```
 ### 执行完整的 S4U 攻击 (Windows/Rubeus)
 
-首先，我们创建了新的计算机对象，密码为 `123456`，因此我们需要该密码的哈希值：
+首先，我们创建了一个新的计算机对象，密码为 `123456`，因此我们需要该密码的哈希值：
 ```bash
 .\Rubeus.exe hash /password:123456 /user:FAKECOMPUTER$ /domain:domain.local
 ```
@@ -110,7 +110,7 @@ impacket-secretsdump -k -no-pass Administrator@victim.domain.local
 Notes
 - 如果强制执行 LDAP 签名/LDAPS，请使用 `impacket-rbcd -use-ldaps ...`。
 - 优先使用 AES 密钥；许多现代域限制 RC4。Impacket 和 Rubeus 都支持仅 AES 流。
-- Impacket 可以为某些工具重写 `sname` ("AnySPN")，但尽可能获取正确的 SPN（例如，CIFS/LDAP/HTTP/HOST/MSSQLSvc）。
+- Impacket 可以为某些工具重写 `sname`（"AnySPN"），但尽可能获取正确的 SPN（例如，CIFS/LDAP/HTTP/HOST/MSSQLSvc）。
 
 ### Accessing
 
@@ -121,7 +121,7 @@ ls \\victim.domain.local\C$
 ```
 ### 滥用不同的服务票证
 
-了解[**可用的服务票证在这里**](silver-ticket.md#available-services)。
+了解有关[**可用服务票证的信息**](silver-ticket.md#available-services)。
 
 ## 枚举、审计和清理
 
@@ -143,7 +143,7 @@ try { $name = $sid.Translate([System.Security.Principal.NTAccount]) } catch { $n
 }
 }
 ```
-Impacket（用一个命令读取或刷新）：
+Impacket (用一个命令读取或刷新):
 ```bash
 # Read who can delegate to VICTIM
 impacket-rbcd -delegate-to 'VICTIM$' -action read 'domain.local/jdoe:Summer2025!'
@@ -165,7 +165,7 @@ impacket-rbcd -delegate-to 'VICTIM$' -action flush 'domain.local/jdoe:Summer2025
 ```
 ## Kerberos 错误
 
-- **`KDC_ERR_ETYPE_NOTSUPP`**: 这意味着 kerberos 配置为不使用 DES 或 RC4，而您仅提供了 RC4 哈希。至少向 Rubeus 提供 AES256 哈希（或同时提供 rc4、aes128 和 aes256 哈希）。示例: `[Rubeus.Program]::MainString("s4u /user:FAKECOMPUTER /aes256:CC648CF0F809EE1AA25C52E963AC0487E87AC32B1F71ACC5304C73BF566268DA /aes128:5FC3D06ED6E8EA2C9BB9CC301EA37AD4 /rc4:EF266C6B963C0BB683941032008AD47F /impersonateuser:Administrator /msdsspn:CIFS/M3DC.M3C.LOCAL /ptt".split())`
+- **`KDC_ERR_ETYPE_NOTSUPP`**: 这意味着 kerberos 配置为不使用 DES 或 RC4，而您仅提供了 RC4 哈希。至少向 Rubeus 提供 AES256 哈希（或者同时提供 rc4、aes128 和 aes256 哈希）。示例: `[Rubeus.Program]::MainString("s4u /user:FAKECOMPUTER /aes256:CC648CF0F809EE1AA25C52E963AC0487E87AC32B1F71ACC5304C73BF566268DA /aes128:5FC3D06ED6E8EA2C9BB9CC301EA37AD4 /rc4:EF266C6B963C0BB683941032008AD47F /impersonateuser:Administrator /msdsspn:CIFS/M3DC.M3C.LOCAL /ptt".split())`
 - **`KRB_AP_ERR_SKEW`**: 这意味着当前计算机的时间与 DC 的时间不同，kerberos 无法正常工作。
 - **`preauth_failed`**: 这意味着给定的用户名 + 哈希无法登录。您可能忘记在生成哈希时在用户名中放入“$”（`.\Rubeus.exe hash /password:123456 /user:FAKECOMPUTER$ /domain:domain.local`）。
 - **`KDC_ERR_BADOPTION`**: 这可能意味着：
@@ -196,6 +196,6 @@ adws-enumeration.md
 - [https://stealthbits.com/blog/resource-based-constrained-delegation-abuse/](https://stealthbits.com/blog/resource-based-constrained-delegation-abuse/)
 - [https://posts.specterops.io/kerberosity-killed-the-domain-an-offensive-kerberos-overview-eb04b1402c61](https://posts.specterops.io/kerberosity-killed-the-domain-an-offensive-kerberos-overview-eb04b1402c61)
 - Impacket rbcd.py (官方): https://github.com/fortra/impacket/blob/master/examples/rbcd.py
-- 快速 Linux 备忘单，包含最新语法: https://tldrbins.github.io/rbcd/
+- Quick Linux cheatsheet with recent syntax: https://tldrbins.github.io/rbcd/
 
 {{#include ../../banners/hacktricks-training.md}}
