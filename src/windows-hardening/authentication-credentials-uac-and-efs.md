@@ -1,15 +1,15 @@
-# Windows Security Controls
+# Controlli di Sicurezza di Windows
 
 {{#include ../banners/hacktricks-training.md}}
 
-## AppLocker Policy
+## Politica di AppLocker
 
-Un elenco di applicazioni approvate è un elenco di software o eseguibili autorizzati a essere presenti e in esecuzione su un sistema. L'obiettivo è proteggere l'ambiente da malware dannoso e software non approvato che non si allinea con le specifiche esigenze aziendali di un'organizzazione.
+Un elenco di applicazioni approvate è un elenco di software o eseguibili approvati che possono essere presenti ed eseguiti su un sistema. L'obiettivo è proteggere l'ambiente da malware dannoso e software non approvato che non si allinea con le specifiche esigenze aziendali di un'organizzazione.
 
-[AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) è la **soluzione di whitelisting delle applicazioni** di Microsoft e offre agli amministratori di sistema il controllo su **quali applicazioni e file gli utenti possono eseguire**. Fornisce **controllo granulare** su eseguibili, script, file di installazione di Windows, DLL, app confezionate e installer di app confezionate.\
+[AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) è la **soluzione di whitelisting delle applicazioni** di Microsoft e offre agli amministratori di sistema il controllo su **quali applicazioni e file gli utenti possono eseguire**. Fornisce **controllo granulare** su eseguibili, script, file di installazione di Windows, DLL, app confezionate e installatori di app confezionate.\
 È comune per le organizzazioni **bloccare cmd.exe e PowerShell.exe** e l'accesso in scrittura a determinate directory, **ma tutto questo può essere aggirato**.
 
-### Check
+### Controllo
 
 Controlla quali file/estensioni sono nella lista nera/bianca:
 ```bash
@@ -36,11 +36,11 @@ C:\windows\tracing
 - I comuni **binaries** **"LOLBAS's"** possono essere utili per bypassare AppLocker.
 - **Regole scritte male possono anche essere bypassate**
 - Ad esempio, **`<FilePathCondition Path="%OSDRIVE%*\allowed*"/>`**, puoi creare una **cartella chiamata `allowed`** ovunque e sarà consentita.
-- Le organizzazioni spesso si concentrano sul **blocco dell'eseguibile `%System32%\WindowsPowerShell\v1.0\powershell.exe`**, ma dimenticano le **altre** **posizioni eseguibili di PowerShell** come `%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe` o `PowerShell_ISE.exe`.
+- Le organizzazioni spesso si concentrano sul **blocco dell'eseguibile `%System32%\WindowsPowerShell\v1.0\powershell.exe`**, ma dimenticano le **altre** **posizioni degli eseguibili di PowerShell** come `%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe` o `PowerShell_ISE.exe`.
 - **L'applicazione delle DLL è molto raramente abilitata** a causa del carico aggiuntivo che può mettere su un sistema e della quantità di test necessari per garantire che nulla si rompa. Quindi utilizzare **DLL come backdoor aiuterà a bypassare AppLocker**.
 - Puoi usare **ReflectivePick** o **SharpPick** per **eseguire codice Powershell** in qualsiasi processo e bypassare AppLocker. Per ulteriori informazioni controlla: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode).
 
-## Archiviazione delle Credenziali
+## Archiviazione delle credenziali
 
 ### Security Accounts Manager (SAM)
 
@@ -58,14 +58,14 @@ Le **credenziali** sono **salvate** all'interno del **processo LSASS**: ticket K
 
 LSA potrebbe salvare su disco alcune credenziali:
 
-- Password dell'account computer dell'Active Directory (controller di dominio irraggiungibile).
+- Password dell'account computer di Active Directory (controller di dominio irraggiungibile).
 - Password degli account dei servizi Windows
 - Password per attività pianificate
 - Altro (password delle applicazioni IIS...)
 
 ### NTDS.dit
 
-È il database dell'Active Directory. È presente solo nei Domain Controllers.
+È il database di Active Directory. È presente solo nei Domain Controllers.
 
 ## Defender
 
@@ -103,11 +103,11 @@ sc query windefend
 ```
 ## Encrypted File System (EFS)
 
-EFS protegge i file tramite crittografia, utilizzando una **chiave simmetrica** nota come **File Encryption Key (FEK)**. Questa chiave è crittografata con la **chiave pubblica** dell'utente e memorizzata all'interno del $EFS **flusso di dati alternativi** del file crittografato. Quando è necessaria la decrittazione, viene utilizzata la corrispondente **chiave privata** del certificato digitale dell'utente per decrittografare la FEK dal flusso $EFS. Maggiori dettagli possono essere trovati [qui](https://en.wikipedia.org/wiki/Encrypting_File_System).
+EFS protegge i file attraverso la crittografia, utilizzando una **chiave simmetrica** nota come **File Encryption Key (FEK)**. Questa chiave è crittografata con la **chiave pubblica** dell'utente e memorizzata all'interno del $EFS **flusso di dati alternativi** del file crittografato. Quando è necessaria la decrittazione, viene utilizzata la corrispondente **chiave privata** del certificato digitale dell'utente per decrittografare la FEK dal flusso $EFS. Maggiori dettagli possono essere trovati [qui](https://en.wikipedia.org/wiki/Encrypting_File_System).
 
 **Scenari di decrittazione senza iniziativa dell'utente** includono:
 
-- Quando file o cartelle vengono spostati in un file system non EFS, come [FAT32](https://en.wikipedia.org/wiki/File_Allocation_Table), vengono automaticamente decrittografati.
+- Quando file o cartelle vengono spostati su un file system non EFS, come [FAT32](https://en.wikipedia.org/wiki/File_Allocation_Table), vengono automaticamente decrittografati.
 - I file crittografati inviati attraverso la rete tramite il protocollo SMB/CIFS vengono decrittografati prima della trasmissione.
 
 Questo metodo di crittografia consente un **accesso trasparente** ai file crittografati per il proprietario. Tuttavia, cambiare semplicemente la password del proprietario e accedere non permetterà la decrittazione.
@@ -143,7 +143,7 @@ https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files
 Microsoft ha sviluppato **Group Managed Service Accounts (gMSA)** per semplificare la gestione degli account di servizio nelle infrastrutture IT. A differenza degli account di servizio tradizionali che spesso hanno l'impostazione "**Password never expire**" abilitata, i gMSA offrono una soluzione più sicura e gestibile:
 
 - **Gestione automatica delle password**: i gMSA utilizzano una password complessa di 240 caratteri che cambia automaticamente in base alla politica del dominio o del computer. Questo processo è gestito dal Key Distribution Service (KDC) di Microsoft, eliminando la necessità di aggiornamenti manuali delle password.
-- **Sicurezza migliorata**: questi account sono immuni a blocchi e non possono essere utilizzati per accessi interattivi, migliorando la loro sicurezza.
+- **Sicurezza migliorata**: questi account sono immuni ai blocchi e non possono essere utilizzati per accessi interattivi, migliorando la loro sicurezza.
 - **Supporto per più host**: i gMSA possono essere condivisi tra più host, rendendoli ideali per servizi in esecuzione su più server.
 - **Capacità di attività pianificate**: a differenza degli account di servizio gestiti, i gMSA supportano l'esecuzione di attività pianificate.
 - **Gestione semplificata degli SPN**: il sistema aggiorna automaticamente il Service Principal Name (SPN) quando ci sono modifiche ai dettagli sAMaccount del computer o al nome DNS, semplificando la gestione degli SPN.
@@ -197,7 +197,7 @@ Puoi usare [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/t
 
 ## Politica di Esecuzione PS
 
-Per impostazione predefinita è impostata su **riservata.** I principali modi per bypassare questa politica:
+Per impostazione predefinita è impostata su **restricted.** I principali modi per bypassare questa politica:
 ```bash
 1º Just copy and paste inside the interactive PS console
 2º Read en Exec

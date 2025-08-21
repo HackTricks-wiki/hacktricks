@@ -4,14 +4,14 @@
 
 ## AppLocker Policy
 
-Un elenco di autorizzazione delle applicazioni è un elenco di applicazioni software o eseguibili approvati che possono essere presenti ed eseguiti su un sistema. L'obiettivo è proteggere l'ambiente da malware dannosi e software non approvato che non si allinea con le specifiche esigenze aziendali di un'organizzazione.
+Un elenco di autorizzazione delle applicazioni è un elenco di applicazioni software o eseguibili approvati che possono essere presenti ed eseguiti su un sistema. L'obiettivo è proteggere l'ambiente da malware dannoso e software non approvato che non si allinea con le specifiche esigenze aziendali di un'organizzazione.
 
 [AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) è la **soluzione di autorizzazione delle applicazioni** di Microsoft e offre agli amministratori di sistema il controllo su **quali applicazioni e file gli utenti possono eseguire**. Fornisce **controllo granulare** su eseguibili, script, file di installazione di Windows, DLL, app confezionate e installatori di app confezionate.\
 È comune per le organizzazioni **bloccare cmd.exe e PowerShell.exe** e l'accesso in scrittura a determinate directory, **ma tutto questo può essere aggirato**.
 
 ### Check
 
-Controlla quali file/estensioni sono nella lista nera/bianca:
+Controlla quali file/estensioni sono nella lista nera/nella lista bianca:
 ```bash
 Get-ApplockerPolicy -Effective -xml
 
@@ -37,7 +37,7 @@ C:\windows\tracing
 - **Regole scritte male potrebbero anche essere bypassate**
 - Ad esempio, **`<FilePathCondition Path="%OSDRIVE%*\allowed*"/>`**, puoi creare una **cartella chiamata `allowed`** ovunque e sarà consentita.
 - Le organizzazioni spesso si concentrano sul **blocco dell'eseguibile `%System32%\WindowsPowerShell\v1.0\powershell.exe`**, ma dimenticano le **altre** [**posizioni eseguibili di PowerShell**](https://www.powershelladmin.com/wiki/PowerShell_Executables_File_System_Locations) come `%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe` o `PowerShell_ISE.exe`.
-- **L'applicazione delle DLL è molto raramente abilitata** a causa del carico aggiuntivo che può comportare su un sistema e della quantità di test necessari per garantire che nulla si rompa. Quindi utilizzare **DLL come backdoor aiuterà a bypassare AppLocker**.
+- **L'applicazione delle DLL è molto raramente abilitata** a causa del carico aggiuntivo che può mettere su un sistema e della quantità di test necessari per garantire che nulla si rompa. Quindi utilizzare **DLL come backdoor aiuterà a bypassare AppLocker**.
 - Puoi usare [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) o [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) per **eseguire codice Powershell** in qualsiasi processo e bypassare AppLocker. Per ulteriori informazioni controlla: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode).
 
 ## Archiviazione delle credenziali
@@ -162,7 +162,7 @@ Inoltre, controlla questa [pagina web](https://cube0x0.github.io/Relaying-for-gM
 
 ## LAPS
 
-La **Local Administrator Password Solution (LAPS)**, disponibile per il download da [Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899), consente la gestione delle password degli amministratori locali. Queste password, che sono **randomizzate**, uniche e **cambiate regolarmente**, sono memorizzate centralmente in Active Directory. L'accesso a queste password è limitato tramite ACL a utenti autorizzati. Con permessi sufficienti, è possibile leggere le password degli amministratori locali.
+La **Local Administrator Password Solution (LAPS)**, disponibile per il download da [Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899), consente la gestione delle password degli amministratori locali. Queste password, che sono **randomizzate**, uniche e **cambiate regolarmente**, sono memorizzate centralmente in Active Directory. L'accesso a queste password è limitato tramite ACL a utenti autorizzati. Con permessi sufficienti, è fornita la possibilità di leggere le password degli amministratori locali.
 
 {{#ref}}
 ../active-directory-methodology/laps.md
@@ -182,7 +182,7 @@ $ExecutionContext.SessionState.LanguageMode
 #Easy bypass
 Powershell -version 2
 ```
-In Windows attuali, quel bypass non funzionerà, ma puoi usare [**PSByPassCLM**](https://github.com/padovah4ck/PSByPassCLM).\
+In Windows attuali quel bypass non funzionerà, ma puoi usare [ **PSByPassCLM**](https://github.com/padovah4ck/PSByPassCLM).\
 **Per compilarlo potresti aver bisogno di** **_Aggiungere un Riferimento_** -> _Sfoglia_ -> _Sfoglia_ -> aggiungi `C:\Windows\Microsoft.NET\assembly\GAC_MSIL\System.Management.Automation\v4.0_3.0.0.0\31bf3856ad364e35\System.Management.Automation.dll` e **cambiare il progetto in .Net4.5**.
 
 #### Bypass diretto:
@@ -195,9 +195,9 @@ C:\Windows\Microsoft.NET\Framework64\v4.0.30319\InstallUtil.exe /logfile= /LogTo
 ```
 Puoi usare [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) o [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) per **eseguire codice Powershell** in qualsiasi processo e bypassare la modalità vincolata. Per ulteriori informazioni controlla: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode).
 
-## Politica di Esecuzione PS
+## PS Execution Policy
 
-Per impostazione predefinita è impostata su **restricted.** I principali modi per bypassare questa politica:
+Per impostazione predefinita è impostato su **restricted.** I principali modi per bypassare questa politica:
 ```bash
 1º Just copy and paste inside the interactive PS console
 2º Read en Exec

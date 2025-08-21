@@ -22,7 +22,7 @@ Si prega di notare che **la maggior parte dei trucchi sull'escalation dei privil
 
 ### Sudo Hijacking
 
-Puoi trovare la tecnica originale [Sudo Hijacking all'interno del post sull'escalation dei privilegi di Linux](../../linux-hardening/privilege-escalation/index.html#sudo-hijacking).
+Puoi trovare la tecnica originale di [Sudo Hijacking all'interno del post sull'escalation dei privilegi di Linux](../../linux-hardening/privilege-escalation/index.html#sudo-hijacking).
 
 Tuttavia, macOS **mantiene** il **`PATH`** dell'utente quando esegue **`sudo`**. Il che significa che un altro modo per realizzare questo attacco sarebbe **di dirottare altri binari** che la vittima eseguirà quando **esegue sudo:**
 ```bash
@@ -46,7 +46,7 @@ Nota che un utente che utilizza il terminale avrà molto probabilmente **Homebre
 Utilizzando un po' di **ingegneria sociale** potresti **impersonare ad esempio Google Chrome** all'interno del dock ed eseguire effettivamente il tuo script:
 
 {{#tabs}}
-{{#tab name="Impersonificazione di Chrome"}}
+{{#tab name="Chrome Impersonation"}}
 Alcuni suggerimenti:
 
 - Controlla nel Dock se c'è un Chrome e, in tal caso, **rimuovi** quella voce e **aggiungi** la **voce falsa** **Chrome nella stessa posizione** nell'array del Dock.
@@ -205,7 +205,7 @@ killall Dock
 
 ### CVE-2020-9771 - bypass TCC di mount_apfs e escalation dei privilegi
 
-**Qualsiasi utente** (anche quelli non privilegiati) può creare e montare un'istantanea di Time Machine e **accedere a TUTTI i file** di quell'istantanea.\
+**Qualsiasi utente** (anche quelli non privilegiati) può creare e montare uno snapshot di Time Machine e **accedere a TUTTI i file** di quello snapshot.\
 L'**unico privilegio** necessario è che l'applicazione utilizzata (come `Terminal`) abbia accesso **Full Disk Access** (FDA) (`kTCCServiceSystemPolicyAllfiles`), che deve essere concesso da un amministratore.
 ```bash
 # Create snapshot

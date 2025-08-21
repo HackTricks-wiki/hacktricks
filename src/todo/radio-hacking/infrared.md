@@ -96,7 +96,7 @@ Il firmware 1.0 (settembre 2024) ha aggiunto **dozzine di protocolli IR extra e 
 
 ---
 
-## Strumenti e Esempi Pratici <a href="#tooling" id="tooling"></a>
+## Strumenti ed Esempi Pratici <a href="#tooling" id="tooling"></a>
 
 ### Hardware
 
@@ -113,7 +113,7 @@ Il firmware 1.0 (settembre 2024) ha aggiunto **dozzine di protocolli IR extra e 
 IRsend sender;
 void setup(){ sender.begin(); }
 void loop(){
-sender.sendNEC(0x20DF10EF, 32); // Accensione TV Samsung
+sender.sendNEC(0x20DF10EF, 32); // Samsung TV Power
 delay(5000);
 }
 ```
@@ -136,6 +136,6 @@ irsend SEND_ONCE samsung KEY_POWER
 ## Riferimenti
 
 - [Post del blog Flipper Zero Infrared](https://blog.flipperzero.one/infrared/)
-- EvilScreen: dirottamento della Smart TV tramite imitazione del telecomando (arXiv 2210.03014)
+- EvilScreen: dirottamento di Smart TV tramite imitazione del telecomando (arXiv 2210.03014)
 
 {{#include ../../banners/hacktricks-training.md}}

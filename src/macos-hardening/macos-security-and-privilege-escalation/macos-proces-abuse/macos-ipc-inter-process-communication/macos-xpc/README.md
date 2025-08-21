@@ -73,7 +73,7 @@ Inoltre, la funzione `xpc_copy_description(object)` può essere utilizzata per o
 Questi oggetti hanno anche alcuni metodi da chiamare come `xpc_<object>_copy`, `xpc_<object>_equal`, `xpc_<object>_hash`, `xpc_<object>_serialize`, `xpc_<object>_deserialize`...
 
 Gli `xpc_object_t` vengono creati chiamando la funzione `xpc_<objetType>_create`, che internamente chiama `_xpc_base_create(Class, Size)` dove viene indicato il tipo della classe dell'oggetto (uno di `XPC_TYPE_*`) e la sua dimensione (alcuni extra 40B verranno aggiunti alla dimensione per i metadati). Ciò significa che i dati dell'oggetto inizieranno all'offset di 40B.\
-Pertanto, il `xpc_<objectType>_t` è una sorta di sottoclasse di `xpc_object_t`, che sarebbe una sottoclasse di `os_object_t*`.
+Pertanto, il `xpc_<objectType>_t` è una sorta di sottoclasse di `xpc_object_t` che sarebbe una sottoclasse di `os_object_t*`.
 
 > [!WARNING]
 > Nota che dovrebbe essere lo sviluppatore a utilizzare `xpc_dictionary_[get/set]_<objectType>` per ottenere o impostare il tipo e il valore reale di una chiave.
@@ -85,7 +85,7 @@ Un **`xpc_pipe`** è un tubo FIFO che i processi possono utilizzare per comunica
 
 Nota che l'oggetto **`xpc_pipe`** è un **`xpc_object_t`** con informazioni nella sua struct riguardo ai due port Mach utilizzati e al nome (se presente). Il nome, ad esempio, il demone `secinitd` nel suo plist `/System/Library/LaunchDaemons/com.apple.secinitd.plist` configura il tubo chiamato `com.apple.secinitd`.
 
-Un esempio di un **`xpc_pipe`** è il **bootstrap pipe** creato da **`launchd`**, che rende possibile la condivisione dei port Mach.
+Un esempio di un **`xpc_pipe`** è il **bootstrap pipe** creato da **`launchd`** che rende possibile la condivisione dei port Mach.
 
 - **`NSXPC*`**
 
@@ -99,9 +99,9 @@ XPC utilizza GCD per inviare messaggi, inoltre genera alcune code di dispatch co
 ## Servizi XPC
 
 Questi sono **bundle con estensione `.xpc`** situati all'interno della cartella **`XPCServices`** di altri progetti e nel `Info.plist` hanno il `CFBundlePackageType` impostato su **`XPC!`**.\
-Questo file ha altre chiavi di configurazione come `ServiceType`, che può essere Application, User, System o `_SandboxProfile`, che può definire un sandbox, o `_AllowedClients`, che potrebbe indicare diritti o ID richiesti per contattare il server. Queste e altre opzioni di configurazione saranno utili per configurare il servizio al momento del lancio.
+Questo file ha altre chiavi di configurazione come `ServiceType` che può essere Application, User, System o `_SandboxProfile` che può definire un sandbox o `_AllowedClients` che potrebbe indicare diritti o ID richiesti per contattare il servizio. Queste e altre opzioni di configurazione saranno utili per configurare il servizio al momento del lancio.
 
-### Avviare un Servizio
+### Avvio di un Servizio
 
 L'app tenta di **connettersi** a un servizio XPC utilizzando `xpc_connection_create_mach_service`, quindi launchd localizza il demone e avvia **`xpcproxy`**. **`xpcproxy`** applica le restrizioni configurate e genera il servizio con i FD e i port Mach forniti.
 
@@ -116,7 +116,7 @@ L'utilità `xpcproxy` utilizza il prefisso `0x22`, ad esempio: `0x2200001c: xpcp
 
 ## Messaggi di Evento XPC
 
-Le applicazioni possono **iscriversi** a diversi **messaggi di evento**, consentendo loro di essere **iniziati su richiesta** quando si verificano tali eventi. La **configurazione** per questi servizi è effettuata nei file **plist di launchd**, situati nelle **stesse directory di quelli precedenti** e contenenti una chiave **`LaunchEvent`** aggiuntiva.
+Le applicazioni possono **iscriversi** a diversi **messaggi di evento**, consentendo loro di essere **iniziati su richiesta** quando si verificano tali eventi. La **configurazione** per questi servizi è effettuata nei file **plist di launchd**, situati nelle **stesse directory di quelli precedenti** e contenenti una chiave extra **`LaunchEvent`**.
 
 ### Controllo del Processo di Connessione XPC
 
@@ -440,7 +440,7 @@ return;
 ## Remote XPC
 
 Questa funzionalità fornita da `RemoteXPC.framework` (da `libxpc`) consente di comunicare tramite XPC tra diversi host.\
-I servizi che supportano remote XPC avranno nel loro plist la chiave UsesRemoteXPC come nel caso di `/System/Library/LaunchDaemons/com.apple.SubmitDiagInfo.plist`. Tuttavia, sebbene il servizio sia registrato con `launchd`, è `UserEventAgent` con i plugin `com.apple.remoted.plugin` e `com.apple.remoteservicediscovery.events.plugin` a fornire la funzionalità.
+I servizi che supportano XPC remoto avranno nel loro plist la chiave UsesRemoteXPC come nel caso di `/System/Library/LaunchDaemons/com.apple.SubmitDiagInfo.plist`. Tuttavia, sebbene il servizio sia registrato con `launchd`, è `UserEventAgent` con i plugin `com.apple.remoted.plugin` e `com.apple.remoteservicediscovery.events.plugin` a fornire la funzionalità.
 
 Inoltre, il `RemoteServiceDiscovery.framework` consente di ottenere informazioni dal `com.apple.remoted.plugin` esponendo funzioni come `get_device`, `get_unique_device`, `connect`...
 

@@ -97,7 +97,7 @@ Puoi utilizzare strumenti come [https://github.com/lgandx/PCredz](https://github
 
 ### Suricata
 
-**Install and setup**
+**Installare e configurare**
 ```
 apt-get install suricata
 apt-get install oinkmaster
@@ -129,7 +129,7 @@ Controlla se riesci a trovare qualche impronta di un malware noto:
 
 ## Zeek
 
-> [Zeek](https://docs.zeek.org/en/master/about.html) è un analizzatore di traffico di rete passivo e open-source. Molti operatori utilizzano Zeek come Network Security Monitor (NSM) per supportare le indagini su attività sospette o dannose. Zeek supporta anche una vasta gamma di compiti di analisi del traffico oltre al dominio della sicurezza, inclusi la misurazione delle prestazioni e la risoluzione dei problemi.
+> [Zeek](https://docs.zeek.org/en/master/about.html) è un analizzatore di traffico di rete passivo e open-source. Molti operatori utilizzano Zeek come Network Security Monitor (NSM) per supportare le indagini su attività sospette o malevole. Zeek supporta anche una vasta gamma di compiti di analisi del traffico oltre il dominio della sicurezza, inclusi la misurazione delle prestazioni e la risoluzione dei problemi.
 
 Fondamentalmente, i log creati da `zeek` non sono **pcaps**. Pertanto, sarà necessario utilizzare **altri strumenti** per analizzare i log dove si trova l'**informazione** sui pcaps.
 

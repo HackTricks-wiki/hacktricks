@@ -4,7 +4,7 @@
 
 ## Intro
 
-Per ulteriori informazioni su cos'è un iButton controlla:
+Per ulteriori informazioni su cosa sia un iButton, controlla:
 
 {{#ref}}
 ../ibutton.md

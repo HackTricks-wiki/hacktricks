@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Documenti Office
+## Office Documents
 
 Microsoft Word esegue la convalida dei dati del file prima di aprire un file. La convalida dei dati viene eseguita sotto forma di identificazione della struttura dei dati, rispetto allo standard OfficeOpenXML. Se si verifica un errore durante l'identificazione della struttura dei dati, il file in analisi non verrà aperto.
 
@@ -66,14 +66,14 @@ proc.Create "powershell <beacon line generated>
 ```
 #### Rimuovere manualmente i metadati
 
-Vai su **File > Info > Ispeziona documento > Ispeziona documento**, che aprirà l'Ispezione documento. Clicca su **Ispeziona** e poi su **Rimuovi tutto** accanto a **Proprietà documento e informazioni personali**.
+Vai su **File > Info > Ispeziona documento > Ispeziona documento**, che aprirà l'Inspect Document. Clicca su **Ispeziona** e poi su **Rimuovi tutto** accanto a **Proprietà del documento e informazioni personali**.
 
-#### Estensione Doc
+#### Estensione del documento
 
 Quando hai finito, seleziona il menu a discesa **Salva come tipo**, cambia il formato da **`.docx`** a **Word 97-2003 `.doc`**.\
 Fallo perché **non puoi salvare macro all'interno di un `.docx`** e c'è uno **stigma** **attorno** all'estensione abilitata per le macro **`.docm`** (ad esempio, l'icona della miniatura ha un enorme `!` e alcuni gateway web/email le bloccano completamente). Pertanto, questa **estensione legacy `.doc` è il miglior compromesso**.
 
-#### Generatori di macro malevoli
+#### Generatori di macro dannose
 
 - MacOS
 - [**macphish**](https://github.com/cldrn/macphish)

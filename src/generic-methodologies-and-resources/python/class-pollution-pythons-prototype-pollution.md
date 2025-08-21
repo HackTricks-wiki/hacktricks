@@ -182,7 +182,7 @@ subprocess.Popen('whoami', shell=True) # Calc.exe will pop up
 
 <summary>Sovrascrittura di <strong><code>__kwdefaults__</code></strong></summary>
 
-**`__kwdefaults__`** è un attributo speciale di tutte le funzioni, basato sulla [documentazione](https://docs.python.org/3/library/inspect.html) di Python, è una “mappatura di eventuali valori predefiniti per i parametri **solo parola chiave**”. Inquinare questo attributo ci consente di controllare i valori predefiniti dei parametri solo parola chiave di una funzione, questi sono i parametri della funzione che seguono \* o \*args.
+**`__kwdefaults__`** è un attributo speciale di tutte le funzioni, basato sulla [documentazione](https://docs.python.org/3/library/inspect.html) di Python, è una “mappatura di eventuali valori predefiniti per i parametri **solo parola chiave**”. Inquinare questo attributo ci consente di controllare i valori predefiniti dei parametri solo parola chiave di una funzione, questi sono i parametri della funzione che vengono dopo \* o \*args.
 ```python
 from os import system
 import json

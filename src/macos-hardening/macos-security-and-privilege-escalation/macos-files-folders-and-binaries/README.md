@@ -25,7 +25,7 @@
 - **Le applicazioni di sistema** si trovano in `/System/Applications`
 - **Le applicazioni installate** sono solitamente installate in `/Applications` o in `~/Applications`
 - **I dati delle applicazioni** possono essere trovati in `/Library/Application Support` per le applicazioni in esecuzione come root e `~/Library/Application Support` per le applicazioni in esecuzione come utente.
-- I **daemon** delle applicazioni di terze parti che **devono essere eseguiti come root** si trovano solitamente in `/Library/PrivilegedHelperTools/`
+- Le **daemon** delle applicazioni di terze parti che **devono essere eseguite come root** si trovano solitamente in `/Library/PrivilegedHelperTools/`
 - Le app **sandboxed** sono mappate nella cartella `~/Library/Containers`. Ogni app ha una cartella denominata secondo l'ID del bundle dell'applicazione (`com.apple.Safari`).
 - Il **kernel** si trova in `/System/Library/Kernels/kernel`
 - **Le estensioni del kernel di Apple** si trovano in `/System/Library/Extensions`
@@ -77,7 +77,7 @@ macos-bundles.md
 
 Su macOS (e iOS) tutte le librerie condivise di sistema, come framework e dylibs, sono **combinati in un unico file**, chiamato **dyld shared cache**. Questo migliora le prestazioni, poiché il codice può essere caricato più rapidamente.
 
-Questo si trova in macOS in `/System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/` e nelle versioni precedenti potresti trovare la **shared cache** in **`/System/Library/dyld/`**.\
+Questo si trova in macOS in `/System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/` e nelle versioni più vecchie potresti trovare la **shared cache** in **`/System/Library/dyld/`**.\
 In iOS puoi trovarli in **`/System/Library/Caches/com.apple.dyld/`**.
 
 Simile alla dyld shared cache, il kernel e le estensioni del kernel sono anche compilati in una cache del kernel, che viene caricata all'avvio.
@@ -108,7 +108,7 @@ Alcuni estrattori non funzioneranno poiché le dylibs sono precollegate con indi
 
 Nota che anche se l'SLC è scivolato al primo utilizzo, tutti i **processi** utilizzano la **stessa copia**, il che **elimina la protezione ASLR** se l'attaccante è in grado di eseguire processi nel sistema. Questo è stato effettivamente sfruttato in passato e corretto con il pager della regione condivisa.
 
-I branch pool sono piccole Mach-O dylibs che creano piccoli spazi tra le mappature delle immagini rendendo impossibile l'interposizione delle funzioni.
+I branch pool sono piccole dylibs Mach-O che creano piccoli spazi tra le mappature delle immagini rendendo impossibile l'interposizione delle funzioni.
 
 ### Override SLCs
 
@@ -117,20 +117,20 @@ Utilizzando le variabili di ambiente:
 - **`DYLD_DHARED_REGION=private DYLD_SHARED_CACHE_DIR=</path/dir> DYLD_SHARED_CACHE_DONT_VALIDATE=1`** -> Questo permetterà di caricare una nuova cache di librerie condivise.
 - **`DYLD_SHARED_CACHE_DIR=avoid`** e sostituire manualmente le librerie con symlink alla cache condivisa con quelle reali (dovrai estrarle).
 
-## Special File Permissions
+## Permessi Speciali dei File
 
-### Folder permissions
+### Permessi delle Cartelle
 
-In una **cartella**, **la lettura** consente di **elencarla**, **la scrittura** consente di **eliminare** e **scrivere** file al suo interno, e **l'esecuzione** consente di **traversare** la directory. Quindi, ad esempio, un utente con **permesso di lettura su un file** all'interno di una directory in cui **non ha permesso di esecuzione** **non sarà in grado di leggere** il file.
+In una **cartella**, **la lettura** consente di **elencarla**, **la scrittura** consente di **eliminare** e **scrivere** file al suo interno, e **l'esecuzione** consente di **attraversare** la directory. Quindi, ad esempio, un utente con **permesso di lettura su un file** all'interno di una directory in cui non ha **permesso di esecuzione** **non sarà in grado di leggere** il file.
 
-### Flag modifiers
+### Modificatori di Flag
 
 Ci sono alcuni flag che possono essere impostati nei file che faranno comportare il file in modo diverso. Puoi **controllare i flag** dei file all'interno di una directory con `ls -lO /path/directory`
 
 - **`uchg`**: Conosciuto come flag **uchange** impedirà **qualsiasi azione** di modifica o eliminazione del **file**. Per impostarlo fare: `chflags uchg file.txt`
 - L'utente root potrebbe **rimuovere il flag** e modificare il file.
 - **`restricted`**: Questo flag rende il file **protetto da SIP** (non puoi aggiungere questo flag a un file).
-- **`Sticky bit`**: Se una directory ha il bit sticky, **solo** il **proprietario della directory o root può rinominare o eliminare** file. Tipicamente questo è impostato sulla directory /tmp per impedire agli utenti normali di eliminare o spostare i file di altri utenti.
+- **`Sticky bit`**: Se una directory ha il bit sticky, **solo** il **proprietario della directory o root può rinominare o eliminare** file. Tipicamente questo è impostato sulla directory /tmp per impedire agli utenti ordinari di eliminare o spostare i file di altri utenti.
 
 Tutti i flag possono essere trovati nel file `sys/stat.h` (trovalo usando `mdfind stat.h | grep stat.h`) e sono:
 
@@ -138,7 +138,7 @@ Tutti i flag possono essere trovati nel file `sys/stat.h` (trovalo usando `mdfin
 - `UF_NODUMP` 0x00000001: Non eseguire il dump del file.
 - `UF_IMMUTABLE` 0x00000002: Il file non può essere modificato.
 - `UF_APPEND` 0x00000004: Le scritture nel file possono solo aggiungere.
-- `UF_OPAQUE` 0x00000008: La directory è opaca rispetto a union.
+- `UF_OPAQUE` 0x00000008: La directory è opaca rispetto all'unione.
 - `UF_COMPRESSED` 0x00000020: Il file è compresso (alcuni file system).
 - `UF_TRACKED` 0x00000040: Nessuna notifica per eliminazioni/rinominazioni per file con questo impostato.
 - `UF_DATAVAULT` 0x00000080: È richiesta un'autorizzazione per la lettura e la scrittura.
@@ -156,12 +156,12 @@ Tutti i flag possono essere trovati nel file `sys/stat.h` (trovalo usando `mdfin
 
 ### **File ACLs**
 
-Le **ACL** dei file contengono **ACE** (Access Control Entries) dove possono essere assegnati permessi **più granulari** a diversi utenti.
+Le **ACLs** dei file contengono **ACE** (Access Control Entries) dove possono essere assegnati permessi più **granulari** a diversi utenti.
 
 È possibile concedere a una **directory** questi permessi: `list`, `search`, `add_file`, `add_subdirectory`, `delete_child`, `delete_child`.\
 E a un **file**: `read`, `write`, `append`, `execute`.
 
-Quando il file contiene ACL, troverai **un "+" quando elenchi i permessi come in**:
+Quando il file contiene ACLs troverai **un "+" quando elenchi i permessi come in**:
 ```bash
 ls -ld Movies
 drwx------+   7 username  staff     224 15 Apr 19:42 Movies
@@ -221,7 +221,7 @@ Lo strumento afscexpand può essere utilizzato per forzare la decompressione di 
 
 ## **Universal binaries &** Mach-o Format
 
-I binari Mac OS di solito sono compilati come **universal binaries**. Un **universal binary** può **supportare più architetture nello stesso file**.
+I binari di Mac OS sono solitamente compilati come **universal binaries**. Un **universal binary** può **supportare più architetture nello stesso file**.
 
 {{#ref}}
 universal-binaries-and-mach-o-format.md

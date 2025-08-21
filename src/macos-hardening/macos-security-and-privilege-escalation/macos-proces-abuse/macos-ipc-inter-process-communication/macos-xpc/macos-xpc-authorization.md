@@ -10,7 +10,7 @@ Quando un'applicazione ha bisogno di **eseguire azioni come utente privilegiato*
 
 ### ShouldAcceptNewConnection sempre YES
 
-Un esempio può essere trovato in [EvenBetterAuthorizationSample](https://github.com/brenwell/EvenBetterAuthorizationSample). In `App/AppDelegate.m` cerca di **connettersi** al **HelperTool**. E in `HelperTool/HelperTool.m` la funzione **`shouldAcceptNewConnection`** **non controllerà** nessuno dei requisiti indicati in precedenza. Restituirà sempre YES:
+Un esempio può essere trovato in [EvenBetterAuthorizationSample](https://github.com/brenwell/EvenBetterAuthorizationSample). In `App/AppDelegate.m` tenta di **connettersi** al **HelperTool**. E in `HelperTool/HelperTool.m` la funzione **`shouldAcceptNewConnection`** **non controllerà** nessuno dei requisiti indicati in precedenza. Restituirà sempre YES:
 ```objectivec
 - (BOOL)listener:(NSXPCListener *)listener shouldAcceptNewConnection:(NSXPCConnection *)newConnection
 // Called by our XPC listener when a new connection comes in.  We configure the connection
@@ -37,7 +37,7 @@ macos-xpc-connecting-process-check/
 
 Tuttavia, c'è una **autorizzazione in corso quando viene chiamato un metodo dal HelperTool**.
 
-La funzione **`applicationDidFinishLaunching`** di `App/AppDelegate.m` creerà un riferimento di autorizzazione vuoto dopo che l'app è stata avviata. Questo dovrebbe sempre funzionare.\
+La funzione **`applicationDidFinishLaunching`** da `App/AppDelegate.m` creerà un riferimento di autorizzazione vuoto dopo che l'app è stata avviata. Questo dovrebbe sempre funzionare.\
 Poi, cercherà di **aggiungere alcuni diritti** a quel riferimento di autorizzazione chiamando `setupAuthorizationRights`:
 ```objectivec
 - (void)applicationDidFinishLaunching:(NSNotification *)note
@@ -62,7 +62,7 @@ if (self->_authRef) {
 [self.window makeKeyAndOrderFront:self];
 }
 ```
-La funzione `setupAuthorizationRights` di `Common/Common.m` memorizzerà nel database di autorizzazione `/var/db/auth.db` i diritti dell'applicazione. Nota come aggiungerà solo i diritti che non sono ancora nel database:
+La funzione `setupAuthorizationRights` da `Common/Common.m` memorizzerà nel database di autorizzazione `/var/db/auth.db` i diritti dell'applicazione. Nota come aggiungerà solo i diritti che non sono ancora nel database:
 ```objectivec
 + (void)setupAuthorizationRights:(AuthorizationRef)authRef
 // See comment in header.
@@ -228,7 +228,7 @@ assert(junk == errAuthorizationSuccess);
 return error;
 }
 ```
-Nota che per **verificare i requisiti per ottenere il diritto** di chiamare quel metodo, la funzione `authorizationRightForCommand` controllerà solo l'oggetto commento precedente **`commandInfo`**. Poi, chiamerà **`AuthorizationCopyRights`** per verificare **se ha i diritti** di chiamare la funzione (nota che i flag consentono l'interazione con l'utente).
+Nota che per **verificare i requisiti per ottenere il diritto** di chiamare quel metodo, la funzione `authorizationRightForCommand` controllerà semplicemente l'oggetto commento precedente **`commandInfo`**. Poi, chiamerà **`AuthorizationCopyRights`** per verificare **se ha i diritti** di chiamare la funzione (nota che i flag consentono l'interazione con l'utente).
 
 In questo caso, per chiamare la funzione `readLicenseKeyAuthorization`, il `kCommandKeyAuthRightDefault` è definito come `@kAuthorizationRuleClassAllow`. Quindi **chiunque può chiamarlo**.
 
@@ -240,7 +240,7 @@ sudo sqlite3 /var/db/auth.db
 SELECT name FROM rules;
 SELECT name FROM rules WHERE name LIKE '%safari%';
 ```
-Quindi, puoi leggere chi può accedere al diritto con:
+Poi, puoi leggere chi può accedere al diritto con:
 ```bash
 security authorizationdb read com.apple.safaridriver.allow
 ```
@@ -249,8 +249,8 @@ security authorizationdb read com.apple.safaridriver.allow
 Puoi trovare **tutte le configurazioni dei permessi** [**qui**](https://www.dssw.co.uk/reference/authorization-rights/), ma le combinazioni che non richiederanno interazione da parte dell'utente sarebbero:
 
 1. **'authenticate-user': 'false'**
-- Questa è la chiave più diretta. Se impostata su `false`, specifica che un utente non ha bisogno di fornire autenticazione per ottenere questo diritto.
-- Questo viene utilizzato in **combinazione con una delle 2 sotto o indicando un gruppo** a cui l'utente deve appartenere.
+- Questa è la chiave più diretta. Se impostata su `false`, specifica che un utente non deve fornire autenticazione per ottenere questo diritto.
+- Questo è usato in **combinazione con una delle 2 sotto o indicando un gruppo** a cui l'utente deve appartenere.
 2. **'allow-root': 'true'**
 - Se un utente opera come utente root (che ha permessi elevati), e questa chiave è impostata su `true`, l'utente root potrebbe potenzialmente ottenere questo diritto senza ulteriore autenticazione. Tuttavia, tipicamente, ottenere lo stato di utente root richiede già autenticazione, quindi questo non è uno scenario di "nessuna autenticazione" per la maggior parte degli utenti.
 3. **'session-owner': 'true'**
@@ -258,7 +258,7 @@ Puoi trovare **tutte le configurazioni dei permessi** [**qui**](https://www.dssw
 4. **'shared': 'true'**
 - Questa chiave non concede diritti senza autenticazione. Invece, se impostata su `true`, significa che una volta che il diritto è stato autenticato, può essere condiviso tra più processi senza che ciascuno debba ri-autenticarsi. Ma la concessione iniziale del diritto richiederebbe comunque autenticazione a meno che non sia combinata con altre chiavi come `'authenticate-user': 'false'`.
 
-Puoi [**utilizzare questo script**](https://gist.github.com/carlospolop/96ecb9e385a4667b9e40b24e878652f9) per ottenere i diritti interessanti:
+Puoi [**usare questo script**](https://gist.github.com/carlospolop/96ecb9e385a4667b9e40b24e878652f9) per ottenere i diritti interessanti:
 ```bash
 Rights with 'authenticate-user': 'false':
 is-admin (admin), is-admin-nonshared (admin), is-appstore (_appstore), is-developer (_developer), is-lpadmin (_lpadmin), is-root (run as root), is-session-owner (session owner), is-webdeveloper (_webdeveloper), system-identity-write-self (session owner), system-install-iap-software (run as root), system-install-software-iap (run as root)

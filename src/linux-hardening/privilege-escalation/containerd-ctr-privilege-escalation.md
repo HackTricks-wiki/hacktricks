@@ -31,8 +31,8 @@ ctr run --mount type=bind,src=/,dst=/,options=rbind -t registry:5000/ubuntu:late
 ```
 ## PE 2
 
-Esegui un contenitore privilegiato ed esci da esso.\
-Puoi eseguire un contenitore privilegiato come:
+Esegui un container privilegiato ed esci da esso.\
+Puoi eseguire un container privilegiato come:
 ```bash
 ctr run --privileged --net-host -t registry:5000/modified-ubuntu:latest ubuntu bash
 ```

@@ -10,7 +10,7 @@
 
 ## Analisi del Malware
 
-Questo **non è necessariamente il primo passo da eseguire una volta ottenuta l'immagine**. Ma puoi utilizzare queste tecniche di analisi del malware in modo indipendente se hai un file, un'immagine del file system, un'immagine della memoria, pcap... quindi è utile **tenere a mente queste azioni**:
+Questo **non è necessariamente il primo passo da eseguire una volta ottenuta l'immagine**. Ma puoi utilizzare queste tecniche di analisi del malware in modo indipendente se hai un file, un'immagine del file system, un'immagine di memoria, pcap... quindi è utile **tenere a mente queste azioni**:
 
 {{#ref}}
 malware-analysis.md

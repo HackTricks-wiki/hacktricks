@@ -83,7 +83,7 @@ Artifacts
 
 ### Impacket smbexec.py (SMBExec)
 
-- Crea un servizio temporaneo che avvia cmd.exe e utilizza una pipe denominata per I/O. In genere evita di scaricare un payload EXE completo; l'esecuzione dei comandi è semi-interattiva.
+- Crea un servizio temporaneo che avvia cmd.exe e utilizza un pipe nominato per I/O. In genere evita di scaricare un payload EXE completo; l'esecuzione dei comandi è semi-interattiva.
 ```bash
 smbexec.py DOMAIN/user:Password@HOST
 smbexec.py -hashes LMHASH:NTHASH DOMAIN/user@HOST
@@ -113,15 +113,15 @@ Artefatti tipici di host/rete quando si utilizzano tecniche simili a PsExec:
 - Sysmon 1 (Creazione processo) per services.exe o l'immagine del servizio, 3 (Connessione di rete), 11 (Creazione file) in C:\Windows\, 17/18 (Pipe Creata/Connessa) per pipe come \\.\pipe\psexesvc, \\.\pipe\remcom_*, o equivalenti randomizzati.
 - Artefatto di registro per EULA di Sysinternals: HKCU\Software\Sysinternals\PsExec\EulaAccepted=0x1 sull'host operatore (se non soppressa).
 
-Idee di ricerca
+Idee di caccia
 - Allerta su installazioni di servizi dove l'ImagePath include cmd.exe /c, powershell.exe, o posizioni TEMP.
 - Cerca creazioni di processi dove ParentImage è C:\Windows\PSEXESVC.exe o figli di services.exe in esecuzione come SYSTEM LOCALE che eseguono shell.
-- Segnala pipe nominate che terminano con -stdin/-stdout/-stderr o nomi di pipe ben noti di clone PsExec.
+- Segnala pipe nominate che terminano con -stdin/-stdout/-stderr o nomi di pipe ben noti di clone di PsExec.
 
 ## Risoluzione dei problemi comuni
-- Accesso negato (5) durante la creazione di servizi: non è realmente admin locale, restrizioni remote UAC per account locali, o protezione da manomissione EDR sul percorso del binario di servizio.
+- Accesso negato (5) durante la creazione di servizi: non è un vero admin locale, restrizioni UAC remote per account locali, o protezione da manomissione EDR sul percorso del binario di servizio.
 - Il percorso di rete non è stato trovato (53) o non è stato possibile connettersi a ADMIN$: firewall che blocca SMB/RPC o condivisioni admin disabilitate.
-- Kerberos fallisce ma NTLM è bloccato: connettersi utilizzando hostname/FQDN (non IP), assicurarsi che SPN siano corretti, o fornire -k/-no-pass con i biglietti quando si utilizza Impacket.
+- Kerberos fallisce ma NTLM è bloccato: connettersi utilizzando hostname/FQDN (non IP), assicurarsi che SPN siano corretti, o fornire -k/-no-pass con ticket quando si utilizza Impacket.
 - L'avvio del servizio scade ma il payload è stato eseguito: previsto se non è un vero binario di servizio; catturare l'output in un file o utilizzare smbexec per I/O dal vivo.
 
 ## Note di indurimento

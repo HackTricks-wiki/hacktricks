@@ -78,7 +78,7 @@ La firma delle immagini Docker garantisce la sicurezza e l'integrità delle imma
 - Tentare di scaricare un'immagine non firmata con la fiducia nei contenuti attivata risulta in un errore "No trust data for latest".
 - Per le spinte delle immagini dopo la prima, Docker richiede la frase di accesso della chiave del repository per firmare l'immagine.
 
-Per eseguire il backup delle tue chiavi private, utilizza il comando:
+Per eseguire il backup delle tue chiavi private, usa il comando:
 ```bash
 tar -zcvf private_keys_backup.tar.gz ~/.docker/trust/private
 ```
@@ -90,15 +90,15 @@ Quando si cambia host Docker, è necessario spostare le chiavi root e repository
 
 <summary>Riepilogo delle Funzionalità di Sicurezza dei Container</summary>
 
-**Principali Funzionalità di Isolamento dei Processi**
+**Funzionalità Principali di Isolamento dei Processi**
 
 Negli ambienti containerizzati, isolare i progetti e i loro processi è fondamentale per la sicurezza e la gestione delle risorse. Ecco una spiegazione semplificata dei concetti chiave:
 
 **Namespace**
 
 - **Scopo**: Garantire l'isolamento delle risorse come processi, rete e filesystem. In particolare in Docker, gli namespace mantengono i processi di un container separati dall'host e da altri container.
-- **Utilizzo di `unshare`**: Il comando `unshare` (o la syscall sottostante) è utilizzato per creare nuovi namespace, fornendo un ulteriore livello di isolamento. Tuttavia, mentre Kubernetes non blocca intrinsecamente questo, Docker lo fa.
-- **Limitazione**: Creare nuovi namespace non consente a un processo di tornare ai namespace predefiniti dell'host. Per penetrare nei namespace dell'host, in genere è necessario avere accesso alla directory `/proc` dell'host, utilizzando `nsenter` per l'ingresso.
+- **Utilizzo di `unshare`**: Il comando `unshare` (o la syscall sottostante) viene utilizzato per creare nuovi namespace, fornendo un ulteriore livello di isolamento. Tuttavia, mentre Kubernetes non blocca intrinsecamente questo, Docker lo fa.
+- **Limitazione**: Creare nuovi namespace non consente a un processo di tornare ai namespace predefiniti dell'host. Per penetrare nei namespace dell'host, di solito è necessario avere accesso alla directory `/proc` dell'host, utilizzando `nsenter` per l'ingresso.
 
 **Gruppi di Controllo (CGroups)**
 
@@ -169,7 +169,7 @@ cgroups.md
 
 Le capacità consentono un **controllo più fine delle capacità che possono essere consentite** per l'utente root. Docker utilizza la funzionalità di capacità del kernel Linux per **limitare le operazioni che possono essere eseguite all'interno di un Container** indipendentemente dal tipo di utente.
 
-Quando un container docker viene eseguito, il **processo abbandona capacità sensibili che il processo potrebbe utilizzare per sfuggire all'isolamento**. Questo cerca di garantire che il processo non possa eseguire azioni sensibili e fuggire:
+Quando un container docker viene eseguito, il **processo abbandona capacità sensibili che il processo potrebbe utilizzare per sfuggire all'isolamento**. Questo cerca di garantire che il processo non sarà in grado di eseguire azioni sensibili e fuggire:
 
 {{#ref}}
 ../linux-capabilities.md
@@ -271,15 +271,15 @@ docker run -it --security-opt=no-new-privileges:true nonewpriv
 ```
 Per ulteriori opzioni **`--security-opt`** controlla: [https://docs.docker.com/engine/reference/run/#security-configuration](https://docs.docker.com/engine/reference/run/#security-configuration)
 
-## Altre Considerazioni di Sicurezza
+## Altre Considerazioni sulla Sicurezza
 
 ### Gestione dei Segreti: Migliori Pratiche
 
-È fondamentale evitare di incorporare segreti direttamente nelle immagini Docker o di utilizzare variabili d'ambiente, poiché questi metodi espongono le tue informazioni sensibili a chiunque abbia accesso al container tramite comandi come `docker inspect` o `exec`.
+È fondamentale evitare di incorporare segreti direttamente nelle immagini Docker o di utilizzare variabili d'ambiente, poiché questi metodi espongono le tue informazioni sensibili a chiunque abbia accesso al contenitore tramite comandi come `docker inspect` o `exec`.
 
-I **volumi Docker** sono un'alternativa più sicura, raccomandata per accedere a informazioni sensibili. Possono essere utilizzati come un filesystem temporaneo in memoria, mitigando i rischi associati a `docker inspect` e al logging. Tuttavia, gli utenti root e quelli con accesso `exec` al container potrebbero comunque accedere ai segreti.
+**I volumi Docker** sono un'alternativa più sicura, raccomandata per accedere a informazioni sensibili. Possono essere utilizzati come un filesystem temporaneo in memoria, mitigando i rischi associati a `docker inspect` e al logging. Tuttavia, gli utenti root e coloro che hanno accesso `exec` al contenitore potrebbero comunque accedere ai segreti.
 
-I **segreti Docker** offrono un metodo ancora più sicuro per gestire informazioni sensibili. Per le istanze che richiedono segreti durante la fase di costruzione dell'immagine, **BuildKit** presenta una soluzione efficiente con supporto per segreti a tempo di costruzione, migliorando la velocità di costruzione e fornendo funzionalità aggiuntive.
+**I segreti Docker** offrono un metodo ancora più sicuro per gestire informazioni sensibili. Per le istanze che richiedono segreti durante la fase di costruzione dell'immagine, **BuildKit** presenta una soluzione efficiente con supporto per segreti a tempo di costruzione, migliorando la velocità di costruzione e fornendo funzionalità aggiuntive.
 
 Per sfruttare BuildKit, può essere attivato in tre modi:
 
@@ -310,7 +310,7 @@ Negli ambienti Kubernetes, i segreti sono supportati nativamente e possono esser
 
 ### gVisor
 
-**gVisor** è un kernel applicativo, scritto in Go, che implementa una parte sostanziale della superficie del sistema Linux. Include un runtime [Open Container Initiative (OCI)](https://www.opencontainers.org) chiamato `runsc` che fornisce un **confine di isolamento tra l'applicazione e il kernel host**. Il runtime `runsc` si integra con Docker e Kubernetes, rendendo semplice l'esecuzione di container in sandbox.
+**gVisor** è un kernel applicativo, scritto in Go, che implementa una parte sostanziale della superficie di sistema Linux. Include un runtime [Open Container Initiative (OCI)](https://www.opencontainers.org) chiamato `runsc` che fornisce un **confine di isolamento tra l'applicazione e il kernel host**. Il runtime `runsc` si integra con Docker e Kubernetes, rendendo semplice l'esecuzione di container in sandbox.
 
 {{#ref}}
 https://github.com/google/gvisor
@@ -326,17 +326,17 @@ https://katacontainers.io/
 
 ### Suggerimenti Riassuntivi
 
-- **Non utilizzare il flag `--privileged` o montare un** [**socket Docker all'interno del container**](https://raesene.github.io/blog/2016/03/06/The-Dangers-Of-Docker.sock/)**.** Lo socket docker consente di avviare container, quindi è un modo semplice per prendere il pieno controllo dell'host, ad esempio, eseguendo un altro container con il flag `--privileged`.
+- **Non utilizzare il flag `--privileged` o montare un** [**socket Docker all'interno del container**](https://raesene.github.io/blog/2016/03/06/The-Dangers-Of-Docker.sock/)**.** Il socket docker consente di avviare container, quindi è un modo semplice per prendere il pieno controllo dell'host, ad esempio, eseguendo un altro container con il flag `--privileged`.
 - **Non eseguire come root all'interno del container. Utilizzare un** [**utente diverso**](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#user) **e** [**namespace utente**](https://docs.docker.com/engine/security/userns-remap/)**.** Il root nel container è lo stesso che sull'host a meno che non venga rimappato con i namespace utente. È solo leggermente limitato da, principalmente, namespace Linux, capacità e cgroups.
-- [**Elimina tutte le capacità**](https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities) **(`--cap-drop=all`) e abilita solo quelle necessarie** (`--cap-add=...`). Molti carichi di lavoro non necessitano di capacità e aggiungerle aumenta l'ambito di un potenziale attacco.
-- [**Utilizza l'opzione di sicurezza “no-new-privileges”**](https://raesene.github.io/blog/2019/06/01/docker-capabilities-and-no-new-privs/) per impedire ai processi di acquisire più privilegi, ad esempio tramite binari suid.
-- [**Limita le risorse disponibili per il container**](https://docs.docker.com/engine/reference/run/#runtime-constraints-on-resources)**.** I limiti delle risorse possono proteggere la macchina da attacchi di denial of service.
-- **Regola** [**seccomp**](https://docs.docker.com/engine/security/seccomp/)**,** [**AppArmor**](https://docs.docker.com/engine/security/apparmor/) **(o SELinux)** profili per limitare le azioni e le syscalls disponibili per il container al minimo necessario.
-- **Utilizza** [**immagini docker ufficiali**](https://docs.docker.com/docker-hub/official_images/) **e richiedi firme** o costruisci le tue basate su di esse. Non ereditare o utilizzare immagini [backdoored](https://arstechnica.com/information-technology/2018/06/backdoored-images-downloaded-5-million-times-finally-removed-from-docker-hub/). Inoltre, conserva le chiavi root e le frasi di accesso in un luogo sicuro. Docker ha piani per gestire le chiavi con UCP.
-- **Ricostruisci regolarmente** le tue immagini per **applicare patch di sicurezza all'host e alle immagini.**
-- Gestisci i tuoi **segreti con saggezza** in modo che sia difficile per l'attaccante accedervi.
+- [**Eliminare tutte le capacità**](https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities) **(`--cap-drop=all`) e abilitare solo quelle necessarie** (`--cap-add=...`). Molti carichi di lavoro non necessitano di capacità e aggiungerle aumenta l'ambito di un potenziale attacco.
+- [**Utilizzare l'opzione di sicurezza “no-new-privileges”**](https://raesene.github.io/blog/2019/06/01/docker-capabilities-and-no-new-privs/) per impedire ai processi di acquisire più privilegi, ad esempio tramite binari suid.
+- [**Limitare le risorse disponibili per il container**](https://docs.docker.com/engine/reference/run/#runtime-constraints-on-resources)**.** I limiti delle risorse possono proteggere la macchina da attacchi di denial of service.
+- **Regolare** [**seccomp**](https://docs.docker.com/engine/security/seccomp/)**,** [**AppArmor**](https://docs.docker.com/engine/security/apparmor/) **(o SELinux)** profili per limitare le azioni e le syscalls disponibili per il container al minimo necessario.
+- **Utilizzare** [**immagini docker ufficiali**](https://docs.docker.com/docker-hub/official_images/) **e richiedere firme** o costruire le proprie basate su di esse. Non ereditare o utilizzare immagini [backdoored](https://arstechnica.com/information-technology/2018/06/backdoored-images-downloaded-5-million-times-finally-removed-from-docker-hub/). Inoltre, conservare le chiavi root e le frasi di accesso in un luogo sicuro. Docker ha piani per gestire le chiavi con UCP.
+- **Ricostruire regolarmente** le proprie immagini per **applicare patch di sicurezza all'host e alle immagini.**
+- Gestire i propri **segreti con saggezza** in modo che sia difficile per l'attaccante accedervi.
 - Se **esponi il demone docker utilizza HTTPS** con autenticazione client e server.
-- Nel tuo Dockerfile, **preferisci COPY invece di ADD**. ADD estrae automaticamente i file compressi e può copiare file da URL. COPY non ha queste capacità. Ogni volta che è possibile, evita di utilizzare ADD per non essere suscettibile ad attacchi tramite URL remoti e file Zip.
+- Nel tuo Dockerfile, **preferisci COPY invece di ADD**. ADD estrae automaticamente file compressi e può copiare file da URL. COPY non ha queste capacità. Ogni volta che è possibile, evita di utilizzare ADD per non essere suscettibile ad attacchi tramite URL remoti e file Zip.
 - Avere **container separati per ogni micro-s**ervizio.
 - **Non mettere ssh** all'interno del container, “docker exec” può essere utilizzato per ssh nel Container.
 - Avere **immagini di container più piccole**.
@@ -351,7 +351,7 @@ docker-breakout-privilege-escalation/
 
 ## Bypass del Plugin di Autenticazione Docker
 
-Se hai accesso allo socket docker o hai accesso a un utente nel **gruppo docker ma le tue azioni sono limitate da un plugin di autenticazione docker**, verifica se puoi **bypassarlo:**
+Se hai accesso al socket docker o hai accesso a un utente nel **gruppo docker ma le tue azioni sono limitate da un plugin di autenticazione docker**, controlla se puoi **bypassarlo:**
 
 {{#ref}}
 authz-and-authn-docker-access-authorization-plugin.md
@@ -359,7 +359,7 @@ authz-and-authn-docker-access-authorization-plugin.md
 
 ## Indurimento di Docker
 
-- Lo strumento [**docker-bench-security**](https://github.com/docker/docker-bench-security) è uno script che controlla dozzine di pratiche migliori comuni per il deployment di container Docker in produzione. I test sono tutti automatizzati e si basano sul [CIS Docker Benchmark v1.3.1](https://www.cisecurity.org/benchmark/docker/).\
+- Lo strumento [**docker-bench-security**](https://github.com/docker/docker-bench-security) è uno script che controlla dozzine di best-practices comuni per il deployment di container Docker in produzione. I test sono tutti automatizzati e si basano sul [CIS Docker Benchmark v1.3.1](https://www.cisecurity.org/benchmark/docker/).\
 Devi eseguire lo strumento dall'host che esegue docker o da un container con privilegi sufficienti. Scopri **come eseguirlo nel README:** [**https://github.com/docker/docker-bench-security**](https://github.com/docker/docker-bench-security).
 
 ## Riferimenti

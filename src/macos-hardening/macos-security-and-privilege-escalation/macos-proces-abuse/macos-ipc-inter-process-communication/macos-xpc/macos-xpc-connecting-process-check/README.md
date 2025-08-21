@@ -17,7 +17,7 @@ Quando viene stabilita una connessione a un servizio XPC, il server verificherà
 5. (4 o 5) Controlla se il processo di connessione ha un runtime rinforzato senza diritti pericolosi (come quelli che consentono di caricare librerie arbitrarie o utilizzare variabili d'ambiente DYLD).
 1. Se questo **non è verificato**, il client potrebbe essere **vulnerabile all'iniezione di codice**.
 6. Controlla se il processo di connessione ha un **diritto** che gli consente di connettersi al servizio. Questo è applicabile per i binari Apple.
-7. La **verifica** deve essere **basata** sul **token di audit del client di connessione** **invece** che sul suo ID processo (**PID**) poiché il primo previene **attacchi di riutilizzo del PID**.
+7. La **verifica** deve essere **basata** sul **token di audit del client di connessione** **invece** che sul suo ID di processo (**PID**) poiché il primo previene **attacchi di riutilizzo del PID**.
 - Gli sviluppatori **raramente utilizzano la chiamata API del token di audit** poiché è **privata**, quindi Apple potrebbe **cambiarla** in qualsiasi momento. Inoltre, l'uso di API private non è consentito nelle app del Mac App Store.
 - Se viene utilizzato il metodo **`processIdentifier`**, potrebbe essere vulnerabile.
 - **`xpc_dictionary_get_audit_token`** dovrebbe essere utilizzato invece di **`xpc_connection_get_audit_token`**, poiché quest'ultimo potrebbe anche essere [vulnerabile in determinate situazioni](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/).
@@ -71,7 +71,7 @@ SecCodeCheckValidity(code, kSecCSDefaultFlags, requirementRef);
 SecTaskRef taskRef = SecTaskCreateWithAuditToken(NULL, ((ExtendedNSXPCConnection*)newConnection).auditToken);
 SecTaskValidateForRequirement(taskRef, (__bridge CFStringRef)(requirementString))
 ```
-Se un sviluppatore non vuole controllare la versione del client, potrebbe almeno verificare che il client non sia vulnerabile all'iniezione di processi:
+Se un sviluppatore non vuole controllare la versione del client, potrebbe verificare che il client non sia vulnerabile all'iniezione di processi almeno:
 ```objectivec
 [...]
 CFDictionaryRef csInfo = NULL;

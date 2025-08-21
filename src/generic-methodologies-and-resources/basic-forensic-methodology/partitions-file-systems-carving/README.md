@@ -10,7 +10,7 @@ L'unità **minima** di un disco è il **settore** (normalmente composto da 512B)
 ### MBR (master Boot Record)
 
 È allocato nel **primo settore del disco dopo i 446B del codice di avvio**. Questo settore è essenziale per indicare al PC cosa e da dove una partizione dovrebbe essere montata.\
-Permette fino a **4 partizioni** (al massimo **solo 1** può essere attiva/**avviabile**). Tuttavia, se hai bisogno di più partizioni, puoi utilizzare **partizioni estese**. L'**ultimo byte** di questo primo settore è la firma del record di avvio **0x55AA**. Solo una partizione può essere contrassegnata come attiva.\
+Permette fino a **4 partizioni** (al massimo **solo 1** può essere attiva/**avviabile**). Tuttavia, se hai bisogno di più partizioni puoi utilizzare **partizioni estese**. L'**ultimo byte** di questo primo settore è la firma del record di avvio **0x55AA**. Solo una partizione può essere contrassegnata come attiva.\
 MBR consente **max 2.2TB**.
 
 ![](<../../../images/image (350).png>)
@@ -26,10 +26,10 @@ Dai **byte 440 ai 443** dell'MBR puoi trovare la **Windows Disk Signature** (se 
 | Offset      | Lunghezza   | Voce                |
 | ----------- | ----------- | ------------------- |
 | 0 (0x00)    | 446(0x1BE)  | Codice di avvio     |
-| 446 (0x1BE) | 16 (0x10)   | Prima Partizione     |
+| 446 (0x1BE) | 16 (0x10)   | Prima Partizione    |
 | 462 (0x1CE) | 16 (0x10)   | Seconda Partizione  |
-| 478 (0x1DE) | 16 (0x10)   | Terza Partizione     |
-| 494 (0x1EE) | 16 (0x10)   | Quarta Partizione    |
+| 478 (0x1DE) | 16 (0x10)   | Terza Partizione    |
+| 494 (0x1EE) | 16 (0x10)   | Quarta Partizione   |
 | 510 (0x1FE) | 2 (0x2)     | Firma 0x55 0xAA     |
 
 **Formato del Record di Partizione**
@@ -47,7 +47,7 @@ Dai **byte 440 ai 443** dell'MBR puoi trovare la **Windows Disk Signature** (se 
 | 8 (0x08)  | 4 (0x04) | Settori precedenti la partizione (little endian)      |
 | 12 (0x0C) | 4 (0x04) | Settori nella partizione                               |
 
-Per montare un MBR in Linux, devi prima ottenere l'offset di inizio (puoi usare `fdisk` e il comando `p`)
+Per montare un MBR in Linux devi prima ottenere l'offset di inizio (puoi usare `fdisk` e il comando `p`)
 
 ![](<../../../images/image (413) (3) (3) (3) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
@@ -131,7 +131,7 @@ Altri tipi di partizioni in [https://en.wikipedia.org/wiki/GUID_Partition_Table]
 
 ### Ispezione
 
-Dopo aver montato l'immagine forense con [**ArsenalImageMounter**](https://arsenalrecon.com/downloads/), puoi ispezionare il primo settore utilizzando lo strumento Windows [**Active Disk Editor**](https://www.disk-editor.org/index.html)**.** Nell'immagine seguente è stato rilevato un **MBR** sul **settore 0** e interpretato:
+Dopo aver montato l'immagine forense con [**ArsenalImageMounter**](https://arsenalrecon.com/downloads/), puoi ispezionare il primo settore utilizzando lo strumento di Windows [**Active Disk Editor**](https://www.disk-editor.org/index.html)**.** Nell'immagine seguente è stato rilevato un **MBR** sul **settore 0** e interpretato:
 
 ![](<../../../images/image (354).png>)
 
@@ -157,11 +157,11 @@ L'unità di archiviazione di base del file system è un **cluster, di solito 512
 - **FAT16**, che migliora a indirizzi a 16 bit, consentendo così di ospitare fino a 65.517 cluster.
 - **FAT32**, che avanza ulteriormente con indirizzi a 32 bit, consentendo un impressionante 268.435.456 cluster per volume.
 
-Una limitazione significativa in tutte le versioni di FAT è la **dimensione massima del file di 4GB**, imposta dal campo a 32 bit utilizzato per la memorizzazione della dimensione del file.
+Una limitazione significativa in tutte le versioni FAT è la **dimensione massima del file di 4GB**, imposta dal campo a 32 bit utilizzato per la memorizzazione della dimensione del file.
 
 I componenti chiave della directory radice, in particolare per FAT12 e FAT16, includono:
 
-- **Nome del File/Cartella** (fino a 8 caratteri)
+- **Nome File/Cartella** (fino a 8 caratteri)
 - **Attributi**
 - **Date di Creazione, Modifica e Ultimo Accesso**
 - **Indirizzo della Tabella FAT** (che indica il cluster iniziale del file)
@@ -169,11 +169,11 @@ I componenti chiave della directory radice, in particolare per FAT12 e FAT16, in
 
 ### EXT
 
-**Ext2** è il file system più comune per **partizioni non journaling** (**partizioni che non cambiano molto**) come la partizione di avvio. **Ext3/4** sono **journaling** e vengono solitamente utilizzati per le **altre partizioni**.
+**Ext2** è il file system più comune per le partizioni **non journaling** (**partizioni che non cambiano molto**) come la partizione di avvio. **Ext3/4** sono **journaling** e vengono solitamente utilizzati per le **altre partizioni**.
 
 ## **Metadata**
 
-Al alcuni file contengono metadati. Queste informazioni riguardano il contenuto del file che a volte potrebbe essere interessante per un analista poiché, a seconda del tipo di file, potrebbe contenere informazioni come:
+Alcuni file contengono metadati. Queste informazioni riguardano il contenuto del file che a volte potrebbe essere interessante per un analista poiché, a seconda del tipo di file, potrebbe contenere informazioni come:
 
 - Titolo
 - Versione di MS Office utilizzata
@@ -211,7 +211,7 @@ file-data-carving-recovery-tools.md
 
 ### Data Stream **C**arving
 
-Data Stream Carving è simile al File Carving ma **invece di cercare file completi, cerca frammenti interessanti** di informazioni.\
+Data Stream Carving è simile a File Carving ma **invece di cercare file completi, cerca frammenti interessanti** di informazioni.\
 Ad esempio, invece di cercare un file completo contenente URL registrati, questa tecnica cercherà URL.
 
 {{#ref}}
@@ -220,7 +220,7 @@ file-data-carving-recovery-tools.md
 
 ### Cancellazione Sicura
 
-Ovviamente, ci sono modi per **"cancellare in modo sicuro" file e parte dei registri su di essi**. Ad esempio, è possibile **sovrascrivere il contenuto** di un file con dati spazzatura più volte, e poi **rimuovere** i **registri** dal **$MFT** e **$LOGFILE** riguardanti il file, e **rimuovere le Copie Shadow del Volume**.\
+Ovviamente, ci sono modi per **cancellare "in modo sicuro" file e parte dei registri su di essi**. Ad esempio, è possibile **sovrascrivere il contenuto** di un file con dati spazzatura più volte, e poi **rimuovere** i **registri** dal **$MFT** e **$LOGFILE** riguardanti il file, e **rimuovere le Copie Shadow del Volume**.\
 Potresti notare che anche eseguendo quell'azione potrebbero esserci **altre parti in cui l'esistenza del file è ancora registrata**, e questo è vero e parte del lavoro del professionista forense è trovarle.
 
 ## Riferimenti

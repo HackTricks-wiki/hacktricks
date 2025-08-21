@@ -20,7 +20,7 @@ Questo è simile al [**LD_PRELOAD su Linux**](../../../../linux-hardening/privil
 Questa tecnica può essere anche **utilizzata come tecnica ASEP** poiché ogni applicazione installata ha un plist chiamato "Info.plist" che consente di **assegnare variabili ambientali** utilizzando una chiave chiamata `LSEnvironmental`.
 
 > [!TIP]
-> Dal 2012 **Apple ha drasticamente ridotto il potere** del **`DYLD_INSERT_LIBRARIES`**.
+> Dal 2012 **Apple ha drasticamente ridotto il potere** di **`DYLD_INSERT_LIBRARIES`**.
 >
 > Vai al codice e **controlla `src/dyld.cpp`**. Nella funzione **`pruneEnvironmentVariables`** puoi vedere che le variabili **`DYLD_*`** vengono rimosse.
 >
@@ -33,7 +33,7 @@ Questa tecnica può essere anche **utilizzata come tecnica ASEP** poiché ogni a
 >
 > Nelle versioni più aggiornate puoi trovare questa logica nella seconda parte della funzione **`configureProcessRestrictions`**. Tuttavia, ciò che viene eseguito nelle versioni più recenti sono i **controlli iniziali della funzione** (puoi rimuovere gli if relativi a iOS o simulazione poiché non verranno utilizzati in macOS).
 
-### Validazione della Libreria
+### Library Validation
 
 Anche se il binario consente di utilizzare la variabile di ambiente **`DYLD_INSERT_LIBRARIES`**, se il binario controlla la firma della libreria da caricare, non caricherà una libreria personalizzata.
 
@@ -57,10 +57,10 @@ macos-dyld-hijacking-and-dyld_insert_libraries.md
 ## Dylib Hijacking
 
 > [!CAUTION]
-> Ricorda che **le precedenti restrizioni sulla validazione della libreria si applicano anche** per eseguire attacchi di Dylib hijacking.
+> Ricorda che **le precedenti restrizioni sulla validazione delle librerie si applicano anche** per eseguire attacchi di Dylib hijacking.
 
 Come in Windows, anche in MacOS puoi **hijackare dylibs** per far **eseguire** **codice** **arbitrario** alle **applicazioni** (beh, in realtà da un utente normale questo potrebbe non essere possibile poiché potresti aver bisogno di un permesso TCC per scrivere all'interno di un pacchetto `.app` e hijackare una libreria).\
-Tuttavia, il modo in cui le applicazioni **MacOS** **caricano** le librerie è **più ristretto** rispetto a Windows. Ciò implica che gli sviluppatori di **malware** possono comunque utilizzare questa tecnica per **furtività**, ma la probabilità di poter **abusare di questo per elevare i privilegi è molto più bassa**.
+Tuttavia, il modo in cui le applicazioni **MacOS** **caricano** le librerie è **più ristretto** rispetto a Windows. Questo implica che gli sviluppatori di **malware** possono comunque utilizzare questa tecnica per **furtività**, ma la probabilità di poter **abusare di questo per elevare i privilegi è molto più bassa**.
 
 Prima di tutto, è **più comune** trovare che i **binari MacOS indicano il percorso completo** alle librerie da caricare. E in secondo luogo, **MacOS non cerca mai** nelle cartelle del **$PATH** per le librerie.
 
@@ -71,7 +71,7 @@ Ci sono **4 diversi comandi header** che un binario macho può utilizzare per ca
 - Il comando **`LC_LOAD_DYLIB`** è il comando comune per caricare un dylib.
 - Il comando **`LC_LOAD_WEAK_DYLIB`** funziona come il precedente, ma se il dylib non viene trovato, l'esecuzione continua senza alcun errore.
 - Il comando **`LC_REEXPORT_DYLIB`** proxy (o riesporta) i simboli da una libreria diversa.
-- Il comando **`LC_LOAD_UPWARD_DYLIB`** viene utilizzato quando due librerie dipendono l'una dall'altra (questo è chiamato _dipendenza verso l'alto_).
+- Il comando **`LC_LOAD_UPWARD_DYLIB`** viene utilizzato quando due librerie dipendono l'una dall'altra (questo è chiamato _dipendenza ascendente_).
 
 Tuttavia, ci sono **2 tipi di hijacking di dylib**:
 
@@ -115,7 +115,7 @@ macos-dyld-hijacking-and-dyld_insert_libraries.md
 ## Dlopen Hijacking
 
 > [!CAUTION]
-> Ricorda che **le precedenti restrizioni sulla validazione della libreria si applicano anche** per eseguire attacchi di Dlopen hijacking.
+> Ricorda che **le precedenti restrizioni sulla validazione delle librerie si applicano anche** per eseguire attacchi di Dlopen hijacking.
 
 Da **`man dlopen`**:
 
@@ -162,7 +162,7 @@ Da **`man dlopen`**:
 >
 > Nota: Se l'eseguibile principale è un **binario set\[ug]id o firmato con diritti**, allora **tutte le variabili ambientali vengono ignorate**, e può essere utilizzato solo un percorso completo ([controlla le restrizioni di DYLD_INSERT_LIBRARIES](macos-dyld-hijacking-and-dyld_insert_libraries.md#check-dyld_insert_librery-restrictions) per ulteriori informazioni dettagliate)
 >
-> Nota: Le piattaforme Apple utilizzano file "universali" per combinare librerie a 32 bit e 64 bit. Ciò significa che non ci sono **percorsi di ricerca separati per 32 bit e 64 bit**.
+> Nota: Le piattaforme Apple utilizzano file "universali" per combinare librerie a 32 bit e 64 bit. Questo significa che non ci sono **percorsi di ricerca separati per 32 bit e 64 bit**.
 >
 > Nota: Su piattaforme Apple, la maggior parte delle librerie OS dylib sono **combinati nel cache di dyld** e non esistono su disco. Pertanto, chiamare **`stat()`** per verificare se un OS dylib esiste **non funzionerà**. Tuttavia, **`dlopen_preflight()`** utilizza gli stessi passaggi di **`dlopen()`** per trovare un file mach-o compatibile.
 
@@ -307,15 +307,15 @@ codesign -f -s <cert-name> --option=restrict hello-signed
 DYLD_INSERT_LIBRARIES=inject.dylib ./hello-signed # Won't work
 ```
 > [!CAUTION]
-> Nota che anche se ci sono binari firmati con i flag **`0x0(none)`**, possono ottenere dinamicamente il flag **`CS_RESTRICT`** quando vengono eseguiti e quindi questa tecnica non funzionerà in essi.
+> Nota che anche se ci sono binari firmati con i flag **`0x0(none)`**, possono ottenere dinamicamente il flag **`CS_RESTRICT`** quando vengono eseguiti e quindi questa tecnica non funzionerà su di essi.
 >
-> Puoi controllare se un proc ha questo flag con (get [**csops here**](https://github.com/axelexic/CSOps)):
+> Puoi controllare se un proc ha questo flag con (ottieni [**csops qui**](https://github.com/axelexic/CSOps)):
 >
 > ```bash
 > csops -status <pid>
 > ```
 >
-> e poi controllare se il flag 0x800 è abilitato.
+> e poi controlla se il flag 0x800 è abilitato.
 
 ## References
 

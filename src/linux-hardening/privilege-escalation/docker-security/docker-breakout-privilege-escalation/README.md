@@ -19,7 +19,7 @@ Questo di solito accade nei container docker che per qualche motivo devono conne
 find / -name docker.sock 2>/dev/null
 #It's usually in /run/docker.sock
 ```
-In questo caso puoi utilizzare comandi docker regolari per comunicare con il demone docker:
+In questo caso puoi utilizzare i comandi docker regolari per comunicare con il demone docker:
 ```bash
 #List images to use one
 docker images
@@ -100,7 +100,7 @@ docker run --rm -it --privileged ubuntu bash
 ```
 #### Montaggio Disco - Poc1
 
-Container docker ben configurati non permetteranno comandi come **fdisk -l**. Tuttavia, su comandi docker mal configurati dove è specificato il flag `--privileged` o `--device=/dev/sda1` con maiuscole, è possibile ottenere i privilegi per vedere l'unità host.
+Container docker ben configurati non permetteranno comandi come **fdisk -l**. Tuttavia, su comandi docker mal configurati dove il flag `--privileged` o `--device=/dev/sda1` con maiuscole è specificato, è possibile ottenere i privilegi per vedere l'unità host.
 
 ![](https://bestestredteam.com/content/images/2019/08/image-16.png)
 
@@ -216,9 +216,9 @@ Trova una **spiegazione della tecnica** in:
 docker-release_agent-cgroups-escape.md
 {{#endref}}
 
-#### Privileged Escape Abusando release_agent senza conoscere il percorso relativo - PoC3
+#### Privileged Escape Abusando di release_agent senza conoscere il percorso relativo - PoC3
 
-Negli exploit precedenti, **il percorso assoluto del contenitore all'interno del filesystem dell'host è rivelato**. Tuttavia, questo non è sempre il caso. Nei casi in cui **non conosci il percorso assoluto del contenitore all'interno dell'host**, puoi utilizzare questa tecnica:
+Negli exploit precedenti, il **percorso assoluto del container all'interno del filesystem dell'host è rivelato**. Tuttavia, questo non è sempre il caso. Nei casi in cui **non conosci il percorso assoluto del container all'interno dell'host**, puoi utilizzare questa tecnica:
 
 {{#ref}}
 release_agent-exploit-relative-paths-to-pids.md
@@ -335,7 +335,7 @@ docker run --rm -it -v /:/host ubuntu bash
 ```
 Un altro esempio interessante può essere trovato in [**questo blog**](https://projectdiscovery.io/blog/versa-concerto-authentication-bypass-rce) dove è indicato che le cartelle `/usr/bin/` e `/bin/` dell'host sono montate all'interno del container, consentendo all'utente root del container di modificare i binari all'interno di queste cartelle. Pertanto, se un cron job utilizza un binario da lì, come `/etc/cron.d/popularity-contest`, questo consente di uscire dal container modificando un binario utilizzato dal cron job.
 
-### Escalation dei privilegi con 2 shell e montaggio dell'host
+### Privilege Escalation con 2 shell e montaggio dell'host
 
 Se hai accesso come **root all'interno di un container** che ha alcune cartelle dell'host montate e hai **escapato come utente non privilegiato all'host** e hai accesso in lettura sulla cartella montata.\
 Puoi creare un **file bash suid** nella **cartella montata** all'interno del **container** e **eseguirlo dall'host** per privesc.
@@ -419,7 +419,7 @@ cat /proc/635813/fd/4
 Puoi anche **terminare processi e causare un DoS**.
 
 > [!WARNING]
-> Se in qualche modo hai **accesso privilegiato a un processo al di fuori del container**, potresti eseguire qualcosa come `nsenter --target <pid> --all` o `nsenter --target <pid> --mount --net --pid --cgroup` per **eseguire una shell con le stesse restrizioni ns** (si spera nessuna) **di quel processo.**
+> Se in qualche modo hai accesso privilegiato **su un processo al di fuori del container**, potresti eseguire qualcosa come `nsenter --target <pid> --all` o `nsenter --target <pid> --mount --net --pid --cgroup` per **eseguire una shell con le stesse restrizioni ns** (si spera nessuna) **di quel processo.**
 
 ### hostNetwork
 ```

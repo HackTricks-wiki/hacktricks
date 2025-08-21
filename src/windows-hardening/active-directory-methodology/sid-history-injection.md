@@ -10,7 +10,7 @@ Esistono due metodi per eseguire questo attacco: attraverso la creazione di un *
 
 Per individuare il SID per il gruppo **"Enterprise Admins"**, è necessario prima localizzare il SID del dominio radice. Dopo l'identificazione, il SID del gruppo Enterprise Admins può essere costruito aggiungendo `-519` al SID del dominio radice. Ad esempio, se il SID del dominio radice è `S-1-5-21-280534878-1496970234-700767426`, il SID risultante per il gruppo "Enterprise Admins" sarebbe `S-1-5-21-280534878-1496970234-700767426-519`.
 
-Puoi anche utilizzare i gruppi **Domain Admins**, che termina in **512**.
+Puoi anche utilizzare i gruppi **Domain Admins**, che terminano in **512**.
 
 Un altro modo per trovare il SID di un gruppo dell'altro dominio (ad esempio "Domain Admins") è con:
 ```bash
@@ -22,7 +22,7 @@ Get-DomainGroup -Identity "Domain Admins" -Domain parent.io -Properties ObjectSi
 Secondo la [**documentazione**](https://technet.microsoft.com/library/cc835085.aspx):
 - **Disabilitare SIDHistory su trust di foresta** utilizzando lo strumento netdom (`netdom trust /domain: /EnableSIDHistory:no on the domain controller`)
 - **Applicare il quarantining del filtro SID a trust esterni** utilizzando lo strumento netdom (`netdom trust /domain: /quarantine:yes on the domain controller`)
-- **Applicare il filtro SID a trust di dominio all'interno di una singola foresta** non è raccomandato poiché è una configurazione non supportata e può causare cambiamenti critici. Se un dominio all'interno di una foresta non è affidabile, allora non dovrebbe essere un membro della foresta. In questa situazione è necessario prima separare i domini fidati e non fidati in foreste separate dove il filtro SID può essere applicato a un trust interforesta.
+- **Applicare il filtro SID ai trust di dominio all'interno di una singola foresta** non è raccomandato poiché è una configurazione non supportata e può causare cambiamenti critici. Se un dominio all'interno di una foresta non è affidabile, allora non dovrebbe essere un membro della foresta. In questa situazione è necessario prima separare i domini fidati e non fidati in foreste separate dove il filtro SID può essere applicato a un trust interforesta.
 
 Controlla questo post per ulteriori informazioni su come bypassare questo: [**https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4**](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)
 
@@ -122,7 +122,7 @@ psexec.py <child_domain>/Administrator@dc.root.local -k -no-pass -target-ip 10.1
 ```
 #### Automatic using [raiseChild.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/raiseChild.py)
 
-Questo è uno script Impacket che **automatizza l'innalzamento dal dominio child al dominio parent**. Lo script richiede:
+Questo è uno script Impacket che **automatizza l'innalzamento da un dominio child a un dominio parent**. Lo script richiede:
 
 - Domain controller di destinazione
 - Credenziali per un utente admin nel dominio child

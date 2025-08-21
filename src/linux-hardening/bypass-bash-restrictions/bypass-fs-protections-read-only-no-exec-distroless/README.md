@@ -30,7 +30,7 @@ securityContext:
 Tuttavia, anche se il file system è montato come ro, **`/dev/shm`** sarà comunque scrivibile, quindi è falso che non possiamo scrivere nulla nel disco. Tuttavia, questa cartella sarà **montata con protezione no-exec**, quindi se scarichi un binario qui **non sarai in grado di eseguirlo**.
 
 > [!WARNING]
-> Da una prospettiva di red team, questo rende **complicato scaricare ed eseguire** binari che non sono già nel sistema (come backdoor o enumeratori come `kubectl`).
+> Da una prospettiva red team, questo rende **complicato scaricare ed eseguire** binari che non sono già nel sistema (come backdoor o enumeratori come `kubectl`).
 
 ## Easiest bypass: Scripts
 
@@ -40,13 +40,13 @@ Tuttavia, questo non è sufficiente per eseguire la tua backdoor binaria o altri
 
 ## Memory Bypasses
 
-Se vuoi eseguire un binario ma il file system non lo consente, il modo migliore per farlo è **eseguirlo dalla memoria**, poiché **le protezioni non si applicano lì**.
+Se vuoi eseguire un binario ma il file system non lo consente, il modo migliore per farlo è **eseguirlo dalla memoria**, poiché le **protezioni non si applicano lì**.
 
 ### FD + exec syscall bypass
 
 Se hai alcuni potenti motori di script all'interno della macchina, come **Python**, **Perl** o **Ruby**, potresti scaricare il binario da eseguire dalla memoria, memorizzarlo in un descrittore di file di memoria (`create_memfd` syscall), che non sarà protetto da quelle protezioni e poi chiamare una **`exec` syscall** indicando il **fd come file da eseguire**.
 
-Per questo puoi facilmente utilizzare il progetto [**fileless-elf-exec**](https://github.com/nnsee/fileless-elf-exec). Puoi passarci un binario e genererà uno script nel linguaggio indicato con il **binario compresso e codificato in b64** con le istruzioni per **decodificarlo e decomprimerlo** in un **fd** creato chiamando la syscall `create_memfd` e una chiamata alla syscall **exec** per eseguirlo.
+Per questo puoi facilmente utilizzare il progetto [**fileless-elf-exec**](https://github.com/nnsee/fileless-elf-exec). Puoi passargli un binario e genererà uno script nel linguaggio indicato con il **binario compresso e codificato in b64** con le istruzioni per **decodificarlo e decomprimerlo** in un **fd** creato chiamando la syscall `create_memfd` e una chiamata alla syscall **exec** per eseguirlo.
 
 > [!WARNING]
 > Questo non funziona in altri linguaggi di scripting come PHP o Node perché non hanno alcun **modo predefinito per chiamare syscall raw** da uno script, quindi non è possibile chiamare `create_memfd` per creare il **memory fd** per memorizzare il binario.
@@ -96,7 +96,7 @@ In un container distroless potresti **non trovare nemmeno `sh` o `bash`** per ot
 > [!WARNING]
 > Pertanto, **non** sarai in grado di ottenere una **reverse shell** o **enumerare** il sistema come fai di solito.
 
-Tuttavia, se il container compromesso sta eseguendo ad esempio un'app Flask, allora Python è installato, e quindi puoi ottenere una **reverse shell Python**. Se sta eseguendo Node, puoi ottenere una reverse shell Node, e lo stesso vale per quasi qualsiasi **linguaggio di scripting**.
+Tuttavia, se il container compromesso sta eseguendo ad esempio un'app web Flask, allora Python è installato, e quindi puoi ottenere una **reverse shell Python**. Se sta eseguendo Node, puoi ottenere una reverse shell Node, e lo stesso vale per quasi qualsiasi **linguaggio di scripting**.
 
 > [!TIP]
 > Utilizzando il linguaggio di scripting potresti **enumerare il sistema** utilizzando le capacità del linguaggio.
@@ -104,7 +104,7 @@ Tuttavia, se il container compromesso sta eseguendo ad esempio un'app Flask, all
 Se non ci sono protezioni **`read-only/no-exec`** potresti abusare della tua reverse shell per **scrivere nel file system i tuoi binari** e **eseguirli**.
 
 > [!TIP]
-> Tuttavia, in questo tipo di container queste protezioni di solito esistono, ma potresti usare le **precedenti tecniche di esecuzione in memoria per bypassarle**.
+> Tuttavia, in questo tipo di container queste protezioni di solito esistono, ma potresti usare le **tecniche di esecuzione in memoria precedenti per bypassarle**.
 
 Puoi trovare **esempi** su come **sfruttare alcune vulnerabilità RCE** per ottenere reverse shell di linguaggi di scripting ed eseguire binari dalla memoria in [**https://github.com/carlospolop/DistrolessRCE**](https://github.com/carlospolop/DistrolessRCE).
 

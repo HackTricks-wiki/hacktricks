@@ -37,7 +37,7 @@ Dovresti iniziare leggendo questo post per alcuni concetti di base che dovresti 
 
 > [!TIP]
 > L'obiettivo di questa terza fase è molto semplice: **Assegnare a ciascuno dei token precedenti nel vocabolario un vettore delle dimensioni desiderate per addestrare il modello.** Ogni parola nel vocabolario sarà un punto in uno spazio di X dimensioni.\
-> Nota che inizialmente la posizione di ciascuna parola nello spazio è semplicemente inizializzata "casualmente" e queste posizioni sono parametri addestrabili (saranno migliorati durante l'addestramento).
+> Nota che inizialmente la posizione di ogni parola nello spazio è semplicemente inizializzata "casualmente" e queste posizioni sono parametri addestrabili (saranno migliorati durante l'addestramento).
 >
 > Inoltre, durante l'embedding dei token **viene creata un'altra layer di embeddings** che rappresenta (in questo caso) la **posizione assoluta della parola nella frase di addestramento**. In questo modo, una parola in posizioni diverse nella frase avrà una rappresentazione diversa (significato).
 
@@ -82,7 +82,7 @@ Dovresti iniziare leggendo questo post per alcuni concetti di base che dovresti 
 ## 7.0. LoRA Improvements in fine-tuning
 
 > [!TIP]
-> L'uso di **LoRA riduce notevolmente il calcolo** necessario per **ottimizzare** modelli già addestrati.
+> L'uso di **LoRA riduce notevolmente il calcolo** necessario per **fine-tune** modelli già addestrati.
 
 
 {{#ref}}
@@ -92,7 +92,7 @@ Dovresti iniziare leggendo questo post per alcuni concetti di base che dovresti 
 ## 7.1. Fine-Tuning for Classification
 
 > [!TIP]
-> L'obiettivo di questa sezione è mostrare come ottimizzare un modello già pre-addestrato in modo che, invece di generare nuovo testo, il LLM fornisca le **probabilità che il testo fornito venga categorizzato in ciascuna delle categorie date** (come se un testo fosse spam o meno).
+> L'obiettivo di questa sezione è mostrare come fare fine-tuning a un modello già pre-addestrato in modo che, invece di generare nuovo testo, il LLM fornisca le **probabilità che il testo dato venga categorizzato in ciascuna delle categorie date** (come se un testo fosse spam o meno).
 
 
 {{#ref}}
@@ -102,7 +102,7 @@ Dovresti iniziare leggendo questo post per alcuni concetti di base che dovresti 
 ## 7.2. Fine-Tuning to follow instructions
 
 > [!TIP]
-> L'obiettivo di questa sezione è mostrare come **ottimizzare un modello già pre-addestrato per seguire istruzioni** piuttosto che semplicemente generare testo, ad esempio, rispondendo a compiti come un chatbot.
+> L'obiettivo di questa sezione è mostrare come **fare fine-tuning a un modello già pre-addestrato per seguire istruzioni** piuttosto che semplicemente generare testo, ad esempio, rispondere a compiti come un chatbot.
 
 
 {{#ref}}

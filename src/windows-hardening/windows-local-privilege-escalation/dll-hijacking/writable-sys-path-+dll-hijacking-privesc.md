@@ -42,7 +42,7 @@ $newPath = "$envPath;$folderPath"
 - Avvia **`procmon`** e vai su **`Options`** --> **`Enable boot logging`** e premi **`OK`** nel prompt.
 - Poi, **riavvia**. Quando il computer si riavvia, **`procmon`** inizierà a **registrare** eventi il prima possibile.
 - Una volta che **Windows** è **avviato, esegui di nuovo `procmon`**, ti dirà che è stato in esecuzione e ti **chiederà se vuoi memorizzare** gli eventi in un file. Rispondi **sì** e **memorizza gli eventi in un file**.
-- **Dopo** che il **file** è **stato generato**, **chiudi** la finestra **`procmon`** aperta e **apri il file degli eventi**.
+- **Dopo** che il **file** è stato **generato**, **chiudi** la finestra di **`procmon`** aperta e **apri il file degli eventi**.
 - Aggiungi questi **filtri** e troverai tutti i Dll che alcuni **processi hanno cercato di caricare** dalla cartella del System Path scrivibile:
 
 <figure><img src="../../../images/image (945).png" alt=""><figcaption></figcaption></figure>
@@ -53,9 +53,9 @@ Eseguendo questo su una **macchina virtuale (vmware) Windows 11** gratuita ho ot
 
 <figure><img src="../../../images/image (607).png" alt=""><figcaption></figcaption></figure>
 
-In questo caso gli .exe sono inutili, quindi ignorali, le DLL mancanti erano da:
+In questo caso gli .exe sono inutili, quindi ignorali, le DLL mancanti erano di:
 
-| Servizio                         | Dll                | Riga CMD                                                             |
+| Servizio                         | Dll                | Riga di comando                                                       |
 | ------------------------------- | ------------------ | -------------------------------------------------------------------- |
 | Task Scheduler (Schedule)       | WptsExtensions.dll | `C:\Windows\system32\svchost.exe -k netsvcs -p -s Schedule`          |
 | Diagnostic Policy Service (DPS) | Unknown.DLL        | `C:\Windows\System32\svchost.exe -k LocalServiceNoNetwork -p -s DPS` |
@@ -70,13 +70,13 @@ Quindi, per **escalare i privilegi** stiamo per dirottare la libreria **WptsExte
 Puoi [**provare a usare uno di questi esempi**](#creating-and-compiling-dlls). Potresti eseguire payload come: ottenere una rev shell, aggiungere un utente, eseguire un beacon...
 
 > [!WARNING]
-> Nota che **non tutti i servizi vengono eseguiti** con **`NT AUTHORITY\SYSTEM`**, alcuni vengono eseguiti anche con **`NT AUTHORITY\LOCAL SERVICE`** che ha **meno privilegi** e **non sarai in grado di creare un nuovo utente** abusando delle sue autorizzazioni.\
-> Tuttavia, quell'utente ha il privilegio **`seImpersonate`**, quindi puoi usare il [**potato suite per escalare i privilegi**](../roguepotato-and-printspoofer.md). Quindi, in questo caso, una rev shell è una scelta migliore rispetto a cercare di creare un utente.
+> Nota che **non tutti i servizi vengono eseguiti** con **`NT AUTHORITY\SYSTEM`**, alcuni vengono eseguiti anche con **`NT AUTHORITY\LOCAL SERVICE`** che ha **meno privilegi** e **non sarai in grado di creare un nuovo utente** per abusare delle sue autorizzazioni.\
+> Tuttavia, quell'utente ha il privilegio **`seImpersonate`**, quindi puoi usare il [**potato suite per escalare i privilegi**](../roguepotato-and-printspoofer.md). Quindi, in questo caso, una rev shell è una migliore opzione rispetto a cercare di creare un utente.
 
 Al momento della scrittura, il servizio **Task Scheduler** è eseguito con **Nt AUTHORITY\SYSTEM**.
 
-Avendo **generato la Dll malevola** (_nel mio caso ho usato una rev shell x64 e ho ottenuto una shell di ritorno ma Defender l'ha uccisa perché proveniva da msfvenom_), salvala nel System Path scrivibile con il nome **WptsExtensions.dll** e **riavvia** il computer (o riavvia il servizio o fai tutto il necessario per rieseguire il servizio/programma interessato).
+Avendo **generato la dll malevola** (_nel mio caso ho usato una rev shell x64 e ho ottenuto una shell di ritorno ma Defender l'ha uccisa perché proveniva da msfvenom_), salvala nel System Path scrivibile con il nome **WptsExtensions.dll** e **riavvia** il computer (o riavvia il servizio o fai qualsiasi cosa per rieseguire il servizio/programma interessato).
 
-Quando il servizio viene riavviato, la **dll dovrebbe essere caricata ed eseguita** (puoi **riutilizzare** il trucco **procmon** per controllare se la **libreria è stata caricata come previsto**).
+Quando il servizio viene riavviato, la **dll dovrebbe essere caricata ed eseguita** (puoi **riutilizzare** il trucco di **procmon** per controllare se la **libreria è stata caricata come previsto**).
 
 {{#include ../../../banners/hacktricks-training.md}}

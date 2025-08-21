@@ -4,15 +4,15 @@
 
 ## Informazioni di base
 
-Un namespace cgroup è una funzionalità del kernel Linux che fornisce **isolamento delle gerarchie cgroup per i processi in esecuzione all'interno di un namespace**. I cgroups, abbreviazione di **control groups**, sono una funzionalità del kernel che consente di organizzare i processi in gruppi gerarchici per gestire e applicare **limiti sulle risorse di sistema** come CPU, memoria e I/O.
+Un cgroup namespace è una funzionalità del kernel Linux che fornisce **isolamento delle gerarchie cgroup per i processi in esecuzione all'interno di un namespace**. I cgroups, abbreviazione di **control groups**, sono una funzionalità del kernel che consente di organizzare i processi in gruppi gerarchici per gestire e applicare **limiti sulle risorse di sistema** come CPU, memoria e I/O.
 
-Sebbene i namespace cgroup non siano un tipo di namespace separato come gli altri di cui abbiamo discusso in precedenza (PID, mount, network, ecc.), sono correlati al concetto di isolamento dei namespace. **I namespace cgroup virtualizzano la vista della gerarchia cgroup**, in modo che i processi in esecuzione all'interno di un namespace cgroup abbiano una vista diversa della gerarchia rispetto ai processi in esecuzione nell'host o in altri namespace.
+Sebbene i cgroup namespaces non siano un tipo di namespace separato come gli altri di cui abbiamo discusso in precedenza (PID, mount, network, ecc.), sono correlati al concetto di isolamento dei namespace. **I cgroup namespaces virtualizzano la vista della gerarchia cgroup**, in modo che i processi in esecuzione all'interno di un cgroup namespace abbiano una vista diversa della gerarchia rispetto ai processi in esecuzione nell'host o in altri namespaces.
 
 ### Come funziona:
 
-1. Quando viene creato un nuovo namespace cgroup, **inizia con una vista della gerarchia cgroup basata sul cgroup del processo creatore**. Ciò significa che i processi in esecuzione nel nuovo namespace cgroup vedranno solo un sottoinsieme dell'intera gerarchia cgroup, limitato al sottoalbero cgroup radicato nel cgroup del processo creatore.
-2. I processi all'interno di un namespace cgroup **vedranno il proprio cgroup come la radice della gerarchia**. Ciò significa che, dalla prospettiva dei processi all'interno del namespace, il proprio cgroup appare come la radice e non possono vedere o accedere ai cgroup al di fuori del proprio sottoalbero.
-3. I namespace cgroup non forniscono direttamente isolamento delle risorse; **forniscono solo isolamento della vista della gerarchia cgroup**. **Il controllo e l'isolamento delle risorse sono ancora applicati dai sottosistemi cgroup** (ad es., cpu, memoria, ecc.) stessi.
+1. Quando viene creato un nuovo cgroup namespace, **inizia con una vista della gerarchia cgroup basata sul cgroup del processo creatore**. Ciò significa che i processi in esecuzione nel nuovo cgroup namespace vedranno solo un sottoinsieme dell'intera gerarchia cgroup, limitato al sottoalbero cgroup radicato nel cgroup del processo creatore.
+2. I processi all'interno di un cgroup namespace **vedranno il proprio cgroup come la radice della gerarchia**. Ciò significa che, dalla prospettiva dei processi all'interno del namespace, il proprio cgroup appare come la radice e non possono vedere o accedere ai cgroups al di fuori del proprio sottoalbero.
+3. I cgroup namespaces non forniscono direttamente isolamento delle risorse; **forniscono solo isolamento della vista della gerarchia cgroup**. **Il controllo e l'isolamento delle risorse sono ancora applicati dai sottosistemi cgroup** (ad es., cpu, memoria, ecc.) stessi.
 
 Per ulteriori informazioni sui CGroups controlla:
 
@@ -22,7 +22,7 @@ Per ulteriori informazioni sui CGroups controlla:
 
 ## Laboratorio:
 
-### Crea diversi Namespace
+### Crea diversi Namespaces
 
 #### CLI
 ```bash
@@ -40,7 +40,7 @@ Quando `unshare` viene eseguito senza l'opzione `-f`, si incontra un errore a ca
 
 - Il kernel Linux consente a un processo di creare nuovi namespace utilizzando la chiamata di sistema `unshare`. Tuttavia, il processo che avvia la creazione di un nuovo namespace PID (chiamato "processo unshare") non entra nel nuovo namespace; solo i suoi processi figli lo fanno.
 - Eseguire `%unshare -p /bin/bash%` avvia `/bin/bash` nello stesso processo di `unshare`. Di conseguenza, `/bin/bash` e i suoi processi figli si trovano nel namespace PID originale.
-- Il primo processo figlio di `/bin/bash` nel nuovo namespace diventa PID 1. Quando questo processo termina, attiva la pulizia del namespace se non ci sono altri processi, poiché PID 1 ha il ruolo speciale di adottare processi orfani. Il kernel Linux disabiliterà quindi l'allocazione di PID in quel namespace.
+- Il primo processo figlio di `/bin/bash` nel nuovo namespace diventa PID 1. Quando questo processo termina, attiva la pulizia del namespace se non ci sono altri processi, poiché PID 1 ha il ruolo speciale di adottare processi orfani. Il kernel Linux disabiliterà quindi l'allocazione PID in quel namespace.
 
 2. **Conseguenza**:
 
@@ -48,7 +48,7 @@ Quando `unshare` viene eseguito senza l'opzione `-f`, si incontra un errore a ca
 
 3. **Soluzione**:
 - Il problema può essere risolto utilizzando l'opzione `-f` con `unshare`. Questa opzione fa sì che `unshare` fork un nuovo processo dopo aver creato il nuovo namespace PID.
-- Eseguire `%unshare -fp /bin/bash%` garantisce che il comando `unshare` stesso diventi PID 1 nel nuovo namespace. `/bin/bash` e i suoi processi figli sono quindi contenuti in modo sicuro all'interno di questo nuovo namespace, prevenendo l'uscita prematura di PID 1 e consentendo l'allocazione normale di PID.
+- Eseguire `%unshare -fp /bin/bash%` garantisce che il comando `unshare` stesso diventi PID 1 nel nuovo namespace. `/bin/bash` e i suoi processi figli sono quindi contenuti in modo sicuro all'interno di questo nuovo namespace, prevenendo l'uscita prematura di PID 1 e consentendo l'allocazione normale dei PID.
 
 Assicurandoti che `unshare` venga eseguito con il flag `-f`, il nuovo namespace PID viene mantenuto correttamente, consentendo a `/bin/bash` e ai suoi subprocessi di operare senza incontrare l'errore di allocazione della memoria.
 

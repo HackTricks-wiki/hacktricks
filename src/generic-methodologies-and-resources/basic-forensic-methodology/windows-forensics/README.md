@@ -12,7 +12,7 @@ All'interno di questo database SQLite, puoi trovare la tabella `Notification` co
 
 ### Timeline
 
-La Timeline è una caratteristica di Windows che fornisce una **storia cronologica** delle pagine web visitate, dei documenti modificati e delle applicazioni eseguite.
+La Timeline è una caratteristica di Windows che fornisce una **cronologia** **cronologica** delle pagine web visitate, dei documenti modificati e delle applicazioni eseguite.
 
 Il database si trova nel percorso `\Users\<username>\AppData\Local\ConnectedDevicesPlatform\<id>\ActivitiesCache.db`. Questo database può essere aperto con uno strumento SQLite o con lo strumento [**WxTCmd**](https://github.com/EricZimmerman/WxTCmd) **che genera 2 file che possono essere aperti con lo strumento** [**TimeLine Explorer**](https://ericzimmerman.github.io/#!index.md).
 
@@ -25,7 +25,7 @@ I file scaricati possono contenere l'**ADS Zone.Identifier** che indica **come**
 ### Recycle Bin
 
 In Vista/Win7/Win8/Win10 il **Recycle Bin** può essere trovato nella cartella **`$Recycle.bin`** nella radice dell'unità (`C:\$Recycle.bin`).\
-Quando un file viene eliminato in questa cartella vengono creati 2 file specifici:
+Quando un file viene eliminato in questa cartella, vengono creati 2 file specifici:
 
 - `$I{id}`: Informazioni sul file (data di quando è stato eliminato)
 - `$R{id}`: Contenuto del file
@@ -38,44 +38,44 @@ Avendo questi file puoi utilizzare lo strumento [**Rifiuti**](https://github.com
 ```
 ![](<../../../images/image (495) (1) (1) (1).png>)
 
-### Copie Shadow del Volume
+### Volume Shadow Copies
 
-La Shadow Copy è una tecnologia inclusa in Microsoft Windows che può creare **copia di backup** o snapshot di file o volumi del computer, anche quando sono in uso.
+Shadow Copy è una tecnologia inclusa in Microsoft Windows che può creare **copia di backup** o snapshot di file o volumi del computer, anche quando sono in uso.
 
 Questi backup si trovano solitamente in `\System Volume Information` dalla radice del file system e il nome è composto da **UID** mostrati nell'immagine seguente:
 
 ![](<../../../images/image (94).png>)
 
-Montando l'immagine forense con **ArsenalImageMounter**, lo strumento [**ShadowCopyView**](https://www.nirsoft.net/utils/shadow_copy_view.html) può essere utilizzato per ispezionare una copia shadow e persino **estrarre i file** dai backup delle copie shadow.
+Montando l'immagine forense con **ArsenalImageMounter**, lo strumento [**ShadowCopyView**](https://www.nirsoft.net/utils/shadow_copy_view.html) può essere utilizzato per ispezionare una shadow copy e persino **estrarre i file** dai backup delle shadow copy.
 
 ![](<../../../images/image (576).png>)
 
-L'entry del registro `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\BackupRestore` contiene i file e le chiavi **da non eseguire il backup**:
+L'entry del registro `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\BackupRestore` contiene i file e le chiavi **da non fare il backup**:
 
 ![](<../../../images/image (254).png>)
 
-Il registro `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\VSS` contiene anche informazioni di configurazione riguardo le `Volume Shadow Copies`.
+Il registro `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\VSS` contiene anche informazioni di configurazione sui `Volume Shadow Copies`.
 
-### File AutoSalvati di Office
+### Office AutoSaved Files
 
-Puoi trovare i file auto salvati di Office in: `C:\Usuarios\\AppData\Roaming\Microsoft{Excel|Word|Powerpoint}\`
+Puoi trovare i file autosalvati di Office in: `C:\Usuarios\\AppData\Roaming\Microsoft{Excel|Word|Powerpoint}\`
 
-## Elementi Shell
+## Shell Items
 
 Un elemento shell è un elemento che contiene informazioni su come accedere a un altro file.
 
-### Documenti Recenti (LNK)
+### Recent Documents (LNK)
 
 Windows **crea automaticamente** questi **collegamenti** quando l'utente **apre, utilizza o crea un file** in:
 
 - Win7-Win10: `C:\Users\\AppData\Roaming\Microsoft\Windows\Recent\`
 - Office: `C:\Users\\AppData\Roaming\Microsoft\Office\Recent\`
 
-Quando viene creata una cartella, viene anche creato un collegamento alla cartella, alla cartella padre e alla cartella nonna.
+Quando viene creata una cartella, viene creato anche un collegamento alla cartella, alla cartella padre e alla cartella nonna.
 
-Questi file di collegamento creati automaticamente **contengono informazioni sull'origine** come se è un **file** **o** una **cartella**, **tempi MAC** di quel file, **informazioni sul volume** dove è memorizzato il file e **cartella del file di destinazione**. Queste informazioni possono essere utili per recuperare quei file nel caso siano stati rimossi.
+Questi file di collegamento creati automaticamente **contengono informazioni sull'origine** come se si tratta di un **file** **o** di una **cartella**, **tempi MAC** di quel file, **informazioni sul volume** di dove è memorizzato il file e **cartella del file di destinazione**. Queste informazioni possono essere utili per recuperare quei file nel caso siano stati rimossi.
 
-Inoltre, la **data di creazione del collegamento** è il primo **tempo** in cui il file originale è stato **utilizzato** e la **data** **modificata** del file di collegamento è l'**ultima** **volta** in cui il file di origine è stato utilizzato.
+Inoltre, la **data di creazione del collegamento** è il primo **tempo** in cui il file originale è stato **utilizzato per la prima volta** e la **data** **modificata** del file di collegamento è l'**ultima** **volta** in cui il file di origine è stato utilizzato.
 
 Per ispezionare questi file puoi utilizzare [**LinkParser**](http://4discovery.com/our-tools/).
 
@@ -130,7 +130,7 @@ Nota che alcuni file LNK invece di puntare al percorso originale, puntano alla c
 
 ![](<../../../images/image (218).png>)
 
-I file nella cartella WPDNSE sono una copia di quelli originali, quindi non sopravvivranno a un riavvio del PC e il GUID è preso da un shellbag.
+I file nella cartella WPDNSE sono una copia degli originali, quindi non sopravvivranno a un riavvio del PC e il GUID è preso da un shellbag.
 
 ### Informazioni sul Registro
 
@@ -140,7 +140,7 @@ I file nella cartella WPDNSE sono una copia di quelli originali, quindi non sopr
 
 Controlla il file `C:\Windows\inf\setupapi.dev.log` per ottenere i timestamp su quando è stata effettuata la connessione USB (cerca `Section start`).
 
-![](<../../../images/image (477) (2) (2) (2) (2) (2) (2) (2) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (14) (2).png>)
+![](<../../../images/image (477) (2) (2) (2) (2) (2) (2) (2) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (14) (2).png>)
 
 ### USB Detective
 
@@ -162,7 +162,7 @@ Uno screenshot che mostra il contenuto del compito è fornito: ![](https://2.bp.
 - **UseUnifiedSchedulingEngine**: Impostato su `TRUE`, indica l'uso del motore di pianificazione dei compiti generico.
 - **MaintenanceSettings**:
 - **Period ('P1M')**: Indica al Task Scheduler di avviare il compito di pulizia mensilmente durante la manutenzione automatica regolare.
-- **Deadline ('P2M')**: Istruisce il Task Scheduler, se il compito fallisce per due mesi consecutivi, a eseguire il compito durante la manutenzione automatica di emergenza.
+- **Deadline ('P2M')**: Istruisce il Task Scheduler, se il compito fallisce per due mesi consecutivi, ad eseguire il compito durante la manutenzione automatica di emergenza.
 
 Questa configurazione garantisce una manutenzione e pulizia regolari dei driver, con disposizioni per riprovare il compito in caso di fallimenti consecutivi.
 
@@ -181,7 +181,7 @@ Inoltre, all'interno delle intestazioni `References` e `In-Reply-To` puoi trovar
 
 ### App di posta di Windows
 
-Questa applicazione salva le email in HTML o testo. Puoi trovare le email all'interno delle sottocartelle in `\Users\<username>\AppData\Local\Comms\Unistore\data\3\`. Le email sono salvate con l'estensione `.dat`.
+Questa applicazione salva le email in HTML o testo. Puoi trovare le email all'interno di sottocartelle in `\Users\<username>\AppData\Local\Comms\Unistore\data\3\`. Le email sono salvate con l'estensione `.dat`.
 
 I **metadati** delle email e i **contatti** possono essere trovati all'interno del **database EDB**: `\Users\<username>\AppData\Local\Comms\UnistoreDB\store.vol`
 
@@ -225,7 +225,7 @@ Allegati persi potrebbero essere recuperabili da:
 ### Miniature delle Immagini
 
 - **Windows XP e 8-8.1**: Accedere a una cartella con miniature genera un file `thumbs.db` che memorizza le anteprime delle immagini, anche dopo la cancellazione.
-- **Windows 7/10**: `thumbs.db` viene creato quando viene accesso tramite una rete tramite percorso UNC.
+- **Windows 7/10**: `thumbs.db` viene creato quando viene accesso tramite rete tramite percorso UNC.
 - **Windows Vista e versioni successive**: Le anteprime delle miniature sono centralizzate in `%userprofile%\AppData\Local\Microsoft\Windows\Explorer` con file denominati **thumbcache_xxx.db**. [**Thumbsviewer**](https://thumbsviewer.github.io) e [**ThumbCache Viewer**](https://thumbcacheviewer.github.io) sono strumenti per visualizzare questi file.
 
 ### Informazioni sul Registro di Windows
@@ -235,11 +235,11 @@ Il Registro di Windows, che memorizza un'ampia gamma di dati sulle attività di 
 - `%windir%\System32\Config` per varie sottochiavi `HKEY_LOCAL_MACHINE`.
 - `%UserProfile%{User}\NTUSER.DAT` per `HKEY_CURRENT_USER`.
 - Windows Vista e versioni successive eseguono il backup dei file di registro `HKEY_LOCAL_MACHINE` in `%Windir%\System32\Config\RegBack\`.
-- Inoltre, le informazioni sull'esecuzione dei programmi sono memorizzate in `%UserProfile%\{User}\AppData\Local\Microsoft\Windows\USERCLASS.DAT` a partire da Windows Vista e Windows 2008 Server.
+- Inoltre, le informazioni sull'esecuzione dei programmi sono memorizzate in `%UserProfile%\{User}\AppData\Local\Microsoft\Windows\USERCLASS.DAT` da Windows Vista e Windows 2008 Server in poi.
 
 ### Strumenti
 
-Alcuni strumenti sono utili per analizzare i file di registro:
+Al alcuni strumenti sono utili per analizzare i file di registro:
 
 - **Editor del Registro**: È installato in Windows. È un'interfaccia grafica per navigare attraverso il registro di Windows della sessione corrente.
 - [**Registry Explorer**](https://ericzimmerman.github.io/#!index.md): Ti consente di caricare il file di registro e navigare attraverso di esso con un'interfaccia grafica. Contiene anche segnalibri che evidenziano le chiavi con informazioni interessanti.
@@ -269,9 +269,9 @@ interesting-windows-registry-keys.md
 
 ## Programmi Eseguiti
 
-### Processi Windows di Base
+### Processi di Windows di Base
 
-In [questo post](https://jonahacks.medium.com/investigating-common-windows-processes-18dee5f97c1d) puoi scoprire i processi Windows comuni per rilevare comportamenti sospetti.
+In [questo post](https://jonahacks.medium.com/investigating-common-windows-processes-18dee5f97c1d) puoi scoprire i processi comuni di Windows per rilevare comportamenti sospetti.
 
 ### APP Recenti di Windows
 
@@ -333,7 +333,7 @@ Il **AppCompatCache**, noto anche come **ShimCache**, fa parte del **Database di
 - Percorso completo del file
 - Dimensione del file
 - Ultima data di modifica sotto **$Standard_Information** (SI)
-- Ultima data di aggiornamento del ShimCache
+- Ultima data di aggiornamento dello ShimCache
 - Flag di esecuzione del processo
 
 Tali dati sono memorizzati nel registro in posizioni specifiche in base alla versione del sistema operativo:
@@ -435,8 +435,8 @@ Gli eventi di accesso sono registrati nel file di configurazione della sicurezza
 - **0xC0000070**: Violazione delle restrizioni della workstation - Potrebbe essere un tentativo di accesso da una posizione non autorizzata.
 - **0xC0000193**: Scadenza dell'account - Tentativi di accesso con account utente scaduti.
 - **0xC0000071**: Password scaduta - Tentativi di accesso con password obsolete.
-- **0xC0000133**: Problemi di sincronizzazione dell'orario - Grandi discrepanze di tempo tra client e server possono indicare attacchi più sofisticati come pass-the-ticket.
-- **0xC0000224**: Cambio di password obbligatorio richiesto - Cambiamenti obbligatori frequenti potrebbero suggerire un tentativo di destabilizzare la sicurezza dell'account.
+- **0xC0000133**: Problemi di sincronizzazione dell'ora - Grandi discrepanze di tempo tra client e server possono indicare attacchi più sofisticati come pass-the-ticket.
+- **0xC0000224**: Cambio di password obbligatorio richiesto - Cambi frequenti obbligatori potrebbero suggerire un tentativo di destabilizzare la sicurezza dell'account.
 - **0xC0000225**: Indica un bug di sistema piuttosto che un problema di sicurezza.
 - **0xC000015b**: Tipo di accesso negato - Tentativo di accesso con tipo di accesso non autorizzato, come un utente che cerca di eseguire un accesso di servizio.
 

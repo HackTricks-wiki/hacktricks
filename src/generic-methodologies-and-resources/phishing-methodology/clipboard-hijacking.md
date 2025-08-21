@@ -6,7 +6,7 @@
 
 ## Panoramica
 
-Il clipboard hijacking – noto anche come *pastejacking* – sfrutta il fatto che gli utenti copiano e incollano routine comandi senza ispezionarli. Una pagina web malevola (o qualsiasi contesto capace di JavaScript come un'applicazione Electron o Desktop) inserisce programmaticamente testo controllato dall'attaccante negli appunti di sistema. Le vittime sono incoraggiate, normalmente da istruzioni di ingegneria sociale accuratamente elaborate, a premere **Win + R** (finestra Esegui), **Win + X** (Accesso rapido / PowerShell), o aprire un terminale e *incollare* il contenuto degli appunti, eseguendo immediatamente comandi arbitrari.
+Il clipboard hijacking – noto anche come *pastejacking* – sfrutta il fatto che gli utenti copiano e incollano routine comandi senza ispezionarli. Una pagina web malevola (o qualsiasi contesto capace di eseguire JavaScript come un'applicazione Electron o Desktop) inserisce programmaticamente testo controllato dall'attaccante negli appunti di sistema. Le vittime sono incoraggiate, normalmente da istruzioni di ingegneria sociale accuratamente elaborate, a premere **Win + R** (finestra Esegui), **Win + X** (Accesso rapido / PowerShell), o aprire un terminale e *incollare* il contenuto degli appunti, eseguendo immediatamente comandi arbitrari.
 
 Poiché **nessun file viene scaricato e nessun allegato viene aperto**, la tecnica elude la maggior parte dei controlli di sicurezza delle e-mail e dei contenuti web che monitorano allegati, macro o esecuzione diretta di comandi. L'attacco è quindi popolare nelle campagne di phishing che distribuiscono famiglie di malware di consumo come NetSupport RAT, Latrodectus loader o Lumma Stealer.
 
@@ -29,7 +29,7 @@ Le campagne più vecchie utilizzavano `document.execCommand('copy')`, quelle pi�
 1. L'utente visita un sito con errori di battitura o compromesso (ad es. `docusign.sa[.]com`)
 2. Il JavaScript **ClearFake** iniettato chiama un helper `unsecuredCopyToClipboard()` che memorizza silenziosamente una riga di comando PowerShell codificata in Base64 negli appunti.
 3. Le istruzioni HTML dicono alla vittima di: *“Premere **Win + R**, incollare il comando e premere Invio per risolvere il problema.”*
-4. `powershell.exe` viene eseguito, scaricando un archivio che contiene un eseguibile legittimo più un DLL malevolo (classico DLL sideloading).
+4. `powershell.exe` viene eseguito, scaricando un archivio che contiene un eseguibile legittimo più un DLL malevolo (classico sideloading di DLL).
 5. Il loader decripta fasi aggiuntive, inietta shellcode e installa persistenza (ad es. attività pianificata) – eseguendo infine NetSupport RAT / Latrodectus / Lumma Stealer.
 
 ### Esempio di Catena NetSupport RAT
@@ -63,7 +63,7 @@ I blue team possono combinare il monitoraggio degli appunti, la creazione di pro
 
 * Registro di Windows: `HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\RunMRU` mantiene una cronologia dei comandi **Win + R** – cerca voci insolite in Base64 / offuscate.
 * ID Evento di Sicurezza **4688** (Creazione Processo) dove `ParentImage` == `explorer.exe` e `NewProcessName` in { `powershell.exe`, `wscript.exe`, `mshta.exe`, `curl.exe`, `cmd.exe` }.
-* ID Evento **4663** per la creazione di file sotto `%LocalAppData%\Microsoft\Windows\WinX\` o cartelle temporanee subito prima dell'evento sospetto 4688.
+* ID Evento **4663** per la creazione di file sotto `%LocalAppData%\Microsoft\Windows\WinX\` o cartelle temporanee subito prima dell'evento 4688 sospetto.
 * Sensori degli appunti EDR (se presenti) – correlare `Clipboard Write` seguito immediatamente da un nuovo processo PowerShell.
 
 ## Mitigazioni

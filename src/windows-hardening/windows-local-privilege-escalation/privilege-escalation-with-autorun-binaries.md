@@ -26,7 +26,7 @@ schtasks /Create /RU "SYSTEM" /SC ONLOGON /TN "SchedPE" /TR "cmd /c net localgro
 ```
 ## Cartelle
 
-Tutti i binari situati nelle **cartelle di avvio verranno eseguiti all'avvio**. Le comuni cartelle di avvio sono quelle elencate di seguito, ma la cartella di avvio è indicata nel registro. [Leggi questo per scoprire dove.](privilege-escalation-with-autorun-binaries.md#startup-path)
+Tutti i binari situati nelle **cartelle di avvio verranno eseguiti all'avvio**. Le comuni cartelle di avvio sono quelle elencate di seguito, ma la cartella di avvio è indicata nel registro. [Read this to learn where.](privilege-escalation-with-autorun-binaries.md#startup-path)
 ```bash
 dir /b "C:\Documents and Settings\All Users\Start Menu\Programs\Startup" 2>nul
 dir /b "C:\Documents and Settings\%username%\Start Menu\Programs\Startup" 2>nul
@@ -154,7 +154,7 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Wow6432Node\Microsoft\Windows\Ru
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders`
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders`
 
-I collegamenti posizionati nella cartella **Startup** attiveranno automaticamente servizi o applicazioni all'avvio dell'utente o al riavvio del sistema. La posizione della cartella **Startup** è definita nel registro sia per l'ambito **Local Machine** che per l'ambito **Current User**. Ciò significa che qualsiasi collegamento aggiunto a queste posizioni **Startup** specificate garantirà che il servizio o il programma collegato si avvii dopo il processo di accesso o riavvio, rendendolo un metodo semplice per pianificare l'esecuzione automatica dei programmi.
+I collegamenti posizionati nella cartella **Startup** attiveranno automaticamente servizi o applicazioni all'accesso dell'utente o al riavvio del sistema. La posizione della cartella **Startup** è definita nel registro sia per l'ambito **Local Machine** che per l'**Current User**. Ciò significa che qualsiasi collegamento aggiunto a queste posizioni **Startup** specificate garantirà che il servizio o il programma collegato si avvii dopo il processo di accesso o riavvio, rendendolo un metodo semplice per pianificare l'esecuzione automatica dei programmi.
 
 > [!TIP]
 > Se puoi sovrascrivere qualsiasi \[User] Shell Folder sotto **HKLM**, sarai in grado di puntarlo a una cartella controllata da te e posizionare una backdoor che verrà eseguita ogni volta che un utente accede al sistema, elevando i privilegi.
@@ -250,20 +250,20 @@ reg query "HKCU\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components
 ```
 ### Browser Helper Objects
 
-### Panoramica dei Browser Helper Objects (BHO)
+### Overview of Browser Helper Objects (BHOs)
 
-I Browser Helper Objects (BHO) sono moduli DLL che aggiungono funzionalità extra a Microsoft Internet Explorer. Si caricano in Internet Explorer e Windows Explorer ad ogni avvio. Tuttavia, la loro esecuzione può essere bloccata impostando la chiave **NoExplorer** a 1, impedendo loro di caricarsi con le istanze di Windows Explorer.
+I Browser Helper Objects (BHOs) sono moduli DLL che aggiungono funzionalità extra a Microsoft Internet Explorer. Si caricano in Internet Explorer e Windows Explorer ad ogni avvio. Tuttavia, la loro esecuzione può essere bloccata impostando la chiave **NoExplorer** a 1, impedendo loro di caricarsi con le istanze di Windows Explorer.
 
-I BHO sono compatibili con Windows 10 tramite Internet Explorer 11, ma non sono supportati in Microsoft Edge, il browser predefinito nelle versioni più recenti di Windows.
+I BHOs sono compatibili con Windows 10 tramite Internet Explorer 11, ma non sono supportati in Microsoft Edge, il browser predefinito nelle versioni più recenti di Windows.
 
-Per esplorare i BHO registrati su un sistema, puoi ispezionare le seguenti chiavi di registro:
+Per esplorare i BHOs registrati su un sistema, puoi ispezionare le seguenti chiavi di registro:
 
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects`
 - `HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects`
 
 Ogni BHO è rappresentato dal suo **CLSID** nel registro, che funge da identificatore unico. Informazioni dettagliate su ciascun CLSID possono essere trovate sotto `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`.
 
-Per interrogare i BHO nel registro, possono essere utilizzati i seguenti comandi:
+Per interrogare i BHOs nel registro, possono essere utilizzati i seguenti comandi:
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects" /s
 reg query "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects" /s

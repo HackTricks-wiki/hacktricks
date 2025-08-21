@@ -64,7 +64,7 @@ AI-Prompts.md
 AI-Models-RCE.md
 {{#endref}}
 
-### Protocollo di Contesto dei Modelli AI
+### Protocollo di Contesto del Modello AI
 
 MCP (Model Context Protocol) è un protocollo che consente ai client agenti AI di connettersi con strumenti esterni e fonti di dati in modo plug-and-play. Questo abilita flussi di lavoro complessi e interazioni tra modelli AI e sistemi esterni:
 

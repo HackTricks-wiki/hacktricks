@@ -2,8 +2,8 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-> L'iniezione di **argomenti wildcard** (noto anche come *glob*) si verifica quando uno script privilegiato esegue un binario Unix come `tar`, `chown`, `rsync`, `zip`, `7z`, … con un wildcard non quotato come `*`.
-> Poiché la shell espande il wildcard **prima** di eseguire il binario, un attaccante che può creare file nella directory di lavoro può creare nomi di file che iniziano con `-` in modo che vengano interpretati come **opzioni invece di dati**, permettendo di contrabbandare flag arbitrari o persino comandi.
+> L'iniezione di **argomenti** con caratteri jolly (noto anche come *glob*) si verifica quando uno script privilegiato esegue un binario Unix come `tar`, `chown`, `rsync`, `zip`, `7z`, … con un carattere jolly non quotato come `*`.
+> Poiché la shell espande il carattere jolly **prima** di eseguire il binario, un attaccante che può creare file nella directory di lavoro può creare nomi di file che iniziano con `-` in modo che vengano interpretati come **opzioni invece di dati**, permettendo di contrabbandare flag arbitrari o persino comandi.
 > Questa pagina raccoglie le primitive più utili, le ricerche recenti e le rilevazioni moderne per il 2023-2025.
 
 ## chown / chmod
@@ -18,10 +18,10 @@ Quando root esegue successivamente qualcosa come:
 chown -R alice:alice *.php
 chmod -R 644 *.php
 ```
-`--reference=/root/secret``file` viene iniettato, causando che *tutti* i file corrispondenti ereditino la proprietà/i permessi di `/root/secret``file`.
+`--reference=/root/secret``file` viene iniettato, causando che *tutti* i file corrispondenti ereditino la proprietà/permissi di `/root/secret``file`.
 
 *PoC & tool*: [`wildpwn`](https://github.com/localh0t/wildpwn) (attacco combinato).
-Vedi anche il classico documento di DefenseCode per i dettagli.
+Vedi anche il classico documento di DefenseCode per dettagli.
 
 ---
 
@@ -46,7 +46,7 @@ Il `tar` predefinito su macOS recenti (basato su `libarchive`) *non* implementa 
 # macOS example
 touch "--use-compress-program=/bin/sh"
 ```
-Quando uno script privilegiato esegue `tar -cf backup.tar *`, verrà avviato `/bin/sh`.
+Quando uno script con privilegi esegue `tar -cf backup.tar *`, verrà avviato `/bin/sh`.
 
 ---
 
@@ -86,13 +86,13 @@ Se root esegue qualcosa come:
 ```bash
 zip result.zip files -T --unzip-command "sh -c id"
 ```
-Injecta il flag tramite un nome file creato ad arte e attendi che lo script di backup privilegiato chiami `zip -T` (test archive) sul file risultante.
+Injecta il flag tramite un nome file creato ad arte e attendi che lo script di backup privilegiato chiami `zip -T` (testa archivio) sul file risultante.
 
 ---
 
 ## Binaries aggiuntivi vulnerabili all'iniezione di wildcard (lista rapida 2023-2025)
 
-I seguenti comandi sono stati abusati in CTF moderni e in ambienti reali. Il payload è sempre creato come un *nome file* all'interno di una directory scrivibile che sarà successivamente elaborata con una wildcard:
+I seguenti comandi sono stati abusati in CTF moderni e in ambienti reali. Il payload è sempre creato come un *nome file* all'interno di una directory scrivibile che sarà successivamente elaborata con un wildcard:
 
 | Binary | Flag da abusare | Effetto |
 | --- | --- | --- |
@@ -101,7 +101,7 @@ I seguenti comandi sono stati abusati in CTF moderni e in ambienti reali. Il pay
 | `git`   | `-c core.sshCommand=<cmd>` | Esecuzione del comando tramite git su SSH |
 | `scp`   | `-S <cmd>` | Avvia un programma arbitrario invece di ssh |
 
-Queste primitive sono meno comuni rispetto ai classici *tar/rsync/zip* ma vale la pena controllarle durante la caccia.
+Queste primitive sono meno comuni rispetto ai classici *tar/rsync/zip* ma vale la pena controllarle durante la ricerca.
 
 ---
 

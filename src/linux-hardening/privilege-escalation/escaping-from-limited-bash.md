@@ -116,7 +116,7 @@ chroot(".");
 > - Esegui chroot nel processo figlio in una cartella diversa
 > - Nel processo genitore, crea un FD di una cartella che si trova al di fuori del nuovo chroot del processo figlio
 > - Passa a quel processo figlio quell'FD utilizzando l'UDS
-> - Il processo figlio cambia directory in quell'FD, e poiché è al di fuori del suo chroot, evaderà la prigione
+> - Il processo figlio cambia directory in quell'FD, e poiché è al di fuori del suo chroot, sfuggirà alla prigione
 
 ### Root + Mount
 

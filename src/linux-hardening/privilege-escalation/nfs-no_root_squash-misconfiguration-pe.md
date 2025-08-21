@@ -9,7 +9,7 @@ NFS di solito (soprattutto in linux) si fida del `uid` e `gid` indicati dal clie
 
 - **`all_squash`**: Riduce tutti gli accessi mappando ogni utente e gruppo a **`nobody`** (65534 unsigned / -2 signed). Pertanto, tutti sono `nobody` e non vengono utilizzati utenti.
 - **`root_squash`/`no_all_squash`**: Questo è il valore predefinito su Linux e **riduce solo l'accesso con uid 0 (root)**. Pertanto, qualsiasi `UID` e `GID` sono fidati, ma `0` è ridotto a `nobody` (quindi non è possibile impersonare root).
-- **`no_root_squash`**: Questa configurazione, se abilitata, non riduce nemmeno l'utente root. Ciò significa che se monti una directory con questa configurazione, puoi accedervi come root.
+- **``no_root_squash`**: Questa configurazione, se abilitata, non riduce nemmeno l'utente root. Ciò significa che se monti una directory con questa configurazione, puoi accedervi come root.
 
 Nel file **/etc/exports**, se trovi qualche directory configurata come **no_root_squash**, allora puoi **accedervi** da **client** e **scrivere all'interno** di quella directory **come** se fossi il **root** locale della macchina.
 
@@ -60,13 +60,13 @@ cd <SHAREDD_FOLDER>
 
 > [!TIP]
 > Nota che se puoi creare un **tunnel dalla tua macchina alla macchina vittima, puoi comunque utilizzare la versione Remota per sfruttare questa escalation di privilegi tunnelando le porte richieste**.\
-> Il seguente trucco è nel caso in cui il file `/etc/exports` **indichi un IP**. In questo caso **non sarai in grado di utilizzare** in nessun caso il **remote exploit** e dovrai **sfruttare questo trucco**.\
+> Il seguente trucco è nel caso in cui il file `/etc/exports` **indichi un IP**. In questo caso **non potrai utilizzare** in alcun modo il **remote exploit** e dovrai **sfruttare questo trucco**.\
 > Un altro requisito necessario affinché l'exploit funzioni è che **l'export all'interno di `/etc/export`** **deve utilizzare il flag `insecure`**.\
 > --_Non sono sicuro che se `/etc/export` indica un indirizzo IP questo trucco funzionerà_--
 
 ### Basic Information
 
-Lo scenario prevede di sfruttare una condivisione NFS montata su una macchina locale, sfruttando un difetto nella specifica NFSv3 che consente al client di specificare il proprio uid/gid, potenzialmente abilitando l'accesso non autorizzato. Lo sfruttamento prevede l'uso di [libnfs](https://github.com/sahlberg/libnfs), una libreria che consente la falsificazione delle chiamate RPC NFS.
+Lo scenario prevede di sfruttare una condivisione NFS montata su una macchina locale, sfruttando un difetto nella specifica NFSv3 che consente al client di specificare il proprio uid/gid, potenzialmente abilitando l'accesso non autorizzato. Lo sfruttamento coinvolge l'uso di [libnfs](https://github.com/sahlberg/libnfs), una libreria che consente la falsificazione delle chiamate RPC NFS.
 
 #### Compiling the Library
 
@@ -77,7 +77,7 @@ I passaggi per la compilazione della libreria potrebbero richiedere aggiustament
 make
 gcc -fPIC -shared -o ld_nfs.so examples/ld_nfs.c -ldl -lnfs -I./include/ -L./lib/.libs/
 ```
-#### Esecuzione dell'Exploit
+#### Eseguire l'Exploit
 
 L'exploit prevede la creazione di un semplice programma C (`pwn.c`) che eleva i privilegi a root e poi esegue una shell. Il programma viene compilato e il binario risultante (`a.out`) viene posizionato nella condivisione con suid root, utilizzando `ld_nfs.so` per falsificare l'uid nelle chiamate RPC:
 
@@ -99,7 +99,7 @@ LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chmod u+s nfs:/
 /mnt/share/a.out
 #root
 ```
-### Bonus: NFShell per Accesso ai File in Modo Stealth
+### Bonus: NFShell per Accesso ai File Stealth
 
 Una volta ottenuto l'accesso root, per interagire con la condivisione NFS senza cambiare la proprietà (per evitare di lasciare tracce), viene utilizzato uno script Python (nfsh.py). Questo script regola l'uid per corrispondere a quello del file a cui si accede, consentendo l'interazione con i file sulla condivisione senza problemi di autorizzazione:
 ```python

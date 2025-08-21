@@ -11,7 +11,7 @@ Prima di tutto, è consigliato avere una **USB** con **binaries e librerie ben n
 export PATH=/mnt/usb/bin:/mnt/usb/sbin
 export LD_LIBRARY_PATH=/mnt/usb/lib:/mnt/usb/lib64
 ```
-Una volta configurato il sistema per utilizzare binari buoni e noti, puoi iniziare a **estrarre alcune informazioni di base**:
+Una volta che hai configurato il sistema per utilizzare binari buoni e noti, puoi iniziare a **estrarre alcune informazioni di base**:
 ```bash
 date #Date and time (Clock may be skewed, Might be at a different timezone)
 uname -a #OS info
@@ -172,7 +172,7 @@ find /sbin/ –exec rpm -qf {} \; | grep "is not"
 # Find exacuable files
 find / -type f -executable | grep <something>
 ```
-## Recuperare i Binaries Eseguiti Cancellati
+## Recuperare Binaries Eseguiti Cancellati
 
 Immagina un processo che è stato eseguito da /tmp/exec e poi cancellato. È possibile estrarlo
 ```bash
@@ -273,7 +273,7 @@ I sistemi Linux tracciano le attività degli utenti e gli eventi di sistema attr
 - **/var/log/**: Controlla sempre per log inaspettati qui.
 
 > [!TIP]
-> I log di sistema Linux e i sottosistemi di audit potrebbero essere disabilitati o eliminati in un incidente di intrusione o malware. Poiché i log sui sistemi Linux contengono generalmente alcune delle informazioni più utili sulle attività malevole, gli intrusi li eliminano di routine. Pertanto, quando si esaminano i file di log disponibili, è importante cercare lacune o voci fuori ordine che potrebbero essere un'indicazione di eliminazione o manomissione.
+> I log di sistema Linux e i sottosistemi di audit possono essere disabilitati o eliminati in un'intrusione o in un incidente di malware. Poiché i log sui sistemi Linux contengono generalmente alcune delle informazioni più utili sulle attività malevole, gli intrusi li eliminano di routine. Pertanto, quando si esaminano i file di log disponibili, è importante cercare lacune o voci fuori ordine che potrebbero essere un'indicazione di eliminazione o manomissione.
 
 **Linux mantiene una cronologia dei comandi per ogni utente**, memorizzata in:
 
@@ -339,7 +339,7 @@ Quando si indagano incidenti di malware, la struttura del file system è una fon
 
 Per contrastare questi metodi anti-forensi, è essenziale:
 
-- **Condurre un'analisi della timeline approfondita** utilizzando strumenti come **Autopsy** per visualizzare le timeline degli eventi o `mactime` di **Sleuth Kit** per dati dettagliati sulla timeline.
+- **Condurre un'analisi approfondita della timeline** utilizzando strumenti come **Autopsy** per visualizzare le timeline degli eventi o `mactime` di **Sleuth Kit** per dati dettagliati sulla timeline.
 - **Indagare su script inaspettati** nel $PATH del sistema, che potrebbero includere script shell o PHP utilizzati dagli attaccanti.
 - **Esaminare `/dev` per file atipici**, poiché tradizionalmente contiene file speciali, ma potrebbe ospitare file correlati al malware.
 - **Cercare file o directory nascosti** con nomi come ".. " (punto punto spazio) o "..^G" (punto punto controllo-G), che potrebbero nascondere contenuti dannosi.
@@ -367,7 +367,7 @@ Per confrontare le versioni del filesystem e individuare le modifiche, utilizzia
 ```bash
 git diff --no-index --diff-filter=A path/to/old_version/ path/to/new_version/
 ```
-- **Per contenuti modificati**, elenca le modifiche ignorando linee specifiche:
+- **Per contenuto modificato**, elenca le modifiche ignorando righe specifiche:
 ```bash
 git diff --no-index --diff-filter=M path/to/old_version/ path/to/new_version/ | grep -E "^\+" | grep -v "Installed-Time"
 ```

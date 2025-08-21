@@ -23,14 +23,14 @@ I diritti di porta, che definiscono quali operazioni un compito può eseguire, s
 - **Diritto di invio**, che consente di inviare messaggi alla porta.
 - Il diritto di invio può essere **clonato** in modo che un compito che possiede un diritto di invio possa clonare il diritto e **concederlo a un terzo compito**.
 - **Diritto di invio una sola volta**, che consente di inviare un messaggio alla porta e poi scompare.
-- **Diritto di insieme di porte**, che denota un _insieme di porte_ piuttosto che una singola porta. Dequeuing un messaggio da un insieme di porte dequeues un messaggio da una delle porte che contiene. Gli insiemi di porte possono essere utilizzati per ascoltare su più porte simultaneamente, molto simile a `select`/`poll`/`epoll`/`kqueue` in Unix.
+- **Diritto di insieme di porte**, che denota un _insieme di porte_ piuttosto che una singola porta. Dequeuing un messaggio da un insieme di porte estrae un messaggio da una delle porte che contiene. Gli insiemi di porte possono essere utilizzati per ascoltare su più porte simultaneamente, molto simile a `select`/`poll`/`epoll`/`kqueue` in Unix.
 - **Nome morto**, che non è un vero e proprio diritto di porta, ma semplicemente un segnaposto. Quando una porta viene distrutta, tutti i diritti di porta esistenti per la porta si trasformano in nomi morti.
 
 **I compiti possono trasferire diritti di INVIO ad altri**, consentendo loro di inviare messaggi di ritorno. **I diritti di INVIO possono anche essere clonati, quindi un compito può duplicare e dare il diritto a un terzo compito**. Questo, combinato con un processo intermedio noto come **bootstrap server**, consente una comunicazione efficace tra i compiti.
 
 ### Porte di File
 
-Le porte di file consentono di incapsulare descrittori di file in porte Mac (utilizzando diritti di porta Mach). È possibile creare un `fileport` da un FD dato utilizzando `fileport_makeport` e creare un FD da un fileport utilizzando `fileport_makefd`.
+Le porte di file consentono di racchiudere descrittori di file in porte Mac (utilizzando diritti di porta Mach). È possibile creare un `fileport` da un FD dato utilizzando `fileport_makeport` e creare un FD da un fileport utilizzando `fileport_makefd`.
 
 ### Stabilire una comunicazione
 
@@ -43,19 +43,19 @@ Come menzionato, per stabilire il canale di comunicazione, è coinvolto il **boo
 3. Il compito **A** stabilisce una **connessione** con il **bootstrap server**, fornendo il **nome del servizio della porta** e il **diritto di INVIO** attraverso una procedura nota come registrazione bootstrap.
 4. Il compito **B** interagisce con il **bootstrap server** per eseguire una **ricerca bootstrap per il nome del servizio**. Se ha successo, il **server duplica il diritto di INVIO** ricevuto dal Compito A e **lo trasmette al Compito B**.
 5. Dopo aver acquisito un diritto di INVIO, il Compito **B** è in grado di **formulare** un **messaggio** e inviarlo **al Compito A**.
-6. Per una comunicazione bidirezionale, di solito il compito **B** genera una nuova porta con un **diritto di RICEZIONE** e un **diritto di INVIO**, e concede il **diritto di INVIO al Compito A** in modo che possa inviare messaggi al COMPITO B (comunicazione bidirezionale).
+6. Per una comunicazione bidirezionale, di solito il compito **B** genera una nuova porta con un **DIRITTO DI RICEZIONE** e un **DIRITTO DI INVIO**, e concede il **DIRITTO DI INVIO al Compito A** in modo che possa inviare messaggi al COMPITO B (comunicazione bidirezionale).
 
 Il bootstrap server **non può autenticare** il nome del servizio rivendicato da un compito. Questo significa che un **compito** potrebbe potenzialmente **impersonare qualsiasi compito di sistema**, come rivendicare falsamente un nome di servizio di autorizzazione e poi approvare ogni richiesta.
 
-Successivamente, Apple memorizza i **nomi dei servizi forniti dal sistema** in file di configurazione sicuri, situati in directory **protette da SIP**: `/System/Library/LaunchDaemons` e `/System/Library/LaunchAgents`. Accanto a ciascun nome di servizio, è anche memorizzato il **binario associato**. Il bootstrap server creerà e manterrà un **diritto di RICEZIONE per ciascuno di questi nomi di servizio**.
+Successivamente, Apple memorizza i **nomi dei servizi forniti dal sistema** in file di configurazione sicuri, situati in directory **protette da SIP**: `/System/Library/LaunchDaemons` e `/System/Library/LaunchAgents`. Accanto a ciascun nome di servizio, è anche memorizzato il **binario associato**. Il bootstrap server creerà e manterrà un **DIRITTO DI RICEZIONE per ciascuno di questi nomi di servizio**.
 
 Per questi servizi predefiniti, il **processo di ricerca differisce leggermente**. Quando un nome di servizio viene cercato, launchd avvia il servizio dinamicamente. Il nuovo flusso di lavoro è il seguente:
 
 - Il compito **B** avvia una **ricerca bootstrap** per un nome di servizio.
 - **launchd** verifica se il compito è in esecuzione e, se non lo è, **lo avvia**.
 - Il compito **A** (il servizio) esegue un **check-in bootstrap**. Qui, il **bootstrap** server crea un diritto di INVIO, lo trattiene e **trasferisce il diritto di RICEZIONE al Compito A**.
-- launchd duplica il **diritto di INVIO e lo invia al Compito B**.
-- Il compito **B** genera una nuova porta con un **diritto di RICEZIONE** e un **diritto di INVIO**, e concede il **diritto di INVIO al Compito A** (il svc) in modo che possa inviare messaggi al COMPITO B (comunicazione bidirezionale).
+- launchd duplica il **DIRITTO DI INVIO e lo invia al Compito B**.
+- Il Compito **B** genera una nuova porta con un **DIRITTO DI RICEZIONE** e un **DIRITTO DI INVIO**, e concede il **DIRITTO DI INVIO al Compito A** (il svc) in modo che possa inviare messaggi al COMPITO B (comunicazione bidirezionale).
 
 Tuttavia, questo processo si applica solo ai compiti di sistema predefiniti. I compiti non di sistema operano ancora come descritto originariamente, il che potrebbe potenzialmente consentire l'impersonificazione.
 
@@ -76,7 +76,7 @@ mach_msg_id_t                 msgh_id;
 ```
 I process che possiedono un _**diritto di ricezione**_ possono ricevere messaggi su una porta Mach. Al contrario, ai **mittenti** viene concesso un _**diritto di invio**_ o un _**diritto di invio-una-volta**_. Il diritto di invio-una-volta è esclusivamente per l'invio di un singolo messaggio, dopo il quale diventa non valido.
 
-Per ottenere una facile **comunicazione bi-direzionale**, un processo può specificare una **porta mach** nell'**intestazione del messaggio** chiamata _porta di risposta_ (**`msgh_local_port`**) dove il **ricevente** del messaggio può **inviare una risposta** a questo messaggio. I bitflags in **`msgh_bits`** possono essere utilizzati per **indicare** che un **diritto di invio-una-volta** dovrebbe essere derivato e trasferito per questa porta (`MACH_MSG_TYPE_MAKE_SEND_ONCE`).
+Per ottenere una facile **comunicazione bi-direzionale**, un processo può specificare una **porta mach** nell'**intestazione del messaggio** chiamata _porta di risposta_ (**`msgh_local_port`**) dove il **ricevitore** del messaggio può **inviare una risposta** a questo messaggio. I bitflags in **`msgh_bits`** possono essere utilizzati per **indicare** che un **diritto di invio-una-volta** dovrebbe essere derivato e trasferito per questa porta (`MACH_MSG_TYPE_MAKE_SEND_ONCE`).
 
 > [!TIP]
 > Nota che questo tipo di comunicazione bi-direzionale è utilizzato nei messaggi XPC che si aspettano una risposta (`xpc_connection_send_message_with_reply` e `xpc_connection_send_message_with_reply_sync`). Ma **di solito vengono create porte diverse** come spiegato in precedenza per creare la comunicazione bi-direzionale.
@@ -84,12 +84,12 @@ Per ottenere una facile **comunicazione bi-direzionale**, un processo può speci
 Gli altri campi dell'intestazione del messaggio sono:
 
 - `msgh_size`: la dimensione dell'intero pacchetto.
-- `msgh_remote_port`: la porta su cui questo messaggio è inviato.
+- `msgh_remote_port`: la porta sulla quale questo messaggio è inviato.
 - `msgh_voucher_port`: [mach vouchers](https://robert.sesek.com/2023/6/mach_vouchers.html).
-- `msgh_id`: l'ID di questo messaggio, che è interpretato dal ricevente.
+- `msgh_id`: l'ID di questo messaggio, che è interpretato dal ricevitore.
 
 > [!CAUTION]
-> Nota che **i messaggi mach vengono inviati su una \_porta mach**\_, che è un canale di comunicazione **a singolo ricevente**, **multipli mittenti** integrato nel kernel mach. **Più processi** possono **inviare messaggi** a una porta mach, ma in qualsiasi momento solo **un singolo processo può leggere** da essa.
+> Nota che **i messaggi mach vengono inviati su una \_porta mach**\_, che è un canale di comunicazione **a singolo ricevitore**, **multipli mittenti** integrato nel kernel mach. **Più processi** possono **inviare messaggi** a una porta mach, ma in qualsiasi momento solo **un singolo processo può leggere** da essa.
 
 ### Enumerare porte
 ```bash
@@ -228,7 +228,7 @@ printf("Sent a message\n");
 ### Porte Privilegiate
 
 - **Porta host**: Se un processo ha il privilegio di **Invio** su questa porta, può ottenere **informazioni** sul **sistema** (ad es. `host_processor_info`).
-- **Porta priv di host**: Un processo con diritto di **Invio** su questa porta può eseguire **azioni privilegiate** come caricare un'estensione del kernel. Il **processo deve essere root** per ottenere questo permesso.
+- **Porta priv di host**: Un processo con diritto di **Invio** su questa porta può eseguire **azioni privilegiate** come il caricamento di un'estensione del kernel. Il **processo deve essere root** per ottenere questo permesso.
 - Inoltre, per chiamare l'API **`kext_request`** è necessario avere altri diritti **`com.apple.private.kext*`** che sono concessi solo ai binari Apple.
 - **Porta nome task:** Una versione non privilegiata della _porta task_. Riferisce al task, ma non consente di controllarlo. L'unica cosa che sembra essere disponibile attraverso di essa è `task_info()`.
 - **Porta task** (nota anche come porta kernel)**:** Con permesso di Invio su questa porta è possibile controllare il task (leggere/scrivere memoria, creare thread...).
@@ -293,7 +293,7 @@ return 0;
 {{#endtab}}
 {{#endtabs}}
 
-**Compila** il programma precedente e aggiungi i **diritti** per poter iniettare codice con lo stesso utente (se no dovrai usare **sudo**).
+**Compila** il programma precedente e aggiungi i **diritti** per poter iniettare codice con lo stesso utente (altrimenti dovrai usare **sudo**).
 
 <details>
 
@@ -507,7 +507,7 @@ In macOS **i thread** possono essere manipolati tramite **Mach** o utilizzando *
 
 Pertanto, per **migliorare il thread** dovrebbe chiamare **`pthread_create_from_mach_thread`** che **creerà un pthread valido**. Poi, questo nuovo pthread potrebbe **chiamare dlopen** per **caricare un dylib** dal sistema, quindi invece di scrivere nuovo shellcode per eseguire diverse azioni è possibile caricare librerie personalizzate.
 
-Puoi trovare **esempi di dylibs** in (ad esempio quello che genera un log e poi puoi ascoltarlo):
+Puoi trovare **dylibs di esempio** in (ad esempio quello che genera un log e poi puoi ascoltarlo):
 
 
 {{#ref}}
@@ -805,7 +805,7 @@ In questa tecnica un thread del processo viene hijacked:
 
 ### Informazioni di base
 
-XPC, che sta per XNU (il kernel utilizzato da macOS) inter-Process Communication, è un framework per **la comunicazione tra processi** su macOS e iOS. XPC fornisce un meccanismo per effettuare **chiamate a metodi sicure e asincrone tra diversi processi** sul sistema. Fa parte del paradigma di sicurezza di Apple, consentendo la **creazione di applicazioni separate per privilegi** in cui ogni **componente** viene eseguito con **solo i permessi necessari** per svolgere il proprio lavoro, limitando così il potenziale danno derivante da un processo compromesso.
+XPC, che sta per XNU (il kernel utilizzato da macOS) inter-Process Communication, è un framework per **la comunicazione tra processi** su macOS e iOS. XPC fornisce un meccanismo per effettuare **chiamate a metodi sicure e asincrone tra diversi processi** sul sistema. Fa parte del paradigma di sicurezza di Apple, consentendo la **creazione di applicazioni separate per privilegi** in cui ogni **componente** funziona con **solo i permessi necessari** per svolgere il proprio lavoro, limitando così il potenziale danno derivante da un processo compromesso.
 
 Per ulteriori informazioni su come questa **comunicazione funziona** e su come potrebbe **essere vulnerabile**, controlla:
 

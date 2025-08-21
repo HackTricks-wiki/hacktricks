@@ -34,7 +34,6 @@ Per informazioni su come funzionano queste chiavi, controlla la pagina [https://
 
 Gli iButton possono essere attaccati con Flipper Zero:
 
-
 {{#ref}}
 flipper-zero/fz-ibutton.md
 {{#endref}}

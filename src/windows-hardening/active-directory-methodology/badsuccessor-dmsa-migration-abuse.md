@@ -4,7 +4,7 @@
 
 ## Panoramica
 
-I Delegated Managed Service Accounts (**dMSA**) sono il successore di nuova generazione dei **gMSA** che verranno inclusi in Windows Server 2025. Un flusso di lavoro di migrazione legittimo consente agli amministratori di sostituire un account *vecchio* (utente, computer o account di servizio) con un dMSA mantenendo in modo trasparente i permessi. Il flusso di lavoro è esposto tramite cmdlet PowerShell come `Start-ADServiceAccountMigration` e `Complete-ADServiceAccountMigration` e si basa su due attributi LDAP dell'**oggetto dMSA**:
+Gli Account di Servizio Gestiti Delegati (**dMSA**) sono il successore di nuova generazione degli **gMSA** che verranno inclusi in Windows Server 2025. Un flusso di lavoro di migrazione legittimo consente agli amministratori di sostituire un account *vecchio* (utente, computer o account di servizio) con un dMSA preservando in modo trasparente i permessi. Il flusso di lavoro è esposto tramite cmdlet PowerShell come `Start-ADServiceAccountMigration` e `Complete-ADServiceAccountMigration` e si basa su due attributi LDAP dell'**oggetto dMSA**:
 
 * **`msDS-ManagedAccountPrecededByLink`** – *DN link* all'account superseded (vecchio).
 * **`msDS-DelegatedMSAState`**       – stato di migrazione (`0` = nessuno, `1` = in corso, `2` = *completato*).
@@ -47,11 +47,11 @@ Set-ADServiceAccount attacker_dMSA -Add \
 # 3. Mark the migration as *completed*
 Set-ADServiceAccount attacker_dMSA -Replace @{msDS-DelegatedMSAState=2}
 ```
-Dopo la replicazione, l'attaccante può semplicemente **logon** come `attacker_dMSA$` o richiedere un Kerberos TGT – Windows costruirà il token dell'account *superseded*.
+Dopo la replicazione, l'attaccante può semplicemente **logon** come `attacker_dMSA$` o richiedere un TGT Kerberos – Windows costruirà il token dell'account *superseded*.
 
 ### Automazione
 
-Diverse PoC pubbliche avvolgono l'intero flusso di lavoro, inclusi il recupero della password e la gestione dei ticket:
+Diversi PoC pubblici avvolgono l'intero flusso di lavoro, inclusi il recupero della password e la gestione dei ticket:
 
 * SharpSuccessor (C#) – [https://github.com/logangoins/SharpSuccessor](https://github.com/logangoins/SharpSuccessor)
 * BadSuccessor.ps1 (PowerShell) – [https://github.com/LuemmelSec/Pentest-Tools-Collection/blob/main/tools/ActiveDirectory/BadSuccessor.ps1](https://github.com/LuemmelSec/Pentest-Tools-Collection/blob/main/tools/ActiveDirectory/BadSuccessor.ps1)
@@ -93,9 +93,9 @@ golden-dmsa-gmsa.md
 
 ## Riferimenti
 
-- [Unit42 – Quando i Buoni Account Diventano Cattivi: Sfruttare gli Account di Servizio Gestiti Delegati](https://unit42.paloaltonetworks.com/badsuccessor-attack-vector/)
+- [Unit42 – When Good Accounts Go Bad: Exploiting Delegated Managed Service Accounts](https://unit42.paloaltonetworks.com/badsuccessor-attack-vector/)
 - [SharpSuccessor PoC](https://github.com/logangoins/SharpSuccessor)
-- [BadSuccessor.ps1 – Collezione di Strumenti per Pentest](https://github.com/LuemmelSec/Pentest-Tools-Collection/blob/main/tools/ActiveDirectory/BadSuccessor.ps1)
-- [Modulo BadSuccessor di NetExec](https://github.com/Pennyw0rth/NetExec/blob/main/nxc/modules/badsuccessor.py)
+- [BadSuccessor.ps1 – Pentest-Tools-Collection](https://github.com/LuemmelSec/Pentest-Tools-Collection/blob/main/tools/ActiveDirectory/BadSuccessor.ps1)
+- [NetExec BadSuccessor module](https://github.com/Pennyw0rth/NetExec/blob/main/nxc/modules/badsuccessor.py)
 
 {{#include ../../banners/hacktricks-training.md}}

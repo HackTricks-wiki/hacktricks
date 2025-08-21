@@ -4,11 +4,11 @@
 
 ## Cosa Influisce
 
-Quando esegui un contenitore come privilegiato, queste sono le protezioni che stai disabilitando:
+Quando esegui un container come privilegiato, queste sono le protezioni che stai disabilitando:
 
 ### Monta /dev
 
-In un contenitore privilegiato, tutti i **dispositivi possono essere accessibili in `/dev/`**. Pertanto puoi **uscire** **montando** il disco dell'host.
+In un container privilegiato, tutti i **dispositivi possono essere accessibili in `/dev/`**. Pertanto puoi **uscire** **montando** il disco dell'host.
 
 {{#tabs}}
 {{#tab name="Inside default container"}}
@@ -20,7 +20,7 @@ core     full     null     pts      shm      stdin    tty      zero
 ```
 {{#endtab}}
 
-{{#tab name="Dentro il Contenitore Privilegiato"}}
+{{#tab name="Inside Privileged Container"}}
 ```bash
 # docker run --rm --privileged -it alpine sh
 ls /dev
@@ -57,7 +57,7 @@ mount  | grep '(ro'
 {{#endtab}}
 {{#endtabs}}
 
-### Mascheramento dei file system del kernel
+### Mascheramento sui file system del kernel
 
 Il file system **/proc** è scrivibile in modo selettivo, ma per motivi di sicurezza, alcune parti sono protette da accesso in scrittura e lettura sovrapponendole con **tmpfs**, garantendo che i processi del container non possano accedere ad aree sensibili.
 
@@ -103,7 +103,7 @@ Bounding set =cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setg
 ```
 {{#endtab}}
 
-{{#tab name="Dentro il Contenitore Privilegiato"}}
+{{#tab name="Inside Privileged Container"}}
 ```bash
 # docker run --rm --privileged -it alpine sh
 apk add -U libcap; capsh --print
@@ -119,7 +119,7 @@ Puoi manipolare le capacità disponibili per un container senza eseguire in moda
 
 ### Seccomp
 
-**Seccomp** è utile per **limitare** le **syscall** che un container può chiamare. Un profilo seccomp predefinito è abilitato per impostazione predefinita quando si eseguono container docker, ma in modalità privilegiata è disabilitato. Scopri di più su Seccomp qui:
+**Seccomp** è utile per **limitare** le **syscalls** che un container può chiamare. Un profilo seccomp predefinito è abilitato per impostazione predefinita quando si eseguono container docker, ma in modalità privilegiata è disabilitato. Scopri di più su Seccomp qui:
 
 {{#ref}}
 seccomp.md
@@ -163,7 +163,7 @@ apparmor.md
 ```
 ### SELinux
 
-Eseguire un container con il flag `--privileged` disabilita le **etichette SELinux**, facendogli ereditare l'etichetta del motore del container, tipicamente `unconfined`, concedendo accesso completo simile a quello del motore del container. In modalità senza root, utilizza `container_runtime_t`, mentre in modalità root, viene applicato `spc_t`.
+Eseguire un container con il flag `--privileged` disabilita le **etichette SELinux**, causando l'ereditarietà dell'etichetta del motore del container, tipicamente `unconfined`, concedendo accesso completo simile a quello del motore del container. In modalità senza root, utilizza `container_runtime_t`, mentre in modalità root, viene applicato `spc_t`.
 
 
 {{#ref}}
@@ -205,7 +205,7 @@ PID   USER     TIME  COMMAND
 
 ### Spazio utente
 
-**Per impostazione predefinita, i motori dei container non utilizzano spazi utente, tranne per i container senza root**, che li richiedono per il montaggio del file system e l'uso di più UID. Gli spazi utente, fondamentali per i container senza root, non possono essere disabilitati e migliorano significativamente la sicurezza limitando i privilegi.
+**Per impostazione predefinita, i motori dei container non utilizzano spazi utente, tranne che per i container senza root**, che li richiedono per il montaggio del file system e per l'uso di più UID. Gli spazi utente, fondamentali per i container senza root, non possono essere disabilitati e migliorano significativamente la sicurezza limitando i privilegi.
 
 ## Riferimenti
 

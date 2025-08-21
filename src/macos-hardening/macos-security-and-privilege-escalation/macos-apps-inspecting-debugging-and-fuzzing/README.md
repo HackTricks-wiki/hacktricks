@@ -88,7 +88,7 @@ Questi installer hanno script bash `preinstall` e `postinstall` che gli autori d
 
 ### hdiutil
 
-Questo strumento consente di **mount** le immagini disco Apple (**.dmg**) per ispezionarle prima di eseguire qualsiasi cosa:
+Questo strumento consente di **mount** i file immagine disco Apple (**.dmg**) per ispezionarli prima di eseguire qualsiasi cosa:
 ```bash
 hdiutil attach ~/Downloads/Firefox\ 58.0.2.dmg
 ```
@@ -97,7 +97,7 @@ Sarà montato in `/Volumes`
 ### Binarie impacchettate
 
 - Controlla l'alta entropia
-- Controlla le stringhe (se ci sono quasi nessuna stringa comprensibile, impacchettato)
+- Controlla le stringhe (se non ci sono stringhe comprensibili, è impacchettato)
 - Il pacchetto UPX per MacOS genera una sezione chiamata "\_\_XHDR"
 
 ## Analisi statica di Objective-C
@@ -123,10 +123,10 @@ Quando una funzione viene chiamata in un binario che utilizza Objective-C, il co
 I parametri che questa funzione si aspetta sono:
 
 - Il primo parametro (**self**) è "un puntatore che punta all'**istanza della classe che deve ricevere il messaggio**". In altre parole, è l'oggetto su cui viene invocato il metodo. Se il metodo è un metodo di classe, questo sarà un'istanza dell'oggetto classe (nel suo insieme), mentre per un metodo di istanza, self punterà a un'istanza instanziata della classe come oggetto.
-- Il secondo parametro, (**op**), è "il selettore del metodo che gestisce il messaggio". Ancora una volta, in termini più semplici, questo è solo il **nome del metodo.**
+- Il secondo parametro, (**op**), è "il selettore del metodo che gestisce il messaggio". In termini più semplici, questo è solo il **nome del metodo.**
 - I parametri rimanenti sono eventuali **valori richiesti dal metodo** (op).
 
-Vedi come **ottenere facilmente queste informazioni con `lldb` in ARM64** in questa pagina:
+Vedi come **ottenere queste informazioni facilmente con `lldb` in ARM64** in questa pagina:
 
 {{#ref}}
 arm64-basic-assembly.md
@@ -135,13 +135,13 @@ arm64-basic-assembly.md
 x64:
 
 | **Argomento**     | **Registro**                                                   | **(per) objc_msgSend**                                 |
-| ----------------- | ------------------------------------------------------------- | ------------------------------------------------------ |
-| **1° argomento**  | **rdi**                                                       | **self: oggetto su cui viene invocato il metodo**     |
-| **2° argomento**  | **rsi**                                                       | **op: nome del metodo**                                |
-| **3° argomento**  | **rdx**                                                       | **1° argomento per il metodo**                         |
-| **4° argomento**  | **rcx**                                                       | **2° argomento per il metodo**                         |
-| **5° argomento**  | **r8**                                                        | **3° argomento per il metodo**                         |
-| **6° argomento**  | **r9**                                                        | **4° argomento per il metodo**                         |
+| ------------------| -------------------------------------------------------------- | ------------------------------------------------------ |
+| **1° argomento**  | **rdi**                                                        | **self: oggetto su cui viene invocato il metodo**     |
+| **2° argomento**  | **rsi**                                                        | **op: nome del metodo**                                |
+| **3° argomento**  | **rdx**                                                        | **1° argomento per il metodo**                         |
+| **4° argomento**  | **rcx**                                                        | **2° argomento per il metodo**                         |
+| **5° argomento**  | **r8**                                                         | **3° argomento per il metodo**                         |
+| **6° argomento**  | **r9**                                                         | **4° argomento per il metodo**                         |
 | **7°+ argomento** | <p><strong>rsp+</strong><br><strong>(sullo stack)</strong></p> | **5°+ argomento per il metodo**                        |
 
 ### Dump dei metadati di ObjectiveC
@@ -191,7 +191,7 @@ Mem: 0x100027064-0x1000274cc        __TEXT.__swift5_fieldmd
 Mem: 0x1000274cc-0x100027608        __TEXT.__swift5_capture
 [...]
 ```
-Puoi trovare ulteriori informazioni su [**le informazioni memorizzate in queste sezioni in questo post del blog**](https://knight.sc/reverse%20engineering/2019/07/17/swift-metadata.html).
+Puoi trovare ulteriori informazioni su [**le informazioni memorizzate in questa sezione in questo post del blog**](https://knight.sc/reverse%20engineering/2019/07/17/swift-metadata.html).
 
 Inoltre, **i binari Swift potrebbero avere simboli** (ad esempio, le librerie devono memorizzare simboli affinché le loro funzioni possano essere chiamate). I **simboli di solito contengono informazioni sul nome della funzione** e sugli attributi in un modo poco chiaro, quindi sono molto utili e ci sono "**demanglers"** che possono ottenere il nome originale:
 ```bash
@@ -216,7 +216,7 @@ macOS espone alcune API interessanti che forniscono informazioni sui processi:
 - `proc_info`: Questo è il principale che fornisce molte informazioni su ciascun processo. Devi essere root per ottenere informazioni su altri processi, ma non hai bisogno di diritti speciali o porte mach.
 - `libsysmon.dylib`: Consente di ottenere informazioni sui processi tramite funzioni esposte da XPC, tuttavia, è necessario avere il diritto `com.apple.sysmond.client`.
 
-### Stackshot & microstackshots
+### Stackshot e microstackshots
 
 **Stackshotting** è una tecnica utilizzata per catturare lo stato dei processi, inclusi gli stack di chiamate di tutti i thread in esecuzione. Questo è particolarmente utile per il debug, l'analisi delle prestazioni e la comprensione del comportamento del sistema in un momento specifico. Su iOS e macOS, lo stackshotting può essere eseguito utilizzando diversi strumenti e metodi come gli strumenti **`sample`** e **`spindump`**.
 
@@ -258,7 +258,7 @@ Inoltre, nella **parte centrale in basso puoi scrivere comandi python**.
 
 #### Pannello destro
 
-Nel pannello destro puoi vedere informazioni interessanti come la **cronologia di navigazione** (così sai come sei arrivato alla situazione attuale), il **grafico delle chiamate** dove puoi vedere tutte le **funzioni che chiamano questa funzione** e tutte le funzioni che **questa funzione chiama**, e informazioni sulle **variabili locali**.
+Nel pannello destro puoi vedere informazioni interessanti come la **cronologia di navigazione** (così sai come sei arrivato alla situazione attuale), il **grafo delle chiamate** dove puoi vedere tutte le **funzioni che chiamano questa funzione** e tutte le funzioni che **questa funzione chiama**, e informazioni sulle **variabili locali**.
 
 ### dtrace
 
@@ -290,6 +290,8 @@ Una spiegazione più dettagliata e ulteriori esempi possono essere trovati in [h
 #### Esempi
 
 Esegui `man -k dtrace` per elencare gli **script DTrace disponibili**. Esempio: `sudo dtruss -n binary`
+
+- In linea
 ```bash
 #Count the number of syscalls of each running process
 sudo dtrace -n 'syscall:::entry {@[execname] = count()}'
@@ -343,7 +345,7 @@ dtruss -c -p 1000 #get syscalls of PID 1000
 
 Strumenti come `latency`, `sc_usage`, `fs_usage` e `trace` lo utilizzano internamente.
 
-Per interfacciarsi con `kdebug` si utilizza `sysctl` attraverso lo spazio dei nomi `kern.kdebug` e i MIB da utilizzare possono essere trovati in `sys/sysctl.h`, con le funzioni implementate in `bsd/kern/kdebug.c`.
+Per interfacciarsi con `kdebug`, si utilizza `sysctl` sul namespace `kern.kdebug` e i MIB da utilizzare possono essere trovati in `sys/sysctl.h`, con le funzioni implementate in `bsd/kern/kdebug.c`.
 
 Per interagire con kdebug con un client personalizzato, questi sono solitamente i passaggi:
 
@@ -361,7 +363,7 @@ Per ottenere queste informazioni è possibile utilizzare lo strumento Apple **`t
 
 ### ktrace
 
-Le API `ktrace_*` provengono da `libktrace.dylib` che avvolgono quelle di `Kdebug`. Quindi, un client può semplicemente chiamare `ktrace_session_create` e `ktrace_events_[single/class]` per impostare callback su codici specifici e poi avviarlo con `ktrace_start`.
+Le API `ktrace_*` provengono da `libktrace.dylib`, che avvolgono quelle di `Kdebug`. Quindi, un client può semplicemente chiamare `ktrace_session_create` e `ktrace_events_[single/class]` per impostare callback su codici specifici e poi avviarlo con `ktrace_start`.
 
 Puoi utilizzare questo anche con **SIP attivato**
 
@@ -398,7 +400,7 @@ Devi monitorare il tuo mac con un comando come **`sudo eslogger fork exec rename
 
 ### Crescendo
 
-[**Crescendo**](https://github.com/SuprHackerSteve/Crescendo) è uno strumento GUI con l'aspetto e la sensazione che gli utenti Windows potrebbero conoscere da _Procmon_ di Microsoft Sysinternal. Questo strumento consente di registrare vari tipi di eventi che possono essere avviati e fermati, consente il filtraggio di questi eventi per categorie come file, processo, rete, ecc., e fornisce la funzionalità di salvare gli eventi registrati in formato json.
+[**Crescendo**](https://github.com/SuprHackerSteve/Crescendo) è uno strumento GUI con l'aspetto e la sensazione che gli utenti Windows potrebbero conoscere da _Procmon_ di Microsoft Sysinternal. Questo strumento consente di registrare vari tipi di eventi da avviare e fermare, consente il filtraggio di questi eventi per categorie come file, processo, rete, ecc., e fornisce la funzionalità di salvare gli eventi registrati in formato json.
 
 ### Apple Instruments
 
@@ -438,7 +440,7 @@ settings set target.x86-disassembly-flavor intel
 > [!WARNING]
 > All'interno di lldb, esegui il dump di un processo con `process save-core`
 
-<table data-header-hidden><thead><tr><th width="225"></th><th></th></tr></thead><tbody><tr><td><strong>(lldb) Comando</strong></td><td><strong>Descrizione</strong></td></tr><tr><td><strong>run (r)</strong></td><td>Inizia l'esecuzione, che continuerà senza interruzioni fino a quando non viene colpito un breakpoint o il processo termina.</td></tr><tr><td><strong>process launch --stop-at-entry</strong></td><td>Inizia l'esecuzione fermandosi al punto di ingresso</td></tr><tr><td><strong>continue (c)</strong></td><td>Continua l'esecuzione del processo in debug.</td></tr><tr><td><strong>nexti (n / ni)</strong></td><td>Esegui la prossima istruzione. Questo comando salterà le chiamate di funzione.</td></tr><tr><td><strong>stepi (s / si)</strong></td><td>Esegui la prossima istruzione. A differenza del comando nexti, questo comando entrerà nelle chiamate di funzione.</td></tr><tr><td><strong>finish (f)</strong></td><td>Esegui il resto delle istruzioni nella funzione corrente (“frame”) e ritorna e ferma.</td></tr><tr><td><strong>control + c</strong></td><td>Metti in pausa l'esecuzione. Se il processo è stato eseguito (r) o continuato (c), questo causerà l'arresto del processo ...dove si trova attualmente in esecuzione.</td></tr><tr><td><strong>breakpoint (b)</strong></td><td><p><code>b main</code> #Qualsiasi funzione chiamata main</p><p><code>b <binname>`main</code> #Funzione principale del bin</p><p><code>b set -n main --shlib <lib_name></code> #Funzione principale del bin indicato</p><p><code>breakpoint set -r '\[NSFileManager .*\]$'</code> #Qualsiasi metodo NSFileManager</p><p><code>breakpoint set -r '\[NSFileManager contentsOfDirectoryAtPath:.*\]$'</code></p><p><code>break set -r . -s libobjc.A.dylib</code> # Interrompi in tutte le funzioni di quella libreria</p><p><code>b -a 0x0000000100004bd9</code></p><p><code>br l</code> #Elenco dei breakpoint</p><p><code>br e/dis <num></code> #Abilita/Disabilita breakpoint</p><p>breakpoint delete <num></p></td></tr><tr><td><strong>help</strong></td><td><p>help breakpoint #Ottieni aiuto sul comando breakpoint</p><p>help memory write #Ottieni aiuto per scrivere nella memoria</p></td></tr><tr><td><strong>reg</strong></td><td><p>reg read</p><p>reg read $rax</p><p>reg read $rax --format <<a href="https://lldb.llvm.org/use/variable.html#type-format">format</a>></p><p>reg write $rip 0x100035cc0</p></td></tr><tr><td><strong>x/s <reg/memory address></strong></td><td>Visualizza la memoria come una stringa terminata da null.</td></tr><tr><td><strong>x/i <reg/memory address></strong></td><td>Visualizza la memoria come istruzione assembly.</td></tr><tr><td><strong>x/b <reg/memory address></strong></td><td>Visualizza la memoria come byte.</td></tr><tr><td><strong>print object (po)</strong></td><td><p>Questo stamperà l'oggetto referenziato dal parametro</p><p>po $raw</p><p><code>{</code></p><p><code>dnsChanger = {</code></p><p><code>"affiliate" = "";</code></p><p><code>"blacklist_dns" = ();</code></p><p>Nota che la maggior parte delle API o dei metodi Objective-C di Apple restituiscono oggetti, e quindi dovrebbero essere visualizzati tramite il comando “print object” (po). Se po non produce un output significativo usa <code>x/b</code></p></td></tr><tr><td><strong>memory</strong></td><td>memory read 0x000....<br>memory read $x0+0xf2a<br>memory write 0x100600000 -s 4 0x41414141 #Scrivi AAAA in quell'indirizzo<br>memory write -f s $rip+0x11f+7 "AAAA" #Scrivi AAAA nell'indirizzo</td></tr><tr><td><strong>disassembly</strong></td><td><p>dis #Disassembla la funzione corrente</p><p>dis -n <funcname> #Disassembla la funzione</p><p>dis -n <funcname> -b <basename> #Disassembla la funzione<br>dis -c 6 #Disassembla 6 righe<br>dis -c 0x100003764 -e 0x100003768 # Da un indirizzo all'altro<br>dis -p -c 4 # Inizia nell'indirizzo corrente disassemblando</p></td></tr><tr><td><strong>parray</strong></td><td>parray 3 (char **)$x1 # Controlla l'array di 3 componenti nel registro x1</td></tr><tr><td><strong>image dump sections</strong></td><td>Stampa la mappa della memoria del processo corrente</td></tr><tr><td><strong>image dump symtab <library></strong></td><td><code>image dump symtab CoreNLP</code> #Ottieni l'indirizzo di tutti i simboli da CoreNLP</td></tr></tbody></table>
+<table data-header-hidden><thead><tr><th width="225"></th><th></th></tr></thead><tbody><tr><td><strong>(lldb) Comando</strong></td><td><strong>Descrizione</strong></td></tr><tr><td><strong>run (r)</strong></td><td>Inizia l'esecuzione, che continuerà senza interruzioni fino a quando non viene colpito un breakpoint o il processo termina.</td></tr><tr><td><strong>process launch --stop-at-entry</strong></td><td>Inizia l'esecuzione fermandosi al punto di ingresso</td></tr><tr><td><strong>continue (c)</strong></td><td>Continua l'esecuzione del processo in debug.</td></tr><tr><td><strong>nexti (n / ni)</strong></td><td>Esegui la prossima istruzione. Questo comando salterà le chiamate di funzione.</td></tr><tr><td><strong>stepi (s / si)</strong></td><td>Esegui la prossima istruzione. A differenza del comando nexti, questo comando entrerà nelle chiamate di funzione.</td></tr><tr><td><strong>finish (f)</strong></td><td>Esegui il resto delle istruzioni nella funzione corrente (“frame”) e ritorna e ferma.</td></tr><tr><td><strong>control + c</strong></td><td>Metti in pausa l'esecuzione. Se il processo è stato eseguito (r) o continuato (c), questo causerà l'arresto del processo ...dove si trova attualmente in esecuzione.</td></tr><tr><td><strong>breakpoint (b)</strong></td><td><p><code>b main</code> #Qualsiasi funzione chiamata main</p><p><code>b <binname>`main</code> #Funzione principale del bin</p><p><code>b set -n main --shlib <lib_name></code> #Funzione principale del bin indicato</p><p><code>breakpoint set -r '\[NSFileManager .*\]$'</code> #Qualsiasi metodo NSFileManager</p><p><code>breakpoint set -r '\[NSFileManager contentsOfDirectoryAtPath:.*\]$'</code></p><p><code>break set -r . -s libobjc.A.dylib</code> # Interrompi in tutte le funzioni di quella libreria</p><p><code>b -a 0x0000000100004bd9</code></p><p><code>br l</code> #Elenco dei breakpoint</p><p><code>br e/dis <num></code> #Abilita/Disabilita il breakpoint</p><p>breakpoint delete <num></p></td></tr><tr><td><strong>help</strong></td><td><p>help breakpoint #Ottieni aiuto sul comando breakpoint</p><p>help memory write #Ottieni aiuto per scrivere nella memoria</p></td></tr><tr><td><strong>reg</strong></td><td><p>reg read</p><p>reg read $rax</p><p>reg read $rax --format <<a href="https://lldb.llvm.org/use/variable.html#type-format">format</a>></p><p>reg write $rip 0x100035cc0</p></td></tr><tr><td><strong>x/s <reg/memory address></strong></td><td>Visualizza la memoria come una stringa terminata da null.</td></tr><tr><td><strong>x/i <reg/memory address></strong></td><td>Visualizza la memoria come istruzione assembly.</td></tr><tr><td><strong>x/b <reg/memory address></strong></td><td>Visualizza la memoria come byte.</td></tr><tr><td><strong>print object (po)</strong></td><td><p>Questo stamperà l'oggetto referenziato dal parametro</p><p>po $raw</p><p><code>{</code></p><p><code>dnsChanger = {</code></p><p><code>"affiliate" = "";</code></p><p><code>"blacklist_dns" = ();</code></p><p>Nota che la maggior parte delle API o dei metodi Objective-C di Apple restituiscono oggetti, e quindi dovrebbero essere visualizzati tramite il comando “print object” (po). Se po non produce un output significativo usa <code>x/b</code></p></td></tr><tr><td><strong>memory</strong></td><td>memory read 0x000....<br>memory read $x0+0xf2a<br>memory write 0x100600000 -s 4 0x41414141 #Scrivi AAAA in quell'indirizzo<br>memory write -f s $rip+0x11f+7 "AAAA" #Scrivi AAAA nell'indirizzo</td></tr><tr><td><strong>disassembly</strong></td><td><p>dis #Disassembla la funzione corrente</p><p>dis -n <funcname> #Disassembla la funzione</p><p>dis -n <funcname> -b <basename> #Disassembla la funzione<br>dis -c 6 #Disassembla 6 righe<br>dis -c 0x100003764 -e 0x100003768 # Da un indirizzo all'altro<br>dis -p -c 4 # Inizia nell'indirizzo corrente disassemblando</p></td></tr><tr><td><strong>parray</strong></td><td>parray 3 (char **)$x1 # Controlla l'array di 3 componenti nel registro x1</td></tr><tr><td><strong>image dump sections</strong></td><td>Stampa la mappa della memoria del processo corrente</td></tr><tr><td><strong>image dump symtab <library></strong></td><td><code>image dump symtab CoreNLP</code> #Ottieni l'indirizzo di tutti i simboli da CoreNLP</td></tr></tbody></table>
 
 > [!TIP]
 > Quando chiami la funzione **`objc_sendMsg`**, il registro **rsi** contiene il **nome del metodo** come stringa terminata da null (“C”). Per stampare il nome tramite lldb fai:
@@ -450,7 +452,7 @@ settings set target.x86-disassembly-flavor intel
 >
 > `(lldb) reg read $rsi: rsi = 0x00000001000f1576 "startMiningWithPort:password:coreCount:slowMemory:currency:"`
 
-### Anti-Analisi Dinamica
+### Anti-Dynamic Analysis
 
 #### Rilevamento VM
 
@@ -571,7 +573,7 @@ litefuzz -lk -c "smbutil view smb://localhost:4455" -a tcp://localhost:4455 -i i
 # screensharingd (using pcap capture)
 litefuzz -s -a tcp://localhost:5900 -i input/screenshared-session --reportcrash screensharingd -p -n 100000
 ```
-### Maggiori informazioni sul Fuzzing MacOS
+### Maggiori informazioni sul Fuzzing di MacOS
 
 - [https://www.youtube.com/watch?v=T5xfL9tEg44](https://www.youtube.com/watch?v=T5xfL9tEg44)
 - [https://github.com/bnagy/slides/blob/master/OSXScale.pdf](https://github.com/bnagy/slides/blob/master/OSXScale.pdf)

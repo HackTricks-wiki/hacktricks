@@ -133,15 +133,15 @@ Qui puoi trovare un esempio:
 > [!TIP]
 > Controlla questa [**ricerca**](https://reverse.put.as/2011/09/14/apple-sandbox-guide-v1-0/) **per verificare ulteriori azioni che potrebbero essere consentite o negate.**
 >
-> Nota che nella versione compilata di un profilo, il nome delle operazioni è sostituito dalle loro voci in un array conosciuto dalla dylib e dal kext, rendendo la versione compilata più corta e più difficile da leggere.
+> Nota che nella versione compilata di un profilo il nome delle operazioni è sostituito dalle loro voci in un array conosciuto dalla dylib e dal kext, rendendo la versione compilata più corta e più difficile da leggere.
 
-Importanti **servizi di sistema** vengono eseguiti all'interno del proprio **sandbox** personalizzato, come il servizio `mdnsresponder`. Puoi visualizzare questi **profili sandbox** personalizzati all'interno di:
+Importanti **servizi di sistema** vengono eseguiti anche all'interno del proprio **sandbox** personalizzato, come il servizio `mdnsresponder`. Puoi visualizzare questi **profili sandbox** personalizzati all'interno di:
 
 - **`/usr/share/sandbox`**
 - **`/System/Library/Sandbox/Profiles`**
 - Altri profili sandbox possono essere controllati in [https://github.com/s7ephen/OSX-Sandbox--Seatbelt--Profiles](https://github.com/s7ephen/OSX-Sandbox--Seatbelt--Profiles).
 
-Le app dell'**App Store** utilizzano il **profilo** **`/System/Library/Sandbox/Profiles/application.sb`**. Puoi controllare in questo profilo come i diritti, come **`com.apple.security.network.server`**, consentono a un processo di utilizzare la rete.
+Le app dell'**App Store** utilizzano il **profilo** **`/System/Library/Sandbox/Profiles/application.sb`**. Puoi controllare in questo profilo come i diritti come **`com.apple.security.network.server`** consentono a un processo di utilizzare la rete.
 
 Poi, alcuni **servizi daemon di Apple** utilizzano profili diversi situati in `/System/Library/Sandbox/Profiles/*.sb` o `/usr/share/sandbox/*.sb`. Questi sandbox vengono applicati nella funzione principale che chiama l'API `sandbox_init_XXX`.
 
@@ -237,7 +237,7 @@ La funzione `sandbox_set_trace_path` esportata da `libsystem_sandbox.dylib` cons
 
 MacOS memorizza i profili della sandbox di sistema in due posizioni: **/usr/share/sandbox/** e **/System/Library/Sandbox/Profiles**.
 
-E se un'applicazione di terze parti porta il diritto _**com.apple.security.app-sandbox**_, il sistema applica il profilo **/System/Library/Sandbox/Profiles/application.sb** a quel processo.
+E se un'applicazione di terze parti porta il _**com.apple.security.app-sandbox**_ diritto, il sistema applica il profilo **/System/Library/Sandbox/Profiles/application.sb** a quel processo.
 
 In iOS, il profilo predefinito si chiama **container** e non abbiamo la rappresentazione testuale SBPL. In memoria, questa sandbox è rappresentata come un albero binario Allow/Deny per ciascuna autorizzazione della sandbox.
 
@@ -265,7 +265,7 @@ Inoltre, per confinare un processo all'interno di un contenitore, potrebbe chiam
 
 ## Debug e Bypass Sandbox
 
-Su macOS, a differenza di iOS dove i processi sono sandboxati fin dall'inizio dal kernel, **i processi devono optare per la sandbox da soli**. Ciò significa che su macOS, un processo non è limitato dalla sandbox fino a quando non decide attivamente di entrarvi, anche se le app dell'App Store sono sempre sandboxate.
+Su macOS, a differenza di iOS dove i processi sono sandboxati fin dall'inizio dal kernel, **i processi devono optare per la sandbox da soli**. Questo significa che su macOS, un processo non è limitato dalla sandbox fino a quando non decide attivamente di entrarci, anche se le app dell'App Store sono sempre sandboxate.
 
 I processi sono automaticamente sandboxati dal userland quando iniziano se hanno il diritto: `com.apple.security.app-sandbox`. Per una spiegazione dettagliata di questo processo controlla:
 
@@ -317,7 +317,7 @@ Nota che per chiamare la funzione di sospensione vengono controllati alcuni diri
 
 Questa chiamata di sistema (#381) si aspetta un primo argomento stringa che indicherà il modulo da eseguire, e poi un codice nel secondo argomento che indicherà la funzione da eseguire. Poi il terzo argomento dipenderà dalla funzione eseguita.
 
-La chiamata della funzione `___sandbox_ms` avvolge `mac_syscall` indicando nel primo argomento `"Sandbox"` proprio come `___sandbox_msp` è un wrapper di `mac_set_proc` (#387). Poi, alcuni dei codici supportati da `___sandbox_ms` possono essere trovati in questa tabella:
+La chiamata alla funzione `___sandbox_ms` avvolge `mac_syscall` indicando nel primo argomento `"Sandbox"` proprio come `___sandbox_msp` è un wrapper di `mac_set_proc` (#387). Poi, alcuni dei codici supportati da `___sandbox_ms` possono essere trovati in questa tabella:
 
 - **set_profile (#0)**: Applica un profilo compilato o nominato a un processo.
 - **platform_policy (#1)**: Applica controlli di policy specifici per la piattaforma (varia tra macOS e iOS).

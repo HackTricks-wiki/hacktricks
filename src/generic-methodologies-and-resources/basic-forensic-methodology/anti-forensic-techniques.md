@@ -109,7 +109,7 @@ Ogni volta che una cartella viene aperta da un volume NTFS su un server Windows 
 
 ### Eliminare la Cronologia USB
 
-Tutti gli **USB Device Entries** sono memorizzati nel Registro di Windows sotto la chiave di registro **USBSTOR** che contiene sottochiavi create ogni volta che si collega un dispositivo USB al PC o Laptop. Puoi trovare questa chiave qui `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`. **Eliminando questa** eliminerai la cronologia USB.\
+Tutti i **USB Device Entries** sono memorizzati nel Registro di Windows sotto la chiave di registro **USBSTOR** che contiene sottochiavi create ogni volta che si collega un dispositivo USB al PC o Laptop. Puoi trovare questa chiave qui `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`. **Eliminando questa** eliminerai la cronologia USB.\
 Puoi anche utilizzare lo strumento [**USBDeview**](https://www.nirsoft.net/utils/usb_devices_view.html) per essere sicuro di averle eliminate (e per eliminarle).
 
 Un altro file che salva informazioni sugli USB è il file `setupapi.dev.log` all'interno di `C:\Windows\INF`. Questo dovrebbe essere eliminato.
@@ -143,7 +143,7 @@ Per disabilitare le copie shadow [passaggi da qui](https://support.waters.com/KB
 ### Disabilitare i registri eventi di Windows
 
 - `reg add 'HKLM\\SYSTEM\\CurrentControlSet\\Services\\eventlog' /v Start /t REG_DWORD /d 4 /f`
-- All'interno della sezione servizi disabilitare il servizio "Registro eventi di Windows"
+- All'interno della sezione servizi disabilitare il servizio "Windows Event Log"
 - `WEvtUtil.exec clear-log` o `WEvtUtil.exe cl`
 
 ### Disabilitare $UsnJrnl
@@ -154,7 +154,7 @@ Per disabilitare le copie shadow [passaggi da qui](https://support.waters.com/KB
 
 ## Logging Avanzato & Manomissione delle Tracce (2023-2025)
 
-### Logging di ScriptBlock/Modulo PowerShell
+### Logging ScriptBlock/Modulo PowerShell
 
 Le versioni recenti di Windows 10/11 e Windows Server mantengono **artifacts forensi PowerShell ricchi** sotto
 `Microsoft-Windows-PowerShell/Operational` (eventi 4104/4105/4106).
@@ -182,7 +182,7 @@ WriteProcessMemory(GetCurrentProcess(),
 GetProcAddress(GetModuleHandleA("ntdll.dll"), "EtwEventWrite"),
 patch, sizeof(patch), NULL);
 ```
-Public PoCs (e.g. `EtwTiSwallow`) implement the same primitive in PowerShell o C++.  
+Public PoCs (e.g. `EtwTiSwallow`) implementano la stessa primitiva in PowerShell o C++.  
 Poiché la patch è **locale al processo**, gli EDR che girano all'interno di altri processi potrebbero non rilevarla.  
 Rilevamento: confrontare `ntdll` in memoria rispetto a quello su disco, o hookare prima della modalità utente.
 
@@ -254,9 +254,9 @@ Il tradecraft osservato ha combinato più percorsi C2 a lungo termine e imballag
 - Marcatori di rete: `api.dropboxapi.com` / `content.dropboxapi.com` con `Authorization: Bearer <token>`.
 - Caccia in proxy/NetFlow/Zeek/Suricata per HTTPS in uscita verso domini Dropbox da carichi di lavoro del server che normalmente non sincronizzano file.
 - C2 parallelo/di backup tramite tunneling (ad es., Cloudflare Tunnel `cloudflared`), mantenendo il controllo se un canale è bloccato.
-- IOCs host: processi/unità `cloudflared`, configurazione in `~/.cloudflared/*.json`, uscita 443 verso gli edge di Cloudflare.
+- IOCs dell'host: processi/unità `cloudflared`, configurazione in `~/.cloudflared/*.json`, uscita 443 verso gli edge di Cloudflare.
 
-### Persistenza e “rollback di indurimento” per mantenere l'accesso (esempi Linux)
+### Persistenza e “rollback di hardening” per mantenere l'accesso (esempi Linux)
 Gli attaccanti abbinano frequentemente l'auto-patching con percorsi di accesso durevoli:
 - Cron/Anacron: modifiche allo stub `0anacron` in ciascuna directory `/etc/cron.*/` per esecuzione periodica.
 - Caccia:
@@ -264,7 +264,7 @@ Gli attaccanti abbinano frequentemente l'auto-patching con percorsi di accesso d
 for d in /etc/cron.*; do [ -f "$d/0anacron" ] && stat -c '%n %y %s' "$d/0anacron"; done
 grep -R --line-number -E 'curl|wget|python|/bin/sh' /etc/cron.*/* 2>/dev/null
 ```
-- Rollback dell'indurimento della configurazione SSH: abilitazione degli accessi root e modifica delle shell predefinite per account a bassa privilegio.
+- Rollback dell'hardening della configurazione SSH: abilitazione degli accessi root e modifica delle shell predefinite per account a bassa privilegio.
 - Caccia per l'abilitazione del login root:
 ```bash
 grep -E '^\s*PermitRootLogin' /etc/ssh/sshd_config
@@ -281,7 +281,7 @@ find / -maxdepth 3 -type f -regextype posix-extended -regex '.*/[A-Za-z]{8}$' \
 -exec stat -c '%n %s %y' {} \; 2>/dev/null | sort
 ```
 
-I difensori dovrebbero correlare questi artefatti con esposizioni esterne ed eventi di patching dei servizi per scoprire l'auto-remediazione anti-forense utilizzata per nascondere lo sfruttamento iniziale.
+I difensori dovrebbero correlare questi artefatti con l'esposizione esterna e gli eventi di patching del servizio per scoprire l'auto-remediazione anti-forense utilizzata per nascondere lo sfruttamento iniziale.
 
 ## References
 

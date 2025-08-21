@@ -57,7 +57,7 @@ SharpHound.exe --CollectionMethods All           # Full sweep (noisy)
 SharpHound.exe --CollectionMethods Group,LocalAdmin,Session,Trusts,ACL
 SharpHound.exe --Stealth --LDAP                      # Low noise LDAP only
 ```
-I collezionisti generano JSON che viene ingerito tramite l'interfaccia grafica di BloodHound.
+I collezionisti generano JSON che viene acquisito tramite l'interfaccia grafica di BloodHound.
 
 ---
 

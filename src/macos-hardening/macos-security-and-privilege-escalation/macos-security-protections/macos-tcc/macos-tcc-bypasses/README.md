@@ -6,7 +6,7 @@
 
 ### Bypass di scrittura
 
-Questo non è un bypass, è solo come funziona TCC: **Non protegge dalla scrittura**. Se il Terminale **non ha accesso per leggere il Desktop di un utente, può comunque scriverci dentro**:
+Questo non è un bypass, è solo il modo in cui funziona TCC: **Non protegge dalla scrittura**. Se il Terminale **non ha accesso per leggere il Desktop di un utente, può comunque scriverci dentro**:
 ```shell-session
 username@hostname ~ % ls Desktop
 ls: Desktop: Operation not permitted
@@ -39,7 +39,7 @@ Ulteriori informazioni e PoC in:
 
 ### Bypass SSH
 
-Per impostazione predefinita, un accesso tramite **SSH aveva "Accesso completo al disco"**. Per disabilitarlo, è necessario averlo elencato ma disabilitato (rimuoverlo dall'elenco non rimuoverà quei privilegi):
+Per impostazione predefinita, un accesso tramite **SSH aveva "Accesso completo al disco"**. Per disabilitarlo è necessario averlo elencato ma disabilitato (rimuoverlo dall'elenco non rimuoverà quei privilegi):
 
 ![](<../../../../../images/image (1077).png>)
 
@@ -52,7 +52,7 @@ Qui puoi trovare esempi di come alcuni **malware siano stati in grado di bypassa
 
 ### Gestione delle estensioni - CVE-2022-26767
 
-L'attributo **`com.apple.macl`** viene dato ai file per dare a una **certa applicazione i permessi per leggerlo.** Questo attributo viene impostato quando si **trascina** un file su un'app, o quando un utente **fa doppio clic** su un file per aprirlo con l'**applicazione predefinita**.
+L'attributo **`com.apple.macl`** viene dato ai file per dare a **una certa applicazione i permessi per leggerlo.** Questo attributo viene impostato quando si **trascina** un file su un'app, o quando un utente **fa doppio clic** su un file per aprirlo con l'**applicazione predefinita**.
 
 Pertanto, un utente potrebbe **registrare un'app malevola** per gestire tutte le estensioni e chiamare i Servizi di avvio per **aprire** qualsiasi file (così il file malevolo avrà accesso per leggerlo).
 
@@ -66,7 +66,7 @@ Per ulteriori **informazioni** sull'exploit per **ottenere token iCloud** da que
 
 ### kTCCServiceAppleEvents / Automazione
 
-Un'app con il permesso **`kTCCServiceAppleEvents`** sarà in grado di **controllare altre app**. Questo significa che potrebbe essere in grado di **abuse dei permessi concessi alle altre app**.
+Un'app con il permesso **`kTCCServiceAppleEvents`** sarà in grado di **controllare altre app**. Questo significa che potrebbe **abusare dei permessi concessi alle altre app**.
 
 Per ulteriori informazioni sugli Apple Scripts, controlla:
 
@@ -115,7 +115,7 @@ do shell script "rm " & POSIX path of (copyFile as alias)
 Il **daemon tccd** in userland utilizzava la variabile di ambiente **`HOME`** per accedere al database utenti TCC da: **`$HOME/Library/Application Support/com.apple.TCC/TCC.db`**
 
 Secondo [questo post di Stack Exchange](https://stackoverflow.com/questions/135688/setting-environment-variables-on-os-x/3756686#3756686) e poiché il daemon TCC viene eseguito tramite `launchd` all'interno del dominio dell'utente corrente, è possibile **controllare tutte le variabili di ambiente** passate ad esso.\
-Pertanto, un **attaccante potrebbe impostare la variabile di ambiente `$HOME`** in **`launchctl`** per puntare a una **directory** **controllata**, **riavviare** il **daemon TCC** e poi **modificare direttamente il database TCC** per concedersi **tutti i diritti TCC disponibili** senza mai richiedere l'intervento dell'utente finale.\
+Pertanto, un **attaccante potrebbe impostare la variabile di ambiente `$HOME`** in **`launchctl`** per puntare a una **directory controllata**, **riavviare** il **daemon TCC** e poi **modificare direttamente il database TCC** per concedersi **tutti i diritti TCC disponibili** senza mai richiedere all'utente finale.\
 PoC:
 ```bash
 # reset database just in case (no cheating!)
@@ -182,20 +182,20 @@ launchctl setenv SQLITE_AUTO_TRACE 1
 
 Questa **variabile di ambiente è utilizzata dal framework `Metal`** che è una dipendenza per vari programmi, in particolare `Music`, che ha FDA.
 
-Impostando quanto segue: `MTL_DUMP_PIPELINES_TO_JSON_FILE="path/name"`. Se `path` è una directory valida, il bug si attiverà e possiamo usare `fs_usage` per vedere cosa sta succedendo nel programma:
+Impostando quanto segue: `MTL_DUMP_PIPELINES_TO_JSON_FILE="path/name"`. Se `path` è una directory valida, il bug verrà attivato e possiamo usare `fs_usage` per vedere cosa sta succedendo nel programma:
 
-- un file sarà `open()`ato, chiamato `path/.dat.nosyncXXXX.XXXXXX` (X è casuale)
+- un file verrà `open()`ato, chiamato `path/.dat.nosyncXXXX.XXXXXX` (X è casuale)
 - uno o più `write()` scriveranno i contenuti nel file (non controlliamo questo)
-- `path/.dat.nosyncXXXX.XXXXXX` sarà `renamed()` a `path/name`
+- `path/.dat.nosyncXXXX.XXXXXX` verrà `renamed()` a `path/name`
 
 È una scrittura temporanea di file, seguita da un **`rename(old, new)`** **che non è sicuro.**
 
-Non è sicuro perché deve **risolvere i vecchi e nuovi percorsi separatamente**, il che può richiedere del tempo e può essere vulnerabile a una Condizione di Gara. Per ulteriori informazioni puoi controllare la funzione `renameat_internal()` di `xnu`.
+Non è sicuro perché deve **risolvere i vecchi e nuovi percorsi separatamente**, il che può richiedere del tempo e può essere vulnerabile a una Condizione di Gara. Per ulteriori informazioni, puoi controllare la funzione `renameat_internal()` di `xnu`.
 
 > [!CAUTION]
 > Quindi, fondamentalmente, se un processo privilegiato sta rinominando da una cartella che controlli, potresti ottenere un RCE e farlo accedere a un file diverso o, come in questo CVE, aprire il file creato dall'app privilegiata e memorizzare un FD.
 >
-> Se il rinomina accede a una cartella che controlli, mentre hai modificato il file sorgente o hai un FD ad esso, cambi il file di destinazione (o cartella) per puntare a un symlink, così puoi scrivere quando vuoi.
+> Se il rinominare accede a una cartella che controlli, mentre hai modificato il file sorgente o hai un FD ad esso, cambi il file di destinazione (o cartella) per puntare a un symlink, così puoi scrivere quando vuoi.
 
 Questo era l'attacco nel CVE: Ad esempio, per sovrascrivere il `TCC.db` dell'utente, possiamo:
 
@@ -205,22 +205,22 @@ Questo era l'attacco nel CVE: Ad esempio, per sovrascrivere il `TCC.db` dell'ute
 - attivare il bug eseguendo `Music` con questa variabile di ambiente
 - catturare l'`open()` di `/Users/hacker/tmp/.dat.nosyncXXXX.XXXXXX` (X è casuale)
 - qui apriamo anche questo file per scrivere e teniamo il descrittore di file
-- scambiare in modo atomico `/Users/hacker/tmp` con `/Users/hacker/ourlink` **in un ciclo**
+- scambiare atomicamente `/Users/hacker/tmp` con `/Users/hacker/ourlink` **in un ciclo**
 - lo facciamo per massimizzare le nostre possibilità di successo poiché la finestra di gara è piuttosto ristretta, ma perdere la gara ha un impatto trascurabile
 - aspettare un po'
 - testare se abbiamo avuto fortuna
 - se no, ripetere dall'inizio
 
-Ulteriori informazioni in [https://gergelykalman.com/lateralus-CVE-2023-32407-a-macos-tcc-bypass.html](https://gergelykalman.com/lateralus-CVE-2023-32407-a-macos-tcc-bypass.html)
+Ulteriori informazioni su [https://gergelykalman.com/lateralus-CVE-2023-32407-a-macos-tcc-bypass.html](https://gergelykalman.com/lateralus-CVE-2023-32407-a-macos-tcc-bypass.html)
 
 > [!CAUTION]
-> Ora, se provi a usare la variabile di ambiente `MTL_DUMP_PIPELINES_TO_JSON_FILE`, le app non si avviano
+> Ora, se provi a usare la variabile di ambiente `MTL_DUMP_PIPELINES_TO_JSON_FILE`, le app non si avvieranno
 
 ### Apple Remote Desktop
 
-Come root potresti abilitare questo servizio e l'**agente ARD avrà accesso completo al disco** che potrebbe poi essere abusato da un utente per farlo copiare un nuovo **database utente TCC**.
+Come root potresti abilitare questo servizio e l'**agente ARD avrà accesso completo al disco**, che potrebbe poi essere abusato da un utente per farlo copiare un nuovo **database utente TCC**.
 
-## By **NFSHomeDirectory**
+## Per **NFSHomeDirectory**
 
 TCC utilizza un database nella cartella HOME dell'utente per controllare l'accesso alle risorse specifiche per l'utente in **$HOME/Library/Application Support/com.apple.TCC/TCC.db**.\
 Pertanto, se l'utente riesce a riavviare TCC con una variabile di ambiente $HOME che punta a una **cartella diversa**, l'utente potrebbe creare un nuovo database TCC in **/Library/Application Support/com.apple.TCC/TCC.db** e ingannare TCC per concedere qualsiasi autorizzazione TCC a qualsiasi app.
@@ -244,11 +244,11 @@ Il **primo POC** utilizza [**dsexport**](https://www.unix.com/man-page/osx/1/dse
 6. Ferma il _tccd_ dell'utente e riavvia il processo.
 
 Il secondo POC ha utilizzato **`/usr/libexec/configd`** che aveva `com.apple.private.tcc.allow` con il valore `kTCCServiceSystemPolicySysAdminFiles`.\
-Era possibile eseguire **`configd`** con l'opzione **`-t`**, un attaccante poteva specificare un **Bundle personalizzato da caricare**. Pertanto, l'exploit **sostituisce** il metodo **`dsexport`** e **`dsimport`** per cambiare la home directory dell'utente con un **iniezione di codice configd**.
+Era possibile eseguire **`configd`** con l'opzione **`-t`**, un attaccante potrebbe specificare un **Bundle personalizzato da caricare**. Pertanto, l'exploit **sostituisce** il metodo **`dsexport`** e **`dsimport`** per cambiare la home directory dell'utente con un **iniezione di codice configd**.
 
-Per ulteriori informazioni controlla il [**report originale**](https://www.microsoft.com/en-us/security/blog/2022/01/10/new-macos-vulnerability-powerdir-could-lead-to-unauthorized-user-data-access/).
+Per ulteriori informazioni, controlla il [**report originale**](https://www.microsoft.com/en-us/security/blog/2022/01/10/new-macos-vulnerability-powerdir-could-lead-to-unauthorized-user-data-access/).
 
-## By process injection
+## Per iniezione di processo
 
 Ci sono diverse tecniche per iniettare codice all'interno di un processo e abusare dei suoi privilegi TCC:
 
@@ -258,7 +258,7 @@ Ci sono diverse tecniche per iniettare codice all'interno di un processo e abusa
 {{#endref}}
 
 Inoltre, la tecnica di iniezione di processo più comune per bypassare TCC trovata è tramite **plugin (load library)**.\
-I plugin sono codice extra solitamente sotto forma di librerie o plist, che saranno **caricati dall'applicazione principale** e verranno eseguiti nel suo contesto. Pertanto, se l'applicazione principale aveva accesso a file TCC riservati (tramite permessi o diritti concessi), il **codice personalizzato avrà anche accesso**.
+I plugin sono codice extra solitamente sotto forma di librerie o plist, che verranno **caricati dall'applicazione principale** e verranno eseguiti nel suo contesto. Pertanto, se l'applicazione principale aveva accesso a file TCC riservati (tramite permessi o diritti concessi), il **codice personalizzato avrà anch'esso accesso**.
 
 ### CVE-2020-27937 - Directory Utility
 
@@ -266,7 +266,7 @@ L'applicazione `/System/Library/CoreServices/Applications/Directory Utility.app`
 
 Per armare questo CVE, il **`NFSHomeDirectory`** è **cambiato** (abusando del diritto precedente) per poter **prendere il controllo del database TCC degli utenti** per bypassare TCC.
 
-Per ulteriori informazioni controlla il [**report originale**](https://wojciechregula.blog/post/change-home-directory-and-bypass-tcc-aka-cve-2020-27937/).
+Per ulteriori informazioni, controlla il [**report originale**](https://wojciechregula.blog/post/change-home-directory-and-bypass-tcc-aka-cve-2020-27937/).
 
 ### CVE-2020-29621 - Coreaudiod
 
@@ -303,7 +303,7 @@ Per ulteriori informazioni, controlla il [**rapporto originale**](https://wojcie
 
 ### Plug-in del Layer di Astrazione del Dispositivo (DAL)
 
-Le applicazioni di sistema che aprono il flusso della fotocamera tramite Core Media I/O (app con **`kTCCServiceCamera`**) caricano **nel processo questi plugin** situati in `/Library/CoreMediaIO/Plug-Ins/DAL` (non soggetti a restrizioni SIP).
+Le applicazioni di sistema che aprono il flusso della fotocamera tramite Core Media I/O (app con **`kTCCServiceCamera`**) caricano **in questo processo questi plugin** situati in `/Library/CoreMediaIO/Plug-Ins/DAL` (non soggetti a restrizioni SIP).
 
 Basta memorizzare lì una libreria con il **costruttore** comune per **iniettare codice**.
 
@@ -418,7 +418,7 @@ exploit_location]; task.standardOutput = pipe;
 
 ### CVE-2020-9771 - bypass TCC di mount_apfs e escalation dei privilegi
 
-**Qualsiasi utente** (anche quelli non privilegiati) può creare e montare un'istantanea di Time Machine e **accedere a TUTTI i file** di quell'istantanea.\
+**Qualsiasi utente** (anche quelli non privilegiati) può creare e montare uno snapshot di Time Machine e **accedere a TUTTI i file** di quello snapshot.\
 L'**unico privilegio** necessario è che l'applicazione utilizzata (come `Terminal`) abbia accesso **Full Disk Access** (FDA) (`kTCCServiceSystemPolicyAllfiles`), che deve essere concesso da un amministratore.
 ```bash
 # Create snapshot
@@ -492,7 +492,7 @@ La cartella **`/var/db/locationd/` non era protetta dal montaggio DMG** quindi e
 
 ## Da grep
 
-In diverse occasioni i file memorizzano informazioni sensibili come email, numeri di telefono, messaggi... in posizioni non protette (che contano come una vulnerabilità in Apple).
+In diverse occasioni i file memorizzeranno informazioni sensibili come email, numeri di telefono, messaggi... in posizioni non protette (che contano come una vulnerabilità in Apple).
 
 <figure><img src="../../../../../images/image (474).png" alt=""><figcaption></figcaption></figure>
 

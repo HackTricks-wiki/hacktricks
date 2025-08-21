@@ -6,7 +6,7 @@
 
 1. Riconoscere la vittima
 1. Selezionare il **dominio della vittima**.
-2. Eseguire alcune enumerazioni web di base **cercando portali di accesso** utilizzati dalla vittima e **decidere** quale impersonare.
+2. Eseguire alcune basi di enumerazione web **cercando portali di accesso** utilizzati dalla vittima e **decidere** quale impersonare.
 3. Utilizzare alcune **OSINT** per **trovare email**.
 2. Preparare l'ambiente
 1. **Acquistare il dominio** che si intende utilizzare per la valutazione di phishing
@@ -24,19 +24,19 @@
 - **Parola chiave**: Il nome di dominio **contiene** una **parola chiave** importante del dominio originale (es., zelster.com-management.com).
 - **sottodominio con trattino**: Cambiare il **punto con un trattino** di un sottodominio (es., www-zelster.com).
 - **Nuovo TLD**: Stesso dominio utilizzando un **nuovo TLD** (es., zelster.org)
-- **Omo-glyph**: **sostituisce** una lettera nel nome di dominio con **lettere che sembrano simili** (es., zelfser.com).
+- **Omoglif**: **sostituisce** una lettera nel nome di dominio con **lettere che sembrano simili** (es., zelfser.com).
 
 {{#ref}}
 homograph-attacks.md
 {{#endref}}
 - **Trasposizione:** **scambia due lettere** all'interno del nome di dominio (es., zelsetr.com).
-- **Singolarizzazione/Plurale**: Aggiunge o rimuove “s” alla fine del nome di dominio (es., zeltsers.com).
+- **Singolarizzazione/Pluralizzazione**: Aggiunge o rimuove “s” alla fine del nome di dominio (es., zeltsers.com).
 - **Omissione**: **rimuove una** delle lettere dal nome di dominio (es., zelser.com).
 - **Ripetizione:** **ripete una** delle lettere nel nome di dominio (es., zeltsser.com).
-- **Sostituzione**: Come l'omo-glyph ma meno furtivo. Sostituisce una delle lettere nel nome di dominio, forse con una lettera vicina alla lettera originale sulla tastiera (es., zektser.com).
-- **Sottodominio**: Introduce un **punto** all'interno del nome di dominio (es., ze.lster.com).
+- **Sostituzione**: Come omoglif ma meno furtivo. Sostituisce una delle lettere nel nome di dominio, forse con una lettera vicina alla lettera originale sulla tastiera (es., zektser.com).
+- **Sottodominato**: Introduce un **punto** all'interno del nome di dominio (es., ze.lster.com).
 - **Inserimento**: **inserisce una lettera** nel nome di dominio (es., zerltser.com).
-- **Punto mancante**: Aggiunge il TLD al nome di dominio. (es., zelstercom.com)
+- **Punto mancante**: Aggiungere il TLD al nome di dominio. (es., zelstercom.com)
 
 **Strumenti Automatici**
 
@@ -57,14 +57,14 @@ Quando questo concetto è **applicato alle richieste DNS**, è possibile che il 
 
 Ad esempio, una singola modifica di bit nel dominio "windows.com" può cambiarlo in "windnws.com."
 
-Gli attaccanti possono **sfruttare questo registrando più domini con bit-flipping** che sono simili al dominio della vittima. La loro intenzione è reindirizzare gli utenti legittimi alla propria infrastruttura.
+Gli attaccanti possono **sfruttare questo registrando più domini di bit-flipping** simili a quello della vittima. La loro intenzione è reindirizzare gli utenti legittimi alla propria infrastruttura.
 
 Per ulteriori informazioni leggi [https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)
 
 ### Acquistare un dominio affidabile
 
 Puoi cercare in [https://www.expireddomains.net/](https://www.expireddomains.net) un dominio scaduto che potresti utilizzare.\
-Per assicurarti che il dominio scaduto che intendi acquistare **abbia già un buon SEO**, puoi cercare come è categorizzato in:
+Per assicurarti che il dominio scaduto che stai per acquistare **abbia già un buon SEO**, puoi cercare come è categorizzato in:
 
 - [http://www.fortiguard.com/webfilter](http://www.fortiguard.com/webfilter)
 - [https://urlfiltering.paloaltonetworks.com/query/](https://urlfiltering.paloaltonetworks.com/query/)
@@ -138,7 +138,7 @@ echo "This is the body of the email" | mail -s "This is the subject line" test@e
 **Configurazione di Gophish**
 
 Ferma l'esecuzione di gophish e configuriamolo.\
-Modifica `/opt/gophish/config.json` come segue (nota l'uso di https):
+Modifica `/opt/gophish/config.json` nel seguente modo (nota l'uso di https):
 ```bash
 {
 "admin_server": {
@@ -165,7 +165,7 @@ Modifica `/opt/gophish/config.json` come segue (nota l'uso di https):
 ```
 **Configura il servizio gophish**
 
-Per creare il servizio gophish in modo che possa essere avviato automaticamente e gestito come un servizio, puoi creare il file `/etc/init.d/gophish` con il seguente contenuto:
+Per creare il servizio gophish in modo che possa essere avviato automaticamente e gestito come servizio, puoi creare il file `/etc/init.d/gophish` con il seguente contenuto:
 ```bash
 #!/bin/bash
 # /etc/init.d/gophish
@@ -275,7 +275,7 @@ Basta accedere alla pagina e inviare un'email all'indirizzo che ti forniscono:
 ```bash
 echo "This is the body of the email" | mail -s "This is the subject line" test-iimosa79z@srv1.mail-tester.com
 ```
-Puoi anche **controllare la tua configurazione email** inviando un'email a `check-auth@verifier.port25.com` e **leggendo la risposta** (per questo dovrai **aprire** la porta **25** e vedere la risposta nel file _/var/mail/root_ se invii l'email come root).\
+Puoi anche **controllare la configurazione della tua email** inviando un'email a `check-auth@verifier.port25.com` e **leggendo la risposta** (per questo dovrai **aprire** la porta **25** e vedere la risposta nel file _/var/mail/root_ se invii l'email come root).\
 Controlla di superare tutti i test:
 ```bash
 ==========================================================
@@ -343,12 +343,12 @@ Nota che **per aumentare la credibilità dell'email**, è consigliato utilizzare
 
 - Invia un'email a un **indirizzo inesistente** e controlla se la risposta ha qualche firma.
 - Cerca **email pubbliche** come info@ex.com o press@ex.com o public@ex.com e invia loro un'email e aspetta la risposta.
-- Prova a contattare **qualche email valida scoperta** e aspetta la risposta.
+- Prova a contattare **alcune email valide scoperte** e aspetta la risposta.
 
 ![](<../../images/image (80).png>)
 
 > [!TIP]
-> Il Modello di Email consente anche di **allegare file da inviare**. Se desideri anche rubare le sfide NTLM utilizzando alcuni file/documenti appositamente creati [leggi questa pagina](../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md).
+> Il modello di email consente anche di **allegare file da inviare**. Se desideri anche rubare le sfide NTLM utilizzando alcuni file/documenti appositamente creati [leggi questa pagina](../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md).
 
 ### Landing Page
 
@@ -396,7 +396,7 @@ clone-a-website.md
 
 ## Documenti & File Backdoor
 
-In alcune valutazioni di phishing (principalmente per Red Teams) vorrai anche **inviare file contenenti qualche tipo di backdoor** (magari un C2 o magari solo qualcosa che attivi un'autenticazione).\
+In alcune valutazioni di phishing (principalmente per Red Teams) vorrai anche **inviare file contenenti qualche tipo di backdoor** (magari un C2 o semplicemente qualcosa che attivi un'autenticazione).\
 Controlla la seguente pagina per alcuni esempi:
 
 {{#ref}}
@@ -442,15 +442,15 @@ Usa [**Phishious** ](https://github.com/Rices/Phishious) per valutare se la tua 
 
 I moderni set di intrusione saltano sempre più spesso le esche email e **mirano direttamente al servizio di assistenza / flusso di recupero identità** per sconfiggere il MFA. L'attacco è completamente "living-off-the-land": una volta che l'operatore possiede credenziali valide, si sposta con strumenti di amministrazione integrati – non è necessario alcun malware.
 
-### Flusso dell'attacco
+### Flusso di attacco
 1. Ricognizione della vittima
 * Raccogli dettagli personali e aziendali da LinkedIn, violazioni di dati, GitHub pubblici, ecc.
-* Identifica identità di alto valore (dirigenti, IT, finanza) ed enumera il **processo esatto del help-desk** per il reset della password / MFA.
+* Identifica identità di alto valore (dirigenti, IT, finanza) ed enumera il **processo esatto di help-desk** per il reset della password / MFA.
 2. Ingegneria sociale in tempo reale
-* Chiama, Teams o chatta con il help-desk impersonando il target (spesso con **ID chiamante falsificato** o **voce clonata**).
+* Chiama, usa Teams o chatta con l'assistenza mentre impersoni il bersaglio (spesso con **ID chiamante falsificato** o **voce clonata**).
 * Fornisci le PII raccolte in precedenza per superare la verifica basata sulla conoscenza.
-* Convincere l'agente a **reimpostare il segreto MFA** o eseguire uno **scambio SIM** su un numero di cellulare registrato.
-3. Azioni immediate post-accesso (≤60 min nei casi reali)
+* Convincere l'agente a **resettare il segreto MFA** o eseguire uno **scambio SIM** su un numero di cellulare registrato.
+3. Azioni immediate post-accesso (≤60 min in casi reali)
 * Stabilire una base attraverso qualsiasi portale SSO web.
 * Enumerare AD / AzureAD con strumenti integrati (nessun binario scaricato):
 ```powershell
@@ -463,15 +463,15 @@ Get-MgDirectoryRole | ft DisplayName,Id
 # Enumera i dispositivi a cui l'account può accedere
 Get-MgUserRegisteredDevice -UserId <user@corp.local>
 ```
-* Movimento laterale con **WMI**, **PsExec**, o legittimi agenti **RMM** già autorizzati nell'ambiente.
+* Movimento laterale con **WMI**, **PsExec**, o legittimi **agenti RMM** già autorizzati nell'ambiente.
 
 ### Rilevamento & Mitigazione
-* Tratta il recupero dell'identità del help-desk come un'**operazione privilegiata** – richiedi autenticazione avanzata e approvazione del manager.
+* Tratta il recupero dell'identità dell'assistenza come un'**operazione privilegiata** – richiedi autenticazione avanzata e approvazione del manager.
 * Implementa regole di **Identity Threat Detection & Response (ITDR)** / **UEBA** che avvisano su:
 * Metodo MFA cambiato + autenticazione da nuovo dispositivo / geo.
 * Elevazione immediata dello stesso principale (utente-→-admin).
-* Registra le chiamate del help-desk e imposta un **richiamo a un numero già registrato** prima di qualsiasi reset.
-* Implementa **Just-In-Time (JIT) / Accesso Privilegiato** in modo che gli account appena reimpostati non **ereditino automaticamente** token ad alto privilegio.
+* Registra le chiamate all'assistenza e imposta un **richiamo a un numero già registrato** prima di qualsiasi reset.
+* Implementa **Just-In-Time (JIT) / Accesso Privilegiato** in modo che gli account appena resettati non **ereditino automaticamente** token ad alto privilegio.
 
 ---
 
@@ -489,7 +489,7 @@ Le squadre di commodity compensano il costo delle operazioni ad alto contatto co
 * componente di persistenza (chiave di esecuzione del registro + attività pianificata)
 
 ### Suggerimenti per il rafforzamento
-* Blocca i domini appena registrati e applica **Advanced DNS / URL Filtering** su *search-ads* così come su email.
+* Blocca i domini appena registrati e applica **Advanced DNS / URL Filtering** su *annunci di ricerca* così come su email.
 * Limita l'installazione del software a pacchetti MSI / Store firmati, nega l'esecuzione di `HTA`, `ISO`, `VBS` per policy.
 * Monitora i processi figli dei browser che aprono installer:
 ```yaml
@@ -500,24 +500,24 @@ and child_image: *\\*.exe
 
 ---
 
-## Operazioni di Phishing Potenziate dall'AI
-Gli attaccanti ora concatenano **LLM & voice-clone APIs** per esche completamente personalizzate e interazione in tempo reale.
+## Operazioni di Phishing Potenziate dall'IA
+Gli attaccanti ora concatenano **LLM & API di clonazione vocale** per esche completamente personalizzate e interazione in tempo reale.
 
 | Livello | Esempio di utilizzo da parte dell'attore di minaccia |
 |-------|-----------------------------|
 |Automazione|Genera e invia >100 k email / SMS con formulazioni randomizzate e link di tracciamento.|
-|AI Generativa|Produce email *uniche* che fanno riferimento a M&A pubblici, battute interne dai social media; voce CEO deep-fake in una truffa di richiamo.|
+|AI Generativa|Produce email *uniche* che fanno riferimento a M&A pubblici, battute interne dai social media; voce del CEO deep-fake in una truffa di richiamo.|
 |AI Agente|Registra autonomamente domini, estrae intel open-source, crea email di prossima fase quando una vittima clicca ma non invia credenziali.|
 
 **Difesa:**
-• Aggiungi **banner dinamici** che evidenziano messaggi inviati da automazioni non affidabili (via anomalie ARC/DKIM).
+• Aggiungi **banner dinamici** che evidenziano messaggi inviati da automazioni non affidabili (tramite anomalie ARC/DKIM).
 • Implementa **frasi di sfida biometriche vocali** per richieste telefoniche ad alto rischio.
-• Simula continuamente esche generate dall'AI nei programmi di sensibilizzazione – i modelli statici sono obsoleti.
+• Simula continuamente esche generate dall'IA nei programmi di sensibilizzazione – i modelli statici sono obsoleti.
 
 ---
 
 ## Fatica da MFA / Variante Push Bombing – Reset Forzato
-Oltre al classico push-bombing, gli operatori semplicemente **forzano una nuova registrazione MFA** durante la chiamata al help-desk, annullando il token esistente dell'utente. Qualsiasi successivo prompt di accesso appare legittimo per la vittima.
+Oltre al classico push-bombing, gli operatori semplicemente **forzano una nuova registrazione MFA** durante la chiamata all'assistenza, annullando il token esistente dell'utente. Qualsiasi successivo prompt di accesso appare legittimo per la vittima.
 ```text
 [Attacker]  →  Help-Desk:  “I lost my phone while travelling, can you unenrol it so I can add a new authenticator?”
 [Help-Desk] →  AzureAD: ‘Delete existing methods’ → sends registration e-mail
@@ -527,7 +527,7 @@ Monitora gli eventi di AzureAD/AWS/Okta in cui **`deleteMFA` + `addMFA`** si ver
 
 ## Clipboard Hijacking / Pastejacking
 
-Gli attaccanti possono silenziosamente copiare comandi dannosi negli appunti della vittima da una pagina web compromessa o con errore di battitura e poi ingannare l'utente a incollarli all'interno di **Win + R**, **Win + X** o una finestra del terminale, eseguendo codice arbitrario senza alcun download o allegato.
+Gli attaccanti possono silenziosamente copiare comandi dannosi negli appunti della vittima da una pagina web compromessa o con errore di battitura e poi ingannare l'utente a incollarli all'interno di **Win + R**, **Win + X** o in una finestra del terminale, eseguendo codice arbitrario senza alcun download o allegato.
 
 {{#ref}}
 clipboard-hijacking.md
@@ -539,7 +539,7 @@ clipboard-hijacking.md
 mobile-phishing-malicious-apps.md
 {{#endref}}
 
-## Riferimenti
+## References
 
 - [https://zeltser.com/domain-name-variations-in-phishing/](https://zeltser.com/domain-name-variations-in-phishing/)
 - [https://0xpatrik.com/phishing-domains/](https://0xpatrik.com/phishing-domains/)

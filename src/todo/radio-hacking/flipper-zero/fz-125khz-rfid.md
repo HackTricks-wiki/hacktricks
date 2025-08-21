@@ -33,8 +33,8 @@ A volte, quando ottieni una scheda, troverai l'ID (o parte di esso) scritto sull
 
 - **EM Marin**
 
-Ad esempio, in questa scheda EM-Marin è possibile **leggere gli ultimi 3 di 5 byte in chiaro**.\
-Gli altri 2 possono essere forzati se non riesci a leggerli dalla scheda.
+Ad esempio, in questa scheda EM-Marin è possibile **leggere gli ultimi 3 dei 5 byte in chiaro**.\
+Gli altri 2 possono essere forzati a bruteforce se non riesci a leggerli dalla scheda.
 
 <figure><img src="../../../images/image (104).png" alt=""><figcaption></figcaption></figure>
 
@@ -46,7 +46,7 @@ Lo stesso accade in questa scheda HID dove solo 2 su 3 byte possono essere trova
 
 ### Emulate/Write
 
-Dopo aver **copiato** una scheda o **inserito** l'ID **manualmente**, è possibile **emularla** con Flipper Zero o **scriverla** su una scheda reale.
+Dopo aver **copiato** una scheda o **inserito** l'ID **manualmente** è possibile **emularla** con Flipper Zero o **scriverla** su una scheda reale.
 
 ## References
 

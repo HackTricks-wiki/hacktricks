@@ -11,7 +11,7 @@ Questo linker dovrà localizzare tutte le librerie eseguibili, mappare in memori
 Naturalmente, **`dyld`** non ha dipendenze (utilizza syscalls e estratti di libSystem).
 
 > [!CAUTION]
-> Se questo linker contiene vulnerabilità, poiché viene eseguito prima di eseguire qualsiasi binario (anche quelli con privilegi elevati), sarebbe possibile **escalare i privilegi**.
+> Se questo linker contiene vulnerabilità, poiché viene eseguito prima di qualsiasi binario (anche quelli con privilegi elevati), sarebbe possibile **escalare i privilegi**.
 
 ### Flusso
 
@@ -36,9 +36,9 @@ I terminatori sono codificati con **`__attribute__((destructor))`** e si trovano
 
 ### Stub
 
-Tutti i binari su macOS sono collegati dinamicamente. Pertanto, contengono alcune sezioni di stub che aiutano il binario a saltare al codice corretto in diverse macchine e contesti. È dyld, quando il binario viene eseguito, il cervello che deve risolvere questi indirizzi (almeno quelli non pigri).
+Tutti i binari su macOS sono collegati dinamicamente. Pertanto, contengono alcune sezioni stub che aiutano il binario a saltare al codice corretto in diverse macchine e contesti. È dyld, quando il binario viene eseguito, il cervello che deve risolvere questi indirizzi (almeno quelli non pigri).
 
-Alcune sezioni di stub nel binario:
+Alcune sezioni stub nel binario:
 
 - **`__TEXT.__[auth_]stubs`**: Puntatori dalle sezioni `__DATA`
 - **`__TEXT.__stub_helper`**: Piccolo codice che invoca il linking dinamico con informazioni sulla funzione da chiamare
@@ -68,7 +68,7 @@ Parte di disassemblaggio interessante:
 100003f80: 913e9000    	add	x0, x0, #4004
 100003f84: 94000005    	bl	0x100003f98 <_printf+0x100003f98>
 ```
-È possibile vedere che il salto per chiamare printf sta andando a **`__TEXT.__stubs`**:
+È possibile vedere che il salto per chiamare printf va a **`__TEXT.__stubs`**:
 ```bash
 objdump --section-headers ./load
 
@@ -95,9 +95,9 @@ Disassembly of section __TEXT,__stubs:
 100003f9c: f9400210    	ldr	x16, [x16]
 100003fa0: d61f0200    	br	x16
 ```
-puoi vedere che stiamo **saltando all'indirizzo del GOT**, che in questo caso è risolto in modo non pigro e conterrà l'indirizzo della funzione printf.
+puoi vedere che stiamo **saltando all'indirizzo del GOT**, che in questo caso è risolto non pigro e conterrà l'indirizzo della funzione printf.
 
-In altre situazioni, invece di saltare direttamente al GOT, potrebbe saltare a **`__DATA.__la_symbol_ptr`** che caricherà un valore che rappresenta la funzione che sta cercando di caricare, quindi saltare a **`__TEXT.__stub_helper`** che salta il **`__DATA.__nl_symbol_ptr`** che contiene l'indirizzo di **`dyld_stub_binder`** che prende come parametri il numero della funzione e un indirizzo.\
+In altre situazioni, invece di saltare direttamente al GOT, potrebbe saltare a **`__DATA.__la_symbol_ptr`** che caricherà un valore che rappresenta la funzione che sta cercando di caricare, poi saltare a **`__TEXT.__stub_helper`** che salta il **`__DATA.__nl_symbol_ptr`** che contiene l'indirizzo di **`dyld_stub_binder`** che prende come parametri il numero della funzione e un indirizzo.\
 Questa ultima funzione, dopo aver trovato l'indirizzo della funzione cercata, lo scrive nella posizione corrispondente in **`__TEXT.__stub_helper`** per evitare di fare ricerche in futuro.
 
 > [!TIP]
@@ -254,15 +254,15 @@ dyld[21623]: running initializer 0x18e59e5c0 in /usr/lib/libSystem.B.dylib
 ### Altri
 
 - `DYLD_BIND_AT_LAUNCH`: I legami pigri vengono risolti con quelli non pigri
-- `DYLD_DISABLE_PREFETCH`: Disabilita il pre-caricamento dei contenuti \_\_DATA e \_\_LINKEDIT
+- `DYLD_DISABLE_PREFETCH`: Disabilita il pre-caricamento del contenuto di \_\_DATA e \_\_LINKEDIT
 - `DYLD_FORCE_FLAT_NAMESPACE`: Legami a livello singolo
 - `DYLD_[FRAMEWORK/LIBRARY]_PATH | DYLD_FALLBACK_[FRAMEWORK/LIBRARY]_PATH | DYLD_VERSIONED_[FRAMEWORK/LIBRARY]_PATH`: Percorsi di risoluzione
 - `DYLD_INSERT_LIBRARIES`: Carica una libreria specifica
 - `DYLD_PRINT_TO_FILE`: Scrivi il debug di dyld in un file
 - `DYLD_PRINT_APIS`: Stampa le chiamate API di libdyld
 - `DYLD_PRINT_APIS_APP`: Stampa le chiamate API di libdyld effettuate da main
-- `DYLD_PRINT_BINDINGS`: Stampa i simboli quando vengono legati
-- `DYLD_WEAK_BINDINGS`: Stampa solo simboli deboli quando vengono legati
+- `DYLD_PRINT_BINDINGS`: Stampa i simboli quando sono legati
+- `DYLD_WEAK_BINDINGS`: Stampa solo simboli deboli quando sono legati
 - `DYLD_PRINT_CODE_SIGNATURES`: Stampa le operazioni di registrazione della firma del codice
 - `DYLD_PRINT_DOFS`: Stampa le sezioni del formato oggetto D-Trace come caricate
 - `DYLD_PRINT_ENV`: Stampa l'ambiente visto da dyld
@@ -272,8 +272,8 @@ dyld[21623]: running initializer 0x18e59e5c0 in /usr/lib/libSystem.B.dylib
 - `DYLD_REBASING`: Stampa le operazioni di riassegnazione dei simboli
 - `DYLD_RPATHS`: Stampa le espansioni di @rpath
 - `DYLD_PRINT_SEGMENTS`: Stampa le mappature dei segmenti Mach-O
-- `DYLD_PRINT_STATISTICS`: Stampa le statistiche di temporizzazione
-- `DYLD_PRINT_STATISTICS_DETAILS`: Stampa statistiche di temporizzazione dettagliate
+- `DYLD_PRINT_STATISTICS`: Stampa le statistiche temporali
+- `DYLD_PRINT_STATISTICS_DETAILS`: Stampa statistiche temporali dettagliate
 - `DYLD_PRINT_WARNINGS`: Stampa messaggi di avviso
 - `DYLD_SHARED_CACHE_DIR`: Percorso da utilizzare per la cache delle librerie condivise
 - `DYLD_SHARED_REGION`: "usa", "privato", "evita"

@@ -2,7 +2,7 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**Questo è un piccolo riassunto dei capitoli sul furto dell'ottima ricerca di [https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)**
+**Questo è un piccolo riassunto dei capitoli sul furto delle certificazioni della fantastica ricerca di [https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)**
 
 ## Cosa posso fare con un certificato
 
@@ -22,7 +22,7 @@ certutil.exe -dump -v cert.pfx
 
 In una **sessione desktop interattiva**, estrarre un certificato utente o macchina, insieme alla chiave privata, può essere fatto facilmente, particolarmente se la **chiave privata è esportabile**. Questo può essere realizzato navigando al certificato in `certmgr.msc`, facendo clic destro su di esso e selezionando `All Tasks → Export` per generare un file .pfx protetto da password.
 
-Per un **approccio programmatico**, sono disponibili strumenti come il cmdlet PowerShell `ExportPfxCertificate` o progetti come [TheWover’s CertStealer C# project](https://github.com/TheWover/CertStealer). Questi utilizzano le **Microsoft CryptoAPI** (CAPI) o la Cryptography API: Next Generation (CNG) per interagire con il negozio di certificati. Queste API forniscono una gamma di servizi crittografici, inclusi quelli necessari per la memorizzazione e l'autenticazione dei certificati.
+Per un **approccio programmatico**, sono disponibili strumenti come il cmdlet PowerShell `ExportPfxCertificate` o progetti come [TheWover’s CertStealer C# project](https://github.com/TheWover/CertStealer). Questi utilizzano la **Microsoft CryptoAPI** (CAPI) o la Cryptography API: Next Generation (CNG) per interagire con il negozio di certificati. Queste API forniscono una gamma di servizi crittografici, inclusi quelli necessari per la memorizzazione e l'autenticazione dei certificati.
 
 Tuttavia, se una chiave privata è impostata come non esportabile, sia CAPI che CNG normalmente bloccheranno l'estrazione di tali certificati. Per bypassare questa restrizione, possono essere impiegati strumenti come **Mimikatz**. Mimikatz offre comandi `crypto::capi` e `crypto::cng` per patchare le rispettive API, consentendo l'esportazione delle chiavi private. In particolare, `crypto::capi` patcha il CAPI all'interno del processo corrente, mentre `crypto::cng` mira alla memoria di **lsass.exe** per la patch.
 
@@ -64,7 +64,7 @@ openssl pkcs12 -in cert.pem -keyex -CSP "Microsoft Enhanced Cryptographic Provid
 
 I certificati di macchina memorizzati da Windows nel registro in `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\SystemCertificates` e le chiavi private associate situate in `%ALLUSERSPROFILE%\Application Data\Microsoft\Crypto\RSA\MachineKeys` (per CAPI) e `%ALLUSERSPROFILE%\Application Data\Microsoft\Crypto\Keys` (per CNG) sono crittografati utilizzando le chiavi master DPAPI della macchina. Queste chiavi non possono essere decrittografate con la chiave di backup DPAPI del dominio; invece, è necessaria la **segreto LSA DPAPI_SYSTEM**, a cui può accedere solo l'utente SYSTEM.
 
-La decrittografia manuale può essere ottenuta eseguendo il comando `lsadump::secrets` in **Mimikatz** per estrarre il segreto LSA DPAPI_SYSTEM e successivamente utilizzando questa chiave per decrittografare le chiavi master della macchina. In alternativa, il comando `crypto::certificates /export /systemstore:LOCAL_MACHINE` di Mimikatz può essere utilizzato dopo aver patchato CAPI/CNG come descritto in precedenza.
+La decrittografia manuale può essere ottenuta eseguendo il comando `lsadump::secrets` in **Mimikatz** per estrarre il segreto LSA DPAPI_SYSTEM, e successivamente utilizzando questa chiave per decrittografare le chiavi master della macchina. In alternativa, il comando `crypto::certificates /export /systemstore:LOCAL_MACHINE` di Mimikatz può essere utilizzato dopo aver patchato CAPI/CNG come descritto in precedenza.
 
 **SharpDPAPI** offre un approccio più automatizzato con il suo comando certificati. Quando il flag `/machine` è utilizzato con permessi elevati, si eleva a SYSTEM, estrae il segreto LSA DPAPI_SYSTEM, lo utilizza per decrittografare le chiavi master DPAPI della macchina e poi impiega queste chiavi in chiaro come tabella di ricerca per decrittografare eventuali chiavi private dei certificati di macchina.
 
@@ -102,8 +102,8 @@ tgt::pac /caname:generic-DC-CA /subject:genericUser /castore:current_user /domai
 ```
 **`Rubeus`** può anche ottenere queste informazioni con l'opzione **`asktgt [...] /getcredentials`**.
 
-Inoltre, si nota che Kekeo può elaborare certificati protetti da smartcard, dato che il pin può essere recuperato, con riferimento a [https://github.com/CCob/PinSwipe](https://github.com/CCob/PinSwipe). La stessa capacità è indicata come supportata da **Rubeus**, disponibile su [https://github.com/GhostPack/Rubeus](https://github.com/GhostPack/Rubeus).
+Inoltre, si segnala che Kekeo può elaborare certificati protetti da smartcard, a condizione che il pin possa essere recuperato, con riferimento a [https://github.com/CCob/PinSwipe](https://github.com/CCob/PinSwipe). La stessa capacità è indicata come supportata da **Rubeus**, disponibile su [https://github.com/GhostPack/Rubeus](https://github.com/GhostPack/Rubeus).
 
-Questa spiegazione racchiude il processo e gli strumenti coinvolti nel furto di credenziali NTLM tramite PKINIT, concentrandosi sul recupero degli hash NTLM attraverso il TGT ottenuto utilizzando PKINIT, e le utility che facilitano questo processo.
+Questa spiegazione racchiude il processo e gli strumenti coinvolti nel furto di credenziali NTLM tramite PKINIT, concentrandosi sul recupero degli hash NTLM attraverso il TGT ottenuto utilizzando PKINIT e le utility che facilitano questo processo.
 
 {{#include ../../../banners/hacktricks-training.md}}

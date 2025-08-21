@@ -74,12 +74,12 @@ macos-security-protections/
 Se un **processo in esecuzione come root scrive** un file che può essere controllato da un utente, l'utente potrebbe abusarne per **escalare i privilegi**.\
 Questo potrebbe verificarsi nelle seguenti situazioni:
 
-- Il file utilizzato era già stato creato da un utente (di proprietà dell'utente)
+- Il file utilizzato è già stato creato da un utente (di proprietà dell'utente)
 - Il file utilizzato è scrivibile dall'utente a causa di un gruppo
 - Il file utilizzato si trova all'interno di una directory di proprietà dell'utente (l'utente potrebbe creare il file)
 - Il file utilizzato si trova all'interno di una directory di proprietà di root, ma l'utente ha accesso in scrittura su di essa a causa di un gruppo (l'utente potrebbe creare il file)
 
-Essere in grado di **creare un file** che sarà **utilizzato da root**, consente a un utente di **sfruttare il suo contenuto** o persino di creare **symlink/hardlink** per puntarlo in un altro posto.
+Essere in grado di **creare un file** che sarà **utilizzato da root** consente a un utente di **sfruttare il suo contenuto** o persino creare **symlink/hardlink** per puntarlo in un altro posto.
 
 Per questo tipo di vulnerabilità non dimenticare di **controllare gli installer `.pkg` vulnerabili**:
 
@@ -88,7 +88,7 @@ Per questo tipo di vulnerabilità non dimenticare di **controllare gli installer
 macos-files-folders-and-binaries/macos-installers-abuse.md
 {{#endref}}
 
-### Gestori di Estensioni di File e URL
+### Gestori di app per Estensione di File e Schema URL
 
 App strane registrate da estensioni di file potrebbero essere abusate e diverse applicazioni possono essere registrate per aprire protocolli specifici
 
@@ -107,7 +107,7 @@ Questi privilegi sono solitamente concessi sotto forma di **diritti** con cui l'
 
 Segui questi link per trovare diversi modi per [**escalare i privilegi in TCC**](macos-security-protections/macos-tcc/index.html#tcc-privesc-and-bypasses), per [**bypassare TCC**](macos-security-protections/macos-tcc/macos-tcc-bypasses/index.html) e come in passato [**SIP è stato bypassato**](macos-security-protections/macos-sip.md#sip-bypasses).
 
-## Escalation Tradizionale dei Privilegi in macOS
+## Escalation Tradizionale dei Privilegi di macOS
 
 Certo, dal punto di vista di un red team, dovresti essere anche interessato a escalare a root. Controlla il seguente post per alcuni suggerimenti:
 

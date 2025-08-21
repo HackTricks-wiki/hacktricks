@@ -3,7 +3,7 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 ## TL;DR
-Costringendo un **System Center Configuration Manager (SCCM) Management Point (MP)** ad autenticarsi tramite SMB/RPC e **rilasciando** quel NTLM machine account al **database del sito (MSSQL)** si ottengono diritti `smsdbrole_MP` / `smsdbrole_MPUserSvc`. Questi ruoli ti consentono di chiamare un insieme di procedure memorizzate che espongono i blob delle politiche di **Operating System Deployment (OSD)** (credenziali dell'Account di Accesso alla Rete, variabili della Sequenza di Attività, ecc.). I blob sono codificati/encriptati in esadecimale ma possono essere decodificati e decrittografati con **PXEthief**, restituendo segreti in chiaro.
+Costringendo un **System Center Configuration Manager (SCCM) Management Point (MP)** ad autenticarsi tramite SMB/RPC e **rilasciando** quel NTLM machine account al **database del sito (MSSQL)** si ottengono diritti `smsdbrole_MP` / `smsdbrole_MPUserSvc`. Questi ruoli ti consentono di chiamare un insieme di stored procedures che espongono i blob delle politiche di **Operating System Deployment (OSD)** (credenziali dell'Account di Accesso alla Rete, variabili della Sequenza di Attività, ecc.). I blob sono codificati/encriptati in esadecimale ma possono essere decodificati e decrittati con **PXEthief**, restituendo segreti in chiaro.
 
 Catena ad alto livello:
 1. Scoprire MP & DB del sito ↦ endpoint HTTP non autenticato `/SMS_MP/.sms_aut?MPKEYINFORMATIONMEDIA`.
@@ -65,7 +65,7 @@ SELECT SMS_Unique_Identifier0
 FROM dbo.UnknownSystem_DISC
 WHERE DiscArchKey = 2; -- 2 = x64, 0 = x86
 ```
-### 3.2 Elenca le politiche assegnate
+### 3.2  Elenca le politiche assegnate
 ```sql
 EXEC MP_GetMachinePolicyAssignments N'e9cd8c06-cc50-4b05-a4b2-9c9b5a51bbe7', N'';
 ```

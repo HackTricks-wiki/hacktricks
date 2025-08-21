@@ -6,7 +6,7 @@
 
 Un processo è un'istanza di un eseguibile in esecuzione, tuttavia i processi non eseguono codice, questi sono thread. Pertanto **i processi sono solo contenitori per thread in esecuzione** che forniscono memoria, descrittori, porte, permessi...
 
-Tradizionalmente, i processi venivano avviati all'interno di altri processi (eccetto PID 1) chiamando **`fork`**, che creava una copia esatta del processo corrente e poi il **processo figlio** generalmente chiamava **`execve`** per caricare il nuovo eseguibile e eseguirlo. Poi, **`vfork`** è stato introdotto per rendere questo processo più veloce senza alcuna copia di memoria.\
+Tradizionalmente, i processi venivano avviati all'interno di altri processi (eccetto il PID 1) chiamando **`fork`**, che creava una copia esatta del processo corrente e poi il **processo figlio** generalmente chiamava **`execve`** per caricare il nuovo eseguibile e eseguirlo. Poi, **`vfork`** è stato introdotto per rendere questo processo più veloce senza alcuna copia di memoria.\
 Successivamente, **`posix_spawn`** è stato introdotto combinando **`vfork`** e **`execve`** in un'unica chiamata e accettando flag:
 
 - `POSIX_SPAWN_RESETIDS`: Ripristina gli ID effettivi agli ID reali
@@ -23,7 +23,7 @@ Successivamente, **`posix_spawn`** è stato introdotto combinando **`vfork`** e 
 
 Inoltre, `posix_spawn` consente di specificare un array di **`posix_spawnattr`** che controlla alcuni aspetti del processo generato, e **`posix_spawn_file_actions`** per modificare lo stato dei descrittori.
 
-Quando un processo muore, invia il **codice di ritorno al processo padre** (se il padre è morto, il nuovo padre è PID 1) con il segnale `SIGCHLD`. Il padre deve ottenere questo valore chiamando `wait4()` o `waitid()` e fino a quel momento il figlio rimane in uno stato zombie dove è ancora elencato ma non consuma risorse.
+Quando un processo muore, invia il **codice di ritorno al processo padre** (se il padre è morto, il nuovo padre è il PID 1) con il segnale `SIGCHLD`. Il padre deve ottenere questo valore chiamando `wait4()` o `waitid()` e fino a quel momento il figlio rimane in uno stato zombie dove è ancora elencato ma non consuma risorse.
 
 ### PIDs
 
@@ -36,7 +36,7 @@ I PIDs, identificatori di processo, identificano un processo unico. In XNU i **P
 
 La coalizione è un altro modo per raggruppare i processi in Darwin. Un processo che si unisce a una coalizione gli consente di accedere a risorse condivise, condividendo un libro mastro o affrontando Jetsam. Le coalizioni hanno ruoli diversi: Leader, servizio XPC, Estensione.
 
-### Credenziali e Persone
+### Credenziali e Personae
 
 Ogni processo detiene **credenziali** che **identificano i suoi privilegi** nel sistema. Ogni processo avrà un `uid` primario e un `gid` primario (anche se potrebbe appartenere a più gruppi).\
 È anche possibile cambiare l'ID utente e l'ID gruppo se il binario ha il bit `setuid/setgid`.\
@@ -63,7 +63,7 @@ char     persona_name[MAXLOGNAME + 1];
 - **Dimensione Predefinita dello Stack:** La dimensione predefinita dello stack per i nuovi thread è di 512 KB, che è sufficiente per operazioni tipiche ma può essere regolata tramite gli attributi del thread se è necessario più o meno spazio.
 3. **Inizializzazione del Thread:** La funzione `__pthread_init()` è cruciale durante la configurazione del thread, utilizzando l'argomento `env[]` per analizzare le variabili di ambiente che possono includere dettagli sulla posizione e sulla dimensione dello stack.
 
-#### Terminazione dei Thread in macOS
+#### Terminazione del Thread in macOS
 
 1. **Uscita dai Thread:** I thread vengono tipicamente terminati chiamando `pthread_exit()`. Questa funzione consente a un thread di uscire in modo pulito, eseguendo le operazioni di pulizia necessarie e permettendo al thread di inviare un valore di ritorno a eventuali joiner.
 2. **Pulizia del Thread:** Al momento della chiamata a `pthread_exit()`, viene invocata la funzione `pthread_terminate()`, che gestisce la rimozione di tutte le strutture di thread associate. Dealloca le porte di thread Mach (Mach è il sottosistema di comunicazione nel kernel XNU) e chiama `bsdthread_terminate`, una syscall che rimuove le strutture a livello di kernel associate al thread.
@@ -88,9 +88,9 @@ Per gestire l'accesso alle risorse condivise e evitare condizioni di gara, macOS
 > [!TIP]
 > Gli ultimi 4 byte di quegli oggetti vengono utilizzati per rilevare overflow.
 
-### Variabili Locali ai Thread (TLV)
+### Variabili Locali al Thread (TLV)
 
-**Variabili Locali ai Thread (TLV)** nel contesto dei file Mach-O (il formato per gli eseguibili in macOS) vengono utilizzate per dichiarare variabili specifiche per **ogni thread** in un'applicazione multi-threaded. Questo garantisce che ogni thread abbia la propria istanza separata di una variabile, fornendo un modo per evitare conflitti e mantenere l'integrità dei dati senza la necessità di meccanismi di sincronizzazione espliciti come i mutex.
+**Variabili Locali al Thread (TLV)** nel contesto dei file Mach-O (il formato per gli eseguibili in macOS) vengono utilizzate per dichiarare variabili specifiche per **ogni thread** in un'applicazione multi-threaded. Questo garantisce che ogni thread abbia la propria istanza separata di una variabile, fornendo un modo per evitare conflitti e mantenere l'integrità dei dati senza la necessità di meccanismi di sincronizzazione espliciti come i mutex.
 
 In C e linguaggi correlati, puoi dichiarare una variabile locale al thread utilizzando la parola chiave **`__thread`**. Ecco come funziona nel tuo esempio:
 ```c
@@ -153,7 +153,7 @@ macos-library-injection/
 
 ### Hooking di Funzioni
 
-Il hooking di funzioni implica **intercettare le chiamate di funzione** o i messaggi all'interno di un codice software. Intercettando le funzioni, un attaccante può **modificare il comportamento** di un processo, osservare dati sensibili o persino ottenere il controllo sul flusso di esecuzione.
+Il hooking di funzioni implica **intercettare le chiamate di funzione** o i messaggi all'interno di un codice software. Hookando le funzioni, un attaccante può **modificare il comportamento** di un processo, osservare dati sensibili o persino ottenere il controllo sul flusso di esecuzione.
 
 {{#ref}}
 macos-function-hooking.md
@@ -169,7 +169,7 @@ macos-ipc-inter-process-communication/
 
 ### Iniezione di Applicazioni Electron
 
-Le applicazioni Electron eseguite con variabili ambientali specifiche potrebbero essere vulnerabili all'iniezione di processi:
+Le applicazioni Electron eseguite con variabili di ambiente specifiche potrebbero essere vulnerabili all'iniezione di processi:
 
 {{#ref}}
 macos-electron-applications-injection.md
@@ -193,7 +193,7 @@ macos-dirty-nib.md
 
 ### Iniezione di Applicazioni Java
 
-È possibile abusare di alcune capacità di Java (come la variabile ambientale **`_JAVA_OPTS`**) per far eseguire a un'applicazione Java **codice/comandi arbitrari**.
+È possibile abusare di alcune capacità di Java (come la variabile di ambiente **`_JAVA_OPTS`**) per far eseguire a un'applicazione Java **codice/comandi arbitrari**.
 
 {{#ref}}
 macos-java-apps-injection.md
@@ -217,7 +217,7 @@ macos-perl-applications-injection.md
 
 ### Iniezione di Ruby
 
-È anche possibile abusare delle variabili ambientali di Ruby per far eseguire script arbitrari a codice arbitrario:
+È anche possibile abusare delle variabili di ambiente Ruby per far eseguire script arbitrari a codice arbitrario:
 
 {{#ref}}
 macos-ruby-applications-injection.md
@@ -225,16 +225,16 @@ macos-ruby-applications-injection.md
 
 ### Iniezione di Python
 
-Se la variabile ambientale **`PYTHONINSPECT`** è impostata, il processo python entrerà in un cli python una volta terminato. È anche possibile utilizzare **`PYTHONSTARTUP`** per indicare uno script python da eseguire all'inizio di una sessione interattiva.\
+Se la variabile di ambiente **`PYTHONINSPECT`** è impostata, il processo python entrerà in un cli python una volta terminato. È anche possibile utilizzare **`PYTHONSTARTUP`** per indicare uno script python da eseguire all'inizio di una sessione interattiva.\
 Tuttavia, nota che lo script **`PYTHONSTARTUP`** non verrà eseguito quando **`PYTHONINSPECT`** crea la sessione interattiva.
 
-Altre variabili ambientali come **`PYTHONPATH`** e **`PYTHONHOME`** potrebbero essere utili per far eseguire a un comando python codice arbitrario.
+Altre variabili di ambiente come **`PYTHONPATH`** e **`PYTHONHOME`** potrebbero essere utili per far eseguire a un comando python codice arbitrario.
 
 Nota che gli eseguibili compilati con **`pyinstaller`** non utilizzeranno queste variabili ambientali anche se vengono eseguiti utilizzando un python incorporato.
 
 > [!CAUTION]
-> In generale, non sono riuscito a trovare un modo per far eseguire a python codice arbitrario abusando delle variabili ambientali.\
-> Tuttavia, la maggior parte delle persone installa python utilizzando **Homebrew**, che installerà python in una **posizione scrivibile** per l'utente admin predefinito. Puoi dirottarlo con qualcosa del tipo:
+> In generale non sono riuscito a trovare un modo per far eseguire a python codice arbitrario abusando delle variabili di ambiente.\
+> Tuttavia, la maggior parte delle persone installa python utilizzando **Homebrew**, che installerà python in una **posizione scrivibile** per l'utente admin predefinito. Puoi dirottarlo con qualcosa del genere:
 >
 > ```bash
 > mv /opt/homebrew/bin/python3 /opt/homebrew/bin/python3.old

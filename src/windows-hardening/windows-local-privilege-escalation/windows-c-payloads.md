@@ -4,7 +4,7 @@
 
 Questa pagina raccoglie **piccole porzioni di codice C autonome** che sono utili durante l'Escalation Locale dei Privilegi in Windows o post-exploitation. Ogni payload è progettato per essere **facile da copiare e incollare**, richiede solo l'API di Windows / il runtime C e può essere compilato con `i686-w64-mingw32-gcc` (x86) o `x86_64-w64-mingw32-gcc` (x64).
 
-> ⚠️  Questi payload assumono che il processo abbia già i privilegi minimi necessari per eseguire l'azione (ad es. `SeDebugPrivilege`, `SeImpersonatePrivilege` o contesto di integrità media per un bypass UAC). Sono destinati a **impostazioni di red-team o CTF** dove sfruttare una vulnerabilità ha portato all'esecuzione arbitraria di codice nativo.
+> ⚠️  Questi payload assumono che il processo abbia già i privilegi minimi necessari per eseguire l'azione (ad es. `SeDebugPrivilege`, `SeImpersonatePrivilege` o contesto di integrità media per un bypass UAC). Sono destinati a **impostazioni di red team o CTF** dove sfruttare una vulnerabilità ha portato all'esecuzione arbitraria di codice nativo.
 
 ---
 
@@ -122,7 +122,7 @@ sedebug-+-seimpersonate-copy-token.md
 
 ---
 
-## Patch AMSI & ETW in Memoria (Evasione della Difesa)
+## Patch AMSI & ETW in memoria (Evasione della difesa)
 La maggior parte dei moderni motori AV/EDR si basa su **AMSI** e **ETW** per ispezionare comportamenti malevoli. Patchare entrambe le interfacce all'interno del processo corrente impedisce la scansione dei payload basati su script (ad es. PowerShell, JScript).
 ```c
 // gcc -o patch_amsi.exe patch_amsi.c -lntdll
