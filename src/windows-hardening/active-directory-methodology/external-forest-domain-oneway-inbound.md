@@ -70,6 +70,7 @@ You can use **Powerview functions** to **enumerate** the **other domain** using 
 Get-DomainUser -SPN -Domain domain_name.local | select SamAccountName
 ```
 
+
 {{#ref}}
 ./
 {{#endref}}
@@ -127,6 +128,5 @@ Rubeus.exe asktgs /service:cifs/dc.doamin.external /domain:dc.domain.external /d
 ```
 
 {{#include ../../banners/hacktricks-training.md}}
-
 
 

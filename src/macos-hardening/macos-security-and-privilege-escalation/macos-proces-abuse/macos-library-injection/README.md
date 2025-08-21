@@ -9,6 +9,7 @@
 
 Take a look on how Dyld loads libraries inside binaries in:
 
+
 {{#ref}}
 macos-dyld-process.md
 {{#endref}}
@@ -49,6 +50,7 @@ You can check if a binary has **hardened runtime** with `codesign --display --ve
 You can also load a library if it's **signed with the same certificate as the binary**.
 
 Find a example on how to (ab)use this and check the restrictions in:
+
 
 {{#ref}}
 macos-dyld-hijacking-and-dyld_insert_libraries.md
@@ -107,6 +109,7 @@ The way to **escalate privileges** abusing this functionality would be in the ra
 > A nice **report with technical details** about this technique can be found [**here**](https://www.virusbulletin.com/virusbulletin/2015/03/dylib-hijacking-os-x).
 
 **Example**
+
 
 {{#ref}}
 macos-dyld-hijacking-and-dyld_insert_libraries.md
@@ -337,6 +340,5 @@ DYLD_INSERT_LIBRARIES=inject.dylib ./hello-signed # Won't work
 - [**\*OS Internals, Volume I: User Mode. By Jonathan Levin**](https://www.amazon.com/MacOS-iOS-Internals-User-Mode/dp/099105556X)
 
 {{#include ../../../../banners/hacktricks-training.md}}
-
 
 
