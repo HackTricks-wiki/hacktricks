@@ -2,15 +2,23 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## [**Shells - Linux**](linux.md)
+## [Shells - Linux](linux.md)
 
-## [**Shells - Windows**](windows.md)
+---
 
-## [**MSFVenom - CheatSheet**](msfvenom.md)
+## [Shells - Windows](windows.md)
 
-## [**Full TTYs**](full-ttys.md)
+---
 
-## **Auto-generated shells**
+## [MSFVenom - CheatSheet](msfvenom.md)
+
+---
+
+## [Full TTYs](full-ttys.md)
+
+---
+
+## Auto-generated shells
 
 - [**https://reverse-shell.sh/**](https://reverse-shell.sh/)
 - [**https://www.revshells.com/**](https://www.revshells.com/)
