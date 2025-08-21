@@ -3,7 +3,7 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 ## TL;DR
-**System Center Configuration Manager (SCCM) Management Point (MP)**가 SMB/RPC를 통해 인증하도록 강제하고 그 NTLM 머신 계정을 **사이트 데이터베이스 (MSSQL)**에 **중계**하면 `smsdbrole_MP` / `smsdbrole_MPUserSvc` 권한을 얻습니다. 이 역할은 **운영 체제 배포 (OSD)** 정책 블롭(네트워크 액세스 계정 자격 증명, 작업 시퀀스 변수 등)을 노출하는 일련의 저장 프로시저를 호출할 수 있게 해줍니다. 블롭은 16진수로 인코딩/암호화되어 있지만 **PXEthief**를 사용하여 디코딩 및 복호화할 수 있어 평문 비밀을 얻을 수 있습니다.
+**System Center Configuration Manager (SCCM) Management Point (MP)**가 SMB/RPC를 통해 인증하도록 강제하고 해당 NTLM 머신 계정을 **사이트 데이터베이스 (MSSQL)**에 **중계**하면 `smsdbrole_MP` / `smsdbrole_MPUserSvc` 권한을 얻습니다. 이러한 역할은 **운영 체제 배포 (OSD)** 정책 블롭(네트워크 액세스 계정 자격 증명, 작업 시퀀스 변수 등)을 노출하는 일련의 저장 프로시저를 호출할 수 있게 해줍니다. 블롭은 16진수로 인코딩/암호화되어 있지만 **PXEthief**를 사용하여 디코딩 및 복호화할 수 있어 평문 비밀을 얻을 수 있습니다.
 
 고수준 체인:
 1. MP 및 사이트 DB 발견 ↦ 인증되지 않은 HTTP 엔드포인트 `/SMS_MP/.sms_aut?MPKEYINFORMATIONMEDIA`.
@@ -21,13 +21,13 @@
 ---
 
 ## 1. 인증되지 않은 MP 엔드포인트 열거
-MP ISAPI 확장 **GetAuth.dll**는 인증이 필요 없는 여러 매개변수를 노출합니다 (사이트가 PKI 전용이 아닌 경우):
+MP ISAPI 확장 **GetAuth.dll**은 인증이 필요 없는 여러 매개변수를 노출합니다(사이트가 PKI 전용이 아닌 경우):
 
 | 매개변수 | 목적 |
 |-----------|---------|
 | `MPKEYINFORMATIONMEDIA` | 사이트 서명 인증서 공개 키 + *x86* / *x64* **모든 알 수 없는 컴퓨터** 장치의 GUID를 반환합니다. |
 | `MPLIST` | 사이트의 모든 관리 지점을 나열합니다. |
-| `SITESIGNCERT` | 기본 사이트 서명 인증서를 반환합니다 (LDAP 없이 사이트 서버 식별). |
+| `SITESIGNCERT` | 기본 사이트 서명 인증서를 반환합니다( LDAP 없이 사이트 서버 식별). |
 
 나중에 DB 쿼리를 위해 **clientID** 역할을 할 GUID를 가져옵니다:
 ```bash
@@ -56,7 +56,7 @@ SOCKS 프록시를 통해 연결 (기본 포트 1080):
 ```bash
 proxychains mssqlclient.py CONTOSO/MP01$@10.10.10.15 -windows-auth
 ```
-**CM_<SiteCode>** DB로 전환합니다 (3자리 사이트 코드를 사용하세요, 예: `CM_001`).
+**CM_<SiteCode>** DB로 전환합니다(3자리 사이트 코드를 사용합니다, 예: `CM_001`).
 
 ### 3.1 알 수 없는 컴퓨터 GUID 찾기 (선택 사항)
 ```sql
@@ -69,7 +69,7 @@ WHERE DiscArchKey = 2; -- 2 = x64, 0 = x86
 ```sql
 EXEC MP_GetMachinePolicyAssignments N'e9cd8c06-cc50-4b05-a4b2-9c9b5a51bbe7', N'';
 ```
-각 행에는 `PolicyAssignmentID`, `Body` (hex), `PolicyID`, `PolicyVersion`이 포함되어 있습니다.
+각 행은 `PolicyAssignmentID`, `Body` (hex), `PolicyID`, `PolicyVersion`을 포함합니다.
 
 정책에 집중하세요:
 * **NAAConfig**  – 네트워크 액세스 계정 자격 증명
@@ -77,11 +77,11 @@ EXEC MP_GetMachinePolicyAssignments N'e9cd8c06-cc50-4b05-a4b2-9c9b5a51bbe7', N''
 * **CollectionSettings** – 실행 계정을 포함할 수 있습니다.
 
 ### 3.3 전체 본문 검색
-이미 `PolicyID` 및 `PolicyVersion`이 있는 경우, 다음을 사용하여 clientID 요구 사항을 건너뛸 수 있습니다:
+이미 `PolicyID` 및 `PolicyVersion`이 있는 경우 다음을 사용하여 clientID 요구 사항을 건너뛸 수 있습니다:
 ```sql
 EXEC MP_GetPolicyBody N'{083afd7a-b0be-4756-a4ce-c31825050325}', N'2.00';
 ```
-> 중요: SSMS에서 "가져온 최대 문자"를 증가시키세요 (>65535), 그렇지 않으면 blob이 잘릴 수 있습니다.
+> 중요: SSMS에서 "가져온 최대 문자"를 증가시키세요 (>65535) 그렇지 않으면 blob이 잘립니다.
 
 ---
 
@@ -135,13 +135,15 @@ AND  pe.permission_name='EXECUTE';
 
 ---
 
-## 참조
-* NTLM 릴레이 기본 사항:
+## 추가 정보
+* NTLM 릴레이 기초:
+
 {{#ref}}
 ../ntlm/README.md
 {{#endref}}
 
 * MSSQL 남용 및 사후 활용:
+
 {{#ref}}
 abusing-ad-mssql.md
 {{#endref}}
@@ -149,7 +151,7 @@ abusing-ad-mssql.md
 
 
 ## 참고 문헌
-- [귀하의 관리자와 이야기하고 싶습니다: 관리 포인트 릴레이로 비밀 훔치기](https://specterops.io/blog/2025/07/15/id-like-to-speak-to-your-manager-stealing-secrets-with-management-point-relays/)
+- [귀하의 관리자와 이야기하고 싶습니다: 관리 포인트 릴레이를 통한 비밀 도용](https://specterops.io/blog/2025/07/15/id-like-to-speak-to-your-manager-stealing-secrets-with-management-point-relays/)
 - [PXEthief](https://github.com/MWR-CyberSec/PXEThief)
 - [구성 오류 관리자 – ELEVATE-4 & ELEVATE-5](https://github.com/subat0mik/Misconfiguration-Manager)
 {{#include ../../banners/hacktricks-training.md}}

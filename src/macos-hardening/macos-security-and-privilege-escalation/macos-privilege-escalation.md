@@ -6,13 +6,15 @@
 
 TCC 권한 상승을 찾고 계신다면 다음으로 가세요:
 
+
 {{#ref}}
 macos-security-protections/macos-tcc/
 {{#endref}}
 
-## Linux 권한 상승
+## 리눅스 권한 상승
 
-**Linux/Unix에 영향을 미치는 권한 상승에 대한 대부분의 트릭은 MacOS에도 영향을 미친다는 점에 유의하세요.** 따라서 다음을 참조하세요:
+**리눅스/유닉스에 영향을 미치는 권한 상승에 대한 대부분의 트릭은 MacOS에도 영향을 미칩니다.** 따라서 다음을 참조하세요:
+
 
 {{#ref}}
 ../../linux-hardening/privilege-escalation/
@@ -22,9 +24,9 @@ macos-security-protections/macos-tcc/
 
 ### Sudo 하이재킹
 
-원래 [Sudo 하이재킹 기법은 Linux 권한 상승 게시물에서 찾을 수 있습니다](../../linux-hardening/privilege-escalation/index.html#sudo-hijacking).
+원래 [Sudo 하이재킹 기법은 리눅스 권한 상승 게시물에서 찾을 수 있습니다](../../linux-hardening/privilege-escalation/index.html#sudo-hijacking).
 
-그러나 macOS는 사용자가 **`sudo`**를 실행할 때 사용자의 **`PATH`**를 **유지**합니다. 즉, 이 공격을 달성하는 또 다른 방법은 피해자가 **sudo를 실행할 때** 여전히 실행할 **다른 바이너리**를 **하이재킹**하는 것입니다:
+그러나 macOS는 사용자가 **`sudo`**를 실행할 때 사용자의 **`PATH`**를 **유지**합니다. 이는 이 공격을 달성하는 또 다른 방법이 피해자가 **sudo를 실행할 때** 여전히 실행할 **다른 바이너리**를 **하이재킹**하는 것임을 의미합니다:
 ```bash
 # Let's hijack ls in /opt/homebrew/bin, as this is usually already in the users PATH
 cat > /opt/homebrew/bin/ls <<EOF
@@ -43,7 +45,7 @@ sudo ls
 
 ### Dock 사칭
 
-일부 **소셜 엔지니어링**을 사용하여 실제로 자신의 스크립트를 실행하면서 Dock에서 **예를 들어 Google Chrome을 사칭**할 수 있습니다:
+일부 **소셜 엔지니어링**을 사용하여 Dock에서 **예를 들어 Google Chrome**을 **사칭**하고 실제로 자신의 스크립트를 실행할 수 있습니다:
 
 {{#tabs}}
 {{#tab name="Chrome Impersonation"}}
@@ -124,11 +126,11 @@ killall Dock
 {{#tab name="Finder Impersonation"}}
 몇 가지 제안:
 
-- 당신은 **Finder를 Dock에서 제거할 수 없으므로**, Dock에 추가할 경우 가짜 Finder를 실제 Finder 바로 옆에 두는 것이 좋습니다. 이를 위해서는 **Dock 배열의 시작 부분에 가짜 Finder 항목을 추가해야** 합니다.
-- 또 다른 옵션은 Dock에 배치하지 않고 그냥 여는 것입니다. "Finder가 Finder를 제어하도록 요청하는 것"은 그렇게 이상하지 않습니다.
+- 당신은 **Finder를 Dock에서 제거할 수 없으므로**, Dock에 추가할 경우 가짜 Finder를 실제 Finder 바로 옆에 두는 것이 좋습니다. 이를 위해 **Dock 배열의 시작 부분에 가짜 Finder 항목을 추가해야** 합니다.
+- 또 다른 옵션은 Dock에 배치하지 않고 그냥 여는 것입니다. "Finder가 Finder를 제어하도록 요청하고 있습니다"는 그리 이상하지 않습니다.
 - 비밀번호를 묻는 끔찍한 상자 없이 **루트로 상승**하는 또 다른 옵션은 Finder가 실제로 권한 있는 작업을 수행하기 위해 비밀번호를 요청하도록 만드는 것입니다:
-- Finder에게 **`/etc/pam.d`**에 새로운 **`sudo`** 파일을 복사하도록 요청합니다 (비밀번호를 요청하는 프롬프트는 "Finder가 sudo를 복사하고 싶어합니다"라고 표시됩니다).
-- Finder에게 새로운 **Authorization Plugin**을 복사하도록 요청합니다 (파일 이름을 제어할 수 있으므로 비밀번호를 요청하는 프롬프트는 "Finder가 Finder.bundle을 복사하고 싶어합니다"라고 표시됩니다).
+- Finder에게 **`/etc/pam.d`**에 새로운 **`sudo`** 파일을 복사하도록 요청합니다 (비밀번호를 요청하는 프롬프트는 "Finder가 sudo를 복사하고 싶어합니다"를 나타낼 것입니다).
+- Finder에게 새로운 **Authorization Plugin**을 복사하도록 요청합니다 (파일 이름을 제어할 수 있으므로 비밀번호를 요청하는 프롬프트는 "Finder가 Finder.bundle을 복사하고 싶어합니다"를 나타낼 것입니다).
 ```bash
 #!/bin/sh
 
@@ -226,11 +228,12 @@ mkdir /tmp/snap
 # Access it
 ls /tmp/snap/Users/admin_user # This will work
 ```
-보다 자세한 설명은 [**원본 보고서에서 확인할 수 있습니다**](https://theevilbit.github.io/posts/cve_2020_9771/)**.**
+더 자세한 설명은 [**원본 보고서에서 확인할 수 있습니다**](https://theevilbit.github.io/posts/cve_2020_9771/)**.**
 
 ## 민감한 정보
 
 이는 권한 상승에 유용할 수 있습니다:
+
 
 {{#ref}}
 macos-files-folders-and-binaries/macos-sensitive-locations.md

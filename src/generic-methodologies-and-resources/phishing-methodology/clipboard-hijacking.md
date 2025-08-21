@@ -1,16 +1,16 @@
-# Clipboard Hijacking (Pastejacking) Attacks
+# 클립보드 하이재킹 (Pastejacking) 공격
 
 {{#include ../../banners/hacktricks-training.md}}
 
-> "절대 자신이 복사하지 않은 것을 붙여넣지 마세요." – 오래된 조언이지만 여전히 유효합니다.
+> "자신이 복사하지 않은 것은 절대 붙여넣지 마세요." – 오래된 조언이지만 여전히 유효합니다.
 
-## Overview
+## 개요
 
-Clipboard hijacking – 또한 *pastejacking*으로 알려져 있음 – 사용자가 명령을 검사하지 않고 일상적으로 복사하고 붙여넣는 사실을 악용합니다. 악의적인 웹 페이지(또는 Electron 또는 데스크탑 애플리케이션과 같은 JavaScript를 지원하는 컨텍스트)는 공격자가 제어하는 텍스트를 시스템 클립보드에 프로그래밍 방식으로 삽입합니다. 피해자는 일반적으로 정교하게 제작된 사회 공학 지침에 의해 **Win + R** (실행 대화 상자), **Win + X** (빠른 액세스 / PowerShell)을 누르거나 터미널을 열고 클립보드 내용을 *붙여넣기* 하도록 유도되어 즉시 임의의 명령을 실행하게 됩니다.
+클립보드 하이재킹 – *pastejacking*으로도 알려짐 – 은 사용자가 명령을 복사하고 붙여넣는 것을 검사하지 않고 일상적으로 수행하는 사실을 악용합니다. 악의적인 웹 페이지(또는 Electron 또는 데스크탑 애플리케이션과 같은 JavaScript를 지원하는 컨텍스트)는 공격자가 제어하는 텍스트를 시스템 클립보드에 프로그래밍 방식으로 삽입합니다. 피해자는 일반적으로 정교하게 제작된 사회 공학 지침에 의해 **Win + R** (실행 대화상자), **Win + X** (빠른 액세스 / PowerShell)을 누르거나 터미널을 열고 클립보드 내용을 *붙여넣기* 하도록 유도되어 즉시 임의의 명령을 실행하게 됩니다.
 
-**파일이 다운로드되지 않고 첨부파일이 열리지 않기 때문에**, 이 기술은 첨부파일, 매크로 또는 직접 명령 실행을 모니터링하는 대부분의 이메일 및 웹 콘텐츠 보안 제어를 우회합니다. 따라서 이 공격은 NetSupport RAT, Latrodectus 로더 또는 Lumma Stealer와 같은 상용 맬웨어 패밀리를 배포하는 피싱 캠페인에서 인기가 있습니다.
+**파일이 다운로드되지 않고 첨부파일이 열리지 않기 때문에**, 이 기술은 첨부파일, 매크로 또는 직접 명령 실행을 모니터링하는 대부분의 이메일 및 웹 콘텐츠 보안 제어를 우회합니다. 따라서 이 공격은 NetSupport RAT, Latrodectus 로더 또는 Lumma Stealer와 같은 일반적인 맬웨어 패밀리를 배포하는 피싱 캠페인에서 인기가 있습니다.
 
-## JavaScript Proof-of-Concept
+## JavaScript 개념 증명
 ```html
 <!-- Any user interaction (click) is enough to grant clipboard write permission in modern browsers -->
 <button id="fix" onclick="copyPayload()">Fix the error</button>
@@ -71,11 +71,12 @@ The **mshta** 호출은 숨겨진 PowerShell 스크립트를 실행하여 `Party
 1. 브라우저 강화 – 클립보드 쓰기 접근을 비활성화 (`dom.events.asyncClipboard.clipboardItem` 등)하거나 사용자 제스처를 요구합니다.
 2. 보안 인식 – 사용자에게 민감한 명령을 *타이핑* 하거나 먼저 텍스트 편집기에 붙여넣도록 교육합니다.
 3. PowerShell 제한 언어 모드 / 실행 정책 + 응용 프로그램 제어를 통해 임의의 원라이너를 차단합니다.
-4. 네트워크 제어 – 알려진 pastejacking 및 악성 C2 도메인에 대한 아웃바운드 요청을 차단합니다.
+4. 네트워크 제어 – 알려진 pastejacking 및 악성 코드 C2 도메인에 대한 아웃바운드 요청을 차단합니다.
 
 ## 관련 트릭
 
-* **Discord 초대 하이재킹**은 사용자를 악성 서버로 유인한 후 동일한 ClickFix 접근 방식을 자주 남용합니다:
+* **Discord 초대 하이재킹**은 종종 사용자를 악성 서버로 유인한 후 동일한 ClickFix 접근 방식을 남용합니다:
+
 {{#ref}}
 discord-invite-hijacking.md
 {{#endref}}

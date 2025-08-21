@@ -8,11 +8,13 @@ macOS에 익숙하지 않다면, macOS의 기본을 배우기 시작해야 합�
 
 - 특별한 macOS **파일 및 권한:**
 
+
 {{#ref}}
 macos-files-folders-and-binaries/
 {{#endref}}
 
 - 일반적인 macOS **사용자**
+
 
 {{#ref}}
 macos-users.md
@@ -20,17 +22,20 @@ macos-users.md
 
 - **AppleFS**
 
+
 {{#ref}}
 macos-applefs.md
 {{#endref}}
 
-- **커널**의 **구조**
+- **커널**의 **아키텍처**
+
 
 {{#ref}}
 mac-os-architecture/
 {{#endref}}
 
 - 일반적인 macOS n**네트워크 서비스 및 프로토콜**
+
 
 {{#ref}}
 macos-protocols.md
@@ -43,11 +48,13 @@ macos-protocols.md
 
 기업에서 **macOS** 시스템은 **MDM으로 관리될 가능성이 높습니다**. 따라서 공격자의 관점에서 **그 작동 방식을 아는 것이 흥미롭습니다**:
 
+
 {{#ref}}
 ../macos-red-teaming/macos-mdm/
 {{#endref}}
 
 ### MacOS - 검사, 디버깅 및 퍼징
+
 
 {{#ref}}
 macos-apps-inspecting-debugging-and-fuzzing/
@@ -71,9 +78,10 @@ macos-security-protections/
 - 사용자가 파일을 생성할 수 있는 사용자가 소유한 디렉토리 내의 파일
 - 루트가 소유한 디렉토리 내의 파일이지만 사용자가 그룹 때문에 쓰기 권한이 있는 경우(사용자가 파일을 생성할 수 있음)
 
-**루트에 의해 사용될 파일을 생성할 수 있는** 능력은 사용자가 **그 내용의 이점을 취하거나 심볼릭 링크/하드 링크를 생성하여 다른 위치를 가리키게 할 수 있게 합니다**.
+**루트에 의해 사용될 파일을 생성할 수 있는** 것은 사용자가 **그 내용의 이점을 취하거나** 심지어 **심볼릭 링크/하드 링크**를 만들어 다른 위치를 가리키게 할 수 있게 합니다.
 
-이러한 종류의 취약점에 대해 **취약한 `.pkg` 설치 프로그램을 확인하는 것을 잊지 마세요**:
+이러한 종류의 취약성에 대해서는 **취약한 `.pkg` 설치 프로그램을 확인하는 것을 잊지 마세요**:
+
 
 {{#ref}}
 macos-files-folders-and-binaries/macos-installers-abuse.md
@@ -83,6 +91,7 @@ macos-files-folders-and-binaries/macos-installers-abuse.md
 
 파일 확장자로 등록된 이상한 앱은 악용될 수 있으며, 특정 프로토콜을 열기 위해 다양한 애플리케이션이 등록될 수 있습니다.
 
+
 {{#ref}}
 macos-file-extension-apps.md
 {{#endref}}
@@ -91,15 +100,16 @@ macos-file-extension-apps.md
 
 macOS에서 **애플리케이션과 바이너리는** 폴더나 설정에 접근할 수 있는 권한을 가질 수 있으며, 이는 다른 것들보다 더 특권을 부여합니다.
 
-따라서 macOS 머신을 성공적으로 침해하고자 하는 공격자는 **TCC 권한을 상승시켜야 합니다**(또는 필요에 따라 **SIP를 우회해야 합니다**).
+따라서 macOS 기계를 성공적으로 침해하려는 공격자는 **TCC 권한을 상승시켜야 합니다**(또는 필요에 따라 **SIP를 우회해야 합니다**).
 
-이러한 권한은 일반적으로 애플리케이션이 서명된 **권한**의 형태로 제공되거나, 애플리케이션이 일부 접근을 요청하고 **사용자가 이를 승인한 후** **TCC 데이터베이스**에서 찾을 수 있습니다. 프로세스가 이러한 권한을 얻는 또 다른 방법은 **그 권한을 가진 프로세스의 자식이 되는 것**입니다. 이 권한은 일반적으로 **상속됩니다**.
+이러한 권한은 일반적으로 애플리케이션이 서명된 **권한**의 형태로 주어지거나, 애플리케이션이 일부 접근을 요청하고 **사용자가 이를 승인한 후** **TCC 데이터베이스**에서 찾을 수 있습니다. 프로세스가 이러한 권한을 얻는 또 다른 방법은 **그 권한을 가진 프로세스의 자식**이 되는 것입니다. 이 권한은 일반적으로 **상속됩니다**.
 
-다음 링크를 따라 [**TCC에서 권한 상승하는 다양한 방법**](macos-security-protections/macos-tcc/index.html#tcc-privesc-and-bypasses), [**TCC 우회하기**](macos-security-protections/macos-tcc/macos-tcc-bypasses/index.html) 및 과거에 [**SIP가 우회된 방법**](macos-security-protections/macos-sip.md#sip-bypasses)을 확인하세요.
+다양한 방법으로 [**TCC에서 권한을 상승시키는 방법**](macos-security-protections/macos-tcc/index.html#tcc-privesc-and-bypasses), [**TCC를 우회하는 방법**](macos-security-protections/macos-tcc/macos-tcc-bypasses/index.html) 및 과거에 [**SIP가 우회된 방법**](macos-security-protections/macos-sip.md#sip-bypasses)을 찾으려면 이 링크를 따르세요.
 
 ## macOS 전통적인 권한 상승
 
 물론 레드 팀의 관점에서 루트로 상승하는 것에도 관심이 있어야 합니다. 다음 게시물을 확인하여 몇 가지 힌트를 얻으세요:
+
 
 {{#ref}}
 macos-privilege-escalation.md

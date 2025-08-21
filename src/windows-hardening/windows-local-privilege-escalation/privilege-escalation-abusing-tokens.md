@@ -14,7 +14,7 @@ access-tokens.md
 
 ### SeImpersonatePrivilege
 
-이 권한은 어떤 프로세스가 토큰을 생성하지 않고도 임시로 사용할 수 있게 해줍니다. 핸들을 얻을 수 있다면, Windows 서비스(DCOM)에서 특권 토큰을 획득하여 NTLM 인증을 유도하고, 이후 SYSTEM 권한으로 프로세스를 실행할 수 있습니다. 이 취약점은 [juicy-potato](https://github.com/ohpe/juicy-potato), [RogueWinRM](https://github.com/antonioCoco/RogueWinRM) (winrm이 비활성화되어 있어야 함), [SweetPotato](https://github.com/CCob/SweetPotato), [PrintSpoofer](https://github.com/itm4n/PrintSpoofer)와 같은 다양한 도구를 사용하여 악용할 수 있습니다.
+이 권한은 어떤 프로세스가 토큰을 생성하지 않고도 임시로 사용할 수 있도록 허용합니다. 토큰에 대한 핸들을 얻을 수 있는 경우, Windows 서비스(DCOM)에서 특권 토큰을 획득하여 NTLM 인증을 수행하게 하여 SYSTEM 권한으로 프로세스를 실행할 수 있습니다. 이 취약점은 [juicy-potato](https://github.com/ohpe/juicy-potato), [RogueWinRM](https://github.com/antonioCoco/RogueWinRM) (winrm이 비활성화되어 있어야 함), [SweetPotato](https://github.com/CCob/SweetPotato), [PrintSpoofer](https://github.com/itm4n/PrintSpoofer)와 같은 다양한 도구를 사용하여 악용할 수 있습니다.
 
 {{#ref}}
 roguepotato-and-printspoofer.md
@@ -26,17 +26,17 @@ juicypotato.md
 
 ### SeAssignPrimaryPrivilege
 
-**SeImpersonatePrivilege**와 매우 유사하며, 특권 토큰을 얻기 위해 **같은 방법**을 사용합니다.\
-이 권한은 **새로운/중단된 프로세스에 기본 토큰을 할당**할 수 있게 해줍니다. 특권 임시 토큰을 사용하여 기본 토큰을 파생할 수 있습니다(DuplicateTokenEx).\
+이 권한은 **SeImpersonatePrivilege**와 매우 유사하며, 특권 토큰을 얻기 위해 **같은 방법**을 사용합니다.\
+그 후, 이 권한은 **새로운/중단된 프로세스에 기본 토큰을 할당**할 수 있도록 허용합니다. 특권 임시 토큰을 사용하여 기본 토큰을 파생할 수 있습니다(DuplicateTokenEx).\
 이 토큰을 사용하여 'CreateProcessAsUser'로 **새 프로세스**를 생성하거나 중단된 프로세스를 생성하고 **토큰을 설정**할 수 있습니다(일반적으로 실행 중인 프로세스의 기본 토큰을 수정할 수는 없습니다).
 
 ### SeTcbPrivilege
 
-이 토큰이 활성화되어 있다면, **KERB_S4U_LOGON**을 사용하여 자격 증명 없이 다른 사용자의 **임시 토큰**을 얻을 수 있으며, **임의의 그룹**(관리자)을 토큰에 추가하고, 토큰의 **무결성 수준**을 "**중간**"으로 설정하고, 이 토큰을 **현재 스레드**에 할당할 수 있습니다(SetThreadToken).
+이 토큰이 활성화되어 있으면 **KERB_S4U_LOGON**을 사용하여 자격 증명 없이 다른 사용자의 **임시 토큰**을 얻을 수 있으며, **임의의 그룹**(관리자)을 토큰에 추가하고, 토큰의 **무결성 수준**을 "**중간**"으로 설정하고, 이 토큰을 **현재 스레드**에 할당할 수 있습니다(SetThreadToken).
 
 ### SeBackupPrivilege
 
-이 권한은 시스템이 모든 파일에 대해 **모든 읽기 접근** 제어를 부여하도록 합니다(읽기 작업에 한정됨). 이는 레지스트리에서 로컬 관리자 계정의 비밀번호 해시를 **읽기 위해** 사용되며, 이후 "**psexec**" 또는 "**wmiexec**"와 같은 도구를 해시와 함께 사용할 수 있습니다(패스-더-해시 기법). 그러나 이 기법은 두 가지 조건에서 실패합니다: 로컬 관리자 계정이 비활성화되어 있거나, 원격으로 연결하는 로컬 관리자에게 관리 권한을 제거하는 정책이 시행될 때입니다.\
+이 권한은 시스템이 모든 파일에 대한 **읽기 접근** 제어를 부여하도록 합니다(읽기 작업에 한정됨). 이는 레지스트리에서 로컬 관리자 계정의 비밀번호 해시를 **읽기 위해** 사용되며, 이후 "**psexec**" 또는 "**wmiexec**"와 같은 도구를 해시와 함께 사용할 수 있습니다(패스-더-해시 기법). 그러나 이 기법은 두 가지 조건에서 실패합니다: 로컬 관리자 계정이 비활성화되어 있거나, 원격으로 연결하는 로컬 관리자에게 관리 권한을 제거하는 정책이 시행될 때입니다.\
 이 권한을 **악용할 수 있는 방법**은 다음과 같습니다:
 
 - [https://github.com/Hackplayers/PsCabesha-tools/blob/master/Privesc/Acl-FullControl.ps1](https://github.com/Hackplayers/PsCabesha-tools/blob/master/Privesc/Acl-FullControl.ps1)
@@ -54,29 +54,29 @@ juicypotato.md
 
 ### SeCreateTokenPrivilege
 
-SeCreateTokenPrivilege는 강력한 권한으로, 사용자가 토큰을 임시로 사용할 수 있는 능력을 가질 때 특히 유용하지만 SeImpersonatePrivilege가 없을 때도 유용합니다. 이 기능은 동일한 사용자를 나타내는 토큰을 임시로 사용할 수 있는 능력에 의존하며, 이 토큰의 무결성 수준이 현재 프로세스의 무결성 수준을 초과하지 않아야 합니다.
+SeCreateTokenPrivilege는 강력한 권한으로, 사용자가 토큰을 임시로 사용할 수 있는 능력을 가질 때 특히 유용하지만 SeImpersonatePrivilege가 없는 경우에도 유용합니다. 이 기능은 동일한 사용자를 나타내는 토큰을 임시로 사용할 수 있는 능력에 의존하며, 이 토큰의 무결성 수준이 현재 프로세스의 무결성 수준을 초과하지 않아야 합니다.
 
 **주요 사항:**
 
 - **SeImpersonatePrivilege 없이 임시 사용:** 특정 조건에서 토큰을 임시로 사용하여 EoP를 위해 SeCreateTokenPrivilege를 활용할 수 있습니다.
-- **토큰 임시 사용 조건:** 성공적인 임시 사용은 대상 토큰이 동일한 사용자에 속하고, 임시 사용을 시도하는 프로세스의 무결성 수준보다 낮거나 같아야 합니다.
+- **토큰 임시 사용 조건:** 성공적인 임시 사용은 대상 토큰이 동일한 사용자에게 속하고, 임시 사용을 시도하는 프로세스의 무결성 수준보다 낮거나 같아야 합니다.
 - **임시 토큰의 생성 및 수정:** 사용자는 임시 토큰을 생성하고 특권 그룹의 SID(보안 식별자)를 추가하여 이를 향상시킬 수 있습니다.
 
 ### SeLoadDriverPrivilege
 
-이 권한은 특정 값으로 `ImagePath`와 `Type`을 가진 레지스트리 항목을 생성하여 **장치 드라이버를 로드하고 언로드**할 수 있게 해줍니다. `HKLM` (HKEY_LOCAL_MACHINE)에 대한 직접 쓰기 접근이 제한되므로 대신 `HKCU` (HKEY_CURRENT_USER)를 사용해야 합니다. 그러나 드라이버 구성을 위해 `HKCU`가 커널에 인식되도록 하려면 특정 경로를 따라야 합니다.
+이 권한은 특정 값으로 `ImagePath` 및 `Type`을 가진 레지스트리 항목을 생성하여 **장치 드라이버를 로드하고 언로드**할 수 있도록 허용합니다. `HKLM`(HKEY_LOCAL_MACHINE)에 대한 직접 쓰기 접근이 제한되므로 대신 `HKCU`(HKEY_CURRENT_USER)를 사용해야 합니다. 그러나 드라이버 구성을 위해 `HKCU`를 커널이 인식하도록 하려면 특정 경로를 따라야 합니다.
 
 이 경로는 `\Registry\User\<RID>\System\CurrentControlSet\Services\DriverName`이며, 여기서 `<RID>`는 현재 사용자의 상대 식별자입니다. `HKCU` 내에서 이 전체 경로를 생성하고 두 값을 설정해야 합니다:
 
 - `ImagePath`, 실행할 바이너리의 경로
-- `Type`, 값은 `SERVICE_KERNEL_DRIVER` (`0x00000001`).
+- `Type`, 값은 `SERVICE_KERNEL_DRIVER`(`0x00000001`).
 
 **따라야 할 단계:**
 
 1. 제한된 쓰기 접근으로 인해 `HKLM` 대신 `HKCU`에 접근합니다.
 2. `HKCU` 내에 `\Registry\User\<RID>\System\CurrentControlSet\Services\DriverName` 경로를 생성합니다. 여기서 `<RID>`는 현재 사용자의 상대 식별자를 나타냅니다.
 3. `ImagePath`를 바이너리의 실행 경로로 설정합니다.
-4. `Type`을 `SERVICE_KERNEL_DRIVER` (`0x00000001`)로 설정합니다.
+4. `Type`을 `SERVICE_KERNEL_DRIVER`(`0x00000001`)로 할당합니다.
 ```python
 # Example Python code to set the registry values
 import winreg as reg
@@ -92,7 +92,7 @@ reg.CloseKey(key)
 
 ### SeTakeOwnershipPrivilege
 
-이는 **SeRestorePrivilege**와 유사합니다. 이 특권의 주요 기능은 프로세스가 **객체의 소유권을 가정**할 수 있도록 하여, WRITE_OWNER 접근 권한을 제공함으로써 명시적인 재량적 접근 요구 사항을 우회하는 것입니다. 이 과정은 먼저 쓰기 목적으로 의도된 레지스트리 키의 소유권을 확보한 다음, DACL을 변경하여 쓰기 작업을 가능하게 하는 것입니다.
+이는 **SeRestorePrivilege**와 유사합니다. 이 특권의 주요 기능은 프로세스가 **객체의 소유권을 가정**할 수 있도록 하여 WRITE_OWNER 접근 권한을 제공함으로써 명시적인 재량적 접근 요구 사항을 우회하는 것입니다. 이 과정은 먼저 쓰기 목적으로 의도된 레지스트리 키의 소유권을 확보한 다음, 쓰기 작업을 가능하게 하기 위해 DACL을 변경하는 것을 포함합니다.
 ```bash
 takeown /f 'C:\some\file.txt' #Now the file is owned by you
 icacls 'C:\some\file.txt' /grant <your_username>:F #Now you have full access
@@ -110,7 +110,7 @@ c:\inetpub\wwwwroot\web.config
 ```
 ### SeDebugPrivilege
 
-이 권한은 **다른 프로세스를 디버그**할 수 있게 해주며, 메모리에서 읽고 쓸 수 있습니다. 대부분의 안티바이러스 및 호스트 침입 방지 솔루션을 회피할 수 있는 다양한 메모리 주입 전략을 이 권한으로 사용할 수 있습니다.
+이 권한은 **다른 프로세스를 디버그**할 수 있게 해주며, 메모리에서 읽고 쓸 수 있습니다. 대부분의 안티바이러스 및 호스트 침입 방지 솔루션을 회피할 수 있는 메모리 주입을 위한 다양한 전략을 이 권한으로 사용할 수 있습니다.
 
 #### 메모리 덤프
 
@@ -125,7 +125,7 @@ mimikatz # sekurlsa::logonpasswords
 ```
 #### RCE
 
-`NT SYSTEM` 셸을 얻으려면 다음을 사용할 수 있습니다:
+`NT SYSTEM` 셸을 얻고 싶다면 다음을 사용할 수 있습니다:
 
 - [**SeDebugPrivilege-Exploit (C++)**](https://github.com/bruno-1337/SeDebugPrivilege-Exploit)
 - [**SeDebugPrivilegePoC (C#)**](https://github.com/daem0nc0re/PrivFu/tree/main/PrivilegedOperations/SeDebugPrivilegePoC)
@@ -138,7 +138,7 @@ import-module psgetsys.ps1; [MyProcess]::CreateProcessFromParent(<system_pid>,<c
 ```
 whoami /priv
 ```
-**비활성화된 것으로 나타나는 토큰**은 활성화할 수 있으며, 실제로 _활성화된_ 및 _비활성화된_ 토큰을 악용할 수 있습니다.
+**비활성화된 토큰**으로 나타나는 **토큰**은 활성화할 수 있으며, 실제로 _활성화된_ 및 _비활성화된_ 토큰을 악용할 수 있습니다.
 
 ### 모든 토큰 활성화
 
@@ -159,9 +159,9 @@ Full token privileges cheatsheet at [https://github.com/gtworek/Priv2Admin](http
 | **`SeBackup`**             | **Threat**  | _**Built-in commands**_ | `robocopy /b`로 민감한 파일 읽기                                                                                                                                                                                                                                                                                                             | <p>- %WINDIR%\MEMORY.DMP를 읽을 수 있다면 더 흥미로울 수 있습니다.<br><br>- <code>SeBackupPrivilege</code> (및 robocopy)는 열린 파일에 대해서는 도움이 되지 않습니다.<br><br>- Robocopy는 /b 매개변수로 작동하려면 SeBackup과 SeRestore가 모두 필요합니다.</p>                                                                      |
 | **`SeCreateToken`**        | _**Admin**_ | 3rd party tool          | `NtCreateToken`으로 로컬 관리자 권한을 포함한 임의의 토큰 생성.                                                                                                                                                                                                                                                                          |                                                                                                                                                                                                                                                                                                                                |
 | **`SeDebug`**              | _**Admin**_ | **PowerShell**          | `lsass.exe` 토큰 복제.                                                                                                                                                                                                                                                                                                                   | Script to be found at [FuzzySecurity](https://github.com/FuzzySecurity/PowerShell-Suite/blob/master/Conjure-LSASS.ps1)                                                                                                                                                                                                         |
-| **`SeLoadDriver`**         | _**Admin**_ | 3rd party tool          | <p>1. <code>szkg64.sys</code>와 같은 결함이 있는 커널 드라이버 로드<br>2. 드라이버 취약점 악용<br><br>또는, 이 권한을 사용하여 <code>ftlMC</code> 내장 명령으로 보안 관련 드라이버를 언로드할 수 있습니다. 즉: <code>fltMC sysmondrv</code></p>                                                                           | <p>1. <code>szkg64</code> 취약점은 <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-15732">CVE-2018-15732</a>로 나열되어 있습니다.<br>2. <code>szkg64</code> <a href="https://www.greyhathacker.net/?p=1025">악용 코드</a>는 <a href="https://twitter.com/parvezghh">Parvez Anwar</a>에 의해 작성되었습니다.</p> |
-| **`SeRestore`**            | _**Admin**_ | **PowerShell**          | <p>1. SeRestore 권한이 있는 PowerShell/ISE 시작.<br>2. <a href="https://github.com/gtworek/PSBits/blob/master/Misc/EnableSeRestorePrivilege.ps1">Enable-SeRestorePrivilege</a>로 권한 활성화.<br>3. utilman.exe를 utilman.old로 이름 변경<br>4. cmd.exe를 utilman.exe로 이름 변경<br>5. 콘솔 잠그고 Win+U 누르기</p> | <p>공격은 일부 AV 소프트웨어에 의해 감지될 수 있습니다.</p><p>대체 방법은 동일한 권한을 사용하여 "Program Files"에 저장된 서비스 바이너리를 교체하는 것입니다.</p>                                                                                                                                                            |
-| **`SeTakeOwnership`**      | _**Admin**_ | _**Built-in commands**_ | <p>1. <code>takeown.exe /f "%windir%\system32"</code><br>2. <code>icalcs.exe "%windir%\system32" /grant "%username%":F</code><br>3. cmd.exe를 utilman.exe로 이름 변경<br>4. 콘솔 잠그고 Win+U 누르기</p>                                                                                                                                       | <p>공격은 일부 AV 소프트웨어에 의해 감지될 수 있습니다.</p><p>대체 방법은 동일한 권한을 사용하여 "Program Files"에 저장된 서비스 바이너리를 교체하는 것입니다.</p>                                                                                                                                                           |
+| **`SeLoadDriver`**         | _**Admin**_ | 3rd party tool          | <p>1. <code>szkg64.sys</code>와 같은 결함이 있는 커널 드라이버 로드<br>2. 드라이버 취약점 악용<br><br>또는, 이 권한을 사용하여 <code>ftlMC</code> 내장 명령으로 보안 관련 드라이버를 언로드할 수 있습니다. 즉: <code>fltMC sysmondrv</code></p>                                                                           | <p>1. <code>szkg64</code> 취약점은 <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-15732">CVE-2018-15732</a>로 나열되어 있습니다.<br>2. <code>szkg64</code> <a href="https://www.greyhathacker.net/?p=1025">악용 코드</a>는 <a href="https://twitter.com/parvezghh">Parvez Anwar</a>에 의해 생성되었습니다.</p> |
+| **`SeRestore`**            | _**Admin**_ | **PowerShell**          | <p>1. SeRestore 권한이 있는 상태에서 PowerShell/ISE 시작.<br>2. <a href="https://github.com/gtworek/PSBits/blob/master/Misc/EnableSeRestorePrivilege.ps1">Enable-SeRestorePrivilege</a>로 권한 활성화.<br>3. utilman.exe를 utilman.old로 이름 변경<br>4. cmd.exe를 utilman.exe로 이름 변경<br>5. 콘솔을 잠그고 Win+U를 누릅니다.</p> | <p>공격은 일부 AV 소프트웨어에 의해 감지될 수 있습니다.</p><p>대체 방법은 동일한 권한을 사용하여 "Program Files"에 저장된 서비스 바이너리를 교체하는 것입니다.</p>                                                                                                                                                            |
+| **`SeTakeOwnership`**      | _**Admin**_ | _**Built-in commands**_ | <p>1. <code>takeown.exe /f "%windir%\system32"</code><br>2. <code>icalcs.exe "%windir%\system32" /grant "%username%":F</code><br>3. cmd.exe를 utilman.exe로 이름 변경<br>4. 콘솔을 잠그고 Win+U를 누릅니다.</p>                                                                                                                                       | <p>공격은 일부 AV 소프트웨어에 의해 감지될 수 있습니다.</p><p>대체 방법은 동일한 권한을 사용하여 "Program Files"에 저장된 서비스 바이너리를 교체하는 것입니다.</p>                                                                                                                                                           |
 | **`SeTcb`**                | _**Admin**_ | 3rd party tool          | <p>토큰을 조작하여 로컬 관리자 권한을 포함하도록 합니다. SeImpersonate가 필요할 수 있습니다.</p><p>확인 필요.</p>                                                                                                                                                                                                                                     |                                                                                                                                                                                                                                                                                                                                |
 
 ## Reference

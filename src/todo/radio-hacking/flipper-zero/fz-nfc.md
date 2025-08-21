@@ -6,6 +6,7 @@
 
 RFID 및 NFC에 대한 정보는 다음 페이지를 확인하세요:
 
+
 {{#ref}}
 ../pentesting-rfid.md
 {{#endref}}
@@ -20,7 +21,7 @@ RFID 및 NFC에 대한 정보는 다음 페이지를 확인하세요:
 - **은행 카드 (EMV)** — UID, SAK 및 ATQA만 읽고 저장하지 않습니다.
 - **알 수 없는 카드** — UID를 읽고 에뮬레이트합니다.
 
-**NFC 카드 유형 B, F 및 V**의 경우, Flipper Zero는 UID를 읽을 수 있지만 저장하지 않습니다.
+**NFC 카드 유형 B, 유형 F 및 유형 V**의 경우, Flipper Zero는 UID를 읽을 수 있지만 저장하지 않습니다.
 
 ### NFC 카드 유형 A <a href="#uvusf" id="uvusf"></a>
 
@@ -28,7 +29,7 @@ RFID 및 NFC에 대한 정보는 다음 페이지를 확인하세요:
 
 Flipper Zero는 은행 카드에서 UID, SAK, ATQA 및 저장된 데이터를 **저장하지 않고** 읽을 수 있습니다.
 
-은행 카드 읽기 화면 은행 카드의 경우, Flipper Zero는 데이터를 **저장하지 않고 에뮬레이트하지 않고** 읽을 수 있습니다.
+은행 카드 읽기 화면 은행 카드의 경우 Flipper Zero는 데이터를 **저장하지 않고 에뮬레이트하지 않고** 읽을 수 있습니다.
 
 <figure><img src="https://cdn.flipperzero.one/Monosnap_Miro_2022-08-17_12-26-31.png?auto=format&ixlib=react-9.1.1&h=916&w=2662" alt=""><figcaption></figcaption></figure>
 
@@ -36,7 +37,7 @@ Flipper Zero는 은행 카드에서 UID, SAK, ATQA 및 저장된 데이터를 **
 
 Flipper Zero가 **NFC 카드의 유형을 결정할 수 없을 때**, **UID, SAK 및 ATQA**만 **읽고 저장할 수 있습니다**.
 
-알 수 없는 카드 읽기 화면 알 수 없는 NFC 카드의 경우, Flipper Zero는 UID만 에뮬레이트할 수 있습니다.
+알 수 없는 카드 읽기 화면 Flipper Zero는 알 수 없는 NFC 카드에서 UID만 에뮬레이트할 수 있습니다.
 
 <figure><img src="https://cdn.flipperzero.one/Monosnap_Miro_2022-08-17_12-27-53.png?auto=format&ixlib=react-9.1.1&h=932&w=2634" alt=""><figcaption></figcaption></figure>
 
@@ -52,7 +53,7 @@ NFC에 대한 소개는 [**이 페이지를 읽어보세요**](../pentesting-rfi
 
 ### 읽기
 
-Flipper Zero는 **NFC 카드를 읽을 수 있지만**, ISO 14443를 기반으로 한 모든 프로토콜을 **이해하지는 못합니다**. 그러나 **UID는 저수준 속성**이기 때문에, **UID가 이미 읽혔지만 고수준 데이터 전송 프로토콜은 여전히 알 수 없는 상황**에 처할 수 있습니다. Flipper를 사용하여 UID를 읽고 에뮬레이트하며 수동으로 입력할 수 있습니다.
+Flipper Zero는 **NFC 카드를 읽을 수 있지만**, ISO 14443를 기반으로 한 모든 프로토콜을 **이해하지는 못합니다**. 그러나 **UID는 저수준 속성**이기 때문에 **UID가 이미 읽혔지만 고수준 데이터 전송 프로토콜은 여전히 ​​알 수 없는 상황에 처할 수 있습니다**. Flipper를 사용하여 UID를 읽고 에뮬레이트하며 수동으로 입력할 수 있습니다.
 
 #### UID 읽기 VS 내부 데이터 읽기 <a href="#reading-the-uid-vs-reading-the-data-inside" id="reading-the-uid-vs-reading-the-data-inside"></a>
 
@@ -69,8 +70,8 @@ Flipper Zero가 저수준 데이터에서 카드 유형을 찾을 수 없는 경
 
 #### EMV 은행 카드 (PayPass, payWave, Apple Pay, Google Pay) <a href="#emv-bank-cards-paypass-paywave-apple-pay-google-pay" id="emv-bank-cards-paypass-paywave-apple-pay-google-pay"></a>
 
-UID를 단순히 읽는 것 외에도 은행 카드에서 더 많은 데이터를 추출할 수 있습니다. **전체 카드 번호**(카드 앞면의 16자리 숫자), **유효 기간**, 그리고 경우에 따라 **소유자의 이름**과 **가장 최근 거래 목록**을 **얻을 수 있습니다**.\
-그러나 이 방법으로 **CVV를 읽을 수는 없습니다**(카드 뒷면의 3자리 숫자). 또한 **은행 카드는 재전송 공격으로부터 보호됩니다**, 따라서 Flipper로 복사한 후 이를 에뮬레이트하여 무언가를 결제하는 것은 작동하지 않습니다.
+UID를 단순히 읽는 것 외에도 은행 카드에서 더 많은 데이터를 추출할 수 있습니다. **전체 카드 번호**(카드 앞면의 16자리), **유효 기간**, 그리고 경우에 따라 **소유자의 이름**과 **가장 최근 거래 목록**을 **얻을 수 있습니다**.\
+그러나 이렇게 해서 **CVV를 읽을 수는 없습니다**(카드 뒷면의 3자리). 또한 **은행 카드는 재전송 공격으로부터 보호됩니다**, 따라서 Flipper로 복사한 후 이를 에뮬레이트하여 결제하는 것은 작동하지 않습니다.
 
 ## 참고 문헌
 

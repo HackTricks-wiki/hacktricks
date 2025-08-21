@@ -6,13 +6,14 @@
 
 **runc**에 대해 더 알고 싶다면 다음 페이지를 확인하세요:
 
+
 {{#ref}}
 ../../network-services-pentesting/2375-pentesting-docker.md
 {{#endref}}
 
 ## PE
 
-호스트에 `runc`가 설치되어 있다면 **호스트의 루트 / 폴더를 마운트하여 컨테이너를 실행할 수 있을지도 모릅니다**.
+호스트에 `runc`가 설치되어 있다면 **호스트의 루트 / 폴더를 마운트하는 컨테이너를 실행할 수 있을지도 모릅니다**.
 ```bash
 runc -help #Get help and see if runc is intalled
 runc spec #This will create the config.json file in your current folder

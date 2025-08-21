@@ -4,7 +4,7 @@
 
 **이것은 [https://specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://specterops.io/assets/resources/Certified_Pre-Owned.pdf)에서의 멋진 연구의 계정 지속성 장에 대한 간단한 요약입니다.**
 
-## 인증서로 활성 사용자 자격 증명 도난 이해하기 – PERSIST1
+## 인증서를 통한 활성 사용자 자격 증명 도난 이해 – PERSIST1
 
 사용자가 도메인 인증을 허용하는 인증서를 요청할 수 있는 시나리오에서, 공격자는 이 인증서를 요청하고 훔쳐 네트워크에서 지속성을 유지할 기회를 갖습니다. 기본적으로 Active Directory의 `User` 템플릿은 이러한 요청을 허용하지만, 때때로 비활성화될 수 있습니다.
 
@@ -32,7 +32,7 @@ Rubeus.exe asktgt /user:john /certificate:C:\Temp\cert.pfx /password:CertPass! /
 # Or with Certipy
 certipy auth -pfx user.pfx -dc-ip 10.0.0.10
 ```
-> 참고: 다른 기술과 결합하여 (THEFT 섹션 참조), 인증서 기반 인증은 LSASS에 손대지 않고 비승격 컨텍스트에서도 지속적인 접근을 허용합니다.
+> 참고: 다른 기술과 결합하여 (THEFT 섹션 참조), 인증서 기반 인증은 LSASS에 접근하지 않고도 비승격 컨텍스트에서 지속적인 접근을 허용합니다.
 
 ## 인증서를 통한 머신 지속성 확보 - PERSIST2
 
@@ -66,7 +66,7 @@ certreq -enroll -user -cert <SerialOrID> renew [reusekeys]
 고수준 흐름:
 
 1. 제어하는 클라이언트 인증서를 얻거나 발급합니다(예: `User` 템플릿에 본인으로 등록).
-2. 인증서에서 강력한 식별자를 추출합니다(발급자+일련번호, SKI 또는 SHA1-PublicKey).
+2. 인증서에서 강력한 식별자를 추출합니다(발급자+일련번호, SKI 또는 SHA1-공개키).
 3. 해당 식별자를 사용하여 피해자 주체의 `altSecurityIdentities`에 명시적 매핑을 추가합니다.
 4. 인증서로 인증합니다; DC는 이를 명시적 매핑을 통해 피해자에게 매핑합니다.
 
@@ -84,17 +84,17 @@ Set-ADUser -Identity 'victim' -Add @{altSecurityIdentities=$Map}
 ```bash
 certipy auth -pfx attacker_user.pfx -dc-ip 10.0.0.10
 ```
-Notes  
-- 강력한 매핑 유형만 사용하십시오: X509IssuerSerialNumber, X509SKI 또는 X509SHA1PublicKey. 약한 형식(Subject/Issuer, Subject-only, RFC822 이메일)은 더 이상 사용되지 않으며 DC 정책에 의해 차단될 수 있습니다.  
-- 인증서 체인은 DC에서 신뢰하는 루트로 구축되어야 합니다. NTAuth의 엔터프라이즈 CA는 일반적으로 신뢰되며, 일부 환경에서는 공용 CA도 신뢰합니다.  
+노트
+- 강력한 매핑 유형만 사용하십시오: X509IssuerSerialNumber, X509SKI 또는 X509SHA1PublicKey. 약한 형식(Subject/Issuer, Subject-only, RFC822 이메일)은 더 이상 사용되지 않으며 DC 정책에 의해 차단될 수 있습니다.
+- 인증서 체인은 DC에서 신뢰하는 루트로 구축되어야 합니다. NTAuth의 엔터프라이즈 CA는 일반적으로 신뢰되며, 일부 환경에서는 공용 CA도 신뢰합니다.
 
-약한 명시적 매핑 및 공격 경로에 대한 자세한 내용은 다음을 참조하십시오:  
+약한 명시적 매핑 및 공격 경로에 대한 자세한 내용은 다음을 참조하십시오:
 
-{{#ref}}  
-domain-escalation.md  
-{{#endref}}  
+{{#ref}}
+domain-escalation.md
+{{#endref}}
 
-## Enrollment Agent as Persistence – PERSIST5  
+## Enrollment Agent as Persistence – PERSIST5
 
 유효한 Certificate Request Agent/Enrollment Agent 인증서를 얻으면 사용자를 대신하여 새로운 로그온 가능 인증서를 마음대로 발급할 수 있으며, 에이전트 PFX를 오프라인 상태로 유지하여 지속성 토큰으로 사용할 수 있습니다. 남용 워크플로우:
 ```bash
@@ -109,7 +109,7 @@ Certify.exe request /ca:CA-SERVER\CA-NAME /template:User \
 certipy req -u 'john@corp.local' -p 'Passw0rd!' -ca 'CA-SERVER\CA-NAME' \
 -template 'User' -on-behalf-of 'CORP/victim' -pfx agent.pfx -out victim_onbo.pfx
 ```
-에이전트 인증서 또는 템플릿 권한의 폐기가 이 지속성을 제거하는 데 필요합니다.
+에이전트 인증서 또는 템플릿 권한의 취소가 이 지속성을 제거하는 데 필요합니다.
 
 ## 2025 강력한 인증서 매핑 시행: 지속성에 미치는 영향
 
@@ -119,7 +119,7 @@ Microsoft KB5014754는 도메인 컨트롤러에서 강력한 인증서 매핑 �
 - 강력한 형식(발급자+일련번호, SKI, SHA1-공개키)을 사용하는 명시적 매핑은 계속 작동합니다. 약한 형식(발급자/주체, 주체 전용, RFC822)은 차단될 수 있으며 지속성을 위해 피해야 합니다.
 
 관리자는 다음을 모니터링하고 경고해야 합니다:
-- `altSecurityIdentities`의 변경 및 등록 에이전트와 사용자 인증서의 발급/갱신.
+- `altSecurityIdentities`의 변경 및 등록 에이전트 및 사용자 인증서의 발급/갱신.
 - 대리 요청 및 비정상적인 갱신 패턴에 대한 CA 발급 로그.
 
 ## 참조

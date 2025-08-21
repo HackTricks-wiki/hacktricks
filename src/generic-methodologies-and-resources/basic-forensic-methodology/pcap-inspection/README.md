@@ -2,14 +2,14 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-> [!NOTE]
-> **PCAP**와 **PCAPNG**에 대한 주의: PCAP 파일 형식에는 두 가지 버전이 있습니다; **PCAPNG는 더 최신이며 모든 도구에서 지원되지 않습니다**. 다른 도구에서 작업하기 위해 Wireshark 또는 다른 호환 도구를 사용하여 PCAPNG에서 PCAP로 파일을 변환해야 할 수도 있습니다.
+> [!TIP]
+> **PCAP**와 **PCAPNG**에 대한 주의 사항: PCAP 파일 형식에는 두 가지 버전이 있습니다; **PCAPNG는 더 최신이며 모든 도구에서 지원되지 않습니다**. 다른 도구에서 작업하기 위해 Wireshark 또는 다른 호환 도구를 사용하여 PCAPNG에서 PCAP로 파일을 변환해야 할 수도 있습니다.
 
 ## pcaps를 위한 온라인 도구
 
 - pcap의 헤더가 **손상된** 경우 다음을 사용하여 **수정**해 보십시오: [http://f00l.de/hacking/**pcapfix.php**](http://f00l.de/hacking/pcapfix.php)
-- [**PacketTotal**](https://packettotal.com)에서 pcap 내의 **정보**를 추출하고 **악성 소프트웨어**를 검색하십시오.
-- [**www.virustotal.com**](https://www.virustotal.com) 및 [**www.hybrid-analysis.com**](https://www.hybrid-analysis.com)에서 **악성 활동**을 검색하십시오.
+- [**PacketTotal**](https://packettotal.com)에서 pcap 내부의 **정보**를 추출하고 **악성 소프트웨어**를 검색하십시오.
+- [**www.virustotal.com**](https://www.virustotal.com) 및 [**www.hybrid-analysis.com**](https://www.hybrid-analysis.com)에서 **악의적인 활동**을 검색하십시오.
 - [**https://apackets.com/**](https://apackets.com/)에서 **브라우저에서 전체 pcap 분석**을 수행하십시오.
 
 ## 정보 추출
@@ -18,7 +18,7 @@
 
 ### Wireshark
 
-> [!NOTE]
+> [!TIP]
 > **PCAP을 분석하려면 기본적으로 Wireshark를 사용하는 방법을 알아야 합니다.**
 
 다음에서 Wireshark 팁을 찾을 수 있습니다:
@@ -54,7 +54,7 @@ _**127.0.0.1:9876**_에 _**xplico:xplico**_ 자격 증명으로 접근합니다.
 ### NetworkMiner
 
 Xplico와 마찬가지로 **pcap에서 객체를 분석하고 추출하는** 도구입니다. 무료 버전이 있으며, [**여기서 다운로드**](https://www.netresec.com/?page=NetworkMiner)할 수 있습니다. **Windows**에서 작동합니다.\
-이 도구는 패킷에서 **분석된 다른 정보를 얻는 데** 유용하여 **더 빠르게** 무슨 일이 일어나고 있는지 알 수 있습니다.
+이 도구는 패킷에서 **분석된 다른 정보를** 얻는 데도 유용하여 **더 빠르게** 무슨 일이 일어나고 있는지 알 수 있습니다.
 
 ### NetWitness Investigator
 
@@ -63,7 +63,7 @@ Xplico와 마찬가지로 **pcap에서 객체를 분석하고 추출하는** 도
 
 ### [BruteShark](https://github.com/odedshimon/BruteShark)
 
-- 사용자 이름과 비밀번호 추출 및 인코딩 (HTTP, FTP, Telnet, IMAP, SMTP...)
+- 사용자 이름 및 비밀번호 추출 및 인코딩 (HTTP, FTP, Telnet, IMAP, SMTP...)
 - 인증 해시 추출 및 Hashcat을 사용하여 크랙 (Kerberos, NTLM, CRAM-MD5, HTTP-Digest...)
 - 시각적 네트워크 다이어그램 구축 (네트워크 노드 및 사용자)
 - DNS 쿼리 추출
@@ -84,6 +84,7 @@ ngrep -I packets.pcap "^GET" "port 80 and tcp and host 192.168 and dst host 192.
 
 일반적인 카빙 기술을 사용하면 pcap에서 파일과 정보를 추출하는 데 유용할 수 있습니다:
 
+
 {{#ref}}
 ../partitions-file-systems-carving/file-data-carving-recovery-tools.md
 {{#endref}}
@@ -96,7 +97,7 @@ pcap 또는 라이브 인터페이스에서 자격 증명을 구문 분석하기
 
 ### Suricata
 
-**설치 및 설정**
+**Install and setup**
 ```
 apt-get install suricata
 apt-get install oinkmaster
@@ -113,7 +114,7 @@ suricata -r packets.pcap -c /etc/suricata/suricata.yaml -k none -v -l log
 
 - PCAP 파일을 읽고 Http 스트림을 추출합니다.
 - gzip으로 압축된 스트림을 해제합니다.
-- 모든 파일을 yara로 스캔합니다.
+- yara로 모든 파일을 스캔합니다.
 - report.txt를 작성합니다.
 - 선택적으로 일치하는 파일을 디렉토리에 저장합니다.
 
@@ -127,7 +128,7 @@ suricata -r packets.pcap -c /etc/suricata/suricata.yaml -k none -v -l log
 
 ## Zeek
 
-> [Zeek](https://docs.zeek.org/en/master/about.html)는 수동 오픈 소스 네트워크 트래픽 분석기입니다. 많은 운영자들이 Zeek를 네트워크 보안 모니터(NSM)로 사용하여 의심스러운 또는 악의적인 활동에 대한 조사를 지원합니다. Zeek는 보안 도메인을 넘어 성능 측정 및 문제 해결을 포함한 다양한 트래픽 분석 작업도 지원합니다.
+> [Zeek](https://docs.zeek.org/en/master/about.html)은 수동적이고 오픈 소스인 네트워크 트래픽 분석기입니다. 많은 운영자들이 Zeek을 네트워크 보안 모니터(NSM)로 사용하여 의심스러운 또는 악의적인 활동에 대한 조사를 지원합니다. Zeek은 보안 도메인을 넘어 성능 측정 및 문제 해결을 포함한 다양한 트래픽 분석 작업을 지원합니다.
 
 기본적으로 `zeek`에 의해 생성된 로그는 **pcap**이 아닙니다. 따라서 **pcap**에 대한 **정보**가 포함된 로그를 분석하기 위해 **다른 도구**를 사용해야 합니다.
 
@@ -200,13 +201,16 @@ rita show-exploded-dns -H --limit 10 zeek_logs
 ```
 ## 다른 pcap 분석 팁
 
+
 {{#ref}}
 dnscat-exfiltration.md
 {{#endref}}
 
+
 {{#ref}}
 wifi-pcap-analysis.md
 {{#endref}}
+
 
 {{#ref}}
 usb-keystrokes.md

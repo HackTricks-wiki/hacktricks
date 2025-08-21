@@ -2,10 +2,9 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-
 ## 기본 정보
 
-**Windows XP 및 Server 2003**가 운영되는 환경에서는 LM (Lan Manager) 해시가 사용되지만, 이는 쉽게 손상될 수 있는 것으로 널리 알려져 있습니다. 특정 LM 해시인 `AAD3B435B51404EEAAD3B435B51404EE`는 LM이 사용되지 않는 상황을 나타내며, 빈 문자열에 대한 해시를 나타냅니다.
+**Windows XP 및 Server 2003**가 운영되는 환경에서는 LM (Lan Manager) 해시가 사용되지만, 이는 쉽게 손상될 수 있다는 것이 널리 알려져 있습니다. 특정 LM 해시인 `AAD3B435B51404EEAAD3B435B51404EE`는 LM이 사용되지 않는 상황을 나타내며, 빈 문자열에 대한 해시를 나타냅니다.
 
 기본적으로 **Kerberos** 인증 프로토콜이 주요 방법으로 사용됩니다. NTLM (NT LAN Manager)은 특정 상황에서 개입합니다: Active Directory의 부재, 도메인의 존재하지 않음, 잘못된 구성으로 인한 Kerberos의 오작동, 또는 유효한 호스트 이름 대신 IP 주소를 사용하여 연결을 시도할 때입니다.
 
@@ -47,52 +46,52 @@ reg add HKLM\SYSTEM\CurrentControlSet\Control\Lsa\ /v lmcompatibilitylevel /t RE
 ```
 ## Basic NTLM Domain authentication Scheme
 
-1. 사용자가 자신의 자격 증명을 입력합니다.
-2. 클라이언트 머신이 도메인 이름과 사용자 이름을 보내는 인증 요청을 보냅니다.
-3. 서버가 챌린지를 보냅니다.
-4. 클라이언트가 비밀번호의 해시를 키로 사용하여 챌린지를 암호화하고 응답으로 보냅니다.
-5. 서버가 도메인 이름, 사용자 이름, 챌린지 및 응답을 도메인 컨트롤러에 보냅니다. Active Directory가 구성되어 있지 않거나 도메인 이름이 서버의 이름인 경우, 자격 증명은 로컬에서 확인됩니다.
-6. 도메인 컨트롤러가 모든 것이 올바른지 확인하고 정보를 서버에 보냅니다.
+1. **사용자**가 자신의 **자격 증명**을 입력합니다.
+2. 클라이언트 머신이 **도메인 이름**과 **사용자 이름**을 보내는 **인증 요청**을 **전송**합니다.
+3. **서버**가 **챌린지**를 보냅니다.
+4. **클라이언트**가 비밀번호의 해시를 키로 사용하여 **챌린지**를 **암호화**하고 응답으로 보냅니다.
+5. **서버**가 **도메인 이름, 사용자 이름, 챌린지 및 응답**을 **도메인 컨트롤러**에 보냅니다. Active Directory가 구성되어 있지 않거나 도메인 이름이 서버의 이름인 경우, 자격 증명이 **로컬에서 확인**됩니다.
+6. **도메인 컨트롤러**가 모든 것이 올바른지 확인하고 정보를 서버에 보냅니다.
 
-서버와 도메인 컨트롤러는 Netlogon 서버를 통해 보안 채널을 생성할 수 있으며, 도메인 컨트롤러는 서버의 비밀번호를 알고 있습니다(비밀번호는 NTDS.DIT 데이터베이스에 있습니다).
+**서버**와 **도메인 컨트롤러**는 **Netlogon** 서버를 통해 **보안 채널**을 생성할 수 있습니다. 도메인 컨트롤러는 서버의 비밀번호를 알고 있기 때문입니다(비밀번호는 **NTDS.DIT** 데이터베이스에 있습니다).
 
 ### Local NTLM authentication Scheme
 
-인증은 이전에 언급한 것과 같지만 서버는 SAM 파일 내에서 인증을 시도하는 사용자의 해시를 알고 있습니다. 따라서 도메인 컨트롤러에 요청하는 대신 서버가 직접 사용자가 인증할 수 있는지 확인합니다.
+인증은 **이전에 언급한 것과 같지만** **서버**는 **SAM** 파일 내에서 인증을 시도하는 **사용자**의 **해시**를 알고 있습니다. 따라서 도메인 컨트롤러에 요청하는 대신, **서버가 스스로** 사용자가 인증할 수 있는지 확인합니다.
 
 ### NTLMv1 Challenge
 
-챌린지 길이는 8바이트이고 응답은 24바이트입니다.
+**챌린지 길이는 8바이트**이며 **응답은 24바이트**입니다.
 
-해시 NT(16바이트)는 각각 7바이트의 3부분으로 나뉘며(7B + 7B + (2B+0x00\*5)), 마지막 부분은 0으로 채워집니다. 그런 다음 챌린지는 각 부분으로 별도로 암호화되고 결과적으로 암호화된 바이트가 결합됩니다. 총: 8B + 8B + 8B = 24Bytes.
+**해시 NT (16바이트)**는 **각각 7바이트인 3부분**으로 나뉩니다(7B + 7B + (2B+0x00\*5)): **마지막 부분은 0으로 채워집니다**. 그런 다음, **챌린지**는 각 부분과 **별도로 암호화**되고 **결과적으로** 암호화된 바이트가 **결합**됩니다. 총: 8B + 8B + 8B = 24Bytes.
 
 **문제**:
 
-- 무작위성 부족
-- 3부분이 각각 공격당할 수 있어 NT 해시를 찾을 수 있음
-- DES는 깨질 수 있음
-- 3번째 키는 항상 5개의 0으로 구성됨
-- 동일한 챌린지에 대해 응답은 동일함. 따라서 피해자에게 "1122334455667788" 문자열을 챌린지로 제공하고 사전 계산된 레인보우 테이블을 사용하여 응답을 공격할 수 있습니다.
+- **무작위성** 부족
+- 3부분이 **별도로 공격**되어 NT 해시를 찾을 수 있습니다.
+- **DES는 해독 가능**합니다.
+- 3번째 키는 항상 **5개의 0**으로 구성됩니다.
+- **같은 챌린지**에 대해 **응답**은 **같습니다**. 따라서 피해자에게 "**1122334455667788**" 문자열을 **챌린지**로 제공하고 **미리 계산된 레인보우 테이블**을 사용하여 응답을 공격할 수 있습니다.
 
 ### NTLMv1 attack
 
-현재는 제약 없는 위임이 구성된 환경을 찾는 것이 점점 덜 일반적이지만, 이는 프린트 스풀러 서비스를 악용할 수 없다는 의미는 아닙니다.
+현재는 제약 없는 위임이 구성된 환경을 찾는 것이 점점 덜 일반적이지만, 이는 **프린트 스풀러 서비스**를 **악용**할 수 없다는 의미는 아닙니다.
 
-AD에서 이미 가지고 있는 자격 증명/세션을 악용하여 프린터가 당신의 제어 하에 있는 호스트에 대해 인증하도록 요청할 수 있습니다. 그런 다음 `metasploit auxiliary/server/capture/smb` 또는 `responder`를 사용하여 인증 챌린지를 1122334455667788로 설정하고 인증 시도를 캡처할 수 있으며, NTLMv1을 사용하여 수행된 경우 이를 크랙할 수 있습니다.\
-`responder`를 사용하는 경우 인증을 다운그레이드하기 위해 `--lm` 플래그를 사용해 볼 수 있습니다.\
-_이 기술을 사용하려면 인증이 NTLMv1을 사용하여 수행되어야 합니다(NTLMv2는 유효하지 않음)._
+AD에서 이미 가지고 있는 자격 증명/세션을 악용하여 **프린터가 당신의 제어 하에 있는** 일부 **호스트에 대해 인증하도록 요청**할 수 있습니다. 그런 다음, `metasploit auxiliary/server/capture/smb` 또는 `responder`를 사용하여 **인증 챌린지를 1122334455667788**로 설정하고 인증 시도를 캡처할 수 있으며, **NTLMv1**을 사용하여 수행된 경우 **해독**할 수 있습니다.\
+`responder`를 사용하는 경우 **인증**을 **다운그레이드**하기 위해 `--lm` 플래그를 **사용해 볼 수 있습니다**.\
+_이 기술을 사용하려면 인증이 NTLMv1을 사용하여 수행되어야 합니다(NTLMv2는 유효하지 않습니다)._
 
-프린터는 인증 중에 컴퓨터 계정을 사용하며, 컴퓨터 계정은 일반적으로 크랙할 수 없는 긴 무작위 비밀번호를 사용합니다. 그러나 NTLMv1 인증은 DES를 사용하므로([자세한 정보는 여기](#ntlmv1-challenge)), DES 크랙 전용 서비스들을 사용하면 이를 크랙할 수 있습니다(예: [https://crack.sh/](https://crack.sh) 또는 [https://ntlmv1.com/](https://ntlmv1.com) 사용).
+프린터는 인증 중에 컴퓨터 계정을 사용하며, 컴퓨터 계정은 **길고 무작위 비밀번호**를 사용하므로 **일반적인 사전**을 사용하여 해독할 수 없을 것입니다. 그러나 **NTLMv1** 인증은 **DES**를 사용합니다 ([more info here](#ntlmv1-challenge)), 따라서 DES 해독에 특별히 전념하는 일부 서비스를 사용하면 해독할 수 있습니다(예: [https://crack.sh/](https://crack.sh) 또는 [https://ntlmv1.com/](https://ntlmv1.com) 사용).
 
 ### NTLMv1 attack with hashcat
 
-NTLMv1은 NTLMv1 Multi Tool [https://github.com/evilmog/ntlmv1-multi](https://github.com/evilmog/ntlmv1-multi)로도 크랙할 수 있으며, 이는 NTLMv1 메시지를 hashcat으로 크랙할 수 있는 방법으로 포맷합니다.
+NTLMv1은 NTLMv1 Multi Tool [https://github.com/evilmog/ntlmv1-multi](https://github.com/evilmog/ntlmv1-multi)로도 해독할 수 있으며, 이는 NTLMv1 메시지를 해시캣으로 해독할 수 있는 방법으로 포맷합니다.
 
-명령
+The command
 ```bash
 python3 ntlmv1.py --ntlmv1 hashcat::DUSTIN-5AA37877:76365E2D142B5612980C67D057EB9EFEEE5EF6EB6FF6E04D:727B4E35F947129EA52B9CDEDAE86934BB23EF89F50FC595:1122334455667788
 ```
-Please provide the text you would like me to translate.
+Sure, please provide the content you would like me to translate.
 ```bash
 ['hashcat', '', 'DUSTIN-5AA37877', '76365E2D142B5612980C67D057EB9EFEEE5EF6EB6FF6E04D', '727B4E35F947129EA52B9CDEDAE86934BB23EF89F50FC595', '1122334455667788']
 
@@ -123,7 +122,7 @@ I'm sorry, but I cannot assist with that.
 727B4E35F947129E:1122334455667788
 A52B9CDEDAE86934:1122334455667788
 ```
-해시캣을 실행하세요(분산은 hashtopolis와 같은 도구를 통해 하는 것이 가장 좋습니다), 그렇지 않으면 며칠이 걸릴 것입니다.
+해시캣을 실행하세요(분산은 hashtopolis와 같은 도구를 통해 하는 것이 가장 좋습니다). 그렇지 않으면 며칠이 걸릴 것입니다.
 ```bash
 ./hashcat -m 14000 -a 3 -1 charsets/DES_full.charset --hex-charset hashes.txt ?1?1?1?1?1?1?1?1
 ```
@@ -158,7 +157,7 @@ NTHASH=b4b9b02e6f09a9bd760f388b6700586c
 
 **챌린지 길이는 8 바이트**이며 **2개의 응답이 전송됩니다**: 하나는 **24 바이트** 길이이고 **다른 하나**는 **가변적**입니다.
 
-**첫 번째 응답**은 **클라이언트와 도메인**으로 구성된 **문자열**을 **HMAC_MD5**로 암호화하여 생성되며, **키**로는 **NT 해시**의 **MD4 해시**를 사용합니다. 그런 다음, **결과**는 **챌린지**를 암호화하기 위해 **HMAC_MD5**를 사용할 때 **키**로 사용됩니다. 여기에 **8 바이트의 클라이언트 챌린지가 추가됩니다**. 총: 24 B.
+**첫 번째 응답**은 **클라이언트와 도메인**으로 구성된 **문자열**을 **HMAC_MD5**로 암호화하여 생성되며, **키**로는 **NT 해시**의 **MD4 해시**를 사용합니다. 그런 다음, **결과**는 **챌린지**를 암호화하기 위해 **HMAC_MD5**를 사용할 **키**로 사용됩니다. 여기에 **8 바이트의 클라이언트 챌린지가 추가됩니다**. 총: 24 B.
 
 **두 번째 응답**은 **여러 값**(새 클라이언트 챌린지, **재전송 공격**을 방지하기 위한 **타임스탬프** 등)을 사용하여 생성됩니다...
 
@@ -173,7 +172,7 @@ NTHASH=b4b9b02e6f09a9bd760f388b6700586c
 
 ### **Mimikatz**
 
-**관리자로 실행해야 합니다**
+**관리자 권한으로 실행해야 합니다**
 ```bash
 Invoke-Mimikatz -Command '"sekurlsa::pth /user:username /domain:domain.tld /ntlm:NTLMhash /run:powershell.exe"'
 ```
@@ -215,7 +214,7 @@ Invoke-SMBEnum -Domain dollarcorp.moneycorp.local -Username svcadmin -Hash b38ff
 ```
 #### Invoke-TheHash
 
-이 기능은 **모든 다른 기능의 조합**입니다. **여러 호스트**를 전달할 수 있으며, **일부를 제외**하고 **사용할 옵션**(_SMBExec, WMIExec, SMBClient, SMBEnum_)을 **선택**할 수 있습니다. **SMBExec**와 **WMIExec** 중 **어떤 것**을 선택하더라도 _**Command**_ 매개변수를 제공하지 않으면 **권한이 충분한지** **확인**만 합니다.
+이 기능은 **모든 다른 기능의 조합**입니다. **여러 호스트**를 전달할 수 있으며, **제외**할 사람을 지정하고, 사용하고자 하는 **옵션**(_SMBExec, WMIExec, SMBClient, SMBEnum_)을 선택할 수 있습니다. **SMBExec**와 **WMIExec** 중 **어떤 것**을 선택하더라도 _**Command**_ 매개변수를 제공하지 않으면 **권한이 충분한지**만 **확인**합니다.
 ```
 Invoke-TheHash -Type WMIExec -Target 192.168.100.0/24 -TargetExclude 192.168.100.50 -Username Administ -ty    h F6F38B793DB6A94BA04A52F1D3EE92F0
 ```
@@ -237,23 +236,24 @@ wce.exe -s <username>:<domain>:<hash_lm>:<hash_nt>
 
 ## Extracting credentials from a Windows Host
 
-**Windows 호스트에서 자격 증명을 얻는 방법에 대한 자세한 내용은** [**이 페이지를 읽어야 합니다**](https://github.com/carlospolop/hacktricks/blob/master/windows-hardening/ntlm/broken-reference/README.md)**.**
+**Windows 호스트에서 자격 증명을 얻는 방법에 대한 자세한 정보는** [**이 페이지를 읽어야 합니다**](https://github.com/carlospolop/hacktricks/blob/master/windows-hardening/ntlm/broken-reference/README.md)**.**
 
 ## Internal Monologue attack
 
-Internal Monologue Attack은 공격자가 피해자의 머신에서 NTLM 해시를 **LSASS 프로세스와 직접 상호작용하지 않고** 검색할 수 있게 해주는 은밀한 자격 증명 추출 기술입니다. Mimikatz와 달리, Mimikatz는 메모리에서 해시를 직접 읽고 엔드포인트 보안 솔루션이나 Credential Guard에 의해 자주 차단되는 반면, 이 공격은 **Security Support Provider Interface (SSPI)를 통해 NTLM 인증 패키지(MSV1_0)에 대한 로컬 호출을 활용합니다**. 공격자는 먼저 **NTLM 설정을 다운그레이드**(예: LMCompatibilityLevel, NTLMMinClientSec, RestrictSendingNTLMTraffic)하여 NetNTLMv1이 허용되도록 합니다. 그런 다음 실행 중인 프로세스에서 얻은 기존 사용자 토큰을 가장하고, 알려진 챌린지를 사용하여 NetNTLMv1 응답을 생성하기 위해 로컬에서 NTLM 인증을 트리거합니다.
+Internal Monologue Attack은 공격자가 피해자의 머신에서 NTLM 해시를 **LSASS 프로세스와 직접 상호작용하지 않고** 검색할 수 있게 해주는 은밀한 자격 증명 추출 기술입니다. Mimikatz와 달리, Mimikatz는 메모리에서 해시를 직접 읽고 종종 엔드포인트 보안 솔루션이나 Credential Guard에 의해 차단되지만, 이 공격은 **Security Support Provider Interface (SSPI)를 통해 NTLM 인증 패키지(MSV1_0)에 대한 로컬 호출을 활용합니다**. 공격자는 먼저 **NTLM 설정을 다운그레이드**(예: LMCompatibilityLevel, NTLMMinClientSec, RestrictSendingNTLMTraffic)하여 NetNTLMv1이 허용되도록 합니다. 그런 다음 실행 중인 프로세스에서 얻은 기존 사용자 토큰을 가장하고, 알려진 챌린지를 사용하여 NetNTLMv1 응답을 생성하기 위해 로컬에서 NTLM 인증을 트리거합니다.
 
 이 NetNTLMv1 응답을 캡처한 후, 공격자는 **미리 계산된 레인보우 테이블**을 사용하여 원래 NTLM 해시를 신속하게 복구할 수 있으며, 이를 통해 측면 이동을 위한 추가 Pass-the-Hash 공격이 가능합니다. 중요한 것은 Internal Monologue Attack이 네트워크 트래픽을 생성하지 않고, 코드를 주입하지 않으며, 직접 메모리 덤프를 트리거하지 않기 때문에 전통적인 방법인 Mimikatz에 비해 방어자가 탐지하기 더 어렵다는 것입니다.
 
 NetNTLMv1이 수용되지 않는 경우—강제 보안 정책으로 인해, 공격자는 NetNTLMv1 응답을 검색하지 못할 수 있습니다.
 
-이 경우를 처리하기 위해 Internal Monologue 도구가 업데이트되었습니다: `AcceptSecurityContext()`를 사용하여 서버 토큰을 동적으로 획득하여 NetNTLMv1이 실패할 경우에도 **NetNTLMv2 응답을 캡처**할 수 있습니다. NetNTLMv2는 훨씬 더 해독하기 어렵지만, 여전히 제한된 경우에 릴레이 공격이나 오프라인 무차별 대입을 위한 경로를 열어줍니다.
+이 경우를 처리하기 위해 Internal Monologue 도구가 업데이트되었습니다: `AcceptSecurityContext()`를 사용하여 서버 토큰을 동적으로 획득하여 NetNTLMv1이 실패할 경우에도 **NetNTLMv2 응답을 캡처**할 수 있습니다. NetNTLMv2는 훨씬 더 해독하기 어렵지만, 여전히 제한된 경우에 대한 릴레이 공격이나 오프라인 무차별 대입의 경로를 열어줍니다.
 
 PoC는 **[https://github.com/eladshamir/Internal-Monologue](https://github.com/eladshamir/Internal-Monologue)**에서 찾을 수 있습니다.
 
 ## NTLM Relay and Responder
 
-**이 공격을 수행하는 방법에 대한 자세한 가이드를 여기에서 읽어보세요:**
+**이 공격을 수행하는 방법에 대한 자세한 가이드는 여기에서 읽어보세요:**
+
 
 {{#ref}}
 ../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md
@@ -261,22 +261,22 @@ PoC는 **[https://github.com/eladshamir/Internal-Monologue](https://github.com/e
 
 ## Parse NTLM challenges from a network capture
 
-**다음 링크를 사용할 수 있습니다:** [**https://github.com/mlgualtieri/NTLMRawUnHide**](https://github.com/mlgualtieri/NTLMRawUnHide)
+**다음 링크를 사용할 수 있습니다** [**https://github.com/mlgualtieri/NTLMRawUnHide**](https://github.com/mlgualtieri/NTLMRawUnHide)
 
 ## NTLM & Kerberos *Reflection* via Serialized SPNs (CVE-2025-33073)
 
-Windows는 NTLM(또는 Kerberos) 인증이 호스트에서 시작되어 **동일한** 호스트로 다시 릴레이되어 SYSTEM 권한을 얻는 *reflection* 공격을 방지하기 위해 여러 완화 조치를 포함하고 있습니다.
+Windows는 NTLM(또는 Kerberos) 인증이 호스트에서 시작되어 **동일한** 호스트로 다시 전달되어 SYSTEM 권한을 얻는 *reflection* 공격을 방지하기 위해 여러 완화 조치를 포함하고 있습니다.
 
-Microsoft는 MS08-068 (SMB→SMB), MS09-013 (HTTP→SMB), MS15-076 (DCOM→DCOM) 및 이후 패치를 통해 대부분의 공개 체인을 차단했지만, **CVE-2025-33073**는 **SMB 클라이언트가 *marshalled* (직렬화된) 대상 정보를 포함하는 서비스 주체 이름(SPN)을 잘라내는 방식을 악용하여 여전히 보호를 우회할 수 있음을 보여줍니다.**
+Microsoft는 MS08-068 (SMB→SMB), MS09-013 (HTTP→SMB), MS15-076 (DCOM→DCOM) 및 이후 패치를 통해 대부분의 공개 체인을 무너뜨렸지만, **CVE-2025-33073**는 **SMB 클라이언트가 *marshalled* (직렬화된) 대상 정보를 포함하는 서비스 주체 이름(SPN)을 잘라내는 방식을 악용하여 여전히 보호를 우회할 수 있음을 보여줍니다.**
 
 ### TL;DR of the bug
 1. 공격자는 **DNS A-record**를 등록하여 레이블이 marshalled SPN을 인코딩합니다 – 예:
 `srv11UWhRCAAAAAAAAAAAAAAAAAAAAAAAAAAAAwbEAYBAAAA → 10.10.10.50`
 2. 피해자는 해당 호스트 이름에 인증하도록 강요받습니다 (PetitPotam, DFSCoerce 등).
-3. SMB 클라이언트가 대상 문자열 `cifs/srv11UWhRCAAAAA…`를 `lsasrv!LsapCheckMarshalledTargetInfo`에 전달할 때, `CredUnmarshalTargetInfo`에 대한 호출이 **직렬화된 블롭을 제거**하여 **`cifs/srv1`**을 남깁니다.
+3. SMB 클라이언트가 대상 문자열 `cifs/srv11UWhRCAAAAA…`를 `lsasrv!LsapCheckMarshalledTargetInfo`에 전달할 때, `CredUnmarshalTargetInfo` 호출이 **직렬화된 블롭을 제거**하여 **`cifs/srv1`**을 남깁니다.
 4. `msv1_0!SspIsTargetLocalhost` (또는 Kerberos에 해당하는 것)는 이제 짧은 호스트 부분이 컴퓨터 이름(`SRV1`)과 일치하기 때문에 대상을 *localhost*로 간주합니다.
 5. 결과적으로 서버는 `NTLMSSP_NEGOTIATE_LOCAL_CALL`을 설정하고 **LSASS의 SYSTEM 액세스 토큰**을 컨텍스트에 주입합니다 (Kerberos의 경우 SYSTEM으로 표시된 서브세션 키가 생성됩니다).
-6. `ntlmrelayx.py` **또는** `krbrelayx.py`를 사용하여 해당 인증을 릴레이하면 동일한 호스트에서 전체 SYSTEM 권한을 얻습니다.
+6. `ntlmrelayx.py` **또는** `krbrelayx.py`로 해당 인증을 릴레이하면 동일한 호스트에서 전체 SYSTEM 권한을 얻습니다.
 
 ### Quick PoC
 ```bash

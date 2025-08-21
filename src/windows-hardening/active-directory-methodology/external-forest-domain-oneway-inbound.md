@@ -1,12 +1,12 @@
-# 외부 포리스트 도메인 - 일방향 (수신) 또는 양방향
+# External Forest Domain - OneWay (Inbound) or bidirectional
 
 {{#include ../../banners/hacktricks-training.md}}
 
-이 시나리오에서 외부 도메인은 당신을 신뢰하고 있습니다 (또는 두 도메인이 서로를 신뢰하고 있습니다), 따라서 당신은 그에 대한 어떤 형태의 접근 권한을 얻을 수 있습니다.
+이 시나리오에서 외부 도메인은 당신을 신뢰하고 있습니다(또는 두 도메인이 서로를 신뢰하고 있습니다), 따라서 당신은 그에 대한 어떤 형태의 접근 권한을 얻을 수 있습니다.
 
-## 열거
+## Enumeration
 
-우선, **신뢰**를 **열거**해야 합니다:
+우선, **trust**를 **enumerate**해야 합니다:
 ```bash
 Get-DomainTrust
 SourceName      : a.domain.local   --> Current domain
@@ -78,14 +78,14 @@ Get-DomainUser -SPN -Domain domain_name.local | select SamAccountName
 ```bash
 Enter-PSSession -ComputerName dc.external_domain.local -Credential domain\administrator
 ```
-### SID History 남용
+### SID History Abuse
 
-당신은 또한 숲 신뢰를 가로질러 [**SID History**](sid-history-injection.md)를 남용할 수 있습니다.
+당신은 또한 [**SID History**](sid-history-injection.md)를 포리스트 트러스트를 통해 악용할 수 있습니다.
 
-사용자가 **한 숲에서 다른 숲으로** 마이그레이션되고 **SID 필터링이 활성화되지 않은 경우**, **다른 숲의 SID를 추가하는** 것이 가능해지며, 이 **SID**는 **신뢰를 가로질러 인증할 때** **사용자의 토큰**에 **추가**됩니다.
+사용자가 **한 포리스트에서 다른 포리스트로** 마이그레이션되고 **SID 필터링이 활성화되지 않은 경우**, **다른 포리스트의 SID**를 **추가하는 것이 가능**해지며, 이 **SID**는 **트러스트를 통해 인증할 때** **사용자의 토큰**에 **추가**됩니다.
 
 > [!WARNING]
-> 참고로, 서명 키를 얻으려면
+> 상기 사항으로, 서명 키를 얻는 방법은 다음과 같습니다.
 >
 > ```bash
 > Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.domain.local

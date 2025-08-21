@@ -50,7 +50,7 @@ curl -L https://ghst.ly/getbhce | docker compose -f - up
 * `AzureHound` – Azure AD 열거
 * **SoaPy + BOFHound** – ADWS 수집 (상단의 링크 참조)
 
-#### 일반적인 SharpHound 모드
+#### 일반 SharpHound 모드
 ```powershell
 SharpHound.exe --CollectionMethods All           # Full sweep (noisy)
 SharpHound.exe --CollectionMethods Group,LocalAdmin,Session,Trusts,ACL
@@ -71,7 +71,7 @@ Group3r.exe -f gpo.log   # -s to stdout
 
 ## PingCastle
 
-[PingCastle](https://www.pingcastle.com/documentation/)는 Active Directory의 **건강 점검**을 수행하고 위험 점수가 포함된 HTML 보고서를 생성합니다.
+[PingCastle](https://www.pingcastle.com/documentation/)는 Active Directory의 **건강 점검**을 수행하고 위험 점수를 포함한 HTML 보고서를 생성합니다.
 ```powershell
 PingCastle.exe --healthcheck --server corp.local --user bob --password "P@ssw0rd!"
 ```

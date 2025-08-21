@@ -14,7 +14,7 @@
 # Allow members of group admin to execute any command
 %admin 	ALL=(ALL:ALL) ALL
 ```
-이것은 **sudo 또는 admin 그룹에 속한 모든 사용자가 sudo로 무엇이든 실행할 수 있다는 것을 의미합니다**.
+이것은 **sudo 또는 admin 그룹에 속한 모든 사용자가 sudo로 무엇이든 실행할 수 있음을 의미합니다**.
 
 이 경우, **root가 되려면 다음을 실행하면 됩니다**:
 ```
@@ -27,7 +27,7 @@ sudo su
 find / -perm -4000 2>/dev/null
 ```
 이진 파일 **pkexec가 SUID 이진 파일**이고 **sudo** 또는 **admin** 그룹에 속한다면, `pkexec`를 사용하여 sudo로 이진 파일을 실행할 수 있습니다.\
-이는 일반적으로 이러한 그룹이 **polkit 정책** 내에 있기 때문입니다. 이 정책은 기본적으로 어떤 그룹이 `pkexec`를 사용할 수 있는지를 식별합니다. 다음을 사용하여 확인하십시오:
+이는 일반적으로 이러한 그룹이 **polkit 정책** 내에 있기 때문입니다. 이 정책은 기본적으로 어떤 그룹이 `pkexec`를 사용할 수 있는지를 식별합니다. 다음을 사용하여 확인하세요:
 ```bash
 cat /etc/polkit-1/localauthority.conf.d/*
 ```
@@ -76,9 +76,9 @@ So, read the file and try to **crack some hashes**.
 
 ## Staff Group
 
-**staff**: 사용자가 루트 권한 없이 시스템에 대한 로컬 수정을 추가할 수 있도록 허용합니다 (`/usr/local`). `/usr/local/bin`의 실행 파일은 모든 사용자의 PATH 변수에 포함되어 있으며, 동일한 이름의 `/bin` 및 `/usr/bin`의 실행 파일을 "덮어쓸" 수 있습니다. 모니터링/보안과 더 관련된 "adm" 그룹과 비교하십시오. [\[source\]](https://wiki.debian.org/SystemGroups)
+**staff**: 사용자가 루트 권한 없이 시스템에 로컬 수정을 추가할 수 있도록 허용합니다 (`/usr/local`). `/usr/local/bin`의 실행 파일은 모든 사용자의 PATH 변수에 포함되어 있으며, 동일한 이름의 `/bin` 및 `/usr/bin`의 실행 파일을 "덮어쓸" 수 있습니다. 모니터링/보안과 더 관련된 "adm" 그룹과 비교하십시오. [\[source\]](https://wiki.debian.org/SystemGroups)
 
-debian 배포판에서, `$PATH` 변수는 `/usr/local/`가 우선적으로 실행될 것임을 보여줍니다, 권한이 있는 사용자이든 아니든 상관없이.
+debian 배포판에서 `$PATH` 변수는 `/usr/local/`가 우선적으로 실행된다는 것을 보여줍니다.
 ```bash
 $ echo $PATH
 /usr/local/sbin:/usr/sbin:/sbin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games
@@ -86,9 +86,9 @@ $ echo $PATH
 # echo $PATH
 /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 ```
-`/usr/local`에 있는 일부 프로그램을 탈취할 수 있다면, 루트를 쉽게 얻을 수 있습니다.
+`/usr/local`에 있는 일부 프로그램을 탈취할 수 있다면, 루트 권한을 쉽게 얻을 수 있습니다.
 
-`run-parts` 프로그램을 탈취하는 것은 루트를 얻는 쉬운 방법입니다. 대부분의 프로그램이 (crontab, ssh 로그인 시) `run-parts`를 실행하기 때문입니다.
+`run-parts` 프로그램을 탈취하는 것은 루트 권한을 얻는 쉬운 방법입니다. 대부분의 프로그램은 (crontab, ssh 로그인 시) `run-parts`를 실행합니다.
 ```bash
 $ cat /etc/crontab | grep run-parts
 17 *    * * *   root    cd / && run-parts --report /etc/cron.hourly
@@ -150,7 +150,7 @@ debugfs:  dump /tmp/asd1.txt /tmp/asd2.txt
 
 ## Video Group
 
-`w` 명령을 사용하면 **시스템에 로그인한 사람**을 찾을 수 있으며 다음과 같은 출력을 보여줍니다:
+`w` 명령어를 사용하면 **시스템에 로그인한 사람**을 찾을 수 있으며, 다음과 같은 출력을 보여줍니다:
 ```bash
 USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU WHAT
 yossi    tty1                      22:16    5:13m  0.05s  0.04s -bash
@@ -158,7 +158,7 @@ moshe    pts/1    10.10.14.44      02:53   24:07   0.06s  0.06s /bin/bash
 ```
 **tty1**는 사용자 **yossi가 물리적으로** 머신의 터미널에 로그인했음을 의미합니다.
 
-**video group**은 화면 출력을 볼 수 있는 권한이 있습니다. 기본적으로 화면을 관찰할 수 있습니다. 이를 위해서는 **현재 화면의 이미지를** 원시 데이터로 가져오고 화면이 사용하는 해상도를 알아내야 합니다. 화면 데이터는 `/dev/fb0`에 저장할 수 있으며, 이 화면의 해상도는 `/sys/class/graphics/fb0/virtual_size`에서 찾을 수 있습니다.
+**video group**은 화면 출력을 볼 수 있는 권한이 있습니다. 기본적으로 화면을 관찰할 수 있습니다. 이를 위해서는 **현재 화면의 이미지를** 원시 데이터로 가져오고 화면이 사용하는 해상도를 알아내야 합니다. 화면 데이터는 `/dev/fb0`에 저장될 수 있으며, 이 화면의 해상도는 `/sys/class/graphics/fb0/virtual_size`에서 찾을 수 있습니다.
 ```bash
 cat /dev/fb0 > /tmp/screen.raw
 cat /sys/class/graphics/fb0/virtual_size
@@ -181,7 +181,7 @@ find / -group root -perm -g=w 2>/dev/null
 ```
 ## Docker Group
 
-호스트 머신의 **루트 파일 시스템을 인스턴스의 볼륨에 마운트**할 수 있으므로, 인스턴스가 시작될 때 해당 볼륨으로 즉시 `chroot`를 로드합니다. 이는 사실상 머신에서 루트 권한을 부여합니다.
+호스트 머신의 **루트 파일 시스템을 인스턴스의 볼륨에 마운트**할 수 있으므로, 인스턴스가 시작될 때 해당 볼륨에 `chroot`를 즉시 로드합니다. 이는 사실상 머신에서 루트 권한을 부여합니다.
 ```bash
 docker image #Get images from the docker service
 
@@ -199,7 +199,7 @@ docker run --rm -it --pid=host --net=host --privileged -v /:/mnt <imagename> chr
 ../docker-security/
 {{#endref}}
 
-docker 소켓에 대한 쓰기 권한이 있는 경우 [**docker 소켓을 악용하여 권한을 상승시키는 방법에 대한 이 게시물을 읽어보세요**](../index.html#writable-docker-socket)**.**
+docker 소켓에 대한 쓰기 권한이 있는 경우 [**docker 소켓을 악용하여 권한을 상승시키는 방법에 대한 이 게시물을 읽어보세요**](../index.html#writable-docker-socket)**.** 
 
 {{#ref}}
 https://github.com/KrustyHack/docker-privilege-escalation
@@ -218,11 +218,11 @@ https://fosterelli.co/privilege-escalation-via-docker.html
 ## Adm 그룹
 
 일반적으로 **`adm`** 그룹의 **구성원**은 _/var/log/_에 위치한 **로그** 파일을 **읽을** 수 있는 권한을 가지고 있습니다.\
-따라서 이 그룹 내의 사용자를 손상시킨 경우 **로그를 확인해야** 합니다.
+따라서 이 그룹 내의 사용자를 침해한 경우 **로그를 확인해야** 합니다.
 
 ## Auth 그룹
 
-OpenBSD 내에서 **auth** 그룹은 사용되는 경우 _**/etc/skey**_ 및 _**/var/db/yubikey**_ 폴더에 쓸 수 있는 권한이 있습니다.\
-이 권한은 다음의 익스플로잇을 사용하여 **루트로 권한을 상승시키는** 데 악용될 수 있습니다: [https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot](https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot)
+OpenBSD 내에서 **auth** 그룹은 일반적으로 사용되는 경우 _**/etc/skey**_ 및 _**/var/db/yubikey**_ 폴더에 쓸 수 있습니다.\
+이 권한은 다음의 익스플로잇을 사용하여 **루트 권한을 상승시키는** 데 악용될 수 있습니다: [https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot](https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot)
 
 {{#include ../../../banners/hacktricks-training.md}}

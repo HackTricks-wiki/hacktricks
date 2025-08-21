@@ -1,4 +1,4 @@
-# 감옥에서 탈출하기
+# Jails에서 탈출하기
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -8,7 +8,7 @@
 
 ## Chroot 탈출
 
-[위키백과](https://en.wikipedia.org/wiki/Chroot#Limitations)에서: chroot 메커니즘은 **특권 있는** (**root**) **사용자에 의한 의도적인 변조를 방어하기 위한 것이 아닙니다**. 대부분의 시스템에서 chroot 컨텍스트는 제대로 쌓이지 않으며, 충분한 권한을 가진 chrooted 프로그램은 **탈출하기 위해 두 번째 chroot를 수행할 수 있습니다**.\
+[wikipedia](https://en.wikipedia.org/wiki/Chroot#Limitations)에서: chroot 메커니즘은 **특권 있는** (**root**) **사용자에 의한 의도적인 변조를 방어하기 위한 것이 아닙니다**. 대부분의 시스템에서 chroot 컨텍스트는 제대로 쌓이지 않으며, **충분한 권한을 가진 chrooted 프로그램은 탈출하기 위해 두 번째 chroot를 수행할 수 있습니다**.\
 보통 이는 탈출하기 위해 chroot 내부에서 root가 되어야 함을 의미합니다.
 
 > [!TIP]
@@ -17,7 +17,7 @@
 ### Root + CWD
 
 > [!WARNING]
-> chroot 내부에서 **root**인 경우 **다른 chroot를 생성하여 탈출할 수 있습니다**. 이는 2개의 chroot가 (리눅스에서) 공존할 수 없기 때문에, 폴더를 생성한 후 **그 새로운 폴더에서 새로운 chroot를 생성하면** **당신이 그 외부에 있을 때**, 이제 **새로운 chroot 외부에 있게 되어** 파일 시스템에 있게 됩니다.
+> chroot 내부에서 **root**인 경우 **다른 chroot를 생성하여 탈출할 수 있습니다**. 이는 2개의 chroot가 (Linux에서) 공존할 수 없기 때문에, 폴더를 생성한 후 **그 새로운 폴더에서 새로운 chroot를 생성하면** **당신이 그 외부에 있게 되어**, 이제 **새로운 chroot 외부에 있게 되고** 따라서 FS에 있게 됩니다.
 >
 > 이는 보통 chroot가 작업 디렉토리를 지정된 위치로 이동하지 않기 때문에 발생하므로, chroot를 생성할 수 있지만 그 외부에 있게 됩니다.
 
@@ -79,7 +79,7 @@ system("/bin/bash");
 ### Root + Saved fd
 
 > [!WARNING]
-> 이것은 이전 사례와 유사하지만, 이 경우 **공격자가 현재 디렉토리에 대한 파일 설명자를 저장**하고 **새 폴더에 chroot를 생성**합니다. 마지막으로, 그는 chroot **외부**에서 그 **FD**에 **접근**할 수 있으므로, 이를 접근하여 **탈출**합니다.
+> 이것은 이전 사례와 유사하지만, 이 경우 **공격자가 현재 디렉토리에 대한 파일 설명자를 저장**하고 **새 폴더에 chroot를 생성**합니다. 마지막으로, 그는 chroot **외부**에서 그 **FD**에 **접근**할 수 있으므로 이를 접근하고 **탈출**합니다.
 
 <details>
 
@@ -147,7 +147,7 @@ chroot(".");
 
 > [!WARNING]
 >
-> - 예전에는 사용자가 자신의 프로세스를 자신의 프로세스에서 디버깅할 수 있었지만... 이제는 기본적으로 불가능
+> - 예전에는 사용자가 자신의 프로세스에서 자신을 디버깅할 수 있었지만... 이제는 기본적으로 불가능
 > - 어쨌든 가능하다면, 프로세스에 ptrace를 사용하고 그 안에서 shellcode를 실행할 수 있음 ([이 예제 참조](linux-capabilities.md#cap_sys_ptrace)).
 
 ## Bash Jails
@@ -177,7 +177,7 @@ echo /home/* #List directory
 ```
 ### 스크립트 생성
 
-_content_에 _/bin/bash_가 포함된 실행 파일을 생성할 수 있는지 확인하십시오.
+_check if you can create an executable file with _/bin/bash_ as content_
 ```bash
 red /bin/bash
 > w wx/path #Write /bin/bash in a writable and executable path
@@ -205,9 +205,10 @@ wget http://127.0.0.1:8080/sudoers -O /etc/sudoers
 ### 다른 트릭
 
 [**https://fireshellsecurity.team/restricted-linux-shell-escaping-techniques/**](https://fireshellsecurity.team/restricted-linux-shell-escaping-techniques/)\
-[https://pen-testing.sans.org/blog/2012/06/06/escaping-restricted-linux-shells](https://pen-testing.sans.org/blog/2012/06/06/escaping-restricted-linux-shells)\
-[https://gtfobins.github.io](https://gtfobins.github.io)\
+[https://pen-testing.sans.org/blog/2012/0**b**6/06/escaping-restricted-linux-shells](https://pen-testing.sans.org/blog/2012/06/06/escaping-restricted-linux-shells**](https://pen-testing.sans.org/blog/2012/06/06/escaping-restricted-linux-shells)\
+[https://gtfobins.github.io](https://gtfobins.github.io/**](https/gtfobins.github.io)\
 **다음 페이지도 흥미로울 수 있습니다:**
+
 
 {{#ref}}
 ../bypass-bash-restrictions/
@@ -216,6 +217,7 @@ wget http://127.0.0.1:8080/sudoers -O /etc/sudoers
 ## Python 감옥
 
 다음 페이지에서 파이썬 감옥에서 탈출하는 트릭:
+
 
 {{#ref}}
 ../../generic-methodologies-and-resources/python/bypass-python-sandboxes/
@@ -238,7 +240,7 @@ print(rawget(string, "char")(0x41, 0x42))
 ```bash
 for k,v in pairs(string) do print(k,v) end
 ```
-다른 lua 환경에서 이전의 원라이너를 실행할 때마다 **함수의 순서가 변경됩니다**. 따라서 특정 함수를 실행해야 하는 경우, 다양한 lua 환경을 로드하고 le library의 첫 번째 함수를 호출하여 무차별 공격을 수행할 수 있습니다:
+다른 lua 환경에서 이전의 원 라이너를 실행할 때마다 **함수의 순서가 변경됩니다**. 따라서 특정 함수를 실행해야 하는 경우, 다양한 lua 환경을 로드하고 le library의 첫 번째 함수를 호출하여 무차별 공격을 수행할 수 있습니다:
 ```bash
 #In this scenario you could BF the victim that is generating a new lua environment
 #for every interaction with the following line and when you are lucky

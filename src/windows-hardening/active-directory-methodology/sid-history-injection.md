@@ -8,7 +8,7 @@
 
 이 공격을 실행하는 방법은 **Golden Ticket** 또는 **Diamond Ticket**의 생성 두 가지가 있습니다.
 
-**"Enterprise Admins"** 그룹의 SID를 찾으려면 먼저 루트 도메인의 SID를 찾아야 합니다. 식별 후, Enterprise Admins 그룹 SID는 루트 도메인의 SID에 `-519`를 추가하여 구성할 수 있습니다. 예를 들어, 루트 도메인 SID가 `S-1-5-21-280534878-1496970234-700767426`인 경우, "Enterprise Admins" 그룹의 결과 SID는 `S-1-5-21-280534878-1496970234-700767426-519`가 됩니다.
+**"Enterprise Admins"** 그룹의 SID를 찾으려면 먼저 루트 도메인의 SID를 찾아야 합니다. 식별 후, Enterprise Admins 그룹 SID는 루트 도메인 SID에 `-519`를 추가하여 구성할 수 있습니다. 예를 들어, 루트 도메인 SID가 `S-1-5-21-280534878-1496970234-700767426`인 경우, "Enterprise Admins" 그룹의 결과 SID는 `S-1-5-21-280534878-1496970234-700767426-519`가 됩니다.
 
 **Domain Admins** 그룹도 사용할 수 있으며, 이는 **512**로 끝납니다.
 
@@ -19,10 +19,10 @@ Get-DomainGroup -Identity "Domain Admins" -Domain parent.io -Properties ObjectSi
 > [!WARNING]
 > SID 히스토리를 신뢰 관계에서 비활성화할 수 있으며, 이로 인해 이 공격이 실패할 수 있습니다.
 
-다음은 [**문서**](https://technet.microsoft.com/library/cc835085.aspx)에 따른 내용입니다:
-- **forest trusts에서 SIDHistory 비활성화**: netdom 도구 사용 (`netdom trust /domain: /EnableSIDHistory:no on the domain controller`)
-- **외부 trusts에 SID 필터 격리 적용**: netdom 도구 사용 (`netdom trust /domain: /quarantine:yes on the domain controller`)
-- **단일 forest 내 도메인 trusts에 SID 필터링 적용**은 지원되지 않는 구성으로 인해 권장되지 않으며, 파괴적인 변경을 초래할 수 있습니다. forest 내의 도메인이 신뢰할 수 없는 경우, 해당 도메인은 forest의 구성원이 되어서는 안 됩니다. 이 경우, 신뢰할 수 있는 도메인과 신뢰할 수 없는 도메인을 별도의 forest로 분리하여 SID 필터링을 interforest trust에 적용해야 합니다.
+[**문서**](https://technet.microsoft.com/library/cc835085.aspx)에 따르면:
+- **netdom 도구를 사용하여 포리스트 신뢰에서 SIDHistory 비활성화** (`netdom trust /domain: /EnableSIDHistory:no on the domain controller`)
+- **netdom 도구를 사용하여 외부 신뢰에 SID 필터 격리 적용** (`netdom trust /domain: /quarantine:yes on the domain controller`)
+- **단일 포리스트 내 도메인 신뢰에 SID 필터링 적용**은 지원되지 않는 구성으로 인해 권장되지 않으며, 파괴적인 변경을 초래할 수 있습니다. 포리스트 내 도메인이 신뢰할 수 없는 경우, 해당 도메인은 포리스트의 구성원이 되어서는 안 됩니다. 이 경우, 신뢰할 수 있는 도메인과 신뢰할 수 없는 도메인을 별도의 포리스트로 분리하여 SID 필터링을 적용할 수 있는 상호 포리스트 신뢰를 설정해야 합니다.
 
 이 우회에 대한 자세한 정보는 이 게시물을 확인하세요: [**https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4**](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)
 
@@ -61,14 +61,16 @@ mimikatz.exe "kerberos::golden /user:Administrator /domain:<current_domain> /sid
 # The previous command will generate a file called ticket.kirbi
 # Just loading you can perform a dcsync attack agains the domain
 ```
-골든 티켓에 대한 자세한 내용은 다음을 확인하세요:
+골든 티켓에 대한 자세한 정보는 다음을 확인하세요:
+
 
 {{#ref}}
 golden-ticket.md
 {{#endref}}
 
 
-다이아몬드 티켓에 대한 자세한 내용은 다음을 확인하세요:
+다이아몬드 티켓에 대한 자세한 정보는 다음을 확인하세요:
+
 
 {{#ref}}
 diamond-ticket.md
@@ -90,7 +92,7 @@ schtasks /create /S mcorp-dc.moneycorp.local /SC Weekely /RU "NT Authority\SYSTE
 
 schtasks /Run /S mcorp-dc.moneycorp.local /TN "STCheck114"
 ```
-획득한 권한으로 공격자는 새로운 도메인에서 예를 들어 DCSync 공격을 실행할 수 있습니다:
+획득한 권한으로 새로운 도메인에서 예를 들어 DCSync 공격을 실행할 수 있습니다:
 
 {{#ref}}
 dcsync.md
@@ -120,7 +122,7 @@ psexec.py <child_domain>/Administrator@dc.root.local -k -no-pass -target-ip 10.1
 ```
 #### Automatic using [raiseChild.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/raiseChild.py)
 
-이것은 **자식 도메인에서 부모 도메인으로의 상승을 자동화하는** Impacket 스크립트입니다. 스크립트에는 다음이 필요합니다:
+이것은 **자식 도메인에서 부모 도메인으로의 상승을 자동화하는** Impacket 스크립트입니다. 스크립트는 다음이 필요합니다:
 
 - 대상 도메인 컨트롤러
 - 자식 도메인의 관리자 사용자에 대한 자격 증명
@@ -128,7 +130,7 @@ psexec.py <child_domain>/Administrator@dc.root.local -k -no-pass -target-ip 10.1
 흐름은 다음과 같습니다:
 
 - 부모 도메인의 Enterprise Admins 그룹에 대한 SID를 얻습니다.
-- 자식 도메인의 KRBTGT 계정 해시를 검색합니다.
+- 자식 도메인의 KRBTGT 계정에 대한 해시를 검색합니다.
 - Golden Ticket을 생성합니다.
 - 부모 도메인에 로그인합니다.
 - 부모 도메인의 Administrator 계정에 대한 자격 증명을 검색합니다.

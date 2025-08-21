@@ -20,31 +20,31 @@ certutil.exe -dump -v cert.pfx
 ```
 ## Exporting Certificates Using the Crypto APIs – THEFT1
 
-**인터랙티브 데스크탑 세션**에서 사용자 또는 머신 인증서와 개인 키를 추출하는 것은 **개인 키가 내보낼 수 있는 경우** 특히 쉽게 수행할 수 있습니다. 이는 `certmgr.msc`에서 인증서를 찾아 마우스 오른쪽 버튼을 클릭하고 `모든 작업 → 내보내기`를 선택하여 비밀번호로 보호된 .pfx 파일을 생성함으로써 달성할 수 있습니다.
+In an **interactive desktop session**, 사용자의 인증서 또는 머신 인증서를 개인 키와 함께 추출하는 것은 **개인 키가 내보낼 수 있는 경우** 특히 쉽게 수행할 수 있습니다. 이는 `certmgr.msc`에서 인증서를 찾아 마우스 오른쪽 버튼을 클릭하고 `모든 작업 → 내보내기`를 선택하여 비밀번호로 보호된 .pfx 파일을 생성함으로써 달성할 수 있습니다.
 
-**프로그래밍 방식 접근법**으로는 PowerShell `ExportPfxCertificate` cmdlet 또는 [TheWover의 CertStealer C# 프로젝트](https://github.com/TheWover/CertStealer)와 같은 도구가 있습니다. 이들은 **Microsoft CryptoAPI** (CAPI) 또는 Cryptography API: Next Generation (CNG)을 사용하여 인증서 저장소와 상호작용합니다. 이러한 API는 인증서 저장 및 인증에 필요한 다양한 암호화 서비스를 제공합니다.
+For a **programmatic approach**, PowerShell `ExportPfxCertificate` cmdlet 또는 [TheWover’s CertStealer C# project](https://github.com/TheWover/CertStealer)와 같은 도구가 제공됩니다. 이들은 **Microsoft CryptoAPI** (CAPI) 또는 Cryptography API: Next Generation (CNG)을 사용하여 인증서 저장소와 상호작용합니다. 이러한 API는 인증서 저장 및 인증에 필요한 다양한 암호화 서비스를 제공합니다.
 
 그러나 개인 키가 내보낼 수 없는 것으로 설정된 경우, CAPI와 CNG는 일반적으로 이러한 인증서의 추출을 차단합니다. 이 제한을 우회하기 위해 **Mimikatz**와 같은 도구를 사용할 수 있습니다. Mimikatz는 개인 키의 내보내기를 허용하기 위해 해당 API를 패치하는 `crypto::capi` 및 `crypto::cng` 명령을 제공합니다. 구체적으로, `crypto::capi`는 현재 프로세스 내의 CAPI를 패치하고, `crypto::cng`는 패치를 위해 **lsass.exe**의 메모리를 타겟팅합니다.
 
 ## User Certificate Theft via DPAPI – THEFT2
 
-DPAPI에 대한 더 많은 정보는 다음에서 확인할 수 있습니다:
+More info about DPAPI in:
 
 {{#ref}}
 ../../windows-local-privilege-escalation/dpapi-extracting-passwords.md
 {{#endref}}
 
-Windows에서 **인증서 개인 키는 DPAPI에 의해 보호됩니다**. **사용자 및 머신 개인 키의 저장 위치**가 다르며, 파일 구조는 운영 체제가 사용하는 암호화 API에 따라 다르다는 점을 인식하는 것이 중요합니다. **SharpDPAPI**는 DPAPI 블롭을 복호화할 때 이러한 차이를 자동으로 탐색할 수 있는 도구입니다.
+In Windows, **certificate private keys are safeguarded by DPAPI**. 사용자 및 머신 개인 키의 **저장 위치**가 다르며, 파일 구조는 운영 체제가 사용하는 암호화 API에 따라 다르다는 것을 인식하는 것이 중요합니다. **SharpDPAPI**는 DPAPI 블롭을 해독할 때 이러한 차이를 자동으로 탐색할 수 있는 도구입니다.
 
 **사용자 인증서**는 주로 `HKEY_CURRENT_USER\SOFTWARE\Microsoft\SystemCertificates`의 레지스트리에 저장되지만, 일부는 `%APPDATA%\Microsoft\SystemCertificates\My\Certificates` 디렉토리에서도 찾을 수 있습니다. 이러한 인증서에 대한 해당 **개인 키**는 일반적으로 **CAPI** 키의 경우 `%APPDATA%\Microsoft\Crypto\RSA\User SID\`에, **CNG** 키의 경우 `%APPDATA%\Microsoft\Crypto\Keys\`에 저장됩니다.
 
-**인증서와 관련된 개인 키를 추출하기 위해** 과정은 다음과 같습니다:
+To **extract a certificate and its associated private key**, the process involves:
 
-1. **사용자의 저장소에서 대상 인증서를 선택하고** 해당 키 저장소 이름을 검색합니다.
-2. **해당 개인 키를 복호화하기 위해 필요한 DPAPI 마스터 키를 찾습니다.**
-3. **평문 DPAPI 마스터 키를 사용하여 개인 키를 복호화합니다.**
+1. **대상 인증서 선택** 사용자의 저장소에서 키 저장소 이름을 검색합니다.
+2. **해당 개인 키를 해독하기 위한 DPAPI 마스터 키 찾기**.
+3. **평문 DPAPI 마스터 키를 사용하여 개인 키 해독하기**.
 
-**평문 DPAPI 마스터 키를 획득하기 위해** 다음 접근 방식을 사용할 수 있습니다:
+For **acquiring the plaintext DPAPI masterkey**, the following approaches can be used:
 ```bash
 # With mimikatz, when running in the user's context
 dpapi::masterkey /in:"C:\PATH\TO\KEY" /rpc
@@ -66,7 +66,7 @@ Windows에 의해 레지스트리에 저장된 머신 인증서 `HKEY_LOCAL_MACH
 
 수동 복호화는 **Mimikatz**에서 `lsadump::secrets` 명령을 실행하여 DPAPI_SYSTEM LSA 비밀을 추출한 후, 이 키를 사용하여 머신 마스터 키를 복호화함으로써 달성할 수 있습니다. 또는, 이전에 설명한 대로 CAPI/CNG를 패치한 후 Mimikatz의 `crypto::certificates /export /systemstore:LOCAL_MACHINE` 명령을 사용할 수 있습니다.
 
-**SharpDPAPI**는 인증서 명령을 통해 보다 자동화된 접근 방식을 제공합니다. `/machine` 플래그가 상승된 권한으로 사용될 때, SYSTEM으로 상승하고 DPAPI_SYSTEM LSA 비밀을 덤프하며, 이를 사용하여 머신 DPAPI 마스터 키를 복호화한 다음, 이러한 평문 키를 조회 테이블로 사용하여 모든 머신 인증서 개인 키를 복호화합니다.
+**SharpDPAPI**는 인증서 명령을 통해 보다 자동화된 접근 방식을 제공합니다. `/machine` 플래그가 상승된 권한으로 사용될 때, SYSTEM으로 상승하고 DPAPI_SYSTEM LSA 비밀을 덤프하며, 이를 사용하여 머신 DPAPI 마스터 키를 복호화한 후, 이러한 평문 키를 조회 테이블로 사용하여 모든 머신 인증서 개인 키를 복호화합니다.
 
 ## Finding Certificate Files – THEFT4
 
@@ -92,18 +92,18 @@ john --wordlist=passwords.txt hash.txt
 ```
 ## NTLM Credential Theft via PKINIT – THEFT5 (UnPAC the hash)
 
-주어진 내용은 PKINIT를 통한 NTLM 자격 증명 도용 방법, 특히 THEFT5로 표시된 도용 방법을 설명합니다. 다음은 수동태로 재설명하고, 내용이 익명화 및 요약된 것입니다:
+주어진 내용은 PKINIT를 통한 NTLM 자격 증명 도용 방법, 특히 THEFT5로 레이블이 붙은 도용 방법을 설명합니다. 다음은 수동태로 재설명된 내용으로, 필요에 따라 익명화되고 요약되었습니다:
 
 NTLM 인증 `MS-NLMP`를 지원하기 위해 Kerberos 인증을 지원하지 않는 애플리케이션의 경우, KDC는 PKCA가 사용될 때 권한 속성 인증서(PAC) 내에서 사용자의 NTLM 일방향 함수(OWF)를 반환하도록 설계되었습니다. 따라서 계정이 PKINIT를 통해 티켓 부여 티켓(TGT)을 인증하고 확보할 경우, 현재 호스트가 TGT에서 NTLM 해시를 추출하여 레거시 인증 프로토콜을 유지할 수 있도록 하는 메커니즘이 본질적으로 제공됩니다. 이 과정은 NTLM 평문을 NDR 직렬화된 형태로 나타내는 `PAC_CREDENTIAL_DATA` 구조체의 복호화를 포함합니다.
 
-유틸리티 **Kekeo**는 [https://github.com/gentilkiwi/kekeo](https://github.com/gentilkiwi/kekeo)에서 접근할 수 있으며, 이 특정 데이터를 포함하는 TGT를 요청할 수 있는 기능이 있다고 언급됩니다. 이를 위한 명령은 다음과 같습니다:
+유틸리티 **Kekeo**는 [https://github.com/gentilkiwi/kekeo](https://github.com/gentilkiwi/kekeo)에서 접근할 수 있으며, 이 특정 데이터를 포함하는 TGT를 요청할 수 있는 기능이 언급되어 있어 사용자의 NTLM을 검색하는 데 도움을 줍니다. 이 목적을 위해 사용되는 명령은 다음과 같습니다:
 ```bash
 tgt::pac /caname:generic-DC-CA /subject:genericUser /castore:current_user /domain:domain.local
 ```
-**`Rubeus`**는 **`asktgt [...] /getcredentials`** 옵션을 사용하여 이 정보를 얻을 수 있습니다.
+**`Rubeus`**는 **`asktgt [...] /getcredentials`** 옵션으로 이 정보를 얻을 수 있습니다.
 
 또한, Kekeo는 핀을 검색할 수 있는 경우 스마트카드 보호 인증서를 처리할 수 있다고 언급되며, [https://github.com/CCob/PinSwipe](https://github.com/CCob/PinSwipe)에 대한 참조가 있습니다. 동일한 기능이 **Rubeus**에서도 지원된다고 하며, [https://github.com/GhostPack/Rubeus](https://github.com/GhostPack/Rubeus)에서 사용할 수 있습니다.
 
-이 설명은 PKINIT을 통한 NTLM 자격 증명 도용 과정과 도구를 요약하며, PKINIT을 사용하여 얻은 TGT를 통해 NTLM 해시를 검색하는 데 중점을 두고, 이 과정을 용이하게 하는 유틸리티를 설명합니다.
+이 설명은 PKINIT을 통한 NTLM 자격 증명 도용 과정과 도구를 요약하며, PKINIT을 사용하여 얻은 TGT를 통해 NTLM 해시를 검색하는 데 중점을 두고 있으며, 이 과정을 용이하게 하는 유틸리티에 대해 설명합니다.
 
 {{#include ../../../banners/hacktricks-training.md}}

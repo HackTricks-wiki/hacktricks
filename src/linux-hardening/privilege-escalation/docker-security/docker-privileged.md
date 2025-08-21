@@ -4,11 +4,11 @@
 
 ## What Affects
 
-특권이 있는 컨테이너를 실행할 때 비활성화되는 보호 기능은 다음과 같습니다:
+privileged 컨테이너를 실행할 때 비활성화되는 보호 기능은 다음과 같습니다:
 
 ### Mount /dev
 
-특권 컨테이너에서는 모든 **장치가 `/dev/`에서 접근 가능합니다**. 따라서 **호스트의** 디스크를 **마운트**하여 **탈출**할 수 있습니다.
+privileged 컨테이너에서는 모든 **장치에 `/dev/`에서 접근할 수 있습니다**. 따라서 **호스트의** 디스크를 **마운트**하여 **탈출**할 수 있습니다.
 
 {{#tabs}}
 {{#tab name="Inside default container"}}
@@ -64,7 +64,7 @@ mount  | grep '(ro'
 > [!NOTE] > **tmpfs**는 모든 파일을 가상 메모리에 저장하는 파일 시스템입니다. tmpfs는 하드 드라이브에 파일을 생성하지 않습니다. 따라서 tmpfs 파일 시스템을 언마운트하면 그 안에 있는 모든 파일은 영원히 사라집니다.
 
 {{#tabs}}
-{{#tab name="기본 컨테이너 내부"}}
+{{#tab name="Inside default container"}}
 ```bash
 # docker run --rm -it alpine sh
 mount  | grep /proc.*tmpfs
@@ -84,7 +84,7 @@ mount  | grep /proc.*tmpfs
 
 ### 리눅스 기능
 
-컨테이너 엔진은 기본적으로 컨테이너 내부에서 발생하는 일을 제어하기 위해 **제한된 수의 기능**으로 컨테이너를 시작합니다. **특권**이 있는 경우 **모든** **기능**에 접근할 수 있습니다. 기능에 대해 알아보려면 읽어보세요:
+컨테이너 엔진은 기본적으로 컨테이너 내부에서 발생하는 것을 제어하기 위해 **제한된 수의 기능**으로 컨테이너를 시작합니다. **특권**이 있는 경우 **모든** **기능**에 접근할 수 있습니다. 기능에 대해 알아보려면 읽어보세요:
 
 {{#ref}}
 ../linux-capabilities.md
@@ -114,11 +114,12 @@ Bounding set =cap_chown,cap_dac_override,cap_dac_read_search,cap_fowner,cap_fset
 {{#endtab}}
 {{#endtabs}}
 
-컨테이너에서 `--privileged` 모드로 실행하지 않고도 사용할 수 있는 기능을 `--cap-add` 및 `--cap-drop` 플래그를 사용하여 조작할 수 있습니다.
+컨테이너에서 사용할 수 있는 권한을 `--privileged` 모드로 실행하지 않고도 `--cap-add` 및 `--cap-drop` 플래그를 사용하여 조작할 수 있습니다.
 
 ### Seccomp
 
-**Seccomp**는 컨테이너가 호출할 수 있는 **syscalls**를 **제한**하는 데 유용합니다. 기본적으로 도커 컨테이너를 실행할 때 기본 seccomp 프로파일이 활성화되지만, 특권 모드에서는 비활성화됩니다. Seccomp에 대해 더 알아보려면 여기를 참조하세요:
+**Seccomp**는 컨테이너가 호출할 수 있는 **syscalls**를 **제한**하는 데 유용합니다. 기본적으로 도커 컨테이너를 실행할 때 기본 seccomp 프로파일이 활성화되지만, 특권 모드에서는 비활성화됩니다. Seccomp에 대해 더 알아보세요:
+
 
 {{#ref}}
 seccomp.md
@@ -153,6 +154,7 @@ Seccomp_filters:	0
 
 **AppArmor**는 **컨테이너**를 **제한된** **리소스** 집합에 **프로그램별 프로파일**로 제한하는 커널 향상 기능입니다. `--privileged` 플래그로 실행할 때 이 보호 기능은 비활성화됩니다.
 
+
 {{#ref}}
 apparmor.md
 {{#endref}}
@@ -162,7 +164,8 @@ apparmor.md
 ```
 ### SELinux
 
-`--privileged` 플래그로 컨테이너를 실행하면 **SELinux 레이블**이 비활성화되어 컨테이너 엔진의 레이블을 상속받습니다. 일반적으로 `unconfined`로 설정되어 컨테이너 엔진과 유사한 전체 접근 권한을 부여합니다. 루트리스 모드에서는 `container_runtime_t`를 사용하고, 루트 모드에서는 `spc_t`가 적용됩니다.
+`--privileged` 플래그로 컨테이너를 실행하면 **SELinux 레이블**이 비활성화되어 컨테이너 엔진의 레이블, 일반적으로 `unconfined`를 상속받아 컨테이너 엔진과 유사한 전체 접근 권한을 부여합니다. 루트리스 모드에서는 `container_runtime_t`를 사용하고, 루트 모드에서는 `spc_t`가 적용됩니다.
+
 
 {{#ref}}
 ../selinux.md

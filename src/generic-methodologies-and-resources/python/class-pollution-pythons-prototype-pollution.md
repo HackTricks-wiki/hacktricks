@@ -1,8 +1,8 @@
-# 클래스 오염 (파이썬의 프로토타입 오염)
+# Class Pollution (Python's Prototype Pollution)
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## 기본 예제
+## Basic Example
 
 문자열로 객체의 클래스를 오염시킬 수 있는 방법을 확인하세요:
 ```python
@@ -28,7 +28,7 @@ e.__class__.__base__.__base__.__qualname__ = 'Polluted_Company'
 print(d) #<__main__.Polluted_Developer object at 0x1041d2b80>
 print(c) #<__main__.Polluted_Company object at 0x1043a72b0>
 ```
-## 기본 취약점 예제
+## 기본 취약점 예시
 ```python
 # Initial state
 class Employee: pass
@@ -116,7 +116,7 @@ print(system_admin_emp.execute_command())
 
 <details>
 
-<summary><code>globals</code>를 통한 다른 클래스 및 전역 변수 오염</summary>
+<summary><code>globals</code>를 통해 다른 클래스와 전역 변수를 오염시키기</summary>
 ```python
 def merge(src, dst):
 # Recursive merge function
@@ -148,7 +148,7 @@ print(NotAccessibleClass) #> <class '__main__.PollutedClass'>
 
 <details>
 
-<summary>임의의 서브프로세스 실행</summary>
+<summary>임의 서브프로세스 실행</summary>
 ```python
 import subprocess, json
 
@@ -182,7 +182,7 @@ subprocess.Popen('whoami', shell=True) # Calc.exe will pop up
 
 <summary>Overwritting <strong><code>__kwdefaults__</code></strong></summary>
 
-**`__kwdefaults__`**는 모든 함수의 특별한 속성으로, Python [documentation](https://docs.python.org/3/library/inspect.html)에 따르면, 이는 “**키워드 전용** 매개변수에 대한 기본값의 매핑”입니다. 이 속성을 오염시키면 함수의 키워드 전용 매개변수의 기본값을 제어할 수 있으며, 이는 \* 또는 \*args 뒤에 오는 함수의 매개변수입니다.
+**`__kwdefaults__`**는 모든 함수의 특별한 속성으로, Python [documentation](https://docs.python.org/3/library/inspect.html)에 따르면, “**키워드 전용** 매개변수에 대한 기본값의 매핑”입니다. 이 속성을 오염시키면 함수의 키워드 전용 매개변수의 기본값을 제어할 수 있으며, 이는 \* 또는 \*args 뒤에 오는 함수의 매개변수입니다.
 ```python
 from os import system
 import json
@@ -225,15 +225,15 @@ execute() #> Executing echo Polluted
 
 <summary>파일 간 Flask 비밀 덮어쓰기</summary>
 
-따라서, 웹의 주요 파이썬 파일에 정의된 객체에 대해 클래스 오염을 수행할 수 있지만 **주요 파일과 다른 파일에 정의된 클래스**의 경우입니다. 이전 페이로드에서 \_\_globals\_\_에 접근하려면 객체의 클래스나 클래스의 메서드에 접근해야 하므로, **주요 파일이 아닌 해당 파일의 globals에 접근할 수 있습니다**. \
-따라서, **주요 페이지에서 비밀 키를 정의한 Flask 앱의 전역 객체에 접근할 수 없습니다**:
+따라서, 웹의 주요 파이썬 파일에 정의된 객체에 대해 클래스 오염을 수행할 수 있지만 **주요 파일과는 다른 파일에 정의된 클래스**인 경우입니다. 이전 페이로드에서 \_\_globals\_\_에 접근하려면 객체의 클래스나 클래스의 메서드에 접근해야 하므로, **주요 파일이 아닌 해당 파일의 globals에 접근할 수 있습니다**. \
+따라서, **주요 페이지에 정의된 비밀 키**를 가진 Flask 앱의 전역 객체에 접근할 수 없습니다:
 ```python
 app = Flask(__name__, template_folder='templates')
 app.secret_key = '(:secret:)'
 ```
-이 시나리오에서는 파일을 탐색하여 **전역 객체 `app.secret_key`에 접근**하여 Flask 비밀 키를 변경하고 이 키를 알고 [**권한 상승**을 할 수 있는 도구가 필요합니다](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).
+이 시나리오에서는 파일을 탐색하여 **전역 객체 `app.secret_key`에 접근**하여 Flask 비밀 키를 변경하고 이 키를 알고 [**권한 상승**을 할 수 있는]((../../network-services-pentesting/pentesting-web/flask.md#flask-unsign)) 장치가 필요합니다.
 
-이와 같은 페이로드 [이 글에서](https://ctftime.org/writeup/36082):
+이와 같은 페이로드는 [이 작성물에서](https://ctftime.org/writeup/36082):
 ```python
 __init__.__globals__.__loader__.__init__.__globals__.sys.modules.__main__.app.secret_key
 ```
@@ -241,13 +241,13 @@ __init__.__globals__.__loader__.__init__.__globals__.sys.modules.__main__.app.se
 
 </details>
 
-다음 페이지에서도 읽기 전용 가젯을 확인하세요:
+다음 페이지에서 읽기 전용 가젯도 확인하세요:
 
 {{#ref}}
 python-internal-read-gadgets.md
 {{#endref}}
 
-## 참고 문헌
+## References
 
 - [https://blog.abdulrah33m.com/prototype-pollution-in-python/](https://blog.abdulrah33m.com/prototype-pollution-in-python/)
 

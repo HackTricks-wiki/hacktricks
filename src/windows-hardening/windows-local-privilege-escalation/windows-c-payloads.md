@@ -4,7 +4,7 @@
 
 이 페이지는 Windows 로컬 권한 상승 또는 사후 활용 중에 유용한 **작고 독립적인 C 코드 조각**을 모은 것입니다. 각 페이로드는 **복사-붙여넣기 친화적**으로 설계되었으며, Windows API / C 런타임만 필요하고 `i686-w64-mingw32-gcc` (x86) 또는 `x86_64-w64-mingw32-gcc` (x64)로 컴파일할 수 있습니다.
 
-> ⚠️  이 페이로드는 프로세스가 이미 작업을 수행하는 데 필요한 최소 권한(예: `SeDebugPrivilege`, `SeImpersonatePrivilege` 또는 UAC 우회를 위한 중간 무결성 컨텍스트)을 가지고 있다고 가정합니다. 이들은 취약점을 이용하여 임의의 네이티브 코드 실행이 가능한 **레드팀 또는 CTF 환경**을 위해 설계되었습니다.
+> ⚠️  이 페이로드는 프로세스가 이미 작업을 수행하는 데 필요한 최소 권한(예: `SeDebugPrivilege`, `SeImpersonatePrivilege`, 또는 UAC 우회를 위한 중간 무결성 컨텍스트)을 가지고 있다고 가정합니다. 이들은 취약점을 이용하여 임의의 네이티브 코드 실행이 가능한 **레드팀 또는 CTF 환경**을 위해 설계되었습니다.
 
 ---
 
@@ -66,7 +66,7 @@ return 0;
 ---
 
 ## 토큰 중복을 통한 SYSTEM 셸 생성 (`SeDebugPrivilege` + `SeImpersonatePrivilege`)
-현재 프로세스가 **둘 다** `SeDebug` 및 `SeImpersonate` 권한을 보유하고 있는 경우(많은 서비스 계정에서 일반적), `winlogon.exe`에서 토큰을 훔쳐서 복제하고 상승된 프로세스를 시작할 수 있습니다:
+현재 프로세스가 **둘 다** `SeDebug` 및 `SeImpersonate` 권한을 보유하고 있는 경우(많은 서비스 계정에서 일반적), `winlogon.exe`에서 토큰을 훔쳐 복제하고 상승된 프로세스를 시작할 수 있습니다:
 ```c
 // x86_64-w64-mingw32-gcc -O2 -o system_shell.exe system_shell.c -ladvapi32 -luser32
 #include <windows.h>
@@ -115,6 +115,7 @@ return 0;
 }
 ```
 더 깊은 설명은 다음을 참조하십시오:
+
 {{#ref}}
 sedebug-+-seimpersonate-copy-token.md
 {{#endref}}
