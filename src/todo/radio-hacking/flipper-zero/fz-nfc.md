@@ -13,7 +13,7 @@ Kwa maelezo kuhusu RFID na NFC angalia ukurasa ufuatao:
 ## Kadi za NFC Zinazoungwa Mkono <a href="#id-9wrzi" id="id-9wrzi"></a>
 
 > [!CAUTION]
-> Mbali na kadi za NFC, Flipper Zero inasaidia **aina nyingine za kadi za Masafa ya Juu** kama vile kadhaa za **Mifare** Classic na Ultralight na **NTAG**.
+> Mbali na kadi za NFC, Flipper Zero inasaidia **aina nyingine za kadi za Masafa ya Juu** kama vile **Mifare** Classic na Ultralight na **NTAG**.
 
 Aina mpya za kadi za NFC zitaongezwa kwenye orodha ya kadi zinazoungwa mkono. Flipper Zero inasaidia **aina za kadi za NFC A** (ISO 14443A):
 
@@ -52,7 +52,7 @@ Kwa utangulizi kuhusu NFC [**soma ukurasa huu**](../pentesting-rfid.md#high-freq
 
 ### Soma
 
-Flipper Zero inaweza **kusoma kadi za NFC**, hata hivyo, **haiwezi kuelewa protokali zote** zinazotegemea ISO 14443. Hata hivyo, kwa sababu **UID ni sifa ya kiwango cha chini**, unaweza kujikuta katika hali ambapo **UID tayari umesomwa, lakini protokali ya uhamishaji wa data ya kiwango cha juu bado haijulikani**. Unaweza kusoma, kuiga na kuingiza UID kwa mikono ukitumia Flipper kwa wasomaji wa msingi wanaotumia UID kwa uthibitisho.
+Flipper Zero inaweza **kusoma kadi za NFC**, hata hivyo, **haiwezi kuelewa itifaki zote** zinazotegemea ISO 14443. Hata hivyo, kwa kuwa **UID ni sifa ya kiwango cha chini**, unaweza kujikuta katika hali ambapo **UID tayari umesomwa, lakini itifaki ya juu ya uhamishaji wa data bado haijulikani**. Unaweza kusoma, kuiga na kuingiza UID kwa mikono ukitumia Flipper kwa wasomaji wa msingi wanaotumia UID kwa ajili ya uthibitishaji.
 
 #### Kusoma UID VS Kusoma Data Ndani <a href="#reading-the-uid-vs-reading-the-data-inside" id="reading-the-uid-vs-reading-the-data-inside"></a>
 
@@ -60,17 +60,17 @@ Flipper Zero inaweza **kusoma kadi za NFC**, hata hivyo, **haiwezi kuelewa proto
 
 Katika Flipper, kusoma lebo za 13.56 MHz kunaweza kugawanywa katika sehemu mbili:
 
-- **Kusoma kiwango cha chini** — inasoma tu UID, SAK, na ATQA. Flipper inajaribu kudhani protokali ya kiwango cha juu kulingana na data hii iliyosomwa kutoka kwa kadi. Huwezi kuwa na uhakika wa 100% na hii, kwani ni dhana tu kulingana na mambo fulani.
-- **Kusoma kiwango cha juu** — inasoma data kutoka kwenye kumbukumbu ya kadi kwa kutumia protokali maalum ya kiwango cha juu. Hiyo itakuwa ni kusoma data kwenye Mifare Ultralight, kusoma sekta kutoka Mifare Classic, au kusoma sifa za kadi kutoka PayPass/Apple Pay.
+- **Kusoma kiwango cha chini** — inasoma tu UID, SAK, na ATQA. Flipper inajaribu kukisia itifaki ya juu kulingana na data hii iliyosomwa kutoka kwa kadi. Huwezi kuwa na uhakika wa 100% na hii, kwani ni dhana tu kulingana na mambo fulani.
+- **Kusoma kiwango cha juu** — inasoma data kutoka kwenye kumbukumbu ya kadi kwa kutumia itifaki maalum ya kiwango cha juu. Hii itakuwa ni kusoma data kwenye Mifare Ultralight, kusoma sekta kutoka Mifare Classic, au kusoma sifa za kadi kutoka PayPass/Apple Pay.
 
 ### Soma Maalum
 
-Iwapo Flipper Zero haiwezi kubaini aina ya kadi kutoka kwa data ya kiwango cha chini, katika `Vitendo vya Ziada` unaweza kuchagua `Soma Aina Maalum ya Kadi` na **kwa mikono** **kuashiria aina ya kadi unayotaka kusoma**.
+Iwapo Flipper Zero haiwezi kubaini aina ya kadi kutoka kwenye data ya kiwango cha chini, katika `Vitendo vya Ziada` unaweza kuchagua `Soma Aina Maalum ya Kadi` na **kwa mikono** **kuashiria aina ya kadi unayotaka kusoma**.
 
 #### Kadi za Benki za EMV (PayPass, payWave, Apple Pay, Google Pay) <a href="#emv-bank-cards-paypass-paywave-apple-pay-google-pay" id="emv-bank-cards-paypass-paywave-apple-pay-google-pay"></a>
 
-Mbali na kusoma tu UID, unaweza kutoa data nyingi zaidi kutoka kwa kadi ya benki. Inawezekana **kupata nambari kamili ya kadi** (nambari 16 kwenye uso wa kadi), **tarehe ya uhalali**, na katika baadhi ya matukio hata **jina la mmiliki** pamoja na orodha ya **miamala ya hivi karibuni**.\
-Hata hivyo, huwezi kusoma CVV kwa njia hii** (nambari 3 kwenye nyuma ya kadi). Pia **kadi za benki zinalindwa dhidi ya mashambulizi ya kurudi**, hivyo kunakili kwa Flipper na kisha kujaribu kuiga ili kulipia kitu hakutafanya kazi.
+Mbali na kusoma tu UID, unaweza kutoa data zaidi kutoka kwenye kadi ya benki. Inawezekana **kupata nambari kamili ya kadi** (nambari 16 kwenye uso wa kadi), **tarehe ya uhalali**, na katika baadhi ya matukio hata **jina la mmiliki** pamoja na orodha ya **miamala ya hivi karibuni**.\
+Hata hivyo, huwezi kusoma CVV kwa njia hii** (nambari 3 kwenye nyuma ya kadi). Pia **kadi za benki zinalindwa dhidi ya mashambulizi ya kurudi nyuma**, hivyo kunakili kadi hiyo kwa Flipper na kisha kujaribu kuiga ili kulipia kitu hakutafanya kazi.
 
 ## Marejeo
 

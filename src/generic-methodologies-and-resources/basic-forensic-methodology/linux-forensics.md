@@ -2,11 +2,11 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Mkusanyiko wa Taarifa za Awali
+## Initial Information Gathering
 
-### Taarifa za Msingi
+### Basic Information
 
-Kwanza kabisa, inashauriwa kuwa na **USB** yenye **binaries na maktaba zinazojulikana vizuri** (unaweza tu kupata ubuntu na nakala za folda _/bin_, _/sbin_, _/lib,_ na _/lib64_), kisha unganisha USB, na badilisha mabadiliko ya mazingira ili kutumia hizo binaries:
+Kwanza kabisa, inashauriwa kuwa na **USB** yenye **binaries na maktaba zinazojulikana vizuri** (unaweza tu kupata ubuntu na nakala za folda _/bin_, _/sbin_, _/lib,_ na _/lib64_), kisha ung'anisha USB, na badilisha mabadiliko ya mazingira ili kutumia binaries hizo:
 ```bash
 export PATH=/mnt/usb/bin:/mnt/usb/sbin
 export LD_LIBRARY_PATH=/mnt/usb/lib:/mnt/usb/lib64
@@ -33,7 +33,7 @@ find /directory -type f -mtime -1 -print #Find modified files during the last mi
 
 Wakati wa kupata taarifa za msingi unapaswa kuangalia mambo ya ajabu kama:
 
-- **Mchakato wa Root** kwa kawaida huendesha na PIDS za chini, hivyo ikiwa utapata mchakato wa root wenye PID kubwa unaweza kushuku
+- **Mchakato wa Root** kawaida huendesha na PIDS za chini, hivyo ikiwa unapata mchakato wa root wenye PID kubwa unaweza kushuku
 - Angalia **kuingia kwa watumiaji** waliojiandikisha bila shell ndani ya `/etc/passwd`
 - Angalia **hash za nywila** ndani ya `/etc/shadow` kwa watumiaji bila shell
 
@@ -43,10 +43,10 @@ Ili kupata kumbukumbu ya mfumo unaoendesha, inashauriwa kutumia [**LiME**](https
 Ili **kuunda** hiyo, unahitaji kutumia **kernel sawa** ambayo mashine ya mwathirika inatumia.
 
 > [!TIP]
-> Kumbuka kwamba huwezi **kusanidi LiME au kitu kingine chochote** kwenye mashine ya mwathirika kwani itafanya mabadiliko kadhaa kwake
+> Kumbuka kwamba huwezi **kusanidi LiME au kitu kingine chochote** katika mashine ya mwathirika kwani itafanya mabadiliko kadhaa ndani yake
 
 Hivyo, ikiwa una toleo sawa la Ubuntu unaweza kutumia `apt-get install lime-forensics-dkms`\
-Katika hali nyingine, unahitaji kupakua [**LiME**](https://github.com/504ensicsLabs/LiME) kutoka github na kuunda hiyo kwa kutumia vichwa vya kernel sahihi. Ili **kupata vichwa vya kernel sahihi** vya mashine ya mwathirika, unaweza tu **kunakili saraka** `/lib/modules/<kernel version>` kwenye mashine yako, na kisha **kuunda** LiME kwa kutumia hivyo:
+Katika hali nyingine, unahitaji kupakua [**LiME**](https://github.com/504ensicsLabs/LiME) kutoka github na kuunda hiyo kwa kutumia vichwa vya kernel sahihi. Ili **kupata vichwa vya kernel sahihi** vya mashine ya mwathirika, unaweza tu **kunakili directory** `/lib/modules/<kernel version>` kwenye mashine yako, na kisha **kuunda** LiME kwa kutumia hivyo:
 ```bash
 make -C /lib/modules/<kernel version>/build M=$PWD
 sudo insmod lime.ko "path=/home/sansforensics/Desktop/mem_dump.bin format=lime"
@@ -54,7 +54,7 @@ sudo insmod lime.ko "path=/home/sansforensics/Desktop/mem_dump.bin format=lime"
 LiME inasaidia **format** 3:
 
 - Raw (sehemu zote zimeunganishwa pamoja)
-- Padded (sawa na raw, lakini na sifuri katika bits za kulia)
+- Padded (sawa na raw, lakini na sifuri kwenye bits za kulia)
 - Lime (format inayopendekezwa yenye metadata)
 
 LiME pia inaweza kutumika **kutuma dump kupitia mtandao** badala ya kuihifadhi kwenye mfumo kwa kutumia kitu kama: `path=tcp:4444`
@@ -64,11 +64,11 @@ LiME pia inaweza kutumika **kutuma dump kupitia mtandao** badala ya kuihifadhi k
 #### Shutting down
 
 Kwanza kabisa, utahitaji **kuzima mfumo**. Hii si chaguo kila wakati kwani wakati mwingine mfumo utakuwa seva ya uzalishaji ambayo kampuni haiwezi kumudu kuzima.\
-Kuna **njia 2** za kuzima mfumo, **kuzima kawaida** na **"kuvuta plug" kuzima**. Ya kwanza itaruhusu **mchakato kumalizika kama kawaida** na **filesystem** kuwa **synchronized**, lakini pia itaruhusu **malware** inay posible **kuharibu ushahidi**. Njia ya "pull the plug" inaweza kuleta **kupoteza taarifa** (sio nyingi za taarifa zitapotea kwani tayari tumepata picha ya kumbukumbu) na **malware haitakuwa na fursa yoyote** ya kufanya chochote kuhusu hilo. Hivyo, ikiwa unadhani kuna **malware**, tekeleza tu **amri ya `sync`** kwenye mfumo na uvute plug.
+Kuna **njia 2** za kuzima mfumo, **kuzima kawaida** na **kuzima "kuvuta plug"**. Ya kwanza itaruhusu **mchakato kumalizika kama kawaida** na **filesystem** kuwa **synchronized**, lakini pia itaruhusu **malware** inayoweza **kuharibu ushahidi**. Njia ya "kuvuta plug" inaweza kuleta **kupoteza taarifa** (sio nyingi za taarifa zitapotea kwani tayari tumepata picha ya kumbukumbu) na **malware haitakuwa na fursa yoyote** ya kufanya chochote kuhusu hilo. Hivyo, ikiwa unadhani kuna **malware**, tekeleza tu **amri ya `sync`** kwenye mfumo na uvute plug.
 
 #### Taking an image of the disk
 
-Ni muhimu kutambua kwamba **kabla ya kuunganisha kompyuta yako na chochote kinachohusiana na kesi**, unahitaji kuwa na uhakika kwamba itakuwa **imewekwa kama kusoma tu** ili kuepuka kubadilisha taarifa yoyote.
+Ni muhimu kutambua kwamba **kabla ya kuunganisha kompyuta yako na chochote kinachohusiana na kesi**, unahitaji kuwa na uhakika kwamba itakuwa **imewekwa kama kusoma pekee** ili kuepuka kubadilisha taarifa yoyote.
 ```bash
 #Create a raw copy of the disk
 dd if=<subject device> of=<image file> bs=512
@@ -206,7 +206,7 @@ for d in /etc/cron.*; do [ -f "$d/0anacron" ] && stat -c '%n %y %s' "$d/0anacron
 grep -R --line-number -E 'curl|wget|/bin/sh|python|bash -c' /etc/cron.*/* 2>/dev/null
 ```
 #### Hunt: SSH hardening rollback and backdoor shells
-Mabadiliko kwenye sshd_config na mifumo ya akaunti za shell ni ya kawaida baada ya matumizi ya nguvu ili kuhifadhi ufikiaji.
+Mabadiliko kwenye sshd_config na mifumo ya akaunti za shell ni ya kawaida baada ya matumizi ili kuhifadhi ufikiaji.
 ```bash
 # Root login enablement (flag "yes" or lax values)
 grep -E '^\s*PermitRootLogin' /etc/ssh/sshd_config
@@ -226,7 +226,7 @@ systemctl list-units | grep -i cloudflared
 
 Njia ambapo malware inaweza kufungwa kama huduma:
 
-- **/etc/inittab**: Inaita skripti za awali kama rc.sysinit, ikielekeza zaidi kwa skripti za kuanzisha.
+- **/etc/inittab**: Inaita skripti za kuanzisha kama rc.sysinit, ikielekeza zaidi kwenye skripti za kuanzisha.
 - **/etc/rc.d/** na **/etc/rc.boot/**: Zina skripti za kuanzisha huduma, ya pili ikipatikana katika matoleo ya zamani ya Linux.
 - **/etc/init.d/**: Inatumika katika matoleo fulani ya Linux kama Debian kwa kuhifadhi skripti za kuanzisha.
 - Huduma zinaweza pia kuanzishwa kupitia **/etc/inetd.conf** au **/etc/xinetd/**, kulingana na toleo la Linux.
@@ -240,21 +240,21 @@ Njia ambapo malware inaweza kufungwa kama huduma:
 
 Moduli za kernel za Linux, mara nyingi hutumiwa na malware kama sehemu za rootkit, zinawekwa wakati wa kuanzisha mfumo. Katalogi na faili muhimu kwa moduli hizi ni pamoja na:
 
-- **/lib/modules/$(uname -r)**: Inashikilia moduli za toleo la kernel linalotumika.
+- **/lib/modules/$(uname -r)**: Inashikilia moduli za toleo la kernel linaloendesha.
 - **/etc/modprobe.d**: Inashikilia faili za usanidi kudhibiti upakiaji wa moduli.
 - **/etc/modprobe** na **/etc/modprobe.conf**: Faili za mipangilio ya kimataifa ya moduli.
 
 ### Other Autostart Locations
 
-Linux inatumia faili mbalimbali kwa kutekeleza programu kiotomatiki wakati wa kuingia kwa mtumiaji, ambayo inaweza kuwa na malware:
+Linux inatumia faili mbalimbali kwa ajili ya kutekeleza programu kiotomatiki wakati wa kuingia kwa mtumiaji, ambayo inaweza kuwa na malware:
 
 - **/etc/profile.d/**\*, **/etc/profile**, na **/etc/bash.bashrc**: Zinatekelezwa kwa kuingia kwa mtumiaji yeyote.
 - **\~/.bashrc**, **\~/.bash_profile**, **\~/.profile**, na **\~/.config/autostart**: Faili maalum za mtumiaji zinazotekelezwa wakati wa kuingia kwao.
-- **/etc/rc.local**: Inatekelezwa baada ya huduma zote za mfumo kuanzishwa, ikionyesha mwisho wa mpito kwenda mazingira ya watumiaji wengi.
+- **/etc/rc.local**: Inatekelezwa baada ya huduma zote za mfumo kuanzishwa, ikionyesha mwisho wa mpito kwenda kwenye mazingira ya watumiaji wengi.
 
 ## Examine Logs
 
-Mifumo ya Linux inafuatilia shughuli za watumiaji na matukio ya mfumo kupitia faili mbalimbali za kumbukumbu. Kumbukumbu hizi ni muhimu kwa kutambua ufikiaji usioidhinishwa, maambukizi ya malware, na matukio mengine ya usalama. Faili muhimu za kumbukumbu ni pamoja na:
+Mifumo ya Linux inafuatilia shughuli za watumiaji na matukio ya mfumo kupitia faili mbalimbali za log. Logs hizi ni muhimu kwa kutambua ufikiaji usioidhinishwa, maambukizi ya malware, na matukio mengine ya usalama. Faili muhimu za log ni pamoja na:
 
 - **/var/log/syslog** (Debian) au **/var/log/messages** (RedHat): Huhifadhi ujumbe na shughuli za mfumo mzima.
 - **/var/log/auth.log** (Debian) au **/var/log/secure** (RedHat): Hurekodi majaribio ya uthibitishaji, kuingia kwa mafanikio na yasiyofanikiwa.
@@ -267,13 +267,13 @@ Mifumo ya Linux inafuatilia shughuli za watumiaji na matukio ya mfumo kupitia fa
 - **/var/log/cron**: Huhifadhi utekelezaji wa kazi za cron.
 - **/var/log/daemon.log**: Inafuatilia shughuli za huduma za nyuma.
 - **/var/log/btmp**: Huhifadhi majaribio ya kuingia yasiyofanikiwa.
-- **/var/log/httpd/**: Inashikilia kumbukumbu za makosa na ufikiaji wa Apache HTTPD.
+- **/var/log/httpd/**: Inashikilia makosa na log za ufikiaji za Apache HTTPD.
 - **/var/log/mysqld.log** au **/var/log/mysql.log**: Huhifadhi shughuli za hifadhidata ya MySQL.
 - **/var/log/xferlog**: Huhifadhi uhamishaji wa faili za FTP.
-- **/var/log/**: Daima angalia kumbukumbu zisizotarajiwa hapa.
+- **/var/log/**: Daima angalia kwa log zisizotarajiwa hapa.
 
 > [!TIP]
-> Kumbukumbu za mifumo ya Linux na mifumo ya ukaguzi zinaweza kuzuiliwa au kufutwa katika tukio la uvamizi au malware. Kwa sababu kumbukumbu kwenye mifumo ya Linux kwa ujumla zina habari muhimu zaidi kuhusu shughuli za uhalifu, wavamizi mara nyingi huzifuta. Kwa hivyo, wakati wa kuchunguza faili za kumbukumbu zinazopatikana, ni muhimu kutafuta mapengo au entries zisizo za kawaida ambazo zinaweza kuwa dalili za kufutwa au kuingilia kati.
+> Logs za mifumo ya Linux na subsystems za ukaguzi zinaweza kuzuiliwa au kufutwa katika tukio la uvamizi au malware. Kwa sababu logs kwenye mifumo ya Linux kwa ujumla zina habari muhimu zaidi kuhusu shughuli za uhalifu, wavamizi mara nyingi huzifuta. Kwa hivyo, unapochunguza faili za log zinazopatikana, ni muhimu kutafuta mapengo au entries zisizo za kawaida ambazo zinaweza kuwa dalili za kufutwa au kuingiliwa.
 
 **Linux inahifadhi historia ya amri kwa kila mtumiaji**, iliyohifadhiwa katika:
 
@@ -289,24 +289,24 @@ Angalia faili ambazo zinaweza kutoa rprivileges za ziada:
 
 - Kagua `/etc/sudoers` kwa haki za mtumiaji zisizotarajiwa ambazo zinaweza kuwa zimetolewa.
 - Kagua `/etc/sudoers.d/` kwa haki za mtumiaji zisizotarajiwa ambazo zinaweza kuwa zimetolewa.
-- Kagua `/etc/groups` ili kubaini uanachama wa vikundi au ruhusa zisizo za kawaida.
-- Kagua `/etc/passwd` ili kubaini uanachama wa vikundi au ruhusa zisizo za kawaida.
+- Chunguza `/etc/groups` ili kubaini uanachama wa vikundi au ruhusa zisizo za kawaida.
+- Chunguza `/etc/passwd` ili kubaini uanachama wa vikundi au ruhusa zisizo za kawaida.
 
-Baadhi ya programu pia zinaweza kuunda kumbukumbu zake:
+Baadhi ya programu pia zinaweza kuunda log zao:
 
-- **SSH**: Kagua _\~/.ssh/authorized_keys_ na _\~/.ssh/known_hosts_ kwa muunganisho wa mbali usioidhinishwa.
-- **Gnome Desktop**: Angalia _\~/.recently-used.xbel_ kwa faili zilizofikiwa hivi karibuni kupitia programu za Gnome.
+- **SSH**: Chunguza _\~/.ssh/authorized_keys_ na _\~/.ssh/known_hosts_ kwa uhusiano wa mbali usioidhinishwa.
+- **Gnome Desktop**: Angalia _\~/.recently-used.xbel_ kwa faili zilizotumiwa hivi karibuni kupitia programu za Gnome.
 - **Firefox/Chrome**: Kagua historia ya kivinjari na upakuaji katika _\~/.mozilla/firefox_ au _\~/.config/google-chrome_ kwa shughuli za kushangaza.
 - **VIM**: Kagua _\~/.viminfo_ kwa maelezo ya matumizi, kama vile njia za faili zilizofikiwa na historia ya utafutaji.
 - **Open Office**: Kagua ufikiaji wa hati za hivi karibuni ambazo zinaweza kuashiria faili zilizovunjwa.
-- **FTP/SFTP**: Kagua kumbukumbu katika _\~/.ftp_history_ au _\~/.sftp_history_ kwa uhamishaji wa faili ambao unaweza kuwa haujaidhinishwa.
+- **FTP/SFTP**: Kagua log katika _\~/.ftp_history_ au _\~/.sftp_history_ kwa uhamishaji wa faili ambao unaweza kuwa usioidhinishwa.
 - **MySQL**: Chunguza _\~/.mysql_history_ kwa maswali ya MySQL yaliyotekelezwa, ambayo yanaweza kufichua shughuli zisizoidhinishwa za hifadhidata.
 - **Less**: Changanua _\~/.lesshst_ kwa historia ya matumizi, ikiwa ni pamoja na faili zilizotazamwa na amri zilizotekelezwa.
 - **Git**: Kagua _\~/.gitconfig_ na mradi _.git/logs_ kwa mabadiliko ya hifadhidata.
 
 ### USB Logs
 
-[**usbrip**](https://github.com/snovvcrash/usbrip) ni kipande kidogo cha programu kilichoandikwa kwa Python 3 safi ambacho kinachambua faili za kumbukumbu za Linux (`/var/log/syslog*` au `/var/log/messages*` kulingana na distro) kwa ajili ya kujenga meza za historia ya matukio ya USB.
+[**usbrip**](https://github.com/snovvcrash/usbrip) ni kipande kidogo cha programu kilichoandikwa kwa Python 3 safi ambacho kinachambua faili za log za Linux (`/var/log/syslog*` au `/var/log/messages*` kulingana na distro) kwa ajili ya kujenga meza za historia ya matukio ya USB.
 
 Ni muhimu **kujua USB zote ambazo zimekuwa zikitumika** na itakuwa na manufaa zaidi ikiwa una orodha iliyoidhinishwa ya USB ili kupata "matukio ya ukiukaji" (matumizi ya USB ambazo si ndani ya orodha hiyo).
 
@@ -327,17 +327,17 @@ More examples and info inside the github: [https://github.com/snovvcrash/usbrip]
 
 ## Review User Accounts and Logon Activities
 
-Examine the _**/etc/passwd**_, _**/etc/shadow**_ and **security logs** for unusual names or accounts created and or used in close proximity to known unauthorized events. Also, check possible sudo brute-force attacks.\
-Moreover, check files like _**/etc/sudoers**_ and _**/etc/groups**_ for unexpected privileges given to users.\
-Finally, look for accounts with **no passwords** or **easily guessed** passwords.
+Chunguza _**/etc/passwd**_, _**/etc/shadow**_ na **security logs** kwa majina yasiyo ya kawaida au akaunti zilizoundwa na au kutumika karibu na matukio yaliyojulikana yasiyoidhinishwa. Pia, angalia mashambulizi ya sudo brute-force.\
+Zaidi ya hayo, angalia faili kama _**/etc/sudoers**_ na _**/etc/groups**_ kwa ruhusa zisizotarajiwa zilizotolewa kwa watumiaji.\
+Hatimaye, angalia akaunti zenye **hakuna nywila** au **nywila zinazoweza kukisiwa kwa urahisi**.
 
 ## Examine File System
 
 ### Analyzing File System Structures in Malware Investigation
 
-When investigating malware incidents, the structure of the file system is a crucial source of information, revealing both the sequence of events and the malware's content. However, malware authors are developing techniques to hinder this analysis, such as modifying file timestamps or avoiding the file system for data storage.
+Wakati wa kuchunguza matukio ya malware, muundo wa mfumo wa faili ni chanzo muhimu cha habari, kinachoonyesha mfululizo wa matukio na maudhui ya malware. Hata hivyo, waandishi wa malware wanatengeneza mbinu za kuzuia uchambuzi huu, kama vile kubadilisha muda wa faili au kuepuka mfumo wa faili kwa ajili ya uhifadhi wa data.
 
-To counter these anti-forensic methods, it's essential to:
+Ili kupambana na mbinu hizi za anti-forensic, ni muhimu:
 
 - **Conduct a thorough timeline analysis** using tools like **Autopsy** for visualizing event timelines or **Sleuth Kit's** `mactime` for detailed timeline data.
 - **Investigate unexpected scripts** in the system's $PATH, which might include shell or PHP scripts used by attackers.
@@ -355,11 +355,11 @@ ls -laR --sort=time /bin```
 ls -lai /bin | sort -n```
 ````
 > [!TIP]
-> Kumbuka kwamba **mshambuliaji** anaweza **kubadilisha** **wakati** ili kufanya **faili kuonekana** **halali**, lakini hawezi **kubadilisha** **inode**. Ikiwa unapata kwamba **faili** inaonyesha kwamba iliumbwa na kubadilishwa kwa **wakati mmoja** na faili zingine katika folda hiyo hiyo, lakini **inode** ni **kubwa zaidi** kwa **kushtukiza**, basi **alama za wakati za faili hiyo zilibadilishwa**.
+> Kumbuka kwamba **mshambuliaji** anaweza **kubadilisha** **wakati** ili kufanya **faili kuonekana** **halali**, lakini hawezi **kubadilisha** **inode**. Ikiwa unapata kwamba **faili** inaonyesha kwamba iliumbwa na kubadilishwa kwa **wakati mmoja** na faili zingine katika folda hiyo hiyo, lakini **inode** ni **kubwa zaidi** **kisivyo tarajiwa**, basi **alama za wakati za faili hiyo zilibadilishwa**.
 
 ## Linganisha faili za toleo tofauti la mfumo wa faili
 
-### Muhtasari wa Linganisho la Toleo la Mfumo wa Faili
+### Muhtasari wa Linganisha Toleo la Mfumo wa Faili
 
 Ili kulinganisha toleo la mfumo wa faili na kubaini mabadiliko, tunatumia amri rahisi za `git diff`:
 
@@ -367,7 +367,7 @@ Ili kulinganisha toleo la mfumo wa faili na kubaini mabadiliko, tunatumia amri r
 ```bash
 git diff --no-index --diff-filter=A path/to/old_version/ path/to/new_version/
 ```
-- **Kwa yaliyobadilishwa**, orodhesha mabadiliko huku ukipuuzilia mbali mistari maalum:
+- **Kwa yaliyobadilishwa**, orodhesha mabadiliko huku ukipuuza mistari maalum:
 ```bash
 git diff --no-index --diff-filter=M path/to/old_version/ path/to/new_version/ | grep -E "^\+" | grep -v "Installed-Time"
 ```
@@ -375,9 +375,9 @@ git diff --no-index --diff-filter=M path/to/old_version/ path/to/new_version/ | 
 ```bash
 git diff --no-index --diff-filter=D path/to/old_version/ path/to/new_version/
 ```
-- **Chaguzi za kuchuja** (`--diff-filter`) husaidia kupunguza hadi mabadiliko maalum kama vile faili zilizoongezwa (`A`), kufutwa (`D`), au kubadilishwa (`M`).
+- **Chaguo za kuchuja** (`--diff-filter`) husaidia kupunguza hadi mabadiliko maalum kama vile faili zilizoongezwa (`A`), kufutwa (`D`), au kubadilishwa (`M`).
 - `A`: Faili zilizoongezwa
-- `C`: Faili zilizokopiwa
+- `C`: Faili zilizokopwa
 - `D`: Faili zilizofutwa
 - `M`: Faili zilizobadilishwa
 - `R`: Faili zilizobadilishwa jina

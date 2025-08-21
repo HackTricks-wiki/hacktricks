@@ -15,11 +15,11 @@ macos-dyld-process.md
 
 ## **DYLD_INSERT_LIBRARIES**
 
-Hii ni kama [**LD_PRELOAD kwenye Linux**](../../../../linux-hardening/privilege-escalation/index.html#ld_preload). Inaruhusu kuashiria mchakato utakaotekelezwa kupakia maktaba maalum kutoka kwa njia (ikiwa variable ya env imewezeshwa)
+Hii ni kama [**LD_PRELOAD kwenye Linux**](../../../../linux-hardening/privilege-escalation/index.html#ld_preload). Inaruhusu kuashiria mchakato ambao utaendeshwa kupakia maktaba maalum kutoka kwa njia (ikiwa variable ya env imewezeshwa)
 
 Teknolojia hii inaweza pia **kutumika kama mbinu ya ASEP** kwani kila programu iliyosakinishwa ina plist inayoitwa "Info.plist" ambayo inaruhusu **kuweka variables za mazingira** kwa kutumia ufunguo unaoitwa `LSEnvironmental`.
 
-> [!NOTE]
+> [!TIP]
 > Tangu mwaka 2012 **Apple imepunguza kwa kiasi kikubwa nguvu** ya **`DYLD_INSERT_LIBRARIES`**.
 >
 > Nenda kwenye msimbo na **angalia `src/dyld.cpp`**. Katika kazi **`pruneEnvironmentVariables`** unaweza kuona kuwa **`DYLD_*`** variables zimeondolewa.
@@ -28,10 +28,10 @@ Teknolojia hii inaweza pia **kutumika kama mbinu ya ASEP** kwani kila programu i
 >
 > - Binary ni `setuid/setgid`
 > - Uwepo wa sehemu `__RESTRICT/__restrict` katika binary ya macho.
-> - Programu ina haki (hardened runtime) bila [`com.apple.security.cs.allow-dyld-environment-variables`](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-dyld-environment-variables) haki
->   - Angalia **haki** za binary kwa: `codesign -dv --entitlements :- </path/to/bin>`
+> - Programu ina haki (hardened runtime) bila [`com.apple.security.cs.allow-dyld-environment-variables`](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-dyld-environment-variables) entitlement
+>  - Angalia **entitlements** za binary kwa: `codesign -dv --entitlements :- </path/to/bin>`
 >
-> Katika toleo za kisasa zaidi unaweza kupata mantiki hii katika sehemu ya pili ya kazi **`configureProcessRestrictions`.** Hata hivyo, kile kinachotekelezwa katika toleo jipya ni **ukaguzi wa mwanzo wa kazi** (unaweza kuondoa ifs zinazohusiana na iOS au simulation kwani hizo hazitatumika katika macOS).
+> Katika toleo la kisasa zaidi unaweza kupata mantiki hii katika sehemu ya pili ya kazi **`configureProcessRestrictions`.** Hata hivyo, kile kinachotekelezwa katika toleo jipya ni **ukaguzi wa mwanzo wa kazi** (unaweza kuondoa ifs zinazohusiana na iOS au simulation kwani hizo hazitatumika katika macOS).
 
 ### Library Validation
 
@@ -42,13 +42,13 @@ Ili kupakia maktaba ya kawaida, binary inahitaji kuwa na **moja ya haki zifuataz
 - [`com.apple.security.cs.disable-library-validation`](../../macos-security-protections/macos-dangerous-entitlements.md#com.apple.security.cs.disable-library-validation)
 - [`com.apple.private.security.clear-library-validation`](../../macos-security-protections/macos-dangerous-entitlements.md#com.apple.private.security.clear-library-validation)
 
-au binary **haipaswi** kuwa na **haki ya hardened runtime** au **haki ya uhakiki wa maktaba**.
+au binary **haipaswi** kuwa na **hardened runtime flag** au **library validation flag**.
 
 Unaweza kuangalia ikiwa binary ina **hardened runtime** kwa `codesign --display --verbose <bin>` ukikagua bendera ya runtime katika **`CodeDirectory`** kama: **`CodeDirectory v=20500 size=767 flags=0x10000(runtime) hashes=13+7 location=embedded`**
 
 Unaweza pia kupakia maktaba ikiwa ime **sainiwa kwa cheti sawa na binary**.
 
-Pata mfano wa jinsi ya (ku) kutumia hii na kuangalia vizuizi katika:
+Pata mfano wa jinsi ya (ab) kutumia hii na kuangalia vizuizi katika:
 
 {{#ref}}
 macos-dyld-hijacking-and-dyld_insert_libraries.md
@@ -57,12 +57,12 @@ macos-dyld-hijacking-and-dyld_insert_libraries.md
 ## Dylib Hijacking
 
 > [!CAUTION]
-> Kumbuka kwamba **vizuizi vya awali vya Uthibitishaji wa Maktaba pia vinatumika** kutekeleza mashambulizi ya Dylib hijacking.
+> Kumbuka kwamba **vizuizi vya awali vya Library Validation pia vinatumika** kufanya mashambulizi ya Dylib hijacking.
 
-Kama ilivyo katika Windows, katika MacOS unaweza pia **kuchukua dylibs** ili kufanya **programu** **kufanya** **msimbo** **wowote** (vizuri, kwa kweli kutoka kwa mtumiaji wa kawaida hii inaweza isiwezekane kwani unaweza kuhitaji ruhusa ya TCC kuandika ndani ya kifurushi cha `.app` na kuchukua maktaba).\
-Hata hivyo, njia ambayo **MacOS** programu **zinavyopakia** maktaba ni **zaidi ya kizuizi** kuliko katika Windows. Hii ina maana kwamba **waendelezaji wa malware** bado wanaweza kutumia mbinu hii kwa **kujificha**, lakini uwezekano wa kuweza **kuvitumia hili kuongeza mamlaka ni mdogo sana**.
+Kama ilivyo katika Windows, katika MacOS unaweza pia **kudhibiti dylibs** ili kufanya **programu** **kufanya** **msimbo** **wowote** (vizuri, kwa kweli kutoka kwa mtumiaji wa kawaida hii inaweza isiwezekane kwani unaweza kuhitaji ruhusa ya TCC kuandika ndani ya `.app` bundle na kudhibiti maktaba).\
+Hata hivyo, njia ambayo **MacOS** programu **zinavyopakia** maktaba ni **zaidi ya kizuizi** kuliko katika Windows. Hii inamaanisha kwamba **waendelezaji wa malware** bado wanaweza kutumia mbinu hii kwa **kujificha**, lakini uwezekano wa kuweza **kuabudu hii ili kupandisha mamlaka ni mdogo sana**.
 
-Kwanza kabisa, ni **ya kawaida zaidi** kupata kwamba **MacOS binaries inaonyesha njia kamili** kwa maktaba za kupakia. Na pili, **MacOS kamwe haitafuta** katika folda za **$PATH** kwa maktaba.
+Kwanza kabisa, ni **ya kawaida zaidi** kupata kwamba **MacOS binaries inaonyesha njia kamili** za maktaba za kupakia. Na pili, **MacOS kamwe haitafuta** katika folda za **$PATH** kwa maktaba.
 
 Sehemu **kuu** ya **msimbo** unaohusiana na kazi hii iko katika **`ImageLoader::recursiveLoadLibraries`** katika `ImageLoader.cpp`.
 
@@ -70,15 +70,15 @@ Kuna **amri 4 tofauti za kichwa** ambazo binary ya macho inaweza kutumia kupakia
 
 - Amri ya **`LC_LOAD_DYLIB`** ni amri ya kawaida ya kupakia dylib.
 - Amri ya **`LC_LOAD_WEAK_DYLIB`** inafanya kazi kama ile ya awali, lakini ikiwa dylib haipatikani, utekelezaji unaendelea bila kosa lolote.
-- Amri ya **`LC_REEXPORT_DYLIB`** inafanya proxy (au re-export) alama kutoka maktaba tofauti.
+- Amri ya **`LC_REEXPORT_DYLIB`** inafanya proxy (au re-exports) alama kutoka maktaba tofauti.
 - Amri ya **`LC_LOAD_UPWARD_DYLIB`** inatumika wakati maktaba mbili zinategemeana (hii inaitwa _upward dependency_).
 
 Hata hivyo, kuna **aina 2 za dylib hijacking**:
 
-- **Maktaba za dhaifu zilizokosekana**: Hii ina maana kwamba programu itajaribu kupakia maktaba ambayo haipo iliyowekwa na **LC_LOAD_WEAK_DYLIB**. Kisha, **ikiwa mshambuliaji anaweka dylib mahali inatarajiwa itapakiwa**.
-- Ukweli kwamba kiungo ni "dhaifu" ina maana kwamba programu itaendelea kufanya kazi hata kama maktaba haipatikani.
+- **Maktaba za dhaifu zilizokosekana**: Hii inamaanisha kwamba programu itajaribu kupakia maktaba ambayo haipo iliyowekwa na **LC_LOAD_WEAK_DYLIB**. Kisha, **ikiwa mshambuliaji anaweka dylib mahali inatarajiwa itapakiwa**.
+- Ukweli kwamba kiungo ni "dhaifu" inamaanisha kwamba programu itaendelea kufanya kazi hata kama maktaba haipatikani.
 - **Msimbo unaohusiana** na hii uko katika kazi `ImageLoaderMachO::doGetDependentLibraries` ya `ImageLoaderMachO.cpp` ambapo `lib->required` ni tu `false` wakati `LC_LOAD_WEAK_DYLIB` ni kweli.
-- **Pata maktaba dhaifu zilizokosekana** katika binaries na (una mfano baadaye wa jinsi ya kuunda maktaba za kuchukua):
+- **Pata maktaba za dhaifu zilizokosekana** katika binaries na (una mfano baadaye wa jinsi ya kuunda maktaba za kudhibiti):
 - ```bash
 otool -l </path/to/bin> | grep LC_LOAD_WEAK_DYLIB -A 5 cmd LC_LOAD_WEAK_DYLIB
 cmdsize 56
@@ -87,20 +87,20 @@ time stamp 2 Wed Jun 21 12:23:31 1969
 current version 1.0.0
 compatibility version 1.0.0
 ```
-- **Imepangwa na @rpath**: Binaries za Mach-O zinaweza kuwa na amri **`LC_RPATH`** na **`LC_LOAD_DYLIB`**. Kulingana na **thamani** za amri hizo, **maktaba** zitapakiwa kutoka **folda tofauti**.
+- **Iliyowekwa na @rpath**: Mach-O binaries zinaweza kuwa na amri **`LC_RPATH`** na **`LC_LOAD_DYLIB`**. Kulingana na **maadili** ya amri hizo, **maktaba** zitapakiwa kutoka **directories** tofauti.
 - **`LC_RPATH`** ina njia za baadhi ya folda zinazotumika kupakia maktaba na binary.
-- **`LC_LOAD_DYLIB`** ina njia za maktaba maalum za kupakia. Njia hizi zinaweza kuwa na **`@rpath`**, ambayo itabadilishwa na thamani katika **`LC_RPATH`**. Ikiwa kuna njia kadhaa katika **`LC_RPATH`** kila mmoja atatumika kutafuta maktaba ya kupakia. Mfano:
-- Ikiwa **`LC_LOAD_DYLIB`** ina `@rpath/library.dylib` na **`LC_RPATH`** ina `/application/app.app/Contents/Framework/v1/` na `/application/app.app/Contents/Framework/v2/`. Folda zote mbili zitatumika kupakia `library.dylib`**.** Ikiwa maktaba haipo katika `[...]/v1/` na mshambuliaji anaweza kuiweka hapo ili kuchukua upakiaji wa maktaba katika `[...]/v2/` kwani mpangilio wa njia katika **`LC_LOAD_DYLIB`** unafuata.
+- **`LC_LOAD_DYLIB`** ina njia za maktaba maalum za kupakia. Njia hizi zinaweza kuwa na **`@rpath`**, ambayo itabadilishwa na maadili katika **`LC_RPATH`**. Ikiwa kuna njia kadhaa katika **`LC_RPATH`** kila mmoja atatumika kutafuta maktaba ya kupakia. Mfano:
+- Ikiwa **`LC_LOAD_DYLIB`** ina `@rpath/library.dylib` na **`LC_RPATH`** ina `/application/app.app/Contents/Framework/v1/` na `/application/app.app/Contents/Framework/v2/`. Folda zote mbili zitatumika kupakia `library.dylib`**.** Ikiwa maktaba haipo katika `[...]/v1/` na mshambuliaji anaweza kuiweka hapo ili kudhibiti upakiaji wa maktaba katika `[...]/v2/` kwani mpangilio wa njia katika **`LC_LOAD_DYLIB`** unafuata.
 - **Pata njia za rpath na maktaba** katika binaries kwa: `otool -l </path/to/binary> | grep -E "LC_RPATH|LC_LOAD_DYLIB" -A 5`
 
 > [!NOTE] > **`@executable_path`**: Ni **njia** ya folda inayoshikilia **faili kuu ya kutekeleza**.
 >
-> **`@loader_path`**: Ni **njia** ya **folda** inayoshikilia **binary ya Mach-O** ambayo ina amri ya upakiaji.
+> **`@loader_path`**: Ni **njia** ya **folda** inayoshikilia **binary ya Mach-O** ambayo ina amri ya kupakia.
 >
 > - Inapotumika katika executable, **`@loader_path`** ni kwa ufanisi **sawa** na **`@executable_path`**.
 > - Inapotumika katika **dylib**, **`@loader_path`** inatoa **njia** kwa **dylib**.
 
-Njia ya **kuongeza mamlaka** kwa kutumia kazi hii itakuwa katika kesi nadra ambapo **programu** inayotekelezwa **na** **root** inatafuta **maktaba katika folda ambayo mshambuliaji ana ruhusa za kuandika.**
+Njia ya **kupandisha mamlaka** kwa kutumia kazi hii itakuwa katika kesi nadra ambapo **programu** inayotekelezwa **na** **root** inatafuta **maktaba katika folda ambayo mshambuliaji ana ruhusa za kuandika.**
 
 > [!TIP]
 > Scanner mzuri wa kupata **maktaba zilizokosekana** katika programu ni [**Dylib Hijack Scanner**](https://objective-see.com/products/dhs.html) au [**toleo la CLI**](https://github.com/pandazheng/DylibHijack).\
@@ -115,11 +115,11 @@ macos-dyld-hijacking-and-dyld_insert_libraries.md
 ## Dlopen Hijacking
 
 > [!CAUTION]
-> Kumbuka kwamba **vizuizi vya awali vya Uthibitishaji wa Maktaba pia vinatumika** kutekeleza mashambulizi ya Dlopen hijacking.
+> Kumbuka kwamba **vizuizi vya awali vya Library Validation pia vinatumika** kufanya mashambulizi ya Dlopen hijacking.
 
 Kutoka **`man dlopen`**:
 
-- Wakati njia **haijumuishi tabia ya slash** (yaani ni jina tu la majani), **dlopen() itafanya utafutaji**. Ikiwa **`$DYLD_LIBRARY_PATH`** ilipangwa wakati wa uzinduzi, dyld kwanza **itaangalia katika folda hiyo**. Kisha, ikiwa faili ya mach-o inayopiga simu au executable kuu inabainisha **`LC_RPATH`**, basi dyld itatafuta katika folda hizo. Kisha, ikiwa mchakato ni **usio na kizuizi**, dyld itatafuta katika **folda ya kazi ya sasa**. Mwishowe, kwa binaries za zamani, dyld itajaribu baadhi ya njia mbadala. Ikiwa **`$DYLD_FALLBACK_LIBRARY_PATH`** ilipangwa wakati wa uzinduzi, dyld itatafuta katika **folda hizo**, vinginevyo, dyld itatafuta katika **`/usr/local/lib/`** (ikiwa mchakato ni usio na kizuizi), na kisha katika **`/usr/lib/`** (habari hii ilichukuliwa kutoka **`man dlopen`**).
+- Wakati njia **haijumuishi tabia ya slash** (yaani ni jina tu la jani), **dlopen() itafanya utafutaji**. Ikiwa **`$DYLD_LIBRARY_PATH`** ilipangwa wakati wa uzinduzi, dyld itatafuta kwanza **katika folda hiyo**. Kisha, ikiwa faili ya mach-o inayopiga simu au executable kuu inabainisha **`LC_RPATH`**, basi dyld itatafuta **katika folda hizo**. Kisha, ikiwa mchakato ni **usio na kizuizi**, dyld itatafuta katika **folda ya kazi ya sasa**. Mwishowe, kwa binaries za zamani, dyld itajaribu baadhi ya njia mbadala. Ikiwa **`$DYLD_FALLBACK_LIBRARY_PATH`** ilipangwa wakati wa uzinduzi, dyld itatafuta katika **folda hizo**, vinginevyo, dyld itatafuta katika **`/usr/local/lib/`** (ikiwa mchakato ni usio na kizuizi), na kisha katika **`/usr/lib/`** (habari hii ilichukuliwa kutoka **`man dlopen`**).
 1. `$DYLD_LIBRARY_PATH`
 2. `LC_RPATH`
 3. `CWD`(ikiwa haina kizuizi)
@@ -130,10 +130,10 @@ Kutoka **`man dlopen`**:
 > [!CAUTION]
 > Ikiwa hakuna slashes katika jina, kutakuwa na njia 2 za kufanya hijacking:
 >
-> - Ikiwa **`LC_RPATH`** yoyote ni **ya kuandika** (lakini saini inakaguliwa, hivyo kwa hili unahitaji pia binary kuwa isiyo na kizuizi)
+> - Ikiwa **`LC_RPATH`** yoyote ni **ya kuandikwa** (lakini saini inakaguliwa, hivyo kwa hili unahitaji pia binary kuwa isiyo na kizuizi)
 > - Ikiwa binary ni **isiyo na kizuizi** na kisha inawezekana kupakia kitu kutoka CWD (au kutumia moja ya variable za mazingira zilizotajwa)
 
-- Wakati njia **inaonekana kama njia ya framework** (kwa mfano `/stuff/foo.framework/foo`), ikiwa **`$DYLD_FRAMEWORK_PATH`** ilipangwa wakati wa uzinduzi, dyld kwanza itaangalia katika folda hiyo kwa **njia ya sehemu ya framework** (kwa mfano `foo.framework/foo`). Kisha, dyld itajaribu **njia iliyotolewa kama ilivyo** (ikitumika folda ya kazi ya sasa kwa njia za uhusiano). Mwishowe, kwa binaries za zamani, dyld itajaribu baadhi ya njia mbadala. Ikiwa **`$DYLD_FALLBACK_FRAMEWORK_PATH`** ilipangwa wakati wa uzinduzi, dyld itatafuta katika folda hizo. Vinginevyo, itatafuta **`/Library/Frameworks`** (katika macOS ikiwa mchakato ni usio na kizuizi), kisha **`/System/Library/Frameworks`**.
+- Wakati njia **inaonekana kama njia ya framework** (kwa mfano `/stuff/foo.framework/foo`), ikiwa **`$DYLD_FRAMEWORK_PATH`** ilipangwa wakati wa uzinduzi, dyld itatafuta kwanza katika folda hiyo kwa **njia ya sehemu ya framework** (kwa mfano `foo.framework/foo`). Kisha, dyld itajaribu **njia iliyotolewa kama ilivyo** (ikitumika folda ya kazi ya sasa kwa njia za uhusiano). Mwishowe, kwa binaries za zamani, dyld itajaribu baadhi ya njia mbadala. Ikiwa **`$DYLD_FALLBACK_FRAMEWORK_PATH`** ilipangwa wakati wa uzinduzi, dyld itatafuta katika folda hizo. Vinginevyo, itatafuta **`/Library/Frameworks`** (katika macOS ikiwa mchakato ni usio na kizuizi), kisha **`/System/Library/Frameworks`**.
 1. `$DYLD_FRAMEWORK_PATH`
 2. njia iliyotolewa (ikitumika folda ya kazi ya sasa kwa njia za uhusiano ikiwa haina kizuizi)
 3. `$DYLD_FALLBACK_FRAMEWORK_PATH`
@@ -141,11 +141,11 @@ Kutoka **`man dlopen`**:
 5. `/System/Library/Frameworks`
 
 > [!CAUTION]
-> Ikiwa ni njia ya framework, njia ya kuichukua itakuwa:
+> Ikiwa ni njia ya framework, njia ya kuipora itakuwa:
 >
 > - Ikiwa mchakato ni **usio na kizuizi**, kutumia **njia ya uhusiano kutoka CWD** variable za mazingira zilizotajwa (hata kama haijasemwa katika nyaraka ikiwa mchakato umewekwa kizuizi DYLD\_\* variable za mazingira zimeondolewa)
 
-- Wakati njia **ina slashes lakini si njia ya framework** (yaani, njia kamili au njia ya sehemu kwa dylib), dlopen() kwanza inatafuta (ikiwa imewekwa) katika **`$DYLD_LIBRARY_PATH`** (ikiwa na sehemu ya majani kutoka kwa njia). Kisha, dyld **inajaribu njia iliyotolewa** (ikitumika folda ya kazi ya sasa kwa njia za uhusiano (lakini tu kwa michakato isiyo na kizuizi)). Mwishowe, kwa binaries za zamani, dyld itajaribu njia mbadala. Ikiwa **`$DYLD_FALLBACK_LIBRARY_PATH`** ilipangwa wakati wa uzinduzi, dyld itatafuta katika folda hizo, vinginevyo, dyld itatafuta katika **`/usr/local/lib/`** (ikiwa mchakato ni usio na kizuizi), na kisha katika **`/usr/lib/`**.
+- Wakati njia **ina slashes lakini si njia ya framework** (yaani, njia kamili au njia ya sehemu kwa dylib), dlopen() kwanza inatafuta (ikiwa imewekwa) katika **`$DYLD_LIBRARY_PATH`** (ikiwa na sehemu ya mwisho kutoka kwa njia). Kisha, dyld **inajaribu njia iliyotolewa** (ikitumika folda ya kazi ya sasa kwa njia za uhusiano (lakini tu kwa michakato isiyo na kizuizi)). Mwishowe, kwa binaries za zamani, dyld itajaribu njia mbadala. Ikiwa **`$DYLD_FALLBACK_LIBRARY_PATH`** ilipangwa wakati wa uzinduzi, dyld itatafuta katika folda hizo, vinginevyo, dyld itatafuta katika **`/usr/local/lib/`** (ikiwa mchakato ni usio na kizuizi), na kisha katika **`/usr/lib/`**.
 1. `$DYLD_LIBRARY_PATH`
 2. njia iliyotolewa (ikitumika folda ya kazi ya sasa kwa njia za uhusiano ikiwa haina kizuizi)
 3. `$DYLD_FALLBACK_LIBRARY_PATH`
@@ -153,16 +153,16 @@ Kutoka **`man dlopen`**:
 5. `/usr/lib/`
 
 > [!CAUTION]
-> Ikiwa kuna slashes katika jina na si framework, njia ya kuichukua itakuwa:
+> Ikiwa kuna slashes katika jina na si framework, njia ya kuipora itakuwa:
 >
 > - Ikiwa binary ni **isiyo na kizuizi** na kisha inawezekana kupakia kitu kutoka CWD au `/usr/local/lib` (au kutumia moja ya variable za mazingira zilizotajwa)
 
-> [!NOTE]
+> [!TIP]
 > Kumbuka: Hakuna **faili za usanidi** za **kudhibiti utafutaji wa dlopen**.
 >
-> Kumbuka: Ikiwa executable kuu ni **set\[ug]id binary au codesigned na haki**, basi **variable zote za mazingira zinapuuziliwa mbali**, na njia kamili pekee inaweza kutumika ([angalia vizuizi vya DYLD_INSERT_LIBRARIES](macos-dyld-hijacking-and-dyld_insert_libraries.md#check-dyld_insert_librery-restrictions) kwa maelezo zaidi)
+> Kumbuka: Ikiwa executable kuu ni **set\[ug]id binary au codesigned na entitlements**, basi **variable zote za mazingira zinapuuziliwa mbali**, na njia kamili pekee inaweza kutumika ([angalia vizuizi vya DYLD_INSERT_LIBRARIES](macos-dyld-hijacking-and-dyld_insert_libraries.md#check-dyld_insert_librery-restrictions) kwa maelezo zaidi)
 >
-> Kumbuka: Mifumo ya Apple hutumia faili "za ulimwengu" kuunganisha maktaba za 32-bit na 64-bit. Hii ina maana hakuna **njia tofauti za utafutaji za 32-bit na 64-bit**.
+> Kumbuka: Mifumo ya Apple hutumia faili "za ulimwengu" kuunganisha maktaba za 32-bit na 64-bit. Hii inamaanisha hakuna **njia tofauti za utafutaji za 32-bit na 64-bit**.
 >
 > Kumbuka: Katika mifumo ya Apple, maktaba nyingi za OS **zimeunganishwa katika cache ya dyld** na hazipo kwenye diski. Kwa hivyo, kuita **`stat()`** ili kuangalia ikiwa maktaba ya OS ipo **haitafanya kazi**. Hata hivyo, **`dlopen_preflight()`** inatumia hatua sawa na **`dlopen()`** kutafuta faili ya mach-o inayofaa.
 
@@ -217,7 +217,7 @@ sudo fs_usage | grep "dlopentest"
 ```
 ## Relative Path Hijacking
 
-Ikiwa **binary/app yenye mamlaka** (kama SUID au binary fulani yenye haki zenye nguvu) in **pakiwa maktaba ya njia ya uhusiano** (kwa mfano kutumia `@executable_path` au `@loader_path`) na ina **Library Validation disabled**, inaweza kuwa inawezekana kuhamasisha binary hiyo kwenye eneo ambapo mshambuliaji anaweza **kubadilisha maktaba ya njia ya uhusiano**, na kuitumia kuingiza msimbo kwenye mchakato.
+Ikiwa **binary/app yenye mamlaka** (kama SUID au binary fulani yenye haki zenye nguvu) in **pakia maktaba ya njia ya uhusiano** (kwa mfano kutumia `@executable_path` au `@loader_path`) na ina **Library Validation imezimwa**, inaweza kuwa inawezekana kuhamasisha binary kwenye eneo ambapo mshambuliaji anaweza **kubadilisha maktaba ya njia ya uhusiano iliyopakiwa**, na kuitumia kuingiza msimbo kwenye mchakato.
 
 ## Prune `DYLD_*` na `LD_LIBRARY_PATH` env variables
 
@@ -231,7 +231,7 @@ Kazi hii inaitwa kutoka kwa kazi **`_main`** ya faili hiyo hiyo ikiwa inalenga O
 if ( !gLinkContext.allowEnvVarsPrint && !gLinkContext.allowEnvVarsPath && !gLinkContext.allowEnvVarsSharedCache ) {
 pruneEnvironmentVariables(envp, &apple);
 ```
-na bendera hizo za boolean zimewekwa katika faili hiyo hiyo katika msimbo:
+na bendera hizo boolean zimewekwa katika faili hiyo hiyo katika msimbo:
 ```cpp
 #if TARGET_OS_OSX
 // support chrooting from old kernel
@@ -262,9 +262,9 @@ gLinkContext.allowClassicFallbackPaths   = !isRestricted;
 gLinkContext.allowInsertFailures         = false;
 gLinkContext.allowInterposing         	 = true;
 ```
-Ambayo kwa msingi inamaanisha kwamba ikiwa binary ni **suid** au **sgid**, au ina sehemu ya **RESTRICT** katika vichwa au ilisainiwa na bendera ya **CS_RESTRICT**, basi **`!gLinkContext.allowEnvVarsPrint && !gLinkContext.allowEnvVarsPath && !gLinkContext.allowEnvVarsSharedCache`** ni kweli na mabadiliko ya mazingira yanakatwa.
+Ambayo kwa msingi inamaanisha kwamba ikiwa binary ni **suid** au **sgid**, au ina sehemu ya **RESTRICT** katika vichwa au ilisainiwa kwa kutumia bendera ya **CS_RESTRICT**, basi **`!gLinkContext.allowEnvVarsPrint && !gLinkContext.allowEnvVarsPath && !gLinkContext.allowEnvVarsSharedCache`** ni kweli na mabadiliko ya mazingira yanakatwa.
 
-Kumbuka kwamba ikiwa CS_REQUIRE_LV ni kweli, basi mabadiliko hayatakatiwa lakini uthibitishaji wa maktaba utaangalia wanatumia cheti sawa na binary ya awali.
+Kumbuka kwamba ikiwa CS_REQUIRE_LV ni kweli, basi mabadiliko hayatakatiwa lakini uthibitishaji wa maktaba utaangalia kwamba yanatumia cheti sawa na binary ya awali.
 
 ## Angalia Vikwazo
 

@@ -1,4 +1,4 @@
-# Kutoroka kutoka kwa Jails
+# Kutoka kwa Jails
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -6,22 +6,22 @@
 
 **Tafuta katika** [**https://gtfobins.github.io/**](https://gtfobins.github.io) **kama unaweza kutekeleza binary yoyote yenye mali ya "Shell"**
 
-## Chroot Escapes
+## Kutoroka kwa Chroot
 
-Kutoka [wikipedia](https://en.wikipedia.org/wiki/Chroot#Limitations): Mekanism ya chroot **haikusudiwi kulinda** dhidi ya kuingilia kati kwa makusudi na **watumiaji wenye mamlaka** (**root**). Katika mifumo mingi, muktadha wa chroot haujajumuishwa vizuri na programu zilizochrooted **zikiwa na mamlaka ya kutosha zinaweza kufanya chroot ya pili ili kutoroka**.\
+Kutoka [wikipedia](https://en.wikipedia.org/wiki/Chroot#Limitations): Mekanismu ya chroot **haikusudiwi kulinda** dhidi ya kuingilia kati kwa makusudi na **watumiaji wenye mamlaka** (**root**). Katika mifumo mingi, muktadha wa chroot haujajipanga vizuri na programu zilizowekwa chroot **zikiwa na mamlaka ya kutosha zinaweza kufanya chroot ya pili ili kutoroka**.\
 Kawaida hii inamaanisha kwamba ili kutoroka unahitaji kuwa root ndani ya chroot.
 
 > [!TIP]
-> **Zana** [**chw00t**](https://github.com/earthquake/chw00t) iliumbwa kutumia hali zifuatazo na kutoroka kutoka `chroot`.
+> **Zana** [**chw00t**](https://github.com/earthquake/chw00t) iliumbwa ili kutumia hali zifuatazo na kutoroka kutoka `chroot`.
 
 ### Root + CWD
 
 > [!WARNING]
-> Ikiwa wewe ni **root** ndani ya chroot unaweza **kutoroka** kwa kuunda **chroot nyingine**. Hii ni kwa sababu chroots 2 cannot coexists (katika Linux), hivyo ikiwa utaunda folda kisha **kuunda chroot mpya** kwenye folda hiyo mpya ukiwa **nje yake**, sasa utakuwa **nje ya chroot mpya** na hivyo utakuwa katika FS.
+> Ikiwa wewe ni **root** ndani ya chroot unaweza **kutoroka** kwa kuunda **chroot nyingine**. Hii ni kwa sababu chroots 2 haziwezi kuishi pamoja (katika Linux), hivyo ikiwa utaunda folda kisha **kuunda chroot mpya** kwenye folda hiyo mpya ukiwa **nje yake**, sasa utakuwa **nje ya chroot mpya** na hivyo utakuwa katika FS.
 >
-> Hii inatokea kwa sababu kawaida chroot HAHAHUSU kazi yako ya saraka kwa ile iliyoonyeshwa, hivyo unaweza kuunda chroot lakini uwe nje yake.
+> Hii inatokea kwa sababu kawaida chroot HAHAHUSU kazi yako ya sasa kwenye ile iliyoonyeshwa, hivyo unaweza kuunda chroot lakini ukawa nje yake.
 
-Kawaida hutapata binary ya `chroot` ndani ya chroot jail, lakini unaweza **kuchakata, kupakia na kutekeleza** binary:
+Kawaida huwezi kupata binary ya `chroot` ndani ya jela ya chroot, lakini unaweza **kusaidia, kupakia na kutekeleza** binary:
 
 <details>
 
@@ -122,8 +122,8 @@ chroot(".");
 
 > [!WARNING]
 >
-> - Kuunganisha kifaa cha mzizi (/) katika folda ndani ya chroot
-> - Kuingia chroot katika folda hiyo
+> - Kuunganisha kifaa cha mzizi (/) ndani ya directory ndani ya chroot
+> - Kuingia chroot katika hiyo directory
 >
 > Hii inawezekana katika Linux
 
@@ -131,9 +131,9 @@ chroot(".");
 
 > [!WARNING]
 >
-> - Kuunganisha procfs katika folda ndani ya chroot (ikiwa bado haijafanywa)
-> - Tafuta pid ambayo ina kiingilio tofauti cha mzizi/cwd, kama: /proc/1/root
-> - Chroot katika kiingilio hicho
+> - Kuunganisha procfs ndani ya directory ndani ya chroot (ikiwa bado haijafanywa)
+> - Tafuta pid ambayo ina kiingilio tofauti cha root/cwd, kama: /proc/1/root
+> - Chroot katika hiyo kiingilio
 
 ### Root(?) + Fork
 
@@ -147,7 +147,7 @@ chroot(".");
 
 > [!WARNING]
 >
-> - Wakati fulani watumiaji wangeweza kubaini michakato yao wenyewe kutoka kwa mchakato wa wenyewe... lakini hii haiwezekani kwa default tena
+> - Wakati fulani watumiaji wangeweza ku-debug mchakato wao wenyewe kutoka kwa mchakato wa wenyewe... lakini hii haiwezekani kwa default tena
 > - Hata hivyo, ikiwa inawezekana, unaweza ptrace katika mchakato na kutekeleza shellcode ndani yake ([ona mfano huu](linux-capabilities.md#cap_sys_ptrace)).
 
 ## Bash Jails
@@ -162,7 +162,7 @@ env
 export
 pwd
 ```
-### Modify PATH
+### Badilisha PATH
 
 Angalia kama unaweza kubadilisha variable ya mazingira ya PATH
 ```bash
@@ -175,7 +175,7 @@ echo /home/* #List directory
 :set shell=/bin/sh
 :shell
 ```
-### Unda skripti
+### Create script
 
 Angalia kama unaweza kuunda faili inayoweza kutekelezwa yenye _/bin/bash_ kama maudhui
 ```bash
@@ -184,7 +184,7 @@ red /bin/bash
 ```
 ### Pata bash kutoka SSH
 
-Ikiwa unapata ufikiaji kupitia ssh unaweza kutumia hila hii kutekeleza shell ya bash:
+Ikiwa unapata kupitia ssh unaweza kutumia hila hii kutekeleza shell ya bash:
 ```bash
 ssh -t user@<IP> bash # Get directly an interactive shell
 ssh user@<IP> -t "bash --noprofile -i"
@@ -198,7 +198,7 @@ BASH_CMDS[shell]=/bin/bash;shell -i
 ```
 ### Wget
 
-Unaweza kuandika upya faili ya sudoers kwa mfano
+Unaweza kuandika upya faili ya sudoers kwa mfano.
 ```bash
 wget http://127.0.0.1:8080/sudoers -O /etc/sudoers
 ```
@@ -209,6 +209,7 @@ wget http://127.0.0.1:8080/sudoers -O /etc/sudoers
 [https://gtfobins.github.io](https://gtfobins.github.io/**](https/gtfobins.github.io)\
 **Inaweza pia kuwa ya kuvutia ukurasa:**
 
+
 {{#ref}}
 ../bypass-bash-restrictions/
 {{#endref}}
@@ -216,6 +217,7 @@ wget http://127.0.0.1:8080/sudoers -O /etc/sudoers
 ## Python Jails
 
 Njia kuhusu kutoroka kutoka kwa jails za python katika ukurasa ufuatao:
+
 
 {{#ref}}
 ../../generic-methodologies-and-resources/python/bypass-python-sandboxes/
@@ -253,7 +255,7 @@ for i in seq 1000; do echo "for k1,chr in pairs(string) do for k2,exec in pairs(
 ```bash
 debug.debug()
 ```
-## Marejeleo
+## Marejeo
 
 - [https://www.youtube.com/watch?v=UO618TeyCWo](https://www.youtube.com/watch?v=UO618TeyCWo) (Slides: [https://deepsec.net/docs/Slides/2015/Chw00t_How_To_Break%20Out_from_Various_Chroot_Solutions\_-_Bucsay_Balazs.pdf](https://deepsec.net/docs/Slides/2015/Chw00t_How_To_Break%20Out_from_Various_Chroot_Solutions_-_Bucsay_Balazs.pdf))
 

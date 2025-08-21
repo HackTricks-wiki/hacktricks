@@ -17,7 +17,7 @@ MBR inaruhusu **max 2.2TB**.
 
 ![](<../../../images/image (304).png>)
 
-Kutoka **bytes 440 hadi 443** za MBR unaweza kupata **Saini ya Diski ya Windows** (ikiwa Windows inatumika). Barua ya diski ya mantiki ya diski ngumu inategemea Saini ya Diski ya Windows. Kubadilisha saini hii kunaweza kuzuia Windows kuanza (chombo: [**Active Disk Editor**](https://www.disk-editor.org/index.html)**)**.
+Kutoka **bytes 440 hadi 443** za MBR unaweza kupata **Saini ya Disk ya Windows** (ikiwa Windows inatumika). Barua ya diski ya mantiki ya diski ngumu inategemea Saini ya Disk ya Windows. Kubadilisha saini hii kunaweza kuzuia Windows kuanza (chombo: [**Active Disk Editor**](https://www.disk-editor.org/index.html)**)**.
 
 ![](<../../../images/image (310).png>)
 
@@ -39,17 +39,17 @@ Kutoka **bytes 440 hadi 443** za MBR unaweza kupata **Saini ya Diski ya Windows*
 | 0 (0x00)  | 1 (0x01) | Bendera hai (0x80 = bootable)                          |
 | 1 (0x01)  | 1 (0x01) | Kichwa cha mwanzo                                      |
 | 2 (0x02)  | 1 (0x01) | Sehemu ya mwanzo (bits 0-5); bits za juu za silinda (6- 7) |
-| 3 (0x03)  | 1 (0x01) | Silinda ya mwanzo bits 8 za chini                      |
-| 4 (0x04)  | 1 (0x01) | Msimbo wa aina ya sehemu (0x83 = Linux)                |
-| 5 (0x05)  | 1 (0x01) | Kichwa cha mwisho                                      |
+| 3 (0x03)  | 1 (0x01) | Silinda ya mwanzo bits 8 za chini                       |
+| 4 (0x04)  | 1 (0x01) | Msimbo wa aina ya sehemu (0x83 = Linux)                 |
+| 5 (0x05)  | 1 (0x01) | Kichwa cha mwisho                                       |
 | 6 (0x06)  | 1 (0x01) | Sehemu ya mwisho (bits 0-5); bits za juu za silinda (6- 7)   |
 | 7 (0x07)  | 1 (0x01) | Silinda ya mwisho bits 8 za chini                       |
 | 8 (0x08)  | 4 (0x04) | Sehemu zinazotangulia sehemu (little endian)           |
-| 12 (0x0C) | 4 (0x04) | Sehemu katika sehemu                                    |
+| 12 (0x0C) | 4 (0x04) | Sehemu katika sehemu                                     |
 
 Ili kuunganisha MBR katika Linux unahitaji kwanza kupata offset ya mwanzo (unaweza kutumia `fdisk` na amri `p`)
 
-![](<../../../images/image (413) (3) (3) (3) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
+![](<../../../images/image (413) (3) (3) (3) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
 Na kisha tumia msimbo ufuatao
 ```bash
@@ -64,7 +64,7 @@ mount -o ro,loop,offset=32256,noatime /path/to/image.dd /media/part/
 
 ### GPT (Jedwali la Partition la GUID)
 
-Jedwali la Partition la GUID, linalojulikana kama GPT, linapendekezwa kwa uwezo wake ulioimarishwa ikilinganishwa na MBR (Rekodi ya Boot Kuu). Inajulikana kwa **kitambulisho chake cha kipekee duniani** kwa partitions, GPT inajitenga kwa njia kadhaa:
+Jedwali la Partition la GUID, linalojulikana kama GPT, linapendekezwa kwa uwezo wake ulioimarishwa ikilinganishwa na MBR (Rekodi ya Boot Kuu). Inajulikana kwa **kitambulisho chake cha kipekee duniani** kwa partitions, GPT inajitokeza kwa njia kadhaa:
 
 - **Eneo na Ukubwa**: GPT na MBR zote huanza kwenye **sehemu 0**. Hata hivyo, GPT inafanya kazi kwa **64bits**, tofauti na MBR ambayo ni 32bits.
 - **Mipaka ya Partition**: GPT inasaidia hadi **partitions 128** kwenye mifumo ya Windows na inaruhusu hadi **9.4ZB** ya data.
@@ -72,12 +72,12 @@ Jedwali la Partition la GUID, linalojulikana kama GPT, linapendekezwa kwa uwezo 
 
 **Ustahimilivu wa Data na Urejeleaji**:
 
-- **Ukarabati**: Tofauti na MBR, GPT haifungii partitioning na data za boot mahali pamoja. Inarudia data hii kwenye diski, ikiongeza uaminifu wa data na ustahimilivu.
+- **Ukarabati**: Tofauti na MBR, GPT haifungii partitioning na data ya boot mahali pamoja. Inarudia data hii kwenye diski, ikiongeza uaminifu wa data na ustahimilivu.
 - **Cyclic Redundancy Check (CRC)**: GPT inatumia CRC kuhakikisha uaminifu wa data. Inachunguza kwa makini uharibifu wa data, na inapogundulika, GPT inajaribu kurejesha data iliyoathirika kutoka eneo lingine la diski.
 
 **MBR ya Kulinda (LBA0)**:
 
-- GPT inahifadhi ulinganifu wa nyuma kupitia MBR ya kulinda. Kipengele hiki kiko katika nafasi ya MBR ya zamani lakini kimeundwa ili kuzuia zana za zamani za MBR zisizokosee kuandika diski za GPT, hivyo kulinda uaminifu wa data kwenye diski zilizofomatiwa kwa GPT.
+- GPT inahifadhi ulinganifu wa nyuma kupitia MBR ya kulinda. Kipengele hiki kiko katika nafasi ya MBR ya zamani lakini kimeundwa ili kuzuia zana za zamani za MBR zisifanye makosa ya kufuta diski za GPT, hivyo kulinda uaminifu wa data kwenye diski zilizofomatiwa kwa GPT.
 
 ![https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/GUID_Partition_Table_Scheme.svg/800px-GUID_Partition_Table_Scheme.svg.png](<../../../images/image (1062).png>)
 
@@ -109,7 +109,7 @@ Kichwa cha jedwali la partition kinaelezea blocks zinazoweza kutumika kwenye dis
 | 80 (0x50) | 4 bytes  | Idadi ya entries za partition katika safu                                                                                                                                         |
 | 84 (0x54) | 4 bytes  | Ukubwa wa entry moja ya partition (kawaida 80h au 128)                                                                                                                        |
 | 88 (0x58) | 4 bytes  | CRC32 ya safu ya entries za partition katika little endian                                                                                                                            |
-| 92 (0x5C) | \*       | Imehifadhiwa; lazima iwe sifuri kwa sehemu zingine za block (420 bytes kwa ukubwa wa sehemu 512 bytes; lakini inaweza kuwa zaidi na ukubwa wa sehemu kubwa)                                      |
+| 92 (0x5C) | \*       | Imehifadhiwa; lazima iwe sifuri kwa sehemu nyingine za block (420 bytes kwa ukubwa wa sehemu ya 512 bytes; lakini inaweza kuwa zaidi na ukubwa wa sehemu kubwa)                                      |
 
 **Entries za Partition (LBA 2–33)**
 
@@ -154,7 +154,7 @@ Mfumo wa faili wa **FAT (Jedwali la Usambazaji wa Faili)** umeundwa kuzunguka ki
 Kitengo cha msingi cha kuhifadhi cha mfumo wa faili ni **cluster, kawaida 512B**, kinachojumuisha sekta kadhaa. FAT imeendelea kupitia matoleo:
 
 - **FAT12**, inasaidia anwani za cluster za 12-bit na kushughulikia hadi clusters 4078 (4084 na UNIX).
-- **FAT16**, ikiongeza hadi anwani za 16-bit, hivyo inaruhusu clusters hadi 65,517.
+- **FAT16**, ikiongeza hadi anwani za 16-bit, hivyo inaruhusu clusters 65,517.
 - **FAT32**, ikipiga hatua zaidi na anwani za 32-bit, ikiruhusu clusters 268,435,456 kwa kiasi.
 
 Kikwazo kikubwa katika matoleo ya FAT ni **ukubwa wa faili wa juu wa 4GB**, ulioanzishwa na uwanja wa 32-bit unaotumika kwa uhifadhi wa ukubwa wa faili.
@@ -189,7 +189,7 @@ Unaweza kutumia zana kama [**exiftool**](https://exiftool.org) na [**Metadiver**
 
 ### Faili Zilizofutwa Zilizorekodiwa
 
-Kama ilivyoonekana hapo awali kuna maeneo kadhaa ambapo faili bado inahifadhiwa baada ya "kufutwa". Hii ni kwa sababu kawaida kufutwa kwa faili kutoka mfumo wa faili kunaashiria tu kuwa imefutwa lakini data haiguswa. Hivyo, inawezekana kukagua rekodi za faili (kama MFT) na kupata faili zilizofutwa.
+Kama ilivyoonekana hapo awali kuna maeneo kadhaa ambapo faili bado inahifadhiwa baada ya "kufutwa". Hii ni kwa sababu kawaida kufutwa kwa faili kutoka kwa mfumo wa faili kunaashiria tu kuwa imefutwa lakini data haiguswa. Hivyo, inawezekana kukagua rekodi za faili (kama MFT) na kupata faili zilizofutwa.
 
 Pia, OS kawaida huhifadhi habari nyingi kuhusu mabadiliko ya mfumo wa faili na nakala za akiba, hivyo inawezekana kujaribu kuzitumia kurejesha faili au habari nyingi iwezekanavyo.
 
@@ -203,7 +203,7 @@ file-data-carving-recovery-tools.md
 
 Kumbuka kwamba mbinu hii **haiwezi kufanya kazi kurejesha faili zilizovunjika**. Ikiwa faili **haijahifadhiwa katika sekta zinazofuatana**, basi mbinu hii haitakuwa na uwezo wa kuipata au angalau sehemu yake.
 
-Kuna zana kadhaa ambazo unaweza kutumia kwa kuchonga faili zikionyesha aina za faili unazotaka kutafuta
+Kuna zana kadhaa ambazo unaweza kutumia kwa kuchonga faili ukionyesha aina za faili unazotaka kutafuta.
 
 {{#ref}}
 file-data-carving-recovery-tools.md
@@ -218,12 +218,12 @@ Kwa mfano, badala ya kutafuta faili kamili inayojumuisha URLs zilizorekodiwa, mb
 file-data-carving-recovery-tools.md
 {{#endref}}
 
-### Kufuta Salama
+### Kufuta kwa Usalama
 
-Bila shaka, kuna njia za **"kufuta salama" faili na sehemu ya rekodi kuhusu hizo**. Kwa mfano, inawezekana **kuandika upya maudhui** ya faili kwa data ya takataka mara kadhaa, na kisha **kuondoa** **rekodi** kutoka **$MFT** na **$LOGFILE** kuhusu faili hiyo, na **kuondoa Nakala za Kivuli za Kiasi**.\
-Unaweza kugundua kwamba hata ukifanya kitendo hicho kunaweza kuwa na **sehemu nyingine ambapo uwepo wa faili bado umeandikwa**, na hiyo ni kweli na sehemu ya kazi ya kitaalamu ya forensics ni kuzipata.
+Kwa wazi, kuna njia za **"kufuta kwa usalama" faili na sehemu za rekodi kuhusu hizo**. Kwa mfano, inawezekana **kuandika upya maudhui** ya faili kwa data ya takataka mara kadhaa, na kisha **kuondoa** **rekodi** kutoka kwa **$MFT** na **$LOGFILE** kuhusu faili hiyo, na **kuondoa Nakala za Kivuli za Kiasi**.\
+Unaweza kugundua kwamba hata ukifanya kitendo hicho kunaweza kuwa **sehemu nyingine ambapo uwepo wa faili bado umeandikwa**, na hiyo ni kweli na sehemu ya kazi ya kitaalamu ya forensics ni kuzipata.
 
-## Marejeleo
+## Marejeo
 
 - [https://en.wikipedia.org/wiki/GUID_Partition_Table](https://en.wikipedia.org/wiki/GUID_Partition_Table)
 - [http://ntfs.com/ntfs-permissions.htm](http://ntfs.com/ntfs-permissions.htm)

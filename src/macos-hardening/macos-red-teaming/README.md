@@ -3,14 +3,15 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 
-## Kutumia MDMs
+## Kutumia MDM vibaya
 
 - JAMF Pro: `jamf checkJSSConnection`
 - Kandji
 
-Ikiwa utafanikiwa **kushawishi akauti za admin** ili kufikia jukwaa la usimamizi, unaweza **kushawishi kompyuta zote** kwa kusambaza malware yako kwenye mashine.
+Ikiwa utaweza **kushinda akauti za admin** ili kufikia jukwaa la usimamizi, unaweza **kushinda kompyuta zote** kwa kusambaza malware yako kwenye mashine.
 
 Kwa red teaming katika mazingira ya MacOS, inashauriwa sana kuwa na ufahamu wa jinsi MDMs zinavyofanya kazi:
+
 
 {{#ref}}
 macos-mdm/
@@ -20,25 +21,25 @@ macos-mdm/
 
 MDM itakuwa na ruhusa ya kufunga, kuuliza au kuondoa profaili, kufunga programu, kuunda akaunti za admin za ndani, kuweka nenosiri la firmware, kubadilisha funguo za FileVault...
 
-Ili kuendesha MDM yako mwenyewe unahitaji **CSR yako isainiwe na muuzaji** ambayo unaweza kujaribu kupata na [**https://mdmcert.download/**](https://mdmcert.download/). Na kuendesha MDM yako mwenyewe kwa vifaa vya Apple unaweza kutumia [**MicroMDM**](https://github.com/micromdm/micromdm).
+Ili kuendesha MDM yako mwenyewe unahitaji **CSR yako isainiwa na muuzaji** ambayo unaweza kujaribu kupata na [**https://mdmcert.download/**](https://mdmcert.download/). Na kuendesha MDM yako mwenyewe kwa vifaa vya Apple unaweza kutumia [**MicroMDM**](https://github.com/micromdm/micromdm).
 
 Hata hivyo, ili kufunga programu kwenye kifaa kilichosajiliwa, bado unahitaji isainiwe na akaunti ya developer... hata hivyo, wakati wa usajili wa MDM **kifaa kinaongeza cheti cha SSL cha MDM kama CA inayotambulika**, hivyo sasa unaweza kusaini chochote.
 
-Ili kusajili kifaa katika MDM unahitaji kufunga **`mobileconfig`** faili kama root, ambayo inaweza kutolewa kupitia **pkg** faili (unaweza kuifunga katika zip na wakati inapakuliwa kutoka safari itakua decompressed).
+Ili kusajili kifaa katika MDM unahitaji kufunga **`mobileconfig`** faili kama root, ambayo inaweza kutolewa kupitia faili ya **pkg** (unaweza kuifunga katika zip na wakati inapakuliwa kutoka safari itakua decompressed).
 
 **Mythic agent Orthrus** inatumia mbinu hii.
 
-### Kutumia JAMF PRO
+### Kutumia JAMF PRO vibaya
 
 JAMF inaweza kuendesha **scripts za kawaida** (scripts zilizotengenezwa na sysadmin), **payloads za asili** (kuunda akaunti za ndani, kuweka nenosiri la EFI, ufuatiliaji wa faili/mchakato...) na **MDM** (mipangilio ya kifaa, vyeti vya kifaa...).
 
 #### Usajili wa kujitegemea wa JAMF
 
-Nenda kwenye ukurasa kama `https://<company-name>.jamfcloud.com/enroll/` kuona kama wana **usajili wa kujitegemea ulioanzishwa**. Ikiwa wanaweza **kuomba akauti za kufikia**.
+Nenda kwenye ukurasa kama `https://<company-name>.jamfcloud.com/enroll/` kuona kama wana **usajili wa kujitegemea umewezeshwa**. Ikiwa wanaweza **kuomba akauti za kufikia**.
 
 Unaweza kutumia script [**JamfSniper.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfSniper.py) kufanya shambulio la password spraying.
 
-Zaidi ya hayo, baada ya kupata akauti sahihi unaweza kuwa na uwezo wa kujaribu nguvu majina mengine ya watumiaji kwa fomu ifuatayo:
+Zaidi ya hayo, baada ya kupata akauti sahihi unaweza kuwa na uwezo wa kujaribu nguvu nyingine za majina ya watumiaji kwa fomu ifuatayo:
 
 ![](<../../images/image (107).png>)
 
@@ -49,7 +50,7 @@ Zaidi ya hayo, baada ya kupata akauti sahihi unaweza kuwa na uwezo wa kujaribu n
 Binary ya **`jamf`** ilihifadhi siri ya kufungua keychain ambayo wakati wa ugunduzi ilikuwa **shirikishi** kati ya kila mtu na ilikuwa: **`jk23ucnq91jfu9aj`**.\
 Zaidi ya hayo, jamf **inasalia** kama **LaunchDaemon** katika **`/Library/LaunchAgents/com.jamf.management.agent.plist`**
 
-#### Kuchukua Kifaa cha JAMF
+#### Kuchukua Udhibiti wa Kifaa cha JAMF
 
 **JSS** (Jamf Software Server) **URL** ambayo **`jamf`** itatumia iko katika **`/Library/Preferences/com.jamfsoftware.jamf.plist`**.\
 Faili hii kimsingi ina URL:
@@ -60,12 +61,12 @@ plutil -convert xml1 -o - /Library/Preferences/com.jamfsoftware.jamf.plist
 <key>is_virtual_machine</key>
 <false/>
 <key>jss_url</key>
-<string>https://halbornasd.jamfcloud.com/</string>
+<string>https://subdomain-company.jamfcloud.com/</string>
 <key>last_management_framework_change_id</key>
 <integer>4</integer>
 [...]
 ```
-Hivyo, mshambuliaji anaweza kuweka kifurushi kibaya (`pkg`) ambacho **kinabadilisha faili hii** wakati wa usakinishaji na kuweka **URL kwa mteja wa Mythic C2 kutoka kwa wakala wa Typhon** ili sasa aweze kutumia JAMF kama C2.
+Hivyo, mshambuliaji anaweza kuweka kifurushi kibaya (`pkg`) ambacho **kinabadilisha faili hii** wakati wa usakinishaji na kuweka **URL kwa mlistener wa Mythic C2 kutoka kwa wakala wa Typhon** ili sasa aweze kutumia JAMF kama C2.
 ```bash
 # After changing the URL you could wait for it to be reloaded or execute:
 sudo jamf policy -id 0
@@ -79,13 +80,13 @@ Ili **kuiga mawasiliano** kati ya kifaa na JMF unahitaji:
 - **UUID** ya kifaa: `ioreg -d2 -c IOPlatformExpertDevice | awk -F" '/IOPlatformUUID/{print $(NF-1)}'`
 - **JAMF keychain** kutoka: `/Library/Application\ Support/Jamf/JAMF.keychain` ambayo ina cheti cha kifaa
 
-Kwa habari hii, **unda VM** yenye **stolen** Hardware **UUID** na **SIP disabled**, weka **JAMF keychain,** **hook** Jamf **agent** na uibe habari zake.
+Kwa habari hii, **unda VM** yenye **stolen** Hardware **UUID** na **SIP disabled**, weka **JAMF keychain,** **hook** Jamf **agent** na uibe taarifa zake.
 
 #### Secrets stealing
 
 <figure><img src="../../images/image (1025).png" alt=""><figcaption><p>a</p></figcaption></figure>
 
-Unaweza pia kufuatilia eneo `/Library/Application Support/Jamf/tmp/` kwa **custom scripts** ambazo wasimamizi wanaweza kutaka kutekeleza kupitia Jamf kwani zina **wekwa hapa, kutekelezwa na kuondolewa**. Scripts hizi **zinaweza kuwa na credentials**.
+Unaweza pia kufuatilia eneo `/Library/Application Support/Jamf/tmp/` kwa **scripts za kawaida** ambazo wasimamizi wanaweza kutaka kutekeleza kupitia Jamf kwani zina **wekwa hapa, kutekelezwa na kuondolewa**. Scripts hizi **zinaweza kuwa na credentials**.
 
 Hata hivyo, **credentials** zinaweza kupitishwa kwa scripts hizi kama **parameters**, hivyo unahitaji kufuatilia `ps aux | grep -i jamf` (bila hata kuwa root).
 
@@ -95,6 +96,7 @@ Script [**JamfExplorer.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolk
 
 Na pia kuhusu **MacOS** "maalum" **network** **protocols**:
 
+
 {{#ref}}
 ../macos-security-and-privilege-escalation/macos-protocols.md
 {{#endref}}
@@ -103,13 +105,16 @@ Na pia kuhusu **MacOS** "maalum" **network** **protocols**:
 
 Katika hali fulani utaona kuwa **kompyuta ya MacOS imeunganishwa na AD**. Katika hali hii unapaswa kujaribu **kuorodhesha** active directory kama unavyojua. Pata **msaada** katika kurasa zifuatazo:
 
+
 {{#ref}}
 ../../network-services-pentesting/pentesting-ldap.md
 {{#endref}}
 
+
 {{#ref}}
 ../../windows-hardening/active-directory-methodology/
 {{#endref}}
+
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-kerberos-88/
@@ -119,10 +124,10 @@ Zana **za ndani za MacOS** ambazo zinaweza pia kukusaidia ni `dscl`:
 ```bash
 dscl "/Active Directory/[Domain]/All Domains" ls /
 ```
-Pia kuna zana zilizotayarishwa kwa MacOS ili kuhesabu moja kwa moja AD na kucheza na kerberos:
+Pia kuna zana kadhaa zilizotayarishwa kwa MacOS ili kuhesabu moja kwa moja AD na kucheza na kerberos:
 
-- [**Machound**](https://github.com/XMCyber/MacHound): MacHound ni nyongeza kwa zana ya ukaguzi ya Bloodhound inayoruhusu kukusanya na kuingiza uhusiano wa Active Directory kwenye mwenyeji wa MacOS.
-- [**Bifrost**](https://github.com/its-a-feature/bifrost): Bifrost ni mradi wa Objective-C ulioandaliwa ili kuingiliana na Heimdal krb5 APIs kwenye macOS. Lengo la mradi ni kuwezesha upimaji bora wa usalama kuhusiana na Kerberos kwenye vifaa vya macOS kwa kutumia APIs za asili bila kuhitaji mfumo mwingine au pakiti kwenye lengo.
+- [**Machound**](https://github.com/XMCyber/MacHound): MacHound ni nyongeza kwa chombo cha ukaguzi wa Bloodhound kinachoruhusu kukusanya na kuingiza uhusiano wa Active Directory kwenye mwenyeji wa MacOS.
+- [**Bifrost**](https://github.com/its-a-feature/bifrost): Bifrost ni mradi wa Objective-C ulioandaliwa ili kuingiliana na Heimdal krb5 APIs kwenye macOS. Lengo la mradi ni kuwezesha upimaji bora wa usalama kuhusiana na Kerberos kwenye vifaa vya macOS kwa kutumia APIs za asili bila kuhitaji mfumo mwingine wowote au pakiti kwenye lengo.
 - [**Orchard**](https://github.com/its-a-feature/Orchard): Zana ya JavaScript kwa Utaftaji (JXA) kufanya hesabu ya Active Directory.
 
 ### Taarifa za Kikoa
@@ -133,7 +138,7 @@ echo show com.apple.opendirectoryd.ActiveDirectory | scutil
 
 Aina tatu za watumiaji wa MacOS ni:
 
-- **Watumiaji wa Mitaa** — Wanadhibitiwa na huduma ya OpenDirectory ya ndani, hawajashikamana kwa njia yoyote na Active Directory.
+- **Watumiaji wa Mitaa** — Wanayosimamiwa na huduma ya OpenDirectory ya ndani, hawajashikamana kwa njia yoyote na Active Directory.
 - **Watumiaji wa Mtandao** — Watumiaji wa Active Directory wanaobadilika ambao wanahitaji muunganisho na seva ya DC ili kuthibitisha.
 - **Watumiaji wa Simu** — Watumiaji wa Active Directory wenye nakala ya ndani ya hati zao na faili.
 
@@ -174,7 +179,7 @@ Pata nywila kwa kutumia:
 ```bash
 bifrost --action askhash --username [name] --password [password] --domain [domain]
 ```
-Inawezekana kufikia nenosiri la **`Computer$`** ndani ya mfumo wa keychain.
+Inawezekana kufikia **`Computer$`** nenosiri ndani ya mfumo wa keychain.
 
 ### Over-Pass-The-Hash
 
@@ -226,6 +231,5 @@ Wakati faili inapopakuliwa katika Safari, ikiwa ni faili "salama", itafunguliwa 
 - [**https://gist.github.com/its-a-feature/1a34f597fb30985a2742bb16116e74e0**](https://gist.github.com/its-a-feature/1a34f597fb30985a2742bb16116e74e0)
 - [**Come to the Dark Side, We Have Apples: Turning macOS Management Evil**](https://www.youtube.com/watch?v=pOQOh07eMxY)
 - [**OBTS v3.0: "An Attackers Perspective on Jamf Configurations" - Luke Roberts / Calum Hall**](https://www.youtube.com/watch?v=ju1IYWUv4ZA)
-
 
 {{#include ../../banners/hacktricks-training.md}}

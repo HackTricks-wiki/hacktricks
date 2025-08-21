@@ -6,7 +6,7 @@
 
 ## Basic Information
 
-DLL Hijacking inahusisha kubadilisha programu inayotegemewa ili kupakia DLL mbaya. Neno hili linajumuisha mbinu kadhaa kama **DLL Spoofing, Injection, na Side-Loading**. Kimsingi inatumika kwa ajili ya utekelezaji wa msimbo, kufikia kudumu, na, kwa kiwango kidogo, kupandisha mamlaka. Licha ya kuzingatia kupandisha mamlaka hapa, mbinu ya hijacking inabaki kuwa sawa katika malengo.
+DLL Hijacking inahusisha kubadilisha programu inayotambulika ili kupakia DLL mbaya. Neno hili linajumuisha mbinu kadhaa kama **DLL Spoofing, Injection, na Side-Loading**. Kimsingi inatumika kwa ajili ya utekelezaji wa msimbo, kufikia kudumu, na, kwa kiwango kidogo, kupandisha mamlaka. Licha ya kuzingatia kupandisha mamlaka hapa, mbinu ya hijacking inabaki kuwa sawa katika malengo.
 
 ### Common Techniques
 
@@ -21,7 +21,7 @@ Mbinu kadhaa zinatumika kwa DLL hijacking, kila moja ikiwa na ufanisi wake kulin
 
 ## Finding missing Dlls
 
-Njia ya kawaida zaidi ya kupata Dlls zinazokosekana ndani ya mfumo ni kuendesha [procmon](https://docs.microsoft.com/en-us/sysinternals/downloads/procmon) kutoka sysinternals, **kuweka** **filta hizi 2**:
+Njia ya kawaida zaidi ya kupata Dlls zinazokosekana ndani ya mfumo ni kuendesha [procmon](https://docs.microsoft.com/en-us/sysinternals/downloads/procmon) kutoka sysinternals, **kuiweka** **filta hizi 2**:
 
 ![](<../../images/image (311).png>)
 
@@ -31,8 +31,8 @@ na kuonyesha tu **Shughuli za Mfumo wa Faili**:
 
 ![](<../../images/image (314).png>)
 
-Ikiwa unatafuta **dlls zinazokosekana kwa ujumla** unapaswa **kuacha** hii ikifanya kazi kwa **sekunde** chache.\
-Ikiwa unatafuta **dll inayokosekana ndani ya executable maalum** unapaswa kuweka **filta nyingine kama "Jina la Mchakato" "linajumuisha" "\<jina la exec>", kuitekeleza, na kusitisha kukamata matukio**.
+Ikiwa unatafuta **dll zinazokosekana kwa ujumla** unapaswa **kuacha** hii ikikimbia kwa **sekunde** chache.\
+Ikiwa unatafuta **dll inayokosekana ndani ya executable maalum** unapaswa kuweka **filta nyingine kama "Jina la Mchakato" "linajumuisha" "\<jina la exec>", kuendesha, na kusitisha kukamata matukio**.
 
 ## Exploiting Missing Dlls
 
@@ -42,7 +42,7 @@ Ili kupandisha mamlaka, nafasi bora tuliyonayo ni kuwa na uwezo wa **kuandika dl
 
 **Ndani ya** [**nyaraka za Microsoft**](https://docs.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-search-order#factors-that-affect-searching) **unaweza kupata jinsi Dlls zinavyopakiwa kwa usahihi.**
 
-**Programu za Windows** zinatafuta DLLs kwa kufuata seti ya **njia za utafutaji zilizowekwa awali**, zikizingatia mpangilio maalum. Tatizo la DLL hijacking linatokea wakati DLL mbaya imewekwa kimkakati katika moja ya hizi directories, kuhakikisha inapata kupakiwa kabla ya DLL halisi. Suluhisho la kuzuia hili ni kuhakikisha programu inatumia njia za moja kwa moja inaporejelea DLLs inazohitaji.
+**Programu za Windows** hutafuta DLLs kwa kufuata seti ya **njia za utafutaji zilizowekwa awali**, zikizingatia mpangilio maalum. Tatizo la DLL hijacking linatokea wakati DLL mbaya imewekwa kimkakati katika moja ya hizi directories, kuhakikisha inapata kupakiwa kabla ya DLL halisi. Suluhisho la kuzuia hili ni kuhakikisha programu inatumia njia za moja kwa moja inaporejelea DLLs inazohitaji.
 
 Unaweza kuona **mpangilio wa utafutaji wa DLL kwenye mifumo ya 32-bit** hapa chini:
 
@@ -52,9 +52,9 @@ Unaweza kuona **mpangilio wa utafutaji wa DLL kwenye mifumo ya 32-bit** hapa chi
 4. Directory ya Windows. Tumia [**GetWindowsDirectory**](https://docs.microsoft.com/en-us/windows/desktop/api/sysinfoapi/nf-sysinfoapi-getwindowsdirectorya) kazi kupata njia ya directory hii.
 1. (_C:\Windows_)
 5. Directory ya sasa.
-6. Directory ambazo ziko kwenye mabadiliko ya mazingira ya PATH. Kumbuka kwamba hii haijumuishi njia ya kila programu iliyowekwa na ufunguo wa rejista wa **App Paths**. Ufunguzi wa **App Paths** haujatumika wakati wa kuhesabu njia ya utafutaji wa DLL.
+6. Directory ambazo ziko kwenye variable ya mazingira ya PATH. Kumbuka kwamba hii haijumuishi njia ya kila programu iliyotajwa na funguo ya registry ya **App Paths**. Funguo ya **App Paths** haitumiki wakati wa kuhesabu njia ya utafutaji wa DLL.
 
-Huu ndio **mpangilio wa kawaida** wa utafutaji na **SafeDllSearchMode** imewezeshwa. Wakati imezimwa, directory ya sasa inapaa hadi nafasi ya pili. Ili kuzima kipengele hiki, tengeneza **HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager**\\**SafeDllSearchMode** thamani ya rejista na uweke kuwa 0 (chaguo-msingi ni kuwezeshwa).
+Huu ndio **mpangilio wa kawaida** wa utafutaji na **SafeDllSearchMode** imewezeshwa. Wakati imezimwa, directory ya sasa inapaa hadi nafasi ya pili. Ili kuzima kipengele hiki, tengeneza **HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager**\\**SafeDllSearchMode** thamani ya registry na uweke kuwa 0 (default imewezeshwa).
 
 Ikiwa [**LoadLibraryEx**](https://docs.microsoft.com/en-us/windows/desktop/api/LibLoaderAPI/nf-libloaderapi-loadlibraryexa) kazi inaitwa na **LOAD_WITH_ALTERED_SEARCH_PATH** utafutaji huanza katika directory ya moduli ya executable ambayo **LoadLibraryEx** inakabili.
 
@@ -66,18 +66,18 @@ Kuna njia nyingine za kubadilisha njia za kubadilisha mpangilio wa utafutaji lak
 
 Mambo fulani ya kipekee kwa mpangilio wa kawaida wa utafutaji wa DLL yanatajwa katika nyaraka za Windows:
 
-- Wakati **DLL inayoshiriki jina lake na moja ambayo tayari imepakiwa kwenye kumbukumbu** inakutana, mfumo hupita utafutaji wa kawaida. Badala yake, unafanya ukaguzi wa uelekeo na manifest kabla ya kurudi kwa DLL ambayo tayari iko kwenye kumbukumbu. **Katika hali hii, mfumo haufanyi utafutaji wa DLL**.
-- Katika kesi ambapo DLL inatambuliwa kama **DLL inayojulikana** kwa toleo la sasa la Windows, mfumo utatumia toleo lake la DLL inayojulikana, pamoja na yoyote ya DLLs zake zinazotegemea, **bila kufanya mchakato wa utafutaji**. Ufunguzi wa rejista **HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\KnownDLLs** una orodha ya hizi DLLs zinazojulikana.
-- Ikiwa **DLL ina utegemezi**, utafutaji wa hizi DLLs zinazotegemea unafanywa kana kwamba zilionyeshwa tu kwa **majina ya moduli** zao, bila kujali ikiwa DLL ya awali ilitambuliwa kupitia njia kamili.
+- Wakati **DLL inayoshiriki jina lake na moja ambayo tayari imepakiwa kwenye kumbukumbu** inakutana, mfumo hupita utafutaji wa kawaida. Badala yake, unafanya ukaguzi wa uelekezaji na manifest kabla ya kurudi kwa DLL iliyoko kwenye kumbukumbu. **Katika hali hii, mfumo haufanyi utafutaji wa DLL**.
+- Katika kesi ambapo DLL inatambuliwa kama **DLL inayojulikana** kwa toleo la sasa la Windows, mfumo utatumia toleo lake la DLL inayojulikana, pamoja na DLL zake zinazotegemea, **bila kufanya mchakato wa utafutaji**. Funguo ya registry **HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\KnownDLLs** ina orodha ya hizi DLL zinazojulikana.
+- Ikiwa **DLL ina utegemezi**, utafutaji wa hizi DLL zinazotegemea unafanywa kana kwamba zilionyeshwa tu kwa **majina ya moduli**, bila kujali ikiwa DLL ya awali ilitambuliwa kupitia njia kamili.
 
 ### Escalating Privileges
 
 **Mahitaji**:
 
-- Tambua mchakato unaofanya kazi au utaweza kufanya kazi chini ya **mamlaka tofauti** (harakati za usawa au za pembeni), ambayo **haina DLL**.
-- Hakikisha **ufikiaji wa kuandika** upo kwa **directory** yoyote ambayo **DLL** itatafutwa. Mahali hapa inaweza kuwa directory ya executable au directory ndani ya njia ya mfumo.
+- Tambua mchakato unaofanya kazi au utafanya kazi chini ya **mamlaka tofauti** (harakati za usawa au za pembeni), ambayo **haina DLL**.
+- Hakikisha **upatikanaji wa kuandika** unapatikana kwa **directory** yoyote ambayo **DLL** itatafutwa. Mahali hapa inaweza kuwa directory ya executable au directory ndani ya njia ya mfumo.
 
-Ndio, mahitaji ni magumu kupatikana kwani **kwa chaguo-msingi ni ajabu kidogo kupata executable yenye mamlaka ikikosekana dll** na ni **ajabu zaidi kuwa na ruhusa za kuandika kwenye folda ya njia ya mfumo** (huwezi kwa chaguo-msingi). Lakini, katika mazingira yasiyofanywa vizuri, hii inawezekana.\
+Ndio, mahitaji ni magumu kupatikana kwani **kwa kawaida ni ajabu kupata executable yenye mamlaka ikikosa dll** na ni **ajabu zaidi kuwa na ruhusa za kuandika kwenye folda ya njia ya mfumo** (huwezi kwa kawaida). Lakini, katika mazingira yasiyo sahihi, hii inawezekana.\
 Katika kesi uko na bahati na unakutana na mahitaji, unaweza kuangalia mradi wa [UACME](https://github.com/hfiref0x/UACME). Hata kama **lengo kuu la mradi ni kupita UAC**, unaweza kupata huko **PoC** ya Dll hijacking kwa toleo la Windows ambalo unaweza kutumia (labda tu kubadilisha njia ya folda ambapo una ruhusa za kuandika).
 
 Kumbuka kwamba unaweza **kuangalia ruhusa zako katika folda** ukifanya:
@@ -102,19 +102,19 @@ dll-hijacking/writable-sys-path-+dll-hijacking-privesc.md
 
 ### Zana za Kiotomatiki
 
-[**Winpeas** ](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS) itakagua ikiwa una ruhusa za kuandika kwenye folda yoyote ndani ya mfumo PATH.\
-Zana nyingine za kiotomatiki zinazovutia kugundua vulnerabiliti hii ni **PowerSploit functions**: _Find-ProcessDLLHijack_, _Find-PathDLLHijack_ na _Write-HijackDll._
+[**Winpeas**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS) itakagua ikiwa una ruhusa za kuandika kwenye folda yoyote ndani ya mfumo PATH.\
+Zana nyingine za kiotomatiki zinazovutia kugundua udhaifu huu ni **PowerSploit functions**: _Find-ProcessDLLHijack_, _Find-PathDLLHijack_ na _Write-HijackDll._
 
 ### Mfano
 
-Iwapo utapata hali inayoweza kutumiwa, moja ya mambo muhimu ili kufanikiwa kuitumia ni **kuunda dll inayosafirisha angalau kazi zote ambazo executable itazipata kutoka kwake**. Hata hivyo, kumbuka kwamba Dll Hijacking inakuja kwa manufaa ili [kupandisha kutoka Kiwango cha Uaminifu wa Kati hadi Juu **(kupita UAC)**](../authentication-credentials-uac-and-efs.md#uac) au kutoka [**Kiwango cha Juu hadi SYSTEM**](#from-high-integrity-to-system)**.** Unaweza kupata mfano wa **jinsi ya kuunda dll halali** ndani ya utafiti huu wa dll hijacking uliozingatia dll hijacking kwa utekelezaji: [**https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows**](https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows)**.**\
+Iwapo utapata hali inayoweza kutumika, moja ya mambo muhimu ili kufanikiwa kuitumia ni **kuunda dll inayosafirisha angalau kazi zote ambazo executable itazipata kutoka kwake**. Hata hivyo, kumbuka kwamba Dll Hijacking inakuwa na manufaa ili [kupandisha kutoka Kiwango cha Uaminifu wa Kati hadi Juu **(kupita UAC)**](../authentication-credentials-uac-and-efs.md#uac) au kutoka [**Kiwango cha Juu hadi SYSTEM**](#from-high-integrity-to-system)**.** Unaweza kupata mfano wa **jinsi ya kuunda dll halali** ndani ya utafiti huu wa dll hijacking uliozingatia dll hijacking kwa utekelezaji: [**https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows**](https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows)**.**\
 Zaidi ya hayo, katika **sehemu inayofuata** unaweza kupata baadhi ya **misimbo ya msingi ya dll** ambayo inaweza kuwa na manufaa kama **mifano** au kuunda **dll yenye kazi zisizohitajika zilizofichwa**.
 
 ## **Kuunda na kukusanya Dlls**
 
 ### **Dll Proxifying**
 
-Kimsingi **Dll proxy** ni Dll inayoweza **kutekeleza msimbo wako mbaya unapoload** lakini pia **kuonyesha** na **kufanya kazi** kama **ilivyotarajiwa** kwa **kupeleka simu zote kwa maktaba halisi**.
+Kimsingi **Dll proxy** ni Dll inayoweza **kutekeleza msimbo wako mbaya unapopakuliwa** lakini pia **kuonyesha** na **kufanya kazi** kama **ilivyotarajiwa** kwa **kupeleka simu zote kwa maktaba halisi**.
 
 Kwa zana [**DLLirant**](https://github.com/redteamsocietegenerale/DLLirant) au [**Spartacus**](https://github.com/Accenture/Spartacus) unaweza kwa kweli **kuashiria executable na kuchagua maktaba** unayotaka kuproxify na **kuunda dll iliyoprosify** au **kuashiria Dll** na **kuunda dll iliyoprosify**.
 
@@ -134,7 +134,7 @@ msfvenom -p windows/adduser USER=privesc PASS=Attacker@123 -f dll -o msf.dll
 ```
 ### Yako mwenyewe
 
-Kumbuka kwamba katika kesi kadhaa Dll unayoandika lazima **iweke nje kazi kadhaa** ambazo zitakuwa zikipakiwa na mchakato wa mwathirika, ikiwa kazi hizi hazipo **binary haitakuwa na uwezo wa kupakia** hizo na **kuvunjika kwa usalama kutashindwa**.
+Kumbuka kwamba katika kesi kadhaa Dll unayoandika lazima **iweke nje kazi kadhaa** ambazo zitapakiwa na mchakato wa mwathirika, ikiwa kazi hizi hazipo **binary haitakuwa na uwezo wa kupakia** hizo na **kuvunjika kwa usalama kutashindwa**.
 ```c
 // Tested in Win10
 // i686-w64-mingw32-g++ dll.c -lws2_32 -o srrstr.dll -shared

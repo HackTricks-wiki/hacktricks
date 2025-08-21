@@ -10,39 +10,39 @@ Ruhusa katika **directory**:
 - **kuandika** - unaweza **kufuta/kuandika** **files** katika directory na unaweza **kufuta folda tupu**.
 - Lakini huwezi **kufuta/kubadilisha folda zisizo tupu** isipokuwa una ruhusa za kuandika juu yake.
 - Huwezi **kubadilisha jina la folda** isipokuwa unamiliki hiyo.
-- **kutekeleza** - ume **ruhusiwa kupita** directory - ikiwa huna haki hii, huwezi kufikia files zozote ndani yake, au katika subdirectories zozote.
+- **kutekeleza** - ume **ruhusiwa kupita** katika directory - ikiwa huna haki hii, huwezi kufikia files zozote ndani yake, au katika folda ndogo zozote.
 
 ### Mchanganyiko Hatari
 
-**Jinsi ya kufuta file/folda inayomilikiwa na root**, lakini:
+**Jinsi ya kufuta faili/folda inayomilikiwa na root**, lakini:
 
 - Mmiliki mmoja wa **directory** katika njia ni mtumiaji
 - Mmiliki mmoja wa **directory** katika njia ni **kikundi cha watumiaji** chenye **ruhusa za kuandika**
-- Kikundi cha watumiaji kina **ruhusa za kuandika** kwa **file**
+- Kikundi cha watumiaji kina **ruhusa za kuandika** kwa **faili**
 
 Kwa mchanganyiko wowote wa hapo juu, mshambuliaji anaweza **kuingiza** **sym/hard link** kwenye njia inayotarajiwa ili kupata kuandika kwa kibali bila mipaka.
 
-### Kesi Maalum ya Folder root R+X
+### Kesi Maalum ya Folda root R+X
 
-Ikiwa kuna files katika **directory** ambapo **ni root pekee mwenye R+X access**, hizo **hazipatikani kwa mtu mwingine yeyote**. Hivyo, udhaifu unaoruhusu **kuhamasisha file inayoweza kusomwa na mtumiaji**, ambayo haiwezi kusomwa kwa sababu ya **kizuizi** hicho, kutoka folda hii **kwenda folda tofauti**, unaweza kutumiwa kusoma files hizi.
+Ikiwa kuna files katika **directory** ambapo **ni root pekee ana R+X access**, hizo **hazipatikani kwa mtu mwingine yeyote**. Hivyo, udhaifu unaoruhusu **kuhamasisha faili inayoweza kusomwa na mtumiaji**, ambayo haiwezi kusomwa kwa sababu ya **kizuizi** hicho, kutoka folda hii **kwenda folda nyingine**, inaweza kutumika kusoma files hizi.
 
 Mfano katika: [https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions](https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions)
 
-## Link ya Alama / Link Ngumu
+## Link ya Alama / Link ya Ngumu
 
-### File/folda yenye ruhusa
+### Faili/Folda za Ruhusa
 
-Ikiwa mchakato wenye kibali unaandika data katika **file** ambayo inaweza **kudhibitiwa** na **mtumiaji mwenye ruhusa ndogo**, au ambayo inaweza **kuundwa awali** na mtumiaji mwenye ruhusa ndogo. Mtumiaji anaweza tu **kuielekeza kwenye file nyingine** kupitia Link ya Alama au Link Ngumu, na mchakato wenye kibali utaandika kwenye file hiyo.
+Ikiwa mchakato wenye mamlaka unandika data katika **faili** ambayo inaweza **kudhibitiwa** na **mtumiaji mwenye mamlaka ya chini**, au ambayo inaweza **kuundwa awali** na mtumiaji mwenye mamlaka ya chini. Mtumiaji anaweza tu **kuielekeza kwenye faili nyingine** kupitia Link ya Alama au Link ya Ngumu, na mchakato wenye mamlaka utaandika kwenye faili hiyo.
 
-Angalia katika sehemu nyingine ambapo mshambuliaji anaweza **kutitumia kuandika bila mipaka ili kupandisha ruhusa**.
+Angalia katika sehemu nyingine ambapo mshambuliaji anaweza **kudhulumu kuandika bila mipaka ili kupandisha mamlaka**.
 
-### Fungua `O_NOFOLLOW`
+### Funguo `O_NOFOLLOW`
 
-Bendera `O_NOFOLLOW` inapokuwa inatumika na kazi `open` haitafuata symlink katika kipengele cha mwisho cha njia, lakini itafuata sehemu nyingine za njia. Njia sahihi ya kuzuia kufuata symlinks katika njia ni kwa kutumia bendera `O_NOFOLLOW_ANY`.
+Funguo `O_NOFOLLOW` inapokuwa inatumika na kazi `open` haitafuata symlink katika kipengele cha mwisho cha njia, lakini itafuata sehemu nyingine za njia. Njia sahihi ya kuzuia kufuata symlinks katika njia ni kwa kutumia funguo `O_NOFOLLOW_ANY`.
 
 ## .fileloc
 
-Files zenye kiambishi **`.fileloc`** zinaweza kuelekeza kwenye programu nyingine au binaries hivyo wakati zinapofunguliwa, programu/binary itakuwa ndiyo itakayotekelezwa.\
+Files zenye kiambatisho **`.fileloc`** zinaweza kuelekeza kwenye programu nyingine au binaries hivyo wakati zinapofunguliwa, programu/binary itakuwa ndiyo itakayotekelezwa.\
 Mfano:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -60,9 +60,9 @@ Mfano:
 
 ### Leak FD (no `O_CLOEXEC`)
 
-Ikiwa wito wa `open` haina bendera `O_CLOEXEC`, desktopu la faili litakurudishwa na mchakato wa mtoto. Hivyo, ikiwa mchakato wenye mamlaka unafungua faili yenye mamlaka na kutekeleza mchakato unaodhibitiwa na mshambuliaji, mshambuliaji atakuwa **na FD juu ya faili yenye mamlaka**.
+Ikiwa wito wa `open` haina bendera `O_CLOEXEC`, desktopu ya faili itarithiwa na mchakato wa mtoto. Hivyo, ikiwa mchakato wenye mamlaka unafungua faili yenye mamlaka na kutekeleza mchakato unaodhibitiwa na mshambuliaji, mshambuliaji atakuwa **na FD juu ya faili yenye mamlaka**.
 
-Ikiwa unaweza kufanya **mchakato ufungue faili au folda zenye mamlaka ya juu**, unaweza kutumia **`crontab`** kufungua faili katika `/etc/sudoers.d` na **`EDITOR=exploit.py`**, hivyo `exploit.py` itapata FD kwa faili ndani ya `/etc/sudoers` na kuifanya itumike vibaya.
+Ikiwa unaweza kufanya **mchakato ufungue faili au folda zenye mamlaka ya juu**, unaweza kutumia **`crontab`** kufungua faili katika `/etc/sudoers.d` na **`EDITOR=exploit.py`**, hivyo `exploit.py` itapata FD kwa faili ndani ya `/etc/sudoers` na kuifanya.
 
 Kwa mfano: [https://youtu.be/f1HA5QhLQ7Y?t=21098](https://youtu.be/f1HA5QhLQ7Y?t=21098), code: https://github.com/gergelykalman/CVE-2023-32428-a-macOS-LPE-via-MallocStackLogging
 
@@ -74,7 +74,7 @@ xattr -d com.apple.quarantine /path/to/file_or_app
 ```
 ### uchg / uchange / uimmutable flag
 
-Ikiwa faili/folda ina sifa hii isiyoweza kubadilishwa haitakuwa na uwezo wa kuweka xattr juu yake.
+Ikiwa faili/folda ina sifa hii isiyobadilika haitakuwa na uwezo wa kuweka xattr juu yake
 ```bash
 echo asd > /tmp/asd
 chflags uchg /tmp/asd # "chflags uchange /tmp/asd" or "chflags uimmutable /tmp/asd"
@@ -122,7 +122,7 @@ ls -le /tmp/test
 
 **AppleDouble** muundo wa faili unakopi faili pamoja na ACE zake.
 
-Katika [**kanuni ya chanzo**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html) inawezekana kuona kwamba uwakilishi wa maandiko wa ACL ulihifadhiwa ndani ya xattr inayoitwa **`com.apple.acl.text`** utawekwa kama ACL katika faili lililoshughulikiwa. Hivyo, ikiwa umecompress programu ndani ya faili la zip lenye muundo wa **AppleDouble** ukiwa na ACL inayozuia xattrs nyingine kuandikwa ndani yake... xattr ya karantini haikuwekwa kwenye programu:
+Katika [**kanuni ya chanzo**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html) inawezekana kuona kwamba uwakilishi wa maandiko wa ACL ulihifadhiwa ndani ya xattr inayoitwa **`com.apple.acl.text`** utawekwa kama ACL katika faili lililoshughulikiwa. Hivyo, ikiwa umeweka programu katika faili la zip kwa muundo wa faili wa **AppleDouble** ukiwa na ACL inayozuia xattrs zingine kuandikwa ndani yake... xattr ya karantini haikuwekwa katika programu:
 
 Angalia [**ripoti ya asili**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/) kwa maelezo zaidi.
 
@@ -146,19 +146,19 @@ ls -le test
 ```
 (Note that even if this works the sandbox write the quarantine xattr before)
 
-Not really needed but I leave it there just in case:
+Sio kweli inahitajika lakini naiacha hapa tu kwa sababu:
 
 {{#ref}}
 macos-xattr-acls-extra-stuff.md
 {{#endref}}
 
-## Bypass signature checks
+## Pita ukaguzi wa saini
 
-### Bypass platform binaries checks
+### Pita ukaguzi wa binaries za jukwaa
 
-Baadhi ya ukaguzi wa usalama huangalia ikiwa binary ni **platform binary**, kwa mfano kuruhusu kuungana na huduma ya XPC. Hata hivyo, kama ilivyoonyeshwa katika bypass kwenye https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/, inawezekana kupita ukaguzi huu kwa kupata platform binary (kama /bin/ls) na kuingiza exploit kupitia dyld kwa kutumia variable ya mazingira `DYLD_INSERT_LIBRARIES`.
+Baadhi ya ukaguzi wa usalama huangalia kama binary ni **binary ya jukwaa**, kwa mfano kuruhusu kuungana na huduma ya XPC. Hata hivyo, kama ilivyoonyeshwa katika njia ya kupita katika https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/, inawezekana kupita ukaguzi huu kwa kupata binary ya jukwaa (kama /bin/ls) na kuingiza exploit kupitia dyld kwa kutumia variable ya mazingira `DYLD_INSERT_LIBRARIES`.
 
-### Bypass flags `CS_REQUIRE_LV` and `CS_FORCED_LV`
+### Pita bendera `CS_REQUIRE_LV` na `CS_FORCED_LV`
 
 Inawezekana kwa binary inayotekelezwa kubadilisha bendera zake mwenyewe ili kupita ukaguzi kwa kutumia msimbo kama:
 ```c
@@ -177,7 +177,7 @@ NSLog(@"=====Inject successfully into %d(%@), csflags=0x%x", pid, exePath, statu
 
 Bundles zina faili **`_CodeSignature/CodeResources`** ambayo ina **hash** ya kila **faili** katika **bundle**. Kumbuka kwamba hash ya CodeResources pia **imejumuishwa katika executable**, hivyo hatuwezi kuingilia hapo pia.
 
-Hata hivyo, kuna baadhi ya faili ambazo saini yake haitakaguliwa, hizi zina ufunguo omit katika plist, kama:
+Hata hivyo, kuna baadhi ya faili ambazo saini zao hazitakaguliwa, hizi zina ufunguo omit katika plist, kama:
 ```xml
 <dict>
 ...
@@ -227,7 +227,7 @@ openssl dgst -binary -sha1 /System/Cryptexes/App/System/Applications/Safari.app/
 ```
 ## Mount dmgs
 
-Mtumiaji anaweza kuunganisha dmg maalum iliyoundwa hata juu ya folda zilizopo. Hivi ndivyo unaweza kuunda kifurushi cha dmg maalum chenye maudhui maalum:
+Mtumiaji anaweza kuunganisha dmg maalum iliyoundwa hata juu ya folda zilizopo. Hivi ndivyo unavyoweza kuunda kifurushi cha dmg maalum chenye maudhui maalum:
 ```bash
 # Create the volume
 hdiutil create /private/tmp/tmp.dmg -size 2m -ov -volname CustomVolName -fs APFS 1>/dev/null
@@ -253,15 +253,15 @@ Hata hivyo, inawezekana kutumia zana kama `hdik` na `hdiutil` kuwasiliana moja k
 
 ## Maandishi ya Huru
 
-### Mifumo ya sh ya Kila Wakati
+### Scripts za sh za Kila Wakati
 
-Ikiwa skripti yako inaweza kutafsiriwa kama **shell script** unaweza kuandika upya **`/etc/periodic/daily/999.local`** shell script ambayo itazinduliwa kila siku.
+Ikiwa script yako inaweza kutafsiriwa kama **shell script** unaweza kuandika upya **`/etc/periodic/daily/999.local`** shell script ambayo itazinduliwa kila siku.
 
-Unaweza **kuigiza** utekelezaji wa skripti hii kwa: **`sudo periodic daily`**
+Unaweza **kuigiza** utekelezaji wa script hii kwa: **`sudo periodic daily`**
 
 ### Daemons
 
-Andika **LaunchDaemon** ya huru kama **`/Library/LaunchDaemons/xyz.hacktricks.privesc.plist`** yenye plist inayotekeleza skripti ya huru kama:
+Andika **LaunchDaemon** ya huru kama **`/Library/LaunchDaemons/xyz.hacktricks.privesc.plist`** yenye plist inayotekeleza script ya huru kama:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -300,7 +300,7 @@ ErrorLog /etc/sudoers.d/lpe
 LogFilePerm 777
 <some junk>
 ```
-Hii itaunda faili `/etc/sudoers.d/lpe` yenye ruhusa 777. Takataka za ziada mwishoni ni kuanzisha uundaji wa kumbukumbu za makosa.
+Hii itaunda faili `/etc/sudoers.d/lpe` yenye ruhusa 777. Takataka za ziada mwishoni ni kuanzisha uundaji wa log ya makosa.
 
 Kisha, andika katika `/etc/sudoers.d/lpe` usanidi unaohitajika ili kupandisha mamlaka kama `%staff ALL=(ALL) NOPASSWD:ALL`.
 
@@ -308,7 +308,7 @@ Kisha, badilisha faili `/etc/cups/cups-files.conf` tena ukionyesha `LogFilePerm 
 
 ### Sandbox Escape
 
-Inawezekana kutoroka sandbox ya macOS kwa kuandika FS isiyo na mipaka. Kwa baadhi ya mifano angalia ukurasa [macOS Auto Start](../../../../macos-auto-start-locations.md) lakini moja ya kawaida ni kuandika faili ya mapendeleo ya Terminal katika `~/Library/Preferences/com.apple.Terminal.plist` inayotekeleza amri wakati wa kuanzisha na kuitwa kwa kutumia `open`.
+Inawezekana kutoroka sandbox ya macOS kwa kuandika FS isiyo na mipaka. Kwa mifano mingine angalia ukurasa [macOS Auto Start](../../../../macos-auto-start-locations.md) lakini moja ya kawaida ni kuandika faili ya mapendeleo ya Terminal katika `~/Library/Preferences/com.apple.Terminal.plist` inayotekeleza amri wakati wa kuanzisha na kuitwa kwa kutumia `open`.
 
 ## Generate writable files as other users
 
@@ -326,7 +326,7 @@ echo $FILENAME
 ```
 ## POSIX Shared Memory
 
-**POSIX shared memory** inaruhusu michakato katika mifumo ya uendeshaji inayokubaliana na POSIX kufikia eneo la kawaida la kumbukumbu, ikirahisisha mawasiliano ya haraka ikilinganishwa na mbinu nyingine za mawasiliano kati ya michakato. Inahusisha kuunda au kufungua kitu cha kumbukumbu ya pamoja kwa kutumia `shm_open()`, kuweka ukubwa wake kwa `ftruncate()`, na kuunganisha katika nafasi ya anwani ya mchakato kwa kutumia `mmap()`. Michakato inaweza kisha kusoma moja kwa moja kutoka na kuandika kwenye eneo hili la kumbukumbu. Ili kudhibiti ufikiaji wa pamoja na kuzuia uharibifu wa data, mitambo ya usawazishaji kama vile mutexes au semaphores mara nyingi hutumiwa. Hatimaye, michakato inafuta na kufunga kumbukumbu ya pamoja kwa kutumia `munmap()` na `close()`, na kwa hiari kuondoa kitu cha kumbukumbu kwa kutumia `shm_unlink()`. Mfumo huu ni wa ufanisi hasa kwa IPC yenye ufanisi na haraka katika mazingira ambapo michakato mingi inahitaji kufikia data ya pamoja kwa haraka.
+**POSIX shared memory** inaruhusu michakato katika mifumo ya uendeshaji inayokubaliana na POSIX kufikia eneo la kawaida la kumbukumbu, ikirahisisha mawasiliano ya haraka ikilinganishwa na mbinu nyingine za mawasiliano kati ya michakato. Inahusisha kuunda au kufungua kitu cha kumbukumbu ya pamoja kwa kutumia `shm_open()`, kuweka ukubwa wake kwa `ftruncate()`, na kuunganisha katika nafasi ya anwani ya mchakato kwa kutumia `mmap()`. Michakato inaweza kisha kusoma moja kwa moja kutoka na kuandika kwenye eneo hili la kumbukumbu. Ili kudhibiti ufikiaji wa pamoja na kuzuia uharibifu wa data, mitambo ya usawazishaji kama vile mutexes au semaphores mara nyingi hutumiwa. Hatimaye, michakato huondoa na kufunga kumbukumbu ya pamoja kwa kutumia `munmap()` na `close()`, na kwa hiari kuondoa kitu cha kumbukumbu kwa kutumia `shm_unlink()`. Mfumo huu ni wa ufanisi hasa kwa IPC yenye ufanisi na haraka katika mazingira ambapo michakato mingi inahitaji kufikia data ya pamoja kwa haraka.
 
 <details>
 
@@ -422,7 +422,7 @@ return 0;
 
 ## macOS Guarded Descriptors
 
-**macOSCguarded descriptors** ni kipengele cha usalama kilichowekwa katika macOS ili kuboresha usalama na uaminifu wa **file descriptor operations** katika programu za mtumiaji. Hizi guarded descriptors zinatoa njia ya kuunganisha vizuizi maalum au "guards" na file descriptors, ambavyo vinatekelezwa na kernel.
+**macOSCguarded descriptors** ni kipengele cha usalama kilichozinduliwa katika macOS ili kuboresha usalama na uaminifu wa **file descriptor operations** katika programu za mtumiaji. Hizi guarded descriptors zinatoa njia ya kuunganisha vizuizi maalum au "guards" na file descriptors, ambavyo vinatekelezwa na kernel.
 
 Kipengele hiki ni muhimu hasa katika kuzuia aina fulani za udhaifu wa usalama kama vile **unauthorized file access** au **race conditions**. Udhaifu huu hutokea wakati kwa mfano thread inapata file description ikitoa **thread nyingine yenye udhaifu ufikiaji juu yake** au wakati file descriptor inachukuliwa na mchakato wa mtoto mwenye udhaifu. Baadhi ya kazi zinazohusiana na kazi hii ni:
 

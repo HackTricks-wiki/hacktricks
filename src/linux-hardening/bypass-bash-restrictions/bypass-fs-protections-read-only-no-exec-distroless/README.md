@@ -4,14 +4,14 @@
 
 ## Videos
 
-Katika video zifuatazo unaweza kupata mbinu zilizotajwa katika ukurasa huu zikielezewa kwa undani zaidi:
+In the following videos you can find the techniques mentioned in this page explained more in depth:
 
 - [**DEF CON 31 - Exploring Linux Memory Manipulation for Stealth and Evasion**](https://www.youtube.com/watch?v=poHirez8jk4)
 - [**Stealth intrusions with DDexec-ng & in-memory dlopen() - HackTricks Track 2023**](https://www.youtube.com/watch?v=VM_gjjiARaU)
 
 ## read-only / no-exec scenario
 
-Ni kawaida zaidi na zaidi kupata mashine za linux zilizowekwa na **read-only (ro) file system protection**, hasa katika kontena. Hii ni kwa sababu kuendesha kontena na mfumo wa faili wa ro ni rahisi kama kuweka **`readOnlyRootFilesystem: true`** katika `securitycontext`:
+Ni kawaida zaidi na zaidi kupata mashine za linux zilizowekwa na **read-only (ro) file system protection**, hasa katika kontena. Hii ni kwa sababu ya kuendesha kontena na mfumo wa faili wa ro ni rahisi kama kuweka **`readOnlyRootFilesystem: true`** katika `securitycontext`:
 
 <pre class="language-yaml"><code class="lang-yaml">apiVersion: v1
 kind: Pod
@@ -26,7 +26,7 @@ securityContext:
 </strong>    command: ["sh", "-c", "while true; do sleep 1000; done"]
 </code></pre>
 
-Hata hivyo, hata kama mfumo wa faili umewekwa kama ro, **`/dev/shm`** bado itaandikwa, hivyo ni uongo hatuwezi kuandika chochote kwenye diski. Hata hivyo, folda hii itakuwa **imewekwa na no-exec protection**, hivyo ikiwa utashusha binary hapa huwezi **kuweza kuitekeleza**.
+Hata hivyo, hata kama mfumo wa faili umewekwa kama ro, **`/dev/shm`** bado itaandikwa, hivyo ni uongo hatuwezi kuandika chochote kwenye diski. Hata hivyo, folda hii itakuwa **imewekwa na no-exec protection**, hivyo ikiwa utashusha binary hapa hu **wezi kuitekeleza**.
 
 > [!WARNING]
 > Kutoka kwa mtazamo wa timu nyekundu, hii inafanya **kuwa ngumu kupakua na kutekeleza** binaries ambazo hazipo kwenye mfumo tayari (kama backdoors au enumerators kama `kubectl`).
@@ -45,7 +45,7 @@ Ikiwa unataka kutekeleza binary lakini mfumo wa faili haukuruhusu hilo, njia bor
 
 Ikiwa una injini za script zenye nguvu ndani ya mashine, kama **Python**, **Perl**, au **Ruby** unaweza kupakua binary ili kuitekeleza kutoka kwenye kumbukumbu, kuihifadhi katika file descriptor ya kumbukumbu (`create_memfd` syscall), ambayo haitalindwa na ulinzi huo na kisha kuita **`exec` syscall** ikionyesha **fd kama faili ya kutekeleza**.
 
-Kwa hili unaweza kwa urahisi kutumia mradi [**fileless-elf-exec**](https://github.com/nnsee/fileless-elf-exec). Unaweza kupitisha binary na itaunda script katika lugha iliyoonyeshwa na **binary iliyoshinikizwa na b64 encoded** pamoja na maagizo ya **kufungua na kubana** katika **fd** iliyoundwa kwa kuita `create_memfd` syscall na wito kwa **exec** syscall kuikimbia.
+Kwa hili unaweza kwa urahisi kutumia mradi [**fileless-elf-exec**](https://github.com/nnsee/fileless-elf-exec). Unaweza kupitisha binary na itaunda script katika lugha iliyoonyeshwa na **binary iliyoshinikizwa na b64 encoded** na maagizo ya **kufungua na kubana** katika **fd** iliyoundwa kwa kuita `create_memfd` syscall na wito kwa **exec** syscall kuikimbia.
 
 > [!WARNING]
 > Hii haifanyi kazi katika lugha nyingine za skripti kama PHP au Node kwa sababu hazina njia yoyote ya **kawaida ya kuita raw syscalls** kutoka kwa script, hivyo haiwezekani kuita `create_memfd` kuunda **memory fd** kuhifadhi binary.
@@ -54,7 +54,7 @@ Kwa hili unaweza kwa urahisi kutumia mradi [**fileless-elf-exec**](https://githu
 
 ### DDexec / EverythingExec
 
-[**DDexec / EverythingExec**](https://github.com/arget13/DDexec) ni mbinu inayokuruhusu **kudhibiti kumbukumbu ya mchakato wako mwenyewe** kwa kuandika tena **`/proc/self/mem`**.
+[**DDexec / EverythingExec**](https://github.com/arget13/DDexec) ni mbinu inayokuruhusu **kubadilisha kumbukumbu ya mchakato wako mwenyewe** kwa kuandika tena **`/proc/self/mem`**.
 
 Hivyo, **kudhibiti msimbo wa mkusanyiko** unaotekelezwa na mchakato, unaweza kuandika **shellcode** na "kubadilisha" mchakato ili **kutekeleza msimbo wowote wa kawaida**.
 
@@ -78,34 +78,33 @@ Unaweza kupata mfano wa jinsi ya kutumia **memexec kutekeleza binaries kutoka kw
 
 ### Memdlopen
 
-Kwa kusudi sawa na DDexec, [**memdlopen**](https://github.com/arget13/memdlopen) mbinu inaruhusu **njia rahisi ya kupakia binaries** kwenye kumbukumbu ili baadaye kuziendesha. Inaweza hata kuruhusu kupakia binaries zenye utegemezi.
+Kwa kusudi linalofanana na DDexec, mbinu ya [**memdlopen**](https://github.com/arget13/memdlopen) inaruhusu **njia rahisi ya kupakia binaries** kwenye kumbukumbu ili baadaye kuziendesha. Inaweza hata kuruhusu kupakia binaries zenye utegemezi.
 
 ## Distroless Bypass
 
 ### Nini maana ya distroless
 
-Kontena za distroless zina vitu tu **vya msingi vinavyohitajika kuendesha programu au huduma maalum**, kama maktaba na utegemezi wa wakati wa kuendesha, lakini zinatenga vitu vikubwa kama meneja wa pakiti, shell, au zana za mfumo.
+Mizigo ya distroless ina sehemu tu za **muhimu kabisa zinazohitajika kuendesha programu au huduma maalum**, kama vile maktaba na utegemezi wa wakati wa kuendesha, lakini inatenga sehemu kubwa kama vile meneja wa pakiti, shell, au zana za mfumo.
 
-Lengo la kontena za distroless ni **kupunguza uso wa shambulio wa kontena kwa kuondoa vitu visivyohitajika** na kupunguza idadi ya udhaifu ambao unaweza kutumiwa.
+Lengo la mizigo ya distroless ni **kupunguza uso wa shambulio wa mizigo kwa kuondoa sehemu zisizohitajika** na kupunguza idadi ya udhaifu ambao unaweza kutumiwa.
 
 ### Reverse Shell
 
-Katika kontena ya distroless huenda **usipate hata `sh` au `bash`** kupata shell ya kawaida. Hutaweza pia kupata binaries kama `ls`, `whoami`, `id`... kila kitu ambacho kawaida unakimbia kwenye mfumo.
+Katika mizigo ya distroless huenda **usione hata `sh` au `bash`** kupata shell ya kawaida. Hutaweza pia kupata binaries kama `ls`, `whoami`, `id`... kila kitu ambacho kawaida unakimbia kwenye mfumo.
 
 > [!WARNING]
-> Kwa hivyo, huwezi kupata **reverse shell** au **kuhesabu** mfumo kama kawaida unavyofanya.
+> Kwa hivyo, huwezi kupata **reverse shell** au **kuhesabu** mfumo kama unavyofanya kawaida.
 
-Hata hivyo, ikiwa kontena iliyoathirika inakimbia kwa mfano flask web, basi python imewekwa, na hivyo unaweza kupata **Python reverse shell**. Ikiwa inakimbia node, unaweza kupata Node rev shell, na vivyo hivyo na lugha nyingi za **scripting**.
+Hata hivyo, ikiwa mizigo iliyovunjwa inakimbia kwa mfano flask web, basi python imewekwa, na kwa hivyo unaweza kupata **Python reverse shell**. Ikiwa inakimbia node, unaweza kupata Node rev shell, na vivyo hivyo na lugha nyingi za **scripting**.
 
 > [!TIP]
-> Kwa kutumia lugha ya scripting unaweza **kuhesabu mfumo** kwa kutumia uwezo wa lugha hiyo.
+> Kutumia lugha ya scripting unaweza **kuhesabu mfumo** kwa kutumia uwezo wa lugha hiyo.
 
 Ikiwa hakuna **`read-only/no-exec`** ulinzi unaweza kutumia reverse shell yako **kuandika kwenye mfumo wa faili binaries zako** na **kuziendesha**.
 
 > [!TIP]
-> Hata hivyo, katika aina hii ya kontena ulinzi huu kwa kawaida utakuwepo, lakini unaweza kutumia **mbinu za awali za utekelezaji wa kumbukumbu kuzipita**.
+> Hata hivyo, katika aina hii ya mizigo ulinzi huu kwa kawaida utawepo, lakini unaweza kutumia **mbinu za awali za utekelezaji wa kumbukumbu kuzipita**.
 
-Unaweza kupata **mfano** wa jinsi ya **kutumia udhaifu fulani wa RCE** kupata lugha za scripting **reverse shells** na kuendesha binaries kutoka kwa kumbukumbu katika [**https://github.com/carlospolop/DistrolessRCE**](https://github.com/carlospolop/DistrolessRCE).
-
+Unaweza kupata **mfano** wa jinsi ya **kutumia baadhi ya udhaifu wa RCE** kupata lugha za scripting **reverse shells** na kuendesha binaries kutoka kwenye kumbukumbu katika [**https://github.com/carlospolop/DistrolessRCE**](https://github.com/carlospolop/DistrolessRCE).
 
 {{#include ../../../banners/hacktricks-training.md}}

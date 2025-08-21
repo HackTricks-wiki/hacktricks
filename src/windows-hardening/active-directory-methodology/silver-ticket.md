@@ -2,14 +2,12 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-
-
 ## Silver ticket
 
-Shambulio la **Silver Ticket** linahusisha unyakuzi wa tiketi za huduma katika mazingira ya Active Directory (AD). Njia hii inategemea **kupata NTLM hash ya akaunti ya huduma**, kama akaunti ya kompyuta, ili kuunda tiketi ya Ticket Granting Service (TGS). Kwa tiketi hii iliyoundwa, mshambuliaji anaweza kufikia huduma maalum kwenye mtandao, **akijifanya kuwa mtumiaji yeyote**, kwa kawaida akilenga haki za usimamizi. Inasisitizwa kwamba kutumia funguo za AES kwa ajili ya kuunda tiketi ni salama zaidi na zisizoweza kugundulika.
+Shambulio la **Silver Ticket** linahusisha unyakuzi wa tiketi za huduma katika mazingira ya Active Directory (AD). Njia hii inategemea **kupata hash ya NTLM ya akaunti ya huduma**, kama akaunti ya kompyuta, ili kuunda tiketi ya Ticket Granting Service (TGS). Kwa tiketi hii iliyoundwa, mshambuliaji anaweza kufikia huduma maalum kwenye mtandao, **akijifanya kuwa mtumiaji yeyote**, kwa kawaida akilenga haki za usimamizi. Inasisitizwa kwamba kutumia funguo za AES kwa ajili ya kuunda tiketi ni salama zaidi na si rahisi kugundulika.
 
 > [!WARNING]
-> Silver Tickets hazigunduliki kwa urahisi kama Golden Tickets kwa sababu zinahitaji tu **hash ya akaunti ya huduma**, si akaunti ya krbtgt. Hata hivyo, zinapungukiwa na huduma maalum wanazolenga. Aidha, kuiba tu nenosiri la mtumiaji.
+> Silver Tickets ni rahisi kidogo kugundulika kuliko Golden Tickets kwa sababu zinahitaji tu **hash ya akaunti ya huduma**, si akaunti ya krbtgt. Hata hivyo, zinapungukiwa na huduma maalum wanazolenga. Aidha, kuiba tu nenosiri la mtumiaji.
 Zaidi ya hayo, ikiwa unavunja **nenosiri la akaunti na SPN** unaweza kutumia nenosiri hilo kuunda Silver Ticket ukijifanya kuwa mtumiaji yeyote kwa huduma hiyo.
 
 Kwa ajili ya kuunda tiketi, zana tofauti zinatumika kulingana na mfumo wa uendeshaji:
@@ -80,13 +78,14 @@ copy afile.txt \\vulnerable.computer\C$\Windows\Temp
 ```
 Utapata pia uwezo wa kupata shell ndani ya mwenyeji au kutekeleza amri za kawaida ukitumia **psexec**:
 
+
 {{#ref}}
 ../lateral-movement/psexec-and-winexec.md
 {{#endref}}
 
 ### HOST
 
-Kwa ruhusa hii unaweza kuunda kazi za ratiba katika kompyuta za mbali na kutekeleza amri za kawaida:
+Kwa ruhusa hii unaweza kuunda kazi zilizopangwa katika kompyuta za mbali na kutekeleza amri za kawaida:
 ```bash
 #Check you have permissions to use schtasks over a remote server
 schtasks /S some.vuln.pc
@@ -124,6 +123,7 @@ New-PSSession -Name PSC -ComputerName the.computer.name; Enter-PSSession PSC
 ```
 Check the following page to learn **njia zaidi za kuungana na mwenyeji wa mbali kwa kutumia winrm**:
 
+
 {{#ref}}
 ../lateral-movement/winrm.md
 {{#endref}}
@@ -139,12 +139,13 @@ mimikatz(commandline) # lsadump::dcsync /dc:pcdc.domain.local /domain:domain.loc
 ```
 **Jifunze zaidi kuhusu DCSync** katika ukurasa ufuatao:
 
+
 {{#ref}}
 dcsync.md
 {{#endref}}
 
 
-## Marejeleo
+## Marejeo
 
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-silver-tickets](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-silver-tickets)
 - [https://www.tarlogic.com/blog/how-to-attack-kerberos/](https://www.tarlogic.com/blog/how-to-attack-kerberos/)

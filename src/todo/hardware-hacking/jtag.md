@@ -2,6 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
+
 {{#ref}}
 README.md
 {{#endref}}
@@ -16,7 +17,7 @@ README.md
 Mara tu unapoflash, fungua monitor ya serial kwa 115200 baud na tuma `h` kwa msaada. Mchakato wa kawaida:
 
 - `l` pata loopbacks ili kuepuka positives za uwongo
-- `r` badilisha pull‑ups za ndani ikiwa inahitajika
+- `r` geuza pull‑ups za ndani ikiwa inahitajika
 - `s` scan kwa TCK/TMS/TDI/TDO (na wakati mwingine TRST/SRST)
 - `y` brute‑force IR kugundua opcodes zisizorekodiwa
 - `x` snapshot ya boundary‑scan ya hali za pini
@@ -38,7 +39,7 @@ Vidokezo
 ## Uwindaji wa pini salama na usanidi wa vifaa
 
 - Tambua Vtref na GND kwanza kwa kutumia multimeter. Adapta nyingi zinahitaji Vtref kuweka voltage ya I/O.
-- Level shifting: pendelea level shifters za pande mbili zilizoundwa kwa ishara za push‑pull (michakato ya JTAG si open‑drain). Epuka auto‑direction I2C shifters kwa JTAG.
+- Level shifting: pendelea level shifters za pande mbili zilizoundwa kwa ishara za push‑pull (michakato ya JTAG si wazi). Epuka level shifters za I2C za auto‑direction kwa JTAG.
 - Adapta zinazofaa: bodi za FT2232H/FT232H (mfano, Tigard), CMSIS‑DAP, J‑Link, ST‑LINK (maalum kwa muuzaji), ESP‑USB‑JTAG (juu ya ESP32‑Sx). Unganisha angalau TCK, TMS, TDI, TDO, GND na Vtref; hiari TRST na SRST.
 
 ## Mawasiliano ya kwanza na OpenOCD (scan na IDCODE)
@@ -60,7 +61,7 @@ Notes
 
 ## Kusimamisha CPU na kutupa kumbukumbu/flash
 
-Mara TAP inapokubaliwa na script ya lengo kuchaguliwa, unaweza kusimamisha msingi na kutupa maeneo ya kumbukumbu au flash ya ndani. Mifano (badilisha lengo, anwani za msingi na saizi): 
+Mara tu TAP inapokubaliwa na script ya lengo imechaguliwa, unaweza kusimamisha core na kutupa maeneo ya kumbukumbu au flash ya ndani. Mifano (badilisha lengo, anwani za msingi na saizi): 
 
 - Lengo la jumla baada ya kuanzisha:
 ```
@@ -79,12 +80,12 @@ openocd -f board/esp32s3-builtin.cfg \
 ```
 Tips
 - Tumia `mdw/mdh/mdb` kuthibitisha kumbukumbu kabla ya dumps ndefu.
-- Kwa minyororo ya vifaa vingi, weka BYPASS kwenye zisizo lengo au tumia faili ya bodi inayofafanua TAP zote.
+- Kwa minyororo ya vifaa vingi, weka BYPASS kwenye visivyo lengo au tumia faili ya bodi inayofafanua TAP zote.
 
 ## Hila za boundary-scan (EXTEST/SAMPLE)
 
 Hata wakati ufikiaji wa debug wa CPU umefungwa, boundary-scan bado inaweza kuwa wazi. Kwa UrJTAG/OpenOCD unaweza:
-- SAMPLE kuchukua picha za hali za pini wakati mfumo unafanya kazi (pata shughuli za basi, thibitisha ramani ya pini).
+- SAMPLE kuchukua picha za hali za pini wakati mfumo unafanya kazi (pata shughuli za basi, thibitisha ramani za pini).
 - EXTEST kuendesha pini (kwa mfano, bit-bang mistari ya SPI flash ya nje kupitia MCU ili kuisoma bila mtandao ikiwa wiring ya bodi inaruhusu).
 
 Mchakato wa chini wa UrJTAG na adapter ya FT2232x:
@@ -97,20 +98,20 @@ jtag> instruction EXTEST
 jtag> shift ir
 jtag> dr  <bit pattern for boundary register>
 ```
-Unahitaji kifaa BSDL ili kujua mpangilio wa bit za register za mipaka. Kuwa makini kwamba wauzaji wengine wanafungia seli za uchunguzi wa mipaka katika uzalishaji.
+Unahitaji kifaa BSDL ili kujua mpangilio wa bit za register za mipaka. Kuwa makini kwamba wauzaji wengine wanaweza kufunga seli za skana za mipaka katika uzalishaji.
 
 ## Malengo ya kisasa na maelezo
 
 - ESP32‑S3/C3 inajumuisha daraja la USB‑JTAG asilia; OpenOCD inaweza kuzungumza moja kwa moja kupitia USB bila kipimo cha nje. Ni rahisi sana kwa uchambuzi na dump.
-- Ufuatiliaji wa RISC‑V (v0.13+) unasaidiwa sana na OpenOCD; pendelea SBA kwa ufikiaji wa kumbukumbu wakati kiini hakiwezi kusimamishwa salama.
-- MCU nyingi zinafanya uthibitisho wa ufuatiliaji na hali za mzunguko wa maisha. Ikiwa JTAG inaonekana kufa lakini nguvu ni sahihi, kifaa kinaweza kuwa kimeunganishwa kwenye hali iliyofungwa au kinahitaji kipimo kilichothibitishwa.
+- RISC‑V debug (v0.13+) inasaidiwa sana na OpenOCD; pendelea SBA kwa ufikiaji wa kumbukumbu wakati kiini hakiwezi kusimamishwa kwa usalama.
+- MCU nyingi zinafanya uthibitisho wa debug na hali za mzunguko wa maisha. Ikiwa JTAG inaonekana kufa lakini nguvu ni sahihi, kifaa kinaweza kuwa kimeunganishwa katika hali iliyofungwa au kinahitaji kipimo kilichothibitishwa.
 
 ## Ulinzi na kuimarisha (kila unachoweza kutarajia kwenye vifaa halisi)
 
-- Zima kabisa au fungia JTAG/SWD katika uzalishaji (mfano, STM32 RDP kiwango cha 2, ESP eFuses zinazozuia PAD JTAG, NXP/Nordic APPROTECT/DPAP).
-- Hitaji uthibitisho wa ufuatiliaji (ARMv8.2‑A ADIv6 Uthibitisho wa Ufuatiliaji, changamoto-ujibu inayosimamiwa na OEM) huku ukihifadhi ufikiaji wa utengenezaji.
-- Usipange pad za majaribio rahisi; ficha vias za majaribio, ondoa/jaza upinzani ili kutenga TAP, tumia viunganishi vyenye funguo au vifaa vya pogo‑pin.
-- Kufunga ufuatiliaji wa nguvu: funga TAP nyuma ya ROM ya mapema inayolazimisha kuanza salama.
+- Zima kabisa au fungia JTAG/SWD katika uzalishaji (mfano, STM32 RDP kiwango 2, ESP eFuses zinazozuia PAD JTAG, NXP/Nordic APPROTECT/DPAP).
+- Hitaji uthibitisho wa debug (ARMv8.2‑A ADIv6 Debug Authentication, changamoto-ujibu inayosimamiwa na OEM) huku ukihifadhi ufikiaji wa uzalishaji.
+- Usipange pad za majaribio rahisi; ficha vias za majaribio, ondoa/jaza upinzani ili kutenga TAP, tumia viunganishi vyenye ufunguo au vifaa vya pogo‑pin.
+- Kufunga lock ya debug wakati wa kuwasha: funga TAP nyuma ya ROM ya mapema inayolazimisha boot salama.
 
 ## Marejeleo
 

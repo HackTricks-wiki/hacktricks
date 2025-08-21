@@ -6,7 +6,7 @@
 adws-enumeration.md
 {{#endref}}
 
-> KUMBUKA: Ukurasa huu unakusanya baadhi ya zana muhimu zaidi za **kuorodhesha** na **kuonyesha** uhusiano wa Active Directory. Kwa ukusanyaji kupitia njia ya siri ya **Active Directory Web Services (ADWS)** angalia rejea hapo juu.
+> KUMBUKA: Ukurasa huu unakusanya baadhi ya zana muhimu zaidi za **kuorodhesha** na **kuonyesha** uhusiano wa Active Directory. Kwa ukusanyaji kupitia njia ya siri ya **Active Directory Web Services (ADWS)** angalia rejeleo hapo juu.
 
 ---
 
@@ -20,7 +20,7 @@ adws-enumeration.md
 
 ### Matumizi ya haraka
 
-1. Anza chombo na uungane na `dc01.corp.local` kwa akidi yoyote ya domain.
+1. Anza zana na uungane na `dc01.corp.local` kwa akidi yoyote ya domain.
 2. Unda picha ya mbali kupitia `File ➜ Create Snapshot`.
 3. Linganisha picha mbili kwa `File ➜ Compare` ili kugundua mabadiliko ya ruhusa.
 
@@ -48,7 +48,7 @@ curl -L https://ghst.ly/getbhce | docker compose -f - up
 
 * `SharpHound.exe` / `Invoke-BloodHound` – toleo la asili au PowerShell
 * `AzureHound` – uainishaji wa Azure AD
-* **SoaPy + BOFHound** – ukusanyaji wa ADWS (angalia kiungo kilichopo juu)
+* **SoaPy + BOFHound** – ukusanyaji wa ADWS (angalia kiungo kilichoko juu)
 
 #### Njia za kawaida za SharpHound
 ```powershell

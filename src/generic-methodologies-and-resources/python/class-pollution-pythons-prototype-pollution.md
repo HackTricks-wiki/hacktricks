@@ -1,4 +1,4 @@
-# Uchafuzi wa Darasa (Uchafuzi wa Prototype wa Python)
+# Class Pollution (Python's Prototype Pollution)
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -116,7 +116,7 @@ print(system_admin_emp.execute_command())
 
 <details>
 
-<summary>Kuchafua madarasa mengine na mabadiliko ya kimataifa kupitia <code>globals</code></summary>
+<summary>Kuchafua madarasa mengine na vigezo vya ulimwengu kupitia <code>globals</code></summary>
 ```python
 def merge(src, dst):
 # Recursive merge function
@@ -180,9 +180,9 @@ subprocess.Popen('whoami', shell=True) # Calc.exe will pop up
 
 <details>
 
-<summary>Kufuta <strong><code>__kwdefaults__</code></strong></summary>
+<summary>Kupitia <strong><code>__kwdefaults__</code></strong></summary>
 
-**`__kwdefaults__`** ni sifa maalum ya kazi zote, kulingana na [nyaraka za Python](https://docs.python.org/3/library/inspect.html), ni “ramani ya thamani zozote za msingi kwa **parameta za neno funguo pekee**”. Kuingiza uchafu katika sifa hii inatupa uwezo wa kudhibiti thamani za msingi za parameta za neno funguo pekee za kazi, hizi ni parameta za kazi zinazokuja baada ya \* au \*args.
+**`__kwdefaults__`** ni sifa maalum ya kazi zote, kulingana na [nyaraka](https://docs.python.org/3/library/inspect.html) za Python, ni “ramani ya thamani zozote za msingi kwa **parameta-za-neno pekee**”. Kuingilia kati sifa hii kunatuwezesha kudhibiti thamani za msingi za parameta-za-neno pekee za kazi, hizi ni parameta za kazi zinazokuja baada ya \* au \*args.
 ```python
 from os import system
 import json
@@ -226,22 +226,23 @@ execute() #> Executing echo Polluted
 <summary>Kufuta siri ya Flask kati ya faili</summary>
 
 Hivyo, ikiwa unaweza kufanya uchafuzi wa darasa juu ya kitu kilichofafanuliwa katika faili kuu ya python ya wavuti lakini **ambayo darasa lake limefafanuliwa katika faili tofauti** na ile kuu. Kwa sababu ili kufikia \_\_globals\_\_ katika payloads zilizopita unahitaji kufikia darasa la kitu au mbinu za darasa, utaweza **kufikia globals katika faili hiyo, lakini si katika ile kuu**. \
-Hivyo, **hutaweza kufikia kitu cha kimataifa cha Flask app** ambacho kilifafanua **funguo ya siri** katika ukurasa kuu:
+Kwa hivyo, **hutaweza kufikia kitu cha ulimwengu cha Flask app** ambacho kilifafanua **funguo ya siri** katika ukurasa kuu:
 ```python
 app = Flask(__name__, template_folder='templates')
 app.secret_key = '(:secret:)'
 ```
-Katika hali hii unahitaji kifaa cha kupita faili ili kufikia faili kuu ili **kupata kitu cha ulimwengu `app.secret_key`** kubadilisha funguo ya siri ya Flask na kuwa na uwezo wa [**kuinua mamlaka** ukijua funguo hii](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).
+Katika hali hii unahitaji kifaa cha kupita faili ili kufikia faili kuu ili **kupata kitu cha ulimwengu `app.secret_key`** kubadilisha funguo za siri za Flask na kuwa na uwezo wa [**kuinua mamlaka** ukijua funguo hii](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).
 
-Payload kama hii [kutoka kwa andiko hili](https://ctftime.org/writeup/36082):
+Malipo kama haya [kutoka kwa andiko hili](https://ctftime.org/writeup/36082):
 ```python
 __init__.__globals__.__loader__.__init__.__globals__.sys.modules.__main__.app.secret_key
 ```
-Tumia payload hii kubadilisha **`app.secret_key`** (jina katika programu yako linaweza kuwa tofauti) ili uweze kusaini vidakuzi vya flask vipya na vya kibali zaidi.
+Tumia payload hii kubadilisha **`app.secret_key`** (jina katika programu yako linaweza kuwa tofauti) ili uweze kusaini vidakuzi vya flask vipya na vya ruhusa zaidi.
 
 </details>
 
-Angalia pia ukurasa ufuatao kwa vifaa vya kusoma tu:
+Angalia pia ukurasa ufuatao kwa vifaa vya kusoma pekee:
+
 
 {{#ref}}
 python-internal-read-gadgets.md

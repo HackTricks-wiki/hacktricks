@@ -1,44 +1,51 @@
-# Majina
+# Namespaces
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-### **PID jina la eneo**
+### **PID namespace**
+
 
 {{#ref}}
 pid-namespace.md
 {{#endref}}
 
-### **Mount jina la eneo**
+### **Mount namespace**
+
 
 {{#ref}}
 mount-namespace.md
 {{#endref}}
 
-### **Network jina la eneo**
+### **Network namespace**
+
 
 {{#ref}}
 network-namespace.md
 {{#endref}}
 
-### **IPC Jina la eneo**
+### **IPC Namespace**
+
 
 {{#ref}}
 ipc-namespace.md
 {{#endref}}
 
-### **UTS jina la eneo**
+### **UTS namespace**
+
 
 {{#ref}}
 uts-namespace.md
 {{#endref}}
 
-### Wakati Jina la eneo
+### Time Namespace
+
 
 {{#ref}}
 time-namespace.md
 {{#endref}}
 
-### Jina la mtumiaji
+### User namespace
+
 
 {{#ref}}
 user-namespace.md

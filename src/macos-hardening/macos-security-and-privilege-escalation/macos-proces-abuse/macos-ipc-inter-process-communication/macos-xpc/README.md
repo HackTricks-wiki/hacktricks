@@ -4,25 +4,25 @@
 
 ## Basic Information
 
-XPC, ambayo inasimama kwa XNU (kernel inayotumiwa na macOS) mawasiliano kati ya Mchakato, ni mfumo wa **mawasiliano kati ya michakato** kwenye macOS na iOS. XPC inatoa mekanizma ya kufanya **kuitana kwa njia salama, zisizo za wakati mmoja kati ya michakato tofauti** kwenye mfumo. Ni sehemu ya mtindo wa usalama wa Apple, ikiruhusu **kuundwa kwa programu zenye kutenganishwa kwa ruhusa** ambapo kila **kipengele** kinakimbia na **ruhusa pekee inazohitaji** kufanya kazi yake, hivyo kupunguza uharibifu unaoweza kutokea kutokana na mchakato ulioathirika.
+XPC, ambayo inasimama kwa XNU (kernel inayotumiwa na macOS) Inter-Process Communication, ni mfumo wa **mawasiliano kati ya michakato** kwenye macOS na iOS. XPC inatoa mekanismu ya kufanya **kuitwa kwa njia salama, zisizo za kawaida kati ya michakato tofauti** kwenye mfumo. Ni sehemu ya mtindo wa usalama wa Apple, ikiruhusu **kuundwa kwa programu zenye ruhusa tofauti** ambapo kila **kipengele** kinakimbia na **ruhusa pekee zinazohitajika** kufanya kazi yake, hivyo kupunguza uharibifu unaoweza kutokea kutokana na mchakato ulioathirika.
 
-XPC inatumia aina ya Mawasiliano kati ya Mchakato (IPC), ambayo ni seti ya mbinu za programu tofauti zinazokimbia kwenye mfumo mmoja kutuma data kwa pande zote.
+XPC inatumia aina ya Mawasiliano kati ya Michakato (IPC), ambayo ni seti ya mbinu za programu tofauti zinazokimbia kwenye mfumo mmoja kutuma data kwa pande zote.
 
 Faida kuu za XPC ni pamoja na:
 
-1. **Usalama**: Kwa kutenganisha kazi katika michakato tofauti, kila mchakato unaweza kupewa ruhusa pekee inazohitaji. Hii inamaanisha kwamba hata kama mchakato umeathirika, ina uwezo mdogo wa kufanya madhara.
-2. **Utulivu**: XPC husaidia kutenga ajali kwenye kipengele ambapo zinatokea. Ikiwa mchakato unashindwa, unaweza kuanzishwa upya bila kuathiri mfumo mzima.
+1. **Usalama**: Kwa kutenganisha kazi katika michakato tofauti, kila mchakato unaweza kupewa ruhusa pekee zinazohitajika. Hii inamaanisha kwamba hata kama mchakato umeathirika, ina uwezo mdogo wa kufanya madhara.
+2. **Utulivu**: XPC husaidia kutenga ajali kwenye kipengele ambapo zinatokea. Ikiwa mchakato utaanguka, unaweza kuanzishwa tena bila kuathiri mfumo mzima.
 3. **Utendaji**: XPC inaruhusu urahisi wa ushirikiano, kwani kazi tofauti zinaweza kufanywa kwa wakati mmoja katika michakato tofauti.
 
-Pungufu pekee ni kwamba **kutenganisha programu katika michakato kadhaa** na kuwafanya komunikate kupitia XPC ni **kasi kidogo**. Lakini katika mifumo ya leo hii haionekani sana na faida ni bora.
+Pungufu pekee ni kwamba **kutenganisha programu katika michakato kadhaa** na kuwafanya komunikate kupitia XPC ni **chini ya ufanisi**. Lakini katika mifumo ya leo hii haionekani sana na faida ni bora.
 
 ## Application Specific XPC services
 
-Vipengele vya XPC vya programu viko **ndani ya programu yenyewe.** Kwa mfano, katika Safari unaweza kuvikuta katika **`/Applications/Safari.app/Contents/XPCServices`**. Vina kiendelezi **`.xpc`** (kama **`com.apple.Safari.SandboxBroker.xpc`**) na pia ni **bundles** na binary kuu ndani yake: `/Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/MacOS/com.apple.Safari.SandboxBroker` na `Info.plist: /Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/Info.plist`
+Vipengele vya XPC vya programu viko **ndani ya programu yenyewe.** Kwa mfano, katika Safari unaweza kuviona katika **`/Applications/Safari.app/Contents/XPCServices`**. Vina kiendelezi **`.xpc`** (kama **`com.apple.Safari.SandboxBroker.xpc`**) na pia ni **bundles** na binary kuu ndani yake: `/Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/MacOS/com.apple.Safari.SandboxBroker` na `Info.plist: /Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/Info.plist`
 
-Kama unavyofikiria, **kipengele cha XPC kitakuwa na ruhusa na haki tofauti** na vipengele vingine vya XPC au binary kuu ya programu. ISIPOKUWA huduma ya XPC imewekwa na [**JoinExistingSession**](https://developer.apple.com/documentation/bundleresources/information_property_list/xpcservice/joinexistingsession) kuwekwa kuwa “True” katika **faili yake ya Info.plist**. Katika kesi hii, huduma ya XPC itakimbia katika **sehemu sawa ya usalama kama programu** iliyoiita.
+Kama unavyofikiria, **kipengele cha XPC kitakuwa na ruhusa na haki tofauti** na vipengele vingine vya XPC au binary kuu ya programu. ISIPOKUWA huduma ya XPC imewekwa na [**JoinExistingSession**](https://developer.apple.com/documentation/bundleresources/information_property_list/xpcservice/joinexistingsession) iliyowekwa kuwa “True” katika **faili yake ya Info.plist**. Katika kesi hii, huduma ya XPC itakimbia katika **sehemu moja ya usalama kama programu** iliyoiita.
 
-Huduma za XPC **zinanzishwa** na **launchd** inapohitajika na **zinazimwa** mara tu kazi zote **zinapokamilika** ili kuachilia rasilimali za mfumo. **Vipengele vya XPC vya programu vinaweza kutumika tu na programu**, hivyo kupunguza hatari inayohusiana na udhaifu unaoweza kutokea.
+Huduma za XPC **zinanzishwa** na **launchd** zinapohitajika na **zinapozuiliwa** mara tu kazi zote **zinapokamilika** ili kuachilia rasilimali za mfumo. **Vipengele vya XPC vya programu vinaweza kutumiwa tu na programu**, hivyo kupunguza hatari inayohusiana na udhaifu unaoweza kutokea.
 
 ## System Wide XPC services
 
@@ -62,18 +62,18 @@ cat /Library/LaunchDaemons/com.jamf.management.daemon.plist
 </dict>
 </plist>
 ```
-Wale katika **`LaunchDameons`** wanatekelezwa na root. Hivyo kama mchakato usio na mamlaka unaweza kuzungumza na mmoja wa hawa unaweza kuwa na uwezo wa kupandisha mamlaka.
+Wale walio katika **`LaunchDameons`** wanatekelezwa na root. Hivyo basi, ikiwa mchakato usio na ruhusa unaweza kuzungumza na mmoja wa hawa, unaweza kuwa na uwezo wa kupandisha ruhusa.
 
 ## XPC Objects
 
 - **`xpc_object_t`**
 
-Kila ujumbe wa XPC ni kitu cha kamusi ambacho kinarahisisha uhamasishaji na uhamasishaji wa data. Zaidi ya hayo, `libxpc.dylib` inatangaza aina nyingi za data hivyo inawezekana kuhakikisha kuwa data iliyopokelewa ni ya aina inayotarajiwa. Katika API ya C kila kitu ni `xpc_object_t` (na aina yake inaweza kuangaliwa kwa kutumia `xpc_get_type(object)`).\
-Zaidi ya hayo, kazi `xpc_copy_description(object)` inaweza kutumika kupata uwakilishi wa maandiko wa kitu ambacho kinaweza kuwa na manufaa kwa madhumuni ya urekebishaji.\
+Kila ujumbe wa XPC ni kitu cha kamusi kinachorahisisha uhamasishaji na uhamasishaji wa data. Aidha, `libxpc.dylib` inatangaza aina nyingi za data hivyo inawezekana kuhakikisha kuwa data iliyopokelewa ni ya aina inayotarajiwa. Katika API ya C kila kitu ni `xpc_object_t` (na aina yake inaweza kuangaliwa kwa kutumia `xpc_get_type(object)`).\
+Aidha, kazi `xpc_copy_description(object)` inaweza kutumika kupata uwakilishi wa maandiko wa kitu ambacho kinaweza kuwa na manufaa kwa madhumuni ya urekebishaji.\
 Vitu hivi pia vina baadhi ya mbinu za kuita kama `xpc_<object>_copy`, `xpc_<object>_equal`, `xpc_<object>_hash`, `xpc_<object>_serialize`, `xpc_<object>_deserialize`...
 
 `xpc_object_t` zinaundwa kwa kuita kazi `xpc_<objetType>_create`, ambayo ndani inaita `_xpc_base_create(Class, Size)` ambapo inaonyeshwa aina ya darasa la kitu (moja ya `XPC_TYPE_*`) na ukubwa wake (baadhi ya 40B za ziada zitaongezwa kwenye ukubwa kwa metadata). Hii inamaanisha kuwa data ya kitu itaanza kwenye ofset 40B.\
-Hivyo, `xpc_<objectType>_t` ni aina ya darasa ndogo la `xpc_object_t` ambayo itakuwa darasa ndogo la `os_object_t*`.
+Hivyo, `xpc_<objectType>_t` ni aina ya subclass ya `xpc_object_t` ambayo itakuwa subclass ya `os_object_t*`.
 
 > [!WARNING]
 > Kumbuka kwamba inapaswa kuwa mbunifu anayetumia `xpc_dictionary_[get/set]_<objectType>` kupata au kuweka aina na thamani halisi ya funguo.
@@ -81,7 +81,7 @@ Hivyo, `xpc_<objectType>_t` ni aina ya darasa ndogo la `xpc_object_t` ambayo ita
 - **`xpc_pipe`**
 
 **`xpc_pipe`** ni bomba la FIFO ambalo michakato inaweza kutumia kuwasiliana (mawasiliano hutumia ujumbe wa Mach).\
-Inawezekana kuunda seva ya XPC kwa kuita `xpc_pipe_create()` au `xpc_pipe_create_from_port()` kuunda kwa kutumia bandari maalum ya Mach. Kisha, kupokea ujumbe inawezekana kuita `xpc_pipe_receive` na `xpc_pipe_try_receive`.
+Inawezekana kuunda seva ya XPC kwa kuita `xpc_pipe_create()` au `xpc_pipe_create_from_port()` ili kuunda kwa kutumia bandari maalum ya Mach. Kisha, kupokea ujumbe inawezekana kuita `xpc_pipe_receive` na `xpc_pipe_try_receive`.
 
 Kumbuka kwamba kitu cha **`xpc_pipe`** ni **`xpc_object_t`** chenye taarifa katika muundo wake kuhusu bandari mbili za Mach zinazotumika na jina (ikiwa ipo). Jina, kwa mfano, daemoni `secinitd` katika plist yake `/System/Library/LaunchDaemons/com.apple.secinitd.plist` inakamilisha bomba linaloitwa `com.apple.secinitd`.
 
@@ -89,17 +89,17 @@ Mfano wa **`xpc_pipe`** ni **bootstrap pipe** iliyoundwa na **`launchd`** ikifan
 
 - **`NSXPC*`**
 
-Hizi ni vitu vya kiwango cha juu vya Objective-C ambavyo vinaruhusu uhamasishaji wa muunganisho wa XPC.\
-Zaidi ya hayo, ni rahisi kurekebisha vitu hivi na DTrace kuliko zile za awali.
+Hizi ni vitu vya kiwango cha juu vya Objective-C ambavyo vinaruhusu uabstrakto wa muunganisho wa XPC.\
+Aidha, ni rahisi zaidi kurekebisha vitu hivi na DTrace kuliko wale wa awali.
 
 - **`GCD Queues`**
 
-XPC inatumia GCD kupitisha ujumbe, zaidi inazalisha foleni fulani za dispatch kama `xpc.transactionq`, `xpc.io`, `xpc-events.add-listenerq`, `xpc.service-instance`...
+XPC inatumia GCD kupitisha ujumbe, aidha inazalisha foleni fulani za dispatch kama `xpc.transactionq`, `xpc.io`, `xpc-events.add-listenerq`, `xpc.service-instance`...
 
 ## XPC Services
 
-Hizi ni **bundles zenye kiendelezi `.xpc`** zilizoko ndani ya folda **`XPCServices`** za miradi mingine na katika `Info.plist` zina `CFBundlePackageType` iliyowekwa kuwa **`XPC!`**.\
-Faili hii ina funguo nyingine za usanidi kama `ServiceType` ambayo inaweza kuwa Programu, Mtumiaji, Mfumo au `_SandboxProfile` ambayo inaweza kufafanua sandbox au `_AllowedClients` ambayo inaweza kuashiria haki au ID inayohitajika kuwasiliana na seva. hizi na chaguzi nyingine za usanidi zitakuwa na manufaa kuunda huduma wakati inazinduliwa.
+Hizi ni **bundles zenye kiambatisho `.xpc`** zilizoko ndani ya folda ya **`XPCServices`** ya miradi mingine na katika `Info.plist` zina `CFBundlePackageType` iliyowekwa kuwa **`XPC!`**.\
+Faili hii ina funguo nyingine za usanidi kama `ServiceType` ambayo inaweza kuwa Application, User, System au `_SandboxProfile` ambayo inaweza kufafanua sandbox au `_AllowedClients` ambayo inaweza kuashiria haki au ID inayohitajika kuwasiliana na seva. hizi na chaguzi nyingine za usanidi zitakuwa na manufaa kuunda huduma wakati inapoanzishwa.
 
 ### Kuanzisha Huduma
 
@@ -111,16 +111,16 @@ Inawezekana kufuatilia vitendo vya `xpcproxy` kwa kutumia:
 ```bash
 supraudit S -C -o /tmp/output /dev/auditpipe
 ```
-Maktaba ya XPC inatumia `kdebug` kurekodi vitendo vinavyopiga simu `xpc_ktrace_pid0` na `xpc_ktrace_pid1`. Mifumo inayotumika haijaandikwa, hivyo inahitajika kuiongeza kwenye `/usr/share/misc/trace.codes`. Zinatumia kiambishi `0x29` na kwa mfano moja ni `0x29000004`: `XPC_serializer_pack`.\
+Maktaba ya XPC inatumia `kdebug` kurekodi vitendo vinavyopiga simu `xpc_ktrace_pid0` na `xpc_ktrace_pid1`. Mifumo inayotumika haijaandikwa, hivyo inahitajika kuiongeza kwenye `/usr/share/misc/trace.codes`. Wana kiambishi `0x29` na kwa mfano moja ni `0x29000004`: `XPC_serializer_pack`.\
 Kifaa `xpcproxy` kinatumia kiambishi `0x22`, kwa mfano: `0x2200001c: xpcproxy:will_do_preexec`.
 
 ## Ujumbe wa Matukio ya XPC
 
-Programu zinaweza **kujiandikisha** kwa ujumbe tofauti wa matukio, na kuwapa uwezo wa **kuanzishwa kwa mahitaji** wakati matukio kama hayo yanapotokea. **Mpangilio** wa huduma hizi unafanywa katika **faili za plist za launchd**, zilizoko katika **directories sawa na zile za awali** na zinafungua **`LaunchEvent`** funguo ya ziada.
+Programu zinaweza **kujiandikisha** kwa ujumbe tofauti wa matukio, na kuwapa uwezo wa **kuanzishwa kwa mahitaji** wakati matukio kama hayo yanapotokea. **Mpangilio** wa huduma hizi unafanywa katika **faili za plist za launchd**, zilizoko katika **directories sawa na zile za awali** na zinafunguo ya ziada **`LaunchEvent`**.
 
 ### Ukaguzi wa Mchakato wa Kuungana wa XPC
 
-Wakati mchakato unajaribu kupiga simu njia kupitia muunganisho wa XPC, **huduma ya XPC inapaswa kukagua kama mchakato huo unaruhusiwa kuungana**. Hapa kuna njia za kawaida za kukagua hiyo na mtego wa kawaida:
+Wakati mchakato unajaribu kupiga simu njia kupitia muunganisho wa XPC, **huduma ya XPC inapaswa kukagua kama mchakato huo unaruhusiwa kuungana**. Hapa kuna njia za kawaida za kukagua hilo na mtego wa kawaida:
 
 {{#ref}}
 macos-xpc-connecting-process-check/
@@ -128,7 +128,7 @@ macos-xpc-connecting-process-check/
 
 ## Uidhinishaji wa XPC
 
-Apple pia inaruhusu programu **kuweka haki fulani na jinsi ya kuzipata** hivyo ikiwa mchakato unaopiga simu una hizo itaruhusiwa **kupiga simu njia** kutoka huduma ya XPC:
+Apple pia inaruhusu programu **kuunda haki fulani na jinsi ya kuzipata** hivyo ikiwa mchakato unaopiga simu unao, itaruhusiwa **kupiga simu njia** kutoka huduma ya XPC:
 
 {{#ref}}
 macos-xpc-authorization.md
@@ -136,7 +136,7 @@ macos-xpc-authorization.md
 
 ## Sniffer ya XPC
 
-Ili kunasa ujumbe wa XPC unaweza kutumia [**xpcspy**](https://github.com/hot3eed/xpcspy) ambayo inatumia **Frida**.
+Ili kunusa ujumbe wa XPC unaweza kutumia [**xpcspy**](https://github.com/hot3eed/xpcspy) ambayo inatumia **Frida**.
 ```bash
 # Install
 pip3 install xpcspy
@@ -149,7 +149,7 @@ xpcspy -U <prog-name> -t 'i:com.apple.*' -t 'o:com.apple.*' -r
 ```
 Zana nyingine inayoweza kutumika ni [**XPoCe2**](https://newosxbook.com/tools/XPoCe2.html).
 
-## Mfano wa Kode ya C ya Mawasiliano ya XPC
+## Mfano wa Msimbo wa C wa Mawasiliano ya XPC
 
 {{#tabs}}
 {{#tab name="xpc_server.c"}}
@@ -281,7 +281,7 @@ sudo launchctl load /Library/LaunchDaemons/xyz.hacktricks.service.plist
 sudo launchctl unload /Library/LaunchDaemons/xyz.hacktricks.service.plist
 sudo rm /Library/LaunchDaemons/xyz.hacktricks.service.plist /tmp/xpc_server
 ```
-## Mfano wa Kode ya XPC Mawasiliano ya Objective-C
+## XPC Communication Objective-C Code Example
 
 {{#tabs}}
 {{#tab name="oc_xpc_server.m"}}
@@ -403,7 +403,7 @@ sudo launchctl load /Library/LaunchDaemons/xyz.hacktricks.svcoc.plist
 sudo launchctl unload /Library/LaunchDaemons/xyz.hacktricks.svcoc.plist
 sudo rm /Library/LaunchDaemons/xyz.hacktricks.svcoc.plist /tmp/oc_xpc_server
 ```
-## Mteja ndani ya Dylb code
+## Mteja ndani ya msimbo wa Dylb
 ```objectivec
 // gcc -dynamiclib -framework Foundation oc_xpc_client.m -o oc_xpc_client.dylib
 // gcc injection example:
@@ -444,7 +444,7 @@ Huduma zinazounga mkono XPC ya mbali zitakuwa na katika plist yao ufunguo UsesRe
 
 Zaidi ya hayo, `RemoteServiceDiscovery.framework` inaruhusu kupata taarifa kutoka kwa `com.apple.remoted.plugin` ikionyesha kazi kama `get_device`, `get_unique_device`, `connect`...
 
-Mara tu `connect` inapotumika na socket `fd` ya huduma inakusanywa, inawezekana kutumia darasa `remote_xpc_connection_*`.
+Mara tu `connect` inapotumika na socket `fd` ya huduma inakusanywa, inawezekana kutumia darasa la `remote_xpc_connection_*`.
 
 Inawezekana kupata taarifa kuhusu huduma za mbali kwa kutumia zana ya cli `/usr/libexec/remotectl` kwa kutumia vigezo kama:
 ```bash

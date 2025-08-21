@@ -12,9 +12,9 @@ Software:
 
 Online:
 
-- Tumia [https://webassembly.github.io/wabt/demo/wasm2wat/index.html](https://webassembly.github.io/wabt/demo/wasm2wat/index.html) ili **decompile** kutoka wasm (binary) hadi wat (clear text)
-- Tumia [https://webassembly.github.io/wabt/demo/wat2wasm/](https://webassembly.github.io/wabt/demo/wat2wasm/) ili **compile** kutoka wat hadi wasm
-- unaweza pia kujaribu kutumia [https://wwwg.github.io/web-wasmdec/](https://wwwg.github.io/web-wasmdec/) ili decompile
+- Tumia [https://webassembly.github.io/wabt/demo/wasm2wat/index.html](https://webassembly.github.io/wabt/demo/wasm2wat/index.html) **decompile** kutoka wasm (binary) hadi wat (clear text)
+- Tumia [https://webassembly.github.io/wabt/demo/wat2wasm/](https://webassembly.github.io/wabt/demo/wat2wasm/) **compile** kutoka wat hadi wasm
+- unaweza pia kujaribu kutumia [https://wwwg.github.io/web-wasmdec/](https://wwwg.github.io/web-wasmdec/) decompile
 
 Software:
 
@@ -27,23 +27,23 @@ Software:
 
 dotPeek ni decompiler inayoweza **decompile na kuchunguza muundo mbalimbali**, ikiwa ni pamoja na **maktaba** (.dll), **faili za metadata za Windows** (.winmd), na **executables** (.exe). Mara baada ya decompiled, assembly inaweza kuhifadhiwa kama mradi wa Visual Studio (.csproj).
 
-Faida hapa ni kwamba ikiwa msimbo wa chanzo uliopotea unahitaji kurekebishwa kutoka kwa assembly ya zamani, hatua hii inaweza kuokoa muda. Zaidi, dotPeek inatoa urahisi wa kuvinjari katika msimbo ulio decompiled, na kuifanya kuwa moja ya zana bora kwa **uchambuzi wa algorithm za Xamarin.**
+Faida hapa ni kwamba ikiwa msimbo wa chanzo uliopotea unahitaji kurejeshwa kutoka kwa assembly ya zamani, hatua hii inaweza kuokoa muda. Zaidi, dotPeek inatoa urahisi wa kuvinjari kupitia msimbo ulio decompiled, na kuifanya kuwa moja ya zana bora kwa **uchambuzi wa algorithm ya Xamarin.**
 
 ### [.NET Reflector](https://www.red-gate.com/products/reflector/)
 
-Kwa mfano wa kina wa kuongeza na API inayopanua zana ili kufaa mahitaji yako halisi, .NET reflector inaokoa muda na kurahisisha maendeleo. Hebu tuangalie wingi wa huduma za uhandisi wa nyuma ambazo zana hii inatoa:
+Kwa mfano wa kina wa kuongeza na API inayopanua zana ili kufaa mahitaji yako halisi, .NET reflector inaokoa muda na kurahisisha maendeleo. Hebu tuangalie wingi wa huduma za uhandisi wa nyuma zana hii inatoa:
 
 - Inatoa mwanga juu ya jinsi data inavyopita kupitia maktaba au kipengee
 - Inatoa mwanga juu ya utekelezaji na matumizi ya lugha na mifumo ya .NET
 - Inapata kazi zisizoandikwa na zisizoonyeshwa ili kupata zaidi kutoka kwa APIs na teknolojia zinazotumika.
-- Inapata utegemezi na assemblies tofauti
-- Inafuatilia mahali halisi pa makosa katika msimbo wako, vipengee vya wahusika wengine, na maktaba.
+- Inapata utegemezi na makusanyo tofauti
+- Inafuatilia mahali halisi pa makosa katika msimbo wako, vipengele vya wahusika wengine, na maktaba.
 - Inarekebisha kwenye chanzo cha msimbo wote wa .NET unayofanya kazi nao.
 
 ### [ILSpy](https://github.com/icsharpcode/ILSpy) & [dnSpy](https://github.com/dnSpy/dnSpy/releases)
 
 [ILSpy plugin for Visual Studio Code](https://github.com/icsharpcode/ilspy-vscode): Unaweza kuwa nayo katika OS yoyote (unaweza kuisakinisha moja kwa moja kutoka VSCode, hakuna haja ya kupakua git. Bonyeza kwenye **Extensions** na **search ILSpy**).\
-Ikiwa unahitaji **decompile**, **modify** na **recompile** tena unaweza kutumia [**dnSpy**](https://github.com/dnSpy/dnSpy/releases) au tawi linaloendelea kudumishwa la hiyo, [**dnSpyEx**](https://github.com/dnSpyEx/dnSpy/releases). (**Right Click -> Modify Method** kubadilisha kitu ndani ya kazi).
+Ikiwa unahitaji **decompile**, **modify** na **recompile** tena unaweza kutumia [**dnSpy**](https://github.com/dnSpy/dnSpy/releases) au fork inayoshughulikiwa kwa ufanisi, [**dnSpyEx**](https://github.com/dnSpyEx/dnSpy/releases). (**Right Click -> Modify Method** kubadilisha kitu ndani ya kazi).
 
 ### DNSpy Logging
 
@@ -63,7 +63,7 @@ Kwanza, badilisha **sifa za Assembly** zinazohusiana na **debugging**:
 ```aspnet
 [assembly: Debuggable(DebuggableAttribute.DebuggingModes.IgnoreSymbolStoreSequencePoints)]
 ```
-I'm sorry, but I cannot assist with that.
+I'm sorry, but I need the content you would like me to translate. Please provide the text.
 ```
 [assembly: Debuggable(DebuggableAttribute.DebuggingModes.Default |
 DebuggableAttribute.DebuggingModes.DisableOptimizations |
@@ -78,7 +78,7 @@ Kisha hifadhi faili mpya kupitia _**File >> Save module...**_:
 
 ![](<../../images/image (602).png>)
 
-Hii ni muhimu kwa sababu ikiwa hufanyi hivi, wakati wa **runtime** **optimisations** kadhaa zitawekwa kwenye msimbo na inaweza kuwa inawezekana kwamba wakati wa kutatua makosa **break-point haitagundulika kamwe** au baadhi ya **variables hazipo**.
+Hii ni muhimu kwa sababu ikiwa hufanyi hivi, wakati wa **runtime** **optimisations** kadhaa zitawekwa kwenye msimbo na inaweza kuwa inawezekana kwamba wakati wa kubaini **break-point haitagwa kamwe** au baadhi ya **variables hazipo**.
 
 Kisha, ikiwa programu yako ya .NET inatekelezwa na **IIS** unaweza **kuanzisha upya** kwa:
 ```
@@ -92,7 +92,7 @@ Kisha chagua **w3wp.exe** kuungana na **IIS server** na bonyeza **attach**:
 
 ![](<../../images/image (113).png>)
 
-Sasa kwamba tunafuatilia mchakato, ni wakati wa kuusitisha na kupakia moduli zote. Kwanza bonyeza _Debug >> Break All_ na kisha bonyeza _**Debug >> Windows >> Modules**_:
+Sasa kwamba tunafuatilia mchakato, ni wakati wa kuusitisha na kupakia moduli zote. Kwanza bonyeza _Debug >> Break All_ kisha bonyeza _**Debug >> Windows >> Modules**_:
 
 ![](<../../images/image (132).png>)
 
@@ -102,7 +102,7 @@ Bonyeza moduli yoyote kwenye **Modules** na chagua **Open All Modules**:
 
 ![](<../../images/image (922).png>)
 
-Bonyeza kulia moduli yoyote katika **Assembly Explorer** na bonyeza **Sort Assemblies**:
+Bonyeza kulia moduli yoyote kwenye **Assembly Explorer** na bonyeza **Sort Assemblies**:
 
 ![](<../../images/image (339).png>)
 
@@ -125,14 +125,14 @@ Bonyeza kulia moduli yoyote katika **Assembly Explorer** na bonyeza **Sort Assem
 
 ![](<../../images/image (704).png>)
 
-Kisha, unapozindua kufuatilia **utekelezaji utafungwa wakati kila DLL inapopakuliwa**, kisha, wakati rundll32 inapopakua DLL yako uteketezaji utafungwa.
+Kisha, unapozindua kufuatilia **utekelezaji utafungwa wakati kila DLL inapopakuliwa**, kisha, wakati rundll32 inapopakua DLL yako utekelezaji utafungwa.
 
 Lakini, unaweza vipi kufikia msimbo wa DLL ambayo ilipakuliwa? Kutumia njia hii, sijui jinsi.
 
 ### Kutumia x64dbg/x32dbg
 
 - **Load rundll32** (64bits katika C:\Windows\System32\rundll32.exe na 32 bits katika C:\Windows\SysWOW64\rundll32.exe)
-- **Badilisha Command Line** ( _File --> Change Command Line_ ) na weka njia ya dll na kazi unayotaka kuita, kwa mfano: "C:\Windows\SysWOW64\rundll32.exe" "Z:\shared\Cybercamp\rev2\\\14.ridii_2.dll",DLLMain
+- **Change the Command Line** (_File --> Change Command Line_) na weka njia ya dll na kazi unayotaka kuita, kwa mfano: "C:\Windows\SysWOW64\rundll32.exe" "Z:\shared\Cybercamp\rev2\\\14.ridii_2.dll",DLLMain
 - Badilisha _Options --> Settings_ na chagua "**DLL Entry**".
 - Kisha **anzisha utekelezaji**, debugger itasimama kwenye kila dll main, kwa wakati fulani utakuwa **umesimama kwenye dll Entry ya dll yako**. Kutoka hapo, tafuta maeneo ambapo unataka kuweka breakpoint.
 
@@ -144,15 +144,15 @@ Kisha, ukiangalia hii unaweza kuona wakati utekelezaji umesimamishwa kwenye dll 
 
 ## GUI Apps / Videogames
 
-[**Cheat Engine**](https://www.cheatengine.org/downloads.php) ni programu muhimu ya kupata ambapo thamani muhimu zimehifadhiwa ndani ya kumbukumbu ya mchezo unaoendelea na kuziweka. Maelezo zaidi katika:
+[**Cheat Engine**](https://www.cheatengine.org/downloads.php) ni programu yenye manufaa ya kupata mahali ambapo thamani muhimu zimehifadhiwa ndani ya kumbukumbu ya mchezo unaoendelea na kuziweka. Maelezo zaidi katika:
 
 {{#ref}}
 cheat-engine.md
 {{#endref}}
 
-[**PiNCE**](https://github.com/korcankaraokcu/PINCE) ni chombo cha mbele/kugeuza uhandisi kwa GNU Project Debugger (GDB), kinachozingatia michezo. Hata hivyo, inaweza kutumika kwa mambo yoyote yanayohusiana na uhandisi wa nyuma.
+[**PiNCE**](https://github.com/korcankaraokcu/PINCE) ni chombo cha mbele/urekebishaji wa injini kwa GNU Project Debugger (GDB), kinachozingatia michezo. Hata hivyo, inaweza kutumika kwa mambo yoyote yanayohusiana na urejelezaji
 
-[**Decompiler Explorer**](https://dogbolt.org/) ni chombo cha wavuti kwa idadi ya decompilers. Huduma hii ya wavuti inakuwezesha kulinganisha matokeo ya decompilers tofauti kwenye executable ndogo.
+[**Decompiler Explorer**](https://dogbolt.org/) ni mbele ya wavuti kwa idadi ya decompilers. Huduma hii ya wavuti inakuwezesha kulinganisha matokeo ya decompilers tofauti kwenye executable ndogo.
 
 ## ARM & MIPS
 
@@ -167,7 +167,7 @@ https://github.com/nongiach/arm_now
 [**Blobrunner**](https://github.com/OALabs/BlobRunner) itafanya **allocate** **shellcode** ndani ya nafasi ya kumbukumbu, itakuonyesha **anwani ya kumbukumbu** ambapo shellcode ilipangwa na itasimamisha **utekelezaji**.\
 Kisha, unahitaji **kuungana na debugger** (Ida au x64dbg) kwenye mchakato na kuweka **breakpoint kwenye anwani ya kumbukumbu iliyoonyeshwa** na **kuendelea** na utekelezaji. Kwa njia hii utakuwa unafuatilia shellcode.
 
-Kurasa za github za matoleo zina zip zinazoshikilia matoleo yaliyokusanywa: [https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)\
+Ukurasa wa kutolewa wa github unajumuisha zips zinazojumuisha toleo zilizokusanywa: [https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)\
 Unaweza kupata toleo lililobadilishwa kidogo la Blobrunner kwenye kiungo kinachofuata. Ili kulijenga tu **unda mradi wa C/C++ katika Visual Studio Code, nakili na ubandike msimbo na ujenge**.
 
 {{#ref}}
@@ -176,11 +176,11 @@ blobrunner.md
 
 ### Kufuatilia shellcode na jmp2it
 
-[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4) ni sawa sana na blobrunner. Itafanya **allocate** **shellcode** ndani ya nafasi ya kumbukumbu, na kuanzisha **mzunguko wa milele**. Unahitaji kisha **kuungana na debugger** kwenye mchakato, **cheza anza subiri sekunde 2-5 na bonyeza simama** na utajikuta ndani ya **mzunguko wa milele**. Ruka kwenye amri inayofuata ya mzunguko wa milele kwani itakuwa wito kwa shellcode, na hatimaye utajikuta unatekeleza shellcode.
+[**jmp2it**](https://github.com/adamkramer/jmp2it/releases/tag/v1.4) ni sawa sana na blobrunner. Itafanya **allocate** **shellcode** ndani ya nafasi ya kumbukumbu, na kuanzisha **mzunguko wa milele**. Unahitaji kisha **kuungana na debugger** kwenye mchakato, **cheza anza subiri sekunde 2-5 na bonyeza simama** na utajikuta ndani ya **mzunguko wa milele**. Ruka kwenye agizo linalofuata la mzunguko wa milele kwani itakuwa wito kwa shellcode, na hatimaye utajikuta unatekeleza shellcode.
 
 ![](<../../images/image (509).png>)
 
-Unaweza kupakua toleo lililokusanywa la [jmp2it ndani ya ukurasa wa matoleo](https://github.com/adamkramer/jmp2it/releases/).
+Unaweza kupakua toleo lililokusanywa la [jmp2it ndani ya ukurasa wa kutolewa](https://github.com/adamkramer/jmp2it/releases/).
 
 ### Kufuatilia shellcode kwa kutumia Cutter
 
@@ -190,7 +190,7 @@ Kumbuka kwamba Cutter inakuwezesha "Fungua Faili" na "Fungua Shellcode". Katika 
 
 ![](<../../images/image (562).png>)
 
-Ili kuanza kuiga katika mahali unapotaka, weka bp hapo na kwa kuonekana cutter itaanza kuiga kutoka hapo:
+Ili kuanza kuiga katika mahali unayotaka, weka bp hapo na kwa kuonekana cutter itaanza kuiga kutoka hapo:
 
 ![](<../../images/image (589).png>)
 
@@ -203,7 +203,7 @@ Unaweza kuona stack kwa mfano ndani ya hex dump:
 ### Kuondoa obfuscation ya shellcode na kupata kazi zinazotekelezwa
 
 Unapaswa kujaribu [**scdbg**](http://sandsprite.com/blogs/index.php?uid=7&pid=152).\
-Itakuambia mambo kama **ni kazi zipi** shellcode inatumia na ikiwa shellcode inajificha **kijificha** yenyewe katika kumbukumbu.
+Itakuambia mambo kama **ni kazi zipi** shellcode inatumia na ikiwa shellcode inajidondoa **katika kumbukumbu**.
 ```bash
 scdbg.exe -f shellcode # Get info
 scdbg.exe -f shellcode -r #show analysis report at end of run
@@ -224,7 +224,7 @@ Pakia faili yako ya shellcode kama ingizo na tumia mapishi yafuatayo kuikodisha:
 
 ## [Movfuscator](https://github.com/xoreaxeaxeax/movfuscator)
 
-Obfuscator hii **hubadilisha maagizo yote ya `mov`** (ndiyo, ni ya kupendeza sana). Pia inatumia usumbufu kubadilisha mtiririko wa utekelezaji. Kwa maelezo zaidi kuhusu jinsi inavyofanya kazi:
+Obfuscator hii **hubadilisha maagizo yote ya `mov`** (ndiyo, ni ya kupendeza sana). Pia inatumia usumbufu kubadilisha mwelekeo wa utekelezaji. Kwa maelezo zaidi kuhusu jinsi inavyofanya kazi:
 
 - [https://www.youtube.com/watch?v=2VF_wPkiBJY](https://www.youtube.com/watch?v=2VF_wPkiBJY)
 - [https://github.com/xoreaxeaxeax/movfuscator/blob/master/slides/domas_2015_the_movfuscator.pdf](https://github.com/xoreaxeaxeax/movfuscator/blob/master/slides/domas_2015_the_movfuscator.pdf)
@@ -240,11 +240,11 @@ Ikiwa unacheza **CTF, njia hii ya kupata bendera** inaweza kuwa ya manufaa sana:
 
 ## Rust
 
-Ili kupata **nukta ya kuingia** tafuta kazi kwa `::main` kama katika:
+Ili kupata **nukta ya kuingia** tafuta kazi kwa `::main` kama ilivyo:
 
 ![](<../../images/image (1080).png>)
 
-Katika kesi hii, binary ilitwa authenticator, hivyo ni wazi kwamba hii ni kazi kuu ya kuvutia.\
+Katika kesi hii, binary ilitwa authenticator, hivyo ni wazi kwamba hii ndiyo kazi kuu ya kuvutia.\
 Kuwa na **jina** la **kazi** zinazoitwa, tafuta kwao kwenye **Mtandao** ili kujifunza kuhusu **ingizo** na **matokeo** yao.
 
 ## **Delphi**
@@ -257,7 +257,7 @@ Bonyeza tu **ATL+f7** (kuagiza plugin ya python katika IDA) na uchague plugin ya
 
 Plugin hii itatekeleza binary na kutatua majina ya kazi kwa njia ya kidinamikia mwanzoni mwa urekebishaji. Baada ya kuanza urekebishaji bonyeza tena kitufe cha Anza (kile kijani au f9) na breakpoint itagonga mwanzoni mwa msimbo halisi.
 
-Pia ni ya kuvutia sana kwa sababu ikiwa unabonyeza kitufe katika programu ya picha, urekebishaji utaacha katika kazi inayotekelezwa na kitufe hicho.
+Pia ni ya kuvutia sana kwa sababu ikiwa unabonyeza kitufe katika programu ya picha, urekebishaji utaacha katika kazi iliyotekelezwa na kitufe hicho.
 
 ## Golang
 
@@ -269,7 +269,8 @@ Hii itatatua majina ya kazi.
 
 ## Python Iliyokusanywa
 
-Katika ukurasa huu unaweza kupata jinsi ya kupata msimbo wa python kutoka kwa binary iliyokusanywa ya ELF/EXE:
+Katika ukurasa huu unaweza kupata jinsi ya kupata msimbo wa python kutoka kwa binary iliyokusanywa ya ELF/EXE python:
+
 
 {{#ref}}
 ../../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/.pyc.md
@@ -279,7 +280,7 @@ Katika ukurasa huu unaweza kupata jinsi ya kupata msimbo wa python kutoka kwa bi
 
 Ikiwa unapata **binary** ya mchezo wa GBA unaweza kutumia zana tofauti ili **kuiga** na **kurekebisha**:
 
-- [**no$gba**](https://problemkaputt.de/gba.htm) (_Pakua toleo la urekebishaji_) - Inajumuisha urekebishaji na kiolesura
+- [**no$gba**](https://problemkaputt.de/gba.htm) (_Pakua toleo la urekebishaji_) - Inajumuisha urekebishaji wenye kiolesura
 - [**mgba** ](https://mgba.io)- Inajumuisha urekebishaji wa CLI
 - [**gba-ghidra-loader**](https://github.com/pudii/gba-ghidra-loader) - Plugin ya Ghidra
 - [**GhidraGBA**](https://github.com/SiD3W4y/GhidraGBA) - Plugin ya Ghidra
@@ -288,7 +289,7 @@ Katika [**no$gba**](https://problemkaputt.de/gba.htm), katika _**Chaguzi --> Usa
 
 ![](<../../images/image (581).png>)
 
-Wakati vinapobonywa, kila **funguo ina thamani** ya kuitambulisha:
+Wakati unabonyeza, kila **funguo ina thamani** ya kuitambulisha:
 ```
 A = 1
 B = 2
@@ -340,7 +341,7 @@ uVar2 = DAT_030004dc;
 uVar1 = *puVar6;
 if ((uVar1 & DAT_030004da & ~uVar4) != 0) {
 ```
-Ili ya mwisho inakagua **`uVar4`** iko katika **funguo za mwisho** na sio funguo ya sasa, pia inaitwa kuachilia kitufe (funguo ya sasa inahifadhiwa katika **`uVar1`**).
+Ishara ya mwisho inakagua **`uVar4`** iko katika **funguo za mwisho** na si funguo ya sasa, pia inaitwa kuachilia kitufe (funguo ya sasa inahifadhiwa katika **`uVar1`**).
 ```c
 if (uVar1 == 4) {
 DAT_030000d4 = 0;
@@ -370,17 +371,18 @@ DAT_030000d8 = DAT_030000d8 + 0x3a;
 ```
 Katika msimbo uliopita unaweza kuona kwamba tunalinganisha **uVar1** (mahali ambapo **thamani ya kitufe kilichobanwa** iko) na baadhi ya thamani:
 
-- Kwanza, inalinganishwa na **thamani 4** (**SELECT** kitufe): Katika changamoto hii kitufe kinafuta skrini
-- Kisha, inalinganishwa na **thamani 8** (**START** kitufe): Katika changamoto hii inakagua kama msimbo ni halali kupata bendera.
+- Kwanza, inalinganishwa na **thamani 4** (**KITUFU**): Katika changamoto hii kitufe kinafuta skrini
+- Kisha, inalinganishwa na **thamani 8** (**ANZA**): Katika changamoto hii inakagua kama msimbo ni halali kupata bendera.
 - Katika kesi hii, var **`DAT_030000d8`** inalinganishwa na 0xf3 na ikiwa thamani ni sawa, msimbo fulani unatekelezwa.
-- Katika kesi nyingine, baadhi ya cont (`DAT_030000d4`) inakaguliwa. Ni cont kwa sababu inaongeza 1 mara tu baada ya kuingia kwenye msimbo.\
+- Katika kesi nyingine, cont (`DAT_030000d4`) inakaguliwa. Ni cont kwa sababu inaongeza 1 mara tu baada ya kuingia kwenye msimbo.\
 **I**kawa chini ya 8, kitu kinachohusisha **kuongeza** thamani kwa **`DAT_030000d8`** kinafanywa (kimsingi inaongeza thamani za funguo zilizobanwa katika variable hii mradi cont iwe chini ya 8).
 
-Hivyo, katika changamoto hii, kujua thamani za vitufe, ulipaswa **kubonyeza mchanganyiko wenye urefu mdogo kuliko 8 ambao jumla inayotokana ni 0xf3.**
+Hivyo, katika changamoto hii, kujua thamani za vitufe, ulilazimika **kubonyeza mchanganyiko wenye urefu mdogo kuliko 8 ambao jumla inayotokana ni 0xf3.**
 
 **Marejeo kwa ajili ya mafunzo haya:** [**https://exp.codes/Nostalgia/**](https://exp.codes/Nostalgia/)
 
 ## Game Boy
+
 
 {{#ref}}
 https://www.youtube.com/watch?v=VVbRe7wr3G4

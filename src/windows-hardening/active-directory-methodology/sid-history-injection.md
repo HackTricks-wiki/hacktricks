@@ -22,7 +22,7 @@ Get-DomainGroup -Identity "Domain Admins" -Domain parent.io -Properties ObjectSi
 Kulingana na [**docs**](https://technet.microsoft.com/library/cc835085.aspx):
 - **Kuzima SIDHistory kwenye uhusiano wa msitu** kwa kutumia zana ya netdom (`netdom trust /domain: /EnableSIDHistory:no on the domain controller`)
 - **Kuweka Kizuizi cha SID kwa uhusiano wa nje** kwa kutumia zana ya netdom (`netdom trust /domain: /quarantine:yes on the domain controller`)
-- **Kuweka Kichujio cha SID kwa uhusiano wa kikoa ndani ya msitu mmoja** hakupendekezwi kwani ni usanidi usio na msaada na unaweza kusababisha mabadiliko mabaya. Ikiwa kikoa ndani ya msitu si cha kuaminika basi hakipaswi kuwa mwanachama wa msitu. Katika hali hii ni muhimu kwanza kugawanya kikoa kinachoweza kuaminika na kisichoweza kuaminika katika misitu tofauti ambapo Kichujio cha SID kinaweza kutumika kwa uhusiano wa interforest.
+- **Kuweka Kichujio cha SID kwa uhusiano wa kikoa ndani ya msitu mmoja** hakupendekezwi kwani ni usanidi usio na msaada na unaweza kusababisha mabadiliko mabaya. Ikiwa kikoa ndani ya msitu si cha kuaminika basi hakipaswi kuwa mwanachama wa msitu huo. Katika hali hii ni muhimu kwanza kugawanya kikoa kilicho na uaminifu na kisicho na uaminifu katika misitu tofauti ambapo Kichujio cha SID kinaweza kutumika kwa uhusiano wa interforest.
 
 Angalia chapisho hili kwa maelezo zaidi kuhusu kupita hili: [**https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4**](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)
 
@@ -63,12 +63,14 @@ mimikatz.exe "kerberos::golden /user:Administrator /domain:<current_domain> /sid
 ```
 Kwa maelezo zaidi kuhusu tiketi za dhahabu angalia:
 
+
 {{#ref}}
 golden-ticket.md
 {{#endref}}
 
 
 Kwa maelezo zaidi kuhusu tiketi za almasi angalia:
+
 
 {{#ref}}
 diamond-ticket.md
@@ -132,7 +134,7 @@ Mchakato ni:
 - Inaunda Tiketi ya Dhahabu
 - Inajiandikisha katika domain ya mzazi
 - Inapata akawasilisha kwa akaunti ya Msimamizi katika domain ya mzazi
-- Ikiwa swichi ya `target-exec` imeainishwa, inathibitisha kwa Kituo cha Kudhibiti Domain cha domain ya mzazi kupitia Psexec.
+- Ikiwa swichi ya `target-exec` imeainishwa, inajithibitisha kwa Kituo cha Kudhibiti Domain cha mzazi kupitia Psexec.
 ```bash
 raiseChild.py -target-exec 10.10.10.10 <child_domain>/username
 ```

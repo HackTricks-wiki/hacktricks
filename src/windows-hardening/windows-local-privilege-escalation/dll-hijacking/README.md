@@ -50,9 +50,9 @@ Unaweza kuona **mpangilio wa utafutaji wa DLL kwenye mifumo ya 32-bit** hapa chi
 3. Directory ya mfumo wa 16-bit. Hakuna kazi inayopata njia ya directory hii, lakini inatafutwa. (_C:\Windows\System_)
 4. Directory ya Windows. Tumia [**GetWindowsDirectory**](https://docs.microsoft.com/en-us/windows/desktop/api/sysinfoapi/nf-sysinfoapi-getwindowsdirectorya) kazi kupata njia ya directory hii. (_C:\Windows_)
 5. Directory ya sasa.
-6. Directory ambazo ziko kwenye variable ya mazingira ya PATH. Kumbuka kwamba hii haijumuishi njia ya kila programu iliyotajwa na funguo za register za **App Paths**. Funguo za **App Paths** hazitumiki wakati wa kuhesabu njia ya utafutaji wa DLL.
+6. Directory ambazo ziko kwenye mabadiliko ya mazingira ya PATH. Kumbuka kwamba hii haijumuishi njia ya kila programu iliyotajwa na funguo za register za **App Paths**. Funguo za **App Paths** hazitumiki wakati wa kuhesabu njia ya utafutaji wa DLL.
 
-Huu ndio **mpangilio wa utafutaji wa kawaida** ukiwa na **SafeDllSearchMode** imewezeshwa. Wakati imezimwa, directory ya sasa inapaa hadi nafasi ya pili. Ili kuzima kipengele hiki, tengeneza **HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager**\\**SafeDllSearchMode** funguo ya register na uweke kuwa 0 (default imewezeshwa).
+Huu ndio **mpangilio wa kawaida** wa utafutaji na **SafeDllSearchMode** imewezeshwa. Wakati imezimwa, directory ya sasa inapaa hadi nafasi ya pili. Ili kuzima kipengele hiki, tengeneza **HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager**\\**SafeDllSearchMode** funguo ya register na uweke kuwa 0 (kawaida imewezeshwa).
 
 Ikiwa [**LoadLibraryEx**](https://docs.microsoft.com/en-us/windows/desktop/api/LibLoaderAPI/nf-libloaderapi-loadlibraryexa) kazi inaitwa na **LOAD_WITH_ALTERED_SEARCH_PATH** utafutaji huanza katika directory ya moduli ya executable ambayo **LoadLibraryEx** inakipakia.
 
@@ -66,7 +66,7 @@ Mambo fulani ya kipekee kwa mpangilio wa kawaida wa utafutaji wa DLL yanatajwa k
 
 - Wakati **DLL inayoshiriki jina lake na moja ambayo tayari imepakiwa kwenye kumbukumbu** inakutana, mfumo hupita utafutaji wa kawaida. Badala yake, unafanya ukaguzi wa uelekeo na manifest kabla ya kurudi kwa DLL iliyoko kwenye kumbukumbu. **Katika hali hii, mfumo haufanyi utafutaji wa DLL**.
 - Katika kesi ambapo DLL inatambuliwa kama **DLL inayojulikana** kwa toleo la sasa la Windows, mfumo utatumia toleo lake la DLL inayojulikana, pamoja na DLL zake zinazotegemea, **bila kufanya mchakato wa utafutaji**. Funguo ya register **HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\KnownDLLs** ina orodha ya hizi DLL zinazojulikana.
-- Ikiwa **DLL ina utegemezi**, utafutaji wa hizi DLL zinazotegemea unafanywa kana kwamba zilionyeshwa tu kwa **majina ya moduli** zao, bila kujali ikiwa DLL ya awali ilitambuliwa kupitia njia kamili.
+- Ikiwa **DLL ina utegemezi**, utafutaji wa hizi DLL zinazotegemea unafanywa kana kwamba zilionyeshwa tu kwa **majina ya moduli**, bila kujali ikiwa DLL ya awali ilitambuliwa kupitia njia kamili.
 
 ### Escalating Privileges
 
@@ -98,21 +98,21 @@ Kwa mwongozo kamili juu ya jinsi ya **kudhulumu Dll Hijacking ili kupandisha mam
 writable-sys-path-+dll-hijacking-privesc.md
 {{#endref}}
 
-### Zana za Kiotomatiki
+### Zana za kiotomatiki
 
 [**Winpeas** ](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS) itakagua ikiwa una ruhusa za kuandika kwenye folda yoyote ndani ya mfumo PATH.\
 Zana nyingine za kiotomatiki zinazovutia kugundua udhaifu huu ni **PowerSploit functions**: _Find-ProcessDLLHijack_, _Find-PathDLLHijack_ na _Write-HijackDll._
 
 ### Mfano
 
-Iwapo utapata hali inayoweza kutumika, moja ya mambo muhimu ili kufanikiwa kuitumia ni **kuunda dll inayosafirisha angalau kazi zote ambazo executable itazipata kutoka kwake**. Hata hivyo, kumbuka kwamba Dll Hijacking inakuwa na manufaa ili [kupandisha kutoka Kiwango cha Uaminifu wa Kati hadi Juu **(kupita UAC)**](../../authentication-credentials-uac-and-efs/index.html#uac) au kutoka [**Kiwango cha Juu hadi SYSTEM**](../index.html#from-high-integrity-to-system)**.** Unaweza kupata mfano wa **jinsi ya kuunda dll halali** ndani ya utafiti huu wa dll hijacking uliozingatia dll hijacking kwa utekelezaji: [**https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows**](https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows)**.**\
+Iwapo utapata hali inayoweza kutumiwa, moja ya mambo muhimu ili kufanikiwa kuitumia ni **kuunda dll inayosafirisha angalau kazi zote ambazo executable itazipata kutoka kwake**. Hata hivyo, kumbuka kwamba Dll Hijacking inakuwa muhimu ili [kupandisha kutoka Kiwango cha Uaminifu wa Kati hadi Juu **(kupita UAC)**](../../authentication-credentials-uac-and-efs/index.html#uac) au kutoka [**Kiwango cha Juu hadi SYSTEM**](../index.html#from-high-integrity-to-system)**.** Unaweza kupata mfano wa **jinsi ya kuunda dll halali** ndani ya utafiti huu wa dll hijacking uliozingatia dll hijacking kwa utekelezaji: [**https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows**](https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows)**.**\
 Zaidi ya hayo, katika **sehemu inayofuata** unaweza kupata baadhi ya **misimbo ya msingi ya dll** ambayo inaweza kuwa na manufaa kama **mifano** au kuunda **dll yenye kazi zisizohitajika zilizofichwa**.
 
 ## **Kuunda na kukusanya Dlls**
 
 ### **Dll Proxifying**
 
-Kimsingi **Dll proxy** ni Dll inayoweza **kutekeleza msimbo wako mbaya unapopakuliwa** lakini pia **kuonyesha** na **kufanya kazi** kama **ilivyotarajiwa** kwa **kupeleka simu zote kwa maktaba halisi**.
+Kimsingi **Dll proxy** ni Dll inayoweza **kutekeleza msimbo wako mbaya unapoload** lakini pia **kuonyesha** na **kufanya kazi** kama **ilivyotarajiwa** kwa **kupeleka simu zote kwa maktaba halisi**.
 
 Kwa zana [**DLLirant**](https://github.com/redteamsocietegenerale/DLLirant) au [**Spartacus**](https://github.com/Accenture/Spartacus) unaweza kwa kweli **kuashiria executable na kuchagua maktaba** unayotaka kuproxify na **kuunda dll iliyoprosify** au **kuashiria Dll** na **kuunda dll iliyoprosify**.
 
@@ -132,7 +132,7 @@ msfvenom -p windows/adduser USER=privesc PASS=Attacker@123 -f dll -o msf.dll
 ```
 ### Yako mwenyewe
 
-Kumbuka kwamba katika kesi kadhaa Dll unayoandika lazima **iweke nje kazi kadhaa** ambazo zitapakiwa na mchakato wa mwathirika, ikiwa kazi hizi hazipo **binary haitakuwa na uwezo wa kupakia** hizo na **kuvunjika kwa exploit kutatokea**.
+Kumbuka kwamba katika kesi kadhaa Dll unayoandika lazima **iweke nje kazi kadhaa** ambazo zitapakiwa na mchakato wa mwathirika, ikiwa kazi hizi hazipo **binary haitakuwa na uwezo wa kupakia** hizo na **kuvunjika kwa usalama kutashindwa**.
 ```c
 // Tested in Win10
 // i686-w64-mingw32-g++ dll.c -lws2_32 -o srrstr.dll -shared
@@ -217,16 +217,16 @@ return TRUE;
 
 Hali hii inaonyesha **Phantom DLL Hijacking** katika Menyu ya Haraka ya TrackPoint ya Lenovo (`TPQMAssistant.exe`), inayofuatiliwa kama **CVE-2025-1729**.
 
-### Maelezo ya Uthibitisho
+### Vulnerability Details
 
-- **Sehemu**: `TPQMAssistant.exe` iliyoko katika `C:\ProgramData\Lenovo\TPQM\Assistant\`.
-- **Kazi Iliyopangwa**: `Lenovo\TrackPointQuickMenu\Schedule\ActivationDailyScheduleTask` inafanya kazi kila siku saa 9:30 AM chini ya muktadha wa mtumiaji aliyeingia.
-- **Ruhusa za Katalogi**: Inaweza kuandikwa na `CREATOR OWNER`, ikiruhusu watumiaji wa ndani kuweka faili zisizo na mpangilio.
-- **Tabia ya Utafutaji wa DLL**: Inajaribu kupakia `hostfxr.dll` kutoka kwa katalogi yake ya kazi kwanza na inarekodi "NAME NOT FOUND" ikiwa haipo, ikionyesha kipaumbele cha utafutaji wa katalogi ya ndani.
+- **Component**: `TPQMAssistant.exe` iliyoko katika `C:\ProgramData\Lenovo\TPQM\Assistant\`.
+- **Scheduled Task**: `Lenovo\TrackPointQuickMenu\Schedule\ActivationDailyScheduleTask` inafanya kazi kila siku saa 9:30 AM chini ya muktadha wa mtumiaji aliyeingia.
+- **Directory Permissions**: Inaruhusiwa kuandikwa na `CREATOR OWNER`, ikiruhusu watumiaji wa ndani kuweka faili zisizo na mpangilio.
+- **DLL Search Behavior**: Inajaribu kupakia `hostfxr.dll` kutoka kwenye saraka yake ya kazi kwanza na inaandika "NAME NOT FOUND" ikiwa haipo, ikionyesha kipaumbele cha utafutaji wa saraka za ndani.
 
-### Utekelezaji wa Uhalifu
+### Exploit Implementation
 
-Mshambuliaji anaweza kuweka stub mbaya ya `hostfxr.dll` katika katalogi hiyo hiyo, akitumia DLL inayokosekana ili kufikia utekelezaji wa msimbo chini ya muktadha wa mtumiaji:
+Mshambuliaji anaweza kuweka stub mbaya ya `hostfxr.dll` katika saraka hiyo hiyo, akitumia DLL inayokosekana ili kufikia utekelezaji wa msimbo chini ya muktadha wa mtumiaji:
 ```c
 #include <windows.h>
 
@@ -238,25 +238,23 @@ MessageBoxA(NULL, "DLL Hijacked!", "TPQM", MB_OK);
 return TRUE;
 }
 ```
-### Attack Flow
+### Mchakato wa Shambulio
 
 1. Kama mtumiaji wa kawaida, weka `hostfxr.dll` ndani ya `C:\ProgramData\Lenovo\TPQM\Assistant\`.
-2. Subiri kazi iliyopangwa ifanye kazi saa 9:30 asubuhi chini ya muktadha wa mtumiaji wa sasa.
+2. Subiri kazi iliyopangwa ifanyike saa 9:30 asubuhi chini ya muktadha wa mtumiaji wa sasa.
 3. Ikiwa msimamizi ameingia wakati kazi inatekelezwa, DLL mbaya inakimbia katika kikao cha msimamizi kwa uaminifu wa kati.
 4. Unganisha mbinu za kawaida za UAC bypass ili kuinua kutoka kwa uaminifu wa kati hadi mamlaka ya SYSTEM.
 
-### Mitigation
+### Kupunguza
 
 Lenovo ilitoa toleo la UWP **1.12.54.0** kupitia Duka la Microsoft, ambalo linaweka TPQMAssistant chini ya `C:\Program Files (x86)\Lenovo\TPQM\TPQMAssistant\`, linaondoa kazi iliyopangwa yenye hatari, na kuondoa vipengele vya zamani vya Win32.
 
-## References
+## Marejeleo
 
 - [CVE-2025-1729 - Privilege Escalation Using TPQMAssistant.exe](https://trustedsec.com/blog/cve-2025-1729-privilege-escalation-using-tpqmassistant-exe)
 - [Microsoft Store - TPQM Assistant UWP](https://apps.microsoft.com/detail/9mz08jf4t3ng)
 
-
 - [https://medium.com/@pranaybafna/tcapt-dll-hijacking-888d181ede8e](https://medium.com/@pranaybafna/tcapt-dll-hijacking-888d181ede8e)
 - [https://cocomelonc.github.io/pentest/2021/09/24/dll-hijacking-1.html](https://cocomelonc.github.io/pentest/2021/09/24/dll-hijacking-1.html)
-
 
 {{#include ../../../banners/hacktricks-training.md}}

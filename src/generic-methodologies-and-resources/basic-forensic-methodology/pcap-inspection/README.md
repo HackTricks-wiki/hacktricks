@@ -2,7 +2,7 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-> [!NOTE]
+> [!TIP]
 > Kumbuka kuhusu **PCAP** dhidi ya **PCAPNG**: kuna toleo mbili za muundo wa faili wa PCAP; **PCAPNG ni mpya na haikubaliwi na zana zote**. Unaweza kuhitaji kubadilisha faili kutoka PCAPNG hadi PCAP kwa kutumia Wireshark au zana nyingine inayofaa, ili kufanya kazi nayo katika zana nyingine.
 
 ## Zana za mtandaoni za pcaps
@@ -18,10 +18,10 @@ Zana zifuatazo ni muhimu kutoa takwimu, faili, nk.
 
 ### Wireshark
 
-> [!NOTE]
-> **Ikiwa unakusudia kuchambua PCAP lazima ujue jinsi ya kutumia Wireshark**
+> [!TIP]
+> **Ikiwa unataka kuchambua PCAP lazima ujue jinsi ya kutumia Wireshark**
 
-Unaweza kupata hila za Wireshark katika:
+Unaweza kupata vidokezo vya Wireshark katika:
 
 {{#ref}}
 wireshark-tricks.md
@@ -47,9 +47,9 @@ sudo apt-get install xplico
 /etc/init.d/apache2 restart
 /etc/init.d/xplico start
 ```
-Kupata _**127.0.0.1:9876**_ kwa akauti _**xplico:xplico**_
+Access to _**127.0.0.1:9876**_ with credentials _**xplico:xplico**_
 
-Kisha tengeneza **kesi mpya**, tengeneza **sehemu mpya** ndani ya kesi na **pakia** faili ya pcap.
+Then create a **new case**, create a **new session** inside the case and **upload the pcap** file.
 
 ### NetworkMiner
 
@@ -64,37 +64,40 @@ Hiki ni chombo kingine muhimu ambacho **kuchambua pakiti** na kupanga habari kwa
 ### [BruteShark](https://github.com/odedshimon/BruteShark)
 
 - Kutolewa na kuandika majina ya watumiaji na nywila (HTTP, FTP, Telnet, IMAP, SMTP...)
-- Kutolewa kwa hash za uthibitisho na kuzivunja kwa kutumia Hashcat (Kerberos, NTLM, CRAM-MD5, HTTP-Digest...)
-- Kujenga mchoro wa mtandao wa kuona (Vituo vya mtandao & watumiaji)
-- Kutolewa kwa maswali ya DNS
-- Kurekebisha Mikutano yote ya TCP & UDP
-- Kukata Faili
+- Toa hash za uthibitisho na uzivunje kwa kutumia Hashcat (Kerberos, NTLM, CRAM-MD5, HTTP-Digest...)
+- Jenga mchoro wa mtandao wa kuona (Vituo vya mtandao & watumiaji)
+- Toa maswali ya DNS
+- Rejesha vikao vyote vya TCP & UDP
+- Ukarabati wa Faili
+
+### Capinfos
 ```
 capinfos capture.pcap
 ```
 ### Ngrep
 
-Ikiwa unatafuta **kitu** ndani ya pcap unaweza kutumia **ngrep**. Hapa kuna mfano ukitumia vichujio vikuu:
+Ikiwa unatafuta **kitu** ndani ya pcap unaweza kutumia **ngrep**. Hapa kuna mfano ukitumia filters kuu:
 ```bash
 ngrep -I packets.pcap "^GET" "port 80 and tcp and host 192.168 and dst host 192.168 and src host 192.168"
 ```
-### Kukata
+### Carving
 
-Kutumia mbinu za kawaida za kukata kunaweza kuwa na manufaa kutoa faili na taarifa kutoka kwa pcap:
+Kutumia mbinu za kawaida za carving kunaweza kuwa na manufaa kutoa faili na taarifa kutoka kwa pcap:
+
 
 {{#ref}}
 ../partitions-file-systems-carving/file-data-carving-recovery-tools.md
 {{#endref}}
 
-### Kukamata akidi
+### Capturing credentials
 
-Unaweza kutumia zana kama [https://github.com/lgandx/PCredz](https://github.com/lgandx/PCredz) kuchambua akidi kutoka kwa pcap au kiolesura cha moja kwa moja.
+Unaweza kutumia zana kama [https://github.com/lgandx/PCredz](https://github.com/lgandx/PCredz) kuchambua credentials kutoka kwa pcap au interface ya moja kwa moja.
 
-## Angalia Ukatili/Malware
+## Check Exploits/Malware
 
 ### Suricata
 
-**Sakinisha na weka mipangilio**
+**Install and setup**
 ```
 apt-get install suricata
 apt-get install oinkmaster
@@ -109,9 +112,9 @@ suricata -r packets.pcap -c /etc/suricata/suricata.yaml -k none -v -l log
 
 [**YaraPCAP**](https://github.com/kevthehermit/YaraPcap) ni chombo ambacho
 
-- Huasoma Faili la PCAP na Kutolewa kwa Mito ya Http.
+- Huwasomea Faili la PCAP na Kutolewa kwa Mito ya Http.
 - gzip inachambua mitiririko yoyote iliyoshinikizwa
-- Inachunguza kila faili kwa yara
+- Inachunguza kila faili kwa kutumia yara
 - Inaandika ripoti.txt
 - Kwa hiari huhifadhi faili zinazolingana kwenye Dir
 
@@ -119,13 +122,14 @@ suricata -r packets.pcap -c /etc/suricata/suricata.yaml -k none -v -l log
 
 Angalia kama unaweza kupata alama yoyote ya malware inayojulikana:
 
+
 {{#ref}}
 ../malware-analysis.md
 {{#endref}}
 
 ## Zeek
 
-> [Zeek](https://docs.zeek.org/en/master/about.html) ni mchambuzi wa trafiki wa mtandao wa wazi na wa kupita. Waendeshaji wengi hutumia Zeek kama Msimamizi wa Usalama wa Mtandao (NSM) kusaidia uchunguzi wa shughuli za kushuku au zenye uharibifu. Zeek pia inasaidia aina mbalimbali za kazi za uchambuzi wa trafiki zaidi ya eneo la usalama, ikiwa ni pamoja na kipimo cha utendaji na kutatua matatizo.
+> [Zeek](https://docs.zeek.org/en/master/about.html) ni mchambuzi wa trafiki wa mtandao wa wazi na wa kupita. Waendeshaji wengi hutumia Zeek kama Msimamizi wa Usalama wa Mtandao (NSM) kusaidia uchunguzi wa shughuli za kushuku au zenye uhalifu. Zeek pia inasaidia aina mbalimbali za kazi za uchambuzi wa trafiki zaidi ya eneo la usalama, ikiwa ni pamoja na kipimo cha utendaji na kutatua matatizo.
 
 Kimsingi, kumbukumbu zinazoundwa na `zeek` si **pcaps**. Hivyo utahitaji kutumia **vifaa vingine** kuchambua kumbukumbu ambapo **habari** kuhusu pcaps ziko.
 
@@ -198,13 +202,16 @@ rita show-exploded-dns -H --limit 10 zeek_logs
 ```
 ## Njia Nyingine za Uchambuzi wa pcap
 
+
 {{#ref}}
 dnscat-exfiltration.md
 {{#endref}}
 
+
 {{#ref}}
 wifi-pcap-analysis.md
 {{#endref}}
+
 
 {{#ref}}
 usb-keystrokes.md

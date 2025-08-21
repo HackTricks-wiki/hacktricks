@@ -1,10 +1,12 @@
+# Burp Suite
+
 {{#include ../banners/hacktricks-training.md}}
 
-# Mifumo ya Msingi
+## Msingi wa Payloads
 
 - **Orodha Rahisi:** Orodha tu yenye kipengee katika kila mstari
 - **Faili ya Wakati wa Uendeshaji:** Orodha inayosomwa wakati wa uendeshaji (siyo iliyopakuliwa kwenye kumbukumbu). Kwa kusaidia orodha kubwa.
-- **Mabadiliko ya Kesi:** Fanya mabadiliko fulani kwenye orodha ya nyuzi (Hakuna mabadiliko, kwa chini, kwa JUU, kwa Jina Sahihi - Kwanza kuandikwa kwa herufi kubwa na zingine kwa chini-, kwa Jina Sahihi -Kwanza kuandikwa kwa herufi kubwa na zingine zinabaki vile vile-).
+- **Mabadiliko ya Kesi:** Fanya mabadiliko fulani kwa orodha ya nyuzi (Hakuna mabadiliko, kwa chini, kwa JUU, kwa Jina Sahihi - Kwanza kuandikwa kwa herufi kubwa na zingine kwa chini-, kwa Jina Sahihi -Kwanza kuandikwa kwa herufi kubwa na zingine kubaki vile vile-.
 - **Nambari:** Tengeneza nambari kutoka X hadi Y ukitumia hatua ya Z au kwa bahati nasibu.
 - **Brute Forcer:** Seti ya wahusika, urefu wa chini na wa juu.
 

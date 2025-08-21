@@ -13,11 +13,11 @@ Sifa zote zina nyakati 4: **Mabadiliko**, **ufikiaji**, **kuundwa**, na **mabadi
 
 ### TimeStomp - Zana ya Anti-forensic
 
-Zana hii **inabadilisha** taarifa za wakati ndani ya **`$STANDARD_INFORMATION`** **lakini** **sio** taarifa ndani ya **`$FILE_NAME`**. Hivyo, inawezekana **kutambua** **shughuli** **za kutatanisha**.
+Zana hii **inabadilisha** taarifa za wakati ndani ya **`$STANDARD_INFORMATION`** **lakini** **sio** taarifa ndani ya **`$FILE_NAME`**. Hivyo, inawezekana **kutambua** **shughuli** **za shaka**.
 
 ### Usnjrnl
 
-**USN Journal** (Journali ya Nambari ya Mabadiliko) ni kipengele cha NTFS (mfumo wa faili wa Windows NT) kinachofuatilia mabadiliko ya kiasi. Zana ya [**UsnJrnl2Csv**](https://github.com/jschicht/UsnJrnl2Csv) inaruhusu uchambuzi wa mabadiliko haya.
+**USN Journal** (Jarida la Nambari ya Mabadiliko) ni kipengele cha NTFS (mfumo wa faili wa Windows NT) kinachofuatilia mabadiliko ya kiasi. Zana ya [**UsnJrnl2Csv**](https://github.com/jschicht/UsnJrnl2Csv) inaruhusu uchambuzi wa mabadiliko haya.
 
 ![](<../../images/image (801).png>)
 
@@ -25,7 +25,7 @@ Picha ya awali ni **matokeo** yanayoonyeshwa na **zana** ambapo inaonekana kuwa 
 
 ### $LogFile
 
-**Mabadiliko yote ya metadata kwa mfumo wa faili yanarekodiwa** katika mchakato unaojulikana kama [kuandika kabla ya kurekodi](https://en.wikipedia.org/wiki/Write-ahead_logging). Metadata iliyorekodiwa inahifadhiwa katika faili inayoitwa `**$LogFile**`, iliyoko katika saraka ya mzizi ya mfumo wa faili wa NTFS. Zana kama [LogFileParser](https://github.com/jschicht/LogFileParser) zinaweza kutumika kuchambua faili hii na kutambua mabadiliko.
+**Mabadiliko yote ya metadata kwa mfumo wa faili yanarekodiwa** katika mchakato unaojulikana kama [kuandika kabla ya kuandika](https://en.wikipedia.org/wiki/Write-ahead_logging). Metadata iliyorekodiwa inahifadhiwa katika faili inayoitwa `**$LogFile**`, iliyoko katika saraka ya mzizi ya mfumo wa faili wa NTFS. Zana kama [LogFileParser](https://github.com/jschicht/LogFileParser) zinaweza kutumika kuchambua faili hii na kutambua mabadiliko.
 
 ![](<../../images/image (137).png>)
 
@@ -42,11 +42,11 @@ Kwa kutumia zana hiyo hiyo inawezekana kutambua **wakati ambao nyakati ziliporom
 
 ### Ulinganisho wa `$STANDARD_INFORMATION` na `$FILE_NAME`
 
-Njia nyingine ya kutambua faili zilizobadilishwa kwa kutatanisha ni kulinganisha wakati kwenye sifa zote mbili kutafuta **mismatch**.
+Njia nyingine ya kutambua faili za shaka zilizobadilishwa ingekuwa kulinganisha wakati kwenye sifa zote mbili kutafuta **mismatch**.
 
 ### Nanoseconds
 
-**Nyakati za NTFS** zina **usahihi** wa **nanoseconds 100**. Hivyo, kupata faili zikiwa na nyakati kama 2010-10-10 10:10:**00.000:0000 ni ya kutatanisha sana**.
+**Nyakati za NTFS** zina **usahihi** wa **nanosekondi 100**. Hivyo, kupata faili zikiwa na nyakati kama 2010-10-10 10:10:**00.000:0000 ni ya kushangaza sana**.
 
 ### SetMace - Zana ya Anti-forensic
 
@@ -64,8 +64,8 @@ Hivyo, inawezekana kurejesha nafasi ya slack kwa kutumia zana kama FTK Imager. K
 
 ## UsbKill
 
-Hii ni zana ambayo it **izima kompyuta ikiwa mabadiliko yoyote katika USB** bandari yanagunduliwa.\
-Njia moja ya kugundua hii ni kukagua michakato inayotembea na **kurejea kila script ya python inayotembea**.
+Hii ni zana ambayo it **izima kompyuta ikiwa mabadiliko yoyote katika USB** bandari yanagundulika.\
+Njia moja ya kugundua hii ingekuwa kuchunguza michakato inayoendesha na **kurejea kila script ya python inayotembea**.
 
 ## Usambazaji wa Live Linux
 
@@ -104,7 +104,7 @@ Wakati folder inafunguliwa kutoka kiasi cha NTFS kwenye seva ya Windows NT, mfum
 
 1. Fungua Mhariri wa Rejista (Regedit.exe).
 2. Tembelea `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem`.
-3. Tafuta `NtfsDisableLastAccessUpdate`. Ikiwa haipo, ongeza DWORD hii na weka thamani yake kuwa 1, ambayo itazima mchakato.
+3. Tafuta `NtfsDisableLastAccessUpdate`. Ikiwa haipo, ongeza hii DWORD na weka thamani yake kuwa 1, ambayo itazima mchakato.
 4. Funga Mhariri wa Rejista, na upya seva.
 
 ### Futa Historia ya USB
@@ -116,8 +116,8 @@ Faili nyingine inayohifadhi taarifa kuhusu USB ni faili `setupapi.dev.log` ndani
 
 ### Zima Nakala za Kivuli
 
-**Orodha** ya nakala za kivuli kwa kutumia `vssadmin list shadowstorage`\
-**Futa** kwa kuendesha `vssadmin delete shadow`
+**Orodha** ya nakala za kivuli na `vssadmin list shadowstorage`\
+**Futa** hizo ukikimbia `vssadmin delete shadow`
 
 Unaweza pia kuzifuta kupitia GUI ukifuatia hatua zilizopendekezwa katika [https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html](https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html)
 
@@ -131,12 +131,12 @@ Pia inawezekana kubadilisha mipangilio ya faili zipi zitakazokopwa katika nakala
 
 ### Andika tena faili zilizofutwa
 
-- Unaweza kutumia **zana ya Windows**: `cipher /w:C` Hii itamwambia cipher kuondoa data yoyote kutoka kwa nafasi isiyotumika ya diski inayopatikana ndani ya diski ya C.
+- Unaweza kutumia **zana ya Windows**: `cipher /w:C` Hii itamwambia cipher kuondoa data yoyote kutoka kwa nafasi isiyotumika ya diski ndani ya diski ya C.
 - Unaweza pia kutumia zana kama [**Eraser**](https://eraser.heidi.ie)
 
 ### Futa kumbukumbu za matukio ya Windows
 
-- Windows + R --> eventvwr.msc --> Panua "Kumbukumbu za Windows" --> Bonyeza kulia kila kikundi na uchague "Futa Kumbukumbu"
+- Windows + R --> eventvwr.msc --> Panua "Kumbukumbu za Windows" --> Bonyeza kulia kila kikundi na chagua "Futa Kumbukumbu"
 - `for /F "tokens=*" %1 in ('wevtutil.exe el') DO wevtutil.exe cl "%1"`
 - `Get-EventLog -LogName * | ForEach { Clear-EventLog $_.Log }`
 
@@ -158,7 +158,7 @@ Pia inawezekana kubadilisha mipangilio ya faili zipi zitakazokopwa katika nakala
 
 Matoleo ya hivi karibuni ya Windows 10/11 na Windows Server yana **vitu vya forensics vya PowerShell** chini ya
 `Microsoft-Windows-PowerShell/Operational` (matukio 4104/4105/4106).
-Mshambuliaji anaweza kuzima au kufuta mara moja:
+Mshambuliaji anaweza kuzima au kufuta kwa haraka:
 ```powershell
 # Turn OFF ScriptBlock & Module logging (registry persistence)
 New-ItemProperty -Path "HKLM:\\SOFTWARE\\Microsoft\\PowerShell\\3\\PowerShellEngine" \
@@ -174,7 +174,7 @@ Walinda wanapaswa kufuatilia mabadiliko kwenye funguo hizo za rejista na kuondol
 
 ### ETW (Event Tracing for Windows) Patch
 
-Bidhaa za usalama wa mwisho zinategemea sana ETW. Njia maarufu ya kuepuka mwaka wa 2024 ni kupachika `ntdll!EtwEventWrite`/`EtwEventWriteFull` katika kumbukumbu ili kila wito wa ETW urudishe `STATUS_SUCCESS` bila kutoa tukio:
+Bidhaa za usalama wa mwisho zinategemea sana ETW. Njia maarufu ya kuepuka mwaka wa 2024 ni kupachika `ntdll!EtwEventWrite`/`EtwEventWriteFull` kwenye kumbukumbu ili kila wito wa ETW urudishe `STATUS_SUCCESS` bila kutoa tukio:
 ```c
 // 0xC3 = RET on x64
 unsigned char patch[1] = { 0xC3 };
@@ -186,36 +186,37 @@ Public PoCs (e.g. `EtwTiSwallow`) implement the same primitive in PowerShell or 
 Kwa sababu ya patch ni **process-local**, EDRs zinazotembea ndani ya michakato mingine zinaweza kukosa hiyo.
 Uchunguzi: linganisha `ntdll` katika kumbukumbu dhidi ya kwenye diski, au hook kabla ya user-mode.
 
-### Urejeleaji wa Mito ya Takwimu Mbadala (ADS)
+### Ufuatiliaji wa Data Mbadala (ADS) Urejeleaji
 
-Kampeni za malware mwaka wa 2023 (e.g. **FIN12** loaders) zimeonekana zikifanya staging binaries za hatua ya pili ndani ya ADS ili kubaki nje ya mtazamo wa skana za jadi:
+Kampeni za malware mwaka wa 2023 (e.g. **FIN12** loaders) zimeonekana zikifanya staging binaries za hatua ya pili ndani ya ADS ili kubaki nje ya mtazamo wa scanners za jadi:
 ```cmd
 rem Hide cobalt.bin inside an ADS of a PDF
 type cobalt.bin > report.pdf:win32res.dll
 rem Execute directly
 wmic process call create "cmd /c report.pdf:win32res.dll"
 ```
-Enumerate streams with `dir /R`, `Get-Item -Stream *`, or Sysinternals `streams64.exe`. Kuiga faili la mwenyeji kwa FAT/exFAT au kupitia SMB kutafuta mtiririko wa siri na inaweza kutumika na wachunguzi kurejesha mzigo.
+Enumerate streams with `dir /R`, `Get-Item -Stream *`, or Sysinternals `streams64.exe`. Copying the host file to FAT/exFAT or via SMB will strip the hidden stream and can be used by investigators to recover the payload.
 
 ### BYOVD & “AuKill” (2023)
 
-Bring-Your-Own-Vulnerable-Driver sasa hutumiwa mara kwa mara kwa **anti-forensics** katika uvamizi wa ransomware. Zana ya chanzo wazi **AuKill** inachukua dereva ulioidhinishwa lakini dhaifu (`procexp152.sys`) kusimamisha au kumaliza EDR na sensorer za forensics **kabla ya usimbaji na uharibifu wa kumbukumbu**:
+Bring-Your-Own-Vulnerable-Driver sasa inatumika mara kwa mara kwa **anti-forensics** katika uvamizi wa ransomware. Zana ya chanzo wazi **AuKill** inachukua dereva ulio saini lakini una udhaifu (`procexp152.sys`) ili kusimamisha au kumaliza EDR na sensorer za forensics **kabla ya usimbaji na uharibifu wa kumbukumbu**:
 ```cmd
 AuKill.exe -e "C:\\Program Files\\Windows Defender\\MsMpEng.exe"
 AuKill.exe -k CrowdStrike
 ```
 Driver inatolewa baadaye, ikiacha artefacts chache.
-Mikakati: wezesha orodha ya kuzuia madereva hatarishi ya Microsoft (HVCI/SAC), na onya juu ya uundaji wa huduma za kernel kutoka kwa njia zinazoweza kuandikwa na mtumiaji.
+Mikakati: wezesha orodha ya kuzuia madereva hatarishi ya Microsoft (HVCI/SAC),
+na onya juu ya uundaji wa huduma za kernel kutoka kwa njia zinazoweza kuandikwa na mtumiaji.
 
 ---
 
 ## Linux Anti-Forensics: Kujipatia Kijisafisha na Cloud C2 (2023–2025)
 
 ### Kujipatia Kijisafisha huduma zilizovunjwa ili kupunguza kugundulika (Linux)
-Wadadisi wanajitahidi "kujipatia kijisafisha" huduma mara tu baada ya kuzikandamiza ili kuzuia tena kuzikandamiza na kukandamiza kugundulika kwa msingi wa udhaifu. Wazo ni kubadilisha vipengele vyenye udhaifu na binaries/JARs halali za juu zaidi, ili skana ziweze kuripoti mwenyeji kama amepatiwa kijisafisha wakati uvumilivu na C2 vinabaki.
+Wadadisi wanajitahidi "kujipatia kijisafisha" huduma mara tu baada ya kuikandamiza ili kuzuia tena kuikandamiza na kukandamiza kugundulika kwa msingi wa udhaifu. Wazo ni kubadilisha vipengele vyenye udhaifu na binaries/JARs halali za juu zaidi, ili skana ziweze kuripoti mwenyeji kama amepatiwa kijisafisha wakati uvumilivu na C2 vinabaki.
 
 Mfano: Apache ActiveMQ OpenWire RCE (CVE‑2023‑46604)
-- Baada ya kuzikandamiza, washambuliaji walipata JARs halali kutoka Maven Central (repo1.maven.org), wakafuta JARs zenye udhaifu katika usakinishaji wa ActiveMQ, na kuanzisha tena broker.
+- Baada ya kuikandamiza, washambuliaji walipata JARs halali kutoka Maven Central (repo1.maven.org), wakafuta JARs zenye udhaifu katika usakinishaji wa ActiveMQ, na kuanzisha tena broker.
 - Hii ilifunga RCE ya awali huku ikihifadhi maeneo mengine (cron, mabadiliko ya usanidi wa SSH, vipandikizi vya C2 tofauti).
 
 Mfano wa operesheni (kuonyesha)
@@ -240,21 +241,21 @@ Forensic/hunting tips
 - Kagua huduma za directories kwa ajili ya kubadilisha binary/JAR zisizopangwa:
 - Debian/Ubuntu: `dpkg -V activemq` na kulinganisha hash za faili/paths na repo mirrors.
 - RHEL/CentOS: `rpm -Va 'activemq*'`
-- Tafuta toleo la JAR lililopo kwenye diski ambalo halimilikiwi na meneja wa pakiti, au viungo vya alama vilivyosasishwa nje ya muktadha.
-- Timeline: `find "$AMQ_DIR" -type f -printf '%TY-%Tm-%Td %TH:%TM %p\n' | sort` ili kuhusisha ctime/mtime na dirisha la kukiuka.
+- Tafuta toleo za JAR zilizopo kwenye diski ambazo hazimilikiwi na meneja wa pakiti, au viungo vya alama vilivyosasishwa nje ya muktadha.
+- Timeline: `find "$AMQ_DIR" -type f -printf '%TY-%Tm-%Td %TH:%TM %p\n' | sort` ili kuhusisha ctime/mtime na dirisha la kuathiriwa.
 - Historia ya shell/telemetry ya mchakato: ushahidi wa `curl`/`wget` kwa `repo1.maven.org` au CDNs nyingine za artefacts mara tu baada ya unyakuzi wa awali.
 - Usimamizi wa mabadiliko: thibitisha ni nani aliyeweka “patch” na kwa nini, si tu kwamba toleo lililosasishwa lipo.
 
 ### Cloud‑service C2 with bearer tokens and anti‑analysis stagers
-Uchunguzi wa biashara ulionyesha njia nyingi za C2 za muda mrefu na ufungaji wa anti‑analysis:
-- Wasilishi wa PyInstaller ELF walio na nenosiri ili kuzuia sandboxing na uchambuzi wa statiki (mfano, PYZ iliyosimbwa, utoaji wa muda mfupi chini ya `/_MEI*`).
+Uchunguzi wa biashara ulionyesha njia nyingi za C2 za muda mrefu na ufungaji wa kupambana na uchambuzi:
+- Wasilishi wa PyInstaller ELF walio na nenosiri ili kuzuia sanduku la mchanga na uchambuzi wa statiki (mfano, PYZ iliyosimbwa, utoaji wa muda mfupi chini ya `/_MEI*`).
 - Viashiria: `strings` hits kama `PyInstaller`, `pyi-archive`, `PYZ-00.pyz`, `MEIPASS`.
-- Artefacts za wakati wa utekelezaji: utoaji kwa `/tmp/_MEI*` au njia za desturi `--runtime-tmpdir`.
+- Artefacts za wakati wa kukimbia: utoaji kwa `/tmp/_MEI*` au njia za `--runtime-tmpdir` za kawaida.
 - C2 inayotegemea Dropbox ikitumia tokens za OAuth Bearer zilizowekwa kwa nguvu
 - Alama za mtandao: `api.dropboxapi.com` / `content.dropboxapi.com` zikiwa na `Authorization: Bearer <token>`.
 - Tafuta katika proxy/NetFlow/Zeek/Suricata kwa HTTPS ya nje kwa maeneo ya Dropbox kutoka kwa kazi za seva ambazo kawaida hazisawazishi faili.
-- C2 ya sambamba/backup kupitia tunneling (mfano, Cloudflare Tunnel `cloudflared`), ikihifadhi udhibiti ikiwa channel moja imezuiwa.
-- IOCs za mwenyeji: mchakato/units za `cloudflared`, config katika `~/.cloudflared/*.json`, outbound 443 kwa Cloudflare edges.
+- C2 ya sambamba/ya akiba kupitia tunneling (mfano, Cloudflare Tunnel `cloudflared`), ikihifadhi udhibiti ikiwa channel moja imezuiwa.
+- IOCs za mwenyeji: michakato/units za `cloudflared`, config katika `~/.cloudflared/*.json`, outbound 443 kwa Cloudflare edges.
 
 ### Persistence and “hardening rollback” to maintain access (Linux examples)
 Wavamizi mara nyingi huunganisha kujisahihisha na njia za ufikiaji zenye kudumu:
@@ -281,7 +282,7 @@ find / -maxdepth 3 -type f -regextype posix-extended -regex '.*/[A-Za-z]{8}$' \
 -exec stat -c '%n %s %y' {} \; 2>/dev/null | sort
 ```
 
-Walinda wanapaswa kuhusisha artefacts hizi na kufichuliwa kwa nje na matukio ya kusasisha huduma ili kugundua kujirekebisha kwa anti‑forensic kutumika kuficha unyakuzi wa awali.
+Walinda wanapaswa kuhusisha artefacts hizi na kufichuliwa kwa nje na matukio ya kusasisha huduma ili kugundua kujirekebisha kwa kupambana na uchunguzi kutumika kuficha unyakuzi wa awali.
 
 ## References
 

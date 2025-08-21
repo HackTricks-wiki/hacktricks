@@ -27,7 +27,7 @@ newConnection.exportedObject = self;
 return YES;
 }
 ```
-Kwa maelezo zaidi kuhusu jinsi ya kusanidi hii ipasavyo angalia:
+Kwa maelezo zaidi kuhusu jinsi ya kusanidi ipasavyo ukaguzi huu:
 
 {{#ref}}
 macos-xpc-connecting-process-check/
@@ -37,7 +37,7 @@ macos-xpc-connecting-process-check/
 
 Hata hivyo, kuna **idhini inayofanyika wakati njia kutoka kwa HelperTool inaitwa**.
 
-Kazi **`applicationDidFinishLaunching`** kutoka `App/AppDelegate.m` itaunda rejeleo tupu la idhini baada ya programu kuanza. Hii inapaswa kufanya kazi kila wakati.\
+Kazi **`applicationDidFinishLaunching`** kutoka `App/AppDelegate.m` itaunda rejeleo tupu la idhini baada ya programu kuanzishwa. Hii inapaswa kila wakati kufanya kazi.\
 Kisha, itajaribu **kuongeza haki fulani** kwa rejeleo hilo la idhini kwa kuita `setupAuthorizationRights`:
 ```objectivec
 - (void)applicationDidFinishLaunching:(NSNotification *)note
@@ -62,7 +62,7 @@ if (self->_authRef) {
 [self.window makeKeyAndOrderFront:self];
 }
 ```
-Kazi `setupAuthorizationRights` kutoka `Common/Common.m` itahifadhi katika hifadhidata ya uthibitisho `/var/db/auth.db` haki za programu. Kumbuka jinsi itakavyoongeza tu haki ambazo bado hazipo katika hifadhidata:
+Funguo `setupAuthorizationRights` kutoka `Common/Common.m` itahifadhi katika hifadhidata ya uthibitisho `/var/db/auth.db` haki za programu. Kumbuka jinsi itakavyoongeza tu haki ambazo bado hazipo katika hifadhidata:
 ```objectivec
 + (void)setupAuthorizationRights:(AuthorizationRef)authRef
 // See comment in header.
@@ -94,7 +94,7 @@ assert(blockErr == errAuthorizationSuccess);
 }];
 }
 ```
-Kazi `enumerateRightsUsingBlock` ndiyo inayotumika kupata ruhusa za programu, ambazo zimefafanuliwa katika `commandInfo`:
+Funguo `enumerateRightsUsingBlock` ndiyo inayotumika kupata ruhusa za programu, ambazo zimefafanuliwa katika `commandInfo`:
 ```objectivec
 static NSString * kCommandKeyAuthRightName    = @"authRightName";
 static NSString * kCommandKeyAuthRightDefault = @"authRightDefault";
@@ -172,15 +172,15 @@ block(authRightName, authRightDefault, authRightDesc);
 }];
 }
 ```
-Hii inamaanisha kwamba mwishoni mwa mchakato huu, ruhusa zilizotangazwa ndani ya `commandInfo` zitawekwa katika `/var/db/auth.db`. Angalia jinsi kuna unaweza kupata kwa **kila njia** ambayo itahitaji **uthibitisho**, **jina la ruhusa** na **`kCommandKeyAuthRightDefault`**. Ya mwisho **inaonyesha ni nani anaweza kupata haki hii**.
+Hii inamaanisha kwamba mwishoni mwa mchakato huu, ruhusa zilizotangazwa ndani ya `commandInfo` zitawekwa katika `/var/db/auth.db`. Angalia jinsi kuna unaweza kupata kwa **kila njia** ambayo itahitaji **uthibitisho**, **jina la ruhusa** na **`kCommandKeyAuthRightDefault`**. Ya mwisho **inaonyesha nani anaweza kupata haki hii**.
 
-Kuna maeneo tofauti kuonyesha ni nani anaweza kufikia haki. Baadhi yao zimetajwa katika [AuthorizationDB.h](https://github.com/aosm/Security/blob/master/Security/libsecurity_authorization/lib/AuthorizationDB.h) (unaweza kupata [zote hapa](https://www.dssw.co.uk/reference/authorization-rights/)), lakini kwa muhtasari:
+Kuna maeneo tofauti kuonyesha nani anaweza kufikia haki. Baadhi yao zimefafanuliwa katika [AuthorizationDB.h](https://github.com/aosm/Security/blob/master/Security/libsecurity_authorization/lib/AuthorizationDB.h) (unaweza kupata [zote hapa](https://www.dssw.co.uk/reference/authorization-rights/)), lakini kwa muhtasari:
 
-<table><thead><tr><th width="284.3333333333333">Jina</th><th width="165">Thamani</th><th>Maelezo</th></tr></thead><tbody><tr><td>kAuthorizationRuleClassAllow</td><td>ruhusu</td><td>Mtu yeyote</td></tr><tr><td>kAuthorizationRuleClassDeny</td><td>kata</td><td>Hakuna mtu</td></tr><tr><td>kAuthorizationRuleIsAdmin</td><td>ni-admin</td><td>Mtumiaji wa sasa anahitaji kuwa admin (ndani ya kundi la admin)</td></tr><tr><td>kAuthorizationRuleAuthenticateAsSessionUser</td><td>authenticate-session-owner</td><td>Muulize mtumiaji kuthibitisha.</td></tr><tr><td>kAuthorizationRuleAuthenticateAsAdmin</td><td>authenticate-admin</td><td>Muulize mtumiaji kuthibitisha. Anahitaji kuwa admin (ndani ya kundi la admin)</td></tr><tr><td>kAuthorizationRightRule</td><td>kanuni</td><td>Eleza sheria</td></tr><tr><td>kAuthorizationComment</td><td>maoni</td><td>Eleza maoni ya ziada kuhusu haki</td></tr></tbody></table>
+<table><thead><tr><th width="284.3333333333333">Jina</th><th width="165">Thamani</th><th>Maelezo</th></tr></thead><tbody><tr><td>kAuthorizationRuleClassAllow</td><td>allow</td><td>Mtu yeyote</td></tr><tr><td>kAuthorizationRuleClassDeny</td><td>deny</td><td>Hakuna mtu</td></tr><tr><td>kAuthorizationRuleIsAdmin</td><td>is-admin</td><td>Mtumiaji wa sasa anahitaji kuwa admin (ndani ya kundi la admin)</td></tr><tr><td>kAuthorizationRuleAuthenticateAsSessionUser</td><td>authenticate-session-owner</td><td>Muulize mtumiaji kuthibitisha.</td></tr><tr><td>kAuthorizationRuleAuthenticateAsAdmin</td><td>authenticate-admin</td><td>Muulize mtumiaji kuthibitisha. Anahitaji kuwa admin (ndani ya kundi la admin)</td></tr><tr><td>kAuthorizationRightRule</td><td>rule</td><td>Fafanua sheria</td></tr><tr><td>kAuthorizationComment</td><td>comment</td><td>Fafanua maelezo ya ziada kuhusu haki</td></tr></tbody></table>
 
 ### Uthibitishaji wa Haki
 
-Katika `HelperTool/HelperTool.m` kazi **`readLicenseKeyAuthorization`** inakagua ikiwa mpiga simu ameidhinishwa **kutekeleza njia hiyo** kwa kuita kazi **`checkAuthorization`**. Kazi hii itakagua **authData** iliyotumwa na mchakato unaoitwa ina **muundo sahihi** na kisha itakagua **kila kinachohitajika kupata haki** ya kuita njia maalum. Ikiwa kila kitu kinaenda vizuri **`error` iliyorejeshwa itakuwa `nil`**:
+Katika `HelperTool/HelperTool.m` kazi **`readLicenseKeyAuthorization`** inakagua ikiwa mpiga simu ameidhinishwa **kutekeleza njia hiyo** kwa kuita kazi **`checkAuthorization`**. Kazi hii itakagua **authData** iliyotumwa na mchakato wa kupiga simu ina **muundo sahihi** na kisha itakagua **kila kinachohitajika kupata haki** ya kuita njia maalum. Ikiwa kila kitu kinaenda vizuri **`error` iliyorejeshwa itakuwa `nil`**:
 ```objectivec
 - (NSError *)checkAuthorization:(NSData *)authData command:(SEL)command
 {
@@ -228,7 +228,7 @@ assert(junk == errAuthorizationSuccess);
 return error;
 }
 ```
-Kumbuka kwamba ili **kuangalia mahitaji ya kupata** haki ya kuita ile njia, kazi `authorizationRightForCommand` itakagua tu kitu cha maoni kilichotajwa awali **`commandInfo`**. Kisha, itaita **`AuthorizationCopyRights`** kuangalia **kama ina haki** ya kuita kazi hiyo (kumbuka kwamba bendera zinaruhusu mwingiliano na mtumiaji).
+Kumbuka kwamba ili **kuangalia mahitaji ya kupata** haki ya kuita njia hiyo, kazi `authorizationRightForCommand` itakagua tu kitu cha maoni kilichotajwa awali **`commandInfo`**. Kisha, itaita **`AuthorizationCopyRights`** kuangalia **kama ina haki** ya kuita kazi hiyo (kumbuka kwamba bendera zinaruhusu mwingiliano na mtumiaji).
 
 Katika kesi hii, ili kuita kazi `readLicenseKeyAuthorization`, `kCommandKeyAuthRightDefault` imewekwa kuwa `@kAuthorizationRuleClassAllow`. Hivyo **mtu yeyote anaweza kuita**.
 
@@ -244,12 +244,12 @@ Kisha, unaweza kusoma ni nani anaweza kufikia haki hiyo kwa:
 ```bash
 security authorizationdb read com.apple.safaridriver.allow
 ```
-### Haki za Permissive
+### Permissive rights
 
-Unaweza kupata **mipangilio yote ya ruhusa** [**hapa**](https://www.dssw.co.uk/reference/authorization-rights/), lakini mchanganyiko ambao hautahitaji mwingiliano wa mtumiaji ungekuwa:
+You can find **all the permissions configurations** [**in here**](https://www.dssw.co.uk/reference/authorization-rights/), but the combinations that won't require user interaction would be:
 
 1. **'authenticate-user': 'false'**
-- Hii ndiyo funguo ya moja kwa moja zaidi. Ikiwa imewekwa kuwa `false`, inaashiria kwamba mtumiaji hatahitaji kutoa uthibitisho ili kupata haki hii.
+- Hii ndiyo funguo ya moja kwa moja zaidi. Ikiwa imewekwa kuwa `false`, inaonyesha kwamba mtumiaji hatahitaji kutoa uthibitisho ili kupata haki hii.
 - Hii inatumika kwa **mchanganyiko na moja ya 2 hapa chini au kuashiria kundi** ambalo mtumiaji lazima awe sehemu yake.
 2. **'allow-root': 'true'**
 - Ikiwa mtumiaji anafanya kazi kama mtumiaji wa root (ambaye ana ruhusa za juu), na funguo hii imewekwa kuwa `true`, mtumiaji wa root anaweza kupata haki hii bila uthibitisho zaidi. Hata hivyo, kwa kawaida, kufikia hadhi ya mtumiaji wa root tayari kunahitaji uthibitisho, hivyo hii si hali ya "hakuna uthibitisho" kwa watumiaji wengi.
@@ -258,7 +258,7 @@ Unaweza kupata **mipangilio yote ya ruhusa** [**hapa**](https://www.dssw.co.uk/r
 4. **'shared': 'true'**
 - Funguo hii haitoi haki bila uthibitisho. Badala yake, ikiwa imewekwa kuwa `true`, inamaanisha kwamba mara haki hiyo itakapothibitishwa, inaweza kushirikiwa kati ya michakato mingi bila kila mmoja kuhitaji kuthibitishwa tena. Lakini utoaji wa awali wa haki hiyo bado utahitaji uthibitisho isipokuwa ikichanganywa na funguo nyingine kama `'authenticate-user': 'false'`.
 
-Unaweza [**kutumia skripti hii**](https://gist.github.com/carlospolop/96ecb9e385a4667b9e40b24e878652f9) kupata haki za kuvutia:
+You can [**use this script**](https://gist.github.com/carlospolop/96ecb9e385a4667b9e40b24e878652f9) to get the interesting rights:
 ```bash
 Rights with 'authenticate-user': 'false':
 is-admin (admin), is-admin-nonshared (admin), is-appstore (_appstore), is-developer (_developer), is-lpadmin (_lpadmin), is-root (run as root), is-session-owner (session owner), is-webdeveloper (_webdeveloper), system-identity-write-self (session owner), system-install-iap-software (run as root), system-install-software-iap (run as root)
@@ -269,29 +269,29 @@ com-apple-aosnotification-findmymac-remove, com-apple-diskmanagement-reservekek,
 Rights with 'session-owner': 'true':
 authenticate-session-owner, authenticate-session-owner-or-admin, authenticate-session-user, com-apple-safari-allow-apple-events-to-run-javascript, com-apple-safari-allow-javascript-in-smart-search-field, com-apple-safari-allow-unsigned-app-extensions, com-apple-safari-install-ephemeral-extensions, com-apple-safari-show-credit-card-numbers, com-apple-safari-show-passwords, com-apple-icloud-passwordreset, com-apple-icloud-passwordreset, is-session-owner, system-identity-write-self, use-login-window-ui
 ```
-## Kurejesha Mamlaka
+## Kurejesha Idhini
 
 ### Kuangalia kama EvenBetterAuthorization inatumika
 
-Ikiwa unapata kazi: **`[HelperTool checkAuthorization:command:]`** inawezekana kwamba mchakato unatumia mpangilio ulioelezwa hapo awali kwa ajili ya mamlaka:
+Ikiwa unapata kazi: **`[HelperTool checkAuthorization:command:]`** inawezekana mchakato unatumia mpangilio ulioelezwa hapo awali kwa ajili ya idhini:
 
 <figure><img src="../../../../../images/image (42).png" alt=""><figcaption></figcaption></figure>
 
 Hii, ikiwa kazi hii inaita kazi kama `AuthorizationCreateFromExternalForm`, `authorizationRightForCommand`, `AuthorizationCopyRights`, `AuhtorizationFree`, inatumia [**EvenBetterAuthorizationSample**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L101-L154).
 
-Angalia **`/var/db/auth.db`** ili kuona kama inawezekana kupata ruhusa za kuita hatua fulani za mamlaka bila mwingiliano wa mtumiaji.
+Angalia **`/var/db/auth.db`** ili kuona kama inawezekana kupata ruhusa za kuita hatua fulani za kipaumbele bila mwingiliano wa mtumiaji.
 
-### Mawasiliano ya Itifaki
+### Mawasiliano ya Protoko
 
-Kisha, unahitaji kupata mpangilio wa itifaki ili uweze kuanzisha mawasiliano na huduma ya XPC.
+Kisha, unahitaji kupata mpangilio wa protokali ili uweze kuanzisha mawasiliano na huduma ya XPC.
 
-Kazi **`shouldAcceptNewConnection`** inaonyesha itifaki inayotolewa:
+Kazi **`shouldAcceptNewConnection`** inaonyesha protokali inayosambazwa:
 
 <figure><img src="../../../../../images/image (44).png" alt=""><figcaption></figcaption></figure>
 
 Katika kesi hii, tuna sawa na katika EvenBetterAuthorizationSample, [**angalia mstari huu**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L94).
 
-Kujua, jina la itifaki inayotumika, inawezekana **kudondosha ufafanuzi wa kichwa chake** kwa:
+Kwa kujua, jina la protokali inayotumika, inawezekana **kudondosha ufafanuzi wa kichwa chake** kwa:
 ```bash
 class-dump /Library/PrivilegedHelperTools/com.example.HelperTool
 
@@ -413,7 +413,7 @@ NSLog(@"Finished!");
 
 - [https://blog.securelayer7.net/applied-endpointsecurity-framework-previlege-escalation/?utm_source=pocket_shared](https://blog.securelayer7.net/applied-endpointsecurity-framework-previlege-escalation/?utm_source=pocket_shared)
 
-## Marejeleo
+## Marejeo
 
 - [https://theevilbit.github.io/posts/secure_coding_xpc_part1/](https://theevilbit.github.io/posts/secure_coding_xpc_part1/)
 

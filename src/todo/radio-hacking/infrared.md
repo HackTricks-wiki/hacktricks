@@ -4,7 +4,7 @@
 
 ## How the Infrared Works <a href="#how-the-infrared-port-works" id="how-the-infrared-port-works"></a>
 
-**Mwanga wa infrared hauonekani kwa wanadamu**. Urefu wa mawimbi ya IR ni kutoka **0.7 hadi 1000 microns**. Remote za nyumbani hutumia ishara ya IR kwa ajili ya uhamasishaji wa data na zinafanya kazi katika wigo wa mawimbi wa 0.75..1.4 microns. Microcontroller katika remote inafanya LED ya infrared kung'ara kwa mzunguko maalum, ikigeuza ishara ya dijitali kuwa ishara ya IR.
+**Mwanga wa infrared hauonekani kwa wanadamu**. Urefu wa mawimbi ya IR ni kutoka **0.7 hadi 1000 microns**. Remotes za nyumbani hutumia ishara ya IR kwa ajili ya uhamasishaji wa data na zinafanya kazi katika wigo wa mawimbi wa 0.75..1.4 microns. Microcontroller katika remote inafanya LED ya infrared kung'ara kwa mzunguko maalum, ikigeuza ishara ya dijitali kuwa ishara ya IR.
 
 Ili kupokea ishara za IR, **photoreceiver** hutumiwa. In **geuza mwanga wa IR kuwa mapigo ya voltage**, ambayo tayari ni **ishara za dijitali**. Kawaida, kuna **filter ya mwanga mweusi ndani ya mpokeaji**, ambayo inaruhusu **tu wigo unaotakiwa kupita** na kuondoa kelele.
 
@@ -39,13 +39,13 @@ Inajulikana pia kama uandishi wa Manchester. Thamani ya mantiki inafafanuliwa na
 **4. Combination of previous ones and other exotics**
 
 > [!TIP]
-> Kuna protokali za IR ambazo **zinajaribu kuwa za ulimwengu mzima** kwa aina kadhaa za vifaa. Zile maarufu ni RC5 na NEC. Kwa bahati mbaya, maarufu **haimaanishi ya kawaida**. Katika mazingira yangu, nilikutana na remote mbili za NEC na hakuna RC5.
+> Kuna protokali za IR ambazo **zinajaribu kuwa za ulimwengu mzima** kwa aina kadhaa za vifaa. Zile maarufu ni RC5 na NEC. Kwa bahati mbaya, maarufu **haimaanishi ya kawaida**. Katika mazingira yangu, nilikutana na remotes mbili za NEC tu na hakuna za RC5.
 >
-> Watengenezaji wanapenda kutumia protokali zao za IR za kipekee, hata ndani ya safu moja ya vifaa (kwa mfano, TV-boxes). Hivyo basi, remotes kutoka kampuni tofauti na wakati mwingine kutoka mifano tofauti kutoka kampuni moja, hazina uwezo wa kufanya kazi na vifaa vingine vya aina hiyo.
+> Watengenezaji wanapenda kutumia protokali zao za IR za kipekee, hata ndani ya safu sawa ya vifaa (kwa mfano, TV-boxes). Kwa hivyo, remotes kutoka kampuni tofauti na wakati mwingine kutoka mifano tofauti kutoka kampuni moja, hazina uwezo wa kufanya kazi na vifaa vingine vya aina hiyo.
 
 ### Exploring an IR signal
 
-Njia ya kuaminika zaidi kuona jinsi ishara ya IR ya remote inavyoonekana ni kutumia oscilloscope. Hii haidhauri au kubadilisha ishara iliyopokelewa, inajitokeza "kama ilivyo". Hii ni muhimu kwa ajili ya kupima na kutatua matatizo. Nitaonyesha ishara inayotarajiwa kwa mfano wa protokali ya NEC IR.
+Njia ya kuaminika zaidi ya kuona jinsi ishara ya IR ya remote inavyoonekana ni kutumia oscilloscope. Haitaondoa au kubadilisha ishara iliyopokelewa, inayoonyeshwa "kama ilivyo". Hii ni muhimu kwa ajili ya kupima na kutatua matatizo. Nitaonyesha ishara inayotarajiwa kwa mfano wa protokali ya NEC IR.
 
 <figure><img src="../../images/image (235).png" alt=""><figcaption></figcaption></figure>
 
@@ -53,9 +53,9 @@ Kawaida, kuna preamble mwanzoni mwa pakiti iliyowekwa. Hii inaruhusu mpokeaji ku
 
 Kisha data inatumwa. Muundo, preamble, na njia ya uandishi wa bit zinatambuliwa na protokali maalum.
 
-**Protokali ya NEC IR** ina amri fupi na nambari ya kurudia, ambayo inatumwa wakati kifungo kinaposhinikizwa. Zote, amri na nambari ya kurudia zina preamble sawa mwanzoni.
+**Protokali ya NEC IR** ina amri fupi na nambari ya kurudia, ambayo inatumwa wakati kifungo kinaposhikiliwa. Zote amri na nambari ya kurudia zina preamble sawa mwanzoni.
 
-**Amri ya NEC**, mbali na preamble, inajumuisha byte ya anwani na byte ya nambari ya amri, ambayo kifaa kinaelewa kinachohitajika kutekelezwa. Byte za anwani na nambari ya amri zinajirudia kwa thamani za kinyume, ili kuangalia uadilifu wa uhamasishaji. Kuna bit ya kusitisha ya ziada mwishoni mwa amri.
+**Amri ya NEC**, pamoja na preamble, inajumuisha byte ya anwani na byte ya nambari ya amri, ambayo kifaa kinaelewa kinachohitajika kutekelezwa. Byte za anwani na nambari ya amri zinajirudia kwa thamani za kinyume, ili kuangalia uadilifu wa uhamasishaji. Kuna bit ya kusitisha ya ziada mwishoni mwa amri.
 
 **Nambari ya kurudia** ina "1" baada ya preamble, ambayo ni bit ya kusitisha.
 
@@ -63,14 +63,15 @@ Kwa **mantiki "0" na "1"** NEC inatumia Pulse Distance Encoding: kwanza, mlipuko
 
 ### Air Conditioners
 
-Tofauti na remotes nyingine, **viyoyozi havitumii tu nambari ya kifungo kilichoshinikizwa**. Pia **hutoa taarifa zote** wakati kifungo kinaposhinikizwa ili kuhakikisha kwamba **kifaa cha viyoyozi na remote vinapatana**.\
-Hii itazuia kwamba mashine iliyowekwa kama 20ºC inakuwa 21ºC kwa remote moja, na kisha wakati remote nyingine, ambayo bado ina joto kama 20ºC, inatumika kuongeza zaidi joto, itakuwa "inaongeza" hadi 21ºC (na si 22ºC ikidhani iko katika 21ºC).
+Tofauti na remotes nyingine, **viyoyozi havitumii tu nambari ya kifungo kilichoshikiliwa**. Pia **hutoa taarifa zote** wakati kifungo kinaposhikiliwa ili kuhakikisha kwamba **kifaa cha viyoyozi na remote vimeunganishwa**.\
+Hii itazuia kwamba mashine iliyowekwa kama 20ºC inakuwa 21ºC kwa remote moja, na kisha wakati remote nyingine, ambayo bado ina joto kama 20ºC, inatumika kuongeza zaidi joto, itakuwa "inaongeza" hadi 21ºC (na si 22ºC ikidhaniwa iko katika 21ºC).
 
 ---
 
 ## Attacks & Offensive Research <a href="#attacks" id="attacks"></a>
 
 Unaweza kushambulia Infrared na Flipper Zero:
+
 
 {{#ref}}
 flipper-zero/fz-infrared.md
@@ -82,13 +83,13 @@ Kazi za hivi karibuni za kitaaluma (EvilScreen, 2022) zilionyesha kwamba **remot
 
 ### Air-Gapped Data Exfiltration via IR LEDs (aIR-Jumper family)
 
-Mikamera ya usalama, routers au hata flash drives za uhalifu mara nyingi zinajumuisha **LED za IR za kuona usiku**. Utafiti unaonyesha kuwa malware inaweza kubadilisha hizi LED (<10–20 kbit/s kwa OOK rahisi) ili **kuhamasisha siri kupitia kuta na madirisha** kwa kamera ya nje iliyowekwa mita kumi mbali. Kwa sababu mwanga uko nje ya wigo unaoonekana, waendeshaji mara nyingi hawaoni. Hatua za kupambana:
+Mikamera ya usalama, routers au hata flash drives za uhalifu mara nyingi zinajumuisha **LED za IR za kuona usiku**. Utafiti unaonyesha kuwa malware inaweza kubadilisha hizi LED (<10–20 kbit/s kwa OOK rahisi) ili **kuhamasisha siri kupitia kuta na madirisha** kwa kamera ya nje iliyowekwa mita kadhaa mbali. Kwa sababu mwanga uko nje ya wigo unaoonekana, waendeshaji mara nyingi hawaoni. Hatua za kupambana:
 
 * Ficha kimwili au ondoa LED za IR katika maeneo nyeti
 * Fuata mzunguko wa LED wa kamera na uadilifu wa firmware
 * Tumia filters za IR-cut kwenye madirisha na kamera za ufuatiliaji
 
-Mshambuliaji pia anaweza kutumia projector za IR zenye nguvu ili **kuingiza** amri ndani ya mtandao kwa kuangaza data nyuma kwa kamera zisizo salama.
+Mshambuliaji pia anaweza kutumia projector za IR zenye nguvu ili **kuingiza** amri kwenye mtandao kwa kung'ara data nyuma kwa kamera zisizo salama.
 
 ### Long-Range Brute-Force & Extended Protocols with Flipper Zero 1.0
 
@@ -103,7 +104,7 @@ Firmware 1.0 (Septemba 2024) iliongeza **mifumo ya ziada ya IR na moduli za nguv
 * **Flipper Zero** – transceiver inayoweza kubebeka yenye hali za kujifunza, kurudia na brute-force ya kamusi (ona hapo juu).
 * **Arduino / ESP32** + IR LED / TSOP38xx mpokeaji – mchanganuzi/mwambazaji wa DIY wa bei nafuu. Changanya na maktaba ya `Arduino-IRremote` (v4.x inasaidia >40 protokali).
 * **Logic analysers** (Saleae/FX2) – capture timings za raw wakati protokali haijulikani.
-* **Smartphones with IR-blaster** (e.g., Xiaomi) – mtihani wa haraka wa uwanjani lakini una wigo mdogo.
+* **Smartphones with IR-blaster** (mfano, Xiaomi) – mtihani wa haraka wa uwanjani lakini una wigo mdogo.
 
 ### Software
 
@@ -118,7 +119,7 @@ delay(5000);
 }
 ```
 * **IRscrutinizer / AnalysIR** – decoders za GUI zinazounga mkono captures za raw na kutambua protokali kiotomatiki + kuunda msimbo wa Pronto/Arduino.
-* **LIRC / ir-keytable (Linux)** – pokea na ingiza IR kutoka kwa mstari wa amri:
+* **LIRC / ir-keytable (Linux)** – pokea na ingiza IR kutoka kwenye mstari wa amri:
 ```bash
 sudo ir-keytable -p nec,rc5 -t   # live-dump decoded scancodes
 irsend SEND_ONCE samsung KEY_POWER

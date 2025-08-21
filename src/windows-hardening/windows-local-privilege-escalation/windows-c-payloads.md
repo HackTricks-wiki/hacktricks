@@ -2,9 +2,9 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Ukurasa huu unakusanya **vipande vidogo vya C vilivyojitegemea** ambavyo ni vya manufaa wakati wa Windows Local Privilege Escalation au baada ya unyakuzi. Kila payload imeundwa kuwa **rafiki kwa nakala-na-kupaste**, inahitaji tu Windows API / C runtime, na inaweza kukusanywa kwa `i686-w64-mingw32-gcc` (x86) au `x86_64-w64-mingw32-gcc` (x64).
+Ukurasa huu unakusanya **vipande vidogo vya C vilivyojitegemea** ambavyo ni vya manufaa wakati wa Windows Local Privilege Escalation au post-exploitation. Kila payload imeundwa kuwa **rafiki kwa nakala na bandika**, inahitaji tu Windows API / C runtime, na inaweza kukusanywa kwa `i686-w64-mingw32-gcc` (x86) au `x86_64-w64-mingw32-gcc` (x64).
 
-> ⚠️  Payload hizi zinadhani kwamba mchakato tayari una ruhusa za chini zinazohitajika kutekeleza kitendo (mfano `SeDebugPrivilege`, `SeImpersonatePrivilege`, au muktadha wa kati wa uaminifu kwa bypass ya UAC). Zimekusudiwa kwa **red-team au mazingira ya CTF** ambapo kutumia udhaifu kumepata utekelezaji wa msimbo wa asili usio na mipaka.
+> ⚠️  Hizi payload zinadhani kwamba mchakato tayari una ruhusa za chini zinazohitajika kutekeleza kitendo (mfano `SeDebugPrivilege`, `SeImpersonatePrivilege`, au muktadha wa kati wa uaminifu kwa UAC bypass). Zimekusudiwa kwa **red-team au mazingira ya CTF** ambapo kutumia udhaifu kumepata utekelezaji wa msimbo wa asili usio na mipaka.
 
 ---
 
@@ -61,12 +61,12 @@ system("fodhelper.exe");
 return 0;
 }
 ```
-*Imepimwa kwenye Windows 10 22H2 na Windows 11 23H2 (pachiko za Julai 2025). Njia ya kupita bado inafanya kazi kwa sababu Microsoft haijarekebisha ukosefu wa ukaguzi wa uaminifu katika njia ya `DelegateExecute`.*
+*Imepimwa kwenye Windows 10 22H2 na Windows 11 23H2 (pachiko za Julai 2025). Njia ya kukwepa bado inafanya kazi kwa sababu Microsoft haijarekebisha ukosefu wa ukaguzi wa uaminifu katika njia ya `DelegateExecute`.*
 
 ---
 
 ## Kuanzisha shell ya SYSTEM kupitia nakala ya tokeni (`SeDebugPrivilege` + `SeImpersonatePrivilege`)
-Ikiwa mchakato wa sasa una **zote** `SeDebug` na `SeImpersonate` ruhusa (ya kawaida kwa akaunti nyingi za huduma), unaweza kuiba tokeni kutoka `winlogon.exe`, kuiga, na kuanzisha mchakato wa juu:
+Ikiwa mchakato wa sasa unashikilia **zote** `SeDebug` na `SeImpersonate` ruhusa (ya kawaida kwa akaunti nyingi za huduma), unaweza kuiba tokeni kutoka `winlogon.exe`, kuiga, na kuanzisha mchakato wa juu:
 ```c
 // x86_64-w64-mingw32-gcc -O2 -o system_shell.exe system_shell.c -ladvapi32 -luser32
 #include <windows.h>
@@ -114,7 +114,8 @@ if (dupToken) CloseHandle(dupToken);
 return 0;
 }
 ```
-Kwa maelezo ya kina kuhusu jinsi hiyo inavyofanya kazi ona:
+Kwa maelezo ya kina kuhusu jinsi hiyo inavyofanya kazi angalia:
+
 {{#ref}}
 sedebug-+-seimpersonate-copy-token.md
 {{#endref}}
@@ -149,7 +150,7 @@ MessageBoxA(NULL, "AMSI & ETW patched!", "OK", MB_OK);
 return 0;
 }
 ```
-*Patches hapo juu ni za mchakato wa ndani; kuanzisha PowerShell mpya baada ya kuikimbia itatekelezwa bila ukaguzi wa AMSI/ETW.*
+*Patches hapo juu ni za mchakato wa ndani; kuanzisha PowerShell mpya baada ya kuikimbia kutatekelezwa bila ukaguzi wa AMSI/ETW.*
 
 ---
 

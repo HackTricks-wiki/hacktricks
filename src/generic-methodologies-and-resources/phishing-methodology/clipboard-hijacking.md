@@ -6,7 +6,7 @@
 
 ## Overview
 
-Clipboard hijacking – pia inajulikana kama *pastejacking* – inatumia ukweli kwamba watumiaji mara nyingi huiga na kuweka amri bila kuzichunguza. Tovuti mbaya (au muktadha wowote unaoweza kutumia JavaScript kama vile programu ya Electron au Desktop) inaweka maandiko yanayodhibitiwa na mshambuliaji kwenye clipboard ya mfumo. Waathirika wanahimizwa, kawaida kwa maagizo ya uhandisi wa kijamii yaliyoundwa kwa uangalifu, kubonyeza **Win + R** (Run dialog), **Win + X** (Quick Access / PowerShell), au kufungua terminal na *kweka* yaliyomo kwenye clipboard, mara moja wakitekeleza amri zisizo na mpangilio.
+Clipboard hijacking – pia inajulikana kama *pastejacking* – inatumia ukweli kwamba watumiaji mara kwa mara huiga na kuweka amri bila kuzichunguza. Tovuti mbaya (au muktadha wowote unaoweza kutumia JavaScript kama programu ya Electron au Desktop) inachanganya maandiko yanayodhibitiwa na mshambuliaji kwenye clipboard ya mfumo. Waathirika wanahimizwa, kawaida kwa maagizo ya uhandisi wa kijamii yaliyoundwa kwa uangalifu, kubonyeza **Win + R** (Run dialog), **Win + X** (Quick Access / PowerShell), au kufungua terminal na *kweka* yaliyomo kwenye clipboard, mara moja wakitekeleza amri zisizo na mpangilio.
 
 Kwa sababu **hakuna faili inayopakuliwa na hakuna kiambatisho kinachofunguliwa**, mbinu hii inapita karibu na udhibiti wote wa usalama wa barua pepe na maudhui ya wavuti yanayofuatilia viambatisho, macros au utekelezaji wa amri moja kwa moja. Shambulio hili kwa hivyo ni maarufu katika kampeni za phishing zinazotoa familia za malware za kawaida kama NetSupport RAT, Latrodectus loader au Lumma Stealer.
 
@@ -27,7 +27,7 @@ Older campaigns used `document.execCommand('copy')`, newer ones rely on the asyn
 ## The ClickFix / ClearFake Flow
 
 1. Mtumiaji anatembelea tovuti iliyo na makosa ya tahajia au iliyovunjwa (e.g. `docusign.sa[.]com`)
-2. JavaScript ya **ClearFake** iliyowekwa inaita `unsecuredCopyToClipboard()` msaada ambayo kimya kimya inahifadhi PowerShell one-liner iliyokuwa na Base64 katika clipboard.
+2. JavaScript ya **ClearFake** iliyowekwa inaita `unsecuredCopyToClipboard()` ambayo kimya kimya inahifadhi PowerShell one-liner iliyokuwa na Base64 katika clipboard.
 3. Maelekezo ya HTML yanamwambia mwathirika: *“Bonyeza **Win + R**, bandika amri na bonyeza Enter kutatua tatizo.”*
 4. `powershell.exe` inatekelezwa, ikipakua archive ambayo ina executable halali pamoja na DLL mbaya (classic DLL sideloading).
 5. Loader inachambua hatua za ziada, inaingiza shellcode na kuanzisha kudumu (e.g. kazi iliyopangwa) – hatimaye inatekeleza NetSupport RAT / Latrodectus / Lumma Stealer.
@@ -41,7 +41,7 @@ Expand-Archive %TEMP%\f.zip -DestinationPath %TEMP%\f ;
 %TEMP%\f\jp2launcher.exe             # Sideloads msvcp140.dll
 ```
 * `jp2launcher.exe` (halali Java WebStart) inatafuta saraka yake kwa `msvcp140.dll`.
-* DLL mbaya inatatua kwa dinamik API na **GetProcAddress**, inashusha binaries mbili (`data_3.bin`, `data_4.bin`) kupitia **curl.exe**, inazificha kwa kutumia ufunguo wa rolling XOR `"https://google.com/"`, inaingiza shellcode ya mwisho na inafungua **client32.exe** (NetSupport RAT) hadi `C:\ProgramData\SecurityCheck_v1\`.
+* DLL mbaya inatatua kwa dinamik API na **GetProcAddress**, inapakua binaries mbili (`data_3.bin`, `data_4.bin`) kupitia **curl.exe**, inazificha kwa kutumia ufunguo wa rolling XOR `"https://google.com/"`, inaingiza shellcode ya mwisho na inafungua **client32.exe** (NetSupport RAT) hadi `C:\ProgramData\SecurityCheck_v1\`.
 
 ### Latrodectus Loader
 ```
@@ -76,6 +76,7 @@ Blue-teams can combine clipboard, process-creation and registry telemetry to pin
 ## Related Tricks
 
 * **Discord Invite Hijacking** often abuses the same ClickFix approach after luring users into a malicious server:
+
 {{#ref}}
 discord-invite-hijacking.md
 {{#endref}}

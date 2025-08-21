@@ -4,7 +4,8 @@
 
 ## Basic information
 
-If you want to learn more about **runc** check the following page:
+Ikiwa unataka kujifunza zaidi kuhusu **runc** angalia ukurasa ufuatao:
+
 
 {{#ref}}
 ../../network-services-pentesting/2375-pentesting-docker.md
@@ -12,7 +13,7 @@ If you want to learn more about **runc** check the following page:
 
 ## PE
 
-If you find that `runc` is installed in the host you may be able to **kufanya kazi na kontena ikitumia folda ya mzizi / ya mwenyeji**.
+Ikiwa unapata kwamba `runc` imewekwa kwenye mwenyeji unaweza kuwa na uwezo wa **kuendesha kontena ukitumia folda ya mizizi / ya mwenyeji**.
 ```bash
 runc -help #Get help and see if runc is intalled
 runc spec #This will create the config.json file in your current folder
@@ -37,6 +38,6 @@ mkdir rootfs
 runc run demo
 ```
 > [!CAUTION]
-> Hii haitafanya kazi kila wakati kwani operesheni ya default ya runc ni kukimbia kama root, hivyo kukimbia kama mtumiaji asiye na haki haiwezi kufanya kazi (isipokuwa una usanidi usio na root). Kufanya usanidi usio na root kuwa wa default si wazo zuri kwa ujumla kwa sababu kuna vizuizi vingi ndani ya kontena zisizo na root ambavyo havihusiani na kontena zisizo na root. 
+> Hii haitafanya kazi kila wakati kwani operesheni ya default ya runc ni kukimbia kama root, hivyo kukimbia kama mtumiaji asiye na haki haiwezi kufanya kazi (isipokuwa una usanidi usio na root). Kufanya usanidi usio na root kuwa wa default si wazo zuri kwa ujumla kwa sababu kuna vizuizi vingi ndani ya kontena zisizo na root ambavyo havihusiani na kontena zisizo na root.
 
 {{#include ../../banners/hacktricks-training.md}}

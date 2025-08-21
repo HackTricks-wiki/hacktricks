@@ -26,7 +26,7 @@ schtasks /Create /RU "SYSTEM" /SC ONLOGON /TN "SchedPE" /TR "cmd /c net localgro
 ```
 ## Folders
 
-Mifano yote iliyo katika **Startup folders itatekelezwa wakati wa kuanzisha**. Mifano ya kawaida ya kuanzisha ni zile zilizo orodheshwa hapa chini, lakini folda ya kuanzisha inaonyeshwa katika rejista. [Read this to learn where.](privilege-escalation-with-autorun-binaries.md#startup-path)
+All the binaries located in the **Startup folders are going to be executed on startup**. The common startup folders are the ones listed a continuation, but the startup folder is indicated in the registry. [Soma hii kujifunza wapi.](privilege-escalation-with-autorun-binaries.md#startup-path)
 ```bash
 dir /b "C:\Documents and Settings\All Users\Start Menu\Programs\Startup" 2>nul
 dir /b "C:\Documents and Settings\%username%\Start Menu\Programs\Startup" 2>nul
@@ -35,7 +35,8 @@ dir /b "%appdata%\Microsoft\Windows\Start Menu\Programs\Startup" 2>nul
 Get-ChildItem "C:\Users\All Users\Start Menu\Programs\Startup"
 Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 ```
-> **FYI**: Utoaji wa archive *path traversal* vulnerabilities (kama ile inayotumiwa katika WinRAR kabla ya 7.13 – CVE-2025-8088) inaweza kutumika ku **weka payloads moja kwa moja ndani ya folda hizi za Startup wakati wa kufungua**, na kusababisha utekelezaji wa msimbo wakati wa kuingia kwa mtumiaji anayefuata. Kwa maelezo zaidi kuhusu mbinu hii angalia:
+> **FYI**: Utoaji wa archive *path traversal* vulnerabilities (kama ile inayotumiwa katika WinRAR kabla ya 7.13 – CVE-2025-8088) inaweza kutumika ku **weka payloads moja kwa moja ndani ya folda hizi za Startup wakati wa kufungua**, na kusababisha utekelezaji wa msimbo wakati wa kuingia kwa mtumiaji. Kwa maelezo zaidi kuhusu mbinu hii angalia:
+
 
 {{#ref}}
 ../../generic-hacking/archive-extraction-path-traversal.md
@@ -64,7 +65,7 @@ Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 - `HKLM\Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Install\Software\Microsoft\Windows\CurrentVersion\Runonce`
 - `HKLM\Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Install\Software\Microsoft\Windows\CurrentVersion\RunonceEx`
 
-Funguo za registry zinazojulikana kama **Run** na **RunOnce** zimedhamiria kutekeleza programu kiotomatiki kila wakati mtumiaji anapoingia kwenye mfumo. Mstari wa amri uliotolewa kama thamani ya data ya funguo umewekwa mipaka ya herufi 260 au chini.
+Funguo za registry zinazojulikana kama **Run** na **RunOnce** zimeundwa ili kutekeleza programu kiotomatiki kila wakati mtumiaji anapoingia kwenye mfumo. Mstari wa amri uliotolewa kama thamani ya data ya funguo umewekwa mipaka ya herufi 260 au chini.
 
 **Huduma inazoendesha** (zinaweza kudhibiti kuanzishwa kiotomatiki kwa huduma wakati wa boot):
 
@@ -82,7 +83,7 @@ Funguo za registry zinazojulikana kama **Run** na **RunOnce** zimedhamiria kutek
 - `HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\RunOnceEx`
 - `HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunOnceEx`
 
-Katika Windows Vista na toleo la baadaye, funguo za **Run** na **RunOnce** hazizalishwi kiotomatiki. Kuingizwa katika funguo hizi kunaweza kuanzisha programu moja kwa moja au kuzitaja kama utegemezi. Kwa mfano, ili kupakia faili ya DLL wakati wa kuingia, mtu anaweza kutumia funguo ya registry ya **RunOnceEx** pamoja na funguo ya "Depend". Hii inaonyeshwa kwa kuongeza kuingizwa kwa registry ili kutekeleza "C:\temp\evil.dll" wakati wa kuanzishwa kwa mfumo:
+Katika Windows Vista na toleo la baadaye, funguo za **Run** na **RunOnce** hazizalishwi kiotomatiki. Kuingizwa katika funguo hizi kunaweza kuanzisha moja kwa moja programu au kuziweka kama utegemezi. Kwa mfano, ili kupakia faili ya DLL wakati wa kuingia, mtu anaweza kutumia funguo ya registry ya **RunOnceEx** pamoja na funguo ya "Depend". Hii inaonyeshwa kwa kuongeza kuingizwa kwa registry ili kutekeleza "C:\temp\evil.dll" wakati wa kuanzishwa kwa mfumo:
 ```
 reg add HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnceEx\\0001\\Depend /v 1 /d "C:\\temp\\evil.dll"
 ```
@@ -146,17 +147,17 @@ Get-ItemProperty -Path 'Registry::HKLM\Software\Wow6432Node\Microsoft\Windows\Ru
 Get-ItemProperty -Path 'Registry::HKCU\Software\Microsoft\Windows\RunOnceEx'
 Get-ItemProperty -Path 'Registry::HKCU\Software\Wow6432Node\Microsoft\Windows\RunOnceEx'
 ```
-### Startup Path
+### Njia ya Kuanzisha
 
 - `HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders`
 - `HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders`
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders`
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders`
 
-Mifano ya njia iliyo katika folda ya **Startup** itasababisha huduma au programu kuanzishwa wakati wa kuingia kwa mtumiaji au upya wa mfumo. Mahali pa folda ya **Startup** lin defined katika rejista kwa ajili ya **Local Machine** na **Current User**. Hii inamaanisha kwamba kila kifupisho kilichoongezwa kwenye maeneo haya maalum ya **Startup** kitahakikisha huduma au programu iliyounganishwa inaanza baada ya mchakato wa kuingia au upya, na kufanya kuwa njia rahisi ya kupanga programu kuendesha kiotomatiki.
+Viungo vilivyowekwa katika folda ya **Kuanzisha** vitasababisha huduma au programu kuanzishwa wakati wa kuingia kwa mtumiaji au upya wa mfumo. Mahali pa folda ya **Kuanzisha** lin defined katika rejista kwa mipangilio ya **Mashine ya Mitaa** na **Mtumiaji wa Sasa**. Hii inamaanisha kwamba kiungo chochote kilichoongezwa kwenye maeneo haya maalum ya **Kuanzisha** kitahakikisha huduma au programu iliyounganishwa inaanza baada ya mchakato wa kuingia au upya, na kufanya kuwa njia rahisi ya kupanga programu kuendesha kiotomatiki.
 
 > [!TIP]
-> Ikiwa unaweza kubadilisha chochote \[User] Shell Folder chini ya **HKLM**, utaweza kuielekeza kwenye folda inayodhibitiwa na wewe na kuweka backdoor ambayo itatekelezwa wakati wowote mtumiaji anapoingia kwenye mfumo ikipandisha haki.
+> Ikiwa unaweza kubadilisha yoyote ya \[User] Shell Folder chini ya **HKLM**, utaweza kuielekeza kwenye folda inayodhibitiwa na wewe na kuweka backdoor itakayotekelezwa wakati wowote mtumiaji anapoingia kwenye mfumo ikipandisha haki.
 ```bash
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders" /v "Common Startup"
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" /v "Common Startup"
@@ -172,7 +173,7 @@ Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion
 
 `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon`
 
-Kawaida, ufunguo wa **Userinit** umewekwa kwa **userinit.exe**. Hata hivyo, ikiwa ufunguo huu umebadilishwa, executable iliyoainishwa pia itazinduliwa na **Winlogon** wakati wa kuingia kwa mtumiaji. Vivyo hivyo, ufunguo wa **Shell** unakusudia kuelekeza kwa **explorer.exe**, ambayo ni shell ya kawaida kwa Windows.
+Kawaida, ufunguo wa **Userinit** umewekwa kwenye **userinit.exe**. Hata hivyo, ikiwa ufunguo huu umebadilishwa, executable iliyoainishwa pia itazinduliwa na **Winlogon** wakati wa kuingia kwa mtumiaji. Vivyo hivyo, ufunguo wa **Shell** unakusudia kuelekeza kwenye **explorer.exe**, ambayo ni shell ya kawaida kwa Windows.
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "Userinit"
 reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "Shell"
@@ -180,7 +181,7 @@ Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVers
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon' -Name "Shell"
 ```
 > [!TIP]
-> Ikiwa unaweza kubadilisha thamani ya registry au binary, utaweza kuongeza mamlaka.
+> Ikiwa unaweza kubadilisha thamani ya registry au binary utaweza kuongeza mamlaka.
 
 ### Sera za Mipangilio
 
@@ -221,21 +222,21 @@ Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Co
 
 Active Setup ni kipengele katika Windows ambacho **kinanzishwa kabla ya mazingira ya desktop kupakiwa kikamilifu**. Kinapa kipaumbele utekelezaji wa amri fulani, ambazo lazima zikamilike kabla ya kuendelea na kuingia kwa mtumiaji. Mchakato huu unafanyika hata kabla ya kuanzishwa kwa entries nyingine za kuanzisha, kama zile katika sehemu za Run au RunOnce za rejista.
 
-Active Setup inasimamiwa kupitia funguo za rejista zifuatazo:
+Active Setup inasimamiwa kupitia funguo zifuatazo za rejista:
 
 - `HKLM\SOFTWARE\Microsoft\Active Setup\Installed Components`
 - `HKLM\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components`
 - `HKCU\SOFTWARE\Microsoft\Active Setup\Installed Components`
 - `HKCU\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components`
 
-Ndani ya funguo hizi, kuna funguo ndogo mbalimbali, kila moja ikihusiana na kipengele maalum. Thamani za funguo zinazovutia hasa ni pamoja na:
+Ndani ya funguo hizi, kuna funguo ndogo mbalimbali, kila moja ikihusiana na kipengele maalum. Thamani za funguo ambazo zina umuhimu maalum ni pamoja na:
 
 - **IsInstalled:**
 - `0` inaonyesha amri ya kipengele haitatekelezwa.
 - `1` inamaanisha amri itatekelezwa mara moja kwa kila mtumiaji, ambayo ni tabia ya kawaida ikiwa thamani ya `IsInstalled` haipo.
 - **StubPath:** Inaelezea amri itakayotekelezwa na Active Setup. Inaweza kuwa amri yoyote halali ya mstari, kama kuanzisha `notepad`.
 
-**Mawazo ya Usalama:**
+**Mawasiliano ya Usalama:**
 
 - Kubadilisha au kuandika kwenye funguo ambapo **`IsInstalled`** imewekwa kuwa `"1"` na **`StubPath`** maalum kunaweza kusababisha utekelezaji wa amri zisizoidhinishwa, huenda kwa ajili ya kupandisha hadhi.
 - Kubadilisha faili ya binary inayorejelewa katika thamani yoyote ya **`StubPath`** pia kunaweza kufanikisha kupandisha hadhi, ikiwa na ruhusa za kutosha.
@@ -251,7 +252,7 @@ reg query "HKCU\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components
 
 ### Overview of Browser Helper Objects (BHOs)
 
-Browser Helper Objects (BHOs) ni moduli za DLL ambazo zinaongeza vipengele vya ziada kwa Internet Explorer ya Microsoft. Zinapakia kwenye Internet Explorer na Windows Explorer kila wakati zinapoanzishwa. Hata hivyo, utekelezaji wao unaweza kuzuiwa kwa kuweka ufunguo wa **NoExplorer** kuwa 1, kuzuia kutoka kupakia na mifano ya Windows Explorer.
+Browser Helper Objects (BHOs) ni moduli za DLL ambazo zinaongeza vipengele vya ziada kwa Internet Explorer ya Microsoft. Zinapakia kwenye Internet Explorer na Windows Explorer kila wakati wa kuanzisha. Hata hivyo, utekelezaji wao unaweza kuzuiwa kwa kuweka ufunguo wa **NoExplorer** kuwa 1, kuzuia kutoka kupakia na matukio ya Windows Explorer.
 
 BHOs zinaendana na Windows 10 kupitia Internet Explorer 11 lakini hazipati msaada katika Microsoft Edge, kivinjari cha chaguo-msingi katika matoleo mapya ya Windows.
 
@@ -262,7 +263,7 @@ Ili kuchunguza BHOs zilizosajiliwa kwenye mfumo, unaweza kukagua funguo zifuataz
 
 Kila BHO inawakilishwa na **CLSID** yake katika rejista, ikihudumu kama kitambulisho cha kipekee. Taarifa za kina kuhusu kila CLSID zinaweza kupatikana chini ya `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`.
 
-Kwa kuuliza BHOs katika rejista, amri hizi zinaweza kutumika:
+Ili kuuliza BHOs katika rejista, amri hizi zinaweza kutumika:
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects" /s
 reg query "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects" /s
@@ -301,7 +302,7 @@ HKLM\Software\Microsoft\Wow6432Node\Windows NT\CurrentVersion\Image File Executi
 ```
 ## SysInternals
 
-Kumbuka kwamba tovuti zote ambapo unaweza kupata autoruns **zimeshachunguzwa na** [**winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe). Hata hivyo, kwa **orodha kamili zaidi ya** faili zinazotekelezwa kiotomatiki unaweza kutumia [autoruns](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns) kutoka sysinternals:
+Kumbuka kwamba tovuti zote ambapo unaweza kupata autoruns **zimeshachunguzwa na**[ **winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe). Hata hivyo, kwa **orodha kamili zaidi ya** faili zinazotekelezwa kiotomatiki unaweza kutumia [autoruns ](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns) kutoka sysinternals:
 ```
 autorunsc.exe -m -nobanner -a * -ct /accepteula
 ```
