@@ -2,16 +2,16 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Erste Informationssammlung
+## Initial Information Gathering
 
-### Grundlegende Informationen
+### Basic Information
 
-Zunächst wird empfohlen, ein **USB** mit **gut bekannten Binärdateien und Bibliotheken** darauf zu haben (Sie können einfach Ubuntu herunterladen und die Ordner _/bin_, _/sbin_, _/lib,_ und _/lib64_ kopieren), dann das USB-Laufwerk einbinden und die Umgebungsvariablen so ändern, dass diese Binärdateien verwendet werden:
+Zunächst wird empfohlen, ein **USB** mit **gut bekannten Binaries und Bibliotheken darauf** zu haben (du kannst einfach Ubuntu herunterladen und die Ordner _/bin_, _/sbin_, _/lib,_ und _/lib64_ kopieren), dann das USB mounten und die Umgebungsvariablen so ändern, dass diese Binaries verwendet werden:
 ```bash
 export PATH=/mnt/usb/bin:/mnt/usb/sbin
 export LD_LIBRARY_PATH=/mnt/usb/lib:/mnt/usb/lib64
 ```
-Sobald Sie das System so konfiguriert haben, dass es gute und bekannte Binaries verwendet, können Sie **einige grundlegende Informationen extrahieren**:
+Sobald Sie das System so konfiguriert haben, dass es gute und bekannte Binärdateien verwendet, können Sie **einige grundlegende Informationen extrahieren**:
 ```bash
 date #Date and time (Clock may be skewed, Might be at a different timezone)
 uname -a #OS info
@@ -31,44 +31,44 @@ find /directory -type f -mtime -1 -print #Find modified files during the last mi
 ```
 #### Verdächtige Informationen
 
-Während Sie die grundlegenden Informationen abrufen, sollten Sie nach seltsamen Dingen suchen wie:
+Während Sie die grundlegenden Informationen sammeln, sollten Sie nach seltsamen Dingen suchen, wie zum Beispiel:
 
-- **Root-Prozesse** laufen normalerweise mit niedrigen PIDs, also wenn Sie einen Root-Prozess mit einer großen PID finden, können Sie Verdacht schöpfen
-- Überprüfen Sie die **registrierten Logins** von Benutzern ohne eine Shell in `/etc/passwd`
-- Überprüfen Sie auf **Passworthashes** in `/etc/shadow` für Benutzer ohne eine Shell
+- **Root-Prozesse** laufen normalerweise mit niedrigen PIDs, also wenn Sie einen Root-Prozess mit einer hohen PID finden, könnten Sie Verdacht schöpfen.
+- Überprüfen Sie die **registrierten Logins** von Benutzern ohne eine Shell in `/etc/passwd`.
+- Überprüfen Sie auf **Passworthashes** in `/etc/shadow` für Benutzer ohne eine Shell.
 
 ### Speicherabbild
 
 Um den Speicher des laufenden Systems zu erhalten, wird empfohlen, [**LiME**](https://github.com/504ensicsLabs/LiME) zu verwenden.\
 Um es zu **kompilieren**, müssen Sie den **gleichen Kernel** verwenden, den die Zielmaschine verwendet.
 
-> [!NOTE]
-> Denken Sie daran, dass Sie **LiME oder irgendetwas anderes** nicht auf der Zielmaschine installieren können, da dies mehrere Änderungen daran vornehmen würde
+> [!TIP]
+> Denken Sie daran, dass Sie **LiME oder irgendetwas anderes** nicht auf der Zielmaschine installieren können, da dies mehrere Änderungen daran vornehmen würde.
 
 Wenn Sie also eine identische Version von Ubuntu haben, können Sie `apt-get install lime-forensics-dkms` verwenden.\
-In anderen Fällen müssen Sie [**LiME**](https://github.com/504ensicsLabs/LiME) von GitHub herunterladen und es mit den richtigen Kernel-Headern kompilieren. Um die **genauen Kernel-Header** der Zielmaschine zu erhalten, können Sie einfach das **Verzeichnis** `/lib/modules/<kernel version>` auf Ihre Maschine kopieren und dann LiME mit ihnen **kompilieren**:
+In anderen Fällen müssen Sie [**LiME**](https://github.com/504ensicsLabs/LiME) von GitHub herunterladen und es mit den richtigen Kernel-Headern kompilieren. Um die **genauen Kernel-Header** der Zielmaschine zu erhalten, können Sie einfach das Verzeichnis `/lib/modules/<kernel version>` auf Ihre Maschine kopieren und dann LiME mit diesen kompilieren:
 ```bash
 make -C /lib/modules/<kernel version>/build M=$PWD
 sudo insmod lime.ko "path=/home/sansforensics/Desktop/mem_dump.bin format=lime"
 ```
 LiME unterstützt 3 **Formate**:
 
-- Raw (jeder Abschnitt zusammengefügt)
+- Raw (jeder Abschnitt wird zusammengefügt)
 - Padded (gleich wie raw, aber mit Nullen in den rechten Bits)
 - Lime (empfohlenes Format mit Metadaten)
 
-LiME kann auch verwendet werden, um den **Dump über das Netzwerk zu senden**, anstatt ihn auf dem System zu speichern, indem man etwas wie: `path=tcp:4444` verwendet.
+LiME kann auch verwendet werden, um den Dump über das **Netzwerk zu senden**, anstatt ihn auf dem System zu speichern, indem man etwas wie `path=tcp:4444` verwendet.
 
 ### Festplattenabbildung
 
 #### Herunterfahren
 
 Zunächst müssen Sie das **System herunterfahren**. Dies ist nicht immer eine Option, da das System manchmal ein Produktionsserver ist, den sich das Unternehmen nicht leisten kann, herunterzufahren.\
-Es gibt **2 Möglichkeiten**, das System herunterzufahren: ein **normales Herunterfahren** und ein **"Stecker ziehen" Herunterfahren**. Das erste ermöglicht es den **Prozessen, wie gewohnt zu beenden** und das **Dateisystem** zu **synchronisieren**, aber es ermöglicht auch, dass mögliche **Malware** **Beweise zerstört**. Der "Stecker ziehen"-Ansatz kann **einige Informationsverluste** mit sich bringen (nicht viele Informationen werden verloren gehen, da wir bereits ein Abbild des Speichers erstellt haben) und die **Malware wird keine Gelegenheit haben**, etwas dagegen zu unternehmen. Daher, wenn Sie **verdächtigen**, dass es **Malware** geben könnte, führen Sie einfach den **`sync`** **Befehl** auf dem System aus und ziehen Sie den Stecker.
+Es gibt **2 Möglichkeiten**, das System herunterzufahren: ein **normales Herunterfahren** und ein **"Stecker ziehen" Herunterfahren**. Das erste ermöglicht es den **Prozessen, wie gewohnt zu beenden** und das **Dateisystem** zu **synchronisieren**, aber es könnte auch dem möglichen **Malware** erlauben, **Beweise zu vernichten**. Der "Stecker ziehen"-Ansatz kann **einige Informationsverluste** mit sich bringen (nicht viele Informationen werden verloren gehen, da wir bereits ein Abbild des Speichers gemacht haben) und die **Malware wird keine Gelegenheit haben**, etwas dagegen zu unternehmen. Daher, wenn Sie **vermuten**, dass es **Malware** geben könnte, führen Sie einfach den **`sync`** **Befehl** auf dem System aus und ziehen Sie den Stecker.
 
 #### Erstellen eines Abbilds der Festplatte
 
-Es ist wichtig zu beachten, dass Sie **bevor Sie Ihren Computer mit etwas, das mit dem Fall zu tun hat, verbinden**, sicherstellen müssen, dass er als **schreibgeschützt** **gemountet** wird, um zu vermeiden, dass Informationen verändert werden.
+Es ist wichtig zu beachten, dass **bevor Sie Ihren Computer mit etwas in Verbindung bringen, das mit dem Fall zu tun hat**, Sie sicherstellen müssen, dass er als **nur lesen** gemountet wird, um zu vermeiden, dass Informationen verändert werden.
 ```bash
 #Create a raw copy of the disk
 dd if=<subject device> of=<image file> bs=512
@@ -79,7 +79,7 @@ dcfldd if=/dev/sdc of=/media/usb/pc.image hash=sha256 hashwindow=1M hashlog=/med
 ```
 ### Disk Image Voranalyse
 
-Erstellen eines Disk-Images ohne weitere Daten.
+Erstellung eines Abbilds einer Festplatte ohne weitere Daten.
 ```bash
 #Find out if it's a disk image using "file" command
 file disk.img
@@ -196,6 +196,32 @@ cat /var/spool/cron/crontabs/*  \
 #MacOS
 ls -l /usr/lib/cron/tabs/ /Library/LaunchAgents/ /Library/LaunchDaemons/ ~/Library/LaunchAgents/
 ```
+#### Hunt: Missbrauch von Cron/Anacron über 0anacron und verdächtige Stubs
+Angreifer bearbeiten häufig den 0anacron-Stubs, der in jedem /etc/cron.*/-Verzeichnis vorhanden ist, um eine periodische Ausführung sicherzustellen.
+```bash
+# List 0anacron files and their timestamps/sizes
+for d in /etc/cron.*; do [ -f "$d/0anacron" ] && stat -c '%n %y %s' "$d/0anacron"; done
+
+# Look for obvious execution of shells or downloaders embedded in cron stubs
+grep -R --line-number -E 'curl|wget|/bin/sh|python|bash -c' /etc/cron.*/* 2>/dev/null
+```
+#### Hunt: SSH-Härtung Rollback und Backdoor-Shells
+Änderungen an sshd_config und Systemkonto-Shells sind häufige Maßnahmen nach der Ausnutzung, um den Zugriff zu erhalten.
+```bash
+# Root login enablement (flag "yes" or lax values)
+grep -E '^\s*PermitRootLogin' /etc/ssh/sshd_config
+
+# System accounts with interactive shells (e.g., games → /bin/sh)
+awk -F: '($7 ~ /bin\/(sh|bash|zsh)/ && $1 ~ /^(games|lp|sync|shutdown|halt|mail|operator)$/) {print}' /etc/passwd
+```
+#### Hunt: Cloud C2 Marker (Dropbox/Cloudflare Tunnel)
+- Dropbox API-Beacons verwenden typischerweise api.dropboxapi.com oder content.dropboxapi.com über HTTPS mit Authorization: Bearer-Token.
+- Suche in Proxy/Zeek/NetFlow nach unerwartetem Dropbox-Egress von Servern.
+- Cloudflare Tunnel (`cloudflared`) bietet Backup-C2 über ausgehendes 443.
+```bash
+ps aux | grep -E '[c]loudflared|trycloudflare'
+systemctl list-units | grep -i cloudflared
+```
 ### Dienste
 
 Pfad, wo Malware als Dienst installiert werden könnte:
@@ -212,7 +238,7 @@ Pfad, wo Malware als Dienst installiert werden könnte:
 
 ### Kernel-Module
 
-Linux-Kernel-Module, die oft von Malware als Rootkit-Komponenten verwendet werden, werden beim Systemstart geladen. Die für diese Module kritischen Verzeichnisse und Dateien umfassen:
+Linux-Kernel-Module, die oft von Malware als Rootkit-Komponenten verwendet werden, werden beim Systemstart geladen. Die Verzeichnisse und Dateien, die für diese Module entscheidend sind, umfassen:
 
 - **/lib/modules/$(uname -r)**: Enthält Module für die laufende Kernel-Version.
 - **/etc/modprobe.d**: Enthält Konfigurationsdateien zur Steuerung des Modul-Ladens.
@@ -228,7 +254,7 @@ Linux verwendet verschiedene Dateien, um Programme automatisch beim Benutzer-Log
 
 ## Protokolle überprüfen
 
-Linux-Systeme verfolgen Benutzeraktivitäten und Systemereignisse durch verschiedene Protokolldateien. Diese Protokolle sind entscheidend für die Identifizierung von unbefugtem Zugriff, Malware-Infektionen und anderen Sicherheitsvorfällen. Wichtige Protokolldateien umfassen:
+Linux-Systeme verfolgen Benutzeraktivitäten und Systemereignisse durch verschiedene Protokolldateien. Diese Protokolle sind entscheidend für die Identifizierung unbefugter Zugriffe, Malware-Infektionen und anderer Sicherheitsvorfälle. Wichtige Protokolldateien umfassen:
 
 - **/var/log/syslog** (Debian) oder **/var/log/messages** (RedHat): Erfassen systemweite Nachrichten und Aktivitäten.
 - **/var/log/auth.log** (Debian) oder **/var/log/secure** (RedHat): Protokollieren Authentifizierungsversuche, erfolgreiche und fehlgeschlagene Anmeldungen.
@@ -237,7 +263,7 @@ Linux-Systeme verfolgen Benutzeraktivitäten und Systemereignisse durch verschie
 - **/var/log/maillog** oder **/var/log/mail.log**: Protokolliert Aktivitäten des E-Mail-Servers, nützlich zur Verfolgung von E-Mail-bezogenen Diensten.
 - **/var/log/kern.log**: Speichert Kernel-Nachrichten, einschließlich Fehlern und Warnungen.
 - **/var/log/dmesg**: Enthält Nachrichten von Gerätetreibern.
-- **/var/log/faillog**: Protokolliert fehlgeschlagene Anmeldeversuche, was bei der Untersuchung von Sicherheitsverletzungen hilft.
+- **/var/log/faillog**: Protokolliert fehlgeschlagene Anmeldeversuche, was bei Sicherheitsuntersuchungen hilft.
 - **/var/log/cron**: Protokolliert die Ausführung von Cron-Jobs.
 - **/var/log/daemon.log**: Verfolgt Aktivitäten von Hintergrunddiensten.
 - **/var/log/btmp**: Dokumentiert fehlgeschlagene Anmeldeversuche.
@@ -246,10 +272,10 @@ Linux-Systeme verfolgen Benutzeraktivitäten und Systemereignisse durch verschie
 - **/var/log/xferlog**: Protokolliert FTP-Dateiübertragungen.
 - **/var/log/**: Überprüfen Sie hier immer auf unerwartete Protokolle.
 
-> [!NOTE]
-> Linux-Systemprotokolle und Auditsysteme können bei einem Eindringen oder Malware-Vorfall deaktiviert oder gelöscht werden. Da Protokolle auf Linux-Systemen im Allgemeinen einige der nützlichsten Informationen über böswillige Aktivitäten enthalten, löschen Eindringlinge sie routinemäßig. Daher ist es wichtig, beim Überprüfen der verfügbaren Protokolldateien nach Lücken oder nicht in der Reihenfolge befindlichen Einträgen zu suchen, die auf Löschungen oder Manipulationen hinweisen könnten.
+> [!TIP]
+> Linux-Systemprotokolle und Auditsysteme können in einem Eindringungs- oder Malware-Vorfall deaktiviert oder gelöscht werden. Da Protokolle auf Linux-Systemen im Allgemeinen einige der nützlichsten Informationen über böswillige Aktivitäten enthalten, löschen Eindringlinge sie routinemäßig. Daher ist es wichtig, beim Überprüfen der verfügbaren Protokolldateien nach Lücken oder nicht in der Reihenfolge befindlichen Einträgen zu suchen, die auf Löschung oder Manipulation hinweisen könnten.
 
-**Linux führt eine Befehlsverlaufshistorie für jeden Benutzer**, die gespeichert wird in:
+**Linux führt eine Befehlsverlauf für jeden Benutzer**:
 
 - \~/.bash_history
 - \~/.zsh_history
@@ -261,22 +287,22 @@ Darüber hinaus bietet der Befehl `last -Faiwx` eine Liste der Benutzeranmeldung
 
 Überprüfen Sie Dateien, die zusätzliche Berechtigungen gewähren können:
 
-- Überprüfen Sie `/etc/sudoers` auf unvorhergesehene Benutzerberechtigungen, die möglicherweise gewährt wurden.
-- Überprüfen Sie `/etc/sudoers.d/` auf unvorhergesehene Benutzerberechtigungen, die möglicherweise gewährt wurden.
+- Überprüfen Sie `/etc/sudoers` auf unerwartete Benutzerberechtigungen, die möglicherweise gewährt wurden.
+- Überprüfen Sie `/etc/sudoers.d/` auf unerwartete Benutzerberechtigungen, die möglicherweise gewährt wurden.
 - Untersuchen Sie `/etc/groups`, um ungewöhnliche Gruppenmitgliedschaften oder Berechtigungen zu identifizieren.
 - Untersuchen Sie `/etc/passwd`, um ungewöhnliche Gruppenmitgliedschaften oder Berechtigungen zu identifizieren.
 
 Einige Apps generieren auch ihre eigenen Protokolle:
 
 - **SSH**: Überprüfen Sie _\~/.ssh/authorized_keys_ und _\~/.ssh/known_hosts_ auf unbefugte Remote-Verbindungen.
-- **Gnome Desktop**: Überprüfen Sie _\~/.recently-used.xbel_ auf kürzlich verwendete Dateien über Gnome-Anwendungen.
+- **Gnome Desktop**: Überprüfen Sie _\~/.recently-used.xbel_ auf kürzlich zugegriffene Dateien über Gnome-Anwendungen.
 - **Firefox/Chrome**: Überprüfen Sie den Browserverlauf und Downloads in _\~/.mozilla/firefox_ oder _\~/.config/google-chrome_ auf verdächtige Aktivitäten.
 - **VIM**: Überprüfen Sie _\~/.viminfo_ auf Nutzungsdetails, wie z.B. aufgerufene Dateipfade und Suchverlauf.
-- **Open Office**: Überprüfen Sie den Zugriff auf kürzlich verwendete Dokumente, die auf kompromittierte Dateien hinweisen könnten.
-- **FTP/SFTP**: Überprüfen Sie Protokolle in _\~/.ftp_history_ oder _\~/.sftp_history_ auf Dateiübertragungen, die möglicherweise unbefugt sind.
+- **Open Office**: Überprüfen Sie auf den Zugriff auf kürzlich verwendete Dokumente, die auf kompromittierte Dateien hinweisen könnten.
+- **FTP/SFTP**: Überprüfen Sie Protokolle in _\~/.ftp_history_ oder _\~/.sftp_history_ auf möglicherweise unbefugte Dateiübertragungen.
 - **MySQL**: Untersuchen Sie _\~/.mysql_history_ auf ausgeführte MySQL-Abfragen, die möglicherweise unbefugte Datenbankaktivitäten offenbaren.
 - **Less**: Analysieren Sie _\~/.lesshst_ auf Nutzungshistorie, einschließlich angezeigter Dateien und ausgeführter Befehle.
-- **Git**: Überprüfen Sie _\~/.gitconfig_ und Projekt _.git/logs_ auf Änderungen an Repositories.
+- **Git**: Überprüfen Sie _\~/.gitconfig_ und Projekt_.git/logs_ auf Änderungen an Repositories.
 
 ### USB-Protokolle
 
@@ -316,11 +342,11 @@ Um diesen anti-forensischen Methoden entgegenzuwirken, ist es wichtig:
 - **Eine gründliche Zeitlinienanalyse durchzuführen** mit Tools wie **Autopsy** zur Visualisierung von Ereigniszeitlinien oder **Sleuth Kit's** `mactime` für detaillierte Zeitliniendaten.
 - **Unerwartete Skripte** im $PATH des Systems zu untersuchen, die Shell- oder PHP-Skripte enthalten könnten, die von Angreifern verwendet werden.
 - **`/dev` auf atypische Dateien zu überprüfen**, da es traditionell spezielle Dateien enthält, aber möglicherweise malwarebezogene Dateien beherbergt.
-- **Nach versteckten Dateien oder Verzeichnissen** mit Namen wie ".. " (Punkt Punkt Leerzeichen) oder "..^G" (Punkt Punkt Steuerung-G) zu suchen, die bösartigen Inhalt verbergen könnten.
+- **Nach versteckten Dateien oder Verzeichnissen** mit Namen wie ".. " (Punkt Punkt Leerzeichen) oder "..^G" (Punkt Punkt Steuerung-G) zu suchen, die bösartige Inhalte verbergen könnten.
 - **Setuid-Root-Dateien zu identifizieren** mit dem Befehl: `find / -user root -perm -04000 -print` Dies findet Dateien mit erhöhten Berechtigungen, die von Angreifern missbraucht werden könnten.
 - **Löschzeitstempel** in Inode-Tabellen zu überprüfen, um massenhafte Dateilöschungen zu erkennen, die möglicherweise auf die Anwesenheit von Rootkits oder Trojanern hinweisen.
 - **Konsekutive Inodes** auf nahegelegene bösartige Dateien zu überprüfen, nachdem eine identifiziert wurde, da sie möglicherweise zusammen platziert wurden.
-- **Häufige Binärverzeichnisse** (_/bin_, _/sbin_) auf kürzlich geänderte Dateien zu überprüfen, da diese möglicherweise von Malware verändert wurden.
+- **Häufige Binärverzeichnisse** (_/bin_, _/sbin_) auf kürzlich geänderte Dateien zu überprüfen, da diese von Malware verändert worden sein könnten.
 ````bash
 # List recent files in a directory:
 ls -laR --sort=time /bin```
@@ -328,10 +354,10 @@ ls -laR --sort=time /bin```
 # Sort files in a directory by inode:
 ls -lai /bin | sort -n```
 ````
-> [!NOTE]
+> [!TIP]
 > Beachten Sie, dass ein **Angreifer** die **Zeit** **ändern** kann, um **Dateien legitim erscheinen** zu lassen, aber er **kann** die **inode** **nicht** ändern. Wenn Sie feststellen, dass eine **Datei** angibt, dass sie zur **gleichen Zeit** wie die anderen Dateien im selben Ordner erstellt und geändert wurde, aber die **inode** **unerwartet größer** ist, dann wurden die **Zeitstempel dieser Datei geändert**.
 
-## Vergleichen von Dateien verschiedener Dateisystemversionen
+## Vergleich von Dateien verschiedener Dateisystemversionen
 
 ### Zusammenfassung des Dateisystemversionsvergleichs
 
@@ -341,7 +367,7 @@ Um Dateisystemversionen zu vergleichen und Änderungen zu identifizieren, verwen
 ```bash
 git diff --no-index --diff-filter=A path/to/old_version/ path/to/new_version/
 ```
-- **Für modifizierte Inhalte**: Änderungen auflisten, während spezifische Zeilen ignoriert werden:
+- **Für modifizierte Inhalte**, listen Sie Änderungen auf, während Sie spezifische Zeilen ignorieren:
 ```bash
 git diff --no-index --diff-filter=M path/to/old_version/ path/to/new_version/ | grep -E "^\+" | grep -v "Installed-Time"
 ```
@@ -366,5 +392,7 @@ git diff --no-index --diff-filter=D path/to/old_version/ path/to/new_version/
 - [https://www.plesk.com/blog/featured/linux-logs-explained/](https://www.plesk.com/blog/featured/linux-logs-explained/)
 - [https://git-scm.com/docs/git-diff#Documentation/git-diff.txt---diff-filterACDMRTUXB82308203](https://git-scm.com/docs/git-diff#Documentation/git-diff.txt---diff-filterACDMRTUXB82308203)
 - **Buch: Malware Forensics Field Guide for Linux Systems: Digital Forensics Field Guides**
+
+- [Red Canary – Patching for persistence: How DripDropper Linux malware moves through the cloud](https://redcanary.com/blog/threat-intelligence/dripdropper-linux-malware/)
 
 {{#include ../../banners/hacktricks-training.md}}
