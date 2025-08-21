@@ -42,7 +42,7 @@ Mientras obtienes la información básica, deberías verificar cosas extrañas c
 Para obtener la memoria del sistema en ejecución, se recomienda usar [**LiME**](https://github.com/504ensicsLabs/LiME).\
 Para **compilarlo**, necesitas usar el **mismo kernel** que está utilizando la máquina víctima.
 
-> [!NOTE]
+> [!TIP]
 > Recuerda que **no puedes instalar LiME ni nada más** en la máquina víctima, ya que hará varios cambios en ella.
 
 Así que, si tienes una versión idéntica de Ubuntu, puedes usar `apt-get install lime-forensics-dkms`\
@@ -64,7 +64,7 @@ LiME también se puede usar para **enviar el volcado a través de la red** en lu
 #### Apagado
 
 Primero que nada, necesitarás **apagar el sistema**. Esto no siempre es una opción, ya que a veces el sistema será un servidor de producción que la empresa no puede permitirse apagar.\
-Hay **2 maneras** de apagar el sistema, un **apagado normal** y un **apagado de "desenchufar"**. El primero permitirá que los **procesos se terminen como de costumbre** y que el **sistema de archivos** esté **sincronizado**, pero también permitirá que el posible **malware** **destruya evidencia**. El enfoque de "desenchufar" puede conllevar **alguna pérdida de información** (no se perderá mucha información ya que ya tomamos una imagen de la memoria) y el **malware no tendrá ninguna oportunidad** de hacer algo al respecto. Por lo tanto, si **sospechas** que puede haber un **malware**, simplemente ejecuta el **comando** **`sync`** en el sistema y desenchufa.
+Hay **2 formas** de apagar el sistema, un **apagado normal** y un **apagado de "desconectar el enchufe"**. El primero permitirá que los **procesos se terminen como de costumbre** y que el **sistema de archivos** esté **sincronizado**, pero también permitirá que el posible **malware** **destruya evidencia**. El enfoque de "desconectar el enchufe" puede conllevar **alguna pérdida de información** (no se perderá mucha información ya que ya tomamos una imagen de la memoria) y el **malware no tendrá ninguna oportunidad** de hacer algo al respecto. Por lo tanto, si **sospechas** que puede haber un **malware**, simplemente ejecuta el **comando** **`sync`** en el sistema y desconecta el enchufe.
 
 #### Tomando una imagen del disco
 
@@ -132,18 +132,18 @@ r/r 16: secret.txt
 icat -i raw -f ext4 disk.img 16
 ThisisTheMasterSecret
 ```
-## Buscar Malware conocido
+## Buscar malware conocido
 
 ### Archivos del sistema modificados
 
 Linux ofrece herramientas para garantizar la integridad de los componentes del sistema, crucial para detectar archivos potencialmente problemáticos.
 
-- **Sistemas basados en RedHat**: Use `rpm -Va` para una verificación completa.
+- **Sistemas basados en RedHat**: Usa `rpm -Va` para una verificación completa.
 - **Sistemas basados en Debian**: `dpkg --verify` para una verificación inicial, seguido de `debsums | grep -v "OK$"` (después de instalar `debsums` con `apt-get install debsums`) para identificar cualquier problema.
 
 ### Detectores de Malware/Rootkit
 
-Lea la siguiente página para aprender sobre herramientas que pueden ser útiles para encontrar malware:
+Lee la siguiente página para aprender sobre herramientas que pueden ser útiles para encontrar malware:
 
 {{#ref}}
 malware-analysis.md
@@ -151,12 +151,12 @@ malware-analysis.md
 
 ## Buscar programas instalados
 
-Para buscar de manera efectiva programas instalados en sistemas Debian y RedHat, considere aprovechar los registros del sistema y bases de datos junto con verificaciones manuales en directorios comunes.
+Para buscar de manera efectiva programas instalados en sistemas Debian y RedHat, considera aprovechar los registros del sistema y bases de datos junto con verificaciones manuales en directorios comunes.
 
-- Para Debian, inspeccione _**`/var/lib/dpkg/status`**_ y _**`/var/log/dpkg.log`**_ para obtener detalles sobre las instalaciones de paquetes, utilizando `grep` para filtrar información específica.
+- Para Debian, inspecciona _**`/var/lib/dpkg/status`**_ y _**`/var/log/dpkg.log`**_ para obtener detalles sobre las instalaciones de paquetes, utilizando `grep` para filtrar información específica.
 - Los usuarios de RedHat pueden consultar la base de datos RPM con `rpm -qa --root=/mntpath/var/lib/rpm` para listar los paquetes instalados.
 
-Para descubrir software instalado manualmente o fuera de estos gestores de paquetes, explore directorios como _**`/usr/local`**_, _**`/opt`**_, _**`/usr/sbin`**_, _**`/usr/bin`**_, _**`/bin`**_ y _**`/sbin`**_. Combine listados de directorios con comandos específicos del sistema para identificar ejecutables no asociados con paquetes conocidos, mejorando su búsqueda de todos los programas instalados.
+Para descubrir software instalado manualmente o fuera de estos gestores de paquetes, explora directorios como _**`/usr/local`**_, _**`/opt`**_, _**`/usr/sbin`**_, _**`/usr/bin`**_, _**`/bin`**_ y _**`/sbin`**_. Combina listados de directorios con comandos específicos del sistema para identificar ejecutables no asociados con paquetes conocidos, mejorando tu búsqueda de todos los programas instalados.
 ```bash
 # Debian package and log details
 cat /var/lib/dpkg/status | grep -E "Package:|Status:"
@@ -172,9 +172,9 @@ find /sbin/ –exec rpm -qf {} \; | grep "is not"
 # Find exacuable files
 find / -type f -executable | grep <something>
 ```
-## Recuperar Binarios Ejecutables Borrados
+## Recuperar binarios en ejecución eliminados
 
-Imagina un proceso que se ejecutó desde /tmp/exec y luego fue borrado. Es posible extraerlo.
+Imagina un proceso que se ejecutó desde /tmp/exec y luego fue eliminado. Es posible extraerlo.
 ```bash
 cd /proc/3746/ #PID with the exec file deleted
 head -1 maps #Get address of the file. It was 08048000-08049000
@@ -196,16 +196,42 @@ cat /var/spool/cron/crontabs/*  \
 #MacOS
 ls -l /usr/lib/cron/tabs/ /Library/LaunchAgents/ /Library/LaunchDaemons/ ~/Library/LaunchAgents/
 ```
+#### Caza: abuso de Cron/Anacron a través de 0anacron y stubs sospechosos
+Los atacantes a menudo editan el stub 0anacron presente en cada directorio /etc/cron.*/ para asegurar la ejecución periódica.
+```bash
+# List 0anacron files and their timestamps/sizes
+for d in /etc/cron.*; do [ -f "$d/0anacron" ] && stat -c '%n %y %s' "$d/0anacron"; done
+
+# Look for obvious execution of shells or downloaders embedded in cron stubs
+grep -R --line-number -E 'curl|wget|/bin/sh|python|bash -c' /etc/cron.*/* 2>/dev/null
+```
+#### Hunt: Endurecimiento de SSH, retroceso y shells de puerta trasera
+Los cambios en sshd_config y en los shells de cuentas del sistema son comunes después de la explotación para preservar el acceso.
+```bash
+# Root login enablement (flag "yes" or lax values)
+grep -E '^\s*PermitRootLogin' /etc/ssh/sshd_config
+
+# System accounts with interactive shells (e.g., games → /bin/sh)
+awk -F: '($7 ~ /bin\/(sh|bash|zsh)/ && $1 ~ /^(games|lp|sync|shutdown|halt|mail|operator)$/) {print}' /etc/passwd
+```
+#### Hunt: Marcadores de C2 en la nube (Dropbox/Cloudflare Tunnel)
+- Las balizas de la API de Dropbox típicamente utilizan api.dropboxapi.com o content.dropboxapi.com a través de HTTPS con tokens de autorización: Bearer.
+- Busca en proxy/Zeek/NetFlow por egresos inesperados de Dropbox desde servidores.
+- Cloudflare Tunnel (`cloudflared`) proporciona C2 de respaldo a través de 443 saliente.
+```bash
+ps aux | grep -E '[c]loudflared|trycloudflare'
+systemctl list-units | grep -i cloudflared
+```
 ### Servicios
 
-Rutas donde un malware podría instalarse como un servicio:
+Rutas donde un malware podría ser instalado como un servicio:
 
 - **/etc/inittab**: Llama a scripts de inicialización como rc.sysinit, dirigiendo posteriormente a scripts de inicio.
 - **/etc/rc.d/** y **/etc/rc.boot/**: Contienen scripts para el inicio de servicios, siendo este último encontrado en versiones más antiguas de Linux.
 - **/etc/init.d/**: Usado en ciertas versiones de Linux como Debian para almacenar scripts de inicio.
 - Los servicios también pueden ser activados a través de **/etc/inetd.conf** o **/etc/xinetd/**, dependiendo de la variante de Linux.
 - **/etc/systemd/system**: Un directorio para scripts del gestor de sistema y servicios.
-- **/etc/systemd/system/multi-user.target.wants/**: Contiene enlaces a servicios que deben iniciarse en un nivel de ejecución multiusuario.
+- **/etc/systemd/system/multi-user.target.wants/**: Contiene enlaces a servicios que deben ser iniciados en un nivel de ejecución multiusuario.
 - **/usr/local/etc/rc.d/**: Para servicios personalizados o de terceros.
 - **\~/.config/autostart/**: Para aplicaciones de inicio automático específicas del usuario, que pueden ser un escondite para malware dirigido a usuarios.
 - **/lib/systemd/system/**: Archivos de unidad predeterminados a nivel de sistema proporcionados por paquetes instalados.
@@ -220,7 +246,7 @@ Los módulos del kernel de Linux, a menudo utilizados por malware como component
 
 ### Otras Ubicaciones de Autoinicio
 
-Linux emplea varios archivos para ejecutar automáticamente programas al iniciar sesión del usuario, potencialmente albergando malware:
+Linux emplea varios archivos para ejecutar automáticamente programas al iniciar sesión el usuario, potencialmente albergando malware:
 
 - **/etc/profile.d/**\*, **/etc/profile**, y **/etc/bash.bashrc**: Se ejecutan para cualquier inicio de sesión de usuario.
 - **\~/.bashrc**, **\~/.bash_profile**, **\~/.profile**, y **\~/.config/autostart**: Archivos específicos del usuario que se ejecutan al iniciar sesión.
@@ -246,8 +272,8 @@ Los sistemas Linux rastrean las actividades de los usuarios y los eventos del si
 - **/var/log/xferlog**: Registra transferencias de archivos FTP.
 - **/var/log/**: Siempre verifica si hay registros inesperados aquí.
 
-> [!NOTE]
-> Los registros del sistema Linux y los subsistemas de auditoría pueden estar deshabilitados o eliminados en un incidente de intrusión o malware. Debido a que los registros en los sistemas Linux generalmente contienen información muy útil sobre actividades maliciosas, los intrusos los eliminan rutinariamente. Por lo tanto, al examinar los archivos de registro disponibles, es importante buscar brechas o entradas fuera de orden que puedan ser una indicación de eliminación o manipulación.
+> [!TIP]
+> Los registros del sistema Linux y los subsistemas de auditoría pueden ser deshabilitados o eliminados en un incidente de intrusión o malware. Debido a que los registros en los sistemas Linux generalmente contienen alguna de la información más útil sobre actividades maliciosas, los intrusos los eliminan rutinariamente. Por lo tanto, al examinar los archivos de registro disponibles, es importante buscar brechas o entradas fuera de orden que puedan ser una indicación de eliminación o manipulación.
 
 **Linux mantiene un historial de comandos para cada usuario**, almacenado en:
 
@@ -261,28 +287,28 @@ Además, el comando `last -Faiwx` proporciona una lista de inicios de sesión de
 
 Verifica archivos que pueden otorgar privilegios adicionales:
 
-- Revisa `/etc/sudoers` en busca de privilegios de usuario no anticipados que puedan haberse otorgado.
-- Revisa `/etc/sudoers.d/` en busca de privilegios de usuario no anticipados que puedan haberse otorgado.
+- Revisa `/etc/sudoers` en busca de privilegios de usuario no anticipados que puedan haber sido otorgados.
+- Revisa `/etc/sudoers.d/` en busca de privilegios de usuario no anticipados que puedan haber sido otorgados.
 - Examina `/etc/groups` para identificar cualquier membresía o permisos de grupo inusuales.
 - Examina `/etc/passwd` para identificar cualquier membresía o permisos de grupo inusuales.
 
 Algunas aplicaciones también generan sus propios registros:
 
-- **SSH**: Examina _\~/.ssh/authorized_keys_ y _\~/.ssh/known_hosts_ en busca de conexiones remotas no autorizadas.
-- **Gnome Desktop**: Revisa _\~/.recently-used.xbel_ en busca de archivos accedidos recientemente a través de aplicaciones de Gnome.
-- **Firefox/Chrome**: Verifica el historial del navegador y las descargas en _\~/.mozilla/firefox_ o _\~/.config/google-chrome_ en busca de actividades sospechosas.
+- **SSH**: Examina _\~/.ssh/authorized_keys_ y _\~/.ssh/known_hosts_ para conexiones remotas no autorizadas.
+- **Gnome Desktop**: Revisa _\~/.recently-used.xbel_ para archivos accedidos recientemente a través de aplicaciones de Gnome.
+- **Firefox/Chrome**: Verifica el historial del navegador y las descargas en _\~/.mozilla/firefox_ o _\~/.config/google-chrome_ para actividades sospechosas.
 - **VIM**: Revisa _\~/.viminfo_ para detalles de uso, como rutas de archivos accedidos e historial de búsqueda.
-- **Open Office**: Verifica el acceso reciente a documentos que pueda indicar archivos comprometidos.
-- **FTP/SFTP**: Revisa los registros en _\~/.ftp_history_ o _\~/.sftp_history_ en busca de transferencias de archivos que puedan ser no autorizadas.
-- **MySQL**: Investiga _\~/.mysql_history_ en busca de consultas MySQL ejecutadas, que podrían revelar actividades no autorizadas en la base de datos.
-- **Less**: Analiza _\~/.lesshst_ en busca de historial de uso, incluidos archivos vistos y comandos ejecutados.
-- **Git**: Examina _\~/.gitconfig_ y el proyecto _.git/logs_ en busca de cambios en los repositorios.
+- **Open Office**: Verifica el acceso a documentos recientes que puedan indicar archivos comprometidos.
+- **FTP/SFTP**: Revisa registros en _\~/.ftp_history_ o _\~/.sftp_history_ para transferencias de archivos que podrían no estar autorizadas.
+- **MySQL**: Investiga _\~/.mysql_history_ para consultas de MySQL ejecutadas, que podrían revelar actividades no autorizadas en la base de datos.
+- **Less**: Analiza _\~/.lesshst_ para el historial de uso, incluidos archivos vistos y comandos ejecutados.
+- **Git**: Examina _\~/.gitconfig_ y el proyecto _.git/logs_ para cambios en los repositorios.
 
 ### Registros USB
 
 [**usbrip**](https://github.com/snovvcrash/usbrip) es un pequeño software escrito en Python 3 puro que analiza archivos de registro de Linux (`/var/log/syslog*` o `/var/log/messages*` dependiendo de la distribución) para construir tablas de historial de eventos USB.
 
-Es interesante **conocer todos los USB que se han utilizado** y será más útil si tienes una lista autorizada de USB para encontrar "eventos de violación" (el uso de USB que no están dentro de esa lista).
+Es interesante **conocer todos los USB que han sido utilizados** y será más útil si tienes una lista autorizada de USB para encontrar "eventos de violación" (el uso de USB que no están dentro de esa lista).
 
 ### Instalación
 ```bash
@@ -303,7 +329,7 @@ Más ejemplos e información dentro del github: [https://github.com/snovvcrash/u
 
 Examine el _**/etc/passwd**_, _**/etc/shadow**_ y **registros de seguridad** en busca de nombres inusuales o cuentas creadas y/o utilizadas en estrecha proximidad a eventos no autorizados conocidos. Además, verifique posibles ataques de fuerza bruta a sudo.\
 Además, revise archivos como _**/etc/sudoers**_ y _**/etc/groups**_ en busca de privilegios inesperados otorgados a los usuarios.\
-Finalmente, busque cuentas con **sin contraseñas** o contraseñas **fácilmente adivinables**.
+Finalmente, busque cuentas con **sin contraseñas** o **contraseñas fácilmente adivinables**.
 
 ## Examinar el Sistema de Archivos
 
@@ -328,20 +354,20 @@ ls -laR --sort=time /bin```
 # Sort files in a directory by inode:
 ls -lai /bin | sort -n```
 ````
-> [!NOTE]
-> Tenga en cuenta que un **atacante** puede **modificar** el **tiempo** para hacer que los **archivos aparezcan** **legítimos**, pero no **puede** modificar el **inode**. Si encuentra que un **archivo** indica que fue creado y modificado al **mismo tiempo** que el resto de los archivos en la misma carpeta, pero el **inode** es **inesperadamente más grande**, entonces los **timestamps de ese archivo fueron modificados**.
+> [!TIP]
+> Tenga en cuenta que un **atacante** puede **modificar** la **hora** para hacer que los **archivos aparezcan** **legítimos**, pero **no puede** modificar el **inode**. Si encuentra que un **archivo** indica que fue creado y modificado a la **misma hora** que el resto de los archivos en la misma carpeta, pero el **inode** es **inesperadamente más grande**, entonces los **timestamps de ese archivo fueron modificados**.
 
 ## Comparar archivos de diferentes versiones del sistema de archivos
 
 ### Resumen de comparación de versiones del sistema de archivos
 
-Para comparar versiones del sistema de archivos y señalar cambios, usamos comandos simplificados de `git diff`:
+Para comparar versiones del sistema de archivos y señalar cambios, utilizamos comandos simplificados de `git diff`:
 
 - **Para encontrar nuevos archivos**, compare dos directorios:
 ```bash
 git diff --no-index --diff-filter=A path/to/old_version/ path/to/new_version/
 ```
-- **Para contenido modificado**, enumere los cambios ignorando líneas específicas:
+- **Para contenido modificado**, enumera los cambios ignorando líneas específicas:
 ```bash
 git diff --no-index --diff-filter=M path/to/old_version/ path/to/new_version/ | grep -E "^\+" | grep -v "Installed-Time"
 ```
@@ -366,5 +392,7 @@ git diff --no-index --diff-filter=D path/to/old_version/ path/to/new_version/
 - [https://www.plesk.com/blog/featured/linux-logs-explained/](https://www.plesk.com/blog/featured/linux-logs-explained/)
 - [https://git-scm.com/docs/git-diff#Documentation/git-diff.txt---diff-filterACDMRTUXB82308203](https://git-scm.com/docs/git-diff#Documentation/git-diff.txt---diff-filterACDMRTUXB82308203)
 - **Libro: Malware Forensics Field Guide for Linux Systems: Digital Forensics Field Guides**
+
+- [Red Canary – Patching for persistence: How DripDropper Linux malware moves through the cloud](https://redcanary.com/blog/threat-intelligence/dripdropper-linux-malware/)
 
 {{#include ../../banners/hacktricks-training.md}}
