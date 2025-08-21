@@ -17,7 +17,7 @@ To narzędzie **modyfikuje** informacje o znaczniku czasu wewnątrz **`$STANDARD
 
 ### Usnjrnl
 
-**Dziennik USN** (Dziennik Numeru Sekwencyjnego Aktualizacji) to funkcja NTFS (system plików Windows NT), która śledzi zmiany w woluminie. Narzędzie [**UsnJrnl2Csv**](https://github.com/jschicht/UsnJrnl2Csv) umożliwia badanie tych zmian.
+**Dziennik USN** (Dziennik Numeru Sekwencyjnego Aktualizacji) to funkcja systemu plików NTFS (Windows NT), która śledzi zmiany w woluminie. Narzędzie [**UsnJrnl2Csv**](https://github.com/jschicht/UsnJrnl2Csv) umożliwia badanie tych zmian.
 
 ![](<../../images/image (801).png>)
 
@@ -31,7 +31,7 @@ Poprzedni obrazek to **wyjście** pokazane przez **narzędzie**, gdzie można za
 
 Ponownie, w wyjściu narzędzia można zobaczyć, że **wprowadzono pewne zmiany**.
 
-Używając tego samego narzędzia, można zidentyfikować, **do którego czasu zmodyfikowano znaczniki czasu**:
+Używając tego samego narzędzia, można zidentyfikować, **do którego czasu zmieniono znaczniki czasu**:
 
 ![](<../../images/image (1089).png>)
 
@@ -50,22 +50,22 @@ Innym sposobem na zidentyfikowanie podejrzanych zmodyfikowanych plików byłoby 
 
 ### SetMace - Narzędzie Antyforensyczne
 
-To narzędzie może modyfikować oba atrybuty `$STARNDAR_INFORMATION` i `$FILE_NAME`. Jednak od Windows Vista, konieczne jest, aby system operacyjny na żywo mógł modyfikować te informacje.
+To narzędzie może modyfikować oba atrybuty `$STARNDAR_INFORMATION` i `$FILE_NAME`. Jednak od Windows Vista, konieczne jest, aby system operacyjny na żywo modyfikował te informacje.
 
 ## Ukrywanie Danych
 
-NFTS używa klastra i minimalnego rozmiaru informacji. Oznacza to, że jeśli plik zajmuje i używa klastra i pół, **pozostała połowa nigdy nie będzie używana** aż do usunięcia pliku. Wtedy możliwe jest **ukrycie danych w tej przestrzeni luzem**.
+NFTS używa klastra i minimalnego rozmiaru informacji. Oznacza to, że jeśli plik zajmuje i używa klastra i pół, **pozostała połowa nigdy nie będzie używana** aż do usunięcia pliku. Wtedy możliwe jest **ukrycie danych w tej przestrzeni luzu**.
 
 Istnieją narzędzia takie jak slacker, które pozwalają na ukrywanie danych w tej "ukrytej" przestrzeni. Jednak analiza `$logfile` i `$usnjrnl` może pokazać, że dodano pewne dane:
 
 ![](<../../images/image (1060).png>)
 
-Wtedy możliwe jest odzyskanie przestrzeni luzem za pomocą narzędzi takich jak FTK Imager. Należy zauważyć, że tego rodzaju narzędzie może zapisać zawartość w sposób zniekształcony lub nawet zaszyfrowany.
+Wtedy możliwe jest odzyskanie przestrzeni luzu za pomocą narzędzi takich jak FTK Imager. Należy zauważyć, że tego rodzaju narzędzie może zapisać zawartość w sposób zniekształcony lub nawet zaszyfrowany.
 
 ## UsbKill
 
 To narzędzie, które **wyłączy komputer, jeśli wykryje jakąkolwiek zmianę w portach USB**.\
-Sposobem na odkrycie tego byłoby sprawdzenie uruchomionych procesów i **przejrzenie każdego uruchomionego skryptu Pythona**.
+Sposobem na odkrycie tego byłoby sprawdzenie uruchomionych procesów i **przejrzenie każdego uruchomionego skryptu python**.
 
 ## Dystrybucje Live Linux
 
@@ -100,7 +100,7 @@ To zapisze informacje o aplikacjach uruchamianych w celu poprawy wydajności sys
 
 ### Wyłącz Znaczniki Czasu - Czas Ostatniego Dostępu
 
-Kiedy folder jest otwierany z woluminu NTFS na serwerze Windows NT, system zajmuje czas na **aktualizację pola znacznika czasu w każdym wymienionym folderze**, nazywanego czasem ostatniego dostępu. Na mocno używanym woluminie NTFS może to wpłynąć na wydajność.
+Kiedy folder jest otwierany z woluminu NTFS na serwerze Windows NT, system zajmuje czas na **aktualizację pola znacznika czasu w każdym wymienionym folderze**, nazywanego czasem ostatniego dostępu. Na mocno używanym woluminie NTFS może to wpływać na wydajność.
 
 1. Otwórz Edytor Rejestru (Regedit.exe).
 2. Przejdź do `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem`.
@@ -112,14 +112,14 @@ Kiedy folder jest otwierany z woluminu NTFS na serwerze Windows NT, system zajmu
 Wszystkie **Wpisy Urządzeń USB** są przechowywane w rejestrze Windows pod kluczem **USBSTOR**, który zawiera podklucze tworzone za każdym razem, gdy podłączasz urządzenie USB do swojego komputera lub laptopa. Możesz znaleźć ten klucz tutaj `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`. **Usunięcie tego** spowoduje usunięcie historii USB.\
 Możesz również użyć narzędzia [**USBDeview**](https://www.nirsoft.net/utils/usb_devices_view.html), aby upewnić się, że je usunąłeś (i aby je usunąć).
 
-Innym plikiem, który zapisuje informacje o USB, jest plik `setupapi.dev.log` wewnątrz `C:\Windows\INF`. Ten plik również powinien zostać usunięty.
+Innym plikiem, który zapisuje informacje o USB, jest plik `setupapi.dev.log` w `C:\Windows\INF`. Ten plik również powinien zostać usunięty.
 
 ### Wyłącz Kopie Cieni
 
-**Wylistuj** kopie cieni za pomocą `vssadmin list shadowstorage`\
+**Lista** kopii cieni za pomocą `vssadmin list shadowstorage`\
 **Usuń** je, uruchamiając `vssadmin delete shadow`
 
-Możesz również usunąć je za pomocą GUI, postępując zgodnie z krokami zaproponowanymi w [https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html](https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html)
+Możesz również usunąć je za pomocą GUI, postępując zgodnie z krokami opisanymi w [https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html](https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html)
 
 Aby wyłączyć kopie cieni, [kroki stąd](https://support.waters.com/KB_Inf/Other/WKB15560_How_to_disable_Volume_Shadow_Copy_Service_VSS_in_Windows):
 
@@ -131,7 +131,7 @@ Możliwe jest również modyfikowanie konfiguracji, które pliki będą kopiowan
 
 ### Nadpisz usunięte pliki
 
-- Możesz użyć **narzędzia Windows**: `cipher /w:C` To wskaże cipher, aby usunąć wszelkie dane z dostępnej nieużywanej przestrzeni dyskowej wewnątrz dysku C.
+- Możesz użyć **narzędzia Windows**: `cipher /w:C` To spowoduje, że cipher usunie wszelkie dane z dostępnej nieużywanej przestrzeni dyskowej wewnątrz dysku C.
 - Możesz również użyć narzędzi takich jak [**Eraser**](https://eraser.heidi.ie)
 
 ### Usuń dzienniki zdarzeń Windows
@@ -207,15 +207,92 @@ AuKill.exe -e "C:\\Program Files\\Windows Defender\\MsMpEng.exe"
 AuKill.exe -k CrowdStrike
 ```
 Sterownik jest usuwany później, pozostawiając minimalne artefakty.  
-Środki zaradcze: włącz listę blokowania podatnych sterowników Microsoftu (HVCI/SAC) i powiadamiaj o tworzeniu usług jądra z ścieżek zapisywalnych przez użytkownika.
+Środki zaradcze: włącz blokadę podatnych sterowników Microsoftu (HVCI/SAC) i powiadamiaj o tworzeniu usług jądra z ścieżek zapisywalnych przez użytkownika.
 
 ---
 
-## Odniesienia
+## Linux Anti-Forensics: Samopatchowanie i Cloud C2 (2023–2025)
 
-- Sophos X-Ops – “AuKill: A Weaponized Vulnerable Driver for Disabling EDR” (marzec 2023)  
-https://news.sophos.com/en-us/2023/03/07/aukill-a-weaponized-vulnerable-driver-for-disabling-edr  
-- Red Canary – “Patching EtwEventWrite for Stealth: Detection & Hunting” (czerwiec 2024)  
-https://redcanary.com/blog/etw-patching-detection  
+### Samopatchowanie skompromitowanych usług w celu zmniejszenia wykrywalności (Linux)  
+Przeciwnicy coraz częściej „samopatchują” usługę tuż po jej wykorzystaniu, aby zapobiec ponownemu wykorzystaniu i stłumić wykrycia oparte na podatnościach. Idea polega na zastąpieniu podatnych komponentów najnowszymi legalnymi binariami/JAR-ami z upstream, aby skanery zgłaszały hosta jako załatwionego, podczas gdy trwałość i C2 pozostają.
+
+Przykład: Apache ActiveMQ OpenWire RCE (CVE‑2023‑46604)  
+- Po wykorzystaniu, napastnicy pobrali legalne JAR-y z Maven Central (repo1.maven.org), usunęli podatne JAR-y w instalacji ActiveMQ i zrestartowali brokera.  
+- To zamknęło początkowe RCE, jednocześnie utrzymując inne punkty dostępu (cron, zmiany w konfiguracji SSH, oddzielne implanty C2).
+
+Przykład operacyjny (ilustracyjny)
+```bash
+# ActiveMQ install root (adjust as needed)
+AMQ_DIR=/opt/activemq
+cd "$AMQ_DIR"/lib
+
+# Fetch patched JARs from Maven Central (versions as appropriate)
+curl -fsSL -O https://repo1.maven.org/maven2/org/apache/activemq/activemq-client/5.18.3/activemq-client-5.18.3.jar
+curl -fsSL -O https://repo1.maven.org/maven2/org/apache/activemq/activemq-openwire-legacy/5.18.3/activemq-openwire-legacy-5.18.3.jar
+
+# Remove vulnerable files and ensure the service uses the patched ones
+rm -f activemq-client-5.18.2.jar activemq-openwire-legacy-5.18.2.jar || true
+ln -sf activemq-client-5.18.3.jar activemq-client.jar
+ln -sf activemq-openwire-legacy-5.18.3.jar activemq-openwire-legacy.jar
+
+# Apply changes without removing persistence
+systemctl restart activemq || service activemq restart
+```
+Forensic/hunting tips
+- Przejrzyj katalogi usług w poszukiwaniu nieschedułowanych zamienników binarnych/JAR:
+- Debian/Ubuntu: `dpkg -V activemq` i porównaj hashe/ścieżki plików z lustrami repozytoriów.
+- RHEL/CentOS: `rpm -Va 'activemq*'`
+- Szukaj wersji JAR obecnych na dysku, które nie są własnością menedżera pakietów, lub zaktualizowanych linków symbolicznych.
+- Oś czasu: `find "$AMQ_DIR" -type f -printf '%TY-%Tm-%Td %TH:%TM %p\n' | sort` w celu skorelowania ctime/mtime z oknem kompromitacji.
+- Historia powłoki/telemetria procesów: dowody użycia `curl`/`wget` do `repo1.maven.org` lub innych CDN artefaktów bezpośrednio po początkowej eksploatacji.
+- Zarządzanie zmianami: zweryfikuj, kto zastosował „łatkę” i dlaczego, a nie tylko, że obecna jest wersja z poprawką.
+
+### Cloud‑service C2 with bearer tokens and anti‑analysis stagers
+Obserwowana technika łączyła wiele długoterminowych ścieżek C2 i pakowanie antyanalizacyjne:
+- Ładowarki ELF PyInstaller chronione hasłem, aby utrudnić sandboxing i analizę statyczną (np. zaszyfrowany PYZ, tymczasowe wydobycie pod `/_MEI*`).
+- Wskaźniki: trafienia `strings` takie jak `PyInstaller`, `pyi-archive`, `PYZ-00.pyz`, `MEIPASS`.
+- Artefakty czasu wykonywania: wydobycie do `/tmp/_MEI*` lub niestandardowe ścieżki `--runtime-tmpdir`.
+- C2 wspierane przez Dropbox z zakodowanymi tokenami OAuth Bearer
+- Wskaźniki sieciowe: `api.dropboxapi.com` / `content.dropboxapi.com` z `Authorization: Bearer <token>`.
+- Poluj w proxy/NetFlow/Zeek/Suricata na wychodzące HTTPS do domen Dropbox z obciążeń serwera, które normalnie nie synchronizują plików.
+- Równoległe/zapasowe C2 przez tunelowanie (np. Cloudflare Tunnel `cloudflared`), utrzymując kontrolę, jeśli jeden kanał jest zablokowany.
+- IOCs hosta: procesy/jednostki `cloudflared`, konfiguracja w `~/.cloudflared/*.json`, wychodzące 443 do krawędzi Cloudflare.
+
+### Persistence and “hardening rollback” to maintain access (Linux examples)
+Napastnicy często łączą samopoprawianie z trwałymi ścieżkami dostępu:
+- Cron/Anacron: edycje stubu `0anacron` w każdym katalogu `/etc/cron.*/` dla okresowego wykonywania.
+- Poluj:
+```bash
+for d in /etc/cron.*; do [ -f "$d/0anacron" ] && stat -c '%n %y %s' "$d/0anacron"; done
+grep -R --line-number -E 'curl|wget|python|/bin/sh' /etc/cron.*/* 2>/dev/null
+```
+- Cofanie twardych zabezpieczeń konfiguracji SSH: włączenie logowania roota i zmiana domyślnych powłok dla kont o niskich uprawnieniach.
+- Poluj na włączenie logowania roota:
+```bash
+grep -E '^\s*PermitRootLogin' /etc/ssh/sshd_config
+# wartości flag takie jak "yes" lub zbyt liberalne ustawienia
+```
+- Poluj na podejrzane interaktywne powłoki na kontach systemowych (np. `games`):
+```bash
+awk -F: '($7 ~ /bin\/(sh|bash|zsh)/ && $1 ~ /^(games|lp|sync|shutdown|halt|mail|operator)$/) {print}' /etc/passwd
+```
+- Losowe, krótko nazwane artefakty sygnalizacyjne (8 liter) umieszczane na dysku, które również kontaktują się z chmurą C2:
+- Poluj:
+```bash
+find / -maxdepth 3 -type f -regextype posix-extended -regex '.*/[A-Za-z]{8}$' \
+-exec stat -c '%n %s %y' {} \; 2>/dev/null | sort
+```
+
+Obrońcy powinni skorelować te artefakty z zewnętrzną ekspozycją i wydarzeniami łatania usług, aby odkryć samoremediację antyforensyczną używaną do ukrycia początkowej eksploatacji.
+
+## References
+
+- Sophos X-Ops – “AuKill: A Weaponized Vulnerable Driver for Disabling EDR” (March 2023)
+https://news.sophos.com/en-us/2023/03/07/aukill-a-weaponized-vulnerable-driver-for-disabling-edr
+- Red Canary – “Patching EtwEventWrite for Stealth: Detection & Hunting” (June 2024)
+https://redcanary.com/blog/etw-patching-detection
+
+- [Red Canary – Patching for persistence: How DripDropper Linux malware moves through the cloud](https://redcanary.com/blog/threat-intelligence/dripdropper-linux-malware/)
+- [CVE‑2023‑46604 – Apache ActiveMQ OpenWire RCE (NVD)](https://nvd.nist.gov/vuln/detail/CVE-2023-46604)
 
 {{#include ../../banners/hacktricks-training.md}}
