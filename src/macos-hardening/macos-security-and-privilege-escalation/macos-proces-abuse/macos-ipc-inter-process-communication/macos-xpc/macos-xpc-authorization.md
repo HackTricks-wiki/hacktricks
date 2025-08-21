@@ -31,6 +31,7 @@ An example could be found in [EvenBetterAuthorizationSample](https://github.com/
 
 For more information about how to properly configure this check:
 
+
 {{#ref}}
 macos-xpc-connecting-process-check/
 {{#endref}}
@@ -440,6 +441,5 @@ int main(void) {
 - [https://theevilbit.github.io/posts/secure_coding_xpc_part1/](https://theevilbit.github.io/posts/secure_coding_xpc_part1/)
 
 {{#include ../../../../../banners/hacktricks-training.md}}
-
 
 

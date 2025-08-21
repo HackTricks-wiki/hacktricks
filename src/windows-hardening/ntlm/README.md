@@ -265,6 +265,7 @@ wce.exe -s <username>:<domain>:<hash_lm>:<hash_nt>
 
 ### Manual Windows remote execution with username and password
 
+
 {{#ref}}
 ../lateral-movement/
 {{#endref}}
@@ -288,6 +289,7 @@ The PoC can be found in **[https://github.com/eladshamir/Internal-Monologue](htt
 ## NTLM Relay and Responder
 
 **Read more detailed guide on how to perform those attacks here:**
+
 
 {{#ref}}
 ../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md
@@ -345,4 +347,3 @@ krbrelayx.py -t TARGET.DOMAIN.LOCAL -smb2support
 * [MSRC – CVE-2025-33073](https://msrc.microsoft.com/update-guide/vulnerability/CVE-2025-33073)
 
 {{#include ../../banners/hacktricks-training.md}}
-

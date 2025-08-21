@@ -26,6 +26,7 @@
 - **New TLD**: Same domain using a **new TLD** (e.g., zelster.org)
 - **Homoglyph**: It **replaces** a letter in the domain name with **letters that look similar** (e.g., zelfser.com).
 
+
 {{#ref}}
 homograph-attacks.md
 {{#endref}}
@@ -414,6 +415,7 @@ Once everything is ready, just launch the campaign!
 
 If for any reason you want to clone the website check the following page:
 
+
 {{#ref}}
 clone-a-website.md
 {{#endref}}
@@ -422,6 +424,7 @@ clone-a-website.md
 
 In some phishing assessments (mainly for Red Teams) you will want to also **send files containing some kind of backdoor** (maybe a C2 or maybe just something that will trigger an authentication).\
 Check out the following page for some examples:
+
 
 {{#ref}}
 phishing-documents.md
@@ -451,6 +454,7 @@ Obviously one of the best ways to know if you have been busted is to **search yo
 One easy way to check if you domain appears in any blacklist is to use [https://malwareworld.com/](https://malwareworld.com)
 
 However, there are other ways to know if the victim is **actively looking for suspicions phishing activity in the wild** as explained in:
+
 
 {{#ref}}
 detecting-phising.md
@@ -557,11 +561,13 @@ Monitor for AzureAD/AWS/Okta events where **`deleteMFA` + `addMFA`** occur **wit
 
 Attackers can silently copy malicious commands into the victim’s clipboard from a compromised or typosquatted web page and then trick the user to paste them inside **Win + R**, **Win + X** or a terminal window, executing arbitrary code without any download or attachment.
 
+
 {{#ref}}
 clipboard-hijacking.md
 {{#endref}}
 
 ## Mobile Phishing & Malicious App Distribution (Android & iOS)
+
 
 {{#ref}}
 mobile-phishing-malicious-apps.md
@@ -576,5 +582,4 @@ mobile-phishing-malicious-apps.md
 - [2025 Unit 42 Global Incident Response Report – Social Engineering Edition](https://unit42.paloaltonetworks.com/2025-unit-42-global-incident-response-report-social-engineering-edition/)
 
 {{#include ../../banners/hacktricks-training.md}}
-
 

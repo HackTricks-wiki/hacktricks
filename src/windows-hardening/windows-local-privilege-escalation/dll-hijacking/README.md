@@ -101,6 +101,7 @@ dumpbin /export /path/file.dll
 
 For a full guide on how to **abuse Dll Hijacking to escalate privileges** with permissions to write in a **System Path folder** check:
 
+
 {{#ref}}
 writable-sys-path-+dll-hijacking-privesc.md
 {{#endref}}
@@ -277,6 +278,5 @@ Lenovo released UWP version **1.12.54.0** via the Microsoft Store, which install
 
 
 {{#include ../../../banners/hacktricks-training.md}}
-
 
 

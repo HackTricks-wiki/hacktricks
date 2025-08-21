@@ -10,6 +10,7 @@ In order to do that you can abuse a **Dll Hijacking** where you are going to **h
 
 For more info about **what is Dll Hijackig** check:
 
+
 {{#ref}}
 ./
 {{#endref}}
@@ -82,6 +83,5 @@ Having **generated the malicious Dll** (_in my case I used x64 rev shell and I g
 When the service is re-started, the **dll should be loaded and executed** (you can **reuse** the **procmon** trick to check if the **library was loaded as expected**).
 
 {{#include ../../../banners/hacktricks-training.md}}
-
 
 

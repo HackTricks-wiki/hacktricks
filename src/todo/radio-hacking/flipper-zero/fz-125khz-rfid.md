@@ -7,6 +7,7 @@
 
 For more info about how 125kHz tags work check:
 
+
 {{#ref}}
 ../pentesting-rfid.md
 {{#endref}}
@@ -53,6 +54,5 @@ After **copying** a card or **entering** the ID **manually** it's possible to **
 
 
 {{#include ../../../banners/hacktricks-training.md}}
-
 
 
