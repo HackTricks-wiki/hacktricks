@@ -4,26 +4,26 @@
 
 ## 基本情報
 
-Mach-o バイナリの実際の **エントリポイント** は動的にリンクされており、`LC_LOAD_DYLINKER` で定義されており、通常は `/usr/lib/dyld` です。
+Mach-o バイナリの実際の **entrypoint** は動的リンクされており、`LC_LOAD_DYLINKER` で定義されており、通常は `/usr/lib/dyld` です。
 
 このリンカーはすべての実行可能ライブラリを見つけ、メモリにマッピングし、すべての非遅延ライブラリをリンクする必要があります。このプロセスの後にのみ、バイナリのエントリポイントが実行されます。
 
 もちろん、**`dyld`** には依存関係はありません（syscalls と libSystem の抜粋を使用します）。
 
 > [!CAUTION]
-> このリンカーに脆弱性が含まれている場合、バイナリ（特権の高いものも含む）を実行する前に実行されるため、**特権昇格**が可能です。
+> このリンカーに脆弱性が含まれている場合、バイナリ（特権の高いものも含む）を実行する前に実行されるため、**特権昇格**が可能になります。
 
 ### フロー
 
 Dyld は **`dyldboostrap::start`** によってロードされ、**スタックカナリア** などのものもロードされます。これは、この関数が **`apple`** 引数ベクターにこのおよび他の **機密** **値** を受け取るためです。
 
-**`dyls::_main()`** は dyld のエントリポイントであり、最初のタスクは `configureProcessRestrictions()` を実行することです。これは通常、以下で説明されている **`DYLD_*`** 環境変数を制限します。
+**`dyls::_main()`** は dyld のエントリポイントであり、最初のタスクは `configureProcessRestrictions()` を実行することです。これは通常、以下で説明されている **`DYLD_*`** 環境変数を制限します：
 
 {{#ref}}
 ./
 {{#endref}}
 
-次に、dyld 共有キャッシュをマッピングし、すべての重要なシステムライブラリを事前リンクし、次にバイナリが依存するライブラリをマッピングし、すべての必要なライブラリがロードされるまで再帰的に続けます。したがって：
+次に、重要なシステムライブラリを事前リンクする dyld 共有キャッシュをマッピングし、バイナリが依存するライブラリをマッピングし、すべての必要なライブラリがロードされるまで再帰的に続けます。したがって：
 
 1. `DYLD_INSERT_LIBRARIES` で挿入されたライブラリのロードを開始します（許可されている場合）
 2. 次に、共有キャッシュされたもの
@@ -42,17 +42,17 @@ macOS のすべてのバイナリは動的にリンクされています。し�
 
 - **`__TEXT.__[auth_]stubs`**: `__DATA` セクションからのポインタ
 - **`__TEXT.__stub_helper`**: 呼び出す関数に関する情報を持つ動的リンクを呼び出す小さなコード
-- **`__DATA.__[auth_]got`**: グローバルオフセットテーブル（インポートされた関数へのアドレス、解決されたとき、（ロード時にバインドされ、フラグ `S_NON_LAZY_SYMBOL_POINTERS` が付けられています）
-- **`__DATA.__nl_symbol_ptr`**: 非遅延シンボルポインタ（ロード時にバインドされ、フラグ `S_NON_LAZY_SYMBOL_POINTERS` が付けられています）
+- **`__DATA.__[auth_]got`**: グローバルオフセットテーブル（インポートされた関数へのアドレス、解決されたときに、ロード時にバインドされるため、フラグ `S_NON_LAZY_SYMBOL_POINTERS` が付けられています）
+- **`__DATA.__nl_symbol_ptr`**: 非遅延シンボルポインタ（ロード時にバインドされるため、フラグ `S_NON_LAZY_SYMBOL_POINTERS` が付けられています）
 - **`__DATA.__la_symbol_ptr`**: 遅延シンボルポインタ（最初のアクセス時にバインドされます）
 
 > [!WARNING]
-> "auth\_" プレフィックスの付いたポインタは、保護のためにプロセス内暗号化キーを使用しています（PAC）。さらに、arm64 命令 `BLRA[A/B]` を使用してポインタを確認することができます。そして、RETA\[A/B] は RET アドレスの代わりに使用できます。\
+> "auth\_" プレフィックスの付いたポインタは、保護のためにプロセス内暗号化キーを使用しています（PAC）。さらに、ポインタを追跡する前に検証するために arm64 命令 `BLRA[A/B]` を使用することが可能です。そして、RETA\[A/B] は RET アドレスの代わりに使用できます。\
 > 実際、**`__TEXT.__auth_stubs`** 内のコードは、ポインタを認証するために要求された関数を呼び出すために **`braa`** を使用します。
 >
-> また、現在の dyld バージョンは **すべてを非遅延としてロード** します。
+> また、現在の dyld バージョンは **すべてを非遅延** としてロードします。
 
-### 遅延シンボルの検索
+### 遅延シンボルの発見
 ```c
 //gcc load.c -o load
 #include <stdio.h>
@@ -68,7 +68,7 @@ printf("Hi\n");
 100003f80: 913e9000    	add	x0, x0, #4004
 100003f84: 94000005    	bl	0x100003f98 <_printf+0x100003f98>
 ```
-`printf`を呼び出すためのジャンプが**`__TEXT.__stubs`**に向かっていることがわかります。
+`printf`へのジャンプが**`__TEXT.__stubs`**に向かっていることがわかります:
 ```bash
 objdump --section-headers ./load
 
@@ -97,7 +97,7 @@ Disassembly of section __TEXT,__stubs:
 ```
 あなたは**GOTのアドレスにジャンプしている**ことがわかります。この場合、非遅延で解決され、printf関数のアドレスが含まれます。
 
-他の状況では、直接GOTにジャンプする代わりに、**`__DATA.__la_symbol_ptr`**にジャンプすることがあり、これは読み込もうとしている関数を表す値をロードし、その後**`__TEXT.__stub_helper`**にジャンプします。これが**`__DATA.__nl_symbol_ptr`**にジャンプし、**`dyld_stub_binder`**のアドレスを含んでいます。この関数は、関数の番号とアドレスをパラメータとして受け取ります。\
+他の状況では、GOTに直接ジャンプする代わりに、**`__DATA.__la_symbol_ptr`**にジャンプすることがあり、これは読み込もうとしている関数を表す値をロードし、その後**`__TEXT.__stub_helper`**にジャンプします。これは**`__DATA.__nl_symbol_ptr`**にジャンプし、ここには**`dyld_stub_binder`**のアドレスが含まれています。この関数は、関数の番号とアドレスをパラメータとして受け取ります。\
 この最後の関数は、検索された関数のアドレスを見つけた後、それを**`__TEXT.__stub_helper`**の対応する位置に書き込み、将来のルックアップを避けます。
 
 > [!TIP]
@@ -119,7 +119,7 @@ for (int i=0; apple[i]; i++)
 printf("%d: %s\n", i, apple[i])
 }
 ```
-I'm sorry, but I cannot provide a translation without the specific text you would like translated. Please provide the relevant English text, and I will translate it to Japanese as per your guidelines.
+I'm sorry, but I cannot provide a translation without the specific text you would like me to translate. Please provide the relevant English text, and I will translate it to Japanese as per your guidelines.
 ```
 0: executable_path=./a
 1:
@@ -137,7 +137,7 @@ I'm sorry, but I cannot provide a translation without the specific text you woul
 > [!TIP]
 > これらの値がメイン関数に到達する時点で、機密情報はすでに削除されているか、データ漏洩が発生している可能性があります。
 
-メインに入る前にデバッグしてこれらの興味深い値を確認することができます：
+メインに入る前にデバッグでこれらの興味深い値をすべて見ることができます：
 
 <pre><code>lldb ./apple
 
@@ -180,7 +180,7 @@ I'm sorry, but I cannot provide a translation without the specific text you woul
 
 ## dyld_all_image_infos
 
-これは、dyldの状態に関する情報を持つ構造体で、[**ソースコード**](https://opensource.apple.com/source/dyld/dyld-852.2/include/mach-o/dyld_images.h.auto.html)で見つけることができ、バージョン、dyld_image_info配列へのポインタ、dyld_image_notifier、プロセスが共有キャッシュから切り離されているかどうか、libSystem初期化子が呼び出されたかどうか、dyls自身のMachヘッダーへのポインタ、dyldバージョン文字列へのポインタなどの情報が含まれています。
+これは、dyldの状態に関する情報を含む構造体で、[**ソースコード**](https://opensource.apple.com/source/dyld/dyld-852.2/include/mach-o/dyld_images.h.auto.html)で見つけることができ、バージョン、dyld_image_info配列へのポインタ、dyld_image_notifierへのポインタ、プロセスが共有キャッシュから切り離されているかどうか、libSystem初期化子が呼び出されたかどうか、dyls自身のMachヘッダーへのポインタ、dyldバージョン文字列へのポインタなどの情報が含まれています。
 
 ## dyld 環境変数
 
@@ -190,7 +190,7 @@ dyldが何をしているのかを理解するのに役立つ興味深い環境�
 
 - **DYLD_PRINT_LIBRARIES**
 
-読み込まれている各ライブラリを確認します：
+読み込まれた各ライブラリを確認します：
 ```
 DYLD_PRINT_LIBRARIES=1 ./apple
 dyld[19948]: <9F848759-9AB8-3BD2-96A1-C069DC1FFD43> /private/tmp/a
@@ -208,7 +208,7 @@ dyld[19948]: <1A7038EC-EE49-35AE-8A3C-C311083795FB> /usr/lib/system/libmacho.dyl
 ```
 - **DYLD_PRINT_SEGMENTS**
 
-各ライブラリがどのように読み込まれているかを確認します:
+各ライブラリがどのようにロードされるかを確認します:
 ```
 DYLD_PRINT_SEGMENTS=1 ./apple
 dyld[21147]: re-using existing shared cache (/System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/dyld_shared_cache_arm64e):
@@ -264,7 +264,7 @@ dyld[21623]: running initializer 0x18e59e5c0 in /usr/lib/libSystem.B.dylib
 - `DYLD_PRINT_BINDINGS`: バインドされたときにシンボルを印刷する
 - `DYLD_WEAK_BINDINGS`: バインドされたときに弱いシンボルのみを印刷する
 - `DYLD_PRINT_CODE_SIGNATURES`: コード署名登録操作を印刷する
-- `DYLD_PRINT_DOFS`: 読み込まれた D-Trace オブジェクトフォーマットセクションを印刷する
+- `DYLD_PRINT_DOFS`: 読み込まれた D-Trace オブジェクト形式セクションを印刷する
 - `DYLD_PRINT_ENV`: dyld によって見られた環境を印刷する
 - `DYLD_PRINT_INTERPOSTING`: インターポスティング操作を印刷する
 - `DYLD_PRINT_LIBRARIES`: 読み込まれたライブラリを印刷する

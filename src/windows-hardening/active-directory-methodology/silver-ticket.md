@@ -6,11 +6,11 @@
 
 ## Silver ticket
 
-**Silver Ticket**攻撃は、Active Directory (AD) 環境におけるサービスチケットの悪用を含みます。この手法は、**サービスアカウントのNTLMハッシュを取得すること**に依存しており、コンピュータアカウントなどのチケットを偽造するために使用されます。この偽造されたチケットを使用することで、攻撃者はネットワーク上の特定のサービスにアクセスでき、**任意のユーザーを偽装**し、通常は管理者権限を狙います。チケットを偽造する際にAESキーを使用することが、より安全で検出されにくいことが強調されています。
+**Silver Ticket**攻撃は、Active Directory (AD) 環境におけるサービスチケットの悪用を含みます。この手法は、**サービスアカウントのNTLMハッシュを取得すること**に依存し、Ticket Granting Service (TGS) チケットを偽造します。この偽造されたチケットを使用することで、攻撃者はネットワーク上の特定のサービスにアクセスでき、**任意のユーザーを偽装**し、通常は管理者権限を狙います。チケットを偽造する際にAESキーを使用することが、より安全で検出されにくいことが強調されています。
 
 > [!WARNING]
-> Silver Ticketsは、**サービスアカウントのハッシュ**のみを必要とし、krbtgtアカウントを必要としないため、Golden Ticketsよりも検出されにくいです。しかし、特定のサービスに限定されます。さらに、ユーザーのパスワードを盗むだけではありません。
-さらに、**SPNを持つアカウントのパスワードを侵害した場合**、そのパスワードを使用して任意のユーザーをそのサービスに偽装するSilver Ticketを作成できます。
+> Silver Ticketsは、**サービスアカウントのハッシュ**のみを必要とし、krbtgtアカウントを必要としないため、Golden Ticketsよりも検出されにくいです。しかし、ターゲットとする特定のサービスに制限されています。さらに、ユーザーのパスワードを盗むだけではありません。
+また、**SPNを持つアカウントのパスワードを侵害した場合**、そのパスワードを使用して任意のユーザーをそのサービスに偽装するSilver Ticketを作成できます。
 
 チケット作成には、オペレーティングシステムに基づいて異なるツールが使用されます。
 
@@ -45,14 +45,14 @@ CIFSサービスは、被害者のファイルシステムにアクセスする�
 | ------------------------------------------ | -------------------------------------------------------------------------- |
 | WMI                                        | <p>HOST</p><p>RPCSS</p>                                                    |
 | PowerShellリモーティング                   | <p>HOST</p><p>HTTP</p><p>OSによっては:</p><p>WSMAN</p><p>RPCSS</p> |
-| WinRM                                      | <p>HOST</p><p>HTTP</p><p>場合によっては、単にWINRMを要求できます</p> |
-| スケジュールタスク                         | HOST                                                                       |
+| WinRM                                      | <p>HOST</p><p>HTTP</p><p>場合によっては、単に要求することができます: WINRM</p> |
+| スケジュールされたタスク                   | HOST                                                                       |
 | Windowsファイル共有、またpsexec            | CIFS                                                                       |
 | LDAP操作、DCSyncを含む                     | LDAP                                                                       |
-| Windowsリモートサーバー管理ツール         | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                         |
+| Windowsリモートサーバー管理ツール          | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                         |
 | ゴールデンチケット                         | krbtgt                                                                     |
 
-**Rubeus**を使用すると、次のパラメータを使用して**すべての**チケットを**要求**できます：
+**Rubeus**を使用すると、次のパラメータを使用して**すべての**チケットを**要求**できます:
 
 - `/altservice:host,RPCSS,http,wsman,cifs,ldap,krbtgt,winrm`
 
@@ -72,7 +72,7 @@ CIFSサービスは、被害者のファイルシステムにアクセスする�
 
 ### CIFS
 
-このチケットを使用すると、**SMB**を介して`C$`および`ADMIN$`フォルダーにアクセスし、リモートファイルシステムの一部にファイルをコピーすることができます。これは次のように行います：
+このチケットを使用すると、**SMB**を介して`C$`および`ADMIN$`フォルダーにアクセスし、リモートファイルシステムの一部にファイルをコピーすることができます。これは次のように行います:
 ```bash
 dir \\vulnerable.computer\C$
 dir \\vulnerable.computer\ADMIN$
@@ -122,14 +122,14 @@ winrmアクセスを介してコンピュータに**アクセス**し、PowerShe
 ```bash
 New-PSSession -Name PSC -ComputerName the.computer.name; Enter-PSSession PSC
 ```
-次のページを確認して、**winrmを使用してリモートホストに接続する他の方法**を学んでください：
+以下のページを確認して、**winrmを使用してリモートホストに接続する他の方法**を学んでください：
 
 {{#ref}}
 ../lateral-movement/winrm.md
 {{#endref}}
 
 > [!WARNING]
-> **winrmがリモートコンピュータでアクティブでリスニングしている必要がある**ことに注意してください。
+> **winrmはリモートコンピュータでアクティブでリスニングしている必要があります**。
 
 ### LDAP
 
@@ -137,19 +137,16 @@ New-PSSession -Name PSC -ComputerName the.computer.name; Enter-PSSession PSC
 ```
 mimikatz(commandline) # lsadump::dcsync /dc:pcdc.domain.local /domain:domain.local /user:krbtgt
 ```
-**DCSyncについて詳しく学ぶ**には、以下のページをご覧ください：
+**DCSyncについてもっと学ぶ**には、以下のページをご覧ください：
 
 {{#ref}}
 dcsync.md
 {{#endref}}
-
 
 ## 参考文献
 
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-silver-tickets](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-silver-tickets)
 - [https://www.tarlogic.com/blog/how-to-attack-kerberos/](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
 - [https://techcommunity.microsoft.com/blog/askds/machine-account-password-process/396027](https://techcommunity.microsoft.com/blog/askds/machine-account-password-process/396027)
-
-
 
 {{#include ../../banners/hacktricks-training.md}}

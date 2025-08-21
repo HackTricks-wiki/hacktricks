@@ -4,11 +4,11 @@
 
 ## 影響するもの
 
-特権コンテナを実行すると、これらの保護が無効になります：
+特権コンテナを実行すると、無効にする保護は次のとおりです。
 
 ### /devのマウント
 
-特権コンテナでは、すべての**デバイスが`/dev/`でアクセス可能です**。したがって、ホストのディスクを**マウント**することで**エスケープ**できます。
+特権コンテナでは、すべての**デバイスが`/dev/`でアクセス可能です**。したがって、ホストのディスクを**マウント**することで**脱出**できます。
 
 {{#tabs}}
 {{#tab name="Inside default container"}}
@@ -20,7 +20,7 @@ core     full     null     pts      shm      stdin    tty      zero
 ```
 {{#endtab}}
 
-{{#tab name="特権コンテナ内"}}
+{{#tab name="Inside Privileged Container"}}
 ```bash
 # docker run --rm --privileged -it alpine sh
 ls /dev
@@ -33,7 +33,7 @@ cpu              nbd0             pts              stdout           tty27       
 {{#endtab}}
 {{#endtabs}}
 
-### 読み取り専用のカーネルファイルシステム
+### 読み取り専用カーネルファイルシステム
 
 カーネルファイルシステムは、プロセスがカーネルの動作を変更するためのメカニズムを提供します。しかし、コンテナプロセスに関しては、カーネルに対して変更を加えることを防ぎたいと考えています。したがって、カーネルファイルシステムをコンテナ内で**読み取り専用**としてマウントし、コンテナプロセスがカーネルを変更できないようにします。
 
@@ -59,9 +59,9 @@ mount  | grep '(ro'
 
 ### カーネルファイルシステムのマスキング
 
-**/proc**ファイルシステムは選択的に書き込み可能ですが、セキュリティのために、特定の部分は**tmpfs**で覆われており、コンテナプロセスが機密領域にアクセスできないようにしています。
+**/proc** ファイルシステムは選択的に書き込み可能ですが、セキュリティのために、特定の部分は **tmpfs** でオーバーレイされ、コンテナプロセスが機密エリアにアクセスできないように保護されています。
 
-> [!NOTE] > **tmpfs**は、すべてのファイルを仮想メモリに保存するファイルシステムです。tmpfsはハードドライブ上にファイルを作成しません。したがって、tmpfsファイルシステムをアンマウントすると、その中に存在するすべてのファイルは永遠に失われます。
+> [!NOTE] > **tmpfs** はすべてのファイルを仮想メモリに保存するファイルシステムです。tmpfs はハードドライブ上にファイルを作成しません。したがって、tmpfs ファイルシステムをアンマウントすると、その中に存在するすべてのファイルは永遠に失われます。
 
 {{#tabs}}
 {{#tab name="Inside default container"}}
@@ -74,7 +74,7 @@ tmpfs on /proc/keys type tmpfs (rw,nosuid,size=65536k,mode=755)
 ```
 {{#endtab}}
 
-{{#tab name="特権コンテナ内"}}
+{{#tab name="Inside Privileged Container"}}
 ```bash
 # docker run --rm --privileged -it alpine sh
 mount  | grep /proc.*tmpfs
@@ -114,7 +114,7 @@ Bounding set =cap_chown,cap_dac_override,cap_dac_read_search,cap_fowner,cap_fset
 {{#endtab}}
 {{#endtabs}}
 
-コンテナに対して利用可能な機能を、`--privileged` モードで実行せずに、`--cap-add` および `--cap-drop` フラグを使用して操作できます。
+`--privileged` モードで実行せずに、`--cap-add` および `--cap-drop` フラグを使用して、コンテナに利用可能な機能を操作できます。
 
 ### Seccomp
 
@@ -134,7 +134,7 @@ Seccomp_filters:	1
 ```
 {{#endtab}}
 
-{{#tab name="特権コンテナ内"}}
+{{#tab name="Inside Privileged Container"}}
 ```bash
 # docker run --rm --privileged -it alpine sh
 grep Seccomp /proc/1/status
@@ -147,11 +147,11 @@ Seccomp_filters:	0
 # You can manually disable seccomp in docker with
 --security-opt seccomp=unconfined
 ```
-また、Docker（または他のCRIs）が**Kubernetes**クラスターで使用されるとき、**seccompフィルターはデフォルトで無効**になっていることに注意してください。
+また、**Kubernetes** クラスターで Docker（または他の CRI）が使用されるとき、**seccomp フィルターはデフォルトで無効**になります。
 
 ### AppArmor
 
-**AppArmor**は、**コンテナ**を**制限された**リソースのセットに制限するためのカーネル拡張です。**プログラムごとのプロファイル**を使用します。`--privileged`フラグを使用して実行すると、この保護は無効になります。
+**AppArmor** は、**コンテナ** を **制限された** **リソース** のセットに制限するためのカーネル拡張です。これは **プログラムごとのプロファイル** を使用します。`--privileged` フラグを使用して実行すると、この保護は無効になります。
 
 {{#ref}}
 apparmor.md
@@ -175,7 +175,7 @@ apparmor.md
 
 ### ネームスペース
 
-ネームスペースは **`--privileged`** フラグの影響を **受けません**。セキュリティ制約が有効でないにもかかわらず、例えば **システム上のすべてのプロセスやホストネットワークを見ることはできません**。ユーザーは **`--pid=host`、`--net=host`、`--ipc=host`、`--uts=host`** コンテナエンジンフラグを使用して個々のネームスペースを無効にできます。
+ネームスペースは **`--privileged`** フラグの影響を **受けません**。セキュリティ制約が有効になっていないにもかかわらず、例えば **システム上のすべてのプロセスやホストネットワークを見ることはできません**。ユーザーは **`--pid=host`、`--net=host`、`--ipc=host`、`--uts=host`** コンテナエンジンフラグを使用して、個々のネームスペースを無効にすることができます。
 
 {{#tabs}}
 {{#tab name="Inside default privileged container"}}
@@ -203,7 +203,7 @@ PID   USER     TIME  COMMAND
 
 ### ユーザー名前空間
 
-**デフォルトでは、コンテナエンジンはユーザー名前空間を利用しませんが、ルートレスコンテナはファイルシステムのマウントや複数のUIDを使用するためにそれを必要とします。** ルートレスコンテナに不可欠なユーザー名前空間は無効にできず、特権を制限することでセキュリティを大幅に向上させます。
+**デフォルトでは、コンテナエンジンはユーザー名前空間を利用しませんが、rootlessコンテナはファイルシステムのマウントや複数のUIDを使用するためにそれを必要とします。** ユーザー名前空間はrootlessコンテナに不可欠であり、無効にすることはできず、特権を制限することでセキュリティを大幅に向上させます。
 
 ## 参考文献
 

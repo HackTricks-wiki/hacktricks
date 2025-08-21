@@ -8,11 +8,13 @@ macOSに不慣れな場合は、macOSの基本を学び始めるべきです：
 
 - 特殊なmacOS **ファイルと権限：**
 
+
 {{#ref}}
 macos-files-folders-and-binaries/
 {{#endref}}
 
 - 一般的なmacOS **ユーザー**
+
 
 {{#ref}}
 macos-users.md
@@ -20,17 +22,20 @@ macos-users.md
 
 - **AppleFS**
 
+
 {{#ref}}
 macos-applefs.md
 {{#endref}}
 
-- k**ernel**の**アーキテクチャ**
+- **カーネル**の**アーキテクチャ**
+
 
 {{#ref}}
 mac-os-architecture/
 {{#endref}}
 
-- 一般的なmacOS n**etworkサービスとプロトコル**
+- 一般的なmacOS n**ネットワークサービスとプロトコル**
+
 
 {{#ref}}
 macos-protocols.md
@@ -41,7 +46,8 @@ macos-protocols.md
 
 ### MacOS MDM
 
-企業の**macOS**システムは、**MDMで管理される**可能性が非常に高いです。したがって、攻撃者の視点からは、**それがどのように機能するか**を知ることが興味深いです：
+企業では、**macOS**システムはMDMで**管理される**可能性が非常に高いです。したがって、攻撃者の視点からは、**それがどのように機能するか**を知ることが興味深いです：
+
 
 {{#ref}}
 ../macos-red-teaming/macos-mdm/
@@ -49,11 +55,13 @@ macos-protocols.md
 
 ### MacOS - 検査、デバッグ、ファジング
 
+
 {{#ref}}
 macos-apps-inspecting-debugging-and-fuzzing/
 {{#endref}}
 
 ## MacOS Security Protections
+
 
 {{#ref}}
 macos-security-protections/
@@ -68,12 +76,13 @@ macos-security-protections/
 
 - 使用されたファイルはすでにユーザーによって作成されている（ユーザーが所有）
 - 使用されたファイルはグループのためにユーザーによって書き込み可能
-- 使用されたファイルはユーザーが所有するディレクトリ内にある（ユーザーがファイルを作成できる）
-- 使用されたファイルはrootが所有するディレクトリ内にあるが、ユーザーはグループのために書き込みアクセスを持っている（ユーザーがファイルを作成できる）
+- 使用されたファイルはユーザーが所有するディレクトリ内にある（ユーザーはファイルを作成できる）
+- 使用されたファイルはrootが所有するディレクトリ内にあるが、ユーザーはグループのために書き込みアクセスを持っている（ユーザーはファイルを作成できる）
 
-**rootによって使用される**ファイルを**作成する**ことができると、ユーザーはその**内容を利用する**ことができたり、別の場所を指す**シンボリックリンク/ハードリンク**を作成することができます。
+**rootによって使用される**ファイルを**作成できる**ことは、ユーザーがその**内容を利用する**ことを可能にし、さらには**シンボリックリンク/ハードリンク**を作成して別の場所を指すこともできます。
 
 この種の脆弱性については、**脆弱な`.pkg`インストーラーを確認することを忘れないでください**：
+
 
 {{#ref}}
 macos-files-folders-and-binaries/macos-installers-abuse.md
@@ -83,23 +92,25 @@ macos-files-folders-and-binaries/macos-installers-abuse.md
 
 ファイル拡張子によって登録された奇妙なアプリは悪用される可能性があり、異なるアプリケーションが特定のプロトコルを開くために登録されることがあります。
 
+
 {{#ref}}
 macos-file-extension-apps.md
 {{#endref}}
 
 ## macOS TCC / SIP 権限昇格
 
-macOSでは、**アプリケーションやバイナリが**フォルダや設定にアクセスする権限を持つことができ、他のものよりも特権的になります。
+macOSでは、**アプリケーションとバイナリがフォルダや設定にアクセスする権限を持つ**ことがあり、これにより他のものよりも特権が与えられます。
 
 したがって、macOSマシンを成功裏に侵害したい攻撃者は、**TCC権限を昇格させる**必要があります（または、ニーズに応じて**SIPをバイパスする**必要があります）。
 
-これらの権限は通常、アプリケーションが署名されている**権利**の形で与えられるか、アプリケーションがいくつかのアクセスを要求し、**ユーザーがそれらを承認した後**に**TCCデータベース**に見つけることができます。プロセスがこれらの権限を取得する別の方法は、**その権限を持つプロセスの子プロセス**であることです。これらの権限は通常**継承されます**。
+これらの権限は通常、アプリケーションが署名されている**権利**の形で与えられるか、アプリケーションがいくつかのアクセスを要求し、**ユーザーがそれらを承認した後**に**TCCデータベース**に見つかります。プロセスがこれらの権限を取得する別の方法は、これらの**権限**を持つプロセスの**子プロセス**であることです。これらは通常**継承されます**。
 
-これらのリンクをたどって、TCCでの[**権限昇格の異なる方法**](macos-security-protections/macos-tcc/index.html#tcc-privesc-and-bypasses)、[**TCCをバイパスする方法**](macos-security-protections/macos-tcc/macos-tcc-bypasses/index.html)、および過去に[**SIPがバイパスされた方法**](macos-security-protections/macos-sip.md#sip-bypasses)を見つけてください。
+これらのリンクをたどって、[**TCCでの権限昇格のさまざまな方法**](macos-security-protections/macos-tcc/index.html#tcc-privesc-and-bypasses)、[**TCCをバイパスする方法**](macos-security-protections/macos-tcc/macos-tcc-bypasses/index.html)、および過去に[**SIPがバイパスされた方法**](macos-security-protections/macos-sip.md#sip-bypasses)を見つけてください。
 
 ## macOS 伝統的権限昇格
 
-もちろん、レッドチームの視点からは、rootに昇格することにも興味があるべきです。以下の投稿をチェックして、いくつかのヒントを得てください：
+もちろん、レッドチームの視点からは、rootに昇格することにも興味があるはずです。いくつかのヒントについては、以下の投稿を確認してください：
+
 
 {{#ref}}
 macos-privilege-escalation.md

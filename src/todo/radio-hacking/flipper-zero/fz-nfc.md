@@ -17,7 +17,7 @@ RFIDとNFCに関する情報は、以下のページを確認してください�
 
 新しいタイプのNFCカードがサポートカードのリストに追加されます。Flipper Zeroは以下の**NFCカードタイプA**（ISO 14443A）をサポートしています：
 
-- **銀行カード（EMV）** — UID、SAK、ATQAのみを読み取り、保存はしません。
+- **銀行カード（EMV）** — UID、SAK、ATQAのみを読み取り、保存しません。
 - **不明なカード** — UID、SAK、ATQAを読み取り、UIDをエミュレートします。
 
 **NFCカードタイプB、タイプF、タイプV**については、Flipper ZeroはUIDを読み取ることができますが、保存はできません。
@@ -28,7 +28,7 @@ RFIDとNFCに関する情報は、以下のページを確認してください�
 
 Flipper Zeroは銀行カードのUID、SAK、ATQA、保存されたデータを**保存せずに**読み取ることができます。
 
-銀行カード読み取り画面銀行カードについて、Flipper Zeroはデータを**保存せずに読み取り、エミュレートすることはできません**。
+銀行カード読み取り画面銀行カードについて、Flipper Zeroはデータを**保存せずにエミュレートすることもできません**。
 
 <figure><img src="https://cdn.flipperzero.one/Monosnap_Miro_2022-08-17_12-26-31.png?auto=format&ixlib=react-9.1.1&h=916&w=2662" alt=""><figcaption></figcaption></figure>
 
@@ -42,7 +42,7 @@ Flipper Zeroが**NFCカードのタイプを特定できない場合**、UID、S
 
 ### NFC cards types B, F, and V <a href="#wyg51" id="wyg51"></a>
 
-**NFCカードタイプB、F、V**について、Flipper ZeroはUIDを**読み取り、表示することができますが、保存はできません**。
+**NFCカードタイプB、F、V**について、Flipper ZeroはUIDを**読み取り、表示**することができますが、保存はできません。
 
 <figure><img src="https://archbee.imgix.net/3StCFqarJkJQZV-7N79yY/zBU55Fyj50TFO4U7S-OXH_screenshot-2022-08-12-at-182540.png?auto=format&ixlib=react-9.1.1&h=1080&w=2704" alt=""><figcaption></figcaption></figure>
 
@@ -52,7 +52,7 @@ NFCについてのイントロは[**このページを読んでください**](.
 
 ### Read
 
-Flipper Zeroは**NFCカードを読み取ることができますが、ISO 14443に基づくすべてのプロトコルを理解しているわけではありません**。ただし、**UIDは低レベルの属性であるため**、**UIDがすでに読み取られているが、高レベルのデータ転送プロトコルがまだ不明な状況**に直面することがあります。Flipperを使用して、UIDを認証に使用する原始的なリーダーのためにUIDを読み取り、エミュレートし、手動で入力することができます。
+Flipper Zeroは**NFCカードを読み取る**ことができますが、**ISO 14443に基づくすべてのプロトコルを理解しているわけではありません**。ただし、**UIDは低レベルの属性であるため**、**UIDがすでに読み取られているが、高レベルのデータ転送プロトコルがまだ不明な状況**に遭遇することがあります。Flipperを使用して、UIDを認証に使用する原始的なリーダーのために、UIDを読み取り、エミュレートし、手動で入力することができます。
 
 #### Reading the UID VS Reading the Data Inside <a href="#reading-the-uid-vs-reading-the-data-inside" id="reading-the-uid-vs-reading-the-data-inside"></a>
 
@@ -60,7 +60,7 @@ Flipper Zeroは**NFCカードを読み取ることができますが、ISO 14443
 
 Flipperでは、13.56 MHzタグの読み取りは2つの部分に分けられます：
 
-- **低レベルの読み取り** — UID、SAK、ATQAのみを読み取ります。Flipperは、カードから読み取ったこのデータに基づいて高レベルのプロトコルを推測しようとします。これは特定の要因に基づく仮定に過ぎないため、100%確実ではありません。
+- **低レベルの読み取り** — UID、SAK、ATQAのみを読み取ります。Flipperは、カードから読み取ったこのデータに基づいて高レベルのプロトコルを推測しようとします。これは、特定の要因に基づく仮定に過ぎないため、100%確実ではありません。
 - **高レベルの読み取り** — 特定の高レベルプロトコルを使用してカードのメモリからデータを読み取ります。これは、Mifare Ultralightのデータを読み取ったり、Mifare Classicのセクターを読み取ったり、PayPass/Apple Payからカードの属性を読み取ったりすることです。
 
 ### Read Specific

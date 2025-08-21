@@ -4,13 +4,13 @@
 
 ## 基本情報
 
-MacOS Sandbox（最初はSeatbeltと呼ばれていました）は、**サンドボックス内で実行されるアプリケーションを、アプリが実行されているサンドボックスプロファイルで指定された**許可されたアクションに**制限します**。これにより、**アプリケーションが予期されるリソースのみをアクセスすることが保証されます**。
+MacOS Sandbox（最初はSeatbeltと呼ばれていました）は、**サンドボックス内で実行されるアプリケーション**を、アプリが実行されている**サンドボックスプロファイルで指定された許可されたアクション**に制限します。これにより、**アプリケーションが予期されるリソースのみをアクセスすることが保証されます**。
 
-**`com.apple.security.app-sandbox`**という**権限**を持つアプリは、サンドボックス内で実行されます。**Appleのバイナリ**は通常サンドボックス内で実行され、**App Storeのすべてのアプリケーションはその権限を持っています**。したがって、いくつかのアプリケーションはサンドボックス内で実行されます。
+**`com.apple.security.app-sandbox`**という**権限**を持つアプリは、サンドボックス内で実行されます。**Appleのバイナリ**は通常サンドボックス内で実行され、**App Store**のすべてのアプリケーションはその権限を持っています。したがって、いくつかのアプリケーションはサンドボックス内で実行されます。
 
-プロセスが何をできるか、またはできないかを制御するために、**サンドボックスはほぼすべての操作にフックを持っています**（ほとんどのシステムコールを含む）**MACF**を使用しています。しかし、アプリの**権限**に応じて、サンドボックスはプロセスに対してより許可的になる場合があります。
+プロセスが何をできるか、またはできないかを制御するために、**サンドボックスはほぼすべての操作にフック**を持っています（ほとんどのシステムコールを含む）**MACF**を使用しています。ただし、アプリの**権限**に応じて、サンドボックスはプロセスに対してより許可的になる場合があります。
 
-サンドボックスの重要なコンポーネントは以下の通りです：
+サンドボックスの重要なコンポーネントは次のとおりです：
 
 - **カーネル拡張** `/System/Library/Extensions/Sandbox.kext`
 - **プライベートフレームワーク** `/System/Library/PrivateFrameworks/AppSandbox.framework`
@@ -54,9 +54,9 @@ drwx------   2 username  staff    64 Mar 24 18:02 SystemData
 drwx------   2 username  staff    64 Mar 24 18:02 tmp
 ```
 > [!CAUTION]
-> サンドボックスから「脱出」して他のフォルダにアクセスするためにシンボリックリンクがあっても、アプリはそれらにアクセスするための**権限を持っている必要があります**。これらの権限は`RedirectablePaths`の**`.plist`**内にあります。
+> 注意してください。シンボリックリンクがSandboxから「脱出」して他のフォルダにアクセスするために存在していても、アプリはそれらにアクセスするための**権限を持っている必要があります**。これらの権限は`RedirectablePaths`の**`.plist`**内にあります。
 
-**`SandboxProfileData`**は、B64にエスケープされたコンパイル済みサンドボックスプロファイルCFDataです。
+**`SandboxProfileData`**は、B64にエスケープされたコンパイル済みのサンドボックスプロファイルCFDataです。
 ```bash
 # Get container config
 ## You need FDA to access the file, not even just root can read it
@@ -106,13 +106,13 @@ AAAhAboBAAAAAAgAAABZAO4B5AHjBMkEQAUPBSsGPwsgASABHgEgASABHwEf...
 [...]
 ```
 > [!WARNING]
-> サンドボックスアプリケーションによって作成または変更されたすべてのものには、**隔離属性**が付与されます。これは、サンドボックスアプリが**`open`**を使用して何かを実行しようとした場合に、Gatekeeperをトリガーすることによってサンドボックス空間を防ぎます。
+> サンドボックスアプリケーションによって作成または変更されたすべてのものには、**隔離属性**が付与されます。これは、サンドボックスアプリが**`open`**を使用して何かを実行しようとした場合に、Gatekeeperをトリガーしてサンドボックススペースを防ぐことになります。
 
 ## サンドボックスプロファイル
 
 サンドボックスプロファイルは、その**サンドボックス**で何が**許可/禁止**されるかを示す設定ファイルです。これは、[**Scheme**](<https://en.wikipedia.org/wiki/Scheme_(programming_language)>)プログラミング言語を使用する**サンドボックスプロファイル言語（SBPL）**を使用します。
 
-ここに例があります：
+ここに例があります:
 ```scheme
 (version 1) ; First you get the version
 
@@ -131,15 +131,15 @@ AAAhAboBAAAAAAgAAABZAO4B5AHjBMkEQAUPBSsGPwsgASABHgEgASABHwEf...
 )
 ```
 > [!TIP]
-> この[**研究**](https://reverse.put.as/2011/09/14/apple-sandbox-guide-v1-0/)を確認して、許可または拒否される可能性のあるアクションを確認してください。
+> この[**研究**](https://reverse.put.as/2011/09/14/apple-sandbox-guide-v1-0/)を確認して、許可または拒否される可能性のあるアクションをさらに確認してください。
 >
-> プロファイルのコンパイル版では、操作の名前がdylibおよびkextによって知られている配列のエントリに置き換えられ、コンパイル版が短く、読みづらくなります。
+> プロファイルのコンパイル版では、操作の名前がdylibおよびkextによって知られる配列のエントリに置き換えられ、コンパイル版が短く、読みづらくなります。
 
 重要な**システムサービス**も、`mdnsresponder`サービスのように独自のカスタム**サンドボックス**内で実行されます。これらのカスタム**サンドボックスプロファイル**は以下で確認できます：
 
 - **`/usr/share/sandbox`**
 - **`/System/Library/Sandbox/Profiles`**
-- 他のサンドボックスプロファイルは[https://github.com/s7ephen/OSX-Sandbox--Seatbelt--Profiles](https://github.com/s7ephen/OSX-Sandbox--Seatbelt--Profiles)で確認できます。
+- その他のサンドボックスプロファイルは[https://github.com/s7ephen/OSX-Sandbox--Seatbelt--Profiles](https://github.com/s7ephen/OSX-Sandbox--Seatbelt--Profiles)で確認できます。
 
 **App Store**アプリは**プロファイル****`/System/Library/Sandbox/Profiles/application.sb`**を使用します。このプロファイルで、**`com.apple.security.network.server`**のような権限がプロセスにネットワークを使用することを許可する方法を確認できます。
 
@@ -199,13 +199,13 @@ log show --style syslog --predicate 'eventMessage contains[c] "sandbox"' --last 
 {{#endtab}}
 {{#endtabs}}
 
-> [!NOTE]
-> **Apple**が作成した**ソフトウェア**は**Windows**上で**追加のセキュリティ対策**を持っていないことに注意してください。アプリケーションサンドボックスなど。
+> [!TIP]
+> **Appleが作成した** **ソフトウェア**は、**Windows**上で**追加のセキュリティ対策**、例えばアプリケーションサンドボックスがありません。
 
 バイパスの例:
 
 - [https://lapcatsoftware.com/articles/sandbox-escape.html](https://lapcatsoftware.com/articles/sandbox-escape.html)
-- [https://desi-jarvis.medium.com/office365-macos-sandbox-escape-fcce4fa4123c](https://desi-jarvis.medium.com/office365-macos-sandbox-escape-fcce4fa4123c)（彼らは`~$`で始まる名前のファイルをサンドボックスの外に書き込むことができます）。
+- [https://desi-jarvis.medium.com/office365-macos-sandbox-escape-fcce4fa4123c](https://desi-jarvis.medium.com/office365-macos-sandbox-escape-fcce4fa4123c) (彼らは`~$`で始まる名前のファイルをサンドボックスの外に書き込むことができます)。
 
 ### サンドボックストレース
 
@@ -216,18 +216,18 @@ log show --style syslog --predicate 'eventMessage contains[c] "sandbox"' --last 
 (version 1)
 (trace /tmp/trace.out)
 ```
-その後、そのプロファイルを使用して何かを実行します:
+そのプロファイルを使用して何かを実行します:
 ```bash
 sandbox-exec -f /tmp/trace.sb /bin/ls
 ```
-`/tmp/trace.out` では、呼び出されるたびに実行された各サンドボックスチェックを見ることができます（つまり、多くの重複があります）。
+`/tmp/trace.out` では、呼び出されるたびに実行される各サンドボックスチェックを見ることができます（つまり、多くの重複があります）。
 
 **`-t`** パラメータを使用してサンドボックスをトレースすることも可能です: `sandbox-exec -t /path/trace.out -p "(version 1)" /bin/ls`
 
 #### API経由
 
-`libsystem_sandbox.dylib` にエクスポートされた関数 `sandbox_set_trace_path` は、サンドボックスチェックが書き込まれるトレースファイル名を指定することを可能にします。\
-`sandbox_vtrace_enable()` を呼び出し、その後 `sandbox_vtrace_report()` を呼び出してバッファからログエラーを取得することでも、同様のことが可能です。
+`libsystem_sandbox.dylib` にエクスポートされている関数 `sandbox_set_trace_path` は、サンドボックスチェックが書き込まれるトレースファイル名を指定することを可能にします。\
+`sandbox_vtrace_enable()` を呼び出し、その後 `sandbox_vtrace_report()` を呼び出すことでバッファからログエラーを取得することも可能です。
 
 ### サンドボックス検査
 
@@ -235,7 +235,7 @@ sandbox-exec -f /tmp/trace.sb /bin/ls
 
 ### MacOS & iOS サンドボックスプロファイル
 
-MacOS は、システムサンドボックスプロファイルを **/usr/share/sandbox/** と **/System/Library/Sandbox/Profiles** の2つの場所に保存します。
+MacOS は、システムサンドボックスプロファイルを2つの場所に保存します: **/usr/share/sandbox/** と **/System/Library/Sandbox/Profiles**。
 
 サードパーティアプリケーションが _**com.apple.security.app-sandbox**_ 権限を持っている場合、システムはそのプロセスに **/System/Library/Sandbox/Profiles/application.sb** プロファイルを適用します。
 
@@ -243,7 +243,7 @@ iOS では、デフォルトプロファイルは **container** と呼ばれ、S
 
 ### App Store アプリのカスタム SBPL
 
-企業が **カスタムサンドボックスプロファイル** でアプリを実行することが可能かもしれません（デフォルトのものではなく）。彼らは、Apple によって承認される必要がある **`com.apple.security.temporary-exception.sbpl`** 権限を使用する必要があります。
+企業がアプリを **カスタムサンドボックスプロファイル** で実行することが可能です（デフォルトのものではなく）。彼らは **`com.apple.security.temporary-exception.sbpl`** 権限を使用する必要があり、これは Apple によって承認される必要があります。
 
 この権限の定義は **`/System/Library/Sandbox/Profiles/application.sb:`** で確認できます。
 ```scheme
@@ -253,21 +253,21 @@ iOS では、デフォルトプロファイルは **container** と呼ばれ、S
 (let* ((port (open-input-string string)) (sbpl (read port)))
 (with-transparent-redirection (eval sbpl)))))
 ```
-この権限の後の文字列は、Sandboxプロファイルとして**eval**されます。
+この権限の後の文字列を**eval**し、Sandboxプロファイルとして扱います。
 
 ### Sandboxプロファイルのコンパイルとデコンパイル
 
 **`sandbox-exec`**ツールは、`libsandbox.dylib`の`sandbox_compile_*`関数を使用します。エクスポートされる主な関数は次のとおりです：`sandbox_compile_file`（ファイルパスを期待、パラメータ`-f`）、`sandbox_compile_string`（文字列を期待、パラメータ`-p`）、`sandbox_compile_name`（コンテナの名前を期待、パラメータ`-n`）、`sandbox_compile_entitlements`（権限plistを期待）。
 
-この逆コンパイルされた[**オープンソース版のsandbox-execツール**](https://newosxbook.com/src.jl?tree=listings&file=/sandbox_exec.c)は、**`sandbox-exec`**がコンパイルされたSandboxプロファイルをファイルに書き込むことを可能にします。
+この逆コンパイルされた[**sandbox-execツールのオープンソース版**](https://newosxbook.com/src.jl?tree=listings&file=/sandbox_exec.c)は、**`sandbox-exec`**がコンパイルされたSandboxプロファイルをファイルに書き込むことを可能にします。
 
-さらに、プロセスをコンテナ内に制限するために、`sandbox_spawnattrs_set[container/profilename]`を呼び出し、コンテナまたは既存のプロファイルを渡すことがあります。
+さらに、コンテナ内でプロセスを制限するために、`sandbox_spawnattrs_set[container/profilename]`を呼び出し、コンテナまたは既存のプロファイルを渡すことがあります。
 
 ## Sandboxのデバッグとバイパス
 
-macOSでは、プロセスがカーネルによって最初からサンドボックス化されるiOSとは異なり、**プロセスは自らサンドボックスに参加する必要があります**。これは、macOSではプロセスが積極的にサンドボックスに入ることを決定するまで、サンドボックスによって制限されないことを意味しますが、App Storeアプリは常にサンドボックス化されています。
+macOSでは、iOSとは異なり、プロセスはカーネルによって最初からサンドボックス化されているわけではなく、**プロセスは自らサンドボックスに参加する必要があります**。これは、macOSではプロセスが積極的にサンドボックスに入ることを決定するまで、サンドボックスによって制限されないことを意味しますが、App Storeアプリは常にサンドボックス化されています。
 
-プロセスは、権限`com.apple.security.app-sandbox`を持っている場合、ユーザーランドから自動的にサンドボックス化されます。このプロセスの詳細な説明については、次を確認してください：
+プロセスは、権限`com.apple.security.app-sandbox`を持っている場合、ユーザーランドから自動的にサンドボックス化されます。このプロセスの詳細な説明については、以下を確認してください：
 
 {{#ref}}
 macos-sandbox-debug-and-bypass/
@@ -275,7 +275,7 @@ macos-sandbox-debug-and-bypass/
 
 ## **Sandbox拡張**
 
-拡張はオブジェクトにさらなる権限を与えることを可能にし、次の関数のいずれかを呼び出すことで与えられます：
+拡張はオブジェクトにさらなる権限を与えることを可能にし、次の関数のいずれかを呼び出すことで行われます：
 
 - `sandbox_issue_extension`
 - `sandbox_extension_issue_file[_with_new_type]`
@@ -354,25 +354,25 @@ iOSでは、カーネル拡張が`__TEXT.__const`セグメント内に**すべ�
 
 - **`hook_policy_init`**: `mpo_policy_init`をフックし、`mac_policy_register`の後に呼び出されます。サンドボックスの初期化のほとんどを実行します。また、SIPも初期化します。
 - **`hook_policy_initbsd`**: `security.mac.sandbox.sentinel`、`security.mac.sandbox.audio_active`、および`security.mac.sandbox.debug_mode`を登録するsysctlインターフェースを設定します（`PE_i_can_has_debugger`でブートされた場合）。
-- **`hook_policy_syscall`**: "Sandbox"を最初の引数、操作を示すコードを2番目の引数として`mac_syscall`によって呼び出されます。スイッチを使用して、要求されたコードに応じて実行するコードを見つけます。
+- **`hook_policy_syscall`**: "Sandbox"を最初の引数として、操作を示すコードを2番目の引数として`mac_syscall`によって呼び出されます。要求されたコードに応じて実行するコードを見つけるためにスイッチが使用されます。
 
 ### MACF Hooks
 
-**`Sandbox.kext`**は、MACFを介して100以上のフックを使用します。ほとんどのフックは、アクションを実行できるかどうかを確認するための些細なケースをチェックし、そうでない場合は**`cred_sb_evalutate`**を呼び出し、**操作**を実行するための**資格情報**と**出力**用の**バッファ**を渡します。
+**`Sandbox.kext`**は、MACFを介して100以上のフックを使用しています。ほとんどのフックは、アクションを実行できるかどうかを確認するための些細なケースをチェックし、そうでない場合は**`cred_sb_evalutate`**を呼び出し、**操作**を実行するための**資格情報**と出力用の**バッファ**を渡します。
 
-その良い例が、**`_mpo_file_check_mmap`**関数で、これは**`mmap`**をフックし、新しいメモリが書き込み可能かどうかをチェックし（そうでない場合は実行を許可）、次にそれがdyld共有キャッシュに使用されているかどうかをチェックし、そうであれば実行を許可し、最後に**`sb_evaluate_internal`**（またはそのラッパーの1つ）を呼び出してさらなる許可チェックを実行します。
+その良い例が、フックされた**`_mpo_file_check_mmap`**関数で、これは**`mmap`**をフックし、新しいメモリが書き込み可能かどうかをチェックし（そうでない場合は実行を許可）、次にそれがdyld共有キャッシュに使用されているかどうかをチェックし、そうであれば実行を許可し、最後に**`sb_evaluate_internal`**（またはそのラッパーの1つ）を呼び出してさらなる許可チェックを実行します。
 
 さらに、サンドボックスが使用する数百のフックの中で、特に興味深い3つがあります。
 
-- `mpo_proc_check_for`: 必要に応じてプロファイルを適用し、以前に適用されていない場合。
+- `mpo_proc_check_for`: 必要に応じてプロファイルを適用し、以前に適用されていなかった場合。
 - `mpo_vnode_check_exec`: プロセスが関連するバイナリをロードするときに呼び出され、プロファイルチェックとSUID/SGID実行を禁止するチェックが行われます。
 - `mpo_cred_label_update_execve`: ラベルが割り当てられるときに呼び出されます。これは、バイナリが完全にロードされるがまだ実行されていないときに呼び出されるため、最も長いものです。サンドボックスオブジェクトの作成、kauth資格情報へのサンドボックス構造の添付、machポートへのアクセスの削除などのアクションを実行します。
 
-**`_cred_sb_evalutate`**は**`sb_evaluate_internal`**のラッパーであり、この関数は渡された資格情報を取得し、次に**`eval`**関数を使用して評価を実行します。この関数は通常、すべてのプロセスにデフォルトで適用される**プラットフォームプロファイル**を評価し、その後**特定のプロセスプロファイル**を評価します。プラットフォームプロファイルは、macOSの**SIP**の主要なコンポーネントの1つです。
+**`_cred_sb_evalutate`**は**`sb_evaluate_internal`**のラッパーであり、この関数は渡された資格情報を取得し、次に**`eval`**関数を使用して評価を実行します。この関数は通常、すべてのプロセスにデフォルトで適用される**プラットフォームプロファイル**を評価し、その後**特定のプロセスプロファイル**を評価します。プラットフォームプロファイルは、macOSの**SIP**の主要なコンポーネントの1つであることに注意してください。
 
 ## Sandboxd
 
-サンドボックスには、XPC Machサービス`com.apple.sandboxd`を公開し、カーネル拡張が通信に使用する特別なポート14（`HOST_SEATBELT_PORT`）をバインドするユーザーデーモンもあります。MIGを使用していくつかの関数を公開します。
+サンドボックスには、XPC Machサービス`com.apple.sandboxd`を公開し、カーネル拡張が通信に使用する特別なポート14（`HOST_SEATBELT_PORT`）をバインドするユーザーデーモンもあります。MIGを使用していくつかの関数を公開しています。
 
 ## References
 

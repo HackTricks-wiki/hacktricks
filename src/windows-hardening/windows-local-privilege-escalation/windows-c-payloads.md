@@ -4,7 +4,7 @@
 
 このページでは、Windowsのローカル特権昇格やポストエクスプロイト中に便利な**小さく、自己完結したCスニペット**を集めています。各ペイロードは**コピー＆ペーストしやすい**ように設計されており、Windows API / Cランタイムのみを必要とし、`i686-w64-mingw32-gcc` (x86) または `x86_64-w64-mingw32-gcc` (x64) でコンパイルできます。
 
-> ⚠️  これらのペイロードは、プロセスがアクションを実行するために必要な最小限の特権（例：`SeDebugPrivilege`、`SeImpersonatePrivilege`、またはUACバイパスのための中程度の整合性コンテキスト）をすでに持っていることを前提としています。これらは、脆弱性を悪用して任意のネイティブコード実行が可能になった**レッドチームまたはCTF設定**を目的としています。
+> ⚠️  これらのペイロードは、プロセスがアクションを実行するために必要な最小限の特権（例：`SeDebugPrivilege`、`SeImpersonatePrivilege`、またはUACバイパスのための中程度の整合性コンテキスト）をすでに持っていることを前提としています。これらは、脆弱性を悪用して任意のネイティブコード実行が可能な**レッドチームまたはCTF設定**を目的としています。
 
 ---
 
@@ -23,7 +23,7 @@ return 0;
 ## UACバイパス – `fodhelper.exe` レジストリハイジャック (中 → 高整合性)
 信頼されたバイナリ **`fodhelper.exe`** が実行されると、以下のレジストリパスを **`DelegateExecute` 動詞をフィルタリングせずに** クエリします。このキーの下にコマンドを植え付けることで、攻撃者はファイルをディスクに落とすことなくUACをバイパスできます。
 
-*`fodhelper.exe` によってクエリされるレジストリパス*
+*`fodhelper.exe` によってクエリされたレジストリパス*
 ```
 HKCU\Software\Classes\ms-settings\Shell\Open\command
 ```
@@ -61,7 +61,7 @@ system("fodhelper.exe");
 return 0;
 }
 ```
-*Windows 10 22H2およびWindows 11 23H2（2025年7月のパッチ）でテスト済み。このバイパスは、Microsoftが`DelegateExecute`パスの欠落した整合性チェックを修正していないため、まだ機能します。*
+*Windows 10 22H2およびWindows 11 23H2（2025年7月のパッチ）でテスト済み。バイパスはまだ機能します。なぜなら、Microsoftは`DelegateExecute`パスの欠落した整合性チェックを修正していないからです。*
 
 ---
 
@@ -115,6 +115,7 @@ return 0;
 }
 ```
 For a deeper explanation of how that works see:
+
 {{#ref}}
 sedebug-+-seimpersonate-copy-token.md
 {{#endref}}

@@ -6,29 +6,29 @@
 
 <figure><img src="../../../../../images/image (901).png" alt=""><figcaption><p>Image from <a href="http://newosxbook.com/files/HITSB.pdf">http://newosxbook.com/files/HITSB.pdf</a></p></figcaption></figure>
 
-前の画像では、**アプリケーションが権限** **`com.apple.security.app-sandbox`** **を持っている場合、サンドボックスがどのように読み込まれるか**を観察できます。
+前の画像では、**`com.apple.security.app-sandbox`** の権限を持つアプリケーションが実行されるときに**サンドボックスがどのようにロードされるか**を観察できます。
 
-コンパイラは、バイナリに`/usr/lib/libSystem.B.dylib`をリンクします。
+コンパイラはバイナリに `/usr/lib/libSystem.B.dylib` をリンクします。
 
-次に、**`libSystem.B`**は他のいくつかの関数を呼び出し、**`xpc_pipe_routine`**がアプリの権限を**`securityd`**に送信します。Securitydは、プロセスがサンドボックス内で隔離されるべきかどうかを確認し、そうであれば隔離します。\
-最後に、サンドボックスは**`__sandbox_ms`**への呼び出しでアクティブ化され、**`__mac_syscall`**が呼び出されます。
+その後、**`libSystem.B`** は他のいくつかの関数を呼び出し、**`xpc_pipe_routine`** がアプリの権限を **`securityd`** に送信します。Securitydはプロセスがサンドボックス内で隔離されるべきかどうかを確認し、そうであれば隔離します。\
+最後に、サンドボックスは **`__sandbox_ms`** への呼び出しによってアクティブ化され、これが **`__mac_syscall`** を呼び出します。
 
 ## Possible Bypasses
 
 ### Bypassing quarantine attribute
 
-**サンドボックス化されたプロセスによって作成されたファイル**には、サンドボックスからの脱出を防ぐために**隔離属性**が追加されます。しかし、もしあなたが**隔離属性なしで`.app`フォルダを作成することができれば**、アプリバンドルのバイナリを**`/bin/bash`**にポイントさせ、**plist**にいくつかの環境変数を追加して**`open`**を悪用し、**新しいアプリをサンドボックスなしで起動**することができます。
+**サンドボックス化されたプロセスによって作成されたファイル** には、サンドボックスからの脱出を防ぐために**隔離属性**が追加されます。しかし、もしあなたが**隔離属性なしで `.app` フォルダを作成することができれば**、アプリバンドルのバイナリを **`/bin/bash`** にポイントさせ、**plist** にいくつかの環境変数を追加して **`open`** を悪用し、**新しいアプリをサンドボックスなしで起動する**ことができます。
 
-これは[**CVE-2023-32364**](https://gergelykalman.com/CVE-2023-32364-a-macOS-sandbox-escape-by-mounting.html)**で行われました。**
+これは [**CVE-2023-32364**](https://gergelykalman.com/CVE-2023-32364-a-macOS-sandbox-escape-by-mounting.html)** で行われたことです。**
 
 > [!CAUTION]
-> したがって、現時点では、**隔離属性なしで`.app`**で終わる名前のフォルダを作成できる場合、サンドボックスから脱出できます。なぜなら、macOSは**`.app`フォルダ**と**メイン実行可能ファイル**の**隔離**属性のみを**チェック**するからです（そして、私たちはメイン実行可能ファイルを**`/bin/bash`**にポイントさせます）。
+> したがって、現時点では、**隔離属性なしで `.app`** で終わる名前のフォルダを作成できる場合、サンドボックスから脱出できます。なぜなら、macOSは**`.app` フォルダ**と**メイン実行可能ファイル**の**隔離**属性のみを**チェック**するからです（そして、私たちはメイン実行可能ファイルを **`/bin/bash`** にポイントさせます）。
 >
-> すでに実行を許可された.appバンドル（実行を許可するフラグが付いた隔離xttrを持つ）も悪用できます... ただし、今は**`.app`**バンドル内に書き込むことはできません。特権TCC権限がない限り（サンドボックス内では持っていません）。
+> すでに実行を許可された .app バンドル（実行を許可されたフラグが付いた隔離属性を持つ）についても悪用できる可能性があります... ただし、今は**`.app`** バンドル内に書き込むことはできません。なぜなら、サンドボックス内では特権TCC権限を持っていないからです（高いサンドボックス内では持っていません）。
 
 ### Abusing Open functionality
 
-[**Wordサンドボックスバイパスの最後の例**](macos-office-sandbox-bypasses.md#word-sandbox-bypass-via-login-items-and-.zshenv)では、**`open`** CLI機能がサンドボックスをバイパスするために悪用される様子が確認できます。
+[**Wordサンドボックスバイパスの最後の例**](macos-office-sandbox-bypasses.md#word-sandbox-bypass-via-login-items-and-.zshenv)では、**`open`** CLI機能がサンドボックスをバイパスするためにどのように悪用されるかが示されています。
 
 {{#ref}}
 macos-office-sandbox-bypasses.md
@@ -36,16 +36,16 @@ macos-office-sandbox-bypasses.md
 
 ### Launch Agents/Daemons
 
-アプリケーションが**サンドボックス化されることを意図している**（`com.apple.security.app-sandbox`）場合でも、例えば**LaunchAgent**（`~/Library/LaunchAgents`）から実行される場合、サンドボックスをバイパスすることが可能です。\
+アプリケーションが**サンドボックス化されることを意図している** (`com.apple.security.app-sandbox`)場合でも、例えば**LaunchAgent** (`~/Library/LaunchAgents`)から実行される場合、サンドボックスをバイパスすることが可能です。\
 [**この投稿**](https://www.vicarius.io/vsociety/posts/cve-2023-26818-sandbox-macos-tcc-bypass-w-telegram-using-dylib-injection-part-2-3?q=CVE-2023-26818)で説明されているように、サンドボックス化されたアプリケーションで永続性を得たい場合、LaunchAgentとして自動的に実行されるようにし、DyLib環境変数を介して悪意のあるコードを注入することができます。
 
 ### Abusing Auto Start Locations
 
-サンドボックス化されたプロセスが**後にサンドボックスなしで実行されるアプリケーションがバイナリを実行する場所に**書き込むことができれば、**そこにバイナリを置くだけで脱出**できます。この種の場所の良い例は`~/Library/LaunchAgents`や`/System/Library/LaunchDaemons`です。
+サンドボックス化されたプロセスが**書き込むことができる場所**に**後でサンドボックスなしのアプリケーションがバイナリを実行する**場合、そこにバイナリを配置するだけで**脱出**できます。この種の場所の良い例は `~/Library/LaunchAgents` や `/System/Library/LaunchDaemons` です。
 
-これには**2ステップ**が必要な場合があります：**より許可されたサンドボックス**（`file-read*`、`file-write*`）を持つプロセスを作成し、そのプロセスが実際に**サンドボックスなしで実行される場所に書き込む**コードを実行します。
+これには**2ステップ**が必要な場合があります：**より許可されたサンドボックス** (`file-read*`, `file-write*`)を持つプロセスを実行して、実際に**サンドボックスなしで実行される場所に書き込む**コードを実行します。
 
-**Auto Start locations**についてはこのページを確認してください：
+**Auto Start locations**についてのこのページを確認してください：
 
 {{#ref}}
 ../../../../macos-auto-start-locations.md
@@ -53,7 +53,7 @@ macos-office-sandbox-bypasses.md
 
 ### Abusing other processes
 
-サンドボックスプロセスから、**制限の少ない（または全くない）他のプロセスを妥協**できれば、それらのサンドボックスに脱出することができます：
+サンドボックスプロセスから、**制限の少ない（または全くない）他のプロセスを妥協する**ことができれば、それらのサンドボックスに脱出することができます：
 
 {{#ref}}
 ../../../macos-proces-abuse/
@@ -61,11 +61,11 @@ macos-office-sandbox-bypasses.md
 
 ### Available System and User Mach services
 
-サンドボックスは、プロファイル`application.sb`で定義された特定の**Machサービス**と通信することも許可します。これらのサービスの1つを**悪用**できれば、**サンドボックスから脱出**できるかもしれません。
+サンドボックスは、プロファイル `application.sb` で定義された特定の**Machサービス**と通信することも許可します。これらのサービスの1つを**悪用**できれば、**サンドボックスから脱出**できるかもしれません。
 
-[この書き込み](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/)で示されているように、Machサービスに関する情報は`/System/Library/xpc/launchd.plist`に保存されています。`<string>System</string>`および`<string>User</string>`をそのファイル内で検索することで、すべてのシステムおよびユーザMachサービスを見つけることができます。
+[この書き込み](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/)で示されているように、Machサービスに関する情報は `/System/Library/xpc/launchd.plist` に保存されています。`<string>System</string>` と `<string>User</string>` をそのファイル内で検索することで、すべてのシステムおよびユーザMachサービスを見つけることができます。
 
-さらに、`bootstrap_look_up`を呼び出すことで、サンドボックス化されたアプリケーションに利用可能なMachサービスがあるかどうかを確認できます。
+さらに、`bootstrap_look_up` を呼び出すことで、サンドボックス化されたアプリケーションに利用可能なMachサービスを確認することができます。
 ```objectivec
 void checkService(const char *serviceName) {
 mach_port_t service_port = MACH_PORT_NULL;
@@ -90,7 +90,7 @@ checkService(serviceName.UTF8String);
 ```
 ### 利用可能なPID Machサービス
 
-これらのMachサービスは、最初にこの[サンドボックスからの脱出に利用されました](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/)。その時点で、**アプリケーションとそのフレームワークによって必要とされるすべてのXPCサービス**がアプリのPIDドメイン内で表示されていました（これらは`ServiceType`が`Application`のMachサービスです）。
+これらのMachサービスは、最初に[この文書でサンドボックスから脱出するために悪用されました](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/)。その時点で、**アプリケーションとそのフレームワークによって必要とされるすべてのXPCサービス**は、アプリのPIDドメイン内で表示されていました（これらは`ServiceType`が`Application`のMachサービスです）。
 
 **PIDドメインXPCサービスに連絡するためには**、アプリ内で次のような行を使って登録するだけで済みます:
 ```objectivec
@@ -98,12 +98,12 @@ checkService(serviceName.UTF8String);
 ```
 さらに、`System/Library/xpc/launchd.plist` 内で `<string>Application</string>` を検索することで、すべての **Application** Mach サービスを見つけることができます。
 
-有効な xpc サービスを見つける別の方法は、次の場所を確認することです：
+有効な xpc サービスを見つける別の方法は、次の場所を確認することです:
 ```bash
 find /System/Library/Frameworks -name "*.xpc"
 find /System/Library/PrivateFrameworks -name "*.xpc"
 ```
-この技術を悪用したいくつかの例は[**元のレポート**](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/)に見つけることができますが、以下は要約された例です。
+この技術を悪用したいくつかの例は[**元の解説**](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/)に見つけることができますが、以下は要約された例です。
 
 #### /System/Library/PrivateFrameworks/StorageKit.framework/XPCServices/storagekitfsrunner.xpc
 
@@ -132,7 +132,7 @@ NSLog(@"run task result:%@, error:%@", bSucc, error);
 
 このXPCサービスは、常にYESを返すことで、すべてのクライアントを許可し、メソッド`createZipAtPath:hourThreshold:withReply:`は、圧縮するフォルダのパスを指定することを基本的に許可しました。そして、それはZIPファイルに圧縮されます。
 
-したがって、偽のアプリフォルダ構造を生成し、それを圧縮し、次に解凍して実行することで、サンドボックスを脱出することが可能です。新しいファイルには検疫属性がないためです。
+したがって、偽のアプリフォルダ構造を生成し、それを圧縮し、次に解凍して実行することで、サンドボックスを脱出することが可能です。新しいファイルには検疫属性が付与されないためです。
 
 エクスプロイトは：
 ```objectivec
@@ -173,7 +173,7 @@ break;
 ```
 #### /System/Library/PrivateFrameworks/WorkflowKit.framework/XPCServices/ShortcutsFileAccessHelper.xpc
 
-このXPCサービスは、`extendAccessToURL:completion:`メソッドを介して、任意のURLに対する読み取りおよび書き込みアクセスをXPCクライアントに提供することを可能にします。このXPCサービスにはFDAがあるため、これらの権限を悪用してTCCを完全にバイパスすることが可能です。
+このXPCサービスは、`extendAccessToURL:completion:`メソッドを介してXPCクライアントに任意のURLへの読み取りおよび書き込みアクセスを提供することを可能にします。このXPCサービスにはFDAがあるため、これらの権限を悪用してTCCを完全にバイパスすることが可能です。
 
 エクスプロイトは：
 ```objectivec
@@ -203,23 +203,23 @@ NSLog(@"Read the target content:%@", [NSData dataWithContentsOfURL:targetURL]);
 }];
 }
 ```
-### 静的コンパイルと動的リンク
+### Static Compiling & Dynamically linking
 
 [**この研究**](https://saagarjha.com/blog/2020/05/20/mac-app-store-sandbox-escape/)では、Sandboxをバイパスする2つの方法が発見されました。Sandboxは、**libSystem**ライブラリがロードされるときにユーザーランドから適用されます。バイナリがそれをロードしないことができれば、Sandboxに入ることはありません：
 
 - バイナリが**完全に静的にコンパイルされている**場合、そのライブラリをロードせずに済みます。
 - **バイナリがライブラリをロードする必要がない**場合（リンカーもlibSystemにあるため）、libSystemをロードする必要はありません。
 
-### シェルコード
+### Shellcodes
 
-**シェルコード**であっても、ARM64では`libSystem.dylib`にリンクする必要があることに注意してください：
+**シェルコード**はARM64でも`libSystem.dylib`にリンクする必要があることに注意してください：
 ```bash
 ld -o shell shell.o -macosx_version_min 13.0
 ld: dynamic executables or dylibs must link with libSystem.dylib for architecture arm64
 ```
 ### 継承されない制限
 
-**[この書き込みのボーナス](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/)** で説明されているように、サンドボックスの制限は次のようになります：
+**[この書き込みのボーナス](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/)** で説明されているように、サンドボックスの制限は次のようになります:
 ```
 (version 1)
 (allow default)
@@ -248,13 +248,14 @@ open /tmp/poc.app
 ```
 ### インターポスティングバイパス
 
-**インターポスティング**に関する詳細は以下を参照してください:
+**インターポスティング**に関する詳細情報は以下を参照してください:
+
 
 {{#ref}}
 ../../../macos-proces-abuse/macos-function-hooking.md
 {{#endref}}
 
-#### サンドボックスを防ぐために `_libsecinit_initializer` をインターポストする
+#### サンドボックスを防ぐために`_libsecinit_initializer`をインターポストする
 ```c
 // gcc -dynamiclib interpose.c -o interpose.dylib
 
@@ -278,7 +279,7 @@ DYLD_INSERT_LIBRARIES=./interpose.dylib ./sand
 _libsecinit_initializer called
 Sandbox Bypassed!
 ```
-#### Interpost `__mac_syscall` でサンドボックスを防ぐ
+#### Interpost `__mac_syscall` を使用してサンドボックスを防ぐ
 ```c:interpose.c
 // gcc -dynamiclib interpose.c -o interpose.dylib
 
@@ -322,7 +323,7 @@ __mac_syscall invoked. Policy: Quarantine, Call: 87
 __mac_syscall invoked. Policy: Sandbox, Call: 4
 Sandbox Bypassed!
 ```
-### lldbを使用したSandboxのデバッグとバイパス
+### Debug & bypass Sandbox with lldb
 
 サンドボックス化されるべきアプリケーションをコンパイルしましょう：
 
@@ -361,7 +362,7 @@ system("cat ~/Desktop/del.txt");
 {{#endtab}}
 {{#endtabs}}
 
-次にアプリをコンパイルします：
+次にアプリをコンパイルします:
 ```bash
 # Compile it
 gcc -Xlinker -sectcreate -Xlinker __TEXT -Xlinker __info_plist -Xlinker Info.plist sand.c -o sand
@@ -372,14 +373,14 @@ gcc -Xlinker -sectcreate -Xlinker __TEXT -Xlinker __info_plist -Xlinker Info.pli
 codesign -s <cert-name> --entitlements entitlements.xml sand
 ```
 > [!CAUTION]
-> アプリは **`~/Desktop/del.txt`** ファイルを**読み取ろうとします**が、**Sandboxはそれを許可しません**。\
-> Sandboxがバイパスされると読み取れるように、そこにファイルを作成してください：
+> アプリは **`~/Desktop/del.txt`** ファイルを **Sandboxが許可しない** 状態で **読み取ろう** とします。\
+> Sandboxがバイパスされると読み取れるように、そこにファイルを作成してください:
 >
 > ```bash
 > echo "Sandbox Bypassed" > ~/Desktop/del.txt
 > ```
 
-アプリケーションをデバッグして、Sandboxがいつ読み込まれるかを見てみましょう：
+アプリケーションをデバッグして、Sandboxがいつロードされるかを見てみましょう:
 ```bash
 # Load app in debugging
 lldb ./sand

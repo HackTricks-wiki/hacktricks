@@ -8,9 +8,9 @@
 
 - **read** - ディレクトリエントリを**列挙**できます
 - **write** - ディレクトリ内の**ファイル**を**削除/作成**でき、**空のフォルダ**を**削除**できます。
-- ただし、**書き込み権限**がない限り、**非空のフォルダ**を削除/変更することはできません。
+- しかし、**書き込み権限**がない限り、**非空のフォルダ**を削除/変更することはできません。
 - **フォルダの名前を変更**することは、そのフォルダを所有していない限りできません。
-- **execute** - ディレクトリを**横断することが許可**されています。この権利がないと、その中のファイルやサブディレクトリにアクセスできません。
+- **execute** - ディレクトリを**横断することが許可**されています - この権利がないと、その中のファイルやサブディレクトリにアクセスできません。
 
 ### Dangerous Combinations
 
@@ -24,7 +24,7 @@
 
 ### Folder root R+X Special case
 
-**rootのみがR+Xアクセスを持つ**ディレクトリ内にファイルがある場合、それらは**他の誰にもアクセスできません**。したがって、**制限**のためにユーザーが読み取れない**ファイルを**このフォルダから**別のフォルダに移動**できる脆弱性は、これらのファイルを読むために悪用される可能性があります。
+**rootのみがR+Xアクセス**を持つ**ディレクトリ**内にファイルがある場合、それらは**他の誰にもアクセスできません**。したがって、**制限**のためにユーザーが読み取れない**ファイルを**このフォルダから**別のフォルダに移動**できる脆弱性は、これらのファイルを読むために悪用される可能性があります。
 
 例: [https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions](https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions)
 
@@ -32,13 +32,13 @@
 
 ### Permissive file/folder
 
-特権プロセスが**低特権ユーザー**によって**制御される**可能性のある**ファイル**にデータを書き込んでいる場合、または低特権ユーザーによって**以前に作成された**可能性がある場合、そのユーザーはシンボリックまたはハードリンクを介して**別のファイルを指す**ことができ、特権プロセスはそのファイルに書き込みます。
+特権プロセスが**低特権ユーザー**によって**制御**される可能性のある**ファイル**にデータを書き込んでいる場合、または低特権ユーザーによって**以前に作成**されたものである場合、そのユーザーはシンボリックまたはハードリンクを介して**別のファイルを指す**ことができ、特権プロセスはそのファイルに書き込みます。
 
 攻撃者が**特権を昇格させるために任意の書き込みを悪用できる**他のセクションを確認してください。
 
 ### Open `O_NOFOLLOW`
 
-関数`open`で使用されるフラグ`O_NOFOLLOW`は、最後のパスコンポーネントでシンボリックリンクを追跡しませんが、パスの残りの部分は追跡します。パス内のシンボリックリンクを追跡しない正しい方法は、フラグ`O_NOFOLLOW_ANY`を使用することです。
+関数`open`で使用されるフラグ`O_NOFOLLOW`は、最後のパスコンポーネントでシンボリックリンクを追跡しませんが、パスの残りの部分は追跡します。パス内のシンボリックリンクを追跡しないようにする正しい方法は、フラグ`O_NOFOLLOW_ANY`を使用することです。
 
 ## .fileloc
 
@@ -60,9 +60,9 @@
 
 ### FDの漏洩（`O_CLOEXEC`なし）
 
-`open`への呼び出しに`O_CLOEXEC`フラグがない場合、ファイルディスクリプタは子プロセスによって継承されます。したがって、特権プロセスが特権ファイルを開き、攻撃者が制御するプロセスを実行すると、攻撃者は**特権ファイルに対するFDを継承します**。
+`open`への呼び出しにフラグ`O_CLOEXEC`がない場合、ファイルディスクリプタは子プロセスによって継承されます。したがって、特権プロセスが特権ファイルを開き、攻撃者が制御するプロセスを実行すると、攻撃者は**特権ファイルに対するFDを継承します**。
 
-**高い特権でファイルまたはフォルダを開くプロセスを作成できる場合**、**`crontab`**を悪用して、**`EDITOR=exploit.py`**で`/etc/sudoers.d`内のファイルを開くことができます。これにより、`exploit.py`は`/etc/sudoers`内のファイルへのFDを取得し、それを悪用します。
+**高い特権でファイルまたはフォルダを開くプロセスを作成できる場合**、**`crontab`**を悪用して、**`EDITOR=exploit.py`**で`/etc/sudoers.d`内のファイルを開くことができ、`exploit.py`は`/etc/sudoers`内のファイルへのFDを取得し、それを悪用します。
 
 例えば: [https://youtu.be/f1HA5QhLQ7Y?t=21098](https://youtu.be/f1HA5QhLQ7Y?t=21098)、コード: https://github.com/gergelykalman/CVE-2023-32428-a-macOS-LPE-via-MallocStackLogging
 
@@ -84,7 +84,7 @@ xattr: [Errno 1] Operation not permitted: '/tmp/asd'
 ls -lO /tmp/asd
 # check the "uchg" in the output
 ```
-### defvfs マウント
+### defvfs mount
 
 **devfs** マウントは **xattr** をサポートしていません。詳細は [**CVE-2023-32364**](https://gergelykalman.com/CVE-2023-32364-a-macOS-sandbox-escape-by-mounting.html) を参照してください。
 ```bash
@@ -120,13 +120,13 @@ ls -le /tmp/test
 ```
 ### **com.apple.acl.text xattr + AppleDouble**
 
-**AppleDouble**ファイル形式は、ファイルとそのACEを含むコピーを作成します。
+**AppleDouble** ファイル形式は、ファイルとその ACE を含むコピーを作成します。
 
-[**ソースコード**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html)を見ると、xattrの中に保存されているACLのテキスト表現である**`com.apple.acl.text`**が、解凍されたファイルのACLとして設定されることがわかります。したがって、ACLが他のxattrsの書き込みを防ぐように設定されたアプリケーションを**AppleDouble**ファイル形式のzipファイルに圧縮した場合... クアランティンxattrはアプリケーションに設定されませんでした：
+[**ソースコード**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html) では、xattr の中に保存されている ACL テキスト表現が **`com.apple.acl.text`** と呼ばれ、解凍されたファイルの ACL として設定されることがわかります。したがって、他の xattrs の書き込みを防ぐ ACL を持つ **AppleDouble** ファイル形式の zip ファイルにアプリケーションを圧縮した場合... 検疫 xattr はアプリケーションに設定されませんでした：
 
-詳細については[**元の報告**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/)を確認してください。
+詳細については、[**元の報告**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/) を確認してください。
 
-これを再現するには、まず正しいacl文字列を取得する必要があります：
+これを再現するには、まず正しい acl 文字列を取得する必要があります：
 ```bash
 # Everything will be happening here
 mkdir /tmp/temp_xattrs
@@ -158,7 +158,7 @@ macos-xattr-acls-extra-stuff.md
 
 一部のセキュリティチェックは、バイナリが**プラットフォームバイナリ**であるかどうかを確認します。たとえば、XPCサービスに接続を許可するためです。しかし、https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/で示されているように、プラットフォームバイナリ（例：/bin/ls）を取得し、環境変数`DYLD_INSERT_LIBRARIES`を使用してdyld経由でエクスプロイトを注入することで、このチェックをバイパスすることが可能です。
 
-### フラグ`CS_REQUIRE_LV`と`CS_FORCED_LV`のバイパス
+### フラグ`CS_REQUIRE_LV`および`CS_FORCED_LV`のバイパス
 
 実行中のバイナリが自分自身のフラグを変更してチェックをバイパスすることが可能です。コードは次のようになります：
 ```c
@@ -173,7 +173,7 @@ csops(pid, 9, &status, 4); // CS_OPS_SET_STATUS
 status = SecTaskGetCodeSignStatus(SecTaskCreateFromSelf(0));
 NSLog(@"=====Inject successfully into %d(%@), csflags=0x%x", pid, exePath, status);
 ```
-## バイパスコード署名
+## コード署名のバイパス
 
 バンドルには、**`_CodeSignature/CodeResources`** というファイルが含まれており、これは **バンドル** 内のすべての **ファイル** の **ハッシュ** を含んでいます。CodeResources のハッシュは **実行可能ファイル** にも **埋め込まれている** ため、それをいじることはできません。
 
@@ -221,13 +221,13 @@ NSLog(@"=====Inject successfully into %d(%@), csflags=0x%x", pid, exePath, statu
 ...
 </dict>
 ```
-リソースの署名をCLIから計算することが可能です:
+CLIからリソースの署名を計算することができます:
 ```bash
 openssl dgst -binary -sha1 /System/Cryptexes/App/System/Applications/Safari.app/Contents/Resources/AppIcon.icns | openssl base64
 ```
 ## Mount dmgs
 
-ユーザーは、既存のフォルダーの上に作成されたカスタムdmgをマウントできます。これが、カスタムコンテンツを含むカスタムdmgパッケージを作成する方法です：
+ユーザーは、既存のフォルダーの上にカスタムで作成されたdmgをマウントできます。これが、カスタムコンテンツを含むカスタムdmgパッケージを作成する方法です：
 ```bash
 # Create the volume
 hdiutil create /private/tmp/tmp.dmg -size 2m -ov -volname CustomVolName -fs APFS 1>/dev/null
@@ -248,20 +248,20 @@ hdiutil detach /private/tmp/mnt 1>/dev/null
 # You can also create a dmg from an app using:
 hdiutil create -srcfolder justsome.app justsome.dmg
 ```
-通常、macOSは`com.apple.DiskArbitrarion.diskarbitrariond` Machサービス（`/usr/libexec/diskarbitrationd`によって提供される）と通信してディスクをマウントします。LaunchDaemons plistファイルに`-d`パラメータを追加して再起動すると、`/var/log/diskarbitrationd.log`にログを保存します。\
+通常、macOSは`com.apple.DiskArbitrarion.diskarbitrariond` Machサービス（`/usr/libexec/diskarbitrationd`によって提供される）と通信してディスクをマウントします。LaunchDaemons plistファイルに`-d`パラメータを追加して再起動すると、`/var/log/diskarbitrationd.log`にログが保存されます。\
 ただし、`hdik`や`hdiutil`のようなツールを使用して、`com.apple.driver.DiskImages` kextと直接通信することも可能です。
 
 ## 任意の書き込み
 
-### 定期的なシェルスクリプト
+### 定期的なshスクリプト
 
 あなたのスクリプトが**シェルスクリプト**として解釈される場合、毎日トリガーされる**`/etc/periodic/daily/999.local`**シェルスクリプトを上書きすることができます。
 
-このスクリプトの実行を**偽装**するには、**`sudo periodic daily`**を使用できます。
+このスクリプトの実行を**偽装**することができます：**`sudo periodic daily`**
 
 ### デーモン
 
-任意の**LaunchDaemon**を作成します。例えば、**`/Library/LaunchDaemons/xyz.hacktricks.privesc.plist`**のように、任意のスクリプトを実行するplistを作成します。
+任意のスクリプトを実行するplistを持つ任意の**LaunchDaemon**を作成します。例えば、**`/Library/LaunchDaemons/xyz.hacktricks.privesc.plist`**のように：
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -300,19 +300,19 @@ ErrorLog /etc/sudoers.d/lpe
 LogFilePerm 777
 <some junk>
 ```
-この操作により、パーミッションが777のファイル`/etc/sudoers.d/lpe`が作成されます。最後の余分なゴミはエラーログの作成をトリガーするためのものです。
+これは、パーミッション777で`/etc/sudoers.d/lpe`というファイルを作成します。最後の余分なゴミは、エラーログの作成をトリガーするためのものです。
 
-次に、`/etc/sudoers.d/lpe`に特権を昇格させるために必要な設定を記述します。例えば、`%staff ALL=(ALL) NOPASSWD:ALL`のようにします。
+次に、`/etc/sudoers.d/lpe`に、特権を昇格させるために必要な設定を記述します。例えば、`%staff ALL=(ALL) NOPASSWD:ALL`のようにします。
 
-その後、再度`/etc/cups/cups-files.conf`ファイルを修正し、`LogFilePerm 700`を指定して、新しいsudoersファイルが`cupsctl`を呼び出すことで有効になるようにします。
+その後、`/etc/cups/cups-files.conf`ファイルを再度修正し、`LogFilePerm 700`を指定して、新しいsudoersファイルが`cupsctl`を呼び出すことで有効になるようにします。
 
 ### サンドボックスエスケープ
 
-FSの任意の書き込みを使用してmacOSサンドボックスをエスケープすることが可能です。いくつかの例については、ページ[macOS Auto Start](../../../../macos-auto-start-locations.md)を確認してください。ただし、一般的な方法は、`~/Library/Preferences/com.apple.Terminal.plist`にターミナルの設定ファイルを書き込み、起動時にコマンドを実行するようにして`open`を使用して呼び出すことです。
+macOSのサンドボックスをFSの任意の書き込みでエスケープすることが可能です。いくつかの例については、ページ[macOS Auto Start](../../../../macos-auto-start-locations.md)を確認してください。ただし、一般的な方法は、`~/Library/Preferences/com.apple.Terminal.plist`にターミナルの設定ファイルを書き込み、起動時にコマンドを実行するようにして、`open`を使用して呼び出すことです。
 
 ## 他のユーザーとして書き込み可能なファイルを生成する
 
-これは、私が書き込み可能なrootに属するファイルを生成します（[**ここからのコード**](https://github.com/gergelykalman/brew-lpe-via-periodic/blob/main/brew_lpe.sh)）。これは特権昇格としても機能する可能性があります。
+これは、私が書き込み可能なrootに属するファイルを生成します（[**ここからのコード**](https://github.com/gergelykalman/brew-lpe-via-periodic/blob/main/brew_lpe.sh)）。これは特権昇格としても機能する可能性があります：
 ```bash
 DIRNAME=/usr/local/etc/periodic/daily
 
@@ -326,7 +326,7 @@ echo $FILENAME
 ```
 ## POSIX共有メモリ
 
-**POSIX共有メモリ**は、POSIX準拠のオペレーティングシステムにおいてプロセスが共通のメモリ領域にアクセスできるようにし、他のプロセス間通信方法と比較してより迅速な通信を促進します。これは、`shm_open()`を使用して共有メモリオブジェクトを作成または開き、`ftruncate()`でそのサイズを設定し、`mmap()`を使用してプロセスのアドレス空間にマッピングすることを含みます。プロセスはこのメモリ領域から直接読み書きできます。並行アクセスを管理し、データの破損を防ぐために、ミューテックスやセマフォなどの同期メカニズムがよく使用されます。最後に、プロセスは`munmap()`と`close()`で共有メモリをアンマップおよび閉じ、オプションで`shm_unlink()`でメモリオブジェクトを削除します。このシステムは、複数のプロセスが迅速に共有データにアクセスする必要がある環境で、効率的で迅速なIPCに特に効果的です。
+**POSIX共有メモリ**は、POSIX準拠のオペレーティングシステムにおいて、プロセスが共通のメモリ領域にアクセスできるようにし、他のプロセス間通信方法と比較してより迅速な通信を可能にします。これは、`shm_open()`を使用して共有メモリオブジェクトを作成または開き、`ftruncate()`でそのサイズを設定し、`mmap()`を使用してプロセスのアドレス空間にマッピングすることを含みます。プロセスはこのメモリ領域から直接読み書きできます。並行アクセスを管理し、データの破損を防ぐために、ミューテックスやセマフォなどの同期メカニズムがよく使用されます。最後に、プロセスは`munmap()`と`close()`で共有メモリをアンマップおよび閉じ、オプションで`shm_unlink()`でメモリオブジェクトを削除します。このシステムは、複数のプロセスが迅速に共有データにアクセスする必要がある環境で、効率的で迅速なIPCに特に効果的です。
 
 <details>
 
@@ -424,7 +424,7 @@ return 0;
 
 **macOS ガード付きディスクリプタ**は、ユーザーアプリケーションにおける**ファイルディスクリプタ操作**の安全性と信頼性を向上させるためにmacOSに導入されたセキュリティ機能です。これらのガード付きディスクリプタは、ファイルディスクリプタに特定の制限や「ガード」を関連付ける方法を提供し、カーネルによって強制されます。
 
-この機能は、**不正なファイルアクセス**や**レースコンディション**などの特定のクラスのセキュリティ脆弱性を防ぐのに特に役立ちます。これらの脆弱性は、例えばスレッドがファイルディスクリプタにアクセスしているときに**別の脆弱なスレッドがそれにアクセスできる**場合や、ファイルディスクリプタが**脆弱な子プロセスに継承される**場合に発生します。この機能に関連するいくつかの関数は次のとおりです：
+この機能は、**不正なファイルアクセス**や**レースコンディション**などの特定のクラスのセキュリティ脆弱性を防ぐのに特に役立ちます。これらの脆弱性は、たとえば、スレッドがファイルディスクリプタにアクセスして**別の脆弱なスレッドにアクセスを許可する**場合や、ファイルディスクリプタが**脆弱な子プロセスに継承される**場合に発生します。この機能に関連するいくつかの関数は次のとおりです：
 
 - `guarded_open_np`: ガード付きでFDをオープン
 - `guarded_close_np`: 閉じる

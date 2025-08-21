@@ -5,9 +5,9 @@
 
 ## Basics of Resource-based Constrained Delegation
 
-これは基本的な [Constrained Delegation](constrained-delegation.md) に似ていますが、**代わりに** **オブジェクト** に **任意のユーザーをマシンに対してなりすます権限を与える** のではなく、リソースベースの制約付き委任は **そのオブジェクトに対して任意のユーザーをなりすますことができる者を設定します**。
+これは基本的な [Constrained Delegation](constrained-delegation.md) に似ていますが、**代わりに** **オブジェクト** に **ユーザーを機械に対して偽装する権限を与えるのではなく**、リソースベースの制約付き委任は **そのオブジェクトに対して偽装できるユーザーを設定します**。
 
-この場合、制約されたオブジェクトには、任意の他のユーザーをそのオブジェクトに対してなりすますことができるユーザーの名前を持つ属性 _**msDS-AllowedToActOnBehalfOfOtherIdentity**_ が存在します。
+この場合、制約されたオブジェクトには、他のユーザーを偽装できるユーザーの名前を持つ _**msDS-AllowedToActOnBehalfOfOtherIdentity**_ という属性があります。
 
 この制約付き委任と他の委任との重要な違いは、**マシンアカウントに対する書き込み権限** (_GenericAll/GenericWrite/WriteDacl/WriteProperty/etc_) を持つ任意のユーザーが **_msDS-AllowedToActOnBehalfOfOtherIdentity_** を設定できることです（他の委任の形式ではドメイン管理者の特権が必要でした）。
 
@@ -25,12 +25,12 @@
 攻撃者がすでに **被害者コンピュータに対する書き込み同等の特権** を持っていると仮定します。
 
 1. 攻撃者は **SPN** を持つアカウントを **侵害** するか、**作成します**（“Service A”）。注意すべきは、**特別な特権を持たない** _Admin User_ は最大10個のコンピュータオブジェクト（**_MachineAccountQuota_**）を **作成** し、**SPN** を設定できることです。したがって、攻撃者はコンピュータオブジェクトを作成し、SPNを設定することができます。
-2. 攻撃者は被害者コンピュータ（ServiceB）に対する **書き込み権限** を悪用して、**リソースベースの制約付き委任を構成し、ServiceAがその被害者コンピュータ（ServiceB）に対して任意のユーザーをなりすますことを許可します**。
-3. 攻撃者は Rubeus を使用して、**Service A から Service B への完全な S4U 攻撃**（S4U2Self と S4U2Proxy）を実行します。対象は **Service B に特権アクセスを持つユーザー** です。
-1. S4U2Self（侵害または作成されたアカウントの SPN から）：**私に対する Administrator の TGS を要求します**（Forwardable ではない）。
-2. S4U2Proxy：前のステップの **Forwardable でない TGS** を使用して、**被害者ホスト** に対する **Administrator** の **TGS** を要求します。
+2. 攻撃者は被害者コンピュータ（ServiceB）に対する **書き込み権限** を悪用して、**リソースベースの制約付き委任を構成し、ServiceAがその被害者コンピュータ（ServiceB）に対して任意のユーザーを偽装できるようにします**。
+3. 攻撃者は Rubeus を使用して、**特権アクセスを持つユーザー**のために Service A から Service B への **完全な S4U 攻撃**（S4U2Self と S4U2Proxy）を実行します。
+1. S4U2Self（侵害または作成されたアカウントの SPN から）：**私に対する Administrator の TGS を要求します**（Forwardable ではありません）。
+2. S4U2Proxy：前のステップの **Forwardable でない TGS** を使用して、**被害者ホスト**への **Administrator** の **TGS** を要求します。
 3. Forwardable でない TGS を使用している場合でも、リソースベースの制約付き委任を悪用しているため、**機能します**。
-4. 攻撃者は **パス・ザ・チケット** を行い、ユーザーを **なりすまし、被害者 ServiceB へのアクセスを得ます**。
+4. 攻撃者は **パス・ザ・チケット** を行い、ユーザーを **偽装して被害者 ServiceB へのアクセスを得る** ことができます。
 
 ドメインの _**MachineAccountQuota**_ を確認するには、次のコマンドを使用できます：
 ```bash
@@ -50,7 +50,7 @@ Get-DomainComputer SERVICEA
 ```
 ### リソースベースの制約付き委任の構成
 
-**activedirectory PowerShellモジュールを使用**
+**activedirectory PowerShell モジュールを使用**
 ```bash
 Set-ADComputer $targetComputer -PrincipalsAllowedToDelegateToAccount SERVICEA$ #Assing delegation privileges
 Get-ADComputer $targetComputer -Properties PrincipalsAllowedToDelegateToAccount #Check that it worked
@@ -70,7 +70,7 @@ msds-allowedtoactonbehalfofotheridentity
 ----------------------------------------
 {1, 0, 4, 128...}
 ```
-### 完全なS4U攻撃を実行する (Windows/Rubeus)
+### 完全なS4U攻撃の実行 (Windows/Rubeus)
 
 まず最初に、パスワード`123456`で新しいコンピュータオブジェクトを作成したので、そのパスワードのハッシュが必要です:
 ```bash
@@ -109,7 +109,7 @@ impacket-secretsdump -k -no-pass Administrator@victim.domain.local
 ```
 ノート
 - LDAP署名/LDAPSが強制されている場合は、`impacket-rbcd -use-ldaps ...`を使用してください。
-- AESキーを優先してください。多くの現代のドメインはRC4を制限しています。ImpacketとRubeusはどちらもAES専用フローをサポートしています。
+- AESキーを優先してください。多くの現代のドメインはRC4を制限しています。ImpacketとRubeusはどちらもAES専用のフローをサポートしています。
 - Impacketは一部のツールのために`sname`（"AnySPN"）を書き換えることができますが、可能な限り正しいSPNを取得してください（例：CIFS/LDAP/HTTP/HOST/MSSQLSvc）。
 
 ### アクセス
@@ -172,17 +172,17 @@ impacket-rbcd -delegate-to 'VICTIM$' -action flush 'domain.local/jdoe:Summer2025
   - 偽装しようとしているユーザーが希望するサービスにアクセスできない（偽装できないか、十分な権限がないため）
   - 要求されたサービスが存在しない（winrmのチケットを要求したが、winrmが実行されていない場合）
   - 作成されたfakecomputerが脆弱なサーバーに対する権限を失っており、それを戻す必要がある。
-  - クラシックKCDを悪用している；RBCDは非転送可能なS4U2Selfチケットで機能することを覚えておいてください。一方、KCDは転送可能である必要があります。
+  - クラシックKCDを悪用している；RBCDは非転送可能なS4U2Selfチケットで機能することを思い出してくださいが、KCDは転送可能である必要があります。
 
 ## Notes, relays and alternatives
 
-- LDAPがフィルタリングされている場合、AD Web Services (ADWS) 上にRBCD SDを書くこともできます。参照してください：
+- LDAPがフィルタリングされている場合、AD Web Services (ADWS) 上にRBCD SDを書き込むこともできます。参照してください：
 
 {{#ref}}
 adws-enumeration.md
 {{#endref}}
 
-- Kerberosリレーチェーンは、ローカルSYSTEMを1ステップで達成するためにRBCDで終わることがよくあります。実用的なエンドツーエンドの例を参照してください：
+- Kerberosリレーのチェーンは、1ステップでローカルSYSTEMを達成するためにRBCDで終わることがよくあります。実用的なエンドツーエンドの例を参照してください：
 
 {{#ref}}
 ../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md

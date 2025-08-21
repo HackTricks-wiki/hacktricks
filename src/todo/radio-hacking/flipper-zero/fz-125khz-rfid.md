@@ -2,9 +2,11 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
+
 ## Intro
 
-125kHzタグの動作についての詳細は、以下を確認してください：
+125kHzタグの動作についての詳細は以下を確認してください:
+
 
 {{#ref}}
 ../pentesting-rfid.md
@@ -12,7 +14,7 @@
 
 ## Actions
 
-これらのタイプのタグについての詳細は、[**このイントロを読む**](../pentesting-rfid.md#low-frequency-rfid-tags-125khz)で確認できます。
+これらのタイプのタグについての詳細は[**このイントロを読む**](../pentesting-rfid.md#low-frequency-rfid-tags-125khz)。
 
 ### Read
 
@@ -23,15 +25,15 @@
 
 ### Add Manually
 
-Flipper Zeroで**手動でデータを指定して偽のカードを作成**し、その後エミュレートできます。
+Flipper Zeroで**手動でデータを指定して偽のカードを作成**し、それをエミュレートできます。
 
 #### IDs on cards
 
-カードを取得すると、カードの一部にID（またはその一部）が表示されていることがあります。
+カードを取得すると、カードの一部にIDが書かれていることがあります。
 
 - **EM Marin**
 
-例えば、このEM-Marinカードでは、物理カードの**最後の3バイトのうちの5バイトがクリアに読み取れる**ことが可能です。\
+例えば、このEM-Marinカードでは、物理カードの最後の3バイトのうちの5バイトを**クリアで読み取る**ことが可能です。\
 他の2バイトは、カードから読み取れない場合はブルートフォースで解読できます。
 
 <figure><img src="../../../images/image (104).png" alt=""><figcaption></figcaption></figure>
@@ -44,10 +46,11 @@ Flipper Zeroで**手動でデータを指定して偽のカードを作成**し�
 
 ### Emulate/Write
 
-カードを**コピー**したり、IDを**手動で入力**した後、Flipper Zeroでそれを**エミュレート**したり、実際のカードに**書き込む**ことが可能です。
+カードを**コピー**したり、IDを**手動で入力**した後、Flipper Zeroでそれを**エミュレート**したり、実際のカードに**書き込む**ことができます。
 
 ## References
 
 - [https://blog.flipperzero.one/rfid/](https://blog.flipperzero.one/rfid/)
+
 
 {{#include ../../../banners/hacktricks-training.md}}

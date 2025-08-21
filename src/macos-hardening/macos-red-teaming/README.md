@@ -2,12 +2,13 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
+
 ## MDMの悪用
 
 - JAMF Pro: `jamf checkJSSConnection`
 - Kandji
 
-管理プラットフォームにアクセスするために**管理者資格情報を侵害**することができれば、マシンにマルウェアを配布することで**すべてのコンピュータを侵害する可能性があります**。
+管理プラットフォームにアクセスするために**管理者資格情報を侵害**することができれば、マシンにマルウェアを配布することで**すべてのコンピュータを潜在的に侵害**することができます。
 
 MacOS環境でのレッドチーミングには、MDMの動作についての理解が非常に推奨されます：
 
@@ -15,11 +16,11 @@ MacOS環境でのレッドチーミングには、MDMの動作についての理
 macos-mdm/
 {{#endref}}
 
-### C2としてのMDMの使用
+### MDMをC2として使用する
 
-MDMは、プロファイルのインストール、クエリ、削除、アプリケーションのインストール、ローカル管理者アカウントの作成、ファームウェアパスワードの設定、FileVaultキーの変更を行う権限を持っています...
+MDMは、プロファイルのインストール、クエリまたは削除、アプリケーションのインストール、ローカル管理者アカウントの作成、ファームウェアパスワードの設定、FileVaultキーの変更を行う権限を持っています...
 
-独自のMDMを運営するには、**ベンダーによって署名されたCSRが必要**で、[**https://mdmcert.download/**](https://mdmcert.download/)で取得を試みることができます。また、Appleデバイス用の独自のMDMを運営するには、[**MicroMDM**](https://github.com/micromdm/micromdm)を使用できます。
+独自のMDMを運営するには、**ベンダーによって署名されたCSRが必要**で、これを[**https://mdmcert.download/**](https://mdmcert.download/)で取得しようとすることができます。Appleデバイス用の独自のMDMを運営するには、[**MicroMDM**](https://github.com/micromdm/micromdm)を使用できます。
 
 ただし、登録されたデバイスにアプリケーションをインストールするには、開発者アカウントによって署名されている必要があります... しかし、MDM登録時に**デバイスはMDMのSSL証明書を信頼されたCAとして追加**するため、今では何でも署名できます。
 
@@ -29,7 +30,7 @@ MDMは、プロファイルのインストール、クエリ、削除、アプ�
 
 ### JAMF PROの悪用
 
-JAMFは**カスタムスクリプト**（システム管理者によって開発されたスクリプト）、**ネイティブペイロード**（ローカルアカウントの作成、EFIパスワードの設定、ファイル/プロセスの監視...）および**MDM**（デバイスの構成、デバイス証明書...）を実行できます。
+JAMFは**カスタムスクリプト**（システム管理者によって開発されたスクリプト）、**ネイティブペイロード**（ローカルアカウントの作成、EFIパスワードの設定、ファイル/プロセスの監視...）、および**MDM**（デバイスの構成、デバイス証明書...）を実行できます。
 
 #### JAMF自己登録
 
@@ -45,12 +46,12 @@ JAMFは**カスタムスクリプト**（システム管理者によって開発
 
 <figure><img src="../../images/image (167).png" alt=""><figcaption></figcaption></figure>
 
-**`jamf`**バイナリには、キーチェーンを開くための秘密が含まれており、発見時には**誰もが共有**していました。それは：**`jk23ucnq91jfu9aj`**です。\
+**`jamf`**バイナリには、発見時に**共有**されていたキーチェーンを開くための秘密が含まれており、それは**`jk23ucnq91jfu9aj`**でした。\
 さらに、jamfは**`/Library/LaunchAgents/com.jamf.management.agent.plist`**に**LaunchDaemon**として**持続**します。
 
-#### JAMFデバイスタ takeover
+#### JAMFデバイスタケオーバー
 
-**JSS**（Jamf Software Server）**URL**は、**`jamf`**が使用するもので、**`/Library/Preferences/com.jamfsoftware.jamf.plist`**にあります。\
+**JSS**（Jamf Software Server）**URL**は、**`jamf`**が使用する**`/Library/Preferences/com.jamfsoftware.jamf.plist`**にあります。\
 このファイルには基本的にURLが含まれています：
 ```bash
 plutil -convert xml1 -o - /Library/Preferences/com.jamfsoftware.jamf.plist
@@ -59,7 +60,7 @@ plutil -convert xml1 -o - /Library/Preferences/com.jamfsoftware.jamf.plist
 <key>is_virtual_machine</key>
 <false/>
 <key>jss_url</key>
-<string>https://halbornasd.jamfcloud.com/</string>
+<string>https://subdomain-company.jamfcloud.com/</string>
 <key>last_management_framework_change_id</key>
 <integer>4</integer>
 [...]
@@ -71,28 +72,28 @@ sudo jamf policy -id 0
 
 # TODO: There is an ID, maybe it's possible to have the real jamf connection and another one to the C2
 ```
-#### JAMFなりすまし
+#### JAMF なりすまし
 
-デバイスとJMF間の**通信をなりすます**には、以下が必要です：
+デバイスと JMF の間の **通信をなりすます** には、以下が必要です：
 
-- デバイスの**UUID**: `ioreg -d2 -c IOPlatformExpertDevice | awk -F" '/IOPlatformUUID/{print $(NF-1)}'`
-- デバイス証明書を含む**JAMFキーチェーン**: `/Library/Application\ Support/Jamf/JAMF.keychain`
+- デバイスの **UUID**: `ioreg -d2 -c IOPlatformExpertDevice | awk -F" '/IOPlatformUUID/{print $(NF-1)}'`
+- デバイス証明書を含む **JAMF キーチェーン**: `/Library/Application\ Support/Jamf/JAMF.keychain`
 
-この情報をもとに、**盗まれた**ハードウェア**UUID**を持ち、**SIPを無効にした**VMを**作成**し、**JAMFキーチェーンをドロップ**し、Jamf**エージェントをフック**してその情報を盗みます。
+この情報をもとに、**盗まれた**ハードウェア **UUID** を持ち、**SIP を無効にした** VM を作成し、**JAMF キーチェーンをドロップ**し、Jamf **エージェントをフック**してその情報を盗みます。
 
 #### 秘密の盗難
 
 <figure><img src="../../images/image (1025).png" alt=""><figcaption><p>a</p></figcaption></figure>
 
-管理者がJamfを介して実行したい**カスタムスクリプト**を監視するために、`/Library/Application Support/Jamf/tmp/`の場所を監視することもできます。これらのスクリプトは**ここに配置され、実行され、削除されます**。これらのスクリプトには**資格情報が含まれている可能性があります**。
+また、管理者が Jamf 経由で実行したい **カスタムスクリプト** のために、`/Library/Application Support/Jamf/tmp/` の場所を監視することもできます。これらのスクリプトは **ここに配置され、実行され、削除されます**。これらのスクリプトには **資格情報** が含まれている可能性があります。
 
-ただし、**資格情報**はこれらのスクリプトに**パラメータ**として渡される可能性があるため、`ps aux | grep -i jamf`を監視する必要があります（ルートでなくても）。
+ただし、**資格情報** はこれらのスクリプトに **パラメータ** として渡される可能性があるため、`ps aux | grep -i jamf` を監視する必要があります（ルートでなくても）。
 
-スクリプト[**JamfExplorer.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfExplorer.py)は、新しいファイルが追加されたり、新しいプロセス引数が追加されたりするのをリッスンできます。
+スクリプト [**JamfExplorer.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfExplorer.py) は、新しいファイルが追加されるのをリッスンし、新しいプロセス引数を監視できます。
 
-### macOSリモートアクセス
+### macOS リモートアクセス
 
-また、**MacOS**の「特別な」**ネットワーク****プロトコル**についても：
+また、**MacOS** の "特別な" **ネットワーク** **プロトコル** について：
 
 {{#ref}}
 ../macos-security-and-privilege-escalation/macos-protocols.md
@@ -100,7 +101,7 @@ sudo jamf policy -id 0
 
 ## Active Directory
 
-場合によっては、**MacOSコンピュータがADに接続されている**ことがあります。このシナリオでは、慣れているようにアクティブディレクトリを**列挙**しようとするべきです。以下のページで**ヘルプ**を見つけてください：
+場合によっては、**MacOS コンピュータが AD に接続されている**ことがあります。このシナリオでは、慣れているようにアクティブディレクトリを **列挙** しようとするべきです。以下のページで **ヘルプ** を見つけてください：
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-ldap.md
@@ -114,30 +115,30 @@ sudo jamf policy -id 0
 ../../network-services-pentesting/pentesting-kerberos-88/
 {{#endref}}
 
-役立つ可能性のある**ローカルMacOSツール**は`dscl`です：
+役立つ可能性のある **ローカル MacOS ツール** は `dscl` です：
 ```bash
 dscl "/Active Directory/[Domain]/All Domains" ls /
 ```
 また、ADを自動的に列挙し、Kerberosを操作するためにMacOS用に準備されたツールがあります：
 
 - [**Machound**](https://github.com/XMCyber/MacHound): MacHoundは、MacOSホスト上のActive Directory関係を収集および取り込むことを可能にするBloodhound監査ツールの拡張です。
-- [**Bifrost**](https://github.com/its-a-feature/bifrost): Bifrostは、macOS上のHeimdal krb5 APIと対話するために設計されたObjective-Cプロジェクトです。このプロジェクトの目標は、ターゲットに他のフレームワークやパッケージを必要とせずに、ネイティブAPIを使用してmacOSデバイス上のKerberosに関するセキュリティテストを向上させることです。
+- [**Bifrost**](https://github.com/its-a-feature/bifrost): Bifrostは、macOS上のHeimdal krb5 APIと対話するために設計されたObjective-Cプロジェクトです。このプロジェクトの目標は、ターゲットに他のフレームワークやパッケージを必要とせずに、ネイティブAPIを使用してmacOSデバイス上のKerberosに関するセキュリティテストを改善することです。
 - [**Orchard**](https://github.com/its-a-feature/Orchard): Active Directory列挙を行うためのJavaScript for Automation (JXA)ツールです。
 
 ### ドメイン情報
 ```bash
 echo show com.apple.opendirectoryd.ActiveDirectory | scutil
 ```
-### ユーザー
+### Users
 
 MacOSのユーザーには3種類があります：
 
-- **ローカルユーザー** — ローカルOpenDirectoryサービスによって管理され、Active Directoryとは一切接続されていません。
-- **ネットワークユーザー** — DCサーバーに接続して認証を受ける必要がある揮発性のActive Directoryユーザーです。
+- **ローカルユーザー** — ローカルOpenDirectoryサービスによって管理されており、Active Directoryとは接続されていません。
+- **ネットワークユーザー** — 認証のためにDCサーバーへの接続が必要な揮発性のActive Directoryユーザーです。
 - **モバイルユーザー** — 認証情報とファイルのローカルバックアップを持つActive Directoryユーザーです。
 
 ユーザーとグループに関するローカル情報は、フォルダー _/var/db/dslocal/nodes/Default._ に保存されています。\
-例えば、_mark_ というユーザーに関する情報は _/var/db/dslocal/nodes/Default/users/mark.plist_ に保存されており、_admin_ グループに関する情報は _/var/db/dslocal/nodes/Default/groups/admin.plist_ にあります。
+例えば、_mark_というユーザーに関する情報は _/var/db/dslocal/nodes/Default/users/mark.plist_ に保存されており、_admin_というグループに関する情報は _/var/db/dslocal/nodes/Default/groups/admin.plist_ にあります。
 
 HasSessionおよびAdminToエッジを使用することに加えて、**MacHoundはBloodhoundデータベースに3つの新しいエッジを追加します**：
 
@@ -165,11 +166,11 @@ dscl "/Active Directory/TEST/All Domains" read "/Groups/[groupname]"
 #Domain Information
 dsconfigad -show
 ```
-[https://its-a-feature.github.io/posts/2018/01/Active-Directory-Discovery-with-a-Mac/](https://its-a-feature.github.io/posts/2018/01/Active-Directory-Discovery-with-a-Mac/)
+More info in [https://its-a-feature.github.io/posts/2018/01/Active-Directory-Discovery-with-a-Mac/](https://its-a-feature.github.io/posts/2018/01/Active-Directory-Discovery-with-a-Mac/)
 
 ### Computer$ パスワード
 
-次の方法でパスワードを取得します:
+Get passwords using:
 ```bash
 bifrost --action askhash --username [name] --password [password] --domain [domain]
 ```
@@ -182,7 +183,7 @@ bifrost --action askhash --username [name] --password [password] --domain [domai
 bifrost --action asktgt --username [user] --domain [domain.com] \
 --hash [hash] --enctype [enctype] --keytab [/path/to/keytab]
 ```
-TGTが収集されると、次のコマンドで現在のセッションに注入することができます:
+TGTが収集されると、次のコマンドで現在のセッションに注入することが可能です:
 ```bash
 bifrost --action asktgt --username test_lab_admin \
 --hash CF59D3256B62EE655F6430B0F80701EE05A0885B8B52E9C2480154AFA62E78 \
@@ -193,7 +194,7 @@ bifrost --action asktgt --username test_lab_admin \
 bifrost --action asktgs --spn [service] --domain [domain.com] \
 --username [user] --hash [hash] --enctype [enctype]
 ```
-取得したサービスチケットを使用して、他のコンピュータの共有にアクセスしようとすることが可能です：
+取得したサービスチケットを使用して、他のコンピュータの共有にアクセスを試みることができます:
 ```bash
 smbutil view //computer.fqdn
 mount -t smbfs //server/folder /local/mount/point
@@ -208,13 +209,13 @@ macos-keychain.md
 
 ## 外部サービス
 
-MacOSのレッドチーミングは、通常**MacOSがいくつかの外部プラットフォームと直接統合されている**ため、通常のWindowsレッドチーミングとは異なります。MacOSの一般的な構成は、**OneLoginで同期された資格情報を使用してコンピュータにアクセスし、OneLoginを介していくつかの外部サービス**（github、awsなど）にアクセスすることです。
+MacOSのレッドチーミングは、通常のWindowsのレッドチーミングとは異なり、**MacOSは通常、いくつかの外部プラットフォームと直接統合されています**。 MacOSの一般的な構成は、**OneLoginで同期された資格情報を使用してコンピュータにアクセスし、OneLoginを介していくつかの外部サービス**（github、awsなど）にアクセスすることです。
 
 ## その他のレッドチーム技術
 
 ### Safari
 
-Safariでファイルがダウンロードされると、それが「安全な」ファイルであれば、**自動的に開かれます**。例えば、**zipファイルをダウンロード**すると、自動的に解凍されます：
+Safariでファイルがダウンロードされると、それが「安全な」ファイルであれば、**自動的に開かれます**。 例えば、**zipファイルをダウンロード**すると、自動的に解凍されます：
 
 <figure><img src="../../images/image (226).png" alt=""><figcaption></figcaption></figure>
 

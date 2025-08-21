@@ -11,7 +11,7 @@ Delegated Managed Service Accounts (**dMSA**) は、Windows Server 2025 に搭�
 
 攻撃者が OU 内に **任意の** dMSA を作成し、これら 2 つの属性を直接操作できる場合、LSASS と KDC は dMSA をリンクされたアカウントの *後継* として扱います。攻撃者がその後 dMSA として認証すると、**リンクされたアカウントのすべての権限を継承します** – 管理者アカウントがリンクされている場合は **Domain Admin** まで。
 
-この技術は 2025 年に Unit 42 によって **BadSuccessor** と名付けられました。執筆時点では **セキュリティパッチ** は利用できず、OU 権限の強化のみが問題を軽減します。
+この技術は、2025 年に Unit 42 によって **BadSuccessor** と名付けられました。執筆時点では **セキュリティパッチ** は利用できず、OU 権限の強化のみが問題を軽減します。
 
 ### 攻撃の前提条件
 
@@ -33,7 +33,7 @@ Get-BadSuccessorOUPermissions.ps1 -Domain contoso.local
 
 ## 攻撃手順
 
-書き込み可能な OU が特定されると、攻撃は LDAP 書き込みが 3 回で完了します：
+書き込み可能な OU が特定されると、攻撃は LDAP 書き込み 3 回で完了します:
 ```powershell
 # 1. Create a new delegated MSA inside the delegated OU
 New-ADServiceAccount -Name attacker_dMSA \
@@ -77,7 +77,7 @@ dir \\DC01\C$
 * GUID `a0945b2b-57a2-43bd-b327-4d112a4e8bd1` → `msDS-ManagedAccountPrecededByLink`
 * **2946** – dMSAのTGT発行
 
-`4662`（属性の変更）、`4741`（コンピュータ/サービスアカウントの作成）、および`4624`（その後のログオン）を相関させることで、BadSuccessorの活動がすぐに明らかになります。 **XSIAM**のようなXDRソリューションには、すぐに使用できるクエリが付属しています（参照を参照）。
+`4662`（属性の変更）、`4741`（コンピュータ/サービスアカウントの作成）、および`4624`（その後のログオン）を相関させることで、BadSuccessorの活動がすぐに明らかになります。 **XSIAM**のようなXDRソリューションは、すぐに使用できるクエリを搭載しています（参照を参照）。
 
 ## Mitigation
 
@@ -86,6 +86,7 @@ dir \\DC01\C$
 * 上記のイベントIDを監視し、dMSAを作成または編集する*非Tier-0*のアイデンティティに警告を出します。
 
 ## See also
+
 
 {{#ref}}
 golden-dmsa-gmsa.md

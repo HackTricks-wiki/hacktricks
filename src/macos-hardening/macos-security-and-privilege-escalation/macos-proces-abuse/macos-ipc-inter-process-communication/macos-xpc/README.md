@@ -4,7 +4,7 @@
 
 ## 基本情報
 
-XPCは、macOSで使用されるカーネルであるXNUのプロセス間通信の略で、macOSおよびiOS上の**プロセス間の通信**のためのフレームワークです。XPCは、システム上の異なるプロセス間で**安全で非同期のメソッド呼び出し**を行うためのメカニズムを提供します。これはAppleのセキュリティパラダイムの一部であり、各**コンポーネント**がその仕事を行うために必要な**権限のみ**で実行される**特権分離アプリケーション**の**作成**を可能にします。これにより、侵害されたプロセスからの潜在的な損害を制限します。
+XPCは、macOSで使用されるカーネルであるXNU（XNUは「X is Not Unix」の略）間のプロセス通信のためのフレームワークで、macOSおよびiOS上の**プロセス間の通信**を提供します。XPCは、システム上の異なるプロセス間で**安全で非同期のメソッド呼び出し**を行うためのメカニズムを提供します。これはAppleのセキュリティパラダイムの一部であり、各**コンポーネント**がその仕事を行うために必要な**権限のみ**で実行される**特権分離アプリケーション**の**作成**を可能にし、侵害されたプロセスからの潜在的な損害を制限します。
 
 XPCは、同じシステム上で実行されている異なるプログラムがデータを送受信するための一連のメソッドであるプロセス間通信（IPC）の一形態を使用します。
 
@@ -18,15 +18,15 @@ XPCの主な利点は以下の通りです：
 
 ## アプリケーション特有のXPCサービス
 
-アプリケーションのXPCコンポーネントは**アプリケーション自体の内部**にあります。たとえば、Safariでは**`/Applications/Safari.app/Contents/XPCServices`**に見つけることができます。これらは**`.xpc`**拡張子を持ち（例：**`com.apple.Safari.SandboxBroker.xpc`**）、メインバイナリの内部に**バンドル**されています：`/Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/MacOS/com.apple.Safari.SandboxBroker`および`Info.plist: /Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/Info.plist`
+アプリケーションのXPCコンポーネントは**アプリケーション自体の内部**にあります。たとえば、Safariでは**`/Applications/Safari.app/Contents/XPCServices`**に見つけることができます。これらは**`.xpc`**拡張子（例：**`com.apple.Safari.SandboxBroker.xpc`**）を持ち、メインバイナリの内部に**バンドル**されています：`/Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/MacOS/com.apple.Safari.SandboxBroker`および`Info.plist: /Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/Info.plist`
 
-あなたが考えているように、**XPCコンポーネントは他のXPCコンポーネントやメインアプリバイナリとは異なる権限と特権を持つ**ことになります。ただし、XPCサービスが**Info.plist**ファイルで**JoinExistingSession**を“True”に設定されている場合を除きます。この場合、XPCサービスは呼び出したアプリケーションと**同じセキュリティセッション**で実行されます。
+あなたが考えているように、**XPCコンポーネントは他のXPCコンポーネントやメインアプリバイナリとは異なる権限と特権を持ちます**。ただし、XPCサービスが**Info.plist**ファイルで**JoinExistingSession**を「True」に設定して構成されている場合を除きます。この場合、XPCサービスは呼び出したアプリケーションと**同じセキュリティセッション**で実行されます。
 
-XPCサービスは**launchd**によって必要に応じて**開始**され、すべてのタスクが**完了**するとシステムリソースを解放するために**シャットダウン**されます。**アプリケーション特有のXPCコンポーネントはアプリケーションによってのみ利用可能**であり、潜在的な脆弱性に関連するリスクを低減します。
+XPCサービスは**launchd**によって必要に応じて**開始され**、すべてのタスクが**完了**するとシステムリソースを解放するために**シャットダウン**されます。**アプリケーション特有のXPCコンポーネントはアプリケーションによってのみ利用可能**であり、潜在的な脆弱性に関連するリスクを低減します。
 
 ## システム全体のXPCサービス
 
-システム全体のXPCサービスはすべてのユーザーがアクセス可能です。これらのサービスは、launchdまたはMachタイプであり、**`/System/Library/LaunchDaemons`**、**`/Library/LaunchDaemons`**、**`/System/Library/LaunchAgents`**、または**`/Library/LaunchAgents`**などの指定されたディレクトリにあるplistファイルで**定義**する必要があります。
+システム全体のXPCサービスはすべてのユーザーがアクセス可能です。これらのサービスは、launchdまたはMachタイプであり、**`/System/Library/LaunchDaemons`**、**`/Library/LaunchDaemons`**、**`/System/Library/LaunchAgents`**、または**`/Library/LaunchAgents`**などの指定されたディレクトリにあるplistファイルで**定義する必要があります**。
 
 これらのplistファイルには、サービスの名前を持つ**`MachServices`**というキーと、バイナリへのパスを持つ**`Program`**というキーがあります：
 ```xml
@@ -62,65 +62,65 @@ cat /Library/LaunchDaemons/com.jamf.management.daemon.plist
 </dict>
 </plist>
 ```
-**`LaunchDameons`**内のものはrootによって実行されます。したがって、特権のないプロセスがこれらのいずれかと通信できる場合、特権を昇格させることができる可能性があります。
+**`LaunchDameons`** にあるものは root によって実行されます。したがって、特権のないプロセスがこれらのいずれかと通信できる場合、特権を昇格させることができる可能性があります。
 
-## XPCオブジェクト
+## XPC オブジェクト
 
 - **`xpc_object_t`**
 
-すべてのXPCメッセージは、シリアル化とデシリアル化を簡素化する辞書オブジェクトです。さらに、`libxpc.dylib`はほとんどのデータ型を宣言しているため、受信したデータが期待される型であることを確認できます。C APIでは、すべてのオブジェクトは`xpc_object_t`であり（その型は`xpc_get_type(object)`を使用して確認できます）。\
-さらに、`xpc_copy_description(object)`関数を使用して、デバッグ目的に役立つオブジェクトの文字列表現を取得できます。\
-これらのオブジェクトには、`xpc_<object>_copy`、`xpc_<object>_equal`、`xpc_<object>_hash`、`xpc_<object>_serialize`、`xpc_<object>_deserialize`などの呼び出し可能なメソッドもあります。
+すべての XPC メッセージは、シリアル化とデシリアル化を簡素化する辞書オブジェクトです。さらに、`libxpc.dylib` はほとんどのデータ型を宣言しているため、受信したデータが期待される型であることを確認できます。C API では、すべてのオブジェクトは `xpc_object_t` であり（その型は `xpc_get_type(object)` を使用して確認できます）。\
+さらに、`xpc_copy_description(object)` 関数を使用して、デバッグ目的に役立つオブジェクトの文字列表現を取得できます。\
+これらのオブジェクトには、`xpc_<object>_copy`、`xpc_<object>_equal`、`xpc_<object>_hash`、`xpc_<object>_serialize`、`xpc_<object>_deserialize` などの呼び出し可能なメソッドもあります。
 
-`xpc_object_t`は、`xpc_<objetType>_create`関数を呼び出すことで作成され、内部的に`_xpc_base_create(Class, Size)`を呼び出し、オブジェクトのクラスの型（`XPC_TYPE_*`のいずれか）とそのサイズ（メタデータ用に追加の40Bがサイズに加算されます）が指定されます。つまり、オブジェクトのデータはオフセット40Bから始まります。\
-したがって、`xpc_<objectType>_t`は`xpc_object_t`のサブクラスのようなものであり、`os_object_t*`のサブクラスになります。
+`xpc_object_t` は、`xpc_<objetType>_create` 関数を呼び出すことで作成され、内部的に `_xpc_base_create(Class, Size)` を呼び出し、オブジェクトのクラスの型（`XPC_TYPE_*` のいずれか）とそのサイズ（メタデータ用に追加の 40B がサイズに加算されます）を指定します。つまり、オブジェクトのデータはオフセット 40B から始まります。\
+したがって、`xpc_<objectType>_t` は `xpc_object_t` のサブクラスのようなものであり、`os_object_t*` のサブクラスになります。
 
 > [!WARNING]
-> `xpc_dictionary_[get/set]_<objectType>`を使用して、キーの型と実際の値を取得または設定するのは開発者であるべきです。
+> `xpc_dictionary_[get/set]_<objectType>` を使用して、キーの型と実際の値を取得または設定するのは開発者であるべきです。
 
 - **`xpc_pipe`**
 
-**`xpc_pipe`**は、プロセスが通信するために使用できるFIFOパイプです（通信はMachメッセージを使用します）。\
-特定のMachポートを使用して作成するために、`xpc_pipe_create()`または`xpc_pipe_create_from_port()`を呼び出すことでXPCサーバーを作成できます。次に、メッセージを受信するには、`xpc_pipe_receive`および`xpc_pipe_try_receive`を呼び出すことができます。
+**`xpc_pipe`** は、プロセスが通信するために使用できる FIFO パイプです（通信は Mach メッセージを使用します）。\
+特定の Mach ポートを使用して作成するには、`xpc_pipe_create()` または `xpc_pipe_create_from_port()` を呼び出して XPC サーバーを作成できます。次に、メッセージを受信するには `xpc_pipe_receive` および `xpc_pipe_try_receive` を呼び出すことができます。
 
-**`xpc_pipe`**オブジェクトは、使用される2つのMachポートと名前（ある場合）の情報をその構造体に持つ**`xpc_object_t`**です。たとえば、plist `/System/Library/LaunchDaemons/com.apple.secinitd.plist`内のデーモン`secinitd`の名前は、`com.apple.secinitd`と呼ばれるパイプを構成します。
+**`xpc_pipe`** オブジェクトは、使用される 2 つの Mach ポートと名前（ある場合）の情報を含む **`xpc_object_t`** です。たとえば、plist `/System/Library/LaunchDaemons/com.apple.secinitd.plist` にあるデーモン `secinitd` の名前は、`com.apple.secinitd` というパイプを構成します。
 
-**`xpc_pipe`**の例は、**`launchd`**によって作成された**bootstrap pipe**で、Machポートの共有を可能にします。
+**`xpc_pipe`** の例は、**`launchd`** によって作成された **bootstrap pipe** で、Mach ポートの共有を可能にします。
 
 - **`NSXPC*`**
 
-これらは、XPC接続の抽象化を可能にするObjective-Cの高レベルオブジェクトです。\
-さらに、これらのオブジェクトは、前のものよりもDTraceでデバッグしやすくなっています。
+これらは、XPC 接続の抽象化を可能にする Objective-C の高レベルオブジェクトです。\
+さらに、これらのオブジェクトは、前のものよりも DTrace でデバッグしやすくなっています。
 
 - **`GCD Queues`**
 
-XPCはメッセージを渡すためにGCDを使用し、さらに`xpc.transactionq`、`xpc.io`、`xpc-events.add-listenerq`、`xpc.service-instance`などの特定のディスパッチキューを生成します。
+XPC はメッセージを渡すために GCD を使用し、さらに `xpc.transactionq`、`xpc.io`、`xpc-events.add-listenerq`、`xpc.service-instance` などの特定のディスパッチキューを生成します。
 
-## XPCサービス
+## XPC サービス
 
-これらは、他のプロジェクトの**`XPCServices`**フォルダー内にある`.xpc`拡張子を持つ**バンドル**であり、`Info.plist`では`CFBundlePackageType`が**`XPC!`**に設定されています。\
-このファイルには、Application、User、System、またはサンドボックスを定義できる`_SandboxProfile`、またはサービスに連絡するために必要な権限やIDを示す可能性のある`_AllowedClients`など、他の構成キーがあります。これらおよび他の構成オプションは、サービスが起動されるときにサービスを構成するのに役立ちます。
+これらは、他のプロジェクトの **`XPCServices`** フォルダー内にある `.xpc` 拡張子を持つバンドルであり、`Info.plist` では `CFBundlePackageType` が **`XPC!`** に設定されています。\
+このファイルには、Application、User、System または `_SandboxProfile` のような他の構成キーがあり、サンドボックスを定義したり、`_AllowedClients` がサービスに連絡するために必要な権限や ID を示すことがあります。これらの構成オプションは、サービスを起動する際に役立ちます。
 
 ### サービスの開始
 
-アプリは、`xpc_connection_create_mach_service`を使用してXPCサービスに**接続**しようとし、その後launchdがデーモンを見つけて**`xpcproxy`**を起動します。**`xpcproxy`**は構成された制限を強制し、提供されたFDとMachポートでサービスを生成します。
+アプリは `xpc_connection_create_mach_service` を使用して XPC サービスに **接続** しようとし、その後 launchd がデーモンを見つけて **`xpcproxy`** を起動します。**`xpcproxy`** は構成された制限を強制し、提供された FD と Mach ポートでサービスを生成します。
 
-XPCサービスの検索速度を向上させるために、キャッシュが使用されます。
+XPC サービスの検索速度を向上させるために、キャッシュが使用されます。
 
-`xpcproxy`のアクションをトレースすることができます：
+`xpcproxy` のアクションをトレースすることができます:
 ```bash
 supraudit S -C -o /tmp/output /dev/auditpipe
 ```
-XPCライブラリは、`xpc_ktrace_pid0`および`xpc_ktrace_pid1`を呼び出すアクションをログするために`kdebug`を使用します。使用されるコードは文書化されていないため、`/usr/share/misc/trace.codes`に追加する必要があります。これらのコードは`0x29`のプレフィックスを持ち、例えば`0x29000004`: `XPC_serializer_pack`があります。\
-ユーティリティ`xpcproxy`は`0x22`のプレフィックスを使用し、例えば`0x2200001c: xpcproxy:will_do_preexec`があります。
+XPCライブラリは、`xpc_ktrace_pid0`および`xpc_ktrace_pid1`を呼び出すアクションをログするために`kdebug`を使用します。使用されるコードは文書化されていないため、これらを`/usr/share/misc/trace.codes`に追加する必要があります。これらのコードはプレフィックス`0x29`を持ち、例えば`0x29000004`: `XPC_serializer_pack`のようになります。\
+ユーティリティ`xpcproxy`はプレフィックス`0x22`を使用し、例えば`0x2200001c: xpcproxy:will_do_preexec`のようになります。
 
 ## XPCイベントメッセージ
 
-アプリケーションは異なるイベント**メッセージ**に**サブスクライブ**でき、これによりそのようなイベントが発生したときに**オンデマンドで開始**できるようになります。これらのサービスの**セットアップ**は、**前述のディレクトリと同じディレクトリ**にある**launchd plistファイル**で行われ、追加の**`LaunchEvent`**キーが含まれています。
+アプリケーションは異なるイベント**メッセージ**に**サブスクライブ**でき、これによりそのようなイベントが発生したときに**オンデマンドで開始**されることが可能です。これらのサービスの**セットアップ**は、**前述のディレクトリと同じディレクトリにある**`launchd plistファイル`で行われ、追加の**`LaunchEvent`**キーを含んでいます。
 
 ### XPC接続プロセスチェック
 
-プロセスがXPC接続を介してメソッドを呼び出そうとすると、**XPCサービスはそのプロセスが接続を許可されているかどうかを確認する必要があります**。以下は、一般的な確認方法と一般的な落とし穴です：
+プロセスがXPC接続を介してメソッドを呼び出そうとする場合、**XPCサービスはそのプロセスが接続を許可されているかどうかを確認する必要があります**。以下はその確認方法と一般的な落とし穴です：
 
 {{#ref}}
 macos-xpc-connecting-process-check/
@@ -128,7 +128,7 @@ macos-xpc-connecting-process-check/
 
 ## XPC認可
 
-Appleは、アプリが**いくつかの権利を構成し、それを取得する方法を設定する**ことを許可しているため、呼び出しプロセスがそれらを持っている場合、**XPCサービスからメソッドを呼び出すことが許可されます**：
+Appleはまた、アプリが**いくつかの権利を設定し、それを取得する方法を構成する**ことを許可しているため、呼び出しプロセスがそれらを持っている場合、**XPCサービスからメソッドを呼び出すことが許可されます**：
 
 {{#ref}}
 macos-xpc-authorization.md
@@ -149,7 +149,7 @@ xpcspy -U <prog-name> -t 'i:com.apple.*' -t 'o:com.apple.*' -r
 ```
 別の使用可能なツールは [**XPoCe2**](https://newosxbook.com/tools/XPoCe2.html) です。
 
-## XPC 通信 C コード例
+## XPC 通信 C コードの例
 
 {{#tabs}}
 {{#tab name="xpc_server.c"}}
@@ -281,7 +281,7 @@ sudo launchctl load /Library/LaunchDaemons/xyz.hacktricks.service.plist
 sudo launchctl unload /Library/LaunchDaemons/xyz.hacktricks.service.plist
 sudo rm /Library/LaunchDaemons/xyz.hacktricks.service.plist /tmp/xpc_server
 ```
-## XPCコミュニケーション Objective-C コード例
+## XPC通信のObjective-Cコード例
 
 {{#tabs}}
 {{#tab name="oc_xpc_server.m"}}
@@ -439,14 +439,14 @@ return;
 ```
 ## Remote XPC
 
-この機能は `RemoteXPC.framework`（`libxpc`から）によって提供され、異なるホスト間でXPCを介して通信することができます。\
-リモートXPCをサポートするサービスは、plistにUsesRemoteXPCキーを持っており、これは`/System/Library/LaunchDaemons/com.apple.SubmitDiagInfo.plist`のケースのようです。しかし、サービスは`launchd`で登録されますが、機能を提供するのは`UserEventAgent`で、プラグイン`com.apple.remoted.plugin`と`com.apple.remoteservicediscovery.events.plugin`です。
+この機能は `RemoteXPC.framework`（`libxpc`から）によって提供され、異なるホスト間でXPCを介して通信することを可能にします。\
+リモートXPCをサポートするサービスは、`/System/Library/LaunchDaemons/com.apple.SubmitDiagInfo.plist`のように、plistにUsesRemoteXPCキーを持っています。しかし、サービスは`launchd`に登録されますが、機能を提供するのは`UserEventAgent`で、プラグイン`com.apple.remoted.plugin`と`com.apple.remoteservicediscovery.events.plugin`です。
 
-さらに、`RemoteServiceDiscovery.framework`は、`com.apple.remoted.plugin`から情報を取得することを可能にし、`get_device`、`get_unique_device`、`connect`などの関数を公開しています。
+さらに、`RemoteServiceDiscovery.framework`は、`com.apple.remoted.plugin`から情報を取得することを可能にし、`get_device`、`get_unique_device`、`connect`などの関数を公開します。
 
-一度`connect`が使用され、サービスのソケット`fd`が収集されると、`remote_xpc_connection_*`クラスを使用することが可能です。
+一度`connect`が使用され、サービスのソケット`fd`が取得されると、`remote_xpc_connection_*`クラスを使用することが可能です。
 
-リモートサービスに関する情報は、次のようなパラメータを使用してCLIツール`/usr/libexec/remotectl`を使用することで取得できます：
+リモートサービスに関する情報は、次のようなパラメータを使用してCLIツール`/usr/libexec/remotectl`を使用することで取得できます:
 ```bash
 /usr/libexec/remotectl list # Get bridge devices
 /usr/libexec/remotectl show ...# Get device properties and services

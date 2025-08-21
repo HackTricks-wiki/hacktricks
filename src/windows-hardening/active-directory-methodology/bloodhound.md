@@ -48,7 +48,7 @@ curl -L https://ghst.ly/getbhce | docker compose -f - up
 
 * `SharpHound.exe` / `Invoke-BloodHound` – ネイティブまたはPowerShellバリアント
 * `AzureHound` – Azure AD列挙
-* **SoaPy + BOFHound** – ADWSコレクション（リンクは上部参照）
+* **SoaPy + BOFHound** – ADWSコレクション（リンクは上部を参照）
 
 #### 一般的なSharpHoundモード
 ```powershell
@@ -62,7 +62,7 @@ SharpHound.exe --Stealth --LDAP                      # Low noise LDAP only
 
 ## Group3r
 
-[Group3r](https://github.com/Group3r/Group3r) は**グループポリシーオブジェクト**を列挙し、誤設定を強調表示します。
+[Group3r](https://github.com/Group3r/Group3r) は **Group Policy Objects** を列挙し、誤設定を強調表示します。
 ```bash
 # Execute inside the domain
 Group3r.exe -f gpo.log   # -s to stdout

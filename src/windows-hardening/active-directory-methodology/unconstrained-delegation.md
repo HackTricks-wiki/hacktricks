@@ -32,27 +32,28 @@ Rubeus.exe monitor /interval:10 [/filteruser:<username>] #Check every 10s for ne
 ```
 管理者（または被害者ユーザー）のチケットをメモリにロードします **Mimikatz** または **Rubeus for a** [**Pass the Ticket**](pass-the-ticket.md)**.**\
 詳細情報: [https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/](https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/)\
-[**ired.teamの非制約デリゲーションに関する詳細情報。**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/domain-compromise-via-unrestricted-kerberos-delegation)
+[**ired.teamの制約のない委任に関する詳細情報。**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/domain-compromise-via-unrestricted-kerberos-delegation)
 
 ### **強制認証**
 
-攻撃者が「非制約デリゲーション」を許可されたコンピュータを**侵害**することができれば、**Print server**を**自動的にログイン**させて**TGTをメモリに保存**させることができます。\
-その後、攻撃者はユーザーPrint serverコンピュータアカウントを**偽装するためにPass the Ticket攻撃を実行**することができます。
+攻撃者が「制約のない委任」を許可されたコンピュータを**侵害**することができれば、**Print server**を**自動的にログイン**させて**TGTをメモリに保存**させることができます。\
+その後、攻撃者は**Pass the Ticket攻撃を実行して**Print serverコンピュータアカウントのユーザーを**なりすます**ことができます。
 
 印刷サーバーを任意のマシンにログインさせるには、[**SpoolSample**](https://github.com/leechristensen/SpoolSample)を使用できます:
 ```bash
 .\SpoolSample.exe <printmachine> <unconstrinedmachine>
 ```
-TGTがドメインコントローラーからのものであれば、[**DCSync attack**](acl-persistence-abuse/index.html#dcsync)を実行して、DCからすべてのハッシュを取得することができます。\
+TGTがドメインコントローラーからのものであれば、[**DCSync攻撃**](acl-persistence-abuse/index.html#dcsync)を実行してDCからすべてのハッシュを取得できます。\
 [**この攻撃に関する詳細はired.teamで。**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/domain-compromise-via-dc-print-server-and-kerberos-delegation)
 
-ここに**認証を強制する他の方法があります：**
+ここに**認証を強制する**他の方法があります:
+
 
 {{#ref}}
 printers-spooler-service-abuse.md
 {{#endref}}
 
-### Mitigation
+### 緩和策
 
 - DA/Adminのログインを特定のサービスに制限する
 - 特権アカウントに対して「アカウントは機密であり、委任できない」を設定する。

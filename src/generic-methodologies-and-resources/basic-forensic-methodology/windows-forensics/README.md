@@ -14,25 +14,25 @@
 
 Timeline は、訪問したウェブページ、編集した文書、実行したアプリケーションの **時系列履歴** を提供する Windows の特徴です。
 
-データベースは、パス `\Users\<username>\AppData\Local\ConnectedDevicesPlatform\<id>\ActivitiesCache.db` にあります。このデータベースは、SQLite ツールまたはツール [**WxTCmd**](https://github.com/EricZimmerman/WxTCmd) を使用して開くことができ、**このツールで生成された 2 つのファイルは、ツール** [**TimeLine Explorer**](https://ericzimmerman.github.io/#!index.md) **で開くことができます**。
+データベースは、パス `\Users\<username>\AppData\Local\ConnectedDevicesPlatform\<id>\ActivitiesCache.db` にあります。このデータベースは、SQLite ツールまたはツール [**WxTCmd**](https://github.com/EricZimmerman/WxTCmd) を使用して開くことができ、**2つのファイルを生成し、それらはツール** [**TimeLine Explorer**](https://ericzimmerman.github.io/#!index.md) **で開くことができます**。
 
 ### ADS (Alternate Data Streams)
 
-ダウンロードされたファイルには、**ADS Zone.Identifier** が含まれており、**どのように** intranet、internet などから **ダウンロードされたか** を示しています。一部のソフトウェア（ブラウザなど）は、ファイルがダウンロードされた **URL** など、さらに **多くの情報** を提供することがよくあります。
+ダウンロードされたファイルには、**ADS Zone.Identifier** が含まれており、**どのように** intranet、internet などから **ダウンロードされたか** を示しています。一部のソフトウェア（ブラウザなど）は、ファイルがダウンロードされた**URL**など、さらに**多くの情報**を提供することがよくあります。
 
 ## **File Backups**
 
 ### Recycle Bin
 
 Vista/Win7/Win8/Win10 では、**Recycle Bin** はドライブのルートにあるフォルダー **`$Recycle.bin`** にあります（`C:\$Recycle.bin`）。\
-このフォルダーでファイルが削除されると、2 つの特定のファイルが作成されます：
+このフォルダー内でファイルが削除されると、2つの特定のファイルが作成されます：
 
 - `$I{id}`: ファイル情報（削除された日時）
 - `$R{id}`: ファイルの内容
 
 ![](<../../../images/image (1029).png>)
 
-これらのファイルがあれば、ツール [**Rifiuti**](https://github.com/abelcheung/rifiuti2) を使用して、削除されたファイルの元のアドレスと削除された日時を取得できます（Vista – Win10 には `rifiuti-vista.exe` を使用）。
+これらのファイルがあれば、ツール [**Rifiuti**](https://github.com/abelcheung/rifiuti2) を使用して削除されたファイルの元のアドレスと削除日時を取得できます（Vista – Win10 には `rifiuti-vista.exe` を使用）。
 ```
 .\rifiuti-vista.exe C:\Users\student\Desktop\Recycle
 ```
@@ -40,7 +40,7 @@ Vista/Win7/Win8/Win10 では、**Recycle Bin** はドライブのルートにあ
 
 ### ボリュームシャドウコピー
 
-シャドウコピーは、Microsoft Windowsに含まれる技術で、コンピュータファイルやボリュームの**バックアップコピー**やスナップショットを作成できます。これらは使用中であっても可能です。
+シャドウコピーは、Microsoft Windowsに含まれる技術で、コンピュータファイルやボリュームの**バックアップコピー**やスナップショットを作成できます。これらは使用中であっても作成可能です。
 
 これらのバックアップは通常、ファイルシステムのルートから` \System Volume Information`にあり、名前は以下の画像に示されている**UID**で構成されています。
 
@@ -54,7 +54,7 @@ Vista/Win7/Win8/Win10 では、**Recycle Bin** はドライブのルートにあ
 
 ![](<../../../images/image (254).png>)
 
-レジストリ`HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\VSS`にも、`ボリュームシャドウコピー`に関する構成情報が含まれています。
+レジストリ`HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\VSS`には、`ボリュームシャドウコピー`に関する構成情報も含まれています。
 
 ### Office自動保存ファイル
 
@@ -66,12 +66,12 @@ Officeの自動保存ファイルは次の場所にあります: `C:\Usuarios\\A
 
 ### 最近の文書 (LNK)
 
-Windowsは、ユーザーが次の場所で**ファイルを開く、使用する、または作成する**と、これらの**ショートカット**を**自動的に****作成**します:
+Windowsは、ユーザーが次の場所で**ファイルを開く、使用する、または作成する**ときに、これらの**ショートカット**を**自動的に****作成**します:
 
 - Win7-Win10: `C:\Users\\AppData\Roaming\Microsoft\Windows\Recent\`
 - Office: `C:\Users\\AppData\Roaming\Microsoft\Office\Recent\`
 
-フォルダーが作成されると、フォルダーへのリンク、親フォルダー、および祖父フォルダーへのリンクも作成されます。
+フォルダーが作成されると、フォルダーへのリンク、親フォルダーへのリンク、および祖父フォルダーへのリンクも作成されます。
 
 これらの自動的に作成されたリンクファイルは、**ファイル**か**フォルダー**か、**MAC** **タイム**、**ボリューム情報**、および**ターゲットファイルのフォルダー**に関する情報を**含んでいます**。この情報は、ファイルが削除された場合にそれらを回復するのに役立ちます。
 
@@ -100,11 +100,11 @@ LECmd.exe -d C:\Users\student\Desktop\LNKs --csv C:\Users\student\Desktop\LNKs
 
 ### ジャンプリスト
 
-これらはアプリケーションごとに示される最近のファイルです。各アプリケーションでアクセスできる**アプリケーションによって使用された最近のファイルのリスト**です。これらは**自動的に作成されるか、カスタム**で作成されることがあります。
+これはアプリケーションごとに示される最近のファイルです。各アプリケーションでアクセスできる**アプリケーションによって使用された最近のファイルのリスト**です。これらは**自動的に作成されるか、カスタム**で作成されることがあります。
 
 自動的に作成された**ジャンプリスト**は、`C:\Users\{username}\AppData\Roaming\Microsoft\Windows\Recent\AutomaticDestinations\`に保存されます。ジャンプリストは、最初のIDがアプリケーションのIDである`{id}.autmaticDestinations-ms`という形式で命名されます。
 
-カスタムジャンプリストは、`C:\Users\{username}\AppData\Roaming\Microsoft\Windows\Recent\CustomDestination\`に保存され、通常はファイルに**重要な**ことが起こったためにアプリケーションによって作成されます（お気に入りとしてマークされたかもしれません）。
+カスタムジャンプリストは、`C:\Users\{username}\AppData\Roaming\Microsoft\Windows\Recent\CustomDestination\`に保存され、通常はファイルに**重要な**ことが起こったためにアプリケーションによって作成されます（お気に入りとしてマークされているかもしれません）。
 
 任意のジャンプリストの**作成時間**は、**ファイルが最初にアクセスされた時間**を示し、**修正時間は最後にアクセスされた時間**を示します。
 
@@ -144,13 +144,13 @@ USB接続が行われた時刻に関するタイムスタンプを取得する�
 
 ### USB Detective
 
-[**USBDetective**](https://usbdetective.com)を使用して、画像に接続されたUSBデバイスに関する情報を取得できます。
+[**USBDetective**](https://usbdetective.com)は、画像に接続されたUSBデバイスに関する情報を取得するために使用できます。
 
 ![](<../../../images/image (452).png>)
 
 ### プラグアンドプレイのクリーンアップ
 
-「プラグアンドプレイのクリーンアップ」として知られるスケジュールされたタスクは、主に古いドライバーバージョンの削除を目的としています。最新のドライバーパッケージバージョンを保持するという指定された目的に反して、オンラインソースは、過去30日間に非アクティブなドライバーも対象にしていることを示唆しています。したがって、過去30日間に接続されていないリムーバブルデバイスのドライバーは削除される可能性があります。
+「プラグアンドプレイのクリーンアップ」として知られるスケジュールされたタスクは、主に古いドライバーバージョンの削除を目的としています。最新のドライバーパッケージバージョンを保持するという指定された目的とは対照的に、オンラインソースは、過去30日間に非アクティブなドライバーも対象にしていることを示唆しています。したがって、過去30日間に接続されていないリムーバブルデバイスのドライバーは削除される可能性があります。
 
 タスクは次のパスにあります：`C:\Windows\System32\Tasks\Microsoft\Windows\Plug and Play\Plug and Play Cleanup`。
 
@@ -164,9 +164,9 @@ USB接続が行われた時刻に関するタイムスタンプを取得する�
 - **Period ('P1M')**：タスクスケジューラに、定期的な自動メンテナンス中に毎月クリーンアップタスクを開始するよう指示します。
 - **Deadline ('P2M')**：タスクスケジューラに、タスクが2か月連続で失敗した場合、緊急自動メンテナンス中にタスクを実行するよう指示します。
 
-この構成により、ドライバーの定期的なメンテナンスとクリーンアップが確保され、連続して失敗した場合のタスクの再試行のための規定が設けられています。
+この構成により、ドライバーの定期的なメンテナンスとクリーンアップが確保され、連続的な失敗が発生した場合にタスクを再試行するための規定が設けられています。
 
-**詳細については次を確認してください：** [**https://blog.1234n6.com/2018/07/windows-plug-and-play-cleanup.html**](https://blog.1234n6.com/2018/07/windows-plug-and-play-cleanup.html)
+**詳細については、次を確認してください：** [**https://blog.1234n6.com/2018/07/windows-plug-and-play-cleanup.html**](https://blog.1234n6.com/2018/07/windows-plug-and-play-cleanup.html)
 
 ## メール
 
@@ -181,11 +181,11 @@ USB接続が行われた時刻に関するタイムスタンプを取得する�
 
 ### Windowsメールアプリ
 
-このアプリケーションは、メールをHTMLまたはテキストで保存します。メールは`Users\<username>\AppData\Local\Comms\Unistore\data\3\`内のサブフォルダーにあります。メールは`.dat`拡張子で保存されます。
+このアプリケーションは、メールをHTMLまたはテキスト形式で保存します。メールは、`\Users\<username>\AppData\Local\Comms\Unistore\data\3\`内のサブフォルダーにあります。メールは`.dat`拡張子で保存されます。
 
 メールの**メタデータ**と**連絡先**は、**EDBデータベース**内にあります：`\Users\<username>\AppData\Local\Comms\UnistoreDB\store.vol`
 
-ファイルの拡張子を`.vol`から`.edb`に変更すると、[ESEDatabaseView](https://www.nirsoft.net/utils/ese_database_view.html)ツールを使用して開くことができます。`Message`テーブル内でメールを見ることができます。
+ファイルの拡張子を`.vol`から`.edb`に変更すると、ツール[**ESEDatabaseView**](https://www.nirsoft.net/utils/ese_database_view.html)を使用して開くことができます。`Message`テーブル内でメールを見ることができます。
 
 ### Microsoft Outlook
 
@@ -203,7 +203,7 @@ Microsoft Outlookクライアントでは、送信/受信されたすべての�
 
 レジストリパス`HKEY_CURRENT_USER\Software\Microsoft\WindowsNT\CurrentVersion\Windows Messaging Subsystem\Profiles\Outlook`は、使用されているファイルを示しています。
 
-PSTファイルは、[**Kernel PST Viewer**](https://www.nucleustechnologies.com/es/visor-de-pst.html)ツールを使用して開くことができます。
+PSTファイルは、ツール[**Kernel PST Viewer**](https://www.nucleustechnologies.com/es/visor-de-pst.html)を使用して開くことができます。
 
 ![](<../../../images/image (498).png>)
 
@@ -234,7 +234,7 @@ Windowsレジストリは、広範なシステムおよびユーザー活動デ�
 
 - `%windir%\System32\Config`は、さまざまな`HKEY_LOCAL_MACHINE`サブキー用です。
 - `%UserProfile%{User}\NTUSER.DAT`は、`HKEY_CURRENT_USER`用です。
-- Windows Vista以降のバージョンは、`HKEY_LOCAL_MACHINE`レジストリファイルを`%Windir%\System32\Config\RegBack\`にバックアップします。
+- Windows Vista以降のバージョンは、`%Windir%\System32\Config\RegBack\`に`HKEY_LOCAL_MACHINE`レジストリファイルのバックアップを保存します。
 - さらに、プログラム実行情報は、Windows VistaおよびWindows 2008 Server以降の`%UserProfile%\{User}\AppData\Local\Microsoft\Windows\USERCLASS.DAT`に保存されます。
 
 ### ツール
@@ -242,9 +242,9 @@ Windowsレジストリは、広範なシステムおよびユーザー活動デ�
 レジストリファイルを分析するために役立つツールがいくつかあります：
 
 - **レジストリエディタ**：Windowsにインストールされています。現在のセッションのWindowsレジストリをナビゲートするためのGUIです。
-- [**Registry Explorer**](https://ericzimmerman.github.io/#!index.md)：レジストリファイルをロードし、GUIでナビゲートすることができます。また、興味深い情報を持つキーをハイライトするブックマークも含まれています。
-- [**RegRipper**](https://github.com/keydet89/RegRipper3.0)：再び、ロードされたレジストリをナビゲートするためのGUIがあり、ロードされたレジストリ内の興味深い情報をハイライトするプラグインも含まれています。
-- [**Windows Registry Recovery**](https://www.mitec.cz/wrr.html)：レジストリから重要な情報を抽出できる別のGUIアプリケーションです。
+- [**Registry Explorer**](https://ericzimmerman.github.io/#!index.md)：レジストリファイルをロードし、GUIでナビゲートすることを可能にします。また、興味深い情報を持つキーをハイライトするブックマークも含まれています。
+- [**RegRipper**](https://github.com/keydet89/RegRipper3.0)：再び、ロードされたレジストリをナビゲートするためのGUIを持ち、ロードされたレジストリ内の興味深い情報をハイライトするプラグインも含まれています。
+- [**Windows Registry Recovery**](https://www.mitec.cz/wrr.html)：レジストリから重要な情報を抽出することができる別のGUIアプリケーションです。
 
 ### 削除された要素の回復
 
@@ -252,15 +252,16 @@ Windowsレジストリは、広範なシステムおよびユーザー活動デ�
 
 ### 最終書き込み時間
 
-各キー-値には、最後に変更された時間を示す**タイムスタンプ**が含まれています。
+各キー-値には、最後に修正された時間を示す**タイムスタンプ**が含まれています。
 
 ### SAM
 
 ファイル/ハイブ**SAM**には、システムの**ユーザー、グループ、およびユーザーパスワード**のハッシュが含まれています。
 
-`SAM\Domains\Account\Users`内で、ユーザー名、RID、最終ログイン、最終失敗ログオン、ログインカウンター、パスワードポリシー、およびアカウントが作成された日時を取得できます。**ハッシュ**を取得するには、ファイル/ハイブ**SYSTEM**も**必要**です。
+`SAM\Domains\Account\Users`で、ユーザー名、RID、最終ログイン、最終失敗ログオン、ログインカウンター、パスワードポリシー、およびアカウントが作成された時期を取得できます。**ハッシュ**を取得するには、ファイル/ハイブ**SYSTEM**も**必要**です。
 
 ### Windowsレジストリの興味深いエントリ
+
 
 {{#ref}}
 interesting-windows-registry-keys.md
@@ -284,13 +285,13 @@ interesting-windows-registry-keys.md
 
 プリフェッチは、コンピュータがユーザーが**近い将来にアクセスする可能性のあるコンテンツを表示するために必要なリソースを静かに取得する**ことを可能にする技術です。これにより、リソースに迅速にアクセスできます。
 
-Windowsプリフェッチは、**実行されたプログラムのキャッシュを作成**して、より速くロードできるようにします。これらのキャッシュは、`C:\Windows\Prefetch`内に`.pf`ファイルとして作成されます。XP/VISTA/WIN7では128ファイル、Win8/Win10では1024ファイルの制限があります。
+Windowsプリフェッチは、**実行されたプログラムのキャッシュを作成**して、より速くロードできるようにします。これらのキャッシュは、次のパス内に`.pf`ファイルとして作成されます：`C:\Windows\Prefetch`。XP/VISTA/WIN7では128ファイル、Win8/Win10では1024ファイルの制限があります。
 
 ファイル名は`{program_name}-{hash}.pf`として作成されます（ハッシュは実行可能ファイルのパスと引数に基づいています）。W10では、これらのファイルは圧縮されています。ファイルの存在は、**プログラムが実行された**ことを示しています。
 
-ファイル`C:\Windows\Prefetch\Layout.ini`には、**プリフェッチされたファイルのフォルダーの名前**が含まれています。このファイルには、**実行回数**、**実行日**、および**プログラムによって開かれたファイル**に関する情報が含まれています。
+ファイル`C:\Windows\Prefetch\Layout.ini`には、**プリフェッチされたファイルのフォルダーの名前**が含まれています。このファイルには、**実行回数**、**実行日**、および**プログラムによって**開かれた**ファイルに関する情報が含まれています。
 
-これらのファイルを調査するには、[**PEcmd.exe**](https://github.com/EricZimmerman/PECmd)ツールを使用できます。
+これらのファイルを調査するには、ツール[**PEcmd.exe**](https://github.com/EricZimmerman/PECmd)を使用できます。
 ```bash
 .\PECmd.exe -d C:\Users\student\Desktop\Prefetch --html "C:\Users\student\Desktop\out_folder"
 ```
@@ -298,7 +299,7 @@ Windowsプリフェッチは、**実行されたプログラムのキャッシ�
 
 ### Superprefetch
 
-**Superprefetch**は、次に読み込まれるものを予測することによって**プログラムをより速く読み込む**という同じ目的を持っています。しかし、これはプリフェッチサービスの代わりにはなりません。\
+**Superprefetch**は、次に読み込まれるものを予測することによって**プログラムをより速く読み込む**という同じ目的を持っています。しかし、これはprefetchサービスの代わりにはなりません。\
 このサービスは、`C:\Windows\Prefetch\Ag*.db`にデータベースファイルを生成します。
 
 これらのデータベースには、**プログラム**の**名前**、**実行回数**、**開かれたファイル**、**アクセスされたボリューム**、**完全なパス**、**時間枠**、および**タイムスタンプ**が含まれています。
@@ -313,8 +314,8 @@ Windowsプリフェッチは、**実行されたプログラムのキャッシ�
 
 - AppIDとパス
 - プロセスを実行したユーザー
-- 送信バイト数
-- 受信バイト数
+- 送信バイト
+- 受信バイト
 - ネットワークインターフェース
 - 接続の持続時間
 - プロセスの持続時間
@@ -348,7 +349,7 @@ Windowsプリフェッチは、**実行されたプログラムのキャッシ�
 
 **Amcache.hve** ファイルは、システム上で実行されたアプリケーションの詳細を記録するレジストリハイブです。通常、`C:\Windows\AppCompat\Programas\Amcache.hve` にあります。
 
-このファイルは、実行されたプロセスの記録を保存することで注目されており、実行可能ファイルへのパスやその SHA1 ハッシュを含んでいます。この情報は、システム上のアプリケーションの活動を追跡するために非常に貴重です。
+このファイルは、最近実行されたプロセスの記録を保存しており、実行可能ファイルへのパスやその SHA1 ハッシュを含んでいます。この情報は、システム上のアプリケーションの活動を追跡するために非常に貴重です。
 
 **Amcache.hve** からデータを抽出して分析するには、[**AmcacheParser**](https://github.com/EricZimmerman/AmcacheParser) ツールを使用できます。以下のコマンドは、AmcacheParser を使用して **Amcache.hve** ファイルの内容を解析し、結果を CSV 形式で出力する方法の例です。
 ```bash
@@ -366,7 +367,7 @@ AmcacheParser.exe -f C:\Users\genericUser\Desktop\Amcache.hve --csv C:\Users\gen
 
 ### スケジュールされたタスク
 
-これらは`C:\Windows\Tasks`または`C:\Windows\System32\Tasks`から抽出でき、XMLとして読むことができます。
+これらは`C:\Windows\Tasks`または`C:\Windows\System32\Tasks`から抽出でき、XMLとして読み取ることができます。
 
 ### サービス
 
@@ -382,7 +383,7 @@ AmcacheParser.exe -f C:\Users\genericUser\Desktop\Amcache.hve --csv C:\Users\gen
 
 ## Windowsイベント
 
-Windowsイベント内に表示される情報は次のとおりです：
+Windowsイベントに表示される情報は次のとおりです：
 
 - 何が起こったか
 - タイムスタンプ（UTC + 0）
@@ -390,7 +391,7 @@ Windowsイベント内に表示される情報は次のとおりです：
 - 関与したホスト（ホスト名、IP）
 - アクセスされた資産（ファイル、フォルダー、プリンター、サービス）
 
-ログは、Windows Vista以前では`C:\Windows\System32\config`にあり、Windows Vista以降では`C:\Windows\System32\winevt\Logs`にあります。Windows Vista以前はイベントログはバイナリ形式であり、以降は**XML形式**で、**.evtx**拡張子を使用しています。
+ログは、Windows Vista以前は`C:\Windows\System32\config`にあり、Windows Vista以降は`C:\Windows\System32\winevt\Logs`にあります。Windows Vista以前はイベントログはバイナリ形式であり、以降は**XML形式**で、**.evtx**拡張子を使用しています。
 
 イベントファイルの場所は、SYSTEMレジストリの**`HKLM\SYSTEM\CurrentControlSet\services\EventLog\{Application|System|Security}`**で見つけることができます。
 
@@ -398,7 +399,7 @@ Windowsイベント内に表示される情報は次のとおりです：
 
 ## Windowsセキュリティイベントログの理解
 
-アクセスイベントは、`C:\Windows\System32\winevt\Security.evtx`にあるセキュリティ構成ファイルに記録されます。このファイルのサイズは調整可能で、容量に達すると古いイベントが上書きされます。記録されたイベントには、ユーザーログインとログオフ、ユーザーアクション、セキュリティ設定の変更、ファイル、フォルダー、共有資産へのアクセスが含まれます。
+アクセスイベントは、`C:\Windows\System32\winevt\Security.evtx`にあるセキュリティ構成ファイルに記録されます。このファイルのサイズは調整可能で、容量に達すると古いイベントが上書きされます。記録されたイベントには、ユーザーログインとログオフ、ユーザーアクション、セキュリティ設定の変更、ファイル、フォルダー、および共有資産へのアクセスが含まれます。
 
 ### ユーザー認証のための主要なイベントID：
 
@@ -409,18 +410,18 @@ Windowsイベント内に表示される情報は次のとおりです：
 
 #### EventID 4634/4647内のサブタイプ：
 
-- **インタラクティブ (2)**: 直接のユーザーログイン。
+- **インタラクティブ (2)**: 直接ユーザーログイン。
 - **ネットワーク (3)**: 共有フォルダーへのアクセス。
 - **バッチ (4)**: バッチプロセスの実行。
 - **サービス (5)**: サービスの起動。
 - **プロキシ (6)**: プロキシ認証。
-- **ロック解除 (7)**: パスワードで画面がロック解除されました。
+- **アンロック (7)**: パスワードで画面が解除されました。
 - **ネットワーククリアテキスト (8)**: IISからのクリアテキストパスワードの送信。
 - **新しい資格情報 (9)**: アクセスのために異なる資格情報を使用。
 - **リモートインタラクティブ (10)**: リモートデスクトップまたはターミナルサービスのログイン。
 - **キャッシュインタラクティブ (11)**: ドメインコントローラーに連絡せずにキャッシュされた資格情報でログイン。
 - **キャッシュリモートインタラクティブ (12)**: キャッシュされた資格情報でのリモートログイン。
-- **キャッシュロック解除 (13)**: キャッシュされた資格情報でのロック解除。
+- **キャッシュアンロック (13)**: キャッシュされた資格情報での解除。
 
 #### EventID 4625のステータスおよびサブステータスコード：
 
@@ -435,7 +436,7 @@ Windowsイベント内に表示される情報は次のとおりです：
 - **0xC0000133**: 時間同期の問題 - クライアントとサーバー間の大きな時間の不一致は、パス・ザ・チケットのようなより高度な攻撃を示す可能性があります。
 - **0xC0000224**: 強制的なパスワード変更が必要 - 頻繁な強制変更は、アカウントセキュリティを不安定にしようとする試みを示唆するかもしれません。
 - **0xC0000225**: セキュリティの問題ではなく、システムバグを示します。
-- **0xC000015b**: 拒否されたログオンタイプ - サービスログオンを実行しようとするユーザーなど、不正なログオンタイプでのアクセスの試み。
+- **0xC000015b**: 拒否されたログオンタイプ - サービスログオンを実行しようとするユーザーなど、不正なログオンタイプでのアクセス試行。
 
 #### EventID 4616：
 
@@ -461,7 +462,7 @@ Windowsイベント内に表示される情報は次のとおりです：
 
 ### Windowsイベントの回復
 
-削除されたWindowsイベントを回復する可能性を高めるために、疑わしいコンピュータの電源を直接抜いてシャットダウンすることをお勧めします。**Bulk_extractor**は、`.evtx`拡張子を指定する回復ツールで、これらのイベントを回復しようとする際に推奨されます。
+削除されたWindowsイベントを回復する可能性を高めるために、疑わしいコンピュータの電源を直接抜いてシャットダウンすることをお勧めします。**Bulk_extractor**は、`.evtx`拡張子を指定する回復ツールであり、そのようなイベントを回復しようとする際に推奨されます。
 
 ### Windowsイベントを通じて一般的な攻撃を特定する
 
@@ -473,11 +474,11 @@ Windowsイベント内に表示される情報は次のとおりです：
 
 #### 時間変更
 
-EventID 4616によって記録され、システム時間の変更は法医学的分析を複雑にする可能性があります。
+EventID 4616によって記録され、システム時間の変更はフォレンジック分析を複雑にする可能性があります。
 
 #### USBデバイストラッキング
 
-USBデバイストラッキングに役立つシステムイベントIDには、初回使用のための20001/20003/10000、ドライバー更新のための10100、挿入タイムスタンプのためのDeviceSetupManagerからのEventID 112が含まれます。
+USBデバイストラッキングに役立つシステムイベントIDには、初回使用のための20001/20003/10000、ドライバー更新のための10100、挿入タイムスタンプのためのEventID 112が含まれます。
 
 #### システム電源イベント
 
@@ -485,6 +486,6 @@ EventID 6005はシステムの起動を示し、EventID 6006はシャットダ�
 
 #### ログ削除
 
-セキュリティEventID 1102はログの削除を示し、法医学的分析にとって重要なイベントです。
+セキュリティEventID 1102はログの削除を示し、フォレンジック分析にとって重要なイベントです。
 
 {{#include ../../../banners/hacktricks-training.md}}

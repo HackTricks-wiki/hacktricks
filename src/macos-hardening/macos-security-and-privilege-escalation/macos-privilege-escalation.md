@@ -4,7 +4,8 @@
 
 ## TCC 特権昇格
 
-TCC 特権昇格を探している場合は、次に進んでください：
+TCC 特権昇格を探している場合は、次に進んでください:
+
 
 {{#ref}}
 macos-security-protections/macos-tcc/
@@ -12,7 +13,8 @@ macos-security-protections/macos-tcc/
 
 ## Linux Privesc
 
-**特権昇格に関するほとんどのトリックは、Linux/Unix に影響を与えるものは MacOS にも影響を与えることに注意してください。** したがって、次を参照してください：
+**特権昇格に関するほとんどのトリックは、Linux/Unix に影響を与えるものは MacOS にも影響を与えることに注意してください。** したがって、次を参照してください:
+
 
 {{#ref}}
 ../../linux-hardening/privilege-escalation/
@@ -24,7 +26,7 @@ macos-security-protections/macos-tcc/
 
 元の [Sudo ハイジャック技術は Linux 特権昇格の投稿内にあります](../../linux-hardening/privilege-escalation/index.html#sudo-hijacking)。
 
-しかし、macOS は **`sudo`** を実行する際にユーザーの **`PATH`** を **保持** します。つまり、この攻撃を達成する別の方法は、被害者が **sudo を実行する際に** 実行する他のバイナリを **ハイジャックする** ことです：
+しかし、macOS は **`sudo`** を実行する際にユーザーの **`PATH`** を **保持** します。つまり、この攻撃を達成する別の方法は、被害者が **sudo を実行する際に実行する他のバイナリをハイジャックする** ことです:
 ```bash
 # Let's hijack ls in /opt/homebrew/bin, as this is usually already in the users PATH
 cat > /opt/homebrew/bin/ls <<EOF
@@ -43,13 +45,13 @@ sudo ls
 
 ### Dockのなりすまし
 
-いくつかの**ソーシャルエンジニアリング**を使用して、実際に自分のスクリプトを実行しながら、Dock内で**Google Chromeのなりすまし**をすることができます：
+いくつかの**ソーシャルエンジニアリング**を使用して、Dock内で**Google Chromeのなりすまし**を行い、実際に自分のスクリプトを実行することができます：
 
 {{#tabs}}
 {{#tab name="Chrome Impersonation"}}
 いくつかの提案：
 
-- DockにChromeがあるか確認し、その場合はそのエントリを**削除**し、Dock配列の**同じ位置に****偽の**Chromeエントリを**追加**します。
+- Dock内にChromeがあるか確認し、その場合はそのエントリを**削除**し、Dock配列の**同じ位置に****偽の**Chromeエントリを**追加**します。
 ```bash
 #!/bin/sh
 
@@ -124,11 +126,11 @@ killall Dock
 {{#tab name="Finder Impersonation"}}
 いくつかの提案：
 
-- **FinderをDockから削除することはできない**ので、Dockに追加する場合は、偽のFinderを本物のFinderのすぐ隣に置くことができます。そのためには、**Dock配列の最初に偽のFinderエントリを追加する必要があります**。
-- 別のオプションは、Dockに配置せずにただ開くことで、「FinderがFinderを制御することを要求している」というのはそれほど奇妙ではありません。
+- **DockからFinderを削除することはできない**ので、Dockに追加する場合は、偽のFinderを本物のすぐ隣に置くことができます。そのためには、**Dock配列の最初に偽のFinderエントリを追加する必要があります**。
+- 別のオプションは、Dockに置かずにただ開くことで、「FinderがFinderを制御するように求めています」はそれほど奇妙ではありません。
 - パスワードを尋ねることなく**rootに昇格する**別のオプションは、Finderに本当に特権アクションを実行するためのパスワードを要求させることです：
-- Finderに**`/etc/pam.d`**に新しい**`sudo`**ファイルをコピーするように依頼します（パスワードを要求するプロンプトは「Finderがsudoをコピーしたい」と示します）。
-- Finderに新しい**Authorization Plugin**をコピーするように依頼します（ファイル名を制御できるので、パスワードを要求するプロンプトは「FinderがFinder.bundleをコピーしたい」と示します）。
+- Finderに**`/etc/pam.d`**に新しい**`sudo`**ファイルをコピーするように依頼します（パスワードを尋ねるプロンプトは「Finderがsudoをコピーしたい」と示します）。
+- Finderに新しい**Authorization Plugin**をコピーするように依頼します（ファイル名を制御できるので、パスワードを尋ねるプロンプトは「FinderがFinder.bundleをコピーしたい」と示します）。
 ```bash
 #!/bin/sh
 
@@ -205,8 +207,8 @@ killall Dock
 
 ### CVE-2020-9771 - mount_apfs TCC バイパスと特権昇格
 
-**任意のユーザー**（特権のないユーザーも含む）は、タイムマシンのスナップショットを作成し、マウントして、そのスナップショットの**すべてのファイル**にアクセスできます。\
-必要な**特権**は、使用されるアプリケーション（`Terminal`など）が**フルディスクアクセス**（FDA）アクセス（`kTCCServiceSystemPolicyAllfiles`）を持つことであり、これは管理者によって付与される必要があります。
+**任意のユーザー**（特権のないユーザーも含む）がタイムマシンのスナップショットを作成し、マウントして、そのスナップショットの**すべてのファイルにアクセス**できます。\
+必要な**特権**は、使用するアプリケーション（`Terminal`など）が**フルディスクアクセス**（FDA）アクセス（`kTCCServiceSystemPolicyAllfiles`）を持つことであり、これは管理者によって付与される必要があります。
 ```bash
 # Create snapshot
 tmutil localsnapshot
@@ -231,6 +233,7 @@ ls /tmp/snap/Users/admin_user # This will work
 ## 機密情報
 
 これは特権を昇格させるのに役立ちます：
+
 
 {{#ref}}
 macos-files-folders-and-binaries/macos-sensitive-locations.md

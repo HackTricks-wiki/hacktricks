@@ -4,7 +4,7 @@
 
 ## タイムスタンプ
 
-攻撃者は、**ファイルのタイムスタンプを変更すること**に興味を持つかもしれません。\
+攻撃者は**ファイルのタイムスタンプを変更すること**に興味を持つかもしれません。\
 タイムスタンプは、MFT内の属性`$STANDARD_INFORMATION` \_\_ と \_\_ `$FILE_NAME`に見つけることができます。
 
 両方の属性には4つのタイムスタンプがあります: **変更**, **アクセス**, **作成**, および **MFTレジストリ変更** (MACEまたはMACB)。
@@ -13,7 +13,7 @@
 
 ### TimeStomp - アンチフォレンジックツール
 
-このツールは、**`$STANDARD_INFORMATION`**内のタイムスタンプ情報を**変更**しますが、**`$FILE_NAME`**内の情報は**変更しません**。したがって、**疑わしい** **活動を特定することが可能です**。
+このツールは**`$STANDARD_INFORMATION`**内のタイムスタンプ情報を**変更**しますが、**`$FILE_NAME`**内の情報は**変更しません**。したがって、**疑わしい** **活動を特定することが可能です**。
 
 ### Usnjrnl
 
@@ -25,7 +25,7 @@
 
 ### $LogFile
 
-**ファイルシステムへのすべてのメタデータ変更は、**[write-ahead logging](https://en.wikipedia.org/wiki/Write-ahead_logging)として知られるプロセスでログに記録されます。ログに記録されたメタデータは、NTFSファイルシステムのルートディレクトリにある`**$LogFile**`という名前のファイルに保持されます。[LogFileParser](https://github.com/jschicht/LogFileParser)のようなツールを使用して、このファイルを解析し、変更を特定できます。
+**ファイルシステムへのすべてのメタデータ変更は**、[書き込み先行ログ](https://en.wikipedia.org/wiki/Write-ahead_logging)として知られるプロセスで記録されます。記録されたメタデータは、NTFSファイルシステムのルートディレクトリにある`**$LogFile**`という名前のファイルに保持されます。[LogFileParser](https://github.com/jschicht/LogFileParser)のようなツールを使用して、このファイルを解析し、変更を特定できます。
 
 ![](<../../images/image (137).png>)
 
@@ -98,9 +98,9 @@ UserAssistを無効にするには、2つのステップが必要です：
 - 各々の値を1（または3）から0に変更するために修正を選択
 - 再起動
 
-### タイムスタンプの無効化 - 最終アクセス時間
+### タイムスタンプの無効化 - 最終アクセス時刻
 
-NTFSボリュームからフォルダーが開かれるたびに、システムは各リストされたフォルダーの**タイムスタンプフィールドを更新するための時間を取ります**。これは、最終アクセス時間と呼ばれます。NTFSボリュームが頻繁に使用される場合、これがパフォーマンスに影響を与える可能性があります。
+NTFSボリュームからフォルダーが開かれるたびに、システムは各リストされたフォルダーの**タイムスタンプフィールドを更新するための時間を取ります**。これは、最終アクセス時刻と呼ばれます。NTFSボリュームが頻繁に使用される場合、これがパフォーマンスに影響を与える可能性があります。
 
 1. レジストリエディタを開く (Regedit.exe)。
 2. `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem`に移動します。
@@ -109,7 +109,7 @@ NTFSボリュームからフォルダーが開かれるたびに、システム�
 
 ### USB履歴の削除
 
-すべての**USBデバイスエントリ**は、PCまたはラップトップにUSBデバイスを接続するたびに作成されるサブキーを含む**USBSTOR**レジストリキーの下にWindowsレジストリに保存されます。このキーはここにあります`HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`。**これを削除することで**USB履歴を削除します。\
+すべての**USBデバイスエントリ**は、PCまたはラップトップにUSBデバイスを接続するたびに作成されるサブキーを含む**USBSTOR**レジストリキーの下にWindowsレジストリに保存されます。このキーはここにあります`HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`。**これを削除することで**、USB履歴を削除します。\
 また、[**USBDeview**](https://www.nirsoft.net/utils/usb_devices_view.html)ツールを使用して、削除したことを確認することもできます（および削除するために）。
 
 USBに関する情報を保存する別のファイルは、`C:\Windows\INF`内の`setupapi.dev.log`ファイルです。これも削除する必要があります。
@@ -125,9 +125,9 @@ GUIを介して削除することも可能で、[https://www.ubackup.com/windows
 
 1. Windowsスタートボタンをクリックした後、テキスト検索ボックスに「services」と入力してサービスプログラムを開きます。
 2. リストから「Volume Shadow Copy」を見つけて選択し、右クリックしてプロパティにアクセスします。
-3. 「スタートアップの種類」ドロップダウンメニューから「無効」を選択し、変更を適用してOKをクリックして確認します。
+3. 「スタートアップの種類」ドロップダウンメニューから「無効」を選択し、変更を確認するために「適用」と「OK」をクリックします。
 
-シャドウコピーでコピーされるファイルの構成を変更することも可能で、レジストリ`HKLM\SYSTEM\CurrentControlSet\Control\BackupRestore\FilesNotToSnapshot`で行います。
+シャドウコピーでコピーされるファイルの構成を変更することも可能で、レジストリ`HKLM\SYSTEM\CurrentControlSet\Control\BackupRestore\FilesNotToSnapshot`で設定できます。
 
 ### 削除されたファイルの上書き
 
@@ -203,14 +203,14 @@ AuKill.exe -e "C:\\Program Files\\Windows Defender\\MsMpEng.exe"
 AuKill.exe -k CrowdStrike
 ```
 ドライバーはその後削除され、最小限のアーティファクトが残ります。  
-緩和策：Microsoftの脆弱なドライバーブロックリスト（HVCI/SAC）を有効にし、ユーザーが書き込み可能なパスからのカーネルサービスの作成に警告します。
+緩和策：Microsoftの脆弱なドライバーブロックリスト（HVCI/SAC）を有効にし、ユーザーが書き込み可能なパスからのカーネルサービスの作成を警告します。
 
 ---
 
 ## Linuxアンチフォレンジックス：自己パッチとクラウドC2（2023–2025）
 
 ### 検出を減らすために妥協されたサービスを自己パッチする（Linux）  
-敵対者は、再利用を防ぎ、脆弱性に基づく検出を抑制するために、サービスを悪用した直後に「自己パッチ」を行うことが増えています。アイデアは、脆弱なコンポーネントを最新の正当なアップストリームバイナリ/JARに置き換えることで、スキャナーがホストをパッチ済みとして報告し、持続性とC2を維持することです。
+敵対者は、再利用を防ぎ、脆弱性に基づく検出を抑制するために、サービスを悪用した直後に「自己パッチ」を行うことが増えています。アイデアは、脆弱なコンポーネントを最新の正当なアップストリームバイナリ/JARに置き換えることで、スキャナーがホストをパッチ済みとして報告しつつ、持続性とC2を維持することです。
 
 例：Apache ActiveMQ OpenWire RCE（CVE‑2023‑46604）  
 - ポストエクスプロイト後、攻撃者はMaven Central（repo1.maven.org）から正当なJARを取得し、ActiveMQインストール内の脆弱なJARを削除し、ブローカーを再起動しました。  
@@ -240,18 +240,18 @@ Forensic/hunting tips
 - RHEL/CentOS: `rpm -Va 'activemq*'`
 - パッケージマネージャーに所有されていないディスク上のJARバージョンや、バンド外で更新されたシンボリックリンクを探します。
 - タイムライン: `find "$AMQ_DIR" -type f -printf '%TY-%Tm-%Td %TH:%TM %p\n' | sort` を使用して、ctime/mtimeを侵害ウィンドウと相関させます。
-- シェル履歴/プロセステレメトリ: 初期の悪用直後に `curl`/`wget` が `repo1.maven.org` や他のアーティファクトCDNに対しての証拠。
-- 変更管理: “パッチ”を適用したのは誰で、なぜ適用されたのかを検証し、パッチ版が存在するだけでは不十分です。
+- シェル履歴/プロセステレメトリ: 初期の悪用直後に `curl`/`wget` を `repo1.maven.org` または他のアーティファクトCDNに対して使用した証拠。
+- 変更管理: “パッチ”を適用したのは誰で、なぜ適用されたのかを検証し、パッチバージョンが存在するだけでは不十分です。
 
 ### Cloud‑service C2 with bearer tokens and anti‑analysis stagers
 観察されたトレードクラフトは、複数の長距離C2パスとアンチ分析パッケージングを組み合わせていました：
 - サンドボックス化や静的分析を妨げるためのパスワード保護されたPyInstaller ELFローダー（例：暗号化されたPYZ、`/_MEI*`の下での一時的な抽出）。
 - インジケーター: `strings` ヒットの例として `PyInstaller`, `pyi-archive`, `PYZ-00.pyz`, `MEIPASS`。
 - ランタイムアーティファクト: `/tmp/_MEI*` への抽出またはカスタム `--runtime-tmpdir` パス。
-- ハードコーディングされたOAuthベアラートークンを使用したDropboxバックアップC2
+- ハードコーディングされたOAuthベアラートークンを使用したDropboxバックアップC2。
 - ネットワークマーカー: `api.dropboxapi.com` / `content.dropboxapi.com` で `Authorization: Bearer <token>`。
 - 通常ファイルを同期しないサーバーワークロードからDropboxドメインへのアウトバウンドHTTPSを探すために、プロキシ/NetFlow/Zeek/Suricataでハントします。
-- トンネリングを介した並行/バックアップC2（例：Cloudflare Tunnel `cloudflared`）、1つのチャネルがブロックされた場合でも制御を保持します。
+- トンネリングを介した並行/バックアップC2（例：Cloudflare Tunnel `cloudflared`）、1つのチャネルがブロックされた場合でも制御を維持します。
 - ホストIOC: `cloudflared` プロセス/ユニット、`~/.cloudflared/*.json` の設定、Cloudflareエッジへのアウトバウンド443。
 
 ### Persistence and “hardening rollback” to maintain access (Linux examples)
@@ -272,7 +272,7 @@ grep -E '^\s*PermitRootLogin' /etc/ssh/sshd_config
 ```bash
 awk -F: '($7 ~ /bin\/(sh|bash|zsh)/ && $1 ~ /^(games|lp|sync|shutdown|halt|mail|operator)$/) {print}' /etc/passwd
 ```
-- クラウドC2にも接続するランダムで短い名前のビーコンアーティファクト（8文字のアルファベット）をディスクにドロップ：
+- クラウドC2にも接続するランダムで短い名前のビーコンアーティファクト（8文字のアルファベット）をディスクにドロップします：
 - ハント:
 ```bash
 find / -maxdepth 3 -type f -regextype posix-extended -regex '.*/[A-Za-z]{8}$' \

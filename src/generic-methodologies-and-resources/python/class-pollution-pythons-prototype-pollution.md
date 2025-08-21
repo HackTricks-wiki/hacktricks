@@ -116,7 +116,7 @@ print(system_admin_emp.execute_command())
 
 <details>
 
-<summary><code>globals</code>を通じて他のクラスやグローバル変数を汚染する</summary>
+<summary>他のクラスやグローバル変数を<code>globals</code>を通じて汚染する</summary>
 ```python
 def merge(src, dst):
 # Recursive merge function
@@ -148,7 +148,7 @@ print(NotAccessibleClass) #> <class '__main__.PollutedClass'>
 
 <details>
 
-<summary>任意のサブプロセス実行</summary>
+<summary>任意のサブプロセスの実行</summary>
 ```python
 import subprocess, json
 
@@ -180,9 +180,9 @@ subprocess.Popen('whoami', shell=True) # Calc.exe will pop up
 
 <details>
 
-<summary>オーバーライティング <strong><code>__kwdefaults__</code></strong></summary>
+<summary>Overwritting <strong><code>__kwdefaults__</code></strong></summary>
 
-**`__kwdefaults__`** はすべての関数の特別な属性であり、Pythonの[ドキュメント](https://docs.python.org/3/library/inspect.html)に基づいて、「**キーワード専用**パラメータのデフォルト値のマッピング」です。この属性を汚染することで、関数のキーワード専用パラメータのデフォルト値を制御できます。これらは、\*または\*argsの後に来る関数のパラメータです。
+**`__kwdefaults__`** はすべての関数の特別な属性であり、Pythonの[ドキュメント](https://docs.python.org/3/library/inspect.html)に基づいています。これは「**キーワード専用**パラメータのデフォルト値のマッピング」です。この属性を汚染することで、関数のキーワード専用パラメータのデフォルト値を制御することができます。これらは、\*または\*argsの後に来る関数のパラメータです。
 ```python
 from os import system
 import json
@@ -225,23 +225,23 @@ execute() #> Executing echo Polluted
 
 <summary>ファイル間でのFlaskシークレットの上書き</summary>
 
-したがって、ウェブのメインPythonファイルで定義されたオブジェクトに対してクラス汚染を行うことができる場合、**そのクラスがメインファイルとは異なるファイルで定義されている**必要があります。前のペイロードで\_\_globals\_\_にアクセスするには、オブジェクトのクラスまたはクラスのメソッドにアクセスする必要があるため、**そのファイルのグローバルにアクセスできますが、メインファイルのグローバルにはアクセスできません**。\
-したがって、**メインページでシークレットキーを定義したFlaskアプリのグローバルオブジェクトにアクセスできません**。
+したがって、ウェブのメインPythonファイルで定義されたオブジェクトに対してクラス汚染を行うことができる場合、**そのクラスがメインファイルとは異なるファイルで定義されている**必要があります。前のペイロードで\_\_globals\_\_にアクセスするには、オブジェクトのクラスまたはクラスのメソッドにアクセスする必要があるため、**そのファイルのグローバルにアクセスできますが、メインのものにはアクセスできません**。\
+したがって、**メインページでシークレットキーを定義したFlaskアプリのグローバルオブジェクトにアクセスできなくなります**。
 ```python
 app = Flask(__name__, template_folder='templates')
 app.secret_key = '(:secret:)'
 ```
-このシナリオでは、ファイルを横断してメインのファイルに到達し、**グローバルオブジェクト `app.secret_key`** にアクセスしてFlaskのシークレットキーを変更し、このキーを知ることで[**権限を昇格させる**](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign)ためのガジェットが必要です。
+このシナリオでは、ファイルを横断してメインのファイルに到達し、**グローバルオブジェクト `app.secret_key`** にアクセスしてFlaskのシークレットキーを変更し、このキーを知ることで[**権限を昇格させる**](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign)必要があります。
 
-このようなペイロードは、[この解説から](https://ctftime.org/writeup/36082):
+このようなペイロードは、[このレポート](https://ctftime.org/writeup/36082)からのものです：
 ```python
 __init__.__globals__.__loader__.__init__.__globals__.sys.modules.__main__.app.secret_key
 ```
-このペイロードを使用して**`app.secret_key`**（あなたのアプリでは名前が異なる場合があります）を変更し、新しいより多くの権限を持つフラスククッキーに署名できるようにします。
+このペイロードを使用して **`app.secret_key`** を変更し（アプリ内の名前は異なる場合があります）、新しいより多くの権限を持つフラスククッキーに署名できるようにします。
 
 </details>
 
-さらに、以下のページも参照して読み取り専用のガジェットを確認してください：
+次のページも参照して、読み取り専用のガジェットを確認してください：
 
 {{#ref}}
 python-internal-read-gadgets.md

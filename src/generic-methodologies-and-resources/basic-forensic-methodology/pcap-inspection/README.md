@@ -2,15 +2,15 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-> [!NOTE]
+> [!TIP]
 > **PCAP**と**PCAPNG**についての注意: PCAPファイル形式には2つのバージョンがあり、**PCAPNGは新しく、すべてのツールでサポートされているわけではありません**。他のツールで作業するために、Wiresharkや他の互換性のあるツールを使用してPCAPNGからPCAPにファイルを変換する必要があるかもしれません。
 
 ## Online tools for pcaps
 
-- pcapのヘッダーが**壊れている**場合は、次のリンクを使用して**修正**を試みるべきです: [http://f00l.de/hacking/**pcapfix.php**](http://f00l.de/hacking/pcapfix.php)
+- あなたのpcapのヘッダーが**壊れている**場合、次のリンクを使用して**修正**を試みるべきです: [http://f00l.de/hacking/**pcapfix.php**](http://f00l.de/hacking/pcapfix.php)
 - [**PacketTotal**](https://packettotal.com)でpcap内の**情報**を抽出し、**マルウェア**を検索します。
-- [**www.virustotal.com**](https://www.virustotal.com)および[**www.hybrid-analysis.com**](https://www.hybrid-analysis.com)を使用して**悪意のある活動**を検索します。
-- [**https://apackets.com/**](https://apackets.com/)で**ブラウザからの完全なpcap分析**。
+- [**www.virustotal.com**](https://www.virustotal.com)と[**www.hybrid-analysis.com**](https://www.hybrid-analysis.com)を使用して**悪意のある活動**を検索します。
+- [**https://apackets.com/**](https://apackets.com/)で**ブラウザからの完全なpcap分析**を行います。
 
 ## Extract Information
 
@@ -18,10 +18,11 @@
 
 ### Wireshark
 
-> [!NOTE]
-> **PCAPを分析する場合、基本的にWiresharkの使い方を知っておく必要があります**
+> [!TIP]
+> **PCAPを分析するつもりなら、基本的にWiresharkの使い方を知っておく必要があります**
 
 Wiresharkのトリックを見つけることができます:
+
 
 {{#ref}}
 wireshark-tricks.md
@@ -29,11 +30,11 @@ wireshark-tricks.md
 
 ### [**https://apackets.com/**](https://apackets.com/)
 
-ブラウザからのpcap分析。
+ブラウザからのPcap分析。
 
 ### Xplico Framework
 
-[**Xplico** ](https://github.com/xplico/xplico)_(Linuxのみ)_は、**pcap**を**分析**し、そこから情報を抽出できます。たとえば、pcapファイルからXplicoは、各メール（POP、IMAP、SMTPプロトコル）、すべてのHTTPコンテンツ、各VoIP通話（SIP）、FTP、TFTPなどを抽出します。
+[**Xplico** ](https://github.com/xplico/xplico)_(Linuxのみ)_は**pcap**を**分析**し、そこから情報を抽出することができます。たとえば、pcapファイルからXplicoは各メール（POP、IMAP、SMTPプロトコル）、すべてのHTTPコンテンツ、各VoIP通話（SIP）、FTP、TFTPなどを抽出します。
 
 **Install**
 ```bash
@@ -53,21 +54,21 @@ _**127.0.0.1:9876**_ に _**xplico:xplico**_ の資格情報でアクセスし�
 
 ### NetworkMiner
 
-Xplicoと同様に、**pcaps**からオブジェクトを**分析して抽出する**ツールです。無料版があり、[**こちらからダウンロード**](https://www.netresec.com/?page=NetworkMiner)できます。**Windows**で動作します。\
-このツールは、パケットから**他の情報を分析**して、何が起こっていたのかを**より迅速に**把握するのにも役立ちます。
+Xplicoと同様に、**pcapsからオブジェクトを分析および抽出する**ツールです。無料版があり、[**こちらからダウンロード**](https://www.netresec.com/?page=NetworkMiner)できます。**Windows**で動作します。\
+このツールは、パケットから**他の情報を分析**するのにも役立ち、**より迅速**に何が起こっているかを把握することができます。
 
 ### NetWitness Investigator
 
-[**こちらからNetWitness Investigatorをダウンロード**](https://www.rsa.com/en-us/contact-us/netwitness-investigator-freeware)できます。**(Windowsで動作します)**。\
+[**こちらからNetWitness Investigatorをダウンロード**](https://www.rsa.com/en-us/contact-us/netwitness-investigator-freeware)できます**（Windowsで動作します）**。\
 これは、パケットを**分析**し、情報を有用な形で整理して、**内部で何が起こっているかを知る**のに役立つ別の便利なツールです。
 
 ### [BruteShark](https://github.com/odedshimon/BruteShark)
 
-- ユーザー名とパスワードを抽出およびエンコード (HTTP, FTP, Telnet, IMAP, SMTP...)
-- 認証ハッシュを抽出し、Hashcatを使用してクラックします (Kerberos, NTLM, CRAM-MD5, HTTP-Digest...)
-- ビジュアルネットワークダイアグラムを作成 (ネットワークノードとユーザー)
-- DNSクエリを抽出
-- すべてのTCPおよびUDPセッションを再構築
+- ユーザー名とパスワードの抽出とエンコード（HTTP、FTP、Telnet、IMAP、SMTP...）
+- 認証ハッシュを抽出し、Hashcatを使用してそれらをクラッキング（Kerberos、NTLM、CRAM-MD5、HTTP-Digest...）
+- ビジュアルネットワークダイアグラムの構築（ネットワークノードとユーザー）
+- DNSクエリの抽出
+- すべてのTCPおよびUDPセッションの再構築
 - ファイルカービング
 
 ### Capinfos
@@ -76,7 +77,7 @@ capinfos capture.pcap
 ```
 ### Ngrep
 
-pcap内で**何か**を**探している**場合は、**ngrep**を使用できます。以下は主要なフィルターを使用した例です：
+pcap内で**何か**を**探している**場合は、**ngrep**を使用できます。以下は主要なフィルターを使用した例です:
 ```bash
 ngrep -I packets.pcap "^GET" "port 80 and tcp and host 192.168 and dst host 192.168 and src host 192.168"
 ```
@@ -109,12 +110,12 @@ suricata -r packets.pcap -c /etc/suricata/suricata.yaml -k none -v -l log
 ```
 ### YaraPcap
 
-[**YaraPCAP**](https://github.com/kevthehermit/YaraPcap) は、次のことができるツールです。
+[**YaraPCAP**](https://github.com/kevthehermit/YaraPcap) は、次の機能を持つツールです。
 
 - PCAPファイルを読み取り、Httpストリームを抽出します。
 - gzipは圧縮されたストリームを解凍します。
 - すべてのファイルをyaraでスキャンします。
-- report.txtを書き込みます。
+- report.txtを作成します。
 - 一致するファイルをディレクトリに保存するオプションがあります。
 
 ### Malware Analysis
@@ -129,7 +130,7 @@ suricata -r packets.pcap -c /etc/suricata/suricata.yaml -k none -v -l log
 
 > [Zeek](https://docs.zeek.org/en/master/about.html) は、受動的なオープンソースのネットワークトラフィックアナライザーです。多くのオペレーターは、疑わしいまたは悪意のある活動の調査をサポートするために、Zeekをネットワークセキュリティモニター（NSM）として使用しています。Zeekは、セキュリティドメインを超えたパフォーマンス測定やトラブルシューティングを含む、幅広いトラフィック分析タスクもサポートしています。
 
-基本的に、`zeek`によって作成されたログは**pcap**ではありません。したがって、**pcap**に関する**情報**を分析するために、**他のツール**を使用する必要があります。
+基本的に、`zeek`によって作成されたログは**pcaps**ではありません。したがって、**pcaps**に関する**情報**を分析するために**他のツール**を使用する必要があります。
 
 ### Connections Info
 ```bash
@@ -200,13 +201,16 @@ rita show-exploded-dns -H --limit 10 zeek_logs
 ```
 ## 他のpcap分析のトリック
 
+
 {{#ref}}
 dnscat-exfiltration.md
 {{#endref}}
 
+
 {{#ref}}
 wifi-pcap-analysis.md
 {{#endref}}
+
 
 {{#ref}}
 usb-keystrokes.md

