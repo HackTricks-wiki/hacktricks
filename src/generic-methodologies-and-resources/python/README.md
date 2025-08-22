@@ -4,10 +4,11 @@
 
 **Zanimljive stranice za proveru:**
 
-- [**Pyscript hacking tricks**](pyscript.md)
-- [**Python deserializations**](../../pentesting-web/deserialization/README.md)
-- [**Tricks to bypass python sandboxes**](bypass-python-sandboxes/README.md)
-- [**Basic python web requests syntax**](web-requests.md)
-- [**Basic python syntax and libraries**](basic-python.md)
+- [**Pyscript hacking trikovi**](pyscript.md)
+- [**Python deseralizacije**](../../pentesting-web/deserialization/README.md)
+- [**Keras model deseralizacija RCE i lov na gadgete**](keras-model-deserialization-rce-and-gadget-hunting.md)
+- [**Trikovi za zaobilaženje python sandboksova**](bypass-python-sandboxes/README.md)
+- [**Osnovna sintaksa python web zahteva**](web-requests.md)
+- [**Osnovna sintaksa i biblioteke u pythonu**](basic-python.md)
 
 {{#include ../../banners/hacktricks-training.md}}
