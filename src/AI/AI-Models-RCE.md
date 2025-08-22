@@ -15,12 +15,12 @@ No momento da escrita, estes são alguns exemplos desse tipo de vulnerabilidades
 | **TensorFlow/Keras**        | **CVE-2021-37678** (YAML inseguro) <br> **CVE-2024-3660** (Keras Lambda)                                                   | Carregar modelo de YAML usa `yaml.unsafe_load` (execução de código) <br> Carregar modelo com camada **Lambda** executa código Python arbitrário | |
 | TensorFlow (TFLite)         | **CVE-2022-23559** (análise TFLite)                                                                                         | Modelo `.tflite` malformado aciona estouro de inteiro → corrupção de heap (potencial RCE)                                             | |
 | **Scikit-learn** (Python)   | **CVE-2020-13092** (joblib/pickle)                                                                                          | Carregar um modelo via `joblib.load` executa pickle com o payload `__reduce__` do atacante                                             | |
-| **NumPy** (Python)          | **CVE-2019-6446** (inseguro `np.load`) *disputado*                                                                          | `numpy.load` padrão permitia arrays de objetos pickle – `.npy/.npz` malicioso aciona execução de código                                 | |
+| **NumPy** (Python)          | **CVE-2019-6446** (inseguro `np.load`) *disputado*                                                                          | `numpy.load` permitia por padrão arrays de objetos pickle – `.npy/.npz` malicioso aciona execução de código                             | |
 | **ONNX / ONNX Runtime**     | **CVE-2022-25882** (traversal de diretório) <br> **CVE-2024-5187** (traversal tar)                                         | O caminho de pesos externos do modelo ONNX pode escapar do diretório (ler arquivos arbitrários) <br> Modelo ONNX malicioso tar pode sobrescrever arquivos arbitrários (levando a RCE) | |
-| ONNX Runtime (risco de design) | *(Sem CVE)* operações personalizadas ONNX / fluxo de controle                                                               | Modelo com operador personalizado requer carregamento do código nativo do atacante; gráficos de modelo complexos abusam da lógica para executar cálculos não intencionais | |
+| ONNX Runtime (risco de design) | *(Sem CVE)* operações personalizadas ONNX / fluxo de controle                                                              | Modelo com operador personalizado requer carregamento do código nativo do atacante; gráficos de modelo complexos abusam da lógica para executar cálculos não intencionais | |
 | **NVIDIA Triton Server**    | **CVE-2023-31036** (traversal de caminho)                                                                                   | Usar a API de carregamento de modelo com `--model-control` habilitado permite traversal de caminho relativo para escrever arquivos (por exemplo, sobrescrever `.bashrc` para RCE) | |
 | **GGML (formato GGUF)**     | **CVE-2024-25664 … 25668** (múltiplos estouros de heap)                                                                     | Arquivo de modelo GGUF malformado causa estouros de buffer de heap no parser, permitindo execução de código arbitrário no sistema da vítima | |
-| **Keras (formatos antigos)** | *(Sem nova CVE)* Modelo Keras H5 legado                                                                                     | Modelo HDF5 malicioso (`.h5`) com código de camada Lambda ainda executa ao carregar (modo seguro do Keras não cobre formato antigo – “ataque de downgrade”) | |
+| **Keras (formatos antigos)** | *(Sem nova CVE)* Modelo Keras H5 legado                                                                                     | Modelo HDF5 (`.h5`) malicioso com código de camada Lambda ainda executa ao carregar (modo seguro do Keras não cobre formato antigo – “ataque de downgrade”) | |
 | **Outros** (geral)          | *Falha de design* – Serialização Pickle                                                                                     | Muitas ferramentas de ML (por exemplo, formatos de modelo baseados em pickle, `pickle.load` do Python) executarão código arbitrário embutido em arquivos de modelo, a menos que mitigado | |
 
 Além disso, existem alguns modelos baseados em pickle do Python, como os usados pelo [PyTorch](https://github.com/pytorch/pytorch/security), que podem ser usados para executar código arbitrário no sistema se não forem carregados com `weights_only=True`. Portanto, qualquer modelo baseado em pickle pode ser especialmente suscetível a esse tipo de ataque, mesmo que não esteja listado na tabela acima.
@@ -33,9 +33,9 @@ Internamente, o endpoint eventualmente chama:
 ```python
 checkpoint = torch.load(path, map_location=torch.device("meta"))
 ```
-Quando o arquivo fornecido é um **PyTorch checkpoint (`*.ckpt`)**, `torch.load` realiza uma **desserialização pickle**. Como o conteúdo vem diretamente da URL controlada pelo usuário, um atacante pode incorporar um objeto malicioso com um método `__reduce__` personalizado dentro do checkpoint; o método é executado **durante a desserialização**, levando à **execução remota de código (RCE)** no servidor InvokeAI.
+Quando o arquivo fornecido é um **PyTorch checkpoint (`*.ckpt`)**, `torch.load` realiza uma **desserialização de pickle**. Como o conteúdo vem diretamente da URL controlada pelo usuário, um atacante pode incorporar um objeto malicioso com um método `__reduce__` personalizado dentro do checkpoint; o método é executado **durante a desserialização**, levando à **execução remota de código (RCE)** no servidor InvokeAI.
 
-A vulnerabilidade foi atribuída como **CVE-2024-12029** (CVSS 9.8, EPSS 61.17 %).
+A vulnerabilidade foi atribuída **CVE-2024-12029** (CVSS 9.8, EPSS 61.17 %).
 
 #### Passo a passo da exploração
 
@@ -161,7 +161,15 @@ with tarfile.open("symlink_demo.model", "w:gz") as tf:
 tf.add(pathlib.Path(PAYLOAD).parent, filter=link_it)
 tf.add(PAYLOAD)                      # rides the symlink
 ```
-## Referências
+### Deep-dive: Keras .keras deserialization and gadget hunting
+
+Para um guia focado sobre os internos do .keras, RCE de Lambda-layer, o problema de importação arbitrária em ≤ 3.8, e descoberta de gadgets pós-correção dentro da lista de permissões, veja:
+
+{{#ref}}
+../generic-methodologies-and-resources/python/keras-model-deserialization-rce-and-gadget-hunting.md
+{{#endref}}
+
+## References
 
 - [OffSec blog – "CVE-2024-12029 – InvokeAI Deserialization of Untrusted Data"](https://www.offsec.com/blog/cve-2024-12029/)
 - [InvokeAI patch commit 756008d](https://github.com/invoke-ai/invokeai/commit/756008dc5899081c5aa51e5bd8f24c1b3975a59e)
