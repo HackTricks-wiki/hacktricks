@@ -69,6 +69,7 @@
   - [Bypass Python sandboxes](generic-methodologies-and-resources/python/bypass-python-sandboxes/README.md)
     - [LOAD_NAME / LOAD_CONST opcode OOB Read](generic-methodologies-and-resources/python/bypass-python-sandboxes/load_name-load_const-opcode-oob-read.md)
   - [Class Pollution (Python's Prototype Pollution)](generic-methodologies-and-resources/python/class-pollution-pythons-prototype-pollution.md)
+  - [Keras Model Deserialization Rce And Gadget Hunting](generic-methodologies-and-resources/python/keras-model-deserialization-rce-and-gadget-hunting.md)
   - [Python Internal Read Gadgets](generic-methodologies-and-resources/python/python-internal-read-gadgets.md)
   - [Pyscript](generic-methodologies-and-resources/python/pyscript.md)
   - [venv](generic-methodologies-and-resources/python/venv.md)

@@ -11,17 +11,17 @@ Tydens die skryf hiervan is hier 'n paar voorbeelde van hierdie tipe kwesbaarhed
 | **Raamwerk / Gereedskap**   | **Kwesbaarheid (CVE indien beskikbaar)**                                                                                     | **RCE Vektor**                                                                                                                         | **Verwysings**                               |
 |-----------------------------|------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------|
 | **PyTorch** (Python)        | *Onveilige deserialisering in* `torch.load` **(CVE-2025-32434)**                                                             | Kwaadwillige pickle in model kontrolepunt lei tot kode-uitvoering (om `weights_only` beskerming te omseil)                               | |
-| PyTorch **TorchServe**      | *ShellTorch* – **CVE-2023-43654**, **CVE-2022-1471**                                                                        | SSRF + kwaadwillige model aflaai veroorsaak kode-uitvoering; Java deserialisering RCE in bestuur API                                     | |
+| PyTorch **TorchServe**      | *ShellTorch* – **CVE-2023-43654**, **CVE-2022-1471**                                                                        | SSRF + kwaadwillige model aflaai veroorsaak kode-uitvoering; Java deserialisering RCE in bestuurs-API                                   | |
 | **TensorFlow/Keras**        | **CVE-2021-37678** (onveilige YAML) <br> **CVE-2024-3660** (Keras Lambda)                                                   | Laai model vanaf YAML gebruik `yaml.unsafe_load` (kode exec) <br> Laai model met **Lambda** laag voer arbitrêre Python kode uit          | |
 | TensorFlow (TFLite)         | **CVE-2022-23559** (TFLite parsing)                                                                                         | Gemaakte `.tflite` model veroorsaak heelgetal oorgang → heap korrupsie (potensiële RCE)                                               | |
-| **Scikit-learn** (Python)   | **CVE-2020-13092** (joblib/pickle)                                                                                          | Laai 'n model via `joblib.load` voer pickle met aanvaller se `__reduce__` payload uit                                                    | |
-| **NumPy** (Python)          | **CVE-2019-6446** (onveilige `np.load`) *betwis*                                                                            | `numpy.load` standaard het toegelaat dat gepekelde objekreeks – kwaadwillige `.npy/.npz` veroorsaak kode exec                           | |
-| **ONNX / ONNX Runtime**     | **CVE-2022-25882** (dir traversaal) <br> **CVE-2024-5187** (tar traversaal)                                                 | ONNX model se eksterne gewigte pad kan die gids ontsnap (lees arbitrêre lêers) <br> Kwaadwillige ONNX model tar kan arbitrêre lêers oorskryf (wat lei tot RCE) | |
-| ONNX Runtime (ontwerp risiko) | *(Geen CVE)* ONNX pasgemaakte ops / kontrole vloei                                                                          | Model met pasgemaakte operator vereis laai van aanvaller se inheemse kode; komplekse model grafieke misbruik logika om onbedoelde berekeninge uit te voer | |
-| **NVIDIA Triton Server**    | **CVE-2023-31036** (pad traversaal)                                                                                         | Gebruik model-laai API met `--model-control` geaktiveer laat relatiewe pad traversaal toe om lêers te skryf (bv., oorskryf `.bashrc` vir RCE) | |
-| **GGML (GGUF formaat)**     | **CVE-2024-25664 … 25668** (meervoudige heap oorgange)                                                                      | Gemaakte GGUF model lêer veroorsaak heap buffer oorgange in parser, wat arbitrêre kode-uitvoering op die slagoffer stelsel moontlik maak | |
+| **Scikit-learn** (Python)   | **CVE-2020-13092** (joblib/pickle)                                                                                          | Laai 'n model via `joblib.load` voer pickle met aanvaller se `__reduce__` payload uit                                                   | |
+| **NumPy** (Python)          | **CVE-2019-6446** (onveilige `np.load`) *betwis*                                                                             | `numpy.load` standaard het toegelaat dat gepekelde objekreeks – kwaadwillige `.npy/.npz` veroorsaak kode exec                           | |
+| **ONNX / ONNX Runtime**     | **CVE-2022-25882** (dir traversie) <br> **CVE-2024-5187** (tar traversie)                                                   | ONNX model se eksterne gewigte pad kan die gids ontsnap (lees arbitrêre lêers) <br> Kwaadwillige ONNX model tar kan arbitrêre lêers oorskryf (lei tot RCE) | |
+| ONNX Runtime (ontwerp risiko) | *(Geen CVE)* ONNX pasgemaakte ops / kontrole vloei                                                                          | Model met pasgemaakte operateur vereis laai van aanvaller se inheemse kode; komplekse model grafieke misbruik logika om onbedoelde berekeninge uit te voer | |
+| **NVIDIA Triton Server**    | **CVE-2023-31036** (pad traversie)                                                                                          | Gebruik model-laai API met `--model-control` geaktiveer laat relatiewe pad traversie toe om lêers te skryf (bv. oorskryf `.bashrc` vir RCE) | |
+| **GGML (GGUF formaat)**     | **CVE-2024-25664 … 25668** (meervoudige heap oorgange)                                                                      | Misvormde GGUF model lêer veroorsaak heap buffer oorgange in parser, wat arbitrêre kode-uitvoering op die slagoffer stelsel moontlik maak | |
 | **Keras (ou formate)**      | *(Geen nuwe CVE)* Erflike Keras H5 model                                                                                     | Kwaadwillige HDF5 (`.h5`) model met Lambda laag kode voer steeds uit op laai (Keras safe_mode dek nie ou formaat nie – “downgrade aanval”) | |
-| **Ander** (generies)        | *Ontwerp fout* – Pickle serialisering                                                                                         | Baie ML gereedskap (bv., pickle-gebaseerde model formate, Python `pickle.load`) sal arbitrêre kode wat in model lêers ingebed is uitvoer tensy dit gemitigeer word | |
+| **Ander** (generies)        | *Ontwerp fout* – Pickle serialisering                                                                                         | Baie ML gereedskap (bv. pickle-gebaseerde model formate, Python `pickle.load`) sal arbitrêre kode wat in model lêers ingebed is uitvoer tensy dit gemitigeer word | |
 
 Boonop is daar 'n paar python pickle-gebaseerde modelle soos die wat deur [PyTorch](https://github.com/pytorch/pytorch/security) gebruik word wat gebruik kan word om arbitrêre kode op die stelsel uit te voer as hulle nie met `weights_only=True` gelaai word nie. So, enige pickle-gebaseerde model kan spesiaal kwesbaar wees vir hierdie tipe aanvalle, selfs al is hulle nie in die tabel hierbo gelys nie.
 
@@ -75,13 +75,13 @@ Klaar-gemaakte uitbuiting: **Metasploit** module `exploit/linux/http/invokeai_rc
 
 •  InvokeAI 5.3.1-5.4.2 (skandeervlag standaard **vals**)
 •  `/api/v2/models/install` bereikbaar deur die aanvaller
-•  Proses het toestemming om skulpopdragte uit te voer
+•  Proses het regte om skaalopdragte uit te voer
 
 #### Versagtings
 
 * Opgradeer na **InvokeAI ≥ 5.4.3** – die patch stel `scan=True` standaard en voer malware-skandering uit voor deserialisering.
 * Wanneer jy kontrolepunte programmaties laai, gebruik `torch.load(file, weights_only=True)` of die nuwe [`torch.load_safe`](https://pytorch.org/docs/stable/serialization.html#security) helper.
-* Handhaaf toelaat-lists / handtekeninge vir modelbronne en voer die diens met die minste voorregte uit.
+* Handhaaf toelaat-lists / handtekeninge vir modelbronne en voer die diens uit met die minste voorregte.
 
 > ⚠️ Onthou dat **enige** Python pickle-gebaseerde formaat (insluitend baie `.pt`, `.pkl`, `.ckpt`, `.pth` lêers) inherent onveilig is om te deserialiseer vanaf onbetroubare bronne.
 
@@ -133,7 +133,7 @@ model.load_state_dict(torch.load("malicious_state.pth", weights_only=False))
 ```
 ## Modelle na Pad Traversal
 
-Soos kommentaar in [**hierdie blogpos**](https://blog.huntr.com/pivoting-archive-slip-bugs-into-high-value-ai/ml-bounties), is die meeste modelle formate wat deur verskillende AI-raamwerke gebruik word, gebaseer op argiewe, gewoonlik `.zip`. Daarom kan dit moontlik wees om hierdie formate te misbruik om pad traversaal aanvalle uit te voer, wat dit moontlik maak om arbitrêre lêers van die stelsel waar die model gelaai word, te lees.
+Soos kommentaar in [**hierdie blogpos**](https://blog.huntr.com/pivoting-archive-slip-bugs-into-high-value-ai/ml-bounties), is die meeste modelle formate wat deur verskillende AI-raamwerke gebruik word, gebaseer op argiewe, gewoonlik `.zip`. Daarom mag dit moontlik wees om hierdie formate te misbruik om pad traversaal aanvalle uit te voer, wat dit moontlik maak om arbitrêre lêers van die stelsel waar die model gelaai word, te lees.
 
 Byvoorbeeld, met die volgende kode kan jy 'n model skep wat 'n lêer in die `/tmp` gids sal skep wanneer dit gelaai word:
 ```python
@@ -161,6 +161,15 @@ with tarfile.open("symlink_demo.model", "w:gz") as tf:
 tf.add(pathlib.Path(PAYLOAD).parent, filter=link_it)
 tf.add(PAYLOAD)                      # rides the symlink
 ```
+### Deep-dive: Keras .keras deserialisering en gadget jag
+
+Vir 'n gefokusde gids oor .keras interne, Lambda-laag RCE, die arbitrêre invoer probleem in ≤ 3.8, en post-fix gadget ontdekking binne die toelaatlys, sien:
+
+
+{{#ref}}
+../generic-methodologies-and-resources/python/keras-model-deserialization-rce-and-gadget-hunting.md
+{{#endref}}
+
 ## Verwysings
 
 - [OffSec blog – "CVE-2024-12029 – InvokeAI Deserialisering van Onbetroubare Data"](https://www.offsec.com/blog/cve-2024-12029/)
