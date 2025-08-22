@@ -33,7 +33,7 @@ Ndani, mwisho huu hatimaye unaita:
 ```python
 checkpoint = torch.load(path, map_location=torch.device("meta"))
 ```
-Wakati faili iliyopewa ni **PyTorch checkpoint (`*.ckpt`)**, `torch.load` inafanya **pickle deserialization**. Kwa sababu maudhui yanatoka moja kwa moja kwenye URL inayodhibitiwa na mtumiaji, mshambuliaji anaweza kuingiza kitu kibaya chenye njia ya `__reduce__` iliyobinafsishwa ndani ya checkpoint; njia hiyo inatekelezwa **wakati wa deserialization**, ikisababisha **remote code execution (RCE)** kwenye seva ya InvokeAI.
+Wakati faili iliyotolewa ni **PyTorch checkpoint (`*.ckpt`)**, `torch.load` inafanya **pickle deserialization**. Kwa sababu maudhui yanatoka moja kwa moja kwenye URL inayodhibitiwa na mtumiaji, mshambuliaji anaweza kuingiza kitu kibaya chenye njia ya `__reduce__` iliyobinafsishwa ndani ya checkpoint; njia hiyo inatekelezwa **wakati wa deserialization**, ikisababisha **remote code execution (RCE)** kwenye seva ya InvokeAI.
 
 Uthibitisho wa udhaifu ulipatiwa **CVE-2024-12029** (CVSS 9.8, EPSS 61.17 %).
 
@@ -67,7 +67,7 @@ json={},                                         # body can be empty
 timeout=5,
 )
 ```
-4. Wakati InvokeAI inapopakua faili inaita `torch.load()` → gadget ya `os.system` inakimbia na mshambuliaji anapata utekelezaji wa msimbo katika muktadha wa mchakato wa InvokeAI.
+4. Wakati InvokeAI inaposhusha faili inaita `torch.load()` → gadget ya `os.system` inakimbia na mshambuliaji anapata utekelezaji wa msimbo katika muktadha wa mchakato wa InvokeAI.
 
 Ready-made exploit: **Metasploit** module `exploit/linux/http/invokeai_rce_cve_2024_12029` inafanya mchakato mzima kuwa wa kiotomatiki.
 
@@ -81,13 +81,13 @@ Ready-made exploit: **Metasploit** module `exploit/linux/http/invokeai_rce_cve_2
 
 * Pandisha hadi **InvokeAI ≥ 5.4.3** – patch inafanya `scan=True` kuwa ya kawaida na inafanya uchunguzi wa malware kabla ya deserialization.
 * Wakati wa kupakia checkpoints kwa njia ya programu tumia `torch.load(file, weights_only=True)` au [`torch.load_safe`](https://pytorch.org/docs/stable/serialization.html#security) msaidizi mpya.
-* Lazimisha orodha za ruhusa / saini za vyanzo vya modeli na uendeshe huduma hiyo kwa ruhusa ndogo.
+* Lazimisha orodha za ruhusa / saini za vyanzo vya modeli na uendeshe huduma kwa kiwango cha chini cha ruhusa.
 
-> ⚠️ Kumbuka kwamba **aina yoyote** ya muundo wa Python pickle (ikiwemo faili nyingi za `.pt`, `.pkl`, `.ckpt`, `.pth`) kwa asili si salama kutekeleza deserialization kutoka vyanzo visivyoaminika.
+> ⚠️ Kumbuka kwamba **aina yoyote** ya muundo wa Python pickle (ikiwemo faili nyingi za `.pt`, `.pkl`, `.ckpt`, `.pth`) kwa asili si salama kutekeleza kutoka vyanzo visivyoaminika.
 
 ---
 
-Mfano wa mipango ya kuzuia ya ad-hoc ikiwa lazima uendelee kutumia toleo za zamani za InvokeAI nyuma ya proxy ya kurudi:
+Mfano wa mipango ya kuzuia ya ad-hoc ikiwa lazima uendelee kutumia toleo la zamani la InvokeAI nyuma ya proxy ya kurudi:
 ```nginx
 location /api/v2/models/install {
 deny all;                       # block direct Internet access
@@ -133,9 +133,9 @@ model.load_state_dict(torch.load("malicious_state.pth", weights_only=False))
 ```
 ## Models to Path Traversal
 
-Kama ilivyoelezwa katika [**hiki blogu**](https://blog.huntr.com/pivoting-archive-slip-bugs-into-high-value-ai/ml-bounties), muundo wa modeli nyingi zinazotumiwa na mifumo tofauti ya AI unategemea archives, mara nyingi `.zip`. Hivyo, inaweza kuwa inawezekana kutumia muundo huu kufanya mashambulizi ya path traversal, kuruhusu kusoma faili zisizo na mipaka kutoka kwenye mfumo ambapo modeli imepakuliwa.
+Kama ilivyoelezwa katika [**hiki blogu**](https://blog.huntr.com/pivoting-archive-slip-bugs-into-high-value-ai/ml-bounties), mifano mingi inayotumika na mifumo tofauti ya AI inategemea archives, mara nyingi `.zip`. Hivyo, inaweza kuwa inawezekana kutumia mifano hii kufanya mashambulizi ya path traversal, kuruhusu kusoma faili za kawaida kutoka kwenye mfumo ambapo mfano umewekwa.
 
-Kwa mfano, kwa kutumia msimbo ufuatao unaweza kuunda modeli ambayo itaunda faili katika saraka ya `/tmp` wakati inapo pakuliwa:
+Kwa mfano, kwa kutumia msimbo ufuatao unaweza kuunda mfano ambao utaunda faili katika saraka ya `/tmp` wakati unapo load:
 ```python
 import tarfile
 
@@ -161,7 +161,15 @@ with tarfile.open("symlink_demo.model", "w:gz") as tf:
 tf.add(pathlib.Path(PAYLOAD).parent, filter=link_it)
 tf.add(PAYLOAD)                      # rides the symlink
 ```
-## Marejeo
+### Deep-dive: Keras .keras deserialization and gadget hunting
+
+Kwa mwongozo wa kina kuhusu .keras ndani, Lambda-layer RCE, suala la kuagiza bila mpangilio katika ≤ 3.8, na ugunduzi wa gadget baada ya kurekebisha ndani ya orodha ya ruhusa, angalia:
+
+{{#ref}}
+../generic-methodologies-and-resources/python/keras-model-deserialization-rce-and-gadget-hunting.md
+{{#endref}}
+
+## References
 
 - [OffSec blog – "CVE-2024-12029 – InvokeAI Deserialization of Untrusted Data"](https://www.offsec.com/blog/cve-2024-12029/)
 - [InvokeAI patch commit 756008d](https://github.com/invoke-ai/invokeai/commit/756008dc5899081c5aa51e5bd8f24c1b3975a59e)
