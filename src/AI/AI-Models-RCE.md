@@ -4,7 +4,7 @@
 
 ## Cargando modelos a RCE
 
-Los modelos de Machine Learning generalmente se comparten en diferentes formatos, como ONNX, TensorFlow, PyTorch, etc. Estos modelos pueden ser cargados en las máquinas de los desarrolladores o en sistemas de producción para ser utilizados. Por lo general, los modelos no deberían contener código malicioso, pero hay algunos casos en los que el modelo puede ser utilizado para ejecutar código arbitrario en el sistema como una característica prevista o debido a una vulnerabilidad en la biblioteca de carga de modelos.
+Los modelos de Machine Learning generalmente se comparten en diferentes formatos, como ONNX, TensorFlow, PyTorch, etc. Estos modelos pueden ser cargados en las máquinas de los desarrolladores o en sistemas de producción para ser utilizados. Por lo general, los modelos no deberían contener código malicioso, pero hay algunos casos en los que el modelo puede ser utilizado para ejecutar código arbitrario en el sistema como una característica prevista o debido a una vulnerabilidad en la biblioteca de carga del modelo.
 
 En el momento de la redacción, estos son algunos ejemplos de este tipo de vulnerabilidades:
 
@@ -20,8 +20,8 @@ En el momento de la redacción, estos son algunos ejemplos de este tipo de vulne
 | ONNX Runtime (riesgo de diseño)  | *(Sin CVE)* operaciones personalizadas de ONNX / flujo de control                                                                                    | Modelo con operador personalizado requiere cargar el código nativo del atacante; gráficos de modelo complejos abusan de la lógica para ejecutar cálculos no intencionados   | |
 | **NVIDIA Triton Server**    | **CVE-2023-31036** (traversal de ruta)                                                                                          | Usar la API de carga de modelos con `--model-control` habilitado permite traversal de ruta relativa para escribir archivos (por ejemplo, sobrescribir `.bashrc` para RCE)    | |
 | **GGML (formato GGUF)**      | **CVE-2024-25664 … 25668** (múltiples desbordamientos de heap)                                                                         | Archivo de modelo GGUF malformado causa desbordamientos de buffer en el parser, habilitando la ejecución de código arbitrario en el sistema víctima                     | |
-| **Keras (formatos antiguos)**   | *(Sin nuevo CVE)* Modelo Keras H5 legado                                                                                         | Modelo HDF5 malicioso (`.h5`) con código de capa Lambda aún se ejecuta al cargar (el modo seguro de Keras no cubre el formato antiguo – “ataque de degradación”) | |
-| **Otros** (general)        | *Falla de diseño* – serialización de Pickle                                                                                         | Muchas herramientas de ML (por ejemplo, formatos de modelo basados en pickle, `pickle.load` de Python) ejecutarán código arbitrario incrustado en archivos de modelo a menos que se mitigue | |
+| **Keras (formatos antiguos)**   | *(Sin nuevo CVE)* Modelo Keras H5 legado                                                                                         | Modelo HDF5 malicioso (`.h5`) con código de capa Lambda aún se ejecuta al cargar (Keras safe_mode no cubre el formato antiguo – “ataque de degradación”) | |
+| **Otros** (general)        | *Falla de diseño* – Serialización de Pickle                                                                                         | Muchas herramientas de ML (por ejemplo, formatos de modelo basados en pickle, `pickle.load` de Python) ejecutarán código arbitrario incrustado en archivos de modelo a menos que se mitigue | |
 
 Además, hay algunos modelos basados en pickle de Python, como los utilizados por [PyTorch](https://github.com/pytorch/pytorch/security), que pueden ser utilizados para ejecutar código arbitrario en el sistema si no se cargan con `weights_only=True`. Por lo tanto, cualquier modelo basado en pickle podría ser especialmente susceptible a este tipo de ataques, incluso si no están listados en la tabla anterior.
 
@@ -69,7 +69,7 @@ timeout=5,
 ```
 4. Cuando InvokeAI descarga el archivo, llama a `torch.load()` → el gadget `os.system` se ejecuta y el atacante obtiene ejecución de código en el contexto del proceso InvokeAI.
 
-Explotación lista para usar: **Módulo Metasploit** `exploit/linux/http/invokeai_rce_cve_2024_12029` automatiza todo el flujo.
+Explotación lista para usar: **Metasploit** módulo `exploit/linux/http/invokeai_rce_cve_2024_12029` automatiza todo el flujo.
 
 #### Condiciones
 
@@ -87,7 +87,7 @@ Explotación lista para usar: **Módulo Metasploit** `exploit/linux/http/invokea
 
 ---
 
-Ejemplo de una mitigación ad-hoc si debes mantener versiones más antiguas de InvokeAI ejecutándose detrás de un proxy inverso:
+Ejemplo de una mitigación ad-hoc si debes mantener versiones más antiguas de InvokeAI funcionando detrás de un proxy inverso:
 ```nginx
 location /api/v2/models/install {
 deny all;                       # block direct Internet access
@@ -161,11 +161,19 @@ with tarfile.open("symlink_demo.model", "w:gz") as tf:
 tf.add(pathlib.Path(PAYLOAD).parent, filter=link_it)
 tf.add(PAYLOAD)                      # rides the symlink
 ```
+### Profundización: deserialización de Keras .keras y búsqueda de gadgets
+
+Para una guía enfocada en los internos de .keras, RCE de Lambda-layer, el problema de importación arbitraria en ≤ 3.8, y el descubrimiento de gadgets post-fix dentro de la lista permitida, consulte:
+
+{{#ref}}
+../generic-methodologies-and-resources/python/keras-model-deserialization-rce-and-gadget-hunting.md
+{{#endref}}
+
 ## Referencias
 
-- [OffSec blog – "CVE-2024-12029 – InvokeAI Deserialization of Untrusted Data"](https://www.offsec.com/blog/cve-2024-12029/)
-- [InvokeAI patch commit 756008d](https://github.com/invoke-ai/invokeai/commit/756008dc5899081c5aa51e5bd8f24c1b3975a59e)
-- [Rapid7 Metasploit module documentation](https://www.rapid7.com/db/modules/exploit/linux/http/invokeai_rce_cve_2024_12029/)
-- [PyTorch – security considerations for torch.load](https://pytorch.org/docs/stable/notes/serialization.html#security)
+- [OffSec blog – "CVE-2024-12029 – Deserialización de datos no confiables en InvokeAI"](https://www.offsec.com/blog/cve-2024-12029/)
+- [Compromiso de parche de InvokeAI 756008d](https://github.com/invoke-ai/invokeai/commit/756008dc5899081c5aa51e5bd8f24c1b3975a59e)
+- [Documentación del módulo Metasploit de Rapid7](https://www.rapid7.com/db/modules/exploit/linux/http/invokeai_rce_cve_2024_12029/)
+- [PyTorch – consideraciones de seguridad para torch.load](https://pytorch.org/docs/stable/notes/serialization.html#security)
 
 {{#include ../banners/hacktricks-training.md}}
