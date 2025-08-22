@@ -11,7 +11,7 @@
 
 ### **MDM (모바일 장치 관리) 개요**
 
-[모바일 장치 관리](https://en.wikipedia.org/wiki/Mobile_device_management) (MDM)는 스마트폰, 노트북 및 태블릿과 같은 다양한 최종 사용자 장치를 관리하는 데 사용됩니다. 특히 Apple의 플랫폼(iOS, macOS, tvOS)에 대해, 이는 일련의 전문 기능, API 및 관행을 포함합니다. MDM의 작동은 상용 또는 오픈 소스인 호환 MDM 서버에 의존하며, [MDM 프로토콜](https://developer.apple.com/enterprise/documentation/MDM-Protocol-Reference.pdf)을 지원해야 합니다. 주요 사항은 다음과 같습니다:
+[모바일 장치 관리](https://en.wikipedia.org/wiki/Mobile_device_management) (MDM)는 스마트폰, 노트북 및 태블릿과 같은 다양한 최종 사용자 장치를 관리하는 데 사용됩니다. 특히 Apple의 플랫폼(iOS, macOS, tvOS)에서는 특수 기능, API 및 관행의 집합이 포함됩니다. MDM의 작동은 상용 또는 오픈 소스인 호환 MDM 서버에 의존하며, [MDM 프로토콜](https://developer.apple.com/enterprise/documentation/MDM-Protocol-Reference.pdf)을 지원해야 합니다. 주요 사항은 다음과 같습니다:
 
 - 장치에 대한 중앙 집중식 제어.
 - MDM 프로토콜을 준수하는 MDM 서버에 의존.
@@ -19,7 +19,7 @@
 
 ### **DEP (장치 등록 프로그램) 기본 사항**
 
-Apple이 제공하는 [장치 등록 프로그램](https://www.apple.com/business/site/docs/DEP_Guide.pdf) (DEP)은 iOS, macOS 및 tvOS 장치에 대한 제로 터치 구성을 용이하게 하여 모바일 장치 관리(MDM)의 통합을 간소화합니다. DEP는 등록 프로세스를 자동화하여 장치가 최소한의 사용자 또는 관리 개입으로 즉시 작동할 수 있도록 합니다. 필수 측면은 다음과 같습니다:
+Apple에서 제공하는 [장치 등록 프로그램](https://www.apple.com/business/site/docs/DEP_Guide.pdf) (DEP)은 iOS, macOS 및 tvOS 장치에 대한 제로 터치 구성을 용이하게 하여 모바일 장치 관리(MDM)의 통합을 간소화합니다. DEP는 등록 프로세스를 자동화하여 장치가 최소한의 사용자 또는 관리 개입으로 즉시 작동할 수 있도록 합니다. 필수 사항은 다음과 같습니다:
 
 - 장치가 초기 활성화 시 미리 정의된 MDM 서버에 자율적으로 등록할 수 있도록 합니다.
 - 주로 새 장치에 유용하지만 재구성 중인 장치에도 적용 가능합니다.
@@ -52,14 +52,14 @@ DEP가 제공하는 등록의 용이성은 유익하지만 보안 위험을 초�
 - **통신**은 **장치**와 **장치 관리** **제품**과 관련된 서버 간에 발생합니다.
 - **명령**은 **plist 인코딩된 사전** 형식으로 MDM에서 장치로 전달됩니다.
 - 모든 것이 **HTTPS**를 통해 이루어집니다. MDM 서버는 (대개) 핀 고정됩니다.
-- Apple은 MDM 벤더에게 인증을 위한 **APNs 인증서**를 부여합니다.
+- Apple은 인증을 위해 MDM 벤더에게 **APNs 인증서**를 부여합니다.
 
 ### DEP
 
 - **3개의 API**: 1개는 리셀러용, 1개는 MDM 벤더용, 1개는 장치 식별용(문서화되지 않음):
-- 이른바 [DEP "클라우드 서비스" API](https://developer.apple.com/enterprise/documentation/MDM-Protocol-Reference.pdf). MDM 서버가 특정 장치와 DEP 프로파일을 연결하는 데 사용됩니다.
+- 소위 [DEP "클라우드 서비스" API](https://developer.apple.com/enterprise/documentation/MDM-Protocol-Reference.pdf). MDM 서버가 특정 장치와 DEP 프로파일을 연결하는 데 사용됩니다.
 - Apple 공인 리셀러가 장치를 등록하고, 등록 상태를 확인하고, 거래 상태를 확인하는 데 사용하는 [DEP API](https://applecareconnect.apple.com/api-docs/depuat/html/WSImpManual.html).
-- 문서화되지 않은 비공식 DEP API. Apple 장치가 자신의 DEP 프로파일을 요청하는 데 사용됩니다. macOS에서는 `cloudconfigurationd` 바이너리가 이 API를 통해 통신하는 역할을 합니다.
+- 문서화되지 않은 비공식 DEP API. Apple 장치가 자신의 DEP 프로파일을 요청하는 데 사용됩니다. macOS에서는 `cloudconfigurationd` 바이너리가 이 API를 통해 통신하는 책임이 있습니다.
 - 더 현대적이고 **JSON** 기반입니다(대비 plist).
 - Apple은 MDM 벤더에게 **OAuth 토큰**을 부여합니다.
 
@@ -75,7 +75,7 @@ DEP가 제공하는 등록의 용이성은 유익하지만 보안 위험을 초�
 
 ## 일련 번호
 
-2010년 이후 제조된 Apple 장치는 일반적으로 **12자리 알phanumeric** 일련 번호를 가지며, **첫 세 자리는 제조 위치**를 나타내고, 다음 **두 자리는 제조 연도**와 **주**를 나타내며, 다음 **세 자리는 고유 식별자**를 제공하고, **마지막 네 자리는 모델 번호**를 나타냅니다.
+2010년 이후 제조된 Apple 장치는 일반적으로 **12자리 알phanumeric** 일련 번호를 가지며, **첫 세 자리는 제조 위치**를 나타내고, 다음 **두 자리는** **제조 연도**와 **주**를 나타내며, 다음 **세 자리는** **고유 식별자**를 제공하고, **마지막 네 자리는** **모델 번호**를 나타냅니다.
 
 {{#ref}}
 macos-serial-number.md
@@ -103,19 +103,19 @@ macos-serial-number.md
 
 또는 `sudo profiles show -type enrollment`을 실행할 때
 
-- **장치가 DEP 활성화되었는지 여부 확인**
+- **장치가 DEP 활성화되었는지 여부를 확인합니다.**
 - 활성화 기록은 **DEP “프로파일”**의 내부 이름입니다.
 - 장치가 인터넷에 연결되면 시작됩니다.
 - **`CPFetchActivationRecord`**에 의해 구동됩니다.
-- **`cloudconfigurationd`**가 XPC를 통해 구현합니다. **"설정 도우미"** (장치가 처음 부팅될 때) 또는 **`profiles`** 명령이 이 데몬에 연락하여 활성화 기록을 검색합니다.
-- LaunchDaemon (항상 root로 실행)
+- **`cloudconfigurationd`**가 XPC를 통해 구현합니다. **"설정 도우미"**(장치가 처음 부팅될 때) 또는 **`profiles`** 명령이 이 데몬에 연락하여 활성화 기록을 검색합니다.
+- LaunchDaemon (항상 root로 실행됨)
 
-활성화 기록을 가져오기 위해 **`MCTeslaConfigurationFetcher`**가 수행하는 몇 가지 단계를 따릅니다. 이 프로세스는 **Absinthe**라는 암호화를 사용합니다.
+활성화 기록을 가져오는 과정은 **`MCTeslaConfigurationFetcher`**에 의해 수행됩니다. 이 과정은 **Absinthe**라는 암호화를 사용합니다.
 
 1. **인증서 검색**
 1. GET [https://iprofiles.apple.com/resource/certificate.cer](https://iprofiles.apple.com/resource/certificate.cer)
 2. 인증서에서 상태 **초기화** (**`NACInit`**)
-1. 다양한 장치 특정 데이터를 사용합니다(예: **`IOKit`를 통한 일련 번호**).
+1. 다양한 장치 특정 데이터 사용(예: **`IOKit`를 통한 일련 번호**)
 3. **세션 키 검색**
 1. POST [https://iprofiles.apple.com/session](https://iprofiles.apple.com/session)
 4. 세션 설정 (**`NACKeyEstablishment`**)
@@ -135,7 +135,7 @@ macos-serial-number.md
 
 ![](<../../../images/image (444).png>)
 
-- **DEP 프로파일**에 제공된 **url**로 요청이 전송됩니다.
+- **DEP 프로파일에 제공된 url**로 요청이 전송됩니다.
 - 제공된 경우 **앵커 인증서**가 **신뢰성 평가**에 사용됩니다.
 - 알림: **DEP 프로파일의 anchor_certs** 속성
 - **요청은 장치 식별이 포함된 간단한 .plist**입니다.
