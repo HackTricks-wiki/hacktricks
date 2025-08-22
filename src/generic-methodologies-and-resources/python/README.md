@@ -6,6 +6,7 @@
 
 - [**Pyscript 해킹 기법**](pyscript.md)
 - [**Python 역직렬화**](../../pentesting-web/deserialization/README.md)
+- [**Keras 모델 역직렬화 RCE 및 가젯 탐색**](keras-model-deserialization-rce-and-gadget-hunting.md)
 - [**Python 샌드박스를 우회하는 기법**](bypass-python-sandboxes/README.md)
 - [**기본 Python 웹 요청 구문**](web-requests.md)
 - [**기본 Python 구문 및 라이브러리**](basic-python.md)
