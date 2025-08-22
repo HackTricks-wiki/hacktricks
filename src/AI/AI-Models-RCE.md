@@ -10,24 +10,24 @@ W momencie pisania, oto kilka przykładów tego typu luk:
 
 | **Framework / Narzędzie**   | **Luka (CVE, jeśli dostępne)**                                                                                               | **Wektor RCE**                                                                                                                        | **Odnośniki**                               |
 |-----------------------------|------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------|
-| **PyTorch** (Python)        | *Niebezpieczna deserializacja w* `torch.load` **(CVE-2025-32434)**                                                          | Złośliwy pickle w punkcie kontrolnym modelu prowadzi do wykonania kodu (obejście zabezpieczenia `weights_only`)                       | |
+| **PyTorch** (Python)        | *Niebezpieczna deserializacja w* `torch.load` **(CVE-2025-32434)**                                                          | Złośliwy pickle w punkcie kontrolnym modelu prowadzi do wykonania kodu (obejście zabezpieczenia `weights_only`)                        | |
 | PyTorch **TorchServe**      | *ShellTorch* – **CVE-2023-43654**, **CVE-2022-1471**                                                                        | SSRF + złośliwe pobieranie modelu powoduje wykonanie kodu; deserializacja RCE w API zarządzania                                        | |
 | **TensorFlow/Keras**        | **CVE-2021-37678** (niebezpieczny YAML) <br> **CVE-2024-3660** (Keras Lambda)                                               | Ładowanie modelu z YAML używa `yaml.unsafe_load` (wykonanie kodu) <br> Ładowanie modelu z warstwą **Lambda** uruchamia dowolny kod Pythona | |
 | TensorFlow (TFLite)         | **CVE-2022-23559** (parsing TFLite)                                                                                          | Opracowany model `.tflite` wywołuje przepełnienie całkowite → uszkodzenie sterty (potencjalne RCE)                                   | |
 | **Scikit-learn** (Python)   | **CVE-2020-13092** (joblib/pickle)                                                                                           | Ładowanie modelu za pomocą `joblib.load` wykonuje pickle z ładunkiem `__reduce__` atakującego                                        | |
-| **NumPy** (Python)          | **CVE-2019-6446** (niebezpieczne `np.load`) *kwestionowane*                                                                  | Domyślnie `numpy.load` pozwalało na ładowanie zserializowanych tablic obiektów – złośliwe `.npy/.npz` wywołuje wykonanie kodu        | |
+| **NumPy** (Python)          | **CVE-2019-6446** (niebezpieczne `np.load`) *kwestionowane*                                                                  | Domyślnie `numpy.load` pozwalało na ładowanie obiektów tablicowych w formacie pickle – złośliwe `.npy/.npz` wywołuje wykonanie kodu    | |
 | **ONNX / ONNX Runtime**     | **CVE-2022-25882** (przechodzenie katalogów) <br> **CVE-2024-5187** (przechodzenie tar)                                      | Ścieżka zewnętrznych wag modelu ONNX może uciec z katalogu (odczyt dowolnych plików) <br> Złośliwy model ONNX tar może nadpisać dowolne pliki (prowadząc do RCE) | |
 | ONNX Runtime (ryzyko projektowe) | *(Brak CVE)* Niestandardowe operacje ONNX / przepływ sterowania                                                            | Model z niestandardowym operatorem wymaga załadowania natywnego kodu atakującego; złożone grafy modelu nadużywają logiki do wykonania niezamierzonych obliczeń | |
-| **NVIDIA Triton Server**    | **CVE-2023-31036** (przechodzenie ścieżki)                                                                                   | Użycie API ładowania modelu z włączonym `--model-control` pozwala na przechodzenie ścieżki względnej do zapisywania plików (np. nadpisanie `.bashrc` dla RCE) | |
+| **NVIDIA Triton Server**    | **CVE-2023-31036** (przechodzenie ścieżek)                                                                                   | Użycie API ładowania modelu z włączonym `--model-control` pozwala na przechodzenie ścieżek względnych do zapisywania plików (np. nadpisanie `.bashrc` dla RCE) | |
 | **GGML (format GGUF)**      | **CVE-2024-25664 … 25668** (wiele przepełnień sterty)                                                                        | Źle sformatowany plik modelu GGUF powoduje przepełnienia bufora sterty w parserze, umożliwiając wykonanie dowolnego kodu na systemie ofiary | |
 | **Keras (starsze formaty)** | *(Brak nowego CVE)* Model Keras H5 w wersji legacy                                                                            | Złośliwy model HDF5 (`.h5`) z kodem warstwy Lambda nadal wykonuje się podczas ładowania (tryb bezpieczeństwa Keras nie obejmuje starego formatu – „atak degradacyjny”) | |
 | **Inne** (ogólnie)          | *Wada projektowa* – Serializacja Pickle                                                                                      | Wiele narzędzi ML (np. formaty modeli oparte na pickle, Python `pickle.load`) wykona dowolny kod osadzony w plikach modeli, chyba że zostanie to złagodzone | |
 
-Ponadto istnieją modele oparte na python pickle, takie jak te używane przez [PyTorch](https://github.com/pytorch/pytorch/security), które mogą być użyte do wykonania dowolnego kodu w systemie, jeśli nie są ładowane z `weights_only=True`. Tak więc, każdy model oparty na pickle może być szczególnie podatny na tego typu ataki, nawet jeśli nie są wymienione w powyższej tabeli.
+Ponadto istnieją modele oparte na pickle w Pythonie, takie jak te używane przez [PyTorch](https://github.com/pytorch/pytorch/security), które mogą być użyte do wykonania dowolnego kodu w systemie, jeśli nie są ładowane z `weights_only=True`. Tak więc, każdy model oparty na pickle może być szczególnie podatny na tego typu ataki, nawet jeśli nie są wymienione w powyższej tabeli.
 
 ### 🆕  InvokeAI RCE przez `torch.load` (CVE-2024-12029)
 
-`InvokeAI` to popularny interfejs webowy open-source dla Stable-Diffusion. Wersje **5.3.1 – 5.4.2** udostępniają punkt końcowy REST `/api/v2/models/install`, który pozwala użytkownikom pobierać i ładować modele z dowolnych adresów URL.
+`InvokeAI` to popularny interfejs webowy typu open-source dla Stable-Diffusion. Wersje **5.3.1 – 5.4.2** udostępniają punkt końcowy REST `/api/v2/models/install`, który pozwala użytkownikom pobierać i ładować modele z dowolnych adresów URL.
 
 Wewnątrz punkt końcowy ostatecznie wywołuje:
 ```python
@@ -67,19 +67,19 @@ json={},                                         # body can be empty
 timeout=5,
 )
 ```
-4. Gdy InvokeAI pobiera plik, wywołuje `torch.load()` → uruchamia się gadżet `os.system`, a atakujący uzyskuje wykonanie kodu w kontekście procesu InvokeAI.
+4. Kiedy InvokeAI pobiera plik, wywołuje `torch.load()` → uruchamia się gadżet `os.system`, a atakujący zyskuje wykonanie kodu w kontekście procesu InvokeAI.
 
 Gotowy exploit: **Metasploit** moduł `exploit/linux/http/invokeai_rce_cve_2024_12029` automatyzuje cały proces.
 
 #### Warunki
 
-•  InvokeAI 5.3.1-5.4.2 (domyślna flaga skanowania **false**)
+•  InvokeAI 5.3.1-5.4.2 (flaga skanowania domyślnie **false**)
 •  `/api/v2/models/install` dostępne dla atakującego
 •  Proces ma uprawnienia do wykonywania poleceń powłoki
 
 #### Łagodzenia
 
-* Uaktualnij do **InvokeAI ≥ 5.4.3** – poprawka ustawia `scan=True` domyślnie i przeprowadza skanowanie złośliwego oprogramowania przed deserializacją.
+* Uaktualnij do **InvokeAI ≥ 5.4.3** – łatka ustawia `scan=True` domyślnie i przeprowadza skanowanie złośliwego oprogramowania przed deserializacją.
 * Podczas programowego ładowania punktów kontrolnych używaj `torch.load(file, weights_only=True)` lub nowego [`torch.load_safe`](https://pytorch.org/docs/stable/serialization.html#security) pomocnika.
 * Wymuszaj listy dozwolone / podpisy dla źródeł modeli i uruchamiaj usługę z minimalnymi uprawnieniami.
 
@@ -133,7 +133,7 @@ model.load_state_dict(torch.load("malicious_state.pth", weights_only=False))
 ```
 ## Modele do przejścia ścieżki
 
-Jak wspomniano w [**tym wpisie na blogu**](https://blog.huntr.com/pivoting-archive-slip-bugs-into-high-value-ai/ml-bounties), większość formatów modeli używanych przez różne frameworki AI opiera się na archiwach, zazwyczaj `.zip`. Dlatego może być możliwe nadużycie tych formatów do przeprowadzania ataków typu path traversal, co pozwala na odczyt dowolnych plików z systemu, w którym model jest załadowany.
+Jak wspomniano w [**tym poście na blogu**](https://blog.huntr.com/pivoting-archive-slip-bugs-into-high-value-ai/ml-bounties), większość formatów modeli używanych przez różne frameworki AI opiera się na archiwach, zazwyczaj `.zip`. Dlatego może być możliwe nadużycie tych formatów do przeprowadzania ataków typu path traversal, co pozwala na odczyt dowolnych plików z systemu, w którym model jest załadowany.
 
 Na przykład, za pomocą poniższego kodu możesz stworzyć model, który utworzy plik w katalogu `/tmp` po załadowaniu:
 ```python
@@ -161,7 +161,15 @@ with tarfile.open("symlink_demo.model", "w:gz") as tf:
 tf.add(pathlib.Path(PAYLOAD).parent, filter=link_it)
 tf.add(PAYLOAD)                      # rides the symlink
 ```
-## Odniesienia
+### Deep-dive: Keras .keras deserialization and gadget hunting
+
+Aby uzyskać szczegółowy przewodnik po wewnętrznych mechanizmach .keras, RCE warstwy Lambda, problemie z dowolnym importem w ≤ 3.8 oraz odkrywaniu gadżetów po poprawce w liście dozwolonej, zobacz:
+
+{{#ref}}
+../generic-methodologies-and-resources/python/keras-model-deserialization-rce-and-gadget-hunting.md
+{{#endref}}
+
+## References
 
 - [OffSec blog – "CVE-2024-12029 – InvokeAI Deserialization of Untrusted Data"](https://www.offsec.com/blog/cve-2024-12029/)
 - [InvokeAI patch commit 756008d](https://github.com/invoke-ai/invokeai/commit/756008dc5899081c5aa51e5bd8f24c1b3975a59e)

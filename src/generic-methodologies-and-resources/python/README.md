@@ -6,6 +6,7 @@
 
 - [**Sztuczki hackingowe Pyscript**](pyscript.md)
 - [**Deserializacje Pythona**](../../pentesting-web/deserialization/README.md)
+- [**Deserializacja modelu Keras RCE i polowanie na gadżety**](keras-model-deserialization-rce-and-gadget-hunting.md)
 - [**Sztuczki do omijania piaskownic Pythona**](bypass-python-sandboxes/README.md)
 - [**Podstawowa składnia żądań webowych w Pythonie**](web-requests.md)
 - [**Podstawowa składnia Pythona i biblioteki**](basic-python.md)
