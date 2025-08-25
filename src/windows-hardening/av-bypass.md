@@ -755,10 +755,89 @@ After replacing the original files and restarting the service stack:
 
 This case study demonstrates how purely client-side trust decisions and simple signature checks can be defeated with a few byte patches.
 
+## Abusing Protected Process Light (PPL) To Tamper AV/EDR With LOLBINs
+
+Protected Process Light (PPL) enforces a signer/level hierarchy so that only equal-or-higher protected processes can tamper with each other. Offensively, if you can legitimately launch a PPL-enabled binary and control its arguments, you can convert benign functionality (e.g., logging) into a constrained, PPL-backed write primitive against protected directories used by AV/EDR.
+
+What makes a process run as PPL
+- The target EXE (and any loaded DLLs) must be signed with a PPL-capable EKU.
+- The process must be created with CreateProcess using the flags: `EXTENDED_STARTUPINFO_PRESENT | CREATE_PROTECTED_PROCESS`.
+- A compatible protection level must be requested that matches the signer of the binary (e.g., `PROTECTION_LEVEL_ANTIMALWARE_LIGHT` for anti-malware signers, `PROTECTION_LEVEL_WINDOWS` for Windows signers). Wrong levels will fail at creation.
+
+See also a broader intro to PP/PPL and LSASS protection here:
+
+{{#ref}}
+stealing-credentials/credentials-protections.md
+{{#endref}}
+
+Launcher tooling
+- Open-source helper: CreateProcessAsPPL (selects protection level and forwards arguments to the target EXE):
+  - [https://github.com/2x7EQ13/CreateProcessAsPPL](https://github.com/2x7EQ13/CreateProcessAsPPL)
+- Usage pattern:
+
+```text
+CreateProcessAsPPL.exe <level 0..4> <path-to-ppl-capable-exe> [args...]
+# example: spawn a Windows-signed component at PPL level 1 (Windows)
+CreateProcessAsPPL.exe 1 C:\Windows\System32\ClipUp.exe <args>
+# example: spawn an anti-malware signed component at level 3
+CreateProcessAsPPL.exe 3 <anti-malware-signed-exe> <args>
+```
+
+LOLBIN primitive: ClipUp.exe
+- The signed system binary `C:\Windows\System32\ClipUp.exe` self-spawns and accepts a parameter to write a log file to a caller-specified path.
+- When launched as a PPL process, the file write occurs with PPL backing.
+- ClipUp cannot parse paths containing spaces; use 8.3 short paths to point into normally protected locations.
+
+8.3 short path helpers
+- List short names: `dir /x` in each parent directory.
+- Derive short path in cmd: `for %A in ("C:\ProgramData\Microsoft\Windows Defender\Platform") do @echo %~sA`
+
+Abuse chain (abstract)
+1) Launch the PPL-capable LOLBIN (ClipUp) with `CREATE_PROTECTED_PROCESS` using a launcher (e.g., CreateProcessAsPPL).
+2) Pass the ClipUp log-path argument to force a file creation in a protected AV directory (e.g., Defender Platform). Use 8.3 short names if needed.
+3) If the target binary is normally open/locked by the AV while running (e.g., MsMpEng.exe), schedule the write at boot before the AV starts by installing an auto-start service that reliably runs earlier. Validate boot ordering with Process Monitor (boot logging).
+4) On reboot the PPL-backed write happens before the AV locks its binaries, corrupting the target file and preventing startup.
+
+Example invocation (paths redacted/shortened for safety):
+
+```text
+# Run ClipUp as PPL at Windows signer level (1) and point its log to a protected folder using 8.3 names
+CreateProcessAsPPL.exe 1 C:\Windows\System32\ClipUp.exe -ppl C:\PROGRA~3\MICROS~1\WINDOW~1\Platform\<ver>\samplew.dll
+```
+
+Notes and constraints
+- You cannot control the contents ClipUp writes beyond placement; the primitive is suited to corruption rather than precise content injection.
+- Requires local admin/SYSTEM to install/start a service and a reboot window.
+- Timing is critical: the target must not be open; boot-time execution avoids file locks.
+
+Detections
+- Process creation of `ClipUp.exe` with unusual arguments, especially parented by non-standard launchers, around boot.
+- New services configured to auto-start suspicious binaries and consistently starting before Defender/AV. Investigate service creation/modification prior to Defender startup failures.
+- File integrity monitoring on Defender binaries/Platform directories; unexpected file creations/modifications by processes with protected-process flags.
+- ETW/EDR telemetry: look for processes created with `CREATE_PROTECTED_PROCESS` and anomalous PPL level usage by non-AV binaries.
+
+Mitigations
+- WDAC/Code Integrity: restrict which signed binaries may run as PPL and under which parents; block ClipUp invocation outside legitimate contexts.
+- Service hygiene: restrict creation/modification of auto-start services and monitor start-order manipulation.
+- Ensure Defender tamper protection and early-launch protections are enabled; investigate startup errors indicating binary corruption.
+- Consider disabling 8.3 short-name generation on volumes hosting security tooling if compatible with your environment (test thoroughly).
+
+References for PPL and tooling
+- Microsoft Protected Processes overview: https://learn.microsoft.com/windows/win32/procthread/protected-processes
+- EKU reference: https://learn.microsoft.com/openspecs/windows_protocols/ms-ppsec/651a90f3-e1f5-4087-8503-40d804429a88
+- Procmon boot logging (ordering validation): https://learn.microsoft.com/sysinternals/downloads/procmon
+- CreateProcessAsPPL launcher: https://github.com/2x7EQ13/CreateProcessAsPPL
+- Technique writeup (ClipUp + PPL + boot-order tamper): https://www.zerosalarium.com/2025/08/countering-edrs-with-backing-of-ppl-protection.html
+
 ## References
 
 - [Unit42 – New Infection Chain and ConfuserEx-Based Obfuscation for DarkCloud Stealer](https://unit42.paloaltonetworks.com/new-darkcloud-stealer-infection-chain/)
 - [Synacktiv – Should you trust your zero trust? Bypassing Zscaler posture checks](https://www.synacktiv.com/en/publications/should-you-trust-your-zero-trust-bypassing-zscaler-posture-checks.html)
 - [Check Point Research – Before ToolShell: Exploring Storm-2603’s Previous Ransomware Operations](https://research.checkpoint.com/2025/before-toolshell-exploring-storm-2603s-previous-ransomware-operations/)
+- [Microsoft – Protected Processes](https://learn.microsoft.com/windows/win32/procthread/protected-processes)
+- [Microsoft – EKU reference (MS-PPSEC)](https://learn.microsoft.com/openspecs/windows_protocols/ms-ppsec/651a90f3-e1f5-4087-8503-40d804429a88)
+- [Sysinternals – Process Monitor](https://learn.microsoft.com/sysinternals/downloads/procmon)
+- [CreateProcessAsPPL launcher](https://github.com/2x7EQ13/CreateProcessAsPPL)
+- [Zero Salarium – Countering EDRs With The Backing Of Protected Process Light (PPL)](https://www.zerosalarium.com/2025/08/countering-edrs-with-backing-of-ppl-protection.html)
 
 {{#include ../banners/hacktricks-training.md}}
