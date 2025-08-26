@@ -1,8 +1,8 @@
-# Belirli Yazılım/Dosya Türü Hileleri
+# Belirli Yazılım/Dosya Türü Püf Noktaları
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Burada belirli dosya türleri ve/veya yazılımlar için ilginç hileler bulabilirsiniz:
+Burada belirli dosya türleri ve/veya yazılımlar için ilginç püf noktalarını bulabilirsiniz:
 
 
 {{#ref}}
@@ -32,6 +32,11 @@ office-file-analysis.md
 
 {{#ref}}
 pdf-file-analysis.md
+{{#endref}}
+
+
+{{#ref}}
+structural-file-format-exploit-detection.md
 {{#endref}}
 
 
