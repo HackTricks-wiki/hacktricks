@@ -4,9 +4,9 @@
 
 ## CFRuntimeClass
 
-CF\* ऑब्जेक्ट्स CoreFoundation से आते हैं, जो `CFString`, `CFNumber` या `CFAllocator` जैसे 50 से अधिक ऑब्जेक्ट क्लास प्रदान करते हैं।
+CF* objects CoreFoundation से आते हैं, जो `CFString`, `CFNumber` या `CFAllocator` जैसे 50 से अधिक क्लास ऑब्जेक्ट्स प्रदान करता है।
 
-इन सभी क्लासों के उदाहरण `CFRuntimeClass` क्लास के होते हैं, जिसे कॉल करने पर यह `__CFRuntimeClassTable` का एक इंडेक्स लौटाता है। CFRuntimeClass को [**CFRuntime.h**](https://opensource.apple.com/source/CF/CF-1153.18/CFRuntime.h.auto.html) में परिभाषित किया गया है:
+ये सभी क्लासें `CFRuntimeClass` क्लास के instances हैं, जो कॉल किए जाने पर `__CFRuntimeClassTable` का एक index लौटाता है। CFRuntimeClass [**CFRuntime.h**](https://opensource.apple.com/source/CF/CF-1153.18/CFRuntime.h.auto.html) में परिभाषित है:
 ```objectivec
 // Some comments were added to the original code
 
@@ -55,68 +55,79 @@ uintptr_t requiredAlignment; // Or in _kCFRuntimeRequiresAlignment in the .versi
 ```
 ## Objective-C
 
-### Memory sections used
+### उपयोग किए जाने वाले मेमोरी सेक्शन
 
-ObjectiveC रनटाइम द्वारा उपयोग किए जाने वाले अधिकांश डेटा निष्पादन के दौरान बदलेंगे, इसलिए यह मेमोरी में **\_\_DATA** खंड से कुछ सेक्शन का उपयोग करता है:
+Objective‑C runtime द्वारा उपयोग किया जाने वाला अधिकांश डेटा निष्पादन के दौरान बदलता रहता है, इसलिए यह मेमोरी में Mach‑O `__DATA` परिवार के कई सेक्शनों का उपयोग करता है। ऐतिहासिक रूप से इनमें शामिल थे:
 
-- **`__objc_msgrefs`** (`message_ref_t`): संदेश संदर्भ
-- **`__objc_ivar`** (`ivar`): उदाहरण चर
-- **`__objc_data`** (`...`): परिवर्तनीय डेटा
-- **`__objc_classrefs`** (`Class`): वर्ग संदर्भ
-- **`__objc_superrefs`** (`Class`): सुपरक्लास संदर्भ
-- **`__objc_protorefs`** (`protocol_t *`): प्रोटोकॉल संदर्भ
-- **`__objc_selrefs`** (`SEL`): चयनकर्ता संदर्भ
-- **`__objc_const`** (`...`): वर्ग `r/o` डेटा और अन्य (उम्मीद है) स्थिर डेटा
-- **`__objc_imageinfo`** (`version, flags`): छवि लोड के दौरान उपयोग किया जाता है: वर्तमान संस्करण `0`; फ्लैग पूर्व-ऑप्टिमाइज्ड GC समर्थन आदि निर्दिष्ट करते हैं।
-- **`__objc_protolist`** (`protocol_t *`): प्रोटोकॉल सूची
-- **`__objc_nlcatlist`** (`category_t`): इस बाइनरी में परिभाषित नॉन-लेज़ी श्रेणियों के लिए पॉइंटर
-- **`__objc_catlist`** (`category_t`): इस बाइनरी में परिभाषित श्रेणियों के लिए पॉइंटर
-- **`__objc_nlclslist`** (`classref_t`): इस बाइनरी में परिभाषित नॉन-लेज़ी ऑब्जेक्टिव-सी वर्गों के लिए पॉइंटर
-- **`__objc_classlist`** (`classref_t`): इस बाइनरी में परिभाषित सभी ऑब्जेक्टिव-सी वर्गों के लिए पॉइंटर
+- `__objc_msgrefs` (`message_ref_t`): संदेश संदर्भ
+- `__objc_ivar` (`ivar`): इंस्टेंस वेरिएबल्स
+- `__objc_data` (`...`): परिवर्तनीय डेटा
+- `__objc_classrefs` (`Class`): क्लास संदर्भ
+- `__objc_superrefs` (`Class`): सुपरक्लास संदर्भ
+- `__objc_protorefs` (`protocol_t *`): प्रोटोकॉल संदर्भ
+- `__objc_selrefs` (`SEL`): सेलेक्टर संदर्भ
+- `__objc_const` (`...`): क्लास रीड‑ओनली डेटा और अन्य (आशा है कि) स्थिर डेटा
+- `__objc_imageinfo` (`version, flags`): इमेज लोड के दौरान उपयोग होता है: Version वर्तमान में `0`; Flags प्रीऑप्टिमाइज़्ड GC सपोर्ट आदि को निर्दिष्ट करते हैं।
+- `__objc_protolist` (`protocol_t *`): प्रोटोकॉल सूची
+- `__objc_nlcatlist` (`category_t`): इस बाइनरी में परिभाषित Non-Lazy Categories का पॉइंटर
+- `__objc_catlist` (`category_t`): इस बाइनरी में परिभाषित Categories का पॉइंटर
+- `__objc_nlclslist` (`classref_t`): इस बाइनरी में परिभाषित Non-Lazy Objective‑C classes का पॉइंटर
+- `__objc_classlist` (`classref_t`): इस बाइनरी में परिभाषित सभी Objective‑C classes के पॉइंटर
 
-यह **`__TEXT`** खंड में कुछ सेक्शन का भी उपयोग करता है ताकि स्थायी मानों को संग्रहीत किया जा सके यदि इस खंड में लिखना संभव नहीं है:
+यह constants संग्रहीत करने के लिए `__TEXT` सेगमेंट के कुछ सेक्शनों का भी उपयोग करता है:
 
-- **`__objc_methname`** (C-String): विधि नाम
-- **`__objc_classname`** (C-String): वर्ग नाम
-- **`__objc_methtype`** (C-String): विधि प्रकार
+- `__objc_methname` (C‑String): मेथड नाम
+- `__objc_classname` (C‑String): क्लास नाम
+- `__objc_methtype` (C‑String): मेथड प्रकार
 
-### Type Encoding
+आधुनिक macOS/iOS (विशेषकर Apple Silicon पर) Objective‑C/Swift मेटाडेटा को निम्न में भी रखता है:
 
-Objective-c चयनकर्ता और सरल और जटिल प्रकारों के चर प्रकारों को एन्कोड करने के लिए कुछ मैनलिंग का उपयोग करता है:
+- `__DATA_CONST`: immutable Objective‑C metadata जो processes के बीच read‑only रूप में साझा किया जा सकता है (उदाहरण के लिए कई `__objc_*` सूचियाँ अब यहाँ रहती हैं).
+- `__AUTH` / `__AUTH_CONST`: ऐसे सेगमेंट जिनमें पॉइंटर्स होते हैं जिन्हें arm64e पर लोड या उपयोग के समय authenticated होना चाहिए (Pointer Authentication). आप `__AUTH_CONST` में पारंपरिक `__la_symbol_ptr`/`__got` की जगह `__auth_got` भी देखेंगे. When instrumenting or hooking, modern बाइनरीज़ में दोनों `__got` और `__auth_got` एंट्रीज़ को ध्यान में रखें.
 
-- प्राइमिटिव प्रकार अपने प्रकार के पहले अक्षर का उपयोग करते हैं `i` के लिए `int`, `c` के लिए `char`, `l` के लिए `long`... और यदि यह unsigned है तो बड़े अक्षर का उपयोग करते हैं (`L` के लिए `unsigned Long`)।
-- अन्य डेटा प्रकार जिनके अक्षर उपयोग किए जाते हैं या विशेष होते हैं, अन्य अक्षरों या प्रतीकों का उपयोग करते हैं जैसे `q` के लिए `long long`, `b` के लिए `bitfields`, `B` के लिए `booleans`, `#` के लिए `classes`, `@` के लिए `id`, `*` के लिए `char pointers`, `^` के लिए सामान्य `pointers` और `?` के लिए `undefined`।
-- ऐरे, संरचनाएँ और संघ `[`, `{` और `(` का उपयोग करते हैं।
+For background on dyld pre‑optimization (e.g., selector uniquing and class/protocol precomputation) and why many of these sections are "already fixed up" when coming from the shared cache, check the Apple `objc-opt` sources and dyld shared cache notes. यह प्रभावित करता है कि आप runtime में मेटाडेटा को कहाँ और कैसे patch कर सकते हैं.
 
-#### Example Method Declaration
+{{#ref}}
+../macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md
+{{#endref}}
+
+### टाइप एन्कोडिंग
+
+Objective‑C सरल और जटिल प्रकारों के selector और variable प्रकारों को encode करने के लिए mangling का उपयोग करता है:
+
+- Primitive types उनके प्रकार के पहले अक्षर का उपयोग करते हैं — `i` for `int`, `c` for `char`, `l` for `long`... और unsigned होने पर capital letter का उपयोग होता है (`L` for `unsigned long`).
+- अन्य डेटा प्रकार अन्य अक्षरों या प्रतीकों का उपयोग करते हैं जैसे `q` for `long long`, `b` for bitfields, `B` for booleans, `#` for classes, `@` for `id`, `*` for `char *`, `^` for generic pointers और `?` for undefined.
+- Arrays, structures and unions क्रमशः `[`, `{` और `(` का उपयोग करते हैं।
+
+#### उदाहरण मेथड घोषणा
 ```objectivec
 - (NSString *)processString:(id)input withOptions:(char *)options andError:(id)error;
 ```
-चुनावकर्ता होगा `processString:withOptions:andError:`
+सेलेक्टर होगा `processString:withOptions:andError:`
 
-#### प्रकार एन्कोडिंग
+#### टाइप एन्कोडिंग
 
-- `id` को `@` के रूप में एन्कोड किया गया है
-- `char *` को `*` के रूप में एन्कोड किया गया है
+- `id` को `@` के रूप में एन्कोड किया जाता है
+- `char *` को `*` के रूप में एन्कोड किया जाता है
 
-विधि के लिए पूर्ण प्रकार एन्कोडिंग है:
+मेथड के लिए पूर्ण टाइप एन्कोडिंग:
 ```less
 @24@0:8@16*20^@24
 ```
-#### विस्तृत विश्लेषण
+#### विस्तृत विवरण
 
-1. **वापसी प्रकार (`NSString *`)**: `@` के रूप में एन्कोड किया गया, लंबाई 24
-2. **`self` (ऑब्जेक्ट उदाहरण)**: `@` के रूप में एन्कोड किया गया, ऑफसेट 0 पर
-3. **`_cmd` (सेलेक्टर)**: `:` के रूप में एन्कोड किया गया, ऑफसेट 8 पर
-4. **पहला तर्क (`char * input`)**: `*` के रूप में एन्कोड किया गया, ऑफसेट 16 पर
-5. **दूसरा तर्क (`NSDictionary * options`)**: `@` के रूप में एन्कोड किया गया, ऑफसेट 20 पर
-6. **तीसरा तर्क (`NSError ** error`)**: `^@` के रूप में एन्कोड किया गया, ऑफसेट 24 पर
+1. रिटर्न प्रकार (`NSString *`): एन्कोडेड के रूप में `@` लंबाई 24 के साथ  
+2. `self` (ऑब्जेक्ट उदाहरण): एन्कोडेड के रूप में `@`, ऑफ़सेट 0 पर  
+3. `_cmd` (सेलेक्टर): एन्कोडेड के रूप में `:`, ऑफ़सेट 8 पर  
+4. पहला आर्ग्युमेंट (`char * input`): एन्कोडेड के रूप में `*`, ऑफ़सेट 16 पर  
+5. दूसरा आर्ग्युमेंट (`NSDictionary * options`): एन्कोडेड के रूप में `@`, ऑफ़सेट 20 पर  
+6. तीसरा आर्ग्युमेंट (`NSError ** error`): एन्कोडेड के रूप में `^@`, ऑफ़सेट 24 पर
 
-**सेलेक्टर + एन्कोडिंग के साथ आप विधि को पुनर्निर्माण कर सकते हैं।**
+selector + एन्कोडिंग के साथ आप मेथड को पुनर्निर्मित कर सकते हैं।
 
-### **क्लासेस**
+### क्लासेस
 
-Objective-C में क्लास एक संरचना है जिसमें प्रॉपर्टीज, मेथड पॉइंटर्स... होते हैं। आप [**स्रोत कोड**](https://opensource.apple.com/source/objc4/objc4-756.2/runtime/objc-runtime-new.h.auto.html) में संरचना `objc_class` को ढूंढना संभव है:
+Objective‑C में क्लासेस C structs होते हैं जिनमें properties, method pointers, आदि होते हैं। यह struct `objc_class` [**source code**](https://opensource.apple.com/source/objc4/objc4-756.2/runtime/objc-runtime-new.h.auto.html) में पाया जा सकता है:
 ```objectivec
 struct objc_class : objc_object {
 // Class ISA;
@@ -137,9 +148,114 @@ data()->setFlags(set);
 }
 [...]
 ```
-यह क्लास isa फ़ील्ड के कुछ बिट्स का उपयोग क्लास के बारे में कुछ जानकारी इंगित करने के लिए करता है।
+यह क्लास `isa` फील्ड के कुछ बिट्स का उपयोग क्लास के बारे में जानकारी संकेत करने के लिए करती है।
 
-फिर, स्ट्रक्चर में `class_ro_t` स्ट्रक्चर का एक पॉइंटर होता है जो डिस्क पर स्टोर किया गया है, जिसमें क्लास के गुण जैसे इसका नाम, बेस मेथड्स, प्रॉपर्टीज और इंस्टेंस वेरिएबल्स होते हैं।\
-रनटाइम के दौरान एक अतिरिक्त स्ट्रक्चर `class_rw_t` का उपयोग किया जाता है जिसमें पॉइंटर्स होते हैं जिन्हें बदला जा सकता है जैसे मेथड्स, प्रोटोकॉल्स, प्रॉपर्टीज... 
+फिर, struct में डिस्क पर स्टोर किए गए struct `class_ro_t` का एक पॉइंटर होता है जिसमें क्लास के नाम, बेस मेथड्स, प्रॉपर्टीज और इंस्टेंस वेरिएबल्स जैसे एट्रिब्यूट्स होते हैं। रनटाइम के दौरान एक अतिरिक्त संरचना `class_rw_t` उपयोग में ली जाती है जिसमें ऐसे पॉइंटर्स होते हैं जिन्हें बदला जा सकता है जैसे methods, protocols, properties।
+
+{{#ref}}
+../macos-basic-objective-c.md
+{{#endref}}
+
+---
+
+## मेमोरी में आधुनिक ऑब्जेक्ट प्रतिनिधित्व (arm64e, tagged pointers, Swift)
+
+### Non‑pointer `isa` और Pointer Authentication (arm64e)
+
+Apple Silicon और हाल के runtimes पर Objective‑C `isa` हमेशा कच्चा क्लास पॉइंटर नहीं होता। arm64e पर यह एक packed संरचना है जो Pointer Authentication Code (PAC) भी रख सकती है। प्लेटफॉर्म के अनुसार इसमें `nonpointer`, `has_assoc`, `weakly_referenced`, `extra_rc` जैसे फील्ड और क्लास पॉइंटर स्वयं (shifted या signed) शामिल हो सकते हैं। इसका मतलब है कि किसी Objective‑C ऑब्जेक्ट के पहले 8 बाइट्स को अंधाधुंध dereference करने पर हमेशा वैध `Class` पॉइंटर प्राप्त नहीं होगा।
+
+arm64e पर debugging के दौरान व्यावहारिक नोट्स:
+
+- LLDB आमतौर पर `po` के साथ Objective‑C ऑब्जेक्ट्स प्रिंट करते समय आपके लिए PAC बिट्स हटा देता है, लेकिन raw pointers के साथ काम करते समय आपको मैन्युअली authentication हटानी पड़ सकती है:
+
+```lldb
+(lldb) expr -l objc++ -- #include <ptrauth.h>
+(lldb) expr -l objc++ -- void *raw = ptrauth_strip((void*)0x000000016f123abc, ptrauth_key_asda);
+(lldb) expr -l objc++ -O -- (Class)object_getClass((id)raw)
+```
+
+- Mach‑O में कई function/data pointers `__AUTH`/`__AUTH_CONST` में रहेंगे और उपयोग से पहले authentication की आवश्यकता होगी। यदि आप interposing या re‑binding कर रहे हैं (उदा., fishhook‑style), तो legacy `__got` के अलावा `__auth_got` को भी हैंडल करना सुनिश्चित करें।
+
+भाषा/ABI गारंटियों और Clang/LLVM से उपलब्ध `<ptrauth.h>` intrinsics में गहरा उतरने के लिए, पृष्ठ के अंत में दिए गए संदर्भ को देखें।
+
+### Tagged pointer objects
+
+कुछ Foundation क्लासेस heap allocation से बचने के लिए ऑब्जेक्ट का payload सीधे pointer value में encode कर देती हैं (tagged pointers)। detection प्लेटफॉर्म के अनुसार अलग होती है (उदा., arm64 पर most‑significant bit, x86_64 macOS पर least‑significant)। Tagged objects के पास मेमोरी में नियमित `isa` स्टोर नहीं होता; runtime टैग बिट्स से क्लास को resolve करता है। arbitrary `id` मानों का निरीक्षण करते समय:
+
+- `isa` फील्ड को छेड़ने के बजाय runtime APIs का उपयोग करें: `object_getClass(obj)` / `[obj class]`.
+- LLDB में, सिर्फ `po (id)0xADDR` tagged pointer instances को ठीक से प्रिंट करेगा क्योंकि क्लास resolve करने के लिए runtime से परामर्श किया जाता है।
+
+### Swift heap objects and metadata
+
+Pure Swift classes भी ऐसे ऑब्जेक्ट्स हैं जिनके हेडर में Swift metadata की ओर पॉइंटर होता है (Objective‑C `isa` नहीं)। बिना उन्हें मॉडिफाई किए लाइव Swift processes का introspect करने के लिए आप Swift toolchain का `swift-inspect` उपयोग कर सकते हैं, जो runtime metadata पढ़ने के लिए Remote Mirror library का लाभ उठाता है:
+```bash
+# Xcode toolchain (or Swift.org toolchain) provides swift-inspect
+swift-inspect dump-raw-metadata <pid-or-name>
+swift-inspect dump-arrays <pid-or-name>
+# On Darwin additionally:
+swift-inspect dump-concurrency <pid-or-name>
+```
+यह mixed Swift/ObjC apps को reversing करते समय Swift हीप ऑब्जेक्ट्स और प्रोटोकॉल अनुरूपताओं को मैप करने के लिए बहुत उपयोगी है।
+
+---
+
+## रनटाइम निरीक्षण चीटशीट (LLDB / Frida)
+
+### LLDB
+
+- Raw pointer से object या class प्रिंट करें:
+```lldb
+(lldb) expr -l objc++ -O -- (id)0x0000000101234560
+(lldb) expr -l objc++ -O -- (Class)object_getClass((id)0x0000000101234560)
+```
+- breakpoint में object method के `self` pointer से Objective‑C class को जांचें:
+```lldb
+(lldb) br se -n '-[NSFileManager fileExistsAtPath:]'
+(lldb) r
+... breakpoint hit ...
+(lldb) po (id)$x0                 # self
+(lldb) expr -l objc++ -O -- (Class)object_getClass((id)$x0)
+```
+- उन सेक्शनों को डंप करें जो Objective‑C मेटाडेटा रखते हैं (नोट: कई अब `__DATA_CONST` / `__AUTH_CONST` में हैं):
+```lldb
+(lldb) image dump section --section __DATA_CONST.__objc_classlist
+(lldb) image dump section --section __DATA_CONST.__objc_selrefs
+(lldb) image dump section --section __AUTH_CONST.__auth_got
+```
+- एक ज्ञात class object की memory पढ़ें ताकि method lists को reversing करते समय `class_ro_t` / `class_rw_t` पर pivot कर सकें:
+```lldb
+(lldb) image lookup -r -n _OBJC_CLASS_$_NSFileManager
+(lldb) memory read -fx -s8 0xADDRESS_OF_CLASS_OBJECT
+```
+### Frida (Objective‑C and Swift)
+
+Frida उच्च‑स्तरीय runtime bridges प्रदान करता है जो बिना symbols के लाइव ऑब्जेक्ट्स को खोजने और instrument करने के लिए बहुत उपयोगी हैं:
+
+- क्लास और मेथड्स को सूचीबद्ध करना, रनटाइम पर वास्तविक क्लास नामों का पता लगाना, और Objective‑C selectors को इंटरसेप्ट करना:
+```js
+if (ObjC.available) {
+// List a class' methods
+console.log(ObjC.classes.NSFileManager.$ownMethods);
+
+// Intercept and inspect arguments/return values
+const impl = ObjC.classes.NSFileManager['- fileExistsAtPath:isDirectory:'].implementation;
+Interceptor.attach(impl, {
+onEnter(args) {
+this.path = new ObjC.Object(args[2]).toString();
+},
+onLeave(retval) {
+console.log('fileExistsAtPath:', this.path, '=>', retval);
+}
+});
+}
+```
+- Swift bridge: Swift प्रकारों की सूची बनाएं और Swift instances के साथ इंटरैक्ट करें (हाल के Frida की आवश्यकता; Apple Silicon लक्षित सिस्टम पर बहुत उपयोगी)।
+
+---
+
+## संदर्भ
+
+- Clang/LLVM: Pointer Authentication and the `<ptrauth.h>` intrinsics (arm64e ABI). https://clang.llvm.org/docs/PointerAuthentication.html
+- Apple objc runtime headers (tagged pointers, non‑pointer `isa`, etc.) e.g., `objc-object.h`. https://opensource.apple.com/source/objc4/objc4-818.2/runtime/objc-object.h.auto.html
 
 {{#include ../../../banners/hacktricks-training.md}}
