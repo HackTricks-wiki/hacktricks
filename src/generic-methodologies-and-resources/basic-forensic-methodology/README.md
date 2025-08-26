@@ -1,79 +1,172 @@
-# Podstawowa Metodologia Kryminalistyczna
+# Podstawowa metodologia informatyki śledczej
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Tworzenie i Montowanie Obrazu
+## Tworzenie i montowanie obrazu
+
 
 {{#ref}}
 ../../generic-methodologies-and-resources/basic-forensic-methodology/image-acquisition-and-mount.md
 {{#endref}}
 
-## Analiza Złośliwego Oprogramowania
+## Malware Analysis
 
-To **nie jest koniecznie pierwszy krok do wykonania, gdy masz obraz**. Ale możesz używać tych technik analizy złośliwego oprogramowania niezależnie, jeśli masz plik, obraz systemu plików, obraz pamięci, pcap... więc dobrze jest **mieć te działania na uwadze**:
+To **niekoniecznie jest pierwszy krok do wykonania po otrzymaniu obrazu**. Jednak możesz używać tych technik analizy malware niezależnie, jeśli masz plik, obraz systemu plików, obraz pamięci, pcap... więc warto **mieć te działania na uwadze**:
+
 
 {{#ref}}
 malware-analysis.md
 {{#endref}}
 
-## Inspekcja Obrazu
+## Analiza obrazu
 
-Jeśli otrzymasz **obraz kryminalistyczny** urządzenia, możesz zacząć **analizować partycje, system plików** używany i **odzyskiwać** potencjalnie **interesujące pliki** (nawet usunięte). Dowiedz się jak w:
+Jeśli otrzymasz **obraz forensyczny** urządzenia, możesz rozpocząć **analizę partycji i używanego systemu plików** oraz **odzyskiwanie** potencjalnie **interesujących plików** (nawet usuniętych). Dowiedz się jak w:
+
+
+{{#ref}}
+partitions-file-systems-carving/
+{{#endref}}# Podstawowa metodologia informatyki śledczej
+
+
+
+## Tworzenie i montowanie obrazu
+
+
+{{#ref}}
+../../generic-methodologies-and-resources/basic-forensic-methodology/image-acquisition-and-mount.md
+{{#endref}}
+
+## Malware Analysis
+
+To **niekoniecznie jest pierwszy krok do wykonania po otrzymaniu obrazu**. Jednak możesz używać tych technik analizy malware niezależnie, jeśli masz plik, obraz systemu plików, obraz pamięci, pcap... więc warto **mieć te działania na uwadze**:
+
+
+{{#ref}}
+malware-analysis.md
+{{#endref}}
+
+## Analiza obrazu
+
+Jeśli otrzymasz **obraz forensyczny** urządzenia, możesz rozpocząć **analizę partycji i używanego systemu plików** oraz **odzyskiwanie** potencjalnie **interesujących plików** (nawet usuniętych). Dowiedz się jak w:
+
 
 {{#ref}}
 partitions-file-systems-carving/
 {{#endref}}
 
-W zależności od używanych systemów operacyjnych, a nawet platform, należy szukać różnych interesujących artefaktów:
+W zależności od używanych systemów operacyjnych i platform, należy szukać różnych potencjalnie interesujących artefaktów:
+
 
 {{#ref}}
 windows-forensics/
 {{#endref}}
 
+
 {{#ref}}
 linux-forensics.md
 {{#endref}}
+
 
 {{#ref}}
 docker-forensics.md
 {{#endref}}
 
-## Głęboka inspekcja specyficznych typów plików i oprogramowania
 
-Jeśli masz bardzo **podejrzany** **plik**, to **w zależności od typu pliku i oprogramowania**, które go stworzyło, kilka **sztuczek** może być przydatnych.\
-Przeczytaj następującą stronę, aby poznać kilka interesujących sztuczek:
+{{#ref}}
+ios-backup-forensics.md
+{{#endref}}
+
+## Szczegółowa analiza konkretnych typów plików i oprogramowania
+
+Jeśli masz bardzo **podejrzany** **plik**, to **w zależności od typu pliku i oprogramowania**, które go stworzyło, przydatnych może być kilka **sztuczek**.\
+Przeczytaj następującą stronę, aby poznać kilka ciekawych trików:
+
 
 {{#ref}}
 specific-software-file-type-tricks/
 {{#endref}}
 
-Chcę szczególnie wspomnieć o stronie:
+Chcę szczególnie wskazać stronę:
+
 
 {{#ref}}
 specific-software-file-type-tricks/browser-artifacts.md
 {{#endref}}
 
-## Inspekcja Zrzutu Pamięci
+## Analiza zrzutu pamięci
+
 
 {{#ref}}
 memory-dump-analysis/
 {{#endref}}
 
-## Inspekcja Pcap
+## Analiza pcap
+
 
 {{#ref}}
 pcap-inspection/
 {{#endref}}
 
-## **Techniki Anty-Kryminalistyczne**
+## **Techniki anty-forensyczne**
 
-Pamiętaj o możliwym użyciu technik anty-kryminalistycznych:
+Miej na uwadze możliwe użycie technik anty-forensycznych:
+
 
 {{#ref}}
 anti-forensic-techniques.md
 {{#endref}}
 
-## Polowanie na Zagrożenia
+## Threat Hunting
+
+
+{{#ref}}
+file-integrity-monitoring.md
+{{#endref}}
+
+
+
+## Szczegółowa analiza konkretnych typów plików i oprogramowania
+
+Jeśli masz bardzo **podejrzany** **plik**, to **w zależności od typu pliku i oprogramowania**, które go stworzyło, przydatnych może być kilka **sztuczek**.\
+Przeczytaj następującą stronę, aby poznać kilka ciekawych trików:
+
+
+{{#ref}}
+specific-software-file-type-tricks/
+{{#endref}}
+
+Chcę szczególnie wskazać stronę:
+
+
+{{#ref}}
+specific-software-file-type-tricks/browser-artifacts.md
+{{#endref}}
+
+## Analiza zrzutu pamięci
+
+
+{{#ref}}
+memory-dump-analysis/
+{{#endref}}
+
+## Analiza pcap
+
+
+{{#ref}}
+pcap-inspection/
+{{#endref}}
+
+## **Techniki anty-forensyczne**
+
+Miej na uwadze możliwe użycie technik anty-forensycznych:
+
+
+{{#ref}}
+anti-forensic-techniques.md
+{{#endref}}
+
+## Threat Hunting
+
 
 {{#ref}}
 file-integrity-monitoring.md

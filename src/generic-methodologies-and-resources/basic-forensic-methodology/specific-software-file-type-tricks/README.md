@@ -1,8 +1,8 @@
-# Sztuczki dotyczące konkretnych typów plików/oprogramowania
+# Specyficzne sztuczki dla oprogramowania i typów plików
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Tutaj znajdziesz interesujące sztuczki dotyczące konkretnych typów plików i/lub oprogramowania:
+Poniżej znajdziesz interesujące sztuczki dotyczące konkretnych typów plików i/lub oprogramowania:
 
 
 {{#ref}}
@@ -32,6 +32,11 @@ office-file-analysis.md
 
 {{#ref}}
 pdf-file-analysis.md
+{{#endref}}
+
+
+{{#ref}}
+structural-file-format-exploit-detection.md
 {{#endref}}
 
 
