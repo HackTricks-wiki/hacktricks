@@ -1,8 +1,8 @@
-# Specifične trikovi za softver/tipove datoteka
+# Trikovi za specifičan softver/format fajla
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Ovde možete pronaći zanimljive trikove za specifične tipove datoteka i/ili softver:
+Ovde možete pronaći zanimljive trikove za specifične tipove fajlova i/ili softver:
 
 
 {{#ref}}
@@ -32,6 +32,11 @@ office-file-analysis.md
 
 {{#ref}}
 pdf-file-analysis.md
+{{#endref}}
+
+
+{{#ref}}
+structural-file-format-exploit-detection.md
 {{#endref}}
 
 

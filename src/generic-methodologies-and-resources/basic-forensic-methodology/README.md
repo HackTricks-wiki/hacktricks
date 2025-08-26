@@ -1,79 +1,172 @@
-# Osnovna Forenzička Metodologija
+# Osnovna forenzička metodologija
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Kreiranje i Montiranje Slike
+## Kreiranje i montiranje image-a
+
 
 {{#ref}}
 ../../generic-methodologies-and-resources/basic-forensic-methodology/image-acquisition-and-mount.md
 {{#endref}}
 
-## Analiza Malvera
+## Malware analiza
 
-Ovo **nije nužno prvi korak koji treba preduzeti kada imate sliku**. Ali možete koristiti ove tehnike analize malvera nezavisno ako imate datoteku, sliku datotečnog sistema, sliku memorije, pcap... tako da je dobro **imati ove akcije na umu**:
+Ovo **nije nužno prvi korak koji treba uraditi nakon što imate image**. Ali ove Malware analysis tehnike možete koristiti nezavisno ako imate file, file-system image, memory image, pcap... zato je dobro **imati ove radnje na umu**:
+
 
 {{#ref}}
 malware-analysis.md
 {{#endref}}
 
-## Istraživanje Slike
+## Inspekcija image-a
 
-Ako dobijete **forenzičku sliku** uređaja, možete početi **analizirati particije, datotečni sistem** koji se koristi i **opraviti** potencijalno **zanimljive datoteke** (čak i obrisane). Saznajte kako u:
+Ako vam je dat **forensic image** uređaja, možete početi **analizu particija, file-system** koji je korišćen i **oporavak** potencijalno **interesantnih file-ova** (čak i obrisanih). Saznajte kako u:
+
+
+{{#ref}}
+partitions-file-systems-carving/
+{{#endref}}# Osnovna forenzička metodologija
+
+
+
+## Kreiranje i montiranje image-a
+
+
+{{#ref}}
+../../generic-methodologies-and-resources/basic-forensic-methodology/image-acquisition-and-mount.md
+{{#endref}}
+
+## Malware analiza
+
+Ovo **nije nužno prvi korak koji treba uraditi nakon što imate image**. Ali ove Malware analysis tehnike možete koristiti nezavisno ako imate file, file-system image, memory image, pcap... zato je dobro **imati ove radnje na umu**:
+
+
+{{#ref}}
+malware-analysis.md
+{{#endref}}
+
+## Inspekcija image-a
+
+Ako vam je dat **forensic image** uređaja, možete početi **analizu particija, file-system** koji je korišćen i **oporavak** potencijalno **interesantnih file-ova** (čak i obrisanih). Saznajte kako u:
+
 
 {{#ref}}
 partitions-file-systems-carving/
 {{#endref}}
 
-U zavisnosti od korišćenih OS-ova i čak platformi, različiti zanimljivi artefakti treba da se pretražuju:
+U zavisnosti od korišćenih OSs pa čak i platforme, treba tražiti različite interesantne artefakte:
+
 
 {{#ref}}
 windows-forensics/
 {{#endref}}
 
+
 {{#ref}}
 linux-forensics.md
 {{#endref}}
+
 
 {{#ref}}
 docker-forensics.md
 {{#endref}}
 
-## Dubinska Inspekcija Specifičnih Tipova Datoteka i Softvera
 
-Ako imate veoma **sumnjivu** **datoteku**, onda **u zavisnosti od tipa datoteke i softvera** koji je kreirao, nekoliko **trikova** može biti korisno.\
-Pročitajte sledeću stranicu da biste saznali neke zanimljive trikove:
+{{#ref}}
+ios-backup-forensics.md
+{{#endref}}
+
+## Dubinska inspekcija specifičnih tipova file-ova i softvera
+
+Ako imate veoma **sumnjiv** **file**, onda **u zavisnosti od file-type i softvera** koji ga je kreirao, nekoliko **trikova** može biti korisno.\
+Pročitajte sledeću stranicu da naučite neke interesantne trikove:
+
 
 {{#ref}}
 specific-software-file-type-tricks/
 {{#endref}}
 
-Želim da posebno pomenem stranicu:
+Želim posebno pomenuti stranicu:
+
 
 {{#ref}}
 specific-software-file-type-tricks/browser-artifacts.md
 {{#endref}}
 
-## Inspekcija Dump-a Memorije
+## Inspekcija Memory Dump-a
+
 
 {{#ref}}
 memory-dump-analysis/
 {{#endref}}
 
-## Inspekcija Pcap-a
+## Inspekcija pcap-a
+
 
 {{#ref}}
 pcap-inspection/
 {{#endref}}
 
-## **Anti-Forenzičke Tehnike**
+## **Anti-Forensic Techniques**
 
-Imajte na umu moguću upotrebu anti-forenzičkih tehnika:
+Imajte na umu mogućnost upotrebe anti-forensic tehnika:
+
 
 {{#ref}}
 anti-forensic-techniques.md
 {{#endref}}
 
-## Lov na Pretnje
+## Threat Hunting
+
+
+{{#ref}}
+file-integrity-monitoring.md
+{{#endref}}
+
+
+
+## Dubinska inspekcija specifičnih tipova file-ova i softvera
+
+Ako imate veoma **sumnjiv** **file**, onda **u zavisnosti od file-type i softvera** koji ga je kreirao, nekoliko **trikova** može biti korisno.\
+Pročitajte sledeću stranicu da naučite neke interesantne trikove:
+
+
+{{#ref}}
+specific-software-file-type-tricks/
+{{#endref}}
+
+Želim posebno pomenuti stranicu:
+
+
+{{#ref}}
+specific-software-file-type-tricks/browser-artifacts.md
+{{#endref}}
+
+## Inspekcija Memory Dump-a
+
+
+{{#ref}}
+memory-dump-analysis/
+{{#endref}}
+
+## Inspekcija pcap-a
+
+
+{{#ref}}
+pcap-inspection/
+{{#endref}}
+
+## **Anti-Forensic Techniques**
+
+Imajte na umu mogućnost upotrebe anti-forensic tehnika:
+
+
+{{#ref}}
+anti-forensic-techniques.md
+{{#endref}}
+
+## Threat Hunting
+
 
 {{#ref}}
 file-integrity-monitoring.md
