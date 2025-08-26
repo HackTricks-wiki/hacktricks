@@ -1,4 +1,4 @@
-# बेसिक फॉरेंसिक मेथोडोलॉजी
+# बेसिक फॉरेंसिक कार्यप्रणाली
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -9,9 +9,9 @@
 ../../generic-methodologies-and-resources/basic-forensic-methodology/image-acquisition-and-mount.md
 {{#endref}}
 
-## मैलवेयर विश्लेषण
+## Malware Analysis
 
-यह **छवि प्राप्त करने के बाद करने के लिए पहला कदम जरूरी नहीं है**। लेकिन आप इस मैलवेयर विश्लेषण तकनीकों का स्वतंत्र रूप से उपयोग कर सकते हैं यदि आपके पास एक फ़ाइल, फ़ाइल-प्रणाली छवि, मेमोरी छवि, pcap... है, इसलिए यह **इन क्रियाओं को ध्यान में रखना अच्छा है**:
+यह **जरूरी नहीं कि यह इमेज मिलने के बाद करने वाला पहला कदम हो**। लेकिन आप इन malware analysis techniques को स्वतंत्र रूप से उपयोग कर सकते हैं अगर आपके पास कोई file, file-system image, memory image, pcap... हो, इसलिए इन क्रियाओं को **ध्यान में रखना** अच्छा है:
 
 
 {{#ref}}
@@ -20,14 +20,41 @@ malware-analysis.md
 
 ## इमेज का निरीक्षण
 
-यदि आपको एक **फॉरेंसिक इमेज** दी गई है, तो आप **पार्टीशनों, फ़ाइल-प्रणाली** का विश्लेषण करना शुरू कर सकते हैं और संभावित **दिलचस्प फ़ाइलों** (यहां तक कि हटाई गई) को **पुनर्प्राप्त** कर सकते हैं। जानें कैसे:
+यदि आपको किसी डिवाइस की **forensic image** दी गई है तो आप उपयोग किए गए **partitions, file-system** का विश्लेषण शुरू कर सकते हैं और संभावित रूप से **interesting files** (यहाँ तक कि deleted ones) को **recover** कर सकते हैं। यह सीखें:
+
+
+{{#ref}}
+partitions-file-systems-carving/
+{{#endref}}# बेसिक फॉरेंसिक कार्यप्रणाली
+
+
+
+## इमेज बनाना और माउंट करना
+
+
+{{#ref}}
+../../generic-methodologies-and-resources/basic-forensic-methodology/image-acquisition-and-mount.md
+{{#endref}}
+
+## Malware Analysis
+
+यह **जरूरी नहीं कि यह इमेज मिलने के बाद करने वाला पहला कदम हो**। लेकिन आप इन malware analysis techniques को स्वतंत्र रूप से उपयोग कर सकते हैं अगर आपके पास कोई file, file-system image, memory image, pcap... हो, इसलिए इन क्रियाओं को **ध्यान में रखना** अच्छा है:
+
+
+{{#ref}}
+malware-analysis.md
+{{#endref}}
+
+## इमेज का निरीक्षण
+
+यदि आपको किसी डिवाइस की **forensic image** दी गई है तो आप उपयोग किए गए **partitions, file-system** का विश्लेषण शुरू कर सकते हैं और संभावित रूप से **interesting files** (यहाँ तक कि deleted ones) को **recover** कर सकते हैं। यह सीखें:
 
 
 {{#ref}}
 partitions-file-systems-carving/
 {{#endref}}
 
-उपयोग किए गए OSs और यहां तक कि प्लेटफ़ॉर्म के आधार पर विभिन्न दिलचस्प कलाकृतियों की खोज की जानी चाहिए:
+उपयोग किए गए OSs और प्लेटफ़ॉर्म के अनुसार अलग-अलग रोचक artifacts खोजे जाने चाहिए:
 
 
 {{#ref}}
@@ -44,47 +71,101 @@ linux-forensics.md
 docker-forensics.md
 {{#endref}}
 
-## विशिष्ट फ़ाइल-प्रकारों और सॉफ़्टवेयर की गहरी जांच
 
-यदि आपके पास बहुत **संदिग्ध** **फ़ाइल** है, तो **फ़ाइल-प्रकार और सॉफ़्टवेयर** के आधार पर जो इसे बनाया है, कई **तरकीबें** उपयोगी हो सकती हैं।\
-कुछ दिलचस्प तरकीबें जानने के लिए निम्नलिखित पृष्ठ पढ़ें:
+{{#ref}}
+ios-backup-forensics.md
+{{#endref}}
+
+## विशिष्ट फाइल-प्रकार और सॉफ़्टवेयर का गहरा निरीक्षण
+
+यदि आपके पास बहुत ही **suspicious** **file** है, तो इसे बनाने वाले **file-type और software** के आधार पर कई **tricks** उपयोगी हो सकते हैं।\
+कुछ रोचक tricks सीखने के लिए निम्न पृष्ठ पढ़ें:
 
 
 {{#ref}}
 specific-software-file-type-tricks/
 {{#endref}}
 
-मैं पृष्ठ का विशेष उल्लेख करना चाहता हूं:
+मैं विशेष रूप से इस पृष्ठ का उल्लेख करना चाहूँगा:
 
 
 {{#ref}}
 specific-software-file-type-tricks/browser-artifacts.md
 {{#endref}}
 
-## मेमोरी डंप निरीक्षण
+## Memory Dump Inspection
 
 
 {{#ref}}
 memory-dump-analysis/
 {{#endref}}
 
-## Pcap निरीक्षण
+## Pcap Inspection
 
 
 {{#ref}}
 pcap-inspection/
 {{#endref}}
 
-## **एंटी-फॉरेंसिक तकनीकें**
+## **Anti-Forensic Techniques**
 
-एंटी-फॉरेंसिक तकनीकों के संभावित उपयोग को ध्यान में रखें:
+anti-forensic techniques के संभावित उपयोग को ध्यान में रखें:
 
 
 {{#ref}}
 anti-forensic-techniques.md
 {{#endref}}
 
-## खतरे की खोज
+## Threat Hunting
+
+
+{{#ref}}
+file-integrity-monitoring.md
+{{#endref}}
+
+
+
+## विशिष्ट फाइल-प्रकार और सॉफ़्टवेयर का गहरा निरीक्षण
+
+यदि आपके पास बहुत ही **suspicious** **file** है, तो इसे बनाने वाले **file-type और software** के आधार पर कई **tricks** उपयोगी हो सकते हैं।\
+कुछ रोचक tricks सीखने के लिए निम्न पृष्ठ पढ़ें:
+
+
+{{#ref}}
+specific-software-file-type-tricks/
+{{#endref}}
+
+मैं विशेष रूप से इस पृष्ठ का उल्लेख करना चाहूँगा:
+
+
+{{#ref}}
+specific-software-file-type-tricks/browser-artifacts.md
+{{#endref}}
+
+## Memory Dump Inspection
+
+
+{{#ref}}
+memory-dump-analysis/
+{{#endref}}
+
+## Pcap Inspection
+
+
+{{#ref}}
+pcap-inspection/
+{{#endref}}
+
+## **Anti-Forensic Techniques**
+
+anti-forensic techniques के संभावित उपयोग को ध्यान में रखें:
+
+
+{{#ref}}
+anti-forensic-techniques.md
+{{#endref}}
+
+## Threat Hunting
 
 
 {{#ref}}

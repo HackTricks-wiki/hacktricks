@@ -1,8 +1,8 @@
-# विशिष्ट सॉफ़्टवेयर/फाइल प्रकार के ट्रिक्स
+# विशिष्ट सॉफ़्टवेयर/फ़ाइल प्रकार युक्तियाँ
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-यहाँ आप विशिष्ट फाइल-प्रकारों और/या सॉफ़्टवेयर के लिए दिलचस्प ट्रिक्स पा सकते हैं:
+यहाँ आप विशिष्ट फ़ाइल-प्रकार और/या सॉफ़्टवेयर के लिए रोचक ट्रिक्स पा सकते हैं:
 
 
 {{#ref}}
@@ -32,6 +32,11 @@ office-file-analysis.md
 
 {{#ref}}
 pdf-file-analysis.md
+{{#endref}}
+
+
+{{#ref}}
+structural-file-format-exploit-detection.md
 {{#endref}}
 
 
