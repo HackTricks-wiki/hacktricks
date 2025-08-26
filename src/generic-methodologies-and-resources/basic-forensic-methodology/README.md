@@ -9,9 +9,9 @@
 ../../generic-methodologies-and-resources/basic-forensic-methodology/image-acquisition-and-mount.md
 {{#endref}}
 
-## Analisi Malware
+## Analisi del Malware
 
-Questo **non è necessariamente il primo passo da eseguire una volta che hai l'immagine**. Però puoi usare queste tecniche di malware analysis in modo indipendente se hai un file, un file-system image, memory image, pcap... quindi è bene **tenere a mente queste azioni**:
+Questo **non è necessariamente il primo passo da eseguire una volta ottenuta l'immagine**. Ma puoi usare queste tecniche di analisi del malware in modo indipendente se hai un file, un'immagine del file-system, un'immagine di memoria, pcap... quindi è utile **tenere queste azioni a mente**:
 
 
 {{#ref}}
@@ -20,7 +20,7 @@ malware-analysis.md
 
 ## Ispezione di un'Immagine
 
-Se ti viene fornita un'**immagine forense** di un dispositivo puoi iniziare a **analizzare le partizioni, il file-system** usato e **recuperare** potenzialmente **file interessanti** (anche eliminati). Scopri come in:
+Se ti viene fornita un'**immagine forense** di un dispositivo puoi iniziare a **analizzare le partizioni, il file-system** usato e **recuperare** potenzialmente **file interessanti** (anche cancellati). Impara come in:
 
 
 {{#ref}}
@@ -36,9 +36,9 @@ partitions-file-systems-carving/
 ../../generic-methodologies-and-resources/basic-forensic-methodology/image-acquisition-and-mount.md
 {{#endref}}
 
-## Analisi Malware
+## Analisi del Malware
 
-Questo **non è necessariamente il primo passo da eseguire una volta che hai l'immagine**. Però puoi usare queste tecniche di malware analysis in modo indipendente se hai un file, un file-system image, memory image, pcap... quindi è bene **tenere a mente queste azioni**:
+Questo **non è necessariamente il primo passo da eseguire una volta ottenuta l'immagine**. Ma puoi usare queste tecniche di analisi del malware in modo indipendente se hai un file, un'immagine del file-system, un'immagine di memoria, pcap... quindi è utile **tenere queste azioni a mente**:
 
 
 {{#ref}}
@@ -47,14 +47,14 @@ malware-analysis.md
 
 ## Ispezione di un'Immagine
 
-Se ti viene fornita un'**immagine forense** di un dispositivo puoi iniziare a **analizzare le partizioni, il file-system** usato e **recuperare** potenzialmente **file interessanti** (anche eliminati). Scopri come in:
+Se ti viene fornita un'**immagine forense** di un dispositivo puoi iniziare a **analizzare le partizioni, il file-system** usato e **recuperare** potenzialmente **file interessanti** (anche cancellati). Impara come in:
 
 
 {{#ref}}
 partitions-file-systems-carving/
 {{#endref}}
 
-A seconda dei sistemi operativi e della piattaforma usati, dovrebbero essere ricercati diversi artefatti interessanti:
+A seconda degli OS e della piattaforma utilizzata, vanno cercati diversi artefatti interessanti:
 
 
 {{#ref}}
@@ -78,38 +78,38 @@ ios-backup-forensics.md
 
 ## Ispezione approfondita di tipi di file e Software specifici
 
-Se hai un file molto **sospetto**, allora **a seconda del file-type e del software** che lo ha creato, possono essere utili diversi **trucchi**.\
-Leggi la pagina seguente per apprendere alcuni trucchi interessanti:
+Se hai un file molto **sospetto**, allora **a seconda del tipo di file e del software** che lo ha creato diversi **trucchi** possono essere utili.\
+Leggi la pagina seguente per imparare alcuni trucchi interessanti:
 
 
 {{#ref}}
 specific-software-file-type-tricks/
-{{#endref}
+{{#endref}}
 
-Voglio fare una menzione speciale alla pagina:
+Faccio una menzione speciale alla pagina:
 
 
 {{#ref}}
 specific-software-file-type-tricks/browser-artifacts.md
 {{#endref}}
 
-## Ispezione del memory dump
+## Ispezione del Memory Dump
 
 
 {{#ref}}
 memory-dump-analysis/
 {{#endref}}
 
-## Ispezione di pcap
+## Ispezione del Pcap
 
 
 {{#ref}}
 pcap-inspection/
 {{#endref}}
 
-## **Tecniche anti-forensi**
+## **Tecniche Anti-Forensi**
 
-Tieni presente il possibile uso di tecniche anti-forensi:
+Tieni presente l'eventuale uso di tecniche anti-forensi:
 
 
 {{#ref}}
@@ -127,38 +127,38 @@ file-integrity-monitoring.md
 
 ## Ispezione approfondita di tipi di file e Software specifici
 
-Se hai un file molto **sospetto**, allora **a seconda del file-type e del software** che lo ha creato, possono essere utili diversi **trucchi**.\
-Leggi la pagina seguente per apprendere alcuni trucchi interessanti:
+Se hai un file molto **sospetto**, allora **a seconda del tipo di file e del software** che lo ha creato diversi **trucchi** possono essere utili.\
+Leggi la pagina seguente per imparare alcuni trucchi interessanti:
 
 
 {{#ref}}
 specific-software-file-type-tricks/
 {{#endref}}
 
-Voglio fare una menzione speciale alla pagina:
+Faccio una menzione speciale alla pagina:
 
 
 {{#ref}}
 specific-software-file-type-tricks/browser-artifacts.md
 {{#endref}}
 
-## Ispezione del memory dump
+## Ispezione del Memory Dump
 
 
 {{#ref}}
 memory-dump-analysis/
 {{#endref}}
 
-## Ispezione di pcap
+## Ispezione del Pcap
 
 
 {{#ref}}
 pcap-inspection/
 {{#endref}}
 
-## **Tecniche anti-forensi**
+## **Tecniche Anti-Forensi**
 
-Tieni presente il possibile uso di tecniche anti-forensi:
+Tieni presente l'eventuale uso di tecniche anti-forensi:
 
 
 {{#ref}}
