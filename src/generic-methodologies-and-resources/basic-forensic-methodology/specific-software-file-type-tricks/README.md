@@ -1,4 +1,4 @@
-# Truques Específicos de Software/Tipo de Arquivo
+# Truques Específicos de Software/Tipos de Arquivo
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -32,6 +32,11 @@ office-file-analysis.md
 
 {{#ref}}
 pdf-file-analysis.md
+{{#endref}}
+
+
+{{#ref}}
+structural-file-format-exploit-detection.md
 {{#endref}}
 
 
