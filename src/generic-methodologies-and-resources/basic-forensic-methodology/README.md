@@ -1,8 +1,9 @@
-# Grundlegende forensische Methodik
+# Grundlegende Forensik-Methodik
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Erstellen und Einbinden eines Images
+
 
 {{#ref}}
 ../../generic-methodologies-and-resources/basic-forensic-methodology/image-acquisition-and-mount.md
@@ -10,70 +11,163 @@
 
 ## Malware-Analyse
 
-Dies **ist nicht unbedingt der erste Schritt, den Sie ausführen sollten, sobald Sie das Image haben**. Aber Sie können diese Malware-Analyse-Techniken unabhängig verwenden, wenn Sie eine Datei, ein Dateisystem-Image, ein Speicher-Image, pcap... haben, also ist es gut, **diese Aktionen im Hinterkopf zu behalten**:
+Dies **muss nicht unbedingt der erste Schritt sein, nachdem du das Image erhalten hast**. Aber du kannst diese Malware-Analyse-Techniken unabhängig verwenden, wenn du eine Datei, ein Dateisystem-Image, Memory-Image, pcap ... hast, daher ist es gut, diese Aktionen **im Hinterkopf zu behalten**:
+
 
 {{#ref}}
 malware-analysis.md
 {{#endref}}
 
-## Überprüfung eines Images
+## Untersuchung eines Images
 
-Wenn Ihnen ein **forensisches Image** eines Geräts gegeben wird, können Sie beginnen, **die Partitionen, das verwendete Dateisystem** zu **analysieren** und potenziell **interessante Dateien** (sogar gelöschte) **wiederherzustellen**. Erfahren Sie, wie in:
+Wenn dir ein **forensisches Image** eines Geräts gegeben wird, kannst du mit dem **Analysieren der Partitionen und des Dateisystems** beginnen und potenziell **interessante Dateien** (auch gelöschte) **wiederherstellen**. Erfahre wie in:
+
+
+{{#ref}}
+partitions-file-systems-carving/
+{{#endref}}# Grundlegende Forensik-Methodik
+
+
+
+## Erstellen und Einbinden eines Images
+
+
+{{#ref}}
+../../generic-methodologies-and-resources/basic-forensic-methodology/image-acquisition-and-mount.md
+{{#endref}}
+
+## Malware-Analyse
+
+Dies **muss nicht unbedingt der erste Schritt sein, nachdem du das Image erhalten hast**. Aber du kannst diese Malware-Analyse-Techniken unabhängig verwenden, wenn du eine Datei, ein Dateisystem-Image, Memory-Image, pcap ... hast, daher ist es gut, diese Aktionen **im Hinterkopf zu behalten**:
+
+
+{{#ref}}
+malware-analysis.md
+{{#endref}}
+
+## Untersuchung eines Images
+
+Wenn dir ein **forensisches Image** eines Geräts gegeben wird, kannst du mit dem **Analysieren der Partitionen und des Dateisystems** beginnen und potenziell **interessante Dateien** (auch gelöschte) **wiederherstellen**. Erfahre wie in:
+
 
 {{#ref}}
 partitions-file-systems-carving/
 {{#endref}}
 
-Je nach den verwendeten Betriebssystemen und sogar Plattformen sollten verschiedene interessante Artefakte gesucht werden:
+Je nach verwendetem Betriebssystem und sogar Plattform sollten unterschiedliche interessante Artefakte gesucht werden:
+
 
 {{#ref}}
 windows-forensics/
 {{#endref}}
 
+
 {{#ref}}
 linux-forensics.md
 {{#endref}}
+
 
 {{#ref}}
 docker-forensics.md
 {{#endref}}
 
-## Tiefeninspektion spezifischer Dateitypen und Software
 
-Wenn Sie eine sehr **verdächtige** **Datei** haben, dann können **je nach Dateityp und Software**, die sie erstellt hat, mehrere **Tricks** nützlich sein.\
-Lesen Sie die folgende Seite, um einige interessante Tricks zu lernen:
+{{#ref}}
+ios-backup-forensics.md
+{{#endref}}
+
+## Tiefergehende Untersuchung bestimmter Dateitypen und Software
+
+Wenn du eine sehr **verdächtige** **Datei** hast, können je nach **Dateityp und der Software**, die sie erstellt hat, verschiedene **Tricks** nützlich sein.\
+Lies die folgende Seite, um einige interessante Tricks zu lernen:
+
 
 {{#ref}}
 specific-software-file-type-tricks/
 {{#endref}}
 
-Ich möchte die Seite besonders erwähnen:
+Ich möchte die folgende Seite besonders hervorheben:
+
 
 {{#ref}}
 specific-software-file-type-tricks/browser-artifacts.md
 {{#endref}}
 
-## Überprüfung von Speicher-Dumps
+## Memory-Dump-Analyse
+
 
 {{#ref}}
 memory-dump-analysis/
 {{#endref}}
 
-## Pcap-Überprüfung
+## Pcap-Analyse
+
 
 {{#ref}}
 pcap-inspection/
 {{#endref}}
 
-## **Anti-Forensische Techniken**
+## **Anti-forensische Techniken**
 
-Behalten Sie die mögliche Verwendung von anti-forensischen Techniken im Hinterkopf:
+Beachte die mögliche Verwendung von anti-forensischen Techniken:
+
 
 {{#ref}}
 anti-forensic-techniques.md
 {{#endref}}
 
-## Bedrohungsjagd
+## Threat Hunting
+
+
+{{#ref}}
+file-integrity-monitoring.md
+{{#endref}}
+
+
+
+
+## Tiefergehende Untersuchung bestimmter Dateitypen und Software
+
+Wenn du eine sehr **verdächtige** **Datei** hast, können je nach **Dateityp und der Software**, die sie erstellt hat, verschiedene **Tricks** nützlich sein.\
+Lies die folgende Seite, um einige interessante Tricks zu lernen:
+
+
+{{#ref}}
+specific-software-file-type-tricks/
+{{#endref}}
+
+Ich möchte die folgende Seite besonders hervorheben:
+
+
+{{#ref}}
+specific-software-file-type-tricks/browser-artifacts.md
+{{#endref}}
+
+## Memory-Dump-Analyse
+
+
+{{#ref}}
+memory-dump-analysis/
+{{#endref}}
+
+## Pcap-Analyse
+
+
+{{#ref}}
+pcap-inspection/
+{{#endref}}
+
+## **Anti-forensische Techniken**
+
+Beachte die mögliche Verwendung von anti-forensischen Techniken:
+
+
+{{#ref}}
+anti-forensic-techniques.md
+{{#endref}}
+
+## Threat Hunting
+
 
 {{#ref}}
 file-integrity-monitoring.md
