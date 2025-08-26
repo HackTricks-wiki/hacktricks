@@ -1,8 +1,8 @@
-# 특정 소프트웨어/파일 유형 트릭
+# 특정 소프트웨어/파일 형식 팁
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-여기에서 특정 파일 유형 및/또는 소프트웨어에 대한 흥미로운 트릭을 찾을 수 있습니다:
+여기에서는 특정 파일 형식 및/또는 소프트웨어에 대한 흥미로운 팁을 제공합니다:
 
 
 {{#ref}}
@@ -32,6 +32,11 @@ office-file-analysis.md
 
 {{#ref}}
 pdf-file-analysis.md
+{{#endref}}
+
+
+{{#ref}}
+structural-file-format-exploit-detection.md
 {{#endref}}
 
 
