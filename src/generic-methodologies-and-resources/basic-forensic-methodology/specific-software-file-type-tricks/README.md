@@ -1,8 +1,8 @@
-# Specific Software/File Type Tricks
+# Trucchi per Software/Tipi di File Specifici
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Qui puoi trovare trucchi interessanti per specifici tipi di file e/o software:
+Qui puoi trovare trucchi interessanti per tipi di file e/o software specifici:
 
 
 {{#ref}}
@@ -32,6 +32,11 @@ office-file-analysis.md
 
 {{#ref}}
 pdf-file-analysis.md
+{{#endref}}
+
+
+{{#ref}}
+structural-file-format-exploit-detection.md
 {{#endref}}
 
 
