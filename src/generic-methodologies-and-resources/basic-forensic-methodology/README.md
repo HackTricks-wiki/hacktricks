@@ -9,18 +9,18 @@
 ../../generic-methodologies-and-resources/basic-forensic-methodology/image-acquisition-and-mount.md
 {{#endref}}
 
-## Malware Analysis
+## Malware Analizi
 
-Bu **imajı elde ettikten sonra yapılması gereken ilk adım olmak zorunda değil**. Ancak bir dosyanız, bir dosya-sistemi imajı, bellek imajı, pcap... varsa bu malware analysis tekniklerini bağımsız olarak kullanabilirsiniz; bu yüzden bu eylemleri **akılda tutmak** iyidir:
+Bu, imaja sahip olduğunuzda yapılması gereken ilk adım olmak zorunda değildir. Ancak bir dosyanız, bir dosya-sistemi imajınız, bellek imajınız, pcap... varsa bu malware analiz tekniklerini bağımsız olarak kullanabilirsiniz; bu eylemleri aklınızda bulundurmak iyidir:
 
 
 {{#ref}}
 malware-analysis.md
 {{#endref}}
 
-## İmajı İnceleme
+## Bir İmajı İnceleme
 
-Eğer size bir cihazın **adli imajı** verildiyse, kullanılan **bölümleri, dosya sistemi**ni **analiz etmeye** ve potansiyel olarak **ilginç dosyaları** (hatta silinmiş olanları) **kurtarmaya** başlayabilirsiniz. Nasıl yapılacağını öğrenin:
+Eğer bir cihazın bir adli imajı size verildiyse, bölümleri, kullanılan dosya sistemini analiz etmeye ve potansiyel olarak ilginç dosyaları (silinmiş olanlar dahi) kurtarmaya başlayabilirsiniz. Nasıl yapılacağını şu sayfalarda öğrenin:
 
 
 {{#ref}}
@@ -36,25 +36,25 @@ partitions-file-systems-carving/
 ../../generic-methodologies-and-resources/basic-forensic-methodology/image-acquisition-and-mount.md
 {{#endref}}
 
-## Malware Analysis
+## Malware Analizi
 
-Bu **imajı elde ettikten sonra yapılması gereken ilk adım olmak zorunda değil**. Ancak bir dosyanız, bir dosya-sistemi imajı, bellek imajı, pcap... varsa bu malware analysis tekniklerini bağımsız olarak kullanabilirsiniz; bu yüzden bu eylemleri **akılda tutmak** iyidir:
+Bu, imaja sahip olduğunuzda yapılması gereken ilk adım olmak zorunda değildir. Ancak bir dosyanız, bir dosya-sistemi imajınız, bellek imajınız, pcap... varsa bu malware analiz tekniklerini bağımsız olarak kullanabilirsiniz; bu eylemleri aklınızda bulundurmak iyidir:
 
 
 {{#ref}}
 malware-analysis.md
 {{#endref}}
 
-## İmajı İnceleme
+## Bir İmajı İnceleme
 
-Eğer size bir cihazın **adli imajı** verildiyse, kullanılan **bölümleri, dosya sistemi**ni **analiz etmeye** ve potansiyel olarak **ilginç dosyaları** (hatta silinmiş olanları) **kurtarmaya** başlayabilirsiniz. Nasıl yapılacağını öğrenin:
+Eğer bir cihazın bir adli imajı size verildiyse, bölümleri, kullanılan dosya sistemini analiz etmeye ve potansiyel olarak ilginç dosyaları (silinmiş olanlar dahi) kurtarmaya başlayabilirsiniz. Nasıl yapılacağını şu sayfalarda öğrenin:
 
 
 {{#ref}}
 partitions-file-systems-carving/
 {{#endref}}
 
-Kullanılan işletim sistemlerine ve hatta platforma bağlı olarak farklı ilginç artefaktlar aranmalıdır:
+Kullanılan işletim sistemine ve hatta platforma bağlı olarak farklı ilginç artefaktlar aranmalıdır:
 
 
 {{#ref}}
@@ -76,17 +76,17 @@ docker-forensics.md
 ios-backup-forensics.md
 {{#endref}}
 
-## Belirli Dosya Türleri ve Yazılımların Derin İncelenmesi
+## Belirli dosya türleri ve yazılımların derin incelemesi
 
-Eğer çok **şüpheli** bir **dosyanız** varsa, onu oluşturan **dosya tipi ve yazılıma** bağlı olarak birkaç **püf noktası** faydalı olabilir.\
-Bazı ilginç püf noktalarını öğrenmek için aşağıdaki sayfayı okuyun:
+Eğer çok **şüpheli** bir **dosyanız** varsa, bu dosya türüne ve onu oluşturan yazılıma bağlı olarak çeşitli **püf noktaları** faydalı olabilir.\
+İlginç bazı yöntemleri öğrenmek için şu sayfayı okuyun:
 
 
 {{#ref}}
 specific-software-file-type-tricks/
 {{#endref}}
 
-Özellikle şu sayfaya değinmek istiyorum:
+Özellikle şu sayfayı vurgulamak istiyorum:
 
 
 {{#ref}}
@@ -107,69 +107,69 @@ memory-dump-analysis/
 pcap-inspection/
 {{#endref}}
 
-## **Anti-Adli Teknikler**
+## **Anti-Forensic Techniques**
 
-Anti-adli tekniklerin olası kullanımını aklınızda bulundurun:
+anti-forensic techniques kullanımını göz önünde bulundurun:
 
 
 {{#ref}}
 anti-forensic-techniques.md
-{{#endref}
+{{#endref}}
 
-## Tehdit Avcılığı
+## Threat Hunting
 
 
 {{#ref}}
 file-integrity-monitoring.md
-{{#endref}
+{{#endref}}
 
 
 
-## Belirli Dosya Türleri ve Yazılımların Derin İncelenmesi
+## Belirli dosya türleri ve yazılımların derin incelemesi
 
-Eğer çok **şüpheli** bir **dosyanız** varsa, onu oluşturan **dosya tipi ve yazılıma** bağlı olarak birkaç **püf noktası** faydalı olabilir.\
-Bazı ilginç püf noktalarını öğrenmek için aşağıdaki sayfayı okuyun:
+Eğer çok **şüpheli** bir **dosyanız** varsa, bu dosya türüne ve onu oluşturan yazılıma bağlı olarak çeşitli **püf noktaları** faydalı olabilir.\
+İlginç bazı yöntemleri öğrenmek için şu sayfayı okuyun:
 
 
 {{#ref}}
 specific-software-file-type-tricks/
 {{#endref}}
 
-Özellikle şu sayfaya değinmek istiyorum:
+Özellikle şu sayfayı vurgulamak istiyorum:
 
 
 {{#ref}}
 specific-software-file-type-tricks/browser-artifacts.md
-{{#endref}
+{{#endref}}
 
 ## Bellek Dökümü İncelemesi
 
 
 {{#ref}}
 memory-dump-analysis/
-{{#endref}
+{{#endref}}
 
 ## Pcap İncelemesi
 
 
 {{#ref}}
 pcap-inspection/
-{{#endref}
+{{#endref}}
 
-## **Anti-Adli Teknikler**
+## **Anti-Forensic Techniques**
 
-Anti-adli tekniklerin olası kullanımını aklınızda bulundurun:
+anti-forensic techniques kullanımını göz önünde bulundurun:
 
 
 {{#ref}}
 anti-forensic-techniques.md
-{{#endref}
+{{#endref}}
 
-## Tehdit Avcılığı
+## Threat Hunting
 
 
 {{#ref}}
 file-integrity-monitoring.md
-{{#endref}
+{{#endref}}
 
 {{#include ../../banners/hacktricks-training.md}}
