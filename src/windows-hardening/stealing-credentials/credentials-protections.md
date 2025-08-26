@@ -1,94 +1,150 @@
-# Windows Credentials Protections
+# Ulinzi wa Vifikisho vya Windows
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## WDigest
 
-Protokali ya [WDigest](<https://technet.microsoft.com/pt-pt/library/cc778868(v=ws.10).aspx?f=255&MSPPError=-2147217396>), iliyozinduliwa na Windows XP, imeundwa kwa ajili ya uthibitishaji kupitia Protokali ya HTTP na **imewezeshwa kwa default kwenye Windows XP hadi Windows 8.0 na Windows Server 2003 hadi Windows Server 2012**. Mpangilio huu wa default unapelekea **hifadhi ya nywila za maandiko wazi katika LSASS** (Local Security Authority Subsystem Service). Mshambuliaji anaweza kutumia Mimikatz ili **kuchota hizi akidi** kwa kutekeleza:
+Protocol ya [WDigest](<https://technet.microsoft.com/pt-pt/library/cc778868(v=ws.10).aspx?f=255&MSPPError=-2147217396>), iliyoanzishwa na Windows XP, imeundwa kwa ajili ya uthibitishaji kupitia HTTP Protocol na **imewezeshwa kwa chaguo-msingi kwenye Windows XP hadi Windows 8.0 na Windows Server 2003 hadi Windows Server 2012**. Mpangilio huu wa chaguo-msingi husababisha **plain-text password storage in LSASS** (Local Security Authority Subsystem Service). Mshambulizi anaweza kutumia Mimikatz ili **kutoa vifikisho hivi** kwa kukimbiza:
 ```bash
 sekurlsa::wdigest
 ```
-Ili **kuwasha au kuzima kipengele hiki**, funguo za rejista _**UseLogonCredential**_ na _**Negotiate**_ ndani ya _**HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\SecurityProviders\WDigest**_ lazima ziwe zimewekwa kuwa "1". Ikiwa funguo hizi **hazipo au zimewekwa kuwa "0"**, WDigest ime **zimwa**:
+Ili **kuzima au kuwasha kipengele hiki**, vifunguo vya rejista _**UseLogonCredential**_ na _**Negotiate**_ ndani ya _**HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\SecurityProviders\WDigest**_ lazima viwe vimewekwa kuwa "1". Ikiwa vifunguo hivi **havipo au vimewekwa kuwa "0"**, WDigest **imezimwa**:
 ```bash
 reg query HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest /v UseLogonCredential
 ```
-## LSA Protection (PP & PPL protected processes)
+## LSA Ulinzi (PP & PPL protected processes)
 
-**Protected Process (PP)** na **Protected Process Light (PPL)** ni **ulinzi wa kiwango cha kernel cha Windows** ulioanzishwa ili kuzuia ufikiaji usioidhinishwa kwa michakato nyeti kama **LSASS**. Ilianzishwa katika **Windows Vista**, **mfano wa PP** awali ulitengenezwa kwa ajili ya utekelezaji wa **DRM** na iliruhusu tu binaries zilizotiwa saini na **cheti maalum cha media** kulindwa. Mchakato ulioashiriwa kama **PP** unaweza kufikiwa tu na michakato mingine ambayo ni **pia PP** na ina **kiwango sawa au cha juu cha ulinzi**, na hata hivyo, **tu kwa haki za ufikiaji zilizopunguzwa** isipokuwa zimeruhusiwa kwa mahsusi.
+**Protected Process (PP)** na **Protected Process Light (PPL)** ni **ulinzi za ngazi ya kernel za Windows** zilizoundwa kuzuia ufikiaji usioidhinishwa kwa michakato nyeti kama **LSASS**. Imetangazwa katika **Windows Vista**, **mfumo wa PP** awali uliundwa kwa ajili ya utekelezaji wa **DRM** na uliruhusu tu binaries zilizotiwa saini na **cheti maalumu cha media** kuwalindwa. Mchakato uliotajwa kama **PP** unaweza kufikiwa tu na michakato mingine ambayo **pia ni PP** na ina **ngazi sawa au ya juu ya ulinzi**, na hata hivyo, **kwa haki za kufikia zilizo na mipaka tu** isipokuwa ruhusiwe maalumu.
 
-**PPL**, iliyoanzishwa katika **Windows 8.1**, ni toleo lenye kubadilika zaidi la PP. Inaruhusu **matumizi mapana** (mfano, LSASS, Defender) kwa kuanzisha **"viwango vya ulinzi"** kulingana na **sehemu ya EKU (Enhanced Key Usage)** ya saini ya kidijitali. Kiwango cha ulinzi kinahifadhiwa katika uwanja wa `EPROCESS.Protection`, ambao ni muundo wa `PS_PROTECTION` wenye:
-- **Aina** (`Protected` au `ProtectedLight`)
-- **Msigner** (mfano, `WinTcb`, `Lsa`, `Antimalware`, n.k.)
+**PPL**, iliyoanzishwa katika **Windows 8.1**, ni toleo lenye urekebishaji zaidi la PP. Inaruhusu **matumizi mapana zaidi** (mfano, LSASS, Defender) kwa kuanzisha **"protection levels"** kulingana na uwanja wa **EKU (Enhanced Key Usage)** wa saini ya kidijitali. Ngazi ya ulinzi huhifadhiwa katika uwanja wa `EPROCESS.Protection`, ambao ni muundo wa `PS_PROTECTION` wenye:
+- **Type** (`Protected` au `ProtectedLight`)
+- **Signer** (mfano, `WinTcb`, `Lsa`, `Antimalware`, n.k.)
 
-Muundo huu umefungwa katika byte moja na unamua **nani anaweza kufikia nani**:
-- **Thamani za msigner za juu zinaweza kufikia za chini**
-- **PPLs haziwezi kufikia PPs**
-- **Michakato isiyo na ulinzi haiwezi kufikia PPL/PP yoyote**
+Muundo huu umepakwa ndani ya bait moja na unaamua **nani anaweza kumfikia nani**:
+- **Thamani za signer za juu zinaweza kumfikia wale wa chini**
+- **PPLs hawawezi kufikia PPs**
+- **Michakato isiyolindwa haiwezi kufikia PPL/PP yoyote**
 
-### Unachohitaji kujua kutoka kwa mtazamo wa mashambulizi
+### Unachohitaji kujua kwa mtazamo wa mashambulizi
 
-- Wakati **LSASS inafanya kazi kama PPL**, juhudi za kuifungua kwa kutumia `OpenProcess(PROCESS_VM_READ | QUERY_INFORMATION)` kutoka kwa muktadha wa kawaida wa admin **zinashindwa na `0x5 (Access Denied)`**, hata kama `SeDebugPrivilege` imewezeshwa.
-- Unaweza **kuangalia kiwango cha ulinzi cha LSASS** kwa kutumia zana kama Process Hacker au kwa njia ya programu kwa kusoma thamani ya `EPROCESS.Protection`.
-- LSASS kwa kawaida itakuwa na `PsProtectedSignerLsa-Light` (`0x41`), ambayo inaweza kufikiwa **tu na michakato iliyotiwa saini na msigner wa kiwango cha juu**, kama `WinTcb` (`0x61` au `0x62`).
-- PPL ni **kizuizi cha Userland pekee**; **kanuni za kiwango cha kernel zinaweza kuzikwepa kabisa**.
-- LSASS kuwa PPL haina **zuia dumping ya akidi ikiwa unaweza kutekeleza shellcode ya kernel** au **kutumia mchakato wa haki za juu wenye ufikiaji sahihi**.
-- **Kuweka au kuondoa PPL** kunahitaji kuanzisha upya au **mipangilio ya Secure Boot/UEFI**, ambayo inaweza kudumisha mipangilio ya PPL hata baada ya mabadiliko ya rejista kurudishwa nyuma.
+- Wakati **LSASS** inapoendesha kama **PPL**, majaribio ya kuifungua kwa kutumia `OpenProcess(PROCESS_VM_READ | QUERY_INFORMATION)` kutoka muktadha wa kawaida wa admin **huishia kwa `0x5 (Access Denied)`**, hata kama `SeDebugPrivilege` iko imewezeshwa.
+- Unaweza **kuangalia ngazi ya ulinzi ya LSASS** kwa kutumia zana kama Process Hacker au kwa njia ya programu kwa kusoma thamani ya `EPROCESS.Protection`.
+- Kwa kawaida LSASS itakuwa na `PsProtectedSignerLsa-Light` (`0x41`), ambayo inaweza kufikiwa **tu na michakato iliyotiwa saini na signer wa kiwango cha juu**, kama `WinTcb` (`0x61` au `0x62`).
+- PPL ni **kizuizi tu cha Userland**; **msimbo wa kernel unaweza kukivuka kikamilifu**.
+- LSASS kuwa PPL **haitazuia credential dumping** ikiwa unaweza kutekeleza **kernel shellcode** au kutumia mchakato mwenye ruhusa za juu na ufikiaji unaofaa.
+- Kuweka au kuondoa PPL kunahitaji kuanzisha upya au mipangilio ya **Secure Boot/UEFI**, ambayo inaweza kudumu kuweka PPL hata baada ya mabadiliko ya registry kurudishwa.
 
-**Chaguzi za kuondoa ulinzi wa PPL:**
+### Tengeneza mchakato wa PPL wakati wa kuanzisha (documented API)
 
-Ikiwa unataka kudondoa LSASS licha ya PPL, una chaguzi 3 kuu:
-1. **Tumia dereva wa kernel ulio saini (mfano, Mimikatz + mimidrv.sys)** ili **kuondoa bendera ya ulinzi ya LSASS**:
+Windows inatoa njia iliyoandikwa ya kuomba ngazi ya Protected Process Light kwa mchakato mtoto wakati wa uundaji kwa kutumia extended startup attribute list. Hii haivunji mahitaji ya saini — image lengwa lazima iwe imetiwa saini kwa daraja la signer linalohitajika.
+
+Mtiririko mdogo katika C/C++:
+```c
+// Request a PPL protection level for the child process at creation time
+// Requires Windows 8.1+ and a properly signed image for the selected level
+#include <windows.h>
+
+int wmain(int argc, wchar_t **argv) {
+STARTUPINFOEXW si = {0};
+PROCESS_INFORMATION pi = {0};
+si.StartupInfo.cb = sizeof(si);
+
+SIZE_T attrSize = 0;
+InitializeProcThreadAttributeList(NULL, 1, 0, &attrSize);
+si.lpAttributeList = (PPROC_THREAD_ATTRIBUTE_LIST)HeapAlloc(GetProcessHeap(), 0, attrSize);
+if (!si.lpAttributeList) return 1;
+
+if (!InitializeProcThreadAttributeList(si.lpAttributeList, 1, 0, &attrSize)) return 1;
+
+DWORD level = PROTECTION_LEVEL_ANTIMALWARE_LIGHT; // or WINDOWS_LIGHT/LSA_LIGHT/WINTCB_LIGHT
+if (!UpdateProcThreadAttribute(
+si.lpAttributeList, 0,
+PROC_THREAD_ATTRIBUTE_PROTECTION_LEVEL,
+&level, sizeof(level), NULL, NULL)) {
+return 1;
+}
+
+DWORD flags = EXTENDED_STARTUPINFO_PRESENT;
+if (!CreateProcessW(L"C\\Windows\\System32\\notepad.exe", NULL, NULL, NULL, FALSE,
+flags, NULL, NULL, &si.StartupInfo, &pi)) {
+// If the image isn't signed appropriately for the requested level,
+// CreateProcess will fail with ERROR_INVALID_IMAGE_HASH (577).
+return 1;
+}
+
+// cleanup
+DeleteProcThreadAttributeList(si.lpAttributeList);
+HeapFree(GetProcessHeap(), 0, si.lpAttributeList);
+CloseHandle(pi.hThread);
+CloseHandle(pi.hProcess);
+return 0;
+}
+```
+Vidokezo na vikwazo:
+- Tumia `STARTUPINFOEX` pamoja na `InitializeProcThreadAttributeList` na `UpdateProcThreadAttribute(PROC_THREAD_ATTRIBUTE_PROTECTION_LEVEL, ...)`, kisha pasha `EXTENDED_STARTUPINFO_PRESENT` kwa `CreateProcess*`.
+- DWORD ya ulinzi inaweza kuwekwa kwa vigezo kama `PROTECTION_LEVEL_WINTCB_LIGHT`, `PROTECTION_LEVEL_WINDOWS`, `PROTECTION_LEVEL_WINDOWS_LIGHT`, `PROTECTION_LEVEL_ANTIMALWARE_LIGHT`, au `PROTECTION_LEVEL_LSA_LIGHT`.
+- Child hupanuka kama PPL tu ikiwa image yake imesainiwa kwa signer class hiyo; vinginevyo uundaji wa process unashindwa, kawaida kwa `ERROR_INVALID_IMAGE_HASH (577)` / `STATUS_INVALID_IMAGE_HASH (0xC0000428)`.
+- Hii si bypass — ni API inayounga mkono iliyokusudiwa kwa images zilizosainiwa ipasavyo. Inafaa kuimarisha tools au kuthibitisha mipangilio iliyo chini ya ulinzi wa PPL.
+
+Mfano wa CLI ukitumia loader ndogo:
+- Antimalware signer: `CreateProcessAsPPL.exe 3 C:\Tools\agent.exe --svc`
+- LSA-light signer: `CreateProcessAsPPL.exe 4 C:\Windows\System32\notepad.exe`
+
+**Bypass PPL protections options:**
+
+Ikiwa unataka dump LSASS licha ya PPL, una chaguzi kuu 3:
+1. **Use a signed kernel driver (e.g., Mimikatz + mimidrv.sys)** ili **kuondoa bendera ya ulinzi ya LSASS**:
 
 ![](../../images/mimidrv.png)
 
-2. **Leta Dereva Yako ya Hatari (BYOVD)** ili kuendesha kanuni maalum ya kernel na kuondoa ulinzi. Zana kama **PPLKiller**, **gdrv-loader**, au **kdmapper** zinafanya hii iwezekane.
-3. **Pora kushughulikia LSASS iliyopo** kutoka kwa mchakato mwingine ambao una wazi (mfano, mchakato wa AV), kisha **iga** ndani ya mchakato wako. Hii ndiyo msingi wa mbinu ya `pypykatz live lsa --method handledup`.
-4. **Tumia mchakato fulani wa haki** ambao utaruhusu kupakia kanuni yoyote ndani ya nafasi yake ya anwani au ndani ya mchakato mwingine wa haki, kwa ufanisi ukipita vizuizi vya PPL. Unaweza kuangalia mfano wa hii katika [bypassing-lsa-protection-in-userland](https://blog.scrt.ch/2021/04/22/bypassing-lsa-protection-in-userland/) au [https://github.com/itm4n/PPLdump](https://github.com/itm4n/PPLdump).
+2. **Bring Your Own Vulnerable Driver (BYOVD)** ili kuendesha custom kernel code na kuzima ulinzi. Tools kama **PPLKiller**, **gdrv-loader**, au **kdmapper** hufanya hili liwezekane.
+3. **Steal an existing LSASS handle** kutoka kwa process nyingine ambayo imeifungua (mfano, process ya AV), kisha **duplicate** ndani ya process yako. Hii ni msingi wa mbinu ya `pypykatz live lsa --method handledup`.
+4. **Abuse some privileged process** ambayo itakuwezesha kupakia code yoyote ndani ya address space yake au ndani ya process nyingine yenye privilégè, effectively bypassing the PPL restrictions. Unaweza kuona mfano ya hili katika [bypassing-lsa-protection-in-userland](https://blog.scrt.ch/2021/04/22/bypassing-lsa-protection-in-userland/) au [https://github.com/itm4n/PPLdump](https://github.com/itm4n/PPLdump).
 
-**Angalia hali ya sasa ya ulinzi wa LSA (PPL/PP) kwa LSASS**:
+**Check current status of LSA protection (PPL/PP) for LSASS**:
 ```bash
 reg query HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA /v RunAsPPL
 ```
-When you running **`mimikatz privilege::debug sekurlsa::logonpasswords`** it'll probably fail with the error code `0x00000005` becasue of this.
+When you running **`mimikatz privilege::debug sekurlsa::logonpasswords`** it'll probably fail with the error code `0x00000005` because of this.
 
-- Kwa maelezo zaidi kuhusu hili angalia [https://itm4n.github.io/lsass-runasppl/](https://itm4n.github.io/lsass-runasppl/)
+- For more information about this check [https://itm4n.github.io/lsass-runasppl/](https://itm4n.github.io/lsass-runasppl/)
 
 
 ## Credential Guard
 
-**Credential Guard**, kipengele ambacho ni maalum kwa **Windows 10 (Enterprise na Education editions)**, kinaongeza usalama wa akiba za mashine kwa kutumia **Virtual Secure Mode (VSM)** na **Virtualization Based Security (VBS)**. Kinatumia nyongeza za virtualisasi za CPU kutenga michakato muhimu ndani ya nafasi ya kumbukumbu iliyo salama, mbali na ufikiaji wa mfumo wa uendeshaji mkuu. Kutengwa huku kunahakikisha kwamba hata kernel haiwezi kufikia kumbukumbu katika VSM, kwa ufanisi ikilinda akiba dhidi ya mashambulizi kama **pass-the-hash**. **Local Security Authority (LSA)** inafanya kazi ndani ya mazingira haya salama kama trustlet, wakati mchakato wa **LSASS** katika OS kuu unafanya kazi kama mwasiliani tu na LSA ya VSM.
+**Credential Guard**, kipengele kinachopatikana tu kwenye **Windows 10 (Enterprise and Education editions)**, kinaimarisha usalama wa nywila za mashine kwa kutumia **Virtual Secure Mode (VSM)** na **Virtualization Based Security (VBS)**. Inatumia ugani wa virtualization wa CPU kutenganisha michakato muhimu ndani ya eneo la kumbukumbu lililolindwa, mbali na ufikivu wa mfumo mkuu wa uendeshaji. Kutengwa hili kunahakikisha hata kernel hawezi kufikia kumbukumbu ndani ya VSM, hivyo kulinda nywila dhidi ya mashambulizi kama **pass-the-hash**. Local Security Authority (LSA) inafanya kazi ndani ya mazingira haya salama kama trustlet, wakati mchakato wa **LSASS** kwenye OS kuu unatumika tu kama mwasilishaji kwa LSA ya VSM.
 
-Kwa kawaida, **Credential Guard** haifanyi kazi na inahitaji kuamshwa kwa mikono ndani ya shirika. Ni muhimu kwa kuongeza usalama dhidi ya zana kama **Mimikatz**, ambazo zinakabiliwa na uwezo wao wa kutoa akiba. Hata hivyo, udhaifu bado unaweza kutumika kupitia kuongeza **Security Support Providers (SSP)** za kawaida ili kukamata akiba katika maandiko wazi wakati wa majaribio ya kuingia.
+Kwa kawaida, **Credential Guard** haizimwi kwa default na inahitaji uanzishaji kwa mkono ndani ya shirika. Ni muhimu kwa kuimarisha usalama dhidi ya zana kama **Mimikatz**, ambazo zinapata ugumu katika uwezo wao wa kutoa nywila. Hata hivyo, udhaifu bado unaweza kutumika kwa kuongeza custom **Security Support Providers (SSP)** ili kunasa nywila kwa maandishi wazi wakati wa jaribio la kuingia.
 
-Ili kuthibitisha hali ya kuamshwa ya **Credential Guard**, funguo ya rejista _**LsaCfgFlags**_ chini ya _**HKLM\System\CurrentControlSet\Control\LSA**_ inaweza kukaguliwa. Thamani ya "**1**" inaonyesha kuamshwa kwa **UEFI lock**, "**2**" bila lock, na "**0**" inaashiria haijawashwa. Ukaguzi huu wa rejista, ingawa ni kiashiria kizuri, si hatua pekee ya kuamsha Credential Guard. Mwongozo wa kina na skripti ya PowerShell ya kuamsha kipengele hiki zinapatikana mtandaoni.
+Ili kuthibitisha hali ya uanzishaji ya **Credential Guard**, funguo la rejista _**LsaCfgFlags**_ chini ya _**HKLM\System\CurrentControlSet\Control\LSA**_ linaweza kutazamwa. Thamani ya "**1**" inaonyesha uanzishaji na **UEFI lock**, "**2**" bila lock, na "**0**" inaonyesha haijawezeshwa. Ukaguzi huu wa rejista, ingawa ni dalili thabiti, si hatua pekee ya kuwezesha Credential Guard. Mwongozo wa kina na script ya **PowerShell** ya kuwezesha kipengele hiki yanapatikana mtandaoni.
 ```bash
 reg query HKLM\System\CurrentControlSet\Control\LSA /v LsaCfgFlags
 ```
-Kwa ufahamu wa kina na maelekezo juu ya kuwezesha **Credential Guard** katika Windows 10 na uanzishaji wake wa kiotomatiki katika mifumo inayofaa ya **Windows 11 Enterprise na Education (toleo 22H2)**, tembelea [dokumentasiyo ya Microsoft](https://docs.microsoft.com/en-us/windows/security/identity-protection/credential-guard/credential-guard-manage).
+Kwa uelewa kamili na maagizo ya kuwawezesha **Credential Guard** katika Windows 10 na uanzishaji wake wa moja kwa moja katika mifumo inayofaa ya **Windows 11 Enterprise and Education (version 22H2)**, tembelea [nyaraka za Microsoft](https://docs.microsoft.com/en-us/windows/security/identity-protection/credential-guard/credential-guard-manage).
 
-Maelezo zaidi juu ya kutekeleza SSPs za kawaida kwa ajili ya kukamata akidi yanapatikana katika [hiki kiongozi](../active-directory-methodology/custom-ssp.md).
+Maelezo zaidi kuhusu kutekeleza custom SSPs kwa ajili ya credential capture yameelezwa katika [this guide](../active-directory-methodology/custom-ssp.md).
 
 ## RDP RestrictedAdmin Mode
 
-**Windows 8.1 na Windows Server 2012 R2** zilileta vipengele vingi vipya vya usalama, ikiwa ni pamoja na _**Restricted Admin mode kwa RDP**_. Hali hii ilipangwa kuboresha usalama kwa kupunguza hatari zinazohusiana na [**pass the hash**](https://blog.ahasayen.com/pass-the-hash/) mashambulizi.
+**Windows 8.1 and Windows Server 2012 R2** ziliweka vipengele vingi vipya vya usalama, ikiwemo _**Restricted Admin mode for RDP**_. Mode hii ilibuniwa kuboresha usalama kwa kupunguza hatari zinazohusiana na mashambulizi ya [**pass the hash**](https://blog.ahasayen.com/pass-the-hash/).
 
-Kawaida, unapounganisha na kompyuta ya mbali kupitia RDP, akidi zako zinahifadhiwa kwenye mashine lengwa. Hii inatoa hatari kubwa ya usalama, hasa unapokuwa ukitumia akaunti zenye mamlaka ya juu. Hata hivyo, kwa kuanzishwa kwa _**Restricted Admin mode**_, hatari hii inapunguzwa kwa kiasi kikubwa.
+Kawaida, unaponunganishwa kwenye kompyuta ya mbali kupitia RDP, credentials zako zinahifadhiwa kwenye mashine lengwa. Hii inasababisha hatari kubwa ya usalama, hasa unapoitumia akaunti zenye ruhusa za juu. Hata hivyo, kwa kuanzishwa kwa _**Restricted Admin mode**_, hatari hii inapunguzwa kwa kiasi kikubwa.
 
-Wakati wa kuanzisha muunganisho wa RDP kwa kutumia amri **mstsc.exe /RestrictedAdmin**, uthibitishaji wa kompyuta ya mbali unafanywa bila kuhifadhi akidi zako kwenye hiyo. Njia hii inahakikisha kwamba, katika tukio la maambukizi ya programu hasidi au ikiwa mtumiaji mbaya atapata ufikiaji wa seva ya mbali, akidi zako hazitakuwa hatarini, kwani hazihifadhiwa kwenye seva.
+Unapoanzisha muunganisho wa RDP kwa kutumia amri **mstsc.exe /RestrictedAdmin**, uthibitishaji kwa kompyuta ya mbali hufanyika bila kuhifadhi credentials zako juu yake. Mbinu hii inahakikisha kwamba, endapo kutatokea maambukizi ya malware au mtumiaji mbaya atapata ufikiaji kwenye server ya mbali, credentials zako hazitavamiwa, kwa kuwa hazijahifadhiwa kwenye server.
 
-Ni muhimu kutambua kwamba katika **Restricted Admin mode**, juhudi za kufikia rasilimali za mtandao kutoka kwenye kikao cha RDP hazitatumia akidi zako binafsi; badala yake, **utambulisho wa mashine** unatumika.
+Ni muhimu kutambua kwamba katika **Restricted Admin mode**, jaribio la kufikia rasilimali za mtandao kutoka kwa kikao cha RDP halitatumia credentials zako za kibinafsi; badala yake, **machine's identity** inatumika.
 
-Kipengele hiki kinatoa hatua muhimu mbele katika kulinda muunganisho wa desktop ya mbali na kulinda taarifa nyeti zisifichuliwe katika tukio la uvunjaji wa usalama.
+Kipengele hiki ni hatua muhimu katika kuimarisha usalama wa remote desktop connections na kulinda taarifa nyeti kuonyeshwa endapo kutatokea uvunjaji wa usalama.
 
 ![](../../images/RAM.png)
 
-Kwa maelezo zaidi tembelea [rasilimali hii](https://blog.ahasayen.com/restricted-admin-mode-for-rdp/).
+Kwa maelezo ya kina zaidi tembelea [chanzo hiki](https://blog.ahasayen.com/restricted-admin-mode-for-rdp/).
 
 ## Cached Credentials
 
-Windows inalinda **akidi za kikoa** kupitia **Local Security Authority (LSA)**, ikisaidia michakato ya kuingia kwa kutumia itifaki za usalama kama **Kerberos** na **NTLM**. Kipengele muhimu cha Windows ni uwezo wake wa kuhifadhi **kuingia kumi za mwisho za kikoa** ili kuhakikisha watumiaji wanaweza kuendelea kufikia kompyuta zao hata kama **kikundi cha kudhibiti kikoa kiko offline**—faida kwa watumiaji wa laptop ambao mara nyingi wako mbali na mtandao wa kampuni yao.
+Windows inalinda **domain credentials** kupitia **Local Security Authority (LSA)**, ikisaidia michakato ya kuingia kwa itifaki za usalama kama **Kerberos** na **NTLM**. Kipengele muhimu cha Windows ni uwezo wake wa kuhifadhi (cache) **last ten domain logins** ili kuhakikisha watumiaji bado wanaweza kufikia kompyuta zao hata pale **domain controller** iko offline — jambo lenye faida kwa watumiaji wa laptop wanaotoka mara kwa mara kwenye mtandao wa kampuni yao.
 
-Idadi ya kuingia zilizohifadhiwa inaweza kubadilishwa kupitia **funguo maalum za rejista au sera ya kikundi**. Ili kuona au kubadilisha mipangilio hii, amri ifuatayo inatumika:
+Idadi ya logins zilizohifadhiwa inaweza kubadilishwa kupitia **registry key or group policy** maalum. Ili kuona au kubadilisha mipangilio hii, amri ifuatayo inatumika:
 ```bash
 reg query "HKEY_LOCAL_MACHINE\SOFTWARE\MICROSOFT\WINDOWS NT\CURRENTVERSION\WINLOGON" /v CACHEDLOGONSCOUNT
 ```
@@ -98,21 +154,21 @@ Access to these cached credentials is tightly controlled, with only the **SYSTEM
 
 For further details, the original [source](http://juggernaut.wikidot.com/cached-credentials) provides comprehensive information.
 
-## Watumiaji Waliohifadhiwa
+## Protected Users
 
-Uanachama katika **kikundi cha Watumiaji Waliohifadhiwa** unaleta maboresho kadhaa ya usalama kwa watumiaji, kuhakikisha viwango vya juu vya ulinzi dhidi ya wizi na matumizi mabaya ya akidi:
+Uanachama katika **Protected Users group** huleta maboresho kadhaa ya usalama kwa watumiaji, kuhakikisha viwango vya juu vya ulinzi dhidi ya wizi na matumizi mabaya ya nyaraka za utambulisho:
 
-- **Delegation ya Akidi (CredSSP)**: Hata kama mipangilio ya Kundi la Sera ya **Ruhusu kuhamasisha akidi za kawaida** imewezeshwa, akidi za maandiko wazi za Watumiaji Waliohifadhiwa hazitahifadhiwa.
-- **Windows Digest**: Kuanzia **Windows 8.1 na Windows Server 2012 R2**, mfumo hautahifadhi akidi za maandiko wazi za Watumiaji Waliohifadhiwa, bila kujali hali ya Windows Digest.
-- **NTLM**: Mfumo hautahifadhi akidi za maandiko wazi za Watumiaji Waliohifadhiwa au kazi za NT moja kwa moja (NTOWF).
-- **Kerberos**: Kwa Watumiaji Waliohifadhiwa, uthibitishaji wa Kerberos hautazalisha **DES** au **RC4 keys**, wala hautahifadhi akidi za maandiko wazi au funguo za muda mrefu zaidi ya upatikanaji wa Tiketi ya Kutoa Tiketi (TGT) ya awali.
-- **Kuingia Bila Mtandao**: Watumiaji Waliohifadhiwa hawatakuwa na mthibitishaji aliyehifadhiwa anayeundwa wakati wa kuingia au kufungua, ikimaanisha kuingia bila mtandao hakusaidiwi kwa akaunti hizi.
+- **Credential Delegation (CredSSP)**: Hata kama Group Policy setting ya **Allow delegating default credentials** imewezeshwa, nyaraka za watumiaji zilizo kwa maandishi wazi za Protected Users hazitahifadhiwa.
+- **Windows Digest**: Kuanzia **Windows 8.1 and Windows Server 2012 R2**, mfumo hautahifadhi nyaraka za maandishi wazi za Protected Users, bila kujali hali ya Windows Digest.
+- **NTLM**: Mfumo hautahifadhi nyaraka za maandishi wazi za Protected Users au NT one-way functions (NTOWF).
+- **Kerberos**: Kwa Protected Users, uthibitishaji wa Kerberos hautazalisha funguo za **DES** au **RC4**, wala hautahifadhi nyaraka za maandishi wazi au funguo za muda mrefu zaidi ya ununuzi wa awali wa Ticket-Granting Ticket (TGT).
+- **Offline Sign-In**: Watumiaji wa Protected Users hawatakuwa na verifier iliyohifadhiwa (cached verifier) inayoundwa wakati wa kuingia au kufungua kifaa, hivyo kuingia bila mtandao (offline sign-in) haitegemezeki kwa akaunti hizi.
 
-Ulinzi huu unawashwa mara tu mtumiaji, ambaye ni mwanachama wa **kikundi cha Watumiaji Waliohifadhiwa**, anapoingia kwenye kifaa. Hii inahakikisha kuwa hatua muhimu za usalama zipo ili kulinda dhidi ya mbinu mbalimbali za kuathiri akidi.
+Ulinzi huu unaanza mara mtumiaji ambaye ni mwanachama wa **Protected Users group** anapoingia kwenye kifaa. Hii inahakikisha hatua muhimu za usalama ziko tayari kulinda dhidi ya mbinu mbalimbali za uvunjaji wa nyaraka za utambulisho.
 
-Kwa maelezo zaidi, angalia [nyaraka rasmi](https://docs.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/protected-users-security-group).
+For more detailed information, consult the official [documentation](https://docs.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/protected-users-security-group).
 
-**Jedwali kutoka** [**nyaraka**](https://docs.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices/appendix-c--protected-accounts-and-groups-in-active-directory)**.**
+**Table from** [**the docs**](https://docs.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices/appendix-c--protected-accounts-and-groups-in-active-directory)**.**
 
 | Windows Server 2003 RTM | Windows Server 2003 SP1+ | <p>Windows Server 2012,<br>Windows Server 2008 R2,<br>Windows Server 2008</p> | Windows Server 2016          |
 | ----------------------- | ------------------------ | ----------------------------------------------------------------------------- | ---------------------------- |
@@ -132,5 +188,13 @@ Kwa maelezo zaidi, angalia [nyaraka rasmi](https://docs.microsoft.com/en-us/wind
 | Replicator              | Replicator               | Replicator                                                                    | Replicator                   |
 | Schema Admins           | Schema Admins            | Schema Admins                                                                 | Schema Admins                |
 | Server Operators        | Server Operators         | Server Operators                                                              | Server Operators             |
+
+## References
+
+- [CreateProcessAsPPL – minimal PPL process launcher](https://github.com/2x7EQ13/CreateProcessAsPPL)
+- [STARTUPINFOEX structure (Win32 API)](https://learn.microsoft.com/en-us/windows/win32/api/winbase/ns-winbase-startupinfoexw)
+- [InitializeProcThreadAttributeList (Win32 API)](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-initializeprocthreadattributelist)
+- [UpdateProcThreadAttribute (Win32 API)](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-updateprocthreadattribute)
+- [LSASS RunAsPPL – background and internals](https://itm4n.github.io/lsass-runasppl/)
 
 {{#include ../../banners/hacktricks-training.md}}

