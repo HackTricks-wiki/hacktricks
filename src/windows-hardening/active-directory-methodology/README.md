@@ -240,6 +240,26 @@ If you can **access other PCs or shares** you could **place files** (like a SCF 
 ../ntlm/places-to-steal-ntlm-creds.md
 {{#endref}}
 
+### Abusing discovery/management scanners to harvest credentials
+
+Enterprise inventory and scanning platforms often authenticate to targets using stored credentials. If you can define scan targets, point one to an attacker-controlled host/service and run a honeypot to capture the attempted authentication.
+
+Example for SSH:
+- Run an SSH honeypot (e.g., sshesame) on a reachable port.
+- In the scanner, create a target pointing to your host:port and map a stored SSH credential to it.
+- Trigger the scan and collect the username/password from the honeypot logs.
+
+This pattern generalizes to any active scanner/ITAM that performs authenticated checks against operator-defined targets.
+
+### Abusing remote deployment features for SYSTEM execution
+
+Many IT asset/patching tools support push deployments. With sufficient portal privileges, create or edit a deployment package to run arbitrary commands on an enrolled agent or remote host. These jobs frequently execute as a high-privileged service account or LocalSystem, yielding local privilege escalation and lateral movement.
+
+- Create a new package with a simple command (e.g., add a user, run PowerShell, drop an agent) and deploy it to a test target.
+- Preferred transport depends on the product (agent channel, SMB/ADMIN$, WinRM). Adjust firewall/AV evasion accordingly.
+
+Hygiene: treat these features like remote admin. Least privilege and approvals limit impact.
+
 ### CVE-2021-1675/CVE-2021-34527 PrintNightmare
 
 This vulnerability allowed any authenticated user to **compromise the domain controller**.
@@ -249,7 +269,6 @@ This vulnerability allowed any authenticated user to **compromise the domain con
 printnightmare.md
 {{#endref}}
 
-## Privilege escalation on Active Directory WITH privileged credentials/session
 
 **For the following techniques a regular domain user is not enough, you need some special privileges/credentials to perform these attacks.**
 
@@ -807,5 +826,7 @@ https://cloud.hacktricks.wiki/en/pentesting-cloud/azure-security/az-lateral-move
 - [http://www.harmj0y.net/blog/redteaming/a-guide-to-attacking-domain-trusts/](http://www.harmj0y.net/blog/redteaming/a-guide-to-attacking-domain-trusts/)
 - [https://www.labofapenetrationtester.com/2018/10/deploy-deception.html](https://www.labofapenetrationtester.com/2018/10/deploy-deception.html)
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/child-domain-da-to-ea-in-parent-domain](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/child-domain-da-to-ea-in-parent-domain)
+- [sshesame – SSH honeypot](https://github.com/jaksi/sshesame)
+- [HTB: Sweep — Lansweeper credential interception and AD ACL abuse to Domain Admin](https://0xdf.gitlab.io/2025/08/14/htb-sweep.html)
 
 {{#include ../../banners/hacktricks-training.md}}

