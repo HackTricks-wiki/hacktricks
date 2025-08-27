@@ -430,6 +430,7 @@
   - [H2 - Java SQL database](network-services-pentesting/pentesting-web/h2-java-sql-database.md)
   - [IIS - Internet Information Services](network-services-pentesting/pentesting-web/iis-internet-information-services.md)
   - [ImageMagick Security](network-services-pentesting/pentesting-web/imagemagick-security.md)
+  - [Ispconfig](network-services-pentesting/pentesting-web/ispconfig.md)
   - [JBOSS](network-services-pentesting/pentesting-web/jboss.md)
   - [Jira & Confluence](network-services-pentesting/pentesting-web/jira.md)
   - [Joomla](network-services-pentesting/pentesting-web/joomla.md)
