@@ -933,3 +933,4 @@
   - [Readme](reversing/cryptographic-algorithms/README.md)
   - [Readme](reversing/reversing-tools/README.md)
   - [Readme](windows-hardening/windows-local-privilege-escalation/privilege-escalation-abusing-tokens/README.md)
+  - [Readme](generic-methodologies-and-resources/lua/bypass-lua-sandboxes/README.md)
