@@ -1,112 +1,122 @@
-# AD Certificates
+# AD Сертифікати
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Introduction
+## Вступ
 
-### Components of a Certificate
+### Компоненти сертифіката
 
-- **Суб'єкт** сертифіката позначає його власника.
-- **Публічний ключ** поєднується з приватно утримуваним ключем, щоб зв'язати сертифікат з його законним власником.
-- **Період дії**, визначений датами **NotBefore** та **NotAfter**, позначає ефективну тривалість сертифіката.
-- Унікальний **Серійний номер**, наданий Центром сертифікації (CA), ідентифікує кожен сертифікат.
-- **Видавець** відноситься до CA, який видав сертифікат.
-- **SubjectAlternativeName** дозволяє додаткові імена для суб'єкта, підвищуючи гнучкість ідентифікації.
-- **Основні обмеження** визначають, чи є сертифікат для CA або кінцевого суб'єкта, і визначають обмеження використання.
-- **Розширені ключові використання (EKUs)** окреслюють конкретні цілі сертифіката, такі як підписання коду або шифрування електронної пошти, через ідентифікатори об'єктів (OIDs).
-- **Алгоритм підпису** визначає метод підписання сертифіката.
-- **Підпис**, створений за допомогою приватного ключа видавця, гарантує автентичність сертифіката.
+- **Subject** сертифіката позначає його власника.
+- **Public Key** пов'язаний з приватним ключем, що дозволяє пов'язати сертифікат з його законним власником.
+- **Validity Period**, визначений датами **NotBefore** та **NotAfter**, позначає період дії сертифіката.
+- Унікальний **Serial Number**, що присвоюється Certificate Authority (CA), ідентифікує кожний сертифікат.
+- **Issuer** позначає CA, який видав сертифікат.
+- **SubjectAlternativeName** дозволяє додавати додаткові імена для Subject, підвищуючи гнучкість ідентифікації.
+- **Basic Constraints** вказують, чи є сертифікат для CA або кінцевого об'єкта, і визначають обмеження використання.
+- **Extended Key Usages (EKUs)** визначають конкретні призначення сертифіката, наприклад code signing або email encryption, через Object Identifiers (OIDs).
+- **Signature Algorithm** визначає метод підпису сертифіката.
+- **Signature**, створена приватним ключем видавця, гарантує автентичність сертифіката.
 
-### Special Considerations
+### Особливі зауваження
 
-- **Додаткові імена суб'єкта (SANs)** розширюють застосування сертифіката на кілька ідентичностей, що є критично важливим для серверів з кількома доменами. Безпечні процеси видачі є важливими для уникнення ризиків обману з боку зловмисників, які маніпулюють специфікацією SAN.
+- **Subject Alternative Names (SANs)** розширюють застосовність сертифіката на декілька ідентичностей, що критично для серверів із кількома доменами. Безпечні процеси видачі важливі, щоб уникнути ризику підроблення через маніпуляції атакувальників зі специфікацією SAN.
 
 ### Certificate Authorities (CAs) in Active Directory (AD)
 
-AD CS визнає сертифікати CA в лісі AD через призначені контейнери, кожен з яких виконує унікальні ролі:
+AD CS реєструє CA сертифікати в лісі AD через спеціальні контейнери, кожен з яких виконує певну роль:
 
-- Контейнер **Certification Authorities** містить довірені кореневі сертифікати CA.
-- Контейнер **Enrolment Services** містить деталі корпоративних CA та їх шаблони сертифікатів.
-- Об'єкт **NTAuthCertificates** включає сертифікати CA, авторизовані для автентифікації AD.
-- Контейнер **AIA (Authority Information Access)** полегшує валідацію ланцюга сертифікатів з проміжними та крос CA сертифікатами.
+- Контейнер **Certification Authorities** містить довірені root CA сертифікати.
+- Контейнер **Enrolment Services** містить відомості про Enterprise CAs та їхні шаблони сертифікатів.
+- Об'єкт **NTAuthCertificates** включає CA сертифікати, авторизовані для автентифікації в AD.
+- Контейнер **AIA (Authority Information Access)** сприяє перевірці ланцюжка сертифікатів через проміжні та cross CA сертифікати.
 
-### Certificate Acquisition: Client Certificate Request Flow
+### Отримання сертифіката: потік запиту клієнта
 
-1. Процес запиту починається з того, що клієнти знаходять корпоративний CA.
-2. Створюється CSR, що містить публічний ключ та інші деталі, після генерації пари публічного-приватного ключа.
-3. CA оцінює CSR відповідно до доступних шаблонів сертифікатів, видаючи сертифікат на основі дозволів шаблону.
-4. Після затвердження CA підписує сертифікат своїм приватним ключем і повертає його клієнту.
+1. Процес запиту починається з пошуку клієнтом Enterprise CA.
+2. Створюється CSR, який містить public key та інші дані, після генерації пари public-private ключів.
+3. CA оцінює CSR щодо доступних шаблонів сертифікатів і видає сертифікат на основі дозволів шаблону.
+4. Після погодження CA підписує сертифікат своїм приватним ключем і повертає його клієнту.
 
-### Certificate Templates
+### Шаблони сертифікатів
 
-Визначені в AD, ці шаблони окреслюють налаштування та дозволи для видачі сертифікатів, включаючи дозволені EKUs та права на реєстрацію або модифікацію, що є критично важливими для управління доступом до сертифікатних послуг.
+Шаблони, визначені в AD, описують налаштування та дозволи для видачі сертифікатів, включно з дозволеними EKU та правами на enrollment або модифікацію, що критично для контролю доступу до сервісів сертифікації.
 
-## Certificate Enrollment
+## Реєстрація сертифікатів
 
-Процес реєстрації сертифікатів ініціюється адміністратором, який **створює шаблон сертифіката**, який потім **публікується** корпоративним Центром сертифікації (CA). Це робить шаблон доступним для реєстрації клієнтів, що досягається шляхом додавання імені шаблону до поля `certificatetemplates` об'єкта Active Directory.
+Процес реєстрації сертифікатів ініціюється адміністратором, який **створює шаблон сертифіката**, який потім **публікується** Enterprise Certificate Authority (CA). Це робить шаблон доступним для реєстрації клієнтами, що досягається додаванням імені шаблону до поля `certificatetemplates` об'єкта Active Directory.
 
-Щоб клієнт міг запитати сертифікат, **права на реєстрацію** повинні бути надані. Ці права визначаються дескрипторами безпеки на шаблоні сертифіката та самому корпоративному CA. Дозволи повинні бути надані в обох місцях для успішного запиту.
+Щоб клієнт міг запитати сертифікат, повинні бути надані **enrollment rights**. Ці права визначаються через security descriptors на шаблоні сертифіката та на самому Enterprise CA. Права мають бути надані в обох місцях для успішного виконання запиту.
 
-### Template Enrollment Rights
+### Права на реєстрацію шаблону
 
-Ці права визначаються через записи контролю доступу (ACE), що деталізують дозволи, такі як:
+Ці права вказуються через Access Control Entries (ACEs) і деталізують дозволи, такі як:
 
-- Права **Certificate-Enrollment** та **Certificate-AutoEnrollment**, кожне з яких пов'язане з конкретними GUID.
+- **Certificate-Enrollment** та **Certificate-AutoEnrollment** права, кожне з яких пов'язане зі специфічним GUID.
 - **ExtendedRights**, що дозволяє всі розширені дозволи.
 - **FullControl/GenericAll**, що надає повний контроль над шаблоном.
 
-### Enterprise CA Enrollment Rights
+### Права реєстрації Enterprise CA
 
-Права CA викладені в його дескрипторі безпеки, доступному через консоль управління Центром сертифікації. Деякі налаштування навіть дозволяють користувачам з низькими привілеями віддалений доступ, що може бути проблемою безпеки.
+Права CA визначені в його security descriptor, доступному через консоль управління Certificate Authority. Деякі налаштування навіть дозволяють віддалений доступ користувачам з низькими привілеями, що може становити ризик безпеці.
 
-### Additional Issuance Controls
+### Додаткові обмеження при видачі
 
-Можуть застосовуватися певні контролі, такі як:
+Можуть застосовуватись певні контролі, такі як:
 
-- **Затвердження менеджера**: ставить запити в стан очікування до затвердження менеджером сертифікатів.
-- **Агенти реєстрації та авторизовані підписи**: визначають кількість необхідних підписів на CSR та необхідні OIDs політики застосування.
+- **Manager Approval**: ставить запити в очікуваний стан до затвердження менеджером сертифікатів.
+- **Enrolment Agents and Authorized Signatures**: вказують кількість підписів, необхідних на CSR, та необхідні Application Policy OIDs.
 
-### Methods to Request Certificates
+### Методи запиту сертифікатів
 
 Сертифікати можна запитувати через:
 
-1. **Протокол реєстрації сертифікатів Windows Client** (MS-WCCE), використовуючи інтерфейси DCOM.
-2. **Протокол віддаленого проходження ICertPassage** (MS-ICPR), через іменовані канали або TCP/IP.
-3. **веб-інтерфейс реєстрації сертифікатів**, з встановленою роллю веб-реєстрації Центру сертифікації.
-4. **Служба реєстрації сертифікатів** (CES), у поєднанні з службою політики реєстрації сертифікатів (CEP).
-5. **Служба реєстрації мережевих пристроїв** (NDES) для мережевих пристроїв, використовуючи простий протокол реєстрації сертифікатів (SCEP).
+1. **Windows Client Certificate Enrollment Protocol** (MS-WCCE), використовуючи DCOM інтерфейси.
+2. **ICertPassage Remote Protocol** (MS-ICPR), через named pipes або TCP/IP.
+3. **certificate enrollment web interface**, при встановленій ролі Certificate Authority Web Enrollment.
+4. **Certificate Enrollment Service** (CES) у поєднанні з Certificate Enrollment Policy (CEP) service.
+5. **Network Device Enrollment Service** (NDES) для мережевих пристроїв, використовуючи Simple Certificate Enrollment Protocol (SCEP).
 
-Користувачі Windows також можуть запитувати сертифікати через GUI (`certmgr.msc` або `certlm.msc`) або командні інструменти (`certreq.exe` або команду PowerShell `Get-Certificate`).
+Користувачі Windows також можуть запитувати сертифікати через GUI (`certmgr.msc` або `certlm.msc`) або інструменти командного рядка (`certreq.exe` або PowerShell команду `Get-Certificate`).
 ```bash
 # Example of requesting a certificate using PowerShell
 Get-Certificate -Template "User" -CertStoreLocation "cert:\\CurrentUser\\My"
 ```
-## Сертифікатна Аутентифікація
+## Аутентифікація за сертифікатами
 
-Active Directory (AD) підтримує сертифікатну аутентифікацію, в основному використовуючи **Kerberos** та **Secure Channel (Schannel)** протоколи.
+Active Directory (AD) підтримує автентифікацію за сертифікатами, здебільшого використовуючи протоколи **Kerberos** та **Secure Channel (Schannel)**.
 
-### Процес Аутентифікації Kerberos
+### Процес автентифікації Kerberos
 
-У процесі аутентифікації Kerberos запит користувача на отримання квитка (Ticket Granting Ticket, TGT) підписується за допомогою **приватного ключа** сертифіката користувача. Цей запит проходить кілька перевірок контролером домену, включаючи **дійсність** сертифіката, **шлях** та **статус відкликання**. Перевірки також включають підтвердження, що сертифікат походить з надійного джерела, та підтвердження наявності видавця в **NTAUTH certificate store**. Успішні перевірки призводять до видачі TGT. Об'єкт **`NTAuthCertificates`** в AD, розташований за:
+У процесі автентифікації Kerberos запит користувача на Ticket Granting Ticket (TGT) підписується за допомогою **приватного ключа** сертифіката користувача. Цей запит проходить кілька перевірок з боку доменного контролера, включаючи **дійсність**, **ланцюжок сертифікації (path)** та **статус відкликання** сертифіката. Перевірки також включають підтвердження того, що сертифікат походить із довіреного джерела, та підтвердження присутності видавця у **NTAUTH certificate store**. Успішні перевірки призводять до видачі TGT. Об'єкт **`NTAuthCertificates`** в AD, який знаходиться за адресою:
 ```bash
 CN=NTAuthCertificates,CN=Public Key Services,CN=Services,CN=Configuration,DC=<domain>,DC=<com>
 ```
-є центральним для встановлення довіри до сертифікатної аутентифікації.
+є центральним для встановлення довіри при автентифікації за допомогою сертифікатів.
 
-### Аутентифікація через Secure Channel (Schannel)
+### Secure Channel (Schannel) Authentication
 
-Schannel забезпечує безпечні TLS/SSL з'єднання, під час яких клієнт представляє сертифікат, який, якщо успішно перевірений, надає доступ. Відображення сертифіката на обліковий запис AD може включати функцію Kerberos **S4U2Self** або **Subject Alternative Name (SAN)** сертифіката, серед інших методів.
+Schannel сприяє встановленню захищених TLS/SSL-з'єднань, де під час handshake клієнт пред'являє сертифікат, який у разі успішної валідації надає доступ. Відповідність сертифіката обліковому запису AD може залучати функцію **Kerberos’s S4U2Self** або поле сертифіката **Subject Alternative Name (SAN)**, серед інших методів.
 
-### Перерахування сертифікатних служб AD
+### AD Certificate Services Enumeration
 
-Служби сертифікатів AD можна перерахувати через LDAP-запити, що розкриває інформацію про **Enterprise Certificate Authorities (CAs)** та їх конфігурації. Це доступно будь-якому користувачу, аутентифікованому в домені, без спеціальних привілеїв. Інструменти, такі як **[Certify](https://github.com/GhostPack/Certify)** та **[Certipy](https://github.com/ly4k/Certipy)**, використовуються для перерахування та оцінки вразливостей в середовищах AD CS.
+Служби сертифікації AD можна перелічити через LDAP-запити, що розкривають інформацію про **Enterprise Certificate Authorities (CAs)** та їхні конфігурації. До цього має доступ будь-який користувач, автентифікований у домені, без спеціальних привілеїв. Інструменти, такі як **[Certify](https://github.com/GhostPack/Certify)** та **[Certipy](https://github.com/ly4k/Certipy)**, використовуються для перелічення та оцінки вразливостей у середовищах AD CS.
 
 Команди для використання цих інструментів включають:
 ```bash
-# Enumerate trusted root CA certificates and Enterprise CAs with Certify
-Certify.exe cas
-# Identify vulnerable certificate templates with Certify
-Certify.exe find /vulnerable
+# Enumerate trusted root CA certificates, Enterprise CAs and HTTP enrollment endpoints
+# Useful flags: /domain, /path, /hideAdmins, /showAllPermissions, /skipWebServiceChecks
+Certify.exe cas [/ca:SERVER\ca-name | /domain:domain.local | /path:CN=Configuration,DC=domain,DC=local] [/hideAdmins] [/showAllPermissions] [/skipWebServiceChecks]
+
+# Identify vulnerable certificate templates and filter for common abuse cases
+Certify.exe find
+Certify.exe find /vulnerable [/currentuser]
+Certify.exe find /enrolleeSuppliesSubject   # ESC1 candidates (CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT)
+Certify.exe find /clientauth                # templates with client-auth EKU
+Certify.exe find /showAllPermissions        # include template ACLs in output
+Certify.exe find /json /outfile:C:\Temp\adcs.json
+
+# Enumerate PKI object ACLs (Enterprise PKI container, templates, OIDs) – useful for ESC4/ESC7 discovery
+Certify.exe pkiobjects [/domain:domain.local] [/showAdmins]
 
 # Use Certipy for enumeration and identifying vulnerable templates
 certipy find -vulnerable -u john@corp.local -p Passw0rd -dc-ip 172.16.126.128
@@ -119,5 +129,7 @@ certutil -v -dstemplate
 
 - [https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)
 - [https://comodosslstore.com/blog/what-is-ssl-tls-client-authentication-how-does-it-work.html](https://comodosslstore.com/blog/what-is-ssl-tls-client-authentication-how-does-it-work.html)
+- [GhostPack/Certify](https://github.com/GhostPack/Certify)
+- [GhostPack/Rubeus](https://github.com/GhostPack/Rubeus)
 
 {{#include ../../../banners/hacktricks-training.md}}
