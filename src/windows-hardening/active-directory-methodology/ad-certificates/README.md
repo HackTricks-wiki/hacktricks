@@ -1,112 +1,122 @@
-# AD Certificates
+# AD 証明書
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Introduction
+## はじめに
 
-### Components of a Certificate
+### 証明書の構成要素
 
-- **証明書の主題**は、その所有者を示します。
-- **公開鍵**は、証明書を正当な所有者にリンクするために、プライベートキーとペアになります。
-- **有効期間**は、**NotBefore**および**NotAfter**の日付によって定義され、証明書の有効な期間を示します。
-- 一意の**シリアル番号**は、証明書機関（CA）によって提供され、各証明書を識別します。
-- **発行者**は、証明書を発行したCAを指します。
-- **SubjectAlternativeName**は、主題の追加名を許可し、識別の柔軟性を高めます。
-- **基本制約**は、証明書がCA用かエンドエンティティ用かを識別し、使用制限を定義します。
-- **拡張キー使用法（EKU）**は、オブジェクト識別子（OID）を通じて、証明書の特定の目的（コード署名やメール暗号化など）を示します。
-- **署名アルゴリズム**は、証明書に署名する方法を指定します。
-- **署名**は、発行者のプライベートキーで作成され、証明書の真正性を保証します。
+- **Subject** は証明書の所有者を示します。
+- **Public Key** は秘密鍵と対になり、証明書を正当な所有者に結び付けます。
+- **Validity Period**（**NotBefore** と **NotAfter** によって定義）は、証明書の有効期間を示します。
+- 一意の **Serial Number** は Certificate Authority (CA) によって付与され、各証明書を識別します。
+- **Issuer** は証明書を発行した CA を指します。
+- **SubjectAlternativeName** は主体に追加の名前を許可し、識別の柔軟性を高めます。
+- **Basic Constraints** は証明書が CA 向けかエンドエンティティ向けかを識別し、使用制限を定義します。
+- **Extended Key Usages (EKUs)** は、**Object Identifiers (OIDs)** を通じてコード署名やメール暗号化など証明書の特定の用途を示します。
+- **Signature Algorithm** は証明書に署名するための方法を指定します。
+- **Signature** は Issuer の秘密鍵で作成され、証明書の真正性を保証します。
 
-### Special Considerations
+### 特別な考慮事項
 
-- **Subject Alternative Names (SANs)**は、証明書の適用範囲を複数のアイデンティティに拡張し、複数のドメインを持つサーバーにとって重要です。攻撃者がSAN仕様を操作することによるなりすましリスクを回避するために、安全な発行プロセスが重要です。
+- **Subject Alternative Names (SANs)** は複数の識別子に対して証明書の適用範囲を拡大し、複数ドメインを持つサーバーにとって重要です。発行プロセスを適切に保護しないと、攻撃者が SAN の仕様を操作してなりすましを行うリスクが生じます。
 
-### Certificate Authorities (CAs) in Active Directory (AD)
+### Active Directory (AD) における Certificate Authorities (CAs)
 
-AD CSは、指定されたコンテナを通じてADフォレスト内のCA証明書を認識し、それぞれが独自の役割を果たします：
+AD CS は、AD フォレスト内の指定コンテナを通じて CA 証明書を認識し、各コンテナは固有の役割を果たします：
 
-- **Certification Authorities**コンテナは、信頼されたルートCA証明書を保持します。
-- **Enrolment Services**コンテナは、エンタープライズCAとその証明書テンプレートの詳細を示します。
-- **NTAuthCertificates**オブジェクトは、AD認証のために承認されたCA証明書を含みます。
-- **AIA (Authority Information Access)**コンテナは、中間CAおよびクロスCA証明書を使用して証明書チェーンの検証を促進します。
+- **Certification Authorities** コンテナは信頼されたルート CA 証明書を格納します。
+- **Enrolment Services** コンテナは Enterprise CAs とその証明書テンプレートに関する情報を保持します。
+- **NTAuthCertificates** オブジェクトは AD 認証で許可された CA 証明書を含みます。
+- **AIA (Authority Information Access)** コンテナは中間 CA やクロス CA の証明書を用いた証明書チェーン検証を容易にします。
 
-### Certificate Acquisition: Client Certificate Request Flow
+### 証明書取得：クライアントによる証明書要求のフロー
 
-1. リクエストプロセスは、クライアントがエンタープライズCAを見つけることから始まります。
-2. 公開鍵とその他の詳細を含むCSRが作成され、公開-プライベートキーのペアが生成された後に行われます。
-3. CAは、利用可能な証明書テンプレートに対してCSRを評価し、テンプレートの権限に基づいて証明書を発行します。
-4. 承認後、CAはプライベートキーで証明書に署名し、クライアントに返します。
+1. 要求プロセスはクライアントが Enterprise CA を発見することから始まります。
+2. 公開/秘密鍵ペアを生成した後、公開鍵やその他の詳細を含む CSR が作成されます。
+3. CA は利用可能な証明書テンプレートに対して CSR を評価し、テンプレートの権限に基づいて証明書を発行します。
+4. 承認されると、CA は自身の秘密鍵で証明書に署名し、クライアントに返します。
 
-### Certificate Templates
+### 証明書テンプレート
 
-AD内で定義されているこれらのテンプレートは、証明書を発行するための設定と権限を概説し、許可されたEKUや登録または変更権限を含み、証明書サービスへのアクセス管理において重要です。
+AD 内で定義されるこれらのテンプレートは、許可される EKU や登録・変更の権限など、証明書発行に関する設定と権限を定義し、証明書サービスへのアクセス管理において重要です。
 
-## Certificate Enrollment
+## 証明書登録
 
-証明書の登録プロセスは、管理者が**証明書テンプレートを作成**し、それがエンタープライズ証明書機関（CA）によって**公開**されることから始まります。これにより、クライアントの登録に利用可能なテンプレートが作成され、Active Directoryオブジェクトの`certificatetemplates`フィールドにテンプレート名を追加することで達成されます。
+証明書の登録プロセスは、管理者が **証明書テンプレートを作成** することで開始され、Enterprise Certificate Authority (CA) によって **公開（published）** されます。これによりテンプレートはクライアントの登録に利用可能になり、Active Directory オブジェクトの `certificatetemplates` フィールドにテンプレート名を追加することで行われます。
 
-クライアントが証明書をリクエストするには、**登録権限**が付与されている必要があります。これらの権限は、証明書テンプレートおよびエンタープライズCA自体のセキュリティ記述子によって定義されます。リクエストが成功するためには、両方の場所で権限が付与される必要があります。
+クライアントが証明書を要求するには、**enrollment rights** が付与されている必要があります。これらの権利は証明書テンプレートおよび Enterprise CA 自身のセキュリティ記述子によって定義されます。要求を成功させるには両方に権限が付与されている必要があります。
 
-### Template Enrollment Rights
+### テンプレートのエンロールメント権限
 
-これらの権限は、アクセス制御エントリ（ACE）を通じて指定され、次のような権限が詳細に示されます：
+これらの権利は Access Control Entries (ACEs) で指定され、次のような権限を含みます：
 
-- **Certificate-Enrollment**および**Certificate-AutoEnrollment**権限は、それぞれ特定のGUIDに関連付けられています。
-- **ExtendedRights**は、すべての拡張権限を許可します。
-- **FullControl/GenericAll**は、テンプレートに対する完全な制御を提供します。
+- **Certificate-Enrollment** および **Certificate-AutoEnrollment** の権利（それぞれ特定の GUID に紐づく）。
+- **ExtendedRights**（全ての拡張権限を許可）。
+- **FullControl/GenericAll**（テンプレートに対する完全な制御）。
 
-### Enterprise CA Enrollment Rights
+### Enterprise CA のエンロールメント権限
 
-CAの権限は、そのセキュリティ記述子に記載されており、証明書機関管理コンソールを介してアクセスできます。一部の設定では、低権限のユーザーにリモートアクセスを許可することもあり、これはセキュリティ上の懸念となる可能性があります。
+CA の権利はそのセキュリティ記述子に明記されており、Certificate Authority management console からアクセスできます。一部の設定は権限の低いユーザーに遠隔アクセスを許可することがあり、これはセキュリティ上の懸念となります。
 
-### Additional Issuance Controls
+### 追加の発行制御
 
-特定の制御が適用される場合があります：
+特定の制御が適用される場合があります。例えば：
 
-- **マネージャーの承認**：リクエストを保留状態にし、証明書マネージャーによって承認されるまで待機します。
-- **登録エージェントおよび承認された署名**：CSRに必要な署名の数と必要なアプリケーションポリシーOIDを指定します。
+- **Manager Approval**：要求を保留状態にし、証明書マネージャーの承認を待ちます。
+- **Enrolment Agents and Authorized Signatures**：CSR に必要な署名数や、必要な Application Policy OIDs を指定します。
 
-### Methods to Request Certificates
+### 証明書要求の方法
 
-証明書は次の方法でリクエストできます：
+証明書は以下の方法で要求できます：
 
-1. **Windows Client Certificate Enrollment Protocol**（MS-WCCE）、DCOMインターフェースを使用。
-2. **ICertPassage Remote Protocol**（MS-ICPR）、名前付きパイプまたはTCP/IPを介して。
-3. **証明書登録Webインターフェース**、証明書機関Web登録役割がインストールされていること。
-4. **Certificate Enrollment Service**（CES）、証明書登録ポリシー（CEP）サービスと連携。
-5. **Network Device Enrollment Service**（NDES）、ネットワークデバイス用、シンプル証明書登録プロトコル（SCEP）を使用。
+1. Windows Client Certificate Enrollment Protocol (MS-WCCE)（DCOM インターフェースを使用）。
+2. ICertPassage Remote Protocol (MS-ICPR)、named pipes または TCP/IP 経由。
+3. Certificate Authority Web Enrollment ロールがインストールされた証明書登録のウェブインターフェース。
+4. Certificate Enrollment Service (CES) と Certificate Enrollment Policy (CEP) サービスを組み合わせた方法。
+5. ネットワーク機器向けの Network Device Enrollment Service (NDES)、Simple Certificate Enrollment Protocol (SCEP) を使用。
 
-Windowsユーザーは、GUI（`certmgr.msc`または`certlm.msc`）またはコマンドラインツール（`certreq.exe`またはPowerShellの`Get-Certificate`コマンド）を介しても証明書をリクエストできます。
+Windows ユーザーは GUI（certmgr.msc または certlm.msc）やコマンドラインツール（certreq.exe や PowerShell の Get-Certificate コマンド）を使って証明書を要求することもできます。
 ```bash
 # Example of requesting a certificate using PowerShell
 Get-Certificate -Template "User" -CertStoreLocation "cert:\\CurrentUser\\My"
 ```
 ## 証明書認証
 
-Active Directory (AD) は、主に **Kerberos** と **Secure Channel (Schannel)** プロトコルを利用して証明書認証をサポートしています。
+Active Directory (AD) は主に **Kerberos** と **Secure Channel (Schannel)** プロトコルを利用して証明書認証をサポートします。
 
 ### Kerberos 認証プロセス
 
-Kerberos 認証プロセスでは、ユーザーの Ticket Granting Ticket (TGT) の要求がユーザーの証明書の **秘密鍵** を使用して署名されます。この要求は、ドメインコントローラーによって証明書の **有効性**、**パス**、および **失効状況** を含むいくつかの検証を受けます。検証には、証明書が信頼できるソースから来ていることの確認や、**NTAUTH 証明書ストア** に発行者が存在することの確認も含まれます。検証が成功すると、TGT が発行されます。AD の **`NTAuthCertificates`** オブジェクトは、次の場所にあります:
+Kerberos 認証プロセスでは、ユーザーの Ticket Granting Ticket (TGT) 取得要求はユーザーの証明書の **秘密鍵** で署名されます。この要求はドメインコントローラーによっていくつかの検証を受け、検証項目には証明書の **有効性**、**パス（証明書チェーン）**、および **失効状況** が含まれます。さらに、証明書が信頼できる発行元からのものであることの確認や、発行者が **NTAUTH 証明書ストア** に存在することの確認も行われます。検証が成功すると TGT が発行されます。AD の **`NTAuthCertificates`** オブジェクトは次の場所にあります:
 ```bash
 CN=NTAuthCertificates,CN=Public Key Services,CN=Services,CN=Configuration,DC=<domain>,DC=<com>
 ```
-信頼を確立するために中心的な役割を果たします。
+証明書認証の信頼を確立する上で中心的な役割を果たす。
 
-### セキュアチャネル (Schannel) 認証
+### Secure Channel (Schannel) 認証
 
-Schannelは、安全なTLS/SSL接続を促進します。ハンドシェイク中に、クライアントは証明書を提示し、成功裏に検証されるとアクセスが許可されます。証明書をADアカウントにマッピングするには、Kerberosの**S4U2Self**機能や証明書の**Subject Alternative Name (SAN)**など、他の方法が関与する場合があります。
+Schannel は TLS/SSL によるセキュアな接続を促進します。ハンドシェイク中にクライアントが証明書を提示し、それが検証に成功すればアクセスが許可されます。証明書を AD アカウントにマッピングする方法には、Kerberos の **S4U2Self** 機能や証明書の **Subject Alternative Name (SAN)** などが含まれます。
 
-### AD証明書サービスの列挙
+### AD Certificate Services の列挙
 
-ADの証明書サービスはLDAPクエリを通じて列挙でき、**Enterprise Certificate Authorities (CAs)**およびその構成に関する情報を明らかにします。これは特別な権限なしに、ドメイン認証されたユーザーによってアクセス可能です。**[Certify](https://github.com/GhostPack/Certify)**や**[Certipy](https://github.com/ly4k/Certipy)**のようなツールは、AD CS環境での列挙と脆弱性評価に使用されます。
+AD の証明書サービスは LDAP クエリで列挙でき、**Enterprise Certificate Authorities (CAs)** やその設定に関する情報が明らかになります。これは特別な権限を必要とせず、ドメイン認証済みの任意のユーザーがアクセス可能です。ツールとしては **[Certify](https://github.com/GhostPack/Certify)** や **[Certipy](https://github.com/ly4k/Certipy)** のようなものが、AD CS 環境での列挙や脆弱性評価に使用されます。
 
-これらのツールを使用するためのコマンドには次のものが含まれます:
+これらのツールを使用するためのコマンドには次のようなものがあります：
 ```bash
-# Enumerate trusted root CA certificates and Enterprise CAs with Certify
-Certify.exe cas
-# Identify vulnerable certificate templates with Certify
-Certify.exe find /vulnerable
+# Enumerate trusted root CA certificates, Enterprise CAs and HTTP enrollment endpoints
+# Useful flags: /domain, /path, /hideAdmins, /showAllPermissions, /skipWebServiceChecks
+Certify.exe cas [/ca:SERVER\ca-name | /domain:domain.local | /path:CN=Configuration,DC=domain,DC=local] [/hideAdmins] [/showAllPermissions] [/skipWebServiceChecks]
+
+# Identify vulnerable certificate templates and filter for common abuse cases
+Certify.exe find
+Certify.exe find /vulnerable [/currentuser]
+Certify.exe find /enrolleeSuppliesSubject   # ESC1 candidates (CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT)
+Certify.exe find /clientauth                # templates with client-auth EKU
+Certify.exe find /showAllPermissions        # include template ACLs in output
+Certify.exe find /json /outfile:C:\Temp\adcs.json
+
+# Enumerate PKI object ACLs (Enterprise PKI container, templates, OIDs) – useful for ESC4/ESC7 discovery
+Certify.exe pkiobjects [/domain:domain.local] [/showAdmins]
 
 # Use Certipy for enumeration and identifying vulnerable templates
 certipy find -vulnerable -u john@corp.local -p Passw0rd -dc-ip 172.16.126.128
@@ -115,9 +125,11 @@ certipy find -vulnerable -u john@corp.local -p Passw0rd -dc-ip 172.16.126.128
 certutil.exe -TCAInfo
 certutil -v -dstemplate
 ```
-## 参考文献
+## 参考資料
 
 - [https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)
 - [https://comodosslstore.com/blog/what-is-ssl-tls-client-authentication-how-does-it-work.html](https://comodosslstore.com/blog/what-is-ssl-tls-client-authentication-how-does-it-work.html)
+- [GhostPack/Certify](https://github.com/GhostPack/Certify)
+- [GhostPack/Rubeus](https://github.com/GhostPack/Rubeus)
 
 {{#include ../../../banners/hacktricks-training.md}}
