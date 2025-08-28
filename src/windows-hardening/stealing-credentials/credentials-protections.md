@@ -38,6 +38,64 @@ This structure is packed into a single byte and determines **who can access whom
 - LSASS being PPL does **not prevent credential dumping if you can execute kernel shellcode** or **leverage a high-privileged process with proper access**.
 - **Setting or removing PPL** requires reboot or **Secure Boot/UEFI settings**, which can persist the PPL setting even after registry changes are reversed.
   
+### Create a PPL process at launch (documented API)
+
+Windows exposes a documented way to request a Protected Process Light level for a child process during creation using the extended startup attribute list. This does not bypass signing requirements — the target image must be signed for the requested signer class.
+
+Minimal flow in C/C++:
+
+```c
+// Request a PPL protection level for the child process at creation time
+// Requires Windows 8.1+ and a properly signed image for the selected level
+#include <windows.h>
+
+int wmain(int argc, wchar_t **argv) {
+    STARTUPINFOEXW si = {0};
+    PROCESS_INFORMATION pi = {0};
+    si.StartupInfo.cb = sizeof(si);
+
+    SIZE_T attrSize = 0;
+    InitializeProcThreadAttributeList(NULL, 1, 0, &attrSize);
+    si.lpAttributeList = (PPROC_THREAD_ATTRIBUTE_LIST)HeapAlloc(GetProcessHeap(), 0, attrSize);
+    if (!si.lpAttributeList) return 1;
+
+    if (!InitializeProcThreadAttributeList(si.lpAttributeList, 1, 0, &attrSize)) return 1;
+
+    DWORD level = PROTECTION_LEVEL_ANTIMALWARE_LIGHT; // or WINDOWS_LIGHT/LSA_LIGHT/WINTCB_LIGHT
+    if (!UpdateProcThreadAttribute(
+            si.lpAttributeList, 0,
+            PROC_THREAD_ATTRIBUTE_PROTECTION_LEVEL,
+            &level, sizeof(level), NULL, NULL)) {
+        return 1;
+    }
+
+    DWORD flags = EXTENDED_STARTUPINFO_PRESENT;
+    if (!CreateProcessW(L"C\\Windows\\System32\\notepad.exe", NULL, NULL, NULL, FALSE,
+                        flags, NULL, NULL, &si.StartupInfo, &pi)) {
+        // If the image isn't signed appropriately for the requested level,
+        // CreateProcess will fail with ERROR_INVALID_IMAGE_HASH (577).
+        return 1;
+    }
+
+    // cleanup
+    DeleteProcThreadAttributeList(si.lpAttributeList);
+    HeapFree(GetProcessHeap(), 0, si.lpAttributeList);
+    CloseHandle(pi.hThread);
+    CloseHandle(pi.hProcess);
+    return 0;
+}
+```
+
+Notes and constraints:
+- Use `STARTUPINFOEX` with `InitializeProcThreadAttributeList` and `UpdateProcThreadAttribute(PROC_THREAD_ATTRIBUTE_PROTECTION_LEVEL, ...)`, then pass `EXTENDED_STARTUPINFO_PRESENT` to `CreateProcess*`.
+- The protection `DWORD` can be set to constants such as `PROTECTION_LEVEL_WINTCB_LIGHT`, `PROTECTION_LEVEL_WINDOWS`, `PROTECTION_LEVEL_WINDOWS_LIGHT`, `PROTECTION_LEVEL_ANTIMALWARE_LIGHT`, or `PROTECTION_LEVEL_LSA_LIGHT`.
+- The child only starts as PPL if its image is signed for that signer class; otherwise process creation fails, commonly with `ERROR_INVALID_IMAGE_HASH (577)` / `STATUS_INVALID_IMAGE_HASH (0xC0000428)`.
+- This is not a bypass — it’s a supported API meant for appropriately signed images. Useful to harden tools or validate PPL-protected configurations.
+
+Example CLI using a minimal loader:
+- Antimalware signer: `CreateProcessAsPPL.exe 3 C:\Tools\agent.exe --svc`
+- LSA-light signer: `CreateProcessAsPPL.exe 4 C:\Windows\System32\notepad.exe`
+
 **Bypass PPL protections options:**
 
 If you want to dump LSASS despite PPL, you have 3 main options:
@@ -143,7 +201,12 @@ For more detailed information, consult the official [documentation](https://docs
 | Schema Admins           | Schema Admins            | Schema Admins                                                                 | Schema Admins                |
 | Server Operators        | Server Operators         | Server Operators                                                              | Server Operators             |
 
+## References
+
+- [CreateProcessAsPPL – minimal PPL process launcher](https://github.com/2x7EQ13/CreateProcessAsPPL)
+- [STARTUPINFOEX structure (Win32 API)](https://learn.microsoft.com/en-us/windows/win32/api/winbase/ns-winbase-startupinfoexw)
+- [InitializeProcThreadAttributeList (Win32 API)](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-initializeprocthreadattributelist)
+- [UpdateProcThreadAttribute (Win32 API)](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-updateprocthreadattribute)
+- [LSASS RunAsPPL – background and internals](https://itm4n.github.io/lsass-runasppl/)
+
 {{#include ../../banners/hacktricks-training.md}}
-
-
-
