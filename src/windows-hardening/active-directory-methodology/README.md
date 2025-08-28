@@ -307,6 +307,18 @@ Also, if a MSSQL instance is trusted (database link) by a different MSSQL instan
 abusing-ad-mssql.md
 {{#endref}}
 
+### IT asset/deployment platforms abuse
+
+Third-party inventory and deployment suites often expose powerful paths to credentials and code execution. See:
+
+{{#ref}}
+sccm-management-point-relay-sql-policy-secrets.md
+{{#endref}}
+
+{{#ref}}
+lansweeper-security.md
+{{#endref}}
+
 ### Unconstrained Delegation
 
 If you find any Computer object with the attribute [ADS_UF_TRUSTED_FOR_DELEGATION](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>) and you have domain privileges in the computer, you will be able to dump TGTs from memory of every users that logins onto the computer.\
