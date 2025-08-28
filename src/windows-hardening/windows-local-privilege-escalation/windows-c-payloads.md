@@ -106,7 +106,7 @@ int wmain(void) {
         STARTUPINFOW si = { .cb = sizeof(si) };
         PROCESS_INFORMATION pi = { 0 };
         if (CreateProcessWithTokenW(dupToken, LOGON_WITH_PROFILE,
-                L"C\\\Windows\\\System32\\\cmd.exe", NULL, CREATE_NEW_CONSOLE,
+                L"C\\\\Windows\\\\System32\\\\cmd.exe", NULL, CREATE_NEW_CONSOLE,
                 NULL, NULL, &si, &pi)) {
             CloseHandle(pi.hProcess);
             CloseHandle(pi.hThread);
@@ -159,8 +159,54 @@ int main(void) {
 
 ---
 
+## Create child as Protected Process Light (PPL)
+Request a PPL protection level for a child at creation time using `STARTUPINFOEX` + `PROC_THREAD_ATTRIBUTE_PROTECTION_LEVEL`. This is a documented API and will only succeed if the target image is signed for the requested signer class (Windows/WindowsLight/Antimalware/LSA/WinTcb).
+
+```c
+// x86_64-w64-mingw32-gcc -O2 -o spawn_ppl.exe spawn_ppl.c
+#include <windows.h>
+
+int wmain(void) {
+    STARTUPINFOEXW si = {0};
+    PROCESS_INFORMATION pi = {0};
+    si.StartupInfo.cb = sizeof(si);
+
+    SIZE_T attrSize = 0;
+    InitializeProcThreadAttributeList(NULL, 1, 0, &attrSize);
+    si.lpAttributeList = (PPROC_THREAD_ATTRIBUTE_LIST)HeapAlloc(GetProcessHeap(), 0, attrSize);
+    InitializeProcThreadAttributeList(si.lpAttributeList, 1, 0, &attrSize);
+
+    DWORD lvl = PROTECTION_LEVEL_ANTIMALWARE_LIGHT; // choose the desired level
+    UpdateProcThreadAttribute(si.lpAttributeList, 0,
+        PROC_THREAD_ATTRIBUTE_PROTECTION_LEVEL,
+        &lvl, sizeof(lvl), NULL, NULL);
+
+    if (!CreateProcessW(L"C\\\Windows\\\System32\\\notepad.exe", NULL, NULL, NULL, FALSE,
+                        EXTENDED_STARTUPINFO_PRESENT, NULL, NULL, &si.StartupInfo, &pi)) {
+        // likely ERROR_INVALID_IMAGE_HASH (577) if the image is not properly signed for that level
+        return 1;
+    }
+    DeleteProcThreadAttributeList(si.lpAttributeList);
+    HeapFree(GetProcessHeap(), 0, si.lpAttributeList);
+    CloseHandle(pi.hThread);
+    CloseHandle(pi.hProcess);
+    return 0;
+}
+```
+
+Levels used most commonly:
+- `PROTECTION_LEVEL_WINDOWS_LIGHT` (2)
+- `PROTECTION_LEVEL_ANTIMALWARE_LIGHT` (3)
+- `PROTECTION_LEVEL_LSA_LIGHT` (4)
+
+Validate the result with Process Explorer/Process Hacker by checking the Protection column.
+
+---
+
 ## References
 * Ron Bowes – “Fodhelper UAC Bypass Deep Dive” (2024)
 * SplinterCode – “AMSI Bypass 2023: The Smallest Patch Is Still Enough” (BlackHat Asia 2023)
+* CreateProcessAsPPL – minimal PPL process launcher: https://github.com/2x7EQ13/CreateProcessAsPPL
+* Microsoft Docs – STARTUPINFOEX / InitializeProcThreadAttributeList / UpdateProcThreadAttribute
 
 {{#include ../../banners/hacktricks-training.md}}
