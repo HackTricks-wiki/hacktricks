@@ -36,6 +36,11 @@ pdf-file-analysis.md
 
 
 {{#ref}}
+structural-file-format-exploit-detection.md
+{{#endref}}
+
+
+{{#ref}}
 png-tricks.md
 {{#endref}}
 
@@ -50,5 +55,3 @@ zips-tricks.md
 {{#endref}}
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-
