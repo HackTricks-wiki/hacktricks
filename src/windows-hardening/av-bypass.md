@@ -715,7 +715,64 @@ Detection / Mitigation
 •  Monitor creations of new *kernel* services and alert when a driver is loaded from a world-writable directory or not present on the allow-list.
 •  Watch for user-mode handles to custom device objects followed by suspicious `DeviceIoControl` calls.
 
-### Bypassing Zscaler Client Connector Posture Checks via On-Disk Binary Patching
+### Silver Fox BYOVD: WatchDog amsdk.sys/wamsdk.sys (Zemana SDK) on Win10/11
+
+A real-world APT campaign (“Silver Fox”) abused a signed but vulnerable antimalware driver to reliably kill EDR/AV (including PP/PPL) and sometimes elevate privileges on fully patched Windows 10/11.
+
+Key points
+- Driver: WatchDog Anti‑Malware amsdk.sys v1.0.600 (Microsoft-signed). Internals show Zemana SDK reuse (PDB path: zam64.pdb). Loadable on modern Windows where blocklists didn’t yet include it.
+- Legacy path: Older variants used ZAM.exe (legacy Zemana) on Win7-era systems.
+- Post-patch: Vendor released wamsdk.sys v1.1.100. It fixed LPE by tightening device security but still allowed arbitrary termination of processes, including PP/PPL.
+
+Root cause (amsdk.sys v1.0.600)
+- The device object is created via IoCreateDeviceSecure with a strong SDDL: D:P(A;;GA;;;SY)(A;;GA;;;BA) but DeviceCharacteristics omits FILE_DEVICE_SECURE_OPEN.
+- Without FILE_DEVICE_SECURE_OPEN, the secure DACL does not protect opens via the device namespace. Any user can open a handle by using a path with an extra component such as \\ .\\amsdk\\anyfile. Windows resolves it to the device object and returns a handle, bypassing the intended ACL.
+
+Powerful IOCTLs exposed
+- 0x80002010 – IOCTL_REGISTER_PROCESS: Register the caller.
+- 0x80002048 – IOCTL_TERMINATE_PROCESS: Terminates arbitrary PIDs, including PP/PPL (the driver only avoids critical system PIDs to prevent bugchecks).
+- 0x8000204C – IOCTL_OPEN_PROCESS: Returns full-access handles to target processes (LPE/token‑theft pivot).
+- 0x80002014 / 0x80002018 – Raw disk read/write (stealth tampering possible).
+
+Minimal PoC to terminate PP/PPL via user mode
+```c
+#define IOCTL_REGISTER_PROCESS  0x80002010
+#define IOCTL_TERMINATE_PROCESS 0x80002048
+
+int main() {
+    DWORD pidRegister = GetCurrentProcessId();
+    DWORD pidTerminate = /* target PID */;
+    HANDLE h = CreateFileA("\\\\.\\amsdk\\anyfile", GENERIC_READ|GENERIC_WRITE, 0, 0, OPEN_EXISTING, 0, 0);
+    DeviceIoControl(h, IOCTL_REGISTER_PROCESS,  &pidRegister,  sizeof(pidRegister),  0, 0, 0, 0);
+    DeviceIoControl(h, IOCTL_TERMINATE_PROCESS, &pidTerminate, sizeof(pidTerminate), 0, 0, 0, 0);
+    return 0;
+}
+```
+
+Local privilege escalation pivot
+- Because any user can open the device, IOCTL_OPEN_PROCESS can hand out full-access handles to privileged processes. From there you can DuplicateTokenEx/CreateProcessAsUser to jump to SYSTEM. Raw disk I/O IOCTLs can also be abused for stealthy boot/config tampering.
+
+Patch and adversary response
+- Fix guidance: set FILE_DEVICE_SECURE_OPEN at device creation and add PP/PPL checks to block protected process termination.
+- Vendor patch (wamsdk.sys v1.1.100): Enforced secure opens (closing the LPE) but still allowed arbitrary termination (no PP/PPL level checks).
+- Signature evasion: Actors flipped a single byte in the unauthenticated RFC 3161 countersignature inside the WIN_CERTIFICATE. Result: the Microsoft Authenticode chain remains valid, but the file’s SHA‑256 changes, defeating hash‑based driver blocklists.
+
+Operational tradecraft observed (loader)
+- Single EXE bundles the vulnerable driver(s) and a downloader module. On modern OS, amsdk.sys loads; on legacy OS, ZAM.exe path is used. The loader persists via services (e.g., Amsdk_Service kernel driver; a misspelled Termaintor service) and drops under C:\\Program Files\\RunTime.
+- EDR killer logic: open amsdk device; for each process name in a Base64 list (~192 entries), issue IOCTL_REGISTER_PROCESS → IOCTL_TERMINATE_PROCESS.
+
+Detection ideas
+- Monitor creation/start of kernel driver services backed by unusual paths and registry-driven NtLoadDriver flows creating Amsdk_Service; look for user-mode opens of \\.\\amsdk* followed by DeviceIoControl 0x80002010 → 0x80002048.
+- Hunt for the suspicious service name "Termaintor" and drops under C:\\Program Files\\RunTime.
+- Keep Microsoft’s vulnerable-driver blocklist current and augment with allow/deny lists (WDAC/HVCI/Smart App Control). Track use of new hashes on known signed binaries to catch countersignature tampering.
+
+References and tooling
+- LOLDrivers: https://github.com/magicsword-io/LOLDrivers
+- Microsoft Vulnerable Driver Blocklist: https://learn.microsoft.com/en-us/windows/security/application-security/application-control/app-control-for-business/design/microsoft-recommended-driver-block-rules
+- Terminator (Zemana BYOVD PoC): https://github.com/ZeroMemoryEx/Terminator
+- CPR writeup with IOCTLs/PoCs/IOCs: https://research.checkpoint.com/2025/silver-fox-apt-vulnerable-drivers/
+
+
 
 Zscaler’s **Client Connector** applies device-posture rules locally and relies on Windows RPC to communicate the results to other components. Two weak design choices make a full bypass possible:
 
@@ -839,5 +896,11 @@ References for PPL and tooling
 - [Sysinternals – Process Monitor](https://learn.microsoft.com/sysinternals/downloads/procmon)
 - [CreateProcessAsPPL launcher](https://github.com/2x7EQ13/CreateProcessAsPPL)
 - [Zero Salarium – Countering EDRs With The Backing Of Protected Process Light (PPL)](https://www.zerosalarium.com/2025/08/countering-edrs-with-backing-of-ppl-protection.html)
+
+- [Check Point Research – Chasing the Silver Fox: Cat & Mouse in Kernel Shadows](https://research.checkpoint.com/2025/silver-fox-apt-vulnerable-drivers/)
+- [LOLDrivers](https://github.com/magicsword-io/LOLDrivers)
+- [Microsoft – Vulnerable Driver Blocklist](https://learn.microsoft.com/en-us/windows/security/application-security/application-control/app-control-for-business/design/microsoft-recommended-driver-block-rules)
+- [Terminator – Zemana BYOVD PoC](https://github.com/ZeroMemoryEx/Terminator)
+- [Watchdog Anti‑Malware (product page)](https://watchdog.com/solutions/anti-malware/)
 
 {{#include ../banners/hacktricks-training.md}}
