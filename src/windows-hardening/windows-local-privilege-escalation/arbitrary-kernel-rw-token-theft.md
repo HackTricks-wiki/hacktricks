@@ -4,31 +4,31 @@
 
 ## Visão geral
 
-Se um driver vulnerável expõe um IOCTL que dá a um atacante primitivas arbitrárias de leitura e/ou escrita no kernel, elevar para NT AUTHORITY\SYSTEM pode frequentemente ser alcançado roubando um token de acesso do SYSTEM. A técnica copia o ponteiro Token do EPROCESS de um processo SYSTEM para o EPROCESS do processo atual.
+Se um driver vulnerável expõe um IOCTL que dá a um atacante primitivos arbitrários de leitura e/ou escrita no kernel, a elevação para NT AUTHORITY\SYSTEM costuma ser alcançada roubando um SYSTEM access token. A técnica copia o ponteiro Token do EPROCESS de um processo SYSTEM para o EPROCESS do processo atual.
 
 Por que funciona:
 - Cada processo tem uma estrutura EPROCESS que contém (entre outros campos) um Token (na verdade um EX_FAST_REF para um objeto token).
 - O processo SYSTEM (PID 4) possui um token com todos os privilégios habilitados.
-- Substituir o EPROCESS.Token do processo atual pelo ponteiro de token do SYSTEM faz com que o processo atual passe a executar como SYSTEM imediatamente.
+- Substituir o EPROCESS.Token do processo atual pelo ponteiro do token do SYSTEM faz com que o processo atual passe a rodar como SYSTEM imediatamente.
 
-> Os offsets em EPROCESS variam entre versões do Windows. Determine-os dinamicamente (símbolos) ou use constantes específicas da versão. Lembre-se também que EPROCESS.Token é um EX_FAST_REF (os 3 bits menos significativos são flags de contagem de referência).
+> Offsets em EPROCESS variam entre versões do Windows. Determine-os dinamicamente (symbols) ou use constantes específicas da versão. Lembre-se também que EPROCESS.Token é um EX_FAST_REF (os 3 bits menos significativos são flags de contagem de referência).
 
 ## Passos em alto nível
 
 1) Localize a base de ntoskrnl.exe e resolva o endereço de PsInitialSystemProcess.
-- A partir do modo usuário, use NtQuerySystemInformation(SystemModuleInformation) ou EnumDeviceDrivers para obter as bases dos drivers carregados.
-- Adicione o offset de PsInitialSystemProcess (a partir de símbolos/reversão) à base do kernel para obter seu endereço.
+- Do modo usuário, use NtQuerySystemInformation(SystemModuleInformation) ou EnumDeviceDrivers para obter as bases dos drivers carregados.
+- Some o offset de PsInitialSystemProcess (a partir de símbolos/reversing) à base do kernel para obter seu endereço.
 2) Leia o ponteiro em PsInitialSystemProcess → este é um ponteiro do kernel para o EPROCESS do SYSTEM.
-3) A partir do EPROCESS do SYSTEM, leia os offsets de UniqueProcessId e ActiveProcessLinks para percorrer a lista duplamente ligada das estruturas EPROCESS (ActiveProcessLinks.Flink/Blink) até encontrar o EPROCESS cujo UniqueProcessId é igual a GetCurrentProcessId(). Mantenha ambos:
-- EPROCESS_SYSTEM (para SYSTEM)
-- EPROCESS_SELF (para o processo atual)
+3) A partir do EPROCESS do SYSTEM, leia os offsets UniqueProcessId e ActiveProcessLinks para percorrer a lista duplamente ligada de estruturas EPROCESS (ActiveProcessLinks.Flink/Blink) até encontrar o EPROCESS cujo UniqueProcessId é igual a GetCurrentProcessId(). Mantenha ambos:
+- EPROCESS_SYSTEM (do SYSTEM)
+- EPROCESS_SELF (do processo atual)
 4) Leia o valor do token do SYSTEM: Token_SYS = *(EPROCESS_SYSTEM + TokenOffset).
 - Mascarar os 3 bits menos significativos: Token_SYS_masked = Token_SYS & ~0xF (comumente ~0xF ou ~0x7 dependendo do build; em x64 os 3 bits menos significativos são usados — máscara 0xFFFFFFFFFFFFFFF8).
-5) Option A (common): Preserve os 3 bits menos significativos do seu token atual e combine-os com o ponteiro do SYSTEM para manter o contador de referência embutido consistente.
+5) Opção A (mais comum): Preserve os 3 bits menos significativos do seu token atual e os combine com o ponteiro do SYSTEM para manter a contagem de referência embutida consistente.
 - Token_ME = *(EPROCESS_SELF + TokenOffset)
 - Token_NEW = (Token_SYS_masked | (Token_ME & 0x7))
-6) Escreva Token_NEW de volta em (EPROCESS_SELF + TokenOffset) usando sua primitiva de escrita no kernel.
-7) Seu processo atual agora é SYSTEM. Opcionalmente, inicie um novo cmd.exe ou powershell.exe para confirmar.
+6) Escreva Token_NEW de volta em (EPROCESS_SELF + TokenOffset) usando seu primitivo de escrita no kernel.
+7) Seu processo atual agora é SYSTEM. Opcionalmente, spawn um novo cmd.exe ou powershell.exe para confirmar.
 
 ## Pseudocódigo
 
@@ -106,14 +106,14 @@ return 0;
 }
 ```
 Notas:
-- Offsets: Use WinDbg’s `dt nt!_EPROCESS` com os PDBs do alvo, ou um carregador de símbolos em tempo de execução, para obter offsets corretos. Não hardcodear cegamente.
-- Mask: Em x64 o token é um EX_FAST_REF; os 3 bits menos significativos são bits de contagem de referência. Manter os bits baixos originais do seu token evita inconsistências imediatas no refcount.
-- Stability: Prefira elevar o processo atual; se você elevar um helper de curta duração pode perder SYSTEM quando ele encerrar.
+- Offsets: Use WinDbg’s `dt nt!_EPROCESS` with the target’s PDBs, or a runtime symbol loader, to get correct offsets. Não use valores codificados de forma cega.
+- Mask: On x64 the token is an EX_FAST_REF; low 3 bits are reference count bits. Manter os bits inferiores originais do seu token evita inconsistências imediatas na contagem de referências.
+- Stability: Prefira elevar o processo atual; se você elevar um helper de curta duração pode perder SYSTEM quando ele terminar.
 
 ## Detecção e mitigação
-- Carregar drivers de terceiros não assinados ou não confiáveis que expõem IOCTLs poderosos é a causa raiz.
+- Carregar drivers de terceiros não assinados ou não confiáveis que exponham IOCTLs poderosos é a causa raiz.
 - Kernel Driver Blocklist (HVCI/CI), DeviceGuard e as regras de Attack Surface Reduction podem impedir que drivers vulneráveis sejam carregados.
-- EDR pode monitorar sequências suspeitas de IOCTL que implementem leitura/gravação arbitrária e trocas de token.
+- EDR pode monitorar sequências de IOCTL suspeitas que implementem arbitrary read/write e token swaps.
 
 ## Referências
 - [HTB Reaper: Format-string leak + stack BOF → VirtualAlloc ROP (RCE) and kernel token theft](https://0xdf.gitlab.io/2025/08/26/htb-reaper.html)
