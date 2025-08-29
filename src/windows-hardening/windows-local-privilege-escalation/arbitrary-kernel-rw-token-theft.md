@@ -4,35 +4,35 @@
 
 ## Pregled
 
-Ako ranjivi driver izlaže IOCTL koji napadaču daje proizvoljne kernel read i/ili write primitivе, elevacija na NT AUTHORITY\SYSTEM se često može postići krađom SYSTEM access tokena. Tehnika kopira Token pokazivač iz SYSTEM procesa’ EPROCESS u trenutni proces’ EPROCESS.
+Ako ranjivi driver izlaže IOCTL koji omogućava napadaču arbitrary kernel read i/ili write primitive, elevacija na NT AUTHORITY\SYSTEM se često može postići krađom SYSTEM access token-a. Tehnika kopira Token pointer iz EPROCESS SYSTEM procesa u trenutni proces’ EPROCESS.
 
 Zašto radi:
-- Svaki process ima EPROCESS strukturu koja sadrži (između ostalog) Token (zapravo EX_FAST_REF ka token objektu).
-- SYSTEM proces (PID 4) drži token sa svim privilegijama uključenim.
-- Zamena trenutnog process’ EPROCESS.Token sa SYSTEM token pokazivačem odmah čini da trenutni proces radi kao SYSTEM.
+- Svaki proces ima EPROCESS strukturu koja sadrži (između ostalog) Token (zapravo EX_FAST_REF ka token objektu).
+- SYSTEM proces (PID 4) poseduje token sa svim omogućenim privilegijama.
+- Zamenom trenutnog procesa’ EPROCESS.Token sa SYSTEM token pointer-om, trenutni proces odmah radi kao SYSTEM.
 
-> Offsets u EPROCESS variraju između verzija Windowsa. Odredite ih dinamički (symbols) ili koristite constants specifične za verziju. Takođe zapamtite da je EPROCESS.Token EX_FAST_REF (donja 3 bita su flagovi za reference count).
+Napomena: Offsets u EPROCESS se razlikuju između verzija Windows-a. Odredite ih dinamički (symbols) ili koristite konstante specifične za verziju. Takođe zapamtite da je EPROCESS.Token EX_FAST_REF (donja 3 bita služe kao flagovi broja referenci).
 
-## Koraci na visokom nivou
+## Glavni koraci
 
-1) Pronađite ntoskrnl.exe base i rešite adresu PsInitialSystemProcess.
-- Iz user mode-a, koristite NtQuerySystemInformation(SystemModuleInformation) ili EnumDeviceDrivers da dobijete učitane driver baze.
+1) Locirajte ntoskrnl.exe base i rešite adresu PsInitialSystemProcess.
+- Iz user mode-a koristite NtQuerySystemInformation(SystemModuleInformation) ili EnumDeviceDrivers da dobijete baze učitanih drivere-a.
 - Dodajte offset PsInitialSystemProcess (iz symbols/reversing) na kernel base da biste dobili njegovu adresu.
-2) Pročitajte pokazivač na PsInitialSystemProcess → ovo je kernel pokazivač na SYSTEM-ov EPROCESS.
-3) Iz SYSTEM EPROCESS-a, pročitajte UniqueProcessId i ActiveProcessLinks offset-e da biste prešli dvostruko povezanu listu EPROCESS struktura (ActiveProcessLinks.Flink/Blink) dok ne nađete EPROCESS čiji je UniqueProcessId jednak GetCurrentProcessId(). Sačuvajte oba:
+2) Pročitajte pointer na PsInitialSystemProcess → ovo je kernel pointer na SYSTEM-ov EPROCESS.
+3) Iz SYSTEM EPROCESS-a, pročitajte offset-e UniqueProcessId i ActiveProcessLinks da biste prošli kroz dvostruko povezanu listu EPROCESS struktura (ActiveProcessLinks.Flink/Blink) dok ne nađete EPROCESS čiji je UniqueProcessId jednak GetCurrentProcessId(). Sačuvajte oba:
 - EPROCESS_SYSTEM (za SYSTEM)
 - EPROCESS_SELF (za trenutni proces)
-4) Pročitajte SYSTEM token vrednost: Token_SYS = *(EPROCESS_SYSTEM + TokenOffset).
-- Maskirajte donja 3 bita: Token_SYS_masked = Token_SYS & ~0xF (obično ~0xF ili ~0x7 u zavisnosti od build-a; na x64 donja 3 bita se koriste — 0xFFFFFFFFFFFFFFF8 maska).
-5) Opcija A (uobičajeno): Sačuvajte donja 3 bita iz vašeg trenutnog tokena i spojite ih na SYSTEM-ov pokazivač da biste održali ugrađeni ref count konzistentnim.
+4) Pročitajte vrednost SYSTEM token-a: Token_SYS = *(EPROCESS_SYSTEM + TokenOffset).
+- Maskirajte donja 3 bita: Token_SYS_masked = Token_SYS & ~0xF (obično ~0xF ili ~0x7 u zavisnosti od build-a; na x64 donja 3 bita se koriste — maska 0xFFFFFFFFFFFFFFF8).
+5) Option A (uobičajeno): Sačuvajte donja 3 bita iz vašeg trenutnog token-a i spojite ih na SYSTEM-ov pointer kako biste zadržali konzistentan embedded ref count.
 - Token_ME = *(EPROCESS_SELF + TokenOffset)
 - Token_NEW = (Token_SYS_masked | (Token_ME & 0x7))
-6) Zapišite Token_NEW nazad u (EPROCESS_SELF + TokenOffset) koristeći vaš kernel write primitiv.
-7) Vaš trenutni proces je sada SYSTEM. Po želji pokrenite novi cmd.exe ili powershell.exe da potvrdite.
+6) Upíšite Token_NEW nazad u (EPROCESS_SELF + TokenOffset) koristeći vaš kernel write primitive.
+7) Vaš trenutni proces je sada SYSTEM. Opcionalno pokrenite novi cmd.exe ili powershell.exe da potvrdite.
 
 ## Pseudokod
 
-Ispod je kostur koji koristi samo dva IOCTL-a iz ranjivog driver-a, jedan za 8-byte kernel read i jedan za 8-byte kernel write. Zamenite sa interfejsom vašeg drajvera.
+Ispod je skelet koji koristi samo dva IOCTL-a iz ranjivog driver-a, jedan za 8-byte kernel read i jedan za 8-byte kernel write. Zamenite sa interfejsom vašeg driver-a.
 ```c
 #include <Windows.h>
 #include <Psapi.h>
@@ -106,14 +106,14 @@ return 0;
 }
 ```
 Napomene:
-- Offseti: Koristite WinDbg’s `dt nt!_EPROCESS` sa ciljanim PDB-ovima, ili runtime symbol loader-om, da biste dobili ispravne offset-e. Nemojte ih slepo hardkodovati.
-- Maska: Na x64 token je EX_FAST_REF; najniža 3 bita su bita za referentni brojač. Zadržavanje originalnih niskih bitova iz vašeg tokena izbegava neposredne refcount neusaglašenosti.
-- Stabilnost: Poželjno je elevirati trenutni proces; ako elevirate kratkotrajnog helper-a, možete izgubiti SYSTEM kada on izađe.
+- Offseti: Koristite WinDbg’s `dt nt!_EPROCESS` sa ciljnim PDB-ovima, ili runtime symbol loader-om, da dobijete tačne offsete. Nemojte ih slepo hardkodovati.
+- Maska: Na x64 token je EX_FAST_REF; donja 3 bita su bitovi broja referenci. Zadržavanje originalnih donjih bitova iz vašeg token-a izbegava trenutne refcount neusklađenosti.
+- Stabilnost: Poželjno je podići privilegije trenutnog procesa; ako podignete privilegije kratkotrajnog pomoćnog procesa, možete izgubiti SYSTEM kada se on zatvori.
 
-## Otkrivanje i ublažavanje
-- Učitavanje unsigned ili nepouzdanih third‑party drajvera koji otkrivaju moćne IOCTLs je osnovni uzrok.
-- Kernel Driver Blocklist (HVCI/CI), DeviceGuard i pravila Attack Surface Reduction mogu sprečiti učitavanje ranjivih drajvera.
-- EDR može pratiti sumnjive IOCTL sekvence koje implementiraju arbitrary read/write i zamene tokena.
+## Detekcija & mitigacija
+- Učitavanje nepodpisanih ili nepoverljivih third‑party drajvera koji izlažu moćne IOCTLs je osnovni uzrok.
+- Kernel Driver Blocklist (HVCI/CI), DeviceGuard i Attack Surface Reduction pravila mogu sprečiti učitavanje ranjivih drajvera.
+- EDR može pratiti sumnjive IOCTL sekvence koje implementiraju arbitrary read/write i token swaps.
 
 ## References
 - [HTB Reaper: Format-string leak + stack BOF → VirtualAlloc ROP (RCE) and kernel token theft](https://0xdf.gitlab.io/2025/08/26/htb-reaper.html)

