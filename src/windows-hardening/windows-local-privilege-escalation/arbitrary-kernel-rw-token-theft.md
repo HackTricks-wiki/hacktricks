@@ -4,35 +4,35 @@
 
 ## Огляд
 
-Якщо вразливий драйвер експонує IOCTL, який дає атакуючому довільні примітиви kernel read та/або kernel write, підвищення до NT AUTHORITY\SYSTEM часто можна досягти шляхом викрадення SYSTEM access token. Техніка копіює вказівник Token з EPROCESS процесу SYSTEM у EPROCESS поточного процесу.
+Якщо вразливий драйвер надає IOCTL, який дає атакуючому примітиви довільного kernel read і/або write, підвищення привілеїв до NT AUTHORITY\SYSTEM часто можна досягти шляхом викрадення SYSTEM access token. Техніка копіює вказівник Token з EPROCESS процесу SYSTEM у EPROCESS поточного процесу.
 
 Чому це працює:
-- Кожен процес має структуру EPROCESS, яка містить (серед інших полів) Token (фактично EX_FAST_REF на об’єкт token).
-- Процес SYSTEM (PID 4) має token з увімкненими усіма привілеями.
-- Замiна EPROCESS.Token поточного процесу на вказівник SYSTEM token негайно змушує поточний процес працювати як SYSTEM.
+- Кожен процес має структуру EPROCESS, яка містить (серед інших полів) Token (фактично EX_FAST_REF до token object).
+- Процес SYSTEM (PID 4) має token з усіма дозволами.
+- Замінюючи EPROCESS.Token поточного процесу на вказівник SYSTEM token, поточний процес одразу починає виконуватися як SYSTEM.
 
-> Зсуви у EPROCESS змінюються між версіями Windows. Визначайте їх динамічно (symbols) або використовуйте константи для конкретних версій. Також пам’ятайте, що EPROCESS.Token — це EX_FAST_REF (нижні 3 біти — прапорці лічильника посилань).
+> Offsets у EPROCESS відрізняються між версіями Windows. Визначайте їх динамічно (symbols) або використовуйте константи для конкретної версії. Також пам’ятайте, що EPROCESS.Token — це EX_FAST_REF (нижні 3 біти — прапорці лічильника посилань).
 
 ## Основні кроки
 
-1) Знайдіть базу ntoskrnl.exe та визначте адресу PsInitialSystemProcess.
-- З user mode використовуйте NtQuerySystemInformation(SystemModuleInformation) або EnumDeviceDrivers, щоб отримати бази завантажених драйверів.
-- Додайте зсув PsInitialSystemProcess (із symbols/reversing) до бази kernel, щоб отримати його адресу.
-2) Прочитайте вказівник за PsInitialSystemProcess → це kernel-вказівник на EPROCESS процесу SYSTEM.
-3) З EPROCESS процесу SYSTEM прочитайте зсуви полів UniqueProcessId та ActiveProcessLinks, щоб пройти по двозв’язному списку структур EPROCESS (ActiveProcessLinks.Flink/Blink), поки не знайдете EPROCESS, у якого UniqueProcessId дорівнює GetCurrentProcessId(). Збережіть обидва:
-- EPROCESS_SYSTEM (for SYSTEM)
-- EPROCESS_SELF (for the current process)
-4) Прочитайте значення token процесу SYSTEM: Token_SYS = *(EPROCESS_SYSTEM + TokenOffset).
-- Зануліть (маскуйте) нижні 3 біти: Token_SYS_masked = Token_SYS & ~0xF (звичайно ~0xF або ~0x7 залежно від збірки; на x64 використовуються нижні 3 біти — маска 0xFFFFFFFFFFFFFFF8).
-5) Варіант A (поширений): Збережіть нижні 3 біти з вашого поточного token і пришийте їх до вказівника SYSTEM, щоб зберегти узгодженість вбудованого лічильника посилань.
+1) Знайти base ntoskrnl.exe і отримати адресу PsInitialSystemProcess.
+- З user mode використайте NtQuerySystemInformation(SystemModuleInformation) або EnumDeviceDrivers, щоб отримати бази завантажених драйверів.
+- Додайте офсет PsInitialSystemProcess (із symbols/reversing) до kernel base, щоб отримати його адресу.
+2) Прочитати вказівник за PsInitialSystemProcess → це kernel pointer на EPROCESS SYSTEM.
+3) З EPROCESS SYSTEM прочитати UniqueProcessId і ActiveProcessLinks offsets та пройти по двобічному зв’язаному списку структур EPROCESS (ActiveProcessLinks.Flink/Blink), доки не знайдете EPROCESS, у якого UniqueProcessId дорівнює GetCurrentProcessId(). Збережіть обидва:
+- EPROCESS_SYSTEM (для SYSTEM)
+- EPROCESS_SELF (для поточного процесу)
+4) Прочитати системний token: Token_SYS = *(EPROCESS_SYSTEM + TokenOffset).
+- Замаскуйте нижні 3 біти: Token_SYS_masked = Token_SYS & ~0xF (звично ~0xF або ~0x7 залежно від збірки; на x64 використовуються нижні 3 біти — маска 0xFFFFFFFFFFFFFFF8).
+5) Option A (common): Збережіть нижні 3 біти з вашого поточного token і приєднайте їх до вказівника SYSTEM, щоб зберегти консистентність вбудованого ref count.
 - Token_ME = *(EPROCESS_SELF + TokenOffset)
 - Token_NEW = (Token_SYS_masked | (Token_ME & 0x7))
 6) Запишіть Token_NEW назад у (EPROCESS_SELF + TokenOffset) за допомогою вашого kernel write примітиву.
-7) Ваш поточний процес тепер — SYSTEM. За бажанням запустіть cmd.exe або powershell.exe, щоб перевірити.
+7) Ваш поточний процес тепер SYSTEM. За бажанням запустіть новий cmd.exe або powershell.exe для підтвердження.
 
 ## Псевдокод
 
-Нижче скелет, який використовує лише два IOCTL з вразливого драйвера: один для 8-byte kernel read і один для 8-byte kernel write. Замініть на інтерфейс вашого драйвера.
+Нижче наведено скелет, який використовує лише два IOCTL з вразливого драйвера: один для 8-байтового kernel read і один для 8-байтового kernel write. Replace with your driver’s interface.
 ```c
 #include <Windows.h>
 #include <Psapi.h>
@@ -107,15 +107,15 @@ return 0;
 ```
 Примітки:
 - Зсуви: Use WinDbg’s `dt nt!_EPROCESS` with the target’s PDBs, or a runtime symbol loader, to get correct offsets. Do not hardcode blindly.
-- Маска: На x64 токен — EX_FAST_REF; нижні 3 біти — біти лічильника посилань. Збереження початкових молодших бітів вашого токена уникне негайних невідповідностей refcount.
-- Стабільність: Надавайте перевагу підвищенню привілеїв поточного процесу; якщо ви підвищите привілеї короткоживучого допоміжного процесу, при його завершенні ви можете втратити SYSTEM.
+- Маска: On x64 the token is an EX_FAST_REF; low 3 bits are reference count bits. Keeping the original low bits from your token avoids immediate refcount inconsistencies.
+- Стабільність: Віддавайте перевагу підвищенню привілеїв поточного процесу; якщо підвищити привілеї короткоживучого допоміжного процесу, ви можете втратити SYSTEM коли він завершиться.
 
 ## Виявлення та пом'якшення
-- Завантаження непідписаних або ненадійних драйверів сторонніх розробників, які надають потужні IOCTLs, є першопричиною.
-- Kernel Driver Blocklist (HVCI/CI), DeviceGuard, and Attack Surface Reduction rules можуть запобігти завантаженню вразливих драйверів.
-- EDR може відслідковувати підозрілі послідовності IOCTL, які реалізують arbitrary read/write, а також token swaps.
+- Завантаження непідписаних або ненадійних драйверів сторонніх розробників, які надають потужні IOCTLs, є кореневою причиною.
+- Kernel Driver Blocklist (HVCI/CI), DeviceGuard та правила Attack Surface Reduction можуть запобігти завантаженню вразливих драйверів.
+- EDR може спостерігати за підозрілими послідовностями IOCTL, які реалізують arbitrary read/write, а також за token swaps.
 
-## Джерела
+## Посилання
 - [HTB Reaper: Format-string leak + stack BOF → VirtualAlloc ROP (RCE) and kernel token theft](https://0xdf.gitlab.io/2025/08/26/htb-reaper.html)
 - [FuzzySecurity – Windows Kernel ExploitDev (token stealing examples)](https://www.fuzzysecurity.com/tutorials/expDev/17.html)
 

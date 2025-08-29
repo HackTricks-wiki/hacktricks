@@ -2,27 +2,27 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Named Pipe client impersonation — це примітив локального підвищення привілеїв, який дозволяє серверному потоку named-pipe прийняти контекст безпеки клієнта, який підключається до нього. На практиці, атака, що може виконувати код з правами SeImpersonatePrivilege, може змусити привілейований компонент (наприклад, службу SYSTEM) підключитися до контрольованого атакуючим pipe, викликати ImpersonateNamedPipeClient, продублювати отриманий токен у primary token і запустити процес від імені клієнта (часто NT AUTHORITY\SYSTEM).
+Named Pipe client impersonation — це примітив локального підвищення привілеїв, який дозволяє потоку сервера іменованого каналу прийняти контекст безпеки клієнта, що підключається до нього. Насправді, атакуючий, який може виконувати код з SeImpersonatePrivilege, може примусити привілейований клієнт (наприклад, сервіс SYSTEM) підключитися до керованого атакуючим pipe, викликати ImpersonateNamedPipeClient, дублювати отриманий токен у primary token і запустити процес від імені клієнта (часто NT AUTHORITY\SYSTEM).
 
-Ця сторінка зосереджена на основній техніці. Для повних ланцюжків експлойтів, що змушують SYSTEM підключитися до вашого pipe, див. сторінки родини Potato, згадані нижче.
+Ця сторінка зосереджена на основній техніці. Для повних експлойт-чейнів, які змушують SYSTEM підключатися до вашого pipe, див. сторінки сімейства Potato, зазначені нижче.
 
 ## Коротко
-- Create a named pipe: \\.\pipe\<random> і очікуйте підключення.
-- Змусіть привілейований компонент підключитися до нього (spooler/DCOM/EFSRPC/etc.).
-- Прочитайте принаймні одне повідомлення з pipe, після чого викличте ImpersonateNamedPipeClient.
-- Відкрийте impersonation token поточного потоку, DuplicateTokenEx(TokenPrimary) та використайте CreateProcessWithTokenW/CreateProcessAsUser для отримання процесу SYSTEM.
+- Створити named pipe: \\.\pipe\<random> і чекати на підключення.
+- Змусити привілейований компонент підключитися до нього (spooler/DCOM/EFSRPC/etc.).
+- Прочитати принаймні одне повідомлення з pipe, потім викликати ImpersonateNamedPipeClient.
+- Відкрити impersonation token поточного потоку, DuplicateTokenEx(TokenPrimary) та CreateProcessWithTokenW/CreateProcessAsUser щоб отримати процес SYSTEM.
 
 ## Вимоги та ключові API
-- Привілеї, що зазвичай потрібні викликаючому процесу/потоку:
-- SeImpersonatePrivilege для успішної імперсонації підключеного клієнта та для використання CreateProcessWithTokenW.
-- Альтернативно, після імперсонації SYSTEM, можна використати CreateProcessAsUser, що може вимагати SeAssignPrimaryTokenPrivilege і SeIncreaseQuotaPrivilege (ці права задовольняються, коли ви імперсонували SYSTEM).
+- Привілеї, які зазвичай потрібні викликаючому процесу/потоку:
+- SeImpersonatePrivilege щоб успішно імпостерувати підключеного клієнта і використовувати CreateProcessWithTokenW.
+- Альтернативно, після імпостерування SYSTEM, можна використовувати CreateProcessAsUser, що може вимагати SeAssignPrimaryTokenPrivilege і SeIncreaseQuotaPrivilege (ці привілеї задовольняються, коли ви імпостеруєте SYSTEM).
 - Основні API, що використовуються:
 - CreateNamedPipe / ConnectNamedPipe
-- ReadFile/WriteFile (треба прочитати принаймні одне повідомлення перед імперсонацією)
+- ReadFile/WriteFile (потрібно прочитати принаймні одне повідомлення перед імпостеруванням)
 - ImpersonateNamedPipeClient та RevertToSelf
 - OpenThreadToken, DuplicateTokenEx(TokenPrimary)
 - CreateProcessWithTokenW або CreateProcessAsUser
-- Рівень імперсонації: щоб виконувати корисні дії локально, клієнт повинен дозволяти SecurityImpersonation (за замовчуванням для багатьох локальних RPC/named-pipe клієнтів). Клієнти можуть понижувати це, використовуючи SECURITY_SQOS_PRESENT | SECURITY_IDENTIFICATION при відкритті pipe.
+- Рівень імпостерування: щоб виконувати корисні локальні дії, клієнт має дозволяти SecurityImpersonation (типово для багатьох локальних RPC/named-pipe клієнтів). Клієнти можуть знизити це, передавши SECURITY_SQOS_PRESENT | SECURITY_IDENTIFICATION при відкритті pipe.
 
 ## Мінімальний Win32 робочий процес (C)
 ```c
@@ -70,10 +70,10 @@ return 0;
 ```
 Примітки:
 - Якщо ImpersonateNamedPipeClient повертає ERROR_CANNOT_IMPERSONATE (1368), переконайтеся, що ви спочатку читаєте з pipe і що клієнт не обмежив impersonation до Identification level.
-- Віддавайте перевагу DuplicateTokenEx з SecurityImpersonation і TokenPrimary для створення первинного токена, придатного для створення процесу.
+- Віддавайте перевагу DuplicateTokenEx з SecurityImpersonation і TokenPrimary для створення primary token, придатного для створення процесу.
 
 ## .NET швидкий приклад
-У .NET NamedPipeServerStream може виконувати impersonate через RunAsClient. Після impersonate дублюйте thread token і створіть процес.
+У .NET NamedPipeServerStream може impersonate через RunAsClient. Після impersonation продублюйте thread token і створіть процес.
 ```csharp
 using System; using System.IO.Pipes; using System.Runtime.InteropServices; using System.Diagnostics;
 class P {
@@ -93,13 +93,13 @@ Process pi; CreateProcessWithTokenW(p, 2, null, null, 0, IntPtr.Zero, null, ref 
 }
 }
 ```
-## Загальні тригери/примуси, щоб отримати SYSTEM до вашого pipe
-Ці техніки примушують привілейовані служби підключитися до вашого named pipe, щоб ви могли impersonate їх:
+## Поширені тригери/примуси, щоб доставити SYSTEM на ваш pipe
+Ці техніки примушують привілейовані служби підключитися до вашої named pipe, щоб ви могли impersonate them:
 - Print Spooler RPC trigger (PrintSpoofer)
 - DCOM activation/NTLM reflection variants (RoguePotato/JuicyPotato[NG], GodPotato)
 - EFSRPC pipes (EfsPotato/SharpEfsPotato)
 
-See detailed usage and compatibility here:
+Детальне використання та сумісність див. тут:
 
 -
 {{#ref}}
@@ -110,27 +110,27 @@ roguepotato-and-printspoofer.md
 juicypotato.md
 {{#endref}}
 
-If you just need a full example of crafting the pipe and impersonating to spawn SYSTEM from a service trigger, see:
+Якщо вам потрібен повний приклад створення pipe і impersonating, щоб spawn SYSTEM з service trigger, див.:
 
 -
 {{#ref}}
 from-high-integrity-to-system-with-name-pipes.md
 {{#endref}}
 
-## Усунення проблем і нюанси
-- Потрібно прочитати щонайменше одне повідомлення з pipe перед викликом ImpersonateNamedPipeClient; інакше ви отримаєте ERROR_CANNOT_IMPERSONATE (1368).
+## Налагодження та підводні камені
+- Ви повинні прочитати принаймні одне повідомлення з pipe перед викликом ImpersonateNamedPipeClient; інакше отримаєте ERROR_CANNOT_IMPERSONATE (1368).
 - Якщо клієнт підключається з SECURITY_SQOS_PRESENT | SECURITY_IDENTIFICATION, сервер не зможе повністю impersonate; перевірте рівень impersonation токена через GetTokenInformation(TokenImpersonationLevel).
-- CreateProcessWithTokenW вимагає наявності SeImpersonatePrivilege у викликача. Якщо це невдається з ERROR_PRIVILEGE_NOT_HELD (1314), використовуйте CreateProcessAsUser після того, як ви вже impersonated SYSTEM.
-- Переконайтеся, що security descriptor вашого pipe дозволяє цільовій службі підключатися, якщо ви його посилюєте; за замовчуванням, pipes під \\.\pipe доступні згідно з DACL сервера.
+- CreateProcessWithTokenW вимагає SeImpersonatePrivilege у викликача. Якщо це завершується ERROR_PRIVILEGE_NOT_HELD (1314), використайте CreateProcessAsUser після того, як ви вже impersonated SYSTEM.
+- Переконайтесь, що security descriptor вашого pipe дозволяє цільовій службі підключитися, якщо ви його підсилюєте; за замовчуванням, pipe під \\.\pipe доступні відповідно до DACL сервера.
 
-## Виявлення та hardening
-- Моніторьте створення та підключення named pipe. Sysmon Event IDs 17 (Pipe Created) і 18 (Pipe Connected) корисні для встановлення базової лінії легітимних імен pipe і виявлення незвичних, випадковоподібних pipe перед подіями маніпуляції токенами.
-- Шукайте послідовності: процес створює pipe, служба SYSTEM підключається, потім процес-створювач породжує дочірній процес у контексті SYSTEM.
-- Зменшіть ризик, видаливши SeImpersonatePrivilege з неключових облікових записів служб та уникаючи непотрібних логонів служб з високими привілеями.
-- Захисна розробка: при підключенні до ненадійних named pipe вказуйте SECURITY_SQOS_PRESENT з SECURITY_IDENTIFICATION, щоб перешкодити серверам повністю impersonate клієнта, якщо це не потрібно.
+## Виявлення та захист
+- Моніторте створення named pipe і підключення. Sysmon Event IDs 17 (Pipe Created) та 18 (Pipe Connected) корисні для складання бази легітимних імен pipe і виявлення незвичних, випадковоподібних pipe перед подіями маніпуляцій з токеном.
+- Шукайте послідовності: процес створює pipe, служба SYSTEM підключається, після чого процес-створювач породжує дочірній процес як SYSTEM.
+- Зменшіть ризик, видаливши SeImpersonatePrivilege з неважливих облікових записів служб і уникаючи непотрібних логонів служб з високими привілеями.
+- Захисна розробка: при підключенні до ненадійних named pipe вказуйте SECURITY_SQOS_PRESENT з SECURITY_IDENTIFICATION, щоб запобігти повному impersonate серверів клієнта, якщо це не потрібно.
 
-## References
-- Windows: ImpersonateNamedPipeClient documentation (impersonation requirements and behavior). https://learn.microsoft.com/en-us/windows/win32/api/namedpipeapi/nf-namedpipeapi-impersonatenamedpipeclient
-- ired.team: Windows named pipes privilege escalation (walkthrough and code examples). https://ired.team/offensive-security/privilege-escalation/windows-namedpipes-privilege-escalation
+## Посилання
+- Windows: ImpersonateNamedPipeClient documentation (вимоги до impersonation та поведінка). https://learn.microsoft.com/en-us/windows/win32/api/namedpipeapi/nf-namedpipeapi-impersonatenamedpipeclient
+- ired.team: Windows named pipes privilege escalation (покрокове керівництво та приклади коду). https://ired.team/offensive-security/privilege-escalation/windows-namedpipes-privilege-escalation
 
 {{#include ../../banners/hacktricks-training.md}}
