@@ -1,93 +1,93 @@
-# AD Certificates
+# AD-Zertifikate
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Introduction
+## Einführung
 
-### Components of a Certificate
+### Bestandteile eines Zertifikats
 
-- The **Subject** of the certificate denotes its owner.
-- A **Public Key** is paired with a privately held key to link the certificate to its rightful owner.
-- The **Validity Period**, defined by **NotBefore** and **NotAfter** dates, marks the certificate's effective duration.
-- A unique **Serial Number**, provided by the Certificate Authority (CA), identifies each certificate.
-- The **Issuer** refers to the CA that has issued the certificate.
-- **SubjectAlternativeName** allows for additional names for the subject, enhancing identification flexibility.
-- **Basic Constraints** identify if the certificate is for a CA or an end entity and define usage restrictions.
-- **Extended Key Usages (EKUs)** delineate the certificate's specific purposes, like code signing or email encryption, through Object Identifiers (OIDs).
-- The **Signature Algorithm** specifies the method for signing the certificate.
-- The **Signature**, created with the issuer's private key, guarantees the certificate's authenticity.
+- Der **Subject** des Zertifikats bezeichnet seinen Inhaber.
+- Ein **Public Key** ist mit einem privat gehaltenen Schlüssel gepaart, um das Zertifikat seinem rechtmäßigen Inhaber zuzuordnen.
+- Die **Validity Period**, definiert durch die **NotBefore**- und **NotAfter**-Daten, gibt die Gültigkeitsdauer des Zertifikats an.
+- Eine eindeutige **Serial Number**, von der Certificate Authority (CA) vergeben, identifiziert jedes Zertifikat.
+- Der **Issuer** ist die CA, die das Zertifikat ausgestellt hat.
+- Die **SubjectAlternativeName** erlaubt zusätzliche Namen für den Subject und erhöht die Flexibilität bei der Identifikation.
+- Die **Basic Constraints** geben an, ob das Zertifikat für eine CA oder für ein End Entity bestimmt ist, und definieren Nutzungsbeschränkungen.
+- Die **Extended Key Usages (EKUs)** legen die spezifischen Zwecke des Zertifikats fest, z. B. Code-Signing oder E-Mail-Verschlüsselung, über Object Identifiers (OIDs).
+- Der **Signature Algorithm** legt die Methode zum Signieren des Zertifikats fest.
+- Die **Signature**, mit dem privaten Schlüssel des Issuers erstellt, garantiert die Authentizität des Zertifikats.
 
-### Special Considerations
+### Besondere Überlegungen
 
-- **Subject Alternative Names (SANs)** expand a certificate's applicability to multiple identities, crucial for servers with multiple domains. Secure issuance processes are vital to avoid impersonation risks by attackers manipulating the SAN specification.
+- **Subject Alternative Names (SANs)** erweitern die Anwendbarkeit eines Zertifikats auf mehrere Identitäten und sind besonders wichtig für Server mit mehreren Domains. Sichere Ausstellungsprozesse sind entscheidend, um Risiken der Identitätsvortäuschung zu vermeiden, etwa durch Angreifer, die die SAN-Spezifikation manipulieren.
 
-### Certificate Authorities (CAs) in Active Directory (AD)
+### Zertifizierungsstellen (CAs) in Active Directory (AD)
 
-AD CS acknowledges CA certificates in an AD forest through designated containers, each serving unique roles:
+AD CS erkennt CA-Zertifikate in einem AD-Forest durch bestimmte Container an, die jeweils unterschiedliche Rollen erfüllen:
 
-- **Certification Authorities** container holds trusted root CA certificates.
-- **Enrolment Services** container details Enterprise CAs and their certificate templates.
-- **NTAuthCertificates** object includes CA certificates authorized for AD authentication.
-- **AIA (Authority Information Access)** container facilitates certificate chain validation with intermediate and cross CA certificates.
+- Der Container **Certification Authorities** enthält vertrauenswürdige Root-CA-Zertifikate.
+- Der Container **Enrolment Services** enthält Informationen zu Enterprise CAs und deren Zertifikatvorlagen.
+- Das Objekt **NTAuthCertificates** enthält CA-Zertifikate, die für AD-Authentifizierung autorisiert sind.
+- Der **AIA (Authority Information Access)** Container erleichtert die Validierung der Zertifikatskette mit Zwischen- und Cross-CA-Zertifikaten.
 
-### Certificate Acquisition: Client Certificate Request Flow
+### Zertifikatserwerb: Ablauf einer Client-Zertifikatsanfrage
 
-1. The request process begins with clients finding an Enterprise CA.
-2. A CSR is created, containing a public key and other details, after generating a public-private key pair.
-3. The CA assesses the CSR against available certificate templates, issuing the certificate based on the template's permissions.
-4. Upon approval, the CA signs the certificate with its private key and returns it to the client.
+1. Der Anforderungsprozess beginnt damit, dass Clients eine Enterprise CA finden.
+2. Ein CSR wird erstellt, der nach Generierung eines Public-/Private-Key-Paares einen Public Key und weitere Details enthält.
+3. Die CA bewertet den CSR anhand verfügbarer Zertifikatvorlagen und stellt das Zertifikat basierend auf den Berechtigungen der Vorlage aus.
+4. Nach Genehmigung signiert die CA das Zertifikat mit ihrem privaten Schlüssel und gibt es an den Client zurück.
 
-### Certificate Templates
+### Zertifikatvorlagen
 
-Defined within AD, these templates outline the settings and permissions for issuing certificates, including permitted EKUs and enrollment or modification rights, critical for managing access to certificate services.
+In AD definierte Vorlagen legen Einstellungen und Berechtigungen für die Ausstellung von Zertifikaten fest, einschließlich erlaubter EKUs und Enrollment- oder Änderungsrechte, und sind entscheidend für die Verwaltung des Zugriffs auf Zertifikatdienste.
 
-## Certificate Enrollment
+## Zertifikats-Enrollment
 
-Der Enrollment-Prozess für Zertifikate wird von einem Administrator initiiert, der eine **certificate template** erstellt, welche anschließend von einer Enterprise Certificate Authority (CA) **veröffentlicht** wird. Dadurch wird die Vorlage für die Client-Enrollments verfügbar, ein Schritt, der erreicht wird, indem der Name der Vorlage zum `certificatetemplates` Feld eines Active Directory-Objekts hinzugefügt wird.
+Der Enrollment-Prozess wird von einem Administrator initiiert, der eine **Zertifikatvorlage erstellt**, die dann von einer Enterprise Certificate Authority (CA) **publiziert** wird. Dadurch wird die Vorlage für Client-Enrollment verfügbar, ein Schritt, der erreicht wird, indem der Name der Vorlage dem Feld `certificatetemplates` eines Active Directory-Objekts hinzugefügt wird.
 
-Damit ein Client ein Zertifikat anfordern kann, müssen ihm **Enrollment-Rechte** gewährt werden. Diese Rechte werden durch Security Descriptors auf der certificate template und auf der Enterprise CA selbst definiert. Berechtigungen müssen an beiden Stellen gesetzt sein, damit eine Anfrage erfolgreich ist.
+Damit ein Client ein Zertifikat anfordern kann, müssen **enrollment rights** gewährt werden. Diese Rechte werden durch Sicherheitsdeskriptoren sowohl auf der Zertifikatvorlage als auch auf der Enterprise CA selbst definiert. Berechtigungen müssen an beiden Stellen vergeben sein, damit eine Anfrage erfolgreich ist.
 
-### Template Enrollment Rights
+### Enrollment-Berechtigungen der Vorlage
 
-Diese Rechte werden über Access Control Entries (ACEs) spezifiziert und beschreiben Berechtigungen wie:
+Diese Rechte werden durch Access Control Entries (ACEs) festgelegt und beschreiben Berechtigungen wie:
 
-- **Certificate-Enrollment** und **Certificate-AutoEnrollment** Rechte, jeweils verknüpft mit spezifischen GUIDs.
-- **ExtendedRights**, die alle erweiterten Berechtigungen zulassen.
+- **Certificate-Enrollment** und **Certificate-AutoEnrollment** Rechte, jeweils mit bestimmten GUIDs verknüpft.
+- **ExtendedRights**, die alle erweiterten Berechtigungen erlauben.
 - **FullControl/GenericAll**, die vollständige Kontrolle über die Vorlage gewähren.
 
-### Enterprise CA Enrollment Rights
+### Enterprise-CA Enrollment-Berechtigungen
 
-Die Rechte der CA sind im Security Descriptor der CA beschrieben, der über die Certificate Authority Management-Konsole zugänglich ist. Einige Einstellungen erlauben sogar Low-Privileged Usern Remote-Zugriff, was ein Sicherheitsrisiko darstellen kann.
+Die Rechte der CA sind in ihrem Sicherheitsdeskriptor festgelegt und über die Certificate Authority Management-Konsole zugänglich. Einige Einstellungen erlauben sogar niedrig privilegierten Benutzern Remote-Zugriff, was ein Sicherheitsrisiko darstellen kann.
 
-### Additional Issuance Controls
+### Zusätzliche Ausstellungssteuerungen
 
-Bestimmte Kontrollen können angewendet werden, wie z. B.:
+Bestimmte Kontrollen können angewendet werden, z. B.:
 
-- **Manager Approval**: Platziert Anfragen in einem Pending-Zustand, bis ein Certificate Manager diese genehmigt.
-- **Enrolment Agents and Authorized Signatures**: Legen die Anzahl erforderlicher Signaturen auf einer CSR und die nötigen Application Policy OIDs fest.
+- **Manager Approval**: Setzt Anfragen in einen ausstehenden Zustand, bis sie von einem Certificate Manager genehmigt werden.
+- **Enrolment Agents and Authorized Signatures**: Legen die Anzahl erforderlicher Signaturen auf einem CSR und die notwendigen Application Policy OIDs fest.
 
-### Methods to Request Certificates
+### Methoden zum Anfordern von Zertifikaten
 
 Zertifikate können angefordert werden über:
 
-1. Das **Windows Client Certificate Enrollment Protocol** (MS-WCCE), unter Verwendung von DCOM-Interfaces.
-2. Das **ICertPassage Remote Protocol** (MS-ICPR), über Named Pipes oder TCP/IP.
-3. Die **certificate enrollment web interface**, wenn die Certificate Authority Web Enrollment Rolle installiert ist.
-4. Den **Certificate Enrollment Service** (CES), in Verbindung mit dem Certificate Enrollment Policy (CEP) Service.
-5. Den **Network Device Enrollment Service** (NDES) für Netzwerkgeräte, unter Nutzung des Simple Certificate Enrollment Protocol (SCEP).
+1. **Windows Client Certificate Enrollment Protocol** (MS-WCCE), über DCOM-Schnittstellen.
+2. **ICertPassage Remote Protocol** (MS-ICPR), über Named Pipes oder TCP/IP.
+3. Die **certificate enrollment web interface**, wenn die Certificate Authority Web Enrollment-Rolle installiert ist.
+4. Den **Certificate Enrollment Service** (CES), in Verbindung mit dem Certificate Enrollment Policy (CEP)-Dienst.
+5. Den **Network Device Enrollment Service** (NDES) für Netzwerkgeräte, unter Verwendung des Simple Certificate Enrollment Protocol (SCEP).
 
-Windows-Benutzer können Zertifikate außerdem über die GUI (`certmgr.msc` oder `certlm.msc`) oder über Kommandozeilentools (`certreq.exe` oder PowerShells `Get-Certificate`-Befehl) anfordern.
+Windows-Benutzer können Zertifikate auch über die GUI (`certmgr.msc` oder `certlm.msc`) oder über Kommandozeilentools (`certreq.exe` oder PowerShells `Get-Certificate`-Befehl) anfordern.
 ```bash
 # Example of requesting a certificate using PowerShell
 Get-Certificate -Template "User" -CertStoreLocation "cert:\\CurrentUser\\My"
 ```
-## Zertifikat-Authentifizierung
+## Zertifikatsauthentifizierung
 
-Active Directory (AD) unterstützt die Zertifikat-Authentifizierung und verwendet hauptsächlich die Protokolle **Kerberos** und **Secure Channel (Schannel)**.
+Active Directory (AD) unterstützt Zertifikatsauthentifizierung und verwendet primär die Protokolle **Kerberos** und **Secure Channel (Schannel)**.
 
 ### Kerberos-Authentifizierungsprozess
 
-Im Kerberos-Authentifizierungsprozess wird die Anfrage eines Benutzers für ein Ticket Granting Ticket (TGT) mit dem **private key** des Benutzerzertifikats signiert. Diese Anfrage durchläuft beim Domain Controller mehrere Prüfungen, darunter die **Gültigkeit**, der **Pfad** und der **Widerrufsstatus** des Zertifikats. Zu den Prüfungen gehört außerdem die Überprüfung, dass das Zertifikat aus einer vertrauenswürdigen Quelle stammt und die Bestätigung, dass der Aussteller im **NTAUTH certificate store** vorhanden ist. Erfolgreiche Prüfungen führen zur Ausstellung eines TGT. Das **`NTAuthCertificates`**-Objekt in AD, zu finden unter:
+Im Kerberos-Authentifizierungsprozess wird die Anfrage eines Benutzers für ein Ticket Granting Ticket (TGT) mit dem **privaten Schlüssel** des Benutzerzertifikats signiert. Diese Anfrage unterliegt mehreren Prüfungen durch den Domain Controller, einschließlich der **Gültigkeit**, des **Zertifikatspfads** und des **Widerrufsstatus** des Zertifikats. Zu den Prüfungen gehört auch die Überprüfung, dass das Zertifikat von einer vertrauenswürdigen Quelle stammt, sowie die Bestätigung, dass der Aussteller im **NTAUTH Zertifikatspeicher** vorhanden ist. Erfolgreiche Prüfungen führen zur Ausstellung eines TGT. Das **`NTAuthCertificates`**-Objekt in AD, zu finden unter:
 ```bash
 CN=NTAuthCertificates,CN=Public Key Services,CN=Services,CN=Configuration,DC=<domain>,DC=<com>
 ```
@@ -95,11 +95,11 @@ ist zentral für den Aufbau von Vertrauen bei der Zertifikatsauthentifizierung.
 
 ### Secure Channel (Schannel) Authentifizierung
 
-Schannel erleichtert sichere TLS/SSL-Verbindungen, bei denen während eines Handshakes der Client ein Zertifikat präsentiert, das, wenn es erfolgreich validiert wird, den Zugriff autorisiert. Die Zuordnung eines Zertifikats zu einem AD-Konto kann Kerberos’ **S4U2Self**-Funktion oder den **Subject Alternative Name (SAN)** des Zertifikats umfassen, neben anderen Methoden.
+Schannel ermöglicht sichere TLS/SSL-Verbindungen, bei denen der Client während des Handshakes ein Zertifikat präsentiert, das bei erfolgreicher Validierung Zugriff autorisiert. Die Zuordnung eines Zertifikats zu einem AD-Konto kann Kerberos’ **S4U2Self**-Funktion oder den Zertifikats-**Subject Alternative Name (SAN)** sowie andere Methoden involvieren.
 
 ### AD Certificate Services Enumeration
 
-Die Zertifikatdienste von AD können über LDAP-Abfragen enumeriert werden, wodurch Informationen über **Enterprise Certificate Authorities (CAs)** und deren Konfigurationen offenbart werden. Dies ist für jeden domänen-authentifizierten Benutzer ohne besondere Berechtigungen zugänglich. Tools wie **[Certify](https://github.com/GhostPack/Certify)** und **[Certipy](https://github.com/ly4k/Certipy)** werden zur Enumeration und Schwachstellenbewertung in AD CS-Umgebungen verwendet.
+Die Certificate Services von AD können durch LDAP-Abfragen enumerated werden und liefern Informationen über **Enterprise Certificate Authorities (CAs)** und deren Konfigurationen. Dies ist für jeden domänenauthentifizierten Benutzer ohne besondere Privilegien zugänglich. Tools wie **[Certify](https://github.com/GhostPack/Certify)** und **[Certipy](https://github.com/ly4k/Certipy)** werden für enumeration und vulnerability assessment in AD CS-Umgebungen verwendet.
 
 Befehle zur Verwendung dieser Tools umfassen:
 ```bash
