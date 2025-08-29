@@ -4,35 +4,35 @@
 
 ## Muhtasari
 
-Ikiwa driver dhaifu ina IOCTL inayomruhusu mshambuliaji primitives za arbitrary kernel read na/au write, kuinua haki hadi NT AUTHORITY\SYSTEM mara nyingi inaweza kufanikiwa kwa kuiba token ya SYSTEM. Mbinu hii inakopa pointer ya Token kutoka kwenye EPROCESS ya mchakato wa SYSTEM na kuiweka kwenye EPROCESS ya mchakato wako wa sasa.
+Ikiwa driver iliyo hatarini ina IOCTL inayomruhusu mshambuliaji arbitrary kernel read and/or write primitives, kuinua haki hadi NT AUTHORITY\SYSTEM mara nyingi hufanikiwa kwa kuiba SYSTEM access token. Mbinu inakopa pointer ya Token kutoka EPROCESS ya mchakato wa SYSTEM na kuiweka kwenye EPROCESS ya mchakato wa sasa.
 
 Kwa nini inafanya kazi:
-- Kila mchakato una muundo wa EPROCESS ambao una (miongoni mwa sehemu nyingine) Token (kwa kweli EX_FAST_REF kuelekea kitu cha token).
-- Mchakato wa SYSTEM (PID 4) una token yenye ruhusa zote zikiwa zimeteuliwa.
-- Kubadilisha EPROCESS.Token ya mchakato wako wa sasa na pointer ya token ya SYSTEM hufanya mchakato wako uendelee kuendesha kama SYSTEM mara moja.
+- Kila mchakato una muundo wa EPROCESS ambao una (miongoni mwa mashamba mengine) Token (kibinadamu ni EX_FAST_REF kwa token object).
+- Mchakato wa SYSTEM (PID 4) una token yenye haki zote zikiwa zimewezeshwa.
+- Kubadilisha EPROCESS.Token ya mchakato wa sasa na pointer ya token ya SYSTEM hufanya mchakato wa sasa uendeshe kama SYSTEM mara moja.
 
-> Offsets katika EPROCESS zinatofautiana kati ya matoleo ya Windows. Zidhibitio kwa njia ya dynamic (symbols) au tumia constants maalum kwa toleo. Pia kumbuka kuwa EPROCESS.Token ni EX_FAST_REF (bita 3 za chini ni flag za reference count).
+> Offsets kwenye EPROCESS zinatofautiana kati ya matoleo ya Windows. Ziagilie kwa njia ya dynamic (symbols) au tumia constants za toleo maalum. Pia kumbuka kwamba EPROCESS.Token ni EX_FAST_REF (viga vya chini 3 ni bendera za reference count).
 
 ## Hatua za juu
 
-1) Pata base ya ntoskrnl.exe na tatua anwani ya PsInitialSystemProcess.
-- Kutoka user mode, tumia NtQuerySystemInformation(SystemModuleInformation) au EnumDeviceDrivers kupata base za drivers zilizo load.
-- Ongeza offset ya PsInitialSystemProcess (kutoka symbols/reversing) kwenye kernel base kupata anwani yake.
-2) Soma pointer kwenye PsInitialSystemProcess → hii ni kernel pointer kuelekea EPROCESS ya SYSTEM.
-3) Kutoka EPROCESS ya SYSTEM, soma UniqueProcessId na ActiveProcessLinks offsets ili kuvuka orodha ya double linked list ya miundo ya EPROCESS (ActiveProcessLinks.Flink/Blink) hadi utakapopata EPROCESS ambayo UniqueProcessId yake ni sawa na GetCurrentProcessId(). Hifadhi yote:
+1) Pata ntoskrnl.exe base na ufute anwani ya PsInitialSystemProcess.
+- Kutoka user mode, tumia NtQuerySystemInformation(SystemModuleInformation) au EnumDeviceDrivers kupata driver bases zilizosomwa.
+- Ongeza offset ya PsInitialSystemProcess (kutokana na symbols/reversing) kwenye kernel base kupata anwani yake.
+2) Soma pointer kwenye PsInitialSystemProcess → hii ni pointer ya kernel kwenda EPROCESS ya SYSTEM.
+3) Kutoka EPROCESS ya SYSTEM, soma offsets za UniqueProcessId na ActiveProcessLinks ili kupitia linked list ya EPROCESS (ActiveProcessLinks.Flink/Blink) hadi utakapopata EPROCESS ambayo UniqueProcessId inalingana na GetCurrentProcessId(). Hifadhi zote:
 - EPROCESS_SYSTEM (kwa SYSTEM)
 - EPROCESS_SELF (kwa mchakato wa sasa)
 4) Soma thamani ya token ya SYSTEM: Token_SYS = *(EPROCESS_SYSTEM + TokenOffset).
-- Futa bit 3 za chini: Token_SYS_masked = Token_SYS & ~0xF (kawaida ~0xF au ~0x7 kulingana na build; kwenye x64 bit 3 za chini zinatumika — mask 0xFFFFFFFFFFFFFFF8).
-5) Chaguo A (kawaida): Hifadhi bit 3 za chini kutoka token yako ya sasa na ziweke kwenye pointer ya SYSTEM ili kuweka reference count iliyojengwa iwe thabiti.
+- Ondoa bits za chini 3: Token_SYS_masked = Token_SYS & ~0xF (kwa kawaida ~0xF au ~0x7 kutegemea build; kwenye x64 bits za chini 3 zinatumika — 0xFFFFFFFFFFFFFFF8 mask).
+5) Chaguo A (kawaida): Hifadhi bits za chini 3 kutoka token yako ya sasa na uziunganishe kwenye pointer ya SYSTEM ili kuweka reference count iliyojengwa kuwa thabiti.
 - Token_ME = *(EPROCESS_SELF + TokenOffset)
 - Token_NEW = (Token_SYS_masked | (Token_ME & 0x7))
-6) Andika Token_NEW kurudi ndani ya (EPROCESS_SELF + TokenOffset) kwa kutumia kernel write primitive yako.
-7) Mchakato wako wa sasa sasa ni SYSTEM. Hiari anzisha cmd.exe mpya au powershell.exe kuthibitisha.
+6) Andika Token_NEW tena kwenye (EPROCESS_SELF + TokenOffset) ukitumia kernel write primitive yako.
+7) Mchakato wako wa sasa sasa ni SYSTEM. Hiari, anzisha cmd.exe mpya au powershell.exe kuthibitisha.
 
 ## Pseudocode
 
-Chini ni skeleton inayotumia tu IOCTL mbili kutoka kwa driver dhaifu, mojawapo kwa 8-byte kernel read na mojawapo kwa 8-byte kernel write. Badilisha na interface ya driver yako.
+Below is a skeleton that only uses two IOCTLs from a vulnerable driver, one for 8-byte kernel read and one for 8-byte kernel write. Replace with your driver’s interface.
 ```c
 #include <Windows.h>
 #include <Psapi.h>
@@ -106,16 +106,16 @@ return 0;
 }
 ```
 Vidokezo:
-- Offsets: Tumia WinDbg’s `dt nt!_EPROCESS` na PDBs za lengo, au runtime symbol loader, ili kupata offsets sahihi. Usifanye hardcode bila tahadhari.
-- Mask: On x64 the token is an EX_FAST_REF; low 3 bits are reference count bits. Kuendelea na low bits za asili kutoka token yako kuepuka matatizo ya refcount mara moja.
-- Stability: Pendelea kuinua current process; ikiwa unainua helper mfupi unaweza kupoteza SYSTEM anapoondoka.
+- Ofseti: Tumia WinDbg’s `dt nt!_EPROCESS` pamoja na PDBs za lengo, au runtime symbol loader, kupata ofseti sahihi. Usiyaharcode bila kufikiri.
+- Mask: Kwenye x64 token ni EX_FAST_REF; low 3 bits ni reference count bits. Kuhifadhi low bits za asili kutoka kwa token yako kunazuia inconsistent refcount mara moja.
+- Utulivu: Pendelea kuinua mchakato wa sasa; ikiwa utaelevate helper mfupi-muda unaweza kupoteza SYSTEM anapoondoka.
 
-## Ugunduzi na kupunguza
-- Kupakia unsigned au untrusted third‑party drivers ambazo zinaonyesha IOCTLs zenye nguvu ndizo chanzo cha tatizo.
-- Kernel Driver Blocklist (HVCI/CI), DeviceGuard, and Attack Surface Reduction rules zinaweza kuzuia vulnerable drivers kupakiwa.
-- EDR inaweza kuangalia mfululizo wa IOCTL unaoshukiwa ambao unatekeleza arbitrary read/write na token swaps.
+## Utambuzi & mitigation
+- Kupakia madereva ya third‑party yasiyotiwa saini au yasiyothibitishwa yanayofunua IOCTLs zenye nguvu ndicho chanzo kikuu.
+- Kernel Driver Blocklist (HVCI/CI), DeviceGuard, and Attack Surface Reduction rules zinaweza kuzuia madereva yaliyo hatarishi kupakia.
+- EDR inaweza kusubiri mfululizo wa suspicious IOCTLs ambazo zinaimplement arbitrary read/write na token swaps.
 
-## Marejeleo
+## References
 - [HTB Reaper: Format-string leak + stack BOF → VirtualAlloc ROP (RCE) and kernel token theft](https://0xdf.gitlab.io/2025/08/26/htb-reaper.html)
 - [FuzzySecurity – Windows Kernel ExploitDev (token stealing examples)](https://www.fuzzysecurity.com/tutorials/expDev/17.html)
 

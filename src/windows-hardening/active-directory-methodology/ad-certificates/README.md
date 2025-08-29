@@ -7,99 +7,99 @@
 ### Vipengele vya Cheti
 
 - **Subject** ya cheti inaonyesha mmiliki wake.
-- **Public Key** imeambatanishwa na ufunguo wa kibinafsi ili kuunganisha cheti na mmiliki wake halali.
-- **Validity Period**, inayofafanuliwa na tarehe za **NotBefore** na **NotAfter**, inaonyesha muda wa uhalali wa cheti.
-- **Serial Number** ya kipekee, inayotolewa na Certificate Authority (CA), inatambulisha kila cheti.
-- **Issuer** inarejea CA iliyotolewa cheti.
-- **SubjectAlternativeName** inaruhusu majina ya ziada kwa subject, ikiongeza ufanisi wa utambuzi.
-- **Basic Constraints** zinaonyesha kama cheti ni kwa ajili ya CA au kwa entiti ya mwisho na zinafafanua vizuizi vya matumizi.
-- **Extended Key Usages (EKUs)** zinaainisha madhumuni maalum ya cheti, kama kusaini code au kushughulikia encryption ya barua pepe, kupitia Object Identifiers (OIDs).
-- **Signature Algorithm** inaelezea njia ya kusaini cheti.
-- **Signature**, inayotengenezwa kwa ufunguo wa kibinafsi wa issuer, inahakikisha uhalali wa cheti.
+- **Public Key** ni sambamba na key iliyohifadhiwa kwa siri ili kuunganisha cheti na mmiliki halali.
+- **Validity Period**, iliyofafanuliwa kwa tarehe za **NotBefore** na **NotAfter**, inaonyesha muda cheti kinachofanya kazi.
+- **Serial Number** ya kipekee, inayotolewa na Certificate Authority (CA), inatambua kila cheti.
+- **Issuer** inarejea CA iliyetoa cheti.
+- **SubjectAlternativeName** inaruhusu majina ya ziada kwa subject, ikiongeza kubadilika kwa utambuzi.
+- **Basic Constraints** zinaonyesha kama cheti ni kwa CA au kwa entiti ya mwisho na zinafafanua vikwazo vya matumizi.
+- **Extended Key Usages (EKUs)** zinaainisha madhumuni maalum ya cheti, kama code signing au email encryption, kupitia Object Identifiers (OIDs).
+- **Signature Algorithm** inaeleza njia ya kusaini cheti.
+- **Signature**, iliyotengenezwa kwa private key ya issuer, inahakikisha uhalali wa cheti.
 
 ### Mambo Maalum ya Kuzingatia
 
-- **Subject Alternative Names (SANs)** huongeza matumizi ya cheti kwa vitambulisho vingi, jambo muhimu kwa seva zenye domains nyingi. Mchakato salama wa utoaji ni muhimu ili kuepuka hatari ya kuigwa au utapeli kwa wapinzani wanaoweza kubadilisha vipimo vya SAN.
+- **Subject Alternative Names (SANs)** hueneza uhalali wa cheti kwa vitambulisho vingi, muhimu kwa server zenye domains nyingi. Mchakato salama wa utoaji ni muhimu ili kuepuka hatari za utapeli ambapo wadukuzi wanaweza kubadilisha vipimo vya SAN.
 
 ### Certificate Authorities (CAs) katika Active Directory (AD)
 
-AD CS inatambua vyeti vya CA katika AD forest kupitia containers zilizotengwa, kila moja ikiwa na jukumu maalum:
+AD CS inatambua vyeti vya CA ndani ya msitu wa AD kupitia makontena yaliyoteuliwa, kila mmoja ukiwa na jukumu lake la kipekee:
 
-- **Certification Authorities** container inashikilia vyeti vya root CA vinavyoaminika.
-- **Enrolment Services** container inaeleza Enterprise CAs na template zao za cheti.
-- **NTAuthCertificates** object inajumuisha vyeti vya CA vinavyoruhusiwa kwa uthibitisho wa AD.
-- **AIA (Authority Information Access)** container inasaidia uthibitisho wa mnyororo wa vyeti kwa vyeti vya intermediate na cross CA.
+- **Certification Authorities** container ina vyeti vya CA za root vinavyotendwa kuaminiwa.
+- **Enrolment Services** container inaelezea Enterprise CAs na template za vyeti zao.
+- **NTAuthCertificates** object inajumuisha vyeti vya CA vilivyoidhinishwa kwa authentication ya AD.
+- **AIA (Authority Information Access)** container inasaidia uhakiki wa mnyororo wa vyeti kwa vyeti vya intermediate na cross CA.
 
-### Upataji wa Cheti: Mtiririko wa Ombi la Cheti la Mteja
+### Certificate Acquisition: Client Certificate Request Flow
 
-1. Mchakato wa ombi unaanza kwa wateja kupata Enterprise CA.
-2. CSR inaundwa, ikiwa na public key na maelezo mengine, baada ya kuunda jozi ya ufunguo wa umma/wa kibinafsi.
-3. CA inapima CSR dhidi ya template za cheti zilizo wazi, na kutoa cheti kulingana na ruhusa za template.
-4. Baada ya kuidhinishwa, CA inasaini cheti kwa ufunguo wake wa kibinafsi na kurirudisha kwa mteja.
+1. Mchakato wa ombi huanza kwa wateja kutafuta Enterprise CA.
+2. CSR inaundwa, ikiwa na public key na maelezo mengine, baada ya kutengeneza jozi ya public-private key.
+3. CA inakagua CSR dhidi ya template za vyeti zilizopo, ikitoa cheti kulingana na ruhusa za kiolezo.
+4. Baada ya kuidhinishwa, CA inasaini cheti kwa private key yake na kurudisha kwa mteja.
 
-### Violezo vya Cheti
+### Certificate Templates
 
-Violezo hivi vinavyowekwa ndani ya AD vinaeleza mipangilio na ruhusa za kutoa vyeti, ikiwa ni pamoja na EKUs zinazoruhusiwa na haki za kujiandikisha au kuhariri, muhimu kwa kusimamia ufikiaji kwa huduma za vyeti.
+Zilizoainishwa ndani ya AD, violezo hivi vinaelezea mipangilio na ruhusa za kutoa vyeti, ikiwa ni pamoja na EKUs zinazoruhusiwa na haki za usajili au uhariri, muhimu kwa kusimamia ufikiaji wa huduma za cheti.
 
 ## Usajili wa Cheti
 
-Mchakato wa usajili wa vyeti unaanzishwa na msimamizi anayehubiri **kuunda template ya cheti**, ambayo kisha **inachapishwa** na Enterprise Certificate Authority (CA). Hii inafanya template kupatikana kwa ajili ya usajili wa mteja, hatua ambayo hufikiwa kwa kuongeza jina la template kwenye shamba la `certificatetemplates` la kitu katika Active Directory.
+Mchakato wa usajili wa vyeti unaanzishwa na msimamizi anayeyaunda **certificate template**, ambayo kisha **huchapishwa** na Enterprise Certificate Authority (CA). Hii hufanya kiolezo kupatikana kwa usajili wa mteja, hatua inayofikiwa kwa kuongeza jina la kiolezo kwenye uwanja wa `certificatetemplates` wa kitu cha Active Directory.
 
-Ili mteja aombe cheti, lazima apewe **haki za usajili**. Haki hizi zinafafanuliwa na security descriptors kwenye template ya cheti na kwenye Enterprise CA yenyewe. Ruhusa lazima zitatekelezwa katika maeneo yote mawili ili ombi lifanikiwe.
+Ili mteja kuomba cheti, lazima apewe **haki za usajili**. Haki hizi zimetengwa na security descriptors kwenye kiolezo cha cheti na kwenye Enterprise CA yenyewe. Ruhusa lazima zichukuliwe katika maeneo yote mawili ili ombi lifanikiwe.
 
-### Haki za Usajili za Template
+### Haki za Usajili za Kiolezo
 
-Haki hizi zinaainishwa kupitia Access Control Entries (ACEs), zikieleza ruhusa kama:
+Haki hizi zinaainishwa kupitia Access Control Entries (ACEs), zikielezea ruhusa kama:
 
-- Haki za **Certificate-Enrollment** na **Certificate-AutoEnrollment**, kila moja ikiwa na GUID maalum.
-- **ExtendedRights**, kuruhusu ruhusa zote zilizopanuliwa.
-- **FullControl/GenericAll**, kutoa udhibiti kamili juu ya template.
+- **Certificate-Enrollment** na **Certificate-AutoEnrollment** rights, kila moja ikihusishwa na GUID maalum.
+- **ExtendedRights**, ikiruhusu ruhusa zote za ziada.
+- **FullControl/GenericAll**, ikitoa udhibiti kamili juu ya kiolezo.
 
 ### Haki za Usajili za Enterprise CA
 
-Haki za CA zimetajwa katika security descriptor yake, inayopatikana kupitia consola ya Certificate Authority. Mipangilio fulani hata inaweza kuruhusu watumiaji wenye hadhi ndogo kufikia mbali, jambo ambalo linaweza kuwa hatari kwa usalama.
+Haki za CA zimetajwa kwenye security descriptor yake, inayopatikana kupitia Certificate Authority management console. Baadhi ya mipangilio hata inaruhusu watumiaji wenye haki ndogo ufikiaji wa mbali, jambo ambalo linaweza kuwa hatari kwa usalama.
 
 ### Udhibiti wa Ziada wa Utoaji
 
-Udhibiti fulani unaweza kutumika, kama vile:
+Udhibiti fulani unaweza kutumika, kama:
 
-- **Manager Approval**: Inuweka maombi katika hali ya kusubiri hadi idhini itolewe na meneja wa vyeti.
-- **Enrolment Agents and Authorized Signatures**: Huweka idadi ya saini zinazohitajika kwenye CSR na Application Policy OIDs zinazohitajika.
+- **Manager Approval**: Inaweka maombi katika hali ya kusubiri hadi yaidhinishwe na meneja wa vyeti.
+- **Enrolment Agents and Authorized Signatures**: Huaeleza idadi ya saini zinazohitajika kwenye CSR na Application Policy OIDs zinazohitajika.
 
-### Njia za Kuomba Vyeti
+### Mbinu za Kuomba Vyeti
 
 Vyeti vinaweza kuombwa kupitia:
 
-1. **Windows Client Certificate Enrollment Protocol** (MS-WCCE), kwa kutumia interfaces za DCOM.
+1. **Windows Client Certificate Enrollment Protocol** (MS-WCCE), kwa kutumia DCOM interfaces.
 2. **ICertPassage Remote Protocol** (MS-ICPR), kupitia named pipes au TCP/IP.
-3. kiolesura cha wavuti cha **certificate enrollment**, ikiwa role ya Certificate Authority Web Enrollment imewekwa.
-4. **Certificate Enrollment Service** (CES), pamoja na Certificate Enrollment Policy (CEP) service.
-5. **Network Device Enrollment Service** (NDES) kwa vifaa vya mtandao, kwa kutumia Simple Certificate Enrollment Protocol (SCEP).
+3. interface ya wavuti ya certificate enrollment, kwa kusakinisha Certificate Authority Web Enrollment role.
+4. **Certificate Enrollment Service** (CES), kwa pamoja na huduma ya Certificate Enrollment Policy (CEP).
+5. **Network Device Enrollment Service** (NDES) kwa vifaa vya mtandao, ikitumia Simple Certificate Enrollment Protocol (SCEP).
 
-Watumiaji wa Windows pia wanaweza kuomba vyeti kupitia GUI (`certmgr.msc` au `certlm.msc`) au zana za mstari wa amri (`certreq.exe` au amri ya PowerShell `Get-Certificate`).
+Watumiaji wa Windows pia wanaweza kuomba vyeti kupitia GUI (`certmgr.msc` au `certlm.msc`) au zana za command-line (`certreq.exe` au amri ya PowerShell `Get-Certificate`).
 ```bash
 # Example of requesting a certificate using PowerShell
 Get-Certificate -Template "User" -CertStoreLocation "cert:\\CurrentUser\\My"
 ```
-## Uthibitishaji wa Cheti
+## Uthibitishaji wa Vyeti
 
-Active Directory (AD) inaunga mkono uthibitishaji wa vyeti, hasa ikitumia protokoli za **Kerberos** na **Secure Channel (Schannel)**.
+Active Directory (AD) inaunga mkono uthibitishaji wa vyeti, hasa ikitumia protokali za **Kerberos** na **Secure Channel (Schannel)**.
 
 ### Mchakato wa Uthibitishaji wa Kerberos
 
-Katika mchakato wa uthibitishaji wa Kerberos, ombi la mtumiaji la Ticket Granting Ticket (TGT) linasainiwa kwa kutumia **private key** ya cheti cha mtumiaji. Ombi hili hupitia uthibitisho kadhaa na domain controller, ikijumuisha **validity**, **path**, na **revocation status** ya cheti. Uthibitisho pia unajumuisha kuthibitisha kwamba cheti kinatokana na chanzo kinachotegemewa na kuthibitisha uwepo wa muuzaji katika **NTAUTH certificate store**. Uthibitisho uliopitishwa husababisha utolewaji wa TGT. Kitu cha **`NTAuthCertificates`** katika AD, kinapatikana katika:
+Katika mchakato wa uthibitishaji wa Kerberos, ombi la mtumiaji la Ticket Granting Ticket (TGT) linasainiwa kwa kutumia **funguo binafsi** ya cheti cha mtumiaji. Ombi hili hupitia uthibitisho kadhaa na domain controller, ikiwa ni pamoja na **uhalali**, **mlolongo (path)**, na **hali ya kufutwa (revocation status)** ya cheti. Uthibitisho pia unajumuisha kuthibitisha kwamba cheti kimetoka kwa chanzo kinachotambulika na kuthibitisha uwepo wa mdhibitishaji katika **NTAUTH certificate store**. Uthibitisho uliofanikiwa husababisha kutolewa kwa TGT. Kitu cha **`NTAuthCertificates`** katika AD, kilicho katika:
 ```bash
 CN=NTAuthCertificates,CN=Public Key Services,CN=Services,CN=Configuration,DC=<domain>,DC=<com>
 ```
-ni muhimu katika kuanzisha uaminifu kwa uthibitishaji wa vyeti.
+ina jukumu kuu katika kuanzisha uaminifu kwa uthibitishaji wa cheti.
 
-### Secure Channel (Schannel) Authentication
+### Uthibitishaji wa Secure Channel (Schannel)
 
-Schannel inawezesha miunganisho salama ya TLS/SSL, ambapo wakati wa handshake, mteja huwasilisha cheti ambacho, ikiwa kimeidhinishwa kwa mafanikio, hutoa idhini ya upatikanaji. Kuambatanisha cheti kwa akaunti ya AD kunaweza kuhusisha Kerberos’s **S4U2Self** function au cheti’s **Subject Alternative Name (SAN)**, miongoni mwa mbinu nyingine.
+Schannel huwezesha muunganisho salama wa TLS/SSL, ambapo wakati wa handshake, mteja huwasilisha cheti ambacho, ikiwa kimethibitishwa kwa mafanikio, kinaruhusu upatikanaji. Ulinganifu wa cheti na akaunti ya AD unaweza kuhusisha kipengele cha Kerberos **S4U2Self** au **Subject Alternative Name (SAN)** ya cheti, miongoni mwa mbinu nyingine.
 
 ### AD Certificate Services Enumeration
 
-AD's certificate services zinaweza kuorodheshwa kupitia maswali ya LDAP, zikifichua taarifa kuhusu **Enterprise Certificate Authorities (CAs)** na usanidi wao. Hii inapatikana kwa mtumiaji yeyote aliye domain-authenticated bila vibali maalum. Zana kama **[Certify](https://github.com/GhostPack/Certify)** na **[Certipy](https://github.com/ly4k/Certipy)** zinatumiwa kwa ajili ya kuorodhesha na tathmini ya udhaifu katika mazingira ya AD CS.
+Huduma za cheti za AD zinaweza kuorodheshwa kupitia maswali ya LDAP, zikifichua taarifa kuhusu **Enterprise Certificate Authorities (CAs)** na usanidi wao. Hii inapatikana kwa mtumiaji yeyote aliyeathibitishwa kwenye domaine bila ruhusa maalum. Zana kama **[Certify](https://github.com/GhostPack/Certify)** na **[Certipy](https://github.com/ly4k/Certipy)** zinatumiwa kwa uorodheshaji na tathmini ya udhaifu katika mazingira ya AD CS.
 
 Amri za kutumia zana hizi ni pamoja na:
 ```bash
@@ -125,7 +125,7 @@ certipy find -vulnerable -u john@corp.local -p Passw0rd -dc-ip 172.16.126.128
 certutil.exe -TCAInfo
 certutil -v -dstemplate
 ```
-## Marejeo
+## Marejeleo
 
 - [https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)
 - [https://comodosslstore.com/blog/what-is-ssl-tls-client-authentication-how-does-it-work.html](https://comodosslstore.com/blog/what-is-ssl-tls-client-authentication-how-does-it-work.html)

