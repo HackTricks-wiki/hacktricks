@@ -4,35 +4,35 @@
 
 ## Genel Bakış
 
-Eğer bir vulnerable driver bir saldırganın arbitrary kernel read ve/veya write primitiflerine erişim sağlayan bir IOCTL sunuyorsa, NT AUTHORITY\SYSTEM yükseltmesi sıklıkla bir SYSTEM erişim token’ı çalınarak gerçekleştirilebilir. Teknik, bir SYSTEM process’in EPROCESS içindeki Token pointer’ını mevcut process’in EPROCESS’ine kopyalar.
+Eğer bir vuln driver, saldırgana arbitrary kernel read ve/veya write primitive’leri sağlayan bir IOCTL açıyorsa, NT AUTHORITY\SYSTEM yetkisine yükselme genellikle bir SYSTEM access Token’ı çalarak gerçekleştirilebilir. Teknik, SYSTEM process’in EPROCESS’indeki Token pointer’ını mevcut process’in EPROCESS’ine kopyalar.
 
-Neden işe yarıyor:
-- Her process’in, (diğer alanlar arasında) bir Token (aslında token objesine işaret eden bir EX_FAST_REF) içeren bir EPROCESS yapısı vardır.
-- SYSTEM process (PID 4) tüm ayrıcalıkları etkin olan bir token’a sahiptir.
+Neden işe yarar:
+- Her process’in içinde (diğer alanlar arasında) bir Token içeren bir EPROCESS yapısı vardır (aslında bir EX_FAST_REF to a token object).
+- SYSTEM process (PID 4) tüm ayrıcalıkları etkinleştirilmiş bir token’a sahiptir.
 - Mevcut process’in EPROCESS.Token’ını SYSTEM token pointer’ı ile değiştirmek, mevcut process’in hemen SYSTEM olarak çalışmasını sağlar.
 
-> EPROCESS içindeki offset’ler Windows sürümleri arasında değişir. Bunları dinamik olarak (symbols) belirleyin veya sürüme özel sabitler kullanın. Ayrıca EPROCESS.Token’ın bir EX_FAST_REF olduğunu unutmayın (alt 3 bit referans sayacı bayraklarıdır).
+> EPROCESS içindeki offset’ler Windows sürümleri arasında değişir. Bunları dinamik olarak belirleyin (symbols) veya sürüme özel sabitler kullanın. Ayrıca EPROCESS.Token’ın bir EX_FAST_REF olduğunu unutmayın (alt 3 bit referans sayacı bayraklarıdır).
 
-## Yüksek seviye adımlar
+## Yüksek seviyeli adımlar
 
 1) ntoskrnl.exe base’ini bulun ve PsInitialSystemProcess adresini çözün.
-- User mode’dan, yüklü driver base’lerini almak için NtQuerySystemInformation(SystemModuleInformation) veya EnumDeviceDrivers kullanın.
+- User mode’dan, yüklenmiş driver bazlarını almak için NtQuerySystemInformation(SystemModuleInformation) veya EnumDeviceDrivers kullanın.
 - Kernel base’e PsInitialSystemProcess offset’ini (symbols/reversing’den) ekleyerek adresini elde edin.
-2) PsInitialSystemProcess’teki pointer’ı okuyun → bu, SYSTEM’in EPROCESS’ine işaret eden bir kernel pointer’ıdır.
-3) SYSTEM EPROCESS’inden UniqueProcessId ve ActiveProcessLinks offset’lerini okuyarak EPROCESS yapılarının çift bağlı listesini (ActiveProcessLinks.Flink/Blink) gezin; UniqueProcessId’si GetCurrentProcessId() ile eşit olan EPROCESS’i bulana kadar devam edin. İkisini saklayın:
+2) PsInitialSystemProcess’teki pointer’ı okuyun → bu SYSTEM’in EPROCESS’ine işaret eden bir kernel pointer’ıdır.
+3) SYSTEM EPROCESS’inden UniqueProcessId ve ActiveProcessLinks offset’lerini okuyarak EPROCESS yapılarını doubly linked list halinde (ActiveProcessLinks.Flink/Blink) dolaşın; UniqueProcessId’nin GetCurrentProcessId() ile eşit olduğu EPROCESS’i bulana kadar devam edin. Her iki adresi saklayın:
 - EPROCESS_SYSTEM (SYSTEM için)
 - EPROCESS_SELF (mevcut process için)
 4) SYSTEM token değerini okuyun: Token_SYS = *(EPROCESS_SYSTEM + TokenOffset).
-- Alt 3 biti maskeleyin: Token_SYS_masked = Token_SYS & ~0xF (genelde ~0xF veya build’e bağlı olarak ~0x7; x64 üzerinde alt 3 bit kullanılır — 0xFFFFFFFFFFFFFFF8 maskesi).
-5) Seçenek A (yaygın): Gömülü ref count’ın tutarlı kalması için mevcut token’ınızdaki alt 3 biti koruyup SYSTEM pointer’ına ekleyin.
+- Alt 3 biti maskeleyin: Token_SYS_masked = Token_SYS & ~0xF (genelde ~0xF veya build’e bağlı olarak ~0x7; x64’te alt 3 bit kullanılır — 0xFFFFFFFFFFFFFFF8 mask).
+5) Seçenek A (yaygın): Gömülü referans sayısını tutarlı kılmak için mevcut token’ınızın alt 3 bitini koruyun ve SYSTEM’in pointer’ına ekleyin.
 - Token_ME = *(EPROCESS_SELF + TokenOffset)
 - Token_NEW = (Token_SYS_masked | (Token_ME & 0x7))
-6) Kernel write primitive’inizi kullanarak Token_NEW’i (EPROCESS_SELF + TokenOffset) adresine yazın.
-7) Mevcut process’iniz artık SYSTEM. Doğrulamak için isteğe bağlı olarak yeni bir cmd.exe veya powershell.exe spawn edin.
+6) Kernel write primitive’inizi kullanarak Token_NEW’i (EPROCESS_SELF + TokenOffset) adresine geri yazın.
+7) Mevcut process’iniz artık SYSTEM. Doğrulamak için opsiyonel olarak yeni bir cmd.exe veya powershell.exe spawn edebilirsiniz.
 
-## Pseudocode
+## Pseudokod
 
-Aşağıda sadece bir vulnerable driver’dan iki IOCTL kullanan bir iskelet var: biri 8-byte kernel read, diğeri 8-byte kernel write için. Kendi driver arayüzünüzle değiştirin.
+Aşağıda sadece vuln driver’dan iki IOCTL kullanan iskelet bir örnek verilmiştir; biri 8-byte kernel read, diğeri 8-byte kernel write içindir. Kendi driver arayüzünüzle değiştirin.
 ```c
 #include <Windows.h>
 #include <Psapi.h>
@@ -106,14 +106,14 @@ return 0;
 }
 ```
 Notlar:
-- Ofsetler: Doğru offsetleri elde etmek için hedefin PDBs'iyle veya bir çalışma zamanı sembol yükleyicisi ile WinDbg’in `dt nt!_EPROCESS` komutunu kullanın. Offs etleri körü körüne sabit değer olarak kullanmayın.
-- Maske: x64'te token bir EX_FAST_REF'tir; en düşük 3 bit referans sayacı bitleridir. Tokeninizin orijinal düşük bitlerini korumak, anında referans sayacı tutarsızlıklarını önler.
-- Kararlılık: Mevcut işlemi yükseltmeyi tercih edin; kısa ömürlü bir yardımcıyı yükseltirseniz, o sonlandığında SYSTEM yetkisini kaybedebilirsiniz.
+- Ofsetler: Doğru ofsetleri almak için hedefin PDBs'i ile veya bir runtime symbol loader ile WinDbg’in `dt nt!_EPROCESS` komutunu kullanın. Hardcode yapmayın.
+- Maske: x64'te token bir EX_FAST_REF'tir; düşük 3 bit referans sayısı bitleridir. Tokenınızdan orijinal düşük bitleri korumak, anlık refcount tutarsızlıklarını önler.
+- Kararlılık: Mevcut süreci yükseltmeyi tercih edin; kısa ömürlü bir yardımcıyı yükseltirseniz, o süreç sonlandığında SYSTEM'i kaybedebilirsiniz.
 
 ## Tespit ve hafifletme
-- Güçlü IOCTL'ler açığa çıkaran imzasız veya güvenilmez üçüncü taraf sürücülerin yüklenmesi temel nedendir.
-- Kernel Driver Blocklist (HVCI/CI), DeviceGuard ve Attack Surface Reduction kuralları savunmasız sürücülerin yüklenmesini engelleyebilir.
-- EDR, arbitrary read/write uygulayan şüpheli IOCTL dizilerini ve token swaps için izleme yapabilir.
+- Güçlü IOCTLs açığa çıkaran imzalanmamış veya güvenilmeyen üçüncü taraf sürücülerin yüklenmesi temel nedendir.
+- Kernel Driver Blocklist (HVCI/CI), DeviceGuard ve Attack Surface Reduction kuralları zayıf sürücülerin yüklenmesini engelleyebilir.
+- EDR, arbitrary read/write uygulayan ve token swaps içeren şüpheli IOCTL dizilerini izleyebilir.
 
 ## Referanslar
 - [HTB Reaper: Format-string leak + stack BOF → VirtualAlloc ROP (RCE) and kernel token theft](https://0xdf.gitlab.io/2025/08/26/htb-reaper.html)

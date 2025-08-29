@@ -7,101 +7,101 @@
 ### Bir Sertifikanın Bileşenleri
 
 - **Subject** sertifikanın sahibini belirtir.
-- Bir **Public Key**, sertifikayı gerçek sahibine bağlamak için özel tutulan bir anahtar ile eşleştirilir.
-- **Validity Period**, **NotBefore** ve **NotAfter** tarihleriyle tanımlanır ve sertifikanın geçerli olduğu süreyi gösterir.
-- Her sertifikayı tanımlayan benzersiz bir **Serial Number**, Certificate Authority (CA) tarafından sağlanır.
+- Bir **Public Key**, sertifikayı gerçek sahibine bağlamak için özel olarak tutulan bir anahtar ile eşleştirilir.
+- **Validity Period**, **NotBefore** ve **NotAfter** tarihlerince tanımlanan sertifikanın geçerli olduğu süredir.
+- Benzersiz bir **Serial Number**, Sertifika Yetkilisi (CA) tarafından sağlanır ve her sertifikayı tanımlar.
 - **Issuer**, sertifikayı düzenleyen CA'yı ifade eder.
-- **SubjectAlternativeName** konu için ek isimlere izin vererek tanımlama esnekliğini artırır.
-- **Basic Constraints**, sertifikanın bir CA için mi yoksa bir uç varlık için mi olduğunu belirler ve kullanım kısıtlamalarını tanımlar.
-- **Extended Key Usages (EKUs)**, Object Identifier'lar (OIDs) aracılığıyla sertifikanın kod imzalama veya e-posta şifreleme gibi belirli amaçlarını belirtir.
-- **Signature Algorithm**, sertifikanın imzalanma yöntemini belirtir.
-- **Signature**, sertifikanın gerçekliğini garanti etmek için issuer'ın özel anahtarıyla oluşturulur.
+- **SubjectAlternativeName** konu için ek adlar izin vererek tanımlama esnekliğini artırır.
+- **Basic Constraints** sertifikanın bir CA mı yoksa son nokta varlık mı olduğunu ve kullanım kısıtlamalarını tanımlar.
+- **Extended Key Usages (EKUs)**, Object Identifier (OID) aracılığıyla kod imzalama veya e-posta şifreleme gibi sertifikanın özel amaçlarını belirtir.
+- **Signature Algorithm** sertifikanın imzalanma yöntemini belirtir.
+- **Signature**, düzenleyenin özel anahtarı ile oluşturularak sertifikanın doğruluğunu garanti eder.
 
 ### Özel Hususlar
 
-- **Subject Alternative Names (SANs)** bir sertifikanın birden çok kimliğe uygulanabilirliğini genişletir; çoklu alan adlarına sahip sunucular için kritiktir. SAN tanımının kötüye kullanılmasını önlemek için güvenli sertifika verme süreçleri çok önemlidir; aksi takdirde saldırganlar taklit riskine yol açabilir.
+- **Subject Alternative Names (SANs)** bir sertifikanın birden çok kimliğe uygulanmasını sağlar; birden fazla domaine sahip sunucular için kritiktir. SAN tanımının kötüye kullanımıyla saldırganların taklit riskini önlemek için güvenli sertifika verme süreçleri hayati öneme sahiptir.
 
-### Active Directory (AD) İçindeki Certificate Authorities (CAs)
+### Active Directory (AD) İçindeki Sertifika Yetkilileri (CAs)
 
-AD CS, bir AD ormanında CA sertifikalarını belirli konteynerler aracılığıyla tanır; her biri farklı rollere hizmet eder:
+AD CS, AD ormanındaki CA sertifikalarını belirlenmiş konteynerler aracılığıyla tanır; her biri farklı roller sağlar:
 
-- **Certification Authorities** container, güvenilen root CA sertifikalarını tutar.
-- **Enrolment Services** container, Enterprise CAs ve onların certificate templates bilgilerini içerir.
-- **NTAuthCertificates** objesi, AD kimlik doğrulaması için yetkilendirilmiş CA sertifikalarını içerir.
-- **AIA (Authority Information Access)** container, ara ve cross CA sertifikaları ile sertifika zinciri doğrulamasını kolaylaştırır.
+- **Certification Authorities** konteyneri güvenilen root CA sertifikalarını tutar.
+- **Enrolment Services** konteyneri Enterprise CAs ve bunların sertifika şablonları hakkında ayrıntı içerir.
+- **NTAuthCertificates** nesnesi AD kimlik doğrulaması için yetkilendirilmiş CA sertifikalarını içerir.
+- **AIA (Authority Information Access)** konteyneri, ara ve çapraz CA sertifikaları ile sertifika zinciri doğrulamasını kolaylaştırır.
 
 ### Sertifika Edinimi: İstemci Sertifika İsteği Akışı
 
-1. Süreç, istemcilerin bir Enterprise CA bulmasıyla başlar.
-2. Bir public-private anahtar çifti oluşturulduktan sonra bir CSR (Certificate Signing Request) oluşturulur; bu CSR içinde bir public key ve diğer bilgiler bulunur.
-3. CA, CSR'yi mevcut certificate templates ile karşılaştırır ve şablonun izinlerine göre sertifikayı yayınlar.
-4. Onaylandıktan sonra CA, sertifikayı kendi özel anahtarıyla imzalar ve istemciye geri gönderir.
+1. İstek süreci, istemcilerin bir Enterprise CA bulmasıyla başlar.
+2. Bir CSR, bir public-private anahtar çifti oluşturulduktan sonra public key ve diğer bilgileri içerecek şekilde oluşturulur.
+3. CA, CSR'yi mevcut sertifika şablonlarına göre değerlendirir ve şablonun izinlerine bağlı olarak sertifikayı verir.
+4. Onaylandığında, CA sertifikayı kendi özel anahtarıyla imzalar ve istemciye döner.
 
-### Certificate Templates
+### Sertifika Şablonları
 
-AD içinde tanımlanan bu şablonlar, hangi EKU'ların izinli olduğu, kayıt veya değişiklik hakları gibi sertifika yayınlama ayarları ve izinlerini belirler; bu, sertifika hizmetlerine erişimin yönetimi için kritiktir.
+AD içinde tanımlanan bu şablonlar, sertifika verme ayarlarını ve izinlerini (izin verilen EKU'lar, kayıt veya değişiklik hakları gibi) belirler; sertifika hizmetlerine erişimi yönetmek için kritiktir.
 
-## Sertifika Kaydı
+## Sertifika Kaydı (Enrollment)
 
-Sertifikalar için kayıt süreci, bir yönetici tarafından **bir certificate template oluşturulması** ile başlatılır; bu template daha sonra bir Enterprise Certificate Authority (CA) tarafından **yayınlanır**. Bu, template'in istemci kayıtları için kullanılabilir olmasını sağlar ve genellikle Active Directory nesnesinin `certificatetemplates` alanına şablonun adının eklenmesiyle gerçekleştirilir.
+Sertifikalar için kayıt süreci, bir yönetici tarafından **bir sertifika şablonu oluşturulması** ile başlatılır; bu şablon daha sonra bir Enterprise Certificate Authority (CA) tarafından **yayınlanır**. Bu, şablonu istemci kaydı için kullanılabilir hale getirir; bu adım, şablonun adının bir Active Directory nesnesinin `certificatetemplates` alanına eklenmesiyle gerçekleştirilir.
 
-Bir istemcinin sertifika talep edebilmesi için **enrollment rights** verilmiş olmalıdır. Bu haklar, certificate template üzerindeki ve Enterprise CA'nin kendisindeki security descriptor'lar tarafından tanımlanır. Bir isteğin başarılı olması için izinlerin her iki yerde de verilmiş olması gerekir.
+Bir istemcinin sertifika talep edebilmesi için **enrollment rights** verilmiş olmalıdır. Bu haklar, sertifika şablonu ve Enterprise CA üzerindeki güvenlik descriptor'larıyla tanımlanır. Bir isteğin başarılı olabilmesi için izinlerin her iki yerde de verilmiş olması gerekir.
 
 ### Şablon Kayıt Hakları
 
-Bu haklar Access Control Entry (ACE) üzerinden belirtilir ve şu izinleri içerebilir:
+Bu haklar Access Control Entry (ACE) aracılığıyla belirtilir ve şu izinleri içerebilir:
 
 - **Certificate-Enrollment** ve **Certificate-AutoEnrollment** hakları, her biri belirli GUID'lerle ilişkilidir.
-- **ExtendedRights**, tüm genişletilmiş izinlere olanak tanır.
+- **ExtendedRights**, tüm genişletilmiş izinlere izin verir.
 - **FullControl/GenericAll**, şablon üzerinde tam kontrol sağlar.
 
 ### Enterprise CA Kayıt Hakları
 
-CA'nın hakları, Certificate Authority yönetim konsolu aracılığıyla erişilebilen security descriptor'da belirtilir. Bazı ayarlar düşük ayrıcalıklı kullanıcılara uzaktan erişim izni verebilir; bu durum bir güvenlik endişesi oluşturabilir.
+CA'nın hakları, Certificate Authority yönetim konsolu üzerinden erişilebilen güvenlik descriptor'unda özetlenir. Bazı ayarlar, düşük ayrıcalıklı kullanıcılara bile uzaktan erişim sağlayabilecek şekilde yapılandırılabilir; bu bir güvenlik endişesi olabilir.
 
-### Ek Yayınlama Kontrolleri
+### Ek Veriliş Kontrolleri
 
 Bazı kontroller uygulanabilir, örneğin:
 
-- **Manager Approval**: Talepleri bir certificate manager onaylayana kadar bekleyen durumda tutar.
-- **Enrolment Agents and Authorized Signatures**: Bir CSR üzerinde gereken imza sayısını ve gerekli Application Policy OID'lerini belirtir.
+- **Manager Approval**: Talepleri onaylanana kadar beklemede bırakır.
+- **Enrolment Agents ve Authorized Signatures**: Bir CSR üzerinde gerekli imza sayısını ve gerekli Application Policy OID'lerini belirtir.
 
-### Sertifika İstem Yöntemleri
+### Sertifika İsteme Yöntemleri
 
-Sertifikalar şu yollarla istenebilir:
+Sertifikalar şu yollarla talep edilebilir:
 
 1. **Windows Client Certificate Enrollment Protocol** (MS-WCCE), DCOM arayüzleri kullanılarak.
 2. **ICertPassage Remote Protocol** (MS-ICPR), named pipes veya TCP/IP üzerinden.
-3. Certificate Authority Web Enrollment rolü yüklü ise **certificate enrollment web interface** üzerinden.
+3. **certificate enrollment web interface**, Certificate Authority Web Enrollment rolü yüklüyken.
 4. **Certificate Enrollment Service** (CES), Certificate Enrollment Policy (CEP) servisi ile birlikte.
-5. Network cihazları için **Network Device Enrollment Service** (NDES) ve Simple Certificate Enrollment Protocol (SCEP) kullanılarak.
+5. **Network Device Enrollment Service** (NDES) için network cihazları, Simple Certificate Enrollment Protocol (SCEP) kullanılarak.
 
-Windows kullanıcıları ayrıca GUI (`certmgr.msc` veya `certlm.msc`) veya komut satırı araçları (`certreq.exe` veya PowerShell'in `Get-Certificate` komutu) aracılığıyla da sertifika talep edebilirler.
+Windows kullanıcıları ayrıca GUI (`certmgr.msc` veya `certlm.msc`) veya komut satırı araçları (`certreq.exe` veya PowerShell'in `Get-Certificate` komutu) aracılığıyla sertifika talep edebilirler.
 ```bash
 # Example of requesting a certificate using PowerShell
 Get-Certificate -Template "User" -CertStoreLocation "cert:\\CurrentUser\\My"
 ```
-## Certificate Authentication
+## Sertifika Kimlik Doğrulaması
 
-Active Directory (AD), öncelikli olarak **Kerberos** ve **Secure Channel (Schannel)** protokollerini kullanarak sertifika kimlik doğrulamayı destekler.
+Active Directory (AD), öncelikle **Kerberos** ve **Secure Channel (Schannel)** protokollerini kullanarak sertifika ile kimlik doğrulamayı destekler.
 
-### Kerberos Authentication Process
+### Kerberos Kimlik Doğrulama Süreci
 
-Kerberos kimlik doğrulama sürecinde, bir kullanıcının Ticket Granting Ticket (TGT) talebi, kullanıcının sertifikasının **özel anahtarı** ile imzalanır. Bu istek, domain controller tarafından sertifikanın **geçerliliği**, **yolu** ve **iptal durumu** dahil olmak üzere birkaç doğrulamadan geçer. Doğrulamalar ayrıca sertifikanın güvenilir bir kaynaktan geldiğinin ve düzenleyicinin **NTAUTH certificate store** içinde bulunduğunun teyit edilmesini içerir. Başarılı doğrulamalar TGT'nin verilmesiyle sonuçlanır. AD içindeki **`NTAuthCertificates`** nesnesi, şu konumda bulunur:
+Kerberos kimlik doğrulama sürecinde, bir kullanıcının Ticket Granting Ticket (TGT) talebi, kullanıcının sertifikasının **özel anahtarı** ile imzalanır. Bu istek, etki alanı denetleyicisi tarafından sertifikanın **geçerliliği**, **zinciri** ve **iptal durumu** dahil olmak üzere çeşitli doğrulamaya tabi tutulur. Doğrulamalar ayrıca sertifikanın güvenilir bir kaynaktan geldiğinin ve düzenleyenin **NTAUTH certificate store** içinde bulunduğunun teyit edilmesini içerir. Doğrulamaların başarılı olması TGT'nin verilmesiyle sonuçlanır. AD içindeki **`NTAuthCertificates`** objesi, şu konumda bulunur:
 ```bash
 CN=NTAuthCertificates,CN=Public Key Services,CN=Services,CN=Configuration,DC=<domain>,DC=<com>
 ```
-Sertifika kimlik doğrulaması için güvenin kurulmasında merkezi öneme sahiptir.
+sertifika kimlik doğrulaması için güven oluşturmanın merkezindedir.
 
 ### Güvenli Kanal (Schannel) Kimlik Doğrulaması
 
-Schannel, TLS/SSL bağlantılarını kolaylaştırır; el sıkışma sırasında istemci bir sertifika sunar ve bu sertifika başarıyla doğrulanırsa erişimi yetkilendirir. Bir sertifikanın bir AD hesabına eşlenmesi, diğer yöntemlerin yanı sıra Kerberos'un **S4U2Self** fonksiyonunu veya sertifikanın **Subject Alternative Name (SAN)** alanını içerebilir.
+Schannel, bir handshake sırasında istemcinin bir sertifika sunduğu güvenli TLS/SSL bağlantılarını kolaylaştırır; bu sertifika başarıyla doğrulanırsa erişime izin verilir. Bir sertifikanın bir AD hesabına eşlenmesi, Kerberos’un **S4U2Self** işlevini veya sertifikanın **Subject Alternative Name (SAN)**'ını ve diğer yöntemleri içerebilir.
 
-### AD Sertifika Servislerinin Keşfi
+### AD Certificate Services Enumeration
 
-AD'nin sertifika servisleri LDAP sorguları aracılığıyla keşfedilebilir; bu, **Enterprise Certificate Authorities (CAs)** ve yapılandırmaları hakkında bilgi açığa çıkarır. Bu, özel ayrıcalıklara ihtiyaç duymadan etki alanı kimlik doğrulaması yapılmış herhangi bir kullanıcı tarafından erişilebilir. AD CS ortamlarında keşif ve zafiyet değerlendirmesi için **[Certify](https://github.com/GhostPack/Certify)** ve **[Certipy](https://github.com/ly4k/Certipy)** gibi araçlar kullanılır.
+AD'nin certificate services'i LDAP sorguları aracılığıyla enumerate edilebilir; bu, **Enterprise Certificate Authorities (CAs)** ve yapılandırmaları hakkında bilgi açığa çıkarır. Bu, özel ayrıcalık gerektirmeden etki alanında kimliği doğrulanmış herhangi bir kullanıcı tarafından erişilebilir. **[Certify](https://github.com/GhostPack/Certify)** ve **[Certipy](https://github.com/ly4k/Certipy)** gibi araçlar, AD CS ortamlarında enumeration ve zafiyet değerlendirmesi için kullanılır.
 
-Bu araçları kullanmak için komutlar şunlardır:
+Bu araçların kullanımı için komutlar şunları içerir:
 ```bash
 # Enumerate trusted root CA certificates, Enterprise CAs and HTTP enrollment endpoints
 # Useful flags: /domain, /path, /hideAdmins, /showAllPermissions, /skipWebServiceChecks
