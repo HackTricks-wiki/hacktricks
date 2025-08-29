@@ -7,101 +7,101 @@
 ### Komponente van 'n Sertifikaat
 
 - Die **Subject** van die sertifikaat dui die eienaar aan.
-- 'n **Public Key** word gepaard met 'n privaat sleutel om die sertifikaat aan die regmatige eienaar te koppel.
-- Die **Validity Period**, gedefinieer deur **NotBefore** en **NotAfter** datums, dui die sertifikaat se geldigheidsduur aan.
-- 'n unieke **Serial Number**, voorsien deur die Certificate Authority (CA), identifiseer elke sertifikaat.
+- 'n **Public Key** word gepaard met 'n privaat gehoude sleutel om die sertifikaat aan sy regmatige eienaar te koppel.
+- Die **Validity Period**, bepaal deur **NotBefore** en **NotAfter** datums, merk die sertifikaat se geldigheidsduur.
+- 'n unieke **Serial Number**, verskaf deur die Certificate Authority (CA), identifiseer elke sertifikaat.
 - Die **Issuer** verwys na die CA wat die sertifikaat uitgereik het.
-- **SubjectAlternativeName** laat addisionele name vir die subject toe, wat identifikasiebuigbaarheid verbeter.
+- **SubjectAlternativeName** laat addisionele name vir die subject toe, wat identifikasie meer buigsaam maak.
 - **Basic Constraints** identifiseer of die sertifikaat vir 'n CA of 'n eindentiteit is en definieer gebruiksbeperkings.
-- **Extended Key Usages (EKUs)** omskryf die sertifikaat se spesifieke doeleindes, soos code signing of e-pos enkripsie, via Object Identifiers (OIDs).
-- Die **Signature Algorithm** spesifiseer die metode om die sertifikaat te onderteken.
-- Die **Signature**, geskep met die issuer se privaat sleutel, waarborg die sertifikaat se egtheid.
+- **Extended Key Usages (EKUs)** omskryf die sertifikaat se spesifieke doeleindes, soos code signing of email encryption, deur Object Identifiers (OIDs).
+- Die **Signature Algorithm** spesifiseer die metode vir die ondertekening van die sertifikaat.
+- Die **Signature**, geskep met die issuer se private sleutel, waarborg die sertifikaat se egtheid.
 
 ### Spesiale Oorwegings
 
-- **Subject Alternative Names (SANs)** brei 'n sertifikaat se toepaslikheid uit na meerdere identiteite, wat kritiek is vir servers met verskeie domeine. Veiligheid in die uitreikproses is noodsaaklik om te voorkom dat aanvallers die SAN-spesifikasie manipuleer en sodoende tot identiteitsmisleiding lei.
+- **Subject Alternative Names (SANs)** brei 'n sertifikaat se toepaslikheid uit na meerdere identiteite, noodsaaklik vir bedieners met meerdere domeine. Veilige uitreikprosesse is van kardinale belang om te voorkom dat 'n aanvaller die SAN-spesifikasie manipuleer en impersonasie doen.
 
 ### Certificate Authorities (CAs) in Active Directory (AD)
 
-AD CS erken CA-sertifikate in 'n AD-forest deur aangewese houers, elk met 'n unieke rol:
+AD CS erken CA-sertifikate in 'n AD-bos deur aangewese houers, elk met unieke rolle:
 
-- Die **Certification Authorities** kontainer hou vertroude root CA-sertifikate.
-- Die **Enrolment Services** kontainer bevat besonderhede van Enterprise CAs en hul sertifikaattemplates.
-- Die **NTAuthCertificates** objek sluit CA-sertifikate in wat gemagtig is vir AD-verifikasie.
-- Die **AIA (Authority Information Access)** kontainer fasiliteer sertifikaatkettingvalidasie met intermediêre en cross-CA sertifikate.
+- **Certification Authorities** container hou vertroude root CA-sertifikate.
+- **Enrolment Services** container bevat besonderhede oor Enterprise CAs en hul sertifikaatsjablone.
+- **NTAuthCertificates** objek sluit CA-sertifikate in wat gemagtig is vir AD-authentication.
+- **AIA (Authority Information Access)** container fasiliteer sertifikaatkettingvalidasie met intermediate en cross CA-sertifikate.
 
-### Sertifikaatverkryging: Kliënt Sertifikaataanvraag-vloei
+### Sertifikaatverkryging: Kliënt Sertifikaataanvraagvloei
 
-1. Die aanvraagproses begin daarmee dat kliënte 'n Enterprise CA vind.
-2. 'n CSR word geskep en bevat 'n public key en ander besonderhede, nadat 'n publieke-privaat sleutelpaartjie gegenereer is.
-3. Die CA evalueer die CSR teen beskikbare sertifikaattemplates en gee die sertifikaat uit gebaseer op die template se regte.
-4. Na goedkeuring teken die CA die sertifikaat met sy privaat sleutel en stuur dit terug na die kliënt.
+1. Die proses begin met kliënte wat 'n Enterprise CA vind.
+2. 'n CSR word geskep, wat 'n public key en ander besonderhede bevat, nadat 'n public-private sleutelpaar gegenereer is.
+3. Die CA beoordeel die CSR teen beskikbare sertifikaatsjablone en keur die sertifikaat uit op grond van die sjabloon se toestemmings.
+4. Na goedkeuring teken die CA die sertifikaat met sy private sleutel en stuur dit terug aan die kliënt.
 
-### Sertifikaattemplates
+### Sertifikaatsjablone
 
-Binne AD gedefinieer, beskryf hierdie templates die instellings en regte vir die uitreiking van sertifikate, insluitend toegelate EKUs en registrasie- of wysigingsregte, wat kritiek is vir die bestuur van toegang tot sertifikaatdienste.
+Gedefinieer binne AD, beskryf hierdie sjablone die instellings en regte vir die uitreiking van sertifikate, insluitend toegelate EKUs en inskrywings- of wysigingsregte, krities vir die bestuur van toegang tot sertifikaatdienste.
 
 ## Sertifikaatinskrywing
 
-Die inskrywingsproses vir sertifikate word geïnisieer deur 'n administrateur wat **'n sertifikaattemplate skep**, wat dan deur 'n Enterprise Certificate Authority (CA) **gepubliseer** word. Dit maak die template beskikbaar vir kliëntinskrywing, 'n stap wat bereik word deur die template se naam by die `certificatetemplates` veld van 'n Active Directory-objek te voeg.
+Die inskrywingsproses vir sertifikate word geïnisieer deur 'n administrateur wat 'n sertifikaatsjabloon skep, wat dan deur 'n Enterprise Certificate Authority (CA) gepubliseer word. Dit maak die sjabloon beskikbaar vir kliëntinskrywing, 'n stap wat bereik word deur die sjabloonnaam by die `certificatetemplates` veld van 'n Active Directory-objek te voeg.
 
-Om 'n sertifikaat te versoek, moet **enrollment rights** toegeken word. Hierdie regte word gedefinieer deur security descriptors op die sertifikaattemplate en op die Enterprise CA self. Permissies moet in beide plekke toegeken word vir 'n suksesvolle aanvraag.
+Vir 'n kliënt om 'n sertifikaat aan te vra, moet **enrollment rights** toegekend word. Hierdie regte word bepaal deur sekuriteitsdescriptors op die sertifikaatsjabloon en op die Enterprise CA self. Permissies moet op beide plekke gegee word vir 'n aanvraag om suksesvol te wees.
 
-### Template Inskrywingsregte
+### Sjabloon Inskrywingsregte
 
-Hierdie regte word gespesifiseer deur Access Control Entries (ACEs), en beskryf permissies soos:
+Hierdie regte word gespesifiseer deur Toegangsbeheerinsette (Access Control Entries, ACEs), wat toestemmings soos volg beskryf:
 
 - **Certificate-Enrollment** en **Certificate-AutoEnrollment** regte, elk geassosieer met spesifieke GUIDs.
-- **ExtendedRights**, wat alle uitgebreide permissies toelaat.
-- **FullControl/GenericAll**, wat volle beheer oor die template bied.
+- **ExtendedRights**, wat alle uitgebreide toestemmings toelaat.
+- **FullControl/GenericAll**, wat volledige beheer oor die sjabloon bied.
 
 ### Enterprise CA Inskrywingsregte
 
-Die CA se regte word uiteengesit in sy security descriptor, toeganklik via die Certificate Authority bestuurkonsole. Sommige instellings laat selfs lae-bevoorregte gebruikers afgeleë toegang toe, wat 'n sekuriteitsrisiko kan wees.
+Die CA se regte word uiteengesit in sy sekuriteitsdescriptor, beskikbaar via die Certificate Authority-beheerconsole. Sommige instellings laat selfs lae-geprivilegieerde gebruikers afgeleë toegang toe, wat 'n sekuriteitsrisiko kan wees.
 
-### Addisionele Uitreikbeheer
+### Addisionele Uitreikbeheerders
 
-Sekere kontroles kan van toepassing wees, soos:
+Sekere beheerders kan van toepassing wees, soos:
 
-- **Manager Approval**: Plaas versoeke in 'n hangende toestand totdat goedgekeur deur 'n sertifikaatbestuurder.
+- **Manager Approval**: Plaas aansoeke in 'n hangende toestand totdat dit deur 'n sertifikaatbestuurder goedgekeur word.
 - **Enrolment Agents and Authorized Signatures**: Spesifiseer die aantal vereiste handtekeninge op 'n CSR en die nodige Application Policy OIDs.
 
-### Metodes om Sertifikate te Versoek
+### Metodes om Sertifikate aan te vra
 
-Sertifikate kan versoek word deur:
+Sertifikate kan aangevra word deur:
 
-1. **Windows Client Certificate Enrollment Protocol** (MS-WCCE), met gebruik van DCOM-intefaces.
-2. **ICertPassage Remote Protocol** (MS-ICPR), deur named pipes of TCP/IP.
-3. Die **certificate enrollment web interface**, met die Certificate Authority Web Enrollment-rol geïnstalleer.
+1. **Windows Client Certificate Enrollment Protocol** (MS-WCCE), met DCOM-koppelvlakke.
+2. **ICertPassage Remote Protocol** (MS-ICPR), via named pipes of TCP/IP.
+3. Die **certificate enrollment web interface**, met die Certificate Authority Web Enrollment rol geïnstalleer.
 4. Die **Certificate Enrollment Service** (CES), saam met die Certificate Enrollment Policy (CEP) diens.
-5. Die **Network Device Enrollment Service** (NDES) vir netwerktoestelle, met gebruik van die Simple Certificate Enrollment Protocol (SCEP).
+5. Die **Network Device Enrollment Service** (NDES) vir netwerktoestelle, wat die Simple Certificate Enrollment Protocol (SCEP) gebruik.
 
-Windows gebruikers kan sertifikate ook versoek via die GUI (`certmgr.msc` of `certlm.msc`) of reëllyninstrumente (`certreq.exe` of PowerShell se `Get-Certificate` opdrag).
+Windows-gebruikers kan ook sertifikate versoek via die GUI (`certmgr.msc` of `certlm.msc`) of opdraglyn-instrumente (`certreq.exe` of PowerShell se `Get-Certificate` opdrag).
 ```bash
 # Example of requesting a certificate using PowerShell
 Get-Certificate -Template "User" -CertStoreLocation "cert:\\CurrentUser\\My"
 ```
-## Sertifikaatverifikasie
+## Sertifikaat-outentisering
 
-Active Directory (AD) ondersteun sertifikaatverifikasie, hoofsaaklik deur die **Kerberos** en **Secure Channel (Schannel)** protokolle te gebruik.
+Active Directory (AD) ondersteun sertifikaat-outentisering, hoofsaaklik deur gebruik te maak van **Kerberos** en **Secure Channel (Schannel)** protokolle.
 
-### Kerberos-verifikasieproses
+### Kerberos-outentiseringsproses
 
-In die Kerberos-verifikasieproses word 'n gebruiker se versoek vir 'n Ticket Granting Ticket (TGT) geteken met die **privaat sleutel** van die gebruiker se sertifikaat. Hierdie versoek ondergaan verskeie kontrole deur die domeinbeheerder, insluitend die sertifikaat se **geldigheid**, **pad**, en **herroepingsstatus**. Kontroles sluit ook in die verifiëring dat die sertifikaat van 'n betroubare bron afkomstig is en die bevestiging van die uitreiker se teenwoordigheid in die **NTAUTH certificate store**. Suksesvolle kontroles lei tot die uitreiking van 'n TGT. Die **`NTAuthCertificates`**-object in AD, gevind by:
+In die Kerberos-outentiseringsproses word 'n gebruiker se versoek vir 'n Ticket Granting Ticket (TGT) onderteken met die **private key** van die gebruiker se sertifikaat. Hierdie versoek deurgaan verskeie validerings deur die domain controller, insluitend die sertifikaat se **geldigheid**, **pad**, en **herroepingsstatus**. Validerings sluit ook in die verifikasie dat die sertifikaat van 'n betroubare bron kom en die bevestiging van die uitreiker se teenwoordigheid in die **NTAUTH certificate store**. Suksesvolle validerings lei tot die uitreiking van 'n TGT. Die **`NTAuthCertificates`** object in AD, gevind by:
 ```bash
 CN=NTAuthCertificates,CN=Public Key Services,CN=Services,CN=Configuration,DC=<domain>,DC=<com>
 ```
-is sentraal vir die vestiging van vertroue vir sertifikaatverifikasie.
+is sentraal in die vestiging van vertroue vir sertifikaatautentisering.
 
-### Secure Channel (Schannel) Verifikasie
+### Secure Channel (Schannel) Autentisering
 
-Schannel fasiliteer veilige TLS/SSL-verbindinge, waar tydens 'n handshake die kliënt 'n sertifikaat voorlê wat, indien suksesvol gevalideer, toegang magtig. Die kartysering van 'n sertifikaat na 'n AD-rekening kan Kerberos’s **S4U2Self** funksie of die sertifikaat se **Subject Alternative Name (SAN)** betrek, onder andere metodes.
+Schannel maak veilige TLS/SSL-verbindinge moontlik, waar tydens 'n handshake die kliënt 'n sertifikaat voorlê wat, indien suksesvol gevalideer, toegang magtig. Die kartering van 'n sertifikaat na 'n AD-rekening kan Kerberos se **S4U2Self** funksie of die sertifikaat se **Subject Alternative Name (SAN)** insluit, onder andere metodes.
 
-### AD Sertifikaatdienste-enumerasie
+### AD Sertifikaatdienste Enumerasie
 
-AD se sertifikaatdienste kan deur LDAP-navrae gedenumeriseer word, wat inligting oor **Enterprise Certificate Authorities (CAs)** en hul konfigurasies openbaar. Dit is toeganklik vir enige domein-geauthentiseerde gebruiker sonder spesiale voorregte. Gereedskap soos **[Certify](https://github.com/GhostPack/Certify)** en **[Certipy](https://github.com/ly4k/Certipy)** word gebruik vir enumerasie en kwesbaarheidsevaluering in AD CS-omgewings.
+AD se sertifikaatdienste kan deur LDAP-navrae opgenoem word, wat inligting oor **Enterprise Sertifikaatautoriteite (CAs)** en hul konfigurasies openbaar. Dit is toeganklik vir enige domeingeverifieerde gebruiker sonder spesiale voorregte. Gereedskap soos **[Certify](https://github.com/GhostPack/Certify)** en **[Certipy](https://github.com/ly4k/Certipy)** word gebruik vir enumerasie en kwesbaarheidsassessering in AD CS omgewings.
 
-Kommando's vir die gebruik van hierdie gereedskap sluit in:
+Opdragte vir die gebruik van hierdie gereedskap sluit in:
 ```bash
 # Enumerate trusted root CA certificates, Enterprise CAs and HTTP enrollment endpoints
 # Useful flags: /domain, /path, /hideAdmins, /showAllPermissions, /skipWebServiceChecks
