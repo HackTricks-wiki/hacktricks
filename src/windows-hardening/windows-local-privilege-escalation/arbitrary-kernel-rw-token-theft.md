@@ -4,35 +4,35 @@
 
 ## Vue d'ensemble
 
-Si un driver vulnérable expose un IOCTL qui donne à un attaquant des primitives de lecture et/ou d'écriture arbitraires dans le kernel, l'élévation vers NT AUTHORITY\SYSTEM peut souvent être obtenue en volant un token SYSTEM. La technique copie le pointeur Token depuis l'EPROCESS d'un processus SYSTEM dans l'EPROCESS du processus courant.
+Si un driver vulnérable expose un IOCTL donnant à un attaquant des primitives de lecture et/ou d'écriture arbitraires dans le kernel, l'élévation vers NT AUTHORITY\SYSTEM peut souvent être obtenue en volant le token d'accès SYSTEM. La technique copie le pointeur Token de l'EPROCESS d'un process SYSTEM dans l'EPROCESS du processus courant.
 
-Pourquoi ça marche :
-- Chaque processus possède une structure EPROCESS qui contient (parmi d'autres champs) un Token (en réalité un EX_FAST_REF vers un objet token).
-- Le processus SYSTEM (PID 4) détient un token avec tous les privilèges activés.
-- Remplacer l'EPROCESS.Token du processus courant par le pointeur du token SYSTEM fait que le processus courant s'exécute immédiatement en tant que SYSTEM.
+Pourquoi ça fonctionne :
+- Chaque processus possède une structure EPROCESS qui contient (entre autres champs) un Token (en fait un EX_FAST_REF vers un objet token).
+- Le processus SYSTEM (PID 4) possède un token avec tous les privilèges activés.
+- Remplacer l'EPROCESS.Token du processus courant par le pointeur du token SYSTEM fait exécuter immédiatement le processus courant en tant que SYSTEM.
 
-> Les offsets dans EPROCESS varient selon les versions de Windows. Déterminez-les dynamiquement (symbols) ou utilisez des constantes spécifiques à la version. Souvenez-vous aussi que EPROCESS.Token est un EX_FAST_REF (les 3 bits de poids faible sont des flags de comptage de références).
+> Les offsets dans EPROCESS varient selon les versions de Windows. Déterminez-les dynamiquement (symboles) ou utilisez des constantes spécifiques à la version. Notez aussi que EPROCESS.Token est un EX_FAST_REF (les 3 bits de poids faible sont des flags de comptage de références).
 
-## Étapes générales
+## Étapes principales
 
-1) Localisez la base de ntoskrnl.exe et résolvez l'adresse de PsInitialSystemProcess.
-- Depuis l'user mode, utilisez NtQuerySystemInformation(SystemModuleInformation) ou EnumDeviceDrivers pour obtenir les bases des drivers chargés.
-- Ajoutez l'offset de PsInitialSystemProcess (depuis les symbols / reverse) à la base du kernel pour obtenir son adresse.
-2) Lisez le pointeur à PsInitialSystemProcess → c'est un pointeur kernel vers l'EPROCESS de SYSTEM.
-3) Depuis l'EPROCESS de SYSTEM, lisez les offsets UniqueProcessId et ActiveProcessLinks pour parcourir la liste doublement chaînée des structures EPROCESS (ActiveProcessLinks.Flink/Blink) jusqu'à trouver l'EPROCESS dont UniqueProcessId égale GetCurrentProcessId(). Conservez les deux :
+1) Localiser la base de ntoskrnl.exe et résoudre l'adresse de PsInitialSystemProcess.
+- Depuis le mode utilisateur, utilisez NtQuerySystemInformation(SystemModuleInformation) ou EnumDeviceDrivers pour obtenir les bases des drivers chargés.
+- Ajoutez l'offset de PsInitialSystemProcess (depuis les symboles/le reverse) à la base du kernel pour obtenir son adresse.
+2) Lire le pointeur à PsInitialSystemProcess → il s'agit d'un pointeur kernel vers l'EPROCESS de SYSTEM.
+3) Depuis l'EPROCESS de SYSTEM, lisez les offsets UniqueProcessId et ActiveProcessLinks pour parcourir la liste doublement chaînée des structures EPROCESS (ActiveProcessLinks.Flink/Blink) jusqu'à trouver l'EPROCESS dont UniqueProcessId est égal à GetCurrentProcessId(). Conservez les deux :
 - EPROCESS_SYSTEM (pour SYSTEM)
 - EPROCESS_SELF (pour le processus courant)
-4) Lisez la valeur du token SYSTEM : Token_SYS = *(EPROCESS_SYSTEM + TokenOffset).
-- Masquez les 3 bits de poids faible : Token_SYS_masked = Token_SYS & ~0xF (communément ~0xF ou ~0x7 selon le build ; sur x64 les 3 bits de poids faible sont utilisés — masque 0xFFFFFFFFFFFFFFF8).
-5) Option A (courante) : préservez les 3 bits de poids faible de votre token actuel et greffez-les sur le pointeur SYSTEM pour garder le comptage de références interne cohérent.
+4) Lire la valeur du token SYSTEM : Token_SYS = *(EPROCESS_SYSTEM + TokenOffset).
+- Masquez les 3 bits de poids faible : Token_SYS_masked = Token_SYS & ~0xF (généralement ~0xF ou ~0x7 selon le build ; sur x64, les 3 bits de poids faible sont utilisés — masque 0xFFFFFFFFFFFFFFF8).
+5) Option A (commune) : Conservez les 3 bits de poids faible de votre token actuel et fusionnez-les sur le pointeur SYSTEM pour garder le comptage de références embarqué cohérent.
 - Token_ME = *(EPROCESS_SELF + TokenOffset)
 - Token_NEW = (Token_SYS_masked | (Token_ME & 0x7))
 6) Écrivez Token_NEW dans (EPROCESS_SELF + TokenOffset) en utilisant votre primitive d'écriture kernel.
-7) Votre processus courant est maintenant SYSTEM. Facultatif : lancez un nouveau cmd.exe ou powershell.exe pour vérifier.
+7) Votre processus courant est maintenant SYSTEM. Éventuellement, lancez un nouveau cmd.exe ou powershell.exe pour confirmer.
 
 ## Pseudo-code
 
-Below is a skeleton that only uses two IOCTLs from a vulnerable driver, one for 8-byte kernel read and one for 8-byte kernel write. Replace with your driver’s interface.
+Ci-dessous un squelette qui n'utilise que deux IOCTLs d'un driver vulnérable, un pour une lecture kernel de 8 octets et un pour une écriture kernel de 8 octets. Remplacez par l'interface de votre driver.
 ```c
 #include <Windows.h>
 #include <Psapi.h>
@@ -106,16 +106,16 @@ return 0;
 }
 ```
 Remarques :
-- Offsets : Utilisez WinDbg’s `dt nt!_EPROCESS` avec les PDBs de la cible, ou un runtime symbol loader, pour obtenir les offsets corrects. Ne hardcodez pas aveuglément.
-- Masque : Sur x64 le token est un EX_FAST_REF ; les 3 bits bas sont des bits de reference count. Conserver les bits bas originaux de votre token évite des incohérences immédiates du refcount.
-- Stabilité : Préférez élever le processus courant ; si vous élevez un helper de courte durée vous risquez de perdre SYSTEM quand il se termine.
+- Offsets : Utilisez WinDbg’s `dt nt!_EPROCESS` avec les PDBs de la cible, ou un chargeur de symboles à l'exécution, pour obtenir les offsets corrects. Ne pas coder en dur les offsets aveuglément.
+- Mask : Sur x64 le token est un EX_FAST_REF ; les 3 bits de poids faible sont des bits de compteur de références. Conserver les bits faibles originaux de votre token évite des incohérences de refcount immédiates.
+- Stability : Préférez élever le processus actuel ; si vous élevez un helper de courte durée vous pouvez perdre SYSTEM lorsqu'il se termine.
 
-## Détection & mitigation
-- Le chargement de drivers tiers non signés ou non fiables qui exposent des IOCTLs puissants est la cause racine.
-- Kernel Driver Blocklist (HVCI/CI), DeviceGuard, et les règles Attack Surface Reduction peuvent empêcher le chargement de drivers vulnérables.
-- EDR peut surveiller des séquences IOCTL suspectes qui implémentent arbitrary read/write et les token swaps.
+## Détection & atténuation
+- Le chargement de pilotes tiers non signés ou non fiables exposant des IOCTLs puissants est la cause principale.
+- Kernel Driver Blocklist (HVCI/CI), DeviceGuard, and Attack Surface Reduction rules peuvent empêcher le chargement de pilotes vulnérables.
+- EDR peut surveiller les séquences IOCTL suspectes qui implémentent des opérations de lecture/écriture arbitraires et les échanges de token.
 
-## References
+## Références
 - [HTB Reaper: Format-string leak + stack BOF → VirtualAlloc ROP (RCE) and kernel token theft](https://0xdf.gitlab.io/2025/08/26/htb-reaper.html)
 - [FuzzySecurity – Windows Kernel ExploitDev (token stealing examples)](https://www.fuzzysecurity.com/tutorials/expDev/17.html)
 
