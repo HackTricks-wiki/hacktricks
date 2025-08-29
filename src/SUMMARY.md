@@ -936,3 +936,4 @@
   - [Readme](reversing/cryptographic-algorithms/README.md)
   - [Readme](reversing/reversing-tools/README.md)
   - [Readme](windows-hardening/windows-local-privilege-escalation/privilege-escalation-abusing-tokens/README.md)
+  - [Readme](network-services-pentesting/pentesting-web/sitecore/README.md)
