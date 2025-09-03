@@ -1,18 +1,18 @@
-# Bypass Lua sandboxes (embedded VMs, game clients)
+# Lua sandbox'larını atlatma (gömülü VM'ler, game clients)
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Bu sayfa, uygulamalara gömülü Lua "sandboxes" içinde bulunan ortamları (özellikle game clients, plugins veya in-app scripting engines) keşfetmek ve bu sandbox'lardan çıkmak için pratik teknikleri toplar. Birçok engine kısıtlı bir Lua ortamı sunar, ancak güçlü globals'a erişim bırakarak, bytecode loaders açığa çıkarsa keyfi komut yürütme veya hatta native bellek bozulmasına yol açabilir.
+Bu sayfa, uygulamalara gömülü Lua "sandbox"larını (özellikle game clients, plugins veya uygulama içi scripting motorları) listelemek ve kırmak için pratik teknikleri toplar. Birçok motor kısıtlı bir Lua ortamı açığa çıkarır, ancak güçlü global'leri erişilebilir bırakır; bunlar, bytecode yükleyicileri açığa çıktığında keyfi komut yürütmeye veya hatta native bellek bozulmasına izin verebilir.
 
-Temel fikirler:
-- VM'i bilinmeyen bir ortam olarak ele alın: _G'yi listeleyin ve hangi tehlikeli primitives'e erişilebildiğini keşfedin.
-- stdout/print engellendiğinde, sonuçları gözlemlemek için herhangi bir in-VM UI/IPC kanalını çıktı hedefi olarak kötüye kullanın.
-- io/os açığa çıkarsa, genellikle doğrudan komut yürütme elde edersiniz (io.popen, os.execute).
-- load/loadstring/loadfile açığa çıkarsa, hazırlanmış Lua bytecode'unu yürütmek bazı sürümlerde bellek güvenliğini bozabilir (≤5.1 verifier'lar bypasslanabilir; 5.2 verifier'ı kaldırdı), bu da gelişmiş istismara olanak tanır.
+Ana fikirler:
+- VM'i bilinmeyen bir ortam olarak ele alın: _G'yi enumerate edin ve hangi tehlikeli primitive'lerin erişilebilir olduğunu keşfedin.
+- stdout/print engellendiğinde, sonuçları görmek için herhangi bir in-VM UI/IPC kanalını çıktı havuzu olarak kötüye kullanın.
+- io/os açığa çıktıysa, genellikle doğrudan komut yürütme imkânı vardır (io.popen, os.execute).
+- load/loadstring/loadfile açığa çıktıysa, hazırlanmış Lua bytecode'u çalıştırmak bazı sürümlerde bellek güvenliğini altüst edebilir (≤5.1 doğrulayıcıları atlatılabilir; 5.2 doğrulayıcıyı kaldırdı), bu da ileri düzey exploit'e imkan verir.
 
 ## Sandbox'lanmış ortamı keşfetme
 
-- Erişilebilir tablolar/fonksiyonları envanterlemek için global environment'i dökün:
+- Erişilebilir tabloları/fonksiyonları envantere almak için global ortamı dök:
 ```lua
 -- Minimal _G dumper for any Lua sandbox with some output primitive `out`
 local function dump_globals(out)
@@ -22,7 +22,7 @@ out(tostring(k) .. " = " .. tostring(v))
 end
 end
 ```
-- Eğer print() kullanılamıyorsa, VM içi kanalları yeniden amaçlayın. Örnek: chat çıktısının yalnızca bir ses çağrısından sonra çalıştığı bir MMO housing script VM'inden; aşağıdakiler güvenilir bir çıktı fonksiyonu oluşturur:
+- Eğer print() yoksa, in-VM kanalları yeniden amaçlandırın. Bir MMO housing script VM örneğinde chat çıktısı yalnızca bir sound call'dan sonra çalışıyordu; aşağıdaki güvenilir bir çıktı fonksiyonu oluşturur:
 ```lua
 -- Build an output channel using in-game primitives
 local function ButlerOut(label)
@@ -39,11 +39,11 @@ local out = ButlerOut(1)
 dump_globals(out)
 end
 ```
-Hedefiniz için bu deseni genelleştirin: strings kabul eden herhangi bir textbox, toast, logger veya UI callback'i reconnaissance için stdout olarak kullanabilirsiniz.
+Bu deseni hedefiniz için genelleştirin: string kabul eden herhangi bir textbox, toast, logger veya UI callback keşif için stdout olarak davranabilir.
 
-## io/os açık olduğunda doğrudan command execution
+## io/os açığa çıkmışsa doğrudan komut yürütme
 
-Eğer sandbox hâlâ standart kütüphaneler io veya os'u açığa çıkarıyorsa, muhtemelen immediate command execution'a sahipsiniz:
+Eğer sandbox hâlâ standart kütüphaneler io veya os'u açığa çıkarıyorsa, muhtemelen anında komut yürütme imkanınız vardır:
 ```lua
 -- Windows example
 io.popen("calc.exe")
@@ -53,29 +53,29 @@ os.execute("/usr/bin/id")
 io.popen("/bin/sh -c 'id'")
 ```
 Notlar:
-- Yürütme client process içinde gerçekleşir; harici debugger'ları engelleyen birçok anti-cheat/antidebug katmanı, in-VM process creation'ı engellemez.
-- Ayrıca kontrol et: package.loadlib (arbitrary DLL/.so loading), require with native modules, LuaJIT's ffi (if present), and the debug library (can raise privileges inside the VM).
+- Execution client process içinde gerçekleşir; dış debugger'ları engelleyen birçok anti-cheat/antidebug katmanı, in-VM process creation'ı engellemeyecektir.
+- Ayrıca kontrol et: package.loadlib (herhangi bir DLL/.so yükleme), require with native modules, LuaJIT's ffi (varsa), ve debug library (VM içinde ayrıcalıkları yükseltebilir).
 
-## Zero-click triggers via auto-run callbacks
+## Zero-click tetiklemeleri (auto-run callbacks aracılığıyla)
 
-If the host application pushes scripts to clients and the VM exposes auto-run hooks (e.g., OnInit/OnLoad/OnEnter), place your payload there for drive-by compromise as soon as the script loads:
+Eğer host application scriptleri clients'a gönderiyorsa ve VM auto-run hooks (ör. OnInit/OnLoad/OnEnter) sağlıyorsa, script yüklenir yüklenmez drive-by compromise için payload'unuzu oraya yerleştirin:
 ```lua
 function OnInit()
 io.popen("calc.exe") -- or any command
 end
 ```
-Scriptler istemciye otomatik olarak iletilip çalıştırıldığında, herhangi bir eşdeğer callback (OnLoad, OnEnter, vb.) bu tekniği genelleştirir.
+Herhangi bir eşdeğer callback (OnLoad, OnEnter, vb.) scriptler otomatik olarak client üzerinde iletilip çalıştırıldığında bu tekniği genelleştirir.
 
-## Recon sırasında aranacak tehlikeli primitive'ler
+## Recon sırasında aranacak tehlikeli primitifler
 
 _G enumeration sırasında özellikle şunlara bakın:
-- io, os: io.popen, os.execute, dosya I/O, ortam değişkenlerine erişim.
-- load, loadstring, loadfile, dofile: kaynak veya bytecode'u çalıştırır; güvenilmeyen bytecode yüklemeyi destekler.
-- package, package.loadlib, require: dinamik kütüphane yükleme ve modül arayüzü.
+- io, os: io.popen, os.execute, file I/O, env access.
+- load, loadstring, loadfile, dofile: kaynak veya bytecode çalıştırır; güvenilmeyen bytecode yüklemeyi destekler.
+- package, package.loadlib, require: dinamik kütüphane yükleme ve modül yüzeyi.
 - debug: setfenv/getfenv (≤5.1), getupvalue/setupvalue, getinfo ve hooks.
-- LuaJIT-only: ffi.cdef, ffi.load yerel kodu doğrudan çağırmak için.
+- LuaJIT-only: ffi.cdef, ffi.load ile doğrudan native code çağırma.
 
-Minimal kullanım örnekleri (ulaşılabilirse):
+Erişilebiliyorsa minimal kullanım örnekleri:
 ```lua
 -- Execute source/bytecode
 local f = load("return 1+1")
@@ -99,11 +99,11 @@ When load/loadstring/loadfile are reachable but io/os are restricted, execution 
 
 This path is engine/version-specific and requires RE. See references for deep dives, exploitation primitives, and example gadgetry in games.
 
-## Detection and hardening notes (for defenders)
+## Tespit ve sertleştirme notları (savunucular için)
 
-- Server side: reject or rewrite user scripts; allowlist safe APIs; strip or bind-empty io, os, load/loadstring/loadfile/dofile, package.loadlib, debug, ffi.
-- Client side: run Lua with a minimal _ENV, forbid bytecode loading, reintroduce a strict bytecode verifier or signature checks, and block process creation from the client process.
-- Telemetry: alert on gameclient → child process creation shortly after script load; correlate with UI/chat/script events.
+- Sunucu tarafı: kullanıcı scriptlerini reddet veya yeniden yaz; güvenli API'leri allowlistle; io, os, load/loadstring/loadfile/dofile, package.loadlib, debug, ffi öğelerini strip et veya bind-empty yap.
+- İstemci tarafı: Lua'yı minimal bir _ENV ile çalıştır, bytecode yüklemeyi yasakla, katı bir bytecode verifier veya imza kontrolleri yeniden getir, ve istemci süreçten process oluşturmayı engelle.
+- Telemetry: script yüklemesini takip eden kısa sürede gameclient → child process oluşturulmasında alarm üret; UI/chat/script olaylarıyla korelasyon yap.
 
 ## References
 
