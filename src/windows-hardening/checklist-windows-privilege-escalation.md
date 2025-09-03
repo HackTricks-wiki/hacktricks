@@ -15,6 +15,7 @@
 - [ ] Interesting info in [**Internet settings**](windows-local-privilege-escalation/index.html#internet-settings)?
 - [ ] [**Drives**](windows-local-privilege-escalation/index.html#drives)?
 - [ ] [**WSUS exploit**](windows-local-privilege-escalation/index.html#wsus)?
+- [ ] [**Third-party agent auto-updaters / IPC abuse**](windows-local-privilege-escalation/abusing-auto-updaters-and-ipc.md)
 - [ ] [**AlwaysInstallElevated**](windows-local-privilege-escalation/index.html#alwaysinstallelevated)?
 
 ### [Logging/AV enumeration](windows-local-privilege-escalation/index.html#enumeration)
