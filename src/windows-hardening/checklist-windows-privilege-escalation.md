@@ -1,114 +1,115 @@
-# Orodha - Kuinua Haki za Windows za Mitaa
+# Orodha ya ukaguzi - Local Windows Privilege Escalation
 
 {{#include ../banners/hacktricks-training.md}}
 
-### **Zana bora ya kutafuta njia za kuinua haki za Windows za ndani:** [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)
+### **Zana bora ya kutafuta Windows local privilege escalation vectors:** [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)
 
-### [Taarifa za Mfumo](windows-local-privilege-escalation/index.html#system-info)
+### [System Info](windows-local-privilege-escalation/index.html#system-info)
 
-- [ ] Pata [**Taarifa za mfumo**](windows-local-privilege-escalation/index.html#system-info)
-- [ ] Tafuta **kernel** [**exploits kwa kutumia scripts**](windows-local-privilege-escalation/index.html#version-exploits)
-- [ ] Tumia **Google kutafuta** **exploits** za kernel
-- [ ] Tumia **searchsploit kutafuta** **exploits** za kernel
-- [ ] Taarifa za kuvutia katika [**env vars**](windows-local-privilege-escalation/index.html#environment)?
-- [ ] Nywila katika [**PowerShell history**](windows-local-privilege-escalation/index.html#powershell-history)?
+- [ ] Pata [**System information**](windows-local-privilege-escalation/index.html#system-info)
+- [ ] Tafuta **kernel** [**exploits using scripts**](windows-local-privilege-escalation/index.html#version-exploits)
+- [ ] Tumia **Google to search** for kernel **exploits**
+- [ ] Tumia **searchsploit to search** for kernel **exploits**
+- [ ] Kuna taarifa ya kuvutia katika [**env vars**](windows-local-privilege-escalation/index.html#environment)?
+- [ ] Manenosiri katika [**PowerShell history**](windows-local-privilege-escalation/index.html#powershell-history)?
 - [ ] Taarifa za kuvutia katika [**Internet settings**](windows-local-privilege-escalation/index.html#internet-settings)?
 - [ ] [**Drives**](windows-local-privilege-escalation/index.html#drives)?
 - [ ] [**WSUS exploit**](windows-local-privilege-escalation/index.html#wsus)?
+- [ ] [**Third-party agent auto-updaters / IPC abuse**](windows-local-privilege-escalation/abusing-auto-updaters-and-ipc.md)
 - [ ] [**AlwaysInstallElevated**](windows-local-privilege-escalation/index.html#alwaysinstallelevated)?
 
-### [Kuhesabu/AV enumeration](windows-local-privilege-escalation/index.html#enumeration)
+### [Logging/AV enumeration](windows-local-privilege-escalation/index.html#enumeration)
 
-- [ ] Angalia [**Audit** ](windows-local-privilege-escalation/index.html#audit-settings)na [**WEF** ](windows-local-privilege-escalation/index.html#wef)settings
+- [ ] Angalia [**Audit** ](windows-local-privilege-escalation/index.html#audit-settings) na [**WEF** ](windows-local-privilege-escalation/index.html#wef) mipangilio
 - [ ] Angalia [**LAPS**](windows-local-privilege-escalation/index.html#laps)
-- [ ] Angalia kama [**WDigest** ](windows-local-privilege-escalation/index.html#wdigest)iko hai
+- [ ] Angalia ikiwa [**WDigest** ](windows-local-privilege-escalation/index.html#wdigest) inafanya kazi
 - [ ] [**LSA Protection**](windows-local-privilege-escalation/index.html#lsa-protection)?
 - [ ] [**Credentials Guard**](windows-local-privilege-escalation/index.html#credentials-guard)[?](windows-local-privilege-escalation/index.html#cached-credentials)
 - [ ] [**Cached Credentials**](windows-local-privilege-escalation/index.html#cached-credentials)?
-- [ ] Angalia kama kuna [**AV**](https://github.com/carlospolop/hacktricks/blob/master/windows-hardening/windows-av-bypass/README.md)
+- [ ] Angalia ikiwa kuna [**AV**](https://github.com/carlospolop/hacktricks/blob/master/windows-hardening/windows-av-bypass/README.md)
 - [ ] [**AppLocker Policy**](https://github.com/carlospolop/hacktricks/blob/master/windows-hardening/authentication-credentials-uac-and-efs/README.md#applocker-policy)?
 - [ ] [**UAC**](https://github.com/carlospolop/hacktricks/blob/master/windows-hardening/authentication-credentials-uac-and-efs/uac-user-account-control/README.md)
 - [ ] [**User Privileges**](windows-local-privilege-escalation/index.html#users-and-groups)
-- [ ] Angalia [**haki za**] **mtumiaji wa sasa** (windows-local-privilege-escalation/index.html#users-and-groups)
-- [ ] Je, wewe ni [**mwanachama wa kikundi chochote chenye haki**](windows-local-privilege-escalation/index.html#privileged-groups)?
-- [ ] Angalia kama una [mifumo hii ya tokens iliyoanzishwa](windows-local-privilege-escalation/index.html#token-manipulation): **SeImpersonatePrivilege, SeAssignPrimaryPrivilege, SeTcbPrivilege, SeBackupPrivilege, SeRestorePrivilege, SeCreateTokenPrivilege, SeLoadDriverPrivilege, SeTakeOwnershipPrivilege, SeDebugPrivilege** ?
-- [ ] [**Sessions za Watumiaji**](windows-local-privilege-escalation/index.html#logged-users-sessions)?
-- [ ] Angalia [**nyumba za watumiaji**](windows-local-privilege-escalation/index.html#home-folders) (ufikiaji?)
-- [ ] Angalia [**Sera ya Nywila**](windows-local-privilege-escalation/index.html#password-policy)
-- [ ] Nini kiko [**ndani ya Clipboard**](windows-local-privilege-escalation/index.html#get-the-content-of-the-clipboard)?
+- [ ] Angalia [**current** user **privileges**](windows-local-privilege-escalation/index.html#users-and-groups)
+- [ ] Je, wewe ni [**member of any privileged group**](windows-local-privilege-escalation/index.html#privileged-groups)?
+- [ ] Angalia ikiwa una [any of these tokens enabled](windows-local-privilege-escalation/index.html#token-manipulation): **SeImpersonatePrivilege, SeAssignPrimaryPrivilege, SeTcbPrivilege, SeBackupPrivilege, SeRestorePrivilege, SeCreateTokenPrivilege, SeLoadDriverPrivilege, SeTakeOwnershipPrivilege, SeDebugPrivilege** ?
+- [ ] [**Users Sessions**](windows-local-privilege-escalation/index.html#logged-users-sessions)?
+- [ ] Angalia[ **users homes**](windows-local-privilege-escalation/index.html#home-folders) (ufikia?)
+- [ ] Angalia [**Password Policy**](windows-local-privilege-escalation/index.html#password-policy)
+- [ ] Nini kimepo[ **inside the Clipboard**](windows-local-privilege-escalation/index.html#get-the-content-of-the-clipboard)?
 
-### [Mtandao](windows-local-privilege-escalation/index.html#network)
+### [Network](windows-local-privilege-escalation/index.html#network)
 
-- [ ] Angalia **taarifa za sasa za** [**mtandao**](windows-local-privilege-escalation/index.html#network)
-- [ ] Angalia **huduma za ndani zilizofichwa** zilizozuiliwa kwa nje
+- [ ] Angalia **current** [**network** **information**](windows-local-privilege-escalation/index.html#network)
+- [ ] Angalia **hidden local services** zinazopatikana kutoka nje
 
-### [Mchakato unaoendelea](windows-local-privilege-escalation/index.html#running-processes)
+### [Running Processes](windows-local-privilege-escalation/index.html#running-processes)
 
-- [ ] Mchakato wa binaries [**file na ruhusa za folda**](windows-local-privilege-escalation/index.html#file-and-folder-permissions)
-- [ ] [**Kuchimba nywila za kumbukumbu**](windows-local-privilege-escalation/index.html#memory-password-mining)
-- [ ] [**Programu za GUI zisizo salama**](windows-local-privilege-escalation/index.html#insecure-gui-apps)
-- [ ] Pora nywila na **michakato ya kuvutia** kupitia `ProcDump.exe` ? (firefox, chrome, nk ...)
+- [ ] Processes binaries [**file and folders permissions**](windows-local-privilege-escalation/index.html#file-and-folder-permissions)
+- [ ] [**Memory Password mining**](windows-local-privilege-escalation/index.html#memory-password-mining)
+- [ ] [**Insecure GUI apps**](windows-local-privilege-escalation/index.html#insecure-gui-apps)
+- [ ] Pora credentials kwa **interesting processes** kwa kutumia `ProcDump.exe` ? (firefox, chrome, etc ...)
 
-### [Huduma](windows-local-privilege-escalation/index.html#services)
+### [Services](windows-local-privilege-escalation/index.html#services)
 
-- [ ] [Je, unaweza **kubadilisha huduma yoyote**?](windows-local-privilege-escalation/index.html#permissions)
-- [ ] [Je, unaweza **kubadilisha** **binary** inayotekelezwa na **huduma yoyote**?](windows-local-privilege-escalation/index.html#modify-service-binary-path)
-- [ ] [Je, unaweza **kubadilisha** **registry** ya **huduma yoyote**?](windows-local-privilege-escalation/index.html#services-registry-modify-permissions)
-- [ ] [Je, unaweza kunufaika na **path** ya **binary** ya **huduma isiyo na quote**?](windows-local-privilege-escalation/index.html#unquoted-service-paths)
+- [ ] [Can you **modify any service**?](windows-local-privilege-escalation/index.html#permissions)
+- [ ] [Can you **modify** the **binary** that is **executed** by any **service**?](windows-local-privilege-escalation/index.html#modify-service-binary-path)
+- [ ] [Can you **modify** the **registry** of any **service**?](windows-local-privilege-escalation/index.html#services-registry-modify-permissions)
+- [ ] [Can you take advantage of any **unquoted service** binary **path**?](windows-local-privilege-escalation/index.html#unquoted-service-paths)
 
-### [**Programu**](windows-local-privilege-escalation/index.html#applications)
+### [**Applications**](windows-local-privilege-escalation/index.html#applications)
 
-- [ ] **Andika** [**ruhusa kwenye programu zilizowekwa**](windows-local-privilege-escalation/index.html#write-permissions)
-- [ ] [**Programu za Kuanzisha**](windows-local-privilege-escalation/index.html#run-at-startup)
-- [ ] **Wasiwasi** [**Madereva**](windows-local-privilege-escalation/index.html#drivers)
+- [ ] **Write** [**permissions on installed applications**](windows-local-privilege-escalation/index.html#write-permissions)
+- [ ] [**Startup Applications**](windows-local-privilege-escalation/index.html#run-at-startup)
+- [ ] **Vulnerable** [**Drivers**](windows-local-privilege-escalation/index.html#drivers)
 
 ### [DLL Hijacking](windows-local-privilege-escalation/index.html#path-dll-hijacking)
 
-- [ ] Je, unaweza **kuandika katika folda yoyote ndani ya PATH**?
-- [ ] Je, kuna binary ya huduma inayojulikana ambayo **inajaribu kupakia DLL isiyokuwepo**?
-- [ ] Je, unaweza **kuandika** katika **folda za binaries**?
+- [ ] Je, unaweza **write in any folder inside PATH**?
+- [ ] Je, kuna binary ya huduma inayojulikana ambayo **tries to load any non-existant DLL**?
+- [ ] Je, unaweza **write** in any **binaries folder**?
 
-### [Mtandao](windows-local-privilege-escalation/index.html#network)
+### [Network](windows-local-privilege-escalation/index.html#network)
 
-- [ ] Hesabu mtandao (shares, interfaces, routes, neighbours, ...)
-- [ ] Angalia kwa makini huduma za mtandao zinazokisikiliza kwenye localhost (127.0.0.1)
+- [ ] Orodhesha mtandao (shares, interfaces, routes, neighbours, ...)
+- [ ] Angalia kwa makini network services listening on localhost (127.0.0.1)
 
-### [Nywila za Windows](windows-local-privilege-escalation/index.html#windows-credentials)
+### [Windows Credentials](windows-local-privilege-escalation/index.html#windows-credentials)
 
-- [ ] [**Winlogon** ](windows-local-privilege-escalation/index.html#winlogon-credentials)nywila
-- [ ] [**Windows Vault**](windows-local-privilege-escalation/index.html#credentials-manager-windows-vault) nywila ambazo unaweza kutumia?
-- [ ] Taarifa za kuvutia [**DPAPI credentials**](windows-local-privilege-escalation/index.html#dpapi)?
-- [ ] Nywila za mitandao ya [**Wifi zilizohifadhiwa**](windows-local-privilege-escalation/index.html#wifi)?
-- [ ] Taarifa za kuvutia katika [**RDP Connections zilizohifadhiwa**](windows-local-privilege-escalation/index.html#saved-rdp-connections)?
-- [ ] Nywila katika [**amri zilizokimbizwa hivi karibuni**](windows-local-privilege-escalation/index.html#recently-run-commands)?
-- [ ] [**Meneja wa Nywila za Desktop ya KijRemote**](windows-local-privilege-escalation/index.html#remote-desktop-credential-manager) nywila?
-- [ ] [**AppCmd.exe** ipo](windows-local-privilege-escalation/index.html#appcmd-exe)? Nywila?
+- [ ] [**Winlogon** ](windows-local-privilege-escalation/index.html#winlogon-credentials)credentials
+- [ ] [**Windows Vault**](windows-local-privilege-escalation/index.html#credentials-manager-windows-vault) credentials ambazo unaweza kutumia?
+- [ ] Taarifa za kuvutia katika [**DPAPI credentials**](windows-local-privilege-escalation/index.html#dpapi)?
+- [ ] Manenosiri za mitandao zilizohifadhiwa za [**Wifi networks**](windows-local-privilege-escalation/index.html#wifi)?
+- [ ] Taarifa za kuvutia katika [**saved RDP Connections**](windows-local-privilege-escalation/index.html#saved-rdp-connections)?
+- [ ] Manenosiri katika [**recently run commands**](windows-local-privilege-escalation/index.html#recently-run-commands)?
+- [ ] [**Remote Desktop Credentials Manager**](windows-local-privilege-escalation/index.html#remote-desktop-credential-manager) manenosiri?
+- [ ] [**AppCmd.exe** exists](windows-local-privilege-escalation/index.html#appcmd-exe)? Credentials?
 - [ ] [**SCClient.exe**](windows-local-privilege-escalation/index.html#scclient-sccm)? DLL Side Loading?
 
-### [Faili na Registry (Nywila)](windows-local-privilege-escalation/index.html#files-and-registry-credentials)
+### [Files and Registry (Credentials)](windows-local-privilege-escalation/index.html#files-and-registry-credentials)
 
-- [ ] **Putty:** [**Creds**](windows-local-privilege-escalation/index.html#putty-creds) **na** [**SSH host keys**](windows-local-privilege-escalation/index.html#putty-ssh-host-keys)
-- [ ] [**SSH keys katika registry**](windows-local-privilege-escalation/index.html#ssh-keys-in-registry)?
-- [ ] Nywila katika [**faili zisizokuwa na mtu**](windows-local-privilege-escalation/index.html#unattended-files)?
-- [ ] Backup yoyote ya [**SAM & SYSTEM**](windows-local-privilege-escalation/index.html#sam-and-system-backups)?
+- [ ] **Putty:** [**Creds**](windows-local-privilege-escalation/index.html#putty-creds) **and** [**SSH host keys**](windows-local-privilege-escalation/index.html#putty-ssh-host-keys)
+- [ ] [**SSH keys in registry**](windows-local-privilege-escalation/index.html#ssh-keys-in-registry)?
+- [ ] Manenosiri katika [**unattended files**](windows-local-privilege-escalation/index.html#unattended-files)?
+- [ ] Any [**SAM & SYSTEM**](windows-local-privilege-escalation/index.html#sam-and-system-backups) backup?
 - [ ] [**Cloud credentials**](windows-local-privilege-escalation/index.html#cloud-credentials)?
-- [ ] [**McAfee SiteList.xml**](windows-local-privilege-escalation/index.html#mcafee-sitelist.xml) faili?
+- [ ] [**McAfee SiteList.xml**](windows-local-privilege-escalation/index.html#mcafee-sitelist.xml) file?
 - [ ] [**Cached GPP Password**](windows-local-privilege-escalation/index.html#cached-gpp-pasword)?
-- [ ] Nywila katika [**IIS Web config file**](windows-local-privilege-escalation/index.html#iis-web-config)?
+- [ ] Nenosiri katika [**IIS Web config file**](windows-local-privilege-escalation/index.html#iis-web-config)?
 - [ ] Taarifa za kuvutia katika [**web** **logs**](windows-local-privilege-escalation/index.html#logs)?
-- [ ] Je, unataka [**kuomba nywila**](windows-local-privilege-escalation/index.html#ask-for-credentials) kwa mtumiaji?
-- [ ] Taarifa za kuvutia [**ndani ya Recycle Bin**](windows-local-privilege-escalation/index.html#credentials-in-the-recyclebin)?
-- [ ] Registry nyingine [**ikiwemo nywila**](windows-local-privilege-escalation/index.html#inside-the-registry)?
-- [ ] Ndani ya [**data za kivinjari**](windows-local-privilege-escalation/index.html#browsers-history) (dbs, historia, alama, ...)?
-- [ ] [**Utafutaji wa nywila wa jumla**](windows-local-privilege-escalation/index.html#generic-password-search-in-files-and-registry) katika faili na registry
-- [ ] [**Zana**](windows-local-privilege-escalation/index.html#tools-that-search-for-passwords) za kutafuta nywila kiotomatiki
+- [ ] Unataka [**ask for credentials**](windows-local-privilege-escalation/index.html#ask-for-credentials) kwa mtumiaji?
+- [ ] Taarifa za kuvutia katika [**files inside the Recycle Bin**](windows-local-privilege-escalation/index.html#credentials-in-the-recyclebin)?
+- [ ] Mengine [**registry containing credentials**](windows-local-privilege-escalation/index.html#inside-the-registry)?
+- [ ] Ndani ya [**Browser data**](windows-local-privilege-escalation/index.html#browsers-history) (dbs, history, bookmarks, ...)?
+- [ ] [**Generic password search**](windows-local-privilege-escalation/index.html#generic-password-search-in-files-and-registry) katika faili na registry
+- [ ] [**Tools**](windows-local-privilege-escalation/index.html#tools-that-search-for-passwords) to automatically search for passwords
 
 ### [Leaked Handlers](windows-local-privilege-escalation/index.html#leaked-handlers)
 
-- [ ] Je, una ufikiaji wa handler yoyote ya mchakato unaoendeshwa na msimamizi?
+- [ ] Je, una ufikiaji wa handler yoyote ya mchakato unaoendeshwa na administrator?
 
 ### [Pipe Client Impersonation](windows-local-privilege-escalation/index.html#named-pipe-client-impersonation)
 
-- [ ] Angalia kama unaweza kuitumia
+- [ ] Angalia ikiwa unaweza kuitumia vibaya
 
 {{#include ../banners/hacktricks-training.md}}
