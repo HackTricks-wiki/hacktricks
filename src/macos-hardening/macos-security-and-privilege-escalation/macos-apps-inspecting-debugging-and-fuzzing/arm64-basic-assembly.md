@@ -45,6 +45,9 @@ ARM64 has **31 general-purpose registers**, labeled `x0` through `x30`. Each can
 
 The **`Wn`** registers are the **32bit** version of the **`Xn`** register.
 
+> [!TIP]
+> The registers from X0 - X18 are volatile, which means that their values can be changed by function calls and interrupts. However, the registers from X19 - X28 are non-volatile, meaning their values must be preserved across function calls ("callee saved").
+
 ### SIMD and Floating-Point Registers
 
 Moreover, there are another **32 registers of 128bit length** that can be used in optimized single instruction multiple data (SIMD) operations and for performing floating-point arithmetic. These are called the Vn registers although they can also operate in **64**-bit, **32**-bit, **16**-bit and **8**-bit and then they are called **`Qn`**, **`Dn`**, **`Sn`**, **`Hn`** and **`Bn`**.
@@ -275,7 +278,7 @@ There are 16 32-bit registers (r0-r15). **From r0 to r14** they can be used for 
 - **`r15`**: Program counter (always). Contains the address of the next instruction. In A32 current + 8, in T32, current + 4.
 - **`r11`**: Frame Pointer
 - **`r12`**: Intra-procedural call register
-- **`r13`**: Stack Pointer
+- **`r13`**: Stack Pointer (Note the stack is always 16-byte aligned)
 - **`r14`**: Link Register
 
 Moreover, registers are backed up in **`banked registries`**. Which are places that store the registers values allowing to perform **fast context switching** in exception handling and privileged operations to avoid the need to manually save and restore registers every time.\
@@ -317,7 +320,7 @@ The fields are divided in some groups:
 
 ### BSD syscalls
 
-Check out [**syscalls.master**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/bsd/kern/syscalls.master). BSD syscalls will have **x16 > 0**.
+Check out [**syscalls.master**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/bsd/kern/syscalls.master) or run `cat /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/syscall.h`. BSD syscalls will have **x16 > 0**.
 
 ### Mach Traps
 
