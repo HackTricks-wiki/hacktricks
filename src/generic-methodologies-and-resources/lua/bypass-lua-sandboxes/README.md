@@ -1,18 +1,18 @@
-# Bypass Lua sandboxes (embedded VMs, game clients)
+# Lua sandboxes को बायपास करें (embedded VMs, game clients)
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-यह पृष्ठ ऐप्लिकेशन में embedded Lua "sandboxes" को enumerate करने और उनसे बाहर निकलने के व्यावहारिक तरीकों को इकट्ठा करता है (विशेषकर game clients, plugins, या in-app scripting engines)। कई engines सीमित Lua environment expose करते हैं, लेकिन शक्तिशाली globals को reachable छोड़ देते हैं जो arbitrary command execution या यहां तक कि native memory corruption की अनुमति देते हैं जब bytecode loaders exposed हों।
+यह पृष्ठ उन व्यावहारिक तकनीकों को एकत्रित करता है जो applications में embedded Lua "sandboxes" की सूची बनाने और उनसे बाहर निकलने के लिए उपयोगी होती हैं (विशेषकर game clients, plugins, या in-app scripting engines)। कई engines एक restricted Lua environment एक्सपोज़ करते हैं, लेकिन शक्तिशाली globals को पहुँच में छोड़ देते हैं जो arbitrary command execution या यहाँ तक कि native memory corruption को सक्षम कर सकते हैं जब bytecode loaders एक्सपोज़ होते हैं।
 
-मुख्य विचार:
-- VM को एक अज्ञात environment मानें: _G को enumerate करें और पता लगाएँ कौन से dangerous primitives reachable हैं।
-- जब stdout/print blocked हो, किसी भी in-VM UI/IPC चैनल का output sink के रूप में दुरुपयोग करके परिणाम देखें।
-- अगर io/os exposed है, तो अक्सर आपके पास direct command execution होता है (io.popen, os.execute)।
-- अगर load/loadstring/loadfile exposed हैं, तो crafted Lua bytecode चलाकर कुछ संस्करणों में memory safety को subvert किया जा सकता है (≤5.1 verifiers bypassable हैं; 5.2 ने verifier हटा दिया), जिससे advanced exploitation संभव होता है।
+Key ideas:
+- VM को एक अज्ञात environment की तरह समझें: _G को enumerate करें और पता लगाएं कि कौन से dangerous primitives पहुँच योग्य हैं।
+- जब stdout/print ब्लॉक हों, किसी भी in-VM UI/IPC चैनल को output sink के रूप में दुरुपयोग करके परिणामों का अवलोकन करें।
+- यदि io/os एक्सपोज़ हैं, तो अक्सर आपके पास direct command execution होता है (io.popen, os.execute)।
+- यदि load/loadstring/loadfile एक्सपोज़ हैं, तो crafted Lua bytecode को execute करने से कुछ versions में memory safety subvert की जा सकती है (≤5.1 verifiers bypassable हैं; 5.2 में verifier हटाया गया था), जिससे advanced exploitation संभव होता है।
 
-## Sandboxed environment को enumerate करें
+## Sandboxed environment को सूचीबद्ध करें
 
-- Global environment को dump करके reachable tables/functions का inventory बनाएं:
+- पहुँच योग्य tables/functions का inventory करने के लिए global environment को dump करें:
 ```lua
 -- Minimal _G dumper for any Lua sandbox with some output primitive `out`
 local function dump_globals(out)
@@ -22,7 +22,7 @@ out(tostring(k) .. " = " .. tostring(v))
 end
 end
 ```
-- यदि print() उपलब्ध नहीं है, तो in-VM channels का पुन: उपयोग करें। MMO housing script VM के उदाहरण में जहाँ chat output केवल sound call के बाद ही काम करता है; निम्नलिखित एक विश्वसनीय output function बनाता है:
+- अगर print() उपलब्ध नहीं है, तो in-VM channels का पुन: उपयोग करें। उदाहरण एक MMO housing script VM का है जहाँ chat output केवल sound call के बाद काम करता है; नीचे एक भरोसेमंद output function बनाया गया है:
 ```lua
 -- Build an output channel using in-game primitives
 local function ButlerOut(label)
@@ -39,11 +39,11 @@ local out = ButlerOut(1)
 dump_globals(out)
 end
 ```
-अपने लक्ष्य के लिए इस पैटर्न को सामान्य करें: कोई भी textbox, toast, logger, या UI callback जो strings स्वीकार करता है, reconnaissance के लिए stdout की तरह कार्य कर सकता है।
+अपने लक्ष्य के लिए इस पैटर्न को सामान्य बनाएं: कोई भी textbox, toast, logger, या UI callback जो strings स्वीकार करता है, reconnaissance के लिए stdout के रूप में कार्य कर सकता है।
 
-## Direct command execution if io/os is exposed
+## Direct command execution यदि io/os एक्सपोज़ हैं
 
-यदि sandbox अभी भी मानक लाइब्रेरी io या os को एक्सपोज़ करता है, तो आपके पास संभवतः immediate command execution है:
+यदि sandbox अभी भी मानक लाइब्रेरीज़ io या os को एक्सपोज़ करता है, तो संभवतः आपके पास तत्काल command execution है:
 ```lua
 -- Windows example
 io.popen("calc.exe")
@@ -52,30 +52,29 @@ io.popen("calc.exe")
 os.execute("/usr/bin/id")
 io.popen("/bin/sh -c 'id'")
 ```
-नोट्स:
-- निष्पादन client process के भीतर होता है; कई anti-cheat/antidebug परतें जो external debuggers को ब्लॉक करती हैं, in-VM process creation को रोक नहीं पाएंगी।
-- यह भी जांचें: package.loadlib (arbitrary DLL/.so loading), require with native modules, LuaJIT's ffi (if present), और debug library (can raise privileges inside the VM).
+- निष्पादन client process के अंदर होता है; कई anti-cheat/antidebug लेयर्स जो external debuggers को ब्लॉक करती हैं, वे in-VM process creation को रोक नहीं पाएंगी।
+- इसके अलावा जाँचें: package.loadlib (arbitrary DLL/.so loading), require with native modules, LuaJIT's ffi (if present), and the debug library (can raise privileges inside the VM).
 
 ## Zero-click triggers via auto-run callbacks
 
-If the host application pushes scripts to clients and the VM exposes auto-run hooks (e.g., OnInit/OnLoad/OnEnter), place your payload there for drive-by compromise as soon as the script loads:
+यदि host application clients को scripts पुश करता है और VM auto-run hooks (e.g., OnInit/OnLoad/OnEnter) एक्सपोज़ करता है, तो जैसे ही script लोड हो, drive-by compromise के लिए अपना payload वहां रखें:
 ```lua
 function OnInit()
 io.popen("calc.exe") -- or any command
 end
 ```
-कोई भी समकक्ष callback (OnLoad, OnEnter, आदि) इस तकनीक को सामान्यीकृत करता है जब scripts स्वतः client पर भेजे और निष्पादित किए जाते हैं।
+कोई भी समान callback (OnLoad, OnEnter, आदि) इस तकनीक को सामान्यीकृत कर देता है जब scripts क्लाइंट पर स्वचालित रूप से भेजे और execute किए जाते हैं।
 
-## Recon के दौरान खोजने के लिए खतरनाक primitives
+## Recon के दौरान खोजने के लिए Dangerous primitives
 
-_G enumeration के दौरान, विशेष रूप से निम्न देखें:
+_G enumeration के दौरान, खासकर इन पर देखें:
 - io, os: io.popen, os.execute, file I/O, env access.
-- load, loadstring, loadfile, dofile: source या bytecode को निष्पादित करता है; untrusted bytecode को लोड करने का समर्थन करता है.
-- package, package.loadlib, require: dynamic library loading और module surface.
+- load, loadstring, loadfile, dofile: source या bytecode को execute करता है; untrusted bytecode को लोड करने का समर्थन करता है।
+- package, package.loadlib, require: डायनेमिक लाइब्रेरी लोडिंग और मॉड्यूल इंटरफ़ेस।
 - debug: setfenv/getfenv (≤5.1), getupvalue/setupvalue, getinfo, and hooks.
-- LuaJIT-only: ffi.cdef, ffi.load native code को सीधे call करने के लिए.
+- LuaJIT-only: ffi.cdef, ffi.load — native code को सीधे call करने के लिए।
 
-यदि पहुँच संभव हो तो न्यूनतम उपयोग के उदाहरण:
+Minimal usage examples (if reachable):
 ```lua
 -- Execute source/bytecode
 local f = load("return 1+1")
@@ -90,20 +89,20 @@ print(g())
 local mylib = package.loadlib("./libfoo.so", "luaopen_foo")
 local foo = mylib()
 ```
-## वैकल्पिक escalation: Lua bytecode loaders का दुरुपयोग
+## वैकल्पिक उन्नयन: Lua bytecode loaders का दुरुपयोग
 
-जब load/loadstring/loadfile पहुँच में हों पर io/os प्रतिबंधित हों, तो crafted Lua bytecode का निष्पादन memory disclosure और corruption primitives तक पहुंचा सकता है। मुख्य तथ्य:
-- Lua ≤ 5.1 shipped a bytecode verifier that has known bypasses.
-- Lua 5.2 removed the verifier entirely (official stance: applications should just reject precompiled chunks), widening the attack surface if bytecode loading is not prohibited.
-- Workflows typically: leak pointers via in-VM output, craft bytecode to create type confusions (e.g., around FORLOOP or other opcodes), then pivot to arbitrary read/write or native code execution.
+जब load/loadstring/loadfile पहुँच योग्य हों लेकिन io/os प्रतिबंधित हों, तब निर्मित Lua bytecode का निष्पादन memory disclosure और corruption primitives को जन्म दे सकता है। मुख्य तथ्य:
+- Lua ≤ 5.1 में एक bytecode verifier शिप किया गया था जिसमें ज्ञात bypasses मौजूद हैं।
+- Lua 5.2 ने verifier को पूरी तरह हटा दिया (official stance: applications should just reject precompiled chunks), जिससे attack surface बढ़ता है अगर bytecode loading निषिद्ध नहीं किया गया हो।
+- सामान्य रूप से: leak pointers via in-VM output, craft bytecode to create type confusions (e.g., around FORLOOP or other opcodes), फिर pivot कर arbitrary read/write या native code execution पर।
 
-यह रास्ता engine/version-specific है और RE की आवश्यकता होती है। गहराई से जानने के लिए references देखें — exploitation primitives और games में मौजूद example gadgetry के लिए।
+यह रास्ता engine/संस्करण-विशिष्ट है और RE की आवश्यकता होती है। गहरी जानकारी, exploitation primitives, और गेम्स में उदाहरण gadgetry के लिए references देखें।
 
-## Detection and hardening notes (for defenders)
+## पहचान और हार्डनिंग नोट्स (रक्षकों के लिए)
 
-- Server side: user scripts को reject या rewrite करें; allowlist safe APIs लागू करें; io, os, load/loadstring/loadfile/dofile, package.loadlib, debug, ffi को strip या bind-empty कर दें।
-- Client side: Lua को एक minimal _ENV के साथ चलाएँ, bytecode loading को निषिद्ध करें, एक strict bytecode verifier या signature checks पुनः लागू करें, और client process से process creation को ब्लॉक करें।
-- Telemetry: script load के तुरंत बाद gameclient → child process creation पर अलर्ट करें; इसे UI/chat/script events के साथ correlate करें।
+- Server side: user scripts को reject या rewrite करें; सुरक्षित APIs को allowlist करें; io, os, load/loadstring/loadfile/dofile, package.loadlib, debug, ffi को strip या bind-empty करें।
+- Client side: Lua को minimal _ENV के साथ चलाएं, bytecode loading को निषिद्ध करें, एक strict bytecode verifier या signature checks पुनः लागू करें, और client process से process creation को ब्लॉक करें।
+- Telemetry: gameclient → child process creation पर अलर्ट करें जो script load के तुरंत बाद हो; इसे UI/chat/script events के साथ correlate करें।
 
 ## References
 
