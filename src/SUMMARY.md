@@ -80,6 +80,8 @@
   - [Bruteforce hash (few chars)](generic-methodologies-and-resources/python/bruteforce-hash-few-chars.md)
   - [Basic Python](generic-methodologies-and-resources/python/basic-python.md)
 - [Threat Modeling](generic-methodologies-and-resources/threat-modeling.md)
+- [Blockchain & Crypto](blockchain/blockchain-and-crypto-currencies/README.md)
+- [Lua Sandbox Escape](generic-methodologies-and-resources/lua/bypass-lua-sandboxes/README.md)
 
 # 🧙‍♂️ Generic Hacking
 
@@ -926,13 +928,4 @@
 - [Post Exploitation](todo/post-exploitation.md)
 - [Investment Terms](todo/investment-terms.md)
 - [Cookies Policy](todo/cookies-policy.md)
-
-
-
-  - [Readme](blockchain/blockchain-and-crypto-currencies/README.md)
-  - [Readme](macos-hardening/macos-security-and-privilege-escalation/mac-os-architecture/macos-ipc-inter-process-communication/README.md)
-  - [Readme](network-services-pentesting/1521-1522-1529-pentesting-oracle-listener/README.md)
-  - [Readme](pentesting-web/web-vulnerabilities-methodology/README.md)
-  - [Readme](reversing/cryptographic-algorithms/README.md)
-  - [Readme](reversing/reversing-tools/README.md)
-  - [Readme](windows-hardening/windows-local-privilege-escalation/privilege-escalation-abusing-tokens/README.md)
+  
