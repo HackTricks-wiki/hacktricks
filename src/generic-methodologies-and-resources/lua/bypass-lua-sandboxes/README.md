@@ -1,18 +1,18 @@
-# Bypass Lua sandboxes (embedded VMs, game clients)
+# 绕过 Lua 沙箱（嵌入式 VM、游戏客户端）
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-本页收集了用于枚举并从嵌入在应用中的 Lua “sandboxes” 中突破的实用技术（尤其是 game clients、plugins 或应用内脚本引擎）。许多引擎暴露了受限的 Lua 环境，但仍会留下可访问的强大 globals；如果暴露 bytecode loaders，就可能实现任意命令执行甚至本机内存损坏。
+本页收集了用于枚举并突破嵌入在应用程序中的 Lua “沙箱”的实用技术（尤其是游戏客户端、插件或应用内脚本引擎）。许多引擎暴露出受限的 Lua 环境，但仍会留下可访问的强大全局，这些全局可导致任意命令执行，甚至在暴露字节码加载器时引发本地内存破坏。
 
 关键思路：
-- 把 VM 当作未知环境来处理：枚举 _G，发现哪些危险的 primitives 可达。
-- 当 stdout/print 被屏蔽时，滥用任何 in-VM 的 UI/IPC 通道作为输出汇点以观察结果。
-- 如果 io/os 可用，通常可以直接执行命令（io.popen、os.execute）。
-- 如果暴露了 load/loadstring/loadfile，执行精心构造的 Lua bytecode 可能会在某些版本中破坏内存安全（≤5.1 的 verifiers 可被绕过；5.2 已移除 verifier），从而实现高级利用。
+- 将 VM 视为未知环境：枚举 _G，发现哪些危险原语可达。
+- 当 stdout/print 被屏蔽时，滥用 VM 内的任意 UI/IPC 通道作为输出接收器以观察结果。
+- 如果 io/os 被暴露，通常可以直接执行命令（io.popen、os.execute）。
+- 如果暴露了 load/loadstring/loadfile，执行精心构造的 Lua 字节码可以在某些版本中破坏内存安全（≤5.1 的验证器可被绕过；5.2 移除了验证器），从而实现高级利用。
 
-## 枚举 the sandboxed environment
+## 枚举沙箱环境
 
-- 转储 global environment，以清点可访问的 tables/functions：
+- 转储全局环境以清点可达的表/函数：
 ```lua
 -- Minimal _G dumper for any Lua sandbox with some output primitive `out`
 local function dump_globals(out)
@@ -22,7 +22,7 @@ out(tostring(k) .. " = " .. tostring(v))
 end
 end
 ```
-- 如果没有 print() 可用，可重用 in-VM channels。以下示例来自一个 MMO housing 脚本 VM：chat 输出只有在 sound call 之后才生效；下面构建了一个可靠的输出函数：
+- 如果没有 print() 可用，可改用 in-VM 通道。来自 MMO housing script VM 的示例：chat output 只有在 sound call 之后才会生效；以下构建了一个可靠的输出函数：
 ```lua
 -- Build an output channel using in-game primitives
 local function ButlerOut(label)
@@ -39,11 +39,11 @@ local out = ButlerOut(1)
 dump_globals(out)
 end
 ```
-将此模式泛化到你的目标：任何接受字符串的 textbox、toast、logger 或 UI callback 都可以作为 stdout 用于 reconnaissance。
+将此模式泛化到你的目标：任何接受字符串的 textbox, toast, logger, or UI callback 都可以作为 stdout 用于侦察。
 
-## 如果 io/os 被暴露则可直接执行命令
+## 如果暴露了 io/os，可以直接执行命令
 
-如果 sandbox 仍然暴露标准库 io 或 os，你很可能立即获得命令执行：
+如果沙箱仍然暴露标准库 io or os，你很可能可以立即执行命令：
 ```lua
 -- Windows example
 io.popen("calc.exe")
@@ -52,29 +52,29 @@ io.popen("calc.exe")
 os.execute("/usr/bin/id")
 io.popen("/bin/sh -c 'id'")
 ```
-- 执行发生在客户端进程内；许多阻止外部调试器的 anti-cheat/antidebug 层不会阻止 in-VM 进程创建。
-- 还要检查：package.loadlib (arbitrary DLL/.so loading)、require with native modules、LuaJIT's ffi (if present)、以及 debug library（可能在 VM 内提升权限）。
+- 执行发生在 client process 内；许多阻止 external debuggers 的 anti-cheat/antidebug 层并不会阻止 in-VM process creation。
+- 还要检查：package.loadlib (arbitrary DLL/.so loading)、require with native modules、LuaJIT's ffi (if present)、以及 debug library（可以在 VM 内提升权限）。
 
-## Zero-click triggers via auto-run callbacks
+## 通过 auto-run callbacks 的 Zero-click 触发器
 
-如果宿主应用将脚本推送到客户端，且 VM 暴露 auto-run hooks（例如 OnInit/OnLoad/OnEnter），在脚本加载时立即将 payload 放到这些钩子中以实现 drive-by compromise：
+如果 host application 将脚本推送到 clients 且 VM 暴露 auto-run hooks（例如 OnInit/OnLoad/OnEnter），则在脚本加载时立即将你的 payload 放到那里，以实现 drive-by compromise：
 ```lua
 function OnInit()
 io.popen("calc.exe") -- or any command
 end
 ```
-任何等效的回调（OnLoad、OnEnter 等）都会在脚本被自动传输并在客户端执行时使该技术泛化。
+任何等效的回调（OnLoad、OnEnter 等）在脚本被传输并自动在客户端执行时会将此技术泛化。
 
-## 在 recon 期间要寻找的危险原语
+## 在侦察期间要搜索的危险原语
 
-在对 _G 进行枚举时，特别注意查找：
-- io、os：io.popen、os.execute、file I/O、env access。
-- load、loadstring、loadfile、dofile：执行源代码或字节码；支持加载不受信任的字节码。
-- package、package.loadlib、require：动态库加载和模块暴露面。
-- debug：setfenv/getfenv（≤5.1）、getupvalue/setupvalue、getinfo，以及 hooks。
-- LuaJIT-only：ffi.cdef、ffi.load，用于直接调用本地代码。
+在 _G 枚举期间，特别注意查找：
+- io, os: io.popen, os.execute, file I/O, env access.
+- load, loadstring, loadfile, dofile: 执行源代码或 bytecode；支持加载不受信任的 bytecode。
+- package, package.loadlib, require: 动态库加载和模块接口。
+- debug: setfenv/getfenv (≤5.1), getupvalue/setupvalue, getinfo, and hooks.
+- LuaJIT-only: ffi.cdef, ffi.load to call native code directly.
 
-最小使用示例（如果可达）：
+Minimal usage examples (if reachable):
 ```lua
 -- Execute source/bytecode
 local f = load("return 1+1")
@@ -89,20 +89,20 @@ print(g())
 local mylib = package.loadlib("./libfoo.so", "luaopen_foo")
 local foo = mylib()
 ```
-## 可选的权限提升：滥用 Lua bytecode loaders
+## 可选升级：abusing Lua bytecode loaders
 
-当 load/loadstring/loadfile 可达但 io/os 受限时，执行精心构造的 Lua bytecode 可能导致内存泄露和破坏原语。关键要点：
-- Lua ≤ 5.1 附带一个已知可被绕过的 bytecode verifier。
-- Lua 5.2 完全移除了 verifier（官方立场：应用程序应直接拒绝预编译的 chunks），如果不禁止 bytecode 加载，则扩大了攻击面。
-- 典型流程：通过 in-VM 输出 leak pointers，构造 bytecode 以制造类型混淆（例如围绕 FORLOOP 或其他 opcodes），然后转向 arbitrary read/write 或 native code execution。
+当 load/loadstring/loadfile 可达但 io/os 受限时，执行精心构造的 Lua bytecode 可能导致内存泄露和破坏原语。要点：
+- Lua ≤ 5.1 随附了一个 bytecode verifier，该 verifier 有已知的 bypasses。
+- Lua 5.2 完全移除了该 verifier（官方立场：应用应直接拒绝 precompiled chunks），如果不禁止 bytecode loading 则扩大了攻击面。
+- 典型工作流：通过 in-VM 输出 leak 指针，构造 bytecode 以制造 type confusions（例如围绕 FORLOOP 或其他 opcodes），然后枢转为 arbitrary read/write 或 native code execution。
 
-该路径与 engine/version 相关，并且需要 RE。详见 references 中的深入分析、利用原语和游戏中的示例 gadgetry。
+此路径依赖于引擎/版本并需 RE。详见参考以获取深入分析、利用原语和在游戏中的示例 gadgetry。
 
-## Detection and hardening notes (for defenders)
+## 检测与加固说明（供防御者）
 
-- 服务器端：拒绝或重写用户脚本；白名单安全 APIs；移除或绑定为空 io、os、load/loadstring/loadfile/dofile、package.loadlib、debug、ffi。
-- 客户端：以最小 _ENV 运行 Lua，禁止 bytecode 加载，重新引入严格的 bytecode verifier 或签名校验，并阻止客户端进程创建子进程。
-- 遥测：在 script 加载后不久检测到 gameclient → 子进程创建时触发告警；与 UI/chat/script 事件进行关联。
+- Server side：拒绝或重写用户脚本；白名单安全 API；移除或绑定为空 io、os、load/loadstring/loadfile/dofile、package.loadlib、debug、ffi。
+- Client side：以最小 _ENV 运行 Lua，禁止 bytecode loading，重新引入严格的 bytecode verifier 或签名校验，并阻止客户端进程创建子进程。
+- Telemetry：在脚本加载后不久对 gameclient → child process creation 发出告警；与 UI/chat/script 事件做关联分析。
 
 ## References
 
