@@ -2,17 +2,17 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Questa pagina raccoglie tecniche pratiche per enumerare e uscire da Lua "sandboxes" integrate nelle applicazioni (in particolare game clients, plugins o in-app scripting engines). Molti engine espongono un ambiente Lua ristretto, ma lasciano globals potenti raggiungibili che permettono l'esecuzione arbitraria di comandi o persino la corruzione della memoria nativa quando sono esposti bytecode loaders.
+Questa pagina raccoglie tecniche pratiche per enumerare e uscire dalle Lua "sandboxes" integrate nelle applicazioni (in particolare game clients, plugins o in-app scripting engines). Molti engine espongono un ambiente Lua ristretto, ma lasciano globals potenti raggiungibili che permettono l'esecuzione arbitraria di comandi o anche la corruzione nativa della memoria quando sono esposti bytecode loaders.
 
 Concetti chiave:
-- Treat the VM as an unknown environment: enumerate _G and discover what dangerous primitives are reachable.
-- When stdout/print is blocked, abuse any in-VM UI/IPC channel as an output sink to observe results.
-- If io/os is exposed, you often have direct command execution (io.popen, os.execute).
-- If load/loadstring/loadfile are exposed, executing crafted Lua bytecode can subvert memory safety in some versions (≤5.1 verifiers are bypassable; 5.2 removed verifier), enabling advanced exploitation.
+- Considera la VM come un ambiente sconosciuto: enumera _G e scopri quali primitive pericolose sono raggiungibili.
+- Quando stdout/print è bloccato, sfrutta qualsiasi canale UI/IPC in-VM come sink di output per osservare i risultati.
+- Se io/os è esposto, spesso puoi ottenere esecuzione diretta di comandi (io.popen, os.execute).
+- Se load/loadstring/loadfile sono esposti, l'esecuzione di bytecode Lua appositamente creato può compromettere la sicurezza della memoria in alcune versioni (≤5.1 i verifier sono bypassabili; 5.2 ha rimosso il verifier), permettendo exploitation avanzata.
 
-## Enumerare l'ambiente sandbox
+## Enumerare l'ambiente sandboxed
 
-- Dump the global environment to inventory reachable tables/functions:
+- Esegui il dump dell'ambiente globale per inventariare le tabelle/funzioni raggiungibili:
 ```lua
 -- Minimal _G dumper for any Lua sandbox with some output primitive `out`
 local function dump_globals(out)
@@ -22,7 +22,7 @@ out(tostring(k) .. " = " .. tostring(v))
 end
 end
 ```
-- Se print() non è disponibile, riutilizza i canali in-VM. Esempio tratto da una VM di script per housing di un MMO in cui l'output della chat funziona solo dopo la riproduzione di un suono; il seguente costruisce una funzione di output affidabile:
+- Se print() non è disponibile, riutilizza i canali in-VM. Esempio tratto da uno script VM per il housing di un MMO in cui l'output della chat funziona solo dopo una sound call; quanto segue costruisce una funzione di output affidabile:
 ```lua
 -- Build an output channel using in-game primitives
 local function ButlerOut(label)
@@ -39,11 +39,11 @@ local out = ButlerOut(1)
 dump_globals(out)
 end
 ```
-Generalizza questo pattern per il tuo target: qualsiasi textbox, toast, logger o UI callback che accetta stringhe può fungere da stdout per reconnaissance.
+Generalizza questo schema per il tuo target: qualsiasi campo di testo, toast, logger o callback UI che accetti stringhe può fungere da stdout per la ricognizione.
 
 ## Esecuzione diretta di comandi se io/os è esposto
 
-Se la sandbox espone ancora le librerie standard io o os, è probabile che tu possa eseguire comandi immediatamente:
+Se la sandbox espone ancora le librerie standard io o os, è probabile che tu abbia esecuzione immediata di comandi:
 ```lua
 -- Windows example
 io.popen("calc.exe")
@@ -53,12 +53,12 @@ os.execute("/usr/bin/id")
 io.popen("/bin/sh -c 'id'")
 ```
 Note:
-- L'esecuzione avviene all'interno del processo client; molti layer anti-cheat/antidebug che bloccano debugger esterni non impediranno la creazione di processi dentro la VM.
-- Controllare anche: package.loadlib (caricamento arbitrario di DLL/.so), require con moduli nativi, LuaJIT's ffi (se presente), and the debug library (can raise privileges inside the VM).
+- L'esecuzione avviene all'interno del processo client; molti strati anti-cheat/antidebug che bloccano debugger esterni non impediranno la creazione di processi in-VM.
+- Controllare anche: package.loadlib (caricamento arbitrario di DLL/.so), require con native modules, LuaJIT's ffi (se presente), e la debug library (può elevare i privilegi all'interno della VM).
 
-## Trigger Zero-click tramite auto-run callbacks
+## Zero-click triggers tramite auto-run callbacks
 
-Se l'applicazione host invia script ai client e la VM espone auto-run hooks (es. OnInit/OnLoad/OnEnter), piazza il tuo payload lì per una compromissione drive-by non appena lo script viene caricato:
+Se l'applicazione host invia script ai client e la VM espone hook di auto-run (es. OnInit/OnLoad/OnEnter), posiziona il tuo payload lì per una compromissione drive-by non appena lo script viene caricato:
 ```lua
 function OnInit()
 io.popen("calc.exe") -- or any command
@@ -66,16 +66,16 @@ end
 ```
 Qualsiasi callback equivalente (OnLoad, OnEnter, etc.) generalizza questa tecnica quando gli script vengono trasmessi ed eseguiti automaticamente sul client.
 
-## Dangerous primitives to hunt during recon
+## Primitive pericolose da cercare durante il recon
 
 Durante l'enumerazione di _G, cerca specificamente:
 - io, os: io.popen, os.execute, file I/O, env access.
-- load, loadstring, loadfile, dofile: eseguire sorgente o bytecode; supporta il caricamento di bytecode non attendibile.
-- package, package.loadlib, require: caricamento dinamico di librerie e interfaccia dei moduli.
+- load, loadstring, loadfile, dofile: eseguono sorgente o bytecode; permettono il caricamento di bytecode non attendibile.
+- package, package.loadlib, require: caricamento dinamico di librerie e superficie dei moduli.
 - debug: setfenv/getfenv (≤5.1), getupvalue/setupvalue, getinfo, e hooks.
 - LuaJIT-only: ffi.cdef, ffi.load per chiamare codice nativo direttamente.
 
-Minimal usage examples (if reachable):
+Esempi minimi di utilizzo (se raggiungibili):
 ```lua
 -- Execute source/bytecode
 local f = load("return 1+1")
@@ -90,22 +90,22 @@ print(g())
 local mylib = package.loadlib("./libfoo.so", "luaopen_foo")
 local foo = mylib()
 ```
-## Escalation opzionale: abuso dei loader di bytecode di Lua
+## Optional escalation: abusing Lua bytecode loaders
 
-Quando `load`/`loadstring`/`loadfile` sono raggiungibili ma `io`/`os` sono limitati, l'esecuzione di bytecode Lua creato ad hoc può portare a primitive di divulgazione della memoria e corruzione. Punti chiave:
-- Lua ≤ 5.1 includeva un verificatore di bytecode che ha bypass noti.
-- Lua 5.2 ha rimosso il verificatore completamente (posizione ufficiale: le applicazioni dovrebbero semplicemente rifiutare i precompiled chunks), ampliando la superficie di attacco se il caricamento di bytecode non è proibito.
-- Tipici workflow: leak pointers via in-VM output, craft bytecode per creare type confusions (es., attorno a FORLOOP o altri opcodes), quindi pivotare verso arbitrary read/write o native code execution.
+Quando load/loadstring/loadfile sono raggiungibili ma io/os sono limitati, l'esecuzione di crafted Lua bytecode può portare a memory disclosure and corruption primitives. Punti chiave:
+- Lua ≤ 5.1 aveva un bytecode verifier con bypass noti.
+- Lua 5.2 ha rimosso completamente il verifier (posizione ufficiale: le applicazioni dovrebbero semplicemente rifiutare i precompiled chunks), ampliando la superficie d'attacco se il bytecode loading non è proibito.
+- Tipici workflow: leak pointers via in-VM output, craft bytecode per creare type confusions (es., attorno a FORLOOP o altri opcodes), poi pivotare verso arbitrary read/write o native code execution.
 
-Questo percorso è specifico per engine/version e richiede RE. Vedi i riferimenti per approfondimenti, exploitation primitives e esempi di gadgetry nei giochi.
+Questo percorso è specifico per engine/versione e richiede RE. Vedi le referenze per deep dives, exploitation primitives e esempi di gadgetry nei giochi.
 
-## Note di rilevamento e hardening (per i difensori)
+## Detection and hardening notes (for defenders)
 
-- Lato server: rifiutare o riscrivere gli user script; usare allowlist per le API sicure; rimuovere o bindare a vuoto `io`, `os`, `load`/`loadstring`/`loadfile`/`dofile`, `package.loadlib`, `debug`, `ffi`.
-- Lato client: eseguire Lua con un `_ENV` minimale, vietare il caricamento di bytecode, reintrodurre un strict bytecode verifier o controlli di firma, e bloccare la creazione di processi dal processo client.
-- Telemetria: generare allarmi su gameclient → child process creation poco dopo lo script load; correlare con eventi UI/chat/script.
+- Server side: reject or rewrite user scripts; allowlist safe APIs; strip or bind-empty io, os, load/loadstring/loadfile/dofile, package.loadlib, debug, ffi.
+- Client side: run Lua with a minimal _ENV, forbid bytecode loading, reintroduce a strict bytecode verifier or signature checks, and block process creation from the client process.
+- Telemetry: alert on gameclient → child process creation shortly after script load; correlate with UI/chat/script events.
 
-## Riferimenti
+## References
 
 - [This House is Haunted: a decade old RCE in the AION client (housing Lua VM)](https://appsec.space/posts/aion-housing-exploit/)
 - [Bytecode Breakdown: Unraveling Factorio's Lua Security Flaws](https://memorycorruption.net/posts/rce-lua-factorio/)
