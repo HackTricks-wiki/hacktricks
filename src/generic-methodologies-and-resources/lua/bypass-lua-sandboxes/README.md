@@ -1,18 +1,18 @@
-# Παρακάμψτε Lua sandboxes (embedded VMs, game clients)
+# Bypass Lua sandboxes (embedded VMs, game clients)
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Αυτή η σελίδα συγκεντρώνει πρακτικές τεχνικές για να εξερευνήσετε και να ξεφύγετε από ενσωματωμένα Lua "sandboxes" σε εφαρμογές (ιδιαίτερα game clients, plugins, ή in-app scripting engines). Πολλές engines εκθέτουν ένα περιορισμένο περιβάλλον Lua, αλλά αφήνουν ισχυρά globals προσβάσιμα που επιτρέπουν αυθαίρετη εκτέλεση εντολών ή ακόμη και native memory corruption όταν εκτίθενται bytecode loaders.
+Αυτή η σελίδα συγκεντρώνει πρακτικές τεχνικές για να απαριθμήσετε και να διαφύγετε από Lua "sandboxes" ενσωματωμένα σε εφαρμογές (ιδιαίτερα game clients, plugins ή in-app scripting engines). Πολλές engines εκθέτουν ένα περιορισμένο περιβάλλον Lua, αλλά αφήνουν ισχυρά globals προσβάσιμα που επιτρέπουν εκτέλεση αυθαίρετων εντολών ή ακόμη και native memory corruption όταν bytecode loaders είναι εκτεθειμένοι.
 
-Key ideas:
-- Θεωρήστε το VM ως άγνωστο περιβάλλον: καταγράψτε το _G και ανακαλύψτε ποια επικίνδυνα primitives είναι προσβάσιμα.
-- Όταν stdout/print είναι μπλοκαρισμένο, κακοποιήστε οποιοδήποτε in-VM UI/IPC κανάλι ως output sink για να παρατηρήσετε αποτελέσματα.
-- Αν io/os είναι εκτεθειμένα, συχνά έχετε απευθείας εκτέλεση εντολών (io.popen, os.execute).
-- Αν load/loadstring/loadfile είναι εκτεθειμένα, η εκτέλεση crafted Lua bytecode μπορεί να υπονομεύσει την ασφάλεια μνήμης σε μερικές εκδόσεις (≤5.1 verifiers are bypassable; 5.2 removed verifier), επιτρέποντας προχωρημένη εκμετάλλευση.
+Βασικές ιδέες:
+- Αντιμετωπίστε τη VM ως άγνωστο περιβάλλον: απαριθμήστε το _G και ανακαλύψτε ποιες επικίνδυνες primitives είναι προσβάσιμες.
+- Όταν stdout/print είναι μπλοκαρισμένα, εκμεταλλευτείτε οποιοδήποτε in-VM UI/IPC κανάλι ως output sink για να παρατηρήσετε τα αποτελέσματα.
+- Εάν io/os είναι εκτεθειμένα, συχνά έχετε άμεση εκτέλεση εντολών (io.popen, os.execute).
+- Εάν load/loadstring/loadfile είναι εκτεθειμένα, η εκτέλεση επιμελημένου Lua bytecode μπορεί να υπονομεύσει την ασφάλεια της μνήμης σε ορισμένες εκδόσεις (≤5.1 verifiers είναι bypassable· 5.2 αφαίρεσε τον verifier), επιτρέποντας προηγμένη εκμετάλλευση.
 
-## Εξερεύνηση του sandboxed περιβάλλοντος
+## Enumerate the sandboxed environment
 
-- Dump το global environment για να καταγράψετε reachable tables/functions:
+- Dump the global environment to inventory reachable tables/functions:
 ```lua
 -- Minimal _G dumper for any Lua sandbox with some output primitive `out`
 local function dump_globals(out)
@@ -22,7 +22,7 @@ out(tostring(k) .. " = " .. tostring(v))
 end
 end
 ```
-- Αν το print() δεν είναι διαθέσιμο, επαναχρησιμοποιήστε τα in-VM κανάλια. Παράδειγμα από ένα MMO housing script VM όπου η έξοδος στο chat λειτουργεί μόνο μετά από μια sound call; το παρακάτω δημιουργεί μια αξιόπιστη συνάρτηση εξόδου:
+- Αν δεν υπάρχει διαθέσιμο print(), επαναχρησιμοποίησε in-VM κανάλια. Παράδειγμα από ένα MMO housing script VM όπου η έξοδος του chat λειτουργεί μόνο μετά από μια sound call· το ακόλουθο δημιουργεί μια αξιόπιστη συνάρτηση εξόδου:
 ```lua
 -- Build an output channel using in-game primitives
 local function ButlerOut(label)
@@ -39,11 +39,11 @@ local out = ButlerOut(1)
 dump_globals(out)
 end
 ```
-Γενικεύστε αυτό το μοτίβο για τον στόχο σας: οποιοδήποτε textbox, toast, logger ή UI callback που δέχεται strings μπορεί να λειτουργήσει ως stdout για reconnaissance.
+Γενικεύστε αυτό το pattern για τον στόχο σας: οποιοδήποτε textbox, toast, logger, ή UI callback που δέχεται strings μπορεί να λειτουργήσει ως stdout για reconnaissance.
 
-## Άμεση εκτέλεση εντολών αν io/os είναι εκτεθειμένα
+## Άμεση εκτέλεση εντολών εάν io/os είναι εκτεθειμένα
 
-Αν το sandbox εξακολουθεί να εκθέει τις standard βιβλιοθήκες io or os, πιθανότατα έχετε άμεση εκτέλεση εντολών:
+Αν το sandbox εξακολουθεί να εκθέτει τις standard libraries io ή os, πιθανότατα έχετε άμεση command execution:
 ```lua
 -- Windows example
 io.popen("calc.exe")
@@ -52,28 +52,28 @@ io.popen("calc.exe")
 os.execute("/usr/bin/id")
 io.popen("/bin/sh -c 'id'")
 ```
-Σημειώσεις:
-- Η εκτέλεση συμβαίνει μέσα στο client process· πολλά anti-cheat/antidebug layers που μπλοκάρουν external debuggers δεν θα αποτρέψουν το in-VM process creation.
-- Επίσης έλεγξε: package.loadlib (arbitrary DLL/.so loading), require with native modules, LuaJIT's ffi (if present), and the debug library (can raise privileges inside the VM).
+Notes:
+- Η εκτέλεση γίνεται μέσα στην client process; πολλά anti-cheat/antidebug layers που μπλοκάρουν external debuggers δεν θα αποτρέψουν in-VM process creation.
+- Επίσης ελέγξτε: package.loadlib (arbitrary DLL/.so loading), require with native modules, LuaJIT's ffi (if present), and the debug library (can raise privileges inside the VM).
 
 ## Zero-click triggers via auto-run callbacks
 
-Αν η host application ωθεί scripts στους clients και η VM εκθέτει auto-run hooks (π.χ. OnInit/OnLoad/OnEnter), τοποθέτησε το payload σου εκεί για drive-by compromise μόλις το script φορτωθεί:
+Αν η host application προωθεί scripts σε clients και το VM εκθέτει auto-run hooks (π.χ. OnInit/OnLoad/OnEnter), τοποθετήστε το payload σας εκεί για drive-by compromise αμέσως μόλις φορτωθεί το script:
 ```lua
 function OnInit()
 io.popen("calc.exe") -- or any command
 end
 ```
-Οποιοσδήποτε ισοδύναμος callback (OnLoad, OnEnter, etc.) γενικεύει αυτή την τεχνική όταν scripts μεταδίδονται και εκτελούνται αυτόματα στον client.
+Κάθε αντίστοιχο callback (OnLoad, OnEnter, etc.) γενικεύει αυτή την τεχνική όταν scripts μεταδίδονται και εκτελούνται στον client αυτόματα.
 
-## Επικίνδυνα primitives για να εντοπίσετε κατά το recon
+## Επικίνδυνα primitives για να εντοπίσετε κατά την recon
 
 Κατά την enumeration του _G, ψάξτε ειδικά για:
-- io, os: io.popen, os.execute, file I/O, πρόσβαση σε μεταβλητές περιβάλλοντος.
-- load, loadstring, loadfile, dofile: εκτελούν πηγαίο κώδικα ή bytecode· επιτρέπουν τη φόρτωση μη αξιόπιστου bytecode.
+- io, os: io.popen, os.execute, file I/O, env access.
+- load, loadstring, loadfile, dofile: εκτελεί source ή bytecode; υποστηρίζει φόρτωση μη αξιόπιστου bytecode.
 - package, package.loadlib, require: φόρτωση δυναμικών βιβλιοθηκών και επιφάνεια module.
 - debug: setfenv/getfenv (≤5.1), getupvalue/setupvalue, getinfo, και hooks.
-- LuaJIT-only: ffi.cdef, ffi.load για να καλεί άμεσα native code.
+- LuaJIT-only: ffi.cdef, ffi.load για άμεση κλήση native code.
 
 Minimal usage examples (if reachable):
 ```lua
@@ -92,18 +92,18 @@ local foo = mylib()
 ```
 ## Προαιρετική κλιμάκωση: κατάχρηση των Lua bytecode loaders
 
-Όταν τα load/loadstring/loadfile είναι προσβάσιμα αλλά io/os είναι περιορισμένα, η εκτέλεση χειροποίητου Lua bytecode μπορεί να οδηγήσει σε memory disclosure και primitives καταστροφής μνήμης. Βασικά σημεία:
-- Lua ≤ 5.1 shipped a bytecode verifier that has known bypasses.
-- Lua 5.2 removed the verifier entirely (official stance: applications should just reject precompiled chunks), widening the attack surface if bytecode loading is not prohibited.
-- Workflows typically: leak pointers via in-VM output, craft bytecode to create type confusions (e.g., around FORLOOP or other opcodes), then pivot to arbitrary read/write or native code execution.
+Όταν τα load/loadstring/loadfile είναι προσβάσιμα αλλά io/os είναι περιορισμένα, η εκτέλεση χειροποίητου Lua bytecode μπορεί να οδηγήσει σε memory disclosure και corruption primitives. Κύρια σημεία:
+- Το Lua ≤ 5.1 περιελάμβανε έναν bytecode verifier με γνωστές παρακάμψεις.
+- Το Lua 5.2 αφαίρεσε πλήρως τον verifier (επίσημη θέση: οι εφαρμογές θα πρέπει απλά να απορρίπτουν precompiled chunks), διευρύνοντας την attack surface αν το bytecode loading δεν απαγορεύεται.
+- Τυπικά workflows: leak pointers μέσω in-VM output, δημιουργία bytecode που προκαλεί type confusions (π.χ. γύρω από FORLOOP ή άλλα opcodes), και στη συνέχεια pivot σε arbitrary read/write ή native code execution.
 
-Αυτή η διαδρομή είναι engine/version-specific και απαιτεί RE. Δείτε τις αναφορές για deep dives, exploitation primitives, και παραδείγματα gadgetry σε παιχνίδια.
+Αυτή η διαδρομή εξαρτάται από το engine/version και απαιτεί RE. Δείτε τις αναφορές για σε βάθος αναλύσεις, exploitation primitives και παραδείγματα gadgetry σε games.
 
-## Detection and hardening notes (for defenders)
+## Σημειώσεις ανίχνευσης και ενίσχυσης (για defenders)
 
-- Server side: απορρίψτε ή επαναγράψτε user scripts; allowlist safe APIs; strip ή bind-empty io, os, load/loadstring/loadfile/dofile, package.loadlib, debug, ffi.
-- Client side: τρέξτε Lua με ένα minimal _ENV, απαγορεύστε bytecode loading, επανεισάγετε έναν αυστηρό bytecode verifier ή signature checks, και μπλοκάρετε τη δημιουργία διαδικασιών από τη διεργασία του client.
-- Telemetry: ειδοποιήστε για gameclient → child process creation σύντομα μετά το script load; συσχετίστε με UI/chat/script events.
+- Server side: reject ή επαναγράψτε τα user scripts; allowlist ασφαλή APIs; αφαιρέστε ή bind-empty τα io, os, load/loadstring/loadfile/dofile, package.loadlib, debug, ffi.
+- Client side: τρέξτε το Lua με ένα ελάχιστο _ENV, απαγορεύστε το bytecode loading, επανεισάγετε έναν strict bytecode verifier ή signature checks, και μπλοκάρετε τη δημιουργία process από τη διαδικασία του client.
+- Telemetry: ειδοποίηση σε gameclient → child process creation λίγο μετά το script load; συσχετίστε με UI/chat/script events.
 
 ## References
 
