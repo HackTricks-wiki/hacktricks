@@ -444,6 +444,7 @@
   - [NextJS](network-services-pentesting/pentesting-web/nextjs.md)
   - [Nginx](network-services-pentesting/pentesting-web/nginx.md)
   - [NodeJS Express](network-services-pentesting/pentesting-web/nodejs-express.md)
+  - [Sitecore](network-services-pentesting/pentesting-web/sitecore/README.md)
   - [PHP Tricks](network-services-pentesting/pentesting-web/php-tricks-esp/README.md)
     - [PHP - Useful Functions & disable_functions/open_basedir bypass](network-services-pentesting/pentesting-web/php-tricks-esp/php-useful-functions-disable_functions-open_basedir-bypass/README.md)
       - [disable_functions bypass - php-fpm/FastCGI](network-services-pentesting/pentesting-web/php-tricks-esp/php-useful-functions-disable_functions-open_basedir-bypass/disable_functions-bypass-php-fpm-fastcgi.md)
@@ -926,14 +927,3 @@
 - [Post Exploitation](todo/post-exploitation.md)
 - [Investment Terms](todo/investment-terms.md)
 - [Cookies Policy](todo/cookies-policy.md)
-
-
-
-  - [Readme](blockchain/blockchain-and-crypto-currencies/README.md)
-  - [Readme](macos-hardening/macos-security-and-privilege-escalation/mac-os-architecture/macos-ipc-inter-process-communication/README.md)
-  - [Readme](network-services-pentesting/1521-1522-1529-pentesting-oracle-listener/README.md)
-  - [Readme](pentesting-web/web-vulnerabilities-methodology/README.md)
-  - [Readme](reversing/cryptographic-algorithms/README.md)
-  - [Readme](reversing/reversing-tools/README.md)
-  - [Readme](windows-hardening/windows-local-privilege-escalation/privilege-escalation-abusing-tokens/README.md)
-  - [Readme](network-services-pentesting/pentesting-web/sitecore/README.md)
