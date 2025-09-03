@@ -840,10 +840,4 @@ References for PPL and tooling
 - [CreateProcessAsPPL launcher](https://github.com/2x7EQ13/CreateProcessAsPPL)
 - [Zero Salarium – Countering EDRs With The Backing Of Protected Process Light (PPL)](https://www.zerosalarium.com/2025/08/countering-edrs-with-backing-of-ppl-protection.html)
 
-- [Check Point Research – Chasing the Silver Fox: Cat & Mouse in Kernel Shadows](https://research.checkpoint.com/2025/silver-fox-apt-vulnerable-drivers/)
-- [LOLDrivers](https://github.com/magicsword-io/LOLDrivers)
-- [Microsoft – Vulnerable Driver Blocklist](https://learn.microsoft.com/en-us/windows/security/application-security/application-control/app-control-for-business/design/microsoft-recommended-driver-block-rules)
-- [Terminator – Zemana BYOVD PoC](https://github.com/ZeroMemoryEx/Terminator)
-- [Watchdog Anti‑Malware (product page)](https://watchdog.com/solutions/anti-malware/)
-
 {{#include ../banners/hacktricks-training.md}}
