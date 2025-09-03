@@ -440,16 +440,6 @@ Bash performs parameter expansion and command substitution before arithmetic eva
   # When the root cron parser evaluates (( total += count )), your command runs as root.
   ```
 
-- Preconditions:
-  - You can cause a line you control to be written into the log consumed by the root script.
-  - The script evaluates an untrusted variable inside ((...)), $((...)) or let.
-
-- Mitigations (for defenders):
-  - Never use arithmetic evaluation on untrusted strings. Validate first: `[[ $count =~ ^[0-9]+$ ]] || continue`.
-  - Prefer integer-safe parsing with awk or mapfile and explicit regex checks.
-  - Run log parsers as least-privileged users; never as root unless strictly necessary.
-
-
 ### Cron script overwriting and symlink
 
 If you **can modify a cron script** executed by root, you can get a shell very easily:
