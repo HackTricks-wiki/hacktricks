@@ -45,13 +45,49 @@ certipy auth -pfx administrator_forged.pfx -dc-ip 172.16.126.128
 This forged certificate will be **valid** until the end date specified and as **long as the root CA certificate is valid** (usually from 5 to **10+ years**). It's also valid for **machines**, so combined with **S4U2Self**, an attacker can **maintain persistence on any domain machine** for as long as the CA certificate is valid.\
 Moreover, the **certificates generated** with this method **cannot be revoked** as CA is not aware of them.
 
+### Operating under Strong Certificate Mapping Enforcement (2025+)
+
+Since February 11, 2025 (after KB5014754 rollout), domain controllers default to **Full Enforcement** for certificate mappings. Practically this means your forged certificates must either:
+
+- Contain a strong binding to the target account (for example, the SID security extension), or
+- Be paired with a strong, explicit mapping on the target object’s `altSecurityIdentities` attribute.
+
+A reliable approach for persistence is to mint a forged certificate chained to the stolen Enterprise CA and then add a strong explicit mapping to the victim principal:
+
+```powershell
+# Example: map a forged cert to a target account using Issuer+Serial (strong mapping)
+$Issuer  = 'DC=corp,DC=local,CN=CORP-DC-CA'           # reverse DN format expected by AD
+$SerialR = '1200000000AC11000000002B'                  # serial in reversed byte order
+$Map     = "X509:<I>$Issuer<SR>$SerialR"             # strong mapping format
+Set-ADUser -Identity 'victim' -Add @{altSecurityIdentities=$Map}
+```
+
+Notes
+- If you can craft forged certificates that include the SID security extension, those will map implicitly even under Full Enforcement. Otherwise, prefer explicit strong mappings. See {{#ref}}account-persistence.md{{#endref}} for more on explicit mappings.
+- Revocation does not help defenders here: forged certificates are unknown to the CA database and thus cannot be revoked.
+
 ## Trusting Rogue CA Certificates - DPERSIST2
 
 The `NTAuthCertificates` object is defined to contain one or more **CA certificates** within its `cacertificate` attribute, which Active Directory (AD) utilizes. The verification process by the **domain controller** involves checking the `NTAuthCertificates` object for an entry matching the **CA specified** in the Issuer field of the authenticating **certificate**. Authentication proceeds if a match is found.
 
-A self-signed CA certificate can be added to the `NTAuthCertificates` object by an attacker, provided they have control over this AD object. Normally, only members of the **Enterprise Admin** group, along with **Domain Admins** or **Administrators** in the **forest root’s domain**, are granted permission to modify this object. They can edit the `NTAuthCertificates` object using `certutil.exe` with the command `certutil.exe -dspublish -f C:\Temp\CERT.crt NTAuthCA126`, or by employing the [**PKI Health Tool**](https://docs.microsoft.com/en-us/troubleshoot/windows-server/windows-security/import-third-party-ca-to-enterprise-ntauth-store#method-1---import-a-certificate-by-using-the-pki-health-tool).
+A self-signed CA certificate can be added to the `NTAuthCertificates` object by an attacker, provided they have control over this AD object. Normally, only members of the **Enterprise Admin** group, along with **Domain Admins** or **Administrators** in the **forest root’s domain**, are granted permission to modify this object. They can edit the `NTAuthCertificates` object using `certutil.exe` with the command `certutil.exe -dspublish -f C:\Temp\CERT.crt NTAuthCA`, or by employing the [**PKI Health Tool**](https://docs.microsoft.com/en-us/troubleshoot/windows-server/windows-security/import-third-party-ca-to-enterprise-ntauth-store#method-1---import-a-certificate-by-using-the-pki-health-tool).
+
+Additional helpful commands for this technique:
+
+```bash
+# Add/remove and inspect the Enterprise NTAuth store
+certutil -enterprise -f -AddStore NTAuth C:\Temp\CERT.crt
+certutil -enterprise -viewstore NTAuth
+certutil -enterprise -delstore NTAuth <Thumbprint>
+
+# (Optional) publish into AD CA containers to improve chain building across the forest
+certutil -dspublish -f C:\Temp\CERT.crt RootCA          # CN=Certification Authorities
+certutil -dspublish -f C:\Temp\CERT.crt CA               # CN=AIA
+```
 
 This capability is especially relevant when used in conjunction with a previously outlined method involving ForgeCert to dynamically generate certificates.
+
+> Post-2025 mapping considerations: placing a rogue CA in NTAuth only establishes trust in the issuing CA. To use leaf certificates for logon when DCs are in **Full Enforcement**, the leaf must either contain the SID security extension or there must be a strong explicit mapping on the target object (for example, Issuer+Serial in `altSecurityIdentities`). See {{#ref}}account-persistence.md{{#endref}}.
 
 ## Malicious Misconfiguration - DPERSIST3
 
@@ -64,7 +100,19 @@ Opportunities for **persistence** through **security descriptor modifications of
 
 An example of malicious implementation would involve an attacker, who has **elevated permissions** in the domain, adding the **`WriteOwner`** permission to the default **`User`** certificate template, with the attacker being the principal for the right. To exploit this, the attacker would first change the ownership of the **`User`** template to themselves. Following this, the **`mspki-certificate-name-flag`** would be set to **1** on the template to enable **`ENROLLEE_SUPPLIES_SUBJECT`**, allowing a user to provide a Subject Alternative Name in the request. Subsequently, the attacker could **enroll** using the **template**, choosing a **domain administrator** name as an alternative name, and utilize the acquired certificate for authentication as the DA.
 
+Practical knobs attackers may set for long-term domain persistence (see {{#ref}}domain-escalation.md{{#endref}} for full details and detection):
+
+- CA policy flags that allow SAN from requesters (e.g., enabling `EDITF_ATTRIBUTESUBJECTALTNAME2`). This keeps ESC1-like paths exploitable.
+- Template DACL or settings that allow authentication-capable issuance (e.g., adding Client Authentication EKU, enabling `CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT`).
+- Controlling the `NTAuthCertificates` object or the CA containers to continuously re-introduce rogue issuers if defenders attempt cleanup.
+
+> [!TIP]
+> In hardened environments after KB5014754, pairing these misconfigurations with explicit strong mappings (`altSecurityIdentities`) ensures your issued or forged certificates remain usable even when DCs enforce strong mapping.
+
+
+
+## References
+
+- Microsoft KB5014754 – Certificate-based authentication changes on Windows domain controllers (enforcement timeline and strong mappings). https://support.microsoft.com/en-au/topic/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers-ad2c23b0-15d8-4340-a468-4d4f3b188f16
+- Certipy – Command Reference and forge/auth usage. https://github.com/ly4k/Certipy/wiki/08-%E2%80%90-Command-Reference
 {{#include ../../../banners/hacktricks-training.md}}
-
-
-
