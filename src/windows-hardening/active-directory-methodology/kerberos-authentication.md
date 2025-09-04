@@ -2,6 +2,6 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-**इस शानदार पोस्ट को देखें:** [**https://www.tarlogic.com/en/blog/how-kerberos-works/**](https://www.tarlogic.com/en/blog/how-kerberos-works/)
+**इस बेहतरीन पोस्ट को देखें:** [**https://www.tarlogic.com/en/blog/how-kerberos-works/**](https://www.tarlogic.com/en/blog/how-kerberos-works/)
 
 {{#include ../../banners/hacktricks-training.md}}

