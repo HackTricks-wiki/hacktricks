@@ -1,28 +1,28 @@
-# Kutumiwa Vibaya kwa Auto-Updaters za Shirika na IPC zilizo na Vibali (e.g., Netskope stAgentSvc)
+# Kutumia Vibaya Auto-Updaters za Enterprise na Privileged IPC (mf., Netskope stAgentSvc)
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Ukurasa huu unazungumzia darasa la Windows local privilege escalation chains zinazopatikana katika endpoint agents na updaters za shirika ambazo zinaonyesha uso wa IPC wa low‑friction na mtiririko wa update wenye vibali. Mfano unaowakilisha ni Netskope Client for Windows < R129 (CVE-2025-0309), ambapo mtumiaji mwenye vibali vya chini anaweza kulazimishwa kujiunga na server inayodhibitiwa na mshambuliaji kisha kuwasilisha MSI ya uharibifu ambayo service ya SYSTEM inaisakinisha.
+Ukurasa huu unagawa kwa ujumla daraja la chains za Windows local privilege escalation zilizopatikana kwenye enterprise endpoint agents na updaters zinazotoa uso wa IPC rahisi kutumia na mchakato wa masasisho wenye ruhusa za juu. Mfano unaowakilisha ni Netskope Client for Windows < R129 (CVE-2025-0309), ambapo mtumiaji mwenye ruhusa ndogo anaweza kulazimisha enrollment kwenye server inayodhibitiwa na mshambuliaji na kisha kuwasilisha MSI ya uharibifu ambayo huduma ya SYSTEM inaisakinisha.
 
-Mawazo muhimu unayoweza kutumia dhidi ya bidhaa zinazofanana:
-- Abuse a privileged service’s localhost IPC to force re‑enrollment or reconfiguration to an attacker server.
-- Implement the vendor’s update endpoints, deliver a rogue Trusted Root CA, and point the updater to a malicious, “signed” package.
-- Evade weak signer checks (CN allow‑lists), optional digest flags, and lax MSI properties.
-- If IPC is “encrypted”, derive the key/IV from world‑readable machine identifiers stored in the registry.
-- If the service restricts callers by image path/process name, inject into an allow‑listed process or spawn one suspended and bootstrap your DLL via a minimal thread‑context patch.
+Mafikra muhimu unaweza kuyatumia dhidi ya bidhaa zinazofanana:
+- Tumia localhost IPC ya huduma iliyo na ruhusa za juu kulazimisha re‑enrollment au reconfiguration kwenda kwenye server ya mshambuliaji.
+- Tekeleza endpoints za vendor za update, wasilishe rogue Trusted Root CA, na elekeza updater kwa package hatari, “signed”.
+- Epuka ukaguzi dhaifu wa signer (CN allow‑lists), flags za digest za hiari, na mali za MSI zilizo na uvumilivu mdogo.
+- Ikiwa IPC ime “encrypted”, zaa key/IV kutoka kwa vitambulisho vya mashine vinavyososwa kwa kusomeka na wote kwenye registry.
+- Ikiwa huduma inazuia waite kwa image path/process name, weka injection kwenye process iliyoorodheshwa kwenye allow‑list au zalisha moja kwa status suspended na bootstrap DLL yako kupitia mabadiliko madogo ya thread‑context.
 
 ---
-## 1) Forcing enrollment to an attacker server via localhost IPC
+## 1) Kulazimisha enrollment kwenye server ya mshambuliaji kupitia localhost IPC
 
-Wakala wengi hutoa mchakato wa user‑mode UI ambao unazungumza na service ya SYSTEM juu ya localhost TCP kwa kutumia JSON.
+Wakala wengi huambatanisha mchakato wa UI wa user‑mode ambao unazungumza na huduma ya SYSTEM juu ya localhost TCP kwa kutumia JSON.
 
 Imeonekana katika Netskope:
 - UI: stAgentUI (low integrity) ↔ Service: stAgentSvc (SYSTEM)
 - IPC command ID 148: IDP_USER_PROVISIONING_WITH_TOKEN
 
-Exploit flow:
-1) Craft a JWT enrollment token whose claims control the backend host (e.g., AddonUrl). Use alg=None so no signature is required.
-2) Send the IPC message invoking the provisioning command with your JWT and tenant name:
+Mtiririko wa exploit:
+1) Tunga token ya JWT ya enrollment yenye claims zinazoamua backend host (mf., AddonUrl). Tumia alg=None ili saini isiwe muhimu.
+2) Tuma ujumbe wa IPC unaoitisha amri ya provisioning ukiweka JWT yako na jina la tenant:
 ```json
 {
 "148": {
@@ -31,88 +31,88 @@ Exploit flow:
 }
 }
 ```
-3) Service inaanza kuwasiliana na rogue server yako kwa ajili ya enrollment/config, kwa mfano:
+3) Huduma inaanza kuwasiliana na rogue server yako kwa ajili ya enrollment/config, kwa mfano:
 - /v1/externalhost?service=enrollment
 - /config/user/getbrandingbyemail
 
 Vidokezo:
-- Ikiwa uthibitishaji wa mtumaji unategemea njia/jina, tuma ombi kutoka kwa vendor binary iliyoorodheshwa kwenye orodha ya kuruhusiwa (angalia §4).
+- Ikiwa caller verification inategemea path/name‑based, anzisha ombi kutoka kwa vendor binary iliyoorodheshwa (angalia §4).
 
 ---
-## 2) Hijacking the update channel to run code as SYSTEM
+## 2) Kuiba chaneli ya masasisho ili kuendesha msimbo kama SYSTEM
 
-Mara client inapozungumza na server yako, tekeleza endpoints zinazotarajiwa na ielekeze kwa attacker MSI. Mfuatano wa kawaida:
+Mara client anapozungumza na server yako, tekeleza endpoints zinazotarajiwa na muelekeze kwa MSI ya mshambuliaji. Mfuatano wa kawaida:
 
-1) /v2/config/org/clientconfig → Rudisha JSON config yenye kipindi kifupi sana cha updater, kwa mfano:
+1) /v2/config/org/clientconfig → Rudisha JSON config yenye muda mfupi sana wa updater, kwa mfano:
 ```json
 {
 "clientUpdate": { "updateIntervalInMin": 1 },
 "check_msi_digest": false
 }
 ```
-2) /config/ca/cert → Rudisha cheti cha CA katika fomati PEM. Huduma inakisakinisha katika Local Machine Trusted Root store.
-3) /v2/checkupdate → Weka metadata inayorejelea MSI haribifu na toleo bandia.
+2) /config/ca/cert → Rejesha PEM CA certificate. Huduma inaiweka kwenye Local Machine Trusted Root store.
+3) /v2/checkupdate → Toa metadata inayorejelea MSI hasidi na toleo bandia.
 
 Bypassing common checks seen in the wild:
-- Signer CN allow‑list: huduma inaweza tu kuangalia Subject CN ni “netSkope Inc” au “Netskope, Inc.”. CA yako ya uhalifu inaweza kutoa leaf yenye CN hiyo na kusaini MSI.
-- CERT_DIGEST property: jumuisha mali ya MSI isiyoharibu yenye jina CERT_DIGEST. Hakuna utekelezaji wa lazima wakati wa usakinishaji.
-- Optional digest enforcement: config flag (e.g., check_msi_digest=false) inazima uthibitishaji wa ziada wa kriptografia.
+- Signer CN allow‑list: huduma inaweza tu kuangalia Subject CN ikiwa ni sawa na “netSkope Inc” au “Netskope, Inc.”. Rogue CA yako inaweza kutoa leaf yenye CN hiyo na kusaini MSI.
+- CERT_DIGEST property: jumuisha mali ya MSI isiyo hatari iitwayo CERT_DIGEST. Hakuna utekelezaji wakati wa usakinishaji.
+- Optional digest enforcement: bendera ya config (mf., check_msi_digest=false) inazima uthibitishaji wa ziada wa kriptografia.
 
-Matokeo: service ya SYSTEM inakisakinisha MSI yako kutoka
+Result: huduma ya SYSTEM inasakinisha MSI yako kutoka
 C:\ProgramData\Netskope\stAgent\data\*.msi
-ikitekeleza nambari yoyote kama NT AUTHORITY\SYSTEM.
+ikitekeleza msimbo wowote kama NT AUTHORITY\SYSTEM.
 
 ---
 ## 3) Forging encrypted IPC requests (when present)
 
-Kutoka R127, Netskope ilifunika IPC JSON katika uwanja encryptData unaoonekana kama Base64. Reversing ilionyesha AES yenye key/IV zinazotokana na thamani za registry zinazoweza kusomwa na mtumiaji yeyote:
+From R127, Netskope wrapped IPC JSON in an encryptData field that looks like Base64. Reversing showed AES with key/IV derived from registry values readable by any user:
 - Key = HKLM\SOFTWARE\NetSkope\Provisioning\nsdeviceidnew
 - IV  = HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProductID
 
-Wavamizi wanaweza kuiga encryption na kutuma amri za IPC zenye encryption halali kutoka kwa mtumiaji wa kawaida. Ushauri wa jumla: ikiwa agent kwa ghafla “inaficha” IPC yake, tazama device IDs, product GUIDs, install IDs chini ya HKLM kama nyenzo za encryption.
+Wavamizi wanaweza kurudia usimbaji na kutuma amri za kusimbwa halali kutoka kwa mtumiaji wa kawaida. Kidokezo kwa ujumla: ikiwa agent ghafla “encrypts” IPC yake, angalia device IDs, product GUIDs, install IDs chini ya HKLM kama nyenzo.
 
 ---
 ## 4) Bypassing IPC caller allow‑lists (path/name checks)
 
-Huduma zingine hujaribu kuthibitisha peer kwa kutatua PID ya muunganisho wa TCP na kulinganisha image path/name dhidi ya binaries zilizoorodheshwa za vendor chini ya Program Files (mfano stagentui.exe, bwansvc.exe, epdlp.exe).
+Some services try to authenticate the peer by resolving the TCP connection’s PID and comparing the image path/name against allow‑listed vendor binaries located under Program Files (e.g., stagentui.exe, bwansvc.exe, epdlp.exe).
 
-Njia mbili za vitendo:
-- DLL injection ndani ya process iliyo kwenye allow‑list (mfano nsdiag.exe) na kushika/proxy IPC kutoka ndani yake.
-- Piga kengele binary iliyoorodheshwa ikifufuliwa kwa hali ya suspended na kuanzisha DLL yako ya proxy bila CreateRemoteThread (see §5) ili kutosheleza sheria zilizotekelezwa na driver kuzuia tampering.
+Two practical bypasses:
+- DLL injection into an allow‑listed process (e.g., nsdiag.exe) and proxy IPC from inside it.
+- Spawn an allow‑listed binary suspended and bootstrap your proxy DLL without CreateRemoteThread (see §5) to satisfy driver‑enforced tamper rules.
 
 ---
 ## 5) Tamper‑protection friendly injection: suspended process + NtContinue patch
 
-Products mara nyingi huja na minifilter/OB callbacks driver (mfano Stadrv) inayokata haki hatari kutoka kwa handles za processes zilizo na ulinzi:
-- Process: inatoa mazingira kama PROCESS_TERMINATE, PROCESS_CREATE_THREAD, PROCESS_VM_READ, PROCESS_DUP_HANDLE, PROCESS_SUSPEND_RESUME
-- Thread: inazuia hadi THREAD_GET_CONTEXT, THREAD_QUERY_LIMITED_INFORMATION, THREAD_RESUME, SYNCHRONIZE
+Products often ship a minifilter/OB callbacks driver (e.g., Stadrv) to strip dangerous rights from handles to protected processes:
+- Process: removes PROCESS_TERMINATE, PROCESS_CREATE_THREAD, PROCESS_VM_READ, PROCESS_DUP_HANDLE, PROCESS_SUSPEND_RESUME
+- Thread: restricts to THREAD_GET_CONTEXT, THREAD_QUERY_LIMITED_INFORMATION, THREAD_RESUME, SYNCHRONIZE
 
-Loader ya user‑mode inayotegemewa na kuheshimu vikwazo hivi:
-1) CreateProcess ya vendor binary na CREATE_SUSPENDED.
-2) Pata handles ambazo bado unaruhusiwa: PROCESS_VM_WRITE | PROCESS_VM_OPERATION kwa process, na thread handle yenye THREAD_GET_CONTEXT/THREAD_SET_CONTEXT (au tu THREAD_RESUME ikiwa unatayarisha code kwenye RIP inayojulikana).
-3) Andika juu ya ntdll!NtContinue (au thunk nyingine ya mapema, iliyoorodheshwa kwa hakika) kwa stub ndogo inayopiga LoadLibraryW kwenye path ya DLL yako, kisha kuruka kurudi.
-4) ResumeThread ili kuamsha stub yako ndani ya process, ikipakia DLL yako.
+Loader ya user‑mode yenye kuaminika inayoheshimu vikwazo hivi:
+1) CreateProcess ya binary ya vendor kwa CREATE_SUSPENDED.
+2) Pata handles unazoruhusiwa nadal: PROCESS_VM_WRITE | PROCESS_VM_OPERATION kwenye process, na thread handle yenye THREAD_GET_CONTEXT/THREAD_SET_CONTEXT (au THREAD_RESUME tu ikiwa unatengeneza patch kwenye RIP inayojulikana).
+3) Andika juu ntdll!NtContinue (au thunk nyingine ya mapema, iliyohakikishiwa‑mapped) na stub ndogo inayomwita LoadLibraryW kwa path ya DLL yako, kisha irudi.
+4) ResumeThread ili kusababisha stub yako ndani ya process, ikipakia DLL yako.
 
-Kwa sababu haukutumia PROCESS_CREATE_THREAD au PROCESS_SUSPEND_RESUME kwenye process iliyokuwa tayari na ulinzi (uliiunda wewe), sera ya driver inatimizwa.
+Kwa kuwa hukutumia PROCESS_CREATE_THREAD au PROCESS_SUSPEND_RESUME juu ya process tayari iliyo‑protected (uliunda wewe), sera ya driver inatimizwa.
 
 ---
 ## 6) Practical tooling
-- NachoVPN (Netskope plugin) inaendesha otomatiki rogue CA, kusaini MSI haribifu, na kutumika kupeana endpoints zinazohitajika: /v2/config/org/clientconfig, /config/ca/cert, /v2/checkupdate.
-- UpSkope ni custom IPC client inayotengeneza ujumbe wowote wa IPC (hiari kwa AES‑encryption) na inajumuisha suspended‑process injection ili asili iwe kutoka kwa binary iliyoorodheshwa.
+- NachoVPN (Netskope plugin) inautomate rogue CA, kusaini MSI hasidi, na kutumikia endpoints zinazohitajika: /v2/config/org/clientconfig, /config/ca/cert, /v2/checkupdate.
+- UpSkope ni custom IPC client inayotengeneza ujumbe wa IPC yoyote (hiari kwa AES‑encrypted) na inajumuisha suspended‑process injection ili uitoke kutoka kwa binary iliyoorodheshwa.
 
 ---
 ## 7) Detection opportunities (blue team)
-- Simamia uongezaji wa Local Machine Trusted Root. Sysmon + registry‑mod eventing (see SpecterOps guidance) hufanya kazi vizuri.
-- Tambua utekelezaji wa MSI ulioanzishwa na service ya agent kutoka paths kama C:\ProgramData\<vendor>\<agent>\data\*.msi.
-- Angalia logs za agent kwa hosts/tenants zisizotarajiwa za enrollment, kwa mfano: C:\ProgramData\netskope\stagent\logs\nsdebuglog.log – tafuta addonUrl / tenant anomalies na provisioning msg 148.
-- Toa alarm juu ya localhost IPC clients ambao si binaries zilizotarajiwa kusainiwa, au wanaotokana na miti ya child process isiyo ya kawaida.
+- Monitor additions to Local Machine Trusted Root. Sysmon + registry‑mod eventing (see SpecterOps guidance) inafanya kazi vizuri.
+- Flag MSI executions initiated by the agent’s service from paths like C:\ProgramData\<vendor>\<agent>\data\*.msi.
+- Review agent logs for unexpected enrollment hosts/tenants, e.g.: C:\ProgramData\netskope\stagent\logs\nsdebuglog.log – angalia addonUrl / tenant anomalies na provisioning msg 148.
+- Alert on localhost IPC clients that are not the expected signed binaries, or that originate from unusual child process trees.
 
 ---
 ## Hardening tips for vendors
-- Gana enrollment/update hosts kwa allow‑list kali; kataa domains zisizo salama katika clientcode.
-- Thibitisha IPC peers kwa primitives za OS (ALPC security, named‑pipe SIDs) badala ya ukaguzi wa image path/name.
-- Weka nyenzo za siri nje ya HKLM zinazosomeka kwa wote; ikiwa IPC lazima iwe encrypted, zaa keys kutoka kwa siri zilizo na ulinzi au zigadilishe juu ya channels zilizo thibitishwa.
-- Tendea updater kama uso wa supply‑chain: hitaji mnyororo kamili hadi CA uamiliki, thibitisha signatures za package dhidi ya pinned keys, na fail closed ikiwa validation imezimwa katika config.
+- Bind enrollment/update hosts to a strict allow‑list; reject untrusted domains in clientcode.
+- Authenticate IPC peers with OS primitives (ALPC security, named‑pipe SIDs) instead of image path/name checks.
+- Keep secret material out of world‑readable HKLM; if IPC must be encrypted, derive keys from protected secrets or negotiate over authenticated channels.
+- Treat the updater as a supply‑chain surface: require a full chain to a trusted CA you control, verify package signatures against pinned keys, and fail closed if validation is disabled in config.
 
 ## References
 - [Advisory – Netskope Client for Windows – Local Privilege Escalation via Rogue Server (CVE-2025-0309)](https://blog.amberwolf.com/blog/2025/august/advisory---netskope-client-for-windows---local-privilege-escalation-via-rogue-server/)
