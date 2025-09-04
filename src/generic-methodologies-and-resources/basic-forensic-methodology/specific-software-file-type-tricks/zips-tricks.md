@@ -1,30 +1,30 @@
-# ZIPs tricks
+# Sztuczki ZIP
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**Narzędzia w wierszu poleceń** do zarządzania **zip files** są niezbędne do diagnozowania, naprawiania i łamania plików zip. Oto kilka kluczowych narzędzi:
+**Narzędzia wiersza poleceń** do obsługi **plików zip** są niezbędne do diagnozy, naprawy i łamania haseł w zipach. Oto najważniejsze narzędzia:
 
-- **`unzip`**: Pokazuje, dlaczego plik zip może się nie rozpakowywać.
-- **`zipdetails -v`**: Oferuje szczegółową analizę pól formatu zip.
-- **`zipinfo`**: Wyświetla zawartość pliku zip bez wyodrębniania.
-- **`zip -F input.zip --out output.zip`** i **`zip -FF input.zip --out output.zip`**: Próbują naprawić uszkodzone pliki zip.
-- **[fcrackzip](https://github.com/hyc/fcrackzip)**: Narzędzie do brute-force łamania haseł zip, skuteczne dla haseł do około 7 znaków.
+- **`unzip`**: Ujawnia, dlaczego plik zip może się nie rozpakowywać.
+- **`zipdetails -v`**: Daje szczegółową analizę pól formatu pliku zip.
+- **`zipinfo`**: Wypisuje zawartość pliku zip bez ich rozpakowywania.
+- **`zip -F input.zip --out output.zip`** i **`zip -FF input.zip --out output.zip`**: Próbują naprawić uszkodzone archiwa zip.
+- **[fcrackzip](https://github.com/hyc/fcrackzip)**: Narzędzie do brute-force łamania haseł plików zip, skuteczne dla haseł do około 7 znaków.
 
-Specyfikacja formatu pliku [Zip file format specification](https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT) zawiera kompleksowe informacje o strukturze i standardach plików zip.
+The [Zip file format specification](https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT) provides comprehensive details on the structure and standards of zip files.
 
-Warto zauważyć, że pliki zip zabezpieczone hasłem **nie szyfrują nazw plików ani rozmiarów plików** wewnątrz archiwum — jest to luka bezpieczeństwa, której nie mają RAR ani 7z, które szyfrują te informacje. Ponadto pliki zip zaszyfrowane starszą metodą ZipCrypto są podatne na **plaintext attack**, jeśli dostępna jest nieszyfrowana kopia skompresowanego pliku. Ten atak wykorzystuje znaną zawartość do złamania hasła zip, co opisano w artykule [HackThis's article](https://www.hackthis.co.uk/articles/known-plaintext-attack-cracking-zip-files) oraz w [tym artykule naukowym](https://www.cs.auckland.ac.nz/~mike/zipattacks.pdf). Pliki zip zabezpieczone **AES-256** są jednak odporne na ten plaintext attack, co pokazuje, jak ważne jest wybieranie bezpiecznych metod szyfrowania dla danych wrażliwych.
+Ważne jest zauważyć, że pliki zip chronione hasłem **nie szyfrują nazw plików ani rozmiarów plików** wewnątrz, co stanowi wadę bezpieczeństwa, której nie mają archiwa RAR ani 7z, które szyfrują te informacje. Ponadto pliki zip zaszyfrowane starszą metodą ZipCrypto są podatne na plaintext attack, jeśli dostępna jest niezaszyfrowana kopia skompresowanego pliku. Atak ten wykorzystuje znaną zawartość do złamania hasła zip — podatność opisana w [HackThis's article](https://www.hackthis.co.uk/articles/known-plaintext-attack-cracking-zip-files) i dalej wyjaśniona w [this academic paper](https://www.cs.auckland.ac.nz/~mike/zipattacks.pdf). Jednak pliki zip zabezpieczone szyfrowaniem **AES-256** są odporne na tę plaintext attack, co pokazuje znaczenie wyboru bezpiecznych metod szyfrowania dla danych wrażliwych.
 
 ---
 
-## Anti-reversing tricks in APKs using manipulated ZIP headers
+## Sztuczki anty-rewersji w APKach wykorzystujące zmanipulowane nagłówki ZIP
 
-Nowoczesne droppery malware na Androida używają sfałszowanych metadanych ZIP, aby zepsuć narzędzia statyczne (jadx/apktool/unzip), jednocześnie zachowując możliwość instalacji APK na urządzeniu. Najczęstsze sztuczki to:
+Nowoczesne droppery malware na Androida używają niepoprawnych metadanych ZIP, aby zepsuć narzędzia statyczne (jadx/apktool/unzip), jednocześnie pozwalając na instalację APK na urządzeniu. Najczęstsze sztuczki to:
 
-- Fake encryption by setting the ZIP General Purpose Bit Flag (GPBF) bit 0
-- Abusing large/custom Extra fields to confuse parsers
-- File/directory name collisions to hide real artifacts (e.g., a directory named `classes.dex/` next to the real `classes.dex`)
+- Fałszywe szyfrowanie przez ustawienie bitu 0 w ZIP General Purpose Bit Flag (GPBF)
+- Nadużywanie dużych/własnych pól Extra, aby zmylić parsery
+- Kolizje nazw plików/katalogów w celu ukrycia rzeczywistych artefaktów (np. katalog o nazwie `classes.dex/` obok prawdziwego `classes.dex`)
 
-### 1) Fake encryption (GPBF bit 0 set) without real crypto
+### 1) Fałszywe szyfrowanie (GPBF bit 0 ustawiony) bez rzeczywistego szyfrowania
 
 Objawy:
 - `jadx-gui` zgłasza błędy takie jak:
@@ -32,7 +32,7 @@ Objawy:
 ```
 java.util.zip.ZipException: invalid CEN header (encrypted entry)
 ```
-- `unzip` prosi o hasło dla kluczowych plików APK, mimo że prawidłowy APK nie może mieć zaszyfrowanych `classes*.dex`, `resources.arsc`, ani `AndroidManifest.xml`:
+- `unzip` prosi o hasło dla kluczowych plików APK, mimo że prawidłowe APK nie może mieć zaszyfrowanych `classes*.dex`, `resources.arsc`, ani `AndroidManifest.xml`:
 
 ```bash
 unzip sample.apk
@@ -47,7 +47,7 @@ Wykrywanie za pomocą zipdetails:
 ```bash
 zipdetails -v sample.apk | less
 ```
-Spójrz na General Purpose Bit Flag w nagłówkach lokalnych i centralnych. Charakterystyczną wartością jest ustawiony bit 0 (Encryption) nawet dla głównych wpisów:
+Spójrz na General Purpose Bit Flag dla local i central headers. Wskazującą wartością jest ustawiony bit 0 (Encryption) nawet dla core entries:
 ```
 Extract Zip Spec      2D '4.5'
 General Purpose Flag  0A09
@@ -56,9 +56,9 @@ General Purpose Flag  0A09
 [Bit 3]   1 'Streamed'
 [Bit 11]  1 'Language Encoding'
 ```
-Heurystyka: Jeśli APK instaluje się i uruchamia na urządzeniu, ale core entries wyglądają na "encrypted" dla narzędzi, GPBF został zmanipulowany.
+Heurystyka: Jeśli APK instaluje się i działa na urządzeniu, ale kluczowe wpisy wyglądają dla narzędzi na "encrypted", GPBF został zmieniony.
 
-Napraw to przez wyczyszczenie bitu 0 GPBF w wpisach Local File Headers (LFH) oraz Central Directory (CD). Minimal byte-patcher:
+Naprawa: wyczyść bit 0 GPBF zarówno w Local File Headers (LFH), jak i we wpisach Central Directory (CD). Minimalny byte-patcher:
 ```python
 # gpbf_clear.py – clear encryption bit (bit 0) in ZIP local+central headers
 import struct, sys
@@ -94,33 +94,33 @@ Użycie:
 python3 gpbf_clear.py obfuscated.apk normalized.apk
 zipdetails -v normalized.apk | grep -A2 "General Purpose Flag"
 ```
-Powinieneś teraz widzieć `General Purpose Flag  0000` przy głównych wpisach, a narzędzia ponownie sparsują APK.
+Powinieneś teraz zobaczyć `General Purpose Flag  0000` na głównych wpisach, a narzędzia ponownie sparsują APK.
 
-### 2) Duże/niestandardowe pola Extra, które łamią parsery
+### 2) Duże/niestandardowe Extra fields, które łamią parsery
 
-Atakujący umieszczają przesadnie duże pola Extra i nietypowe ID w nagłówkach, żeby rozbić dekompilery. W praktyce możesz spotkać niestandardowe markery (np. ciągi takie jak `JADXBLOCK`) osadzone tam.
+Atakujący upychają przewymiarowane Extra fields i dziwne ID w nagłówkach, aby zmylić dekompilery. W praktyce możesz zobaczyć tam niestandardowe znaczniki (np. ciągi takie jak `JADXBLOCK`) osadzone w tych polach.
 
-Inspection:
+Inspekcja:
 ```bash
 zipdetails -v sample.apk | sed -n '/Extra ID/,+4p' | head -n 50
 ```
-Zaobserwowane przykłady: nieznane ID takie jak `0xCAFE` ("Java Executable") lub `0x414A` ("JA:") zawierające duże payloads.
+Zaobserwowane przykłady: nieznane ID, takie jak `0xCAFE` ("Java Executable") lub `0x414A` ("JA:"), niosące duże payloady.
 
-DFIR heurystyki:
-- Wyzwalaj alert, gdy Extra fields są wyjątkowo duże w kluczowych wpisach (`classes*.dex`, `AndroidManifest.xml`, `resources.arsc`).
+DFIR heuristics:
+- Wygeneruj alert, gdy Extra fields są wyjątkowo duże w przypadku kluczowych wpisów (`classes*.dex`, `AndroidManifest.xml`, `resources.arsc`).
 - Traktuj nieznane Extra IDs w tych wpisach jako podejrzane.
 
-Praktyczne łagodzenie: odbudowa archiwum (np. ponowne zipowanie wyodrębnionych plików) usuwa złośliwe Extra fields. Jeśli narzędzia odmawiają rozpakowania z powodu fałszywego szyfrowania, najpierw wyczyść GPBF bit 0 jak powyżej, a następnie ponownie spakuj:
+Praktyczne środki zaradcze: odbudowanie archiwum (np. ponowne spakowanie wyodrębnionych plików) usuwa złośliwe Extra fields. Jeśli narzędzia odmawiają rozpakowania z powodu fałszywego szyfrowania, najpierw wyczyść GPBF bit 0 jak powyżej, a następnie zapakuj ponownie:
 ```bash
 mkdir /tmp/apk
 unzip -qq normalized.apk -d /tmp/apk
 (cd /tmp/apk && zip -qr ../clean.apk .)
 ```
-### 3) Kolizje nazw plików/katalogów (ukrywanie prawdziwych artefaktów)
+### 3) Zderzenia nazw plików/katalogów (ukrywanie rzeczywistych artefaktów)
 
-A ZIP może zawierać zarówno plik `X`, jak i katalog `X/`. Niektóre programy rozpakowujące i dekompilery mogą się w tym pogubić i przykryć lub ukryć prawdziwy plik wpisem katalogu. Zaobserwowano to przy wpisach kolidujących z podstawowymi nazwami w APK, takimi jak `classes.dex`.
+Archiwum ZIP może zawierać zarówno plik `X`, jak i katalog `X/`. Niektóre ekstraktory i dekompilery mogą się z tym pogubić i nadpisać lub ukryć rzeczywisty plik wpisem katalogu. Zaobserwowano to przy kolizjach wpisów z podstawowymi nazwami APK, takimi jak `classes.dex`.
 
-Triage i bezpieczne rozpakowywanie:
+Selekcja i bezpieczne wypakowywanie:
 ```bash
 # List potential collisions (names that differ only by trailing slash)
 zipinfo -1 sample.apk | awk '{n=$0; sub(/\/$/,"",n); print n}' | sort | uniq -d
@@ -131,7 +131,7 @@ unzip normalized.apk -d outdir
 # replace outdir/classes.dex? [y]es/[n]o/[A]ll/[N]one/[r]ename: r
 # new name: unk_classes.dex
 ```
-Postfiks wykrywania programowego:
+Przyrostek do wykrywania programowego:
 ```python
 from zipfile import ZipFile
 from collections import defaultdict
@@ -149,9 +149,9 @@ if len(variants) > 1:
 print('COLLISION', base, '->', variants)
 ```
 Blue-team — pomysły wykrywania:
-- Flag APKs, których lokalne nagłówki oznaczają szyfrowanie (GPBF bit 0 = 1), a mimo to instalują/uruchamiają się.
-- Flag duże/nieznane Extra fields w core entries (szukaj znaczników takich jak `JADXBLOCK`).
-- Flag kolizje ścieżek (`X` i `X/`) szczególnie dla `AndroidManifest.xml`, `resources.arsc`, `classes*.dex`.
+- Oznacz APKs, których lokalne nagłówki oznaczają szyfrowanie (GPBF bit 0 = 1), lecz instalują/uruchamiają się.
+- Oznacz duże/nieznane pola Extra na podstawowych wpisach (szukaj znaczników takich jak `JADXBLOCK`).
+- Oznacz kolizje ścieżek (`X` i `X/`) szczególnie dla `AndroidManifest.xml`, `resources.arsc`, `classes*.dex`.
 
 ---
 
