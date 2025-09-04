@@ -1,30 +1,30 @@
-# ZIPs tricks
+# Trucos de ZIPs
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 **Herramientas de línea de comandos** para gestionar **archivos zip** son esenciales para diagnosticar, reparar y crackear zip files. Aquí hay algunas utilidades clave:
 
-- **`unzip`**: Revela por qué un archivo zip puede no descomprimirse.
-- **`zipdetails -v`**: Ofrece un análisis detallado de los campos del formato zip.
-- **`zipinfo`**: Lista el contenido de un archivo zip sin extraerlo.
-- **`zip -F input.zip --out output.zip`** y **`zip -FF input.zip --out output.zip`**: Intentan reparar archivos zip corruptos.
-- **[fcrackzip](https://github.com/hyc/fcrackzip)**: Una herramienta para brute-force de contraseñas de zip, efectiva para contraseñas de hasta aproximadamente 7 caracteres.
+- **`unzip`**: Revela por qué un zip file puede no descomprimirse.
+- **`zipdetails -v`**: Ofrece análisis detallado de los campos del formato zip.
+- **`zipinfo`**: Lista el contenido de un zip file sin extraerlo.
+- **`zip -F input.zip --out output.zip`** y **`zip -FF input.zip --out output.zip`**: Intentan reparar zip files corruptos.
+- **[fcrackzip](https://github.com/hyc/fcrackzip)**: Una herramienta para brute-force cracking de contraseñas de zip, efectiva para contraseñas de hasta alrededor de 7 caracteres.
 
-La [Zip file format specification](https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT) proporciona detalles exhaustivos sobre la estructura y estándares de los archivos zip.
+La [Zip file format specification](https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT) proporciona detalles completos sobre la estructura y los estándares de los zip files.
 
-Es crucial notar que los archivos zip protegidos por contraseña **no cifran los nombres de archivos ni los tamaños de los archivos** en su interior, un fallo de seguridad que no comparten RAR o 7z, los cuales sí cifran esa información. Además, los archivos zip encriptados con el método antiguo ZipCrypto son vulnerables a un **plaintext attack** si existe una copia no cifrada de un archivo comprimido disponible. Este ataque aprovecha el contenido conocido para crackear la contraseña del zip, una vulnerabilidad detallada en [HackThis's article](https://www.hackthis.co.uk/articles/known-plaintext-attack-cracking-zip-files) y explicada más a fondo en [this academic paper](https://www.cs.auckland.ac.nz/~mike/zipattacks.pdf). Sin embargo, los archivos zip protegidos con **AES-256** son inmunes a este plaintext attack, lo que demuestra la importancia de elegir métodos de cifrado seguros para datos sensibles.
+Es crucial notar que los zip files protegidos con contraseña **no cifran los nombres de archivo ni los tamaños de archivo** en su interior, una falla de seguridad que no comparten RAR o 7z, que sí cifran esa información. Además, los zip files cifrados con el método antiguo ZipCrypto son vulnerables a un **plaintext attack** si existe una copia sin cifrar de un archivo comprimido disponible. Este ataque aprovecha el contenido conocido para crackear la contraseña del zip, una vulnerabilidad detallada en el artículo de [HackThis](https://www.hackthis.co.uk/articles/known-plaintext-attack-cracking-zip-files) y explicada más a fondo en [este paper académico](https://www.cs.auckland.ac.nz/~mike/zipattacks.pdf). Sin embargo, los zip files asegurados con **AES-256** son inmunes a este plaintext attack, lo que demuestra la importancia de elegir métodos de cifrado seguros para datos sensibles.
 
 ---
 
-## Anti-reversing tricks in APKs using manipulated ZIP headers
+## Trucos anti-reversing en APKs usando cabeceras ZIP manipuladas
 
-El malware moderno para Android (droppers) usa metadata ZIP malformada para romper herramientas estáticas (jadx/apktool/unzip) mientras mantiene el APK instalable en el dispositivo. Los trucos más comunes son:
+El malware moderno para Android utiliza metadata ZIP malformada para romper herramientas estáticas (jadx/apktool/unzip) mientras mantiene el APK instalable en el dispositivo. Los trucos más comunes son:
 
-- Fake encryption by setting the ZIP General Purpose Bit Flag (GPBF) bit 0
-- Abusing large/custom Extra fields to confuse parsers
-- Colisiones de nombres de archivo/directorio para ocultar artefactos reales (por ejemplo, un directorio llamado `classes.dex/` junto al verdadero `classes.dex`)
+- Falsa encriptación activando el bit 0 del ZIP General Purpose Bit Flag (GPBF)
+- Abusar de Extra fields grandes/personalizados para confundir parsers
+- Colisiones de nombres de archivo/directorio para ocultar artefactos reales (por ejemplo, un directorio llamado `classes.dex/` al lado del real `classes.dex`)
 
-### 1) Fake encryption (GPBF bit 0 set) without real crypto
+### 1) Falsa encriptación (GPBF bit 0 activado) sin criptografía real
 
 Síntomas:
 - `jadx-gui` falla con errores como:
@@ -32,7 +32,7 @@ Síntomas:
 ```
 java.util.zip.ZipException: invalid CEN header (encrypted entry)
 ```
-- `unzip` pide una contraseña para archivos core del APK aunque un APK válido no puede tener `classes*.dex`, `resources.arsc` o `AndroidManifest.xml` cifrados:
+- `unzip` solicita una contraseña para archivos principales del APK a pesar de que un APK válido no puede tener `classes*.dex`, `resources.arsc`, o `AndroidManifest.xml` cifrados:
 
 ```bash
 unzip sample.apk
@@ -47,7 +47,7 @@ Detección con zipdetails:
 ```bash
 zipdetails -v sample.apk | less
 ```
-Mira el General Purpose Bit Flag de los encabezados locales y centrales. Un valor revelador es el bit 0 activado (Encryption) incluso para entradas core:
+Mira el General Purpose Bit Flag para los encabezados locales y centrales. Un valor revelador es el bit 0 activado (Encryption) incluso para entradas principales:
 ```
 Extract Zip Spec      2D '4.5'
 General Purpose Flag  0A09
@@ -56,9 +56,11 @@ General Purpose Flag  0A09
 [Bit 3]   1 'Streamed'
 [Bit 11]  1 'Language Encoding'
 ```
-Heurística: Si un APK se instala y se ejecuta en el dispositivo pero las entradas principales aparecen "encrypted" para las herramientas, el GPBF fue manipulado.
+Heurística: Si un APK se instala y se ejecuta en el dispositivo pero las entradas principales aparecen "cifradas" para las herramientas, el GPBF fue manipulado.
 
-Solución: borrar el bit 0 del GPBF tanto en los Local File Headers (LFH) como en las entradas del Central Directory (CD). Minimal byte-patcher:
+Solución: borrar el bit 0 del GPBF en las entradas tanto de Local File Headers (LFH) como de Central Directory (CD).
+
+Parcheador de bytes mínimo:
 ```python
 # gpbf_clear.py – clear encryption bit (bit 0) in ZIP local+central headers
 import struct, sys
@@ -96,29 +98,29 @@ zipdetails -v normalized.apk | grep -A2 "General Purpose Flag"
 ```
 Ahora deberías ver `General Purpose Flag  0000` en las entradas principales y las herramientas volverán a analizar el APK.
 
-### 2) Extra fields grandes/personalizados para romper parsers
+### 2) Campos Extra grandes/personalizados para romper analizadores
 
-Los atacantes colocan Extra fields sobredimensionados e IDs extraños en los encabezados para provocar fallos en los decompilers. En entornos reales puede que veas marcadores personalizados (p. ej., cadenas como `JADXBLOCK`) incrustados allí.
+Los atacantes introducen Extra fields sobredimensionados y IDs extraños en los encabezados para hacer fallar a los descompiladores. En entornos reales puedes ver marcadores personalizados (p. ej., cadenas como `JADXBLOCK`) incrustados allí.
 
 Inspección:
 ```bash
 zipdetails -v sample.apk | sed -n '/Extra ID/,+4p' | head -n 50
 ```
-Ejemplos observados: IDs desconocidos como `0xCAFE` ("Ejecutable Java") o `0x414A` ("JA:") que contienen grandes cargas útiles.
+Ejemplos observados: IDs desconocidos como `0xCAFE` ("Ejecutable Java") o `0x414A` ("JA:") que contienen grandes payloads.
 
 Heurísticas DFIR:
-- Generar alerta cuando los campos Extra sean inusualmente grandes en entradas principales (`classes*.dex`, `AndroidManifest.xml`, `resources.arsc`).
+- Alertar cuando los campos Extra sean inusualmente grandes en las entradas principales (`classes*.dex`, `AndroidManifest.xml`, `resources.arsc`).
 - Tratar los IDs Extra desconocidos en esas entradas como sospechosos.
 
-Mitigación práctica: reconstruir el archivo (p. ej., re-zipping de los archivos extraídos) elimina los campos Extra maliciosos. Si las herramientas se niegan a extraer debido a un cifrado falso, primero borre el bit 0 de GPBF como se indicó arriba, y luego reempaque:
+Mitigación práctica: la reconstrucción del archivo (p. ej., volver a comprimir los archivos extraídos) elimina los campos Extra maliciosos. Si las herramientas se niegan a extraer debido a cifrado falso, primero borra GPBF bit 0 como se indicó arriba, luego vuelve a empaquetar:
 ```bash
 mkdir /tmp/apk
 unzip -qq normalized.apk -d /tmp/apk
 (cd /tmp/apk && zip -qr ../clean.apk .)
 ```
-### 3) Colisiones de nombres de archivo/directorio (ocultando artefactos reales)
+### 3) File/Directory name collisions (hiding real artifacts)
 
-Un ZIP puede contener tanto un archivo `X` como un directorio `X/`. Algunos extractors y decompilers se confunden y pueden sobreponer u ocultar el archivo real con una entrada de directorio. Esto se ha observado con entradas que colisionan con nombres core de APK como `classes.dex`.
+Un ZIP puede contener tanto un archivo `X` como un directorio `X/`. Algunos extractores y decompiladores se confunden y pueden superponer u ocultar el archivo real con una entrada de directorio. Esto se ha observado con entradas que colisionan con nombres clave de APK como `classes.dex`.
 
 Triage y extracción segura:
 ```bash
@@ -131,7 +133,7 @@ unzip normalized.apk -d outdir
 # replace outdir/classes.dex? [y]es/[n]o/[A]ll/[N]one/[r]ename: r
 # new name: unk_classes.dex
 ```
-Detección programática post-fix:
+Sufijo posterior a la detección programática:
 ```python
 from zipfile import ZipFile
 from collections import defaultdict
@@ -149,9 +151,9 @@ if len(variants) > 1:
 print('COLLISION', base, '->', variants)
 ```
 Ideas de detección para Blue-team:
-- Marcar APKs cuyos encabezados locales indiquen cifrado (GPBF bit 0 = 1) pero que aún se instalen/ejecuten.
+- Marcar APKs cuyos encabezados locales indican cifrado (GPBF bit 0 = 1) pero que se instalan/ejecutan.
 - Marcar campos Extra grandes/desconocidos en las entradas core (buscar marcadores como `JADXBLOCK`).
-- Marcar colisiones de ruta (`X` y `X/`) específicamente para `AndroidManifest.xml`, `resources.arsc`, `classes*.dex`.
+- Marcar colisiones de rutas (`X` y `X/`) específicamente para `AndroidManifest.xml`, `resources.arsc`, `classes*.dex`.
 
 ---
 
