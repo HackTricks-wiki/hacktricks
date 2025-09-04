@@ -185,6 +185,14 @@ These practices and mechanisms are foundational for anyone looking to engage wit
 - [https://ethereum.org/en/developers/docs/gas/](https://ethereum.org/en/developers/docs/gas/)
 - [https://en.bitcoin.it/wiki/Privacy](https://en.bitcoin.it/wiki/Privacy#Forced_address_reuse)
 
+## DeFi/AMM Exploitation
+
+Looking for practical offensive content on DEX/AMM exploits (Uniswap v4 hooks, rounding/precision abuse, flash‑loan amplified threshold‑crossing swaps)?
+
+{{#ref}}
+../blockchain/defi-amm-exploitation/README.md
+{{#endref}}
+
 {{#include ../banners/hacktricks-training.md}}
 
 
