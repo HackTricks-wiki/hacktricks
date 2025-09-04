@@ -1,8 +1,8 @@
-# Контрольний список - Local Windows Privilege Escalation
+# Перевірочний список - Local Windows Privilege Escalation
 
 {{#include ../banners/hacktricks-training.md}}
 
-### **Best tool to look for Windows local privilege escalation vectors:** [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)
+### **Найкращий інструмент для пошуку векторів Windows local privilege escalation:** [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)
 
 ### [System Info](windows-local-privilege-escalation/index.html#system-info)
 
@@ -20,7 +20,7 @@
 
 ### [Logging/AV enumeration](windows-local-privilege-escalation/index.html#enumeration)
 
-- [ ] Перевірити [**Audit** ](windows-local-privilege-escalation/index.html#audit-settings)та [**WEF** ](windows-local-privilege-escalation/index.html#wef)налаштування
+- [ ] Перевірити налаштування [**Audit** ](windows-local-privilege-escalation/index.html#audit-settings)та [**WEF** ](windows-local-privilege-escalation/index.html#wef)
 - [ ] Перевірити [**LAPS**](windows-local-privilege-escalation/index.html#laps)
 - [ ] Перевірити, чи активний [**WDigest** ](windows-local-privilege-escalation/index.html#wdigest)
 - [ ] [**LSA Protection**](windows-local-privilege-escalation/index.html#lsa-protection)?
@@ -32,7 +32,7 @@
 - [ ] [**User Privileges**](windows-local-privilege-escalation/index.html#users-and-groups)
 - [ ] Перевірити [**current** user **privileges**](windows-local-privilege-escalation/index.html#users-and-groups)
 - [ ] Чи є ви [**member of any privileged group**](windows-local-privilege-escalation/index.html#privileged-groups)?
-- [ ] Перевірити, чи увімкнено будь-який із цих токенів: **SeImpersonatePrivilege, SeAssignPrimaryPrivilege, SeTcbPrivilege, SeBackupPrivilege, SeRestorePrivilege, SeCreateTokenPrivilege, SeLoadDriverPrivilege, SeTakeOwnershipPrivilege, SeDebugPrivilege** ?
+- [ ] Перевірити, чи маєте будь-який із цих токенів: **SeImpersonatePrivilege, SeAssignPrimaryPrivilege, SeTcbPrivilege, SeBackupPrivilege, SeRestorePrivilege, SeCreateTokenPrivilege, SeLoadDriverPrivilege, SeTakeOwnershipPrivilege, SeDebugPrivilege** ?
 - [ ] [**Users Sessions**](windows-local-privilege-escalation/index.html#logged-users-sessions)?
 - [ ] Перевірити[ **users homes**](windows-local-privilege-escalation/index.html#home-folders) (доступ?)
 - [ ] Перевірити [**Password Policy**](windows-local-privilege-escalation/index.html#password-policy)
@@ -41,43 +41,43 @@
 ### [Network](windows-local-privilege-escalation/index.html#network)
 
 - [ ] Перевірити **current** [**network** **information**](windows-local-privilege-escalation/index.html#network)
-- [ ] Перевірити **hidden local services**, обмежені зовні
+- [ ] Перевірити **hidden local services**, які обмежені зовні
 
 ### [Running Processes](windows-local-privilege-escalation/index.html#running-processes)
 
-- [ ] Бінарні файли процесів [**file and folders permissions**](windows-local-privilege-escalation/index.html#file-and-folder-permissions)
+- [ ] Права на файли та папки процесів — [**file and folders permissions**](windows-local-privilege-escalation/index.html#file-and-folder-permissions)
 - [ ] [**Memory Password mining**](windows-local-privilege-escalation/index.html#memory-password-mining)
 - [ ] [**Insecure GUI apps**](windows-local-privilege-escalation/index.html#insecure-gui-apps)
 - [ ] Вкрасти облікові дані з **interesting processes** за допомогою `ProcDump.exe` ? (firefox, chrome, etc ...)
 
 ### [Services](windows-local-privilege-escalation/index.html#services)
 
-- [ ] Чи можете ви **modify any service**?(windows-local-privilege-escalation/index.html#permissions)
-- [ ] Чи можете ви **modify** the **binary** that is **executed** by any **service**?(windows-local-privilege-escalation/index.html#modify-service-binary-path)
-- [ ] Чи можете ви **modify** the **registry** of any **service**?(windows-local-privilege-escalation/index.html#services-registry-modify-permissions)
-- [ ] Чи можна скористатися будь-яким **unquoted service** binary **path**?(windows-local-privilege-escalation/index.html#unquoted-service-paths)
+- [ ] Чи можете ви **modify any service**? (змінити будь-яку службу) (permissions)?
+- [ ] Чи можете ви **modify** бінарний файл, який **executed** будь-якою **service**? (modify-service-binary-path)
+- [ ] Чи можете ви **modify** реєстр будь-якої **service**? (services-registry-modify-permissions)
+- [ ] Чи можна використати будь-який **unquoted service** binary **path**?
 
 ### [**Applications**](windows-local-privilege-escalation/index.html#applications)
 
-- [ ] **Write** [**permissions on installed applications**](windows-local-privilege-escalation/index.html#write-permissions)
+- [ ] **Write** права на встановлені застосунки — [**Write permissions on installed applications**](windows-local-privilege-escalation/index.html#write-permissions)
 - [ ] [**Startup Applications**](windows-local-privilege-escalation/index.html#run-at-startup)
 - [ ] **Vulnerable** [**Drivers**](windows-local-privilege-escalation/index.html#drivers)
 
 ### [DLL Hijacking](windows-local-privilege-escalation/index.html#path-dll-hijacking)
 
 - [ ] Чи можете ви **write in any folder inside PATH**?
-- [ ] Чи є відомий service binary, який **tries to load any non-existant DLL**?
+- [ ] Чи є відома служба, бінарник якої **tries to load any non-existant DLL**?
 - [ ] Чи можете ви **write** в будь-яку **binaries folder**?
 
 ### [Network](windows-local-privilege-escalation/index.html#network)
 
-- [ ] Перелічити мережу (shares, interfaces, routes, neighbours, ...)
-- [ ] Особливу увагу приділити мережевим сервісам, що слухають на localhost (127.0.0.1)
+- [ ] Просканувати мережу (shares, interfaces, routes, neighbours, ...)
+- [ ] Особливу увагу приділити мережевим сервісам, які слухають на localhost (127.0.0.1)
 
 ### [Windows Credentials](windows-local-privilege-escalation/index.html#windows-credentials)
 
 - [ ] [**Winlogon** ](windows-local-privilege-escalation/index.html#winlogon-credentials) credentials
-- [ ] Чи є [**Windows Vault**](windows-local-privilege-escalation/index.html#credentials-manager-windows-vault) credentials, які можна використати?
+- [ ] Чи є облікові дані в [**Windows Vault**](windows-local-privilege-escalation/index.html#credentials-manager-windows-vault), які можна використати?
 - [ ] Цікаві [**DPAPI credentials**](windows-local-privilege-escalation/index.html#dpapi)?
 - [ ] Паролі збережених [**Wifi networks**](windows-local-privilege-escalation/index.html#wifi)?
 - [ ] Цікава інформація в [**saved RDP Connections**](windows-local-privilege-escalation/index.html#saved-rdp-connections)?
@@ -91,7 +91,7 @@
 - [ ] **Putty:** [**Creds**](windows-local-privilege-escalation/index.html#putty-creds) **and** [**SSH host keys**](windows-local-privilege-escalation/index.html#putty-ssh-host-keys)
 - [ ] [**SSH keys in registry**](windows-local-privilege-escalation/index.html#ssh-keys-in-registry)?
 - [ ] Паролі в [**unattended files**](windows-local-privilege-escalation/index.html#unattended-files)?
-- [ ] Будь-яка резервна копія [**SAM & SYSTEM**](windows-local-privilege-escalation/index.html#sam-and-system-backups)?
+- [ ] Будь-який резервний файл [**SAM & SYSTEM**](windows-local-privilege-escalation/index.html#sam-and-system-backups)?
 - [ ] [**Cloud credentials**](windows-local-privilege-escalation/index.html#cloud-credentials)?
 - [ ] [**McAfee SiteList.xml**](windows-local-privilege-escalation/index.html#mcafee-sitelist.xml) файл?
 - [ ] [**Cached GPP Password**](windows-local-privilege-escalation/index.html#cached-gpp-pasword)?
@@ -106,10 +106,10 @@
 
 ### [Leaked Handlers](windows-local-privilege-escalation/index.html#leaked-handlers)
 
-- [ ] Чи маєте доступ до будь-якого handler процесу, запущеного адміністратором?
+- [ ] Чи маєте доступ до будь-якого handler процесу, що запущений від імені адміністратора?
 
 ### [Pipe Client Impersonation](windows-local-privilege-escalation/index.html#named-pipe-client-impersonation)
 
-- [ ] Перевірте, чи можна його зловживати
+- [ ] Перевірити, чи можна це зловживати
 
 {{#include ../banners/hacktricks-training.md}}
