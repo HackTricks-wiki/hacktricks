@@ -1,18 +1,18 @@
-# Abusando de Auto-Updaters Empresariais e IPC Privilegiado (e.g., Netskope stAgentSvc)
+# Abusando de Auto-Atualizadores Empresariais e IPC Privilegiado (por exemplo, Netskope stAgentSvc)
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Esta página generaliza uma classe de Windows local privilege escalation chains encontradas em agentes de endpoint empresariais e updaters que expõem uma superfície de IPC de baixa fricção e um fluxo de atualização privilegiado. Um exemplo representativo é o Netskope Client for Windows < R129 (CVE-2025-0309), onde um usuário com poucos privilégios pode forçar o enrollment em um servidor controlado pelo atacante e então entregar um MSI malicioso que o serviço SYSTEM instala.
+Esta página generaliza uma classe de cadeias de elevação de privilégio local no Windows encontradas em agentes de endpoint e updaters empresariais que expõem uma superfície IPC de baixa fricção e um fluxo de atualização privilegiado. Um exemplo representativo é Netskope Client for Windows < R129 (CVE-2025-0309), onde um usuário de baixo privilégio pode coercir o enrollment para um servidor controlado pelo atacante e então entregar um MSI malicioso que o serviço SYSTEM instala.
 
-Ideias-chave reutilizáveis contra produtos similares:
+Ideias-chave que você pode reutilizar contra produtos similares:
 - Abusar do localhost IPC de um serviço privilegiado para forçar re‑enrollment ou reconfiguração para um servidor do atacante.
-- Implementar os endpoints de update do vendor, entregar um rogue Trusted Root CA, e apontar o updater para um pacote malicioso “assinado”.
-- Evadir verificações de signer fracas (CN allow‑lists), flags de digest opcionais, e propriedades relaxadas de MSI.
-- Se o IPC for “encrypted”, derivar a key/IV a partir de identificadores da máquina legíveis globalmente armazenados no registry.
-- Se o serviço restringe callers por image path/process name, injetar em um processo allow‑listed ou spawnar um suspenso e bootstrapar sua DLL via um patch mínimo de thread‑context.
+- Implementar os endpoints de update do fornecedor, entregar uma Trusted Root CA maliciosa e apontar o updater para um pacote malicioso “assinado”.
+- Evadir verificações de signer fracas (CN allow‑lists), flags de digest opcionais e propriedades MSI laxas.
+- Se o IPC for “encrypted”, derivar key/IV a partir de identificadores de máquina legíveis pelo mundo armazenados no registry.
+- Se o serviço restringir callers por image path/process name, injetar em um processo allow‑listed ou spawnar um suspenso e bootstrapar sua DLL via um patch mínimo de thread‑context.
 
 ---
-## 1) Forçando o enrollment para um servidor do atacante via localhost IPC
+## 1) Forçando enrollment para um servidor atacante via localhost IPC
 
 Muitos agentes incluem um processo UI em user‑mode que conversa com um serviço SYSTEM via localhost TCP usando JSON.
 
@@ -21,8 +21,8 @@ Observado no Netskope:
 - IPC command ID 148: IDP_USER_PROVISIONING_WITH_TOKEN
 
 Exploit flow:
-1) Craft um JWT enrollment token cujas claims controlam o backend host (e.g., AddonUrl). Use alg=None para que nenhuma assinatura seja requerida.
-2) Send the IPC message invoking the provisioning command with your JWT and tenant name:
+1) Crie um token JWT de enrollment cujas claims controlam o host backend (por exemplo, AddonUrl). Use alg=None para que nenhuma assinatura seja necessária.
+2) Envie a mensagem IPC invocando o comando de provisioning com seu JWT e o nome do tenant:
 ```json
 {
 "148": {
@@ -31,91 +31,91 @@ Exploit flow:
 }
 }
 ```
-3) O serviço começa a acessar seu servidor rogue para enrollment/config, por exemplo:
+3) O serviço começa a contatar seu servidor malicioso para enrollment/config, por exemplo:
 - /v1/externalhost?service=enrollment
 - /config/user/getbrandingbyemail
 
 Notas:
-- Se a verificação do chamador for baseada em caminho/nome, origine a requisição a partir de um allow‑listed vendor binary (veja §4).
+- Se a verificação do caller for baseada em caminho/nome, origine a requisição a partir de um binário de fornecedor autorizado (veja §4).
 
 ---
-## 2) Hijacking the update channel to run code as SYSTEM
+## 2) Sequestrando o canal de atualização para executar código como SYSTEM
 
-Uma vez que o cliente se comunique com seu servidor, implemente os endpoints esperados e direcione-o para um MSI malicioso. Sequência típica:
+Uma vez que o cliente conversa com seu servidor, implemente os endpoints esperados e direcione-o para um MSI do atacante. Sequência típica:
 
-1) /v2/config/org/clientconfig → Retornar configuração JSON com um intervalo do updater muito curto, por exemplo:
+1) /v2/config/org/clientconfig → Retornar config JSON com um intervalo de atualização muito curto, por exemplo:
 ```json
 {
 "clientUpdate": { "updateIntervalInMin": 1 },
 "check_msi_digest": false
 }
 ```
-2) /config/ca/cert → Retorna um certificado CA em PEM. O serviço o instala no Local Machine Trusted Root store.
-3) /v2/checkupdate → Fornece metadata apontando para um MSI malicioso e uma versão falsa.
+2) /config/ca/cert → Return a PEM CA certificate. The service installs it into the Local Machine Trusted Root store.
+3) /v2/checkupdate → Supply metadata pointing to a malicious MSI and a fake version.
 
-Bypassando verificações comuns observadas na prática:
-- Signer CN allow‑list: o serviço pode checar apenas se o Subject CN é “netSkope Inc” ou “Netskope, Inc.”. Sua CA maliciosa pode emitir um leaf com esse CN e assinar o MSI.
-- CERT_DIGEST property: inclua uma propriedade MSI benigno chamada CERT_DIGEST. Não há enforcement na instalação.
-- Optional digest enforcement: flag de config (por exemplo, check_msi_digest=false) desativa validação criptográfica adicional.
+Bypassing common checks seen in the wild:
+- Signer CN allow‑list: the service may only check the Subject CN equals “netSkope Inc” or “Netskope, Inc.”. Your rogue CA can issue a leaf with that CN and sign the MSI.
+- CERT_DIGEST property: include a benign MSI property named CERT_DIGEST. No enforcement at install.
+- Optional digest enforcement: config flag (e.g., check_msi_digest=false) disables extra cryptographic validation.
 
-Resultado: o serviço SYSTEM instala seu MSI de
+Result: the SYSTEM service installs your MSI from
 C:\ProgramData\Netskope\stAgent\data\*.msi
-executando código arbitrário como NT AUTHORITY\SYSTEM.
+executing arbitrary code as NT AUTHORITY\SYSTEM.
 
 ---
 ## 3) Forging encrypted IPC requests (when present)
 
-A partir do R127, Netskope envolveu o JSON de IPC em um campo encryptData que parece Base64. Reversing mostrou AES com key/IV derivado de valores do registry legíveis por qualquer usuário:
+From R127, Netskope wrapped IPC JSON in an encryptData field that looks like Base64. Reversing showed AES with key/IV derived from registry values readable by any user:
 - Key = HKLM\SOFTWARE\NetSkope\Provisioning\nsdeviceidnew
 - IV  = HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProductID
 
-Atacantes podem reproduzir a encriptação e enviar comandos encriptados válidos a partir de um usuário padrão. Dica geral: se um agente subitamente “encriptar” seu IPC, procure device IDs, product GUIDs, install IDs em HKLM como material.
+Attackers can reproduce encryption and send valid encrypted commands from a standard user. General tip: if an agent suddenly “encrypts” its IPC, look for device IDs, product GUIDs, install IDs under HKLM as material.
 
 ---
 ## 4) Bypassing IPC caller allow‑lists (path/name checks)
 
-Alguns serviços tentam autenticar o peer resolvendo o PID da conexão TCP e comparando o image path/name contra binários allow‑listados do vendor localizados em Program Files (por exemplo, stagentui.exe, bwansvc.exe, epdlp.exe).
+Some services try to authenticate the peer by resolving the TCP connection’s PID and comparing the image path/name against allow‑listed vendor binaries located under Program Files (e.g., stagentui.exe, bwansvc.exe, epdlp.exe).
 
-Dois bypasses práticos:
-- DLL injection em um processo allow‑listado (ex.: nsdiag.exe) e proxy do IPC internamente.
-- Spawn de um binário allow‑listado em suspended e bootstrap da sua proxy DLL sem CreateRemoteThread (see §5) para satisfazer regras de tamper impostas pelo driver.
+Two practical bypasses:
+- DLL injection into an allow‑listed process (e.g., nsdiag.exe) and proxy IPC from inside it.
+- Spawn an allow‑listed binary suspended and bootstrap your proxy DLL without CreateRemoteThread (see §5) to satisfy driver‑enforced tamper rules.
 
 ---
 ## 5) Tamper‑protection friendly injection: suspended process + NtContinue patch
 
-Produtos frequentemente incluem um minifilter/OB callbacks driver (ex.: Stadrv) para remover direitos perigosos de handles para processos protegidos:
-- Process: remove PROCESS_TERMINATE, PROCESS_CREATE_THREAD, PROCESS_VM_READ, PROCESS_DUP_HANDLE, PROCESS_SUSPEND_RESUME
-- Thread: restringe para THREAD_GET_CONTEXT, THREAD_QUERY_LIMITED_INFORMATION, THREAD_RESUME, SYNCHRONIZE
+Products often ship a minifilter/OB callbacks driver (e.g., Stadrv) to strip dangerous rights from handles to protected processes:
+- Process: removes PROCESS_TERMINATE, PROCESS_CREATE_THREAD, PROCESS_VM_READ, PROCESS_DUP_HANDLE, PROCESS_SUSPEND_RESUME
+- Thread: restricts to THREAD_GET_CONTEXT, THREAD_QUERY_LIMITED_INFORMATION, THREAD_RESUME, SYNCHRONIZE
 
-Um loader user‑mode confiável que respeita essas restrições:
-1) CreateProcess de um binário do vendor com CREATE_SUSPENDED.
-2) Obtenha handles que ainda são permitidos: PROCESS_VM_WRITE | PROCESS_VM_OPERATION no processo, e um handle de thread com THREAD_GET_CONTEXT/THREAD_SET_CONTEXT (ou apenas THREAD_RESUME se você patchar código em um RIP conhecido).
-3) Sobrescreva ntdll!NtContinue (ou outro thunk inicial garantido mapeado) com um pequeno stub que chama LoadLibraryW no caminho da sua DLL, depois retorna.
-4) ResumeThread para acionar seu stub in‑process, carregando sua DLL.
+A reliable user‑mode loader that respects these constraints:
+1) CreateProcess of a vendor binary with CREATE_SUSPENDED.
+2) Obtain handles you’re still allowed to: PROCESS_VM_WRITE | PROCESS_VM_OPERATION on the process, and a thread handle with THREAD_GET_CONTEXT/THREAD_SET_CONTEXT (or just THREAD_RESUME if you patch code at a known RIP).
+3) Overwrite ntdll!NtContinue (or other early, guaranteed‑mapped thunk) with a tiny stub that calls LoadLibraryW on your DLL path, then jumps back.
+4) ResumeThread to trigger your stub in‑process, loading your DLL.
 
-Porque você nunca usou PROCESS_CREATE_THREAD ou PROCESS_SUSPEND_RESUME em um processo já protegido (você o criou), a política do driver é satisfeita.
+Because you never used PROCESS_CREATE_THREAD or PROCESS_SUSPEND_RESUME on an already‑protected process (you created it), the driver’s policy is satisfied.
 
 ---
 ## 6) Practical tooling
-- NachoVPN (Netskope plugin) automatiza uma rogue CA, assinatura de MSI malicioso, e serve os endpoints necessários: /v2/config/org/clientconfig, /config/ca/cert, /v2/checkupdate.
-- UpSkope é um IPC client custom que cria mensagens IPC arbitrárias (opcionalmente AES‑encriptadas) e inclui a injeção por processo suspenso para originar de um binário allow‑listado.
+- NachoVPN (Netskope plugin) automates a rogue CA, malicious MSI signing, and serves the needed endpoints: /v2/config/org/clientconfig, /config/ca/cert, /v2/checkupdate.
+- UpSkope is a custom IPC client that crafts arbitrary (optionally AES‑encrypted) IPC messages and includes the suspended‑process injection to originate from an allow‑listed binary.
 
 ---
 ## 7) Detection opportunities (blue team)
-- Monitorar adições ao Local Machine Trusted Root. Sysmon + registry‑mod eventing (see SpecterOps guidance) funciona bem.
-- Sinalizar execuções de MSI iniciadas pelo serviço do agente a partir de paths como C:\ProgramData\<vendor>\<agent>\data\*.msi.
-- Revisar logs do agente por hosts/tenants de enrollment inesperados, ex.: C:\ProgramData\netskope\stagent\logs\nsdebuglog.log – procure por addonUrl / tenant anomalies e provisioning msg 148.
-- Alertar sobre clientes IPC localhost que não sejam os binários assinados esperados, ou que se originem de árvores de processos filhas incomuns.
+- Monitor additions to Local Machine Trusted Root. Sysmon + registry‑mod eventing (see SpecterOps guidance) works well.
+- Flag MSI executions initiated by the agent’s service from paths like C:\ProgramData\<vendor>\<agent>\data\*.msi.
+- Review agent logs for unexpected enrollment hosts/tenants, e.g.: C:\ProgramData\netskope\stagent\logs\nsdebuglog.log – look for addonUrl / tenant anomalies and provisioning msg 148.
+- Alert on localhost IPC clients that are not the expected signed binaries, or that originate from unusual child process trees.
 
 ---
 ## Hardening tips for vendors
-- Vincular hosts de enrollment/update a uma allow‑list estrita; rejeitar domínios não confiáveis no clientcode.
-- Autenticar peers de IPC com primitives do OS (ALPC security, named‑pipe SIDs) em vez de checks por image path/name.
-- Manter material secreto fora de HKLM legível por todos; se o IPC precisar ser encriptado, derivar chaves de segredos protegidos ou negociar em canais autenticados.
-- Tratar o updater como superfície da supply‑chain: exigir uma cadeia completa até uma CA confiável que você controla, verificar assinaturas de pacotes contra chaves pinned, e fail closed se a validação estiver desabilitada na config.
+- Bind enrollment/update hosts to a strict allow‑list; reject untrusted domains in clientcode.
+- Authenticate IPC peers with OS primitives (ALPC security, named‑pipe SIDs) instead of image path/name checks.
+- Keep secret material out of world‑readable HKLM; if IPC must be encrypted, derive keys from protected secrets or negotiate over authenticated channels.
+- Treat the updater as a supply‑chain surface: require a full chain to a trusted CA you control, verify package signatures against pinned keys, and fail closed if validation is disabled in config.
 
 ## References
-- [Advisory – Netskope Client for Windows – Local Privilege Escalation via Rogue Server (CVE-2025-0309)](https://blog.amberwolf.com/blog/2025/august/advisory---netskope-client-for-windows---local-privilege-escalation-via-rogue-server/)
+- [Aviso – Netskope Client for Windows – Elevação de Privilégios Local via Servidor malicioso (CVE-2025-0309)](https://blog.amberwolf.com/blog/2025/august/advisory---netskope-client-for-windows---local-privilege-escalation-via-rogue-server/)
 - [NachoVPN – Netskope plugin](https://github.com/AmberWolfCyber/NachoVPN)
 - [UpSkope – Netskope IPC client/exploit](https://github.com/AmberWolfCyber/UpSkope)
 - [NVD – CVE-2025-0309](https://nvd.nist.gov/vuln/detail/CVE-2025-0309)

