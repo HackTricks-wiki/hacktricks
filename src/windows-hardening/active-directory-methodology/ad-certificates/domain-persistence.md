@@ -63,7 +63,8 @@ Set-ADUser -Identity 'victim' -Add @{altSecurityIdentities=$Map}
 ```
 
 Notes
-- If you can craft forged certificates that include the SID security extension, those will map implicitly even under Full Enforcement. Otherwise, prefer explicit strong mappings. See {{#ref}}account-persistence.md{{#endref}} for more on explicit mappings.
+- If you can craft forged certificates that include the SID security extension, those will map implicitly even under Full Enforcement. Otherwise, prefer explicit strong mappings. See 
+[account-persistence](account-persistence.md) for more on explicit mappings.
 - Revocation does not help defenders here: forged certificates are unknown to the CA database and thus cannot be revoked.
 
 ## Trusting Rogue CA Certificates - DPERSIST2
