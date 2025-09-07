@@ -1,27 +1,27 @@
-# AD CS Perzistencija u domenu
+# AD CS Domain Persistence
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**Ovo je sažetak tehnika perzistencije u domenu podeljenih u [https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)**. Proverite taj izvor za dodatne detalje.
+**Ovo je sažetak tehnika perzistencije u domenu iz [https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)**. Pogledajte ga za više detalja.
 
-## Lažiranje sertifikata sa ukradenim CA sertifikatima - DPERSIST1
+## Forging Certificates with Stolen CA Certificates - DPERSIST1
 
-Kako možete da utvrdite da je sertifikat CA sertifikat?
+How can you tell that a certificate is a CA certificate?
 
-Može se utvrditi da je sertifikat CA sertifikat ako su ispunjeni sledeći uslovi:
+It can be determined that a certificate is a CA certificate if several conditions are met:
 
-- Sertifikat je uskladišten na CA serveru, a njegov privatni ključ je zaštićen mašinskim DPAPI-jem ili hardverom poput TPM/HSM ako operativni sistem to podržava.
-- Polja Issuer i Subject sertifikata se poklapaju sa distinguished name-om CA.
+- Sertifikat je smešten na CA serveru, a njegov privatni ključ je zaštićen DPAPI-jem mašine, ili hardverom kao što su TPM/HSM ako operativni sistem to podržava.
+- Polja Issuer i Subject sertifikata se poklapaju sa distinguished name CA.
 - Ekstenzija "CA Version" prisutna je isključivo u CA sertifikatima.
-- Sertifikat nema polja Extended Key Usage (EKU).
+- Sertifikat nema Extended Key Usage (EKU) polja.
 
-Za izvlačenje privatnog ključa ovog sertifikata, alat `certsrv.msc` na CA serveru je podržana metoda putem ugrađenog GUI-ja. Ipak, ovaj sertifikat se ne razlikuje od ostalih pohranjenih u sistemu; stoga se za ekstrakciju mogu primeniti metode kao što je [THEFT2 technique](certificate-theft.md#user-certificate-theft-via-dpapi-theft2).
+Za ekstrakciju privatnog ključa ovog sertifikata, podržani metod je korišćenje alata certsrv.msc na CA serveru putem ugrađenog GUI-ja. Ipak, ovaj sertifikat se ne razlikuje od ostalih koji su pohranjeni u sistemu; stoga se mogu primeniti metode kao što je [THEFT2 technique](certificate-theft.md#user-certificate-theft-via-dpapi-theft2) za ekstrakciju.
 
-Sertifikat i privatni ključ se takođe mogu dobiti korišćenjem Certipy pomoću sledeće naredbe:
+Sertifikat i privatni ključ se takođe mogu dobiti pomoću Certipy sa sledećom naredbom:
 ```bash
 certipy ca 'corp.local/administrator@ca.corp.local' -hashes :123123.. -backup
 ```
-Po pribavljanju CA sertifikata i njegovog privatnog ključa u `.pfx` formatu, alati poput [ForgeCert](https://github.com/GhostPack/ForgeCert) mogu se koristiti za generisanje validnih sertifikata:
+Nakon pribavljanja CA sertifikata i njegovog privatnog ključa u `.pfx` formatu, alati poput [ForgeCert](https://github.com/GhostPack/ForgeCert) mogu se iskoristiti za generisanje važećih sertifikata:
 ```bash
 # Generating a new certificate with ForgeCert
 ForgeCert.exe --CaCertPath ca.pfx --CaCertPassword Password123! --Subject "CN=User" --SubjectAltName localadmin@theshire.local --NewCertPath localadmin.pfx --NewCertPassword Password123!
@@ -36,19 +36,19 @@ Rubeus.exe asktgt /user:localdomain /certificate:C:\ForgeCert\localadmin.pfx /pa
 certipy auth -pfx administrator_forged.pfx -dc-ip 172.16.126.128
 ```
 > [!WARNING]
-> Korisnik kome je cilj falsifikovanje sertifikata mora biti aktivan i sposoban da se autentifikuje u Active Directory-ju da bi proces uspeo. Falsifikovanje sertifikata za specijalne naloge kao što je krbtgt nije efikasno.
+> Korisnik koji je meta falsifikovanja sertifikata mora biti aktivan i sposoban da se autentifikuje u Active Directory da bi proces uspeo. Falsifikovanje sertifikata za specijalne naloge kao što je krbtgt je neefikasno.
 
-Ovaj falsifikovani sertifikat će biti **važeći** do navedenog datuma isteka i sve dok je korenski CA sertifikat **važeći** (obično od 5 do **10+ godina**). Takođe važi za **mašine**, pa u kombinaciji sa **S4U2Self**, napadač može **održavati persistenciju na bilo kojoj mašini u domenu** sve dok CA sertifikat važi.\
+Ovaj falsifikovani sertifikat će biti **važeći** do datuma isteka navedenog i sve dok root CA sertifikat bude važeći (obično od 5 do **10+ godina**). Takođe je važeći za **mašine**, pa u kombinaciji sa **S4U2Self**, napadač može **održavati persistence na bilo kojoj mašini u domenu** sve dok je CA sertifikat važeći.\
 Štaviše, **sertifikati generisani** ovom metodom **ne mogu biti opozvani** jer CA za njih nije svestan.
 
 ### Rad pod Strong Certificate Mapping Enforcement (2025+)
 
-Od 11. februara 2025. (posle roll-out-a KB5014754), kontroleri domena podrazumevano koriste **Full Enforcement** za mapiranja sertifikata. U praksi to znači da vaši falsifikovani sertifikati moraju ili:
+Since February 11, 2025 (after KB5014754 rollout), domain controllers default to **Full Enforcement** for certificate mappings. Practically this means your forged certificates must either:
 
-- Sadržati snažnu vezu sa ciljnim nalogom (na primer, SID security extension), ili
-- Biti upareni sa jakim, eksplicitnim mapiranjem na atributu ciljnog objekta `altSecurityIdentities`.
+- Sadržati snažnu vezu sa ciljnim nalogom (na primer, the SID security extension), ili
+- Biti upareni sa snažnim, eksplicitnim mapiranjem na `altSecurityIdentities` atributu ciljnog objekta.
 
-Pouzdan pristup za održavanje persistencije je da se izda falsifikovani sertifikat povezan sa ukradenim Enterprise CA i zatim doda snažno eksplicitno mapiranje na žrtvinom principal-u:
+A reliable approach for persistence is to mint a forged certificate chained to the stolen Enterprise CA and then add a strong explicit mapping to the victim principal:
 ```powershell
 # Example: map a forged cert to a target account using Issuer+Serial (strong mapping)
 $Issuer  = 'DC=corp,DC=local,CN=CORP-DC-CA'           # reverse DN format expected by AD
@@ -57,14 +57,15 @@ $Map     = "X509:<I>$Issuer<SR>$SerialR"             # strong mapping format
 Set-ADUser -Identity 'victim' -Add @{altSecurityIdentities=$Map}
 ```
 Napomene
-- Ako možete kreirati forged certificates koji uključuju SID security extension, oni će se mapirati implicitno čak i pod Full Enforcement. U suprotnom, preferirajte eksplicitna snažna mapiranja. See [account-persistence](account-persistence.md) for more on explicit mappings.
-- Opoziv ovde ne pomaže braniteljima: forged certificates nisu poznati CA database i stoga ih nije moguće opozvati.
+- If you can craft forged certificates that include the SID security extension, those will map implicitly even under Full Enforcement. Otherwise, prefer explicit strong mappings. See
+[account-persistence](account-persistence.md) for more on explicit mappings.
+- Revocation does not help defenders here: forged certificates are unknown to the CA database and thus cannot be revoked.
 
 ## Trusting Rogue CA Certificates - DPERSIST2
 
-Objekat `NTAuthCertificates` je definisan da sadrži jedan ili više **CA certificates** u okviru svog `cacertificate` atributa, koji koristi Active Directory (AD). Proces verifikacije od strane **domain controller** uključuje proveru objekta `NTAuthCertificates` da li postoji unos koji odgovara **CA specified** u polju Issuer autentifikacione **certificate**. Autentifikacija se nastavlja ako se nađe podudaranje.
+The `NTAuthCertificates` object is defined to contain one or more **CA certificates** within its `cacertificate` attribute, which Active Directory (AD) utilizes. The verification process by the **domain controller** involves checking the `NTAuthCertificates` object for an entry matching the **CA specified** in the Issuer field of the authenticating **certificate**. Authentication proceeds if a match is found.
 
-Napadač može dodati self-signed CA certificate u objekat `NTAuthCertificates`, pod uslovom da ima kontrolu nad ovim AD objektom. Obično samo članovi grupe **Enterprise Admin**, zajedno sa **Domain Admins** ili **Administrators** u **forest root’s domain**, imaju dozvolu da modifikuju ovaj objekat. Mogu izmeniti objekat `NTAuthCertificates` koristeći `certutil.exe` komandom `certutil.exe -dspublish -f C:\Temp\CERT.crt NTAuthCA`, ili koristeći [**PKI Health Tool**](https://docs.microsoft.com/en-us/troubleshoot/windows-server/windows-security/import-third-party-ca-to-enterprise-ntauth-store#method-1---import-a-certificate-by-using-the-pki-health-tool).
+A self-signed CA certificate can be added to the `NTAuthCertificates` object by an attacker, provided they have control over this AD object. Normally, only members of the **Enterprise Admin** group, along with **Domain Admins** or **Administrators** in the **forest root’s domain**, are granted permission to modify this object. They can edit the `NTAuthCertificates` object using `certutil.exe` with the command `certutil.exe -dspublish -f C:\Temp\CERT.crt NTAuthCA`, or by employing the [**PKI Health Tool**](https://docs.microsoft.com/en-us/troubleshoot/windows-server/windows-security/import-third-party-ca-to-enterprise-ntauth-store#method-1---import-a-certificate-by-using-the-pki-health-tool).
 
 Additional helpful commands for this technique:
 ```bash
@@ -77,34 +78,34 @@ certutil -enterprise -delstore NTAuth <Thumbprint>
 certutil -dspublish -f C:\Temp\CERT.crt RootCA          # CN=Certification Authorities
 certutil -dspublish -f C:\Temp\CERT.crt CA               # CN=AIA
 ```
-Ova mogućnost je posebno relevantna kada se koristi zajedno sa ranije opisanim metodom koja uključuje ForgeCert za dinamičko generisanje sertifikata.
+Ova mogućnost je posebno relevantna kada se koristi zajedno sa prethodno opisanom metodom koja uključuje ForgeCert za dinamičko generisanje sertifikata.
 
 > Post-2025 mapping considerations: placing a rogue CA in NTAuth only establishes trust in the issuing CA. To use leaf certificates for logon when DCs are in **Full Enforcement**, the leaf must either contain the SID security extension or there must be a strong explicit mapping on the target object (for example, Issuer+Serial in `altSecurityIdentities`). See {{#ref}}account-persistence.md{{#endref}}.
 
-## Malicious Misconfiguration - DPERSIST3
+## Maliciozna pogrešna konfiguracija - DPERSIST3
 
-Mogućnosti za **persistence** putem **izmena security descriptor-a komponenti AD CS** su brojne. Izmene opisane u "[Domain Escalation](domain-escalation.md)" sekciji mogu biti zlonamerno sprovedene od strane napadača sa povišenim privilegijama. To uključuje dodavanje "control rights" (npr. `WriteOwner`/`WriteDACL`/itd.) osetljivim komponentama kao što su:
+Mogućnosti za **persistence** kroz izmene security descriptor-a AD CS komponenti su brojne. Izmene opisane u sekciji [Eskalacija domena](domain-escalation.md) mogu biti zlonamerno implementirane od strane napadača sa povišenim privilegijama. To uključuje dodavanje "control rights" (npr. `WriteOwner`/`WriteDACL`/itd.) osetljivim komponentama kao što su:
 
-- The **CA server’s AD computer** object
-- The **CA server’s RPC/DCOM server**
-- Any **descendant AD object or container** in **`CN=Public Key Services,CN=Services,CN=Configuration,DC=<DOMAIN>,DC=<COM>`** (for instance, the Certificate Templates container, Certification Authorities container, the NTAuthCertificates object, etc.)
-- **AD groups delegated rights to control AD CS** by default or by the organization (such as the built-in Cert Publishers group and any of its members)
+- **AD computer objekat CA servera**
+- **RPC/DCOM server CA servera**
+- Bilo koji **descendant AD object or container** u **`CN=Public Key Services,CN=Services,CN=Configuration,DC=<DOMAIN>,DC=<COM>`** (na primer, Certificate Templates container, Certification Authorities container, the `NTAuthCertificates` object, itd.)
+- **AD grupe kojima su dodeljena prava za kontrolu AD CS** po defaultu ili od strane organizacije (kao što je ugrađena Cert Publishers grupa i bilo koji od njenih članova)
 
-Primer zlonamerne implementacije bi uključivao napadača koji ima **povišene dozvole** u domenu i dodaje `WriteOwner` dozvolu na podrazumevani `User` certificate template, pri čemu je napadač subjekt za to pravo. Da bi iskoristio ovo, napadač bi prvo promenio ownership `User` template-a na sebe. Nakon toga, `mspki-certificate-name-flag` bi bio postavljen na **1** na template-u da omogući `ENROLLEE_SUPPLIES_SUBJECT`, dopuštajući korisniku da u zahtevu navede Subject Alternative Name. Zatim bi se napadač mogao **enroll-ovati** koristeći taj **template**, izabrati ime **domain administrator-a** kao alternativno ime, i iskoristiti dobijeni sertifikat za autentifikaciju kao DA.
+Primer zlonamerne implementacije bi uključivao napadača koji ima **elevated permissions** u domeni i dodaje dozvolu **`WriteOwner`** na podrazumevani `User` certificate template, sa napadačem postavljenim kao principal za to pravo. Da bi iskoristio ovo, napadač bi prvo promenio ownership `User` template-a na sebe. Nakon toga, `mspki-certificate-name-flag` bi bio postavljen na **1** na template-u da omogući **`ENROLLEE_SUPPLIES_SUBJECT`**, što dozvoljava korisniku da navede Subject Alternative Name u zahtevu. Zatim bi napadač mogao da se **enroll**-uje koristeći taj **template**, izabere ime domain administrator-a kao alternativni naziv i iskoristi pribavljeni sertifikat za autentifikaciju kao DA.
 
-Praktični parametri koje napadači mogu podesiti za dugoročnu persistenciju u domenu (vidi {{#ref}}domain-escalation.md{{#endref}} za kompletne detalje i detekciju):
+Praktične postavke koje napadači mogu podesiti za dugoročnu persistence u domenu (pogledajte {{#ref}}domain-escalation.md{{#endref}} za potpune detalje i detekciju):
 
-- CA policy flags koji dozvoljavaju SAN iz zahteva (npr. omogućavanje `EDITF_ATTRIBUTESUBJECTALTNAME2`). Ovo održava exploitable putanje slične ESC1.
-- Template DACL ili podešavanja koja dopuštaju izdavanje sposobno za autentifikaciju (npr. dodavanje Client Authentication EKU, omogućavanje `CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT`).
-- Kontrolisanje `NTAuthCertificates` objekta ili CA container-a da kontinuirano vrate rogue issuere ako branioci pokušaju čišćenje.
+- CA policy flags koje dozvoljavaju SAN iz zahtevaoca (npr. omogućavanje `EDITF_ATTRIBUTESUBJECTALTNAME2`). Ovo ostavlja ESC1-like puteve iskoristivim.
+- Template DACL ili podešavanja koja omogućavaju izdavanje sposobno za autentifikaciju (npr. dodavanje Client Authentication EKU, omogućavanje `CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT`).
+- Kontrolisanje `NTAuthCertificates` objekta ili CA kontejnera kako bi se kontinuirano ponovo uvozili rogue issuers ako branitelji pokušaju čišćenje.
 
 > [!TIP]
-> U ojačanim okruženjima nakon KB5014754, udruživanje ovih pogrešnih konfiguracija sa eksplicitnim jakim mapiranjima (`altSecurityIdentities`) osigurava da vaši izdata ili falsifikovani sertifikati ostanu upotrebljivi čak i kada DC-ovi primenjuju strong mapping.
+> U hardened okruženjima nakon KB5014754, kombinovanje ovih pogrešnih konfiguracija sa eksplicitnim snažnim mapiranjima (`altSecurityIdentities`) osigurava da vaši izdate ili falsifikovani sertifikati ostanu upotrebljivi čak i kada DC-ovi primenjuju strong mapping.
 
 
 
 ## References
 
-- Microsoft KB5014754 – Certificate-based authentication changes on Windows domain controllers (enforcement timeline and strong mappings). https://support.microsoft.com/en-au/topic/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers-ad2c23b0-15d8-4340-a468-4d4f3b188f16
-- Certipy – Command Reference and forge/auth usage. https://github.com/ly4k/Certipy/wiki/08-%E2%80%90-Command-Reference
+- Microsoft KB5014754 – Promene u autentifikaciji zasnovanoj na sertifikatima na Windows domain controller-ima (vremenski okvir primene i strong mappings). https://support.microsoft.com/en-au/topic/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers-ad2c23b0-15d8-4340-a468-4d4f3b188f16
+- Certipy – Komandni priručnik i upotreba forge/auth. https://github.com/ly4k/Certipy/wiki/08-%E2%80%90-Command-Reference
 {{#include ../../../banners/hacktricks-training.md}}
