@@ -785,7 +785,7 @@
   - [Windows Seh Overflow](binary-exploitation/stack-overflow/windows-seh-overflow.md)
 - [Array Indexing](binary-exploitation/array-indexing.md)
 - [Chrome Exploiting](binary-exploitation/chrome-exploiting.md)
-- [Integer Overflow](binary-exploitation/integer-overflow.md)
+- [Integer Overflow](binary-exploitation/integer-overflow-and-underflow.md)
 - [Format Strings](binary-exploitation/format-strings/README.md)
   - [Format Strings - Arbitrary Read Example](binary-exploitation/format-strings/format-strings-arbitrary-read-example.md)
   - [Format Strings Template](binary-exploitation/format-strings/format-strings-template.md)
