@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-> [!WARNING] > **JuicyPotato doesn't work** on Windows Server 2019 and Windows 10 build 1809 onwards. However, [**PrintSpoofer**](https://github.com/itm4n/PrintSpoofer)**,** [**RoguePotato**](https://github.com/antonioCoco/RoguePotato)**,** [**SharpEfsPotato**](https://github.com/bugch3ck/SharpEfsPotato) can be used to **leverage the same privileges and gain `NT AUTHORITY\SYSTEM`** level access. _**Check:**_
+> [!WARNING] > JuicyPotato is legacy. It generally works on Windows versions up to Windows 10 1803 / Windows Server 2016. Microsoft changes shipped starting in Windows 10 1809 / Server 2019 broke the original technique. For those builds and newer, consider modern alternatives such as PrintSpoofer, RoguePotato, SharpEfsPotato/EfsPotato, GodPotato and others. See the page below for up-to-date options and usage.
 
 
 {{#ref}}
@@ -14,6 +14,11 @@ roguepotato-and-printspoofer.md
 _A sugared version of_ [_RottenPotatoNG_](https://github.com/breenmachine/RottenPotatoNG)_, with a bit of juice, i.e. **another Local Privilege Escalation tool, from a Windows Service Accounts to NT AUTHORITY\SYSTEM**_
 
 #### You can download juicypotato from [https://ci.appveyor.com/project/ohpe/juicy-potato/build/artifacts](https://ci.appveyor.com/project/ohpe/juicy-potato/build/artifacts)
+
+### Compatibility quick notes
+
+- Works reliably up to Windows 10 1803 and Windows Server 2016 when the current context has SeImpersonatePrivilege or SeAssignPrimaryTokenPrivilege.
+- Broken by Microsoft hardening in Windows 10 1809 / Windows Server 2019 and later. Prefer the alternatives linked above for those builds.
 
 ### Summary <a href="#summary" id="summary"></a>
 
@@ -81,6 +86,29 @@ The actual solution is to protect sensitive accounts and applications which run 
 
 From: [http://ohpe.it/juicy-potato/](http://ohpe.it/juicy-potato/)
 
+## JuicyPotatoNG (2022+)
+
+JuicyPotatoNG re-introduces a JuicyPotato-style local privilege escalation on modern Windows by combining:
+- DCOM OXID resolution to a local RPC server on a chosen port, avoiding the old hardcoded 127.0.0.1:6666 listener.
+- An SSPI hook to capture and impersonate the inbound SYSTEM authentication without requiring RpcImpersonateClient, which also enables CreateProcessAsUser when only SeAssignPrimaryTokenPrivilege is present.
+- Tricks to satisfy DCOM activation constraints (e.g., the former INTERACTIVE-group requirement when targeting PrintNotify / ActiveX Installer Service classes).
+
+Important notes (evolving behavior across builds):
+- September 2022: Initial technique worked on supported Windows 10/11 and Server targets using the “INTERACTIVE trick”.
+- January 2023 update from the authors: Microsoft later blocked the INTERACTIVE trick. A different CLSID ({A9819296-E5B3-4E67-8226-5E72CE9E1FB7}) restores exploitation but only on Windows 11 / Server 2022 according to their post.
+
+Basic usage (more flags in the help):
+
+```
+JuicyPotatoNG.exe -t * -p "C:\Windows\System32\cmd.exe" -a "/c whoami"  
+# Useful helpers:  
+#  -b  Bruteforce all CLSIDs (testing only; spawns many processes)  
+#  -s  Scan for a COM port not filtered by Windows Defender Firewall  
+#  -i  Interactive console (only with CreateProcessAsUser)
+```
+
+If you’re targeting Windows 10 1809 / Server 2019 where classic JuicyPotato is patched, prefer the alternatives linked at the top (RoguePotato, PrintSpoofer, EfsPotato/GodPotato, etc.). NG may be situational depending on build and service state.
+
 ## Examples
 
 Note: Visit [this page](https://ohpe.it/juicy-potato/CLSID/) for a list of CLSIDs to try.
@@ -114,10 +142,7 @@ c:\Users\Public>
 
 Oftentimes, the default CLSID that JuicyPotato uses **doesn't work** and the exploit fails. Usually, it takes multiple attempts to find a **working CLSID**. To get a list of CLSIDs to try for a specific operating system, you should visit this page:
 
-
-{{#ref}}
-https://ohpe.it/juicy-potato/CLSID/
-{{#endref}}
+- [https://ohpe.it/juicy-potato/CLSID/](https://ohpe.it/juicy-potato/CLSID/)
 
 ### **Checking CLSIDs**
 
@@ -132,5 +157,6 @@ Then download [test_clsid.bat ](https://github.com/ohpe/juicy-potato/blob/master
 ## References
 
 - [https://github.com/ohpe/juicy-potato/blob/master/README.md](https://github.com/ohpe/juicy-potato/blob/master/README.md)
+- [Giving JuicyPotato a second chance: JuicyPotatoNG (decoder.it)](https://decoder.cloud/2022/09/21/giving-juicypotato-a-second-chance-juicypotatong/)
 
 {{#include ../../banners/hacktricks-training.md}}

