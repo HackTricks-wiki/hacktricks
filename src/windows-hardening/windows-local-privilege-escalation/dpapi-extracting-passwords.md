@@ -14,7 +14,7 @@ Moreover, these functions accepts also an **`entropy` parameter** which will als
 
 ### Users key generation
 
-The DPAPI generates a unique key (called **`pre-key`**) for each user based on their credentials. This key is derived from the user's password and other factors and the algorithm depends on the type of user but ends being a SHA1. For example, for domain users, **it depends on the HTLM hash of the user**.
+The DPAPI generates a unique key (called **`pre-key`**) for each user based on their credentials. This key is derived from the user's password and other factors and the algorithm depends on the type of user but ends being a SHA1. For example, for domain users, **it depends on the NTLM hash of the user**.
 
 This is specially interesting because if an attacker can obtain the user's password hash, they can:
 

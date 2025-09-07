@@ -80,6 +80,8 @@
   - [Bruteforce hash (few chars)](generic-methodologies-and-resources/python/bruteforce-hash-few-chars.md)
   - [Basic Python](generic-methodologies-and-resources/python/basic-python.md)
 - [Threat Modeling](generic-methodologies-and-resources/threat-modeling.md)
+- [Blockchain & Crypto](blockchain/blockchain-and-crypto-currencies/README.md)
+- [Lua Sandbox Escape](generic-methodologies-and-resources/lua/bypass-lua-sandboxes/README.md)
 
 # 🧙‍♂️ Generic Hacking
 
@@ -234,6 +236,7 @@
 - [Authentication Credentials Uac And Efs](windows-hardening/authentication-credentials-uac-and-efs.md)
 - [Checklist - Local Windows Privilege Escalation](windows-hardening/checklist-windows-privilege-escalation.md)
 - [Windows Local Privilege Escalation](windows-hardening/windows-local-privilege-escalation/README.md)
+  - [Abusing Auto Updaters And Ipc](windows-hardening/windows-local-privilege-escalation/abusing-auto-updaters-and-ipc.md)
   - [Arbitrary Kernel Rw Token Theft](windows-hardening/windows-local-privilege-escalation/arbitrary-kernel-rw-token-theft.md)
   - [Dll Hijacking](windows-hardening/windows-local-privilege-escalation/dll-hijacking.md)
   - [Abusing Tokens](windows-hardening/windows-local-privilege-escalation/privilege-escalation-abusing-tokens.md)
@@ -782,7 +785,7 @@
   - [Windows Seh Overflow](binary-exploitation/stack-overflow/windows-seh-overflow.md)
 - [Array Indexing](binary-exploitation/array-indexing.md)
 - [Chrome Exploiting](binary-exploitation/chrome-exploiting.md)
-- [Integer Overflow](binary-exploitation/integer-overflow.md)
+- [Integer Overflow](binary-exploitation/integer-overflow-and-underflow.md)
 - [Format Strings](binary-exploitation/format-strings/README.md)
   - [Format Strings - Arbitrary Read Example](binary-exploitation/format-strings/format-strings-arbitrary-read-example.md)
   - [Format Strings Template](binary-exploitation/format-strings/format-strings-template.md)
@@ -926,13 +929,4 @@
 - [Post Exploitation](todo/post-exploitation.md)
 - [Investment Terms](todo/investment-terms.md)
 - [Cookies Policy](todo/cookies-policy.md)
-
-
-
-  - [Readme](blockchain/blockchain-and-crypto-currencies/README.md)
-  - [Readme](macos-hardening/macos-security-and-privilege-escalation/mac-os-architecture/macos-ipc-inter-process-communication/README.md)
-  - [Readme](network-services-pentesting/1521-1522-1529-pentesting-oracle-listener/README.md)
-  - [Readme](pentesting-web/web-vulnerabilities-methodology/README.md)
-  - [Readme](reversing/cryptographic-algorithms/README.md)
-  - [Readme](reversing/reversing-tools/README.md)
-  - [Readme](windows-hardening/windows-local-privilege-escalation/privilege-escalation-abusing-tokens/README.md)
+  
