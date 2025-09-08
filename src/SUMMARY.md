@@ -494,6 +494,7 @@
 - [135, 593 - Pentesting MSRPC](network-services-pentesting/135-pentesting-msrpc.md)
 - [137,138,139 - Pentesting NetBios](network-services-pentesting/137-138-139-pentesting-netbios.md)
 - [139,445 - Pentesting SMB](network-services-pentesting/pentesting-smb/README.md)
+  - [Ksmbd Attack Surface And Fuzzing Syzkaller](network-services-pentesting/pentesting-smb/ksmbd-attack-surface-and-fuzzing-syzkaller.md)
   - [rpcclient enumeration](network-services-pentesting/pentesting-smb/rpcclient-enumeration.md)
 - [143,993 - Pentesting IMAP](network-services-pentesting/pentesting-imap.md)
 - [161,162,10161,10162/udp - Pentesting SNMP](network-services-pentesting/pentesting-snmp/README.md)
