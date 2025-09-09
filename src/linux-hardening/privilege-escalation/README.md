@@ -55,6 +55,13 @@ Tools that could help to search for kernel exploits are:
 [linux-exploit-suggester2.pl](https://github.com/jondonas/linux-exploit-suggester-2)\
 [linuxprivchecker.py](http://www.securitysift.com/download/linuxprivchecker.py) (execute IN victim,only checks exploits for kernel 2.x)
 
+New kernel exploit note:
+- POSIX CPU timers TOCTOU race (CVE-2025-38352): expiry vs deletion under task exit can corrupt timer state in kernels with CONFIG_POSIX_CPU_TIMERS_TASK_WORK=n. See details:
+
+{{#ref}}
+linux-kernel-exploitation/posix-cpu-timers-toctou-cve-2025-38352.md
+{{#endref}}
+
 Always **search the kernel version in Google**, maybe your kernel version is written in some kernel exploit and then you will be sure that this exploit is valid.
 
 ### CVE-2016-5195 (DirtyCow)
