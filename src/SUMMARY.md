@@ -37,6 +37,7 @@
   - [Mobile Phishing Malicious Apps](generic-methodologies-and-resources/phishing-methodology/mobile-phishing-malicious-apps.md)
   - [Phishing Files & Documents](generic-methodologies-and-resources/phishing-methodology/phishing-documents.md)
 - [Basic Forensic Methodology](generic-methodologies-and-resources/basic-forensic-methodology/README.md)
+  - [Adaptixc2 Config Extraction And Ttps](generic-methodologies-and-resources/basic-forensic-methodology/adaptixc2-config-extraction-and-ttps.md)
   - [Baseline Monitoring](generic-methodologies-and-resources/basic-forensic-methodology/file-integrity-monitoring.md)
   - [Anti-Forensic Techniques](generic-methodologies-and-resources/basic-forensic-methodology/anti-forensic-techniques.md)
   - [Docker Forensics](generic-methodologies-and-resources/basic-forensic-methodology/docker-forensics.md)
