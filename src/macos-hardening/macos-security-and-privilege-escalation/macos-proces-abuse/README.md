@@ -262,6 +262,18 @@ Note that executables compiled with **`pyinstaller`** won't use these environmen
 >
 > Even **root** will run this code when running python.
 
+### FreeBSD/PS5 ptrace RFI and vm_map PROT_EXEC bypass
+
+Technique leveraging FreeBSD internals with kernel R/W primitives to:
+- Patch ucred to grant debugger authority (ptrace/mdbg)
+- Flip vm_map_entry protections to obtain executable memory in user processes
+- Drive in-process execution via ptrace-based Remote Function Invocation (RFI)
+- Map and run arbitrary ELF payloads with a stager thread and clean detach
+
+{{#ref}}
+freebsd-ptrace-rfi-vm_map-prot_exec-bypass-ps5.md
+{{#endref}}
+
 ## Detection
 
 ### Shield
