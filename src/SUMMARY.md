@@ -182,6 +182,7 @@
   - [macOS Objective-C](macos-hardening/macos-security-and-privilege-escalation/macos-basic-objective-c.md)
   - [macOS Privilege Escalation](macos-hardening/macos-security-and-privilege-escalation/macos-privilege-escalation.md)
   - [macOS Process Abuse](macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/README.md)
+    - [Freebsd Ptrace Rfi Vm Map Prot Exec Bypass Ps5](macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/freebsd-ptrace-rfi-vm_map-prot_exec-bypass-ps5.md)
     - [macOS Dirty NIB](macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-dirty-nib.md)
     - [macOS Chromium Injection](macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-chromium-injection.md)
     - [macOS Electron Applications Injection](macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-electron-applications-injection.md)
