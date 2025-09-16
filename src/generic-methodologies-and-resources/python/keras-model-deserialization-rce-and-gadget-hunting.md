@@ -207,6 +207,53 @@ Repeat tests across codebases and formats (.keras vs legacy HDF5) to uncover reg
 - Consider running deserialization in a sandboxed, least-privileged environment without network egress and with restricted filesystem access.
 - Enforce allowlists/signatures for model sources and integrity checking where possible.
 
+## ML pickle import allowlisting for AI/ML models (Fickling)
+
+Many AI/ML model formats (PyTorch .pt/.pth/.ckpt, joblib/scikit-learn, older TensorFlow artifacts, etc.) embed Python pickle data. Attackers routinely abuse pickle GLOBAL imports and object constructors to achieve RCE or model swapping during load. Blacklist-based scanners often miss novel or unlisted dangerous imports.
+
+A practical fail-closed defense is to hook Python’s pickle deserializer and only allow a reviewed set of harmless ML-related imports during unpickling. Trail of Bits’ Fickling implements this policy and ships a curated ML import allowlist built from thousands of public Hugging Face pickles.
+
+Security model for “safe” imports (intuitions distilled from research and practice): imported symbols used by a pickle must simultaneously:
+- Not execute code or cause execution (no compiled/source code objects, shelling out, hooks, etc.)
+- Not get/set arbitrary attributes or items
+- Not import or obtain references to other Python objects from the pickle VM
+- Not trigger any secondary deserializers (e.g., marshal, nested pickle), even indirectly
+
+Enable Fickling’s protections as early as possible in process startup so that any pickle loads performed by frameworks (torch.load, joblib.load, etc.) are checked:
+
+```python
+import fickling
+# Sets global hooks on the stdlib pickle module
+fickling.hook.activate_safe_ml_environment()
+```
+
+Operational tips:
+- You can temporarily disable/re-enable the hooks where needed:
+
+```python
+fickling.hook.deactivate_safe_ml_environment()
+# ... load fully trusted files only ...
+fickling.hook.activate_safe_ml_environment()
+```
+
+- If a known-good model is blocked, extend the allowlist for your environment after reviewing the symbols:
+
+```python
+fickling.hook.activate_safe_ml_environment(also_allow=[
+    "package.subpackage.safe_symbol",
+    "another.safe.import",
+])
+```
+
+- Fickling also exposes generic runtime guards if you prefer more granular control:
+  - fickling.always_check_safety() to enforce checks for all pickle.load()
+  - with fickling.check_safety(): for scoped enforcement
+  - fickling.load(path) / fickling.is_likely_safe(path) for one-off checks
+
+- Prefer non-pickle model formats when possible (e.g., SafeTensors). If you must accept pickle, run loaders under least privilege without network egress and enforce the allowlist.
+
+This allowlist-first strategy demonstrably blocks common ML pickle exploit paths while keeping compatibility high. In ToB’s benchmark, Fickling flagged 100% of synthetic malicious files and allowed ~99% of clean files from top Hugging Face repos.
+
 ## References
 
 - [Hunting Vulnerabilities in Keras Model Deserialization (huntr blog)](https://blog.huntr.com/hunting-vulnerabilities-in-keras-model-deserialization)
@@ -215,5 +262,11 @@ Repeat tests across codebases and formats (.keras vs legacy HDF5) to uncover reg
 - [CVE-2025-1550 – Keras arbitrary module import (≤ 3.8)](https://nvd.nist.gov/vuln/detail/CVE-2025-1550)
 - [huntr report – arbitrary import #1](https://huntr.com/bounties/135d5dcd-f05f-439f-8d8f-b21fdf171f3e)
 - [huntr report – arbitrary import #2](https://huntr.com/bounties/6fcca09c-8c98-4bc5-b32c-e883ab3e4ae3)
+- [Trail of Bits blog – Fickling’s new AI/ML pickle file scanner](https://blog.trailofbits.com/2025/09/16/ficklings-new-ai/ml-pickle-file-scanner/)
+- [Fickling – Securing AI/ML environments (README)](https://github.com/trailofbits/fickling#securing-aiml-environments)
+- [Fickling pickle scanning benchmark corpus](https://github.com/trailofbits/fickling/tree/master/pickle_scanning_benchmark)
+- [Picklescan](https://github.com/mmaitre314/picklescan), [ModelScan](https://github.com/protectai/modelscan), [model-unpickler](https://github.com/goeckslab/model-unpickler)
+- [Sleepy Pickle attacks background](https://blog.trailofbits.com/2024/06/11/exploiting-ml-models-with-pickle-file-attacks-part-1/)
+- [SafeTensors project](https://github.com/safetensors/safetensors)
 
 {{#include ../../banners/hacktricks-training.md}}
