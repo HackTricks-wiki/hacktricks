@@ -725,6 +725,7 @@
   - [SOME - Same Origin Method Execution](pentesting-web/xss-cross-site-scripting/some-same-origin-method-execution.md)
   - [Sniff Leak](pentesting-web/xss-cross-site-scripting/sniff-leak.md)
   - [Steal Info JS](pentesting-web/xss-cross-site-scripting/steal-info-js.md)
+  - [Wasm Linear Memory Template Overwrite Xss](pentesting-web/xss-cross-site-scripting/wasm-linear-memory-template-overwrite-xss.md)
   - [XSS in Markdown](pentesting-web/xss-cross-site-scripting/xss-in-markdown.md)
 - [XSSI (Cross-Site Script Inclusion)](pentesting-web/xssi-cross-site-script-inclusion.md)
 - [XS-Search/XS-Leaks](pentesting-web/xs-search/README.md)
