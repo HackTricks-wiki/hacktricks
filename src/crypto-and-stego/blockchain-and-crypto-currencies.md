@@ -176,6 +176,14 @@ Transactions in Ethereum involve a sender and a recipient, which can be either u
 
 These practices and mechanisms are foundational for anyone looking to engage with cryptocurrencies while prioritizing privacy and security.
 
+## Smart Contract Security
+
+- Mutation testing to find blind spots in test suites:
+
+{{#ref}}
+../blockchain/smart-contract-security/testing-and-analysis/mutation-testing-with-slither.md
+{{#endref}}
+
 ## References
 
 - [https://en.wikipedia.org/wiki/Proof_of_stake](https://en.wikipedia.org/wiki/Proof_of_stake)
