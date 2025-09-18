@@ -931,3 +931,5 @@
 - [Post Exploitation](todo/post-exploitation.md)
 - [Investment Terms](todo/investment-terms.md)
 - [Cookies Policy](todo/cookies-policy.md)
+
+  - [Mutation Testing With Slither](blockchain/smart-contract-security/testing-and-analysis/mutation-testing-with-slither.md)
