@@ -542,6 +542,12 @@ Attackers now chain **LLM & voice-clone APIs** for fully personalised lures and 
 • Deploy **voice-biometric challenge phrases** for high-risk phone requests.  
 • Continuously simulate AI-generated lures in awareness programmes – static templates are obsolete.
 
+See also – agentic browsing abuse for credential phishing:
+
+{{#ref}}
+ai-agent-mode-phishing-abusing-hosted-agent-browsers.md
+{{#endref}}
+
 ---
 
 ## MFA Fatigue / Push Bombing Variant – Forced Reset
