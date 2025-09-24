@@ -1690,6 +1690,15 @@ Android rooting frameworks commonly hook a syscall to expose privileged kernel f
 android-rooting-frameworks-manager-auth-bypass-syscall-hook.md
 {{#endref}}
 
+## Android Binder kernel driver: stateful fuzzing and race reproduction (LKL)
+
+Binder IPC exposes a complex kernel state machine where cross-client sequencing and interleavings matter. To find and deterministically reproduce Binder LPEs (e.g., UAFs like CVE‑2020‑0423) build a stateful three‑actor harness on top of LKL, generate coherent binder_buffer_object groups, track per‑client state (buffer pointers for BC_FREE_BUFFER), and instrument Binder with schedule() near lock/unlock to explore races. Details and buildable PoCs here:
+
+
+{{#ref}}
+android-binder-kernel-fuzzing-lkl.md
+{{#endref}}
+
 ## Kernel Security Protections
 
 - [https://github.com/a13xp0p0v/kconfig-hardened-check](https://github.com/a13xp0p0v/kconfig-hardened-check)
