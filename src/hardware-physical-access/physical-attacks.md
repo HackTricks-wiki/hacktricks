@@ -52,6 +52,56 @@ Changing system binaries like **_sethc.exe_** or **_Utilman.exe_** with a copy o
 
 Devices like **Rubber Ducky** and **Teensyduino** serve as platforms for creating **bad USB** devices, capable of executing predefined payloads when connected to a target computer.
 
+#### Linux USB HID kernel info leak and KASLR bypass (CVE-2025-38494/38495)
+
+Recent bugs in the Linux HID core allow a malicious USB HID device to trigger an out-of-bounds read and disclose kernel memory over the USB link. Two issues are involved:
+
+- Validation bypass for certain raw HID request paths, allowing calls that skip the hid_hw_raw_request() wrapper and its length checks.
+- Report-ID sizing mismatch when a reserved Report ID byte is assumed but the buffer is allocated without accounting for it, leading to an integer underflow and length/size inconsistencies.
+
+Impact:
+
+- Up to ~64 KB of data from a small kzalloc(7, GFP_KERNEL) allocation can be leaked to the device over USB, revealing kernel heap contents, pointers and potentially defeating mitigations like KASLR. Related sanitizers reported OOB reads and infoleaks in usbhid_raw_request()/usb_start_wait_urb.
+- Other HID code paths may lead to more severe memory corruptions.
+
+Practical exploitation setup (high level):
+
+- Emulate a USB HID device and craft HID reports/requests that hit the vulnerable paths. The public PoC uses Raw Gadget on Linux to act as a device and receive leaked data from the host.
+- This is a physical-access and device-emulation attack surface: it applies when a system accepts new USB HID devices (including via VM USB passthrough).
+
+Hardening and detection:
+
+- Update the kernel. Fixes landed in the following upstream commits:
+  - HID: core: ensure the allocated report buffer can contain the reserved report ID (id 4f15ee98304b)
+  - HID: core: ensure __hid_request reserves the report ID as the first byte (id 0d0777ccaa2d)
+  - HID: core: do not bypass hid_hw_raw_request (id c2ca42f190b6)
+- Restrict raw HID access so untrusted users or processes cannot open /dev/hidrawN:
+  - Example udev rule to keep hidraw root-only:
+    ```
+    # /etc/udev/rules.d/99-hidraw-permissions.rules
+    SUBSYSTEM=="hidraw", MODE="0600", GROUP="root"
+    ```
+    Reload rules: `udevadm control --reload-rules && udevadm trigger`.
+  - Audit current exposure:
+    ```bash
+    ls -l /dev/hidraw*
+    for d in /dev/hidraw*; do echo "== $d =="; udevadm info -q all -n "$d" | sed -n '1,12p'; done
+    ```
+- Require explicit authorization for new USB devices or enforce a default-deny posture:
+  - usbcore.authorized_default=0 kernel parameter (or runtime via `/sys/module/usbcore/parameters/authorized_default` on some distros)
+  - Deploy USBGuard to allow-list devices:
+    ```bash
+    sudo apt-get install usbguard
+    sudo usbguard generate-policy -U | sudo tee /etc/usbguard/rules.conf
+    sudo systemctl enable --now usbguard
+    ```
+- In virtualized environments, avoid exposing host USB devices to sensitive VMs unless strictly required.
+
+References and PoC context:
+
+- Trigger and discussion with syzbot reports and fixes: https://github.com/xairy/kernel-exploits/tree/master/CVE-2025-38494
+- Raw Gadget device emulation required for the public trigger.
+
 ### Volume Shadow Copy
 
 Administrator privileges allow for the creation of copies of sensitive files, including the **SAM** file, through PowerShell.
@@ -116,5 +166,8 @@ After the tenth cycle the EC sets a flag that instructs the BIOS to wipe NVRAM a
 
 - [Pentest Partners – “Framework 13. Press here to pwn”](https://www.pentestpartners.com/security-blog/framework-13-press-here-to-pwn/)
 - [FrameWiki – Mainboard Reset Guide](https://framewiki.net/guides/mainboard-reset)
+- [xairy/kernel-exploits – CVE-2025-38494/38495 HID core info leak trigger](https://github.com/xairy/kernel-exploits/tree/master/CVE-2025-38494)
+- [KASAN/KMSAN bug reports (syzkaller) referenced by PoC](https://syzkaller.appspot.com/bug?extid=fbe9fff1374eefadffb9)
+- [HID: core fixes upstream (report-ID sizing, request validation, wrapper enforcement)](https://lore.kernel.org/linux-cve-announce/2025072818-CVE-2025-38494-63e4@gregkh/)
 
 {{#include ../banners/hacktricks-training.md}}

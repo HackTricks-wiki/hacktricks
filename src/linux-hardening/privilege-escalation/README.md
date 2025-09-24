@@ -57,6 +57,15 @@ Tools that could help to search for kernel exploits are:
 
 Always **search the kernel version in Google**, maybe your kernel version is written in some kernel exploit and then you will be sure that this exploit is valid.
 
+#### USB/HID-based kernel info leak useful for KASLR bypass (CVE-2025-38494/38495)
+
+On vulnerable Linux kernels, a malicious USB HID device can trigger HID-core bugs that cause an out-of-bounds read and disclose kernel memory (up to ~64 KB) over the USB connection. The leak can reveal kernel pointers and defeat KASLR, making subsequent local kernel exploits more reliable. This hinges on a validation bypass for raw HID requests and a report-ID sizing issue in HID report buffers. See details and hardening guidance here:
+
+{{#ref}}
+../../hardware-physical-access/physical-attacks.md
+{{#endref}}
+
+
 ### CVE-2016-5195 (DirtyCow)
 
 Linux Privilege Escalation - Linux Kernel <= 3.19.0-73.8
@@ -1736,5 +1745,6 @@ android-rooting-frameworks-manager-auth-bypass-syscall-hook.md
 - [0xdf – HTB Eureka (bash arithmetic injection via logs, overall chain)](https://0xdf.gitlab.io/2025/08/30/htb-eureka.html)
 - [GNU Bash Manual – BASH_ENV (non-interactive startup file)](https://www.gnu.org/software/bash/manual/bash.html#index-BASH_005fENV)
 - [0xdf – HTB Environment (sudo env_keep BASH_ENV → root)](https://0xdf.gitlab.io/2025/09/06/htb-environment.html)
+- [Linux HID validation-bypass and report-ID sizing info leak (CVE-2025-38494/38495) – trigger and discussion](https://github.com/xairy/kernel-exploits/tree/master/CVE-2025-38494)
 
 {{#include ../../banners/hacktricks-training.md}}
