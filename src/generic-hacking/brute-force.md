@@ -494,6 +494,12 @@ legba ssh --username admin --password '@/some/path/*' --ssh-auth-mode key --targ
 
 Some systems have known flaws in the random seed used to generate cryptographic material. This can result in a dramatically reduced keyspace which can be bruteforced with tools such as [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute). Pre-generated sets of weak keys are also available such as [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh).
 
+See also practical token prediction techniques for weak PRNGs:
+
+{{#ref}}
+prng-weaknesses-and-token-prediction.md
+{{#endref}}
+
 ### STOMP (ActiveMQ, RabbitMQ, HornetQ and OpenMQ)
 
 The STOMP text protocol is a widely used messaging protocol that **allows seamless communication and interaction with popular message queueing services** such as RabbitMQ, ActiveMQ, HornetQ, and OpenMQ. It provides a standardized and efficient approach to exchange messages and perform various messaging operations.
