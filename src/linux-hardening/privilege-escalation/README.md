@@ -886,6 +886,33 @@ This example, **based on HTB machine Admirer**, was **vulnerable** to **PYTHONPA
 sudo PYTHONPATH=/dev/shm/ /opt/scripts/admin_tasks.sh
 ```
 
+### BASH_ENV preserved via sudo env_keep → root shell
+
+If sudoers preserves `BASH_ENV` (e.g., `Defaults env_keep+="ENV BASH_ENV"`), you can leverage Bash’s non-interactive startup behavior to run arbitrary code as root when invoking an allowed command.
+
+- Why it works: For non-interactive shells, Bash evaluates `$BASH_ENV` and sources that file before running the target script. Many sudo rules allow running a script or a shell wrapper. If `BASH_ENV` is preserved by sudo, your file is sourced with root privileges.
+
+- Requirements:
+  - A sudo rule you can run (any target that invokes `/bin/bash` non-interactively, or any bash script).
+  - `BASH_ENV` present in `env_keep` (check with `sudo -l`).
+
+- PoC:
+
+```bash
+cat > /dev/shm/shell.sh <<'EOF'
+#!/bin/bash
+/bin/bash
+EOF
+chmod +x /dev/shm/shell.sh
+BASH_ENV=/dev/shm/shell.sh sudo /usr/bin/systeminfo   # or any permitted script/binary that triggers bash
+# You should now have a root shell
+```
+
+- Hardening:
+  - Remove `BASH_ENV` (and `ENV`) from `env_keep`, prefer `env_reset`.
+  - Avoid shell wrappers for sudo-allowed commands; use minimal binaries.
+  - Consider sudo I/O logging and alerting when preserved env vars are used.
+
 ### Sudo execution bypassing paths
 
 **Jump** to read other files or use **symlinks**. For example in sudoers file: _hacker10 ALL= (root) /bin/less /var/log/\*_
@@ -1707,6 +1734,7 @@ android-rooting-frameworks-manager-auth-bypass-syscall-hook.md
 - [https://vulmon.com/exploitdetails?qidtp=maillist_fulldisclosure\&qid=e026a0c5f83df4fd532442e1324ffa4f](https://vulmon.com/exploitdetails?qidtp=maillist_fulldisclosure&qid=e026a0c5f83df4fd532442e1324ffa4f)
 - [https://www.linode.com/docs/guides/what-is-systemd/](https://www.linode.com/docs/guides/what-is-systemd/)
 - [0xdf – HTB Eureka (bash arithmetic injection via logs, overall chain)](https://0xdf.gitlab.io/2025/08/30/htb-eureka.html)
-- [GNU Bash Reference Manual – Shell Arithmetic](https://www.gnu.org/software/bash/manual/bash.html#Shell-Arithmetic)
+- [GNU Bash Manual – BASH_ENV (non-interactive startup file)](https://www.gnu.org/software/bash/manual/bash.html#index-BASH_005fENV)
+- [0xdf – HTB Environment (sudo env_keep BASH_ENV → root)](https://0xdf.gitlab.io/2025/09/06/htb-environment.html)
 
 {{#include ../../banners/hacktricks-training.md}}
