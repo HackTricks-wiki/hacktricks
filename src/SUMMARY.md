@@ -103,6 +103,7 @@
 - [Checklist - Linux Privilege Escalation](linux-hardening/linux-privilege-escalation-checklist.md)
 - [Linux Privilege Escalation](linux-hardening/privilege-escalation/README.md)
   - [Android Rooting Frameworks Manager Auth Bypass Syscall Hook](linux-hardening/privilege-escalation/android-rooting-frameworks-manager-auth-bypass-syscall-hook.md)
+  - [Android Unisoc Engineermode Cmd Services Lpe](linux-hardening/privilege-escalation/android-unisoc-engineermode-cmd-services-lpe.md)
   - [Arbitrary File Write to Root](linux-hardening/privilege-escalation/write-to-root.md)
   - [Cisco - vmanage](linux-hardening/privilege-escalation/cisco-vmanage.md)
   - [Containerd (ctr) Privilege Escalation](linux-hardening/privilege-escalation/containerd-ctr-privilege-escalation.md)
