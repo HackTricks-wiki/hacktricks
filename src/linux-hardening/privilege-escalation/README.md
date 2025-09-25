@@ -1690,6 +1690,14 @@ Android rooting frameworks commonly hook a syscall to expose privileged kernel f
 android-rooting-frameworks-manager-auth-bypass-syscall-hook.md
 {{#endref}}
 
+## Android: Unisoc EngineerMode / cmd_services LPE
+
+Unisoc-based builds expose a root service (cmd_services) on the abstract socket @cmd_skt that authorizes a package whitelist including EngineerMode (com.sprd.engineermode). By chaining a System shell exposed by EngineerMode (CVE-2025-31710) with an authorized client (cli-pie), you can race-enable cmd_services and pivot System→root without disabling SELinux. A successor service (tool_service) may be always-on, removing the race.
+
+
+{{#ref}}
+android-unisoc-engineermode-cmd-services-lpe.md
+{{#endref}}
 ## Kernel Security Protections
 
 - [https://github.com/a13xp0p0v/kconfig-hardened-check](https://github.com/a13xp0p0v/kconfig-hardened-check)
