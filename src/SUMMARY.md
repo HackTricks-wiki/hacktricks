@@ -447,6 +447,7 @@
   - [NextJS](network-services-pentesting/pentesting-web/nextjs.md)
   - [Nginx](network-services-pentesting/pentesting-web/nginx.md)
   - [NodeJS Express](network-services-pentesting/pentesting-web/nodejs-express.md)
+  - [Sitecore](network-services-pentesting/pentesting-web/sitecore/README.md)
   - [PHP Tricks](network-services-pentesting/pentesting-web/php-tricks-esp/README.md)
     - [PHP - Useful Functions & disable_functions/open_basedir bypass](network-services-pentesting/pentesting-web/php-tricks-esp/php-useful-functions-disable_functions-open_basedir-bypass/README.md)
       - [disable_functions bypass - php-fpm/FastCGI](network-services-pentesting/pentesting-web/php-tricks-esp/php-useful-functions-disable_functions-open_basedir-bypass/disable_functions-bypass-php-fpm-fastcgi.md)
@@ -493,6 +494,7 @@
 - [135, 593 - Pentesting MSRPC](network-services-pentesting/135-pentesting-msrpc.md)
 - [137,138,139 - Pentesting NetBios](network-services-pentesting/137-138-139-pentesting-netbios.md)
 - [139,445 - Pentesting SMB](network-services-pentesting/pentesting-smb/README.md)
+  - [Ksmbd Attack Surface And Fuzzing Syzkaller](network-services-pentesting/pentesting-smb/ksmbd-attack-surface-and-fuzzing-syzkaller.md)
   - [rpcclient enumeration](network-services-pentesting/pentesting-smb/rpcclient-enumeration.md)
 - [143,993 - Pentesting IMAP](network-services-pentesting/pentesting-imap.md)
 - [161,162,10161,10162/udp - Pentesting SNMP](network-services-pentesting/pentesting-snmp/README.md)
@@ -929,4 +931,3 @@
 - [Post Exploitation](todo/post-exploitation.md)
 - [Investment Terms](todo/investment-terms.md)
 - [Cookies Policy](todo/cookies-policy.md)
-  
