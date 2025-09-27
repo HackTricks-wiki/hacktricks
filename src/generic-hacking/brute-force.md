@@ -646,15 +646,34 @@ john --wordlist=/usr/share/wordlists/rockyou.txt --format=NT file_NTLM.hashes
 hashcat -a 0 -m 1000 --username file_NTLM.hashes /usr/share/wordlists/rockyou.txt --potfile-path salida_NT.pot
 ```
 
-### Keepass
+### KeePass / KeePassXC (KDBX v4 Argon2)
+
+Modern KeePassXC databases (KDBX v4) often use an Argon2 KDF. Older keepass2john/john builds fail with “File version '40000' is currently not supported!”. Use an updated JohnTheRipper build (e.g., the snap package) to extract and crack.
 
 ```bash
-sudo apt-get install -y kpcli #Install keepass tools like keepass2john
-keepass2john file.kdbx > hash #The keepass is only using password
-keepass2john -k <file-password> file.kdbx > hash # The keepass is also using a file as a needed credential
-#The keepass can use a password and/or a file as credentials, if it is using both you need to provide them to keepass2john
-john --wordlist=/usr/share/wordlists/rockyou.txt hash
+# Install a recent JtR build (Ubuntu/Debian)
+sudo snap install john-the-ripper
+
+# Extract KDBX v4 (Argon2) hash
+john-the-ripper.keepass2john recovery.kdbx | tee recovery.kdbx.hash
+
+# Crack with a wordlist
+john-the-ripper recovery.kdbx.hash --wordlist=rockyou.txt
 ```
+
+Notes
+- If a key file is used as an additional factor, supply it to keepass2john with -k <keyfile>.
+- Hashcat does not support the JtR keepass2john Argon2 format; use JtR for Argon2‑KDF KDBX.
+
+After recovering the master password, you can enumerate entries from Linux without a GUI via KeePassXC CLI and feed results into spraying:
+
+```bash
+# Export entries (CSV) – prompts for the master password
+keepassxc-cli export --format csv recovery.kdbx > recovery.csv
+# Or, depending on packaging, the binary may be named keepassxc.cli
+keepassxc.cli export --format csv recovery.kdbx > recovery.csv
+```
+
 
 ### Keberoasting
 
@@ -878,6 +897,12 @@ Cracking Common Application Hashes
  1400 | SHA-256                                          | Raw Hash
  1700 | SHA-512                                          | Raw Hash
 ```
+
+## References
+
+- [John the Ripper (KeePass Argon2 support)](https://github.com/openwall/john)
+- [KeePassXC – CLI](https://keepassxc.org/)
+- [HTB Puppy: AD ACL abuse, KeePassXC Argon2 cracking, and DPAPI decryption to DC admin](https://0xdf.gitlab.io/2025/09/27/htb-puppy.html)
 
 {{#include ../banners/hacktricks-training.md}}
 

