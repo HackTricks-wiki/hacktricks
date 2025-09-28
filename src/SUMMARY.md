@@ -487,6 +487,7 @@
 - [88tcp/udp - Pentesting Kerberos](network-services-pentesting/pentesting-kerberos-88/README.md)
   - [Harvesting tickets from Windows](network-services-pentesting/pentesting-kerberos-88/harvesting-tickets-from-windows.md)
   - [Harvesting tickets from Linux](network-services-pentesting/pentesting-kerberos-88/harvesting-tickets-from-linux.md)
+  - [Wsgi](network-services-pentesting/pentesting-web/wsgi.md)
 - [110,995 - Pentesting POP](network-services-pentesting/pentesting-pop.md)
 - [111/TCP/UDP - Pentesting Portmapper](network-services-pentesting/pentesting-rpcbind.md)
 - [113 - Pentesting Ident](network-services-pentesting/113-pentesting-ident.md)
@@ -931,3 +932,9 @@
 - [Post Exploitation](todo/post-exploitation.md)
 - [Investment Terms](todo/investment-terms.md)
 - [Cookies Policy](todo/cookies-policy.md)
+
+  - [Cve 2020 27950 Mach Msg Trailer T](binary-exploitation/ios-exploiting/CVE-2020-27950-mach_msg_trailer_t.md)
+  - [Cve 2021 30807 Iomobileframebuffer](binary-exploitation/ios-exploiting/CVE-2021-30807-IOMobileFrameBuffer.md)
+  - [Ios Corellium](binary-exploitation/ios-exploiting/ios-corellium.md)
+  - [Ios Example Heap Exploit](binary-exploitation/ios-exploiting/ios-example-heap-exploit.md)
+  - [Ios Physical Uaf Iosurface](binary-exploitation/ios-exploiting/ios-physical-uaf-iosurface.md)
