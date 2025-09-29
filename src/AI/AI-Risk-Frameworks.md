@@ -1,81 +1,102 @@
-# AI-Risiken
+# KI-Risiken
 
 {{#include ../banners/hacktricks-training.md}}
 
 ## OWASP Top 10 Machine Learning Schwachstellen
 
-Owasp hat die Top 10 Machine Learning Schwachstellen identifiziert, die AI-Systeme betreffen können. Diese Schwachstellen können zu verschiedenen Sicherheitsproblemen führen, einschließlich Datenvergiftung, Modellinversion und adversarialen Angriffen. Das Verständnis dieser Schwachstellen ist entscheidend für den Aufbau sicherer AI-Systeme.
+Owasp hat die Top‑10‑Machine‑Learning‑Schwachstellen identifiziert, die AI‑Systeme betreffen können. Diese Schwachstellen können zu verschiedenen Sicherheitsproblemen führen, darunter Data Poisoning, Model Inversion und adversariale Angriffe. Das Verständnis dieser Schwachstellen ist entscheidend, um sichere AI‑Systeme zu bauen.
 
-Für eine aktualisierte und detaillierte Liste der Top 10 Machine Learning Schwachstellen verweisen Sie auf das [OWASP Top 10 Machine Learning Vulnerabilities](https://owasp.org/www-project-machine-learning-security-top-10/) Projekt.
+Für eine aktualisierte und detaillierte Liste der Top‑10 Machine‑Learning‑Schwachstellen siehe das Projekt [OWASP Top 10 Machine Learning Vulnerabilities](https://owasp.org/www-project-machine-learning-security-top-10/).
 
-- **Eingabemanipulationsangriff**: Ein Angreifer fügt winzige, oft unsichtbare Änderungen an **eingehenden Daten** hinzu, sodass das Modell die falsche Entscheidung trifft.\
-*Beispiel*: Ein paar Farbspritzer auf einem Stoppschild täuschen ein selbstfahrendes Auto, sodass es ein Geschwindigkeitsbegrenzungsschild "sieht".
+- **Input Manipulation Attack**: Ein Angreifer fügt winzige, oft unsichtbare Änderungen an **eingehenden Daten** hinzu, sodass das Modell die falsche Entscheidung trifft.\
+*Beispiel*: Ein paar Farbspritzer auf einem Stoppschild veranlassen ein selbstfahrendes Auto dazu, ein Tempolimitschild "zu sehen".
 
-- **Datenvergiftungsangriff**: Der **Trainingssatz** wird absichtlich mit schlechten Proben kontaminiert, wodurch das Modell schädliche Regeln lernt.\
-*Beispiel*: Malware-Binärdateien werden in einem Antivirus-Trainingskorpus fälschlicherweise als "gutartig" gekennzeichnet, sodass ähnliche Malware später durchrutscht.
+- **Data Poisoning Attack**: Der **Trainingssatz** wird vorsätzlich mit fehlerhaften Beispielen verseucht, wodurch das Modell schädliche Regeln lernt.\
+*Beispiel*: Malware‑Binaries werden in einem Antivirus‑Trainingskorpus als "benign" falsch etikettiert, sodass ähnliche Malware später durchrutscht.
 
-- **Modellinversionsangriff**: Durch das Abfragen von Ausgaben erstellt ein Angreifer ein **Umkehrmodell**, das sensible Merkmale der ursprünglichen Eingaben rekonstruiert.\
-*Beispiel*: Rekonstruktion eines MRI-Bildes eines Patienten aus den Vorhersagen eines Krebsdiagnosemodells.
+- **Model Inversion Attack**: Durch Abfragen der Ausgaben baut ein Angreifer ein **Reverse‑Modell** auf, das sensible Merkmale der ursprünglichen Eingaben rekonstruiert.\
+*Beispiel*: Ein MRT‑Bild eines Patienten aus den Vorhersagen eines Krebs‑Erkennungsmodells rekonstruieren.
 
-- **Mitgliedschaftsinferenzangriff**: Der Angreifer testet, ob ein **bestimmter Datensatz** während des Trainings verwendet wurde, indem er Unterschiede in der Zuversicht erkennt.\
-*Beispiel*: Bestätigung, dass eine Banktransaktion einer Person in den Trainingsdaten eines Betrugserkennungsmodells erscheint.
+- **Membership Inference Attack**: Der Angreifer prüft, ob ein **bestimmter Datensatz** im Training verwendet wurde, indem er Unterschiede in der Confidence erkennt.\
+*Beispiel*: Bestätigen, dass eine Personstransaktion in den Trainingsdaten eines Betrugserkennungsmodells vorkommt.
 
-- **Modellklau**: Wiederholtes Abfragen ermöglicht es einem Angreifer, Entscheidungsgrenzen zu lernen und das **Verhalten des Modells zu klonen** (und IP).\
-*Beispiel*: Ernte von genügend Q&A-Paaren aus einer ML-as-a-Service-API, um ein nahezu gleichwertiges lokales Modell zu erstellen.
+- **Model Theft**: Wiederholte Abfragen erlauben einem Angreifer, Entscheidungsgrenzen zu lernen und **das Verhalten des Modells zu klonen** (und geistiges Eigentum).\
+*Beispiel*: Genug Q&A‑Paare von einer ML‑as‑a‑Service API sammeln, um ein nahezu äquivalentes lokales Modell zu erstellen.
 
-- **AI-Lieferkettenangriff**: Kompromittieren Sie jede Komponente (Daten, Bibliotheken, vortrainierte Gewichte, CI/CD) in der **ML-Pipeline**, um nachgelagerte Modelle zu korrumpieren.\
-*Beispiel*: Eine vergiftete Abhängigkeit auf einem Modell-Hub installiert ein mit einem Hintertür versehenes Sentiment-Analyse-Modell in vielen Apps.
+- **AI Supply‑Chain Attack**: Kompromittierung einer beliebigen Komponente (Daten, Bibliotheken, vortrainierte Gewichte, CI/CD) in der **ML‑Pipeline**, um nachgelagerte Modelle zu korrumpieren.\
+*Beispiel*: Eine vergiftete Abhängigkeit in einem model‑hub installiert ein mit Backdoor versehenes Sentiment‑Analyse‑Modell in vielen Apps.
 
-- **Transfer-Learning-Angriff**: Bösartige Logik wird in ein **vortrainiertes Modell** eingebaut und übersteht das Feintuning für die Aufgabe des Opfers.\
-*Beispiel*: Ein Vision-Backbone mit einem versteckten Trigger ändert weiterhin Labels, nachdem es für die medizinische Bildgebung angepasst wurde.
+- **Transfer Learning Attack**: Bösartige Logik wird in ein **pre‑trained model** eingebettet und überlebt das Fine‑Tuning für die Aufgabe des Opfers.\
+*Beispiel*: Ein Vision‑Backbone mit einem versteckten Trigger ändert trotz Anpassung für medizinische Bildgebung weiterhin Labels.
 
-- **Modellverzerrung**: Subtil voreingenommene oder falsch gekennzeichnete Daten **verschieben die Ausgaben des Modells**, um die Agenda des Angreifers zu begünstigen.\
-*Beispiel*: Einspeisung von "sauberen" Spam-E-Mails, die als Ham gekennzeichnet sind, sodass ein Spam-Filter ähnliche zukünftige E-Mails durchlässt.
+- **Model Skewing**: Subtil voreingenommene oder falsch gelabelte Daten **verschieben die Modell‑Ausgaben**, sodass sie die Agenda des Angreifers begünstigen.\
+*Beispiel*: "Saubere" Spam‑E‑Mails als ham labeln, damit ein Spam‑Filter ähnliche zukünftige E‑Mails durchlässt.
 
-- **Ausgabeintegritätsangriff**: Der Angreifer **ändert die Modellvorhersagen während des Transports**, nicht das Modell selbst, und täuscht nachgelagerte Systeme.\
-*Beispiel*: Ändern des "bösartigen" Urteils eines Malware-Klassifizierers in "gutartig", bevor die Datei-Quarantäne-Phase sie sieht.
+- **Output Integrity Attack**: Der Angreifer **verändert Modell‑Vorhersagen auf dem Weg**, nicht das Modell selbst, und täuscht nachgelagerte Systeme.\
+*Beispiel*: Ein Malware‑Classifier‑Verdikt von "malicious" auf "benign" umschreiben, bevor die Datei‑Quarantäne es sieht.
 
-- **Modellvergiftung** --- Direkte, gezielte Änderungen an den **Modellparametern** selbst, oft nach Erlangung von Schreibzugriff, um das Verhalten zu ändern.\
-*Beispiel*: Anpassen der Gewichte eines Betrugserkennungsmodells in der Produktion, sodass Transaktionen von bestimmten Karten immer genehmigt werden.
+- **Model Poisoning** --- Direkte, gezielte Änderungen an den **Modellparametern** selbst, oft nachdem Schreibzugriff erlangt wurde, um das Verhalten zu verändern.\
+*Beispiel*: Gewichte in einem Produktions‑Betrugserkennungsmodell so anpassen, dass Transaktionen bestimmter Karten immer genehmigt werden.
 
 
-## Google SAIF Risiken
+## Google SAIF Risks
 
-Google's [SAIF (Security AI Framework)](https://saif.google/secure-ai-framework/risks) skizziert verschiedene Risiken, die mit AI-Systemen verbunden sind:
+Googles [SAIF (Security AI Framework)](https://saif.google/secure-ai-framework/risks) beschreibt verschiedene Risiken, die mit AI‑Systemen verbunden sind:
 
-- **Datenvergiftung**: Böswillige Akteure ändern oder injizieren Trainings-/Feinabstimmungsdaten, um die Genauigkeit zu verringern, Hintertüren einzufügen oder Ergebnisse zu verzerren, was die Integrität des Modells über den gesamten Datenlebenszyklus untergräbt.
+- **Data Poisoning**: Böswillige Akteure verändern oder injizieren Trainings-/Tuning‑Daten, um die Genauigkeit zu verschlechtern, Backdoors einzupflanzen oder Ergebnisse zu verzerren und so die Modellintegrität über den gesamten Datenlebenszyklus zu untergraben.
 
-- **Unbefugte Trainingsdaten**: Das Einpflegen von urheberrechtlich geschützten, sensiblen oder unzulässigen Datensätzen schafft rechtliche, ethische und leistungsbezogene Haftungen, da das Modell aus Daten lernt, die es niemals verwenden durfte.
+- **Unauthorized Training Data**: Das Einlesen von urheberrechtlich geschützten, sensiblen oder nicht genehmigten Datensätzen schafft rechtliche, ethische und Performance‑Risiken, weil das Modell von Daten lernt, die nie verwendet werden durften.
 
-- **Manipulation der Modellquelle**: Manipulation des Modellcodes, der Abhängigkeiten oder der Gewichte in der Lieferkette oder durch Insider vor oder während des Trainings kann versteckte Logik einbetten, die auch nach dem Retraining bestehen bleibt.
+- **Model Source Tampering**: Supply‑Chain‑ oder Insider‑Manipulation von Modellcode, Abhängigkeiten oder Gewichten vor oder während des Trainings kann versteckte Logik einbetten, die auch nach Retraining bestehen bleibt.
 
-- **Übermäßige Datenverarbeitung**: Schwache Datenaufbewahrungs- und Governance-Kontrollen führen dazu, dass Systeme mehr persönliche Daten speichern oder verarbeiten, als notwendig, was die Exposition und das Compliance-Risiko erhöht.
+- **Excessive Data Handling**: Schwache Daten‑Aufbewahrungs‑ und Governance‑Kontrollen führen dazu, dass Systeme mehr personenbezogene Daten speichern oder verarbeiten als nötig, was die Exponierung und Compliance‑Risiken erhöht.
 
-- **Modell-Exfiltration**: Angreifer stehlen Modell-Dateien/Gewichte, was zu einem Verlust von geistigem Eigentum führt und Nachahmungsdienste oder Folgetransaktionen ermöglicht.
+- **Model Exfiltration**: Angreifer stehlen Modelfiles/Gewichte, was zum Verlust geistigen Eigentums führt und Nachahmungsdienste oder Folgeangriffe ermöglicht.
 
-- **Manipulation der Modellbereitstellung**: Gegner ändern Modellartefakte oder Bereitstellungsinfrastruktur, sodass das laufende Modell von der geprüften Version abweicht, was das Verhalten potenziell ändert.
+- **Model Deployment Tampering**: Gegner verändern Modellartefakte oder Serving‑Infrastruktur, sodass das laufende Modell von der geprüften Version abweicht und eventuell anderes Verhalten zeigt.
 
-- **Verweigerung des ML-Dienstes**: Überflutung von APIs oder das Senden von "Schwamm"-Eingaben kann Rechen-/Energieressourcen erschöpfen und das Modell offline nehmen, was klassischen DoS-Angriffen ähnelt.
+- **Denial of ML Service**: APIs überfluten oder "sponge" Inputs senden kann Compute/Energie erschöpfen und das Modell offline nehmen, analog klassischen DoS‑Angriffen.
 
-- **Modell-Rückentwicklung**: Durch das Ernten großer Mengen von Eingabe-Ausgabe-Paaren können Angreifer das Modell klonen oder destillieren, was Nachahmungsprodukte und angepasste adversariale Angriffe anheizt.
+- **Model Reverse Engineering**: Durch das Sammeln großer Mengen von Input‑Output‑Paaren können Angreifer das Modell klonen oder distillieren, was Nachahmungsprodukte und maßgeschneiderte adversariale Angriffe begünstigt.
 
-- **Unsichere integrierte Komponente**: Verwundbare Plugins, Agenten oder Upstream-Dienste ermöglichen es Angreifern, Code einzuschleusen oder Berechtigungen innerhalb der AI-Pipeline zu eskalieren.
+- **Insecure Integrated Component**: Verwundbare Plugins, Agents oder Upstream‑Services erlauben Angreifern, Code einzuschleusen oder Privilegien innerhalb der AI‑Pipeline zu eskalieren.
 
-- **Prompt-Injektion**: Das Erstellen von Eingabeaufforderungen (direkt oder indirekt), um Anweisungen zu schmuggeln, die die Systemabsicht überschreiben, sodass das Modell unbeabsichtigte Befehle ausführt.
+- **Prompt Injection**: Prompts (direkt oder indirekt) so gestalten, dass Anweisungen eingeschleust werden, die die System‑Intention außer Kraft setzen und das Modell unerwünschte Befehle ausführen lassen.
 
-- **Modell-Umgehung**: Sorgfältig gestaltete Eingaben bringen das Modell dazu, falsch zu klassifizieren, zu halluzinieren oder unerlaubte Inhalte auszugeben, was Sicherheit und Vertrauen untergräbt.
+- **Model Evasion**: Sorgfältig gestaltete Eingaben bringen das Modell dazu, falsch zu klassifizieren, zu halluzinieren oder unerlaubte Inhalte auszugeben und untergraben so Sicherheit und Vertrauen.
 
-- **Offenlegung sensibler Daten**: Das Modell gibt private oder vertrauliche Informationen aus seinen Trainingsdaten oder dem Benutzerkontext preis, was gegen Datenschutz und Vorschriften verstößt.
+- **Sensitive Data Disclosure**: Das Modell gibt private oder vertrauliche Informationen aus seinen Trainingsdaten oder dem Benutzerkontext preis, was Datenschutz und Regulierung verletzt.
 
-- **Inferenz sensibler Daten**: Das Modell schlussfolgert persönliche Attribute, die niemals bereitgestellt wurden, und schafft neue Datenschutzschäden durch Inferenz.
+- **Inferred Sensitive Data**: Das Modell leitet persönliche Attribute ab, die nie bereitgestellt wurden, und schafft so neue Datenschutzschäden durch Inferenz.
 
-- **Unsichere Modellausgabe**: Unsaniertes Antworten übermitteln schädlichen Code, Fehlinformationen oder unangemessene Inhalte an Benutzer oder nachgelagerte Systeme.
+- **Insecure Model Output**: Ungefilterte Antworten geben schädlichen Code, Fehlinformationen oder unangemessene Inhalte an Benutzer oder nachgelagerte Systeme weiter.
 
-- **Rogue-Aktionen**: Autonom integrierte Agenten führen unbeabsichtigte reale Operationen (Dateischreibvorgänge, API-Aufrufe, Käufe usw.) ohne angemessene Benutzeraufsicht aus.
+- **Rogue Actions**: Autonom integrierte Agents führen unbeabsichtigte reale Aktionen aus (Dateischreiben, API‑Aufrufe, Käufe etc.) ohne ausreichende Nutzeraufsicht.
 
 ## Mitre AI ATLAS Matrix
 
-Die [MITRE AI ATLAS Matrix](https://atlas.mitre.org/matrices/ATLAS) bietet einen umfassenden Rahmen zum Verständnis und zur Minderung von Risiken, die mit AI-Systemen verbunden sind. Sie kategorisiert verschiedene Angriffstechniken und Taktiken, die Gegner gegen AI-Modelle verwenden können, und auch, wie AI-Systeme verwendet werden können, um verschiedene Angriffe durchzuführen.
+Die [MITRE AI ATLAS Matrix](https://atlas.mitre.org/matrices/ATLAS) bietet einen umfassenden Rahmen, um Risiken im Zusammenhang mit AI‑Systemen zu verstehen und zu mindern. Sie kategorisiert verschiedene Angriffs‑Techniken und Taktiken, die Gegner gegen AI‑Modelle einsetzen können, sowie wie man AI‑Systeme für unterschiedliche Angriffe nutzen kann.
 
+
+## LLMJacking (Token Theft & Resale of Cloud-hosted LLM Access)
+
+Angreifer stehlen aktive Session‑Tokens oder Cloud‑API‑Credentials und rufen bezahlte, cloud‑gehostete LLMs ohne Autorisierung auf. Zugriff wird oft über Reverse‑Proxies weiterverkauft, die das Konto des Opfers "vorneweg" benutzen, z. B. oai‑reverse‑proxy‑Deployments. Konsequenzen sind finanzielle Verluste, Missbrauch von Modellen außerhalb der Richtlinien und Zuordnungen zum Opfer‑Tenant.
+
+TTPs:
+- Harvest tokens from infected developer machines or browsers; steal CI/CD secrets; buy leaked cookies.
+- Stand up a reverse proxy that forwards requests to the genuine provider, hiding the upstream key and multiplexing many customers.
+- Abuse direct base‑model endpoints to bypass enterprise guardrails and rate limits.
+
+Mitigations:
+- Bind tokens to device fingerprint, IP ranges, and client attestation; enforce short expirations and refresh with MFA.
+- Scope keys minimally (no tool access, read‑only where applicable); rotate on anomaly.
+- Terminate all traffic server‑side behind a policy gateway that enforces safety filters, per‑route quotas, and tenant isolation.
+- Monitor for unusual usage patterns (sudden spend spikes, atypical regions, UA strings) and auto‑revoke suspicious sessions.
+- Prefer mTLS or signed JWTs issued by your IdP over long‑lived static API keys.
+
+## References
+- [Unit 42 – The Risks of Code Assistant LLMs: Harmful Content, Misuse and Deception](https://unit42.paloaltonetworks.com/code-assistant-llms/)
+- [LLMJacking scheme overview – The Hacker News](https://thehackernews.com/2024/05/researchers-uncover-llmjacking-scheme.html)
+- [oai-reverse-proxy (reselling stolen LLM access)](https://gitgud.io/khanon/oai-reverse-proxy)
 
 {{#include ../banners/hacktricks-training.md}}
