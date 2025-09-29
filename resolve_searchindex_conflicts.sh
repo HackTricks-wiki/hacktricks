@@ -53,7 +53,7 @@ trap cleanup EXIT
 # Clone the repository to the temp directory
 echo "Cloning repository..."
 cd "$TEMP_DIR"
-gh repo clone "$GITHUB_REPOSITORY" . --branch "$HEAD_BRANCH"
+gh repo clone "$GITHUB_REPOSITORY" . -- --branch "$HEAD_BRANCH"
 
 # Configure git
 git config user.email "action@github.com"
