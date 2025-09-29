@@ -1,81 +1,102 @@
-# AI Rizici
+# AI rizici
 
 {{#include ../banners/hacktricks-training.md}}
 
-## OWASP Top 10 Ranljivosti Mašinskog Učenja
+## OWASP Top 10 ranjivosti mašinskog učenja
 
-Owasp je identifikovao top 10 ranljivosti mašinskog učenja koje mogu uticati na AI sisteme. Ove ranljivosti mogu dovesti do različitih bezbednosnih problema, uključujući trovanje podacima, inverziju modela i protivničke napade. Razumevanje ovih ranljivosti je ključno za izgradnju sigurnih AI sistema.
+Owasp je identifikovao top 10 ranjivosti mašinskog učenja koje mogu uticati na AI sisteme. Ove ranjivosti mogu dovesti do raznih bezbednosnih problema, uključujući data poisoning, model inversion i adversarial attacks. Razumevanje ovih ranjivosti je ključno za izgradnju sigurnih AI sistema.
 
-Za ažuriranu i detaljnu listu top 10 ranljivosti mašinskog učenja, pogledajte projekat [OWASP Top 10 Machine Learning Vulnerabilities](https://owasp.org/www-project-machine-learning-security-top-10/).
+For an updated and detailed list of the top 10 machine learning vulnerabilities, refer to the [OWASP Top 10 Machine Learning Vulnerabilities](https://owasp.org/www-project-machine-learning-security-top-10/) project.
 
-- **Napad Manipulacije Ulazom**: Napadač dodaje sitne, često nevidljive promene u **dolazne podatke** kako bi model doneo pogrešnu odluku.\
-*Primer*: Nekoliko mrlja boje na znak stopa prevari autonomni automobil da "vidi" znak za ograničenje brzine.
+- **Input Manipulation Attack**: Napadač dodaje male, često nevidljive izmene u **dolazne podatke** kako bi model doneo pogrešnu odluku.\
+*Primer*: Nekoliko tačkica boje na stop‑sign zbuni self‑driving automobil tako da "vidi" saobraćajni znak za ograničenje brzine.
 
-- **Napad Trovanja Podacima**: **Trening set** je namerno zagađen lošim uzorcima, učeći model štetnim pravilima.\
-*Primer*: Zlonamerni binarni fajlovi su pogrešno označeni kao "benigni" u antivirusnom trening skupu, omogućavajući sličnom zlonamernom softveru da prođe kasnije.
+- **Data Poisoning Attack**: **skup za treniranje** je namerno zagađen lošim uzorcima, učeći model štetnim pravilima.\
+*Primer*: Malware binarni fajlovi su pogrešno označeni kao "benign" u antivirus trening korpusu, što omogućava sličnom malware‑u da kasnije prolazi neprimećeno.
 
-- **Napad Inverzije Modela**: Istražujući izlaze, napadač gradi **obrnuti model** koji rekonstruiše osetljive karakteristike originalnih ulaza.\
-*Primer*: Ponovno kreiranje MRI slike pacijenta na osnovu predikcija modela za otkrivanje raka.
+- **Model Inversion Attack**: Ispitujući izlaze, napadač gradi **reverse model** koji rekonstruiše osetljive karakteristike originalnih ulaza.\
+*Primer*: Rekreiranje MRI slike pacijenta iz predikcija modela za detekciju raka.
 
-- **Napad Inference Članstva**: Protivnik testira da li je **određeni zapis** korišćen tokom treninga uočavajući razlike u poverenju.\
-*Primer*: Potvrđivanje da se bankovna transakcija osobe pojavljuje u podacima za obuku modela za otkrivanje prevara.
+- **Membership Inference Attack**: Adversar testira da li je **konkretan zapis** korišćen tokom treniranja uočavajući razlike u poverenju.\
+*Primer*: Potvrđivanje da se nečija bankarska transakcija pojavljuje u trening podacima modela za detekciju prevara.
 
-- **Krađa Modela**: Ponovnim postavljanjem upita napadač može naučiti granice odluka i **klonirati ponašanje modela** (i IP).\
-*Primer*: Prikupljanje dovoljno Q&A parova sa ML‑as‑a‑Service API-ja da bi se izgradio gotovo ekvivalentan lokalni model.
+- **Model Theft**: Ponavljanim upitima napadač uči granice odluke i **klonira ponašanje modela** (i IP).\
+*Primer*: Prikupljanje dovoljnih Q&A parova iz ML‑as‑a‑Service API‑ja da se izgradi gotovo ekvivalentan lokalni model.
 
-- **Napad na AI Lanac Snabdevanja**: Kompromitovanje bilo kojeg dela (podaci, biblioteke, unapred obučene težine, CI/CD) u **ML lancu** kako bi se korumpirali modeli nizvodno.\
-*Primer*: Zagađena zavisnost na model‑hub instalira model analize sentimenta sa zadnjim ulazom u mnogim aplikacijama.
+- **AI Supply‑Chain Attack**: Kompromitovanje bilo koje komponente (podataka, biblioteka, pre‑trained weights, CI/CD) u **ML pipeline** da bi se pokvarili downstream modeli.\
+*Primer*: Poisoned dependency na model‑hub instalira backdoored sentiment‑analysis model u mnoge aplikacije.
 
-- **Napad Prenosa Učenja**: Zlonamerna logika je usađena u **unapred obučeni model** i opstaje tokom fino podešavanja na zadatku žrtve.\
-*Primer*: Vizuelna osnova sa skrivenim okidačem i dalje menja oznake nakon što je prilagođena za medicinsko snimanje.
+- **Transfer Learning Attack**: Zlonamerna logika je ubačena u **pre‑trained model** i preživi fine‑tuning na zadatku žrtve.\
+*Primer*: Vision backbone sa skrivenim trigger‑om i dalje menja oznake nakon adaptacije za medicinsko snimanje.
 
-- **Iskrivljavanje Modela**: Suptilno pristrasni ili pogrešno označeni podaci **pomera izlaze modela** u korist agende napadača.\
-*Primer*: Umetanje "čistih" spam e-mailova označenih kao ham tako da spam filter propušta slične buduće e-mailove.
+- **Model Skewing**: Suptilno pristrasni ili pogrešno označeni podaci **pomera izlaze modela** da favorizuju napadačevu agendu.\
+*Primer*: Usporavanje "clean" spam mejlova označenih kao ham tako da spam filter pusti slične buduće mejlove.
 
-- **Napad na Integritet Izlaza**: Napadač **menja predikcije modela u tranzitu**, a ne sam model, obmanjujući nizvodne sisteme.\
-*Primer*: Promena "maliciozne" presude klasifikatora zlonamernog softvera u "benignu" pre nego što faza karantina fajla to vidi.
+- **Output Integrity Attack**: Napadač **menja predikcije modela u prenosu**, a ne sam model, zavaravajući downstream sisteme.\
+*Primer*: Preokretanje verdict‑a malware klasifikatora iz "malicious" u "benign" pre nego što faza karantinovanja fajla to vidi.
 
-- **Trovanje Modela** --- Direktne, ciljne promene u **parametrima modela** samih, često nakon sticanja pristupa za pisanje, kako bi se promenilo ponašanje.\
-*Primer*: Podešavanje težina na modelu za otkrivanje prevara u produkciji tako da transakcije sa određenih kartica uvek budu odobrene.
+- **Model Poisoning** --- Direktne, ciljne izmene u **parametrima modela** same po sebi, često nakon sticanja write pristupa, kako bi se promenilo ponašanje.\
+*Primer*: Podešavanje weights na fraud‑detection modelu u produkciji tako da transakcije sa određenih kartica uvek bivaju odobrene.
 
 
-## Google SAIF Rizici
+## Google SAIF rizici
 
-Googleov [SAIF (Security AI Framework)](https://saif.google/secure-ai-framework/risks) opisuje različite rizike povezane sa AI sistemima:
+Google's [SAIF (Security AI Framework)](https://saif.google/secure-ai-framework/risks) opisuje različite rizike povezane sa AI sistemima:
 
-- **Trovanje Podacima**: Zlonamerni akteri menjaju ili umetnuju podatke za obuku/podešavanje kako bi smanjili tačnost, implantirali zadnje ulaze ili iskrivili rezultate, potkopavajući integritet modela kroz ceo životni ciklus podataka.
+- **Data Poisoning**: Zlonamerni akteri menjaju ili ubacuju trening/tuning podatke da degradiraju tačnost, implantiraju backdoore ili iskrivljuju rezultate, potkopavajući integritet modela kroz ceo data‑lifecycle.
 
-- **Neovlašćeni Podaci za Obuku**: Uzimanje zaštićenih, osetljivih ili neodobrenih skupova podataka stvara pravne, etičke i performansne obaveze jer model uči iz podataka koje nikada nije smeo da koristi.
+- **Unauthorized Training Data**: Uvođenje zaštićenih autorskim pravima, osetljivih ili neodobrenih dataset‑ova stvara pravne, etičke i performansne obaveze jer model uči iz podataka koje nije smeo da koristi.
 
-- **Manipulacija Izvorom Modela**: Manipulacija kodom modela, zavisnostima ili težinama u lancu snabdevanja ili od strane insajdera pre ili tokom obuke može ugraditi skrivenu logiku koja opstaje čak i nakon ponovne obuke.
+- **Model Source Tampering**: Supply‑chain ili insider manipulacija model code, dependencies ili weights pre ili tokom treniranja može ugraditi skrivenu logiku koja opstaje i nakon retraining‑a.
 
-- **Prekomerno Rukovanje Podacima**: Slabi kontrole zadržavanja i upravljanja podacima dovode sisteme da čuvaju ili obrađuju više ličnih podataka nego što je potrebno, povećavajući izloženost i rizik od usklađenosti.
+- **Excessive Data Handling**: Slabe kontrole zadržavanja i upravljanja podacima dovode do toga da sistemi čuvaju ili procesuiraju više personalnih podataka nego što je potrebno, povećavajući izloženost i rizik od neusaglašenosti.
 
-- **Ekstrakcija Modela**: Napadači kradu fajlove/težine modela, uzrokujući gubitak intelektualne svojine i omogućavajući usluge imitacije ili naknadne napade.
+- **Model Exfiltration**: Napadači kradu model fajlove/weights, uzrokujući gubitak intelektualne svojine i omogućavajući copy‑cat servise ili naknadne napade.
 
-- **Manipulacija Implementacijom Modela**: Protivnici menjaju artefakte modela ili infrastrukturu za pružanje tako da se pokreće model razlikuje od odobrene verzije, potencijalno menjajući ponašanje.
+- **Model Deployment Tampering**: Adversar menja model artifacts ili serving infrastrukturu tako da pokrenuti model razlikuje se od verificirane verzije, potencijalno menjajući ponašanje.
 
-- **Odbijanje ML Usluge**: Preplavljivanje API-ja ili slanje "sponge" ulaza može iscrpiti računarske/energetske resurse i isključiti model, odražavajući klasične DoS napade.
+- **Denial of ML Service**: Poplava API‑ja ili slanje “sponge” inputa može iscrpeti compute/energiju i oboriti model offline, što podseća na klasične DoS napade.
 
-- **Obrnuto Inženjerstvo Modela**: Prikupljanjem velikog broja parova ulaz-izlaz, napadači mogu klonirati ili destilovati model, podstičući imitacione proizvode i prilagođene protivničke napade.
+- **Model Reverse Engineering**: Prikupljanjem velikog broja input‑output parova, napadači mogu klonirati ili distilovati model, podstičući imitacione proizvode i prilagođene adversarial napade.
 
-- **Neosigurana Integrisana Komponenta**: Ranjivi dodaci, agenti ili uzvodne usluge omogućavaju napadačima da umetnu kod ili eskaliraju privilegije unutar AI lanca.
+- **Insecure Integrated Component**: Ranljivi plugin‑ovi, agenti ili upstream servisi dopuštaju napadačima da ubace kod ili eskaliraju privilegije unutar AI pipeline‑a.
 
-- **Umetanje Upita**: Kreiranje upita (direktno ili indirektno) kako bi se prokrijumčarile instrukcije koje nadmašuju nameru sistema, čineći da model izvršava nepredviđene komande.
+- **Prompt Injection**: Konstruisanje promptova (direktno ili indirektno) da unesu instrukcije koje nadjačavaju sistemski intent, navodeći model da izvrši neželjene komande.
 
-- **Izbegavanje Modela**: Pažljivo dizajnirani ulazi pokreću model da pogrešno klasifikuje, halucinira ili izbacuje zabranjeni sadržaj, erodirajući bezbednost i poverenje.
+- **Model Evasion**: Pažljivo dizajnirani inputi izazivaju model da pogrešno klasifikuje, hallucinate ili iskaže zabranjeni sadržaj, urušavajući sigurnost i poverenje.
 
-- **Otkrivanje Osetljivih Podataka**: Model otkriva privatne ili poverljive informacije iz svojih podataka za obuku ili korisničkog konteksta, kršeći privatnost i propise.
+- **Sensitive Data Disclosure**: Model otkriva privatne ili poverljive informacije iz svojih trening podataka ili korisničkog konteksta, kršeći privatnost i regulative.
 
-- **Inferisani Osetljivi Podaci**: Model dedukuje lične atribute koji nikada nisu pruženi, stvarajući nove povrede privatnosti kroz inferenciju.
+- **Inferred Sensitive Data**: Model izvodi lične atribute koji nikada nisu bili dostavljeni, stvarajući nove štete po privatnost putem inferencije.
 
-- **Neosigurani Izlaz Modela**: Nečist odgovori prenose štetni kod, dezinformacije ili neprimeren sadržaj korisnicima ili nizvodnim sistemima.
+- **Insecure Model Output**: Nesanitizovani odgovori prosleđuju štetan kod, dezinformacije ili neprikladan sadržaj korisnicima ili downstream sistemima.
 
-- **Rogue Akcije**: Autonomno integrisani agenti izvršavaju nepredviđene operacije u stvarnom svetu (pisanje fajlova, API pozivi, kupovine itd.) bez adekvatnog nadzora korisnika.
+- **Rogue Actions**: Autonomno integrisani agenti izvršavaju neželjene real‑world operacije (pisanje fajlova, API pozivi, kupovine, itd.) bez adekvatnog nadzora korisnika.
 
-## Mitre AI ATLAS Matriks
+## Mitre AI ATLAS Matrix
 
-[MITRE AI ATLAS Matriks](https://atlas.mitre.org/matrices/ATLAS) pruža sveobuhvatan okvir za razumevanje i ublažavanje rizika povezanih sa AI sistemima. Kategorizuje različite tehnike napada i taktike koje protivnici mogu koristiti protiv AI modela, kao i kako koristiti AI sisteme za izvođenje različitih napada.
+The [MITRE AI ATLAS Matrix](https://atlas.mitre.org/matrices/ATLAS) pruža obuhvatni okvir za razumevanje i ublažavanje rizika povezanih sa AI sistemima. Kategorizuje različite tehnike napada i taktike koje adversari mogu koristiti protiv AI modela i takođe kako koristiti AI sisteme za izvođenje različitih napada.
 
+
+## LLMJacking (Token Theft & Resale of Cloud-hosted LLM Access)
+
+Napadači kradu aktivne session tokene ili cloud API kredencijale i pozivaju plaćene, cloud-hosted LLM‑ove bez autorizacije. Pristup se često preprodaje preko reverse proxy‑a koji stoje ispred naloga žrtve, npr. "oai-reverse-proxy" deploymenti. Posledice uključuju finansijski gubitak, zloupotrebu modela van politike i atribuciju na tenant‑a žrtve.
+
+TTPs:
+- Harvest tokens sa inficiranih developer mašina ili browsera; steal CI/CD secrets; buy leaked cookies.
+- Podizanje reverse proxy‑ja koji prosleđuje zahteve pravom provajderu, skrivajući upstream key i multiplexing mnogo korisnika.
+- Abuse direct base‑model endpoints da se zaobiđu enterprise guardrails i rate limits.
+
+Mitigations:
+- Bind tokens na device fingerprint, IP opsege i client attestation; enforce short expirations i refresh sa MFA.
+- Scope keys minimalno (no tool access, read‑only gde je primenljivo); rotate na anomaliju.
+- Terminate sav traffic server‑side iza policy gateway‑a koji sprovodi safety filters, per‑route kvote i tenant isolation.
+- Monitor za neuobičajene obrasce korišćenja (nagli skokovi potrošnje, netipične regije, UA stringovi) i auto‑revoke sumnjive sesije.
+- Prefer mTLS ili signed JWTs issued by your IdP over dugotrajnim statičkim API ključevima.
+
+## References
+- [Unit 42 – The Risks of Code Assistant LLMs: Harmful Content, Misuse and Deception](https://unit42.paloaltonetworks.com/code-assistant-llms/)
+- [LLMJacking scheme overview – The Hacker News](https://thehackernews.com/2024/05/researchers-uncover-llmjacking-scheme.html)
+- [oai-reverse-proxy (reselling stolen LLM access)](https://gitgud.io/khanon/oai-reverse-proxy)
 
 {{#include ../banners/hacktricks-training.md}}
