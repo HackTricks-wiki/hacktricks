@@ -78,4 +78,25 @@ Google's [SAIF (Security AI Framework)](https://saif.google/secure-ai-framework/
 The [MITRE AI ATLAS Matrix](https://atlas.mitre.org/matrices/ATLAS) provides a comprehensive framework for understanding and mitigating risks associated with AI systems. It categorizes various attack techniques and tactics that adversaries may use against AI models and also how to use AI systems to perform different attacks.
 
 
+## LLMJacking (Token Theft & Resale of Cloud-hosted LLM Access)
+
+Attackers steal active session tokens or cloud API credentials and invoke paid, cloud-hosted LLMs without authorization. Access is often resold via reverse proxies that front the victim’s account, e.g. "oai-reverse-proxy" deployments. Consequences include financial loss, model misuse outside policy, and attribution to the victim tenant.
+
+TTPs:
+- Harvest tokens from infected developer machines or browsers; steal CI/CD secrets; buy leaked cookies.
+- Stand up a reverse proxy that forwards requests to the genuine provider, hiding the upstream key and multiplexing many customers.
+- Abuse direct base-model endpoints to bypass enterprise guardrails and rate limits.
+
+Mitigations:
+- Bind tokens to device fingerprint, IP ranges, and client attestation; enforce short expirations and refresh with MFA.
+- Scope keys minimally (no tool access, read-only where applicable); rotate on anomaly.
+- Terminate all traffic server-side behind a policy gateway that enforces safety filters, per-route quotas, and tenant isolation.
+- Monitor for unusual usage patterns (sudden spend spikes, atypical regions, UA strings) and auto-revoke suspicious sessions.
+- Prefer mTLS or signed JWTs issued by your IdP over long-lived static API keys.
+
+## References
+- [Unit 42 – The Risks of Code Assistant LLMs: Harmful Content, Misuse and Deception](https://unit42.paloaltonetworks.com/code-assistant-llms/)
+- [LLMJacking scheme overview – The Hacker News](https://thehackernews.com/2024/05/researchers-uncover-llmjacking-scheme.html)
+- [oai-reverse-proxy (reselling stolen LLM access)](https://gitgud.io/khanon/oai-reverse-proxy)
+
 {{#include ../banners/hacktricks-training.md}}
