@@ -81,6 +81,7 @@
   - [Basic Python](generic-methodologies-and-resources/python/basic-python.md)
 - [Threat Modeling](generic-methodologies-and-resources/threat-modeling.md)
 - [Blockchain & Crypto](blockchain/blockchain-and-crypto-currencies/README.md)
+  - [Mutation Testing With Slither](blockchain/smart-contract-security/mutation-testing-with-slither.md)
 - [Lua Sandbox Escape](generic-methodologies-and-resources/lua/bypass-lua-sandboxes/README.md)
 
 # 🧙‍♂️ Generic Hacking
@@ -932,5 +933,3 @@
 - [Post Exploitation](todo/post-exploitation.md)
 - [Investment Terms](todo/investment-terms.md)
 - [Cookies Policy](todo/cookies-policy.md)
-
-  - [Mutation Testing With Slither](blockchain/smart-contract-security/testing-and-analysis/mutation-testing-with-slither.md)

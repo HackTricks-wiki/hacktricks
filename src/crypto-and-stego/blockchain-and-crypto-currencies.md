@@ -181,7 +181,7 @@ These practices and mechanisms are foundational for anyone looking to engage wit
 - Mutation testing to find blind spots in test suites:
 
 {{#ref}}
-../blockchain/smart-contract-security/testing-and-analysis/mutation-testing-with-slither.md
+../blockchain/smart-contract-security/mutation-testing-with-slither.md
 {{#endref}}
 
 ## References
