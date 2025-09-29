@@ -2,18 +2,18 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Ukurasa huu unatoa muhtasari wa mbinu za vitendo za unyakuzi dhidi ya pipeline ya deserialization ya modeli ya Keras, unaelezea ndani ya muundo wa .keras na uso wa shambulio, na unatoa zana za utafiti za kutafuta Uthibitisho wa Faili za Modeli (MFVs) na vifaa vya baada ya kurekebisha.
+Ukurasa huu unafupisha mbinu za vitendo za kutekeleza udanganyifu dhidi ya Keras model deserialization pipeline, unaeleza ndani ya muundo wa asili wa .keras na attack surface, na unatoa zana kwa mtafiti za kupata Model File Vulnerabilities (MFVs) na post-fix gadgets.
 
 ## .keras model format internals
 
-Faili ya .keras ni archive ya ZIP inayojumuisha angalau:
-- metadata.json – taarifa za jumla (mfano, toleo la Keras)
-- config.json – muundo wa modeli (uso wa shambulio wa msingi)
+A .keras file is a ZIP archive containing at least:
+- metadata.json – taarifa za jumla (km., toleo la Keras)
+- config.json – usanifu wa modelu (primary attack surface)
 - model.weights.h5 – uzito katika HDF5
 
-config.json inaendesha deserialization ya kurudi: Keras inaagiza moduli, inatatua madarasa/funzo na inajenga tena tabaka/vitu kutoka kwa kamusi zinazodhibitiwa na mshambuliaji.
+The config.json drives recursive deserialization: Keras imports modules, resolves classes/functions and reconstructs layers/objects from attacker-controlled dictionaries.
 
-Mfano wa kipande kwa kitu cha tabaka la Dense:
+Example snippet for a Dense layer object:
 ```json
 {
 "module": "keras.layers",
@@ -31,22 +31,22 @@ Mfano wa kipande kwa kitu cha tabaka la Dense:
 }
 }
 ```
-Deserialization inatekeleza:
-- Kuagiza moduli na kutatua alama kutoka kwa funguo za moduli/class_name
-- from_config(...) au mwito wa mjenzi na kwargs zinazodhibitiwa na mshambuliaji
-- Kurudi kwenye vitu vilivyo ndani (activations, initializers, constraints, nk.)
+Deserialization hufanya:
+- Kuagiza module na utatuzi wa alama kutoka kwa funguo module/class_name
+- from_config(...) au mwito wa constructor ukitumia kwargs zinazosimamiwa na mshambuliaji
+- Kurudia ndani ya vitu vilivyowekwa (activations, initializers, constraints, etc.)
 
-Kihistoria, hii ilifunua primitives tatu kwa mshambuliaji anayekunda config.json:
-- Udhibiti wa moduli zipi zinazoagizwa
-- Udhibiti wa ni madarasa/mifunction gani zinazoamuliwa
-- Udhibiti wa kwargs zinazopitishwa kwenye wajenzi/from_config
+Kihistoria, hili liliweka wazi primitives tatu kwa mshambuliaji anayejenga config.json:
+- Udhibiti wa modules zinazoagizwa
+- Udhibiti wa ni classes/functions zipi zinazotatuliwa
+- Udhibiti wa kwargs zinazopitishwa kwa constructors/from_config
 
 ## CVE-2024-3660 – Lambda-layer bytecode RCE
 
-Sababu ya msingi:
-- Lambda.from_config() ilitumia python_utils.func_load(...) ambayo inafanya base64-decode na kuita marshal.loads() kwenye bytes za mshambuliaji; Python unmarshalling inaweza kutekeleza msimbo.
+Chanzo la mzizi:
+- Lambda.from_config() ilitumia python_utils.func_load(...) ambayo hufasiri base64 na kuita marshal.loads() juu ya bytes za mshambuliaji; Python unmarshalling inaweza kutekeleza code.
 
-Wazo la kutumia (payload iliyo rahisishwa katika config.json):
+Exploit idea (simplified payload in config.json):
 ```json
 {
 "module": "keras.layers",
@@ -60,19 +60,19 @@ Wazo la kutumia (payload iliyo rahisishwa katika config.json):
 }
 }
 ```
-Mitigation:
-- Keras inatekeleza safe_mode=True kama chaguo la default. Mifano ya Python iliyohifadhiwa katika Lambda inazuia isipokuwa mtumiaji aondoe wazi kwa safe_mode=False.
+Kupunguza hatari:
+- Keras inaweka safe_mode=True kwa default. Serialized Python functions katika Lambda zimezuiliwa isipokuwa mtumiaji anaamua kuondoa kwa wazi kwa safe_mode=False.
 
-Notes:
-- Mifumo ya zamani (hifadhi za HDF5 za zamani) au misimbo ya zamani inaweza isitekeleze ukaguzi wa kisasa, hivyo mashambulizi ya “downgrade” yanaweza bado kutumika wakati waathirika wanatumia loaders za zamani.
+Vidokezo:
+- Legacy formats (older HDF5 saves) au codebases za zamani huenda zisitekeleze ukaguzi wa kisasa, hivyo mashambulizi ya aina ya “downgrade” bado yanaweza kutumika wakati waathirika wanapotumia loaders za zamani.
 
-## CVE-2025-1550 – Uagizaji wa moduli zisizo na mipaka katika Keras ≤ 3.8
+## CVE-2025-1550 – Uingizaji wa moduli yoyote kwa hiari katika Keras ≤ 3.8
 
-Root cause:
-- _retrieve_class_or_fn ilitumia importlib.import_module() isiyo na mipaka na nyuzi za moduli zinazodhibitiwa na mshambuliaji kutoka config.json.
-- Impact: Uagizaji wa kiholela wa moduli yoyote iliyosakinishwa (au moduli iliyopandikizwa na mshambuliaji kwenye sys.path). Msimbo wa wakati wa uagizaji unakimbia, kisha ujenzi wa kitu unafanyika na kwargs za mshambuliaji.
+Sababu kuu:
+- _retrieve_class_or_fn ilitumia importlib.import_module() isiyozuiliwa na module strings zinazosimamiwa na mshambuliaji kutoka config.json.
+- Athari: Uingizaji wa moduli yoyote iliyowekwa kwa hiari (au moduli iliyowekewa na mshambuliaji kwenye sys.path). Msimbo unaoendeshwa wakati wa import unaanzishwa, kisha ujenzi wa object hufanyika kwa kutumia kwargs za mshambuliaji.
 
-Exploit idea:
+Wazo la exploit:
 ```json
 {
 "module": "maliciouspkg",
@@ -80,16 +80,17 @@ Exploit idea:
 "config": {"arg": "val"}
 }
 ```
-Security improvements (Keras ≥ 3.9):
-- Module allowlist: imports restricted to official ecosystem modules: keras, keras_hub, keras_cv, keras_nlp
-- Safe mode default: safe_mode=True blocks unsafe Lambda serialized-function loading
-- Basic type checking: deserialized objects must match expected types
+Maboresho ya usalama (Keras ≥ 3.9):
 
-## Post-fix gadget surface inside allowlist
+- Orodha ya moduli iliyoruhusiwa: imports zimezuiliwa kwa moduli rasmi za ekosistimu: keras, keras_hub, keras_cv, keras_nlp
+- Mode salama ya chaguo-msingi: safe_mode=True inazuia loading ya serialized-function za Lambda zisizo salama
+- Uhakiki wa aina za msingi: vitu vilivyodeserialized lazima viendane na aina zinazotarajiwa
 
-Hata na allowlisting na safe mode, uso mpana unabaki kati ya Keras callables zinazoruhusiwa. Kwa mfano, keras.utils.get_file inaweza kupakua URLs zisizo na mipaka kwenye maeneo yanayoweza kuchaguliwa na mtumiaji.
+## Uso wa gadget wa post-fix ndani ya orodha iliyoruhusiwa
 
-Gadget kupitia Lambda inayorejelea kazi inayoruhusiwa (siyo serialized Python bytecode):
+Hata kwa kutumia orodha ya ruhusa na mode salama, uso mpana bado upo miongoni mwa callables za Keras zilizoruhusiwa. Kwa mfano, keras.utils.get_file inaweza kupakua URL yoyote kwenda kwenye maeneo yanayochaguliwa na mtumiaji.
+
+Gadget kupitia Lambda inayorejelea function iliyoruhusiwa (not serialized Python bytecode):
 ```json
 {
 "module": "keras.layers",
@@ -105,19 +106,19 @@ Gadget kupitia Lambda inayorejelea kazi inayoruhusiwa (siyo serialized Python by
 }
 }
 ```
-Important limitation:
-- Lambda.call() inajumuisha tensor ya ingizo kama hoja ya kwanza ya nafasi wakati inaita callable lengwa. Gadgets zilizochaguliwa zinapaswa kuvumilia hoja ya ziada ya nafasi (au kukubali *args/**kwargs). Hii inakandamiza kazi zipi zinaweza kutumika.
+Kizuizi muhimu:
+- Lambda.call() inaweka input tensor kama hoja ya kwanza ya positional wakati inapoita callable lengwa. Gadgets zilizochaguliwa lazima zivumilie positional arg ya ziada (au zikubali *args/**kwargs). Hii inaleta vikwazo kwa functions zinazoweza kutumika.
 
-Potential impacts of allowlisted gadgets:
-- Kupakua/kandika bila mipaka (kupanda njia, kuharibu usanidi)
-- Mkurugenzi wa mtandao/madhara kama ya SSRF kulingana na mazingira
-- Kuunganisha kwa utekelezaji wa msimbo ikiwa njia zilizokandikwa zitaagizwa/kuendeshwa baadaye au kuongezwa kwenye PYTHONPATH, au ikiwa kuna mahali pa kuandika ambapo utekelezaji unafanyika
+Madhara yanayowezekana ya allowlisted gadgets:
+- Kupakua/kuandika kwa hiari (path planting, config poisoning)
+- Network callbacks/SSRF-like effects zikitegemea environment
+- Kuunganisha hadi code execution ikiwa paths zilizoorodheshwa zitaimportiwa/ziendeshwa baadaye au zitaongezwa kwenye PYTHONPATH, au ikiwa kuna eneo linaloweza kuandikwa ambalo hufanya execution-on-write
 
-## Researcher toolkit
+## Zana za Mtafiti
 
-1) Ugunduzi wa gadget wa kimfumo katika moduli zilizoruhusiwa
+1) Ugunduzi wa gadgets kwa mfumo katika moduli zilizoruhusiwa
 
-Taja callables za wagombea katika keras, keras_nlp, keras_cv, keras_hub na uweke kipaumbele kwa wale wenye madhara ya faili/mtandao/mchakato/mazingira.
+Taja callables zinazowezekana katika keras, keras_nlp, keras_cv, keras_hub, na zipangilie kwa kipaumbele zile zenye madhara ya upande wa file/network/process/env.
 ```python
 import importlib, inspect, pkgutil
 
@@ -160,9 +161,9 @@ candidates.append(text)
 
 print("\n".join(sorted(candidates)[:200]))
 ```
-2) Upimaji wa moja kwa moja wa deserialization (hakuna archive ya .keras inahitajika)
+2) Upimaji wa deserialization ya moja kwa moja (hakuna .keras archive inayohitajika)
 
-Ingiza dicts zilizoundwa moja kwa moja kwenye deserializers za Keras ili kujifunza vigezo vinavyokubalika na kuangalia athari za upande.
+Weka dicts zilizotengenezwa moja kwa moja ndani ya Keras deserializers ili kujifunza params zinazokubalika na kuona madhara ya pembeni.
 ```python
 from keras import layers
 
@@ -178,24 +179,65 @@ cfg = {
 
 layer = layers.deserialize(cfg, safe_mode=True)  # Observe behavior
 ```
-3) Uchunguzi wa toleo tofauti na muundo
+3) Uchunguzi kwa matoleo tofauti na miundo
 
-Keras ipo katika misingi tofauti ya kanuni/mizani na muundo tofauti:
-- Keras iliyo ndani ya TensorFlow: tensorflow/python/keras (urithi, inatarajiwa kufutwa)
-- tf-keras: inatunzwa tofauti
-- Keras 3 ya Multi-backend (rasmi): ilianzisha .keras asilia
+Keras inapatikana katika codebases/eras mbalimbali zenye vizuizi na miundo tofauti:
+- TensorFlow built-in Keras: tensorflow/python/keras (legacy, slated for deletion)
+- tf-keras: maintained separately
+- Multi-backend Keras 3 (official): introduced native .keras
 
-Rudia majaribio kati ya misingi ya kanuni na muundo (.keras dhidi ya urithi HDF5) ili kugundua kurudi nyuma au ulinzi unaokosekana.
+Rudia majaribio katika codebases na miundo (.keras vs legacy HDF5) ili kugundua regressions au ukosefu wa vizuizi.
 
-## Mapendekezo ya kujihami
+## Mapendekezo ya ulinzi
 
-- Chukulia faili za modeli kama ingizo lisiloaminika. Pakua tu modeli kutoka vyanzo vinavyoaminika.
-- Hifadhi Keras kuwa wa kisasa; tumia Keras ≥ 3.9 ili kufaidika na orodha za ruhusa na ukaguzi wa aina.
-- Usisete safe_mode=False unapopakua modeli isipokuwa unamwamini kabisa faili hiyo.
-- Fikiria kuendesha deserialization katika mazingira yaliyofungwa, yenye mamlaka madogo bila kutoka mtandao na kwa ufikiaji wa mfumo wa faili ulio na mipaka.
-- Lazimisha orodha za ruhusa/saini kwa vyanzo vya modeli na ukaguzi wa uaminifu inapowezekana.
+- Tazama faili za modeli kama ingizo zisizoaminika. Pakia modeli tu kutoka vyanzo vinavyotegemewa.
+- Weka Keras imesasishwa; tumia Keras ≥ 3.9 ili kunufaika na allowlisting na type checks.
+- Usiweka safe_mode=False wakati wa kupakia modeli isipokuwa ukiwa unaamini kabisa faili.
+- Fikiria kuendesha deserialization katika mazingira yaliyofungiwa (sandboxed), yenye vibali vya chini kabisa bila network egress na na upatikanaji wa filesystem uliodhibitiwa.
+- Tekeleza allowlists/signatures kwa vyanzo vya modeli na ukaguzi wa uadilifu inapowezekana.
 
-## Marejeleo
+## ML pickle import allowlisting for AI/ML models (Fickling)
+
+Many AI/ML model formats (PyTorch .pt/.pth/.ckpt, joblib/scikit-learn, older TensorFlow artifacts, etc.) embed Python pickle data. Wadukuzi mara kwa mara wanatumia kwa mabaya pickle GLOBAL imports na object constructors ili kufanikisha RCE au model swapping wakati wa load. Blacklist-based scanners mara nyingi hukosa imports hatarishi mpya au zisizoorodheshwa.
+
+Ulinzi wa vitendo wa fail-closed ni ku-hook deserializer ya Python’s pickle na kuruhusu tu seti iliyopitiwa ya imports zisizo hatari zinazohusiana na ML wakati wa unpickling. Trail of Bits’ Fickling inatekeleza sera hii na inakuja na curated ML import allowlist iliyojengwa kutoka maelfu ya public Hugging Face pickles.
+
+Security model for “safe” imports (intuitions distilled from research and practice): imported symbols used by a pickle must simultaneously:
+- Not execute code or cause execution (no compiled/source code objects, shelling out, hooks, etc.)
+- Not get/set arbitrary attributes or items
+- Not import or obtain references to other Python objects from the pickle VM
+- Not trigger any secondary deserializers (e.g., marshal, nested pickle), even indirectly
+
+Enable Fickling’s protections as early as possible in process startup so that any pickle loads performed by frameworks (torch.load, joblib.load, etc.) are checked:
+```python
+import fickling
+# Sets global hooks on the stdlib pickle module
+fickling.hook.activate_safe_ml_environment()
+```
+Vidokezo vya uendeshaji:
+- Unaweza kuzima kwa muda/kuwezesha tena hooks pale inapohitajika:
+```python
+fickling.hook.deactivate_safe_ml_environment()
+# ... load fully trusted files only ...
+fickling.hook.activate_safe_ml_environment()
+```
+- Ikiwa model inayojulikana kuwa salama imezuiwa, panua allowlist kwa mazingira yako baada ya kupitia symbols:
+```python
+fickling.hook.activate_safe_ml_environment(also_allow=[
+"package.subpackage.safe_symbol",
+"another.safe.import",
+])
+```
+- Fickling pia inatoa kinga za runtime za jumla ikiwa unapendelea udhibiti wa kina zaidi:
+- fickling.always_check_safety() to enforce checks for all pickle.load()
+- with fickling.check_safety(): for scoped enforcement
+- fickling.load(path) / fickling.is_likely_safe(path) for one-off checks
+
+- Tumia fomati za modeli zisizo za pickle inapowezekana (mfano, SafeTensors). Ikiwa lazima upokee pickle, endesha loaders kwa idhini ndogo kabisa bila kuondoka kwa trafiki mtandaoni na utekeleze orodha ya kuruhusu.
+
+Mkakati huu wa orodha ya kuruhusu kwanza unaonyesha wazi kuzuia njia za kawaida za eksploit za pickle katika ML wakati ukibakiza kiwango kikubwa cha compatibility. Katika benchmark ya ToB, Fickling ilitambua 100% ya faili bandia za uharibifu na kuruhusu takriban 99% ya faili safi kutoka kwa repos maarufu za Hugging Face.
+
+## References
 
 - [Hunting Vulnerabilities in Keras Model Deserialization (huntr blog)](https://blog.huntr.com/hunting-vulnerabilities-in-keras-model-deserialization)
 - [Keras PR #20751 – Added checks to serialization](https://github.com/keras-team/keras/pull/20751)
@@ -203,5 +245,11 @@ Rudia majaribio kati ya misingi ya kanuni na muundo (.keras dhidi ya urithi HDF5
 - [CVE-2025-1550 – Keras arbitrary module import (≤ 3.8)](https://nvd.nist.gov/vuln/detail/CVE-2025-1550)
 - [huntr report – arbitrary import #1](https://huntr.com/bounties/135d5dcd-f05f-439f-8d8f-b21fdf171f3e)
 - [huntr report – arbitrary import #2](https://huntr.com/bounties/6fcca09c-8c98-4bc5-b32c-e883ab3e4ae3)
+- [Trail of Bits blog – Fickling’s new AI/ML pickle file scanner](https://blog.trailofbits.com/2025/09/16/ficklings-new-ai/ml-pickle-file-scanner/)
+- [Fickling – Securing AI/ML environments (README)](https://github.com/trailofbits/fickling#securing-aiml-environments)
+- [Fickling pickle scanning benchmark corpus](https://github.com/trailofbits/fickling/tree/master/pickle_scanning_benchmark)
+- [Picklescan](https://github.com/mmaitre314/picklescan), [ModelScan](https://github.com/protectai/modelscan), [model-unpickler](https://github.com/goeckslab/model-unpickler)
+- [Sleepy Pickle attacks background](https://blog.trailofbits.com/2024/06/11/exploiting-ml-models-with-pickle-file-attacks-part-1/)
+- [SafeTensors project](https://github.com/safetensors/safetensors)
 
 {{#include ../../banners/hacktricks-training.md}}
