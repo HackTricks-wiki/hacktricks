@@ -264,24 +264,6 @@ See also WebSocket tradecraft and tooling:
 ../../pentesting-web/websocket-attacks.md
 {{#endref}}
 
-### Open-directory APK staging & rotation
-
-Operators often keep multiple bank-themed loaders in browsable indexes for rapid rotation and reuse. This enables:
-- Fast swapping of filenames/brands without code changes in lures.
-- Seed lists for smishing/SEO lures that reference fresh filenames.
-
-Hunting tips:
-- Continuously scrape open indexes for APK filenames + hashes; diff over time to track rotations.
-- Correlate APK families by reused signing certs, package names, hardcoded endpoints, and string kits.
-
-### Infrastructure fingerprints for proactive blocking
-
-Common recurring traits worth risk-scoring when observed together:
-- Hosting: Alibaba, Scloud, Cloudflare fronting; geo often SG/ID; nginx servers.
-- Registrar/NS: Gname.com Pte. Ltd.; nameservers like share-dns[.]net; inexpensive/fast issuance CAs (e.g., R10, R11, WE1).
-- Content: page titles like “Identitas Kependudukan Digital- Apps on Google Play”; short domain-registration→first-DNS resolution deltas (< 12h) indicating quick operationalization.
-
-
 
 ## References
 
