@@ -1,19 +1,19 @@
-# Keras模型反序列化RCE和小工具搜索
+# Keras Model Deserialization RCE and Gadget Hunting
 
 {{#include ../../banners/hacktricks-training.md}}
 
-本页总结了针对Keras模型反序列化管道的实用利用技术，解释了本地.keras格式的内部结构和攻击面，并提供了一个研究人员工具包，用于查找模型文件漏洞（MFVs）和后修复小工具。
+本页总结了针对 Keras model deserialization 管道的实用利用技术，解释了原生 .keras 格式的内部结构和攻击面，并为研究人员提供用于查找 Model File Vulnerabilities (MFVs) 和 post-fix gadgets 的工具包。
 
-## .keras模型格式内部结构
+## .keras model 格式内部
 
-一个.keras文件是一个ZIP归档，至少包含：
-- metadata.json – 通用信息（例如，Keras版本）
-- config.json – 模型架构（主要攻击面）
-- model.weights.h5 – HDF5中的权重
+A .keras 文件是一个 ZIP 压缩包，至少包含：
+- metadata.json – 通用信息（例如，Keras 版本）
+- config.json – 模型架构（主要的攻击面）
+- model.weights.h5 – 以 HDF5 存储的 weights
 
-config.json驱动递归反序列化：Keras导入模块，解析类/函数，并从攻击者控制的字典中重建层/对象。
+config.json 驱动递归 deserialization：Keras 导入模块，解析 classes/functions，并从由攻击者控制的 dictionaries 中重建 layers/objects。
 
-Dense层对象的示例代码片段：
+Example snippet for a Dense layer object:
 ```json
 {
 "module": "keras.layers",
@@ -31,22 +31,22 @@ Dense层对象的示例代码片段：
 }
 }
 ```
-反序列化执行：
-- 从模块/class_name 键导入模块和符号解析
+Deserialization 执行：
+- 从 module/class_name 键导入模块并解析符号
 - 使用攻击者控制的 kwargs 调用 from_config(...) 或构造函数
-- 递归进入嵌套对象（激活、初始化器、约束等）
+- 递归进入嵌套对象（activations、initializers、constraints 等）
 
-历史上，这向攻击者构造 config.json 暴露了三个原语：
-- 控制导入哪些模块
-- 控制解析哪些类/函数
-- 控制传递给构造函数/from_config 的 kwargs
+历史上，这向构造 config.json 的攻击者暴露了三种原语：
+- 控制导入哪些 modules
+- 控制解析哪些 classes/functions
+- 控制传入 constructors/from_config 的 kwargs
 
-## CVE-2024-3660 – Lambda-layer 字节码 RCE
+## CVE-2024-3660 – Lambda-layer bytecode RCE
 
-根本原因：
-- Lambda.from_config() 使用 python_utils.func_load(...)，该函数对攻击者字节进行 base64 解码并调用 marshal.loads()；Python 反序列化可以执行代码。
+Root cause:
+- Lambda.from_config() 使用 python_utils.func_load(...)，该函数对攻击者的字节进行 base64-decodes 并调用 marshal.loads()；Python unmarshalling 可能会执行代码。
 
-利用思路（config.json 中的简化有效载荷）：
+Exploit idea (simplified payload in config.json):
 ```json
 {
 "module": "keras.layers",
@@ -60,19 +60,19 @@ Dense层对象的示例代码片段：
 }
 }
 ```
-缓解措施：
-- Keras 默认强制 safe_mode=True。除非用户明确选择 safe_mode=False，否则 Lambda 中的序列化 Python 函数会被阻止。
+缓解:
+- Keras enforces safe_mode=True by default. Serialized Python functions in Lambda are blocked unless a user explicitly opts out with safe_mode=False.
 
-注意事项：
-- 旧格式（较旧的 HDF5 保存）或旧代码库可能不执行现代检查，因此当受害者使用旧加载器时，“降级”风格的攻击仍然适用。
+Notes:
+- Legacy formats (older HDF5 saves) or older codebases may not enforce modern checks, so “downgrade” style attacks can still apply when victims use older loaders.
 
 ## CVE-2025-1550 – Keras ≤ 3.8 中的任意模块导入
 
-根本原因：
-- _retrieve_class_or_fn 使用了不受限制的 importlib.import_module()，并从 config.json 中获取攻击者控制的模块字符串。
-- 影响：可以任意导入任何已安装的模块（或攻击者植入的模块在 sys.path 上）。导入时代码运行，然后使用攻击者的 kwargs 进行对象构造。
+根本原因:
+- _retrieve_class_or_fn used unrestricted importlib.import_module() with attacker-controlled module strings from config.json.
+- 影响: 可以任意导入任何已安装的模块（或攻击者放置在 sys.path 上的模块）。导入时的代码会执行，然后以攻击者的 kwargs 构造对象。
 
-利用思路：
+利用思路:
 ```json
 {
 "module": "maliciouspkg",
@@ -80,16 +80,16 @@ Dense层对象的示例代码片段：
 "config": {"arg": "val"}
 }
 ```
-安全改进 (Keras ≥ 3.9):
-- 模块白名单：导入限制为官方生态模块：keras, keras_hub, keras_cv, keras_nlp
-- 安全模式默认：safe_mode=True 阻止不安全的 Lambda 序列化函数加载
-- 基本类型检查：反序列化对象必须匹配预期类型
+Security improvements (Keras ≥ 3.9):
+- Module allowlist: imports restricted to official ecosystem modules: keras, keras_hub, keras_cv, keras_nlp
+- Safe mode default: safe_mode=True blocks unsafe Lambda serialized-function loading
+- Basic type checking: deserialized objects must match expected types
 
-## 白名单内的后修复 gadget 表面
+## 允许列表内的后置 gadget 攻击面
 
-即使有白名单和安全模式，允许的 Keras 可调用对象之间仍然存在广泛的表面。例如，keras.utils.get_file 可以将任意 URL 下载到用户可选择的位置。
+即使启用了 allowlisting 和 safe mode，在被允许的 Keras 可调用对象中仍然存在广泛的攻击面。例如，keras.utils.get_file 可以将任意 URLs 下载到用户可选择的位置。
 
-通过引用允许函数的 Lambda 的 gadget（不是序列化的 Python 字节码）：
+通过引用被允许函数的 Lambda 的 gadget（不是序列化的 Python bytecode）：
 ```json
 {
 "module": "keras.layers",
@@ -105,19 +105,19 @@ Dense层对象的示例代码片段：
 }
 }
 ```
-重要限制：
-- Lambda.call() 在调用目标可调用对象时，将输入张量作为第一个位置参数添加。选择的 gadget 必须能够容忍额外的位置参数（或接受 *args/**kwargs）。这限制了可行函数的选择。
+重要限制:
+- Lambda.call() 在调用目标可调用对象时会将输入张量预置为第一个位置参数。所选的 gadgets 必须能容忍额外的位置参数（或接受 *args/**kwargs）。这会限制哪些函数可行。
 
-允许的 gadget 的潜在影响：
-- 任意下载/写入（路径植入，配置中毒）
-- 根据环境的网络回调/类似 SSRF 的效果
-- 如果写入的路径随后被导入/执行或添加到 PYTHONPATH，或者如果存在可写的执行时写入位置，则链式调用到代码执行
+Potential impacts of allowlisted gadgets:
+- 任意下载/写入（path planting, config poisoning）
+- 网络回调/取决于环境的 SSRF-like 效果
+- 如果写入的路径随后被导入/执行或被添加到 PYTHONPATH，或存在可写的 execution-on-write 位置，则可能链式导致代码执行
 
-## 研究人员工具包
+## Researcher toolkit
 
-1) 在允许的模块中系统地发现 gadget
+1) Systematic gadget discovery in allowed modules
 
-枚举 keras、keras_nlp、keras_cv、keras_hub 中的候选可调用对象，并优先考虑那些具有文件/网络/进程/环境副作用的对象。
+枚举 keras、keras_nlp、keras_cv、keras_hub 中的候选可调用对象，并优先考虑那些具有文件/网络/进程/环境 副作用的对象。
 ```python
 import importlib, inspect, pkgutil
 
@@ -160,9 +160,9 @@ candidates.append(text)
 
 print("\n".join(sorted(candidates)[:200]))
 ```
-2) 直接反序列化测试（不需要 .keras 存档）
+2) 直接反序列化测试 (no .keras archive needed)
 
-将精心制作的字典直接输入 Keras 反序列化器，以了解接受的参数并观察副作用。
+将精心构造的 dicts 直接输入到 Keras deserializers 中，以了解被接受的 params 并观察副作用。
 ```python
 from keras import layers
 
@@ -178,24 +178,65 @@ cfg = {
 
 layer = layers.deserialize(cfg, safe_mode=True)  # Observe behavior
 ```
-3) 跨版本探测和格式
+3) 跨版本探测与格式
 
 Keras 存在于多个代码库/时代，具有不同的保护措施和格式：
-- TensorFlow 内置 Keras: tensorflow/python/keras (遗留，计划删除)
-- tf-keras: 单独维护
-- 多后端 Keras 3 (官方): 引入原生 .keras
+- TensorFlow built-in Keras: tensorflow/python/keras (legacy, slated for deletion)
+- tf-keras: maintained separately
+- Multi-backend Keras 3 (official): introduced native .keras
 
-在代码库和格式之间重复测试 (.keras 与遗留 HDF5) 以发现回归或缺失的保护措施。
+在不同代码库和格式之间重复测试（.keras vs legacy HDF5），以发现回归或缺失的防护。
 
 ## 防御建议
 
 - 将模型文件视为不受信任的输入。仅从受信任的来源加载模型。
-- 保持 Keras 更新；使用 Keras ≥ 3.9 以受益于白名单和类型检查。
-- 加载模型时不要设置 safe_mode=False，除非您完全信任该文件。
-- 考虑在一个沙箱、最低特权的环境中运行反序列化，且没有网络出口并限制文件系统访问。
-- 在可能的情况下，强制执行模型来源和完整性检查的白名单/签名。
+- 保持 Keras 最新；使用 Keras ≥ 3.9 以受益于允许列表和类型检查。
+- 除非完全信任文件，否则不要在加载模型时将 safe_mode=False。
+- 考虑在沙箱化、最小权限的环境中运行反序列化，禁止网络出站并限制文件系统访问。
+- 在可能的情况下，对模型来源实施允许列表/签名和完整性校验。
 
-## 参考文献
+## 针对 AI/ML 模型的 ML pickle 导入允许列表 (Fickling)
+
+许多 AI/ML 模型格式（PyTorch .pt/.pth/.ckpt、joblib/scikit-learn、较旧的 TensorFlow 工件等）嵌入 Python pickle 数据。攻击者经常滥用 pickle GLOBAL imports 和对象构造器来在加载时实现 RCE 或模型替换。基于黑名单的扫描器往往会漏掉新出现的或未列入名单的危险导入。
+
+一种实用的失败封闭(fail-closed)防御是 hook Python 的 pickle 反序列化器，并在反序列化期间仅允许一组经审查的无害 ML 相关导入。Trail of Bits 的 Fickling 实现了这一策略，并随附了一个从数千个公开 Hugging Face pickle 构建的精选 ML 导入允许列表。
+
+“安全”导入的安全模型（基于研究和实践的直觉精炼）：pickle 使用的导入符号必须同时满足：
+- 不执行代码或导致执行（无编译/源代码对象、调用外部命令、hooks 等）
+- 不获取/设置任意属性或项
+- 不从 pickle VM 导入或获取对其他 Python 对象的引用
+- 不触发任何次级反序列化器（例如 marshal、嵌套的 pickle），即便是间接触发
+
+尽早在进程启动时启用 Fickling 的保护，以便框架（torch.load、joblib.load 等）执行的任何 pickle 加载都会被检查：
+```python
+import fickling
+# Sets global hooks on the stdlib pickle module
+fickling.hook.activate_safe_ml_environment()
+```
+操作提示：
+- 您可以在需要时临时禁用/重新启用这些 hooks：
+```python
+fickling.hook.deactivate_safe_ml_environment()
+# ... load fully trusted files only ...
+fickling.hook.activate_safe_ml_environment()
+```
+- 如果已知良好的模型被阻止，在审查符号后为你的环境扩展 allowlist：
+```python
+fickling.hook.activate_safe_ml_environment(also_allow=[
+"package.subpackage.safe_symbol",
+"another.safe.import",
+])
+```
+- Fickling 还提供通用的运行时防护，如果你需要更细粒度的控制：
+- fickling.always_check_safety() 用于对所有 pickle.load() 强制执行检查
+- with fickling.check_safety(): 用于在作用域内强制检查
+- fickling.load(path) / fickling.is_likely_safe(path) 用于一次性检查
+
+- 尽量优先使用非-pickle 的模型格式（例如，SafeTensors）。如果必须接受 pickle，请在最小权限下运行加载器，禁止网络出口并强制执行 allowlist。
+
+这一以 allowlist 为先的策略已被证明能阻止常见的 ML pickle 利用路径，同时保持很高的兼容性。在 ToB 的基准测试中，Fickling 标记了 100% 的合成恶意文件，并允许了来自顶级 Hugging Face 仓库约 99% 的干净文件。
+
+## References
 
 - [Hunting Vulnerabilities in Keras Model Deserialization (huntr blog)](https://blog.huntr.com/hunting-vulnerabilities-in-keras-model-deserialization)
 - [Keras PR #20751 – Added checks to serialization](https://github.com/keras-team/keras/pull/20751)
@@ -203,5 +244,11 @@ Keras 存在于多个代码库/时代，具有不同的保护措施和格式：
 - [CVE-2025-1550 – Keras arbitrary module import (≤ 3.8)](https://nvd.nist.gov/vuln/detail/CVE-2025-1550)
 - [huntr report – arbitrary import #1](https://huntr.com/bounties/135d5dcd-f05f-439f-8d8f-b21fdf171f3e)
 - [huntr report – arbitrary import #2](https://huntr.com/bounties/6fcca09c-8c98-4bc5-b32c-e883ab3e4ae3)
+- [Trail of Bits blog – Fickling’s new AI/ML pickle file scanner](https://blog.trailofbits.com/2025/09/16/ficklings-new-ai/ml-pickle-file-scanner/)
+- [Fickling – Securing AI/ML environments (README)](https://github.com/trailofbits/fickling#securing-aiml-environments)
+- [Fickling pickle scanning benchmark corpus](https://github.com/trailofbits/fickling/tree/master/pickle_scanning_benchmark)
+- [Picklescan](https://github.com/mmaitre314/picklescan), [ModelScan](https://github.com/protectai/modelscan), [model-unpickler](https://github.com/goeckslab/model-unpickler)
+- [Sleepy Pickle attacks background](https://blog.trailofbits.com/2024/06/11/exploiting-ml-models-with-pickle-file-attacks-part-1/)
+- [SafeTensors project](https://github.com/safetensors/safetensors)
 
 {{#include ../../banners/hacktricks-training.md}}
