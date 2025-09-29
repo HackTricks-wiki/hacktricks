@@ -190,7 +190,7 @@ These practices and mechanisms are foundational for anyone looking to engage wit
 If you are researching practical exploitation of DEXes and AMMs (Uniswap v4 hooks, rounding/precision abuse, flash‑loan amplified threshold‑crossing swaps), check:
 
 {{#ref}}
-../defi-amm-exploitation/README.md
+defi-amm-hook-precision.md
 {{#endref}}
 
 {{#include ../../banners/hacktricks-training.md}}

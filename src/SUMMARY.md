@@ -81,6 +81,7 @@
   - [Basic Python](generic-methodologies-and-resources/python/basic-python.md)
 - [Threat Modeling](generic-methodologies-and-resources/threat-modeling.md)
 - [Blockchain & Crypto](blockchain/blockchain-and-crypto-currencies/README.md)
+  - [Defi/AMM Hook Precision](blockchain/blockchain-and-crypto-currencies/defi-amm-hook-precision.md)
 - [Lua Sandbox Escape](generic-methodologies-and-resources/lua/bypass-lua-sandboxes/README.md)
 
 # 🧙‍♂️ Generic Hacking
@@ -886,7 +887,6 @@
 - [RC4 - Encrypt\&Decrypt](crypto-and-stego/rc4-encrypt-and-decrypt.md)
 - [Stego Tricks](crypto-and-stego/stego-tricks.md)
 - [Esoteric languages](crypto-and-stego/esoteric-languages.md)
-- [Blockchain & Crypto Currencies](crypto-and-stego/blockchain-and-crypto-currencies.md)
 
 # ✍️ TODO
 
@@ -930,5 +930,3 @@
 - [Investment Terms](todo/investment-terms.md)
 - [Cookies Policy](todo/cookies-policy.md)
   
-
-  - [Readme](blockchain/defi-amm-exploitation/README.md)
