@@ -837,9 +837,14 @@
   - [WWW2Exec - GOT/PLT](binary-exploitation/arbitrary-write-2-exec/aw2exec-got-plt.md)
   - [WWW2Exec - \_\_malloc_hook & \_\_free_hook](binary-exploitation/arbitrary-write-2-exec/aw2exec-__malloc_hook.md)
 - [Common Exploiting Problems](binary-exploitation/common-exploiting-problems.md)
-- [Linux kernel exploitation - toctou](binary-exploitation/linux-kernel-exploitation/posix-cpu-timers-toctou-cve-2025-38352.md)
 - [Windows Exploiting (Basic Guide - OSCP lvl)](binary-exploitation/windows-exploiting-basic-guide-oscp-lvl.md)
-- [iOS Exploiting](binary-exploitation/ios-exploiting.md)
+- [iOS Exploiting](binary-exploitation/ios-exploiting/README.md)
+  - [ios CVE-2020-27950-mach_msg_trailer_t](binary-exploitation/ios-exploiting/CVE-2020-27950-mach_msg_trailer_t.md)
+  - [ios CVE-2021-30807-IOMobileFrameBuffer](binary-exploitation/ios-exploiting/CVE-2021-30807-IOMobileFrameBuffer.md)
+  - [ios Corellium](binary-exploitation/ios-exploiting/ios-corellium.md)
+  - [ios Heap Exploitation](binary-exploitation/ios-exploiting/ios-example-heap-exploit.md)
+  - [ios Physical UAF - IOSurface](binary-exploitation/ios-exploiting/ios-physical-uaf-iosurface.md)
+
 
 # 🤖 AI
 - [AI Security](AI/README.md)
