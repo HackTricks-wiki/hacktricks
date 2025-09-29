@@ -137,7 +137,7 @@ jobs:
                 else
                   echo "Failed to merge PR #$pr_number: $pr_title"
                 fi
-              elif [ "$pr_mergeable" = "CONFLICTED" ]; then
+              elif [ "$pr_mergeable" = "CONFLICTED" ] || [ "$pr_mergeable" = "CONFLICTING" ]; then
                 echo "PR #$pr_number has conflicts. Attempting to resolve searchindex.js conflicts..."
                 
                 # Try to resolve conflicts by updating the branch
