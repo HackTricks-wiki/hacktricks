@@ -1,79 +1,102 @@
-# AI Risks
+# AI Risiko's
 
 {{#include ../banners/hacktricks-training.md}}
 
 ## OWASP Top 10 Machine Learning Vulnerabilities
 
-Owasp het die top 10 masjienleer kwesbaarhede geïdentifiseer wat AI stelsels kan beïnvloed. Hierdie kwesbaarhede kan lei tot verskeie sekuriteitskwessies, insluitend data vergiftiging, model inversie, en vyandige aanvalle. Om hierdie kwesbaarhede te verstaan is van kardinale belang vir die bou van veilige AI stelsels.
+Owasp het die top 10 machine learning kwesbaarhede geïdentifiseer wat AI‑stelsels kan raak. Hierdie kwesbaarhede kan tot verskeie veiligheidsondersoeke lei, insluitend data poisoning, model inversion, en adversarial attacks. Om hierdie kwesbaarhede te verstaan is noodsaaklik vir die bou van veilige AI‑stelsels.
 
-Vir 'n opgedateerde en gedetailleerde lys van die top 10 masjienleer kwesbaarhede, verwys na die [OWASP Top 10 Machine Learning Vulnerabilities](https://owasp.org/www-project-machine-learning-security-top-10/) projek.
+For an updated and detailed list of the top 10 machine learning vulnerabilities, refer to the [OWASP Top 10 Machine Learning Vulnerabilities](https://owasp.org/www-project-machine-learning-security-top-10/) project.
 
-- **Input Manipulation Attack**: 'n Aanvaller voeg klein, dikwels onsigbare veranderinge by aan **inkomende data** sodat die model die verkeerde besluit neem.\
-*Voorbeeld*: 'n Paar verfspikkels op 'n stop‑teken mislei 'n self‑ryende motor om 'n spoed‑limiet teken te "sien".
+- **Input Manipulation Attack**: ’n Aanvaller voeg klein, dikwels onsigbare veranderinge by die **inkomende data** sodat die model die verkeerde besluit neem.\
+*Voorbeeld*: ’n Paar kolle verf op ’n stop‑teken mislei ’n selfbesturende voertuig om ’n snelheidsbeperking‑teken te "sien".
 
-- **Data Poisoning Attack**: Die **opleidingstel** word doelbewus besoedel met slegte monsters, wat die model skadelike reëls leer.\
-*Voorbeeld*: Malware binaries word verkeerdelik as "benigne" gemerk in 'n antivirus opleidingskorpus, wat soortgelyke malware later laat deurkom.
+- **Data Poisoning Attack**: Die **training set** word doelbewus besmet met slegte monsters, wat die model skadelike reëls leer.\
+*Voorbeeld*: Malware‑binaries word verkeerdelik gemerk as "benign" in ’n antivirus‑opleidingskorpus, wat toelaat dat soortgelyke malware later deurglip.
 
-- **Model Inversion Attack**: Deur uitsette te ondersoek, bou 'n aanvaller 'n **omgekeerde model** wat sensitiewe kenmerke van die oorspronklike insette heropbou.\
-*Voorbeeld*: Herstel van 'n pasiënt se MRI-beeld uit 'n kanker-detektering model se voorspellings.
+- **Model Inversion Attack**: Deur uitgangswaardes te ondersoek bou ’n aanvaller ’n **omgekeerde model** wat sensitiewe kenmerke van die oorspronklike insette kan rekonstrueer.\
+*Voorbeeld*: Herstel van ’n pasiënt se MRI‑beeld uit ’n kanker‑deteksie‑model se voorspellings.
 
-- **Membership Inference Attack**: Die vyand toets of 'n **spesifieke rekord** tydens opleiding gebruik is deur vertrouensverskille op te spoor.\
-*Voorbeeld*: Bevestiging dat 'n persoon se banktransaksie in 'n bedrog-detektering model se opleidingsdata verskyn.
+- **Membership Inference Attack**: Die teenstander toets of ’n **spesifieke rekord** tydens opleiding gebruik is deur verskille in selfvertroue op te spoor.\
+*Voorbeeld*: Bevestig dat ’n persoon se banktransaksie in die opleidingdata van ’n fraudedetektiemodel voorkom.
 
-- **Model Theft**: Herhaalde navrae laat 'n aanvaller toe om besluitgrense te leer en **die model se gedrag te kloon** (en IP).\
-*Voorbeeld*: Versameling van genoeg Q&A pare van 'n ML‑as‑'n‑diens API om 'n naby‑gelyke plaaslike model te bou.
+- **Model Theft**: Deurlopende navrae laat ’n aanvaller toe om besluitgrense te leer en die **model se gedrag te kloon** (en IP).\
+*Voorbeeld*: Oes genoeg Q&A‑pare van ’n ML‑as‑a‑Service API om ’n naby‑ekwivalente plaaslike model te bou.
 
-- **AI Supply‑Chain Attack**: Kompromitteer enige komponent (data, biblioteke, vooropgeleide gewigte, CI/CD) in die **ML-pyplyn** om afwaartse modelle te korrupteer.\
-*Voorbeeld*: 'n Besoedelde afhanklikheid op 'n model-hub installeer 'n backdoored sentiment-analise model oor baie toepassings.
+- **AI Supply‑Chain Attack**: Kompromiseer enige komponent (data, libraries, pre‑trained weights, CI/CD) in die **ML pipeline** om afgeleë modelle te korrupteer.\
+*Voorbeeld*: ’n Gifagtige dependency op ’n model‑hub installeer ’n backdoored sentiment‑analise‑model oor baie toepassings.
 
-- **Transfer Learning Attack**: Kwaadwillige logika word in 'n **vooropgeleide model** geplant en oorleef fyn-afstemming op die slagoffer se taak.\
-*Voorbeeld*: 'n Visie-ruggraat met 'n versteekte sneller draai steeds etikette om nadat dit vir mediese beeldvorming aangepas is.
+- **Transfer Learning Attack**: Kwaadaardige logika word in ’n **pre‑trained model** geplant en oorleef fine‑tuning vir die slagoffer se taak.\
+*Voorbeeld*: ’n vision backbone met ’n verborge trigger keer nog steeds etikette om na aanpassing vir mediese beeldvorming.
 
-- **Model Skewing**: Subtiel bevooroordeelde of verkeerdelik gemerkte data **verskuif die model se uitsette** om die aanvaller se agenda te bevoordeel.\
-*Voorbeeld*: Inspuiting van "skoon" spam-e-posse wat as ham gemerk is sodat 'n spamfilter soortgelyke toekomstige e-posse deurlaat.
+- **Model Skewing**: Fyn bevooroordeelde of verkeerd gemerkte data **skuif die model se uitsette** om die aanvaller se agenda te bevoordeel.\
+*Voorbeeld*: Inspuiting van "skoon" spam‑e‑posse gemerk as ham sodat ’n spamfilter soortgelyke toekomstige e‑posse deurlaat.
 
-- **Output Integrity Attack**: Die aanvaller **verander modelvoorspellings in oorgang**, nie die model self nie, wat afwaartse stelsels mislei.\
-*Voorbeeld*: Draai 'n malware klassifiseerder se "kwaadwillig" oordeel na "benigne" voordat die lêer-quarantaine fase dit sien.
+- **Output Integrity Attack**: Die aanvaller **verander modelvoorspellings tydens vervoer**, nie die model self nie, en mislei downstream‑stelsels.\
+*Voorbeeld*: Die "malicious" uitspraak van ’n malware‑klassifiseerder word na "benign" omgedraai voordat die file‑quarantine‑stap dit sien.
 
-- **Model Poisoning** --- Direkte, geteikende veranderinge aan die **modelparameters** self, dikwels nadat skrywe toegang verkry is, om gedrag te verander.\
-*Voorbeeld*: Aanpassing van gewigte op 'n bedrog-detektering model in produksie sodat transaksies van sekere kaarte altyd goedgekeur word.
+- **Model Poisoning** --- Direkte, geteikende veranderinge aan die **model parameters** self, dikwels na verwerving van skryf‑toegang, om gedrag te verander.\
+*Voorbeeld*: Aanpassing van gewigte op ’n fraudedetektiemodel in produksie sodat transaksies van sekere kaarte altyd goedgekeur word.
+
 
 ## Google SAIF Risks
 
-Google se [SAIF (Security AI Framework)](https://saif.google/secure-ai-framework/risks) skets verskeie risiko's wat met AI stelsels geassosieer word:
+Google se [SAIF (Security AI Framework)](https://saif.google/secure-ai-framework/risks) skets verskeie risiko's wat met AI‑stelsels geassosieer word:
 
-- **Data Poisoning**: Kwaadwillige akteurs verander of inspuit opleidings/tuning data om akkuraatheid te verlaag, agterdeure in te plant, of resultate te skeef, wat die model integriteit oor die hele data-lewe siklus ondermyn.
+- **Data Poisoning**: Kwaadaardige akteurs verander of spuit opleiding/tuning‑data in om akkuraatheid te degradeer, backdoors in te plant, of resultate te skeef, wat modelintegriteit dwarsdeur die data‑lewe‑siklus ondermyn.
 
-- **Unauthorized Training Data**: Inname van kopiereg, sensitiewe, of nie-toegestane datastelle skep regslike, etiese, en prestasies verantwoordelikhede omdat die model van data leer wat dit nooit toegelaat is om te gebruik nie.
+- **Unauthorized Training Data**: Insluiting van gekopieerde, sensitiewe of nie‑toegestane datastelle skep regs-, etiese en prestasie‑aanspreeklikhede omdat die model van data leer wat nooit gebruik moes word nie.
 
-- **Model Source Tampering**: Verskaffingsketting of insider manipulasie van modelkode, afhanklikhede, of gewigte voor of tydens opleiding kan versteekte logika inbed wat selfs na heropleiding voortduur.
+- **Model Source Tampering**: Supply‑chain of insider‑manipulasie van modelkode, dependencies, of weights voor of tydens opleiding kan verborge logika inbaken wat selfs na heropleiding voortbestaan.
 
-- **Excessive Data Handling**: Swak data-behoud en bestuurbeheer lei stelsels om meer persoonlike data te stoor of te verwerk as wat nodig is, wat blootstelling en nakoming risiko verhoog.
+- **Excessive Data Handling**: Swak data‑bewaring en governance‑kontroles laat stelsels toe om meer persoonlike data te berg of te verwerk as nodig, wat blootstelling en nakomingsrisiko verhoog.
 
-- **Model Exfiltration**: Aanvallers steel model lêers/gewigte, wat verlies van intellektuele eiendom veroorsaak en kopie-dienste of opvolg aanvalle moontlik maak.
+- **Model Exfiltration**: Aanvallers steel modellêers/weights, wat verlies van intellektuele eiendom veroorsaak en copy‑cat dienste of opvolgaanvalle moontlik maak.
 
-- **Model Deployment Tampering**: Vyandige partye verander modelartefakte of bedieningsinfrastruktuur sodat die lopende model verskil van die goedgekeurde weergawe, wat gedrag moontlik verander.
+- **Model Deployment Tampering**: Teenstanders wysig model‑artefakte of serving‑infrastruktuur sodat die lopende model van die geverifieerde weergawe verskil en moontlik gedrag verander.
 
-- **Denial of ML Service**: Oorstroming van API's of die stuur van “spons” insette kan rekenaar/energie uitput en die model vanlyn slaan, wat klassieke DoS-aanvalle naboots.
+- **Denial of ML Service**: Oorlaai van APIs of stuur van “sponge” insette kan rekenaarources/energie uitput en die model afneem, soortgelyk aan klassieke DoS‑aanvalle.
 
-- **Model Reverse Engineering**: Deur groot hoeveelhede inset-uitset pare te oes, kan aanvallers die model kloon of distilleer, wat nabootsprodukte en aangepaste vyandige aanvalle aanwakker.
+- **Model Reverse Engineering**: Deur groot getalle inset‑uitset pare te oes, kan aanvallers die model kloon of distilleer, wat nabootsprodukte en gekonfigureerde adversarial aanvalle aanwakker.
 
-- **Insecure Integrated Component**: Kwetsbare plugins, agente, of opwaartse dienste laat aanvallers toe om kode in te spuit of bevoegdhede binne die AI-pyplyn te verhoog.
+- **Insecure Integrated Component**: Kwesbare plugins, agents of upstream‑dienste laat aanvallers toe om kode in te spuit of privilegies te eskaleer binne die AI‑pyplyn.
 
-- **Prompt Injection**: Die opstel van prompts (direk of indirek) om instruksies te smokkelen wat die stelselsintensie oortree, wat die model dwing om onbedoelde opdragte uit te voer.
+- **Prompt Injection**: Skep van prompts (direk of indirek) om instruksies te smokkel wat stelselintensie oorry, en die model laat onbedoelde opdragte uitvoer.
 
-- **Model Evasion**: Versigtig ontwerpde insette aktiveer die model om verkeerd te klassifiseer, te hallusineer, of verbode inhoud uit te voer, wat veiligheid en vertroue ondermyn.
+- **Model Evasion**: Noukeurig ontwerpte insette spoor die model aan om foutief te klassifiseer, te hallucinate, of ontoegelate inhoud te lewer, wat veiligheid en vertroue ondermyn.
 
-- **Sensitive Data Disclosure**: Die model onthul private of vertroulike inligting uit sy opleidingsdata of gebruikerskonteks, wat privaatheid en regulasies oortree.
+- **Sensitive Data Disclosure**: Die model openbaar private of vertroulike inligting uit sy opleidingsdata of gebruikerskonteks, wat privaatheid en regulasies skend.
 
-- **Inferred Sensitive Data**: Die model deduseer persoonlike eienskappe wat nooit verskaf is nie, wat nuwe privaatheidskade deur afleiding skep.
+- **Inferred Sensitive Data**: Die model leiden persoonlike eienskappe af wat nooit verskaf is nie, wat nuwe privaatheidsskade deur inferensie veroorsaak.
 
-- **Insecure Model Output**: Ongefilterde antwoorde stuur skadelike kode, verkeerde inligting, of onvanpaste inhoud aan gebruikers of afwaartse stelsels.
+- **Insecure Model Output**: Onsaniteerde antwoorde lewer skade‑kode, misinformasie, of ongepaste inhoud aan gebruikers of downstream‑stelsels.
 
-- **Rogue Actions**: Outonoom geïntegreerde agente voer onbedoelde werklike operasies uit (lêer skrywe, API oproepe, aankope, ens.) sonder voldoende gebruikers toesig.
+- **Rogue Actions**: Outonoom geïntegreerde agents voer onbedoelde werklike wêreld‑operasies uit (file writes, API calls, aankope, ens.) sonder voldoende gebruikers‑toesig.
 
 ## Mitre AI ATLAS Matrix
 
-Die [MITRE AI ATLAS Matrix](https://atlas.mitre.org/matrices/ATLAS) bied 'n omvattende raamwerk vir die verstaan en mitigering van risiko's wat met AI stelsels geassosieer word. Dit kategoriseer verskeie aanvaltegnieke en taktieke wat vyandige partye teen AI modelle kan gebruik en ook hoe om AI stelsels te gebruik om verskillende aanvalle uit te voer.
+Die [MITRE AI ATLAS Matrix](https://atlas.mitre.org/matrices/ATLAS) verskaf ’n omvattende raamwerk om risiko's verbonde aan AI‑stelsels te verstaan en te versag. Dit kategoriseer verskeie aanvalstegnieke en taktieke wat teenstanders teen AI‑modelle kan gebruik en ook hoe om AI‑stelsels te gebruik om verskillende aanvalle uit te voer.
+
+
+## LLMJacking (Token Theft & Resale of Cloud-hosted LLM Access)
+
+Aanvallers steel aktiewe sessie‑tokens of cloud API‑credentials en roep betaalde, cloud‑gehoste LLMs aan sonder magtiging. Toegang word dikwels herverkoop via reverse proxies wat die slagoffer se rekening voorsien, bv. "oai-reverse-proxy" deployments. Gevolge sluit in finansiële verlies, modelmisbruik buite beleid, en toewysing na die slagoffer‑tenant.
+
+TTPs:
+- Harvest tokens from infected developer machines or browsers; steal CI/CD secrets; buy leaked cookies.
+- Stand up a reverse proxy that forwards requests to the genuine provider, hiding the upstream key and multiplexing many customers.
+- Abuse direct base-model endpoints to bypass enterprise guardrails and rate limits.
+
+Mitigations:
+- Bind tokens to device fingerprint, IP ranges, and client attestation; enforce short expirations and refresh with MFA.
+- Scope keys minimally (no tool access, read-only where applicable); rotate on anomaly.
+- Terminate all traffic server-side behind a policy gateway that enforces safety filters, per-route quotas, and tenant isolation.
+- Monitor for unusual usage patterns (sudden spend spikes, atypical regions, UA strings) and auto-revoke suspicious sessions.
+- Prefer mTLS or signed JWTs issued by your IdP over long-lived static API keys.
+
+## References
+- [Unit 42 – The Risks of Code Assistant LLMs: Harmful Content, Misuse and Deception](https://unit42.paloaltonetworks.com/code-assistant-llms/)
+- [LLMJacking scheme overview – The Hacker News](https://thehackernews.com/2024/05/researchers-uncover-llmjacking-scheme.html)
+- [oai-reverse-proxy (reselling stolen LLM access)](https://gitgud.io/khanon/oai-reverse-proxy)
 
 {{#include ../banners/hacktricks-training.md}}
