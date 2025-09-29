@@ -15,6 +15,20 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.PAT_TOKEN }}
+
+      - name: Configure git
+        run: |
+          git config --global user.email "action@github.com"
+          git config --global user.name "GitHub Action"
+
+      - name: Make conflict resolution script executable
+        run: chmod +x ./resolve_searchindex_conflicts.sh
+
       - name: Check for running workflows
         id: check_workflows
         run: |
@@ -93,6 +107,11 @@ jobs:
             if [ "$has_merge_comment" = true ]; then
               echo "Attempting to merge PR #$pr_number..."
 
+              # Get PR details including head branch
+              pr_details=$(gh pr view "$pr_number" --json headRefName,baseRefName --repo "$GITHUB_REPOSITORY")
+              head_branch=$(echo "$pr_details" | jq -r '.headRefName')
+              base_branch=$(echo "$pr_details" | jq -r '.baseRefName')
+
               # --- Polling for non-UNKNOWN mergeable status ---
               max_retries=10
               retry=0
@@ -117,6 +136,35 @@ jobs:
                   echo $((current_count + 1)) > /tmp/merged_count
                 else
                   echo "Failed to merge PR #$pr_number: $pr_title"
+                fi
+              elif [ "$pr_mergeable" = "CONFLICTED" ]; then
+                echo "PR #$pr_number has conflicts. Attempting to resolve searchindex.js conflicts..."
+                
+                # Try to resolve conflicts by updating the branch
+                export GITHUB_REPOSITORY="$GITHUB_REPOSITORY"
+                export GH_TOKEN="${{ secrets.PAT_TOKEN }}"
+                if ./resolve_searchindex_conflicts.sh "$pr_number" "$head_branch" "$base_branch"; then
+                  echo "Successfully resolved searchindex.js conflicts for PR #$pr_number"
+                  
+                  # Wait for GitHub to update the mergeable status after conflict resolution
+                  echo "Waiting for GitHub to process the conflict resolution..."
+                  sleep 15
+                  
+                  # Check if it's now mergeable
+                  pr_mergeable_after=$(gh pr view "$pr_number" --json mergeable --jq '.mergeable' --repo "$GITHUB_REPOSITORY")
+                  if [ "$pr_mergeable_after" = "MERGEABLE" ]; then
+                    if gh pr merge "$pr_number" --merge --delete-branch --repo "$GITHUB_REPOSITORY"; then
+                      echo "Successfully merged PR #$pr_number after resolving conflicts: $pr_title"
+                      current_count=$(cat /tmp/merged_count)
+                      echo $((current_count + 1)) > /tmp/merged_count
+                    else
+                      echo "Failed to merge PR #$pr_number after conflict resolution: $pr_title"
+                    fi
+                  else
+                    echo "PR #$pr_number still not mergeable after conflict resolution (status: $pr_mergeable_after)"
+                  fi
+                else
+                  echo "Failed to resolve conflicts for PR #$pr_number"
                 fi
               else
                 echo "PR #$pr_number is not mergeable (status: $pr_mergeable)"
