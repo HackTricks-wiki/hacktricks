@@ -215,6 +215,15 @@ Hunting/IOCs
 - AMSI tampering via [System.Management.Automation.AmsiUtils]::amsiInitFailed.
 - Long-running business threads ending with links hosted under trusted PaaS domains.
 
+## Windows files to steal NTLM hashes
+
+Check the page about **places to steal NTLM creds**:
+
+{{#ref}}
+../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md
+{{#endref}}
+
+
 ## References
 
 - [Check Point Research – ZipLine Campaign: A Sophisticated Phishing Attack Targeting US Companies](https://research.checkpoint.com/2025/zipline-phishing-campaign/)
