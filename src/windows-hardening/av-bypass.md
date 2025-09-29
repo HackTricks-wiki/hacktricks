@@ -937,18 +937,8 @@ Post-exploitation options
 rmdir "C:\ProgramData\Microsoft\Windows Defender\Platform\5.18.25070.5-0"
 ```
 
-Detection ideas
-- Alert on new directory reparse points under `C:\ProgramData\Microsoft\Windows Defender\Platform\`.
-- Watch for new version-looking folder names exceeding known Defender versions.
-- Detect Defender binaries executing from non-standard paths (e.g., `C:\TMP\`).
-- Sysmon telemetry: FileCreate (Event ID 11) with ReparsePoint/Symlink in that path; process starts for `MsMpEng.exe` with unexpected image path.
-
-Hardening tips
-- Enforce allow-listed execution paths with WDAC/AppLocker; prohibit Defender from running outside trusted directories.
-- Continuously validate Defender’s configured platform path; remediate anomalies.
-- Keep Tamper Protection enabled; monitor for Defender platform location changes.
-
-> Note: This technique does not provide privilege escalation by itself; it requires admin rights.
+> [!TIP]
+> Note that This technique does not provide privilege escalation by itself; it requires admin rights.
 
 ## References
 
