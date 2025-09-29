@@ -1,79 +1,104 @@
-# AI Risks
+# AI जोखिम
 
 {{#include ../banners/hacktricks-training.md}}
 
 ## OWASP Top 10 Machine Learning Vulnerabilities
 
-Owasp ने AI सिस्टम को प्रभावित करने वाली शीर्ष 10 मशीन लर्निंग कमजोरियों की पहचान की है। ये कमजोरियाँ विभिन्न सुरक्षा मुद्दों का कारण बन सकती हैं, जिसमें डेटा विषाक्तता, मॉडल उलटाव, और प्रतिकूल हमले शामिल हैं। इन कमजोरियों को समझना सुरक्षित AI सिस्टम बनाने के लिए महत्वपूर्ण है।
+Owasp ने उन शीर्ष 10 machine learning कमजोरियों की पहचान की है जो AI सिस्टम को प्रभावित कर सकती हैं। ये कमजोरियाँ विभिन्न सुरक्षा समस्याओं जैसे डेटा poisoning, model inversion, और adversarial attacks का कारण बन सकती हैं। सुरक्षित AI सिस्टम बनाने के लिए इन कमजोरियों को समझना बहुत ज़रूरी है।
 
-शीर्ष 10 मशीन लर्निंग कमजोरियों की अद्यतन और विस्तृत सूची के लिए, [OWASP Top 10 Machine Learning Vulnerabilities](https://owasp.org/www-project-machine-learning-security-top-10/) प्रोजेक्ट को देखें।
+For an updated and detailed list of the top 10 machine learning vulnerabilities, refer to the [OWASP Top 10 Machine Learning Vulnerabilities](https://owasp.org/www-project-machine-learning-security-top-10/) project.
 
-- **Input Manipulation Attack**: एक हमलावर **incoming data** में छोटे, अक्सर अदृश्य परिवर्तन जोड़ता है ताकि मॉडल गलत निर्णय ले सके।\
-*Example*: स्टॉप-साइन पर कुछ रंग के धब्बे एक आत्म-ड्राइविंग कार को "देखने" के लिए गति-सीमा संकेत में धोखा देते हैं।
+- **Input Manipulation Attack**: एक हमलावर incoming data में छोटे, अक्सर दिखाई न देने वाले बदलाव जोड़ता है ताकि मॉडल गलत निर्णय ले।\
+*उदाहरण*: एक stop‑sign पर कुछ रंग‑के दाग एक self‑driving car को धोखा दे कर उसे speed‑limit sign "देखने" पर मजबूर कर देते हैं।
 
-- **Data Poisoning Attack**: **training set** को जानबूझकर खराब नमूनों से प्रदूषित किया जाता है, जिससे मॉडल को हानिकारक नियम सिखाए जाते हैं।\
-*Example*: एंटीवायरस प्रशिक्षण कोष में मैलवेयर बाइनरी को "benign" के रूप में गलत लेबल किया जाता है, जिससे समान मैलवेयर बाद में बच निकलता है।
+- **Data Poisoning Attack**: **प्रशिक्षण सेट** जानबूझकर खराब नमूनों से दूषित कर दिया जाता है, जिससे मॉडल हानिकारक नियम सीख लेता है।\
+*उदाहरण*: एक antivirus प्रशिक्षण कॉर्पस में malware binaries को गलत तरीके से "benign" लेबल कर देना ताकि बाद में समान malware बायपास कर सके।
 
-- **Model Inversion Attack**: आउटपुट की जांच करके, एक हमलावर एक **reverse model** बनाता है जो मूल इनपुट के संवेदनशील विशेषताओं को पुनर्निर्माण करता है।\
-*Example*: कैंसर-डिटेक्शन मॉडल की भविष्यवाणियों से एक मरीज की MRI छवि को पुनः बनाना।
+- **Model Inversion Attack**: आउटपुट्स को probe करके, एक हमलावर एक **reverse model** बनाता है जो मूल इनपुट्स की संवेदनशील विशेषताओं को reconstruct कर लेता है।\
+*उदाहरण*: एक cancer‑detection मॉडल की predictions से किसी रोगी की MRI छवि फिर से बनाना।
 
-- **Membership Inference Attack**: प्रतिकूल व्यक्ति यह परीक्षण करता है कि क्या एक **specific record** प्रशिक्षण के दौरान उपयोग किया गया था, विश्वास के अंतर को देखकर।\
-*Example*: यह पुष्टि करना कि किसी व्यक्ति का बैंक लेनदेन धोखाधड़ी-डिटेक्शन मॉडल के प्रशिक्षण डेटा में दिखाई देता है।
+- **Membership Inference Attack**: विरोधी यह परीक्षण कर सकता है कि कोई **विशिष्ट रिकॉर्ड** प्रशिक्षण के दौरान उपयोग हुआ था या नहीं, confidence के अंतर देखकर।\
+*उदाहरण*: यह पुष्टि करना कि किसी व्यक्ति का बैंक लेन‑देन fraud‑detection मॉडल के प्रशिक्षण डेटा में मौजूद है।
 
-- **Model Theft**: बार-बार पूछताछ करने से एक हमलावर निर्णय सीमाओं को सीखता है और **clone the model's behavior** (और IP)।\
-*Example*: एक ML‑as‑a‑Service API से पर्याप्त Q&A जोड़े इकट्ठा करना ताकि एक लगभग समान स्थानीय मॉडल बनाया जा सके।
+- **Model Theft**: बार‑बार क्वेरी करके एक हमलावर decision boundaries सीख लेता है और **model's behavior** की नकल कर लेता है (और IP चुरा लेता है)।\
+*उदाहरण*: ML‑as‑a‑Service API से पर्याप्त Q&A जोड़े इकट्ठा कर के लगभग समकक्ष local मॉडल बनाना।
 
-- **AI Supply‑Chain Attack**: **ML pipeline** में किसी भी घटक (डेटा, पुस्तकालय, पूर्व-प्रशिक्षित वजन, CI/CD) से समझौता करना ताकि डाउनस्ट्रीम मॉडलों को भ्रष्ट किया जा सके।\
-*Example*: एक मॉडल-हब पर एक विषाक्त निर्भरता कई ऐप्स में एक बैकडोर वाले भावना-विश्लेषण मॉडल को स्थापित करती है।
+- **AI Supply‑Chain Attack**: किसी भी घटक (data, libraries, pre‑trained weights, CI/CD) को compromise करके ML pipeline में downstream मॉडलों को दूषित कर देना।\
+*उदाहरण*: model‑hub पर एक poisoned dependency एक backdoored sentiment‑analysis मॉडल इंस्टॉल कर देती है जो कई ऐप्स में फैल जाता है।
 
-- **Transfer Learning Attack**: एक **pre‑trained model** में दुर्भावनापूर्ण लॉजिक लगाया जाता है और यह पीड़ित के कार्य पर फाइन-ट्यूनिंग के दौरान जीवित रहता है।\
-*Example*: एक दृष्टि बैकबोन जिसमें एक छिपा हुआ ट्रिगर है, चिकित्सा इमेजिंग के लिए अनुकूलित होने के बाद भी लेबल को पलटता है।
+- **Transfer Learning Attack**: एक malicious logic किसी **pre‑trained model** में छिपा दिया जाता है और victim के task पर fine‑tuning के बाद भी जीवित रहता है।\
+*उदाहरण*: एक vision backbone जिसमें hidden trigger है, medical imaging के लिए प्रयोग करने के बाद भी labels को उलट देता है।
 
-- **Model Skewing**: सूक्ष्म रूप से पूर्वाग्रहित या गलत लेबल वाला डेटा **shifts the model's outputs** ताकि हमलावर के एजेंडे को प्राथमिकता दी जा सके।\
-*Example*: "clean" स्पैम ईमेल को हैम के रूप में लेबल करना ताकि एक स्पैम फ़िल्टर भविष्य के समान ईमेल को पास कर दे।
+- **Model Skewing**: सूक्ष्म रूप से biased या mislabeled डेटा **मॉडल के आउटपुट्स को शिफ्ट** कर देता है जिससे हमलावर के एजेंडा को लाभ होता है।\
+*उदाहरण*: "clean" spam ई‑मेल्स को ham के रूप में लेबल कर के spam filter में समान future ई‑मेल्स को पास कराना।
 
-- **Output Integrity Attack**: हमलावर **alters model predictions in transit**, न कि मॉडल को स्वयं, डाउनस्ट्रीम सिस्टम को धोखा देता है।\
-*Example*: एक मैलवेयर क्लासिफायर के "malicious" निर्णय को "benign" में पलटना इससे पहले कि फ़ाइल-कारण चरण इसे देखे।
+- **Output Integrity Attack**: हमलावर मॉडल के predictions को transit में **बदल देता है**, मॉडल को नहीं, जिससे downstream सिस्टम धोखा खा जाते हैं।\
+*उदाहरण*: एक malware classifier के "malicious" निर्णय को "benign" में बदल देना इससे पहले कि file‑quarantine स्टेज उसे देखे।
 
-- **Model Poisoning** --- **model parameters** में सीधे, लक्षित परिवर्तन, अक्सर लिखने की पहुंच प्राप्त करने के बाद, व्यवहार को बदलने के लिए।\
-*Example*: उत्पादन में धोखाधड़ी-डिटेक्शन मॉडल पर वजन को समायोजित करना ताकि कुछ कार्डों से लेनदेन हमेशा स्वीकृत हों।
+- **Model Poisoning** --- सीधे, लक्षित बदलाव **मॉडल पैरामीटर** में करना, अक्सर write access प्राप्त करने के बाद, व्यवहार बदलने के लिए।\
+*उदाहरण*: production में fraud‑detection मॉडल के weights को tweak कर देना ताकि कुछ कार्ड्स के लेन‑देन हमेशा मंजूर हो जाएं।
+
 
 ## Google SAIF Risks
 
-Google का [SAIF (Security AI Framework)](https://saif.google/secure-ai-framework/risks) AI सिस्टम से संबंधित विभिन्न जोखिमों को रेखांकित करता है:
+Google's [SAIF (Security AI Framework)](https://saif.google/secure-ai-framework/risks) विभिन्न जोखिमों की रूपरेखा देता है जो AI सिस्टम से संबंधित हैं:
 
-- **Data Poisoning**: दुर्भावनापूर्ण अभिनेता प्रशिक्षण/ट्यूनिंग डेटा को बदलते या इंजेक्ट करते हैं ताकि सटीकता को कम किया जा सके, बैकडोर लगाए जा सकें, या परिणामों को विकृत किया जा सके, जिससे पूरे डेटा-लाइफसाइकिल में मॉडल की अखंडता कमजोर होती है।
+- **Data Poisoning**: malicious actors प्रशिक्षण/ट्यूनिंग डेटा को बदलते या इंजेक्ट करते हैं ताकि accuracy घटे, backdoors implant हों, या परिणाम skew हो जाएँ, जिससे मॉडल की अखंडता पूरे डेटा‑लाइफसाइकल में कमजोर पड़ती है।
 
-- **Unauthorized Training Data**: कॉपीराइटेड, संवेदनशील, या अनधिकृत डेटा सेट को ग्रहण करना कानूनी, नैतिक, और प्रदर्शन संबंधी जिम्मेदारियों को उत्पन्न करता है क्योंकि मॉडल उस डेटा से सीखता है जिसका उपयोग करने की उसे कभी अनुमति नहीं थी।
+- **Unauthorized Training Data**: copyrighted, sensitive, या अनधिकृत datasets को ingest करने से कानूनी, नैतिक, और प्रदर्शन संबंधी जोखिम बनते हैं क्योंकि मॉडल ऐसे डेटा से सीखता है जिसका उपयोग अनुमति के बिना किया गया।
 
-- **Model Source Tampering**: प्रशिक्षण से पहले या दौरान मॉडल कोड, निर्भरताओं, या वजन का आपूर्ति-श्रृंखला या अंदरूनी हेरफेर छिपी लॉजिक को एम्बेड कर सकता है जो पुनः प्रशिक्षण के बाद भी बनी रहती है।
+- **Model Source Tampering**: सप्लाई‑चेन या insider द्वारा model code, dependencies, या weights को training से पहले या दौरान manipulate करके hidden logic embed किया जा सकता है जो retraining के बाद भी बनी रहती है।
 
-- **Excessive Data Handling**: कमजोर डेटा-रखरखाव और शासन नियंत्रण सिस्टम को आवश्यक से अधिक व्यक्तिगत डेटा संग्रहीत या संसाधित करने के लिए प्रेरित करते हैं, जिससे जोखिम और अनुपालन बढ़ता है।
+- **Excessive Data Handling**: कमजोर data‑retention और governance controls सिस्टम को आवश्यक से अधिक personal data स्टोर या प्रोसेस करने देते हैं, जिससे exposure और अनुपालन जोखिम बढ़ता है।
 
-- **Model Exfiltration**: हमलावर मॉडल फ़ाइलों/वजन को चुरा लेते हैं, जिससे बौद्धिक संपदा का नुकसान होता है और कॉपी-कट सेवाओं या अनुवर्ती हमलों को सक्षम बनाता है।
+- **Model Exfiltration**: हमलावर model files/weights चुरा लेते हैं, जिससे intellectual property का नुकसान होता है और copy‑cat सेवाएँ या follow‑on attacks संभव होते हैं।
 
-- **Model Deployment Tampering**: प्रतिकूल व्यक्ति मॉडल कलाकृतियों या सेवा अवसंरचना को संशोधित करते हैं ताकि चल रहा मॉडल अनुमोदित संस्करण से भिन्न हो, संभावित रूप से व्यवहार को बदलता है।
+- **Model Deployment Tampering**: विरोधी model artifacts या serving infrastructure को modify कर देते हैं ताकि चल रहा मॉडल vetted version से अलग हो और संभावित रूप से व्यवहार बदल जाए।
 
-- **Denial of ML Service**: APIs को बाढ़ करना या "स्पंज" इनपुट भेजना कंप्यूट/ऊर्जा को समाप्त कर सकता है और मॉडल को ऑफ़लाइन कर सकता है, जो क्लासिक DoS हमलों को दर्शाता है।
+- **Denial of ML Service**: APIs को flood करना या “sponge” inputs भेजना compute/energy को ख़त्म कर सकता है और मॉडल को offline कर सकता है, जो classic DoS attacks की तरह है।
 
-- **Model Reverse Engineering**: इनपुट-आउटपुट जोड़ों की बड़ी संख्या को इकट्ठा करके, हमलावर मॉडल को क्लोन या डिस्टिल कर सकते हैं, अनुकरण उत्पादों और अनुकूलित प्रतिकूल हमलों को बढ़ावा देते हैं।
+- **Model Reverse Engineering**: बहुत सारी input‑output जोड़ियाँ harvest करके, हमलावर मॉडल की नकल या distill कर सकते हैं, जो imitation products और customized adversarial attacks को जन्म देते हैं।
 
-- **Insecure Integrated Component**: कमजोर प्लगइन्स, एजेंट, या अपस्ट्रीम सेवाएं हमलावरों को AI पाइपलाइन के भीतर कोड इंजेक्ट करने या विशेषाधिकार बढ़ाने की अनुमति देती हैं।
+- **Insecure Integrated Component**: vulnerable plugins, agents, या upstream services हमलावरों को code inject करने या AI pipeline के भीतर privileges escalate करने देते हैं।
 
-- **Prompt Injection**: संकेतों को तैयार करना (प्रत्यक्ष या अप्रत्यक्ष रूप से) ताकि निर्देशों को चुराया जा सके जो सिस्टम के इरादे को ओवरराइड करते हैं, जिससे मॉडल अनपेक्षित आदेशों को निष्पादित करता है।
+- **Prompt Injection**: prompts (seedirectly या indirectly) craft करके ऐसे निर्देश smuggle किए जाते हैं जो system intent को override कर देते हैं और मॉडल को unintended commands करने पर मजबूर करते हैं।
 
-- **Model Evasion**: सावधानीपूर्वक डिज़ाइन किए गए इनपुट मॉडल को गलत वर्गीकृत करने, भ्रांति उत्पन्न करने, या निषिद्ध सामग्री को आउटपुट करने के लिए प्रेरित करते हैं, जिससे सुरक्षा और विश्वास में कमी आती है।
+- **Model Evasion**: सावधानीपूर्वक डिज़ाइन किए गए inputs मॉडल को mis‑classify, hallucinate, या disallowed content आउटपुट करने के लिए trigger करते हैं, जिससे safety और trust erode होते हैं।
 
-- **Sensitive Data Disclosure**: मॉडल अपने प्रशिक्षण डेटा या उपयोगकर्ता संदर्भ से निजी या गोपनीय जानकारी प्रकट करता है, जिससे गोपनीयता और नियमों का उल्लंघन होता है।
+- **Sensitive Data Disclosure**: मॉडल अपने training डेटा या user context से निजी या गोपनीय जानकारी प्रकट कर देता है, जिससे privacy और नियमों का उल्लंघन होता है।
 
-- **Inferred Sensitive Data**: मॉडल व्यक्तिगत विशेषताओं का अनुमान लगाता है जो कभी प्रदान नहीं की गई थीं, जिससे अनुमान के माध्यम से नई गोपनीयता हानि होती है।
+- **Inferred Sensitive Data**: मॉडल ऐसे personal attributes का अनुमान लगा लेता है जो कभी प्रदान नहीं किये गये थे, जिससे inference के माध्यम से नए privacy नुकसान उत्पन्न होते हैं।
 
-- **Insecure Model Output**: अस्वच्छ प्रतिक्रियाएँ उपयोगकर्ताओं या डाउनस्ट्रीम सिस्टम को हानिकारक कोड, गलत जानकारी, या अनुपयुक्त सामग्री प्रदान करती हैं।
+- **Insecure Model Output**: unsanitized responses users या downstream systems को हानिकारक code, misinformation, या अनुचित सामग्री पास कर देते हैं।
 
-- **Rogue Actions**: स्वायत्त रूप से एकीकृत एजेंट अनपेक्षित वास्तविक-विश्व संचालन (फाइल लेखन, API कॉल, खरीदारी, आदि) को पर्याप्त उपयोगकर्ता निगरानी के बिना निष्पादित करते हैं।
+- **Rogue Actions**: स्वायत्त रूप से integrated agents unintended real‑world operations (file writes, API calls, purchases, आदि) execute कर देते हैं बिना पर्याप्त user oversight के।
+
 
 ## Mitre AI ATLAS Matrix
 
-[MITRE AI ATLAS Matrix](https://atlas.mitre.org/matrices/ATLAS) AI सिस्टम से संबंधित जोखिमों को समझने और कम करने के लिए एक व्यापक ढांचा प्रदान करता है। यह विभिन्न हमले की तकनीकों और रणनीतियों को वर्गीकृत करता है जो प्रतिकूल व्यक्ति AI मॉडलों के खिलाफ उपयोग कर सकते हैं और यह भी कि विभिन्न हमलों को करने के लिए AI सिस्टम का उपयोग कैसे किया जा सकता है।
+The [MITRE AI ATLAS Matrix](https://atlas.mitre.org/matrices/ATLAS) AI सिस्टम से जुड़े जोखिमों को समझने और कम करने के लिए एक व्यापक फ्रेमवर्क प्रदान करता है। यह विभिन्न attack techniques और tactics को श्रेणीबद्ध करता है जो विरोधी AI मॉडलों के खिलाफ उपयोग कर सकते हैं और साथ ही यह बताता है कि AI सिस्टम का उपयोग विभिन्न attacks को निष्पादित करने के लिए कैसे किया जा सकता है।
+
+
+## LLMJacking (Token Theft & Resale of Cloud-hosted LLM Access)
+
+Attackers सक्रिय session tokens या cloud API credentials चुरा लेते हैं और बिना authorization के paid, cloud‑hosted LLMs को invoke करते हैं। Access अक्सर reverse proxies के माध्यम से resale की जाती है जो victim के account को front करते हैं, उदाहरण के लिए "oai-reverse-proxy" deployments। परिणामों में वित्तीय नुकसान, नीति के बाहर मॉडल का दुरुपयोग, और victim tenant पर attribution शामिल हैं।
+
+TTPs:
+- संक्रमित developer machines या browsers से tokens harvest करना; CI/CD secrets चुराना; leaked cookies खरीदना।
+- एक reverse proxy खड़ी करना जो requests को genuine provider की तरफ forward करे, upstream key छुपाए और कई ग्राहकों को multiplex करे।
+- enterprise guardrails और rate limits को bypass करने के लिए direct base‑model endpoints का दुरुपयोग करना।
+
+Mitigations:
+- tokens को device fingerprint, IP ranges, और client attestation से bind करें; short expirations लागू करें और MFA के साथ refresh करें।
+- keys को न्यूनतम scope दें (कोई tool access न दें, जहाँ लागू हो वहां read‑only रखें); anomaly पर rotate करें।
+- एक policy gateway के पीछे server‑side पर सभी ट्रैफ़िक terminate करें जो safety filters, per‑route quotas, और tenant isolation लागू करे।
+- असामान्य उपयोग पैटर्न (अचानक खर्च में spike, असामान्य regions, UA strings) की निगरानी करें और suspicious sessions को auto‑revoke करें।
+- long‑lived static API keys की बजाय अपने IdP द्वारा जारी mTLS या signed JWTs को प्राथमिकता दें।
+
+
+## References
+- [Unit 42 – The Risks of Code Assistant LLMs: Harmful Content, Misuse and Deception](https://unit42.paloaltonetworks.com/code-assistant-llms/)
+- [LLMJacking scheme overview – The Hacker News](https://thehackernews.com/2024/05/researchers-uncover-llmjacking-scheme.html)
+- [oai-reverse-proxy (reselling stolen LLM access)](https://gitgud.io/khanon/oai-reverse-proxy)
 
 {{#include ../banners/hacktricks-training.md}}
