@@ -1,69 +1,147 @@
-# フィッシングの検出
+# Detecting Phishing
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## はじめに
+## Introduction
 
-フィッシングの試みを検出するには、**現在使用されているフィッシング技術を理解することが重要です**。この投稿の親ページにはこの情報があるので、今日使用されている技術について知らない場合は、親ページに行って少なくともそのセクションを読むことをお勧めします。
+phishingの試行を検出するには、**現在使われているphishing techniquesを理解することが重要です**。この投稿の親ページにその情報があるので、もしどのtechniquesが使われているか分からない場合は親ページの少なくとも該当セクションを読むことをおすすめします。
 
-この投稿は、**攻撃者が被害者のドメイン名を何らかの形で模倣または使用しようとする**という考えに基づいています。あなたのドメインが `example.com` と呼ばれ、何らかの理由で `youwonthelottery.com` のような全く異なるドメイン名でフィッシングされる場合、これらの技術ではそれを明らかにすることはできません。
+この投稿は**攻撃者が被害者のドメイン名を何らかの方法で模倣するか利用しようとする**という考えに基づいています。もしあなたのドメインが`example.com`で、`youwonthelottery.com`のような全く別のドメインでphishingされた場合、これらの手法は検出できません。
 
 ## ドメイン名のバリエーション
 
-メール内で**類似のドメイン**名を使用するフィッシングの試みを**明らかにするのは比較的簡単**です。\
-攻撃者が使用する可能性のある**最も考えられるフィッシング名のリストを生成し**、それが**登録されているか**、またはその**IP**が使用されているかを**確認**するだけで十分です。
+メール内で類似したドメイン名を使う**phishing**の試みは、比較的**簡単**に**発見**できます。\
+攻撃者が使用する可能性が高いドメイン名のリストを**生成**し、それが**登録されているか**、またはそのドメインに割り当てられた**IP**が存在するかどうかを**確認**するだけで十分です。
 
-### 疑わしいドメインの発見
+### 疑わしいドメインの見つけ方
 
-この目的のために、以下のツールのいずれかを使用できます。これらのツールは、ドメインにIPが割り当てられているかどうかを自動的に確認するDNSリクエストも実行します：
+この目的には、以下のツールのいずれかを使用できます。これらのツールはドメインに割り当てられたIPがあるかどうかを確認するために、DNSクエリを自動的に実行する点に注意してください：
 
 - [**dnstwist**](https://github.com/elceef/dnstwist)
 - [**urlcrazy**](https://github.com/urbanadventurer/urlcrazy)
 
-### ビットフリッピング
+ヒント: 候補リストを生成した場合は、それをDNSリゾルバログに入れて**NXDOMAIN lookups from inside your org**（攻撃者が実際に登録する前にユーザがタイプミスで到達しようとしたもの）を検出してください。ポリシーが許すなら、これらのドメインをシンクホール化するか事前にブロックしてください。
 
-**この技術の簡単な説明は親ページにあります。あるいは、** [**https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/**](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/) **で元の研究を読むことができます。**
+### Bitflipping
 
-例えば、ドメイン microsoft.com の1ビットの変更は、_windnws.com_ に変換できます。\
-**攻撃者は、被害者に関連するビットフリッピングドメインをできるだけ多く登録し、正当なユーザーを自分のインフラにリダイレクトさせることができます**。
+**You can find a short the explanation of this technique in the parent page. Or read the original research in** [**https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/**](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)
 
-**すべての可能なビットフリッピングドメイン名も監視する必要があります。**
+例えば、ドメインmicrosoft.comの1ビット変更で_windnws.com_のようになることがあります。\
+**攻撃者は被害者に関連する可能な限り多くのbit-flippingドメインを登録して、正当なユーザを自分たちのインフラにリダイレクトする可能性があります。**
+
+**すべての可能なbit-flippingドメイン名も監視するべきです。**
+
+もしhomoglyph/IDNの類似（例：Latin/Cyrillic文字の混合）も考慮する必要があるなら、次を確認してください：
+
+{{#ref}}
+homograph-attacks.md
+{{#endref}}
 
 ### 基本的なチェック
 
-潜在的な疑わしいドメイン名のリストができたら、それらを**チェック**する必要があります（主にHTTPおよびHTTPSポート）**被害者のドメインの誰かに似たログインフォームを使用しているかどうかを確認するために**。\
-ポート3333が開いていて `gophish` のインスタンスが稼働しているかどうかも確認できます。\
-**発見された疑わしいドメインがどれくらい古いかを知ることも興味深い**です。若いほどリスクが高くなります。\
-疑わしいウェブページのHTTPおよび/またはHTTPSの**スクリーンショット**を取得して、それが疑わしいかどうかを確認し、その場合は**アクセスして詳しく見る**ことができます。
+潜在的に疑わしいドメイン名のリストを入手したら、まずそれらを**チェック**してください（主にHTTPおよびHTTPSのポート）そしてそれらが被害者のドメインのものと**類似したログインフォームを使用しているかどうかを確認**します。\
+また、ポート3333が開いていて`gophish`のインスタンスが動作しているかを確認することもできます。\
+発見した各疑わしいドメインが**どれくらい古いか（登録日）**を知ることは興味深いです。若いほどリスクが高いです。\
+HTTPおよび/またはHTTPSの疑わしいウェブページの**スクリーンショット**を取得して、疑わしいかどうか確認し、その場合はさらに詳しく**アクセスして調査**してください。
 
 ### 高度なチェック
 
-さらに一歩進みたい場合は、**疑わしいドメインを監視し、時々（毎日？数秒/分しかかかりません）さらに検索することをお勧めします**。関連するIPのオープン**ポート**も**チェック**し、**`gophish` や類似のツールのインスタンスを検索**することも必要です（はい、攻撃者も間違いを犯します）し、**疑わしいドメインおよびサブドメインのHTTPおよびHTTPSウェブページを監視**して、被害者のウェブページからログインフォームをコピーしているかどうかを確認します。\
-これを**自動化するために**、被害者のドメインのログインフォームのリストを持ち、疑わしいウェブページをスパイダーし、疑わしいドメイン内で見つかった各ログインフォームを被害者のドメインの各ログインフォームと比較するために `ssdeep` のようなものを使用することをお勧めします。\
-疑わしいドメインのログインフォームを特定した場合、**ジャンククレデンシャルを送信**し、**被害者のドメインにリダイレクトされるかどうかを確認**できます。
+さらに踏み込むなら、これらの疑わしいドメインを**監視し、時々（毎日？数秒/分しかかかりません）追加のドメインを検索する**ことをお勧めします。関連IPの開いている**ポート**を**チェック**し、`gophish`や類似ツールのインスタンスを**検索**するべきです（はい、攻撃者もミスをします）。疑わしいドメインやサブドメインのHTTPおよびHTTPSのウェブページを**監視**して、被害者のウェブページからログインフォームをコピーしていないか確認してください。\
+この作業を**自動化する**ために、被害者ドメインのログインフォーム一覧を用意し、疑わしいウェブページをスパイダーで巡回して、疑わしいドメイン内で見つかった各ログインフォームを`ssdeep`のようなものを使って被害者ドメインの各ログインフォームと比較することを推奨します。\
+もし疑わしいドメインのログインフォームを見つけたら、ダミーの資格情報を**送信**して、それが被害者のドメインへ**リダイレクトするかどうか**を**確認**できます。
 
-## キーワードを使用したドメイン名
+---
 
-親ページでは、**被害者のドメイン名をより大きなドメイン内に入れる**というドメイン名のバリエーション技術についても言及しています（例：paypal-financial.com は paypal.com のためのものです）。
+### Hunting by favicon and web fingerprints (Shodan/ZoomEye/Censys)
 
-### 証明書の透明性
+多くのphishingキットは、なりすますブランドのfaviconを再利用します。ネットワーク全体のスキャナはbase64エンコードされたfaviconのMurmurHash3を計算します。ハッシュを生成してそれを起点に調査できます：
 
-前述の「ブルートフォース」アプローチを取ることはできませんが、実際には**そのようなフィッシングの試みを明らかにすることも可能です**。CAによって証明書が発行されるたびに、詳細が公開されます。これは、証明書の透明性を読み取ることや監視することで、**名前の中にキーワードを使用しているドメインを見つけることが可能であることを意味します**。例えば、攻撃者が [https://paypal-financial.com](https://paypal-financial.com) の証明書を生成した場合、証明書を見ることで「paypal」というキーワードを見つけ、疑わしいメールが使用されていることを知ることができます。
+Pythonの例 (mmh3):
+```python
+import base64, requests, mmh3
+url = "https://www.paypal.com/favicon.ico"  # change to your brand icon
+b64 = base64.encodebytes(requests.get(url, timeout=10).content)
+print(mmh3.hash(b64))  # e.g., 309020573
+```
+- Shodanで検索: `http.favicon.hash:309020573`
+- ツールを使う場合: favfreakのようなコミュニティツールを参照して、Shodan/ZoomEye/Censys向けのハッシュやdorksを生成する。
 
-投稿 [https://0xpatrik.com/phishing-domains/](https://0xpatrik.com/phishing-domains/) では、特定のキーワードに影響を与える証明書を検索し、日付（「新しい」証明書のみ）およびCA発行者「Let's Encrypt」でフィルタリングするためにCensysを使用できると提案しています：
+注意
+- Faviconsは再利用されることが多いので、一致は手がかりとして扱い、行動する前にコンテンツとcertsを検証する。
+- 精度を上げるために、domain-ageやkeyword heuristicsと組み合わせる。
+
+### URLテレメトリのハンティング (urlscan.io)
+
+`urlscan.io`は、提出されたURLの過去のスクリーンショット、DOM、リクエスト、TLSメタデータを保存します。ブランドの悪用やクローンを探索できます：
+
+Example queries (UI or API):
+- Find lookalikes excluding your legit domains: `page.domain:(/.*yourbrand.*/ AND NOT yourbrand.com AND NOT www.yourbrand.com)`
+- Find sites hotlinking your assets: `domain:yourbrand.com AND NOT page.domain:yourbrand.com`
+- Restrict to recent results: append `AND date:>now-7d`
+
+API example:
+```bash
+# Search recent scans mentioning your brand
+curl -s 'https://urlscan.io/api/v1/search/?q=page.domain:(/.*yourbrand.*/%20AND%20NOT%20yourbrand.com)%20AND%20date:>now-7d' \
+-H 'API-Key: <YOUR_URLSCAN_KEY>' | jq '.results[].page.url'
+```
+From the JSON, pivot on:
+- `page.tlsIssuer`, `page.tlsValidFrom`, `page.tlsAgeDays` — lookalikesの判別のため、非常に新しいcertsを検出する
+- `task.source` の値（例: `certstream-suspicious`） — 所見をCT監視に紐づけるため
+
+### RDAPによるドメイン年齢（スクリプト可能）
+
+RDAPは機械可読な作成イベントを返す。**新規登録ドメイン (NRDs)** のフラグ付けに有用。
+```bash
+# .com/.net RDAP (Verisign)
+curl -s https://rdap.verisign.com/com/v1/domain/suspicious-example.com | \
+jq -r '.events[] | select(.eventAction=="registration") | .eventDate'
+
+# Generic helper using rdap.net redirector
+curl -s https://www.rdap.net/domain/suspicious-example.com | jq
+```
+Enrich your pipeline by tagging domains with registration age buckets (e.g., <7 days, <30 days) and prioritise triage accordingly.
+
+### TLS/JAx fingerprints to spot AiTM infrastructure
+
+近年の credential-phishing では、セッション・トークンを盗むために **Adversary-in-the-Middle (AiTM)** 型の reverse proxies（例: Evilginx）が増えています。ネットワーク側での検出を追加できます:
+
+- Log TLS/HTTP fingerprints (JA3/JA4/JA4S/JA4H) at egress. 一部の Evilginx ビルドでは安定した JA4 クライアント/サーバー値が観測されています。known-bad なフィンガープリントに対しては弱いシグナルとしてアラートを出し、必ずコンテンツと domain intel で確認してください。
+- Proactively record TLS certificate metadata (issuer, SAN count, wildcard use, validity) for lookalike hosts discovered via CT or urlscan and correlate with DNS age and geolocation.
+
+> Note: Treat fingerprints as enrichment, not as sole blockers; frameworks evolve and may randomise or obfuscate.
+
+### Domain names using keywords
+
+親ページでは、ドメイン名バリエーションの手法として、**victim's domain name inside a bigger domain**（例: paypal-financial.com が paypal.com の場合）のように被害者ドメインをより大きなドメイン名の中に含める手法も紹介されています。
+
+#### Certificate Transparency
+
+前述の "Brute-Force" アプローチは実行困難な場合がありますが、証明書透明性のおかげでこのようなフィッシング試行を発見することは実際に可能です。CA が証明書を発行するたびにその詳細は公開されます。つまり、証明書透明性を読む、あるいは監視することで、名前の中にキーワードを含むドメインを見つけることができます。たとえば攻撃者が [https://paypal-financial.com](https://paypal-financial.com) の証明書を作成すると、その証明書から "paypal" というキーワードを見つけ、不審なメールに使われていると判断できます。
+
+投稿 [https://0xpatrik.com/phishing-domains/](https://0xpatrik.com/phishing-domains/) では、Censys を使って特定のキーワードに該当する証明書を検索し、日付（新しい証明書のみ）や CA 発行者 "Let's Encrypt" でフィルタする方法が提案されています:
 
 ![https://0xpatrik.com/content/images/2018/07/cert_listing.png](<../../images/image (1115).png>)
 
-ただし、無料のウェブ [**crt.sh**](https://crt.sh) を使用して「同じこと」を行うこともできます。**キーワードを検索し**、**結果を日付とCAでフィルタリング**することができます。
+しかし、無料のウェブサービス [**crt.sh**](https://crt.sh) を使って同様のことができます。キーワードで検索し、必要に応じて日付や CA で結果をフィルタできます。
 
 ![](<../../images/image (519).png>)
 
-この最後のオプションを使用すると、Matching Identitiesフィールドを使用して、実際のドメインのいずれかのアイデンティティが疑わしいドメインのいずれかと一致するかどうかを確認できます（疑わしいドメインは偽陽性である可能性があることに注意してください）。
+この方法では、Matching Identities フィールドを使って実際のドメインのいずれかの identity が不審なドメインと一致するかを確認できます（不審なドメインは誤検知である場合もあります）。
 
-**もう一つの代替手段**は、[**CertStream**](https://medium.com/cali-dog-security/introducing-certstream-3fc13bb98067)という素晴らしいプロジェクトです。CertStreamは、新しく生成された証明書のリアルタイムストリームを提供し、指定されたキーワードを（ほぼ）リアルタイムで検出するために使用できます。実際、[**phishing_catcher**](https://github.com/x0rz/phishing_catcher)というプロジェクトがあり、まさにそれを行います。
+**Another alternative** は [**CertStream**](https://medium.com/cali-dog-security/introducing-certstream-3fc13bb98067) という素晴らしいプロジェクトです。CertStream は新しく生成された証明書のリアルタイムストリームを提供し、指定したキーワードを（ほぼ）リアルタイムで検出するのに使えます。実際に [**phishing_catcher**](https://github.com/x0rz/phishing_catcher) というプロジェクトがこれを実装しています。
 
-### **新しいドメイン**
+実践的なヒント: CT ヒットをトリアージする際は、NRDs、untrusted/unknown registrars、privacy-proxy WHOIS、および非常に最近の `NotBefore` 時刻を持つ cert を優先してください。所有しているドメイン/ブランドの allowlist を維持してノイズを減らしましょう。
 
-**最後の代替手段**は、いくつかのTLDの**新しく登録されたドメインのリストを収集**し、**これらのドメイン内のキーワードを確認することです**。ただし、長いドメインは通常1つ以上のサブドメインを使用するため、キーワードはFLD内に表示されず、フィッシングサブドメインを見つけることはできません。
+#### **New domains**
+
+**One last alternative** は、いくつかの TLD について newly registered domains のリストを集め（[Whoxy](https://www.whoxy.com/newly-registered-domains/) などが提供）、それらのドメインに含まれるキーワードをチェックすることです。ただし、長いドメインは通常 1 つ以上のサブドメインを使うため、キーワードが FLD の中に現れず、フィッシング用サブドメインを見つけられないことがあります。
+
+追加のヒューリスティック: 特定の file-extension TLD（例: `.zip`, `.mov`）は、誘い文句でファイル名と誤認されやすいため、アラートで追加の疑いを持って扱ってください。TLD シグナルをブランドキーワードや NRD 年齢と組み合わせると精度が上がります。
+
+## References
+
+- urlscan.io – Search API reference: https://urlscan.io/docs/search/
+- APNIC Blog – JA4+ network fingerprinting (includes Evilginx example): https://blog.apnic.net/2023/11/22/ja4-network-fingerprinting/
 
 {{#include ../../banners/hacktricks-training.md}}
