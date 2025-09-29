@@ -1,69 +1,147 @@
-# Kugundua Phishing
+# Kutambua Phishing
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Utangulizi
 
-Ili kugundua jaribio la phishing ni muhimu **kuelewa mbinu za phishing zinazotumiwa leo**. Kwenye ukurasa wa mzazi wa chapisho hili, unaweza kupata taarifa hii, hivyo kama hujui ni mbinu zipi zinazotumiwa leo nakusihi uende kwenye ukurasa wa mzazi na usome angalau sehemu hiyo.
+Ili kutambua jaribio la phishing ni muhimu **kuelewa phishing techniques zinazotumika sasa hivi**. Kwenye ukurasa mzazi wa chapisho hiki, unaweza kupata taarifa hizi, hivyo ikiwa hufahamu ni tekniki gani zinatumika leo ninakushauri uende kwenye ukurasa mzazi na usome angalau sehemu hiyo.
 
-Chapisho hili linategemea wazo kwamba **washambuliaji watajaribu kwa namna fulani kuiga au kutumia jina la kikoa la mwathirika**. Ikiwa kikoa chako kinaitwa `example.com` na unapata phishing ukitumia jina la kikoa tofauti kabisa kwa sababu fulani kama `youwonthelottery.com`, mbinu hizi hazitakufichua.
+Chapisho hili limetegemea wazo kwamba **washambuliaji watajaribu kwa namna fulani kuiga au kutumia jina la domain la mwathiriwa**. Ikiwa domain yako inaitwa `example.com` na umepigwa phishing ukitumia kwa sababu fulani domain tofauti kabisa kama `youwonthelottery.com`, mbinu hizi hazitatambua hilo.
 
-## Mabadiliko ya majina ya kikoa
+## Mabadiliko ya jina la domain
 
-Ni rahisi **kufichua** jaribio hizo za **phishing** ambazo zitatumia jina la **kikoa linalofanana** ndani ya barua pepe.\
-Inatosha **kuunda orodha ya majina ya phishing yanayoweza kutokea** ambayo mshambuliaji anaweza kutumia na **kuangalia** ikiwa yame **jiandikisha** au kuangalia ikiwa kuna **IP** inayotumia hilo.
+Ni aina ya **rahisi** ku**gundua** yale majaribio ya **phishing** yatakayotumia **jina la domain linalofanana** ndani ya barua pepe.\
+Inatosha **kutengeneza orodha ya majina ya phishing yanayowezekana zaidi** ambayo mshambuliaji anaweza kutumia na **kuangalia** ikiwa yameorodheshwa au angalia tu ikiwa kuna **IP** inayoyatumia.
 
-### Kupata kikoa chenye shaka
+### Kupata domain zenye kutiliwa shaka
 
-Kwa kusudi hili, unaweza kutumia yoyote ya zana zifuatazo. Kumbuka kwamba zana hizi pia zitafanya maombi ya DNS kiotomatiki ili kuangalia ikiwa kikoa kina IP yoyote iliyotolewa:
+Kwa kusudi hili, unaweza kutumia zana yoyote kati ya zifuatazo. Kumbuka kwamba zana hizi pia zitafanya maombi ya DNS moja kwa moja ili kuangalia ikiwa domain ina IP yoyote iliyotengwa:
 
 - [**dnstwist**](https://github.com/elceef/dnstwist)
 - [**urlcrazy**](https://github.com/urbanadventurer/urlcrazy)
 
+Vidokezo: Ikiwa utatengeneza orodha ya wagombea, pia ingiza kwenye DNS resolver logs zako ili kugundua **NXDOMAIN lookups from inside your org** (watumiaji wakijaribu kufikia typo kabla mshambuliaji hajayasajili). Sinkhole or pre-block these domains if policy allows.
+
 ### Bitflipping
 
-**Unaweza kupata maelezo mafupi ya mbinu hii kwenye ukurasa wa mzazi. Au soma utafiti wa asili katika** [**https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/**](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)
+**You can find a short the explanation of this technique in the parent page. Or read the original research in** [**https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/**](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)
 
-Kwa mfano, mabadiliko ya bit 1 katika kikoa microsoft.com yanaweza kubadilisha kuwa _windnws.com._\
-**Washambuliaji wanaweza kujiandikisha kwa majina mengi ya kikoa yanayohusiana na mwathirika ili kuwahamisha watumiaji halali kwenye miundombinu yao**.
+Kwa mfano, mabadiliko ya 1 bit kwenye domain microsoft.com yanaweza kuibadilisha kuwa _windnws.com._\
+**Washambuliaji wanaweza kusajili kadri iwezekanavyo domain nyingi za bit-flipping zinazohusiana na mwathiriwa ili kupeleka watumiaji halali kwenye miundombinu yao**.
 
-**Majina yote ya kikoa yanayoweza kubadilishwa yanapaswa pia kufuatiliwa.**
+**All possible bit-flipping domain names should be also monitored.**
+
+Ikiwa pia unahitaji kuzingatia homoglyph/IDN lookalikes (kwa mfano, kuchanganya herufi za Latin/Cyrillic), angalia:
+
+{{#ref}}
+homograph-attacks.md
+{{#endref}}
 
 ### Ukaguzi wa Msingi
 
-Mara tu unapokuwa na orodha ya majina ya kikoa yenye shaka unapaswa **kuangalia** (hasa bandari za HTTP na HTTPS) ili **kuona ikiwa wanatumia fomu ya kuingia inayofanana** na moja ya kikoa cha mwathirika.\
-Unaweza pia kuangalia bandari 3333 kuona ikiwa iko wazi na inafanya kazi ya `gophish`.\
-Ni muhimu pia kujua **umri wa kila kikoa chenye shaka kilichogunduliwa**, kadri inavyokuwa changa ndivyo inavyokuwa hatari zaidi.\
-Unaweza pia kupata **picha za skrini** za ukurasa wa wavuti wa HTTP na/au HTTPS wenye shaka ili kuona ikiwa ni ya shaka na katika hali hiyo **ingia ili kuangalia kwa undani zaidi**.
+Mara tu ukiwa na orodha ya majina ya domain yenye kutiliwa shaka unapaswa **kuzijaribu** (hasa ports HTTP na HTTPS) ili **kuona kama zinatumia fomu ya login inayofanana** na moja ya domain za mwathiriwa.\
+Unaweza pia kuangalia port 3333 kuona ikiwa imefunguliwa na inaendesha mfano wa `gophish`.\
+Pia inavutia kujua **umri wa kila domain ya mashaka uliyogundua**, kadri mdogo ndivyo hatari zaidi.\
+Unaweza pia kupata **screenshots** za ukurasa wa HTTP na/au HTTPS wa tovuti yenye mashaka ili kuona ikiwa ni ya hovyo na katika hali hiyo **uingie ili ukaangalie kwa undani zaidi**.
 
 ### Ukaguzi wa Juu
 
-Ikiwa unataka kwenda hatua moja mbele nakusihi **ufuatilie majina hayo ya kikoa yenye shaka na kutafuta zaidi** mara kwa mara (kila siku? inachukua sekunde/chache tu). Unapaswa pia **kuangalia** bandari **zilizofunguliwa** za IP zinazohusiana na **kutafuta mifano ya `gophish` au zana zinazofanana** (ndiyo, washambuliaji pia hufanya makosa) na **kufuatilia ukurasa wa wavuti wa HTTP na HTTPS wa majina ya kikoa yenye shaka na subdomains** ili kuona ikiwa wameiga fomu yoyote ya kuingia kutoka kwenye kurasa za wavuti za mwathirika.\
-Ili **kujiandaa** kwa hili nakusihi uwe na orodha ya fomu za kuingia za majina ya kikoa ya mwathirika, spider ukurasa wa wavuti wenye shaka na kulinganisha kila fomu ya kuingia iliyopatikana ndani ya majina ya kikoa yenye shaka na kila fomu ya kuingia ya kikoa cha mwathirika kwa kutumia kitu kama `ssdeep`.\
-Ikiwa umepata fomu za kuingia za majina ya kikoa yenye shaka, unaweza kujaribu **kutuma akidi za takataka** na **kuangalia ikiwa inakuhamisha kwenye kikoa cha mwathirika**.
+Ikiwa ungependa kwenda hatua moja zaidi ningependekeza **kufuatilia domain hizo za mashaka na kutafuta zaidi** mara kwa mara (kila siku? huchukua sekunde/dakika chache tu). Pia unapaswa **kuangalia** ports zilizo wazi za IP zinazohusiana na **kutafuta instances za `gophish` au zana zinazofanana** (ndio, washambuliaji pia hufanya makosa) na **kuangalia HTTP na HTTPS wa kurasa za domain na subdomains zenye shaka** kuona kama wameiga fomu yoyote ya login kutoka kwenye kurasa za mwathiriwa.\
+Ili **kuziweka otomatiki** ningependekeza kuwa na orodha ya fomu za login za domain za mwathiriwa, spider the suspicious web pages na kulinganisha kila fomu ya login iliyopatikana ndani ya domain zenye mashaka na kila fomu ya login ya domain ya mwathiriwa kwa kutumia kitu kama `ssdeep`.\
+Kama umeweka fomu za login za domain zenye mashaka, unaweza kujaribu **kutuma nywila za junk** na **kuangalia kama inakurudisha kwenye domain ya mwathiriwa**.
 
-## Majina ya kikoa yanayotumia maneno muhimu
+---
 
-Ukurasa wa mzazi pia unataja mbinu ya mabadiliko ya jina la kikoa ambayo inajumuisha kuweka **jina la kikoa la mwathirika ndani ya kikoa kikubwa** (kwa mfano, paypal-financial.com kwa paypal.com).
+### Kufatilia kwa kutumia favicon na web fingerprints (Shodan/ZoomEye/Censys)
 
-### Uwazi wa Cheti
+Mifumo mingi ya phishing hutumia tena favicons kutoka kwa brand wanayoiga. Skana za mtandao wote huhesabu MurmurHash3 ya favicon iliyotangazwa kwa base64. Unaweza kuunda hash na kuifanya pivot:
 
-Haiwezekani kuchukua mbinu ya awali ya "Brute-Force" lakini kwa kweli **inawezekana kufichua jaribio kama hilo la phishing** pia kwa shukrani kwa uwazi wa cheti. Kila wakati cheti kinapotolewa na CA, maelezo yanapatikana hadharani. Hii inamaanisha kwamba kwa kusoma uwazi wa cheti au hata kufuatilia, **inawezekana kupata majina ya kikoa yanayotumia neno muhimu ndani ya jina lake** Kwa mfano, ikiwa mshambuliaji anaunda cheti cha [https://paypal-financial.com](https://paypal-financial.com), kuona cheti kunawezekana kupata neno muhimu "paypal" na kujua kwamba barua pepe yenye shaka inatumika.
+Mfano wa Python (mmh3):
+```python
+import base64, requests, mmh3
+url = "https://www.paypal.com/favicon.ico"  # change to your brand icon
+b64 = base64.encodebytes(requests.get(url, timeout=10).content)
+print(mmh3.hash(b64))  # e.g., 309020573
+```
+- Tafuta kwenye Shodan: `http.favicon.hash:309020573`
+- Kwa kutumia tooling: angalia community tools kama favfreak ku-generate hashes na dorks kwa Shodan/ZoomEye/Censys.
 
-Chapisho [https://0xpatrik.com/phishing-domains/](https://0xpatrik.com/phishing-domains/) linapendekeza kwamba unaweza kutumia Censys kutafuta vyeti vinavyoathiri neno muhimu maalum na kuchuja kwa tarehe (vyeti "vipya" pekee) na kwa mtoaji wa CA "Let's Encrypt":
+Notes
+- Favicons zinatumika tena; chukulia matches kama leads na validate content na certs kabla ya kuchukua hatua.
+- Unganisha na domain-age na keyword heuristics kwa usahihi zaidi.
+
+### Utafutaji wa telemetry za URL (urlscan.io)
+
+`urlscan.io` inahifadhi historical screenshots, DOM, requests na TLS metadata za URL zilizotumwa. Unaweza kutafuta brand abuse na clones:
+
+Example queries (UI or API):
+- Tafuta lookalikes ukiondoa domain zako halali: `page.domain:(/.*yourbrand.*/ AND NOT yourbrand.com AND NOT www.yourbrand.com)`
+- Tafuta sites zinazongeuka assets zako (hotlinking): `domain:yourbrand.com AND NOT page.domain:yourbrand.com`
+- Punguza kwa matokeo ya karibuni: ongeza `AND date:>now-7d`
+
+API example:
+```bash
+# Search recent scans mentioning your brand
+curl -s 'https://urlscan.io/api/v1/search/?q=page.domain:(/.*yourbrand.*/%20AND%20NOT%20yourbrand.com)%20AND%20date:>now-7d' \
+-H 'API-Key: <YOUR_URLSCAN_KEY>' | jq '.results[].page.url'
+```
+Kutoka kwenye JSON, zingatia:
+- `page.tlsIssuer`, `page.tlsValidFrom`, `page.tlsAgeDays` ili kugundua vyeti vipya kabisa kwa matovuti yanayofanana
+- `task.source` values like `certstream-suspicious` ili kuhusisha matokeo na ufuatiliaji wa CT
+
+### Umri wa domain kupitia RDAP (inayoweza kuendeshwa kwa script)
+
+RDAP hurudisha matukio ya uundaji yanayosomeka na mashine. Inafaa kuashiria **domain zilizosajiliwa hivi karibuni (NRDs)**.
+```bash
+# .com/.net RDAP (Verisign)
+curl -s https://rdap.verisign.com/com/v1/domain/suspicious-example.com | \
+jq -r '.events[] | select(.eventAction=="registration") | .eventDate'
+
+# Generic helper using rdap.net redirector
+curl -s https://www.rdap.net/domain/suspicious-example.com | jq
+```
+Boresheni pipeline yenu kwa ku-tag domains na makundi ya umri wa usajili (mf., <7 days, <30 days) na panga triage kwa kipaumbele ipasavyo.
+
+### TLS/JAx fingerprints to spot AiTM infrastructure
+
+Phishing za kisasa za credential mara nyingi zinatumia **Adversary-in-the-Middle (AiTM)** reverse proxies (mf., Evilginx) kuiba session tokens. Unaweza kuongeza utambuzi upande wa mtandao:
+
+- Rekodi TLS/HTTP fingerprints (JA3/JA4/JA4S/JA4H) kwenye egress. Baadhi ya builds za Evilginx zimetazamwa zikiwa na JA4 client/server values thabiti. Toa tahadhari kwa fingerprints zinazojulikana-kutwa mbaya kama ishara dhaifu tu na thibitisha kila mara kwa content na domain intel.
+- Rekodi kwa njia ya hiari metadata ya TLS certificate (issuer, SAN count, wildcard use, validity) kwa lookalike hosts zilizogunduliwa kupitia CT au urlscan na zilelekee/korelasha na umri wa DNS na geolocation.
+
+> Kumbuka: Chukulia fingerprints kama uboreshaji, sio kama vikwazo pekee; frameworks hubadilika na zinaweza kubadilisha au kuficha taarifa.
+
+### Domain names using keywords
+
+Ukurasa mzazi pia unataja mbinu ya utofauti wa jina la domain inayojumuisha kuweka **jina la domain la mwathirika ndani ya domain kubwa** (mf., paypal-financial.com kwa paypal.com).
+
+#### Certificate Transparency
+
+Haiwezekani kutumia mbinu ya "Brute-Force" iliyotajwa hapo awali lakini kwa kweli **inawezekana kugundua jaribio kama hilo la phishing** pia shukrani kwa certificate transparency. Kila wakati CA inapotoa certificate, maelezo yake yanakuwa ya umma. Hii inamaanisha kwamba kwa kusoma certificate transparency au hata kuifuatilia, ni **inawezekana kupata domains zinazotumia neno muhimu ndani ya jina lao**. Kwa mfano, kama mshambuliaji anazalisha certificate ya [https://paypal-financial.com](https://paypal-financial.com), kwa kuona certificate inawezekana kupata neno muhimu "paypal" na kujua kwamba email inayoshukiwa inatumiwa.
+
+Chapisho [https://0xpatrik.com/phishing-domains/](https://0xpatrik.com/phishing-domains/) kinapendekeza unaweza kutumia Censys kutafuta certificates zinazohusiana na neno maalum na kuchuja kwa tarehe (tu certificates "mpya") na kwa CA issuer "Let's Encrypt":
 
 ![https://0xpatrik.com/content/images/2018/07/cert_listing.png](<../../images/image (1115).png>)
 
-Hata hivyo, unaweza kufanya "kile kile" kwa kutumia wavuti ya bure [**crt.sh**](https://crt.sh). Unaweza **kutafuta neno muhimu** na **kuchuja** matokeo **kwa tarehe na CA** ikiwa unataka.
+Hata hivyo, unaweza kufanya "the same" ukitumia tovuti ya bure [**crt.sh**](https://crt.sh). Unaweza **kutafuta neno muhimu** na **kichuja** matokeo **kwa tarehe na CA** ikiwa unataka.
 
 ![](<../../images/image (519).png>)
 
-Kwa kutumia chaguo hili la mwisho unaweza hata kutumia uwanja wa Matching Identities kuona ikiwa kuna kitambulisho chochote kutoka kwenye kikoa halisi kinacholingana na chochote cha majina ya kikoa yenye shaka (kumbuka kwamba jina la kikoa lenye shaka linaweza kuwa la uwongo).
+Kwa kutumia chaguo la mwisho unaweza hata kutumia uwanja Matching Identities kuona kama identity yoyote kutoka domain halisi inaendana na yoyote ya domain zinazoshukiwa (kumbuka kwamba domain inayoshukiwa inaweza kuwa false positive).
 
-**Chaguo lingine** ni mradi mzuri unaoitwa [**CertStream**](https://medium.com/cali-dog-security/introducing-certstream-3fc13bb98067). CertStream inatoa mtiririko wa wakati halisi wa vyeti vilivyoundwa hivi karibuni ambavyo unaweza kutumia kugundua maneno muhimu yaliyotajwa katika wakati (karibu) halisi. Kwa kweli, kuna mradi unaoitwa [**phishing_catcher**](https://github.com/x0rz/phishing_catcher) ambao unafanya hivyo.
+**Another alternative** ni mradi mzuri uitwao [**CertStream**](https://medium.com/cali-dog-security/introducing-certstream-3fc13bb98067). CertStream hutoa mtiririko wa wakati-halisi wa certificates mpya zilizotengenezwa ambao unaweza kutumia kugundua maneno maalum kwa wakati (karibu) halisi. Kwa kweli, kuna mradi uitwao [**phishing_catcher**](https://github.com/x0rz/phishing_catcher) unaofanya hivyo.
 
-### **Majina mapya ya kikoa**
+Tip ya vitendo: unapotriage hits za CT, panga kipaumbele NRDs, registrars zisizo za kuaminika/zisizojulikana, privacy-proxy WHOIS, na certs zenye `NotBefore` za hivi karibuni. Dumisha allowlist ya domains/brand zako ili kupunguza kelele.
 
-**Chaguo la mwisho** ni kukusanya orodha ya **majina mapya ya kikoa yaliyosajiliwa** kwa baadhi ya TLDs ([Whoxy](https://www.whoxy.com/newly-registered-domains/) inatoa huduma hiyo) na **kuangalia maneno muhimu katika majina haya ya kikoa**. Hata hivyo, majina marefu ya kikoa mara nyingi hutumia moja au zaidi ya subdomains, hivyo neno muhimu halitaonekana ndani ya FLD na huwezi kupata subdomain ya phishing.
+#### **Domain mpya**
+
+**Chaguo la mwisho** ni kukusanya orodha ya **domains zilizosajiliwa hivi karibuni** kwa baadhi ya TLDs ([Whoxy](https://www.whoxy.com/newly-registered-domains/) inatoa huduma hiyo) na **kukagua maneno muhimu katika domains hizi**. Hata hivyo, domains ndefu kwa kawaida hutumia subdomain moja au zaidi, hivyo neno muhimu hautaonekana ndani ya FLD na hautaweza kupata subdomain ya phishing.
+
+Mchakato wa ziada: chukulia baadhi ya **file-extension TLDs** (mf., `.zip`, `.mov`) kwa tahadhari zaidi katika onyo. Hizi mara nyingi huchanganywa na majina ya faili katika lures; changanya ishara ya TLD na maneno ya brand na umri wa NRD kwa usahihi zaidi.
+
+## Marejeo
+
+- urlscan.io – Search API reference: https://urlscan.io/docs/search/
+- APNIC Blog – JA4+ network fingerprinting (includes Evilginx example): https://blog.apnic.net/2023/11/22/ja4-network-fingerprinting/
 
 {{#include ../../banners/hacktricks-training.md}}
