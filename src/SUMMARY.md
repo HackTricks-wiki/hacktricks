@@ -447,6 +447,7 @@
   - [NextJS](network-services-pentesting/pentesting-web/nextjs.md)
   - [Nginx](network-services-pentesting/pentesting-web/nginx.md)
   - [NodeJS Express](network-services-pentesting/pentesting-web/nodejs-express.md)
+  - [Sitecore](network-services-pentesting/pentesting-web/sitecore/README.md)
   - [PHP Tricks](network-services-pentesting/pentesting-web/php-tricks-esp/README.md)
     - [PHP - Useful Functions & disable_functions/open_basedir bypass](network-services-pentesting/pentesting-web/php-tricks-esp/php-useful-functions-disable_functions-open_basedir-bypass/README.md)
       - [disable_functions bypass - php-fpm/FastCGI](network-services-pentesting/pentesting-web/php-tricks-esp/php-useful-functions-disable_functions-open_basedir-bypass/disable_functions-bypass-php-fpm-fastcgi.md)
@@ -493,6 +494,7 @@
 - [135, 593 - Pentesting MSRPC](network-services-pentesting/135-pentesting-msrpc.md)
 - [137,138,139 - Pentesting NetBios](network-services-pentesting/137-138-139-pentesting-netbios.md)
 - [139,445 - Pentesting SMB](network-services-pentesting/pentesting-smb/README.md)
+  - [Ksmbd Attack Surface And Fuzzing Syzkaller](network-services-pentesting/pentesting-smb/ksmbd-attack-surface-and-fuzzing-syzkaller.md)
   - [rpcclient enumeration](network-services-pentesting/pentesting-smb/rpcclient-enumeration.md)
 - [143,993 - Pentesting IMAP](network-services-pentesting/pentesting-imap.md)
 - [161,162,10161,10162/udp - Pentesting SNMP](network-services-pentesting/pentesting-snmp/README.md)
@@ -766,7 +768,7 @@
     - [Stack Shellcode - arm64](binary-exploitation/stack-overflow/stack-shellcode/stack-shellcode-arm64.md)
   - [Stack Pivoting - EBP2Ret - EBP chaining](binary-exploitation/stack-overflow/stack-pivoting-ebp2ret-ebp-chaining.md)
   - [Uninitialized Variables](binary-exploitation/stack-overflow/uninitialized-variables.md)
-- [ROP - Return Oriented Programing](binary-exploitation/rop-return-oriented-programing/README.md)
+- [ROP and JOP](binary-exploitation/rop-return-oriented-programing/README.md)
   - [BROP - Blind Return Oriented Programming](binary-exploitation/rop-return-oriented-programing/brop-blind-return-oriented-programming.md)
   - [Ret2csu](binary-exploitation/rop-return-oriented-programing/ret2csu.md)
   - [Ret2dlresolve](binary-exploitation/rop-return-oriented-programing/ret2dlresolve.md)
@@ -785,7 +787,7 @@
   - [Windows Seh Overflow](binary-exploitation/stack-overflow/windows-seh-overflow.md)
 - [Array Indexing](binary-exploitation/array-indexing.md)
 - [Chrome Exploiting](binary-exploitation/chrome-exploiting.md)
-- [Integer Overflow](binary-exploitation/integer-overflow.md)
+- [Integer Overflow](binary-exploitation/integer-overflow-and-underflow.md)
 - [Format Strings](binary-exploitation/format-strings/README.md)
   - [Format Strings - Arbitrary Read Example](binary-exploitation/format-strings/format-strings-arbitrary-read-example.md)
   - [Format Strings Template](binary-exploitation/format-strings/format-strings-template.md)
@@ -836,7 +838,7 @@
   - [WWW2Exec - \_\_malloc_hook & \_\_free_hook](binary-exploitation/arbitrary-write-2-exec/aw2exec-__malloc_hook.md)
 - [Common Exploiting Problems](binary-exploitation/common-exploiting-problems.md)
 - [Windows Exploiting (Basic Guide - OSCP lvl)](binary-exploitation/windows-exploiting-basic-guide-oscp-lvl.md)
-- [iOS Exploiting](binary-exploitation/ios-exploiting.md)
+- [iOS Exploiting](binary-exploitation/ios-exploiting/README.md)
 
 # 🤖 AI
 - [AI Security](AI/README.md)
@@ -929,4 +931,3 @@
 - [Post Exploitation](todo/post-exploitation.md)
 - [Investment Terms](todo/investment-terms.md)
 - [Cookies Policy](todo/cookies-policy.md)
-  
