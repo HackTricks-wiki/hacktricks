@@ -22,7 +22,7 @@ Port rights, which define what operations a task can perform, are key to this co
 
 - **Receive right**, which allows receiving messages sent to the port. Mach ports are MPSC (multiple-producer, single-consumer) queues, which means that there may only ever be **one receive right for each port** in the whole system (unlike with pipes, where multiple processes can all hold file descriptors to the read end of one pipe).
   - A **task with the Receive** right can receive messages and **create Send rights**, allowing it to send messages. Originally only the **own task has Receive right over its por**t.
-  - If the owner of the Receive right **dies** or kills it, the **send right became useless (dead name).**
+  - If the owner of the Receive right **dies** or kills it, the **send right becomes useless (dead name).**
 - **Send right**, which allows sending messages to the port.
   - The Send right can be **cloned** so a task owning a Send right can clone the right and **grant it to a third task**.
   - Note that **port rights** can also be **passed** though Mac messages.
