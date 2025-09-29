@@ -769,7 +769,7 @@
     - [Stack Shellcode - arm64](binary-exploitation/stack-overflow/stack-shellcode/stack-shellcode-arm64.md)
   - [Stack Pivoting - EBP2Ret - EBP chaining](binary-exploitation/stack-overflow/stack-pivoting-ebp2ret-ebp-chaining.md)
   - [Uninitialized Variables](binary-exploitation/stack-overflow/uninitialized-variables.md)
-- [ROP - Return Oriented Programing](binary-exploitation/rop-return-oriented-programing/README.md)
+- [ROP & JOP](binary-exploitation/rop-return-oriented-programing/README.md)
   - [BROP - Blind Return Oriented Programming](binary-exploitation/rop-return-oriented-programing/brop-blind-return-oriented-programming.md)
   - [Ret2csu](binary-exploitation/rop-return-oriented-programing/ret2csu.md)
   - [Ret2dlresolve](binary-exploitation/rop-return-oriented-programing/ret2dlresolve.md)
@@ -838,6 +838,7 @@
   - [WWW2Exec - GOT/PLT](binary-exploitation/arbitrary-write-2-exec/aw2exec-got-plt.md)
   - [WWW2Exec - \_\_malloc_hook & \_\_free_hook](binary-exploitation/arbitrary-write-2-exec/aw2exec-__malloc_hook.md)
 - [Common Exploiting Problems](binary-exploitation/common-exploiting-problems.md)
+- [Linux kernel exploitation - toctou](binary-exploitation/linux-kernel-exploitation/posix-cpu-timers-toctou-cve-2025-38352.md)
 - [Windows Exploiting (Basic Guide - OSCP lvl)](binary-exploitation/windows-exploiting-basic-guide-oscp-lvl.md)
 - [iOS Exploiting](binary-exploitation/ios-exploiting.md)
 
