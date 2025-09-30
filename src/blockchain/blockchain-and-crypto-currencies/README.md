@@ -4,173 +4,181 @@
 
 ## Osnovni pojmovi
 
-- **Smart Contracts** su definisani kao programi koji se izvršavaju na blockchain-u kada su ispunjeni određeni uslovi, automatizujući izvršavanje sporazuma bez posrednika.
-- **Decentralizovane aplikacije (dApps)** nadograđuju se na smart contracts, imajući korisnički prihvatljiv front-end i transparentan, auditabilan back-end.
-- **Tokeni & Coinsi** razlikuju se tako što coinsi služe kao digitalni novac, dok tokeni predstavljaju vrednost ili vlasništvo u specifičnim kontekstima.
-- **Utility Tokens** daju pristup uslugama, a **Security Tokens** označavaju vlasništvo nad imovinom.
-- **DeFi** označava Decentralizovane finansije, koje nude finansijske usluge bez centralnih autoriteta.
-- **DEX** i **DAOs** odnose se na Decentralizovane berze i Decentralizovane autonomne organizacije.
+- **Smart Contracts** su definisani kao programi koji se izvršavaju na blockchainu kada su ispunjeni određeni uslovi, automatizujući sprovođenje ugovora bez posrednika.
+- **Decentralized Applications (dApps)** se oslanjaju na smart contracts, imajući korisnički pristupačan front-end i transparentan i podložan reviziji back-end.
+- **Tokens & Coins** razlikuju se tako što coini služe kao digitalni novac, dok tokeni predstavljaju vrednost ili vlasništvo u određenim kontekstima.
+- **Utility Tokens** omogućavaju pristup uslugama, a **Security Tokens** označavaju vlasništvo nad imovinom.
+- **DeFi** označava Decentralized Finance, koji nudi finansijske usluge bez centralnih autoriteta.
+- **DEX** i **DAOs** se odnose na Decentralized Exchange Platforms i Decentralized Autonomous Organizations, redom.
 
 ## Mehanizmi konsenzusa
 
-Mehanizmi konsenzusa obezbeđuju sigurnu i dogovorenu validaciju transakcija na blockchain-u:
+Mehanizmi konsenzusa obezbeđuju sigurnu i zajednički prihvaćenu validaciju transakcija na blockchainu:
 
-- **Proof of Work (PoW)** oslanja se na računarsku snagu za verifikaciju transakcija.
-- **Proof of Stake (PoS)** zahteva od validatora da drže određenu količinu tokena, smanjujući potrošnju energije u odnosu na PoW.
+- **Proof of Work (PoW)** se oslanja na računarsku snagu za verifikaciju transakcija.
+- **Proof of Stake (PoS)** zahteva da validatori drže određenu količinu tokena, smanjujući potrošnju energije u odnosu na PoW.
 
-## Osnove Bitcoina
+## Osnovno o Bitcoinu
 
 ### Transakcije
 
-Bitcoin transakcije uključuju prenos sredstava između adresa. Transakcije se validiraju digitalnim potpisima, što osigurava da samo vlasnik privatnog ključa može inicirati transfer.
+Bitcoin transakcije uključuju prenos sredstava između adresa. Transakcije se validiraju digitalnim potpisima, što osigurava da samo vlasnik privatnog ključa može inicirati prenose.
 
 #### Ključne komponente:
 
 - **Multisignature Transactions** zahtevaju više potpisa za autorizaciju transakcije.
-- Transakcije se sastoje od **inputs** (izvor sredstava), **outputs** (odredište), **fees** (plaćeni rudarima) i **scripts** (pravila transakcije).
+- Transakcije se sastoje od **inputs** (izvor sredstava), **outputs** (odredište), **fees** (plaćanja minerima) i **scripts** (pravila transakcije).
 
 ### Lightning Network
 
-Cilj mu je poboljšanje skalabilnosti Bitcoina omogućavajući više transakcija unutar kanala, pri čemu se samo konačno stanje objavljuje na blockchain-u.
+Cilj je poboljšanje skalabilnosti Bitcoina omogućavanjem više transakcija unutar kanala, pri čemu se na blockchain emituje samo konačno stanje.
 
 ## Problemi privatnosti Bitcoina
 
-Napadi na privatnost, kao što su **Common Input Ownership** i **UTXO Change Address Detection**, iskorišćavaju obrasce u transakcijama. Strategije kao što su **Mixers** i **CoinJoin** poboljšavaju anonimnost time što zamagljuju veze transakcija između korisnika.
+Napadi na privatnost, kao što su **Common Input Ownership** i **UTXO Change Address Detection**, koriste obrasce transakcija. Strategije poput **Mixers** i **CoinJoin** poboljšavaju anonimnost zamagljivanjem veza između transakcija korisnika.
 
-## Anonimno sticanje Bitcoina
+## Nabavka Bitcoina anonimno
 
-Metode uključuju trgovinu za keš, mining i korišćenje mixera. **CoinJoin** meša više transakcija kako bi otežao praćenje, dok **PayJoin** prikriva CoinJoin kao obične transakcije za veću privatnost.
+Metode uključuju trgovinu za keš, mining i korišćenje Mixers. **CoinJoin** meša više transakcija kako bi se zakomplikovala tragabilnost, dok **PayJoin** maskira CoinJoin-ove kao obične transakcije za poboljšanu privatnost.
 
-# Bitcoin Privacy Atacks
+# Napadi na privatnost Bitcoina
 
 # Sažetak napada na privatnost Bitcoina
 
-U svetu Bitcoina, privatnost transakcija i anonimnost korisnika često su predmet brige. Evo pojednostavljenog pregleda nekoliko uobičajenih metoda kojima napadači mogu ugroziti privatnost Bitcoina.
+U svetu Bitcoina, privatnost transakcija i anonimnost korisnika često su predmet zabrinutosti. Evo pojednostavljenog pregleda nekoliko uobičajenih metoda kojima napadači mogu narušiti privatnost Bitcoina.
 
 ## **Common Input Ownership Assumption**
 
-Generalno je retko da se inputi različitih korisnika kombinuju u jednoj transakciji zbog složenosti koja je u tome uključena. Zato se **dve input adrese u istoj transakciji često pretpostavljaju da pripadaju istom vlasniku**.
+Generalno je retko da se inputs od različitih korisnika kombinuju u jednoj transakciji zbog uključenih komplikacija. Stoga se često pretpostavlja da **dve input adrese u istoj transakciji pripadaju istom vlasniku**.
 
 ## **UTXO Change Address Detection**
 
-UTXO, odnosno **Unspent Transaction Output**, mora biti u potpunosti potrošen u transakciji. Ako se samo deo šalje na drugu adresu, ostatak ide na novu change address. Posmatrači mogu pretpostaviti da ta nova adresa pripada pošiljaocu, čime se narušava privatnost.
+UTXO, odnosno **Unspent Transaction Output**, mora biti u potpunosti potrošen u transakciji. Ako se samo deo pošalje na drugu adresu, ostatak ide na novu change adresu. Posmatrači mogu pretpostaviti da ta nova adresa pripada pošiljaocu, čime se narušava privatnost.
 
 ### Primer
 
-Da bi se to ublažilo, mixing servisi ili korišćenje više adresa mogu pomoći da se zamagli vlasništvo.
+Da bi se to ublažilo, servisi za mešanje ili korišćenje više adresa mogu pomoći da se zamaskira vlasništvo.
 
-## **Izlaganje preko društvenih mreža i foruma**
+## **Social Networks & Forums Exposure**
 
 Korisnici ponekad dele svoje Bitcoin adrese online, što olakšava **povezivanje adrese sa njenim vlasnikom**.
 
-## **Analiza grafova transakcija**
+## **Transaction Graph Analysis**
 
 Transakcije se mogu vizualizovati kao grafovi, otkrivajući potencijalne veze između korisnika na osnovu toka sredstava.
 
 ## **Unnecessary Input Heuristic (Optimal Change Heuristic)**
 
-Ova heuristika se zasniva na analizi transakcija sa više inputa i outputa kako bi se pogodilo koji output predstavlja change koji se vraća pošiljaocu.
+Ova heuristika se zasniva na analizi transakcija sa višestrukim inputs i outputs kako bi se pogodilo koji output predstavlja change koji se vraća pošiljaocu.
 
 ### Primer
 ```bash
 2 btc --> 4 btc
 3 btc     1 btc
 ```
-Ako dodavanje više inputa učini da change output bude veći od bilo kojeg pojedinačnog inputa, to može zbuniti heuristiku.
+Ako dodavanje više inputa učini da change output bude veći od bilo kog pojedinačnog inputa, to može zbuniti heuristiku.
 
 ## **Forced Address Reuse**
 
-Napadači mogu poslati male iznose na prethodno korišćene adrese, nadajući se da će primalac u budućim transakcijama kombinovati te iznose sa drugim inputima, čime bi adrese bile povezane.
+Napadači mogu poslati male iznose na prethodno korišćene adrese, nadajući se da će primalac ubuduće kombinovati ove sa drugim inputima u budućim transakcijama, čime se adrese dovode u vezu.
 
 ### Correct Wallet Behavior
 
-Novčanici bi trebalo da izbegavaju korišćenje coina primljenih na već korišćene, prazne adrese kako bi sprečili ovaj privacy leak.
+Novčanici bi trebalo da izbegavaju korišćenje kovanica primljenih na već korišćene, prazne adrese kako bi sprečili ovaj privacy leak.
 
 ## **Other Blockchain Analysis Techniques**
 
-- **Exact Payment Amounts:** Transakcije bez change-a verovatno su između dve adrese koje pripadaju istom korisniku.
-- **Round Numbers:** Zaokružen broj u transakciji ukazuje na to da je reč o uplati, dok je ne-zaokruženi output verovatno change.
-- **Wallet Fingerprinting:** Različiti novčanici imaju jedinstvene obrasce kreiranja transakcija, što analitičarima omogućava da identifikuju korišćeni softver i potencijalno change address.
-- **Amount & Timing Correlations:** Otkrivanje vremena ili iznosa transakcija može učiniti transakcije sledljivim.
+- **Exact Payment Amounts:** Transakcije bez change verovatno su između dve adrese koje pripadaju istom korisniku.
+- **Round Numbers:** Zaokružen iznos u transakciji sugeriše da je u pitanju plaćanje, pri čemu je ne-zaokruženi izlaz verovatno change.
+- **Wallet Fingerprinting:** Različiti novčanici imaju jedinstvene obrasce kreiranja transakcija, što analitičarima omogućava da identifikuju softver koji je korišćen i potencijalno change address.
+- **Amount & Timing Correlations:** Otkrivanje vremena ili iznosa transakcija može učiniti transakcije pratljivim.
 
 ## **Traffic Analysis**
 
-Praćenjem mrežnog saobraćaja, napadači potencijalno mogu povezati transakcije ili blokove sa IP adresama, ugrožavajući privatnost korisnika. Ovo je naročito tačno ako neka organizacija upravlja velikim brojem Bitcoin nodova, čime povećava svoju sposobnost nadgledanja transakcija.
+Praćenjem mrežnog saobraćaja, napadači mogu potencijalno povezati transakcije ili blokove sa IP adresama, ugrožavajući privatnost korisnika. Ovo je naročito tačno ako neko upravlja velikim brojem Bitcoin čvorova, čime se povećava njihova sposobnost nadgledanja transakcija.
 
 ## More
 
-Za sveobuhvatan spisak napada na privatnost i odbrana, posetite [Bitcoin Privacy on Bitcoin Wiki](https://en.bitcoin.it/wiki/Privacy).
+For a comprehensive list of privacy attacks and defenses, visit [Bitcoin Privacy on Bitcoin Wiki](https://en.bitcoin.it/wiki/Privacy).
 
-# Anonimne Bitcoin Transakcije
+# Anonymous Bitcoin Transactions
 
-## Načini za anonimno dobijanje Bitcoina
+## Ways to Get Bitcoins Anonymously
 
-- **Cash Transactions**: Nabavka bitcoina gotovinom.
-- **Cash Alternatives**: Kupovina poklon kartica i njihova zamena na internetu za bitcoin.
-- **Mining**: Najprivatniji metod za zarađivanje bitcoina je mining, posebno kada se radi samostalno, jer mining poolovi mogu znati IP adresu rudara. [Mining Pools Information](https://en.bitcoin.it/wiki/Pooled_mining)
-- **Theft**: Teoretski, krađa bitcoina mogla bi biti još jedan metod za njegovo anonimno sticanje, iako je to protivzakonito i ne preporučuje se.
+- **Cash Transactions**: Nabavka Bitcoina gotovinom.
+- **Cash Alternatives**: Kupovina poklon kartica i zamena na internetu za Bitcoin.
+- **Mining**: Najprivatniji način da se zaradi Bitcoin je rudarenje, naročito kada se radi solo jer mining pools mogu znati IP adresu rudara. [Mining Pools Information](https://en.bitcoin.it/wiki/Pooled_mining)
+- **Theft**: Teoretski, krađa Bitcoina bi mogla biti još jedan metod da se stekne anonimno, iako je to nezakonito i nije preporučljivo.
 
 ## Mixing Services
 
-Korišćenjem mixing servisa, korisnik može poslati bitcoine i primiti drugačije bitcoine zauzvrat, što otežava praćenje izvornog vlasnika. Ipak, to zahteva poverenje u servis da neće čuvati logove i da će zaista vratiti bitcoine. Alternativa mixing servisima su Bitcoin kazina.
+Korišćenjem mixing service-a, korisnik može poslati bitcoine i dobiti druge bitcoine zauzvrat, što otežava praćenje originalnog vlasnika. Ipak, ovo zahteva poverenje u servis da neće voditi logove i da će zaista vratiti bitcoine. Alternativne opcije za mixanje uključuju Bitcoin kazina.
 
 ## CoinJoin
 
-CoinJoin spaja više transakcija od različitih korisnika u jednu, otežavajući povezivanje inputa i outputa. Uprkos efikasnosti, transakcije sa jedinstvenim veličinama inputa i outputa i dalje se mogu pratiti.
+CoinJoin spaja više transakcija od različitih korisnika u jednu, otežavajući povezivanje inputa sa outputima. Uprkos efikasnosti, transakcije sa jedinstvenim veličinama inputa i outputa i dalje se mogu pratiti.
 
-Primer transakcija koje su možda koristile CoinJoin uključuju `402d3e1df685d1fdf82f36b220079c1bf44db227df2d676625ebcbee3f6cb22a` i `85378815f6ee170aa8c26694ee2df42b99cff7fa9357f073c1192fff1f540238`.
+Example transactions that may have used CoinJoin include `402d3e1df685d1fdf82f36b220079c1bf44db227df2d676625ebcbee3f6cb22a` and `85378815f6ee170aa8c26694ee2df42b99cff7fa9357f073c1192fff1f540238`.
 
-Za više informacija, posetite [CoinJoin](https://coinjoin.io/en). Za sličan servis na Ethereum-u, pogledajte [Tornado Cash](https://tornado.cash), koji anonimizuje transakcije koristeći sredstva od miner-a.
+For more information, visit [CoinJoin](https://coinjoin.io/en). For a similar service on Ethereum, check out [Tornado Cash](https://tornado.cash), which anonymizes transactions with funds from miners.
 
 ## PayJoin
 
-Varijanta CoinJoin-a, PayJoin (ili P2EP), maskira transakciju između dve strane (npr. kupac i trgovac) kao običnu transakciju, bez karakterističnih jednakih outputa tipičnih za CoinJoin. To je izuzetno teško detektovati i može poništiti common-input-ownership heuristic koju koriste entiteti za nadzor transakcija.
+Varijanta CoinJoin-a, PayJoin (ili P2EP), maskira transakciju između dve strane (npr. kupca i trgovca) kao običnu transakciju, bez karakterističnih jednakih outputs koji su tipični za CoinJoin. To je čini izuzetno teškom za detekciju i može obesmišljiti common-input-ownership heuristic koju koriste entiteti za nadzor transakcija.
 ```plaintext
 2 btc --> 3 btc
 5 btc     4 btc
 ```
-Transakcije kao gore navedene mogu biti PayJoin, poboljšavajući privatnost dok ostaju neodvojive od standardnih bitcoin transakcija.
+Transakcije poput gornje mogu biti PayJoin, čime se poboljšava privatnost, a istovremeno ostaju neprepoznatljive u odnosu na standardne bitcoin transakcije.
 
-**Korišćenje PayJoin-a moglo bi značajno da poremeti tradicionalne metode nadzora**, čineći ga perspektivnim razvojem u potrazi za privatnošću transakcija.
+**The utilization of PayJoin could significantly disrupt traditional surveillance methods**, čineći ga perspektivnim razvojem u nastojanju ka privatnosti transakcija.
 
-# Najbolje prakse za privatnost u kriptovalutama
+# Best Practices for Privacy in Cryptocurrencies
 
-## **Tehnike sinhronizacije novčanika**
+## **Wallet Synchronization Techniques**
 
-Za očuvanje privatnosti i bezbednosti, sinhronizacija novčanika sa blockchain-om je ključna. Ističu se dve metode:
+Da bi se očuvale privatnost i bezbednost, sinhronizacija novčanika sa blockchainom je ključna. Dve metode se ističu:
 
-- **Full node**: Preuzimanjem celog blockchain-a, Full node obezbeđuje maksimalnu privatnost. Sve transakcije ikada izvršene se čuvaju lokalno, čime je onemogućeno da protivnici identifikuju koje transakcije ili adrese korisnika su relevantne.
-- **Client-side block filtering**: Ova metoda podrazumeva kreiranje filtera za svaki blok u blockchain-u, omogućavajući novčanicima da identifikuju relevantne transakcije bez otkrivanja specifičnih interesovanja posmatračima mreže. Lightweight wallets preuzimaju ove filtere i dohvataju pune blokove samo kad se pronađe poklapanje sa adresama korisnika.
+- **Full node**: Preuzimanjem celog blockchaina, Full node obezbeđuje maksimalnu privatnost. Sve ikada izvršene transakcije skladište se lokalno, čineći nemogućim za protivnike da identifikuju koje transakcije ili adrese zanimaju korisnika.
+- **Client-side block filtering**: Ova metoda podrazumeva kreiranje filtera za svaki blok u blockchainu, što omogućava novčanicima da identifikuju relevantne transakcije bez otkrivanja specifičnih interesovanja posmatračima mreže. Lightweight wallets preuzimaju ove filtere i dohvaćaju pune blokove samo kada se pronađe podudaranje sa adresama korisnika.
 
-## **Korišćenje Tor-a za anonimnost**
+## **Utilizing Tor for Anonymity**
 
-S obzirom da Bitcoin radi na peer-to-peer mreži, preporučuje se korišćenje Tor-a za maskiranje IP adrese, čime se povećava privatnost pri interakciji sa mrežom.
+S obzirom da Bitcoin funkcioniše na peer-to-peer mreži, preporučuje se korišćenje Tor-a za prikrivanje vaše IP adrese, čime se poboljšava privatnost pri interakciji sa mrežom.
 
-## **Sprečavanje ponovne upotrebe adresa**
+## **Preventing Address Reuse**
 
-Za zaštitu privatnosti važno je koristiti novu adresu za svaku transakciju. Ponovna upotreba adresa može ugroziti privatnost povezivanjem transakcija sa istim entitetom. Moderni novčanici svojim dizajnom obeshrabruju ponovnu upotrebu adresa.
+Za očuvanje privatnosti, važno je koristiti novu adresu za svaku transakciju. Ponovno korišćenje adresa može kompromitovati privatnost povezivanjem transakcija sa istim entitetom. Moderni novčanici svojim dizajnom obeshrabruju ponovnu upotrebu adresa.
 
-## **Strategije za privatnost transakcija**
+## **Strategies for Transaction Privacy**
 
-- **Multiple transactions**: Razdvajanje uplate na više transakcija može zamagliti iznos transakcije i otežati napade na privatnost.
-- **Change avoidance**: Odabir transakcija koje ne zahtevaju change outputs povećava privatnost jer remeti metode detekcije change-a.
-- **Multiple change outputs**: Ako izbegavanje change-a nije moguće, generisanje više change outputs može i dalje poboljšati privatnost.
+- **Multiple transactions**: Razdvajanje uplate na više transakcija može zamagliti iznos plaćanja i otežati napade na privatnost.
+- **Change avoidance**: Odabir transakcija koje ne zahtevaju change outputs povećava privatnost tako što narušava metode detekcije promena.
+- **Multiple change outputs**: Ako izbegavanje change outputs nije moguće, generisanje više change outputs i dalje može poboljšati privatnost.
 
-# **Monero: Svetionik anonimnosti**
+# **Monero: A Beacon of Anonymity**
 
 Monero odgovara na potrebu za apsolutnom anonimnošću u digitalnim transakcijama, postavljajući visok standard privatnosti.
 
-# **Ethereum: Gas i transakcije**
+# **Ethereum: Gas and Transactions**
 
-## **Razumevanje gasa**
+## **Understanding Gas**
 
-Gas meri računarski napor potreban za izvršavanje operacija na Ethereum-u, cenjen u **gwei**. Na primer, transakcija koja košta 2,310,000 gwei (ili 0.00231 ETH) uključuje gas limit i baznu naknadu, kao i napojnicu za podsticanje rudara. Korisnici mogu postaviti maksimalnu naknadu kako ne bi preplatili, a višak se refundira.
+Gas meri računarski napor potreban za izvršavanje operacija na Ethereum-u, cenjen u **gwei**. Na primer, transakcija koja košta 2,310,000 gwei (ili 0.00231 ETH) uključuje gas limit i osnovnu naknadu, uz napojnicu koja podstiče rudare. Korisnici mogu postaviti maksimalnu naknadu da ne bi preplatili, pri čemu se višak vraća.
 
-## **Izvršavanje transakcija**
+## **Executing Transactions**
 
-Transakcije na Ethereum-u uključuju pošiljaoca i primaoca, koji mogu biti adrese korisnika ili smart contract-a. One zahtevaju naknadu i moraju biti mined. Osnovne informacije u transakciji uključuju primaoca, potpis pošiljaoca, vrednost, opcionu data, gas limit i naknade. Značajno je da se adresa pošiljaoca izvodi iz potpisa, što eliminiše potrebu da bude eksplicitno uključena u podacima transakcije.
+Transakcije na Ethereum-u uključuju pošiljaoca i primaoca, koji mogu biti adrese korisnika ili smart contract-a. Za njih je potrebna naknada i moraju biti potvrđene rudarenjem. Bitne informacije u transakciji uključuju primaoca, potpis pošiljaoca, vrednost, opciona polja, gas limit i naknade. Važno je da se adresa pošiljaoca izvodi iz potpisa, što eliminiše potrebu da bude eksplicitno uključena u podatke transakcije.
 
-Ove prakse i mehanizmi su temeljni za svakoga ko želi da se bavi kriptovalutama, a prioritet mu je privatnost i bezbednost.
+Ove prakse i mehanizmi predstavljaju osnovu za svakog ko želi da se bavi kriptovalutama, a prioritet mu je privatnost i bezbednost.
+
+## Smart Contract Security
+
+- Mutation testing to find blind spots in test suites:
+
+{{#ref}}
+../smart-contract-security/mutation-testing-with-slither.md
+{{#endref}}
 
 ## References
 
@@ -183,7 +191,7 @@ Ove prakse i mehanizmi su temeljni za svakoga ko želi da se bavi kriptovalutama
 
 ## DeFi/AMM Exploitation
 
-Ako istražujete praktičnu eksploataciju DEX-ova i AMM-ova (Uniswap v4 hooks, rounding/precision abuse, flash‑loan amplified threshold‑crossing swaps), pogledajte:
+If you are researching practical exploitation of DEXes and AMMs (Uniswap v4 hooks, rounding/precision abuse, flash‑loan amplified threshold‑crossing swaps), check:
 
 {{#ref}}
 defi-amm-hook-precision.md

