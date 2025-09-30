@@ -4,55 +4,55 @@
 
 ## Tarayıcı Artifaktları <a href="#id-3def" id="id-3def"></a>
 
-Tarayıcı artifaktları, web tarayıcıları tarafından saklanan çeşitli veri türlerini içerir; bunlar arasında gezinme geçmişi, yer imleri ve önbellek verileri bulunur. Bu artifaktlar, işletim sistemi içinde belirli klasörlerde saklanır, konum ve isim açısından tarayıcılar arasında farklılık gösterir, ancak genellikle benzer veri türlerini depolar.
+Tarayıcı artifaktları, gezinme geçmişi, yer imleri ve önbellek verileri gibi web tarayıcıları tarafından saklanan çeşitli veri türlerini içerir. Bu artifaktlar işletim sistemi içinde belirli klasörlerde tutulur; tarayıcıya göre konum ve isimler değişse de genelde benzer veri türlerini depolarlar.
 
 En yaygın tarayıcı artifaktlarının bir özeti:
 
-- **Geçmiş**: Kullanıcıların web sitelerine yaptığı ziyaretleri takip eder, kötü niyetli sitelere yapılan ziyaretleri belirlemek için faydalıdır.
-- **Otomatik Tamamlama Verileri**: Sık yapılan aramalara dayalı öneriler, gezinme geçmişi ile birleştirildiğinde içgörüler sunar.
-- **Yer İmleri**: Kullanıcı tarafından hızlı erişim için kaydedilen siteler.
-- **Eklentiler ve Ekstralar**: Kullanıcı tarafından yüklenen tarayıcı eklentileri veya ekstraları.
-- **Önbellek**: Web içeriğini (örneğin, resimler, JavaScript dosyaları) saklar, web sitesi yükleme sürelerini iyileştirir, adli analiz için değerlidir.
-- **Girişler**: Saklanan giriş kimlik bilgileri.
-- **Favikonlar**: Web siteleriyle ilişkili simgeler, sekmelerde ve yer imlerinde görünür, kullanıcı ziyaretleri hakkında ek bilgi sağlar.
+- **Gezinme Geçmişi**: Kullanıcının ziyaret ettiği siteleri izler; kötü amaçlı sitelere yapılan ziyaretleri belirlemede faydalıdır.
+- **Otomatik Doldurma Verileri**: Sık yapılan aramalara dayalı öneriler; gezinme geçmişi ile birleştirildiğinde içgörü sağlar.
+- **Yer İmleri**: Kullanıcının hızlı erişim için kaydettiği siteler.
+- **Eklentiler ve Add-on'lar**: Kullanıcının yüklediği tarayıcı eklentileri veya add-on'lar.
+- **Önbellek**: Web içeriğini (ör. resimler, JavaScript dosyaları) saklayarak site yükleme sürelerini iyileştirir; adli analiz için değerlidir.
+- **Giriş Bilgileri**: Saklanan oturum açma kimlik bilgileri.
+- **Favikonlar**: Sekelerde ve yer imlerinde görünen site ikonları; kullanıcı ziyaretleri hakkında ek bilgi sağlar.
 - **Tarayıcı Oturumları**: Açık tarayıcı oturumlarıyla ilgili veriler.
-- **İndirmeler**: Tarayıcı üzerinden indirilen dosyaların kayıtları.
-- **Form Verileri**: Web formlarına girilen bilgiler, gelecekteki otomatik doldurma önerileri için saklanır.
-- **Küçük Resimler**: Web sitelerinin önizleme resimleri.
-- **Custom Dictionary.txt**: Kullanıcı tarafından tarayıcının sözlüğüne eklenen kelimeler.
+- **İndirilenler**: Tarayıcı üzerinden indirilen dosyaların kayıtları.
+- **Form Verileri**: Web formlarına girilen bilgiler; gelecekte otomatik doldurma önerileri için saklanır.
+- **Küçük Resimler (Thumbnails)**: Web sitelerinin önizleme görüntüleri.
+- **Custom Dictionary.txt**: Kullanıcının tarayıcının sözlüğüne eklediği kelimeler.
 
 ## Firefox
 
-Firefox, kullanıcı verilerini profiller içinde düzenler, bu profiller işletim sistemine bağlı olarak belirli konumlarda saklanır:
+Firefox, kullanıcı verilerini profiller içinde düzenler; bu profiller işletim sistemine bağlı olarak belirli konumlarda saklanır:
 
 - **Linux**: `~/.mozilla/firefox/`
 - **MacOS**: `/Users/$USER/Library/Application Support/Firefox/Profiles/`
 - **Windows**: `%userprofile%\AppData\Roaming\Mozilla\Firefox\Profiles\`
 
-Bu dizinlerdeki `profiles.ini` dosyası, kullanıcı profillerini listeler. Her profilin verileri, `profiles.ini` içindeki `Path` değişkeninde belirtilen bir klasörde saklanır ve bu klasör `profiles.ini` ile aynı dizindedir. Eğer bir profilin klasörü eksikse, silinmiş olabilir.
+Bu dizinler içinde yer alan `profiles.ini` dosyası kullanıcı profillerini listeler. Her profilin verileri, `profiles.ini` içindeki `Path` değişkeninde belirtilen isimdeki bir klasörde tutulur; bu klasör `profiles.ini` ile aynı dizinde bulunur. Bir profil klasörü eksikse, silinmiş olabilir.
 
-Her profil klasöründe, birkaç önemli dosya bulabilirsiniz:
+Her profil klasöründe bulunabilecek bazı önemli dosyalar:
 
-- **places.sqlite**: Geçmiş, yer imleri ve indirmeleri saklar. Windows'ta [BrowsingHistoryView](https://www.nirsoft.net/utils/browsing_history_view.html) gibi araçlar geçmiş verilerine erişebilir.
-- Geçmiş ve indirme bilgilerini çıkarmak için belirli SQL sorguları kullanın.
-- **bookmarkbackups**: Yer imlerinin yedeklerini içerir.
-- **formhistory.sqlite**: Web form verilerini saklar.
-- **handlers.json**: Protokol yöneticilerini yönetir.
+- **places.sqlite**: Geçmiş, yer imleri ve indirilenleri saklar. Windows'ta [BrowsingHistoryView](https://www.nirsoft.net/utils/browsing_history_view.html) gibi araçlar geçmiş verilerine erişebilir.
+- Geçmiş ve indirilenler bilgilerini çıkarmak için belirli SQL sorguları kullanın.
+- **bookmarkbackups**: Yer imi yedeklerini içerir.
+- **formhistory.sqlite**: Web formu verilerini saklar.
+- **handlers.json**: Protokol işleyicilerini yönetir.
 - **persdict.dat**: Özel sözlük kelimeleri.
-- **addons.json** ve **extensions.sqlite**: Yüklenen eklentiler ve uzantılar hakkında bilgi.
-- **cookies.sqlite**: Çerez depolama, Windows'ta inceleme için [MZCookiesView](https://www.nirsoft.net/utils/mzcv.html) mevcuttur.
-- **cache2/entries** veya **startupCache**: Önbellek verileri, [MozillaCacheView](https://www.nirsoft.net/utils/mozilla_cache_viewer.html) gibi araçlar aracılığıyla erişilebilir.
+- **addons.json** ve **extensions.sqlite**: Yüklü add-on ve eklentilerle ilgili bilgiler.
+- **cookies.sqlite**: Çerez depolaması; Windows'ta inceleme için [MZCookiesView](https://www.nirsoft.net/utils/mzcv.html) mevcuttur.
+- **cache2/entries** veya **startupCache**: Önbellek verileri; [MozillaCacheView](https://www.nirsoft.net/utils/mozilla_cache_viewer.html) gibi araçlarla erişilebilir.
 - **favicons.sqlite**: Favikonları saklar.
 - **prefs.js**: Kullanıcı ayarları ve tercihleri.
-- **downloads.sqlite**: Eski indirme veritabanı, artık places.sqlite içine entegre edilmiştir.
+- **downloads.sqlite**: Eski indirme veritabanı, artık places.sqlite ile entegredir.
 - **thumbnails**: Web sitesi küçük resimleri.
 - **logins.json**: Şifrelenmiş giriş bilgileri.
-- **key4.db** veya **key3.db**: Hassas bilgileri güvence altına almak için şifreleme anahtarlarını saklar.
+- **key4.db** veya **key3.db**: Hassas bilgileri korumak için şifreleme anahtarlarını saklar.
 
-Ayrıca, tarayıcının anti-fishing ayarlarını kontrol etmek için `prefs.js` içinde `browser.safebrowsing` girdilerini arayarak güvenli tarama özelliklerinin etkin veya devre dışı olup olmadığını belirleyebilirsiniz.
+Ayrıca, tarayıcının anti-phishing ayarlarını kontrol etmek için `prefs.js` içinde `browser.safebrowsing` girdilerinin aranması, güvenli gezinme özelliklerinin etkin olup olmadığını gösterir.
 
-Ana şifreyi çözmeye çalışmak için [https://github.com/unode/firefox_decrypt](https://github.com/unode/firefox_decrypt) kullanabilirsiniz.\
-Aşağıdaki script ve çağrı ile bir şifre dosyasını brute force yapmak için belirtebilirsiniz:
+Ana şifreyi çözmeyi denemek için şu adresi kullanabilirsiniz: https://github.com/unode/firefox_decrypt\
+Aşağıdaki script ve çağrı ile kırma işlemi için bir parola dosyası belirtebilirsiniz:
 ```bash:brute.sh
 #!/bin/bash
 
@@ -67,90 +67,96 @@ done < $passfile
 
 ## Google Chrome
 
-Google Chrome, kullanıcı profillerini işletim sistemine bağlı olarak belirli konumlarda saklar:
+Google Chrome, kullanıcı profillerini işletim sistemine göre şu konumlarda depolar:
 
 - **Linux**: `~/.config/google-chrome/`
 - **Windows**: `C:\Users\XXX\AppData\Local\Google\Chrome\User Data\`
 - **MacOS**: `/Users/$USER/Library/Application Support/Google/Chrome/`
 
-Bu dizinler içinde, çoğu kullanıcı verisi **Default/** veya **ChromeDefaultData/** klasörlerinde bulunabilir. Aşağıdaki dosyalar önemli veriler içerir:
+Bu dizinlerin içinde, çoğu kullanıcı verisi **Default/** veya **ChromeDefaultData/** klasörlerinde bulunur. Aşağıdaki dosyalar önemli veriler içerir:
 
-- **History**: URL'ler, indirmeler ve arama anahtar kelimelerini içerir. Windows'ta, [ChromeHistoryView](https://www.nirsoft.net/utils/chrome_history_view.html) kullanılarak geçmiş okunabilir. "Transition Type" sütunu, kullanıcıların bağlantılara tıklamaları, yazılan URL'ler, form gönderimleri ve sayfa yenilemeleri gibi çeşitli anlamlar taşır.
-- **Cookies**: Çerezleri saklar. İnceleme için [ChromeCookiesView](https://www.nirsoft.net/utils/chrome_cookies_view.html) mevcuttur.
-- **Cache**: Önbelleğe alınmış verileri tutar. İncelemek için, Windows kullanıcıları [ChromeCacheView](https://www.nirsoft.net/utils/chrome_cache_view.html) kullanabilir.
+- **History**: URL'leri, indirmeleri ve arama anahtar kelimelerini içerir. Windows'ta geçmişi okumak için [ChromeHistoryView](https://www.nirsoft.net/utils/chrome_history_view.html) kullanılabilir. "Transition Type" sütunu, linklere kullanıcı tıklamaları, yazılan URL'ler, form gönderimleri ve sayfa yenilemeleri gibi çeşitli anlamlara sahiptir.
+- **Cookies**: Çerezleri depolar. İnceleme için [ChromeCookiesView](https://www.nirsoft.net/utils/chrome_cookies_view.html) mevcuttur.
+- **Cache**: Önbelleğe alınmış verileri tutar. İncelemek için Windows kullanıcıları [ChromeCacheView](https://www.nirsoft.net/utils/chrome_cache_view.html) kullanabilir.
+  
+Electron tabanlı masaüstü uygulamaları (ör. Discord) da Chromium Simple Cache kullanır ve disk üzerinde zengin artefaktlar bırakır. Bakınız:
+
+{{#ref}}
+discord-cache-forensics.md
+{{#endref}}
 - **Bookmarks**: Kullanıcı yer imleri.
 - **Web Data**: Form geçmişini içerir.
-- **Favicons**: Web sitesi favicon'larını saklar.
-- **Login Data**: Kullanıcı adları ve şifreler gibi giriş bilgilerini içerir.
+- **Favicons**: Web sitesi favicon'larını depolar.
+- **Login Data**: Kullanıcı adları ve parolalar gibi giriş bilgilerini içerir.
 - **Current Session**/**Current Tabs**: Mevcut tarayıcı oturumu ve açık sekmeler hakkında veri.
-- **Last Session**/**Last Tabs**: Chrome kapatılmadan önceki son oturumda aktif olan siteler hakkında bilgi.
-- **Extensions**: Tarayıcı uzantıları ve eklentileri için dizinler.
-- **Thumbnails**: Web sitesi küçük resimlerini saklar.
-- **Preferences**: Eklentiler, uzantılar, açılır pencereler, bildirimler ve daha fazlası için ayarları içeren bilgi zengini bir dosya.
-- **Browser’ın yerleşik anti-phishing**: Anti-phishing ve kötü amaçlı yazılım korumasının etkin olup olmadığını kontrol etmek için `grep 'safebrowsing' ~/Library/Application Support/Google/Chrome/Default/Preferences` komutunu çalıştırın. Çıktıda `{"enabled: true,"}` arayın.
+- **Last Session**/**Last Tabs**: Chrome kapatılmadan önceki son oturumda aktif olan sitelerle ilgili bilgiler.
+- **Extensions**: Tarayıcı eklentileri ve addon'lar için dizinler.
+- **Thumbnails**: Web sitesi küçük resimlerini depolar.
+- **Preferences**: Eklentiler, uzantılar, açılır pencereler, bildirimler ve daha fazlası için ayarları içeren bilgi açısından zengin bir dosya.
+- **Browser’s built-in anti-phishing**: Anti-phishing ve kötü amaçlı yazılım korumasının etkin olup olmadığını kontrol etmek için `grep 'safebrowsing' ~/Library/Application Support/Google/Chrome/Default/Preferences` çalıştırın. Çıktıda `{"enabled: true,"}` arayın.
 
-## **SQLite DB Veri Kurtarma**
+## **SQLite DB Data Recovery**
 
-Önceki bölümlerde gözlemlediğiniz gibi, hem Chrome hem de Firefox **SQLite** veritabanlarını veri saklamak için kullanır. **Silinmiş girişleri kurtarmak için** [**sqlparse**](https://github.com/padfoot999/sqlparse) **veya** [**sqlparse_gui**](https://github.com/mdegrazia/SQLite-Deleted-Records-Parser/releases) **aracını kullanmak mümkündür.**
+Önceki bölümlerde görebileceğiniz gibi, hem Chrome hem de Firefox verileri depolamak için **SQLite** veritabanlarını kullanır. Silinmiş kayıtları kurtarmak için [**sqlparse**](https://github.com/padfoot999/sqlparse) veya [**sqlparse_gui**](https://github.com/mdegrazia/SQLite-Deleted-Records-Parser/releases) araçları kullanılabilir.
 
 ## **Internet Explorer 11**
 
-Internet Explorer 11, verilerini ve meta verilerini çeşitli konumlarda yönetir, bu da saklanan bilgilerin ve ilgili detayların kolay erişim ve yönetim için ayrılmasına yardımcı olur.
+Internet Explorer 11, verilerini ve meta verilerini çeşitli konumlarda yönetir; bu da saklanan bilgiler ile ilgili ayrıntıların ayrıştırılmasını ve erişimini kolaylaştırır.
 
-### Meta Veri Saklama
+### Metadata Storage
 
-Internet Explorer için meta veriler `%userprofile%\Appdata\Local\Microsoft\Windows\WebCache\WebcacheVX.data` içinde saklanır (VX V01, V16 veya V24 olabilir). Bununla birlikte, `V01.log` dosyası `WebcacheVX.data` ile değişiklik zamanı tutarsızlıklarını gösterebilir ve bu, `esentutl /r V01 /d` kullanarak onarım gerektirdiğini gösterir. Bu meta veriler, bir ESE veritabanında yer alır ve photorec ve [ESEDatabaseView](https://www.nirsoft.net/utils/ese_database_view.html) gibi araçlar kullanılarak kurtarılabilir ve incelenebilir. **Containers** tablosunda, her veri segmentinin saklandığı belirli tablolar veya konteynerler, diğer Microsoft araçları için önbellek detayları da dahil olmak üzere, belirlenebilir.
+Internet Explorer için meta veriler `%userprofile%\Appdata\Local\Microsoft\Windows\WebCache\WebcacheVX.data` içinde saklanır (VX V01, V16 veya V24 olabilir). Buna ek olarak, `V01.log` dosyası `WebcacheVX.data` ile zaman damgası uyumsuzlukları gösterebilir; bu durumda `esentutl /r V01 /d` ile onarım gerekebilir. Bu meta veriler, bir ESE veritabanında tutulur ve photorec ile kurtarılabilir, [ESEDatabaseView](https://www.nirsoft.net/utils/ese_database_view.html) ile incelenebilir. **Containers** tablosunda, her veri bölümünün hangi tablo veya konteynerde saklandığı, ayrıca Skype gibi diğer Microsoft araçlarının önbellek ayrıntıları görülebilir.
 
-### Önbellek İncelemesi
+### Cache Inspection
 
-[IECacheView](https://www.nirsoft.net/utils/ie_cache_viewer.html) aracı, önbellek incelemesi için kullanılabilir ve önbellek verisi çıkarım klasör konumunu gerektirir. Önbellek için meta veriler, dosya adı, dizin, erişim sayısı, URL kaynağı ve önbellek oluşturma, erişim, değiştirme ve sona erme zamanlarını gösteren zaman damgalarını içerir.
+Önbelleği incelemek için [IECacheView](https://www.nirsoft.net/utils/ie_cache_viewer.html) aracı kullanılabilir; bunun için önbellek verilerinin çıkarıldığı klasörün konumu gereklidir. Önbellek meta verileri dosya adı, dizin, erişim sayısı, URL kaynağı ve önbellek oluşturma, erişim, değiştirme ve sona erme zamanlarını içerir.
 
-### Çerez Yönetimi
+### Cookies Management
 
-Çerezler, [IECookiesView](https://www.nirsoft.net/utils/iecookies.html) kullanılarak incelenebilir ve meta veriler isimler, URL'ler, erişim sayıları ve çeşitli zamanla ilgili detayları kapsar. Kalıcı çerezler `%userprofile%\Appdata\Roaming\Microsoft\Windows\Cookies` içinde saklanırken, oturum çerezleri bellekte bulunur.
+Çerezler [IECookiesView](https://www.nirsoft.net/utils/iecookies.html) ile incelenebilir; meta veriler isimler, URL'ler, erişim sayıları ve çeşitli zaman bilgilerini kapsar. Kalıcı çerezler `%userprofile%\Appdata\Roaming\Microsoft\Windows\Cookies` içinde saklanırken, oturum çerezleri bellekte tutulur.
 
-### İndirme Detayları
+### Download Details
 
-İndirme meta verileri [ESEDatabaseView](https://www.nirsoft.net/utils/ese_database_view.html) aracılığıyla erişilebilir ve belirli konteynerler URL, dosya türü ve indirme konumu gibi verileri tutar. Fiziksel dosyalar `%userprofile%\Appdata\Roaming\Microsoft\Windows\IEDownloadHistory` altında bulunabilir.
+İndirme meta verilerine [ESEDatabaseView](https://www.nirsoft.net/utils/ese_database_view.html) üzerinden ulaşılabilir; belirli konteynerler URL, dosya türü ve indirme konumu gibi verileri tutar. Fiziksel dosyalar `%userprofile%\Appdata\Roaming\Microsoft\Windows\IEDownloadHistory` altında bulunabilir.
 
-### Tarayıcı Geçmişi
+### Browsing History
 
-Tarayıcı geçmişini gözden geçirmek için [BrowsingHistoryView](https://www.nirsoft.net/utils/browsing_history_view.html) kullanılabilir ve çıkarılan geçmiş dosyalarının konumunu ve Internet Explorer için yapılandırmayı gerektirir. Buradaki meta veriler, değişiklik ve erişim zamanlarını, ayrıca erişim sayısını içerir. Geçmiş dosyaları `%userprofile%\Appdata\Local\Microsoft\Windows\History` içinde yer alır.
+Tarama geçmişini gözden geçirmek için [BrowsingHistoryView](https://www.nirsoft.net/utils/browsing_history_view.html) kullanılabilir; bunun için çıkarılmış geçmiş dosyalarının konumu ve Internet Explorer yapılandırması gereklidir. Buradaki meta veriler değiştirme ve erişim zamanlarını ile erişim sayısını içerir. Geçmiş dosyaları `%userprofile%\Appdata\Local\Microsoft\Windows\History` yolunda yer alır.
 
-### Yazılan URL'ler
+### Typed URLs
 
-Yazılan URL'ler ve kullanım zamanları, `NTUSER.DAT` içinde `Software\Microsoft\InternetExplorer\TypedURLs` ve `Software\Microsoft\InternetExplorer\TypedURLsTime` altında saklanır ve kullanıcının girdiği son 50 URL ve son giriş zamanlarını takip eder.
+Yazılan URL'ler ve kullanım zamanları, kayıt defterinde `NTUSER.DAT` altında `Software\Microsoft\InternetExplorer\TypedURLs` ve `Software\Microsoft\InternetExplorer\TypedURLsTime` yollarında saklanır; bu kayıtlar kullanıcının girilen son 50 URL'sini ve son giriş zamanlarını takip eder.
 
 ## Microsoft Edge
 
-Microsoft Edge, kullanıcı verilerini `%userprofile%\Appdata\Local\Packages` içinde saklar. Çeşitli veri türleri için yollar:
+Microsoft Edge kullanıcı verilerini `%userprofile%\Appdata\Local\Packages` içinde saklar. Çeşitli veri türleri için yollar:
 
-- **Profil Yolu**: `C:\Users\XX\AppData\Local\Packages\Microsoft.MicrosoftEdge_XXX\AC`
-- **Geçmiş, Çerezler ve İndirmeler**: `C:\Users\XX\AppData\Local\Microsoft\Windows\WebCache\WebCacheV01.dat`
-- **Ayarlar, Yer İmleri ve Okuma Listesi**: `C:\Users\XX\AppData\Local\Packages\Microsoft.MicrosoftEdge_XXX\AC\MicrosoftEdge\User\Default\DataStore\Data\nouser1\XXX\DBStore\spartan.edb`
-- **Önbellek**: `C:\Users\XXX\AppData\Local\Packages\Microsoft.MicrosoftEdge_XXX\AC#!XXX\MicrosoftEdge\Cache`
-- **Son Aktif Oturumlar**: `C:\Users\XX\AppData\Local\Packages\Microsoft.MicrosoftEdge_XXX\AC\MicrosoftEdge\User\Default\Recovery\Active`
+- **Profile Path**: `C:\Users\XX\AppData\Local\Packages\Microsoft.MicrosoftEdge_XXX\AC`
+- **History, Cookies, and Downloads**: `C:\Users\XX\AppData\Local\Microsoft\Windows\WebCache\WebCacheV01.dat`
+- **Settings, Bookmarks, and Reading List**: `C:\Users\XX\AppData\Local\Packages\Microsoft.MicrosoftEdge_XXX\AC\MicrosoftEdge\User\Default\DataStore\Data\nouser1\XXX\DBStore\spartan.edb`
+- **Cache**: `C:\Users\XXX\AppData\Local\Packages\Microsoft.MicrosoftEdge_XXX\AC#!XXX\MicrosoftEdge\Cache`
+- **Last Active Sessions**: `C:\Users\XX\AppData\Local\Packages\Microsoft.MicrosoftEdge_XXX\AC\MicrosoftEdge\User\Default\Recovery\Active`
 
 ## Safari
 
-Safari verileri `/Users/$User/Library/Safari` içinde saklanır. Ana dosyalar şunlardır:
+Safari verileri `/Users/$User/Library/Safari` altında saklanır. Önemli dosyalar şunlardır:
 
-- **History.db**: `history_visits` ve `history_items` tablolarını içerir ve URL'ler ile ziyaret zaman damgalarını barındırır. Sorgulamak için `sqlite3` kullanın.
+- **History.db**: `history_visits` ve `history_items` tablolarını içerir; URL'ler ve ziyaret zaman damgaları buradadır. Sorgulamak için `sqlite3` kullanın.
 - **Downloads.plist**: İndirilen dosyalar hakkında bilgi.
-- **Bookmarks.plist**: Yerleştirilen URL'leri saklar.
+- **Bookmarks.plist**: Yer işaretlenen URL'leri depolar.
 - **TopSites.plist**: En sık ziyaret edilen siteler.
-- **Extensions.plist**: Safari tarayıcı uzantılarının listesi. Almak için `plutil` veya `pluginkit` kullanın.
-- **UserNotificationPermissions.plist**: Bildirim göndermeye izin verilen alanlar. Ayrıştırmak için `plutil` kullanın.
-- **LastSession.plist**: Son oturumdan sekmeler. Ayrıştırmak için `plutil` kullanın.
-- **Browser’ın yerleşik anti-phishing**: `defaults read com.apple.Safari WarnAboutFraudulentWebsites` kullanarak kontrol edin. 1 yanıtı, özelliğin aktif olduğunu gösterir.
+- **Extensions.plist**: Safari tarayıcı uzantıları listesi. Erişim için `plutil` veya `pluginkit` kullanın.
+- **UserNotificationPermissions.plist**: Bildirim göndermesine izin verilen alan adları. `plutil` ile ayrıştırın.
+- **LastSession.plist**: Son oturumdan sekmeler. `plutil` ile ayrıştırın.
+- **Browser’s built-in anti-phishing**: Kontrol etmek için `defaults read com.apple.Safari WarnAboutFraudulentWebsites` komutunu kullanın. Çıktı 1 ise özellik etkin demektir.
 
 ## Opera
 
-Opera'nın verileri `/Users/$USER/Library/Application Support/com.operasoftware.Opera` içinde yer alır ve geçmiş ile indirmeler için Chrome'un formatını paylaşır.
+Opera verileri `/Users/$USER/Library/Application Support/com.operasoftware.Opera` içinde bulunur ve geçmiş ile indirmeler için Chrome ile aynı formatı paylaşır.
 
-- **Browser’ın yerleşik anti-phishing**: `Preferences` dosyasında `fraud_protection_enabled` değerinin `true` olarak ayarlandığını kontrol ederek doğrulayın.
+- **Browser’s built-in anti-phishing**: Preferences dosyasında `fraud_protection_enabled` değerinin `true` olarak ayarlanıp ayarlanmadığını `grep` ile kontrol edin.
 
-Bu yollar ve komutlar, farklı web tarayıcıları tarafından saklanan tarayıcı verilerine erişim ve anlama açısından kritik öneme sahiptir.
+Bu yollar ve komutlar, farklı web tarayıcıları tarafından saklanan tarama verilerine erişmek ve bunları anlamak için kritik öneme sahiptir.
 
 ## References
 
@@ -158,5 +164,6 @@ Bu yollar ve komutlar, farklı web tarayıcıları tarafından saklanan tarayıc
 - [https://www.sentinelone.com/labs/macos-incident-response-part-3-system-manipulation/](https://www.sentinelone.com/labs/macos-incident-response-part-3-system-manipulation/)
 - [https://books.google.com/books?id=jfMqCgAAQBAJ\&pg=PA128\&lpg=PA128\&dq=%22This+file](https://books.google.com/books?id=jfMqCgAAQBAJ&pg=PA128&lpg=PA128&dq=%22This+file)
 - **Book: OS X Incident Response: Scripting and Analysis By Jaron Bradley pag 123**
+
 
 {{#include ../../../banners/hacktricks-training.md}}
