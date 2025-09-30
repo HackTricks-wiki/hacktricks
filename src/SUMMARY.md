@@ -845,6 +845,7 @@
   - [WWW2Exec - \_\_malloc_hook & \_\_free_hook](binary-exploitation/arbitrary-write-2-exec/aw2exec-__malloc_hook.md)
 - [Common Exploiting Problems](binary-exploitation/common-exploiting-problems.md)
 - [Linux kernel exploitation - toctou](binary-exploitation/linux-kernel-exploitation/posix-cpu-timers-toctou-cve-2025-38352.md)
+- [PS5 compromission](binary-exploitation/freebsd-ptrace-rfi-vm_map-prot_exec-bypass-ps5.md)
 - [Windows Exploiting (Basic Guide - OSCP lvl)](binary-exploitation/windows-exploiting-basic-guide-oscp-lvl.md)
 - [iOS Exploiting](binary-exploitation/ios-exploiting/README.md)
   - [ios CVE-2020-27950-mach_msg_trailer_t](binary-exploitation/ios-exploiting/CVE-2020-27950-mach_msg_trailer_t.md)
