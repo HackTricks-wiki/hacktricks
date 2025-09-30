@@ -81,6 +81,7 @@
   - [Basic Python](generic-methodologies-and-resources/python/basic-python.md)
 - [Threat Modeling](generic-methodologies-and-resources/threat-modeling.md)
 - [Blockchain & Crypto](blockchain/blockchain-and-crypto-currencies/README.md)
+  - [Defi/AMM Hook Precision](blockchain/blockchain-and-crypto-currencies/defi-amm-hook-precision.md)
 - [Lua Sandbox Escape](generic-methodologies-and-resources/lua/bypass-lua-sandboxes/README.md)
 
 # 🧙‍♂️ Generic Hacking
@@ -769,7 +770,7 @@
     - [Stack Shellcode - arm64](binary-exploitation/stack-overflow/stack-shellcode/stack-shellcode-arm64.md)
   - [Stack Pivoting - EBP2Ret - EBP chaining](binary-exploitation/stack-overflow/stack-pivoting-ebp2ret-ebp-chaining.md)
   - [Uninitialized Variables](binary-exploitation/stack-overflow/uninitialized-variables.md)
-- [ROP & JOP](binary-exploitation/rop-return-oriented-programing/README.md)
+  - [ROP and JOP](binary-exploitation/rop-return-oriented-programing/README.md)
   - [BROP - Blind Return Oriented Programming](binary-exploitation/rop-return-oriented-programing/brop-blind-return-oriented-programming.md)
   - [Ret2csu](binary-exploitation/rop-return-oriented-programing/ret2csu.md)
   - [Ret2dlresolve](binary-exploitation/rop-return-oriented-programing/ret2dlresolve.md)
@@ -846,7 +847,6 @@
   - [ios Heap Exploitation](binary-exploitation/ios-exploiting/ios-example-heap-exploit.md)
   - [ios Physical UAF - IOSurface](binary-exploitation/ios-exploiting/ios-physical-uaf-iosurface.md)
 
-
 # 🤖 AI
 - [AI Security](AI/README.md)
   - [Ai Assisted Fuzzing And Vulnerability Discovery](AI/AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md)
@@ -895,7 +895,6 @@
 - [RC4 - Encrypt\&Decrypt](crypto-and-stego/rc4-encrypt-and-decrypt.md)
 - [Stego Tricks](crypto-and-stego/stego-tricks.md)
 - [Esoteric languages](crypto-and-stego/esoteric-languages.md)
-- [Blockchain & Crypto Currencies](crypto-and-stego/blockchain-and-crypto-currencies.md)
 
 # ✍️ TODO
 
