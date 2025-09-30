@@ -80,6 +80,12 @@ Within these directories, most user data can be found in the **Default/** or **C
 - **History**: Contains URLs, downloads, and search keywords. On Windows, [ChromeHistoryView](https://www.nirsoft.net/utils/chrome_history_view.html) can be used to read the history. The "Transition Type" column has various meanings, including user clicks on links, typed URLs, form submissions, and page reloads.
 - **Cookies**: Stores cookies. For inspection, [ChromeCookiesView](https://www.nirsoft.net/utils/chrome_cookies_view.html) is available.
 - **Cache**: Holds cached data. To inspect, Windows users can utilize [ChromeCacheView](https://www.nirsoft.net/utils/chrome_cache_view.html).
+
+  Electron-based desktop apps (e.g., Discord) also use Chromium Simple Cache and leave rich on-disk artifacts. See:
+
+  {{#ref}}
+  discord-cache-forensics.md
+  {{#endref}}
 - **Bookmarks**: User bookmarks.
 - **Web Data**: Contains form history.
 - **Favicons**: Stores website favicons.
