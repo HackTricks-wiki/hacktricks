@@ -5,7 +5,10 @@
 
 (() => {
   const KEY = 'htSummerDiscountsDismissed';
-  const IMG = '/images/discount.jpeg';
+  const IMG = '/ima * HackTricks AI Chat Widget v1.17 – enhanced resizable sidebar
+ * ---------------------------------------------------
+ * ❶ Markdown rendering + sanitised (same as before)
+ * ❷ ENHANCED: improved drag‑to‑resize panel with better UXdiscount.jpeg';
   const TXT = 'Click here for HT Summer Discounts, Last Days!';
   const URL = 'https://training.hacktricks.xyz';
 
@@ -13,7 +16,20 @@
   if (localStorage.getItem(KEY) === 'true') return;
 
   // Quick helper
-  const $ = (tag, css = '') => Object.assign(document.createElement(tag), { style: css });
+  const $ = (tag, css = '') => Object.assign(document.cr    p.innerHTML = `
+      <div id="ht-ai-header">
+        <strong>HackTricks AI Chat</strong>
+        <span style="font-size:11px;opacity:0.6;margin-left:8px;">↔ Drag edge to resize</span>
+        <div class="ht-actions">
+          <button id="ht-ai-reset" title="Reset">↺</button>
+          <span id="ht-ai-close" title="Close">✖</span>
+        </div>
+      </div>
+      <div id="ht-ai-chat"></div>
+      <div id="ht-ai-input">
+        <textarea id="ht-ai-question" placeholder="Type your question…"></textarea>
+        <button id="ht-ai-send">Send</button>
+      </div>`;tag), { style: css });
 
   // --- Overlay (blur + dim) ---
   const overlay = $('div', `
@@ -111,7 +127,7 @@
   const MAX_CONTEXT  = 3000;   // highlighted‑text char limit
   const MAX_QUESTION = 500;    // question char limit
   const MIN_W        = 250;    // ← resize limits →
-  const MAX_W        = 600;
+  const MAX_W        = 800;
   const DEF_W        = 350;    // default width (if nothing saved)
   const TOOLTIP_TEXT =
     "💡 Highlight any text on the page,\nthen click to ask HackTricks AI about it";
@@ -345,8 +361,9 @@
 #ht-ai-panel{position:fixed;top:0;right:0;height:100%;max-width:90vw;background:#000;color:#fff;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .3s ease;z-index:100000;font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial,sans-serif}
 #ht-ai-panel.open{transform:translateX(0)}
 @media(max-width:768px){#ht-ai-panel{display:none}}
-#ht-ai-header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid #333}
-#ht-ai-header .ht-actions{display:flex;gap:8px;align-items:center}
+#ht-ai-header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid #333;flex-wrap:wrap}
+#ht-ai-header strong{flex-shrink:0}
+#ht-ai-header .ht-actions{display:flex;gap:8px;align-items:center;margin-left:auto}
 #ht-ai-close,#ht-ai-reset{cursor:pointer;font-size:18px;background:none;border:none;color:#fff;padding:0}
 #ht-ai-close:hover,#ht-ai-reset:hover{opacity:.7}
 #ht-ai-chat{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;font-size:14px}
@@ -367,8 +384,10 @@
 ::selection{background:#ffeb3b;color:#000}
 ::-moz-selection{background:#ffeb3b;color:#000}
 /* NEW: resizer handle */
-#ht-ai-resizer{position:absolute;left:0;top:0;width:6px;height:100%;cursor:ew-resize;background:transparent}
-#ht-ai-resizer:hover{background:rgba(255,255,255,.05)}`;
+#ht-ai-resizer{position:absolute;left:0;top:0;width:8px;height:100%;cursor:ew-resize;background:rgba(255,255,255,.08);border-right:1px solid rgba(255,255,255,.15);transition:background .2s ease}
+#ht-ai-resizer:hover{background:rgba(255,255,255,.15);border-right:1px solid rgba(255,255,255,.3)}
+#ht-ai-resizer:active{background:rgba(255,255,255,.25)}
+#ht-ai-resizer::before{content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:2px;height:20px;background:rgba(255,255,255,.4);border-radius:1px}`;
     const s = document.createElement("style");
     s.id = "ht-ai-style";
     s.textContent = css;
@@ -432,24 +451,43 @@
 
     const onMove = (e) => {
       if (!dragging) return;
-      const dx = startX - e.clientX;           // dragging leftwards ⇒ +dx
+      e.preventDefault();
+      const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+      const dx = startX - clientX;           // dragging leftwards ⇒ +dx
       let newW = startW + dx;
       newW = Math.min(Math.max(newW, MIN_W), MAX_W);
       panel.style.width = newW + "px";
     };
+
     const onUp = () => {
       if (!dragging) return;
       dragging = false;
+      handle.style.background = "";
+      document.body.style.userSelect = "";
+      document.body.style.cursor = "";
       localStorage.setItem("htAiWidth", parseInt(panel.style.width, 10));
       document.removeEventListener("mousemove", onMove);
       document.removeEventListener("mouseup", onUp);
+      document.removeEventListener("touchmove", onMove);
+      document.removeEventListener("touchend", onUp);
     };
-    handle.addEventListener("mousedown", (e) => {
+
+    const onStart = (e) => {
+      e.preventDefault();
       dragging = true;
-      startX = e.clientX;
+      startX = e.clientX || (e.touches && e.touches[0].clientX);
       startW = parseInt(window.getComputedStyle(panel).width, 10);
+      handle.style.background = "rgba(255,255,255,.25)";
+      document.body.style.userSelect = "none";
+      document.body.style.cursor = "ew-resize";
+      
       document.addEventListener("mousemove", onMove);
       document.addEventListener("mouseup", onUp);
-    });
+      document.addEventListener("touchmove", onMove, { passive: false });
+      document.addEventListener("touchend", onUp);
+    };
+
+    handle.addEventListener("mousedown", onStart);
+    handle.addEventListener("touchstart", onStart, { passive: false });
   }
 })();
