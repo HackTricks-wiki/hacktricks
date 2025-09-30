@@ -1,4 +1,4 @@
-# ファームウェア分析
+# ファームウェア解析
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -11,43 +11,47 @@
 synology-encrypted-archive-decryption.md
 {{#endref}}
 
+{{#ref}}
+../../network-services-pentesting/32100-udp-pentesting-pppp-cs2-p2p-cameras.md
+{{#endref}}
 
-ファームウェアは、デバイスが正しく動作するために必要なソフトウェアであり、ハードウェアコンポーネントとユーザーが対話するソフトウェア間の通信を管理し促進します。これは永続メモリに保存されており、デバイスが電源を入れた瞬間から重要な指示にアクセスできるようにし、オペレーティングシステムの起動につながります。ファームウェアを調査し、潜在的に修正することは、セキュリティの脆弱性を特定するための重要なステップです。
+
+ファームウェアは、デバイスが正しく動作するためにハードウェアコンポーネントとユーザーが扱うソフトウェア間の通信を管理・仲介する重要なソフトウェアです。不揮発性メモリに格納され、電源投入直後からデバイスが必要な命令へアクセスできるようにしてOSの起動に繋がります。ファームウェアを調査し、場合によっては改変することは、セキュリティ脆弱性を特定する上で重要なステップです。
 
 ## **情報収集**
 
-**情報収集**は、デバイスの構成や使用されている技術を理解するための重要な初期ステップです。このプロセスには、以下のデータを収集することが含まれます：
+**情報収集** は、デバイスの構成や使用技術を理解するための重要な初期段階です。このプロセスでは次のようなデータを収集します:
 
-- CPUアーキテクチャと実行されているオペレーティングシステム
-- ブートローダーの詳細
-- ハードウェアレイアウトとデータシート
-- コードベースのメトリクスとソースの場所
-- 外部ライブラリとライセンスの種類
+- CPUアーキテクチャと実行しているOS
+- ブートローダの詳細
+- ハードウェアのレイアウトとデータシート
+- コードベースのメトリクスとソースの所在
+- 外部ライブラリとライセンス種別
 - 更新履歴と規制認証
-- アーキテクチャ図とフローダイアグラム
+- アーキテクチャ図やフロー図
 - セキュリティ評価と特定された脆弱性
 
-この目的のために、**オープンソースインテリジェンス（OSINT）**ツールは非常に貴重であり、手動および自動レビュープロセスを通じて利用可能なオープンソースソフトウェアコンポーネントの分析も重要です。[Coverity Scan](https://scan.coverity.com)や[Semmle’s LGTM](https://lgtm.com/#explore)のようなツールは、潜在的な問題を見つけるために活用できる無料の静的分析を提供します。
+この目的には、**open-source intelligence (OSINT)** ツールが非常に有用であり、入手可能なオープンソースソフトウェアコンポーネントを手動・自動でレビューして解析することも重要です。Tools like [Coverity Scan](https://scan.coverity.com) and [Semmle’s LGTM](https://lgtm.com/#explore) は、潜在的な問題を見つけるために活用できる無料の静的解析を提供しています。
 
-## **ファームウェアの取得**
+## **ファームウェアの入手**
 
-ファームウェアを取得する方法はいくつかあり、それぞれ異なる複雑さがあります：
+ファームウェアの入手方法はいくつかあり、それぞれ難易度が異なります:
 
-- **直接**ソース（開発者、製造業者）から
-- **提供された指示**から構築する
-- **公式サポートサイト**からダウンロードする
-- ホストされたファームウェアファイルを見つけるために**Google dork**クエリを利用する
-- [S3Scanner](https://github.com/sa7mon/S3Scanner)のようなツールを使って**クラウドストレージ**に直接アクセスする
-- 中間者攻撃技術を介して**更新**を傍受する
-- **UART**、**JTAG**、または**PICit**のような接続を通じてデバイスから**抽出**する
-- デバイス通信内での更新要求を**スニッフィング**する
-- **ハードコーディングされた更新エンドポイント**を特定して使用する
-- ブートローダーまたはネットワークから**ダンプ**する
-- すべてが失敗した場合、適切なハードウェアツールを使用してストレージチップを**取り外して読み取る**
+- **直接** 開発者やメーカーから入手
+- **Building** 提供された手順からビルドする
+- **Downloading** 公式サポートサイトからダウンロード
+- ホストされているファームウェアファイルを見つけるために**Google dork**クエリを利用
+- [S3Scanner](https://github.com/sa7mon/S3Scanner) のようなツールで**クラウドストレージ**へ直接アクセス
+- man-in-the-middle 技術を用いて**updates**を傍受
+- **Extracting** デバイスから **UART**, **JTAG**, または **PICit** のような接続経由で抽出
+- デバイス通信内の更新リクエストを監視する**Sniffing**
+- ハードコードされた更新エンドポイントを特定して利用
+- ブートローダやネットワークからの**Dumping**
+- それでも駄目な場合、適切なハードウェアツールを使ってストレージチップを**取り外し・読み取り**
 
-## ファームウェアの分析
+## ファームウェアの解析
 
-ファームウェアを**取得した**ので、それに関する情報を抽出してどのように扱うかを知る必要があります。そのために使用できるさまざまなツールがあります：
+**ファームウェアを入手したので**、処理方法を決めるためにその情報を抽出する必要があります。これに使える様々なツール:
 ```bash
 file <bin>
 strings -n8 <bin>
@@ -56,24 +60,24 @@ hexdump -C -n 512 <bin> > hexdump.out
 hexdump -C <bin> | head # might find signatures in header
 fdisk -lu <bin> #lists a drives partition and filesystems if multiple
 ```
-画像の**エントロピー**を`binwalk -E <bin>`で確認し、エントロピーが低ければ暗号化されていない可能性が高いです。エントロピーが高ければ、暗号化されている（または何らかの方法で圧縮されている）可能性があります。
+もしこれらのツールであまり見つからない場合は、`binwalk -E <bin>` でイメージの **entropy** を確認してください。entropy が低ければ暗号化されている可能性は低く、entropy が高ければ暗号化されている（あるいは何らかの方法で圧縮されている）可能性が高いです。
 
-さらに、これらのツールを使用して**ファームウェア内に埋め込まれたファイル**を抽出できます：
+さらに、これらのツールを使って **ファームウェア内に埋め込まれたファイル** を抽出できます:
+
 
 {{#ref}}
 ../../generic-methodologies-and-resources/basic-forensic-methodology/partitions-file-systems-carving/file-data-carving-recovery-tools.md
 {{#endref}}
 
-または[**binvis.io**](https://binvis.io/#/)（[code](https://code.google.com/archive/p/binvis/)）を使用してファイルを検査します。
+あるいは [**binvis.io**](https://binvis.io/#/) ([code](https://code.google.com/archive/p/binvis/)) を使ってファイルを確認できます。
 
-### ファイルシステムの取得
+### Getting the Filesystem
 
-前述のツール`binwalk -ev <bin>`を使用して**ファイルシステムを抽出**できたはずです。\
-Binwalkは通常、**ファイルシステムのタイプに名前を付けたフォルダー**内に抽出します。通常、以下のいずれかです：squashfs、ubifs、romfs、rootfs、jffs2、yaffs2、cramfs、initramfs。
+`binwalk -ev <bin>` のような前述のツールを使えば、**ファイルシステムを抽出できているはずです**.\ Binwalk は通常、抽出したものを **ファイルシステムの種類を名前にしたフォルダ** 内に保存します。通常、以下のいずれかです: squashfs, ubifs, romfs, rootfs, jffs2, yaffs2, cramfs, initramfs.
 
-#### 手動ファイルシステム抽出
+#### Manual Filesystem Extraction
 
-場合によっては、binwalkが**ファイルシステムのマジックバイトをシグネチャに持っていない**ことがあります。このような場合は、binwalkを使用して**ファイルシステムのオフセットを見つけ、バイナリから圧縮されたファイルシステムを切り出し**、以下の手順に従ってそのタイプに応じて**手動でファイルシステムを抽出**します。
+場合によっては、binwalk のシグネチャにファイルシステムの **マジックバイトが含まれていない** ことがあります。このような場合は、binwalk を使って **ファイルシステムのオフセットを特定し、バイナリから圧縮されたファイルシステムを切り出す** ことで、以下の手順に従ってファイルシステムを **手動で抽出** してください。
 ```
 $ binwalk DIR850L_REVB.bin
 
@@ -85,7 +89,7 @@ DECIMAL HEXADECIMAL DESCRIPTION
 1704052 0x1A0074 PackImg section delimiter tag, little endian size: 32256 bytes; big endian size: 8257536 bytes
 1704084 0x1A0094 Squashfs filesystem, little endian, version 4.0, compression:lzma, size: 8256900 bytes, 2688 inodes, blocksize: 131072 bytes, created: 2016-07-12 02:28:41
 ```
-次の**ddコマンド**を実行して、Squashfsファイルシステムを切り出します。
+以下の **dd command** を実行して Squashfs filesystem をカービングしてください。
 ```
 $ dd if=DIR850L_REVB.bin bs=1 skip=1704084 of=dir.squashfs
 
@@ -95,37 +99,37 @@ $ dd if=DIR850L_REVB.bin bs=1 skip=1704084 of=dir.squashfs
 
 8257536 bytes (8.3 MB, 7.9 MiB) copied, 12.5777 s, 657 kB/s
 ```
-代わりに、次のコマンドを実行することもできます。
+Alternatively, the following command could also be run.
 
 `$ dd if=DIR850L_REVB.bin bs=1 skip=$((0x1A0094)) of=dir.squashfs`
 
-- squashfs（上記の例で使用）
+- For squashfs (used in the example above)
 
 `$ unsquashfs dir.squashfs`
 
-ファイルはその後"`squashfs-root`"ディレクトリにあります。
+Files will be in "`squashfs-root`" directory afterwards.
 
-- CPIOアーカイブファイル
+- CPIO archive files
 
 `$ cpio -ivd --no-absolute-filenames -F <bin>`
 
-- jffs2ファイルシステムの場合
+- For jffs2 filesystems
 
 `$ jefferson rootfsfile.jffs2`
 
-- NANDフラッシュを使用したubifsファイルシステムの場合
+- For ubifs filesystems with NAND flash
 
 `$ ubireader_extract_images -u UBI -s <start_offset> <bin>`
 
 `$ ubidump.py <bin>`
 
-## ファームウェアの分析
+## ファームウェアの解析
 
-ファームウェアが取得されたら、その構造と潜在的な脆弱性を理解するために解剖することが重要です。このプロセスでは、ファームウェアイメージから貴重なデータを分析し抽出するためにさまざまなツールを利用します。
+ファームウェアを取得したら、その構造や潜在的な脆弱性を理解するために解析することが重要です。このプロセスでは、ファームウェアイメージから有用なデータを解析・抽出するためにさまざまなツールを使用します。
 
-### 初期分析ツール
+### 初期解析ツール
 
-バイナリファイル（`<bin>`と呼ばれる）の初期検査のためのコマンドセットが提供されています。これらのコマンドは、ファイルタイプの特定、文字列の抽出、バイナリデータの分析、およびパーティションとファイルシステムの詳細の理解に役立ちます：
+以下は、バイナリファイル（`<bin>`と呼ぶ）の初期検査に使用するコマンド群です。これらのコマンドは、ファイルタイプの特定、文字列抽出、バイナリデータの解析、パーティションやファイルシステムの詳細把握に役立ちます:
 ```bash
 file <bin>
 strings -n8 <bin>
@@ -134,137 +138,137 @@ hexdump -C -n 512 <bin> > hexdump.out
 hexdump -C <bin> | head #useful for finding signatures in the header
 fdisk -lu <bin> #lists partitions and filesystems, if there are multiple
 ```
-画像の暗号化状態を評価するために、**entropy**は`binwalk -E <bin>`でチェックされます。低いエントロピーは暗号化の欠如を示唆し、高いエントロピーは暗号化または圧縮の可能性を示します。
+イメージの暗号化状態を評価するために、**エントロピー**を`binwalk -E <bin>`で確認します。エントロピーが低い場合は暗号化されていないことを示唆し、エントロピーが高い場合は暗号化または圧縮の可能性を示します。
 
-**埋め込まれたファイル**を抽出するために、**file-data-carving-recovery-tools**のドキュメントやファイル検査のための**binvis.io**などのツールとリソースが推奨されます。
+埋め込みファイルを抽出するために、**file-data-carving-recovery-tools**のドキュメントやファイル検査用の**binvis.io**のようなツールやリソースが推奨されます。
 
 ### ファイルシステムの抽出
 
-`binwalk -ev <bin>`を使用することで、通常はファイルシステムを抽出でき、しばしばファイルシステムタイプ（例：squashfs、ubifs）にちなんだ名前のディレクトリに抽出されます。しかし、**binwalk**がマジックバイトの欠如によりファイルシステムタイプを認識できない場合、手動抽出が必要です。これには、`binwalk`を使用してファイルシステムのオフセットを特定し、その後`dd`コマンドを使用してファイルシステムを切り出します。
+`binwalk -ev <bin>` を使うと、通常ファイルシステムを抽出でき、多くの場合ファイルシステムタイプ（例: squashfs、ubifs）にちなんだディレクトリに展開されます。しかし、マジックバイトが欠けているために **binwalk** がファイルシステムタイプを認識できない場合は、手動での抽出が必要です。これには `binwalk` でファイルシステムのオフセットを特定し、続いて `dd` コマンドでファイルシステムを切り出す作業が含まれます：
 ```bash
 $ binwalk DIR850L_REVB.bin
 
 $ dd if=DIR850L_REVB.bin bs=1 skip=1704084 of=dir.squashfs
 ```
-その後、ファイルシステムのタイプ（例：squashfs、cpio、jffs2、ubifs）に応じて、異なるコマンドが使用されて手動で内容を抽出します。
+その後、ファイルシステムのタイプ（例：squashfs、cpio、jffs2、ubifs）に応じて、内容を手動で展開するために異なるコマンドが使用されます。
 
-### ファイルシステム分析
+### ファイルシステム解析
 
-ファイルシステムが抽出されると、セキュリティの欠陥を探す作業が始まります。注意が払われるのは、安全でないネットワークデーモン、ハードコーディングされた認証情報、APIエンドポイント、更新サーバーの機能、未コンパイルのコード、スタートアップスクリプト、オフライン分析用のコンパイル済みバイナリです。
+ファイルシステムを展開した後、セキュリティ上の欠陥を探し始めます。特に注意する項目は、脆弱なネットワークデーモン、ハードコードされた資格情報、API endpoints、更新サーバー機能、未コンパイルのコード、起動スクリプト、およびオフライン解析用のコンパイル済みバイナリです。
 
-**検査すべき主要な場所**と**項目**には以下が含まれます：
+**主に確認すべき場所** と **項目** は次のとおりです：
 
-- **etc/shadow** と **etc/passwd** のユーザー認証情報
-- **etc/ssl** のSSL証明書とキー
-- 潜在的な脆弱性のための設定ファイルとスクリプトファイル
-- さらなる分析のための埋め込まれたバイナリ
-- 一般的なIoTデバイスのウェブサーバーとバイナリ
+- **etc/shadow** および **etc/passwd**（ユーザー資格情報）
+- **etc/ssl** にあるSSL証明書と鍵
+- 潜在的な脆弱性を含む設定ファイルやスクリプト
+- 追加解析のための組み込みバイナリ
+- 一般的なIoTデバイスの web サーバーやバイナリ
 
-いくつかのツールがファイルシステム内の機密情報や脆弱性を明らかにするのを助けます：
+ファイルシステム内の機密情報や脆弱性を発見するのに役立つツール：
 
-- [**LinPEAS**](https://github.com/carlospolop/PEASS-ng) と [**Firmwalker**](https://github.com/craigz28/firmwalker) の機密情報検索
-- [**The Firmware Analysis and Comparison Tool (FACT)**](https://github.com/fkie-cad/FACT_core) の包括的なファームウェア分析
-- [**FwAnalyzer**](https://github.com/cruise-automation/fwanalyzer)、[**ByteSweep**](https://gitlab.com/bytesweep/bytesweep)、[**ByteSweep-go**](https://gitlab.com/bytesweep/bytesweep-go)、および [**EMBA**](https://github.com/e-m-b-a/emba) の静的および動的分析
+- [**LinPEAS**](https://github.com/carlospolop/PEASS-ng) と [**Firmwalker**](https://github.com/craigz28/firmwalker)：機密情報の検索用
+- [**The Firmware Analysis and Comparison Tool (FACT)**](https://github.com/fkie-cad/FACT_core)：包括的なファームウェア解析用
+- [**FwAnalyzer**](https://github.com/cruise-automation/fwanalyzer)、[**ByteSweep**](https://gitlab.com/bytesweep/bytesweep)、[**ByteSweep-go**](https://gitlab.com/bytesweep/bytesweep-go)、および [**EMBA**](https://github.com/e-m-b-a/emba)：for static and dynamic analysis
 
 ### コンパイル済みバイナリのセキュリティチェック
 
-ファイルシステム内で見つかったソースコードとコンパイル済みバイナリは、脆弱性のために精査されなければなりません。Unixバイナリ用の**checksec.sh**やWindowsバイナリ用の**PESecurity**のようなツールは、悪用される可能性のある保護されていないバイナリを特定するのに役立ちます。
+ファイルシステム内で見つかったソースコードとコンパイル済みバイナリの両方を脆弱性について精査する必要があります。Unixバイナリ向けの **checksec.sh** や Windowsバイナリ向けの **PESecurity** のようなツールは、悪用可能な保護のないバイナリを特定するのに役立ちます。
 
-## 動的分析のためのファームウェアのエミュレーション
+## ファームウェアをエミュレートして Dynamic Analysis を行う
 
-ファームウェアをエミュレートするプロセスは、デバイスの動作または個々のプログラムの**動的分析**を可能にします。このアプローチは、ハードウェアやアーキテクチャの依存関係に関する課題に直面することがありますが、ルートファイルシステムや特定のバイナリを、Raspberry Piのような一致するアーキテクチャとエンディアンネスを持つデバイスや、事前構築された仮想マシンに転送することで、さらなるテストが容易になります。
+ファームウェアをエミュレートすることで、デバイス全体の動作や個々のプログラムの dynamic analysis が可能になります。この方法はハードウェアやアーキテクチャ依存の問題に直面することがありますが、ルートファイルシステムや特定のバイナリを、アーキテクチャとエンディアンが一致するデバイス（例：Raspberry Pi）や事前構築された仮想マシンに移すことで、さらなるテストが容易になります。
 
 ### 個々のバイナリのエミュレーション
 
-単一のプログラムを調べるためには、プログラムのエンディアンネスとCPUアーキテクチャを特定することが重要です。
+単一のプログラムを解析する場合、プログラムのエンディアンとCPUアーキテクチャを特定することが重要です。
 
-#### MIPSアーキテクチャの例
+#### MIPS アーキテクチャの例
 
 MIPSアーキテクチャのバイナリをエミュレートするには、次のコマンドを使用できます：
 ```bash
 file ./squashfs-root/bin/busybox
 ```
-必要なエミュレーションツールをインストールするには:
+そして、必要なエミュレーションツールをインストールするには:
 ```bash
 sudo apt-get install qemu qemu-user qemu-user-static qemu-system-arm qemu-system-mips qemu-system-x86 qemu-utils
 ```
-MIPS（ビッグエンディアン）用には `qemu-mips` が使用され、リトルエンディアンバイナリ用には `qemu-mipsel` が選択されます。
+For MIPS (big-endian), `qemu-mips` is used, and for little-endian binaries, `qemu-mipsel` would be the choice.
 
-#### ARMアーキテクチャエミュレーション
+#### ARM Architecture Emulation
 
-ARMバイナリの場合、プロセスは似ており、エミュレーションには `qemu-arm` エミュレーターが利用されます。
+For ARM binaries, the process is similar, with the `qemu-arm` emulator being utilized for emulation.
 
-### フルシステムエミュレーション
+### Full System Emulation
 
-[Firmadyne](https://github.com/firmadyne/firmadyne)、[Firmware Analysis Toolkit](https://github.com/attify/firmware-analysis-toolkit) などのツールは、フルファームウェアエミュレーションを容易にし、プロセスを自動化し、動的分析を支援します。
+Tools like [Firmadyne](https://github.com/firmadyne/firmadyne), [Firmware Analysis Toolkit](https://github.com/attify/firmware-analysis-toolkit), and others, facilitate full firmware emulation, automating the process and aiding in dynamic analysis.
 
-## 実践における動的分析
+## Dynamic Analysis in Practice
 
-この段階では、実際のデバイス環境またはエミュレートされたデバイス環境が分析に使用されます。OSおよびファイルシステムへのシェルアクセスを維持することが重要です。エミュレーションはハードウェアの相互作用を完全に模倣できない場合があるため、時折エミュレーションを再起動する必要があります。分析はファイルシステムを再訪し、公開されたウェブページやネットワークサービスを悪用し、ブートローダーの脆弱性を探るべきです。ファームウェアの整合性テストは、潜在的なバックドアの脆弱性を特定するために重要です。
+この段階では、実機またはエミュレートしたデバイス環境のいずれかを用いて解析を行います。OS とファイルシステムへのシェルアクセスを維持することが重要です。エミュレーションはハードウェアとの相互作用を完全には再現しない場合があり、そのためエミュレーションの再起動が必要になることがあります。解析ではファイルシステムを再確認し、公開されているウェブページやネットワークサービスを悪用し、ブートローダの脆弱性を調査するべきです。ファームウェアの整合性テストは、バックドアとなりうる脆弱性を特定するために重要です。
 
-## 実行時分析技術
+## Runtime Analysis Techniques
 
-実行時分析は、gdb-multiarch、Frida、Ghidraなどのツールを使用して、プロセスまたはバイナリとその動作環境で相互作用し、ブレークポイントを設定し、ファジングやその他の技術を通じて脆弱性を特定します。
+ランタイム解析は、プロセスやバイナリをその実行環境で操作することを含み、ブレークポイントの設定や fuzzing などの手法で脆弱性を特定するために gdb-multiarch、Frida、Ghidra のようなツールを使用します。
 
-## バイナリの悪用と概念実証
+## Binary Exploitation and Proof-of-Concept
 
-特定された脆弱性のPoCを開発するには、ターゲットアーキテクチャと低レベル言語でのプログラミングに関する深い理解が必要です。組み込みシステムにおけるバイナリ実行時保護は稀ですが、存在する場合は、リターン指向プログラミング（ROP）などの技術が必要になることがあります。
+既知の脆弱性に対する PoC を開発するには、ターゲットアーキテクチャの深い理解と低レベル言語でのプログラミングが必要です。組み込みシステムではバイナリのランタイム保護は稀ですが、存在する場合は Return Oriented Programming (ROP) のような手法が必要になることがあります。
 
-## ファームウェア分析のための準備されたオペレーティングシステム
+## Prepared Operating Systems for Firmware Analysis
 
-[AttifyOS](https://github.com/adi0x90/attifyos) や [EmbedOS](https://github.com/scriptingxss/EmbedOS) のようなオペレーティングシステムは、必要なツールを備えたファームウェアセキュリティテストのための事前構成された環境を提供します。
+Operating systems like [AttifyOS](https://github.com/adi0x90/attifyos) and [EmbedOS](https://github.com/scriptingxss/EmbedOS) provide pre-configured environments for firmware security testing, equipped with necessary tools.
 
-## ファームウェアを分析するための準備されたOS
+## Prepared OSs to analyze Firmware
 
-- [**AttifyOS**](https://github.com/adi0x90/attifyos): AttifyOSは、IoTデバイスのセキュリティ評価とペネトレーションテストを行うためのディストリビューションです。必要なツールがすべてロードされた事前構成された環境を提供することで、多くの時間を節約します。
-- [**EmbedOS**](https://github.com/scriptingxss/EmbedOS): ファームウェアセキュリティテストツールがプリロードされたUbuntu 18.04に基づく組み込みセキュリティテストオペレーティングシステムです。
+- [**AttifyOS**](https://github.com/adi0x90/attifyos): AttifyOS は Internet of Things (IoT) デバイスの security assessment と penetration testing を行うためのディストリビューションです。必要なツールがプリコンフィグ済みで全てロードされている環境を提供することで、多くの時間を節約できます。
+- [**EmbedOS**](https://github.com/scriptingxss/EmbedOS): Ubuntu 18.04 をベースとした embedded security testing 用のオペレーティングシステムで、ファームウェアセキュリティテスト用のツールがプリロードされています。
 
-## ファームウェアダウングレード攻撃と安全でない更新メカニズム
+## Firmware Downgrade Attacks & Insecure Update Mechanisms
 
-ベンダーがファームウェアイメージの暗号署名チェックを実装しても、**バージョンロールバック（ダウングレード）保護はしばしば省略されます**。ブートローダーまたはリカバリーローダーが埋め込まれた公開鍵で署名を検証するだけで、フラッシュされるイメージの*バージョン*（または単調カウンター）を比較しない場合、攻撃者は**有効な署名を持つ古い脆弱なファームウェアを正当にインストール**でき、修正された脆弱性を再導入することができます。
+ベンダーがファームウェアイメージに対して暗号署名のチェックを実装していても、**version rollback (downgrade) protection はしばしば欠如しています**。ブートローダやリカバリーローダが埋め込み公開鍵で署名のみを検証し、フラッシュされるイメージの *version*（または単調増加カウンタ）を比較しない場合、攻撃者は合法的に有効な署名を保持した **古い脆弱なファームウェアをインストール** でき、パッチ済みの脆弱性を再導入できます。
 
-典型的な攻撃ワークフロー：
+Typical attack workflow:
 
-1. **古い署名済みイメージを取得**
-* ベンダーの公開ダウンロードポータル、CDN、またはサポートサイトから取得します。
-* 付属のモバイル/デスクトップアプリケーションから抽出します（例：Android APKの `assets/firmware/` 内）。
-* VirusTotal、インターネットアーカイブ、フォーラムなどのサードパーティリポジトリから取得します。
-2. **イメージをデバイスにアップロードまたは提供** します：
-* Web UI、モバイルアプリAPI、USB、TFTP、MQTTなど。
-* 多くの消費者向けIoTデバイスは、Base64エンコードされたファームウェアブロブを受け入れる*認証されていない* HTTP(S) エンドポイントを公開し、サーバー側でデコードし、リカバリ/アップグレードをトリガーします。
-3. ダウングレード後、最新のリリースで修正された脆弱性を悪用します（例えば、後で追加されたコマンドインジェクションフィルターなど）。
-4. オプションで、最新のイメージを再フラッシュするか、持続性を得た後に検出を避けるために更新を無効にします。
+1. **Obtain an older signed image**
+* ベンダーの公開ダウンロードポータル、CDN、またはサポートサイトから入手する。
+* コンパニオンのモバイル/デスクトップアプリケーションから抽出する（例：Android APK 内の `assets/firmware/` に含まれる場合）。
+* VirusTotal、Internet archives、フォーラムなどのサードパーティリポジトリから取得する。
+2. **Upload or serve the image to the device** via any exposed update channel:
+* Web UI, mobile-app API, USB, TFTP, MQTT, etc.
+* 多くのコンシューマ向け IoT デバイスは *unauthenticated* な HTTP(S) エンドポイントを公開しており、Base64-encoded なファームウェアブロブを受け取り、サーバー側でデコードしてリカバリ/アップグレードをトリガーします。
+3. ダウングレード後、新しいリリースでパッチされた脆弱性を悪用する（例えば後から追加された command-injection フィルタなど）。
+4. 永続化を得た後、検出を避けるためにオプションで最新のイメージに再フラッシュするか、更新を無効にする。
 
-### 例：ダウングレード後のコマンドインジェクション
+### 例: Command Injection のダウングレード後
 ```http
 POST /check_image_and_trigger_recovery?md5=1; echo 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC...' >> /root/.ssh/authorized_keys HTTP/1.1
 Host: 192.168.0.1
 Content-Type: application/octet-stream
 Content-Length: 0
 ```
-脆弱な（ダウングレードされた）ファームウェアでは、`md5`パラメータがサニタイズされることなくシェルコマンドに直接連結されており、任意のコマンドの注入を可能にしています（ここでは、SSHキーによるルートアクセスの有効化）。後のファームウェアバージョンでは基本的な文字フィルタが導入されましたが、ダウングレード保護が欠如しているため、修正は無意味です。
+脆弱な（ダウングレードされた）ファームウェアでは、`md5` パラメータがサニタイズされずに直接シェルコマンドに連結されており、任意のコマンドを注入できる（ここでは SSH key-based root access を有効にする）。後続のファームウェアバージョンでは基本的な文字フィルタが導入されたが、ダウングレード保護がないため修正は意味を成さない。
 
-### モバイルアプリからのファームウェアの抽出
+### モバイルアプリからのファームウェア抽出
 
-多くのベンダーは、アプリがBluetooth/Wi-Fi経由でデバイスを更新できるように、完全なファームウェアイメージをそのコンパニオンモバイルアプリケーション内にバンドルしています。これらのパッケージは、一般的に`assets/fw/`や`res/raw/`のようなパスの下に暗号化されずに保存されています。`apktool`、`ghidra`、または単純な`unzip`などのツールを使用すると、物理ハードウェアに触れることなく署名されたイメージを抽出できます。
+多くのベンダは、コンパニオンのモバイルアプリ内に完全なファームウェアイメージをバンドルしており、アプリが Bluetooth/Wi‑Fi 経由でデバイスを更新できるようにしている。これらのパッケージは通常、APK/APEX の `assets/fw/` や `res/raw/` のようなパスに暗号化されずに格納されている。`apktool`、`ghidra`、または単純に `unzip` などのツールを使えば、物理ハードウェアに触れずに署名済みイメージを取り出すことができる。
 ```
 $ apktool d vendor-app.apk -o vendor-app
 $ ls vendor-app/assets/firmware
 firmware_v1.3.11.490_signed.bin
 ```
-### アップデートロジック評価のチェックリスト
+### 更新ロジック評価チェックリスト
 
-* *アップデートエンドポイント*の輸送/認証は適切に保護されていますか（TLS + 認証）？
-* デバイスはフラッシングの前に**バージョン番号**または**単調なアンチロールバックカウンター**を比較しますか？
-* 画像はセキュアブートチェーン内で検証されていますか（例：ROMコードによる署名の確認）？
-* ユーザーランドコードは追加のサニティチェックを行いますか（例：許可されたパーティションマップ、モデル番号）？
-* *部分的*または*バックアップ*のアップデートフローは同じ検証ロジックを再利用していますか？
+* *update endpoint* のトランスポート／認証は十分に保護されているか（TLS + authentication）?
+* デバイスはフラッシュの前に **バージョン番号** または **monotonic anti-rollback counter** を比較しているか?
+* イメージはセキュアブートチェーンの内部で検証されているか（例：ROM code による署名チェック）?
+* userland code は追加の妥当性チェックを実行しているか（例：許可された partition map、model number）?
+* *partial* や *backup* のアップデートフローは同じ検証ロジックを再利用しているか?
 
-> 💡  上記のいずれかが欠けている場合、プラットフォームはロールバック攻撃に対して脆弱である可能性があります。
+> 💡  上記のいずれかが欠けている場合、プラットフォームはおそらく rollback attacks に対して脆弱です。
 
-## 実践用の脆弱なファームウェア
+## 演習向けの脆弱なファームウェア
 
-ファームウェアの脆弱性を発見する練習をするために、以下の脆弱なファームウェアプロジェクトを出発点として使用してください。
+ファームウェアの脆弱性発見を練習するには、以下の脆弱なファームウェアプロジェクトを出発点として利用してください。
 
 - OWASP IoTGoat
 - [https://github.com/OWASP/IoTGoat](https://github.com/OWASP/IoTGoat)
@@ -279,13 +283,13 @@ firmware_v1.3.11.490_signed.bin
 - Damn Vulnerable IoT Device (DVID)
 - [https://github.com/Vulcainreo/DVID](https://github.com/Vulcainreo/DVID)
 
-## 参考文献
+## 参考
 
 - [https://scriptingxss.gitbook.io/firmware-security-testing-methodology/](https://scriptingxss.gitbook.io/firmware-security-testing-methodology/)
 - [Practical IoT Hacking: The Definitive Guide to Attacking the Internet of Things](https://www.amazon.co.uk/Practical-IoT-Hacking-F-Chantzis/dp/1718500904)
 - [Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
 
-## トレーニングと認証
+## トレーニングと認定
 
 - [https://www.attify-store.com/products/offensive-iot-exploitation](https://www.attify-store.com/products/offensive-iot-exploitation)
 
