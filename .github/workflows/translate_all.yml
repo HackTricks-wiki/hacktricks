@@ -65,7 +65,7 @@ jobs:
       - name: Update and download scripts
         run: |
           sudo apt-get update
-          sudo apt-get install wget -y
+          sudo apt-get install -y wget gh
           mkdir scripts
           cd scripts
           wget -O get_and_save_refs.py https://raw.githubusercontent.com/HackTricks-wiki/hacktricks-cloud/master/scripts/get_and_save_refs.py
