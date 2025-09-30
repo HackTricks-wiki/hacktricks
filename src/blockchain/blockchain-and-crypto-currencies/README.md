@@ -176,6 +176,14 @@ Transactions in Ethereum involve a sender and a recipient, which can be either u
 
 These practices and mechanisms are foundational for anyone looking to engage with cryptocurrencies while prioritizing privacy and security.
 
+## Smart Contract Security
+
+- Mutation testing to find blind spots in test suites:
+
+{{#ref}}
+../smart-contract-security/mutation-testing-with-slither.md
+{{#endref}}
+
 ## References
 
 - [https://en.wikipedia.org/wiki/Proof_of_stake](https://en.wikipedia.org/wiki/Proof_of_stake)
@@ -184,6 +192,14 @@ These practices and mechanisms are foundational for anyone looking to engage wit
 - [https://ethereum.org/en/developers/docs/transactions/](https://ethereum.org/en/developers/docs/transactions/)
 - [https://ethereum.org/en/developers/docs/gas/](https://ethereum.org/en/developers/docs/gas/)
 - [https://en.bitcoin.it/wiki/Privacy](https://en.bitcoin.it/wiki/Privacy#Forced_address_reuse)
+
+## DeFi/AMM Exploitation
+
+If you are researching practical exploitation of DEXes and AMMs (Uniswap v4 hooks, rounding/precision abuse, flash‑loan amplified threshold‑crossing swaps), check:
+
+{{#ref}}
+defi-amm-hook-precision.md
+{{#endref}}
 
 {{#include ../../banners/hacktricks-training.md}}
 

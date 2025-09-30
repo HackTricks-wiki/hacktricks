@@ -262,6 +262,7 @@ Note that executables compiled with **`pyinstaller`** won't use these environmen
 >
 > Even **root** will run this code when running python.
 
+
 ## Detection
 
 ### Shield
