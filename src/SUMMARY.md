@@ -103,6 +103,7 @@
 
 # 🐧 Linux Hardening
 
+- [Linux Basics](linux-hardening/linux-basics.md)
 - [Checklist - Linux Privilege Escalation](linux-hardening/linux-privilege-escalation-checklist.md)
 - [Linux Privilege Escalation](linux-hardening/privilege-escalation/README.md)
   - [Android Rooting Frameworks Manager Auth Bypass Syscall Hook](linux-hardening/privilege-escalation/android-rooting-frameworks-manager-auth-bypass-syscall-hook.md)
