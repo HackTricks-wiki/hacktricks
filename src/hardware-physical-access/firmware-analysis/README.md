@@ -11,6 +11,10 @@
 synology-encrypted-archive-decryption.md
 {{#endref}}
 
+{{#ref}}
+../../network-services-pentesting/32100-udp-pentesting-pppp-cs2-p2p-cameras.md
+{{#endref}}
+
 
 Firmware is essential software that enables devices to operate correctly by managing and facilitating communication between the hardware components and the software that users interact with. It's stored in permanent memory, ensuring the device can access vital instructions from the moment it's powered on, leading to the operating system's launch. Examining and potentially modifying firmware is a critical step in identifying security vulnerabilities.
 
@@ -309,5 +313,3 @@ To practice discovering vulnerabilities in firmware, use the following vulnerabl
 - [https://www.attify-store.com/products/offensive-iot-exploitation](https://www.attify-store.com/products/offensive-iot-exploitation)
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
