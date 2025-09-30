@@ -4,48 +4,54 @@
 
 ## **Introduction**
 
-### Ressources connexes
+### Ressources associées
+
 
 {{#ref}}
 synology-encrypted-archive-decryption.md
 {{#endref}}
 
-Le firmware est un logiciel essentiel qui permet aux appareils de fonctionner correctement en gérant et en facilitant la communication entre les composants matériels et le logiciel avec lequel les utilisateurs interagissent. Il est stocké dans une mémoire permanente, garantissant que l'appareil peut accéder à des instructions vitales dès qu'il est allumé, ce qui conduit au lancement du système d'exploitation. L'examen et la modification potentielle du firmware sont une étape critique pour identifier les vulnérabilités de sécurité.
+{{#ref}}
+../../network-services-pentesting/32100-udp-pentesting-pppp-cs2-p2p-cameras.md
+{{#endref}}
+
+
+Le firmware est un logiciel essentiel qui permet aux appareils de fonctionner correctement en gérant et facilitant la communication entre les composants hardware et le software avec lequel les utilisateurs interagissent. Il est stocké en mémoire permanente, garantissant que l'appareil peut accéder aux instructions vitales dès sa mise sous tension, ce qui conduit au lancement du système d'exploitation. Examiner et potentiellement modifier le firmware est une étape critique pour identifier des vulnérabilités de sécurité.
 
 ## **Collecte d'informations**
 
-**La collecte d'informations** est une étape initiale cruciale pour comprendre la composition d'un appareil et les technologies qu'il utilise. Ce processus implique la collecte de données sur :
+La **collecte d'informations** est une étape initiale cruciale pour comprendre la composition d'un appareil et les technologies qu'il utilise. Ce processus implique la collecte de données sur :
 
-- L'architecture CPU et le système d'exploitation qu'il utilise
+- L'architecture CPU et le système d'exploitation qu'il exécute
 - Les spécificités du bootloader
-- La disposition matérielle et les fiches techniques
-- Les métriques de code et les emplacements source
+- La disposition hardware et les datasheets
+- Les métriques de la codebase et les emplacements des sources
 - Les bibliothèques externes et les types de licences
 - Les historiques de mise à jour et les certifications réglementaires
-- Les diagrammes architecturaux et de flux
+- Les diagrammes d'architecture et de flux
 - Les évaluations de sécurité et les vulnérabilités identifiées
 
-À cette fin, les outils de **renseignement open-source (OSINT)** sont inestimables, tout comme l'analyse de tout composant logiciel open-source disponible par le biais de processus de révision manuels et automatisés. Des outils comme [Coverity Scan](https://scan.coverity.com) et [Semmle’s LGTM](https://lgtm.com/#explore) offrent une analyse statique gratuite qui peut être exploitée pour trouver des problèmes potentiels.
+À cet effet, les outils d’**open-source intelligence (OSINT)** sont précieux, tout comme l'analyse des composants logiciels open-source disponibles via des revues manuelles et automatisées. Des outils comme [Coverity Scan](https://scan.coverity.com) et [Semmle’s LGTM](https://lgtm.com/#explore) offrent une analyse statique gratuite qui peut être exploitée pour trouver des problèmes potentiels.
 
 ## **Acquisition du firmware**
 
-L'obtention du firmware peut être abordée par divers moyens, chacun ayant son propre niveau de complexité :
+Obtenir le firmware peut se faire par diverses méthodes, chacune avec son niveau de complexité :
 
-- **Directement** à partir de la source (développeurs, fabricants)
-- **En le construisant** à partir des instructions fournies
-- **En le téléchargeant** depuis des sites de support officiels
-- En utilisant des requêtes **Google dork** pour trouver des fichiers de firmware hébergés
-- Accéder au **stockage cloud** directement, avec des outils comme [S3Scanner](https://github.com/sa7mon/S3Scanner)
-- Intercepter les **mises à jour** via des techniques de l'homme du milieu
-- **Extraire** depuis l'appareil via des connexions comme **UART**, **JTAG** ou **PICit**
-- **Sniffer** les requêtes de mise à jour dans la communication de l'appareil
-- Identifier et utiliser des **points de terminaison de mise à jour codés en dur**
-- **Dumping** depuis le bootloader ou le réseau
-- **Retirer et lire** la puce de stockage, lorsque tout le reste échoue, en utilisant des outils matériels appropriés
+- **Directement** depuis la source (développeurs, fabricants)
+- **Le construire** à partir des instructions fournies
+- **Le télécharger** depuis les sites de support officiels
+- Utiliser des requêtes **Google dork** pour trouver des fichiers firmware hébergés
+- Accéder directement au **cloud storage**, avec des outils comme [S3Scanner](https://github.com/sa7mon/S3Scanner)
+- Intercepter les **updates** via des techniques man-in-the-middle
+- **Extraire** depuis l'appareil via des connexions comme **UART**, **JTAG**, ou **PICit**
+- **Sniffer** les requêtes de mise à jour dans les communications de l'appareil
+- Identifier et utiliser des **endpoints de mise à jour hardcodés**
+- **Dumper** depuis le bootloader ou le réseau
+- **Retirer et lire** la puce de stockage, quand tout échoue, en utilisant des outils hardware appropriés
 
-## Analyser le firmware
+## Analyse du firmware
 
-Maintenant que vous **avez le firmware**, vous devez extraire des informations à son sujet pour savoir comment le traiter. Différents outils que vous pouvez utiliser pour cela :
+Maintenant que vous **avez le firmware**, vous devez extraire des informations le concernant pour savoir comment l'aborder. Différents outils que vous pouvez utiliser pour cela :
 ```bash
 file <bin>
 strings -n8 <bin>
@@ -54,9 +60,10 @@ hexdump -C -n 512 <bin> > hexdump.out
 hexdump -C <bin> | head # might find signatures in header
 fdisk -lu <bin> #lists a drives partition and filesystems if multiple
 ```
-Si vous ne trouvez pas grand-chose avec ces outils, vérifiez l'**entropie** de l'image avec `binwalk -E <bin>`, si l'entropie est faible, il est peu probable qu'elle soit chiffrée. Si l'entropie est élevée, il est probable qu'elle soit chiffrée (ou compressée d'une certaine manière).
+Si vous ne trouvez pas grand-chose avec ces outils, vérifiez l'**entropie** de l'image avec `binwalk -E <bin>` ; si l'entropie est faible, il est peu probable qu'elle soit chiffrée. Si l'entropie est élevée, il est probable qu'elle soit chiffrée (ou compressée d'une manière ou d'une autre).
 
-De plus, vous pouvez utiliser ces outils pour extraire des **fichiers intégrés dans le firmware** :
+De plus, vous pouvez utiliser ces outils pour extraire les **fichiers embarqués dans le firmware** :
+
 
 {{#ref}}
 ../../generic-methodologies-and-resources/basic-forensic-methodology/partitions-file-systems-carving/file-data-carving-recovery-tools.md
@@ -64,14 +71,14 @@ De plus, vous pouvez utiliser ces outils pour extraire des **fichiers intégrés
 
 Ou [**binvis.io**](https://binvis.io/#/) ([code](https://code.google.com/archive/p/binvis/)) pour inspecter le fichier.
 
-### Récupération du Système de Fichiers
+### Récupération du système de fichiers
 
-Avec les outils commentés précédemment comme `binwalk -ev <bin>`, vous devriez avoir pu **extraire le système de fichiers**.\
+Avec les outils mentionnés précédemment comme `binwalk -ev <bin>` vous devriez avoir pu **extraire le système de fichiers**.\
 Binwalk l'extrait généralement dans un **dossier nommé selon le type de système de fichiers**, qui est généralement l'un des suivants : squashfs, ubifs, romfs, rootfs, jffs2, yaffs2, cramfs, initramfs.
 
-#### Extraction Manuelle du Système de Fichiers
+#### Extraction manuelle du système de fichiers
 
-Parfois, binwalk **n'aura pas le byte magique du système de fichiers dans ses signatures**. Dans ces cas, utilisez binwalk pour **trouver l'offset du système de fichiers et extraire le système de fichiers compressé** du binaire et **extraire manuellement** le système de fichiers selon son type en suivant les étapes ci-dessous.
+Parfois, binwalk ne détectera pas **l'octet magique du système de fichiers dans ses signatures**. Dans ces cas, utilisez binwalk pour **trouver l'offset du système de fichiers et carve le système de fichiers compressé** depuis le binaire et **extraire manuellement** le système de fichiers selon son type en utilisant les étapes ci-dessous.
 ```
 $ binwalk DIR850L_REVB.bin
 
@@ -83,7 +90,7 @@ DECIMAL HEXADECIMAL DESCRIPTION
 1704052 0x1A0074 PackImg section delimiter tag, little endian size: 32256 bytes; big endian size: 8257536 bytes
 1704084 0x1A0094 Squashfs filesystem, little endian, version 4.0, compression:lzma, size: 8256900 bytes, 2688 inodes, blocksize: 131072 bytes, created: 2016-07-12 02:28:41
 ```
-Exécutez la commande **dd** suivante pour extraire le système de fichiers Squashfs.
+Exécutez la **dd command** suivante pour extraire le système de fichiers Squashfs.
 ```
 $ dd if=DIR850L_REVB.bin bs=1 skip=1704084 of=dir.squashfs
 
@@ -93,7 +100,7 @@ $ dd if=DIR850L_REVB.bin bs=1 skip=1704084 of=dir.squashfs
 
 8257536 bytes (8.3 MB, 7.9 MiB) copied, 12.5777 s, 657 kB/s
 ```
-Alternativement, la commande suivante pourrait également être exécutée.
+Alternatively, the following command could also be run.
 
 `$ dd if=DIR850L_REVB.bin bs=1 skip=$((0x1A0094)) of=dir.squashfs`
 
@@ -101,7 +108,7 @@ Alternativement, la commande suivante pourrait également être exécutée.
 
 `$ unsquashfs dir.squashfs`
 
-Les fichiers seront dans le répertoire "`squashfs-root`" par la suite.
+Les fichiers se trouveront ensuite dans le répertoire `squashfs-root`.
 
 - Fichiers d'archive CPIO
 
@@ -117,13 +124,13 @@ Les fichiers seront dans le répertoire "`squashfs-root`" par la suite.
 
 `$ ubidump.py <bin>`
 
-## Analyse du Firmware
+## Analyzing Firmware
 
-Une fois le firmware obtenu, il est essentiel de le disséquer pour comprendre sa structure et ses vulnérabilités potentielles. Ce processus implique l'utilisation de divers outils pour analyser et extraire des données précieuses de l'image du firmware.
+Once the firmware is obtained, it's essential to dissect it for understanding its structure and potential vulnerabilities. This process involves utilizing various tools to analyze and extract valuable data from the firmware image.
 
-### Outils d'Analyse Initiale
+### Initial Analysis Tools
 
-Un ensemble de commandes est fourni pour l'inspection initiale du fichier binaire (appelé `<bin>`). Ces commandes aident à identifier les types de fichiers, extraire des chaînes, analyser des données binaires et comprendre les détails de la partition et du système de fichiers :
+A set of commands is provided for initial inspection of the binary file (referred to as `<bin>`). These commands help in identifying file types, extracting strings, analyzing binary data, and understanding the partition and filesystem details:
 ```bash
 file <bin>
 strings -n8 <bin>
@@ -132,51 +139,51 @@ hexdump -C -n 512 <bin> > hexdump.out
 hexdump -C <bin> | head #useful for finding signatures in the header
 fdisk -lu <bin> #lists partitions and filesystems, if there are multiple
 ```
-Pour évaluer l'état de chiffrement de l'image, l'**entropie** est vérifiée avec `binwalk -E <bin>`. Une faible entropie suggère un manque de chiffrement, tandis qu'une haute entropie indique un possible chiffrement ou compression.
+Pour évaluer le statut de chiffrement de l'image, on vérifie l'**entropie** avec `binwalk -E <bin>`. Une entropie faible suggère l'absence de chiffrement, tandis qu'une entropie élevée indique un chiffrement ou une compression possible.
 
-Pour extraire des **fichiers intégrés**, des outils et ressources comme la documentation **file-data-carving-recovery-tools** et **binvis.io** pour l'inspection des fichiers sont recommandés.
+Pour extraire les **fichiers intégrés**, des outils et ressources comme la documentation **file-data-carving-recovery-tools** et **binvis.io** pour l'inspection de fichiers sont recommandés.
 
-### Extraction du Système de Fichiers
+### Extraction du système de fichiers
 
-En utilisant `binwalk -ev <bin>`, on peut généralement extraire le système de fichiers, souvent dans un répertoire nommé d'après le type de système de fichiers (par exemple, squashfs, ubifs). Cependant, lorsque **binwalk** ne parvient pas à reconnaître le type de système de fichiers en raison de l'absence de bytes magiques, une extraction manuelle est nécessaire. Cela implique d'utiliser `binwalk` pour localiser l'offset du système de fichiers, suivi de la commande `dd` pour extraire le système de fichiers :
+En utilisant `binwalk -ev <bin>`, on peut généralement extraire le système de fichiers, souvent dans un répertoire nommé d'après le type de système de fichiers (par ex. squashfs, ubifs). Cependant, lorsque **binwalk** n'arrive pas à reconnaître le type de système de fichiers en raison de l'absence des magic bytes, une extraction manuelle est nécessaire. Cela implique d'utiliser `binwalk` pour localiser l'offset du système de fichiers, suivie de la commande `dd` pour extraire le système de fichiers :
 ```bash
 $ binwalk DIR850L_REVB.bin
 
 $ dd if=DIR850L_REVB.bin bs=1 skip=1704084 of=dir.squashfs
 ```
-Après cela, en fonction du type de système de fichiers (par exemple, squashfs, cpio, jffs2, ubifs), différentes commandes sont utilisées pour extraire manuellement le contenu.
+Ensuite, selon le type de système de fichiers (p. ex., squashfs, cpio, jffs2, ubifs), différentes commandes sont utilisées pour extraire manuellement le contenu.
 
-### Analyse du Système de Fichiers
+### Analyse du système de fichiers
 
-Une fois le système de fichiers extrait, la recherche de failles de sécurité commence. Une attention particulière est portée aux démons réseau non sécurisés, aux identifiants codés en dur, aux points de terminaison API, aux fonctionnalités des serveurs de mise à jour, au code non compilé, aux scripts de démarrage et aux binaires compilés pour une analyse hors ligne.
+Une fois le système de fichiers extrait, la recherche de failles de sécurité commence. On prête attention aux network daemons non sécurisés, aux hardcoded credentials, aux API endpoints, aux fonctionnalités du serveur de mise à jour, au uncompiled code, aux startup scripts et aux compiled binaries pour analyse hors ligne.
 
 **Emplacements clés** et **éléments** à inspecter incluent :
 
-- **etc/shadow** et **etc/passwd** pour les identifiants utilisateurs
-- Certificats SSL et clés dans **etc/ssl**
-- Fichiers de configuration et scripts pour des vulnérabilités potentielles
-- Binaires intégrés pour une analyse plus approfondie
-- Serveurs web et binaires courants des dispositifs IoT
+- **etc/shadow** and **etc/passwd** for user credentials
+- Certificats et clés SSL dans **etc/ssl**
+- Fichiers de configuration et scripts pour identifier des vulnérabilités potentielles
+- Binaires embarqués pour une analyse plus approfondie
+- Serveurs web courants d'appareils IoT et binaires
 
-Plusieurs outils aident à découvrir des informations sensibles et des vulnérabilités au sein du système de fichiers :
+Plusieurs outils aident à découvrir des informations sensibles et des vulnérabilités dans le système de fichiers :
 
-- [**LinPEAS**](https://github.com/carlospolop/PEASS-ng) et [**Firmwalker**](https://github.com/craigz28/firmwalker) pour la recherche d'informations sensibles
+- [**LinPEAS**](https://github.com/carlospolop/PEASS-ng) and [**Firmwalker**](https://github.com/craigz28/firmwalker) pour la recherche d'informations sensibles
 - [**The Firmware Analysis and Comparison Tool (FACT)**](https://github.com/fkie-cad/FACT_core) pour une analyse complète du firmware
 - [**FwAnalyzer**](https://github.com/cruise-automation/fwanalyzer), [**ByteSweep**](https://gitlab.com/bytesweep/bytesweep), [**ByteSweep-go**](https://gitlab.com/bytesweep/bytesweep-go), et [**EMBA**](https://github.com/e-m-b-a/emba) pour l'analyse statique et dynamique
 
-### Vérifications de Sécurité sur les Binaires Compilés
+### Vérifications de sécurité sur les binaires compilés
 
-Le code source et les binaires compilés trouvés dans le système de fichiers doivent être scrutés pour détecter des vulnérabilités. Des outils comme **checksec.sh** pour les binaires Unix et **PESecurity** pour les binaires Windows aident à identifier les binaires non protégés qui pourraient être exploités.
+Le code source et les binaires compilés trouvés dans le système de fichiers doivent être examinés pour détecter des vulnérabilités. Des outils comme **checksec.sh** pour les binaires Unix et **PESecurity** pour les binaires Windows aident à identifier les binaires non protégés qui pourraient être exploités.
 
-## Émulation de Firmware pour Analyse Dynamique
+## Émulation du firmware pour l'analyse dynamique
 
-Le processus d'émulation de firmware permet une **analyse dynamique** soit du fonctionnement d'un dispositif, soit d'un programme individuel. Cette approche peut rencontrer des défis liés aux dépendances matérielles ou d'architecture, mais le transfert du système de fichiers racine ou de binaires spécifiques vers un dispositif avec une architecture et un ordre des octets correspondants, comme un Raspberry Pi, ou vers une machine virtuelle préconstruite, peut faciliter des tests supplémentaires.
+Le processus d'émulation du firmware permet une **analyse dynamique** du fonctionnement d'un appareil ou d'un programme individuel. Cette approche peut rencontrer des difficultés liées au matériel ou aux dépendances d'architecture, mais transférer le root filesystem ou des binaires spécifiques vers un appareil ayant la même architecture et endianness, comme un Raspberry Pi, ou vers une machine virtuelle préconstruite, peut faciliter les tests supplémentaires.
 
-### Émulation de Binaires Individuels
+### Émuler des binaires individuels
 
-Pour examiner des programmes uniques, il est crucial d'identifier l'ordre des octets et l'architecture CPU du programme.
+Pour examiner des programmes isolés, il est crucial d'identifier l'endianness et l'architecture CPU du programme.
 
-#### Exemple avec l'Architecture MIPS
+#### Exemple avec l'architecture MIPS
 
 Pour émuler un binaire d'architecture MIPS, on peut utiliser la commande :
 ```bash
@@ -186,65 +193,65 @@ Et pour installer les outils d'émulation nécessaires :
 ```bash
 sudo apt-get install qemu qemu-user qemu-user-static qemu-system-arm qemu-system-mips qemu-system-x86 qemu-utils
 ```
-Pour MIPS (big-endian), `qemu-mips` est utilisé, et pour les binaires little-endian, `qemu-mipsel` serait le choix.
+Pour MIPS (big-endian), `qemu-mips` est utilisé, et pour les binaires little-endian, `qemu-mipsel` est le choix.
 
 #### Émulation de l'architecture ARM
 
-Pour les binaires ARM, le processus est similaire, avec l'émulateur `qemu-arm` utilisé pour l'émulation.
+Pour les binaires ARM, le processus est similaire, l'émulation étant assurée par `qemu-arm`.
 
-### Émulation de système complet
+### Émulation système complète
 
-Des outils comme [Firmadyne](https://github.com/firmadyne/firmadyne), [Firmware Analysis Toolkit](https://github.com/attify/firmware-analysis-toolkit), et d'autres, facilitent l'émulation complète du firmware, automatisant le processus et aidant à l'analyse dynamique.
+Des outils comme [Firmadyne](https://github.com/firmadyne/firmadyne), [Firmware Analysis Toolkit](https://github.com/attify/firmware-analysis-toolkit), et d'autres, facilitent l'émulation complète du firmware, automatisent le processus et aident à l'analyse dynamique.
 
 ## Analyse dynamique en pratique
 
-À ce stade, un environnement de dispositif réel ou émulé est utilisé pour l'analyse. Il est essentiel de maintenir un accès shell au système d'exploitation et au système de fichiers. L'émulation peut ne pas imiter parfaitement les interactions matérielles, nécessitant des redémarrages d'émulation occasionnels. L'analyse doit revisiter le système de fichiers, exploiter les pages web et services réseau exposés, et explorer les vulnérabilités du chargeur de démarrage. Les tests d'intégrité du firmware sont critiques pour identifier les vulnérabilités potentielles de porte dérobée.
+À ce stade, un environnement appareil réel ou émulé est utilisé pour l'analyse. Il est essentiel de conserver un accès shell à l'OS et au système de fichiers. L'émulation peut ne pas reproduire parfaitement les interactions matérielles, nécessitant des redémarrages d'émulation occasionnels. L'analyse doit revisiter le système de fichiers, exploiter les pages web et services réseau exposés, et examiner les vulnérabilités du bootloader. Des tests d'intégrité du firmware sont cruciaux pour identifier d'éventuelles portes dérobées.
 
 ## Techniques d'analyse à l'exécution
 
-L'analyse à l'exécution implique d'interagir avec un processus ou un binaire dans son environnement d'exploitation, en utilisant des outils comme gdb-multiarch, Frida, et Ghidra pour définir des points d'arrêt et identifier des vulnérabilités par le biais de fuzzing et d'autres techniques.
+L'analyse à l'exécution consiste à interagir avec un process ou un binaire dans son environnement d'exécution, en utilisant des outils comme gdb-multiarch, Frida et Ghidra pour poser des breakpoints et identifier des vulnérabilités via le fuzzing et d'autres techniques.
 
 ## Exploitation binaire et preuve de concept
 
-Développer un PoC pour les vulnérabilités identifiées nécessite une compréhension approfondie de l'architecture cible et de la programmation dans des langages de bas niveau. Les protections d'exécution binaire dans les systèmes embarqués sont rares, mais lorsqu'elles sont présentes, des techniques comme le Return Oriented Programming (ROP) peuvent être nécessaires.
+Développer un PoC pour des vulnérabilités identifiées requiert une connaissance approfondie de l'architecture cible et de la programmation en langages bas niveau. Les protections d'exécution binaire dans les systèmes embarqués sont rares, mais lorsqu'elles existent, des techniques comme Return Oriented Programming (ROP) peuvent être nécessaires.
 
 ## Systèmes d'exploitation préparés pour l'analyse de firmware
 
-Des systèmes d'exploitation comme [AttifyOS](https://github.com/adi0x90/attifyos) et [EmbedOS](https://github.com/scriptingxss/EmbedOS) fournissent des environnements préconfigurés pour les tests de sécurité des firmwares, équipés des outils nécessaires.
+Des systèmes d'exploitation comme [AttifyOS](https://github.com/adi0x90/attifyos) et [EmbedOS](https://github.com/scriptingxss/EmbedOS) fournissent des environnements préconfigurés pour les tests de sécurité des firmware, équipés des outils nécessaires.
 
-## Systèmes d'exploitation préparés pour analyser le firmware
+## OSs préparés pour analyser le firmware
 
-- [**AttifyOS**](https://github.com/adi0x90/attifyos) : AttifyOS est une distribution destinée à vous aider à effectuer des évaluations de sécurité et des tests de pénétration des dispositifs Internet des objets (IoT). Elle vous fait gagner beaucoup de temps en fournissant un environnement préconfiguré avec tous les outils nécessaires chargés.
-- [**EmbedOS**](https://github.com/scriptingxss/EmbedOS) : Système d'exploitation de test de sécurité embarqué basé sur Ubuntu 18.04 préchargé avec des outils de test de sécurité des firmwares.
+- [**AttifyOS**](https://github.com/adi0x90/attifyos): AttifyOS est une distro destinée à vous aider à effectuer des security assessment et penetration testing des appareils Internet of Things (IoT). Elle vous fait gagner beaucoup de temps en fournissant un environnement pré-configuré avec tous les outils nécessaires.
+- [**EmbedOS**](https://github.com/scriptingxss/EmbedOS): Système d'exploitation pour les tests de sécurité embarquée basé sur Ubuntu 18.04, préchargé avec des outils de test de sécurité du firmware.
 
-## Attaques de rétrogradation de firmware et mécanismes de mise à jour non sécurisés
+## Attaques de downgrade du firmware & mécanismes de mise à jour non sécurisés
 
-Même lorsqu'un fournisseur met en œuvre des vérifications de signature cryptographique pour les images de firmware, **la protection contre le retour à une version antérieure (rétrogradation) est souvent omise**. Lorsque le chargeur de démarrage ou de récupération ne vérifie que la signature avec une clé publique intégrée mais ne compare pas la *version* (ou un compteur monotone) de l'image flashée, un attaquant peut légitimement installer un **firmware plus ancien et vulnérable qui porte toujours une signature valide** et ainsi réintroduire des vulnérabilités corrigées.
+Même lorsqu'un fournisseur implémente des vérifications de signature cryptographique pour les images firmware, **la protection contre le version rollback (downgrade) est fréquemment omise**. Lorsque le bootloader ou recovery-loader vérifie seulement la signature avec une clé publique embarquée mais ne compare pas la *version* (ou un compteur monotone) de l'image en cours de flash, un attaquant peut légitimement installer un **firmware plus ancien et vulnérable qui porte toujours une signature valide** et réintroduire ainsi des vulnérabilités corrigées.
 
-Flux de travail typique de l'attaque :
+Flux d'attaque typique :
 
-1. **Obtenir une image signée plus ancienne**
-   * La récupérer sur le portail de téléchargement public du fournisseur, CDN ou site de support.
-   * L'extraire d'applications mobiles/de bureau compagnon (par exemple, à l'intérieur d'un APK Android sous `assets/firmware/`).
-   * La récupérer à partir de dépôts tiers tels que VirusTotal, archives Internet, forums, etc.
-2. **Télécharger ou servir l'image au dispositif** via n'importe quel canal de mise à jour exposé :
-   * Interface Web, API d'application mobile, USB, TFTP, MQTT, etc.
-   * De nombreux dispositifs IoT grand public exposent des points de terminaison HTTP(S) *non authentifiés* qui acceptent des blobs de firmware encodés en Base64, les décodent côté serveur et déclenchent la récupération/mise à jour.
-3. Après la rétrogradation, exploiter une vulnérabilité qui a été corrigée dans la version plus récente (par exemple, un filtre d'injection de commande qui a été ajouté plus tard).
-4. Optionnellement, flasher la dernière image ou désactiver les mises à jour pour éviter la détection une fois la persistance acquise.
+1. **Obtain an older signed image**
+* Récupérez-la depuis le portail de téléchargement public du fournisseur, un CDN ou le site de support.
+* Extrayez-la d'applications mobiles/desktop accompagnantes (p. ex. à l'intérieur d'un APK Android sous `assets/firmware/`).
+* Récupérez-la depuis des dépôts tiers tels que VirusTotal, des archives Internet, des forums, etc.
+2. **Upload or serve the image to the device** via any exposed update channel:
+* Web UI, mobile-app API, USB, TFTP, MQTT, etc.
+* De nombreux appareils IoT grand public exposent des endpoints HTTP(S) *unauthenticated* qui acceptent des blobs de firmware encodés en Base64, les décodent côté serveur et déclenchent la récupération/la mise à jour.
+3. Après le downgrade, exploitez une vulnérabilité qui avait été corrigée dans la version plus récente (par exemple un filtre de command-injection ajouté ultérieurement).
+4. Optionnellement, reflashez l'image la plus récente ou désactivez les mises à jour pour éviter la détection une fois la persistance établie.
 
-### Exemple : Injection de commande après rétrogradation
+### Exemple : Command Injection après downgrade
 ```http
 POST /check_image_and_trigger_recovery?md5=1; echo 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC...' >> /root/.ssh/authorized_keys HTTP/1.1
 Host: 192.168.0.1
 Content-Type: application/octet-stream
 Content-Length: 0
 ```
-Dans le firmware vulnérable (rétrogradé), le paramètre `md5` est concaténé directement dans une commande shell sans assainissement, permettant l'injection de commandes arbitraires (ici – l'activation de l'accès root basé sur une clé SSH). Les versions ultérieures du firmware ont introduit un filtre de caractères de base, mais l'absence de protection contre la rétrogradation rend la correction inutile.
+Dans le firmware vulnérable (rétrogradé), le paramètre `md5` est concaténé directement dans une commande shell sans être assaini, permettant l'injection de commandes arbitraires (ici — activation d'un accès root par clé SSH). Les versions de firmware ultérieures ont introduit un filtrage basique des caractères, mais l'absence de protection contre le downgrade rend la correction caduque.
 
-### Extraction de Firmware à partir d'Applications Mobiles
+### Extraction du firmware depuis les applications mobiles
 
-De nombreux fournisseurs regroupent des images de firmware complètes dans leurs applications mobiles compagnon afin que l'application puisse mettre à jour l'appareil via Bluetooth/Wi-Fi. Ces paquets sont généralement stockés non chiffrés dans l'APK/APEX sous des chemins comme `assets/fw/` ou `res/raw/`. Des outils tels que `apktool`, `ghidra`, ou même un simple `unzip` vous permettent d'extraire des images signées sans toucher au matériel physique.
+De nombreux fournisseurs embarquent des images firmware complètes dans leurs applications mobiles compagnon afin que l'application puisse mettre à jour l'appareil via Bluetooth/Wi-Fi. Ces paquets sont généralement stockés en clair dans l'APK/APEX sous des chemins comme `assets/fw/` ou `res/raw/`. Des outils tels que `apktool`, `ghidra` ou même le simple `unzip` permettent d'extraire des images signées sans toucher au matériel physique.
 ```
 $ apktool d vendor-app.apk -o vendor-app
 $ ls vendor-app/assets/firmware
@@ -252,17 +259,17 @@ firmware_v1.3.11.490_signed.bin
 ```
 ### Liste de contrôle pour évaluer la logique de mise à jour
 
-* Le transport/l'authentification de l'*endpoint de mise à jour* est-il adéquatement protégé (TLS + authentification) ?
-* L'appareil compare-t-il les **numéros de version** ou un **compteur anti-rollback monotone** avant de flasher ?
-* L'image est-elle vérifiée dans une chaîne de démarrage sécurisé (par exemple, signatures vérifiées par le code ROM) ?
-* Le code en espace utilisateur effectue-t-il des vérifications supplémentaires de validité (par exemple, carte de partition autorisée, numéro de modèle) ?
-* Les flux de mise à jour *partiels* ou *de sauvegarde* réutilisent-ils la même logique de validation ?
+* Le transport/l'authentification du *update endpoint* est-il suffisamment protégé (TLS + authentication) ?
+* L'appareil compare-t-il **version numbers** ou un **monotonic anti-rollback counter** avant le flashing ?
+* L'image est-elle vérifiée dans une secure boot chain (par ex. signatures vérifiées par du ROM code) ?
+* Le userland code effectue-t-il des vérifications supplémentaires de sanity (par ex. allowed partition map, model number) ?
+* Les flux de mise à jour *partial* ou *backup* réutilisent-ils la même validation logic ?
 
-> 💡  Si l'un des éléments ci-dessus est manquant, la plateforme est probablement vulnérable aux attaques de rollback.
+> 💡  Si un des points ci‑dessus manque, la plateforme est probablement vulnérable à des rollback attacks.
 
-## Firmware vulnérable pour pratiquer
+## Firmware vulnérable pour s'entraîner
 
-Pour pratiquer la découverte de vulnérabilités dans le firmware, utilisez les projets de firmware vulnérables suivants comme point de départ.
+Pour s'exercer à découvrir des vulnérabilités dans le firmware, utilisez les projets de firmware vulnérables suivants comme point de départ.
 
 - OWASP IoTGoat
 - [https://github.com/OWASP/IoTGoat](https://github.com/OWASP/IoTGoat)
@@ -283,7 +290,7 @@ Pour pratiquer la découverte de vulnérabilités dans le firmware, utilisez les
 - [Practical IoT Hacking: The Definitive Guide to Attacking the Internet of Things](https://www.amazon.co.uk/Practical-IoT-Hacking-F-Chantzis/dp/1718500904)
 - [Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
 
-## Formation et Certificat
+## Formation et certifications
 
 - [https://www.attify-store.com/products/offensive-iot-exploitation](https://www.attify-store.com/products/offensive-iot-exploitation)
 
