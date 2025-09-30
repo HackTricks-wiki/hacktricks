@@ -152,11 +152,14 @@ jobs:
           fi
           export GH_TOKEN="$TOKEN"
 
-          if ! gh release view "$TAG" >/dev/null 2>&1; then
-            gh release create "$TAG" "$ASSET" --title "$TITLE" --notes "Automated search index build for $BRANCH" --repo "$GITHUB_REPOSITORY"
-          else
-            gh release upload "$TAG" "$ASSET" --clobber --repo "$GITHUB_REPOSITORY"
+          # Delete the release if it exists
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release $TAG already exists, deleting it..."
+            gh release delete "$TAG" --yes --repo "$GITHUB_REPOSITORY"
           fi
+          
+          # Create new release
+          gh release create "$TAG" "$ASSET" --title "$TITLE" --notes "Automated search index build for $BRANCH" --repo "$GITHUB_REPOSITORY"
 
       # Login in AWs
       - name: Configure AWS credentials using OIDC
