@@ -2,9 +2,9 @@
 
 <figure><img src="images/hacktricks.gif" alt=""><figcaption></figcaption></figure>
 
-_Hacktricks λογότυπα & κίνηση σχεδίαση από_ [_@ppieranacho_](https://www.instagram.com/ppieranacho/)_._
+_Hacktricks λογότυπα & motion design από_ [_@ppieranacho_](https://www.instagram.com/ppieranacho/)_._
 
-### Εκτέλεση του HackTricks Τοπικά
+### Εκτέλεση HackTricks τοπικά
 ```bash
 # Download latest version of hacktricks
 git clone https://github.com/HackTricks-wiki/hacktricks
@@ -31,19 +31,19 @@ export LANG="master" # Leave master for english
 # Run the docker container indicating the path to the hacktricks folder
 docker run -d --rm --platform linux/amd64 -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "mkdir -p ~/.ssh && ssh-keyscan -H github.com >> ~/.ssh/known_hosts && cd /app && git config --global --add safe.directory /app && git checkout $LANG && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
 ```
-Η τοπική σας αντίγραφο του HackTricks θα είναι **διαθέσιμο στο [http://localhost:3337](http://localhost:3337)** μετά από <5 λεπτά (χρειάζεται να κατασκευάσει το βιβλίο, να είστε υπομονετικοί).
+Η τοπική σας αντιγραφή του HackTricks θα είναι **διαθέσιμη στο [http://localhost:3337](http://localhost:3337)** μετά από <5 λεπτά (πρέπει να χτίσει το βιβλίο, να είστε υπομονετικοί).
 
-## Χορηγοί Εταιρειών
+## Εταιρικοί Χορηγοί
 
 ### [STM Cyber](https://www.stmcyber.com)
 
 <figure><img src="images/stm (1).png" alt=""><figcaption></figcaption></figure>
 
-[**STM Cyber**](https://www.stmcyber.com) είναι μια εξαιρετική εταιρεία κυβερνοασφάλειας της οποίας το σλόγκαν είναι **HACK THE UNHACKABLE**. Πραγματοποιούν τη δική τους έρευνα και αναπτύσσουν τα δικά τους εργαλεία hacking για να **προσφέρουν πολλές πολύτιμες υπηρεσίες κυβερνοασφάλειας** όπως pentesting, Red teams και εκπαίδευση.
+[**STM Cyber**](https://www.stmcyber.com) είναι μια εξαιρετική εταιρεία κυβερνοασφάλειας του οποίου το σύνθημα είναι **HACK THE UNHACKABLE**. Πραγματοποιούν τη δική τους έρευνα και αναπτύσσουν τα δικά τους hacking εργαλεία για να **προσφέρουν αρκετές πολύτιμες υπηρεσίες κυβερνοασφάλειας** όπως pentesting, Red teams και εκπαίδευση.
 
-Μπορείτε να ελέγξετε το **blog** τους στο [**https://blog.stmcyber.com**](https://blog.stmcyber.com)
+Μπορείτε να δείτε το **blog** τους στο [**https://blog.stmcyber.com**](https://blog.stmcyber.com)
 
-**STM Cyber** υποστηρίζει επίσης έργα ανοιχτού κώδικα στον τομέα της κυβερνοασφάλειας όπως το HackTricks :)
+**STM Cyber** επίσης στηρίζει open source έργα κυβερνοασφάλειας όπως το HackTricks :)
 
 ---
 
@@ -51,7 +51,7 @@ docker run -d --rm --platform linux/amd64 -p 3337:3000 --name hacktricks -v $(pw
 
 <figure><img src="images/image (45).png" alt=""><figcaption></figcaption></figure>
 
-[**RootedCON**](https://www.rootedcon.com) είναι η πιο σχετική εκδήλωση κυβερνοασφάλειας στην **Ισπανία** και μία από τις πιο σημαντικές στην **Ευρώπη**. Με **αποστολή την προώθηση της τεχνικής γνώσης**, αυτό το συνέδριο είναι ένα καυτό σημείο συνάντησης για επαγγελματίες τεχνολογίας και κυβερνοασφάλειας σε κάθε πειθαρχία.
+[**RootedCON**](https://www.rootedcon.com) είναι το πιο σημαντικό event κυβερνοασφάλειας στην **Ισπανία** και ένα από τα πιο σημαντικά στην **Ευρώπη**. Με **την αποστολή προώθησης της τεχνικής γνώσης**, αυτό το συνέδριο αποτελεί ένα καυτό σημείο συνάντησης για επαγγελματίες της τεχνολογίας και της κυβερνοασφάλειας σε κάθε πειθαρχία.
 
 {{#ref}}
 https://www.rootedcon.com/
@@ -63,9 +63,9 @@ https://www.rootedcon.com/
 
 <figure><img src="images/image (47).png" alt=""><figcaption></figcaption></figure>
 
-**Intigriti** είναι η **#1 στην Ευρώπη** πλατφόρμα ηθικού hacking και **bug bounty.**
+**Intigriti** είναι η **Europe's #1** ethical hacking και **bug bounty platform.**
 
-**Συμβουλή bug bounty**: **εγγραφείτε** στο **Intigriti**, μια premium **πλατφόρμα bug bounty που δημιουργήθηκε από hackers, για hackers**! Ελάτε μαζί μας στο [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) σήμερα και αρχίστε να κερδίζετε βραβεία έως **$100,000**!
+**Bug bounty tip**: **sign up** για **Intigriti**, μια premium **bug bounty platform created by hackers, for hackers**! Join us at [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) σήμερα, και ξεκινήστε να κερδίζετε bounties μέχρι **$100,000**!
 
 {{#ref}}
 https://go.intigriti.com/hacktricks
@@ -78,9 +78,9 @@ https://go.intigriti.com/hacktricks
 <figure><img src="images/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-Χρησιμοποιήστε [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) για να δημιουργήσετε εύκολα και **να αυτοματοποιήσετε ροές εργασίας** που υποστηρίζονται από τα **πιο προηγμένα** εργαλεία της κοινότητας.
+Χρησιμοποιήστε [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) για να δημιουργείτε εύκολα και να **αυτοματοποιείτε workflows** που τροφοδοτούνται από τα **πιο προηγμένα** community εργαλεία στον κόσμο.
 
-Αποκτήστε πρόσβαση σήμερα:
+Get Access Today:
 
 {{#ref}}
 https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks
@@ -92,23 +92,23 @@ https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktr
 
 <figure><img src="images/image (3).png" alt=""><figcaption></figcaption></figure>
 
-Εγγραφείτε στον [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) server για να επικοινωνήσετε με έμπειρους hackers και κυνηγούς bug bounty!
+Join [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) server για να επικοινωνήσετε με έμπειρους hackers και bug bounty hunters!
 
-- **Insights Hacking:** Συμμετοχή σε περιεχόμενο που εμβαθύνει στην αδρεναλίνη και τις προκλήσεις του hacking
-- **Νέα Hack σε Πραγματικό Χρόνο:** Μείνετε ενημερωμένοι με τον ταχύτατο κόσμο του hacking μέσω ειδήσεων και insights σε πραγματικό χρόνο
-- **Τελευταίες Ανακοινώσεις:** Μείνετε ενημερωμένοι με τις πιο πρόσφατες εκκινήσεις bug bounty και κρίσιμες ενημερώσεις πλατφόρμας
+- **Hacking Insights:** Engage with content that delves into the thrill and challenges of hacking
+- **Real-Time Hack News:** Keep up-to-date with fast-paced hacking world through real-time news and insights
+- **Latest Announcements:** Stay informed with the newest bug bounties launching and crucial platform updates
 
-**Ελάτε μαζί μας στο** [**Discord**](https://discord.com/invite/N3FrSbmwdy) και αρχίστε να συνεργάζεστε με κορυφαίους hackers σήμερα!
+**Join us on** [**Discord**](https://discord.com/invite/N3FrSbmwdy) και ξεκινήστε να συνεργάζεστε με κορυφαίους hackers σήμερα!
 
 ---
 
-### [Pentest-Tools.com](https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons) - Το απαραίτητο εργαλείο δοκιμών διείσδυσης
+### [Pentest-Tools.com](https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons) - The essential penetration testing toolkit
 
 <figure><img src="images/pentest-tools.svg" alt=""><figcaption></figcaption></figure>
 
-**Αποκτήστε την προοπτική ενός hacker για τις εφαρμογές σας, το δίκτυο και το cloud**
+**Get a hacker's perspective on your web apps, network, and cloud**
 
-**Βρείτε και αναφέρετε κρίσιμες, εκμεταλλεύσιμες ευπάθειες με πραγματικό επιχειρηματικό αντίκτυπο.** Χρησιμοποιήστε τα 20+ προσαρμοσμένα εργαλεία μας για να χαρτογραφήσετε την επιφάνεια επίθεσης, να βρείτε ζητήματα ασφαλείας που σας επιτρέπουν να κλιμακώσετε προνόμια και να χρησιμοποιήσετε αυτοματοποιημένες εκμεταλλεύσεις για να συλλέξετε βασικά αποδεικτικά στοιχεία, μετατρέποντας τη σκληρή σας δουλειά σε πειστικές αναφορές.
+**Find and report critical, exploitable vulnerabilities with real business impact.** Χρησιμοποιήστε τα 20+ custom εργαλεία μας για να χαρτογραφήσετε την attack surface, να εντοπίσετε θέματα ασφάλειας που επιτρέπουν escalation privileges, και να χρησιμοποιήσετε automated exploits για να συλλέξετε απαραίτητα αποδεικτικά στοιχεία, μετατρέποντας τη σκληρή δουλειά σας σε πειστικές αναφορές.
 
 {{#ref}}
 https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons
@@ -120,22 +120,22 @@ https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktrick
 
 <figure><img src="images/image (1254).png" alt=""><figcaption></figcaption></figure>
 
-**SerpApi** προσφέρει γρήγορες και εύκολες APIs σε πραγματικό χρόνο για **πρόσβαση στα αποτελέσματα μηχανών αναζήτησης**. Scrape μηχανές αναζήτησης, χειρίζονται proxies, λύνουν captchas και αναλύουν όλα τα πλούσια δομημένα δεδομένα για εσάς.
+**SerpApi** προσφέρει γρήγορα και εύκολα real-time APIs για να **access search engine results**. Κάνουν scraping σε search engines, διαχειρίζονται proxies, λύνουν captchas, και parse-άρουν όλα τα rich structured data για εσάς.
 
-Μια συνδρομή σε ένα από τα σχέδια του SerpApi περιλαμβάνει πρόσβαση σε πάνω από 50 διαφορετικά APIs για scraping διαφορετικών μηχανών αναζήτησης, συμπεριλαμβανομένων των Google, Bing, Baidu, Yahoo, Yandex και άλλων.\
-Σε αντίθεση με άλλους παρόχους, **η SerpApi δεν scrapes μόνο οργανικά αποτελέσματα**. Οι απαντήσεις της SerpApi περιλαμβάνουν σταθερά όλες τις διαφημίσεις, inline εικόνες και βίντεο, γραφήματα γνώσεων και άλλα στοιχεία και χαρακτηριστικά που υπάρχουν στα αποτελέσματα αναζήτησης.
+Μια συνδρομή σε ένα από τα σχέδια της SerpApi περιλαμβάνει πρόσβαση σε πάνω από 50 διαφορετικά APIs για scraping διαφορετικών search engines, συμπεριλαμβανομένων Google, Bing, Baidu, Yahoo, Yandex, και άλλα.\
+Σε αντίθεση με άλλους providers, **SerpApi doesn’t just scrape organic results**. Οι απαντήσεις της SerpApi περιλαμβάνουν σταθερά όλα τα ads, inline images και videos, knowledge graphs, και άλλα στοιχεία και features που υπάρχουν στα search results.
 
-Οι τρέχοντες πελάτες της SerpApi περιλαμβάνουν **Apple, Shopify και GrubHub**.\
-Για περισσότερες πληροφορίες, ελέγξτε το [**blog**](https://serpapi.com/blog/)** τους,** ή δοκιμάστε ένα παράδειγμα στο [**playground**](https://serpapi.com/playground)** τους.**\
-Μπορείτε να **δημιουργήσετε έναν δωρεάν λογαριασμό** [**εδώ**](https://serpapi.com/users/sign_up)**.**
+Οι τρέχοντες πελάτες της SerpApi περιλαμβάνουν **Apple, Shopify, and GrubHub**.\
+Για περισσότερες πληροφορίες δείτε το [**blog**](https://serpapi.com/blog/)**,** ή δοκιμάστε ένα παράδειγμα στο [**playground**](https://serpapi.com/playground)**.**\
+Μπορείτε να **δημιουργήσετε δωρεάν λογαριασμό** [**εδώ**](https://serpapi.com/users/sign_up)**.**
 
 ---
 
-### [8kSec Academy – Σε βάθος Μαθήματα Ασφαλείας Κινητών](https://academy.8ksec.io/)
+### [8kSec Academy – In-Depth Mobile Security Courses](https://academy.8ksec.io/)
 
 <figure><img src="images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-Μάθετε τις τεχνολογίες και τις δεξιότητες που απαιτούνται για να εκτελέσετε έρευνα ευπαθειών, δοκιμές διείσδυσης και αντίστροφη μηχανική για να προστατεύσετε τις κινητές εφαρμογές και τις συσκευές. **Κατακτήστε την ασφάλεια iOS και Android** μέσω των on-demand μαθημάτων μας και **λάβετε πιστοποίηση**:
+Μάθετε τις τεχνολογίες και τις δεξιότητες που απαιτούνται για να πραγματοποιήσετε vulnerability research, penetration testing, και reverse engineering για να προστατέψετε mobile applications και devices. **Master iOS and Android security** μέσω των on-demand courses μας και **get certified**:
 
 {{#ref}}
 https://academy.8ksec.io/
@@ -147,13 +147,13 @@ https://academy.8ksec.io/
 
 <figure><img src="images/websec (1).svg" alt=""><figcaption></figcaption></figure>
 
-[**WebSec**](https://websec.net) είναι μια επαγγελματική εταιρεία κυβερνοασφάλειας με έδρα το **Άμστερνταμ** που βοηθά **να προστατεύει** τις επιχειρήσεις **σε όλο τον κόσμο** από τις τελευταίες απειλές κυβερνοασφάλειας παρέχοντας **υπηρεσίες επιθετικής ασφάλειας** με **σύγχρονη** προσέγγιση.
+[**WebSec**](https://websec.net) είναι μια επαγγελματική εταιρεία κυβερνοασφάλειας με έδρα το **Άμστερνταμ** που βοηθά **να προστατέψει** επιχειρήσεις **σε όλο τον κόσμο** από τις τελευταίες απειλές κυβερνοασφάλειας παρέχοντας **offensive-security services** με μια **μοντέρνα** προσέγγιση.
 
-Η WebSec είναι μια διεθνής εταιρεία ασφάλειας με γραφεία στο Άμστερνταμ και το Wyoming. Προσφέρουν **υπηρεσίες ασφάλειας all-in-one** που σημαίνει ότι τα κάνουν όλα: Pentesting, **Ασφάλεια** Ελέγχων, Εκπαιδεύσεις Ευαισθητοποίησης, Καμπάνιες Phishing, Ανασκόπηση Κώδικα, Ανάπτυξη Εκμεταλλεύσεων, Εξωτερική Ανάθεση Ειδικών Ασφαλείας και πολλά άλλα.
+Η WebSec είναι μια διεθνής εταιρεία ασφαλείας με γραφεία σε Amsterdam και Wyoming. Προσφέρουν **all-in-one security services** που σημαίνει ότι κάνουν σχεδόν τα πάντα: Pentesting, **Security** Audits, Awareness Trainings, Phishing Campagnes, Code Review, Exploit Development, Security Experts Outsourcing και πολλά άλλα.
 
-Ένα άλλο ενδιαφέρον πράγμα για την WebSec είναι ότι σε αντίθεση με τον μέσο όρο της βιομηχανίας, η WebSec είναι **πολύ σίγουρη για τις δεξιότητές της**, σε τέτοιο βαθμό που **εγγυάται τα καλύτερα ποιοτικά αποτελέσματα**, δηλώνει στην ιστοσελίδα της "**Αν δεν μπορούμε να το χακάρουμε, δεν το πληρώνετε!**". Για περισσότερες πληροφορίες, ρίξτε μια ματιά στην [**ιστοσελίδα**](https://websec.net/en/) και το [**blog**](https://websec.net/blog/) τους!
+Ένα ακόμα καλό για τη WebSec είναι ότι σε αντίθεση με τον μέσο όρο της βιομηχανίας, η WebSec είναι **πολύ σίγουρη για τις δεξιότητές της**, σε τέτοιο βαθμό που **εγγυάται τα καλύτερα ποιοτικά αποτελέσματα**, στο site τους αναφέρεται "**If we can't hack it, You don't pay it!**". Για περισσότερες πληροφορίες ρίξτε μια ματιά στο [**website**](https://websec.net/en/) και στο [**blog**](https://websec.net/blog/)!
 
-Επιπλέον, η WebSec είναι επίσης **δεσμευμένος υποστηρικτής του HackTricks.**
+Επιπλέον, η WebSec είναι επίσης **δέσμευση υποστηρικτής του HackTricks.**
 
 {{#ref}}
 https://www.youtube.com/watch?v=Zq2JycGDCPM
@@ -165,10 +165,10 @@ https://www.youtube.com/watch?v=Zq2JycGDCPM
 
 <figure><img src="images/venacus-logo.svg" alt="venacus logo"><figcaption></figcaption></figure>
 
-[**Venacus**](https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons) είναι μια μηχανή αναζήτησης διαρροών δεδομένων (leak). \
-Παρέχουμε αναζητήσεις τυχαίων συμβολοσειρών (όπως η google) σε όλους τους τύπους διαρροών δεδομένων μεγάλων και μικρών --όχι μόνο τις μεγάλες-- από δεδομένα πολλαπλών πηγών. \
-Αναζητήσεις ανθρώπων, αναζητήσεις AI, αναζητήσεις οργανισμών, πρόσβαση API (OpenAPI), ενσωμάτωση theHarvester, όλα τα χαρακτηριστικά που χρειάζεται ένας pentester.\
-**Το HackTricks συνεχίζει να είναι μια εξαιρετική πλατφόρμα μάθησης για όλους μας και είμαστε περήφανοι που το υποστηρίζουμε!**
+[**Venacus**](https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons) είναι μια μηχανή αναζήτησης data breach (leak). \
+Προσφέρουμε random string search (like google) πάνω σε όλα τα είδη data leaks μεγάλα και μικρά --όχι μόνο τα μεγάλα-- πάνω σε δεδομένα από πολλαπλές πηγές. \
+People search, AI search, organization search, API (OpenAPI) access, theHarvester integration, όλα τα features που χρειάζεται ένας pentester.\
+**HackTricks continues to be a great learning platform for us all and we're proud to be sponsoring it!**
 
 {{#ref}}
 https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons
@@ -180,16 +180,14 @@ https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons
 
 <figure><img src="images/cyberhelmets-logo.png" alt="cyberhelmets logo"><figcaption></figcaption></figure>
 
-**Κατασκευασμένο για το πεδίο. Κατασκευασμένο γύρω σας.**\
-[**Cyber Helmets**](https://cyberhelmets.com/?ref=hacktricks) αναπτύσσει και παρέχει αποτελεσματική εκπαίδευση κυβερνοασφάλειας που κατασκευάζεται και καθοδηγείται από
-ειδικούς της βιομηχανίας. Τα προγράμματά τους ξεπερνούν τη θεωρία για να εξοπλίσουν τις ομάδες με βαθιά
-κατανόηση και εφαρμόσιμες δεξιότητες, χρησιμοποιώντας προσαρμοσμένα περιβάλλοντα που αντικατοπτρίζουν τις πραγματικές
-απειλές. Για ερωτήσεις σχετικά με προσαρμοσμένη εκπαίδευση, επικοινωνήστε μαζί μας [**εδώ**](https://cyberhelmets.com/tailor-made-training/?ref=hacktricks).
+
+**Built for the field. Built around you.**\
+[**Cyber Helmets**](https://cyberhelmets.com/?ref=hacktricks) αναπτύσσει και παραδίδει αποτελεσματική εκπαίδευση κυβερνοασφάλειας σχεδιασμένη και καθοδηγούμενη από industry experts. Τα προγράμματά τους ξεπερνούν τη θεωρία για να εξοπλίσουν ομάδες με βαθιά κατανόηση και εφαρμόσιμες δεξιότητες, χρησιμοποιώντας custom περιβάλλοντα που αντανακλούν πραγματικές απειλές. Για προσαρμοσμένες εκπαιδεύσεις, επικοινωνήστε μαζί μας [**εδώ**](https://cyberhelmets.com/tailor-made-training/?ref=hacktricks).
 
 **Τι ξεχωρίζει την εκπαίδευσή τους:**
-* Προσαρμοσμένο περιεχόμενο και εργαστήρια
-* Υποστηριζόμενο από κορυφαία εργαλεία και πλατφόρμες
-* Σχεδιασμένο και διδασκόμενο από επαγγελματίες
+* Custom-built content and labs
+* Backed by top-tier tools and platforms
+* Designed and taught by practitioners
 
 {{#ref}}
 https://cyberhelmets.com/courses/?ref=hacktricks
@@ -201,19 +199,13 @@ https://cyberhelmets.com/courses/?ref=hacktricks
 
 <figure><img src="images/lasttower.png" alt="lasttower logo"><figcaption></figcaption></figure>
 
-Last Tower Solutions παρέχει εξειδικευμένες υπηρεσίες κυβερνοασφάλειας για **Εκπαίδευση** και **FinTech**
-ιδρύματα, με έμφαση σε **δοκιμές διείσδυσης, αξιολογήσεις ασφάλειας cloud** και
-**ετοιμότητα συμμόρφωσης** (SOC 2, PCI-DSS, NIST). Η ομάδα μας περιλαμβάνει **OSCP και CISSP
-πιστοποιημένους επαγγελματίες**, φέρνοντας βαθιά τεχνική εμπειρία και γνώση βιομηχανίας σε
-κάθε συνεργασία.
+Last Tower Solutions παρέχει εξειδικευμένες υπηρεσίες κυβερνοασφάλειας για ιδρύματα **Education** και **FinTech**, με έμφαση σε **penetration testing, cloud security assessments**, και **compliance readiness** (SOC 2, PCI-DSS, NIST). Η ομάδα μας περιλαμβάνει επαγγελματίες πιστοποιημένους με **OSCP and CISSP**, φέρνοντας βαθιά τεχνική εξειδίκευση και γνώση βιομηχανικών προτύπων σε κάθε συνεργασία.
 
-Πηγαίνουμε πέρα από τις αυτοματοποιημένες σαρώσεις με **χειροκίνητες, καθοδηγούμενες από πληροφορίες δοκιμές** προσαρμοσμένες σε
-υψηλού κινδύνου περιβάλλοντα. Από την ασφάλιση αρχείων φοιτητών έως την προστασία χρηματοοικονομικών συναλλαγών,
-βοηθάμε τους οργανισμούς να υπερασπιστούν ό,τι έχει σημασία περισσότερο.
+Προχωρούμε πέρα από τα automated scans με **manual, intelligence-driven testing** προσαρμοσμένο σε περιβάλλοντα υψηλού ρίσκου. Από την ασφάλεια των μαθητικών αρχείων μέχρι την προστασία χρηματοοικονομικών συναλλαγών, βοηθάμε οργανισμούς να υπερασπίζονται ό,τι έχει μεγαλύτερη σημασία.
 
-_“Μια ποιοτική άμυνα απαιτεί γνώση της επίθεσης, παρέχουμε ασφάλεια μέσω της κατανόησης.”_
+_“A quality defense requires knowing the offense, we provide security through understanding.”_
 
-Μείνετε ενημερωμένοι και ενημερωμένοι με τα τελευταία νέα στην κυβερνοασφάλεια επισκεπτόμενοι το [**blog**](https://www.lasttowersolutions.com/blog).
+Μείνετε ενημερωμένοι με τα τελευταία νέα στην κυβερνοασφάλεια επισκεπτόμενοι το [**blog**](https://www.lasttowersolutions.com/blog).
 
 {{#ref}}
 https://www.lasttowersolutions.com/
@@ -221,15 +213,30 @@ https://www.lasttowersolutions.com/
 
 ---
 
-## Άδεια & Αποποίηση Ευθυνών
+### [K8Studio - The Smarter GUI to Manage Kubernetes.](https://k8studio.io/)
 
-Ελέγξτε τα εδώ:
+<figure><img src="images/k8studio.png" alt="k8studio logo"><figcaption></figcaption></figure>
+
+K8Studio IDE δίνει τη δυνατότητα σε DevOps, DevSecOps, και developers να διαχειρίζονται, να παρακολουθούν, και να ασφαλίζουν Kubernetes clusters αποδοτικά. Αξιοποιήστε τα AI-driven insights μας, το advanced security framework, και το ευχάριστο CloudMaps GUI για να οπτικοποιήσετε τα clusters σας, να κατανοήσετε την κατάσταση τους, και να δράσετε με αυτοπεποίθηση.
+
+Επιπλέον, το K8Studio είναι **συμβατό με όλες τις κύριες kubernetes distributions** (AWS, GCP, Azure, DO, Rancher, K3s, Openshift and more).
+
+{{#ref}}
+https://k8studio.io/
+{{#endref}}
+
+
+---
+
+## License & Disclaimer
+
+Check them in:
 
 {{#ref}}
 welcome/hacktricks-values-and-faq.md
 {{#endref}}
 
-## Στατιστικά Github
+## Github Stats
 
 ![HackTricks Github Stats](https://repobeats.axiom.co/api/embed/68f8746802bcf1c8462e889e6e9302d4384f164b.svg)
 

