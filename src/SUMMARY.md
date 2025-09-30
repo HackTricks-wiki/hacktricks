@@ -37,6 +37,7 @@
   - [Mobile Phishing Malicious Apps](generic-methodologies-and-resources/phishing-methodology/mobile-phishing-malicious-apps.md)
   - [Phishing Files & Documents](generic-methodologies-and-resources/phishing-methodology/phishing-documents.md)
 - [Basic Forensic Methodology](generic-methodologies-and-resources/basic-forensic-methodology/README.md)
+  - [Adaptixc2 Config Extraction And Ttps](generic-methodologies-and-resources/basic-forensic-methodology/adaptixc2-config-extraction-and-ttps.md)
   - [Baseline Monitoring](generic-methodologies-and-resources/basic-forensic-methodology/file-integrity-monitoring.md)
   - [Anti-Forensic Techniques](generic-methodologies-and-resources/basic-forensic-methodology/anti-forensic-techniques.md)
   - [Docker Forensics](generic-methodologies-and-resources/basic-forensic-methodology/docker-forensics.md)
@@ -81,6 +82,7 @@
   - [Basic Python](generic-methodologies-and-resources/python/basic-python.md)
 - [Threat Modeling](generic-methodologies-and-resources/threat-modeling.md)
 - [Blockchain & Crypto](blockchain/blockchain-and-crypto-currencies/README.md)
+  - [Defi/AMM Hook Precision](blockchain/blockchain-and-crypto-currencies/defi-amm-hook-precision.md)
 - [Lua Sandbox Escape](generic-methodologies-and-resources/lua/bypass-lua-sandboxes/README.md)
 
 # 🧙‍♂️ Generic Hacking
@@ -129,6 +131,7 @@
     - [Seccomp](linux-hardening/privilege-escalation/docker-security/seccomp.md)
     - [Weaponizing Distroless](linux-hardening/privilege-escalation/docker-security/weaponizing-distroless.md)
   - [Escaping from Jails](linux-hardening/privilege-escalation/escaping-from-limited-bash.md)
+  - [Posix Cpu Timers Toctou Cve 2025 38352](linux-hardening/privilege-escalation/linux-kernel-exploitation/posix-cpu-timers-toctou-cve-2025-38352.md)
   - [euid, ruid, suid](linux-hardening/privilege-escalation/euid-ruid-suid.md)
   - [Interesting Groups - Linux Privesc](linux-hardening/privilege-escalation/interesting-groups-linux-pe/README.md)
     - [lxd/lxc Group - Privilege escalation](linux-hardening/privilege-escalation/interesting-groups-linux-pe/lxd-privilege-escalation.md)
@@ -352,6 +355,7 @@
     - [Frida Tutorial 3](mobile-pentesting/android-app-pentesting/frida-tutorial/owaspuncrackable-1.md)
     - [Objection Tutorial](mobile-pentesting/android-app-pentesting/frida-tutorial/objection-tutorial.md)
   - [Google CTF 2018 - Shall We Play a Game?](mobile-pentesting/android-app-pentesting/google-ctf-2018-shall-we-play-a-game.md)
+  - [In Memory Jni Shellcode Execution](mobile-pentesting/android-app-pentesting/in-memory-jni-shellcode-execution.md)
   - [Insecure In App Update Rce](mobile-pentesting/android-app-pentesting/insecure-in-app-update-rce.md)
   - [Install Burp Certificate](mobile-pentesting/android-app-pentesting/install-burp-certificate.md)
   - [Intent Injection](mobile-pentesting/android-app-pentesting/intent-injection.md)
@@ -769,7 +773,7 @@
     - [Stack Shellcode - arm64](binary-exploitation/stack-overflow/stack-shellcode/stack-shellcode-arm64.md)
   - [Stack Pivoting - EBP2Ret - EBP chaining](binary-exploitation/stack-overflow/stack-pivoting-ebp2ret-ebp-chaining.md)
   - [Uninitialized Variables](binary-exploitation/stack-overflow/uninitialized-variables.md)
-- [ROP & JOP](binary-exploitation/rop-return-oriented-programing/README.md)
+  - [ROP & JOP](binary-exploitation/rop-return-oriented-programing/README.md)
   - [BROP - Blind Return Oriented Programming](binary-exploitation/rop-return-oriented-programing/brop-blind-return-oriented-programming.md)
   - [Ret2csu](binary-exploitation/rop-return-oriented-programing/ret2csu.md)
   - [Ret2dlresolve](binary-exploitation/rop-return-oriented-programing/ret2dlresolve.md)
@@ -838,6 +842,7 @@
   - [WWW2Exec - GOT/PLT](binary-exploitation/arbitrary-write-2-exec/aw2exec-got-plt.md)
   - [WWW2Exec - \_\_malloc_hook & \_\_free_hook](binary-exploitation/arbitrary-write-2-exec/aw2exec-__malloc_hook.md)
 - [Common Exploiting Problems](binary-exploitation/common-exploiting-problems.md)
+- [Linux kernel exploitation - toctou](binary-exploitation/linux-kernel-exploitation/posix-cpu-timers-toctou-cve-2025-38352.md)
 - [Windows Exploiting (Basic Guide - OSCP lvl)](binary-exploitation/windows-exploiting-basic-guide-oscp-lvl.md)
 - [iOS Exploiting](binary-exploitation/ios-exploiting/README.md)
   - [ios CVE-2020-27950-mach_msg_trailer_t](binary-exploitation/ios-exploiting/CVE-2020-27950-mach_msg_trailer_t.md)
@@ -845,7 +850,6 @@
   - [ios Corellium](binary-exploitation/ios-exploiting/ios-corellium.md)
   - [ios Heap Exploitation](binary-exploitation/ios-exploiting/ios-example-heap-exploit.md)
   - [ios Physical UAF - IOSurface](binary-exploitation/ios-exploiting/ios-physical-uaf-iosurface.md)
-
 
 # 🤖 AI
 - [AI Security](AI/README.md)
@@ -895,7 +899,6 @@
 - [RC4 - Encrypt\&Decrypt](crypto-and-stego/rc4-encrypt-and-decrypt.md)
 - [Stego Tricks](crypto-and-stego/stego-tricks.md)
 - [Esoteric languages](crypto-and-stego/esoteric-languages.md)
-- [Blockchain & Crypto Currencies](crypto-and-stego/blockchain-and-crypto-currencies.md)
 
 # ✍️ TODO
 
