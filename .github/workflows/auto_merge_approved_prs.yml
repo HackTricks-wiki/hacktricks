@@ -2,7 +2,7 @@ name: Auto Merge Approved PRs
 
 on:
   schedule:
-    - cron: '0 */2 * * *'  # Every 2 hours
+    - cron: '0 */1 * * *'  # Every 1 hour
   workflow_dispatch:  # Allow manual triggering
 
 permissions:
@@ -26,9 +26,12 @@ jobs:
           git config --global user.email "action@github.com"
           git config --global user.name "GitHub Action"
 
+<<<<<<< HEAD
       - name: Make conflict resolution script executable
         run: chmod +x ./resolve_searchindex_conflicts.sh
 
+=======
+>>>>>>> master
       - name: Check for running workflows
         id: check_workflows
         run: |
@@ -138,6 +141,7 @@ jobs:
                   echo "Failed to merge PR #$pr_number: $pr_title"
                 fi
               elif [ "$pr_mergeable" = "CONFLICTED" ] || [ "$pr_mergeable" = "CONFLICTING" ]; then
+<<<<<<< HEAD
                 echo "PR #$pr_number has conflicts. Attempting to resolve searchindex.js conflicts..."
                 
                 # Try to resolve conflicts by updating the branch
@@ -166,6 +170,9 @@ jobs:
                 else
                   echo "Failed to resolve conflicts for PR #$pr_number"
                 fi
+=======
+                echo "PR #$pr_number has conflicts. Skipping auto-merge so it can be resolved manually."
+>>>>>>> master
               else
                 echo "PR #$pr_number is not mergeable (status: $pr_mergeable)"
               fi
