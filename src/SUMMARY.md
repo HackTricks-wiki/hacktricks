@@ -590,6 +590,7 @@
   - [BrowExt - ClickJacking](pentesting-web/browser-extension-pentesting-methodology/browext-clickjacking.md)
   - [BrowExt - permissions & host_permissions](pentesting-web/browser-extension-pentesting-methodology/browext-permissions-and-host_permissions.md)
   - [BrowExt - XSS Example](pentesting-web/browser-extension-pentesting-methodology/browext-xss-example.md)
+  - [Forced Extension Load Preferences Mac Forgery Windows](pentesting-web/browser-extension-pentesting-methodology/forced-extension-load-preferences-mac-forgery-windows.md)
 - [Bypass Payment Process](pentesting-web/bypass-payment-process.md)
 - [Captcha Bypass](pentesting-web/captcha-bypass.md)
 - [Cache Poisoning and Cache Deception](pentesting-web/cache-deception/README.md)
