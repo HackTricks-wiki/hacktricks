@@ -1,0 +1,204 @@
+name: Cleanup Merged/Closed PR Branches
+
+on:
+  schedule:
+    - cron: '0 2 * * 0'  # Every Sunday at 2 AM UTC
+  workflow_dispatch:  # Allow manual triggering
+    inputs:
+      dry_run:
+        description: 'Dry run (show what would be deleted without actually deleting)'
+        required: false
+        default: 'false'
+        type: boolean
+
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  cleanup-branches:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Need full history to see all branches
+          token: ${{ secrets.PAT_TOKEN }}
+
+      - name: Install GitHub CLI
+        run: |
+          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
+          && sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
+          && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
+          && sudo apt update \
+          && sudo apt install gh -y
+
+      - name: Configure git
+        run: |
+          git config --global user.email "action@github.com"
+          git config --global user.name "GitHub Action"
+
+      - name: Cleanup merged/closed PR branches
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+        run: |
+          echo "Starting branch cleanup process..."
+          
+          # Check if this is a dry run
+          DRY_RUN="${{ github.event.inputs.dry_run || 'false' }}"
+          if [ "$DRY_RUN" = "true" ]; then
+            echo "🔍 DRY RUN MODE - No branches will actually be deleted"
+            echo ""
+          fi
+          
+          # Define protected branches and patterns
+          protected_branches=(
+            "master"
+            "main"
+          )
+          
+          # Translation branch patterns (any 2-letter combination)
+          translation_pattern="^[a-zA-Z]{2}$"
+          
+          # Get all remote branches except protected ones
+          echo "Fetching all remote branches..."
+          git fetch --all --prune
+          
+          # Get list of all remote branches (excluding HEAD)
+          all_branches=$(git branch -r | grep -v 'HEAD' | sed 's/origin\///' | grep -v '^$')
+          
+          # Get all open PRs to identify branches with open PRs
+          echo "Getting list of open PRs..."
+          open_pr_branches=$(gh pr list --state open --json headRefName --jq '.[].headRefName' | sort | uniq)
+          
+          echo "Open PR branches:"
+          echo "$open_pr_branches"
+          echo ""
+          
+          deleted_count=0
+          skipped_count=0
+          
+          for branch in $all_branches; do
+            branch=$(echo "$branch" | xargs)  # Trim whitespace
+            
+            # Skip if empty
+            if [ -z "$branch" ]; then
+              continue
+            fi
+            
+            echo "Checking branch: $branch"
+            
+            # Check if it's a protected branch
+            is_protected=false
+            for protected in "${protected_branches[@]}"; do
+              if [ "$branch" = "$protected" ]; then
+                echo "  ✓ Skipping protected branch: $branch"
+                is_protected=true
+                skipped_count=$((skipped_count + 1))
+                break
+              fi
+            done
+            
+            if [ "$is_protected" = true ]; then
+              continue
+            fi
+            
+            # Check if it's a translation branch (any 2-letter combination)
+            # Also protect any branch that starts with 2 letters followed by additional content
+            if echo "$branch" | grep -Eq "$translation_pattern" || echo "$branch" | grep -Eq "^[a-zA-Z]{2}[_-]"; then
+              echo "  ✓ Skipping translation/language branch: $branch"
+              skipped_count=$((skipped_count + 1))
+              continue
+            fi
+            
+            # Check if branch has an open PR
+            if echo "$open_pr_branches" | grep -Fxq "$branch"; then
+              echo "  ✓ Skipping branch with open PR: $branch"
+              skipped_count=$((skipped_count + 1))
+              continue
+            fi
+            
+            # Check if branch had a PR that was merged or closed
+            echo "  → Checking PR history for branch: $branch"
+            
+            # Look for PRs from this branch (both merged and closed)
+            pr_info=$(gh pr list --state all --head "$branch" --json number,state,mergedAt --limit 1)
+            
+            if [ "$pr_info" != "[]" ]; then
+              pr_state=$(echo "$pr_info" | jq -r '.[0].state')
+              pr_number=$(echo "$pr_info" | jq -r '.[0].number')
+              merged_at=$(echo "$pr_info" | jq -r '.[0].mergedAt')
+              
+              if [ "$pr_state" = "MERGED" ] || [ "$pr_state" = "CLOSED" ]; then
+                if [ "$DRY_RUN" = "true" ]; then
+                  echo "  🔍 [DRY RUN] Would delete branch: $branch (PR #$pr_number was $pr_state)"
+                  deleted_count=$((deleted_count + 1))
+                else
+                  echo "  ✗ Deleting branch: $branch (PR #$pr_number was $pr_state)"
+                  
+                  # Delete the remote branch
+                  if git push origin --delete "$branch" 2>/dev/null; then
+                    echo "    Successfully deleted remote branch: $branch"
+                    deleted_count=$((deleted_count + 1))
+                  else
+                    echo "    Failed to delete remote branch: $branch"
+                  fi
+                fi
+              else
+                echo "  ✓ Skipping branch with open PR: $branch (PR #$pr_number is $pr_state)"
+                skipped_count=$((skipped_count + 1))
+              fi
+            else
+              # No PR found for this branch - it might be a stale branch
+              # Check if branch is older than 30 days and has no recent activity
+              last_commit_date=$(git log -1 --format="%ct" origin/"$branch" 2>/dev/null || echo "0")
+              
+              if [ "$last_commit_date" != "0" ] && [ -n "$last_commit_date" ]; then
+                # Calculate 30 days ago in seconds since epoch
+                thirty_days_ago=$(($(date +%s) - 30 * 24 * 60 * 60))
+                
+                if [ "$last_commit_date" -lt "$thirty_days_ago" ]; then
+                  if [ "$DRY_RUN" = "true" ]; then
+                    echo "  🔍 [DRY RUN] Would delete stale branch (no PR, >30 days old): $branch"
+                    deleted_count=$((deleted_count + 1))
+                  else
+                    echo "  ✗ Deleting stale branch (no PR, >30 days old): $branch"
+                    
+                    if git push origin --delete "$branch" 2>/dev/null; then
+                      echo "    Successfully deleted stale branch: $branch"
+                      deleted_count=$((deleted_count + 1))
+                    else
+                      echo "    Failed to delete stale branch: $branch"
+                    fi
+                  fi
+                else
+                  echo "  ✓ Skipping recent branch (no PR, <30 days old): $branch"
+                  skipped_count=$((skipped_count + 1))
+                fi
+              else
+                echo "  ✓ Skipping branch (cannot determine age): $branch"
+                skipped_count=$((skipped_count + 1))
+              fi
+            fi
+            
+            echo ""
+          done
+          
+          echo "=================================="
+          echo "Branch cleanup completed!"
+          if [ "$DRY_RUN" = "true" ]; then
+            echo "Branches that would be deleted: $deleted_count"
+          else
+            echo "Branches deleted: $deleted_count"
+          fi
+          echo "Branches skipped: $skipped_count"
+          echo "=================================="
+          
+          # Clean up local tracking branches (only if not dry run)
+          if [ "$DRY_RUN" != "true" ]; then
+            echo "Cleaning up local tracking branches..."
+            git remote prune origin
+          fi
+          
+          echo "Cleanup process finished."
