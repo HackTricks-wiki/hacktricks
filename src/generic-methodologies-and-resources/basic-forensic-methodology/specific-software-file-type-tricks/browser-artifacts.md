@@ -1,58 +1,58 @@
-# Browser Artifacts
+# Mabaki ya vivinjari
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Browsers Artifacts <a href="#id-3def" id="id-3def"></a>
+## Mabaki ya vivinjari <a href="#id-3def" id="id-3def"></a>
 
-Browser artifacts ni pamoja na aina mbalimbali za data zilizohifadhiwa na vivinjari vya wavuti, kama vile historia ya urambazaji, alama, na data ya cache. Vifaa hivi huhifadhiwa katika folda maalum ndani ya mfumo wa uendeshaji, vinatofautiana katika eneo na jina kati ya vivinjari, lakini kwa ujumla huhifadhi data za aina zinazofanana.
+Mabaki ya vivinjari ni aina mbalimbali za data zinazohifadhiwa na vivinjari vya wavuti, kama historia ya urambazaji, alama (bookmarks), na data za kache. Mabaki haya huhifadhiwa katika folda maalum ndani ya mfumo wa uendeshaji, ambapo mahali na majina yanatofautiana kati ya vivinjari, lakini kwa ujumla huwa yana aina sawa za data.
 
-Hapa kuna muhtasari wa vifaa vya vivinjari vinavyotumika sana:
+Hapa kuna muhtasari wa mabaki ya vivinjari yanayotokea mara kwa mara:
 
-- **Historia ya Urambazaji**: Inafuatilia ziara za mtumiaji kwenye tovuti, muhimu kwa kutambua ziara kwenye tovuti hatari.
-- **Data ya Autocomplete**: Mapendekezo yanayotokana na utafutaji wa mara kwa mara, yanayotoa mwanga unapounganishwa na historia ya urambazaji.
-- **Alama**: Tovuti zilizohifadhiwa na mtumiaji kwa ufikiaji wa haraka.
-- **Extensions and Add-ons**: Mipanuzi au nyongeza za vivinjari zilizowekwa na mtumiaji.
-- **Cache**: Huhifadhi maudhui ya wavuti (mfano, picha, faili za JavaScript) ili kuboresha nyakati za upakiaji wa tovuti, muhimu kwa uchambuzi wa forensics.
-- **Logins**: Akiba ya taarifa za kuingia.
-- **Favicons**: Ikoni zinazohusishwa na tovuti, zinazojitokeza katika tab na alama, muhimu kwa taarifa za ziada kuhusu ziara za mtumiaji.
-- **Browser Sessions**: Data inayohusiana na vikao vya vivinjari vilivyo wazi.
+- **Navigation History**: Inarekodi ziara za mtumiaji kwenye tovuti, muhimu kwa kubaini ziara za tovuti hatarishi.
+- **Autocomplete Data**: Mapendekezo yanayotokana na utafutaji wa mara kwa mara, yanaweza kutoa ufahamu ikichanganywa na historia ya urambazaji.
+- **Bookmarks**: Tovuti zilizohifadhiwa na mtumiaji kwa ufikivu wa haraka.
+- **Extensions and Add-ons**: Viendelezi au add-ons vilivyowekwa na mtumiaji.
+- **Cache**: Huhifadhi yaliyomo ya wavuti (mfano: picha, faili za JavaScript) ili kuboresha nyakati za kupakia tovuti, muhimu kwa uchunguzi wa forensiki.
+- **Logins**: Taarifa za kuingia zilizohifadhiwa.
+- **Favicons**: Ikoni zinazohusishwa na tovuti, zinazoonekana kwenye tabo na alama, zikitumika kutoa taarifa za ziada kuhusu ziara za mtumiaji.
+- **Browser Sessions**: Data zinazohusiana na vikao vya kivinjari vilivyo wazi.
 - **Downloads**: Rekodi za faili zilizopakuliwa kupitia kivinjari.
-- **Form Data**: Taarifa zilizoingizwa katika fomu za wavuti, zilizohifadhiwa kwa mapendekezo ya kujaza kiotomatiki baadaye.
-- **Thumbnails**: Picha za awali za tovuti.
+- **Form Data**: Taarifa zilizowekwa katika fomu za wavuti, zilizoifadhiwa kwa mapendekezo ya kujaza moja kwa moja baadaye.
+- **Thumbnails**: Picha ndogo za awali (thumbnails) za tovuti.
 - **Custom Dictionary.txt**: Maneno yaliyoongezwa na mtumiaji kwenye kamusi ya kivinjari.
 
 ## Firefox
 
-Firefox inaandaa data za mtumiaji ndani ya profaili, zilizohifadhiwa katika maeneo maalum kulingana na mfumo wa uendeshaji:
+Firefox huweka data za mtumiaji ndani ya profaili, zinazohifadhiwa katika maeneo maalum kulingana na mfumo wa uendeshaji:
 
 - **Linux**: `~/.mozilla/firefox/`
 - **MacOS**: `/Users/$USER/Library/Application Support/Firefox/Profiles/`
 - **Windows**: `%userprofile%\AppData\Roaming\Mozilla\Firefox\Profiles\`
 
-Faili ya `profiles.ini` ndani ya hizi folda inataja profaili za mtumiaji. Data za kila profaili huhifadhiwa katika folda iliyopewa jina katika variable ya `Path` ndani ya `profiles.ini`, iliyoko katika folda ile ile kama `profiles.ini` yenyewe. Ikiwa folda ya profaili inakosekana, inaweza kuwa imefutwa.
+Faili `profiles.ini` ndani ya direktori hizi inaorodhesha profaili za watumiaji. Data ya kila profaili huhifadhiwa katika folda iliyoitwa kwenye thamani ya `Path` ndani ya `profiles.ini`, iliyopo katika direktori ile ile na `profiles.ini`. Ikiwa folda ya profaili inakosekana, inaweza kuwa imefutwa.
 
 Ndani ya kila folda ya profaili, unaweza kupata faili kadhaa muhimu:
 
-- **places.sqlite**: Huhifadhi historia, alama, na upakuaji. Zana kama [BrowsingHistoryView](https://www.nirsoft.net/utils/browsing_history_view.html) kwenye Windows zinaweza kufikia data ya historia.
-- Tumia maswali maalum ya SQL kutoa taarifa za historia na upakuaji.
-- **bookmarkbackups**: Inahifadhi nakala za alama.
-- **formhistory.sqlite**: Huhifadhi data za fomu za wavuti.
-- **handlers.json**: Inasimamia wakala wa itifaki.
-- **persdict.dat**: Maneno ya kamusi ya kawaida.
-- **addons.json** na **extensions.sqlite**: Taarifa kuhusu nyongeza na mipanuzi iliyowekwa.
-- **cookies.sqlite**: Hifadhi ya kuki, na [MZCookiesView](https://www.nirsoft.net/utils/mzcv.html) inapatikana kwa ukaguzi kwenye Windows.
-- **cache2/entries** au **startupCache**: Data ya cache, inayoweza kupatikana kupitia zana kama [MozillaCacheView](https://www.nirsoft.net/utils/mozilla_cache_viewer.html).
-- **favicons.sqlite**: Huhifadhi favicons.
-- **prefs.js**: Mipangilio na mapendeleo ya mtumiaji.
-- **downloads.sqlite**: Hifadhidata ya zamani ya upakuaji, sasa imeunganishwa katika places.sqlite.
-- **thumbnails**: Thumbnails za tovuti.
-- **logins.json**: Taarifa za kuingia zilizofichwa.
-- **key4.db** au **key3.db**: Huhifadhi funguo za usimbaji kwa ajili ya kulinda taarifa nyeti.
+- **places.sqlite**: Inahifadhi historia, alama (bookmarks), na upakuaji. Zana kama [BrowsingHistoryView](https://www.nirsoft.net/utils/browsing_history_view.html) kwenye Windows zinaweza kupata data ya historia.
+- Tumia maswali maalum ya SQL kupata habari za historia na upakuaji.
+- **bookmarkbackups**: Ina nakala za akiba za alama (bookmarks).
+- **formhistory.sqlite**: Inahifadhi data za fomu za wavuti.
+- **handlers.json**: Inasimamia handlers za itifaki.
+- **persdict.dat**: Maneno ya kamusi ya mtumiaji.
+- **addons.json** na **extensions.sqlite**: Taarifa kuhusu add-ons na viendelezi vilivyowekwa.
+- **cookies.sqlite**: Uhifadhi wa cookie, ambapo [MZCookiesView](https://www.nirsoft.net/utils/mzcv.html) inapatikana kwa uchunguzi kwenye Windows.
+- **cache2/entries** or **startupCache**: Data za kache, zinazoonekana kwa zana kama [MozillaCacheView](https://www.nirsoft.net/utils/mozilla_cache_viewer.html).
+- **favicons.sqlite**: Inahifadhi favicons.
+- **prefs.js**: Mipangilio na upendeleo wa mtumiaji.
+- **downloads.sqlite**: Hifadhi ya zamani ya upakuaji, sasa imeingizwa ndani ya places.sqlite.
+- **thumbnails**: Picha ndogo (thumbnails) za tovuti.
+- **logins.json**: Taarifa za kuingia zilizofichwa (encrypted).
+- **key4.db** or **key3.db**: Inahifadhi funguo za encryption kwa kulinda taarifa nyeti.
 
-Zaidi ya hayo, kuangalia mipangilio ya kivinjari ya kupambana na uvuvi wa mtandao kunaweza kufanywa kwa kutafuta `browser.safebrowsing` katika `prefs.js`, ikionyesha ikiwa vipengele vya kuvinjari salama vimewezeshwa au havijawezeshwa.
+Zaidi ya hayo, kuangalia mipangilio ya kuzuia phishing ya kivinjari inaweza kufanywa kwa kutafuta vifungu `browser.safebrowsing` katika `prefs.js`, vinavyoonyesha ikiwa vipengele vya safe browsing vimewezeshwa au vimezimwa.
 
-Ili kujaribu kufichua nenosiri kuu, unaweza kutumia [https://github.com/unode/firefox_decrypt](https://github.com/unode/firefox_decrypt)\
-Kwa script na wito huu unaweza kubainisha faili la nenosiri ili kufanya brute force:
+To try to decrypt the master password, you can use [https://github.com/unode/firefox_decrypt](https://github.com/unode/firefox_decrypt)\
+Kwa script na wito ifuatayo unaweza kuainisha faili la nenosiri kwa kujaribu kwa brute force:
 ```bash:brute.sh
 #!/bin/bash
 
@@ -67,59 +67,65 @@ done < $passfile
 
 ## Google Chrome
 
-Google Chrome huhifadhi profaili za watumiaji katika maeneo maalum kulingana na mfumo wa uendeshaji:
+Google Chrome huhifadhi profiles za watumiaji katika maeneo maalum kulingana na mfumo wa uendeshaji:
 
 - **Linux**: `~/.config/google-chrome/`
 - **Windows**: `C:\Users\XXX\AppData\Local\Google\Chrome\User Data\`
 - **MacOS**: `/Users/$USER/Library/Application Support/Google/Chrome/`
 
-Ndani ya hizi saraka, data nyingi za mtumiaji zinaweza kupatikana katika folda za **Default/** au **ChromeDefaultData/**. Faili zifuatazo zina data muhimu:
+Ndani ya direktorii hizi, data nyingi za mtumiaji zinaweza kupatikana katika folda za **Default/** au **ChromeDefaultData/**. Faili zifuatazo zina data muhimu:
 
-- **History**: Inashikilia URLs, upakuaji, na maneno ya utafutaji. Kwenye Windows, [ChromeHistoryView](https://www.nirsoft.net/utils/chrome_history_view.html) inaweza kutumika kusoma historia. Safu ya "Transition Type" ina maana mbalimbali, ikiwa ni pamoja na kubonyeza kwa watumiaji kwenye viungo, URLs zilizotajwa, uwasilishaji wa fomu, na upakiaji wa kurasa.
-- **Cookies**: Inahifadhi cookies. Kwa ukaguzi, [ChromeCookiesView](https://www.nirsoft.net/utils/chrome_cookies_view.html) inapatikana.
-- **Cache**: Inashikilia data iliyohifadhiwa. Kwa ukaguzi, watumiaji wa Windows wanaweza kutumia [ChromeCacheView](https://www.nirsoft.net/utils/chrome_cache_view.html).
-- **Bookmarks**: Alama za mtumiaji.
-- **Web Data**: Inashikilia historia ya fomu.
+- **History**: Ina URLs, downloads, na maneno ya utafutaji. On Windows, [ChromeHistoryView](https://www.nirsoft.net/utils/chrome_history_view.html) inaweza kutumika kusoma history. Safu ya "Transition Type" ina maana mbalimbali, ikiwa ni pamoja na bonyezo la mtumiaji kwenye link, URLs zilizotiwa kwa mkono, uwasilishaji wa fomu, na reload za ukurasa.
+- **Cookies**: Inahifadhi cookies. Kwa uchunguzi, [ChromeCookiesView](https://www.nirsoft.net/utils/chrome_cookies_view.html) inapatikana.
+- **Cache**: Inahifadhi data zilizokatwa. Kwa kuzijaribu, watumiaji wa Windows wanaweza kutumia [ChromeCacheView](https://www.nirsoft.net/utils/chrome_cache_view.html).
+
+Electron-based desktop apps (mfano, Discord) pia hutumia Chromium Simple Cache na huacha artifacts tajiri kwenye disk. Angalia:
+
+{{#ref}}
+discord-cache-forensics.md
+{{#endref}}
+- **Bookmarks**: Bookmarks za mtumiaji.
+- **Web Data**: Ina historia ya fomu.
 - **Favicons**: Inahifadhi favicons za tovuti.
-- **Login Data**: Inajumuisha taarifa za kuingia kama vile majina ya watumiaji na nywila.
-- **Current Session**/**Current Tabs**: Data kuhusu kikao cha sasa cha kuvinjari na tabo zilizo wazi.
-- **Last Session**/**Last Tabs**: Taarifa kuhusu tovuti zilizokuwa hai wakati wa kikao cha mwisho kabla ya Chrome kufungwa.
-- **Extensions**: Saraka za nyongeza za kivinjari na addons.
+- **Login Data**: Inajumuisha taarifa za kuingia kama usernames na passwords.
+- **Current Session**/**Current Tabs**: Data kuhusu session ya sasa ya kuvinjari na tab zilizo wazi.
+- **Last Session**/**Last Tabs**: Taarifa kuhusu tovuti zilifanya kazi katika session iliyopita kabla ya Chrome kufungwa.
+- **Extensions**: Direktorii za extensions na addons za browser.
 - **Thumbnails**: Inahifadhi thumbnails za tovuti.
-- **Preferences**: Faili yenye taarifa nyingi, ikiwa ni pamoja na mipangilio ya plugins, nyongeza, pop-ups, arifa, na zaidi.
-- **Browser’s built-in anti-phishing**: Ili kuangalia kama ulinzi wa kupambana na ulaghai na ulinzi wa malware umewezeshwa, endesha `grep 'safebrowsing' ~/Library/Application Support/Google/Chrome/Default/Preferences`. Tafuta `{"enabled: true,"}` katika matokeo.
+- **Preferences**: Faili iliyo na habari nyingi, ikijumuisha mipangilio ya plugins, extensions, pop-ups, notifications, na mengineyo.
+- **Browser’s built-in anti-phishing**: Ili kuangalia kama anti-phishing na ulinzi wa malware vimezimwa au vimewezeshwa, run `grep 'safebrowsing' ~/Library/Application Support/Google/Chrome/Default/Preferences`. Tafuta `{"enabled: true,"}` katika output.
 
 ## **SQLite DB Data Recovery**
 
-Kama unavyoona katika sehemu zilizopita, Chrome na Firefox zote zinatumia **SQLite** databases kuhifadhi data. Inawezekana **kurejesha entries zilizofutwa kwa kutumia zana** [**sqlparse**](https://github.com/padfoot999/sqlparse) **au** [**sqlparse_gui**](https://github.com/mdegrazia/SQLite-Deleted-Records-Parser/releases).
+Kama unavyoona katika sehemu zilizo hapo juu, Chrome na Firefox zote hutumia database za **SQLite** kuhifadhi data. Inawezekana **kupata entries zilizofutwa kwa kutumia zana** [**sqlparse**](https://github.com/padfoot999/sqlparse) **au** [**sqlparse_gui**](https://github.com/mdegrazia/SQLite-Deleted-Records-Parser/releases).
 
 ## **Internet Explorer 11**
 
-Internet Explorer 11 inasimamia data zake na metadata katika maeneo mbalimbali, ikisaidia kutenganisha taarifa zilizohifadhiwa na maelezo yake yanayohusiana kwa urahisi wa ufikiaji na usimamizi.
+Internet Explorer 11 inasimamia data na metadata yake katika maeneo mbalimbali, ikiwezesha kugawanya taarifa zilizohifadhiwa na maelezo yake kwa ufikikaji na usimamizi rahisi.
 
-### Metadata Storage
+### Uhifadhi wa Metadata
 
-Metadata kwa Internet Explorer huhifadhiwa katika `%userprofile%\Appdata\Local\Microsoft\Windows\WebCache\WebcacheVX.data` (ikiwa na VX ikiwa V01, V16, au V24). Pamoja na hii, faili ya `V01.log` inaweza kuonyesha tofauti za muda wa mabadiliko na `WebcacheVX.data`, ikionyesha hitaji la kurekebisha kwa kutumia `esentutl /r V01 /d`. Metadata hii, iliyohifadhiwa katika database ya ESE, inaweza kurejeshwa na kukaguliwa kwa kutumia zana kama photorec na [ESEDatabaseView](https://www.nirsoft.net/utils/ese_database_view.html), mtawalia. Ndani ya jedwali la **Containers**, mtu anaweza kutambua jedwali maalum au vyombo ambavyo kila sehemu ya data imehifadhiwa, ikiwa ni pamoja na maelezo ya cache kwa zana nyingine za Microsoft kama Skype.
+Metadata ya Internet Explorer imehifadhiwa katika `%userprofile%\Appdata\Local\Microsoft\Windows\WebCache\WebcacheVX.data` (ambapo VX ni V01, V16, au V24). Pamoja na hili, faili ya `V01.log` inaweza kuonyesha tofauti za muda wa mabadiliko ikilinganishwa na `WebcacheVX.data`, jambo linaloonyesha hitaji la ukarabati kwa kutumia `esentutl /r V01 /d`. Metadata hii, iliyohifadhiwa katika ESE database, inaweza kurejeshwa na kuchunguzwa kwa zana kama photorec na [ESEDatabaseView](https://www.nirsoft.net/utils/ese_database_view.html), mtawalia. Ndani ya jedwali la **Containers**, unaweza kutambua meza maalum au containers ambazo kila kipande cha data kimehifadhiwa, ikijumuisha maelezo ya cache kwa zana nyingine za Microsoft kama Skype.
 
-### Cache Inspection
+### Uchunguzi wa Cache
 
-Zana ya [IECacheView](https://www.nirsoft.net/utils/ie_cache_viewer.html) inaruhusu ukaguzi wa cache, ikihitaji eneo la saraka ya uchimbaji wa data ya cache. Metadata ya cache inajumuisha jina la faili, saraka, idadi ya ufikiaji, asili ya URL, na alama za muda zinazoonyesha wakati wa uundaji wa cache, ufikiaji, mabadiliko, na muda wa kumalizika.
+Zana ya [IECacheView](https://www.nirsoft.net/utils/ie_cache_viewer.html) inaruhusu uchunguzi wa cache, na inahitaji eneo la folder la uondoaji wa data za cache. Metadata ya cache inajumuisha jina la faili, directory, idadi ya upatikanaji, chanzo cha URL, na timestamps zinazoonyesha uundaji wa cache, upatikanaji, mabadiliko, na wakati wa kumalizika.
 
-### Cookies Management
+### Usimamizi wa Cookies
 
-Cookies zinaweza kuchunguzwa kwa kutumia [IECookiesView](https://www.nirsoft.net/utils/iecookies.html), huku metadata ikijumuisha majina, URLs, idadi ya ufikiaji, na maelezo mbalimbali yanayohusiana na muda. Cookies za kudumu huhifadhiwa katika `%userprofile%\Appdata\Roaming\Microsoft\Windows\Cookies`, huku cookies za kikao zikiwa katika kumbukumbu.
+Cookies zinaweza kuchunguzwa kwa kutumia [IECookiesView](https://www.nirsoft.net/utils/iecookies.html), na metadata inajumuisha majina, URLs, idadi ya upatikanaji, na maandishi mbalimbali yanayohusiana na muda. Cookies za kudumu zipo katika `%userprofile%\Appdata\Roaming\Microsoft\Windows\Cookies`, huku session cookies zikikaa katika memory.
 
-### Download Details
+### Maelezo ya Downloads
 
-Metadata ya upakuaji inapatikana kupitia [ESEDatabaseView](https://www.nirsoft.net/utils/ese_database_view.html), huku vyombo maalum vikihifadhi data kama URL, aina ya faili, na eneo la upakuaji. Faili halisi zinaweza kupatikana chini ya `%userprofile%\Appdata\Roaming\Microsoft\Windows\IEDownloadHistory`.
+Metadata za downloads zinapatikana kupitia [ESEDatabaseView](https://www.nirsoft.net/utils/ese_database_view.html), na containers maalum zina data kama URL, aina ya faili, na eneo la download. Faili halisi zinaweza kupatikana chini ya `%userprofile%\Appdata\Roaming\Microsoft\Windows\IEDownloadHistory`.
 
 ### Browsing History
 
-Ili kupitia historia ya kuvinjari, [BrowsingHistoryView](https://www.nirsoft.net/utils/browsing_history_view.html) inaweza kutumika, ikihitaji eneo la faili za historia zilizochimbwa na usanidi kwa Internet Explorer. Metadata hapa inajumuisha nyakati za mabadiliko na ufikiaji, pamoja na idadi ya ufikiaji. Faili za historia ziko katika `%userprofile%\Appdata\Local\Microsoft\Windows\History`.
+Ili kupitia browsing history, unaweza kutumia [BrowsingHistoryView](https://www.nirsoft.net/utils/browsing_history_view.html), ikihitaji eneo la faili za history zilizochukuliwa na usanidi kwa Internet Explorer. Metadata hapa inajumuisha nyakati za mabadiliko na upatikanaji, pamoja na idadi ya upatikanaji. Faili za history ziko katika `%userprofile%\Appdata\Local\Microsoft\Windows\History`.
 
 ### Typed URLs
 
-URLs zilizotajwa na nyakati zao za matumizi huhifadhiwa ndani ya rejista chini ya `NTUSER.DAT` katika `Software\Microsoft\InternetExplorer\TypedURLs` na `Software\Microsoft\InternetExplorer\TypedURLsTime`, ikifuatilia URLs 50 za mwisho zilizotajwa na mtumiaji na nyakati zao za mwisho za kuingizwa.
+Typed URLs na nyakati za matumizi yamehifadhiwa ndani ya registry chini ya NTUSER.DAT katika `Software\Microsoft\InternetExplorer\TypedURLs` na `Software\Microsoft\InternetExplorer\TypedURLsTime`, zikifuatilia URLs 50 za mwisho zilizowekwa na mtumiaji na nyakati zao za mwisho za kuingiza.
 
 ## Microsoft Edge
 
@@ -133,30 +139,31 @@ Microsoft Edge huhifadhi data za mtumiaji katika `%userprofile%\Appdata\Local\Pa
 
 ## Safari
 
-Data za Safari huhifadhiwa katika `/Users/$User/Library/Safari`. Faili muhimu ni:
+Data za Safari ziko katika `/Users/$User/Library/Safari`. Faili muhimu ni pamoja na:
 
-- **History.db**: Inashikilia jedwali la `history_visits` na `history_items` zenye URLs na alama za wakati wa kutembelea. Tumia `sqlite3` kuuliza.
+- **History.db**: Inajumuisha jedwali za `history_visits` na `history_items` zenye URLs na timestamps za ziara. Tumia `sqlite3` kuendesha query.
 - **Downloads.plist**: Taarifa kuhusu faili zilizopakuliwa.
-- **Bookmarks.plist**: Inahifadhi URLs zilizowekwa alama.
-- **TopSites.plist**: Tovuti zinazotembelewa mara nyingi.
-- **Extensions.plist**: Orodha ya nyongeza za kivinjari cha Safari. Tumia `plutil` au `pluginkit` kupata.
-- **UserNotificationPermissions.plist**: Domains zilizoidhinishwa kutuma arifa. Tumia `plutil` kuchambua.
-- **LastSession.plist**: Tabo kutoka kikao cha mwisho. Tumia `plutil` kuchambua.
-- **Browser’s built-in anti-phishing**: Angalia kwa kutumia `defaults read com.apple.Safari WarnAboutFraudulentWebsites`. Jibu la 1 linaonyesha kipengele hiki kimewezeshwa.
+- **Bookmarks.plist**: Inahifadhi URLs zilizohifadhiwa kama bookmark.
+- **TopSites.plist**: Tovuti zinazozungukwa mara nyingi.
+- **Extensions.plist**: Orodha ya extensions za browser ya Safari. Tumia `plutil` au `pluginkit` kupata.
+- **UserNotificationPermissions.plist**: Domain zilizoidhinishwa kutuma notifications. Tumia `plutil` kusoma.
+- **LastSession.plist**: Tabs kutoka kwa session ya mwisho. Tumia `plutil` kusoma.
+- **Browser’s built-in anti-phishing**: Angalia kwa kutumia `defaults read com.apple.Safari WarnAboutFraudulentWebsites`. Jibu la 1 linaonyesha kipengele kimewekwa.
 
 ## Opera
 
-Data za Opera ziko katika `/Users/$USER/Library/Application Support/com.operasoftware.Opera` na inashiriki muundo wa Chrome kwa historia na upakuaji.
+Data za Opera zipo katika `/Users/$USER/Library/Application Support/com.operasoftware.Opera` na zina muundo sawa na wa Chrome kwa history na downloads.
 
-- **Browser’s built-in anti-phishing**: Thibitisha kwa kuangalia kama `fraud_protection_enabled` katika faili ya Preferences imewekwa kuwa `true` kwa kutumia `grep`.
+- **Browser’s built-in anti-phishing**: Thibitisha kwa kuangalia kama `fraud_protection_enabled` katika faili la Preferences imewekwa kuwa `true` kwa kutumia `grep`.
 
-Njia hizi na amri ni muhimu kwa kufikia na kuelewa data za kuvinjari zilizohifadhiwa na vivinjari tofauti vya wavuti.
+Njia hizi na amri ni muhimu kwa kufikia na kuelewa data za kuvinjari zinazohifadhiwa na browsers mbalimbali.
 
-## References
+## Marejeleo
 
 - [https://nasbench.medium.com/web-browsers-forensics-7e99940c579a](https://nasbench.medium.com/web-browsers-forensics-7e99940c579a)
 - [https://www.sentinelone.com/labs/macos-incident-response-part-3-system-manipulation/](https://www.sentinelone.com/labs/macos-incident-response-part-3-system-manipulation/)
 - [https://books.google.com/books?id=jfMqCgAAQBAJ\&pg=PA128\&lpg=PA128\&dq=%22This+file](https://books.google.com/books?id=jfMqCgAAQBAJ&pg=PA128&lpg=PA128&dq=%22This+file)
-- **Kitabu: OS X Incident Response: Scripting and Analysis By Jaron Bradley pag 123**
+- **Book: OS X Incident Response: Scripting and Analysis By Jaron Bradley pag 123**
+
 
 {{#include ../../../banners/hacktricks-training.md}}
