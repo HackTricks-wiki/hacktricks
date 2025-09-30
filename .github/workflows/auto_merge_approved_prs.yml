@@ -2,7 +2,7 @@ name: Auto Merge Approved PRs
 
 on:
   schedule:
-    - cron: '0 */2 * * *'  # Every 2 hours
+    - cron: '0 */1 * * *'  # Every 1 hour
   workflow_dispatch:  # Allow manual triggering
 
 permissions:
@@ -15,6 +15,17 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.PAT_TOKEN }}
+
+      - name: Configure git
+        run: |
+          git config --global user.email "action@github.com"
+          git config --global user.name "GitHub Action"
+
       - name: Check for running workflows
         id: check_workflows
         run: |
@@ -93,6 +104,11 @@ jobs:
             if [ "$has_merge_comment" = true ]; then
               echo "Attempting to merge PR #$pr_number..."
 
+              # Get PR details including head branch
+              pr_details=$(gh pr view "$pr_number" --json headRefName,baseRefName --repo "$GITHUB_REPOSITORY")
+              head_branch=$(echo "$pr_details" | jq -r '.headRefName')
+              base_branch=$(echo "$pr_details" | jq -r '.baseRefName')
+
               # --- Polling for non-UNKNOWN mergeable status ---
               max_retries=10
               retry=0
@@ -118,6 +134,8 @@ jobs:
                 else
                   echo "Failed to merge PR #$pr_number: $pr_title"
                 fi
+              elif [ "$pr_mergeable" = "CONFLICTED" ] || [ "$pr_mergeable" = "CONFLICTING" ]; then
+                echo "PR #$pr_number has conflicts. Skipping auto-merge so it can be resolved manually."
               else
                 echo "PR #$pr_number is not mergeable (status: $pr_mergeable)"
               fi
