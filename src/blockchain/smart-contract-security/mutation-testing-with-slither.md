@@ -1,14 +1,14 @@
 # Mutation Testing for Solidity with Slither (slither-mutate)
 
-{{#include ../../../banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}
 
-Mutation testing "tests your tests" kwa kuingiza mabadiliko madogo (mutants) kwa njia ya kimfumo katika msimbo wako wa Solidity na kuendesha tena test suite yako. Ikiwa test itashindwa, mutant anaangamizwa. Ikiwa tests bado zinafaulu, mutant ataishi, ikifunua doa la giza kwenye test suite yako ambalo line/branch coverage haiwezi kugundua.
+Mutation testing "tests your tests" kwa kuingiza mabadiliko madogo (mutants) kwa mfumo katika code yako ya Solidity na kuendesha tena test suite yako. Ikiwa test itashindwa, mutant anaangamizwa. Ikiwa tests bado zinafaulu, mutant huishi, ikifichua pengo la upofu katika test suite yako ambalo line/branch coverage haiwezi kugundua.
 
-Wazo kuu: Coverage inaonyesha msimbo uliendeshwa; mutation testing inaonyesha kama tabia imethibitishwa kwa kweli.
+Wazo muhimu: Coverage inaonyesha code ilitekelezwa; mutation testing inaonyesha ikiwa tabia kwa kweli imethibitishwa.
 
 ## Kwa nini coverage inaweza kudanganya
 
-Fikiria ukaguzi huu rahisi wa kizingiti:
+Fikiria ukaguzi huu rahisi wa kikomo:
 ```solidity
 function verifyMinimumDeposit(uint256 deposit) public returns (bool) {
 if (deposit >= 1 ether) {
@@ -18,99 +18,99 @@ return false;
 }
 }
 ```
-Majaribio ya kitengo yanayochunguza tu thamani chini ya na thamani juu ya kikomo yanaweza kufikia 100% ya coverage ya mistari/matawi wakati yakishindwa kuthibitisha ukomo wa usawa (==). Urekebishaji kuwa `deposit >= 2 ether` bado ungefanya majaribio hayo yapite, ukivunja kimya kimya mantiki ya protocol.
+Unit tests ambazo zinachek tu thamani chini na thamani juu ya kizingiti zinaweza kufikia 100% line/branch coverage huku zikishindwa kuthibitisha mpaka wa usawa (==). Refactor kuwa `deposit >= 2 ether` bado ingepita mitihani hiyo, ikivunja mantiki ya protocol bila kuonekana.
 
-Mutation testing inaonyesha pengo hili kwa kubadilisha sharti na kuthibitisha majaribio yako yanashindwa.
+Mutation testing inaonyesha pengo hili kwa kubadilisha condition na kuthibitisha kwamba mitihani yako inashindwa.
 
-## Vigezo vya mutation vya kawaida katika Solidity
+## Operator za mutation za kawaida za Solidity
 
-Slither’s mutation engine inatekeleza mabadiliko madogo mengi yanayobadilisha semantiki, kama vile:
-- Ubadilishaji wa operator: `+` ↔ `-`, `*` ↔ `/`, etc.
-- Ubadilishaji wa assignment: `+=` → `=`, `-=` → `=`
-- Ubadilishaji wa constant: non-zero → `0`, `true` ↔ `false`
-- Kukatizwa/kubadilishwa kwa masharti ndani ya `if`/loops
-- Kufanya mistari yote kuwa maoni (CR: Comment Replacement)
-- Badilisha mstari kwa `revert()`
-- Ubadilishaji wa aina za data: mfano, `int128` → `int64`
+Slither’s mutation engine inatumia mabadiliko madogo mengi yanayobadilisha semantiki, kama:
+- Operator replacement: `+` ↔ `-`, `*` ↔ `/`, etc.
+- Assignment replacement: `+=` → `=`, `-=` → `=`
+- Constant replacement: non-zero → `0`, `true` ↔ `false`
+- Condition negation/replacement inside `if`/loops
+- Comment out whole lines (CR: Comment Replacement)
+- Replace a line with `revert()`
+- Data type swaps: e.g., `int128` → `int64`
 
-Lengo: Uangamize 100% ya mutants waliotengenezwa, au fafanua wale wanaoishi kwa sababu zilizo wazi.
+Lengo: Ua 100% ya mutants waliotengenezwa, au toa sababu za wazi kwa wale wanaobaki.
 
-## Kutumia mutation testing na slither-mutate
+## Kuendesha mutation testing na slither-mutate
 
 Mahitaji: Slither v0.10.2+.
 
-- Orodhesha chaguzi na mutators:
+- List options and mutators:
 ```bash
 slither-mutate --help
 slither-mutate --list-mutators
 ```
-- Mfano wa Foundry (rekodi matokeo na uhifadhi log kamili):
+- Mfano wa Foundry (rekodi matokeo na uhifadhi logi kamili):
 ```bash
 slither-mutate ./src/contracts --test-cmd="forge test" &> >(tee mutation.results)
 ```
-- Ikiwa hautumii Foundry, badilisha `--test-cmd` na amri unayotumia kuendesha majaribio (mfano, `npx hardhat test`, `npm test`).
+- Ikiwa hutoitumia Foundry, badilisha `--test-cmd` na jinsi unavyotekeleza majaribio (kwa mfano, `npx hardhat test`, `npm test`).
 
-Mafaili ya matokeo (artifacts) na ripoti zinahifadhiwa katika `./mutation_campaign` kwa chaguo-msingi. Mutants wasiokamatwa (waliobaki) wanakiliwa huko kwa uchunguzi.
+Artifacts na ripoti huhifadhiwa katika `./mutation_campaign` kwa chaguo-msingi. Mutants zisizogunduliwa (zilizo hai) zinakopishwa huko kwa uchunguzi.
 
-### Understanding the output
+### Kuelewa matokeo
 
-Mistari ya ripoti yanaonekana kama:
+Mistari ya ripoti zinaonekana kama:
 ```text
 INFO:Slither-Mutate:Mutating contract ContractName
 INFO:Slither-Mutate:[CR] Line 123: 'original line' ==> '//original line' --> UNCAUGHT
 ```
-- The tag in brackets is the mutator alias (e.g., `CR` = Comment Replacement).
-- `UNCAUGHT` means tests passed under the mutated behavior → missing assertion.
+- Tagi ndani ya mabano ni jina fupi la mutator (kwa mfano, `CR` = Comment Replacement).
+- `UNCAUGHT` ina maana majaribio yalipita chini ya tabia iliyobadilishwa → ukosefu wa uthibitisho.
 
-## Kupunguza wakati wa utekelezaji: ipa kipaumbele mutants zenye athari kubwa
+## Kupunguza muda wa utekelezaji: weka kipaumbele mutanti zenye athari
 
-Mutation campaigns can take hours or days. Tips to reduce cost:
-- Scope: Start with critical contracts/directories only, then expand.
-- Prioritize mutators: If a high-priority mutant on a line survives (e.g., entire line commented), you can skip lower-priority variants for that line.
-- Parallelize tests if your runner allows it; cache dependencies/builds.
-- Fail-fast: stop early when a change clearly demonstrates an assertion gap.
+Kampeni za mutation zinaweza kuchukua masaa au siku. Vidokezo vya kupunguza gharama:
+- Scope: Anza na mikataba/direktori muhimu tu, kisha panua.
+- Prioritize mutators: Ikiwa mutanti wa kipaumbele juu kwenye mstari anakaa (kwa mfano, mstari mzima umekomentiwa), unaweza kupuuza tofauti zenye kipaumbele cha chini kwa mstari huo.
+- Endesha majaribio kwa usawa ikiwa runner yako inaruhusu; tumia cache kwa dependencies/builds.
+- Fail-fast: simama mapema wakati mabadiliko yanaonyesha wazi ukosefu wa uthibitisho.
 
-## Triage workflow for surviving mutants
+## Mtiririko wa kazi wa triage kwa mutanti waliobaki
 
-1) Inspect the mutated line and behavior.
-- Reproduce locally by applying the mutated line and running a focused test.
+1) Angalia mstari uliobadilishwa na tabia yake.
+- Rudia ndani ya mazingira ya ndani kwa kuingiza mstari uliobadilishwa na kuendesha test iliyojikita.
 
-2) Strengthen tests to assert state, not only return values.
-- Add equality-boundary checks (e.g., test threshold `==`).
-- Assert post-conditions: balances, total supply, authorization effects, and emitted events.
+2) Imarisha majaribio ili yathibishe hali, si tu thamani zinazorejeshwa.
+- Ongeza ukaguzi wa mipaka ya usawa (kwa mfano, test threshold `==`).
+- Thibitisha masharti ya baada: salio, total supply, athari za idhini, na matukio yaliyotolewa.
 
-3) Replace overly permissive mocks with realistic behavior.
-- Ensure mocks enforce transfers, failure paths, and event emissions that occur on-chain.
+3) Badilisha mocks zilizoruhusu mno kwa tabia halisi.
+- Hakikisha mocks zinafanya enforced transfers, njia za kushindwa, na utoaji wa matukio yanayotokea on-chain.
 
-4) Add invariants for fuzz tests.
-- E.g., conservation of value, non-negative balances, authorization invariants, monotonic supply where applicable.
+4) Ongeza invariants kwa fuzz tests.
+- Kwa mfano, uhifadhi wa thamani, salio zisizo hasi, invariants za idhini, supply monotonic pale inapofaa.
 
-5) Re-run slither-mutate until survivors are killed or explicitly justified.
+5) Rerun slither-mutate hadi mutanti waliobaki waondolewe au wathibitishwe wazi.
 
-## Case study: revealing missing state assertions (Arkis protocol)
+## Utafiti wa kesi: kufichua ukosefu wa uthibitisho wa hali (Arkis protocol)
 
-A mutation campaign during an audit of the Arkis DeFi protocol surfaced survivors like:
+Kampeni ya mutation wakati wa ukaguzi wa protokoli ya Arkis DeFi ilibaini mutanti waliobaki kama:
 ```text
 INFO:Slither-Mutate:[CR] Line 33: 'cmdsToExecute.last().value = _cmd.value' ==> '//cmdsToExecute.last().value = _cmd.value' --> UNCAUGHT
 ```
-Kuongeza maoni (commenting out the assignment) hakukuangusha tests, ikithibitisha ukosefu wa post-state assertions. Sababu ya mzizi: code iliamini `_cmd.value` iliyo chini ya udhibiti wa mtumiaji badala ya kuthibitisha uhamisho halisi wa tokeni. Mshambulizi angeweza kusababisha uhamisho uliotarajiwa kutofautiana na uhamisho halisi ili kumwaga fedha. Matokeo: hatari ya kiwango cha juu kwa uthabiti wa kifedha wa protocol.
+Ku-comment out ugawaji hakukuvunja majaribio, ikathibitisha kukosekana kwa post-state assertions. Sababu ya msingi: msimbo uliamini `_cmd.value` inayoendeshwa na mtumiaji badala ya kuthibitisha uhamisho halisi wa tokeni. Mvamizi angeweza kusababisha kutolingana kati ya uhamisho uliotarajiwa na uhalisi ili kuchoma/mkamua fedha. Matokeo: hatari ya kiwango cha juu kwa uendelevu wa protocol.
 
-Mwongozo: Tibu survivors zinazogusa uhamisho wa thamani, uhasibu, au udhibiti wa upatikanaji kama hatari ya juu hadi zitakaposuluhishwa (killed).
+Miongozo: Chukulia mabaki yanayoathiri uhamisho wa thamani, uhasibu, au udhibiti wa upatikanaji kama hatari kubwa hadi yatakaposhindwa/kufutwa.
 
 ## Orodha ya vitendo
 
 - Endesha kampeni iliyolengwa:
 - `slither-mutate ./src/contracts --test-cmd="forge test"`
-- Fanya triage ya survivors na andika tests/invariants ambazo zingeanguka chini ya tabia iliyobadilishwa.
-- Thibitisha salio, usambazaji, idhini, na matukio.
-- Ongeza tests za mipaka (`==`, overflows/underflows, zero-address, zero-amount, empty arrays).
-- Badilisha mocks zisizo za kweli; simulate failure modes.
-- Rudia hadi mutants zote ziwe killed au zifafanuliwe kwa maoni na mantiki.
+- Fanyia triage mabaki na andika tests/invariants zitakazoshindwa chini ya tabia iliyobadilishwa.
+- Thibitisha salio, ugavi, idhini, na matukio.
+- Ongeza mtihani wa mipaka (`==`, overflows/underflows, zero-address, zero-amount, empty arrays).
+- Badilisha mocks zisizo halisi;iga njia za kushindwa.
+- Rudia hadi mutants zote zimeshindikana/kufutwa (killed) au zimefafanuliwa kwa maoni na mantiki.
 
-## References
+## Marejeo
 
 - [Use mutation testing to find the bugs your tests don't catch (Trail of Bits)](https://blog.trailofbits.com/2025/09/18/use-mutation-testing-to-find-the-bugs-your-tests-dont-catch/)
 - [Arkis DeFi Prime Brokerage Security Review (Appendix C)](https://github.com/trailofbits/publications/blob/master/reviews/2024-12-arkis-defi-prime-brokerage-securityreview.pdf)
 - [Slither (GitHub)](https://github.com/crytic/slither)
 
-{{#include ../../../banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}
