@@ -1,8 +1,8 @@
-# Trikovi za specifičan softver/format fajla
+# Specifični trikovi za softver i tipove fajlova
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Ovde možete pronaći zanimljive trikove za specifične tipove fajlova i/ili softver:
+Ovde možete pronaći zanimljive trikove za određene tipove fajlova i/ili softver:
 
 
 {{#ref}}
@@ -52,6 +52,11 @@ video-and-audio-file-analysis.md
 
 {{#ref}}
 zips-tricks.md
+{{#endref}}
+
+
+{{#ref}}
+mach-o-entitlements-and-ipsw-indexing.md
 {{#endref}}
 
 {{#include ../../../banners/hacktricks-training.md}}
