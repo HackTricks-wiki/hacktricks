@@ -1,101 +1,102 @@
-# フィッシング手法
+# Phishing Methodology
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## 手法
+## 方法論
 
-1. 被害者の調査
-1. **被害者のドメイン**を選択します。
-2. 被害者が使用している**ログインポータル**を探すために基本的なウェブ列挙を行い、**なりすます**ポータルを**決定**します。
-3. **OSINT**を使用して**メールアドレス**を**見つけます**。
-2. 環境の準備
-1. フィッシング評価に使用する**ドメインを購入**します。
-2. **メールサービス**に関連するレコード（SPF、DMARC、DKIM、rDNS）を**設定**します。
-3. **gophish**でVPSを設定します。
-3. キャンペーンの準備
-1. **メールテンプレート**を準備します。
-2. 認証情報を盗むための**ウェブページ**を準備します。
-4. キャンペーンを開始！
+1. ターゲットのReconを行う
+1. **victim domain** を選択する。
+2. 被害者が使用する基本的なweb列挙を行い、**searching for login portals** を探してどれを **impersonate** するか**decide**する。
+3. 一部の **OSINT** を使って **find emails**。
+2. 環境を準備する
+1. フィッシング評価で使用する**Buy the domain**を購入する
+2. メールサービス関連レコードを**Configure the email service**する (SPF, DMARC, DKIM, rDNS)
+3. VPSに**gophish**を設定する
+3. キャンペーンを準備する
+1. **email template** を準備する
+2. 資格情報を盗むための**web page** を準備する
+4. キャンペーンを開始する!
 
-## 類似のドメイン名を生成するか、信頼できるドメインを購入する
+## Generate similar domain names or buy a trusted domain
 
-### ドメイン名のバリエーション技術
+### Domain Name Variation Techniques
 
-- **キーワード**: ドメイン名は元のドメインの重要な**キーワード**を**含みます**（例: zelster.com-management.com）。
-- **ハイフン付きサブドメイン**: サブドメインの**ドットをハイフンに変更**します（例: www-zelster.com）。
-- **新しいTLD**: 同じドメインを使用して**新しいTLD**を使用します（例: zelster.org）。
-- **ホモグリフ**: ドメイン名の文字を**似た文字に置き換えます**（例: zelfser.com）。
+- **Keyword**: ドメイン名がオリジナルドメインの重要な**keyword**を含む（例: zelster.com-management.com）。
+- **hypened subdomain**: サブドメインの**dotをハイフンに変更**する（例: www-zelster.com）。
+- **New TLD**: 同じドメインを別の**TLD**で使う（例: zelster.org）
+- **Homoglyph**: ドメイン内の文字を**見た目が似ている文字に置き換える**（例: zelfser.com）。
+
 
 {{#ref}}
 homograph-attacks.md
 {{#endref}}
-- **転置**: ドメイン名内の**2つの文字を入れ替えます**（例: zelsetr.com）。
-- **単数化/複数化**: ドメイン名の末尾に「s」を追加または削除します（例: zeltsers.com）。
-- **省略**: ドメイン名から**1つの文字を削除します**（例: zelser.com）。
-- **繰り返し**: ドメイン名内の**1つの文字を繰り返します**（例: zeltsser.com）。
-- **置換**: ホモグリフのようですが、あまり目立ちません。ドメイン名の1つの文字を、元の文字の近くにある文字に置き換えます（例: zektser.com）。
-- **サブドメイン化**: ドメイン名内に**ドットを挿入します**（例: ze.lster.com）。
-- **挿入**: ドメイン名に**文字を挿入します**（例: zerltser.com）。
-- **ドットの欠落**: ドメイン名にTLDを追加します（例: zelstercom.com）。
+- **Transposition:** ドメイン名内の2文字を**入れ替える**（例: zelsetr.com）。
+- **Singularization/Pluralization**: ドメイン末尾に「s」を追加または削除する（例: zeltsers.com）。
+- **Omission**: ドメイン名から**1文字を削除する**（例: zelser.com）。
+- **Repetition:** ドメイン名のある文字を**繰り返す**（例: zeltsser.com）。
+- **Replacement**: homoglyphに似るが気づかれやすい方法。ドメイン内の文字を別の文字に置き換える（キーボード上で近い文字など）（例: zektser.com）。
+- **Subdomained**: ドメイン名の内部に**ドットを挿入**する（例: ze.lster.com）。
+- **Insertion**: ドメイン名に**1文字を挿入**する（例: zerltser.com）。
+- **Missing dot**: ドメイン名にTLDを付けて続ける。（例: zelstercom.com）
 
-**自動ツール**
+**Automatic Tools**
 
 - [**dnstwist**](https://github.com/elceef/dnstwist)
 - [**urlcrazy**](https://github.com/urbanadventurer/urlcrazy)
 
-**ウェブサイト**
+**Websites**
 
 - [https://dnstwist.it/](https://dnstwist.it)
 - [https://dnstwister.report/](https://dnstwister.report)
 - [https://www.internetmarketingninjas.com/tools/free-tools/domain-typo-generator/](https://www.internetmarketingninjas.com/tools/free-tools/domain-typo-generator/)
 
-### ビットフリッピング
+### Bitflipping
 
-いくつかのビットが保存または通信中に**自動的に反転する可能性があります**。これは、太陽フレア、宇宙線、またはハードウェアエラーなどのさまざまな要因によるものです。
+保存中または通信中のいくつかのビットが、太陽フレア、宇宙線、またはハードウェアのエラーなどのさまざまな要因によって**自動的に反転する可能性がある**。
 
-この概念が**DNSリクエストに適用されると**、**DNSサーバーによって受信されたドメイン**が、最初にリクエストされたドメインと同じでない可能性があります。
+この概念を**DNSリクエストに適用すると**、**DNSサーバーが受け取るドメイン**が最初に要求したドメインと同じでない可能性がある。
 
-例えば、ドメイン「windows.com」の1ビットの変更により、「windnws.com」に変わることがあります。
+例えば、ドメイン "windows.com" の単一ビットの変更で "windnws.com" に変わることがある。
 
-攻撃者は、被害者のドメインに似た複数のビットフリッピングドメインを**登録することでこれを利用する**かもしれません。彼らの意図は、正当なユーザーを自分たちのインフラにリダイレクトすることです。
+攻撃者はこの点を利用して、被害者のドメインに似た**複数のbit-flippingドメインを登録**し、正当なユーザーを自分たちのインフラにリダイレクトさせようとすることがある。
 
-詳細については、[https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)をお読みください。
+詳しくは [https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/) を参照。
 
-### 信頼できるドメインを購入する
+### Buy a trusted domain
 
-[https://www.expireddomains.net/](https://www.expireddomains.net)で使用できる期限切れのドメインを検索できます。\
-購入する期限切れのドメインが**すでに良好なSEOを持っていることを確認するために**、以下のサイトでそのカテゴリを検索できます：
+Expired domain を探すには [https://www.expireddomains.net/](https://www.expireddomains.net) を検索できます。\
+購入しようとしているexpired domainが**既に良好なSEOを持っている**かを確認するには、以下でどのように分類されているかを確認できます:
 
 - [http://www.fortiguard.com/webfilter](http://www.fortiguard.com/webfilter)
 - [https://urlfiltering.paloaltonetworks.com/query/](https://urlfiltering.paloaltonetworks.com/query/)
 
-## メールの発見
+## Discovering Emails
 
-- [https://github.com/laramies/theHarvester](https://github.com/laramies/theHarvester) (100%無料)
-- [https://phonebook.cz/](https://phonebook.cz) (100%無料)
+- [https://github.com/laramies/theHarvester](https://github.com/laramies/theHarvester) (100% free)
+- [https://phonebook.cz/](https://phonebook.cz) (100% free)
 - [https://maildb.io/](https://maildb.io)
 - [https://hunter.io/](https://hunter.io)
 - [https://anymailfinder.com/](https://anymailfinder.com)
 
-**さらに多くの**有効なメールアドレスを**発見するか、すでに発見したものを**確認するために、被害者のSMTPサーバーをブルートフォース攻撃できるか確認できます。[ここでメールアドレスを確認/発見する方法を学びます](../../network-services-pentesting/pentesting-smtp/index.html#username-bruteforce-enumeration)。\
-さらに、ユーザーが**メールにアクセスするためのウェブポータルを使用している場合**、それが**ユーザー名のブルートフォース攻撃に対して脆弱かどうかを確認し、可能であればその脆弱性を悪用することを忘れないでください**。
+より多くの有効なメールアドレスを**discover**したり、既に発見したものを**verify**するために、被害者のsmtpサーバーに対してユーザー名のブルートフォースを試みて確認できるかをチェックできます。 [Learn how to verify/discover email address here](../../network-services-pentesting/pentesting-smtp/index.html#username-bruteforce-enumeration)。\
+さらに、ユーザーが**web portal**を使ってメールにアクセスしている場合、そのポータルが**username brute force**に対して脆弱かどうかを確認し、可能であれば脆弱性を悪用することを忘れないでください。
 
-## GoPhishの設定
+## GoPhish の設定
 
 ### インストール
 
-[https://github.com/gophish/gophish/releases/tag/v0.11.0](https://github.com/gophish/gophish/releases/tag/v0.11.0)からダウンロードできます。
+以下からダウンロードできます: [https://github.com/gophish/gophish/releases/tag/v0.11.0](https://github.com/gophish/gophish/releases/tag/v0.11.0)
 
-`/opt/gophish`内にダウンロードして解凍し、`/opt/gophish/gophish`を実行します。\
-出力にポート3333の管理ユーザー用のパスワードが表示されます。したがって、そのポートにアクセスし、その資格情報を使用して管理者パスワードを変更します。そのポートをローカルにトンネリングする必要があるかもしれません。
+ダウンロードして `/opt/gophish` に展開し、`/opt/gophish/gophish` を実行してください。\
+出力に管理者ユーザー用のパスワードが表示され、管理用ポート3333のアクセス情報が得られます。したがって、そのポートにアクセスして表示された資格情報を使用して管理者パスワードを変更してください。必要に応じてそのポートをローカルにトンネルする必要があります:
 ```bash
 ssh -L 3333:127.0.0.1:3333 <user>@<ip>
 ```
 ### 設定
 
-**TLS証明書の設定**
+**TLS 証明書の設定**
 
-このステップの前に、使用するドメインを**すでに購入している**必要があり、**gophish**を設定している**VPSのIP**に**ポイント**している必要があります。
+この手順の前に、使用する domain を既に購入しておく必要があり、当該 domain が gophish を設定している VPS の IP を指すように設定されている必要があります。
 ```bash
 DOMAIN="<domain>"
 wget https://dl.eff.org/certbot-auto
@@ -111,34 +112,34 @@ mkdir /opt/gophish/ssl_keys
 cp "/etc/letsencrypt/live/$DOMAIN/privkey.pem" /opt/gophish/ssl_keys/key.pem
 cp "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" /opt/gophish/ssl_keys/key.crt​
 ```
-**メール設定**
+**メールの設定**
 
-インストールを開始します: `apt-get install postfix`
+インストールを開始: `apt-get install postfix`
 
-次に、ドメインを以下のファイルに追加します:
+次にドメインを以下のファイルに追加します:
 
 - **/etc/postfix/virtual_domains**
 - **/etc/postfix/transport**
 - **/etc/postfix/virtual_regexp**
 
-**/etc/postfix/main.cf内の以下の変数の値も変更します**
+**/etc/postfix/main.cf 内の以下の変数の値も変更してください**
 
 `myhostname = <domain>`\
 `mydestination = $myhostname, <domain>, localhost.com, localhost`
 
-最後に、ファイル **`/etc/hostname`** と **`/etc/mailname`** をあなたのドメイン名に変更し、**VPSを再起動します。**
+最後に **`/etc/hostname`** と **`/etc/mailname`** をドメイン名に合わせて変更し、**VPSを再起動**してください。
 
-次に、**DNS Aレコード** `mail.<domain>` をVPSの**IPアドレス**にポイントさせ、**DNS MX**レコードを `mail.<domain>` にポイントさせます。
+次に、`mail.<domain>` の **DNS A record** を VPS の **ip address** を指すように作成し、`mail.<domain>` を指す **DNS MX** レコードを作成します。
 
-次に、メールを送信するテストを行いましょう:
+では、メールを送信してテストします:
 ```bash
 apt install mailutils
 echo "This is the body of the email" | mail -s "This is the subject line" test@email.com
 ```
-**Gophishの設定**
+**Gophish の設定**
 
-gophishの実行を停止し、設定を行いましょう。\
-`/opt/gophish/config.json`を以下のように変更します（httpsの使用に注意してください）：
+gophish の実行を停止して、設定を行います。\
+`/opt/gophish/config.json` を以下のように変更してください（https の使用に注意）：
 ```bash
 {
 "admin_server": {
@@ -163,9 +164,9 @@ gophishの実行を停止し、設定を行いましょう。\
 }
 }
 ```
-**gophishサービスの設定**
+**gophish サービスの構成**
 
-gophishサービスを自動的に開始し、サービスとして管理できるようにするために、次の内容でファイル`/etc/init.d/gophish`を作成できます:
+gophish サービスを作成して自動起動およびサービスとして管理できるようにするには、次の内容で `/etc/init.d/gophish` ファイルを作成します:
 ```bash
 #!/bin/bash
 # /etc/init.d/gophish
@@ -212,7 +213,7 @@ case $1 in
 start|stop|status) "$1" ;;
 esac
 ```
-サービスの設定を完了し、次のことを確認します:
+サービスの設定を完了し、次の手順で動作を確認してください:
 ```bash
 mkdir /var/log/gophish
 chmod +x /etc/init.d/gophish
@@ -223,43 +224,43 @@ service gophish status
 ss -l | grep "3333\|443"
 service gophish stop
 ```
-## メールサーバーとドメインの設定
+## Configuring mail server and domain
 
-### 待機して正当性を保つ
+### Wait & be legit
 
-ドメインが古いほど、スパムとして検出される可能性は低くなります。そのため、フィッシング評価の前にできるだけ長く（少なくとも1週間）待つべきです。さらに、評判の良い分野に関するページを作成すれば、得られる評判はより良くなります。
+ドメインが古ければ古いほど、スパムと判定されにくくなります。したがって、phishing assessment の前にできるだけ長く（少なくとも1週間）待つべきです。さらに、評判の良い分野に関するページを用意すると、得られる reputation は向上します。
 
-1週間待たなければならない場合でも、今すぐにすべての設定を終えることができます。
+たとえ1週間待つ必要があっても、今すぐにすべての設定を完了することはできます。
 
-### リバースDNS（rDNS）レコードの設定
+### Configure Reverse DNS (rDNS) record
 
-VPSのIPアドレスをドメイン名に解決するrDNS（PTR）レコードを設定します。
+VPS の IP アドレスをドメイン名に解決する rDNS (PTR) レコードを設定してください。
 
-### 送信者ポリシーフレームワーク（SPF）レコード
+### Sender Policy Framework (SPF) Record
 
-新しいドメインのために**SPFレコードを設定する必要があります**。SPFレコードが何か分からない場合は、[**このページを読んでください**](../../network-services-pentesting/pentesting-smtp/index.html#spf)。
+新しいドメインに対して必ず **SPF record を設定してください**。SPF record が何かわからない場合は[**read this page**](../../network-services-pentesting/pentesting-smtp/index.html#spf)。
 
-[https://www.spfwizard.net/](https://www.spfwizard.net)を使用して、SPFポリシーを生成できます（VPSマシンのIPを使用してください）。
+SPF ポリシーを生成するには [https://www.spfwizard.net/](https://www.spfwizard.net) を使用できます（VPS マシンの IP を使用してください）
 
 ![](<../../images/image (1037).png>)
 
-これは、ドメイン内のTXTレコードに設定する必要がある内容です：
+これはドメイン内の TXT record に設定する必要がある内容です:
 ```bash
 v=spf1 mx a ip4:ip.ip.ip.ip ?all
 ```
-### ドメインベースのメッセージ認証、報告および適合性 (DMARC) レコード
+### Domain-based Message Authentication, Reporting & Conformance (DMARC) Record
 
-新しいドメインのために**DMARCレコードを設定する必要があります**。DMARCレコードが何か分からない場合は、[**このページを読んでください**](../../network-services-pentesting/pentesting-smtp/index.html#dmarc)。
+新しいドメインに対して**DMARC recordを設定する必要があります**。DMARC recordが何か分からない場合は[**read this page**](../../network-services-pentesting/pentesting-smtp/index.html#dmarc)。
 
-次の内容でホスト名`_dmarc.<domain>`を指す新しいDNS TXTレコードを作成する必要があります:
+ホスト名 `_dmarc.<domain>` を指す新しい DNS TXT record を次の内容で作成する必要があります:
 ```bash
 v=DMARC1; p=none
 ```
 ### DomainKeys Identified Mail (DKIM)
 
-新しいドメインのために**DKIMを設定する必要があります**。DMARCレコードが何か分からない場合は、[**このページを読んでください**](../../network-services-pentesting/pentesting-smtp/index.html#dkim)。
+新しいドメインに対して**DKIMを設定する必要があります**。DMARCレコードが何かわからない場合は[**このページを読んでください**](../../network-services-pentesting/pentesting-smtp/index.html#dkim)。
 
-このチュートリアルは、[https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy)に基づいています。
+This tutorial is based on: [https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy)
 
 > [!TIP]
 > DKIMキーが生成する両方のB64値を連結する必要があります：
@@ -268,15 +269,14 @@ v=DMARC1; p=none
 > v=DKIM1; h=sha256; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0wPibdqPtzYk81njjQCrChIcHzxOp8a1wjbsoNtka2X9QXCZs+iXkvw++QsWDtdYu3q0Ofnr0Yd/TmG/Y2bBGoEgeE+YTUG2aEgw8Xx42NLJq2D1pB2lRQPW4IxefROnXu5HfKSm7dyzML1gZ1U0pR5X4IZCH0wOPhIq326QjxJZm79E1nTh3xj" "Y9N/Dt3+fVnIbMupzXE216TdFuifKM6Tl6O/axNsbswMS1TH812euno8xRpsdXJzFlB9q3VbMkVWig4P538mHolGzudEBg563vv66U8D7uuzGYxYT4WS8NVm3QBMg0QKPWZaKp+bADLkOSB9J2nUpk4Aj9KB5swIDAQAB
 > ```
 
-### Test your email configuration score
+### メール設定のスコアをテストする
 
-[https://www.mail-tester.com/](https://www.mail-tester.com)を使用してそれを行うことができます。\
-ページにアクセスして、彼らが提供するアドレスにメールを送信してください：
+これは [https://www.mail-tester.com/](https://www.mail-tester.com/)\ ページにアクセスし、表示されるアドレスにメールを送ってください:
 ```bash
 echo "This is the body of the email" | mail -s "This is the subject line" test-iimosa79z@srv1.mail-tester.com
 ```
-あなたはまた、**メール設定を確認する**ために `check-auth@verifier.port25.com` にメールを送信し、**レスポンスを読む**ことができます（これには、**ポート25を開く**必要があり、メールをrootとして送信した場合はファイル _/var/mail/root_ でレスポンスを確認します）。\
-すべてのテストに合格していることを確認してください：
+また、**メール設定を確認する**には `check-auth@verifier.port25.com` 宛にメールを送り、**応答を確認する**ことができます（このためにはport **25** を**開ける**必要があり、rootで送信した場合はファイル _/var/mail/root_ に応答が記録されます）。\
+すべてのテストに合格していることを確認してください:
 ```bash
 ==========================================================
 Summary of Results
@@ -287,40 +287,40 @@ DKIM check:         pass
 Sender-ID check:    pass
 SpamAssassin check: ham
 ```
-あなたはまた、**あなたの管理下にあるGmailにメッセージを送信し**、Gmailの受信トレイで**メールのヘッダー**を確認することができます。`dkim=pass`は`Authentication-Results`ヘッダー欄に存在する必要があります。
+**自分が管理する Gmail 宛にメッセージを送信**し、Gmail の受信トレイで**メールのヘッダー**を確認してください。`Authentication-Results` ヘッダーフィールドに `dkim=pass` が含まれているはずです。
 ```
 Authentication-Results: mx.google.com;
 spf=pass (google.com: domain of contact@example.com designates --- as permitted sender) smtp.mail=contact@example.com;
 dkim=pass header.i=@example.com;
 ```
-### ​Spamhouseのブラックリストからの削除
+### Spamhouse Blacklist からの削除
 
-ページ [www.mail-tester.com](https://www.mail-tester.com) は、あなたのドメインがspamhouseによってブロックされているかどうかを示すことができます。あなたのドメイン/IPの削除をリクエストすることができます: ​[https://www.spamhaus.org/lookup/](https://www.spamhaus.org/lookup/)
+The page [www.mail-tester.com](https://www.mail-tester.com) は、あなたのドメインが spamhouse によってブロックされているかどうかを示すことができます。ドメイン/IP の削除は次からリクエストできます: ​[https://www.spamhaus.org/lookup/](https://www.spamhaus.org/lookup/)
 
-### Microsoftのブラックリストからの削除
+### Microsoft Blacklist からの削除
 
-あなたのドメイン/IPの削除をリクエストすることができます: [https://sender.office.com/](https://sender.office.com).
+​​ドメイン/IP の削除は [https://sender.office.com/](https://sender.office.com) でリクエストできます。
 
-## GoPhishキャンペーンの作成と開始
+## Create & Launch GoPhish Campaign
 
-### 送信プロファイル
+### Sending Profile
 
-- 送信者プロファイルを識別するための**名前を設定**します
-- フィッシングメールを送信するアカウントを決定します。提案: _noreply, support, servicedesk, salesforce..._
-- ユーザー名とパスワードは空白のままにできますが、「証明書エラーを無視する」にチェックを入れることを確認してください
+- 送信プロファイルを識別するための**名前**を設定する
+- フィッシングメールをどのアカウントから送信するかを決める。提案: _noreply, support, servicedesk, salesforce..._
+- ユーザー名とパスワードは空のままにしておいて構いませんが、必ず "**Ignore Certificate Errors**" にチェックを入れてください
 
-![](<../../images/image (253) (1) (2) (1) (1) (2) (2) (3) (3) (5) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (15) (2).png>)
+![](<../../images/image (253) (1) (2) (1) (1) (2) (2) (3) (3) (5) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (15) (2).png>)
 
 > [!TIP]
-> "**テストメールを送信**"機能を使用して、すべてが正常に動作しているかをテストすることをお勧めします。\
-> テストを行う際にブラックリストに載らないように、**テストメールを10分メールアドレスに送信することをお勧めします**。
+> すべてが正常に動作しているかをテストするために、"**Send Test Email**" 機能を使うことを推奨します。\
+> テスト中にブラックリスト入りするのを避けるため、テストメールは **10min mails addresses** に送ることをおすすめします。
 
-### メールテンプレート
+### Email Template
 
-- テンプレートを識別するための**名前を設定**します
-- 次に、**件名**を書きます（奇妙なものではなく、通常のメールで読むことができるもの）
-- "**トラッキング画像を追加**"にチェックを入れていることを確認してください
-- **メールテンプレート**を書きます（以下の例のように変数を使用できます）：
+- テンプレートを識別するための**名前**を設定する
+- 次に **subject** を書きます（不自然なものではなく、通常のメールで見かけそうな件名）
+- '**Add Tracking Image**' にチェックを入れていることを確認する
+- **email template** を書く（以下の例のように変数を使用できます）:
 ```html
 <html>
 <head>
@@ -339,207 +339,220 @@ WRITE HERE SOME SIGNATURE OF SOMEONE FROM THE COMPANY
 </body>
 </html>
 ```
-注意してほしいのは、**メールの信頼性を高めるために**、クライアントからのメールの署名を使用することが推奨されるということです。提案：
+Note that **in order to increase the credibility of the email**, it's recommended to use some signature from an email from the client. Suggestions:
 
-- **存在しないアドレス**にメールを送信し、返信に署名が含まれているか確認します。
-- **public emails**（例：info@ex.com、press@ex.com、public@ex.com）を探し、メールを送信して返信を待ちます。
-- **いくつかの有効な発見された**メールに連絡を試み、返信を待ちます。
+- Send an email to a **non existent address** and check if the response has any signature.
+- Search for **public emails** like info@ex.com or press@ex.com or public@ex.com and send them an email and wait for the response.
+- Try to contact **some valid discovered** email and wait for the response
 
 ![](<../../images/image (80).png>)
 
 > [!TIP]
-> Email Templateでは、**送信するファイルを添付することもできます**。NTLMチャレンジを特別に作成したファイル/ドキュメントを使用して盗むことに興味がある場合は、[このページを読む](../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md)。
+> The Email Template also allows to **attach files to send**. If you would also like to steal NTLM challenges using some specially crafted files/documents [read this page](../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md).
 
-### ランディングページ
+### Landing Page
 
-- **名前**を記入
-- **ウェブページのHTMLコード**を記入します。ウェブページを**インポート**することもできます。
-- **提出されたデータをキャプチャ**と**パスワードをキャプチャ**にチェックを入れます。
-- **リダイレクト**を設定します。
+- Write a **name**
+- **Write the HTML code** of the web page. Note that you can **import** web pages.
+- Mark **Capture Submitted Data** and **Capture Passwords**
+- Set a **redirection**
 
 ![](<../../images/image (826).png>)
 
 > [!TIP]
-> 通常、ページのHTMLコードを修正し、ローカルでいくつかのテストを行う必要があります（おそらくApacheサーバーを使用して）**結果に満足するまで**。その後、そのHTMLコードをボックスに記入します。\
-> HTML用に**静的リソース**（おそらくCSSやJSページ）を使用する必要がある場合は、_**/opt/gophish/static/endpoint**_に保存し、_**/static/\<filename>**_からアクセスできます。
+> Usually you will need to modify the HTML code of the page and make some tests in local (maybe using some Apache server) **until you like the results.** Then, write that HTML code in the box.\
+> Note that if you need to **use some static resources** for the HTML (maybe some CSS and JS pages) you can save them in _**/opt/gophish/static/endpoint**_ and then access them from _**/static/\<filename>**_
 
 > [!TIP]
-> リダイレクトでは、**被害者の正当なメインウェブページにユーザーをリダイレクトする**か、例えば_/static/migration.html_にリダイレクトし、5秒間**スピニングホイール**（**[https://loading.io/](https://loading.io)**）を表示し、その後プロセスが成功したことを示すことができます。
+> For the redirection you could **redirect the users to the legit main web page** of the victim, or redirect them to _/static/migration.html_ for example, put some **spinning wheel (**[**https://loading.io/**](https://loading.io)**) for 5 seconds and then indicate that the process was successful**.
 
-### ユーザーとグループ
+### Users & Groups
 
-- 名前を設定
-- **データをインポート**します（例のテンプレートを使用するには、各ユーザーの名、姓、メールアドレスが必要です）。
+- Set a name
+- **Import the data** (note that in order to use the template for the example you need the firstname, last name and email address of each user)
 
 ![](<../../images/image (163).png>)
 
-### キャンペーン
+### Campaign
 
-最後に、名前、メールテンプレート、ランディングページ、URL、送信プロファイル、グループを選択してキャンペーンを作成します。URLは被害者に送信されるリンクになります。
+Finally, create a campaign selecting a name, the email template, the landing page, the URL, the sending profile and the group. Note that the URL will be the link sent to the victims
 
-**送信プロファイルでは、最終的なフィッシングメールがどのように見えるかを確認するためにテストメールを送信できます**：
+Note that the **Sending Profile allow to send a test email to see how will the final phishing email looks like**:
 
 ![](<../../images/image (192).png>)
 
 > [!TIP]
-> テストメールは**10分メールアドレス**に送信することをお勧めします。テスト中にブラックリストに載るのを避けるためです。
+> I would recommend to **send the test emails to 10min mails addresses** in order to avoid getting blacklisted making tests.
 
-すべてが準備できたら、キャンペーンを開始してください！
+Once everything is ready, just launch the campaign!
 
-## ウェブサイトのクローン
+## Website Cloning
 
-何らかの理由でウェブサイトをクローンしたい場合は、次のページを確認してください：
+If for any reason you want to clone the website check the following page:
+
 
 {{#ref}}
 clone-a-website.md
 {{#endref}}
 
-## バックドア付きドキュメントとファイル
+## Backdoored Documents & Files
 
-いくつかのフィッシング評価（主にレッドチーム向け）では、**バックドアを含むファイルを送信する**ことも望ましいです（おそらくC2、または認証をトリガーする何か）。\
-いくつかの例については、次のページを確認してください：
+In some phishing assessments (mainly for Red Teams) you will want to also **send files containing some kind of backdoor** (maybe a C2 or maybe just something that will trigger an authentication).\
+Check out the following page for some examples:
+
 
 {{#ref}}
 phishing-documents.md
 {{#endref}}
 
-## フィッシングMFA
+## Phishing MFA
 
-### プロキシMitM経由
+### Via Proxy MitM
 
-前述の攻撃は非常に巧妙で、実際のウェブサイトを偽装し、ユーザーが設定した情報を収集します。残念ながら、ユーザーが正しいパスワードを入力しなかった場合や、偽装したアプリケーションが2FAで設定されている場合、**この情報では騙されたユーザーを偽装することはできません**。
+The previous attack is pretty clever as you are faking a real website and gathering the information set by the user. Unfortunately, if the user didn't put the correct password or if the application you faked is configured with 2FA, **this information won't allow you to impersonate the tricked user**.
 
-ここで、[**evilginx2**](https://github.com/kgretzky/evilginx2)**、**[**CredSniper**](https://github.com/ustayready/CredSniper)および[**muraena**](https://github.com/muraenateam/muraena)のようなツールが役立ちます。このツールは、MitMのような攻撃を生成することを可能にします。基本的に、攻撃は次のように機能します：
+This is where tools like [**evilginx2**](https://github.com/kgretzky/evilginx2)**,** [**CredSniper**](https://github.com/ustayready/CredSniper) and [**muraena**](https://github.com/muraenateam/muraena) are useful. This tool will allow you to generate a MitM like attack. Basically, the attacks works in the following way:
 
-1. 実際のウェブページのログインフォームを**偽装**します。
-2. ユーザーは**資格情報**を偽のページに送信し、ツールはそれを実際のウェブページに送信し、**資格情報が機能するか確認します**。
-3. アカウントが**2FA**で設定されている場合、MitMページはそれを要求し、**ユーザーが入力**すると、ツールはそれを実際のウェブページに送信します。
-4. ユーザーが認証されると、あなた（攻撃者）は**資格情報、2FA、クッキー、ツールがMitMを実行している間のすべてのインタラクションの情報をキャプチャ**します。
+1. You **impersonate the login** form of the real webpage.
+2. The user **send** his **credentials** to your fake page and the tool send those to the real webpage, **checking if the credentials work**.
+3. If the account is configured with **2FA**, the MitM page will ask for it and once the **user introduces** it the tool will send it to the real web page.
+4. Once the user is authenticated you (as attacker) will have **captured the credentials, the 2FA, the cookie and any information** of every interaction your while the tool is performing a MitM.
 
-### VNC経由
+### Via VNC
 
-もし、**被害者を元のページと同じ外観の悪意のあるページに送る代わりに、実際のウェブページに接続されたブラウザの**VNCセッションに送ることができればどうでしょうか？彼が何をしているかを見ることができ、パスワード、使用されるMFA、クッキーを盗むことができます...\
-これを[**EvilnVNC**](https://github.com/JoelGMSec/EvilnoVNC)で行うことができます。
+What if instead of **sending the victim to a malicious page** with the same looks as the original one, you send him to a **VNC session with a browser connected to the real web page**? You will be able to see what he does, steal the password, the MFA used, the cookies...\
+You can do this with [**EvilnVNC**](https://github.com/JoelGMSec/EvilnoVNC)
 
-## 検出の検出
+## Detecting the detection
 
-明らかに、バストされたかどうかを知る最良の方法の1つは、**ブラックリスト内で自分のドメインを検索すること**です。リストに表示されている場合、何らかの形であなたのドメインが疑わしいと検出されました。\
-ドメインがブラックリストに表示されているかどうかを確認する簡単な方法は、[https://malwareworld.com/](https://malwareworld.com)を使用することです。
+Obviously one of the best ways to know if you have been busted is to **search your domain inside blacklists**. If it appears listed, somehow your domain was detected as suspicions.\
+One easy way to check if you domain appears in any blacklist is to use [https://malwareworld.com/](https://malwareworld.com)
 
-ただし、被害者が**野生で疑わしいフィッシング活動を積極的に探しているかどうかを知る他の方法もあります**。これは次のように説明されています：
+However, there are other ways to know if the victim is **actively looking for suspicions phishing activity in the wild** as explained in:
+
 
 {{#ref}}
 detecting-phising.md
 {{#endref}}
 
-非常に似た名前のドメインを**購入する**ことができます。被害者のドメインの**キーワード**を含む**サブドメイン**のために証明書を**生成する**こともできます。もし**被害者**がそれらと何らかの**DNSまたはHTTPインタラクション**を行うと、**彼が積極的に探している**ことがわかり、非常にステルスである必要があります。
+You can **buy a domain with a very similar name** to the victims domain **and/or generate a certificate** for a **subdomain** of a domain controlled by you **containing** the **keyword** of the victim's domain. If the **victim** perform any kind of **DNS or HTTP interaction** with them, you will know that **he is actively looking** for suspicious domains and you will need to be very stealth.
 
-### フィッシングの評価
+### Evaluate the phishing
 
-[**Phishious**](https://github.com/Rices/Phishious)を使用して、あなたのメールがスパムフォルダに入るか、ブロックされるか、成功するかを評価します。
+Use [**Phishious** ](https://github.com/Rices/Phishious)to evaluate if your email is going to end in the spam folder or if it's going to be blocked or successful.
 
-## 高接触型アイデンティティ侵害（ヘルプデスクMFAリセット）
+## High-Touch Identity Compromise (Help-Desk MFA Reset)
 
-現代の侵入セットは、メールの誘惑を完全にスキップし、**サービスデスク/アイデンティティ回復ワークフローを直接ターゲットにしてMFAを打破します**。攻撃は完全に「土地を生きる」ものであり、オペレーターが有効な資格情報を持つと、組み込みの管理ツールを使用してピボットします - マルウェアは必要ありません。
+Modern intrusion sets increasingly skip email lures entirely and **directly target the service-desk / identity-recovery workflow** to defeat MFA.  The attack is fully "living-off-the-land": once the operator owns valid credentials they pivot with built-in admin tooling – no malware is required.
 
-### 攻撃フロー
-1. 被害者の偵察
-* LinkedIn、データ侵害、公開GitHubなどから個人および企業の詳細を収集します。
-* 高価値のアイデンティティ（役員、IT、財務）を特定し、パスワード/MFAリセットのための**正確なヘルプデスクプロセス**を列挙します。
-2. リアルタイムのソーシャルエンジニアリング
-* ターゲットを偽装してヘルプデスクに電話、Teams、またはチャットします（しばしば**偽の発信者ID**または**クローン音声**を使用）。
-* 以前に収集したPIIを提供して、知識ベースの検証を通過します。
-* エージェントに**MFAシークレットをリセット**させるか、登録された携帯番号で**SIMスワップ**を実行させます。
-3. アクセス後の即時アクション（実際のケースでは≤60分）
-* 任意のウェブSSOポータルを通じて足場を確立します。
-* 組み込みを使用してAD/AzureADを列挙します（バイナリはドロップされません）：
+### Attack flow
+1. Recon the victim
+* Harvest personal & corporate details from LinkedIn, data breaches, public GitHub, etc.
+* Identify high-value identities (executives, IT, finance) and enumerate the **exact help-desk process** for password / MFA reset.
+2. Real-time social engineering
+* Phone, Teams or chat the help-desk while impersonating the target (often with **spoofed caller-ID** or **cloned voice**).
+* Provide the previously-collected PII to pass knowledge-based verification.
+* Convince the agent to **reset the MFA secret** or perform a **SIM-swap** on a registered mobile number.
+3. Immediate post-access actions (≤60 min in real cases)
+* Establish a foothold through any web SSO portal.
+* Enumerate AD / AzureAD with built-ins (no binaries dropped):
 ```powershell
-# ディレクトリグループと特権ロールをリスト
+# list directory groups & privileged roles
 Get-ADGroup -Filter * -Properties Members | ?{$_.Members -match $env:USERNAME}
 
-# AzureAD / Graph – ディレクトリロールをリスト
+# AzureAD / Graph – list directory roles
 Get-MgDirectoryRole | ft DisplayName,Id
 
-# アカウントがログインできるデバイスを列挙
+# Enumerate devices the account can login to
 Get-MgUserRegisteredDevice -UserId <user@corp.local>
 ```
-* **WMI**、**PsExec**、または環境内で既にホワイトリストに登録されている正当な**RMM**エージェントを使用して横移動します。
+* Lateral movement with **WMI**, **PsExec**, or legitimate **RMM** agents already whitelisted in the environment.
 
-### 検出と緩和
-* ヘルプデスクのアイデンティティ回復を**特権操作**として扱います - ステップアップ認証とマネージャーの承認を要求します。
-* 次のことに警告する**アイデンティティ脅威検出と応答（ITDR）** / **UEBA**ルールを展開します：
-* MFAメソッドが変更され、新しいデバイス/地理からの認証。
-* 同じプリンシパル（ユーザー→管理者）の即時昇格。
-* ヘルプデスクの通話を記録し、リセットの前に**既に登録された番号へのコールバック**を強制します。
-* **ジャストインタイム（JIT）/特権アクセス**を実装し、新しくリセットされたアカウントが**自動的に高特権トークンを継承しない**ようにします。
+### Detection & Mitigation
+* Treat help-desk identity recovery as a **privileged operation** – require step-up auth & manager approval.
+* Deploy **Identity Threat Detection & Response (ITDR)** / **UEBA** rules that alert on:
+* MFA method changed + authentication from new device / geo.
+* Immediate elevation of the same principal (user-→-admin).
+* Record help-desk calls and enforce a **call-back to an already-registered number** before any reset.
+* Implement **Just-In-Time (JIT) / Privileged Access** so newly reset accounts do **not** automatically inherit high-privilege tokens.
 
 ---
 
-## 大規模な欺瞞 - SEOポイズニングと「ClickFix」キャンペーン
-コモディティクルーは、高接触オペレーションのコストをオフセットするために、**検索エンジンと広告ネットワークを配信チャネルに変えた大量攻撃**を行います。
+## At-Scale Deception – SEO Poisoning & “ClickFix” Campaigns
+Commodity crews offset the cost of high-touch ops with mass attacks that turn **search engines & ad networks into the delivery channel**.
 
-1. **SEOポイズニング/マルバタイジング**は、`chromium-update[.]site`のような偽の結果を検索広告のトップに押し上げます。
-2. 被害者は小さな**第一段階のローダー**（しばしばJS/HTA/ISO）をダウンロードします。Unit 42によって見られた例：
+1. **SEO poisoning / malvertising** pushes a fake result such as `chromium-update[.]site` to the top search ads.
+2. Victim downloads a small **first-stage loader** (often JS/HTA/ISO).  Examples seen by Unit 42:
 * `RedLine stealer`
 * `Lumma stealer`
 * `Lampion Trojan`
-3. ローダーはブラウザのクッキーと資格情報DBを外部に送信し、その後**サイレントローダー**を引き出し、*リアルタイム*でデプロイするかどうかを決定します：
-* RAT（例：AsyncRAT、RustDesk）
-* ランサムウェア/ワイパー
-* 永続コンポーネント（レジストリのRunキー + スケジュールされたタスク）
+3. Loader exfiltrates browser cookies + credential DBs, then pulls a **silent loader** which decides – *in realtime* – whether to deploy:
+* RAT (e.g. AsyncRAT, RustDesk)
+* ransomware / wiper
+* persistence component (registry Run key + scheduled task)
 
-### ハードニングのヒント
-* 新しく登録されたドメインをブロックし、**高度なDNS/URLフィルタリング**を*検索広告*およびメールに強制します。
-* ソフトウェアのインストールを署名されたMSI/ストアパッケージに制限し、ポリシーによって`HTA`、`ISO`、`VBS`の実行を拒否します。
-* インストーラーを開くブラウザの子プロセスを監視します：
+### Hardening tips
+* Block newly-registered domains & enforce **Advanced DNS / URL Filtering** on *search-ads* as well as e-mail.
+* Restrict software installation to signed MSI / Store packages, deny `HTA`, `ISO`, `VBS` execution by policy.
+* Monitor for child processes of browsers opening installers:
 ```yaml
 - parent_image: /Program Files/Google/Chrome/*
 and child_image: *\\*.exe
 ```
-* 第一段階のローダーによって頻繁に悪用されるLOLBins（例：`regsvr32`、`curl`、`mshta`）をハントします。
+* Hunt for LOLBins frequently abused by first-stage loaders (e.g. `regsvr32`, `curl`, `mshta`).
 
 ---
 
-## AI強化フィッシングオペレーション
-攻撃者は現在、**LLMおよび音声クローンAPI**を連鎖させて、完全にパーソナライズされた誘惑とリアルタイムのインタラクションを実現しています。
+## AI-Enhanced Phishing Operations
+Attackers now chain **LLM & voice-clone APIs** for fully personalised lures and real-time interaction.
 
-| レイヤー | 脅威アクターによる使用例 |
+| Layer | Example use by threat actor |
 |-------|-----------------------------|
-|自動化|ランダム化された文言とトラッキングリンクを使用して、>100kのメール/SMSを生成して送信。|
-|生成AI|公開M&A、ソーシャルメディアの内部ジョークを参照する*一回限り*のメールを生成；コールバック詐欺でのディープフェイクCEO音声。|
-|エージェンティックAI|自律的にドメインを登録し、オープンソースのインテリジェンスをスクレイピングし、被害者がクリックするが資格情報を提出しない場合に次の段階のメールを作成。|
+|Automation|Generate & send >100 k emails / SMS with randomised wording & tracking links.|
+|Generative AI|Produce *one-off* emails referencing public M&A, inside jokes from social media; deep-fake CEO voice in callback scam.|
+|Agentic AI|Autonomously register domains, scrape open-source intel, craft next-stage mails when a victim clicks but doesn’t submit creds.|
 
-**防御：**
-• **動的バナー**を追加し、信頼できない自動化から送信されたメッセージを強調表示します（ARC/DKIMの異常を介して）。
-• 高リスクの電話リクエストに対して**音声生体認証チャレンジフレーズ**を展開します。
-• 意識プログラムでAI生成の誘惑を継続的にシミュレートします - 静的テンプレートは時代遅れです。
+**Defence:**
+• Add **dynamic banners** highlighting messages sent from untrusted automation (via ARC/DKIM anomalies).
+• Deploy **voice-biometric challenge phrases** for high-risk phone requests.
+• Continuously simulate AI-generated lures in awareness programmes – static templates are obsolete.
+
+See also – agentic browsing abuse for credential phishing:
+
+{{#ref}}
+ai-agent-mode-phishing-abusing-hosted-agent-browsers.md
+{{#endref}}
 
 ---
 
-## MFA疲労/プッシュボンビングバリアント - 強制リセット
-クラシックなプッシュボンビングに加えて、オペレーターは単に**ヘルプデスクの呼び出し中に新しいMFA登録を強制し、ユーザーの既存のトークンを無効にします**。その後のログインプロンプトは被害者にとって正当なものに見えます。
+## MFA Fatigue / Push Bombing Variant – Forced Reset
+Besides classic push-bombing, operators simply **force a new MFA registration** during the help-desk call, nullifying the user’s existing token.  Any subsequent login prompt appears legitimate to the victim.
 ```text
 [Attacker]  →  Help-Desk:  “I lost my phone while travelling, can you unenrol it so I can add a new authenticator?”
 [Help-Desk] →  AzureAD: ‘Delete existing methods’ → sends registration e-mail
 [Attacker]  →  Completes new TOTP enrolment on their own device
 ```
-AzureAD/AWS/Oktaのイベントを監視し、**`deleteMFA` + `addMFA`** が**同じIPから数分以内に**発生する場合を確認します。
+AzureAD/AWS/Okta のイベントで、同じIPから数分以内に **`deleteMFA` + `addMFA`** が発生しているものを監視してください。
 
-## クリップボードハイジャック / ペーストジャッキング
 
-攻撃者は、侵害されたまたはタイポスクワットされたウェブページから被害者のクリップボードに悪意のあるコマンドを静かにコピーし、その後ユーザーを騙して**Win + R**、**Win + X**、またはターミナルウィンドウ内にペーストさせ、ダウンロードや添付なしで任意のコードを実行させることができます。
+
+## Clipboard Hijacking / Pastejacking
+
+Attackers can silently copy malicious commands into the victim’s clipboard from a compromised or typosquatted web page and then trick the user to paste them inside **Win + R**, **Win + X** or a terminal window, executing arbitrary code without any download or attachment.
+
 
 {{#ref}}
 clipboard-hijacking.md
 {{#endref}}
 
-## モバイルフィッシング & 悪意のあるアプリ配布 (Android & iOS)
+## Mobile Phishing & Malicious App Distribution (Android & iOS)
+
 
 {{#ref}}
 mobile-phishing-malicious-apps.md
 {{#endref}}
 
-## 参考文献
+## 参考
 
 - [https://zeltser.com/domain-name-variations-in-phishing/](https://zeltser.com/domain-name-variations-in-phishing/)
 - [https://0xpatrik.com/phishing-domains/](https://0xpatrik.com/phishing-domains/)
