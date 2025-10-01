@@ -429,6 +429,64 @@ Background: [NFSkate NFC relay](https://www.threatfabric.com/blogs/ghost-tap-new
 - Detect installation/launch of an external NFC-relay app triggered by another app.
 - For banking: enforce out-of-band confirmations, biometrics-binding, and transaction-limits resistant to on-device automation.
 
+### Droppers bypassing Android 13 Restricted Settings (SecuriDropper/Zombinder)
+Android 13 introduced “Restricted Settings” to block sideloaded apps from directly requesting high‑risk capabilities like Accessibility Services and Notification Listener. Modern droppers bypass this by installing the payload via the session‑based Package Installer API, mimicking marketplace installs so the OS does not treat the payload as a classic sideloaded app.
+
+Key traits to look for
+- First‑stage APK presents a benign facade and a “Reinstall/Update” button that triggers a session‑based install of an embedded or downloaded payload.
+- Requests storage and install permissions (WRITE/READ_EXTERNAL_STORAGE, REQUEST_INSTALL_PACKAGES) and then launches the payload, immediately shepherding the user to enable Accessibility.
+- Zombinder “binds” a dropper into a legitimate app so the app works but also silently delivers the malware; variants also ship a pure dropper builder.
+
+Static/dynamic triage
+- Strings/imports for PackageInstaller.Session/commit and asset payloads (e.g., assets/app.apk).
+- UI text like “Reinstall” followed by requests to enable Accessibility despite Restricted Settings.
+- Network fetch of secondary APKs hosted on CDNs/social platforms, then session‑based install.
+
+Defence ideas
+- EDR/MDM: flag non‑store apps using PackageInstaller.Session APIs; alert on Accessibility enablement following a non‑Play install flow.
+- Block installs from unknown sources; enforce Play Protect; monitor for REQUEST_INSTALL_PACKAGES in non‑enterprise apps.
+
+### Android Accessibility Abuse & Overlay‑Based Remote Control – Datzbro patterns
+Datzbro exemplifies a full device‑takeover flow powered by Accessibility plus remote‑ops UX that works even with poor video or when the victim is blinded.
+
+Remote control primitives
+- Screen streaming: start/stop MediaProjection based cast or recording for operator awareness.
+- Interactive control: dispatch gestures and GLOBAL_ACTION_* to drive any app.
+- Black overlay cloaking: draw a semi‑transparent full‑screen overlay (with optional text) to hide live fraud from the victim while the operator still sees and controls the UI.
+- “Schematic” mode: periodically serialize Accessibility node metadata (class/role, bounds, text/ids) so the operator interacts with a logical UI map instead of a pixel stream, enabling precise clicks even under black overlay or low bandwidth.
+
+Minimal black‑overlay sketch
+```java
+View v = new TextView(getApplicationContext());
+((TextView)v).setText(overlayText); v.setBackgroundColor(0xAA000000); // alpha black
+WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
+  MATCH_PARENT, MATCH_PARENT,
+  WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY,
+  WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+  PixelFormat.TRANSLUCENT);
+((WindowManager)getSystemService(WINDOW_SERVICE)).addView(v, lp);
+```
+
+Finance‑focused Accessibility log filtering
+```java
+static final String[] PKG = {"bank","pay","alipay","wechat","wallet","finance"};
+static final String[] TXT = {"password","密码验证","pin","验证码","code","验证"};
+public void onAccessibilityEvent(AccessibilityEvent e){
+  String p = String.valueOf(e.getPackageName());
+  String t = e.getText()==null? "" : TextUtils.join(" ", e.getText());
+  if (containsAny(p, PKG) && containsAny(t.toLowerCase(Locale.ROOT), TXT)) {
+    // persist sensitive event, trigger capture/stream, raise operator task
+  }
+}
+```
+
+Operator command surface commonly includes: toggle screen stream/schematic mode/overlay; perform gestures; wake/unlock; manage SMS/contacts/apps/files; device info; password‑stealer activities; toggle Accessibility processing; camera/mic control; update C2; retrieve crash logs; search/delete Accessibility logs; photo exfiltration.
+
+Hunting and defence
+- Telemetry bursts of Accessibility events plus frequent gesture dispatches; toggling overlays from a non‑Play app.
+- TYPE_ACCESSIBILITY_OVERLAY windows created by untrusted apps; MediaProjection prompts followed by steady frame uploads.
+- Banking/crypto text/package keyword logging in Accessibility services (incl. Chinese strings) and credential prompts for Alipay/WeChat or device PIN.
+
 ## References
 
 - [The Dark Side of Romance: SarangTrap Extortion Campaign](https://zimperium.com/blog/the-dark-side-of-romance-sarangtrap-extortion-campaign)
@@ -440,5 +498,8 @@ Background: [NFSkate NFC relay](https://www.threatfabric.com/blogs/ghost-tap-new
 - [Banker Trojan Targeting Indonesian and Vietnamese Android Users (DomainTools)](https://dti.domaintools.com/banker-trojan-targeting-indonesian-and-vietnamese-android-users/)
 - [DomainTools SecuritySnacks – ID/VN Banker Trojans (IOCs)](https://github.com/DomainTools/SecuritySnacks/blob/main/2025/BankerTrojan-ID-VN)
 - [Socket.IO](https://socket.io)
+- [Datzbro: RAT Hiding Behind Senior Travel Scams](https://www.threatfabric.com/blogs/datzbro-rat-hiding-behind-senior-travel-scams)
+- [Bypassing Android 13 Restrictions with SecuriDropper](https://www.threatfabric.com/blogs/droppers-bypassing-android-13-restrictions)
+- [Zombinder: new obfuscation service used by Ermac, now distributed next to desktop stealers](https://www.threatfabric.com/blogs/zombinder-ermac-and-desktop-stealers)
 
 {{#include ../../banners/hacktricks-training.md}}
