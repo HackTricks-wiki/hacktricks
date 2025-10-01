@@ -2,13 +2,13 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Mutation testing "tests your tests" poprzez systematyczne wprowadzanie małych zmian (mutantów) w Twoim kodzie Solidity i ponowne uruchamianie zestawu testów. Jeśli test zawiedzie, mutant zostaje zabity. Jeśli testy nadal przejdą, mutant przetrwa, ujawniając ślepą plamę w Twoim zestawie testów, której pokrycie linii/gałęzi nie wykryje.
+Mutation testing "tests your tests" przez systematyczne wprowadzanie małych zmian (mutantów) w kodzie Solidity i ponowne uruchamianie zestawu testów. Jeśli test się nie powiedzie, mutant zostaje zabity. Jeśli testy nadal przejdą, mutant przetrwa, ujawniając ślepy punkt w Twoim zestawie testów, którego pokrycie linii/gałęzi nie wykryje.
 
-Key idea: Pokrycie pokazuje, że kod został wykonany; testowanie mutacyjne pokazuje, czy zachowanie zostało faktycznie zweryfikowane.
+Key idea: Coverage shows code was executed; mutation testing shows whether behavior is actually asserted.
 
 ## Dlaczego pokrycie może wprowadzać w błąd
 
-Rozważ to proste sprawdzenie progu:
+Rozważ ten prosty warunek progowy:
 ```solidity
 function verifyMinimumDeposit(uint256 deposit) public returns (bool) {
 if (deposit >= 1 ether) {
@@ -18,96 +18,96 @@ return false;
 }
 }
 ```
-Testy jednostkowe, które sprawdzają tylko wartość poniżej i wartość powyżej progu, mogą osiągnąć 100% pokrycia linii/gałęzi, jednocześnie nie asercjonując granicy równości (==). Refaktoryzacja do `deposit >= 2 ether` nadal przejdzie takie testy, cicho łamiąc logikę protokołu.
+Testy jednostkowe, które sprawdzają tylko wartość poniżej i wartość powyżej progu, mogą osiągnąć 100% pokrycia linii/gałęzi, jednocześnie nie asercjonując granicy równości (==). Refaktoryzacja do `deposit >= 2 ether` nadal zaliczyłaby takie testy, cicho łamiąc logikę protokołu.
 
-Mutation testing ujawnia tę lukę przez mutowanie warunku i weryfikowanie, że testy nie przechodzą.
+Mutation testing ujawnia tę lukę przez zmodyfikowanie warunku i weryfikację, że Twoje testy nie przechodzą.
 
-## Typowe operatory mutacji w Solidity
+## Common Solidity mutation operators
 
-Silnik mutacji Slither stosuje wiele drobnych edycji zmieniających semantykę, takich jak:
+Slither’s mutation engine applies many small, semantics-changing edits, such as:
 - Zamiana operatorów: `+` ↔ `-`, `*` ↔ `/`, itd.
-- Zamiana przypisania: `+=` → `=`, `-=` → `=`
-- Zamiana stałych: wartość niezerowa → `0`, `true` ↔ `false`
+- Zamiana przypisań: `+=` → `=`, `-=` → `=`
+- Zamiana stałych: wartość różna od zera → `0`, `true` ↔ `false`
 - Negacja/zamiana warunku wewnątrz `if`/pętli
 - Zakomentowanie całych linii (CR: Comment Replacement)
-- Zastąpienie linii wywołaniem `revert()`
-- Zamiana typów danych: np. `int128` → `int64`
+- Zamiana linii na `revert()`
+- Zamiany typów danych: np. `int128` → `int64`
 
-Cel: Wyeliminować 100% wygenerowanych mutantów lub uzasadnić przeżycie poszczególnych mutantów jasnym wyjaśnieniem.
+Cel: Zabić 100% wygenerowanych mutantów, albo uzasadnić przeżywających jasnym rozumowaniem.
 
-## Uruchamianie mutation testing za pomocą slither-mutate
+## Running mutation testing with slither-mutate
 
-Wymagania: Slither v0.10.2+.
+Requirements: Slither v0.10.2+.
 
 - Wyświetl opcje i mutatory:
 ```bash
 slither-mutate --help
 slither-mutate --list-mutators
 ```
-- Przykład Foundry (zapisz wyniki i zachowaj pełny log):
+- Foundry — przykład (przechwyć wyniki i zachowaj pełny log):
 ```bash
 slither-mutate ./src/contracts --test-cmd="forge test" &> >(tee mutation.results)
 ```
-- Jeśli nie używasz Foundry, zastąp `--test-cmd` sposobem uruchamiania testów (np. `npx hardhat test`, `npm test`).
+- Jeśli nie używasz Foundry, zamień `--test-cmd` na sposób uruchamiania testów (np. `npx hardhat test`, `npm test`).
 
-Artyfakty i raporty są domyślnie zapisywane w `./mutation_campaign`. Mutanty, które nie zostały wykryte (przetrwałe), są tam kopiowane do inspekcji.
+Artefakty i raporty są domyślnie zapisywane w `./mutation_campaign`. Nieuchwycone (przetrwałe) mutanty są tam kopiowane do inspekcji.
 
-### Zrozumienie wyników
+### Understanding the output
 
 Wiersze raportu wyglądają tak:
 ```text
 INFO:Slither-Mutate:Mutating contract ContractName
 INFO:Slither-Mutate:[CR] Line 123: 'original line' ==> '//original line' --> UNCAUGHT
 ```
-- The tag in brackets is the mutator alias (e.g., `CR` = Comment Replacement).
-- `UNCAUGHT` means tests passed under the mutated behavior → missing assertion.
+- Tag w nawiasach to alias mutatora (np. `CR` = Comment Replacement).
+- `UNCAUGHT` oznacza, że testy przeszły przy zmienionym zachowaniu → brak asercji.
 
-## Reducing runtime: prioritize impactful mutants
+## Redukcja czasu działania: priorytetyzuj mutacje o największym wpływie
 
-Mutation campaigns can take hours or days. Tips to reduce cost:
-- Scope: Start with critical contracts/directories only, then expand.
-- Prioritize mutators: If a high-priority mutant on a line survives (e.g., entire line commented), you can skip lower-priority variants for that line.
-- Parallelize tests if your runner allows it; cache dependencies/builds.
-- Fail-fast: stop early when a change clearly demonstrates an assertion gap.
+Kampanie mutacyjne mogą trwać godziny lub dni. Wskazówki, jak zmniejszyć koszty:
+- Scope: Zacznij tylko od krytycznych kontraktów/katalogów, potem rozszerz.
+- Priorytetyzuj mutatory: jeśli mutacja o wysokim priorytecie na danej linii przetrwa (np. cała linia skomentowana), możesz pominąć warianty o niższym priorytecie dla tej linii.
+- Równoległe uruchamianie testów, jeśli twój runner na to pozwala; cache'uj zależności/kompilacje.
+- Fail-fast: zatrzymaj wcześnie, gdy zmiana wyraźnie pokazuje lukę w asercjach.
 
-## Triage workflow for surviving mutants
+## Procedura triage dla przetrwałych mutantów
 
-1) Inspect the mutated line and behavior.
-- Reproduce locally by applying the mutated line and running a focused test.
+1) Zbadaj zmodyfikowaną linię i zachowanie.
+- Odtwórz lokalnie, wprowadzając zmienioną linię i uruchamiając ukierunkowany test.
 
-2) Strengthen tests to assert state, not only return values.
-- Add equality-boundary checks (e.g., test threshold `==`).
-- Assert post-conditions: balances, total supply, authorization effects, and emitted events.
+2) Wzmocnij testy tak, aby asercjonowały stan, nie tylko wartości zwracane.
+- Dodaj testy graniczne równości (np. sprawdzenie progu `==`).
+- Asercjonuj warunki post-funkcyjne: salda, całkowita podaż, efekty autoryzacji oraz emitowane zdarzenia.
 
-3) Replace overly permissive mocks with realistic behavior.
-- Ensure mocks enforce transfers, failure paths, and event emissions that occur on-chain.
+3) Zastąp zbyt pobłażliwe mocki realistycznym zachowaniem.
+- Upewnij się, że mocki wymuszają transfery, ścieżki błędów oraz emisję zdarzeń, które występują on-chain.
 
-4) Add invariants for fuzz tests.
-- E.g., conservation of value, non-negative balances, authorization invariants, monotonic supply where applicable.
+4) Dodaj inwarianty do fuzz testów.
+- Np. zachowanie wartości, salda nieujemne, inwarianty autoryzacji, monotoniczna podaż tam, gdzie ma zastosowanie.
 
-5) Re-run slither-mutate until survivors are killed or explicitly justified.
+5) Uruchom ponownie slither-mutate, aż przetrwałe mutanty zostaną wyeliminowane lub wyraźnie uzasadnione.
 
-## Case study: revealing missing state assertions (Arkis protocol)
+## Studium przypadku: ujawnienie brakujących asercji stanu (Arkis protocol)
 
-A mutation campaign during an audit of the Arkis DeFi protocol surfaced survivors like:
+Kampania mutacyjna podczas audytu Arkis DeFi protocol ujawniła przetrwałe mutanty takie jak:
 ```text
 INFO:Slither-Mutate:[CR] Line 33: 'cmdsToExecute.last().value = _cmd.value' ==> '//cmdsToExecute.last().value = _cmd.value' --> UNCAUGHT
 ```
-Zakomentowanie przypisania nie zepsuło testów, co dowodzi braku asercji stanu końcowego. Przyczyna: kod ufał kontrolowanej przez użytkownika wartości `_cmd.value` zamiast weryfikować rzeczywiste transfery tokenów. Atakujący mógłby wprowadzić niespójność między oczekiwanymi a faktycznymi transferami i wyprowadzić środki. Skutek: ryzyko wysokiej wagi dla wypłacalności protokołu.
+Zakomentowanie przypisania nie złamało testów, co dowodzi braku asercji stanu po wykonaniu. Przyczyna źródłowa: kod ufał kontrolowanej przez użytkownika `_cmd.value` zamiast weryfikować rzeczywiste transfery tokenów. Atakujący mógłby wprowadzić rozbieżność między oczekiwanymi a rzeczywistymi transferami, aby wypompować środki. Skutek: wysokie ryzyko zagrażające wypłacalności protokołu.
 
-Wskazówka: Traktuj przetrwałe mutanty, które wpływają na transfery wartości, księgowość lub kontrolę dostępu, jako wysokie ryzyko, dopóki nie zostaną wyeliminowane.
+Guidance: Traktuj przetrwałe mutacje, które wpływają na transfery wartości, rozliczenia lub kontrolę dostępu, jako wysokiego ryzyka, dopóki nie zostaną usunięte.
 
-## Practical checklist
+## Praktyczna lista kontrolna
 
-- Przeprowadź ukierunkowaną kampanię:
+- Uruchom ukierunkowaną kampanię:
 - `slither-mutate ./src/contracts --test-cmd="forge test"`
-- Przeprowadź triage przetrwałych mutantów i napisz testy/inwarianty, które zawiodłyby przy zmienionym zachowaniu.
-- Asercje sald, podaży, autoryzacji i zdarzeń.
-- Dodaj testy graniczne (`==`, przepełnienia/underflow, adres zero, ilość zero, puste tablice).
-- Zastąp nierealistyczne mocki; symuluj tryby awarii.
-- Iteruj, aż wszystkie mutanty zostaną wyeliminowane lub udokumentowane komentarzami i uzasadnieniem.
+- Przejrzyj przetrwałe mutacje i napisz testy/inwarianty, które zawiodłyby przy zmienionym zachowaniu.
+- Sprawdź salda, podaż, autoryzacje i zdarzenia.
+- Dodaj testy brzegowe (`==`, overflows/underflows, zero-address, zero-amount, empty arrays).
+- Zamień nierealistyczne mocki; symuluj scenariusze awarii.
+- Iteruj, aż wszystkie mutanty zostaną zabite lub uzasadnione komentarzami i racjonalizacją.
 
-## References
+## Odniesienia
 
 - [Use mutation testing to find the bugs your tests don't catch (Trail of Bits)](https://blog.trailofbits.com/2025/09/18/use-mutation-testing-to-find-the-bugs-your-tests-dont-catch/)
 - [Arkis DeFi Prime Brokerage Security Review (Appendix C)](https://github.com/trailofbits/publications/blob/master/reviews/2024-12-arkis-defi-prime-brokerage-securityreview.pdf)
