@@ -1,8 +1,8 @@
-# विशिष्ट सॉफ़्टवेयर/फ़ाइल प्रकार युक्तियाँ
+# विशिष्ट सॉफ़्टवेयर/फ़ाइल प्रकार ट्रिक्स
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-यहाँ आप विशिष्ट फ़ाइल-प्रकार और/या सॉफ़्टवेयर के लिए रोचक ट्रिक्स पा सकते हैं:
+यहाँ आप विशिष्ट फ़ाइल-प्रकार और/या सॉफ़्टवेयर के लिए दिलचस्प ट्रिक्स पा सकते हैं:
 
 
 {{#ref}}
@@ -52,6 +52,11 @@ video-and-audio-file-analysis.md
 
 {{#ref}}
 zips-tricks.md
+{{#endref}}
+
+
+{{#ref}}
+mach-o-entitlements-and-ipsw-indexing.md
 {{#endref}}
 
 {{#include ../../../banners/hacktricks-training.md}}
