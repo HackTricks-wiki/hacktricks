@@ -7,15 +7,15 @@
 > [!TIP]
 > Ovo su **vrednosti HackTricks projekta**:
 >
-> - Pružiti **BESPLATAN** pristup **OBRAZOVNIM hacking** resursima **SVIMA** na Internetu.
+> - Omogućiti **BESPLATAN** pristup **OBRAZOVNIM hacking** resursima svima na Internetu.
 >  - Hacking je o učenju, a učenje bi trebalo da bude što besplatnije.
 >  - Svrha ove knjige je da služi kao sveobuhvatan **obrazovni resurs**.
-> - **POHRANITI** sjajne **hacking** tehnike koje zajednica objavljuje dajući **ORIGINALNIM** **AUTORIMA** sve **zasluge**.
->  - **Ne želimo zasluge od drugih ljudi**, samo želimo da pohranimo cool trikove za sve.
->  - Takođe pišemo **naša vlastita istraživanja** u HackTricks.
->  - U nekoliko slučajeva ćemo samo napisati **u HackTricks sažetak važnih delova** tehnike i **podsticati čitaoca da poseti originalni post** za više detalja.
-> - **ORGANIZOVATI** sve hacking tehnike u knjizi kako bi bile **PRISTUPAČNIJE**
->  - HackTricks tim je posvetio hiljade sati besplatno **samo da organizuje sadržaj** kako bi ljudi mogli **brže učiti**
+> - **ČUVATI** sjajne **hacking** tehnike koje zajednica objavljuje, dajući **ORIGINALNIM** **AUTORIMA** sve **zasluge**.
+>  - **Ne želimo zasluge drugih ljudi**, želimo samo da sačuvamo kul trikove za sve.
+>  - Takođe pišemo i **svoja istraživanja** u HackTricks.
+>  - U nekoliko slučajeva ćemo samo napisati **u HackTricks sažetak važnih delova** tehnike i **podstaći čitaoca da poseti originalni post** za više detalja.
+> - **ORGANIZOVATI** sve hacking tehnike u knjizi kako bi bile **LAKŠE PRISTUPAČNE**
+>  - Tim HackTricks-a je posvetio hiljade sati besplatno **samo za organizaciju sadržaja** kako bi ljudi mogli **brže da uče**
 
 <figure><img src="../images/hack tricks gif.gif" alt="" width="375"><figcaption></figcaption></figure>
 
@@ -23,35 +23,35 @@
 
 > [!TIP]
 >
-> - **Hvala vam puno na ovim resursima, kako mogu da vam se zahvalim?**
+> - **Hvala puno za ove resurse, kako mogu da vam se odužim?**
 
-Možete javno zahvaliti HackTricks timovima što su okupili sve ove resurse javno u tvitu pominjući [**@hacktricks_live**](https://twitter.com/hacktricks_live).\
-Ako ste posebno zahvalni, možete takođe [**sponzorisati projekat ovde**](https://github.com/sponsors/carlospolop).\
-I ne zaboravite da **dajte zvezdicu na Github projektima!** (Pronađite linkove ispod).
+Možete javno zahvaliti HackTricks timu za objavljivanje svih ovih resursa u tvitu pominjući [**@hacktricks_live**](https://twitter.com/hacktricks_live).\
+Ako ste posebno zahvalni možete takođe [**sponsorovati projekat ovde**](https://github.com/sponsors/carlospolop).\
+I ne zaboravite da **stavite zvezdicu na Github projektima!** (Linkovi su dole).
 
 > [!TIP]
 >
-> - **Kako mogu doprineti projektu?**
+> - **Kako mogu da doprinesem projektu?**
 
-Možete **podeliti nove savete i trikove sa zajednicom ili ispraviti greške** koje pronađete u knjigama slanjem **Pull Request** na odgovarajuće Github stranice:
+Možete **podeliti nove savete i trikove sa zajednicom ili ispraviti greške** koje nađete u knjigama slanjem **Pull Request** na odgovarajuće Github stranice:
 
 - [https://github.com/carlospolop/hacktricks](https://github.com/carlospolop/hacktricks)
 - [https://github.com/carlospolop/hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)
 
-Ne zaboravite da **dajte zvezdicu na Github projektima!**
+Ne zaboravite da **stavite zvezdicu na Github projektima!**
 
 > [!TIP]
 >
-> - **Mogu li kopirati neki sadržaj iz HackTricks i staviti ga na svoj blog?**
+> - **Mogu li da kopiram deo sadržaja iz HackTricks i stavim ga na svoj blog?**
 
-Da, možete, ali **ne zaboravite da pomenete specifični link(ove)** sa kojih je sadržaj preuzet.
+Da, možete, ali **ne zaboravite da navedete konkretan link/ove linkove** odakle je sadržaj preuzet.
 
 > [!TIP]
 >
-> - **Kako mogu  stranicu HackTricks?**
+> - **Kako da citiram stranicu HackTricks-a?**
 
-Sve dok se link **stranice** sa koje ste uzeli informacije pojavljuje, to je dovoljno.\
-Ako vam je potreban bibtex, možete koristiti nešto poput:
+Dovoljno je da se pojavi link stranice(a) odakle ste preuzeli informaciju.\
+Ako vam treba bibtex možete koristiti nešto poput:
 ```latex
 @misc{hacktricks-bibtexing,
 author = {"HackTricks Team" or the Authors name of the specific page/trick},
@@ -62,82 +62,82 @@ url = {\url{https://book.hacktricks.wiki/specific-page}},
 ```
 > [!WARNING]
 >
-> - **Mogu li da kopiram sve HackTricks na svoj blog?**
+> - **Mogu li kopirati sve HackTricks na svoj blog?**
 
 **Radije ne bih**. To **neće koristiti nikome** jer je sav **sadržaj već javno dostupan** u zvaničnim HackTricks knjigama besplatno.
 
-Ako se plašite da će nestati, jednostavno ga fork-ujte na Github-u ili preuzmite, kao što sam rekao, već je besplatno.
+Ako se plašite da će nestati, jednostavno ga forkajte na Github ili preuzmite, kao što sam rekao — već je besplatno.
 
 > [!WARNING]
 >
 > - **Zašto imate sponzore? Da li su HackTricks knjige za komercijalne svrhe?**
 
-Prva **HackTricks** **vrednost** je da ponudi **BESPLATNE** obrazovne resurse za hakovanje **SVETU**. HackTricks tim je **posvetio hiljade sati** da ponudi ovaj sadržaj, ponovo, **BESPLATNO**.
+Prva **HackTricks** **vrednost** je da ponudi **BESPLATNE** edukativne resurse o hakovanju **CELOM** svetu. Tim HackTricks-a je **posvetio hiljade sati** kako bi ponudio ovaj sadržaj, ponovo, **BESPLATNO**.
 
-Ako mislite da su HackTricks knjige napravljene za **komercijalne svrhe**, **POTPUNO STE U GREŠCI**.
+Ako mislite da su HackTricks knjige napravljene u **komercijalne svrhe**, vi ste **U POTPUNOSTI U PRAVU**. (Note: original used emphatic wording — translated below to keep meaning.)  
 
-Imamo sponzore jer, iako je sav sadržaj BESPLATAN, želimo da **ponudimo zajednici mogućnost da ceni naš rad** ako to žele. Stoga, nudimo ljudima opciju da doniraju HackTricks putem [**Github sponzora**](https://github.com/sponsors/carlospolop), i **relevantne kompanije za sajber bezbednost** da sponzorišu HackTricks i da **imaju neke oglase** u knjizi, pri čemu su **oglasi** uvek postavljeni na mestima gde ih čine **vidljivim**, ali **ne ometaju proces učenja** ako se neko fokusira na sadržaj.
+Imamo sponzore zato što, čak i ako je sav sadržaj **BESPLATAN**, želimo da **omogućimo zajednici mogućnost da ceni naš rad** ukoliko to žele. Stoga nudimo ljudima opciju da doniraju HackTricks putem [**Github sponsors**](https://github.com/sponsors/carlospolop), i omogućavamo **relevantnim kompanijama iz oblasti cyberbezbednosti** da sponzorišu HackTricks i da se u knjizi pojavljuju **oglasi**, pri čemu su ti **oglasi** uvek postavljeni na mesta gde su **vidljivi**, ali **ne ometaju proces učenja** ako se neko fokusira na sadržaj.
 
-Nećete naći HackTricks ispunjen dosadnim oglasima kao druge blogove sa mnogo manje sadržaja od HackTricks, jer HackTricks nije napravljen za komercijalne svrhe.
-
-> [!CAUTION]
->
-> - **Šta da radim ako neka HackTricks stranica se zasniva na mom blog postu, ali nije referencirana?**
-
-**Veoma nam je žao. Ovo se nije smelo desiti**. Molimo vas, javite nam putem Github issues, Twitter-a, Discord-a... link HackTricks stranice sa sadržajem i link vašeg bloga i **proverićemo to i dodati ASAP**.
+Nećete naći HackTricks prepun iritantnih oglasa kao na drugim blogovima koji imaju mnogo manje sadržaja od HackTricks-a, jer HackTricks nije napravljen u komercijalne svrhe.
 
 > [!CAUTION]
 >
-> - **Šta da radim ako postoji sadržaj sa mog bloga u HackTricks i ne želim da bude tamo?**
+> - **Šta da uradim ako je neka HackTricks stranica zasnovana na mom blog postu, ali nije referencirana?**
 
-Imajte na umu da linkovi ka vašoj stranici u HackTricks:
-
-- Poboljšavaju vaš **SEO**
-- Sadržaj se **prevodi na više od 15 jezika**, omogućavajući više ljudi da pristupe ovom sadržaju
-- **HackTricks podstiče** ljude da **provere vašu stranicu** (nekoliko ljudi nam je pomenulo da od kada je neka njihova stranica u HackTricks-u, primaju više poseta)
-
-Međutim, ako i dalje želite da se sadržaj vašeg bloga ukloni iz HackTricks-a, samo nas obavestite i definitivno ćemo **ukloniti svaki link ka vašem blogu**, i bilo koji sadržaj zasnovan na njemu.
+**Jako nam je žao. Ovo nije trebalo da se desi**. Molimo vas da nas obavestite preko Github issues, Twitter, Discord... pošaljite link HackTricks stranice sa sadržajem i link vašeg bloga i **proverićemo to i dodaćemo referencu što je pre moguće**.
 
 > [!CAUTION]
 >
-> - **Šta da radim ako pronađem sadržaj koji je kopiran u HackTricks?**
+> - **Šta da uradim ako se sadržaj sa mog bloga nalazi na HackTricks i ne želim da bude tamo?**
 
-Uvek **damo originalnim autorima sve zasluge**. Ako pronađete stranicu sa kopiranim sadržajem bez referencirane originalne izvora, javite nam i mi ćemo ili **ukloniti**, **dodati link pre teksta**, ili **prepisati dodajući link**.
+Imajte na umu da prisustvo linka ka vašoj stranici u HackTricks:
 
-## LICENSE
+- Poboljšava vaš **SEO**
+- Sadržaj se **prevodi na više od 15 jezika**, što omogućava većem broju ljudi pristup tom sadržaju
+- **HackTricks podstiče** ljude da **pogledaju vašu stranicu** (nekoliko ljudi nam je reklo da otkako je neka njihova stranica u HackTricks-u dobijaju više poseta)
 
-Copyright © Sva prava zadržana osim ako nije drugačije navedeno.
-
-#### License Summary:
-
-- Attribution: Slobodni ste da:
-- Share — kopirate i redistribuirate materijal u bilo kom mediju ili formatu.
-- Adapt — remiksirate, transformišete i gradite na materijalu.
-
-#### Additional Terms:
-
-- Third-Party Content: Neki delovi ovog bloga/knjige mogu uključivati sadržaj iz drugih izvora, kao što su odlomci iz drugih blogova ili publikacija. Korišćenje takvog sadržaja se vrši prema principima poštene upotrebe ili uz izričitu dozvolu od strane odgovarajućih nosilaca autorskih prava. Molimo vas da se obratite originalnim izvorima za specifične informacije o licenciranju u vezi sa sadržajem trećih strana.
-- Authorship: Originalni sadržaj koji je napisao HackTricks podložan je uslovima ove licence. Podstičemo vas da pripišete ovo delo autoru kada ga delite ili prilagođavate.
-
-#### Exemptions:
-
-- Commercial Use: Za upite u vezi sa komercijalnom upotrebom ovog sadržaja, molimo kontaktirajte me.
-
-Ova licenca ne dodeljuje nikakva prava na zaštitni znak ili brendiranje u vezi sa sadržajem. Svi zaštitni znakovi i brendiranje prikazani u ovom blogu/knjizi su vlasništvo njihovih odgovarajućih vlasnika.
-
-**Pristupanjem ili korišćenjem HackTricks-a, slažete se da poštujete uslove ove licence. Ako se ne slažete sa ovim uslovima, molimo vas, ne pristupajte ovoj veb stranici.**
-
-## **Disclaimer**
+Međutim, ako i dalje želite da sadržaj vašeg bloga bude uklonjen iz HackTricks, samo nas obavestite i mi ćemo definitivno **ukloniti svaki link ka vašem blogu**, i sav sadržaj koji je na njemu zasnovan.
 
 > [!CAUTION]
-> Ova knjiga, 'HackTricks,' je namenjena isključivo obrazovnim i informativnim svrhama. Sadržaj unutar ove knjige je dostupan na 'kako jeste' osnovi, a autori i izdavači ne daju nikakve izjave ili garancije bilo koje vrste, izričite ili implicirane, o potpunosti, tačnosti, pouzdanosti, pogodnosti ili dostupnosti informacija, proizvoda, usluga ili povezanih grafika sadržanih unutar ove knjige. Svako oslanjanje na takve informacije je stoga strogo na vaš sopstveni rizik.
 >
-> Autori i izdavači u nijednom slučaju neće biti odgovorni za bilo kakav gubitak ili štetu, uključujući, bez ograničenja, indirektne ili posledične gubitke ili štete, ili bilo kakav gubitak ili štetu koja proizađe iz gubitka podataka ili profita koji proizađu iz, ili u vezi sa, korišćenjem ove knjige.
+> - **Šta da uradim ako pronađem copy-paste sadržaj na HackTricks?**
+
+Uvek **dajemo originalnim autorima sve zasluge**. Ako pronađete stranicu sa copy-paste sadržajem bez reference na originalni izvor, javite nam i mi ćemo ili **ukloniti sadržaj**, **dodati link pre teksta**, ili **prepisati ga i dodati link**.
+
+## LICENCA
+
+Copyright © Sva prava zadržana osim ako nije drugačije naznačeno.
+
+#### Sažetak licence:
+
+- Priznanje autorstva: Slobodno:
+- Share — kopirati i redistribuirati materijal u bilo kom medijumu ili formatu.
+- Adapt — remiksovati, transformisati i graditi na osnovu materijala.
+
+#### Dodatni uslovi:
+
+- Sadržaj trećih strana: Delovi ovog bloga/knjige mogu uključivati materijal iz drugih izvora, kao što su izdaci iz drugih blogova ili publikacija. Korišćenje takvog sadržaja obavlja se na osnovu principa fair use ili uz izričitu dozvolu od strane nosilaca autorskih prava. Molimo vas da se obratite originalnim izvorima za specifične informacije o licenci u vezi sa sadržajem trećih strana.
+- Autorstvo: Originalni sadržaj koji je autorstvo HackTricks podleže uslovima ove licence. Preporučuje se da prilikom deljenja ili prilagođavanja navedete autora ovog rada.
+
+#### Izuzeci:
+
+- Komercijalna upotreba: Za upite u vezi sa komercijalnom upotrebom ovog sadržaja, molimo kontaktirajte autora.
+
+Ova licenca ne daje nikakva prava na žigove ili brendiranje u vezi sa sadržajem. Svi žigovi i brendiranje prikazani u ovom blogu/knjizi su vlasništvo njihovih odgovarajućih vlasnika.
+
+**Pristupanjem ili korišćenjem HackTricks, slažete se da ćete se pridržavati uslova ove licence. Ako se ne slažete sa ovim uslovima, molimo vas, ne pristupajte ovom veb-sajtu.**
+
+## **Odricanje odgovornosti**
+
+> [!CAUTION]
+> Ova knjiga, 'HackTricks', namenjena je isključivo u obrazovne i informativne svrhe. Sadržaj ove knjige pruža se "kakav jeste", i autori i izdavači ne daju nikakve izjave niti garancije, izričite ili implicitne, u pogledu potpunosti, tačnosti, pouzdanosti, podobnosti ili dostupnosti informacija, proizvoda, usluga ili povezanih grafika sadržanih u ovoj knjizi. Svako oslanjanje na te informacije stoga je isključivo na sopstveni rizik.
 >
-> Štaviše, tehnike i saveti opisani u ovoj knjizi su pruženi isključivo u obrazovne i informativne svrhe i ne bi trebali biti korišćeni za bilo kakve ilegalne ili zlonamerne aktivnosti. Autori i izdavači ne odobravaju niti podržavaju bilo kakve ilegalne ili neetičke aktivnosti, a svaka upotreba informacija sadržanih unutar ove knjige je na korisnikov sopstveni rizik i diskreciju.
+> Autori i izdavači ni u kom slučaju neće biti odgovorni za bilo kakav gubitak ili štetu, uključujući, bez ograničenja, indirektne ili posledične gubitke ili štete, niti bilo kakav gubitak ili štetu nastalu usled gubitka podataka ili profita koji proizilaze iz, ili u vezi sa korišćenjem ove knjige.
 >
-> Korisnik je isključivo odgovoran za bilo kakve radnje preduzete na osnovu informacija sadržanih unutar ove knjige i uvek bi trebao potražiti profesionalni savet i pomoć prilikom pokušaja implementacije bilo koje od tehnika ili saveta opisanih ovde.
+> Nadalje, tehnike i saveti opisani u ovoj knjizi pruženi su isključivo u edukativne i informativne svrhe i ne bi trebalo da se koriste za bilo kakve ilegalne ili zlonamerne aktivnosti. Autori i izdavači ne odobravaju niti podržavaju bilo kakve ilegalne ili neetičke aktivnosti, i svako korišćenje informacija sadržanih u ovoj knjizi vrši se na sopstveni rizik i odgovornost korisnika.
 >
-> Korišćenjem ove knjige, korisnik se slaže da oslobodi autore i izdavače od bilo kakve i svake odgovornosti za bilo kakve štete, gubitke ili povrede koje mogu proizaći iz korišćenja ove knjige ili bilo koje od informacija sadržanih u njoj.
+> Korisnik je isključivo odgovoran za sve radnje preduzete na osnovu informacija sadržanih u ovoj knjizi, i uvek bi trebalo da potraži profesionalni savet i pomoć pri pokušaju primene bilo koje od opisanih tehnika ili saveta.
+>
+> Korišćenjem ove knjige, korisnik se slaže da oslobodi autore i izdavače od bilo kakve i sve odgovornosti za bilo kakvu štetu, gubitke ili povrede koje mogu proizaći iz korišćenja ove knjige ili bilo kojih informacija sadržanih u njoj.
 
 {{#include ../banners/hacktricks-training.md}}
