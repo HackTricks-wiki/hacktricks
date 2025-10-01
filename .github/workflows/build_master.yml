@@ -67,13 +67,27 @@ jobs:
           export GH_TOKEN="$TOKEN"
 
           # Delete the release if it exists
-          if gh release view "$TAG" >/dev/null 2>&1; then
+          echo "Checking if release $TAG exists..."
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             echo "Release $TAG already exists, deleting it..."
-            gh release delete "$TAG" --yes --repo "$GITHUB_REPOSITORY"
+            gh release delete "$TAG" --yes --repo "$GITHUB_REPOSITORY" --cleanup-tag || {
+              echo "Failed to delete release, trying without cleanup-tag..."
+              gh release delete "$TAG" --yes --repo "$GITHUB_REPOSITORY" || {
+                echo "Warning: Could not delete existing release, will try to recreate..."
+              }
+            }
+            sleep 2  # Give GitHub API a moment to process the deletion
+          else
+            echo "Release $TAG does not exist, proceeding with creation..."
           fi
           
-          # Create new release
-          gh release create "$TAG" "$ASSET" --title "$TITLE" --notes "Automated search index build for master" --repo "$GITHUB_REPOSITORY"
+          # Create new release (with force flag to overwrite if deletion failed)
+          gh release create "$TAG" "$ASSET" --title "$TITLE" --notes "Automated search index build for master" --repo "$GITHUB_REPOSITORY" || {
+            echo "Failed to create release, trying with force flag..."
+            gh release delete "$TAG" --yes --repo "$GITHUB_REPOSITORY" --cleanup-tag >/dev/null 2>&1 || true
+            sleep 2
+            gh release create "$TAG" "$ASSET" --title "$TITLE" --notes "Automated search index build for master" --repo "$GITHUB_REPOSITORY"
+          }
 
 
       # Login in AWs
