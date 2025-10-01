@@ -1723,6 +1723,16 @@ Android rooting frameworks commonly hook a syscall to expose privileged kernel f
 android-rooting-frameworks-manager-auth-bypass-syscall-hook.md
 {{#endref}}
 
+## VMware Tools service discovery LPE (CWE-426) via regex-based exec (CVE-2025-41244)
+
+Regex-driven service discovery in VMware Tools/Aria Operations can extract a binary path from process command lines and execute it with -v under a privileged context. Permissive patterns (e.g., using \S) may match attacker-staged listeners in writable locations (e.g., /tmp/httpd), leading to execution as root (CWE-426 Untrusted Search Path).
+
+Learn more and see a generalized pattern applicable to other discovery/monitoring stacks here:
+
+{{#ref}}
+vmware-tools-service-discovery-untrusted-search-path-cve-2025-41244.md
+{{#endref}}
+
 ## Kernel Security Protections
 
 - [https://github.com/a13xp0p0v/kconfig-hardened-check](https://github.com/a13xp0p0v/kconfig-hardened-check)
@@ -1774,4 +1784,7 @@ android-rooting-frameworks-manager-auth-bypass-syscall-hook.md
 - [GNU Bash Manual – BASH_ENV (non-interactive startup file)](https://www.gnu.org/software/bash/manual/bash.html#index-BASH_005fENV)
 - [0xdf – HTB Environment (sudo env_keep BASH_ENV → root)](https://0xdf.gitlab.io/2025/09/06/htb-environment.html)
 
+- [NVISO – You name it, VMware elevates it (CVE-2025-41244)](https://blog.nviso.eu/2025/09/29/you-name-it-vmware-elevates-it-cve-2025-41244/)
+
 {{#include ../../banners/hacktricks-training.md}}
+

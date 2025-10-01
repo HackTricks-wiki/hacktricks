@@ -226,7 +226,7 @@ https://www.lasttowersolutions.com/
 
 ### [K8Studio - The Smarter GUI to Manage Kubernetes.](https://k8studio.io/)
 
-<figure><img src="images/k8studio.png" alt="k8studio logo"><figcaption></figcaption></figure>
+<figure><img src="images/k8studio.jpg" alt="k8studio logo"><figcaption></figcaption></figure>
 
 K8Studio IDE empowers DevOps, DevSecOps, and developers to manage, monitor, and secure Kubernetes clusters efficiently. Leverage our AI-driven insights, advanced security framework, and intuitive CloudMaps GUI to visualize your clusters, understand their state, and act with confidence.
 
@@ -252,4 +252,5 @@ welcome/hacktricks-values-and-faq.md
 ![HackTricks Github Stats](https://repobeats.axiom.co/api/embed/68f8746802bcf1c8462e889e6e9302d4384f164b.svg)
 
 {{#include ./banners/hacktricks-training.md}}
+
 
