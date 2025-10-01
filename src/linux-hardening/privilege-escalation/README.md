@@ -1787,3 +1787,4 @@ vmware-tools-service-discovery-untrusted-search-path-cve-2025-41244.md
 - [NVISO – You name it, VMware elevates it (CVE-2025-41244)](https://blog.nviso.eu/2025/09/29/you-name-it-vmware-elevates-it-cve-2025-41244/)
 
 {{#include ../../banners/hacktricks-training.md}}
+

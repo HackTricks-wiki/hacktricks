@@ -124,3 +124,4 @@ Guidance: Treat survivors that affect value transfers, accounting, or access con
 - [Slither (GitHub)](https://github.com/crytic/slither)
 
 {{#include ../../banners/hacktricks-training.md}}
+

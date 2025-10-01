@@ -106,7 +106,7 @@ jobs:
             fi
           done
 
-          echo "Files to translate:"
+          echo "Files to translate (`wc -l < /tmp/file_paths.txt`):"
           cat /tmp/file_paths.txt
           echo ""
           echo ""
