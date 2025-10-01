@@ -1,8 +1,8 @@
-# Specyficzne sztuczki dla oprogramowania i typów plików
+# Triki dla konkretnych programów i typów plików
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Poniżej znajdziesz interesujące sztuczki dotyczące konkretnych typów plików i/lub oprogramowania:
+Tutaj znajdziesz interesujące triki dla konkretnych typów plików i/lub oprogramowania:
 
 
 {{#ref}}
@@ -52,6 +52,11 @@ video-and-audio-file-analysis.md
 
 {{#ref}}
 zips-tricks.md
+{{#endref}}
+
+
+{{#ref}}
+mach-o-entitlements-and-ipsw-indexing.md
 {{#endref}}
 
 {{#include ../../../banners/hacktricks-training.md}}
