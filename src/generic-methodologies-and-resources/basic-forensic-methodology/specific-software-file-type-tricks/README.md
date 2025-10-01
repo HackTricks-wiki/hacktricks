@@ -2,7 +2,7 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-这里你可以找到针对特定文件类型和/或软件的有趣技巧：
+在这里你可以找到针对特定文件类型和/或软件的有趣技巧：
 
 
 {{#ref}}
@@ -52,6 +52,11 @@ video-and-audio-file-analysis.md
 
 {{#ref}}
 zips-tricks.md
+{{#endref}}
+
+
+{{#ref}}
+mach-o-entitlements-and-ipsw-indexing.md
 {{#endref}}
 
 {{#include ../../../banners/hacktricks-training.md}}

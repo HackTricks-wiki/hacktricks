@@ -1,43 +1,43 @@
-# macOS Universal binaries & Mach-O Format
+# macOS 通用二进制 & Mach-O 格式
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## 基本信息
 
-Mac OS 二进制文件通常被编译为 **universal binaries**。一个 **universal binary** 可以 **在同一个文件中支持多个架构**。
+Mac OS 二进制通常被编译为 **universal binaries**。一个 **universal binary** 可以在同一文件中 **支持多个架构**。
 
-这些二进制文件遵循 **Mach-O 结构**，基本由以下部分组成：
+这些二进制遵循 **Mach-O 结构**，基本由以下部分组成：
 
-- 头部
-- 加载命令
-- 数据
+- Header
+- Load Commands
+- Data
 
 ![https://alexdremov.me/content/images/2022/10/6XLCD.gif](<../../../images/image (470).png>)
 
 ## Fat Header
 
-使用以下命令搜索文件： `mdfind fat.h | grep -i mach-o | grep -E "fat.h$"`
+使用以下命令搜索文件：`mdfind fat.h | grep -i mach-o | grep -E "fat.h$"`
 
 <pre class="language-c"><code class="lang-c"><strong>#define FAT_MAGIC	0xcafebabe
 </strong><strong>#define FAT_CIGAM	0xbebafeca	/* NXSwapLong(FAT_MAGIC) */
 </strong>
 struct fat_header {
-<strong>	uint32_t	magic;		/* FAT_MAGIC 或 FAT_MAGIC_64 */
-</strong><strong>	uint32_t	nfat_arch;	/* 后续结构的数量 */
+<strong>	uint32_t	magic;		/* FAT_MAGIC or FAT_MAGIC_64 */
+</strong><strong>	uint32_t	nfat_arch;	/* number of structs that follow */
 </strong>};
 
 struct fat_arch {
-cpu_type_t	cputype;	/* cpu 说明符 (int) */
-cpu_subtype_t	cpusubtype;	/* 机器说明符 (int) */
-uint32_t	offset;		/* 文件偏移到此目标文件 */
-uint32_t	size;		/* 此目标文件的大小 */
-uint32_t	align;		/* 以 2 的幂为单位的对齐 */
+cpu_type_t	cputype;	/* cpu specifier (int) */
+cpu_subtype_t	cpusubtype;	/* machine specifier (int) */
+uint32_t	offset;		/* file offset to this object file */
+uint32_t	size;		/* size of this object file */
+uint32_t	align;		/* alignment as a power of 2 */
 };
 </code></pre>
 
-头部包含 **magic** 字节，后面是文件 **包含** 的 **archs** 的 **数量** (`nfat_arch`)，每个架构将有一个 `fat_arch` 结构。
+该 header 包含 **magic** 字节，后跟文件包含的 **架构数量** (`nfat_arch`)，每个架构都会有一个 `fat_arch` 结构。
 
-使用以下命令检查：
+检查示例：
 
 <pre class="language-shell-session"><code class="lang-shell-session">% file /bin/ls
 /bin/ls: Mach-O universal binary with 2 architectures: [x86_64:Mach-O 64-bit executable x86_64] [arm64e:Mach-O 64-bit executable arm64e]
@@ -68,11 +68,11 @@ capabilities PTR_AUTH_VERSION USERSPACE 0
 
 <figure><img src="../../../images/image (1094).png" alt=""><figcaption></figcaption></figure>
 
-正如你所想，通常为 2 个架构编译的 universal binary **会使文件大小翻倍**，而为 1 个架构编译的文件则不会。
+正如你可能想到的，通常为 2 个架构编译的 universal binary 的大小会是只为 1 个架构编译的 **两倍**。
 
 ## **Mach-O Header**
 
-头部包含有关文件的基本信息，例如用于识别它为 Mach-O 文件的 magic 字节和有关目标架构的信息。你可以在以下路径找到它： `mdfind loader.h | grep -i mach-o | grep -E "loader.h$"`
+该 header 包含关于文件的基本信息，例如用于识别为 Mach-O 文件的 magic 字节以及目标架构的信息。你可以在以下位置找到它：`mdfind loader.h | grep -i mach-o | grep -E "loader.h$"`
 ```c
 #define	MH_MAGIC	0xfeedface	/* the mach magic number */
 #define MH_CIGAM	0xcefaedfe	/* NXSwapInt(MH_MAGIC) */
@@ -101,17 +101,17 @@ uint32_t	reserved;	/* reserved */
 ```
 ### Mach-O 文件类型
 
-有不同的文件类型，可以在[**源代码中找到定义，例如这里**](https://opensource.apple.com/source/xnu/xnu-2050.18.24/EXTERNAL_HEADERS/mach-o/loader.h)。最重要的类型有：
+存在不同的文件类型，你可以在 [**source code for example here**](https://opensource.apple.com/source/xnu/xnu-2050.18.24/EXTERNAL_HEADERS/mach-o/loader.h) 中找到它们的定义。最重要的有：
 
-- `MH_OBJECT`: 可重定位目标文件（编译的中间产品，尚未成为可执行文件）。
+- `MH_OBJECT`: 可重定位目标文件（编译的中间产物，尚非可执行文件）。
 - `MH_EXECUTE`: 可执行文件。
-- `MH_FVMLIB`: 固定虚拟机库文件。
-- `MH_CORE`: 代码转储
-- `MH_PRELOAD`: 预加载的可执行文件（在 XNU 中不再支持）
-- `MH_DYLIB`: 动态库
-- `MH_DYLINKER`: 动态链接器
-- `MH_BUNDLE`: “插件文件”。使用 gcc 的 -bundle 生成，并由 `NSBundle` 或 `dlopen` 显式加载。
-- `MH_DYSM`: 伴随的 `.dSym` 文件（用于调试的符号文件）。
+- `MH_FVMLIB`: 固定 VM 库文件。
+- `MH_CORE`: 代码转储。
+- `MH_PRELOAD`: 预加载的可执行文件（XNU 不再支持）。
+- `MH_DYLIB`: 动态库。
+- `MH_DYLINKER`: 动态链接器。
+- `MH_BUNDLE`: "插件文件"。使用 gcc 的 `-bundle` 生成，并由 `NSBundle` 或 `dlopen` 显式加载。
+- `MH_DYSM`: 配套的 `.dSym` 文件（包含调试符号）。
 - `MH_KEXT_BUNDLE`: 内核扩展。
 ```bash
 # Checking the mac header of a binary
@@ -120,54 +120,54 @@ Mach header
 magic  cputype cpusubtype  caps    filetype ncmds sizeofcmds      flags
 MH_MAGIC_64    ARM64          E USR00     EXECUTE    19       1728   NOUNDEFS DYLDLINK TWOLEVEL PIE
 ```
-或使用 [Mach-O View](https://sourceforge.net/projects/machoview/)：
+或者使用 [Mach-O View](https://sourceforge.net/projects/machoview/):
 
 <figure><img src="../../../images/image (1133).png" alt=""><figcaption></figcaption></figure>
 
 ## **Mach-O 标志**
 
-源代码还定义了几个用于加载库的标志：
+源代码还定义了若干对加载库有用的标志：
 
-- `MH_NOUNDEFS`：没有未定义的引用（完全链接）
-- `MH_DYLDLINK`：Dyld 链接
-- `MH_PREBOUND`：动态引用预绑定。
-- `MH_SPLIT_SEGS`：文件分割 r/o 和 r/w 段。
-- `MH_WEAK_DEFINES`：二进制文件具有弱定义符号
-- `MH_BINDS_TO_WEAK`：二进制文件使用弱符号
-- `MH_ALLOW_STACK_EXECUTION`：使堆栈可执行
-- `MH_NO_REEXPORTED_DYLIBS`：库没有 LC_REEXPORT 命令
-- `MH_PIE`：位置无关可执行文件
-- `MH_HAS_TLV_DESCRIPTORS`：有一个包含线程局部变量的部分
-- `MH_NO_HEAP_EXECUTION`：堆/数据页面不执行
-- `MH_HAS_OBJC`：二进制文件具有 oBject-C 部分
-- `MH_SIM_SUPPORT`：模拟器支持
-- `MH_DYLIB_IN_CACHE`：用于共享库缓存中的 dylibs/frameworks。
+- `MH_NOUNDEFS`: 没有未定义引用（完全链接）
+- `MH_DYLDLINK`: Dyld 链接
+- `MH_PREBOUND`: 动态引用预绑定
+- `MH_SPLIT_SEGS`: 文件将只读与读写段分离
+- `MH_WEAK_DEFINES`: 二进制包含弱定义符号
+- `MH_BINDS_TO_WEAK`: 二进制使用弱符号
+- `MH_ALLOW_STACK_EXECUTION`: 使栈可执行
+- `MH_NO_REEXPORTED_DYLIBS`: 库不包含 LC_REEXPORT 命令
+- `MH_PIE`: 位置无关可执行（PIE）
+- `MH_HAS_TLV_DESCRIPTORS`: 包含线程局部变量（TLV）段
+- `MH_NO_HEAP_EXECUTION`: 堆/数据页不可执行
+- `MH_HAS_OBJC`: 二进制包含 Objective-C 段
+- `MH_SIM_SUPPORT`: 模拟器支持
+- `MH_DYLIB_IN_CACHE`: 用于位于共享库缓存中的 dylibs/frameworks
 
 ## **Mach-O 加载命令**
 
-**文件在内存中的布局**在这里指定，详细说明了 **符号表的位置**、执行开始时主线程的上下文以及所需的 **共享库**。向动态加载器 **(dyld)** 提供了有关二进制文件加载到内存中的过程的指令。
+这里指定了文件在内存中的布局，说明了符号表的位置、执行开始时主线程的上下文以及所需的共享库。还向动态加载器（dyld）提供了如何将二进制加载到内存的指示。
 
-使用 **load_command** 结构，该结构在提到的 **`loader.h`** 中定义：
+该文件使用在提到的 `loader.h` 中定义的 **load_command** 结构：
 ```objectivec
 struct load_command {
 uint32_t cmd;           /* type of load command */
 uint32_t cmdsize;       /* total size of command in bytes */
 };
 ```
-有大约 **50 种不同类型的加载命令**，系统以不同方式处理它们。最常见的有： `LC_SEGMENT_64`、`LC_LOAD_DYLINKER`、`LC_MAIN`、`LC_LOAD_DYLIB` 和 `LC_CODE_SIGNATURE`。
+有大约 **50 种不同类型的 load commands**，系统会以不同方式处理。最常见的有：`LC_SEGMENT_64`、`LC_LOAD_DYLINKER`、`LC_MAIN`、`LC_LOAD_DYLIB` 和 `LC_CODE_SIGNATURE`。
 
 ### **LC_SEGMENT/LC_SEGMENT_64**
 
 > [!TIP]
-> 基本上，这种类型的加载命令定义了 **如何加载 \_\_TEXT**（可执行代码）**和 \_\_DATA**（进程数据）**段**，根据二进制文件执行时在数据部分中指示的 **偏移量**。
+> 基本上，这种类型的加载命令定义了在二进制被执行时**如何根据 Data 部分中指示的偏移量加载 \_\_TEXT**（可执行代码）**和 \_\_DATA**（进程数据）**段**。
 
-这些命令 **定义了段**，在执行进程时被 **映射** 到 **虚拟内存空间** 中。
+这些命令**定义了段（segments）**，在进程执行时会被**映射（mapped）**到进程的**虚拟内存空间**中。
 
-有 **不同类型** 的段，例如 **\_\_TEXT** 段，它包含程序的可执行代码，以及 **\_\_DATA** 段，它包含进程使用的数据。这些 **段位于 Mach-O 文件的数据部分** 中。
+存在不同类型的段，例如包含程序可执行代码的 **\_\_TEXT** 段，以及包含进程使用数据的 **\_\_DATA** 段。这些**段位于 Mach-O 文件的数据节**中。
 
-**每个段** 可以进一步 **划分** 为多个 **节**。**加载命令结构** 包含关于 **这些节** 在各自段中的 **信息**。
+**每个段**还可以进一步**划分为多个节（sections）**。load command 的结构包含关于该段中**这些节**的信息。
 
-在头部，首先找到 **段头**：
+在头部首先可以找到**段头（segment header）**：
 
 <pre class="language-c"><code class="lang-c">struct segment_command_64 { /* for 64-bit architectures */
 uint32_t	cmd;		/* LC_SEGMENT_64 */
@@ -184,11 +184,11 @@ int32_t		initprot;	/* initial VM protection */
 };
 </code></pre>
 
-段头的示例：
+Example of segment header:
 
 <figure><img src="../../../images/image (1126).png" alt=""><figcaption></figcaption></figure>
 
-该头部定义了 **其后出现的节头的数量**：
+该头部定义了其后出现的**节头数量**：
 ```c
 struct section_64 { /* for 64-bit architectures */
 char		sectname[16];	/* name of this section */
@@ -205,62 +205,62 @@ uint32_t	reserved2;	/* reserved (for count or sizeof) */
 uint32_t	reserved3;	/* reserved */
 };
 ```
-示例 **节标题**：
+关于 **节标题** 的示例：
 
 <figure><img src="../../../images/image (1108).png" alt=""><figcaption></figcaption></figure>
 
-如果你 **添加** **节偏移** (0x37DC) + **架构开始的偏移**，在这种情况下 `0x18000` --> `0x37DC + 0x18000 = 0x1B7DC`
+如果你把 **section 偏移量** (0x37DC) 与 **arch 起始处的偏移量** 相加，在本例中 `0x18000` --> `0x37DC + 0x18000 = 0x1B7DC`
 
 <figure><img src="../../../images/image (701).png" alt=""><figcaption></figcaption></figure>
 
-也可以通过 **命令行** 获取 **头信息**：
+还可以通过 **命令行** 获取 **头部信息**：
 ```bash
 otool -lv /bin/ls
 ```
-常见的由此命令加载的段：
+Common segments loaded by this cmd:
 
-- **`__PAGEZERO`：** 它指示内核**映射** **地址零**，以便**无法读取、写入或执行**。结构中的maxprot和minprot变量设置为零，以指示此页面上**没有读写执行权限**。
-- 此分配对于**缓解NULL指针解引用漏洞**非常重要。这是因为XNU强制实施一个硬页面零，确保内存的第一页（仅第一页）不可访问（在i386中除外）。一个二进制文件可以通过制作一个小的\_\_PAGEZERO（使用`-pagezero_size`）来满足这些要求，以覆盖前4k，并使其余的32位内存在用户模式和内核模式下可访问。
-- **`__TEXT`**：包含**可执行** **代码**，具有**读取**和**执行**权限（不可写）。此段的常见部分：
-- `__text`：编译的二进制代码
-- `__const`：常量数据（只读）
-- `__ [c/u/os_log]string`：C、Unicode或os日志字符串常量
-- `__stubs`和`__stubs_helper`：在动态库加载过程中涉及
-- `__unwind_info`：堆栈展开数据。
-- 请注意，所有这些内容都是签名的，但也被标记为可执行（为不一定需要此权限的部分（如专用字符串部分）创建更多的利用选项）。
-- **`__DATA`**：包含**可读**和**可写**的数据（不可执行）。
+- **`__PAGEZERO`:** 它指示内核 **映射** **地址零**，因此**无法被读取、写入或执行**。结构中的 maxprot 和 minprot 变量被设置为零，以表示该页**没有读写执行权限**。
+- 这种分配对于**缓解 NULL 指针解引用 漏洞**非常重要。因为 XNU 强制实施一个硬性的 page zero，确保内存的第一页（仅第一页）不可访问（i386 除外）。一个二进制可以通过构造一个小的 \_\_PAGEZERO（使用 `-pagezero_size`）以覆盖前 4k，并使剩余的 32 位内存在用户态和内核态都可访问，从而满足这一要求。
+- **`__TEXT`**: 包含具有**读取**和**执行**权限的**可执行****代码**（不可写）。此段的常见节：
+- `__text`: 已编译的二进制代码
+- `__const`: 常量数据（只读）
+- `__[c/u/os_log]string`: C、Unicode 或 os 日志字符串常量
+- `__stubs` and `__stubs_helper`: 在动态库加载过程中参与
+- `__unwind_info`: 栈展开（unwind）数据
+- 注意所有这些内容都已签名且被标记为可执行（这为某些并不一定需要此权限的节（例如专用于字符串的节）提供了更多利用途径）。
+- **`__DATA`**: 包含**可读**且**可写**的数据（不可执行）。
 - `__got:` 全局偏移表
-- `__nl_symbol_ptr`：非惰性（加载时绑定）符号指针
-- `__la_symbol_ptr`：惰性（使用时绑定）符号指针
-- `__const`：应为只读数据（实际上不是）
-- `__cfstring`：CoreFoundation字符串
-- `__data`：全局变量（已初始化）
-- `__bss`：静态变量（未初始化）
-- `__objc_*`（\_\_objc_classlist，\_\_objc_protolist等）：由Objective-C运行时使用的信息
-- **`__DATA_CONST`**：\_\_DATA.\_\_const不保证是常量（写权限），其他指针和GOT也是如此。此部分使用`mprotect`使`__const`、一些初始化程序和GOT表（解析后）**只读**。
-- **`__LINKEDIT`**：包含链接器（dyld）所需的信息，例如符号、字符串和重定位表条目。它是一个通用容器，包含不在`__TEXT`或`__DATA`中的内容，其内容在其他加载命令中描述。
-- dyld信息：重定位、非惰性/惰性/弱绑定操作码和导出信息
-- 函数开始：函数的起始地址表
-- 代码中的数据：\_\_text中的数据岛
-- 符号表：二进制中的符号
-- 间接符号表：指针/存根符号
-- 字符串表
-- 代码签名
-- **`__OBJC`**：包含由Objective-C运行时使用的信息。尽管这些信息也可能在\_\_DATA段中找到，在各种\_\_objc\_\*部分中。
-- **`__RESTRICT`**：一个没有内容的段，只有一个名为**`__restrict`**（也为空）的单一部分，确保在运行二进制文件时，它将忽略DYLD环境变量。
+- `__nl_symbol_ptr`: 非懒（在加载时绑定）符号指针
+- `__la_symbol_ptr`: 懒（按需绑定）符号指针
+- `__const`: 应为只读数据（但实际上并非如此）
+- `__cfstring`: CoreFoundation 字符串
+- `__data`: 已初始化的全局变量
+- `__bss`: 未初始化的静态变量
+- `__objc_*` (\_\_objc_classlist, \_\_objc_protolist, etc): 由 Objective-C 运行时使用的信息
+- **`__DATA_CONST`**: \_\_DATA.\_\_const 并不保证是常量（存在写权限），其他指针和 GOT 也一样。此段使用 `mprotect` 将 `__const`、一些初始化器和 GOT 表（解析后）设置为**只读**。
+- **`__LINKEDIT`**: 包含链路器（dyld）所需的信息，例如符号、字符串和重定位表条目。它是一个通用容器，用于存放既不在 `__TEXT` 也不在 `__DATA` 中的内容，其内容在其它加载命令中有描述。
+- dyld 信息：Rebase、Non-lazy/lazy/weak binding opcodes 和导出信息
+- Functions starts：函数起始地址表
+- Data In Code：\_\_text 中的数据岛
+- SYmbol Table：二进制中的符号
+- Indirect Symbol Table：指针/存根符号
+- String Table：字符串表
+- Code Signature：代码签名
+- **`__OBJC`**: 包含由 Objective-C 运行时使用的信息。尽管这些信息也可能出现在 \_\_DATA 段内的各种 \_\_objc\_\* 节中。
+- **`__RESTRICT`**: 一个没有内容的段，只有一个名为 **`__restrict`**（同样为空）的节，确保在运行二进制时会忽略 DYLD 环境变量。
 
-正如在代码中所看到的，**段也支持标志**（尽管它们并不常用）：
+As it was possible to see in the code, **segments also support flags** (although they aren't used very much):
 
-- `SG_HIGHVM`：仅核心（未使用）
-- `SG_FVMLIB`：未使用
-- `SG_NORELOC`：段没有重定位
-- `SG_PROTECTED_VERSION_1`：加密。例如，Finder用于加密文本`__TEXT`段。
+- `SG_HIGHVM`: 仅限内核（未使用）
+- `SG_FVMLIB`: 未使用
+- `SG_NORELOC`: 段没有重定位
+- `SG_PROTECTED_VERSION_1`: 加密。例如 Finder 使用它来加密 `__TEXT` 段的文本。
 
 ### **`LC_UNIXTHREAD/LC_MAIN`**
 
-**`LC_MAIN`**包含**entryoff属性**中的入口点。在加载时，**dyld**简单地**将**此值添加到（内存中的）**二进制文件基址**，然后**跳转**到此指令以开始执行二进制代码。
+**`LC_MAIN`** 包含入口点于 **entryoff 属性**。在加载时，**dyld** 简单地**将该值添加到**（二进制在内存中的）**基地址**，然后**跳转**到该指令以开始执行二进制的代码。
 
-**`LC_UNIXTHREAD`**包含启动主线程时寄存器必须具有的值。这已经被弃用，但**`dyld`**仍在使用它。可以通过以下方式查看寄存器设置的值：
+**`LC_UNIXTHREAD`** 包含启动主线程时寄存器应具有的值。它已被弃用，但 **`dyld`** 仍在使用它。可以通过下面的方法查看由此设置的寄存器值：
 ```bash
 otool -l /usr/lib/dyld
 [...]
@@ -286,34 +286,39 @@ cpsr 0x00000000
 ```
 ### **`LC_CODE_SIGNATURE`**
 
-包含关于 **Macho-O 文件的代码签名** 的信息。它仅包含一个 **偏移量**，指向 **签名 blob**。这通常位于文件的最末尾。\
-然而，您可以在 [**这篇博客文章**](https://davedelong.com/blog/2018/01/10/reading-your-own_entitlements/) 和这个 [**gists**](https://gist.github.com/carlospolop/ef26f8eb9fafd4bc22e69e1a32b81da4) 中找到一些关于此部分的信息。
+{{#ref}}
+../../../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/mach-o-entitlements-and-ipsw-indexing.md
+{{#endref}}
+
+
+包含有关 Mach-O 文件**代码签名**的信息。它仅包含一个**偏移量（offset）**，指向**签名 blob**。该偏移通常位于文件的末尾。\
+你可以在[**this blog post**](https://davedelong.com/blog/2018/01/10/reading-your-own-entitlements/) 和 [**gists**](https://gist.github.com/carlospolop/ef26f8eb9fafd4bc22e69e1a32b81da4) 中找到关于该段的一些信息。
 
 ### **`LC_ENCRYPTION_INFO[_64]`**
 
-支持二进制加密。然而，当然，如果攻击者设法破坏了进程，他将能够以未加密的方式转储内存。
+支持二进制加密。不过，如果攻击者成功攻陷进程，当然可以将内存以未加密形式 dump 出来。
 
 ### **`LC_LOAD_DYLINKER`**
 
-包含 **动态链接器可执行文件的路径**，该文件将共享库映射到进程地址空间。**值始终设置为 `/usr/lib/dyld`**。重要的是要注意，在 macOS 中，dylib 映射发生在 **用户模式**，而不是内核模式。
+包含将共享库映射到进程地址空间的动态链接器可执行文件的路径。该值**始终设置为 `/usr/lib/dyld`**。需要注意的是，在 macOS 中，dylib 的映射发生在**user mode**，而不是内核态（kernel mode）。
 
 ### **`LC_IDENT`**
 
-过时，但当配置为在崩溃时生成转储时，会创建一个 Mach-O 核心转储，并在 `LC_IDENT` 命令中设置内核版本。
+已废弃，但当配置为在 panic 时生成转储时，会创建 Mach-O core dump，并且内核版本会在 `LC_IDENT` 命令中设置。
 
 ### **`LC_UUID`**
 
-随机 UUID。它对任何直接的事情都很有用，但 XNU 将其与其他进程信息一起缓存。它可以在崩溃报告中使用。
+随机 UUID。本身直接用途有限，但 XNU 会将其与其他进程信息一起缓存，可用于崩溃报告。
 
 ### **`LC_DYLD_ENVIRONMENT`**
 
-允许在进程执行之前向 dyld 指示环境变量。这可能非常危险，因为它可能允许在进程内部执行任意代码，因此此加载命令仅在使用 `#define SUPPORT_LC_DYLD_ENVIRONMENT` 构建的 dyld 中使用，并进一步限制处理仅限于形式为 `DYLD_..._PATH` 的变量，指定加载路径。
+允许在进程执行前向 dyld 指定环境变量。这可能非常危险，因为它可能允许在进程内执行任意代码，因此该 load command 仅在 dyld 使用 `#define SUPPORT_LC_DYLD_ENVIRONMENT` 构建时使用，并且进一步将处理限制为形如 `DYLD_..._PATH` 的变量（用于指定加载路径）。
 
 ### **`LC_LOAD_DYLIB`**
 
-此加载命令描述了一个 **动态** **库** 依赖关系，**指示** **加载器** (dyld) **加载和链接该库**。每个 Mach-O 二进制文件所需的库都有一个 `LC_LOAD_DYLIB` 加载命令。
+该 load command 描述了一个**动态库（dynamic library）**依赖，指示 loader（dyld）去加载并链接该库。对于 Mach-O 二进制所需的每个库，都会有一个 `LC_LOAD_DYLIB` load command。
 
-- 此加载命令是 **`dylib_command`** 类型的结构（其中包含一个描述实际依赖动态库的 struct dylib）：
+- 该 load command 的结构类型为 **`dylib_command`**（其中包含一个 struct dylib，描述实际的依赖动态库）：
 ```objectivec
 struct dylib_command {
 uint32_t        cmd;            /* LC_LOAD_{,WEAK_}DYLIB */
@@ -330,7 +335,7 @@ uint32_t compatibility_version;     /* library's compatibility vers number*/
 ```
 ![](<../../../images/image (486).png>)
 
-您还可以通过命令行获取此信息：
+你也可以通过 cli 使用以下命令获取这些信息：
 ```bash
 otool -L /bin/ls
 /bin/ls:
@@ -338,53 +343,53 @@ otool -L /bin/ls
 /usr/lib/libncurses.5.4.dylib (compatibility version 5.4.0, current version 5.4.0)
 /usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1319.0.0)
 ```
-一些潜在的与恶意软件相关的库包括：
+一些可能与 malware 相关的库有：
 
-- **DiskArbitration**: 监控 USB 驱动器
+- **DiskArbitration**：监控 USB 驱动器
 - **AVFoundation:** 捕获音频和视频
-- **CoreWLAN**: Wifi 扫描。
+- **CoreWLAN**：Wi‑Fi 扫描。
 
-> [!NOTE]
-> Mach-O 二进制文件可以包含一个或 **多个** **构造函数**，这些构造函数将在 **LC_MAIN** 指定的地址 **之前** 被 **执行**。\
-> 任何构造函数的偏移量保存在 **\_\_mod_init_func** 段的 **\_\_DATA_CONST** 部分中。
+> [!TIP]
+> 一个 Mach-O 二进制可以包含一个或多个 **构造函数**，这些函数会在 **LC_MAIN** 指定的地址之前被 **执行**。\
+> 任何构造函数的偏移量保存在 **__mod_init_func** section 的 **__DATA_CONST** segment。
 
 ## **Mach-O 数据**
 
-文件的核心是数据区域，由加载命令区域中定义的多个段组成。**每个段中可以包含多种数据部分**，每个部分 **保存特定类型的代码或数据**。
+在文件的核心是数据区域，该区域由 load-commands 区域定义的多个段组成。**每个段中可以包含多种数据节**，每个节都**包含特定类型的代码或数据**。
 
 > [!TIP]
-> 数据基本上是包含所有由加载命令 **LC_SEGMENTS_64** 加载的 **信息** 的部分。
+> 数据基本上是由 load commands **LC_SEGMENTS_64** 加载的包含所有**信息**的部分
 
 ![https://www.oreilly.com/api/v2/epubs/9781785883378/files/graphics/B05055_02_38.jpg](<../../../images/image (507) (3).png>)
 
 这包括：
 
-- **函数表:** 包含有关程序函数的信息。
-- **符号表**: 包含有关二进制文件使用的外部函数的信息
-- 还可能包含内部函数、变量名称等。
+- **函数表：** 保存关于程序函数的信息。
+- **符号表：** 包含二进制使用的外部函数的信息
+- 它还可以包含内部函数、变量名等信息。
 
-要检查它，您可以使用 [**Mach-O View**](https://sourceforge.net/projects/machoview/) 工具：
+要检查它，你可以使用 [**Mach-O View**](https://sourceforge.net/projects/machoview/) 工具：
 
 <figure><img src="../../../images/image (1120).png" alt=""><figcaption></figcaption></figure>
 
-或者从命令行：
+或在命令行中：
 ```bash
 size -m /bin/ls
 ```
-## Objetive-C 常见部分
+## Objetive-C 常见节
 
 在 `__TEXT` 段 (r-x):
 
-- `__objc_classname`: 类名 (字符串)
-- `__objc_methname`: 方法名 (字符串)
-- `__objc_methtype`: 方法类型 (字符串)
+- `__objc_classname`: 类名（字符串）
+- `__objc_methname`: 方法名（字符串）
+- `__objc_methtype`: 方法类型（字符串）
 
 在 `__DATA` 段 (rw-):
 
-- `__objc_classlist`: 所有 Objective-C 类的指针
-- `__objc_nlclslist`: 非懒加载 Objective-C 类的指针
-- `__objc_catlist`: 类别的指针
-- `__objc_nlcatlist`: 非懒加载类别的指针
+- `__objc_classlist`: 指向所有 Objetive-C 类的指针
+- `__objc_nlclslist`: 指向非延迟 Objective-C 类的指针
+- `__objc_catlist`: 指向类别的指针
+- `__objc_nlcatlist`: 指向非延迟类别的指针
 - `__objc_protolist`: 协议列表
 - `__objc_const`: 常量数据
 - `__objc_imageinfo`, `__objc_selrefs`, `objc__protorefs`...
