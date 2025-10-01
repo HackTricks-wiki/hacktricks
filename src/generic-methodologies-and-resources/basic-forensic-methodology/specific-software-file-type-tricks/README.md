@@ -1,8 +1,8 @@
-# Συγκεκριμένα κόλπα για λογισμικό/τύπους αρχείων
+# Συγκεκριμένα Κόλπα για Λογισμικό/Τύπους Αρχείων
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Εδώ θα βρείτε ενδιαφέροντα κόλπα για συγκεκριμένους τύπους αρχείων και/ή λογισμικό:
+Εδώ μπορείτε να βρείτε ενδιαφέροντα κόλπα για συγκεκριμένους τύπους αρχείων και/ή λογισμικό:
 
 
 {{#ref}}
@@ -52,6 +52,11 @@ video-and-audio-file-analysis.md
 
 {{#ref}}
 zips-tricks.md
+{{#endref}}
+
+
+{{#ref}}
+mach-o-entitlements-and-ipsw-indexing.md
 {{#endref}}
 
 {{#include ../../../banners/hacktricks-training.md}}
