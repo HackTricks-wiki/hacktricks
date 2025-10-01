@@ -1,57 +1,57 @@
-# HackTricks Values & FAQ
+# HackTricks Αξίες & Συχνές Ερωτήσεις
 
 {{#include ../banners/hacktricks-training.md}}
 
-## HackTricks Values
+## Αξίες HackTricks
 
 > [!TIP]
-> Αυτές είναι οι **αξίες του HackTricks Project**:
+> Αυτές είναι οι **αξίες του έργου HackTricks**:
 >
-> - Δώστε **ΔΩΡΕΑΝ** πρόσβαση σε **ΕΚΠΑΙΔΕΥΤΙΚΟΥΣ πόρους hacking** σε **ΟΛΟΥΣ** στο Διαδίκτυο.
->  - Το hacking αφορά τη μάθηση, και η μάθηση θα πρέπει να είναι όσο το δυνατόν πιο δωρεάν.
->  - Ο σκοπός αυτού του βιβλίου είναι να χρησιμεύσει ως μια ολοκληρωμένη **εκπαιδευτική πηγή**.
-> - **ΑΠΟΘΗΚΕΥΣΤΕ** καταπληκτικές **τεχνικές hacking** που δημοσιεύει η κοινότητα δίνοντας στους **ΑΥΘΕΝΤΙΚΟΥΣ** **ΣΥΓΓΡΑΦΕΙΣ** όλα τα **πιστωτικά**.
->  - **Δεν θέλουμε την αναγνώριση από άλλους ανθρώπους**, απλώς θέλουμε να αποθηκεύσουμε ωραία κόλπα για όλους.
->  - Γράφουμε επίσης **τις δικές μας έρευνες** στο HackTricks.
->  - Σε πολλές περιπτώσεις θα γράψουμε απλώς **στο HackTricks μια περίληψη των σημαντικών μερών** της τεχνικής και θα **ενθαρρύνουμε τον αναγνώστη να επισκεφθεί την αρχική ανάρτηση** για περισσότερες λεπτομέρειες.
-> - **ΟΡΓΑΝΩΣΤΕ** όλες τις τεχνικές hacking στο βιβλίο ώστε να είναι **ΠΙΟ ΠΡΟΣΒΑΣΙΜΕΣ**
->  - Η ομάδα του HackTricks έχει αφιερώσει χιλιάδες ώρες δωρεάν **μόνο για να οργανώσει το περιεχόμενο** ώστε οι άνθρωποι να μπορούν να **μαθαίνουν πιο γρήγορα**
+> - Παρέχουμε **ΔΩΡΕΑΝ** πρόσβαση σε **ΕΚΠΑΙΔΕΥΤΙΚΟΥΣ hacking** πόρους σε **ΟΛΟ** το Διαδίκτυο.
+>  - Το hacking αφορά τη μάθηση, και η μάθηση πρέπει να είναι όσο το δυνατόν πιο δωρεάν.
+>  - Ο σκοπός αυτού του βιβλίου είναι να υπηρετεί ως ένας ολοκληρωμένος **εκπαιδευτικός πόρος**.
+> - **ΑΠΟΘΗΚΕΥΟΥΜΕ** υπέροχες **hacking** τεχνικές που δημοσιεύει η κοινότητα, δίνοντας στους **αρχικούς συγγραφείς** όλες τις **πιστώσεις**.
+>  - **Δεν θέλουμε την αναγνώριση από άλλους**, απλώς θέλουμε να αποθηκεύσουμε ωραία κόλπα για όλους.
+>  - Επίσης γράφουμε **τις δικές μας έρευνες** στο HackTricks.
+>  - Σε αρκετές περιπτώσεις θα γράψουμε απλώς **στο HackTricks μια περίληψη των σημαντικών μερών** της τεχνικής και θα **ενθαρρύνουμε τον αναγνώστη να επισκεφτεί το αρχικό άρθρο** για περισσότερες λεπτομέρειες.
+> - **ΟΡΓΑΝΩΝΟΥΜΕ** όλες τις τεχνικές **hacking** στο βιβλίο ώστε να είναι **πιο προσβάσιμες**
+>  - Η ομάδα HackTricks έχει αφιερώσει χιλιάδες ώρες δωρεάν **μόνο για να οργανώσει το περιεχόμενο** ώστε οι άνθρωποι να μπορούν να **μάθουν πιο γρήγορα**
 
 <figure><img src="../images/hack tricks gif.gif" alt="" width="375"><figcaption></figcaption></figure>
 
-## HackTricks faq
+## Συχνές ερωτήσεις HackTricks
 
 > [!TIP]
 >
-> - **Σας ευχαριστώ πολύ για αυτούς τους πόρους, πώς μπορώ να σας ευχαριστήσω;**
+> - **Thank you so much for these resources, how can I thank you?**
 
-Μπορείτε να ευχαριστήσετε δημόσια τις ομάδες του HackTricks για τη συγκέντρωση όλων αυτών των πόρων δημόσια σε ένα tweet αναφέροντας [**@hacktricks_live**](https://twitter.com/hacktricks_live).\
-Αν είστε ιδιαίτερα ευγνώμονες μπορείτε επίσης να [**χρηματοδοτήσετε το έργο εδώ**](https://github.com/sponsors/carlospolop).\
+Μπορείτε δημόσια να ευχαριστήσετε τις ομάδες HackTricks για τη συγκέντρωση όλων αυτών των πόρων δημόσια σε ένα tweet αναφέροντας [**@hacktricks_live**](https://twitter.com/hacktricks_live).\
+Αν είστε ιδιαίτερα ευγνώμονες μπορείτε επίσης [**sponsor the project here**](https://github.com/sponsors/carlospolop).\
 Και μην ξεχάσετε να **δώσετε ένα αστέρι στα έργα Github!** (Βρείτε τους συνδέσμους παρακάτω).
 
 > [!TIP]
 >
-> - **Πώς μπορώ να συμβάλλω στο έργο;**
+> - **How can I contribute to the project?**
 
-Μπορείτε να **μοιραστείτε νέες συμβουλές και κόλπα με την κοινότητα ή να διορθώσετε σφάλματα** που βρίσκετε στα βιβλία στέλνοντας ένα **Pull Request** στις αντίστοιχες σελίδες Github:
+Μπορείτε να **μοιραστείτε νέες συμβουλές και κόλπα με την κοινότητα ή να διορθώσετε σφάλματα** που βρίσκετε στα βιβλία στέλνοντας ένα **Pull Request** στις αντίστοιχες σελίδες στο Github:
 
-- [https://github.com/carlospolop/hacktricks](https://github.com/carlospolop/hacktricks)
-- [https://github.com/carlospolop/hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)
+- https://github.com/carlospolop/hacktricks
+- https://github.com/carlospolop/hacktricks-cloud
 
 Μην ξεχάσετε να **δώσετε ένα αστέρι στα έργα Github!**
 
 > [!TIP]
 >
-> - **Μπορώ να αντιγράψω κάποιο περιεχόμενο από το HackTricks και να το βάλω στο blog μου;**
+> - **Can I copy some content from HackTricks and put it in my blog?**
 
-Ναι, μπορείτε, αλλά **μην ξεχάσετε να αναφέρετε τον συγκεκριμένο σύνδεσμο(ους)** από όπου ελήφθη το περιεχόμενο.
+Ναι, μπορείτε, αλλά **μην ξεχάσετε να αναφέρετε τους συγκεκριμένους συνδέσμους** από όπου λήφθηκε το περιεχόμενο.
 
 > [!TIP]
 >
-> - **Πώς μπορώ να  μια σελίδα του HackTricks;**
+> - **How can I cite a page of HackTricks?**
 
-Αρκεί να εμφανίζεται ο σύνδεσμος **της** σελίδας(ων) από όπου πήρατε τις πληροφορίες.\
-Αν χρειάζεστε ένα bibtex μπορείτε να χρησιμοποιήσετε κάτι σαν:
+Εφόσον εμφανίζεται ο σύνδεσμος της σελίδας/σελίδων από τις οποίες πήρατε την πληροφορία, αυτό είναι αρκετό.\
+Εάν χρειάζεστε bibtex, μπορείτε να χρησιμοποιήσετε κάτι σαν:
 ```latex
 @misc{hacktricks-bibtexing,
 author = {"HackTricks Team" or the Authors name of the specific page/trick},
@@ -62,82 +62,82 @@ url = {\url{https://book.hacktricks.wiki/specific-page}},
 ```
 > [!WARNING]
 >
-> - **Μπορώ να αντιγράψω όλα τα HackTricks στο blog μου;**
+> - **Can I copy all HackTricks in my blog?**
 
-**Προτιμώ να μην το κάνω**. Αυτό **δεν θα ωφελήσει κανέναν** καθώς όλο το **περιεχόμενο είναι ήδη δημόσια διαθέσιμο** στα επίσημα βιβλία HackTricks δωρεάν.
+**Προτιμώ να μην το κάνετε**. Αυτό **δεν πρόκειται να ωφελήσει κανέναν**, καθώς όλο το **περιεχόμενο είναι ήδη δημόσια διαθέσιμο** στα επίσημα HackTricks βιβλία δωρεάν.
 
-Αν φοβάστε ότι θα εξαφανιστεί, απλά κάντε fork στο Github ή κατεβάστε το, όπως είπα, είναι ήδη δωρεάν.
+Αν ανησυχείτε ότι μπορεί να εξαφανιστεί, απλώς κάντε fork στο Github ή κατεβάστε το — όπως είπα, είναι ήδη δωρεάν.
 
 > [!WARNING]
 >
-> - **Γιατί έχετε χορηγούς; Είναι τα βιβλία HackTricks για εμπορικούς σκοπούς;**
+> - **Why do you have sponsors? Are HackTricks books for commercial purposes?**
 
-Η πρώτη **αξία** των **HackTricks** είναι να προσφέρει **ΔΩΡΕΑΝ** εκπαιδευτικούς πόρους hacking σε **ΟΛΟ** τον κόσμο. Η ομάδα των HackTricks έχει **αφιερώσει χιλιάδες ώρες** για να προσφέρει αυτό το περιεχόμενο, ξανά, **ΔΩΡΕΑΝ**.
+Η πρώτη **HackTricks** **αξία** είναι να προσφέρει **ΔΩΡΕΑΝ** εκπαιδευτικούς πόρους hacking σε **ΟΛΟ** τον κόσμο. Η ομάδα HackTricks έχει **αφιερώσει χιλιάδες ώρες** για να προσφέρει αυτό το περιεχόμενο, ξανά, **ΔΩΡΕΑΝ**.
 
-Αν νομίζετε ότι τα βιβλία HackTricks έχουν φτιαχτεί για **εμπορικούς σκοπούς**, είστε **ΤΕΛΕΙΩΣ ΛΑΘΟΣ**.
+Αν πιστεύετε ότι τα HackTricks βιβλία γίνονται για **εμπορικούς σκοπούς**, **ΛΑΘΑΣΕΤΕ ΕΝΤΕΛΩΣ**.
 
-Έχουμε χορηγούς γιατί, ακόμα και αν όλο το περιεχόμενο είναι ΔΩΡΕΑΝ, θέλουμε να **προσφέρουμε στην κοινότητα τη δυνατότητα να εκτιμήσει τη δουλειά μας** αν το επιθυμούν. Επομένως, προσφέρουμε στους ανθρώπους την επιλογή να δωρίσουν στα HackTricks μέσω [**Github sponsors**](https://github.com/sponsors/carlospolop), και **σχετικών εταιρειών κυβερνοασφάλειας** να χορηγήσουν τα HackTricks και να **έχουν κάποιες διαφημίσεις** στο βιβλίο, με τις **διαφημίσεις** να τοποθετούνται πάντα σε μέρη που τις κάνουν **ορατές** αλλά **δεν διαταράσσουν τη διαδικασία μάθησης** αν κάποιος εστιάζει στο περιεχόμενο.
+Έχουμε χορηγούς γιατί, ακόμα κι αν όλο το περιεχόμενο είναι ΔΩΡΕΑΝ, θέλουμε να **δώσουμε στην κοινότητα τη δυνατότητα να εκτιμήσει τη δουλειά μας** αν το επιθυμεί. Επομένως, προσφέρουμε στους ανθρώπους την επιλογή να δωρίσουν στα HackTricks μέσω του [**Github sponsors**](https://github.com/sponsors/carlospolop), και σε σχετικές εταιρείες cybersecurity να χορηγήσουν τα HackTricks και να **υπάρχουν κάποιες διαφημίσεις** στο βιβλίο, με τις **διαφημίσεις** να τοποθετούνται πάντα σε σημεία όπου είναι **ορατές** αλλά **δεν εμποδίζουν** τη μαθησιακή διαδικασία αν κάποιος επικεντρωθεί στο περιεχόμενο.
 
-Δεν θα βρείτε τα HackTricks γεμάτα ενοχλητικές διαφημίσεις όπως άλλα blogs με πολύ λιγότερο περιεχόμενο από τα HackTricks, γιατί τα HackTricks δεν έχουν φτιαχτεί για εμπορικούς σκοπούς.
-
-> [!CAUTION]
->
-> - **Τι πρέπει να κάνω αν κάποια σελίδα των HackTricks βασίζεται σε ανάρτηση του blog μου αλλά δεν αναφέρεται;**
-
-**Λυπούμαστε πολύ. Αυτό δεν έπρεπε να έχει συμβεί**. Παρακαλώ, ενημερώστε μας μέσω Github issues, Twitter, Discord... το σύνδεσμο της σελίδας των HackTricks με το περιεχόμενο και το σύνδεσμο του blog σας και **θα το ελέγξουμε και θα το προσθέσουμε ASAP**.
+Δεν θα βρείτε τα HackTricks γεμάτα ενοχλητικές διαφημίσεις όπως άλλα blogs με πολύ λιγότερο περιεχόμενο από τα HackTricks, γιατί τα HackTricks δεν είναι φτιαγμένο για εμπορικούς σκοπούς.
 
 > [!CAUTION]
 >
-> - **Τι πρέπει να κάνω αν υπάρχει περιεχόμενο από το blog μου στα HackTricks και δεν το θέλω εκεί;**
+> - **What should I do if some HackTricks page is based on my blog post but it isn't referenced?**
 
-Σημειώστε ότι η ύπαρξη συνδέσμων προς τη σελίδα σας στα HackTricks:
+**Λυπούμαστε πολύ. Αυτό δεν θα έπρεπε να είχε συμβεί**. Παρακαλούμε ενημερώστε μας μέσω Github issues, Twitter, Discord... με το link της σελίδας HackTricks που περιέχει το περιεχόμενο και το link του blog σας και **θα το ελέγξουμε και θα το προσθέσουμε ΑΜΕΣΑ**.
+
+> [!CAUTION]
+>
+> - **What should I do if there is content from my blog in HackTricks and I don't want it there?**
+
+Σημειώστε ότι το να υπάρχουν links στη σελίδα σας στο HackTricks:
 
 - Βελτιώνει το **SEO** σας
-- Το περιεχόμενο **μεταφράζεται σε περισσότερες από 15 γλώσσες** κάνοντάς το δυνατό για περισσότερους ανθρώπους να έχουν πρόσβαση σε αυτό το περιεχόμενο
-- **Τα HackTricks ενθαρρύνουν** τους ανθρώπους να **ελέγξουν τη σελίδα σας** (πολλοί άνθρωποι μας έχουν αναφέρει ότι από τότε που κάποια σελίδα τους είναι στα HackTricks, λαμβάνουν περισσότερες επισκέψεις)
+- Το περιεχόμενο **μεταφράζεται σε πάνω από 15 γλώσσες**, κάνοντας δυνατή την πρόσβαση περισσότερων ανθρώπων σε αυτό
+- **Το HackTricks ενθαρρύνει** τους ανθρώπους να **επισκεφθούν τη σελίδα σας** (αρκετοί μας έχουν αναφέρει ότι από τότε που κάποια σελίδα τους εμφανίστηκε στα HackTricks λαμβάνουν περισσότερες επισκέψεις)
 
-Ωστόσο, αν θέλετε ακόμα το περιεχόμενο του blog σας να αφαιρεθεί από τα HackTricks, απλά ενημερώστε μας και σίγουρα θα **αφαιρέσουμε κάθε σύνδεσμο προς το blog σας**, και οποιοδήποτε περιεχόμενο βασίζεται σε αυτό.
+Ωστόσο, αν εξακολουθείτε να θέλετε το περιεχόμενο του blog σας να αφαιρεθεί από τα HackTricks, απλώς ενημερώστε μας και θα **αφαιρέσουμε οπωσδήποτε κάθε σύνδεσμο προς το blog σας**, και οποιοδήποτε περιεχόμενο βασίζεται σε αυτό.
 
 > [!CAUTION]
 >
-> - **Τι πρέπει να κάνω αν βρω περιεχόμενο που έχει αντιγραφεί και επικολληθεί στα HackTricks;**
+> - **What should I do if I find copy-pasted content in HackTricks?**
 
-Πάντα **δίνουμε στους αρχικούς συγγραφείς όλα τα εύσημα**. Αν βρείτε μια σελίδα με περιεχόμενο που έχει αντιγραφεί και επικολληθεί χωρίς αναφορά στην αρχική πηγή, ενημερώστε μας και θα **το αφαιρέσουμε**, **θα προσθέσουμε τον σύνδεσμο πριν από το κείμενο**, ή **θα το ξαναγράψουμε προσθέτοντας τον σύνδεσμο**.
+Πάντα **δίνουμε στους αρχικούς συγγραφείς όλα τα credits**. Αν βρείτε μια σελίδα με αντιγραμμένο περιεχόμενο χωρίς αναφορά στην πρωτότυπη πηγή, ενημερώστε μας και είτε θα **το αφαιρέσουμε**, είτε θα **προσθέσουμε τον σύνδεσμο πριν το κείμενο**, είτε θα **το ξαναγράψουμε προσθέτοντας το link**.
 
 ## LICENSE
 
-Copyright © All rights reserved unless otherwise specified.
+Copyright © Όλα τα δικαιώματα διατηρούνται εκτός αν αναφέρεται διαφορετικά.
 
-#### License Summary:
+#### Περίληψη Άδειας:
 
-- Attribution: You are free to:
-- Share — copy and redistribute the material in any medium or format.
-- Adapt — remix, transform, and build upon the material.
+- Attribution: Σας επιτρέπεται:
+- Share — αντιγραφή και αναδιανομή του υλικού σε οποιοδήποτε μέσο ή μορφή.
+- Adapt — remix, μετασχηματισμός και δημιουργία έργων βάσει του υλικού.
 
-#### Additional Terms:
+#### Επιπρόσθετοι Όροι:
 
-- Third-Party Content: Some parts of this blog/book may include content from other sources, such as excerpts from other blogs or publications. The use of such content is done under the principles of fair use or with explicit permission from the respective copyright holders. Please refer to the original sources for specific licensing information regarding third-party content.
-- Authorship: The original content authored by HackTricks is subject to the terms of this license. You are encouraged to attribute this work to the author when sharing or adapting it.
+- Third-Party Content: Κάποια μέρη αυτού του blog/book μπορεί να περιλαμβάνουν περιεχόμενο από άλλες πηγές, όπως αποσπάσματα από άλλα blogs ή δημοσιεύσεις. Η χρήση τέτοιου περιεχομένου γίνεται υπό τις αρχές του fair use ή με ρητή άδεια από τους αντίστοιχους κατόχους πνευματικών δικαιωμάτων. Παρακαλούμε ανατρέξτε στις πρωτότυπες πηγές για συγκεκριμένες πληροφορίες αδειοδότησης σχετικά με περιεχόμενο τρίτων.
+- Authorship: Το πρωτότυπο περιεχόμενο που έχει δημιουργηθεί από τα HackTricks υπάγεται στους όρους αυτής της άδειας. Σας ενθαρρύνουμε να αποδώσετε αυτό το έργο στον συγγραφέα όταν το μοιράζεστε ή το προσαρμόζετε.
 
-#### Exemptions:
+#### Εξαιρέσεις:
 
-- Commercial Use: For inquiries regarding commercial use of this content, please contact me.
+- Commercial Use: Για ερωτήματα σχετικά με την εμπορική χρήση αυτού του περιεχομένου, παρακαλώ επικοινωνήστε μαζί μου.
 
-This license does not grant any trademark or branding rights in relation to the content. All trademarks and branding featured in this blog/book are the property of their respective owners.
+Αυτή η άδεια δεν παραχωρεί κανένα δικαίωμα εμπορικών σημάτων ή δικαιωμάτων branding σε σχέση με το περιεχόμενο. Όλα τα trademarks και το branding που εμφανίζονται σε αυτό το blog/book είναι ιδιοκτησία των αντίστοιχων κατόχων τους.
 
-**By accessing or using HackTricks, you agree to abide by the terms of this license. If you do not agree with these terms, please, do not access this website.**
+**Με την πρόσβαση ή τη χρήση των HackTricks συμφωνείτε να τηρείτε τους όρους αυτής της άδειας. Αν δεν συμφωνείτε με αυτούς τους όρους, παρακαλώ, μην προσπελάζετε αυτόν τον ιστότοπο.**
 
 ## **Disclaimer**
 
 > [!CAUTION]
-> This book, 'HackTricks,' is intended for educational and informational purposes only. The content within this book is provided on an 'as is' basis, and the authors and publishers make no representations or warranties of any kind, express or implied, about the completeness, accuracy, reliability, suitability, or availability of the information, products, services, or related graphics contained within this book. Any reliance you place on such information is therefore strictly at your own risk.
+> Αυτό το βιβλίο, 'HackTricks,' προορίζεται μόνο για εκπαιδευτικούς και ενημερωτικούς σκοπούς. Το περιεχόμενο μέσα σε αυτό το βιβλίο παρέχεται "ως έχει", και οι συγγραφείς και οι εκδότες δεν παρέχουν καμία εκπροσώπηση ή εγγύηση οποιουδήποτε είδους, ρητή ή σιωπηρή, σχετικά με την πληρότητα, ακρίβεια, αξιοπιστία, καταλληλότητα ή διαθεσιμότητα των πληροφοριών, προϊόντων, υπηρεσιών ή σχετικών γραφικών που περιλαμβάνονται σε αυτό το βιβλίο. Οποιαδήποτε εμπιστοσύνη τοποθετείτε σε τέτοιες πληροφορίες είναι συνεπώς αυστηρά με δικό σας ρίσκο.
 >
-> The authors and publishers shall in no event be liable for any loss or damage, including without limitation, indirect or consequential loss or damage, or any loss or damage whatsoever arising from loss of data or profits arising out of, or in connection with, the use of this book.
+> Οι συγγραφείς και οι εκδότες δεν θα ευθύνονται σε καμία περίπτωση για οποιαδήποτε απώλεια ή ζημία, συμπεριλαμβανομένων χωρίς περιορισμό, έμμεσων ή επακόλουθων ζημιών ή απωλειών, ή οποιασδήποτε απώλειας ή ζημίας που προκύπτει από απώλεια δεδομένων ή κερδών που προκύπτουν από ή σε σύνδεση με τη χρήση αυτού του βιβλίου.
 >
-> Furthermore, the techniques and tips described in this book are provided for educational and informational purposes only, and should not be used for any illegal or malicious activities. The authors and publishers do not condone or support any illegal or unethical activities, and any use of the information contained within this book is at the user's own risk and discretion.
+> Επιπλέον, οι τεχνικές και οι συμβουλές που περιγράφονται σε αυτό το βιβλίο παρέχονται για εκπαιδευτικούς και ενημερωτικούς σκοπούς μόνο, και δεν πρέπει να χρησιμοποιούνται για οποιεσδήποτε παράνομες ή κακόβουλες δραστηριότητες. Οι συγγραφείς και οι εκδότες δεν εγκρίνουν ούτε υποστηρίζουν οποιεσδήποτε παράνομες ή ανήθικες ενέργειες, και οποιαδήποτε χρήση των πληροφοριών που περιέχονται σε αυτό το βιβλίο γίνεται με δική του ευθύνη.
 >
-> The user is solely responsible for any actions taken based on the information contained within this book, and should always seek professional advice and assistance when attempting to implement any of the techniques or tips described herein.
+> Ο χρήστης είναι αποκλειστικά υπεύθυνος για οποιεσδήποτε ενέργειες λάβει βάσει των πληροφοριών που περιέχονται σε αυτό το βιβλίο, και θα πρέπει πάντα να αναζητά επαγγελματική συμβουλή και βοήθεια όταν επιχειρεί να εφαρμόσει οποιεσδήποτε από τις τεχνικές ή συμβουλές που περιγράφονται εδώ.
 >
-> By using this book, the user agrees to release the authors and publishers from any and all liability and responsibility for any damages, losses, or harm that may result from the use of this book or any of the information contained within it.
+> Με τη χρήση αυτού του βιβλίου, ο χρήστης συμφωνεί να απαλλάξει τους συγγραφείς και τους εκδότες από οποιαδήποτε και όλη την ευθύνη και υπαιτιότητα για οποιεσδήποτε ζημίες, απώλειες ή βλάβες που μπορεί να προκύψουν από τη χρήση αυτού του βιβλίου ή οποιασδήποτε από τις πληροφορίες που περιέχονται σε αυτό.
 
 {{#include ../banners/hacktricks-training.md}}
