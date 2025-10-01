@@ -1,4 +1,4 @@
-# Truques Específicos de Software/Tipos de Arquivo
+# Truques específicos para tipos de arquivo/software
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -52,6 +52,11 @@ video-and-audio-file-analysis.md
 
 {{#ref}}
 zips-tricks.md
+{{#endref}}
+
+
+{{#ref}}
+mach-o-entitlements-and-ipsw-indexing.md
 {{#endref}}
 
 {{#include ../../../banners/hacktricks-training.md}}
