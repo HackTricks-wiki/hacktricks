@@ -2,14 +2,19 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Basic Information
+## Базова інформація
 
-Mach-o бінарники містять команду завантаження під назвою **`LC_CODE_SIGNATURE`**, яка вказує на **зсув** та **розмір** підписів всередині бінарника. Насправді, використовуючи графічний інструмент MachOView, можна знайти в кінці бінарника розділ під назвою **Code Signature** з цією інформацією:
+{{#ref}}
+../../../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/mach-o-entitlements-and-ipsw-indexing.md
+{{#endref}}
+
+
+Mach-o бінарні файли містять load command під назвою **`LC_CODE_SIGNATURE`**, який вказує **offset** і **size** підписів всередині бінарного файлу. Насправді, використовуючи GUI-інструмент MachOView, можна знайти в кінці бінарного файлу розділ під назвою **Code Signature** з цією інформацією:
 
 <figure><img src="../../../images/image (1) (1) (1) (1).png" alt="" width="431"><figcaption></figcaption></figure>
 
-Магічний заголовок підпису коду - **`0xFADE0CC0`**. Потім ви отримуєте інформацію, таку як довжина та кількість блобів суперBlob, які їх містять.\
-Цю інформацію можна знайти в [джерельному коді тут](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L276):
+Магічний заголовок Code Signature — **`0xFADE0CC0`**. Далі міститься інформація, така як довжина та кількість blobs суперBlob, який їх містить.\  
+It's possible to find this information in the [source code here](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L276):
 ```c
 /*
 * Structure of an embedded-signature SuperBlob
@@ -38,14 +43,14 @@ char data[];
 } CS_GenericBlob
 __attribute__ ((aligned(1)));
 ```
-Звичайні об'єкти, що містяться, це Директорія Коду, Вимоги та Права, а також Синтаксис Криптографічного Повідомлення (CMS).\
-Крім того, зверніть увагу, як дані, закодовані в об'єктах, закодовані в **Big Endian.**
+Типові blobs включають Code Directory, Requirements та Entitlements, а також Cryptographic Message Syntax (CMS).\
+Зверніть увагу, що дані, закодовані в blobs, записані у **Big Endian.**
 
-Крім того, підписи можуть бути відокремлені від бінарних файлів і зберігатися в `/var/db/DetachedSignatures` (використовується iOS).
+Крім того, підписи можуть бути відокремлені від бінарних файлів і збережені в `/var/db/DetachedSignatures` (використовується iOS).
 
-## Об'єкт Директорії Коду
+## Code Directory Blob
 
-Можна знайти декларацію [Об'єкта Директорії Коду в коді](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L104):
+It's possible to find the declaration of the [Code Directory Blob in the code](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L104):
 ```c
 typedef struct __CodeDirectory {
 uint32_t magic;                                 /* magic number (CSMAGIC_CODEDIRECTORY) */
@@ -101,12 +106,12 @@ char end_withLinkage[0];
 } CS_CodeDirectory
 __attribute__ ((aligned(1)));
 ```
-Зверніть увагу, що існують різні версії цієї структури, де старі можуть містити менше інформації.
+Note that there are different versions of this struct where old ones might contain less information.
 
-## Сторінки підпису коду
+## Signing Code Pages
 
-Хешування повного бінарного файлу було б неефективним і навіть марним, якщо він завантажений в пам'ять лише частково. Тому підпис коду насправді є хешем хешів, де кожна бінарна сторінка хешується окремо.\
-Насправді, у попередньому коді **Code Directory** ви можете побачити, що **розмір сторінки вказано** в одному з його полів. Більше того, якщо розмір бінарного файлу не є кратним розміру сторінки, поле **CodeLimit** вказує, де закінчується підпис.
+Хешування всього binary було б неефективним і навіть марним, якщо він завантажується в memory лише частково. Тому code signature фактично є hash of hashes, де кожна binary page хешується окремо.\
+Насправді, у попередньому **Code Directory** коді видно, що **page size is specified** в одному з його полів. Більше того, якщо розмір binary не є кратним розміру сторінки, поле **CodeLimit** вказує, де знаходиться кінець signature.
 ```bash
 # Get all hashes of /bin/ps
 codesign -d -vvvvvv /bin/ps
@@ -144,25 +149,25 @@ openssl sha256 /tmp/*.page.*
 ```
 ## Entitlements Blob
 
-Зверніть увагу, що програми можуть також містити **entitlement blob**, де визначені всі права. Більше того, деякі бінарні файли iOS можуть мати свої права, специфічні для спеціального слота -7 (замість спеціального слота -5 для прав).
+Note that applications might also contain an **entitlement blob** where all the entitlements are defined. Moreover, some iOS binaries might have their entitlements specific in the special slot -7 (instead of in the -5 entitlements special slot).
 
-## Special Slots
+## Спеціальні слоти
 
-MacOS програми не мають всього необхідного для виконання всередині бінарного файлу, але також використовують **зовнішні ресурси** (зазвичай всередині **bundle** програми). Тому в бінарному файлі є кілька слотів, які міститимуть хеші деяких цікавих зовнішніх ресурсів, щоб перевірити, чи не були вони змінені.
+MacOS applications doesn't have everything they need to execute inside the binary but they also use **external resources** (usually inside the applications **bundle**). Therefore, there are some slots inside the binary who will be containing the hashes of some interesting external resources to check they weren't modified.
 
-Насправді, в структурах Code Directory можна побачити параметр **`nSpecialSlots`**, який вказує на кількість спеціальних слотів. Спеціального слота 0 немає, а найпоширеніші (від -1 до -6) це:
+Actually, it's possible to see in the Code Directory structs a parameter called **`nSpecialSlots`** indicating the number of the special slots. The there isn't a special slot 0 and the most common ones (from -1 to -6 are):
 
-- Хеш `info.plist` (або той, що всередині `__TEXT.__info__plist`).
-- Хеш вимог
-- Хеш каталогу ресурсів (хеш файлу `_CodeSignature/CodeResources` всередині bundle).
-- Специфічний для програми (не використовується)
-- Хеш прав
-- Тільки DMG підписи коду
+- Хеш `info.plist` (or the one inside `__TEXT.__info__plist`).
+- Хеш Requirements
+- Хеш Resource Directory (хеш файлу `_CodeSignature/CodeResources` inside the bundle).
+- Application specific (unused)
+- Хеш entitlements
+- DMG code signatures only
 - DER Entitlements
 
 ## Code Signing Flags
 
-Кожен процес має пов'язану бітову маску, відому як `status`, яка ініціюється ядром, і деякі з них можуть бути переозначені **підписом коду**. Ці прапори, які можуть бути включені в підпис коду, [визначені в коді](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L36):
+Every process has related a bitmask known as the `status` which is started by the kernel and some of them can be overridden by the **code signature**. These flags that can be included in the code signing are [defined in the code](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L36):
 ```c
 /* code signing attributes of a process */
 #define CS_VALID                    0x00000001  /* dynamically valid */
@@ -207,15 +212,15 @@ CS_RESTRICT | CS_ENFORCEMENT | CS_REQUIRE_LV | CS_RUNTIME | CS_LINKER_SIGNED)
 
 #define CS_ENTITLEMENT_FLAGS        (CS_GET_TASK_ALLOW | CS_INSTALLER | CS_DATAVAULT_CONTROLLER | CS_NVRAM_UNRESTRICTED)
 ```
-Зверніть увагу, що функція [**exec_mach_imgact**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/kern/kern_exec.c#L1420) також може динамічно додавати прапори `CS_EXEC_*` під час запуску виконання.
+Зауважте, що функція [**exec_mach_imgact**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/kern/kern_exec.c#L1420) також може динамічно додавати прапори `CS_EXEC_*` під час початку виконання.
 
-## Вимоги до підпису коду
+## Вимоги підпису коду
 
-Кожен додаток зберігає деякі **вимоги**, які він повинен **виконати**, щоб мати можливість виконуватися. Якщо **вимоги додатка не виконуються**, він не буде виконаний (оскільки, ймовірно, був змінений).
+Кожен додаток зберігає деякі **вимоги**, які він повинен **задовольнити**, щоб його можна було виконати. Якщо **вимоги**, що містяться в додатку, не виконуються додатком, він не буде виконаний (оскільки, ймовірно, був змінений).
 
-Вимоги бінарного файлу використовують **спеціальну граматику**, яка є потоком **виразів** і кодуються як блоби, використовуючи `0xfade0c00` як магічне число, чий **хеш зберігається в спеціальному кодовому слоті**.
+Вимоги бінарного файлу використовують **спеціальну граматику**, яка є потоком **виразів**, і кодуються як blobs з використанням `0xfade0c00` як магічного числа, хеш якого **зберігається в спеціальному слоті коду**.
 
-Вимоги бінарного файлу можна побачити, запустивши:
+Вимоги бінарного файлу можна переглянути, виконавши:
 ```bash
 codesign -d -r- /bin/ls
 Executable=/bin/ls
@@ -225,10 +230,10 @@ codesign -d -r- /Applications/Signal.app/
 Executable=/Applications/Signal.app/Contents/MacOS/Signal
 designated => identifier "org.whispersystems.signal-desktop" and anchor apple generic and certificate 1[field.1.2.840.113635.100.6.2.6] /* exists */ and certificate leaf[field.1.2.840.113635.100.6.1.13] /* exists */ and certificate leaf[subject.OU] = U68MSDN6DR
 ```
-> [!NOTE]
-> Зверніть увагу, як ці підписи можуть перевіряти такі речі, як інформація про сертифікацію, TeamID, ID, права доступу та багато інших даних.
+> [!TIP]
+> Зверніть увагу, що ці підписи можуть перевіряти такі речі, як інформація про сертифікацію, TeamID, IDs, entitlements та багато інших даних.
 
-Більше того, можливо згенерувати деякі скомпільовані вимоги, використовуючи інструмент `csreq`:
+Крім того, можна згенерувати деякі скомпільовані вимоги за допомогою інструменту `csreq`:
 ```bash
 # Generate compiled requirements
 csreq -b /tmp/output.csreq -r='identifier "org.whispersystems.signal-desktop" and anchor apple generic and certificate 1[field.1.2.840.113635.100.6.2.6] /* exists */ and certificate leaf[field.1.2.840.113635.100.6.1.13] /* exists */ and certificate leaf[subject.OU] = U68MSDN6DR'
@@ -240,57 +245,57 @@ od -A x -t x1 /tmp/output.csreq
 0000020    00  00  00  21  6f  72  67  2e  77  68  69  73  70  65  72  73
 [...]
 ```
-Можливо отримати цю інформацію та створити або змінити вимоги за допомогою деяких API з `Security.framework`, таких як:
+Можна отримати доступ до цієї інформації та створювати або змінювати вимоги за допомогою деяких API з `Security.framework`, наприклад:
 
-#### **Перевірка дійсності**
+#### **Checking Validity**
 
-- **`Sec[Static]CodeCheckValidity`**: Перевіряє дійсність SecCodeRef відповідно до вимоги.
-- **`SecRequirementEvaluate`**: Валідовує вимогу в контексті сертифіката.
-- **`SecTaskValidateForRequirement`**: Валідовує запущений SecTask відповідно до вимоги `CFString`.
+- **`Sec[Static]CodeCheckValidity`**: Перевіряє дійсність `SecCodeRef` відповідно до Requirement.
+- **`SecRequirementEvaluate`**: Валідовує Requirement у контексті сертифікату.
+- **`SecTaskValidateForRequirement`**: Валідовує запущений `SecTask` відповідно до вимоги у вигляді `CFString`.
 
-#### **Створення та управління вимогами коду**
+#### **Creating and Managing Code Requirements**
 
-- **`SecRequirementCreateWithData`:** Створює `SecRequirementRef` з двійкових даних, що представляють вимогу.
-- **`SecRequirementCreateWithString`:** Створює `SecRequirementRef` з рядкової виразу вимоги.
-- **`SecRequirementCopy[Data/String]`**: Отримує двійкове представлення даних `SecRequirementRef`.
-- **`SecRequirementCreateGroup`**: Створює вимогу для членства в групі додатків.
+- **`SecRequirementCreateWithData`:** Створює `SecRequirementRef` з бінарних даних, що представляють вимогу.
+- **`SecRequirementCreateWithString`:** Створює `SecRequirementRef` з рядкового виразу вимоги.
+- **`SecRequirementCopy[Data/String]`**: Отримує бінарне подання `SecRequirementRef`.
+- **`SecRequirementCreateGroup`**: Створює вимогу для членства в app-group
 
-#### **Доступ до інформації про підпис коду**
+#### **Accessing Code Signing Information**
 
-- **`SecStaticCodeCreateWithPath`**: Ініціалізує об'єкт `SecStaticCodeRef` з шляху файлової системи для перевірки підписів коду.
-- **`SecCodeCopySigningInformation`**: Отримує інформацію про підпис з `SecCodeRef` або `SecStaticCodeRef`.
+- **`SecStaticCodeCreateWithPath`**: Ініціалізує об'єкт `SecStaticCodeRef` з файлового шляху для інспекції підписів коду.
+- **`SecCodeCopySigningInformation`**: Отримує інформацію про підпис із `SecCodeRef` або `SecStaticCodeRef`.
 
-#### **Модифікація вимог коду**
+#### **Modifying Code Requirements**
 
-- **`SecCodeSignerCreate`**: Створює об'єкт `SecCodeSignerRef` для виконання операцій підпису коду.
-- **`SecCodeSignerSetRequirement`**: Встановлює нову вимогу для підписувача коду, яку потрібно застосувати під час підпису.
-- **`SecCodeSignerAddSignature`**: Додає підпис до коду, що підписується, з вказаним підписувачем.
+- **`SecCodeSignerCreate`**: Створює `SecCodeSignerRef` для виконання операцій підписування коду.
+- **`SecCodeSignerSetRequirement`**: Встановлює нову вимогу для `code signer`, яка застосовується під час підписування.
+- **`SecCodeSignerAddSignature`**: Додає підпис до коду, що підписується вказаним підписувачем.
 
-#### **Валідування коду з вимогами**
+#### **Validating Code with Requirements**
 
-- **`SecStaticCodeCheckValidity`**: Валідовує статичний об'єкт коду відповідно до вказаних вимог.
+- **`SecStaticCodeCheckValidity`**: Валідовує статичний об'єкт коду відповідно до зазначених вимог.
 
-#### **Додаткові корисні API**
+#### **Additional Useful APIs**
 
-- **`SecCodeCopy[Internal/Designated]Requirement`: Отримати SecRequirementRef з SecCodeRef**
-- **`SecCodeCopyGuestWithAttributes`**: Створює `SecCodeRef`, що представляє об'єкт коду на основі специфічних атрибутів, корисно для пісочниці.
-- **`SecCodeCopyPath`**: Отримує шлях файлової системи, пов'язаний з `SecCodeRef`.
-- **`SecCodeCopySigningIdentifier`**: Отримує ідентифікатор підпису (наприклад, Team ID) з `SecCodeRef`.
-- **`SecCodeGetTypeID`**: Повертає ідентифікатор типу для об'єктів `SecCodeRef`.
-- **`SecRequirementGetTypeID`**: Отримує CFTypeID `SecRequirementRef`.
+- **`SecCodeCopy[Internal/Designated]Requirement`: Get SecRequirementRef from SecCodeRef**
+- **`SecCodeCopyGuestWithAttributes`**: Створює `SecCodeRef`, що представляє об’єкт коду на основі певних атрибутів, корисно для sandboxing.
+- **`SecCodeCopyPath`**: Отримує файловий шлях, пов’язаний із `SecCodeRef`.
+- **`SecCodeCopySigningIdentifier`**: Отримує signing identifier (наприклад, Team ID) з `SecCodeRef`.
+- **`SecCodeGetTypeID`**: Повертає ідентифікатор типу для об’єктів `SecCodeRef`.
+- **`SecRequirementGetTypeID`**: Отримує CFTypeID для `SecRequirementRef`
 
-#### **Прапори та константи підпису коду**
+#### **Code Signing Flags and Constants**
 
-- **`kSecCSDefaultFlags`**: Значення за замовчуванням, що використовуються в багатьох функціях Security.framework для операцій підпису коду.
-- **`kSecCSSigningInformation`**: Прапор, що використовується для вказівки на те, що інформацію про підпис слід отримати.
+- **`kSecCSDefaultFlags`**: Прапори за замовчуванням, що використовуються у багатьох функціях `Security.framework` для операцій підписування коду.
+- **`kSecCSSigningInformation`**: Прапор, що вказує на необхідність отримати інформацію про підпис.
 
-## Примус підпису коду
+## Code Signature Enforcement
 
-**Ядро** є тим, хто **перевіряє підпис коду** перед тим, як дозволити виконання коду додатка. Більше того, один зі способів мати можливість записувати та виконувати новий код в пам'яті - це зловживання JIT, якщо `mprotect` викликано з прапором `MAP_JIT`. Зверніть увагу, що додаток потребує спеціального права для того, щоб мати можливість це робити.
+Саме **ядро** перевіряє **підпис коду** перед тим, як дозволити виконання коду додатка. Крім того, одним із способів записати й виконати в пам'яті новий код є зловживання JIT, якщо `mprotect` викликається з прапором `MAP_JIT`. Зверніть увагу, що додаток потребує спеціального entitlement, щоб мати можливість це зробити.
 
 ## `cs_blobs` & `cs_blob`
 
-[**cs_blob**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/sys/ubc_internal.h#L106) структура містить інформацію про права, що має запущений процес. `csb_platform_binary` також інформує, чи є додаток платформним бінарним (що перевіряється в різні моменти операційною системою для застосування механізмів безпеки, таких як захист прав SEND до портів завдань цих процесів).
+[**cs_blob**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/sys/ubc_internal.h#L106) структура містить інформацію про дозволи (entitlements) запущеного процесу. `csb_platform_binary` також вказує, чи є додаток platform binary (що перевіряється ОС у різні моменти для застосування механізмів безпеки, наприклад щоб захищати SEND права до task портів цих процесів).
 ```c
 struct cs_blob {
 struct cs_blob  *csb_next;
