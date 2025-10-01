@@ -1,14 +1,14 @@
 # Mutation Testing for Solidity with Slither (slither-mutate)
 
-{{#include ../../../banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}
 
-Mutation testing "tests your tests" का मतलब है कि यह व्यवस्थित रूप से आपकी Solidity कोड में छोटे परिवर्तन (mutants) डालता है और आपका test suite फिर से चलाता है। यदि कोई टेस्ट फेल होता है, तो mutant को किल माना जाता है। अगर टेस्ट फिर भी पास हो जाते हैं, तो mutant जीवित रह जाता है — यह आपके test suite में एक छिपी हुई कमी उजागर करता है जिसे line/branch coverage पकड़ नहीं पाती।
+Mutation testing "tests your tests" आपके Solidity कोड में व्यवस्थित रूप से छोटे बदलाव (mutants) करके और आपकी टेस्ट सूट को फिर से चलाकर किया जाता है। यदि कोई टेस्ट फेल होता है तो mutant मर जाता है (killed)। अगर टेस्ट फिर भी पास हो जाते हैं, तो mutant बच जाता है (survives), जिससे आपकी टेस्ट सूट में एक ऐसी कमी उजागर होती है जिसे line/branch coverage पकड़ नहीं पाती।
 
-मुख्य विचार: Coverage दिखाती है कि कोड executed हुआ था; mutation testing दिखाता है कि व्यवहार वास्तव में assert किया गया है या नहीं।
+मुख्य विचार: कवरेज दिखाता है कि कोड execute हुआ था; mutation testing दिखाता है कि व्यवहार वास्तव में assert किया गया है या नहीं।
 
-## क्यों कवरेज भ्रामक हो सकती है
+## क्यों कवरेज धोखा दे सकती है
 
-इस सरल threshold चेक पर विचार करें:
+Consider this simple threshold check:
 ```solidity
 function verifyMinimumDeposit(uint256 deposit) public returns (bool) {
 if (deposit >= 1 ether) {
@@ -18,99 +18,99 @@ return false;
 }
 }
 ```
-यूनिट टेस्ट जो केवल थ्रेशोल्ड से नीचे और थ्रेशोल्ड से ऊपर के वैल्यू को चेक करते हैं, वे 100% line/branch coverage तक पहुँच सकते हैं जबकि equality boundary (==) की assertion को चेक करने में असफल हो सकते हैं। कोड को `deposit >= 2 ether` में refactor करने पर ऐसे tests फिर भी पास हो जाएंगे और protocol लॉजिक चुपचाप टूट जाएगा।
+Unit tests that only check a value below and a value above the threshold can reach 100% line/branch coverage while failing to assert the equality boundary (==). A refactor to `deposit >= 2 ether` would still pass such tests, silently breaking protocol logic.
 
-Mutation testing इस कमी को उजागर करता है — यह condition में बदलाव करके यह सत्यापित करता है कि आपके tests फेल होते हैं।
+Mutation testing इस अंतर को उजागर करता है, शर्त को बदलकर और यह सत्यापित करके कि आपके परीक्षण fail हों।
 
-## Common Solidity mutation operators
+## सामान्य Solidity mutation operators
 
-Slither’s mutation engine कई छोटे, semantics बदलने वाले edits लागू करता है, जैसे:
-- Operator replacement: `+` ↔ `-`, `*` ↔ `/`, आदि।
+Slither’s mutation engine कई छोटे, semantics-changing edits लागू करता है, जैसे:
+- ऑपरेटर बदलना: `+` ↔ `-`, `*` ↔ `/`, आदि।
 - Assignment replacement: `+=` → `=`, `-=` → `=`
 - Constant replacement: non-zero → `0`, `true` ↔ `false`
-- Condition negation/replacement inside `if`/loops
-- Comment out whole lines (CR: Comment Replacement)
-- Replace a line with `revert()`
-- Data type swaps: e.g., `int128` → `int64`
+- Condition negation/replacement `if`/loops के अंदर
+- पूरे लाइनों को comment out करना (CR: Comment Replacement)
+- किसी लाइन को `revert()` से बदलना
+- Data type swaps: उदाहरण के लिए, `int128` → `int64`
 
-लक्ष्य: 100% generated mutants को kill करना, या बचे हुए के लिए स्पष्ट तर्क देना।
+Goal: generated mutants में से 100% को kill करें, या जिनका बचना आवश्यक है उन्हें स्पष्ट तर्क के साथ justify करें।
 
 ## Running mutation testing with slither-mutate
 
-आवश्यकताएँ: Slither v0.10.2+.
+Requirements: Slither v0.10.2+.
 
 - List options and mutators:
 ```bash
 slither-mutate --help
 slither-mutate --list-mutators
 ```
-- Foundry उदाहरण (परिणाम कैप्चर करें और पूरा लॉग रखें):
+- Foundry उदाहरण (परिणाम कैप्चर करें और एक पूर्ण लॉग रखें):
 ```bash
 slither-mutate ./src/contracts --test-cmd="forge test" &> >(tee mutation.results)
 ```
-- यदि आप Foundry का उपयोग नहीं करते हैं, तो `--test-cmd` को उस तरीके से बदलें जिससे आप टेस्ट चलाते हैं (उदाहरण के लिए, `npx hardhat test`, `npm test`)।
+- यदि आप Foundry का उपयोग नहीं करते हैं, तो `--test-cmd` को अपने परीक्षण चलाने के तरीके से बदलें (उदा., `npx hardhat test`, `npm test`)।
 
-आर्टिफैक्ट्स और रिपोर्टें डिफ़ॉल्ट रूप से `./mutation_campaign` में संग्रहीत होती हैं। जो पकड़े नहीं गए (बचे हुए) mutants निरीक्षण के लिए वहाँ कॉपी किए जाते हैं।
+Artifacts और रिपोर्ट्स डिफ़ॉल्ट रूप से `./mutation_campaign` में संग्रहीत होते हैं। कैच न हुए (बचे हुए) mutants निरीक्षण के लिए वहाँ कॉपी किए जाते हैं।
 
-### Understanding the output
+### आउटपुट को समझना
 
-रिपोर्ट की पंक्तियाँ इस तरह दिखती हैं:
+रिपोर्ट लाइनें इस तरह दिखती हैं:
 ```text
 INFO:Slither-Mutate:Mutating contract ContractName
 INFO:Slither-Mutate:[CR] Line 123: 'original line' ==> '//original line' --> UNCAUGHT
 ```
-- ब्रैकेट में टैग mutator alias है (उदाहरण: `CR` = Comment Replacement).
-- `UNCAUGHT` का मतलब है कि mutated behavior के तहत tests पास हो गए → missing assertion.
+- कोष्ठक में टैग mutator उपनाम है (उदा., `CR` = Comment Replacement).
+- `UNCAUGHT` का मतलब है कि mutated व्यवहार के तहत tests पास हुए → assertion गायब है।
 
 ## रनटाइम घटाना: प्रभावशाली mutants को प्राथमिकता दें
 
-Mutation campaigns कई घंटे या दिनों तक चल सकती हैं। लागत घटाने के टिप्स:
-- Scope: केवल critical contracts/directories से शुरुआत करें, फिर आवश्यकतानुसार बढ़ाएँ।
-- Prioritize mutators: अगर किसी लाइन पर high-priority mutant बच जाता है (उदा., पूरी लाइन commented), तो आप उस लाइन के lower-priority variants को स्किप कर सकते हैं।
+Mutation अभियानों में घंटे या दिन लग सकते हैं। लागत घटाने के सुझाव:
+- Scope: पहले केवल critical contracts/directories से शुरुआत करें, फिर विस्तार करें।
+- Prioritize mutators: अगर किसी लाइन पर high-priority mutant बच जाता है (उदा., पूरी लाइन comment कर दी गई), तो आप उस लाइन के लिए lower-priority variants को छोड़ सकते हैं।
 - Parallelize tests अगर आपका runner अनुमति देता है; dependencies/builds को cache करें।
-- Fail-fast: जल्दी रोक दें जब कोई परिवर्तन स्पष्ट रूप से assertion gap दिखाए।
+- Fail-fast: जब कोई परिवर्तन स्पष्ट रूप से assertion gap दिखाता है तो जल्दी बंद कर दें।
 
-## बची हुई mutants के लिए ट्रायेज workflow
+## Triage workflow for surviving mutants
 
-1) mutated लाइन और व्यवहार का निरीक्षण करें।
-- स्थानीय रूप से reproduce करें: mutated लाइन लागू करके और एक focused test चलाकर।
+1) mutated line और व्यवहार का निरीक्षण करें।
+- mutated line लागू करके स्थानीय रूप से reproduce करें और एक focused test चलाएँ।
 
-2) tests को मजबूत करें ताकि वे केवल return values नहीं बल्कि state को assert करें।
-- समानता-बाउंडरी चेक जोड़ें (उदा., test threshold `==`)।
-- post-conditions assert करें: balances, total supply, authorization effects, और emitted events।
+2) केवल return values पर नहीं बल्कि state को assert करने के लिए tests को मजबूत करें।
+- equality-boundary checks जोड़ें (उदा., test threshold `==`)।
+- post-conditions को assert करें: balances, total supply, authorization प्रभाव, और emitted events।
 
-3) अत्यधिक permissive mocks को realistic behavior से बदलें।
-- सुनिश्चित करें कि mocks उन transfers, failure paths, और event emissions को enforce करें जो on-chain होते हैं।
+3) अत्यधिक permissive mocks को realistic व्यवहार से बदलें।
+- सुनिश्चित करें कि mocks transfers, failure paths, और on-chain होने वाली event emissions को enforce करें।
 
 4) fuzz tests के लिए invariants जोड़ें।
-- उदाहरण: conservation of value, non-negative balances, authorization invariants, और जहाँ लागू हो monotonic supply।
+- उदा., conservation of value, non-negative balances, authorization invariants, जहाँ लागू हो वहां monotonic supply।
 
-5) Re-run slither-mutate तब तक चलाएँ जब तक survivors मारे न जाएँ या स्पष्ट रूप से justified न हों।
+5) survivors मरने तक या स्पष्ट रूप से justified होने तक slither-mutate फिर से चलाएँ।
 
-## केस स्टडी: missing state assertions का खुलासा (Arkis protocol)
+## Case study: revealing missing state assertions (Arkis protocol)
 
-Arkis DeFi protocol के audit के दौरान एक mutation campaign ने कुछ survivors उभरे जैसे:
+Arkis DeFi protocol के एक audit के दौरान एक mutation अभियान ने निम्नलिखित जैसे surviving cases surface किए:
 ```text
 INFO:Slither-Mutate:[CR] Line 33: 'cmdsToExecute.last().value = _cmd.value' ==> '//cmdsToExecute.last().value = _cmd.value' --> UNCAUGHT
 ```
 Commenting out the assignment didn’t break the tests, proving missing post-state assertions. Root cause: code trusted a user-controlled `_cmd.value` instead of validating actual token transfers. An attacker could desynchronize expected vs. actual transfers to drain funds. Result: high severity risk to protocol solvency.
 
-Guidance: ऐसे survivors जिन्हें मूल्य-स्थानांतरण, लेखांकन, या पहुँच नियंत्रण प्रभावित करते हैं, उन्हें नष्ट किए जाने तक उच्च-जोखिम मानें।
+मार्गदर्शन: वैल्यू ट्रांसफर, अकाउंटिंग, या एक्सेस कंट्रोल को प्रभावित करने वाले survivors को killed किए जाने तक high-risk मानें।
 
-## Practical checklist
+## व्यावहारिक चेकलिस्ट
 
-- लक्ष्यित अभियान चलाएँ:
+- लक्षित अभियान चलाएँ:
 - `slither-mutate ./src/contracts --test-cmd="forge test"`
-- बचे हुए म्यूटेंट्स का ट्रायज करें और ऐसे tests/invariants लिखें जो म्यूटेड व्यवहार के तहत फेल हों।
-- बैलेंस, सप्लाई, प्राधिकरण, और इवेंट्स की पुष्टि करें।
-- बाउंडरी टेस्ट जोड़ें: (`==`, overflows/underflows, zero-address, zero-amount, empty arrays).
-- अवास्तविक mocks बदलें; विफलता-परिस्थितियों का अनुकरण करें।
-- तब तक पुनरावृत्ति करें जब तक सभी mutants नष्ट न हों या टिप्पणियों और तर्क के साथ औचित्य न दिया गया हो।
+- बचे हुए survivors की triage करें और ऐसे tests/invariants लिखें जो mutated व्यवहार में fail हों।
+- balances, supply, authorizations, और events को assert करें।
+- बाउंडरी tests जोड़ें (`==`, overflows/underflows, zero-address, zero-amount, empty arrays)।
+- अवास्तविक mocks को बदलें; failure modes का simulate करें।
+- इटरेट करें जब तक सभी mutants killed न हों या comments और rationale के साथ justified न हों।
 
-## References
+## संदर्भ
 
 - [Use mutation testing to find the bugs your tests don't catch (Trail of Bits)](https://blog.trailofbits.com/2025/09/18/use-mutation-testing-to-find-the-bugs-your-tests-dont-catch/)
 - [Arkis DeFi Prime Brokerage Security Review (Appendix C)](https://github.com/trailofbits/publications/blob/master/reviews/2024-12-arkis-defi-prime-brokerage-securityreview.pdf)
 - [Slither (GitHub)](https://github.com/crytic/slither)
 
-{{#include ../../../banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}

