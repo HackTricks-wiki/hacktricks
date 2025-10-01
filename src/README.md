@@ -2,7 +2,7 @@
 
 <figure><img src="images/hacktricks.gif" alt=""><figcaption></figcaption></figure>
 
-_Hacktricks 徽标和动效设计由_ [_@ppieranacho_](https://www.instagram.com/ppieranacho/)_._
+_Hacktricks 徽标与动效设计由_ [_@ppieranacho_](https://www.instagram.com/ppieranacho/)_._
 
 ### 在本地运行 HackTricks
 ```bash
@@ -31,7 +31,7 @@ export LANG="master" # Leave master for english
 # Run the docker container indicating the path to the hacktricks folder
 docker run -d --rm --platform linux/amd64 -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "mkdir -p ~/.ssh && ssh-keyscan -H github.com >> ~/.ssh/known_hosts && cd /app && git config --global --add safe.directory /app && git checkout $LANG && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
 ```
-你的本地 HackTricks 副本将在 <5 分钟后 **可在 [http://localhost:3337](http://localhost:3337) 访问**（需要构建书籍，请耐心等待）。
+Your local copy of HackTricks will be **available at [http://localhost:3337](http://localhost:3337)** after <5 minutes (it needs to build the book, be patient).
 
 ## 企业赞助商
 
@@ -39,11 +39,11 @@ docker run -d --rm --platform linux/amd64 -p 3337:3000 --name hacktricks -v $(pw
 
 <figure><img src="images/stm (1).png" alt=""><figcaption></figcaption></figure>
 
-[**STM Cyber**](https://www.stmcyber.com) 是一家优秀的网络安全公司，口号为 **HACK THE UNHACKABLE**。他们开展自己的研究并开发自己的黑客工具，以便 **提供多种有价值的网络安全服务**，例如 pentesting、Red teams 和培训。
+[**STM Cyber**](https://www.stmcyber.com) 是一家优秀的网络安全公司，其口号是 **HACK THE UNHACKABLE**。他们进行自主研究并开发自己的 hacking tools，以 **提供多种有价值的网络安全服务**，例如 pentesting、Red teams 和培训。
 
-你可以在 [**https://blog.stmcyber.com**](https://blog.stmcyber.com) 查看他们的 **博客**
+您可以在 [**https://blog.stmcyber.com**](https://blog.stmcyber.com) 查看他们的 **blog**
 
-**STM Cyber** 也支持像 HackTricks 这样的网络安全开源项目 :)
+**STM Cyber** 也支持像 HackTricks 这样的开源网络安全项目 :)
 
 ---
 
@@ -51,7 +51,7 @@ docker run -d --rm --platform linux/amd64 -p 3337:3000 --name hacktricks -v $(pw
 
 <figure><img src="images/image (45).png" alt=""><figcaption></figcaption></figure>
 
-[**RootedCON**](https://www.rootedcon.com) 是 **西班牙** 最重要的网络安全活动，也是 **欧洲** 最重要的会议之一。怀着 **推广技术知识的使命**，这个大会是技术与网络安全各领域专业人士的重要汇聚点。
+[**RootedCON**](https://www.rootedcon.com) 是 **西班牙** 最重要的网络安全活动，也是 **欧洲** 最有影响力的会议之一。该大会以 **促进技术知识** 为使命，是各类技术和网络安全专业人士的热烈汇聚点。
 
 {{#ref}}
 https://www.rootedcon.com/
@@ -63,9 +63,9 @@ https://www.rootedcon.com/
 
 <figure><img src="images/image (47).png" alt=""><figcaption></figcaption></figure>
 
-**Intigriti** 是 **Europe's #1** 的 ethical hacking 与 **bug bounty platform.**
+**Intigriti** 是 **Europe's #1** 的 ethical hacking 和 **bug bounty platform.**
 
-**Bug bounty tip**：**sign up** for **Intigriti**, a premium **bug bounty platform created by hackers, for hackers**! Join us at [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) today, and start earning bounties up to **$100,000**!
+**Bug bounty tip**：**sign up** 加入 **Intigriti**，这是一个由黑客为黑客打造的高级 **bug bounty platform**！现在就访问 [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks)，开始赚取高达 **$100,000** 的赏金！
 
 {{#ref}}
 https://go.intigriti.com/hacktricks
@@ -78,7 +78,7 @@ https://go.intigriti.com/hacktricks
 <figure><img src="images/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-使用 [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) 可以轻松构建并 **自动化工作流**，由世界上**最先进**的社区工具驱动。
+使用 [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) 可以轻松构建并 **自动化工作流**，由全球 **最先进** 的社区工具提供支持。
 
 立即获取访问权限：
 
@@ -94,11 +94,11 @@ https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktr
 
 加入 [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) 服务器，与经验丰富的黑客和 bug bounty 猎人交流！
 
-- **Hacking Insights:** 参与深入探讨黑客世界刺激与挑战的内容
-- **Real-Time Hack News:** 通过实时新闻和洞见及时了解快速变化的黑客世界
-- **Latest Announcements:** 获取最新启动的 bug bounty 和重要平台更新
+- **Hacking Insights:** Engage with content that delves into the thrill and challenges of hacking
+- **Real-Time Hack News:** Keep up-to-date with fast-paced hacking world through real-time news and insights
+- **Latest Announcements:** Stay informed with the newest bug bounties launching and crucial platform updates
 
-**Join us on** [**Discord**](https://discord.com/invite/N3FrSbmwdy) 并开始与顶尖黑客协作！
+**Join us on** [**Discord**](https://discord.com/invite/N3FrSbmwdy) 并开始与顶级黑客协作！
 
 ---
 
@@ -106,9 +106,9 @@ https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktr
 
 <figure><img src="images/pentest-tools.svg" alt=""><figcaption></figcaption></figure>
 
-**从黑客视角审视你的 Web 应用、网络与云**
+**Get a hacker's perspective on your web apps, network, and cloud**
 
-**发现并报告具有真实业务影响的关键可利用漏洞。** 使用我们 20+ 的自定义工具绘制攻击面，发现可导致权限升级的安全问题，并使用自动化利用收集关键证据，将你的工作成果转化为有说服力的报告。
+**Find and report critical, exploitable vulnerabilities with real business impact.** 使用我们 20+ 的自定义工具来绘制攻击面，发现可导致权限升级的安全问题，并使用 automated exploits 收集必要证据，将你的工作转化为有说服力的报告。
 
 {{#ref}}
 https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons
@@ -120,14 +120,14 @@ https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktrick
 
 <figure><img src="images/image (1254).png" alt=""><figcaption></figcaption></figure>
 
-**SerpApi** 提供快速且简便的实时 API 以 **访问搜索引擎结果**。他们负责抓取搜索引擎、处理代理、解决验证码，并为你解析所有丰富的结构化数据。
+**SerpApi** 提供快速且易用的实时 API 来 **访问搜索引擎结果**。他们负责抓取搜索引擎、处理代理、解决验证码，并为你解析所有丰富的结构化数据。
 
-订阅 SerpApi 的任一计划可访问 50 多种不同的 API，用于抓取不同的搜索引擎，包括 Google、Bing、Baidu、Yahoo、Yandex 等。\
-与其他提供商不同，**SerpApi 不仅抓取自然结果**。SerpApi 的响应始终包含所有广告、内联图片与视频、知识图谱以及搜索结果中存在的其他元素与特性。
+订阅 SerpApi 的计划可访问超过 50 个不同的 API，用于抓取不同的搜索引擎，包括 Google、Bing、Baidu、Yahoo、Yandex 等。\
+与其他提供商不同，**SerpApi 不只是抓取 organic results**。SerpApi 的响应始终包含所有广告、内联图片和视频、知识图谱以及搜索结果中存在的其他元素和功能。
 
-当前 SerpApi 的客户包括 **Apple, Shopify, and GrubHub**。\
-欲了解更多信息请查看他们的 [**blog**](https://serpapi.com/blog/)**,** 或在他们的 [**playground**](https://serpapi.com/playground)** 中尝试示例。**\
-你可以在 [**here**](https://serpapi.com/users/sign_up)** 创建一个免费帐户**。
+当前 SerpApi 的客户包括 **Apple、Shopify 和 GrubHub**。\
+更多信息请查看他们的 [**blog**](https://serpapi.com/blog/)**，** 或在他们的 [**playground**](https://serpapi.com/playground) 试用示例。\
+你可以在 [**这里**](https://serpapi.com/users/sign_up)** 创建一个免费账户。**
 
 ---
 
@@ -135,7 +135,7 @@ https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktrick
 
 <figure><img src="images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-学习进行漏洞研究、渗透测试和逆向工程以保护移动应用与设备所需的技术与技能。通过我们的点播课程 **掌握 iOS 与 Android 安全** 并 **获得认证**：
+学习进行漏洞研究、penetration testing 和逆向工程以保护移动应用和设备所需的技术与技能。通过我们的按需课程掌握 iOS 与 Android 安全，并 **获取认证**：
 
 {{#ref}}
 https://academy.8ksec.io/
@@ -147,13 +147,13 @@ https://academy.8ksec.io/
 
 <figure><img src="images/websec (1).svg" alt=""><figcaption></figcaption></figure>
 
-[**WebSec**](https://websec.net) 是一家位于 **Amsterdam** 的专业网络安全公司，帮助全球企业应对最新的网络安全威胁，提供带有**现代**方法的 **offensive-security services**。
+[**WebSec**](https://websec.net) 是一家总部位于 **Amsterdam** 的专业网络安全公司，帮助 **全球** 企业抵御最新的网络安全威胁，提供带有 **现代化** 方法的 **offensive-security services**。
 
-WebSec 是一家国际性安全公司，在 Amsterdam 和 Wyoming 设有办事处。他们提供 **一体化安全服务**，涵盖渗透测试、**Security** 审计、意识培训、网络钓鱼活动、代码审计、漏洞利用开发、安全专家外包等诸多服务。
+WebSec 是一家国际安全公司，在 Amsterdam 和 Wyoming 设有办公室。他们提供 **全方位安全服务**，涵盖 Pentesting、**Security** 审计、意识培训、钓鱼活动、代码审查、Exploit 开发、安全专家外包等诸多服务。
 
-WebSec 的另一大特点是，与行业平均水平不同，WebSec 对自己的技能 **非常有信心**，以至于他们在网站上承诺“**If we can't hack it, You don't pay it!**”。更多信息请查看他们的 [**website**](https://websec.net/en/) 和 [**blog**](https://websec.net/blog/)！
+WebSec 的另一大特点是与行业平均水平不同，他们对自己的技能 **非常自信**，以至于在网站上承诺“**If we can't hack it, You don't pay it!**”。想了解更多请访问他们的 [**website**](https://websec.net/en/) 和 [**blog**](https://websec.net/blog/)！
 
-除了上述内容外，WebSec 也是 HackTricks 的 **坚定支持者**。
+此外，WebSec 也是 HackTricks 的 **坚定支持者。**
 
 {{#ref}}
 https://www.youtube.com/watch?v=Zq2JycGDCPM
@@ -165,10 +165,10 @@ https://www.youtube.com/watch?v=Zq2JycGDCPM
 
 <figure><img src="images/venacus-logo.svg" alt="venacus logo"><figcaption></figcaption></figure>
 
-[**Venacus**](https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons) 是一个数据泄露 (leak) 搜索引擎。\
-我们提供类似 Google 的随机字符串搜索，覆盖各类大小数据泄露 — 不仅限于大型泄露 — 来自多个来源的数据。\
-人名搜索、AI 搜索、组织搜索、API (OpenAPI) 访问、theHarvester 集成，包含所有 pentester 所需的功能。\
-**HackTricks 继续为我们所有人提供很棒的学习平台，我们很自豪能赞助它！**
+[**Venacus**](https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons) 是一个 data breach (leak) 搜索引擎。\
+我们提供类似 google 的随机字符串搜索，覆盖各种规模的数据 leak —— 不仅限于大型泄露 —— 来源于多个数据源。\
+People search、AI search、organization search、API (OpenAPI) 访问、theHarvester integration，所有 pentester 需要的功能一应俱全。\
+**HackTricks 持续是我们大家的优秀学习平台，我们很自豪能赞助它！**
 
 {{#ref}}
 https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons
@@ -182,12 +182,12 @@ https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons
 
 
 **Built for the field. Built around you.**\
-[**Cyber Helmets**](https://cyberhelmets.com/?ref=hacktricks) 开发并提供由业内专家构建和领导的高效网络安全培训。他们的课程超越理论，使用反映真实世界威胁的定制环境，赋能团队掌握深入的理解与可付诸实践的技能。若需定制培训，请通过 [**here**](https://cyberhelmets.com/tailor-made-training/?ref=hacktricks) 与我们联系。
+[**Cyber Helmets**](https://cyberhelmets.com/?ref=hacktricks) 开发并提供由业界专家构建和领导的高效网络安全培训。他们的课程超越理论，通过反映真实世界威胁的定制环境，为团队提供深入理解和可操作技能。若需定制培训，请通过 [**here**](https://cyberhelmets.com/tailor-made-training/?ref=hacktricks) 与我们联系。
 
-**使其培训与众不同的要点：**
-* 定制构建的内容与实验室
-* 支持顶级工具与平台
-* 由实践者设计与授课
+**他们培训的特点：**
+* 定制内容与实验室
+* 依托顶级工具与平台
+* 由实务从业者设计与授课
 
 {{#ref}}
 https://cyberhelmets.com/courses/?ref=hacktricks
@@ -199,13 +199,13 @@ https://cyberhelmets.com/courses/?ref=hacktricks
 
 <figure><img src="images/lasttower.png" alt="lasttower logo"><figcaption></figcaption></figure>
 
-Last Tower Solutions 为 **教育** 与 **金融科技 (FinTech)** 机构提供专业化的网络安全服务，重点关注 **渗透测试、云安全评估** 和 **合规准备**（SOC 2、PCI-DSS、NIST）。我们的团队包含 **OSCP 和 CISSP 认证的专业人员**，为每次服务提供深厚的技术专长与行业标准洞见。
+Last Tower Solutions 为 **教育 (Education)** 和 **金融科技 (FinTech)** 机构提供专门的网络安全服务，重点包括 **penetration testing、cloud security assessments** 和 **compliance readiness**（如 SOC 2、PCI-DSS、NIST）。我们的团队包括持有 **OSCP 和 CISSP** 认证的专业人员，能为每次项目带来深厚的技术专长和行业视角。
 
-我们不仅依赖自动化扫描，还提供 **人工、情报驱动的测试**，为高风险环境量身定制。从保护学生记录到保障金融交易，我们帮助组织守护最重要的资产。
+我们超越自动化扫描，提供针对高风险环境的 **手动、情报驱动的测试**。从保护学生记录到保障金融交易，我们帮助组织守护最重要的资产。
 
-_“高质量的防御来源于了解进攻，我们通过理解来提供安全。”_
+_“A quality defense requires knowing the offense, we provide security through understanding.”_
 
-想了解更多网络安全的最新动态，请访问我们的 [**blog**](https://www.lasttowersolutions.com/blog)。
+通过访问我们的 [**blog**](https://www.lasttowersolutions.com/blog) 保持对最新网络安全动态的了解。
 
 {{#ref}}
 https://www.lasttowersolutions.com/
@@ -215,11 +215,11 @@ https://www.lasttowersolutions.com/
 
 ### [K8Studio - The Smarter GUI to Manage Kubernetes.](https://k8studio.io/)
 
-<figure><img src="images/k8studio.png" alt="k8studio logo"><figcaption></figcaption></figure>
+<figure><img src="images/k8studio.jpg" alt="k8studio logo"><figcaption></figcaption></figure>
 
-K8Studio IDE 使 DevOps、DevSecOps 和开发人员能够高效地管理、监控和保护 Kubernetes 集群。利用我们的 AI 驱动洞见、先进的安全框架和直观的 CloudMaps GUI 来可视化集群、了解其状态并自信地采取行动。
+K8Studio IDE 帮助 DevOps、DevSecOps 和开发者高效地管理、监控和保护 Kubernetes 集群。利用我们的 AI 驱动洞察、高级安全框架和直观的 CloudMaps GUI，可视化集群、了解状态并自信地采取行动。
 
-此外，K8Studio 与所有主流 kubernetes 发行版兼容（AWS, GCP, Azure, DO, Rancher, K3s, Openshift 等）。
+此外，K8Studio 与所有主流 kubernetes 发行版兼容 (AWS, GCP, Azure, DO, Rancher, K3s, Openshift and more)。
 
 {{#ref}}
 https://k8studio.io/
@@ -230,13 +230,13 @@ https://k8studio.io/
 
 ## 许可证与免责声明
 
-请查看：
+查看它们：
 
 {{#ref}}
 welcome/hacktricks-values-and-faq.md
 {{#endref}}
 
-## Github 统计
+## Github Stats
 
 ![HackTricks Github Stats](https://repobeats.axiom.co/api/embed/68f8746802bcf1c8462e889e6e9302d4384f164b.svg)
 
