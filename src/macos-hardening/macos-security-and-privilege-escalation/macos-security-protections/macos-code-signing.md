@@ -1,15 +1,20 @@
-# macOS コード署名
+# macOS Code Signing
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## 基本情報
 
-Mach-o バイナリには、バイナリ内の署名の **オフセット** と **サイズ** を示す **`LC_CODE_SIGNATURE`** というロードコマンドが含まれています。実際、GUIツールの MachOView を使用すると、バイナリの最後にこの情報を含む **コード署名** というセクションを見つけることができます：
+{{#ref}}
+../../../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/mach-o-entitlements-and-ipsw-indexing.md
+{{#endref}}
+
+
+Mach-o バイナリには **`LC_CODE_SIGNATURE`** というロードコマンドが含まれており、バイナリ内部の署名の **offset** と **size** を示します。実際、GUI ツール MachOView を使うと、バイナリの末尾にこの情報を持つ **Code Signature** というセクションを見つけることができます:
 
 <figure><img src="../../../images/image (1) (1) (1) (1).png" alt="" width="431"><figcaption></figcaption></figure>
 
-コード署名のマジックヘッダーは **`0xFADE0CC0`** です。その後、長さやそれらを含む superBlob のブロブの数などの情報があります。\
-この情報は [こちらのソースコード](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L276) で見つけることができます：
+Code Signature のマジックヘッダは **`0xFADE0CC0`** です。続いて、それらを含む superBlob の長さや blob の数といった情報があります。\
+この情報は [source code here](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L276):
 ```c
 /*
 * Structure of an embedded-signature SuperBlob
@@ -38,14 +43,14 @@ char data[];
 } CS_GenericBlob
 __attribute__ ((aligned(1)));
 ```
-一般的なブロブには、Code Directory、Requirements、Entitlements、およびCryptographic Message Syntax (CMS)が含まれています。\
-さらに、ブロブにエンコードされたデータは**ビッグエンディアン**でエンコードされていることに注意してください。
+一般的に含まれる blob は Code Directory、Requirements、Entitlements、および Cryptographic Message Syntax (CMS) です。\
+さらに、blob にエンコードされたデータが **ビッグエンディアン** である点に注意してください。
 
-さらに、署名はバイナリから切り離され、`/var/db/DetachedSignatures`に保存される可能性があります（iOSで使用されます）。
+また、署名はバイナリから切り離されて `/var/db/DetachedSignatures` に保存されることがあり（iOSで使用される）、
 
 ## Code Directory Blob
 
-[Code Directory Blobの宣言をコード内で見つけることができます](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L104):
+宣言は [Code Directory Blob in the code](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L104) で確認できます：
 ```c
 typedef struct __CodeDirectory {
 uint32_t magic;                                 /* magic number (CSMAGIC_CODEDIRECTORY) */
@@ -101,12 +106,13 @@ char end_withLinkage[0];
 } CS_CodeDirectory
 __attribute__ ((aligned(1)));
 ```
-注意すべきは、この構造体の異なるバージョンがあり、古いものは情報が少ない場合があることです。
+この struct には異なるバージョンがあり、古いものは含まれる情報が少ない場合があることに注意してください。
 
-## コード署名ページ
+## コードページの署名
 
-完全なバイナリをハッシュ化することは非効率的であり、部分的にメモリにロードされている場合には無意味です。したがって、コード署名は実際にはハッシュのハッシュであり、各バイナリページが個別にハッシュ化されます。\
-実際、前の**コードディレクトリ**コードでは、**ページサイズが指定されている**のがわかります。さらに、バイナリのサイズがページのサイズの倍数でない場合、フィールド**CodeLimit**は署名の終わりがどこにあるかを指定します。
+バイナリ全体をハッシュするのは、メモリに部分的にしかロードされない場合には非効率であり、ほとんど無意味です。したがって、コード署名は実際にはハッシュのハッシュであり、各バイナリページが個別にハッシュされます。\
+
+実際、前述の **Code Directory** コードでは、そのフィールドのひとつに **ページサイズが指定されている** のがわかります。さらに、バイナリのサイズがページサイズの倍数でない場合、フィールド **CodeLimit** が署名の終端を指定します。
 ```bash
 # Get all hashes of /bin/ps
 codesign -d -vvvvvv /bin/ps
@@ -144,25 +150,25 @@ openssl sha256 /tmp/*.page.*
 ```
 ## Entitlements Blob
 
-アプリケーションにはすべての権限が定義された**entitlement blob**が含まれている場合があります。さらに、一部のiOSバイナリは、特別なスロット-7に権限を特定している場合があります（-5権限の特別なスロットの代わりに）。
+アプリケーションには、すべての entitlements が定義された **entitlement blob** が含まれている場合があることに注意してください。さらに、一部の iOS バイナリでは、entitlements が特殊スロット -7（-5 entitlements special slot の代わり）に格納されていることがあります。
 
 ## Special Slots
 
-MacOSアプリケーションは、バイナリ内で実行するために必要なすべてを持っているわけではなく、**external resources**（通常はアプリケーションの**bundle**内）も使用します。したがって、バイナリ内には、変更されていないことを確認するためにいくつかの興味深い外部リソースのハッシュを含むスロットがあります。
+MacOS のアプリケーションは実行に必要なすべてをバイナリ内に持っているわけではなく、**external resources**（通常はアプリケーションの **bundle** 内）も使用します。したがって、バイナリ内には外部リソースが改変されていないかを確認するためのハッシュを格納するいくつかのスロットがあります。
 
-実際、Code Directory構造体には、特別なスロットの数を示す**`nSpecialSlots`**というパラメータがあります。特別なスロット0は存在せず、最も一般的なもの（-1から-6まで）は次のとおりです：
+実際、Code Directory structs には特殊スロットの数を示すパラメータ **`nSpecialSlots`** があり、それを見ることができます。特殊スロット 0 は存在せず、最も一般的なもの（-1 から -6）は次の通りです:
 
-- `info.plist`のハッシュ（または`__TEXT.__info__plist`内のもの）。
-- 要件のハッシュ
-- リソースディレクトリのハッシュ（バンドル内の`_CodeSignature/CodeResources`ファイルのハッシュ）。
+- `info.plist` のハッシュ（または `__TEXT.__info__plist` 内のもの）。
+- Requirements のハッシュ
+- Resource Directory のハッシュ（bundle 内の `_CodeSignature/CodeResources` ファイルのハッシュ）。
 - アプリケーション固有（未使用）
-- 権限のハッシュ
-- DMGコード署名のみ
-- DER権限
+- entitlements のハッシュ
+- DMG code signatures のみ
+- DER Entitlements
 
 ## Code Signing Flags
 
-すべてのプロセスには、カーネルによって開始される`status`として知られるビットマスクが関連付けられており、その一部は**code signature**によって上書きされる可能性があります。コード署名に含めることができるこれらのフラグは[コードで定義されています](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L36)：
+各プロセスにはカーネルによって設定されるビットマスクである `status` が関連付けられており、その一部は **code signature** によって上書きすることができます。code signing に含めることができるこれらのフラグは [defined in the code](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L36):
 ```c
 /* code signing attributes of a process */
 #define CS_VALID                    0x00000001  /* dynamically valid */
@@ -207,15 +213,15 @@ CS_RESTRICT | CS_ENFORCEMENT | CS_REQUIRE_LV | CS_RUNTIME | CS_LINKER_SIGNED)
 
 #define CS_ENTITLEMENT_FLAGS        (CS_GET_TASK_ALLOW | CS_INSTALLER | CS_DATAVAULT_CONTROLLER | CS_NVRAM_UNRESTRICTED)
 ```
-注意すべきは、関数 [**exec_mach_imgact**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/kern/kern_exec.c#L1420) が実行を開始する際に `CS_EXEC_*` フラグを動的に追加できることです。
+Note that the function [**exec_mach_imgact**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/kern/kern_exec.c#L1420) can also add the `CS_EXEC_*` flags dynamically when starting the execution.
 
-## コード署名要件
+## コード署名の要件
 
-各アプリケーションは、実行可能であるために満たさなければならない **要件** をいくつか **保持** しています。もし **アプリケーションに満たされていない要件が含まれている場合**、それは実行されません（おそらく変更されているためです）。
+各アプリケーションは、実行可能になるために満たすべき**要件**（**requirements**）を格納しています。もしアプリケーションに含まれる**要件が満たされていない場合**、実行は拒否されます（おそらく改変されているため）。
 
-バイナリの要件は **特別な文法** を使用し、**式** のストリームとして表現され、`0xfade0c00` をマジックとして使用してバイナリとしてエンコードされ、その **ハッシュは特別なコードスロットに保存** されます。
+バイナリの要件は、**式**のストリームである**特殊な文法**を使用しており、マジック値 `0xfade0c00` を用いたblobとしてエンコードされ、その**ハッシュは特別なコードスロットに格納されます**。
 
-バイナリの要件は、次のコマンドを実行することで確認できます：
+バイナリの要件は、次のように実行して確認できます:
 ```bash
 codesign -d -r- /bin/ls
 Executable=/bin/ls
@@ -225,10 +231,10 @@ codesign -d -r- /Applications/Signal.app/
 Executable=/Applications/Signal.app/Contents/MacOS/Signal
 designated => identifier "org.whispersystems.signal-desktop" and anchor apple generic and certificate 1[field.1.2.840.113635.100.6.2.6] /* exists */ and certificate leaf[field.1.2.840.113635.100.6.1.13] /* exists */ and certificate leaf[subject.OU] = U68MSDN6DR
 ```
-> [!NOTE]
-> この署名が認証情報、TeamID、ID、権限、その他多くのデータを確認できることに注意してください。
+> [!TIP]
+> これらの署名は証明書情報、TeamID、IDs、entitlements、その他多くのデータをチェックできることに注意してください。
 
-さらに、`csreq`ツールを使用していくつかのコンパイルされた要件を生成することが可能です:
+さらに、`csreq`ツールを使ってコンパイル済みの要件を生成することも可能です:
 ```bash
 # Generate compiled requirements
 csreq -b /tmp/output.csreq -r='identifier "org.whispersystems.signal-desktop" and anchor apple generic and certificate 1[field.1.2.840.113635.100.6.2.6] /* exists */ and certificate leaf[field.1.2.840.113635.100.6.1.13] /* exists */ and certificate leaf[subject.OU] = U68MSDN6DR'
@@ -240,55 +246,57 @@ od -A x -t x1 /tmp/output.csreq
 0000020    00  00  00  21  6f  72  67  2e  77  68  69  73  70  65  72  73
 [...]
 ```
+It's possible to access this information and create or modify requirements with some APIs from the `Security.framework` like:
+
 #### **有効性の確認**
 
-- **`Sec[Static]CodeCheckValidity`**: 要件ごとのSecCodeRefの有効性を確認します。
-- **`SecRequirementEvaluate`**: 証明書コンテキスト内の要件を検証します。
-- **`SecTaskValidateForRequirement`**: 実行中のSecTaskを`CFString`要件に対して検証します。
+- **`Sec[Static]CodeCheckValidity`**: SecCodeRef が Requirement に沿って有効かどうかをチェックします。
+- **`SecRequirementEvaluate`**: 証明書のコンテキストで Requirement を検証します。
+- **`SecTaskValidateForRequirement`**: 実行中の SecTask を `CFString` の Requirement に対して検証します。
 
 #### **コード要件の作成と管理**
 
-- **`SecRequirementCreateWithData`:** 要件を表すバイナリデータから`SecRequirementRef`を作成します。
-- **`SecRequirementCreateWithString`:** 要件の文字列表現から`SecRequirementRef`を作成します。
-- **`SecRequirementCopy[Data/String]`**: `SecRequirementRef`のバイナリデータ表現を取得します。
-- **`SecRequirementCreateGroup`**: アプリグループメンバーシップのための要件を作成します。
+- **`SecRequirementCreateWithData`:** 要件を表すバイナリデータから `SecRequirementRef` を作成します。
+- **`SecRequirementCreateWithString`:** 要件の文字列表現から `SecRequirementRef` を作成します。
+- **`SecRequirementCopy[Data/String]`**: `SecRequirementRef` のバイナリデータ表現を取得します。
+- **`SecRequirementCreateGroup`**: app-group membership の要件を作成します。
 
 #### **コード署名情報へのアクセス**
 
-- **`SecStaticCodeCreateWithPath`**: コード署名を検査するためにファイルシステムパスから`SecStaticCodeRef`オブジェクトを初期化します。
-- **`SecCodeCopySigningInformation`**: `SecCodeRef`または`SecStaticCodeRef`から署名情報を取得します。
+- **`SecStaticCodeCreateWithPath`**: コード署名を検査するためにファイルシステムパスから `SecStaticCodeRef` オブジェクトを初期化します。
+- **`SecCodeCopySigningInformation`**: `SecCodeRef` または `SecStaticCodeRef` から署名情報を取得します。
 
 #### **コード要件の変更**
 
-- **`SecCodeSignerCreate`**: コード署名操作を実行するための`SecCodeSignerRef`オブジェクトを作成します。
-- **`SecCodeSignerSetRequirement`**: 署名中に適用するための新しい要件をコードサイナーに設定します。
-- **`SecCodeSignerAddSignature`**: 指定されたサイナーで署名されるコードに署名を追加します。
+- **`SecCodeSignerCreate`**: コード署名操作を行うための `SecCodeSignerRef` オブジェクトを作成します。
+- **`SecCodeSignerSetRequirement`**: 署名時に適用する新しい要件をコードサイナーに設定します。
+- **`SecCodeSignerAddSignature`**: 指定したサイナーで署名中のコードに署名を追加します。
 
 #### **要件によるコードの検証**
 
 - **`SecStaticCodeCheckValidity`**: 指定された要件に対して静的コードオブジェクトを検証します。
 
-#### **追加の便利なAPI**
+#### **追加の有用なAPI**
 
-- **`SecCodeCopy[Internal/Designated]Requirement`: SecCodeRefからSecRequirementRefを取得**
-- **`SecCodeCopyGuestWithAttributes`**: 特定の属性に基づいてコードオブジェクトを表す`SecCodeRef`を作成し、サンドボックスに便利です。
-- **`SecCodeCopyPath`**: `SecCodeRef`に関連付けられたファイルシステムパスを取得します。
-- **`SecCodeCopySigningIdentifier`**: `SecCodeRef`から署名識別子（例：チームID）を取得します。
-- **`SecCodeGetTypeID`**: `SecCodeRef`オブジェクトのタイプ識別子を返します。
-- **`SecRequirementGetTypeID`**: `SecRequirementRef`のCFTypeIDを取得します。
+- **`SecCodeCopy[Internal/Designated]Requirement`: Get SecRequirementRef from SecCodeRef**
+- **`SecCodeCopyGuestWithAttributes`**: 特定の属性に基づくコードオブジェクトを表す `SecCodeRef` を作成します（サンドボックス用途で有用）。
+- **`SecCodeCopyPath`**: `SecCodeRef` に関連付けられたファイルシステムパスを取得します。
+- **`SecCodeCopySigningIdentifier`**: `SecCodeRef` から署名識別子（例: Team ID）を取得します。
+- **`SecCodeGetTypeID`**: `SecCodeRef` オブジェクトのタイプ識別子を返します。
+- **`SecRequirementGetTypeID`**: `SecRequirementRef` の CFTypeID を取得します。
 
 #### **コード署名フラグと定数**
 
-- **`kSecCSDefaultFlags`**: コード署名操作のための多くのSecurity.framework関数で使用されるデフォルトフラグです。
-- **`kSecCSSigningInformation`**: 署名情報を取得する必要があることを指定するために使用されるフラグです。
+- **`kSecCSDefaultFlags`**: コード署名操作で多くの Security.framework 関数で使用されるデフォルトフラグ。
+- **`kSecCSSigningInformation`**: 署名情報を取得することを指定するために使用されるフラグ。
 
 ## コード署名の強制
 
-**カーネル**は、アプリのコードが実行される前に**コード署名を確認**します。さらに、新しいコードをメモリに書き込み実行する方法の一つは、`mprotect`が`MAP_JIT`フラグで呼び出される場合にJITを悪用することです。この操作を行うには、アプリケーションに特別な権限が必要です。
+アプリのコードが実行される前に、**カーネル** が **コード署名** を検査します。さらに、メモリに新しいコードを書き込み実行する方法の一つは、`mprotect` が `MAP_JIT` フラグで呼び出される場合に JIT を悪用することです。これを行うには、アプリケーションに特別な entitlement が必要である点に注意してください。
 
 ## `cs_blobs` & `cs_blob`
 
-[**cs_blob**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/sys/ubc_internal.h#L106)構造体は、実行中のプロセスの権限に関する情報を含んでいます。`csb_platform_binary`は、アプリケーションがプラットフォームバイナリであるかどうかも通知します（これは、これらのプロセスのタスクポートへのSEND権限を保護するためのセキュリティメカニズムを適用するためにOSによって異なるタイミングでチェックされます）。
+[**cs_blob**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/sys/ubc_internal.h#L106) 構造体は、実行中のプロセスの entitlement に関する情報を含みます。`csb_platform_binary` はアプリケーションがプラットフォームバイナリかどうかも示します（これは OS がこれらのプロセスの task port への SEND 権利を保護するなどのセキュリティ機構を適用するために様々な場面でチェックします）。
 ```c
 struct cs_blob {
 struct cs_blob  *csb_next;

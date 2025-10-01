@@ -1,8 +1,8 @@
-# 特定のソフトウェア／ファイルタイプ向けトリック
+# 特定のソフトウェア／ファイルタイプのトリック
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-ここでは、特定のファイルタイプやソフトウェア向けの興味深いトリックを紹介します：
+ここでは、特定のファイルタイプおよび/またはソフトウェアに関する興味深いトリックを紹介します:
 
 
 {{#ref}}
@@ -52,6 +52,11 @@ video-and-audio-file-analysis.md
 
 {{#ref}}
 zips-tricks.md
+{{#endref}}
+
+
+{{#ref}}
+mach-o-entitlements-and-ipsw-indexing.md
 {{#endref}}
 
 {{#include ../../../banners/hacktricks-training.md}}
