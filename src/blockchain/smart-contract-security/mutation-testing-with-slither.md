@@ -4,11 +4,11 @@
 
 Mutation testing "tests your tests" by systematically introducing small changes (mutants) into your Solidity code and re-running your test suite. If a test fails, the mutant is killed. If the tests still pass, the mutant survives, revealing a blind spot in your test suite that line/branch coverage cannot detect.
 
-Ana fikir: Coverage, kodun çalıştırıldığını gösterir; mutation testing ise davranışın gerçekten doğrulandığını gösterir.
+Key idea: Coverage shows code was executed; mutation testing shows whether behavior is actually asserted.
 
-## Neden coverage yanıltıcı olabilir
+## Neden coverage aldatıcı olabilir
 
-Basit bir eşik kontrolünü düşünün:
+Bu basit eşik kontrolünü düşünün:
 ```solidity
 function verifyMinimumDeposit(uint256 deposit) public returns (bool) {
 if (deposit >= 1 ether) {
@@ -18,22 +18,22 @@ return false;
 }
 }
 ```
-Birim testleri yalnızca eşik değerinin altında bir değeri ve üzerinde bir değeri kontrol ediyorsa, equality boundary (==) eşitliğini doğrulamadan %100 line/branch coverage elde edebilir. `deposit >= 2 ether` şeklinde yapılacak bir refactor bu testleri yine geçer ve protokol mantığını sessizce bozabilir.
+Birim testleri sadece eşik değerin altındaki ve üstündeki bir değeri kontrol ediyorsa, eşitlik sınırını (==) doğrulamadan %100 satır/branch kapsamına ulaşabilir. `deposit >= 2 ether` şeklinde yapılan bir refactor yine bu testleri geçer ve protokol mantığını sessizce bozabilir.
 
-Mutation testing, koşulu değiştirip testlerinizin başarısız olduğunu doğrulayarak bu boşluğu ortaya çıkarır.
+Mutasyon testi, koşulu değiştirerek ve testlerinizin başarısız olduğunu doğrulayarak bu boşluğu açığa çıkarır.
 
 ## Yaygın Solidity mutasyon operatörleri
 
-Slither’in mutasyon motoru, semantiği değiştiren birçok küçük düzenleme uygular, örneğin:
+Slither’s mutation engine birçok küçük, semantik değiştiren düzenleme uygular, örneğin:
 - Operatör değiştirme: `+` ↔ `-`, `*` ↔ `/`, vb.
 - Atama değiştirme: `+=` → `=`, `-=` → `=`
 - Sabit değiştirme: sıfır olmayan → `0`, `true` ↔ `false`
-- `if`/loop içindeki koşulun tersine çevrilmesi/değiştirilmesi
+- `if`/döngüler içinde koşulun tersine çevrilmesi/değiştirilmesi
 - Tüm satırları yorum satırı haline getirme (CR: Comment Replacement)
 - Bir satırı `revert()` ile değiştirme
 - Veri tipi değişimleri: örn., `int128` → `int64`
 
-Hedef: Oluşturulan mutantların %100'ünün testler tarafından tespit edilip başarısızlığa yol açmasının sağlanması veya hayatta kalanlar için net gerekçe sunulması.
+Amaç: Oluşturulan mutantların %100'ünü etkisiz kılmak; hayatta kalanları ise açık gerekçelerle savunmak.
 
 ## slither-mutate ile mutasyon testi çalıştırma
 
@@ -48,66 +48,66 @@ slither-mutate --list-mutators
 ```bash
 slither-mutate ./src/contracts --test-cmd="forge test" &> >(tee mutation.results)
 ```
-- Eğer Foundry kullanmıyorsanız, `--test-cmd`'i testleri nasıl çalıştırıyorsanız onunla değiştirin (örneğin, `npx hardhat test`, `npm test`).
+- Eğer Foundry kullanmıyorsanız, `--test-cmd` ile testleri çalıştırma komutunuzu değiştirin (ör. `npx hardhat test`, `npm test`).
 
-Artefaktlar ve raporlar varsayılan olarak `./mutation_campaign` dizinine kaydedilir. Yakalanmamış (hayatta kalan) mutantlar inceleme için oraya kopyalanır.
+Artefaktlar ve raporlar varsayılan olarak `./mutation_campaign` içinde saklanır. Yakalanmamış (hayatta kalan) mutantlar inceleme için oraya kopyalanır.
 
-### Çıktıyı anlamak
+### Çıktıyı Anlama
 
 Rapor satırları şu şekilde görünür:
 ```text
 INFO:Slither-Mutate:Mutating contract ContractName
 INFO:Slither-Mutate:[CR] Line 123: 'original line' ==> '//original line' --> UNCAUGHT
 ```
-- Köşeli parantez içindeki etiket mutatör takma adıdır (örn., `CR` = Comment Replacement).
-- `UNCAUGHT` mutasyona uğramış davranış altında testlerin geçtiği anlamına gelir → eksik assertion.
+- Köşeli parantez içindeki etiket mutator takma adıdır (örn., `CR` = Comment Replacement).
+- `UNCAUGHT` mutasyona uğramış davranış altında testlerin geçtiği anlamına gelir → eksik doğrulama.
 
-## Reducing runtime: prioritize impactful mutants
+## Çalışma süresini azaltma: etkili mutantlara öncelik verin
 
 Mutasyon kampanyaları saatler veya günler sürebilir. Maliyeti azaltmak için ipuçları:
-- Scope: Önce yalnızca kritik contracts/directories ile başlayın, sonra genişletin.
-- Prioritize mutators: Eğer bir satırdaki yüksek öncelikli bir mutant hayatta kalırsa (örn., tüm satır yorum haline gelmiş), o satır için düşük öncelikli varyantları atlayabilirsiniz.
-- Parallelize tests if your runner allows it; cache dependencies/builds.
-- Fail-fast: bir değişiklik açıkça bir assertion boşluğunu gösterdiğinde erken durdurun.
+- Kapsam: Önce sadece kritik sözleşmeler/dizinlerle başlayın, sonra genişletin.
+- Mutators'a öncelik verin: Bir satırdaki yüksek öncelikli bir mutant hayatta kalırsa (örn., tüm satır yorum satırı yapıldı), o satır için daha düşük öncelikli varyantları atlayabilirsiniz.
+- Runner'ınız izin veriyorsa testleri paralelleştirin; bağımlılıkları/derlemeleri önbelleğe alın.
+- Fail-fast: bir değişiklik açıkça bir doğrulama boşluğunu gösterdiğinde erken durun.
 
-## Triage workflow for surviving mutants
+## Hayatta kalan mutantlar için triage iş akışı
 
-1) Mutasyona uğramış satırı ve davranışı inceleyin.
-- Mutasyona uğramış satırı uygulayıp yerelde odaklanmış bir test çalıştırarak yeniden üretin.
+1) Mutasyon uygulanmış satırı ve davranışı inceleyin.
+- Mutasyonlu satırı uygulayıp odaklanmış bir test çalıştırarak yerelde yeniden üretin.
 
-2) Testleri sadece dönüş değerlerini değil durumu assert edecek şekilde güçlendirin.
-- Eşitlik-sınır kontrolleri ekleyin (örn., test threshold `==`).
-- Post-koşulları assert edin: bakiyeler, total supply, yetkilendirme etkileri ve emit edilen event'ler.
+2) Testleri sadece dönüş değerlerini değil, durumu doğrulayacak şekilde güçlendirin.
+- Eşitlik-sınır kontrolleri ekleyin (örn., eşik için `==` testi).
+- Post-koşulları doğrulayın: bakiyeler, toplam arz, yetkilendirme etkileri ve yayılan olaylar.
 
-3) Aşırı izin veren mock'ları gerçekçi davranışlarla değiştirin.
-- Mock'ların on-chain gerçekleşen transferleri, hata yollarını ve event emit'lerini zorladığından emin olun.
+3) Aşırı izin verici mock'ları gerçekçi davranışlarla değiştirin.
+- Mock'ların on-chain gerçekleşen transferleri, hata yollarını ve olay yayınlarını zorunlu kıldığından emin olun.
 
 4) Fuzz testleri için invariant'lar ekleyin.
-- Örn., değer korunumu, negatif olmayan bakiyeler, yetkilendirme invariant'ları, uygulanabiliyorsa monoton supply.
+- Örn., değer korunumu, negatif olmayan bakiyeler, yetkilendirme invariantları, uygulanabilir yerlerde monoton arz.
 
-5) slither-mutate'i, hayatta kalanlar öldürülene veya açıkça gerekçelendirilene kadar yeniden çalıştırın.
+5) slither-mutate'i tekrar çalıştırın; hayatta kalanlar öldürülene kadar veya açıkça gerekçelendirene kadar.
 
-## Case study: revealing missing state assertions (Arkis protocol)
+## Vaka çalışması: eksik durum doğrulamalarını ortaya çıkarmak (Arkis DeFi protokolü)
 
-Arkis DeFi protokolünün bir audit sırasında yapılan bir mutasyon kampanyası şu tip hayatta kalanlar ortaya çıkardı:
+Arkis DeFi protokolünün bir denetimi sırasında yürütülen bir mutasyon kampanyası şu tür hayatta kalanları ortaya çıkardı:
 ```text
 INFO:Slither-Mutate:[CR] Line 33: 'cmdsToExecute.last().value = _cmd.value' ==> '//cmdsToExecute.last().value = _cmd.value' --> UNCAUGHT
 ```
-Commenting out the assignment didn’t break the tests, proving missing post-state assertions. Root cause: code trusted a user-controlled `_cmd.value` instead of validating actual token transfers. An attacker could desynchronize expected vs. actual transfers to drain funds. Result: high severity risk to protocol solvency.
+Atamanın yorum satırı haline getirilmesi testleri bozmadı; bu, son durum doğrulamalarının eksik olduğunu gösteriyor. Kök neden: kod, gerçek token transferlerini doğrulamak yerine kullanıcı kontrollü `_cmd.value`'ya güveniyordu. Bir saldırgan, beklenen ile gerçek transferleri senkronize etmeyerek fonları boşaltabilir. Sonuç: protokolün solventliği için yüksek risk.
 
-Guidance: Treat survivors that affect value transfers, accounting, or access control as high-risk until killed.
+Guidance: değer transferlerini, muhasebeyi veya erişim kontrolünü etkileyen survivors'ları killed edilene kadar yüksek risk olarak değerlendirin.
 
 ## Pratik kontrol listesi
 
-- Hedefe yönelik bir kampanya çalıştırın:
+- Hedefe yönelik bir kampanya yürütün:
 - `slither-mutate ./src/contracts --test-cmd="forge test"`
-- Survivor'ları önceliklendirin ve mutated davranış altında başarısız olacak testler/invariantler yazın.
-- Bakiye, supply, authorizations ve events'i assert edin.
-- Sınır testleri ekleyin (`==`, overflows/underflows, zero-address, zero-amount, empty arrays).
-- Gerçekçi olmayan mocks'ları değiştirin; failure modlarını simüle edin.
-- Tüm mutants öldürülene veya yorum ve gerekçe ile haklı çıkarılana kadar yineleyin.
+- Hayatta kalan mutantları sınıflandırın (triage) ve mutasyona uğramış davranışta başarısız olacak testler/invariant'lar yazın.
+- Bakiyeleri, supply'ı, yetkilendirmeleri ve event'leri doğrulayın.
+- Sınır testleri ekleyin (`==`, overflows/underflows, zero-address, zero-amount, boş diziler).
+- Gerçekçi olmayan mock'ları değiştirin; hata modlarını simüle edin.
+- Tüm mutantlar öldürülene (killed) veya yorumlar ve gerekçe ile haklı çıkarılana kadar yineleyin.
 
-## References
+## Kaynaklar
 
 - [Use mutation testing to find the bugs your tests don't catch (Trail of Bits)](https://blog.trailofbits.com/2025/09/18/use-mutation-testing-to-find-the-bugs-your-tests-dont-catch/)
 - [Arkis DeFi Prime Brokerage Security Review (Appendix C)](https://github.com/trailofbits/publications/blob/master/reviews/2024-12-arkis-defi-prime-brokerage-securityreview.pdf)
