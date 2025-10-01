@@ -1,14 +1,14 @@
-# Мутаційне тестування для Solidity зі Slither (slither-mutate)
+# Mutation Testing for Solidity with Slither (slither-mutate)
 
-{{#include ../../../banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}
 
-Мутаційне тестування "tests your tests" систематично вносить невеликі зміни (mutants) у ваш код на Solidity і повторно запускає набір тестів. Якщо тест падає — мутант вбито. Якщо тести все ще проходять — мутант виживає, що виявляє сліпу зону у вашому наборі тестів, яку line/branch coverage не може виявити.
+Mutation testing "tests your tests" by systematically introducing small changes (mutants) into your Solidity code and re-running your test suite. If a test fails, the mutant is killed. If the tests still pass, the mutant survives, revealing a blind spot in your test suite that line/branch coverage cannot detect.
 
-Ключова ідея: покриття показує, що код був виконаний; мутаційне тестування показує, чи поведінка фактично перевіряється.
+Key idea: Coverage shows code was executed; mutation testing shows whether behavior is actually asserted.
 
 ## Чому покриття може вводити в оману
 
-Розглянемо цю просту перевірку порогу:
+Розгляньте цю просту перевірку порогу:
 ```solidity
 function verifyMinimumDeposit(uint256 deposit) public returns (bool) {
 if (deposit >= 1 ether) {
@@ -18,39 +18,39 @@ return false;
 }
 }
 ```
-Модульні тести, які перевіряють лише значення нижче і вище порога, можуть досягати 100% покриття рядків/гілок, при цьому не перевіряючи граничну рівність (==). Рефакторинг до `deposit >= 2 ether` все одно пройде такі тести, тихо порушивши логіку протоколу.
+Модульні тести, що перевіряють лише значення нижче та вище порогу, можуть досягти 100% покриття рядків/гілок, одночасно не перевіряючи граничну перевірку на рівність (==). Рефакторинг до `deposit >= 2 ether` все одно пройде такі тести, тихо порушивши логіку протоколу.
 
-Mutation testing виявляє цю прогалину шляхом мутування умови і перевірки, що ваші тести провалюються.
+Мутаційне тестування виявляє цю прогалину шляхом мутації умови та перевірки, що ваші тести не проходять.
 
-## Поширені mutation-оператори для Solidity
+## Поширені оператори мутацій Solidity
 
-Механізм мутацій Slither застосовує багато дрібних змін, що змінюють семантику, наприклад:
+Slither’s mutation engine застосовує багато невеликих змін, що змінюють семантику, таких як:
 - Заміна операторів: `+` ↔ `-`, `*` ↔ `/`, etc.
 - Заміна присвоєння: `+=` → `=`, `-=` → `=`
 - Заміна констант: ненульове → `0`, `true` ↔ `false`
 - Заперечення/заміна умови всередині `if`/loops
-- Закоментувати цілі рядки (CR: Comment Replacement)
+- Коментування цілих рядків (CR: Comment Replacement)
 - Замінити рядок на `revert()`
-- Заміна типів даних: напр., `int128` → `int64`
+- Заміна типів даних: наприклад, `int128` → `int64`
 
-Мета: усунути 100% згенерованих мутантів або обґрунтувати тих, що вижили, чітким поясненням.
+Мета: знищити 100% згенерованих мутантів або обґрунтувати тих, що вижили, чітким поясненням.
 
 ## Running mutation testing with slither-mutate
 
 Requirements: Slither v0.10.2+.
 
-- Перелік опцій і мутаторів:
+- Перелік опцій та мутаційних операторів:
 ```bash
 slither-mutate --help
 slither-mutate --list-mutators
 ```
-- Foundry приклад (захопити результати та зберегти повний лог):
+- Приклад Foundry (зафіксувати результати й вести повний журнал):
 ```bash
 slither-mutate ./src/contracts --test-cmd="forge test" &> >(tee mutation.results)
 ```
-- Якщо ви не використовуєте Foundry, замініть `--test-cmd` на спосіб запуску тестів (наприклад, `npx hardhat test`, `npm test`).
+- Якщо ви не використовуєте Foundry, замініть `--test-cmd` на команду, якою ви запускаєте тести (наприклад, `npx hardhat test`, `npm test`).
 
-Артефакти та звіти зберігаються за замовчуванням у `./mutation_campaign`. Невиявлені (виживші) мутанти копіюються туди для перевірки.
+Артефакти та звіти за замовчуванням зберігаються в `./mutation_campaign`. Незловлені (вцілілі) мутанти копіюються туди для перевірки.
 
 ### Розуміння виводу
 
@@ -59,58 +59,58 @@ slither-mutate ./src/contracts --test-cmd="forge test" &> >(tee mutation.results
 INFO:Slither-Mutate:Mutating contract ContractName
 INFO:Slither-Mutate:[CR] Line 123: 'original line' ==> '//original line' --> UNCAUGHT
 ```
-- Тег у дужках — mutator alias (наприклад, `CR` = Comment Replacement).
-- `UNCAUGHT` означає, що tests пройшли під mutated поведінкою → відсутнє твердження.
+- Тег у дужках — це псевдонім мутатора (наприклад, `CR` = Comment Replacement).
+- `UNCAUGHT` означає, що тести пройшли за зміненої поведінки → відсутня перевірка.
 
-## Зменшення часу виконання: віддавайте пріоритет impactful mutants
+## Скорочення часу виконання: надавайте пріоритет впливовим мутантам
 
-Mutation campaigns можуть займати години або дні. Поради, щоб зменшити витрати:
-- Scope: Починайте лише з критичних contracts/directories, потім розширюйте.
-- Prioritize mutators: Якщо high-priority mutant на рядку виживає (наприклад, цілий рядок закоментований), можна пропустити lower-priority variants для цього рядка.
-- Parallelize tests, якщо ваш runner це дозволяє; кешуйте dependencies/builds.
-- Fail-fast: зупиняйтеся раніше, коли зміна явно демонструє прогалину в assertion.
+Кампії з мутацій можуть тривати години або дні. Поради для зменшення витрат:
+- Scope: почніть лише з критичних контрактів/директорій, потім розширюйте.
+- Prioritize mutators: якщо високопріоритетний мутант на рядку вижив (наприклад, цілий рядок закоментовано), можна пропустити менш пріоритетні варіанти для цього рядка.
+- Parallelize tests if your runner allows it; кешуйте залежності/зборки.
+- Fail-fast: зупиняйтеся раніше, коли зміна явно демонструє відсутність перевірки.
 
-## Triage workflow для surviving mutants
+## Робочий процес триажу для мутантів, що вижили
 
-1) Inspect the mutated line and behavior.
-- Reproduce locally by applying the mutated line and running a focused test.
+1) Огляньте змінений рядок коду та поведінку.
+- Відтворіть локально, застосувавши змінений рядок і запустивши цілеспрямований тест.
 
-2) Strengthen tests to assert state, not only return values.
-- Add equality-boundary checks (e.g., test threshold `==`).
-- Assert post-conditions: balances, total supply, authorization effects, and emitted events.
+2) Посиліть тести, щоб перевіряти стан, а не лише значення, що повертаються.
+- Додайте перевірки меж рівності (наприклад, тест порогу `==`).
+- Перевіряйте постумови: баланси, total supply, ефекти авторизації та згенеровані події.
 
-3) Replace overly permissive mocks with realistic behavior.
-- Ensure mocks enforce transfers, failure paths, and event emissions that occur on-chain.
+3) Замініть надто ліберальні mocks на реалістичну поведінку.
+- Переконайтеся, що mocks відображають transfers, failure paths і event emissions, які відбуваються on-chain.
 
-4) Add invariants for fuzz tests.
-- E.g., conservation of value, non-negative balances, authorization invariants, monotonic supply where applicable.
+4) Додайте інваріанти для fuzz-тестів.
+- Наприклад: збереження вартості, невід'ємні баланси, інваріанти авторизації, монотонність total supply там, де це застосовно.
 
-5) Re-run slither-mutate until survivors are killed or explicitly justified.
+5) Перезапускайте slither-mutate, доки всі вижилі мутанти не будуть вбиті або явно обґрунтовані.
 
-## Case study: revealing missing state assertions (Arkis protocol)
+## Приклад: виявлення відсутніх перевірок стану (Arkis protocol)
 
-Mutation campaign під час аудиту Arkis DeFi protocol виявила survivors, такі як:
+Кампанія мутацій під час аудиту Arkis DeFi protocol виявила вижилі, наприклад:
 ```text
 INFO:Slither-Mutate:[CR] Line 33: 'cmdsToExecute.last().value = _cmd.value' ==> '//cmdsToExecute.last().value = _cmd.value' --> UNCAUGHT
 ```
-Закоментування присвоєння не порушило тести, що свідчить про відсутність перевірок кінцевого стану. Корінь проблеми: код довіряв керованому користувачем `_cmd.value` замість перевірки фактичних переказів токенів. Атакуючий міг десинхронізувати очікувані та фактичні перекази, щоб викрасти кошти. Наслідок: високий ризик для платоспроможності протоколу.
+Закоментування присвоєння не зламало тести, що підтверджує відсутність post-state assertions. Корінь проблеми: код довіряв керованому користувачем `_cmd.value` замість перевіряти фактичні перекази токенів. Атакуючий міг би десинхронізувати очікувані й фактичні перекази, щоб вивести кошти. Наслідок: ризик високої критичності для платоспроможності протоколу.
 
-Guidance: вважайте вцілілих мутантів, які впливають на перекази коштів, облік або контроль доступу, високоризиковими доти, доки їх не ліквідують.
+Guidance: Вважайте survivors, які впливають на перекази вартості, облік або контроль доступу, високоризиковими, поки їх не вбито.
 
-## Practical checklist
+## Практичний чекліст
 
-- Run a targeted campaign:
+- Запустіть цілеспрямовану кампанію:
 - `slither-mutate ./src/contracts --test-cmd="forge test"`
-- Проаналізуйте вцілілих мутантів і напишіть тести/інваріанти, які провалювалися б при модифікованій поведінці.
-- Assert balances, supply, authorizations, and events.
-- Add boundary tests (`==`, overflows/underflows, zero-address, zero-amount, empty arrays).
-- Replace unrealistic mocks; simulate failure modes.
-- Iterate until all mutants are killed or justified with comments and rationale.
+- Проведіть триаж survivors і напишіть тести/інваріанти, які проваляться при мутованій поведінці.
+- Перевірте баланси, supply, авторизації та події.
+- Додайте тести меж (`==`, overflows/underflows, zero-address, zero-amount, empty arrays).
+- Замініть нереалістичні mocks; змоделюйте режими відмов.
+- Повторюйте, поки всі mutants не будуть killed або виправдані коментарями та обґрунтуванням.
 
-## References
+## Посилання
 
 - [Use mutation testing to find the bugs your tests don't catch (Trail of Bits)](https://blog.trailofbits.com/2025/09/18/use-mutation-testing-to-find-the-bugs-your-tests-dont-catch/)
 - [Arkis DeFi Prime Brokerage Security Review (Appendix C)](https://github.com/trailofbits/publications/blob/master/reviews/2024-12-arkis-defi-prime-brokerage-securityreview.pdf)
 - [Slither (GitHub)](https://github.com/crytic/slither)
 
-{{#include ../../../banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}
