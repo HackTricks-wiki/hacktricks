@@ -1,49 +1,50 @@
-# Phishing Methodology
+# Mbinu za Phishing
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Methodology
+## Mbinu
 
-1. Fanya utafiti kuhusu mwathirika
-1. Chagua **domeni la mwathirika**.
-2. Fanya utafiti wa msingi wa wavuti **ukitafuta milango ya kuingia** inayotumiwa na mwathirika na **amua** ni ipi utakuwa **ukijifanya**.
-3. Tumia **OSINT** ili **kupata barua pepe**.
+1. Fanya recon kwa victim
+1. Chagua the **victim domain**.
+2. Fanya web enumeration ya msingi ukitafuta **login portals** zinazotumika na victim na **amua** ni ipi utakayo **impersonate**.
+3. Tumia **OSINT** ili **find emails**.
 2. Andaa mazingira
-1. **Nunua domeni** ambayo utatumia kwa tathmini ya phishing
-2. **Sanidi huduma ya barua pepe** inayohusiana na rekodi (SPF, DMARC, DKIM, rDNS)
+1. **Buy the domain** utakaotumia kwa phishing assessment
+2. **Configure the email service** related records (SPF, DMARC, DKIM, rDNS)
 3. Sanidi VPS na **gophish**
-3. Andaa kampeni
-1. Andaa **kigezo cha barua pepe**
-2. Andaa **ukurasa wa wavuti** wa kuiba taarifa za kuingia
-4. Anzisha kampeni!
+3. Andaa campaign
+1. Andaa **email template**
+2. Andaa **web page** ya kuiba credentials
+4. Launch the campaign!
 
-## Tengeneza majina ya domeni yanayofanana au nunua domeni inayotegemewa
+## Generate similar domain names or buy a trusted domain
 
-### Mbinu za Mabadiliko ya Jina la Domeni
+### Mbinu za mabadiliko ya domain
 
-- **Neno muhimu**: Jina la domeni **linajumuisha** neno muhimu la **domeni la asili** (mfano, zelster.com-management.com).
-- **subdomain iliyo na hyphen**: Badilisha **dot kuwa hyphen** ya subdomain (mfano, www-zelster.com).
-- **TLD Mpya**: Domeni sawa ikitumia **TLD mpya** (mfano, zelster.org)
-- **Homoglyph**: In **badilisha** herufi katika jina la domeni kwa **herufi zinazofanana** (mfano, zelfser.com).
+- **Keyword**: Jina la domain linajumuisha keyword muhimu la domain ya asili (mfano, zelster.com-management.com).
+- **hypened subdomain**: Badilisha dot kwa hyphen ya subdomain (mfano, www-zelster.com).
+- **New TLD**: Ipi domain ile ile ukitumia New TLD (mfano, zelster.org)
+- **Homoglyph**: Inabadilisha herufi katika jina la domain kwa herufi zinazofanana kwa muonekano (mfano, zelfser.com).
+
 
 {{#ref}}
 homograph-attacks.md
 {{#endref}}
-- **Ubadilishaji:** In **badilisha herufi mbili** ndani ya jina la domeni (mfano, zelsetr.com).
-- **Kuweka umoja/kuweka wingi**: Ongeza au ondolea “s” mwishoni mwa jina la domeni (mfano, zeltsers.com).
-- **Kuondoa**: In **ondoa moja** ya herufi kutoka jina la domeni (mfano, zelser.com).
-- **Kurudia:** In **rudia moja** ya herufi katika jina la domeni (mfano, zeltsser.com).
-- **Ubadilishaji**: Kama homoglyph lakini si wa siri sana. Inabadilisha moja ya herufi katika jina la domeni, labda kwa herufi iliyo karibu na herufi ya asili kwenye kibodi (mfano, zektser.com).
-- **Subdomained**: Ingiza **dot** ndani ya jina la domeni (mfano, ze.lster.com).
-- **Kuongeza**: In **ongeza herufi** ndani ya jina la domeni (mfano, zerltser.com).
-- **Dot iliyokosekana**: Ongeza TLD kwenye jina la domeni. (mfano, zelstercom.com)
+- **Transposition:** Inabadilisha nafasi za herufi mbili ndani ya jina la domain (mfano, zelsetr.com).
+- **Singularization/Pluralization**: Inaongeza au kuondoa "s" mwishoni mwa jina la domain (mfano, zeltsers.com).
+- **Omission**: Inaondoa moja ya herufi kutoka jina la domain (mfano, zelser.com).
+- **Repetition:** Inarudia moja ya herufi ndani ya jina la domain (mfano, zeltsser.com).
+- **Replacement**: Kama homoglyph lakini isiyo na stealth nyingi. Inabadilisha moja ya herufi katika jina la domain, labda kwa herufi ambayo iko karibu kwenye keyboard (mfano, zektser.com).
+- **Subdomained**: Ingiza dot ndani ya jina la domain (mfano, ze.lster.com).
+- **Insertion**: Inaingiza herufi katika jina la domain (mfano, zerltser.com).
+- **Missing dot**: Ambatanisha TLD kwa jina la domain. (mfano, zelstercom.com)
 
-**Zana za Kiotomatiki**
+**Automatic Tools**
 
 - [**dnstwist**](https://github.com/elceef/dnstwist)
 - [**urlcrazy**](https://github.com/urbanadventurer/urlcrazy)
 
-**Tovuti**
+**Websites**
 
 - [https://dnstwist.it/](https://dnstwist.it)
 - [https://dnstwister.report/](https://dnstwister.report)
@@ -51,51 +52,51 @@ homograph-attacks.md
 
 ### Bitflipping
 
-Kuna **uwezekano kwamba moja ya baadhi ya bits zilizohifadhiwa au katika mawasiliano inaweza kubadilishwa kiotomatiki** kutokana na sababu mbalimbali kama vile miale ya jua, mionzi ya anga, au makosa ya vifaa.
+Kuna uwezekano kwamba moja ya bits zilizohifadhiwa au zinazotumwa inaweza kupinduliwa kiotomatiki kutokana na sababu mbalimbali kama solar flares, cosmic rays, au makosa ya hardware.
 
-Wakati dhana hii inatumika kwa maombi ya DNS, inawezekana kwamba **domeni iliyopokelewa na seva ya DNS** si sawa na domeni iliyotakiwa awali.
+Wakati dhana hii inapotumika kwa maombi ya DNS, inawezekana kwamba domain iliyopokelewa na DNS server si ile ile iliyokuwa imeombwa awali.
 
-Kwa mfano, mabadiliko ya bit moja katika jina la domeni "windows.com" yanaweza kubadilisha kuwa "windnws.com."
+Kwa mfano, mabadiliko ya bit moja kwenye domain "windows.com" yanaweza kuibadilisha kuwa "windnws.com."
 
-Wavamizi wanaweza **kunufaika na hili kwa kujiandikisha kwa domeni nyingi za bit-flipping** ambazo zinafanana na domeni ya mwathirika. Nia yao ni kuelekeza watumiaji halali kwenye miundombinu yao.
+Attackers wanaweza kuchukua faida ya hili kwa kusajili domains nyingi za bit-flipping zinazofanana na domain ya victim. Kusudio lao ni kupeleka watumiaji halali kwenye infrastructure yao.
 
-Kwa maelezo zaidi soma [https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)
+Kwa taarifa zaidi soma [https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)
 
-### Nunua domeni inayotegemewa
+### Nunua domain yenye kuaminika
 
-Unaweza kutafuta katika [https://www.expireddomains.net/](https://www.expireddomains.net) kwa domeni iliyokwisha ambayo unaweza kutumia.\
-Ili kuhakikisha kwamba domeni iliyokwisha unayokusudia kununua **ina SEO nzuri tayari** unaweza kutafuta jinsi inavyopangwa katika:
+Unaweza kutafuta kwenye [https://www.expireddomains.net/](https://www.expireddomains.net) domain iliyokwisha muda ambayo unaweza kutumia.\
+Ili kuhakikisha kwamba expired domain unayopanga kununua tayari ina SEO nzuri unaweza kuangalia jinsi ilivyokatagoriwa katika:
 
 - [http://www.fortiguard.com/webfilter](http://www.fortiguard.com/webfilter)
 - [https://urlfiltering.paloaltonetworks.com/query/](https://urlfiltering.paloaltonetworks.com/query/)
 
-## Kugundua Barua Pepe
+## Kugundua Emails
 
-- [https://github.com/laramies/theHarvester](https://github.com/laramies/theHarvester) (100% bure)
-- [https://phonebook.cz/](https://phonebook.cz) (100% bure)
+- [https://github.com/laramies/theHarvester](https://github.com/laramies/theHarvester) (100% free)
+- [https://phonebook.cz/](https://phonebook.cz) (100% free)
 - [https://maildb.io/](https://maildb.io)
 - [https://hunter.io/](https://hunter.io)
 - [https://anymailfinder.com/](https://anymailfinder.com)
 
-Ili **gundua zaidi** anwani halali za barua pepe au **kuhakiki zile** ulizozigundua tayari unaweza kuangalia kama unaweza kujaribu nguvu kwenye seva za smtp za mwathirika. [Jifunze jinsi ya kuangalia/kugundua anwani ya barua pepe hapa](../../network-services-pentesting/pentesting-smtp/index.html#username-bruteforce-enumeration).\
-Zaidi ya hayo, usisahau kwamba ikiwa watumiaji wanatumia **milango yoyote ya wavuti kuingia kwenye barua zao**, unaweza kuangalia kama inahatarishwa kwa **kujaribu nguvu jina la mtumiaji**, na kutumia udhaifu huo ikiwa inawezekana.
+Ili kugundua zaidi anwani za email halali au kuthibitisha zile ulizogundua tayari unaweza kuangalia kama unaweza ku-brute-force smtp servers za victim. [Learn how to verify/discover email address here](../../network-services-pentesting/pentesting-smtp/index.html#username-bruteforce-enumeration).\
+Zaidi ya hayo, usisahau kwamba ikiwa watumiaji wanatumia any web portal kufikia mails zao, unaweza kuangalia kama ni vunja kwa username brute force, na kutumia udhaifu huo ikiwa inawezekana.
 
-## Sanidi GoPhish
+## Configuring GoPhish
 
-### Usanidi
+### Installation
 
-Unaweza kuipakua kutoka [https://github.com/gophish/gophish/releases/tag/v0.11.0](https://github.com/gophish/gophish/releases/tag/v0.11.0)
+Unaweza kupakua kutoka [https://github.com/gophish/gophish/releases/tag/v0.11.0](https://github.com/gophish/gophish/releases/tag/v0.11.0)
 
-Pakua na uifanye ndani ya `/opt/gophish` na uendeshe `/opt/gophish/gophish`\
-Utapewa nenosiri kwa mtumiaji wa admin kwenye bandari 3333 katika matokeo. Hivyo, fikia bandari hiyo na tumia hizo taarifa kuhamasisha nenosiri la admin. Unaweza kuhitaji kuunganisha bandari hiyo kwa eneo la ndani:
+Download na decompress ndani ya `/opt/gophish` na uendeshe `/opt/gophish/gophish`\
+Utapewa password kwa admin user kwenye port 3333 katika output. Kwa hiyo, ingia kwenye port hiyo na tumia yale credentials kubadilisha admin password. Unaweza kuhitaji ku-tunnel port hiyo hadi local:
 ```bash
 ssh -L 3333:127.0.0.1:3333 <user>@<ip>
 ```
-### Mipangilio
+### Usanidi
 
-**Mipangilio ya cheti cha TLS**
+**Usanidi wa cheti la TLS**
 
-Kabla ya hatua hii unapaswa kuwa **umeshanunua jina la kikoa** unalotaka kutumia na lazima liwe **linaanika** kwa **IP ya VPS** ambapo unafanya mipangilio ya **gophish**.
+Kabla ya hatua hii unapaswa kuwa tayari umenunua kikoa utakayotumia, na lazima kiwe kimeelekezwa kwenye IP ya VPS ambapo unasanidi gophish.
 ```bash
 DOMAIN="<domain>"
 wget https://dl.eff.org/certbot-auto
@@ -111,34 +112,34 @@ mkdir /opt/gophish/ssl_keys
 cp "/etc/letsencrypt/live/$DOMAIN/privkey.pem" /opt/gophish/ssl_keys/key.pem
 cp "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" /opt/gophish/ssl_keys/key.crt​
 ```
-**Usanidi wa barua**
+**Usanidi wa barua pepe**
 
-Anza kufunga: `apt-get install postfix`
+Anza kusakinisha: `apt-get install postfix`
 
-Kisha ongeza kikoa kwenye faili zifuatazo:
+Kisha ongeza domain kwenye faili zifuatazo:
 
 - **/etc/postfix/virtual_domains**
 - **/etc/postfix/transport**
 - **/etc/postfix/virtual_regexp**
 
-**Badilisha pia thamani za vigezo vifuatavyo ndani ya /etc/postfix/main.cf**
+**Pia badilisha thamani za vigezo vifuatavyo ndani ya /etc/postfix/main.cf**
 
 `myhostname = <domain>`\
 `mydestination = $myhostname, <domain>, localhost.com, localhost`
 
-Hatimaye, badilisha faili **`/etc/hostname`** na **`/etc/mailname`** kuwa jina la kikoa chako na **anzisha upya VPS yako.**
+Mwisho, badilisha mafaili **`/etc/hostname`** na **`/etc/mailname`** kwa jina lako la domain na **anzisha upya VPS yako.**
 
-Sasa, tengeneza **rekodi ya DNS A** ya `mail.<domain>` ikielekeza kwenye **anwani ya ip** ya VPS na rekodi ya **DNS MX** ikielekeza kwa `mail.<domain>`
+Sasa, tengeneza **DNS A record** ya `mail.<domain>` inayoelekeza kwa **ip address** ya VPS na rekodi ya **DNS MX** inayoelekeza kwa `mail.<domain>`
 
-Sasa hebu jaribu kutuma barua pepe:
+Sasa tujaribu kutuma barua pepe:
 ```bash
 apt install mailutils
 echo "This is the body of the email" | mail -s "This is the subject line" test@email.com
 ```
-**Mipangilio ya Gophish**
+**Usanidi wa Gophish**
 
-Acha utekelezaji wa gophish na hebu tuipange.\
-Badilisha `/opt/gophish/config.json` kuwa ifuatayo (zingatia matumizi ya https):
+Simamisha gophish na tufanye usanidi wake.\
+Badilisha `/opt/gophish/config.json` kuwa ifuatayo (kumbuka matumizi ya https):
 ```bash
 {
 "admin_server": {
@@ -212,7 +213,7 @@ case $1 in
 start|stop|status) "$1" ;;
 esac
 ```
-Maliza kuunda huduma na kuangalia inavyofanya:
+Maliza kusanidi huduma na kuangalia inavyofanya:
 ```bash
 mkdir /var/log/gophish
 chmod +x /etc/init.d/gophish
@@ -223,60 +224,60 @@ service gophish status
 ss -l | grep "3333\|443"
 service gophish stop
 ```
-## Kuunda seva ya barua na kikoa
+## Kusanidi mail server na domain
 
 ### Subiri & kuwa halali
 
-Kadiri kikoa kilivyo na umri mrefu ndivyo inavyokuwa na uwezekano mdogo wa kukamatwa kama spam. Hivyo unapaswa kusubiri muda mrefu iwezekanavyo (angalau wiki 1) kabla ya tathmini ya phishing. Zaidi ya hayo, ikiwa utaweka ukurasa kuhusu sekta yenye sifa, sifa iliyopatikana itakuwa bora.
+Kadri domain inavyokuwa ya zamani, ndivyo uwezekano wa kugunduliwa kama spam unavyopungua. Kwa hivyo unapaswa kusubiri muda mrefu iwezekanavyo (angalau 1week) kabla ya phishing assessment. Zaidi ya hayo, ukiongeza ukurasa kuhusu sekta yenye sifa, sifa utakayopata itakuwa bora.
 
-Kumbuka kwamba hata kama unapaswa kusubiri wiki moja unaweza kumaliza kuunda kila kitu sasa.
+Kumbuka kwamba hata ukilazimika kusubiri wiki unaweza kumaliza kusanidi kila kitu sasa.
 
-### Sanidi Rekodi ya Reverse DNS (rDNS)
+### Sanidi Reverse DNS (rDNS) record
 
-Weka rekodi ya rDNS (PTR) inayotatua anwani ya IP ya VPS kwa jina la kikoa.
+Weka rekodi ya rDNS (PTR) inayotatua IP address ya VPS kwa jina la domain.
 
 ### Rekodi ya Sender Policy Framework (SPF)
 
-Lazima **uunde rekodi ya SPF kwa kikoa kipya**. Ikiwa hujui ni nini rekodi ya SPF [**soma ukurasa huu**](../../network-services-pentesting/pentesting-smtp/index.html#spf).
+Unapaswa **kusanidi SPF record kwa domain mpya**. Ikiwa haujui SPF record ni nini [**read this page**](../../network-services-pentesting/pentesting-smtp/index.html#spf).
 
-Unaweza kutumia [https://www.spfwizard.net/](https://www.spfwizard.net) kuunda sera yako ya SPF (tumia IP ya mashine ya VPS)
+Unaweza kutumia [https://www.spfwizard.net/](https://www.spfwizard.net) kuunda SPF policy yako (tumia IP ya mashine ya VPS)
 
 ![](<../../images/image (1037).png>)
 
-Hii ni maudhui ambayo yanapaswa kuwekwa ndani ya rekodi ya TXT ndani ya kikoa:
+Hili ndilo maudhui yanayopaswa kuwekwa ndani ya TXT record ndani ya domain:
 ```bash
 v=spf1 mx a ip4:ip.ip.ip.ip ?all
 ```
-### Domain-based Message Authentication, Reporting & Conformance (DMARC) Record
+### Uthibitishaji wa Ujumbe Unaotegemea Domain, Ripoti & Utii (DMARC) Rekodi
 
-Lazima **uweke rekodi ya DMARC kwa jina jipya la kikoa**. Ikiwa hujui ni nini rekodi ya DMARC [**soma ukurasa huu**](../../network-services-pentesting/pentesting-smtp/index.html#dmarc).
+Lazima **usanidi rekodi ya DMARC kwa domain mpya**. Ikiwa haujui ni rekodi ya DMARC ni nini [**read this page**](../../network-services-pentesting/pentesting-smtp/index.html#dmarc).
 
-Lazima uunde rekodi mpya ya DNS TXT ikielekeza jina la mwenyeji `_dmarc.<domain>` yenye maudhui yafuatayo:
+Unahitaji kuunda rekodi mpya ya DNS TXT ikielekeza hostname `_dmarc.<domain>` na yaliyomo yafuatayo:
 ```bash
 v=DMARC1; p=none
 ```
 ### DomainKeys Identified Mail (DKIM)
 
-Lazima **uweke DKIM kwa jina jipya la kikoa**. Ikiwa hujui ni nini rekodi ya DMARC [**soma ukurasa huu**](../../network-services-pentesting/pentesting-smtp/index.html#dkim).
+Unapaswa **kusanidi DKIM kwa domain mpya**. Ikiwa haujui ni rekodi ya DMARC ni nini [**soma ukurasa huu**](../../network-services-pentesting/pentesting-smtp/index.html#dkim).
 
-Mafunzo haya yanategemea: [https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy)
+This tutorial is based on: [https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy)
 
 > [!TIP]
-> Unahitaji kuunganisha thamani zote mbili za B64 ambazo funguo za DKIM zinazalisha:
+> Unahitaji kuunganisha thamani zote mbili za B64 ambazo ufunguo wa DKIM unazozalisha:
 >
 > ```
 > v=DKIM1; h=sha256; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0wPibdqPtzYk81njjQCrChIcHzxOp8a1wjbsoNtka2X9QXCZs+iXkvw++QsWDtdYu3q0Ofnr0Yd/TmG/Y2bBGoEgeE+YTUG2aEgw8Xx42NLJq2D1pB2lRQPW4IxefROnXu5HfKSm7dyzML1gZ1U0pR5X4IZCH0wOPhIq326QjxJZm79E1nTh3xj" "Y9N/Dt3+fVnIbMupzXE216TdFuifKM6Tl6O/axNsbswMS1TH812euno8xRpsdXJzFlB9q3VbMkVWig4P538mHolGzudEBg563vv66U8D7uuzGYxYT4WS8NVm3QBMg0QKPWZaKp+bADLkOSB9J2nUpk4Aj9KB5swIDAQAB
 > ```
 
-### Jaribu alama ya usanidi wa barua pepe yako
+### Test your email configuration score
 
-Unaweza kufanya hivyo kwa kutumia [https://www.mail-tester.com/](https://www.mail-tester.com)\
-Fikia tu ukurasa huo na tuma barua pepe kwa anwani wanayokupa:
+Unaweza kufanya hivyo kwa kutumia [https://www.mail-tester.com/](https://www.mail-tester.com/)\  
+Fungua ukurasa huo na tuma barua pepe kwa anwani watakayo kutoa:
 ```bash
 echo "This is the body of the email" | mail -s "This is the subject line" test-iimosa79z@srv1.mail-tester.com
 ```
-Unaweza pia **kuangalia usanidi wako wa barua pepe** kwa kutuma barua pepe kwa `check-auth@verifier.port25.com` na **kusoma jibu** (kwa hili utahitaji **kufungua** bandari **25** na kuona jibu katika faili _/var/mail/root_ ikiwa utatuma barua pepe kama root).\
-Angalia kwamba unapita majaribio yote:
+Unaweza pia **kukagua usanidi wako wa barua pepe** kwa kutuma barua pepe kwa `check-auth@verifier.port25.com` na **kusoma majibu** (kwa hili utahitaji **kufungua** port **25** na kuona majibu katika faili _/var/mail/root_ ikiwa utatuma barua pepe a kama root).\
+Angalia kwamba unapitisha vipimo vyote:
 ```bash
 ==========================================================
 Summary of Results
@@ -287,40 +288,40 @@ DKIM check:         pass
 Sender-ID check:    pass
 SpamAssassin check: ham
 ```
-Unaweza pia kutuma **ujumbe kwa Gmail chini ya udhibiti wako**, na kuangalia **vichwa vya barua pepe** katika kikasha chako cha Gmail, `dkim=pass` inapaswa kuwepo katika uwanja wa kichwa cha `Authentication-Results`.
+Unaweza pia kutuma **ujumbe kwa akaunti ya Gmail unayodhibiti**, na ukague **vichwa vya barua pepe** katika inbox yako ya Gmail, `dkim=pass` inapaswa kuwepo katika uwanja wa kichwa `Authentication-Results`.
 ```
 Authentication-Results: mx.google.com;
 spf=pass (google.com: domain of contact@example.com designates --- as permitted sender) smtp.mail=contact@example.com;
 dkim=pass header.i=@example.com;
 ```
-### ​Kuondoa kutoka kwenye Orodha ya Spamhouse
+### ​Kuondolewa kwenye Orodha Nyeusi ya Spamhouse
 
-Ukurasa [www.mail-tester.com](https://www.mail-tester.com) unaweza kuonyesha ikiwa jina la kikoa chako linazuiwa na spamhouse. Unaweza kuomba jina la kikoa/IP yako kuondolewa kwenye: ​[https://www.spamhaus.org/lookup/](https://www.spamhaus.org/lookup/)
+Ukurasa [www.mail-tester.com](https://www.mail-tester.com) unaweza kukuonyesha kama domain yako inazuiliwa na spamhouse. Unaweza kuomba domain/IP yako iondolewe kwa: ​[https://www.spamhaus.org/lookup/](https://www.spamhaus.org/lookup/)
 
-### Kuondoa kutoka kwenye Orodha ya Microsoft
+### Kuondolewa kwenye Orodha Nyeusi ya Microsoft
 
-​​Unaweza kuomba jina la kikoa/IP yako kuondolewa kwenye [https://sender.office.com/](https://sender.office.com).
+​​Unaweza kuomba domain/IP yako iondolewe kwa [https://sender.office.com/](https://sender.office.com).
 
 ## Unda & Anzisha Kampeni ya GoPhish
 
 ### Profaili ya Kutuma
 
-- Weka **jina la kutambulisha** profaili ya mtumaji
-- Amua kutoka kwenye akaunti gani utaenda kutuma barua pepe za phishing. Mapendekezo: _noreply, support, servicedesk, salesforce..._
-- Unaweza kuacha jina la mtumiaji na nenosiri kuwa tupu, lakini hakikisha umeangalia Ignore Certificate Errors
+- Weka **jina la utambuzi** la profaili ya mtumaji
+- Amua kutoka kwa akaunti ipi utakayotumia kutuma phishing emails. Mapendekezo: _noreply, support, servicedesk, salesforce..._
+- Unaweza kuacha username na password wazi, lakini hakikisha umechagua Ignore Certificate Errors
 
-![](<../../images/image (253) (1) (2) (1) (1) (2) (2) (3) (3) (5) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (15) (2).png>)
+![](<../../images/image (253) (1) (2) (1) (1) (2) (2) (3) (3) (5) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (15) (2).png>)
 
 > [!TIP]
-> Inapendekezwa kutumia kazi ya "**Send Test Email**" ili kujaribu kwamba kila kitu kinafanya kazi.\
-> Ningependekeza **kutuma barua pepe za majaribio kwa anwani za 10min mails** ili kuepuka kuorodheshwa kwenye orodha ya watu wasiotakikana wakati wa majaribio.
+> Inashauriwa kutumia kipengele cha "**Send Test Email**" ili kujaribu kwamba kila kitu kinafanya kazi.\
+> Ninapendekeza **kutuma barua za jaribio kwa anwani za 10min mails** ili kuepuka kuwekwa kwenye orodha nyeusi wakati wa majaribio.
 
 ### Kiolezo cha Barua Pepe
 
-- Weka **jina la kutambulisha** kiolezo
-- Kisha andika **kichwa** (hakuna kitu cha ajabu, ni kitu ambacho unaweza kutarajia kusoma katika barua pepe ya kawaida)
-- Hakikisha umeangalia "**Add Tracking Image**"
-- Andika **kiolezo cha barua pepe** (unaweza kutumia vigezo kama katika mfano ufuatao):
+- Weka **jina la utambuzi** la kiolezo
+- Kisha andika **subject** (hakuna kitu cha kigeni, tu kile unachoweza kutarajia kusoma katika barua pepe ya kawaida)
+- Hakikisha umechagua "**Add Tracking Image**"
+- Andika **kiolezo cha barua pepe** (unaweza kutumia variables kama katika mfano ufuatao):
 ```html
 <html>
 <head>
@@ -339,201 +340,214 @@ WRITE HERE SOME SIGNATURE OF SOMEONE FROM THE COMPANY
 </body>
 </html>
 ```
-Kumbuka kwamba **ili kuongeza uaminifu wa barua pepe**, inashauriwa kutumia saini kutoka kwa barua pepe ya mteja. Mapendekezo:
+Kumbuka kwamba **ili kuongeza uhalali wa email**, inashauriwa kutumia baadhi ya saini kutoka kwenye email ya mteja. Mapendekezo:
 
-- Tuma barua pepe kwa **anwani isiyo na uwepo** na uangalie ikiwa jibu lina saini yoyote.
-- Tafuta **barua pepe za umma** kama info@ex.com au press@ex.com au public@ex.com na uwatume barua pepe na subiri jibu.
-- Jaribu kuwasiliana na **barua pepe halali zilizogunduliwa** na subiri jibu.
+- Tuma email kwa **anwani isiyokuwepo** na angalia kama jibu lina saini yoyote.
+- Tafuta **emails za umma** kama info@ex.com au press@ex.com au public@ex.com na utume email kwao na usubiri jibu.
+- Jaribu kuwasiliana na **email sahihi iliyogunduliwa** na subiri jibu
 
 ![](<../../images/image (80).png>)
 
 > [!TIP]
-> Template ya Barua Pepe pia inaruhusu **kuambatisha faili za kutuma**. Ikiwa ungependa pia kuiba changamoto za NTLM kwa kutumia faili/hati zilizoundwa kwa njia maalum [soma ukurasa huu](../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md).
+> The Email Template also allows to **attach files to send**. If you would also like to steal NTLM challenges using some specially crafted files/documents [read this page](../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md).
 
-### Ukurasa wa Kutua
+### Landing Page
 
 - Andika **jina**
-- **Andika msimbo wa HTML** wa ukurasa wa wavuti. Kumbuka kwamba unaweza **kuagiza** kurasa za wavuti.
-- Mark **Kamata Data Iliyowasilishwa** na **Kamata Nywila**
-- Weka **mwelekeo**
+- **Andika the HTML code** ya ukurasa wa wavuti. Kumbuka kwamba unaweza **ku-import** web pages.
+- Mark **Capture Submitted Data** na **Capture Passwords**
+- Weka **redirection**
 
 ![](<../../images/image (826).png>)
 
 > [!TIP]
-> Kawaida utahitaji kubadilisha msimbo wa HTML wa ukurasa na kufanya majaribio katika eneo la ndani (labda kwa kutumia seva ya Apache) **hadi upate matokeo unayopenda.** Kisha, andika msimbo huo wa HTML katika kisanduku.\
-> Kumbuka kwamba ikiwa unahitaji **kutumia rasilimali za kudumu** kwa HTML (labda kurasa za CSS na JS) unaweza kuziokoa katika _**/opt/gophish/static/endpoint**_ na kisha uzifikie kutoka _**/static/\<filename>**_
+> Kwa kawaida utahitaji kubadilisha code ya HTML ya ukurasa na kufanya majaribio kwa local (labda ukitumia Apache server) **mpaka utakapopendeza matokeo.** Kisha, andika hiyo HTML code kwenye box.
+> Kumbuka kwamba ikiwa unahitaji **kutumia static resources** kwa HTML (labda baadhi ya CSS na JS pages) unaweza kuziweka katika _**/opt/gophish/static/endpoint**_ na kisha kuzipata kutoka _**/static/\<filename>**_
 
 > [!TIP]
-> Kwa mwelekeo unaweza **kuhamasisha watumiaji kwenda kwenye ukurasa halali wa wavuti** wa mwathirika, au kuwahamisha kwenye _/static/migration.html_ kwa mfano, weka **wheel inayozunguka (**[**https://loading.io/**](https://loading.io)**) kwa sekunde 5 kisha onyesha kwamba mchakato ulikuwa wa mafanikio**.
+> Kwa redirection unaweza **ku-redirect watumiaji kwenye ukurasa halali wa mwanzo** wa mwathiriwa, au ku-redirect kwa _/static/migration.html_ kwa mfano, weka **spinning wheel (**[**https://loading.io/**](https://loading.io)**) kwa sekunde 5 kisha onyesha kuwa mchakato umefanikiwa**.
 
-### Watumiaji na Makundi
+### Users & Groups
 
 - Weka jina
-- **Agiza data** (kumbuka kwamba ili kutumia template kwa mfano unahitaji jina la kwanza, jina la mwisho na anwani ya barua pepe ya kila mtumiaji)
+- **Import the data** (kumbuka kwamba ili kutumia template kwa mfano unahitaji jina la kwanza, jina la mwisho na email address ya kila mtumiaji)
 
 ![](<../../images/image (163).png>)
 
-### Kampeni
+### Campaign
 
-Hatimaye, tengeneza kampeni ukichagua jina, template ya barua pepe, ukurasa wa kutua, URL, wasifu wa kutuma na kundi. Kumbuka kwamba URL itakuwa kiungo kitakachotumwa kwa wahanga.
+Hatimaye, unda kampeni ukichagua jina, email template, landing page, URL, sending profile na group. Kumbuka kwamba URL itakuwa link itakayotumwa kwa waathiriwa
 
-Kumbuka kwamba **Wasifu wa Kutuma unaruhusu kutuma barua pepe ya majaribio kuona jinsi barua pepe ya mwisho ya udukuzi itakavyokuwa**:
+Kumbuka pia kwamba **Sending Profile inaruhusu kutuma test email ili kuona jinsi email ya hatima itakavyoonekana**:
 
 ![](<../../images/image (192).png>)
 
 > [!TIP]
-> Ningependekeza **kutuma barua pepe za majaribio kwa anwani za barua pepe za 10min** ili kuepuka kuorodheshwa kwenye orodha ya mblacklist wakati wa kufanya majaribio.
+> Napendekeza **kutuma test emails kwa anwani za 10min mails** ili kuepuka kuorodheshwa kwenye blacklist wakati wa kufanya majaribio.
 
-Mara kila kitu kiko tayari, uzindue kampeni!
+Mara kila kitu kikiwa tayari, anza kampeni tu!
 
-## K cloning wa Tovuti
+## Website Cloning
 
-Ikiwa kwa sababu yoyote unataka kunakili tovuti angalia ukurasa ufuatao:
+Ikiwa kwa sababu yoyote ungependa kukopa tovuti angalia ukurasa ufuatao:
+
 
 {{#ref}}
 clone-a-website.md
 {{#endref}}
 
-## Hati na Faili Zenye Backdoor
+## Backdoored Documents & Files
 
-Katika tathmini za udukuzi (hasa kwa Timu za Red) utataka pia **kutuma faili zinazokuwa na aina fulani ya backdoor** (labda C2 au labda kitu ambacho kitachochea uthibitisho).\
-Angalia ukurasa ufuatao kwa mifano:
+Katika baadhi ya tathmini za phishing (hasa kwa Red Teams) utataka pia **kutuma files zenye aina fulani ya backdoor** (labda C2 au labda kitu ambacho kitachochea authentication).\
+Angalia ukurasa ufuatao kwa baadhi ya mifano:
+
 
 {{#ref}}
 phishing-documents.md
 {{#endref}}
 
-## Udukuzi wa MFA
+## Phishing MFA
 
-### Kupitia Proxy MitM
+### Via Proxy MitM
 
-Shambulio la awali ni la busara kwani unafanyia kazi tovuti halisi na kukusanya taarifa zilizowekwa na mtumiaji. Kwa bahati mbaya, ikiwa mtumiaji hakuweka nywila sahihi au ikiwa programu uliyofanya kazi nayo imewekwa na 2FA, **habari hii haitakuruhusu kujifanya kuwa mtumiaji aliyejipatia hila**.
+Shambulio lililotangulia ni changamto kwani unafanana na tovuti halisi na kukusanya taarifa zilizowekwa na mtumiaji. Kwa bahati mbaya, ikiwa mtumiaji hakuweka password sahihi au ikiwa application uliyofanya clone imewekwa na 2FA, **taarifa hizi hazitatumika kukufanya uende kama mtumiaji aliyefumwa**.
 
-Hapa ndipo zana kama [**evilginx2**](https://github.com/kgretzky/evilginx2)**,** [**CredSniper**](https://github.com/ustayready/CredSniper) na [**muraena**](https://github.com/muraenateam/muraena) zinakuwa na manufaa. Zana hii itakuruhusu kuunda shambulio kama la MitM. Kimsingi, shambulio linafanya kazi kwa njia ifuatayo:
+Hapa ndipo zana kama [**evilginx2**](https://github.com/kgretzky/evilginx2)**,** [**CredSniper**](https://github.com/ustayready/CredSniper) na [**muraena**](https://github.com/muraenateam/muraena) zinapoweza kusaidia. Zana hizi zitakuwezesha kuzalisha shambulio la MitM. Kwa msingi, shambulio hufanya kazi kwa njia ifuatayo:
 
-1. Unajifanya kuwa fomu ya kuingia ya ukurasa halisi wa wavuti.
-2. Mtumiaji **anatumia** **taarifa zake** kwenye ukurasa wako wa uongo na zana hiyo inapeleka hizo kwenye ukurasa halisi wa wavuti, **ikikagua ikiwa taarifa hizo zinafanya kazi**.
-3. Ikiwa akaunti imewekwa na **2FA**, ukurasa wa MitM utauliza kwa hiyo na mara mtumiaji **anapoweka** hiyo zana itapeleka kwenye ukurasa halisi wa wavuti.
-4. Mara mtumiaji anapothibitishwa wewe (kama mshambuliaji) utakuwa umepata **taarifa, 2FA, cookie na taarifa yoyote** ya kila mwingiliano wako wakati zana hiyo inafanya MitM.
+1. Unachanganya fomu ya **login** ya ukurasa halisi.
+2. Mtumiaji **anatuma** credential zake kwenye ukurasa wako wa fake na zana inazituma kwenye ukurasa halisi, **ikikagua kama credentials zinafanya kazi**.
+3. Ikiwa akaunti imewekwa na **2FA**, ukurasa wa MitM utaomba 2FA na mara mtumiaji **akitolea** itaambatishwa kwenye ukurasa halisi.
+4. Mara mtumiaji anapothibitishwa wewe (kama mshambulizi) utakuwa ume **kamata credentials, 2FA, cookie na taarifa zote** za kila mwingiliano wakati zana ikifanya MitM.
 
-### Kupitia VNC
+### Via VNC
 
-Je, ni vipi badala ya **kumpeleka mwathirika kwenye ukurasa mbaya** wenye muonekano sawa na wa asili, unampeleka kwenye **kikao cha VNC chenye kivinjari kilichounganishwa na ukurasa halisi wa wavuti**? Utaweza kuona anachofanya, kuiba nywila, MFA iliyotumika, cookies...\
+Je, badala ya **kumtamisha mwathiriwa kwenye ukurasa wa uhalifu** unaoonekana kama wa awali, ungeweza kumpeleka kwenye **kikao cha VNC chenye browser iliyounganishwa kwenye ukurasa halisi**? Utaweza kuona anachofanya, kuiba password, MFA iliyotumika, cookies...\
 Unaweza kufanya hivi kwa kutumia [**EvilnVNC**](https://github.com/JoelGMSec/EvilnoVNC)
 
-## Kugundua kugundua
+## Detecting the detection
 
-Kwa wazi moja ya njia bora za kujua ikiwa umekamatwa ni **kutafuta kikoa chako ndani ya orodha za mblacklist**. Ikiwa inaonekana imeorodheshwa, kwa namna fulani kikoa chako kiligunduliwa kama cha shaka.\
-Njia rahisi ya kuangalia ikiwa kikoa chako kinaonekana katika orodha yoyote ya mblacklist ni kutumia [https://malwareworld.com/](https://malwareworld.com)
+Obvious moja ya njia bora za kujua kama umeuawa ni **kutafuta domain yako ndani ya blacklists**. Ikiwa inaonekana imeorodheshwa, kwa namna fulani domain yako iligunduliwa kama shaka.\
+Njia moja rahisi ya kukagua kama domain yako inaonekana kwenye blacklist ni kutumia [https://malwareworld.com/](https://malwareworld.com)
 
-Hata hivyo, kuna njia nyingine za kujua ikiwa mwathirika **anatafuta kwa nguvu shughuli za udukuzi za shaka katika mazingira** kama ilivyoelezwa katika:
+Hata hivyo, kuna njia nyingine za kujua kama mwathiriwa anatafuta kwa uangalifu shughuli za phishing zenye shaka kama ilivyoelezwa kwenye:
+
 
 {{#ref}}
 detecting-phising.md
 {{#endref}}
 
-Unaweza **kununua kikoa chenye jina linalofanana sana** na kikoa cha mwathirika **na/au kuunda cheti** kwa **subdomain** ya kikoa kinachodhibitiwa na wewe **kilichokuwa** na **neno muhimu** la kikoa cha mwathirika. Ikiwa **mwathirika** atafanya aina yoyote ya **maingiliano ya DNS au HTTP** nao, utajua kwamba **anatafuta kwa nguvu** kikoa za shaka na itabidi uwe na uangalifu mkubwa.
+Unaweza **kununua domain yenye jina linalofanana sana** na domain ya mwathiriwa **na/au kuzalisha certificate** kwa **subdomain** ya domain unayodhibiti **lenye** **keyword** ya domain ya mwathiriwa. Ikiwa **mwathiriwa** atafanya aina yoyote ya mwingiliano wa **DNS au HTTP** nao, utajua kuwa **yeye anatafuta kwa ufanisi** domains zenye shaka na utahitaji kuwa mwiba sana.
 
-### Kadiria udukuzi
+### Evaluate the phishing
 
-Tumia [**Phishious** ](https://github.com/Rices/Phishious)kadiria ikiwa barua pepe yako itakwenda kwenye folda ya spam au ikiwa itazuiwa au kufanikiwa.
+Tumia [**Phishious** ](https://github.com/Rices/Phishious) kutathmini kama email yako itaishia kwenye spam folder au itazuiliwa au itafanikiwa.
 
-## Kuathiri Utambulisho wa Juu (Kusaidia-Desk MFA Reset)
+## High-Touch Identity Compromise (Help-Desk MFA Reset)
 
-Seti za uvamizi za kisasa zinaendelea kupuuza mtego wa barua pepe kabisa na **kuwalenga moja kwa moja huduma za desk / mchakato wa urejeleaji wa utambulisho** ili kushinda MFA. Shambulio hili linaishi "katika ardhi": mara tu opereta anapokuwa na taarifa halali anageuka na zana za usimamizi zilizojengwa - hakuna malware inahitajika.
+Sets za uvamizi wa kisasa mara nyingi hupuuza malengo ya email kabisa na **hufokusisha moja kwa moja mchakato wa service-desk / identity-recovery** ili kuondoa MFA. Shambulio hilo ni kamili "living-off-the-land": mara operator anapomiliki credentials halali wanapitia na zana za admin zilizojengwa – hakuna malware inayohitajika.
 
-### Mchakato wa Shambulio
-1. Fanya utafiti wa mwathirika
-* Kusanya maelezo ya kibinafsi na ya kampuni kutoka LinkedIn, uvujaji wa data, GitHub ya umma, nk.
-* Tambua utambulisho wa thamani kubwa (wakurugenzi, IT, fedha) na orodhesha **mchakato halisi wa desk** wa urejeleaji wa nywila / MFA.
-2. Uhandisi wa kijamii wa wakati halisi
-* Piga simu, Teams au chat desk ya msaada huku ukijifanya kuwa lengo (mara nyingi kwa **ID ya mpiga simu iliyopotoshwa** au **sauti iliyokopwa**).
-* Toa PII iliyokusanywa awali ili kupita uthibitisho wa maarifa.
-* Mshawishi wakala **akirekebisha siri ya MFA** au kufanya **SIM-swap** kwenye nambari ya simu iliyosajiliwa.
-3. Vitendo vya haraka baada ya ufikiaji (≤60 min katika kesi halisi)
-* Kuanzisha mguu kupitia yoyote ya wavuti SSO portal.
-* Orodhesha AD / AzureAD kwa kutumia zana zilizojengwa (hakuna binaries zilizotupwa):
+### Attack flow
+1. Recon ya mwathiriwa
+* Pata maelezo ya binafsi & ya kampuni kutoka LinkedIn, data breaches, public GitHub, n.k.
+* Tambua identities zenye thamani kubwa (maafisa wakuu, IT, fedha) na weka orodha ya **hasa ya mchakato wa help-desk** kwa reset ya password / MFA.
+2. Social engineering kwa wakati halisi
+* Piga simu, tumia Teams au chat kwa help-desk ukijinakili kuwa ni eneo lengwa (mara nyingi kwa **spoofed caller-ID** au **cloned voice**).
+* Toa PII iliyokusanywa ili kupita uthibitishaji wa maarifa.
+* Mshawishi afanye **reset ya MFA secret** au kufanya **SIM-swap** kwenye namba ya simu iliyosajiliwa.
+3. Hatua za mara moja baada ya kupata (≤60 min katika kesi halisi)
+* Anzisha foothold kupitia portal yoyote ya web SSO.
+* Ordoza AD / AzureAD kwa kutumia built-ins (bila kupeleka binaries):
 ```powershell
-# orodhesha makundi ya directory & majukumu yenye mamlaka
+# list directory groups & privileged roles
 Get-ADGroup -Filter * -Properties Members | ?{$_.Members -match $env:USERNAME}
 
-# AzureAD / Graph – orodhesha majukumu ya directory
+# AzureAD / Graph – list directory roles
 Get-MgDirectoryRole | ft DisplayName,Id
 
-# Orodhesha vifaa ambavyo akaunti inaweza kuingia
+# Enumerate devices the account can login to
 Get-MgUserRegisteredDevice -UserId <user@corp.local>
 ```
-* Harakati za upande kwa kutumia **WMI**, **PsExec**, au wakala halali wa **RMM** ambao tayari umeorodheshwa kwenye mazingira.
+* Kuhamia upande wa ndani kwa kutumia **WMI**, **PsExec**, au agents halali za **RMM** ambazo tayari zimewekwa kwenye whitelist ndani ya mazingira.
 
-### Kugundua na Kupunguza
-* Treat desk ya msaada urejeleaji wa utambulisho kama **operesheni yenye mamlaka** – hitaji uthibitisho wa hatua na idhini ya meneja.
-* Tumia **Utambuzi wa Hatari ya Utambulisho na Majibu (ITDR)** / **UEBA** sheria zinazotoa taarifa kuhusu:
-* Njia ya MFA iliyobadilishwa + uthibitisho kutoka kwa kifaa kipya / geo.
-* Kuinua mara moja ya kanuni hiyo hiyo (mtumiaji-→-admin).
-* Rekodi simu za desk ya msaada na kulazimisha **kurudi kwa nambari iliyosajiliwa tayari** kabla ya urejeleaji wowote.
-* Tekeleza **Just-In-Time (JIT) / Ufikiaji wa Mamlaka** ili akaunti mpya zilizorekebishwa **zisirithi** token za mamlaka ya juu moja kwa moja.
+### Detection & Mitigation
+* Tibu help-desk identity recovery kama **operesheni ya kipaumbele** – hitaji step-up auth & idhini ya manager.
+* Tumia **Identity Threat Detection & Response (ITDR)** / **UEBA** rules zinazotia alarm juu ya:
+* MFA method changed + authentication kutoka kwenye device / geo mpya.
+* Kuongezeka mara moja kwa ruhusa kwa mfano huo huo (user-→-admin).
+* Rekodi simu za help-desk na lipa utekelezaji wa **call-back kwa namba iliyosajiliwa tayari** kabla ya reset yoyote.
+* Tekeleza **Just-In-Time (JIT) / Privileged Access** ili akaunti zilizorekebishwa hivi karibuni **zisipate** token za uenyekiti wa juu moja kwa moja.
 
 ---
 
-## Udanganyifu kwa Wingi – SEO Poisoning & Kampeni za “ClickFix”
-Vikundi vya bidhaa vinapunguza gharama za operesheni zenye uhusiano wa karibu kwa mashambulizi ya wingi yanayobadilisha **mashine za utafutaji na mitandao ya matangazo kuwa njia ya usambazaji**.
+## At-Scale Deception – SEO Poisoning & “ClickFix” Campaigns
+Mataifa ya kawaida hupunguza gharama za operesheni za high-touch kwa shambulio la wingi linalotumia **search engines & ad networks kama njia ya utoaji**.
 
-1. **SEO poisoning / malvertising** inasukuma matokeo ya uongo kama `chromium-update[.]site` hadi kwenye matangazo ya utafutaji ya juu.
-2. Mwathirika anapakua **loader ya hatua ya kwanza** ndogo (mara nyingi JS/HTA/ISO). Mifano iliyoonwa na Unit 42:
+1. **SEO poisoning / malvertising** inasukuma matokeo ya uongo kama `chromium-update[.]site` kwenye matangazo ya juu ya search ads.
+2. Mwathiriwa anapakua loader ndogo ya hatua ya kwanza (mara nyingi JS/HTA/ISO). Mifano iliyoshuhudiwa na Unit 42:
 * `RedLine stealer`
 * `Lumma stealer`
 * `Lampion Trojan`
-3. Loader inatoa cookies za kivinjari + DB za taarifa za kuingia, kisha inavuta **loader ya kimya** ambayo inamua – *katika wakati halisi* – ikiwa itapeleka:
+3. Loader inatoa exfiltrate browser cookies + credential DBs, kisha inachukua **silent loader** ambayo inaamua – kwa wakati halisi – ikiwa itaweka:
 * RAT (mfano AsyncRAT, RustDesk)
 * ransomware / wiper
-* kipengele cha kudumu (funguo za Run za rejista + kazi iliyopangwa)
+* sehemu ya persistence (Run key ya registry + scheduled task)
 
-### Vidokezo vya Kuimarisha
-* Zuia maeneo mapya yaliyojisajili na kulazimisha **Filtering ya DNS / URL ya Juu** kwenye *matangazo ya utafutaji* pamoja na barua pepe.
-* Punguza usakinishaji wa programu kwa pakiti za MSI / Duka zilizotiwa saini, kataza `HTA`, `ISO`, `VBS` kutekelezwa kwa sera.
-* Fuata mchakato wa watoto wa vivinjari vinavyofungua waandikaji:
+### Hardening tips
+* Zuia domains zilizosajiliwa hivi karibuni & tekeleza **Advanced DNS / URL Filtering** kwenye *search-ads* pamoja na e-mail.
+* Zuia ufungaji wa software isipokuwa MSI / Store packages zilizosainiwa, kata utekelezaji wa `HTA`, `ISO`, `VBS` kwa sera.
+* Simamia kwa ajili ya child processes za browsers zinazoanisha installers:
 ```yaml
 - parent_image: /Program Files/Google/Chrome/*
 and child_image: *\\*.exe
 ```
-* Tafuta LOLBins zinazotumiwa mara kwa mara na loaders za hatua ya kwanza (mfano `regsvr32`, `curl`, `mshta`).
+* Kagua LOLBins zinazotumika mara kwa mara na first-stage loaders (mfano `regsvr32`, `curl`, `mshta`).
 
 ---
 
-## Operesheni za Udukuzi Zenye AI
-Wavamizi sasa wanashirikisha **LLM & voice-clone APIs** kwa mtego wa kibinafsi na mwingiliano wa wakati halisi.
+## AI-Enhanced Phishing Operations
+Wavamizi sasa wanachanganya **LLM & voice-clone APIs** kwa lures zilizobinafsishwa kikamilifu na mwingiliano wa wakati halisi.
 
-| Tabaka | Matumizi ya mfano na mshambuliaji |
-|-------|-----------------------------|
-|Automatisering|Tengeneza na tuma >100 k barua pepe / SMS zenye maneno yaliyobadilishwa na viungo vya kufuatilia.|
-|AI ya Kizazi|Tengeneza *barua pepe za kipekee* zinazorejelea M&A za umma, vichekesho vya ndani kutoka mitandao ya kijamii; sauti ya CEO ya deep-fake katika udanganyifu wa kurudi.|
-|AI ya Kijamii|Jisajili kiotomatiki maeneo, chora intel ya chanzo wazi, tengeneza barua za hatua inayofuata wakati mwathirika anabonyeza lakini hajawasilisha taarifa.|
+| Layer | Mfano wa matumizi na mtoo wa vitisho |
+|-------|--------------------------------------|
+|Automation|Generate & send >100 k emails / SMS with randomised wording & tracking links.|
+|Generative AI|Produce *one-off* emails referencing public M&A, inside jokes from social media; deep-fake CEO voice in callback scam.|
+|Agentic AI|Autonomously register domains, scrape open-source intel, craft next-stage mails when a victim clicks but doesn’t submit creds.|
 
-**Ulinzi:**
-• Ongeza **banners za dynamic** zinazosisitiza ujumbe uliopelekwa kutoka kwa automatisering zisizoaminika (kupitia anomalies za ARC/DKIM).
-• Tumia **maneno ya changamoto ya sauti-biometric** kwa maombi ya simu ya hatari.
-• Endelea kuiga mtego wa AI ulioandaliwa katika programu za uelewa – templates za kudumu hazifai tena.
+Ulinzi:
+• Ongeza **dynamic banners** zinazobainisha ujumbe ulioletwa na automation isiyotumika kwa kuaminika (kupitia ARC/DKIM anomalies).
+• Tekeleza **voice-biometric challenge phrases** kwa maombi ya hatari kwenye simu.
+• Endelea kutekeleza majaribio ya lures zilizotengenezwa na AI katika programu za uhamasishaji – templates imara zimepitwa na wakati.
+
+See also – agentic browsing abuse for credential phishing:
+
+{{#ref}}
+ai-agent-mode-phishing-abusing-hosted-agent-browsers.md
+{{#endref}}
 
 ---
 
-## Uchovu wa MFA / Push Bombing Variant – Urekebishaji Lazima
-Mbali na push-bombing ya kawaida, waendeshaji kwa urahisi **wanalazimisha usajili mpya wa MFA** wakati wa simu ya desk ya msaada, wakifuta token ya mtumiaji iliyopo. Kila ombi la kuingia linalofuata linaonekana kuwa halali kwa mwathirika.
+## MFA Fatigue / Push Bombing Variant – Forced Reset
+Mbali na push-bombing ya kawaida, operator wanaweza tu **lazimisha usajili mpya wa MFA** wakati wa simu ya help-desk, wakifuta token ya mtumiaji iliyokuwepo. Kumbukumbu yoyote inayofuata ya login itaonekana halali kwa mwathiriwa.
 ```text
 [Attacker]  →  Help-Desk:  “I lost my phone while travelling, can you unenrol it so I can add a new authenticator?”
 [Help-Desk] →  AzureAD: ‘Delete existing methods’ → sends registration e-mail
 [Attacker]  →  Completes new TOTP enrolment on their own device
 ```
-Monitor kwa matukio ya AzureAD/AWS/Okta ambapo **`deleteMFA` + `addMFA`** zinatokea **ndani ya dakika kutoka kwa IP ile ile**.
+Fuatilia matukio ya AzureAD/AWS/Okta ambapo **`deleteMFA` + `addMFA`** yanatokea **katika dakika chache kutoka IP ile ile**.
+
+
 
 ## Clipboard Hijacking / Pastejacking
 
-Wavamizi wanaweza kimya kimya kunakili amri mbaya kwenye clipboard ya mwathirika kutoka kwenye ukurasa wa wavuti ulioathiriwa au ulioandikwa vibaya na kisha kumdanganya mtumiaji kuziweka ndani ya **Win + R**, **Win + X** au dirisha la terminal, wakitekeleza msimbo wa kiholela bila kupakua au kiambatisho.
+Wavamizi wanaweza kwa utulivu kunakili amri zenye madhara kwenye clipboard ya mwathiriwa kutoka kwenye ukurasa wa wavuti uliovamiwa au typosquatted, kisha kumdanganya mtumiaji kubandika ndani ya **Win + R**, **Win + X** au dirisha la terminal, wakitekeleza arbitrary code bila kupakua au kiambatisho.
+
 
 {{#ref}}
 clipboard-hijacking.md
 {{#endref}}
 
 ## Mobile Phishing & Malicious App Distribution (Android & iOS)
+
 
 {{#ref}}
 mobile-phishing-malicious-apps.md
