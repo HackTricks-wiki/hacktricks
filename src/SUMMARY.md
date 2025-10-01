@@ -61,6 +61,7 @@
     - [Deofuscation vbs (cscript.exe)](generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/desofuscation-vbs-cscript.exe.md)
     - [Discord Cache Forensics](generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/discord-cache-forensics.md)
     - [Local Cloud Storage](generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/local-cloud-storage.md)
+    - [Mach O Entitlements And Ipsw Indexing](generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/mach-o-entitlements-and-ipsw-indexing.md)
     - [Office file analysis](generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/office-file-analysis.md)
     - [PDF File analysis](generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/pdf-file-analysis.md)
     - [PNG tricks](generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/png-tricks.md)
