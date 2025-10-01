@@ -1,8 +1,8 @@
-# Mbinu Maalum za Programu/Aina za Faili
+# Hila Maalum za Programu/Aina za Faili
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Hapa unaweza kupata mbinu za kuvutia kwa aina maalum za faili na/au programu:
+Hapa unaweza kupata hila za kuvutia kwa aina maalum za faili na/au programu:
 
 
 {{#ref}}
@@ -52,6 +52,11 @@ video-and-audio-file-analysis.md
 
 {{#ref}}
 zips-tricks.md
+{{#endref}}
+
+
+{{#ref}}
+mach-o-entitlements-and-ipsw-indexing.md
 {{#endref}}
 
 {{#include ../../../banners/hacktricks-training.md}}
