@@ -4,12 +4,17 @@
 
 ## Basiese Inligting
 
-Mach-o binaries bevat 'n laaiopdrag genaamd **`LC_CODE_SIGNATURE`** wat die **offset** en **grootte** van die handtekeninge binne die binêre aandui. Trouens, deur die GUI-gereedskap MachOView te gebruik, is dit moontlik om aan die einde van die binêre 'n afdeling genaamd **Code Signature** met hierdie inligting te vind:
+{{#ref}}
+../../../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/mach-o-entitlements-and-ipsw-indexing.md
+{{#endref}}
+
+
+Mach-o binaries bevat 'n load command genaamd **`LC_CODE_SIGNATURE`** wat die **offset** en **size** van die signatures binne die binary aandui. Met die GUI-instrument MachOView is dit moontlik om aan die einde van die binary 'n afdeling met die naam **Code Signature** te vind met hierdie inligting:
 
 <figure><img src="../../../images/image (1) (1) (1) (1).png" alt="" width="431"><figcaption></figcaption></figure>
 
-Die magiese kop van die Code Signature is **`0xFADE0CC0`**. Dan het jy inligting soos die lengte en die aantal blobs van die superBlob wat hulle bevat.\
-Dit is moontlik om hierdie inligting in die [bron kode hier](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L276) te vind:
+Die magic header van die Code Signature is **`0xFADE0CC0`**. Daarna is daar inligting soos die lengte en die aantal blobs van die superBlob wat hulle bevat.\
+Dit is moontlik om hierdie inligting in die [source code here](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L276):
 ```c
 /*
 * Structure of an embedded-signature SuperBlob
@@ -38,14 +43,14 @@ char data[];
 } CS_GenericBlob
 __attribute__ ((aligned(1)));
 ```
-Gewone blobs wat bevat word, is Code Directory, Requirements en Entitlements en 'n Cryptographic Message Syntax (CMS).\
-Boonop, let op hoe die data wat in die blobs gekodeer is, in **Big Endian** gekodeer is.
+Gereelde blobs wat ingesluit is, is Code Directory, Requirements en Entitlements en 'n Cryptographic Message Syntax (CMS).\
+Let ook daarop dat die data in die blobs in **Big Endian.**
 
-Boonop kan handtekeninge van die binaries losgemaak word en gestoor word in `/var/db/DetachedSignatures` (gebruik deur iOS).
+Verder kan handtekeninge van die binaries afgekoppel wees en in `/var/db/DetachedSignatures` gestoor word (gebruik deur iOS).
 
 ## Code Directory Blob
 
-Dit is moontlik om die verklaring van die [Code Directory Blob in die kode](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L104) te vind:
+Dit is moontlik om die deklarasie van die [Code Directory Blob in the code](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L104):
 ```c
 typedef struct __CodeDirectory {
 uint32_t magic;                                 /* magic number (CSMAGIC_CODEDIRECTORY) */
@@ -101,12 +106,12 @@ char end_withLinkage[0];
 } CS_CodeDirectory
 __attribute__ ((aligned(1)));
 ```
-Let wel dat daar verskillende weergawes van hierdie struktuur is waar oues minder inligting mag bevat.
+Let wel dat daar verskillende weergawes van hierdie struct is, en ouer weergawes kan minder inligting bevat.
 
-## Ondertekening van Kode Bladsye
+## Ondertekening van Code Pages
 
-Hashing van die volle binêre sou ondoeltreffend en selfs nutteloos wees as dit net gedeeltelik in geheue gelaai word. Daarom is die kodehandtekening eintlik 'n hash van hashes waar elke binêre bladsy individueel gehasht word.\
-Eintlik kan jy in die vorige **Kode Gids** kode sien dat die **bladgrootte gespesifiseer is** in een van sy velde. Boonop, as die grootte van die binêre nie 'n veelvoud van die grootte van 'n bladsy is nie, spesifiseer die veld **CodeLimit** waar die einde van die handtekening is.
+Hashing van die volle binary sou ondoeltreffend wees en selfs nutteloos wees as dit slegs gedeeltelik in geheue gelaai word. Daarom is die code signature eintlik 'n hash of hashes waar elke binary page individueel gehashed word.\
+In werklikheid kan jy in die vorige **Code Directory** code sien dat die **page size is specified** in een van sy velde. Verder, as die grootte van die binary nie 'n veelvoud van die grootte van 'n page is nie, spesifiseer die veld **CodeLimit** waar die einde van die signature is.
 ```bash
 # Get all hashes of /bin/ps
 codesign -d -vvvvvv /bin/ps
@@ -142,27 +147,27 @@ dd if=$BINARY of=/tmp/`basename $BINARY`.page.$i bs=$PAGESIZE skip=$i count=1
 done
 openssl sha256 /tmp/*.page.*
 ```
-## Toelaag Blob
+## Entitlements Blob
 
-Let daarop dat toepassings ook 'n **toelaag blob** kan bevat waar al die toelaes gedefinieer is. Boonop mag sommige iOS binêre hul toelaes spesifiek in die spesiale slot -7 hê (in plaas van in die -5 toelaes spesiale slot).
+Let op dat toepassings ook 'n **entitlement blob** kan bevat waar al die entitlements gedefinieer is. Boonop kan sommige iOS-binaries hul entitlements spesifiseer in die spesiale slot -7 (in plaas van in die -5 entitlements spesiale slot).
 
-## Spesiale Slots
+## Special Slots
 
-MacOS toepassings het nie alles wat hulle nodig het om binne die binêre uit te voer nie, maar hulle gebruik ook **buitelandse hulpbronne** (gewoonlik binne die toepassings **bundel**). Daarom is daar 'n paar slots binne die binêre wat die hashes van 'n paar interessante buitelandse hulpbronne sal bevat om te kontroleer dat hulle nie gewysig is nie.
+MacOS-toepassings het nie alles wat hulle nodig het om binne die binary uit te voer nie; hulle gebruik ook **external resources** (gewoonlik binne die toepassing se **bundle**). Daarom is daar sekere slots binne die binary wat die hashes van sommige belangrike eksterne hulpbronne sal bevat om te verifieer dat dit nie verander is nie.
 
-Werklik, dit is moontlik om in die Code Directory strukture 'n parameter genaamd **`nSpecialSlots`** te sien wat die aantal spesiale slots aandui. Daar is nie 'n spesiale slot 0 nie en die mees algemene (van -1 tot -6) is:
+Dit is moontlik om in die Code Directory structs 'n parameter genaamd **`nSpecialSlots`** te sien wat die aantal spesiale slots aandui. Daar is nie 'n spesiale slot 0 nie en die mees algemene (van -1 tot -6) is:
 
 - Hash van `info.plist` (of die een binne `__TEXT.__info__plist`).
-- Hash van die Vereistes
-- Hash van die Hulpbron Gids (hash van `_CodeSignature/CodeResources` lêer binne die bundel).
-- Toepassing spesifiek (onbenut)
-- Hash van die toelaes
-- DMG kode handtekeninge slegs
-- DER Toelaes
+- Hash van die Requirements
+- Hash van die Resource Directory (hash van die `_CodeSignature/CodeResources`-lêer binne die bundle).
+- Toepassingspesifiek (nie gebruik nie)
+- Hash van die entitlements
+- Slegs DMG code signatures
+- DER Entitlements
 
-## Kode Handtekening Vlaggies
+## Code Signing Flags
 
-Elke proses het 'n bitmasker wat bekend staan as die `status` wat deur die kernel begin word en sommige daarvan kan oorgeskryf word deur die **kode handtekening**. Hierdie vlaggies wat in die kode handtekening ingesluit kan word, is [gedefinieer in die kode](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L36):
+Elke proses het 'n verwante bitmasker bekend as die `status` wat deur die kernel gestel word, en sommige kan oorrompel word deur die **code signature**. Hierdie vlae wat in die code signing ingesluit kan word, is [in die kode gedefinieer](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L36):
 ```c
 /* code signing attributes of a process */
 #define CS_VALID                    0x00000001  /* dynamically valid */
@@ -207,15 +212,15 @@ CS_RESTRICT | CS_ENFORCEMENT | CS_REQUIRE_LV | CS_RUNTIME | CS_LINKER_SIGNED)
 
 #define CS_ENTITLEMENT_FLAGS        (CS_GET_TASK_ALLOW | CS_INSTALLER | CS_DATAVAULT_CONTROLLER | CS_NVRAM_UNRESTRICTED)
 ```
-Let wel, die funksie [**exec_mach_imgact**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/kern/kern_exec.c#L1420) kan ook die `CS_EXEC_*` vlae dinamies byvoeg wanneer die uitvoering begin.
+Let daarop dat die funksie [**exec_mach_imgact**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/kern/kern_exec.c#L1420) ook die `CS_EXEC_*` vlagte dinamies kan byvoeg wanneer dit die uitvoering begin.
 
-## Kode Handtekening Vereistes
+## Vereistes vir kodehandtekening
 
-Elke toepassing stoor **vereistes** wat dit moet **tevrede stel** om uitgevoer te kan word. As die **toepassing vereistes bevat wat nie deur die toepassing tevrede gestel word nie**, sal dit nie uitgevoer word nie (soos dit waarskynlik verander is).
+Elke toepassing stoor sekere **vereistes** wat dit moet **bevredig** om uitgevoer te kan word. As die **vereistes wat in die toepassing vervat is nie deur die toepassing bevredig word nie**, sal dit nie uitgevoer word nie (aangesien dit waarskynlik verander is).
 
-Die vereistes van 'n binêre gebruik 'n **spesiale grammatika** wat 'n stroom van **uitdrukkings** is en word as blobs gekodeer met `0xfade0c00` as die magie waarvan die **hash in 'n spesiale kode-slot gestoor word**.
+Die vereistes van 'n binêre gebruik 'n **spesiale grammatika** wat 'n stroom van **uitdrukkings** is en word gekodeer as blobs wat `0xfade0c00` as die magiese waarde gebruik, waarvan die **hash in 'n spesiale code slot gestoor word**.
 
-Die vereistes van 'n binêre kan gesien word deur te loop:
+Die vereistes van 'n binêre kan gesien word deur dit uit te voer:
 ```bash
 codesign -d -r- /bin/ls
 Executable=/bin/ls
@@ -225,10 +230,10 @@ codesign -d -r- /Applications/Signal.app/
 Executable=/Applications/Signal.app/Contents/MacOS/Signal
 designated => identifier "org.whispersystems.signal-desktop" and anchor apple generic and certificate 1[field.1.2.840.113635.100.6.2.6] /* exists */ and certificate leaf[field.1.2.840.113635.100.6.1.13] /* exists */ and certificate leaf[subject.OU] = U68MSDN6DR
 ```
-> [!NOTE]
-> Let op hoe hierdie handtekeninge dinge soos sertifiseringsinligting, TeamID, ID's, regte en baie ander data kan nagaan.
+> [!TIP]
+> Let op hoe hierdie signatures dinge kan nagaan soos sertifiseringsinligting, TeamID, IDs, entitlements en baie ander data.
 
-Boonop is dit moontlik om 'n paar saamgestelde vereistes te genereer met die `csreq` hulpmiddel:
+Verder is dit moontlik om sekere gekompileerde vereistes te genereer met die `csreq`-tool:
 ```bash
 # Generate compiled requirements
 csreq -b /tmp/output.csreq -r='identifier "org.whispersystems.signal-desktop" and anchor apple generic and certificate 1[field.1.2.840.113635.100.6.2.6] /* exists */ and certificate leaf[field.1.2.840.113635.100.6.1.13] /* exists */ and certificate leaf[subject.OU] = U68MSDN6DR'
@@ -240,57 +245,57 @@ od -A x -t x1 /tmp/output.csreq
 0000020    00  00  00  21  6f  72  67  2e  77  68  69  73  70  65  72  73
 [...]
 ```
-It's possible to access this information and create or modify requirements with some APIs from the `Security.framework` like:
+Dit is moontlik om toegang tot hierdie inligting te kry en vereistes te skep of te wysig met sommige API's van die `Security.framework` soos:
 
-#### **Kontroleer Geldigheid**
+#### **Checking Validity**
 
-- **`Sec[Static]CodeCheckValidity`**: Kontroleer die geldigheid van SecCodeRef per Vereiste.
-- **`SecRequirementEvaluate`**: Valideer vereiste in sertifikaat konteks
-- **`SecTaskValidateForRequirement`**: Valideer 'n lopende SecTask teen `CFString` vereiste.
+- **`Sec[Static]CodeCheckValidity`**: Kontroleer die geldigheid van `SecCodeRef` volgens 'n vereiste.
+- **`SecRequirementEvaluate`**: Valideer 'n vereiste in die sertifikaatkonteks.
+- **`SecTaskValidateForRequirement`**: Valideer 'n lopende `SecTask` teen 'n `CFString` vereiste.
 
-#### **Skep en Bestuur Kode Vereistes**
+#### **Creating and Managing Code Requirements**
 
-- **`SecRequirementCreateWithData`:** Skep 'n `SecRequirementRef` uit binêre data wat die vereiste verteenwoordig.
-- **`SecRequirementCreateWithString`:** Skep 'n `SecRequirementRef` uit 'n stringuitdrukking van die vereiste.
-- **`SecRequirementCopy[Data/String]`**: Verkry die binêre data voorstelling van 'n `SecRequirementRef`.
-- **`SecRequirementCreateGroup`**: Skep 'n vereiste vir app-groep lidmaatskap
+- **`SecRequirementCreateWithData`:** Skep 'n `SecRequirementRef` vanaf binêre data wat die vereiste voorstel.
+- **`SecRequirementCreateWithString`:** Skep 'n `SecRequirementRef` vanaf 'n stringuitdrukking van die vereiste.
+- **`SecRequirementCopy[Data/String]`**: Haal die binêre datarepresentasie van 'n `SecRequirementRef`.
+- **`SecRequirementCreateGroup`**: Skep 'n vereiste vir app-groep lidmaatskap.
 
-#### **Toegang tot Kode Handtekening Inligting**
+#### **Accessing Code Signing Information**
 
-- **`SecStaticCodeCreateWithPath`**: Inisialiseer 'n `SecStaticCodeRef` objek vanaf 'n lêerstelsel pad vir die inspeksie van kode handtekeninge.
-- **`SecCodeCopySigningInformation`**: Verkry handtekening inligting van 'n `SecCodeRef` of `SecStaticCodeRef`.
+- **`SecStaticCodeCreateWithPath`**: Initialiseer 'n `SecStaticCodeRef` objek vanaf 'n lêerstelselpad om kodehandtekeninge te ondersoek.
+- **`SecCodeCopySigningInformation`**: Verkry ondertekeningsinligting vanaf 'n `SecCodeRef` of `SecStaticCodeRef`.
 
-#### **Wysig Kode Vereistes**
+#### **Modifying Code Requirements**
 
-- **`SecCodeSignerCreate`**: Skep 'n `SecCodeSignerRef` objek vir die uitvoering van kode handtekening operasies.
-- **`SecCodeSignerSetRequirement`**: Stel 'n nuwe vereiste vir die kode ondertekenaar in om tydens ondertekening toe te pas.
-- **`SecCodeSignerAddSignature`**: Voeg 'n handtekening by die kode wat onderteken word met die gespesifiseerde ondertekenaar.
+- **`SecCodeSignerCreate`**: Skep 'n `SecCodeSignerRef` objek vir die uitvoering van kodeondertekeningsoperasies.
+- **`SecCodeSignerSetRequirement`**: Stel 'n nuwe vereiste vir die kode-signer wat tydens ondertekening toegepas moet word.
+- **`SecCodeSignerAddSignature`**: Voeg 'n handtekening by die kode wat met die gespesifiseerde signer onderteken word.
 
-#### **Valideer Kode met Vereistes**
+#### **Validating Code with Requirements**
 
-- **`SecStaticCodeCheckValidity`**: Valideer 'n statiese kode objek teen gespesifiseerde vereistes.
+- **`SecStaticCodeCheckValidity`**: Valideer 'n statiese kode-objek teen gespesifiseerde vereistes.
 
-#### **Addisionele Nuttige APIs**
+#### **Additional Useful APIs**
 
-- **`SecCodeCopy[Internal/Designated]Requirement`: Kry SecRequirementRef van SecCodeRef**
-- **`SecCodeCopyGuestWithAttributes`**: Skep 'n `SecCodeRef` wat 'n kode objek verteenwoordig gebaseer op spesifieke eienskappe, nuttig vir sandboxing.
-- **`SecCodeCopyPath`**: Verkry die lêerstelsel pad geassosieer met 'n `SecCodeRef`.
-- **`SecCodeCopySigningIdentifier`**: Verkry die handtekening identifiseerder (bv. Span ID) van 'n `SecCodeRef`.
-- **`SecCodeGetTypeID`**: Gee die tipe identifiseerder vir `SecCodeRef` objek.
-- **`SecRequirementGetTypeID`**: Kry 'n CFTypeID van 'n `SecRequirementRef`
+- **`SecCodeCopy[Internal/Designated]Requirement`: Get SecRequirementRef from SecCodeRef**
+- **`SecCodeCopyGuestWithAttributes`**: Skep 'n `SecCodeRef` wat 'n kode-objek voorstel gebaseer op spesifieke eienskappe, nuttig vir sandboxing.
+- **`SecCodeCopyPath`**: Haal die lêerstelselpad wat by 'n `SecCodeRef` hoort.
+- **`SecCodeCopySigningIdentifier`**: Verkry die ondertekeningsidentifiseerder (bv. Team ID) vanaf 'n `SecCodeRef`.
+- **`SecCodeGetTypeID`**: Gee die tipe-identifiseerder vir `SecCodeRef`-objekte terug.
+- **`SecRequirementGetTypeID`**: Kry 'n CFTypeID van 'n `SecRequirementRef`.
 
-#### **Kode Handtekening Vlaggies en Konstanten**
+#### **Code Signing Flags and Constants**
 
-- **`kSecCSDefaultFlags`**: Standaard vlaggies wat in baie Security.framework funksies vir kode handtekening operasies gebruik word.
-- **`kSecCSSigningInformation`**: Vlag wat gebruik word om aan te dui dat handtekening inligting verkry moet word.
+- **`kSecCSDefaultFlags`**: Verstekvlae wat in baie Security.framework-funksies vir kodeondertekeningsoperasies gebruik word.
+- **`kSecCSSigningInformation`**: Vlae wat gebruik word om te spesifiseer dat ondertekeningsinligting verkry moet word.
 
-## Kode Handtekening Afforcing
+## Code Signature Enforcement
 
-Die **kernel** is die een wat **die kode handtekening kontroleer** voordat dit die kode van die app toelaat om uit te voer. Boonop, een manier om in geheue nuwe kode te kan skryf en uitvoer is om JIT te misbruik as `mprotect` met `MAP_JIT` vlag aangeroep word. Let daarop dat die toepassing 'n spesiale regte benodig om dit te kan doen.
+Die kernel is die een wat die kodehandtekening nagaan voordat die app se kode toegelaat word om uit te voer. Verder is een manier om nuwe kode in geheue te kan skryf en uitvoer deur misbruik van JIT indien `mprotect` met die `MAP_JIT` vlag aangeroep word. Let wel dat die toepassing 'n spesiale entitlement nodig het om dit te kan doen.
 
 ## `cs_blobs` & `cs_blob`
 
-[**cs_blob**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/sys/ubc_internal.h#L106) struktuur bevat die inligting oor die regte van die lopende proses daarop. `csb_platform_binary` dui ook aan of die toepassing 'n platform binêre is (wat op verskillende tye deur die OS gekontroleer word om sekuriteitsmeganismes toe te pas soos om die SEND regte na die taak poorte van hierdie prosesse te beskerm).
+[**cs_blob**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/sys/ubc_internal.h#L106) struct bevat die inligting oor die entitlement van die lopende proses daarop. `csb_platform_binary` dui ook aan of die toepassing 'n platform-binary is (wat op verskillende oomblikke deur die OS nagegaan word om sekuriteitsmeganismes toe te pas, soos die beskerming van die SEND rights na die task ports van hierdie prosesse).
 ```c
 struct cs_blob {
 struct cs_blob  *csb_next;
