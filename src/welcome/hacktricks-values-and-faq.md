@@ -7,15 +7,15 @@
 > [!TIP]
 > Questi sono i **valori del progetto HackTricks**:
 >
-> - Fornire accesso **FREE** a risorse **EDUCATIONAL hacking** a **TUTTI** su Internet.
->  - L'hacking riguarda l'apprendimento, e l'apprendimento dovrebbe essere il più gratuito possibile.
->  - Lo scopo di questo libro è servire come una completa **risorsa educativa**.
-> - **STORE** tecniche **hacking** incredibili che la community pubblica dando agli **AUTORI** **ORIGINALI** tutti i **crediti**.
->  - **Non vogliamo i crediti altrui**, vogliamo solo conservare trucchi interessanti per tutti.
->  - Scriviamo anche le **nostre ricerche** in HackTricks.
->  - In diversi casi scriveremo solo **in HackTricks un riassunto delle parti importanti** della tecnica e **incoraggeremo il lettore a visitare il post originale** per maggiori dettagli.
+> - Dare accesso **GRATIS** a risorse educative di **hacking** a **TUTTO** Internet.
+>  - Hacking riguarda l'apprendimento, e l'apprendimento dovrebbe essere il più libero possibile.
+>  - Lo scopo di questo libro è fungere da comprensiva **risorsa educativa**.
+> - **ARCHIVIARE** tecniche di **hacking** straordinarie che la community pubblica dando agli **AUTORI ORIGINALI** tutti i **crediti**.
+>  - **Non vogliamo i meriti di altre persone**, vogliamo solo conservare trucchi interessanti per tutti.
+>  - Scriviamo anche **le nostre ricerche** in HackTricks.
+>  - In diversi casi scriveremo **su HackTricks un riassunto delle parti importanti** della tecnica e **incoraggeremo il lettore a visitare il post originale** per maggiori dettagli.
 > - **ORGANIZZARE** tutte le tecniche di hacking nel libro in modo che sia **PIÙ ACCESSIBILE**
->  - Il team di HackTricks ha dedicato migliaia di ore gratuitamente **solo per organizzare il contenuto** così le persone possono **imparare più velocemente**
+>  - Il team HackTricks ha dedicato migliaia di ore gratuitamente **solo per organizzare il contenuto** così le persone possono **imparare più velocemente**
 
 <figure><img src="../images/hack tricks gif.gif" alt="" width="375"><figcaption></figcaption></figure>
 
@@ -23,35 +23,35 @@
 
 > [!TIP]
 >
-> - **Thank you so much for these resources, how can I thank you?**
+> - **Grazie mille per queste risorse, come posso ringraziarvi?**
 
-Puoi ringraziare pubblicamente il team di HackTricks per aver messo insieme tutte queste risorse con un tweet menzionando [**@hacktricks_live**](https://twitter.com/hacktricks_live).\
+Puoi ringraziare pubblicamente il team di HackTricks per aver raccolto tutte queste risorse pubblicamente con un tweet menzionando [**@hacktricks_live**](https://twitter.com/hacktricks_live).\
 Se sei particolarmente riconoscente puoi anche [**sponsorizzare il progetto qui**](https://github.com/sponsors/carlospolop).\
-E non dimenticare di **mettere una stella ai progetti Github!** (Trova i link qui sotto).
+E non dimenticare di **dare una stella ai progetti su Github!** (Trova i link sotto).
 
 > [!TIP]
 >
-> - **How can I contribute to the project?**
+> - **Come posso contribuire al progetto?**
 
 Puoi **condividere nuovi consigli e trucchi con la community o correggere bug** che trovi nei libri inviando una **Pull Request** alle rispettive pagine Github:
 
 - [https://github.com/carlospolop/hacktricks](https://github.com/carlospolop/hacktricks)
 - [https://github.com/carlospolop/hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)
 
-Non dimenticare di **mettere una stella ai progetti Github!**
+Non dimenticare di **dare una stella ai progetti su Github!**
 
 > [!TIP]
 >
-> - **Can I copy some content from HackTricks and put it in my blog?**
+> - **Posso copiare del contenuto da HackTricks e pubblicarlo sul mio blog?**
 
-Sì, puoi, ma **non dimenticare di menzionare il link (o i link) specifico(i)** da cui il contenuto è stato preso.
+Sì, puoi, ma **non dimenticare di menzionare il(i) link specifico(i)** da cui il contenuto è stato preso.
 
 > [!TIP]
 >
-> - **How can I cite a page of HackTricks?**
+> - **Come posso citare una pagina di HackTricks?**
 
-Finché appare il link **della** pagina (o delle pagine) da cui hai preso l'informazione è sufficiente.\
-Se hai bisogno di un bibtex puoi usare qualcosa del tipo:
+Finché appare il link **della** pagina(o delle pagine) da cui hai tratto le informazioni è sufficiente.\
+Se ti serve un bibtex puoi usare qualcosa del tipo:
 ```latex
 @misc{hacktricks-bibtexing,
 author = {"HackTricks Team" or the Authors name of the specific page/trick},
@@ -62,82 +62,82 @@ url = {\url{https://book.hacktricks.wiki/specific-page}},
 ```
 > [!WARNING]
 >
-> - **Posso copiare tutti gli HackTricks sul mio blog?**
+> - **Posso copiare tutti i contenuti di HackTricks nel mio blog?**
 
-**Preferirei di no**. Questo **non porterà vantaggi a nessuno** dato che tutto il **contenuto è già pubblicamente disponibile** nei libri ufficiali di HackTricks gratuitamente.
+**Preferirei di no**. Questo **non gioverebbe a nessuno** visto che **tutto il contenuto è già disponibile pubblicamente** nei libri ufficiali di HackTricks gratuitamente.
 
-Se temi che possa scomparire, semplicemente fai fork su Github o scaricalo; come ho detto è già gratuito.
+Se temi che possa scomparire, fai semplicemente un fork su Github o scaricalo; come ho detto è già gratis.
 
 > [!WARNING]
 >
-> - **Perché avete sponsor? I libri di HackTricks hanno scopo commerciale?**
+> - **Perché avete sponsor? I libri di HackTricks sono a scopo commerciale?**
 
-Il primo valore di **HackTricks** è offrire risorse educative di hacking **GRATUITE** a TUTTO il mondo. Il team di HackTricks ha **dedicato migliaia di ore** per offrire questo contenuto, ancora, **GRATIS**.
+Il primo **valore** di **HackTricks** è offrire risorse educative di hacking **GRATUITE** a **TUTTO** il mondo. Il team di HackTricks ha **dedicato migliaia di ore** per offrire questo contenuto, ancora una volta, **GRATIS**.
 
-Se pensi che i libri di HackTricks siano fatti per **scopi commerciali**, ti sbagli **COMPLETAMENTE**.
+Se pensi che i libri di HackTricks siano fatti per **scopi commerciali** ti stai **COMPLETAMENTE SBAGLIANDO**.
 
-Abbiamo sponsor perché, anche se tutto il contenuto è GRATUITO, vogliamo **offrire alla community la possibilità di apprezzare il nostro lavoro** se lo desiderano. Perciò offriamo alle persone la possibilità di donare a HackTricks tramite [**Github sponsors**](https://github.com/sponsors/carlospolop), e a **aziende di cybersecurity rilevanti** di sponsorizzare HackTricks e di **inserire alcune pubblicità** nel libro, con le **pubblicità** sempre posizionate in punti che le rendono **visibili** ma che **non disturbano il processo di apprendimento** se qualcuno si concentra sul contenuto.
+Abbiamo sponsor perché, anche se tutto il contenuto è GRATUITO, vogliamo **offrire alla community la possibilità di apprezzare il nostro lavoro** se lo desidera. Pertanto, offriamo alle persone l'opzione di donare a HackTricks tramite [**Github sponsors**](https://github.com/sponsors/carlospolop), e **aziende rilevanti nel settore della cybersecurity** possono sponsorizzare HackTricks e inserire **alcuni annunci** nel libro, posizionati sempre in posti che li rendono **visibili** ma che **non disturbano** il processo di apprendimento se qualcuno si concentra sul contenuto.
 
-Non troverai HackTricks pieno di pubblicità fastidiose come altri blog con molto meno contenuto di HackTricks, perché HackTricks non è fatto per scopi commerciali.
-
-> [!CAUTION]
->
-> - **Cosa devo fare se qualche pagina di HackTricks si basa su un mio post del blog ma non viene citata?**
-
-**Ci dispiace molto. Questo non dovrebbe essere accaduto**. Per favore, faccelo sapere tramite Github issues, Twitter, Discord... il link della pagina HackTricks con il contenuto e il link del tuo blog e **lo verificheremo e lo aggiungeremo il prima possibile**.
+Non troverai HackTricks pieno di annunci fastidiosi come altri blog con molto meno contenuto rispetto a HackTricks, perché HackTricks non è fatto per scopi commerciali.
 
 > [!CAUTION]
 >
-> - **Cosa devo fare se c'è contenuto del mio blog in HackTricks e non voglio che sia lì?**
+> - **Cosa devo fare se qualche pagina di HackTricks è basata su un mio post del blog ma non è referenziata?**
 
-Nota che avere link alla tua pagina in HackTricks:
+**Siamo molto dispiaciuti. Questo non dovrebbe essere successo**. Ti preghiamo di farcelo sapere tramite Github issues, Twitter, Discord... il link della pagina HackTricks con il contenuto e il link del tuo blog e **verificheremo e aggiungeremo il riferimento il prima possibile**.
+
+> [!CAUTION]
+>
+> - **Cosa devo fare se c'è contenuto del mio blog in HackTricks e non voglio che ci sia?**
+
+Nota che avere link alla tua pagina su HackTricks:
 
 - Migliora la tua **SEO**
-- Il contenuto viene **tradotto in più di 15 lingue**, permettendo a più persone di accedere a questo contenuto
-- **HackTricks incoraggia** le persone a **consultare la tua pagina** (diverse persone ci hanno detto che da quando una loro pagina è su HackTricks ricevono più visite)
+- Il contenuto viene **tradotto in più di 15 lingue**, rendendo possibile a più persone l'accesso a questo contenuto
+- **HackTricks incoraggia** le persone a **visitare la tua pagina** (diverse persone ci hanno riferito che da quando una loro pagina è su HackTricks ricevono più visite)
 
-Tuttavia, se desideri comunque che il contenuto del tuo blog venga rimosso da HackTricks basta che ce lo comunichi e noi provvederemo sicuramente a **rimuovere ogni link al tuo blog**, e qualsiasi contenuto basato su di esso.
+Tuttavia, se vuoi comunque che il contenuto del tuo blog venga rimosso da HackTricks, comunicacelo e provvederemo sicuramente a **rimuovere ogni link al tuo blog** e qualsiasi contenuto basato su di esso.
 
 > [!CAUTION]
 >
 > - **Cosa devo fare se trovo contenuti copiati/incollati in HackTricks?**
 
-Attribuiamo sempre **tutti i crediti agli autori originali**. Se trovi una pagina con contenuto copiato/incollato senza la fonte originale citata, faccelo sapere e noi provvederemo o a **rimuoverla**, o a **aggiungere il link prima del testo**, o a **riscriverla aggiungendo il link**.
+Di solito **diamo tutti i crediti agli autori originali**. Se trovi una pagina con contenuti copiati senza la fonte originale referenziata, faccelo sapere e provvederemo o a **rimuoverla**, o a **aggiungere il link prima del testo**, o a **riscriverla aggiungendo il link**.
 
 ## LICENZA
 
 Copyright © Tutti i diritti riservati salvo diversa indicazione.
 
-#### Sommario della licenza:
+#### Riepilogo della licenza:
 
 - Attribuzione: Sei libero di:
-  - Condividere — copiare e ridistribuire il materiale in qualsiasi mezzo o formato.
-  - Adattare — remixare, trasformare e sviluppare il materiale.
+- Share — copiare e ridistribuire il materiale in qualsiasi mezzo o formato.
+- Adapt — remixare, trasformare e sviluppare materiale a partire dal contenuto.
 
 #### Termini aggiuntivi:
 
-- Contenuti di terze parti: Alcune parti di questo blog/libro possono includere contenuti da altre fonti, come estratti da altri blog o pubblicazioni. L'uso di tali contenuti avviene secondo i principi del fair use o con permesso esplicito dei rispettivi titolari del copyright. Si prega di fare riferimento alle fonti originali per informazioni specifiche sulla licenza riguardante i contenuti di terze parti.
-- Autoria: Il contenuto originale creato da HackTricks è soggetto ai termini di questa licenza. Sei incoraggiato ad attribuire questo lavoro all'autore quando lo condividi o lo adatti.
+- Contenuti di terze parti: Alcune parti di questo blog/libro possono includere contenuti provenienti da altre fonti, come estratti da altri blog o pubblicazioni. L'uso di tali contenuti avviene secondo i principi del fair use o con il permesso esplicito dei rispettivi titolari del copyright. Si prega di consultare le fonti originali per informazioni specifiche sulla licenza riguardante i contenuti di terze parti.
+- Autorialità: Il contenuto originale creato da HackTricks è soggetto ai termini di questa licenza. Si incoraggia ad attribuire questo lavoro all'autore quando lo si condivide o si adatta.
 
 #### Esenzioni:
 
-- Uso commerciale: Per richieste riguardo l'uso commerciale di questo contenuto, contattami per favore.
+- Uso commerciale: Per richieste riguardanti l'uso commerciale di questo contenuto, contattami.
 
-Questa licenza non concede diritti su marchi o branding relativi al contenuto. Tutti i marchi e i branding presenti in questo blog/libro sono di proprietà dei rispettivi detentori.
+Questa licenza non concede alcun diritto su marchi o branding relativi al contenuto. Tutti i marchi e i brand presenti in questo blog/libro sono proprietà dei rispettivi proprietari.
 
-**Accedendo o utilizzando HackTricks, accetti di rispettare i termini di questa licenza. Se non sei d'accordo con questi termini, per favore, non accedere a questo sito web.**
+**Accedendo o utilizzando HackTricks, accetti di rispettare i termini di questa licenza. Se non sei d'accordo con questi termini, per favore non accedere a questo sito.**
 
 ## **Esclusione di responsabilità**
 
 > [!CAUTION]
-> Questo libro, 'HackTricks', è destinato esclusivamente a scopi educativi e informativi. Il contenuto di questo libro è fornito 'così com'è', e gli autori e gli editori non rilasciano alcuna dichiarazione o garanzia di alcun tipo, esplicita o implicita, riguardo alla completezza, accuratezza, affidabilità, idoneità, o disponibilità delle informazioni, prodotti, servizi, o grafica correlata contenuti in questo libro. Qualsiasi affidamento che fai su tali informazioni è pertanto esclusivamente a tuo rischio.
+> Questo libro, 'HackTricks', è destinato esclusivamente a scopi educativi e informativi. Il contenuto di questo libro è fornito "così com'è", e gli autori e gli editori non rilasciano alcuna dichiarazione o garanzia di alcun tipo, espressa o implicita, riguardo alla completezza, accuratezza, affidabilità, idoneità o disponibilità delle informazioni, dei prodotti, dei servizi o dei materiali correlati contenuti in questo libro. Qualsiasi affidamento su tali informazioni è quindi esclusivamente a tuo rischio.
 >
-> In nessun caso gli autori e gli editori saranno responsabili per qualsiasi perdita o danno, inclusi, senza limitazioni, perdite o danni indiretti o consequenziali, o qualsiasi perdita o danno derivante dalla perdita di dati o profitti derivanti dall'uso di questo libro o in connessione con esso.
+> Gli autori e gli editori non saranno in alcun caso responsabili per qualsiasi perdita o danno, inclusi, senza limitazione, perdite o danni indiretti o consequenziali, o qualsiasi perdita o danno derivante dalla perdita di dati o profitti derivanti da, o in connessione con, l'uso di questo libro.
 >
-> Inoltre, le tecniche e i suggerimenti descritti in questo libro sono forniti esclusivamente a scopi educativi e informativi, e non devono essere utilizzati per attività illegali o dannose. Gli autori e gli editori non approvano né supportano attività illegali o non etiche, e qualsiasi uso delle informazioni contenute in questo libro avviene a discrezione e a rischio dell'utente.
+> Inoltre, le tecniche e i suggerimenti descritti in questo libro sono forniti a scopo educativo e informativo solamente, e non dovrebbero essere utilizzati per attività illegali o malevole. Gli autori e gli editori non avallano né supportano alcuna attività illegale o non etica, e qualsiasi uso delle informazioni contenute in questo libro è a esclusivo rischio e discrezione dell'utente.
 >
-> L'utente è l'unico responsabile per qualsiasi azione intrapresa sulla base delle informazioni contenute in questo libro, e dovrebbe sempre cercare consulenza e assistenza professionale quando tenta di implementare qualsiasi tecnica o suggerimento qui descritti.
+> L'utente è l'unico responsabile per le azioni intraprese sulla base delle informazioni contenute in questo libro, e dovrebbe sempre cercare consulenza e assistenza professionale quando tenta di implementare tecniche o suggerimenti qui descritti.
 >
-> Usando questo libro, l'utente accetta di liberare gli autori e gli editori da qualsiasi responsabilità per danni, perdite o pregiudizi che possano risultare dall'uso di questo libro o di qualsiasi informazione in esso contenuta.
+> Utilizzando questo libro, l'utente accetta di sollevare gli autori e gli editori da qualsiasi e ogni responsabilità e responsabilità per eventuali danni, perdite o pregiudizi che possano derivare dall'uso di questo libro o di qualsiasi informazione in esso contenuta.
 
 {{#include ../banners/hacktricks-training.md}}

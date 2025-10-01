@@ -2,13 +2,13 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Mutation testing "tests your tests" introducendo sistematicamente piccole modifiche (mutants) nel tuo codice Solidity e rieseguendo la tua test suite. Se un test fallisce, il mutant viene ucciso. Se i test continuano a passare, il mutant sopravvive, rivelando un punto cieco nella tua test suite che la line/branch coverage non può rilevare.
+Mutation testing "testa i tuoi test" introducendo sistematicamente piccole modifiche (mutanti) nel tuo codice Solidity e rieseguendo la tua test suite. Se un test fallisce, il mutante viene ucciso. Se i test continuano a passare, il mutante sopravvive, rivelando un punto cieco nella tua test suite che la copertura delle linee o dei rami non può individuare.
 
-Idea chiave: la copertura mostra che il codice è stato eseguito; mutation testing mostra se il comportamento è effettivamente verificato.
+Idea chiave: la copertura indica che il codice è stato eseguito; la mutation testing indica invece se il comportamento è effettivamente verificato.
 
 ## Perché la copertura può ingannare
 
-Considera questo semplice controllo della soglia:
+Considera questo semplice controllo di soglia:
 ```solidity
 function verifyMinimumDeposit(uint256 deposit) public returns (bool) {
 if (deposit >= 1 ether) {
@@ -18,94 +18,94 @@ return false;
 }
 }
 ```
-I test unitari che verificano solo un valore al di sotto e uno al di sopra della soglia possono raggiungere il 100% di copertura di linee/branch pur non asserendo il confine di uguaglianza (==). Un refactor a `deposit >= 2 ether` passerebbe comunque tali test, rompendo silenziosamente la logica del protocollo.
+I test unitari che verificano solo un valore sotto e un valore sopra la soglia possono raggiungere il 100% di copertura di linea/branch pur non verificando il vincolo di uguaglianza (==). Un refactor a `deposit >= 2 ether` passerebbe comunque questi test, rompendo silenziosamente la logica del protocollo.
 
-Il mutation testing mette in luce questa lacuna mutando la condizione e verificando che i test falliscano.
+Mutation testing espone questa lacuna mutando la condizione e verificando che i test falliscano.
 
-## Common Solidity mutation operators
+## Operatori di mutazione comuni in Solidity
 
-Il motore di mutazione di Slither applica molte piccole modifiche che cambiano la semantica, come:
-- Sostituzione operatori: `+` ↔ `-`, `*` ↔ `/`, etc.
+Il motore di mutation di Slither applica molte piccole modifiche che cambiano la semantica, come:
+- Sostituzione degli operatori: `+` ↔ `-`, `*` ↔ `/`, etc.
 - Sostituzione delle assegnazioni: `+=` → `=`, `-=` → `=`
-- Sostituzione delle costanti: diverso da zero → `0`, `true` ↔ `false`
-- Negazione/sostituzione delle condizioni all'interno di `if`/cicli
+- Sostituzione delle costanti: non-zero → `0`, `true` ↔ `false`
+- Negazione/sostituzione della condizione dentro `if`/loop
 - Commentare intere righe (CR: Comment Replacement)
 - Sostituire una riga con `revert()`
-- Scambio di tipi di dato: p.es., `int128` → `int64`
+- Scambio dei tipi di dato: ad es., `int128` → `int64`
 
-Obiettivo: uccidere il 100% dei mutanti generati, o giustificare i superstiti con ragionamenti chiari.
+Obiettivo: kill 100% dei mutanti generati, o giustificare i sopravvissuti con ragionamenti chiari.
 
 ## Running mutation testing with slither-mutate
 
-Requirements: Slither v0.10.2+.
+Requisiti: Slither v0.10.2+.
 
-- Elenca le opzioni e i mutatori:
+- List options and mutators:
 ```bash
 slither-mutate --help
 slither-mutate --list-mutators
 ```
-- Esempio Foundry (cattura i risultati e conserva un log completo):
+- Foundry esempio (cattura i risultati e mantieni un log completo):
 ```bash
 slither-mutate ./src/contracts --test-cmd="forge test" &> >(tee mutation.results)
 ```
-- Se non usi Foundry, sostituisci `--test-cmd` con il comando che usi per eseguire i test (ad es., `npx hardhat test`, `npm test`).
+- Se non usi Foundry, sostituisci `--test-cmd` con il modo in cui esegui i test (ad esempio, `npx hardhat test`, `npm test`).
 
-Gli artifact e i report vengono salvati in `./mutation_campaign` per impostazione predefinita. I mutanti non rilevati (sopravvissuti) vengono copiati lì per l'ispezione.
+Gli artifact e i report sono memorizzati in `./mutation_campaign` per default. I mutanti non catturati (sopravvissuti) vengono copiati lì per l'ispezione.
 
 ### Comprendere l'output
 
-Le righe del report appaiono così:
+Le righe del report hanno questo aspetto:
 ```text
 INFO:Slither-Mutate:Mutating contract ContractName
 INFO:Slither-Mutate:[CR] Line 123: 'original line' ==> '//original line' --> UNCAUGHT
 ```
 - Il tag tra parentesi è l'alias del mutator (es., `CR` = Comment Replacement).
-- `UNCAUGHT` indica che i test sono passati con il comportamento mutato → manca un'asserzione.
+- `UNCAUGHT` significa che i test sono passati sotto il comportamento mutato → asserzione mancante.
 
-## Ridurre il runtime: dare priorità ai mutanti più impattanti
+## Ridurre i tempi di esecuzione: dare priorità ai mutanti più impattanti
 
-Le campagne di mutation possono richiedere ore o giorni. Suggerimenti per ridurre i costi:
-- Scope: Inizia solo con i contracts/directories critici, poi espandi.
-- Prioritize mutators: se un mutante ad alta priorità su una riga sopravvive (es., l'intera riga commentata), puoi saltare le varianti a priorità inferiore per quella riga.
-- Parallelizza i test se il tuo runner lo permette; usa la cache per dependencies/builds.
-- Fail-fast: interrompi presto quando una modifica dimostra chiaramente un gap di asserzione.
+Le campagne di mutation possono richiedere ore o giorni. Consigli per ridurre i costi:
+- Ambito: Inizia solo con i contratti/directory critici, poi espandi.
+- Prioritizza i mutator: se un mutante ad alta priorità su una riga sopravvive (es., intera riga commentata), puoi saltare le varianti a priorità inferiore per quella riga.
+- Parallelizza i test se il tuo runner lo permette; usa la cache per dipendenze/build.
+- Fail-fast: fermati presto quando una modifica dimostra chiaramente una lacuna nelle asserzioni.
 
-## Flusso di triage per i mutanti sopravvissuti
+## Workflow di triage per i mutanti sopravvissuti
 
-1) Ispeziona la linea mutata e il comportamento.
-- Riproduci localmente applicando la linea mutata ed eseguendo un test focalizzato.
+1) Ispeziona la riga mutata e il comportamento.
+- Riproduci localmente applicando la riga mutata ed eseguendo un test mirato.
 
 2) Rafforza i test per asserire lo stato, non solo i valori di ritorno.
-- Aggiungi controlli di uguaglianza/limite (es., test threshold `==`).
-- Asserisci post-condizioni: balances, total supply, effetti di autorizzazione e eventi emessi.
+- Aggiungi controlli sui confini di uguaglianza (es., verifica della soglia `==`).
+- Asserisci post-condizioni: saldi, total supply, effetti di autorizzazione e eventi emessi.
 
-3) Sostituisci i mock eccessivamente permissivi con comportamenti realistici.
+3) Sostituisci mock eccessivamente permissivi con comportamenti realistici.
 - Assicurati che i mock impongano trasferimenti, percorsi di fallimento e emissioni di eventi che avvengono on-chain.
 
-4) Aggiungi invarianti per i fuzz tests.
-- Es., conservazione del valore, saldi non negativi, invarianti di autorizzazione, monotonia dell'offerta dove applicabile.
+4) Aggiungi invarianti per i test di fuzzing.
+- Es., conservazione del valore, saldi non negativi, invarianti di autorizzazione, supply monotona quando applicabile.
 
-5) Riesegui slither-mutate finché i mutanti sopravvissuti non vengono eliminati o giustificati esplicitamente.
+5) Riesegui slither-mutate finché i sopravvissuti non vengono eliminati o giustificati esplicitamente.
 
-## Caso di studio: rivelare asserzioni di stato mancanti (Arkis protocol)
+## Caso di studio: rivelare asserzioni di stato mancanti (protocollo Arkis)
 
-Una mutation campaign durante un audit del Arkis DeFi protocol ha fatto emergere dei mutanti sopravvissuti come:
+Una campagna di mutation durante un audit del protocollo DeFi Arkis ha portato alla luce sopravvissuti come:
 ```text
 INFO:Slither-Mutate:[CR] Line 33: 'cmdsToExecute.last().value = _cmd.value' ==> '//cmdsToExecute.last().value = _cmd.value' --> UNCAUGHT
 ```
-Commentare l'assegnazione non ha rotto i test, dimostrando la mancanza di asserzioni sullo stato finale. Causa principale: il codice si fidava di un `_cmd.value` controllato dall'utente invece di validare i trasferimenti effettivi di token. Un attacker poteva desincronizzare trasferimenti attesi e reali per prosciugare fondi. Risultato: rischio di alta severità per la solvibilità del protocollo.
+Commentare l'assegnazione non ha fatto fallire i test, dimostrando l'assenza di asserzioni sullo stato post-operazione. Causa principale: il codice si affidava a un `_cmd.value` controllato dall'utente invece di validare i trasferimenti effettivi di token. Un attaccante poteva disallineare i trasferimenti attesi rispetto a quelli effettivi per drenare fondi. Risultato: rischio di alta gravità per la solvibilità del protocollo.
 
-Guidance: Considera i mutanti sopravvissuti che influenzano trasferimenti di valore, contabilità o access control come ad alto rischio finché non vengono eliminati.
+Guidance: Tratta i mutanti sopravvissuti che influenzano trasferimenti di valore, contabilità o controllo degli accessi come ad alto rischio finché non vengono 'killed'.
 
 ## Checklist pratica
 
 - Esegui una campagna mirata:
 - `slither-mutate ./src/contracts --test-cmd="forge test"`
-- Triaga i mutanti sopravvissuti e scrivi test/invarianti che fallirebbero con il comportamento mutato.
+- Effettua il triage dei mutanti sopravvissuti e scrivi test/invarianti che fallirebbero con il comportamento mutato.
 - Verifica saldi, supply, autorizzazioni ed eventi.
-- Aggiungi test sui casi limite (`==`, overflows/underflows, zero-address, zero-amount, empty arrays).
-- Sostituisci mock irrealistici; simula modalità di errore.
-- Itera finché tutti i mutanti non vengono eliminati o giustificati con commenti e razionale.
+- Aggiungi test ai bordi (`==`, overflow/underflow, indirizzo zero, importo zero, array vuoti).
+- Sostituisci i mock irrealistici; simula modalità di fallimento.
+- Itera finché tutti i mutanti non vengono 'killed' o giustificati con commenti e motivazioni.
 
 ## Riferimenti
 
