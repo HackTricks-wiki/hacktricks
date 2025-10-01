@@ -2,42 +2,42 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Basic Information
+## 기본 정보
 
-Mac OS 바이너리는 일반적으로 **유니버설 바이너리**로 컴파일됩니다. **유니버설 바이너리**는 **같은 파일에서 여러 아키텍처를 지원할 수 있습니다**.
+Mac OS 바이너리는 보통 **universal binaries**로 컴파일됩니다. **universal binary**는 단일 파일에서 **여러 아키텍처를 지원할 수 있습니다**.
 
-이 바이너리는 기본적으로 **Mach-O 구조**를 따르며, 이는 다음으로 구성됩니다:
+이러한 바이너리는 기본적으로 다음으로 구성된 **Mach-O 구조**를 따릅니다:
 
-- 헤더
-- 로드 명령
-- 데이터
+- Header
+- Load Commands
+- Data
 
 ![https://alexdremov.me/content/images/2022/10/6XLCD.gif](<../../../images/image (470).png>)
 
 ## Fat Header
 
-다음 명령어로 파일을 검색합니다: `mdfind fat.h | grep -i mach-o | grep -E "fat.h$"`
+다음으로 파일을 검색하세요: `mdfind fat.h | grep -i mach-o | grep -E "fat.h$"`
 
 <pre class="language-c"><code class="lang-c"><strong>#define FAT_MAGIC	0xcafebabe
 </strong><strong>#define FAT_CIGAM	0xbebafeca	/* NXSwapLong(FAT_MAGIC) */
 </strong>
 struct fat_header {
-<strong>	uint32_t	magic;		/* FAT_MAGIC 또는 FAT_MAGIC_64 */
-</strong><strong>	uint32_t	nfat_arch;	/* 뒤따르는 구조체의 수 */
+<strong>	uint32_t	magic;		/* FAT_MAGIC or FAT_MAGIC_64 */
+</strong><strong>	uint32_t	nfat_arch;	/* number of structs that follow */
 </strong>};
 
 struct fat_arch {
-cpu_type_t	cputype;	/* cpu 지정자 (int) */
-cpu_subtype_t	cpusubtype;	/* 머신 지정자 (int) */
-uint32_t	offset;		/* 이 객체 파일에 대한 파일 오프셋 */
-uint32_t	size;		/* 이 객체 파일의 크기 */
-uint32_t	align;		/* 2의 거듭제곱으로 정렬 */
+cpu_type_t	cputype;	/* cpu specifier (int) */
+cpu_subtype_t	cpusubtype;	/* machine specifier (int) */
+uint32_t	offset;		/* file offset to this object file */
+uint32_t	size;		/* size of this object file */
+uint32_t	align;		/* alignment as a power of 2 */
 };
 </code></pre>
 
-헤더에는 **매직** 바이트가 있으며, 그 뒤에 파일이 **포함하는** **아키텍처**의 **수**(`nfat_arch`)가 있습니다. 각 아키텍처는 `fat_arch` 구조체를 가집니다.
+헤더는 **magic** 바이트와 뒤따르는 파일이 포함하는 **archs**의 **개수** (`nfat_arch`)를 포함하며, 각 arch는 `fat_arch` 구조체를 가집니다.
 
-다음 명령어로 확인합니다:
+다음으로 확인하세요:
 
 <pre class="language-shell-session"><code class="lang-shell-session">% file /bin/ls
 /bin/ls: Mach-O universal binary with 2 architectures: [x86_64:Mach-O 64-bit executable x86_64] [arm64e:Mach-O 64-bit executable arm64e]
@@ -68,11 +68,11 @@ capabilities PTR_AUTH_VERSION USERSPACE 0
 
 <figure><img src="../../../images/image (1094).png" alt=""><figcaption></figcaption></figure>
 
-당신이 생각할 수 있듯이, 일반적으로 2개의 아키텍처를 위해 컴파일된 유니버설 바이너리는 1개의 아키텍처를 위해 컴파일된 것의 **크기를 두 배로 늘립니다**.
+아마 생각하셨겠지만, 보통 2개 아키텍처용으로 컴파일된 universal binary는 단일 아키텍처용으로 컴파일된 것보다 크기가 **2배**가 됩니다.
 
 ## **Mach-O Header**
 
-헤더는 파일에 대한 기본 정보를 포함하며, Mach-O 파일로 식별하기 위한 매직 바이트와 대상 아키텍처에 대한 정보를 포함합니다. 다음 명령어로 찾을 수 있습니다: `mdfind loader.h | grep -i mach-o | grep -E "loader.h$"`
+헤더에는 Mach-O 파일로 식별하기 위한 magic 바이트와 대상 아키텍처에 대한 정보 등 파일의 기본 정보가 포함됩니다. 다음에서 찾을 수 있습니다: `mdfind loader.h | grep -i mach-o | grep -E "loader.h$"`
 ```c
 #define	MH_MAGIC	0xfeedface	/* the mach magic number */
 #define MH_CIGAM	0xcefaedfe	/* NXSwapInt(MH_MAGIC) */
@@ -99,19 +99,19 @@ uint32_t	flags;		/* flags */
 uint32_t	reserved;	/* reserved */
 };
 ```
-### Mach-O 파일 유형
+### Mach-O 파일 형식
 
-다양한 파일 유형이 있으며, [**소스 코드에서 예를 찾아볼 수 있습니다**](https://opensource.apple.com/source/xnu/xnu-2050.18.24/EXTERNAL_HEADERS/mach-o/loader.h). 가장 중요한 유형은 다음과 같습니다:
+여러 가지 파일 형식이 있으며, [**source code for example here**](https://opensource.apple.com/source/xnu/xnu-2050.18.24/EXTERNAL_HEADERS/mach-o/loader.h)에서 정의된 것을 확인할 수 있습니다. 가장 중요한 것들은 다음과 같습니다:
 
-- `MH_OBJECT`: 재배치 가능한 오브젝트 파일 (컴파일의 중간 산출물, 아직 실행 파일이 아님).
+- `MH_OBJECT`: 재배치 가능한 오브젝트 파일 (컴파일의 중간 산출물로 아직 실행 파일이 아님).
 - `MH_EXECUTE`: 실행 파일.
 - `MH_FVMLIB`: 고정 VM 라이브러리 파일.
 - `MH_CORE`: 코드 덤프
-- `MH_PRELOAD`: 미리 로드된 실행 파일 (XNU에서 더 이상 지원되지 않음)
+- `MH_PRELOAD`: 사전 로드된 실행 파일 (현재 XNU에서 더 이상 지원되지 않음)
 - `MH_DYLIB`: 동적 라이브러리
 - `MH_DYLINKER`: 동적 링커
-- `MH_BUNDLE`: "플러그인 파일". gcc에서 -bundle을 사용하여 생성되며 `NSBundle` 또는 `dlopen`에 의해 명시적으로 로드됨.
-- `MH_DYSM`: 동반 `.dSym` 파일 (디버깅을 위한 기호가 포함된 파일).
+- `MH_BUNDLE`: "플러그인 파일". -bundle in gcc로 생성되며 명시적으로 `NSBundle` 또는 `dlopen`으로 로드됩니다.
+- `MH_DYSM`: 동반 `.dSym` 파일 (디버깅을 위한 심볼이 포함된 파일).
 - `MH_KEXT_BUNDLE`: 커널 확장.
 ```bash
 # Checking the mac header of a binary
@@ -120,54 +120,54 @@ Mach header
 magic  cputype cpusubtype  caps    filetype ncmds sizeofcmds      flags
 MH_MAGIC_64    ARM64          E USR00     EXECUTE    19       1728   NOUNDEFS DYLDLINK TWOLEVEL PIE
 ```
-또는 [Mach-O View](https://sourceforge.net/projects/machoview/)를 사용하여:
+또는 [Mach-O View](https://sourceforge.net/projects/machoview/):
 
 <figure><img src="../../../images/image (1133).png" alt=""><figcaption></figcaption></figure>
 
 ## **Mach-O 플래그**
 
-소스 코드는 라이브러리 로딩에 유용한 여러 플래그를 정의합니다:
+소스 코드에는 라이브러리 로딩에 유용한 여러 플래그도 정의되어 있다:
 
-- `MH_NOUNDEFS`: 정의되지 않은 참조 없음 (완전히 링크됨)
+- `MH_NOUNDEFS`: 정의되지 않은 참조 없음 (완전 링크됨)
 - `MH_DYLDLINK`: Dyld 링크
-- `MH_PREBOUND`: 동적 참조가 미리 바인딩됨.
-- `MH_SPLIT_SEGS`: 파일이 r/o 및 r/w 세그먼트로 분할됨.
-- `MH_WEAK_DEFINES`: 바이너리에 약한 정의 기호가 있음
-- `MH_BINDS_TO_WEAK`: 바이너리가 약한 기호를 사용함
-- `MH_ALLOW_STACK_EXECUTION`: 스택을 실행 가능하게 만듦
-- `MH_NO_REEXPORTED_DYLIBS`: 라이브러리에 LC_REEXPORT 명령 없음
+- `MH_PREBOUND`: 동적 참조가 사전 바인딩됨
+- `MH_SPLIT_SEGS`: 파일이 r/o 및 r/w 세그먼트로 분리됨
+- `MH_WEAK_DEFINES`: 바이너리에 weak로 정의된 심볼이 있음
+- `MH_BINDS_TO_WEAK`: 바이너리가 weak 심볼을 사용함
+- `MH_ALLOW_STACK_EXECUTION`: 스택을 실행 가능하게 함
+- `MH_NO_REEXPORTED_DYLIBS`: 라이브러리에 LC_REEXPORT 명령이 없음
 - `MH_PIE`: 위치 독립 실행 파일
-- `MH_HAS_TLV_DESCRIPTORS`: 스레드 로컬 변수가 있는 섹션이 있음
-- `MH_NO_HEAP_EXECUTION`: 힙/데이터 페이지에 대한 실행 없음
-- `MH_HAS_OBJC`: 바이너리에 oBject-C 섹션이 있음
+- `MH_HAS_TLV_DESCRIPTORS`: 스레드 로컬 변수 섹션이 있음
+- `MH_NO_HEAP_EXECUTION`: 힙/데이터 페이지에서 실행 불가
+- `MH_HAS_OBJC`: 바이너리에 Objective-C 섹션이 있음
 - `MH_SIM_SUPPORT`: 시뮬레이터 지원
-- `MH_DYLIB_IN_CACHE`: 공유 라이브러리 캐시의 dylibs/frameworks에서 사용됨.
+- `MH_DYLIB_IN_CACHE`: shared library cache에 있는 dylib/framework에 사용됨.
 
 ## **Mach-O 로드 명령**
 
-**메모리에서의 파일 레이아웃**은 여기에서 지정되며, **기호 테이블의 위치**, 실행 시작 시 메인 스레드의 컨텍스트, 그리고 필요한 **공유 라이브러리**가 자세히 설명됩니다. 동적 로더 **(dyld)**에 바이너리의 메모리 로딩 프로세스에 대한 지침이 제공됩니다.
+파일의 메모리 레이아웃이 여기서 지정되며, 심볼 테이블의 위치, 실행 시작 시 메인 스레드의 컨텍스트, 그리고 필요한 공유 라이브러리들이 상세히 기술된다. 바이너리를 메모리에 로드하는 과정에 대해 동적 로더(dyld)에 지침을 제공한다.
 
-**load_command** 구조체를 사용하며, 이는 언급된 **`loader.h`**에 정의되어 있습니다:
+여기서는 앞서 언급한 **`loader.h`**에 정의된 **load_command** 구조체를 사용한다:
 ```objectivec
 struct load_command {
 uint32_t cmd;           /* type of load command */
 uint32_t cmdsize;       /* total size of command in bytes */
 };
 ```
-약 **50가지의 다양한 유형의 로드 명령**이 시스템에 의해 다르게 처리됩니다. 가장 일반적인 것들은: `LC_SEGMENT_64`, `LC_LOAD_DYLINKER`, `LC_MAIN`, `LC_LOAD_DYLIB`, 및 `LC_CODE_SIGNATURE`입니다.
+There are about **50 different types of load commands** that the system handles differently. The most common ones are: `LC_SEGMENT_64`, `LC_LOAD_DYLINKER`, `LC_MAIN`, `LC_LOAD_DYLIB`, and `LC_CODE_SIGNATURE`.
 
 ### **LC_SEGMENT/LC_SEGMENT_64**
 
 > [!TIP]
-> 기본적으로 이 유형의 로드 명령은 **이진 파일이 실행될 때 데이터 섹션에 표시된 오프셋에 따라 \_\_TEXT** (실행 코드) **및 \_\_DATA** (프로세스에 대한 데이터) **세그먼트를 로드하는 방법을 정의합니다.**
+> 기본적으로, 이 유형의 Load Command는 바이너리가 실행될 때 데이터 섹션에 표시된 **오프셋에 따라 \_\_TEXT**(실행 코드) **및 \_\_DATA**(프로세스의 데이터) **세그먼트를 어떻게 로드하는지 정의합니다.**
 
-이 명령은 **실행될 때 프로세스의 가상 메모리 공간에 매핑되는 세그먼트**를 **정의**합니다.
+These commands **define segments** that are **mapped** into the **virtual memory space** of a process when it is executed.
 
-**\_\_TEXT** 세그먼트와 같이 프로그램의 실행 코드를 포함하는 **다양한 유형**의 세그먼트가 있으며, **\_\_DATA** 세그먼트는 프로세스에서 사용하는 데이터를 포함합니다. 이러한 **세그먼트는 Mach-O 파일의 데이터 섹션에 위치합니다.**
+There are **different types** of segments, such as the **\_\_TEXT** segment, which holds the executable code of a program, and the **\_\_DATA** segment, which contains data used by the process. These **segments are located in the data section** of the Mach-O file.
 
-**각 세그먼트**는 여러 **섹션**으로 추가 **구분**될 수 있습니다. **로드 명령 구조**는 해당 세그먼트 내의 **이 섹션들에 대한 정보**를 포함합니다.
+**Each segment** can be further **divided** into multiple **sections**. The **load command structure** contains **information** about **these sections** within the respective segment.
 
-헤더에서는 먼저 **세그먼트 헤더**를 찾습니다:
+In the header first you find the **segment header**:
 
 <pre class="language-c"><code class="lang-c">struct segment_command_64 { /* for 64-bit architectures */
 uint32_t	cmd;		/* LC_SEGMENT_64 */
@@ -184,11 +184,11 @@ int32_t		initprot;	/* initial VM protection */
 };
 </code></pre>
 
-세그먼트 헤더의 예:
+Example of segment header:
 
 <figure><img src="../../../images/image (1126).png" alt=""><figcaption></figcaption></figure>
 
-이 헤더는 **그 뒤에 나타나는 헤더의 섹션 수를 정의합니다:**
+This header defines the **number of sections whose headers appear after** it:
 ```c
 struct section_64 { /* for 64-bit architectures */
 char		sectname[16];	/* name of this section */
@@ -205,62 +205,62 @@ uint32_t	reserved2;	/* reserved (for count or sizeof) */
 uint32_t	reserved3;	/* reserved */
 };
 ```
-예시 **섹션 헤더**:
+예: **섹션 헤더**:
 
 <figure><img src="../../../images/image (1108).png" alt=""><figcaption></figcaption></figure>
 
-**섹션 오프셋** (0x37DC) + **아키텍처 시작 오프셋**을 추가하면, 이 경우 `0x18000` --> `0x37DC + 0x18000 = 0x1B7DC`
+만약 **더하면** **섹션 오프셋** (0x37DC) + **arch가 시작하는 오프셋**, 이 경우 `0x18000` --> `0x37DC + 0x18000 = 0x1B7DC`
 
 <figure><img src="../../../images/image (701).png" alt=""><figcaption></figcaption></figure>
 
-**명령줄**에서 **헤더 정보**를 얻는 것도 가능합니다:
+또한 **헤더 정보**를 **command line**에서 얻을 수도 있습니다:
 ```bash
 otool -lv /bin/ls
 ```
 Common segments loaded by this cmd:
 
-- **`__PAGEZERO`:** 커널에 **주소 0**을 **매핑**하라고 지시하여 **읽거나, 쓸 수 없고, 실행할 수 없도록** 합니다. 구조체의 maxprot 및 minprot 변수는 이 페이지에 **읽기-쓰기-실행 권한이 없음**을 나타내기 위해 0으로 설정됩니다.
-- 이 할당은 **NULL 포인터 역참조 취약점**을 완화하는 데 중요합니다. 이는 XNU가 첫 번째 페이지(오직 첫 번째) 메모리가 접근할 수 없도록 보장하는 하드 페이지 제로를 시행하기 때문입니다(단, i386 제외). 이 요구 사항을 충족하기 위해 바이너리는 첫 4k를 커버하는 작은 \_\_PAGEZERO를 제작하고 나머지 32비트 메모리를 사용자 및 커널 모드에서 접근 가능하게 할 수 있습니다.
-- **`__TEXT`**: **읽기** 및 **실행** 권한이 있는 **실행 가능한** **코드**를 포함합니다(쓰기 불가)**.** 이 세그먼트의 일반적인 섹션:
+- **`__PAGEZERO`:** 커널에게 **주소 0(address zero)**를 **매핑(map)**하도록 지시하여 **읽기/쓰기/실행이 불가능**하도록 합니다. 구조체의 maxprot 및 minprot 변수는 이 페이지에 대한 **읽기-쓰기-실행 권한이 없음을** 나타내기 위해 0으로 설정됩니다.
+- 이 할당은 **NULL pointer dereference vulnerabilities**를 완화하는 데 중요합니다. 이는 XNU가 하드 페이지 제로를 적용하여 메모리의 첫 번째 페이지(첫 페이지만)를 접근 불가로 만들기 때문입니다(i386 제외). 바이너리는 작은 \_\_PAGEZERO( `-pagezero_size` 사용)를 만들어 처음 4K를 덮고 나머지 32비트 메모리는 유저 및 커널 모드에서 접근 가능하도록 하여 이 요구사항을 충족할 수 있습니다.
+- **`__TEXT`**: **실행 가능한(executable)** **코드(code)**를 포함하며 **읽기(read)** 및 **실행(execute)** 권한을 가집니다(쓰기 권한 없음). 이 세그먼트의 일반 섹션:
 - `__text`: 컴파일된 바이너리 코드
 - `__const`: 상수 데이터(읽기 전용)
-- `__[c/u/os_log]string`: C, 유니코드 또는 os 로그 문자열 상수
-- `__stubs` 및 `__stubs_helper`: 동적 라이브러리 로딩 과정에서 관련됨
-- `__unwind_info`: 스택 언와인드 데이터.
-- 이 모든 콘텐츠는 서명되지만 실행 가능하다고도 표시되어 있습니다(문자열 전용 섹션과 같이 이 권한이 반드시 필요하지 않은 섹션의 악용 가능성을 높임).
-- **`__DATA`**: **읽기 가능**하고 **쓰기 가능**한 데이터를 포함합니다(실행 불가)**.**
-- `__got:` 전역 오프셋 테이블
-- `__nl_symbol_ptr`: 비게으른(로드 시 바인딩) 심볼 포인터
-- `__la_symbol_ptr`: 게으른(사용 시 바인딩) 심볼 포인터
-- `__const`: 읽기 전용 데이터여야 함(실제로는 아님)
+- `__[c/u/os_log]string`: C, Unicode 또는 os 로그 문자열 상수
+- `__stubs` and `__stubs_helper`: 동적 라이브러리 로딩 과정에 관여
+- `__unwind_info`: 스택 언와인드 데이터
+- 이 모든 내용은 서명되어 있되 실행 가능으로 표시되어 있다는 점에 유의하세요(문자열 전용 섹션처럼 반드시 실행 권한을 필요로 하지 않는 섹션을 악용할 수 있는 가능성이 증가합니다).
+- **`__DATA`**: **읽기(readable)** 및 **쓰기(writable)** 가능한 데이터를 포함합니다(실행 불가).
+- `__got`: 전역 오프셋 테이블(Global Offset Table)
+- `__nl_symbol_ptr`: Non-lazy(로딩 시 바인딩) 심볼 포인터
+- `__la_symbol_ptr`: Lazy(사용 시 바인딩) 심볼 포인터
+- `__const`: 원래는 읽기 전용 데이터여야 함(실제론 그렇지 않음)
 - `__cfstring`: CoreFoundation 문자열
 - `__data`: 초기화된 전역 변수
 - `__bss`: 초기화되지 않은 정적 변수
-- `__objc_*` (\_\_objc_classlist, \_\_objc_protolist 등): Objective-C 런타임에서 사용되는 정보
-- **`__DATA_CONST`**: \_\_DATA.\_\_const는 상수(쓰기 권한)가 보장되지 않으며, 다른 포인터와 GOT도 마찬가지입니다. 이 섹션은 `mprotect`를 사용하여 `__const`, 일부 초기화기 및 GOT 테이블(해결된 후)을 **읽기 전용**으로 만듭니다.
-- **`__LINKEDIT`**: 심볼, 문자열 및 재배치 테이블 항목과 같은 링커(dyld)에 대한 정보를 포함합니다. `__TEXT` 또는 `__DATA`에 없는 콘텐츠를 위한 일반 컨테이너이며, 그 내용은 다른 로드 명령에서 설명됩니다.
-- dyld 정보: 재배치, 비게으른/게으른/약한 바인딩 opcode 및 내보내기 정보
-- 함수 시작: 함수의 시작 주소 테이블
-- 코드 내 데이터: \_\_text의 데이터 섬
-- 심볼 테이블: 바이너리의 심볼
-- 간접 심볼 테이블: 포인터/스텁 심볼
-- 문자열 테이블
-- 코드 서명
-- **`__OBJC`**: Objective-C 런타임에서 사용되는 정보를 포함합니다. 이 정보는 \_\_DATA 세그먼트의 다양한 \_\_objc\_\* 섹션에서도 발견될 수 있습니다.
-- **`__RESTRICT`**: 내용이 없는 세그먼트로, **`__restrict`**라는 단일 섹션(비어 있음)을 포함하여 바이너리를 실행할 때 DYLD 환경 변수를 무시하도록 보장합니다.
+- `__objc_*` (\_\_objc_classlist, \_\_objc_protolist, 등): Objective-C 런타임에서 사용하는 정보
+- **`__DATA_CONST`**: \_\_DATA.\_\_const는 상수(쓰기 금지)라고 보장되지 않으며, 다른 포인터들과 GOT 또한 마찬가지입니다. 이 섹션은 `__const`, 일부 이니셜라이저 및 (해결된 후의) GOT 테이블을 `mprotect`를 사용해 **읽기 전용**으로 만듭니다.
+- **`__LINKEDIT`**: 링커(dyld)를 위한 정보(심볼, 문자열, 재배치 테이블 엔트리 등)를 포함합니다. `__TEXT`나 `__DATA`에 속하지 않는 내용을 담는 일반 컨테이너이며 그 내용은 다른 로드 커맨드에서 기술됩니다.
+- dyld 정보: Rebase, Non-lazy/lazy/weak binding opcodes 및 export 정보
+- Functions starts: 함수들의 시작 주소 표
+- Data In Code: 데이터 섬들 in \_\_text
+- Symbol Table: 바이너리 내의 심볼
+- Indirect Symbol Table: 포인터/스텁 심볼
+- String Table
+- Code Signature
+- **`__OBJC`**: Objective-C 런타임에서 사용하는 정보를 포함합니다. 이 정보는 \_\_DATA 세그먼트 내의 다양한 \_\_objc\_\* 섹션에서도 찾을 수 있습니다.
+- **`__RESTRICT`**: 내용이 없는 세그먼트로, **`__restrict`**라는 단일 섹션(역시 비어 있음)을 가지며, 바이너리 실행 시 DYLD 환경 변수를 무시하도록 보장합니다.
 
-코드에서 볼 수 있듯이, **세그먼트는 플래그도 지원합니다**(비록 많이 사용되지는 않지만):
+As it was possible to see in the code, **segments also support flags** (although they aren't used very much):
 
-- `SG_HIGHVM`: 코어 전용(사용되지 않음)
+- `SG_HIGHVM`: Core 전용(사용 안 함)
 - `SG_FVMLIB`: 사용되지 않음
 - `SG_NORELOC`: 세그먼트에 재배치 없음
-- `SG_PROTECTED_VERSION_1`: 암호화. 예를 들어 Finder가 `__TEXT` 세그먼트를 암호화하는 데 사용됩니다.
+- `SG_PROTECTED_VERSION_1`: 암호화. 예를 들어 Finder가 텍스트 `__TEXT` 세그먼트를 암호화하는 데 사용됩니다.
 
 ### **`LC_UNIXTHREAD/LC_MAIN`**
 
-**`LC_MAIN`**은 **entryoff 속성**에 있는 진입점을 포함합니다. 로드 시, **dyld**는 이 값을 (메모리 내) **바이너리의 기본 주소**에 **추가**한 다음, 이 명령어로 **점프**하여 바이너리 코드의 실행을 시작합니다.
+**`LC_MAIN`**은 **entryoff attribute**에 엔트리포인트를 포함합니다. 로드 시, **dyld**는 단순히 이 값을 (메모리 상의) **바이너리의 베이스(base of the binary)**에 더한 후 해당 명령으로 **점프(jumps)**하여 바이너리 코드를 실행합니다.
 
-**`LC_UNIXTHREAD`**는 메인 스레드를 시작할 때 레지스터가 가져야 할 값을 포함합니다. 이는 이미 사용 중단되었지만 **`dyld`**는 여전히 사용합니다. 이로 설정된 레지스터의 값을 확인할 수 있습니다:
+**`LC_UNIXTHREAD`**는 메인 스레드를 시작할 때 레지스터가 가져야 할 값들을 포함합니다. 이는 이미 deprecated 되었지만 **`dyld`**는 여전히 이를 사용합니다. 이로 인해 설정된 레지스터 값들은 다음을 통해 확인할 수 있습니다:
 ```bash
 otool -l /usr/lib/dyld
 [...]
@@ -286,34 +286,39 @@ cpsr 0x00000000
 ```
 ### **`LC_CODE_SIGNATURE`**
 
-Mach-O 파일의 **코드 서명**에 대한 정보를 포함합니다. 이는 **서명 블롭**을 가리키는 **오프셋**만 포함합니다. 일반적으로 파일의 맨 끝에 위치합니다.\
-그러나 이 섹션에 대한 일부 정보는 [**이 블로그 게시물**](https://davedelong.com/blog/2018/01/10/reading-your-own-entitlements/)과 이 [**gists**](https://gist.github.com/carlospolop/ef26f8eb9fafd4bc22e69e1a32b81da4)에서 찾을 수 있습니다.
+{{#ref}}
+../../../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/mach-o-entitlements-and-ipsw-indexing.md
+{{#endref}}
+
+
+Contains information about the **code signature of the Macho-O file**. It only contains an **offset** that **points** to the **signature blob**. This is typically at the very end of the file.\
+However, you can find some information about this section in [**this blog post**](https://davedelong.com/blog/2018/01/10/reading-your-own-entitlements/) and this [**gists**](https://gist.github.com/carlospolop/ef26f8eb9fafd4bc22e69e1a32b81da4).
 
 ### **`LC_ENCRYPTION_INFO[_64]`**
 
-바이너리 암호화에 대한 지원. 그러나 물론, 공격자가 프로세스를 손상시키면 메모리를 암호화되지 않은 상태로 덤프할 수 있습니다.
+바이너리 암호화를 지원합니다. 그러나 공격자가 프로세스를 침해하면 메모리를 암호화되지 않은 상태로 덤프할 수 있습니다.
 
 ### **`LC_LOAD_DYLINKER`**
 
-프로세스 주소 공간에 공유 라이브러리를 매핑하는 **동적 링커 실행 파일**의 **경로**를 포함합니다. **값은 항상 `/usr/lib/dyld`로 설정됩니다**. macOS에서는 dylib 매핑이 **커널 모드**가 아닌 **사용자 모드**에서 발생한다는 점에 유의하는 것이 중요합니다.
+공유 라이브러리를 프로세스 주소 공간에 맵핑하는 dynamic linker 실행 파일의 경로를 포함합니다. 값은 항상 `/usr/lib/dyld`로 설정됩니다. macOS에서는 dylib 매핑이 커널 모드가 아니라 사용자 모드에서 발생한다는 점을 유의하세요.
 
 ### **`LC_IDENT`**
 
-구식이지만 패닉 시 덤프를 생성하도록 구성되면 Mach-O 코어 덤프가 생성되고 커널 버전이 `LC_IDENT` 명령에 설정됩니다.
+구식이지만, panic 시 덤프를 생성하도록 구성하면 Mach-O 코어 덤프가 생성되고 커널 버전이 `LC_IDENT` 명령에 설정됩니다.
 
 ### **`LC_UUID`**
 
-무작위 UUID. XNU가 나머지 프로세스 정보와 함께 캐시하므로 직접적으로 유용합니다. 충돌 보고서에서 사용할 수 있습니다.
+무작위 UUID입니다. 자체적으로는 직접적인 용도는 제한적이지만 XNU가 이를 다른 프로세스 정보와 함께 캐시합니다. 크래시 리포트에 사용할 수 있습니다.
 
 ### **`LC_DYLD_ENVIRONMENT`**
 
-프로세스가 실행되기 전에 dyld에 환경 변수를 지정할 수 있습니다. 이는 프로세스 내에서 임의의 코드를 실행할 수 있게 하므로 매우 위험할 수 있습니다. 따라서 이 로드 명령은 `#define SUPPORT_LC_DYLD_ENVIRONMENT`로 빌드된 dyld에서만 사용되며, 로드 경로를 지정하는 `DYLD_..._PATH` 형식의 변수로만 처리하도록 추가 제한됩니다.
+프로세스가 실행되기 전에 dyld에 환경 변수를 지정할 수 있게 합니다. 이는 프로세스 내부에서 임의의 코드를 실행할 수 있게 하므로 매우 위험할 수 있습니다. 따라서 이 load command는 `#define SUPPORT_LC_DYLD_ENVIRONMENT`로 빌드된 dyld에서만 사용되며, 처리는 로드 경로를 지정하는 `DYLD_..._PATH` 형태의 변수로만 제한됩니다.
 
 ### **`LC_LOAD_DYLIB`**
 
-이 로드 명령은 **동적** **라이브러리** 의존성을 설명하며, **로더**(dyld)에게 **해당 라이브러리를 로드하고 링크하라고 지시합니다**. Mach-O 바이너리가 요구하는 **각 라이브러리**에 대해 `LC_LOAD_DYLIB` 로드 명령이 있습니다.
+이 load command는 loader(dyld)에게 라이브러리를 로드하고 링크하도록 지시하는 dynamic library 의존성을 설명합니다. Mach-O 바이너리가 필요로 하는 각 라이브러리마다 하나의 `LC_LOAD_DYLIB` load command가 있습니다.
 
-- 이 로드 명령은 **`dylib_command`** 유형의 구조체입니다(실제 의존 동적 라이브러리를 설명하는 struct dylib 포함):
+- This load command is a structure of type **`dylib_command`** (which contains a struct dylib, describing the actual dependent dynamic library):
 ```objectivec
 struct dylib_command {
 uint32_t        cmd;            /* LC_LOAD_{,WEAK_}DYLIB */
@@ -330,7 +335,7 @@ uint32_t compatibility_version;     /* library's compatibility vers number*/
 ```
 ![](<../../../images/image (486).png>)
 
-이 정보를 cli를 통해서도 얻을 수 있습니다:
+또는 cli에서 다음과 같이 이 정보를 얻을 수도 있습니다:
 ```bash
 otool -L /bin/ls
 /bin/ls:
@@ -338,30 +343,30 @@ otool -L /bin/ls
 /usr/lib/libncurses.5.4.dylib (compatibility version 5.4.0, current version 5.4.0)
 /usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1319.0.0)
 ```
-일부 잠재적인 맬웨어 관련 라이브러리는 다음과 같습니다:
+일부 잠재적 악성코드 관련 라이브러리:
 
 - **DiskArbitration**: USB 드라이브 모니터링
 - **AVFoundation:** 오디오 및 비디오 캡처
 - **CoreWLAN**: Wifi 스캔.
 
-> [!NOTE]
-> Mach-O 바이너리는 **LC_MAIN**에 지정된 주소 **이전**에 **실행**될 **하나 또는 여러 개의** **생성자**를 포함할 수 있습니다.\
-> 모든 생성자의 오프셋은 **\_\_DATA_CONST** 세그먼트의 **\_\_mod_init_func** 섹션에 저장됩니다.
+> [!TIP]
+> A Mach-O binary can contain one or **more** **constructors**, that will be **executed** **before** the address specified in **LC_MAIN**.\
+> The offsets of any constructors are held in the **\_\_mod_init_func** section of the **\_\_DATA_CONST** segment.
 
 ## **Mach-O 데이터**
 
-파일의 핵심은 데이터 영역으로, 로드 명령 영역에 정의된 여러 세그먼트로 구성됩니다. **각 세그먼트 내에는 다양한 데이터 섹션이 포함될 수 있으며**, 각 섹션은 특정 유형에 대한 **코드 또는 데이터**를 보유합니다.
+파일의 핵심에는 load-commands 영역에 정의된 여러 세그먼트로 구성된 데이터 영역이 있습니다. **각 세그먼트 안에는 다양한 데이터 섹션이 존재할 수 있으며**, 각 섹션은 특정 타입에 대한 **코드 또는 데이터를 보관**합니다.
 
 > [!TIP]
-> 데이터는 기본적으로 로드 명령 **LC_SEGMENTS_64**에 의해 로드되는 모든 **정보**를 포함하는 부분입니다.
+> 데이터는 기본적으로 **LC_SEGMENTS_64** 로드 커맨드에 의해 로드되는 모든 **정보**를 포함하는 부분입니다.
 
 ![https://www.oreilly.com/api/v2/epubs/9781785883378/files/graphics/B05055_02_38.jpg](<../../../images/image (507) (3).png>)
 
-여기에는 다음이 포함됩니다:
+이에는 다음이 포함됩니다:
 
-- **함수 테이블:** 프로그램 함수에 대한 정보를 보유합니다.
+- **함수 테이블:** 프로그램 함수에 대한 정보를 보관합니다.
 - **심볼 테이블**: 바이너리에서 사용되는 외부 함수에 대한 정보를 포함합니다.
-- 내부 함수, 변수 이름 등도 포함될 수 있습니다.
+- 내부 함수나 변수 이름 등도 포함될 수 있습니다.
 
 확인하려면 [**Mach-O View**](https://sourceforge.net/projects/machoview/) 도구를 사용할 수 있습니다:
 
@@ -373,18 +378,18 @@ size -m /bin/ls
 ```
 ## Objetive-C 공통 섹션
 
-In `__TEXT` segment (r-x):
+`__TEXT` 세그먼트 (r-x):
 
-- `__objc_classname`: 클래스 이름 (문자열)
-- `__objc_methname`: 메서드 이름 (문자열)
-- `__objc_methtype`: 메서드 유형 (문자열)
+- `__objc_classname`: 클래스 이름(문자열)
+- `__objc_methname`: 메서드 이름(문자열)
+- `__objc_methtype`: 메서드 타입(문자열)
 
-In `__DATA` segment (rw-):
+`__DATA` 세그먼트 (rw-):
 
 - `__objc_classlist`: 모든 Objetive-C 클래스에 대한 포인터
-- `__objc_nlclslist`: 비지연 Objective-C 클래스에 대한 포인터
+- `__objc_nlclslist`: Non-Lazy Objective-C 클래스에 대한 포인터
 - `__objc_catlist`: 카테고리에 대한 포인터
-- `__objc_nlcatlist`: 비지연 카테고리에 대한 포인터
+- `__objc_nlcatlist`: Non-Lazy 카테고리에 대한 포인터
 - `__objc_protolist`: 프로토콜 목록
 - `__objc_const`: 상수 데이터
 - `__objc_imageinfo`, `__objc_selrefs`, `objc__protorefs`...

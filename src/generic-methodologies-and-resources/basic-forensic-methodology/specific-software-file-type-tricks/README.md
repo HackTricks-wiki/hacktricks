@@ -1,8 +1,8 @@
-# 특정 소프트웨어/파일 형식 팁
+# 특정 소프트웨어/파일 형식 요령
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-여기에서는 특정 파일 형식 및/또는 소프트웨어에 대한 흥미로운 팁을 제공합니다:
+여기에서 특정 파일 형식 및/또는 소프트웨어에 대한 흥미로운 요령을 확인할 수 있습니다:
 
 
 {{#ref}}
@@ -52,6 +52,11 @@ video-and-audio-file-analysis.md
 
 {{#ref}}
 zips-tricks.md
+{{#endref}}
+
+
+{{#ref}}
+mach-o-entitlements-and-ipsw-indexing.md
 {{#endref}}
 
 {{#include ../../../banners/hacktricks-training.md}}
