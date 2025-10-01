@@ -491,3 +491,4 @@
     handle.addEventListener("touchstart", onStart, { passive: false });
   }
 })();
+

