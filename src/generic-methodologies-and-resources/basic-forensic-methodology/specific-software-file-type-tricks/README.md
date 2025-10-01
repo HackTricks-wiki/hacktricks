@@ -54,4 +54,9 @@ video-and-audio-file-analysis.md
 zips-tricks.md
 {{#endref}}
 
+
+{{#ref}}
+mach-o-entitlements-and-ipsw-indexing.md
+{{#endref}}
+
 {{#include ../../../banners/hacktricks-training.md}}
