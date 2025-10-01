@@ -1,14 +1,14 @@
-# Mutation Testing dla Solidity z Slither (slither-mutate)
+# Mutation Testing for Solidity with Slither (slither-mutate)
 
-{{#include ../../../banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}
 
-Mutation testing "tests your tests" poprzez systematyczne wprowadzanie drobnych zmian (mutantów) w twoim kodzie Solidity i ponowne uruchamianie zestawu testów. Jeśli test się nie powiedzie, mutant zostaje zabity. Jeśli testy nadal przechodzą, mutant przeżywa, ujawniając ślepy punkt w twoim zestawie testów, którego pokrycie linii/gałęzi nie wykryje.
+Mutation testing "tests your tests" poprzez systematyczne wprowadzanie małych zmian (mutantów) w Twoim kodzie Solidity i ponowne uruchamianie zestawu testów. Jeśli test zawiedzie, mutant zostaje zabity. Jeśli testy nadal przejdą, mutant przetrwa, ujawniając ślepą plamę w Twoim zestawie testów, której pokrycie linii/gałęzi nie wykryje.
 
-Kluczowa myśl: Pokrycie pokazuje, że kod został wykonany; mutation testing pokazuje, czy zachowanie jest faktycznie sprawdzone.
+Key idea: Pokrycie pokazuje, że kod został wykonany; testowanie mutacyjne pokazuje, czy zachowanie zostało faktycznie zweryfikowane.
 
 ## Dlaczego pokrycie może wprowadzać w błąd
 
-Rozważ ten prosty warunek progowy:
+Rozważ to proste sprawdzenie progu:
 ```solidity
 function verifyMinimumDeposit(uint256 deposit) public returns (bool) {
 if (deposit >= 1 ether) {
@@ -18,39 +18,39 @@ return false;
 }
 }
 ```
-Testy jednostkowe, które sprawdzają tylko wartość poniżej oraz wartość powyżej progu, mogą osiągnąć 100% pokrycia linii/gałęzi, jednocześnie nie asercjonując granicy równości (==). Refaktoring do `deposit >= 2 ether` nadal przejdzie takie testy, cicho łamiąc logikę protokołu.
+Testy jednostkowe, które sprawdzają tylko wartość poniżej i wartość powyżej progu, mogą osiągnąć 100% pokrycia linii/gałęzi, jednocześnie nie asercjonując granicy równości (==). Refaktoryzacja do `deposit >= 2 ether` nadal przejdzie takie testy, cicho łamiąc logikę protokołu.
 
-Mutation testing ujawnia tę lukę, mutując warunek i weryfikując, że testy nie przejdą.
+Mutation testing ujawnia tę lukę przez mutowanie warunku i weryfikowanie, że testy nie przechodzą.
 
-## Najczęstsze operatory mutacji w Solidity
+## Typowe operatory mutacji w Solidity
 
-Slither’s mutation engine stosuje wiele drobnych modyfikacji zmieniających semantykę, takich jak:
-- Zamiana operatorów: `+` ↔ `-`, `*` ↔ `/`, itp.
+Silnik mutacji Slither stosuje wiele drobnych edycji zmieniających semantykę, takich jak:
+- Zamiana operatorów: `+` ↔ `-`, `*` ↔ `/`, itd.
 - Zamiana przypisania: `+=` → `=`, `-=` → `=`
-- Zamiana stałych: niezerowe → `0`, `true` ↔ `false`
-- Negacja/zamiana warunku w `if`/pętlach
-- Komentowanie całych linii (CR: Comment Replacement)
-- Zamiana linii na `revert()`
-- Zamiany typów danych: np. `int128` → `int64`
+- Zamiana stałych: wartość niezerowa → `0`, `true` ↔ `false`
+- Negacja/zamiana warunku wewnątrz `if`/pętli
+- Zakomentowanie całych linii (CR: Comment Replacement)
+- Zastąpienie linii wywołaniem `revert()`
+- Zamiana typów danych: np. `int128` → `int64`
 
-Cel: Zabić 100% wygenerowanych mutantów lub uzasadnić ocalałe przypadki jasnym wyjaśnieniem.
+Cel: Wyeliminować 100% wygenerowanych mutantów lub uzasadnić przeżycie poszczególnych mutantów jasnym wyjaśnieniem.
 
-## Uruchamianie Mutation testing za pomocą slither-mutate
+## Uruchamianie mutation testing za pomocą slither-mutate
 
 Wymagania: Slither v0.10.2+.
 
-- Wypisz opcje i mutatory:
+- Wyświetl opcje i mutatory:
 ```bash
 slither-mutate --help
 slither-mutate --list-mutators
 ```
-- Przykład Foundry (przechwyć wyniki i zachowaj pełny log):
+- Przykład Foundry (zapisz wyniki i zachowaj pełny log):
 ```bash
 slither-mutate ./src/contracts --test-cmd="forge test" &> >(tee mutation.results)
 ```
-- Jeśli nie używasz Foundry, zamień `--test-cmd` na komendę uruchamiającą testy (np. `npx hardhat test`, `npm test`).
+- Jeśli nie używasz Foundry, zastąp `--test-cmd` sposobem uruchamiania testów (np. `npx hardhat test`, `npm test`).
 
-Artefakty i raporty są domyślnie przechowywane w `./mutation_campaign`. Niewykryte (przetrwałe) mutanty są tam kopiowane do wglądu.
+Artyfakty i raporty są domyślnie zapisywane w `./mutation_campaign`. Mutanty, które nie zostały wykryte (przetrwałe), są tam kopiowane do inspekcji.
 
 ### Zrozumienie wyników
 
@@ -93,24 +93,24 @@ A mutation campaign during an audit of the Arkis DeFi protocol surfaced survivor
 ```text
 INFO:Slither-Mutate:[CR] Line 33: 'cmdsToExecute.last().value = _cmd.value' ==> '//cmdsToExecute.last().value = _cmd.value' --> UNCAUGHT
 ```
-Zakomentowanie przypisania nie złamało testów, co dowodzi brakujących asercji stanu po wykonaniu. Przyczyna: kod zaufał kontrolowanej przez użytkownika zmiennej `_cmd.value` zamiast walidować rzeczywiste transfery tokenów. Atakujący mógłby rozdesynchronizować oczekiwane i rzeczywiste transfery, aby opróżnić środki. Skutek: ryzyko wysokiej wagi dla wypłacalności protokołu.
+Zakomentowanie przypisania nie zepsuło testów, co dowodzi braku asercji stanu końcowego. Przyczyna: kod ufał kontrolowanej przez użytkownika wartości `_cmd.value` zamiast weryfikować rzeczywiste transfery tokenów. Atakujący mógłby wprowadzić niespójność między oczekiwanymi a faktycznymi transferami i wyprowadzić środki. Skutek: ryzyko wysokiej wagi dla wypłacalności protokołu.
 
-Wytyczne: Traktuj mutanty, które przetrwały i wpływają na transfery wartości, księgowość lub kontrolę dostępu, jako wysokiego ryzyka, dopóki nie zostaną wyeliminowane.
+Wskazówka: Traktuj przetrwałe mutanty, które wpływają na transfery wartości, księgowość lub kontrolę dostępu, jako wysokie ryzyko, dopóki nie zostaną wyeliminowane.
 
-## Praktyczna lista kontrolna
+## Practical checklist
 
-- Uruchom ukierunkowaną kampanię:
+- Przeprowadź ukierunkowaną kampanię:
 - `slither-mutate ./src/contracts --test-cmd="forge test"`
-- Przejrzyj mutanty, które przetrwały, i napisz testy/inwarianty, które zawiodłyby przy zmienionym zachowaniu.
-- Zweryfikuj salda, podaż, uprawnienia i zdarzenia.
-- Dodaj testy brzegowe (`==`, overflows/underflows, zero-address, zero-amount, empty arrays).
-- Zastąp nierealistyczne mocki; zasymuluj tryby awarii.
-- Powtarzaj, aż wszystkie mutanty zostaną wyeliminowane lub uzasadnione komentarzami i wyjaśnieniem.
+- Przeprowadź triage przetrwałych mutantów i napisz testy/inwarianty, które zawiodłyby przy zmienionym zachowaniu.
+- Asercje sald, podaży, autoryzacji i zdarzeń.
+- Dodaj testy graniczne (`==`, przepełnienia/underflow, adres zero, ilość zero, puste tablice).
+- Zastąp nierealistyczne mocki; symuluj tryby awarii.
+- Iteruj, aż wszystkie mutanty zostaną wyeliminowane lub udokumentowane komentarzami i uzasadnieniem.
 
-## Źródła
+## References
 
 - [Use mutation testing to find the bugs your tests don't catch (Trail of Bits)](https://blog.trailofbits.com/2025/09/18/use-mutation-testing-to-find-the-bugs-your-tests-dont-catch/)
 - [Arkis DeFi Prime Brokerage Security Review (Appendix C)](https://github.com/trailofbits/publications/blob/master/reviews/2024-12-arkis-defi-prime-brokerage-securityreview.pdf)
 - [Slither (GitHub)](https://github.com/crytic/slither)
 
-{{#include ../../../banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}
