@@ -1,6 +1,6 @@
 # Mutation Testing for Solidity with Slither (slither-mutate)
 
-{{#include ../../../banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}
 
 Mutation testing "tests your tests" by systematically introducing small changes (mutants) into your Solidity code and re-running your test suite. If a test fails, the mutant is killed. If the tests still pass, the mutant survives, revealing a blind spot in your test suite that line/branch coverage cannot detect.
 
@@ -123,4 +123,4 @@ Guidance: Treat survivors that affect value transfers, accounting, or access con
 - [Arkis DeFi Prime Brokerage Security Review (Appendix C)](https://github.com/trailofbits/publications/blob/master/reviews/2024-12-arkis-defi-prime-brokerage-securityreview.pdf)
 - [Slither (GitHub)](https://github.com/crytic/slither)
 
-{{#include ../../../banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}
