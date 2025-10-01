@@ -1,12 +1,12 @@
 # Mutasietoetsing vir Solidity met Slither (slither-mutate)
 
-{{#include ../../../banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}
 
-Mutasietoetsing "toets jou toetse" deur stelselmatig klein veranderinge (mutants) in jou Solidity-kode in te bring en jou toetsuite weer te laat loop. As 'n toets faal, word die mutant gedood. As die toetse steeds slaag, oorleef die mutant, wat 'n blinde kol in jou toetsuite aan die lig bring wat lyn-/vertakkingsdekking nie kan opspoor nie.
+Mutasietoetsing "toets jou toetse" deur sistematies klein veranderinge (mutante) in jou Solidity-kode in te voer en jou toets-suite weer te laat loop. As 'n toets faal, word die mutant gedood. As die toetse steeds slaag, oorleef die mutant en openbaar dit 'n blinde kol in jou toets-suite wat lyn-/tak-dekking nie kan opspoor nie.
 
-Sleutelgedagte: Dekking toon dat kode uitgevoer is; mutasietoetsing toon of gedrag werklik deur toetse bekragtig word.
+Hoofgedagte: Dekking toon dat kode uitgevoer is; mutasietoetsing toon of gedrag werklik bevestig word.
 
-## Waarom dekking kan mislei
+## Hoekom dekking kan mislei
 
 Oorweeg hierdie eenvoudige drempelkontrole:
 ```solidity
@@ -18,22 +18,22 @@ return false;
 }
 }
 ```
-Eenheidstoetse wat slegs `n` waarde onder en `n` waarde bo die drempel nagaan kan 100% lyn-/takdekking bereik terwyl hulle versuim om die gelykheidsgrens (==) te bekragtig. 'n Refaktorering na `deposit >= 2 ether` sou steeds sulke toetse deurstaan en stilweg protokollogika breek.
+Unit tests wat slegs 'n waarde onder en 'n waarde bo die drempel nagaan, kan 100% lyn-/tak-dekking bereik terwyl hulle versuim om die gelykheidsgrens (==) te bevestig. 'n Refaktor na `deposit >= 2 ether` sou steeds sulke toetse deurgaan en stilweg die protokollogika breek.
 
-Mutasietoetsing openbaar hierdie gaping deur die voorwaarde te muteer en te verifieer dat jou toetse faal.
+Mutasietoetsing openbaar hierdie gaping deur die voorwaarde te muteer en te verifieer dat jou toetse misluk.
 
 ## Algemene Solidity mutasie-operateurs
 
-Die mutasie-enjin van Slither pas baie klein, semantiekveranderende wysigings toe, soos:
-- Operatorvervanging: `+` ↔ `-`, `*` ↔ `/`, etc.
-- Toewysingsvervanging: `+=` → `=`, `-=` → `=`
-- Konstantevervanging: nie-nul → `0`, `true` ↔ `false`
-- Voorwaardelike negasie/vervanging binne `if`/lusse
-- Kommentaar uitkommentarieer hele reëls (CR: Comment Replacement)
-- Vervang 'n reël deur `revert()`
-- Datatipe-wissel: bv. `int128` → `int64`
+Slither se mutasie-enjin pas baie klein, semantiekveranderende wysigings toe, soos:
+- Operateurvervanging: `+` ↔ `-`, `*` ↔ `/`, etc.
+- Toekenningvervanging: `+=` → `=`, `-=` → `=`
+- Konstante vervanging: nie-nul → `0`, `true` ↔ `false`
+- Voorwaardelike negasie/vervanging binne `if`/loops
+- Comment out whole lines (CR: Comment Replacement)
+- Vervang 'n lyn met `revert()`
+- Datatipruilings: e.g., `int128` → `int64`
 
-Doel: Vernietig 100% van die gegenereerde mutants, of regverdig oorlewendes met duidelike redes.
+Doel: Vernietig 100% van die gegenereerde mutante, of regverdig oorblywende mutante met duidelike motivering.
 
 ## Uitvoering van mutasietoetsing met slither-mutate
 
@@ -44,13 +44,13 @@ Vereistes: Slither v0.10.2+.
 slither-mutate --help
 slither-mutate --list-mutators
 ```
-- Foundry voorbeeld (vang resultate en hou 'n volledige log):
+- Foundry voorbeeld (vang resultate en hou 'n volledige logboek):
 ```bash
 slither-mutate ./src/contracts --test-cmd="forge test" &> >(tee mutation.results)
 ```
-- As jy nie Foundry gebruik nie, vervang `--test-cmd` met hoe jy toetse hardloop (bv., `npx hardhat test`, `npm test`).
+- As jy nie Foundry gebruik nie, vervang `--test-cmd` met hoe jy toetse uitvoer (bv., `npx hardhat test`, `npm test`).
 
-Artefakte en verslae word standaard in `./mutation_campaign` gestoor. Ongevang (oorleefde) mutante word daarheen gekopieer vir inspeksie.
+Artefakte en verslae word standaard in `./mutation_campaign` gestoor. Ongevang (oorlewende) mutants word daarheen gekopieer vir inspeksie.
 
 ### Verstaan die uitset
 
@@ -59,53 +59,53 @@ Verslagreëls lyk soos:
 INFO:Slither-Mutate:Mutating contract ContractName
 INFO:Slither-Mutate:[CR] Line 123: 'original line' ==> '//original line' --> UNCAUGHT
 ```
-- Die etiket in hakies is die mutator-alias (bv., `CR` = Comment Replacement).
-- `UNCAUGHT` beteken dat toetse geslaag het onder die gemuteerde gedrag → ontbrekende assertie.
+- Die etiket in hakies is die mutator-alias (bv. `CR` = Comment Replacement).
+- `UNCAUGHT` beteken dat toetse deurgegaan het onder die gemuteerde gedrag → ontbrekende assertie.
 
-## Verminder uitvoeringstyd: prioritiseer invloedryke mutante
+## Verminder uitvoeringstyd: prioritiseer invloedryke mutants
 
-Mutasieveldtogte kan ure of dae neem. Wenke om koste te verminder:
-- Scope: Begin slegs met kritieke contracts/direktore, en brei dan uit.
-- Prioritiseer mutators: As 'n hoë-prioriteits mutant op 'n reël oorleef (bv., hele reël uitgekommenteer), kan jy laer-prioriteits variante vir daardie reël oorslaan.
-- Paralleliseer toetse as jou runner dit toelaat; cache dependencies/builds.
-- Fail-fast: stop vroeg wanneer 'n verandering duidelik 'n assertie-gaping toon.
+Mutasie-veldtogte kan ure of dae neem. Wenke om koste te verminder:
+- Omvang: Begin slegs met kritiese contracts/direktore, brei daarna uit.
+- Prioritiseer mutators: As 'n hoë-prioriteits mutant op 'n reël oorleef (bv. hele reël uitgekommenteer), kan jy laer-prioriteits variante vir daardie reël oorslaan.
+- Paralleliseer toetse as jou runner dit toelaat; cache afhanklikhede en builds.
+- Fail-fast: hou op vroeg wanneer 'n verandering duidelik 'n assertie-gaping aandui.
 
-## Triage-werkstroom vir oorblywende mutante
+## Triëringswerkvloei vir oorlewende mutants
 
 1) Inspekteer die gemuteerde reël en gedrag.
 - Reproduceer plaaslik deur die gemuteerde reël toe te pas en 'n gefokusde toets te hardloop.
 
-2) Verskerp toetse om die toestand te assereer, nie net returnwaardes nie.
-- Voeg gelykheids-grenskontroles by (bv., toets drempel `==`).
-- Asserteer post-voorwaardes: balanse, totale aanbod, magtigings-effekte, en uitgesaai gebeurtenisse.
+2) Versterk toetse om toestand te bevestig, nie net teruggegewe waardes nie.
+- Voeg gelykheid-grenskontroles by (bv. toets drempel `==`).
+- Bevestig post-voorwaardes: balanse, totale toevoer, magtigingseffekte en uitgesaai gebeurtenisse.
 
-3) Vervang te permissiewe mocks met realistiese gedrag.
-- Verseker dat mocks transfers afdwing, foutpaaie en gebeurtenisuitstoot hanteer wat op-chain voorkom.
+3) Vervang oormatige permissiewe mocks met realistiese gedrag.
+- Verseker dat mocks transfers, foutpade en gebeurtenisuitsendings afdwing wat on-chain plaasvind.
 
 4) Voeg invariantes by vir fuzz-toetse.
-- Byv., behoud van waarde, nie-negatiewe balanse, magtigings-invariantes, monotone voorraad waar toepaslik.
+- Bv.: behoud van waarde, nie-negatiewe balanse, magtiging-invariantes, monotoonse voorraad waar toepaslik.
 
-5) Herhardloop slither-mutate totdat die oorblywende mutante gedood is of eksplisiet geregverdig.
+5) Herhardloop slither-mutate totdat oorlewendes gedood is of uitdruklik geregverdig word.
 
-## Gevallestudie: onthul ontbrekende toestand-asserties (Arkis protocol)
+## Gevallestudie: blootlegging van ontbrekende toestand-asserties (Arkis protocol)
 
-'n Mutasieveldtog tydens 'n oudit van die Arkis DeFi-protokol het oorblywende mutante soos die volgende na vore gebring:
+'n Mutasie-veldtog tydens 'n oudit van die Arkis DeFi protocol het oorlewendes soos die onderstaande na vore gebring:
 ```text
 INFO:Slither-Mutate:[CR] Line 33: 'cmdsToExecute.last().value = _cmd.value' ==> '//cmdsToExecute.last().value = _cmd.value' --> UNCAUGHT
 ```
-Kommentering van die toekenning het die toetse nie gebreek nie, wat ontbrekende post-state-asserties bewys. Oorsaak: die kode het vertrou op 'n gebruiker-beheerde `_cmd.value` in plaas daarvan om werklike token-oordragte te valideer. 'n Aanvaller kon verwagte en werklike oordragte desinchroniseer om fondse uit te tap. Resultaat: hoë risiko vir die protokol se solvabiliteit.
+Om die toewysing uit te kommentarieer het die toetse nie gebreek nie, wat bewys dat post-state-asserties ontbreek. Ware oorsaak: die kode het ` _cmd.value` deur die gebruiker beheer vertrou in plaas daarvan om werklike token-oordragte te valideer. ’n aanvaller kon verwagte en werklike oordragte desinkroniseer om fondse leeg te maak. Resultaat: risiko van hoë erns vir die protokol se solvensie.
 
-Riglyne: Beskou oorlewende mutante wat waarde-oordragte, rekeningkunde of toegangbeheer raak as hoë-risiko totdat hulle uitgeskakel is.
+Riglyn: Behandel oorlewendes wat waarde-oordragte, rekeninghouding of toegangsbeheer beïnvloed as hoë-risiko totdat hulle vernietig is.
 
 ## Praktiese kontrolelys
 
 - Voer 'n geteikende veldtog uit:
 - `slither-mutate ./src/contracts --test-cmd="forge test"`
-- Prioritiseer oorlewende mutante en skryf toetse/invariante wat sou misluk onder die gemuteerde gedrag.
-- Kontroleer balanse, totale supply, magtigings en events.
-- Voeg grensgeval-toetse by (`==`, overflows/underflows, zero-address, zero-amount, empty arrays).
-- Vervang onrealistiese mocks; simuleer faalmodusse.
-- Herhaal totdat alle mutante uitgeskakel is of met kommentaar en motivering geregverdig is.
+- Sorteer oorlewendes en skryf toetse/invariante wat sou misluk onder die gemuteerde gedrag.
+- Bevestig balans, totale aanbod, magtigings en gebeure.
+- Voeg grens-toetse by (`==`, oorvloei/ondervloei, nul-adres, nul-bedrag, leë arrays).
+- Vervang onrealistiese mocks; simuleer foutmodusse.
+- Herhaal totdat alle mutants vernietig is of met kommentaar en motivering geregverdig is.
 
 ## Verwysings
 
@@ -113,4 +113,4 @@ Riglyne: Beskou oorlewende mutante wat waarde-oordragte, rekeningkunde of toegan
 - [Arkis DeFi Prime Brokerage Security Review (Appendix C)](https://github.com/trailofbits/publications/blob/master/reviews/2024-12-arkis-defi-prime-brokerage-securityreview.pdf)
 - [Slither (GitHub)](https://github.com/crytic/slither)
 
-{{#include ../../../banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}
