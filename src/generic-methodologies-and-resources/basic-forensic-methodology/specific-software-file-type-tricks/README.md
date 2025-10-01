@@ -1,8 +1,8 @@
-# Belirli Yazılım/Dosya Türü Püf Noktaları
+# Belirli Yazılım/Dosya Türü İpuçları
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Burada belirli dosya türleri ve/veya yazılımlar için ilginç püf noktalarını bulabilirsiniz:
+Burada belirli dosya türleri ve/veya yazılımlar için ilginç ipuçları bulabilirsiniz:
 
 
 {{#ref}}
@@ -52,6 +52,11 @@ video-and-audio-file-analysis.md
 
 {{#ref}}
 zips-tricks.md
+{{#endref}}
+
+
+{{#ref}}
+mach-o-entitlements-and-ipsw-indexing.md
 {{#endref}}
 
 {{#include ../../../banners/hacktricks-training.md}}
