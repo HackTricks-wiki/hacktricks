@@ -43,7 +43,7 @@ jobs:
           && sudo apt update \
           && sudo apt install gh -y
       
-      - name: Publish search index release asset
+      - name: Push search index to hacktricks-searchindex repo
         shell: bash
         env:
           PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
@@ -51,43 +51,52 @@ jobs:
           set -euo pipefail
 
           ASSET="book/searchindex.js"
-          TAG="searchindex-en"
-          TITLE="Search Index (en)"
+          TARGET_REPO="HackTricks-wiki/hacktricks-searchindex"
+          FILENAME="searchindex-en.js"
 
           if [ ! -f "$ASSET" ]; then
             echo "Expected $ASSET to exist after build" >&2
             exit 1
           fi
 
-          TOKEN="${PAT_TOKEN:-${GITHUB_TOKEN:-}}"
+          TOKEN="${PAT_TOKEN}"
           if [ -z "$TOKEN" ]; then
-            echo "No token available for GitHub CLI" >&2
+            echo "No PAT_TOKEN available" >&2
             exit 1
           fi
-          export GH_TOKEN="$TOKEN"
 
-          # Delete the release if it exists
-          echo "Checking if release $TAG exists..."
-          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-            echo "Release $TAG already exists, deleting it..."
-            gh release delete "$TAG" --yes --repo "$GITHUB_REPOSITORY" --cleanup-tag || {
-              echo "Failed to delete release, trying without cleanup-tag..."
-              gh release delete "$TAG" --yes --repo "$GITHUB_REPOSITORY" || {
-                echo "Warning: Could not delete existing release, will try to recreate..."
-              }
-            }
-            sleep 2  # Give GitHub API a moment to process the deletion
-          else
-            echo "Release $TAG does not exist, proceeding with creation..."
-          fi
+          # Clone the searchindex repo
+          git clone https://x-access-token:${TOKEN}@github.com/${TARGET_REPO}.git /tmp/searchindex-repo
           
-          # Create new release (with force flag to overwrite if deletion failed)
-          gh release create "$TAG" "$ASSET" --title "$TITLE" --notes "Automated search index build for master" --repo "$GITHUB_REPOSITORY" || {
-            echo "Failed to create release, trying with force flag..."
-            gh release delete "$TAG" --yes --repo "$GITHUB_REPOSITORY" --cleanup-tag >/dev/null 2>&1 || true
-            sleep 2
-            gh release create "$TAG" "$ASSET" --title "$TITLE" --notes "Automated search index build for master" --repo "$GITHUB_REPOSITORY"
-          }
+          cd /tmp/searchindex-repo
+          git config user.name "GitHub Actions"
+          git config user.email "github-actions@github.com"
+          
+          # Compress the searchindex file
+          cd "${GITHUB_WORKSPACE}"
+          gzip -9 -k -f "$ASSET"
+          
+          # Show compression stats
+          ORIGINAL_SIZE=$(wc -c < "$ASSET")
+          COMPRESSED_SIZE=$(wc -c < "${ASSET}.gz")
+          RATIO=$(awk "BEGIN {printf \"%.1f\", ($COMPRESSED_SIZE / $ORIGINAL_SIZE) * 100}")
+          echo "Compression: ${ORIGINAL_SIZE} bytes -> ${COMPRESSED_SIZE} bytes (${RATIO}%)"
+          
+          # Copy the .gz version to the searchindex repo
+          cd /tmp/searchindex-repo
+          cp "${GITHUB_WORKSPACE}/${ASSET}.gz" "${FILENAME}.gz"
+          
+          # Stage the updated file
+          git add "${FILENAME}.gz"
+          
+          # Commit with timestamp if there are changes
+          TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          git commit -m "Update searchindex files - ${TIMESTAMP}" || echo "No changes to commit"
+          
+          # Push to master branch
+          git push origin master
+          
+          echo "Successfully pushed searchindex files"
 
 
       # Login in AWs
