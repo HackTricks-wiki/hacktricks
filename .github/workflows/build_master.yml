@@ -89,12 +89,59 @@ jobs:
           # Stage the updated file
           git add "${FILENAME}.gz"
           
-          # Commit with timestamp if there are changes
-          TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
-          git commit -m "Update searchindex files - ${TIMESTAMP}" || echo "No changes to commit"
-          
-          # Push to master branch
-          git push origin master
+          # Commit and push with retry logic
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
+            git commit -m "Update searchindex files - ${TIMESTAMP}"
+            
+            # Retry push up to 20 times with pull --rebase between attempts
+            MAX_RETRIES=20
+            RETRY_COUNT=0
+            while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+              if git push origin master; then
+                echo "Successfully pushed on attempt $((RETRY_COUNT + 1))"
+                break
+              else
+                RETRY_COUNT=$((RETRY_COUNT + 1))
+                if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+                  echo "Push failed, attempt $RETRY_COUNT/$MAX_RETRIES. Pulling and retrying..."
+                  
+                  # Try normal rebase first
+                  if git pull --rebase origin master 2>&1 | tee /tmp/pull_output.txt; then
+                    echo "Rebase successful, retrying push..."
+                  else
+                    # If rebase fails due to divergent histories (orphan branch reset), re-clone
+                    if grep -q "unrelated histories\|refusing to merge\|fatal: invalid upstream\|couldn't find remote ref" /tmp/pull_output.txt; then
+                      echo "Detected history rewrite, re-cloning repository..."
+                      cd /tmp
+                      rm -rf searchindex-repo
+                      git clone https://x-access-token:${TOKEN}@github.com/${TARGET_REPO}.git searchindex-repo
+                      cd searchindex-repo
+                      git config user.name "GitHub Actions"
+                      git config user.email "github-actions@github.com"
+                      
+                      # Re-copy the .gz version
+                      cp "${GITHUB_WORKSPACE}/${ASSET}.gz" "${FILENAME}.gz"
+                      
+                      git add "${FILENAME}.gz"
+                      TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
+                      git commit -m "Update searchindex files - ${TIMESTAMP}"
+                      echo "Re-cloned and re-committed, will retry push..."
+                    else
+                      echo "Rebase failed for unknown reason, retrying anyway..."
+                    fi
+                  fi
+                  
+                  sleep 1
+                else
+                  echo "Failed to push after $MAX_RETRIES attempts"
+                  exit 1
+                fi
+              fi
+            done
+          fi
           
           echo "Successfully pushed searchindex files"
 
