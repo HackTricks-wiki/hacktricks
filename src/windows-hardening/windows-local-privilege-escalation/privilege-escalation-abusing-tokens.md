@@ -146,6 +146,16 @@ If you want to get a `NT SYSTEM` shell you could use:
 import-module psgetsys.ps1; [MyProcess]::CreateProcessFromParent(<system_pid>,<command_to_execute>)
 ```
 
+### SeManageVolumePrivilege
+
+This right (Perform volume maintenance tasks) allows opening raw volume device handles (e.g., \\.\C:) for direct disk I/O that bypasses NTFS ACLs. With it you can copy bytes of any file on the volume by reading the underlying blocks, enabling arbitrary file read of sensitive material (e.g., machine private keys in %ProgramData%\Microsoft\Crypto\, registry hives, SAM/NTDS via VSS). It’s particularly impactful on CA servers where exfiltrating the CA private key enables forging a Golden Certificate to impersonate any principal.
+
+See detailed techniques and mitigations:
+
+{{#ref}}
+semanagevolume-perform-volume-maintenance-tasks.md
+{{#endref}}
+
 ## Check privileges
 
 ```
@@ -184,6 +194,8 @@ Full token privileges cheatsheet at [https://github.com/gtworek/Priv2Admin](http
 
 - Take a look to this table defining Windows tokens: [https://github.com/gtworek/Priv2Admin](https://github.com/gtworek/Priv2Admin)
 - Take a look to [**this paper**](https://github.com/hatRiot/token-priv/blob/master/abusing_token_eop_1.0.txt) about privesc with tokens.
+- Microsoft – Perform volume maintenance tasks (SeManageVolumePrivilege): https://learn.microsoft.com/previous-versions/windows/it-pro/windows-10/security/threat-protection/security-policy-settings/perform-volume-maintenance-tasks
+- 0xdf – HTB: Certificate (SeManageVolumePrivilege → CA key exfil → Golden Certificate): https://0xdf.gitlab.io/2025/10/04/htb-certificate.html
 
 {{#include ../../banners/hacktricks-training.md}}
 

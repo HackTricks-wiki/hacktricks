@@ -4,7 +4,7 @@
 
 **This is a summary of the domain persistence techniques shared in [https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)**. Check it for further details.
 
-## Forging Certificates with Stolen CA Certificates - DPERSIST1
+## Forging Certificates with Stolen CA Certificates (Golden Certificate) - DPERSIST1
 
 How can you tell that a certificate is a CA certificate?
 
@@ -116,4 +116,6 @@ Practical knobs attackers may set for long-term domain persistence (see {{#ref}}
 
 - Microsoft KB5014754 – Certificate-based authentication changes on Windows domain controllers (enforcement timeline and strong mappings). https://support.microsoft.com/en-au/topic/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers-ad2c23b0-15d8-4340-a468-4d4f3b188f16
 - Certipy – Command Reference and forge/auth usage. https://github.com/ly4k/Certipy/wiki/08-%E2%80%90-Command-Reference
+- [0xdf – HTB: Certificate (SeManageVolumePrivilege to exfil CA keys → Golden Certificate)](https://0xdf.gitlab.io/2025/10/04/htb-certificate.html)
+
 {{#include ../../../banners/hacktricks-training.md}}
