@@ -266,6 +266,7 @@
   - [RoguePotato, PrintSpoofer, SharpEfsPotato, GodPotato](windows-hardening/windows-local-privilege-escalation/roguepotato-and-printspoofer.md)
   - [SeDebug + SeImpersonate copy token](windows-hardening/windows-local-privilege-escalation/sedebug-+-seimpersonate-copy-token.md)
   - [SeImpersonate from High To System](windows-hardening/windows-local-privilege-escalation/seimpersonate-from-high-to-system.md)
+  - [Semanagevolume Perform Volume Maintenance Tasks](windows-hardening/windows-local-privilege-escalation/semanagevolume-perform-volume-maintenance-tasks.md)
   - [Windows C Payloads](windows-hardening/windows-local-privilege-escalation/windows-c-payloads.md)
 - [Active Directory Methodology](windows-hardening/active-directory-methodology/README.md)
   - [Abusing Active Directory ACLs/ACEs](windows-hardening/active-directory-methodology/acl-persistence-abuse/README.md)
