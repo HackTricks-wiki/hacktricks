@@ -15,6 +15,9 @@ synology-encrypted-archive-decryption.md
 ../../network-services-pentesting/32100-udp-pentesting-pppp-cs2-p2p-cameras.md
 {{#endref}}
 
+{{#ref}}
+android-mediatek-secure-boot-bl2_ext-bypass-el3.md
+{{#endref}}
 
 Firmware is essential software that enables devices to operate correctly by managing and facilitating communication between the hardware components and the software that users interact with. It's stored in permanent memory, ensuring the device can access vital instructions from the moment it's powered on, leading to the operating system's launch. Examining and potentially modifying firmware is a critical step in identifying security vulnerabilities.
 
