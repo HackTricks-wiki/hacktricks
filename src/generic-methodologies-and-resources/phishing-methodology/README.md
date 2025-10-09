@@ -1,19 +1,19 @@
-# Phishing Methodology
+# Metodologia del Phishing
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Metodologia
 
-1. Recon the victim
+1. Ricognizione della vittima
 1. Seleziona il **dominio della vittima**.
-2. Esegui una enumerazione web di base **cercando portali di login** usati dalla vittima e **decidi** quale impersonare.
-3. Usa OSINT per **trovare indirizzi email**.
+2. Esegui una enumerazione web di base **cercando portali di login** usati dalla vittima e **decidi** quale andrai a **impersonare**.
+3. Usa **OSINT** per **trovare indirizzi email**.
 2. Prepara l'ambiente
-1. **Compra il dominio** che userai per la valutazione di phishing
-2. **Configura i record** correlati al servizio email (SPF, DMARC, DKIM, rDNS)
+1. **Compra il dominio** che utilizzerai per l'attività di phishing
+2. **Configura il servizio email** e i record correlati (SPF, DMARC, DKIM, rDNS)
 3. Configura il VPS con **gophish**
 3. Prepara la campagna
-1. Prepara il **template dell'email**
+1. Prepara il **modello email**
 2. Prepara la **pagina web** per rubare le credenziali
 4. Lancia la campagna!
 
@@ -21,23 +21,23 @@
 
 ### Domain Name Variation Techniques
 
-- **Keyword**: Il nome di dominio **contiene** una parola chiave importante del dominio originale (es., zelster.com-management.com).
-- **hypened subdomain**: Sostituisci il **punto con un trattino** in un sottodominio (es., www-zelster.com).
-- **New TLD**: Stesso dominio usando una **nuova TLD** (es., zelster.org)
-- **Homoglyph**: Sostituisce una lettera nel nome di dominio con **caratteri dall'aspetto simile** (es., zelfser.com).
+- **Keyword**: Il nome di dominio **contiene** un'importante **keyword** del dominio originale (e.g., zelster.com-management.com).
+- **hypened subdomain**: Sostituisci il **punto con un trattino** di un sottodominio (e.g., www-zelster.com).
+- **New TLD**: Stesso dominio usando una **new TLD** (e.g., zelster.org)
+- **Homoglyph**: Sostituisce una lettera nel nome di dominio con **lettere che sembrano simili** (e.g., zelfser.com).
 
 
 {{#ref}}
 homograph-attacks.md
 {{#endref}}
-- **Transposition:** Scambia due lettere all'interno del nome di dominio (es., zelsetr.com).
-- **Singularization/Pluralization**: Aggiunge o rimuove una “s” alla fine del nome di dominio (es., zeltsers.com).
-- **Omission**: Rimuove una delle lettere dal nome di dominio (es., zelser.com).
-- **Repetition:** Ripete una delle lettere nel nome di dominio (es., zeltsser.com).
-- **Replacement**: Simile all'homoglyph ma meno stealthy. Sostituisce una delle lettere nel nome di dominio, magari con una lettera vicina sulla tastiera (es., zektser.com).
-- **Subdomained**: Introduce un **punto** all'interno del nome di dominio (es., ze.lster.com).
-- **Insertion**: Inserisce una lettera nel nome di dominio (es., zerltser.com).
-- **Missing dot**: Aggiunge la TLD direttamente al nome di dominio. (es., zelstercom.com)
+- **Transposition:** Scambia due lettere all'interno del nome di dominio (e.g., zelsetr.com).
+- **Singularization/Pluralization**: Aggiunge o rimuove la “s” alla fine del nome di dominio (e.g., zeltsers.com).
+- **Omission**: Rimuove una delle lettere dal nome di dominio (e.g., zelser.com).
+- **Repetition:** Ripete una delle lettere nel nome di dominio (e.g., zeltsser.com).
+- **Replacement**: Simile a homoglyph ma meno stealthy. Sostituisce una delle lettere nel nome di dominio, magari con una lettera vicina sulla tastiera (e.g, zektser.com).
+- **Subdomained**: Introduce un **punto** all'interno del nome di dominio (e.g., ze.lster.com).
+- **Insertion**: Inserisce una lettera nel nome di dominio (e.g., zerltser.com).
+- **Missing dot**: Appende la TLD al nome di dominio. (e.g., zelstercom.com)
 
 **Automatic Tools**
 
@@ -52,20 +52,20 @@ homograph-attacks.md
 
 ### Bitflipping
 
-Esiste la **possibilità che uno o più bit memorizzati o in comunicazione vengano invertiti automaticamente** a causa di vari fattori come brillamenti solari, raggi cosmici o errori hardware.
+Esiste la **possibilità che uno o più bit memorizzati o in comunicazione vengano automaticamente invertiti** a causa di vari fattori come eruzioni solari, raggi cosmici o errori hardware.
 
-Quando questo concetto viene **applicato alle richieste DNS**, è possibile che il **dominio ricevuto dal server DNS** non sia lo stesso del dominio inizialmente richiesto.
+Quando questo concetto è **applicato alle richieste DNS**, è possibile che il **dominio ricevuto dal server DNS** non sia lo stesso del dominio inizialmente richiesto.
 
-Per esempio, una singola modifica di bit nel dominio "windows.com" può trasformarlo in "windnws.com."
+Per esempio, una singola modifica di bit nel dominio "windows.com" può cambiarlo in "windnws.com."
 
-Gli attacker possono **sfruttare questo registrando più domini bit-flipping** simili al dominio della vittima. L'intento è reindirizzare gli utenti legittimi alla propria infrastruttura.
+Gli attaccanti possono **sfruttare questo registrando più domini bit-flipping** simili al dominio della vittima. L'intento è reindirizzare gli utenti legittimi verso la loro infrastruttura.
 
 Per maggiori informazioni leggi [https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)
 
 ### Buy a trusted domain
 
 Puoi cercare su [https://www.expireddomains.net/](https://www.expireddomains.net) un dominio scaduto che potresti usare.\
-Per assicurarti che il dominio scaduto che intendi acquistare **abbia già un buon SEO** puoi verificare come è categorizzato in:
+Per assicurarti che il dominio scaduto che stai per acquistare **abbia già un buon SEO** puoi verificare come è categorizzato in:
 
 - [http://www.fortiguard.com/webfilter](http://www.fortiguard.com/webfilter)
 - [https://urlfiltering.paloaltonetworks.com/query/](https://urlfiltering.paloaltonetworks.com/query/)
@@ -78,8 +78,8 @@ Per assicurarti che il dominio scaduto che intendi acquistare **abbia già un bu
 - [https://hunter.io/](https://hunter.io)
 - [https://anymailfinder.com/](https://anymailfinder.com)
 
-Per **scoprire più** indirizzi email validi o **verificare quelli** che hai già scoperto puoi controllare se puoi effettuare username brute force contro i server smtp della vittima. [Scopri come verificare/scoprire indirizzi email qui](../../network-services-pentesting/pentesting-smtp/index.html#username-bruteforce-enumeration).\
-Inoltre, non dimenticare che se gli utenti usano **un web portal per accedere alle loro mail**, puoi verificare se è vulnerabile a username brute force e sfruttare la vulnerabilità se possibile.
+Per **scoprire più** indirizzi email validi o **verificare quelli** che hai già trovato puoi controllare se è possibile effettuare brute-force sui server smtp della vittima. [Learn how to verify/discover email address here](../../network-services-pentesting/pentesting-smtp/index.html#username-bruteforce-enumeration).\
+Inoltre, non dimenticare che se gli utenti usano **qualsiasi portale web per accedere alle loro mail**, puoi verificare se è vulnerabile a **username brute force**, ed eventualmente sfruttare la vulnerabilità se possibile.
 
 ## Configuring GoPhish
 
@@ -87,8 +87,8 @@ Inoltre, non dimenticare che se gli utenti usano **un web portal per accedere al
 
 Puoi scaricarlo da [https://github.com/gophish/gophish/releases/tag/v0.11.0](https://github.com/gophish/gophish/releases/tag/v0.11.0)
 
-Scaricalo e decomprimilo dentro `/opt/gophish` ed esegui `/opt/gophish/gophish`\
-Ti verrà fornita una password per l'utente admin sulla porta 3333 nell'output. Quindi, accedi a quella porta e usa quelle credenziali per cambiare la password admin. Potrebbe essere necessario fare il tunnel di quella porta in locale:
+Download e decomprimi dentro `/opt/gophish` ed esegui `/opt/gophish/gophish`\
+Ti verrà mostrata una password per l'utente admin sulla porta 3333 nell'output. Quindi, accedi a quella porta e usa quelle credenziali per cambiare la password admin. Potrebbe essere necessario fare il tunneling di quella porta in locale:
 ```bash
 ssh -L 3333:127.0.0.1:3333 <user>@<ip>
 ```
@@ -96,7 +96,7 @@ ssh -L 3333:127.0.0.1:3333 <user>@<ip>
 
 **Configurazione del certificato TLS**
 
-Prima di questo passaggio dovresti aver **già acquistato il dominio** che intendi usare e deve essere **indirizzato** all'**IP del VPS** dove stai configurando **gophish**.
+Prima di questo passaggio dovresti **aver già acquistato il dominio** che intendi usare e deve essere **indirizzato** all'**IP del VPS** dove stai configurando **gophish**.
 ```bash
 DOMAIN="<domain>"
 wget https://dl.eff.org/certbot-auto
@@ -112,7 +112,7 @@ mkdir /opt/gophish/ssl_keys
 cp "/etc/letsencrypt/live/$DOMAIN/privkey.pem" /opt/gophish/ssl_keys/key.pem
 cp "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" /opt/gophish/ssl_keys/key.crt​
 ```
-**Configurazione della posta**
+**Configurazione Mail**
 
 Inizia l'installazione: `apt-get install postfix`
 
@@ -122,16 +122,16 @@ Poi aggiungi il dominio ai seguenti file:
 - **/etc/postfix/transport**
 - **/etc/postfix/virtual_regexp**
 
-**Modifica anche i valori delle seguenti variabili dentro /etc/postfix/main.cf**
+**Cambia anche i valori delle seguenti variabili all'interno di /etc/postfix/main.cf**
 
 `myhostname = <domain>`\
 `mydestination = $myhostname, <domain>, localhost.com, localhost`
 
 Infine modifica i file **`/etc/hostname`** e **`/etc/mailname`** con il tuo nome di dominio e **riavvia il tuo VPS.**
 
-Ora, crea un **DNS A record** per `mail.<domain>` che punti all'**indirizzo IP** del VPS e un record **DNS MX** che punti a `mail.<domain>`
+Ora, crea un **record DNS A** per `mail.<domain>` che punti all'**indirizzo IP** della VPS e un **record DNS MX** che punti a `mail.<domain>`
 
-Ora proviamo a inviare un'email:
+Ora testiamo l'invio di un'email:
 ```bash
 apt install mailutils
 echo "This is the body of the email" | mail -s "This is the subject line" test@email.com
@@ -164,9 +164,9 @@ Modifica `/opt/gophish/config.json` come segue (nota l'uso di https):
 }
 }
 ```
-**Configurare il servizio gophish**
+**Configura il servizio gophish**
 
-Per creare il servizio gophish in modo che possa essere avviato automaticamente e gestito come servizio, è possibile creare il file `/etc/init.d/gophish` con il seguente contenuto:
+Per creare il servizio gophish in modo che possa essere avviato automaticamente e gestito come servizio, puoi creare il file `/etc/init.d/gophish` con il seguente contenuto:
 ```bash
 #!/bin/bash
 # /etc/init.d/gophish
@@ -224,55 +224,55 @@ service gophish status
 ss -l | grep "3333\|443"
 service gophish stop
 ```
-## Configurazione del server mail e del dominio
+## Configurare il server di posta e il dominio
 
-### Aspetta e sii legittimo
+### Aspetta e sii credibile
 
-Più un dominio è vecchio, meno è probabile che venga classificato come spam. Dovresti quindi attendere il più a lungo possibile (almeno 1 settimana) prima del phishing assessment. Inoltre, se pubblichi una pagina relativa a un settore con buona reputazione, la reputazione ottenuta sarà migliore.
+Più vecchio è un dominio, meno è probabile che venga contrassegnato come spam. Quindi dovresti aspettare il più possibile (almeno 1 settimana) prima della valutazione di phishing. Inoltre, se pubblichi una pagina relativa a un settore con buona reputazione, la reputazione ottenuta sarà migliore.
 
-Nota che, anche se devi aspettare una settimana, puoi comunque completare ora tutta la configurazione.
+Nota che anche se devi aspettare una settimana, puoi completare la configurazione di tutto adesso.
 
-### Configura il record Reverse DNS (rDNS)
+### Configurare il record Reverse DNS (rDNS)
 
-Imposta un record rDNS (PTR) che risolva l'indirizzo IP del VPS nel nome di dominio.
+Imposta un record rDNS (PTR) che risolva l'indirizzo IP della VPS nel nome di dominio.
 
 ### Sender Policy Framework (SPF) Record
 
-Devi **configurare un record SPF per il nuovo dominio**. Se non sai cos'è un record SPF [**leggi questa pagina**](../../network-services-pentesting/pentesting-smtp/index.html#spf).
+Devi **configurare un SPF record per il nuovo dominio**. Se non sai cos'è un SPF record [**read this page**](../../network-services-pentesting/pentesting-smtp/index.html#spf).
 
 Puoi usare [https://www.spfwizard.net/](https://www.spfwizard.net) per generare la tua policy SPF (usa l'IP della macchina VPS)
 
 ![](<../../images/image (1037).png>)
 
-Questo è il contenuto da impostare in un record TXT del dominio:
+Questo è il contenuto che deve essere impostato all'interno di un TXT record nel dominio:
 ```bash
 v=spf1 mx a ip4:ip.ip.ip.ip ?all
 ```
-### Record DMARC (Autenticazione dei messaggi basata sul dominio, reporting e conformità)
+### Record DMARC (Autenticazione, Reporting e Conformità basati sul dominio)
 
 Devi **configurare un record DMARC per il nuovo dominio**. Se non sai cos'è un record DMARC [**leggi questa pagina**](../../network-services-pentesting/pentesting-smtp/index.html#dmarc).
 
-Devi creare un nuovo record DNS TXT che punti al nome host `_dmarc.<domain>` con il seguente contenuto:
+Devi creare un nuovo record DNS TXT che punti all'hostname `_dmarc.<domain>` con il seguente contenuto:
 ```bash
 v=DMARC1; p=none
 ```
 ### DomainKeys Identified Mail (DKIM)
 
-Devi **configurare un DKIM per il nuovo dominio**. Se non sai cos'è un record DMARC [**read this page**](../../network-services-pentesting/pentesting-smtp/index.html#dkim).
+Devi **configurare un DKIM per il nuovo dominio**. Se non sai cos'è un record DMARC [**leggi questa pagina**](../../network-services-pentesting/pentesting-smtp/index.html#dkim).
 
 Questo tutorial si basa su: [https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy)
 
 > [!TIP]
-> Devi concatenare entrambi i valori B64 che la chiave DKIM genera:
+> È necessario concatenare entrambi i valori B64 che la chiave DKIM genera:
 >
 > ```
 > v=DKIM1; h=sha256; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0wPibdqPtzYk81njjQCrChIcHzxOp8a1wjbsoNtka2X9QXCZs+iXkvw++QsWDtdYu3q0Ofnr0Yd/TmG/Y2bBGoEgeE+YTUG2aEgw8Xx42NLJq2D1pB2lRQPW4IxefROnXu5HfKSm7dyzML1gZ1U0pR5X4IZCH0wOPhIq326QjxJZm79E1nTh3xj" "Y9N/Dt3+fVnIbMupzXE216TdFuifKM6Tl6O/axNsbswMS1TH812euno8xRpsdXJzFlB9q3VbMkVWig4P538mHolGzudEBg563vv66U8D7uuzGYxYT4WS8NVm3QBMg0QKPWZaKp+bADLkOSB9J2nUpk4Aj9KB5swIDAQAB
 > ```
 
-### Testa il punteggio della configurazione della tua email
+### Test your email configuration score
 
 Puoi farlo usando [https://www.mail-tester.com/](https://www.mail-tester.com)\
-Basta accedere alla pagina e inviare un'email all'indirizzo che ti indicano:
+Accedi alla pagina e invia un'email all'indirizzo che ti forniscono:
 ```bash
 echo "This is the body of the email" | mail -s "This is the subject line" test-iimosa79z@srv1.mail-tester.com
 ```
@@ -288,7 +288,7 @@ DKIM check:         pass
 Sender-ID check:    pass
 SpamAssassin check: ham
 ```
-Puoi anche inviare **un messaggio a un account Gmail sotto il tuo controllo**, e controllare le **intestazioni dell'email** nella tua casella Gmail: `dkim=pass` dovrebbe essere presente nel campo header `Authentication-Results`.
+Puoi anche inviare un **messaggio a un account Gmail sotto il tuo controllo** e controllare le **intestazioni dell'email** nella tua casella di posta Gmail: `dkim=pass` dovrebbe essere presente nel campo di intestazione `Authentication-Results`.
 ```
 Authentication-Results: mx.google.com;
 spf=pass (google.com: domain of contact@example.com designates --- as permitted sender) smtp.mail=contact@example.com;
@@ -296,32 +296,32 @@ dkim=pass header.i=@example.com;
 ```
 ### ​Rimozione dalla Spamhouse Blacklist
 
-La pagina [www.mail-tester.com](https://www.mail-tester.com) può indicarti se il tuo dominio è bloccato da spamhouse. Puoi richiedere la rimozione del tuo dominio/IP su: ​[https://www.spamhaus.org/lookup/](https://www.spamhaus.org/lookup/)
+La pagina [www.mail-tester.com](https://www.mail-tester.com) può indicare se il tuo dominio è bloccato da Spamhouse. Puoi richiedere la rimozione del tuo dominio/IP su: ​[https://www.spamhaus.org/lookup/](https://www.spamhaus.org/lookup/)
 
 ### Rimozione dalla Microsoft Blacklist
 
 ​​Puoi richiedere la rimozione del tuo dominio/IP su [https://sender.office.com/](https://sender.office.com).
 
-## Create & Launch GoPhish Campaign
+## Creare e lanciare una campagna GoPhish
 
-### Sending Profile
+### Profilo mittente
 
-- Inserisci un **nome per identificare** il profilo mittente
+- Imposta un **nome identificativo** per il profilo mittente
 - Decidi da quale account invierai le email di phishing. Suggerimenti: _noreply, support, servicedesk, salesforce..._
-- Puoi lasciare vuoti username e password, ma assicurati di selezionare Ignore Certificate Errors
+- Puoi lasciare vuoti username e password, ma assicurati di selezionare "Ignore Certificate Errors"
 
 ![](<../../images/image (253) (1) (2) (1) (1) (2) (2) (3) (3) (5) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (15) (2).png>)
 
 > [!TIP]
-> È consigliato utilizzare la funzionalità "**Send Test Email**" per verificare che tutto funzioni.\
-> Consiglio di **inviare le test email a 10min mails addresses** per evitare di finire in blacklist durante i test.
+> Si consiglia di utilizzare la funzionalità "**Send Test Email**" per verificare che tutto funzioni.\
+> Raccomando di **inviare le email di test a indirizzi 10min mail** per evitare di finire in blacklist durante i test.
 
-### Email Template
+### Modello email
 
-- Inserisci un **nome per identificare** il template
-- Poi scrivi un **subject** (niente di strano, qualcosa che ci si aspetterebbe di leggere in una email normale)
+- Imposta un **nome identificativo** per il modello
+- Poi scrivi un **oggetto** (niente di strano, qualcosa che ti aspetteresti di leggere in una normale email)
 - Assicurati di aver selezionato "**Add Tracking Image**"
-- Scrivi il **email template** (puoi usare variabili come nel seguente esempio):
+- Scrivi il **template dell'email** (puoi usare variabili come nell'esempio seguente):
 ```html
 <html>
 <head>
@@ -340,20 +340,20 @@ WRITE HERE SOME SIGNATURE OF SOMEONE FROM THE COMPANY
 </body>
 </html>
 ```
-Nota che **per aumentare la credibilità dell'email** è raccomandato usare qualche firma presa da un'email del cliente. Suggerimenti:
+Nota che **per aumentare la credibilità dell'email**, è consigliabile usare qualche firma recuperata da un'email del cliente. Suggerimenti:
 
-- Invia un'email a un **indirizzo inesistente** e verifica se la risposta contiene una firma.
-- Cerca **email pubbliche** come info@ex.com o press@ex.com o public@ex.com e invia loro un'email aspettando la risposta.
-- Prova a contattare **un indirizzo valido scoperto** e attendi la risposta
+- Invia un'email a un **indirizzo inesistente** e verifica se la risposta contiene qualche firma.
+- Cerca **email pubbliche** come info@ex.com o press@ex.com o public@ex.com e inviagli un'email, poi attendi la risposta.
+- Prova a contattare **alcuni indirizzi validi scoperti** e attendi la risposta.
 
 ![](<../../images/image (80).png>)
 
 > [!TIP]
-> The Email Template also allows to **attach files to send**. If you would also like to steal NTLM challenges using some specially crafted files/documents [read this page](../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md).
+> Il template Email permette anche di **allegare file da inviare**. Se vuoi anche rubare challenge NTLM usando file/documenti appositamente creati [leggi questa pagina](../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md).
 
 ### Landing Page
 
-- Inserisci un **nome**
+- Scrivi un **nome**
 - **Scrivi il codice HTML** della pagina web. Nota che puoi **importare** pagine web.
 - Seleziona **Capture Submitted Data** e **Capture Passwords**
 - Imposta una **redirection**
@@ -361,44 +361,44 @@ Nota che **per aumentare la credibilità dell'email** è raccomandato usare qual
 ![](<../../images/image (826).png>)
 
 > [!TIP]
-> Solitamente dovrai modificare il codice HTML della pagina e fare dei test in locale (magari usando un server Apache) **fino a quando non sei soddisfatto del risultato.** Poi, incolla quel codice HTML nella casella.\
-> Nota che se hai bisogno di **utilizzare risorse statiche** per l'HTML (per esempio CSS o JS) puoi salvarle in _**/opt/gophish/static/endpoint**_ e poi accedervi da _**/static/\<filename>**_
+> Di solito dovrai modificare il codice HTML della pagina e fare dei test in locale (magari usando un server Apache) **finché non sei soddisfatto del risultato.** Poi incolla quel codice HTML nella casella.\
+> Nota che se hai bisogno di **usare risorse statiche** per l'HTML (ad esempio dei file CSS o JS) puoi salvarle in _**/opt/gophish/static/endpoint**_ e poi richiamarle da _**/static/\<filename>**_
 
 > [!TIP]
-> Per la redirection potresti **reindirizzare gli utenti alla pagina principale legittima** della vittima, oppure reindirizzarli a _/static/migration.html_ ad esempio, mettere una **ruota che gira (**[**https://loading.io/**](https://loading.io)**) per 5 secondi e poi indicare che il processo è stato completato con successo**.
+> Per la redirezione potresti **riindirizzare gli utenti alla pagina principale legittima** della vittima, oppure reindirizzarli a _/static/migration.html_, mettere una **spinning wheel** ([https://loading.io/](https://loading.io/)) per 5 secondi e poi indicare che il processo è andato a buon fine.
 
 ### Users & Groups
 
 - Imposta un nome
-- **Importa i dati** (nota che per usare il template di esempio hai bisogno del firstname, last name e email address di ogni utente)
+- **Importa i dati** (nota che per usare il template di esempio ti servono firstname, last name e email di ogni utente)
 
 ![](<../../images/image (163).png>)
 
 ### Campaign
 
-Infine, crea una campagna selezionando un nome, l'email template, la landing page, l'URL, il sending profile e il gruppo. Nota che l'URL sarà il link inviato alle vittime
+Infine, crea una campaign selezionando un nome, il template email, la landing page, l'URL, il sending profile e il gruppo. Nota che l'URL sarà il link inviato alle vittime.
 
-Nota che il **Sending Profile permette di inviare un'email di test per vedere come apparirà l'email di phishing finale**:
+Nota che il **Sending Profile permette di inviare una email di test per vedere come apparirà l'email di phishing finale**:
 
 ![](<../../images/image (192).png>)
 
 > [!TIP]
-> Raccomando di **inviare le email di test a indirizzi 10min mails** per evitare di essere inseriti in blacklist durante i test.
+> Consiglio di **inviare le email di test a indirizzi 10min mails** per evitare di essere inseriti in blacklist durante i test.
 
-Una volta pronto tutto, lancia la campagna!
+Una volta che tutto è pronto, avvia la campaign!
 
-## Clonazione del sito web
+## Website Cloning
 
-Se per qualsiasi motivo vuoi clonare il sito web consulta la seguente pagina:
+Se per qualche motivo vuoi clonare il sito web, consulta la seguente pagina:
 
 
 {{#ref}}
 clone-a-website.md
 {{#endref}}
 
-## File e documenti con backdoor
+## Backdoored Documents & Files
 
-In alcune valutazioni di phishing (soprattutto per Red Teams) vorrai anche **inviare file che contengano una qualche backdoor** (magari un C2 o magari solo qualcosa che scateni un'autenticazione).\
+In alcune valutazioni di phishing (soprattutto per Red Teams) vorrai anche **inviare file contenenti una backdoor** (magari una C2 o qualcosa che inneschi un'autenticazione).\
 Dai un'occhiata alla seguente pagina per alcuni esempi:
 
 
@@ -410,53 +410,53 @@ phishing-documents.md
 
 ### Via Proxy MitM
 
-L'attacco precedente è piuttosto efficace perché stai falsificando un sito reale e raccogliendo le informazioni inserite dall'utente. Sfortunatamente, se l'utente non inserisce la password corretta o se l'applicazione che hai falsificato è configurata con 2FA, **queste informazioni non ti permetteranno di impersonare l'utente raggirato**.
+L'attacco precedente è piuttosto astuto perché stai falsificando un sito reale e raccogliendo le informazioni inserite dall'utente. Purtroppo, se l'utente non ha inserito la password corretta o se l'applicazione che hai falsificato è configurata con 2FA, **queste informazioni non ti permetteranno di impersonare l'utente ingannato**.
 
-Qui entrano in gioco strumenti come [**evilginx2**](https://github.com/kgretzky/evilginx2)**,** [**CredSniper**](https://github.com/ustayready/CredSniper) e [**muraena**](https://github.com/muraenateam/muraena). Questi strumenti permettono di generare un attacco MitM. Fondamentalmente, l'attacco funziona così:
+Qui entrano in gioco strumenti come [**evilginx2**](https://github.com/kgretzky/evilginx2)**,** [**CredSniper**](https://github.com/ustayready/CredSniper) e [**muraena**](https://github.com/muraenateam/muraena). Questi tool ti permettono di generare un attacco MitM. Fondamentalmente, l'attacco funziona così:
 
 1. Tu **falsifichi il form di login** della pagina reale.
-2. L'utente **invia** le sue **credenziali** alla tua pagina fake e lo strumento le invia alla pagina reale, **verificando se le credenziali funzionano**.
-3. Se l'account è configurato con **2FA**, la pagina MitM richiederà il codice e una volta che **l'utente lo inserisce** lo strumento lo inoltrerà alla pagina web reale.
-4. Una volta che l'utente è autenticato tu (come attaccante) avrai **catturato le credenziali, la 2FA, il cookie e qualsiasi informazione** di ogni interazione mentre lo strumento esegue il MitM.
+2. L'utente **inviasse** le sue **credenziali** alla tua pagina fake e lo strumento le invia alla pagina reale, **verificando se le credenziali sono valide**.
+3. Se l'account è configurato con **2FA**, la pagina MitM chiederà il codice e una volta che **l'utente lo inserisce** lo strumento lo invierà alla pagina reale.
+4. Una volta che l'utente è autenticato tu (come attaccante) avrai **catturato le credenziali, il 2FA, il cookie e tutte le informazioni** di ogni interazione mentre lo strumento effettua il MitM.
 
 ### Via VNC
 
-E se invece di **inviare la vittima a una pagina malevola** dall'aspetto identico all'originale, la mandi a una **sessione VNC con un browser connesso alla pagina reale**? Potrai vedere cosa fa, rubare la password, l'MFA usata, i cookie...\
+E se invece di **inviare la vittima a una pagina malevola** con lo stesso aspetto dell'originale, la mandi a una **sessione VNC con un browser connesso alla pagina reale**? Potrai vedere cosa fa, rubare la password, l'MFA usata, i cookie...\
 Puoi farlo con [**EvilnVNC**](https://github.com/JoelGMSec/EvilnoVNC)
 
-## Rilevare di essere stati scoperti
+## Detecting the detection
 
-Ovviamente uno dei modi migliori per sapere se sei stato beccato è **cercare il tuo dominio nelle blacklist**. Se appare elencato, in qualche modo il tuo dominio è stato rilevato come sospetto.\
-Un modo semplice per verificare se il tuo dominio appare in qualche blacklist è usare [https://malwareworld.com/](https://malwareworld.com)
+Ovviamente uno dei modi migliori per sapere se sei stato scoperto è **cercare il tuo dominio nelle blacklist**. Se risulta presente, in qualche modo il tuo dominio è stato rilevato come sospetto.\
+Un modo semplice per verificare se il tuo dominio è presente in qualche blacklist è usare [https://malwareworld.com/](https://malwareworld.com)
 
-Tuttavia, ci sono altri modi per capire se la vittima sta **attivamente cercando attività di phishing sospette** in circolazione, come spiegato in:
+Tuttavia, ci sono altri modi per capire se la vittima sta **attivamente cercando attività di phishing sospette** nel mondo reale, come spiegato in:
 
 
 {{#ref}}
 detecting-phising.md
 {{#endref}}
 
-Puoi **comprare un dominio con un nome molto simile** a quello della vittima **e/o generare un certificato** per un **sottodominio** di un dominio controllato da te **contenente** la **parola chiave** del dominio della vittima. Se la **vittima** effettua qualsiasi tipo di **interazione DNS o HTTP** con essi, saprai che **sta cercando attivamente** domini sospetti e dovrai essere molto stealth.
+Puoi **acquistare un dominio con un nome molto simile** a quello della vittima **e/o generare un certificato** per un **sottodominio** di un dominio controllato da te **contenente** la **parola chiave** del dominio della vittima. Se la **vittima** effettua qualsiasi tipo di **interazione DNS o HTTP** con essi, saprai che **sta cercando attivamente** domini sospetti e dovrai essere molto stealth.
 
-### Valutare il phishing
+### Evaluate the phishing
 
-Usa [**Phishious** ](https://github.com/Rices/Phishious) per valutare se la tua email finirà nella cartella spam o se verrà bloccata o avrà successo.
+Usa [**Phishious**](https://github.com/Rices/Phishious) per valutare se la tua email finirà nella cartella spam, se verrà bloccata o se avrà successo.
 
 ## High-Touch Identity Compromise (Help-Desk MFA Reset)
 
-I moderni set di intrusione sempre più spesso evitano completamente gli esche via email e **mirano direttamente al servizio di help-desk / al workflow di recovery dell'identità** per bypassare l'MFA. L'attacco è totalmente "living-off-the-land": una volta che l'operatore ottiene credenziali valide pivotano con strumenti amministrativi integrati – non è necessario malware.
+Set di intrusioni moderni sempre più spesso saltano completamente le email di lure e **puntano direttamente al workflow di service-desk / identity-recovery** per bypassare l'MFA. L'attacco è totalmente "living-off-the-land": una volta ottenute credenziali valide l'operatore pivota con strumenti amministrativi integrati – nessun malware è necessario.
 
-### Flusso dell'attacco
-1. Recon sulla vittima
-* Raccogli dettagli personali e aziendali da LinkedIn, breach di dati, GitHub pubblico, ecc.
-* Identifica identità ad alto valore (dirigenti, IT, finance) e enumera il **preciso processo di help-desk** per il reset di password / MFA.
+### Attack flow
+1. Recon della vittima
+* Raccogli dettagli personali e aziendali da LinkedIn, data breaches, GitHub pubblico, ecc.
+* Identifica identità ad alto valore (executive, IT, finance) e enumera il **processo esatto dell'help-desk** per il reset di password / MFA.
 2. Social engineering in tempo reale
-* Chiama, contatta via Teams o chat l'help-desk impersonando la vittima (spesso con **spoofed caller-ID** o **voce clonata**).
-* Fornisci i PII raccolti in precedenza per superare la verifica basata sulla conoscenza.
-* Convincere l'agente a **resettare il secret MFA** o eseguire un **SIM-swap** su un numero mobile registrato.
-3. Azioni immediate post-accesso (≤60 min in casi reali)
-* Stabilisci un foothold tramite qualsiasi portale web SSO.
-* Enumera AD / AzureAD con strumenti integrati (nessun binary lasciato):
+* Chiama, usa Teams o chatta con l'help-desk impersonando il target (spesso con **caller-ID spoofato** o **voce clonata**).
+* Fornisci il PII raccolto in precedenza per superare la verifica basata sulla conoscenza.
+* Convincere l'operatore a **resettare il secret MFA** o a effettuare un **SIM-swap** su un numero mobile registrato.
+3. Azioni post-accesso immediate (≤60 min nei casi reali)
+* Stabilisci un foothold tramite qualsiasi web SSO portal.
+* Enumera AD / AzureAD con strumenti integrati (nessun binario scaricato):
 ```powershell
 # list directory groups & privileged roles
 Get-ADGroup -Filter * -Properties Members | ?{$_.Members -match $env:USERNAME}
@@ -467,56 +467,56 @@ Get-MgDirectoryRole | ft DisplayName,Id
 # Enumerate devices the account can login to
 Get-MgUserRegisteredDevice -UserId <user@corp.local>
 ```
-* Movimento laterale con **WMI**, **PsExec**, o agenti legittimi **RMM** già nella whitelist dell'ambiente.
+* Movimenti laterali con **WMI**, **PsExec**, o agenti **RMM** legittimi già whitelistati nell'ambiente.
 
-### Rilevazione e mitigazione
-* Tratta il recovery dell'identità tramite help-desk come un'**operazione privilegiata** – richiedi step-up auth e approvazione del manager.
-* Distribuisci regole **Identity Threat Detection & Response (ITDR)** / **UEBA** che generino alert su:
-  * Metodo MFA cambiato + autenticazione da nuovo dispositivo / nuova geo.
-  * Immediata elevazione dello stesso principal (user → admin).
-* Registra le chiamate dell'help-desk e imposta un **call-back a un numero già registrato** prima di qualsiasi reset.
+### Detection & Mitigation
+* Tratta il recovery identità via help-desk come un'operazione **privilegiata** – richiedi step-up auth e approvazione del manager.
+* Deploya regole **Identity Threat Detection & Response (ITDR)** / **UEBA** che generino alert su:
+* Metodo MFA cambiato + autenticazione da nuovo dispositivo / geo.
+* Immediate elevazioni dello stesso principal (user → admin).
+* Registra le chiamate dell'help-desk e applica un **call-back a un numero già registrato** prima di qualunque reset.
 * Implementa **Just-In-Time (JIT) / Privileged Access** in modo che gli account appena resettati **non** ereditino automaticamente token ad alto privilegio.
 
 ---
 
-## Inganno su larga scala – SEO Poisoning & campagne “ClickFix”
-Gruppi commodity compensano il costo delle operazioni high-touch con attacchi di massa che trasformano **motori di ricerca & reti pubblicitarie nel canale di consegna**.
+## At-Scale Deception – SEO Poisoning & “ClickFix” Campaigns
+Gruppi commodity compensano il costo delle operazioni high-touch con attacchi di massa che trasformano **motori di ricerca & reti pubblicitarie nel canale di distribuzione**.
 
-1. **SEO poisoning / malvertising** spinge un risultato falso come `chromium-update[.]site` tra i primi annunci di ricerca.
+1. **SEO poisoning / malvertising** spinge un risultato fake come `chromium-update[.]site` in cima agli annunci di ricerca.
 2. La vittima scarica un piccolo **first-stage loader** (spesso JS/HTA/ISO). Esempi osservati da Unit 42:
 * `RedLine stealer`
 * `Lumma stealer`
 * `Lampion Trojan`
-3. Il loader esfiltra cookie del browser + database credenziali, poi scarica un **silent loader** che decide – *in tempo reale* – se distribuire:
+3. Il loader esfiltra cookie del browser + database di credenziali, poi scarica un **silent loader** che decide – *in tempo reale* – se distribuire:
 * RAT (es. AsyncRAT, RustDesk)
 * ransomware / wiper
-* componente di persistenza (chiave Run del registro + scheduled task)
+* componente di persistenza (chiave Run nel registro + scheduled task)
 
-### Consigli per hardening
-* Blocca i domini appena registrati e applica **Advanced DNS / URL Filtering** sia sugli *search-ads* sia sulle email.
-* Restringi l'installazione di software a pacchetti MSI firmati / Store, nega l'esecuzione di `HTA`, `ISO`, `VBS` tramite policy.
-* Monitora processi figli dei browser che aprono installer:
+### Hardening tips
+* Blocca i domini appena registrati e applica **Advanced DNS / URL Filtering** sia sugli annunci di ricerca sia sulle email.
+* Restringi l'installazione di software a pacchetti MSI firmati / Store, vieta l'esecuzione di `HTA`, `ISO`, `VBS` tramite policy.
+* Monitora i processi figli dei browser che aprono installer:
 ```yaml
 - parent_image: /Program Files/Google/Chrome/*
 and child_image: *\\*.exe
 ```
-* Caccia le LOLBins frequentemente abusate dai first-stage loader (es. `regsvr32`, `curl`, `mshta`).
+* Cerca LOLBins frequentemente abusati dai first-stage loader (es. `regsvr32`, `curl`, `mshta`).
 
 ---
 
-## Operazioni di phishing potenziate dall'AI
-Gli attaccanti ora concatenano **API LLM & voice-clone** per esche totalmente personalizzate e interazioni in tempo reale.
+## AI-Enhanced Phishing Operations
+Gli attaccanti ora concatenano **API LLM & voice-clone** per lure completamente personalizzati e interazioni in tempo reale.
 
-| Layer | Esempio d'uso da parte di un threat actor |
-|-------|-------------------------------------------|
-|Automazione|Generare e inviare >100k email / SMS con testi randomizzati & link di tracking.|
-|AI generativa|Produrre email *one-off* che citano M&A pubblici, battute interne dai social; deep-fake della voce del CEO in una chiamata di callback.|
-|AI agentica|Registrare domini autonomamente, scrape di intel open-source, creare mail di follow-up quando una vittima clicca ma non invia credenziali.|
+| Layer | Example use by threat actor |
+|-------|-----------------------------|
+|Automation|Generate & send >100 k emails / SMS with randomised wording & tracking links.|
+|Generative AI|Produce *one-off* emails referencing public M&A, inside jokes from social media; deep-fake CEO voice in callback scam.|
+|Agentic AI|Autonomously register domains, scrape open-source intel, craft next-stage mails when a victim clicks but doesn’t submit creds.|
 
 **Difesa:**
-• Aggiungi **banner dinamici** che evidenzino messaggi inviati da automazione non attendibile (via anomalie ARC/DKIM).  
-• Distribuisci **frasi di challenge biometrica vocale** per richieste telefoniche ad alto rischio.  
-• Simula continuamente esche generate da AI nei programmi di awareness – i template statici sono obsoleti.
+• Aggiungi **banner dinamici** che evidenzino messaggi inviati da automazioni non attendibili (tramite anomalie ARC/DKIM).  
+• Deploya **challenge biometriche vocali** per le richieste telefoniche ad alto rischio.  
+• Simula continuamente lure generati da AI nei programmi di awareness – i template statici sono obsoleti.
 
 See also – agentic browsing abuse for credential phishing:
 
@@ -527,19 +527,19 @@ ai-agent-mode-phishing-abusing-hosted-agent-browsers.md
 ---
 
 ## MFA Fatigue / Push Bombing Variant – Forced Reset
-Oltre al classico push-bombing, gli operatori semplicemente **forzano una nuova registrazione MFA** durante la chiamata con l'help-desk, azzerando il token esistente dell'utente. Qualsiasi prompt di login successivo apparirà legittimo alla vittima.
+Oltre al classico push-bombing, gli operatori semplicemente **forzano una nuova registrazione MFA** durante la chiamata all'help-desk, annullando il token esistente dell'utente. Qualsiasi successiva richiesta di login apparirà legittima per la vittima.
 ```text
 [Attacker]  →  Help-Desk:  “I lost my phone while travelling, can you unenrol it so I can add a new authenticator?”
 [Help-Desk] →  AzureAD: ‘Delete existing methods’ → sends registration e-mail
 [Attacker]  →  Completes new TOTP enrolment on their own device
 ```
-Monitorare eventi di AzureAD/AWS/Okta in cui **`deleteMFA` + `addMFA`** si verificano **dallo stesso IP entro pochi minuti**.
+Monitor for AzureAD/AWS/Okta events where **`deleteMFA` + `addMFA`** occur **within minutes from the same IP**.
 
 
 
 ## Clipboard Hijacking / Pastejacking
 
-Gli attaccanti possono copiare silenziosamente comandi malevoli negli appunti (clipboard) della vittima da una pagina web compromessa o typosquatted e poi indurre l'utente a incollarli in **Win + R**, **Win + X** o in una finestra del terminale, eseguendo codice arbitrario senza alcun download o allegato.
+Gli aggressori possono copiare silenziosamente comandi malevoli nella clipboard della vittima da una pagina web compromessa o typosquatted e poi indurre l'utente a incollarli dentro **Win + R**, **Win + X** o una terminal window, eseguendo codice arbitrario senza alcun download o attachment.
 
 
 {{#ref}}
@@ -553,6 +553,33 @@ clipboard-hijacking.md
 mobile-phishing-malicious-apps.md
 {{#endref}}
 
+### Mobile‑gated phishing to evade crawlers/sandboxes
+Gli operatori mettono sempre più spesso i loro flussi di phishing dietro un semplice controllo del dispositivo, in modo che i desktop crawlers non raggiungano mai le pagine finali. Uno schema comune è uno script che verifica se il DOM è touch-capable e invia il risultato a un server endpoint; i client non‑mobile ricevono HTTP 500 (o una pagina vuota), mentre agli utenti mobile viene servito il flusso completo.
+
+Minimal client snippet (typical logic):
+```html
+<script src="/static/detect_device.js"></script>
+```
+`detect_device.js` logica (semplificata):
+```javascript
+const isMobile = ('ontouchstart' in document.documentElement);
+fetch('/detect', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({is_mobile:isMobile})})
+.then(()=>location.reload());
+```
+Comportamento del server spesso osservato:
+- Imposta un cookie di sessione durante il primo caricamento.
+- Accetta `POST /detect {"is_mobile":true|false}`.
+- Restituisce 500 (o placeholder) alle GET successive quando `is_mobile=false`; serve il phishing solo se `true`.
+
+Euristiche di ricerca e rilevamento:
+- urlscan query: `filename:"detect_device.js" AND page.status:500`
+- Telemetria web: sequenza di `GET /static/detect_device.js` → `POST /detect` → HTTP 500 per non‑mobile; i percorsi legittimi per vittime mobile restituiscono 200 con HTML/JS successivo.
+- Bloccare o esaminare con attenzione le pagine che condizionano il contenuto esclusivamente su `ontouchstart` o controlli di dispositivo simili.
+
+Consigli di difesa:
+- Eseguire crawler con fingerprint simili a dispositivi mobile e JS abilitato per rivelare contenuti protetti.
+- Generare allerta su risposte 500 sospette successive a `POST /detect` su domini appena registrati.
+
 ## Riferimenti
 
 - [https://zeltser.com/domain-name-variations-in-phishing/](https://zeltser.com/domain-name-variations-in-phishing/)
@@ -560,5 +587,6 @@ mobile-phishing-malicious-apps.md
 - [https://darkbyte.net/robando-sesiones-y-bypasseando-2fa-con-evilnovnc/](https://darkbyte.net/robando-sesiones-y-bypasseando-2fa-con-evilnovnc/)
 - [https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy)
 - [2025 Unit 42 Global Incident Response Report – Social Engineering Edition](https://unit42.paloaltonetworks.com/2025-unit-42-global-incident-response-report-social-engineering-edition/)
+- [Silent Smishing – mobile-gated phishing infra and heuristics (Sekoia.io)](https://blog.sekoia.io/silent-smishing-the-hidden-abuse-of-cellular-router-apis/)
 
 {{#include ../../banners/hacktricks-training.md}}
