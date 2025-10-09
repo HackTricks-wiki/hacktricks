@@ -579,6 +579,37 @@ clipboard-hijacking.md
 mobile-phishing-malicious-apps.md
 {{#endref}}
 
+### Mobile‑gated phishing to evade crawlers/sandboxes
+Operators increasingly gate their phishing flows behind a simple device check so desktop crawlers never reach the final pages. A common pattern is a small script that tests for a touch-capable DOM and posts the result to a server endpoint; non‑mobile clients receive HTTP 500 (or a blank page), while mobile users are served the full flow.
+
+Minimal client snippet (typical logic):
+
+```html
+<script src="/static/detect_device.js"></script>
+```
+
+`detect_device.js` logic (simplified):
+
+```javascript
+const isMobile = ('ontouchstart' in document.documentElement);
+fetch('/detect', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({is_mobile:isMobile})})
+  .then(()=>location.reload());
+```
+
+Server behaviour often observed:
+- Sets a session cookie during the first load.
+- Accepts `POST /detect {"is_mobile":true|false}`.
+- Returns 500 (or placeholder) to subsequent GETs when `is_mobile=false`; serves phishing only if `true`.
+
+Hunting and detection heuristics:
+- urlscan query: `filename:"detect_device.js" AND page.status:500`
+- Web telemetry: sequence of `GET /static/detect_device.js` → `POST /detect` → HTTP 500 for non‑mobile; legitimate mobile victim paths return 200 with follow‑on HTML/JS.
+- Block or scrutinize pages that condition content exclusively on `ontouchstart` or similar device checks.
+
+Defence tips:
+- Execute crawlers with mobile‑like fingerprints and JS enabled to reveal gated content.
+- Alert on suspicious 500 responses following `POST /detect` on newly registered domains.
+
 ## References
 
 - [https://zeltser.com/domain-name-variations-in-phishing/](https://zeltser.com/domain-name-variations-in-phishing/)
@@ -586,6 +617,7 @@ mobile-phishing-malicious-apps.md
 - [https://darkbyte.net/robando-sesiones-y-bypasseando-2fa-con-evilnovnc/](https://darkbyte.net/robando-sesiones-y-bypasseando-2fa-con-evilnovnc/)
 - [https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy)
 - [2025 Unit 42 Global Incident Response Report – Social Engineering Edition](https://unit42.paloaltonetworks.com/2025-unit-42-global-incident-response-report-social-engineering-edition/)
+- [Silent Smishing – mobile-gated phishing infra and heuristics (Sekoia.io)](https://blog.sekoia.io/silent-smishing-the-hidden-abuse-of-cellular-router-apis/)
 
 {{#include ../../banners/hacktricks-training.md}}
 
