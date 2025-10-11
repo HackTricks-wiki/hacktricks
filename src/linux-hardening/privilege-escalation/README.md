@@ -83,7 +83,7 @@ You can check if the sudo version is vulnerable using this grep.
 sudo -V | grep "Sudo ver" | grep "1\.[01234567]\.[0-9]\+\|1\.8\.1[0-9]\*\|1\.8\.2[01234567]"
 ```
 
-#### sudo < v1.28
+#### sudo < v1.8.28
 
 From @sickrov
 

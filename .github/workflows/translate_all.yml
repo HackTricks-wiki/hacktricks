@@ -129,7 +129,7 @@ jobs:
           git pull
           MDBOOK_BOOK__LANGUAGE=$BRANCH mdbook build || (echo "Error logs" && cat hacktricks-preprocessor-error.log && echo "" && echo "" && echo "Debug logs" && (cat hacktricks-preprocessor.log | tail -n 20) && exit 1)
       
-      - name: Publish search index release asset
+      - name: Push search index to hacktricks-searchindex repo
         shell: bash
         env:
           PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
@@ -137,31 +137,93 @@ jobs:
           set -euo pipefail
 
           ASSET="book/searchindex.js"
-          TAG="searchindex-${BRANCH}"
-          TITLE="Search Index (${BRANCH})"
+          TARGET_REPO="HackTricks-wiki/hacktricks-searchindex"
+          FILENAME="searchindex-${BRANCH}.js"
 
           if [ ! -f "$ASSET" ]; then
             echo "Expected $ASSET to exist after build" >&2
             exit 1
           fi
 
-          TOKEN="${PAT_TOKEN:-${GITHUB_TOKEN:-}}"
+          TOKEN="${PAT_TOKEN}"
           if [ -z "$TOKEN" ]; then
-            echo "No token available for GitHub CLI" >&2
+            echo "No PAT_TOKEN available" >&2
             exit 1
           fi
-          export GH_TOKEN="$TOKEN"
 
-          # Delete the release if it exists
-          if gh release view "$TAG" >/dev/null 2>&1; then
-            echo "Release $TAG already exists, deleting it..."
-            gh release delete "$TAG" --yes --repo "$GITHUB_REPOSITORY"
-          fi
+          # Clone the searchindex repo
+          git clone https://x-access-token:${TOKEN}@github.com/${TARGET_REPO}.git /tmp/searchindex-repo
           
-          # Create new release
-          gh release create "$TAG" "$ASSET" --title "$TITLE" --notes "Automated search index build for $BRANCH" --repo "$GITHUB_REPOSITORY"
+          # Compress the searchindex file
+          gzip -9 -k -f "$ASSET"
+          
+          # Show compression stats
+          ORIGINAL_SIZE=$(wc -c < "$ASSET")
+          COMPRESSED_SIZE=$(wc -c < "${ASSET}.gz")
+          RATIO=$(awk "BEGIN {printf \"%.1f\", ($COMPRESSED_SIZE / $ORIGINAL_SIZE) * 100}")
+          echo "Compression: ${ORIGINAL_SIZE} bytes -> ${COMPRESSED_SIZE} bytes (${RATIO}%)"
+          
+          # Copy ONLY the .gz version to the searchindex repo (no uncompressed .js)
+          cp "${ASSET}.gz" "/tmp/searchindex-repo/${FILENAME}.gz"
+          
+          # Commit and push with retry logic
+          cd /tmp/searchindex-repo
+          git config user.name "GitHub Actions"
+          git config user.email "github-actions@github.com"
+          git add "${FILENAME}.gz"
+          
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Update ${FILENAME} from hacktricks-cloud build"
+            
+            # Retry push up to 20 times with pull --rebase between attempts
+            MAX_RETRIES=20
+            RETRY_COUNT=0
+            while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+              if git push origin master; then
+                echo "Successfully pushed on attempt $((RETRY_COUNT + 1))"
+                break
+              else
+                RETRY_COUNT=$((RETRY_COUNT + 1))
+                if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+                  echo "Push failed, attempt $RETRY_COUNT/$MAX_RETRIES. Pulling and retrying..."
+                  
+                  # Try normal rebase first
+                  if git pull --rebase origin master 2>&1 | tee /tmp/pull_output.txt; then
+                    echo "Rebase successful, retrying push..."
+                  else
+                    # If rebase fails due to divergent histories (orphan branch reset), re-clone
+                    if grep -q "unrelated histories\|refusing to merge\|fatal: invalid upstream\|couldn't find remote ref" /tmp/pull_output.txt; then
+                      echo "Detected history rewrite, re-cloning repository..."
+                      cd /tmp
+                      rm -rf searchindex-repo
+                      git clone https://x-access-token:${TOKEN}@github.com/${TARGET_REPO}.git searchindex-repo
+                      cd searchindex-repo
+                      git config user.name "GitHub Actions"
+                      git config user.email "github-actions@github.com"
+                      
+                      # Re-copy ONLY the .gz version (no uncompressed .js)
+                      cp "${ASSET}.gz" "${FILENAME}.gz"
+                      
+                      git add "${FILENAME}.gz"
+                      git commit -m "Update ${FILENAME}.gz from hacktricks-cloud build"
+                      echo "Re-cloned and re-committed, will retry push..."
+                    else
+                      echo "Rebase failed for unknown reason, retrying anyway..."
+                    fi
+                  fi
+                  
+                  sleep 1
+                else
+                  echo "Failed to push after $MAX_RETRIES attempts"
+                  exit 1
+                fi
+              fi
+            done
+          fi
 
-      # Login in AWs
+      # Login in AWS
       - name: Configure AWS credentials using OIDC
         uses: aws-actions/configure-aws-credentials@v3
         with:
