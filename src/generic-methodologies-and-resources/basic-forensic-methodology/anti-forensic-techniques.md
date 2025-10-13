@@ -5,7 +5,7 @@
 ## Timestamps
 
 An attacker may be interested in **changing the timestamps of files** to avoid being detected.\
-It's possible to find the timestamps inside the MFT in attributes `$STANDARD_INFORMATION` \_\_ and \_\_ `$FILE_NAME`.
+It's possible to find the timestamps inside the MFT in attributes `$STANDARD_INFORMATION` __ and __ `$FILE_NAME`.
 
 Both attributes have 4 timestamps: **Modification**, **access**, **creation**, and **MFT registry modification** (MACE or MACB).
 
@@ -226,6 +226,57 @@ and alert on kernel-service creation from user-writable paths.
 
 ---
 
+### Cobalt Strike UDRL/PIC evasion: replacing Sleepmask/BeaconGate
+
+Operators can decouple Beacon from Cobalt Strike’s stock evasion layers (Sleepmask/BeaconGate) by
+using a prepend‑style User‑Defined Reflective Loader (UDRL) that executes custom Crystal Palace
+position‑independent code objects (PIC/O) before Beacon initializes. The same pattern can wrap
+post‑ex DLLs so their API calls are mediated by the loader rather than stock CS hooks.
+
+Key mechanics
+- Pre‑Beacon PIC/O: the UDRL runs first, allowing alternative API resolution, memory layout, and
+  IAT hooks before Beacon starts. This changes fingerprints tied to Sleepmask/BeaconGate.
+- IAT hooking via PIC/O: targeted APIs (e.g., CreateProcessA, LoadLibraryA/W) are redirected to PIC
+  that can mask/unmask memory around calls and apply call‑stack spoofing.
+- Post‑ex symmetry: a dedicated post‑ex UDRL applies the same hooks/telemetry tamper to post‑ex
+  modules. Note: `smartinject` is not yet supported in `stage` for prepended loaders.
+
+Minimal Malleable C2 profile changes (from the PoC)
+```text
+stage {
+    set rdll_loader "PrependLoader";
+    set sleep_mask "false";
+    set cleanup "true";
+    transform-obfuscate { }
+}
+
+post-ex {
+    set cleanup "true";
+}
+```
+Client integration
+- Copy `crystalpalace.jar` into the Cobalt Strike client directory.
+- Load `crystalkit.cna` so the client registers the hooks and UDRL flow.
+
+Evasion hardening ideas (from the PoC/TODO)
+- Memory protections: avoid RWX; prefer W→RX flips or RX mappings to reduce scanner hits.
+- Import resolution hardening: patch GetModuleHandleA/GetProcAddress in post‑ex loader to reduce
+  user‑mode hook interception during symbol resolution.
+- AMSI/ETW interference: add bypasses in the post‑ex loader to reduce content scanning and ETW
+  telemetry for wrapped modules.
+- Memory hygiene: track allocations (BUD‑style) and free on `ExitThread` to reduce residuals.
+
+DFIR and hunting notes
+- Look for non‑standard UDRLs that prepend a loader to staged Beacon/post‑ex DLLs.
+- Early W→RX transitions and short‑lived RW windows around loader activity (VirtualProtect
+  sequences before Beacon init).
+- IAT patching of post‑ex DLLs and hooked `LoadLibrary*` flows that gate module loads
+  (e.g., `System.Management.Automation.dll`, `clr.dll`).
+- Absence of Sleepmask/BeaconGate traits in memory while Beacon still exhibits CS C2 traffic.
+- Patching/tamper of GMA/GPA, AMSI, and ETW within the post‑ex address space.
+
+---
+
 ## Linux Anti-Forensics: Self-Patching and Cloud C2 (2023–2025)
 
 ### Self‑patching compromised services to reduce detection (Linux)
@@ -310,8 +361,7 @@ Defenders should correlate these artifacts with external exposure and service pa
 
 - [Red Canary – Patching for persistence: How DripDropper Linux malware moves through the cloud](https://redcanary.com/blog/threat-intelligence/dripdropper-linux-malware/)
 - [CVE‑2023‑46604 – Apache ActiveMQ OpenWire RCE (NVD)](https://nvd.nist.gov/vuln/detail/CVE-2023-46604)
+- [Crystal Kit — Replacing Cobalt Strike’s Sleepmask/BeaconGate with Crystal Palace PIC/O via UDRL](https://rastamouse.me/crystal-kit/)
+- [rasta-mouse/Crystal-Kit (GitHub)](https://github.com/rasta-mouse/Crystal-Kit)
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-
