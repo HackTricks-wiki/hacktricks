@@ -368,6 +368,7 @@
   - [Intent Injection](mobile-pentesting/android-app-pentesting/intent-injection.md)
   - [Make APK Accept CA Certificate](mobile-pentesting/android-app-pentesting/make-apk-accept-ca-certificate.md)
   - [Manual DeObfuscation](mobile-pentesting/android-app-pentesting/manual-deobfuscation.md)
+  - [Pixnapping Android Pixel Stealing](mobile-pentesting/android-app-pentesting/pixnapping-android-pixel-stealing.md)
   - [React Native Application](mobile-pentesting/android-app-pentesting/react-native-application.md)
   - [Reversing Native Libraries](mobile-pentesting/android-app-pentesting/reversing-native-libraries.md)
   - [Shizuku Privileged Api](mobile-pentesting/android-app-pentesting/shizuku-privileged-api.md)
