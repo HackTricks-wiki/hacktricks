@@ -220,7 +220,11 @@ csreq -t -r /tmp/telegram_csreq.bin
 Apps **don't only need** to **request** and have been **granted access** to some resources, they also need to **have the relevant entitlements**.\
 For example **Telegram** has the entitlement `com.apple.security.device.camera` to request **access to the camera**. An **app** that **doesn't** have this **entitlement won't be able** to access the camera (and the user won't even be asked for the permissions).
 
+Note that entitlements are plist files and are part of code sig, further hashed in code sig by special slots and may be either queried in kernel by kernel code or by user model code using `csops(#169)` or `csops_audittoken(#170)`.
+
 However, for apps to **access** to **certain user folders**, such as `~/Desktop`, `~/Downloads` and `~/Documents`, they **don't need** to have any specific **entitlements.** The system will transparently handle access and **prompt the user** as needed.
+
+- [https://newosxbook.com/ent.php](https://newosxbook.com/ent.php)
 
 Apple's apps **won’t generate prompts**. They contain **pre-granted rights** in their **entitlements** list, meaning they will **never generate a popup**, **nor** they will show up in any of the **TCC databases.** For example:
 
@@ -273,6 +277,193 @@ otool -l /System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal| gr
 > Also note that if you move a file that allows the UUID of an app in your computer to a different computer, because the same app will have different UIDs, it won't grant access to that app.
 
 The extended attribute `com.apple.macl` **can’t be cleared** like other extended attributes because it’s **protected by SIP**. However, as [**explained in this post**](https://www.brunerd.com/blog/2020/01/07/track-and-tackle-com-apple-macl/), it's possible to disable it **zipping** the file, **deleting** it and **unzipping** it.
+
+
+
+
+
+
+## XNU Responsible Process Mechanism
+
+In macOS/iOS, the **responsible process** mechanism is a critical security feature used by the **TCC (Transparency, Consent, and Control)** framework and other security systems to track which process is ultimately responsible for an action, even through chains of child processes.
+
+When TCC checks permissions (e.g., camera, microphone, location), it doesn't always check the immediate process making the request. Instead, it checks the **responsible process** - typically the GUI application that initiated the action, even if the actual request comes from a helper process or daemon.
+
+<details>
+<summary>How Responsible Process is Set</summary>
+
+### Process Structure Fields
+
+Each process in XNU maintains two key UUID identifiers:
+
+```c
+// From bsd/sys/proc_internal.h
+struct proc {
+    // ...
+    pid_t   p_responsible_pid;          // PID of the responsible process
+    uint8_t p_uuid[16];                 // UUID from LC_UUID load command (self)
+    uint8_t p_responsible_uuid[16];     // UUID of pid responsible for this process
+    // ...
+};
+```
+
+- **`p_uuid`**: The process's own UUID (from its Mach-O binary's `LC_UUID` load command)
+- **`p_responsible_pid`**: The PID of the responsible process
+- **`p_responsible_uuid`**: The UUID of the responsible process (persists even after that process exits)
+
+### How Responsible Process is Set
+
+1. **During Process Creation (Fork)**
+
+When a new process is created via `fork()` or `posix_spawn()`, the responsible process is inherited from the parent (the `exec()` syscall reuses the existing `proc` structure, so this step is not repeated there):
+
+**Location**: `bsd/kern/kern_fork.c:1053`
+
+```c
+// In fork1_internal() - called during all process creation
+proc_set_responsible_pid(child_proc, parent_proc->p_responsible_pid);
+```
+
+**Key Points:**
+- Child processes **inherit** the parent's `p_responsible_pid`
+- This creates a **chain of responsibility** through the process hierarchy
+- The responsible process typically points to the original GUI application
+
+2. **The Core Function: `proc_set_responsible_pid()`**
+
+**Location**: `bsd/kern/kern_proc.c:4817-4831`
+
+```c
+void
+proc_set_responsible_pid(proc_t target_proc, pid_t responsible_pid)
+{
+    target_proc->p_responsible_pid = responsible_pid;
+    
+    if (responsible_pid >= 0) {
+        proc_t responsible_proc = proc_find(responsible_pid);
+        if (responsible_proc != PROC_NULL) {
+            // Copy the responsible process's UUID for persistent identification
+            proc_getexecutableuuid(responsible_proc, 
+                target_proc->p_responsible_uuid, 
+                sizeof(target_proc->p_responsible_uuid));
+            proc_rele(responsible_proc);
+        }
+    }
+    return;
+}
+```
+
+**What this function does:**
+1. **Sets the responsible PID** in the target process
+2. **Looks up the responsible process** using `proc_find()` (increments reference count)
+3. **Copies the UUID** from the responsible process's `p_uuid` to the target process's `p_responsible_uuid`
+4. **Releases the reference** with `proc_rele()` (decrements reference count)
+
+3. **Why Store Both PID and UUID?**
+
+The dual-storage approach solves a critical problem:
+
+| Field | Purpose | Problem | Solution |
+|-------|---------|---------|----------|
+| `p_responsible_pid` | Fast lookup of current process | PID can be reused after process exits | Used for active process lookup |
+| `p_responsible_uuid` | Persistent identification | Survives process termination | Used for security checks and auditing |
+
+**The Problem**: If the responsible process exits before the child, the PID might be recycled and assigned to a completely different process.
+
+**The Solution**: The UUID is immutable and uniquely identifies the specific binary that was responsible, even after it exits.
+
+### Process Creation Flow
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Parent Process (e.g., Safari)                               │
+│ p_uuid: A155B8BB-7F2C-3EBA-AE7D-60A1F2CDEF81              │
+│ p_responsible_pid: 1234 (points to itself)                 │
+│ p_responsible_uuid: A155B8BB-7F2C-3EBA-AE7D-60A1F2CDEF81  │
+└─────────────────────┬───────────────────────────────────────┘
+                      │
+                      │ fork() / posix_spawn()
+                      ▼
+         ┌────────────────────────────┐
+         │ kern_fork.c:fork1_internal │
+         │                            │
+         │ proc_set_responsible_pid(  │
+         │   child_proc,              │
+         │   parent->p_responsible_pid│
+         │ );                         │
+         └────────────┬───────────────┘
+                      │
+                      ▼
+         ┌────────────────────────────┐
+         │ proc_set_responsible_pid() │
+         │                            │
+         │ 1. Set p_responsible_pid   │
+         │ 2. Find responsible proc   │
+         │ 3. Copy UUID               │
+         │ 4. Release reference       │
+         └────────────┬───────────────┘
+                      │
+                      ▼
+┌─────────────────────────────────────────────────────────────┐
+│ Child Process (e.g., SafariHelper)                          │
+│ p_uuid: B266C9DD-8E3F-4AAA-9F1E-71D2E3CDEF82              │
+│ p_responsible_pid: 1234 (inherited from parent)            │
+│ p_responsible_uuid: A155B8BB-7F2C-3EBA-AE7D-60A1F2CDEF81  │
+│                     (copied from Safari)                    │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### UUID Source: LC_UUID Load Command
+
+The UUID stored in `p_uuid` comes from the **Mach-O executable's `LC_UUID` load command**:
+
+1. **Compilation Time**
+
+```bash
+# When linking, the linker (ld) generates a unique UUID
+$ ld -o myapp myapp.o
+# Embedded in the Mach-O binary as LC_UUID load command
+```
+
+2. **Execution Time**
+
+**Location**: `bsd/kern/mach_loader.c:2393-2413`
+
+```c
+static load_return_t
+load_uuid(struct uuid_command *uulp, char *command_end, load_result_t *result)
+{
+    if ((uulp->cmdsize < sizeof(struct uuid_command)) ||
+        (((char *)uulp + sizeof(struct uuid_command)) > command_end)) {
+        return LOAD_BADMACHO;
+    }
+
+    // Extract UUID from LC_UUID load command
+    memcpy(&result->uuid[0], &uulp->uuid[0], sizeof(result->uuid));
+    return LOAD_SUCCESS;
+}
+```
+
+3. **Stored in Process Structure**
+
+**Location**: `bsd/kern/kern_exec.c:2281`
+
+```c
+// After loading the Mach-O binary during exec()
+proc_setexecutableuuid(p, &load_result.uuid[0]);
+```
+
+**Location**: `bsd/kern/kern_proc.c:1912-1915`
+
+```c
+void
+proc_setexecutableuuid(proc_t p, const unsigned char *uuid)
+{
+    memcpy(p->p_uuid, uuid, sizeof(p->p_uuid));
+}
+```
+</details>
+
 
 ## TCC Privesc & Bypasses
 

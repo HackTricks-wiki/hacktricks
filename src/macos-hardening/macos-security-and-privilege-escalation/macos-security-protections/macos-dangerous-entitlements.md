@@ -3,7 +3,7 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
 > [!WARNING]
-> Note that entitlements starting with **`com.apple`** are not available to third-parties, only Apple can grant them.
+> Note that entitlements starting with **`com.apple`** are not available to third-parties, only Apple can grant them... Or if you are using an enterprise certificate you could create your own entitlements starting with **`com.apple`** actually and bypass protections based on this.
 
 ## High
 
@@ -122,6 +122,10 @@ It's possible to check who has this access in _System Settings_ > _Privacy & Sec
 ### `kTCCServiceAccessibility`
 
 The process will be able to **abuse the macOS accessibility features**, Which means that for example he will be able to press keystrokes. SO he could request access to control an app like Finder and approve the dialog with this permission.
+
+## Trustcache/CDhash related entitlements
+
+There are some entitlements that could be used to bypass Trustcache/CDhash protections, which prevent the execution of downgraded versions of Apple binaries.
 
 ## Medium
 

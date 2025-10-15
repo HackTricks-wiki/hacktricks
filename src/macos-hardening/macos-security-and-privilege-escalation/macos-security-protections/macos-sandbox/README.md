@@ -148,6 +148,7 @@ Important **system services** also run inside their own custom **sandbox** such 
 - **`/usr/share/sandbox`**
 - **`/System/Library/Sandbox/Profiles`**
 - Other sandbox profiles can be checked in [https://github.com/s7ephen/OSX-Sandbox--Seatbelt--Profiles](https://github.com/s7ephen/OSX-Sandbox--Seatbelt--Profiles).
+- In iOS the platform profile are inside the sandbox `.kext` inside the `_platform_profile_data` inside the binary.
 
 **App Store** apps use the **profile** **`/System/Library/Sandbox/Profiles/application.sb`**. You can check in this profile how entitlements such as **`com.apple.security.network.server`** allows a process to use the network.
 
@@ -161,6 +162,7 @@ To start an application with an **specific sandbox profile** you can use:
 
 ```bash
 sandbox-exec -f example.sb /Path/To/The/Application
+sandbox-exec -n no-internet ping 8.8.8.8
 ```
 
 {{#tabs}}

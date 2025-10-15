@@ -24,43 +24,32 @@ objdump --disassemble-symbols=_hello --x86-asm-syntax=intel toolsdemo #Disassemb
 nm -m ./tccd # List of symbols
 ```
 
-### jtool2 & Disarm
+### Disarm (old jtool2)
 
 You can [**download disarm from here**](https://newosxbook.com/tools/disarm.html).
 
+> [!TIP]
+> Note that **`disarm`** can work also with compressed IM4P files (like `kernelcache`) and extract only required parts or even analyze the required part without extracting it.
+
 ```bash
+export JCOLOR=1
 ARCH=arm64e disarm -c -i -I --signature /path/bin # Get bin info and signature
 ARCH=arm64e disarm -c -l /path/bin # Get binary sections
 ARCH=arm64e disarm -c -L /path/bin # Get binary commands (dependencies included)
 ARCH=arm64e disarm -c -S /path/bin # Get symbols (func names, strings...)
 ARCH=arm64e disarm -c -d /path/bin # Get disasembled
-jtool2 -d __DATA.__const myipc_server | grep MIG # Get MIG info
+
+disarm -e filesets kernelcache.release.d23 # Extract filesets from kernelcache
+JDEBUG=1 disarm -e filesets kernelcache.release.d23 # Extract filesets from kernelcache with debug info
+disarm -r "code signature" /bin/ps # Check code signature of a binary
+disarm -e "code signature" /bin/ps # Extract code signature of a binary
 ```
 
-You can [**download jtool2 here**](http://www.newosxbook.com/tools/jtool.html) or install it with `brew`.
-
-```bash
-# Install
-brew install --cask jtool2
-
-jtool2 -l /bin/ls # Get commands (headers)
-jtool2 -L /bin/ls # Get libraries
-jtool2 -S /bin/ls # Get symbol info
-jtool2 -d /bin/ls # Dump binary
-jtool2 -D /bin/ls # Decompile binary
-
-# Get signature information
-ARCH=x86_64 jtool2 --sig /System/Applications/Automator.app/Contents/MacOS/Automator
-
-# Get MIG information
-jtool2 -d __DATA.__const myipc_server | grep MIG
-```
-
-> [!CAUTION] > **jtool is deprecated in favour of disarm**
 
 ### Codesign / ldid
 
-> [!TIP] > **`Codesign`** can be found in **macOS** while **`ldid`** can be found in **iOS**
+> [!TIP]
+> **`Codesign`** can be found in **macOS** while **`ldid`** can be found in **iOS**
 
 ```bash
 # Get signer

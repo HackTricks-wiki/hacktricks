@@ -13,7 +13,7 @@ Mach-o binaries contains a load command called **`LC_CODE_SIGNATURE`** that indi
 
 <figure><img src="../../../images/image (1) (1) (1) (1).png" alt="" width="431"><figcaption></figcaption></figure>
 
-The magic header of the Code Signature is **`0xFADE0CC0`**. Then you have information such as the length and the number of blobs of the superBlob that contains them.\
+The magic header of the Code Signature is **`0xFADE0CC0`** (embedded code signature) or **`0xFADE0CC1`** (detached code signature). Then you have information such as the length and the number of blobs of the superBlob that contains them.\
 It's possible to find this information in the [source code here](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L276):
 
 ```c
@@ -112,6 +112,8 @@ __attribute__ ((aligned(1)));
 
 Note that there are different versions of this struct where old ones might contain less information.
 
+Note that the Code directory can use any hashing algorithm. At the moment, the most common one is **SHA256** (indicated by the value 2 in the field `hashType`) but in the future if this hash is broken, Apple could start using a different one.
+
 ## Signing Code Pages
 
 Hashing the full binary would be inefficient and even useless if when it's only loaded in memory partially. Therefore, the code signature is actually a hash of hashes where each binary page is hashed individually.\
@@ -142,7 +144,38 @@ Page size=4096
      2=93d476eeace15a5ad14c0fb56169fd080a04b99582b4c7a01e1afcbc58688f
 [...]
 
-# Calculate the hasehs of each page manually
+# get them with disarm
+disarm -vv --sig /bin/ps # Get all the hashes of the binary
+An embedded signature of 5824 bytes, with 5 blobs:
+Code Directory (869 bytes)
+		Version:     20400
+		Flags:       none
+		Platform Binary
+		CodeLimit:   0x10f80
+		Identifier:  com.apple.ps (@0x58)
+		Executable Segment: Base 0x0 Limit: 0x00008000 Flags: 0x00000001 
+		CDHash:	     ba668da43c001d101f02ffd9c915b8d4b88e3a7ad5333acd58499189a22a16a2 (computed)
+		# of hashes: 17 code (4K pages) + 7 special
+		Hashes @325 size: 32 Type: SHA-256
+		Special Slot   7 Entitlements ASN1/DER:	a542b4dcbc134fbd950c230ed9ddb99a343262a2df8e0c847caee2b6d3b41cc8 (OK)
+		Special Slot   6 DMG:	Not Bound
+		Special Slot   5 Entitlements blob:	2bb2de519f43b8e116c7eeea8adc6811a276fb134c55c9c2e9dcbd3047f80c7d (OK)
+		Special Slot   4 Application Specific:	Not Bound
+		Special Slot   3 Resource Directory:	Not Bound
+		Special Slot   2 Requirements blob:	4ca453dc8908dc7f6e637d6159c8761124ae56d080a4a550ad050c27ead273b3 (OK)
+		Special Slot   1 Bound Info.plist:	Not Bound
+			Slot   0 (File page @0x0000):	68eb381817e783faf97d5bf64ca066e6f3867a1ef16c145b32ad282cd550cabd (OK)
+			Slot   1 (File page @0x1000):	4c0714307c8ffbabe003573bc45d5a5690256ecc52c39250cae211f3ecafd507 (OK)
+			Slot   2 (File page @0x2000):	6e291b8260de343ef8fb984b88eac08d55f473870f5a612c71f7538a9c846beb (OK)
+			Slot   3 (File page @0x3000):	7a735f6a34a3544ca716cf2ab7ddf0dbd499aba1c279268de7c86626f4d320d9 (OK)
+			Slot   4 (File page @0x4000):	d01f0d2ddca0b0dc07269349add7320fbc277a7ad629c00f25fe59b926d9ca5f (OK)
+			Slot   5 (File page @0x5000):	7f282101b9601946b573303e3a6adbbc855768a15784d1c25e217b4fdea4da7e (OK)
+			Slot   6 (File page @0x6000):	NULL PAGE HASH (OK)
+			Slot   7 (File page @0x7000):	NULL PAGE HASH (OK)
+			Slot   8 (File page @0x8000):	b90a5987d6daa560ef3013c3626d23133e1dfad33499ae27ba1bd7c40b321347 (OK)
+[...]
+
+# Calculate the hashes of each page manually
 BINARY=/bin/ps
 SIZE=`stat -f "%Z" $BINARY`
 PAGESIZE=4096 # From the previous output
@@ -151,6 +184,8 @@ for i in `seq 0 $PAGES`; do
     dd if=$BINARY of=/tmp/`basename $BINARY`.page.$i bs=$PAGESIZE skip=$i count=1
 done
 openssl sha256 /tmp/*.page.*
+
+#Note that the last pages might not coincide because the binary didn't signed the signatura that it was calculating but the real size of the binary.
 ```
 
 ## Entitlements Blob
@@ -307,7 +342,10 @@ The **kernel** is the one that **checks the code signature** before allowing the
 
 ## `cs_blobs` & `cs_blob`
 
-[**cs_blob**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/sys/ubc_internal.h#L106) struct contains the information about the entitlement of the running process on it. `csb_platform_binary` also informs if the application is a platform binary (which is checked in different moments by the OS to apply security mechanisms like to protect the SEND rights to the task ports of these processes).
+[**cs_blob**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/sys/ubc_internal.h#L106) struct contains the information about the entitlement of the running process on it. `csb_platform_binary` also informs if the application is a **platform binary** (which is checked in different moments by the OS to apply security mechanisms like to protect the SEND rights to the task ports of these processes).
+
+> [!WARNING]
+> Note that several security measures depend on the binary being a platform binary, so way to escalate privileges is to **make the binary a platform binary** (for example, by re-signing it with a certificate that allows it).
 
 ```c
 struct cs_blob {
@@ -373,6 +411,3 @@ struct cs_blob {
 - [**\*OS Internals Volume III**](https://newosxbook.com/home.html)
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-
-
