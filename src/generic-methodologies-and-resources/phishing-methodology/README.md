@@ -548,6 +548,12 @@ See also – agentic browsing abuse for credential phishing:
 ai-agent-mode-phishing-abusing-hosted-agent-browsers.md
 {{#endref}}
 
+See also – AI agent abuse of local CLI tools and MCP (for secrets inventory and detection):
+
+{{#ref}}
+ai-agent-abuse-local-ai-cli-tools-and-mcp.md
+{{#endref}}
+
 ---
 
 ## MFA Fatigue / Push Bombing Variant – Forced Reset
