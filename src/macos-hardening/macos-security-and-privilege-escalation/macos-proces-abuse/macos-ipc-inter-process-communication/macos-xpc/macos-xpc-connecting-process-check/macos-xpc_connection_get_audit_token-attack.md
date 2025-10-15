@@ -124,13 +124,6 @@ Below is a visual representation of the described attack scenario:
 - **Absence of a Broader Fix**: It remains unclear why Apple didn't implement a more comprehensive fix, such as discarding messages not aligning with the saved audit token of the connection. The possibility of legitimate audit token changes in certain scenarios (e.g., `setuid` usage) might be a factor.
 - **Current Status**: The issue persists in iOS 17 and macOS 14, posing a challenge for those seeking to identify and understand it.
 
----
-
-## Patch status and CVE context (updated)
-
-- The concrete instance abusing `smd` was fixed by Apple on May 18, 2023 in macOS Ventura 13.4 (and backported to Big Sur 11.7.7 and Monterey 12.6.6) as CVE-2023-32405 “An app may be able to gain root privileges.” This was a service-specific change, not a platform-wide mitigation in libxpc. See Apple’s security notes for macOS Ventura 13.4. 
-- Sector 7 explicitly noted Apple did not roll out a structural mitigation; other XPC services that fetch credentials from the connection object instead of the current message could still be vulnerable in similar race windows.
-
 ## Finding vulnerable code paths in practice (2024–2025)
 
 When auditing XPC services for this bug class, focus on authorization performed outside the message’s event handler or concurrently with reply processing.
@@ -183,8 +176,8 @@ These require low-level mach message crafting for the XPC bootstrap and message 
 
 ## References
 
-- Sector 7 – Don’t Talk All at Once! Elevating Privileges on macOS by Audit Token Spoofing: https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/
-- Apple – About the security content of macOS Ventura 13.4 (CVE‑2023‑32405): https://support.apple.com/en-us/106333
+- Sector 7 – Don’t Talk All at Once! Elevating Privileges on macOS by Audit Token Spoofing: <https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/>
+- Apple – About the security content of macOS Ventura 13.4 (CVE‑2023‑32405): <https://support.apple.com/en-us/106333>
 
 
 {{#include ../../../../../../banners/hacktricks-training.md}}
