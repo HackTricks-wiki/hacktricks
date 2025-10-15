@@ -2,6 +2,7 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
+
 ## **Exception Levels - EL (ARM64v8)**
 
 In ARMv8 architecture, execution levels, known as Exception Levels (ELs), define the privilege level and capabilities of the execution environment. There are four exception levels, ranging from EL0 to EL3, each serving a different purpose:
@@ -11,13 +12,18 @@ In ARMv8 architecture, execution levels, known as Exception Levels (ELs), define
    - Applications running at EL0 are isolated from each other and from the system software, enhancing security and stability.
 2. **EL1 - Operating System Kernel Mode**:
    - Most operating system kernels run at this level.
-   - EL1 has more privileges than EL0 and can access system resources, but with some restrictions to ensure system integrity.
+   - EL1 has more privileges than EL0 and can access system resources, but with some restrictions to ensure system integrity. You go from EL0 to EL1 with the SVC instruction.
 3. **EL2 - Hypervisor Mode**:
    - This level is used for virtualization. A hypervisor running at EL2 can manage multiple operating systems (each in its own EL1) running on the same physical hardware.
    - EL2 provides features for isolation and control of the virtualized environments.
+   - So virtual machine applications like Parallels can use the `hypervisor.framework` to interact with EL2 and run virtual machines without needing kernel extensions.
+   - TO move from EL1 to EL2 the `HVC` instruction is used.
 4. **EL3 - Secure Monitor Mode**:
    - This is the most privileged level and is often used for secure booting and trusted execution environments.
    - EL3 can manage and control accesses between secure and non-secure states (such as secure boot, trusted OS, etc.).
+   - It was use for KPP (Kernel Patch Protection) in macOS, but it's not used anymore.
+   - EL3 is not used anymore by Apple.
+    - The transition to EL3 is typically done using the `SMC` (Secure Monitor Call) instruction.
 
 The use of these levels allows for a structured and secure way to manage different aspects of the system, from user applications to the most privileged system software. ARMv8's approach to privilege levels helps in effectively isolating different system components, thereby enhancing the security and robustness of the system.
 
@@ -213,7 +219,7 @@ ARM64 instructions generally have the **format `opcode dst, src1, src2`**, where
   - `csetm Xd, Xn, Xm, cond` -> If true, Xd = \<all 1>, if false, Xd = 0
 - **`adrp`**: Compute the **page address of a symbol** and store it in a register.
   - Example: `adrp x0, symbol` — This computes the page address of `symbol` and stores it in `x0`.
-- **`ldrsw`**: **Load** a signed **32-bit** value from memory and **sign-extend it to 64** bits.
+- **`ldrsw`**: **Load** a signed **32-bit** value from memory and **sign-extend it to 64** bits. This is used for common SWITCH cases.
   - Example: `ldrsw x0, [x1]` — This loads a signed 32-bit value from the memory location pointed to by `x1`, sign-extends it to 64 bits, and stores it in `x0`.
 - **`stur`**: **Store a register value to a memory location**, using an offset from another register.
   - Example: `stur x0, [x1, #4]` — This stores the value in `x0` into the memory ddress that is 4 bytes greater than the address currently in `x1`.
@@ -248,6 +254,12 @@ ldp x29, x30, [sp], #16  ; load pair x29 and x30 from the stack and increment th
 ```
 
 3. **Return**: `ret` (returns control to the caller using the address in the link register)
+
+## ARM Common Memory Protections
+
+{{#ref}}
+../../../binary-exploitation/ios-exploiting/README.md
+{{#endref}}
 
 ## AARCH32 Execution State
 

@@ -1,4 +1,4 @@
-# macOS Kernel Extensions & Debugging
+# macOS Kernel Extensions & Kernelcaches
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -87,8 +87,14 @@ kmutil libraries -p /Library/Extensions/FancyUSB.kext --undef-symbols
 
 The **kernelcache** is a **pre-compiled and pre-linked version of the XNU kernel**, along with essential device **drivers** and **kernel extensions**. It's stored in a **compressed** format and gets decompressed into memory during the boot-up process. The kernelcache facilitates a **faster boot time** by having a ready-to-run version of the kernel and crucial drivers available, reducing the time and resources that would otherwise be spent on dynamically loading and linking these components at boot time.
 
-### Local Kerlnelcache
+The main benefits of the kernelcache is **speed of loading** and that all modules are prelinked (no load time impediment). And that once all modules have been prelinked- KXLD can be removed from memory so **XNU cannot load new KEXTs.**
 
+> [!TIP]
+> The [https://github.com/dhinakg/aeota](https://github.com/dhinakg/aeota) tool decrypts Apple’s AEA (Apple Encrypted Archive / AEA asset) containers — the encrypted container format Apple uses for OTA assets and some IPSW pieces — and can produce the underlying .dmg/asset archive that you can then extract with the provided aastuff tools.
+
+
+### Local Kerlnelcache
+  
 In iOS it's located in **`/System/Library/Caches/com.apple.kernelcaches/kernelcache`** in macOS you can find it with: **`find / -name "kernelcache" 2>/dev/null`** \
 In my case in macOS I found it in:
 
@@ -96,7 +102,7 @@ In my case in macOS I found it in:
 
 Find also here the [**kernelcache of version 14 with symbols**](https://x.com/tihmstar/status/1295814618242318337?lang=en).
 
-#### IMG4
+#### IMG4 / BVX2 (LZFSE) compressed
 
 The IMG4 file format is a container format used by Apple in its iOS and macOS devices for securely **storing and verifying firmware** components (like **kernelcache**). The IMG4 format includes a header and several tags which encapsulate different pieces of data including the actual payload (like a kernel or bootloader), a signature, and a set of manifest properties. The format supports cryptographic verification, allowing the device to confirm the authenticity and integrity of the firmware component before executing it.
 
@@ -121,9 +127,36 @@ img4tool -e kernelcache.release.iphone14 -o kernelcache.release.iphone14.e
 
 # pyimg4 (https://github.com/m1stadev/PyIMG4)
 pyimg4 im4p extract -i kernelcache.release.iphone14 -o kernelcache.release.iphone14.e
+
+# imjtool (https://newandroidbook.com/tools/imjtool.html)
+imjtool _img_name_ [extract]
+
+# disarm (you can use it directly on the IMG4 file) - https://newandroidbook.com/tools/disarm.html
+disarm -L kernelcache.release.v57 # From unzip ipsw
+
+# disamer (extract specific parts, e.g. filesets) - https://newandroidbook.com/tools/disarm.html
+disarm -e filesets kernelcache.release.d23 
+```
+
+#### Disarm symbols for the kernel
+
+**`Disarm`** allows to symbolicate functions from the kernelcache using matchers. These matchers are just simple pattern rules (text lines) that tell disarm how to recognise & auto-symbolicate functions, arguments and panic/log strings inside a binary.
+
+So basically you indicate the string that a function is using and disarm will find it and **symbolicate it**.
+
+```bash
+You can find some `xnu.matchers` in [https://newosxbook.com/tools/disarm.html](https://newosxbook.com/tools/disarm.html) in the **`Matchers`** section. You can also create your own matchers.
+
+```bash
+# Go to /tmp/extracted where disarm extracted the filesets
+disarm -e filesets kernelcache.release.d23 # Always extract to /tmp/extracted
+cd /tmp/extracted
+JMATCHERS=xnu.matchers disarm --analyze kernel.rebuilt  # Note that xnu.matchers is actually a file with the matchers
 ```
 
 ### Download
+
+An **IPSW (iPhone/iPad Software)** is Apple’s firmware package format used for device restores, updates, and full firmware bundles. Among other things, it contains the **kernelcache**.
 
 - [**KernelDebugKit Github**](https://github.com/dortania/KdkSupportPkg/releases)
 
@@ -204,6 +237,7 @@ kextex_all kernelcache.release.iphone14.e
 # Check the extension for symbols
 nm -a binaries/com.apple.security.sandbox | wc -l
 ```
+
 
 ## Recent vulnerabilities & exploitation techniques
 

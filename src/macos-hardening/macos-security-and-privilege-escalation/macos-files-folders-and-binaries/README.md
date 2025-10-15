@@ -232,21 +232,38 @@ The extended attribute `com.apple.decmpfs` indicates that the file is stored enc
 
 This attr can be seen with `ls -lO` indicated as compressed because compressed files are also tagged with the flag `UF_COMPRESSED`. If a compressed file is removed this flag with `chflags nocompressed </path/to/file>`, the system won't know that the file was compressed and therefore it won't be able to decompress and access the data (it will think that it's actually empty).
 
-The tool afscexpand can be used to force decompress a dile.
+The tool afscexpand can be used to force decompress a file.
+
+
+### Interesting configuration locations (macOS)
+
+| Path / Location | Purpose / What it configures | Security / Attack-Potential |
+|---|---|---|
+| `/System/Library/FeatureFlags/Domain/` | Stores Apple’s feature-flag plist files controlling optional or experimental behaviors in system daemons / frameworks | If an attacker can bypass SIP or gain privilege, tampering these could enable hidden code paths or disable safeguards |
+| `/System/Library/CoreServices/systemVersion.plist` | Holds macOS version metadata (ProductVersion, BuildVersion) used by apps / installers to gate behavior | Modification may trick apps or installers into accepting unsupported OS versions or unlocking features |
+| `/Library/Preferences/com.apple.*.plist` & `~/Library/Preferences/*.plist` | Application / system-wide preferences | If writable, attackers can inject settings to steer app behavior, disable protections, or cause misconfiguration |
+| `/Library/LaunchDaemons/` / `/Library/LaunchAgents/` | Plist definitions for background daemons and agents | Malicious plist insertion or manipulation (if permissions allow) enables persistence or privilege escalations |
+| `/etc/hosts` | Hostname ↔ IP mappings used by the system DNS resolver | Redirecting domain names, intercepting traffic, spoofing services under local control |
+| `/etc/sudoers` | Defines who can run commands with `sudo` and under what conditions | A corrupted sudoers file can grant root or improper privileges to attacker accounts |
+| `/private/var/db/dslocal/nodes/Default/users/` | Local user account definition plists | Tampering allows creation or modification of user accounts, password hashes, or user metadata |
+| `/System/Library/Extensions/` / `/Library/Extensions/` | Kernel extensions / drivers | Installing or modifying kexts can lead to kernel-level control; heavily protected by SIP / signature policies |
+| `/private/var/db/SystemPolicyConfiguration/` | Stores configuration for system policy enforcement (e.g. Gatekeeper, notarization) | Tampering these may allow circumvention of policy checks or trust rules |
+| `/usr/libexec/ssh-keysign`, `/etc/ssh/ssh_config`, `/etc/ssh/sshd_config` | SSH helper binaries and config files | Misconfiguration leads to weak SSH security, unauthorized access, or insecure algorithms |
+| `/System/Library/Sandbox/Profiles` | System sandbox profiles (SBPL) used to restrict process actions | Replacing or altering profiles can open sandbox escape vectors or weaken containment |
+
+> **Note**: Many of these paths lie under SIP-protected directories (e.g. `/System`) and are protected against writes unless SIP is disabled or bypassed.  
+
 
 ## **Universal binaries &** Mach-o Format
 
 Mac OS binaries usually are compiled as **universal binaries**. A **universal binary** can **support multiple architectures in the same file**.
 
-
 {{#ref}}
 universal-binaries-and-mach-o-format.md
 {{#endref}}
 
-## macOS Process Memory
 
 ## macOS memory dumping
-
 
 {{#ref}}
 macos-memory-dumping.md
