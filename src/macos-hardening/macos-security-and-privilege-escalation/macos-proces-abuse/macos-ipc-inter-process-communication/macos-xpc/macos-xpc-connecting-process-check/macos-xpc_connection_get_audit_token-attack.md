@@ -1,24 +1,25 @@
-# macOS xpc_connection_get_audit_token Attack
+# macOS xpc_connection_get_audit_token 공격
 
 {{#include ../../../../../../banners/hacktricks-training.md}}
 
-**자세한 정보는 원본 게시물을 확인하세요:** [**https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/**](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/). 다음은 요약입니다:
+**추가 정보는 원문 글을 확인하세요:** [**https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/**](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/).  
+요약:
 
-## Mach 메시지 기본 정보
+## Mach Messages 기본 정보
 
-Mach 메시지가 무엇인지 모른다면 이 페이지를 확인하세요:
+If you don't know what Mach Messages are start checking this page:
 
 
 {{#ref}}
 ../../
 {{#endref}}
 
-현재 기억해야 할 것은 ([여기에서 정의](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing)):\
-Mach 메시지는 _mach 포트_를 통해 전송되며, 이는 mach 커널에 내장된 **단일 수신자, 다중 송신자 통신** 채널입니다. **여러 프로세스가** mach 포트에 메시지를 보낼 수 있지만, 언제든지 **단일 프로세스만 읽을 수 있습니다**. 파일 설명자 및 소켓과 마찬가지로, mach 포트는 커널에 의해 할당되고 관리되며, 프로세스는 사용하고자 하는 mach 포트를 커널에 알리기 위해 정수만을 봅니다.
+우선 기억할 점 ([definition from here](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing)):  
+Mach messages는 _mach port_를 통해 전송되며, 이는 mach 커널에 내장된 **단일 수신자, 다중 송신자 통신** 채널입니다. **여러 프로세스가** mach 포트로 메시지를 보낼 수 있지만, 언제나 **하나의 프로세스만** 해당 포트에서 읽을 수 있습니다. 파일 디스크립터나 소켓과 마찬가지로, mach 포트는 커널이 할당하고 관리하며 프로세스는 정수 하나만 보게 되고 이를 통해 커널에게 어떤 mach 포트를 사용할지 지정합니다.
 
 ## XPC 연결
 
-XPC 연결이 어떻게 설정되는지 모른다면 확인하세요:
+If you don't know how a XPC connection is established check:
 
 
 {{#ref}}
@@ -27,81 +28,81 @@ XPC 연결이 어떻게 설정되는지 모른다면 확인하세요:
 
 ## 취약점 요약
 
-당신이 알아야 할 흥미로운 점은 **XPC의 추상화는 일대일 연결**이지만, **다수의 송신자가 있을 수 있는 기술 위에 기반하고 있다는 것입니다.** 
+알아둘 중요한 점은 **XPC의 추상화는 일대일 연결(one-to-one connection)** 이지만, 그 기반이 되는 기술은 **다중 송신자를 가질 수 있다**는 것입니다. 그래서:
 
-- Mach 포트는 단일 수신자, **다중 송신자**입니다.
-- XPC 연결의 감사 토큰은 **가장 최근에 수신된 메시지에서 복사된 감사 토큰**입니다.
-- XPC 연결의 **감사 토큰**을 얻는 것은 많은 **보안 검사**에 중요합니다.
+- Mach ports는 단일 수신자, **다중 송신자**입니다.
+- XPC 연결의 audit token은 **가장 최근에 수신된 메시지에서 복사된** audit token입니다.
+- XPC 연결의 **audit token**을 얻는 것은 많은 **보안 검사**에 중요합니다.
 
-이전 상황이 유망하게 들리지만, 문제가 발생하지 않을 시나리오도 있습니다 ([여기에서](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing)):
+비록 위 상황이 문제를 일으킬 것처럼 보이지만, 몇몇 시나리오에서는 문제가 발생하지 않습니다 ([from here](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing)):
 
-- 감사 토큰은 종종 연결 수락 여부를 결정하기 위한 권한 확인에 사용됩니다. 이는 서비스 포트에 메시지를 사용하여 발생하므로, **아직 연결이 설정되지 않았습니다**. 이 포트에 대한 추가 메시지는 단순히 추가 연결 요청으로 처리됩니다. 따라서 연결 수락 전에 수행되는 **검사는 취약하지 않습니다** (이는 `-listener:shouldAcceptNewConnection:` 내에서 감사 토큰이 안전하다는 것을 의미합니다). 따라서 우리는 **특정 작업을 검증하는 XPC 연결을 찾고 있습니다**.
-- XPC 이벤트 핸들러는 동기적으로 처리됩니다. 이는 하나의 메시지에 대한 이벤트 핸들러가 다음 메시지에 대해 호출되기 전에 완료되어야 함을 의미하며, 동시 디스패치 큐에서도 마찬가지입니다. 따라서 **XPC 이벤트 핸들러 내에서 감사 토큰은 다른 일반(비응답!) 메시지에 의해 덮어씌워질 수 없습니다**.
+- Audit token은 종종 연결을 수락할지 결정하는 권한 확인에 사용됩니다. 이 검사는 서비스 포트에 메시지를 사용해 수행되므로 **아직 연결이 수립되지 않은 상태**입니다. 이 포트로 들어오는 추가 메시지들은 단지 추가 연결 요청으로 처리됩니다. 따라서 연결 수락 전에 이루어지는 **검사들은 취약하지 않습니다** (`-listener:shouldAcceptNewConnection:` 내부의 경우 audit token은 안전합니다). 우리는 따라서 **특정 동작을 검증하는 XPC 연결**을 찾고 있습니다.
+- XPC 이벤트 핸들러는 동기적으로 처리됩니다. 이는 한 메시지의 이벤트 핸들러가 완료되어야 다음 메시지에 대해 호출된다는 뜻이며, 동시성 dispatch 큐에서도 마찬가지입니다. 따라서 **XPC 이벤트 핸들러 내부에서는 audit token이 다른 정상(응답이 아닌) 메시지에 의해 덮어써질 수 없습니다.**
 
-이것이 악용될 수 있는 두 가지 방법이 있습니다:
+다음 두 가지 방법으로 악용 가능성이 있습니다:
 
 1. Variant1:
-- **악용** **서비스 A**와 **서비스 B**에 **연결**합니다.
-- 서비스 **B**는 사용자가 할 수 없는 **특권 기능**을 서비스 A에서 호출할 수 있습니다.
-- 서비스 **A**는 **`xpc_connection_get_audit_token`**을 호출하는데, 이때 **연결의 이벤트 핸들러 내에 있지 않습니다** **`dispatch_async`**에서.
-- 따라서 **다른** 메시지가 **감사 토큰을 덮어쓸 수 있습니다**. 왜냐하면 이벤트 핸들러 외부에서 비동기적으로 디스패치되고 있기 때문입니다.
-- 악용은 **서비스 B에 서비스 A에 대한 SEND 권한을 전달합니다**.
-- 따라서 svc **B**는 실제로 **서비스 A**에 **메시지**를 **전송**합니다.
-- **악용**은 **특권 작업을 호출하려고 시도합니다.** RC svc **A**는 이 **작업**의 권한을 **확인**하는 동안 **svc B가 감사 토큰을 덮어썼습니다** (악용이 특권 작업을 호출할 수 있는 접근을 제공합니다).
+- **Exploit**가 서비스 **A**와 서비스 **B**에 **연결**합니다.
+- 서비스 **B**는 사용자가 할 수 없는 **권한 있는 기능**을 서비스 A에 요청할 수 있습니다.
+- 서비스 **A**는 **이벤트 핸들러 내부가 아닌**, 예를 들어 **`dispatch_async`**에서 `xpc_connection_get_audit_token`을 호출합니다.
+- 따라서 다른 메시지가 비동기적으로 디스패치되는 동안 **Audit Token이 덮어써질 수 있습니다**.
+- 익스플로잇은 서비스 **A에 대한 SEND 권한**을 서비스 **B**에 전달합니다.
+- 따라서 svc **B**가 실제로 서비스 **A**에 **메시지를 보낼 것**입니다.
+- 익스플로잇은 권한이 필요한 동작을 호출하려 시도합니다. 서비스 **A**는 이 동작의 권한을 검사하는데, **svc B가 Audit token을 덮어썼다면**(익스플로잇이 B의 권한을 이용해) 익스플로잇이 권한 있는 동작을 실행할 수 있게 됩니다.
 2. Variant 2:
-- 서비스 **B**는 사용자가 할 수 없는 **특권 기능**을 서비스 A에서 호출할 수 있습니다.
-- 악용은 **서비스 A**와 연결되며, 서비스는 악용에게 특정 **응답**을 기대하는 **메시지**를 보냅니다.
-- 악용은 **서비스** B에 **그 응답 포트**를 전달하는 메시지를 보냅니다.
-- 서비스 **B**가 응답할 때, **서비스 A**에 메시지를 보내고, **악용**은 서비스 A에 다른 **메시지를 보내** 특권 기능에 도달하려고 시도하며, 서비스 B의 응답이 감사 토큰을 완벽한 순간에 덮어쓸 것이라고 기대합니다 (경쟁 조건).
+- 서비스 **B**가 사용자가 할 수 없는 **권한 있는 기능**을 서비스 A에 요청할 수 있습니다.
+- 익스플로잇은 **service A**에 연결하고, A는 특정 **reply 포트**에서 응답을 기대하는 메시지를 익스플로잇에게 보냅니다.
+- 익스플로잇은 그 **reply port**를 포함한 메시지를 서비스 **B**에 전송합니다.
+- 서비스 **B**가 응답을 보낼 때, 이 메시지는 **service A로 전송**되고, 동시에 익스플로잇은 서비스 **A**에 권한 있는 기능을 호출하는 다른 메시지를 보내어 응답이 정확한 순간에 Audit token을 덮어쓰도록 시도합니다(경쟁 상태).
 
-## Variant 1: 이벤트 핸들러 외부에서 xpc_connection_get_audit_token 호출하기 <a href="#variant-1-calling-xpc_connection_get_audit_token-outside-of-an-event-handler" id="variant-1-calling-xpc_connection_get_audit_token-outside-of-an-event-handler"></a>
+## Variant 1: 이벤트 핸들러 외부에서 xpc_connection_get_audit_token 호출 <a href="#variant-1-calling-xpc_connection_get_audit_token-outside-of-an-event-handler" id="variant-1-calling-xpc_connection_get_audit_token-outside-of-an-event-handler"></a>
 
 시나리오:
 
-- 두 개의 mach 서비스 **`A`**와 **`B`**에 연결할 수 있습니다 (샌드박스 프로필 및 연결 수락 전 권한 확인에 따라).
-- _**A**_는 **`B`**가 전달할 수 있는 특정 작업에 대한 **권한 확인**을 가져야 합니다 (하지만 우리의 앱은 할 수 없습니다).
-- 예를 들어, B가 일부 **권한**을 가지고 있거나 **root**로 실행되고 있다면, A에게 특권 작업을 수행하도록 요청할 수 있습니다.
-- 이 권한 확인을 위해, **`A`**는 비동기적으로 감사 토큰을 얻습니다. 예를 들어, **`dispatch_async`**에서 `xpc_connection_get_audit_token`을 호출하여.
+- 샌드박스 프로필 및 연결 수락 전의 권한 검사에 기반해 우리가 둘 다 연결할 수 있는 두 개의 mach 서비스 **`A`**와 **`B`**.
+- _**A**_는 **`B`가 통과시킬 수 있는**, 그러나 우리의 앱은 통과시킬 수 없는 특정 동작에 대해 **권한 검사**를 해야 합니다.
+- 예를 들어, B가 일부 **entitlements**을 갖고 있거나 **root**로 실행 중이라면 A에 권한 있는 동작을 요청할 수 있습니다.
+- 이 권한 검사에서 **`A`**는 비동기적으로 audit token을 얻습니다(예: **`dispatch_async`**에서 `xpc_connection_get_audit_token`을 호출함).
 
 > [!CAUTION]
-> 이 경우 공격자는 **경쟁 조건**을 유발하여 **A에게 작업을 수행하도록 요청하는** 악용을 여러 번 발생시킬 수 있습니다. 동시에 **B가 `A`에 메시지를 보내도록 합니다**. RC가 **성공적일 경우**, **B의 감사 토큰**이 메모리에 복사되며, 우리의 **악용** 요청이 A에 의해 **처리되는 동안** 특권 작업에 대한 접근을 제공합니다.
+> 이 경우 공격자는 **Race Condition**을 유발할 수 있으며, **익스플로잇**은 **A에 여러 번 동작 수행을 요청**하면서 동시에 **B가 `A`로 메시지를 보내도록** 유도할 수 있습니다. RC가 **성공하면**, 요청을 처리하는 동안 메모리에 **B의 audit token이 복사되어** 들어오게 되어, 익스플로잇은 **B만 요청할 수 있는 권한 있는 동작에 접근**할 수 있게 됩니다.
 
-이 사건은 **`A`**가 `smd`이고 **`B`**가 `diagnosticd`일 때 발생했습니다. [`SMJobBless`](https://developer.apple.com/documentation/servicemanagement/1431078-smjobbless?language=objc) 함수는 새로운 특권 헬퍼 도구를 설치하는 데 사용될 수 있습니다 (as **root**). **root로 실행되는 프로세스가** **smd**에 연락하면, 다른 검사는 수행되지 않습니다.
+이 사례에서는 **`A`**가 `smd`, **`B`**가 `diagnosticd`였습니다. smb의 함수 [`SMJobBless`](https://developer.apple.com/documentation/servicemanagement/1431078-smjobbless?language=objc)는 새로운 권한 상승 helper tool(루트로 실행)을 설치하는 데 사용될 수 있습니다. 만약 **root로 실행 중인 프로세스가** `smd`에 연락하면 다른 검사들이 수행되지 않을 수 있습니다.
 
-따라서 서비스 **B**는 **`diagnosticd`**입니다. 이는 **root**로 실행되며 프로세스를 **모니터링**하는 데 사용될 수 있습니다. 모니터링이 시작되면, 초당 **여러 메시지를 전송**합니다.
+따라서 서비스 **B**는 **root**로 실행되어 프로세스를 **모니터링**할 수 있는 `diagnosticd`이며, 모니터링이 시작되면 초당 여러 개의 메시지를 보낼 수 있습니다.
 
-공격을 수행하려면:
+공격 수행 절차:
 
-1. 표준 XPC 프로토콜을 사용하여 `smd`라는 서비스에 **연결**을 시작합니다.
-2. `diagnosticd`에 대한 두 번째 **연결**을 형성합니다. 일반적인 절차와는 달리, 두 개의 새로운 mach 포트를 생성하고 전송하는 대신, 클라이언트 포트 전송 권한이 `smd` 연결과 관련된 **전송 권한**의 복제로 대체됩니다.
-3. 그 결과, XPC 메시지는 `diagnosticd`로 디스패치될 수 있지만, `diagnosticd`의 응답은 `smd`로 리다이렉트됩니다. `smd`에게는 사용자와 `diagnosticd`의 메시지가 동일한 연결에서 발생하는 것처럼 보입니다.
+1. 표준 XPC 프로토콜을 사용해 `smd`라는 서비스에 **연결**을 시작합니다.
+2. 두 번째로 `diagnosticd`에 **연결**을 형성합니다. 일반적인 절차와 달리, 클라이언트 포트의 send 권한을 새 mach 포트를 생성하여 보내는 대신 `smd` 연결에 연관된 **send right**의 복제로 대체합니다.
+3. 결과적으로 XPC 메시지는 `diagnosticd`로 디스패치될 수 있지만, `diagnosticd`의 응답은 `smd`로 리다이렉트됩니다. `smd` 입장에서는 사용자와 `diagnosticd` 양쪽에서 온 메시지가 같은 연결에서 온 것처럼 보입니다.
 
-![악용 프로세스를 나타내는 이미지](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/exploit.png)
+![Image depicting the exploit process](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/exploit.png)
 
-4. 다음 단계는 `diagnosticd`에게 선택한 프로세스(사용자의 프로세스일 수 있음)를 모니터링하도록 지시하는 것입니다. 동시에, `smd`에 대한 1004 메시지의 홍수를 보냅니다. 여기서 목표는 특권이 있는 도구를 설치하는 것입니다.
-5. 이 작업은 `handle_bless` 함수 내에서 경쟁 조건을 유발합니다. 타이밍이 중요합니다: `xpc_connection_get_pid` 함수 호출은 사용자의 프로세스의 PID를 반환해야 합니다 (특권 도구가 사용자의 앱 번들에 있기 때문입니다). 그러나 `xpc_connection_get_audit_token` 함수는 특히 `connection_is_authorized` 서브루틴 내에서 `diagnosticd`의 감사 토큰을 참조해야 합니다.
+4. 다음으로 `diagnosticd`에게 선택한 프로세스(예: 사용자의 프로세스) 모니터링을 시작하도록 지시합니다. 동시에 `smd`로 1004 형식의 일상적 메시지를 대량으로 보냅니다. 목적은 권한이 상승된 툴을 설치하는 것입니다.
+5. 이 동작은 `handle_bless` 함수 내에서 경쟁 상태를 촉발합니다. 타이밍이 중요합니다: `xpc_connection_get_pid` 호출은 사용자의 프로세스 PID를 반환해야 합니다(권한 있는 툴이 사용자의 앱 번들에 위치하기 때문에). 그러나 `connection_is_authorized` 서브루틴 내의 `xpc_connection_get_audit_token` 호출은 `diagnosticd`의 audit token을 참조해야 합니다.
 
-## Variant 2: 응답 전달
+## Variant 2: reply forwarding
 
-XPC (프로세스 간 통신) 환경에서 이벤트 핸들러는 동시 실행되지 않지만, 응답 메시지 처리에는 고유한 동작이 있습니다. 구체적으로, 응답을 기대하는 메시지를 보내는 두 가지 방법이 있습니다:
+XPC(Cross-Process Communication) 환경에서 이벤트 핸들러는 동시에 실행되지는 않지만, reply 메시지의 처리에는 고유한 동작이 있습니다. 구체적으로, 응답을 기대하는 메시지를 보내는 방법에는 두 가지가 있습니다:
 
-1. **`xpc_connection_send_message_with_reply`**: 여기서 XPC 메시지는 지정된 큐에서 수신되고 처리됩니다.
-2. **`xpc_connection_send_message_with_reply_sync`**: 반대로, 이 방법에서는 XPC 메시지가 현재 디스패치 큐에서 수신되고 처리됩니다.
+1. **`xpc_connection_send_message_with_reply`**: 이 경우 XPC 메시지는 지정된 큐에서 수신되고 처리됩니다.
+2. **`xpc_connection_send_message_with_reply_sync`**: 반대로 이 방법에서는 XPC 메시지가 현재의 dispatch 큐에서 수신되고 처리됩니다.
 
-이 구분은 **응답 패킷이 XPC 이벤트 핸들러의 실행과 동시에 구문 분석될 가능성을 허용하기 때문에 중요합니다**. 주목할 점은 `_xpc_connection_set_creds`가 감사 토큰의 부분 덮어쓰기를 방지하기 위해 잠금을 구현하지만, 전체 연결 객체에 대한 이 보호를 확장하지는 않는다는 것입니다. 결과적으로, 패킷 구문 분석과 이벤트 핸들러 실행 사이의 간격 동안 감사 토큰이 교체될 수 있는 취약점이 발생합니다.
+이 차이는 reply 패킷이 XPC 이벤트 핸들러의 실행과 동시에 파싱될 가능성을 제공하기 때문에 중요합니다. 주목할 점은 `_xpc_connection_set_creds`가 audit token의 부분적 덮어쓰기를 방지하기 위해 락을 구현하긴 하지만, 이는 연결 객체 전체에 대한 보호를 확장하지는 않습니다. 결과적으로 패킷 파싱과 그 이벤트 핸들러 실행 사이의 간격 동안 audit token이 교체될 수 있는 취약점이 생깁니다.
 
-이 취약점을 악용하기 위해서는 다음과 같은 설정이 필요합니다:
+이 취약점을 악용하려면 다음과 같은 준비가 필요합니다:
 
-- **`A`**와 **`B`**라는 두 개의 mach 서비스, 둘 다 연결을 설정할 수 있습니다.
-- 서비스 **`A`**는 **`B`**만 수행할 수 있는 특정 작업에 대한 권한 확인을 포함해야 합니다 (사용자의 애플리케이션은 수행할 수 없습니다).
-- 서비스 **`A`**는 응답을 기대하는 메시지를 보내야 합니다.
-- 사용자는 **`B`**에 응답할 메시지를 보낼 수 있습니다.
+- 연결할 수 있는 두 개의 mach 서비스, 즉 **`A`**와 **`B`**.
+- 서비스 **`A`**는 오직 **`B`**만 수행할 수 있는(사용자 앱은 할 수 없는) 특정 동작에 대한 권한 검사를 포함해야 합니다.
+- 서비스 **`A`**는 응답을 기대하는 메시지를 전송해야 합니다.
+- 사용자는 응답할 수 있는 메시지를 **`B`**에게 보낼 수 있어야 합니다.
 
-악용 과정은 다음 단계로 진행됩니다:
+악용 절차:
 
 1. 서비스 **`A`**가 응답을 기대하는 메시지를 보낼 때까지 기다립니다.
-2. **`A`**에 직접 응답하는 대신, 응답 포트를 탈취하여 서비스 **`B`**에 메시지를 보냅니다.
-3. 이후, 금지된 작업과 관련된 메시지를 디스패치하며, 이 메시지가 **`B`**의 응답과 동시에 처리될 것으로 기대합니다.
+2. 응답을 직접 **A에 보내는 대신**, reply 포트를 가로채 서비스 **B**에 메시지를 보냅니다.
+3. 이후 금지된 동작을 포함한 메시지를 전송하여, 이 메시지가 **B의 응답과 동시에 처리되어** 응답이 audit token을 덮어쓰기를 기대합니다.
 
 아래는 설명된 공격 시나리오의 시각적 표현입니다:
 
@@ -109,19 +110,69 @@ XPC (프로세스 간 통신) 환경에서 이벤트 핸들러는 동시 실행�
 
 <figure><img src="../../../../../../images/image (33).png" alt="https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/variant2.png" width="563"><figcaption></figcaption></figure>
 
-## 발견 문제
+## 발견의 어려움
 
-- **인스턴스 찾기 어려움**: `xpc_connection_get_audit_token` 사용 인스턴스를 정적 및 동적으로 찾는 것이 어려웠습니다.
-- **방법론**: Frida를 사용하여 `xpc_connection_get_audit_token` 함수를 후킹하고, 이벤트 핸들러에서 발생하지 않는 호출을 필터링했습니다. 그러나 이 방법은 후킹된 프로세스에 한정되었고, 활성 사용이 필요했습니다.
-- **분석 도구**: IDA/Ghidra와 같은 도구를 사용하여 접근 가능한 mach 서비스를 검사했지만, 이 과정은 시간이 많이 소요되었고 dyld 공유 캐시와 관련된 호출로 인해 복잡했습니다.
-- **스크립팅 제한**: `dispatch_async` 블록에서 `xpc_connection_get_audit_token` 호출을 분석하기 위한 스크립팅 시도가 블록 구문 분석 및 dyld 공유 캐시와의 상호작용의 복잡성으로 인해 방해받았습니다.
+- **인스턴스 찾기의 어려움**: `xpc_connection_get_audit_token` 사용 사례를 정적/동적 모두에서 찾는 것은 어려웠습니다.
+- **방법론**: Frida를 사용해 `xpc_connection_get_audit_token`을 후킹하고 이벤트 핸들러에서 기원하지 않은 호출을 필터링했습니다. 그러나 이 방법은 후킹된 프로세스에만 적용되며 프로세스가 활성 상태일 때만 동작했습니다.
+- **분석 도구**: IDA/Ghidra 같은 도구로 접근 가능한 mach 서비스들을 조사했지만, dyld shared cache와 연관된 호출들 때문에 시간이 많이 걸리고 복잡했습니다.
+- **스크립팅 한계**: `dispatch_async` 블록에서 호출되는 `xpc_connection_get_audit_token`을 찾기 위해 분석을 스크립팅하려 했으나, 블록 파싱과 dyld shared cache 상호작용의 복잡성으로 인해 어려움이 있었습니다.
 
 ## 수정 사항 <a href="#the-fix" id="the-fix"></a>
 
-- **보고된 문제**: `smd` 내에서 발견된 일반 및 특정 문제에 대한 보고서를 Apple에 제출했습니다.
-- **Apple의 응답**: Apple은 `smd`에서 `xpc_connection_get_audit_token`을 `xpc_dictionary_get_audit_token`으로 대체하여 문제를 해결했습니다.
-- **수정의 성격**: `xpc_dictionary_get_audit_token` 함수는 수신된 XPC 메시지와 연결된 mach 메시지에서 직접 감사 토큰을 검색하므로 안전한 것으로 간주됩니다. 그러나 이는 `xpc_connection_get_audit_token`과 유사하게 공개 API의 일부가 아닙니다.
-- **더 넓은 수정의 부재**: Apple이 연결의 저장된 감사 토큰과 일치하지 않는 메시지를 폐기하는 것과 같은 보다 포괄적인 수정을 구현하지 않은 이유는 불분명합니다. 특정 시나리오(예: `setuid` 사용)에서 합법적인 감사 토큰 변경 가능성이 요인이 될 수 있습니다.
-- **현재 상태**: 이 문제는 iOS 17 및 macOS 14에서 여전히 존재하며, 이를 식별하고 이해하려는 사람들에게 도전 과제가 되고 있습니다.
+- **보고된 문제**: `smd` 내에서 발견된 일반적 및 구체적 문제들이 Apple에 보고되었습니다.
+- **Apple의 대응**: Apple은 `smd`에서 `xpc_connection_get_audit_token`을 `xpc_dictionary_get_audit_token`으로 대체하는 방식으로 문제를 수정했습니다.
+- **수정의 성격**: `xpc_dictionary_get_audit_token` 함수는 수신된 XPC 메시지에 연결된 mach 메시지로부터 audit token을 직접 가져오므로 안전하다고 간주됩니다. 다만, 이 함수는 `xpc_connection_get_audit_token`처럼 공개 API의 일부는 아닙니다.
+- **포괄적 수정의 부재**: Apple이 연결의 저장된 audit token과 일치하지 않는 메시지를 폐기하는 등 더 광범위한 수정을 왜 적용하지 않았는지는 불명확합니다. 일부 시나리오(예: `setuid` 사용)에서는 합법적으로 audit token이 변경될 가능성이 있어 고려 요인일 수 있습니다.
+- **현재 상태**: 이 문제는 iOS 17 및 macOS 14에 여전히 존재하며 이를 식별하고 이해하려는 사람들에게 난제로 남아 있습니다.
+
+## 실제로 취약한 코드 경로 찾기 (2024–2025)
+
+XPC 서비스 감사를 할 때는 메시지의 이벤트 핸들러 외부에서 또는 응답 처리와 동시에 수행되는 권한 검사에 주목하세요.
+
+정적 트리아지 힌트:
+- `xpc_connection_get_audit_token` 호출을 찾아보되, 이 호출이 `dispatch_async`/`dispatch_after`나 메시지 핸들러 외부에서 실행되는 다른 워커 큐로 큐잉된 블록에서 도달 가능한지 검사하세요.
+- 연결당 상태와 메시지당 상태를 혼합하는 권한 헬퍼를 찾아보세요(예: `xpc_connection_get_pid`로 PID를 가져오지만 `xpc_connection_get_audit_token`에서 audit token을 가져오는 경우).
+- NSXPC 코드에서는 검사들이 `-listener:shouldAcceptNewConnection:`에서 수행되는지, 또는 메시지당 검사가 필요한 경우 구현이 per-message audit token을 사용하고 있는지(예: 하위 레벨 코드에서 메시지의 dictionary를 통해 `xpc_dictionary_get_audit_token`을 사용하는지) 확인하세요.
+
+동적 트리아지 팁:
+- `xpc_connection_get_audit_token`을 후킹하고 사용자 스택에 이벤트 전달 경로(예: `_xpc_connection_mach_event`)가 포함되지 않은 호출을 표시하세요. 예시 Frida 후킹:
+```javascript
+Interceptor.attach(Module.getExportByName(null, 'xpc_connection_get_audit_token'), {
+onEnter(args) {
+const bt = Thread.backtrace(this.context, Backtracer.ACCURATE)
+.map(DebugSymbol.fromAddress).join('\n');
+if (!bt.includes('_xpc_connection_mach_event')) {
+console.log('[!] xpc_connection_get_audit_token outside handler\n' + bt);
+}
+}
+});
+```
+참고:
+- macOS에서는 보호된/Apple 바이너리를 계측하려면 SIP를 비활성화하거나 개발 환경이 필요할 수 있습니다; 자체 빌드나 userland 서비스에서 테스트하는 것을 권장합니다.
+- reply-forwarding races (Variant 2)의 경우, `xpc_connection_send_message_with_reply`와 일반 요청의 타이밍을 퍼징하여 응답 패킷의 동시 파싱을 모니터링하고 권한 확인 시 사용되는 유효한 audit token이 조작될 수 있는지 확인하세요.
+
+## 필요할 가능성이 높은 익스플로잇 프리미티브
+
+- Multi-sender setup (Variant 1): A와 B에 대한 연결을 생성합니다; A의 client port에 대한 send right를 복제해서 B의 client port로 사용하면 B의 replies가 A로 전달됩니다.
+```c
+// Duplicate a SEND right you already hold
+mach_port_t dup;
+mach_port_insert_right(mach_task_self(), a_client, a_client, MACH_MSG_TYPE_MAKE_SEND);
+dup = a_client; // use `dup` when crafting B’s connect packet instead of a fresh client port
+```
+- Reply hijack (Variant 2): A의 pending request (reply port)에서 send-once right를 가로채고, 그 reply port를 사용해 B에 조작된 메시지를 보내면 B의 응답이 당신의 권한 있는 요청이 파싱되는 동안 A로 도착하게 된다.
+
+이들은 XPC bootstrap 및 메시지 포맷에 대해 저수준 mach 메시지 조작을 필요로 한다; 정확한 패킷 레이아웃과 플래그는 이 섹션의 mach/XPC primer 페이지를 검토하라.
+
+## 유용한 도구
+
+- XPC sniffing/dynamic inspection: gxpc (open-source XPC sniffer)는 연결을 열거하고 트래픽을 관찰해 multi-sender 설정과 타이밍을 검증하는 데 도움을 준다. 예: `gxpc -p <PID> --whitelist <service-name>`.
+- Classic dyld interposing for libxpc: libxpc에 대해 `xpc_connection_send_message*` 및 `xpc_connection_get_audit_token`에 interpose하여 블랙박스 테스트 중 호출 지점과 스택을 로깅하라.
+
+## 참고자료
+
+- Sector 7 – Don’t Talk All at Once! Elevating Privileges on macOS by Audit Token Spoofing: <https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/>
+- Apple – macOS Ventura 13.4의 보안 내용에 관하여 (CVE‑2023‑32405): <https://support.apple.com/en-us/106333>
+
 
 {{#include ../../../../../../banners/hacktricks-training.md}}
