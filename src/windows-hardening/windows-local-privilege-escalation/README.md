@@ -499,6 +499,13 @@ Example: "Windows Help and Support" (Windows + F1), search for "command prompt",
 
 ## Services
 
+Service Triggers let Windows start a service when certain conditions occur (named pipe/RPC endpoint activity, ETW events, IP availability, device arrival, GPO refresh, etc.). Even without SERVICE_START rights you can often start privileged services by firing their triggers. See enumeration and activation techniques here:
+
+-
+{{#ref}}
+service-triggers.md
+{{#endref}}
+
 Get a list of services:
 
 ```bash
