@@ -2,7 +2,8 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-### Git repos ve dosya sisteminde gizli bilgileri bulmak için araçlar
+
+### Tools to find secrets in git repos and file system
 
 - [https://github.com/dxa4481/truffleHog](https://github.com/dxa4481/truffleHog)
 - [https://github.com/gitleaks/gitleaks](https://github.com/gitleaks/gitleaks)
@@ -11,13 +12,71 @@
 - [https://github.com/JaimePolop/RExpository](https://github.com/JaimePolop/RExpository)
 - [https://github.com/Yelp/detect-secrets](https://github.com/Yelp/detect-secrets)
 - [https://github.com/hisxo/gitGraber](https://github.com/hisxo/gitGraber)
-- [https://github.com/eth0izzle/shhgit](https://github.com/eth0izzle/shhgit)
+- https://github.com/eth0izzle/shhgit (unmaintained)
 - [https://github.com/techgaun/github-dorks](https://github.com/techgaun/github-dorks)
-- [https://github.com/michenriksen/gitrob](https://github.com/michenriksen/gitrob)
-- [https://github.com/anshumanbh/git-all-secrets](https://github.com/anshumanbh/git-all-secrets)
+- https://github.com/michenriksen/gitrob (archived)
+- https://github.com/anshumanbh/git-all-secrets (archived)
 - [https://github.com/awslabs/git-secrets](https://github.com/awslabs/git-secrets)
 - [https://github.com/kootenpv/gittyleaks](https://github.com/kootenpv/gittyleaks)
 - [https://github.com/obheda12/GitDorker](https://github.com/obheda12/GitDorker)
+
+> Notlar
+> - TruffleHog v3 birçok kimlik bilgisini canlı doğrulayabilir ve GitHub orgs, issues/PRs, gists ve wikis üzerinde tarama yapabilir. Örnek: `trufflehog github --org <ORG> --results=verified`.
+> - Gitleaks v8 git history, dizinler ve arşivler üzerinde taramayı destekler: `gitleaks detect -v --source .` veya `gitleaks detect --source <repo> --log-opts="--all"`.
+> - Nosey Parker, küratör kurallarla yüksek verimli taramaya odaklanır ve triage için bir Explorer UI sunar. Örnek: `noseyparker scan --datastore np.db <path|repo>` ardından `noseyparker report --datastore np.db`.
+> - ggshield (GitGuardian CLI) pre-commit/CI hooks ve Docker image taraması sağlar: `ggshield secret scan repo <path-or-url>`.
+
+### Where secrets commonly leak in GitHub
+
+- Repository dosyaları, varsayılan ve varsayılan olmayan branch'larda (UI'da `repo:owner/name@branch` ile arayın).
+- Tam git history ve diğer branch'lar/tag'ler (gitleaks/trufflehog ile clone edip tara; GitHub araması indekslenmiş içeriğe odaklanır).
+- Issues, pull requests, yorumlar ve açıklamalar (TruffleHog GitHub source bu alanları `--issue-comments`, `--pr-comments` gibi flag'ler ile destekler).
+- Actions logları ve public repository'lerin artifacts'leri (maskeleme best-effort'tur; logları/artifact'leri görünürse inceleyin).
+- Wikiler ve release asset'leri.
+- Gists (tooling veya UI ile arayın; bazı araçlar gists'i dahil edebilir).
+
+> Uyarılar
+> - GitHub’un REST code search API'si legacy'dir ve regex'i desteklemez; regex aramaları için Web UI'ı tercih edin. gh CLI legacy API'yi kullanır.
+> - Yalnızca belirli bir boyutun altındaki dosyalar arama için indekslenir. Kapsamlı olmak için clone edip yerelde bir secrets scanner ile tara.
+
+### Programmatic org-wide scanning
+
+- TruffleHog (GitHub source):
+```bash
+export GITHUB_TOKEN=<token>
+trufflehog github --org Target --results=verified \
+--include-wikis --issue-comments --pr-comments --gist-comments
+```
+- Gitleaks ile tüm org repolarında (shallow clone yapıp tara):
+```bash
+gh repo list Target --limit 1000 --json nameWithOwner,url \
+| jq -r '.[].url' | while read -r r; do
+tmp=$(mktemp -d); git clone --depth 1 "$r" "$tmp" && \
+gitleaks detect --source "$tmp" -v || true; rm -rf "$tmp";
+done
+```
+- Mono checkout üzerinde meraklı Parker:
+```bash
+# after cloning many repos beneath ./org
+noseyparker scan --datastore np.db org/ && noseyparker report --datastore np.db
+```
+- ggshield hızlı taramalar:
+```bash
+# current working tree
+ggshield secret scan path -r .
+# full git history of a repo
+ggshield secret scan repo <path-or-url>
+```
+> İpucu: git geçmişi için, kaldırılmış secrets'leri yakalamak üzere `git log -p --all` çıktısını ayrıştıran tarayıcıları tercih edin.
+
+### Modern tokenler için güncellenmiş dorks
+
+- GitHub tokens: `ghp_` `gho_` `ghu_` `ghs_` `ghr_` `github_pat_`
+- Slack tokens: `xoxb-` `xoxp-` `xoxa-` `xoxs-` `xoxc-` `xoxe-`
+- Bulut ve genel:
+- `AWS_ACCESS_KEY_ID` `AWS_SECRET_ACCESS_KEY` `aws_session_token`
+- `GOOGLE_API_KEY` `AZURE_TENANT_ID` `AZURE_CLIENT_SECRET`
+- `OPENAI_API_KEY` `ANTHROPIC_API_KEY`
 
 ### **Dorks**
 ```bash
@@ -301,4 +360,15 @@ GCP SECRET
 AWS SECRET
 "private" extension:pgp
 ```
+{{#ref}}
+wide-source-code-search.md
+{{#endref}}
+
+
+
+
+## Referanslar
+
+- Herkese açık depolardan sırları uzak tutma (GitHub Blog, 29 Şub 2024): https://github.blog/news-insights/product-news/keeping-secrets-out-of-public-repositories/
+- TruffleHog v3 – Bul, doğrula ve analiz et leaked credentials: https://github.com/trufflesecurity/trufflehog
 {{#include ../../banners/hacktricks-training.md}}
