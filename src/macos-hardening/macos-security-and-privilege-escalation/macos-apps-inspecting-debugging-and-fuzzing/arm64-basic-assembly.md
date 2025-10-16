@@ -2,100 +2,106 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
+
 ## **Exception Levels - EL (ARM64v8)**
 
 En la arquitectura ARMv8, los niveles de ejecución, conocidos como Exception Levels (ELs), definen el nivel de privilegio y las capacidades del entorno de ejecución. Hay cuatro exception levels, que van desde EL0 hasta EL3, cada uno con un propósito diferente:
 
 1. **EL0 - User Mode**:
-- Este es el nivel menos privilegiado y se usa para ejecutar código de aplicaciones normales.
+- Este es el nivel con menos privilegios y se usa para ejecutar código de aplicaciones normales.
 - Las aplicaciones que se ejecutan en EL0 están aisladas entre sí y del software del sistema, mejorando la seguridad y la estabilidad.
 2. **EL1 - Operating System Kernel Mode**:
-- La mayoría de los kernels de los sistemas operativos se ejecutan en este nivel.
-- EL1 tiene más privilegios que EL0 y puede acceder a los recursos del sistema, pero con algunas restricciones para asegurar la integridad del sistema.
+- La mayoría de los kernels de sistemas operativos se ejecutan en este nivel.
+- EL1 tiene más privilegios que EL0 y puede acceder a recursos del sistema, pero con algunas restricciones para garantizar la integridad del sistema. Se pasa de EL0 a EL1 con la instrucción SVC.
 3. **EL2 - Hypervisor Mode**:
-- Este nivel se usa para virtualización. Un hypervisor que se ejecuta en EL2 puede gestionar múltiples sistemas operativos (cada uno en su propio EL1) ejecutándose en el mismo hardware físico.
-- EL2 proporciona características para el aislamiento y control de los entornos virtualizados.
+- Este nivel se utiliza para virtualización. Un hypervisor que se ejecuta en EL2 puede gestionar múltiples sistemas operativos (cada uno en su propio EL1) ejecutándose en el mismo hardware físico.
+- EL2 proporciona funcionalidades para el aislamiento y control de los entornos virtualizados.
+- Así, aplicaciones de máquinas virtuales como Parallels pueden usar el `hypervisor.framework` para interactuar con EL2 y ejecutar máquinas virtuales sin necesitar extensiones de kernel.
+- Para pasar de EL1 a EL2 se usa la instrucción `HVC`.
 4. **EL3 - Secure Monitor Mode**:
-- Este es el nivel más privilegiado y a menudo se usa para secure boot y entornos de ejecución de confianza.
-- EL3 puede gestionar y controlar los accesos entre estados secure y non-secure (como secure boot, trusted OS, etc.).
+- Este es el nivel más privilegiado y se usa a menudo para arranque seguro y entornos de ejecución confiables.
+- EL3 puede gestionar y controlar accesos entre estados seguros y no seguros (como secure boot, trusted OS, etc.).
+- Se usó para KPP (Kernel Patch Protection) en macOS, pero ya no se utiliza.
+- EL3 ya no es usado por Apple.
+- La transición a EL3 se realiza típicamente usando la instrucción `SMC` (Secure Monitor Call).
 
-El uso de estos niveles permite una forma estructurada y segura de gestionar distintos aspectos del sistema, desde las aplicaciones de usuario hasta el software del sistema con mayores privilegios. El enfoque de ARMv8 sobre los niveles de privilegio ayuda a aislar efectivamente los distintos componentes del sistema, mejorando así la seguridad y la robustez del sistema.
+El uso de estos niveles permite una forma estructurada y segura de gestionar diferentes aspectos del sistema, desde aplicaciones de usuario hasta el software del sistema con más privilegios. El enfoque de ARMv8 en los niveles de privilegio ayuda a aislar eficazmente los distintos componentes del sistema, mejorando así la seguridad y la robustez del sistema.
 
 ## **Registers (ARM64v8)**
 
 ARM64 tiene **31 registros de propósito general**, etiquetados `x0` hasta `x30`. Cada uno puede almacenar un valor de **64 bits** (8 bytes). Para operaciones que requieren solo valores de 32 bits, los mismos registros pueden accederse en modo de 32 bits usando los nombres `w0` hasta `w30`.
 
 1. **`x0`** a **`x7`** - Normalmente se usan como registros temporales y para pasar parámetros a subrutinas.
-- **`x0`** también transporta los datos de retorno de una función
-2. **`x8`** - En el kernel de Linux, `x8` se usa como el número de syscall para la instrucción `svc`. **In macOS the x16 is the one used!**
-3. **`x9`** a **`x15`** - Más registros temporales, usados frecuentemente para variables locales.
+- **`x0`** también porta los datos de retorno de una función
+2. **`x8`** - En el kernel de Linux, `x8` se usa como el número de sistema para la instrucción `svc`. **En macOS el x16 es el que se usa!**
+3. **`x9`** a **`x15`** - Más registros temporales, frecuentemente usados para variables locales.
 4. **`x16`** y **`x17`** - **Intra-procedural Call Registers**. Registros temporales para valores inmediatos. También se usan para llamadas indirectas a funciones y stubs de PLT (Procedure Linkage Table).
-- **`x16`** se usa como el **system call number** para la instrucción **`svc`** en **macOS**.
-5. **`x18`** - **Platform register**. Puede usarse como un registro de propósito general, pero en algunas plataformas este registro está reservado para usos específicos de la plataforma: puntero al bloque de entorno del hilo actual en Windows, o para apuntar a la **estructura de tarea actualmente ejecutada en el kernel de linux**.
-6. **`x19`** a **`x28`** - Estos son registros preservados por el callee. Una función debe preservar los valores de estos registros para su caller, por lo que se almacenan en la pila y se recuperan antes de volver al caller.
-7. **`x29`** - **Frame pointer** para llevar la pista del frame de la pila. Cuando se crea un nuevo frame de pila porque se llama a una función, el registro **`x29`** se **almacena en la pila** y la dirección del **nuevo** frame pointer (la dirección de **`sp`**) se **almacena en este registro**.
-- Este registro también puede usarse como un **registro de propósito general** aunque usualmente se usa como referencia para **variables locales**.
-8. **`x30`** or **`lr`**- **Link register**. Contiene la **dirección de retorno** cuando se ejecuta una instrucción `BL` (Branch with Link) o `BLR` (Branch with Link to Register) almacenando el valor de **`pc`** en este registro.
+- **`x16`** se usa como el **número de syscall** para la instrucción **`svc`** en **macOS**.
+5. **`x18`** - **Platform register**. Puede usarse como registro de propósito general, pero en algunas plataformas este registro está reservado para usos específicos de la plataforma: pointer al current thread environment block en Windows, o para apuntar a la estructura de tarea que se está ejecutando en el kernel de linux.
+6. **`x19`** a **`x28`** - Estos son registros preservados por el callee (callee-saved). Una función debe preservar los valores de estos registros para su caller, por lo que se almacenan en la pila y se recuperan antes de volver al caller.
+7. **`x29`** - **Frame pointer** para rastrear el stack frame. Cuando se crea un nuevo frame en la pila porque se llama a una función, el registro **`x29`** se **almacena en la pila** y la dirección del **nuevo** frame pointer (la dirección de **`sp`**) se **almacena en este registro**.
+- Este registro también puede usarse como registro de propósito general aunque normalmente se usa como referencia para **local variables**.
+8. **`x30`** o **`lr`**- **Link register**. Contiene la **dirección de retorno** cuando se ejecuta una instrucción `BL` (Branch with Link) o `BLR` (Branch with Link to Register) almacenando el valor del **`pc`** en este registro.
 - También puede usarse como cualquier otro registro.
-- Si la función actual va a llamar a una nueva función y por tanto sobrescribir `lr`, lo almacenará en la pila al principio; esto es el epílogo (`stp x29, x30 , [sp, #-48]; mov x29, sp` -> Store `fp` and `lr`, generate space and get new `fp`) y lo recupera al final; esto es el prólogo (`ldp x29, x30, [sp], #48; ret` -> Recover `fp` and `lr` and return).
-9. **`sp`** - **Stack pointer**, usado para llevar la pista del tope de la pila.
-- el valor de **`sp`** debe mantenerse siempre con al menos una **alineación de quadword** o puede ocurrir una excepción de alineación.
-10. **`pc`** - **Program counter**, que apunta a la siguiente instrucción. Este registro solo puede actualizarse mediante la generación de excepciones, retornos de excepción y branches. Las únicas instrucciones ordinarias que pueden leer este registro son las branch with link (BL, BLR) para almacenar la dirección de **`pc`** en **`lr`** (Link Register).
-11. **`xzr`** - **Zero register**. También llamado **`wzr`** en su forma de registro **32**-bit. Puede usarse para obtener fácilmente el valor cero (operación común) o para realizar comparaciones usando **`subs`** como **`subs XZR, Xn, #10`** almacenando los datos resultantes en ninguna parte (en **`xzr`**).
+- Si la función actual va a llamar a una nueva función y por tanto sobrescribir `lr`, lo almacenará en la pila al inicio; esto es el epílogo (`stp x29, x30 , [sp, #-48]; mov x29, sp` -> Store `fp` and `lr`, generate space and get new `fp`) y lo recupera al final, esto es el prologue (`ldp x29, x30, [sp], #48; ret` -> Recover `fp` and `lr` and return).
+9. **`sp`** - **Stack pointer**, usado para llevar el seguimiento de la cima de la pila.
+- El valor de **`sp`** debe mantenerse con al menos una **alineación de quadword** o puede ocurrir una excepción de alineación.
+10. **`pc`** - **Program counter**, que apunta a la siguiente instrucción. Este registro solo puede actualizarse mediante la generación de excepciones, retornos de excepción y saltos. Las únicas instrucciones ordinarias que pueden leer este registro son las branch with link (BL, BLR) para almacenar la dirección del **`pc`** en **`lr`** (Link Register).
+11. **`xzr`** - **Zero register**. También llamado **`wzr`** en su forma de registro de **32** bits. Puede usarse para obtener fácilmente el valor cero (operación común) o para realizar comparaciones usando **`subs`** como **`subs XZR, Xn, #10`** almacenando el dato resultante en ninguna parte (en **`xzr`**).
 
-Los registros **`Wn`** son la versión de **32 bit** del registro **`Xn`**.
+Los registros **`Wn`** son la versión de **32bit** del registro **`Xn`**.
 
 > [!TIP]
-> Los registros de X0 - X18 son volátiles, lo que significa que sus valores pueden cambiar por llamadas a funciones e interrupciones. Sin embargo, los registros de X19 - X28 son no volátiles, lo que significa que sus valores deben preservarse a través de llamadas a funciones ("callee saved").
+> Los registros de X0 a X18 son volátiles, lo que significa que sus valores pueden cambiar por llamadas a funciones e interrupciones. Sin embargo, los registros de X19 a X28 son no volátiles, lo que significa que sus valores deben preservarse a través de llamadas a funciones ("callee saved").
 
 ### SIMD and Floating-Point Registers
 
-Además, hay otros **32 registros de 128bit** que pueden usarse en operaciones SIMD (single instruction multiple data) optimizadas y para realizar aritmética en coma flotante. Estos se llaman registros Vn aunque también pueden operar en **64**-bit, **32**-bit, **16**-bit y **8**-bit y entonces se denominan **`Qn`**, **`Dn`**, **`Sn`**, **`Hn`** y **`Bn`**.
+Además, existen otros **32 registros de 128bit de longitud** que pueden usarse en operaciones SIMD (single instruction multiple data) optimizadas y para realizar aritmética de punto flotante. Estos se llaman registros Vn aunque también pueden operar en **64**-bit, **32**-bit, **16**-bit y **8**-bit y entonces se denominan **`Qn`**, **`Dn`**, **`Sn`**, **`Hn`** y **`Bn`**.
 
 ### System Registers
 
-**Hay cientos de system registers**, también llamados special-purpose registers (SPRs), que se usan para **monitorizar** y **controlar** el comportamiento de los **procesadores**.\
-Solo pueden leerse o establecerse usando las instrucciones especiales dedicadas **`mrs`** y **`msr`**.
+**Existen cientos de system registers**, también llamados special-purpose registers (SPRs), que se usan para **monitorizar** y **controlar** el comportamiento de los **procesadores**.\
+Solo pueden leerse o escribirse usando las instrucciones dedicadas especiales **`mrs`** y **`msr`**.
 
-Los registros especiales **`TPIDR_EL0`** y **`TPIDDR_EL0`** se encuentran comúnmente al realizar reverse engineering. El sufijo `EL0` indica la **exception mínima** desde la cual el registro puede ser accedido (en este caso EL0 es el nivel de excepción (privilegio) regular con el que se ejecutan los programas ordinarios).\
-A menudo se usan para almacenar la **dirección base del thread-local storage** en memoria. Normalmente el primero es legible y escribible por programas que se ejecutan en EL0, pero el segundo puede leerse desde EL0 y escribirse desde EL1 (como el kernel).
+Los registros especiales **`TPIDR_EL0`** y **`TPIDDR_EL0`** son comúnmente encontrados al hacer reversing engineering. El sufijo `EL0` indica la **exception mínima** desde la cual el registro puede ser accedido (en este caso EL0 es el nivel de excepción (privilegio) regular en el que los programas normales se ejecutan).\
+A menudo se usan para almacenar la **dirección base del thread-local storage** en memoria. Usualmente el primero es legible y escribible para programas ejecutándose en EL0, pero el segundo puede leerse desde EL0 y escribirse desde EL1 (como el kernel).
 
 - `mrs x0, TPIDR_EL0 ; Read TPIDR_EL0 into x0`
 - `msr TPIDR_EL0, X0 ; Write x0 into TPIDR_EL0`
 
 ### **PSTATE**
 
-**PSTATE** contiene varios componentes del proceso serializados en el registro especial visible por el sistema operativo **`SPSR_ELx`**, siendo X el **nivel de permiso de la excepción desencadenada** (esto permite recuperar el estado del proceso cuando la excepción finaliza).\
+**PSTATE** contiene varios componentes del proceso serializados en el registro especial visible para el sistema operativo **`SPSR_ELx`**, siendo X el **nivel de permiso de la excepción** disparada (esto permite recuperar el estado del proceso cuando la excepción termina).\
 Estos son los campos accesibles:
 
 <figure><img src="../../../images/image (1196).png" alt=""><figcaption></figcaption></figure>
 
 - Las banderas de condición **`N`**, **`Z`**, **`C`** y **`V`**:
-- **`N`** significa que la operación produjo un resultado negativo
-- **`Z`** significa que la operación produjo cero
-- **`C`** significa que la operación produjo carry
+- **`N`** significa que la operación dio como resultado un valor negativo
+- **`Z`** significa que la operación dio como resultado cero
+- **`C`** significa que la operación generó un carry
 - **`V`** significa que la operación produjo un overflow con signo:
-- La suma de dos números positivos produce un resultado negativo.
-- La suma de dos números negativos produce un resultado positivo.
-- En la resta, cuando se resta un número negativo grande de un número positivo más pequeño (o viceversa), y el resultado no puede representarse dentro del rango del tamaño de bits dado.
-- Obviamente el procesador no sabe si la operación es con signo o sin signo, por lo que comprobará C y V en las operaciones e indicará si ocurrió un carry en caso de que fuera con signo o sin signo.
+- La suma de dos números positivos da como resultado un número negativo.
+- La suma de dos números negativos da como resultado un número positivo.
+- En la resta, cuando se sustrae un número muy negativo de un número positivo más pequeño (o viceversa), y el resultado no puede representarse dentro del rango del tamaño de bits dado.
+- Obviamente el procesador no sabe si la operación es con signo o sin signo, así que comprobará C y V en las operaciones e indicará si ocurrió un carry en caso de que fuese con signo o sin signo.
 
 > [!WARNING]
 > No todas las instrucciones actualizan estas banderas. Algunas como **`CMP`** o **`TST`** sí lo hacen, y otras que tienen un sufijo s como **`ADDS`** también lo hacen.
 
-- La **actual ancho de registro (`nRW`) flag**: Si la bandera tiene el valor 0, el programa se ejecutará en el estado de ejecución AArch64 una vez reanudado.
+- La bandera del **ancho actual de registro (`nRW`)**: Si la bandera tiene el valor 0, el programa se ejecutará en el estado de ejecución AArch64 una vez reanudado.
 - El **Exception Level** actual (**`EL`**): Un programa regular ejecutándose en EL0 tendrá el valor 0
-- La bandera de **single stepping** (**`SS`**): Usada por depuradores para ejecutar paso a paso poniendo la bandera SS a 1 dentro de **`SPSR_ELx`** a través de una excepción. El programa ejecutará un paso y emitirá una excepción de single step.
-- La bandera de **illegal exception state** (**`IL`**): Se usa para marcar cuando un software privilegiado realiza una transferencia de nivel de excepción inválida, esta bandera se pone a 1 y el procesador desencadena una excepción de estado ilegal.
-- Las banderas **`DAIF`**: Estas banderas permiten que un programa privilegiado enmascare selectivamente ciertas excepciones externas.
-- Si **`A`** es 1 significa que se dispararán **asynchronous aborts**. La **`I`** configura la respuesta a las solicitudes externas de interrupción de hardware (IRQs). y la F está relacionada con **Fast Interrupt Requests** (FIRs).
-- Las banderas de **selección de puntero de pila** (**`SPS`**): Los programas privilegiados que se ejecutan en EL1 y superiores pueden alternar entre usar su propio registro de puntero de pila y el del modo usuario (por ejemplo entre `SP_EL1` y `EL0`). Este cambio se realiza escribiendo en el registro especial **`SPSel`**. Esto no puede hacerse desde EL0.
+- La bandera de **single stepping** (**`SS`**): Usada por debuggers para ejecutar paso a paso estableciendo la bandera SS a 1 dentro de **`SPSR_ELx`** a través de una excepción. El programa ejecutará un paso y emitirá una excepción de single step.
+- La bandera de **estado de excepción ilegal** (**`IL`**): Se usa para marcar cuando un software privilegiado realiza una transferencia a un nivel de excepción inválido; esta bandera se pone a 1 y el procesador dispara una excepción de estado ilegal.
+- Las banderas **`DAIF`**: Estas banderas permiten a un programa privilegiado enmascarar selectivamente ciertas excepciones externas.
+- Si **`A`** es 1 significa que se dispararán **asynchronous aborts**. La **`I`** configura la respuesta a solicitudes de interrupción hardware externas (IRQs). y la F está relacionada con **Fast Interrupt Requests** (FIRs).
+- Las banderas de **selección de puntero de pila** (**`SPS`**): Los programas privilegiados que se ejecutan en EL1 y superiores pueden alternar entre usar su propio registro de puntero de pila y el del modelo de usuario (por ejemplo, entre `SP_EL1` y `EL0`). Este cambio se realiza escribiendo en el registro especial **`SPSel`**. Esto no puede hacerse desde EL0.
 
 ## **Calling Convention (ARM64v8)**
 
-La calling convention de ARM64 especifica que los **primeros ocho parámetros** a una función se pasan en los registros **`x0` hasta `x7`**. Los parámetros **adicionales** se pasan en la **pila**. El valor de **retorno** se devuelve en el registro **`x0`**, o también en **`x1`** si tiene **128 bits** de longitud. Los registros **`x19`** a **`x30`** y **`sp`** deben **preservarse** a través de las llamadas a funciones.
+La calling convention de ARM64 especifica que los **ocho primeros parámetros** a una función se pasan en los registros **`x0`** hasta **`x7`**. Los parámetros **adicionales** se pasan en la **pila**. El valor de **retorno** se devuelve en el registro **`x0`**, o también en **`x1`** si tiene **128 bits**. Los registros **`x19`** a **`x30`** y **`sp`** deben **preservarse** a través de llamadas a funciones.
 
-Al leer una función en ensamblador, busca el **prologue** y el **epilogue** de la función. El **prologue** normalmente implica **guardar el frame pointer (`x29`)**, **configurar** un **nuevo frame pointer** y **asignar espacio en la pila**. El **epilogue** normalmente implica **restaurar el frame pointer guardado** y **retornar** desde la función.
+Al leer una función en ensamblador, busca el **prologue y epilogue** de la función. El **prologue** normalmente implica **guardar el frame pointer (`x29`)**, **configurar** un **nuevo frame pointer**, y **asignar espacio en la pila**. El **epilogue** normalmente implica **restaurar el frame pointer guardado** y **retornar** de la función.
 
 ### Calling Convention in Swift
 
@@ -103,7 +109,7 @@ Swift tiene su propia **calling convention** que puede encontrarse en [**https:/
 
 ## **Common Instructions (ARM64v8)**
 
-Las instrucciones ARM64 generalmente tienen el **formato `opcode dst, src1, src2`**, donde **`opcode`** es la **operación** a realizar (como `add`, `sub`, `mov`, etc.), **`dst`** es el registro **destino** donde se almacenará el resultado, y **`src1`** y **`src2`** son los registros **origen**. También se pueden usar valores inmediatos en lugar de registros fuente.
+Las instrucciones ARM64 generalmente tienen el **formato `opcode dst, src1, src2`**, donde **`opcode`** es la **operación** a realizar (como `add`, `sub`, `mov`, etc.), **`dst`** es el registro **destino** donde se almacenará el resultado, y **`src1`** y **`src2`** son los registros **fuente**. También se pueden usar valores inmediatos en lugar de registros fuente.
 
 - **`mov`**: **Mover** un valor de un **registro** a otro.
 - Ejemplo: `mov x0, x1` — Esto mueve el valor de `x1` a `x0`.
@@ -111,19 +117,19 @@ Las instrucciones ARM64 generalmente tienen el **formato `opcode dst, src1, src2
 - Ejemplo: `ldr x0, [x1]` — Esto carga un valor desde la dirección de memoria apuntada por `x1` en `x0`.
 - **Modo offset**: Se indica un offset que afecta al puntero origen, por ejemplo:
 - `ldr x2, [x1, #8]`, esto cargará en x2 el valor desde x1 + 8
-- `ldr x2, [x0, x1, lsl #2]`, esto cargará en x2 un objeto del array x0, desde la posición x1 (índice) * 4
-- **Modo pre-indexado**: Esto aplicará cálculos al origen, obtendrá el resultado y también almacenará el nuevo origen en el registro origen.
+- `ldr x2, [x0, x1, lsl #2]`, esto cargará en x2 un objeto desde el array x0, desde la posición x1 (índice) * 4
+- **Modo pre-indexado**: Esto aplicará cálculos al origen, obtendrá el resultado y también almacenará el nuevo origen en el origen.
 - `ldr x2, [x1, #8]!`, esto cargará `x1 + 8` en `x2` y almacenará en x1 el resultado de `x1 + 8`
 - `str lr, [sp, #-4]!`, Almacena el link register en sp y actualiza el registro sp
 - **Modo post-index**: Esto es como el anterior pero la dirección de memoria se accede y luego se calcula y almacena el offset.
 - `ldr x0, [x1], #8`, carga `x1` en `x0` y actualiza x1 con `x1 + 8`
-- **Direccionamiento relativo a PC**: En este caso la dirección a cargar se calcula relativa al registro PC
-- `ldr x1, =_start`, Esto cargará la dirección donde comienza el símbolo `_start` en x1 en relación con el PC actual.
+- **Dirección relativa al PC**: En este caso la dirección a cargar se calcula relativa al registro PC
+- `ldr x1, =_start`, Esto cargará en x1 la dirección donde comienza el símbolo `_start` en relación con el PC actual.
 - **`str`**: **Almacenar** un valor desde un **registro** en **memoria**.
-- Ejemplo: `str x0, [x1]` — Esto almacena el valor de `x0` en la ubicación de memoria apuntada por `x1`.
-- **`ldp`**: **Load Pair of Registers**. Esta instrucción **carga dos registros** desde **memoria consecutiva**. La dirección de memoria típicamente se forma sumando un offset al valor en otro registro.
+- Ejemplo: `str x0, [x1]` — Esto almacena el valor en `x0` en la dirección de memoria apuntada por `x1`.
+- **`ldp`**: **Load Pair of Registers**. Esta instrucción **carga dos registros** desde **ubicaciones de memoria consecutivas**. La dirección de memoria típicamente se forma sumando un offset al valor en otro registro.
 - Ejemplo: `ldp x0, x1, [x2]` — Esto carga `x0` y `x1` desde las ubicaciones de memoria en `x2` y `x2 + 8`, respectivamente.
-- **`stp`**: **Store Pair of Registers**. Esta instrucción **almacena dos registros** en **memoria consecutiva**. La dirección de memoria típicamente se forma sumando un offset al valor en otro registro.
+- **`stp`**: **Store Pair of Registers**. Esta instrucción **almacena dos registros** en **ubicaciones de memoria consecutivas**. La dirección de memoria típicamente se forma sumando un offset al valor en otro registro.
 - Ejemplo: `stp x0, x1, [sp]` — Esto almacena `x0` y `x1` en las ubicaciones de memoria en `sp` y `sp + 8`, respectivamente.
 - `stp x0, x1, [sp, #16]!` — Esto almacena `x0` y `x1` en las ubicaciones de memoria en `sp+16` y `sp + 24`, respectivamente, y actualiza `sp` con `sp+16`.
 - **`add`**: **Sumar** los valores de dos registros y almacenar el resultado en un registro.
@@ -131,77 +137,77 @@ Las instrucciones ARM64 generalmente tienen el **formato `opcode dst, src1, src2
 - Xn1 -> Destino
 - Xn2 -> Operando 1
 - Xn3 | #imm -> Operando 2 (registro o inmediato)
-- \[shift #N | RRX] -> Realiza un shift o llama a RRX
+- \[shift #N | RRX] -> Realizar un shift o usar RRX
 - Ejemplo: `add x0, x1, x2` — Esto suma los valores en `x1` y `x2` y almacena el resultado en `x0`.
-- `add x5, x5, #1, lsl #12` — Esto equivale a 4096 (un 1 desplazado 12 veces) -> 1 0000 0000 0000 0000
-- **`adds`** Esto realiza un `add` y actualiza las banderas
+- `add x5, x5, #1, lsl #12` — Esto equivale a 4096 (un 1 desplazado 12 posiciones) -> 1 0000 0000 0000 0000
+- **`adds`** Esto realiza un `add` y actualiza las flags
 - **`sub`**: **Restar** los valores de dos registros y almacenar el resultado en un registro.
-- Revisa la **sintaxis** de **`add`**.
+- Ver **sintaxis** de **`add`**.
 - Ejemplo: `sub x0, x1, x2` — Esto resta el valor en `x2` de `x1` y almacena el resultado en `x0`.
-- **`subs`** Esto es como sub pero actualizando las banderas
+- **`subs`** Esto es como sub pero actualiza las flags
 - **`mul`**: **Multiplicar** los valores de **dos registros** y almacenar el resultado en un registro.
 - Ejemplo: `mul x0, x1, x2` — Esto multiplica los valores en `x1` y `x2` y almacena el resultado en `x0`.
 - **`div`**: **Dividir** el valor de un registro por otro y almacenar el resultado en un registro.
 - Ejemplo: `div x0, x1, x2` — Esto divide el valor en `x1` por `x2` y almacena el resultado en `x0`.
 - **`lsl`**, **`lsr`**, **`asr`**, **`ror`, `rrx`**:
-- **Logical shift left**: Añade 0s al final moviendo los otros bits hacia adelante (multiplicar por 2^n)
-- **Logical shift right**: Añade 1s al principio moviendo los otros bits hacia atrás (dividir por 2^n en unsigned)
-- **Arithmetic shift right**: Como **`lsr`**, pero en lugar de añadir 0s si el bit más significativo es 1, se añaden 1s (divide por 2^n en signed)
-- **Rotate right**: Como **`lsr`** pero lo que se quita por la derecha se añade por la izquierda
-- **Rotate Right with Extend**: Como **`ror`**, pero con la bandera de carry como el "bit más significativo". Así la bandera de carry se mueve al bit 31 y el bit removido a la bandera de carry.
+- **Logical shift left**: Añade 0s al final moviendo los otros bits hacia adelante (multiplica por n veces 2)
+- **Logical shift right**: Añade 0s al principio moviendo los otros bits hacia atrás (divide por n veces 2 en unsigned)
+- **Arithmetic shift right**: Como **`lsr`**, pero en lugar de añadir 0s si el bit más significativo es 1, se añaden 1s (divide por n veces 2 en signed)
+- **Rotate right**: Como **`lsr`** pero lo que se elimina por la derecha se anexa a la izquierda
+- **Rotate Right with Extend**: Como **`ror`**, pero con la flag de carry como el "bit más significativo". Así la flag de carry se mueve al bit 31 y el bit eliminado va a la flag de carry.
 - **`bfm`**: **Bit Filed Move**, estas operaciones **copian bits `0...n`** desde un valor y los colocan en posiciones **`m..m+n`**. El **`#s`** especifica la **posición del bit más a la izquierda** y **`#r`** la **cantidad de rotación a la derecha**.
-- Bitfiled move: `BFM Xd, Xn, #r`
+- Bitfield move: `BFM Xd, Xn, #r`
 - Signed Bitfield move: `SBFM Xd, Xn, #r, #s`
 - Unsigned Bitfield move: `UBFM Xd, Xn, #r, #s`
-- **Bitfield Extract and Insert:** Copia un campo de bits desde un registro y lo copia a otro registro.
-- **`BFI X1, X2, #3, #4`** Inserta 4 bits de X2 desde el bit 3 en X1
-- **`BFXIL X1, X2, #3, #4`** Extrae desde el bit 3 de X2 cuatro bits y los copia en X1
-- **`SBFIZ X1, X2, #3, #4`** Extiende con signo 4 bits de X2 e insertarlos en X1 empezando en la posición de bit 3, poniendo a cero los bits a la derecha
+- **Bitfield Extract and Insert:** Copiar un bitfield de un registro y copiarlo a otro registro.
+- **`BFI X1, X2, #3, #4`** Insertar 4 bits desde X2 a partir del bit 3 en X1
+- **`BFXIL X1, X2, #3, #4`** Extraer desde el bit 3 de X2 cuatro bits y copiarlos a X1
+- **`SBFIZ X1, X2, #3, #4`** Extiende con signo 4 bits desde X2 e inserta en X1 comenzando en la posición de bit 3, poniendo a cero los bits de la derecha
 - **`SBFX X1, X2, #3, #4`** Extrae 4 bits empezando en el bit 3 de X2, los extiende con signo y coloca el resultado en X1
-- **`UBFIZ X1, X2, #3, #4`** Extiende con ceros 4 bits de X2 e insertarlos en X1 empezando en la posición de bit 3, poniendo a cero los bits a la derecha
+- **`UBFIZ X1, X2, #3, #4`** Extiende con ceros 4 bits desde X2 e inserta en X1 empezando en la posición de bit 3, poniendo a cero los bits de la derecha
 - **`UBFX X1, X2, #3, #4`** Extrae 4 bits empezando en el bit 3 de X2 y coloca el resultado extendido con ceros en X1.
-- **Sign Extend To X:** Extiende el signo (o añade solo 0s en la versión unsigned) de un valor para poder realizar operaciones con él:
-- **`SXTB X1, W2`** Extiende el signo de un byte **desde W2 a X1** (`W2` es la mitad de `X2`) para rellenar los 64 bits
-- **`SXTH X1, W2`** Extiende el signo de un número de 16 bits **desde W2 a X1** para rellenar los 64 bits
-- **`SXTW X1, W2`** Extiende el signo de un byte **desde W2 a X1** para rellenar los 64 bits
-- **`UXTB X1, W2`** Añade 0s (unsigned) a un byte **desde W2 a X1** para rellenar los 64 bits
-- **`extr`:** Extrae bits de un **par de registros concatenados** especificado.
-- Ejemplo: `EXTR W3, W2, W1, #3` Esto **concatenará W1+W2** y obtendrá **desde el bit 3 de W2 hasta el bit 3 de W1** y lo almacenará en W3.
-- **`cmp`**: **Comparar** dos registros y establecer las banderas de condición. Es un **alias de `subs`** que establece el registro destino al registro cero. Útil para saber si `m == n`.
+- **Sign Extend To X:** Extiende el signo (o añade solo 0s en la versión sin signo) de un valor para poder realizar operaciones con él:
+- **`SXTB X1, W2`** Extiende el signo de un byte **desde W2 a X1** (`W2` es la mitad de `X2`) para rellenar 64 bits
+- **`SXTH X1, W2`** Extiende el signo de un número de 16 bits **desde W2 a X1** para rellenar 64 bits
+- **`SXTW X1, W2`** Extiende el signo de un valor **desde W2 a X1** para rellenar 64 bits
+- **`UXTB X1, W2`** Añade 0s (unsigned) a un byte **desde W2 a X1** para rellenar 64 bits
+- **`extr`:** Extrae bits de un par de registros concatenados especificados.
+- Ejemplo: `EXTR W3, W2, W1, #3` Esto concatenará W1+W2 y obtendrá **desde el bit 3 de W2 hasta el bit 3 de W1** y lo almacenará en W3.
+- **`cmp`**: **Comparar** dos registros y establecer las flags de condición. Es un **alias de `subs`** estableciendo el registro destino al registro cero. Útil para saber si `m == n`.
 - Soporta la **misma sintaxis que `subs`**
-- Ejemplo: `cmp x0, x1` — Esto compara los valores en `x0` y `x1` y establece las banderas de condición en consecuencia.
-- **`cmn`**: **Compare negative** operando. En este caso es un **alias de `adds`** y soporta la misma sintaxis. Útil para saber si `m == -n`.
-- **`ccmp`**: Comparación condicional, es una comparación que se realizará solo si una comparación previa fue verdadera y establecerá específicamente bits nzcv.
-- `cmp x1, x2; ccmp x3, x4, 0, NE; blt _func` -> si x1 != x2 y x3 < x4, salta a func
-- Esto es porque **`ccmp`** solo se ejecutará si la **`cmp`** previa fue `NE`, si no lo fue los bits `nzcv` se establecerán a 0 (lo que no satisfará la comparación `blt`).
+- Ejemplo: `cmp x0, x1` — Esto compara los valores en `x0` y `x1` y establece las flags de condición en consecuencia.
+- **`cmn`**: **Compare negative** operand. En este caso es un **alias de `adds`** y soporta la misma sintaxis. Útil para saber si `m == -n`.
+- **`ccmp`**: Comparación condicional, es una comparación que solo se realizará si una comparación previa fue verdadera y establecerá específicamente bits nzcv.
+- `cmp x1, x2; ccmp x3, x4, 0, NE; blt _func` -> si x1 != x2 y x3 < x4, saltar a func
+- Esto es porque **`ccmp`** solo se ejecutará si el **cmp** previo fue `NE`; si no lo fue, los bits `nzcv` se establecerán a 0 (lo que no satisfará la comparación `blt`).
 - Esto también puede usarse como `ccmn` (igual pero negativo, como `cmp` vs `cmn`).
-- **`tst`**: Comprueba si alguno de los valores de la comparación tiene bits en 1 (funciona como un ANDS sin almacenar el resultado en ninguna parte). Es útil para comprobar un registro con un valor y ver si alguno de los bits del registro indicado en el valor es 1.
+- **`tst`**: Comprueba si alguno de los bits indicados en el valor y el registro comparado son 1 (funciona como un ANDS sin almacenar el resultado en ninguna parte). Es útil para comprobar un registro con un valor y saber si alguno de los bits del registro indicado por el valor es 1.
 - Ejemplo: `tst X1, #7` Comprueba si alguno de los últimos 3 bits de X1 es 1
 - **`teq`**: Operación XOR descartando el resultado
 - **`b`**: Branch incondicional
 - Ejemplo: `b myFunction`
-- Ten en cuenta que esto no llenará el link register con la dirección de retorno (no es adecuado para llamadas a subrutinas que necesitan volver)
+- Nota que esto no llena el link register con la dirección de retorno (no es adecuado para llamadas a subrutinas que necesitan volver)
 - **`bl`**: **Branch** con link, usado para **llamar** a una **subrutina**. Almacena la **dirección de retorno en `x30`**.
 - Ejemplo: `bl myFunction` — Esto llama a la función `myFunction` y almacena la dirección de retorno en `x30`.
-- Ten en cuenta que esto no llenará el link register con la dirección de retorno (no es adecuado para llamadas a subrutinas que necesitan volver)
+- Nota que esto no llena el link register con la dirección de retorno (no es adecuado para subrutinas que necesitan volver)
 - **`blr`**: **Branch** con Link a Registro, usado para **llamar** a una **subrutina** donde el objetivo está **especificado** en un **registro**. Almacena la dirección de retorno en `x30`. (Esto es
 - Ejemplo: `blr x1` — Esto llama a la función cuya dirección está contenida en `x1` y almacena la dirección de retorno en `x30`.
-- **`ret`**: **Retornar** desde una **subrutina**, típicamente usando la dirección en **`x30`**.
-- Ejemplo: `ret` — Esto retorna desde la subrutina actual usando la dirección de retorno en `x30`.
-- **`b.<cond>`**: Branchs condicionales
-- **`b.eq`**: **Branch si es igual**, basado en la instrucción `cmp` previa.
-- Ejemplo: `b.eq label` — Si la instrucción `cmp` previa encontró dos valores iguales, esto salta a `label`.
-- **`b.ne`**: **Branch si No Igual**. Esta instrucción comprueba las banderas de condición (que fueron establecidas por una instrucción de comparación previa), y si los valores comparados no eran iguales, salta a una etiqueta o dirección.
-- Ejemplo: Después de una instrucción `cmp x0, x1`, `b.ne label` — Si los valores en `x0` y `x1` no eran iguales, esto salta a `label`.
-- **`cbz`**: **Compare and Branch on Zero**. Esta instrucción compara un registro con cero, y si son iguales, hace branch a una etiqueta o dirección.
-- Ejemplo: `cbz x0, label` — Si el valor en `x0` es cero, esto salta a `label`.
-- **`cbnz`**: **Compare and Branch on Non-Zero**. Esta instrucción compara un registro con cero, y si no son iguales, hace branch a una etiqueta o dirección.
-- Ejemplo: `cbnz x0, label` — Si el valor en `x0` no es cero, esto salta a `label`.
+- **`ret`**: **Retornar** de una **subrutina**, típicamente usando la dirección en **`x30`**.
+- Ejemplo: `ret` — Esto retorna de la subrutina actual usando la dirección de retorno en `x30`.
+- **`b.<cond>`**: Branches condicionales
+- **`b.eq`**: **Branch si igual**, basado en la instrucción `cmp` previa.
+- Ejemplo: `b.eq label` — Si la instrucción `cmp` previa encontró dos valores iguales, salta a `label`.
+- **`b.ne`**: **Branch si No Igual**. Esta instrucción comprueba las flags de condición (que fueron establecidas por una instrucción de comparación previa), y si los valores comparados no eran iguales, hace branching a una etiqueta o dirección.
+- Ejemplo: Tras una instrucción `cmp x0, x1`, `b.ne label` — Si los valores en `x0` y `x1` no eran iguales, salta a `label`.
+- **`cbz`**: **Compare and Branch on Zero**. Esta instrucción compara un registro con cero, y si son iguales, hace branching a una etiqueta o dirección.
+- Ejemplo: `cbz x0, label` — Si el valor en `x0` es cero, salta a `label`.
+- **`cbnz`**: **Compare and Branch on Non-Zero**. Esta instrucción compara un registro con cero, y si no son iguales, hace branching a una etiqueta o dirección.
+- Ejemplo: `cbnz x0, label` — Si el valor en `x0` no es cero, salta a `label`.
 - **`tbnz`**: Test bit and branch on nonzero
 - Ejemplo: `tbnz x0, #8, label`
 - **`tbz`**: Test bit and branch on zero
 - Ejemplo: `tbz x0, #8, label`
-- **Operaciones de selección condicional**: Son operaciones cuyo comportamiento varía dependiendo de los bits de condición.
+- **Operaciones de selección condicional**: Son operaciones cuyo comportamiento varía dependiendo de las flags condicionales.
 - `csel Xd, Xn, Xm, cond` -> `csel X0, X1, X2, EQ` -> Si es true, X0 = X1, si es false, X0 = X2
 - `csinc Xd, Xn, Xm, cond` -> Si es true, Xd = Xn, si es false, Xd = Xm + 1
 - `cinc Xd, Xn, cond` -> Si es true, Xd = Xn + 1, si es false, Xd = Xn
@@ -211,11 +217,11 @@ Las instrucciones ARM64 generalmente tienen el **formato `opcode dst, src1, src2
 - `cneg Xd, Xn, cond` -> Si es true, Xd = - Xn, si es false, Xd = Xn
 - `cset Xd, Xn, Xm, cond` -> Si es true, Xd = 1, si es false, Xd = 0
 - `csetm Xd, Xn, Xm, cond` -> Si es true, Xd = \<all 1>, si es false, Xd = 0
-- **`adrp`**: Calcula la **dirección de página de un símbolo** y la almacena en un registro.
-- Ejemplo: `adrp x0, symbol` — Esto calcula la dirección de página de `symbol` y la almacena en `x0`.
-- **`ldrsw`**: **Carga** un valor **signed 32-bit** desde memoria y lo **sign-extend a 64** bits.
-- Ejemplo: `ldrsw x0, [x1]` — Esto carga un valor signed de 32 bits desde la dirección en `x1`, lo sign-extiende a 64 bits y lo almacena en `x0`.
-- **`stur`**: **Almacenar un valor de registro en una ubicación de memoria**, usando un offset desde otro registro.
+- **`adrp`**: Calcula la **dirección de página de un símbolo** y la guarda en un registro.
+- Ejemplo: `adrp x0, symbol` — Esto calcula la dirección de página de `symbol` y la guarda en `x0`.
+- **`ldrsw`**: **Carga** un valor con signo de **32 bits** desde memoria y lo **extiende con signo** a 64 bits. Esto se usa para casos comunes de SWITCH.
+- Ejemplo: `ldrsw x0, [x1]` — Esto carga un valor con signo de 32 bits desde la dirección de memoria apuntada por `x1`, lo extiende con signo a 64 bits y lo guarda en `x0`.
+- **`stur`**: **Almacenar el valor de un registro en una ubicación de memoria**, usando un offset desde otro registro.
 - Ejemplo: `stur x0, [x1, #4]` — Esto almacena el valor en `x0` en la dirección de memoria que es 4 bytes mayor que la dirección actualmente en `x1`.
 - **`svc`** : Hacer una **system call**. Significa "Supervisor Call". Cuando el procesador ejecuta esta instrucción, **cambia de user mode a kernel mode** y salta a una ubicación específica en memoria donde está el código de manejo de system call del **kernel**.
 
@@ -229,30 +235,36 @@ svc 0       ; Make the system call.
 
 ### **Function Prologue**
 
-1. **Save the link register and frame pointer to the stack**:
+1. **Guardar el link register y el frame pointer en la pila**:
 ```armasm
 stp x29, x30, [sp, #-16]!  ; store pair x29 and x30 to the stack and decrement the stack pointer
 ```
-2. **Configurar el nuevo puntero de marco**: `mov x29, sp` (configura el nuevo puntero de marco para la función actual)
-3. **Reservar espacio en la pila para variables locales** (si es necesario): `sub sp, sp, <size>` (donde `<size>` es el número de bytes necesarios)
+2. **Configurar el nuevo puntero de marco**: `mov x29, sp` (establece el nuevo puntero de marco para la función actual)
+3. **Asignar espacio en la pila para variables locales** (si es necesario): `sub sp, sp, <size>` (donde `<size>` es el número de bytes necesarios)
 
 ### **Epílogo de la función**
 
-1. **Liberar espacio de variables locales (si se asignaron)**: `add sp, sp, <size>`
+1. **Liberar las variables locales (si se asignaron)**: `add sp, sp, <size>`
 2. **Restaurar el registro de enlace y el puntero de marco**:
 ```armasm
 ldp x29, x30, [sp], #16  ; load pair x29 and x30 from the stack and increment the stack pointer
 ```
-3. **Retorno**: `ret` (devuelve el control al llamador usando la dirección en el registro de enlace)
+3. **Return**: `ret` (devuelve el control al llamador usando la dirección en el registro de enlace)
 
-## Estado de Ejecución AARCH32
+## ARM Common Memory Protections
 
-Armv8-A soporta la ejecución de programas de 32 bits. **AArch32** puede ejecutarse en uno de **dos conjuntos de instrucciones**: **`A32`** y **`T32`**, y puede cambiar entre ellos mediante **`interworking`**.\
-**Privilegiados** programas de 64 bits pueden programar la **ejecución de programas de 32 bits** ejecutando una transferencia de nivel de excepción al 32-bit de privilegios inferiores.\
-Tenga en cuenta que la transición de 64 bits a 32 bits ocurre con un nivel de excepción inferior (por ejemplo, un programa de 64 bits en EL1 que activa un programa en EL0). Esto se realiza estableciendo el **bit 4 de** **`SPSR_ELx`** registro especial **a 1** cuando el hilo de proceso `AArch32` está listo para ejecutarse y el resto de `SPSR_ELx` almacena el CPSR del programa **`AArch32`**. Luego, el proceso privilegiado llama a la instrucción **`ERET`** para que el procesador transicione a **`AArch32`**, entrando en A32 o T32 dependiendo de CPSR**.**
+{{#ref}}
+../../../binary-exploitation/ios-exploiting/README.md
+{{#endref}}
 
-The **`interworking`** occurs using the J and T bits of CPSR. `J=0` and `T=0` means **`A32`** and `J=0` and `T=1` means **T32**. Esto básicamente equivale a establecer el **bit menos significativo a 1** para indicar que el conjunto de instrucciones es T32.\
-Esto se establece durante las **interworking branch instructions,** pero también puede establecerse directamente con otras instrucciones cuando el PC se establece como el registro destino. Ejemplo:
+## AARCH32 Execution State
+
+Armv8-A admite la ejecución de programas de 32 bits. **AArch32** puede ejecutar uno de **dos conjuntos de instrucciones**: **`A32`** y **`T32`** y puede cambiar entre ellos mediante **`interworking`**.\
+Los programas de 64 bits **privilegiados** pueden programar la **ejecución de programas de 32 bits** ejecutando una transferencia de nivel de excepción al 32 bits de menor privilegio.\
+Tenga en cuenta que la transición de 64 bits a 32 bits ocurre con un nivel de excepción inferior (por ejemplo, un programa de 64 bits en EL1 que lanza un programa en EL0). Esto se hace estableciendo el **bit 4 de** el registro especial **`SPSR_ELx`** **a 1** cuando el hilo de proceso `AArch32` está listo para ejecutarse y el resto de `SPSR_ELx` almacena el CPSR del programa `AArch32`. Luego, el proceso privilegiado ejecuta la instrucción **`ERET`** para que el procesador transicione a **`AArch32`**, entrando en A32 o T32 dependiendo de CPSR.
+
+El **`interworking`** ocurre usando los bits J y T del CPSR. `J=0` y `T=0` significa **`A32`** y `J=0` y `T=1` significa **T32**. Básicamente esto se traduce en establecer el **bit menos significativo a 1** para indicar que el conjunto de instrucciones es T32.\
+Esto se establece durante las **interworking branch instructions,** pero también puede establecerse directamente con otras instrucciones cuando el PC se configura como el registro destino. Ejemplo:
 
 Otro ejemplo:
 ```armasm
@@ -267,60 +279,60 @@ mov r0, #8
 ```
 ### Registros
 
-There are 16 32-bit registers (r0-r15). **From r0 to r14** they can be used for **any operation**, however some of them are usually reserved:
+Hay 16 registros de 32 bits (r0-r15). **Desde r0 hasta r14** pueden usarse para **cualquier operación**, sin embargo algunos de ellos suelen reservarse:
 
-- **`r15`**: Contador de programa (siempre). Contiene la dirección de la siguiente instrucción. In A32 current + 8, in T32, current + 4.
+- **`r15`**: Contador de programa (siempre). Contiene la dirección de la próxima instrucción. En A32 actual + 8, en T32 actual + 4.
 - **`r11`**: Puntero de marco
-- **`r12`**: Registro de llamadas intra-procedimiento
-- **`r13`**: Stack Pointer (Nota: la pila siempre está alineada a 16 bytes)
-- **`r14`**: Link Register
+- **`r12`**: Registro de llamada intra-procedimiento
+- **`r13`**: Puntero de pila (Nota: la pila siempre está alineada a 16 bytes)
+- **`r14`**: Registro de enlace
 
-Moreover, registers are backed up in **`banked registries`**. Which are places that store the registers values allowing to perform **conmutación rápida de contexto** in exception handling and privileged operations to avoid the need to manually save and restore registers every time.\
+Moreover, registers are backed up in **`banked registries`**. Which are places that store the registers values allowing to perform **conmutación rápida de contexto** en el manejo de excepciones y operaciones privilegiadas para evitar la necesidad de guardar y restaurar manualmente los registros cada vez.\
 This is done by **saving the processor state from the `CPSR` to the `SPSR`** of the processor mode to which the exception is taken. On the exception returns, the **`CPSR`** is restored from the **`SPSR`**.
 
-### CPSR - Registro de estado del programa actual
+### CPSR - Registro de estado actual del programa
 
-In AArch32 the CPSR works similar to **`PSTATE`** in AArch64 and is also stored in **`SPSR_ELx`** when a exception is taken to restore later the execution:
+En AArch32 el CPSR funciona de forma similar a **`PSTATE`** en AArch64 y también se almacena en **`SPSR_ELx`** cuando se toma una excepción para restaurar posteriormente la ejecución:
 
 <figure><img src="../../../images/image (1197).png" alt=""><figcaption></figcaption></figure>
 
-The fields are divided in some groups:
+Los campos están divididos en algunos grupos:
 
-- Application Program Status Register (APSR): Arithmetic flags and accesible from EL0
-- Execution State Registers: Process behaviour (managed by the OS).
+- Application Program Status Register (APSR): Banderas aritméticas y accesible desde EL0
+- Execution State Registers: Comportamiento del proceso (gestionado por el SO).
 
 #### Application Program Status Register (APSR)
 
-- The **`N`**, **`Z`**, **`C`**, **`V`** flags (just like in AArch64)
-- The **`Q`** flag: It's set to 1 whenever **saturación de enteros** during the execution of a specialized saturating arithmetic instruction. Once it's set to **`1`**, it'll maintain the value until it's manually set to 0. Moreover, there isn't any instruction that checks its value implicitly, it must be done reading it manually.
-- **`GE`** (Mayor o igual) Flags: It's used in SIMD (Single Instruction, Multiple Data) operations, such as "parallel add" and "parallel subtract". These operations allow processing multiple data points in a single instruction.
+- Las banderas **`N`**, **`Z`**, **`C`**, **`V`** (igual que en AArch64)
+- La bandera **`Q`**: Se pone a 1 siempre que ocurra **saturación entera** durante la ejecución de una instrucción aritmética de saturación especializada. Una vez puesta a **`1`**, mantendrá el valor hasta que se ponga manualmente a 0. Además, no existe instrucción que compruebe su valor implícitamente; debe leerse manualmente.
+- **`GE`** (Greater than or equal) Flags: Se usan en operaciones SIMD (Single Instruction, Multiple Data), como "suma paralela" y "resta paralela". Estas operaciones permiten procesar múltiples puntos de datos en una sola instrucción.
 
-For example, the **`UADD8`** instruction **adds four pairs of bytes** (from two 32-bit operands) in parallel and stores the results in a 32-bit register. It then **sets the `GE` flags in the `APSR`** based on these results. Each GE flag corresponds to one of the byte additions, indicating if the addition for that byte pair **desbordamiento**.
+Por ejemplo, la instrucción **`UADD8`** **suma cuatro pares de bytes** (de dos operandos de 32 bits) en paralelo y almacena los resultados en un registro de 32 bits. Luego **establece las banderas `GE` en el `APSR`** basándose en esos resultados. Cada bandera GE corresponde a una de las sumas de bytes, indicando si la suma para ese par de bytes **desbordó**.
 
-The **`SEL`** instruction uses these GE flags to perform conditional actions.
+La instrucción **`SEL`** usa estas banderas GE para realizar acciones condicionales.
 
 #### Execution State Registers
 
-- The **`J`** and **`T`** bits: **`J`** should be 0 and if **`T`** is 0 the instruction set A32 is used, and if it's 1, the T32 is used.
-- **IT Block State Register** (`ITSTATE`): These are the bits from 10-15 and 25-26. They store conditions for instructions inside an **`IT`** prefixed group.
-- **`E`** bit: Indicates the **endianness**.
-- **Mode and Exception Mask Bits** (0-4): They determine the current execution state. The **5th** one indicates if the program runs as 32bit (a 1) or 64bit (a 0). The other 4 represents the **exception mode currently in used** (when a exception occurs and it's being handled). The number set **indicates the current priority** in case another exception is triggered while this is being handled.
+- Los bits **`J`** y **`T`**: **`J`** debe ser 0 y si **`T`** es 0 se usa el conjunto de instrucciones A32, y si es 1, se usa T32.
+- IT Block State Register (`ITSTATE`): Son los bits 10-15 y 25-26. Almacenan condiciones para instrucciones dentro de un grupo prefijado por **`IT`**.
+- **`E`** bit: Indica el orden de bytes (endianness).
+- Mode and Exception Mask Bits (0-4): Determinan el estado de ejecución actual. El **5º** indica si el programa se ejecuta como 32bit (un 1) o 64bit (un 0). Los otros 4 representan el modo de excepción actualmente en uso (cuando ocurre una excepción y se está manejando). El número establecido **indica la prioridad actual** en caso de que se dispare otra excepción mientras ésta se está manejando.
 
 <figure><img src="../../../images/image (1200).png" alt=""><figcaption></figcaption></figure>
 
-- **`AIF`**: Certain exceptions can be disabled using the bits **`A`**, `I`, `F`. If **`A`** is 1 it means **asynchronous aborts** will be triggered. The **`I`** configures to respond to external hardware **Interrupts Requests** (IRQs). and the F is related to **Fast Interrupt Requests** (FIRs).
+- **`AIF`**: Ciertas excepciones pueden desactivarse usando los bits **`A`**, `I`, `F`. Si **`A`** es 1 significa que se dispararán abortos asincrónicos. El **`I`** configura la respuesta a solicitudes de interrupción (IRQs) de hardware externo, y la **`F`** está relacionada con solicitudes de interrupción rápida (FIRs).
 
 ## macOS
 
 ### BSD syscalls
 
-Check out [**syscalls.master**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/bsd/kern/syscalls.master) or run `cat /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/syscall.h`. BSD syscalls will have **x16 > 0**.
+Consulta [**syscalls.master**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/bsd/kern/syscalls.master) o ejecuta `cat /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/syscall.h`. BSD syscalls tendrán **x16 > 0**.
 
 ### Mach Traps
 
-Check out in [**syscall_sw.c**](https://opensource.apple.com/source/xnu/xnu-3789.1.32/osfmk/kern/syscall_sw.c.auto.html) the `mach_trap_table` and in [**mach_traps.h**](https://opensource.apple.com/source/xnu/xnu-3789.1.32/osfmk/mach/mach_traps.h) the prototypes. The mex number of Mach traps is `MACH_TRAP_TABLE_COUNT` = 128. Mach traps will have **x16 < 0**, so you need to call the numbers from the previous list with a **minus**: **`_kernelrpc_mach_vm_allocate_trap`** is **`-10`**.
+Consulta en [**syscall_sw.c**](https://opensource.apple.com/source/xnu/xnu-3789.1.32/osfmk/kern/syscall_sw.c.auto.html) la `mach_trap_table` y en [**mach_traps.h**](https://opensource.apple.com/source/xnu/xnu-3789.1.32/osfmk/mach/mach_traps.h) los prototipos. El número máximo de Mach traps es `MACH_TRAP_TABLE_COUNT` = 128. Mach traps tendrán **x16 < 0**, por lo que necesitas llamar a los números de la lista anterior con un **signo menos**: **`_kernelrpc_mach_vm_allocate_trap`** es **`-10`**.
 
-You can also check **`libsystem_kernel.dylib`** in a disassembler to find how to call these (and BSD) syscalls:
+También puedes revisar **`libsystem_kernel.dylib`** en un desensamblador para encontrar cómo llamar a estos (y a los syscalls BSD):
 ```bash
 # macOS
 dyldex -e libsystem_kernel.dylib /System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/dyld_shared_cache_arm64e
@@ -331,29 +343,29 @@ dyldex -e libsystem_kernel.dylib /System/Library/Caches/com.apple.dyld/dyld_shar
 Note that **Ida** and **Ghidra** can also decompile **specific dylibs** from the cache just by passing the cache.
 
 > [!TIP]
-> A veces es más fácil revisar el código **descompilado** de **`libsystem_kernel.dylib`** **que** revisar el **código fuente**, porque el código de varias syscalls (BSD and Mach) se genera mediante scripts (revisa los comentarios en el código fuente) mientras que en el dylib puedes ver qué se está llamando.
+> A veces es más fácil revisar el código **descompilado** de **`libsystem_kernel.dylib`** **que** revisar el **código fuente** porque el código de varios syscalls (BSD y Mach) se genera mediante scripts (revisa los comentarios en el código fuente) mientras que en el dylib puedes encontrar qué se está llamando.
 
 ### machdep calls
 
-XNU soporta otro tipo de llamadas llamadas machine dependent. Los números de estas llamadas dependen de la arquitectura y ni las llamadas ni los números están garantizados a permanecer constantes.
+XNU admite otro tipo de llamadas llamadas dependientes de la máquina. Los números de estas llamadas dependen de la arquitectura y ni las llamadas ni los números están garantizados a permanecer constantes.
 
 ### comm page
 
-Esta es una página de memoria propiedad del kernel que se mapea en el address space de cada proceso de usuario. Está pensada para hacer la transición de user mode a kernel space más rápida que usando syscalls para servicios del kernel que se usan tanto que esta transición sería muy ineficiente.
+Esta es una página de memoria propiedad del kernel que se mapea en el espacio de direcciones de cada proceso de usuario. Está diseñada para hacer la transición de modo de usuario a espacio del kernel más rápida que usar syscalls para servicios del kernel que se usan tan frecuentemente que esta transición sería muy ineficiente.
 
-Por ejemplo la llamada `gettimeofdate` lee el valor de `timeval` directamente desde la comm page.
+For example the call `gettimeofdate` reads the value of `timeval` directly from the comm page.
 
 ### objc_msgSend
 
-Es muy común encontrar esta función usada en programas Objective-C o Swift. Esta función permite llamar un método de un objeto Objective-C.
+It's super common to find this function used in Objective-C or Swift programs. This function allows to call a method of an objective-C object.
 
-Parámetros ([more info in the docs](https://developer.apple.com/documentation/objectivec/1456712-objc_msgsend)):
+Parameters ([more info in the docs](https://developer.apple.com/documentation/objectivec/1456712-objc_msgsend)):
 
 - x0: self -> Puntero a la instancia
 - x1: op -> Selector del método
 - x2... -> Resto de los argumentos del método invocado
 
-Así que, si pones un breakpoint antes de la rama a esta función, puedes encontrar fácilmente qué se invoca en lldb con (en este ejemplo el objeto llama a un objeto de `NSConcreteTask` que ejecutará un comando):
+So, if you put breakpoint before the branch to this function, you can easily find what is invoked in lldb with (in this example the object calls an object from `NSConcreteTask` that will run a command):
 ```bash
 # Right in the line were objc_msgSend will be called
 (lldb) po $x0
@@ -372,25 +384,25 @@ whoami
 )
 ```
 > [!TIP]
-> Estableciendo la variable de entorno **`NSObjCMessageLoggingEnabled=1`** es posible registrar cuándo se llama a esta función en un archivo como `/tmp/msgSends-pid`.
+> Al establecer la variable de entorno **`NSObjCMessageLoggingEnabled=1`** es posible hacer log de cuándo se llama a esta función en un archivo como `/tmp/msgSends-pid`.
 >
-> Además, estableciendo **`OBJC_HELP=1`** y ejecutando cualquier binario puedes ver otras variables de entorno que podrías usar para **log** cuando ocurren ciertas acciones Objc-C.
+> Además, al establecer **`OBJC_HELP=1`** y ejecutar cualquier binario puedes ver otras variables de entorno que podrías usar para **log** cuando ocurren ciertas acciones Objc-C.
 
-Cuando se llama a esta función, es necesario encontrar el método invocado de la instancia indicada; para ello se realizan las siguientes búsquedas:
+Cuando se llama a esta función, es necesario encontrar el método invocado de la instancia indicada; para ello se realizan distintas búsquedas:
 
-- Realizar búsqueda optimista en cache:
-- Si tiene éxito, listo
-- Adquirir runtimeLock (lectura)
+- Perform optimistic cache lookup:
+- If successful, done
+- Acquire runtimeLock (read)
 - If (realize && !cls->realized) realize class
 - If (initialize && !cls->initialized) initialize class
-- Probar cache propia de la clase:
-- Si tiene éxito, listo
-- Intentar la lista de métodos de la clase:
-- Si se encuentra, llenar cache y listo
-- Probar cache de la superclass:
-- Si tiene éxito, listo
-- Intentar la lista de métodos de la superclass:
-- Si se encuentra, llenar cache y listo
+- Try class own cache:
+- If successful, done
+- Try class method list:
+- If found, fill cache and done
+- Try superclass cache:
+- If successful, done
+- Try superclass method list:
+- If found, fill cache and done
 - If (resolver) try method resolver, and repeat from class lookup
 - If still here (= all else has failed) try forwarder
 
@@ -411,7 +423,7 @@ for c in $(objdump -d "s.o" | grep -E '[0-9a-f]+:' | cut -f 1 | cut -d : -f 2) ;
 echo -n '\\x'$c
 done
 ```
-Para versiones más recientes de macOS:
+Para macOS más recientes:
 ```bash
 # Code from https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/fc0742e9ebaf67c6a50f4c38d59459596e0a6c5d/helper/extract.sh
 for s in $(objdump -d "s.o" | grep -E '[0-9a-f]+:' | cut -f 1 | cut -d : -f 2) ; do
@@ -420,7 +432,7 @@ done
 ```
 <details>
 
-<summary>Código C para probar el shellcode</summary>
+<summary>C code para probar el shellcode</summary>
 ```c
 // code from https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/helper/loader.c
 // gcc loader.c -o loader
@@ -542,7 +554,7 @@ sh_path: .asciz "/bin/sh"
 
 #### Leer con cat
 
-El objetivo es ejecutar `execve("/bin/cat", ["/bin/cat", "/etc/passwd"], NULL)`, por lo que el segundo argumento (x1) es un array de params (que en memoria significa un stack con las direcciones).
+El objetivo es ejecutar `execve("/bin/cat", ["/bin/cat", "/etc/passwd"], NULL)`, así que el segundo argumento (x1) es un array de parámetros (lo que en memoria significa una pila de direcciones).
 ```armasm
 .section __TEXT,__text     ; Begin a new section of type __TEXT and name __text
 .global _main              ; Declare a global symbol _main

