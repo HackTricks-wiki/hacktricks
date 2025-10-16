@@ -447,7 +447,7 @@ __END_DECLS
 
 - [**\*OS Internals Volume III**](https://newosxbook.com/home.html)
 
-{{#include ../../../banners/hacktricks-training.md}}
+
 
 
 
@@ -462,3 +462,4 @@ AMFI registers label #1 - attacher to the creds stores the entielements of proce
 during kern_exec.c -> exec_actovate_image -> macho activation (loader) -> load_code_signature --> hook vnode_check_signature
 
 this will offload all of the 
+{{#include ../../../banners/hacktricks-training.md}}
