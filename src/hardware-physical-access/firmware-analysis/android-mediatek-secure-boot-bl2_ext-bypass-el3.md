@@ -2,51 +2,51 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Ukurasa huu unaelezea kuvunjwa kwa secure-boot katika majukwaa kadhaa za MediaTek kwa kutumia pengo la uthibitishaji wakati usanidi wa bootloader wa kifaa (seccfg) uko "unlocked". Hitilafu hii inaruhusu kuendesha bl2_ext iliyorekebishwa kwenye ARM EL3 ili kuzima ukaguzi wa saini kwa hatua za chini, kuvunja mnyororo wa uaminifu na kuwezesha upakiaji wa TEE/GZ/LK/Kernel zisizosainiwa kwa hiari.
+Ukurasa huu unaelezea kuvunjwa kwa secure-boot kwa vitendo kwenye majukwaa mbalimbali ya MediaTek kwa kutumia pengo la uthibitisho wakati usanidi wa bootloader wa kifaa (seccfg) uko "unlocked". Hitilafu inaruhusu kuendesha bl2_ext iliyorekebishwa kwa ARM EL3 ili kuzima uthibitisho wa saini zinazofuata, kuangusha chain of trust na kuwezesha upakiaji wa TEE/GZ/LK/Kernel zisizo na saini yoyote.
 
-> Tahadhari: Kurekebisha mapema wakati wa boot kunaweza ku-brick vifaa kwa kudumu endapo offsets sio sahihi. Daima hifadhi full dumps na njia ya recovery inayotegemeka.
+> Tahadhari: Kupatchi mapema wakati wa boot kunaweza kufanya vifaa kuwa vilivyoharibika kabisa ikiwa offsets sio sahihi. Daima hifadhi dumps kamili na njia ya kupona inayotegemewa.
 
-## Mtiririko wa boot unaoathiriwa (MediaTek)
+## Affected boot flow (MediaTek)
 
 - Njia ya kawaida: BootROM → Preloader → bl2_ext (EL3, verified) → TEE → GenieZone (GZ) → LK/AEE → Linux kernel (EL1)
-- Njia yenye hatari: Wakati seccfg imewekwa kuwa "unlocked", Preloader inaweza kupuuza kuthibitisha bl2_ext. Preloader bado inaendelea kutekeleza bl2_ext kwenye EL3, hivyo bl2_ext iliyotengenezwa inaweza kupakia vipengele visivyoidhinishwa baadaye.
+- Njia dhaifu: Wakati seccfg imewekwa kuwa "unlocked", Preloader inaweza kuruka kuthibitisha bl2_ext. Preloader bado inaelea ndani ya bl2_ext kwa EL3, hivyo bl2_ext iliyotengenezwa inaweza kupakia vipengele visivyothibitishwa baadaye.
 
-Mipaka muhimu ya uaminifu:
-- bl2_ext inatekelezwa kwenye EL3 na inawajibika kuthibitisha TEE, GenieZone, LK/AEE na kernel. Ikiwa bl2_ext yenyewe haitathibitishwa, mnyororo mzima wa uaminifu unaweza kupitishwa kwa urahisi.
+Mlipuko muhimu wa uaminifu:
+- bl2_ext inaendesha kwa EL3 na inawajibika kuthibitisha TEE, GenieZone, LK/AEE na kernel. Ikiwa bl2_ext yenyewe haijathibitishwa, sehemu nyingine za chain zinaweza kupitishwa kwa urahisi.
 
-## Chanzo
+## Root cause
 
-Kwenye vifaa vinavyoathirika, Preloader haitekelezi uthibitishaji wa partition ya bl2_ext wakati seccfg inaonyesha hali ya "unlocked". Hii inaruhusu kuflash bl2_ext inayodhibitiwa na mshambuliaji inayotekelezwa kwenye EL3.
+Katika vifaa vilivyoathiriwa, Preloader haitekelezi uthibitishaji wa partition ya bl2_ext wakati seccfg inaonyesha hali ya "unlocked". Hii inaruhusu ku-flash bl2_ext inayodhibitiwa na mshambuliaji ambayo inaendesha kwa EL3.
 
-Ndani ya bl2_ext, kazi ya sera ya uthibitishaji inaweza kufanyiwa patch ili kuripoti bila masharti kuwa uthibitishaji hauhitajiki. Patch ya dhana ndogo ni:
+Ndani ya bl2_ext, kazi ya sera ya uthibitisho inaweza kupatchiwa ili kuripoti bila masharti kuwa uthibitisho hauhitajiki. Patch ndogo ya dhana ni:
 ```c
 // inside bl2_ext
 int sec_get_vfy_policy(...) {
 return 0; // always: "no verification required"
 }
 ```
-Kwa mabadiliko haya, picha zote zinazofuata (TEE, GZ, LK/AEE, Kernel) zinakubaliwa bila ukaguzi wa kriptografia zinapopakiwa na bl2_ext iliyorekebishwa inayotekelezwa kwenye EL3.
+Kwa mabadiliko haya, images zote zinazofuata (TEE, GZ, LK/AEE, Kernel) zinakubaliwa bila ukaguzi wa kriptografia wakati zinapopakiwa na bl2_ext iliyorekebishwa inayotumia EL3.
 
 ## Jinsi ya kuchambua lengo (expdb logs)
 
-Dump/inspect boot logs (e.g., expdb) karibu na upakiaji wa bl2_ext. Ikiwa img_auth_required = 0 na wakati wa uhakiki wa cheti ni ~0 ms, uwezekano ni kwamba utekekaji umezimwa na kifaa kinaweza kuwa exploitable.
+Toa/angalia kumbukumbu za boot (kwa mfano, expdb) karibu na upakiaji wa bl2_ext. Ikiwa img_auth_required = 0 na muda wa uthibitishaji wa cheti ni ~0 ms, utekelezaji huenda umezimwa na kifaa kinaweza kushambuliwa.
 
-Mfano wa kifungu cha log:
+Mfano wa kifungu cha logi:
 ```
 [PART] img_auth_required = 0
 [PART] Image with header, name: bl2_ext, addr: FFFFFFFFh, mode: FFFFFFFFh, size:654944, magic:58881688h
 [PART] part: lk_a img: bl2_ext cert vfy(0 ms)
 ```
-Kumbuka: Ripoti zinaonyesha kuwa baadhi ya vifaa hupitisha uidhinishaji wa bl2_ext hata ikiwa bootloader imefungwa, jambo linaloongeza athari.
+Kumbuka: Vifaa vingine, kulingana na ripoti, hupita ukaguzi wa bl2_ext hata bootloader ikiwa imefungwa, jambo linaloongeza athari.
 
-## Practical exploitation workflow (Fenrir PoC)
+## Mtiririko wa utekelezaji wa exploitation (Fenrir PoC)
 
-Fenrir ni reference exploit/patching toolkit kwa darasa hili la tatizo. Inaunga mkono Nothing Phone (2a) (Pacman) na inajulikana kufanya kazi (kwa msaada usio kamili) kwenye CMF Phone 1 (Tetris). Kurekebisha kwa modeli nyingine kunahitaji reverse engineering ya bl2_ext maalum ya kifaa.
+Fenrir ni toolkit ya marejeleo ya exploit/patching kwa aina hii ya tatizo. Inasaidia Nothing Phone (2a) (Pacman) na inajulikana kufanya kazi (kwa usaidizi usio kamili) kwenye CMF Phone 1 (Tetris). Kuhamisha kwa mifano mingine kunahitaji reverse engineering ya bl2_ext maalum kwa kifaa.
 
-High-level process:
-- Pata device bootloader image kwa codename lengwa na uweke kama bin/<device>.bin
-- Jenga patched image inayozima bl2_ext verification policy
-- Flash payload itokanayo kwenye kifaa (fastboot inachukuliwa na helper script)
+Mchakato wa ngazi ya juu:
+- Pata image ya bootloader ya kifaa kwa codename unayolenga na uiweke kama bin/<device>.bin
+- Jenga patched image inayozima sera ya ukaguzi ya bl2_ext
+- Flash payload itokanayo kwenye kifaa (fastboot inachukuliwa na script ya msaada)
 
 Amri:
 ```bash
@@ -61,39 +61,39 @@ Amri:
 ```
 If fastboot is unavailable, you must use a suitable alternative flashing method for your platform.
 
-## Runtime payload capabilities (EL3)
+## Uwezo wa payload za runtime (EL3)
 
 A patched bl2_ext payload can:
-- Sajili amri za fastboot maalum
+- Sajili amri maalum za fastboot
 - Dhibiti/override boot mode
-- Kuita kwa njia ya dynamic kazi za built‑in za bootloader wakati wa runtime
-- Spoof “lock state” as locked while actually unlocked to pass stronger integrity checks (some environments may still require vbmeta/AVB adjustments)
+- Kuita kwa nguvu kazi za built‑in bootloader wakati wa runtime
+- Spoof “lock state” kuwa locked wakati kwa kweli ni unlocked ili kupitisha ukaguzi wa uadilifu wenye nguvu (mazingira mengine yanaweza bado kuhitaji marekebisho ya vbmeta/AVB)
 
-Limitation: PoCs za sasa zinaonyesha kuwa mabadiliko ya kumbukumbu wakati wa runtime yanaweza kusababisha fault kutokana na vikwazo vya MMU; payloads kwa ujumla huepuka kuandika moja kwa moja kwenye kumbukumbu hai hadi hili litakaposuluhishwa.
+Limitation: Current PoCs note that runtime memory modification may fault due to MMU constraints; payloads generally avoid live memory writes until this is resolved.
 
-## Porting tips
+## Vidokezo vya porting
 
-- Reverse engineer bl2_ext ya kifaa ili kutambua mantiki ya sera ya uthibitishaji (mf., sec_get_vfy_policy).
-- Tambua site ya return ya sera au tawi la uamuzi na patch ili “no verification required” (return 0 / unconditional allow).
-- Hifadhi offsets ziwe kabisa device- na firmware-specific; usitumie addresses kati ya variants.
-- Validate kwenye kifaa cha majaribio kwanza. Andaa mpango wa recovery (mf., EDL/BootROM loader/SoC-specific download mode) kabla ya flash.
+- Fanya reverse engineering ya bl2_ext maalum kwa kifaa ili kupata mantiki ya sera ya uthibitisho (e.g., sec_get_vfy_policy).
+- Tambua tovuti ya kurudishiwa sera au tawi la uamuzi na i-patch ili “no verification required” (return 0 / unconditional allow).
+- Hifadhi offsets kuwa maalum kabisa kwa kifaa na firmware; usitumie tena anwani kati ya variants.
+- Thibitisha kwanza kwenye kifaa cha majaribio. Andaa mpango wa urejeshaji (e.g., EDL/BootROM loader/SoC-specific download mode) kabla ya kuflash.
 
-## Security impact
+## Athari za usalama
 
-- EL3 code execution after Preloader and full chain-of-trust collapse for the rest of the boot path.
-- Uwezo wa boot unsigned TEE/GZ/LK/Kernel, bypassing secure/verified boot expectations and enabling persistent compromise.
+- Utekelezaji wa code ya EL3 baada ya Preloader na collapse ya full chain-of-trust kwa sehemu iliyobaki ya boot path.
+- Uwezo wa kuanzisha unsigned TEE/GZ/LK/Kernel, ukiepuka matarajio ya secure/verified boot na kuwezesha kompromisi ya kudumu.
 
-## Detection and hardening ideas
+## Mawazo ya utambuzi na hardening
 
-- Hakikisha Preloader inathibitisha bl2_ext bila kujali seccfg state.
-- Tekeleza authentication results na kusanya ushahidi wa audit (timings > 0 ms, strict errors on mismatch).
-- Lock-state spoofing inapaswa kutengenezwa isiyofaa kwa attestation (tie lock state to AVB/vbmeta verification decisions and fuse-backed state).
+- Hakikisha Preloader inathibitisha bl2_ext bila kujali hali ya seccfg.
+- Tekeleza matokeo ya authentication na kusanya ushahidi wa ukaguzi (timings > 0 ms, makosa makali kwa mismatch).
+- Lock-state spoofing inapaswa kutengenezwa isiyofaa kwa ajili ya attestation (unganisha lock state na maamuzi ya uhalisi ya AVB/vbmeta na fuse-backed state).
 
-## Device notes
+## Vidokezo vya kifaa
 
-- Confirmed supported: Nothing Phone (2a) (Pacman)
-- Known working (incomplete support): CMF Phone 1 (Tetris)
-- Observed: Vivo X80 Pro reportedly did not verify bl2_ext even when locked
+- Imethibitishwa kuungwa mkono: Nothing Phone (2a) (Pacman)
+- Inajulikana kufanya kazi (msaada haujakamilika): CMF Phone 1 (Tetris)
+- Imeonekana: Vivo X80 Pro iliripotiwa kuwa haikutathibitisha bl2_ext hata wakati ilipokuwa locked
 
 ## References
 

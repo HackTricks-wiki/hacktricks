@@ -4,26 +4,26 @@
 
 ## Muhtasari
 
-Windows user right: Kufanya kazi za matengenezo ya volumu (constant: SeManageVolumePrivilege).
+Haki ya mtumiaji ya Windows: Perform volume maintenance tasks (constant: SeManageVolumePrivilege).
 
-Wanaomiliki wanaweza kufanya shughuli za chini za volumu kama defragmentation, kuunda/kuondoa volumu, na maintenance I/O. Muhimu kwa washambuliaji, haki hii inawezesha kufungua handles za kifaa cha volumu ghafi (mfano, \\.\C:) na kutoa I/O ya diski ya moja kwa moja inayoruka ACLs za faili za NTFS. Kwa ufikiaji ghafi unaweza kunakili bytes za faili yoyote kwenye volumu hata kama DACL inakataza, kwa kuchambua miundo ya filesystem nje ya mtandao au kutumia zana zinazosomea kwa ngazi ya block/cluster.
+Wanaoshikilia haki hii wanaweza kufanya shughuli za chini za volumu kama defragmentation, kuunda/kuondoa volumu, na matengenezo ya I/O. Muhimu kwa wadukuzi, haki hii inaruhusu kufungua raw volume device handles (mfano, \\.\C:) na kutoa disk I/O ya moja kwa moja inayopitisha NTFS file ACLs. Kwa ufikiaji ghafi unaweza kunakili byte za faili yoyote kwenye volumu hata kama DACL inakataza, kwa kuchanganua miundo ya filesystem nje ya mtandao (offline) au kwa kutumia zana zinazosomea kwa ngazi ya block/cluster.
 
 Chaguo-msingi: Administrators kwenye servers na domain controllers.
 
-## Matukio ya matumizi mabaya
+## Mifano ya matumizi mabaya
 
-- Kusoma faili yoyote kwa kuruka ACLs kwa kusoma kifaa cha diski (mfano, kuhamisha nje nyenzo nyeti zilizo chini ya ulinzi wa mfumo kama machine private keys chini ya %ProgramData%\Microsoft\Crypto\RSA\MachineKeys na %ProgramData%\Microsoft\Crypto\Keys, registry hives, DPAPI masterkeys, SAM, ntds.dit kupitia VSS, n.k.).
-- Kupitisha njia zilizofungwa/za kipaumbele (C:\Windows\System32\…) kwa kunakili bytes moja kwa moja kutoka kwenye kifaa ghafi.
-- Katika mazingira ya AD CS, kuhamisha nje nyenzo za funguo za CA (machine key store) ili kutengeneza “Golden Certificates” na kujifanya mtu yeyote wa domain kupitia PKINIT. Angalia kiungo hapa chini.
+- Kusoma faili kwa hiari bila kuzingatia ACLs kwa kusoma kifaa cha disk (mfano, ku-exfiltrate nyenzo nyeti zilizo chini ya ulinzi wa mfumo kama private keys za mashine chini ya %ProgramData%\Microsoft\Crypto\RSA\MachineKeys na %ProgramData%\Microsoft\Crypto\Keys, registry hives, DPAPI masterkeys, SAM, ntds.dit kupitia VSS, n.k.).
+- Kupitisha njia zilizofungwa/zinazopewa kipengele maalum (C:\Windows\System32\…) kwa kunakili byte moja kwa moja kutoka kwenye kifaa ghafi.
+- Katika mazingira ya AD CS, ku-exfiltrate nyenzo za kiufunguo za CA (machine key store) ili kutengeneza “Golden Certificates” na kuiga yoyote domain principal kupitia PKINIT. Tazama kiungo hapo chini.
 
-Kumbuka: Bado unahitaji parser kwa miundo ya NTFS isipokuwa ukitegemea zana za msaada. Zana nyingi za sokoni tayari zimeficha ufikiaji ghafi.
+Kumbuka: Bado unahitaji parser wa miundo ya NTFS isipokuwa ukitegemea zana za msaada. Zana nyingi za off-the-shelf zinaficha ufikiaji ghafi.
 
 ## Mbinu za vitendo
 
-- Open a raw volume handle and read clusters:
+- Fungua handle ya volumu ghafi na usome clusters:
 
 <details>
-<summary>Bonyeza ili kupanua</summary>
+<summary>Bofya ili kupanua</summary>
 ```powershell
 # PowerShell – read first MB from C: raw device (requires SeManageVolumePrivilege)
 $fs = [System.IO.File]::Open("\\.\\C:",[System.IO.FileMode]::Open,[System.IO.FileAccess]::Read,[System.IO.FileShare]::ReadWrite)
@@ -49,9 +49,9 @@ File.WriteAllBytes("C:\\temp\\blk.bin", buf);
 ```
 </details>
 
-- Tumia chombo kinachojua NTFS kurejesha faili maalum kutoka kwenye volume ghafi:
+- Tumia zana inayojua NTFS kurejesha faili maalum kutoka kwenye volume ghafi:
 - RawCopy/RawCopy64 (sector-level copy of in-use files)
-- FTK Imager or The Sleuth Kit (read-only imaging, then carve files)
+- FTK Imager or The Sleuth Kit (kuunda picha kwa read-only, kisha kuchimba faili)
 - vssadmin/diskshadow + shadow copy, then copy target file from the snapshot (if you can create VSS; often requires admin but commonly available to the same operators that hold SeManageVolumePrivilege)
 
 Typical sensitive paths to target:
@@ -61,22 +61,22 @@ Typical sensitive paths to target:
 - C:\Windows\NTDS\ntds.dit (domain controllers – via shadow copy)
 - C:\Windows\System32\CertSrv\CertEnroll\ (CA certs/CRLs; private keys live in the machine key store above)
 
-## AD CS Uunganisho: Forging a Golden Certificate
+## AD CS tie‑in: Forging a Golden Certificate
 
-Ikiwa unaweza kusoma private key ya Enterprise CA kutoka kwenye machine key store, unaweza kutengeneza client‑auth certificates kwa principals yoyote na kujiathentisha kupitia PKINIT/Schannel. Hii mara nyingi huitwa Golden Certificate. Tazama:
+Ikiwa unaweza kusoma ufunguo wa faragha wa Enterprise CA kutoka kwenye machine key store, unaweza kuunda vyeti vya client‑auth kwa wadhamini wowote na kuthibitisha kupitia PKINIT/Schannel. Hii mara nyingi huitwa Golden Certificate. Angalia:
 
 {{#ref}}
 ../active-directory-methodology/ad-certificates/domain-persistence.md
 {{#endref}}
 
-(Sehemu: “Forging Certificates with Stolen CA Certificates (Golden Certificate) – DPERSIST1”).
+(Section: “Forging Certificates with Stolen CA Certificates (Golden Certificate) – DPERSIST1”).
 
-## Ugunduzi na kuimarisha
+## Utambuzi na kuimarisha
 
-- Punguza kwa nguvu ugawi wa SeManageVolumePrivilege (Perform volume maintenance tasks) kwa wasimamizi waliothibitishwa tu.
-- Fuatilia Sensitive Privilege Use na ufunguzi wa process handle kwa device objects kama \\.\C:, \\.\PhysicalDrive0.
-- Pendelea HSM/TPM-backed CA keys au DPAPI-NG ili kusoma faili ghafi kusiweze kurejesha nyenzo za funguo kwa namna zinazoweza kutumika.
-- Weka njia za uploads, temp, na extraction zisizotekelezwa (non-executable) na zimetengwa (defense ya muktadha wa web ambayo mara nyingi huambatana na mnyororo huu baada ya post‑exploitation).
+- Punguza kwa kiasi kikubwa utoaji wa SeManageVolumePrivilege (Perform volume maintenance tasks) kwa wasimamizi walioaminika tu.
+- Fuatilia Sensitive Privilege Use na ufunguzi wa handles za mchakato kwa vitu vya kifaa kama \\.\C:, \\.\PhysicalDrive0.
+- Pendelea ufunguo za CA zinazotegemea HSM/TPM au DPAPI-NG ili kusoma faili ghafi kusiweze kurejesha nyenzo za ufunguo kwa namna inayoweza kutumika.
+- Weka njia za uploads, temp, na extraction zisizotekelezeka na zilizo tengana (ulinzi katika muktadha wa wavuti unaoambatana mara nyingi na mnyororo huu baada ya post‑exploitation).
 
 ## Marejeo
 

