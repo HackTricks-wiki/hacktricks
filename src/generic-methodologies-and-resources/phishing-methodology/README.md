@@ -2,41 +2,42 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## 方法
+## Methodology
 
-1. 侦察受害者
-1. 选择 **victim domain**。
-2. 对目标的网站进行基础枚举，**搜索 login portals** 并决定你要**冒充**哪一个。
-3. 使用一些 **OSINT** 来 **查找 emails**。
-2. 准备环境
-1. **Buy the domain** 作为 phishing 评估中使用的域名
-2. 配置与 email service 相关的记录（SPF, DMARC, DKIM, rDNS）
-3. 在 VPS 上配置 **gophish**
-3. 准备活动
-1. 准备 **email template**
-2. 准备用于窃取凭证的 **web page**
-4. 发起活动！
+1. Recon the victim
+1. Select the **victim domain**.
+2. Perform some basic web enumeration **searching for login portals** used by the victim and **decide** which one you will **impersonate**.
+3. Use some **OSINT** to **find emails**.
+2. Prepare the environment
+1. **Buy the domain** you are going to use for the phishing assessment
+2. **Configure the email service** related records (SPF, DMARC, DKIM, rDNS)
+3. Configure the VPS with **gophish**
+3. Prepare the campaign
+1. Prepare the **email template**
+2. Prepare the **web page** to steal the credentials
+4. Launch the campaign!
 
-## 生成相似域名或购买可信域名
+## Generate similar domain names or buy a trusted domain
 
-### 域名变体技巧
+### Domain Name Variation Techniques
 
-- **Keyword**：域名包含原始域名的重要**keyword**（例如，zelster.com-management.com）。
-- **hypened subdomain**：将子域名的**点改为连字符**（例如，www-zelster.com）。
-- **New TLD**：使用不同的**TLD**（例如，zelster.org）
-- **Homoglyph**：用**外观相似的字符**替换域名中的字母（例如，zelfser.com）。
+- **Keyword**: The domain name **contains** an important **keyword** of the original domain (e.g., zelster.com-management.com).
+- **hypened subdomain**: Change the **dot for a hyphen** of a subdomain (e.g., www-zelster.com).
+- **New TLD**: Same domain using a **new TLD** (e.g., zelster.org)
+- **Homoglyph**: It **replaces** a letter in the domain name with **letters that look similar** (e.g., zelfser.com).
+
 
 {{#ref}}
 homograph-attacks.md
 {{#endref}}
-- **Transposition：** 在域名中**交换两个字母**（例如，zelsetr.com）。
-- **Singularization/Pluralization：** 在域名末尾添加或删除 “s”（例如，zeltsers.com）。
-- **Omission：** 从域名中**删除一个字母**（例如，zelser.com）。
-- **Repetition：** 在域名中**重复一个字母**（例如，zeltsser.com）。
-- **Replacement：** 类似 homoglyph 但不那么隐蔽。用其他字母替换域名中的某个字母，可能是键盘上邻近的字母（例如，zektser.com）。
-- **Subdomained：** 在域名内部引入一个**点**（例如，ze.lster.com）。
-- **Insertion：** 在域名中**插入一个字母**（例如，zerltser.com）。
-- **Missing dot：** 将 TLD 直接附加到域名（例如，zelstercom.com）
+- **Transposition:** It **swaps two letters** within the domain name (e.g., zelsetr.com).
+- **Singularization/Pluralization**: Adds or removes “s” at the end of the domain name (e.g., zeltsers.com).
+- **Omission**: It **removes one** of the letters from the domain name (e.g., zelser.com).
+- **Repetition:** It **repeats one** of the letters in the domain name (e.g., zeltsser.com).
+- **Replacement**: Like homoglyph but less stealthy. It replaces one of the letters in the domain name, perhaps with a letter in proximity of the original letter on the keyboard (e.g, zektser.com).
+- **Subdomained**: Introduce a **dot** inside the domain name (e.g., ze.lster.com).
+- **Insertion**: It **inserts a letter** into the domain name (e.g., zerltser.com).
+- **Missing dot**: Append the TLD to the domain name. (e.g., zelstercom.com)
 
 **Automatic Tools**
 
@@ -51,25 +52,25 @@ homograph-attacks.md
 
 ### Bitflipping
 
-存在一种可能性：存储或通信中的某些位可能会由于太阳耀斑、宇宙射线或硬件错误等各种因素而**自动翻转**。
+There is a **possibility that one of some bits stored or in communication might get automatically flipped** due to various factors like solar flares, cosmic rays, or hardware errors.
 
-当这个概念**应用到 DNS 请求**时，可能会导致**DNS 服务器接收到的域名**与最初请求的域名不一致。
+When this concept is **applied to DNS requests**, it is possible that the **domain received by the DNS server** is not the same as the domain initially requested.
 
-例如，域名 "windows.com" 的单个位被修改，可能变为 "windnws.com"。
+For example, a single bit modification in the domain "windows.com" can change it to "windnws.com."
 
-攻击者可能通过注册多个类似于受害者域名的 bit-flipping 域名来利用这一点。他们的目的是将合法用户重定向到自己的基础设施。
+Attackers may **take advantage of this by registering multiple bit-flipping domains** that are similar to the victim's domain. Their intention is to redirect legitimate users to their own infrastructure.
 
-更多信息请阅读 [https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)
+For more information read [https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)
 
-### 购买可信域名
+### Buy a trusted domain
 
-你可以在 [https://www.expireddomains.net/](https://www.expireddomains.net) 上搜索可以购买的过期域名。\
-为了确保你要购买的过期域名**已经有良好的 SEO**，你可以在以下位置检查它的分类情况：
+You can search in [https://www.expireddomains.net/](https://www.expireddomains.net) for a expired domain that you could use.\
+In order to make sure that the expired domain that you are going to buy **has already a good SEO** you could search how is it categorized in:
 
 - [http://www.fortiguard.com/webfilter](http://www.fortiguard.com/webfilter)
 - [https://urlfiltering.paloaltonetworks.com/query/](https://urlfiltering.paloaltonetworks.com/query/)
 
-## 发现 Emails
+## Discovering Emails
 
 - [https://github.com/laramies/theHarvester](https://github.com/laramies/theHarvester) (100% free)
 - [https://phonebook.cz/](https://phonebook.cz) (100% free)
@@ -77,8 +78,8 @@ homograph-attacks.md
 - [https://hunter.io/](https://hunter.io)
 - [https://anymailfinder.com/](https://anymailfinder.com)
 
-为了**发现更多**有效的 email 地址或**验证已发现的地址**，你可以尝试对目标的 smtp servers 进行暴力枚举。 [Learn how to verify/discover email address here](../../network-services-pentesting/pentesting-smtp/index.html#username-bruteforce-enumeration)。\
-此外，不要忘记如果用户通过**任何 web portal**访问他们的邮件，你可以检查该 portal 是否易受**username brute force**，并在可能的情况下利用该漏洞。
+In order to **discover more** valid email addresses or **verify the ones** you have already discovered you can check if you can brute-force them smtp servers of the victim. [Learn how to verify/discover email address here](../../network-services-pentesting/pentesting-smtp/index.html#username-bruteforce-enumeration).\
+Moreover, don't forget that if the users use **any web portal to access their mails**, you can check if it's vulnerable to **username brute force**, and exploit the vulnerability if possible.
 
 ## Configuring GoPhish
 
@@ -95,7 +96,7 @@ ssh -L 3333:127.0.0.1:3333 <user>@<ip>
 
 **TLS 证书配置**
 
-在此步骤之前，你应该已经**购买好将要使用的域名**，并且该域名必须**指向**用于配置 **gophish** 的 **VPS** 的 **IP**。
+在此步骤之前，你应该**已经购买将要使用的域名**，并且它必须**指向**用于配置 **gophish** 的 **VPS 的 IP**。
 ```bash
 DOMAIN="<domain>"
 wget https://dl.eff.org/certbot-auto
@@ -113,9 +114,9 @@ cp "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" /opt/gophish/ssl_keys/key.crt�
 ```
 **邮件配置**
 
-开始安装：`apt-get install postfix`
+开始安装: `apt-get install postfix`
 
-然后将域名添加到以下文件：
+然后将域添加到以下文件:
 
 - **/etc/postfix/virtual_domains**
 - **/etc/postfix/transport**
@@ -126,19 +127,19 @@ cp "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" /opt/gophish/ssl_keys/key.crt�
 `myhostname = <domain>`\
 `mydestination = $myhostname, <domain>, localhost.com, localhost`
 
-最后修改文件 **`/etc/hostname`** 和 **`/etc/mailname`** 为你的域名并 **重启你的 VPS。**
+最后将文件 **`/etc/hostname`** 和 **`/etc/mailname`** 修改为你的域名，并 **重启你的 VPS.**
 
-现在创建一个 **DNS A record** 为 `mail.<domain>`，指向 VPS 的 **ip address**，并创建一个 **DNS MX** 记录 指向 `mail.<domain>`
+现在为 `mail.<domain>` 创建一个 **DNS A record**，指向 VPS 的 **IP 地址**，并创建一个 **DNS MX** 记录指向 `mail.<domain>`
 
-现在测试发送一封邮件：
+现在让我们测试发送邮件：
 ```bash
 apt install mailutils
 echo "This is the body of the email" | mail -s "This is the subject line" test@email.com
 ```
 **Gophish 配置**
 
-停止 gophish 的执行并开始配置。\
-将 `/opt/gophish/config.json` 修改为如下内容（注意使用 https）：
+停止 gophish 的运行，然后进行配置。\
+将 `/opt/gophish/config.json` 修改为以下内容（注意使用 https）：
 ```bash
 {
 "admin_server": {
@@ -165,7 +166,7 @@ echo "This is the body of the email" | mail -s "This is the subject line" test@e
 ```
 **配置 gophish 服务**
 
-为了创建 gophish 服务，使其可以自动启动并作为一个服务进行管理，你可以创建文件 `/etc/init.d/gophish` 并写入以下内容：
+为了创建 gophish 服务，使其可以自动启动并作为服务管理，你可以创建文件 `/etc/init.d/gophish`，内容如下：
 ```bash
 #!/bin/bash
 # /etc/init.d/gophish
@@ -212,7 +213,7 @@ case $1 in
 start|stop|status) "$1" ;;
 esac
 ```
-完成配置该服务并检查其运行情况：
+完成服务的配置并检查其运行情况：
 ```bash
 mkdir /var/log/gophish
 chmod +x /etc/init.d/gophish
@@ -225,11 +226,11 @@ service gophish stop
 ```
 ## 配置邮件服务器和域名
 
-### 等待并显得可信
+### 等待并保持合法
 
-域名存在时间越长，被标记为垃圾邮件的概率越低。因此在开展 phishing 评估前应尽量等待（至少 1 week）。此外，如果你在域名上放置与一个有信誉的行业相关的页面，获得的信誉会更好。
+域名存在的时间越久，被判定为垃圾邮件的概率就越低。因此在进行 phishing assessment 之前应尽可能多地等待（至少1week）。此外，如果你放置一个关于声誉良好行业的页面，所获得的 reputation 会更好。
 
-注意，即使需要等待一周，你也可以现在完成所有配置。
+注意即使你必须等待一周，你也可以现在完成所有配置。
 
 ### Configure Reverse DNS (rDNS) record
 
@@ -237,29 +238,29 @@ service gophish stop
 
 ### Sender Policy Framework (SPF) Record
 
-你必须 **configure a SPF record for the new domain**。如果你不知道什么是 SPF 记录 [**read this page**](../../network-services-pentesting/pentesting-smtp/index.html#spf)。
+你必须 **为新域配置 SPF 记录**。如果你不知道什么是 SPF 记录 [**read this page**](../../network-services-pentesting/pentesting-smtp/index.html#spf)。
 
-你可以使用 https://www.spfwizard.net/ 来生成你的 SPF 策略（使用 VPS 的 IP）
+你可以使用 [https://www.spfwizard.net/](https://www.spfwizard.net) 来生成你的 SPF 策略（使用 VPS 机器的 IP）
 
 ![](<../../images/image (1037).png>)
 
-This is the content that must be set inside a TXT record inside the domain:
+以下内容必须作为域名的 TXT 记录设置：
 ```bash
 v=spf1 mx a ip4:ip.ip.ip.ip ?all
 ```
-### 基于域的消息认证、报告与一致性 (DMARC) 记录
+### 基于域的消息认证、报告与一致性 (DMARC) Record
 
-您必须为新域**配置 DMARC 记录**。如果您不知道什么是 DMARC 记录，[**阅读此页面**](../../network-services-pentesting/pentesting-smtp/index.html#dmarc)。
+你必须 **为新域配置 DMARC 记录**。如果你不知道什么是 DMARC 记录，[**阅读此页面**](../../network-services-pentesting/pentesting-smtp/index.html#dmarc)。
 
-您需要创建一个新的 DNS TXT 记录，主机名指向 `_dmarc.<domain>`，内容如下：
+你需要创建一个新的 DNS TXT 记录，指向主机名 `_dmarc.<domain>`，内容如下：
 ```bash
 v=DMARC1; p=none
 ```
-### 域名密钥识别邮件 (DKIM)
+### DomainKeys Identified Mail (DKIM)
 
-你必须为新域名**配置 DKIM**。如果你不知道什么是 DMARC 记录，[**阅读此页**](../../network-services-pentesting/pentesting-smtp/index.html#dkim)。
+你必须**为新域配置 DKIM**。如果你不知道什么是 DMARC 记录，[**阅读此页面**](../../network-services-pentesting/pentesting-smtp/index.html#dkim)。
 
-本教程基于: [https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy)
+This tutorial is based on: [https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy)
 
 > [!TIP]
 > 你需要将 DKIM 密钥生成的两个 B64 值连接起来：
@@ -268,14 +269,14 @@ v=DMARC1; p=none
 > v=DKIM1; h=sha256; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0wPibdqPtzYk81njjQCrChIcHzxOp8a1wjbsoNtka2X9QXCZs+iXkvw++QsWDtdYu3q0Ofnr0Yd/TmG/Y2bBGoEgeE+YTUG2aEgw8Xx42NLJq2D1pB2lRQPW4IxefROnXu5HfKSm7dyzML1gZ1U0pR5X4IZCH0wOPhIq326QjxJZm79E1nTh3xj" "Y9N/Dt3+fVnIbMupzXE216TdFuifKM6Tl6O/axNsbswMS1TH812euno8xRpsdXJzFlB9q3VbMkVWig4P538mHolGzudEBg563vv66U8D7uuzGYxYT4WS8NVm3QBMg0QKPWZaKp+bADLkOSB9J2nUpk4Aj9KB5swIDAQAB
 > ```
 
-### 测试你的邮件配置评分
+### Test your email configuration score
 
-你可以使用 [https://www.mail-tester.com/](https://www.mail-tester.com) 来完成。  
-只需访问该页面并向他们提供的地址发送一封电子邮件：
+你可以使用 [https://www.mail-tester.com/](https://www.mail-tester.com)\\
+只需访问该页面并将邮件发送到他们提供的地址：
 ```bash
 echo "This is the body of the email" | mail -s "This is the subject line" test-iimosa79z@srv1.mail-tester.com
 ```
-你也可以通过发送邮件到 `check-auth@verifier.port25.com` 来**检查你的电子邮件配置**，并**读取响应**（为此你需要**打开** port **25**，如果你以 root 身份发送邮件，则在文件 _/var/mail/root_ 中查看响应）。\
+你也可以通过发送一封邮件到 `check-auth@verifier.port25.com` 来 **检查你的邮件配置**，并 **读取响应**（为此你需要 **打开** 端口 **25**，如果以 root 发送邮件，可以在文件 _/var/mail/root_ 中查看响应）。\
 检查你是否通过所有测试：
 ```bash
 ==========================================================
@@ -287,40 +288,40 @@ DKIM check:         pass
 Sender-ID check:    pass
 SpamAssassin check: ham
 ```
-你也可以向你控制的 **Gmail 帐户发送一封消息**，并在你的 Gmail 收件箱中检查 **电子邮件的 headers**，`dkim=pass` 应该出现在 `Authentication-Results` header 字段中。
+你也可以**向你控制的 Gmail 发送一条消息**，并在你的 Gmail 收件箱中检查**邮件头**，在 `Authentication-Results` 头字段中应出现 `dkim=pass`。
 ```
 Authentication-Results: mx.google.com;
 spf=pass (google.com: domain of contact@example.com designates --- as permitted sender) smtp.mail=contact@example.com;
 dkim=pass header.i=@example.com;
 ```
-### 从 Spamhouse 黑名单中移除
+### ​Removing from Spamhouse Blacklist
 
-The page [www.mail-tester.com](https://www.mail-tester.com) 可以告诉你你的域名是否被 spamhouse 阻止。你可以在以下地址请求移除你的域名/IP： ​[https://www.spamhaus.org/lookup/](https://www.spamhaus.org/lookup/)
+The page [www.mail-tester.com](https://www.mail-tester.com) 可以告诉你你的域名是否被 spamhouse 阻止。你可以在以下地址请求移除你的域名/IP：​[https://www.spamhaus.org/lookup/](https://www.spamhaus.org/lookup/)
 
-### 从 Microsoft 黑名单中移除
+### Removing from Microsoft Blacklist
 
 ​​你可以在 [https://sender.office.com/](https://sender.office.com) 请求移除你的域名/IP。
 
-## 创建并启动 GoPhish 活动
+## Create & Launch GoPhish Campaign
 
-### 发送配置
+### Sending Profile
 
-- 为发送者配置设置一个用于识别的**名称**
-- 决定你将使用哪个账户发送 phishing 邮件。建议：_noreply, support, servicedesk, salesforce..._
-- 用户名和密码可以留空，但请确保勾选 Ignore Certificate Errors
+- 为发件人配置设置一个用于识别的 **名称**
+- 决定你将从哪个账户发送 phishing 邮件。建议：_noreply, support, servicedesk, salesforce..._
+- 你可以将 username 和 password 留空，但请确保勾选 **Ignore Certificate Errors**
 
 ![](<../../images/image (253) (1) (2) (1) (1) (2) (2) (3) (3) (5) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (15) (2).png>)
 
 > [!TIP]
-> 建议使用“**Send Test Email**”功能来测试一切是否正常。\
-> 我建议**将测试邮件发送到 10min mails 的地址**，以避免在测试时被列入黑名单。
+> 建议使用 "**Send Test Email**" 功能来测试一切是否正常。\
+> 我建议 **将测试邮件发送到 10min mails 地址**，以避免在测试时被列入黑名单。
 
-### 邮件模板
+### Email Template
 
-- 为模板设置一个用于识别的**名称**
-- 然后填写**主题**（不要太奇怪，写一个你在普通邮件中会预期看到的内容）
-- 确保已勾选“**Add Tracking Image**”
-- 编写**邮件模板**（你可以像下面示例那样使用变量）：
+- 为模板设置一个用于识别的 **名称**
+- 然后写一个 **主题**（不要奇怪，就写你在普通邮件中会看到的内容）
+- 确保已勾选 "**Add Tracking Image**"
+- 撰写 **邮件模板**（你可以像下面示例一样使用变量）：
 ```html
 <html>
 <head>
@@ -339,123 +340,123 @@ WRITE HERE SOME SIGNATURE OF SOMEONE FROM THE COMPANY
 </body>
 </html>
 ```
-请注意，**为了增加邮件的可信度**，建议使用来自目标客户邮件中的某些签名。建议：
+注意：为了提高邮件的可信度，建议使用来自客户电子邮件的一些签名。建议：
 
-- 发送一封邮件到一个**不存在的地址**并检查回复中是否包含任何签名。
-- 搜索诸如 info@ex.com、press@ex.com 或 public@ex.com 等**公开邮箱**，向其发送邮件并等待回复。
-- 尝试联系一些**已发现的有效**邮箱并等待回复。
+- 向一个 **不存在的地址** 发送电子邮件，检查回复是否包含任何签名。
+- 搜索 **公开邮箱**，例如 info@ex.com、press@ex.com 或 public@ex.com，给它们发送邮件并等待回复。
+- 尝试联系某些已发现的 **有效邮箱** 并等待回复。
 
 ![](<../../images/image (80).png>)
 
 > [!TIP]
-> Email Template 还允许 **附加要发送的文件**。如果你还想通过某些特制的文件/文档窃取 NTLM challenges，请[阅读此页](../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md)。
+> 邮件模板也允许 **附加要发送的文件**。如果你还想使用一些特殊构造的文件/文档来窃取 NTLM challenges，请阅读此页：[read this page](../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md)。
 
-### Landing Page
+### Landing 页面
 
-- 填写一个**名称**
-- **编写网页的 HTML 代码**。注意你可以 **导入** 网页。
-- 勾选 **“Capture Submitted Data”** 和 **“Capture Passwords”**
-- 设置一个**重定向**
+- 填写一个 **名称**
+- **编写网页的 HTML 代码**。注意你可以**导入**网页。
+- 勾选 **Capture Submitted Data** 和 **Capture Passwords**
+- 设置一个 **重定向**
 
 ![](<../../images/image (826).png>)
 
 > [!TIP]
-> 通常你需要在本地修改 HTML 代码并进行一些测试（也许使用 Apache 服务器）**直到满意为止。** 然后，将该 HTML 代码写入文本框。\
-> 注意，如果你需要为 HTML 使用某些静态资源（例如一些 CSS 和 JS 页面），你可以将它们保存到 _**/opt/gophish/static/endpoint**_，然后通过 _**/static/\<filename>**_ 访问它们。
+> 通常你需要修改页面的 HTML 代码并在本地进行一些测试（例如使用 Apache 服务器），直到你满意结果。然后，将该 HTML 代码写入输入框。\
+> 注意，如果你需要为 HTML 使用一些静态资源（例如一些 CSS 和 JS 页面），你可以将它们保存在 _**/opt/gophish/static/endpoint**_，然后从 _**/static/\<filename>**_ 访问它们。
 
 > [!TIP]
-> 对于重定向，你可以**将用户重定向到受害者的真实主站点**，或者将其重定向到 _/static/migration.html_，例如放置一个 **旋转加载（**[**https://loading.io/**](https://loading.io)**）持续 5 秒，然后提示流程已成功**。
+> 对于重定向，你可以将用户重定向到受害者的合法主网页，或者重定向到 _/static/migration.html_，例如放一个**旋转加载动画（**[**https://loading.io/**](https://loading.io)**）持续 5 秒，然后提示流程已成功**。
 
-### Users & Groups
+### 用户与组
 
-- 设置一个名称
-- **导入数据**（注意：为了使用示例模板，你需要每个用户的 firstname、last name 和 email address）
+- 设置名称
+- **导入数据**（注意：要使用示例模板，你需要每个用户的 firstname、last name 和 email address）
 
 ![](<../../images/image (163).png>)
 
-### Campaign
+### 活动
 
-最后，创建一个 campaign，选择名称、email template、landing page、URL、sending profile 和 group。注意 URL 将是发送给受害者的链接。
+最后，创建一个活动，选择名称、邮件模板、登陆页面、URL、发送配置文件和用户组。注意 URL 将是发送给受害者的链接。
 
-注意 **Sending Profile 允许发送测试邮件以查看最终 phishing 邮件的外观**：
+注意 **Sending Profile 允许发送测试邮件来查看最终钓鱼邮件的样子**：
 
 ![](<../../images/image (192).png>)
 
 > [!TIP]
-> 我建议将测试邮件发送到 10min mails addresses，以避免在测试时被列入黑名单。
+> 我建议将**测试邮件发送到 10min mails 地址**，以避免在测试时被列入黑名单。
 
-一切就绪后，启动 campaign！
+一切准备就绪后，启动活动即可！
 
-## Website Cloning
+## 网站克隆
 
-如果出于任何原因你想要克隆网站，请查看以下页面：
+如果你出于任何原因想要克隆网站，请查看以下页面：
 
 
 {{#ref}}
 clone-a-website.md
 {{#endref}}
 
-## Backdoored Documents & Files
+## 带后门的文档与文件
 
-在一些 phishing 评估（主要是 Red Teams）中，你可能还想**发送包含某种后门的文件**（可能是 C2，或者只是触发一次认证的东西）。\
-请查看以下页面获取一些示例：
+在一些钓鱼评估中（主要是 Red Teams），你可能还希望**发送包含某种后门的文件**（可能是 C2，或只是触发身份验证的东西）。\
+查看下列页面获取一些示例：
 
 
 {{#ref}}
 phishing-documents.md
 {{#endref}}
 
-## Phishing MFA
+## 钓鱼 MFA
 
-### Via Proxy MitM
+### 通过 Proxy MitM
 
-前面的攻击相当巧妙，因为你伪造了一个真实的网站并收集用户提交的信息。不幸的是，如果用户没有输入正确的密码，或者你伪造的应用配置了 2FA，**这些信息将不足以让你冒充被诱骗的用户**。
+前一种攻击相当巧妙，因为你伪造了一个真实网站并收集用户填写的信息。不幸的是，如果用户没有填写正确的密码，或你伪造的应用配置了 2FA，**这些信息并不能让你冒充被欺骗的用户**。
 
-这时像 [**evilginx2**](https://github.com/kgretzky/evilginx2)**、**[**CredSniper**](https://github.com/ustayready/CredSniper) 和 [**muraena**](https://github.com/muraenateam/muraena) 这样的工具就很有用。该类工具可以让你生成类似 MitM 的攻击。基本流程如下：
+这就是像 [**evilginx2**](https://github.com/kgretzky/evilginx2)、[**CredSniper**](https://github.com/ustayready/CredSniper) 和 [**muraena**](https://github.com/muraenateam/muraena) 这类工具派上用场的地方。该工具允许你生成类似 MitM 的攻击。基本上，攻击的工作流程如下：
 
-1. 你**模仿真实网页的登录表单**。
-2. 用户将他的**凭证**发送到你的伪造页面，同时该工具会将这些凭证转发到真实网页，**检查凭证是否有效**。
-3. 如果账号配置了 **2FA**，MitM 页面会要求输入，一旦**用户输入**，该工具会将其发送到真实网页。
-4. 一旦用户认证通过，你（作为攻击者）将**捕获凭证、2FA、cookie 以及在工具进行 MitM 期间的所有交互信息**。
+1. 你冒充真实网页的登录表单。
+2. 用户将其 credentials 发送到你的假页面，工具会把这些转发到真实网页，检查这些 credentials 是否有效。
+3. 如果账户启用了 **2FA**，MitM 页面会请求输入，一旦用户输入，工具会将其转发给真实网页。
+4. 用户认证后，你（作为攻击者）将捕获到 credentials、2FA、cookie 以及工具进行 MitM 期间的所有交互信息。
 
-### Via VNC
+### 通过 VNC
 
-如果不是**把受害者引导到一个恶意页面**（外观与原始页面相同），而是将其引导到一个**通过浏览器连接到真实网页的 VNC 会话**，那会如何？你将能够看到他所做的操作，窃取密码、使用的 MFA、cookie 等。\
+如果不是将受害者发送到一个看起来和原始页面一样的恶意页面，而是把他送到一个通过浏览器连接到真实网页的 VNC 会话呢？你将能够看到他的操作，窃取密码、使用的 MFA、cookies……\
 你可以使用 [**EvilnVNC**](https://github.com/JoelGMSec/EvilnoVNC) 来实现这一点。
 
-## Detecting the detection
+## 检测是否被发现
 
-显然，判断自己是否已被识破的最佳方法之一是**在黑名单中搜索你的域名**。如果它出现在列表中，说明你的域名被检测为可疑。\
-一种简单的方法是使用 [https://malwareworld.com/](https://malwareworld.com) 来检查你的域名是否出现在任何黑名单中。
+显然，判断自己是否已被发现的最佳方法之一是**在黑名单中搜索你的域名**。如果它出现在列表中，说明你的域名在某种程度上被检测为可疑。\
+检查域名是否出现在任何黑名单的一个简单方法是使用 [https://malwareworld.com/](https://malwareworld.com)
 
-不过，还有其他方法可以判断受害者是否**正在主动寻找网络上的可疑 phishing 活动**，如以下内容所述：
+然而，还有其他方法可以判断受害者是否在主动搜索野外的可疑钓鱼活动，如下所述：
 
 
 {{#ref}}
 detecting-phising.md
 {{#endref}}
 
-你可以**购买与受害者域名非常相似的域名**，和/或为你控制的某个域名的**子域生成证书**，该子域名包含受害者域名的**关键字**。如果**受害者**对这些域名执行任何形式的 **DNS 或 HTTP 交互**，你就会知道他**正在主动搜索**可疑域名，那时你需要非常隐蔽地行动。
+你可以购买一个与受害者域名非常相似的域名，和/或为你控制的域名的子域生成一个包含受害者域名关键字的证书。如果受害者对它们执行了任何形式的 DNS 或 HTTP 交互，你就会知道他在主动查找可疑域名，此时你需要非常隐蔽。
 
-### Evaluate the phishing
+### 评估钓鱼
 
-使用 [**Phishious**](https://github.com/Rices/Phishious) 来评估你的邮件是否会被判为垃圾邮件、被阻断或成功到达。
+使用 [**Phishious**](https://github.com/Rices/Phishious) 来评估你的邮件是否会进入垃圾邮件文件夹、被拦截或成功送达。
 
-## High-Touch Identity Compromise (Help-Desk MFA Reset)
+## 高接触身份劫持（帮助台 MFA 重置）
 
-现代的入侵组织越来越多地完全跳过邮件诱饵，直接针对服务台/身份恢复流程以绕过 MFA。该攻击完全依靠“living-off-the-land”：一旦操作员拥有有效凭据，他们就使用内置的管理工具进行横向移动——无需恶意软件。
+现代入侵组合越来越多地完全跳过电子邮件诱饵，直接针对 service-desk / identity-recovery 工作流以绕过 MFA。该攻击完全属于 "living-off-the-land"：一旦操作员获得有效凭证，他们就使用内置管理工具横向移动——不需要恶意软件。
 
-### Attack flow
-1. Recon the victim
-* 从 LinkedIn、数据泄露、公开 GitHub 等处收集个人与公司信息。
-* 识别高价值身份（高管、IT、财务）并枚举用于密码/MFA 重置的**确切 help-desk 流程**。
-2. Real-time social engineering
-* 使用电话、Teams 或聊天与 help-desk 联系，同时冒充目标（通常使用 **spoofed caller-ID** 或 **克隆语音**）。
-* 提供先前收集的 PII 来通过基于知识的验证。
-* 说服客服代理**重置 MFA secret**或对已注册的手机号执行**SIM-swap**。
-3. Immediate post-access actions (≤60 min in real cases)
+### 攻击流程
+1. Recon 受害者
+* 从 LinkedIn、数据泄露、公共 GitHub 等收集个人和公司详细信息。
+* 识别高价值身份（高管、IT、财务）并枚举用于密码 / MFA 重置的**确切帮助台流程**。
+2. 实时社工
+* 在冒充目标的情况下通过电话、Teams 或聊天联系帮助台（通常使用 **spoofed caller-ID** 或 **克隆语音**）。
+* 提供之前收集的 PII 以通过基于知识的验证。
+* 说服客服人员 **重置 MFA secret** 或对已注册的手机号执行 **SIM-swap**。
+3. 即时的访问后操作（实际案例中 ≤60 分钟）
 * 通过任何 web SSO 门户建立立足点。
-* 使用内置工具枚举 AD / AzureAD（不放置任何二进制文件）：
+* 使用内置工具列举 AD / AzureAD（不落地二进制）：
 ```powershell
 # list directory groups & privileged roles
 Get-ADGroup -Filter * -Properties Members | ?{$_.Members -match $env:USERNAME}
@@ -468,56 +469,56 @@ Get-MgUserRegisteredDevice -UserId <user@corp.local>
 ```
 * 使用 **WMI**、**PsExec** 或环境中已被列入白名单的合法 **RMM** 代理进行横向移动。
 
-### Detection & Mitigation
-* 将 help-desk 身份恢复视为**特权操作（privileged operation）**——要求 step-up auth 与经理审批。
-* 部署 **Identity Threat Detection & Response (ITDR)** / **UEBA** 规则以触发告警，例如：
-* MFA 方法被更改 + 来自新设备/新地理位置的认证。
-* 同一主体的即时权限提升（user → admin）。
-* 记录 help-desk 通话，并在任何重置前强制**回拨到已注册的号码**。
-* 实施 **Just-In-Time (JIT) / Privileged Access**，以便新重置的账户**不会**自动继承高权限令牌。
+### 检测与缓解
+* 将帮助台的身份恢复视为 **特权操作**——要求提升认证（step-up auth）与经理批准。
+* 部署 **Identity Threat Detection & Response (ITDR)** / **UEBA** 规则以在以下情况触发告警：
+* MFA 方法被更改 + 来自新设备/地理位置的认证。
+* 同一主体的即时提权（user → admin）。
+* 记录帮助台通话并在任何重置前强制回拨到已注册号码。
+* 实施 **Just-In-Time (JIT) / 特权访问**，以便新重置的账户不会自动继承高权限令牌。
 
 ---
 
-## At-Scale Deception – SEO Poisoning & “ClickFix” Campaigns
-一些普遍的团伙通过大规模攻击来抵消高触达操作的成本，将**搜索引擎和广告网络作为投放渠道**。
+## 大规模欺骗 — SEO 投毒与 “ClickFix” 活动
+普通团队通过大规模攻击将 **搜索引擎与广告网络作为投放渠道** 来抵消高接触操作的成本。
 
-1. **SEO poisoning / malvertising** 将一个虚假结果（例如 `chromium-update[.]site`）推上搜索广告顶部。
-2. 受害者下载一个小型的**第一阶段加载器**（通常为 JS/HTA/ISO）。Unit 42 见过的示例：
+1. **SEO 投毒 / 恶意广告** 将假结果（例如 chromium-update[.]site）推上搜索广告顶部。
+2. 受害者下载一个小型 **首阶段加载器**（通常为 JS/HTA/ISO）。Unit 42 见过的示例：
 * `RedLine stealer`
 * `Lumma stealer`
 * `Lampion Trojan`
-3. 加载器外泄浏览器 cookie + 凭证数据库，然后拉取一个**静默加载器**，该加载器会实时决定是否部署：
+3. 加载器外泄浏览器 cookies + 凭证数据库，然后拉取一个 **静默加载器**，它实时决定是否部署：
 * RAT（例如 AsyncRAT、RustDesk）
-* ransomware / wiper
+* 勒索软件 / 擦除工具
 * 持久化组件（注册表 Run 键 + 计划任务）
 
-### Hardening tips
-* 阻断新注册域名，并在搜索广告以及电子邮件上强制实施 **Advanced DNS / URL Filtering**。
-* 限制软件安装为签名的 MSI / Store 包，策略上禁止执行 `HTA`、`ISO`、`VBS`。
-* 监控浏览器的子进程打开安装程序：
+### 加固建议
+* 阻断新注册域名并对搜索广告及邮件实施 **高级 DNS / URL 过滤**。
+* 将软件安装限制为签名的 MSI / Store 包，策略上禁止执行 `HTA`、`ISO`、`VBS`。
+* 监控浏览器的子进程是否打开安装程序：
 ```yaml
 - parent_image: /Program Files/Google/Chrome/*
 and child_image: *\\*.exe
 ```
-* 搜索常被第一阶段加载器滥用的 LOLBins（例如 `regsvr32`、`curl`、`mshta`）。
+* 查找首阶段加载器频繁滥用的 LOLBins（例如 `regsvr32`、`curl`、`mshta`）。
 
 ---
 
-## AI-Enhanced Phishing Operations
-攻击者现在将 **LLM** 与 语音克隆 API 串联起来，用于完全个性化的诱饵和实时交互。
+## AI 增强的钓鱼行动
+攻击者现在串联 **LLM & 语音克隆 API**，用于完全个性化的诱饵和实时交互。
 
-| Layer | Example use by threat actor |
+| 层级 | 威胁行为者的示例用法 |
 |-------|-----------------------------|
-|Automation|生成并发送 >100 k 封带有随机措辞与跟踪链接的邮件/SMS。|
-|Generative AI|生成一次性邮件，引用公开的并购信息、来自社交媒体的内部笑话；在回拨诈骗中使用 CEO 的 deep-fake 语音。|
-|Agentic AI|自动注册域名、爬取开源情报、当受害者点击但未提交凭证时自动制作后续邮件。|
+| 自动化 | 生成并发送 >100k 封邮件 / 短信，使用随机化措辞与跟踪链接。 |
+| 生成式 AI | 生成一次性邮件，引用公开的并购信息、来自社交媒体的内梗；在回拨诈骗中使用 CEO 的深度伪造语音。 |
+| 代理式 AI | 自动注册域名、抓取开源情报，在受害者点击但未提交凭证时自动生成下一阶段邮件。 |
 
 **防御：**
-• 添加 **动态横幅**，突出显示来自不受信任自动化发送的消息（通过 ARC/DKIM 异常检测）。  
-• 对高风险电话请求部署 **语音生物识别挑战短语**。  
-• 在安全意识培训中持续模拟 AI 生成的诱饵 —— 静态模板已过时。
+• 添加 **动态横幅**，突出标记来自不受信任自动化的消息（通过 ARC/DKIM 异常）。  
+• 对高风险电话请求部署 **语音生物特征挑战短语**。  
+• 在安全意识计划中持续模拟 AI 生成的诱饵 —— 静态模板已过时。
 
-See also – agentic browsing abuse for credential phishing:
+另见 — agentic browsing 滥用以进行凭证钓鱼：
 
 {{#ref}}
 ai-agent-mode-phishing-abusing-hosted-agent-browsers.md
@@ -525,21 +526,18 @@ ai-agent-mode-phishing-abusing-hosted-agent-browsers.md
 
 ---
 
-## MFA Fatigue / Push Bombing Variant – Forced Reset
-除了经典的 push-bombing，操作者也会在 help-desk 通话中直接**强制新的 MFA 注册**，使用户现有的令牌失效。任何随后出现的登录提示对受害者来说都看起来是合法的。
+## MFA 疲劳 / Push Bombing 变体 — 强制重置
+除了经典的 push-bombing 外，操作者在帮助台通话期间直接 **强制新 MFA 注册**，使用户现有的令牌失效。随后出现的任何登录提示对受害者而言都看起来是合法的。
 ```text
 [Attacker]  →  Help-Desk:  “I lost my phone while travelling, can you unenrol it so I can add a new authenticator?”
 [Help-Desk] →  AzureAD: ‘Delete existing methods’ → sends registration e-mail
 [Attacker]  →  Completes new TOTP enrolment on their own device
 ```
-监控 AzureAD/AWS/Okta 事件，当 **`deleteMFA` + `addMFA`** 在同一 IP 的几分钟内发生。
-
-
+监控 AzureAD/AWS/Okta 事件，当 **`deleteMFA` + `addMFA`** 在几分钟内从同一 IP 发生时。
 
 ## Clipboard Hijacking / Pastejacking
 
-攻击者可以从被入侵或 typosquatted 的网页静默地将恶意命令复制到受害者的 clipboard，然后诱导用户将其粘贴到 **Win + R**、**Win + X** 或 terminal 窗口中，从而在无需任何 download 或 attachment 的情况下执行 arbitrary code。
-
+攻击者可以静默地将恶意命令复制到受害者的剪贴板，来源于被入侵或 typosquatted 的网页，然后诱骗用户在 **Win + R**、**Win + X** 或终端窗口中粘贴并执行，从而在无需任何下载或附件的情况下执行任意代码。
 
 {{#ref}}
 clipboard-hijacking.md
@@ -553,30 +551,30 @@ mobile-phishing-malicious-apps.md
 {{#endref}}
 
 ### Mobile‑gated phishing to evade crawlers/sandboxes
-运营者越来越多地在 phishing 流程后设置简单的设备检测，使 desktop crawlers 无法到达最终页面。常见模式是一个小脚本检测是否有 touch-capable DOM 并将结果 post 到 server endpoint；non‑mobile clients 会收到 HTTP 500（或空白页），而 mobile users 则看到完整流程。
+攻击者越来越多地在钓鱼流程后面加入简单的设备检测，从而使桌面爬虫无法访问最终页面。常见的模式是一段小脚本检测是否支持触控的 DOM 并将结果发布到服务器端点；非移动客户端收到 HTTP 500（或空白页），而移动用户则会看到完整流程。
 
 Minimal client snippet (typical logic):
 ```html
 <script src="/static/detect_device.js"></script>
 ```
-`detect_device.js` 逻辑 (简化):
+`detect_device.js` 逻辑（简化）：
 ```javascript
 const isMobile = ('ontouchstart' in document.documentElement);
 fetch('/detect', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({is_mobile:isMobile})})
 .then(()=>location.reload());
 ```
-Server behaviour often observed:
-- 在首次加载时设置会话 cookie。
-- Accepts `POST /detect {"is_mobile":true|false}`.
-- 在随后的 GET 请求中当 `is_mobile=false` 时返回 500（或占位页）；仅在 `true` 时提供 phishing。
+常见的服务器行为：
+- 在首次加载时设置 session cookie。
+- 接受 `POST /detect {"is_mobile":true|false}`。
+- 当 `is_mobile=false` 时，对随后的 GET 返回 500（或占位符）；只有当为 `true` 时才提供钓鱼内容。
 
-Hunting and detection heuristics:
-- urlscan query: `filename:"detect_device.js" AND page.status:500`
-- Web 遥测：序列 `GET /static/detect_device.js` → `POST /detect` → 非移动设备返回 HTTP 500；真实移动受害路径返回 200 并随后返回 HTML/JS。
-- 阻止或审查仅基于 `ontouchstart` 或类似设备检测来决定内容的页面。
+狩猎与检测启发式：
+- urlscan 查询： `filename:"detect_device.js" AND page.status:500`
+- Web 遥测：序列为 `GET /static/detect_device.js` → `POST /detect` → 非移动设备返回 HTTP 500；真实的移动受害者路径返回 200 并返回后续的 HTML/JS。
+- 阻断或审查那些仅依赖 `ontouchstart` 或类似设备检测来决定内容的页面。
 
-Defence tips:
-- 使用带有移动端指纹且启用 JS 的爬虫来揭示受限内容。
+防御提示：
+- 用类似移动设备指纹并启用 JS 的爬虫来抓取，以揭露被门控的内容。
 - 对新注册域名上在 `POST /detect` 之后出现的可疑 500 响应发出警报。
 
 ## References

@@ -2,34 +2,34 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-本页面记录了在多款 MediaTek 平台上通过滥用当设备 bootloader 配置 (seccfg) 处于“unlocked”时的验证缺口来进行的一个实际 secure-boot 绕过。该缺陷允许在 ARM EL3 上运行经过修补的 bl2_ext 以禁用后续的签名验证，从而破坏信任链并允许任意未签名的 TEE/GZ/LK/Kernel 被加载。
+本页面记录了在多款 MediaTek 平台上利用引导加载器配置 (seccfg) 为 "unlocked" 时出现的验证缺口进行的实际 secure-boot 绕过。该缺陷允许在 ARM EL3 上运行被篡改的 bl2_ext 来禁用下游的签名验证，从而破坏信任链并允许任意未签名的 TEE/GZ/LK/Kernel 加载。
 
-> 警告：早期引导阶段打补丁如果偏移量错误可能会永久性使设备变砖。务必保留完整的转储并准备可靠的恢复路径。
+> 警告：Early-boot patching 可能在偏移量错误时永久损坏设备。始终保留完整转储和可靠的恢复路径。
 
 ## Affected boot flow (MediaTek)
 
-- Normal path: BootROM → Preloader → bl2_ext (EL3, verified) → TEE → GenieZone (GZ) → LK/AEE → Linux kernel (EL1)
-- Vulnerable path: When seccfg is set to unlocked, Preloader may skip verifying bl2_ext. Preloader still jumps into bl2_ext at EL3, so a crafted bl2_ext can load unverified components thereafter.
+- 正常路径：BootROM → Preloader → bl2_ext (EL3, verified) → TEE → GenieZone (GZ) → LK/AEE → Linux kernel (EL1)
+- 易受攻击路径：当 seccfg 设置为 unlocked 时，Preloader 可能会跳过对 bl2_ext 的验证。Preloader 仍然会在 EL3 跳转到 bl2_ext，因此经过精心构造的 bl2_ext 可以随后加载未验证的组件。
 
 关键信任边界：
-- bl2_ext 在 EL3 执行，并负责验证 TEE、GenieZone、LK/AEE 和 kernel。如果 bl2_ext 本身未被认证，其余链条就可以被轻易绕过。
+- bl2_ext 在 EL3 执行并负责验证 TEE、GenieZone、LK/AEE 和 kernel。如果 bl2_ext 本身未被认证，其余链就可以轻易被绕过。
 
 ## Root cause
 
-在受影响的设备上，当 seccfg 表示为 “unlocked” 状态时，Preloader 不会强制对 bl2_ext 分区进行认证。这允许刷入一个由攻击者控制的 bl2_ext 并在 EL3 运行。
+在受影响的设备上，当 seccfg 表示为 "unlocked" 状态时，Preloader 不会强制对 bl2_ext 分区进行认证。这允许刷新由攻击者控制的 bl2_ext 并在 EL3 上运行。
 
-在 bl2_ext 内，可以对验证策略函数进行补丁，使其无条件地报告不需要验证。一个最小的概念性补丁是：
+在 bl2_ext 内，可以对 verification policy 函数进行补丁，使其无条件地报告不需要验证。一个最小的概念性补丁是：
 ```c
 // inside bl2_ext
 int sec_get_vfy_policy(...) {
 return 0; // always: "no verification required"
 }
 ```
-有了这个更改，由运行在 EL3 的补丁 bl2_ext 加载的所有后续镜像（TEE、GZ、LK/AEE、Kernel）在加载时都会被接受，且不会进行加密校验。
+有了此更改，当运行于 EL3 的已修补 bl2_ext 加载后续镜像（TEE、GZ、LK/AEE、Kernel）时，这些镜像将被接受而不进行加密校验。
 
-## 如何评估目标（expdb 日志）
+## 如何筛查目标（expdb 日志）
 
-导出/检查 bl2_ext 加载前后的启动日志（例如 expdb）。如果 img_auth_required = 0 并且证书验证时间约为 ~0 ms，则表明强制检查很可能被关闭，设备可能可被利用。
+在 bl2_ext 加载前后转储/检查启动日志（例如 expdb）。如果 img_auth_required = 0 且 certificate verification time is ~0 ms，则很可能已关闭强制检查，设备可被利用。
 
 示例日志摘录：
 ```
@@ -37,18 +37,18 @@ return 0; // always: "no verification required"
 [PART] Image with header, name: bl2_ext, addr: FFFFFFFFh, mode: FFFFFFFFh, size:654944, magic:58881688h
 [PART] part: lk_a img: bl2_ext cert vfy(0 ms)
 ```
-注意：据报告，一些设备即使在锁定 bootloader 的情况下仍会跳过 bl2_ext 验证，这加剧了影响。
+注意：有报告称某些设备即使在 bootloader 锁定的情况下也会跳过 bl2_ext 验证，这会加剧影响。
 
-## 实用利用工作流程 (Fenrir PoC)
+## Practical exploitation workflow (Fenrir PoC)
 
-Fenrir 是一个针对该类问题的参考 exploit/patching 工具包。它支持 Nothing Phone (2a) (Pacman)，并且已知在 CMF Phone 1 (Tetris) 上可运行（支持不完整）。移植到其他型号需要对设备特定的 bl2_ext 进行 reverse engineering。
+Fenrir 是针对该类问题的参考 exploit/patching 工具包。它支持 Nothing Phone (2a) (Pacman)，并且已知在 CMF Phone 1 (Tetris) 上可用（支持不完整）。移植到其他机型需要对设备特定的 bl2_ext 进行逆向工程。
 
-高级流程：
-- 获取目标 codename 设备的 bootloader 镜像，并将其放置为 bin/<device>.bin
-- 构建一个禁用 bl2_ext 验证策略的 patched image
-- 将生成的 payload 刷入设备（helper 脚本假定使用 fastboot）
+High-level process:
+- 获取目标代号对应的设备 bootloader 镜像并将其放置为 bin/<device>.bin
+- 构建一个禁用 bl2_ext 验证策略的修补镜像
+- 将生成的 payload 刷写到设备上（辅助脚本假定使用 fastboot）
 
-命令：
+Commands:
 ```bash
 # Build patched image (default path bin/[device].bin)
 ./build.sh pacman
@@ -61,39 +61,39 @@ Fenrir 是一个针对该类问题的参考 exploit/patching 工具包。它支�
 ```
 If fastboot is unavailable, you must use a suitable alternative flashing method for your platform.
 
-## 运行时 payload 能力 (EL3)
+## Runtime payload capabilities (EL3)
 
 A patched bl2_ext payload can:
-- 注册自定义 fastboot 命令
-- 控制/覆盖启动模式
-- 在运行时动态调用内建 bootloader 函数
-- 欺骗 “lock state”为 locked（实际上为 unlocked）以通过更严格的完整性检查（某些环境仍可能需要对 vbmeta/AVB 进行调整）
+- Register custom fastboot commands
+- Control/override boot mode
+- Dynamically call built‑in bootloader functions at runtime
+- Spoof “lock state” as locked while actually unlocked to pass stronger integrity checks (some environments may still require vbmeta/AVB adjustments)
 
-Limitation: Current PoCs note that runtime memory modification may fault due to MMU constraints; payloads generally avoid live memory writes until this is resolved.
+Limitation: Current PoCs note that MMU constraints may cause runtime memory modification to fault; payloads generally avoid live memory writes until this is resolved.
 
-## 移植提示
+## Porting tips
 
-- 对设备特定的 bl2_ext 进行逆向工程以定位验证策略逻辑（例如 sec_get_vfy_policy）。
-- 确定策略的返回位置或决策分支，并将其补丁为 “no verification required”（return 0 / unconditional allow）。
-- 保持偏移完全针对设备和固件；不要在不同变体间重用地址。
-- 先在牺牲性设备上验证。刷写前准备恢复方案（例如 EDL/BootROM loader/SoC-specific download mode）。
+- Reverse engineer the device-specific bl2_ext to locate verification policy logic (e.g., sec_get_vfy_policy).
+- Identify the policy return site or decision branch and patch it to “no verification required” (return 0 / unconditional allow).
+- Keep offsets fully device- and firmware-specific; do not reuse addresses between variants.
+- Validate on a sacrificial unit first. Prepare a recovery plan (e.g., EDL/BootROM loader/SoC-specific download mode) before you flash.
 
-## 安全影响
+## Security impact
 
-- 在 Preloader 之后执行 EL3 代码，并导致后续启动路径的完整信任链完全崩溃。
-- 能够启动未签名的 TEE/GZ/LK/Kernel，绕过 secure/verified boot 的预期，从而实现持久性妥协。
+- EL3 code execution after Preloader and full chain-of-trust collapse for the rest of the boot path.
+- Ability to boot unsigned TEE/GZ/LK/Kernel, bypassing secure/verified boot expectations and enabling persistent compromise.
 
-## 检测与加固建议
+## Detection and hardening ideas
 
-- 确保 Preloader 无论 seccfg 状态如何都验证 bl2_ext。
-- 强制执行认证结果并收集审计证据（timings > 0 ms，对不匹配给出严格错误）。
-- 应使 lock-state 欺骗对于 attestation 无效（将 lock state 绑定到 AVB/vbmeta 的验证决策和 fuse-backed 状态）。
+- Ensure Preloader verifies bl2_ext regardless of seccfg state.
+- Enforce authentication results and gather audit evidence (timings > 0 ms, strict errors on mismatch).
+- Lock-state spoofing should be made ineffective for attestation (tie lock state to AVB/vbmeta verification decisions and fuse-backed state).
 
-## 设备说明
+## Device notes
 
-- 已确认支持：Nothing Phone (2a) (Pacman)
-- 已知可行（支持不完整）：CMF Phone 1 (Tetris)
-- 观测到：据报 Vivo X80 Pro 即使在 locked 时也未验证 bl2_ext
+- Confirmed supported: Nothing Phone (2a) (Pacman)
+- Known working (incomplete support): CMF Phone 1 (Tetris)
+- Observed: Vivo X80 Pro reportedly did not verify bl2_ext even when locked
 
 ## References
 

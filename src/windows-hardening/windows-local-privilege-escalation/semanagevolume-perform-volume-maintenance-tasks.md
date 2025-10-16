@@ -4,21 +4,21 @@
 
 ## 概述
 
-Windows 用户权限：执行卷维护任务（常量：SeManageVolumePrivilege）。
+Windows 用户权限：Perform volume maintenance tasks (constant: SeManageVolumePrivilege)。
 
-持有该权限的用户可以执行低级卷操作，例如磁盘碎片整理、创建/删除卷以及维护型 IO。对于攻击者而言，这个权限尤为关键，因为它允许打开原始卷设备句柄（例如 \\.\C:）并发出直接的磁盘 I/O，从而绕过 NTFS 文件 ACLs。通过原始访问，可以复制卷上任何文件的字节，即使被 DACL 阻止，也可以通过离线解析文件系统结构或利用在块/簇级别读取的工具来实现。
+持有者可以执行低级卷操作，例如碎片整理、创建/删除卷以及维护 IO。对攻击者来说关键的是，此权限允许打开原始卷设备句柄（例如 \\.\C:）并发出直接磁盘 I/O，从而绕过 NTFS 文件 ACLs。通过原始访问，你可以读取卷上任意文件的字节，即使 DACL 拒绝，也可以通过离线解析文件系统结构或利用以块/簇级别读取的工具来复制文件内容。
 
-默认：服务器和域控制器上的 Administrators 组。
+默认：服务器和域控制器上的 Administrators。
 
 ## 滥用场景
 
-- 通过读取磁盘设备绕过 ACLs 进行任意文件读取（例如，外泄受系统保护的敏感材料，如位于 %ProgramData%\Microsoft\Crypto\RSA\MachineKeys 和 %ProgramData%\Microsoft\Crypto\Keys 下的机器私钥、注册表 hives、DPAPI masterkeys、SAM、通过 VSS 获取的 ntds.dit 等）。
-- 通过直接从原始设备复制字节来绕过被锁定/受限路径（C:\Windows\System32\…）。
-- 在 AD CS 环境中，外泄 CA 的密钥材料（机器密钥存储）以铸造 “Golden Certificates”，并通过 PKINIT 模拟任何域主体。见下方链接。
+- 通过读取磁盘设备进行任意文件读取以绕过 ACLs（例如，exfiltrate 受系统保护的敏感材料，如位于 %ProgramData%\Microsoft\Crypto\RSA\MachineKeys 和 %ProgramData%\Microsoft\Crypto\Keys 下的 machine private keys、注册表 hives、DPAPI masterkeys、SAM、通过 VSS 的 ntds.dit 等）。
+- 绕过被锁定/受限路径（C:\Windows\System32\…），直接从原始设备复制字节。
+- 在 AD CS 环境中，exfiltrate CA 的密钥材料（machine key store）以伪造“Golden Certificates”，并通过 PKINIT 冒充任何域主体。见下方链接。
 
-注意：除非依赖辅助工具，否则仍需要用于解析 NTFS 结构的解析器。许多现成工具已封装了对原始访问的抽象。
+注意：除非依赖辅助工具，否则你仍需要一个用于解析 NTFS 结构的解析器。许多现成工具会对原始访问进行抽象处理。
 
-## 实用技术
+## 实用技巧
 
 - 打开原始卷句柄并读取簇：
 
@@ -49,10 +49,10 @@ File.WriteAllBytes("C:\\temp\\blk.bin", buf);
 ```
 </details>
 
-- 使用支持 NTFS 的工具从原始卷中恢复特定文件：
-- RawCopy/RawCopy64（对正在使用的文件进行扇区级复制）
-- FTK Imager or The Sleuth Kit（只读镜像，然后从中 carve 出文件）
-- vssadmin/diskshadow + shadow copy，然后从快照中复制目标文件（如果你能创建 VSS；通常需要管理员权限，但通常对拥有 SeManageVolumePrivilege 的同一类操作员可用）
+- 使用支持 NTFS 的工具从原始卷恢复特定文件：
+- RawCopy/RawCopy64 (sector-level copy of in-use files)
+- FTK Imager or The Sleuth Kit (read-only imaging, then carve files)
+- vssadmin/diskshadow + shadow copy, then copy target file from the snapshot (if you can create VSS; often requires admin but commonly available to the same operators that hold SeManageVolumePrivilege)
 
 典型的敏感目标路径：
 - %ProgramData%\Microsoft\Crypto\RSA\MachineKeys\
@@ -61,9 +61,9 @@ File.WriteAllBytes("C:\\temp\\blk.bin", buf);
 - C:\Windows\NTDS\ntds.dit (domain controllers – via shadow copy)
 - C:\Windows\System32\CertSrv\CertEnroll\ (CA certs/CRLs; private keys live in the machine key store above)
 
-## AD CS 关联：伪造 Golden Certificate
+## AD CS 关联: Forging a Golden Certificate
 
-如果你能从 machine key store 读取 Enterprise CA 的私钥，就可以为任意主体伪造 client‑auth 证书，并通过 PKINIT/Schannel 进行认证。这通常被称为 Golden Certificate。参见：
+If you can read the Enterprise CA’s private key from the machine key store, you can forge client‑auth certificates for arbitrary principals and authenticate via PKINIT/Schannel. This is often referred to as a Golden Certificate. See:
 
 {{#ref}}
 ../active-directory-methodology/ad-certificates/domain-persistence.md
@@ -73,10 +73,10 @@ File.WriteAllBytes("C:\\temp\\blk.bin", buf);
 
 ## 检测与加固
 
-- 严格限制 SeManageVolumePrivilege (Perform volume maintenance tasks) 的分配，仅限可信管理员。
-- 监控 Sensitive Privilege Use 和进程对设备对象（如 \\.\C:, \\.\PhysicalDrive0）的句柄打开。
-- 优先使用 HSM/TPM 支持的 CA 密钥或 DPAPI-NG，以便原始文件读取无法以可用形式恢复密钥材料。
-- 保持上传、临时和提取路径为不可执行并相互隔离（这是在 web 场景下常与此类利用链后期配套的防御措施）。
+- 严格限制 SeManageVolumePrivilege (Perform volume maintenance tasks) 的分配，只授予受信任的管理员。
+- 监控敏感权限使用以及对设备对象（如 \\.\C:, \\.\PhysicalDrive0）的进程句柄打开。
+- 优先使用 HSM/TPM 支持的 CA 密钥或 DPAPI-NG，以防通过原始文件读取恢复到可用形式的密钥材料。
+- 保持上传、临时和解压路径为不可执行且相互隔离（这是在 web 场景下常与此类链路后利用配对的防御措施）。
 
 ## References
 
