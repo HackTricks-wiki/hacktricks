@@ -1,29 +1,29 @@
-# SeManageVolumePrivilege: Ακατέργαστη πρόσβαση σε τόμο για αυθαίρετη ανάγνωση αρχείων
+# SeManageVolumePrivilege: Πρόσβαση ακατέργαστου τόμου για αυθαίρετη ανάγνωση αρχείων
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Επισκόπηση
 
-Δικαίωμα χρήστη των Windows: Perform volume maintenance tasks (constant: SeManageVolumePrivilege).
+Windows user right: Perform volume maintenance tasks (constant: SeManageVolumePrivilege).
 
-Οι κάτοχοι μπορούν να εκτελούν λειτουργίες σε χαμηλό επίπεδο στον τόμο, όπως defragmentation, δημιουργία/αφαίρεση τόμων και maintenance I/O. Σημαντικό για τους επιτιθέμενους, αυτό το δικαίωμα επιτρέπει το άνοιγμα raw volume device handles (π.χ. \\.\C:) και την εκτέλεση άμεσου disk I/O που παρακάμπτει τα NTFS file ACLs. Με ακατέργαστη πρόσβαση μπορείτε να αντιγράψετε bytes οποιουδήποτε αρχείου στον τόμο ακόμα και αν αρνηθείται από DACL, αναλύοντας τις δομές του filesystem εκτός σύνδεσης ή χρησιμοποιώντας εργαλεία που διαβάζουν σε επίπεδο block/cluster.
+Οι κάτοχοι μπορούν να εκτελέσουν λειτουργίες χαμηλού επιπέδου στον τόμο, όπως αποσυγκρότηση (defragmentation), δημιουργία/αφαίρεση τόμων και εργασίες συντήρησης I/O. Κρίσιμο για επιτιθέμενους, αυτό το δικαίωμα επιτρέπει το άνοιγμα handles συσκευής ακατέργαστου τόμου (π.χ., \\.\C:) και την εκτέλεση άμεσων δίσκων I/O που παρακάμπτουν τα NTFS file ACLs. Με ακατέργαστη πρόσβαση μπορείτε να αντιγράψετε bytes οποιουδήποτε αρχείου στον τόμο ακόμη κι αν το απαγορεύει η DACL, αναλύοντας τις δομές του filesystem εκτός σύνδεσης ή χρησιμοποιώντας εργαλεία που διαβάζουν σε επίπεδο block/cluster.
 
-Προεπιλογή: Η ομάδα Administrators σε servers και domain controllers.
+Default: Administrators on servers and domain controllers.
 
-## Σενάρια κατάχρησης
+## Σενάρια καταχρήσης
 
-- Αυθαίρετη ανάγνωση αρχείων παρακάμπτοντας ACLs με ανάγνωση της συσκευής δίσκου (π.χ., εξαγωγή ευαίσθητου συστήματος-προστατευμένου υλικού όπως machine private keys κάτω από %ProgramData%\Microsoft\Crypto\RSA\MachineKeys και %ProgramData%\Microsoft\Crypto\Keys, registry hives, DPAPI masterkeys, SAM, ntds.dit μέσω VSS, κ.α.).
-- Παράκαμψη κλειδωμένων/προνομιακών διαδρομών (C:\Windows\System32\…) αντιγράφοντας bytes απευθείας από τη raw device.
-- Σε περιβάλλοντα AD CS, εξαγωγή του CA’s key material (machine key store) για τη δημιουργία “Golden Certificates” και προσποίηση οποιουδήποτε domain principal μέσω PKINIT. Δείτε τον σύνδεσμο παρακάτω.
+- Αυθαίρετη ανάγνωση αρχείων παρακάμπτοντας ACLs διαβάζοντας τη συσκευή δίσκου (π.χ., εξαγωγή ευαίσθητου συστημικά προστατευμένου υλικού όπως τα ιδιωτικά κλειδιά μηχανής κάτω από %ProgramData%\Microsoft\Crypto\RSA\MachineKeys και %ProgramData%\Microsoft\Crypto\Keys, registry hives, DPAPI masterkeys, SAM, ntds.dit μέσω VSS, κ.λπ.).
+- Παράκαμψη κλειδωμένων/προνομιακών διαδρομών (C:\Windows\System32\…) με αντιγραφή bytes απευθείας από τη συσκευή ακατέργαστου τόμου.
+- Σε περιβάλλοντα AD CS, εξαγωγή του key material της CA (machine key store) για την έκδοση “Golden Certificates” και την προσποίηση οποιουδήποτε domain principal μέσω PKINIT. Δείτε το σύνδεσμο παρακάτω.
 
-Σημείωση: Ακόμα χρειάζεστε parser για τις δομές NTFS εκτός αν βασιστείτε σε βοηθητικά εργαλεία. Πολλά off-the-shelf εργαλεία αφαιρούν την πολυπλοκότητα της raw πρόσβασης.
+Σημείωση: Ακόμα χρειάζεστε έναν parser για τις δομές NTFS εκτός αν βασιστείτε σε βοηθητικά εργαλεία. Πολλά off-the-shelf εργαλεία αφαιρούν την πολυπλοκότητα της ακατέργαστης πρόσβασης.
 
 ## Πρακτικές τεχνικές
 
-- Open a raw volume handle and read clusters:
+- Άνοιγμα handle ακατέργαστου τόμου και ανάγνωση clusters:
 
 <details>
-<summary>Κάντε κλικ για να επεκταθεί</summary>
+<summary>Κάντε κλικ για εμφάνιση</summary>
 ```powershell
 # PowerShell – read first MB from C: raw device (requires SeManageVolumePrivilege)
 $fs = [System.IO.File]::Open("\\.\\C:",[System.IO.FileMode]::Open,[System.IO.FileAccess]::Read,[System.IO.FileShare]::ReadWrite)
@@ -49,12 +49,12 @@ File.WriteAllBytes("C:\\temp\\blk.bin", buf);
 ```
 </details>
 
-- Χρησιμοποιήστε ένα εργαλείο που καταλαβαίνει NTFS για να ανακτήσετε συγκεκριμένα αρχεία από τον raw volume:
-- RawCopy/RawCopy64 (αντιγραφή σε επίπεδο sector των αρχείων που είναι σε χρήση)
-- FTK Imager ή The Sleuth Kit (read-only imaging, στη συνέχεια carve αρχείων)
-- vssadmin/diskshadow + shadow copy, στη συνέχεια αντιγράψτε το στοχευόμενο αρχείο από το snapshot (εάν μπορείτε να δημιουργήσετε VSS· συχνά απαιτεί admin αλλά συνήθως διαθέσιμο στους ίδιους χειριστές που έχουν SeManageVolumePrivilege)
+- Χρησιμοποιήστε εργαλείο με υποστήριξη NTFS για να ανακτήσετε συγκεκριμένα αρχεία από ακατέργαστο volume:
+- RawCopy/RawCopy64 (αντιγραφή σε επίπεδο τομέα αρχείων σε χρήση)
+- FTK Imager or The Sleuth Kit (read-only imaging, στη συνέχεια carve αρχεία)
+- vssadmin/diskshadow + shadow copy, στη συνέχεια αντιγράψτε το στοχευόμενο αρχείο από το στιγμιότυπο (αν μπορείτε να δημιουργήσετε VSS· συχνά απαιτεί admin αλλά συνήθως διαθέσιμο στους ίδιους χειριστές που κατέχουν SeManageVolumePrivilege)
 
-Τυπικά ευαίσθητα μονοπάτια-στόχοι:
+Τυπικές ευαίσθητες διαδρομές-στόχοι:
 - %ProgramData%\Microsoft\Crypto\RSA\MachineKeys\
 - %ProgramData%\Microsoft\Crypto\Keys\
 - C:\Windows\System32\config\SAM, SYSTEM, SECURITY (local secrets)
@@ -63,7 +63,7 @@ File.WriteAllBytes("C:\\temp\\blk.bin", buf);
 
 ## Σύνδεση με AD CS: Forging a Golden Certificate
 
-Αν μπορείτε να διαβάσετε το private key της Enterprise CA από το machine key store, μπορείτε να δημιουργήσετε client‑auth certificates για οποιουσδήποτε principals και να αυθεντικοποιηθείτε μέσω PKINIT/Schannel. Αυτό συχνά αναφέρεται ως Golden Certificate. Δείτε:
+Αν μπορείτε να διαβάσετε το ιδιωτικό κλειδί της Enterprise CA από το machine key store, μπορείτε να πλαστογραφήσετε client‑auth πιστοποιητικά για αυθαίρετους principals και να αυθεντικοποιηθείτε μέσω PKINIT/Schannel. Αυτό συχνά αναφέρεται ως Golden Certificate. Δείτε:
 
 {{#ref}}
 ../active-directory-methodology/ad-certificates/domain-persistence.md
@@ -71,12 +71,12 @@ File.WriteAllBytes("C:\\temp\\blk.bin", buf);
 
 (Ενότητα: “Forging Certificates with Stolen CA Certificates (Golden Certificate) – DPERSIST1”).
 
-## Detection and hardening
+## Ανίχνευση και σκληροποίηση
 
-- Περιορίστε αυστηρά την ανάθεση του SeManageVolumePrivilege (Perform volume maintenance tasks) μόνο σε εμπιστευμένους admins.
-- Monitor Sensitive Privilege Use και τα ανοίγματα process handle σε device objects όπως \\.\C:, \\.\PhysicalDrive0.
-- Προτιμήστε CA keys backed by HSM/TPM ή χρήση DPAPI-NG ώστε οι raw file reads να μην μπορούν να ανακτήσουν υλικό κλειδιού σε χρησιμοποιήσιμη μορφή.
-- Κρατήστε τα uploads, temp και extraction μονοπάτια μη‑εκτελέσιμα και διαχωρισμένα (web context defense που συχνά συνδυάζεται με αυτή την αλυσίδα post‑exploitation).
+- Περιορίστε αυστηρά την ανάθεση του SeManageVolumePrivilege (Perform volume maintenance tasks) μόνο σε αξιόπιστους admins.
+- Παρακολουθείτε το Sensitive Privilege Use και τα ανοίγματα handle διεργασιών προς αντικείμενα συσκευής όπως \\.\C:, \\.\PhysicalDrive0.
+- Προτιμήστε CA keys με υποστήριξη HSM/TPM ή DPAPI-NG ώστε οι ακατέργαστες αναγνώσεις αρχείων να μην μπορούν να ανακτήσουν το υλικό των κλειδιών σε μορφή έτοιμη για χρήση.
+- Κρατήστε τα paths για uploads, temp και extraction μη εκτελέσιμα και διαχωρισμένα (defense σε web context που συχνά συνδυάζεται με αυτήν την αλυσίδα post‑exploitation).
 
 ## References
 

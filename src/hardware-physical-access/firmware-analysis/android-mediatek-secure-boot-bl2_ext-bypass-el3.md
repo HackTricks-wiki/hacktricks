@@ -2,53 +2,53 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Αυτή η σελίδα τεκμηριώνει ένα πρακτικό secure-boot break σε πολλαπλές πλατφόρμες MediaTek, εκμεταλλευόμενο ένα κενό επαλήθευσης όταν η ρύθμιση του bootloader της συσκευής (seccfg) είναι "unlocked". Το σφάλμα επιτρέπει την εκτέλεση ενός patched bl2_ext σε ARM EL3 για να απενεργοποιήσει την downstream signature verification, να καταρρεύσει την chain of trust και να επιτρέψει το φόρτωμα αυθαίρετων unsigned TEE/GZ/LK/Kernel.
+Αυτή η σελίδα καταγράφει ένα πρακτικό break του secure-boot σε πολλαπλές πλατφόρμες MediaTek εκμεταλλευόμενη ένα κενό επαλήθευσης όταν η ρύθμιση του bootloader της συσκευής (seccfg) είναι "unlocked". Το σφάλμα επιτρέπει την εκτέλεση ενός patched bl2_ext σε ARM EL3 για να απενεργοποιήσει την επαλήθευση υπογραφών στην συνέχεια, καταρρίπτοντας την αλυσίδα εμπιστοσύνης και επιτρέποντας την φόρτωση αυθαίρετων unsigned TEE/GZ/LK/Kernel.
 
-> Προειδοποίηση: Η Early-boot patching μπορεί να οδηγήσει σε μόνιμο brick των συσκευών αν οι offsets είναι λάθος. Διατηρείτε πάντα πλήρη dumps και μια αξιόπιστη recovery path.
+> Προσοχή: Το early-boot patching μπορεί να κάνει μόνιμα brick τις συσκευές αν τα offsets είναι λάθος. Κρατήστε πάντα πλήρη dumps και έναν αξιόπιστο δρόμο ανάκτησης.
 
 ## Επηρεασμένη ροή εκκίνησης (MediaTek)
 
 - Κανονική διαδρομή: BootROM → Preloader → bl2_ext (EL3, verified) → TEE → GenieZone (GZ) → LK/AEE → Linux kernel (EL1)
-- Ευπαθής διαδρομή: Όταν το seccfg είναι ορισμένο σε unlocked, ο Preloader μπορεί να παραλείψει την επαλήθευση του bl2_ext. Ο Preloader εξακολουθεί να κάνει jump στο bl2_ext σε EL3, οπότε ένα crafted bl2_ext μπορεί να φορτώσει μη επαληθευμένα components στη συνέχεια.
+- Ευάλωτη διαδρομή: Όταν το seccfg είναι ρυθμισμένο σε "unlocked", ο Preloader μπορεί να παραλείψει την επαλήθευση του bl2_ext. Ο Preloader εξακολουθεί να κάνει jump στο bl2_ext σε EL3, οπότε ένα crafted bl2_ext μπορεί να φορτώσει μη επαληθευμένα components στη συνέχεια.
 
 Κρίσιμο όριο εμπιστοσύνης:
-- Το bl2_ext εκτελείται σε EL3 και είναι υπεύθυνο για την επαλήθευση του TEE, GenieZone, LK/AEE και του kernel. Αν το bl2_ext δεν είναι authenticated, το υπόλοιπο της chain παρακάμπτεται εύκολα.
+- Το bl2_ext εκτελείται σε EL3 και είναι υπεύθυνο για την επαλήθευση του TEE, GenieZone, LK/AEE και του kernel. Αν το bl2_ext δεν είναι αυθεντικοποιημένο, η υπόλοιπη αλυσίδα παρακάμπτεται εύκολα.
 
-## Βασική αιτία
+## Αιτία
 
-Σε επηρεασμένες συσκευές, ο Preloader δεν επιβάλλει authentication του bl2_ext partition όταν το seccfg δείχνει κατάσταση "unlocked". Αυτό επιτρέπει το flashing ενός attacker-controlled bl2_ext που τρέχει σε EL3.
+Σε επηρεαζόμενες συσκευές, ο Preloader δεν επιβάλλει την αυθεντικοποίηση του partition bl2_ext όταν το seccfg δείχνει κατάσταση "unlocked". Αυτό επιτρέπει να flashαριστεί ένα attacker-controlled bl2_ext που τρέχει σε EL3.
 
-Μέσα στο bl2_ext, η verification policy function μπορεί να patched ώστε να αναφέρει ανεπιφύλακτα ότι η verification δεν απαιτείται. Ένα ελάχιστο εννοιολογικό patch είναι:
+Μέσα στο bl2_ext, η συνάρτηση πολιτικής επαλήθευσης μπορεί να τροποποιηθεί ώστε να αναφέρει αδιακρίτως ότι η επαλήθευση δεν απαιτείται. Ένα ελάχιστο εννοιολογικό patch είναι:
 ```c
 // inside bl2_ext
 int sec_get_vfy_policy(...) {
 return 0; // always: "no verification required"
 }
 ```
-Με αυτή την αλλαγή, όλες οι επόμενες images (TEE, GZ, LK/AEE, Kernel) γίνονται αποδεκτές χωρίς κρυπτογραφικούς ελέγχους όταν φορτώνονται από το patched bl2_ext που εκτελείται στο EL3.
+Με αυτή την αλλαγή, όλες οι επακόλουθες images (TEE, GZ, LK/AEE, Kernel) γίνονται αποδεκτές χωρίς κρυπτογραφικούς ελέγχους όταν φορτώνονται από το patched bl2_ext που τρέχει στο EL3.
 
 ## Πώς να αξιολογήσετε έναν στόχο (expdb logs)
 
-Dump/inspect τα boot logs (π.χ., expdb) γύρω από το φόρτωμα του bl2_ext. Αν img_auth_required = 0 και ο χρόνος επαλήθευσης πιστοποιητικού είναι ~0 ms, η επιβολή πιθανότατα είναι off και η συσκευή είναι exploitable.
+Dump/inspect boot logs (e.g., expdb) γύρω από τη φόρτωση του bl2_ext. Εάν img_auth_required = 0 και ο χρόνος επαλήθευσης πιστοποιητικού είναι ~0 ms, η επιβολή πιθανότατα είναι απενεργοποιημένη και η συσκευή είναι εκμεταλλεύσιμη.
 
-Παράδειγμα αποσπάσματος log:
+Παράδειγμα αποσπάσματος καταγραφής:
 ```
 [PART] img_auth_required = 0
 [PART] Image with header, name: bl2_ext, addr: FFFFFFFFh, mode: FFFFFFFFh, size:654944, magic:58881688h
 [PART] part: lk_a img: bl2_ext cert vfy(0 ms)
 ```
-Σημείωση: Φαίνεται ότι ορισμένες συσκευές παρακάμπτουν την επαλήθευση του bl2_ext ακόμα και με κλειδωμένο bootloader, γεγονός που επιδεινώνει τον αντίκτυπο.
+Σημείωση: Ορισμένες συσκευές αναφέρεται ότι παρακάμπτουν την επαλήθευση του bl2_ext ακόμη και με locked bootloader, κάτι που επιδεινώνει τον αντίκτυπο.
 
 ## Πρακτική ροή εκμετάλλευσης (Fenrir PoC)
 
-Fenrir είναι ένα reference exploit/patching toolkit για αυτή την κατηγορία ζητήματος. Υποστηρίζει Nothing Phone (2a) (Pacman) και είναι γνωστό ότι λειτουργεί (μερικώς υποστηριζόμενο) στο CMF Phone 1 (Tetris). Η μεταφορά σε άλλα μοντέλα απαιτεί reverse engineering του bl2_ext συγκεκριμένης συσκευής.
+Το Fenrir είναι ένα reference exploit/patching toolkit για αυτή την κατηγορία ευπαθειών. Υποστηρίζει τα Nothing Phone (2a) (Pacman) και είναι γνωστό ότι λειτουργεί (με μερική υποστήριξη) στο CMF Phone 1 (Tetris). Η μεταφορά σε άλλα μοντέλα απαιτεί αντίστροφη μηχανική του bl2_ext ειδικού για τη συσκευή.
 
 High-level process:
-- Πάρτε το device bootloader image για το target codename και τοποθετήστε το ως bin/<device>.bin
-- Δημιουργήστε ένα patched image που απενεργοποιεί την πολιτική επαλήθευσης του bl2_ext
-- Φλασάρετε το προκύπτον payload στη συσκευή (το helper script υποθέτει fastboot)
+- Απόκτησε την εικόνα του device bootloader για το target codename σου και τοποθέτησέ την ως bin/<device>.bin
+- Δημιούργησε μια patched image που απενεργοποιεί την πολιτική επαλήθευσης του bl2_ext
+- Flash το προκύπτον payload στη συσκευή (το helper script υποθέτει fastboot)
 
-Commands:
+Εντολές:
 ```bash
 # Build patched image (default path bin/[device].bin)
 ./build.sh pacman
@@ -61,39 +61,39 @@ Commands:
 ```
 If fastboot is unavailable, you must use a suitable alternative flashing method for your platform.
 
-## Runtime payload capabilities (EL3)
+## Δυνατότητες runtime payload (EL3)
 
-A patched bl2_ext payload can:
-- Εγγραφή προσαρμοσμένων εντολών fastboot
-- Έλεγχος/παράκαμψη του boot mode
-- Κλήση κατά runtime των ενσωματωμένων συναρτήσεων του bootloader
-- Spoof “lock state” as locked while actually unlocked to pass stronger integrity checks (some environments may still require vbmeta/AVB adjustments)
+Ένα patched bl2_ext payload μπορεί να:
+- Καταχωρεί προσαρμοσμένες εντολές fastboot
+- Ελέγχει/παρακάμπτει το boot mode
+- Καλεί δυναμικά ενσωματωμένες συναρτήσεις του bootloader κατά το runtime
+- Παραπλανεί την “lock state” ως locked ενώ στην πραγματικότητα είναι unlocked για να περάσει αυστηρότερους ελέγχους ακεραιότητας (ορισμένα περιβάλλοντα μπορεί να απαιτούν ακόμη ρυθμίσεις vbmeta/AVB)
 
-Limitation: Current PoCs note that runtime memory modification may fault due to MMU constraints; payloads generally avoid live memory writes until this is resolved.
+Περιορισμός: Τα τρέχοντα PoC επισημαίνουν ότι η τροποποίηση μνήμης σε runtime μπορεί να κάνει fault λόγω περιορισμών MMU· τα payloads γενικά αποφεύγουν εγγραφές σε ζωντανή μνήμη μέχρι να επιλυθεί αυτό.
 
-## Porting tips
+## Συμβουλές porting
 
-- Αναλύστε (reverse engineer) το device-specific bl2_ext για να εντοπίσετε τη λογική πολιτικής επαλήθευσης (π.χ., sec_get_vfy_policy).
-- Εντοπίστε το policy return site ή το decision branch και τροποποιήστε το σε “no verification required” (return 0 / unconditional allow).
-- Keep offsets fully device- and firmware-specific; do not reuse addresses between variants.
-- Validate on a sacrificial unit first. Prepare a recovery plan (e.g., EDL/BootROM loader/SoC-specific download mode) before you flash.
+- Κάντε reverse engineering του device-specific bl2_ext για να εντοπίσετε τη λογική της πολιτικής επαλήθευσης (π.χ., sec_get_vfy_policy).
+- Εντοπίστε τη θέση επιστροφής της πολιτικής ή τον κλάδο απόφασης και κάντε patch ώστε να «δεν απαιτείται επαλήθευση» (return 0 / unconditional allow).
+- Διατηρήστε τα offsets απολύτως συγκεκριμένα για συσκευή και firmware· μην επαναχρησιμοποιείτε διευθύνσεις ανάμεσα σε παραλλαγές.
+- Επιβεβαιώστε πρώτα σε μια θυσιαστική μονάδα. Προετοιμάστε σχέδιο ανάκτησης (π.χ., EDL/BootROM loader/SoC-specific download mode) πριν κάνετε flash.
 
-## Security impact
+## Επιπτώσεις στην ασφάλεια
 
-- EL3 code execution after Preloader and full chain-of-trust collapse for the rest of the boot path.
-- Ability to boot unsigned TEE/GZ/LK/Kernel, bypassing secure/verified boot expectations and enabling persistent compromise.
+- Εκτέλεση κώδικα σε EL3 μετά το Preloader και πλήρης κατάρρευση της αλυσίδας εμπιστοσύνης για το υπόλοιπο της διαδικασίας εκκίνησης.
+- Ικανότητα να γίνει boot unsigned TEE/GZ/LK/Kernel, παρακάμπτοντας τις προσδοκίες secure/verified boot και επιτρέποντας μόνιμη παραβίαση.
 
-## Detection and hardening ideas
+## Ιδέες ανίχνευσης και ενίσχυσης ασφάλειας
 
-- Ensure Preloader verifies bl2_ext regardless of seccfg state.
-- Enforce authentication results and gather audit evidence (timings > 0 ms, strict errors on mismatch).
-- Lock-state spoofing should be made ineffective for attestation (tie lock state to AVB/vbmeta verification decisions and fuse-backed state).
+- Βεβαιώστε ότι ο Preloader επαληθεύει το bl2_ext ανεξάρτητα από την κατάσταση seccfg.
+- Επιβάλετε τα αποτελέσματα authentication και συλλέξτε αποδεικτικά στοιχεία audit (timings > 0 ms, αυστηρά σφάλματα σε mismatch).
+- Το spoofing της lock-state θα πρέπει να γίνεται άχρηστο για attestation (συνδέστε την lock state με τις αποφάσεις επαλήθευσης AVB/vbmeta και με fuse-backed state).
 
-## Device notes
+## Σημειώσεις συσκευής
 
-- Confirmed supported: Nothing Phone (2a) (Pacman)
-- Known working (incomplete support): CMF Phone 1 (Tetris)
-- Observed: Vivo X80 Pro reportedly did not verify bl2_ext even when locked
+- Επιβεβαιωμένα υποστηριζόμενο: Nothing Phone (2a) (Pacman)
+- Γνωστό ότι λειτουργεί (ατελής υποστήριξη): CMF Phone 1 (Tetris)
+- Παρατηρήθηκε: Φημολογείται ότι το Vivo X80 Pro δεν επαλήθευε το bl2_ext ακόμη και όταν ήταν locked
 
 ## References
 
