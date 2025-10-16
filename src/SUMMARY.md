@@ -17,6 +17,7 @@
   - [EIGRP Attacks](generic-methodologies-and-resources/pentesting-network/eigrp-attacks.md)
   - [GLBP & HSRP Attacks](generic-methodologies-and-resources/pentesting-network/glbp-and-hsrp-attacks.md)
   - [IDS and IPS Evasion](generic-methodologies-and-resources/pentesting-network/ids-evasion.md)
+  - [Key Exchange Attacks Dh Kem](generic-methodologies-and-resources/pentesting-network/key-exchange-attacks-dh-kem.md)
   - [Lateral VLAN Segmentation Bypass](generic-methodologies-and-resources/pentesting-network/lateral-vlan-segmentation-bypass.md)
   - [Network Protocols Explained (ESP)](generic-methodologies-and-resources/pentesting-network/network-protocols-explained-esp.md)
   - [Nmap Summary (ESP)](generic-methodologies-and-resources/pentesting-network/nmap-summary-esp.md)
