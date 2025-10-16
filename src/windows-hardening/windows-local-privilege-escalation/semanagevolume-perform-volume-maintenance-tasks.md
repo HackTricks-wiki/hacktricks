@@ -1,4 +1,4 @@
-# SeManageVolumePrivilege: कच्चे वॉल्यूम एक्सेस के जरिए किसी भी फ़ाइल को पढ़ना
+# SeManageVolumePrivilege: किसी भी फ़ाइल को पढ़ने के लिए कच्चे वॉल्यूम एक्सेस
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -6,21 +6,21 @@
 
 Windows उपयोगकर्ता अधिकार: Perform volume maintenance tasks (constant: SeManageVolumePrivilege).
 
-धारक low-level वॉल्यूम ऑपरेशंस कर सकते हैं जैसे defragmentation, वॉल्यूम बनाना/हटाना, और मेंटेनेंस IO. हमला करने वालों के लिए महत्वपूर्ण बात यह है कि यह अधिकार raw volume device handles (उदा., \\.\C:) खोलने और डायरेक्ट डिस्क I/O जारी करने की अनुमति देता है जो NTFS फ़ाइल ACLs को बायपास करता है। कच्चे एक्सेस के साथ आप वॉल्यूम पर किसी भी फ़ाइल के बाइट्स को कॉपी कर सकते हैं, भले ही DACL द्वारा मना किया गया हो, फाइल सिस्टम स्ट्रक्चर्स को ऑफ़लाइन पार्स करके या उन टूल्स का उपयोग करके जो ब्लॉक/क्लस्टर लेवल पर पढ़ते हैं।
+इस अधिकार के धारक low-level वॉल्यूम ऑपरेशंस कर सकते हैं जैसे कि defragmentation, वॉल्यूम बनाना/हटाना, और मेंटेनेंस I/O। हमलावरों के लिए महत्वपूर्ण बात यह है कि यह अधिकार कच्चे वॉल्यूम डिवाइस हैंडल (उदाहरण: \\.\C:) खोलने और ऐसा डायरेक्ट डिस्क I/O करने की अनुमति देता है जो NTFS फ़ाइल ACLs को बायपास करता है। कच्चे एक्सेस के साथ आप वॉल्यूम पर किसी भी फ़ाइल के बाइट्स कॉपी कर सकते हैं भले ही DACL द्वारा इनकार किया गया हो — यह फ़ाइल सिस्टम स्ट्रक्चर्स को ऑफ़लाइन पार्स करके या ब्लॉक/क्लस्टर स्तर पर पढ़ने वाले टूल्स का उपयोग करके संभव है।
 
-डिफ़ॉल्ट: सर्वर और डोमेन कंट्रोलर पर Administrators।
+डिफ़ॉल्ट: सर्वरों और डोमेन कंट्रोलर्स पर Administrators.
 
 ## दुरुपयोग परिदृश्य
 
-- डिस्क डिवाइस पढ़कर ACLs को बायपास करते हुए मनमाना फ़ाइल पढ़ना (उदा., संवेदनशील सिस्टम-प्रोटेक्टेड सामग्री जैसे %ProgramData%\Microsoft\Crypto\RSA\MachineKeys और %ProgramData%\Microsoft\Crypto\Keys के अंतर्गत मशीन प्राइवेट कीज़, registry hives, DPAPI masterkeys, SAM, ntds.dit via VSS, आदि को exfiltrate करना)।
-- लॉक किए गए/विशेषाधिकार वाले पाथ्स (C:\Windows\System32\…) को बायपास करना, कच्चे डिवाइस से बाइट्स सीधे कॉपी करके।
-- AD CS वातावरणों में, CA की key material (machine key store) को exfiltrate करके “Golden Certificates” बनाना और PKINIT के माध्यम से किसी भी डोमेन प्रिंसिपल की नकल करना। नीचे लिंक देखें।
+- डिस्क डिवाइस पढ़कर ACLs को बायपास करके किसी भी फ़ाइल को पढ़ना/निकासी (उदा., संवेदनशील सिस्टम-प्रोटेक्टेड सामग्री जैसे %ProgramData%\Microsoft\Crypto\RSA\MachineKeys और %ProgramData%\Microsoft\Crypto\Keys के तहत मशीन प्राइवेट कीज़, registry hives, DPAPI masterkeys, SAM, ntds.dit (VSS के माध्यम से) आदि)।
+- लॉक्ड/प्रिविलेज्ड पाथ्स (C:\Windows\System32\…) को कच्चे डिवाइस से सीधे बाइट्स कॉपी करके बायपास करना।
+- AD CS परिवेशों में, CA के की मटेरियल (machine key store) को एक्सफ़िल्ट्रेट करके “Golden Certificates” बनाना और PKINIT के जरिए किसी भी डोमेन प्रिंसिपल का impersonate करना। नीचे लिंक देखें।
 
-नोट: जब तक आप helper tools पर निर्भर नहीं करते, NTFS स्ट्रक्चर्स के लिए आपको अभी भी एक parser की ज़रूरत होगी। कई off-the-shelf टूल्स raw access को abstract करते हैं।
+नोट: जब तक आप helper tools पर भरोसा नहीं करते, आपको NTFS संरचनाओं के लिए एक पार्सर की आवश्यकता होगी। कई रेडी-टू-यूज़ टूल्स कच्चे एक्सेस को abstract कर देते हैं।
 
 ## व्यावहारिक तकनीकें
 
-- raw volume handle खोलें और clusters पढ़ें:
+- कच्चा वॉल्यूम हैंडल खोलें और क्लस्टर्स पढ़ें:
 
 <details>
 <summary>विस्तार के लिए क्लिक करें</summary>
@@ -49,10 +49,10 @@ File.WriteAllBytes("C:\\temp\\blk.bin", buf);
 ```
 </details>
 
-- कच्चे वॉल्यूम से विशिष्ट फ़ाइलें पुनर्प्राप्त करने के लिए NTFS-aware टूल का उपयोग करें:
-- RawCopy/RawCopy64 (sector-level copy of in-use files)
-- FTK Imager or The Sleuth Kit (read-only imaging, then carve files)
-- vssadmin/diskshadow + shadow copy, फिर snapshot से target फ़ाइल कॉपी करें (यदि आप VSS बना सकते हैं; अक्सर admin की आवश्यकता होती है लेकिन आमतौर पर वही ऑपरेटर उपलब्ध होते हैं जिनके पास SeManageVolumePrivilege होता है)
+- NTFS-aware टूल का उपयोग करके raw volume से विशिष्ट फ़ाइलें पुनर्प्राप्त करें:
+- RawCopy/RawCopy64 (in-use फ़ाइलों की sector-स्तरीय कॉपी)
+- FTK Imager or The Sleuth Kit (read-only imaging, फिर फ़ाइलें carve करें)
+- vssadmin/diskshadow + shadow copy, फिर snapshot से target फ़ाइल कॉपी करें (यदि आप VSS बना सकते हैं; अक्सर admin की आवश्यकता होती है पर आम तौर पर वही ऑपरेटर्स जिनके पास SeManageVolumePrivilege होता है इनके पास उपलब्ध होता है)
 
 Typical sensitive paths to target:
 - %ProgramData%\Microsoft\Crypto\RSA\MachineKeys\
@@ -61,7 +61,7 @@ Typical sensitive paths to target:
 - C:\Windows\NTDS\ntds.dit (domain controllers – via shadow copy)
 - C:\Windows\System32\CertSrv\CertEnroll\ (CA certs/CRLs; private keys live in the machine key store above)
 
-## AD CS tie‑in: Forging a Golden Certificate
+## AD CS संबंध: Forging a Golden Certificate
 
 यदि आप machine key store से Enterprise CA की private key पढ़ सकते हैं, तो आप arbitrary principals के लिए client‑auth certificates forge कर सकते हैं और PKINIT/Schannel के माध्यम से authenticate कर सकते हैं। इसे अक्सर Golden Certificate कहा जाता है। देखें:
 
@@ -69,14 +69,14 @@ Typical sensitive paths to target:
 ../active-directory-methodology/ad-certificates/domain-persistence.md
 {{#endref}}
 
-(अनुभाग: “Forging Certificates with Stolen CA Certificates (Golden Certificate) – DPERSIST1”).
+(Section: “Forging Certificates with Stolen CA Certificates (Golden Certificate) – DPERSIST1”).
 
-## Detection and hardening
+## पहचान और हार्डनिंग
 
-- SeManageVolumePrivilege (Perform volume maintenance tasks) को केवल भरोसेमंद admins तक ही सख्ती से सीमित करें।
-- Sensitive Privilege Use और device objects जैसे \\.\C:, \\.\PhysicalDrive0 के लिए process handle opens की निगरानी करें।
-- HSM/TPM-backed CA keys या DPAPI-NG पसंद करें ताकि raw file reads से key material उपयोगयोग्य रूप में पुनर्प्राप्त न हो सके।
-- uploads, temp, और extraction paths को non-executable रखें और अलग रखें (web context defense जो अक्सर इस chain के post‑exploitation के साथ जुड़ती है)।
+- Strongly limit assignment of SeManageVolumePrivilege (Perform volume maintenance tasks) to only trusted admins.
+- Monitor Sensitive Privilege Use और process handle opens to device objects जैसे \\.\C:, \\.\PhysicalDrive0 को मॉनिटर करें।
+- HSM/TPM-backed CA keys या DPAPI-NG को प्राथमिकता दें ताकि raw file reads से key material usable रूप में recover न हो सके।
+- अपलोड, temp, और extraction paths को non-executable और अलग रखें (web context defense जो अक्सर इस chain post‑exploitation के साथ जुड़ती है).
 
 ## References
 

