@@ -117,6 +117,10 @@ If you just need a full example of crafting the pipe and impersonating to spawn 
 {{#ref}}
 from-high-integrity-to-system-with-name-pipes.md
 {{#endref}}
+-
+{{#ref}}
+service-triggers.md
+{{#endref}}
 
 ## Troubleshooting and gotchas
 - You must read at least one message from the pipe before calling ImpersonateNamedPipeClient; otherwise you’ll get ERROR_CANNOT_IMPERSONATE (1368).
