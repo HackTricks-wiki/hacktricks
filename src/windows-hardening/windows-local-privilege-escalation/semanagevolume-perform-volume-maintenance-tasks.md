@@ -1,22 +1,22 @@
-# SeManageVolumePrivilege: Accès brut au volume pour la lecture arbitraire de fichiers
+# SeManageVolumePrivilege: Accès brut au volume pour lecture arbitraire de fichiers
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Aperçu
 
-Droit utilisateur Windows : Perform volume maintenance tasks (constante : SeManageVolumePrivilege).
+Droit utilisateur Windows : Effectuer des tâches de maintenance de volume (constante : SeManageVolumePrivilege).
 
-Les titulaires peuvent effectuer des opérations de volume bas niveau telles que la défragmentation, la création/suppression de volumes et les E/S de maintenance. De façon critique pour les attaquants, ce droit permet d'ouvrir des handles de périphérique de volume brut (par ex., \\.\C:) et d'émettre des E/S disque directes qui contournent les ACLs de fichiers NTFS. Avec un accès brut, vous pouvez copier les octets de n'importe quel fichier sur le volume même si l'accès est refusé par la DACL, en analysant hors ligne les structures du système de fichiers ou en utilisant des outils qui lisent au niveau bloc/cluster.
+Les titulaires peuvent effectuer des opérations de volume bas niveau telles que la défragmentation, la création/suppression de volumes, et des E/S de maintenance. De façon critique pour les attaquants, ce droit permet d'ouvrir des handles de périphérique de volume brut (par ex., \\.\C:) et d'émettre des opérations d'E/S directes sur le disque qui contournent les ACL de fichiers NTFS. Avec un accès brut, vous pouvez copier les octets de n'importe quel fichier sur le volume même si l'accès est refusé par la DACL, en analysant hors ligne les structures du système de fichiers ou en utilisant des outils qui lisent au niveau des blocs/clusters.
 
 Par défaut : Administrators sur les serveurs et les contrôleurs de domaine.
 
 ## Scénarios d'abus
 
-- Lecture arbitraire de fichiers en contournant les ACLs en lisant le périphérique disque (par ex., exfiltrer des éléments sensibles protégés par le système tels que les clés privées machine sous %ProgramData%\Microsoft\Crypto\RSA\MachineKeys et %ProgramData%\Microsoft\Crypto\Keys, les ruche du registre, les DPAPI masterkeys, SAM, ntds.dit via VSS, etc.).
-- Contourner des chemins verrouillés/privilegiés (C:\Windows\System32\…) en copiant directement les octets depuis le périphérique brut.
-- Dans des environnements AD CS, exfiltrer le matériel clé de la CA (machine key store) pour forger des “Golden Certificates” et usurper n'importe quel principal de domaine via PKINIT. Voir le lien ci-dessous.
+- Lecture arbitraire de fichiers en contournant les ACL en lisant le périphérique disque (par ex., exfiltrer du matériel sensible protégé par le système tel que les clés privées de la machine sous %ProgramData%\Microsoft\Crypto\RSA\MachineKeys et %ProgramData%\Microsoft\Crypto\Keys, les ruchettes du Registre, les masterkeys DPAPI, le SAM, ntds.dit via VSS, etc.).
+- Contourner les chemins verrouillés/privilégiés (C:\Windows\System32\…) en copiant les octets directement depuis le périphérique brut.
+- Dans les environnements AD CS, exfiltrer le matériel de clé de la CA (magasin de clés machine) pour forger des “Golden Certificates” et usurper n'importe quel principal de domaine via PKINIT. Voir le lien ci-dessous.
 
-Remarque : Vous aurez toujours besoin d'un parseur pour les structures NTFS sauf si vous comptez sur des outils d'assistance. Beaucoup d'outils prêts à l'emploi abstraient l'accès brut.
+Remarque : Vous avez toujours besoin d'un parseur des structures NTFS à moins de vous appuyer sur des outils d'assistance. De nombreux outils prêts à l'emploi abstraient l'accès brut.
 
 ## Techniques pratiques
 
@@ -49,34 +49,34 @@ File.WriteAllBytes("C:\\temp\\blk.bin", buf);
 ```
 </details>
 
-- Utiliser un outil compatible NTFS pour récupérer des fichiers spécifiques depuis un volume brut :
-- RawCopy/RawCopy64 (copie au niveau des secteurs des fichiers en cours d'utilisation)
-- FTK Imager or The Sleuth Kit (imagerie en lecture seule, puis extraction des fichiers)
-- vssadmin/diskshadow + shadow copy, puis copier le fichier cible depuis le snapshot (si vous pouvez créer VSS ; requiert souvent des droits admin mais est couramment disponible aux mêmes opérateurs qui détiennent SeManageVolumePrivilege)
+- Utiliser un outil compatible NTFS pour récupérer des fichiers spécifiques à partir du volume brut :
+- RawCopy/RawCopy64 (copie au niveau secteur des fichiers en cours d'utilisation)
+- FTK Imager ou The Sleuth Kit (imagerie en lecture seule, puis carve des fichiers)
+- vssadmin/diskshadow + shadow copy, puis copier le fichier cible depuis le snapshot (si vous pouvez créer VSS ; nécessite souvent des privilèges admin mais est fréquemment accessible aux mêmes opérateurs qui détiennent SeManageVolumePrivilege)
 
 Chemins sensibles typiques à cibler :
 - %ProgramData%\Microsoft\Crypto\RSA\MachineKeys\
 - %ProgramData%\Microsoft\Crypto\Keys\
-- C:\Windows\System32\config\SAM, SYSTEM, SECURITY (local secrets)
-- C:\Windows\NTDS\ntds.dit (domain controllers – via shadow copy)
-- C:\Windows\System32\CertSrv\CertEnroll\ (CA certs/CRLs; private keys live in the machine key store above)
+- C:\Windows\System32\config\SAM, SYSTEM, SECURITY (secrets locaux)
+- C:\Windows\NTDS\ntds.dit (contrôleurs de domaine – via shadow copy)
+- C:\Windows\System32\CertSrv\CertEnroll\ (certificats/CRL de la CA ; les clés privées se trouvent dans le magasin de clés machine ci‑dessus)
 
-## AD CS tie‑in: Forging a Golden Certificate
+## AD CS — lien : Forger un Golden Certificate
 
-Si vous pouvez lire la clé privée de l'Enterprise CA depuis le magasin de clés machine, vous pouvez forger des certificats d'authentification client pour des principaux arbitraires et vous authentifier via PKINIT/Schannel. This is often referred to as a Golden Certificate. Voir :
+Si vous pouvez lire la clé privée de la CA d’entreprise dans le magasin de clés machine, vous pouvez forger des certificats client‑auth pour des principals arbitraires et vous authentifier via PKINIT/Schannel. Cela est souvent appelé Golden Certificate. Voir :
 
 {{#ref}}
 ../active-directory-methodology/ad-certificates/domain-persistence.md
 {{#endref}}
 
-(Section : “Forging Certificates with Stolen CA Certificates (Golden Certificate) – DPERSIST1”).
+(Section: “Forging Certificates with Stolen CA Certificates (Golden Certificate) – DPERSIST1”).
 
 ## Détection et durcissement
 
-- Limiter fortement l'attribution de SeManageVolumePrivilege (Perform volume maintenance tasks) aux seuls administrateurs de confiance.
-- Surveiller l'utilisation de privilèges sensibles et les ouvertures de handles de processus vers des objets de périphérique comme \\.\C:, \\.\PhysicalDrive0.
-- Préférer des clés CA protégées par HSM/TPM ou DPAPI-NG afin que les lectures de fichiers bruts ne puissent pas récupérer le matériel clé sous une forme exploitable.
-- Garder les répertoires d'uploads, temporaires et d'extraction non exécutables et séparés (mesure de défense en contexte web qui accompagne souvent cette chaîne post‑exploitation).
+- Limiter strictement l'attribution de SeManageVolumePrivilege (Perform volume maintenance tasks) aux seuls administrateurs de confiance.
+- Surveiller l'utilisation des privilèges sensibles et les ouvertures de handles de processus vers des objets de périphérique comme \\.\C:, \\.\PhysicalDrive0.
+- Préférer des clés CA protégées par HSM/TPM ou DPAPI-NG afin que des lectures brutes de fichiers ne permettent pas de récupérer du matériel clé exploitable.
+- Garder les chemins d'upload, temporaires et d'extraction non exécutables et séparés (défense en contexte web qui est souvent couplée à cette chaîne post‑exploitation).
 
 ## Références
 

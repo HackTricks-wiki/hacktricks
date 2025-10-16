@@ -146,31 +146,31 @@ console.log('[!] xpc_connection_get_audit_token outside handler\n' + bt);
 }
 });
 ```
-Notes:
-- Sur macOS, l'instrumentation de binaires protégés/Apple peut nécessiter la désactivation de SIP ou un environnement de développement ; privilégiez les tests sur vos propres builds ou sur des services userland.
-- Pour les reply-forwarding races (Variant 2), surveillez l'analyse concurrente des reply packets en fuzzant les timings de `xpc_connection_send_message_with_reply` vs. les requêtes normales et vérifiez si l'audit token effectif utilisé lors de l'autorisation peut être influencé.
+Remarques :
+- Sur macOS, instrumenter des binaires protégés d'Apple peut nécessiter de désactiver SIP ou d'utiliser un environnement de développement ; préférez tester vos propres builds ou des services userland.
+- Pour reply-forwarding races (Variant 2), surveillez l'analyse concurrente des reply packets en fuzzant les timings de `xpc_connection_send_message_with_reply` par rapport aux requêtes normales et vérifiez si l'audit token effectif utilisé pendant l'autorisation peut être influencé.
 
 ## Primitives d'exploitation dont vous aurez probablement besoin
 
-- Multi-sender setup (Variant 1) : créez des connexions vers A et B ; dupliquez le send right du client port de A et utilisez-le comme client port de B afin que les replies de B soient délivrés à A.
+- Multi-sender setup (Variant 1) : créez des connexions vers A et B ; dupliquez le send right du client port de A et utilisez-le comme client port de B afin que les replies de B soient livrés à A.
 ```c
 // Duplicate a SEND right you already hold
 mach_port_t dup;
 mach_port_insert_right(mach_task_self(), a_client, a_client, MACH_MSG_TYPE_MAKE_SEND);
 dup = a_client; // use `dup` when crafting B’s connect packet instead of a fresh client port
 ```
-- Reply hijack (Variant 2): capture the send-once right from A’s pending request (reply port), then send a crafted message to B using that reply port so B’s reply lands on A while your privileged request is being parsed.
+- Reply hijack (Variant 2) : capturer le send-once right depuis la requête en attente d'A (reply port), puis envoyer un message façonné à B en utilisant ce reply port afin que la réponse de B atterrisse sur A pendant que votre requête privilégiée est analysée.
 
-Ces attaques nécessitent la création de messages mach de bas niveau pour le XPC bootstrap et les formats de message ; consultez les pages d'introduction mach/XPC de cette section pour les dispositions exactes des paquets et les flags.
+Ces attaques nécessitent la création de messages mach au bas niveau pour le bootstrap XPC et les formats de message ; consultez les pages d'introduction mach/XPC dans cette section pour les agencements exacts des paquets et les flags.
 
-## Outils utiles
+## Useful tooling
 
-- XPC sniffing/dynamic inspection: gxpc (open-source XPC sniffer) peut aider à énumérer les connexions et observer le trafic pour valider les configurations à plusieurs émetteurs et le timing. Exemple : `gxpc -p <PID> --whitelist <service-name>`.
-- Classic dyld interposing for libxpc: interposez sur `xpc_connection_send_message*` et `xpc_connection_get_audit_token` pour consigner les sites d'appel et les piles pendant les tests black-box.
+- XPC sniffing/dynamic inspection : gxpc (open-source XPC sniffer) peut aider à énumérer les connexions et observer le trafic pour valider les configurations multi-sender et le timing. Exemple : `gxpc -p <PID> --whitelist <service-name>`.
+- Classic dyld interposing for libxpc : interposer sur `xpc_connection_send_message*` et `xpc_connection_get_audit_token` pour enregistrer les points d'appel et les traces de pile lors de tests black-box.
 
 
 
-## Références
+## References
 
 - Sector 7 – Don’t Talk All at Once! Elevating Privileges on macOS by Audit Token Spoofing: <https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/>
 - Apple – About the security content of macOS Ventura 13.4 (CVE‑2023‑32405): <https://support.apple.com/en-us/106333>
