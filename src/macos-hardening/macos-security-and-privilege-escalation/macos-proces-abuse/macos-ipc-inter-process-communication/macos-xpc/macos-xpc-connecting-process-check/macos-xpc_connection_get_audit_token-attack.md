@@ -52,7 +52,7 @@ Two different methods this might be exploitable:
 - Service **B** can call a **privileged functionality** in service A that the user cannot
 - Exploit connects with **service A** which **sends** the exploit a **message expecting a response** in a specific **replay** **port**.
 - Exploit sends **service** B a message passing **that reply port**.
-- When service **B replies**, it s**ends the message to service A**, **while** the **exploit** sends a different **message to service A** trying to **reach a privileged functionality** and expecting that the reply from service B will overwrite the Audit token in the perfect moment (Race Condition).
+- When service **B** replies, it s**ends the message to service A**, **while** the **exploit** sends a different **message to service A** trying to **reach a privileged functionality** and expecting that the reply from service B will overwrite the Audit token in the perfect moment (Race Condition).
 
 ## Variant 1: calling xpc_connection_get_audit_token outside of an event handler <a href="#variant-1-calling-xpc_connection_get_audit_token-outside-of-an-event-handler" id="variant-1-calling-xpc_connection_get_audit_token-outside-of-an-event-handler"></a>
 
@@ -147,33 +147,31 @@ console.log('[!] xpc_connection_get_audit_token outside handler\n' + bt);
 });
 ```
 Notlar:
-- macOS'ta, korumalı/Apple ikili dosyaları instrument etmek SIP'in devre dışı bırakılmasını veya bir geliştirme ortamı gerektirebilir; kendi build'lerinizi veya userland servislerinizi test etmeyi tercih edin.
-- reply-forwarding races (Variant 2) için, cevap paketlerinin eşzamanlı ayrıştırılmasını izleyin: `xpc_connection_send_message_with_reply` ile normal istekler arasındaki zamanlamaları fuzz ederek ve yetkilendirme sırasında kullanılan efektif audit token'ın etkilenip etkilenemeyeceğini kontrol ederek.
+- macOS'ta, protected/Apple binaries'ı enstrümante etmek SIP'in devre dışı bırakılmasını veya bir geliştirme ortamını gerektirebilir; kendi build'lerinizi veya userland servislerini test etmeyi tercih edin.
+- reply-forwarding races (Variant 2) için, cevap paketlerinin eşzamanlı ayrıştırılmasını, `xpc_connection_send_message_with_reply` ile normal isteklerin zamanlamalarını fuzzing yaparak izleyin ve yetkilendirme sırasında kullanılan effective audit token'ın etkilenip etkilenemeyeceğini kontrol edin.
 
-## Muhtemelen ihtiyaç duyacağınız Exploitation primitives
+## Muhtemelen ihtiyaç duyacağınız exploitation primitives
 
-- Multi-sender setup (Variant 1): A ve B'ye bağlantılar oluşturun; A’nın client port'unun send right'ını çoğaltıp B’nin client port'u olarak kullanın, böylece B’nin reply'leri A’ya teslim edilir.
+- Multi-sender setup (Variant 1): A ve B'ye bağlantılar oluşturun; A’nın client port'unun send right’unu çoğaltın ve bunu B’nin client portu olarak kullanın, böylece B’nin replies'i A’ya teslim edilir.
 ```c
 // Duplicate a SEND right you already hold
 mach_port_t dup;
 mach_port_insert_right(mach_task_self(), a_client, a_client, MACH_MSG_TYPE_MAKE_SEND);
 dup = a_client; // use `dup` when crafting B’s connect packet instead of a fresh client port
 ```
-- Reply hijack (Variant 2): A'nın bekleyen request'inden (reply port) send-once right'ı ele geçirin, sonra o reply port'u kullanarak B'ye hazırlanmış bir mesaj gönderin; böylece B'nin cevabı ayrıcalıklı isteğiniz işlenirken A'ya ulaşır.
+- Reply hijack (Variant 2): A’nın bekleyen isteğinden (reply port) send-once hakkını ele geçirip, ardından bu reply portu kullanarak B’ye hazırlanmış bir mesaj gönderin; böylece B’nin cevabı, ayrıcalıklı isteğiniz ayrıştırılırken A’ya ulaşır.
 
-Bu, XPC bootstrap ve mesaj formatları için düşük seviyeli mach message crafting gerektirir; kesin paket düzenleri ve flags için bu bölümdeki mach/XPC primer sayfalarını inceleyin.
+Bunlar XPC bootstrap ve mesaj formatları için düşük seviyeli mach message oluşturmayı gerektirir; tam paket düzenleri ve bayraklar için bu bölümdeki mach/XPC primer sayfalarını inceleyin.
 
-## Kullanışlı araçlar
+## Faydalı araçlar
 
-- XPC sniffing/dynamic inspection: gxpc (open-source XPC sniffer) bağlantıları enumerate etmek ve trafiği gözlemleyerek multi-sender konfigürasyonlarını ve zamanlamayı doğrulamak için yardımcı olabilir. Örnek: `gxpc -p <PID> --whitelist <service-name>`.
-- Classic dyld interposing for libxpc: `xpc_connection_send_message*` ve `xpc_connection_get_audit_token` üzerinde interpose yaparak çağrı noktalarını ve stack'leri black-box testing sırasında loglayın.
+- XPC sniffing/dynamic inspection: gxpc (open-source XPC sniffer) bağlantıları listelemede ve çok-gönderen yapılandırmalarını ve zamanlamayı doğrulamak için trafiği gözlemlemede yardımcı olabilir. Örnek: `gxpc -p <PID> --whitelist <service-name>`.
+- Classic dyld interposing for libxpc: interpose on `xpc_connection_send_message*` and `xpc_connection_get_audit_token` to log call sites and stacks during black-box testing.
 
+## References
 
-
-## Referanslar
-
-- Sector 7 – Don’t Talk All at Once! Elevating Privileges on macOS by Audit Token Spoofing: <https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/>
-- Apple – About the security content of macOS Ventura 13.4 (CVE‑2023‑32405): <https://support.apple.com/en-us/106333>
+- Sector 7 – Hepsi Birden Konuşmayın! Audit Token Spoofing ile macOS'ta Ayrıcalık Yükseltme: <https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/>
+- Apple – macOS Ventura 13.4 güvenlik içeriği hakkında (CVE‑2023‑32405): <https://support.apple.com/en-us/106333>
 
 
 {{#include ../../../../../../banners/hacktricks-training.md}}

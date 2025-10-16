@@ -1,19 +1,19 @@
-# Phishing Methodology
+# Phishing Metodolojisi
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Methodology
+## Metodoloji
 
 1. Recon the victim
-1. Select the **hedef alan adı**.
-2. Hedefin kullandığı **login portalları arayarak** temel web keşfi yapın ve hangi portalı **taklit edeceğinize karar verin**.
-3. **OSINT** kullanarak **e-posta adresleri bulun**.
-2. Prepare the environment
-1. **Phishing değerlendirmesinde kullanacağınız alan adını satın alın**
-2. **E-posta servisiyle ilgili kayıtları yapılandırın** (SPF, DMARC, DKIM, rDNS)
+1. **victim domain**'i seçin.
+2. Hedefin kullandığı portalları bulmak için temel web keşfi yapın, **oturum açma portallarını arayın** ve hangi portalı **taklit edeceğinize karar verin**.
+3. Biraz **OSINT** kullanarak **e-posta adresleri bulun**.
+2. Ortamı hazırlayın
+1. Phishing değerlendirmesinde kullanacağınız **domain**'i satın alın
+2. E-posta servisi ile ilgili kayıtları (SPF, DMARC, DKIM, rDNS) yapılandırın
 3. VPS'i **gophish** ile yapılandırın
-3. Prepare the campaign
-1. **E-posta şablonunu** hazırlayın
+3. Kampanyayı hazırlayın
+1. **e-posta şablonunu** hazırlayın
 2. Kimlik bilgilerini çalmak için **web sayfasını** hazırlayın
 4. Kampanyayı başlatın!
 
@@ -21,30 +21,30 @@
 
 ### Domain Name Variation Techniques
 
-- **Keyword**: Alan adı, orijinal domainin önemli bir **anahtar kelimesini** içerir (ör. zelster.com-management.com).
-- **hypened subdomain**: Bir alt alan adındaki **noktayı tıraç ile değiştirin** (ör. www-zelster.com).
-- **New TLD**: Aynı domainin **yeni bir TLD** ile kullanımı (ör. zelster.org)
-- **Homoglyph**: Alan adındaki bir harfi **benzer görünen harflerle** değiştirir (ör. zelfser.com).
+- **Keyword**: Domain adı orijinal domainin önemli bir **keyword**'ünü içerir (ör. zelster.com-management.com).
+- **hypened subdomain**: Bir alt alan adındaki **nokta yerine tire** koyun (ör. www-zelster.com).
+- **New TLD**: Aynı domainin **yeni TLD** ile kullanılması (ör. zelster.org)
+- **Homoglyph**: Domain adındaki bir harfi **benzer görünen** harflerle değiştirir (ör. zelfser.com).
 
 
 {{#ref}}
 homograph-attacks.md
 {{#endref}}
-- **Transposition:** Alan adı içinde iki harfi **değiştirir** (ör. zelsetr.com).
-- **Singularization/Pluralization**: Alan adının sonuna “s” ekler veya kaldırır (ör. zeltsers.com).
-- **Omission**: Alan adından bir harfi **çıkarır** (ör. zelser.com).
-- **Repetition:** Alan adındaki bir harfi **tekrar eder** (ör. zeltsser.com).
-- **Replacement**: Homoglyph'e benzer fakat daha az gizli. Alan adındaki bir harfi, klavyede komşu olabilecek başka bir harfle değiştirir (ör. zektser.com).
-- **Subdomained**: Alan adı içine bir **nokta** ekler (ör. ze.lster.com).
-- **Insertion**: Alan adına bir **harf ekler** (ör. zerltser.com).
-- **Missing dot**: TLD'yi alan adına ekler. (ör. zelstercom.com)
+- **Transposition:** Domain adındaki iki harfi **yer değiştirir** (ör. zelsetr.com).
+- **Singularization/Pluralization**: Domain adının sonuna “s” ekler veya çıkarır (ör. zeltsers.com).
+- **Omission**: Domain adından bir harfi **çıkarır** (ör. zelser.com).
+- **Repetition:** Domain adındaki bir harfi **tekrarlar** (ör. zeltsser.com).
+- **Replacement**: Homoglyph'e benzer ama daha az gizli. Domain adındaki bir harfi, genellikle klavyede orijinal harfe yakın bir harfle **değiştirir** (ör. zektser.com).
+- **Subdomained**: Domain adının içine bir **nokta** ekler (ör. ze.lster.com).
+- **Insertion**: Domain adına bir **harf ekler** (ör. zerltser.com).
+- **Missing dot**: TLD'yi domain adına ekler. (ör. zelstercom.com)
 
-**Automatic Tools**
+**Otomatik Araçlar**
 
 - [**dnstwist**](https://github.com/elceef/dnstwist)
 - [**urlcrazy**](https://github.com/urbanadventurer/urlcrazy)
 
-**Web siteleri**
+**Websiteler**
 
 - [https://dnstwist.it/](https://dnstwist.it)
 - [https://dnstwister.report/](https://dnstwister.report)
@@ -52,20 +52,20 @@ homograph-attacks.md
 
 ### Bitflipping
 
-Güneş patlamaları, kozmik ışınlar veya donanım hataları gibi çeşitli faktörler nedeniyle saklanan veya iletişim halindeki bazı bitlerin **otomatik olarak tersine dönebileceği** bir olasılık vardır.
+Depolanan veya iletim halindeki bazı bitlerin, güneş patlamaları, kozmik ışınlar veya donanım hataları gibi çeşitli faktörler nedeniyle otomatik olarak **fliplenme** ihtimali vardır.
 
-Bu kavram **DNS isteklerine uygulandığında**, DNS sunucusunun aldığı **domain'in başlangıçta istenen domain ile aynı olmama ihtimali** vardır.
+Bu kavram DNS isteklerine **uygulandığında**, DNS sunucusu tarafından **alınan domainin**, başlangıçta istenen domainle aynı olmama ihtimali vardır.
 
-Örneğin, "windows.com" domainindeki tek bir bit değişikliği onu "windnws.com" haline getirebilir.
+Örneğin, "windows.com" domainindeki tek bir bit değişikliği onu "windnws.com" yapabilir.
 
-Saldırganlar, meşru kullanıcıları kendi altyapılarına yönlendirmek amacıyla hedef domain ile benzer **birden fazla bit-flipping domaini kaydederek** bundan yararlanabilirler.
+Saldırganlar, meşru kullanıcıları kendi altyapılarına yönlendirmek amacıyla hedef domainin benzerleri olan birden fazla bit-flipping domaini **kaydettirebilirler**.
 
-Daha fazla bilgi için bkz. [https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)
+Daha fazla bilgi için bakınız: [https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)
 
 ### Buy a trusted domain
 
-Kullanabileceğiniz süresi dolmuş bir domaini bulmak için [https://www.expireddomains.net/](https://www.expireddomains.net) adresinde arama yapabilirsiniz.\
-Satın almayı düşündüğünüz süresi dolmuş domainin **zaten iyi bir SEO'ya** sahip olduğundan emin olmak için aşağıdaki servislerde nasıl kategorize edildiğini kontrol edebilirsiniz:
+Kullanabileceğiniz süresi dolmuş bir domaini bulmak için [https://www.expireddomains.net/](https://www.expireddomains.net) üzerinde arama yapabilirsiniz.  
+Satın almayı düşündüğünüz süresi dolmuş domainin **zaten iyi bir SEO'ya sahip** olduğunu doğrulamak için nasıl kategorize edildiğini şu servislerde kontrol edebilirsiniz:
 
 - [http://www.fortiguard.com/webfilter](http://www.fortiguard.com/webfilter)
 - [https://urlfiltering.paloaltonetworks.com/query/](https://urlfiltering.paloaltonetworks.com/query/)
@@ -78,17 +78,17 @@ Satın almayı düşündüğünüz süresi dolmuş domainin **zaten iyi bir SEO'
 - [https://hunter.io/](https://hunter.io)
 - [https://anymailfinder.com/](https://anymailfinder.com)
 
-Daha fazla geçerli e-posta adresi **keşfetmek** veya zaten keşfettiklerinizi **doğrulamak** için, hedefin SMTP sunucularına karşı bu adresleri brute-force ile deneyebilirsiniz. [E-posta adreslerini doğrulama/keşfetmeyi burada öğrenin](../../network-services-pentesting/pentesting-smtp/index.html#username-bruteforce-enumeration).\
-Ayrıca, eğer kullanıcılar maillerine erişmek için herhangi bir web portalı kullanıyorsa, bu portalın **username brute force**'a karşı zafiyeti olup olmadığını kontrol etmeyi ve mümkünse bu zafiyeti sömürmeyi unutmayın.
+Daha fazla geçerli e-posta adresi **keşfetmek** veya zaten keşfettiğiniz adresleri **doğrulamak** için, hedefin SMTP sunucularına karşı bunları brute-force edip edemeyeceğinizi kontrol edebilirsiniz. [Learn how to verify/discover email address here](../../network-services-pentesting/pentesting-smtp/index.html#username-bruteforce-enumeration).  
+Ayrıca, kullanıcılar maillerine erişmek için **herhangi bir web portalı** kullanıyorsa, bunun **username brute force**'a karşı zafiyeti olup olmadığını kontrol etmeyi ve mümkünse bu zafiyeti istismar etmeyi unutmayın.
 
 ## Configuring GoPhish
 
-### Installation
+### Kurulum
 
-You can download it from [https://github.com/gophish/gophish/releases/tag/v0.11.0](https://github.com/gophish/gophish/releases/tag/v0.11.0)
+İndirmek için: [https://github.com/gophish/gophish/releases/tag/v0.11.0](https://github.com/gophish/gophish/releases/tag/v0.11.0)
 
-Download and decompress it inside `/opt/gophish` and execute `/opt/gophish/gophish`\
-You will be given a password for the admin user in port 3333 in the output. Therefore, access that port and use those credentials to change the admin password. You may need to tunnel that port to local:
+İndirin ve `/opt/gophish` içine açın ve `/opt/gophish/gophish` çalıştırın.  
+Çıktıda admin kullanıcısı için bir parola verilecektir; admin arayüzü 3333 portunda olacaktır. Bu nedenle o porta erişin ve admin parolasını değiştirmek için verilen kimlik bilgilerini kullanın. Bu portu yerel makinenize tünellemeniz gerekebilir:
 ```bash
 ssh -L 3333:127.0.0.1:3333 <user>@<ip>
 ```
@@ -96,7 +96,7 @@ ssh -L 3333:127.0.0.1:3333 <user>@<ip>
 
 **TLS sertifikası yapılandırması**
 
-Bu adımdan önce kullanacağınız **alan adını zaten satın almış** olmalısınız ve bu alan adının, **gophish**'ı yapılandırdığınız **VPS'in IP adresine** **işaret ediyor** olması gerekir.
+Bu adıma geçmeden önce kullanacağınız alan adını zaten satın almış olmalısınız ve alan adının gophish'i yapılandırdığınız VPS'nin IP adresine yönlenmiş olması gerekir.
 ```bash
 DOMAIN="<domain>"
 wget https://dl.eff.org/certbot-auto
@@ -114,32 +114,32 @@ cp "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" /opt/gophish/ssl_keys/key.crt�
 ```
 **Mail yapılandırması**
 
-Yüklemeye başla: `apt-get install postfix`
+Kuruluma başlayın: `apt-get install postfix`
 
-Daha sonra alan adını şu dosyalara ekleyin:
+Sonra alan adını aşağıdaki dosyalara ekleyin:
 
 - **/etc/postfix/virtual_domains**
 - **/etc/postfix/transport**
 - **/etc/postfix/virtual_regexp**
 
-**Ayrıca /etc/postfix/main.cf içindeki aşağıdaki değişkenlerin değerlerini değiştirin**
+**Ayrıca /etc/postfix/main.cf içinde aşağıdaki değişkenlerin değerlerini değiştirin**
 
 `myhostname = <domain>`\
 `mydestination = $myhostname, <domain>, localhost.com, localhost`
 
-Son olarak **`/etc/hostname`** ve **`/etc/mailname`** dosyalarını alan adınız ile güncelleyin ve **VPS'inizi yeniden başlatın.**
+Son olarak **`/etc/hostname`** ve **`/etc/mailname`** dosyalarını alan adınıza göre düzenleyin ve **VPS'inizi yeniden başlatın.**
 
-Şimdi VPS'in IP adresini işaret eden `mail.<domain>` için bir **DNS A record** oluşturun ve `mail.<domain>`'i işaret eden bir **DNS MX** kaydı oluşturun.
+Şimdi, VPS'in **IP adresine** işaret eden `mail.<domain>` için bir **DNS A record** oluşturun ve `mail.<domain>`'e işaret eden bir **DNS MX** kaydı ekleyin
 
-Şimdi e-posta göndermeyi test edelim:
+Şimdi bir e-posta göndermeyi test edelim:
 ```bash
 apt install mailutils
 echo "This is the body of the email" | mail -s "This is the subject line" test@email.com
 ```
 **Gophish yapılandırması**
 
-Gophish'in çalışmasını durdurun ve yapılandırmasını yapalım.\
-`/opt/gophish/config.json` dosyasını aşağıdaki gibi değiştirin (https kullanımına dikkat):
+gophish'in çalışmasını durdurun ve yapılandıralım.\
+`/opt/gophish/config.json` dosyasını aşağıdaki şekilde düzenleyin (https kullanımına dikkat):
 ```bash
 {
 "admin_server": {
@@ -164,9 +164,9 @@ Gophish'in çalışmasını durdurun ve yapılandırmasını yapalım.\
 }
 }
 ```
-**gophish servisini yapılandırma**
+**gophish servisini yapılandırın**
 
-gophish servisinin otomatik olarak başlatılabilmesi ve bir servis olarak yönetilebilmesi için, aşağıdaki içeriğe sahip `/etc/init.d/gophish` dosyasını oluşturabilirsiniz:
+gophish servisinin otomatik olarak başlatılabilmesi ve bir servis olarak yönetilebilmesi için `/etc/init.d/gophish` dosyasını aşağıdaki içerikle oluşturabilirsiniz:
 ```bash
 #!/bin/bash
 # /etc/init.d/gophish
@@ -213,7 +213,7 @@ case $1 in
 start|stop|status) "$1" ;;
 esac
 ```
-Hizmeti yapılandırmayı tamamlayın ve çalıştığını şu şekilde kontrol edin:
+Servisin yapılandırmasını tamamlayın ve çalıştığını kontrol edin:
 ```bash
 mkdir /var/log/gophish
 chmod +x /etc/init.d/gophish
@@ -226,41 +226,41 @@ service gophish stop
 ```
 ## Mail sunucusu ve alan adı yapılandırması
 
-### Bekle & meşru ol
+### Bekleyin ve meşru olun
 
-Ne kadar eski bir domain olursa spam olarak yakalanma olasılığı o kadar düşüktür. Bu yüzden phishing değerlendirmesinden önce mümkün olduğunca uzun süre (en az 1 hafta) beklemelisiniz. Ayrıca, itibar gerektiren bir sektöre ait bir sayfa eklerseniz elde edilen itibar daha iyi olur.
+Bir alan adının yaşı ne kadar büyükse spam olarak işaretlenme olasılığı o kadar düşüktür. Bu nedenle phishing değerlendirmesinden önce mümkün olduğunca uzun süre (en az 1 hafta) beklemelisiniz. Ayrıca, itibarlı bir sektör hakkında bir sayfa eklerseniz elde edilen itibar daha iyi olacaktır.
 
-Unutmayın, bir hafta beklemeniz gerekse bile her şeyi şimdi yapılandırmayı bitirebilirsiniz.
+Unutmayın, bir hafta beklemeniz gerekse bile şimdi her şeyi yapılandırmayı bitirebilirsiniz.
 
-### Reverse DNS (rDNS) record yapılandırması
+### Reverse DNS (rDNS) kaydını yapılandırın
 
-VPS'in IP adresini domain adına çözecek bir rDNS (PTR) record ayarlayın.
+VPS'nin IP adresini alan adına çözecek bir rDNS (PTR) kaydı ayarlayın.
 
-### Sender Policy Framework (SPF) Record
+### Sender Policy Framework (SPF) Kaydı
 
-Yeni domain için **bir SPF record yapılandırmalısınız**. Eğer SPF record'un ne olduğunu bilmiyorsanız [**bu sayfayı okuyun**](../../network-services-pentesting/pentesting-smtp/index.html#spf).
+**Yeni alan adı için bir SPF kaydı yapılandırmalısınız**. Eğer SPF kaydının ne olduğunu bilmiyorsanız [**bu sayfayı okuyun**](../../network-services-pentesting/pentesting-smtp/index.html#spf).
 
-SPF politikanızı oluşturmak için [https://www.spfwizard.net/](https://www.spfwizard.net) adresini kullanabilirsiniz (VPS makinesinin IP'sini kullanın)
+SPF politikanızı oluşturmak için [https://www.spfwizard.net/](https://www.spfwizard.net) sitesini kullanabilirsiniz (VPS makinesinin IP'sini kullanın)
 
 ![](<../../images/image (1037).png>)
 
-Bu, domain içindeki bir TXT record içine konması gereken içeriktir:
+Bu, alan adı içinde bir TXT record olarak ayarlanması gereken içeriktir:
 ```bash
 v=spf1 mx a ip4:ip.ip.ip.ip ?all
 ```
-### Domain-based Message Authentication, Reporting & Conformance (DMARC) Kaydı
+### Alan Tabanlı Mesaj Doğrulama, Raporlama ve Uyum (DMARC) Kaydı
 
-Yeni alan adı için **bir DMARC kaydı yapılandırmalısınız**. Bir DMARC kaydının ne olduğunu bilmiyorsanız [**read this page**](../../network-services-pentesting/pentesting-smtp/index.html#dmarc).
+Yeni etki alanı için **bir DMARC kaydı yapılandırmalısınız**. Eğer DMARC kaydının ne olduğunu bilmiyorsanız [**read this page**](../../network-services-pentesting/pentesting-smtp/index.html#dmarc).
 
-Aşağıdaki içeriğe sahip olacak şekilde `_dmarc.<domain>` host adına işaret eden yeni bir DNS TXT kaydı oluşturmalısınız:
+Aşağıdaki içeriğe sahip olacak şekilde host adı `_dmarc.<domain>` için yeni bir DNS TXT kaydı oluşturmalısınız:
 ```bash
 v=DMARC1; p=none
 ```
 ### DomainKeys Identified Mail (DKIM)
 
-Yeni alan adı için **DKIM yapılandırması yapmalısınız**. Bir DMARC kaydının ne olduğunu bilmiyorsanız [**bu sayfayı okuyun**](../../network-services-pentesting/pentesting-smtp/index.html#dkim).
+Yeni alan adı için **DKIM yapılandırması yapmalısınız**. DMARC kaydının ne olduğunu bilmiyorsanız [**read this page**](../../network-services-pentesting/pentesting-smtp/index.html#dkim).
 
-Bu öğretici şu kaynağa dayanmaktadır: [https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy)
+This tutorial is based on: [https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy)
 
 > [!TIP]
 > DKIM anahtarının oluşturduğu her iki B64 değerini birleştirmeniz gerekir:
@@ -269,13 +269,14 @@ Bu öğretici şu kaynağa dayanmaktadır: [https://www.digitalocean.com/communi
 > v=DKIM1; h=sha256; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0wPibdqPtzYk81njjQCrChIcHzxOp8a1wjbsoNtka2X9QXCZs+iXkvw++QsWDtdYu3q0Ofnr0Yd/TmG/Y2bBGoEgeE+YTUG2aEgw8Xx42NLJq2D1pB2lRQPW4IxefROnXu5HfKSm7dyzML1gZ1U0pR5X4IZCH0wOPhIq326QjxJZm79E1nTh3xj" "Y9N/Dt3+fVnIbMupzXE216TdFuifKM6Tl6O/axNsbswMS1TH812euno8xRpsdXJzFlB9q3VbMkVWig4P538mHolGzudEBg563vv66U8D7uuzGYxYT4WS8NVm3QBMg0QKPWZaKp+bADLkOSB9J2nUpk4Aj9KB5swIDAQAB
 > ```
 
-### E-posta yapılandırma puanınızı test edin
+### Test your email configuration score
 
-Bunu [https://www.mail-tester.com/](https://www.mail-tester.com/)\ kullanarak yapabilirsiniz. Sayfaya girip size verdikleri adrese bir e-posta gönderin:
+Bunu [https://www.mail-tester.com/](https://www.mail-tester.com/) kullanarak yapabilirsiniz\
+Sadece sayfaya erişin ve size verdikleri adrese bir e-posta gönderin:
 ```bash
 echo "This is the body of the email" | mail -s "This is the subject line" test-iimosa79z@srv1.mail-tester.com
 ```
-Ayrıca **e-posta yapılandırmanızı kontrol etmek** için `check-auth@verifier.port25.com` adresine bir e-posta gönderip **yanıtı okuyabilirsiniz** (bunun için port **25**'i **açmanız** ve e-postayı root olarak gönderirseniz yanıtı _/var/mail/root_ dosyasında görmeniz gerekir).\
+Ayrıca `check-auth@verifier.port25.com` adresine bir e-posta göndererek e-posta yapılandırmanızı **kontrol edebilirsiniz** ve **yanıtı okuyabilirsiniz** (bunun için **25** portunu **açmanız** gerekecek ve e-postayı root olarak gönderirseniz yanıtı _/var/mail/root_ dosyasında görürsünüz).\
 Tüm testleri geçtiğinizden emin olun:
 ```bash
 ==========================================================
@@ -287,40 +288,49 @@ DKIM check:         pass
 Sender-ID check:    pass
 SpamAssassin check: ham
 ```
-Kontrolünüzdeki bir **Gmail hesabına mesaj** da gönderebilir ve Gmail gelen kutunuzda **e-postanın başlıklarını** kontrol edebilirsiniz; `Authentication-Results` başlık alanında `dkim=pass` bulunmalıdır.
+Ayrıca kontrolünüz altındaki bir Gmail'e **mesaj gönderebilir** ve Gmail gelen kutunuzda **e-postanın başlıklarını** kontrol edebilirsiniz; `dkim=pass` ifadesi `Authentication-Results` başlık alanında bulunmalıdır.
 ```
 Authentication-Results: mx.google.com;
 spf=pass (google.com: domain of contact@example.com designates --- as permitted sender) smtp.mail=contact@example.com;
 dkim=pass header.i=@example.com;
 ```
-### Spamhouse Kara Listesinden Kaldırma
+### ​Removing from Spamhouse Blacklist
 
-The page [www.mail-tester.com](https://www.mail-tester.com) alan adınızın Spamhouse tarafından engellenip engellenmediğini gösterebilir. Alan adınız/IP'nizin kaldırılmasını şu adresten talep edebilirsiniz: [https://www.spamhaus.org/lookup/](https://www.spamhaus.org/lookup/)
+The page [www.mail-tester.com](https://www.mail-tester.com) can indicate you if you your domain is being blocked by spamhouse. You can request your domain/IP to be removed at: ​[https://www.spamhaus.org/lookup/](https://www.spamhaus.org/lookup/)
 
-### Microsoft Kara Listesinden Kaldırma
+### Removing from Microsoft Blacklist
 
-Alan adınız/IP'nizin kaldırılmasını şu adresten talep edebilirsiniz: [https://sender.office.com/](https://sender.office.com).
+​​You can request your domain/IP to be removed at [https://sender.office.com/](https://sender.office.com).
 
-## GoPhish Kampanyası Oluşturma ve Başlatma
+## Create & Launch GoPhish Campaign
 
-### Gönderici Profili
+### Sending Profile
 
-- Gönderici profilini tanımlamak için bir **isim belirleyin**
-- Phishing e-postalarını hangi hesaptan göndereceğinize karar verin. Öneriler: _noreply, support, servicedesk, salesforce..._
-- Kullanıcı adı ve şifreyi boş bırakabilirsiniz, ancak **Ignore Certificate Errors** seçeneğinin işaretli olduğundan emin olun
+- Set some **name to identify** the sender profile  
+  Gönderici profilini tanımlamak için bir **isim belirleyin**
+- Decide from which account are you going to send the phishing emails. Suggestions: _noreply, support, servicedesk, salesforce..._  
+  Hangi hesaptan phishing e-postalarını göndereceğinize karar verin. Öneriler: _noreply, support, servicedesk, salesforce..._
+- You can leave blank the username and password, but make sure to check the Ignore Certificate Errors  
+  Kullanıcı adı ve parolayı boş bırakabilirsiniz, ancak "**Ignore Certificate Errors**" seçeneğini işaretlediğinizden emin olun.
 
 ![](<../../images/image (253) (1) (2) (1) (1) (2) (2) (3) (3) (5) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (15) (2).png>)
 
 > [!TIP]
-> Her şeyin çalıştığını test etmek için "**Send Test Email**" özelliğini kullanmanız tavsiye edilir.\
-> Testler sırasında kara listeye alınmamak için test e-postalarını **10min mails adreslerine göndermenizi** öneririm.
+> It's recommended to use the "**Send Test Email**" functionality to test that everything is working.\
+> I would recommend to **send the test emails to 10min mails addresses** in order to avoid getting blacklisted making tests.  
+> Her şeyin çalıştığını test etmek için "**Send Test Email**" işlevini kullanmanız önerilir.  
+> Testler sırasında kara listeye düşmemek için test e-postalarını **10min mails** adreslerine göndermenizi tavsiye ederim.
 
-### E-posta Şablonu
+### Email Template
 
-- Şablonu tanımlamak için bir **isim belirleyin**
-- Sonra bir **subject** yazın (tuhaf olmayan, normal bir e-postada görebileceğiniz türden bir şey)
-- Mutlaka "**Add Tracking Image**" seçeneğinin işaretli olduğundan emin olun
-- E-posta **şablonunu** yazın (aşağıdaki örnekte olduğu gibi değişkenler kullanabilirsiniz):
+- Set some **name to identify** the template  
+  Şablonu tanımlamak için bir **isim belirleyin**
+- Then write a **subject** (nothing estrange, just something you could expect to read in a regular email)  
+  Ardından bir **subject** yazın (garip/süpheli olmayan, normal bir e-postada görebileceğiniz bir konu)
+- Make sure you have checked "**Add Tracking Image**"  
+  "**Add Tracking Image**" seçeneğini işaretlediğinizden emin olun
+- Write the **email template** (you can use variables like in the following example):  
+  **email template**'i yazın (aşağıdaki örnekteki gibi değişkenler kullanabilirsiniz):
 ```html
 <html>
 <head>
@@ -339,123 +349,121 @@ WRITE HERE SOME SIGNATURE OF SOMEONE FROM THE COMPANY
 </body>
 </html>
 ```
-Not: E-postanın güvenilirliğini artırmak için, müşterinin bir e-postasından bazı imzaları kullanmanız önerilir. Öneriler:
+Not: **e-postanın güvenilirliğini artırmak için**, müşteriye ait bir e-postadaki bir imzayı kullanmanız önerilir. Öneriler:
 
-- Bir **var olmayan adrese** e-posta gönderin ve yanıtın bir imza içerip içermediğini kontrol edin.
-- info@ex.com veya press@ex.com veya public@ex.com gibi **genel e-posta adreslerini** arayın, onlara bir e-posta gönderin ve yanıtı bekleyin.
-- Keşfettiğiniz **geçerli bir e-posta adresiyle** iletişime geçmeyi deneyin ve yanıtı bekleyin.
+- **var olmayan bir adrese** e-posta gönderin ve yanıtın herhangi bir imza içerip içermediğini kontrol edin.
+- info@ex.com, press@ex.com veya public@ex.com gibi **herkese açık e-posta adresleri** arayın, onlara e-posta gönderin ve yanıtı bekleyin.
+- Keşfedilmiş **geçerli bir e-posta adresiyle** iletişime geçmeyi deneyin ve yanıtı bekleyin.
 
 ![](<../../images/image (80).png>)
 
 > [!TIP]
-> Email Template ayrıca **gönderilecek dosyalar eklemenize** izin verir. Eğer özel hazırlanmış dosya/belgeler kullanarak NTLM challenge'larını çalmak isterseniz [bu sayfayı okuyun](../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md).
+> E-posta Şablonu ayrıca **göndermek için dosya eklemeye** izin verir. Eğer özel hazırlanmış bazı dosyalar/belgeler kullanarak NTLM challenge'larını da çalmak isterseniz [bu sayfayı okuyun](../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md).
 
-### Landing Sayfası
+### Açılış Sayfası
 
 - Bir **isim** yazın
-- Web sayfasının **HTML kodunu yazın**. Web sayfalarını **içe aktarabileceğinizi** unutmayın.
+- Web sayfasının **HTML kodunu yazın**. Web sayfalarını **import** edebileceğinizi unutmayın.
 - **Capture Submitted Data** ve **Capture Passwords** seçeneklerini işaretleyin
-- Bir **yeniden yönlendirme** ayarlayın
+- Bir **yönlendirme** ayarlayın
 
 ![](<../../images/image (826).png>)
 
 > [!TIP]
-> Genellikle sayfanın HTML kodunu değiştirmeniz ve yerelde bazı testler yapmanız (ör. bir Apache sunucusu kullanarak) **sonuçtan memnun kalana kadar** gerekir. Ardından o HTML kodunu kutuya yapıştırın.\
-> Eğer HTML için **bazı statik kaynakları kullanmanız** gerekiyorsa (ör. bazı CSS ve JS dosyaları) bunları _**/opt/gophish/static/endpoint**_ dizinine kaydedebilir ve sonra _**/static/\<filename>**_ üzerinden erişebilirsiniz.
+> Genellikle HTML kodunu değiştirmeniz ve yerelde (muhtemelen bir Apache sunucu kullanarak) bazı testler yapmanız gerekecektir **ta ki sonuçlardan memnun kalana kadar.** Ardından o HTML kodunu kutuya yapıştırın.\
+> HTML için bazı statik kaynaklara (örneğin CSS ve JS sayfaları) ihtiyaç duyarsanız bunları _**/opt/gophish/static/endpoint**_ içine kaydedebilir ve sonra _**/static/\<filename>**_ üzerinden erişebilirsiniz.
 
 > [!TIP]
-> Yönlendirme için kullanıcıları hedefin gerçek ana web sayfasına yönlendirebilir veya örneğin _/static/migration.html_’e yönlendirip [https://loading.io/](https://loading.io/) gibi bir **spinning wheel** 5 saniye gösterip sonra işlemin başarılı olduğunu belirtebilirsiniz.
+> Yönlendirme için **kullanıcıları hedefin gerçek ana web sayfasına yönlendirebilir** veya örneğin _/static/migration.html_ sayfasına yönlendirip, 5 saniye boyunca bir **dönen yükleme göstergesi** ([https://loading.io/](https://loading.io)) koyup sonra işlemin başarılı olduğunu belirtebilirsiniz.
 
 ### Kullanıcılar & Gruplar
 
-- Bir ad belirleyin
-- **Import the data** (örnek şablonu kullanmak için her kullanıcının firstname, last name ve email address bilgilerine ihtiyacınız olduğunu unutmayın)
+- Bir isim belirleyin
+- Verileri **import** edin (şablonu örnek için kullanabilmek adına her kullanıcı için firstname, last name ve email address gereklidir)
 
 ![](<../../images/image (163).png>)
 
 ### Kampanya
 
-Son olarak bir isim, email template, landing page, URL, sending profile ve group seçerek bir kampanya oluşturun. URL'nin kurbana gönderilecek link olduğunu unutmayın
+Son olarak, bir isim, e-posta şablonu, açılış sayfası, URL, sending profile ve grup seçerek bir kampanya oluşturun. URL, kurbana gönderilecek bağlantı olacaktır.
 
-Not: **Sending Profile**, final phishing e-postanın nasıl görüneceğini görmek için bir test e-postası göndermeye izin verir:
+Not: **Sending Profile** test e-postası göndermenize izin verir, böylece son phishing e-postasının nasıl görüneceğini görebilirsiniz:
 
 ![](<../../images/image (192).png>)
 
 > [!TIP]
-> Testler sırasında kara listeye alınmayı önlemek için test e-postalarını **10min mail adreslerine** göndermenizi öneririm.
+> Testleri yaparken kara listeye düşmemek için **test e-postalarını 10min mail adreslerine göndermenizi** öneririm.
 
 Her şey hazır olduğunda, kampanyayı başlatın!
 
 ## Web Sitesi Klonlama
 
-Herhangi bir nedenle web sitesini klonlamak isterseniz aşağıdaki sayfayı kontrol edin:
+Herhangi bir nedenle web sitesini klonlamak isterseniz aşağıdaki sayfayı inceleyin:
 
 
 {{#ref}}
 clone-a-website.md
 {{#endref}}
 
-## Backdoor'lu Belgeler ve Dosyalar
+## Backdoor'lu Belgeler & Dosyalar
 
-Bazı phishing değerlendirmelerinde (özellikle Red Teams için) ayrıca **backdoor içeren dosyalar göndermek** isteyebilirsiniz (örneğin bir C2 veya sadece bir kimlik doğrulamayı tetikleyecek bir şey olabilir).\
-Bazı örnekler için aşağıdaki sayfaya bakın:
+Bazı phishing değerlendirmelerinde (özellikle Red Team'ler için) ayrıca **herhangi bir tür backdoor içeren dosyalar göndermek** isteyebilirsiniz (örneğin bir C2 veya sadece bir kimlik doğrulama tetiklemesi). Örnekler için aşağıdaki sayfaya bakın:
 
 
 {{#ref}}
 phishing-documents.md
 {{#endref}}
 
-## Phishing ile MFA
+## Phishing MFA
 
-### Proxy MitM ile
+### Proxy MitM Yoluyla
 
-Önceki saldırı, gerçek bir web sitesini taklit edip kullanıcının girdiği bilgileri topladığınız için oldukça zekicedir. Ne yazık ki, kullanıcı doğru parolayı girmezse veya taklit ettiğiniz uygulama 2FA ile yapılandırılmışsa, **bu bilgiler sizi kandırılan kullanıcının yerine geçmeye yetmeyecektir**.
+Önceki saldırı, gerçek bir web sitesini taklit edip kullanıcının girdiği bilgileri toplamaya yönelik oldukça zekicedir. Ne var ki, kullanıcı doğru parolayı girmezse veya taklit ettiğiniz uygulama 2FA ile yapılandırılmışsa, **bu bilgiler kandırılan kullanıcı adına taklit yapmanıza izin vermez**.
 
-Bu noktada [**evilginx2**](https://github.com/kgretzky/evilginx2)**,** [**CredSniper**](https://github.com/ustayready/CredSniper) ve [**muraena**](https://github.com/muraenateam/muraena) gibi araçlar faydalıdır. Bu araçlar size bir MitM türü saldırı oluşturma imkanı verir. Temelde saldırı şu şekilde çalışır:
+İşte bu noktada [**evilginx2**](https://github.com/kgretzky/evilginx2)**,** [**CredSniper**](https://github.com/ustayready/CredSniper) ve [**muraena**](https://github.com/muraenateam/muraena) gibi araçlar işe yarar. Bu araçlar size bir MitM benzeri saldırı oluşturma imkanı verir. Temelde saldırı şu şekilde işler:
 
-1. Gerçek web sayfasının **giriş formunu taklit edersiniz**.
-2. Kullanıcı kimlik bilgilerini sahte sayfanıza gönderir ve araç bunları gerçek web sayfasına göndererek **bilgilerin geçerli olup olmadığını kontrol eder**.
-3. Hesap **2FA** ile yapılandırılmışsa, MitM sayfası bunu isteyecek ve kullanıcı girdikten sonra araç bunu gerçek web sayfasına iletecektir.
-4. Kullanıcı doğrulandıktan sonra saldırgan olarak **kimlik bilgilerini, 2FA kodunu, cookie'yi ve araç MitM sırasında gerçekleşen her etkileşimin bilgisini** yakalamış olursunuz.
+1. Gerçek web sayfasının giriş formunu taklit edersiniz.
+2. Kullanıcı kimlik bilgilerini sahte sayfanıza gönderir ve araç bunları gerçek web sayfasına ileterek kimlik bilgilerinin çalışıp çalışmadığını kontrol eder.
+3. Hesap 2FA ile yapılandırılmışsa, MitM sayfası bunu ister ve kullanıcı 2FA'yı girdikten sonra araç onu gerçek web sayfasına iletir.
+4. Kullanıcı kimlik doğrulandıktan sonra, siz (saldırgan) MitM işlemi süresince yapılan her etkileşimden kimlik bilgilerini, 2FA'yı, cookie'yi ve tüm bilgileri yakalamış olursunuz.
 
-### VNC ile
+### VNC Yoluyla
 
-Kurbanı orijinaline benzeyen kötü amaçlı bir sayfaya göndermek yerine, onu gerçek web sayfasına bağlı bir tarayıcıya sahip bir **VNC oturumuna** gönderirseniz ne olur? Ne yaptığını görebilir, parolayı, kullanılan MFA’yı, çerezleri çalabilirsiniz...\
-Bunu [**EvilnVNC**](https://github.com/JoelGMSec/EvilnoVNC) ile yapabilirsiniz
+Kurbanı, orijinal sayfayla bağlantılı bir tarayıcıya sahip bir **malicious page** yerine **tarayıcının gerçek web sayfasına bağlı olduğu bir VNC oturumuna** yönlendirirseniz ne olur? Ne yaptığını görebilir, parolayı, kullanılan MFA'yı, cookie'leri çalabilirsiniz...\
+Bunu [**EvilnVNC**](https://github.com/JoelGMSec/EvilnoVNC) ile yapabilirsiniz.
 
-## Tespitin tespiti
+## Tespit Edilmenin Algılanması
 
-Birinin sizi yakalayıp yakalamadığını anlamanın en iyi yollarından biri, alan adınızı karaliste içinde aramaktır. Alan adınız listeleniyorsa, bir şekilde alan adınız şüpheli olarak tespit edilmiştir.\
-Alan adınızın herhangi bir karalisteye girip girmediğini kontrol etmenin kolay bir yolu [https://malwareworld.com/](https://malwareworld.com) adresini kullanmaktır.
+Tespit edildiğinizi anlamanın en iyi yollarından biri, alan adınızı kara listelerde aramaktır. Eğer listelenmişse, bir şekilde alan adınız şüpheli olarak tespit edilmiştir. Alan adınızın herhangi bir kara listede görünüp görünmediğini kontrol etmenin kolay yollarından biri [https://malwareworld.com/](https://malwareworld.com) kullanmaktır.
 
-Ancak, kurbanın **yabanda şüpheli phishing etkinlikleri arayıp aramadığını** bilmenin başka yolları da vardır; bunlar şu sayfada açıklandığı gibidir:
+Bununla birlikte, kurbanın **aktif olarak şüpheli phishing etkinliklerini** arayıp aramadığını öğrenmenin başka yolları da vardır; bunlar şu sayfada açıklanmıştır:
 
 
 {{#ref}}
 detecting-phising.md
 {{#endref}}
 
-Kurbanın alan adına çok benzer bir isimle bir domain satın alabilir ve/veya sizin kontrolünüzdeki bir domainin **alt alanı** için kurbanın alan adı anahtar kelimesini içeren bir sertifika oluşturabilirsiniz. Eğer **kurban** bu domainlerle herhangi bir DNS veya HTTP etkileşimi yaparsa, aktif olarak şüpheli domainler aradığını anlarsınız ve çok daha gizli hareket etmeniz gerekir.
+Kurbanın alan adına çok benzer bir isimle bir domain satın alabilir ve/veya sizin kontrolünüzde bir domainin alt alanı için hedefin domain anahtar kelimesini içeren bir sertifika oluşturabilirsiniz. Eğer **hedef** bu domainlerle herhangi bir DNS veya HTTP etkileşimi gerçekleştirirse, aktif olarak şüpheli domainleri aradığını anlarsınız ve çok daha gizli olmanız gerekir.
 
-### Phishing'i değerlendirme
+### Phishing'i Değerlendirme
 
-E-postanızın spam klasörüne düşüp düşmeyeceğini, engellenip engellenmeyeceğini veya başarılı olup olmayacağını değerlendirmek için [**Phishious**](https://github.com/Rices/Phishious) kullanın.
+E-postanızın spam klasöründe mi biteceğini, engelleneceğini veya başarılı olup olmayacağını değerlendirmek için [**Phishious**](https://github.com/Rices/Phishious) kullanın.
 
 ## High-Touch Identity Compromise (Help-Desk MFA Reset)
 
-Modern intrusion setleri giderek daha fazla e-posta tuzaklarını tamamen atlayıp **doğrudan service-desk / identity-recovery iş akışını** hedefleyerek MFA'yı aşmayı tercih ediyor. Bu saldırı tamamen "living-off-the-land": operatör geçerli kimlik bilgilerini ele geçirdikten sonra yerleşik admin araçlarıyla pivot yapar – herhangi bir malware gerekli değildir.
+Modern intrusion set'leri giderek e-posta tuzaklarını tamamen atlayıp MFA'yı aşmak için doğrudan service-desk / identity-recovery iş akışını hedefliyor. Saldırı tamamen "living-off-the-land" tarzındadır: operatör geçerli kimlik bilgilerine sahip olduğunda yerleşik admin araçlarıyla pivot yapar – herhangi bir malware gerekmez.
 
 ### Saldırı akışı
-1. Hedefi keşfetme
-* LinkedIn, veri sızıntıları, açık GitHub, vb. kaynaklardan kişisel ve kurumsal bilgileri toplama.
-* Yüksek değerli kimlikleri (yöneticiler, IT, finans) belirleyin ve parola / MFA sıfırlama için **tam yardım masası sürecini** tespit edin.
+1. Hedefi keşfet
+* LinkedIn, data breaches, public GitHub vb. kaynaklardan kişisel ve kurumsal bilgileri toplayın.
+* Yüksek değerli kimlikleri (yöneticiler, IT, finans) belirleyin ve parola / MFA sıfırlama için **tam help-desk sürecini** ayrıntılı şekilde çıkarın.
 2. Gerçek zamanlı sosyal mühendislik
-* Hedefi taklit ederek telefon, Teams veya chat üzerinden help-desk ile iletişim kurun (çoğunlukla **spoofed caller-ID** veya **klonlanmış ses** ile).
-* Önceden toplanmış PII bilgilerini vererek bilgi-temelli doğrulamayı geçin.
-* Görevliden **MFA secret'ı sıfırlamasını** veya kayıtlı bir mobil numarada **SIM-swap** yapmasını sağlayın.
-3. Erişim sonrası anlık eylemler (gerçek vakalarda ≤60 dk)
-* Herhangi bir web SSO portalı üzerinden foothold oluşturun.
-* Yerleşik araçlarla AD / AzureAD keşfi yapın (ikili dosya bırakmaya gerek yok):
+* Hedefi taklit ederek help-desk ile telefon, Teams veya chat üzerinden iletişim kurun (genellikle **spoofed caller-ID** veya **cloned voice** kullanılarak).
+* Önceden toplanmış PII'i vererek bilgi-temelli doğrulamayı geçin.
+* Temsilciyi **MFA secret'ını sıfırlamaya** veya kayıtlı mobil numarada **SIM-swap** yapmaya ikna edin.
+3. Erişim sonrası anlık işlemler (gerçek vakalarda ≤60 dk)
+* Herhangi bir web SSO portalı üzerinden bir foothold sağlayın.
+* AD / AzureAD'yi yerleşik araçlarla keşfedin (binary bırakılmadan):
 ```powershell
 # list directory groups & privileged roles
 Get-ADGroup -Filter * -Properties Members | ?{$_.Members -match $env:USERNAME}
@@ -466,58 +474,58 @@ Get-MgDirectoryRole | ft DisplayName,Id
 # Enumerate devices the account can login to
 Get-MgUserRegisteredDevice -UserId <user@corp.local>
 ```
-* Ortaya hareket için **WMI**, **PsExec** veya ortamda zaten beyaz listeye alınmış meşru **RMM** ajanlarını kullanın.
+* Ortamda zaten beyaz listeye alınmış olan meşru RMM ajanları veya **WMI**, **PsExec** ile lateral hareket gerçekleştirin.
 
 ### Tespit & Hafifletme
-* Help-desk identity recovery işlemini **ayrıcalıklı bir operasyon** olarak ele alın – step-up auth ve yönetici onayı gerektirin.
-* Aşağıdaki durumlarda uyarı veren **Identity Threat Detection & Response (ITDR)** / **UEBA** kuralları dağıtın:
-  * MFA yöntemi değişti + yeni cihaz / coğrafyadan kimlik doğrulama.
-  * Aynı prensibin (user → admin) anında yükseltilmesi.
-* Help-desk aramalarını kaydedin ve herhangi bir sıfırlamadan önce **önceden kayıtlı bir numaraya geri dönüş (call-back)** zorunlu kılın.
-* Yeni sıfırlanan hesapların otomatik olarak yüksek ayrıcalıklı token'lar edinmemesi için **Just-In-Time (JIT) / Privileged Access** uygulayın.
+* Help-desk identity recovery'yi **ayrıcalıklı bir işlem** olarak ele alın – step-up auth ve yönetici onayı gerektirin.
+* **Identity Threat Detection & Response (ITDR)** / **UEBA** kuralları dağıtın ve şu durumlarda alarm verin:
+* MFA yöntemi değişti + yeni bir cihaz/konumdan kimlik doğrulama.
+* Aynı principal'in (kullanıcı→yönetici) hemen yükseltilmesi.
+* Help-desk aramalarını kayıt altına alın ve sıfırlama yapmadan önce **zaten kayıtlı bir numaraya geri arama** uygulayın.
+* Yeni sıfırlanan hesapların otomatik olarak yüksek ayrıcalıklı token'lar elde etmemesi için **Just-In-Time (JIT) / Privileged Access** uygulayın.
 
 ---
 
 ## Büyük Ölçekli Aldatma – SEO Poisoning & “ClickFix” Kampanyaları
-Hammadde ekipleri, yüksek dokunuşlu operasyonların maliyetini, **arama motorlarını ve reklam ağlarını teslimat kanalı haline getiren** kitlesel saldırılarla dengelerler.
+Hacimli ekipler, yüksek-dokunuşlu operasyonların maliyetini, **arama motorlarını ve reklam ağlarını teslimat kanalı haline getiren** kitlesel saldırılarla dengeleyebilir.
 
-1. **SEO poisoning / malvertising**, `chromium-update[.]site` gibi sahte bir sonucu üst sıradaki arama reklamlarına iter.
-2. Kurban küçük bir **first-stage loader** indirir (çoğunlukla JS/HTA/ISO). Unit 42 tarafından görülen örnekler:
+1. **SEO poisoning / malvertising** sahte bir sonuç (ör. `chromium-update[.]site`) arama reklamlarının en üstüne itilir.
+2. Kurban küçük bir **first-stage loader** indirir (genellikle JS/HTA/ISO). Unit 42 tarafından gözlemlenen örnekler:
 * `RedLine stealer`
 * `Lumma stealer`
 * `Lampion Trojan`
-3. Loader tarayıcı çerezlerini + kimlik bilgileri veritabanlarını dışarı aktarır, sonra **sessiz bir loader** çeker ve bu loader *gerçek zamanlı* olarak karar verir – dağıtılacak mı:
+3. Loader tarayıcı cookie'lerini + credential DB'leri dışa aktarır, ardından gerçek zamanlı olarak şu kararı veren sessiz bir loader çeker:
 * RAT (ör. AsyncRAT, RustDesk)
 * ransomware / wiper
 * persistence bileşeni (registry Run anahtarı + scheduled task)
 
-### Sertleştirme ipuçları
-* Yeni kayıtlı domainleri engelleyin ve *arama reklamları* için Advanced DNS / URL Filtering uygulayın.
-* Yazılım kurulumunu imzalı MSI / Store paketleri ile kısıtlayın, `HTA`, `ISO`, `VBS` çalıştırmayı politika ile engelleyin.
-* Tarayıcıların child process olarak kurulum açan süreçlerini izleyin:
+### Güçlendirme ipuçları
+* Yeni kayıtlı domainleri engelleyin ve **Advanced DNS / URL Filtering** uygulayın; bunu arama-reklamları için de zorunlu kılın.
+* Yazılım kurulumunu imzalı MSI / Store paketleri ile sınırlandırın, `HTA`, `ISO`, `VBS` çalıştırılmasını politika ile engelleyin.
+* Tarayıcıların çocuk süreçlerinin kurulum açtığını izleyin:
 ```yaml
 - parent_image: /Program Files/Google/Chrome/*
 and child_image: *\\*.exe
 ```
-* İlk aşama loader'lar tarafından sıkça kötüye kullanılan LOLBins için hunt yapın (ör. `regsvr32`, `curl`, `mshta`).
+* İlk aşama loader'lar tarafından sıkça suistimal edilen LOLBins (ör. `regsvr32`, `curl`, `mshta`) için av yapın.
 
 ---
 
 ## AI Destekli Phishing Operasyonları
-Saldırganlar artık tam kişiselleştirilmiş tuzaklar ve gerçek zamanlı etkileşim için **LLM & voice-clone API'lerini** zincirliyor.
+Saldırganlar artık tamamen kişiselleştirilmiş tuzaklar ve gerçek zamanlı etkileşim için **LLM & voice-clone API'lerini** zincirliyor.
 
 | Katman | Tehdit aktörü tarafından örnek kullanım |
 |-------|-----------------------------|
-|Automation|>100k e-posta / SMS üretebilir ve gönderebilir, rastgeleleştirilmiş ifadeler ve takip linkleri kullanır.|
-|Generative AI|Kamuya açık M&A, sosyal medyadan şaka vb. referanslar içeren *tek seferlik* e-postalar üretir; geri aramada CEO deep-fake sesi kullanır.|
-|Agentic AI|Otonom olarak domain kaydeder, açık kaynak istihbaratı tarar, bir kurban tıkladığında fakat kimlik bilgilerini göndermediğinde bir sonraki aşama e-postasını hazırlar.|
+|Automation|Rastgele kelime seçimleri ve izleme linkleriyle >100k e-posta / SMS üretip gönderme.|
+|Generative AI|Halka açık M&A, sosyal medyadaki iç şakalara referans veren tek seferlik e-postalar; callback dolandırıcılığında CEO sesinin deep-fake'i.|
+|Agentic AI|Otonom olarak domain kaydetme, açık kaynak istihbaratı kazıma, bir kurban tıkladığında ancak kimlik bilgilerini göndermediğinde bir sonraki aşama e-postasını oluşturma.|
 
 **Savunma:**
-• ARC/DKIM anomalileri yoluyla otomasyondan gönderilen mesajları vurgulayan **dinamik bantlar** ekleyin.  
-• Yüksek riskli telefon talepleri için **ses-biyometrik meydan okuma ifadeleri** uygulayın.  
-• Farkındalık programlarında AI üretimli tuzakları sürekli simüle edin – statik şablonlar artık güncel değil.
+• ARC/DKIM anormallikleri üzerinden güvenilmeyen otomasyonlardan gönderilen mesajları vurgulayan **dinamik bannerlar** ekleyin.  
+• Yüksek riskli telefon talepleri için **ses-biyometrik doğrulama cümleleri** kullanın.  
+• Farkındalık programlarında AI ile üretilen tuzakları sürekli simüle edin – statik şablonlar artık geçerli değil.
 
-Ayrıca bkz. – credential phishing için agentic browsing istismarları:
+Ayrıca bkz. – credential phishing için agentic browsing suiistimali:
 
 {{#ref}}
 ai-agent-mode-phishing-abusing-hosted-agent-browsers.md
@@ -526,19 +534,19 @@ ai-agent-mode-phishing-abusing-hosted-agent-browsers.md
 ---
 
 ## MFA Yorgunluğu / Push Bombing Varyantı – Zorunlu Sıfırlama
-Klasik push-bombing dışında operatörler basitçe help-desk görüşmesi sırasında yeni bir MFA kaydı zorlar ve kullanıcının mevcut token'ını geçersiz kılar. Sonraki herhangi bir giriş istemi kurbana meşru gibi görünür.
+Klasik push-bombing'in yanı sıra operatörler basitçe help-desk görüşmesi sırasında **yeni bir MFA kaydı zorlayarak** kullanıcının mevcut token'ını geçersiz kılar. Sonraki herhangi bir oturum açma istemi kurban için meşru görünür.
 ```text
 [Attacker]  →  Help-Desk:  “I lost my phone while travelling, can you unenrol it so I can add a new authenticator?”
 [Help-Desk] →  AzureAD: ‘Delete existing methods’ → sends registration e-mail
 [Attacker]  →  Completes new TOTP enrolment on their own device
 ```
-AzureAD/AWS/Okta olaylarında aynı IP'den birkaç dakika içinde **`deleteMFA` + `addMFA`** gerçekleşen durumları izleyin.
+Aynı IP'den birkaç dakika içinde **`deleteMFA` + `addMFA`** gerçekleşen AzureAD/AWS/Okta olaylarını izleyin.
 
 
 
 ## Clipboard Hijacking / Pastejacking
 
-Saldırganlar, ele geçirilmiş veya typosquatted bir web sayfasından kurbanın clipboard'ına gizlice kötü amaçlı komutlar kopyalayabilir ve sonra kullanıcıyı **Win + R**, **Win + X** veya bir terminal penceresine yapıştırmaya kandırarak herhangi bir indirme veya ek olmadan rastgele kod çalıştırabilirler.
+Saldırganlar, ele geçirilmiş veya typosquatted bir web sayfasından kurbanın clipboard'una kötü amaçlı komutları sessizce kopyalayabilir ve ardından kullanıcıyı bunları **Win + R**, **Win + X** veya bir terminal penceresine yapıştırmaya kandırarak herhangi bir indirme veya ek olmadan rastgele kod çalıştırabilir.
 
 
 {{#ref}}
@@ -553,9 +561,9 @@ mobile-phishing-malicious-apps.md
 {{#endref}}
 
 ### Mobile‑gated phishing to evade crawlers/sandboxes
-Operatörler, desktop crawler'ların son sayfalara asla ulaşmaması için phishing akışlarını giderek basit bir cihaz kontrolünün arkasına alıyor. Yaygın bir örüntü, dokunmatik özellikli bir DOM'u test eden ve sonucu bir server endpoint'ine gönderen küçük bir script'tir; non‑mobile istemciler HTTP 500 (veya boş bir sayfa) alırken, mobile kullanıcılara tam akış sunulur.
+Operatörler phishing akışlarını basit bir cihaz kontrolünün arkasına koyarak masaüstü crawlers'ın son sayfalara ulaşmasını engelliyor. Yaygın bir örüntü, touch-capable DOM'u test eden ve sonucu bir server endpoint'e post eden küçük bir script'tir; non‑mobile clients HTTP 500 (veya boş bir sayfa) alırken, mobile users tam akışı görür.
 
-Minimal client snippet (typical logic):
+Minimal client snippet (tipik mantık):
 ```html
 <script src="/static/detect_device.js"></script>
 ```
@@ -565,19 +573,19 @@ const isMobile = ('ontouchstart' in document.documentElement);
 fetch('/detect', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({is_mobile:isMobile})})
 .then(()=>location.reload());
 ```
-Sıkça gözlemlenen sunucu davranışı:
+Server davranışı sık gözlemlenir:
 - İlk yüklemede bir session cookie ayarlar.
-- Kabul eder: `POST /detect {"is_mobile":true|false}`.
-- Sonraki GET'lere `is_mobile=false` olduğunda 500 (veya placeholder) döner; sadece `true` ise phishing sunar.
+- Accepts `POST /detect {"is_mobile":true|false}`.
+- `is_mobile=false` olduğunda sonraki GET'lere 500 (veya placeholder) döner; yalnızca `true` ise phishing sunar.
 
-Hunting ve tespit heuristikleri:
+Avlama ve tespit heuristikleri:
 - urlscan sorgusu: `filename:"detect_device.js" AND page.status:500`
-- Web telemetrisi: `GET /static/detect_device.js` → `POST /detect` → non‑mobile için HTTP 500; gerçek mobil kurban yolları 200 döner ve takip eden HTML/JS sunar.
-- İçeriği yalnızca `ontouchstart` veya benzeri cihaz kontrollerine göre koşullandıran sayfaları engelleyin veya yakından inceleyin.
+- Web telemetri: `GET /static/detect_device.js` → `POST /detect` → mobil olmayan için HTTP 500 dizisi; meşru mobil hedef yolları 200 döner ve takip eden HTML/JS sunar.
+- İçeriği yalnızca `ontouchstart` veya benzeri cihaz kontrollerine göre şartlandıran sayfaları engelleyin veya inceleyin.
 
 Savunma ipuçları:
-- Crawler'ları mobil benzeri fingerprint'lerle ve JS etkin olarak çalıştırarak kısıtlı içeriği ortaya çıkarın.
-- Yeni kayıtlı domainlerde `POST /detect` sonrası gelen şüpheli 500 yanıtları için uyarı oluşturun.
+- Gated içeriği ortaya çıkarmak için mobil-benzeri fingerprint'lerle ve JS etkinleştirilmiş crawlers çalıştırın.
+- Yeni kayıtlı domainlerde `POST /detect` sonrasında şüpheli 500 yanıtlarına alarm verin.
 
 ## Referanslar
 
