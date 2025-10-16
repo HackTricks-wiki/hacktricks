@@ -1,43 +1,43 @@
-# 피싱 방법론
+# Phishing Methodology
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## 방법론
 
-1. Recon the victim
-1. Select the **victim domain**.
-2. Perform some basic web enumeration **searching for login portals** used by the victim and **decide** which one you will **impersonate**.
-3. Use some **OSINT** to **find emails**.
-2. Prepare the environment
-1. **Buy the domain** you are going to use for the phishing assessment
-2. **Configure the email service** related records (SPF, DMARC, DKIM, rDNS)
-3. Configure the VPS with **gophish**
-3. Prepare the campaign
-1. Prepare the **email template**
-2. Prepare the **web page** to steal the credentials
-4. Launch the campaign!
+1. Recon 대상 파악
+1. **victim domain** 선택.
+2. 피해자가 사용하는 로그인 포털을 찾기 위한 기본적인 웹 열거를 수행하고, 어느 포털을 **impersonate**할지 **decide**.
+3. 일부 **OSINT**를 사용해 **이메일을 찾기**.
+2. 환경 준비
+1. 평가에 사용할 **도메인 구입**
+2. 이메일 서비스 관련 레코드 구성 (SPF, DMARC, DKIM, rDNS)
+3. **gophish**를 설치한 VPS 구성
+3. 캠페인 준비
+1. **email template** 준비
+2. 자격증명을 훔칠 **web page** 준비
+4. 캠페인 실행!
 
-## Generate similar domain names or buy a trusted domain
+## 유사 도메인 생성 또는 신뢰받는 도메인 구매
 
 ### Domain Name Variation Techniques
 
-- **Keyword**: The domain name **contains** an important **keyword** of the original domain (e.g., zelster.com-management.com).
-- **hypened subdomain**: Change the **dot for a hyphen** of a subdomain (e.g., www-zelster.com).
-- **New TLD**: Same domain using a **new TLD** (e.g., zelster.org)
-- **Homoglyph**: It **replaces** a letter in the domain name with **letters that look similar** (e.g., zelfser.com).
+- **Keyword**: 도메인 이름에 원본 도메인의 중요한 **keyword**가 포함됨 (예: zelster.com-management.com).
+- **hypened subdomain**: 서브도메인의 **dot을 하이픈으로 변경** (예: www-zelster.com).
+- **New TLD**: 동일 도메인을 **새로운 TLD**로 사용 (예: zelster.org)
+- **Homoglyph**: 도메인 내의 글자를 **비슷하게 보이는 문자로 대체** (예: zelfser.com).
 
 
 {{#ref}}
 homograph-attacks.md
 {{#endref}}
-- **Transposition:** It **swaps two letters** within the domain name (e.g., zelsetr.com).
-- **Singularization/Pluralization**: Adds or removes “s” at the end of the domain name (e.g., zeltsers.com).
-- **Omission**: It **removes one** of the letters from the domain name (e.g., zelser.com).
-- **Repetition:** It **repeats one** of the letters in the domain name (e.g., zeltsser.com).
-- **Replacement**: Like homoglyph but less stealthy. It replaces one of the letters in the domain name, perhaps with a letter in proximity of the original letter on the keyboard (e.g, zektser.com).
-- **Subdomained**: Introduce a **dot** inside the domain name (e.g., ze.lster.com).
-- **Insertion**: It **inserts a letter** into the domain name (e.g., zerltser.com).
-- **Missing dot**: Append the TLD to the domain name. (e.g., zelstercom.com)
+- **Transposition:** 도메인 이름 내에서 **두 글자를 바꿈** (예: zelsetr.com).
+- **Singularization/Pluralization**: 도메인 끝에 “s”를 추가하거나 제거 (예: zeltsers.com).
+- **Omission**: 도메인 이름에서 한 글자를 **제거** (예: zelser.com).
+- **Repetition:** 도메인 이름의 한 글자를 **반복** (예: zeltsser.com).
+- **Replacement**: homoglyph와 유사하지만 덜 은밀함. 도메인 내 한 글자를 교체하며, 키보드상 인접한 글자 등으로 바꿈 (예: zektser.com).
+- **Subdomained**: 도메인 이름 내부에 **dot 추가** (예: ze.lster.com).
+- **Insertion**: 도메인 이름에 **문자 삽입** (예: zerltser.com).
+- **Missing dot**: 도메인 이름에 TLD를 붙여서 사용. (예: zelstercom.com)
 
 **Automatic Tools**
 
@@ -52,20 +52,20 @@ homograph-attacks.md
 
 ### Bitflipping
 
-There is a **possibility that one of some bits stored or in communication might get automatically flipped** due to various factors like solar flares, cosmic rays, or hardware errors.
+저장되거나 통신 중인 일부 비트가 태양 플레어, 우주선 입자, 하드웨어 오류 등 여러 요인으로 인해 **자동으로 뒤집힐 가능성**이 있습니다.
 
-When this concept is **applied to DNS requests**, it is possible that the **domain received by the DNS server** is not the same as the domain initially requested.
+이 개념을 **DNS 요청에 적용하면**, DNS 서버가 수신한 도메인이 원래 요청한 도메인과 **다를 수 있습니다**.
 
-For example, a single bit modification in the domain "windows.com" can change it to "windnws.com."
+예를 들어, "windows.com"에서 단일 비트가 수정되면 "windnws.com"으로 변경될 수 있습니다.
 
-Attackers may **take advantage of this by registering multiple bit-flipping domains** that are similar to the victim's domain. Their intention is to redirect legitimate users to their own infrastructure.
+공격자는 피해자 도메인과 유사한 여러 bit-flipping 도메인을 **등록하여** 합법적인 사용자를 자사 인프라로 리다이렉트하려 할 수 있습니다.
 
-For more information read [https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)
+자세한 내용은 [https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)를 참고하세요.
 
 ### Buy a trusted domain
 
-You can search in [https://www.expireddomains.net/](https://www.expireddomains.net) for a expired domain that you could use.\
-In order to make sure that the expired domain that you are going to buy **has already a good SEO** you could search how is it categorized in:
+[https://www.expireddomains.net/](https://www.expireddomains.net)에서 사용할 만한 만료된 도메인을 검색할 수 있습니다.\
+구입하려는 만료된 도메인이 **이미 좋은 SEO를 가지고 있는지** 확인하려면 다음에서 어떻게 분류되는지 확인하세요:
 
 - [http://www.fortiguard.com/webfilter](http://www.fortiguard.com/webfilter)
 - [https://urlfiltering.paloaltonetworks.com/query/](https://urlfiltering.paloaltonetworks.com/query/)
@@ -78,17 +78,17 @@ In order to make sure that the expired domain that you are going to buy **has al
 - [https://hunter.io/](https://hunter.io)
 - [https://anymailfinder.com/](https://anymailfinder.com)
 
-In order to **discover more** valid email addresses or **verify the ones** you have already discovered you can check if you can brute-force them smtp servers of the victim. [Learn how to verify/discover email address here](../../network-services-pentesting/pentesting-smtp/index.html#username-bruteforce-enumeration).\
-Moreover, don't forget that if the users use **any web portal to access their mails**, you can check if it's vulnerable to **username brute force**, and exploit the vulnerability if possible.
+더 많은 유효한 이메일 주소를 **발견하거나** 이미 발견한 주소를 **검증**하려면 피해자의 SMTP 서버에 대해 사용자명 브루트포스를 수행해 확인할 수 있습니다. [Learn how to verify/discover email address here](../../network-services-pentesting/pentesting-smtp/index.html#username-bruteforce-enumeration).\
+또한, 사용자가 **웹 포털을 통해 메일에 접근**한다면 해당 포털이 **username brute force**에 취약한지 확인하고, 가능하다면 취약점을 악용하세요.
 
 ## Configuring GoPhish
 
 ### Installation
 
-You can download it from [https://github.com/gophish/gophish/releases/tag/v0.11.0](https://github.com/gophish/gophish/releases/tag/v0.11.0)
+다음에서 다운로드할 수 있습니다: [https://github.com/gophish/gophish/releases/tag/v0.11.0](https://github.com/gophish/gophish/releases/tag/v0.11.0)
 
-Download and decompress it inside `/opt/gophish` and execute `/opt/gophish/gophish`\
-You will be given a password for the admin user in port 3333 in the output. Therefore, access that port and use those credentials to change the admin password. You may need to tunnel that port to local:
+다운로드하여 `/opt/gophish`에 압축 해제하고 `/opt/gophish/gophish`를 실행하세요.\
+출력에 admin 사용자 비밀번호가 포트 3333에 대해 제공됩니다. 따라서 해당 포트에 접속하여 해당 자격증명으로 관리자 비밀번호를 변경하세요. 로컬로 해당 포트를 터널링해야 할 수 있습니다.
 ```bash
 ssh -L 3333:127.0.0.1:3333 <user>@<ip>
 ```
@@ -96,7 +96,7 @@ ssh -L 3333:127.0.0.1:3333 <user>@<ip>
 
 **TLS 인증서 구성**
 
-이 단계 이전에 사용하려는 **이미 구매한 도메인**이 있어야 하며, 그것은 **gophish**를 구성하는 **VPS의 IP**를 **가리키고 있어야** 합니다.
+이 단계 전에 사용하려는 **이미 구매한 domain**이 있어야 하며, 해당 domain은 **gophish**를 구성 중인 **VPS의 IP**를 **가리키고 있어야** 합니다.
 ```bash
 DOMAIN="<domain>"
 wget https://dl.eff.org/certbot-auto
@@ -116,20 +116,20 @@ cp "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" /opt/gophish/ssl_keys/key.crt�
 
 설치 시작: `apt-get install postfix`
 
-그런 다음 도메인을 다음 파일들에 추가하세요:
+그런 다음 다음 파일들에 도메인을 추가하세요:
 
 - **/etc/postfix/virtual_domains**
 - **/etc/postfix/transport**
 - **/etc/postfix/virtual_regexp**
 
-**다음 변수들의 값을 /etc/postfix/main.cf 내부에서 변경하세요**
+**또한 /etc/postfix/main.cf 안의 다음 변수 값도 변경하세요**
 
 `myhostname = <domain>`\
 `mydestination = $myhostname, <domain>, localhost.com, localhost`
 
 마지막으로 **`/etc/hostname`** 및 **`/etc/mailname`** 파일을 도메인 이름으로 수정하고 **VPS를 재시작하세요.**
 
-이제 `mail.<domain>`가 VPS의 **ip address**를 가리키도록 **DNS A record**를 생성하고, `mail.<domain>`를 가리키는 **DNS MX** 레코드를 추가하세요.
+이제 VPS의 **ip address**를 가리키도록 `mail.<domain>`의 **DNS A record**를 생성하고, `mail.<domain>`을 가리키는 **DNS MX** 레코드를 생성하세요.
 
 이제 이메일 전송을 테스트해봅시다:
 ```bash
@@ -138,8 +138,8 @@ echo "This is the body of the email" | mail -s "This is the subject line" test@e
 ```
 **Gophish 설정**
 
-gophish의 실행을 중지하고 설정을 진행합니다.\
-Modify `/opt/gophish/config.json`을 다음과 같이 수정하세요 (https 사용에 유의):
+gophish 실행을 중지하고 설정합시다.\
+`/opt/gophish/config.json`을 다음 내용으로 수정하세요 (https 사용에 주의):
 ```bash
 {
 "admin_server": {
@@ -166,7 +166,7 @@ Modify `/opt/gophish/config.json`을 다음과 같이 수정하세요 (https 사
 ```
 **gophish 서비스 구성**
 
-gophish 서비스를 자동으로 시작하고 서비스로 관리할 수 있도록, 다음 내용을 가진 파일 `/etc/init.d/gophish`를 생성할 수 있습니다:
+gophish 서비스를 자동으로 시작하고 서비스로 관리할 수 있도록, 다음 내용을 가진 파일 `/etc/init.d/gophish` 를 생성하면 됩니다:
 ```bash
 #!/bin/bash
 # /etc/init.d/gophish
@@ -213,7 +213,7 @@ case $1 in
 start|stop|status) "$1" ;;
 esac
 ```
-서비스 구성 완료 후 정상 작동 여부를 확인하세요:
+서비스 구성 마무리 및 작동 확인:
 ```bash
 mkdir /var/log/gophish
 chmod +x /etc/init.d/gophish
@@ -226,56 +226,58 @@ service gophish stop
 ```
 ## 메일 서버 및 도메인 구성
 
-### 기다리기 & 신뢰성 확보
+### 기다리고 정당해 보이기
 
-도메인이 오래될수록 스팸으로 간주될 가능성이 낮아집니다. 따라서 phishing assessment를 시작하기 전에 가능한 한 오래(최소 1주일) 기다려야 합니다. 또한 평판 관련 섹터에 대한 페이지를 올리면 얻는 평판이 더 좋아집니다.
+도메인이 오래될수록 스팸으로 분류될 가능성이 낮아집니다. 따라서 피싱 평가 전에 가능한 한 오래(최소 1주) 기다려야 합니다. 또한 평판이 좋은 분야에 대한 페이지를 넣으면 얻는 평판이 더 좋아집니다.
 
 일주일을 기다려야 하더라도 지금 모든 구성을 완료할 수 있다는 점을 기억하세요.
 
-### Configure Reverse DNS (rDNS) record
+### Reverse DNS (rDNS) 레코드 구성
 
-VPS의 IP 주소를 도메인 이름으로 해석하도록 rDNS (PTR) 레코드를 설정하세요.
+IP 주소가 도메인 이름으로 해석되도록 rDNS (PTR) 레코드를 설정하세요.
 
 ### Sender Policy Framework (SPF) Record
 
-새 도메인에 대해 **SPF 레코드를 구성해야 합니다**. SPF 레코드가 무엇인지 모른다면 [**이 페이지를 읽으세요**](../../network-services-pentesting/pentesting-smtp/index.html#spf).
+당신은 **새 도메인에 대해 SPF 레코드를 설정해야 합니다**. 만약 SPF 레코드가 무엇인지 모른다면 [**read this page**](../../network-services-pentesting/pentesting-smtp/index.html#spf).
 
-SPF 정책을 생성하려면 [https://www.spfwizard.net/](https://www.spfwizard.net)을(를) 사용하세요 (VPS 머신의 IP를 사용).
+https://www.spfwizard.net/ 를 사용하여 SPF 정책을 생성할 수 있습니다 (VPS 기계의 IP를 사용하세요)
 
 ![](<../../images/image (1037).png>)
 
-다음은 도메인의 TXT 레코드에 설정해야 하는 내용입니다:
+이 내용은 도메인 내 TXT 레코드에 설정되어야 합니다:
 ```bash
 v=spf1 mx a ip4:ip.ip.ip.ip ?all
 ```
-### 도메인 기반 메시지 인증, 보고 및 준수 (DMARC) 레코드
+### Domain-based Message Authentication, Reporting & Conformance (DMARC) Record
 
-새 도메인에 대해 **DMARC 레코드를 구성해야 합니다**. DMARC 레코드가 무엇인지 모르면 [**이 페이지를 읽으세요**](../../network-services-pentesting/pentesting-smtp/index.html#dmarc).
+새 도메인에 대해 **DMARC record를 구성해야 합니다**. DMARC record가 무엇인지 모른다면 [**read this page**](../../network-services-pentesting/pentesting-smtp/index.html#dmarc).
 
-호스트명 `_dmarc.<domain>`를 가리키도록 하는 새 DNS TXT 레코드를 다음 내용으로 생성해야 합니다:
+다음 내용을 사용하여 호스트명 `_dmarc.<domain>`를 가리키는 새 DNS TXT 레코드를 생성해야 합니다:
 ```bash
 v=DMARC1; p=none
 ```
-### 도메인키 식별 메일 (DKIM)
+### DomainKeys Identified Mail (DKIM)
 
 새 도메인에 대해 **DKIM을 구성해야 합니다**. DMARC 레코드가 무엇인지 모르면 [**이 페이지를 읽으세요**](../../network-services-pentesting/pentesting-smtp/index.html#dkim).
 
 This tutorial is based on: [https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy)
 
 > [!TIP]
-> DKIM 키가 생성하는 두 개의 B64 값을 연결해야 합니다:
+> DKIM 키가 생성하는 두 B64 값을 이어붙여야 합니다:
 >
 > ```
 > v=DKIM1; h=sha256; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0wPibdqPtzYk81njjQCrChIcHzxOp8a1wjbsoNtka2X9QXCZs+iXkvw++QsWDtdYu3q0Ofnr0Yd/TmG/Y2bBGoEgeE+YTUG2aEgw8Xx42NLJq2D1pB2lRQPW4IxefROnXu5HfKSm7dyzML1gZ1U0pR5X4IZCH0wOPhIq326QjxJZm79E1nTh3xj" "Y9N/Dt3+fVnIbMupzXE216TdFuifKM6Tl6O/axNsbswMS1TH812euno8xRpsdXJzFlB9q3VbMkVWig4P538mHolGzudEBg563vv66U8D7uuzGYxYT4WS8NVm3QBMg0QKPWZaKp+bADLkOSB9J2nUpk4Aj9KB5swIDAQAB
 > ```
 
-### 이메일 구성 점수 테스트
+### Test your email configuration score
 
-이를 위해 [https://www.mail-tester.com/](https://www.mail-tester.com/)\ 페이지에 접속해 그들이 제공하는 주소로 이메일을 보내세요:
+You can do that using [https://www.mail-tester.com/](https://www.mail-tester.com)\
+페이지에 접속하여 그들이 제공하는 주소로 이메일을 보내면 됩니다:
 ```bash
 echo "This is the body of the email" | mail -s "This is the subject line" test-iimosa79z@srv1.mail-tester.com
 ```
-또한 `check-auth@verifier.port25.com`으로 이메일을 보내 **이메일 설정을 확인**하고 **응답을 읽어보세요** (이를 위해서는 **open** port **25**가 필요하며, 루트로 이메일을 보낸 경우 파일 _/var/mail/root_에서 응답을 확인해야 합니다).\\ 모든 테스트를 통과했는지 확인하세요:
+또한 **이메일 설정을 확인하려면** `check-auth@verifier.port25.com`로 이메일을 보내고 **응답을 읽어보세요** (이를 위해서는 포트 **25**를 **열어야** 하고 root로 이메일을 보낼 경우 _/var/mail/root_ 파일에서 응답을 확인해야 합니다).\
+모든 테스트를 통과했는지 확인하세요:
 ```bash
 ==========================================================
 Summary of Results
@@ -286,7 +288,7 @@ DKIM check:         pass
 Sender-ID check:    pass
 SpamAssassin check: ham
 ```
-또한 **자신이 제어하는 Gmail로 메시지를 보내고**, Gmail 받은편지함에서 **이메일 헤더**를 확인하세요. `Authentication-Results` 헤더 필드에 `dkim=pass`가 있어야 합니다.
+또한 본인이 제어하는 **Gmail 계정으로의 메시지**를 보내고, Gmail 받은편지함에서 **이메일의 헤더**를 확인하세요. `Authentication-Results` 헤더 필드에 `dkim=pass`가 있어야 합니다.
 ```
 Authentication-Results: mx.google.com;
 spf=pass (google.com: domain of contact@example.com designates --- as permitted sender) smtp.mail=contact@example.com;
@@ -294,32 +296,32 @@ dkim=pass header.i=@example.com;
 ```
 ### ​Removing from Spamhouse Blacklist
 
-페이지 [www.mail-tester.com](https://www.mail-tester.com)에서 도메인이 spamhouse에 의해 차단되고 있는지 확인할 수 있습니다. 도메인/IP 제거를 요청하려면: ​[https://www.spamhaus.org/lookup/](https://www.spamhaus.org/lookup/)
+The page [www.mail-tester.com](https://www.mail-tester.com) can indicate you if you your domain is being blocked by spamhouse. You can request your domain/IP to be removed at: ​[https://www.spamhaus.org/lookup/](https://www.spamhaus.org/lookup/)
 
 ### Removing from Microsoft Blacklist
 
-​​도메인/IP 제거 요청은 [https://sender.office.com/](https://sender.office.com)에서 할 수 있습니다.
+​​You can request your domain/IP to be removed at [https://sender.office.com/](https://sender.office.com).
 
 ## Create & Launch GoPhish Campaign
 
-### Sending Profile
+### 발신 프로필
 
-- 발신자 프로필을 식별할 **이름을 지정**하세요
-- 어떤 계정에서 phishing 이메일을 보낼지 결정하세요. 예시: _noreply, support, servicedesk, salesforce..._
-- username과 password를 비워 둘 수 있지만, 반드시 Ignore Certificate Errors를 체크하세요
+- 발신자 프로필을 식별할 수 있는 **이름을 설정**
+- 어떤 계정에서 phishing 이메일을 보낼지 결정합니다. 제안: _noreply, support, servicedesk, salesforce..._
+- username과 password는 비워둘 수 있지만, 반드시 Ignore Certificate Errors를 체크하세요
 
-![](<../../images/image (253) (1) (2) (1) (1) (2) (2) (3) (3) (5) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (15) (2).png>)
+![](<../../images/image (253) (1) (2) (1) (1) (2) (2) (3) (3) (5) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (15) (2).png>)
 
 > [!TIP]
-> 모든 설정이 제대로 작동하는지 확인하려면 **Send Test Email** 기능을 사용하는 것이 권장됩니다.\
-> 테스트 중 블랙리스트에 오르는 것을 피하기 위해 **send the test emails to 10min mails addresses**를 권장합니다.
+> 모든 것이 정상인지 테스트하려면 "**Send Test Email**" 기능을 사용하는 것이 권장됩니다.\
+> 블랙리스트에 오르는 것을 피하기 위해 테스트 이메일은 **10min mails 주소로 보내는 것**을 권장합니다.
 
-### Email Template
+### 이메일 템플릿
 
-- 템플릿을 식별할 **이름을 지정**하세요
-- 그런 다음 **subject**를 작성하세요 (너무 이상하지 않고 평범한 이메일에서 볼 법한 제목)
-- 반드시 **Add Tracking Image**를 체크했는지 확인하세요
-- **email template**을 작성하세요 (다음 예시처럼 변수를 사용할 수 있습니다):
+- 템플릿을 식별할 수 있는 **이름을 설정**
+- 그런 다음 **subject**를 작성합니다 (특이한 내용이 아닌 일반 이메일에서 기대할 만한 제목)
+- 반드시 "**Add Tracking Image**"를 체크했는지 확인하세요
+- 이메일 템플릿을 작성하세요 (다음 예시처럼 변수를 사용할 수 있습니다):
 ```html
 <html>
 <head>
@@ -338,123 +340,121 @@ WRITE HERE SOME SIGNATURE OF SOMEONE FROM THE COMPANY
 </body>
 </html>
 ```
-Note that **in order to increase the credibility of the email**, it's recommended to use some signature from an email from the client. Suggestions:
+다음 사항에 유의하세요: 이메일의 신뢰성을 높이기 위해 클라이언트의 실제 이메일 서명 일부를 사용하는 것이 권장됩니다. 제안:
 
-- Send an email to a **non existent address** and check if the response has any signature.
-- Search for **public emails** like info@ex.com or press@ex.com or public@ex.com and send them an email and wait for the response.
-- Try to contact **some valid discovered** email and wait for the response
+- **존재하지 않는 주소**로 이메일을 보내 응답에 서명이 있는지 확인하세요.
+- info@ex.com, press@ex.com, public@ex.com 같은 **공개 이메일**을 찾아 이메일을 보내고 응답을 기다리세요.
+- **발견한 유효한 이메일**로 연락을 시도하고 응답을 기다리세요.
 
 ![](<../../images/image (80).png>)
 
 > [!TIP]
-> The Email Template also allows to **attach files to send**. If you would also like to steal NTLM challenges using some specially crafted files/documents [read this page](../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md).
+> Email Template에서는 **보낼 파일을 첨부**할 수도 있습니다. 특수하게 조작된 파일/문서로 NTLM 챌린지를 탈취하고 싶다면 [read this page](../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md).
 
-### Landing Page
+### 랜딩 페이지
 
-- Write a **name**
-- **Write the HTML code** of the web page. Note that you can **import** web pages.
-- Mark **Capture Submitted Data** and **Capture Passwords**
-- Set a **redirection**
+- **이름**을 작성하세요
+- 웹 페이지의 **HTML 코드를 작성**하세요. 웹 페이지를 **가져올(import)** 수 있습니다.
+- **제출된 데이터 캡처** 및 **비밀번호 캡처**를 선택하세요
+- **리디렉션**을 설정하세요
 
 ![](<../../images/image (826).png>)
 
 > [!TIP]
-> Usually you will need to modify the HTML code of the page and make some tests in local (maybe using some Apache server) **until you like the results.** Then, write that HTML code in the box.\
-> Note that if you need to **use some static resources** for the HTML (maybe some CSS and JS pages) you can save them in _**/opt/gophish/static/endpoint**_ and then access them from _**/static/\<filename>**_
+> 보통 페이지의 HTML 코드를 수정하고 로컬(예: Apache 서버 사용)에서 몇 차례 테스트를 진행하여 **원하는 결과가 나올 때까지** 조정해야 합니다. 그런 다음 그 HTML 코드를 상자에 입력하세요.\
+> HTML에 **정적 리소스**(예: CSS, JS)가 필요하면 _**/opt/gophish/static/endpoint**_에 저장한 뒤 _**/static/\<filename>**_에서 접근할 수 있습니다.
 
 > [!TIP]
-> For the redirection you could **redirect the users to the legit main web page** of the victim, or redirect them to _/static/migration.html_ for example, put some **spinning wheel (**[**https://loading.io/**](https://loading.io)**) for 5 seconds and then indicate that the process was successful**.
+> 리디렉션의 경우 사용자를 피해자의 실제 메인 웹페이지로 **리디렉트**하거나 예를 들어 _/static/migration.html_로 리디렉트하여 **스피닝 휠 (**[**https://loading.io/**](https://loading.io)**)을 5초 동안 보여준 후 프로세스가 성공했다고 표시**할 수 있습니다.
 
-### Users & Groups
+### 사용자 및 그룹
 
-- Set a name
-- **Import the data** (note that in order to use the template for the example you need the firstname, last name and email address of each user)
+- 이름을 설정하세요
+- **데이터 가져오기** (예제 템플릿을 사용하려면 각 사용자에 대해 firstname, last name 및 email address가 필요합니다)
 
 ![](<../../images/image (163).png>)
 
-### Campaign
+### 캠페인
 
-Finally, create a campaign selecting a name, the email template, the landing page, the URL, the sending profile and the group. Note that the URL will be the link sent to the victims
+마지막으로 이름, email template, 랜딩 페이지, URL, Sending Profile 및 그룹을 선택하여 캠페인을 생성하세요. URL은 피해자에게 전송될 링크가 됩니다.
 
-Note that the **Sending Profile allow to send a test email to see how will the final phishing email looks like**:
+Sending Profile를 통해 테스트 이메일을 보내 최종 피싱 이메일이 어떻게 보이는지 확인할 수 있습니다:
 
 ![](<../../images/image (192).png>)
 
 > [!TIP]
-> I would recommend to **send the test emails to 10min mails addresses** in order to avoid getting blacklisted making tests.
+> 테스트 중 블랙리스트에 오르는 것을 피하려면 테스트 이메일을 **10min mails 주소**로 보내는 것을 권장합니다.
 
-Once everything is ready, just launch the campaign!
+준비가 끝나면 캠페인을 시작하세요!
 
-## Website Cloning
+## 웹사이트 클로닝
 
-If for any reason you want to clone the website check the following page:
+웹사이트를 복제하려면 다음 페이지를 확인하세요:
 
 
 {{#ref}}
 clone-a-website.md
 {{#endref}}
 
-## Backdoored Documents & Files
+## 백도어 문서 및 파일
 
-In some phishing assessments (mainly for Red Teams) you will want to also **send files containing some kind of backdoor** (maybe a C2 or maybe just something that will trigger an authentication).\
-Check out the following page for some examples:
+일부 피싱 평가(주로 Red Teams)에서는 **백도어가 포함된 파일 전송**(예: C2 또는 인증을 트리거하는 것)을 함께 수행하기도 합니다. 예시들은 다음 페이지를 확인하세요:
 
 
 {{#ref}}
 phishing-documents.md
 {{#endref}}
 
-## Phishing MFA
+## 피싱 MFA
 
 ### Via Proxy MitM
 
-The previous attack is pretty clever as you are faking a real website and gathering the information set by the user. Unfortunately, if the user didn't put the correct password or if the application you faked is configured with 2FA, **this information won't allow you to impersonate the tricked user**.
+앞서 설명한 공격은 실제 웹사이트를 가장하여 사용자가 입력한 정보를 수집하는 영리한 방법입니다. 그러나 사용자가 올바른 비밀번호를 입력하지 않았거나, 당신이 가장한 애플리케이션이 2FA로 설정되어 있다면 **이 정보만으로는 기만된 사용자를 가장할 수 없습니다**.
 
-This is where tools like [**evilginx2**](https://github.com/kgretzky/evilginx2)**,** [**CredSniper**](https://github.com/ustayready/CredSniper) and [**muraena**](https://github.com/muraenateam/muraena) are useful. This tool will allow you to generate a MitM like attack. Basically, the attacks works in the following way:
+이럴 때 [**evilginx2**](https://github.com/kgretzky/evilginx2)**,** [**CredSniper**](https://github.com/ustayready/CredSniper) 및 [**muraena**](https://github.com/muraenateam/muraena) 같은 도구가 유용합니다. 이 도구들은 MitM 공격을 가능하게 합니다. 기본적인 동작은 다음과 같습니다:
 
-1. You **impersonate the login** form of the real webpage.
-2. The user **send** his **credentials** to your fake page and the tool send those to the real webpage, **checking if the credentials work**.
-3. If the account is configured with **2FA**, the MitM page will ask for it and once the **user introduces** it the tool will send it to the real web page.
-4. Once the user is authenticated you (as attacker) will have **captured the credentials, the 2FA, the cookie and any information** of every interaction your while the tool is performing a MitM.
+1. 실제 웹페이지의 로그인 폼을 **사칭**합니다.
+2. 사용자가 가짜 페이지에 **자격 증명(credentials)**를 전송하면 도구가 이를 실제 웹페이지로 전송하여 **자격 증명이 동작하는지 확인**합니다.
+3. 계정이 **2FA**로 설정되어 있다면 MitM 페이지가 이를 요청하고 사용자가 입력하면 도구는 이를 실제 웹페이지로 전송합니다.
+4. 사용자가 인증되면 공격자는 MitM 수행 중 발생한 모든 상호작용의 **자격 증명, 2FA, 쿠키 및 기타 정보**를 캡처하게 됩니다.
 
 ### Via VNC
 
-What if instead of **sending the victim to a malicious page** with the same looks as the original one, you send him to a **VNC session with a browser connected to the real web page**? You will be able to see what he does, steal the password, the MFA used, the cookies...\
-You can do this with [**EvilnVNC**](https://github.com/JoelGMSec/EvilnoVNC)
+원래 페이지와 같은 모양의 악성 페이지로 사용자를 보내는 대신, 브라우저가 실제 웹페이지에 접속된 상태의 **VNC 세션**으로 사용자를 보내면 어떨까요? 사용자가 무엇을 하는지 실시간으로 볼 수 있고, 비밀번호, MFA, 쿠키 등을 탈취할 수 있습니다. 이를 위해 [**EvilnVNC**](https://github.com/JoelGMSec/EvilnoVNC)를 사용할 수 있습니다.
 
-## Detecting the detection
+## 탐지 여부 확인
 
-Obviously one of the best ways to know if you have been busted is to **search your domain inside blacklists**. If it appears listed, somehow your domain was detected as suspicions.\
-One easy way to check if you domain appears in any blacklist is to use [https://malwareworld.com/](https://malwareworld.com)
+자신이 적발되었는지 확인하는 가장 좋은 방법 중 하나는 **자신의 도메인이 블랙리스트에 올라 있는지 검색**하는 것입니다. 목록에 나타난다면 어떤 방식으로든 도메인이 의심 대상으로 감지된 것입니다.\
+도메인이 블랙리스트에 있는지 확인하는 쉬운 방법 중 하나는 [https://malwareworld.com/](https://malwareworld.com)을 사용하는 것입니다.
 
-However, there are other ways to know if the victim is **actively looking for suspicions phishing activity in the wild** as explained in:
+그러나 피해자가 **활발히 의심스러운 피싱 활동을 찾고 있는지**를 알 수 있는 다른 방법들도 있습니다. 자세한 내용은 다음을 참조하세요:
 
 
 {{#ref}}
 detecting-phising.md
 {{#endref}}
 
-You can **buy a domain with a very similar name** to the victims domain **and/or generate a certificate** for a **subdomain** of a domain controlled by you **containing** the **keyword** of the victim's domain. If the **victim** perform any kind of **DNS or HTTP interaction** with them, you will know that **he is actively looking** for suspicious domains and you will need to be very stealth.
+피해자 도메인과 매우 유사한 이름의 도메인을 구매하거나, 당신이 컨트롤하는 도메인의 **서브도메인**에 대해 피해자 도메인의 **키워드**를 포함한 인증서를 **발급**할 수 있습니다. 피해자가 해당 도메인들과 DNS 또는 HTTP 상호작용을 한다면 **그가 의심스러운 도메인을 적극적으로 탐지하고 있다는 것**을 알 수 있으며, 매우 은밀하게 행동해야 합니다.
 
-### Evaluate the phishing
+### 피싱 평가
 
-Use [**Phishious** ](https://github.com/Rices/Phishious)to evaluate if your email is going to end in the spam folder or if it's going to be blocked or successful.
+이메일이 스팸 폴더로 들어가거나 차단될지 성공할지를 평가하려면 [**Phishious**](https://github.com/Rices/Phishious)를 사용하세요.
 
 ## High-Touch Identity Compromise (Help-Desk MFA Reset)
 
-Modern intrusion sets increasingly skip email lures entirely and **directly target the service-desk / identity-recovery workflow** to defeat MFA.  The attack is fully "living-off-the-land": once the operator owns valid credentials they pivot with built-in admin tooling – no malware is required.
+최근 침해 그룹들은 이메일 유인 없이 서비스 데스크/신원 복구 워크플로우를 직접 공략하여 MFA를 무력화하는 경향이 증가하고 있습니다. 공격은 완전히 “living-off-the-land” 방식으로 진행됩니다: 오퍼레이터가 유효한 자격증명을 확보하면 내장된 관리자 도구로 피벗하고 – 악성코드는 필요 없습니다.
 
-### Attack flow
-1. Recon the victim
-* Harvest personal & corporate details from LinkedIn, data breaches, public GitHub, etc.
-* Identify high-value identities (executives, IT, finance) and enumerate the **exact help-desk process** for password / MFA reset.
-2. Real-time social engineering
-* Phone, Teams or chat the help-desk while impersonating the target (often with **spoofed caller-ID** or **cloned voice**).
-* Provide the previously-collected PII to pass knowledge-based verification.
-* Convince the agent to **reset the MFA secret** or perform a **SIM-swap** on a registered mobile number.
-3. Immediate post-access actions (≤60 min in real cases)
-* Establish a foothold through any web SSO portal.
-* Enumerate AD / AzureAD with built-ins (no binaries dropped):
+### 공격 흐름
+1. 대상 정찰
+* LinkedIn, 데이터 유출, 공개 GitHub 등에서 개인 및 회사 관련 정보를 수집합니다.
+* 고가치 신원(임원, IT, 재무)을 식별하고 비밀번호/MFA 재설정에 대한 **정확한 헬프데스크 절차**를 열거합니다.
+2. 실시간 소셜 엔지니어링
+* 전화, Teams 또는 채팅으로 헬프데스크에 실시간으로 연락하여 대상자를 사칭합니다(종종 **spoofed caller-ID** 또는 **cloned voice** 사용).
+* 이전에 수집한 PII를 제공하여 지식 기반 인증을 통과합니다.
+* 상담원을 설득하여 **MFA 시크릿을 재설정**하거나 등록된 휴대전화에 대해 **SIM-swap**을 수행하도록 만듭니다.
+3. 즉시 후속 액세스 조치(실제 사례에서 ≤60분)
+* 웹 SSO 포털을 통해 발판을 확보합니다.
+* 내장 도구로 AD / AzureAD를 열거(바이너리 배포 없이)합니다:
 ```powershell
 # list directory groups & privileged roles
 Get-ADGroup -Filter * -Properties Members | ?{$_.Members -match $env:USERNAME}
@@ -465,56 +465,56 @@ Get-MgDirectoryRole | ft DisplayName,Id
 # Enumerate devices the account can login to
 Get-MgUserRegisteredDevice -UserId <user@corp.local>
 ```
-* Lateral movement with **WMI**, **PsExec**, or legitimate **RMM** agents already whitelisted in the environment.
+* **WMI**, **PsExec**, 또는 환경에서 이미 허용된 합법적인 **RMM** 에이전트를 이용해 횡적 이동을 수행합니다.
 
-### Detection & Mitigation
-* Treat help-desk identity recovery as a **privileged operation** – require step-up auth & manager approval.
-* Deploy **Identity Threat Detection & Response (ITDR)** / **UEBA** rules that alert on:
-* MFA method changed + authentication from new device / geo.
-* Immediate elevation of the same principal (user-→-admin).
-* Record help-desk calls and enforce a **call-back to an already-registered number** before any reset.
-* Implement **Just-In-Time (JIT) / Privileged Access** so newly reset accounts do **not** automatically inherit high-privilege tokens.
+### 탐지 및 완화
+* 헬프데스크 신원 복구를 **권한이 필요한 작업(privileged operation)**으로 취급하고—스텝업 인증 및 관리자 승인을 요구하세요.
+* **Identity Threat Detection & Response (ITDR)** / **UEBA** 규칙을 배포하여 다음을 탐지하도록 알림을 설정하세요:
+* MFA 방식 변경 + 새로운 디바이스/지리적 위치에서의 인증.
+* 동일 계정의 즉각적인 권한 상승(user → admin).
+* 헬프데스크 통화를 녹음하고 리셋 전에 **이미 등록된 번호로 콜백**을 강제하세요.
+* Just-In-Time (JIT) / Privileged Access를 구현하여 새로 재설정된 계정이 자동으로 고권한 토큰을 상속받지 않도록 하세요.
 
 ---
 
-## At-Scale Deception – SEO Poisoning & “ClickFix” Campaigns
-Commodity crews offset the cost of high-touch ops with mass attacks that turn **search engines & ad networks into the delivery channel**.
+## 대규모 기만 – SEO Poisoning 및 “ClickFix” 캠페인
+일부 대규모 조직은 고접촉 작업의 비용을 상쇄하기 위해 **검색 엔진 및 광고 네트워크를 전달 채널로 전환**하는 대량 공격을 수행합니다.
 
-1. **SEO poisoning / malvertising** pushes a fake result such as `chromium-update[.]site` to the top search ads.
-2. Victim downloads a small **first-stage loader** (often JS/HTA/ISO).  Examples seen by Unit 42:
+1. **SEO poisoning / malvertising**가 `chromium-update[.]site`와 같은 가짜 결과를 검색 광고 상단에 띄웁니다.
+2. 피해자는 작은 **1단계 로더**(주로 JS/HTA/ISO)를 다운로드합니다. Unit 42가 확인한 예:
 * `RedLine stealer`
 * `Lumma stealer`
 * `Lampion Trojan`
-3. Loader exfiltrates browser cookies + credential DBs, then pulls a **silent loader** which decides – *in realtime* – whether to deploy:
-* RAT (e.g. AsyncRAT, RustDesk)
+3. 로더는 브라우저 쿠키 + 자격 증명 DB를 유출한 뒤 **무음 로더(silent loader)**를 불러와 실시간으로 배포 여부를 결정합니다:
+* RAT (예: AsyncRAT, RustDesk)
 * ransomware / wiper
-* persistence component (registry Run key + scheduled task)
+* 영속성 컴포넌트(레지스트리 Run 키 + 예약 작업)
 
-### Hardening tips
-* Block newly-registered domains & enforce **Advanced DNS / URL Filtering** on *search-ads* as well as e-mail.
-* Restrict software installation to signed MSI / Store packages, deny `HTA`, `ISO`, `VBS` execution by policy.
-* Monitor for child processes of browsers opening installers:
+### 하드닝 팁
+* 새로 등록된 도메인을 차단하고 검색 광고뿐 아니라 이메일에 대해서도 **Advanced DNS / URL Filtering**을 적용하세요.
+* 소프트웨어 설치를 서명된 MSI / Store 패키지로 제한하고, 정책으로 `HTA`, `ISO`, `VBS` 실행을 차단하세요.
+* 브라우저의 자식 프로세스가 설치 프로그램을 여는지 모니터링하세요:
 ```yaml
 - parent_image: /Program Files/Google/Chrome/*
 and child_image: *\\*.exe
 ```
-* Hunt for LOLBins frequently abused by first-stage loaders (e.g. `regsvr32`, `curl`, `mshta`).
+* 1단계 로더에 의해 자주 악용되는 LOLBins(`regsvr32`, `curl`, `mshta` 등)를 헌팅하세요.
 
 ---
 
-## AI-Enhanced Phishing Operations
-Attackers now chain **LLM & voice-clone APIs** for fully personalised lures and real-time interaction.
+## AI 강화 피싱 작전
+공격자들은 이제 **LLM 및 음성 합성 API**를 연계해 완전히 개인화된 미끼와 실시간 상호작용을 만듭니다.
 
-| Layer | Example use by threat actor |
+| 레이어 | 위협 행위자의 사용 예 |
 |-------|-----------------------------|
-|Automation|Generate & send >100 k emails / SMS with randomised wording & tracking links.|
-|Generative AI|Produce *one-off* emails referencing public M&A, inside jokes from social media; deep-fake CEO voice in callback scam.|
-|Agentic AI|Autonomously register domains, scrape open-source intel, craft next-stage mails when a victim clicks but doesn’t submit creds.|
+|Automation|랜덤화된 문구와 추적 링크로 >100k 이메일/SMS를 생성 및 발송.|
+|Generative AI|공개된 M&A, 소셜 미디어의 내부 농담을 참조한 일회성 이메일 생성; 콜백 사기에서 CEO의 합성 음성 사용.|
+|Agentic AI|도메인 자율 등록, 오픈소스 인텔 수집, 피해자가 클릭했지만 자격증명을 제출하지 않을 때 다음 단계 이메일을 자동 제작.|
 
-**Defence:**
-• Add **dynamic banners** highlighting messages sent from untrusted automation (via ARC/DKIM anomalies).
-• Deploy **voice-biometric challenge phrases** for high-risk phone requests.
-• Continuously simulate AI-generated lures in awareness programmes – static templates are obsolete.
+**방어:**
+• ARC/DKIM 이상 징후를 통해 비신뢰 자동화에서 보낸 메시지를 강조하는 **동적 배너**를 추가하세요.  
+• 고위험 전화 요청에 대해 **음성 생체 인증 도전 구문(voice-biometric challenge phrases)**을 도입하세요.  
+• 인식 교육 프로그램에서 AI가 생성한 미끼를 지속적으로 시뮬레이션하세요 — 정적 템플릿은 구식입니다.
 
 See also – agentic browsing abuse for credential phishing:
 
@@ -524,18 +524,19 @@ ai-agent-mode-phishing-abusing-hosted-agent-browsers.md
 
 ---
 
-## MFA Fatigue / Push Bombing Variant – Forced Reset
-Besides classic push-bombing, operators simply **force a new MFA registration** during the help-desk call, nullifying the user’s existing token.  Any subsequent login prompt appears legitimate to the victim.
+## MFA 피로 / Push Bombing 변형 – 강제 재등록
+고전적인 push-bombing 외에도 운영자는 헬프데스크 통화 중 단순히 **새 MFA 등록을 강제(force a new MFA registration)**하여 사용자의 기존 토큰을 무효화합니다. 이후의 모든 로그인 프롬프트는 피해자에게 합법적으로 보입니다.
 ```text
 [Attacker]  →  Help-Desk:  “I lost my phone while travelling, can you unenrol it so I can add a new authenticator?”
 [Help-Desk] →  AzureAD: ‘Delete existing methods’ → sends registration e-mail
 [Attacker]  →  Completes new TOTP enrolment on their own device
 ```
 Monitor for AzureAD/AWS/Okta events where **`deleteMFA` + `addMFA`** occur **within minutes from the same IP**.
-
+  
 ## Clipboard Hijacking / Pastejacking
 
-공격자는 침해되었거나 typosquatted된 웹 페이지에서 피해자의 클립보드로 악성 명령을 조용히 복사한 다음, 사용자에게 Win + R, Win + X 또는 터미널 창에 붙여넣도록 속여 다운로드나 첨부파일 없이 임의의 코드를 실행시킬 수 있습니다.
+Attackers can silently copy malicious commands into the victim’s clipboard from a compromised or typosquatted web page and then trick the user to paste them inside **Win + R**, **Win + X** or a terminal window, executing arbitrary code without any download or attachment.
+
 
 {{#ref}}
 clipboard-hijacking.md
@@ -549,13 +550,13 @@ mobile-phishing-malicious-apps.md
 {{#endref}}
 
 ### Mobile‑gated phishing to evade crawlers/sandboxes
-공격자들은 desktop crawlers가 최종 페이지에 도달하지 못하도록 간단한 디바이스 검사를 통해 phishing 흐름을 차단하는 경우가 늘고 있습니다. 일반적인 패턴은 touch-capable DOM을 검사하고 결과를 server endpoint로 전송하는 작은 스크립트입니다; non‑mobile clients는 HTTP 500(또는 빈 페이지)을 받고, mobile users에게는 전체 플로우가 제공됩니다.
+운영자들은 점점 자신의 phishing 흐름을 단순한 디바이스 검사 뒤에 숨겨 데스크탑 crawlers가 최종 페이지에 도달하지 못하도록 합니다. 흔한 패턴은 터치 지원 DOM을 검사하고 그 결과를 서버 endpoint로 전송하는 작은 스크립트입니다; non‑mobile 클라이언트는 HTTP 500(또는 빈 페이지)을 받는 반면, mobile 사용자는 전체 흐름을 제공합니다.
 
 Minimal client snippet (typical logic):
 ```html
 <script src="/static/detect_device.js"></script>
 ```
-`detect_device.js` 로직(단순화):
+`detect_device.js` 로직(단순화됨):
 ```javascript
 const isMobile = ('ontouchstart' in document.documentElement);
 fetch('/detect', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({is_mobile:isMobile})})
@@ -563,19 +564,19 @@ fetch('/detect', {method:'POST', headers:{'Content-Type':'application/json'}, bo
 ```
 서버에서 자주 관찰되는 동작:
 - 첫 로드 시 세션 쿠키를 설정한다.
-- `POST /detect {"is_mobile":true|false}` 를 허용한다.
-- `is_mobile=false` 일 때 이후 GET 요청에 대해 500(또는 플레이스홀더)을 반환한다; `true`일 때만 피싱 페이지를 제공한다.
+- `POST /detect {"is_mobile":true|false}` 요청을 수락한다.
+- 이후 GET 요청에 대해 `is_mobile=false`일 때 500(또는 플레이스홀더)을 반환하고, `true`일 때만 phishing을 제공한다.
 
-헌팅 및 탐지 휴리스틱:
+Hunting and detection heuristics:
 - urlscan 쿼리: `filename:"detect_device.js" AND page.status:500`
-- 웹 텔레메트리: `GET /static/detect_device.js` → `POST /detect` → 비모바일에서 HTTP 500; 정상적인 모바일 피해자 경로는 200과 이어지는 HTML/JS를 반환한다.
-- 콘텐츠를 오로지 `ontouchstart` 같은 디바이스 체크에만 의존하는 페이지는 차단하거나 면밀히 검토하라.
+- Web telemetry: `GET /static/detect_device.js` → `POST /detect` → 비모바일에 대해 HTTP 500; 정당한 모바일 피해자 경로는 후속 HTML/JS와 함께 200을 반환한다.
+- `ontouchstart` 또는 유사한 디바이스 검사로만 콘텐츠를 결정하는 페이지는 차단하거나 면밀히 검토하라.
 
 방어 팁:
-- 모바일 유사 지문과 JS가 활성화된 크롤러를 실행하여 게이트된 콘텐츠를 노출시켜라.
-- 신규 등록 도메인에서 `POST /detect` 이후 발생하는 의심스러운 500 응답에 대해 경고를 발생시켜라.
+- 모바일 유사 지문을 사용하고 JS를 활성화한 크롤러를 실행하여 게이트된 콘텐츠를 노출시켜라.
+- 신규 등록 도메인에서 `POST /detect` 이후의 의심스러운 500 응답에 대해 경보를 설정하라.
 
-## 참고자료
+## References
 
 - [https://zeltser.com/domain-name-variations-in-phishing/](https://zeltser.com/domain-name-variations-in-phishing/)
 - [https://0xpatrik.com/phishing-domains/](https://0xpatrik.com/phishing-domains/)
