@@ -3,7 +3,7 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 
-### Tools zum Finden von Geheimnissen in Git-Repos und Dateisystemen
+### Tools to find secrets in git repos and file system
 
 - [https://github.com/dxa4481/truffleHog](https://github.com/dxa4481/truffleHog)
 - [https://github.com/gitleaks/gitleaks](https://github.com/gitleaks/gitleaks)
@@ -12,13 +12,71 @@
 - [https://github.com/JaimePolop/RExpository](https://github.com/JaimePolop/RExpository)
 - [https://github.com/Yelp/detect-secrets](https://github.com/Yelp/detect-secrets)
 - [https://github.com/hisxo/gitGraber](https://github.com/hisxo/gitGraber)
-- [https://github.com/eth0izzle/shhgit](https://github.com/eth0izzle/shhgit)
+- https://github.com/eth0izzle/shhgit (unmaintained)
 - [https://github.com/techgaun/github-dorks](https://github.com/techgaun/github-dorks)
-- [https://github.com/michenriksen/gitrob](https://github.com/michenriksen/gitrob)
-- [https://github.com/anshumanbh/git-all-secrets](https://github.com/anshumanbh/git-all-secrets)
+- https://github.com/michenriksen/gitrob (archived)
+- https://github.com/anshumanbh/git-all-secrets (archived)
 - [https://github.com/awslabs/git-secrets](https://github.com/awslabs/git-secrets)
 - [https://github.com/kootenpv/gittyleaks](https://github.com/kootenpv/gittyleaks)
 - [https://github.com/obheda12/GitDorker](https://github.com/obheda12/GitDorker)
+
+> Hinweise
+> - TruffleHog v3 kann viele Zugangsdaten live verifizieren und GitHub orgs, issues/PRs, gists und wikis scannen. Beispiel: `trufflehog github --org <ORG> --results=verified`.
+> - Gitleaks v8 unterstützt das Scannen der git-History, Verzeichnisse und Archives: `gitleaks detect -v --source .` oder `gitleaks detect --source <repo> --log-opts="--all"`.
+> - Nosey Parker konzentriert sich auf High-Throughput-Scans mit kuratierten Regeln und bietet eine Explorer UI für Triage. Beispiel: `noseyparker scan --datastore np.db <path|repo>` dann `noseyparker report --datastore np.db`.
+> - ggshield (GitGuardian CLI) stellt pre-commit/CI Hooks und Docker-Image-Scanning bereit: `ggshield secret scan repo <path-or-url>`.
+
+### Where secrets commonly leak in GitHub
+
+- Repository files in default and non-default branches (search `repo:owner/name@branch` in the UI).
+- Full git history and other branches/tags (clone and scan with gitleaks/trufflehog; GitHub search focuses on indexed content).
+- Issues, pull requests, comments, and descriptions (TruffleHog GitHub source supports these via flags like `--issue-comments`, `--pr-comments`).
+- Actions logs and artifacts of public repositories (masking is best-effort; review logs/artifacts if visible).
+- Wikis and release assets.
+- Gists (search with tooling or the UI; some tools can include gists).
+
+> Fallstricke
+> - GitHub’s REST code search API ist legacy und unterstützt kein regex; bevorzugt die Web UI für regex-Suchen. Die gh CLI nutzt die legacy API.
+> - Nur Dateien unter einer bestimmten Größe werden für die Suche indiziert. Um gründlich zu sein, clone und scanne lokal mit einem secrets-Scanner.
+
+### Programmatic org-wide scanning
+
+- TruffleHog (GitHub source):
+```bash
+export GITHUB_TOKEN=<token>
+trufflehog github --org Target --results=verified \
+--include-wikis --issue-comments --pr-comments --gist-comments
+```
+- Gitleaks über alle org repos (shallow clone and scan):
+```bash
+gh repo list Target --limit 1000 --json nameWithOwner,url \
+| jq -r '.[].url' | while read -r r; do
+tmp=$(mktemp -d); git clone --depth 1 "$r" "$tmp" && \
+gitleaks detect --source "$tmp" -v || true; rm -rf "$tmp";
+done
+```
+- Schnüffler bei einem mono checkout:
+```bash
+# after cloning many repos beneath ./org
+noseyparker scan --datastore np.db org/ && noseyparker report --datastore np.db
+```
+- ggshield Schnellscans:
+```bash
+# current working tree
+ggshield secret scan path -r .
+# full git history of a repo
+ggshield secret scan repo <path-or-url>
+```
+> Tipp: Für die git-Historie sollten Scanner bevorzugt werden, die `git log -p --all` parsen, um entfernte secrets aufzuspüren.
+
+### Aktualisierte dorks für moderne tokens
+
+- GitHub tokens: `ghp_` `gho_` `ghu_` `ghs_` `ghr_` `github_pat_`
+- Slack tokens: `xoxb-` `xoxp-` `xoxa-` `xoxs-` `xoxc-` `xoxe-`
+- Cloud und allgemein:
+- `AWS_ACCESS_KEY_ID` `AWS_SECRET_ACCESS_KEY` `aws_session_token`
+- `GOOGLE_API_KEY` `AZURE_TENANT_ID` `AZURE_CLIENT_SECRET`
+- `OPENAI_API_KEY` `ANTHROPIC_API_KEY`
 
 ### **Dorks**
 ```bash
@@ -302,4 +360,15 @@ GCP SECRET
 AWS SECRET
 "private" extension:pgp
 ```
+{{#ref}}
+wide-source-code-search.md
+{{#endref}}
+
+
+
+
+## Quellen
+
+- Geheimnisse aus öffentlichen Repositories fernhalten (GitHub Blog, 29. Feb. 2024): https://github.blog/news-insights/product-news/keeping-secrets-out-of-public-repositories/
+- TruffleHog v3 – Finden, Überprüfen und Analysieren von leaked credentials: https://github.com/trufflesecurity/trufflehog
 {{#include ../../banners/hacktricks-training.md}}
