@@ -3,15 +3,15 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
 
-Za više informacija proverite [https://trailofbits.github.io/ctf/forensics/](https://trailofbits.github.io/ctf/forensics/). Ovo je samo rezime:
+Za dodatne informacije pogledajte [https://trailofbits.github.io/ctf/forensics/](https://trailofbits.github.io/ctf/forensics/). Ovo je samo sažetak:
 
-Microsoft je kreirao mnogo Office formata dokumenata, pri čemu su dve glavne vrste **OLE formats** (kao što su RTF, DOC, XLS, PPT) i **Office Open XML (OOXML) formats** (kao što su DOCX, XLSX, PPTX). Ovi formati mogu da uključuju makroe, zbog čega su mete za phishing i malware. OOXML fajlovi su strukturirani kao zip kontejneri, što omogućava inspekciju raspakivanjem, otkrivajući hijerarhiju fajlova i foldera i sadržaj XML fajlova.
+Microsoft je napravio više Office formata dokumenata, pri čemu su dva glavna tipa **OLE formats** (kao RTF, DOC, XLS, PPT) i **Office Open XML (OOXML) formats** (npr. DOCX, XLSX, PPTX). Ovi formati mogu sadržavati macros, zbog čega su često meta za phishing i malware. OOXML fajlovi su strukturirani kao zip kontejneri, što omogućava njihovu inspekciju raspakivanjem i pregled hijerarhije fajlova/foldera i sadržaja XML datoteka.
 
-Da biste istražili strukturu OOXML fajlova, dat je komand za raspakivanje dokumenta i izlazna struktura. Tehnike skrivanja podataka u ovim fajlovima su dokumentovane, što ukazuje na neprestanu inovaciju u skrivanju podataka u CTF izazovima.
+Za istraživanje strukture OOXML fajlova, dat je komandni način za unzip dokumenta i izlazna struktura. Tehnike skrivanja podataka u ovim fajlovima su dokumentovane, što ukazuje na stalne inovacije u sakrivanju podataka u okviru CTF izazova.
 
-Za analizu, **oletools** i **OfficeDissector** nude sveobuhvatan set alata za ispitivanje kako OLE tako i OOXML dokumenata. Ovi alati pomažu u identifikaciji i analizi ugrađenih makroa, koji često služe kao vektori za dostavu malware-a, obično preuzimanjem i izvršavanjem dodatnih zlonamernih payload-ova. Analiza VBA makroa može se obaviti bez Microsoft Office korišćenjem Libre Office, koji omogućava debugovanje sa breakpoints i watch variables.
+Za analizu, **oletools** i **OfficeDissector** nude sveobuhvatan skup alata za ispitivanje kako OLE tako i OOXML dokumenata. Ovi alati pomažu u identifikaciji i analizi ugrađenih macros, koji često služe kao vektori za isporuku malware-a, obično preuzimajući i izvršavajući dodatne zlonamerne payload-e. Analiza VBA macros može se obaviti bez Microsoft Office koristeći Libre Office, koji omogućava debugovanje sa breakpoints i watch variables.
 
-Instalacija i upotreba **oletools** je jednostavna, sa komandama datim za instalaciju putem pip-a i ekstrakciju makroa iz dokumenata. Automatsko izvršavanje makroa se pokreće funkcijama kao što su `AutoOpen`, `AutoExec`, ili `Document_Open`.
+Instalacija i korišćenje **oletools** su jednostavni, sa komandama za instalaciju putem pip-a i za ekstrakciju macros iz dokumenata. Automatsko izvršavanje macros se pokreće funkcijama kao što su `AutoOpen`, `AutoExec`, ili `Document_Open`.
 ```bash
 sudo pip3 install -U oletools
 olevba -c /path/to/document #Extract macros
@@ -20,57 +20,57 @@ olevba -c /path/to/document #Extract macros
 
 ## OLE Compound File exploitation: Autodesk Revit RFA – ECC recomputation and controlled gzip
 
-Revit RFA modeli se čuvaju kao [OLE Compound File](https://learn.microsoft.com/en-us/windows/win32/stg/istorage-compound-file-implementation) (poznato i kao CFBF). Serijalizovani model se nalazi pod storage/stream:
+Revit RFA modeli su sačuvani kao [OLE Compound File](https://learn.microsoft.com/en-us/windows/win32/stg/istorage-compound-file-implementation) (aka CFBF). Serijalizovani model se nalazi u storage/stream:
 
 - Storage: `Global`
 - Stream: `Latest` → `Global\Latest`
 
-Ključna struktura `Global\Latest` (uočeno na Revit 2025):
+Osnovna struktura `Global\Latest` (zapaženo na Revit 2025):
 
-- Header
-- GZIP-compressed payload (stvarni serijalizovani graf objekata)
-- Zero padding
+- Zaglavlje
+- GZIP-kompresovani payload (stvarni serijalizovani graf objekata)
+- Popunjavanje nulama
 - Error-Correcting Code (ECC) trailer
 
-Revit će automatski popravljati male perturbacije u stream-u koristeći ECC trailer i odbaciti stream-ove koji ne odgovaraju ECC-u. Dakle, naivno uređivanje kompresovanih bajtova se neće zadržati: vaše izmene će ili biti vraćene ili će fajl biti odbijen. Da biste obezbedili tačnu kontrolu po bajtu nad onim što deserializer vidi, morate:
+Revit će automatski popraviti male perturbacije u streamu koristeći ECC trailer i odbaciti streamove koji se ne poklapaju sa ECC. Dakle, naivno menjanje kompresovanih bajtova neće opstati: vaše izmene će biti ili vraćene ili će fajl biti odbijen. Da biste obezbedili kontrolu tačnu po bajtu nad onim što deserializer vidi, morate:
 
-- Ponovo kompresovati koristeći Revit-kompatibilnu gzip implementaciju (tako da kompresovani bajtovi koje Revit proizvodi/prihvata odgovaraju onome što očekuje).
-- Ponovo izračunati ECC trailer preko popunjenog stream-a tako da Revit prihvati izmenjeni stream bez automatske popravke.
+- Ponovo kompresovati pomoću Revit-kompatibilne gzip implementacije (tako da kompresovani bajtovi koje Revit proizvodi/prihvata odgovaraju onome što očekuje).
+- Ponovo izračunati ECC trailer preko popunjenog streama tako da Revit prihvati izmenjeni stream bez automatskog popravljanja.
 
-Praktičan tok rada za patching/fuzzing sadržaja RFA:
+Praktičan workflow za patching/fuzzing sadržaja RFA:
 
-1) Ekstrahujte OLE compound dokument
+1) Ekstraktujte OLE compound dokument
 ```bash
 # Expand RFA into a folder tree (storages → folders, streams → files)
 CompoundFileTool /e model.rfa /o rfa_out
 # rfa_out/Global/Latest is the serialized stream of interest
 ```
-2) Izmeni Global\Latest uz gzip/ECC disciplinu
+2) Izmeni Global\Latest u skladu sa gzip/ECC disciplinom
 
-- Dekonstruiši `Global/Latest`: sačuvaj zaglavlje, izvrši gunzip na payload, mutiraj bajtove, zatim ponovo izvrši gzip koristeći Revit-kompatibilne deflate parametre.
-- Sačuvaj popunjavanje nulama i ponovo izračunaj ECC trailer tako da novi bajtovi budu prihvaćeni od strane Revita.
-- Ako ti treba deterministička bajt-po-bajt reprodukcija, izgradi minimalni wrapper oko Revit’s DLLs da pozove njegove gzip/gunzip putanje i ECC izračunavanje (kao što je demonstrirano u istraživanju), ili ponovo iskoristi bilo koji dostupan helper koji reprodukuje ove semantike.
+- Dekonstruiši `Global/Latest`: zadrži header, gunzip payload, mutiraj bytes, zatim ponovo gzip koristeći Revit-compatible deflate parametre.
+- Sačuvaj zero-padding i ponovo izračunaj ECC trailer tako da novi bytes budu prihvaćeni od strane Revita.
+- Ako ti treba deterministička reprodukcija byte-for-byte, napravi minimalan wrapper oko Revit’s DLLs da pozove njegove gzip/gunzip paths i ECC computation (kako je demonstrirano u research), ili ponovo iskoristi bilo koji dostupan helper koji replicira ove semantics.
 
-3) Ponovo izgradi OLE složeni dokument
+3) Ponovo izgradi OLE compound dokument
 ```bash
 # Repack the folder tree back into an OLE file
 CompoundFileTool /c rfa_out /o model_patched.rfa
 ```
-Beleške:
+Napomene:
 
-- CompoundFileTool upisuje storages/streams na fajl sistem uz escapovanje karaktera nevažećih za NTFS imena; stream path koji želite je tačno `Global/Latest` u izlaznom stablu.
-- Kada isporučujete mass attacks putem ecosystem plugins koji fetchuju RFAs iz cloud storage, osigurajte da vaš patched RFA prvo lokalno prođe Revit’s integrity checks (gzip/ECC correct) pre nego što pokušate network injection.
+- CompoundFileTool upisuje storages/streams na fajl‑sistem uz escapeovanje karaktera nevalidnih za NTFS imena; stream putanja koja vam treba je tačno `Global/Latest` u izlaznom stablu.
+- Kada isporučujete masovne napade putem ecosystem plugins koji preuzimaju RFAs iz cloud storage, uverite se da vaš izmenjeni RFA lokalno prvo prolazi Revit‑ove provere integriteta (gzip/ECC correct) pre pokušaja mrežne injekcije.
 
-Uvid u eksploataciju (da usmeri koje bajtove staviti u gzip payload):
+Uvid u eksploataciju (da vas uputi koje bajtove staviti u gzip payload):
 
-- Revit deserializer čita 16-bit class index i konstruiše objekat. Određeni tipovi su non‑polymorphic i nemaju vtables; zloupotreba rukovanja destruktorom dovodi do type confusion gde engine izvršava indirektan poziv kroz pointer koji kontroliše napadač.
-- Izbor `AString` (class index `0x1F`) postavlja heap pointer kojim kontroliše napadač na offset objekta 0. Tokom petlje destruktora, Revit efektivno izvršava:
+- Revit deserializer čita 16‑bitni class index i konstruiše objekat. Određeni tipovi su ne‑polimorfni i nemaju vtable; zloupotrebom rukovanja destruktorom nastaje type confusion gde engine izvršava indirektan poziv kroz attacker-controlled pointer.
+- Izbor `AString` (class index `0x1F`) postavlja attacker-controlled heap pointer na offset 0 objekta. Tokom destruktor petlje, Revit efektivno izvršava:
 ```asm
 rcx = [rbx]              ; object pointer (e.g., AString*)
 rax = [rcx]              ; attacker-controlled pointer to AString buffer
 call qword ptr [rax]     ; one attacker-chosen gadget per object
 ```
-- Postavite više takvih objekata u serijalizovani graf tako da svaka iteracija destructor loop izvrši jedan gadget (“weird machine”), i organizujte stack pivot u konvencionalni x64 ROP chain.
+- Postavite više takvih objekata u serializovani graf tako da svaka iteracija petlje destruktora izvrši jedan gadget („weird machine“), i ostvarite stack pivot u konvencionalni x64 ROP lanac.
 
 Pogledajte detalje o Windows x64 pivot/gadget izgradnji ovde:
 
@@ -87,10 +87,10 @@ i opšte smernice za ROP ovde:
 Alati:
 
 - CompoundFileTool (OSS) za proširenje/rekonstrukciju OLE compound files: https://github.com/thezdi/CompoundFileTool
-- IDA Pro + WinDBG TTD za reverse/taint; onemogućite page heap sa TTD kako biste tragove držali kompaktne.
-- Lokalni proxy (npr. Fiddler) može simulirati isporuku kroz supply-chain zamenom RFAs u plugin saobraćaju za testiranje.
+- IDA Pro + WinDBG TTD za reverse/taint; onemogućite page heap u TTD da biste održali tragove kompaktne.
+- Lokalni proxy (npr. Fiddler) može simulirati isporuku kroz supply-chain zamenom RFAs u plugin saobraćaju radi testiranja.
 
-## References
+## Reference
 
 - [Crafting a Full Exploit RCE from a Crash in Autodesk Revit RFA File Parsing (ZDI blog)](https://www.thezdi.com/blog/2025/10/6/crafting-a-full-exploit-rce-from-a-crash-in-autodesk-revit-rfa-file-parsing)
 - [CompoundFileTool (GitHub)](https://github.com/thezdi/CompoundFileTool)
