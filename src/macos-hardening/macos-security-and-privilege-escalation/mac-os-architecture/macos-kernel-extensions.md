@@ -131,10 +131,10 @@ pyimg4 im4p extract -i kernelcache.release.iphone14 -o kernelcache.release.iphon
 # imjtool (https://newandroidbook.com/tools/imjtool.html)
 imjtool _img_name_ [extract]
 
-# disarm (you can use it directly on the IMG4 file) - https://newandroidbook.com/tools/disarm.html
+# disarm (you can use it directly on the IMG4 file) - [https://newandroidbook.com/tools/disarm.html](https://newandroidbook.com/tools/disarm.html)
 disarm -L kernelcache.release.v57 # From unzip ipsw
 
-# disamer (extract specific parts, e.g. filesets) - https://newandroidbook.com/tools/disarm.html
+# disamer (extract specific parts, e.g. filesets) - [https://newandroidbook.com/tools/disarm.html](https://newandroidbook.com/tools/disarm.html)
 disarm -e filesets kernelcache.release.d23 
 ```
 
