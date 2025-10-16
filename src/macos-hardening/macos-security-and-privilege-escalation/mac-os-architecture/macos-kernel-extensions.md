@@ -1,53 +1,53 @@
-# macOS 内核扩展与调试
+# macOS Kernel Extensions & Kernelcaches
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## 基本信息
+## Basic Information
 
-内核扩展（Kexts）是 **以 `.kext` 为扩展名的包**，直接 **加载到 macOS 内核空间**，为主操作系统提供额外功能。
+Kernel extensions (Kexts) are **packages** with a **`.kext`** extension that are **loaded directly into the macOS kernel space**, providing additional functionality to the main operating system.
 
-### 废弃状态与 DriverKit / 系统扩展
-从 **macOS Catalina (10.15)** 开始，Apple 将大多数遗留 KPI 标记为 *废弃*，并引入了 **系统扩展和 DriverKit** 框架，这些框架在 **用户空间** 中运行。从 **macOS Big Sur (11)** 开始，操作系统将 *拒绝加载* 依赖于废弃 KPI 的第三方 kext，除非机器以 **降低安全性** 模式启动。在 Apple Silicon 上，启用 kext 还要求用户：
+### Deprecation status & DriverKit / System Extensions
+Starting with **macOS Catalina (10.15)** Apple marked most legacy KPIs as *deprecated* and introduced the **System Extensions & DriverKit** frameworks that run in **user-space**. From **macOS Big Sur (11)** the operating system will *refuse to load* third-party kexts that rely on deprecated KPIs unless the machine is booted in **Reduced Security** mode. On Apple Silicon, enabling kexts additionally requires the user to:
 
-1. 重启进入 **恢复** → *启动安全实用工具*。
-2. 选择 **降低安全性** 并勾选 **“允许用户管理来自已识别开发者的内核扩展”**。
-3. 重启并在 **系统设置 → 隐私与安全** 中批准 kext。
+1. Reboot into **Recovery** → *Startup Security Utility*.
+2. Select **Reduced Security** and tick **“Allow user management of kernel extensions from identified developers”**.
+3. Reboot and approve the kext from **System Settings → Privacy & Security**.
 
-使用 DriverKit/系统扩展编写的用户空间驱动程序显著 **减少攻击面**，因为崩溃或内存损坏被限制在沙盒进程中，而不是内核空间。
+User-land drivers written with DriverKit/System Extensions dramatically **reduce attack surface** because crashes or memory corruption are confined to a sandboxed process rather than kernel space.
 
-> 📝 从 macOS Sequoia (15) 开始，Apple 完全移除了几个遗留的网络和 USB KPI – 唯一向前兼容的解决方案是迁移到系统扩展。
+> 📝 From macOS Sequoia (15) Apple has removed several legacy networking and USB KPIs entirely – the only forward-compatible solution for vendors is to migrate to System Extensions.
 
-### 要求
+### Requirements
 
-显然，这么强大以至于 **加载内核扩展** 是 **复杂的**。内核扩展必须满足以下 **要求** 才能被加载：
+Obviously, this is so powerful that it is **complicated to load a kernel extension**. These are the **requirements** that a kernel extension must meet to be loaded:
 
-- 当 **进入恢复模式** 时，必须 **允许加载内核扩展**：
+- When **entering recovery mode**, kernel **extensions must be allowed** to be loaded:
 
 <figure><img src="../../../images/image (327).png" alt=""><figcaption></figcaption></figure>
 
-- 内核扩展必须 **使用内核代码签名证书签名**，该证书只能由 **Apple 授予**。Apple 将详细审核公司及其所需原因。
-- 内核扩展还必须 **经过公证**，Apple 将能够检查其是否含有恶意软件。
-- 然后，**root** 用户是唯一可以 **加载内核扩展** 的人，包内的文件必须 **属于 root**。
-- 在上传过程中，包必须准备在 **受保护的非 root 位置**：`/Library/StagedExtensions`（需要 `com.apple.rootless.storage.KernelExtensionManagement` 授权）。
-- 最后，在尝试加载时，用户将 [**收到确认请求**](https://developer.apple.com/library/archive/technotes/tn2459/_index.html)，如果接受，计算机必须 **重启** 以加载它。
+- The kernel extension must be **signed with a kernel code signing certificate**, which can only be **granted by Apple**. Who will review in detail the company and the reasons why it is needed.
+- The kernel extension must also be **notarized**, Apple will be able to check it for malware.
+- Then, the **root** user is the one who can **load the kernel extension** and the files inside the package must **belong to root**.
+- During the upload process, the package must be prepared in a **protected non-root location**: `/Library/StagedExtensions` (requires the `com.apple.rootless.storage.KernelExtensionManagement` grant).
+- Finally, when attempting to load it, the user will [**receive a confirmation request**](https://developer.apple.com/library/archive/technotes/tn2459/_index.html) and, if accepted, the computer must be **restarted** to load it.
 
-### 加载过程
+### Loading process
 
-在 Catalina 中是这样的：有趣的是，**验证** 过程发生在 **用户空间**。然而，只有具有 **`com.apple.private.security.kext-management`** 授权的应用程序可以 **请求内核加载扩展**：`kextcache`、`kextload`、`kextutil`、`kextd`、`syspolicyd`
+In Catalina it was like this: It is interesting to note that the **verification** process occurs in **userland**. However, only applications with the **`com.apple.private.security.kext-management`** grant can **request the kernel to load an extension**: `kextcache`, `kextload`, `kextutil`, `kextd`, `syspolicyd`
 
-1. **`kextutil`** cli **启动** 加载扩展的 **验证** 过程
-- 它将通过使用 **Mach 服务** 与 **`kextd`** 进行通信。
-2. **`kextd`** 将检查多个事项，例如 **签名**
-- 它将与 **`syspolicyd`** 进行通信以 **检查** 扩展是否可以 **加载**。
-3. **`syspolicyd`** 将 **提示** **用户** 如果扩展尚未被加载。
-- **`syspolicyd`** 将结果报告给 **`kextd`**
-4. **`kextd`** 最终将能够 **告诉内核加载** 扩展
+1. **`kextutil`** cli **starts** the **verification** process for loading an extension
+- It will talk to **`kextd`** by sending using a **Mach service**.
+2. **`kextd`** will check several things, such as the **signature**
+- It will talk to **`syspolicyd`** to **check** if the extension can be **loaded**.
+3. **`syspolicyd`** will **prompt** the **user** if the extension has not been previously loaded.
+- **`syspolicyd`** will report the result to **`kextd`**
+4. **`kextd`** will finally be able to **tell the kernel to load** the extension
 
-如果 **`kextd`** 不可用，**`kextutil`** 可以执行相同的检查。
+If **`kextd`** is not available, **`kextutil`** can perform the same checks.
 
-### 枚举与管理（已加载的 kexts）
+### Enumeration & management (loaded kexts)
 
-`kextstat` 是历史工具，但在最近的 macOS 版本中已 **废弃**。现代接口是 **`kmutil`**：
+`kextstat` was the historical tool but it is **deprecated** in recent macOS releases. The modern interface is **`kmutil`**:
 ```bash
 # List every extension currently linked in the kernel, sorted by load address
 sudo kmutil showloaded --sort
@@ -58,7 +58,7 @@ sudo kmutil showloaded --collection aux
 # Unload a specific bundle
 sudo kmutil unload -b com.example.mykext
 ```
-旧语法仍可供参考：
+旧语法仍可作为参考：
 ```bash
 # (Deprecated) Get loaded kernel extensions
 kextstat
@@ -66,7 +66,7 @@ kextstat
 # (Deprecated) Get dependencies of the kext number 22
 kextstat | grep " 22 " | cut -c2-5,50- | cut -d '(' -f1
 ```
-`kmutil inspect` 还可以用于 **转储内核集合 (KC)** 的内容或验证 kext 是否解析所有符号依赖：
+`kmutil inspect` 也可用于 **转储 Kernel Collection (KC) 的内容** 或验证 kext 是否解析了所有符号依赖：
 ```bash
 # List fileset entries contained in the boot KC
 kmutil inspect -B /System/Library/KernelCollections/BootKernelExtensions.kc --show-fileset-entries
@@ -77,137 +77,218 @@ kmutil libraries -p /Library/Extensions/FancyUSB.kext --undef-symbols
 ## Kernelcache
 
 > [!CAUTION]
-> 尽管内核扩展预计位于 `/System/Library/Extensions/` 中，但如果你去这个文件夹，你 **不会找到任何二进制文件**。这是因为 **kernelcache**，为了反向工程一个 `.kext`，你需要找到获取它的方法。
+> 即便 kernel extensions 预期位于 `/System/Library/Extensions/`，如果你进入该文件夹你 **不会找到任何二进制文件**。这是由于 **kernelcache** 的存在，若要对某个 `.kext` 进行逆向，你需要想办法获得它。
 
-**kernelcache** 是 **XNU 内核的预编译和预链接版本**，以及必要的设备 **驱动程序** 和 **内核扩展**。它以 **压缩** 格式存储，并在启动过程中解压到内存中。kernelcache 通过提供一个准备就绪的内核和关键驱动程序的版本，促进了 **更快的启动时间**，减少了在启动时动态加载和链接这些组件所需的时间和资源。
+The **kernelcache** 是 XNU kernel 的一个 **预编译且预链接的版本**，同时包含必要的设备 **drivers** 和 **kernel extensions**。它以 **压缩** 格式存储，并在启动过程中解压到内存。kernelcache 通过提供一个可直接运行的内核和关键 drivers 的版本来加快启动时间，减少在启动时动态加载和链接这些组件所需的时间和资源。
+
+kernelcache 的主要优点是 **加载速度**，并且所有模块都已预链接（没有加载时的阻碍）。一旦所有模块被预链接，KXLD 可以从内存中移除，因此 **XNU cannot load new KEXTs.**
+
+> [!TIP]
+> The [https://github.com/dhinakg/aeota](https://github.com/dhinakg/aeota) tool 解密 Apple 的 AEA (Apple Encrypted Archive / AEA asset) 容器——Apple 用于 OTA 资产和某些 IPSW 组件的加密容器格式——并能生成底层的 .dmg/asset 存档，然后你可以使用随附的 aastuff 工具提取它。
 
 ### Local Kerlnelcache
 
-在 iOS 中，它位于 **`/System/Library/Caches/com.apple.kernelcaches/kernelcache`**，在 macOS 中你可以通过以下命令找到它：**`find / -name "kernelcache" 2>/dev/null`** \
-在我的 macOS 中，我找到了它在：
+在 iOS 中它位于 **`/System/Library/Caches/com.apple.kernelcaches/kernelcache`**，在 macOS 上你可以用：**`find / -name "kernelcache" 2>/dev/null`** 来查找。 \
+就我在 macOS 上的情况，我在以下位置找到了它：
 
 - `/System/Volumes/Preboot/1BAEB4B5-180B-4C46-BD53-51152B7D92DA/boot/DAD35E7BC0CDA79634C20BD1BD80678DFB510B2AAD3D25C1228BB34BCD0A711529D3D571C93E29E1D0C1264750FA043F/System/Library/Caches/com.apple.kernelcaches/kernelcache`
 
-#### IMG4
+也可以在这里找到 [**kernelcache of version 14 with symbols**](https://x.com/tihmstar/status/1295814618242318337?lang=en)。
 
-IMG4 文件格式是苹果在其 iOS 和 macOS 设备中用于安全 **存储和验证固件** 组件（如 **kernelcache**）的容器格式。IMG4 格式包括一个头部和几个标签，这些标签封装了不同的数据片段，包括实际的有效载荷（如内核或引导加载程序）、签名和一组清单属性。该格式支持加密验证，允许设备在执行固件组件之前确认其真实性和完整性。
+#### IMG4 / BVX2 (LZFSE) compressed
 
-它通常由以下组件组成：
+The IMG4 file format 是 Apple 在其 iOS 和 macOS 设备中用于安全地 **存储和验证固件** 组件（例如 **kernelcache**）的容器格式。IMG4 格式包含一个头部和若干标签，这些标签封装了不同的数据片段，包括实际的 payload（例如内核或 bootloader）、签名，以及一组 manifest 属性。该格式支持加密验证，使设备在执行固件组件之前能够确认其真实性和完整性。
 
-- **有效载荷 (IM4P)**：
-- 通常被压缩（LZFSE4, LZSS, …）
-- 可选加密
-- **清单 (IM4M)**：
-- 包含签名
-- 额外的键/值字典
-- **恢复信息 (IM4R)**：
-- 也称为 APNonce
-- 防止某些更新的重放
-- 可选：通常不会找到
+It's usually composed of the following components:
 
-解压 Kernelcache：
+- **Payload (IM4P)**:
+  - Often compressed (LZFSE4, LZSS, …)
+  - Optionally encrypted
+- **Manifest (IM4M)**:
+  - Contains Signature
+  - Additional Key/Value dictionary
+- **Restore Info (IM4R)**:
+  - Also known as APNonce
+  - Prevents replaying of some updates
+  - OPTIONAL: Usually this isn't found
+
+Decompress the Kernelcache:
 ```bash
 # img4tool (https://github.com/tihmstar/img4tool)
 img4tool -e kernelcache.release.iphone14 -o kernelcache.release.iphone14.e
 
 # pyimg4 (https://github.com/m1stadev/PyIMG4)
 pyimg4 im4p extract -i kernelcache.release.iphone14 -o kernelcache.release.iphone14.e
+
+# imjtool (https://newandroidbook.com/tools/imjtool.html)
+imjtool _img_name_ [extract]
+
+# disarm (you can use it directly on the IMG4 file) - [https://newandroidbook.com/tools/disarm.html](https://newandroidbook.com/tools/disarm.html)
+disarm -L kernelcache.release.v57 # From unzip ipsw
+
+# disamer (extract specific parts, e.g. filesets) - [https://newandroidbook.com/tools/disarm.html](https://newandroidbook.com/tools/disarm.html)
+disarm -e filesets kernelcache.release.d23
 ```
-### 下载
+#### Disarm 内核符号
+
+**`Disarm`** 允许使用 matchers 从 kernelcache 对函数进行 symbolicate。
+
+这些 matchers 只是简单的模式规则（文本行），用于告诉 disarm 如何识别并 auto-symbolicate 二进制中的函数、参数和 panic/log 字符串。
+
+所以基本上你指出函数使用的字符串，disarm 会找到它并 **symbolicate it**。
+```bash
+You can find some `xnu.matchers` in [https://newosxbook.com/tools/disarm.html](https://newosxbook.com/tools/disarm.html) in the **`Matchers`** section. You can also create your own matchers.
+
+```bash
+# 转到 /tmp/extracted（disarm 解压 filesets 的位置）
+disarm -e filesets kernelcache.release.d23 # Always extract to /tmp/extracted
+cd /tmp/extracted
+JMATCHERS=xnu.matchers disarm --analyze kernel.rebuilt  # Note that xnu.matchers is actually a file with the matchers
+```
+
+### Download
+
+An **IPSW (iPhone/iPad Software)** is Apple’s firmware package format used for device restores, updates, and full firmware bundles. Among other things, it contains the **kernelcache**.
 
 - [**KernelDebugKit Github**](https://github.com/dortania/KdkSupportPkg/releases)
 
-在 [https://github.com/dortania/KdkSupportPkg/releases](https://github.com/dortania/KdkSupportPkg/releases) 可以找到所有的内核调试工具包。你可以下载它，挂载它，用 [Suspicious Package](https://www.mothersruin.com/software/SuspiciousPackage/get.html) 工具打开它，访问 **`.kext`** 文件夹并 **提取它**。
+In [https://github.com/dortania/KdkSupportPkg/releases](https://github.com/dortania/KdkSupportPkg/releases) it's possible to find all the kernel debug kits. You can download it, mount it, open it with [Suspicious Package](https://www.mothersruin.com/software/SuspiciousPackage/get.html) tool, access the **`.kext`** folder and **extract it**.
 
-使用以下命令检查符号：
+Check it for symbols with:
+
 ```bash
 nm -a ~/Downloads/Sandbox.kext/Contents/MacOS/Sandbox | wc -l
 ```
+
 - [**theapplewiki.com**](https://theapplewiki.com/wiki/Firmware/Mac/14.x)**,** [**ipsw.me**](https://ipsw.me/)**,** [**theiphonewiki.com**](https://www.theiphonewiki.com/)
 
-有时，Apple 会发布带有 **symbols** 的 **kernelcache**。您可以通过这些页面上的链接下载一些带有符号的固件。固件将包含 **kernelcache** 以及其他文件。
+Sometime Apple releases **kernelcache** with **symbols**. You can download some firmwares with symbols by following links on those pages. The firmwares will contain the **kernelcache** among other files.
 
-要 **extract** 文件，首先将扩展名从 `.ipsw` 更改为 `.zip` 并 **unzip** 它。
+To **extract** the kernel cache you can do:
 
-提取固件后，您将获得一个文件，如：**`kernelcache.release.iphone14`**。它是 **IMG4** 格式，您可以使用以下工具提取有趣的信息：
+```bash
+# 安装 ipsw 工具
+brew install blacktop/tap/ipsw
+
+# 仅从 IPSW 提取 kernelcache
+ipsw extract --kernel /path/to/YourFirmware.ipsw -o out/
+
+# 你应该得到类似:
+#   out/Firmware/kernelcache.release.iPhoneXX
+#   或者为 IMG4 payload: out/Firmware/kernelcache.release.iPhoneXX.im4p
+
+# 如果得到 IMG4 payload:
+ipsw img4 im4p extract out/Firmware/kernelcache*.im4p -o kcache.raw
+```
+
+Another option to **extract** the files start by changing the extension from `.ipsw` to `.zip` and **unzip** it.
+
+After extracting the firmware you will get a file like: **`kernelcache.release.iphone14`**. It's in **IMG4** format, you can extract the interesting info with:
 
 [**pyimg4**](https://github.com/m1stadev/PyIMG4)**:**
+
 ```bash
 pyimg4 im4p extract -i kernelcache.release.iphone14 -o kernelcache.release.iphone14.e
 ```
+
 [**img4tool**](https://github.com/tihmstar/img4tool)**:**
+
 ```bash
 img4tool -e kernelcache.release.iphone14 -o kernelcache.release.iphone14.e
 ```
+
+```bash
+pyimg4 im4p extract -i kernelcache.release.iphone14 -o kernelcache.release.iphone14.e
+```
+
+[**img4tool**](https://github.com/tihmstar/img4tool)**:**
+
+```bash
+img4tool -e kernelcache.release.iphone14 -o kernelcache.release.iphone14.e
+```
+
 ### Inspecting kernelcache
 
-检查 kernelcache 是否具有符号
+Check if the kernelcache has symbols with
+
 ```bash
 nm -a kernelcache.release.iphone14.e | wc -l
 ```
-通过这个，我们现在可以**提取所有扩展**或**您感兴趣的扩展：**
+
+With this we can now **extract all the extensions** or the **one you are interested in:**
+
 ```bash
-# List all extensions
+# 列出所有扩展
 kextex -l kernelcache.release.iphone14.e
-## Extract com.apple.security.sandbox
+## 提取 com.apple.security.sandbox
 kextex -e com.apple.security.sandbox kernelcache.release.iphone14.e
 
-# Extract all
+# 提取所有
 kextex_all kernelcache.release.iphone14.e
 
-# Check the extension for symbols
+# 检查扩展是否有符号
 nm -a binaries/com.apple.security.sandbox | wc -l
 ```
-## 最近的漏洞与利用技术
 
-| 年份 | CVE | 摘要 |
+
+## Recent vulnerabilities & exploitation techniques
+
+| Year | CVE | Summary |
 |------|-----|---------|
-| 2024 | **CVE-2024-44243** | **`storagekitd`** 中的逻辑缺陷允许 *root* 攻击者注册一个恶意文件系统包，最终加载一个 **未签名的 kext**，**绕过系统完整性保护 (SIP)** 并启用持久性 rootkit。已在 macOS 14.2 / 15.2 中修补。   |
-| 2021 | **CVE-2021-30892** (*Shrootless*) | 带有 `com.apple.rootless.install` 权限的安装守护进程可能被滥用以执行任意后安装脚本，禁用 SIP 并加载任意 kext。  |
+| 2024 | **CVE-2024-44243** | Logic flaw in **`storagekitd`** allowed a *root* attacker to register a malicious file-system bundle that ultimately loaded an **unsigned kext**, **bypassing System Integrity Protection (SIP)** and enabling persistent rootkits. Patched in macOS 14.2 / 15.2.   |
+| 2021 | **CVE-2021-30892** (*Shrootless*) | Installation daemon with the entitlement `com.apple.rootless.install` could be abused to execute arbitrary post-install scripts, disable SIP and load arbitrary kexts.  |
 
-**红队员的要点**
+**Take-aways for red-teamers**
 
-1. **寻找与磁盘仲裁、安装程序或 Kext 管理交互的有权限的守护进程 (`codesign -dvv /path/bin | grep entitlements`)。**
-2. **滥用 SIP 绕过几乎总是授予加载 kext 的能力 → 内核代码执行**。
+1. **Look for entitled daemons (`codesign -dvv /path/bin | grep entitlements`) that interact with Disk Arbitration, Installer or Kext Management.**
+2. **Abusing SIP bypasses almost always grants the ability to load a kext → kernel code execution**.
 
-**防御提示**
+**Defensive tips**
 
-*保持 SIP 启用*，监控来自非 Apple 二进制文件的 `kmutil load`/`kmutil create -n aux` 调用，并对任何写入 `/Library/Extensions` 的操作发出警报。端点安全事件 `ES_EVENT_TYPE_NOTIFY_KEXTLOAD` 提供近实时的可见性。
+*Keep SIP enabled*, monitor for `kmutil load`/`kmutil create -n aux` invocations coming from non-Apple binaries and alert on any write to `/Library/Extensions`. Endpoint Security events `ES_EVENT_TYPE_NOTIFY_KEXTLOAD` provide near real-time visibility.
 
-## 调试 macOS 内核与 kexts
+## Debugging macOS kernel & kexts
 
-苹果推荐的工作流程是构建一个与正在运行的版本匹配的 **内核调试工具包 (KDK)**，然后通过 **KDP (内核调试协议)** 网络会话附加 **LLDB**。
+Apple’s recommended workflow is to build a **Kernel Debug Kit (KDK)** that matches the running build and then attach **LLDB** over a **KDP (Kernel Debugging Protocol)** network session.
 
-### 一次性本地调试 panic
+### One-shot local debug of a panic
+
 ```bash
-# Create a symbolication bundle for the latest panic
+# 为最新 panic 创建符号化包
 sudo kdpwrit dump latest.kcdata
 kmutil analyze-panic latest.kcdata -o ~/panic_report.txt
 ```
-### 从另一台 Mac 进行实时远程调试
 
-1. 下载并安装目标机器的确切 **KDK** 版本。
-2. 使用 **USB-C 或 Thunderbolt 电缆** 将目标 Mac 和主机 Mac 连接起来。
-3. 在 **目标**：
+### Live remote debugging from another Mac
+
+1. Download + install the exact **KDK** version for the target machine.
+2. Connect the target Mac and the host Mac with a **USB-C or Thunderbolt cable**.
+3. On the **target**:
+
 ```bash
 sudo nvram boot-args="debug=0x100 kdp_match_name=macbook-target"
 reboot
 ```
-4. 在**主机**上：
+
+4. On the **host**:
+
 ```bash
 lldb
 (lldb) kdp-remote "udp://macbook-target"
-(lldb) bt  # get backtrace in kernel context
+(lldb) bt  # 在内核上下文获取回溯
 ```
-### 将 LLDB 附加到特定加载的 kext
+
+### Attaching LLDB to a specific loaded kext
+
 ```bash
-# Identify load address of the kext
+# 确定 kext 的加载地址
 ADDR=$(kmutil showloaded --bundle-identifier com.example.driver | awk '{print $4}')
 
-# Attach
+# 附加
 sudo lldb -n kernel_task -o "target modules load --file /Library/Extensions/Example.kext/Contents/MacOS/Example --slide $ADDR"
 ```
-> ℹ️  KDP 仅暴露一个 **只读** 接口。对于动态插桩，您需要在磁盘上修补二进制文件，利用 **内核函数钩子**（例如 `mach_override`）或将驱动程序迁移到 **虚拟机监控程序** 以实现完全的读/写。
+
+> ℹ️  KDP only exposes a **read-only** interface. For dynamic instrumentation you will need to patch the binary on-disk, leverage **kernel function hooking** (e.g. `mach_override`) or migrate the driver to a **hypervisor** for full read/write.
 
 ## References
 
