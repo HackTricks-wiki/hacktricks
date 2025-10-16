@@ -1,29 +1,29 @@
-# SeManageVolumePrivilege: Доступ до сирого тому для довільного читання файлів
+# SeManageVolumePrivilege: Raw volume access for arbitrary file read
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Огляд
+## Overview
 
-Право користувача Windows: Perform volume maintenance tasks (константа: SeManageVolumePrivilege).
+Права користувача Windows: Виконувати завдання з обслуговування томів (constant: SeManageVolumePrivilege).
 
-Тримачі цього права можуть виконувати низькорівневі операції з томом, такі як дефрагментація, створення/видалення томів та обслуговуючі I/O. Критично для атакуючих: це право дозволяє відкривати дескриптори пристрою сирого тому (наприклад, \\.\C:) та виконувати прямі дискові I/O, що обходять NTFS file ACLs. Маючи сирий доступ, можна копіювати байти будь-якого файлу на томі навіть якщо доступ заборонений DACL, парсити структури файлової системи офлайн або використовувати інструменти, що читають на рівні блоків/кластерів.
+Тримачі цього права можуть виконувати низькорівневі операції з томами, такі як дефрагментація, створення/видалення томів та обслуговуючі IO. Критично для нападників, це право дозволяє відкривати raw-обробники пристроїв тома (наприклад, \\.\C:) і виконувати прямі дискові операції вводу/виводу, що обходять NTFS file ACLs. Маючи raw-доступ, ви можете скопіювати байти будь-якого файлу на томі навіть якщо DACL забороняє доступ, розбираючи структури файлової системи офлайн або використовуючи інструменти, що читають на рівні блоків/кластерів.
 
-За замовчуванням: адміністратори на серверах і контролерах домену.
+За замовчуванням: Administrators на серверах та контролерах домену.
 
-## Сценарії зловживань
+## Abuse scenarios
 
-- Довільне читання файлів із обходом ACLs шляхом читання дискового пристрою (наприклад, exfiltrate sensitive system-protected material such as machine private keys under %ProgramData%\Microsoft\Crypto\RSA\MachineKeys and %ProgramData%\Microsoft\Crypto\Keys, registry hives, DPAPI masterkeys, SAM, ntds.dit via VSS, etc.).
-- Обхід заблокованих/привілеєваних шляхів (C:\Windows\System32\…) шляхом прямого копіювання байтів з сирого пристрою.
-- В середовищах AD CS — витягнути ключовий матеріал CA (machine key store) для випуску “Golden Certificates” і імітувати будь-який доменний об’єкт за допомогою PKINIT. Див. посилання нижче.
+- Читання довільних файлів з обходом ACLs шляхом читання пристрою диску (наприклад, ексфільтрація захищених системних матеріалів, таких як приватні ключі машини в %ProgramData%\Microsoft\Crypto\RSA\MachineKeys та %ProgramData%\Microsoft\Crypto\Keys, registry hives, DPAPI masterkeys, SAM, ntds.dit через VSS тощо).
+- Обхід заблокованих/привілейованих шляхів (C:\Windows\System32\…) шляхом копіювання байтів безпосередньо з raw-пристрою.
+- В середовищах AD CS — ексфільтрувати ключовий матеріал CA (machine key store), щоб випустити «Golden Certificates» і видати себе за будь-якого доменного суб’єкта через PKINIT. Див. посилання нижче.
 
-Примітка: Вам все одно потрібен парсер для NTFS structures якщо ви не покладаєтесь на допоміжні інструменти. Багато готових інструментів абстрагують сирий доступ.
+Примітка: вам все ще потрібен парсер структур NTFS, якщо ви не покладаєтесь на допоміжні інструменти. Багато готових інструментів абстрагують raw-доступ.
 
-## Практичні методи
+## Practical techniques
 
-- Відкрити дескриптор сирого тому та читати кластери:
+- Open a raw volume handle and read clusters:
 
 <details>
-<summary>Натисніть, щоб розгорнути</summary>
+<summary>Клацніть, щоб розгорнути</summary>
 ```powershell
 # PowerShell – read first MB from C: raw device (requires SeManageVolumePrivilege)
 $fs = [System.IO.File]::Open("\\.\\C:",[System.IO.FileMode]::Open,[System.IO.FileAccess]::Read,[System.IO.FileShare]::ReadWrite)
@@ -49,10 +49,10 @@ File.WriteAllBytes("C:\\temp\\blk.bin", buf);
 ```
 </details>
 
-- Використовуйте інструмент, що підтримує NTFS, щоб відновити конкретні файли з сирого тому:
-- RawCopy/RawCopy64 (sector-level copy of in-use files)
+- Використовуйте інструмент, що розуміє NTFS, щоб відновити конкретні файли з сирого тома:
+- RawCopy/RawCopy64 (копіювання на рівні секторів активних файлів)
 - FTK Imager or The Sleuth Kit (read-only imaging, then carve files)
-- vssadmin/diskshadow + shadow copy, then copy target file from the snapshot (if you can create VSS; often requires admin but commonly available to the same operators that hold SeManageVolumePrivilege)
+- vssadmin/diskshadow + shadow copy, потім скопіюйте цільовий файл зі знімка (якщо ви можете створити VSS; часто вимагає прав адміністратора, але зазвичай доступне тим самим операторам, які мають SeManageVolumePrivilege)
 
 Типові чутливі шляхи для цілей:
 - %ProgramData%\Microsoft\Crypto\RSA\MachineKeys\
@@ -61,9 +61,9 @@ File.WriteAllBytes("C:\\temp\\blk.bin", buf);
 - C:\Windows\NTDS\ntds.dit (domain controllers – via shadow copy)
 - C:\Windows\System32\CertSrv\CertEnroll\ (CA certs/CRLs; private keys live in the machine key store above)
 
-## AD CS tie‑in: Forging a Golden Certificate
+## Зв'язок з AD CS: Forging a Golden Certificate
 
-Якщо ви можете прочитати приватний ключ Enterprise CA з сховища ключів машини, ви можете підробити сертифікати client‑auth для довільних принципалів і автентифікуватися через PKINIT/Schannel. Це часто називають Golden Certificate. Дивіться:
+Якщо ви можете прочитати приватний ключ Enterprise CA з machine key store, ви можете підробити client‑auth сертифікати для довільних суб’єктів і автентифікуватись через PKINIT/Schannel. Це часто називають Golden Certificate. Див.:
 
 {{#ref}}
 ../active-directory-methodology/ad-certificates/domain-persistence.md
@@ -71,14 +71,14 @@ File.WriteAllBytes("C:\\temp\\blk.bin", buf);
 
 (Розділ: “Forging Certificates with Stolen CA Certificates (Golden Certificate) – DPERSIST1”).
 
-## Виявлення та захист
+## Виявлення та підвищення безпеки
 
 - Суворо обмежте призначення SeManageVolumePrivilege (Perform volume maintenance tasks) лише довіреним адміністраторам.
-- Моніторьте Sensitive Privilege Use та відкриття дескрипторів процесів до об'єктів пристроїв, таких як \\.\C:, \\.\PhysicalDrive0.
-- Віддавайте перевагу CA-ключам, захищеним HSM/TPM, або DPAPI-NG, щоб читання сирих файлів не могло відновити ключовий матеріал у придатному для використання вигляді.
-- Тримайте шляхи для завантажень, тимчасових файлів і вилучення не виконуваними та розділеними (захист у веб-контексті, що часто поєднується з цією ланцюжком post‑exploitation).
+- Моніторьте Sensitive Privilege Use та відкриття дескрипторів процесів до об'єктів пристроїв, наприклад \\.\C:, \\.\PhysicalDrive0.
+- Віддавайте перевагу HSM/TPM-backed CA keys або DPAPI-NG, щоб читання сирих файлів не могло відновити матеріал ключа у придатному для використання вигляді.
+- Тримайте шляхи для uploads, temp і extraction не виконуваними та розділеними (захист у веб-контексті, що часто поєднується з цим ланцюгом post‑exploitation).
 
-## Джерела
+## Посилання
 
 - Microsoft – Perform volume maintenance tasks (SeManageVolumePrivilege): https://learn.microsoft.com/previous-versions/windows/it-pro/windows-10/security/threat-protection/security-policy-settings/perform-volume-maintenance-tasks
 - 0xdf – HTB: Certificate (SeManageVolumePrivilege used to read CA key → Golden Certificate): https://0xdf.gitlab.io/2025/10/04/htb-certificate.html
