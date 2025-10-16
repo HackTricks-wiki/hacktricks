@@ -1,26 +1,26 @@
-# SeManageVolumePrivilege: Dostęp do surowego wolumenu w celu dowolnego odczytu plików
+# SeManageVolumePrivilege: Surowy dostęp do wolumenu w celu dowolnego odczytu plików
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Przegląd
 
-Uprawnienie użytkownika Windows: Wykonywanie czynności konserwacji wolumenu (constant: SeManageVolumePrivilege).
+Uprawnienie użytkownika Windows: Wykonywanie zadań konserwacji wolumenu (stała: SeManageVolumePrivilege).
 
-Posiadacze mogą wykonywać operacje niskopoziomowe na wolumenie, takie jak defragmentacja, tworzenie/usuwanie wolumenów oraz operacje konserwacyjne I/O. Co krytyczne dla atakujących, to uprawnienie pozwala na otwieranie surowych uchwytów urządzeń wolumenu (np. \\.\C:) i wykonywanie bezpośredniego I/O dysku omijającego ACL plików NTFS. Mając surowy dostęp możesz skopiować bajty dowolnego pliku na wolumenie nawet jeśli DACL to zabrania, poprzez parsowanie struktur systemu plików offline lub wykorzystanie narzędzi czytających na poziomie bloków/klastrów.
+Posiadacze tego prawa mogą wykonywać operacje niskiego poziomu na wolumenach, takie jak defragmentacja, tworzenie/usuwanie wolumenów oraz operacje IO konserwacyjne. Co istotne z punktu widzenia atakującego, to prawo pozwala na otwieranie surowych uchwytów urządzeń woluminów (np. \\.\C:) i wykonywanie bezpośrednich operacji dyskowych, które omijają ACL-e plików NTFS. Mając surowy dostęp, możesz skopiować bajty dowolnego pliku na wolumenie, nawet jeśli dostęp jest odmówiony przez DACL, analizując struktury systemu plików offline lub korzystając z narzędzi czytających na poziomie bloków/klastrów.
 
-Domyślnie: Administratorzy na serwerach i kontrolerach domeny.
+Domyślnie: Administrators na serwerach i kontrolerach domeny.
 
 ## Scenariusze nadużyć
 
-- Dowolny odczyt plików omijający ACL poprzez czytanie urządzenia dyskowego (np. wyeksfiltrowanie wrażliwych materiałów chronionych przez system, takich jak klucze prywatne maszyny w %ProgramData%\Microsoft\Crypto\RSA\MachineKeys i %ProgramData%\Microsoft\Crypto\Keys, hive rejestru, DPAPI masterkeys, SAM, ntds.dit przez VSS itp.).
+- Dowolny odczyt plików z obejściem ACL-i poprzez odczyt urządzenia dyskowego (np. exfiltrate wrażliwe, chronione przez system materiały takie jak prywatne klucze maszyny w %ProgramData%\Microsoft\Crypto\RSA\MachineKeys i %ProgramData%\Microsoft\Crypto\Keys, hivery rejestru, DPAPI masterkeys, SAM, ntds.dit via VSS, itd.).
 - Ominięcie zablokowanych/uprzywilejowanych ścieżek (C:\Windows\System32\…) przez kopiowanie bajtów bezpośrednio z surowego urządzenia.
-- W środowiskach AD CS, wyeksfiltrowanie materiału klucza CA (machine key store) w celu wydania „Golden Certificates” i podszycie się pod dowolny podmiot domenowy za pomocą PKINIT. Zobacz link poniżej.
+- W środowiskach AD CS, exfiltrate materiał klucza CA (machine key store) w celu wygenerowania “Golden Certificates” i podszycia się pod dowolny principal domeny przez PKINIT. Zobacz link poniżej.
 
-Uwaga: Nadal potrzebujesz parsera struktur NTFS, chyba że polegasz na narzędziach pomocniczych. Wiele gotowych narzędzi abstrahuje dostęp surowy.
+Uwaga: Nadal potrzebujesz parsera struktur NTFS, chyba że polegasz na narzędziach pomocniczych. Wiele gotowych narzędzi abstrakcyjnie udostępnia surowy dostęp.
 
 ## Praktyczne techniki
 
-- Otworzyć uchwyt surowego wolumenu i czytać klastry:
+- Otwórz surowy uchwyt wolumenu i czytaj klastry:
 
 <details>
 <summary>Kliknij, aby rozwinąć</summary>
@@ -49,12 +49,12 @@ File.WriteAllBytes("C:\\temp\\blk.bin", buf);
 ```
 </details>
 
-- Użyj narzędzia rozumiejącego NTFS do odzyskania konkretnych plików z surowej partycji:
+- Użyj narzędzia rozumiejącego NTFS, aby odzyskać konkretne pliki z surowego woluminu:
 - RawCopy/RawCopy64 (sector-level copy of in-use files)
-- FTK Imager or The Sleuth Kit (read-only imaging, then carve files)
-- vssadmin/diskshadow + shadow copy, then copy target file from the snapshot (if you can create VSS; often requires admin but commonly available to the same operators that hold SeManageVolumePrivilege)
+- FTK Imager or The Sleuth Kit (tworzenie obrazu tylko do odczytu, następnie odzyskiwanie plików metodą carvingu)
+- vssadmin/diskshadow + shadow copy, następnie skopiuj docelowy plik ze snapshotu (jeśli możesz utworzyć VSS; często wymaga uprawnień administratora, ale zwykle dostępne dla tych samych operatorów, którzy mają SeManageVolumePrivilege)
 
-Typowe wrażliwe ścieżki do zaatakowania:
+Typical sensitive paths to target:
 - %ProgramData%\Microsoft\Crypto\RSA\MachineKeys\
 - %ProgramData%\Microsoft\Crypto\Keys\
 - C:\Windows\System32\config\SAM, SYSTEM, SECURITY (local secrets)
@@ -63,7 +63,7 @@ Typowe wrażliwe ścieżki do zaatakowania:
 
 ## Powiązanie z AD CS: Forging a Golden Certificate
 
-Jeśli potrafisz odczytać prywatny klucz Enterprise CA z machine key store, możesz sfałszować certyfikaty client‑auth dla dowolnych podmiotów i uwierzytelnić się za pomocą PKINIT/Schannel. Często nazywa się to Golden Certificate. Zobacz:
+Jeśli możesz odczytać prywatny klucz Enterprise CA z machine key store, możesz sfałszować certyfikaty client‑auth dla dowolnych podmiotów i uwierzytelnić się przez PKINIT/Schannel. To często nazywane jest Golden Certificate. Zobacz:
 
 {{#ref}}
 ../active-directory-methodology/ad-certificates/domain-persistence.md
@@ -71,14 +71,14 @@ Jeśli potrafisz odczytać prywatny klucz Enterprise CA z machine key store, mo�
 
 (Sekcja: “Forging Certificates with Stolen CA Certificates (Golden Certificate) – DPERSIST1”).
 
-## Wykrywanie i zabezpieczenia
+## Wykrywanie i utwardzanie
 
-- Ogranicz przydzielanie SeManageVolumePrivilege (Perform volume maintenance tasks) wyłącznie do zaufanych administratorów.
+- Silnie ogranicz przydzielanie SeManageVolumePrivilege (Perform volume maintenance tasks) tylko do zaufanych administratorów.
 - Monitoruj Sensitive Privilege Use oraz otwarcia uchwytów procesów do obiektów urządzeń takich jak \\.\C:, \\.\PhysicalDrive0.
-- Preferuj klucze CA wspierane przez HSM/TPM lub DPAPI-NG, aby surowe odczyty plików nie mogły odzyskać materiału klucza w formie możliwej do użycia.
-- Utrzymuj katalogi uploadów, temp i ekstrakcji jako niewykonywalne i odseparowane (obrona w kontekście web, która często łączy się z tym łańcuchem po‑eksploatacji).
+- Preferuj klucze CA zabezpieczone HSM/TPM lub DPAPI-NG, tak aby surowe odczyty plików nie mogły odzyskać materiału klucza w używalnej formie.
+- Trzymaj ścieżki uploadów, temp i ekstrakcji jako nie‑wykonywalne i oddzielone (obrona w kontekście web, która często towarzyszy temu łańcuchowi post‑exploitation).
 
-## Źródła
+## References
 
 - Microsoft – Perform volume maintenance tasks (SeManageVolumePrivilege): https://learn.microsoft.com/previous-versions/windows/it-pro/windows-10/security/threat-protection/security-policy-settings/perform-volume-maintenance-tasks
 - 0xdf – HTB: Certificate (SeManageVolumePrivilege used to read CA key → Golden Certificate): https://0xdf.gitlab.io/2025/10/04/htb-certificate.html

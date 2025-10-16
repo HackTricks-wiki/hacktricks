@@ -1,24 +1,24 @@
-# Analiza plików Office
+# Office file analysis
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 
-For further information check [https://trailofbits.github.io/ctf/forensics/](https://trailofbits.github.io/ctf/forensics/). To tylko podsumowanie:
+For further information check [https://trailofbits.github.io/ctf/forensics/](https://trailofbits.github.io/ctf/forensics/). This is just a sumary:
 
-Microsoft stworzył wiele formatów dokumentów Office, z dwoma głównymi typami będącymi **OLE formats** (np. RTF, DOC, XLS, PPT) oraz **Office Open XML (OOXML) formats** (takimi jak DOCX, XLSX, PPTX). Te formaty mogą zawierać macros, co czyni je celem phishingu i malware. Pliki OOXML mają strukturę kontenera zip, co pozwala na ich analizę przez rozpakowanie, ujawniając hierarchię plików i folderów oraz zawartość plików XML.
+Microsoft has created many office document formats, with two main types being **OLE formats** (like RTF, DOC, XLS, PPT) and **Office Open XML (OOXML) formats** (such as DOCX, XLSX, PPTX). These formats can include macros, making them targets for phishing and malware. OOXML files are structured as zip containers, allowing inspection through unzipping, revealing the file and folder hierarchy and XML file contents.
 
-Aby zbadać strukturę plików OOXML, podane jest polecenie do rozpakowania dokumentu oraz wynikowa struktura. Techniki ukrywania danych w tych plikach zostały udokumentowane, co wskazuje na ciągłą innowację w ukrywaniu danych w wyzwaniach CTF.
+To explore OOXML file structures, the command to unzip a document and the output structure are given. Techniques for hiding data in these files have been documented, indicating ongoing innovation in data concealment within CTF challenges.
 
-Do analizy **oletools** i **OfficeDissector** oferują kompleksowy zestaw narzędzi do badania zarówno dokumentów OLE, jak i OOXML. Narzędzia te pomagają w identyfikacji i analizie osadzonych macros, które często służą jako wektory dostarczania malware, zazwyczaj pobierając i uruchamiając dodatkowe złośliwe payloady. Analizę macros VBA można przeprowadzić bez Microsoft Office, używając Libre Office, który umożliwia debugowanie z breakpointami i watch variables.
+For analysis, **oletools** and **OfficeDissector** offer comprehensive toolsets for examining both OLE and OOXML documents. These tools help in identifying and analyzing embedded macros, which often serve as vectors for malware delivery, typically downloading and executing additional malicious payloads. Analysis of VBA macros can be conducted without Microsoft Office by utilizing Libre Office, which allows for debugging with breakpoints and watch variables.
 
-Instalacja i użycie **oletools** są proste — dostępne są polecenia instalacji przez pip oraz wyodrębniania macros z dokumentów. Automatyczne uruchamianie macros jest wywoływane przez funkcje takie jak `AutoOpen`, `AutoExec` lub `Document_Open`.
+Installation and usage of **oletools** are straightforward, with commands provided for installing via pip and extracting macros from documents. Automatic execution of macros is triggered by functions like `AutoOpen`, `AutoExec`, or `Document_Open`.
 ```bash
 sudo pip3 install -U oletools
 olevba -c /path/to/document #Extract macros
 ```
 ---
 
-## Eksploatacja OLE Compound File: Autodesk Revit RFA – ponowne obliczenie ECC i kontrolowany gzip
+## OLE Compound File exploitation: Autodesk Revit RFA – ECC recomputation and controlled gzip
 
 Revit RFA models are stored as an [OLE Compound File](https://learn.microsoft.com/en-us/windows/win32/stg/istorage-compound-file-implementation) (aka CFBF). The serialized model is under storage/stream:
 
@@ -28,57 +28,57 @@ Revit RFA models are stored as an [OLE Compound File](https://learn.microsoft.co
 Key layout of `Global\Latest` (observed on Revit 2025):
 
 - Nagłówek
-- GZIP-compressed payload (faktyczny zserializowany graf obiektów)
+- Dane skompresowane GZIP (rzeczywisty zserializowany graf obiektów)
 - Wypełnienie zerami
-- Trailer z kodem korekcyjnym (Error-Correcting Code, ECC)
+- Trailer ECC (Error-Correcting Code)
 
-Revit will auto-repair small perturbations to the stream using the ECC trailer and will reject streams that don’t match the ECC. Therefore, naïvely editing the compressed bytes won’t persist: your changes are either reverted or the file is rejected. To ensure byte-accurate control over what the deserializer sees you must:
+Revit automatycznie naprawi niewielkie zakłócenia strumienia przy użyciu traileru ECC i odrzuci strumienie, które nie zgadzają się z ECC. Dlatego naiwnie edytowanie skompresowanych bajtów nie przetrwa: twoje zmiany zostaną albo przywrócone, albo plik zostanie odrzucony. Aby zapewnić kontrolę na poziomie bajtów nad tym, co widzi deserializator, musisz:
 
-- Recompress with a Revit-compatible gzip implementation (so the compressed bytes Revit produces/accepts match what it expects).
-- Recompute the ECC trailer over the padded stream so Revit will accept the modified stream without auto-repairing it.
+- Ponownie skompresuj przy użyciu implementacji gzip kompatybilnej z Revit (tak, aby skompresowane bajty, które Revit produkuje/akceptuje, odpowiadały temu, czego oczekuje).
+- Ponownie oblicz trailer ECC dla strumienia z wypełnieniem, aby Revit zaakceptował zmodyfikowany strumień bez automatycznej naprawy.
 
-Practical workflow for patching/fuzzing RFA contents:
+Praktyczny workflow dla patching/fuzzing zawartości RFA:
 
-1) Rozwiń dokument OLE compound
+1) Rozwiń dokument OLE Compound
 ```bash
 # Expand RFA into a folder tree (storages → folders, streams → files)
 CompoundFileTool /e model.rfa /o rfa_out
 # rfa_out/Global/Latest is the serialized stream of interest
 ```
-2) Edytuj Global\Latest zgodnie z zasadami gzip/ECC
+2) Edytuj `Global\Latest` stosując procedurę gzip/ECC
 
-- Rozbij `Global/Latest`: zachowaj nagłówek, rozkompresuj payload (gunzip), zmodyfikuj bajty, a następnie ponownie skompresuj (gzip) używając parametrów deflate kompatybilnych z Revit.
-- Zachowaj zero-padding i przelicz trailer ECC, aby nowe bajty były akceptowane przez Revit.
-- Jeśli potrzebujesz deterministycznej reprodukcji bajt po bajcie, zbuduj minimalny wrapper wokół Revit’s DLLs, aby wywoływać jego ścieżki gzip/gunzip oraz obliczanie ECC (jak pokazano w badaniach), albo ponownie użyj dowolnego dostępnego helpera, który odtwarza te semantyki.
+- Dekonstruuj `Global/Latest`: zachowaj nagłówek, rozkompresuj payload (gunzip), zmodyfikuj bajty, a następnie skompresuj ponownie za pomocą gzip używając parametrów deflate zgodnych z Revit.
+- Zachowaj zero-padding i ponownie oblicz trailer ECC, aby nowe bajty zostały zaakceptowane przez Revit.
+- Jeśli potrzebujesz deterministycznej reprodukcji bajt po bajcie, zbuduj minimalny wrapper wokół DLLi Revita, aby wywołać jego ścieżki gzip/gunzip oraz obliczanie ECC (jak pokazano w badaniach), lub użyj dowolnego dostępnego narzędzia pomocniczego, które odwzorowuje te semantyki.
 
-3) Odbuduj dokument złożony OLE
+3) Odbuduj złożony dokument OLE
 ```bash
 # Repack the folder tree back into an OLE file
 CompoundFileTool /c rfa_out /o model_patched.rfa
 ```
 Uwagi:
 
-- CompoundFileTool zapisuje storages/streams w systemie plików, stosując escapowanie znaków nieprawidłowych w nazwach NTFS; ścieżka strumienia, której chcesz, to dokładnie `Global/Latest` w drzewie wyjściowym.
-- Przy dostarczaniu masowych ataków przez pluginy ekosystemu, które pobierają RFAs z cloud storage, upewnij się najpierw lokalnie, że załatany RFA przechodzi kontrole integralności Revit (gzip/ECC poprawne), zanim spróbujesz wstrzyknięcia przez sieć.
+- CompoundFileTool zapisuje storages/streams w systemie plików z escapingiem dla znaków nieprawidłowych w nazwach NTFS; ścieżka strumienia, której potrzebujesz, to dokładnie `Global/Latest` w drzewie wyjściowym.
+- Przy dostarczaniu masowych ataków przez ecosystem plugins, które pobierają RFA z cloud storage, upewnij się, że twoje załatane RFA najpierw lokalnie przechodzi kontrole integralności Revit (gzip/ECC correct) zanim spróbujesz injekcji przez sieć.
 
-Exploitation insight (to guide what bytes to place in the gzip payload):
+Wgląd w eksploatację (aby pokierować, jakie bajty umieścić w gzip payload):
 
-- The Revit deserializer reads a 16-bit class index and constructs an object. Certain types are non‑polymorphic and lack vtables; abusing destructor handling yields a type confusion where the engine executes an indirect call through an attacker-controlled pointer.
-- Picking `AString` (class index `0x1F`) places an attacker-controlled heap pointer at object offset 0. During the destructor loop, Revit effectively executes:
+- Deserializator Revit odczytuje 16-bitowy indeks klasy i konstruuje obiekt. Niektóre typy są nie‑polimorficzne i nie mają vtables; wykorzystanie obsługi destructora powoduje type confusion, w której silnik wykonuje wywołanie pośrednie przez wskaźnik kontrolowany przez atakującego.
+- Wybranie `AString` (indeks klasy `0x1F`) umieszcza wskaźnik na heap kontrolowany przez atakującego na offsetcie obiektu 0. Podczas pętli destructora, Revit efektywnie wykonuje:
 ```asm
 rcx = [rbx]              ; object pointer (e.g., AString*)
 rax = [rcx]              ; attacker-controlled pointer to AString buffer
 call qword ptr [rax]     ; one attacker-chosen gadget per object
 ```
-- Umieść wiele takich obiektów w zserializowanym grafie, tak aby każda iteracja pętli destruktora wykonywała jeden gadget („weird machine”), i przygotuj stack pivot do konwencjonalnego x64 ROP chain.
+- Umieść wiele takich obiektów w zserializowanym grafie, tak aby każda iteracja pętli destruktora wykonywała jeden gadget (“weird machine”), oraz przygotuj stack pivot do konwencjonalnego x64 ROP chain.
 
-Zobacz szczegóły dotyczące Windows x64 pivot/gadget tutaj:
+Zobacz szczegóły budowy Windows x64 pivot/gadget tutaj:
 
 {{#ref}}
 ../../../binary-exploitation/stack-overflow/stack-pivoting-ebp2ret-ebp-chaining.md
 {{#endref}}
 
-i ogólne wskazówki dotyczące ROP tutaj:
+oraz ogólne wskazówki dotyczące ROP tutaj:
 
 {{#ref}}
 ../../../binary-exploitation/rop-return-oriented-programing/README.md
@@ -86,11 +86,11 @@ i ogólne wskazówki dotyczące ROP tutaj:
 
 Narzędzia:
 
-- CompoundFileTool (OSS) do rozpakowywania/odbudowy plików OLE Compound: https://github.com/thezdi/CompoundFileTool
-- IDA Pro + WinDBG TTD do reverse/taint; wyłącz page heap przy użyciu TTD, aby utrzymać ślady zwarte.
-- Lokalny proxy (np. Fiddler) może symulować dostawę w supply-chain, podmieniając RFAs w ruchu wtyczek do celów testowych.
+- CompoundFileTool (OSS) do rozpakowywania/odtwarzania złożonych plików OLE: https://github.com/thezdi/CompoundFileTool
+- IDA Pro + WinDBG TTD do reverse/taint; wyłącz page heap w TTD, aby ślady były kompaktowe.
+- Lokalny proxy (np. Fiddler) może symulować supply-chain delivery przez podmienianie RFA w ruchu pluginów do testów.
 
-## Odniesienia
+## Referencje
 
 - [Crafting a Full Exploit RCE from a Crash in Autodesk Revit RFA File Parsing (ZDI blog)](https://www.thezdi.com/blog/2025/10/6/crafting-a-full-exploit-rce-from-a-crash-in-autodesk-revit-rfa-file-parsing)
 - [CompoundFileTool (GitHub)](https://github.com/thezdi/CompoundFileTool)
