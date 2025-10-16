@@ -4,23 +4,23 @@
 
 ## Panoramica
 
-Privilegio utente di Windows: Perform volume maintenance tasks (costante: SeManageVolumePrivilege).
+Privilegio utente Windows: Perform volume maintenance tasks (costante: SeManageVolumePrivilege).
 
-I titolari possono eseguire operazioni a basso livello sul volume come deframmentazione, creare/rimuovere volumi e IO di manutenzione. Importante per un attaccante, questo diritto permette di aprire handle su dispositivi volume raw (es., \\.\C:) e inviare I/O diretti su disco che bypassano le ACL dei file NTFS. Con l'accesso raw puoi copiare i byte di qualsiasi file sul volume anche se negato dalla DACL, parsando le strutture del filesystem offline o sfruttando tool che leggono a livello di blocco/cluster.
+I possessori possono eseguire operazioni a basso livello sul volume come deframmentazione, creazione/rimozione di volumi e I/O di manutenzione. Criticamente per gli attaccanti, questo privilegio permette di aprire handle di dispositivo del volume raw (e.g., \\.\C:) e inviare I/O diretto al disco che bypassa le ACL di file NTFS. Con l'accesso raw puoi copiare i byte di qualunque file sul volume anche se negato dalla DACL, analizzando offline le strutture del filesystem o sfruttando tool che leggono a livello di blocco/cluster.
 
-Predefinito: Administrators su server e domain controller.
+Predefinito: Amministratori su server e domain controller.
 
 ## Scenari di abuso
 
-- Lettura arbitraria di file bypassando le ACL leggendo il dispositivo disco (es., exfiltrate materiale sensibile protetto di sistema come le chiavi private macchina sotto %ProgramData%\Microsoft\Crypto\RSA\MachineKeys e %ProgramData%\Microsoft\Crypto\Keys, registry hives, DPAPI masterkeys, SAM, ntds.dit via VSS, ecc.).
-- Bypassare percorsi bloccati/privilegiati (C:\Windows\System32\…) copiando i byte direttamente dal dispositivo raw.
-- In ambienti AD CS, exfiltrate il materiale chiave della CA (machine key store) per coniare “Golden Certificates” e impersonare qualsiasi principal di dominio via PKINIT. Vedi il link sotto.
+- Lettura arbitraria di file bypassando le ACL leggendo il dispositivo disco (e.g., esfiltrare materiale sensibile protetto di sistema come chiavi private macchina sotto %ProgramData%\Microsoft\Crypto\RSA\MachineKeys e %ProgramData%\Microsoft\Crypto\Keys, hive del registro, masterkey DPAPI, SAM, ntds.dit via VSS, ecc.).
+- Bypassare percorsi bloccati/privilegiati (C:\Windows\System32\…) copiando byte direttamente dal dispositivo raw.
+- Negli ambienti AD CS, esfiltrare il materiale chiave della CA (machine key store) per creare “Golden Certificates” e impersonare qualsiasi principal di dominio via PKINIT. Vedi il link sotto.
 
-Nota: Hai ancora bisogno di un parser per le strutture NTFS a meno che non ti affidi a tool di supporto. Molti strumenti off-the-shelf astraggono l'accesso raw.
+Nota: Serve comunque un parser per le strutture NTFS a meno che non ci si affidi a tool di supporto. Molti strumenti off-the-shelf astraono l'accesso raw.
 
 ## Tecniche pratiche
 
-- Aprire un handle raw del volume e leggere cluster:
+- Aprire un handle del volume raw e leggere cluster:
 
 <details>
 <summary>Clicca per espandere</summary>
@@ -49,10 +49,10 @@ File.WriteAllBytes("C:\\temp\\blk.bin", buf);
 ```
 </details>
 
-- Usa uno strumento compatibile con NTFS per recuperare file specifici da un volume grezzo:
-- RawCopy/RawCopy64 (copia a livello di settore di file in uso)
-- FTK Imager or The Sleuth Kit (imaging in sola lettura, poi carving/estrazione dei file)
-- vssadmin/diskshadow + shadow copy, quindi copiare il file target dallo snapshot (se puoi creare VSS; spesso richiede privilegi amministrativi ma è comunemente disponibile agli stessi operatori che possiedono SeManageVolumePrivilege)
+- Usa uno strumento NTFS-aware per recuperare file specifici dal raw volume:
+- RawCopy/RawCopy64 (sector-level copy of in-use files)
+- FTK Imager or The Sleuth Kit (read-only imaging, then carve files)
+- vssadmin/diskshadow + shadow copy, poi copia il file target dallo snapshot (se puoi creare VSS; spesso richiede admin ma comunemente disponibile agli stessi operatori che detengono SeManageVolumePrivilege)
 
 Percorsi sensibili tipici da prendere di mira:
 - %ProgramData%\Microsoft\Crypto\RSA\MachineKeys\
@@ -63,7 +63,7 @@ Percorsi sensibili tipici da prendere di mira:
 
 ## AD CS tie‑in: Forging a Golden Certificate
 
-Se riesci a leggere la chiave privata della Enterprise CA dall'archivio chiavi della macchina, puoi forgiare certificati client‑auth per soggetti arbitrari e autenticarti tramite PKINIT/Schannel. Questo è spesso chiamato Golden Certificate. Vedi:
+Se puoi leggere la chiave privata della Enterprise CA dal machine key store, puoi forgiare client‑auth certificates per arbitrary principals e autenticarti via PKINIT/Schannel. Questo è spesso referred to as a Golden Certificate. Vedi:
 
 {{#ref}}
 ../active-directory-methodology/ad-certificates/domain-persistence.md
@@ -73,10 +73,10 @@ Se riesci a leggere la chiave privata della Enterprise CA dall'archivio chiavi d
 
 ## Rilevamento e hardening
 
-- Limitare fortemente l'assegnazione di SeManageVolumePrivilege (Perform volume maintenance tasks) solo agli amministratori di fiducia.
-- Monitorare Sensitive Privilege Use e le aperture di handle di processo su oggetti dispositivo come \\.\C:, \\.\PhysicalDrive0.
-- Preferire chiavi CA protette da HSM/TPM o DPAPI-NG in modo che letture raw dei file non possano recuperare materiale della chiave in forma utilizzabile.
-- Mantenere i percorsi di upload, temp ed estrazione non eseguibili e separati (difesa nel contesto web che spesso si accompagna a questa catena post‑exploitation).
+- Limitare fortemente l'assegnazione di SeManageVolumePrivilege (Perform volume maintenance tasks) solo ad admin di fiducia.
+- Monitorare Sensitive Privilege Use e le aperture di handle di processo verso oggetti device come \\.\C:, \\.\PhysicalDrive0.
+- Preferire chiavi CA protette da HSM/TPM o DPAPI-NG in modo che raw file reads non possano recuperare materiale chiave in forma utilizzabile.
+- Mantenere percorsi di upload, temp ed estrazione non eseguibili e separati (difesa nel contesto web che spesso si abbina a questa chain post‑exploitation).
 
 ## Riferimenti
 
