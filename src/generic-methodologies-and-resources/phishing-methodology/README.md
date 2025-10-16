@@ -2,19 +2,19 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Методологія
+## Methodology
 
 1. Recon the victim
 1. Select the **домен жертви**.
-2. Виконайте базову веб-енумерацію, **шукаючи login portals**, які використовує жертва, і **вирішіть**, який із них ви будете **impersonate**.
-3. Використайте **OSINT**, щоб **знайти електронні адреси**.
-2. Підготуйте середовище
-1. **Придбайте домен**, який ви збираєтесь використовувати для phishing assessment
-2. **Налаштуйте записи**, пов'язані з email-сервісом (SPF, DMARC, DKIM, rDNS)
+2. Виконайте базову веб-енумерацію, **шукаючи портали входу**, які використовує ціль, і **вирішіть**, який із них ви будете **імітувати**.
+3. Використайте **OSINT**, щоб **знайти email-адреси**.
+2. Prepare the environment
+1. **Купіть домен**, який ви збираєтесь використовувати для phishing-оцінки
+2. **Налаштуйте записи**, пов’язані з email-сервісом (SPF, DMARC, DKIM, rDNS)
 3. Налаштуйте VPS з **gophish**
-3. Підготуйте кампанію
-1. Підготуйте **email template**
-2. Підготуйте **web page** для викрадення облікових даних
+3. Prepare the campaign
+1. Підготуйте **шаблон листа**
+2. Підготуйте **веб-сторінку** для крадіжки облікових даних
 4. Launch the campaign!
 
 ## Generate similar domain names or buy a trusted domain
@@ -22,9 +22,9 @@
 ### Domain Name Variation Techniques
 
 - **Keyword**: Ім'я домену **містить** важливе **ключове слово** оригінального домену (наприклад, zelster.com-management.com).
-- **hypened subdomain**: Змініть **крапку на дефіс** у субдомені (наприклад, www-zelster.com).
-- **New TLD**: Той самий домен з іншим **TLD** (наприклад, zelster.org)
-- **Homoglyph**: Воно **замінює** літеру в імені домену на **літери, що виглядають схоже** (наприклад, zelfser.com).
+- **hypened subdomain**: Замініть **крапку на дефіс** у субдомені (наприклад, www-zelster.com).
+- **New TLD**: Та ж доменна назва з **іншою TLD** (наприклад, zelster.org)
+- **Homoglyph**: Воно **замінює** літеру в імені домену на **літери, що виглядають подібно** (наприклад, zelfser.com).
 
 
 {{#ref}}
@@ -32,12 +32,12 @@ homograph-attacks.md
 {{#endref}}
 - **Transposition:** Воно **міняє місцями дві літери** в імені домену (наприклад, zelsetr.com).
 - **Singularization/Pluralization**: Додає або видаляє “s” в кінці імені домену (наприклад, zeltsers.com).
-- **Omission**: Видаляє **одну** з літер в імені домену (наприклад, zelser.com).
-- **Repetition:** **Повторює одну** з літер в імені домену (наприклад, zeltsser.com).
-- **Replacement**: Як homoglyph, але менш приховано. Замінює одну з літер в імені домену, можливо на літеру, що знаходиться поруч на клавіатурі (наприклад, zektser.com).
+- **Omission**: **Видаляє одну** літеру з імені домену (наприклад, zelser.com).
+- **Repetition:** **Повторює одну** із літер в імені домену (наприклад, zeltsser.com).
+- **Replacement**: Схоже на homoglyph, але менш приховано. Замінює одну із літер у домені, можливо на літеру поруч на клавіатурі (наприклад, zektser.com).
 - **Subdomained**: Вводить **крапку** всередині імені домену (наприклад, ze.lster.com).
-- **Insertion**: **Вставляє літеру** в ім'я домену (наприклад, zerltser.com).
-- **Missing dot**: Приклеює TLD до імені домену (наприклад, zelstercom.com)
+- **Insertion**: **Вставляє літеру** у домен (наприклад, zerltser.com).
+- **Missing dot**: Додає TLD без крапки до імені домену (наприклад, zelstercom.com)
 
 **Automatic Tools**
 
@@ -52,20 +52,20 @@ homograph-attacks.md
 
 ### Bitflipping
 
-Існує **ймовірність**, що деякі біти, що зберігаються або передаються, можуть автоматично змінити свій стан через різні фактори, такі як сонячні спалахи, космічні промені або апаратні помилки.
+Існує **можливість, що деякі біти**, збережені або передані, можуть **автоматично змінитись** через різні фактори, як-от сонячні спалахи, космічні промені або апаратні помилки.
 
-Коли ця концепція **застосовується до DNS-запитів**, можливо, що **домен, який отримує DNS-сервер**, відрізняється від домену, який було запрошено спочатку.
+Коли цей концепт **застосовується до DNS-запитів**, можливо, що **домен, отриманий DNS-сервером**, відрізнятиметься від домену, що був запитаний спочатку.
 
-Наприклад, одиночна зміна біта в домені "windows.com" може перетворити його на "windnws.com."
+Наприклад, одно-бітова модифікація в домені "windows.com" може змінити його на "windnws.com."
 
-Атакувальники можуть **скористатися цим, зареєструвавши кілька bit-flipping доменів**, схожих на домен жертви. Їхня мета — перенаправити легітимних користувачів на власну інфраструктуру.
+Атакувальники можуть **скористатися цим, зареєструвавши кілька доменів з bit-flipping**, схожих на домен жертви, з наміром перенаправити легітимних користувачів на власну інфраструктуру.
 
-Детальніше читайте: [https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)
+Для додаткової інформації прочитайте [https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)
 
 ### Buy a trusted domain
 
-Ви можете шукати на [https://www.expireddomains.net/](https://www.expireddomains.net) прострочений домен, який можна використати.\
-Щоб переконатися, що прострочений домен, який ви збираєтесь придбати, **вже має хороший SEO**, ви можете перевірити, як він класифікується у:
+Ви можете шукати на [https://www.expireddomains.net/](https://www.expireddomains.net) прострочені домени, які можна придбати.\
+Щоб переконатися, що прострочений домен, який ви збираєтесь купити, **вже має хороший SEO**, ви можете перевірити, як він категоризований у:
 
 - [http://www.fortiguard.com/webfilter](http://www.fortiguard.com/webfilter)
 - [https://urlfiltering.paloaltonetworks.com/query/](https://urlfiltering.paloaltonetworks.com/query/)
@@ -78,25 +78,25 @@ homograph-attacks.md
 - [https://hunter.io/](https://hunter.io)
 - [https://anymailfinder.com/](https://anymailfinder.com)
 
-Щоб **знайти більше** дійсних електронних адрес або **перевірити ті**, які ви вже виявили, ви можете перевірити, чи можна brute-force SMTP-сервери жертви. [Дізнайтесь, як перевіряти/виявляти електронні адреси тут](../../network-services-pentesting/pentesting-smtp/index.html#username-bruteforce-enumeration).\
-Крім того, не забувайте, що якщо користувачі використовують будь-який веб-портал для доступу до пошти, ви можете перевірити, чи вразливий він до username brute force, і експлуатувати цю вразливість за наявності можливості.
+Щоб **знайти більше** валідних email-адрес або **перевірити ті**, що ви вже знайшли, ви можете спробувати brute-force smtp-сервери жертви. [Learn how to verify/discover email address here](../../network-services-pentesting/pentesting-smtp/index.html#username-bruteforce-enumeration).\
+Крім того, не забувайте, що якщо користувачі використовують будь-який веб-портал для доступу до пошти, ви можете перевірити, чи вразливий він до username brute force, і експлуатувати цю вразливість за можливості.
 
 ## Configuring GoPhish
 
-### Встановлення
+### Installation
 
 You can download it from [https://github.com/gophish/gophish/releases/tag/v0.11.0](https://github.com/gophish/gophish/releases/tag/v0.11.0)
 
-Завантажте та розпакуйте його в `/opt/gophish` і виконайте `/opt/gophish/gophish`\
-У виводі вам буде видано пароль для admin user на порту 3333. Тому підключіться до цього порту і використайте ці облікові дані, щоб змінити пароль адміна. Можливо, вам доведеться тунелювати цей порт локально:
+Download and decompress it inside `/opt/gophish` and execute `/opt/gophish/gophish`\
+You will be given a password for the admin user in port 3333 in the output. Therefore, access that port and use those credentials to change the admin password. You may need to tunnel that port to local:
 ```bash
 ssh -L 3333:127.0.0.1:3333 <user>@<ip>
 ```
 ### Конфігурація
 
-**Конфігурація сертифіката TLS**
+**Налаштування TLS сертифіката**
 
-Перед цим кроком ви вже повинні були придбати домен, який плануєте використовувати, і він має вказувати на IP-адресу VPS, на якому ви налаштовуєте gophish.
+Перш ніж переходити до цього кроку, ви повинні вже **придбати домен**, який будете використовувати, і він має **вказувати** на **IP VPS**, де ви налаштовуєте **gophish**.
 ```bash
 DOMAIN="<domain>"
 wget https://dl.eff.org/certbot-auto
@@ -112,34 +112,34 @@ mkdir /opt/gophish/ssl_keys
 cp "/etc/letsencrypt/live/$DOMAIN/privkey.pem" /opt/gophish/ssl_keys/key.pem
 cp "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" /opt/gophish/ssl_keys/key.crt​
 ```
-**Налаштування пошти**
+**Конфігурація пошти**
 
 Почніть встановлення: `apt-get install postfix`
 
-Потім додайте домен у такі файли:
+Потім додайте домен у наступні файли:
 
 - **/etc/postfix/virtual_domains**
 - **/etc/postfix/transport**
 - **/etc/postfix/virtual_regexp**
 
-**Змініть також значення наступних змінних у /etc/postfix/main.cf**
+**Також змініть значення наступних змінних у /etc/postfix/main.cf**
 
 `myhostname = <domain>`\
 `mydestination = $myhostname, <domain>, localhost.com, localhost`
 
-Нарешті змініть файли **`/etc/hostname`** та **`/etc/mailname`** на ваш домен і **перезапустіть VPS.**
+Нарешті змініть файли **`/etc/hostname`** та **`/etc/mailname`** на ваш домен і **перезапустіть ваш VPS.**
 
-Тепер створіть **DNS A record** для `mail.<domain>`, який вказує на **ip address** VPS, та **DNS MX** запис, що вказує на `mail.<domain>`
+Тепер створіть **DNS A record** для `mail.<domain>`, який вказує на **ip address** вашого VPS, та **DNS MX** record, що вказує на `mail.<domain>`
 
-Тепер перевіримо відправлення електронного листа:
+Тепер протестуємо відправлення електронного листа:
 ```bash
 apt install mailutils
 echo "This is the body of the email" | mail -s "This is the subject line" test@email.com
 ```
 **Gophish конфігурація**
 
-Зупиніть виконання gophish і налаштуйте його.\
-Змініть `/opt/gophish/config.json` на наступне (зверніть увагу на використання https):
+Зупиніть виконання gophish і налаштуємо його.\
+Змініть `/opt/gophish/config.json` на наступний вміст (зверніть увагу на використання https):
 ```bash
 {
 "admin_server": {
@@ -164,9 +164,9 @@ echo "This is the body of the email" | mail -s "This is the subject line" test@e
 }
 }
 ```
-**Налаштування служби gophish**
+**Налаштування сервісу gophish**
 
-Щоб створити сервіс gophish, щоб його можна було запускати автоматично та керувати ним як службою, ви можете створити файл `/etc/init.d/gophish` з таким вмістом:
+Щоб створити сервіс gophish, щоб його можна було автоматично запускати та керувати ним як сервісом, створіть файл `/etc/init.d/gophish` з таким вмістом:
 ```bash
 #!/bin/bash
 # /etc/init.d/gophish
@@ -213,7 +213,7 @@ case $1 in
 start|stop|status) "$1" ;;
 esac
 ```
-Завершіть налаштування сервісу та перевірте його, зробивши:
+Завершіть налаштування сервісу та перевірте його, виконавши:
 ```bash
 mkdir /var/log/gophish
 chmod +x /etc/init.d/gophish
@@ -226,33 +226,33 @@ service gophish stop
 ```
 ## Налаштування поштового сервера та домену
 
-### Зачекайте й будьте легітимними
+### Почекайте та будьте легітимними
 
-Чим старіший домен, тим менше ймовірність, що він буде помічений як спам. Тому слід чекати якомога довше (принаймні 1 тиждень) перед phishing assessment. Крім того, якщо розмістити сторінку, пов'язану з репутаційною сферою, отримана репутація буде кращою.
+Чим старший домен, тим менш імовірно, що він буде визнаний спамом. Тому слід зачекати якомога довше (не менше 1 тижня) перед phishing assessment. До того ж, якщо ви розмістите сторінку про репутаційно важливий сектор, отримана репутація буде кращою.
 
-Зауважте, що навіть якщо вам доведеться чекати тиждень, ви можете завершити налаштування вже зараз.
+Зверніть увагу, що навіть якщо доведеться чекати тиждень, ви можете завершити налаштування вже зараз.
 
-### Налаштуйте rDNS (PTR) запис
+### Налаштуйте Reverse DNS (rDNS) запис
 
-Налаштуйте rDNS (PTR) запис, який відображає IP-адресу VPS як доменне ім'я.
+Створіть rDNS (PTR) запис, який зв'язує IP-адресу VPS з ім'ям домену.
 
 ### Запис Sender Policy Framework (SPF)
 
-Ви повинні **налаштувати SPF запис для нового домену**. Якщо ви не знаєте, що таке SPF запис [**read this page**](../../network-services-pentesting/pentesting-smtp/index.html#spf).
+Ви повинні **налаштувати SPF record для нового домену**. Якщо ви не знаєте, що таке SPF record [**read this page**](../../network-services-pentesting/pentesting-smtp/index.html#spf).
 
-Ви можете використовувати [https://www.spfwizard.net/](https://www.spfwizard.net) для генерації вашої SPF-політики (використовуйте IP VPS)
+Ви можете використати [https://www.spfwizard.net/](https://www.spfwizard.net) для генерації вашої SPF політики (використайте IP VPS)
 
 ![](<../../images/image (1037).png>)
 
-Це вміст, який потрібно встановити всередині TXT-запису домену:
+Ось вміст, який має бути встановлений у TXT record домену:
 ```bash
 v=spf1 mx a ip4:ip.ip.ip.ip ?all
 ```
-### Аутентифікація повідомлень на основі домену, звітність та відповідність (DMARC) — запис
+### Domain-based Message Authentication, Reporting & Conformance (DMARC) Record
 
-Ви повинні **налаштувати запис DMARC для нового домену**. Якщо ви не знаєте, що таке запис DMARC [**read this page**](../../network-services-pentesting/pentesting-smtp/index.html#dmarc).
+Ви повинні **налаштувати запис DMARC для нового домену**. Якщо ви не знаєте, що таке запис DMARC [**прочитайте цю сторінку**](../../network-services-pentesting/pentesting-smtp/index.html#dmarc).
 
-Вам потрібно створити новий DNS TXT запис, вказавши ім'я хоста `_dmarc.<domain>` з таким вмістом:
+Потрібно створити новий DNS TXT запис з іменем хосту `_dmarc.<domain>` зі наступним вмістом:
 ```bash
 v=DMARC1; p=none
 ```
@@ -263,20 +263,20 @@ v=DMARC1; p=none
 This tutorial is based on: [https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy)
 
 > [!TIP]
-> Потрібно об'єднати обидва B64 значення, які генерує ключ DKIM:
+> Вам потрібно конкатенувати обидва B64 значення, які генерує DKIM ключ:
 >
 > ```
 > v=DKIM1; h=sha256; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0wPibdqPtzYk81njjQCrChIcHzxOp8a1wjbsoNtka2X9QXCZs+iXkvw++QsWDtdYu3q0Ofnr0Yd/TmG/Y2bBGoEgeE+YTUG2aEgw8Xx42NLJq2D1pB2lRQPW4IxefROnXu5HfKSm7dyzML1gZ1U0pR5X4IZCH0wOPhIq326QjxJZm79E1nTh3xj" "Y9N/Dt3+fVnIbMupzXE216TdFuifKM6Tl6O/axNsbswMS1TH812euno8xRpsdXJzFlB9q3VbMkVWig4P538mHolGzudEBg563vv66U8D7uuzGYxYT4WS8NVm3QBMg0QKPWZaKp+bADLkOSB9J2nUpk4Aj9KB5swIDAQAB
 > ```
 
-### Перевірте оцінку налаштування електронної пошти
+### Перевірте оцінку конфігурації електронної пошти
 
-Ви можете зробити це за допомогою [https://www.mail-tester.com/](https://www.mail-tester.com)\
-Просто відкрийте сторінку та надішліть листа на адресу, яку вони вам нададуть:
+Ви можете зробити це, використовуючи [https://www.mail-tester.com/](https://www.mail-tester.com)\
+Просто відкрийте сторінку та надішліть електронного листа на адресу, яку вони вам нададуть:
 ```bash
 echo "This is the body of the email" | mail -s "This is the subject line" test-iimosa79z@srv1.mail-tester.com
 ```
-Ви також можете **перевірити налаштування електронної пошти**, відправивши листа на `check-auth@verifier.port25.com` і **прочитати відповідь** (для цього потрібно **відкрити** порт **25** та побачити відповідь у файлі _/var/mail/root_, якщо ви відправляєте лист як root).\
+Ви також можете **перевірити конфігурацію електронної пошти** надіславши лист на `check-auth@verifier.port25.com` і **прочитавши відповідь** (для цього вам потрібно буде **відкрити** порт **25** і побачити відповідь у файлі _/var/mail/root_, якщо ви надішлете лист від імені root).\
 Переконайтеся, що ви проходите всі тести:
 ```bash
 ==========================================================
@@ -288,7 +288,7 @@ DKIM check:         pass
 Sender-ID check:    pass
 SpamAssassin check: ham
 ```
-Ви також можете надіслати **повідомлення на Gmail під вашим контролем**, і перевірити **заголовки електронної пошти** у вашій поштовій скриньці Gmail, у полі заголовка `Authentication-Results` має бути `dkim=pass`.
+Ви також можете надіслати **повідомлення на Gmail під вашим контролем** і перевірити **заголовки електронного листа** у своїй папці «Вхідні» в Gmail — `dkim=pass` має бути присутнім у полі заголовка `Authentication-Results`.
 ```
 Authentication-Results: mx.google.com;
 spf=pass (google.com: domain of contact@example.com designates --- as permitted sender) smtp.mail=contact@example.com;
@@ -296,31 +296,31 @@ dkim=pass header.i=@example.com;
 ```
 ### ​Removing from Spamhouse Blacklist
 
-Сторінка [www.mail-tester.com](https://www.mail-tester.com) може показати, чи ваш домен блокується spamhouse. Ви можете запросити видалення вашого домену/IP за адресою: ​[https://www.spamhaus.org/lookup/](https://www.spamhaus.org/lookup/)
+The page [www.mail-tester.com](https://www.mail-tester.com) can indicate you if you your domain is being blocked by spamhouse. You can request your domain/IP to be removed at: ​[https://www.spamhaus.org/lookup/](https://www.spamhaus.org/lookup/)
 
 ### Removing from Microsoft Blacklist
 
-​​Ви можете запросити видалення вашого домену/IP за адресою [https://sender.office.com/](https://sender.office.com).
+​​You can request your domain/IP to be removed at [https://sender.office.com/](https://sender.office.com).
 
 ## Create & Launch GoPhish Campaign
 
 ### Sending Profile
 
-- Вкажіть **назву для ідентифікації** профілю відправника
-- Вирішіть, з якого облікового запису ви будете відправляти phishing-листи. Пропозиції: _noreply, support, servicedesk, salesforce..._
-- Ви можете залишити порожніми username та password, але переконайтеся, що відмічено Ignore Certificate Errors
+- Задайте **назву для ідентифікації** профілю відправника
+- Визначте, з якого аккаунта ви будете надсилати фішингові листи. Пропозиції: _noreply, support, servicedesk, salesforce..._
+- Можна залишити порожніми username і password, але обов'язково поставте галочку Ignore Certificate Errors
 
 ![](<../../images/image (253) (1) (2) (1) (1) (2) (2) (3) (3) (5) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (15) (2).png>)
 
 > [!TIP]
-> Рекомендується використовувати функцію "**Send Test Email**", щоб перевірити, що все працює.\
-> Рекомендую **send the test emails to 10min mails addresses**, щоб уникнути блокування під час тестів.
+> Рекомендується використовувати функцію "**Send Test Email**" щоб перевірити, що все працює.\
+> Рекомендую **надсилати тестові листи на адреси 10min mails**, щоб уникнути блокування під час тестів.
 
 ### Email Template
 
-- Вкажіть **назву для ідентифікації** шаблону
-- Потім напишіть **subject** (нічого дивного, просто те, що ви могли б очікувати прочитати в звичайному листі)
-- Переконайтеся, що відмічено "**Add Tracking Image**"
+- Задайте **назву для ідентифікації** шаблону
+- Потім напишіть **subject** (нічого дивного, просто те, що можна очікувати в звичайному листі)
+- Переконайтеся, що ви поставили галочку "**Add Tracking Image**"
 - Напишіть **email template** (ви можете використовувати змінні, як у наступному прикладі):
 ```html
 <html>
@@ -340,11 +340,11 @@ WRITE HERE SOME SIGNATURE OF SOMEONE FROM THE COMPANY
 </body>
 </html>
 ```
-Зауважте, що **щоб підвищити достовірність листа**, рекомендується використовувати підпис із реального листа від клієнта. Пропозиції:
+Note that **in order to increase the credibility of the email**, it's recommended to use some signature from an email from the client. Suggestions:
 
-- Надішліть лист на **неіснуючу адресу** і перевірте, чи відповідь містить якийсь підпис.
-- Шукайте **публічні адреси**, такі як info@ex.com або press@ex.com або public@ex.com, надішліть їм листа і дочекайтеся відповіді.
-- Спробуйте зв'язатися з **якою-небудь виявленою дійсною** електронною адресою і почекайте на відповідь
+- Send an email to a **non existent address** and check if the response has any signature.
+- Search for **public emails** like info@ex.com or press@ex.com or public@ex.com and send them an email and wait for the response.
+- Try to contact **some valid discovered** email and wait for the response
 
 ![](<../../images/image (80).png>)
 
@@ -353,43 +353,43 @@ WRITE HERE SOME SIGNATURE OF SOMEONE FROM THE COMPANY
 
 ### Landing Page
 
-- Вкажіть **назву**
-- **Напишіть HTML код** веб-сторінки. Зауважте, що ви можете **import** веб-сторінки.
-- Відмітьте **Capture Submitted Data** та **Capture Passwords**
-- Встановіть **redirection**
+- Write a **name**
+- **Write the HTML code** of the web page. Note that you can **import** web pages.
+- Mark **Capture Submitted Data** and **Capture Passwords**
+- Set a **redirection**
 
 ![](<../../images/image (826).png>)
 
 > [!TIP]
-> Зазвичай вам доведеться модифікувати HTML-код сторінки і робити тести локально (наприклад, використовуючи Apache) **доки вас не влаштує результат.** Потім вставте цей HTML-код у відповідне поле.\
-> Зауважте, що якщо потрібно **використати статичні ресурси** для HTML (наприклад CSS і JS), ви можете зберегти їх у _**/opt/gophish/static/endpoint**_ і звертатися до них з _**/static/\<filename>**_
+> Usually you will need to modify the HTML code of the page and make some tests in local (maybe using some Apache server) **until you like the results.** Then, write that HTML code in the box.\
+> Note that if you need to **use some static resources** for the HTML (maybe some CSS and JS pages) you can save them in _**/opt/gophish/static/endpoint**_ and then access them from _**/static/\<filename>**_
 
 > [!TIP]
-> Для редиректу ви можете **перенаправляти користувачів на легітимну головну сторінку** жертви, або перенаправити їх, наприклад, на _/static/migration.html_, показати **spinning wheel (**[**https://loading.io/**](https://loading.io)**) протягом 5 секунд, а потім повідомити, що процес пройшов успішно**.
+> For the redirection you could **redirect the users to the legit main web page** of the victim, or redirect them to _/static/migration.html_ for example, put some **spinning wheel (**[**https://loading.io/**](https://loading.io)**) for 5 seconds and then indicate that the process was successful**.
 
 ### Users & Groups
 
-- Вкажіть ім'я
-- **Import the data** (зауважте, що для використання шаблону в прикладі вам потрібні firstname, last name та email address кожного користувача)
+- Set a name
+- **Import the data** (note that in order to use the template for the example you need the firstname, last name and email address of each user)
 
 ![](<../../images/image (163).png>)
 
 ### Campaign
 
-Нарешті, створіть кампанію, вказавши назву, email template, landing page, URL, sending profile та групу. Зауважте, що URL буде посиланням, надісланим жертвам
+Finally, create a campaign selecting a name, the email template, the landing page, the URL, the sending profile and the group. Note that the URL will be the link sent to the victims
 
-Зауважте, що **Sending Profile дозволяє відправити тестовий лист, щоб побачити, як виглядатиме фінальний фішинговий лист**:
+Note that the **Sending Profile allow to send a test email to see how will the final phishing email looks like**:
 
 ![](<../../images/image (192).png>)
 
 > [!TIP]
-> Рекомендував би **відправляти тестові листи на адреси 10min mails**, щоб уникнути блокування під час тестування.
+> I would recommend to **send the test emails to 10min mails addresses** in order to avoid getting blacklisted making tests.
 
-Коли все готово, просто запустіть кампанію!
+Once everything is ready, just launch the campaign!
 
 ## Website Cloning
 
-Якщо з будь-якої причини ви хочете клонувати сайт, перегляньте наступну сторінку:
+If for any reason you want to clone the website check the following page:
 
 
 {{#ref}}
@@ -398,8 +398,8 @@ clone-a-website.md
 
 ## Backdoored Documents & Files
 
-У деяких фішингових тестах (насамперед для Red Teams) ви також захочете **відправляти файли, що містять певний backdoor** (можливо C2 або щось, що спровокує автентифікацію).\
-Перегляньте наступну сторінку для прикладів:
+In some phishing assessments (mainly for Red Teams) you will want to also **send files containing some kind of backdoor** (maybe a C2 or maybe just something that will trigger an authentication).\
+Check out the following page for some examples:
 
 
 {{#ref}}
@@ -410,53 +410,53 @@ phishing-documents.md
 
 ### Via Proxy MitM
 
-Попередня атака доволі хитра, оскільки ви підроблюєте реальний вебсайт і збираєте інформацію, введену користувачем. На жаль, якщо користувач не ввів правильний пароль або якщо додаток, який ви підробили, налаштований з 2FA, **ця інформація не дозволить вам видаватися за обманутого користувача**.
+The previous attack is pretty clever as you are faking a real website and gathering the information set by the user. Unfortunately, if the user didn't put the correct password or if the application you faked is configured with 2FA, **this information won't allow you to impersonate the tricked user**.
 
-Тут стають у пригоді інструменти, як-от [**evilginx2**](https://github.com/kgretzky/evilginx2)**,** [**CredSniper**](https://github.com/ustayready/CredSniper) та [**muraena**](https://github.com/muraenateam/muraena). Ці інструменти дозволяють реалізувати MitM-атаку. В основному атака працює таким чином:
+This is where tools like [**evilginx2**](https://github.com/kgretzky/evilginx2)**,** [**CredSniper**](https://github.com/ustayready/CredSniper) and [**muraena**](https://github.com/muraenateam/muraena) are useful. This tool will allow you to generate a MitM like attack. Basically, the attacks works in the following way:
 
-1. Ви **імітуєте форму входу** реальної веб-сторінки.
-2. Користувач **надсилає** свої **credentials** на вашу фейкову сторінку, і інструмент пересилає їх на реальну сторінку, **перевіряючи, чи працюють ці credentials**.
-3. Якщо обліковий запис налаштований з **2FA**, MitM-сторінка запросить його, і як тільки **користувач введе** код, інструмент перешле його на реальну сторінку.
-4. Після аутентифікації користувача ви (як атакуючий) отримаєте **захоплені credentials, 2FA, cookie та іншу інформацію** про всі взаємодії під час роботи MitM.
+1. You **impersonate the login** form of the real webpage.
+2. The user **send** his **credentials** to your fake page and the tool send those to the real webpage, **checking if the credentials work**.
+3. If the account is configured with **2FA**, the MitM page will ask for it and once the **user introduces** it the tool will send it to the real web page.
+4. Once the user is authenticated you (as attacker) will have **captured the credentials, the 2FA, the cookie and any information** of every interaction your while the tool is performing a MitM.
 
 ### Via VNC
 
-А що як замість того, щоб **перенаправляти жертву на шкідливу сторінку**, яка виглядає як оригінальна, ви відправите її до **VNC-сесії з браузером, підключеним до реальної сторінки**? Ви зможете бачити, що вона робить, вкрасти пароль, використане MFA, cookie...\
-Це можна зробити за допомогою [**EvilnVNC**](https://github.com/JoelGMSec/EvilnoVNC)
+What if instead of **sending the victim to a malicious page** with the same looks as the original one, you send him to a **VNC session with a browser connected to the real web page**? You will be able to see what he does, steal the password, the MFA used, the cookies...\
+You can do this with [**EvilnVNC**](https://github.com/JoelGMSec/EvilnoVNC)
 
 ## Detecting the detection
 
-Очевидно, один з найкращих способів дізнатися, чи вас викрили — **перевірити ваш домен у чорних списках**. Якщо він вказаний у списку, то ваш домен був визначений як підозрілий.\
-Один простий спосіб перевірити, чи ваш домен у будь-якому чорному списку — використати [https://malwareworld.com/](https://malwareworld.com)
+Obviously one of the best ways to know if you have been busted is to **search your domain inside blacklists**. If it appears listed, somehow your domain was detected as suspicions.\
+One easy way to check if you domain appears in any blacklist is to use [https://malwareworld.com/](https://malwareworld.com)
 
-Однак є й інші способи дізнатися, чи жертва **активно шукає підозрілу фішингову активність у мережі**, як пояснено в:
+However, there are other ways to know if the victim is **actively looking for suspicions phishing activity in the wild** as explained in:
 
 
 {{#ref}}
 detecting-phising.md
 {{#endref}}
 
-Ви можете **купити домен з дуже схожою назвою** на домен жертви **і/або згенерувати сертифікат** для **субдомену** домену, яким ви керуєте, **що містить** **ключове слово** з домену жертви. Якщо **жертва** виконає будь-яку **DNS або HTTP взаємодію** з ними, ви дізнаєтесь, що **вона активно шукає** підозрілі домени, і вам потрібно буде діяти дуже обережно.
+You can **buy a domain with a very similar name** to the victims domain **and/or generate a certificate** for a **subdomain** of a domain controlled by you **containing** the **keyword** of the victim's domain. If the **victim** perform any kind of **DNS or HTTP interaction** with them, you will know that **he is actively looking** for suspicious domains and you will need to be very stealth.
 
 ### Evaluate the phishing
 
-Використайте [**Phishious**](https://github.com/Rices/Phishious), щоб оцінити, чи ваш лист потрапить у папку спам, буде заблокований або пройде успішно.
+Use [**Phishious** ](https://github.com/Rices/Phishious)to evaluate if your email is going to end in the spam folder or if it's going to be blocked or successful.
 
 ## High-Touch Identity Compromise (Help-Desk MFA Reset)
 
-Сучасні набори атак усе частіше взагалі уникають email-приманок і **безпосередньо атакують workflow служби підтримки / відновлення ідентичності**, щоб обійти MFA. Атака повністю «living-off-the-land»: як тільки оператор отримує дійсні облікові дані, він використовує вбудовані адміністративні інструменти — без необхідності шкідливого ПО.
+Modern intrusion sets increasingly skip email lures entirely and **directly target the service-desk / identity-recovery workflow** to defeat MFA.  The attack is fully "living-off-the-land": once the operator owns valid credentials they pivot with built-in admin tooling – no malware is required.
 
 ### Attack flow
-1. Розвідка жертви
-* Збирайте персональні та корпоративні дані з LinkedIn, data breaches, публічного GitHub тощо.
-* Визначайте цінні облікові записи (керівники, IT, фінанси) і перелічуйте **точний процес help-desk** для скидання пароля / MFA.
-2. Соціальна інженерія в реальному часі
-* Дзвоніть, пиши в Teams або чат службі підтримки, видаючи себе за ціль (часто з **підробленим caller-ID** або **клонованим голосом**).
-* Надавайте зібрані раніше PII для проходження перевірки за знанням.
-* Переконуйте агента **скинути MFA secret** або виконати **SIM-swap** на зареєстрований мобільний номер.
-3. Негайні дії після доступу (≤60 хв у реальних випадках)
-* Закріпіться через будь-який web SSO портал.
-* Перелічіть AD / AzureAD за допомогою вбудованих інструментів (без завантаження бінарників):
+1. Recon the victim
+* Harvest personal & corporate details from LinkedIn, data breaches, public GitHub, etc.
+* Identify high-value identities (executives, IT, finance) and enumerate the **exact help-desk process** for password / MFA reset.
+2. Real-time social engineering
+* Phone, Teams or chat the help-desk while impersonating the target (often with **spoofed caller-ID** or **cloned voice**).
+* Provide the previously-collected PII to pass knowledge-based verification.
+* Convince the agent to **reset the MFA secret** or perform a **SIM-swap** on a registered mobile number.
+3. Immediate post-access actions (≤60 min in real cases)
+* Establish a foothold through any web SSO portal.
+* Enumerate AD / AzureAD with built-ins (no binaries dropped):
 ```powershell
 # list directory groups & privileged roles
 Get-ADGroup -Filter * -Properties Members | ?{$_.Members -match $env:USERNAME}
@@ -467,45 +467,45 @@ Get-MgDirectoryRole | ft DisplayName,Id
 # Enumerate devices the account can login to
 Get-MgUserRegisteredDevice -UserId <user@corp.local>
 ```
-* Бічний рух з використанням **WMI**, **PsExec**, або легітимних **RMM**-агентів, що вже в білому списку в середовищі.
+* Lateral movement with **WMI**, **PsExec**, or legitimate **RMM** agents already whitelisted in the environment.
 
 ### Detection & Mitigation
-* Розглядайте відновлення ідентичності через help-desk як **привілейовану операцію** – вимагайте підвищеної автентифікації та погодження менеджера.
-* Розгорніть правила **Identity Threat Detection & Response (ITDR)** / **UEBA**, що сповіщають про:
-* зміну методу MFA + аутентифікація з нового пристрою / геолокації.
-* негайне підвищення привілеїв того ж самого принципалу (user → admin).
-* Записуйте дзвінки в help-desk і вимагайте **call-back на вже зареєстрований номер** перед будь-яким скиданням.
-* Впровадьте **Just-In-Time (JIT) / Privileged Access**, щоб нещодавно скинуті облікові записи **не** автоматично не успадковували високі привілеї.
+* Treat help-desk identity recovery as a **privileged operation** – require step-up auth & manager approval.
+* Deploy **Identity Threat Detection & Response (ITDR)** / **UEBA** rules that alert on:
+* MFA method changed + authentication from new device / geo.
+* Immediate elevation of the same principal (user-→-admin).
+* Record help-desk calls and enforce a **call-back to an already-registered number** before any reset.
+* Implement **Just-In-Time (JIT) / Privileged Access** so newly reset accounts do **not** automatically inherit high-privilege tokens.
 
 ---
 
 ## At-Scale Deception – SEO Poisoning & “ClickFix” Campaigns
-Комодифіковані групи компенсують витрати на high-touch операції масовими атаками, що перетворюють **пошукові системи та рекламні мережі на канал доставки**.
+Commodity crews offset the cost of high-touch ops with mass attacks that turn **search engines & ad networks into the delivery channel**.
 
-1. **SEO poisoning / malvertising** витісняє фейковий результат, наприклад `chromium-update[.]site`, у верхні рекламні результати пошуку.
-2. Жертва завантажує невеликий **first-stage loader** (часто JS/HTA/ISO). Приклади, зафіксовані Unit 42:
+1. **SEO poisoning / malvertising** pushes a fake result such as `chromium-update[.]site` to the top search ads.
+2. Victim downloads a small **first-stage loader** (often JS/HTA/ISO).  Examples seen by Unit 42:
 * `RedLine stealer`
 * `Lumma stealer`
 * `Lampion Trojan`
-3. Loader ексфільтрує cookie браузера + бази даних креденшалів, потім завантажує **silent loader**, який у реальному часі вирішує, чи розгорнути:
-* RAT (наприклад AsyncRAT, RustDesk)
+3. Loader exfiltrates browser cookies + credential DBs, then pulls a **silent loader** which decides – *in realtime* – whether to deploy:
+* RAT (e.g. AsyncRAT, RustDesk)
 * ransomware / wiper
-* компонент для персистенції (Run key у реєстрі + scheduled task)
+* persistence component (registry Run key + scheduled task)
 
 ### Hardening tips
-* Блокуйте недавно зареєстровані домени та впровадьте **Advanced DNS / URL Filtering** як для пошукових оголошень, так і для e-mail.
-* Обмежте встановлення ПЗ лише підписаними MSI / Store пакетами, забороніть виконання `HTA`, `ISO`, `VBS` політиками.
-* Моніторьте дочірні процеси браузерів, що відкривають інсталятори:
+* Block newly-registered domains & enforce **Advanced DNS / URL Filtering** on *search-ads* as well as e-mail.
+* Restrict software installation to signed MSI / Store packages, deny `HTA`, `ISO`, `VBS` execution by policy.
+* Monitor for child processes of browsers opening installers:
 ```yaml
 - parent_image: /Program Files/Google/Chrome/*
 and child_image: *\\*.exe
 ```
-* Полюйте на LOLBins, які часто зловживають перші стадії лоадерів (наприклад `regsvr32`, `curl`, `mshta`).
+* Hunt for LOLBins frequently abused by first-stage loaders (e.g. `regsvr32`, `curl`, `mshta`).
 
 ---
 
 ## AI-Enhanced Phishing Operations
-Атакувальники тепер ланцюжать **LLM & voice-clone APIs** для повністю персоналізованих приманок і взаємодії в реальному часі.
+Attackers now chain **LLM & voice-clone APIs** for fully personalised lures and real-time interaction.
 
 | Layer | Example use by threat actor |
 |-------|-----------------------------|
@@ -513,10 +513,10 @@ and child_image: *\\*.exe
 |Generative AI|Produce *one-off* emails referencing public M&A, inside jokes from social media; deep-fake CEO voice in callback scam.|
 |Agentic AI|Autonomously register domains, scrape open-source intel, craft next-stage mails when a victim clicks but doesn’t submit creds.|
 
-**Захист:**
-• Додайте **динамічні банери**, що виділяють повідомлення, надіслані з неперевіреної автоматизації (через ARC/DKIM anomalіes).  
-• Впровадьте **voice-biometric challenge phrases** для запитів високого ризику по телефону.  
-• Постійно імітуйте AI-згенеровані приманки у програмах підвищення обізнаності — статичні шаблони застаріли.
+**Defence:**
+• Add **dynamic banners** highlighting messages sent from untrusted automation (via ARC/DKIM anomalies).
+• Deploy **voice-biometric challenge phrases** for high-risk phone requests.
+• Continuously simulate AI-generated lures in awareness programmes – static templates are obsolete.
 
 See also – agentic browsing abuse for credential phishing:
 
@@ -524,22 +524,28 @@ See also – agentic browsing abuse for credential phishing:
 ai-agent-mode-phishing-abusing-hosted-agent-browsers.md
 {{#endref}}
 
+See also – AI agent abuse of local CLI tools and MCP (for secrets inventory and detection):
+
+{{#ref}}
+ai-agent-abuse-local-ai-cli-tools-and-mcp.md
+{{#endref}}
+
 ---
 
 ## MFA Fatigue / Push Bombing Variant – Forced Reset
-Окрім класичного push-bombing, оператори просто **примусово реєструють нову MFA** під час дзвінка до служби підтримки, анулюючи існуючий токен користувача. Будь-який наступний запит на вхід виглядатиме для жертви легітимним.
+Besides classic push-bombing, operators simply **force a new MFA registration** during the help-desk call, nullifying the user’s existing token.  Any subsequent login prompt appears legitimate to the victim.
 ```text
 [Attacker]  →  Help-Desk:  “I lost my phone while travelling, can you unenrol it so I can add a new authenticator?”
 [Help-Desk] →  AzureAD: ‘Delete existing methods’ → sends registration e-mail
 [Attacker]  →  Completes new TOTP enrolment on their own device
 ```
-Моніторити події AzureAD/AWS/Okta, де **`deleteMFA` + `addMFA`** відбуваються **протягом кількох хвилин з тієї ж IP-адреси**.
+Monitor for AzureAD/AWS/Okta events where **`deleteMFA` + `addMFA`** occur **within minutes from the same IP**.
 
 
 
 ## Clipboard Hijacking / Pastejacking
 
-Зловмисники можуть непомітно скопіювати шкідливі команди в буфер обміну жертви з скомпрометованої або typosquatted веб-сторінки, а потім обдурити користувача, щоб той вставив їх у **Win + R**, **Win + X** або вікно терміналу, виконуючи довільний код без будь‑якого завантаження або вкладення.
+Зловмисники можуть непомітно скопіювати шкідливі команди в буфер обміну жертви з компрометованої або typosquatted веб-сторінки, а потім обманом змусити користувача вставити їх у **Win + R**, **Win + X** або вікно терміналу, виконуючи довільний код без будь-яких завантажень або вкладень.
 
 
 {{#ref}}
@@ -554,9 +560,9 @@ mobile-phishing-malicious-apps.md
 {{#endref}}
 
 ### Mobile‑gated phishing to evade crawlers/sandboxes
-Оператори все частіше обмежують доступ до своїх phishing flows простою перевіркою пристрою, щоб десктопні краулери ніколи не дісталися до фінальних сторінок. Поширений шаблон — невеликий скрипт, який перевіряє наявність touch-capable DOM і відправляє результат на server endpoint; немобільні клієнти отримують HTTP 500 (або порожню сторінку), тоді як мобільним користувачам показується повний flow.
+Оператори все частіше розміщують phishing flows за простою перевіркою пристрою, щоб десктопні crawlers ніколи не дістались фінальних сторінок. Типовий шаблон — невеликий скрипт, який перевіряє, чи підтримує DOM сенсорний ввід, і відправляє результат на server endpoint; немобільні клієнти отримують HTTP 500 (або порожню сторінку), тоді як мобільним користувачам подається повний flow.
 
-Мінімальний клієнтський фрагмент (типова логіка):
+Minimal client snippet (typical logic):
 ```html
 <script src="/static/detect_device.js"></script>
 ```
@@ -566,21 +572,21 @@ const isMobile = ('ontouchstart' in document.documentElement);
 fetch('/detect', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({is_mobile:isMobile})})
 .then(()=>location.reload());
 ```
-Поведінка серверу, яка часто спостерігається:
+Поведінка сервера, що часто спостерігається:
 - Встановлює session cookie під час першого завантаження.
 - Приймає `POST /detect {"is_mobile":true|false}`.
-- Повертає 500 (або заглушку) для наступних GET-запитів, коли `is_mobile=false`; подає phishing лише якщо `true`.
+- Повертає 500 (або placeholder) на наступні GET-запити, коли `is_mobile=false`; показує phishing лише якщо `true`.
 
-Hunting and detection heuristics:
-- urlscan query: `filename:"detect_device.js" AND page.status:500`
-- Веб-телеметрія: послідовність `GET /static/detect_device.js` → `POST /detect` → HTTP 500 для non‑mobile; легітимні mobile victim шляхи повертають 200 з подальшим HTML/JS.
-- Блокувати або ретельно перевіряти сторінки, які обмежують контент виключно на основі `ontouchstart` або подібних перевірок пристрою.
+Пошук і евристики виявлення:
+- Запит в urlscan: `filename:"detect_device.js" AND page.status:500`
+- Веб-телеметрія: послідовність `GET /static/detect_device.js` → `POST /detect` → HTTP 500 для non‑mobile; легітимні мобільні сторінки жертви повертають 200 з подальшим HTML/JS.
+- Блокуйте або ретельно перевіряйте сторінки, що умовно відображають контент виключно за `ontouchstart` або подібними перевірками пристрою.
 
-Defence tips:
-- Запускайте crawlers з mobile-like fingerprints і з увімкненим JS, щоб виявити gated content.
-- Налаштуйте оповіщення про підозрілі відповіді 500 після `POST /detect` на щойно зареєстрованих доменах.
+Поради з захисту:
+- Запускайте краулери з підписами пристрою, схожими на мобільні, і з увімкненим JS, щоб розкрити захищений контент.
+- Повідомляйте про підозрілі відповіді 500 після `POST /detect` на нещодавно зареєстрованих доменах.
 
-## References
+## Джерела
 
 - [https://zeltser.com/domain-name-variations-in-phishing/](https://zeltser.com/domain-name-variations-in-phishing/)
 - [https://0xpatrik.com/phishing-domains/](https://0xpatrik.com/phishing-domains/)
