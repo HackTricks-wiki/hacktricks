@@ -147,33 +147,31 @@ console.log('[!] xpc_connection_get_audit_token outside handler\n' + bt);
 });
 ```
 Notas:
-- No macOS, instrumentar binários protegidos/Apple pode requerer SIP desabilitado ou um ambiente de desenvolvimento; prefira testar suas próprias builds ou userland services.
-- Para reply-forwarding races (Variant 2), monitore o parsing concorrente dos reply packets fuzzando os timings de `xpc_connection_send_message_with_reply` vs. requisições normais e verificando se o audit token efetivo usado durante a autorização pode ser influenciado.
+- No macOS, instrumenting protected/Apple binaries pode requerer SIP desativado ou um ambiente de desenvolvimento; prefira testar suas próprias builds ou userland services.
+- Para reply-forwarding races (Variant 2), monitore o parsing concorrente de reply packets fuzzando os timings de `xpc_connection_send_message_with_reply` vs. normal requests e verifique se o effective audit token usado durante a autorização pode ser influenciado.
 
-## Exploitation primitives you will likely need
+## Primitivas de exploração que você provavelmente vai precisar
 
-- Multi-sender setup (Variant 1): crie conexões para A e B; duplique o send right do client port de A e use-o como client port de B para que as replies de B sejam entregues a A.
+- Multi-sender setup (Variant 1): crie conexões para A e B; duplique o send right da client port de A e use-o como client port de B para que as replies de B sejam entregues a A.
 ```c
 // Duplicate a SEND right you already hold
 mach_port_t dup;
 mach_port_insert_right(mach_task_self(), a_client, a_client, MACH_MSG_TYPE_MAKE_SEND);
 dup = a_client; // use `dup` when crafting B’s connect packet instead of a fresh client port
 ```
-- Reply hijack (Variant 2): capture the send-once right from A’s pending request (reply port), then send a crafted message to B using that reply port so B’s reply lands on A while your privileged request is being parsed.
+- Reply hijack (Variant 2): capturar o send-once right do pedido pendente de A (reply port), depois enviar uma mensagem forjada para B usando esse reply port para que a resposta de B chegue em A enquanto sua requisição privilegiada está sendo analisada.
 
-Estas técnicas requerem low-level mach message crafting para o XPC bootstrap e os formatos de mensagem; revise as páginas primer mach/XPC nesta seção para os layouts exatos de pacotes e flags.
+Isso requer a construção de mensagens mach em baixo nível para o XPC bootstrap e formatos de mensagem; revise as páginas primer mach/XPC nesta seção para os layouts exatos de pacotes e flags.
 
 ## Ferramentas úteis
 
-- XPC sniffing/dynamic inspection: gxpc (open-source XPC sniffer) pode ajudar a enumerar conexões e observar o tráfego para validar setups multi-sender e o timing. Exemplo: `gxpc -p <PID> --whitelist <service-name>`.
-- Classic dyld interposing for libxpc: interpose em `xpc_connection_send_message*` e `xpc_connection_get_audit_token` para registrar os locais de chamada e as pilhas durante testes black-box.
-
-
+- XPC sniffing/dynamic inspection: gxpc (open-source XPC sniffer) pode ajudar a enumerar conexões e observar o tráfego para validar configurações multi-sender e timing. Exemplo: `gxpc -p <PID> --whitelist <service-name>`.
+- Classic dyld interposing for libxpc: interpor em `xpc_connection_send_message*` e `xpc_connection_get_audit_token` para registrar os locais de chamada e as stacks durante testes black-box.
 
 ## Referências
 
-- Sector 7 – Don’t Talk All at Once! Elevação de privilégios no macOS por Audit Token Spoofing: <https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/>
-- Apple – Sobre o conteúdo de segurança do macOS Ventura 13.4 (CVE‑2023‑32405): <https://support.apple.com/en-us/106333>
+- Sector 7 – Don’t Talk All at Once! Elevating Privileges on macOS by Audit Token Spoofing: <https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/>
+- Apple – About the security content of macOS Ventura 13.4 (CVE‑2023‑32405): <https://support.apple.com/en-us/106333>
 
 
 {{#include ../../../../../../banners/hacktricks-training.md}}

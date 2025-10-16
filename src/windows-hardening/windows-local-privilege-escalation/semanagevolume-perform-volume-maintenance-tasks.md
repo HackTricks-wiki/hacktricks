@@ -2,25 +2,25 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Overview
+## Visão geral
 
-Direito do usuário Windows: Executar tarefas de manutenção de volume (constante: SeManageVolumePrivilege).
+Direito de usuário do Windows: Perform volume maintenance tasks (constant: SeManageVolumePrivilege).
 
-Titulares podem executar operações de volume de baixo nível, como desfragmentação, criar/remover volumes e IO de manutenção. Criticamente para atacantes, esse direito permite abrir handles de dispositivo de volume bruto (por exemplo, \\.\C:) e emitir I/O direto no disco que contorna os ACLs de arquivos NTFS. Com acesso bruto você pode copiar bytes de qualquer arquivo no volume mesmo que negado pelo DACL, ao analisar as estruturas do sistema de arquivos offline ou aproveitando ferramentas que leem ao nível de bloco/cluster.
+Titulares podem executar operações de volume de baixo nível, como desfragmentação, criação/remoção de volumes e I/O de manutenção. Criticamente para atacantes, esse direito permite abrir handles de dispositivo de volume bruto (por exemplo, \\.\C:) e emitir I/O de disco direto que contorna as ACLs do NTFS. Com acesso bruto você pode copiar bytes de qualquer arquivo no volume mesmo se negado pela DACL, analisando as estruturas do sistema de arquivos offline ou usando ferramentas que leem no nível de bloco/cluster.
 
-Default: Administradores em servidores e controladores de domínio.
+Padrão: Administradores em servidores e controladores de domínio.
 
-## Abuse scenarios
+## Cenários de abuso
 
-- Leitura arbitrária de arquivos contornando ACLs lendo o dispositivo de disco (por exemplo, exfiltrar material sensível protegido pelo sistema como chaves privadas de máquina em %ProgramData%\Microsoft\Crypto\RSA\MachineKeys e %ProgramData%\Microsoft\Crypto\Keys, hives do registro, DPAPI masterkeys, SAM, ntds.dit via VSS, etc.).
+- Leitura arbitrária de arquivos contornando ACLs ao ler o dispositivo de disco (por exemplo, exfiltrate material sensível protegido do sistema como chaves privadas de máquina em %ProgramData%\Microsoft\Crypto\RSA\MachineKeys e %ProgramData%\Microsoft\Crypto\Keys, registry hives, DPAPI masterkeys, SAM, ntds.dit via VSS, etc.).
 - Contornar caminhos bloqueados/privilegiados (C:\Windows\System32\…) copiando bytes diretamente do dispositivo bruto.
-- Em ambientes AD CS, exfiltrar o material de chaves da CA (machine key store) para cunhar “Golden Certificates” e se passar por qualquer principal do domínio via PKINIT. Veja o link abaixo.
+- Em ambientes AD CS, exfiltrate o material de chave da CA (machine key store) para forjar “Golden Certificates” e se passar por qualquer principal do domínio via PKINIT. Veja o link abaixo.
 
-Nota: Ainda é necessário um parser para as estruturas NTFS a menos que você confie em ferramentas auxiliares. Muitas ferramentas off-the-shelf abstraem o acesso bruto.
+Nota: Você ainda precisa de um parser para as estruturas NTFS a menos que confie em ferramentas auxiliares. Muitas ferramentas prontas abstraem o acesso bruto.
 
-## Practical techniques
+## Técnicas práticas
 
-- Open a raw volume handle and read clusters:
+- Abra um handle de volume bruto e leia clusters:
 
 <details>
 <summary>Clique para expandir</summary>
@@ -49,10 +49,10 @@ File.WriteAllBytes("C:\\temp\\blk.bin", buf);
 ```
 </details>
 
-- Use uma ferramenta compatível com NTFS para recuperar arquivos específicos de um volume bruto:
-- RawCopy/RawCopy64 (cópia a nível de setor de arquivos em uso)
-- FTK Imager or The Sleuth Kit (imagem somente leitura, then carve files)
-- vssadmin/diskshadow + shadow copy, depois copie o arquivo alvo do snapshot (se você puder criar VSS; frequentemente requer admin mas comumente disponível para os mesmos operadores que possuem SeManageVolumePrivilege)
+- Use uma ferramenta com suporte a NTFS para recuperar arquivos específicos do volume bruto:
+- RawCopy/RawCopy64 (cópia ao nível de setor de arquivos em uso)
+- FTK Imager or The Sleuth Kit (criação de imagem somente leitura, depois carve files)
+- vssadmin/diskshadow + shadow copy, então copie o arquivo alvo a partir do snapshot (se você puder criar VSS; frequentemente requer admin, mas comumente disponível para os mesmos operadores que detêm SeManageVolumePrivilege)
 
 Typical sensitive paths to target:
 - %ProgramData%\Microsoft\Crypto\RSA\MachineKeys\
@@ -63,20 +63,20 @@ Typical sensitive paths to target:
 
 ## AD CS tie‑in: Forging a Golden Certificate
 
-Se você conseguir ler a chave privada da Enterprise CA do machine key store, você pode forjar certificados client‑auth para entidades arbitrárias e autenticar via PKINIT/Schannel. Isso é frequentemente referido como Golden Certificate. Veja:
+If you can read the Enterprise CA’s private key from the machine key store, you can forge client‑auth certificates for arbitrary principals and authenticate via PKINIT/Schannel. This is often referred to as a Golden Certificate. See:
 
 {{#ref}}
 ../active-directory-methodology/ad-certificates/domain-persistence.md
 {{#endref}}
 
-(Seção: “Forging Certificates with Stolen CA Certificates (Golden Certificate) – DPERSIST1”).
+(Section: “Forging Certificates with Stolen CA Certificates (Golden Certificate) – DPERSIST1”).
 
 ## Detecção e hardening
 
-- Limite fortemente a concessão da SeManageVolumePrivilege (Perform volume maintenance tasks) apenas a administradores de confiança.
-- Monitore o Sensitive Privilege Use e aberturas de handles de processo para objetos de dispositivo como \\.\C:, \\.\PhysicalDrive0.
-- Prefira chaves de CA com suporte HSM/TPM ou DPAPI-NG para que leituras brutas de arquivos não possam recuperar o material da chave em forma utilizável.
-- Mantenha caminhos de uploads, temp e extração não-executáveis e separados (defesa em contexto web que frequentemente acompanha essa cadeia pós-exploitation).
+- Limitar fortemente a atribuição de SeManageVolumePrivilege (Perform volume maintenance tasks) apenas a administradores confiáveis.
+- Monitorar Sensitive Privilege Use e aberturas de handle de processo para objetos de dispositivo como \\.\C:, \\.\PhysicalDrive0.
+- Preferir chaves de CA com suporte HSM/TPM ou DPAPI-NG para que leituras brutas de arquivos não possam recuperar material de chave em forma utilizável.
+- Manter paths de uploads, temp e extração não executáveis e separados (defesa em contexto web que frequentemente se combina com esta cadeia post‑exploitation).
 
 ## Referências
 
