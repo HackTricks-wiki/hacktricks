@@ -39,22 +39,6 @@
 > - GitHub’s REST code search API is legacy and does not support regex; prefer the Web UI for regex searches. The gh CLI uses the legacy API.
 > - Only files below a certain size are indexed for search. To be thorough, clone and scan locally with a secrets scanner.
 
-### Modern GitHub Code Search tips (UI)
-
-Use the new Code Search UI for fast boolean and regex queries.
-
-- Scope by org/repo/branch: `org:Target` `repo:owner/name@dev`
-- Filter by language/path/file: `language:python path:/config/** filename:.env`
-- Boolean/regex examples (wrap regex with `/.../`):
-  - Find AWS keys near secret: `org:Target content:/aws(_|\W){0,3}(secret|access)/i`
-  - Slack tokens: `org:Target content:/xox[abpsc e]-[A-Za-z0-9-]{10,}/`
-  - GitHub tokens: `content:/(ghp|gho|ghu|ghs|ghr|github_pat_)[A-Za-z0-9_]{10,}/`
-  - Private keys: `content:/-----BEGIN (RSA|OPENSSH|EC) PRIVATE KEY-----/`
-- Search non-default branch: `repo:owner/name@feature-x content:/API_KEY/`
-
-For API/CLI automation (legacy search engine):
-- `gh search code '"SECRET_KEY" org:Target filename:.env' --limit 1000 --json repository,path,url`
-
 ### Programmatic org-wide scanning
 
 - TruffleHog (GitHub source):
