@@ -1,26 +1,26 @@
-# SeManageVolumePrivilege: 任意ファイル読み取りのための生のボリュームアクセス
+# SeManageVolumePrivilege: 任意ファイルの読み取りのための生ボリュームアクセス
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## 概要
 
-Windows のユーザー権利: Perform volume maintenance tasks (定数: SeManageVolumePrivilege)。
+Windows user right: Perform volume maintenance tasks (constant: SeManageVolumePrivilege).
 
-保有者はデフラグ、ボリュームの作成/削除、メンテナンス IO のような低レベルのボリューム操作を実行できます。攻撃者にとって重要なのは、この権利により生のボリュームデバイスハンドル（例: \\.\C:）を開き、NTFS ファイル ACL をバイパスする直接的なディスク I/O を発行できることです。生のアクセスを使用すると、ファイルシステム構造をオフラインで解析するか、ブロック/クラスタレベルで読み取るツールを利用することで、DACL によって拒否されていてもボリューム上の任意のファイルのバイトをコピーできます。
+権利保持者はデフラグ、ボリュームの作成/削除、メンテナンスI/O などの低レベルなボリューム操作を実行できます。攻撃者にとって重要なのは、この権利により生のボリュームデバイスハンドル（例: \\.\C:）を開き、NTFS ファイルの ACL をバイパスする直接的なディスク I/O を発行できる点です。生のアクセスを利用すると、ファイルシステム構造をオフラインで解析するか、ブロック/クラスター単位で読み取るツールを活用することで、DACL により拒否されていてもボリューム上の任意ファイルのバイトをコピーできます。
 
-デフォルト: サーバーおよびドメインコントローラーの Administrators。
+既定: サーバーおよびドメインコントローラー上の Administrators。
 
 ## 悪用シナリオ
 
-- ディスクデバイスを読み取ることで ACL を回避した任意ファイル読み取り（例: %ProgramData%\Microsoft\Crypto\RSA\MachineKeys や %ProgramData%\Microsoft\Crypto\Keys 配下のマシン秘密鍵、レジストリハイブ、DPAPI マスターキー、SAM、VSS 経由の ntds.dit などの機密なシステム保護データを流出させる）。
-- 生のデバイスからバイトを直接コピーすることで、ロックされた/特権的なパス（C:\Windows\System32\…）を回避する。
-- AD CS 環境では、CA の鍵素材（machine key store）を流出させて “Golden Certificates” を作成し、PKINIT を介して任意のドメイン主体を偽装する。下のリンクを参照。
+- ディスクデバイスを読み取ることで ACL をバイパスして任意ファイルを読み出す（例: %ProgramData%\Microsoft\Crypto\RSA\MachineKeys や %ProgramData%\Microsoft\Crypto\Keys にあるマシン秘密鍵、レジストリハイブ、DPAPI masterkeys、SAM、VSS 経由の ntds.dit などの機密なシステム保護データを持ち出す）。
+- ロックされた/特権的なパス (C:\Windows\System32\…) を、生デバイスから直接バイトをコピーして回避する。
+- AD CS 環境では、CA のキー素材（machine key store）を持ち出して「Golden Certificates」を作成し、PKINIT を使って任意のドメイン主体を偽装する。詳細は下のリンクを参照。
 
-注: ヘルパーツールに頼らない場合は NTFS 構造を解析するパーサーが必要です。市販のツールの多くは生のアクセスを抽象化しています。
+注意: ヘルパーツールに頼らない限り、NTFS 構造を解析するパーサーが必要です。市販の多くのツールは生アクセスを抽象化しています。
 
 ## 実用的な手法
 
-- 生のボリュームハンドルを開いてクラスタを読み取る:
+- 生ボリュームハンドルを開いてクラスターを読み取る:
 
 <details>
 <summary>クリックして展開</summary>
@@ -49,34 +49,34 @@ File.WriteAllBytes("C:\\temp\\blk.bin", buf);
 ```
 </details>
 
-- NTFS対応ツールを使って raw volume から特定のファイルを復元する:
+- Use an NTFS-aware tool to recover specific files from raw volume:
 - RawCopy/RawCopy64 (使用中ファイルのセクターレベルコピー)
-- FTK Imager or The Sleuth Kit (読み取り専用でイメージングしてからファイルを復元)
-- vssadmin/diskshadow + shadow copy, そのスナップショットからターゲットファイルをコピー (VSS を作成できる場合; 多くは管理者権限が必要だが SeManageVolumePrivilege を持つオペレータには一般的に利用可能)
+- FTK Imager or The Sleuth Kit (読み取り専用イメージング、後でファイルをカービングして復元)
+- vssadmin/diskshadow + shadow copy、スナップショットから対象ファイルをコピー（VSS を作成できる場合。多くは管理者権限が必要だが、SeManageVolumePrivilege を持つオペレータでは一般的に利用可能）
 
-狙うべき典型的な機密パス:
+Typical sensitive paths to target:
 - %ProgramData%\Microsoft\Crypto\RSA\MachineKeys\
 - %ProgramData%\Microsoft\Crypto\Keys\
-- C:\Windows\System32\config\SAM, SYSTEM, SECURITY (local secrets)
-- C:\Windows\NTDS\ntds.dit (domain controllers – via shadow copy)
-- C:\Windows\System32\CertSrv\CertEnroll\ (CA certs/CRLs; private keys live in the machine key store above)
+- C:\Windows\System32\config\SAM, SYSTEM, SECURITY（ローカルの秘密情報）
+- C:\Windows\NTDS\ntds.dit（ドメインコントローラ — シャドウコピー経由）
+- C:\Windows\System32\CertSrv\CertEnroll\（CA 証明書/CRL；秘密鍵は上記の machine key store に格納）
 
-## AD CS tie‑in: Forging a Golden Certificate
+## AD CS との関連: Forging a Golden Certificate
 
-もし machine key store から Enterprise CA の private key を読み取ることができれば、任意のプリンシパル向けに client‑auth 証明書を偽造し、PKINIT/Schannel 経由で認証することが可能です。これはしばしば Golden Certificate と呼ばれます。参照:
+もし Enterprise CA の秘密鍵を machine key store から読み出せるなら、任意のプリンシパル向けに client-auth 証明書を偽造し、PKINIT/Schannel を使って認証できます。これは一般に Golden Certificate と呼ばれます。参照：
 
 {{#ref}}
 ../active-directory-methodology/ad-certificates/domain-persistence.md
 {{#endref}}
 
-(Section: “Forging Certificates with Stolen CA Certificates (Golden Certificate) – DPERSIST1”).
+(セクション: “Forging Certificates with Stolen CA Certificates (Golden Certificate) – DPERSIST1”).
 
 ## 検出とハードニング
 
-- SeManageVolumePrivilege (Perform volume maintenance tasks) の割り当ては信頼できる管理者のみに厳格に制限する。
-- Sensitive Privilege Use と、\\.\C: や \\.\PhysicalDrive0 のようなデバイスオブジェクトへのプロセスハンドルのオープンを監視する。
-- HSM/TPM バックの CA 鍵や DPAPI-NG を優先し、生のファイル読み取りから鍵素材が実用的な形で復元されないようにする。
-- アップロード、テンポラリ、展開先のパスは実行不可かつ分離しておく（web コンテキスト防御で、しばしばこのチェーンの post‑exploitation と組み合わされる）。
+- SeManageVolumePrivilege (Perform volume maintenance tasks) の割当を信頼できる管理者のみに厳格に制限する。
+- Sensitive Privilege Use と、プロセスが \\.\C:, \\.\PhysicalDrive0 のようなデバイスオブジェクトに対してハンドルを開く動作を監視する。
+- 生ファイルの読み取りで鍵素材が利用可能な形で回復されないよう、HSM/TPM バックの CA 鍵や DPAPI-NG を利用することを推奨する。
+- アップロード、テンポラリ、展開パスを実行不可かつ分離して保つ（Web コンテキストでの防御。ポストエクスプロイトでこのチェーンと組み合わせられることが多い）。
 
 ## References
 
