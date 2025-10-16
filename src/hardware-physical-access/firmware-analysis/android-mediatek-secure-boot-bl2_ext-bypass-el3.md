@@ -2,34 +2,34 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Hierdie bladsy dokumenteer 'n praktiese secure-boot break op verskeie MediaTek-platforms deur 'n verifikasiegaping te misbruik wanneer die toestel se bootloader-konfigurasie (seccfg) op "unlocked" gestel is. Die fout laat 'n gepatchede bl2_ext op ARM EL3 toe om downstream-handtekeningsverifikasie uit te skakel, wat die vertrouensketting laat inklap en willekeurige ongetekende TEE/GZ/LK/Kernel-lading moontlik maak.
+Hierdie bladsy dokumenteer 'n praktiese secure-boot break op verskeie MediaTek-platforms deur 'n verifikasie-gaping te misbruik wanneer die toestel se bootloader-konfigurasie (seccfg) op "unlocked" is. Die fout laat toe dat 'n gepatchte bl2_ext by ARM EL3 uitgevoer word om downstream handtekeningverifikasie uit te skakel, die ketting van vertroue te breek en arbitrêre ongehandte TEE/GZ/LK/Kernel-ladings toe te laat.
 
-> Waarskuwing: Early-boot patching kan toestelle permanent brick maak as offsets verkeerd is. Always keep full dumps and a reliable recovery path.
+> Waarskuwing: Vroeë-opstart patching kan toestelle permanent onbruikbaar maak as offsets verkeerd is. Hou altyd volledige dumps en 'n betroubare herstelpad.
 
-## Geaffekteerde opstartvloei (MediaTek)
+## Affected boot flow (MediaTek)
 
 - Normale pad: BootROM → Preloader → bl2_ext (EL3, verified) → TEE → GenieZone (GZ) → LK/AEE → Linux kernel (EL1)
-- Kwetsbare pad: Wanneer seccfg op "unlocked" gestel is, mag Preloader die verifikasie van bl2_ext oorslaan. Preloader spring steeds na binne in bl2_ext by EL3, dus kan 'n crafted bl2_ext daarna unverified komponente laai.
+- Kwetsbare pad: Wanneer seccfg op unlocked gestel is, kan Preloader die verifikasie van bl2_ext oorslaan. Preloader spring steeds na bl2_ext by EL3, sodat 'n gemaakte bl2_ext daarna ongeverifieerde komponente kan laai.
 
 Belangrike vertrouensgrens:
-- bl2_ext voer uit by EL3 en is verantwoordelik vir die verifikasie van TEE, GenieZone, LK/AEE en die kernel. As bl2_ext self nie geauthentiseer is nie, word die res van die ketting triviaal omseil.
+- bl2_ext voer by EL3 uit en is verantwoordelik vir die verifikasie van TEE, GenieZone, LK/AEE en die kernel. As bl2_ext self nie geauthentiseer is nie, kan die res van die ketting maklik oorgeslaan word.
 
-## Hoofoorsaak
+## Root cause
 
-Op geaffekteerde toestelle dwing die Preloader nie die authentication van die bl2_ext partition af wanneer seccfg 'n "unlocked" toestand aandui nie. Dit laat toe om 'n attacker-controlled bl2_ext te flash wat by EL3 loop.
+Op aangetaste toestelle dwing die Preloader nie die authenticatie van die bl2_ext-partisie af wanneer seccfg 'n "unlocked" toestand aandui nie. Dit maak dit moontlik om 'n deur 'n aanvaller beheerde bl2_ext te flash wat by EL3 uitgevoer word.
 
-Binne bl2_ext kan die verification policy-funksie gepatch word om onvoorwaardelik te rapporteer dat verifikasie nie nodig is nie. 'n Minimale konseptuele patch is:
+Binne bl2_ext kan die verification policy-funksie gepatch word om onvoorwaardelik te rapporteer dat verifikasie nie vereis word nie. 'n Minimale konseptuele patch is:
 ```c
 // inside bl2_ext
 int sec_get_vfy_policy(...) {
 return 0; // always: "no verification required"
 }
 ```
-Met hierdie verandering word alle daaropvolgende beelde (TEE, GZ, LK/AEE, Kernel) aanvaar sonder kriptografiese kontroles wanneer hulle deur die gepatchte bl2_ext wat by EL3 loop gelaai word.
+Met hierdie verandering word alle daaropvolgende images (TEE, GZ, LK/AEE, Kernel) aanvaar sonder kriptografiese kontroles wanneer hulle deur die patched bl2_ext wat by EL3 loop, gelaai word.
 
-## How to triage a target (expdb logs)
+## Hoe om 'n teiken te triageer (expdb logs)
 
-Dump/inspect opstartlogs (bv. expdb) rondom die bl2_ext-laai. As img_auth_required = 0 en certificate verification time is ~0 ms, is afdwinging waarskynlik af en die toestel is uitbuitbaar.
+Dump/inspect boot logs (bv. expdb) rondom die bl2_ext-laai. As img_auth_required = 0 en sertifikaatverifikasietyd ~0 ms is, is afdwinging waarskynlik afgeskakel en is die toestel uitbuitbaar.
 
 Voorbeeld log-uittreksel:
 ```
@@ -37,18 +37,18 @@ Voorbeeld log-uittreksel:
 [PART] Image with header, name: bl2_ext, addr: FFFFFFFFh, mode: FFFFFFFFh, size:654944, magic:58881688h
 [PART] part: lk_a img: bl2_ext cert vfy(0 ms)
 ```
-Let wel: Sommige toestelle slaan na bewering die bl2_ext verifikasie oor, selfs met 'n gegrendelde bootloader, wat die impak vererger.
+Nota: Sommige toestelle blyk bl2_ext verification oor te slaan selfs met 'n locked bootloader, wat die impak vererger.
 
-## Praktiese uitbuiting-werkstroom (Fenrir PoC)
+## Praktiese eksploitasie-werkstroom (Fenrir PoC)
 
-Fenrir is 'n verwysings exploit/patching toolkit vir hierdie klas van probleem. Dit ondersteun Nothing Phone (2a) (Pacman) en is bekend dat dit werk (onvolledig ondersteun) op CMF Phone 1 (Tetris). Porting na ander modelle vereis reverse engineering van die toestel-spesifieke bl2_ext.
+Fenrir is 'n verwysings exploit/patching toolkit vir hierdie tipe probleem. Dit ondersteun Nothing Phone (2a) (Pacman) en is bekend om te werk (onvolledig ondersteun) op CMF Phone 1 (Tetris). Porting na ander modelle vereis reverse engineering van die device-specific bl2_ext.
 
 Hoëvlak proses:
-- Kry die toestel se bootloader-beeld vir jou teiken-kodenaam en plaas dit as bin/<device>.bin
-- Bou 'n gepatchte beeld wat die bl2_ext verifikasiebeleid deaktiveer
-- Flits die resulterende payload na die toestel (fastboot word deur die helper-skrip veronderstel)
+- Verkry die toestel bootloader image vir jou teiken codename en plaas dit as bin/<device>.bin
+- Bou 'n gepatchede image wat die bl2_ext verification policy deaktiveer
+- Flash die resulterende payload na die toestel (fastboot assumed by the helper script)
 
-Opdragte:
+Commands:
 ```bash
 # Build patched image (default path bin/[device].bin)
 ./build.sh pacman
@@ -59,41 +59,41 @@ Opdragte:
 # Flash the resulting lk.patched (fastboot required by helper script)
 ./flash.sh
 ```
-If fastboot is unavailable, you must use a suitable alternative flashing method for your platform.
+As fastboot nie beskikbaar is nie, moet jy 'n geskikte alternatiewe flashing-metode vir jou platform gebruik.
 
-## Runtime payload capabilities (EL3)
+## Runtime payload-vaardighede (EL3)
 
-A patched bl2_ext payload can:
-- Register custom fastboot commands
-- Control/override boot mode
-- Dynamically call built‑in bootloader functions at runtime
-- Spoof “lock state” as locked while actually unlocked to pass stronger integrity checks (some environments may still require vbmeta/AVB adjustments)
+'n Gepatchede bl2_ext payload kan:
+- Registreer pasgemaakte fastboot-opdragte
+- Beheer/override boot-modus
+- Dinamies ingeboude bootloader-funksies tydens runtime aanroep
+- Spoof “lock state” as locked terwyl dit eintlik unlocked is om sterker integriteitskontroles te slaag (sommige omgewings mag steeds vbmeta/AVB-aanpassings vereis)
 
-Limitation: Current PoCs note that runtime memory modification may fault due to MMU constraints; payloads generally avoid live memory writes until this is resolved.
+Beperking: Huidige PoCs merk op dat runtime-geheue-wysigings as gevolg van MMU-beperkings 'n fout kan veroorsaak; payloads vermy oor die algemeen live memory writes totdat dit opgelos is.
 
-## Porting tips
+## Porting-wenke
 
-- Reverse-engineer die device-spesifieke bl2_ext om die verifikasiebeleid-logika te lokaliseer (bv., sec_get_vfy_policy).
-- Identifiseer die beleid se return-ligging of besluittak en patch dit na “no verification required” (return 0 / unconditional allow).
-- Hou offsets volledig device- en firmware-spesifiek; hergebruik nie adresse tussen variante nie.
-- Valideer eers op 'n offer-eenheid. Berei 'n herstelplan voor (bv., EDL/BootROM loader/SoC-specific download mode) voordat jy flash.
+- Reverse engineer die toestel-spesifieke bl2_ext om verifikasiebeleid-logika te lokaliseer (bv., sec_get_vfy_policy).
+- Identifiseer die beleid-terugkeerplek of beslissingsvertakking en patch dit na “no verification required” (return 0 / unconditional allow).
+- Hou offsets volledig toestel- en firmware-spesifiek; moenie adresse tussen variante hergebruik nie.
+- Valideer eers op 'n offer-eenheid. Berei 'n herstelplan voor (bv., EDL/BootROM loader/SoC-spesifieke download mode) voordat jy flash.
 
-## Security impact
+## Sekuriteitsimpak
 
-- EL3 code execution after Preloader and full chain-of-trust collapse for the rest of the boot path.
-- Vermoë om unsigned TEE/GZ/LK/Kernel te boot, wat secure/verified boot-verwagtinge omseil en permanente kompromittering moontlik maak.
+- EL3-kode-uitvoering ná die Preloader en volledige ketting-van-vertroue-instorting vir die res van die boot-pad.
+- Vermoë om unsigned TEE/GZ/LK/Kernel te boot, deur secure/verified boot-verwachtinge te omseil en bestendige kompromittering moontlik te maak.
 
-## Detection and hardening ideas
+## Opsporing en verhardingsidees
 
-- Verseker dat Preloader bl2_ext verifieer ongeag seccfg-toestand.
-- Handhaaf authentication resultate en versamel ouditbewyse (timings > 0 ms, strict errors on mismatch).
-- Lock-state spoofing moet ondoeltreffend gemaak word vir attestation (tie lock state to AVB/vbmeta verification decisions and fuse-backed state).
+- Verseker dat die Preloader bl2_ext verifieer ongeag die seccfg-toestand.
+- Dwing authentication results af en versamel ouditbewyse (timings > 0 ms, streng foute by mismatch).
+- Lock-state spoofing moet ondoeltreffend gemaak word vir attestasie (koppel lock state aan AVB/vbmeta-verifikasiebesluite en fuse-backed state).
 
-## Device notes
+## Toestelnotas
 
-- Bevestigde ondersteuning: Nothing Phone (2a) (Pacman)
+- Bevestig ondersteun: Nothing Phone (2a) (Pacman)
 - Bekend werkend (onvolledige ondersteuning): CMF Phone 1 (Tetris)
-- Waargenome: Vivo X80 Pro reportedly did not verify bl2_ext even when locked
+- Waargeneem: Vivo X80 Pro het na berigte nie bl2_ext verifieer nie, selfs toe dit locked was
 
 ## References
 

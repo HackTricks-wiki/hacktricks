@@ -6,17 +6,17 @@
 
 Windows gebruikersreg: Perform volume maintenance tasks (constant: SeManageVolumePrivilege).
 
-Houers kan laagvlak volume-operasies uitvoer soos defragmentation, skep/verwyder volumes, en onderhouds-I/O. Krities vir aanvallers: hierdie reg laat toe om rou volume-toestel-handles oop te maak (bv. \\.\C:) en direkte skyf I/O uit te voer wat NTFS file ACLs omseil. Met rou toegang kan jy bytes van enige lêer op die volume kopieer selfs al is dit deur die DACL geweier, deur die filesystem-strukture offline te parse of hulpmiddels te gebruik wat op blok-/klustervlak lees.
+Houers kan laevlak-volume-bewerkings uitvoer soos defragmentasie, skep/verwyder van volumes, en maintenance IO. Belangrik vir aanvallers: hierdie reg laat toe om ruwe volume-toestelhandvatsels te open (bv. \\.\C:) en direkte disk I/O uit te voer wat NTFS file ACLs omseil. Met ruwe toegang kan jy bytes van enige lêer op die volume kopieer selfs al word toegang deur die DACL geweier, deur die lêerstelselstrukture offline te ontleed of hulpmiddele te gebruik wat op blok-/clustervlak lees.
 
-Standaard: Administrateurs op bedieners en domeincontrollers.
+Standaard: Administrators on servers and domain controllers.
 
 ## Misbruikscenario's
 
-- Arbitrêre lêerlees wat ACLs omseil deur die skyf-toestel te lees (bv. eksfiltreer sensitiewe stelsel-beskermde materiaal soos masjien-private sleutels onder %ProgramData%\Microsoft\Crypto\RSA\MachineKeys en %ProgramData%\Microsoft\Crypto\Keys, registry hives, DPAPI masterkeys, SAM, ntds.dit via VSS, ens.).
-- Omseil geslote/geprivilegieerde paaie (C:\Windows\System32\…) deur bytes direk vanaf die rou toestel te kopieer.
-- In AD CS omgewings, eksfiltreer die CA se sleutelmateriaal (machine key store) om “Golden Certificates” te mint en enige domein-prinsipaal te imiteer via PKINIT. Sien skakel hieronder.
+- Arbitrêre lêerlees wat ACLs omseil deur die skyftoestel te lees (bv. exfiltrate sensitiewe stelselsbeskermde materiaal soos machine private keys onder %ProgramData%\Microsoft\Crypto\RSA\MachineKeys en %ProgramData%\Microsoft\Crypto\Keys, registry hives, DPAPI masterkeys, SAM, ntds.dit via VSS, ens.).
+- Omseil geslote/geprivilegieerde paaie (C:\Windows\System32\…) deur bytes direk vanaf die ruwe toestel te kopieer.
+- In AD CS omgewings, exfiltrate die CA’s key material (machine key store) om “Golden Certificates” te mint en enige domain principal te impersonate via PKINIT. Sien link hieronder.
 
-Let wel: Jy het steeds 'n parser vir NTFS-strukture nodig tensy jy op helper-werktuie staatmaak. Baie kant-en-klare gereedskap abstraheer die rou toegang.
+Let wel: Jy benodig steeds 'n parser vir NTFS-strukture tensy jy op helper tools staatmaak. Baie kant-en-klare tools abstraheer die ruwe toegang.
 
 ## Praktiese tegnieke
 
@@ -49,21 +49,21 @@ File.WriteAllBytes("C:\\temp\\blk.bin", buf);
 ```
 </details>
 
-- Gebruik 'n NTFS-bewuste hulpmiddel om spesifieke lêers vanaf die rou volume te herstel:
-- RawCopy/RawCopy64 (sector-level copy of in-use files)
-- FTK Imager or The Sleuth Kit (read-only imaging, then carve files)
-- vssadmin/diskshadow + shadow copy, en kopieer dan die teikenlêer vanaf die snapshot (as jy VSS kan skep; vereis dikwels admin maar is gewoonlik beskikbaar vir dieselfde operateurs wat SeManageVolumePrivilege besit)
+- Gebruik 'n NTFS-bewuste tool om spesifieke lêers van 'n rou volume te herstel:
+- RawCopy/RawCopy64 (sektorvlak-kopie van in‑gebruik-lêers)
+- FTK Imager of The Sleuth Kit (lees-alleen imaging, dan carve files)
+- vssadmin/diskshadow + shadow copy, dan kopieer die teikenlêer vanaf die snapshot (as jy VSS kan skep; vereis dikwels admin maar is gewoonlik beskikbaar vir dieselfde operateurs wat SeManageVolumePrivilege het)
 
-Tipiese sensitiewe paaie om te teiken:
+Tipiese sensitiewe paaie om teiken:
 - %ProgramData%\Microsoft\Crypto\RSA\MachineKeys\
 - %ProgramData%\Microsoft\Crypto\Keys\
-- C:\Windows\System32\config\SAM, SYSTEM, SECURITY (local secrets)
+- C:\Windows\System32\config\SAM, SYSTEM, SECURITY (lokale geheime)
 - C:\Windows\NTDS\ntds.dit (domain controllers – via shadow copy)
-- C:\Windows\System32\CertSrv\CertEnroll\ (CA certs/CRLs; private keys live in the machine key store above)
+- C:\Windows\System32\CertSrv\CertEnroll\ (CA certs/CRLs; private keys leef in die machine key store hierbo)
 
-## AD CS koppeling: Forging a Golden Certificate
+## AD CS tie‑in: Forging a Golden Certificate
 
-As jy die Enterprise CA se private sleutel uit die machine key store kan lees, kan jy client‑auth certificates vir arbitrary principals vervals en verifieer via PKINIT/Schannel. Dit word dikwels 'n Golden Certificate genoem. Sien:
+As jy die Enterprise CA se private sleutel uit die machine key store kan lees, kan jy client‑auth certificates vir arbitrêre principals forge en verifieer via PKINIT/Schannel. Dit word dikwels verwys na as 'n Golden Certificate. Sien:
 
 {{#ref}}
 ../active-directory-methodology/ad-certificates/domain-persistence.md
@@ -71,14 +71,14 @@ As jy die Enterprise CA se private sleutel uit die machine key store kan lees, k
 
 (Afdeling: “Forging Certificates with Stolen CA Certificates (Golden Certificate) – DPERSIST1”).
 
-## Opsporing en verharding
+## Detection and hardening
 
-- Beperk sterk die toewysing van SeManageVolumePrivilege (Perform volume maintenance tasks) slegs aan vertroude administrateurs.
-- Monitor Sensitive Privilege Use en proses-handle-openings na toestelobjekte soos \\.\C:, \\.\PhysicalDrive0.
-- Voorkeur vir HSM/TPM-ondersteunde CA-sleutels of DPAPI-NG sodat rou lêerlees nie sleutelmateriaal in bruikbare vorm kan herstel nie.
-- Hou uploads-, temp- en uitpak-paaie nie-uitvoerbaar en geskei (web-konteks verdediging wat dikwels saam met hierdie ketting post‑exploitation gepaardgaan).
+- Beperk sterk die toekenning van SeManageVolumePrivilege (Perform volume maintenance tasks) slegs aan betroubare admins.
+- Monitor Sensitive Privilege Use en proses-handle-openings na device objects soos \\.\C:, \\.\PhysicalDrive0.
+- Bied voorkeur aan HSM/TPM-backed CA keys of DPAPI-NG sodat rou lêerslees nie sleutelmateriaal in bruikbare vorm kan herstel nie.
+- Hou uploads-, temp- en ekstraksiepaaie nie-uitvoerbaar en geskei (web‑konteks verdediging wat dikwels saam met hierdie ketting post‑exploitation gepaard gaan).
 
-## Verwysings
+## References
 
 - Microsoft – Perform volume maintenance tasks (SeManageVolumePrivilege): https://learn.microsoft.com/previous-versions/windows/it-pro/windows-10/security/threat-protection/security-policy-settings/perform-volume-maintenance-tasks
 - 0xdf – HTB: Certificate (SeManageVolumePrivilege used to read CA key → Golden Certificate): https://0xdf.gitlab.io/2025/10/04/htb-certificate.html
