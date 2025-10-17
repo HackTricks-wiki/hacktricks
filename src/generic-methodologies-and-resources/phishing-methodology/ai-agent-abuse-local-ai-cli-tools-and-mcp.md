@@ -2,27 +2,27 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Visão geral
+## Visão Geral
 
-Local AI command-line interfaces (AI CLIs) such as Claude Code, Gemini CLI, Warp and similar tools often ship with powerful built‑ins: filesystem read/write, shell execution and outbound network access. Many act as MCP clients (Model Context Protocol), letting the model call external tools over STDIO or HTTP. Because the LLM plans tool-chains non‑deterministically, identical prompts can lead to different process, file and network behaviours across runs and hosts.
+Interfaces de linha de comando de AI locais (AI CLIs) como Claude Code, Gemini CLI, Warp e ferramentas semelhantes frequentemente vêm com built‑ins poderosos: leitura/escrita de filesystem, execução de shell e acesso de rede outbound. Muitas atuam como clientes MCP (Model Context Protocol), permitindo que o modelo chame ferramentas externas via STDIO ou HTTP. Como o LLM planeja cadeias de ferramentas de forma não determinística, prompts idênticos podem levar a comportamentos diferentes de processos, arquivos e rede entre execuções e hosts.
 
-Principais mecanismos observados em AI CLIs comuns:
-- Tipicamente implementados em Node/TypeScript com um wrapper leve que inicia o modelo e expõe ferramentas.
-- Múltiplos modos: interactive chat, plan/execute, e single‑prompt run.
-- Suporte a MCP client com transportes STDIO e HTTP, permitindo extensão de capacidade tanto local quanto remota.
+Mecânicas-chave observadas em AI CLIs comuns:
+- Tipicamente implementadas em Node/TypeScript com um wrapper fino que lança o modelo e expõe ferramentas.
+- Múltiplos modos: chat interativo, plan/execute, e execução de single‑prompt.
+- Suporte a cliente MCP com transports STDIO e HTTP, habilitando extensão de capacidade tanto local quanto remota.
 
-Abuse impact: A single prompt can inventory and exfiltrate credentials, modify local files, and silently extend capability by connecting to remote MCP servers (visibility gap if those servers are third‑party).
+Impacto do abuso: Um único prompt pode inventariar e exfiltrar credenciais, modificar arquivos locais e estender silenciosamente capacidade conectando-se a servidores MCP remotos (gap de visibilidade se esses servidores forem de terceiros).
 
 ---
 
 ## Adversary Playbook – Prompt‑Driven Secrets Inventory
 
-Task the agent to quickly triage and stage credentials/secrets for exfiltration while staying quiet:
+Instrua o agente para rapidamente triar e agrupar credenciais/segredos para exfiltração enquanto permanece discreto:
 
-- Scope: recursively enumerate under $HOME and application/wallet dirs; avoid noisy/pseudo paths (`/proc`, `/sys`, `/dev`).
-- Performance/stealth: cap recursion depth; avoid `sudo`/priv‑escalation; summarise results.
-- Targets: `~/.ssh`, `~/.aws`, cloud CLI creds, `.env`, `*.key`, `id_rsa`, `keystore.json`, browser storage (LocalStorage/IndexedDB profiles), crypto‑wallet data.
-- Output: write a concise list to `/tmp/inventory.txt`; if the file exists, create a timestamped backup before overwrite.
+- Escopo: enumerar recursivamente sob $HOME e diretórios de aplicações/wallet; evitar paths ruidosos/pseudo (`/proc`, `/sys`, `/dev`).
+- Desempenho/stealth: limitar profundidade de recursão; evitar `sudo`/priv‑escalation; resumir resultados.
+- Alvos: `~/.ssh`, `~/.aws`, cloud CLI creds, `.env`, `*.key`, `id_rsa`, `keystore.json`, armazenamento do browser (LocalStorage/IndexedDB profiles), dados de crypto‑wallet.
+- Output: escrever uma lista concisa em `/tmp/inventory.txt`; se o arquivo existir, criar um backup com timestamp antes de sobrescrever.
 
 Example operator prompt to an AI CLI:
 ```
@@ -37,16 +37,16 @@ Return a short summary only; no file contents.
 ```
 ---
 
-## Extensão de Capacidade via MCP (STDIO e HTTP)
+## Extensão de Capacidades via MCP (STDIO e HTTP)
 
-AI CLIs frequentemente atuam como clientes MCP para acessar ferramentas adicionais:
+AI CLIs frequentemente atuam como clientes MCP para alcançar ferramentas adicionais:
 
-- STDIO transport (local tools): o client gera uma cadeia auxiliar para rodar um tool server. Linhagem típica: `node → <ai-cli> → uv → python → file_write`. Exemplo observado: `uv run --with fastmcp fastmcp run ./server.py` que inicia `python3.13` e executa operações de arquivo locais em nome do agent.
-- HTTP transport (remote tools): o client abre TCP de saída (p.ex., porta 8000) para um remote MCP server, que executa a ação solicitada (p.ex., escrever `/home/user/demo_http`). No endpoint você verá apenas a atividade de rede do client; toques de arquivo do lado do server ocorrem off‑host.
+- STDIO transport (local tools): o client cria uma cadeia auxiliar para rodar um tool server. Linhagem típica: `node → <ai-cli> → uv → python → file_write`. Exemplo observado: `uv run --with fastmcp fastmcp run ./server.py` que inicia `python3.13` e realiza operações locais de arquivo em nome do agente.
+- HTTP transport (remote tools): o client abre TCP de saída (e.g., port 8000) para um remote MCP server, que executa a ação requisitada (e.g., write `/home/user/demo_http`). No endpoint você verá apenas a atividade de rede do client; toques em arquivos no lado do servidor ocorrem off‑host.
 
 Notas:
-- MCP tools são descritos ao modelo e podem ser auto‑selecionados pelo planning. O comportamento varia entre execuções.
-- Remote MCP servers aumentam o blast radius e reduzem a visibilidade host‑side.
+- MCP tools são descritas para o model e podem ser auto‑selecionadas pelo planning. O comportamento varia entre execuções.
+- Remote MCP servers aumentam o blast radius e reduzem a visibilidade no host.
 
 ---
 
@@ -54,11 +54,11 @@ Notas:
 
 - Gemini CLI session logs: `~/.gemini/tmp/<uuid>/logs.json`
 - Campos comumente vistos: `sessionId`, `type`, `message`, `timestamp`.
-- Exemplo de `message`: `"@.bashrc what is in this file?"` (user/agent intent captured).
+- Example `message`: `"@.bashrc what is in this file?"` (intenção do user/agent capturada).
 - Claude Code history: `~/.claude/history.jsonl`
 - Entradas JSONL com campos como `display`, `timestamp`, `project`.
 
-Correlacione esses logs locais com requests observados no seu LLM gateway/proxy (p.ex., LiteLLM) para detectar tampering/model‑hijacking: se o que o modelo processou diverge do prompt/output local, investigue instruções injetadas ou descriptors de tool comprometidos.
+Correlacione esses logs locais com requests observadas no seu LLM gateway/proxy (e.g., LiteLLM) para detectar tampering/model‑hijacking: se o que o model processou divergir do prompt/output local, investigue instruções injetadas ou descritores de tool comprometidos.
 
 ---
 
@@ -66,19 +66,19 @@ Correlacione esses logs locais com requests observados no seu LLM gateway/proxy 
 
 Cadeias representativas em Amazon Linux 2023 com Node v22.19.0 e Python 3.13:
 
-1) Ferramentas embutidas (acesso local a arquivos)
+1) Built‑in tools (local file access)
 - Parent: `node .../bin/claude --model <model>` (ou equivalente para o CLI)
-- Immediate child action: criar/modificar um arquivo local (p.ex., `demo-claude`). Vincule o evento de arquivo de volta pela linhagem parent→child.
+- Ação do filho imediato: criar/modificar um arquivo local (e.g., `demo-claude`). Vincule o evento de arquivo de volta pela linhagem parent→child.
 
-2) MCP sobre STDIO (servidor de ferramenta local)
-- Cadeia: `node → uv → python → file_write`
+2) MCP over STDIO (local tool server)
+- Chain: `node → uv → python → file_write`
 - Exemplo de spawn: `uv run --with fastmcp fastmcp run /home/ssm-user/tools/server.py`
 
-3) MCP sobre HTTP (servidor de ferramenta remoto)
+3) MCP over HTTP (remote tool server)
 - Client: `node/<ai-cli>` abre TCP de saída para `remote_port: 8000` (ou similar)
-- Server: processo Python remoto trata a request e escreve `/home/ssm-user/demo_http`.
+- Server: processo Python remoto lida com a requisição e grava `/home/ssm-user/demo_http`.
 
-Como decisões do agent variam por execução, espere variabilidade nos processos exatos e caminhos tocados.
+Porque decisões do agente diferem por execução, espere variabilidade nos processos exatos e nos caminhos tocados.
 
 ---
 
@@ -87,13 +87,13 @@ Como decisões do agent variam por execução, espere variabilidade nos processo
 Fontes de telemetria
 - Linux EDR usando eBPF/auditd para eventos de processo, arquivo e rede.
 - Logs locais do AI‑CLI para visibilidade de prompt/intenção.
-- Logs do gateway LLM (p.ex., LiteLLM) para validação cruzada e detecção de model‑tamper.
+- Logs do LLM gateway (e.g., LiteLLM) para validação cruzada e detecção de model‑tamper.
 
-Heurísticas de investigação
-- Vincule toques em arquivos sensíveis à cadeia pai do AI‑CLI (p.ex., `node → <ai-cli> → uv/python`).
-- Alertar em acessos/leituras/escritas sob: `~/.ssh`, `~/.aws`, armazenamento de perfil do browser, cloud CLI creds, `/etc/passwd`.
-- Marcar conexões de saída inesperadas do processo AI‑CLI para endpoints MCP não aprovados (HTTP/SSE, portas como 8000).
-- Correlacione artefatos locais `~/.gemini`/`~/.claude` com prompts/outputs do gateway LLM; divergência indica possível hijacking.
+Heurísticas de detecção
+- Relacione acessos a arquivos sensíveis de volta à cadeia pai do AI‑CLI (e.g., `node → <ai-cli> → uv/python`).
+- Alerta para acessos/leituras/gravações em: `~/.ssh`, `~/.aws`, browser profile storage, cloud CLI creds, `/etc/passwd`.
+- Identifique conexões de saída inesperadas do processo AI‑CLI para MCP endpoints não aprovados (HTTP/SSE, portas como 8000).
+- Correlacione artefatos locais `~/.gemini`/`~/.claude` com prompts/outputs do LLM gateway; divergência indica possível hijacking.
 
 Exemplo de pseudo‑regras (adapte ao seu EDR):
 ```yaml
@@ -105,19 +105,19 @@ then: alert("AI-CLI secrets touch via tool chain")
 and dest_port IN [8000, 3333, 8787]
 then: tag("possible MCP over HTTP")
 ```
-Medidas de hardening
-- Exigir aprovação explícita do usuário para ferramentas de arquivo/sistema; registrar e apresentar os planos das ferramentas.
-- Restringir a saída de rede (egress) dos processos AI‑CLI para servidores MCP aprovados.
-- Enviar/ingestar logs locais de AI‑CLI e logs do LLM gateway para auditoria consistente e resistente a adulteração.
+Ideias de Hardening
+- Exigir aprovação explícita do usuário para ferramentas de arquivo/sistema; registrar e expor os planos das ferramentas.
+- Restringir o egress de rede para processos AI‑CLI a servidores MCP aprovados.
+- Enviar/ingerir logs locais de AI‑CLI e logs do LLM gateway para auditoria consistente e resistente à adulteração.
 
 ---
 
-## Notas de reprodução do Blue‑Team
+## Notas de Repro do Blue‑Team
 
-Use uma VM limpa com um EDR ou um tracer eBPF para reproduzir cadeias como:
-- `node → claude --model claude-sonnet-4-20250514` then immediate local file write.
-- `node → uv run --with fastmcp ... → python3.13` writing under `$HOME`.
-- `node/<ai-cli>` establishing TCP to an external MCP server (port 8000) while a remote Python process writes a file.
+Use uma VM limpa com um EDR ou tracer eBPF para reproduzir cadeias como:
+- `node → claude --model claude-sonnet-4-20250514` então gravação imediata de arquivo local.
+- `node → uv run --with fastmcp ... → python3.13` gravando em `$HOME`.
+- `node/<ai-cli>` estabelecendo TCP para um servidor MCP externo (porta 8000) enquanto um processo Python remoto grava um arquivo.
 
 Valide que suas detecções vinculem os eventos de arquivo/rede ao processo pai AI‑CLI que os iniciou, para evitar falsos positivos.
 
