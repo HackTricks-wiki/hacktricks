@@ -4,25 +4,25 @@
 
 ## Oorsig
 
-Plaaslike AI command-line interfaces (AI CLIs) soos Claude Code, Gemini CLI, Warp en soortgelyke tools word dikwels met kragtige ingeboude funksies gelewer: lêerstelsel lees/skryf, shell-uitvoering en uitgaande netwerktoegang. Baie tree op as MCP clients (Model Context Protocol), wat die model toelaat om eksterne tools oor STDIO of HTTP aan te roep. Omdat die LLM nie-deterministies tool-kettings beplan, kan identiese prompts tot verskillende proses-, lêer- en netwerkgedraginge oor verskeie runs en hosts lei.
+Plaaslike AI command-line interfaces (AI CLIs) soos Claude Code, Gemini CLI, Warp en soortgelyke gereedskap word dikwels voorsien met kragtige ingeboude funksies: filesystem read/write, shell execution en outbound network access. Baie tree op as MCP-kliente (Model Context Protocol), wat die model in staat stel om eksterne gereedskap oor STDIO of HTTP aan te roep. Omdat die LLM gereedskapskettings nie-deterministies beplan, kan identiese prompts oor verskillende draaie en gasheerrekenaars uiteenlopende proses-, lêer- en netwerkgedrag veroorsaak.
 
-Belangrike meganika wat in algemene AI CLIs gesien word:
-- Gewoonlik geïmplementeer in Node/TypeScript met 'n dun wrapper wat die model lanseer en tools blootstel.
-- Meervoudige modusse: interaktiewe chat, beplan/uitvoer, en enkel-prompt-uitvoering.
-- MCP-kliëntondersteuning met STDIO- en HTTP-transporte, wat beide plaaslike en afgeleë vermoënsuitbreiding moontlik maak.
+Sleutelmeganika wat in algemene AI CLIs gesien word:
+- Gewoonlik geïmplementeer in Node/TypeScript met 'n dun wrapper wat die model begin en gereedskap blootstel.
+- Verskeie modi: interactive chat, plan/execute, en single‑prompt run.
+- MCP-klientondersteuning met STDIO en HTTP-transporte, wat beide plaaslike en afgeleë vermoënsuitbreiding moontlik maak.
 
-Misbruik-impak: 'n Enkele prompt kan credentials inventariseer en exfiltrate, plaaslike lêers wysig, en stilweg vermoëns uitbrei deur te koppel na afgeleë MCP‑servers (sigbaarheidsgaping as daardie servers third‑party is).
+Gevolge van misbruik: 'n enkele prompt kan 'n inventaris opstel en credentials exfiltrate, lokale lêers wysig, en stilweg vermoëns uitbrei deur te koppel aan afgeleë MCP-servers (sigbaarheidsgaping as daardie servers derdepartye is).
 
 ---
 
-## Aanvaller Speelboek – Prompt‑gedrewe geheiminventarisering
+## Teenstander Speelboek – Prompt‑gedrewe Geheime‑inventaris
 
-Opdrag die agent om vinnig te triageer en credentials/geheimenisse te stage vir exfiltration terwyl dit stilbly:
+Gee die agent die taak om vinnig credentials/geheime te triageer en vir exfiltration voor te berei, terwyl dit stil bly:
 
-- Omvang: rekursief enumerasie onder $HOME en application/wallet dirs; vermy lawaaierige/pseudo‑paadjies (`/proc`, `/sys`, `/dev`).
-- Prestasie/stealth: beperk rekursiediepte; vermy `sudo`/priv‑escalation; som resultate op.
-- Teikens: `~/.ssh`, `~/.aws`, cloud CLI creds, `.env`, `*.key`, `id_rsa`, `keystore.json`, browser storage (LocalStorage/IndexedDB profiles), crypto‑wallet data.
-- Uitset: skryf 'n bondige lys na `/tmp/inventory.txt`; as die lêer bestaan, skep 'n datumstempel‑rugsteun voor oor-skryf.
+- Scope: rekurssief enumereer onder $HOME en application/wallet dirs; vermy noisy/pseudo paths (`/proc`, `/sys`, `/dev`).
+- Performance/stealth: cap recursion depth; vermy `sudo`/priv‑escalation; summarise results.
+- Targets: `~/.ssh`, `~/.aws`, cloud CLI creds, `.env`, `*.key`, `id_rsa`, `keystore.json`, browser storage (LocalStorage/IndexedDB profiles), crypto‑wallet data.
+- Output: write a concise list to `/tmp/inventory.txt`; if the file exists, create a timestamped backup before overwrite.
 
 Example operator prompt to an AI CLI:
 ```
@@ -37,63 +37,63 @@ Return a short summary only; no file contents.
 ```
 ---
 
-## Vermoë-uitbreiding via MCP (STDIO and HTTP)
+## Vermoë‑uitbreiding via MCP (STDIO en HTTP)
 
-AI CLIs funksioneer dikwels as MCP‑kliënte om by addisionele tools uit te kom:
+AI CLIs tree gereeld op as MCP‑kliente om by bykomende gereedskap uit te kom:
 
-- STDIO transport (local tools): die kliënt begin 'n hulpketting om 'n tool‑bediener te laat loop. Tipiese afstamming: `node → <ai-cli> → uv → python → file_write`. Voorbeeld waargeneem: `uv run --with fastmcp fastmcp run ./server.py` wat `python3.13` begin en plaaslike lêeroperasies namens die agent uitvoer.
-- HTTP transport (remote tools): die kliënt open uitgaande TCP (bv. poort 8000) na 'n afgeleë MCP‑bediener, wat die versoekte aksie uitvoer (bv. skryf na `/home/user/demo_http`). Op die eindpunt sien jy slegs die kliënt se netwerkaktiwiteit; bediener‑kant lêer‑aanrakinge gebeur buite‑gasheer.
+- STDIO transport (local tools): die kliënt spawn 'n helpketting om 'n tool‑server te laat loop. Tipiese afstamming: `node → <ai-cli> → uv → python → file_write`. Voorbeeld waargeneem: `uv run --with fastmcp fastmcp run ./server.py` wat `python3.13` start en plaaslike lêerbedrywighede namens die agent uitvoer.
+- HTTP transport (remote tools): die kliënt open uitgaande TCP (bv. poort 8000) na 'n remote MCP‑server, wat die versoekte aksie uitvoer (bv. skryf na `/home/user/demo_http`). Op die endpunt sal jy slegs die kliënt se netwerkaktiwiteit sien; server‑kant lêer‑aanrakinge gebeur buite die gasheer.
 
-Let wel:
-- MCP‑tools word aan die model beskryf en kan outo‑geselekteer word deur beplanning. Gedrag wissel tussen draaie.
-- Afgeleë MCP‑bedieners vergroot die blast radius en verminder gasheer‑kant sigbaarheid.
+Notes:
+- MCP tools word aan die model beskryf en mag deur beplanning outomaties gekies word. Gedrag verskil tussen draaie.
+- Remote MCP‑servers vergroot die blast radius en verminder gasheer‑kant sigbaarheid.
 
 ---
 
-## Plaaslike Artefakte en Logs (Forensika)
+## Lokaal Artefakte en Logs (Forensiek)
 
-- Gemini CLI sessie‑logs: `~/.gemini/tmp/<uuid>/logs.json`
-- Fields commonly seen: `sessionId`, `type`, `message`, `timestamp`.
-- Voorbeeld `message`: `"@.bashrc what is in this file?"` (user/agent intent vasgevang).
+- Gemini CLI session logs: `~/.gemini/tmp/<uuid>/logs.json`
+- Velde wat algemeen sigbaar is: `sessionId`, `type`, `message`, `timestamp`.
+- Voorbeeld `message`: `"@.bashrc what is in this file?"` (user/agent intent vasgelê).
 - Claude Code history: `~/.claude/history.jsonl`
 - JSONL inskrywings met velde soos `display`, `timestamp`, `project`.
 
-Korreleer hierdie plaaslike logs met versoeke wat by jou LLM gateway/proxy (bv. LiteLLM) waargeneem is om knoei/model‑kaping op te spoor: as wat die model verwerk afwyk van die plaaslike prompt/uitset, ondersoek ingespuite instruksies of gekompromitteerde tool‑beskrywings.
+Korreleer hierdie plaaslike logs met versoeke wat by jou LLM gateway/proxy (bv. LiteLLM) waargeneem word om manipulasie/model‑kaping te ontdek: as dit wat die model verwerk het afwyk van die plaaslike prompt/uitset, ondersoek ingespuite instruksies of gekompromitteerde tool‑beskrywers.
 
 ---
 
-## Eindpunt Telemetriepatrone
+## Endpunt Telemetrie Patrone
 
 Verteenwoordigende kettings op Amazon Linux 2023 met Node v22.19.0 en Python 3.13:
 
-1) Ingeboude tools (lokale lêertoegang)
-- Parent: `node .../bin/claude --model <model>` (of ekwivalente vir die CLI)
-- Immediate child action: create/modify a local file (e.g., `demo-claude`). Koppel die lêergebeurtenis terug via parent→child‑afstamming.
+1) Ingeboude gereedskap (lokale lêer‑toegang)
+- Ouer: `node .../bin/claude --model <model>` (of ekwivalent vir die CLI)
+- Onmiddellike kind‑aksie: skep/wysig 'n plaaslike lêer (bv. `demo-claude`). Koppel die lêer‑gebeurtenis terug via ouer→kind afstamming.
 
-2) MCP oor STDIO (lokale tool‑bediener)
+2) MCP oor STDIO (lokale tool‑server)
 - Ketting: `node → uv → python → file_write`
-- Voorbeeld spawn: `uv run --with fastmcp fastmcp run /home/ssm-user/tools/server.py`
+- Voorbeeld opstart: `uv run --with fastmcp fastmcp run /home/ssm-user/tools/server.py`
 
-3) MCP oor HTTP (afgeleë tool‑bediener)
-- Client: `node/<ai-cli>` open uitgaande TCP na `remote_port: 8000` (of soortgelyk)
-- Server: afgeleë Python‑proses hanteer die versoek en skryf `/home/ssm-user/demo_http`.
+3) MCP oor HTTP (remote tool‑server)
+- Kliënt: `node/<ai-cli>` open uitgaande TCP na `remote_port: 8000` (of soortgelyk)
+- Server: remote Python‑proses hanteer die versoek en skryf na `/home/ssm-user/demo_http`.
 
-Omdat agent‑besluite per draaipoging kan verskil, verwag variasie in presiese prosesse en geraakde paadjies.
+Omdat agent‑besluite tussen draaie verskil, verwag variasie in die presiese prosesse en aangeraakte paaie.
 
 ---
 
-## Opsporingsstrategie
+## Deteksiestrategie
 
 Telemetriebronne
-- Linux EDR wat eBPF/auditd gebruik vir proses-, lêer- en netwerkgebeure.
+- Linux EDR wat eBPF/auditd gebruik vir proses‑, lêer‑ en netwerkgebeure.
 - Plaaslike AI‑CLI logs vir sigbaarheid van prompts/bedoelings.
-- LLM gateway logs (bv. LiteLLM) vir kruis‑validering en model‑knoei‑opsporing.
+- LLM gateway logs (bv. LiteLLM) vir kruisvalidering en model‑manipulasie‑deteksie.
 
 Jagheuristieke
 - Koppel sensitiewe lêer‑aanrakinge terug na 'n AI‑CLI ouer‑ketting (bv. `node → <ai-cli> → uv/python`).
-- Waarsku by toegang/lees/skryf onder: `~/.ssh`, `~/.aws`, browser profiel‑opberg, cloud CLI creds, `/etc/passwd`.
-- Merk onverwagte uitgaande verbindings vanaf die AI‑CLI‑proses na nie‑goedgekeurde MCP‑endpunte (HTTP/SSE, poorte soos 8000).
-- Korreleer plaaslike `~/.gemini`/`~/.claude` artefakte met LLM gateway prompts/uitsette; afwyking dui op moontlike kaping.
+- Waarsku by toegang/lees/skryf onder: `~/.ssh`, `~/.aws`, browser profielopberging, cloud CLI creds, `/etc/passwd`.
+- Merk onverwante uitgaande verbindings van die AI‑CLI proses na nie‑goedgekeurde MCP‑endpunte (HTTP/SSE, poorte soos 8000).
+- Korreleer plaaslike `~/.gemini`/`~/.claude` artefakte met LLM gateway prompts/uitsette; divergensie dui op moontlike kaping.
 
 Voorbeeld pseudo‑reëls (pas aan vir jou EDR):
 ```yaml
@@ -105,21 +105,21 @@ then: alert("AI-CLI secrets touch via tool chain")
 and dest_port IN [8000, 3333, 8787]
 then: tag("possible MCP over HTTP")
 ```
-Idees vir verharding
-- Vereis uitdruklike gebruikersgoedkeuring vir file/system tools; log en bring tool plans na vore.
-- Beperk network egress vir AI‑CLI-prosesse tot goedgekeurde MCP-servers.
-- Stuur/ingesteer plaaslike AI‑CLI logs en LLM gateway logs vir konsekwente, manipulasie‑bestande ouditering.
+Verhardingsidees
+- Vereis uitdruklike gebruikersgoedkeuring vir lêer-/stelselhulpmiddels; registreer en vertoon hulpmiddel‑planne.
+- Beperk uitgaande netwerkverkeer van AI‑CLI‑prosesse tot goedgekeurde MCP‑bedieners.
+- Stuur/ingesteer plaaslike AI‑CLI-logs en LLM gateway-logs vir konsekwente, manipulasie‑bestand ouditering.
 
 ---
 
-## Blue‑Team Reproduksie-aantekeninge
+## Blue‑Team Reproduksie‑aantekeninge
 
-Gebruik 'n skoon VM met 'n EDR of eBPF tracer om kettings soos die volgende te reproduseer:
-- `node → claude --model claude-sonnet-4-20250514` dan onmiddellik plaaslike file write.
-- `node → uv run --with fastmcp ... → python3.13` wat skryf onder `$HOME`.
-- `node/<ai-cli>` wat 'n TCP na 'n eksterne MCP server (port 8000) vestig terwyl 'n afgeleë Python-proses 'n file skryf.
+Gebruik 'n skoon VM met 'n EDR of eBPF‑tracer om kettings soos die volgende te reproduseer:
+- `node → claude --model claude-sonnet-4-20250514` then immediate local file write.
+- `node → uv run --with fastmcp ... → python3.13` writing under `$HOME`.
+- `node/<ai-cli>` establishing TCP to an external MCP server (port 8000) while a remote Python process writes a file.
 
-Bevestig dat jou deteksies die file/network events terugkoppel aan die inisierende AI‑CLI-parent om vals positiewe te vermy.
+Valideer dat jou deteksies die lêer-/netwerkgebeure terugskakel na die inisiërende AI‑CLI‑ouer om vals positiewe te vermy.
 
 ---
 
