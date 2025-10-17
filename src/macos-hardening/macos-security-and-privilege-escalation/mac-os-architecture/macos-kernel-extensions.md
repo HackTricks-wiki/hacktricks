@@ -66,7 +66,7 @@ kextstat
 # (Deprecated) Get dependencies of the kext number 22
 kextstat | grep " 22 " | cut -c2-5,50- | cut -d '(' -f1
 ```
-`kmutil inspect` 也可用于 **转储 Kernel Collection (KC) 的内容** 或验证 kext 是否解析了所有符号依赖：
+`kmutil inspect` 也可用于 **转储 Kernel Collection (KC) 的内容** 或 验证 kext 是否解析了所有符号依赖：
 ```bash
 # List fileset entries contained in the boot KC
 kmutil inspect -B /System/Library/KernelCollections/BootKernelExtensions.kc --show-fileset-entries
@@ -77,40 +77,40 @@ kmutil libraries -p /Library/Extensions/FancyUSB.kext --undef-symbols
 ## Kernelcache
 
 > [!CAUTION]
-> 即便 kernel extensions 预期位于 `/System/Library/Extensions/`，如果你进入该文件夹你 **不会找到任何二进制文件**。这是由于 **kernelcache** 的存在，若要对某个 `.kext` 进行逆向，你需要想办法获得它。
+> 虽然内核扩展（kernel extensions）预期位于 `/System/Library/Extensions/`，但如果你进入该文件夹你**找不到任何二进制文件**。这是因为 **kernelcache**，要逆向一个 `.kext` 你需要找到获取它的方法。
 
-The **kernelcache** 是 XNU kernel 的一个 **预编译且预链接的版本**，同时包含必要的设备 **drivers** 和 **kernel extensions**。它以 **压缩** 格式存储，并在启动过程中解压到内存。kernelcache 通过提供一个可直接运行的内核和关键 drivers 的版本来加快启动时间，减少在启动时动态加载和链接这些组件所需的时间和资源。
+The **kernelcache** is a **pre-compiled and pre-linked version of the XNU kernel**, along with essential device **drivers** and **kernel extensions**. It's stored in a **compressed** format and gets decompressed into memory during the boot-up process. The kernelcache facilitates a **faster boot time** by having a ready-to-run version of the kernel and crucial drivers available, reducing the time and resources that would otherwise be spent on dynamically loading and linking these components at boot time.
 
-kernelcache 的主要优点是 **加载速度**，并且所有模块都已预链接（没有加载时的阻碍）。一旦所有模块被预链接，KXLD 可以从内存中移除，因此 **XNU cannot load new KEXTs.**
+kernelcache 的主要好处是 **加载速度**，并且所有模块都已预链接（没有加载时间的阻碍）。而且一旦所有模块被预链接后，KXLD 可以从内存中移除，因此 **XNU 无法加载新的 KEXTs。**
 
 > [!TIP]
-> The [https://github.com/dhinakg/aeota](https://github.com/dhinakg/aeota) tool 解密 Apple 的 AEA (Apple Encrypted Archive / AEA asset) 容器——Apple 用于 OTA 资产和某些 IPSW 组件的加密容器格式——并能生成底层的 .dmg/asset 存档，然后你可以使用随附的 aastuff 工具提取它。
+> The [https://github.com/dhinakg/aeota](https://github.com/dhinakg/aeota) tool decrypts Apple’s AEA (Apple Encrypted Archive / AEA asset) containers — the encrypted container format Apple uses for OTA assets and some IPSW pieces — and can produce the underlying .dmg/asset archive that you can then extract with the provided aastuff tools.
 
-### Local Kerlnelcache
+### 本地 Kernelcache
 
-在 iOS 中它位于 **`/System/Library/Caches/com.apple.kernelcaches/kernelcache`**，在 macOS 上你可以用：**`find / -name "kernelcache" 2>/dev/null`** 来查找。 \
-就我在 macOS 上的情况，我在以下位置找到了它：
+在 iOS 中它位于 **`/System/Library/Caches/com.apple.kernelcaches/kernelcache`**，在 macOS 中你可以用：**`find / -name "kernelcache" 2>/dev/null`** 查找它。\
+在我的 macOS 中我找到它在：
 
 - `/System/Volumes/Preboot/1BAEB4B5-180B-4C46-BD53-51152B7D92DA/boot/DAD35E7BC0CDA79634C20BD1BD80678DFB510B2AAD3D25C1228BB34BCD0A711529D3D571C93E29E1D0C1264750FA043F/System/Library/Caches/com.apple.kernelcaches/kernelcache`
 
-也可以在这里找到 [**kernelcache of version 14 with symbols**](https://x.com/tihmstar/status/1295814618242318337?lang=en)。
+Find also here the [**kernelcache of version 14 with symbols**](https://x.com/tihmstar/status/1295814618242318337?lang=en).
 
 #### IMG4 / BVX2 (LZFSE) compressed
 
-The IMG4 file format 是 Apple 在其 iOS 和 macOS 设备中用于安全地 **存储和验证固件** 组件（例如 **kernelcache**）的容器格式。IMG4 格式包含一个头部和若干标签，这些标签封装了不同的数据片段，包括实际的 payload（例如内核或 bootloader）、签名，以及一组 manifest 属性。该格式支持加密验证，使设备在执行固件组件之前能够确认其真实性和完整性。
+The IMG4 file format is a container format used by Apple in its iOS and macOS devices for securely **storing and verifying firmware** components (like **kernelcache**). The IMG4 format includes a header and several tags which encapsulate different pieces of data including the actual payload (like a kernel or bootloader), a signature, and a set of manifest properties. The format supports cryptographic verification, allowing the device to confirm the authenticity and integrity of the firmware component before executing it.
 
-It's usually composed of the following components:
+通常由以下组件组成：
 
 - **Payload (IM4P)**:
-  - Often compressed (LZFSE4, LZSS, …)
-  - Optionally encrypted
+- 通常被压缩 (LZFSE4, LZSS, …)
+- 可选地被加密
 - **Manifest (IM4M)**:
-  - Contains Signature
-  - Additional Key/Value dictionary
+- 包含 Signature
+- Additional Key/Value dictionary
 - **Restore Info (IM4R)**:
-  - Also known as APNonce
-  - Prevents replaying of some updates
-  - OPTIONAL: Usually this isn't found
+- 也称为 APNonce
+- 防止重放某些更新
+- OPTIONAL: 通常不会找到这个
 
 Decompress the Kernelcache:
 ```bash
@@ -129,18 +129,16 @@ disarm -L kernelcache.release.v57 # From unzip ipsw
 # disamer (extract specific parts, e.g. filesets) - [https://newandroidbook.com/tools/disarm.html](https://newandroidbook.com/tools/disarm.html)
 disarm -e filesets kernelcache.release.d23
 ```
-#### Disarm 内核符号
+#### Disarm 用于内核的符号
 
-**`Disarm`** 允许使用 matchers 从 kernelcache 对函数进行 symbolicate。
+**`Disarm`** 允许使用匹配器对 kernelcache 中的函数进行 symbolicate。 这些匹配器只是简单的模式规则（文本行），用于告诉 disarm 如何识别并自动 symbolicate 二进制内的函数、参数及 panic/log 字符串。
 
-这些 matchers 只是简单的模式规则（文本行），用于告诉 disarm 如何识别并 auto-symbolicate 二进制中的函数、参数和 panic/log 字符串。
-
-所以基本上你指出函数使用的字符串，disarm 会找到它并 **symbolicate it**。
+基本上，你只需指明函数使用的字符串，disarm 就会找到它并 **symbolicate it**。
 ```bash
 You can find some `xnu.matchers` in [https://newosxbook.com/tools/disarm.html](https://newosxbook.com/tools/disarm.html) in the **`Matchers`** section. You can also create your own matchers.
 
 ```bash
-# 转到 /tmp/extracted（disarm 解压 filesets 的位置）
+# 转到 /tmp/extracted（disarm 将 filesets 解压到此处）
 disarm -e filesets kernelcache.release.d23 # Always extract to /tmp/extracted
 cd /tmp/extracted
 JMATCHERS=xnu.matchers disarm --analyze kernel.rebuilt  # Note that xnu.matchers is actually a file with the matchers
@@ -173,11 +171,11 @@ brew install blacktop/tap/ipsw
 # 仅从 IPSW 提取 kernelcache
 ipsw extract --kernel /path/to/YourFirmware.ipsw -o out/
 
-# 你应该得到类似:
+# 你应该会得到类似：
 #   out/Firmware/kernelcache.release.iPhoneXX
-#   或者为 IMG4 payload: out/Firmware/kernelcache.release.iPhoneXX.im4p
+#   or an IMG4 payload: out/Firmware/kernelcache.release.iPhoneXX.im4p
 
-# 如果得到 IMG4 payload:
+# 如果你得到一个 IMG4 payload:
 ipsw img4 im4p extract out/Firmware/kernelcache*.im4p -o kcache.raw
 ```
 
@@ -226,7 +224,7 @@ kextex -e com.apple.security.sandbox kernelcache.release.iphone14.e
 # 提取所有
 kextex_all kernelcache.release.iphone14.e
 
-# 检查扩展是否有符号
+# 检查扩展的符号
 nm -a binaries/com.apple.security.sandbox | wc -l
 ```
 
@@ -254,7 +252,7 @@ Apple’s recommended workflow is to build a **Kernel Debug Kit (KDK)** that mat
 ### One-shot local debug of a panic
 
 ```bash
-# 为最新 panic 创建符号化包
+# 为最近的 panic 创建符号化包
 sudo kdpwrit dump latest.kcdata
 kmutil analyze-panic latest.kcdata -o ~/panic_report.txt
 ```
@@ -275,7 +273,7 @@ reboot
 ```bash
 lldb
 (lldb) kdp-remote "udp://macbook-target"
-(lldb) bt  # 在内核上下文获取回溯
+(lldb) bt  # get backtrace in kernel context
 ```
 
 ### Attaching LLDB to a specific loaded kext
@@ -284,7 +282,7 @@ lldb
 # 确定 kext 的加载地址
 ADDR=$(kmutil showloaded --bundle-identifier com.example.driver | awk '{print $4}')
 
-# 附加
+# Attach
 sudo lldb -n kernel_task -o "target modules load --file /Library/Extensions/Example.kext/Contents/MacOS/Example --slide $ADDR"
 ```
 
