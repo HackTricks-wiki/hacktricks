@@ -1,53 +1,53 @@
-# macOS Kernel Extensions & Kernelcaches
+# Extensions du noyau macOS & Kernelcaches
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Basic Information
+## Informations de base
 
-Kernel extensions (Kexts) are **packages** with a **`.kext`** extension that are **loaded directly into the macOS kernel space**, providing additional functionality to the main operating system.
+Kernel extensions (Kexts) sont des **packages** avec une **`.kext`** extension qui sont **chargés directement dans l'espace kernel de macOS**, fournissant des fonctionnalités supplémentaires au système d'exploitation principal.
 
-### Deprecation status & DriverKit / System Extensions
-Starting with **macOS Catalina (10.15)** Apple marked most legacy KPIs as *deprecated* and introduced the **System Extensions & DriverKit** frameworks that run in **user-space**. From **macOS Big Sur (11)** the operating system will *refuse to load* third-party kexts that rely on deprecated KPIs unless the machine is booted in **Reduced Security** mode. On Apple Silicon, enabling kexts additionally requires the user to:
+### Statut de dépréciation & DriverKit / System Extensions
+À partir de **macOS Catalina (10.15)** Apple a marqué la plupart des KPI hérités comme *dépréciés* et a introduit les frameworks **System Extensions & DriverKit** qui s'exécutent en **user-space**. Depuis **macOS Big Sur (11)** le système refusera de *charger* des kexts tiers qui dépendent de KPI dépréciés à moins que la machine ne soit démarrée en mode **Reduced Security**. Sur Apple Silicon, l'activation des kexts nécessite également que l'utilisateur :
 
-1. Reboot into **Recovery** → *Startup Security Utility*.
-2. Select **Reduced Security** and tick **“Allow user management of kernel extensions from identified developers”**.
-3. Reboot and approve the kext from **System Settings → Privacy & Security**.
+1. Redémarre en **Recovery** → *Startup Security Utility*.
+2. Sélectionne **Reduced Security** et coche **“Allow user management of kernel extensions from identified developers”**.
+3. Redémarre et approuve le kext depuis **System Settings → Privacy & Security**.
 
-User-land drivers written with DriverKit/System Extensions dramatically **reduce attack surface** because crashes or memory corruption are confined to a sandboxed process rather than kernel space.
+Les drivers user-land écrits avec DriverKit/System Extensions réduisent dramatiquement la surface d'attaque parce que les crashes ou corruptions mémoire sont confinés à un processus sandboxé plutôt qu'au kernel space.
 
-> 📝 From macOS Sequoia (15) Apple has removed several legacy networking and USB KPIs entirely – the only forward-compatible solution for vendors is to migrate to System Extensions.
+> 📝 Depuis macOS Sequoia (15) Apple a supprimé plusieurs KPI réseau et USB hérités – la seule solution compatible à long terme pour les fournisseurs est de migrer vers System Extensions.
 
-### Requirements
+### Exigences
 
-Obviously, this is so powerful that it is **complicated to load a kernel extension**. These are the **requirements** that a kernel extension must meet to be loaded:
+Évidemment, c'est si puissant qu'il est **complexe de charger une kernel extension**. Voici les **exigences** qu'une kernel extension doit remplir pour être chargée :
 
-- When **entering recovery mode**, kernel **extensions must be allowed** to be loaded:
+- Lors de l'**entrée en recovery mode**, les kernel **extensions doivent être autorisées** à être chargées :
 
 <figure><img src="../../../images/image (327).png" alt=""><figcaption></figcaption></figure>
 
-- The kernel extension must be **signed with a kernel code signing certificate**, which can only be **granted by Apple**. Who will review in detail the company and the reasons why it is needed.
-- The kernel extension must also be **notarized**, Apple will be able to check it for malware.
-- Then, the **root** user is the one who can **load the kernel extension** and the files inside the package must **belong to root**.
-- During the upload process, the package must be prepared in a **protected non-root location**: `/Library/StagedExtensions` (requires the `com.apple.rootless.storage.KernelExtensionManagement` grant).
-- Finally, when attempting to load it, the user will [**receive a confirmation request**](https://developer.apple.com/library/archive/technotes/tn2459/_index.html) and, if accepted, the computer must be **restarted** to load it.
+- La kernel extension doit être **signée avec un certificat de signature de code kernel**, qui ne peut être **accordé que par Apple**. Apple examinera en détail l'entreprise et les raisons de la demande.
+- La kernel extension doit aussi être **notarisée**, Apple pourra la vérifier pour malware.
+- Ensuite, l'utilisateur **root** est celui qui peut **charger la kernel extension** et les fichiers à l'intérieur du package doivent **appartenir à root**.
+- Pendant le processus d'upload, le package doit être préparé dans un emplacement **protégé non-root** : `/Library/StagedExtensions` (requiert la permission `com.apple.rootless.storage.KernelExtensionManagement`).
+- Enfin, lors de la tentative de chargement, l'utilisateur [**receive a confirmation request**](https://developer.apple.com/library/archive/technotes/tn2459/_index.html) et, si accepté, l'ordinateur doit être **redémarré** pour la charger.
 
-### Loading process
+### Processus de chargement
 
-In Catalina it was like this: It is interesting to note that the **verification** process occurs in **userland**. However, only applications with the **`com.apple.private.security.kext-management`** grant can **request the kernel to load an extension**: `kextcache`, `kextload`, `kextutil`, `kextd`, `syspolicyd`
+Dans Catalina c'était comme suit : Il est intéressant de noter que le processus de **vérification** a lieu en **userland**. Cependant, seules les applications disposant de la permission **`com.apple.private.security.kext-management`** peuvent **demander au kernel de charger une extension** : `kextcache`, `kextload`, `kextutil`, `kextd`, `syspolicyd`
 
-1. **`kextutil`** cli **starts** the **verification** process for loading an extension
-- It will talk to **`kextd`** by sending using a **Mach service**.
-2. **`kextd`** will check several things, such as the **signature**
-- It will talk to **`syspolicyd`** to **check** if the extension can be **loaded**.
-3. **`syspolicyd`** will **prompt** the **user** if the extension has not been previously loaded.
-- **`syspolicyd`** will report the result to **`kextd`**
-4. **`kextd`** will finally be able to **tell the kernel to load** the extension
+1. **`kextutil`** cli **démarre** le processus de **vérification** pour le chargement d'une extension
+- Il communiquera avec **`kextd`** en envoyant via un **Mach service**.
+2. **`kextd`** vérifiera plusieurs éléments, comme la **signature**
+- Il communiquera avec **`syspolicyd`** pour **vérifier** si l'extension peut être **chargée**.
+3. **`syspolicyd`** affichera une **invite** à l'**utilisateur** si l'extension n'a pas été précédemment chargée.
+- **`syspolicyd`** rapportera le résultat à **`kextd`**
+4. **`kextd`** pourra finalement **dire au kernel de charger** l'extension
 
-If **`kextd`** is not available, **`kextutil`** can perform the same checks.
+Si **`kextd`** n'est pas disponible, **`kextutil`** peut effectuer les mêmes vérifications.
 
-### Enumeration & management (loaded kexts)
+### Énumération & gestion (kexts chargés)
 
-`kextstat` was the historical tool but it is **deprecated** in recent macOS releases. The modern interface is **`kmutil`**:
+`kextstat` était l'outil historique mais il est **déprécié** dans les récentes versions de macOS. L'interface moderne est **`kmutil`**:
 ```bash
 # List every extension currently linked in the kernel, sorted by load address
 sudo kmutil showloaded --sort
@@ -66,7 +66,7 @@ kextstat
 # (Deprecated) Get dependencies of the kext number 22
 kextstat | grep " 22 " | cut -c2-5,50- | cut -d '(' -f1
 ```
-`kmutil inspect` peut également être utilisé pour **dump le contenu d'une Kernel Collection (KC)** ou vérifier qu'un kext résout toutes les dépendances de symboles :
+`kmutil inspect` peut également être utilisé pour **extraire le contenu d'une Kernel Collection (KC)** ou vérifier qu'un kext résout toutes les dépendances de symboles :
 ```bash
 # List fileset entries contained in the boot KC
 kmutil inspect -B /System/Library/KernelCollections/BootKernelExtensions.kc --show-fileset-entries
@@ -77,20 +77,20 @@ kmutil libraries -p /Library/Extensions/FancyUSB.kext --undef-symbols
 ## Kernelcache
 
 > [!CAUTION]
-> Même si les kernel extensions sont censées se trouver dans `/System/Library/Extensions/`, si vous ouvrez ce dossier vous **n'y trouverez aucun binaire**. C'est à cause du **kernelcache** et pour renverser un `.kext` vous devez trouver un moyen de l'obtenir.
+> Even though the kernel extensions are expected to be in `/System/Library/Extensions/`, if you go to this folder you **won't find any binary**. This is because of the **kernelcache** and in order to reverse one `.kext` you need to find a way to obtain it.
 
-Le **kernelcache** est une **version pré-compilée et pré-liée du noyau XNU**, avec les **drivers** essentiels et les **kernel extensions**. Il est stocké dans un format **compressé** et est décompressé en mémoire pendant le processus de démarrage. Le kernelcache permet un **démarrage plus rapide** en disposant d'une version prête à l'exécution du noyau et des drivers cruciaux, réduisant le temps et les ressources qui seraient autrement nécessaires pour charger et lier dynamiquement ces composants au démarrage.
+La **kernelcache** est une **version précompilée et préliée du kernel XNU**, avec les **drivers** essentiels et les **kernel extensions**. Elle est stockée dans un format **compressé** et est décompressée en mémoire lors du démarrage. La kernelcache permet un **démarrage plus rapide** en fournissant une version prête à l'exécution du kernel et des drivers cruciaux, réduisant le temps et les ressources qui seraient autrement nécessaires pour charger et lier dynamiquement ces composants au démarrage.
 
-Les principaux avantages du kernelcache sont la **vitesse de chargement** et le fait que tous les modules sont préliés (pas d'impédiment au temps de chargement). Et une fois tous les modules préliés, KXLD peut être retiré de la mémoire de sorte que **XNU ne peut pas charger de nouveaux KEXTs.**
+Les principaux avantages de la kernelcache sont la **vitesse de chargement** et le fait que tous les modules sont préliés (pas d'impact au moment du chargement). Et une fois que tous les modules ont été préliés — KXLD peut être retiré de la mémoire de sorte que **XNU cannot load new KEXTs.**
 
 > [!TIP]
-> L'outil https://github.com/dhinakg/aeota décrypte les conteneurs AEA (Apple Encrypted Archive / AEA asset) d'Apple — le format de conteneur chiffré qu'Apple utilise pour les assets OTA et certaines pièces d'IPSW — et peut produire l'archive sous-jacente .dmg/asset que vous pouvez ensuite extraire avec les outils aastuff fournis.
+> The [https://github.com/dhinakg/aeota](https://github.com/dhinakg/aeota) tool decrypts Apple’s AEA (Apple Encrypted Archive / AEA asset) containers — the encrypted container format Apple uses for OTA assets and some IPSW pieces — and can produce the underlying .dmg/asset archive that you can then extract with the provided aastuff tools.
 
 
 ### Kernelcache local
 
-Sur iOS il est situé dans **`/System/Library/Caches/com.apple.kernelcaches/kernelcache`** ; sur macOS vous pouvez le trouver avec : **`find / -name "kernelcache" 2>/dev/null`** \
-Dans mon cas sur macOS je l'ai trouvé dans :
+Sur iOS il se trouve dans **`/System/Library/Caches/com.apple.kernelcaches/kernelcache`** ; sur macOS vous pouvez le trouver avec : **`find / -name "kernelcache" 2>/dev/null`** \
+Dans mon cas sur macOS je l'ai trouvé ici :
 
 - `/System/Volumes/Preboot/1BAEB4B5-180B-4C46-BD53-51152B7D92DA/boot/DAD35E7BC0CDA79634C20BD1BD80678DFB510B2AAD3D25C1228BB34BCD0A711529D3D571C93E29E1D0C1264750FA043F/System/Library/Caches/com.apple.kernelcaches/kernelcache`
 
@@ -98,22 +98,22 @@ Find also here the [**kernelcache of version 14 with symbols**](https://x.com/ti
 
 #### IMG4 / BVX2 (LZFSE) compressed
 
-Le format de fichier IMG4 est un format conteneur utilisé par Apple sur ses appareils iOS et macOS pour **stocker et vérifier de manière sécurisée des composants de firmware** (comme le **kernelcache**). Le format IMG4 inclut un en-tête et plusieurs tags qui encapsulent différentes pièces de données incluant la payload réelle (comme un kernel ou un bootloader), une signature, et un ensemble de propriétés de manifeste. Le format supporte la vérification cryptographique, permettant à l'appareil de confirmer l'authenticité et l'intégrité du composant firmware avant de l'exécuter.
+Le format IMG4 est un format conteneur utilisé par Apple sur ses appareils iOS et macOS pour **stocker et vérifier de manière sécurisée des composants de firmware** (comme la **kernelcache**). Le format IMG4 inclut un en-tête et plusieurs tags qui encapsulent différentes données, y compris la charge utile réelle (par exemple un kernel ou un bootloader), une signature, et un ensemble de propriétés de manifeste. Le format supporte la vérification cryptographique, permettant à l'appareil de confirmer l'authenticité et l'intégrité du composant de firmware avant de l'exécuter.
 
-Il est généralement composé des composants suivants :
+Il est généralement composé des éléments suivants :
 
-- **Payload (IM4P)**:
+- **Payload (IM4P)** :
 - Souvent compressé (LZFSE4, LZSS, …)
 - Optionnellement chiffré
-- **Manifest (IM4M)**:
+- **Manifest (IM4M)** :
 - Contient la Signature
-- Dictionnaire additionnel Key/Value
-- **Restore Info (IM4R)**:
-- Aussi connu sous le nom APNonce
-- Empêche la réexécution (replay) de certaines mises à jour
-- OPTIONAL : On le trouve généralement pas
+- Dictionnaire supplémentaire de clés/valeurs
+- **Restore Info (IM4R)** :
+- Aussi connu sous le nom d'APNonce
+- Empêche la réutilisation de certaines mises à jour
+- OPTIONAL: Usually this isn't found
 
-Décompresser le Kernelcache:
+Décompresser la kernelcache :
 ```bash
 # img4tool (https://github.com/tihmstar/img4tool)
 img4tool -e kernelcache.release.iphone14 -o kernelcache.release.iphone14.e
@@ -130,11 +130,11 @@ disarm -L kernelcache.release.v57 # From unzip ipsw
 # disamer (extract specific parts, e.g. filesets) - [https://newandroidbook.com/tools/disarm.html](https://newandroidbook.com/tools/disarm.html)
 disarm -e filesets kernelcache.release.d23
 ```
-#### Disarm : symboles pour le kernel
+#### Disarm symboles du kernel
 
-**`Disarm`** permet de symbolicate des fonctions du kernelcache en utilisant des matchers. Ces matchers sont juste de simples règles de pattern (lignes de texte) qui indiquent à disarm comment reconnaître & auto-symbolicate les fonctions, les arguments et les chaînes panic/log à l'intérieur d'un binaire.
+**`Disarm`** permet de symbolicate des fonctions du kernelcache en utilisant des matchers. Ces matchers sont juste des règles de motifs simples (lignes de texte) qui indiquent à disarm comment reconnaître & auto-symbolicate les fonctions, les arguments et les panic/log strings à l'intérieur d'un binary.
 
-Concrètement, vous indiquez la chaîne qu’utilise une fonction et disarm la trouvera et la **symbolicate**.
+En gros, vous indiquez la chaîne qu'utilise une fonction et disarm la trouvera et **symbolicate it**.
 ```bash
 You can find some `xnu.matchers` in [https://newosxbook.com/tools/disarm.html](https://newosxbook.com/tools/disarm.html) in the **`Matchers`** section. You can also create your own matchers.
 
@@ -169,14 +169,14 @@ To **extract** the kernel cache you can do:
 # Installer l'outil ipsw
 brew install blacktop/tap/ipsw
 
-# Extraire uniquement le kernelcache de l'IPSW
+# Extraire uniquement le kernelcache depuis l'IPSW
 ipsw extract --kernel /path/to/YourFirmware.ipsw -o out/
 
-# Vous devriez obtenir quelque chose comme :
+# Vous devriez obtenir quelque chose comme:
 #   out/Firmware/kernelcache.release.iPhoneXX
-#   or an IMG4 payload: out/Firmware/kernelcache.release.iPhoneXX.im4p
+#   ou un payload IMG4: out/Firmware/kernelcache.release.iPhoneXX.im4p
 
-# Si vous obtenez un IMG4 payload :
+# Si vous obtenez un payload IMG4:
 ipsw img4 im4p extract out/Firmware/kernelcache*.im4p -o kcache.raw
 ```
 
@@ -253,7 +253,7 @@ Apple’s recommended workflow is to build a **Kernel Debug Kit (KDK)** that mat
 ### One-shot local debug of a panic
 
 ```bash
-# Créer un bundle de symbolication pour le dernier panic
+# Créer un bundle de symbolication pour le dernier kernel panic
 sudo kdpwrit dump latest.kcdata
 kmutil analyze-panic latest.kcdata -o ~/panic_report.txt
 ```
@@ -274,7 +274,7 @@ reboot
 ```bash
 lldb
 (lldb) kdp-remote "udp://macbook-target"
-(lldb) bt  # obtenir la pile d'appels dans le contexte du noyau
+(lldb) bt  # obtenir backtrace dans le contexte du kernel
 ```
 
 ### Attaching LLDB to a specific loaded kext

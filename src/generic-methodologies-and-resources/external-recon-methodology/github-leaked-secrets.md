@@ -3,7 +3,7 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 
-### Outils pour trouver des secrets dans les git repos et le système de fichiers
+### Outils pour trouver des secrets dans les dépôts git et le système de fichiers
 
 - [https://github.com/dxa4481/truffleHog](https://github.com/dxa4481/truffleHog)
 - [https://github.com/gitleaks/gitleaks](https://github.com/gitleaks/gitleaks)
@@ -20,26 +20,26 @@
 - [https://github.com/kootenpv/gittyleaks](https://github.com/kootenpv/gittyleaks)
 - [https://github.com/obheda12/GitDorker](https://github.com/obheda12/GitDorker)
 
-> Notes
-> - TruffleHog v3 can verify many credentials live and scan GitHub orgs, issues/PRs, gists, and wikis. Example: `trufflehog github --org <ORG> --results=verified`.
-> - Gitleaks v8 supports scanning git history, directories and archives: `gitleaks detect -v --source .` or `gitleaks detect --source <repo> --log-opts="--all"`.
-> - Nosey Parker focuses on high-throughput scanning with curated rules and has an Explorer UI for triage. Example: `noseyparker scan --datastore np.db <path|repo>` then `noseyparker report --datastore np.db`.
-> - ggshield (GitGuardian CLI) provides pre-commit/CI hooks and Docker image scanning: `ggshield secret scan repo <path-or-url>`.
+> Remarques
+> - TruffleHog v3 peut vérifier en direct de nombreuses credentials et scanner les orgs GitHub, issues/PRs, gists et wikis. Exemple : `trufflehog github --org <ORG> --results=verified`.
+> - Gitleaks v8 prend en charge le scan de l'historique git, des répertoires et des archives : `gitleaks detect -v --source .` ou `gitleaks detect --source <repo> --log-opts="--all"`.
+> - Nosey Parker se concentre sur le scanning à haut débit avec des règles triées et propose une UI Explorer pour le triage. Exemple : `noseyparker scan --datastore np.db <path|repo>` puis `noseyparker report --datastore np.db`.
+> - ggshield (GitGuardian CLI) fournit des hooks pre-commit/CI et le scan d'images Docker : `ggshield secret scan repo <path-or-url>`.
 
-### Endroits où les secrets leakent couramment sur GitHub
+### Où les secrets leak couramment sur GitHub
 
-- Repository files in default and non-default branches (search `repo:owner/name@branch` in the UI).
-- Full git history and other branches/tags (clone and scan with gitleaks/trufflehog; GitHub search focuses on indexed content).
-- Issues, pull requests, comments, and descriptions (TruffleHog GitHub source supports these via flags like `--issue-comments`, `--pr-comments`).
-- Actions logs and artifacts of public repositories (masking is best-effort; review logs/artifacts if visible).
-- Wikis and release assets.
-- Gists (search with tooling or the UI; some tools can include gists).
+- Fichiers du dépôt dans les branches par défaut et non par défaut (rechercher `repo:owner/name@branch` dans l'UI).
+- Historique git complet et autres branches/tags (clonez et scannez avec gitleaks/trufflehog ; la recherche GitHub se concentre sur le contenu indexé).
+- Issues, pull requests, commentaires et descriptions (TruffleHog GitHub source prend en charge ces éléments via des flags comme `--issue-comments`, `--pr-comments`).
+- Logs d'Actions et artefacts des dépôts publics (le masquage est au mieux approximatif ; vérifiez les logs/artefacts s'ils sont visibles).
+- Wikis et assets de release.
+- Gists (chercher avec des outils ou l'UI ; certains outils peuvent inclure les gists).
 
-> Gotchas
-> - GitHub’s REST code search API is legacy and does not support regex; prefer the Web UI for regex searches. The gh CLI uses the legacy API.
-> - Only files below a certain size are indexed for search. To be thorough, clone and scan locally with a secrets scanner.
+> Pièges
+> - L'API REST de recherche de code de GitHub est obsolète et ne prend pas en charge les regex ; privilégiez l'interface Web pour les recherches par regex. Le gh CLI utilise cette API obsolète.
+> - Seuls les fichiers en dessous d'une certaine taille sont indexés pour la recherche. Pour être exhaustif, clonez et scannez localement avec un scanner de secrets.
 
-### Analyse programmatique à l'échelle de l'organisation
+### Scan programmatique à l'échelle de l'organisation
 
 - TruffleHog (GitHub source):
 ```bash
@@ -47,7 +47,7 @@ export GITHUB_TOKEN=<token>
 trufflehog github --org Target --results=verified \
 --include-wikis --issue-comments --pr-comments --gist-comments
 ```
-- Gitleaks sur tous les org repos (clone shallow and scan):
+- Gitleaks sur tous les repos de l'organisation (clone shallow and scan):
 ```bash
 gh repo list Target --limit 1000 --json nameWithOwner,url \
 | jq -r '.[].url' | while read -r r; do
@@ -55,7 +55,7 @@ tmp=$(mktemp -d); git clone --depth 1 "$r" "$tmp" && \
 gitleaks detect --source "$tmp" -v || true; rm -rf "$tmp";
 done
 ```
-- Fouineur sur un mono checkout:
+- Fouineur sur un mono checkout :
 ```bash
 # after cloning many repos beneath ./org
 noseyparker scan --datastore np.db org/ && noseyparker report --datastore np.db
@@ -67,7 +67,7 @@ ggshield secret scan path -r .
 # full git history of a repo
 ggshield secret scan repo <path-or-url>
 ```
-> Astuce : pour l'historique git, privilégiez les scanners qui analysent `git log -p --all` pour détecter les secrets supprimés.
+> Astuce : Pour l'historique git, privilégiez les scanners qui analysent `git log -p --all` pour repérer les secrets supprimés.
 
 ### Dorks mis à jour pour les tokens modernes
 
@@ -369,6 +369,6 @@ wide-source-code-search.md
 
 ## Références
 
-- Empêcher que des secrets se retrouvent dans des dépôts publics (GitHub Blog, Feb 29, 2024): https://github.blog/news-insights/product-news/keeping-secrets-out-of-public-repositories/
+- Garder les secrets hors des dépôts publics (GitHub Blog, Feb 29, 2024): https://github.blog/news-insights/product-news/keeping-secrets-out-of-public-repositories/
 - TruffleHog v3 – Find, verify, and analyze leaked credentials: https://github.com/trufflesecurity/trufflehog
 {{#include ../../banners/hacktricks-training.md}}
