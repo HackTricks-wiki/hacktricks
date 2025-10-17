@@ -488,6 +488,7 @@
   - [Spring Actuators](network-services-pentesting/pentesting-web/spring-actuators.md)
   - [Symfony](network-services-pentesting/pentesting-web/symphony.md)
   - [Tomcat](network-services-pentesting/pentesting-web/tomcat/README.md)
+  - [Telerik Ui Aspnet Ajax Unsafe Reflection Webresource Axd](network-services-pentesting/pentesting-web/telerik-ui-aspnet-ajax-unsafe-reflection-webresource-axd.md)
   - [Uncovering CloudFlare](network-services-pentesting/pentesting-web/uncovering-cloudflare.md)
   - [Vuejs](network-services-pentesting/pentesting-web/vuejs.md)
   - [VMWare (ESX, VCenter...)](network-services-pentesting/pentesting-web/vmware-esx-vcenter....md)
