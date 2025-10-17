@@ -1,28 +1,28 @@
-# Matumizi mabaya ya AI Agent: Local AI CLI Tools & MCP (Claude/Gemini/Warp)
+# AI Agent Abuse: Local AI CLI Tools & MCP (Claude/Gemini/Warp)
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Muhtasari
 
-Local AI command-line interfaces (AI CLIs) kama Claude Code, Gemini CLI, Warp na zana zinazofanana mara nyingi huja na built‑ins zenye nguvu: filesystem read/write, shell execution na outbound network access. Nyingi hufanya kazi kama MCP clients (Model Context Protocol), zikimruhusu model call external tools juu ya STDIO au HTTP. Kwa sababu LLM inapanga tool-chains kwa njia isiyo‑deterministic, prompts sawa zinaweza kusababisha tabia tofauti za mchakato, faili na mtandao katika runs na hosts tofauti.
+Interfaces za mstari wa amri za Local AI (AI CLIs) kama Claude Code, Gemini CLI, Warp na zana zinazofanana mara nyingi zinakuja na vipengele vimejengewa ndani vyenye nguvu: filesystem read/write, shell execution na outbound network access. Nyingi hufanya kazi kama MCP clients (Model Context Protocol), zikimruhusu model kuwaita zana za nje kupitia STDIO au HTTP. Kwa sababu LLM inapanga tool-chains kwa njia isiyo-deterministic, prompts sawa zinaweza kusababisha tabia tofauti za michakato, faili na mtandao kati ya utekelezaji na mashine.
 
-Key mechanics seen in common AI CLIs:
-- Kwa kawaida implemented katika Node/TypeScript na thin wrapper inayozindua model na kuonyesha tools.
-- Multiple modes: interactive chat, plan/execute, na single‑prompt run.
-- MCP client support na STDIO na HTTP transports, ikiruhusu extension ya uwezo wa ndani na wa mbali.
+Mekaniki kuu zinazotambulika katika AI CLIs za kawaida:
+- Kwa kawaida zimewekwa kwa Node/TypeScript na wrapper nyembamba inayozindua model na kufichua tools.
+- Mode nyingi: interactive chat, plan/execute, na single‑prompt run.
+- MCP client support na transport za STDIO na HTTP, zikiruhusu upanuzi wa uwezo kwa ndani na kwa mbali.
 
-Abuse impact: Prompt moja inaweza inventory na exfiltrate credentials, modify local files, na silently extend capability kwa kuungana na remote MCP servers (visibility gap ikiwa servers hizo ni third‑party).
+Athari za matumizi mabaya: Prompt moja inaweza kuorodhesha na exfiltrate credentials, kurekebisha local files, na kimya‑kimya kuongeza uwezo kwa kuunganishwa na remote MCP servers (ufunikaji wa uonekano ikiwa server hizo ni third‑party).
 
 ---
 
-## Mpango wa Mshambuliaji – Prompt‑Driven Secrets Inventory
+## Adversary Playbook – Prompt‑Driven Secrets Inventory
 
-Lipeni agent ili haraka triage na stage credentials/siri kwa ajili ya exfiltration huku ikibaki kimya:
+Weka agent kufanya triage haraka na kuandaa credentials/secrets kwa ajili ya exfiltration wakati ukikaa kimya:
 
-- Wigo: orodhesha kwa rekursia chini ya $HOME na application/wallet dirs; epuka noisy/pseudo paths (`/proc`, `/sys`, `/dev`).
-- Utendaji/stealth: cap recursion depth; epuka `sudo`/priv‑escalation; summarise results.
-- Malengo: `~/.ssh`, `~/.aws`, cloud CLI creds, `.env`, `*.key`, `id_rsa`, `keystore.json`, browser storage (LocalStorage/IndexedDB profiles), crypto‑wallet data.
-- Output: andika orodha fupi kwa `/tmp/inventory.txt`; ikiwa faili ipo, tengeneza timestamped backup kabla ya overwrite.
+- Scope: orodhesha recursively chini ya $HOME na application/wallet dirs; epuka noisy/pseudo paths (`/proc`, `/sys`, `/dev`).
+- Performance/stealth: weka kikomo kwa recursion depth; epuka `sudo`/priv‑escalation; fupisha matokeo.
+- Targets: `~/.ssh`, `~/.aws`, cloud CLI creds, `.env`, `*.key`, `id_rsa`, `keystore.json`, browser storage (LocalStorage/IndexedDB profiles), crypto‑wallet data.
+- Output: andika orodha fupi kwa `/tmp/inventory.txt`; ikiwa faili ipo, tengeneza backup yenye timestamp kabla ya kuandika tena.
 
 Example operator prompt to an AI CLI:
 ```
@@ -37,20 +37,20 @@ Return a short summary only; no file contents.
 ```
 ---
 
-## Uboreshaji wa Uwezo kupitia MCP (STDIO na HTTP)
+## Ugani wa Uwezo kupitia MCP (STDIO na HTTP)
 
 AI CLIs mara nyingi hufanya kazi kama wateja wa MCP ili kufikia zana za ziada:
 
-- STDIO transport (local tools): client huanzisha mnyororo wa wasaidizi kuendesha tool server. Typical lineage: `node → <ai-cli> → uv → python → file_write`. Example observed: `uv run --with fastmcp fastmcp run ./server.py` ambayo inaanzisha `python3.13` na kufanya operesheni za faili za eneo kwa niaba ya agent.
-- HTTP transport (remote tools): client hufungua outbound TCP (mf., port 8000) kwa remote MCP server, ambayo inatekeleza kitendo kilichohitajika (mf., write `/home/user/demo_http`). Kwenye endpoint utaona tu shughuli za mtandao za client; kugusa faili upande wa server hutokea off‑host.
+- STDIO transport (local tools): mteja huanzisha mnyororo wa msaada ili kuendesha tool server. Typical lineage: `node → <ai-cli> → uv → python → file_write`. Mfano ulioshuhudiwa: `uv run --with fastmcp fastmcp run ./server.py` ambayo inaanzisha `python3.13` na hufanya operesheni za faili za ndani kwa niaba ya agent.
+- HTTP transport (remote tools): mteja hufungua TCP ya kutoka nje (kwa mfano, port 8000) kwenda kwa remote MCP server, ambayo hufanya kitendo kilichohitajika (kwa mfano, write `/home/user/demo_http`). Kwenye endpoint utaona tu shughuli za mtandao za mteja; kufikiri/kugusa faili upande wa server hufanyika mbali na host.
 
 Notes:
-- Zana za MCP zinaelezewa kwa modeli na zinaweza kuchaguliwa kiotomatiki wakati wa kupanga. Tabia inaweza kutofautiana kati ya runs.
-- Remote MCP servers zinaongeza blast radius na kupunguza uonekano upande wa host.
+- Zana za MCP zinaelezewa kwa model na zinaweza kuchaguliwa kwaauto na planning. Tabia zinatofautiana kati ya runs.
+- Remote MCP servers zinaongeza blast radius na kupunguza uonekanaji upande wa host.
 
 ---
 
-## Vificho vya Ndani na Magogo (Forensics)
+## Local Artifacts and Logs (Forensics)
 
 - Gemini CLI session logs: `~/.gemini/tmp/<uuid>/logs.json`
 - Fields commonly seen: `sessionId`, `type`, `message`, `timestamp`.
@@ -58,17 +58,17 @@ Notes:
 - Claude Code history: `~/.claude/history.jsonl`
 - JSONL entries with fields like `display`, `timestamp`, `project`.
 
-Patanisha magogo haya ya ndani na requests zilizochunguzwa kwenye LLM gateway/proxy (mf., LiteLLM) kugundua tampering/model‑hijacking: ikiwa kile modeli ilichokichakata kinatofautiana na local prompt/output, chunguza injected instructions au compromised tool descriptors.
+Linganisheni hizi local logs na requests zilizoshuhudiwa kwenye LLM gateway/proxy (kwa mfano, LiteLLM) ili kugundua tampering/model‑hijacking: kama kile model ilichokisindika kinatofautiana na local prompt/output, chunguza maagizo yaliyotumika au tool descriptors zilizo compromised.
 
 ---
 
-## Mifumo ya Telemetri ya Endpoint
+## Endpoint Telemetry Patterns
 
 Representative chains on Amazon Linux 2023 with Node v22.19.0 and Python 3.13:
 
 1) Built‑in tools (local file access)
 - Parent: `node .../bin/claude --model <model>` (or equivalent for the CLI)
-- Immediate child action: create/modify a local file (mf., `demo-claude`). Link the file event back via parent→child lineage.
+- Immediate child action: create/modify a local file (e.g., `demo-claude`). Tie the file event back via parent→child lineage.
 
 2) MCP over STDIO (local tool server)
 - Chain: `node → uv → python → file_write`
@@ -78,24 +78,24 @@ Representative chains on Amazon Linux 2023 with Node v22.19.0 and Python 3.13:
 - Client: `node/<ai-cli>` opens outbound TCP to `remote_port: 8000` (or similar)
 - Server: remote Python process handles the request and writes `/home/ssm-user/demo_http`.
 
-Kwa sababu maamuzi ya agent yanatofautiana kwa kila run, tarajia utofauti katika michakato halisi na njia zilizoguswa.
+Kwa sababu maamuzi ya agent yanatofautiana kwa kila run, tarajia utofauti katika mchakato halisi na path zilizoguswa.
 
 ---
 
-## Mkakati wa Ugunduzi
+## Detection Strategy
 
-Telemetry sources
-- Linux EDR using eBPF/auditd for process, file and network events.
-- Local AI‑CLI logs for prompt/intent visibility.
-- LLM gateway logs (mf., LiteLLM) for cross‑validation and model‑tamper detection.
+Vyanzo vya telemetry
+- Linux EDR kutumia eBPF/auditd kwa matukio ya process, file na network.
+- Local AI‑CLI logs kwa uwazi wa prompt/intent.
+- LLM gateway logs (kwa mfano, LiteLLM) kwa cross‑validation na model‑tamper detection.
 
 Hunting heuristics
-- Link sensitive file touches back to an AI‑CLI parent chain (mf., `node → <ai-cli> → uv/python`).
-- Alert on access/reads/writes under: `~/.ssh`, `~/.aws`, browser profile storage, cloud CLI creds, `/etc/passwd`.
-- Flag unexpected outbound connections from the AI‑CLI process to unapproved MCP endpoints (HTTP/SSE, ports like 8000).
-- Correlate local `~/.gemini`/`~/.claude` artifacts with LLM gateway prompts/outputs; divergence indicates possible hijacking.
+- Unganisha kuguswa kwa faili nyeti nyuma hadi kwenye AI‑CLI parent chain (kwa mfano, `node → <ai-cli> → uv/python`).
+- Tuma alama/alert kwa access/reads/writes chini ya: `~/.ssh`, `~/.aws`, browser profile storage, cloud CLI creds, `/etc/passwd`.
+- Weka mabango kwa unexpected outbound connections kutoka kwenye mchakato wa AI‑CLI kwenda kwenye MCP endpoints zisizoruhusiwa (HTTP/SSE, ports kama 8000).
+- Linganisha local `~/.gemini`/`~/.claude` artifacts na LLM gateway prompts/outputs; utofauti unaonyesha uwezekano wa hijacking.
 
-Example pseudo‑rules (adapt to your EDR):
+Mifano ya pseudo‑rules (rekebisha kwa EDR yako):
 ```yaml
 - when: file_write AND path IN ["$HOME/.ssh/*","$HOME/.aws/*","/etc/passwd"]
 and ancestor_chain CONTAINS ["node", "claude|gemini|warp", "python|uv"]
@@ -105,25 +105,26 @@ then: alert("AI-CLI secrets touch via tool chain")
 and dest_port IN [8000, 3333, 8787]
 then: tag("possible MCP over HTTP")
 ```
-Mapendekezo ya kuimarisha
-- Lazimisha idhini wazi ya mtumiaji kwa zana za faili/miundo ya mfumo; rekodi na uonyeshe mipango ya zana.
-- Zuia trafiki ya mtandao inayotoka kwa michakato ya AI‑CLI ili iende tu kwenye server za MCP zilizokubaliwa.
-- Pitia/tengeneza log za AI‑CLI za ndani na log za LLM gateway kwa ajili ya ukaguzi wa kawaida, mgumu kuharibiwa.
+Mawazo ya kuimarisha
+
+- Inahitaji idhini wazi ya mtumiaji kwa file/system tools; andika log na uonyeshe mipango ya zana.
+- Weka vikwazo vya egress ya mtandao kwa michakato ya AI‑CLI kwa seva za MCP zilizokubaliwa.
+- Tuma/chukua logs za eneo za AI‑CLI na logs za LLM gateway kwa ukaguzi thabiti na sugu dhidi ya uharibifu.
 
 ---
 
-Blue‑Team Repro Notes
+## Maelezo ya Kurudia ya Blue‑Team
 
-Tumia VM safi yenye EDR au eBPF tracer ili kuiga mnyororo kama:
-- `node → claude --model claude-sonnet-4-20250514` then immediate local file write.
-- `node → uv run --with fastmcp ... → python3.13` writing under `$HOME`.
-- `node/<ai-cli>` establishing TCP to an external MCP server (port 8000) while a remote Python process writes a file.
+Tumia VM safi yenye EDR au eBPF tracer kurudia mfululizo wa matukio kama:
+- `node → claude --model claude-sonnet-4-20250514` kisha kuandika faili ya eneo mara moja.
+- `node → uv run --with fastmcp ... → python3.13` ikiandika chini ya `$HOME`.
+- `node/<ai-cli>` ikianzisha TCP kwa seva ya MCP ya nje (port 8000) wakati mchakato wa Python wa mbali unaandika faili.
 
-Thibitisha kwamba ugunduzi wako unahusisha matukio ya faili/mtandao kwa mzazi wa AI‑CLI aliyesababisha ili kuepuka matokeo ya uwongo (false positives).
+Thibitisha kwamba utambuzi wako unahusisha matukio ya faili/mtandao kurudi kwa mzazi wa kuanzisha AI‑CLI ili kuepuka matokeo chanya zisizo za kweli.
 
 ---
 
-Marejeo
+## Marejeo
 
 - [Commanding attention: How adversaries are abusing AI CLI tools (Red Canary)](https://redcanary.com/blog/threat-detection/ai-cli-tools/)
 - [Model Context Protocol (MCP)](https://modelcontextprotocol.io)
