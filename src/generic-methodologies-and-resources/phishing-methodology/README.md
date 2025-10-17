@@ -4,47 +4,47 @@
 
 ## Metodoloji
 
-1. Hedef üzerinde keşif yapın
-1. Seçin **hedef alan adını**.
-2. Hedefin kullandığı giriş portallarını **aranarak** bazı temel web keşifleri yapın ve hangi portalı **taklit edeceğinize karar verin**.
-3. Bazı **OSINT** kullanarak **e-postaları bulun**.
-2. Ortamı hazırlayın
-1. Phishing değerlendirmesi için kullanacağınız **alan adını satın alın**
-2. E-posta servisi ile ilgili kayıtları **yapılandırın** (SPF, DMARC, DKIM, rDNS)
+1. Recon the victim
+1. **victim alan adını** seçin.
+2. Hedefin kullandığı giriş portallarını bulmak için bazı temel web keşfi yapın ve hangi portalı taklit edeceğinize karar verin.
+3. Bazı **OSINT** teknikleri kullanarak **e-posta adreslerini bulun**.
+2. Ortamı hazırlama
+1. **phishing değerlendirmesinde kullanacağınız domaini satın alın**
+2. E-posta servisi ile ilgili kayıtları yapılandırın (SPF, DMARC, DKIM, rDNS)
 3. VPS'i **gophish** ile yapılandırın
-3. Kampanyayı hazırlayın
+3. Kampanyayı hazırlama
 1. **E-posta şablonunu** hazırlayın
 2. Kimlik bilgilerini çalmak için **web sayfasını** hazırlayın
 4. Kampanyayı başlatın!
 
-## Benzer alan adları oluşturma veya güvenilir bir alan adı satın alma
+## Benzer domain isimleri üretme veya güvenilir bir domain satın alma
 
-### Alan Adı Varyasyon Teknikleri
+### Domain Adı Varyasyon Teknikleri
 
-- **Anahtar kelime**: Alan adı orijinal domainin önemli bir **anahtar kelimesini içerir** (ör. zelster.com-management.com).
-- **Tireli alt alan adı**: Bir alt alan adındaki **nokta yerine tire** kullanın (ör. www-zelster.com).
-- **Yeni TLD**: Aynı alan adı farklı bir **TLD** ile (ör. zelster.org)
-- **Homoglyph**: Alan adındaki bir harfi **benzer görünen harflerle** değiştirir (ör. zelfser.com).
+- **Keyword**: Domain adı, orijinal domainin önemli bir **anahtar kelimesini** içerir (ör. zelster.com-management.com).
+- **hypened subdomain**: Bir alt domaindeki **nokta yerine tire** kullanılır (ör. www-zelster.com).
+- **New TLD**: Aynı domain farklı bir **TLD** ile (ör. zelster.org)
+- **Homoglyph**: Domain adındaki bir harfi **benzer görünen harflerle** değiştirir (ör. zelfser.com).
 
 
 {{#ref}}
 homograph-attacks.md
 {{#endref}}
-- **Yer değiştirme (Transposition):** Alan adındaki iki harfi **değiştirir** (ör. zelsetr.com).
-- **Tekil/Çoğul yapma**: Alan adının sonuna “s” ekler veya kaldırır (ör. zeltsers.com).
-- **Atlama (Omission)**: Alan adından bir harfi **çıkarır** (ör. zelser.com).
-- **Tekrar (Repetition):** Alan adındaki bir harfi **tekrar eder** (ör. zeltsser.com).
-- **Değiştirme (Replacement)**: Homoglyph’e benzer fakat daha az gizli. Alan adındaki harfi, klavyede yakın bir harfle değiştirir (ör. zektser.com).
-- **Alt alan ayrımı (Subdomained)**: Alan adının içine bir **nokta** ekler (ör. ze.lster.com).
-- **Ekleme (Insertion)**: Alan adına bir **harf ekler** (ör. zerltser.com).
-- **Eksik nokta (Missing dot)**: TLD’yi alan adına ekler. (ör. zelstercom.com)
+- **Transposition:** Domain içindeki iki harfi **yer değiştirir** (ör. zelsetr.com).
+- **Singularization/Pluralization**: Domainin sonuna “s” ekler veya kaldırır (ör. zeltsers.com).
+- **Omission**: Domain adından bir harfi **çıkarır** (ör. zelser.com).
+- **Repetition:** Domain adındaki bir harfi **tekrarlar** (ör. zeltsser.com).
+- **Replacement**: Homoglyph'e benzer ama daha az gizli. Domain içindeki bir harfi, klavyede yakın bir harfle değiştirir (ör. zektser.com).
+- **Subdomained**: Domain adının içine bir **nokta** ekler (ör. ze.lster.com).
+- **Insertion**: Domain adının içine bir harf **ekler** (ör. zerltser.com).
+- **Missing dot**: TLD'yi domain adına ekler. (ör. zelstercom.com)
 
 **Otomatik Araçlar**
 
 - [**dnstwist**](https://github.com/elceef/dnstwist)
 - [**urlcrazy**](https://github.com/urbanadventurer/urlcrazy)
 
-**Websiteleri**
+**Web Siteleri**
 
 - [https://dnstwist.it/](https://dnstwist.it)
 - [https://dnstwister.report/](https://dnstwister.report)
@@ -52,51 +52,51 @@ homograph-attacks.md
 
 ### Bitflipping
 
-Bazı durumlarda depolanan veya iletişim halindeki bazı bitlerin, güneş patlamaları, kozmik ışınlar veya donanım hataları gibi çeşitli faktörler nedeniyle **otomatik olarak tersine çevrilme (fliplenme)** olasılığı vardır.
+Saklanan veya iletişim halindeki bazı bitlerin, güneş patlamaları, kozmik ışınlar veya donanım hataları gibi çeşitli faktörler nedeniyle otomatik olarak **fliplenme** ihtimali vardır.
 
-Bu kavram DNS isteklerine **uygulandığında**, DNS sunucusu tarafından **alınan alan adının**, başlangıçta istenen alan adıyla aynı olmama ihtimali vardır.
+Bu kavram DNS isteklerine **uygulandığında**, DNS sunucusunun aldığı domainin, başlangıçta istenen domain ile aynı olmaması mümkündür.
 
-Örneğin, "windows.com" alan adında tek bir bit değişikliği onu "windnws.com" haline getirebilir.
+Örneğin, "windows.com" domainindeki tek bir bit değişikliği bunu "windnws.com" yapabilir.
 
-Saldırganlar, meşru kullanıcıları kendi altyapılarına yönlendirmek amacıyla hedefin alan adına benzeyen birden fazla bit-flipping domain **kaydederek** bundan **faydalanabilirler**.
+Saldırganlar, meşru kullanıcıları kendi altyapılarına yönlendirmek amacıyla hedef domainine **benzer birden fazla bit-flipping domaini** kaydederek bundan yararlanabilirler.
 
-Daha fazla bilgi için okuyun [https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)
+Daha fazla bilgi için okuyun: [https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)
 
-### Güvenilir bir alan adı satın alma
+### Güvenilir Bir Domain Satın Alma
 
-Kullanabileceğiniz süresi dolmuş bir alan adını bulmak için [https://www.expireddomains.net/](https://www.expireddomains.net) adresinde arama yapabilirsiniz.\
-Satın almayı düşündüğünüz süresi dolmuş alan adının **zaten iyi bir SEO'ya sahip olduğundan** emin olmak için nasıl kategorize edildiğini şu kaynaklarda kontrol edebilirsiniz:
+Kullanabileceğiniz bir expired domain aramak için [https://www.expireddomains.net/](https://www.expireddomains.net) sitesinde arama yapabilirsiniz.\
+Satın almayı düşündüğünüz expired domainin **zaten iyi bir SEO'ya** sahip olduğunu doğrulamak için nasıl kategorize edildiğini şu kaynaklarda kontrol edebilirsiniz:
 
 - [http://www.fortiguard.com/webfilter](http://www.fortiguard.com/webfilter)
 - [https://urlfiltering.paloaltonetworks.com/query/](https://urlfiltering.paloaltonetworks.com/query/)
 
-## E-posta Keşfi
+## E-posta Bulma
 
-- [https://github.com/laramies/theHarvester](https://github.com/laramies/theHarvester) (100% free)
-- [https://phonebook.cz/](https://phonebook.cz) (100% free)
+- [https://github.com/laramies/theHarvester](https://github.com/laramies/theHarvester) (100% ücretsiz)
+- [https://phonebook.cz/](https://phonebook.cz) (100% ücretsiz)
 - [https://maildb.io/](https://maildb.io)
 - [https://hunter.io/](https://hunter.io)
 - [https://anymailfinder.com/](https://anymailfinder.com)
 
-Daha fazla geçerli e-posta adresi **keşfetmek** veya zaten keşfettiğiniz adresleri **doğrulamak** için hedefin SMTP sunucularına karşı bunları brute-force edip edemeyeceğinizi kontrol edebilirsiniz. [Learn how to verify/discover email address here](../../network-services-pentesting/pentesting-smtp/index.html#username-bruteforce-enumeration).\
-Ayrıca, kullanıcılar e-postalarına erişmek için **herhangi bir web portalı** kullanıyorsa, portalın **username brute force** saldırılarına karşı zafiyetli olup olmadığını kontrol etmeyi ve mümkünse bu zafiyeti kullanmayı unutmayın.
+Daha fazla geçerli e-posta adresi **keşfetmek** veya zaten keşfettiklerinizi **doğrulamak** için hedefin SMTP sunucularına kullanıcı adı brute-force (bruteforce) uygulayıp uygulayamayacağınızı kontrol edebilirsiniz. [E-posta adresi nasıl doğrulanır/keşfedilir buradan öğrenin](../../network-services-pentesting/pentesting-smtp/index.html#username-bruteforce-enumeration).\
+Ayrıca, kullanıcıların postalarına erişmek için herhangi bir web portalı kullanıp kullanmadığını unutmayın; eğer portal **username brute force**'a karşı savunmasızsa, mümkünse bu zafiyeti istismar edin.
 
 ## GoPhish Yapılandırma
 
 ### Kurulum
 
-You can download it from [https://github.com/gophish/gophish/releases/tag/v0.11.0](https://github.com/gophish/gophish/releases/tag/v0.11.0)
+İndirme sayfası: [https://github.com/gophish/gophish/releases/tag/v0.11.0](https://github.com/gophish/gophish/releases/tag/v0.11.0)
 
-İndirin ve `/opt/gophish` içine açın ve `/opt/gophish/gophish` çalıştırın.\
-Çıktıda admin kullanıcı için bir parola verilecektir ve yönetim için port 3333'te bu bilgileri kullanmanız gerekir. Bu nedenle o porta erişin ve admin parolasını değiştirin. Bu portu yerelinize tünellemeniz gerekebilir:
+Download and decompress it inside `/opt/gophish` and execute `/opt/gophish/gophish`\
+Çıktıda admin kullanıcısı için port 3333 üzerinde bir parola verilecektir. Bu yüzden o porta erişin ve yönetici parolasını değiştirmek için bu kimlik bilgilerini kullanın. Gerekirse bu portu yerel makinenize tünelleyebilirsiniz:
 ```bash
 ssh -L 3333:127.0.0.1:3333 <user>@<ip>
 ```
 ### Yapılandırma
 
-**TLS sertifikası yapılandırması**
+**TLS sertifika yapılandırması**
 
-Bu adımdan önce kullanacağınız **alan adını zaten satın almış** olmalısınız ve bu alan adı **gophish**'i yapılandırdığınız **VPS'in IP'sine** **işaret ediyor** olmalıdır.
+Bu adımdan önce kullanacağınız **alan adını zaten satın almış** olmalısınız ve bu alan adının **gophish**'i yapılandırdığınız **VPS'nin IP adresine** **yönlendirilmiş** olması gerekir.
 ```bash
 DOMAIN="<domain>"
 wget https://dl.eff.org/certbot-auto
@@ -112,9 +112,9 @@ mkdir /opt/gophish/ssl_keys
 cp "/etc/letsencrypt/live/$DOMAIN/privkey.pem" /opt/gophish/ssl_keys/key.pem
 cp "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" /opt/gophish/ssl_keys/key.crt​
 ```
-**Mail yapılandırması**
+**Mail configuration**
 
-Yüklemeye başla: `apt-get install postfix`
+Yüklemeye başlayın: `apt-get install postfix`
 
 Sonra alan adını aşağıdaki dosyalara ekleyin:
 
@@ -127,9 +127,9 @@ Sonra alan adını aşağıdaki dosyalara ekleyin:
 `myhostname = <domain>`\
 `mydestination = $myhostname, <domain>, localhost.com, localhost`
 
-Son olarak **`/etc/hostname`** ve **`/etc/mailname`** dosyalarını alan adınıza göre değiştirin ve **VPS'inizi yeniden başlatın.**
+Son olarak **`/etc/hostname`** ve **`/etc/mailname`** dosyalarını alan adınıza göre düzenleyin ve **VPS'inizi yeniden başlatın.**
 
-Şimdi, `mail.<domain>` için VPS'in **IP adresini** gösteren bir **DNS A record** ve `mail.<domain>`'i işaret eden bir **DNS MX** kaydı oluşturun
+Şimdi, VPS'nin **ip address**'ine işaret eden `mail.<domain>` için bir **DNS A record** oluşturun ve `mail.<domain>`'e işaret eden bir **DNS MX** kaydı ekleyin
 
 Şimdi e-posta göndermeyi test edelim:
 ```bash
@@ -138,8 +138,8 @@ echo "This is the body of the email" | mail -s "This is the subject line" test@e
 ```
 **Gophish yapılandırması**
 
-gophish'in çalışmasını durdurun ve yapılandırın.  
-`/opt/gophish/config.json` dosyasını aşağıdaki gibi değiştirin (https kullanıldığına dikkat edin):
+gophish'in çalışmasını durdurun ve yapılandırın.\
+Aşağıdaki şekilde `/opt/gophish/config.json` dosyasını değiştirin (https kullanımına dikkat):
 ```bash
 {
 "admin_server": {
@@ -166,7 +166,7 @@ gophish'in çalışmasını durdurun ve yapılandırın.
 ```
 **gophish servisini yapılandırma**
 
-gophish servisini oluşturmak ve otomatik başlatılıp bir servis olarak yönetilmesini sağlamak için, `/etc/init.d/gophish` dosyasını aşağıdaki içerikle oluşturabilirsiniz:
+gophish servisini otomatik olarak başlatılabilir ve bir hizmet olarak yönetilebilir hale getirmek için aşağıdaki içeriğe sahip `/etc/init.d/gophish` dosyasını oluşturabilirsiniz:
 ```bash
 #!/bin/bash
 # /etc/init.d/gophish
@@ -213,7 +213,7 @@ case $1 in
 start|stop|status) "$1" ;;
 esac
 ```
-Hizmeti yapılandırmayı tamamlayın ve aşağıdakileri yaparak kontrol edin:
+Hizmeti yapılandırmayı bitirin ve çalıştığını kontrol edin:
 ```bash
 mkdir /var/log/gophish
 chmod +x /etc/init.d/gophish
@@ -224,46 +224,46 @@ service gophish status
 ss -l | grep "3333\|443"
 service gophish stop
 ```
-## Mail sunucusu ve domain yapılandırma
+## Mail sunucusu ve alan adı yapılandırma
 
-### Bekleyin & meşru olun
+### Bekleyin ve meşru olun
 
-Bir domain ne kadar eskiyse spam olarak yakalanma olasılığı o kadar düşüktür. Bu yüzden phishing değerlendirmesinden önce mümkün olduğunca uzun süre (en az 1 hafta) beklemelisiniz. Ayrıca, itibar olan bir sektöre ait bir sayfa koyarsanız elde edilen itibar daha iyi olur.
+Bir domain ne kadar eskiyse spam olarak yakalanma olasılığı o kadar düşüktür. Bu yüzden phishing değerlendirmesinden önce mümkün olduğunca uzun süre (en az 1 hafta) beklemelisiniz. Ayrıca, itibarlı bir sektörle ilgili bir sayfa eklerseniz elde edilen itibar daha iyi olur.
 
-Bir hafta beklemeniz gerekse bile her şeyi şimdi yapılandırmayı bitirebileceğinizi unutmayın.
+Not: Bir hafta beklemek zorunda olsanız bile her şeyi şimdi yapılandırmayı bitirebilirsiniz.
 
-### Reverse DNS (rDNS) kaydını yapılandırın
+### Reverse DNS (rDNS) kaydını yapılandırma
 
-VPS'nin IP adresini domain adına çözecek bir rDNS (PTR) kaydı ayarlayın.
+VPS'nin IP adresini alan adına çözecek bir rDNS (PTR) kaydı ayarlayın.
 
-### Sender Policy Framework (SPF) Record
+### Sender Policy Framework (SPF) Kaydı
 
-Yeni domain için **bir SPF kaydı yapılandırmalısınız**. Eğer SPF kaydının ne olduğunu bilmiyorsanız [**read this page**](../../network-services-pentesting/pentesting-smtp/index.html#spf).
+**Yeni alan adı için bir SPF kaydı yapılandırmalısınız**. Eğer SPF kaydının ne olduğunu bilmiyorsanız [**read this page**](../../network-services-pentesting/pentesting-smtp/index.html#spf).
 
-SPF politikanızı oluşturmak için [https://www.spfwizard.net/](https://www.spfwizard.net) adresini kullanabilirsiniz (VPS makinesinin IP'sini kullanın)
+SPF politikanızı oluşturmak için https://www.spfwizard.net/ adresini kullanabilirsiniz (VPS makinesinin IP'sini kullanın)
 
 ![](<../../images/image (1037).png>)
 
-Bu, domain içinde bir TXT kaydına girilmesi gereken içeriktir:
+Bu, alan adı içinde bir TXT kaydına eklenmesi gereken içeriktir:
 ```bash
 v=spf1 mx a ip4:ip.ip.ip.ip ?all
 ```
-### Domain-based Message Authentication, Reporting & Conformance (DMARC) Kaydı
+### Alan Tabanlı Mesaj Doğrulama, Raporlama ve Uyumluluk (DMARC) Kaydı
 
-Yeni domain için **DMARC kaydı yapılandırmalısınız**. Bir DMARC kaydının ne olduğunu bilmiyorsanız [**bu sayfayı okuyun**](../../network-services-pentesting/pentesting-smtp/index.html#dmarc).
+Yeni alan için **DMARC kaydını yapılandırmalısınız**. Eğer DMARC kaydının ne olduğunu bilmiyorsanız [**read this page**](../../network-services-pentesting/pentesting-smtp/index.html#dmarc).
 
-Aşağıdaki içeriğe sahip olacak şekilde `_dmarc.<domain>` ana bilgisayar adına işaret eden yeni bir DNS TXT kaydı oluşturmalısınız:
+Aşağıdaki içeriğe sahip `_dmarc.<domain>` host adına işaret eden yeni bir DNS TXT kaydı oluşturmalısınız:
 ```bash
 v=DMARC1; p=none
 ```
 ### DomainKeys Identified Mail (DKIM)
 
-Yeni alan adı için **bir DKIM yapılandırmalısınız**. DMARC kaydının ne olduğunu bilmiyorsanız [**bu sayfayı okuyun**](../../network-services-pentesting/pentesting-smtp/index.html#dkim).
+Yeni alan için **bir DKIM yapılandırmalısınız**. Eğer DMARC kaydının ne olduğunu bilmiyorsanız [**bu sayfayı okuyun**](../../network-services-pentesting/pentesting-smtp/index.html#dkim).
 
 This tutorial is based on: [https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy)
 
 > [!TIP]
-> DKIM anahtarının oluşturduğu iki B64 değerini birleştirmeniz gerekiyor:
+> DKIM anahtarının ürettiği iki B64 değerini birleştirmeniz gerekir:
 >
 > ```
 > v=DKIM1; h=sha256; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0wPibdqPtzYk81njjQCrChIcHzxOp8a1wjbsoNtka2X9QXCZs+iXkvw++QsWDtdYu3q0Ofnr0Yd/TmG/Y2bBGoEgeE+YTUG2aEgw8Xx42NLJq2D1pB2lRQPW4IxefROnXu5HfKSm7dyzML1gZ1U0pR5X4IZCH0wOPhIq326QjxJZm79E1nTh3xj" "Y9N/Dt3+fVnIbMupzXE216TdFuifKM6Tl6O/axNsbswMS1TH812euno8xRpsdXJzFlB9q3VbMkVWig4P538mHolGzudEBg563vv66U8D7uuzGYxYT4WS8NVm3QBMg0QKPWZaKp+bADLkOSB9J2nUpk4Aj9KB5swIDAQAB
@@ -271,11 +271,11 @@ This tutorial is based on: [https://www.digitalocean.com/community/tutorials/how
 
 ### E-posta yapılandırma puanınızı test edin
 
-Bunu [https://www.mail-tester.com/](https://www.mail-tester.com/)\ Sadece sayfaya girip size verdikleri adrese bir e-posta gönderin:
+Bunu [https://www.mail-tester.com/](https://www.mail-tester.com/)\ kullanarak yapabilirsiniz. Sayfaya girip size verdikleri adrese bir e-posta gönderin:
 ```bash
 echo "This is the body of the email" | mail -s "This is the subject line" test-iimosa79z@srv1.mail-tester.com
 ```
-Email yapılandırmanızı ayrıca `check-auth@verifier.port25.com` adresine bir e-posta göndererek **kontrol edebilirsiniz** ve **cevabı okuyabilirsiniz** (bunun için **25** numaralı portu **açmanız** ve e-postayı root olarak gönderirseniz cevabı _/var/mail/root_ dosyasında görmeniz gerekir).\
+Ayrıca `check-auth@verifier.port25.com` adresine bir e-posta göndererek **e-posta yapılandırmanızı kontrol edebilir** ve **yanıtı okuyabilirsiniz** (bunun için **25** numaralı portu **açmanız** ve e-postayı root olarak gönderirseniz yanıtı _/var/mail/root_ dosyasında görmeniz gerekir).\
 Tüm testleri geçtiğinizi kontrol edin:
 ```bash
 ==========================================================
@@ -287,40 +287,40 @@ DKIM check:         pass
 Sender-ID check:    pass
 SpamAssassin check: ham
 ```
-Ayrıca **kontrolünüzdeki bir Gmail hesabına mesaj** gönderebilir ve Gmail gelen kutunuzdaki **e-posta başlıklarını** kontrol edebilirsiniz; `Authentication-Results` başlık alanında `dkim=pass` bulunmalıdır.
+Kontrolünüz altındaki bir **Gmail hesabına mesaj da gönderebilir** ve Gmail gelen kutunuzda **e-postanın başlıklarını** kontrol edebilirsiniz; `Authentication-Results` başlık alanında `dkim=pass` ifadesinin bulunması gerekir.
 ```
 Authentication-Results: mx.google.com;
 spf=pass (google.com: domain of contact@example.com designates --- as permitted sender) smtp.mail=contact@example.com;
 dkim=pass header.i=@example.com;
 ```
-### ​Removing from Spamhouse Blacklist
+### ​Spamhouse Kara Listesinden Kaldırma
 
-The page [www.mail-tester.com](https://www.mail-tester.com) domainunuzun spamhouse tarafından engellenip engellenmediğini gösterebilir. Domain/IP'nizin kaldırılmasını şu adresten talep edebilirsiniz: ​[https://www.spamhaus.org/lookup/](https://www.spamhaus.org/lookup/)
+The page [www.mail-tester.com](https://www.mail-tester.com) domaininizin spamhouse tarafından engellenip engellenmediğini gösterebilir. Domain/IP adresinizin kaldırılmasını şu adresten talep edebilirsiniz: ​[https://www.spamhaus.org/lookup/](https://www.spamhaus.org/lookup/)
 
-### Removing from Microsoft Blacklist
+### Microsoft Kara Listesinden Kaldırma
 
-​​Domain/IP'nizin kaldırılmasını [https://sender.office.com/](https://sender.office.com) adresinden talep edebilirsiniz.
+​​Domain/IP adresinizin kaldırılmasını şu adresten talep edebilirsiniz: [https://sender.office.com/](https://sender.office.com).
 
-## Create & Launch GoPhish Campaign
+## GoPhish Kampanyası Oluşturma ve Başlatma
 
-### Sending Profile
+### Gönderici Profili
 
-- Gönderici profilini tanımlamak için bir **name to identify** belirleyin
-- Phishing e-postalarını hangi hesaptan göndereceğinize karar verin. Öneriler: _noreply, support, servicedesk, salesforce..._
-- Kullanıcı adı ve şifreyi boş bırakabilirsiniz, ancak Ignore Certificate Errors seçeneğini işaretlediğinizden emin olun
+- Gönderici profili için bir **tanımlama adı** belirleyin
+- Hangi hesap üzerinden phishing e-postalarını göndereceğinize karar verin. Öneriler: _noreply, support, servicedesk, salesforce..._
+- Kullanıcı adı ve şifreyi boş bırakabilirsiniz, fakat **Ignore Certificate Errors** seçeneğinin işaretli olduğundan emin olun
 
-![](<../../images/image (253) (1) (2) (1) (1) (2) (2) (3) (3) (5) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (15) (2).png>)
+![](<../../images/image (253) (1) (2) (1) (1) (2) (2) (3) (3) (5) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (15) (2).png>)
 
 > [!TIP]
 > Her şeyin çalıştığını test etmek için "**Send Test Email**" işlevini kullanmanız önerilir.\
-> Testler sırasında kara listeye alınmamak için test e-postalarını **10min mails adreslerine** göndermenizi tavsiye ederim.
+> Testler sırasında kara listeye alınmamak için **send the test emails to 10min mails addresses**'e göndermenizi öneririm.
 
 ### Email Template
 
-- Şablonu tanımlamak için bir **name to identify** belirleyin
-- Ardından bir **subject** yazın (garip olmayan, normal bir e-postada görebileceğiniz türden bir şey)
+- Şablon için bir **tanımlama adı** belirleyin
+- Ardından bir **subject** yazın (tuhaf olmayan, sıradan bir e-postada görebileceğiniz bir şey)
 - "**Add Tracking Image**" seçeneğinin işaretli olduğundan emin olun
-- **email template**'ini yazın (aşağıdaki örnekteki gibi değişkenler kullanabilirsiniz):
+- **email template**'i yazın (aşağıdaki örnekteki gibi değişkenler kullanabilirsiniz):
 ```html
 <html>
 <head>
@@ -538,13 +538,13 @@ Besides classic push-bombing, operators simply **force a new MFA registration** 
 [Help-Desk] →  AzureAD: ‘Delete existing methods’ → sends registration e-mail
 [Attacker]  →  Completes new TOTP enrolment on their own device
 ```
-AzureAD/AWS/Okta olaylarında **`deleteMFA` + `addMFA`** işlemlerinin **aynı IP'den dakikalar içinde** gerçekleşip gerçekleşmediğini izleyin.
+Aynı IP'den dakikalar içinde **`deleteMFA` + `addMFA`** olaylarının görüldüğü AzureAD/AWS/Okta etkinliklerini izleyin.
 
 
 
 ## Clipboard Hijacking / Pastejacking
 
-Saldırganlar, ele geçirilmiş veya typosquatted bir web sayfasından kurbanın panosuna kötü amaçlı komutları sessizce kopyalayabilir ve sonra kullanıcıyı bunları **Win + R**, **Win + X** veya bir terminal penceresine yapıştırmaya kandırarak herhangi bir indirme veya ek olmadan keyfi kod çalıştırabilir.
+Saldırganlar, ele geçirilmiş veya typosquatted bir web sayfasından kurbanın clipboard'una zararlı komutları sessizce kopyalayabilir ve ardından kullanıcının bunları **Win + R**, **Win + X** veya bir terminal penceresine yapıştırmasını sağlayarak herhangi bir indirme veya ek olmadan rastgele kod çalıştırabilir.
 
 
 {{#ref}}
@@ -559,9 +559,9 @@ mobile-phishing-malicious-apps.md
 {{#endref}}
 
 ### Mobile‑gated phishing to evade crawlers/sandboxes
-Operatörler giderek phishing akışlarını basit bir cihaz kontrolünün arkasına alıyor; böylece masaüstü crawlers son sayfalara asla ulaşamıyor. Yaygın bir örüntü, touch-capable DOM'u test eden küçük bir script'in sonucunu bir server endpoint'ine post etmektir; mobil olmayan istemciler HTTP 500 (veya boş bir sayfa) alırken, mobil kullanıcılar tam akışı görür.
+Operatörler artan şekilde phishing akışlarını basit bir cihaz kontrolünün arkasına koyuyor, böylece masaüstü crawlers son sayfalara asla ulaşamıyor. Yaygın bir desen, touch-capable DOM'u test eden ve sonucu bir server endpoint'e post eden küçük bir script'tir; mobil olmayan istemciler HTTP 500 (veya boş bir sayfa) alırken, mobil kullanıcılara tam akış sunulur.
 
-Minimal client snippet (typik mantık):
+Minimal istemci kod parçası (tipik mantık):
 ```html
 <script src="/static/detect_device.js"></script>
 ```
@@ -571,19 +571,19 @@ const isMobile = ('ontouchstart' in document.documentElement);
 fetch('/detect', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({is_mobile:isMobile})})
 .then(()=>location.reload());
 ```
-Sıkça gözlemlenen sunucu davranışı:
+Sık gözlemlenen sunucu davranışı:
 - İlk yüklemede bir session cookie ayarlar.
 - Kabul eder `POST /detect {"is_mobile":true|false}`.
-- Sonraki GET'lere `is_mobile=false` olduğunda 500 (veya placeholder) döndürür; yalnızca `true` ise phishing sunar.
+- Sonraki GET'lere `is_mobile=false` olduğunda 500 (veya placeholder) döner; phishing'i yalnızca `true` ise sunar.
 
-Av ve tespit heuristikleri:
+Avlama ve tespit heuristikleri:
 - urlscan sorgusu: `filename:"detect_device.js" AND page.status:500`
-- Web telemetrisi: `GET /static/detect_device.js` → `POST /detect` → non-mobile için HTTP 500; meşru mobil hedef yolları 200 döndürür ve sonrasında HTML/JS sunar.
-- İçeriği yalnızca `ontouchstart` veya benzeri cihaz kontrollerine göre koşullayan sayfaları engelleyin veya inceleyin.
+- Web telemetrisi: `GET /static/detect_device.js` → `POST /detect` → non‑mobile için HTTP 500; meşru mobil kurban yolları 200 döner ve takip eden HTML/JS sunulur.
+- İçeriği yalnızca `ontouchstart` veya benzeri cihaz kontrollerine göre koşullayan sayfaları engelleyin veya dikkatle inceleyin.
 
 Savunma ipuçları:
-- Kapalı içeriği ortaya çıkarmak için, JS etkin ve mobil benzeri parmak izine sahip crawlers çalıştırın.
-- Yeni kayıtlı alan adlarında `POST /detect` sonrasında şüpheli HTTP 500 yanıtları için alarm oluşturun.
+- Erişime kapalı içeriği ortaya çıkarmak için mobil benzeri parmak izlerine sahip ve JS etkin crawler'lar çalıştırın.
+- Yeni kayıtlı domainlerde `POST /detect`'i takiben gelen şüpheli 500 yanıtları için uyarı oluşturun.
 
 ## Referanslar
 
