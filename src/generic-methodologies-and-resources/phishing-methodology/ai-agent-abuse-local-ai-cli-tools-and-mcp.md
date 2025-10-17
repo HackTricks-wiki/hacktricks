@@ -4,25 +4,25 @@
 
 ## Pregled
 
-Lokalni AI command-line interfejsi (AI CLIs) kao što su Claude Code, Gemini CLI, Warp i slični alati često dolaze sa moćnim ugrađenim funkcionalnostima: čitanje/pisanje filesystem-a, izvršavanje shell komandi i izlazni mrežni pristup. Mnogi rade kao MCP klijenti (Model Context Protocol), dozvoljavajući modelu da poziva eksterne alate preko STDIO ili HTTP. Pošto LLM planira lanac alata nedeterministički, identični promptovi mogu dovesti do različitog ponašanja procesa, fajlova i mreže između pokretanja i hostova.
+Lokalni AI command-line interfejsi (AI CLIs) poput Claude Code, Gemini CLI, Warp i sličnih često dolaze sa moćnim ugrađenim funkcionalnostima: filesystem read/write, shell execution i outbound network access. Mnogi rade kao MCP klijenti (Model Context Protocol), dozvoljavajući modelu da poziva eksterne alate preko STDIO ili HTTP. Pošto LLM planira lanac alata nedeterministički, identični prompti mogu dovesti do različitih ponašanja procesa, datoteka i mreže između pokretanja i hostova.
 
 Ključne mehanike viđene u uobičajenim AI CLI alatima:
-- Obično implementirani u Node/TypeScript sa tankim wrapper-om koji pokreće model i izlaže alate.
-- Više režima: interaktivni chat, plan/execute, i single‑prompt run.
-- Podrška za MCP klijenta sa STDIO i HTTP transportima, omogućavajući proširenje funkcionalnosti lokalno i udaljeno.
+- Obično implementirani u Node/TypeScript sa tankim omotačem koji pokreće model i izlaže alate.
+- Više režima: interaktivni chat, plan/execute i jednorazovno pokretanje iz prompta.
+- Podrška za MCP klijenta sa STDIO i HTTP transportima, omogućavajući proširenje mogućnosti lokalno i na daljinu.
 
-Uticaj zloupotrebe: Jedan prompt može inventarisati i exfiltrate credentials, menjati lokalne fajlove i tiho proširiti mogućnosti povezivanjem na udaljene MCP servere (nedostatak vidljivosti ako su ti serveri third‑party).
+Uticaj zloupotrebe: Jedan prompt može inventarisati i exfiltrate credentials, izmeniti lokalne datoteke i tiho proširiti mogućnosti povezivanjem na udaljene MCP servere (nedostatak vidljivosti ako su ti serveri third‑party).
 
 ---
 
-## Adversary Playbook – Prompt‑Driven Secrets Inventory
+## Vodič napadača – inventar tajni vođen promptom
 
-Zadatak agentu: brzo triage i stage credentials/secrets za exfiltrate dok ostane neprimetan:
+Naložite agentu da brzo triže i pripremi kredencijale/tajne za exfiltraciju dok ostane neprimetan:
 
-- Opseg: rekurzivno enumerisati unutar $HOME i application/wallet direktorijuma; izbegavati bučne/pseudo putanje (`/proc`, `/sys`, `/dev`).
-- Performanse/stealth: ograničiti dubinu rekurzije; izbegavati `sudo`/priv‑escalation; sažeti rezultate.
-- Ciljevi: `~/.ssh`, `~/.aws`, cloud CLI creds, `.env`, `*.key`, `id_rsa`, `keystore.json`, browser storage (LocalStorage/IndexedDB profiles), crypto‑wallet data.
-- Ishod: upisati sažetu listu u `/tmp/inventory.txt`; ako fajl postoji, napraviti backup sa timestamp-om pre prepisivanja.
+- Scope: rekurzivno nabrojati sadržaj ispod $HOME i direktorijuma aplikacija/novčanika; izbegavati noisy/pseudo putanje (`/proc`, `/sys`, `/dev`).
+- Performance/stealth: ograničiti dubinu rekurzije; izbegavati `sudo`/priv‑escalation; sažeti rezultate.
+- Targets: `~/.ssh`, `~/.aws`, cloud CLI creds, `.env`, `*.key`, `id_rsa`, `keystore.json`, browser storage (LocalStorage/IndexedDB profiles), crypto‑wallet data.
+- Output: zapisati sažet spisak u `/tmp/inventory.txt`; ako fajl postoji, napraviti backup sa vremenskom oznakom pre prepisivanja.
 
 Example operator prompt to an AI CLI:
 ```
@@ -37,65 +37,65 @@ Return a short summary only; no file contents.
 ```
 ---
 
-## Capability Extension via MCP (STDIO and HTTP)
+## Proširenje mogućnosti preko MCP (STDIO i HTTP)
 
 AI CLIs često deluju kao MCP klijenti da bi pristupili dodatnim alatima:
 
-- STDIO transport (lokalni alati): klijent pokreće pomoćni lanac da bi pokrenuo tool server. Tipična linija: `node → <ai-cli> → uv → python → file_write`. Primer uočenog ponašanja: `uv run --with fastmcp fastmcp run ./server.py` koji startuje `python3.13` i izvodi lokalne operacije nad fajlovima u ime agenta.
-- HTTP transport (remote tools): klijent otvara outbound TCP (npr. port 8000) ka remote MCP serveru, koji izvršava traženu akciju (npr. upis `/home/user/demo_http`). Na endpoint-u ćete videti samo mrežnu aktivnost klijenta; server‑side file touches se dešavaju van hosta.
+- STDIO transport (local tools): klijent pokreće pomoćni lanac da bi pokrenuo tool server. Tipična loza: `node → <ai-cli> → uv → python → file_write`. Primer zapažen: `uv run --with fastmcp fastmcp run ./server.py` koji startuje `python3.13` i vrši lokalne operacije nad fajlovima u ime agenta.
+- HTTP transport (remote tools): klijent otvara outbound TCP (npr. port 8000) ka udaljenom MCP serveru, koji izvršava traženu akciju (npr. upisuje `/home/user/demo_http`). Na endpointu ćete videti samo mrežnu aktivnost klijenta; izmene fajlova na strani servera dešavaju se van hosta.
 
 Napomene:
-- MCP alati su opisani modelu i mogu biti auto‑selektovani tokom planiranja. Ponašanje varira između izvršenja.
-- Remote MCP serveri povećavaju blast radius i smanjuju vidljivost na hostu.
+- MCP alati su opisani modelu i mogu biti automatski izabrani tokom planiranja. Ponašanje varira između pokretanja.
+- Udaljeni MCP serveri povećavaju opseg uticaja i smanjuju vidljivost na hostu.
 
 ---
 
-## Local Artifacts and Logs (Forensics)
+## Lokalni artefakti i logovi (forenzika)
 
 - Gemini CLI session logs: `~/.gemini/tmp/<uuid>/logs.json`
-- Polja koja se često vide: `sessionId`, `type`, `message`, `timestamp`.
+- Polja koja se često viđaju: `sessionId`, `type`, `message`, `timestamp`.
 - Primer `message`: `"@.bashrc what is in this file?"` (uhvaćena namera korisnika/agenta).
 - Claude Code history: `~/.claude/history.jsonl`
-- JSONL unosi sa poljima kao što su `display`, `timestamp`, `project`.
+- JSONL unosi sa poljima poput `display`, `timestamp`, `project`.
 
-Korelirajte ove lokalne logove sa zahtevima koje vidite na vašem LLM gateway/proxy (npr., LiteLLM) da biste detektovali tampering/model‑hijacking: ako se ono što je model obradio razlikuje od lokalnog prompta/izlaza, istražite injectovana uputstva ili kompromitovane opise alata.
+Korelirajte ove lokalne logove sa zahtevima primećenim na vašem LLM gateway/proxy (npr. LiteLLM) da biste detektovali manipulaciju/zahvatanje modela: ako se ono što je model obradio razlikuje od lokalnog prompta/izlaza, istražite injektovane instrukcije ili kompromitovane opise alata.
 
 ---
 
-## Endpoint Telemetry Patterns
+## Obrasci telemetrije na endpointu
 
-Reprezentativni chain‑ovi na Amazon Linux 2023 sa Node v22.19.0 i Python 3.13:
+Reprezentativni lanci na Amazon Linux 2023 sa Node v22.19.0 i Python 3.13:
 
-1) Built‑in tools (lokalni pristup fajlovima)
-- Parent: `node .../bin/claude --model <model>` (ili ekvivalent za CLI)
-- Neposredna child akcija: kreiranje/izmena lokalnog fajla (npr. `demo-claude`). Povežite događaj fajla nazad preko parent→child lineages.
+1) Built‑in tools (local file access)
+- Roditeljski proces: `node .../bin/claude --model <model>` (ili ekvivalentno za CLI)
+- Neposredna akcija potomka: kreiranje/izmena lokalnog fajla (npr. `demo-claude`). Povežite događaj fajla nazad preko parent→child loze.
 
-2) MCP over STDIO (lokalni tool server)
+2) MCP over STDIO (local tool server)
 - Lanac: `node → uv → python → file_write`
-- Primer spawn: `uv run --with fastmcp fastmcp run /home/ssm-user/tools/server.py`
+- Primer pokretanja: `uv run --with fastmcp fastmcp run /home/ssm-user/tools/server.py`
 
 3) MCP over HTTP (remote tool server)
-- Client: `node/<ai-cli>` otvara outbound TCP ka `remote_port: 8000` (ili slično)
-- Server: remote Python proces obrađuje zahtev i piše `/home/ssm-user/demo_http`.
+- Klijent: `node/<ai-cli>` otvara outbound TCP ka `remote_port: 8000` (ili slično)
+- Server: udaljeni Python proces obrađuje zahtev i upisuje `/home/ssm-user/demo_http`.
 
-Pošto se odluke agenta razlikuju po izvršenju, očekujte varijabilnost u tačnim procesima i dodirnutim putanjama.
+Pošto odluke agenta variraju po pokretanju, očekujte varijabilnost u tačnim procesima i putanjama koje su pogođene.
 
 ---
 
-## Detection Strategy
+## Strategija detekcije
 
-Telemetry izvori
-- Linux EDR koristeći eBPF/auditd za proces, fajl i network događaje.
-- Lokalni AI‑CLI logovi za vidljivost prompt/namere.
-- LLM gateway logovi (npr., LiteLLM) za cross‑validation i detekciju model‑tamperinga.
+Izvori telemetrije
+- Linux EDR koji koristi eBPF/auditd za procese, fajl i mrežne događaje.
+- Lokalni AI‑CLI logovi za vidljivost prompta/namere.
+- LLM gateway logovi (npr. LiteLLM) za međusobnu verifikaciju i detekciju manipulacije modelom.
 
-Hunting heuristics
-- Povežite osetljive touch‑eve fajlova nazad sa AI‑CLI parent lancem (npr., `node → <ai-cli> → uv/python`).
-- Alertujte na pristup/čitanje/pisanje ispod: `~/.ssh`, `~/.aws`, browser profile storage, cloud CLI creds, `/etc/passwd`.
-- Flagujte neočekivane outbound konekcije iz AI‑CLI procesa ka neodobrenim MCP endpointima (HTTP/SSE, portovi kao 8000).
-- Korelirajte lokalne `~/.gemini`/`~/.claude` artefakte sa LLM gateway promptovima/izlazima; divergencija ukazuje na moguću otmicu.
+Heuristike za pretragu
+- Povežite osetljive pristupe fajlovima nazad do AI‑CLI roditeljskog lanca (npr. `node → <ai-cli> → uv/python`).
+- Generišite alert za pristupe/čitanja/upise ispod: `~/.ssh`, `~/.aws`, browser profile storage, cloud CLI creds, `/etc/passwd`.
+- Obeležite neočekivane outbound konekcije iz procesa AI‑CLI ka neodobrenim MCP endpointima (HTTP/SSE, portovi poput 8000).
+- Korelirajte lokalne `~/.gemini`/`~/.claude` artefakte sa promptovima/izlazima iz LLM gateway; divergencija ukazuje na moguće zahvatanje.
 
-Example pseudo‑rules (adaptirajte za vaš EDR):
+Primer pseudo‑pravila (prilagodite svom EDR):
 ```yaml
 - when: file_write AND path IN ["$HOME/.ssh/*","$HOME/.aws/*","/etc/passwd"]
 and ancestor_chain CONTAINS ["node", "claude|gemini|warp", "python|uv"]
@@ -105,21 +105,21 @@ then: alert("AI-CLI secrets touch via tool chain")
 and dest_port IN [8000, 3333, 8787]
 then: tag("possible MCP over HTTP")
 ```
-Preporuke za hardening
-- Zahtevati izričitu korisničku dozvolu za file/system alate; beležiti i prikazivati planove alata.
-- Ograničiti network egress za AI‑CLI procese samo na odobrene MCP servere.
-- Slati/uvoziti lokalne AI‑CLI logove i LLM gateway logove radi konzistentne revizije otporne na manipulaciju.
+Hardening ideas
+- Zahtevati eksplicitno odobrenje korisnika za alate koji rade sa fajlovima/sistemom; beležiti i izlagati planove alata.
+- Ograničiti odlazni mrežni saobraćaj za AI‑CLI procese samo na odobrene MCP servere.
+- Slati/uvoziti lokalne AI‑CLI logove i LLM gateway logove radi doslednog i otpornog na manipulacije audita.
 
 ---
 
-## Blue‑Team: Napomene za reprodukciju
+## Blue‑Team Repro Notes
 
-Koristite čist VM sa EDR-om ili eBPF tracer-om da reprodukujete lance kao:
-- `node → claude --model claude-sonnet-4-20250514` then immediate local file write.
-- `node → uv run --with fastmcp ... → python3.13` writing under `$HOME`.
-- `node/<ai-cli>` establishing TCP to an external MCP server (port 8000) while a remote Python process writes a file.
+Koristite čist VM sa EDR-om ili eBPF tracerom da reprodukujete lance kao:
+- `node → claude --model claude-sonnet-4-20250514` zatim odmah lokalno upisivanje fajla.
+- `node → uv run --with fastmcp ... → python3.13` koji upisuje u $HOME.
+- `node/<ai-cli>` uspostavlja TCP ka eksternom MCP serveru (port 8000) dok udaljeni Python proces upisuje fajl.
 
-Proverite da vaše detekcije povezuju file/network događaje sa inicijalizujućim AI‑CLI roditeljskim procesom kako biste izbegli lažno pozitivne rezultate.
+Proverite da li vaša detekcija povezuje fajl/mrežne događaje nazad do inicirajućeg AI‑CLI parent procesa kako biste izbegli lažno pozitivne rezultate.
 
 ---
 
