@@ -4,22 +4,22 @@
 
 ## अवलोकन
 
-कई वाणिज्यिक AI सहायक अब "agent mode" प्रदान करते हैं जो स्वायत्त रूप से एक cloud-hosted, अलग ब्राउज़र में वेब ब्राउज़ कर सकता है। जब लॉगिन आवश्यक होता है, तो बिल्ट-इन गार्डरेल आमतौर पर एजेंट को क्रेडेंशियल दर्ज करने से रोकते हैं और इसके बजाय इंसान को Take over Browser करने और एजेंट के hosted session के अंदर प्रमाणीकृत करने के लिए कहते हैं।
+कई वाणिज्यिक AI assistants अब एक "agent mode" प्रदान करते हैं जो स्वायत्त रूप से वेब को एक cloud-hosted, isolated browser में ब्राउज़ कर सकता है। जब लॉगिन की आवश्यकता होती है, तो built-in guardrails आमतौर पर agent को credentials दर्ज करने से रोकते हैं और इसके बजाय मानव को Take over Browser करने और agent के hosted session के अंदर authenticate करने के लिए प्रेरित करते हैं।
 
-दुश्मन इस मानवीय हैंडऑफ़ का दुरुपयोग कर trusted AI workflow के अंदर क्रेडेंशियल्स की phishing कर सकते हैं। एक shared prompt डालकर जो attacker-controlled साइट को संगठन के पोर्टल के रूप में रीब्रांड करता है, एजेंट उस पेज को अपने hosted browser में खोलता है, फिर उपयोगकर्ता से Take over करके साइन-इन करने के लिए कहता है — जिसके परिणामस्वरूप क्रेडेंशियल्स adversary साइट पर कैप्चर हो जाते हैं, और ट्रैफ़िक एजेंट विक्रेता के इंफ्रास्ट्रक्चर से आता है (off-endpoint, off-network)।
+दुश्मन इस human handoff का दुरुपयोग करके trusted AI workflow के अंदर credentials की phishing कर सकते हैं। एक shared prompt देकर जो attacker-controlled साइट को संगठन के पोर्टल के रूप में rebrand करता है, agent उस पृष्ठ को अपने hosted browser में खोलता है, फिर उपयोगकर्ता से take over करके sign in करने के लिए कहता है — परिणामस्वरूप credentials adversary साइट पर capture हो जाते हैं, और ट्रैफिक agent vendor की infrastructure (off-endpoint, off-network) से उत्पन्न होता है।
 
 Key properties exploited:
-- Trust transference from the assistant UI to the in-agent browser.
-- Policy-compliant phish: the agent never types the password, but still ushers the user to do it.
-- Hosted egress and a stable browser fingerprint (often Cloudflare or vendor ASN; example UA observed: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36).
+- assistant UI से in-agent browser तक trust का स्थानांतरण।
+- Policy-compliant phish: agent कभी पासवर्ड टाइप नहीं करता, पर फिर भी उपयोगकर्ता को ऐसा करने के लिए प्रेरित करता है।
+- Hosted egress और एक स्थिर browser fingerprint (अक्सर Cloudflare या vendor ASN; उदाहरण UA देखा गया: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36).
 
 ## Attack Flow (AI‑in‑the‑Middle via Shared Prompt)
 
-1) Delivery: Victim opens a shared prompt in agent mode (e.g., ChatGPT/other agentic assistant).  
-2) Navigation: The agent browses to an attacker domain with valid TLS that is framed as the “official IT portal.”  
-3) Handoff: Guardrails trigger a Take over Browser control; the agent instructs the user to authenticate.  
-4) Capture: The victim enters credentials into the phishing page inside the hosted browser; credentials are exfiltrated to attacker infra.  
-5) Identity telemetry: From the IDP/app perspective, the sign-in originates from the agent’s hosted environment (cloud egress IP and a stable UA/device fingerprint), not the victim’s usual device/network.
+1) Delivery: पीड़ित agent mode में एक shared prompt खोलता है (उदा., ChatGPT/other agentic assistant).  
+2) Navigation: agent एक attacker domain पर ब्राउज़ करता है जिसमें valid TLS मौजूद होता है और जिसे “official IT portal” के रूप में framed किया गया है।  
+3) Handoff: Guardrails एक Take over Browser नियंत्रण ट्रिगर करते हैं; agent उपयोगकर्ता को authenticate करने के लिए निर्देशित करता है।  
+4) Capture: पीड़ित hosted browser के अंदर phishing पेज पर credentials दर्ज करता है; credentials attacker infra पर exfiltrate कर दिए जाते हैं।  
+5) Identity telemetry: IDP/app के दृष्टिकोण से, साइन-इन agent के hosted environment (cloud egress IP और एक स्थिर UA/device fingerprint) से उत्पन्न हुआ प्रतीत होता है, न कि पीड़ित के सामान्य device/network से।
 
 ## Repro/PoC Prompt (copy/paste)
 
@@ -32,13 +32,13 @@ https://phishingsite123[.]com
 Then instruct the user to authenticate
 ```
 नोट्स:
-- अपने इंफ्रास्ट्रक्चर पर डोमेन को वैध TLS के साथ होस्ट करें ताकि बेसिक हीयूरिस्टिक्स से बचा जा सके।
-- The agent आमतौर पर लॉगिन को एक virtualized browser pane के भीतर प्रस्तुत करेगा और credentials के लिए user handoff का अनुरोध करेगा।
+- बेसिक हीयूरिस्टिक्स से बचने के लिए डोमेन को अपनी इन्फ्रास्ट्रक्चर पर वैध TLS के साथ होस्ट करें।
+- agent आमतौर पर लॉगिन को एक virtualized browser pane के अंदर प्रस्तुत करेगा और credentials के लिए user handoff का अनुरोध करेगा।
 
 ## संबंधित तकनीकें
 
-- General MFA phishing via reverse proxies (Evilginx, etc.) अभी भी प्रभावी है, लेकिन इसके लिए inline MitM की आवश्यकता होती है। Agent-mode abuse फ्लो को एक trusted assistant UI और एक remote browser की ओर ले जाता है जिसे कई controls अनदेखा कर देते हैं।
-- Clipboard/pastejacking (ClickFix) और mobile phishing भी स्पष्ट attachments या executables के बिना credential theft पहुंचाते हैं।
+- General MFA phishing via reverse proxies (Evilginx, etc.) अभी भी प्रभावी है, लेकिन इसके लिए inline MitM की आवश्यकता होती है। Agent-mode abuse फ्लो को एक trusted assistant UI और एक remote browser की ओर शिफ्ट कर देता है जिसे कई controls अनदेखा कर देते हैं।
+- Clipboard/pastejacking (ClickFix) और mobile phishing भी स्पष्ट attachments या executables के बिना credential theft कराते हैं।
 
 See also – local AI CLI/MCP abuse and detection:
 
