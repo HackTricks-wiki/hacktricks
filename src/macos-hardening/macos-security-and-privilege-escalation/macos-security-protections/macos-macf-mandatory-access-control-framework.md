@@ -447,18 +447,5 @@ __END_DECLS
 
 - [**\*OS Internals Volume III**](https://newosxbook.com/home.html)
 
+
 {{#include ../../../banners/hacktricks-training.md}}
-
-
-
-
-
-
-
-on system boot, IMage4, AMFI and Sandbox are fisrt to load
-
-AMFI registers label #1 - attacher to the creds stores the entielements of process
-
-during kern_exec.c -> exec_actovate_image -> macho activation (loader) -> load_code_signature --> hook vnode_check_signature
-
-this will offload all of the 

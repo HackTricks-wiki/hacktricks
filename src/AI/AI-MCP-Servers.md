@@ -153,6 +153,12 @@ The payload can be anything the current OS user can run, e.g. a reverse-shell ba
 * For legacy versions you can detect suspicious diffs with Git hooks or a security agent watching `.cursor/` paths.
 * Consider signing MCP configurations or storing them outside the repository so they cannot be altered by untrusted contributors.
 
+See also – operational abuse and detection of local AI CLI/MCP clients:
+
+{{#ref}}
+../generic-methodologies-and-resources/phishing-methodology/ai-agent-abuse-local-ai-cli-tools-and-mcp.md
+{{#endref}}
+
 ## References
 - [CVE-2025-54136 – MCPoison Cursor IDE persistent RCE](https://research.checkpoint.com/2025/cursor-vulnerability-mcpoison/)
 
