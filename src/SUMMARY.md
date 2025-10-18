@@ -68,6 +68,7 @@
     - [PDF File analysis](generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/pdf-file-analysis.md)
     - [PNG tricks](generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/png-tricks.md)
     - [Structural File Format Exploit Detection](generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/structural-file-format-exploit-detection.md)
+    - [Svg Font Glyph Analysis And Web Drm Deobfuscation](generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/svg-font-glyph-analysis-and-web-drm-deobfuscation.md)
     - [Video and Audio file analysis](generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/video-and-audio-file-analysis.md)
     - [ZIPs tricks](generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/zips-tricks.md)
   - [Windows Artifacts](generic-methodologies-and-resources/basic-forensic-methodology/windows-forensics/README.md)
