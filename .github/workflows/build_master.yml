@@ -82,9 +82,32 @@ jobs:
           RATIO=$(awk "BEGIN {printf \"%.1f\", ($COMPRESSED_SIZE / $ORIGINAL_SIZE) * 100}")
           echo "Compression: ${ORIGINAL_SIZE} bytes -> ${COMPRESSED_SIZE} bytes (${RATIO}%)"
           
-          # Copy the .gz version to the searchindex repo
+          # XOR encrypt the compressed file
+          KEY='HackTricks_S3arch_K3y_2024!@#$%^&*()_+ComplexPassPhrase_v1.0_SecureObfuscation'
+          python3 - << 'PYTHON_SCRIPT'
+import sys
+key = sys.argv[1]
+input_file = sys.argv[2]
+output_file = sys.argv[3]
+
+with open(input_file, 'rb') as f:
+    data = f.read()
+
+key_bytes = key.encode('utf-8')
+encrypted = bytearray(len(data))
+for i in range(len(data)):
+    encrypted[i] = data[i] ^ key_bytes[i % len(key_bytes)]
+
+with open(output_file, 'wb') as f:
+    f.write(encrypted)
+
+print(f"Encrypted: {len(data)} bytes")
+PYTHON_SCRIPT
+          python3 - "$KEY" "${ASSET}.gz" "${ASSET}.gz.enc"
+          
+          # Copy the encrypted .gz version to the searchindex repo
           cd /tmp/searchindex-repo
-          cp "${GITHUB_WORKSPACE}/${ASSET}.gz" "${FILENAME}.gz"
+          cp "${GITHUB_WORKSPACE}/${ASSET}.gz.enc" "${FILENAME}.gz"
           
           # Stage the updated file
           git add "${FILENAME}.gz"

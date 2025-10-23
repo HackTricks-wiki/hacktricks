@@ -21,7 +21,17 @@
       try { importScripts('https://cdn.jsdelivr.net/npm/elasticlunr@0.9.5/elasticlunr.min.js'); }
       catch { importScripts(abs('/elasticlunr.min.js')); }
   
-    /* 2 — decompress gzip data */
+    /* 2 — XOR decryption function */
+    function xorDecrypt(encryptedData, key){
+      const keyBytes = new TextEncoder().encode(key);
+      const decrypted = new Uint8Array(encryptedData.length);
+      for(let i = 0; i < encryptedData.length; i++){
+        decrypted[i] = encryptedData[i] ^ keyBytes[i % keyBytes.length];
+      }
+      return decrypted.buffer;
+    }
+
+    /* 3 — decompress gzip data */
     async function decompressGzip(arrayBuffer){
       if(typeof DecompressionStream !== 'undefined'){
         /* Modern browsers: use native DecompressionStream */
@@ -40,21 +50,25 @@
       }
     }
 
-    /* 3 — load a single index (remote → local) */
+    /* 4 — load a single index (remote → local) */
     async function loadIndex(remote, local, isCloud=false){
+      const XOR_KEY = "HackTricks_S3arch_K3y_2024!@#$%^&*()_+ComplexPassPhrase_v1.0_SecureObfuscation";
       let rawLoaded = false;
       if(remote){
         /* Try ONLY compressed version from GitHub (remote already includes .js.gz) */
         try {
           const r = await fetch(remote,{mode:'cors'});
           if (r.ok) {
-            const compressed = await r.arrayBuffer();
+            const encryptedCompressed = await r.arrayBuffer();
+            /* Decrypt first */
+            const compressed = xorDecrypt(new Uint8Array(encryptedCompressed), XOR_KEY);
+            /* Then decompress */
             const text = await decompressGzip(compressed);
             importScripts(URL.createObjectURL(new Blob([text],{type:'application/javascript'})));
             rawLoaded = true;
-            console.log('Loaded compressed from GitHub:',remote);
+            console.log('Loaded encrypted+compressed from GitHub:',remote);
           }
-        } catch(e){ console.warn('compressed GitHub',remote,'failed →',e); }
+        } catch(e){ console.warn('encrypted+compressed GitHub',remote,'failed →',e); }
       }
       /* If remote (GitHub) failed, fall back to local uncompressed file */
       if(!rawLoaded && local){
