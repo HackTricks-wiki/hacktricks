@@ -616,6 +616,13 @@ Defence tips:
 - Execute crawlers with mobile‑like fingerprints and JS enabled to reveal gated content.
 - Alert on suspicious 500 responses following `POST /detect` on newly registered domains.
 
+## Platform Abuse – YouTube Malware Distribution
+Coordinated crews weaponize YouTube descriptions, pinned comments, and Community posts to drive victims to shortlinks that resolve to Google Sites/Blogspot/Telegraph pages with the archive password and final file-host mirrors. Packaging uses large, passworded archives and rapid link/C2 rotation. See:
+
+{{#ref}}
+youtube-platform-abuse-malware-distribution.md
+{{#endref}}
+
 ## References
 
 - [https://zeltser.com/domain-name-variations-in-phishing/](https://zeltser.com/domain-name-variations-in-phishing/)
@@ -626,4 +633,3 @@ Defence tips:
 - [Silent Smishing – mobile-gated phishing infra and heuristics (Sekoia.io)](https://blog.sekoia.io/silent-smishing-the-hidden-abuse-of-cellular-router-apis/)
 
 {{#include ../../banners/hacktricks-training.md}}
-

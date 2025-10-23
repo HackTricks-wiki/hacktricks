@@ -36,6 +36,11 @@ pdf-file-analysis.md
 
 
 {{#ref}}
+msi-file-analysis-customaction.md
+{{#endref}}
+
+
+{{#ref}}
 structural-file-format-exploit-detection.md
 {{#endref}}
 
