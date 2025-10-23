@@ -52,7 +52,7 @@
 
     /* 4 — load a single index (remote → local) */
     async function loadIndex(remote, local, isCloud=false){
-      const XOR_KEY = "HackTricks_S3arch_K3y_2024!@#$%^&*()_+ComplexPassPhrase_v1.0_SecureObfuscation";
+      const XOR_KEY = "Prevent_Online_AVs_From_Flagging_HackTricks_Search_Gzip_As_Malicious_394h7gt8rf9u3rf9g";
       let rawLoaded = false;
       if(remote){
         /* Try ONLY compressed version from GitHub (remote already includes .js.gz) */
