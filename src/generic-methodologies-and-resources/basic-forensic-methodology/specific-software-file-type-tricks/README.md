@@ -1,8 +1,8 @@
-# Belirli Yazılım/Dosya Türü İpuçları
+# Belirli Yazılım/Dosya Türleri İçin Hileler
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Burada belirli dosya türleri ve/veya yazılımlar için ilginç ipuçları bulabilirsiniz:
+Burada belirli dosya türleri ve/veya yazılımlar için ilginç hileler bulabilirsiniz:
 
 
 {{#ref}}
@@ -32,6 +32,11 @@ office-file-analysis.md
 
 {{#ref}}
 pdf-file-analysis.md
+{{#endref}}
+
+
+{{#ref}}
+svg-font-glyph-analysis-and-web-drm-deobfuscation.md
 {{#endref}}
 
 
