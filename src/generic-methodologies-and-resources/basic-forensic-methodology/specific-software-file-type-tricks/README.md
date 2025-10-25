@@ -1,8 +1,8 @@
-# Hila Maalum za Programu/Aina za Faili
+# Mbinu Mahususi za Programu/Aina za Faili
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Hapa unaweza kupata hila za kuvutia kwa aina maalum za faili na/au programu:
+Hapa unaweza kupata mbinu za kuvutia kwa aina mahususi za faili na/au programu:
 
 
 {{#ref}}
@@ -32,6 +32,11 @@ office-file-analysis.md
 
 {{#ref}}
 pdf-file-analysis.md
+{{#endref}}
+
+
+{{#ref}}
+svg-font-glyph-analysis-and-web-drm-deobfuscation.md
 {{#endref}}
 
 
