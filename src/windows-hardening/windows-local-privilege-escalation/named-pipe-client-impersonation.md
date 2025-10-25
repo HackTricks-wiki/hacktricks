@@ -1,30 +1,30 @@
-# Uigaji wa Mteja wa Named Pipe
+# Named Pipe Client Impersonation
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Uigaji wa mteja wa Named Pipe ni mbinu ya msingi ya kupandisha hadhi za eneo (local privilege escalation) inayoruhusu thread ya server ya named-pipe kuchukua muktadha wa usalama wa mteja anayeungana nayo. Katika vitendo, mshambulizi anayeweza kuendesha msimbo akiwa na SeImpersonatePrivilege anaweza kulazimisha mteja mwenye ruhusa (mfano, service ya SYSTEM) kuungana na pipe inayodhibitiwa na mshambulizi, kuitisha ImpersonateNamedPipeClient, kutengeneza nakala ya token iliyopatikana kuwa token kuu, na kuanzisha mchakato kama mteja (mara nyingi NT AUTHORITY\SYSTEM).
+Named Pipe client impersonation ni primitive ya local privilege escalation inayoruhusu thread ya server ya named-pipe kuchukua muktadha wa usalama wa mteja anayejunga nayo. Kwa vitendo, mshambuliaji anayeweza kuendesha code akiwa na SeImpersonatePrivilege anaweza kulazimisha mteja wenye vibali (mfano, huduma ya SYSTEM) kuungana na pipe inayodhibitiwa na mshambuliaji, kuita ImpersonateNamedPipeClient, kufanya nakala ya tokeni inayopatikana kuwa tokeni ya msingi, na kuanzisha mchakato kama mteja (kwa kawaida NT AUTHORITY\SYSTEM).
 
-Ukurasa huu unalenga mbinu kuu. Kwa minyororo ya eksploit kuanzia mwanzo hadi mwisho zinazolazimisha SYSTEM kuungana na pipe yako, angalia Potato family pages zilizotajwa hapa chini.
+Ukurasa huu unazingatia mbinu kuu. Kwa mnyororo wa eksploit end-to-end unaolazimisha SYSTEM kuungana na pipe yako, angalia kurasa za familia ya Potato zilizotajwa hapa chini.
 
 ## TL;DR
-- Create a named pipe: \\.\pipe\<random> na subiri muunganisho.
-- Fanya sehemu yenye ruhusa iungane nayo (spooler/DCOM/EFSRPC/etc.).
+- Unda named pipe: \\.\pipe\<random> na subiri muunganisho.
+- Fanya kipengele chenye vibali kiungane nayo (spooler/DCOM/EFSRPC/etc.).
 - Soma angalau ujumbe mmoja kutoka kwenye pipe, kisha ita ImpersonateNamedPipeClient.
-- Fungua token ya uigaji kutoka thread ya sasa, DuplicateTokenEx(TokenPrimary), na CreateProcessWithTokenW/CreateProcessAsUser ili kupata mchakato wa SYSTEM.
+- Fungua tokeni ya impersonation kutoka kwenye thread ya sasa, DuplicateTokenEx(TokenPrimary), na tumia CreateProcessWithTokenW/CreateProcessAsUser kupata mchakato wa SYSTEM.
 
-## Requirements and key APIs
-- PrivilegesTypically needed by the calling process/thread:
-- SeImpersonatePrivilege to successfully impersonate a connecting client and to use CreateProcessWithTokenW.
-- Alternatively, after impersonating SYSTEM, you can use CreateProcessAsUser, which may require SeAssignPrimaryTokenPrivilege and SeIncreaseQuotaPrivilege (these are satisfied when you’re impersonating SYSTEM).
-- Core APIs used:
+## Mahitaji na API kuu
+- Vibali vinavyohitajika kawaida na mchakato/thread inayoitisha:
+- SeImpersonatePrivilege ili kufanikiwa kufanya impersonation kwa mteja anayejunga na pia kutumia CreateProcessWithTokenW.
+- Mbali na hilo, baada ya kufanya impersonation ya SYSTEM, unaweza kutumia CreateProcessAsUser, ambayo inaweza kuhitaji SeAssignPrimaryTokenPrivilege na SeIncreaseQuotaPrivilege (hivi vinatimizwa unapokuwa unafanya impersonation ya SYSTEM).
+- API kuu zinazotumika:
 - CreateNamedPipe / ConnectNamedPipe
-- ReadFile/WriteFile (must read at least one message before impersonation)
+- ReadFile/WriteFile (lazima usome angalau ujumbe mmoja kabla ya impersonation)
 - ImpersonateNamedPipeClient and RevertToSelf
 - OpenThreadToken, DuplicateTokenEx(TokenPrimary)
 - CreateProcessWithTokenW or CreateProcessAsUser
-- Impersonation level: to perform useful actions locally, the client must allow SecurityImpersonation (default for many local RPC/named-pipe clients). Clients can lower this with SECURITY_SQOS_PRESENT | SECURITY_IDENTIFICATION when opening the pipe.
+- Impersonation level: ili kufanya vitendo vinavyofaa kwa localhost, mteja lazima aeruhusu SecurityImpersonation (chaguo-msingi kwa RPC/named-pipe clients wengi wa ndani). Wateja wanaweza kupunguza haya kwa kutumia SECURITY_SQOS_PRESENT | SECURITY_IDENTIFICATION wakati wa kufungua pipe.
 
-## Mtiririko mdogo wa Win32 (C)
+## Minimal Win32 workflow (C)
 ```c
 // Minimal skeleton (no error handling hardening for brevity)
 #include <windows.h>
@@ -69,11 +69,11 @@ return 0;
 }
 ```
 Vidokezo:
-- Ikiwa ImpersonateNamedPipeClient inarudisha ERROR_CANNOT_IMPERSONATE (1368), hakikisha unasoma kutoka kwenye pipe kwanza na kwamba client hakuzuia impersonation hadi kiwango cha Identification.
-- Pendelea DuplicateTokenEx kwa SecurityImpersonation na TokenPrimary ili kuunda token kuu inayofaa kwa uundaji wa mchakato.
+- Kama ImpersonateNamedPipeClient inarudisha ERROR_CANNOT_IMPERSONATE (1368), hakikisha unasoma kutoka kwenye pipe kwanza na kwamba mteja hakuzuia impersonation hadi Identification level.
+- Pendelea kutumia DuplicateTokenEx pamoja na SecurityImpersonation na TokenPrimary ili kuunda token ya msingi inayofaa kwa uundaji wa process.
 
 ## .NET mfano mfupi
-Katika .NET, NamedPipeServerStream inaweza kujifanya kupitia RunAsClient. Mara inapojifanya, nakili token ya thread na unda mchakato.
+Katika .NET, NamedPipeServerStream inaweza kufanya impersonate kupitia RunAsClient. Mara ikipofanya impersonate, nakili token ya thread na unda mchakato.
 ```csharp
 using System; using System.IO.Pipes; using System.Runtime.InteropServices; using System.Diagnostics;
 class P {
@@ -93,13 +93,13 @@ Process pi; CreateProcessWithTokenW(p, 2, null, null, 0, IntPtr.Zero, null, ref 
 }
 }
 ```
-## Vichocheo/vikandamizo vya kawaida ili kupata SYSTEM kwenye pipe yako
-Mbinu hizi zinawalazimisha huduma zilizo na vibali (privileged services) kuungana na named pipe yako ili uweze kujifanya wao:
-- Print Spooler RPC kichocheo (PrintSpoofer)
-- Variant za DCOM activation/NTLM reflection (RoguePotato/JuicyPotato[NG], GodPotato)
+## Vichocheo/vyenye kulazimisha vya kawaida ili kupata SYSTEM kwenye pipe yako
+Mbinu hizi hulazimisha huduma zilizo na ruhusa za juu kuungana na named pipe yako ili uweze impersonate zao:
+- Print Spooler RPC trigger (PrintSpoofer)
+- DCOM activation/NTLM reflection variants (RoguePotato/JuicyPotato[NG], GodPotato)
 - EFSRPC pipes (EfsPotato/SharpEfsPotato)
 
-Angalia utumiaji wa kina na ulinganifu hapa:
+Tazama matumizi ya kina na ulinganifu hapa:
 
 -
 {{#ref}}
@@ -110,27 +110,31 @@ roguepotato-and-printspoofer.md
 juicypotato.md
 {{#endref}}
 
-Ikiwa unahitaji mfano kamili wa kutengeneza pipe na kujifanya ili kuzalisha SYSTEM kutoka kwa kichocheo cha huduma, angalia:
+Ikiwa unahitaji mfano kamili wa kutengeneza pipe na impersonating ili spawn SYSTEM kutoka kwa service trigger, angalia:
 
 -
 {{#ref}}
 from-high-integrity-to-system-with-name-pipes.md
 {{#endref}}
+-
+{{#ref}}
+service-triggers.md
+{{#endref}}
 
-## Utatuzi wa matatizo na vidokezo muhimu
-- Lazima usome angalau ujumbe mmoja kutoka kwa pipe kabla ya kuita ImpersonateNamedPipeClient; vinginevyo utapokea ERROR_CANNOT_IMPERSONATE (1368).
-- Ikiwa client inaungana kwa SECURITY_SQOS_PRESENT | SECURITY_IDENTIFICATION, server haiwezi kujifanya kikamilifu; angalia kiwango cha kujifanya cha token kupitia GetTokenInformation(TokenImpersonationLevel).
-- CreateProcessWithTokenW inahitaji SeImpersonatePrivilege kwa mtumaji. Ikiwa hiyo inashindwa na ERROR_PRIVILEGE_NOT_HELD (1314), tumia CreateProcessAsUser baada ya tayari kujifanya SYSTEM.
-- Hakikisha security descriptor ya pipe yako inamruhusu huduma inayolengwa kuungana ikiwa umeifanya kuwa ngumu; kwa default, pipes chini ya \\.\pipe zinapatikana kwa mujibu wa DACL ya server.
+## Utatuzi wa matatizo na mambo ya kuzingatia
+- Unapaswa kusoma angalau ujumbe mmoja kutoka kwenye pipe kabla ya kuita ImpersonateNamedPipeClient; vinginevyo utapata ERROR_CANNOT_IMPERSONATE (1368).
+- Ikiwa client inaungana kwa SECURITY_SQOS_PRESENT | SECURITY_IDENTIFICATION, server haiwezi ku-impersonate kikamilifu; angalia kiwango cha impersonation cha token kupitia GetTokenInformation(TokenImpersonationLevel).
+- CreateProcessWithTokenW inahitaji SeImpersonatePrivilege kwa caller. Ikiwa hiyo itashindwa na ERROR_PRIVILEGE_NOT_HELD (1314), tumia CreateProcessAsUser baada ya tayari ku-impersonate SYSTEM.
+- Hakikisha security descriptor ya pipe yako inaruhusu service lengwa kuungana ikiwa umeilinda; kwa chaguo-msingi, pipes chini ya \\.\pipe zinapatikana kulingana na DACL ya server.
 
-## Ugunduzi na kuimarisha
-- Fuatilia uundaji na muunganisho wa named pipe. Sysmon Event IDs 17 (Pipe Created) na 18 (Pipe Connected) ni muhimu kuanzisha mstari wa msingi wa majina halali ya pipe na kugundua pipes zisizo za kawaida zinazoonekana kuwa za nasibu kabla ya matukio ya utendakazi wa token.
-- Tafuta mfululizo: mchakato unaunda pipe, huduma ya SYSTEM inaunda muunganisho, kisha mchakato uliounda unazalisha mchakato mtoto kama SYSTEM.
-- Punguza mfao kwa kuondoa SeImpersonatePrivilege kutoka kwa akaunti za huduma zisizo za lazima na kuepuka kuingia kwa huduma zisizo za lazima zenye vibali vya juu.
-- Maendeleo ya kujilinda: wakati wa kuungana na named pipes zisizo za kuaminika, taja SECURITY_SQOS_PRESENT pamoja na SECURITY_IDENTIFICATION ili kuzuia servers kujifanya kikamilifu client isipokuwa inapohitajika.
+## Utambuzi na kuimarisha
+- Monitor named pipe creation and connections. Sysmon Event IDs 17 (Pipe Created) na 18 (Pipe Connected) ni muhimu kwa kuweka msingi wa majina halali ya pipe na kugundua pipes zisizo za kawaida, zenye kuonekana nasibu, zinazotangulia matukio ya token-manipulation.
+- Tazama mfululizo: process inaunda pipe, service ya SYSTEM inaungana, kisha process iliyounda inatoa mtoto kama SYSTEM.
+- Punguza exposure kwa kuondoa SeImpersonatePrivilege kutoka kwa akaunti za service zisizo muhimu na kuepuka logon za service zisizo za lazima zenye ruhusa za juu.
+- Defensive development: unapojiunga na named pipes zisizo za kuaminika, weka SECURITY_SQOS_PRESENT pamoja na SECURITY_IDENTIFICATION ili kuzuia servers ku-impersonate kikamilifu client isipokuwa itakapotakiwa.
 
 ## Marejeo
-- Windows: ImpersonateNamedPipeClient documentation (mahitaji ya kujifanya na tabia). https://learn.microsoft.com/en-us/windows/win32/api/namedpipeapi/nf-namedpipeapi-impersonatenamedpipeclient
-- ired.team: Windows named pipes privilege escalation (mwongozo na mifano ya code). https://ired.team/offensive-security/privilege-escalation/windows-namedpipes-privilege-escalation
+- Windows: ImpersonateNamedPipeClient documentation (impersonation requirements and behavior). https://learn.microsoft.com/en-us/windows/win32/api/namedpipeapi/nf-namedpipeapi-impersonatenamedpipeclient
+- ired.team: Windows named pipes privilege escalation (walkthrough and code examples). https://ired.team/offensive-security/privilege-escalation/windows-namedpipes-privilege-escalation
 
 {{#include ../../banners/hacktricks-training.md}}
