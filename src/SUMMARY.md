@@ -478,6 +478,7 @@
       - [disable_functions bypass - PHP 4 >= 4.2.0, PHP 5 pcntl_exec](network-services-pentesting/pentesting-web/php-tricks-esp/php-useful-functions-disable_functions-open_basedir-bypass/disable_functions-bypass-php-4-greater-than-4.2.0-php-5-pcntl_exec.md)
     - [Php Rce Abusing Object Creation New Usd Get A Usd Get B](network-services-pentesting/pentesting-web/php-tricks-esp/php-rce-abusing-object-creation-new-usd_get-a-usd_get-b.md)
     - [PHP SSRF](network-services-pentesting/pentesting-web/php-tricks-esp/php-ssrf.md)
+  - [Perl Tricks](network-services-pentesting/pentesting-web/perl-tricks.md)
   - [PrestaShop](network-services-pentesting/pentesting-web/prestashop.md)
   - [Python](network-services-pentesting/pentesting-web/python.md)
   - [Rocket Chat](network-services-pentesting/pentesting-web/rocket-chat.md)
@@ -587,7 +588,6 @@
 
 # 🕸️ Pentesting Web
 
-- [Less Code Injection Ssrf](pentesting-web/less-code-injection-ssrf.md)
 - [Web Vulnerabilities Methodology](pentesting-web/web-vulnerabilities-methodology.md)
 - [Reflecting Techniques - PoCs and Polygloths CheatSheet](pentesting-web/pocs-and-polygloths-cheatsheet/README.md)
   - [Web Vulns List](pentesting-web/pocs-and-polygloths-cheatsheet/web-vulns-list.md)
