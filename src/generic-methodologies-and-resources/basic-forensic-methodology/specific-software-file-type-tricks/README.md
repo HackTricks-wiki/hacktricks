@@ -2,7 +2,7 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Ovde možete pronaći zanimljive trikove za određene tipove fajlova i/ili softver:
+Ovde možete pronaći zanimljive trikove za specifične tipove fajlova i/ili softver:
 
 
 {{#ref}}
@@ -32,6 +32,11 @@ office-file-analysis.md
 
 {{#ref}}
 pdf-file-analysis.md
+{{#endref}}
+
+
+{{#ref}}
+svg-font-glyph-analysis-and-web-drm-deobfuscation.md
 {{#endref}}
 
 
