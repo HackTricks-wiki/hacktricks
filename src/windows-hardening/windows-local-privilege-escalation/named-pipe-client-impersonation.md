@@ -2,29 +2,29 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Named Pipe client impersonation은 명명된 파이프 서버 스레드가 연결하는 클라이언트의 보안 컨텍스트를 채택할 수 있게 해주는 로컬 권한 상승 프리미티브입니다. 실무에서는 SeImpersonatePrivilege로 코드 실행이 가능한 공격자가 권한 있는 클라이언트(예: SYSTEM 서비스)를 공격자가 제어하는 파이프에 연결하도록 유도하고, ImpersonateNamedPipeClient를 호출해 생성된 토큰을 primary 토큰으로 복제한 다음 클라이언트 계정(대개 NT AUTHORITY\SYSTEM)으로 프로세스를 생성할 수 있습니다.
+Named Pipe client impersonation은 로컬 권한 상승 프리미티브로, named-pipe 서버 스레드가 연결된 클라이언트의 보안 컨텍스트를 채택할 수 있게 합니다. 실제로 SeImpersonatePrivilege로 코드를 실행할 수 있는 공격자는 권한 있는 클라이언트(예: SYSTEM 서비스)를 공격자가 제어하는 파이프에 연결하도록 유도하고, ImpersonateNamedPipeClient를 호출한 다음 결과 토큰을 primary 토큰으로 복제하여 클라이언트(종종 NT AUTHORITY\SYSTEM)로서 프로세스를 생성할 수 있습니다.
 
-이 페이지는 핵심 기법에 초점을 맞춥니다. SYSTEM을 당신의 파이프에 연결하도록 강제하는 엔드투엔드 익스플로잇 체인에 대해서는 아래에 참조된 Potato family 페이지를 참조하세요.
+이 페이지는 핵심 기법에 초점을 맞춥니다. SYSTEM을 귀하의 파이프에 강제로 연결시키는 end-to-end exploit chains에 대해서는 아래에 참조된 Potato 계열 페이지를 보세요.
 
 ## TL;DR
-- 명명된 파이프 생성: \\.\pipe\<random> 을 만들고 연결을 대기합니다.
-- 권한 있는 구성요소를 해당 파이프에 연결되도록 유도합니다 (spooler/DCOM/EFSRPC/etc.).
-- 파이프에서 적어도 한 메시지를 읽은 다음 ImpersonateNamedPipeClient를 호출합니다.
-- 현재 스레드의 임시화된 토큰을 열고, DuplicateTokenEx(TokenPrimary)로 primary 토큰을 만들고 CreateProcessWithTokenW/CreateProcessAsUser를 사용해 SYSTEM 프로세스를 획득합니다.
+- Create a named pipe: \\.\pipe\<random> and wait for a connection.
+- Make a privileged component connect to it (spooler/DCOM/EFSRPC/etc.).
+- Read at least one message from the pipe, then call ImpersonateNamedPipeClient.
+- Open the impersonation token from the current thread, DuplicateTokenEx(TokenPrimary), and CreateProcessWithTokenW/CreateProcessAsUser to get a SYSTEM process.
 
-## Requirements and key APIs
-- 호출 프로세스/스레드에 일반적으로 필요한 권한:
-- SeImpersonatePrivilege — 연결된 클라이언트를 성공적으로 임시화하고 CreateProcessWithTokenW를 사용하려면 필요합니다.
-- 또는 SYSTEM을 임시화한 후 CreateProcessAsUser를 사용할 수 있으며, 이 경우 SeAssignPrimaryTokenPrivilege 및 SeIncreaseQuotaPrivilege가 필요할 수 있습니다(이 권한들은 SYSTEM을 임시화했을 때 충족됩니다).
+## 요구사항 및 주요 API
+- 호출 프로세스/스레드에서 일반적으로 필요한 권한:
+- SeImpersonatePrivilege — 연결된 클라이언트를 성공적으로 impersonate하고 CreateProcessWithTokenW를 사용하기 위해 필요합니다.
+- 또는 SYSTEM을 impersonate한 후 CreateProcessAsUser를 사용할 수 있으며, 이 경우 SeAssignPrimaryTokenPrivilege 및 SeIncreaseQuotaPrivilege가 필요할 수 있습니다(이 권한들은 SYSTEM을 impersonate하고 있으면 충족됩니다).
 - 사용되는 핵심 API:
 - CreateNamedPipe / ConnectNamedPipe
-- ReadFile/WriteFile (임시화 전에 적어도 한 메시지를 읽어야 함)
-- ImpersonateNamedPipeClient 및 RevertToSelf
+- ReadFile/WriteFile (임시 대리 이전에 최소 하나의 메시지를 읽어야 합니다)
+- ImpersonateNamedPipeClient and RevertToSelf
 - OpenThreadToken, DuplicateTokenEx(TokenPrimary)
-- CreateProcessWithTokenW 또는 CreateProcessAsUser
-- 임시화 수준: 로컬에서 유용한 작업을 수행하려면 클라이언트가 SecurityImpersonation을 허용해야 합니다(많은 로컬 RPC/명명된 파이프 클라이언트의 기본값). 클라이언트는 파이프를 열 때 SECURITY_SQOS_PRESENT | SECURITY_IDENTIFICATION을 사용해 이 수준을 낮출 수 있습니다.
+- CreateProcessWithTokenW or CreateProcessAsUser
+- Impersonation level: 로컬에서 유용한 작업을 수행하려면 클라이언트가 SecurityImpersonation을 허용해야 합니다(여러 로컬 RPC/명명된 파이프 클라이언트의 기본값). 클라이언트는 파이프를 열 때 SECURITY_SQOS_PRESENT | SECURITY_IDENTIFICATION으로 이를 낮출 수 있습니다.
 
-## Minimal Win32 workflow (C)
+## 최소 Win32 워크플로우 (C)
 ```c
 // Minimal skeleton (no error handling hardening for brevity)
 #include <windows.h>
@@ -69,11 +69,11 @@ return 0;
 }
 ```
 참고:
-- If ImpersonateNamedPipeClient returns ERROR_CANNOT_IMPERSONATE (1368), 먼저 파이프에서 읽었는지와 클라이언트가 임퍼스네이션을 Identification level로 제한하지 않았는지 확인하세요.
-- 프로세스 생성에 적합한 주 토큰을 생성할 때는 SecurityImpersonation 및 TokenPrimary와 함께 DuplicateTokenEx를 사용하는 것이 좋습니다.
+- ImpersonateNamedPipeClient가 ERROR_CANNOT_IMPERSONATE (1368)을 반환하면 먼저 파이프에서 읽었는지 확인하고 클라이언트가 impersonation을 Identification level로 제한하지 않았는지 확인하세요.
+- 프로세스 생성에 적합한 primary token을 만들려면 DuplicateTokenEx를 SecurityImpersonation 및 TokenPrimary로 사용하는 것이 권장됩니다.
 
-## .NET 빠른 예제
-.NET에서 NamedPipeServerStream는 RunAsClient를 통해 임퍼스네이션할 수 있습니다. 임퍼스네이션 상태가 되면 스레드 토큰을 복제한 다음 프로세스를 생성하세요.
+## .NET 간단한 예제
+In .NET, NamedPipeServerStream can impersonate via RunAsClient. Once impersonating, duplicate the thread token and create a process.
 ```csharp
 using System; using System.IO.Pipes; using System.Runtime.InteropServices; using System.Diagnostics;
 class P {
@@ -93,8 +93,8 @@ Process pi; CreateProcessWithTokenW(p, 2, null, null, 0, IntPtr.Zero, null, ref 
 }
 }
 ```
-## SYSTEM을 파이프로 끌어오기 위한 일반적인 트리거/강제 방법
-이 기법들은 특권 서비스가 당신의 named pipe에 연결하도록 강제하여 해당 서비스를 가장(impersonate)할 수 있게 합니다:
+## Common triggers/coercions to get SYSTEM to your pipe
+이 기술들은 권한이 높은 서비스들을 강제로 당신의 named pipe에 연결하게 하여 그들을 impersonate할 수 있게 합니다:
 - Print Spooler RPC trigger (PrintSpoofer)
 - DCOM activation/NTLM reflection variants (RoguePotato/JuicyPotato[NG], GodPotato)
 - EFSRPC pipes (EfsPotato/SharpEfsPotato)
@@ -116,21 +116,25 @@ If you just need a full example of crafting the pipe and impersonating to spawn 
 {{#ref}}
 from-high-integrity-to-system-with-name-pipes.md
 {{#endref}}
+-
+{{#ref}}
+service-triggers.md
+{{#endref}}
 
-## 문제해결 및 주의사항
-- ImpersonateNamedPipeClient를 호출하기 전에 파이프에서 최소한 하나의 메시지를 읽어야 합니다; 그렇지 않으면 ERROR_CANNOT_IMPERSONATE (1368)가 발생합니다.
-- 클라이언트가 SECURITY_SQOS_PRESENT | SECURITY_IDENTIFICATION으로 연결하면 서버가 완전한 임시 권한으로 가장할 수 없습니다; 토큰의 임시권한 수준은 GetTokenInformation(TokenImpersonationLevel)으로 확인하세요.
-- CreateProcessWithTokenW는 호출자에게 SeImpersonatePrivilege를 요구합니다. 만약 ERROR_PRIVILEGE_NOT_HELD (1314)로 실패하면, 이미 SYSTEM을 임시로 가장한 후 CreateProcessAsUser를 사용하세요.
-- 파이프를 강화(harden)한 경우 대상 서비스가 연결할 수 있도록 파이프의 security descriptor를 확인하세요; 기본적으로 \\.\pipe 아래의 파이프는 서버의 DACL에 따라 접근 가능합니다.
+## Troubleshooting and gotchas
+- ImpersonateNamedPipeClient를 호출하기 전에 파이프에서 최소한 한 개의 메시지를 읽어야 합니다. 그렇지 않으면 ERROR_CANNOT_IMPERSONATE (1368)가 발생합니다.
+- 클라이언트가 SECURITY_SQOS_PRESENT | SECURITY_IDENTIFICATION로 연결되면 서버는 완전한 impersonation을 할 수 없습니다; GetTokenInformation(TokenImpersonationLevel)을 통해 토큰의 impersonation 레벨을 확인하세요.
+- CreateProcessWithTokenW는 호출자에게 SeImpersonatePrivilege가 필요합니다. 이것이 ERROR_PRIVILEGE_NOT_HELD (1314)로 실패하면, 이미 SYSTEM을 impersonate한 후 CreateProcessAsUser를 사용하세요.
+- 파이프의 보안 기술자를 강화한 경우 대상 서비스가 연결할 수 있도록 설정되어 있는지 확인하세요; 기본적으로 \\.\pipe 아래의 파이프들은 서버의 DACL에 따라 접근 가능합니다.
 
-## 탐지 및 강화
-- named pipe의 생성 및 연결을 모니터링하세요. Sysmon Event IDs 17 (Pipe Created) 및 18 (Pipe Connected)은 정상 파이프 이름의 기준선을 만들고 토큰 조작 이벤트 전에 발생하는 비정상적이거나 무작위처럼 보이는 파이프를 감지하는 데 유용합니다.
-- 다음과 같은 순서를 찾아보세요: 프로세스가 파이프를 생성 → SYSTEM 서비스가 연결 → 생성한 프로세스가 SYSTEM으로 자식 프로세스를 생성.
-- 불필요한 서비스 계정에서 SeImpersonatePrivilege를 제거하고 고권한으로의 불필요한 서비스 로그온을 피하여 노출을 줄이세요.
-- 방어적 개발 지침: 신뢰할 수 없는 named pipes에 연결할 때는 SECURITY_SQOS_PRESENT와 SECURITY_IDENTIFICATION을 지정하여 필요하지 않은 한 서버가 클라이언트를 완전하게 임시 권한으로 획득하지 못하도록 하세요.
+## Detection and hardening
+- named pipe 생성 및 연결을 모니터링하세요. Sysmon Event IDs 17 (Pipe Created) 및 18 (Pipe Connected)은 정상적인 파이프 이름을 기준선으로 삼고, 토큰 조작 이벤트에 앞서 나타나는 비정상적이거나 무작위처럼 보이는 파이프를 탐지하는 데 유용합니다.
+- 다음과 같은 시퀀스를 찾아보세요: 프로세스가 파이프를 생성하고, SYSTEM 서비스가 연결한 뒤, 생성한 프로세스가 SYSTEM으로 자식 프로세스를 생성합니다.
+- 불필요한 서비스 계정에서 SeImpersonatePrivilege를 제거하고, 고권한으로 불필요한 서비스 로그온을 피하여 노출을 줄이세요.
+- 방어적 개발: 신뢰할 수 없는 named pipe에 연결할 때는 서버가 불필요하게 클라이언트를 완전하게 impersonate하지 못하도록 SECURITY_SQOS_PRESENT와 SECURITY_IDENTIFICATION을 지정하세요.
 
-## 참조
-- Windows: ImpersonateNamedPipeClient 문서 (임시권한 요구사항 및 동작). https://learn.microsoft.com/en-us/windows/win32/api/namedpipeapi/nf-namedpipeapi-impersonatenamedpipeclient
-- ired.team: Windows named pipes 권한 상승 (절차 및 코드 예제). https://ired.team/offensive-security/privilege-escalation/windows-namedpipes-privilege-escalation
+## References
+- Windows: ImpersonateNamedPipeClient documentation (impersonation requirements and behavior). https://learn.microsoft.com/en-us/windows/win32/api/namedpipeapi/nf-namedpipeapi-impersonatenamedpipeclient
+- ired.team: Windows named pipes privilege escalation (walkthrough and code examples). https://ired.team/offensive-security/privilege-escalation/windows-namedpipes-privilege-escalation
 
 {{#include ../../banners/hacktricks-training.md}}
