@@ -2,7 +2,7 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Tutaj znajdziesz interesujące triki dla konkretnych typów plików i/lub oprogramowania:
+Tutaj znajdziesz interesujące triki dotyczące konkretnych typów plików i/lub oprogramowania:
 
 
 {{#ref}}
@@ -32,6 +32,11 @@ office-file-analysis.md
 
 {{#ref}}
 pdf-file-analysis.md
+{{#endref}}
+
+
+{{#ref}}
+svg-font-glyph-analysis-and-web-drm-deobfuscation.md
 {{#endref}}
 
 
