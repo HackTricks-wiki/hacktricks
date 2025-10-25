@@ -668,6 +668,7 @@
 - [LDAP Injection](pentesting-web/ldap-injection.md)
 - [Login Bypass](pentesting-web/login-bypass/README.md)
   - [Login bypass List](pentesting-web/login-bypass/sql-login-bypass.md)
+- [Mass Assignment Cwe 915](pentesting-web/mass-assignment-cwe-915.md)
 - [NoSQL injection](pentesting-web/nosql-injection.md)
 - [OAuth to Account takeover](pentesting-web/oauth-to-account-takeover.md)
 - [Open Redirect](pentesting-web/open-redirect.md)
