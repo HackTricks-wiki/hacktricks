@@ -138,7 +138,6 @@
     - [Seccomp](linux-hardening/privilege-escalation/docker-security/seccomp.md)
     - [Weaponizing Distroless](linux-hardening/privilege-escalation/docker-security/weaponizing-distroless.md)
   - [Escaping from Jails](linux-hardening/privilege-escalation/escaping-from-limited-bash.md)
-  - [Ksmbd Streams Xattr Oob Write Cve 2025 37947](linux-hardening/privilege-escalation/linux-kernel-exploitation/ksmbd-streams_xattr-oob-write-cve-2025-37947.md)
   - [Posix Cpu Timers Toctou Cve 2025 38352](linux-hardening/privilege-escalation/linux-kernel-exploitation/posix-cpu-timers-toctou-cve-2025-38352.md)
   - [euid, ruid, suid](linux-hardening/privilege-escalation/euid-ruid-suid.md)
   - [Interesting Groups - Linux Privesc](linux-hardening/privilege-escalation/interesting-groups-linux-pe/README.md)
