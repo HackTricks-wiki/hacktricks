@@ -1,8 +1,8 @@
-# Astuces spécifiques pour logiciels/types de fichiers
+# Astuces spécifiques pour logiciels / types de fichiers
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Vous trouverez ici des astuces intéressantes pour des types de fichiers et/ou des logiciels spécifiques :
+Ici vous trouverez des astuces intéressantes pour des types de fichiers et/ou des logiciels spécifiques :
 
 
 {{#ref}}
@@ -32,6 +32,11 @@ office-file-analysis.md
 
 {{#ref}}
 pdf-file-analysis.md
+{{#endref}}
+
+
+{{#ref}}
+svg-font-glyph-analysis-and-web-drm-deobfuscation.md
 {{#endref}}
 
 
