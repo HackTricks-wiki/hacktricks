@@ -2,7 +2,7 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-यहाँ आप विशिष्ट फ़ाइल-प्रकार और/या सॉफ़्टवेयर के लिए दिलचस्प ट्रिक्स पा सकते हैं:
+यहाँ आप विशिष्ट फ़ाइल-प्रकारों और/या सॉफ़्टवेयर के लिए रोचक ट्रिक्स पा सकते हैं:
 
 
 {{#ref}}
@@ -32,6 +32,11 @@ office-file-analysis.md
 
 {{#ref}}
 pdf-file-analysis.md
+{{#endref}}
+
+
+{{#ref}}
+svg-font-glyph-analysis-and-web-drm-deobfuscation.md
 {{#endref}}
 
 
