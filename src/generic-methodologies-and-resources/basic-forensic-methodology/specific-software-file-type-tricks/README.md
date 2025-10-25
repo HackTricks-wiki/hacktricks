@@ -1,4 +1,4 @@
-# Trucos específicos de software/tipos de archivo
+# Trucos específicos de software/tipo de archivo
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -32,6 +32,11 @@ office-file-analysis.md
 
 {{#ref}}
 pdf-file-analysis.md
+{{#endref}}
+
+
+{{#ref}}
+svg-font-glyph-analysis-and-web-drm-deobfuscation.md
 {{#endref}}
 
 
