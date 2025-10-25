@@ -1,8 +1,8 @@
-# Trucchi per software specifici / tipi di file
+# Trucchi specifici per software / tipologie di file
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Qui puoi trovare trucchi interessanti per tipi di file e/o software specifici:
+Qui puoi trovare trucchi interessanti per tipologie di file specifiche e/o software:
 
 
 {{#ref}}
@@ -32,6 +32,11 @@ office-file-analysis.md
 
 {{#ref}}
 pdf-file-analysis.md
+{{#endref}}
+
+
+{{#ref}}
+svg-font-glyph-analysis-and-web-drm-deobfuscation.md
 {{#endref}}
 
 
