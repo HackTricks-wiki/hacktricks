@@ -1,8 +1,8 @@
-# 특정 소프트웨어/파일 형식 요령
+# 특정 소프트웨어/파일 형식 트릭
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-여기에서 특정 파일 형식 및/또는 소프트웨어에 대한 흥미로운 요령을 확인할 수 있습니다:
+여기에서 특정 파일 형식 및/또는 소프트웨어에 대한 흥미로운 트릭을 확인할 수 있습니다:
 
 
 {{#ref}}
@@ -32,6 +32,11 @@ office-file-analysis.md
 
 {{#ref}}
 pdf-file-analysis.md
+{{#endref}}
+
+
+{{#ref}}
+svg-font-glyph-analysis-and-web-drm-deobfuscation.md
 {{#endref}}
 
 
