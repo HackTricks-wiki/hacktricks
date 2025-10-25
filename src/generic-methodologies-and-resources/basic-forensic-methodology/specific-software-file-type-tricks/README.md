@@ -1,8 +1,8 @@
-# Spesifieke Sagteware/Lêertipe Trikke
+# Spesifieke sagteware/lêertipe-truuks
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Hier kan jy interessante trikke vir spesifieke lêertipes en/of sagteware vind:
+Hier kan jy interessante truuks vir spesifieke lêertipes en/of sagteware vind:
 
 
 {{#ref}}
@@ -32,6 +32,11 @@ office-file-analysis.md
 
 {{#ref}}
 pdf-file-analysis.md
+{{#endref}}
+
+
+{{#ref}}
+svg-font-glyph-analysis-and-web-drm-deobfuscation.md
 {{#endref}}
 
 
