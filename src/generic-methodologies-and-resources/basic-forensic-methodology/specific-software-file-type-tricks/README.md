@@ -36,6 +36,11 @@ pdf-file-analysis.md
 
 
 {{#ref}}
+svg-font-glyph-analysis-and-web-drm-deobfuscation.md
+{{#endref}}
+
+
+{{#ref}}
 structural-file-format-exploit-detection.md
 {{#endref}}
 
