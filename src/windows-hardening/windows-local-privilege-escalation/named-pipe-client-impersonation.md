@@ -2,29 +2,29 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Named Pipe client impersonation 是一个本地权限提升原语，允许命名管道服务器线程采用连接到它的客户端的安全上下文。实际上，能够以 SeImpersonatePrivilege 运行代码的攻击者可以强迫一个特权客户端（例如，SYSTEM 服务）连接到攻击者控制的管道，调用 ImpersonateNamedPipeClient，将得到的令牌复制为主令牌，然后以该客户端的身份创建进程（通常是 NT AUTHORITY\SYSTEM）。
+Named Pipe client impersonation 是一种本地权限提升原语，允许 named-pipe 服务端线程采用连接到它的客户端的安全上下文。实际上，能够以 SeImpersonatePrivilege 运行代码的攻击者可以强制具有更高权限的客户端（例如 SYSTEM 服务）连接到攻击者控制的管道，调用 ImpersonateNamedPipeClient，将得到的 token 复制为 primary token，并以该客户端的身份生成进程（通常是 NT AUTHORITY\SYSTEM）。
 
-本页侧重于核心技术。关于将 SYSTEM 强制连接到你管道的端到端利用链，请参见下文提到的 Potato 家族页面。
+本页聚焦于核心技术。关于将 SYSTEM 强制连接到你的管道的端到端利用链，请参见下面引用的 Potato 家族页面。
 
-## TL;DR
-- 创建命名管道：\\.\pipe\<random> 并等待连接。
-- 让一个特权组件连接到它（spooler/DCOM/EFSRPC/etc.）。
-- 从管道至少读取一条消息，然后调用 ImpersonateNamedPipeClient。
-- 从当前线程打开模拟令牌，DuplicateTokenEx(TokenPrimary)，并使用 CreateProcessWithTokenW/CreateProcessAsUser 获取一个 SYSTEM 进程。
+## 要点
+- 创建一个 named pipe：\\.\pipe\<random> 并等待连接。
+- 让一个有特权的组件连接到它（spooler/DCOM/EFSRPC/等）。
+- 从管道读取至少一条消息，然后调用 ImpersonateNamedPipeClient。
+- 从当前线程打开模拟 token，执行 DuplicateTokenEx(TokenPrimary)，并使用 CreateProcessWithTokenW/CreateProcessAsUser 来获得 SYSTEM 进程。
 
-## Requirements and key APIs
+## 要求和关键 API
 - 调用进程/线程通常需要的权限：
-- SeImpersonatePrivilege 用于成功模拟连接的客户端并使用 CreateProcessWithTokenW。
-- 或者，在模拟到 SYSTEM 之后，可以使用 CreateProcessAsUser，这可能需要 SeAssignPrimaryTokenPrivilege 和 SeIncreaseQuotaPrivilege（当你模拟为 SYSTEM 时，这些权限已满足）。
+- SeImpersonatePrivilege：用于成功模拟连接的客户端并使用 CreateProcessWithTokenW。
+- 或者，在模拟 SYSTEM 之后，可以使用 CreateProcessAsUser，这可能需要 SeAssignPrimaryTokenPrivilege 和 SeIncreaseQuotaPrivilege（当你在模拟 SYSTEM 时，这些权限已满足）。
 - 使用的核心 API：
 - CreateNamedPipe / ConnectNamedPipe
 - ReadFile/WriteFile（在模拟之前必须至少读取一条消息）
-- ImpersonateNamedPipeClient 和 RevertToSelf
+- ImpersonateNamedPipeClient and RevertToSelf
 - OpenThreadToken, DuplicateTokenEx(TokenPrimary)
-- CreateProcessWithTokenW 或 CreateProcessAsUser
-- Impersonation level：要在本地执行有用操作，客户端必须允许 SecurityImpersonation（这是许多本地 RPC/命名管道客户端的默认设置）。客户端可以在打开管道时通过 SECURITY_SQOS_PRESENT | SECURITY_IDENTIFICATION 降低此级别。
+- CreateProcessWithTokenW or CreateProcessAsUser
+- 模拟级别：要在本地执行有用操作，客户端必须允许 SecurityImpersonation（这是许多本地 RPC/命名管道客户端的默认设置）。客户端在打开管道时可以使用 SECURITY_SQOS_PRESENT | SECURITY_IDENTIFICATION 来降低此级别。
 
-## Minimal Win32 workflow (C)
+## 最小 Win32 工作流程 (C)
 ```c
 // Minimal skeleton (no error handling hardening for brevity)
 #include <windows.h>
@@ -68,12 +68,11 @@ RevertToSelf(); // Restore original context
 return 0;
 }
 ```
-注意：
-- 如果 ImpersonateNamedPipeClient 返回 ERROR_CANNOT_IMPERSONATE (1368)，请确保先从管道读取，并确认客户端没有将 impersonation 限制为 Identification level。
-- 优先使用 DuplicateTokenEx，配合 SecurityImpersonation 和 TokenPrimary，以创建适合用于进程创建的主令牌。
+- 如果 ImpersonateNamedPipeClient 返回 ERROR_CANNOT_IMPERSONATE (1368)，请确保先从管道读取，并且客户端没有将 impersonation 限制为 Identification 级别。
+- 更推荐使用 DuplicateTokenEx 并指定 SecurityImpersonation 和 TokenPrimary 来创建适合进程创建的主令牌。
 
 ## .NET 快速示例
-在 .NET 中，NamedPipeServerStream 可以通过 RunAsClient 进行 impersonation。一旦进行 impersonation，复制线程令牌并创建进程。
+在 .NET 中，NamedPipeServerStream 可以通过 RunAsClient 进行 impersonate。模拟后，复制线程令牌并创建进程。
 ```csharp
 using System; using System.IO.Pipes; using System.Runtime.InteropServices; using System.Diagnostics;
 class P {
@@ -93,8 +92,8 @@ Process pi; CreateProcessWithTokenW(p, 2, null, null, 0, IntPtr.Zero, null, ref 
 }
 }
 ```
-## 常见触发/强制手段，让 SYSTEM 连接到你的管道
-These techniques coerce privileged services to connect to your named pipe so you can impersonate them:
+## Common triggers/coercions to get SYSTEM to your pipe
+这些技术会强制特权服务连接到你的 named pipe，以便你可以冒充它们：
 - Print Spooler RPC trigger (PrintSpoofer)
 - DCOM activation/NTLM reflection variants (RoguePotato/JuicyPotato[NG], GodPotato)
 - EFSRPC pipes (EfsPotato/SharpEfsPotato)
@@ -116,20 +115,24 @@ If you just need a full example of crafting the pipe and impersonating to spawn 
 {{#ref}}
 from-high-integrity-to-system-with-name-pipes.md
 {{#endref}}
+-
+{{#ref}}
+service-triggers.md
+{{#endref}}
 
-## 故障排查与注意事项
-- 在调用 ImpersonateNamedPipeClient 之前，必须至少从管道读取一条消息；否则会收到 ERROR_CANNOT_IMPERSONATE (1368)。
-- 如果客户端以 SECURITY_SQOS_PRESENT | SECURITY_IDENTIFICATION 连接，服务器不能完全 impersonate；通过 GetTokenInformation(TokenImpersonationLevel) 检查 token 的 impersonation level。
-- CreateProcessWithTokenW 要求调用者具有 SeImpersonatePrivilege。如果失败并报 ERROR_PRIVILEGE_NOT_HELD (1314)，在你已经 impersonated SYSTEM 之后使用 CreateProcessAsUser。
-- 如果你对管道进行了加固，请确保管道的安全描述符允许目标服务连接；默认情况下，位于 \\.\pipe 下的管道可根据服务器的 DACL 访问。
+## Troubleshooting and gotchas
+- 在调用 ImpersonateNamedPipeClient 之前，必须至少从 pipe 读取一条消息；否则会得到 ERROR_CANNOT_IMPERSONATE (1368)。
+- 如果客户端以 SECURITY_SQOS_PRESENT | SECURITY_IDENTIFICATION 连接，服务端无法完全冒充；通过 GetTokenInformation(TokenImpersonationLevel) 检查令牌的冒充级别。
+- CreateProcessWithTokenW 要求调用者具有 SeImpersonatePrivilege。如果失败并返回 ERROR_PRIVILEGE_NOT_HELD (1314)，在你已经冒充为 SYSTEM 后使用 CreateProcessAsUser。
+- 如果你加固了 pipe，请确保 pipe 的安全描述符允许目标服务连接；默认情况下，位于 \\.\pipe 下的 pipes 的访问取决于服务器的 DACL。
 
-## 检测与加固
-- 监控命名管道的创建和连接。Sysmon Event IDs 17 (Pipe Created) 和 18 (Pipe Connected) 对基线合法管道名称以及捕获在 token-manipulation 事件之前出现的异常、看起来随机的管道很有用。
-- 查找如下序列：进程创建管道，SYSTEM 服务连接，然后创建进程以 SYSTEM 身份生成子进程。
-- 通过从非必要的服务账户移除 SeImpersonatePrivilege，并避免不必要的高权限服务登录来减少暴露。
-- 防御性开发：连接不受信任的命名管道时，指定 SECURITY_SQOS_PRESENT 与 SECURITY_IDENTIFICATION，以防止服务器在非必要情况下完全 impersonate 客户端。
+## Detection and hardening
+- 监控 named pipe 的创建和连接。Sysmon Event IDs 17 (Pipe Created) 和 18 (Pipe Connected) 可用于基线合法 pipe 名称，并检测在令牌操作事件之前出现的不寻常、看起来随机的 pipes。
+- 查找这样的序列：进程创建一个 pipe，SYSTEM 服务连接，然后创建该 pipe 的进程以 SYSTEM 身份生成子进程。
+- 通过从非必要的服务账户移除 SeImpersonatePrivilege 并避免不必要的高权限服务登录来减少暴露面。
+- 防御性开发：在连接不受信任的 named pipes 时，指定 SECURITY_SQOS_PRESENT 与 SECURITY_IDENTIFICATION，以防止服务端在非必要情况下完全冒充客户端。
 
-## 参考
+## References
 - Windows: ImpersonateNamedPipeClient documentation (impersonation requirements and behavior). https://learn.microsoft.com/en-us/windows/win32/api/namedpipeapi/nf-namedpipeapi-impersonatenamedpipeclient
 - ired.team: Windows named pipes privilege escalation (walkthrough and code examples). https://ired.team/offensive-security/privilege-escalation/windows-namedpipes-privilege-escalation
 
