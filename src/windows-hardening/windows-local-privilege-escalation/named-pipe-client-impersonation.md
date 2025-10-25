@@ -2,27 +2,27 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Named Pipe client impersonation, bir named-pipe sunucu iş parçacığının ona bağlanan bir client'ın güvenlik bağlamını üstlenmesini sağlayan bir local privilege escalation primitifidir. Pratikte, SeImpersonatePrivilege ile kod çalıştırabilen bir saldırgan, ayrıcalıklı bir client'ı (ör. bir SYSTEM servisi) saldırgan-kontrolündeki bir pipe'a bağlanmaya zorlayabilir, ImpersonateNamedPipeClient çağrısı yapabilir, ortaya çıkan token'ı primary token olarak DuplicateTokenEx ile çoğaltabilir ve client olarak bir süreç başlatabilir (çoğunlukla NT AUTHORITY\SYSTEM).
+Named Pipe client impersonation, bir named-pipe sunucu iş parçacığının kendisine bağlanan bir istemcinin güvenlik bağlamını benimsemesine izin veren yerel bir ayrıcalık yükseltme ilkelidir. Pratikte, SeImpersonatePrivilege ile kod çalıştırabilen bir saldırgan, ayrıcalıklı bir istemciyi (ör. bir SYSTEM servisi) saldırganın kontrolündeki bir pipe'a bağlanmaya zorlayabilir, ImpersonateNamedPipeClient çağrısı yapabilir, ortaya çıkan token'ı bir primary token olarak duplicate edip istemci olarak bir süreç başlatabilir (çoğunlukla NT AUTHORITY\SYSTEM).
 
-Bu sayfa temel tekniğe odaklanır. SYSTEM'i pipe'ınıza bağlamaya zorlayan uçtan uca exploit zincirleri için aşağıda referans verilen Potato family sayfalarına bakın.
+Bu sayfa temel tekniğe odaklanır. SYSTEM'i pipe'ınıza zorla bağlayan uçtan uca exploit zincirleri için aşağıda referans verilen Potato familyası sayfalarına bakın.
 
 ## TL;DR
 - Bir named pipe oluşturun: \\.\pipe\<random> ve bir bağlantı bekleyin.
-- Ayrıcalıklı bir bileşenin ona bağlanmasını sağlayın (spooler/DCOM/EFSRPC/vesaire).
+- Ayrıcalıklı bir bileşeni bağlanmaya zorlayın (spooler/DCOM/EFSRPC/ve benzeri).
 - Pipe'tan en az bir mesaj okuyun, sonra ImpersonateNamedPipeClient çağrısı yapın.
-- Mevcut iş parçacığından impersonation token'ını açın, DuplicateTokenEx(TokenPrimary) yapın ve CreateProcessWithTokenW/CreateProcessAsUser ile SYSTEM süreci elde edin.
+- Mevcut iş parçacığından impersonation token'ını açın, DuplicateTokenEx(TokenPrimary) ile çoğaltın ve CreateProcessWithTokenW/CreateProcessAsUser ile SYSTEM süreci elde edin.
 
 ## Requirements and key APIs
 - Çağıran process/thread tarafından tipik olarak gereken ayrıcalıklar:
-- SeImpersonatePrivilege, bağlanan bir client'ı başarılı şekilde impersonate etmek ve CreateProcessWithTokenW kullanmak için.
-- Alternatif olarak, SYSTEM'i impersonate ettikten sonra CreateProcessAsUser kullanabilirsiniz; bu SeAssignPrimaryTokenPrivilege ve SeIncreaseQuotaPrivilege gerektirebilir (bunlar SYSTEM'i impersonate ederken sağlanır).
+- SeImpersonatePrivilege, bağlanan bir istemciyi başarılı şekilde taklit edebilmek ve CreateProcessWithTokenW kullanabilmek için.
+- Alternatif olarak, SYSTEM'i taklit ettikten sonra CreateProcessAsUser kullanabilirsiniz; bu SeAssignPrimaryTokenPrivilege ve SeIncreaseQuotaPrivilege gerektirebilir (taklit ettiğinizde bunlar karşılanır).
 - Kullanılan temel API'ler:
 - CreateNamedPipe / ConnectNamedPipe
-- ReadFile/WriteFile (impersonasyondan önce en az bir mesaj okunmalıdır)
+- ReadFile/WriteFile (impersonation'dan önce en az bir mesaj okunmalı)
 - ImpersonateNamedPipeClient ve RevertToSelf
 - OpenThreadToken, DuplicateTokenEx(TokenPrimary)
 - CreateProcessWithTokenW veya CreateProcessAsUser
-- Impersonation seviyesi: yerel olarak faydalı işlemler yapabilmek için client, SecurityImpersonation'a izin vermelidir (birçok yerel RPC/named-pipe client için varsayılan). Client'lar pipe'ı açarken SECURITY_SQOS_PRESENT | SECURITY_IDENTIFICATION ile bunu düşürebilirler.
+- Impersonation seviyesi: yerelde faydalı işlemler yapabilmek için istemcinin SecurityImpersonation'a izin vermesi gerekir (birçok yerel RPC/named-pipe istemcisi için varsayılan). İstemciler, pipe'ı açarken SECURITY_SQOS_PRESENT | SECURITY_IDENTIFICATION ile bunu düşürebilir.
 
 ## Minimal Win32 workflow (C)
 ```c
@@ -69,11 +69,11 @@ return 0;
 }
 ```
 Notlar:
-- Eğer ImpersonateNamedPipeClient ERROR_CANNOT_IMPERSONATE (1368) döndürürse, önce pipe'tan okuduğunuzdan ve istemcinin impersonation'ı Identification level ile sınırlamadığından emin olun.
-- Process oluşturma için uygun bir primary token yaratmak amacıyla DuplicateTokenEx'i SecurityImpersonation ve TokenPrimary ile tercih edin.
+- Eğer ImpersonateNamedPipeClient ERROR_CANNOT_IMPERSONATE (1368) döndürürse, önce named pipe'dan okuduğunuzdan ve istemcinin impersonation'ı Identification seviyesine kısıtlamadığından emin olun.
+- İşlem oluşturmak için uygun bir primary token elde etmek amacıyla DuplicateTokenEx'i SecurityImpersonation ve TokenPrimary ile tercih edin.
 
 ## .NET hızlı örnek
-.NET'te NamedPipeServerStream RunAsClient aracılığıyla impersonate edebilir. Impersonate edildikten sonra thread token'ı duplicate edip bir process oluşturun.
+.NET'te, NamedPipeServerStream RunAsClient aracılığıyla impersonate edebilir. Impersonate edildikten sonra, thread token'ını duplicate edip bir process oluşturun.
 ```csharp
 using System; using System.IO.Pipes; using System.Runtime.InteropServices; using System.Diagnostics;
 class P {
@@ -93,13 +93,13 @@ Process pi; CreateProcessWithTokenW(p, 2, null, null, 0, IntPtr.Zero, null, ref 
 }
 }
 ```
-## SYSTEM'i pipe'ınıza bağlatmak için yaygın tetikleyiciler/zorlama yöntemleri
-Bu teknikler, ayrıcalıklı hizmetleri sizin named pipe'ınıza bağlanmaya zorlayarak onları taklit etmenizi sağlar:
+## SYSTEM'i pipe'inize yönlendirmek için yaygın tetikleyiciler/zorlamalar
+Bu teknikler, ayrıcalıklı hizmetleri sizin named pipe'inize bağlanmaya zorlayarak onları impersonate etmenizi sağlar:
 - Print Spooler RPC trigger (PrintSpoofer)
 - DCOM activation/NTLM reflection variants (RoguePotato/JuicyPotato[NG], GodPotato)
 - EFSRPC pipes (EfsPotato/SharpEfsPotato)
 
-Ayrıntılı kullanım ve uyumluluk için bakınız:
+Ayrıntılı kullanım ve uyumluluk için bakın:
 
 -
 {{#ref}}
@@ -110,27 +110,31 @@ roguepotato-and-printspoofer.md
 juicypotato.md
 {{#endref}}
 
-Eğer sadece pipe'ı oluşturma ve bir hizmet tetikleyicisinden SYSTEM oluşturmak için taklit etme konusunda tam bir örneğe ihtiyacınız varsa, bakınız:
+Eğer sadece bir hizmet tetikleyicisinden SYSTEM spawn etmek için pipe oluşturma ve impersonate etme konusunda tam bir örneğe ihtiyacınız varsa, bakın:
 
 -
 {{#ref}}
 from-high-integrity-to-system-with-name-pipes.md
 {{#endref}}
+-
+{{#ref}}
+service-triggers.md
+{{#endref}}
 
-## Sorun giderme ve tuzaklar
-- ImpersonateNamedPipeClient çağırmadan önce pipe'tan en az bir mesaj okumalısınız; aksi takdirde ERROR_CANNOT_IMPERSONATE (1368) alırsınız.
-- Eğer client SECURITY_SQOS_PRESENT | SECURITY_IDENTIFICATION ile bağlanırsa, server tam olarak taklit edemez; token'ın impersonation seviyesini GetTokenInformation(TokenImpersonationLevel) ile kontrol edin.
-- CreateProcessWithTokenW çağıran üzerinde SeImpersonatePrivilege gerektirir. Bu ERROR_PRIVILEGE_NOT_HELD (1314) ile başarısız olursa, zaten SYSTEM'i taklit ettikten sonra CreateProcessAsUser kullanın.
-- Pipe'ınızın security descriptor'ının hedef servisin bağlanmasına izin verdiğinden emin olun; sertleştirirseniz dikkat edin. Varsayılan olarak, \\.\pipe altındaki pipe'lar server'ın DACL'sine göre erişilebilirdir.
+## Sorun giderme ve dikkat edilmesi gerekenler
+- ImpersonateNamedPipeClient'ı çağırmadan önce pipe'tan en az bir mesaj okumalısınız; aksi halde ERROR_CANNOT_IMPERSONATE (1368) alırsınız.
+- İstemci SECURITY_SQOS_PRESENT | SECURITY_IDENTIFICATION ile bağlanırsa, sunucu tam olarak impersonate edemez; token'ın impersonation seviyesini GetTokenInformation(TokenImpersonationLevel) ile kontrol edin.
+- CreateProcessWithTokenW çağıranın SeImpersonatePrivilege sahibi olmasını gerektirir. Eğer ERROR_PRIVILEGE_NOT_HELD (1314) ile başarısız olursa, SYSTEM'ı zaten impersonate ettikten sonra CreateProcessAsUser kullanın.
+- Pipe'inizin security descriptor'ının hedef hizmetin bağlanmasına izin verdiğinden emin olun; eğer sıkılaştırırsanız, varsayılan olarak \\.\pipe altındaki pipe'lar sunucunun DACL'sine göre erişilebilirdir.
 
 ## Tespit ve sertleştirme
-- Named pipe oluşturulmasını ve bağlantıları izleyin. Sysmon Event IDs 17 (Pipe Created) ve 18 (Pipe Connected), meşru pipe isimlerini temel almak ve token-manipülasyon olaylarından önce görülen sıra dışı, rastgele görünümlü pipe'ları yakalamak için kullanışlıdır.
-- Aşağıdaki dizilimlere bakın: bir process pipe oluşturur, bir SYSTEM service bağlanır, sonra pipe'ı oluşturan process SYSTEM olarak bir child spawn eder.
-- Gereksiz servis hesaplarından SeImpersonatePrivilege'i kaldırarak ve yüksek ayrıcalıklı gereksiz service logon'larından kaçınarak maruziyeti azaltın.
-- Savunmacı geliştirme: güvenilmeyen named pipe'lara bağlanırken, sunucuların gerektiğinde haricinde client'ı tam taklit etmesini engellemek için SECURITY_SQOS_PRESENT ile SECURITY_IDENTIFICATION belirtin.
+- Named pipe oluşturulmasını ve bağlantılarını izleyin. Sysmon Event ID'leri 17 (Pipe Created) ve 18 (Pipe Connected), meşru pipe adlarını temel almak ve token-manipulation olaylarından önceki sıra dışı, rastgele görünen pipe'ları yakalamak için kullanışlıdır.
+- Aşağıdaki sıraları arayın: process bir pipe oluşturur, bir SYSTEM hizmeti bağlanır, ardından oluşturan process SYSTEM olarak bir child spawn eder.
+- Gereksiz hizmet hesaplarından SeImpersonatePrivilege'i kaldırarak ve yüksek ayrıcalıklı gereksiz hizmet oturum açmalarından kaçınarak maruziyeti azaltın.
+- Defansif geliştirme: güvenilmeyen named pipe'lara bağlanırken, sunucuların istemciyi gereksiz yere tam olarak impersonate etmesini önlemek için SECURITY_SQOS_PRESENT ile SECURITY_IDENTIFICATION belirtin.
 
-## References
-- Windows: ImpersonateNamedPipeClient documentation (impersonation requirements and behavior). https://learn.microsoft.com/en-us/windows/win32/api/namedpipeapi/nf-namedpipeapi-impersonatenamedpipeclient
+## Referanslar
+- Windows: ImpersonateNamedPipeClient documentation (impersonation gereksinimleri ve davranışı). https://learn.microsoft.com/en-us/windows/win32/api/namedpipeapi/nf-namedpipeapi-impersonatenamedpipeclient
 - ired.team: Windows named pipes privilege escalation (walkthrough and code examples). https://ired.team/offensive-security/privilege-escalation/windows-namedpipes-privilege-escalation
 
 {{#include ../../banners/hacktricks-training.md}}
