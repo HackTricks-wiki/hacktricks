@@ -480,14 +480,10 @@ echo www | subzuf facebook.com
 Check this blog post I wrote about how to **automate the subdomain discovery** from a domain using **Trickest workflows** so I don't need to launch manually a bunch of tools in my computer:
 
 
-{{#ref}}
-https://trickest.com/blog/full-subdomain-discovery-using-workflow/
-{{#endref}}
+- [Full subdomain discovery using workflow](https://trickest.com/blog/full-subdomain-discovery-using-workflow/)
 
 
-{{#ref}}
-https://trickest.com/blog/full-subdomain-brute-force-discovery-using-workflow/
-{{#endref}}
+- [Full subdomain brute-force discovery using workflow](https://trickest.com/blog/full-subdomain-brute-force-discovery-using-workflow/)
 
 ### **VHosts / Virtual Hosts**
 
@@ -709,8 +705,85 @@ There are several tools out there that will perform part of the proposed actions
 - [**https://github.com/six2dez/reconftw**](https://github.com/six2dez/reconftw)
 - [**https://github.com/hackerspider1/EchoPwn**](https://github.com/hackerspider1/EchoPwn) - A little old and not updated
 
+## Advanced Recon Tips
+
+### Front-end artifact pivots (JS env variables)
+
+- Inspect bundled JS and inline config for env-style URLs (e.g., Vite/NextJS variables like VITE_URL_*, NEXT_PUBLIC_*). These often reveal ancillary roots/APIs hosted under different domains managed by the same org or vendors.
+- Pivot to the leaked root domain and enumerate subdomains, then grep for brand keywords to filter relevant assets.
+
+```bash
+# Example: enumerate and filter for brand (replace liuxinyi1.cn and brand)
+subfinder -silent -d liuxinyi1.cn | grep -i "clubwpt"
+# or
+amass enum -d liuxinyi1.cn | grep -i "clubwpt"
+```
+
+### Hunt exposed artifacts: .env and .git
+
+- Web roots frequently leak build artifacts that accelerate compromise:
+  - .env: service endpoints, admin usernames, cloud keys, secrets
+  - .git/: full server-side source via DVCS leakage
+- Quickly probe known paths across targets and then deep fuzz if needed.
+
+```bash
+# Probe common artifact paths across many hosts
+httpx -l hosts.txt -path "/.env" -path "/.git/" -status-code -content-length -title -silent
+
+# Directory fuzzing for more artifacts
+ffuf -w /usr/share/seclists/Discovery/Web-Content/quickhits.txt -u https://target/FUZZ -mc 200,204,301,302,307,401,403
+```
+
+- If .git is exposed, reconstruct the repository and review auth flows and internal endpoints.
+
+{{#ref}}
+../../network-services-pentesting/pentesting-web/git.md
+{{#endref}}
+
+### CDN/Zero Trust origin bypass via Certificate Transparency
+
+Even when an admin panel is gated behind Cloudflare (or Zero Trust/SSO), origin IPs often remain discoverable via certificate transparency (CT) and OSINT:
+
+- Use Censys/Shodan/CT to find certificates containing the admin hostname and enumerate their associated IPs/services.
+- If the origin is not locked down to the CDN, connect directly to the origin IP to bypass the access gateway.
+
+```bash
+# Example workflow
+# 1) Find candidate origins (tools vary)
+cloudflair -d coin-admin.example.com    # or use Censys/CT search
+# 2) Test direct origin access
+httpx -u http://ORIGIN_IP -follow-redirects -title -status-code -silent
+```
+
+
+
+For more uncovering/bypass techniques and tooling see:
+
+{{#ref}}
+../../network-services-pentesting/pentesting-web/uncovering-cloudflare.md
+{{#endref}}
+
+### MFA/OTP bind misconfigs discovered via leaked source
+
+Code leaks from .git commonly expose logic flaws in MFA enrollment flows. A critical pattern is an unauthenticated "bind" endpoint that upserts a TOTP secret for an arbitrary uid. If present, overwrite a target’s secret with one you control and complete 2FA with a valid code from that seed.
+
+```http
+POST /admin/otp/bind HTTP/2
+Host: `origin_ip_or_host`
+Content-Type: application/x-www-form-urlencoded
+
+uid=`victim_uid`&secret=`attacker_base32_seed`
+```
+
+Then generate a TOTP from the supplied seed to finish login. See more MFA bypass techniques here:
+
+{{#ref}}
+../../network-services-pentesting/pentesting-web/2fa-bypass.md
+{{#endref}}
+
 ## **References**
 
 - All free courses of [**@Jhaddix**](https://twitter.com/Jhaddix) like [**The Bug Hunter's Methodology v4.0 - Recon Edition**](https://www.youtube.com/watch?v=p4JgIu1mceI)
+- [Hacking the World Poker Tour: Inside ClubWPT Gold’s Back Office](https://samcurry.net/hacking-clubwpt-gold)
 
 {{#include ../../banners/hacktricks-training.md}}
