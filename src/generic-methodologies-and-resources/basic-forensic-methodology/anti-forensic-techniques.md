@@ -5,7 +5,7 @@
 ## Timestamps
 
 An attacker may be interested in **changing the timestamps of files** to avoid being detected.\
-It's possible to find the timestamps inside the MFT in attributes `$STANDARD_INFORMATION` \_\_ and \_\_ `$FILE_NAME`.
+It's possible to find the timestamps inside the MFT in attributes `$STANDARD_INFORMATION` and `$FILE_NAME`.
 
 Both attributes have 4 timestamps: **Modification**, **access**, **creation**, and **MFT registry modification** (MACE or MACB).
 
@@ -25,7 +25,7 @@ The previous image is the **output** shown by the **tool** where it can be obser
 
 ### $LogFile
 
-**All metadata changes to a file system are logged** in a process known as [write-ahead logging](https://en.wikipedia.org/wiki/Write-ahead_logging). The logged metadata is kept in a file named `**$LogFile**`, located in the root directory of an NTFS file system. Tools such as [LogFileParser](https://github.com/jschicht/LogFileParser) can be used to parse this file and identify changes.
+**All metadata changes to a file system are logged** in a process known as [write-ahead logging](https://en.wikipedia.org/wiki/Write-ahead_logging). The logged metadata is kept in a file named `$LogFile`, located in the root directory of an NTFS file system. Tools such as [LogFileParser](https://github.com/jschicht/LogFileParser) can be used to parse this file and identify changes.
 
 ![](<../../images/image (137).png>)
 
@@ -50,11 +50,11 @@ Another way to identify suspicious modified files would be to compare the time o
 
 ### SetMace - Anti-forensic Tool
 
-This tool can modify both attributes `$STARNDAR_INFORMATION` and `$FILE_NAME`. However, from Windows Vista, it's necessary for a live OS to modify this information.
+This tool can modify both attributes `$STANDARD_INFORMATION` and `$FILE_NAME`. However, from Windows Vista, it's necessary for a live OS to modify this information.
 
 ## Data Hiding
 
-NFTS uses a cluster and the minimum information size. That means that if a file occupies uses and cluster and a half, the **reminding half is never going to be used** until the file is deleted. Then, it's possible to **hide data in this slack space**.
+NTFS uses a cluster as the minimum allocation size. If a file uses a cluster and a half, the remaining half is unused until the file is deleted; data can be hidden in this slack space.
 
 There are tools like slacker that allow hiding data in this "hidden" space. However, an analysis of the `$logfile` and `$usnjrnl` can show that some data was added:
 
@@ -109,7 +109,7 @@ Whenever a folder is opened from an NTFS volume on a Windows NT server, the syst
 
 ### Delete USB History
 
-All the **USB Device Entries** are stored in Windows Registry Under the **USBSTOR** registry key that contains sub keys which are created whenever you plug a USB Device into your PC or Laptop. You can find this key here H`KEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`. **Deleting this** you will delete the USB history.\
+All the **USB Device Entries** are stored in Windows Registry Under the **USBSTOR** registry key that contains sub keys which are created whenever you plug a USB Device into your PC or Laptop. You can find this key here `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`. **Deleting this** you will delete the USB history.\
 You may also use the tool [**USBDeview**](https://www.nirsoft.net/utils/usb_devices_view.html) to be sure you have deleted them (and to delete them).
 
 Another file that saves information about the USBs is the file `setupapi.dev.log` inside `C:\Windows\INF`. This should also be deleted.
@@ -172,8 +172,6 @@ Get-WinEvent -LogName 'Microsoft-Windows-PowerShell/Operational' |
   Remove-WinEvent               # requires admin & Win11 23H2+
 ```
 
-Defenders should monitor for changes to those registry keys and high-volume removal of PowerShell events.
-
 ### ETW (Event Tracing for Windows) Patch
 
 Endpoint security products rely heavily on ETW. A popular 2024 evasion method is to
@@ -190,7 +188,6 @@ WriteProcessMemory(GetCurrentProcess(),
 
 Public PoCs (e.g. `EtwTiSwallow`) implement the same primitive in PowerShell or C++.  
 Because the patch is **process-local**, EDRs running inside other processes may miss it.  
-Detection: compare `ntdll` in memory vs. on disk, or hook before user-mode.
 
 ### Alternate Data Streams (ADS) Revival
 
@@ -205,8 +202,6 @@ wmic process call create "cmd /c report.pdf:win32res.dll"
 ```
 
 Enumerate streams with `dir /R`, `Get-Item -Stream *`, or Sysinternals `streams64.exe`.
-Copying the host file to FAT/exFAT or via SMB will strip the hidden stream and can be used
-by investigators to recover the payload.
 
 ### BYOVD & “AuKill” (2023)
 
@@ -221,8 +216,6 @@ AuKill.exe -k CrowdStrike
 ```
 
 The driver is removed afterwards, leaving minimal artifacts.  
-Mitigations: enable the Microsoft vulnerable-driver blocklist (HVCI/SAC),
-and alert on kernel-service creation from user-writable paths.
 
 ---
 
@@ -254,64 +247,89 @@ ln -sf activemq-openwire-legacy-5.18.3.jar activemq-openwire-legacy.jar
 systemctl restart activemq || service activemq restart
 ```
 
-Forensic/hunting tips
-- Review service directories for unscheduled binary/JAR replacements:
-  - Debian/Ubuntu: `dpkg -V activemq` and compare file hashes/paths with repo mirrors.
-  - RHEL/CentOS: `rpm -Va 'activemq*'`
-  - Look for JAR versions present on disk that are not owned by the package manager, or symbolic links updated out of band.
-- Timeline: `find "$AMQ_DIR" -type f -printf '%TY-%Tm-%Td %TH:%TM %p\n' | sort` to correlate ctime/mtime with compromise window.
-- Shell history/process telemetry: evidence of `curl`/`wget` to `repo1.maven.org` or other artifact CDNs immediately after initial exploitation.
-- Change management: validate who applied the “patch” and why, not only that a patched version is present.
-
 ### Cloud‑service C2 with bearer tokens and anti‑analysis stagers
 Observed tradecraft combined multiple long‑haul C2 paths and anti‑analysis packaging:
 - Password‑protected PyInstaller ELF loaders to hinder sandboxing and static analysis (e.g., encrypted PYZ, temporary extraction under `/_MEI*`).
-  - Indicators: `strings` hits such as `PyInstaller`, `pyi-archive`, `PYZ-00.pyz`, `MEIPASS`.
-  - Runtime artifacts: extraction to `/tmp/_MEI*` or custom `--runtime-tmpdir` paths.
 - Dropbox‑backed C2 using hardcoded OAuth Bearer tokens
-  - Network markers: `api.dropboxapi.com` / `content.dropboxapi.com` with `Authorization: Bearer <token>`.
-  - Hunt in proxy/NetFlow/Zeek/Suricata for outbound HTTPS to Dropbox domains from server workloads that do not normally sync files.
 - Parallel/backup C2 via tunneling (e.g., Cloudflare Tunnel `cloudflared`), keeping control if one channel is blocked.
-  - Host IOCs: `cloudflared` processes/units, config at `~/.cloudflared/*.json`, outbound 443 to Cloudflare edges.
 
 ### Persistence and “hardening rollback” to maintain access (Linux examples)
 Attackers frequently pair self‑patching with durable access paths:
 - Cron/Anacron: edits to the `0anacron` stub in each `/etc/cron.*/` directory for periodic execution.
-  - Hunt:
-    ```bash
-    for d in /etc/cron.*; do [ -f "$d/0anacron" ] && stat -c '%n %y %s' "$d/0anacron"; done
-    grep -R --line-number -E 'curl|wget|python|/bin/sh' /etc/cron.*/* 2>/dev/null
-    ```
-- SSH configuration hardening rollback: enabling root logins and altering default shells for low‑privileged accounts.
-  - Hunt for root login enablement:
-    ```bash
-    grep -E '^\s*PermitRootLogin' /etc/ssh/sshd_config
-    # flag values like "yes" or overly permissive settings
-    ```
-  - Hunt for suspicious interactive shells on system accounts (e.g., `games`):
-    ```bash
-    awk -F: '($7 ~ /bin\/(sh|bash|zsh)/ && $1 ~ /^(games|lp|sync|shutdown|halt|mail|operator)$/) {print}' /etc/passwd
-    ```
-- Random, short‑named beacon artifacts (8 alphabetical chars) dropped to disk that also contact cloud C2:
-  - Hunt:
-    ```bash
-    find / -maxdepth 3 -type f -regextype posix-extended -regex '.*/[A-Za-z]{8}$' \
-      -exec stat -c '%n %s %y' {} \; 2>/dev/null | sort
-    ```
 
-Defenders should correlate these artifacts with external exposure and service patching events to uncover anti‑forensic self‑remediation used to hide initial exploitation.
+- SSH configuration hardening rollback: enabling root logins and altering default shells for low‑privileged accounts.
+
+- Random, short‑named beacon artifacts (8 alphabetical chars) dropped to disk that also contact cloud C2:
+
+
+## Linux Anti-Forensics: Targeted “Two‑Face” Binaries (Rust) — Host‑fingerprinted AEAD + Diskless Exec
+
+Goal: ship a single ELF that looks harmless off‑target, but transparently executes a hidden payload only on a specific host, without leaving plaintext on disk and with reduced userland observability.
+
+Core idea
+- Build‑time: compress and encrypt the hidden ELF with AEAD (AES‑GCM). Derive the encryption key with HKDF from unique, stable host data. Embed only ciphertext+metadata and a random base key as constants. The harmless ELF is also embedded.
+- Runtime: recompute the key from local host data. If decryption/authentication succeeds → exec the hidden ELF; else → exec the harmless one. Off‑target hosts produce the wrong key and GCM auth fails (acting as a stealth switch).
+
+Recommended host data for derivation
+- Disk partition UUIDs from `/dev/disk/by-uuid` (sorted). They are random, unique, and stable across reboots. Avoid low‑entropy or unstable signals (UID, CPU model, DMI serials, public IP).
+
+Minimal build/runtime with the twoface crate
+- Build environment
+```bash
+export TWOFACE_HOST_INFO=/path/to/host_partition_uuids.json
+export TWOFACE_NORMAL_EXE=/path/to/harmless_elf
+export TWOFACE_HIDDEN_EXE=/path/to/hidden_elf
+cargo build
+```
+- Host info JSON (example)
+```json
+{
+  "part_uuids": [
+    "02e989c5-32dc-45ad-98f8-f284e9ac23c0",
+    "0e2fcda2-5ca1-4e38-841d-68e5d3a46f93",
+    "f99b45d8-d76d-48a3-94a2-3b0c6316d899"
+  ]
+}
+```
+- build.rs
+```rust
+use std::io;
+fn main() -> io::Result<()> {
+    twoface::build::build::<twoface::host::HostPartitionUuids>()
+}
+```
+- Runtime dispatch
+```rust
+include!(concat!(env!("OUT_DIR"), "/target_exe.rs"));
+fn main() -> std::io::Result<!> {
+    twoface::run::run::<twoface::host::HostPartitionUuids>(
+        NORMAL_EXE,
+        HIDDEN_EXE_BLACK,
+        HIDDEN_EXE_KEY,
+        &HIDDEN_EXE_DERIVATION_SALT,
+    )
+}
+```
+
+Diskless, ephemeral execution to reduce artifacts
+- Create an anonymous in‑kernel file with memfd_create, stream decrypted blocks into it, then replace the current image via fexecve. This avoids writing the hidden ELF to disk and avoids holding the full plaintext in memory at once.
+- Reduce write traces while filling the memfd:
+  - io_uring: submit buffered writes without visible write syscalls in strace (may be unsupported/disabled).
+  - mmap: map and memcpy into the file; eliminates write calls at the cost of extra mmap/munmap syscalls and overhead.
+  - Fallback: classic write.
 
 ## References
 
-- Sophos X-Ops – “AuKill: A Weaponized Vulnerable Driver for Disabling EDR” (March 2023)  
-  https://news.sophos.com/en-us/2023/03/07/aukill-a-weaponized-vulnerable-driver-for-disabling-edr
-- Red Canary – “Patching EtwEventWrite for Stealth: Detection & Hunting” (June 2024)  
-  https://redcanary.com/blog/etw-patching-detection
-
+- [Synacktiv – Creating a "Two-Face" Rust binary on Linux](https://www.synacktiv.com/en/publications/creating-a-two-face-rust-binary-on-linux.html)
+- [synacktiv/twoface (GitHub)](https://github.com/synacktiv/twoface)
+- [memfd_create(2) – man7.org](https://man7.org/linux/man-pages/man2/memfd_create.2.html)
+- [fexecve(3) – man7.org](https://man7.org/linux/man-pages/man3/fexecve.3.html)
+- [mmap(2) – man7.org](https://man7.org/linux/man-pages/man2/mmap.2.html)
+- [Synacktiv – io_uring-based network scanner in Rust](https://www.synacktiv.com/publications/building-a-iouring-based-network-scanner-in-rust)
+- [userfaultfd(2) – man7.org](https://man7.org/linux/man-pages/man2/userfaultfd.2.html)
+- [Sophos X-Ops – AuKill: A Weaponized Vulnerable Driver for Disabling EDR (Mar 2023)](https://news.sophos.com/en-us/2023/03/07/aukill-a-weaponized-vulnerable-driver-for-disabling-edr)
+- [Red Canary – Patching EtwEventWrite for Stealth: Detection & Hunting (Jun 2024)](https://redcanary.com/blog/etw-patching-detection)
 - [Red Canary – Patching for persistence: How DripDropper Linux malware moves through the cloud](https://redcanary.com/blog/threat-intelligence/dripdropper-linux-malware/)
 - [CVE‑2023‑46604 – Apache ActiveMQ OpenWire RCE (NVD)](https://nvd.nist.gov/vuln/detail/CVE-2023-46604)
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-
