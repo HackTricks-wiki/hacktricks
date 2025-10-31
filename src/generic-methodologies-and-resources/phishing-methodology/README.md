@@ -147,7 +147,10 @@ echo "This is the body of the email" | mail -s "This is the subject line" test@e
 Stop the execution of gophish and lets configure it.\
 Modify `/opt/gophish/config.json` to the following (note the use of https):
 
-```bash
+<details>
+<summary>Gophish config.json</summary>
+
+```json
 {
         "admin_server": {
                 "listen_url": "127.0.0.1:3333",
@@ -172,9 +175,14 @@ Modify `/opt/gophish/config.json` to the following (note the use of https):
 }
 ```
 
+</details>
+
 **Configure gophish service**
 
 In order to create the gophish service so it can be started automatically and managed a service you can create the file `/etc/init.d/gophish` with the following content:
+
+<details>
+<summary>Init script for Gophish service</summary>
 
 ```bash
 #!/bin/bash
@@ -222,6 +230,8 @@ case $1 in
     start|stop|status) "$1" ;;
 esac
 ```
+
+</details>
 
 Finish configuring the service and checking it doing:
 
@@ -345,6 +355,9 @@ The page [www.mail-tester.com](https://www.mail-tester.com) can indicate you if 
 - Make sure you have checked "**Add Tracking Image**"
 - Write the **email template** (you can use variables like in the following example):
 
+<details>
+<summary>Email HTML template</summary>
+
 ```html
 <html>
 <head>
@@ -363,6 +376,8 @@ WRITE HERE SOME SIGNATURE OF SOMEONE FROM THE COMPANY
 </body>
 </html>
 ```
+
+</details>
 
 Note that **in order to increase the credibility of the email**, it's recommended to use some signature from an email from the client. Suggestions:
 
@@ -386,7 +401,7 @@ Note that **in order to increase the credibility of the email**, it's recommende
 
 > [!TIP]
 > Usually you will need to modify the HTML code of the page and make some tests in local (maybe using some Apache server) **until you like the results.** Then, write that HTML code in the box.\
-> Note that if you need to **use some static resources** for the HTML (maybe some CSS and JS pages) you can save them in _**/opt/gophish/static/endpoint**_ and then access them from _**/static/\<filename>**_
+> Note that if you need to **use some static resources** for the HTML (maybe some CSS and JS pages) you can save them in _**/opt/gophish/static/endpoint**_ and then access them from `/static/<filename>`
 
 > [!TIP]
 > For the redirection you could **redirect the users to the legit main web page** of the victim, or redirect them to _/static/migration.html_ for example, put some **spinning wheel (**[**https://loading.io/**](https://loading.io)**) for 5 seconds and then indicate that the process was successful**.
@@ -554,6 +569,12 @@ See also – AI agent abuse of local CLI tools and MCP (for secrets inventory an
 ai-agent-abuse-local-ai-cli-tools-and-mcp.md
 {{#endref}}
 
+See also – cross‑agent (A2A) session smuggling in stateful agent systems:
+
+{{#ref}}
+agent2agent-a2a-session-smuggling.md
+{{#endref}}
+
 ---
 
 ## MFA Fatigue / Push Bombing Variant – Forced Reset
@@ -626,4 +647,3 @@ Defence tips:
 - [Silent Smishing – mobile-gated phishing infra and heuristics (Sekoia.io)](https://blog.sekoia.io/silent-smishing-the-hidden-abuse-of-cellular-router-apis/)
 
 {{#include ../../banners/hacktricks-training.md}}
-

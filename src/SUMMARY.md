@@ -29,6 +29,7 @@
   - [Enable Nexmon Monitor And Injection On Android](generic-methodologies-and-resources/pentesting-wifi/enable-nexmon-monitor-and-injection-on-android.md)
   - [Evil Twin EAP-TLS](generic-methodologies-and-resources/pentesting-wifi/evil-twin-eap-tls.md)
 - [Phishing Methodology](generic-methodologies-and-resources/phishing-methodology/README.md)
+  - [Agent2agent A2a Session Smuggling](generic-methodologies-and-resources/phishing-methodology/agent2agent-a2a-session-smuggling.md)
   - [Ai Agent Abuse Local Ai Cli Tools And Mcp](generic-methodologies-and-resources/phishing-methodology/ai-agent-abuse-local-ai-cli-tools-and-mcp.md)
   - [Ai Agent Mode Phishing Abusing Hosted Agent Browsers](generic-methodologies-and-resources/phishing-methodology/ai-agent-mode-phishing-abusing-hosted-agent-browsers.md)
   - [Clipboard Hijacking](generic-methodologies-and-resources/phishing-methodology/clipboard-hijacking.md)

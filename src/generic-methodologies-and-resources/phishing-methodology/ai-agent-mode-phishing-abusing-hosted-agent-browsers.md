@@ -48,6 +48,12 @@ See also – local AI CLI/MCP abuse and detection:
 ai-agent-abuse-local-ai-cli-tools-and-mcp.md
 {{#endref}}
 
+See also – stateful Agent2Agent (A2A) session smuggling:
+
+{{#ref}}
+agent2agent-a2a-session-smuggling.md
+{{#endref}}
+
 ## Agentic Browsers Prompt Injections: OCR‑based and Navigation‑based
 
 Agentic browsers often compose prompts by fusing trusted user intent with untrusted page-derived content (DOM text, transcripts, or text extracted from screenshots via OCR). If provenance and trust boundaries aren’t enforced, injected natural-language instructions from untrusted content can steer powerful browser tools under the user’s authenticated session, effectively bypassing the web’s same-origin policy via cross-origin tool use.
