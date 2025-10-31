@@ -13,6 +13,12 @@ Key mechanics seen in common AI CLIs:
 
 Abuse impact: A single prompt can inventory and exfiltrate credentials, modify local files, and silently extend capability by connecting to remote MCP servers (visibility gap if those servers are third‑party).
 
+See also – cross‑agent session smuggling in stateful A2A systems:
+
+{{#ref}}
+agent2agent-a2a-session-smuggling.md
+{{#endref}}
+
 ---
 
 ## Adversary Playbook – Prompt‑Driven Secrets Inventory
