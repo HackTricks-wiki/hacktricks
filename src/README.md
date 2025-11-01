@@ -2,9 +2,9 @@
 
 <figure><img src="images/hacktricks.gif" alt=""><figcaption></figcaption></figure>
 
-_Nembo za Hacktricks na muundo wa mwendo uliofanywa na_ [_@ppieranacho_](https://www.instagram.com/ppieranacho/)_._
+_Nembo za Hacktricks na muundo wa mwendo na_ [_@ppieranacho_](https://www.instagram.com/ppieranacho/)_._
 
-### Endesha HackTricks kwenye mashine yako
+### Endesha HackTricks ndani ya kompyuta yako
 ```bash
 # Download latest version of hacktricks
 git clone https://github.com/HackTricks-wiki/hacktricks
@@ -31,7 +31,7 @@ export LANG="master" # Leave master for english
 # Run the docker container indicating the path to the hacktricks folder
 docker run -d --rm --platform linux/amd64 -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "mkdir -p ~/.ssh && ssh-keyscan -H github.com >> ~/.ssh/known_hosts && cd /app && git config --global --add safe.directory /app && git checkout $LANG && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
 ```
-Nakili yako ya HackTricks ya ndani itakuwa **available at [http://localhost:3337](http://localhost:3337)** baada ya <5 dakika (inahitaji kujenga kitabu, tafadhali vumilia).
+Nakili yako ya karibu ya HackTricks itakuwa **available at [http://localhost:3337](http://localhost:3337)** baada ya <5 dakika (inahitaji kujenga kitabu, kuwa mvumilivu).
 
 ## Wadhamini wa Kampuni
 
@@ -39,11 +39,11 @@ Nakili yako ya HackTricks ya ndani itakuwa **available at [http://localhost:3337
 
 <figure><img src="images/stm (1).png" alt=""><figcaption></figcaption></figure>
 
-[**STM Cyber**](https://www.stmcyber.com) ni kampuni bora ya cybersecurity whose slogan is **HACK THE UNHACKABLE**. Wanafanya utafiti wao wenyewe na kuendeleza zana zao za hacking ili kutoa huduma kadhaa muhimu za cybersecurity kama pentesting, Red teams na mafunzo.
+[**STM Cyber**](https://www.stmcyber.com) ni kampuni nzuri ya cybersecurity ambayo kauli mbiu yake ni **HACK THE UNHACKABLE**. Wanafanya utafiti wao wenyewe na kuendeleza zana zao za hacking ili **kutoa several valuable cybersecurity services** kama pentesting, Red teams na mafunzo.
 
-Unaweza kuangalia **blog** yao kwenye [**https://blog.stmcyber.com**](https://blog.stmcyber.com)
+Unaweza kuangalia blog yao kwenye [**https://blog.stmcyber.com**](https://blog.stmcyber.com)
 
-**STM Cyber** pia inaunga mkono miradi ya open source ya cybersecurity kama HackTricks :)
+**STM Cyber** pia inasaidia miradi ya chanzo huria ya cybersecurity kama HackTricks :)
 
 ---
 
@@ -51,7 +51,7 @@ Unaweza kuangalia **blog** yao kwenye [**https://blog.stmcyber.com**](https://bl
 
 <figure><img src="images/image (45).png" alt=""><figcaption></figcaption></figure>
 
-[**RootedCON**](https://www.rootedcon.com) ni tukio muhimu zaidi la cybersecurity huko **Spain** na moja ya muhimu zaidi huko **Europe**. Kwa **lengo la kuendeleza maarifa ya kiufundi**, kongamano hili ni mahali pa kukutana pa moto kwa wataalamu wa teknolojia na cybersecurity wa aina zote.
+[**RootedCON**](https://www.rootedcon.com) ni tukio la muhimu zaidi la cybersecurity nchini **Spain** na mojawapo ya muhimu zaidi katika **Europe**. Kwa **mission of promoting technical knowledge**, kongamano hili ni kitovu cha kukutana kwa wataalamu wa teknolojia na cybersecurity kutoka taaluma zote.
 
 {{#ref}}
 https://www.rootedcon.com/
@@ -65,7 +65,7 @@ https://www.rootedcon.com/
 
 **Intigriti** ni **Europe's #1** ethical hacking na **bug bounty platform.**
 
-**Bug bounty tip**: **sign up** for **Intigriti**, a premium **bug bounty platform created by hackers, for hackers**! Jiunge nasi kwenye [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) leo, na anza kupata bounties hadi **$100,000**!
+**Bug bounty tip**: **jisajili** kwa **Intigriti**, premium **bug bounty platform created by hackers, for hackers**! Jiunge nasi kwenye [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) leo, na anza kupata bounties hadi **$100,000**!
 
 {{#ref}}
 https://go.intigriti.com/hacktricks
@@ -78,7 +78,7 @@ https://go.intigriti.com/hacktricks
 <figure><img src="images/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-Tumia [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) kujenga kwa urahisi na **kuendesha workflows** zinazotokana na zana **most advanced** za jamii ya ulimwengu.
+Tumia [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) kujenga kwa urahisi na automate workflows zinazotumia zana za jamii zilizoadvanced duniani.
 
 Pata Ufikiaji Leo:
 
@@ -92,13 +92,13 @@ https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktr
 
 <figure><img src="images/image (3).png" alt=""><figcaption></figcaption></figure>
 
-Jiunge na [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) server ili kuwasiliana na hackers wenye uzoefu na hunters wa bug bounty!
+Join [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) server ili kuwasiliana na hackers wenye uzoefu na wadudu wa bug bounty!
 
-- **Hacking Insights:** Shirikiana na maudhui yanayochunguza msisimko na changamoto za hacking
-- **Real-Time Hack News:** Endelea kufuatilia dunia ya hacking kwa habari za wakati halisi na ufahamu
-- **Latest Announcements:** Abiri taarifa za hivi punde kuhusu bug bounties zinazoanzishwa na sasisho muhimu za platform
+- **Hacking Insights:** Shirikiana na maudhui yanayoingia ndani ya msisimko na changamoto za hacking
+- **Real-Time Hack News:** Endelea kupata habari za haraka za dunia ya hacking kupitia taarifa za wakati halisi
+- **Latest Announcements:** Baki umejulishwa kuhusu bug bounties mpya zinazoanzishwa na masasisho muhimu ya jukwaa
 
-**Jiunge nasi kwenye** [**Discord**](https://discord.com/invite/N3FrSbmwdy) na anza kushirikiana na hackers wakubwa leo!
+**Join us on** [**Discord**](https://discord.com/invite/N3FrSbmwdy) na anza kushirikiana na top hackers leo!
 
 ---
 
@@ -106,9 +106,9 @@ Jiunge na [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) serve
 
 <figure><img src="images/pentest-tools.svg" alt=""><figcaption></figcaption></figure>
 
-**Pata mtazamo wa hacker juu ya web apps, network, na cloud yako**
+**Pata mtazamo wa hacker kuhusu web apps yako, mtandao, na cloud**
 
-**Gundua na ripoti vulnerabilities kali, zinazoweza kutumika na zenye athari za kibiashara.** Tumia zana zetu 20+ maalum ili kuchora uso wa shambulio, kutafuta maswala ya usalama yanayokuruhusu kuongeza privileges, na kutumia exploits za moja kwa moja kukusanya ushahidi muhimu, ukibadilisha kazi yako kuwa ripoti za kuvutia.
+**Gundua na ripoti vulnerabilities muhimu, exploitable vulnerabilities zenye athari halisi kwa biashara.** Tumia zana zetu 20+ za kawaida ili kuchora ramani ya attack surface, gundua masuala ya usalama yanayokuruhusu escalate privileges, na tumia automated exploits kukusanya ushahidi muhimu, ukigeuza kazi yako kuwa ripoti zenye kuhimiza.
 
 {{#ref}}
 https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons
@@ -120,14 +120,14 @@ https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktrick
 
 <figure><img src="images/image (1254).png" alt=""><figcaption></figcaption></figure>
 
-**SerpApi** inatoa APIs za haraka na rahisi za wakati halisi za **access search engine results**. Wanachukua data kutoka kwa search engines, wanashughulikia proxies, kutatua captchas, na kuchambua data zote za structured kwa niaba yako.
+**SerpApi** inatoa APIs za haraka na rahisi za wakati halisi ili **kupata search engine results**. Wanapiga scraping search engines, wanashughulikia proxies, kutatua captchas, na kuchambua data zote zenye muundo mzuri kwa niaba yako.
 
-Usajili wa moja ya mipango ya SerpApi unajumuisha ufikiaji wa zaidi ya APIs 50 tofauti za kuchonga search engines mbalimbali, ikiwa ni pamoja na Google, Bing, Baidu, Yahoo, Yandex, na zaidi.\
-Tofauti na wasambazaji wengine, **SerpApi haichongi tu organic results**. Majibu ya SerpApi mara nyingi yanajumuisha matangazo yote, picha na video za ndani, knowledge graphs, na vipengele vingine vinavyopatikana kwenye matokeo ya utafutaji.
+Usajili kwa mojawapo ya mipango ya SerpApi unajumuisha upatikanaji wa APIs zaidi ya 50 tofauti za kuchakata injini mbalimbali za utafutaji, ikiwa ni pamoja na Google, Bing, Baidu, Yahoo, Yandex, na zaidi.\
+Tofauti na wasambazaji wengine, **SerpApi doesn’t just scrape organic results**. Majibu ya SerpApi mara kwa mara yanajumuisha matangazo yote, picha na video zilizo inline, knowledge graphs, na vipengele vingine vilivyo katika matokeo ya utafutaji.
 
 Wateja wa sasa wa SerpApi ni pamoja na **Apple, Shopify, and GrubHub**.\
 Kwa taarifa zaidi angalia [**blog**](https://serpapi.com/blog/)**,** au jaribu mfano katika [**playground**](https://serpapi.com/playground)**.**\
-Unaweza **kuunda akaunti ya bure** [**here**](https://serpapi.com/users/sign_up)**.**
+Unaweza **kuunda akaunti ya bure** [**hapa**](https://serpapi.com/users/sign_up)**.**
 
 ---
 
@@ -135,7 +135,7 @@ Unaweza **kuunda akaunti ya bure** [**here**](https://serpapi.com/users/sign_up)
 
 <figure><img src="images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-Jifunze teknolojia na ujuzi unaohitajika kufanya vulnerability research, penetration testing, na reverse engineering ili kulinda mobile applications na devices. **Mstaadi katika iOS na Android security** kupitia kozi zetu za on-demand na **pata certification**:
+Jifunze teknolojia na ujuzi unaohitajika kufanya vulnerability research, penetration testing, na reverse engineering ili kulinda mobile applications na devices. **Tumia fursa za kujifunza iOS na Android security** kupitia kozi zetu za on-demand na **pata cheti**:
 
 {{#ref}}
 https://academy.8ksec.io/
@@ -147,31 +147,16 @@ https://academy.8ksec.io/
 
 <figure><img src="images/websec (1).svg" alt=""><figcaption></figcaption></figure>
 
-[**WebSec**](https://websec.net) ni kampuni ya kitaalamu ya cybersecurity yenye makao yake **Amsterdam** ambayo husaidia **kulinda** biashara **kote duniani** dhidi ya tishio jipya la cybersecurity kwa kutoa **offensive-security services** kwa njia ya **kisasa**.
+[**WebSec**](https://websec.net) ni kampuni ya kitaalamu ya cybersecurity iliyoko **Amsterdam** ambayo husaidia kulinda biashara **kutoka pande zote za dunia** dhidi ya vitisho vya hivi karibuni vya cybersecurity kwa kutoa **offensive-security services** kwa mtazamo wa kisasa.
 
-WebSec ni kampuni ya kimataifa ya usalama yenye ofisi huko Amsterdam na Wyoming. Wanatoa **all-in-one security services** ambayo ina maana wanashughulikia kila kitu; Pentesting, **Security** Audits, Awareness Trainings, Phishing Campagnes, Code Review, Exploit Development, Security Experts Outsourcing na mengi zaidi.
+WebSec ni kampuni ya usalama ya kimataifa yenye ofisi huko Amsterdam na Wyoming. Wanatoa **all-in-one security services** ambayo inamaanisha wanashughulikia kila kitu; Pentesting, **Security** Audits, Awareness Trainings, Phishing Campagnes, Code Review, Exploit Development, Security Experts Outsourcing na mengi zaidi.
 
-Jambo jingine la kuvutia kuhusu WebSec ni kwamba tofauti na wastani wa sekta WebSec ni **kwa ujasiri mkubwa katika ujuzi wao**, hadi kwa kiwango kwamba **wanahakikisha matokeo ya ubora bora**, inasema kwenye tovuti yao "**If we can't hack it, You don't pay it!**". Kwa habari zaidi tazama [**website**](https://websec.net/en/) na [**blog**](https://websec.net/blog/)!
+Jambo jingine jema kuhusu WebSec ni kwamba tofauti na wastani wa sekta WebSec ni **wana uhakika sana katika ujuzi wao**, hadi kiwango kwamba **wanahakikishia matokeo bora**, inasema kwenye tovuti yao "**If we can't hack it, You don't pay it!**". Kwa maelezo zaidi angalia [**website yao**](https://websec.net/en/) na [**blog**](https://websec.net/blog/)!
 
-Mbali na hayo WebSec pia ni **mchango thabiti kwa HackTricks.**
+Zaidi ya hayo WebSec pia ni **mshirika aliyejitolea wa HackTricks.**
 
 {{#ref}}
 https://www.youtube.com/watch?v=Zq2JycGDCPM
-{{#endref}}
-
----
-
-### [Venacus](https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons)
-
-<figure><img src="images/venacus-logo.svg" alt="venacus logo"><figcaption></figcaption></figure>
-
-[**Venacus**](https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons) ni injini ya utafutaji ya data breach (leak). \
-Tunatoa random string search (like google) juu ya aina zote za data leaks kubwa na ndogo --sio tu kubwa-- juu ya data kutoka vyanzo mbalimbali. \
-Utafutaji wa watu, utafutaji kwa AI, utafutaji wa mashirika, API (OpenAPI) access, theHarvester integration, sifa zote ambazo pentester anahitaji.\
-**HackTricks inaendelea kuwa jukwaa zuri la kujifunzia kwetu sote na tunajivunia kuitegemea!**
-
-{{#ref}}
-https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons
 {{#endref}}
 
 ---
@@ -182,12 +167,12 @@ https://venacus.com/?utm_medium=link&utm_source=hacktricks&utm_campaign=spons
 
 
 **Built for the field. Built around you.**\
-[**Cyber Helmets**](https://cyberhelmets.com/?ref=hacktricks) hutoa na kusambaza mafunzo ya cybersecurity yaliyojengwa na kuongozwa na wataalamu wa sekta. Programu zao zinaenda zaidi ya nadharia ili kuwapatia timu uelewa wa kina na ujuzi wa vitendo, kwa kutumia mazingira maalum yanayoakisi tishio la ulimwengu halisi. Kwa maswali ya mafunzo maalum, wasiliana nasi [**here**](https://cyberhelmets.com/tailor-made-training/?ref=hacktricks).
+[**Cyber Helmets**](https://cyberhelmets.com/?ref=hacktricks) huendeleza na kutoa mafunzo madhubuti ya cybersecurity yaliyoundwa na kuendeshwa na wataalamu wa sekta. Programu zao zinazidi nadharia kuwapa timu uelewa wa kina na ujuzi wa utekelezaji, zikitumia mazingira maalum yanayoakisi vitisho vya ulimwengu wa kweli. Kwa uchunguzi wa mafunzo maalum, wasiliana nasi [**hapa**](https://cyberhelmets.com/tailor-made-training/?ref=hacktricks).
 
-**Kile kinachowatofautisha katika mafunzo yao:**
-* Yaliyotengenezwa maalum yaliyobadilishwa na maabara
-* Yanaungwa mkono na zana na platforms za kiwango cha juu
-* Yameundwa na kufundishwa na watekelezaji
+**Kinachowafanya mafunzo yao yawe ya kipekee:**
+* Maudhui na maabara zilizojengwa maalum
+* Zimetegemezwa na zana na majukwaa ya kiwango cha juu
+* Zimeundwa na kufundishwa na wataalamu wa vitendo
 
 {{#ref}}
 https://cyberhelmets.com/courses/?ref=hacktricks
@@ -199,13 +184,13 @@ https://cyberhelmets.com/courses/?ref=hacktricks
 
 <figure><img src="images/lasttower.png" alt="lasttower logo"><figcaption></figcaption></figure>
 
-Last Tower Solutions hutoa huduma maalum za cybersecurity kwa taasisi za **Education** na **FinTech**, kwa kuzingatia **penetration testing, cloud security assessments**, na **compliance readiness** (SOC 2, PCI-DSS, NIST). Timu yetu inajumuisha wataalamu waliothibitishwa wa **OSCP and CISSP**, wakileta ujuzi wa kina wa kiufundi na ufahamu wa viwango vya sekta kwa kila kazi.
+Last Tower Solutions hutoa huduma maalum za cybersecurity kwa taasisi za **Education** na **FinTech**, kwa kuzingatia **penetration testing, cloud security assessments**, na **compliance readiness** (SOC 2, PCI-DSS, NIST). Timu yetu inajumuisha wataalamu walio na vyeti vya **OSCP and CISSP**, wakiwa na utaalamu wa kina wa kiufundi na ufahamu wa viwango vya tasnia katika kila ushirikiano.
 
-Tunazidi skana za moja kwa moja kwa **manual, intelligence-driven testing** iliyobinafsishwa kwa mazingira yenye hatari kubwa. Kuanzia kulinda rekodi za wanafunzi hadi kuwalinda miamala ya kifedha, tunasaidia mashirika kutetea yale yanayowalea.
+Tunazidi skanning za automated kwa **manual, intelligence-driven testing** iliyobinafsishwa kwa mazingira yenye hatari kubwa. Kuanzia kuimarisha rekodi za wanafunzi hadi kulinda miamala ya kifedha, tunasaidia mashirika kulinda kile kinachothaminiwa zaidi.
 
 _“A quality defense requires knowing the offense, we provide security through understanding.”_
 
-Endelea kupata habari na kusasishwa kuhusu kile kipya katika cybersecurity kwa kutembelea [**blog**](https://www.lasttowersolutions.com/blog).
+Baki umejulishwa na up-to-date na mambo ya hivi karibuni katika cybersecurity kwa kutembelea [**blog yao**](https://www.lasttowersolutions.com/blog).
 
 {{#ref}}
 https://www.lasttowersolutions.com/
@@ -215,11 +200,11 @@ https://www.lasttowersolutions.com/
 
 ### [K8Studio - The Smarter GUI to Manage Kubernetes.](https://k8studio.io/)
 
-<figure><img src="images/k8studio.jpg" alt="k8studio logo"><figcaption></figcaption></figure>
+<figure><img src="images/k8studio.png" alt="k8studio logo"><figcaption></figcaption></figure>
 
-K8Studio IDE inawawezesha DevOps, DevSecOps, na developers kusimamia, kufuatilia, na kulinda Kubernetes clusters kwa ufanisi. Tumia insights zetu za AI, fremu ya usalama ya juu, na CloudMaps GUI rahisi kuona clusters yako, kuelewa hali yake, na kuchukua hatua kwa ujasiri.
+K8Studio IDE inawapa DevOps, DevSecOps, na developers uwezo wa kusimamia, kufuatilia, na kulinda Kubernetes clusters kwa ufanisi. Tumia ufahamu unaoendeshwa na AI, mfumo wa usalama wa hali ya juu, na GUI ya CloudMaps kuona clusters zako, kuelewa hali yao, na kuchukua hatua kwa kujiamini.
 
-Zaidi ya hayo, K8Studio ni **compatible with all major kubernetes distributions** (AWS, GCP, Azure, DO, Rancher, K3s, Openshift and more).
+Zaidi ya hayo, K8Studio ni **inayofanana na distributions zote kuu za kubernetes** (AWS, GCP, Azure, DO, Rancher, K3s, Openshift and more).
 
 {{#ref}}
 https://k8studio.io/
@@ -228,9 +213,9 @@ https://k8studio.io/
 
 ---
 
-## Leseni & Hukumu
+## Leseni & Majaliwa
 
-Angalia huko:
+Tazama hizo katika:
 
 {{#ref}}
 welcome/hacktricks-values-and-faq.md
