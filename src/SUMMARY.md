@@ -36,6 +36,7 @@
   - [Detecting Phishing](generic-methodologies-and-resources/phishing-methodology/detecting-phising.md)
   - [Discord Invite Hijacking](generic-methodologies-and-resources/phishing-methodology/discord-invite-hijacking.md)
   - [Homograph Attacks](generic-methodologies-and-resources/phishing-methodology/homograph-attacks.md)
+  - [Microsoft Teams Impersonation Spoofing](generic-methodologies-and-resources/phishing-methodology/microsoft-teams-impersonation-spoofing.md)
   - [Mobile Phishing Malicious Apps](generic-methodologies-and-resources/phishing-methodology/mobile-phishing-malicious-apps.md)
   - [Phishing Files & Documents](generic-methodologies-and-resources/phishing-methodology/phishing-documents.md)
 - [Basic Forensic Methodology](generic-methodologies-and-resources/basic-forensic-methodology/README.md)

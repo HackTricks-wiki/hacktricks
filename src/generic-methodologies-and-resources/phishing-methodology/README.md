@@ -616,6 +616,14 @@ Defence tips:
 - Execute crawlers with mobile‑like fingerprints and JS enabled to reveal gated content.
 - Alert on suspicious 500 responses following `POST /detect` on newly registered domains.
 
+## Messaging / Collaboration Platforms
+
+- Microsoft Teams: impersonation/spoofing primitives (notification sender spoofing, chat/call display-name tampering, unlabeled edits)
+
+{{#ref}}
+microsoft-teams-impersonation-spoofing.md
+{{#endref}}
+
 ## References
 
 - [https://zeltser.com/domain-name-variations-in-phishing/](https://zeltser.com/domain-name-variations-in-phishing/)
