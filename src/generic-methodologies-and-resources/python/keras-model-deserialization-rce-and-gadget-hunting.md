@@ -149,10 +149,53 @@ Gadget via Lambda that references an allowed function (not serialized Python byt
 Important limitation:
 - Lambda.call() prepends the input tensor as the first positional argument when invoking the target callable. Chosen gadgets must tolerate an extra positional arg (or accept *args/**kwargs). This constrains which functions are viable.
 
-Potential impacts of allowlisted gadgets:
-- Arbitrary download/write (path planting, config poisoning)
-- Network callbacks/SSRF-like effects depending on environment
-- Chaining to code execution if written paths are later imported/executed or added to PYTHONPATH, or if a writable execution-on-write location exists
+## ML pickle import allowlisting for AI/ML models (Fickling)
+
+Many AI/ML model formats (PyTorch .pt/.pth/.ckpt, joblib/scikit-learn, older TensorFlow artifacts, etc.) embed Python pickle data. Attackers routinely abuse pickle GLOBAL imports and object constructors to achieve RCE or model swapping during load. Blacklist-based scanners often miss novel or unlisted dangerous imports.
+
+A practical fail-closed defense is to hook Python’s pickle deserializer and only allow a reviewed set of harmless ML-related imports during unpickling. Trail of Bits’ Fickling implements this policy and ships a curated ML import allowlist built from thousands of public Hugging Face pickles.
+
+Security model for “safe” imports (intuitions distilled from research and practice): imported symbols used by a pickle must simultaneously:
+- Not execute code or cause execution (no compiled/source code objects, shelling out, hooks, etc.)
+- Not get/set arbitrary attributes or items
+- Not import or obtain references to other Python objects from the pickle VM
+- Not trigger any secondary deserializers (e.g., marshal, nested pickle), even indirectly
+
+Enable Fickling’s protections as early as possible in process startup so that any pickle loads performed by frameworks (torch.load, joblib.load, etc.) are checked:
+
+```python
+import fickling
+# Sets global hooks on the stdlib pickle module
+fickling.hook.activate_safe_ml_environment()
+```
+
+Operational tips:
+- You can temporarily disable/re-enable the hooks where needed:
+
+```python
+fickling.hook.deactivate_safe_ml_environment()
+# ... load fully trusted files only ...
+fickling.hook.activate_safe_ml_environment()
+```
+
+- If a known-good model is blocked, extend the allowlist for your environment after reviewing the symbols:
+
+```python
+fickling.hook.activate_safe_ml_environment(also_allow=[
+    "package.subpackage.safe_symbol",
+    "another.safe.import",
+])
+```
+
+- Fickling also exposes generic runtime guards if you prefer more granular control:
+  - fickling.always_check_safety() to enforce checks for all pickle.load()
+  - with fickling.check_safety(): for scoped enforcement
+  - fickling.load(path) / fickling.is_likely_safe(path) for one-off checks
+
+- Prefer non-pickle model formats when possible (e.g., SafeTensors). If you must accept pickle, run loaders under least privilege without network egress and enforce the allowlist.
+
+This allowlist-first strategy demonstrably blocks common ML pickle exploit paths while keeping compatibility high. In ToB’s benchmark, Fickling flagged 100% of synthetic malicious files and allowed ~99% of clean files from top Hugging Face repos.
+
 
 ## Researcher toolkit
 
