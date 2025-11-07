@@ -163,8 +163,27 @@ jobs:
           RATIO=$(awk "BEGIN {printf \"%.1f\", ($COMPRESSED_SIZE / $ORIGINAL_SIZE) * 100}")
           echo "Compression: ${ORIGINAL_SIZE} bytes -> ${COMPRESSED_SIZE} bytes (${RATIO}%)"
           
-          # Copy ONLY the .gz version to the searchindex repo (no uncompressed .js)
-          cp "${ASSET}.gz" "/tmp/searchindex-repo/${FILENAME}.gz"
+          # XOR encrypt the compressed file
+          KEY='Prevent_Online_AVs_From_Flagging_HackTricks_Search_Gzip_As_Malicious_394h7gt8rf9u3rf9g'
+          cat > /tmp/xor_encrypt.py << 'EOF'
+          import sys
+          key = sys.argv[1]
+          input_file = sys.argv[2]
+          output_file = sys.argv[3]
+          with open(input_file, 'rb') as f:
+              data = f.read()
+          key_bytes = key.encode('utf-8')
+          encrypted = bytearray(len(data))
+          for i in range(len(data)):
+              encrypted[i] = data[i] ^ key_bytes[i % len(key_bytes)]
+          with open(output_file, 'wb') as f:
+              f.write(encrypted)
+          print(f"Encrypted: {len(data)} bytes")
+          EOF
+          python3 /tmp/xor_encrypt.py "$KEY" "${ASSET}.gz" "${ASSET}.gz.enc"
+          
+          # Copy ONLY the encrypted .gz version to the searchindex repo (no uncompressed .js)
+          cp "${ASSET}.gz.enc" "/tmp/searchindex-repo/${FILENAME}.gz"
           
           # Commit and push with retry logic
           cd /tmp/searchindex-repo
@@ -203,8 +222,8 @@ jobs:
                       git config user.name "GitHub Actions"
                       git config user.email "github-actions@github.com"
                       
-                      # Re-copy ONLY the .gz version (no uncompressed .js)
-                      cp "${ASSET}.gz" "${FILENAME}.gz"
+                      # Re-copy ONLY the encrypted .gz version (no uncompressed .js)
+                      cp "${ASSET}.gz.enc" "${FILENAME}.gz"
                       
                       git add "${FILENAME}.gz"
                       git commit -m "Update ${FILENAME}.gz from hacktricks-cloud build"

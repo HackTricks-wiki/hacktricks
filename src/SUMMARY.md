@@ -68,6 +68,7 @@
     - [PDF File analysis](generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/pdf-file-analysis.md)
     - [PNG tricks](generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/png-tricks.md)
     - [Structural File Format Exploit Detection](generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/structural-file-format-exploit-detection.md)
+    - [Svg Font Glyph Analysis And Web Drm Deobfuscation](generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/svg-font-glyph-analysis-and-web-drm-deobfuscation.md)
     - [Video and Audio file analysis](generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/video-and-audio-file-analysis.md)
     - [ZIPs tricks](generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/zips-tricks.md)
   - [Windows Artifacts](generic-methodologies-and-resources/basic-forensic-methodology/windows-forensics/README.md)
@@ -268,6 +269,7 @@
   - [SeDebug + SeImpersonate copy token](windows-hardening/windows-local-privilege-escalation/sedebug-+-seimpersonate-copy-token.md)
   - [SeImpersonate from High To System](windows-hardening/windows-local-privilege-escalation/seimpersonate-from-high-to-system.md)
   - [Semanagevolume Perform Volume Maintenance Tasks](windows-hardening/windows-local-privilege-escalation/semanagevolume-perform-volume-maintenance-tasks.md)
+  - [Service Triggers](windows-hardening/windows-local-privilege-escalation/service-triggers.md)
   - [Windows C Payloads](windows-hardening/windows-local-privilege-escalation/windows-c-payloads.md)
 - [Active Directory Methodology](windows-hardening/active-directory-methodology/README.md)
   - [Abusing Active Directory ACLs/ACEs](windows-hardening/active-directory-methodology/acl-persistence-abuse/README.md)
@@ -478,6 +480,7 @@
       - [disable_functions bypass - PHP 4 >= 4.2.0, PHP 5 pcntl_exec](network-services-pentesting/pentesting-web/php-tricks-esp/php-useful-functions-disable_functions-open_basedir-bypass/disable_functions-bypass-php-4-greater-than-4.2.0-php-5-pcntl_exec.md)
     - [Php Rce Abusing Object Creation New Usd Get A Usd Get B](network-services-pentesting/pentesting-web/php-tricks-esp/php-rce-abusing-object-creation-new-usd_get-a-usd_get-b.md)
     - [PHP SSRF](network-services-pentesting/pentesting-web/php-tricks-esp/php-ssrf.md)
+  - [Perl Tricks](network-services-pentesting/pentesting-web/perl-tricks.md)
   - [PrestaShop](network-services-pentesting/pentesting-web/prestashop.md)
   - [Python](network-services-pentesting/pentesting-web/python.md)
   - [Rocket Chat](network-services-pentesting/pentesting-web/rocket-chat.md)
@@ -488,6 +491,7 @@
   - [Spring Actuators](network-services-pentesting/pentesting-web/spring-actuators.md)
   - [Symfony](network-services-pentesting/pentesting-web/symphony.md)
   - [Tomcat](network-services-pentesting/pentesting-web/tomcat/README.md)
+  - [Telerik Ui Aspnet Ajax Unsafe Reflection Webresource Axd](network-services-pentesting/pentesting-web/telerik-ui-aspnet-ajax-unsafe-reflection-webresource-axd.md)
   - [Uncovering CloudFlare](network-services-pentesting/pentesting-web/uncovering-cloudflare.md)
   - [Vuejs](network-services-pentesting/pentesting-web/vuejs.md)
   - [VMWare (ESX, VCenter...)](network-services-pentesting/pentesting-web/vmware-esx-vcenter....md)
@@ -587,7 +591,6 @@
 
 # 🕸️ Pentesting Web
 
-- [Less Code Injection Ssrf](pentesting-web/less-code-injection-ssrf.md)
 - [Web Vulnerabilities Methodology](pentesting-web/web-vulnerabilities-methodology.md)
 - [Reflecting Techniques - PoCs and Polygloths CheatSheet](pentesting-web/pocs-and-polygloths-cheatsheet/README.md)
   - [Web Vulns List](pentesting-web/pocs-and-polygloths-cheatsheet/web-vulns-list.md)
@@ -668,6 +671,7 @@
 - [LDAP Injection](pentesting-web/ldap-injection.md)
 - [Login Bypass](pentesting-web/login-bypass/README.md)
   - [Login bypass List](pentesting-web/login-bypass/sql-login-bypass.md)
+- [Mass Assignment Cwe 915](pentesting-web/mass-assignment-cwe-915.md)
 - [NoSQL injection](pentesting-web/nosql-injection.md)
 - [OAuth to Account takeover](pentesting-web/oauth-to-account-takeover.md)
 - [Open Redirect](pentesting-web/open-redirect.md)
@@ -755,6 +759,7 @@
   - [JavaScript Execution XS Leak](pentesting-web/xs-search/javascript-execution-xs-leak.md)
   - [CSS Injection](pentesting-web/xs-search/css-injection/README.md)
     - [CSS Injection Code](pentesting-web/xs-search/css-injection/css-injection-code.md)
+    - [LESS Code Injection](pentesting-web/xs-search/css-injection/less-code-injection.md)
 - [Iframe Traps](pentesting-web/iframe-traps.md)
 
 # ⛈️ Cloud Security
@@ -855,6 +860,7 @@
   - [WWW2Exec - GOT/PLT](binary-exploitation/arbitrary-write-2-exec/aw2exec-got-plt.md)
   - [WWW2Exec - \_\_malloc_hook & \_\_free_hook](binary-exploitation/arbitrary-write-2-exec/aw2exec-__malloc_hook.md)
 - [Common Exploiting Problems](binary-exploitation/common-exploiting-problems.md)
+- [Ksmbd Streams Xattr Oob Write Cve 2025 37947](binary-exploitation/linux-kernel-exploitation/ksmbd-streams_xattr-oob-write-cve-2025-37947.md)
 - [Linux kernel exploitation - toctou](binary-exploitation/linux-kernel-exploitation/posix-cpu-timers-toctou-cve-2025-38352.md)
 - [PS5 compromission](binary-exploitation/freebsd-ptrace-rfi-vm_map-prot_exec-bypass-ps5.md)
 - [Windows Exploiting (Basic Guide - OSCP lvl)](binary-exploitation/windows-exploiting-basic-guide-oscp-lvl.md)
