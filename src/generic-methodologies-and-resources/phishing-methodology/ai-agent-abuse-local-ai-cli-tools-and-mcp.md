@@ -1,28 +1,28 @@
-# Wykorzystywanie agentów AI: lokalne narzędzia CLI AI i MCP (Claude/Gemini/Warp)
+# Nadużycie agentów AI: Lokalnie uruchamiane AI CLI i MCP (Claude/Gemini/Warp)
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Przegląd
 
-Lokalne interfejsy wiersza poleceń dla AI (AI CLIs) takie jak Claude Code, Gemini CLI, Warp i podobne narzędzia często zawierają potężne wbudowane funkcje: odczyt/zapis systemu plików, wykonywanie poleceń w shellu oraz wychodzący dostęp sieciowy. Wiele z nich działa jako klienci MCP (Model Context Protocol), pozwalając modelowi wywoływać zewnętrzne narzędzia przez STDIO lub HTTP. Ponieważ LLM planuje łańcuchy narzędzi w sposób niedeterministyczny, identyczne prompty mogą powodować różne zachowania procesów, plików i sieci pomiędzy uruchomieniami i hostami.
+Lokalne interfejsy wiersza poleceń dla AI (AI CLIs) takie jak Claude Code, Gemini CLI, Warp i podobne narzędzia często dostarczane są z potężnymi wbudowanymi funkcjami: odczyt/zapis systemu plików, wykonywanie poleceń shell oraz wychodzący dostęp do sieci. Wiele z nich działa jako klienci MCP (Model Context Protocol), pozwalając modelowi wywoływać zewnętrzne narzędzia przez STDIO lub HTTP. Ponieważ LLM planuje łańcuchy narzędzi w sposób niedeterministyczny, identyczne prompty mogą skutkować różnymi zachowaniami procesów, plików i sieci w kolejnych uruchomieniach i na różnych hostach.
 
-Kluczowe mechanizmy obserwowane w popularnych AI CLI:
-- Zwykle implementowane w Node/TypeScript z cienką warstwą uruchamiającą model i udostępniającą narzędzia.
-- Wiele trybów: czat interaktywny, plan/execute oraz uruchomienie pojedynczego promptu.
-- Obsługa klientów MCP z transportami STDIO i HTTP, umożliwiająca rozszerzanie możliwości lokalnie i zdalnie.
+Kluczowe mechanizmy spotykane w powszechnych AI CLI:
+- Zwykle zaimplementowane w Node/TypeScript z cienką nakładką uruchamiającą model i udostępniającą narzędzia.
+- Kilka trybów: interaktywny chat, plan/wykonaj oraz jednokrotne uruchomienie z promptem.
+- Wsparcie klientów MCP z transportami STDIO i HTTP, umożliwiające rozszerzanie funkcji lokalnie i zdalnie.
 
-Skutki nadużyć: pojedynczy prompt może zinwentaryzować i exfiltrate credentials, modyfikować lokalne pliki oraz cicho rozszerzyć możliwości poprzez połączenie z zdalnymi serwerami MCP (luka w widoczności, jeśli te serwery należą do stron trzecich).
+Wpływ nadużycia: pojedynczy prompt może zinwentaryzować i wykraść poświadczenia, zmodyfikować pliki lokalne oraz dyskretnie rozszerzyć możliwości przez połączenie z zdalnymi serwerami MCP (lukę w widoczności jeśli serwery należą do stron trzecich).
 
 ---
 
-## Playbook atakującego – Inwentaryzacja sekretów sterowana przez prompt
+## Scenariusz atakującego – inwentaryzacja sekretów sterowana promptem
 
-Zadanie agenta: szybko posegregować i przygotować credentials/secrets do exfiltration, zachowując ciszę:
+Zadaniem agenta jest szybkie przejrzenie i przygotowanie poświadczeń/sekretów do eksfiltracji przy zachowaniu ciszy:
 
-- Zakres: rekurencyjnie enumerować pod $HOME oraz katalogami aplikacji/portfeli; unikać hałaśliwych/pseudo ścieżek (`/proc`, `/sys`, `/dev`).
-- Wydajność/ukrycie: ograniczyć głębokość rekurencji; unikać `sudo`/priv‑escalation; podsumować wyniki.
-- Cele: `~/.ssh`, `~/.aws`, cloud CLI creds, `.env`, `*.key`, `id_rsa`, `keystore.json`, browser storage (LocalStorage/IndexedDB profiles), crypto‑wallet data.
-- Wynik: zapisać zwięzłą listę do `/tmp/inventory.txt`; jeśli plik istnieje, utworzyć kopię zapasową ze znacznikiem czasu przed nadpisaniem.
+- Zakres: rekurencyjnie enumeruj pod $HOME oraz katalogami aplikacji/portfeli; unikaj głośnych/pseudo ścieżek (`/proc`, `/sys`, `/dev`).
+- Wydajność/ukrycie: ogranicz głębokość rekurencji; unikaj `sudo`/eskalacji uprawnień; podsumuj wyniki.
+- Cele: `~/.ssh`, `~/.aws`, cloud CLI creds, `.env`, `*.key`, `id_rsa`, `keystore.json`, storage przeglądarki (LocalStorage/IndexedDB profiles), dane portfeli kryptowalut.
+- Wyjście: zapisz zwięzłą listę do `/tmp/inventory.txt`; jeśli plik istnieje, utwórz kopię zapasową z sygnaturą czasową przed nadpisaniem.
 
 Przykładowy prompt operatora do AI CLI:
 ```
@@ -37,16 +37,16 @@ Return a short summary only; no file contents.
 ```
 ---
 
-## Rozszerzanie możliwości za pomocą MCP (STDIO i HTTP)
+## Rozszerzanie funkcji via MCP (STDIO i HTTP)
 
 AI CLIs często działają jako klienci MCP, aby uzyskać dostęp do dodatkowych narzędzi:
 
-- STDIO transport (local tools): klient tworzy łańcuch pomocniczy do uruchomienia serwera narzędzi. Typical lineage: `node → <ai-cli> → uv → python → file_write`. Przykład zaobserwowany: `uv run --with fastmcp fastmcp run ./server.py`, który uruchamia `python3.13` i wykonuje lokalne operacje na plikach w imieniu agenta.
-- HTTP transport (remote tools): klient otwiera wychodzące TCP (np. port 8000) do zdalnego serwera MCP, który wykonuje żądaną akcję (np. zapis `/home/user/demo_http`). Na endpointcie zobaczysz tylko aktywność sieciową klienta; operacje na plikach po stronie serwera odbywają się poza hostem.
+- STDIO transport (local tools): klient tworzy łańcuch pomocników do uruchomienia tool server. Typowa kolejność: `node → <ai-cli> → uv → python → file_write`. Przykład zaobserwowany: `uv run --with fastmcp fastmcp run ./server.py`, który uruchamia `python3.13` i wykonuje lokalne operacje na plikach w imieniu agenta.
+- HTTP transport (remote tools): klient otwiera wychodzące połączenie TCP (np. port 8000) do zdalnego MCP server, który wykonuje żądaną akcję (np. write `/home/user/demo_http`). Na endpoint zobaczysz tylko aktywność sieciową klienta; operacje na plikach po stronie serwera zachodzą poza hostem.
 
-Notatki:
-- Narzędzia MCP są opisywane modelowi i mogą być automatycznie wybierane podczas planowania. Zachowanie różni się między uruchomieniami.
-- Zdalne serwery MCP zwiększają blast radius i zmniejszają widoczność po stronie hosta.
+Notes:
+- MCP tools są opisywane modelowi i mogą być auto‑wybierane przez planning. Zachowanie różni się między uruchomieniami.
+- Remote MCP servers zwiększają blast radius i zmniejszają widoczność po stronie hosta.
 
 ---
 
@@ -54,79 +54,98 @@ Notatki:
 
 - Gemini CLI session logs: `~/.gemini/tmp/<uuid>/logs.json`
 - Pola często spotykane: `sessionId`, `type`, `message`, `timestamp`.
-- Example `message`: `"@.bashrc what is in this file?"` (zachowana intencja użytkownika/agenta).
+- Przykładowy `message`: "@.bashrc what is in this file?" (uchwycona intencja user/agera).
 - Claude Code history: `~/.claude/history.jsonl`
 - Wpisy JSONL z polami takimi jak `display`, `timestamp`, `project`.
 
-Korelować te lokalne logi z żądaniami obserwowanymi na twoim LLM gateway/proxy (np. LiteLLM), aby wykryć manipulacje/przejęcie modelu: jeśli to, co model przetworzył, odbiega od lokalnego promptu/wyjścia, zbadaj wstrzyknięte instrukcje lub przejęte deskryptory narzędzi.
-
 ---
 
-## Wzorce telemetrii endpointu
+## Pentesting zdalnych serwerów MCP
 
-Przykładowe ciągi procesów na Amazon Linux 2023 z Node v22.19.0 i Python 3.13:
+Zdalne serwery MCP expose API JSON‑RPC 2.0, które frontuje LLM‑centryczne możliwości (Prompts, Resources, Tools). Dziedziczą klasyczne błędy web API, jednocześnie dodając async transports (SSE/streamable HTTP) oraz semantykę per‑session.
 
-1) Wbudowane narzędzia (lokalny dostęp do plików)
-- Proces nadrzędny: `node .../bin/claude --model <model>` (lub równoważny dla CLI)
-- Bezpośrednia akcja potomna: utworzenie/modyfikacja lokalnego pliku (np. `demo-claude`). Skojarz zdarzenie pliku z parent→child lineage.
+Key actors
+- Host: frontend LLM/agera (Claude Desktop, Cursor, etc.).
+- Client: per‑server connector używany przez Host (one client per server).
+- Server: MCP server (lokalny lub zdalny) expose’ujący Prompts/Resources/Tools.
 
-2) MCP przez STDIO (lokalny serwer narzędzi)
-- Chain: `node → uv → python → file_write`
-- Przykładowe uruchomienie: `uv run --with fastmcp fastmcp run /home/ssm-user/tools/server.py`
+AuthN/AuthZ
+- OAuth2 jest powszechne: IdP uwierzytelnia, MCP server działa jako resource server.
+- Po OAuth serwer wydaje token uwierzytelniający używany w kolejnych MCP requests. To różni się od `Mcp-Session-Id`, które identyfikuje połączenie/sesję po `initialize`.
 
-3) MCP przez HTTP (zdalny serwer narzędzi)
-- Klient: `node/<ai-cli>` otwiera wychodzące połączenie TCP do `remote_port: 8000` (lub podobnego)
-- Serwer: zdalny proces Python obsługuje żądanie i zapisuje `/home/ssm-user/demo_http`.
+Transports
+- Local: JSON‑RPC over STDIN/STDOUT.
+- Remote: Server‑Sent Events (SSE, wciąż szeroko stosowane) oraz streamable HTTP.
 
-Ponieważ decyzje agenta różnią się między uruchomieniami, oczekuj zmienności w dokładnych procesach i ścieżkach plików.
-
----
-
-## Strategia wykrywania
-
-Źródła telemetrii
-- Linux EDR używający eBPF/auditd do zdarzeń procesów, plików i sieci.
-- Lokalne logi AI‑CLI dla widoczności promptu/intencji.
-- Logi LLM gateway (np. LiteLLM) do weryfikacji krzyżowej i wykrywania manipulacji modelem.
-
-Heurystyki polowania
-- Powiąż dostęp do wrażliwych plików z łańcuchem nadrzędnym AI‑CLI (np. `node → <ai-cli> → uv/python`).
-- Generuj alert dla dostępu/odczytów/zapisów w: `~/.ssh`, `~/.aws`, przechowalnia profilu przeglądarki, poświadczenia cloud CLI, `/etc/passwd`.
-- Oznacz nieoczekiwane wychodzące połączenia z procesu AI‑CLI do niezatwierdzonych endpointów MCP (HTTP/SSE, porty takie jak 8000).
-- Koreluj lokalne artefakty `~/.gemini`/`~/.claude` z promptami/wyjściami LLM gateway; rozbieżność wskazuje możliwe przejęcie.
-
-Przykładowe pseudo‑reguły (dostosuj do swojego EDR):
-```yaml
-- when: file_write AND path IN ["$HOME/.ssh/*","$HOME/.aws/*","/etc/passwd"]
-and ancestor_chain CONTAINS ["node", "claude|gemini|warp", "python|uv"]
-then: alert("AI-CLI secrets touch via tool chain")
-
-- when: outbound_tcp FROM process_name =~ "node|python" AND parent =~ "claude|gemini|warp"
-and dest_port IN [8000, 3333, 8787]
-then: tag("possible MCP over HTTP")
+A) Inicjalizacja sesji
+- Uzyskaj token OAuth jeśli wymagany (Authorization: Bearer ...).
+- Rozpocznij sesję i przeprowadź MCP handshake:
+```json
+{"jsonrpc":"2.0","id":0,"method":"initialize","params":{"capabilities":{}}}
 ```
-Pomysły na wzmocnienie zabezpieczeń
-- Wymagaj wyraźnej zgody użytkownika dla narzędzi operujących na plikach/systemie; loguj i ujawniaj plany działania narzędzi.
-- Ogranicz wychodzący ruch sieciowy procesów AI‑CLI do zatwierdzonych serwerów MCP.
-- Przekazuj i konsoliduj lokalne logi AI‑CLI oraz logi LLM gateway, aby uzyskać spójny, odporny na manipulacje audyt.
+- Zachowaj zwrócony `Mcp-Session-Id` i dołącz go do kolejnych żądań zgodnie z regułami transportu.
+
+B) Wylicz możliwości
+- Tools
+```json
+{"jsonrpc":"2.0","id":10,"method":"tools/list"}
+```
+- Zasoby
+```json
+{"jsonrpc":"2.0","id":1,"method":"resources/list"}
+```
+- Prompty
+```json
+{"jsonrpc":"2.0","id":20,"method":"prompts/list"}
+```
+C) Kontrole podatności
+- Zasoby → LFI/SSRF
+- Serwer powinien zezwalać na `resources/read` tylko dla URI, które zadeklarował w `resources/list`. Przetestuj URI spoza tego zbioru, aby wykryć słabe egzekwowanie:
+```json
+{"jsonrpc":"2.0","id":2,"method":"resources/read","params":{"uri":"file:///etc/passwd"}}
+```
+
+```json
+{"jsonrpc":"2.0","id":3,"method":"resources/read","params":{"uri":"http://169.254.169.254/latest/meta-data/"}}
+```
+- Sukces wskazuje na LFI/SSRF i możliwe internal pivoting.
+- Zasoby → IDOR (multi‑tenant)
+- Jeśli serwer jest multi‑tenant, spróbuj bezpośrednio odczytać resource URI innego użytkownika; brak per‑user checks leak cross‑tenant data.
+- Narzędzia → Code execution and dangerous sinks
+- Wyenumeruj schematy narzędzi i fuzzuj parametry, które wpływają na command lines, subprocess calls, templating, deserializers lub file/network I/O:
+```json
+{"jsonrpc":"2.0","id":11,"method":"tools/call","params":{"name":"TOOL_NAME","arguments":{"query":"; id"}}}
+```
+- Szukaj wypisów błędów/stack traces w wynikach, aby dopracować payloads. Niezależne testy zgłaszały powszechne podatności typu command‑injection i pokrewne w narzędziach MCP.
+- Prompts → warunki wstępne dla injection
+- Prompts głównie ujawniają metadane; prompt injection ma znaczenie tylko wtedy, gdy możesz ingerować w prompt parameters (np. przez skompromitowane zasoby lub błędy po stronie klienta).
+
+D) Narzędzia do przechwytywania i fuzzingu
+- MCP Inspector (Anthropic): Web UI/CLI obsługujący STDIO, SSE i streamowane HTTP z OAuth. Idealny do szybkiego rozpoznania i ręcznego uruchamiania narzędzi.
+- HTTP–MCP Bridge (NCC Group): Mostkuje MCP SSE do HTTP/1.1, dzięki czemu możesz użyć Burp/Caido.
+- Uruchom bridge skierowany na docelowy serwer MCP (transport SSE).
+- Ręcznie wykonaj handshake `initialize`, aby pozyskać ważny `Mcp-Session-Id` (zgodnie z README).
+- Przekierowuj wiadomości JSON‑RPC takie jak `tools/list`, `resources/list`, `resources/read` oraz `tools/call` przez Repeater/Intruder w celu replay i fuzzingu.
+
+Quick test plan
+- Uwierzytelnij się (OAuth, jeśli jest dostępne) → uruchom `initialize` → enumeracja (`tools/list`, `resources/list`, `prompts/list`) → zweryfikuj allow‑listę URI zasobów i autoryzację per‑user → fuzzuj wejścia narzędzi w prawdopodobnych miejscach code‑execution i I/O.
+
+Impact highlights
+- Brak wymuszenia sprawdzania URI zasobów → LFI/SSRF, odkrywanie zasobów wewnętrznych i wykradanie danych.
+- Brak kontroli per‑user → IDOR i ujawnienie między tenantami.
+- Niezabezpieczone implementacje narzędzi → command injection → server‑side RCE i data exfiltration.
 
 ---
 
-## Notatki Blue‑Team dotyczące reprodukcji
-
-Użyj czystej VM z EDR lub eBPF tracerem, aby odtworzyć łańcuchy takie jak:
-- `node → claude --model claude-sonnet-4-20250514` a następnie natychmiastowy zapis pliku lokalnie.
-- `node → uv run --with fastmcp ... → python3.13` zapis pod `$HOME`.
-- `node/<ai-cli>` nawiązujące połączenie TCP z zewnętrznym serwerem MCP (port 8000), podczas gdy zdalny proces Python zapisuje plik.
-
-Zweryfikuj, że twoje wykrycia wiążą zdarzenia plikowe/sieciowe z inicjującym procesem macierzystym AI‑CLI, aby uniknąć fałszywych alarmów.
-
----
-
-## Odnośniki
+## References
 
 - [Commanding attention: How adversaries are abusing AI CLI tools (Red Canary)](https://redcanary.com/blog/threat-detection/ai-cli-tools/)
 - [Model Context Protocol (MCP)](https://modelcontextprotocol.io)
-- [LiteLLM – LLM Gateway/Proxy](https://docs.litellm.ai)
+- [Assessing the Attack Surface of Remote MCP Servers](https://blog.kulkan.com/assessing-the-attack-surface-of-remote-mcp-servers-92d630a0cab0)
+- [MCP Inspector (Anthropic)](https://github.com/modelcontextprotocol/inspector)
+- [HTTP–MCP Bridge (NCC Group)](https://github.com/nccgroup/http-mcp-bridge)
+- [MCP spec – Authorization](https://modelcontextprotocol.io/specification/2025-06-18/basic/authorization)
+- [MCP spec – Transports and SSE deprecation](https://modelcontextprotocol.io/specification/2025-06-18/basic/transports#backwards-compatibility)
+- [Equixly: MCP server security issues in the wild](https://equixly.com/blog/2025/03/29/mcp-server-new-security-nightmare/)
 
 {{#include ../../banners/hacktricks-training.md}}
