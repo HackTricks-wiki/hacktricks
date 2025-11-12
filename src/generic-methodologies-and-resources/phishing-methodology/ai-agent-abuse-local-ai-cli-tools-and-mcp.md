@@ -1,28 +1,28 @@
-# Κατάχρηση AI Agent: Τοπικά εργαλεία AI CLI & MCP (Claude/Gemini/Warp)
+# AI Agent Abuse: Τοπικά AI CLI Εργαλεία & MCP (Claude/Gemini/Warp)
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Επισκόπηση
 
-Local AI command-line interfaces (AI CLIs) όπως Claude Code, Gemini CLI, Warp και παρόμοια εργαλεία συχνά περιλαμβάνουν ισχυρά built‑ins: filesystem read/write, shell execution και outbound network access. Πολλά λειτουργούν ως MCP clients (Model Context Protocol), επιτρέποντας στο model να καλεί εξωτερικά εργαλεία μέσω STDIO ή HTTP. Επειδή το LLM σχεδιάζει tool-chains μη‑ντετερμινιστικά, ίδια prompts μπορούν να οδηγήσουν σε διαφορετικές διαδικασίες, συμπεριφορές αρχείων και δικτύου μεταξύ runs και hosts.
+Τοπικές διεπαφές γραμμής εντολών AI (AI CLIs) όπως Claude Code, Gemini CLI, Warp και παρόμοια εργαλεία συχνά συνοδεύονται από ισχυρά ενσωματωμένα: ανάγνωση/εγγραφή στο filesystem, εκτέλεση shell και εξερχόμενη δικτυακή πρόσβαση. Πολλά λειτουργούν ως MCP clients (Model Context Protocol), επιτρέποντας στο model να καλεί εξωτερικά εργαλεία μέσω STDIO ή HTTP. Επειδή το LLM σχεδιάζει αλυσίδες εργαλείων μη‑ντετερμινιστικά, τα ίδια prompts μπορούν να οδηγήσουν σε διαφορετικές συμπεριφορές διεργασιών, αρχείων και δικτύου ανάμεσα σε εκτελέσεις και hosts.
 
 Key mechanics seen in common AI CLIs:
-- Συνήθως υλοποιούνται σε Node/TypeScript με ένα λεπτό wrapper που εκκινεί το model και εκθέτει εργαλεία.
-- Πολλές λειτουργίες: interactive chat, plan/execute, και single‑prompt run.
-- Υποστήριξη MCP client με STDIO και HTTP transports, επιτρέποντας επέκταση δυνατοτήτων τοπικά και απομακρυσμένα.
+- Typically implemented in Node/TypeScript with a thin wrapper launching the model and exposing tools.
+- Multiple modes: interactive chat, plan/execute, and single‑prompt run.
+- MCP client support with STDIO and HTTP transports, enabling both local and remote capability extension.
 
-Abuse impact: Ένα μόνο prompt μπορεί να κάνει inventory και exfiltrate credentials, να τροποποιήσει τοπικά αρχεία, και να επεκτείνει σιωπηλά τις δυνατότητες συνδεόμενο σε απομακρυσμένους MCP servers (visibility gap εάν αυτοί οι servers είναι third‑party).
+Abuse impact: A single prompt can inventory and exfiltrate credentials, modify local files, and silently extend capability by connecting to remote MCP servers (visibility gap if those servers are third‑party).
 
 ---
 
-## Playbook Αντιπάλου – Prompt‑Driven Secrets Inventory
+## Πλάνο Αντιπάλου – Prompt‑Driven Secrets Inventory
 
-Ανάθεση στον agent να αξιολογήσει γρήγορα και να προετοιμάσει credentials/secrets για exfiltration ενώ παραμένει διακριτικός:
+Task the agent to quickly triage and stage credentials/secrets for exfiltration while staying quiet:
 
-- Scope: αναδρομική καταγραφή κάτω από $HOME και application/wallet dirs; αποφυγή noisy/pseudo paths (`/proc`, `/sys`, `/dev`).
-- Performance/stealth: περιορισμός βάθους recursion; αποφυγή `sudo`/priv‑escalation; σύνοψη αποτελεσμάτων.
+- Scope: recursively enumerate under $HOME and application/wallet dirs; avoid noisy/pseudo paths (`/proc`, `/sys`, `/dev`).
+- Performance/stealth: cap recursion depth; avoid `sudo`/priv‑escalation; summarise results.
 - Targets: `~/.ssh`, `~/.aws`, cloud CLI creds, `.env`, `*.key`, `id_rsa`, `keystore.json`, browser storage (LocalStorage/IndexedDB profiles), crypto‑wallet data.
-- Output: γράψε μια συνοπτική λίστα στο `/tmp/inventory.txt`; αν το αρχείο υπάρχει, δημιούργησε ένα timestamped backup πριν το overwrite.
+- Output: write a concise list to `/tmp/inventory.txt`; if the file exists, create a timestamped backup before overwrite.
 
 Example operator prompt to an AI CLI:
 ```
@@ -37,89 +37,103 @@ Return a short summary only; no file contents.
 ```
 ---
 
-## Επέκταση Δυνατοτήτων μέσω MCP (STDIO and HTTP)
+## Επέκταση Δυνατοτήτων μέσω MCP (STDIO και HTTP)
 
-Τα AI CLIs συχνά λειτουργούν ως πελάτες MCP για πρόσβαση σε επιπλέον εργαλεία:
+Τα AI CLIs συχνά λειτουργούν ως MCP clients για πρόσβαση σε επιπλέον εργαλεία:
 
-- STDIO transport (local tools): ο client εκκινεί μια βοηθητική αλυσίδα για να τρέξει έναν tool server. Τυπική αλυσίδα: `node → <ai-cli> → uv → python → file_write`. Παράδειγμα παρατηρούμενο: `uv run --with fastmcp fastmcp run ./server.py` που ξεκινάει `python3.13` και εκτελεί τοπικές λειτουργίες αρχείων εκ μέρους του agent.
-- HTTP transport (remote tools): ο client ανοίγει outbound TCP (π.χ., port 8000) προς έναν remote MCP server, ο οποίος εκτελεί την ζητούμενη ενέργεια (π.χ., write `/home/user/demo_http`). Στο endpoint θα δείτε μόνο τη δικτυακή δραστηριότητα του client· οι server‑side τροποποιήσεις αρχείων συμβαίνουν off‑host.
+- STDIO transport (local tools): ο client δημιουργεί μια αλυσίδα βοηθητικών διεργασιών για να τρέξει έναν tool server. Τυπική ακολουθία: `node → <ai-cli> → uv → python → file_write`. Παράδειγμα που παρατηρήθηκε: `uv run --with fastmcp fastmcp run ./server.py` το οποίο εκκινεί `python3.13` και εκτελεί τοπικές λειτουργίες αρχείων εκ μέρους του agent.
+- HTTP transport (remote tools): ο client ανοίγει εξερχόμενες TCP συνδέσεις (π.χ. θύρα 8000) προς έναν απομακρυσμένο MCP server, ο οποίος εκτελεί την ζητούμενη ενέργεια (π.χ. write `/home/user/demo_http`). Στο endpoint θα δείτε μόνο τη δικτυακή δραστηριότητα του client· οι server‑side αλλαγές αρχείων συμβαίνουν εκτός host.
 
 Σημειώσεις:
-- MCP tools περιγράφονται στο μοντέλο και μπορεί να επιλεχθούν αυτόματα κατά το planning. Η συμπεριφορά διαφέρει μεταξύ runs.
-- Remote MCP servers αυξάνουν το blast radius και μειώνουν την ορατότητα στο host.
+- Τα MCP tools περιγράφονται στο model και μπορεί να επιλεχθούν αυτομάτως κατά το planning. Η συμπεριφορά διαφέρει μεταξύ εκτελέσεων.
+- Οι remote MCP servers αυξάνουν το blast radius και μειώνουν την host‑side visibility.
 
 ---
 
-## Τοπικά artifacts και αρχεία καταγραφής (Forensics)
+## Τοπικά Artifacts και Logs (Forensics)
 
 - Gemini CLI session logs: `~/.gemini/tmp/<uuid>/logs.json`
-- Πεδία που εμφανίζονται συνήθως: `sessionId`, `type`, `message`, `timestamp`.
-- Παράδειγμα `message`: `"@.bashrc what is in this file?"` (user/agent intent captured).
+- Συνηθισμένα πεδία που εμφανίζονται: `sessionId`, `type`, `message`, `timestamp`.
+- Παράδειγμα `message`: "@.bashrc what is in this file?" (captured user/agent intent).
 - Claude Code history: `~/.claude/history.jsonl`
 - JSONL εγγραφές με πεδία όπως `display`, `timestamp`, `project`.
 
-Συσχετίστε αυτά τα τοπικά αρχεία καταγραφής με τα requests που παρατηρούνται στο LLM gateway/proxy σας (π.χ., LiteLLM) για να εντοπίσετε tampering/model‑hijacking: αν αυτό που επεξεργάστηκε το μοντέλο αποκλίνει από το τοπικό prompt/output, διερευνήστε για injected instructions ή compromised tool descriptors.
-
 ---
 
-## Μοτίβα τηλεμετρίας στο endpoint
+## Pentesting απομακρυσμένων MCP servers
 
-Representative chains σε Amazon Linux 2023 με Node v22.19.0 και Python 3.13:
+Οι remote MCP servers εκθέτουν ένα JSON‑RPC 2.0 API που παρέχει LLM‑centric δυνατότητες (Prompts, Resources, Tools). Κληρονομούν κλασικές ευπάθειες web API ενώ προσθέτουν async transports (SSE/streamable HTTP) και per‑session semantics.
 
-1) Built‑in tools (local file access)
-- Parent: `node .../bin/claude --model <model>` (or equivalent for the CLI)
-- Άμεση ενέργεια child: δημιουργία/τροποποίηση τοπικού αρχείου (π.χ., `demo-claude`). Συσχετίστε το γεγονός αρχείου μέσω parent→child lineage.
+Κύριοι ρόλοι
+- Host: το LLM/agent frontend (Claude Desktop, Cursor, κ.λπ.).
+- Client: ο connector ανά server που χρησιμοποιεί ο Host (ένας client ανά server).
+- Server: ο MCP server (local ή remote) που εκθέτει Prompts/Resources/Tools.
 
-2) MCP over STDIO (local tool server)
-- Chain: `node → uv → python → file_write`
-- Παράδειγμα spawn: `uv run --with fastmcp fastmcp run /home/ssm-user/tools/server.py`
+AuthN/AuthZ
+- Το OAuth2 είναι κοινό: ένα IdP κάνει authentication, και ο MCP server λειτουργεί ως resource server.
+- Μετά το OAuth, ο server εκδίδει ένα authentication token που χρησιμοποιείται σε επόμενα MCP requests. Αυτό διαφέρει από το `Mcp-Session-Id` που αναγνωρίζει μια σύνδεση/session μετά το `initialize`.
 
-3) MCP over HTTP (remote tool server)
-- Client: `node/<ai-cli>` ανοίγει outbound TCP προς `remote_port: 8000` (ή παρόμοιο)
-- Server: remote Python process χειρίζεται το αίτημα και γράφει `/home/ssm-user/demo_http`.
+Transports
+- Local: JSON‑RPC πάνω από STDIN/STDOUT.
+- Remote: Server‑Sent Events (SSE, ακόμα ευρέως ανεπτυγμένο) και streamable HTTP.
 
-Εφόσον οι αποφάσεις του agent διαφέρουν ανά εκτέλεση, αναμένεται μεταβλητότητα σε ακριβείς διεργασίες και αγγιζόμενα paths.
-
----
-
-## Στρατηγική ανίχνευσης
-
-Πηγές τηλεμετρίας
-- Linux EDR χρησιμοποιώντας eBPF/auditd για process, file και network events.
-- Τοπικά AI‑CLI logs για ορατότητα σε prompt/intent.
-- LLM gateway logs (π.χ., LiteLLM) για cross‑validation και model‑tamper detection.
-
-Εμπειρικοί κανόνες ανίχνευσης
-- Συσχετίστε ευαίσθητες τροποποιήσεις αρχείων με μια AI‑CLI parent chain (π.χ., `node → <ai-cli> → uv/python`).
-- Ειδοποιήστε για access/reads/writes κάτω από: `~/.ssh`, `~/.aws`, browser profile storage, cloud CLI creds, `/etc/passwd`.
-- Σημάνετε απροσδόκητες outbound συνδέσεις από τη διεργασία AI‑CLI προς μη εγκεκριμένα MCP endpoints (HTTP/SSE, ports όπως 8000).
-- Συσχετίστε τοπικά artifacts `~/.gemini`/`~/.claude` με LLM gateway prompts/outputs· αποκλίσεις υποδηλώνουν πιθανή hijacking.
-
-Example pseudo‑rules (adapt to your EDR):
-```yaml
-- when: file_write AND path IN ["$HOME/.ssh/*","$HOME/.aws/*","/etc/passwd"]
-and ancestor_chain CONTAINS ["node", "claude|gemini|warp", "python|uv"]
-then: alert("AI-CLI secrets touch via tool chain")
-
-- when: outbound_tcp FROM process_name =~ "node|python" AND parent =~ "claude|gemini|warp"
-and dest_port IN [8000, 3333, 8787]
-then: tag("possible MCP over HTTP")
+A) Session initialization
+- Αποκτήστε OAuth token αν απαιτείται (Authorization: Bearer ...).
+- Ξεκινήστε ένα session και εκτελέστε το MCP handshake:
+```json
+{"jsonrpc":"2.0","id":0,"method":"initialize","params":{"capabilities":{}}}
 ```
-Ιδέες σκληρύνσης
-- Απαιτήστε ρητή έγκριση χρήστη για εργαλεία αρχείων/συστήματος· καταγράψτε και εμφανίστε τα σχέδια των εργαλείων.
-- Περιορίστε την εξερχόμενη κίνηση δικτύου των διεργασιών AI‑CLI σε εγκεκριμένους διακομιστές MCP.
-- Διαβιβάστε/εισάγετε τα τοπικά AI‑CLI logs και τα LLM gateway logs για συνεπή, ανθεκτικό σε αλλοίωση έλεγχο.
+- Διατήρησε το επιστρεφόμενο `Mcp-Session-Id` και συμπεριέλαβέ το σε επόμενα αιτήματα σύμφωνα με τους κανόνες μεταφοράς.
 
----
+B) Απαρίθμησε δυνατότητες
+- Εργαλεία
+```json
+{"jsonrpc":"2.0","id":10,"method":"tools/list"}
+```
+- Πόροι
+```json
+{"jsonrpc":"2.0","id":1,"method":"resources/list"}
+```
+- Προτροπές
+```json
+{"jsonrpc":"2.0","id":20,"method":"prompts/list"}
+```
+C) Έλεγχοι εκμεταλλευσιμότητας
+- Πόροι → LFI/SSRF
+- Ο διακομιστής θα πρέπει να επιτρέπει μόνο `resources/read` για τα URIs που ανακοίνωσε στο `resources/list`. Δοκιμάστε URIs εκτός του συνόλου για να εντοπίσετε τυχόν χαλαρή επιβολή:
+```json
+{"jsonrpc":"2.0","id":2,"method":"resources/read","params":{"uri":"file:///etc/passwd"}}
+```
 
-## Σημειώσεις Repro για Blue‑Team
+```json
+{"jsonrpc":"2.0","id":3,"method":"resources/read","params":{"uri":"http://169.254.169.254/latest/meta-data/"}}
+```
+- Η επιτυχία υποδηλώνει LFI/SSRF και πιθανό internal pivoting.
+- Πόροι → IDOR (multi‑tenant)
+- Αν ο διακομιστής είναι multi‑tenant, προσπάθησε να διαβάσεις απευθείας το resource URI άλλου χρήστη; η έλλειψη ελέγχων ανά χρήστη προκαλεί leak cross‑tenant data.
+- Εργαλεία → Code execution and dangerous sinks
+- Απαριθμήστε τα schemas των εργαλείων και fuzz παραμέτρους που επηρεάζουν command lines, subprocess calls, templating, deserializers ή file/network I/O:
+```json
+{"jsonrpc":"2.0","id":11,"method":"tools/call","params":{"name":"TOOL_NAME","arguments":{"query":"; id"}}}
+```
+- Αναζητήστε error echoes/stack traces στα αποτελέσματα για να βελτιώσετε τα payloads. Ανεξάρτητες δοκιμές ανέφεραν ευρείες command‑injection και σχετικές ευπάθειες στα MCP tools.
+- Prompts → Injection preconditions
+- Οι Prompts εκθέτουν κυρίως metadata· το prompt injection έχει σημασία μόνο αν μπορείτε να παραποιήσετε παραμέτρους του prompt (π.χ. μέσω compromised resources ή bugs στον client).
 
-Χρησιμοποιήστε ένα καθαρό VM με EDR ή eBPF tracer για να αναπαράγετε αλυσίδες όπως:
-- `node → claude --model claude-sonnet-4-20250514` then immediate local file write.
-- `node → uv run --with fastmcp ... → python3.13` writing under `$HOME`.
-- `node/<ai-cli>` establishing TCP to an external MCP server (port 8000) while a remote Python process writes a file.
+D) Εργαλεία για interception και fuzzing
+- MCP Inspector (Anthropic): Web UI/CLI που υποστηρίζει STDIO, SSE και streamable HTTP με OAuth. Ιδανικό για γρήγορο recon και χειροκίνητες κλήσεις εργαλείων.
+- HTTP–MCP Bridge (NCC Group): Γεφυρώνει MCP SSE προς HTTP/1.1 ώστε να μπορείτε να χρησιμοποιήσετε Burp/Caido.
+- Ξεκινήστε τη γέφυρα δείχνοντάς τη στον target MCP server (SSE transport).
+- Εκτελέστε χειροκίνητα το `initialize` handshake για να αποκτήσετε ένα έγκυρο `Mcp-Session-Id` (per README).
+- Proxy τα JSON‑RPC μηνύματα όπως `tools/list`, `resources/list`, `resources/read`, και `tools/call` μέσω Repeater/Intruder για replay και fuzzing.
 
-Επιβεβαιώστε ότι οι ανιχνεύσεις σας συσχετίζουν τα γεγονότα αρχείων/δικτύου με τη διεργασία γονέα AI‑CLI που τα ξεκίνησε, για να αποφευχθούν ψευδώς θετικά.
+Γρήγορο πλάνο δοκιμών
+- Authenticate (OAuth αν υπάρχει) → run `initialize` → enumerate (`tools/list`, `resources/list`, `prompts/list`) → επαληθεύστε την resource URI allow‑list και την per‑user authorization → fuzz τις εισόδους των εργαλείων σε πιθανά σημεία code‑execution και I/O sinks.
+
+Επισημάνσεις επιπτώσεων
+- Έλλειψη επιβολής resource URI → LFI/SSRF, internal discovery και κλοπή δεδομένων.
+- Έλλειψη ελέγχων ανά‑χρήστη → IDOR και cross‑tenant exposure.
+- Ασφαλείς/ανασφαλείς υλοποιήσεις εργαλείων → command injection → server‑side RCE και data exfiltration.
 
 ---
 
@@ -127,6 +141,11 @@ then: tag("possible MCP over HTTP")
 
 - [Commanding attention: How adversaries are abusing AI CLI tools (Red Canary)](https://redcanary.com/blog/threat-detection/ai-cli-tools/)
 - [Model Context Protocol (MCP)](https://modelcontextprotocol.io)
-- [LiteLLM – LLM Gateway/Proxy](https://docs.litellm.ai)
+- [Assessing the Attack Surface of Remote MCP Servers](https://blog.kulkan.com/assessing-the-attack-surface-of-remote-mcp-servers-92d630a0cab0)
+- [MCP Inspector (Anthropic)](https://github.com/modelcontextprotocol/inspector)
+- [HTTP–MCP Bridge (NCC Group)](https://github.com/nccgroup/http-mcp-bridge)
+- [MCP spec – Authorization](https://modelcontextprotocol.io/specification/2025-06-18/basic/authorization)
+- [MCP spec – Transports and SSE deprecation](https://modelcontextprotocol.io/specification/2025-06-18/basic/transports#backwards-compatibility)
+- [Equixly: MCP server security issues in the wild](https://equixly.com/blog/2025/03/29/mcp-server-new-security-nightmare/)
 
 {{#include ../../banners/hacktricks-training.md}}
