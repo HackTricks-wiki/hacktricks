@@ -341,9 +341,7 @@ Recent BloodHound/SharpHound preview work adds Sites, Site↔Subnet/Server relat
 
 Check BloodHound usage here: [BloodHound & AD enumeration](../bloodhound.md)
 
----
-
-### Attack 1 — Poison a GPO already linked to a Site
+###  Poison a GPO already linked to a Site
 If you can modify a GPO that is linked to a Site, inject a Computer Immediate Scheduled Task that targets only the DC(s) in that Site. On next refresh, DCs execute as SYSTEM.
 
 Tooling: GroupPolicyBackdoor.py (GPB)
@@ -374,9 +372,7 @@ Cleanup (removes preferences, restores extension list/versions):
 python3 gpb.py gpo clean -d corp.com --dc ad01-dc.corp.com -u adove -p 'Password1' -sf <state_folder>
 ```
 
----
-
-### Attack 2 — Abuse Site ACLs to alter gPLink
+### Abuse Site ACLs to alter gPLink
 If you hold `GenericAll`, `GenericWrite`, or `WriteGPLink` on a Site object, you can change its `gPLink` to deliver a malicious GPO to all Site members.
 
 2.1 Link a controlled domain GPO to a Site DN
@@ -429,9 +425,7 @@ share_name=synacktiv
 ```
 </details>
 
----
-
-### Attack 3 — Forest-wide lateral movement via Configuration NC (bypasses SID filtering)
+### Forest-wide lateral movement via Configuration NC (bypasses SID filtering)
 Sites belong to the writable, forest-replicated Configuration NC. Any writable DC in any domain stores a writable copy. With SYSTEM on a child domain DC you can link a child-domain GPO to a Site that contains root-domain DCs and obtain SYSTEM on them once replication and policy refresh occur.
 
 Walkthrough outline (child `dev.corp.com` → root `corp.com`):
@@ -447,19 +441,6 @@ Preconditions:
 Impact:
 - Site control ⇒ SYSTEM on DCs in that Site ⇒ quick domain compromise.
 - Cross-domain lateral movement within the forest via Configuration NC; unaffected by SID filtering.
-
-
-
-
-
-
-
-
-### Key artefacts and attributes
-- Sites container: `CN=Sites,CN=Configuration,DC=<root>,DC=<tld>`
-- Site policy linking: `gPLink` on `CN=<SiteName>,CN=Sites,...`
-- GPO attributes manipulated by tooling: `gPCFileSysPath`, `gPCMachineExtensionNames`, `versionNumber`
-- Scheduled Tasks CSE GUID commonly seen: `{CAB54552-DEEA-4691-817E-ED4A4D1AFC72}`
 
 ## References
 
