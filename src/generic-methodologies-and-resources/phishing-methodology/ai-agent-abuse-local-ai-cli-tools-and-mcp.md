@@ -56,74 +56,98 @@ Notes:
 
 - Gemini CLI session logs: `~/.gemini/tmp/<uuid>/logs.json`
   - Fields commonly seen: `sessionId`, `type`, `message`, `timestamp`.
-  - Example `message`: `"@.bashrc what is in this file?"` (user/agent intent captured).
+  - Example `message`: "@.bashrc what is in this file?" (user/agent intent captured).
 - Claude Code history: `~/.claude/history.jsonl`
   - JSONL entries with fields like `display`, `timestamp`, `project`.
 
-Correlate these local logs with requests observed at your LLM gateway/proxy (e.g., LiteLLM) to detect tampering/model‑hijacking: if what the model processed deviates from the local prompt/output, investigate injected instructions or compromised tool descriptors.
-
 ---
 
-## Endpoint Telemetry Patterns
+## Pentesting Remote MCP Servers
 
-Representative chains on Amazon Linux 2023 with Node v22.19.0 and Python 3.13:
+Remote MCP servers expose a JSON‑RPC 2.0 API that fronts LLM‑centric capabilities (Prompts, Resources, Tools). They inherit classic web API flaws while adding async transports (SSE/streamable HTTP) and per‑session semantics.
 
-1) Built‑in tools (local file access)
-- Parent: `node .../bin/claude --model <model>` (or equivalent for the CLI)
-- Immediate child action: create/modify a local file (e.g., `demo-claude`). Tie the file event back via parent→child lineage.
+Key actors
+- Host: the LLM/agent frontend (Claude Desktop, Cursor, etc.).
+- Client: per‑server connector used by the Host (one client per server).
+- Server: the MCP server (local or remote) exposing Prompts/Resources/Tools.
 
-2) MCP over STDIO (local tool server)
-- Chain: `node → uv → python → file_write`
-- Example spawn: `uv run --with fastmcp fastmcp run /home/ssm-user/tools/server.py`
+AuthN/AuthZ
+- OAuth2 is common: an IdP authenticates, the MCP server acts as resource server.
+- After OAuth, the server issues an authentication token used on subsequent MCP requests. This is distinct from `Mcp-Session-Id` which identifies a connection/session after `initialize`.
 
-3) MCP over HTTP (remote tool server)
-- Client: `node/<ai-cli>` opens outbound TCP to `remote_port: 8000` (or similar)
-- Server: remote Python process handles the request and writes `/home/ssm-user/demo_http`.
+Transports
+- Local: JSON‑RPC over STDIN/STDOUT.
+- Remote: Server‑Sent Events (SSE, still widely deployed) and streamable HTTP.
 
-Because agent decisions differ by run, expect variability in exact processes and touched paths.
+A) Session initialization
+- Obtain OAuth token if required (Authorization: Bearer ...).
+- Begin a session and run the MCP handshake:
 
----
-
-## Detection Strategy
-
-Telemetry sources
-- Linux EDR using eBPF/auditd for process, file and network events.
-- Local AI‑CLI logs for prompt/intent visibility.
-- LLM gateway logs (e.g., LiteLLM) for cross‑validation and model‑tamper detection.
-
-Hunting heuristics
-- Link sensitive file touches back to an AI‑CLI parent chain (e.g., `node → <ai-cli> → uv/python`).
-- Alert on access/reads/writes under: `~/.ssh`, `~/.aws`, browser profile storage, cloud CLI creds, `/etc/passwd`.
-- Flag unexpected outbound connections from the AI‑CLI process to unapproved MCP endpoints (HTTP/SSE, ports like 8000).
-- Correlate local `~/.gemini`/`~/.claude` artifacts with LLM gateway prompts/outputs; divergence indicates possible hijacking.
-
-Example pseudo‑rules (adapt to your EDR):
-
-```yaml
-- when: file_write AND path IN ["$HOME/.ssh/*","$HOME/.aws/*","/etc/passwd"]
-  and ancestor_chain CONTAINS ["node", "claude|gemini|warp", "python|uv"]
-  then: alert("AI-CLI secrets touch via tool chain")
-
-- when: outbound_tcp FROM process_name =~ "node|python" AND parent =~ "claude|gemini|warp"
-  and dest_port IN [8000, 3333, 8787]
-  then: tag("possible MCP over HTTP")
+```json
+{"jsonrpc":"2.0","id":0,"method":"initialize","params":{"capabilities":{}}}
 ```
 
-Hardening ideas
-- Require explicit user approval for file/system tools; log and surface tool plans.
-- Constrain network egress for AI‑CLI processes to approved MCP servers.
-- Ship/ingest local AI‑CLI logs and LLM gateway logs for consistent, tamper‑resistant auditing.
+- Persist the returned `Mcp-Session-Id` and include it on subsequent requests per transport rules.
 
----
+B) Enumerate capabilities
+- Tools
 
-## Blue‑Team Repro Notes
+```json
+{"jsonrpc":"2.0","id":10,"method":"tools/list"}
+```
 
-Use a clean VM with an EDR or eBPF tracer to reproduce chains like:
-- `node → claude --model claude-sonnet-4-20250514` then immediate local file write.
-- `node → uv run --with fastmcp ... → python3.13` writing under `$HOME`.
-- `node/<ai-cli>` establishing TCP to an external MCP server (port 8000) while a remote Python process writes a file.
+- Resources
 
-Validate that your detections tie the file/network events back to the initiating AI‑CLI parent to avoid false positives.
+```json
+{"jsonrpc":"2.0","id":1,"method":"resources/list"}
+```
+
+- Prompts
+
+```json
+{"jsonrpc":"2.0","id":20,"method":"prompts/list"}
+```
+
+C) Exploitability checks
+- Resources → LFI/SSRF
+  - The server should only allow `resources/read` for URIs it advertised in `resources/list`. Try out‑of‑set URIs to probe weak enforcement:
+
+```json
+{"jsonrpc":"2.0","id":2,"method":"resources/read","params":{"uri":"file:///etc/passwd"}}
+```
+
+```json
+{"jsonrpc":"2.0","id":3,"method":"resources/read","params":{"uri":"http://169.254.169.254/latest/meta-data/"}}
+```
+
+  - Success indicates LFI/SSRF and possible internal pivoting.
+- Resources → IDOR (multi‑tenant)
+  - If the server is multi‑tenant, attempt to read another user’s resource URI directly; missing per‑user checks leak cross‑tenant data.
+- Tools → Code execution and dangerous sinks
+  - Enumerate tool schemas and fuzz parameters that influence command lines, subprocess calls, templating, deserializers, or file/network I/O:
+
+```json
+{"jsonrpc":"2.0","id":11,"method":"tools/call","params":{"name":"TOOL_NAME","arguments":{"query":"; id"}}}
+```
+
+  - Look for error echoes/stack traces in results to refine payloads. Independent testing has reported widespread command‑injection and related flaws in MCP tools.
+- Prompts → Injection preconditions
+  - Prompts mainly expose metadata; prompt injection matters only if you can tamper with prompt parameters (e.g., via compromised resources or client bugs).
+
+D) Tooling for interception and fuzzing
+- MCP Inspector (Anthropic): Web UI/CLI supporting STDIO, SSE and streamable HTTP with OAuth. Ideal for quick recon and manual tool invocations.
+- HTTP–MCP Bridge (NCC Group): Bridges MCP SSE to HTTP/1.1 so you can use Burp/Caido.
+  - Start the bridge pointed at the target MCP server (SSE transport).
+  - Manually perform the `initialize` handshake to acquire a valid `Mcp-Session-Id` (per README).
+  - Proxy JSON‑RPC messages like `tools/list`, `resources/list`, `resources/read`, and `tools/call` via Repeater/Intruder for replay and fuzzing.
+
+Quick test plan
+- Authenticate (OAuth if present) → run `initialize` → enumerate (`tools/list`, `resources/list`, `prompts/list`) → validate resource URI allow‑list and per‑user authorization → fuzz tool inputs at likely code‑execution and I/O sinks.
+
+Impact highlights
+- Missing resource URI enforcement → LFI/SSRF, internal discovery and data theft.
+- Missing per‑user checks → IDOR and cross‑tenant exposure.
+- Unsafe tool implementations → command injection → server‑side RCE and data exfiltration.
 
 ---
 
@@ -131,6 +155,11 @@ Validate that your detections tie the file/network events back to the initiating
 
 - [Commanding attention: How adversaries are abusing AI CLI tools (Red Canary)](https://redcanary.com/blog/threat-detection/ai-cli-tools/)
 - [Model Context Protocol (MCP)](https://modelcontextprotocol.io)
-- [LiteLLM – LLM Gateway/Proxy](https://docs.litellm.ai)
+- [Assessing the Attack Surface of Remote MCP Servers](https://blog.kulkan.com/assessing-the-attack-surface-of-remote-mcp-servers-92d630a0cab0)
+- [MCP Inspector (Anthropic)](https://github.com/modelcontextprotocol/inspector)
+- [HTTP–MCP Bridge (NCC Group)](https://github.com/nccgroup/http-mcp-bridge)
+- [MCP spec – Authorization](https://modelcontextprotocol.io/specification/2025-06-18/basic/authorization)
+- [MCP spec – Transports and SSE deprecation](https://modelcontextprotocol.io/specification/2025-06-18/basic/transports#backwards-compatibility)
+- [Equixly: MCP server security issues in the wild](https://equixly.com/blog/2025/03/29/mcp-server-new-security-nightmare/)
 
 {{#include ../../banners/hacktricks-training.md}}
