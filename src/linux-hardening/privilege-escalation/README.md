@@ -57,6 +57,12 @@ Tools that could help to search for kernel exploits are:
 
 Always **search the kernel version in Google**, maybe your kernel version is written in some kernel exploit and then you will be sure that this exploit is valid.
 
+Additional kernel exploitation technique:
+
+{{#ref}}
+../../binary-exploitation/linux-kernel-exploitation/adreno-a7xx-sds-rb-priv-bypass-gpu-smmu-kernel-rw.md
+{{#endref}}
+
 ### CVE-2016-5195 (DirtyCow)
 
 Linux Privilege Escalation - Linux Kernel <= 3.19.0-73.8
