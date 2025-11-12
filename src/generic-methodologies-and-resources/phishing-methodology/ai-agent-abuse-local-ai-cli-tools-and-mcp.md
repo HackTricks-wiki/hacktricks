@@ -1,28 +1,28 @@
-# Zloupotreba AI agenata: lokalni AI CLI alati & MCP (Claude/Gemini/Warp)
+# Zloupotreba AI agenata: Lokalni AI CLI alati & MCP (Claude/Gemini/Warp)
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Pregled
 
-Lokalni AI command-line interfejsi (AI CLIs) poput Claude Code, Gemini CLI, Warp i sličnih često dolaze sa moćnim ugrađenim funkcionalnostima: filesystem read/write, shell execution i outbound network access. Mnogi rade kao MCP klijenti (Model Context Protocol), dozvoljavajući modelu da poziva eksterne alate preko STDIO ili HTTP. Pošto LLM planira lanac alata nedeterministički, identični prompti mogu dovesti do različitih ponašanja procesa, datoteka i mreže između pokretanja i hostova.
+Lokalni AI command-line interfejsi (AI CLIs) kao što su Claude Code, Gemini CLI, Warp i slični alati često dolaze sa moćnim ugrađenim funkcijama: čitanje/pisanje fajl-sistema, izvršavanje shell-a i outbound network access. Mnogi deluju kao MCP klijenti (Model Context Protocol), dozvoljavajući modelu da poziva eksterne alate preko STDIO ili HTTP. Pošto LLM planira lance alata nedeterministički, identični promptovi mogu dovesti do različitih procesa, fajl i mrežnih ponašanja između pokretanja i hostova.
 
-Ključne mehanike viđene u uobičajenim AI CLI alatima:
-- Obično implementirani u Node/TypeScript sa tankim omotačem koji pokreće model i izlaže alate.
-- Više režima: interaktivni chat, plan/execute i jednorazovno pokretanje iz prompta.
-- Podrška za MCP klijenta sa STDIO i HTTP transportima, omogućavajući proširenje mogućnosti lokalno i na daljinu.
+Ključna mehanika viđena u uobičajenim AI CLI alatima:
+- Obično implementirano u Node/TypeScript sa tankim wrapper-om koji pokreće model i izlaže alate.
+- Više režima: interactive chat, plan/execute, i single‑prompt run.
+- Podrška za MCP klijente sa STDIO i HTTP transportima, omogućavajući i lokalno i remote proširenje mogućnosti.
 
-Uticaj zloupotrebe: Jedan prompt može inventarisati i exfiltrate credentials, izmeniti lokalne datoteke i tiho proširiti mogućnosti povezivanjem na udaljene MCP servere (nedostatak vidljivosti ako su ti serveri third‑party).
+Uticaj zloupotrebe: Jedan prompt može inventory i exfiltrate credentials, izmeniti lokalne fajlove i tiho proširiti sposobnosti povezivanjem na udaljene MCP servere (rupa u vidljivosti ako su ti serveri third‑party).
 
 ---
 
-## Vodič napadača – inventar tajni vođen promptom
+## Adversary Playbook – Prompt‑Driven Secrets Inventory
 
-Naložite agentu da brzo triže i pripremi kredencijale/tajne za exfiltraciju dok ostane neprimetan:
+Task the agent to quickly triage and stage credentials/secrets for exfiltration while staying quiet:
 
-- Scope: rekurzivno nabrojati sadržaj ispod $HOME i direktorijuma aplikacija/novčanika; izbegavati noisy/pseudo putanje (`/proc`, `/sys`, `/dev`).
-- Performance/stealth: ograničiti dubinu rekurzije; izbegavati `sudo`/priv‑escalation; sažeti rezultate.
+- Scope: recursively enumerate under $HOME and application/wallet dirs; avoid noisy/pseudo paths (`/proc`, `/sys`, `/dev`).
+- Performance/stealth: cap recursion depth; avoid `sudo`/priv‑escalation; summarise results.
 - Targets: `~/.ssh`, `~/.aws`, cloud CLI creds, `.env`, `*.key`, `id_rsa`, `keystore.json`, browser storage (LocalStorage/IndexedDB profiles), crypto‑wallet data.
-- Output: zapisati sažet spisak u `/tmp/inventory.txt`; ako fajl postoji, napraviti backup sa vremenskom oznakom pre prepisivanja.
+- Output: write a concise list to `/tmp/inventory.txt`; if the file exists, create a timestamped backup before overwrite.
 
 Example operator prompt to an AI CLI:
 ```
@@ -37,89 +37,103 @@ Return a short summary only; no file contents.
 ```
 ---
 
-## Proširenje mogućnosti preko MCP (STDIO i HTTP)
+## Proširenje mogućnosti putem MCP (STDIO i HTTP)
 
-AI CLIs često deluju kao MCP klijenti da bi pristupili dodatnim alatima:
+AI CLIs često deluju kao MCP klijenti kako bi pristupili dodatnim alatima:
 
-- STDIO transport (local tools): klijent pokreće pomoćni lanac da bi pokrenuo tool server. Tipična loza: `node → <ai-cli> → uv → python → file_write`. Primer zapažen: `uv run --with fastmcp fastmcp run ./server.py` koji startuje `python3.13` i vrši lokalne operacije nad fajlovima u ime agenta.
-- HTTP transport (remote tools): klijent otvara outbound TCP (npr. port 8000) ka udaljenom MCP serveru, koji izvršava traženu akciju (npr. upisuje `/home/user/demo_http`). Na endpointu ćete videti samo mrežnu aktivnost klijenta; izmene fajlova na strani servera dešavaju se van hosta.
+- STDIO transport (local tools): klijent pokreće lanac pomoćnih procesa da bi pokrenuo tool server. Typical lineage: `node → <ai-cli> → uv → python → file_write`. Example observed: `uv run --with fastmcp fastmcp run ./server.py` which starts `python3.13` and performs local file operations on the agent’s behalf.
+- HTTP transport (remote tools): klijent otvara outbound TCP (e.g., port 8000) ka udaljenom MCP serveru, koji izvršava traženu akciju (e.g., write `/home/user/demo_http`). Na endpointu ćete videti samo mrežnu aktivnost klijenta; server‑side file touches occur off‑host.
 
-Napomene:
-- MCP alati su opisani modelu i mogu biti automatski izabrani tokom planiranja. Ponašanje varira između pokretanja.
-- Udaljeni MCP serveri povećavaju opseg uticaja i smanjuju vidljivost na hostu.
+Notes:
+- MCP tools are described to the model and may be auto‑selected by planning. Behaviour varies between runs.
+- Remote MCP servers increase blast radius and reduce host‑side visibility.
 
 ---
 
-## Lokalni artefakti i logovi (forenzika)
+## Local Artifacts and Logs (Forensics)
 
 - Gemini CLI session logs: `~/.gemini/tmp/<uuid>/logs.json`
-- Polja koja se često viđaju: `sessionId`, `type`, `message`, `timestamp`.
-- Primer `message`: `"@.bashrc what is in this file?"` (uhvaćena namera korisnika/agenta).
+- Polja koja se često vide: `sessionId`, `type`, `message`, `timestamp`.
+- Example `message`: "@.bashrc what is in this file?" (user/agent intent captured).
 - Claude Code history: `~/.claude/history.jsonl`
-- JSONL unosi sa poljima poput `display`, `timestamp`, `project`.
-
-Korelirajte ove lokalne logove sa zahtevima primećenim na vašem LLM gateway/proxy (npr. LiteLLM) da biste detektovali manipulaciju/zahvatanje modela: ako se ono što je model obradio razlikuje od lokalnog prompta/izlaza, istražite injektovane instrukcije ili kompromitovane opise alata.
+- JSONL unosi sa poljima kao što su `display`, `timestamp`, `project`.
 
 ---
 
-## Obrasci telemetrije na endpointu
+## Pentesting Remote MCP Servers
 
-Reprezentativni lanci na Amazon Linux 2023 sa Node v22.19.0 i Python 3.13:
+Remote MCP servers expose a JSON‑RPC 2.0 API that fronts LLM‑centric capabilities (Prompts, Resources, Tools). They inherit classic web API flaws while adding async transports (SSE/streamable HTTP) and per‑session semantics.
 
-1) Built‑in tools (local file access)
-- Roditeljski proces: `node .../bin/claude --model <model>` (ili ekvivalentno za CLI)
-- Neposredna akcija potomka: kreiranje/izmena lokalnog fajla (npr. `demo-claude`). Povežite događaj fajla nazad preko parent→child loze.
+Key actors
+- Host: the LLM/agent frontend (Claude Desktop, Cursor, etc.).
+- Client: per‑server connector used by the Host (one client per server).
+- Server: the MCP server (local or remote) exposing Prompts/Resources/Tools.
 
-2) MCP over STDIO (local tool server)
-- Lanac: `node → uv → python → file_write`
-- Primer pokretanja: `uv run --with fastmcp fastmcp run /home/ssm-user/tools/server.py`
+AuthN/AuthZ
+- OAuth2 is common: an IdP authenticates, the MCP server acts as resource server.
+- After OAuth, the server issues an authentication token used on subsequent MCP requests. This is distinct from `Mcp-Session-Id` which identifies a connection/session after `initialize`.
 
-3) MCP over HTTP (remote tool server)
-- Klijent: `node/<ai-cli>` otvara outbound TCP ka `remote_port: 8000` (ili slično)
-- Server: udaljeni Python proces obrađuje zahtev i upisuje `/home/ssm-user/demo_http`.
+Transports
+- Local: JSON‑RPC over STDIN/STDOUT.
+- Remote: Server‑Sent Events (SSE, still widely deployed) and streamable HTTP.
 
-Pošto odluke agenta variraju po pokretanju, očekujte varijabilnost u tačnim procesima i putanjama koje su pogođene.
-
----
-
-## Strategija detekcije
-
-Izvori telemetrije
-- Linux EDR koji koristi eBPF/auditd za procese, fajl i mrežne događaje.
-- Lokalni AI‑CLI logovi za vidljivost prompta/namere.
-- LLM gateway logovi (npr. LiteLLM) za međusobnu verifikaciju i detekciju manipulacije modelom.
-
-Heuristike za pretragu
-- Povežite osetljive pristupe fajlovima nazad do AI‑CLI roditeljskog lanca (npr. `node → <ai-cli> → uv/python`).
-- Generišite alert za pristupe/čitanja/upise ispod: `~/.ssh`, `~/.aws`, browser profile storage, cloud CLI creds, `/etc/passwd`.
-- Obeležite neočekivane outbound konekcije iz procesa AI‑CLI ka neodobrenim MCP endpointima (HTTP/SSE, portovi poput 8000).
-- Korelirajte lokalne `~/.gemini`/`~/.claude` artefakte sa promptovima/izlazima iz LLM gateway; divergencija ukazuje na moguće zahvatanje.
-
-Primer pseudo‑pravila (prilagodite svom EDR):
-```yaml
-- when: file_write AND path IN ["$HOME/.ssh/*","$HOME/.aws/*","/etc/passwd"]
-and ancestor_chain CONTAINS ["node", "claude|gemini|warp", "python|uv"]
-then: alert("AI-CLI secrets touch via tool chain")
-
-- when: outbound_tcp FROM process_name =~ "node|python" AND parent =~ "claude|gemini|warp"
-and dest_port IN [8000, 3333, 8787]
-then: tag("possible MCP over HTTP")
+A) Inicijalizacija sesije
+- Nabavite OAuth token ako je potreban (Authorization: Bearer ...).
+- Započnite sesiju i izvršite MCP handshake:
+```json
+{"jsonrpc":"2.0","id":0,"method":"initialize","params":{"capabilities":{}}}
 ```
-Hardening ideas
-- Zahtevati eksplicitno odobrenje korisnika za alate koji rade sa fajlovima/sistemom; beležiti i izlagati planove alata.
-- Ograničiti odlazni mrežni saobraćaj za AI‑CLI procese samo na odobrene MCP servere.
-- Slati/uvoziti lokalne AI‑CLI logove i LLM gateway logove radi doslednog i otpornog na manipulacije audita.
+- Sačuvajte vraćeni `Mcp-Session-Id` i uključite ga u naredne zahteve u skladu sa pravilima transporta.
 
----
+B) Enumeracija mogućnosti
+- Alati
+```json
+{"jsonrpc":"2.0","id":10,"method":"tools/list"}
+```
+- Resursi
+```json
+{"jsonrpc":"2.0","id":1,"method":"resources/list"}
+```
+- Promptovi
+```json
+{"jsonrpc":"2.0","id":20,"method":"prompts/list"}
+```
+C) Provere iskoristivosti
+- Resursi → LFI/SSRF
+- Server bi trebalo da dozvoli samo `resources/read` za URI-je koje je oglasio u `resources/list`. Isprobajte URI-je izvan skupa da biste ispitali slabu primenu ograničenja:
+```json
+{"jsonrpc":"2.0","id":2,"method":"resources/read","params":{"uri":"file:///etc/passwd"}}
+```
 
-## Blue‑Team Repro Notes
+```json
+{"jsonrpc":"2.0","id":3,"method":"resources/read","params":{"uri":"http://169.254.169.254/latest/meta-data/"}}
+```
+- Uspeh ukazuje na LFI/SSRF i moguće internal pivoting.
+- Resursi → IDOR (multi‑tenant)
+- Ako je server multi‑tenant, pokušajte direktno pročitati resource URI drugog korisnika; nedostajuće per‑user provere leak cross‑tenant data.
+- Alati → Code execution and dangerous sinks
+- Enumerišite tool schemas i fuzz parametre koji utiču na command lines, subprocess calls, templating, deserializers, ili file/network I/O:
+```json
+{"jsonrpc":"2.0","id":11,"method":"tools/call","params":{"name":"TOOL_NAME","arguments":{"query":"; id"}}}
+```
+- Potražite error echoes/stack traces u rezultatima da biste rafinirali payloads. Independent testing je prijavio raširene command‑injection i srodne ranjivosti u MCP tools.
+- Prompts → Injection preconditions
+- Prompts uglavnom izlažu metapodatke; prompt injection je bitan samo ako možete manipulisati prompt parameters (npr. preko kompromitovanih resursa ili bagova klijenta).
 
-Koristite čist VM sa EDR-om ili eBPF tracerom da reprodukujete lance kao:
-- `node → claude --model claude-sonnet-4-20250514` zatim odmah lokalno upisivanje fajla.
-- `node → uv run --with fastmcp ... → python3.13` koji upisuje u $HOME.
-- `node/<ai-cli>` uspostavlja TCP ka eksternom MCP serveru (port 8000) dok udaljeni Python proces upisuje fajl.
+D) Alati za presretanje i fuzzing
+- MCP Inspector (Anthropic): Web UI/CLI koji podržava STDIO, SSE i streamable HTTP sa OAuth. Idealan za brzo recon i ručno pozivanje alata.
+- HTTP–MCP Bridge (NCC Group): Povezuje MCP SSE na HTTP/1.1 tako da možete koristiti Burp/Caido.
+- Pokrenite bridge usmeren na ciljni MCP server (SSE transport).
+- Ručno izvršite `initialize` handshake da biste dobili validan `Mcp-Session-Id` (prema README).
+- Presretnite i proksirajte JSON‑RPC poruke kao `tools/list`, `resources/list`, `resources/read`, i `tools/call` preko Repeater/Intruder za replay i fuzzing.
 
-Proverite da li vaša detekcija povezuje fajl/mrežne događaje nazad do inicirajućeg AI‑CLI parent procesa kako biste izbegli lažno pozitivne rezultate.
+Brzi plan testa
+- Autentifikujte se (OAuth ako postoji) → pokrenite `initialize` → enumerišite (`tools/list`, `resources/list`, `prompts/list`) → proverite allow‑list za URI resursa i autorizaciju po korisniku → izvršite fuzzing ulaza alata na verovatnim code‑execution i I/O sinkovima.
+
+Ključni uticaji
+- Nepostojanje provere resource URI → LFI/SSRF, interno otkrivanje i krađa podataka.
+- Nedostatak provera po korisniku → IDOR i cross‑tenant izlaganje.
+- Nezaštićene implementacije alata → command injection → server‑side RCE i data exfiltration.
 
 ---
 
@@ -127,6 +141,11 @@ Proverite da li vaša detekcija povezuje fajl/mrežne događaje nazad do inicira
 
 - [Commanding attention: How adversaries are abusing AI CLI tools (Red Canary)](https://redcanary.com/blog/threat-detection/ai-cli-tools/)
 - [Model Context Protocol (MCP)](https://modelcontextprotocol.io)
-- [LiteLLM – LLM Gateway/Proxy](https://docs.litellm.ai)
+- [Assessing the Attack Surface of Remote MCP Servers](https://blog.kulkan.com/assessing-the-attack-surface-of-remote-mcp-servers-92d630a0cab0)
+- [MCP Inspector (Anthropic)](https://github.com/modelcontextprotocol/inspector)
+- [HTTP–MCP Bridge (NCC Group)](https://github.com/nccgroup/http-mcp-bridge)
+- [MCP spec – Authorization](https://modelcontextprotocol.io/specification/2025-06-18/basic/authorization)
+- [MCP spec – Transports and SSE deprecation](https://modelcontextprotocol.io/specification/2025-06-18/basic/transports#backwards-compatibility)
+- [Equixly: MCP server security issues in the wild](https://equixly.com/blog/2025/03/29/mcp-server-new-security-nightmare/)
 
 {{#include ../../banners/hacktricks-training.md}}
