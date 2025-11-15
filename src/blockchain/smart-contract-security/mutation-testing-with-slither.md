@@ -117,6 +117,12 @@ Guidance: Treat survivors that affect value transfers, accounting, or access con
 - Replace unrealistic mocks; simulate failure modes.
 - Iterate until all mutants are killed or justified with comments and rationale.
 
+## Related
+
+{{#ref}}
+llm-assisted-auditing-with-slither-mcp.md
+{{#endref}}
+
 ## References
 
 - [Use mutation testing to find the bugs your tests don't catch (Trail of Bits)](https://blog.trailofbits.com/2025/09/18/use-mutation-testing-to-find-the-bugs-your-tests-dont-catch/)
@@ -124,4 +130,3 @@ Guidance: Treat survivors that affect value transfers, accounting, or access con
 - [Slither (GitHub)](https://github.com/crytic/slither)
 
 {{#include ../../banners/hacktricks-training.md}}
-
