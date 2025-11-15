@@ -87,6 +87,7 @@
   - [Basic Python](generic-methodologies-and-resources/python/basic-python.md)
 - [Threat Modeling](generic-methodologies-and-resources/threat-modeling.md)
 - [Blockchain & Crypto](blockchain/blockchain-and-crypto-currencies/README.md)
+  - [Llm Assisted Auditing With Slither Mcp](blockchain/smart-contract-security/llm-assisted-auditing-with-slither-mcp.md)
   - [Mutation Testing With Slither](blockchain/smart-contract-security/mutation-testing-with-slither.md)
   - [Defi/AMM Hook Precision](blockchain/blockchain-and-crypto-currencies/defi-amm-hook-precision.md)
 - [Lua Sandbox Escape](generic-methodologies-and-resources/lua/bypass-lua-sandboxes/README.md)
