@@ -25,6 +25,7 @@ additional-js = [
 no-section-label = true
 preferred-dark-theme = "hacktricks-dark"
 default-theme = "hacktricks-light"
+hash-files = false
 
 [output.html.fold]
 enable = true # whether or not to enable section folding
