@@ -1,7 +1,6 @@
 [book]
 authors = ["HackTricks Team"]
 language = "en"
-multilingual = false
 src = "src"
 title = "HackTricks"
 
