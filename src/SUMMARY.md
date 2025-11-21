@@ -443,6 +443,7 @@
     - [Electron contextIsolation RCE via Electron internal code](network-services-pentesting/pentesting-web/electron-desktop-apps/electron-contextisolation-rce-via-electron-internal-code.md)
     - [Electron contextIsolation RCE via IPC](network-services-pentesting/pentesting-web/electron-desktop-apps/electron-contextisolation-rce-via-ipc.md)
   - [Flask](network-services-pentesting/pentesting-web/flask.md)
+  - [Fortinet Fortiweb](network-services-pentesting/pentesting-web/fortinet-fortiweb.md)
   - [Git](network-services-pentesting/pentesting-web/git.md)
   - [Golang](network-services-pentesting/pentesting-web/golang.md)
   - [Grafana](network-services-pentesting/pentesting-web/grafana.md)
