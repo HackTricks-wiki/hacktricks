@@ -166,8 +166,13 @@ if __name__ == '__main__':
     context, book = json.load(sys.stdin)
 
     logger.debug(f"Context: {context}")
+    logger.debug(f"Book keys: {book.keys()}")
+    logger.debug(f"Book structure: {json.dumps(book, indent=2)[:500]}")
 
-    for chapter in iterate_chapters(book['sections']):
+    # Handle both old (sections) and new (items) mdbook API
+    book_items = book.get('sections') or book.get('items', [])
+    
+    for chapter in iterate_chapters(book_items):
         logger.debug(f"Chapter: {chapter['path']}")
         current_chapter = chapter
         # regex = r'{{[\s]*#ref[\s]*}}(?:\n)?([^\\\n]*)(?:\n)?{{[\s]*#endref[\s]*}}'
