@@ -1,74 +1,74 @@
-# 加密/压缩 算法
+# Cryptographic/Compression Algorithms
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## 识别算法
+## Identifying Algorithms
 
-如果你在代码中看到包含 **shift rights and lefts, xors and several arithmetic operations** 的操作，则很可能是在实现一个 **cryptographic algorithm**。这里将展示一些方法，来在不需要逆向每一步的情况下识别所使用的算法。
+If you ends in a code **using shift rights and lefts, xors and several arithmetic operations** it's highly possible that it's the implementation of a **cryptographic algorithm**. Here it's going to be showed some ways to **identify the algorithm that it's used without needing to reverse each step**.
 
-### API 函数
+### API functions
 
 **CryptDeriveKey**
 
-如果使用此函数，你可以通过检查第二个参数的值来确定正在使用的 **algorithm**：
+If this function is used, you can find which **algorithm is being used** checking the value of the second parameter:
 
 ![](<../../images/image (156).png>)
 
-在此查看可能的算法及其分配值的表： [https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id](https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id)
+Check here the table of possible algorithms and their assigned values: [https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id](https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id)
 
 **RtlCompressBuffer/RtlDecompressBuffer**
 
-压缩和解压给定的数据缓冲区。
+Compresses and decompresses a given buffer of data.
 
 **CryptAcquireContext**
 
-From [the docs](https://learn.microsoft.com/en-us/windows/win32/api/wincrypt/nf-wincrypt-cryptacquirecontexta)：CryptAcquireContext 函数用于获取特定 cryptographic service provider (CSP) 中某个 key container 的句柄。该返回句柄用于调用使用所选 CSP 的 CryptoAPI 函数。
+From [the docs](https://learn.microsoft.com/en-us/windows/win32/api/wincrypt/nf-wincrypt-cryptacquirecontexta): The **CryptAcquireContext** function is used to acquire a handle to a particular key container within a particular cryptographic service provider (CSP). **This returned handle is used in calls to CryptoAPI** functions that use the selected CSP.
 
 **CryptCreateHash**
 
-启动对数据流的哈希。如果使用此函数，你可以通过检查第二个参数的值来确定正在使用的 **algorithm**：
+Initiates the hashing of a stream of data. If this function is used, you can find which **algorithm is being used** checking the value of the second parameter:
 
 ![](<../../images/image (549).png>)
 
 \
-在此查看可能的算法及其分配值的表： [https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id](https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id)
+Check here the table of possible algorithms and their assigned values: [https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id](https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id)
 
-### 代码常量
+### Code constants
 
-有时可以很容易识别算法，因为它需要使用某个特殊且唯一的值。
+Sometimes it's really easy to identify an algorithm thanks to the fact that it needs to use a special and unique value.
 
 ![](<../../images/image (833).png>)
 
-如果你用 Google 搜索第一个常量，会得到如下结果：
+If you search for the first constant in Google this is what you get:
 
 ![](<../../images/image (529).png>)
 
-因此，你可以认为反编译得到的函数是一个 **sha256** 计算器。\
-你也可以搜索其它常量，通常会得到相同的结果。
+Therefore, you can assume that the decompiled function is a **sha256 calculator.**\
+You can search any of the other constants and you will obtain (probably) the same result.
 
-### 数据信息
+### data info
 
-如果代码没有明显的常量，可能是在从 .data 段加载信息。\
-你可以访问那些数据，组合第一个 dword 并像前面章节那样在 Google 上搜索它：
+If the code doesn't have any significant constant it may be **loading information from the .data section**.\
+You can access that data, **group the first dword** and search for it in google as we have done in the section before:
 
 ![](<../../images/image (531).png>)
 
-在此例中，搜索 **0xA56363C6** 会发现它与 **AES** 算法的 tables 有关。
+In this case, if you look for **0xA56363C6** you can find that it's related to the **tables of the AES algorithm**.
 
-## RC4 **(对称加密)**
+## RC4 **(Symmetric Crypt)**
 
-### 特点
+### Characteristics
 
-它由 3 个主要部分组成：
+It's composed of 3 main parts:
 
-- **Initialization stage/**：创建一个值表，从 0x00 到 0xFF（共 256 字节，0x100）。该表通常称为 **Substitution Box**（或 SBox）。
-- **Scrambling stage**：会遍历之前创建的表（0x100 次循环），用半随机字节修改每个值。为了生成这些半随机字节，会使用 RC4 的 **密钥**。RC4 密钥长度可以在 1 到 256 字节之间，但通常建议大于 5 字节。常见的 RC4 密钥为 16 字节。
-- **XOR stage**：最后，明文或密文会与之前生成的值进行 XOR。加密和解密使用相同的函数。为此会对生成的 256 字节进行循环，执行所需次数。通常在反编译代码中可通过 **%256 (mod 256)** 识别。
+- **Initialization stage/**: Creates a **table of values from 0x00 to 0xFF** (256bytes in total, 0x100). This table is commonly call **Substitution Box** (or SBox).
+- **Scrambling stage**: Will **loop through the table** crated before (loop of 0x100 iterations, again) creating modifying each value with **semi-random** bytes. In order to create this semi-random bytes, the RC4 **key is used**. RC4 **keys** can be **between 1 and 256 bytes in length**, however it is usually recommended that it is above 5 bytes. Commonly, RC4 keys are 16 bytes in length.
+- **XOR stage**: Finally, the plain-text or cyphertext is **XORed with the values created before**. The function to encrypt and decrypt is the same. For this, a **loop through the created 256 bytes** will be performed as many times as necessary. This is usually recognized in a decompiled code with a **%256 (mod 256)**.
 
 > [!TIP]
-> **要在反汇编/反编译代码中识别 RC4，可以检查是否有两个大小为 0x100 的循环（使用密钥），然后将输入数据与在这两个循环中生成的 256 个值进行 XOR，通常会使用 %256 (mod 256)。**
+> **In order to identify a RC4 in a disassembly/decompiled code you can check for 2 loops of size 0x100 (with the use of a key) and then a XOR of the input data with the 256 values created before in the 2 loops probably using a %256 (mod 256)**
 
-### **Initialization stage/Substitution Box:** (注意作为计数器使用的数字 256 以及在每个位置写入 0 的操作)
+### **Initialization stage/Substitution Box:** (Note the number 256 used as counter and how a 0 is written in each place of the 256 chars)
 
 ![](<../../images/image (584).png>)
 
@@ -80,122 +80,122 @@ From [the docs](https://learn.microsoft.com/en-us/windows/win32/api/wincrypt/nf-
 
 ![](<../../images/image (904).png>)
 
-## AES (对称加密)
+## **AES (Symmetric Crypt)**
 
-### 特点
+### **Characteristics**
 
-- 使用替代盒（substitution boxes）和查找表（lookup tables）
-- 可以通过使用特定查找表值（常量）来区分 AES。注意这些 **常量**可以被存储在二进制中，也可以**动态**生成。
-- **加密密钥**长度必须能被 **16** 整除（通常为 32B），并且通常使用 16B 的 **IV**。
+- Use of **substitution boxes and lookup tables**
+- It's possible to **distinguish AES thanks to the use of specific lookup table values** (constants). _Note that the **constant** can be **stored** in the binary **or created**_ _**dynamically**._
+- The **encryption key** must be **divisible** by **16** (usually 32B) and usually an **IV** of 16B is used.
 
-### SBox 常量
+### SBox constants
 
 ![](<../../images/image (208).png>)
 
-## Serpent **(对称加密)**
+## Serpent **(Symmetric Crypt)**
 
-### 特点
+### Characteristics
 
-- 在恶意软件中较少见，但存在使用案例（Ursnif）
-- 可基于其长度（极长的函数）简单判断是否为 Serpent
+- It's rare to find some malware using it but there are examples (Ursnif)
+- Simple to determine if an algorithm is Serpent or not based on it's length (extremely long function)
 
-### 识别方法
+### Identifying
 
-在下图中注意常量 **0x9E3779B9** 的使用（注意该常量也被其它 crypto 算法使用，如 **TEA** - Tiny Encryption Algorithm）。\
-还要注意循环大小（**132**）以及在反汇编指令和代码示例中的 XOR 操作次数：
+In the following image notice how the constant **0x9E3779B9** is used (note that this constant is also used by other crypto algorithms like **TEA** -Tiny Encryption Algorithm).\
+Also note the **size of the loop** (**132**) and the **number of XOR operations** in the **disassembly** instructions and in the **code** example:
 
 ![](<../../images/image (547).png>)
 
-如前所述，该代码在任何反编译器中都会显示为一个 **非常长的函数**，因为内部没有跳转。反编译代码可能如下所示：
+As it was mentioned before, this code can be visualized inside any decompiler as a **very long function** as there **aren't jumps** inside of it. The decompiled code can look like the following:
 
 ![](<../../images/image (513).png>)
 
-因此，可以通过检查 **magic number** 和初始 **XORs**、观察 **非常长的函数** 并将该长函数的某些 **指令** 与已知实现（比如左移 7 和左循环移位 22）进行比较来识别该算法。
+Therefore, it's possible to identify this algorithm checking the **magic number** and the **initial XORs**, seeing a **very long function** and **comparing** some **instructions** of the long function **with an implementation** (like the shift left by 7 and the rotate left by 22).
 
-## RSA **(非对称加密)**
+## RSA **(Asymmetric Crypt)**
 
-### 特点
+### Characteristics
 
-- 比对称算法更复杂
-- 没有常量！（自定义实现难以判断）
-- KANAL（一个 crypto analyzer）在 RSA 上无法提供提示，因为它依赖常量。
+- More complex than symmetric algorithms
+- There are no constants! (custom implementation are difficult to determine)
+- KANAL (a crypto analyzer) fails to show hints on RSA ad it relies on constants.
 
-### 通过比较来识别
+### Identifying by comparisons
 
 ![](<../../images/image (1113).png>)
 
-- 在左侧第 11 行有 `+7) >> 3`，与右侧第 35 行的 `+7) / 8` 相同
-- 左侧第 12 行检查 `modulus_len < 0x040`，右侧第 36 行检查 `inputLen+11 > modulusLen`
+- In line 11 (left) there is a `+7) >> 3` which is the same as in line 35 (right): `+7) / 8`
+- Line 12 (left) is checking if `modulus_len < 0x040` and in line 36 (right) it's checking if `inputLen+11 > modulusLen`
 
-## MD5 & SHA（哈希）
+## MD5 & SHA (hash)
 
-### 特点
+### Characteristics
 
-- 3 个函数：Init, Update, Final
-- 初始化函数相似
+- 3 functions: Init, Update, Final
+- Similar initialize functions
 
-### 识别
+### Identify
 
 **Init**
 
-可以通过检查常量来识别两者。注意 sha_init 有一个 MD5 没有的常量：
+You can identify both of them checking the constants. Note that the sha_init has 1 constant that MD5 doesn't have:
 
 ![](<../../images/image (406).png>)
 
 **MD5 Transform**
 
-注意使用了更多常量
+Note the use of more constants
 
 ![](<../../images/image (253) (1) (1).png>)
 
-## CRC（哈希）
+## CRC (hash)
 
-- 更小、更高效，其功能是检测数据的意外变化
-- 使用查找表（因此可以识别出常量）
+- Smaller and more efficient as it's function is to find accidental changes in data
+- Uses lookup tables (so you can identify constants)
 
-### 识别
+### Identify
 
-检查 **查找表常量**：
+Check **lookup table constants**:
 
 ![](<../../images/image (508).png>)
 
-CRC 哈希算法看起来像：
+A CRC hash algorithm looks like:
 
 ![](<../../images/image (391).png>)
 
-## APLib（压缩）
+## APLib (Compression)
 
-### 特点
+### Characteristics
 
-- 没有明显可识别的常量
-- 可以尝试用 python 实现该算法并在线搜索相似实现
+- Not recognizable constants
+- You can try to write the algorithm in python and search for similar things online
 
-### 识别
+### Identify
 
-图表相当大：
+The graph is quiet large:
 
 ![](<../../images/image (207) (2) (1).png>)
 
-检查用于识别它的 **3 个比较点**：
+Check **3 comparisons to recognise it**:
 
 ![](<../../images/image (430).png>)
 
-## 椭圆曲线签名实现漏洞
+## Elliptic-Curve Signature Implementation Bugs
 
-### EdDSA 标量范围强制（HashEdDSA 可变性）
+### EdDSA scalar range enforcement (HashEdDSA malleability)
 
-- FIPS 186-5 §7.8.2 要求 HashEdDSA 验证者将签名拆分为 `sig = R || s` 并拒绝任何满足 `s \geq n` 的标量，其中 `n` 是群阶。`elliptic` JS 库跳过了该边界检查，因此任何知道有效对 `(msg, R || s)` 的攻击者都可以伪造替代签名 `s' = s + k·n` 并不断重新编码 `sig' = R || s'`。
-- 验证例程只使用 `s mod n`，因此所有与 `s` 同余的 `s'` 都会被接受，即使它们是不同的字节串。将签名视为规范令牌的系统（blockchain consensus、replay caches、DB keys 等）可能因此不同步，因为严格的实现会拒绝 `s'`。
-- 在审计其它 HashEdDSA 代码时，确保解析器同时验证点 `R` 和标量长度；尝试在已知良好的 `s` 后追加 `n` 的倍数，以确认验证器会安全地拒绝（fails closed）。
+- FIPS 186-5 §7.8.2 requires HashEdDSA verifiers to split a signature `sig = R || s` and reject any scalar with `s \geq n`, where `n` is the group order. The `elliptic` JS library skipped that bound check, so any attacker that knows a valid pair `(msg, R || s)` can forge alternate signatures `s' = s + k·n` and keep re-encoding `sig' = R || s'`.
+- The verification routines only consume `s mod n`, therefore all `s'` congruent to `s` are accepted even though they are different byte strings. Systems treating signatures as canonical tokens (blockchain consensus, replay caches, DB keys, etc.) can be desynchronized because strict implementations will reject `s'`.
+- When auditing other HashEdDSA code, ensure the parser validates both the point `R` and the scalar length; try appending multiples of `n` to a known-good `s` to confirm the verifier fails closed.
 
-### ECDSA 截断与前导零哈希
+### ECDSA truncation vs. leading-zero hashes
 
-- ECDSA 验证者必须仅使用消息哈希 `H` 的最左侧 `log2(n)` 位。在 `elliptic` 中，截断辅助函数计算 `delta = (BN(msg).byteLength()*8) - bitlen(n)`；`BN` 构造函数会丢弃前导的零字节，因此在像 secp192r1（192-bit order）这类曲线上，任何以 ≥4 个零字节开头的哈希会被误判为只有 224 位而非 256 位。
-- 验证器向右移位了 32 位而不是 64 位，导致生成的 `E` 与签名者使用的值不匹配。因此对这些哈希的有效签名在 SHA-256 输入情况下以约 `2^-32` 的概率失败。
-- 将“全部正常”的向量和前导零变体（例如 Wycheproof `ecdsa_secp192r1_sha256_test.json` case `tc296`）提供给目标实现；如果验证器与签名者的结果不一致，则你发现了可利用的截断漏洞。
+- ECDSA verifiers must use only the leftmost `log2(n)` bits of the message hash `H`. In `elliptic`, the truncation helper computed `delta = (BN(msg).byteLength()*8) - bitlen(n)`; the `BN` constructor drops leading zero octets, so any hash that begins with ≥4 zero bytes on curves like secp192r1 (192-bit order) appeared to be only 224 bits instead of 256.
+- The verifier right-shifted by 32 bits instead of 64, producing an `E` that does not match the value used by the signer. Valid signatures on those hashes therefore fail with probability ≈`2^-32` for SHA-256 inputs.
+- Feed both the “all good” vector and leading-zero variants (e.g., Wycheproof `ecdsa_secp192r1_sha256_test.json` case `tc296`) to a target implementation; if the verifier disagrees with the signer, you found an exploitable truncation bug.
 
-### 使用 Wycheproof 向量测试库
-- Wycheproof 提供了编码畸形点、可变标量、异常哈希和其他边界情况的 JSON 测试集。围绕 `elliptic`（或任何 crypto 库）构建测试 harness 很简单：加载 JSON，反序列化每个测试用例，并断言实现与期望的 `result` 标志一致。
+### Exercising Wycheproof vectors against libraries
+- Wycheproof ships JSON test sets that encode malformed points, malleable scalars, unusual hashes and other corner cases. Building a harness around `elliptic` (or any crypto library) is straightforward: load the JSON, deserialize each test case, and assert that the implementation matches the expected `result` flag.
 ```javascript
 for (const tc of ecdsaVectors.testGroups) {
 const curve = new EC(tc.curve);
@@ -204,10 +204,10 @@ const ok = curve.verify(tc.msg, tc.sig, pub, 'hex', tc.msgSize);
 assert.strictEqual(ok, tc.result === 'valid');
 }
 ```
-- 应对失败进行分级以区分规范违规与误报。对于上面提到的两个 bug，失败的 Wycheproof cases 立即指向了缺失的标量范围检查 (EdDSA) 和不正确的哈希截断 (ECDSA)。
-- 将测试 harness 集成到 CI 中，以便在引入对标量解析、哈希处理或坐标有效性的回归时立即触发测试。对于 JS、Python、Go 等高级语言尤其有用，因为微妙的大整数转换很容易出错。
+- 应将失败进行分类，以区分规范违规与误报。对于上面两个 bug，失败的 Wycheproof 用例立即指向缺失的标量范围检查 (EdDSA) 和不正确的哈希截断 (ECDSA)。
+- 将 harness 集成到 CI 中，以便一旦引入标量解析、哈希处理或坐标有效性方面的回归就触发测试。对于高层语言 (JS, Python, Go) 尤其有用，因为微妙的大数转换很容易出错。
 
-## 参考资料
+## References
 
 - [Trail of Bits - We found cryptography bugs in the elliptic library using Wycheproof](https://blog.trailofbits.com/2025/11/18/we-found-cryptography-bugs-in-the-elliptic-library-using-wycheproof/)
 - [Wycheproof Test Suite](https://github.com/C2SP/wycheproof)
