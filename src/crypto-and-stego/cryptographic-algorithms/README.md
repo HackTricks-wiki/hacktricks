@@ -2,77 +2,77 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Algoritmaları Tanımlama
+## Algoritmaların Tanımlanması
 
-Eğer bir kod **sağ ve sol kaydırmalar, xors ve çeşitli aritmetik işlemler** kullanıyorsa, bunun bir **kriptografik algoritmanın** uygulanması olması oldukça olasıdır. Burada, **her adımı tersine çevirmeden kullanılan algoritmayı tanımlamanın bazı yolları** gösterilecektir.
+Bir kodda **sağa/sola kaydırma, xor'lar ve çeşitli aritmetik işlemler** kullanılıyorsa, bunun bir **kriptografik algoritma** uygulaması olması yüksek olasılıktadır. Burada, **her adımı tersine çevirmeye gerek kalmadan hangi algoritmanın kullanıldığını** tanımlamanın bazı yolları gösterilecektir.
 
 ### API fonksiyonları
 
 **CryptDeriveKey**
 
-Bu fonksiyon kullanılıyorsa, ikinci parametrenin değerini kontrol ederek hangi **algoritmanın kullanıldığını** bulabilirsiniz:
+Bu fonksiyon kullanılıyorsa, hangi **algoritmanın kullanıldığını** ikinci parametrenin değerine bakarak bulabilirsiniz:
 
 ![](<../../images/image (156).png>)
 
-Olası algoritmalar ve atanan değerleri için buradaki tabloya bakın: [https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id](https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id)
+Muhtemel algoritmalar ve atanan değerlerin tablosunu burada kontrol edin: [https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id](https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id)
 
 **RtlCompressBuffer/RtlDecompressBuffer**
 
-Verilen bir veri tamponunu sıkıştırır ve açar.
+Verilen bir veri buffer'ını sıkıştırır ve açar.
 
 **CryptAcquireContext**
 
-[Belgelerden](https://learn.microsoft.com/en-us/windows/win32/api/wincrypt/nf-wincrypt-cryptacquirecontexta): **CryptAcquireContext** fonksiyonu, belirli bir kriptografik hizmet sağlayıcısı (CSP) içindeki belirli bir anahtar konteynerine bir tanıtıcı almak için kullanılır. **Bu döndürülen tanıtıcı, seçilen CSP'yi kullanan CryptoAPI** fonksiyonlarına yapılan çağrılarda kullanılır.
+Dokümanlara göre: **CryptAcquireContext** fonksiyonu, belirli bir cryptographic service provider (CSP) içindeki belirli bir anahtar konteynerine bir handle edinmek için kullanılır. **Bu döndürülen handle, seçilen CSP'yi kullanan CryptoAPI çağrılarında kullanılır.**
 
 **CryptCreateHash**
 
-Bir veri akışının hash'ini başlatır. Bu fonksiyon kullanılıyorsa, ikinci parametrenin değerini kontrol ederek hangi **algoritmanın kullanıldığını** bulabilirsiniz:
+Bir veri akışının hash'lenmesini başlatır. Bu fonksiyon kullanılıyorsa, hangi **algoritmanın kullanıldığını** ikinci parametrenin değerine bakarak bulabilirsiniz:
 
 ![](<../../images/image (549).png>)
 
 \
-Olası algoritmalar ve atanan değerleri için buradaki tabloya bakın: [https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id](https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id)
+Muhtemel algoritmalar ve atanan değerlerin tablosunu burada kontrol edin: [https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id](https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id)
 
 ### Kod sabitleri
 
-Bazen, bir algoritmayı tanımlamak gerçekten kolaydır çünkü özel ve benzersiz bir değer kullanması gerekir.
+Bazen bir algoritmayı tanımlamak çok kolaydır çünkü özel ve benzersiz bir değer kullanması gerekir.
 
 ![](<../../images/image (833).png>)
 
-Eğer ilk sabiti Google'da ararsanız, bu sonucu alırsınız:
+İlk sabiti Google'da ararsanız şunu elde edersiniz:
 
 ![](<../../images/image (529).png>)
 
-Bu nedenle, dekompile edilmiş fonksiyonun bir **sha256 hesaplayıcı** olduğunu varsayabilirsiniz.\
-Diğer sabitlerden herhangi birini ararsanız, (muhtemelen) aynı sonucu alırsınız.
+Buna göre, decompile edilmiş fonksiyonun bir **sha256 hesaplayıcısı** olduğunu varsayabilirsiniz.\
+Diğer sabitlerden herhangi birini ararsanız muhtemelen aynı sonucu alırsınız.
 
 ### veri bilgisi
 
-Eğer kodda herhangi bir önemli sabit yoksa, bu **.data bölümünden bilgi yüklüyor olabilir**.\
-Bu veriye erişebilir, **ilk dword'u gruplandırabilir** ve daha önceki bölümde yaptığımız gibi Google'da arama yapabilirsiniz:
+Kodda anlamlı bir sabit yoksa, **.data bölümünden bilgi yüklüyor** olabilir.\
+Bu verilere erişip, **ilk dword'u gruplayabilir** ve daha önceki bölümde yaptığımız gibi Google'da arayabilirsiniz:
 
 ![](<../../images/image (531).png>)
 
-Bu durumda, eğer **0xA56363C6**'yı ararsanız, bunun **AES algoritmasının tablolarıyla** ilişkili olduğunu bulabilirsiniz.
+Bu durumda, **0xA56363C6** değerini ararsanız bunun **AES algoritmasının tablolarıyla** ilişkili olduğunu bulabilirsiniz.
 
-## RC4 **(Simetrik Kriptografi)**
+## RC4 **(Symmetric Crypt)**
 
 ### Özellikler
 
-3 ana bölümden oluşur:
+3 ana kısımdan oluşur:
 
-- **Başlatma aşaması/**: **0x00'dan 0xFF'e kadar değerler içeren bir tablo oluşturur** (toplam 256 bayt, 0x100). Bu tablo genellikle **Yer Değiştirme Kutusu** (veya SBox) olarak adlandırılır.
-- **Karıştırma aşaması**: Daha önce oluşturulan tabloyu **döngü ile geçer** (0x100 yineleme döngüsü) ve her değeri **yarı rastgele** baytlarla değiştirir. Bu yarı rastgele baytları oluşturmak için RC4 **anahtarı kullanılır**. RC4 **anahtarları** **1 ile 256 bayt arasında** olabilir, ancak genellikle 5 bayttan fazla olması önerilir. Genellikle, RC4 anahtarları 16 bayt uzunluğundadır.
-- **XOR aşaması**: Son olarak, düz metin veya şifreli metin, **önceki değerlerle XOR'lanır**. Şifreleme ve şifre çözme fonksiyonu aynıdır. Bunun için, oluşturulan 256 bayt üzerinden gerekli olduğu kadar döngü yapılacaktır. Bu genellikle dekompile edilmiş kodda **%256 (mod 256)** ile tanınır.
+- **Initialization stage/**: 0x00'dan 0xFF'e kadar değerlerden oluşan bir tablo oluşturur (toplam 256byte, 0x100). Bu tablo genellikle **Substitution Box** (veya SBox) olarak adlandırılır.
+- **Scrambling stage**: Önceden oluşturulan tablo üzerinde **döngüye girer** (yine 0x100 iterasyonluk döngü) ve her değeri **yarı-rastgele** byte'larla değiştirir. Bu yarı-rastgele byte'ları oluşturmak için RC4 **key**'i kullanılır. RC4 **key**'leri **1 ile 256 byte** arasında olabilir; ancak genellikle 5 bytten uzun olması tavsiye edilir. Yaygın olarak, RC4 key'leri 16 byte uzunluğundadır.
+- **XOR stage**: Son olarak, düz metin veya şifre metin daha önce oluşturulan değerlerle **XOR'lanır**. Şifreleme ve şifre çözme fonksiyonu aynıdır. Bunun için oluşturulan 256 byte üzerinde gerektiği kadar tekrar eden bir **döngü** yürütülür. Decompile edilmiş kodda bu genellikle **%256 (mod 256)** ile tanınır.
 
 > [!TIP]
-> **Bir deşifreleme/dekompile edilmiş kodda bir RC4'ü tanımlamak için, 0x100 boyutunda 2 döngü kontrol edebilir ve ardından giriş verilerinin 2 döngüde oluşturulan 256 değerle XOR'lanmasını kontrol edebilirsiniz, muhtemelen bir %256 (mod 256) kullanarak.**
+> **Bir disassembly/decompile edilmiş kodda RC4'ü tanımlamak için 0x100 boyutunda 2 döngü (key kullanımı ile) ve ardından giriş verisinin önceki 2 döngüde oluşturulan 256 değer ile XOR'lanması, muhtemelen %256 (mod 256) kullanılarak, aranabilir.**
 
-### **Başlatma aşaması/Yer Değiştirme Kutusu:** (Sayacın olarak kullanılan 256 sayısına ve 256 karakterin her yerinde 0 yazılmasına dikkat edin)
+### **Initialization stage/Substitution Box:** (Sayaç olarak kullanılan 256 sayısına ve 256 karakterin her yerine nasıl 0 yazıldığına dikkat edin)
 
 ![](<../../images/image (584).png>)
 
-### **Karıştırma Aşaması:**
+### **Scrambling Aşaması:**
 
 ![](<../../images/image (835).png>)
 
@@ -80,52 +80,52 @@ Bu durumda, eğer **0xA56363C6**'yı ararsanız, bunun **AES algoritmasının ta
 
 ![](<../../images/image (904).png>)
 
-## **AES (Simetrik Kriptografi)**
+## **AES (Symmetric Crypt)**
 
 ### **Özellikler**
 
-- **yer değiştirme kutuları ve arama tabloları** kullanımı
-- **Belirli arama tablo değerlerinin** (sabitlerin) kullanımı sayesinde AES'i **ayırmak mümkündür**. _Not edin ki **sabit** ikili **ya da dinamik olarak** _**oluşturulabilir**._
-- **Şifreleme anahtarı** **16'ya** (genellikle 32B) **tam bölünebilir** olmalıdır ve genellikle 16B'lik bir **IV** kullanılır.
+- **substitution box'lar ve lookup tabloları** kullanımı
+- Belirli **lookup tablo** değerlerinin kullanımı sayesinde AES'i ayırt etmek mümkündür (sabitler). _Sabitin ikili dosyada **saklanabileceğini** veya **dinamik olarak oluşturulabileceğini** unutmayın._
+- **Şifreleme key'i** 16'ya bölünebilir olmalıdır (genellikle 32B) ve genellikle 16B boyutunda bir **IV** kullanılır.
 
 ### SBox sabitleri
 
 ![](<../../images/image (208).png>)
 
-## Serpent **(Simetrik Kriptografi)**
+## Serpent **(Symmetric Crypt)**
 
 ### Özellikler
 
-- Bunu kullanan bazı kötü amaçlı yazılımlar bulmak nadirdir ama örnekler vardır (Ursnif)
-- Bir algoritmanın Serpent olup olmadığını belirlemek basittir, uzunluğuna (son derece uzun fonksiyon) dayanarak.
+- Bazı kötü amaçlı yazılımlarda kullanılması nadirdir ama örnekleri vardır (Ursnif)
+- Bir algoritmanın Serpent olup olmadığını uzunluğuna bakarak belirlemek basittir (aşırı uzun fonksiyon)
 
 ### Tanımlama
 
-Aşağıdaki görüntüde **0x9E3779B9** sabitinin nasıl kullanıldığına dikkat edin (bu sabitin ayrıca **TEA** -Küçük Şifreleme Algoritması gibi diğer kripto algoritmalarında da kullanıldığını unutmayın).\
-Ayrıca, **döngünün boyutuna** (**132**) ve **dekompile** talimatlarındaki XOR işlemlerinin **sayısına** ve **kod** örneğine dikkat edin:
+Aşağıdaki görüntüde **0x9E3779B9** sabitinin nasıl kullanıldığına dikkat edin (bu sabitin **TEA** - Tiny Encryption Algorithm gibi diğer kripto algoritmalarında da kullanıldığını unutmayın).\
+Ayrıca **döngü boyuna** (**132**) ve **disassembly** talimatlarındaki ve **kod** örneğindeki XOR operasyonu sayısına dikkat edin:
 
 ![](<../../images/image (547).png>)
 
-Daha önce belirtildiği gibi, bu kod herhangi bir dekompiler içinde **çok uzun bir fonksiyon** olarak görselleştirilebilir çünkü içinde **atlamalar** yoktur. Dekompile edilmiş kod aşağıdaki gibi görünebilir:
+Daha önce bahsedildiği gibi, bu kod herhangi bir decompiler içinde **çok uzun bir fonksiyon** olarak görülebilir çünkü içinde **atlamalar (jumps)** yoktur. Decompile edilmiş kod aşağıdaki gibi görünebilir:
 
 ![](<../../images/image (513).png>)
 
-Bu nedenle, bu algoritmayı **büyü numarayı** ve **ilk XOR'ları** kontrol ederek, **çok uzun bir fonksiyon** görerek ve uzun fonksiyonun bazı **talimatlarını** bir **uygulama** ile karşılaştırarak tanımlamak mümkündür (örneğin, 7'ye sola kaydırma ve 22'ye sola döndürme).
+Bu nedenle, **magic number'ı** ve **ilk XOR'ları** kontrol ederek, **çok uzun bir fonksiyon** görerek ve uzun fonksiyonun bazı **talimatlarını** (ör. 7 ile sola kaydırma ve 22 ile rotate sol) bir **implementasyonla karşılaştırarak** bu algoritmayı tanımlamak mümkündür.
 
-## RSA **(Asimetrik Kriptografi)**
+## RSA **(Asymmetric Crypt)**
 
 ### Özellikler
 
-- Simetrik algoritmalardan daha karmaşık
-- Sabit yok! (özel uygulamaların belirlenmesi zordur)
-- KANAL (bir kripto analizörü) RSA hakkında ipuçları gösteremiyor çünkü sabitlere dayanıyor.
+- Symmetric algoritmalardan daha karmaşıktır
+- Sabitler yoktur! (özelleştirilmiş implementasyonları belirlemek zordur)
+- KANAL (bir crypto analyzer) RSA hakkında ipuçları göstermede başarısız olur çünkü sabitlere dayanır.
 
-### Karşılaştırmalarla Tanımlama
+### Karşılaştırmalarla tanımlama
 
 ![](<../../images/image (1113).png>)
 
-- 11. satırda (solda) `+7) >> 3` var, bu sağdaki 35. satırda da aynı: `+7) / 8`
-- 12. satır (solda) `modulus_len < 0x040` kontrol ediyor ve sağdaki 36. satırda `inputLen+11 > modulusLen` kontrol ediliyor.
+- Sol taraftaki 11. satırda `+7) >> 3` var, bu sağdaki 35. satırdaki `+7) / 8` ile aynıdır.
+- Sol taraftaki 12. satır `modulus_len < 0x040` kontrolü yapıyor ve sağdaki 36. satır `inputLen+11 > modulusLen` kontrolünü yapıyor.
 
 ## MD5 & SHA (hash)
 
@@ -138,11 +138,11 @@ Bu nedenle, bu algoritmayı **büyü numarayı** ve **ilk XOR'ları** kontrol ed
 
 **Init**
 
-Her ikisini de sabitleri kontrol ederek tanımlayabilirsiniz. sha_init'in MD5'de olmayan 1 sabiti olduğunu unutmayın:
+Her ikisini de sabitleri kontrol ederek tanımlayabilirsiniz. sha_init'in MD5'te olmayan 1 sabiti olduğunu unutmayın:
 
 ![](<../../images/image (406).png>)
 
-**MD5 Dönüşümü**
+**MD5 Transform**
 
 Daha fazla sabit kullanımına dikkat edin
 
@@ -150,12 +150,12 @@ Daha fazla sabit kullanımına dikkat edin
 
 ## CRC (hash)
 
-- Daha küçük ve daha verimli, çünkü işlevi verilerdeki kazara değişiklikleri bulmaktır
-- Sabitleri tanımlamak için arama tabloları kullanır
+- Amacı verideki kazara değişiklikleri bulmak olduğundan daha küçük ve daha verimlidir
+- Lookup tabloları kullanır (dolayısıyla sabitleri tanımlayabilirsiniz)
 
 ### Tanımlama
 
-**arama tablo sabitlerini** kontrol edin:
+Lookup tablo sabitlerini kontrol edin:
 
 ![](<../../images/image (508).png>)
 
@@ -163,21 +163,53 @@ Bir CRC hash algoritması şöyle görünür:
 
 ![](<../../images/image (391).png>)
 
-## APLib (Sıkıştırma)
+## APLib (Compression)
 
 ### Özellikler
 
-- Tanınabilir sabit yok
-- Algoritmayı Python'da yazmayı deneyebilir ve çevrimiçi benzer şeyler arayabilirsiniz
+- Tanınabilir sabitler yok
+- Algoritmayı python'da yazmayı deneyebilir ve benzer şeyleri çevrimiçi arayabilirsiniz
 
 ### Tanımlama
 
-Grafik oldukça büyük:
+Graf oldukça büyük:
 
 ![](<../../images/image (207) (2) (1).png>)
 
-Bunu tanımak için **3 karşılaştırma** kontrol edin:
+Tanımak için **3 karşılaştırmaya** bakın:
 
 ![](<../../images/image (430).png>)
+
+## Elliptik Eğri İmza Uygulama Hataları
+
+### EdDSA scalar range enforcement (HashEdDSA malleability)
+
+- FIPS 186-5 §7.8.2, HashEdDSA doğrulayıcılarının bir imzayı `sig = R || s` olarak ayırmalarını ve `n` grup düzeni olmak üzere `s \geq n` olan herhangi bir skaler değeri reddetmelerini gerektirir. `elliptic` JS kütüphanesi bu sınır kontrolünü atlamıştı; bu yüzden bir saldırgan, geçerli `(msg, R || s)` çiftini biliyorsa alternatif imzalar `s' = s + k·n` üretebilir ve `sig' = R || s'` olarak yeniden kodlamaya devam edebilir.
+- Doğrulama rutini yalnızca `s mod n` değerini kullanır; bu nedenle farklı byte dizileri olsalar bile `s` ile kongruent olan tüm `s'` değerleri kabul edilir. İmzaları canonical token olarak işleyen sistemler (blockchain consensus, replay caches, DB keys, vb.) katı implementasyonlar `s'`'yi reddedeceği için senkronizasyon dışı kalabilir.
+- Diğer HashEdDSA kodlarını denetlerken, parser'ın hem `R` noktasını hem de skaler uzunluğunu doğruladığından emin olun; doğrulayıcının kapalı (fail closed) davrandığını teyit etmek için bilinen doğrulanmış bir `s`'ye `n`'in katlarını eklemeyi deneyin.
+
+### ECDSA truncation vs. leading-zero hashes
+
+- ECDSA doğrulayıcıları mesaj hash'i `H`'in yalnızca en sol `log2(n)` bitini kullanmalıdır. `elliptic`'te truncation yardımcı fonksiyonu `delta = (BN(msg).byteLength()*8) - bitlen(n)` şeklinde hesaplanıyordu; `BN` yapıcısı baştaki sıfır oktetleri düşürdüğünden, secp192r1 (192-bit düzen) gibi eğrilerde ≥4 sıfır byte ile başlayan herhangi bir hash 256 yerine yalnızca 224 bit olarak görünüyordu.
+- Doğrulayıcı 64 yerine 32 bit sağa kaydırma yaptı ve bu da imzalayan tarafından kullanılan değerle eşleşmeyen bir `E` üretti. Bu nedenle bu hash'lere ait geçerli imzalar, SHA-256 girdileri için ≈`2^-32` ihtimalle başarısız olur.
+- Hedef implementasyona hem “her şey iyi” vektörünü hem de baştaki sıfırlı varyantları (ör. Wycheproof `ecdsa_secp192r1_sha256_test.json` vaka `tc296`) verin; doğrulayıcı ile imzalayan farklı düşünüyorsa, tespit edilebilir bir kırpma hatası buldunuz.
+
+### Kütüphanelere karşı Wycheproof vektörlerini uygulama
+- Wycheproof, bozuk noktaları, değiştirilebilir skalerleri, sıra dışı hash'leri ve diğer köşe durumlarını kodlayan JSON test setleri sağlar. `elliptic` (veya herhangi bir kripto kütüphanesi) etrafında bir harness oluşturmak basittir: JSON'u yükleyin, her test vakasını deserialize edin ve implementasyonun beklenen `result` bayrağıyla eşleştiğini doğrulayın.
+```javascript
+for (const tc of ecdsaVectors.testGroups) {
+const curve = new EC(tc.curve);
+const pub = curve.keyFromPublic(tc.key, 'hex');
+const ok = curve.verify(tc.msg, tc.sig, pub, 'hex', tc.msgSize);
+assert.strictEqual(ok, tc.result === 'valid');
+}
+```
+- Hatalar, spesifikasyon ihlallerini yanlış pozitiflerden ayırt etmek üzere sınıflandırılmalıdır. Yukarıdaki iki hata için, başarısız Wycheproof vakaları hemen eksik skaler aralık kontrollerine (EdDSA) ve hatalı hash kırpılmasına (ECDSA) işaret etti.
+- Test harness'ı CI'ye entegre edin, böylece skaler ayrıştırma, hash işleme veya koordinat geçerliliğiyle ilgili gerilemeler ortaya çıkar çıkmaz testler tetiklenir. Bu, ince bignum dönüşümlerinin kolayca yanlış yapıldığı yüksek seviyeli diller (JS, Python, Go) için özellikle faydalıdır.
+
+## Referanslar
+
+- [Trail of Bits - We found cryptography bugs in the elliptic library using Wycheproof](https://blog.trailofbits.com/2025/11/18/we-found-cryptography-bugs-in-the-elliptic-library-using-wycheproof/)
+- [Wycheproof Test Suite](https://github.com/C2SP/wycheproof)
 
 {{#include ../../banners/hacktricks-training.md}}
