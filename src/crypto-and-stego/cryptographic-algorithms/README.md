@@ -180,7 +180,38 @@ Check **3 comparisons to recognise it**:
 
 ![](<../../images/image (430).png>)
 
+## Elliptic-Curve Signature Implementation Bugs
+
+### EdDSA scalar range enforcement (HashEdDSA malleability)
+
+- FIPS 186-5 §7.8.2 requires HashEdDSA verifiers to split a signature `sig = R || s` and reject any scalar with `s \geq n`, where `n` is the group order. The `elliptic` JS library skipped that bound check, so any attacker that knows a valid pair `(msg, R || s)` can forge alternate signatures `s' = s + k·n` and keep re-encoding `sig' = R || s'`.
+- The verification routines only consume `s mod n`, therefore all `s'` congruent to `s` are accepted even though they are different byte strings. Systems treating signatures as canonical tokens (blockchain consensus, replay caches, DB keys, etc.) can be desynchronized because strict implementations will reject `s'`.
+- When auditing other HashEdDSA code, ensure the parser validates both the point `R` and the scalar length; try appending multiples of `n` to a known-good `s` to confirm the verifier fails closed.
+
+### ECDSA truncation vs. leading-zero hashes
+
+- ECDSA verifiers must use only the leftmost `log2(n)` bits of the message hash `H`. In `elliptic`, the truncation helper computed `delta = (BN(msg).byteLength()*8) - bitlen(n)`; the `BN` constructor drops leading zero octets, so any hash that begins with ≥4 zero bytes on curves like secp192r1 (192-bit order) appeared to be only 224 bits instead of 256.
+- The verifier right-shifted by 32 bits instead of 64, producing an `E` that does not match the value used by the signer. Valid signatures on those hashes therefore fail with probability ≈`2^-32` for SHA-256 inputs.
+- Feed both the “all good” vector and leading-zero variants (e.g., Wycheproof `ecdsa_secp192r1_sha256_test.json` case `tc296`) to a target implementation; if the verifier disagrees with the signer, you found an exploitable truncation bug.
+
+### Exercising Wycheproof vectors against libraries
+- Wycheproof ships JSON test sets that encode malformed points, malleable scalars, unusual hashes and other corner cases. Building a harness around `elliptic` (or any crypto library) is straightforward: load the JSON, deserialize each test case, and assert that the implementation matches the expected `result` flag.
+
+```javascript
+for (const tc of ecdsaVectors.testGroups) {
+  const curve = new EC(tc.curve);
+  const pub = curve.keyFromPublic(tc.key, 'hex');
+  const ok = curve.verify(tc.msg, tc.sig, pub, 'hex', tc.msgSize);
+  assert.strictEqual(ok, tc.result === 'valid');
+}
+```
+
+- Failures should be triaged to distinguish spec violations from false positives. For the two bugs above, the failing Wycheproof cases immediately pointed at missing scalar range checks (EdDSA) and incorrect hash truncation (ECDSA).
+- Integrate the harness into CI so that regressions in scalar parsing, hash handling, or coordinate validity trigger tests as soon as they are introduced. This is especially useful for high-level languages (JS, Python, Go) where subtle bignum conversions are easy to get wrong.
+
+## References
+
+- [Trail of Bits - We found cryptography bugs in the elliptic library using Wycheproof](https://blog.trailofbits.com/2025/11/18/we-found-cryptography-bugs-in-the-elliptic-library-using-wycheproof/)
+- [Wycheproof Test Suite](https://github.com/C2SP/wycheproof)
+
 {{#include ../../banners/hacktricks-training.md}}
-
-
-
