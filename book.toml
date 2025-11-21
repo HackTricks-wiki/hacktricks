@@ -15,7 +15,7 @@ command = "python3 ./hacktricks-preprocessor.py"
 env = "prod"
 
 [output.html]
-additional-css = ["theme/tabs.css"]
+additional-css = ["theme/tabs.css", "theme/pagetoc.css"]
 additional-js = [
     "theme/tabs.js",
     "theme/ht_searcher.js",
