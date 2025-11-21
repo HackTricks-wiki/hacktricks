@@ -1,20 +1,20 @@
-# Algorytmy kryptograficzne/kompresji
+# Kryptograficzne/Algorytmy kompresji
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Identyfikacja algorytmów
 
-Jeśli kończysz w kodzie **używając przesunięć w prawo i w lewo, xorów oraz kilku operacji arytmetycznych**, to jest bardzo prawdopodobne, że jest to implementacja **algorytmu kryptograficznego**. Poniżej przedstawione zostaną sposoby na **identyfikację algorytmu, który jest używany bez potrzeby odwracania każdego kroku**.
+Jeśli trafisz na kod, który **używa rotacji w prawo i w lewo, xorów oraz kilku operacji arytmetycznych**, istnieje duże prawdopodobieństwo, że to implementacja **algorytmu kryptograficznego**. Poniżej pokazano sposoby na **zidentyfikowanie używanego algorytmu bez konieczności odwracania każdego kroku**.
 
 ### Funkcje API
 
 **CryptDeriveKey**
 
-Jeśli ta funkcja jest używana, możesz znaleźć, który **algorytm jest używany**, sprawdzając wartość drugiego parametru:
+Jeśli ta funkcja jest używana, możesz sprawdzić, który **algorytm jest używany** patrząc na wartość drugiego parametru:
 
 ![](<../../images/image (156).png>)
 
-Sprawdź tutaj tabelę możliwych algorytmów i ich przypisanych wartości: [https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id](https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id)
+Sprawdź tabelę możliwych algorytmów i ich przypisanych wartości: [https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id](https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id)
 
 **RtlCompressBuffer/RtlDecompressBuffer**
 
@@ -22,53 +22,53 @@ Kompresuje i dekompresuje dany bufor danych.
 
 **CryptAcquireContext**
 
-Z [dokumentacji](https://learn.microsoft.com/en-us/windows/win32/api/wincrypt/nf-wincrypt-cryptacquirecontexta): Funkcja **CryptAcquireContext** jest używana do uzyskania uchwytu do konkretnego kontenera kluczy w danym dostawcy usług kryptograficznych (CSP). **Ten zwrócony uchwyt jest używany w wywołaniach funkcji CryptoAPI**, które korzystają z wybranego CSP.
+Z dokumentacji: The **CryptAcquireContext** function is used to acquire a handle to a particular key container within a particular cryptographic service provider (CSP). **This returned handle is used in calls to CryptoAPI** functions that use the selected CSP.
 
 **CryptCreateHash**
 
-Inicjuje haszowanie strumienia danych. Jeśli ta funkcja jest używana, możesz znaleźć, który **algorytm jest używany**, sprawdzając wartość drugiego parametru:
+Inicjuje hashowanie strumienia danych. Jeśli ta funkcja jest używana, możesz sprawdzić, który **algorytm jest używany** patrząc na wartość drugiego parametru:
 
 ![](<../../images/image (549).png>)
 
 \
 Sprawdź tutaj tabelę możliwych algorytmów i ich przypisanych wartości: [https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id](https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id)
 
-### Stałe kodu
+### Stałe w kodzie
 
-Czasami naprawdę łatwo jest zidentyfikować algorytm dzięki temu, że musi używać specjalnej i unikalnej wartości.
+Czasami łatwo zidentyfikować algorytm dzięki temu, że używa on specyficznej i unikalnej wartości.
 
 ![](<../../images/image (833).png>)
 
-Jeśli wyszukasz pierwszą stałą w Google, to jest to, co otrzymasz:
+Jeśli wyszukasz pierwszą stałą w Google, otrzymasz takie wyniki:
 
 ![](<../../images/image (529).png>)
 
-Możesz więc założyć, że zdekompilowana funkcja to **kalkulator sha256.**\
-Możesz wyszukać dowolną z innych stałych, a prawdopodobnie uzyskasz ten sam wynik.
+W związku z tym możesz założyć, że zdekompilowana funkcja to **kalkulator sha256.**\
+Możesz wyszukać dowolną z pozostałych stałych i najprawdopodobniej otrzymasz podobny rezultat.
 
-### Informacje o danych
+### informacje o danych
 
-Jeśli kod nie ma żadnej znaczącej stałej, może być **ładowanie informacji z sekcji .data**.\
-Możesz uzyskać dostęp do tych danych, **grupując pierwszy dword** i wyszukując go w Google, tak jak zrobiliśmy w poprzedniej sekcji:
+Jeśli kod nie ma znaczących stałych, może **ładować informacje z sekcji .data**.\
+Możesz uzyskać dostęp do tych danych, **pogroupować pierwszy dword** i wyszukać go w Google tak jak w poprzedniej sekcji:
 
 ![](<../../images/image (531).png>)
 
-W tym przypadku, jeśli wyszukasz **0xA56363C6**, możesz znaleźć, że jest to związane z **tabelami algorytmu AES**.
+W tym przypadku, jeśli poszukasz **0xA56363C6**, znajdziesz, że jest powiązany z **tablicami algorytmu AES**.
 
-## RC4 **(Symetryczna kryptografia)**
+## RC4 **(Symmetric Crypt)**
 
-### Cechy
+### Charakterystyka
 
 Składa się z 3 głównych części:
 
-- **Etap inicjalizacji/**: Tworzy **tabelę wartości od 0x00 do 0xFF** (łącznie 256 bajtów, 0x100). Ta tabela jest powszechnie nazywana **Substitution Box** (lub SBox).
-- **Etap mieszania**: Będzie **przechodzić przez tabelę** utworzoną wcześniej (pętla 0x100 iteracji, ponownie) modyfikując każdą wartość za pomocą **półlosowych** bajtów. Aby stworzyć te półlosowe bajty, używany jest klucz RC4. Klucze RC4 mogą mieć **od 1 do 256 bajtów długości**, jednak zazwyczaj zaleca się, aby miały więcej niż 5 bajtów. Zwykle klucze RC4 mają długość 16 bajtów.
-- **Etap XOR**: Na koniec, tekst jawny lub szyfrogram jest **XORowany z wartościami utworzonymi wcześniej**. Funkcja do szyfrowania i deszyfrowania jest taka sama. W tym celu zostanie wykonana **pętla przez utworzone 256 bajtów** tyle razy, ile to konieczne. Zwykle rozpoznaje się to w zdekompilowanym kodzie za pomocą **%256 (mod 256)**.
+- **Etap inicjalizacji/**: Tworzy **tablicę wartości od 0x00 do 0xFF** (256 bajtów, 0x100). Ta tablica jest powszechnie nazywana **Substitution Box** (lub SBox).
+- **Etap mieszania**: Będzie **iterować po wcześniej utworzonej tablicy** (pętla o 0x100 iteracjach) modyfikując każdą wartość przy użyciu **półlosowych** bajtów. Do stworzenia tych półlosowych bajtów używany jest **klucz RC4**. Klucze RC4 mogą mieć **od 1 do 256 bajtów długości**, jednak zwykle zaleca się, aby miały więcej niż 5 bajtów. Typowo klucze RC4 mają długość 16 bajtów.
+- **Etap XOR**: Wreszcie, plaintext lub ciphertext jest **XORowany z wartościami stworzymi wcześniej**. Funkcja szyfrująca i deszyfrująca jest taka sama. W tym celu wykonywana jest **pętla przez utworzone 256 bajtów** tak często, jak jest to potrzebne. Zwykle rozpoznawalne w zdekompilowanym kodzie przez użycie **%256 (mod 256)**.
 
 > [!TIP]
-> **Aby zidentyfikować RC4 w kodzie disassembly/zdekompilowanym, możesz sprawdzić 2 pętle o rozmiarze 0x100 (z użyciem klucza), a następnie XOR danych wejściowych z 256 wartościami utworzonymi wcześniej w 2 pętlach, prawdopodobnie używając %256 (mod 256)**
+> **Aby zidentyfikować RC4 w disassembl/ zdekompilowanym kodzie możesz sprawdzić obecność 2 pętli o rozmiarze 0x100 (z użyciem klucza) a następnie XOR danych wejściowych z 256 wartościami utworzonymi wcześniej, prawdopodobnie używając %256 (mod 256)**
 
-### **Etap inicjalizacji/Substitution Box:** (Zauważ liczbę 256 używaną jako licznik i jak 0 jest zapisywane w każdym miejscu 256 znaków)
+### **Etap inicjalizacji/Substitution Box:** (Zwróć uwagę na użycie liczby 256 jako licznika i na zapisanie 0 w każdym miejscu 256 znaków)
 
 ![](<../../images/image (584).png>)
 
@@ -80,104 +80,136 @@ Składa się z 3 głównych części:
 
 ![](<../../images/image (904).png>)
 
-## **AES (Symetryczna kryptografia)**
+## **AES (Symmetric Crypt)**
 
-### **Cechy**
+### **Charakterystyka**
 
-- Użycie **tabel substytucji i tabel wyszukiwania**
-- Możliwe jest **rozróżnienie AES dzięki użyciu specyficznych wartości tabel wyszukiwania** (stałych). _Zauważ, że **stała** może być **przechowywana** w binarnym **lub tworzona** _**dynamicznie**._
-- **Klucz szyfrowania** musi być **podzielny** przez **16** (zwykle 32B) i zazwyczaj używa się **IV** o długości 16B.
+- Zastosowanie **tablic podstawień i lookup tables**
+- Można **odróżnić AES dzięki użyciu specyficznych wartości w tabelach lookup** (stałe). _Zauważ, że **stała** może być **przechowywana** w binarce **lub tworzona** **dynamicznie**._
+- **Klucz szyfrujący** powinien mieć długość będącą wielokrotnością **16** (zwykle 32B) i zwykle używany jest **IV** o długości 16B.
 
 ### Stałe SBox
 
 ![](<../../images/image (208).png>)
 
-## Serpent **(Symetryczna kryptografia)**
+## Serpent **(Symmetric Crypt)**
 
-### Cechy
+### Charakterystyka
 
-- Rzadko można znaleźć złośliwe oprogramowanie używające go, ale są przykłady (Ursnif)
-- Łatwo określić, czy algorytm to Serpent, czy nie, na podstawie jego długości (ekstremalnie długa funkcja)
+- Rzadko spotyka się malware używające go, ale istnieją przykłady (Ursnif)
+- Łatwo określić, czy algorytm to Serpent na podstawie jego długości (wyjątkowo długa funkcja)
 
 ### Identyfikacja
 
-Na poniższym obrazku zauważ, jak stała **0x9E3779B9** jest używana (zauważ, że ta stała jest również używana przez inne algorytmy kryptograficzne, takie jak **TEA** - Tiny Encryption Algorithm).\
-Zauważ także **rozmiar pętli** (**132**) oraz **liczbę operacji XOR** w instrukcjach **disassembly** i w przykładzie **kodu**:
+Na poniższym obrazie zwróć uwagę, jak użyto stałej **0x9E3779B9** (ta stała jest też używana przez inne algorytmy kryptograficzne jak **TEA** - Tiny Encryption Algorithm).\
+Zauważ też **rozmiar pętli** (**132**) oraz **liczbę operacji XOR** w instrukcjach disassembly i w przykładzie kodu:
 
 ![](<../../images/image (547).png>)
 
-Jak wspomniano wcześniej, ten kod można zobaczyć w dowolnym dekompilatorze jako **bardzo długą funkcję**, ponieważ **nie ma skoków** w jej wnętrzu. Zdekompilowany kod może wyglądać następująco:
+Jak wspomniano wcześniej, ten kod w dekompilatorze wygląda jak **bardzo długa funkcja**, ponieważ **brakuje w niej skoków**. Zdekompilowany kod może wyglądać następująco:
 
 ![](<../../images/image (513).png>)
 
-Dlatego możliwe jest zidentyfikowanie tego algorytmu, sprawdzając **magiczną liczbę** i **początkowe XORy**, widząc **bardzo długą funkcję** i **porównując** niektóre **instrukcje** długiej funkcji **z implementacją** (taką jak przesunięcie w lewo o 7 i obrót w lewo o 22).
+W związku z tym możliwe jest zidentyfikowanie tego algorytmu sprawdzając **liczbę magiczną** i **początkowe XORy**, widząc **bardzo długą funkcję** i **porównując** niektóre **instrukcje** tej funkcji z implementacją referencyjną (np. przesunięcie w lewo o 7 i rotacja w lewo o 22).
 
-## RSA **(Asymetryczna kryptografia)**
+## RSA **(Asymmetric Crypt)**
 
-### Cechy
+### Charakterystyka
 
-- Bardziej złożone niż algorytmy symetryczne
-- Nie ma stałych! (trudno określić niestandardowe implementacje)
-- KANAL (analityk kryptograficzny) nie pokazuje wskazówek dotyczących RSA, ponieważ opiera się na stałych.
+- Bardziej złożony niż algorytmy symetryczne
+- Brak stałych! (własne implementacje są trudne do rozpoznania)
+- KANAL (analizator kryptograficzny) nie potrafi wskazać wskazówek dotyczących RSA, ponieważ opiera się na stałych.
 
 ### Identyfikacja przez porównania
 
 ![](<../../images/image (1113).png>)
 
-- W linii 11 (po lewej) jest `+7) >> 3`, co jest takie samo jak w linii 35 (po prawej): `+7) / 8`
-- Linia 12 (po lewej) sprawdza, czy `modulus_len < 0x040`, a w linii 36 (po prawej) sprawdza, czy `inputLen+11 > modulusLen`
+- W linii 11 (lewo) jest `+7) >> 3` co jest takie samo jak w linii 35 (prawo): `+7) / 8`
+- Linia 12 (lewo) sprawdza czy `modulus_len < 0x040` a w linii 36 (prawo) sprawdza czy `inputLen+11 > modulusLen`
 
-## MD5 i SHA (hash)
+## MD5 & SHA (hash)
 
-### Cechy
+### Charakterystyka
 
 - 3 funkcje: Init, Update, Final
-- Podobne funkcje inicjalizacyjne
+- Podobne funkcje inicjalizujące
 
 ### Identyfikacja
 
 **Init**
 
-Możesz zidentyfikować obie, sprawdzając stałe. Zauważ, że sha_init ma 1 stałą, której MD5 nie ma:
+Możesz zidentyfikować oba sprawdzając stałe. Zauważ, że sha_init ma jedną stałą, której MD5 nie ma:
 
 ![](<../../images/image (406).png>)
 
 **MD5 Transform**
 
-Zauważ użycie większej liczby stałych
+Zwróć uwagę na użycie większej liczby stałych
 
 ![](<../../images/image (253) (1) (1).png>)
 
 ## CRC (hash)
 
-- Mniejszy i bardziej wydajny, ponieważ jego funkcją jest znajdowanie przypadkowych zmian w danych
-- Używa tabel wyszukiwania (więc możesz zidentyfikować stałe)
+- Mniejszy i wydajniejszy, ponieważ jego funkcją jest wykrywanie przypadkowych zmian w danych
+- Używa tabel lookup (więc możesz zidentyfikować po stałych)
 
 ### Identyfikacja
 
-Sprawdź **stałe tabeli wyszukiwania**:
+Sprawdź **stałe tabel lookup**:
 
 ![](<../../images/image (508).png>)
 
-Algorytm haszujący CRC wygląda jak:
+Algorytm CRC wygląda tak:
 
 ![](<../../images/image (391).png>)
 
-## APLib (Kompresja)
+## APLib (Compression)
 
-### Cechy
+### Charakterystyka
 
 - Brak rozpoznawalnych stałych
-- Możesz spróbować napisać algorytm w Pythonie i wyszukać podobne rzeczy w Internecie
+- Możesz spróbować napisać algorytm w Pythonie i wyszukać podobieństwa online
 
 ### Identyfikacja
 
-Wykres jest dość duży:
+Graf jest dość duży:
 
 ![](<../../images/image (207) (2) (1).png>)
 
 Sprawdź **3 porównania, aby go rozpoznać**:
 
 ![](<../../images/image (430).png>)
+
+## Błędy implementacji podpisów na krzywych eliptycznych
+
+### Egzekwowanie zakresu skalarnego w EdDSA ( podatność na modyfikowalność HashEdDSA )
+
+- FIPS 186-5 §7.8.2 wymaga, aby weryfikatory HashEdDSA rozdzielały podpis `sig = R || s` i odrzucały każdy skalar z `s \geq n`, gdzie `n` to rząd grupy. Biblioteka `elliptic` w JS pominęła tę kontrolę zakresu, więc każdy atakujący, który zna prawidłową parę `(msg, R || s)` może sfałszować alternatywne podpisy `s' = s + k·n` i dalej kodować `sig' = R || s'`.
+- Rutyny weryfikacyjne zużywają tylko `s mod n`, dlatego wszystkie `s'` kongruentne z `s` są akceptowane nawet jeśli są różnymi ciągami bajtów. Systemy traktujące podpisy jako kanoniczne tokeny (konsensus w blockchain, cache replay, klucze DB itd.) mogą zostać desynchronizowane, ponieważ ścisłe implementacje odrzucą `s'`.
+- Audytując inne implementacje HashEdDSA, upewnij się, że parser waliduje zarówno punkt `R`, jak i długość skalaru; spróbuj dopisać wielokrotności `n` do znanego poprawnego `s`, aby potwierdzić, że weryfikator poprawnie odrzuca takie przypadki.
+
+### Ucinanie ECDSA vs. hashe z wiodącymi zerami
+
+- Weryfikatory ECDSA muszą używać tylko lewostronnych `log2(n)` bitów hasha wiadomości `H`. W `elliptic` helper do ucinania obliczał `delta = (BN(msg).byteLength()*8) - bitlen(n)`; konstruktor `BN` usuwa wiodące zera oktetów, więc każdy hash zaczynający się od ≥4 zerowych bajtów na krzywych takich jak secp192r1 (rząd 192-bitowy) wydawał się mieć tylko 224 bity zamiast 256.
+- Weryfikator przesuwał w prawo o 32 bity zamiast 64, produkując `E`, które nie odpowiada wartości użytej przez podpisującego. Prawidłowe podpisy na tych hashach więc nie przechodzą weryfikacji z prawdopodobieństwem ≈`2^-32` dla wejść SHA-256.
+- Dostarcz zarówno „dobry” wektor testowy, jak i warianty z wiodącymi zerami (np. Wycheproof `ecdsa_secp192r1_sha256_test.json` przypadek `tc296`) do testowanej implementacji; jeśli weryfikator nie zgadza się z podpisującym, znalazłeś wykorzystywalny błąd ucinania.
+
+### Testowanie wektorów Wycheproof przeciw bibliotekom
+- Wycheproof dostarcza zestawy testów w JSON, które kodują nieprawidłowe punkty, modyfikowalne skalary, nietypowe hashe i inne przypadki brzegowe. Zbudowanie harnessu wokół `elliptic` (lub dowolnej biblioteki kryptograficznej) jest proste: załaduj JSON, zdeserializuj każdy przypadek testowy i sprawdź, czy implementacja zgadza się z oczekiwanym flagiem `result`.
+```javascript
+for (const tc of ecdsaVectors.testGroups) {
+const curve = new EC(tc.curve);
+const pub = curve.keyFromPublic(tc.key, 'hex');
+const ok = curve.verify(tc.msg, tc.sig, pub, 'hex', tc.msgSize);
+assert.strictEqual(ok, tc.result === 'valid');
+}
+```
+- Należy przeprowadzić triage błędów, aby odróżnić naruszenia specyfikacji od fałszywych alarmów. W przypadku dwóch powyższych błędów nieprawidłowe przypadki Wycheproof od razu wskazały na brak sprawdzeń zakresu skalarów (EdDSA) oraz nieprawidłowe obcinanie hasha (ECDSA).
+- Zintegruj harness z CI tak, aby regresje w parsowaniu skalarów, obsłudze hasha lub walidacji współrzędnych uruchamiały testy natychmiast po ich wprowadzeniu. Jest to szczególnie przydatne w językach wysokiego poziomu (JS, Python, Go), gdzie subtelne konwersje bignumów łatwo mogą być błędne.
+
+## References
+
+- [Trail of Bits - We found cryptography bugs in the elliptic library using Wycheproof](https://blog.trailofbits.com/2025/11/18/we-found-cryptography-bugs-in-the-elliptic-library-using-wycheproof/)
+- [Wycheproof Test Suite](https://github.com/C2SP/wycheproof)
 
 {{#include ../../banners/hacktricks-training.md}}
