@@ -699,7 +699,7 @@ Bu kontrolü kötüye kullanma hakkında daha fazla bilgi için:
 
 
 {{#ref}}
-dll-hijacking/writable-sys-path-+dll-hijacking-privesc.md
+dll-hijacking/writable-sys-path-dll-hijacking-privesc.md
 {{#endref}}
 
 ## Ağ

@@ -193,7 +193,7 @@ For a full guide on how to **abuse Dll Hijacking to escalate privileges** with p
 
 
 {{#ref}}
-writable-sys-path-+dll-hijacking-privesc.md
+writable-sys-path-dll-hijacking-privesc.md
 {{#endref}}
 
 ### Otomatik araçlar
