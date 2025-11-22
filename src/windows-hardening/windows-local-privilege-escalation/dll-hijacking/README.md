@@ -192,7 +192,7 @@ dumpbin /export /path/file.dll
 Für einen vollständigen Leitfaden, wie man **abuse Dll Hijacking to escalate privileges** mit Berechtigungen zum Schreiben in einem **System Path folder** nutzt, siehe:
 
 {{#ref}}
-writable-sys-path-+dll-hijacking-privesc.md
+writable-sys-path-dll-hijacking-privesc.md
 {{#endref}}
 
 ### Automated tools
