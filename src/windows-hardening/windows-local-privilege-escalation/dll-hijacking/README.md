@@ -193,7 +193,7 @@ Aby uzyskać pełny poradnik jak **abuse Dll Hijacking to escalate privileges** 
 
 
 {{#ref}}
-writable-sys-path-+dll-hijacking-privesc.md
+writable-sys-path-dll-hijacking-privesc.md
 {{#endref}}
 
 ### Zautomatyzowane narzędzia
