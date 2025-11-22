@@ -192,7 +192,7 @@ dumpbin /export /path/file.dll
 Para una guía completa sobre cómo **abusar Dll Hijacking para escalar privilegios** con permisos para escribir en una **carpeta del System Path** consulta:
 
 {{#ref}}
-writable-sys-path-+dll-hijacking-privesc.md
+writable-sys-path-dll-hijacking-privesc.md
 {{#endref}}
 
 ### Herramientas automatizadas

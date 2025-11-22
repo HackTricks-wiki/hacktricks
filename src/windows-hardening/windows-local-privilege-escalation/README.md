@@ -702,7 +702,7 @@ Para más información sobre cómo abusar de esta comprobación:
 
 
 {{#ref}}
-dll-hijacking/writable-sys-path-+dll-hijacking-privesc.md
+dll-hijacking/writable-sys-path-dll-hijacking-privesc.md
 {{#endref}}
 
 ## Red
