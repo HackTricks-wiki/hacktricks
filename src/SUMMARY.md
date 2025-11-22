@@ -256,7 +256,7 @@
   - [Create MSI with WIX](windows-hardening/windows-local-privilege-escalation/create-msi-with-wix.md)
   - [COM Hijacking](windows-hardening/windows-local-privilege-escalation/com-hijacking.md)
   - [Dll Hijacking](windows-hardening/windows-local-privilege-escalation/dll-hijacking/README.md)
-    - [Writable Sys Path +Dll Hijacking Privesc](windows-hardening/windows-local-privilege-escalation/dll-hijacking/writable-sys-path-+dll-hijacking-privesc.md)
+    - [Writable Sys Path +Dll Hijacking Privesc](windows-hardening/windows-local-privilege-escalation/dll-hijacking/writable-sys-path-dll-hijacking-privesc.md)
   - [DPAPI - Extracting Passwords](windows-hardening/windows-local-privilege-escalation/dpapi-extracting-passwords.md)
   - [From High Integrity to SYSTEM with Name Pipes](windows-hardening/windows-local-privilege-escalation/from-high-integrity-to-system-with-name-pipes.md)
   - [Integrity Levels](windows-hardening/windows-local-privilege-escalation/integrity-levels.md)
