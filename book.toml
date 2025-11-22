@@ -18,6 +18,7 @@ env = "prod"
 additional-css = ["theme/tabs.css", "theme/pagetoc.css"]
 additional-js = [
     "theme/tabs.js",
+    "theme/pagetoc.js",
     "theme/ht_searcher.js",
     "theme/sponsor.js",
     "theme/ai.js"
