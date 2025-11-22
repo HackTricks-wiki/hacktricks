@@ -700,7 +700,7 @@ for %%A in ("%path:;=";"%") do ( cmd.exe /c icacls "%%~A" 2>nul | findstr /i "(F
 Pour plus d'informations sur la façon d'abuser de ce check :
 
 {{#ref}}
-dll-hijacking/writable-sys-path-+dll-hijacking-privesc.md
+dll-hijacking/writable-sys-path-dll-hijacking-privesc.md
 {{#endref}}
 
 ## Réseau
