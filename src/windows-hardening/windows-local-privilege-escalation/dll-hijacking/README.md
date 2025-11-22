@@ -191,7 +191,7 @@ dumpbin /export /path/file.dll
 यदि आप **System Path folder** में लिखने की permissions रखते हैं तो **abuse Dll Hijacking to escalate privileges** करने के लिए पूरी गाइड देखें:
 
 {{#ref}}
-writable-sys-path-+dll-hijacking-privesc.md
+writable-sys-path-dll-hijacking-privesc.md
 {{#endref}}
 
 ### ऑटोमेटेड टूल्स
