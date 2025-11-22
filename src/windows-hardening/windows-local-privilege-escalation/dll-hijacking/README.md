@@ -193,7 +193,7 @@ dumpbin /export /path/file.dll
 
 
 {{#ref}}
-writable-sys-path-+dll-hijacking-privesc.md
+writable-sys-path-dll-hijacking-privesc.md
 {{#endref}}
 
 ### Αυτοματοποιημένα εργαλεία
