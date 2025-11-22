@@ -193,7 +193,7 @@ Para um guia completo sobre como **abusar Dll Hijacking para escalar privilégio
 
 
 {{#ref}}
-writable-sys-path-+dll-hijacking-privesc.md
+writable-sys-path-dll-hijacking-privesc.md
 {{#endref}}
 
 ### Ferramentas automatizadas
