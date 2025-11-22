@@ -193,7 +193,7 @@ Per una guida completa su come **abusare Dll Hijacking per ottenere privilegi el
 
 
 {{#ref}}
-writable-sys-path-+dll-hijacking-privesc.md
+writable-sys-path-dll-hijacking-privesc.md
 {{#endref}}
 
 ### Strumenti automatici
