@@ -193,7 +193,7 @@ Kwa mwongozo kamili wa jinsi ya **abuse Dll Hijacking to escalate privileges** u
 
 
 {{#ref}}
-writable-sys-path-+dll-hijacking-privesc.md
+writable-sys-path-dll-hijacking-privesc.md
 {{#endref}}
 
 ### Zana za otomatiki
