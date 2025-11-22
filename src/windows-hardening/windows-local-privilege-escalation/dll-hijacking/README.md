@@ -191,7 +191,7 @@ dumpbin /export /path/file.dll
 有关如何在具有写入 **System Path folder** 权限的情况下，完整地 **abuse Dll Hijacking to escalate privileges** 的指南，请查看：
 
 {{#ref}}
-writable-sys-path-+dll-hijacking-privesc.md
+writable-sys-path-dll-hijacking-privesc.md
 {{#endref}}
 
 ### Automated tools
