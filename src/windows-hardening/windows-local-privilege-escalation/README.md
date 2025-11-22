@@ -701,7 +701,7 @@ Vir meer inligting oor hoe om hierdie kontrole te misbruik:
 
 
 {{#ref}}
-dll-hijacking/writable-sys-path-+dll-hijacking-privesc.md
+dll-hijacking/writable-sys-path-dll-hijacking-privesc.md
 {{#endref}}
 
 ## Netwerk

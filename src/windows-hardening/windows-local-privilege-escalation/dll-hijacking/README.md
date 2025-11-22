@@ -191,7 +191,7 @@ dumpbin /export /path/file.dll
 Vir 'n volledige gids oor hoe om **Dll Hijacking te misbruik om privilegies te verhoog** met permissies om in 'n **System Path folder** te skryf, kyk:
 
 {{#ref}}
-writable-sys-path-+dll-hijacking-privesc.md
+writable-sys-path-dll-hijacking-privesc.md
 {{#endref}}
 
 ### Automated tools
