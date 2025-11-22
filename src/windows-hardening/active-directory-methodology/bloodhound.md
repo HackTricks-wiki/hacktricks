@@ -67,6 +67,28 @@ The collectors generate JSON which is ingested via the BloodHound GUI.
 
 ---
 
+## Prioritising Kerberoasting with BloodHound
+
+Graph context is vital to avoid noisy, indiscriminate roasting. A lightweight workflow:
+
+1. **Collect everything once** using an ADWS-compatible collector (e.g. RustHound-CE) so you can work offline and rehearse paths without touching the DC again:
+
+```bash
+rusthound-ce -d corp.local -u svc.collector -p 'Passw0rd!' -c All -z
+```
+
+2. **Import the ZIP, mark the compromised principal as owned**, then run built-in queries such as *Kerberoastable Users* and *Shortest Paths to Domain Admins*. This instantly highlights SPN-bearing accounts with useful group memberships (Exchange, IT, tier0 service accounts, etc.).
+3. **Prioritise by blast radius** – focus on SPNs that control shared infrastructure or have admin rights, and check `pwdLastSet`, `lastLogon`, and allowed encryption types before spending cracking cycles.
+4. **Request only the tickets you care about**. Tools like NetExec can target selected `sAMAccountName`s so that each LDAP ROAST request has a clear justification:
+
+```bash
+netexec ldap dc01.corp.local -u svc.collector -p 'Passw0rd!' --kerberoasting kerberoast.txt --spn svc-sql
+```
+
+5. **Crack offline**, then immediately re-query BloodHound to plan post-exploitation with the new privileges.
+
+This approach keeps the signal-to-noise ratio high, reduces detectable volume (no mass SPN requests), and ensures that every cracked ticket translates to meaningful privilege escalation steps.
+
 ## Group3r
 
 [Group3r](https://github.com/Group3r/Group3r) enumerates **Group Policy Objects** and highlights misconfigurations.
@@ -85,5 +107,10 @@ Group3r.exe -f gpo.log   # -s to stdout
 ```powershell
 PingCastle.exe --healthcheck --server corp.local --user bob --password "P@ssw0rd!"
 ```
+
+## References
+
+- [HackTheBox Mirage: Chaining NFS Leaks, Dynamic DNS Abuse, NATS Credential Theft, JetStream Secrets, and Kerberoasting](https://0xdf.gitlab.io/2025/11/22/htb-mirage.html)
+- [RustHound-CE](https://github.com/g0h4n/RustHound-CE)
 
 {{#include ../../banners/hacktricks-training.md}}
