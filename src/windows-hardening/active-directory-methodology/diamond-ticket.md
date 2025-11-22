@@ -4,33 +4,33 @@
 
 ## Diamond Ticket
 
-**Like a golden ticket**, a diamond ticket は、任意のユーザーとして任意のサービスにアクセスするために使用できる TGT です。golden ticket は完全にオフラインで偽造され、そのドメインの krbtgt ハッシュで暗号化されてからログオン セッションに注入されます。ドメイン コントローラーは自分が正当に発行した TGT を追跡しないため、krbtgt ハッシュで暗号化された TGT を喜んで受け入れます。
+**golden ticket のように**、diamond ticket は任意のユーザーとして**任意のサービスにアクセスする**ために使用できる TGT です。golden ticket は完全にオフラインで偽造され、当該ドメインの krbtgt hash で暗号化されてからログオンセッションに渡されて使用されます。ドメインコントローラーは実際に発行した TGT を追跡しないため、自ドメインの krbtgt hash で暗号化された TGT を喜んで受け入れます。
 
-golden ticket の使用を検出する一般的な手法は次の二つです:
+golden ticket の使用を検出する一般的な手法は二つあります:
 
-- 対応する AS-REQ のない TGS-REQ を探す。
-- Mimikatz のデフォルトの 10-year lifetime のような不自然な TGT を探す。
+- 対応する AS-REQ がない TGS-REQ を探す。
+- Mimikatz のデフォルトの10年の有効期間のような、不自然な値を持つ TGT を探す。
 
-diamond ticket は DC によって発行された正当な TGT のフィールドを変更して作成されます。これは、TGT を要求し（requesting）、ドメインの krbtgt キーで復号し（decrypting）、チケットの目的のフィールドを修正し（modifying）、再暗号化する（re-encrypting）ことで達成されます。これにより golden ticket の上記二つの欠点を克服できます:
+diamond ticket は、DC によって発行された正規の TGT のフィールドを修正することで作成されます。これは TGT をリクエストし、その TGT をドメインの krbtgt hash で復号してチケットの必要なフィールドを修正し、再度暗号化することで実現します。これにより golden ticket の前述の二つの欠点を克服できます。理由は以下のとおりです:
 
-- TGS-REQ には前段の AS-REQ が存在する。
-- TGT は DC によって発行されるため、domain の Kerberos ポリシーから正しい詳細をすべて含みます。これらは golden ticket でも正確に偽造できますが、より複雑でミスが起きやすいです。
+- TGS-REQ には先行する AS-REQ が存在します。
+- TGT が DC によって発行されているため、ドメインの Kerberos ポリシーに基づく正しい詳細情報をすべて含んでいます。これらは golden ticket でも正確に偽造可能ですが、より複雑でミスが生じやすくなります。
 
-### Requirements & workflow
+### 要件 & ワークフロー
 
-- **Cryptographic material**: TGT を復号／再署名するための krbtgt AES256 key（推奨）または NTLM hash。
-- **Legitimate TGT blob**: `/tgtdeleg`, `asktgt`, `s4u`、またはメモリからのチケットエクスポートで取得したもの。
-- **Context data**: 対象ユーザーの RID、グループの RIDs/SIDs、（オプションで）LDAP から取得した PAC 属性。
-- **Service keys**（service ticket を再発行する場合のみ）: 乗っ取り対象のサービス SPN の AES key。
+- **Cryptographic material**: krbtgt AES256 key（推奨）または NTLM hash — TGT を復号し再署名するために必要です。
+- **Legitimate TGT blob**: `/tgtdeleg`、`asktgt`、`s4u` で取得するか、メモリからチケットをエクスポートして得ます。
+- **Context data**: 対象ユーザーの RID、グループの RIDs/SIDs、（任意で）LDAP に由来する PAC 属性。
+- **Service keys**（service ticket を再作成する予定がある場合のみ）: 代行するサービス SPN の AES key。
 
-1. AS-REQ により制御下の任意のユーザーの TGT を取得する（Rubeus の `/tgtdeleg` はクライアントに資格情報なしで Kerberos GSS-API ダンスを強制させるので便利）。
-2. 返された TGT を krbtgt キーで復号し、PAC 属性（ユーザー、グループ、ログオン情報、SIDs、デバイスクレーム等）をパッチする。
-3. 同じ krbtgt キーでチケットを再暗号化／署名し、現在のログオン セッションに注入する（`kerberos::ptt`, `Rubeus.exe ptt` 等）。
-4. 必要に応じて、有効な TGT blob と対象サービスキーを使って service ticket に対して同じ処理を行い、ワイヤ上でのステルス性を保つ。
+1. 管理下の任意のユーザーの TGT を AS-REQ 経由で取得します（Rubeus の `/tgtdeleg` は、クライアントを資格情報なしで Kerberos GSS-API ダンスを実行させるため便利です）。
+2. 返却された TGT を krbtgt key で復号し、PAC 属性（ユーザー、グループ、ログオン情報、SIDs、デバイスクレームなど）を修正します。
+3. 同じ krbtgt key でチケットを再暗号化／署名し、現在のログオンセッションに注入します（`kerberos::ptt`、`Rubeus.exe ptt`...）。
+4. オプションで、有線上での痕跡を残さないために、有効な TGT blob とターゲットサービスキーを供給して同様の手順を service ticket に対して繰り返します。
 
 ### Updated Rubeus tradecraft (2024+)
 
-Huntress による最近の作業は、Rubeus の内部にある `diamond` アクションを近代化し、以前は golden/silver tickets のみに存在した `/ldap` と `/opsec` の改善点を移植しました。`/ldap` は AD から直接正確な PAC 属性（ユーザープロファイル、logon hours、sidHistory、ドメインポリシー）を自動入力し、`/opsec` は二段階の pre-auth シーケンスを実行して AES-only crypto を強制することで AS-REQ/AS-REP フローを Windows クライアントと見分けがつかないものにします。これにより、空白の device IDs や非現実的な有効期間などの明白な指標が大幅に減少します。
+Huntress による最近の作業で、Rubeus 内の `diamond` アクションが近代化され、以前は golden/silver tickets にしか存在しなかった `/ldap` と `/opsec` の改善が取り込まれました。`/ldap` は現在 AD から正確な PAC 属性（ユーザープロファイル、ログオン時間、sidHistory、ドメインポリシー）を自動で入力し、`/opsec` は二段階の事前認証シーケンスを実行し AES-only crypto を強制することで AS-REQ/AS-REP のフローを Windows クライアントと区別がつかないものにします。これにより、空のデバイス ID や現実的でない有効期間といった明白な指標が劇的に減少します。
 ```powershell
 # Query RID/context data (PowerView/SharpView/AD modules all work)
 Get-DomainUser -Identity <username> -Properties objectsid | Select-Object samaccountname,objectsid
@@ -43,13 +43,13 @@ Get-DomainUser -Identity <username> -Properties objectsid | Select-Object samacc
 /ldap /ldapuser:MARVEL\loki /ldappassword:Mischief$ \
 /opsec /nowrap
 ```
-- `/ldap`（オプションの `/ldapuser` および `/ldappassword` と共に）は AD と SYSVOL を照会して、ターゲットユーザーの PAC ポリシーデータをミラーします。
+- `/ldap` (with optional `/ldapuser` & `/ldappassword`) は AD と SYSVOL を照会して対象ユーザーの PAC ポリシーのデータをミラーリングします。
 - `/opsec` は Windows ライクな AS-REQ リトライを強制し、ノイズの多いフラグをゼロ化し、AES256 を使用します。
-- `/tgtdeleg` は被害者の cleartext password や NTLM/AES キーに触れずに、復号可能な TGT を返します。
+- `/tgtdeleg` は被害者の cleartext password や NTLM/AES key に触れずに、復号可能な TGT を返します。
 
-### Service-ticket recutting
+### サービスチケットの再生成
 
-同じ Rubeus のリフレッシュで、diamond technique を TGS blobs に適用する機能が追加されました。`diamond` に **base64-encoded TGT**（`asktgt`、`/tgtdeleg`、または以前に偽造した TGT から）、**service SPN**、および **service AES key** を与えることで、KDC に触れることなく現実的なサービスチケットを作成でき—事実上よりステルスな silver ticket になります。
+同じ Rubeus の刷新で、diamond technique を TGS blobs に適用する機能も追加されました。`diamond` に **base64-encoded TGT**（`asktgt`、`/tgtdeleg`、または以前に偽造した TGT から）、**service SPN**、および **service AES key** を与えることで、KDC に触れずに現実味のあるサービスチケットを生成できます — 実質的によりステルスな silver ticket。
 ```powershell
 .\Rubeus.exe diamond \
 /ticket:<BASE64_TGT_OR_KRB-CRED> \
@@ -58,13 +58,13 @@ Get-DomainUser -Identity <username> -Properties objectsid | Select-Object samacc
 /ticketuser:svc_sql /ticketuserid:1109 \
 /ldap /opsec /nowrap
 ```
-このワークフローは、すでにサービスアカウントのキー（例：`lsadump::lsa /inject` や `secretsdump.py` でダンプしたもの）を掌握しており、新たな AS/TGS トラフィックを発生させずに、AD ポリシー、タイムライン、PAC データに完全に一致する一回限りの TGS を作成したい場合に理想的です。
+このワークフローは、既にサービスアカウントのキーを掌握している（例: `lsadump::lsa /inject` や `secretsdump.py` でダンプした）場合に理想的です。新たに AS/TGS トラフィックを発生させることなく、AD ポリシー、タイムライン、PAC データに完全に一致する一回限りの TGS を作成したいときに向いています。
 
-### OPSEC と検出に関する注意
+### OPSEC & 検出に関する注意事項
 
-- 従来の検出ヒューリスティック（AS なしの TGS、10 年単位の有効期間など）は golden tickets に対しても有効ですが、diamond tickets は主に **PAC の内容やグループマッピングがあり得ないように見える場合** に表面化します。自動比較で偽造が即座に検出されないよう、すべての PAC フィールド（logon hours、user profile paths、device IDs）を埋めてください。
-- **groups/RIDs を過剰に割り当てないこと**。`512`（Domain Admins）や `519`（Enterprise Admins）だけで足りるならそこで止め、ターゲットアカウントが AD の他の場所でも妥当にこれらのグループに属していることを確認してください。過剰な `ExtraSids` は明らかな手がかりです。
-- Splunk の Security Content プロジェクトは、diamond tickets に関する attack-range テレメトリや、*Windows Domain Admin Impersonation Indicator* のような検出（異常な Event ID 4768/4769/4624 の連続や PAC グループの変更を相関させるもの）を配布しています。上記コマンドでそのデータセットを再生するか自前で生成することで、T1558.001 に対する SOC のカバレッジを検証でき、回避のための具体的なアラートロジックも得られます。
+- 伝統的なハンターのヒューリスティクス（AS なしの TGS、10年単位の有効期間）は golden tickets にも依然として当てはまりますが、diamond tickets は主に **PAC の内容やグループマッピングが不可能に見える** 場合に表面化します。自動比較で即座に偽造と判定されないよう、すべての PAC フィールド（ログオン時間、ユーザープロファイルパス、デバイス ID）を埋めてください。
+- **groups/RIDs を過剰に割り当てないでください**。必要なのが `512` (Domain Admins) と `519` (Enterprise Admins) のみであればそこで止め、対象アカウントが AD の他所でそれらのグループに存在することがもっともらしく見えるか確認してください。過剰な `ExtraSids` はバレる原因です。
+- Splunk の Security Content プロジェクトは、diamond tickets 用の attack-range テレメトリと、*Windows Domain Admin Impersonation Indicator* のような検出ルールを配布しています。これらは異常な Event ID 4768/4769/4624 の連続や PAC のグループ変更を相関させます。そのデータセットを再生する（または上記コマンドで自分で生成する）ことで、T1558.001 に対する SOC のカバレッジを検証し、回避のための具体的なアラートロジックを得ることができます。
 
 ## 参考
 
