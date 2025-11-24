@@ -398,6 +398,7 @@
   - [iOS Universal Links](mobile-pentesting/ios-pentesting/ios-universal-links.md)
   - [iOS UIPasteboard](mobile-pentesting/ios-pentesting/ios-uipasteboard.md)
   - [iOS WebViews](mobile-pentesting/ios-pentesting/ios-webviews.md)
+  - [Itunesstored Bookassetd Sandbox Escape](mobile-pentesting/ios-pentesting/itunesstored-bookassetd-sandbox-escape.md)
 - [Cordova Apps](mobile-pentesting/cordova-apps.md)
 - [Xamarin Apps](mobile-pentesting/xamarin-apps.md)
 
