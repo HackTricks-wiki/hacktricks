@@ -1,25 +1,25 @@
-# PID Namespace
+# Przestrzeń nazw PID
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
 ## Podstawowe informacje
 
-Namespace PID (Process IDentifier) to funkcja w jądrze Linux, która zapewnia izolację procesów, umożliwiając grupie procesów posiadanie własnego zestawu unikalnych PID-ów, oddzielonych od PID-ów w innych namespace'ach. Jest to szczególnie przydatne w konteneryzacji, gdzie izolacja procesów jest niezbędna dla bezpieczeństwa i zarządzania zasobami.
+Przestrzeń nazw PID (PID — Process IDentifier) to funkcja w jądrze Linuxa, która zapewnia izolację procesów poprzez umożliwienie grupie procesów posiadania własnego zestawu unikalnych PID-ów, oddzielnych od PID-ów w innych przestrzeniach nazw. Jest to szczególnie przydatne w konteneryzacji, gdzie izolacja procesów jest kluczowa dla bezpieczeństwa i zarządzania zasobami.
 
-Gdy tworzony jest nowy namespace PID, pierwszy proces w tym namespace otrzymuje PID 1. Ten proces staje się procesem "init" nowego namespace i jest odpowiedzialny za zarządzanie innymi procesami w obrębie namespace. Każdy kolejny proces utworzony w namespace będzie miał unikalny PID w tym namespace, a te PID-y będą niezależne od PID-ów w innych namespace'ach.
+Gdy tworzona jest nowa przestrzeń nazw PID, pierwszy proces w tej przestrzeni otrzymuje PID 1. Proces ten staje się procesem "init" nowej przestrzeni nazw i odpowiada za zarządzanie innymi procesami w obrębie tej przestrzeni. Każdy kolejny proces utworzony w tej przestrzeni będzie miał unikalny PID w tej przestrzeni, a te PID-y będą niezależne od PID-ów w innych przestrzeniach nazw.
 
-Z perspektywy procesu w namespace PID, może on widzieć tylko inne procesy w tym samym namespace. Nie jest świadomy procesów w innych namespace'ach i nie może z nimi interagować za pomocą tradycyjnych narzędzi do zarządzania procesami (np. `kill`, `wait` itp.). Zapewnia to poziom izolacji, który pomaga zapobiegać zakłóceniom między procesami.
+Z perspektywy procesu znajdującego się w przestrzeni nazw PID, widoczne są tylko inne procesy w tej samej przestrzeni nazw. Nie jest on świadomy procesów w innych przestrzeniach nazw i nie może wchodzić z nimi w interakcję przy użyciu tradycyjnych narzędzi do zarządzania procesami (np. `kill`, `wait` itp.). Zapewnia to poziom izolacji, który pomaga zapobiegać wzajemnemu zakłócaniu się procesów.
 
 ### Jak to działa:
 
-1. Gdy nowy proces jest tworzony (np. za pomocą wywołania systemowego `clone()`), proces może być przypisany do nowego lub istniejącego namespace PID. **Jeśli tworzony jest nowy namespace, proces staje się procesem "init" tego namespace**.
-2. **Jądro** utrzymuje **mapowanie między PID-ami w nowym namespace a odpowiadającymi PID-ami** w namespace rodzicu (tj. namespace, z którego utworzono nowy namespace). To mapowanie **pozwala jądru na tłumaczenie PID-ów w razie potrzeby**, na przykład podczas wysyłania sygnałów między procesami w różnych namespace'ach.
-3. **Procesy w namespace PID mogą widzieć i interagować tylko z innymi procesami w tym samym namespace**. Nie są świadome procesów w innych namespace'ach, a ich PID-y są unikalne w obrębie ich namespace.
-4. Gdy **namespace PID jest niszczony** (np. gdy proces "init" namespace kończy działanie), **wszystkie procesy w tym namespace są kończone**. Zapewnia to, że wszystkie zasoby związane z namespace są odpowiednio sprzątane.
+1. Gdy tworzony jest nowy proces (np. przy użyciu wywołania systemowego `clone()`), proces może zostać przypisany do nowej lub istniejącej przestrzeni nazw PID. **Jeśli tworzona jest nowa przestrzeń nazw, proces staje się procesem "init" tej przestrzeni**.
+2. **Jądro** utrzymuje **mapowanie między PID-ami w nowej przestrzeni nazw a odpowiadającymi im PID-ami** w przestrzeni nadrzędnej (tzn. w przestrzeni, z której utworzono nową przestrzeń nazw). To mapowanie **pozwala jądru tłumaczyć PID-y w razie potrzeby**, na przykład podczas wysyłania sygnałów między procesami w różnych przestrzeniach nazw.
+3. **Procesy w obrębie przestrzeni nazw PID mogą widzieć i wchodzić w interakcję tylko z innymi procesami w tej samej przestrzeni nazw**. Nie są świadome procesów w innych przestrzeniach nazw, a ich PID-y są unikalne w obrębie ich przestrzeni.
+4. Gdy **przestrzeń nazw PID zostaje zniszczona** (np. gdy proces "init" tej przestrzeni zakończy działanie), **wszystkie procesy w tej przestrzeni zostają zakończone**. Zapewnia to poprawne posprzątanie wszystkich zasobów związanych z przestrzenią nazw.
 
 ## Laboratorium:
 
-### Tworzenie różnych namespace'ów
+### Utwórz różne przestrzenie nazw
 
 #### CLI
 ```bash
@@ -27,29 +27,29 @@ sudo unshare -pf --mount-proc /bin/bash
 ```
 <details>
 
-<summary>Błąd: bash: fork: Nie można przydzielić pamięci</summary>
+<summary>Error: bash: fork: Cannot allocate memory</summary>
 
-Gdy `unshare` jest wykonywane bez opcji `-f`, napotykany jest błąd z powodu sposobu, w jaki Linux obsługuje nowe przestrzenie nazw PID (identyfikator procesu). Kluczowe szczegóły i rozwiązanie są opisane poniżej:
+Kiedy `unshare` jest uruchamiany bez opcji `-f`, pojawia się błąd spowodowany sposobem, w jaki Linux obsługuje nowe przestrzenie nazw PID (Process ID). Poniżej przedstawiono kluczowe informacje i rozwiązanie:
 
 1. **Wyjaśnienie problemu**:
 
-- Jądro Linuxa pozwala procesowi na tworzenie nowych przestrzeni nazw za pomocą wywołania systemowego `unshare`. Jednak proces, który inicjuje tworzenie nowej przestrzeni nazw PID (nazywany "procesem unshare"), nie wchodzi do nowej przestrzeni nazw; tylko jego procesy potomne to robią.
-- Uruchomienie `%unshare -p /bin/bash%` uruchamia `/bin/bash` w tym samym procesie co `unshare`. W konsekwencji, `/bin/bash` i jego procesy potomne znajdują się w oryginalnej przestrzeni nazw PID.
-- Pierwszy proces potomny `/bin/bash` w nowej przestrzeni nazw staje się PID 1. Gdy ten proces kończy działanie, uruchamia czyszczenie przestrzeni nazw, jeśli nie ma innych procesów, ponieważ PID 1 ma specjalną rolę przyjmowania osieroconych procesów. Jądro Linuxa wyłączy wtedy przydzielanie PID w tej przestrzeni nazw.
+- Jądro Linuxa pozwala procesowi tworzyć nowe przestrzenie nazw za pomocą wywołania systemowego `unshare`. Jednak proces, który inicjuje utworzenie nowej przestrzeni nazw PID (określany jako "unshare"), nie wchodzi do tej nowej przestrzeni nazw; robią to tylko jego procesy potomne.
+- Uruchomienie %unshare -p /bin/bash% uruchamia `/bin/bash` w tym samym procesie co `unshare`. W konsekwencji `/bin/bash` i jego procesy potomne znajdują się w oryginalnej przestrzeni nazw PID.
+- Pierwszy proces potomny `/bin/bash` w nowej przestrzeni nazw staje się PID 1. Gdy ten proces zakończy działanie, jeśli nie ma innych procesów, powoduje to sprzątanie przestrzeni nazw, ponieważ PID 1 ma specjalną rolę adoptowania procesów osieroconych. Jądro Linux wyłączy wtedy alokację PID w tej przestrzeni nazw.
 
 2. **Konsekwencja**:
 
-- Zakończenie PID 1 w nowej przestrzeni nazw prowadzi do wyczyszczenia flagi `PIDNS_HASH_ADDING`. Skutkuje to niepowodzeniem funkcji `alloc_pid` w przydzieleniu nowego PID podczas tworzenia nowego procesu, co skutkuje błędem "Nie można przydzielić pamięci".
+- Wyjście PID 1 w nowej przestrzeni nazw powoduje wyczyszczenie flagi PIDNS_HASH_ADDING. To sprawia, że funkcja `alloc_pid` nie może przydzielić nowego PID przy tworzeniu nowego procesu, co skutkuje błędem "Cannot allocate memory".
 
 3. **Rozwiązanie**:
-- Problem można rozwiązać, używając opcji `-f` z `unshare`. Ta opcja sprawia, że `unshare` fork'uje nowy proces po utworzeniu nowej przestrzeni nazw PID.
-- Wykonanie `%unshare -fp /bin/bash%` zapewnia, że polecenie `unshare` samo staje się PID 1 w nowej przestrzeni nazw. `/bin/bash` i jego procesy potomne są następnie bezpiecznie zawarte w tej nowej przestrzeni nazw, co zapobiega przedwczesnemu zakończeniu PID 1 i umożliwia normalne przydzielanie PID.
+- Problem można rozwiązać, używając opcji `-f` z `unshare`. Ta opcja powoduje, że `unshare` wykonuje fork nowego procesu po utworzeniu nowej przestrzeni nazw PID.
+- Uruchomienie %unshare -fp /bin/bash% zapewnia, że sam `unshare` staje się PID 1 w nowej przestrzeni nazw. `/bin/bash` i jego procesy potomne są wtedy bezpiecznie osadzone w tej przestrzeni, co zapobiega przedwczesnemu zakończeniu PID 1 i pozwala na normalną alokację PID.
 
-Zapewniając, że `unshare` działa z flagą `-f`, nowa przestrzeń nazw PID jest prawidłowo utrzymywana, co pozwala na działanie `/bin/bash` i jego podprocesów bez napotkania błędu przydzielania pamięci.
+Upewniając się, że `unshare` działa z flagą `-f`, nowa przestrzeń nazw PID jest poprawnie utrzymywana, co pozwala `/bin/bash` i jego procesom potomnym działać bez napotkania błędu alokacji pamięci.
 
 </details>
 
-Montaż nowej instancji systemu plików `/proc`, jeśli użyjesz parametru `--mount-proc`, zapewnia, że nowa przestrzeń nazw montowania ma **dokładny i izolowany widok informacji o procesach specyficznych dla tej przestrzeni nazw**.
+Montując nową instancję systemu plików `/proc` przy użyciu parametru `--mount-proc`, zapewniasz, że nowa przestrzeń nazw montowania ma **dokładny i odizolowany widok informacji o procesach specyficznych dla tej przestrzeni nazw**.
 
 #### Docker
 ```bash
@@ -64,18 +64,51 @@ lrwxrwxrwx 1 root root 0 Apr  3 18:45 /proc/self/ns/pid -> 'pid:[4026532412]'
 ```bash
 sudo find /proc -maxdepth 3 -type l -name pid -exec readlink {} \; 2>/dev/null | sort -u
 ```
-Zauważ, że użytkownik root z początkowej (domyślnej) przestrzeni nazw PID może widzieć wszystkie procesy, nawet te w nowych przestrzeniach nazw PID, dlatego możemy zobaczyć wszystkie przestrzenie nazw PID.
+Zauważ, że użytkownik root z początkowej (domyślnej) PID namespace może zobaczyć wszystkie procesy, nawet te w nowych PID namespace'ach, dlatego możemy zobaczyć wszystkie PID namespaces.
 
-### Wejście do przestrzeni nazw PID
+### Wejdź do PID namespace
 ```bash
 nsenter -t TARGET_PID --pid /bin/bash
 ```
-Kiedy wchodzisz do przestrzeni nazw PID z domyślnej przestrzeni, nadal będziesz mógł zobaczyć wszystkie procesy. A proces z tej przestrzeni PID będzie mógł zobaczyć nowego basha w przestrzeni PID.
+Kiedy wejdziesz do przestrzeni PID z domyślnej przestrzeni nazw, nadal będziesz widzieć wszystkie procesy. Proces z tej przestrzeni PID będzie też widział nowy bash w tej przestrzeni PID.
 
-Również możesz **wejść do innej przestrzeni nazw PID tylko jeśli jesteś rootem**. I **nie możesz** **wejść** do innej przestrzeni **bez deskryptora** wskazującego na nią (jak `/proc/self/ns/pid`)
+Ponadto możesz **wejść do innej przestrzeni PID procesu tylko jeśli jesteś rootem**. I **nie możesz** **wejść** do innej przestrzeni **bez deskryptora** wskazującego na nią (np. `/proc/self/ns/pid`)
+
+## Najnowsze uwagi dotyczące eksploatacji
+
+### CVE-2025-31133: wykorzystywanie `maskedPaths` do dostępu do PID-ów hosta
+
+runc ≤1.2.7 pozwalał atakującym, którzy kontrolowali obrazy kontenerów lub workloady uruchamiane przez `runc exec`, zastąpić po stronie kontenera `/dev/null` tuż przed tym, jak runtime maskował wrażliwe wpisy procfs. Gdy wyścig się powiedzie, `/dev/null` może zostać zamieniony na symlink wskazujący na dowolną ścieżkę hosta (na przykład `/proc/sys/kernel/core_pattern`), więc nowy namespace PID kontenera nagle dziedziczy dostęp do odczytu/zapisu globalnych ustawień procfs hosta, mimo że nigdy nie opuścił własnej przestrzeni nazw. Gdy `core_pattern` lub `/proc/sysrq-trigger` będzie zapisywalny, wygenerowanie coredumpa lub wywołanie SysRq daje wykonanie kodu lub denial of service w przestrzeni PID hosta.
+
+Praktyczny przebieg:
+
+1. Zbuduj OCI bundle, którego rootfs zastępuje `/dev/null` linkiem do ścieżki hosta, której potrzebujesz (`ln -sf /proc/sys/kernel/core_pattern rootfs/dev/null`).
+2. Uruchom kontener przed załataniem, tak aby runc bind-mountował docelowy plik procfs hosta nad tym linkiem.
+3. W obrębie namespace kontenera zapisz do teraz-ujawnionego pliku procfs (np. ustaw `core_pattern` na helper reverse shell) i spowoduj awarię dowolnego procesu, aby zmusić jądro hosta do wykonania twojego helpera w kontekście PID 1.
+
+Możesz szybko sprawdzić, czy bundle maskuje odpowiednie pliki przed jego uruchomieniem:
+```bash
+jq '.linux.maskedPaths' config.json | tr -d '"'
+```
+Jeśli w środowisku uruchomieniowym brakuje oczekiwanego wpisu maskującego (lub zostanie on pominięty, ponieważ `/dev/null` zniknął), traktuj kontener jako mogący mieć widoczność PID hosta.
+
+### Iniekcja przestrzeni nazw za pomocą `insject`
+
+`insject` firmy NCC Group ładuje się jako ładunek LD_PRELOAD, który hookuje późny etap w docelowym programie (domyślnie `main`) i wykonuje sekwencję wywołań `setns()` po `execve()`. To pozwala na dołączenie z hosta (lub innego kontenera) do przestrzeni PID ofiary *po* inicjalizacji jej runtime, zachowując widok `/proc/<pid>` bez konieczności kopiowania binarek do systemu plików kontenera. Ponieważ `insject` może odroczyć dołączenie do przestrzeni PID aż do fork(), możesz utrzymać jeden wątek w namespace hosta (z CAP_SYS_PTRACE), podczas gdy inny wątek wykonuje się w docelowej przestrzeni PID, tworząc potężne prymitywy debugowania lub ofensywne.
+
+Przykładowe użycie:
+```bash
+sudo insject -S -p $(pidof containerd-shim) -- bash -lc 'readlink /proc/self/ns/pid && ps -ef'
+```
+Najważniejsze wnioski dotyczące wykorzystywania lub obrony przed namespace injection:
+
+- Użyj `-S/--strict`, aby wymusić, by `insject` przerwał, jeśli wątki już istnieją lub dołączenia namespace zakończą się niepowodzeniem — w przeciwnym razie możesz pozostawić częściowo migrowane wątki obejmujące przestrzenie PID hosta i kontenera.
+- Nigdy nie dołączaj narzędzi, które nadal trzymają zapisywalne deskryptory plików hosta, chyba że dołączysz też mount namespace — w przeciwnym razie każdy proces wewnątrz PID namespace może użyć ptrace na twoim helperze i ponownie wykorzystać te deskryptory do manipulacji zasobami hosta.
 
 ## References
 
 - [https://stackoverflow.com/questions/44666700/unshare-pid-bin-bash-fork-cannot-allocate-memory](https://stackoverflow.com/questions/44666700/unshare-pid-bin-bash-fork-cannot-allocate-memory)
+- [container escape via "masked path" abuse due to mount race conditions (GitHub Security Advisory)](https://github.com/opencontainers/runc/security/advisories/GHSA-9493-h29p-rfm2)
+- [Tool Release – insject: A Linux Namespace Injector (NCC Group)](https://www.nccgroup.com/us/research-blog/tool-release-insject-a-linux-namespace-injector/)
 
 {{#include ../../../../banners/hacktricks-training.md}}
