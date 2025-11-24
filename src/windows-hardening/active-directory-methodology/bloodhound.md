@@ -2,11 +2,12 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
+
 {{#ref}}
 adws-enumeration.md
 {{#endref}}
 
-> NOTA: Esta página agrupa algumas das utilidades mais úteis para **enumerar** e **visualizar** relacionamentos do Active Directory. Para coleta através do canal discreto **Active Directory Web Services (ADWS)**, consulte a referência acima.
+> NOTA: Esta página agrupa algumas das utilidades mais úteis para **enumerar** e **visualizar** relacionamentos do Active Directory. Para coleta através do canal furtivo **Active Directory Web Services (ADWS)** verifique a referência acima.
 
 ---
 
@@ -14,30 +15,30 @@ adws-enumeration.md
 
 [AD Explorer](https://docs.microsoft.com/en-us/sysinternals/downloads/adexplorer) (Sysinternals) é um **visualizador e editor de AD** avançado que permite:
 
-* Navegação GUI da árvore de diretórios
-* Edição de atributos de objetos e descritores de segurança
-* Criação / comparação de instantâneos para análise offline
+* Navegação via GUI pela árvore do diretório
+* Edição de atributos de objetos & descritores de segurança
+* Criação / comparação de snapshots para análise offline
 
 ### Uso rápido
 
 1. Inicie a ferramenta e conecte-se a `dc01.corp.local` com quaisquer credenciais de domínio.
-2. Crie um instantâneo offline via `File ➜ Create Snapshot`.
-3. Compare dois instantâneos com `File ➜ Compare` para identificar desvios de permissão.
+2. Crie um snapshot offline via `File ➜ Create Snapshot`.
+3. Compare dois snapshots com `File ➜ Compare` para identificar desvios de permissões.
 
 ---
 
 ## ADRecon
 
-[ADRecon](https://github.com/adrecon/ADRecon) extrai um grande conjunto de artefatos de um domínio (ACLs, GPOs, trusts, modelos de CA…) e produz um **relatório Excel**.
+[ADRecon](https://github.com/adrecon/ADRecon) extrai um grande conjunto de artefatos de um domínio (ACLs, GPOs, trusts, CA templates …) e produz um **relatório Excel**.
 ```powershell
 # On a Windows host in the domain
 PS C:\> .\ADRecon.ps1 -OutputDir C:\Temp\ADRecon
 ```
 ---
 
-## BloodHound (visualização gráfica)
+## BloodHound (visualização de grafos)
 
-[BloodHound](https://github.com/BloodHoundAD/BloodHound) usa teoria dos grafos + Neo4j para revelar relacionamentos de privilégio ocultos dentro do AD local e do Azure AD.
+[BloodHound](https://github.com/BloodHoundAD/BloodHound) usa teoria dos grafos + Neo4j para revelar relações de privilégio ocultas dentro do on-prem AD & Azure AD.
 
 ### Implantação (Docker CE)
 ```bash
@@ -46,9 +47,9 @@ curl -L https://ghst.ly/getbhce | docker compose -f - up
 ```
 ### Coletores
 
-* `SharpHound.exe` / `Invoke-BloodHound` – variante nativa ou PowerShell
+* `SharpHound.exe` / `Invoke-BloodHound` – nativo ou variante PowerShell
 * `AzureHound` – enumeração do Azure AD
-* **SoaPy + BOFHound** – coleta do ADWS (veja o link no topo)
+* **SoaPy + BOFHound** – coleta ADWS (veja o link no topo)
 
 #### Modos comuns do SharpHound
 ```powershell
@@ -56,13 +57,31 @@ SharpHound.exe --CollectionMethods All           # Full sweep (noisy)
 SharpHound.exe --CollectionMethods Group,LocalAdmin,Session,Trusts,ACL
 SharpHound.exe --Stealth --LDAP                      # Low noise LDAP only
 ```
-Os coletores geram JSON que é ingerido através da interface do BloodHound.
+Os collectors geram JSON que é ingerido pela GUI do BloodHound.
 
 ---
 
+## Priorizando Kerberoasting com BloodHound
+
+O contexto do grafo é vital para evitar roasting ruidoso e indiscriminado. Um fluxo de trabalho enxuto:
+
+1. **Colete tudo uma vez** usando um collector compatível com ADWS (por exemplo, RustHound-CE) para que você possa trabalhar offline e ensaiar caminhos sem tocar no DC novamente:
+```bash
+rusthound-ce -d corp.local -u svc.collector -p 'Passw0rd!' -c All -z
+```
+2. **Importe o ZIP, marque o principal comprometido como owned**, então execute consultas integradas como *Kerberoastable Users* e *Shortest Paths to Domain Admins*. Isso destaca instantaneamente contas com SPN e associações de grupo úteis (Exchange, IT, contas de serviço tier0, etc.).
+3. **Priorize por blast radius** – concentre-se em SPNs que controlam infraestrutura compartilhada ou têm direitos de administrador, e verifique `pwdLastSet`, `lastLogon`, e os tipos de encriptação permitidos antes de gastar ciclos de cracking.
+4. **Solicite apenas os tickets que lhe interessam**. Ferramentas como NetExec podem direcionar `sAMAccountName`s selecionados para que cada solicitação LDAP ROAST tenha uma justificativa clara:
+```bash
+netexec ldap dc01.corp.local -u svc.collector -p 'Passw0rd!' --kerberoasting kerberoast.txt --spn svc-sql
+```
+5. **Crack offline**, em seguida reconsulte o BloodHound imediatamente para planejar post-exploitation com os novos privilégios.
+
+Essa abordagem mantém a relação sinal-ruído alta, reduz o volume detectável (sem requisições massivas de SPN) e garante que cada cracked ticket se traduza em etapas significativas de escalonamento de privilégios.
+
 ## Group3r
 
-[Group3r](https://github.com/Group3r/Group3r) enumera **Group Policy Objects** e destaca configurações incorretas.
+[Group3r](https://github.com/Group3r/Group3r) enumera **Objetos de Política de Grupo** e destaca configurações incorretas.
 ```bash
 # Execute inside the domain
 Group3r.exe -f gpo.log   # -s to stdout
@@ -71,8 +90,13 @@ Group3r.exe -f gpo.log   # -s to stdout
 
 ## PingCastle
 
-[PingCastle](https://www.pingcastle.com/documentation/) realiza um **health-check** do Active Directory e gera um relatório em HTML com pontuação de risco.
+[PingCastle](https://www.pingcastle.com/documentation/) realiza uma **verificação de integridade** do Active Directory e gera um relatório HTML com pontuação de risco.
 ```powershell
 PingCastle.exe --healthcheck --server corp.local --user bob --password "P@ssw0rd!"
 ```
+## Referências
+
+- [HackTheBox Mirage: Chaining NFS Leaks, Dynamic DNS Abuse, NATS Credential Theft, JetStream Secrets, and Kerberoasting](https://0xdf.gitlab.io/2025/11/22/htb-mirage.html)
+- [RustHound-CE](https://github.com/g0h4n/RustHound-CE)
+
 {{#include ../../banners/hacktricks-training.md}}
