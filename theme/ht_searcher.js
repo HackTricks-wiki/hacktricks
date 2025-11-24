@@ -177,11 +177,32 @@
     const listOut = document.getElementById('searchresults-outer');
     const header  = document.getElementById('searchresults-header');
     const icon    = document.getElementById('search-toggle');
-  
-    const READY_ICON = icon.innerHTML;
+
+    if(!wrap || !bar || !list || !listOut || !header || !icon) {
+      console.error('[HT Search] Missing DOM elements:', {wrap:!!wrap, bar:!!bar, list:!!list, listOut:!!listOut, header:!!header, icon:!!icon});
+      return;
+    }
+
+    /* Clear icon content and use emoji states directly */
     icon.textContent = '⏳';
     icon.setAttribute('aria-label','Loading search …');
-      icon.setAttribute('title','Search is loading, please wait...');
+    icon.setAttribute('title','Search is loading, please wait...');
+
+    const setIconState = state => {
+      if(state === 'ready'){
+        icon.textContent = '🔍';
+        icon.setAttribute('aria-label','Open search (S)');
+        icon.removeAttribute('title');
+      } else if(state === 'error'){
+        icon.textContent = '❌';
+        icon.setAttribute('aria-label','Search unavailable');
+        icon.setAttribute('title','Search is unavailable');
+      } else {
+        icon.textContent = '⏳';
+        icon.setAttribute('aria-label','Loading search …');
+        icon.setAttribute('title','Search is loading, please wait...');
+      }
+    };
 
   
     const HOT=83, ESC=27, DOWN=40, UP=38, ENTER=13;
@@ -240,16 +261,7 @@
     /* ───────────── worker messages ───────────── */
     worker.onmessage = ({data}) => {
       if(data && data.ready!==undefined){
-        if(data.ready){ 
-          icon.innerHTML=READY_ICON; 
-          icon.setAttribute('aria-label','Open search (S)'); 
-          icon.removeAttribute('title');
-        }
-        else { 
-          icon.textContent='❌'; 
-          icon.setAttribute('aria-label','Search unavailable'); 
-          icon.setAttribute('title','Search is unavailable');
-        }
+        setIconState(data.ready ? 'ready' : 'error');
         return;
       }
       const docs=data, q=bar.value.trim(), terms=q.split(/\s+/).filter(Boolean);
