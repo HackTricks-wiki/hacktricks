@@ -403,6 +403,7 @@
 
 # 👽 Network Services Pentesting
 
+- [4222 Pentesting Nats](network-services-pentesting/4222-pentesting-nats.md)
 - [Pentesting JDWP - Java Debug Wire Protocol](network-services-pentesting/pentesting-jdwp-java-debug-wire-protocol.md)
 - [Pentesting Printers$$external:http://hacking-printers.net/wiki/index.php/Main_Page$$]()
 - [Pentesting SAP](network-services-pentesting/pentesting-sap.md)
