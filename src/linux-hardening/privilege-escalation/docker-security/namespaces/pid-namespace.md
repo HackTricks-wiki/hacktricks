@@ -84,11 +84,45 @@ When you enter inside a PID namespace from the default namespace, you will still
 
 Also, you can only **enter in another process PID namespace if you are root**. And you **cannot** **enter** in other namespace **without a descriptor** pointing to it (like `/proc/self/ns/pid`)
 
+## Recent Exploitation Notes
+
+### CVE-2025-31133: abusing `maskedPaths` to reach host PIDs
+
+runc ≤1.2.7 allowed attackers that control container images or `runc exec` workloads to replace the container-side `/dev/null` just before the runtime masked sensitive procfs entries. When the race succeeds, `/dev/null` can be turned into a symlink pointing at any host path (for example `/proc/sys/kernel/core_pattern`), so the new container PID namespace suddenly inherits read/write access to host-global procfs knobs even though it never left its own namespace. Once `core_pattern` or `/proc/sysrq-trigger` is writable, generating a coredump or triggering SysRq yields code execution or denial of service in the host PID namespace.
+
+Practical workflow:
+
+1. Build an OCI bundle whose rootfs replaces `/dev/null` with a link to the host path you want (`ln -sf /proc/sys/kernel/core_pattern rootfs/dev/null`).
+2. Start the container before the fix so runc bind-mounts the host procfs target over the link.
+3. Inside the container namespace, write to the now-exposed procfs file (e.g., point `core_pattern` to a reverse shell helper) and crash any process to force the host kernel to execute your helper as PID 1 context.
+
+You can quickly audit whether a bundle is masking the right files before starting it:
+
+```bash
+jq '.linux.maskedPaths' config.json | tr -d '"'
+```
+
+If the runtime is missing a masking entry you expect (or skips it because `/dev/null` vanished), treat the container as having potential host PID visibility.
+
+### Namespace injection with `insject`
+
+NCC Group’s `insject` loads as an LD_PRELOAD payload that hooks a late stage in the target program (default `main`) and issues a sequence of `setns()` calls after `execve()`. That lets you attach from the host (or another container) into a victim’s PID namespace *after* its runtime initialized, preserving its `/proc/<pid>` view without having to copy binaries into the container filesystem. Because `insject` can defer joining the PID namespace until it forks, you can keep one thread in the host namespace (with CAP_SYS_PTRACE) while another thread executes in the target PID namespace, creating powerful debugging or offensive primitives.
+
+Example usage:
+
+```bash
+sudo insject -S -p $(pidof containerd-shim) -- bash -lc 'readlink /proc/self/ns/pid && ps -ef'
+```
+
+Key takeaways when abusing or defending against namespace injection:
+
+- Use `-S/--strict` to force `insject` to abort if threads already exist or namespace joins fail, otherwise you may leave partly-migrated threads straddling host and container PID spaces.
+- Never attach tools that still hold writable host file descriptors unless you also join the mount namespace—otherwise any process inside the PID namespace can ptrace your helper and reuse those descriptors to tamper with host resources.
+
 ## References
 
 - [https://stackoverflow.com/questions/44666700/unshare-pid-bin-bash-fork-cannot-allocate-memory](https://stackoverflow.com/questions/44666700/unshare-pid-bin-bash-fork-cannot-allocate-memory)
+- [container escape via "masked path" abuse due to mount race conditions (GitHub Security Advisory)](https://github.com/opencontainers/runc/security/advisories/GHSA-9493-h29p-rfm2)
+- [Tool Release – insject: A Linux Namespace Injector (NCC Group)](https://www.nccgroup.com/us/research-blog/tool-release-insject-a-linux-namespace-injector/)
 
 {{#include ../../../../banners/hacktricks-training.md}}
-
-
-
