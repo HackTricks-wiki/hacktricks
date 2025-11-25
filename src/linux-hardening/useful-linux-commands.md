@@ -307,6 +307,52 @@ iptables -P FORWARD ACCEPT
 iptables -P OUTPUT ACCEPT
 ```
 
+## eBPF Telemetry & Rootkit Hunting
+
+Modern rootkits (TripleCross, BPFDoor variants, etc.) increasingly persist as hidden eBPF programs. Baseline your fleet with `bpftool`/`eBPFmon` so you can spot unsigned programs, unexpected cgroup hooks, or malicious map contents before detaching them.
+
+```bash
+#Enumerate all eBPF programs, attach points, owning PIDs and map IDs
+sudo bpftool prog
+
+#Inspect suspicious bytecode + helper calls (replace 835 with the target program id)
+sudo bpftool prog dump xlated id 835 | less
+
+#List and dump program maps to reveal covert sockets/credentials (replace 104 accordingly)
+sudo bpftool map show id 104
+sudo bpftool map dump id 104 | hexdump -C
+
+#Verify kernel feature support before loading/patching custom probes
+sudo bpftool feature probe | less
+
+#TUI wrapper that tracks program/map diffs in real time (wraps bpftool perf/net output)
+sudo ebpfmon
+```
+
+Correlate the bpftool output with expected NIC/cgroup attachments; a sudden `xdp` or `kprobe` program owned by an unapproved PID is a strong indicator of an injected eBPF payload.
+
+## Journald Incident Triage
+
+systemd-journald keeps structured metadata, so you can pivot by boot, severity, unit, or UID without touching `/var/log/*`. Combine filters with relative timestamps to isolate attack windows or prove log tampering quickly.
+
+```bash
+journalctl --list-boots                                #Enumerate boot IDs with timestamps
+journalctl -b -1 -p err -o short-iso                   #Previous boot only, severity >= err
+journalctl -u nginx.service --since="2025-06-01 01:00" --until="2025-06-01 02:00"
+journalctl -u ssh.service -f | grep "Failed password"  #Live brute-force monitoring
+journalctl _UID=0 --output=json-pretty --since "1 hour ago"
+journalctl --disk-usage                               #Quickly show journal size
+sudo journalctl --vacuum-size=1G --vacuum-time=7days   #Trim only after taking evidence
+journalctl --no-pager --since="2025-06-01" --until="2025-06-10" > system_logs_2025-06-01_to_06-10.log
+```
+
+Add `--grep 'Invalid user' --case-sensitive` or `-k` (kernel ring buffer only) when you need tighter filters, and remember `_PID`, `_SYSTEMD_UNIT`, `_HOSTNAME`, and `_TRANSPORT` selectors stack together for multi-tenant hunts.
+
+## References
+
+- [eBPFmon: A new tool for exploring and interacting with eBPF applications](https://redcanary.com/blog/linux-security/ebpfmon/)
+- [How to use the journalctl command to view Linux logs](https://www.hostinger.com/tutorials/journalctl-command)
+
 {{#include ../banners/hacktricks-training.md}}
 
 
