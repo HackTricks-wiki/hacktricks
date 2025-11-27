@@ -286,6 +286,21 @@ Rights with 'session-owner': 'true':
 authenticate-session-owner, authenticate-session-owner-or-admin, authenticate-session-user, com-apple-safari-allow-apple-events-to-run-javascript, com-apple-safari-allow-javascript-in-smart-search-field, com-apple-safari-allow-unsigned-app-extensions, com-apple-safari-install-ephemeral-extensions, com-apple-safari-show-credit-card-numbers, com-apple-safari-show-passwords, com-apple-icloud-passwordreset, com-apple-icloud-passwordreset, is-session-owner, system-identity-write-self, use-login-window-ui
 ```
 
+### Authorization Bypass Case Studies
+
+- **CVE-2024-4395 – Jamf Compliance Editor helper**: Running an audit drops `/Library/LaunchDaemons/com.jamf.complianceeditor.helper.plist`, exposes the Mach service `com.jamf.complianceeditor.helper`, and exports `-executeScriptAt:arguments:then:` without verifying the caller’s `AuthorizationExternalForm` or code signature. A trivial exploit `AuthorizationCreate`s an empty reference, connects with `[[NSXPCConnection alloc] initWithMachServiceName:options:NSXPCConnectionPrivileged]`, and invokes the method to execute arbitrary binaries as root. Full reversing notes (plus PoC) in [Mykola Grymalyuk’s write-up](https://khronokernel.com/macos/2024/05/01/CVE-2024-4395.html).
+- **CVE-2025-25251 – FortiClient Mac helper**: FortiClient Mac 7.0.0–7.0.14, 7.2.0–7.2.8 and 7.4.0–7.4.2 accepted crafted XPC messages that reached a privileged helper lacking authorization gates. Because the helper trusted its own privileged `AuthorizationRef`, any local user able to message the service could coerce it into executing arbitrary configuration changes or commands as root. Details in [SentinelOne’s advisory summary](https://www.sentinelone.com/vulnerability-database/cve-2025-25251/).
+
+#### Rapid triage tips
+
+- When an app ships both a GUI and helper, diff their code requirements and check whether `shouldAcceptNewConnection` locks the listener with `-setCodeSigningRequirement:` (or validates `SecCodeCopySigningInformation`). Missing checks usually yield CWE-863 scenarios like the Jamf case. A quick peek looks like:
+
+```bash
+codesign --display --requirements - /Applications/Jamf\ Compliance\ Editor.app
+```
+
+- Compare what the helper *thinks* it is authorizing with what the client supplies. When reversing, break on `AuthorizationCopyRights` and confirm the `AuthorizationRef` originates from `AuthorizationCreateFromExternalForm` (client provided) instead of the helper’s own privileged context, otherwise you likely found a CWE-863 pattern similar to the cases above.
+
 ## Reversing Authorization
 
 ### Checking if EvenBetterAuthorization is used
@@ -439,6 +454,8 @@ int main(void) {
 ## References
 
 - [https://theevilbit.github.io/posts/secure_coding_xpc_part1/](https://theevilbit.github.io/posts/secure_coding_xpc_part1/)
+- [https://khronokernel.com/macos/2024/05/01/CVE-2024-4395.html](https://khronokernel.com/macos/2024/05/01/CVE-2024-4395.html)
+- [https://www.sentinelone.com/vulnerability-database/cve-2025-25251/](https://www.sentinelone.com/vulnerability-database/cve-2025-25251/)
 
 {{#include ../../../../../banners/hacktricks-training.md}}
 
