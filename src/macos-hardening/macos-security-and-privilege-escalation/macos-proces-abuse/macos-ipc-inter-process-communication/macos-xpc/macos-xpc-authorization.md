@@ -4,13 +4,13 @@
 
 ## XPC Authorization
 
-Appleは、接続プロセスが**公開されたXPCメソッドを呼び出す権限を持っているかどうかを認証する別の方法**を提案しています。
+Apple は、接続するプロセスが **公開された XPC メソッドを呼び出す権限** を持っている場合に認証する別の方法も提案しています。
 
-アプリケーションが**特権ユーザーとしてアクションを実行する必要がある**場合、通常は特権ユーザーとしてアプリを実行するのではなく、アプリから呼び出してそのアクションを実行できるXPCサービスとしてHelperToolをルートとしてインストールします。ただし、サービスを呼び出すアプリは十分な認可を持っている必要があります。
+アプリケーションが **特権ユーザとしてアクションを実行する** 必要がある場合、アプリ自体を特権ユーザとして実行する代わりに、通常は root として HelperTool を XPC サービスとしてインストールし、アプリからそのサービスを呼び出して操作を行います。ただし、サービスを呼び出すアプリは十分な authorization を持っているべきです。
 
-### ShouldAcceptNewConnectionは常にYES
+### ShouldAcceptNewConnection は常に YES
 
-例として、[EvenBetterAuthorizationSample](https://github.com/brenwell/EvenBetterAuthorizationSample)を見つけることができます。`App/AppDelegate.m`では、**HelperTool**に**接続**しようとします。そして、`HelperTool/HelperTool.m`では、関数**`shouldAcceptNewConnection`**は、前述の要件のいずれも**チェックしません**。常にYESを返します:
+例は [EvenBetterAuthorizationSample](https://github.com/brenwell/EvenBetterAuthorizationSample) にあります。`App/AppDelegate.m` では **connect** を試みて **HelperTool** に接続します。そして `HelperTool/HelperTool.m` では関数 **`shouldAcceptNewConnection`** が前述の要件のいずれも **チェックしません**。この関数は常に YES を返します:
 ```objectivec
 - (BOOL)listener:(NSXPCListener *)listener shouldAcceptNewConnection:(NSXPCConnection *)newConnection
 // Called by our XPC listener when a new connection comes in.  We configure the connection
@@ -27,18 +27,19 @@ newConnection.exportedObject = self;
 return YES;
 }
 ```
-詳細な設定方法については、こちらをご覧ください：
+For more information about how to properly configure this check:
+
 
 {{#ref}}
 macos-xpc-connecting-process-check/
 {{#endref}}
 
-### アプリケーションの権限
+### アプリケーション権限
 
-ただし、**HelperToolからメソッドが呼び出されるときにいくつかの認可が行われます**。
+ただし、HelperTool のメソッドが呼び出される際に何らかの**認可が行われています**。
 
-`App/AppDelegate.m`の**`applicationDidFinishLaunching`**関数は、アプリが起動した後に空の認可参照を作成します。これは常に機能するはずです。\
-次に、`setupAuthorizationRights`を呼び出して、その認可参照に**いくつかの権限を追加しようとします**：
+`App/AppDelegate.m` の関数 **`applicationDidFinishLaunching`** はアプリ起動後に空の authorization reference を作成します。これは常に動作するはずです。\
+その後、`setupAuthorizationRights` を呼び出してその authorization reference に**いくつかの権限を追加しようとします**:
 ```objectivec
 - (void)applicationDidFinishLaunching:(NSNotification *)note
 {
@@ -62,7 +63,7 @@ if (self->_authRef) {
 [self.window makeKeyAndOrderFront:self];
 }
 ```
-`Common/Common.m`の`setupAuthorizationRights`関数は、アプリケーションの権限を`/var/db/auth.db`の認証データベースに保存します。データベースにまだ存在しない権限のみが追加されることに注意してください。
+Common/Common.m の関数 `setupAuthorizationRights` は、アプリケーションの権限を auth データベース ` /var/db/auth.db` に格納します。データベースにまだ存在しない権限のみを追加する点に注意してください:
 ```objectivec
 + (void)setupAuthorizationRights:(AuthorizationRef)authRef
 // See comment in header.
@@ -94,7 +95,7 @@ assert(blockErr == errAuthorizationSuccess);
 }];
 }
 ```
-関数 `enumerateRightsUsingBlock` は、`commandInfo` に定義されたアプリケーションの権限を取得するために使用されます。
+関数 `enumerateRightsUsingBlock` は、アプリケーションの権限を取得するために使用されるもので、これらは `commandInfo` に定義されています:
 ```objectivec
 static NSString * kCommandKeyAuthRightName    = @"authRightName";
 static NSString * kCommandKeyAuthRightDefault = @"authRightDefault";
@@ -172,15 +173,21 @@ block(authRightName, authRightDefault, authRightDesc);
 }];
 }
 ```
-このプロセスの最後には、`commandInfo`内で宣言された権限が`/var/db/auth.db`に保存されることを意味します。ここでは、**各メソッド**が**認証を必要とする**こと、**権限名**、および**`kCommandKeyAuthRightDefault`**が見つかります。後者は**誰がこの権利を取得できるか**を示します。
+This means that at the end of this process, the permissions declared inside `commandInfo` will be stored in `/var/db/auth.db`. Note how there you can find for **each method** that will r**equire authentication**, **permission name** and the **`kCommandKeyAuthRightDefault`**. The later one **indicates who can get this right**.
 
-権利にアクセスできる人を示すための異なるスコープがあります。それらのいくつかは[AuthorizationDB.h](https://github.com/aosm/Security/blob/master/Security/libsecurity_authorization/lib/AuthorizationDB.h)で定義されています（[ここで全てを見つけることができます](https://www.dssw.co.uk/reference/authorization-rights/)）。要約すると：
+これはこの処理の最後に、`commandInfo` 内で宣言された権限が `/var/db/auth.db` に格納されることを意味します。そこでは、**各メソッド**について、**認証を必要とするもの**、**permission name**、および **`kCommandKeyAuthRightDefault`** を確認できます。後者はその権利を**誰が取得できるか**を示します。
 
-<table><thead><tr><th width="284.3333333333333">名前</th><th width="165">値</th><th>説明</th></tr></thead><tbody><tr><td>kAuthorizationRuleClassAllow</td><td>allow</td><td>誰でも</td></tr><tr><td>kAuthorizationRuleClassDeny</td><td>deny</td><td>誰も</td></tr><tr><td>kAuthorizationRuleIsAdmin</td><td>is-admin</td><td>現在のユーザーは管理者である必要があります（管理者グループ内）</td></tr><tr><td>kAuthorizationRuleAuthenticateAsSessionUser</td><td>authenticate-session-owner</td><td>ユーザーに認証を求めます。</td></tr><tr><td>kAuthorizationRuleAuthenticateAsAdmin</td><td>authenticate-admin</td><td>ユーザーに認証を求めます。彼は管理者である必要があります（管理者グループ内）</td></tr><tr><td>kAuthorizationRightRule</td><td>rule</td><td>ルールを指定します</td></tr><tr><td>kAuthorizationComment</td><td>comment</td><td>権利に関する追加のコメントを指定します</td></tr></tbody></table>
+There are different scopes to indicate who can access a right. Some of them are defined in [AuthorizationDB.h](https://github.com/aosm/Security/blob/master/Security/libsecurity_authorization/lib/AuthorizationDB.h) (you can find [all of them in here](https://www.dssw.co.uk/reference/authorization-rights/)), but as summary:
 
-### 権利の検証
+ある権利に誰がアクセスできるかを示すさまざまなスコープがあります。そのいくつかは [AuthorizationDB.h](https://github.com/aosm/Security/blob/master/Security/libsecurity_authorization/lib/AuthorizationDB.h) に定義されており（you can find [all of them in here](https://www.dssw.co.uk/reference/authorization-rights/)）、要約すると:
 
-`HelperTool/HelperTool.m`の関数**`readLicenseKeyAuthorization`**は、呼び出し元が**そのメソッドを実行する**権限があるかどうかを確認するために、関数**`checkAuthorization`**を呼び出します。この関数は、呼び出しプロセスから送信された**authData**が**正しい形式**であるかどうかを確認し、その後、特定のメソッドを呼び出すために**必要なもの**を確認します。すべてがうまくいけば、**返された`error`は`nil`になります**：
+<table><thead><tr><th width="284.3333333333333">名前</th><th width="165">値</th><th>説明</th></tr></thead><tbody><tr><td>kAuthorizationRuleClassAllow</td><td>allow</td><td>誰でも</td></tr><tr><td>kAuthorizationRuleClassDeny</td><td>deny</td><td>誰も</td></tr><tr><td>kAuthorizationRuleIsAdmin</td><td>is-admin</td><td>現在のユーザーは管理者（admin グループ内）である必要がある</td></tr><tr><td>kAuthorizationRuleAuthenticateAsSessionUser</td><td>authenticate-session-owner</td><td>ユーザーに認証を求める</td></tr><tr><td>kAuthorizationRuleAuthenticateAsAdmin</td><td>authenticate-admin</td><td>ユーザーに認証を求める。管理者（admin グループ内）である必要がある</td></tr><tr><td>kAuthorizationRightRule</td><td>rule</td><td>ルールを指定する</td></tr><tr><td>kAuthorizationComment</td><td>comment</td><td>その権利に関する追加コメントを指定する</td></tr></tbody></table>
+
+### Rights Verification
+
+In `HelperTool/HelperTool.m` the function **`readLicenseKeyAuthorization`** checks if the caller is authorized to **execute such method** calling the function **`checkAuthorization`**. This function will check the **authData** sent by the calling process has a **correct format** and then will check **what is needed to get the right** to call the specific method. If all goes good the **returned `error` will be `nil`**:
+
+`HelperTool/HelperTool.m` の関数 **`readLicenseKeyAuthorization`** は、呼び出し元がそのメソッドを実行する権限を持っているかを **`checkAuthorization`** を呼び出して確認します。`checkAuthorization` は呼び出しプロセスが送信した **authData** が**正しい形式**であるかを検証し、続いて特定のメソッドを呼び出すために**何が必要か**を確認します。すべてが問題なければ、**返される `error` は `nil` になります**:
 ```objectivec
 - (NSError *)checkAuthorization:(NSData *)authData command:(SEL)command
 {
@@ -228,37 +235,37 @@ assert(junk == errAuthorizationSuccess);
 return error;
 }
 ```
-注意してください、**そのメソッドを呼び出す権利を得るための要件を確認するには**、関数 `authorizationRightForCommand` は以前のコメントオブジェクト **`commandInfo`** をチェックします。次に、**`AuthorizationCopyRights`** を呼び出して **その関数を呼び出す権利があるかどうか** を確認します（フラグはユーザーとの対話を許可することに注意してください）。
+Note that to **権利を得るための要件を確認する** to call that method the function `authorizationRightForCommand` will just check the previously comment object **`commandInfo`**. Then, it will call **`AuthorizationCopyRights`** to check **権限があるかどうか** to call the function (note that the flags allow interaction with the user).
 
-この場合、関数 `readLicenseKeyAuthorization` を呼び出すために、`kCommandKeyAuthRightDefault` は `@kAuthorizationRuleClassAllow` に定義されています。したがって、**誰でも呼び出すことができます**。
+In this case, to call the function `readLicenseKeyAuthorization` the `kCommandKeyAuthRightDefault` is defined to `@kAuthorizationRuleClassAllow`. So **誰でも呼び出せます**。
 
-### DB 情報
+### DB Information
 
-この情報は `/var/db/auth.db` に保存されていると述べられています。保存されたすべてのルールをリストするには、次のようにします:
+この情報は `/var/db/auth.db` に保存されていると述べられていました。保存されているすべてのルールは次のコマンドで一覧表示できます：
 ```sql
 sudo sqlite3 /var/db/auth.db
 SELECT name FROM rules;
 SELECT name FROM rules WHERE name LIKE '%safari%';
 ```
-次に、誰がその権利にアクセスできるかを読むことができます:
+次に、その権限に誰がアクセスできるかを次のコマンドで確認できます:
 ```bash
 security authorizationdb read com.apple.safaridriver.allow
 ```
-### Permissive rights
+### 許容的な権限
 
-**すべての権限設定** [**はここにあります**](https://www.dssw.co.uk/reference/authorization-rights/)、ただし、ユーザーの操作を必要としない組み合わせは次のとおりです。
+**すべての権限設定**は[**in here**](https://www.dssw.co.uk/reference/authorization-rights/)で確認できますが、ユーザーの操作を必要としない組み合わせは次のとおりです：
 
 1. **'authenticate-user': 'false'**
-- これは最も直接的なキーです。`false`に設定されている場合、ユーザーがこの権利を得るために認証を提供する必要がないことを指定します。
-- これは、以下の2つのいずれかと組み合わせて使用されるか、ユーザーが属する必要があるグループを示します。
+- これは最も直接的なキーです。`false` に設定されている場合、ユーザーはこの権利を得るために認証を提供する必要がないことを指定します。
+- これは**以下の2つのいずれかとの組み合わせ、またはユーザーが属すべきグループを示す場合に使用されます。**
 2. **'allow-root': 'true'**
-- ユーザーがルートユーザー（昇格された権限を持つ）として操作している場合、このキーが`true`に設定されていると、ルートユーザーは追加の認証なしにこの権利を得る可能性があります。ただし、通常、ルートユーザーの状態に到達するにはすでに認証が必要であるため、これはほとんどのユーザーにとって「認証なし」のシナリオではありません。
+- ユーザーが rootユーザー（権限が昇格したユーザー）として操作しており、このキーが `true` に設定されている場合、rootユーザーは追加の認証なしにこの権利を得る可能性があります。ただし、通常、rootユーザーの状態になるには既に認証が必要であるため、ほとんどのユーザーにとってこれは「認証なし」のシナリオにはなりません。
 3. **'session-owner': 'true'**
-- `true`に設定されている場合、セッションの所有者（現在ログインしているユーザー）は自動的にこの権利を得ます。ユーザーがすでにログインしている場合、追加の認証をバイパスする可能性があります。
+- `true` に設定されている場合、セッションの所有者（現在ログインしているユーザー）が自動的にこの権利を取得します。ユーザーが既にログインしている場合、追加の認証を回避する可能性があります。
 4. **'shared': 'true'**
-- このキーは、認証なしに権利を付与しません。代わりに、`true`に設定されている場合、権利が認証された後は、各プロセスが再認証を必要とせずに複数のプロセス間で共有できることを意味します。ただし、権利の最初の付与は、`'authenticate-user': 'false'`のような他のキーと組み合わせない限り、認証を必要とします。
+- このキー自体は認証なしで権利を付与するものではありません。代わりに、`true` に設定されている場合、一度権利が認証されると、各プロセスが再認証することなく複数のプロセス間で共有できることを意味します。ただし、最初の権利付与は、`'authenticate-user': 'false'` のような他のキーと組み合わせない限り、引き続き認証を必要とします。
 
-[**このスクリプトを使用**](https://gist.github.com/carlospolop/96ecb9e385a4667b9e40b24e878652f9)して、興味深い権利を取得できます：
+興味深い権利を取得するには[**use this script**](https://gist.github.com/carlospolop/96ecb9e385a4667b9e40b24e878652f9)を使用できます：
 ```bash
 Rights with 'authenticate-user': 'false':
 is-admin (admin), is-admin-nonshared (admin), is-appstore (_appstore), is-developer (_developer), is-lpadmin (_lpadmin), is-root (run as root), is-session-owner (session owner), is-webdeveloper (_webdeveloper), system-identity-write-self (session owner), system-install-iap-software (run as root), system-install-software-iap (run as root)
@@ -269,29 +276,42 @@ com-apple-aosnotification-findmymac-remove, com-apple-diskmanagement-reservekek,
 Rights with 'session-owner': 'true':
 authenticate-session-owner, authenticate-session-owner-or-admin, authenticate-session-user, com-apple-safari-allow-apple-events-to-run-javascript, com-apple-safari-allow-javascript-in-smart-search-field, com-apple-safari-allow-unsigned-app-extensions, com-apple-safari-install-ephemeral-extensions, com-apple-safari-show-credit-card-numbers, com-apple-safari-show-passwords, com-apple-icloud-passwordreset, com-apple-icloud-passwordreset, is-session-owner, system-identity-write-self, use-login-window-ui
 ```
-## 認可の逆コンパイル
+### Authorization Bypass ケーススタディ
 
-### EvenBetterAuthorizationが使用されているかの確認
+- **CVE-2024-4395 – Jamf Compliance Editor helper**: 監査を実行すると `/Library/LaunchDaemons/com.jamf.complianceeditor.helper.plist` を設置し、Mach service `com.jamf.complianceeditor.helper` を公開し、`-executeScriptAt:arguments:then:` をエクスポートしますが、呼び出し元の `AuthorizationExternalForm` やコード署名を検証していません。単純な exploit は空の参照を `AuthorizationCreate` し、`[[NSXPCConnection alloc] initWithMachServiceName:options:NSXPCConnectionPrivileged]` で接続してそのメソッドを呼び出すことで、任意のバイナリを root として実行できます。詳細なリバースノート（および PoC）は [Mykola Grymalyuk’s write-up](https://khronokernel.com/macos/2024/05/01/CVE-2024-4395.html) を参照してください。
+- **CVE-2025-25251 – FortiClient Mac helper**: FortiClient Mac 7.0.0–7.0.14, 7.2.0–7.2.8 および 7.4.0–7.4.2 は、権限チェックのない privileged helper に届く細工された XPC messages を受け入れていました。その helper が自身の privileged `AuthorizationRef` を信頼していたため、サービスにメッセージを送れるローカルユーザは、任意の設定変更やコマンドを root として実行させるよう強制できました。詳細は [SentinelOne’s advisory summary](https://www.sentinelone.com/vulnerability-database/cve-2025-25251/) を参照してください。
 
-関数 **`[HelperTool checkAuthorization:command:]`** を見つけた場合、おそらくそのプロセスは前述のスキーマを使用して認可を行っています：
+#### 迅速トリアージのヒント
+
+- アプリが GUI と helper の両方を同梱している場合、両者の code requirements の差分を確認し、`shouldAcceptNewConnection` がリスナーを `-setCodeSigningRequirement:` でロックしているか（または `SecCodeCopySigningInformation` を検証しているか）をチェックしてください。これらのチェックが欠けていると、Jamf のケースのような CWE-863 のシナリオが発生することが多いです。簡単な確認例は次のとおり:
+```bash
+codesign --display --requirements - /Applications/Jamf\ Compliance\ Editor.app
+```
+- helper が *認可していると思っているもの* と client が提供するものを比較する。リバースするときは `AuthorizationCopyRights` でブレークし、`AuthorizationRef` が helper の独自の特権コンテキストではなくクライアント提供の `AuthorizationCreateFromExternalForm` に由来していることを確認する。そうでない場合、上記のケースに類似した CWE-863 パターンを発見した可能性が高い。
+
+## Authorization のリバースエンジニアリング
+
+### EvenBetterAuthorization が使われているか確認する
+
+If you find the function: **`[HelperTool checkAuthorization:command:]`** it's probably the the process is using the previously mentioned schema for authorization:
 
 <figure><img src="../../../../../images/image (42).png" alt=""><figcaption></figcaption></figure>
 
-この場合、この関数が `AuthorizationCreateFromExternalForm`、`authorizationRightForCommand`、`AuthorizationCopyRights`、`AuhtorizationFree` などの関数を呼び出している場合、[**EvenBetterAuthorizationSample**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L101-L154) を使用しています。
+Thisn, if this function is calling functions such as `AuthorizationCreateFromExternalForm`, `authorizationRightForCommand`, `AuthorizationCopyRights`, `AuhtorizationFree`, it's using [**EvenBetterAuthorizationSample**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L101-L154).
 
-**`/var/db/auth.db`** を確認して、ユーザーの操作なしで特権アクションを呼び出すための権限を取得できるかどうかを確認してください。
+Check the **`/var/db/auth.db`** to see if it's possible to get permissions to call some privileged action without user interaction.
 
 ### プロトコル通信
 
-次に、XPCサービスとの通信を確立するためにプロトコルスキーマを見つける必要があります。
+Then, you need to find the protocol schema in order to be able to establish a communication with the XPC service.
 
-関数 **`shouldAcceptNewConnection`** は、エクスポートされているプロトコルを示しています：
+The function **`shouldAcceptNewConnection`** indicates the protocol being exported:
 
 <figure><img src="../../../../../images/image (44).png" alt=""><figcaption></figcaption></figure>
 
-この場合、EvenBetterAuthorizationSampleと同じであり、[**この行を確認してください**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L94) 。
+In this case, we have the same as in EvenBetterAuthorizationSample, [**check this line**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L94).
 
-使用されているプロトコルの名前が分かれば、**そのヘッダー定義をダンプする**ことが可能です：
+使用されているプロトコル名が分かれば、**ヘッダ定義をダンプ**することが可能である：
 ```bash
 class-dump /Library/PrivilegedHelperTools/com.example.HelperTool
 
@@ -305,13 +325,13 @@ class-dump /Library/PrivilegedHelperTools/com.example.HelperTool
 @end
 [...]
 ```
-最後に、**公開されたMachサービスの名前**を知る必要があります。これと通信を確立するための方法はいくつかあります：
+最後に、通信を確立するためには、**公開された Mach Service の名前**を知るだけで十分です。これを見つける方法はいくつかあります：
 
-- **`[HelperTool init]`** で使用されているMachサービスを見ることができます：
+- **`[HelperTool init]`** の中で、Mach Service が使用されているのが見えます：
 
 <figure><img src="../../../../../images/image (41).png" alt=""><figcaption></figcaption></figure>
 
-- launchd plistの中で：
+- launchd plist の中でも確認できます：
 ```xml
 cat /Library/LaunchDaemons/com.example.HelperTool.plist
 
@@ -324,14 +344,14 @@ cat /Library/LaunchDaemons/com.example.HelperTool.plist
 </dict>
 [...]
 ```
-### Exploit Example
+### Exploit の例
 
-この例では、次のものが作成されます：
+この例では次のものを作成します：
 
-- 関数を持つプロトコルの定義
-- アクセスを要求するために使用する空の認証
+- 関数を含むプロトコルの定義
+- アクセスを要求するための空の auth
 - XPCサービスへの接続
-- 接続が成功した場合の関数への呼び出し
+- 接続が成功した場合の関数呼び出し
 ```objectivec
 // gcc -framework Foundation -framework Security expl.m -o expl
 
@@ -409,12 +429,14 @@ NSLog(@"Response: %@", error);
 NSLog(@"Finished!");
 }
 ```
-## 他のXPC特権ヘルパーの悪用
+## その他の悪用された XPC privilege helpers
 
 - [https://blog.securelayer7.net/applied-endpointsecurity-framework-previlege-escalation/?utm_source=pocket_shared](https://blog.securelayer7.net/applied-endpointsecurity-framework-previlege-escalation/?utm_source=pocket_shared)
 
-## 参考文献
+## 参考
 
 - [https://theevilbit.github.io/posts/secure_coding_xpc_part1/](https://theevilbit.github.io/posts/secure_coding_xpc_part1/)
+- [https://khronokernel.com/macos/2024/05/01/CVE-2024-4395.html](https://khronokernel.com/macos/2024/05/01/CVE-2024-4395.html)
+- [https://www.sentinelone.com/vulnerability-database/cve-2025-25251/](https://www.sentinelone.com/vulnerability-database/cve-2025-25251/)
 
 {{#include ../../../../../banners/hacktricks-training.md}}
