@@ -198,19 +198,6 @@ The command-template variant exercised by JFrog (CVE-2025-8943) does not even ne
 }
 ```
 
-#### Detection ideas
-
-- Web server or Flowise logs containing requests to `/api/v1/node-load-method/customMCP` with unexpected `loadMethod` values, or payloads that reference `process.mainModule`, `child_process`, `fs`, etc.
-- Process creation telemetry from the Flowise host for binaries launched under the Flowise service account (e.g., sudden `bash`, `powershell`, `curl`, `nc`, `python`).
-- File integrity monitoring around `/tmp`, project directories, or `/home/flowise/.flowise` for artefacts created immediately after Flowise receives `customMCP` requests.
-
-#### Mitigations
-
-- Upgrade to **Flowise 3.0.6+** where `convertToValidJSONString` and the custom MCP loader were hardened; earlier versions (≤3.0.5) are trivially exploitable.
-- Set `FLOWISE_USERNAME`/`FLOWISE_PASSWORD`, disable anonymous API access, and restrict `/api/v1/node-load-method/*` to trusted admin subnets via reverse proxies.
-- Remove Custom MCP capability if not strictly required (`DISABLE_FLOWISE_CUSTOM_MCP=1`) or wrap it with an allow-list proxy so only vetted executables can be launched.
-- Monitor and rotate any secrets stored inside Flowise (LLM provider API keys, database passwords) after an incident because the RCE primitives grant full filesystem and network access.
-
 ## References
 - [CVE-2025-54136 – MCPoison Cursor IDE persistent RCE](https://research.checkpoint.com/2025/cursor-vulnerability-mcpoison/)
 - [Metasploit Wrap-Up 11/28/2025 – new Flowise custom MCP & JS injection exploits](https://www.rapid7.com/blog/post/pt-metasploit-wrap-up-11-28-2025)
