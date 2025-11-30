@@ -4,13 +4,13 @@
 
 ## XPC Authorization
 
-Apple, bağlanan işlemin **açık bir XPC yöntemini çağırma izinlerine sahip olup olmadığını** doğrulamak için başka bir yol önerir.
+Apple ayrıca, bağlanan sürecin **permissions to call the an exposed XPC method** sahibi olup olmadığını doğrulayarak başka bir kimlik doğrulama yöntemi önerir.
 
-Bir uygulama **ayrılmış bir kullanıcı olarak eylemler gerçekleştirmesi** gerektiğinde, genellikle uygulamayı ayrıcalıklı bir kullanıcı olarak çalıştırmak yerine, bu eylemleri gerçekleştirmek için uygulamadan çağrılabilecek bir XPC hizmeti olarak kök olarak bir HelperTool kurar. Ancak, hizmeti çağıran uygulamanın yeterli yetkilendirmeye sahip olması gerekir.
+When an application needs to **execute actions as a privileged user**, uygulamayı ayrıcalıklı bir kullanıcı olarak çalıştırmak yerine genellikle bu işlemleri gerçekleştirmek için uygulamadan çağrılabilecek bir XPC servisi olarak root altında bir HelperTool kurar. Ancak, servisi çağıran uygulamanın yeterli yetkilendirmeye sahip olması gerekir.
 
-### ShouldAcceptNewConnection her zaman YES
+### ShouldAcceptNewConnection always YES
 
-Bir örnek [EvenBetterAuthorizationSample](https://github.com/brenwell/EvenBetterAuthorizationSample) içinde bulunabilir. `App/AppDelegate.m` dosyasında **HelperTool** ile **bağlanmaya** çalışır. Ve `HelperTool/HelperTool.m` dosyasında **`shouldAcceptNewConnection`** **önceden belirtilen** gereksinimlerin hiçbirini **kontrol etmeyecek**. Her zaman YES döndürecektir:
+An example could be found in [EvenBetterAuthorizationSample](https://github.com/brenwell/EvenBetterAuthorizationSample). In `App/AppDelegate.m` dosyasında **bağlanmaya çalışır** **HelperTool**'a. Ve `HelperTool/HelperTool.m` dosyasında fonksiyon **`shouldAcceptNewConnection`** daha önce belirtilen gereksinimlerin hiçbirini **kontrol etmez**. Her zaman YES döndürecektir:
 ```objectivec
 - (BOOL)listener:(NSXPCListener *)listener shouldAcceptNewConnection:(NSXPCConnection *)newConnection
 // Called by our XPC listener when a new connection comes in.  We configure the connection
@@ -27,7 +27,8 @@ newConnection.exportedObject = self;
 return YES;
 }
 ```
-Daha fazla bilgi için bu kontrolü doğru bir şekilde yapılandırma hakkında:
+For more information about how to properly configure this check:
+
 
 {{#ref}}
 macos-xpc-connecting-process-check/
@@ -35,10 +36,10 @@ macos-xpc-connecting-process-check/
 
 ### Uygulama hakları
 
-Ancak, **HelperTool'dan bir yöntem çağrıldığında bazı yetkilendirmeler gerçekleşiyor**.
+Bununla birlikte, HelperTool'dan bir metot çağrıldığında bazı **yetkilendirme işlemleri** gerçekleşir.
 
-`App/AppDelegate.m` dosyasındaki **`applicationDidFinishLaunching`** fonksiyonu, uygulama başlatıldıktan sonra boş bir yetkilendirme referansı oluşturacaktır. Bu her zaman çalışmalıdır.\
-Sonra, `setupAuthorizationRights` çağrısını yaparak o yetkilendirme referansına **bazı haklar eklemeye** çalışacaktır:
+`App/AppDelegate.m` içindeki **`applicationDidFinishLaunching`** fonksiyonu uygulama başladıktan sonra boş bir yetkilendirme referansı oluşturur. Bu her zaman çalışmalıdır.\
+Sonrasında, `setupAuthorizationRights` çağırarak bu yetkilendirme referansına **bazı haklar eklemeye** çalışır:
 ```objectivec
 - (void)applicationDidFinishLaunching:(NSNotification *)note
 {
@@ -62,7 +63,7 @@ if (self->_authRef) {
 [self.window makeKeyAndOrderFront:self];
 }
 ```
-`Common/Common.m` dosyasındaki `setupAuthorizationRights` fonksiyonu, uygulamanın haklarını `/var/db/auth.db` yetki veritabanında saklayacaktır. Veritabanında henüz bulunmayan hakları yalnızca ekleyeceğine dikkat edin:
+Common/Common.m içindeki `setupAuthorizationRights` fonksiyonu uygulamanın haklarını kimlik doğrulama veritabanı `/var/db/auth.db` içine kaydedecektir. Veritabanında henüz olmayan hakları ekleyeceğine dikkat edin:
 ```objectivec
 + (void)setupAuthorizationRights:(AuthorizationRef)authRef
 // See comment in header.
@@ -94,7 +95,7 @@ assert(blockErr == errAuthorizationSuccess);
 }];
 }
 ```
-`enumerateRightsUsingBlock` fonksiyonu, `commandInfo` içinde tanımlanan uygulama izinlerini almak için kullanılır:
+Uygulamaların izinlerini almak için kullanılan fonksiyon `enumerateRightsUsingBlock` olup, bunlar `commandInfo` içinde tanımlanmıştır:
 ```objectivec
 static NSString * kCommandKeyAuthRightName    = @"authRightName";
 static NSString * kCommandKeyAuthRightDefault = @"authRightDefault";
@@ -172,15 +173,15 @@ block(authRightName, authRightDefault, authRightDesc);
 }];
 }
 ```
-Bu, bu sürecin sonunda `commandInfo` içinde belirtilen izinlerin `/var/db/auth.db` içinde saklanacağı anlamına gelir. Her **yöntem** için **kimlik doğrulama gerektiren**, **izin adı** ve **`kCommandKeyAuthRightDefault`** bulabileceğinizi unutmayın. Sonuncusu **bu hakkı kimin alabileceğini gösterir**.
+Bu, bu işlemin sonunda `commandInfo` içinde bildirilen izinlerin `/var/db/auth.db` içinde saklanacağı anlamına gelir. Orada doğrulama gerektirecek **her yöntem** için **izin adı** ve **`kCommandKeyAuthRightDefault`**'ı bulabileceğinizi unutmayın. Sonuncusu **bu hakkı kimin alabileceğini gösterir**.
 
-Bir hakkın kimler tarafından erişilebileceğini belirtmek için farklı kapsamlar vardır. Bunlardan bazıları [AuthorizationDB.h](https://github.com/aosm/Security/blob/master/Security/libsecurity_authorization/lib/AuthorizationDB.h) içinde tanımlanmıştır (hepsini [burada bulabilirsiniz](https://www.dssw.co.uk/reference/authorization-rights/)), ancak özet olarak:
+Bir hakkın kim tarafından erişilebileceğini belirtmek için farklı kapsamlar vardır. Bunların bazıları [AuthorizationDB.h](https://github.com/aosm/Security/blob/master/Security/libsecurity_authorization/lib/AuthorizationDB.h) içinde tanımlıdır (tümünü [burada](https://www.dssw.co.uk/reference/authorization-rights/) bulabilirsiniz), ama özetle:
 
-<table><thead><tr><th width="284.3333333333333">Ad</th><th width="165">Değer</th><th>Açıklama</th></tr></thead><tbody><tr><td>kAuthorizationRuleClassAllow</td><td>allow</td><td>Herkes</td></tr><tr><td>kAuthorizationRuleClassDeny</td><td>deny</td><td>Hiç kimse</td></tr><tr><td>kAuthorizationRuleIsAdmin</td><td>is-admin</td><td>Mevcut kullanıcı bir admin olmalıdır (admin grubunda)</td></tr><tr><td>kAuthorizationRuleAuthenticateAsSessionUser</td><td>authenticate-session-owner</td><td>Kullanıcıdan kimlik doğrulaması yapması istenir.</td></tr><tr><td>kAuthorizationRuleAuthenticateAsAdmin</td><td>authenticate-admin</td><td>Kullanıcıdan kimlik doğrulaması yapması istenir. Admin olmalıdır (admin grubunda)</td></tr><tr><td>kAuthorizationRightRule</td><td>rule</td><td>Kuralları belirtin</td></tr><tr><td>kAuthorizationComment</td><td>comment</td><td>Hakkın üzerine bazı ek yorumlar belirtin</td></tr></tbody></table>
+<table><thead><tr><th width="284.3333333333333">Ad</th><th width="165">Value</th><th>Açıklama</th></tr></thead><tbody><tr><td>kAuthorizationRuleClassAllow</td><td>allow</td><td>Herkes</td></tr><tr><td>kAuthorizationRuleClassDeny</td><td>deny</td><td>Hiç kimse</td></tr><tr><td>kAuthorizationRuleIsAdmin</td><td>is-admin</td><td>Mevcut kullanıcı admin (admin grubunda) olmalıdır</td></tr><tr><td>kAuthorizationRuleAuthenticateAsSessionUser</td><td>authenticate-session-owner</td><td>Kullanıcıdan kimlik doğrulaması istenir.</td></tr><tr><td>kAuthorizationRuleAuthenticateAsAdmin</td><td>authenticate-admin</td><td>Kullanıcıdan kimlik doğrulaması istenir. Kullanıcının admin (admin grubunda) olması gerekir</td></tr><tr><td>kAuthorizationRightRule</td><td>rule</td><td>Kuralları belirtir</td></tr><tr><td>kAuthorizationComment</td><td>comment</td><td>Hak ile ilgili bazı ek yorumlar belirtir</td></tr></tbody></table>
 
-### Hakların Doğrulanması
+### Hak Doğrulama
 
-`HelperTool/HelperTool.m` içinde **`readLicenseKeyAuthorization`** fonksiyonu, çağrıyı yapanın **böyle bir yöntemi çalıştırmak için yetkili olup olmadığını** kontrol eder ve **`checkAuthorization`** fonksiyonunu çağırır. Bu fonksiyon, çağrıyı yapan süreç tarafından gönderilen **authData**'nın **doğru formatta** olup olmadığını kontrol eder ve ardından belirli bir yöntemi çağırmak için **neye ihtiyaç olduğunu** kontrol eder. Her şey yolunda giderse, **dönen `error` `nil` olacaktır**:
+`HelperTool/HelperTool.m` içindeki fonksiyon **`readLicenseKeyAuthorization`**, çağıranın **böyle bir yöntemi yürütme** yetkisine sahip olup olmadığını kontrol etmek için **`checkAuthorization`** fonksiyonunu çağırır. Bu fonksiyon, çağıran süreç tarafından gönderilen **`authData`**'nın **doğru bir biçime** sahip olup olmadığını kontrol eder ve ardından belirli yöntemi çağırmak için **hakkı elde etmek için nelerin gerektiğini** denetler. Her şey yolunda giderse döndürülen **`error` `nil` olacaktır`**:
 ```objectivec
 - (NSError *)checkAuthorization:(NSData *)authData command:(SEL)command
 {
@@ -228,37 +229,37 @@ assert(junk == errAuthorizationSuccess);
 return error;
 }
 ```
-Not edin ki **o yöntemi çağırma hakkını elde etmek için gereksinimleri kontrol etmek** amacıyla `authorizationRightForCommand` fonksiyonu sadece daha önceki yorum nesnesini **`commandInfo`** kontrol edecektir. Ardından, fonksiyonu çağırma **hakkına sahip olup olmadığını kontrol etmek için** **`AuthorizationCopyRights`** çağrılacaktır (bayrakların kullanıcı ile etkileşime izin verdiğini unutmayın).
+Şunu unutmayın: bu yöntemi çağırmak için hak elde etme gereksinimlerini **kontrol etmek** amacıyla `authorizationRightForCommand` fonksiyonu yalnızca daha önce bahsedilen nesne **`commandInfo`**'yu kontrol eder. Ardından, fonksiyonu çağırma **haklarına sahip olup olmadığını** kontrol etmek için **`AuthorizationCopyRights`** çağrılır (bayrakların kullanıcı ile etkileşime izin verdiğini unutmayın).
 
-Bu durumda, `readLicenseKeyAuthorization` fonksiyonunu çağırmak için `kCommandKeyAuthRightDefault` `@kAuthorizationRuleClassAllow` olarak tanımlanmıştır. Yani **herkes bunu çağırabilir**.
+Bu durumda, `readLicenseKeyAuthorization` fonksiyonunu çağırmak için `kCommandKeyAuthRightDefault` `@kAuthorizationRuleClassAllow` olarak tanımlanmıştır. Yani **herkes çağırabilir**.
 
 ### DB Bilgileri
 
-Bu bilginin `/var/db/auth.db` içinde saklandığı belirtilmiştir. Saklanan tüm kuralları listelemek için:
+Bu bilgilerin `/var/db/auth.db` içinde saklandığı belirtilmişti. Tüm saklı kuralları şu şekilde listeleyebilirsiniz:
 ```sql
 sudo sqlite3 /var/db/auth.db
 SELECT name FROM rules;
 SELECT name FROM rules WHERE name LIKE '%safari%';
 ```
-Sonra, bu hakka kimin erişebileceğini şu şekilde okuyabilirsiniz:
+Sonra, bu yetkiye kimlerin erişebileceğini şu şekilde okuyabilirsiniz:
 ```bash
 security authorizationdb read com.apple.safaridriver.allow
 ```
-### İzinler
+### Hoşgörülü haklar
 
-**Tüm izin yapılandırmalarını** [**burada**](https://www.dssw.co.uk/reference/authorization-rights/) bulabilirsiniz, ancak kullanıcı etkileşimi gerektirmeyecek kombinasyonlar şunlardır:
+Tüm izin yapılandırmalarını [**in here**](https://www.dssw.co.uk/reference/authorization-rights/) adresinde bulabilirsiniz, ancak user etkileşimi gerektirmeyecek kombinasyonlar şunlardır:
 
 1. **'authenticate-user': 'false'**
-- Bu en doğrudan anahtardır. `false` olarak ayarlandığında, bir kullanıcının bu hakkı elde etmek için kimlik doğrulaması sağlaması gerekmediğini belirtir.
-- Bu, kullanıcının ait olması gereken bir grup ile birlikte **aşağıdaki 2'den biriyle** kombinasyon halinde kullanılır.
+- Bu en doğrudan anahtar. Eğer `false` olarak ayarlanırsa, bu hakkı elde etmek için bir user'ın kimlik doğrulaması sağlaması gerekmediğini belirtir.
+- Bu, **aşağıdaki 2 seçenekten biriyle veya user'ın ait olması gereken bir grup belirtilmesiyle birlikte kullanılır**.
 2. **'allow-root': 'true'**
-- Bir kullanıcı root kullanıcı olarak çalışıyorsa (yükseltilmiş izinlere sahip) ve bu anahtar `true` olarak ayarlandıysa, root kullanıcı bu hakkı daha fazla kimlik doğrulaması olmadan elde edebilir. Ancak, genellikle root kullanıcı statüsüne ulaşmak zaten kimlik doğrulaması gerektirdiğinden, bu çoğu kullanıcı için "kimlik doğrulaması yok" senaryosu değildir.
+- Eğer bir user root user olarak işlem yapıyorsa (yükseltilmiş izinlere sahip olan), ve bu anahtar `true` olarak ayarlanmışsa, root user bu hakkı ek bir kimlik doğrulama olmadan elde edebilir. Ancak genellikle root user statüsüne ulaşmak zaten kimlik doğrulama gerektirdiğinden, bu çoğu user için "no authentication" senaryosu değildir.
 3. **'session-owner': 'true'**
-- `true` olarak ayarlandığında, oturumun sahibi (şu anda oturum açmış kullanıcı) otomatik olarak bu hakkı alır. Kullanıcı zaten oturum açmışsa, bu ek kimlik doğrulamasını atlayabilir.
+- `true` olarak ayarlanırsa, session owner (o an oturum açmış olan user) otomatik olarak bu hakkı alır. Bu, user zaten oturum açmışsa ek kimlik doğrulamayı atlayabilir.
 4. **'shared': 'true'**
-- Bu anahtar kimlik doğrulaması olmadan hak vermez. Bunun yerine, `true` olarak ayarlandığında, hak kimlik doğrulaması yapıldıktan sonra birden fazla işlem arasında paylaşılabileceği anlamına gelir; her birinin yeniden kimlik doğrulaması yapmasına gerek kalmaz. Ancak, hakkın başlangıçta verilmesi yine de kimlik doğrulaması gerektirecektir, aksi takdirde `'authenticate-user': 'false'` gibi diğer anahtarlarla birleştirilmedikçe.
+- Bu anahtar kimlik doğrulamadan hak vermez. Bunun yerine, `true` olarak ayarlanırsa, bir hak doğrulandığında her süreç için tekrar doğrulama gerekmeksizin birden fazla süreç arasında paylaşılabileceği anlamına gelir. Ancak hakkın ilk verilmesi yine kimlik doğrulama gerektirir; `'authenticate-user': 'false'` gibi diğer anahtarlarla birleştirilmedikçe.
 
-İlginç hakları elde etmek için [**bu betiği**](https://gist.github.com/carlospolop/96ecb9e385a4667b9e40b24e878652f9) kullanabilirsiniz:
+İlginç hakları almak için [**use this script**](https://gist.github.com/carlospolop/96ecb9e385a4667b9e40b24e878652f9) kullanabilirsiniz:
 ```bash
 Rights with 'authenticate-user': 'false':
 is-admin (admin), is-admin-nonshared (admin), is-appstore (_appstore), is-developer (_developer), is-lpadmin (_lpadmin), is-root (run as root), is-session-owner (session owner), is-webdeveloper (_webdeveloper), system-identity-write-self (session owner), system-install-iap-software (run as root), system-install-software-iap (run as root)
@@ -269,29 +270,42 @@ com-apple-aosnotification-findmymac-remove, com-apple-diskmanagement-reservekek,
 Rights with 'session-owner': 'true':
 authenticate-session-owner, authenticate-session-owner-or-admin, authenticate-session-user, com-apple-safari-allow-apple-events-to-run-javascript, com-apple-safari-allow-javascript-in-smart-search-field, com-apple-safari-allow-unsigned-app-extensions, com-apple-safari-install-ephemeral-extensions, com-apple-safari-show-credit-card-numbers, com-apple-safari-show-passwords, com-apple-icloud-passwordreset, com-apple-icloud-passwordreset, is-session-owner, system-identity-write-self, use-login-window-ui
 ```
+### Yetki Atlatma Vaka İncelemeleri
+
+- **CVE-2024-4395 – Jamf Compliance Editor helper**: Bir denetim çalıştırıldığında `/Library/LaunchDaemons/com.jamf.complianceeditor.helper.plist` bırakıyor, Mach servisi `com.jamf.complianceeditor.helper`'ı açığa çıkarıyor ve çağıranın `AuthorizationExternalForm`'unu veya kod imzasını doğrulamadan `-executeScriptAt:arguments:then:` metodunu dışa aktarıyor. Basit bir exploit `AuthorizationCreate` ile boş bir referans oluşturur, `[[NSXPCConnection alloc] initWithMachServiceName:options:NSXPCConnectionPrivileged]` ile bağlanır ve root olarak rastgele ikili dosyaları çalıştırmak için ilgili metodu çağırır. Tam tersine mühendislik notları (ve PoC) için [Mykola Grymalyuk’s write-up](https://khronokernel.com/macos/2024/05/01/CVE-2024-4395.html).
+- **CVE-2025-25251 – FortiClient Mac helper**: FortiClient Mac 7.0.0–7.0.14, 7.2.0–7.2.8 ve 7.4.0–7.4.2, yetkilendirme kontrolleri olmayan ayrıcalıklı helper'a ulaşan hazırlanmış XPC mesajlarını kabul ediyordu. Helper kendi ayrıcalıklı `AuthorizationRef`'ine güvendiği için, servise mesaj gönderebilen herhangi bir yerel kullanıcı helper'ı rastgele yapılandırma değişikliklerini veya komutları root olarak çalıştırmaya zorlayabiliyordu. Detaylar için [SentinelOne’s advisory summary](https://www.sentinelone.com/vulnerability-database/cve-2025-25251/).
+
+#### Hızlı ön değerlendirme ipuçları
+
+- Bir uygulama hem GUI hem helper ile dağıtıldığında, kod gereksinimlerinin farklarını diff edin ve `shouldAcceptNewConnection`'ın listener'ı `-setCodeSigningRequirement:` ile kilitlediğini (veya `SecCodeCopySigningInformation`'ı doğruladığını) kontrol edin. Eksik kontroller genellikle Jamf vakasına benzer CWE-863 senaryolarına yol açar. Kısa bir bakış şöyle görünür:
+```bash
+codesign --display --requirements - /Applications/Jamf\ Compliance\ Editor.app
+```
+- Yardımcının *yetkilendirdiğini düşündüğü şeyi* istemcinin sağladığıyla karşılaştırın. Tersine mühendislik yaparken, `AuthorizationCopyRights` üzerinde kesme noktası koyun ve `AuthorizationRef`'in helper’ın kendi ayrıcalıklı bağlamından değil, istemci tarafından sağlanan `AuthorizationCreateFromExternalForm`'dan kaynaklandığını doğrulayın; aksi halde yukarıdaki vakalara benzer bir CWE-863 desenine rastlamış olabilirsiniz.
+
 ## Yetkilendirmeyi Tersine Çevirme
 
-### EvenBetterAuthorization'ın Kullanılıp Kullanılmadığını Kontrol Etme
+### EvenBetterAuthorization'ın kullanılıp kullanılmadığını kontrol etme
 
-Eğer **`[HelperTool checkAuthorization:command:]`** fonksiyonunu bulursanız, muhtemelen süreç daha önce bahsedilen yetkilendirme şemasını kullanıyor:
+Eğer şu fonksiyonu bulursanız: **`[HelperTool checkAuthorization:command:]`** muhtemelen süreç daha önce bahsedilen yetkilendirme şemasını kullanıyordur:
 
 <figure><img src="../../../../../images/image (42).png" alt=""><figcaption></figcaption></figure>
 
-Bu durumda, eğer bu fonksiyon `AuthorizationCreateFromExternalForm`, `authorizationRightForCommand`, `AuthorizationCopyRights`, `AuhtorizationFree` gibi fonksiyonları çağırıyorsa, [**EvenBetterAuthorizationSample**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L101-L154) kullanılıyor demektir.
+Bununla birlikte, bu fonksiyon `AuthorizationCreateFromExternalForm`, `authorizationRightForCommand`, `AuthorizationCopyRights`, `AuhtorizationFree` gibi fonksiyonları çağırıyorsa, [**EvenBetterAuthorizationSample**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L101-L154) kullanılıyor demektir.
 
-Kullanıcı etkileşimi olmadan bazı ayrıcalıklı eylemleri çağırmak için izin almanın mümkün olup olmadığını görmek için **`/var/db/auth.db`** dosyasını kontrol edin.
+Kullanıcı etkileşimi olmadan bazı ayrıcalıklı işlemleri çağırma izni almanın mümkün olup olmadığını görmek için **`/var/db/auth.db`** dosyasını kontrol edin.
 
 ### Protokol İletişimi
 
-Sonra, XPC servisi ile iletişim kurabilmek için protokol şemasını bulmanız gerekiyor.
+Ardından, XPC servisiyle iletişim kurabilmek için protokol şemasını bulmanız gerekir.
 
-**`shouldAcceptNewConnection`** fonksiyonu, dışa aktarılan protokolü gösterir:
+**`shouldAcceptNewConnection`** fonksiyonu dışa aktarılan protokolü gösterir:
 
 <figure><img src="../../../../../images/image (44).png" alt=""><figcaption></figcaption></figure>
 
-Bu durumda, EvenBetterAuthorizationSample'daki ile aynıyız, [**bu satırı kontrol edin**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L94).
+Bu durumda, EvenBetterAuthorizationSample'daki ile aynı, [**bu satıra bakın**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L94).
 
-Kullanılan protokolün adını bildiğinizde, **başlık tanımını dökme** işlemini gerçekleştirmek mümkündür:
+Kullanılan protokolün adını bildiğinizde, **dump its header definition** ile başlık tanımını dökmek mümkündür:
 ```bash
 class-dump /Library/PrivilegedHelperTools/com.example.HelperTool
 
@@ -305,9 +319,9 @@ class-dump /Library/PrivilegedHelperTools/com.example.HelperTool
 @end
 [...]
 ```
-Son olarak, onunla iletişim kurmak için **açık Mach Servisinin adını** bilmemiz gerekiyor. Bunu bulmanın birkaç yolu vardır:
+Son olarak, onunla iletişim kurabilmek için açığa çıkmış **Mach Service**'in ismini bilmemiz gerekiyor. Bunu bulmanın birkaç yolu var:
 
-- **`[HelperTool init]`** içinde Mach Servisinin kullanıldığını görebilirsiniz:
+- **`[HelperTool init]`** içinde Mach Service'in kullanıldığını görebileceğiniz yer:
 
 <figure><img src="../../../../../images/image (41).png" alt=""><figcaption></figcaption></figure>
 
@@ -326,12 +340,12 @@ cat /Library/LaunchDaemons/com.example.HelperTool.plist
 ```
 ### Exploit Örneği
 
-Bu örnekte oluşturulur:
+Bu örnekte şunlar oluşturulur:
 
-- Fonksiyonlarla birlikte protokolün tanımı
+- Fonksiyonları içeren protokolün tanımı
 - Erişim istemek için kullanılacak boş bir auth
-- XPC hizmetine bir bağlantı
-- Bağlantı başarılıysa fonksiyona bir çağrı
+- XPC servisine bir bağlantı
+- Bağlantı başarılıysa fonksiyonun çağrılması
 ```objectivec
 // gcc -framework Foundation -framework Security expl.m -o expl
 
@@ -409,12 +423,14 @@ NSLog(@"Response: %@", error);
 NSLog(@"Finished!");
 }
 ```
-## Diğer XPC ayrıcalık yardımcıları istismar edildi
+## Diğer XPC privilege yardımcılarının kötüye kullanılması
 
 - [https://blog.securelayer7.net/applied-endpointsecurity-framework-previlege-escalation/?utm_source=pocket_shared](https://blog.securelayer7.net/applied-endpointsecurity-framework-previlege-escalation/?utm_source=pocket_shared)
 
-## Referanslar
+## Kaynaklar
 
 - [https://theevilbit.github.io/posts/secure_coding_xpc_part1/](https://theevilbit.github.io/posts/secure_coding_xpc_part1/)
+- [https://khronokernel.com/macos/2024/05/01/CVE-2024-4395.html](https://khronokernel.com/macos/2024/05/01/CVE-2024-4395.html)
+- [https://www.sentinelone.com/vulnerability-database/cve-2025-25251/](https://www.sentinelone.com/vulnerability-database/cve-2025-25251/)
 
 {{#include ../../../../../banners/hacktricks-training.md}}
