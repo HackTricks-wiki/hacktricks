@@ -1,16 +1,16 @@
-# macOS XPC Authorization
+# macOS XPC Autorisation
 
 {{#include ../../../../../banners/hacktricks-training.md}}
 
-## XPC Authorization
+## XPC Autorisation
 
-Apple propose également une autre façon d'authentifier si le processus de connexion a **les autorisations d'appeler une méthode XPC exposée**.
+Apple propose également une autre façon de s'authentifier si le processus qui se connecte a **les permissions pour appeler une méthode XPC exposée**.
 
-Lorsqu'une application a besoin d'**exécuter des actions en tant qu'utilisateur privilégié**, au lieu d'exécuter l'application en tant qu'utilisateur privilégié, elle installe généralement en tant que root un HelperTool en tant que service XPC qui peut être appelé depuis l'application pour effectuer ces actions. Cependant, l'application appelant le service doit avoir suffisamment d'autorisation.
+Quand une application doit **exécuter des actions en tant qu'utilisateur privilégié**, au lieu d'exécuter l'app en tant qu'utilisateur privilégié elle installe généralement en root un HelperTool en tant que service XPC qui peut être appelé depuis l'app pour effectuer ces actions. Cependant, l'app appelant le service devrait disposer d'une autorisation suffisante.
 
-### ShouldAcceptNewConnection toujours OUI
+### ShouldAcceptNewConnection toujours YES
 
-Un exemple peut être trouvé dans [EvenBetterAuthorizationSample](https://github.com/brenwell/EvenBetterAuthorizationSample). Dans `App/AppDelegate.m`, il essaie de **se connecter** au **HelperTool**. Et dans `HelperTool/HelperTool.m`, la fonction **`shouldAcceptNewConnection`** **ne vérifiera pas** les exigences indiquées précédemment. Elle renverra toujours OUI :
+Un exemple se trouve dans [EvenBetterAuthorizationSample](https://github.com/brenwell/EvenBetterAuthorizationSample). Dans `App/AppDelegate.m` elle tente de **se connecter** au **HelperTool**. Et dans `HelperTool/HelperTool.m` la fonction **`shouldAcceptNewConnection`** **ne vérifiera pas** aucune des exigences indiquées précédemment. Elle retournera toujours YES :
 ```objectivec
 - (BOOL)listener:(NSXPCListener *)listener shouldAcceptNewConnection:(NSXPCConnection *)newConnection
 // Called by our XPC listener when a new connection comes in.  We configure the connection
@@ -27,18 +27,18 @@ newConnection.exportedObject = self;
 return YES;
 }
 ```
-Pour plus d'informations sur la façon de configurer correctement cette vérification :
+Pour plus d'informations sur la manière de configurer correctement cette vérification :
 
 {{#ref}}
 macos-xpc-connecting-process-check/
 {{#endref}}
 
-### Droits d'application
+### Droits de l'application
 
-Cependant, il y a une **autorisation en cours lorsque qu'une méthode du HelperTool est appelée**.
+Cependant, il y a une sorte d'**autorisation en cours lorsqu'une méthode du HelperTool est appelée**.
 
-La fonction **`applicationDidFinishLaunching`** de `App/AppDelegate.m` créera une référence d'autorisation vide après le démarrage de l'application. Cela devrait toujours fonctionner.\
-Ensuite, elle essaiera **d'ajouter des droits** à cette référence d'autorisation en appelant `setupAuthorizationRights` :
+La fonction **`applicationDidFinishLaunching`** dans `App/AppDelegate.m` créera une référence d'autorisation vide après le démarrage de l'application. Cela devrait toujours fonctionner.\
+Ensuite, elle tentera **d'ajouter certains droits** à cette référence d'autorisation en appelant `setupAuthorizationRights` :
 ```objectivec
 - (void)applicationDidFinishLaunching:(NSNotification *)note
 {
@@ -62,7 +62,7 @@ if (self->_authRef) {
 [self.window makeKeyAndOrderFront:self];
 }
 ```
-La fonction `setupAuthorizationRights` de `Common/Common.m` stockera dans la base de données d'authentification `/var/db/auth.db` les droits de l'application. Notez qu'elle n'ajoutera que les droits qui ne sont pas encore dans la base de données :
+La fonction `setupAuthorizationRights` de `Common/Common.m` va stocker dans la base d'authentification `/var/db/auth.db` les droits de l'application. Notez qu'elle n'ajoutera que les droits qui ne sont pas encore dans la base :
 ```objectivec
 + (void)setupAuthorizationRights:(AuthorizationRef)authRef
 // See comment in header.
@@ -94,7 +94,7 @@ assert(blockErr == errAuthorizationSuccess);
 }];
 }
 ```
-La fonction `enumerateRightsUsingBlock` est celle utilisée pour obtenir les autorisations des applications, qui sont définies dans `commandInfo` :
+La fonction `enumerateRightsUsingBlock` est celle utilisée pour récupérer les permissions des applications, qui sont définies dans `commandInfo` :
 ```objectivec
 static NSString * kCommandKeyAuthRightName    = @"authRightName";
 static NSString * kCommandKeyAuthRightDefault = @"authRightDefault";
@@ -172,15 +172,15 @@ block(authRightName, authRightDefault, authRightDesc);
 }];
 }
 ```
-Cela signifie qu'à la fin de ce processus, les autorisations déclarées dans `commandInfo` seront stockées dans `/var/db/auth.db`. Notez comment vous pouvez trouver pour **chaque méthode** qui nécessitera une **authentification**, **nom de l'autorisation** et le **`kCommandKeyAuthRightDefault`**. Ce dernier **indique qui peut obtenir ce droit**.
+Cela signifie qu'à la fin de ce processus, les permissions déclarées dans `commandInfo` seront stockées dans `/var/db/auth.db`. Remarquez qu'on peut y trouver, pour **chaque méthode** qui **requiert une authentification**, **le nom de la permission** et la **`kCommandKeyAuthRightDefault`**. Cette dernière **indique qui peut obtenir ce droit**.
 
-Il existe différents portées pour indiquer qui peut accéder à un droit. Certaines d'entre elles sont définies dans [AuthorizationDB.h](https://github.com/aosm/Security/blob/master/Security/libsecurity_authorization/lib/AuthorizationDB.h) (vous pouvez trouver [toutes ici](https://www.dssw.co.uk/reference/authorization-rights/)), mais en résumé :
+Il existe différentes portées pour indiquer qui peut accéder à un droit. Certaines d'entre elles sont définies dans [AuthorizationDB.h](https://github.com/aosm/Security/blob/master/Security/libsecurity_authorization/lib/AuthorizationDB.h) (vous pouvez trouver [all of them in here](https://www.dssw.co.uk/reference/authorization-rights/)), mais en résumé :
 
-<table><thead><tr><th width="284.3333333333333">Nom</th><th width="165">Valeur</th><th>Description</th></tr></thead><tbody><tr><td>kAuthorizationRuleClassAllow</td><td>allow</td><td>Tout le monde</td></tr><tr><td>kAuthorizationRuleClassDeny</td><td>deny</td><td>Personne</td></tr><tr><td>kAuthorizationRuleIsAdmin</td><td>is-admin</td><td>L'utilisateur actuel doit être un admin (dans le groupe admin)</td></tr><tr><td>kAuthorizationRuleAuthenticateAsSessionUser</td><td>authenticate-session-owner</td><td>Demander à l'utilisateur de s'authentifier.</td></tr><tr><td>kAuthorizationRuleAuthenticateAsAdmin</td><td>authenticate-admin</td><td>Demander à l'utilisateur de s'authentifier. Il doit être un admin (dans le groupe admin)</td></tr><tr><td>kAuthorizationRightRule</td><td>rule</td><td>Spécifier des règles</td></tr><tr><td>kAuthorizationComment</td><td>comment</td><td>Spécifier quelques commentaires supplémentaires sur le droit</td></tr></tbody></table>
+<table><thead><tr><th width="284.3333333333333">Name</th><th width="165">Value</th><th>Description</th></tr></thead><tbody><tr><td>kAuthorizationRuleClassAllow</td><td>allow</td><td>Tout le monde</td></tr><tr><td>kAuthorizationRuleClassDeny</td><td>deny</td><td>Personne</td></tr><tr><td>kAuthorizationRuleIsAdmin</td><td>is-admin</td><td>L'utilisateur courant doit être administrateur (membre du groupe admin)</td></tr><tr><td>kAuthorizationRuleAuthenticateAsSessionUser</td><td>authenticate-session-owner</td><td>Demande à l'utilisateur de s'authentifier.</td></tr><tr><td>kAuthorizationRuleAuthenticateAsAdmin</td><td>authenticate-admin</td><td>Demande à l'utilisateur de s'authentifier. Il doit être administrateur (membre du groupe admin)</td></tr><tr><td>kAuthorizationRightRule</td><td>rule</td><td>Définir des règles</td></tr><tr><td>kAuthorizationComment</td><td>comment</td><td>Fournir des commentaires supplémentaires sur le droit</td></tr></tbody></table>
 
-### Vérification des Droits
+### Vérification des droits
 
-Dans `HelperTool/HelperTool.m`, la fonction **`readLicenseKeyAuthorization`** vérifie si l'appelant est autorisé à **exécuter cette méthode** en appelant la fonction **`checkAuthorization`**. Cette fonction vérifiera que les **authData** envoyés par le processus appelant ont un **format correct** et ensuite vérifiera **ce qui est nécessaire pour obtenir le droit** d'appeler la méthode spécifique. Si tout se passe bien, l'**erreur retournée sera `nil`** :
+Dans `HelperTool/HelperTool.m` la fonction **`readLicenseKeyAuthorization`** vérifie si l'appelant est autorisé à **exécuter une telle méthode** en appelant la fonction **`checkAuthorization`**. Cette fonction va vérifier que les **authData** envoyés par le processus appelant ont un **format correct** puis vérifier **ce qui est nécessaire pour obtenir le droit** d'appeler la méthode spécifique. Si tout se passe bien, l'**`error` retourné sera `nil`** :
 ```objectivec
 - (NSError *)checkAuthorization:(NSData *)authData command:(SEL)command
 {
@@ -228,11 +228,11 @@ assert(junk == errAuthorizationSuccess);
 return error;
 }
 ```
-Notez que pour **vérifier les exigences pour obtenir le droit** d'appeler cette méthode, la fonction `authorizationRightForCommand` va simplement vérifier l'objet de commentaire précédent **`commandInfo`**. Ensuite, elle appellera **`AuthorizationCopyRights`** pour vérifier **si elle a les droits** d'appeler la fonction (notez que les drapeaux permettent l'interaction avec l'utilisateur).
+Notez que pour **vérifier les exigences pour obtenir le droit** d'appeler cette méthode, la fonction `authorizationRightForCommand` vérifiera simplement l'objet commenté précédemment **`commandInfo`**. Ensuite, elle appellera **`AuthorizationCopyRights`** pour vérifier **si elle possède les droits** d'appeler la fonction (notez que les flags permettent l'interaction avec l'utilisateur).
 
-Dans ce cas, pour appeler la fonction `readLicenseKeyAuthorization`, le `kCommandKeyAuthRightDefault` est défini sur `@kAuthorizationRuleClassAllow`. Donc **tout le monde peut l'appeler**.
+Dans ce cas, pour appeler la fonction `readLicenseKeyAuthorization`, le `kCommandKeyAuthRightDefault` est défini sur `@kAuthorizationRuleClassAllow`. Donc **n'importe qui peut l'appeler**.
 
-### Informations sur la base de données
+### DB Information
 
 Il a été mentionné que ces informations sont stockées dans `/var/db/auth.db`. Vous pouvez lister toutes les règles stockées avec :
 ```sql
@@ -240,25 +240,25 @@ sudo sqlite3 /var/db/auth.db
 SELECT name FROM rules;
 SELECT name FROM rules WHERE name LIKE '%safari%';
 ```
-Ensuite, vous pouvez lire qui peut accéder au droit avec :
+Ensuite, vous pouvez lire qui peut accéder à ce droit avec :
 ```bash
 security authorizationdb read com.apple.safaridriver.allow
 ```
 ### Droits permissifs
 
-Vous pouvez trouver **toutes les configurations de permissions** [**ici**](https://www.dssw.co.uk/reference/authorization-rights/), mais les combinaisons qui ne nécessiteront pas d'interaction de l'utilisateur seraient :
+Vous pouvez trouver **toutes les configurations de permissions** [**ici**](https://www.dssw.co.uk/reference/authorization-rights/), mais les combinaisons qui n'exigeront pas d'interaction de l'utilisateur seraient :
 
 1. **'authenticate-user': 'false'**
-- C'est la clé la plus directe. Si elle est définie sur `false`, cela spécifie qu'un utilisateur n'a pas besoin de fournir d'authentification pour obtenir ce droit.
-- Cela est utilisé en **combinaison avec l'une des 2 ci-dessous ou en indiquant un groupe** auquel l'utilisateur doit appartenir.
+- C'est la clé la plus directe. Si elle est définie sur `false`, cela indique qu'un utilisateur n'a pas besoin de s'authentifier pour obtenir ce droit.
+- Ceci est utilisé en **combinaison avec l'une des 2 options ci‑dessous ou en indiquant un groupe** auquel l'utilisateur doit appartenir.
 2. **'allow-root': 'true'**
-- Si un utilisateur opère en tant qu'utilisateur root (qui a des permissions élevées), et que cette clé est définie sur `true`, l'utilisateur root pourrait potentiellement obtenir ce droit sans authentification supplémentaire. Cependant, en général, accéder à un statut d'utilisateur root nécessite déjà une authentification, donc ce n'est pas un scénario "sans authentification" pour la plupart des utilisateurs.
+- Si un utilisateur opère en tant que root (qui a des permissions élevées), et que cette clé est à `true`, l'utilisateur root pourrait potentiellement obtenir ce droit sans authentification supplémentaire. Cependant, typiquement, obtenir le statut root nécessite déjà une authentification, donc pour la plupart des utilisateurs ce n'est pas un scénario «sans authentification».
 3. **'session-owner': 'true'**
-- Si défini sur `true`, le propriétaire de la session (l'utilisateur actuellement connecté) obtiendrait automatiquement ce droit. Cela pourrait contourner une authentification supplémentaire si l'utilisateur est déjà connecté.
+- Si défini sur `true`, le propriétaire de la session (l'utilisateur actuellement connecté) obtiendrait automatiquement ce droit. Cela peut contourner une authentification supplémentaire si l'utilisateur est déjà connecté.
 4. **'shared': 'true'**
-- Cette clé ne confère pas de droits sans authentification. Au lieu de cela, si elle est définie sur `true`, cela signifie qu'une fois le droit authentifié, il peut être partagé entre plusieurs processus sans que chacun d'eux ait besoin de se ré-authentifier. Mais l'octroi initial du droit nécessiterait toujours une authentification, sauf s'il est combiné avec d'autres clés comme `'authenticate-user': 'false'`.
+- Cette clé n'accorde pas de droits sans authentification. Au lieu de cela, si elle est définie sur `true`, cela signifie qu'une fois le droit authentifié, il peut être partagé entre plusieurs processus sans que chacun doive se ré-authentifier. Mais l'octroi initial du droit nécessitera toujours une authentification à moins d'être combiné avec d'autres clés comme `'authenticate-user': 'false'`.
 
-Vous pouvez [**utiliser ce script**](https://gist.github.com/carlospolop/96ecb9e385a4667b9e40b24e878652f9) pour obtenir les droits intéressants :
+Vous pouvez [**utiliser ce script**](https://gist.github.com/carlospolop/96ecb9e385a4667b9e40b24e878652f9) pour récupérer les droits intéressants :
 ```bash
 Rights with 'authenticate-user': 'false':
 is-admin (admin), is-admin-nonshared (admin), is-appstore (_appstore), is-developer (_developer), is-lpadmin (_lpadmin), is-root (run as root), is-session-owner (session owner), is-webdeveloper (_webdeveloper), system-identity-write-self (session owner), system-install-iap-software (run as root), system-install-software-iap (run as root)
@@ -269,29 +269,42 @@ com-apple-aosnotification-findmymac-remove, com-apple-diskmanagement-reservekek,
 Rights with 'session-owner': 'true':
 authenticate-session-owner, authenticate-session-owner-or-admin, authenticate-session-user, com-apple-safari-allow-apple-events-to-run-javascript, com-apple-safari-allow-javascript-in-smart-search-field, com-apple-safari-allow-unsigned-app-extensions, com-apple-safari-install-ephemeral-extensions, com-apple-safari-show-credit-card-numbers, com-apple-safari-show-passwords, com-apple-icloud-passwordreset, com-apple-icloud-passwordreset, is-session-owner, system-identity-write-self, use-login-window-ui
 ```
+### Études de cas de contournement d'Authorization
+
+- **CVE-2024-4395 – Jamf Compliance Editor helper**: L'exécution d'un audit dépose `/Library/LaunchDaemons/com.jamf.complianceeditor.helper.plist`, expose le service Mach `com.jamf.complianceeditor.helper`, et exporte `-executeScriptAt:arguments:then:` sans vérifier le `AuthorizationExternalForm` de l'appelant ni la signature du code. Une exploitation triviale appelle `AuthorizationCreate` avec une référence vide, se connecte via `[[NSXPCConnection alloc] initWithMachServiceName:options:NSXPCConnectionPrivileged]`, et invoque la méthode pour exécuter des binaires arbitraires en tant que root. Full reversing notes (plus PoC) in [Mykola Grymalyuk’s write-up](https://khronokernel.com/macos/2024/05/01/CVE-2024-4395.html).
+- **CVE-2025-25251 – FortiClient Mac helper**: FortiClient Mac 7.0.0–7.0.14, 7.2.0–7.2.8 et 7.4.0–7.4.2 acceptaient des messages XPC forgés qui atteignaient un helper privilégié dépourvu de contrôles d'autorisation. Parce que le helper faisait confiance à son propre `AuthorizationRef` privilégié, tout utilisateur local capable d'envoyer des messages au service pouvait le contraindre à exécuter des modifications de configuration arbitraires ou des commandes en tant que root. Details in [SentinelOne’s advisory summary](https://www.sentinelone.com/vulnerability-database/cve-2025-25251/).
+
+#### Conseils de triage rapide
+
+- Lorsqu'une app fournit à la fois une GUI et un helper, diff leurs exigences de code et vérifiez si `shouldAcceptNewConnection` verrouille le listener avec `-setCodeSigningRequirement:` (ou valide `SecCodeCopySigningInformation`). L'absence de contrôles entraîne généralement des scénarios CWE-863 comme dans le cas Jamf. Un aperçu rapide ressemble à :
+```bash
+codesign --display --requirements - /Applications/Jamf\ Compliance\ Editor.app
+```
+- Comparez ce que le helper *pense* qu'il autorise avec ce que le client fournit. Lors de la rétro-ingénierie, mettez un breakpoint sur `AuthorizationCopyRights` et confirmez que le `AuthorizationRef` provient de `AuthorizationCreateFromExternalForm` (fourni par le client) plutôt que du propre contexte privilégié du helper, sinon vous avez probablement trouvé un pattern CWE-863 similaire aux cas ci‑dessus.
+
 ## Reversing Authorization
 
 ### Checking if EvenBetterAuthorization is used
 
-Si vous trouvez la fonction : **`[HelperTool checkAuthorization:command:]`**, il est probable que le processus utilise le schéma mentionné précédemment pour l'autorisation :
+Si vous trouvez la fonction : **`[HelperTool checkAuthorization:command:]`** il est probable que le processus utilise le schéma d'autorisation mentionné précédemment :
 
 <figure><img src="../../../../../images/image (42).png" alt=""><figcaption></figcaption></figure>
 
-Cela, si cette fonction appelle des fonctions telles que `AuthorizationCreateFromExternalForm`, `authorizationRightForCommand`, `AuthorizationCopyRights`, `AuhtorizationFree`, elle utilise [**EvenBetterAuthorizationSample**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L101-L154).
+Ensuite, si cette fonction appelle des fonctions telles que `AuthorizationCreateFromExternalForm`, `authorizationRightForCommand`, `AuthorizationCopyRights`, `AuhtorizationFree`, elle utilise [**EvenBetterAuthorizationSample**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L101-L154).
 
-Vérifiez le **`/var/db/auth.db`** pour voir s'il est possible d'obtenir des autorisations pour appeler une action privilégiée sans interaction de l'utilisateur.
+Vérifiez le **`/var/db/auth.db`** pour voir s'il est possible d'obtenir les permissions pour appeler une action privilégiée sans interaction utilisateur.
 
 ### Protocol Communication
 
-Ensuite, vous devez trouver le schéma de protocole afin de pouvoir établir une communication avec le service XPC.
+Ensuite, vous devez trouver le schéma du protocole afin de pouvoir établir une communication avec le service XPC.
 
-La fonction **`shouldAcceptNewConnection`** indique le protocole étant exporté :
+La fonction **`shouldAcceptNewConnection`** indique le protocole exporté :
 
 <figure><img src="../../../../../images/image (44).png" alt=""><figcaption></figcaption></figure>
 
 Dans ce cas, nous avons le même que dans EvenBetterAuthorizationSample, [**check this line**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L94).
 
-Sachant le nom du protocole utilisé, il est possible de **dump its header definition** avec :
+Connaissant le nom du protocole utilisé, il est possible de dump its header definition avec :
 ```bash
 class-dump /Library/PrivilegedHelperTools/com.example.HelperTool
 
@@ -305,13 +318,13 @@ class-dump /Library/PrivilegedHelperTools/com.example.HelperTool
 @end
 [...]
 ```
-Enfin, nous devons juste connaître le **nom du service Mach exposé** afin d'établir une communication avec celui-ci. Il existe plusieurs façons de le trouver :
+Enfin, il nous suffit de connaître le **nom du Mach Service exposé** afin d'établir une communication avec lui. Il existe plusieurs façons de le trouver :
 
-- Dans le **`[HelperTool init]`** où vous pouvez voir le service Mach utilisé :
+- Dans le **`[HelperTool init]`** où vous pouvez voir le Mach Service utilisé :
 
 <figure><img src="../../../../../images/image (41).png" alt=""><figcaption></figcaption></figure>
 
-- Dans le plist launchd :
+- Dans le launchd plist:
 ```xml
 cat /Library/LaunchDaemons/com.example.HelperTool.plist
 
@@ -324,13 +337,13 @@ cat /Library/LaunchDaemons/com.example.HelperTool.plist
 </dict>
 [...]
 ```
-### Exemple d'Exploitation
+### Exploit Example
 
-Dans cet exemple, il est créé :
+Dans cet exemple sont créés :
 
 - La définition du protocole avec les fonctions
-- Une authentification vide à utiliser pour demander l'accès
-- Une connexion au service XPC
+- Une auth vide à utiliser pour demander l'accès
+- Une connexion au XPC service
 - Un appel à la fonction si la connexion a réussi
 ```objectivec
 // gcc -framework Foundation -framework Security expl.m -o expl
@@ -409,12 +422,14 @@ NSLog(@"Response: %@", error);
 NSLog(@"Finished!");
 }
 ```
-## Autres helpers de privilèges XPC abusés
+## Autres helpers XPC abusés pour l'élévation de privilèges
 
 - [https://blog.securelayer7.net/applied-endpointsecurity-framework-previlege-escalation/?utm_source=pocket_shared](https://blog.securelayer7.net/applied-endpointsecurity-framework-previlege-escalation/?utm_source=pocket_shared)
 
 ## Références
 
 - [https://theevilbit.github.io/posts/secure_coding_xpc_part1/](https://theevilbit.github.io/posts/secure_coding_xpc_part1/)
+- [https://khronokernel.com/macos/2024/05/01/CVE-2024-4395.html](https://khronokernel.com/macos/2024/05/01/CVE-2024-4395.html)
+- [https://www.sentinelone.com/vulnerability-database/cve-2025-25251/](https://www.sentinelone.com/vulnerability-database/cve-2025-25251/)
 
 {{#include ../../../../../banners/hacktricks-training.md}}
