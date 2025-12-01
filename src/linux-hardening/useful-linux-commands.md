@@ -1,4 +1,4 @@
-# Nuttige Linux Opdragte
+# Nuttige Linux-opdragte
 
 {{#include ../banners/hacktricks-training.md}}
 
@@ -221,7 +221,7 @@ grep -Po 'd{3}[s-_]?d{3}[s-_]?d{4}' *.txt > us-phones.txt
 #Extract ISBN Numbers
 egrep -a -o "\bISBN(?:-1[03])?:? (?=[0-9X]{10}$|(?=(?:[0-9]+[- ]){3})[- 0-9X]{13}$|97[89][0-9]{10}$|(?=(?:[0-9]+[- ]){4})[- 0-9]{17}$)(?:97[89][- ]?)?[0-9]{1,5}[- ]?[0-9]+[- ]?[0-9]+[- ]?[0-9X]\b" *.txt > isbn.txt
 ```
-## Vind
+## Find
 ```bash
 # Find SUID set files.
 find / -perm /u=s -ls 2>/dev/null
@@ -250,7 +250,7 @@ find / -maxdepth 5 -type f -printf "%T@ %Tc | %p \n" 2>/dev/null | grep -v "| /p
 # Found Newer directory only and sort by time. (depth = 5)
 find / -maxdepth 5 -type d -printf "%T@ %Tc | %p \n" 2>/dev/null | grep -v "| /proc" | grep -v "| /dev" | grep -v "| /run" | grep -v "| /var/log" | grep -v "| /boot"  | grep -v "| /sys/" | sort -n -r | less
 ```
-## Nmap soek hulp
+## Nmap soekhulp
 ```bash
 #Nmap scripts ((default or version) and smb))
 nmap --script-help "(default or version) and *smb*"
@@ -293,4 +293,46 @@ iptables -P INPUT DROP
 iptables -P FORWARD ACCEPT
 iptables -P OUTPUT ACCEPT
 ```
+## eBPF Telemetry & Rootkit Hunting
+
+Moderne rootkits (TripleCross, BPFDoor variants, etc.) bly toenemend voortbestaan as versteekte eBPF-programme. Stel 'n basislyn vir jou vloot op met `bpftool`/`eBPFmon` sodat jy onondertekende programme, onverwagte cgroup hooks, of kwaadwillige map contents kan opspoor voordat jy hulle ontkoppel.
+```bash
+#Enumerate all eBPF programs, attach points, owning PIDs and map IDs
+sudo bpftool prog
+
+#Inspect suspicious bytecode + helper calls (replace 835 with the target program id)
+sudo bpftool prog dump xlated id 835 | less
+
+#List and dump program maps to reveal covert sockets/credentials (replace 104 accordingly)
+sudo bpftool map show id 104
+sudo bpftool map dump id 104 | hexdump -C
+
+#Verify kernel feature support before loading/patching custom probes
+sudo bpftool feature probe | less
+
+#TUI wrapper that tracks program/map diffs in real time (wraps bpftool perf/net output)
+sudo ebpfmon
+```
+Korreleer die bpftool-uitset met die verwagte NIC/cgroup-aanhegtings; 'n skielike `xdp`- of `kprobe`-program wat deur 'n nie-goedgekeurde PID besit word, is 'n sterk aanduiding van 'n injected eBPF payload.
+
+## Journald Voorvaltriage
+
+systemd-journald hou gestruktureerde metadata, sodat jy per opstart, erns, eenheid of UID kan pivot sonder om `/var/log/*` aan te raak. Kombineer filters met relatiewe tydstempels om aanvalsvensters te isoleer of om vinnig log-manipulasie aan te toon.
+```bash
+journalctl --list-boots                                #Enumerate boot IDs with timestamps
+journalctl -b -1 -p err -o short-iso                   #Previous boot only, severity >= err
+journalctl -u nginx.service --since="2025-06-01 01:00" --until="2025-06-01 02:00"
+journalctl -u ssh.service -f | grep "Failed password"  #Live brute-force monitoring
+journalctl _UID=0 --output=json-pretty --since "1 hour ago"
+journalctl --disk-usage                               #Quickly show journal size
+sudo journalctl --vacuum-size=1G --vacuum-time=7days   #Trim only after taking evidence
+journalctl --no-pager --since="2025-06-01" --until="2025-06-10" > system_logs_2025-06-01_to_06-10.log
+```
+Voeg `--grep 'Invalid user' --case-sensitive` of `-k` (slegs kernel ring buffer) by wanneer jy nouer filters nodig het, en onthou dat die selektore `_PID`, `_SYSTEMD_UNIT`, `_HOSTNAME`, en `_TRANSPORT` saamgestapel word vir multi-tenant jagte.
+
+## Verwysings
+
+- [eBPFmon: A new tool for exploring and interacting with eBPF applications](https://redcanary.com/blog/linux-security/ebpfmon/)
+- [How to use the journalctl command to view Linux logs](https://www.hostinger.com/tutorials/journalctl-command)
+
 {{#include ../banners/hacktricks-training.md}}
