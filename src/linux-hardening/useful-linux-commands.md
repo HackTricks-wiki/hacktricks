@@ -1,8 +1,8 @@
-# Χρήσιμες Εντολές Linux
+# Χρήσιμες εντολές Linux
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Κοινές Bash
+## Συνηθισμένες εντολές Bash
 ```bash
 #Exfiltration using Base64
 base64 -w 0 file
@@ -221,7 +221,7 @@ grep -Po 'd{3}[s-_]?d{3}[s-_]?d{4}' *.txt > us-phones.txt
 #Extract ISBN Numbers
 egrep -a -o "\bISBN(?:-1[03])?:? (?=[0-9X]{10}$|(?=(?:[0-9]+[- ]){3})[- 0-9X]{13}$|97[89][0-9]{10}$|(?=(?:[0-9]+[- ]){4})[- 0-9]{17}$)(?:97[89][- ]?)?[0-9]{1,5}[- ]?[0-9]+[- ]?[0-9]+[- ]?[0-9X]\b" *.txt > isbn.txt
 ```
-## Βρείτε
+## Find
 ```bash
 # Find SUID set files.
 find / -perm /u=s -ls 2>/dev/null
@@ -250,14 +250,14 @@ find / -maxdepth 5 -type f -printf "%T@ %Tc | %p \n" 2>/dev/null | grep -v "| /p
 # Found Newer directory only and sort by time. (depth = 5)
 find / -maxdepth 5 -type d -printf "%T@ %Tc | %p \n" 2>/dev/null | grep -v "| /proc" | grep -v "| /dev" | grep -v "| /run" | grep -v "| /var/log" | grep -v "| /boot"  | grep -v "| /sys/" | sort -n -r | less
 ```
-## Βοήθεια αναζήτησης Nmap
+## Nmap βοήθεια αναζήτησης
 ```bash
 #Nmap scripts ((default or version) and smb))
 nmap --script-help "(default or version) and *smb*"
 locate -r '\.nse$' | xargs grep categories | grep 'default\|version\|safe' | grep smb
 nmap --script-help "(default or version) and smb)"
 ```
-## Μπάσα
+## Bash
 ```bash
 #All bytes inside a file (except 0x20 and 0x00)
 for j in $((for i in {0..9}{0..9} {0..9}{a..f} {a..f}{0..9} {a..f}{a..f}; do echo $i; done ) | sort | grep -v "20\|00"); do echo -n -e "\x$j" >> bytes; done
@@ -293,4 +293,46 @@ iptables -P INPUT DROP
 iptables -P FORWARD ACCEPT
 iptables -P OUTPUT ACCEPT
 ```
+## eBPF Τηλεμετρία & Rootkit Hunting
+
+Σύγχρονα rootkits (TripleCross, παραλλαγές BPFDoor, κ.λπ.) ολοένα και περισσότερο παραμένουν ως κρυμμένα eBPF προγράμματα. Καθιέρωσε baseline για το στόλο σου με `bpftool`/`eBPFmon` ώστε να μπορείς να εντοπίσεις μη υπογεγραμμένα προγράμματα, απροσδόκητα cgroup hooks ή κακόβουλο περιεχόμενο map πριν τα αποσυνδέσεις.
+```bash
+#Enumerate all eBPF programs, attach points, owning PIDs and map IDs
+sudo bpftool prog
+
+#Inspect suspicious bytecode + helper calls (replace 835 with the target program id)
+sudo bpftool prog dump xlated id 835 | less
+
+#List and dump program maps to reveal covert sockets/credentials (replace 104 accordingly)
+sudo bpftool map show id 104
+sudo bpftool map dump id 104 | hexdump -C
+
+#Verify kernel feature support before loading/patching custom probes
+sudo bpftool feature probe | less
+
+#TUI wrapper that tracks program/map diffs in real time (wraps bpftool perf/net output)
+sudo ebpfmon
+```
+Συσχετίστε την έξοδο του bpftool με τις αναμενόμενες NIC/cgroup συνδέσεις; ένα ξαφνικό `xdp` ή `kprobe` πρόγραμμα που ανήκει σε μη εγκεκριμένο PID είναι ισχυρός δείκτης ενός εγχυμένου eBPF payload.
+
+## Διερεύνηση περιστατικών Journald
+
+systemd-journald διατηρεί δομημένα μεταδεδομένα, οπότε μπορείτε να κάνετε pivot κατά boot, severity, unit ή UID χωρίς να αγγίξετε τα `/var/log/*`. Συνδυάστε φίλτρα με σχετικούς χρονικούς δείκτες για να απομονώσετε παράθυρα επίθεσης ή να αποδείξετε γρήγορα παραποίηση καταγραφών.
+```bash
+journalctl --list-boots                                #Enumerate boot IDs with timestamps
+journalctl -b -1 -p err -o short-iso                   #Previous boot only, severity >= err
+journalctl -u nginx.service --since="2025-06-01 01:00" --until="2025-06-01 02:00"
+journalctl -u ssh.service -f | grep "Failed password"  #Live brute-force monitoring
+journalctl _UID=0 --output=json-pretty --since "1 hour ago"
+journalctl --disk-usage                               #Quickly show journal size
+sudo journalctl --vacuum-size=1G --vacuum-time=7days   #Trim only after taking evidence
+journalctl --no-pager --since="2025-06-01" --until="2025-06-10" > system_logs_2025-06-01_to_06-10.log
+```
+Προσθέστε `--grep 'Invalid user' --case-sensitive` ή `-k` (μόνο kernel ring buffer) όταν χρειάζεστε πιο σφιχτά φίλτρα, και θυμηθείτε ότι οι επιλογείς `_PID`, `_SYSTEMD_UNIT`, `_HOSTNAME`, και `_TRANSPORT` στοιβάζονται μαζί για αναζητήσεις πολλαπλών ενοικιαστών.
+
+## Αναφορές
+
+- [eBPFmon: A new tool for exploring and interacting with eBPF applications](https://redcanary.com/blog/linux-security/ebpfmon/)
+- [How to use the journalctl command to view Linux logs](https://www.hostinger.com/tutorials/journalctl-command)
+
 {{#include ../banners/hacktricks-training.md}}
