@@ -2,7 +2,7 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Bash común
+## Comandos comunes de Bash
 ```bash
 #Exfiltration using Base64
 base64 -w 0 file
@@ -221,7 +221,7 @@ grep -Po 'd{3}[s-_]?d{3}[s-_]?d{4}' *.txt > us-phones.txt
 #Extract ISBN Numbers
 egrep -a -o "\bISBN(?:-1[03])?:? (?=[0-9X]{10}$|(?=(?:[0-9]+[- ]){3})[- 0-9X]{13}$|97[89][0-9]{10}$|(?=(?:[0-9]+[- ]){4})[- 0-9]{17}$)(?:97[89][- ]?)?[0-9]{1,5}[- ]?[0-9]+[- ]?[0-9]+[- ]?[0-9X]\b" *.txt > isbn.txt
 ```
-## Encontrar
+## Find
 ```bash
 # Find SUID set files.
 find / -perm /u=s -ls 2>/dev/null
@@ -293,4 +293,46 @@ iptables -P INPUT DROP
 iptables -P FORWARD ACCEPT
 iptables -P OUTPUT ACCEPT
 ```
+## Telemetría de eBPF & Rootkit Hunting
+
+Los rootkits modernos (TripleCross, variantes BPFDoor, etc.) persisten cada vez más como programas eBPF ocultos. Establece una línea base de tu flota con `bpftool`/`eBPFmon` para que puedas detectar programas no firmados, cgroup hooks inesperados, o contenidos maliciosos de maps antes de desactivarlos.
+```bash
+#Enumerate all eBPF programs, attach points, owning PIDs and map IDs
+sudo bpftool prog
+
+#Inspect suspicious bytecode + helper calls (replace 835 with the target program id)
+sudo bpftool prog dump xlated id 835 | less
+
+#List and dump program maps to reveal covert sockets/credentials (replace 104 accordingly)
+sudo bpftool map show id 104
+sudo bpftool map dump id 104 | hexdump -C
+
+#Verify kernel feature support before loading/patching custom probes
+sudo bpftool feature probe | less
+
+#TUI wrapper that tracks program/map diffs in real time (wraps bpftool perf/net output)
+sudo ebpfmon
+```
+Correlaciona la salida de bpftool con las vinculaciones esperadas a NIC/cgroup; un programa `xdp` o `kprobe` repentino propiedad de un PID no aprobado es un fuerte indicador de un eBPF payload inyectado.
+
+## Triaje de incidentes de Journald
+
+systemd-journald mantiene metadatos estructurados, por lo que puedes pivotar por arranque, gravedad, unidad o UID sin tocar `/var/log/*`. Combina filtros con marcas de tiempo relativas para aislar ventanas de ataque o demostrar manipulación de registros rápidamente.
+```bash
+journalctl --list-boots                                #Enumerate boot IDs with timestamps
+journalctl -b -1 -p err -o short-iso                   #Previous boot only, severity >= err
+journalctl -u nginx.service --since="2025-06-01 01:00" --until="2025-06-01 02:00"
+journalctl -u ssh.service -f | grep "Failed password"  #Live brute-force monitoring
+journalctl _UID=0 --output=json-pretty --since "1 hour ago"
+journalctl --disk-usage                               #Quickly show journal size
+sudo journalctl --vacuum-size=1G --vacuum-time=7days   #Trim only after taking evidence
+journalctl --no-pager --since="2025-06-01" --until="2025-06-10" > system_logs_2025-06-01_to_06-10.log
+```
+Añade `--grep 'Invalid user' --case-sensitive` o `-k` (solo kernel ring buffer) cuando necesites filtros más estrictos, y recuerda que los selectores `_PID`, `_SYSTEMD_UNIT`, `_HOSTNAME` y `_TRANSPORT` se combinan para búsquedas multitenant.
+
+## Referencias
+
+- [eBPFmon: A new tool for exploring and interacting with eBPF applications](https://redcanary.com/blog/linux-security/ebpfmon/)
+- [How to use the journalctl command to view Linux logs](https://www.hostinger.com/tutorials/journalctl-command)
+
 {{#include ../banners/hacktricks-training.md}}
