@@ -2,7 +2,7 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Загальний Bash
+## Загальні команди Bash
 ```bash
 #Exfiltration using Base64
 base64 -w 0 file
@@ -221,7 +221,7 @@ grep -Po 'd{3}[s-_]?d{3}[s-_]?d{4}' *.txt > us-phones.txt
 #Extract ISBN Numbers
 egrep -a -o "\bISBN(?:-1[03])?:? (?=[0-9X]{10}$|(?=(?:[0-9]+[- ]){3})[- 0-9X]{13}$|97[89][0-9]{10}$|(?=(?:[0-9]+[- ]){4})[- 0-9]{17}$)(?:97[89][- ]?)?[0-9]{1,5}[- ]?[0-9]+[- ]?[0-9]+[- ]?[0-9X]\b" *.txt > isbn.txt
 ```
-## Знайти
+## Find
 ```bash
 # Find SUID set files.
 find / -perm /u=s -ls 2>/dev/null
@@ -250,14 +250,14 @@ find / -maxdepth 5 -type f -printf "%T@ %Tc | %p \n" 2>/dev/null | grep -v "| /p
 # Found Newer directory only and sort by time. (depth = 5)
 find / -maxdepth 5 -type d -printf "%T@ %Tc | %p \n" 2>/dev/null | grep -v "| /proc" | grep -v "| /dev" | grep -v "| /run" | grep -v "| /var/log" | grep -v "| /boot"  | grep -v "| /sys/" | sort -n -r | less
 ```
-## Допомога з пошуку Nmap
+## Nmap — довідка з пошуку
 ```bash
 #Nmap scripts ((default or version) and smb))
 nmap --script-help "(default or version) and *smb*"
 locate -r '\.nse$' | xargs grep categories | grep 'default\|version\|safe' | grep smb
 nmap --script-help "(default or version) and smb)"
 ```
-## Баш
+## Bash
 ```bash
 #All bytes inside a file (except 0x20 and 0x00)
 for j in $((for i in {0..9}{0..9} {0..9}{a..f} {a..f}{0..9} {a..f}{a..f}; do echo $i; done ) | sort | grep -v "20\|00"); do echo -n -e "\x$j" >> bytes; done
@@ -293,4 +293,46 @@ iptables -P INPUT DROP
 iptables -P FORWARD ACCEPT
 iptables -P OUTPUT ACCEPT
 ```
+## eBPF телеметрія та полювання на Rootkit
+
+Сучасні rootkits (TripleCross, BPFDoor variants тощо) дедалі частіше залишаються прихованими eBPF-програмами. Отримайте базову телеметрію вашого парку за допомогою `bpftool`/`eBPFmon`, щоб помітити непідписані програми, неочікувані cgroup hooks або зловмисний вміст map перед тим, як відключити їх.
+```bash
+#Enumerate all eBPF programs, attach points, owning PIDs and map IDs
+sudo bpftool prog
+
+#Inspect suspicious bytecode + helper calls (replace 835 with the target program id)
+sudo bpftool prog dump xlated id 835 | less
+
+#List and dump program maps to reveal covert sockets/credentials (replace 104 accordingly)
+sudo bpftool map show id 104
+sudo bpftool map dump id 104 | hexdump -C
+
+#Verify kernel feature support before loading/patching custom probes
+sudo bpftool feature probe | less
+
+#TUI wrapper that tracks program/map diffs in real time (wraps bpftool perf/net output)
+sudo ebpfmon
+```
+Корелюйте вивід bpftool з очікуваними приєднаннями NIC/cgroup; раптово з'явлена програма `xdp` або `kprobe`, що належить несхваленому PID, є сильним індикатором ін'єкції eBPF payload.
+
+## Тріаж інцидентів Journald
+
+systemd-journald зберігає структуровані метадані, тому ви можете фільтрувати за завантаженням, рівнем серйозності, unit або UID без звернення до `/var/log/*`. Поєднуйте фільтри з відносними часовими мітками, щоб відокремити часові вікна атак або швидко довести фальсифікацію журналів.
+```bash
+journalctl --list-boots                                #Enumerate boot IDs with timestamps
+journalctl -b -1 -p err -o short-iso                   #Previous boot only, severity >= err
+journalctl -u nginx.service --since="2025-06-01 01:00" --until="2025-06-01 02:00"
+journalctl -u ssh.service -f | grep "Failed password"  #Live brute-force monitoring
+journalctl _UID=0 --output=json-pretty --since "1 hour ago"
+journalctl --disk-usage                               #Quickly show journal size
+sudo journalctl --vacuum-size=1G --vacuum-time=7days   #Trim only after taking evidence
+journalctl --no-pager --since="2025-06-01" --until="2025-06-10" > system_logs_2025-06-01_to_06-10.log
+```
+Додайте `--grep 'Invalid user' --case-sensitive` або `-k` (тільки kernel ring buffer), коли потрібні більш жорсткі фільтри, і пам'ятайте, що селектори `_PID`, `_SYSTEMD_UNIT`, `_HOSTNAME` та `_TRANSPORT` комбінуються для multi-tenant hunts.
+
+## References
+
+- [eBPFmon: A new tool for exploring and interacting with eBPF applications](https://redcanary.com/blog/linux-security/ebpfmon/)
+- [How to use the journalctl command to view Linux logs](https://www.hostinger.com/tutorials/journalctl-command)
+
 {{#include ../banners/hacktricks-training.md}}
