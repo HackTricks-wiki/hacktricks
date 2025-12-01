@@ -1,8 +1,8 @@
-# Kullanışlı Linux Komutları
+# Yararlı Linux Komutları
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Yaygın Bash
+## Sık Kullanılan Bash
 ```bash
 #Exfiltration using Base64
 base64 -w 0 file
@@ -221,7 +221,7 @@ grep -Po 'd{3}[s-_]?d{3}[s-_]?d{4}' *.txt > us-phones.txt
 #Extract ISBN Numbers
 egrep -a -o "\bISBN(?:-1[03])?:? (?=[0-9X]{10}$|(?=(?:[0-9]+[- ]){3})[- 0-9X]{13}$|97[89][0-9]{10}$|(?=(?:[0-9]+[- ]){4})[- 0-9]{17}$)(?:97[89][- ]?)?[0-9]{1,5}[- ]?[0-9]+[- ]?[0-9]+[- ]?[0-9X]\b" *.txt > isbn.txt
 ```
-## Bulmak
+## Find
 ```bash
 # Find SUID set files.
 find / -perm /u=s -ls 2>/dev/null
@@ -293,4 +293,46 @@ iptables -P INPUT DROP
 iptables -P FORWARD ACCEPT
 iptables -P OUTPUT ACCEPT
 ```
+## eBPF Telemetry & Rootkit Hunting
+
+Günümüz rootkits (TripleCross, BPFDoor variants, vb.) giderek gizli eBPF programları olarak kalıcı hale geliyor. Filonuz için `bpftool`/`eBPFmon` ile bir temel referans oluşturun; böylece imzasız programları, beklenmeyen cgroup hooks'ları veya kötü amaçlı map içeriklerini ayırmadan önce tespit edebilirsiniz.
+```bash
+#Enumerate all eBPF programs, attach points, owning PIDs and map IDs
+sudo bpftool prog
+
+#Inspect suspicious bytecode + helper calls (replace 835 with the target program id)
+sudo bpftool prog dump xlated id 835 | less
+
+#List and dump program maps to reveal covert sockets/credentials (replace 104 accordingly)
+sudo bpftool map show id 104
+sudo bpftool map dump id 104 | hexdump -C
+
+#Verify kernel feature support before loading/patching custom probes
+sudo bpftool feature probe | less
+
+#TUI wrapper that tracks program/map diffs in real time (wraps bpftool perf/net output)
+sudo ebpfmon
+```
+bpftool çıktısını beklenen NIC/cgroup eklemeleriyle ilişkilendirin; onaylanmamış bir PID'ye ait `xdp` veya `kprobe` programının aniden görünmesi, enjekte edilmiş bir eBPF payload'ının güçlü bir göstergesidir.
+
+## Journald Olay Triyajı
+
+systemd-journald yapılandırılmış meta veriler tutar, böylece `/var/log/*`'a dokunmadan önyükleme, önem düzeyi, unit veya UID'e göre filtreleme yapabilirsiniz. Filtreleri göreli zaman damgalarıyla birleştirerek saldırı pencerelerini izole edebilir veya log tahrifatını hızlıca kanıtlayabilirsiniz.
+```bash
+journalctl --list-boots                                #Enumerate boot IDs with timestamps
+journalctl -b -1 -p err -o short-iso                   #Previous boot only, severity >= err
+journalctl -u nginx.service --since="2025-06-01 01:00" --until="2025-06-01 02:00"
+journalctl -u ssh.service -f | grep "Failed password"  #Live brute-force monitoring
+journalctl _UID=0 --output=json-pretty --since "1 hour ago"
+journalctl --disk-usage                               #Quickly show journal size
+sudo journalctl --vacuum-size=1G --vacuum-time=7days   #Trim only after taking evidence
+journalctl --no-pager --since="2025-06-01" --until="2025-06-10" > system_logs_2025-06-01_to_06-10.log
+```
+Dar filtrelere ihtiyaç duyduğunuzda `--grep 'Invalid user' --case-sensitive` veya `-k` (sadece kernel ring buffer) ekleyin ve `_PID`, `_SYSTEMD_UNIT`, `_HOSTNAME` ile `_TRANSPORT` seçicilerinin çok kiracılı avlarda birlikte üst üste binerek çalıştığını unutmayın.
+
+## Referanslar
+
+- [eBPFmon: A new tool for exploring and interacting with eBPF applications](https://redcanary.com/blog/linux-security/ebpfmon/)
+- [How to use the journalctl command to view Linux logs](https://www.hostinger.com/tutorials/journalctl-command)
+
 {{#include ../banners/hacktricks-training.md}}
