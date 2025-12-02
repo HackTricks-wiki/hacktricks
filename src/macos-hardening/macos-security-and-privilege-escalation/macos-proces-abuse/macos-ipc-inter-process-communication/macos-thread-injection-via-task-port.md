@@ -2,6 +2,21 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
+## 0. Modern task_for_pid Hardening (macOS 14.4+ / 15.x)
+
+Apple quietly tightened `task_for_pid()` semantics in macOS 14.4 (Sonoma) and kept those guard rails in Sequoia betas: when a non-entitled process touches a protected task port, the kernel now throws an `EXC_GUARD` with the message `Process used task_for_pid()` and immediately kills the caller. Practically this means you can no longer probe arbitrary processes for a hijackable thread without either:
+
+* running inside the same security context (matching `com.apple.security.get-task-allow` entitlement and hardened-runtime profile) or
+* arranging for the target to gift you a send right through another channel (XPC, shared Mach service, etc.).
+
+For lab work you can still opt into the legacy behaviour by relaxing AMFI and the new guard checks through NVRAM boot-args (requires full disk access + reboot):
+
+```bash
+sudo nvram boot-args="-arm64e_preview_abi amfi_get_out_of_my_way=1 thid_should_crash=0 tss_should_crash=0"
+```
+
+The extra flags re-enable the arm64e preview ABI, turn off several task-signing checks, and prevent the guard exception helpers (`thid_should_crash`, `tss_should_crash`) from panic-killing your injector. Only do this on disposable research hosts and remember to clear the boot-args afterwards (`sudo nvram -d boot-args`) before going back to production targets.
+
 ## Code
 
 - [https://github.com/bazad/threadexec](https://github.com/bazad/threadexec)
@@ -139,6 +154,10 @@ ptr = ptrauth_sign_unauthenticated((void*)ptr, ptrauth_key_asia, 0);
 
 Alternatively, stay PAC-compliant by chaining existing gadgets/functions (traditional ROP).
 
+### Tracking PAC bypass CVEs (2024+)
+
+Keep tabs on CL-style vulnerabilities that downgrade PAC requirements. For instance, CVE-2024-40815 (patched in Ventura 13.6.8 and Sonoma 14.6 on 29 July 2024) is a dyld race condition that lets an attacker with arbitrary R/W bypass pointer authentication entirely. On unpatched hosts this bug turns any memory disclosure + write primitive into a PAC-strip primitive, meaning you can drop signed return addresses without calling `ptrauth_sign_unauthenticated()` first. When targeting high-value systems, check their patch level before assuming your PAC-aware shellcode will survive.
+
 ## 7. Detection & Hardening with EndpointSecurity
 
 The **EndpointSecurity (ES)** framework exposes kernel events that allow defenders to observe or block thread-injection attempts:
@@ -187,5 +206,7 @@ Distributing your application **without** the `com.apple.security.get-task-allow
 - [https://bazad.github.io/2018/10/bypassing-platform-binary-task-threads/](https://bazad.github.io/2018/10/bypassing-platform-binary-task-threads/)
 - [https://github.com/rodionovd/task_vaccine](https://github.com/rodionovd/task_vaccine)
 - [https://developer.apple.com/documentation/endpointsecurity/es_event_type_notify_remote_thread_create](https://developer.apple.com/documentation/endpointsecurity/es_event_type_notify_remote_thread_create)
+- [https://unsafe.sh/go-179561.html](https://unsafe.sh/go-179561.html)
+- [https://nvd.nist.gov/vuln/detail/CVE-2024-40815](https://nvd.nist.gov/vuln/detail/CVE-2024-40815)
 
 {{#include ../../../../banners/hacktricks-training.md}}
