@@ -201,6 +201,12 @@ If you are researching practical exploitation of DEXes and AMMs (Uniswap v4 hook
 defi-amm-hook-precision.md
 {{#endref}}
 
+For multi-asset weighted pools that cache virtual balances and can be poisoned when `supply == 0`, study:
+
+{{#ref}}
+defi-amm-virtual-balance-cache-exploitation.md
+{{#endref}}
+
 {{#include ../../banners/hacktricks-training.md}}
 
 
